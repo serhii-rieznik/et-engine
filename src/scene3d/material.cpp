@@ -89,7 +89,7 @@ inline size_t keyToMaterialParameter(const std::string& k)
 }
 
 MaterialData::MaterialData() :
-	LoadableObject("default"),_blendState(Blend_Disabled), _depthWriteEnabled(true), tag(0)
+	LoadableObject("default"),_blendState(BlendState_Disabled), _depthWriteEnabled(true), tag(0)
 {
 	setVector(MaterialParameter_DiffuseColor, vec4(1.0f));
 }

@@ -276,8 +276,20 @@ void Framebuffer::setCurrentRenderTarget(const Texture& texture, uint32_t target
 	}
 	else
 	{
-		glFramebufferTexture2D(GL_FRAMEBUFFER, colorAttachments[0], target, texture->glID(), 0);
-		checkOpenGLError("glFramebufferTexture2D");
+		if (target == GL_TEXTURE_CUBE_MAP)
+		{
+			for (GLenum i = 0; i < 6; ++i)
+			{
+				glFramebufferTexture2D(GL_FRAMEBUFFER, colorAttachments[_numTargets],
+					GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, texture->glID(), 0);
+				checkOpenGLError("glFramebufferTexture2D");
+			}
+		}
+		else
+		{
+			glFramebufferTexture2D(GL_FRAMEBUFFER, colorAttachments[_numTargets], target, texture->glID(), 0);
+			checkOpenGLError("glFramebufferTexture2D");
+		}
 	}
 }
 
@@ -391,6 +403,7 @@ void Framebuffer::resize(const vec2i& sz)
 	
 	bool hasColor = (_description.colorFormat != 0) && (_description.colorInternalformat != 0) &&
 		(_description.colorType != 0) && (_description.numColorRenderTargets > 0);
+	
 	bool hasDepth = (_description.depthFormat != 0) && (_description.depthInternalformat != 0) &&
 		(_description.depthType != 0);
 
@@ -406,7 +419,7 @@ void Framebuffer::resize(const vec2i& sz)
 			{
 				TextureDescription::Pointer desc = _renderTargets[i]->description();
 				desc->size = sz;
-				desc->data.resize(desc->dataSizeForAllMipLevels());
+				desc->data.resize(desc->layersCount * desc->dataSizeForAllMipLevels());
 				_renderTargets[i]->updateData(_rc, desc);
 				setCurrentRenderTarget(_renderTargets[i], _renderTargets[i]->target());
 			}

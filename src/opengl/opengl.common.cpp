@@ -562,6 +562,9 @@ size_t et::bitsPerPixelForType(uint32_t type)
 		case GL_BYTE:
 			return 8;
 			
+		case GL_UNSIGNED_SHORT_5_6_5:
+		case GL_UNSIGNED_SHORT_4_4_4_4:
+		case GL_UNSIGNED_SHORT_5_5_5_1:
 		case GL_UNSIGNED_SHORT:
 		case GL_SHORT:
 			return 16;
@@ -569,6 +572,7 @@ size_t et::bitsPerPixelForType(uint32_t type)
 		case GL_UNSIGNED_INT:
 		case GL_INT:
 			return 32;
+			
 			
 		default:
 			assert("Not yet implemented for this type." && false);
@@ -581,10 +585,29 @@ size_t et::bitsPerPixelForTextureFormat(uint32_t internalFormat, uint32_t type)
 	switch (internalFormat)
 	{
 		case GL_RGB:
-			return 3 * bitsPerPixelForType(type);
+		{
+			switch (type)
+			{
+				case GL_UNSIGNED_SHORT_5_6_5:
+					return bitsPerPixelForType(type);
+					
+				default:
+					return 3 * bitsPerPixelForType(type);
+			}
+		}
 			
 		case GL_RGBA:
-			return 4 * bitsPerPixelForType(type);
+		{
+			switch (type)
+			{
+				case GL_UNSIGNED_SHORT_5_5_5_1:
+				case GL_UNSIGNED_SHORT_4_4_4_4:
+					return bitsPerPixelForType(type);
+					
+				default:
+					return 4 * bitsPerPixelForType(type);
+			}
+		}
 			
 		case GL_DEPTH_COMPONENT:
 			return bitsPerPixelForType(type);

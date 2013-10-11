@@ -94,15 +94,20 @@ Texture TextureFactory::genTexture(uint32_t target, int32_t internalformat, cons
 	uint32_t format, uint32_t type, const BinaryDataStorage& data, const std::string& id)
 {
 	TextureDescription::Pointer desc(new TextureDescription);
+	
 	desc->target = target;
-	desc->data = data;
+	
 	desc->format = format;
 	desc->internalformat = internalformat;
 	desc->type = type;
+	
 	desc->size = size;
+	
 	desc->mipMapCount = 1;
 	desc->layersCount = 1;
 	desc->bitsPerPixel = bitsPerPixelForTextureFormat(internalformat, type);
+	
+	desc->data = data;
 	
 	return Texture(new TextureData(renderContext(), desc, id, false));
 }
@@ -111,15 +116,21 @@ Texture TextureFactory::genCubeTexture(int32_t internalformat, GLsizei size, uin
 	const std::string& id)
 {
 	TextureDescription::Pointer desc(new TextureDescription);
+	
 	desc->target = GL_TEXTURE_CUBE_MAP;
+	
 	desc->format = format;
 	desc->internalformat = internalformat;
 	desc->type = type;
+	
 	desc->size = vec2i(size);
-	desc->layersCount = 6;
+	
 	desc->mipMapCount = 1;
-	desc->data = BinaryDataStorage(desc->size.square() * bitsPerPixelForTextureFormat(internalformat, type) / 8);
-
+	desc->layersCount = 6;
+	desc->bitsPerPixel = bitsPerPixelForTextureFormat(internalformat, type);
+	
+	desc->data = BinaryDataStorage(desc->layersCount * desc->dataSizeForAllMipLevels(), 0);
+	
 	return Texture(new TextureData(renderContext(), desc, id, false));
 }
 

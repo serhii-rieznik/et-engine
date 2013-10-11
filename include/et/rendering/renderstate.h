@@ -24,7 +24,13 @@ namespace et
 	public:
 		struct State
 		{
-			StaticDataStorage<uint32_t, MaxTextureUnits> boundTextures;
+		public:
+			typedef std::map<uint32_t, uint32_t> UnitToTextureMap;
+			typedef std::map<uint32_t, UnitToTextureMap> TargetToUnitTextureMap;
+			
+		public:
+			TargetToUnitTextureMap boundTextures;
+			
 			StaticDataStorage<size_t, Usage_max> enabledVertexAttributes;
 			
 			uint32_t activeTextureUnit;
@@ -59,6 +65,7 @@ namespace et
 			bool polygonOffsetFillEnabled;
 			bool wireframe;
 			bool clipEnabled;
+			bool cullEnabled;
 
 			BlendState lastBlend;
 			CullState lastCull;
@@ -168,8 +175,8 @@ namespace et
 		size_t colorMask() const
 			{ return _currentState.colorMask; }
 
-		void setBlend(bool enable, BlendState blend = Blend_Current);
-		void setCulling(CullState cull);
+		void setBlend(bool enable, BlendState blend = BlendState_Current);
+		void setCulling(bool enabled, CullState cull = CullState_Current);
 		void setDepthTest(bool enable);
 		void setDepthFunc(DepthFunc func);
 		void setDepthMask(bool enable);

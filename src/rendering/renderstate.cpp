@@ -12,14 +12,14 @@
 
 using namespace et;
 
-RenderState::State::State() : activeTextureUnit(0), boundFramebuffer(0), boundReadFramebuffer(0),
-	boundDrawFramebuffer(0), boundRenderbuffer(0), boundArrayBuffer(0), boundElementArrayBuffer(0),
-	boundVertexArrayObject(0), boundProgram(0), clearColor(0.0f), colorMask(ColorMask_RGBA),
-	clearDepth(1.0f), polygonOffsetFactor(0.0f), polygonOffsetUnits(0.0f), blendEnabled(false),
-	depthTestEnabled(false), depthMask(true), polygonOffsetFillEnabled(false), wireframe(false),
-	lastBlend(Blend_Disabled), lastCull(CullState_None), lastDepthFunc(DepthFunc_Less)
+RenderState::State::State() :
+	activeTextureUnit(0), boundFramebuffer(0), boundReadFramebuffer(0), boundDrawFramebuffer(0),
+	boundRenderbuffer(0), boundArrayBuffer(0), boundElementArrayBuffer(0), boundVertexArrayObject(0),
+	boundProgram(0), clearColor(0.0f), colorMask(ColorMask_RGBA), clearDepth(1.0f), polygonOffsetFactor(0.0f),
+	polygonOffsetUnits(0.0f), blendEnabled(false), depthTestEnabled(false), depthMask(true),
+	polygonOffsetFillEnabled(false), wireframe(false), lastBlend(BlendState_Disabled), lastCull(CullState_Current),
+	lastDepthFunc(DepthFunc_Less), cullEnabled(false)
 {
-	boundTextures.fill(0);
 	enabledVertexAttributes.fill(0);
 }
 
@@ -38,6 +38,7 @@ PreservedRenderStateScope::~PreservedRenderStateScope()
 void RenderState::setRenderContext(RenderContext* rc)
 {
 	_rc = rc;
+	
 	_currentState = RenderState::currentState();
 	
 	char zero[] = { 0, 0, 0, 0 };
@@ -49,7 +50,7 @@ void RenderState::setRenderContext(RenderContext* rc)
 	etTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, &zero);
 	
 	bindTexture(_currentState.activeTextureUnit,
-		_currentState.boundTextures[_currentState.activeTextureUnit], GL_TEXTURE_2D);
+		_currentState.boundTextures[GL_TEXTURE_2D][_currentState.activeTextureUnit], GL_TEXTURE_2D);
 }
 
 void RenderState::setMainViewportSize(const vec2i& sz, bool force)
@@ -87,9 +88,9 @@ void RenderState::setActiveTextureUnit(uint32_t unit, bool force)
 void RenderState::bindTexture(uint32_t unit, uint32_t texture, uint32_t target, bool force)
 {
 	setActiveTextureUnit(unit, force);
-	if (force || (_currentState.boundTextures[unit] != texture))
+	if (force || (_currentState.boundTextures[target][unit] != texture))
 	{
-		_currentState.boundTextures[unit] = texture;
+		_currentState.boundTextures[target][unit] = texture;
 		etBindTexture(target, texture);
 	}
 }
@@ -342,42 +343,42 @@ void RenderState::setBlend(bool enable, BlendState blend)
 		(enable ? glEnable : glDisable)(GL_BLEND);
 	}
 
-	if ((_currentState.lastBlend != blend) && (blend != Blend_Current))
+	if ((_currentState.lastBlend != blend) && (blend != BlendState_Current))
 	{
 		_currentState.lastBlend = blend;
 		switch (blend)
 		{  
-		case Blend_Disabled: 
+		case BlendState_Disabled: 
 			{
 				glBlendFunc(GL_ONE, GL_ZERO); 
 				break;
 			}
 
-		case Blend_Default: 
+		case BlendState_Default: 
 			{
 				glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); 
 				break;
 			}
 
-		case Blend_Additive: 
+		case BlendState_Additive: 
 			{
 				glBlendFunc(GL_ONE, GL_ONE); 
 				break;
 			}
 
-		case Blend_AlphaAdditive: 
+		case BlendState_AlphaAdditive: 
 			{
 				glBlendFunc(GL_SRC_ALPHA, GL_ONE); 
 				break;
 			}
 				
-		case Blend_AlphaPremultiplied:
+		case BlendState_AlphaPremultiplied:
 			{
 				glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 				break;
 			}
 
-		case Blend_ColorAdditive: 
+		case BlendState_ColorAdditive: 
 			{
 				glBlendFunc(GL_SRC_COLOR, GL_ONE); 
 				break;
@@ -415,13 +416,13 @@ void RenderState::programDeleted(uint32_t program)
 
 void RenderState::textureDeleted(uint32_t texture)
 {
-	if (_currentState.boundTextures[_currentState.activeTextureUnit] == texture)
-		bindTexture(_currentState.activeTextureUnit, 0, GL_TEXTURE_2D);
-
-	for (uint32_t i = 0; i < MaxTextureUnits; ++i)
+	for (auto& target : _currentState.boundTextures)
 	{
-		if (_currentState.boundTextures[i] == texture)
-			_currentState.boundTextures[i] = 0;
+		for (auto& unit : target.second)
+		{
+			if (unit.second == texture)
+				bindTexture(unit.first, unit.second, target.first);
+		}
 	}
 }
 
@@ -460,41 +461,19 @@ void RenderState::setVertexAttribPointer(const VertexElement& e, size_t baseInde
 	checkOpenGLError("glVertexAttribPointer");
 }
 
-void RenderState::setCulling(CullState cull)
+void RenderState::setCulling(bool enabled, CullState cull)
 {
-	if (_currentState.lastCull == cull) return;
-
-	switch (cull)
+	if (_currentState.cullEnabled != enabled)
 	{
-	case CullState_None:
-		{
-			glDisable(GL_CULL_FACE);
-			break;
-		}
-
-	case CullState_Back:
-		{
-			if (_currentState.lastCull == CullState_None)
-				glEnable(GL_CULL_FACE);
-
-			glCullFace(GL_BACK);
-			break;
-		}
-
-	case CullState_Front:
-		{
-			if (_currentState.lastCull == CullState_None)
-				glEnable(GL_CULL_FACE);
-
-			glCullFace(GL_FRONT);
-			break;
-		}
-
-	default: 
-		assert("Unsupported CullState value." && false);
-	};
-
-	_currentState.lastCull = cull;
+		_currentState.cullEnabled = enabled;
+		(enabled ? glEnable : glDisable)(GL_CULL_FACE);
+	}
+	
+	if ((cull != CullState_Current) && (_currentState.lastCull != cull))
+	{
+		_currentState.lastCull = cull;
+		glCullFace(cull == CullState_Back ? GL_BACK : GL_FRONT);
+	}
 }
 
 void RenderState::setPolygonOffsetFill(bool enabled, float factor, float units)
@@ -577,7 +556,7 @@ void RenderState::applyState(const RenderState::State& s)
 	setDepthTest(s.depthTestEnabled);
 	setPolygonOffsetFill(s.polygonOffsetFillEnabled, s.polygonOffsetFactor, s.polygonOffsetUnits);
 	setWireframeRendering(s.wireframe);
-	setCulling(s.lastCull);
+	setCulling(s.cullEnabled, s.lastCull);
 	setViewportSize(s.viewportSize);
 	bindFramebuffer(s.boundFramebuffer, true);
 	bindProgram(s.boundProgram, true);
@@ -585,8 +564,11 @@ void RenderState::applyState(const RenderState::State& s)
 	bindBuffer(GL_ELEMENT_ARRAY_BUFFER, s.boundElementArrayBuffer, true);
 	bindBuffer(GL_ARRAY_BUFFER, s.boundArrayBuffer, true);
 	
-	for (uint32_t i = 0; i < MaxTextureUnits; ++i)
-		bindTexture(i, s.boundTextures[i], GL_TEXTURE_2D);
+	for (auto& target : s.boundTextures)
+	{
+		for (auto& unit : target.second)
+			bindTexture(unit.first, unit.second, target.first);
+	}
 	
 	for (uint32_t i = 0; i < Usage_max; ++i)
 	{
@@ -608,13 +590,22 @@ RenderState::State RenderState::currentState()
 	s.activeTextureUnit = static_cast<uint32_t>(value - GL_TEXTURE0);
 	checkOpenGLError("");
 	
-	for (GLenum i = 0; i < MaxTextureUnits; ++i)
+	int maxTextureUnits = 0;
+	glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &maxTextureUnits);
+	
+	for (GLenum i = 0; i < maxTextureUnits; ++i)
 	{
-		value = 0;
 		glActiveTexture(GL_TEXTURE0 + i);
+		
+		value = 0;
 		glGetIntegerv(GL_TEXTURE_BINDING_2D, &value);
-		s.boundTextures[i] = static_cast<uint32_t>(value);
+		s.boundTextures[GL_TEXTURE_2D][i] = value;
+		
+		value = 0;
+		glGetIntegerv(GL_TEXTURE_BINDING_CUBE_MAP, &value);
+		s.boundTextures[GL_TEXTURE_BINDING_CUBE_MAP][i] = value;
 	}
+	
 	glActiveTexture(GL_TEXTURE0 + s.activeTextureUnit);
 	checkOpenGLError("");
 
@@ -674,6 +665,7 @@ RenderState::State RenderState::currentState()
 
 	s.depthTestEnabled = glIsEnabled(GL_DEPTH_TEST) != 0;
 	s.polygonOffsetFillEnabled = glIsEnabled(GL_POLYGON_OFFSET_FILL) != 0;
+	s.cullEnabled = glIsBuffer(GL_CULL_FACE) != 0;
 	
 	glGetFloatv(GL_POLYGON_OFFSET_FACTOR, &s.polygonOffsetFactor);
 	checkOpenGLError("");
@@ -698,17 +690,12 @@ RenderState::State RenderState::currentState()
 
 	value = 0;
 	glGetIntegerv(GL_CULL_FACE_MODE, &value);
-	s.lastCull = CullState_None;
 	if (value == GL_FRONT)
 		s.lastCull = CullState_Front;
 	else if (value == GL_BACK)
 		s.lastCull = CullState_Back;
-	checkOpenGLError("");
-
-	bValue = 0;
-	glGetBooleanv(GL_CULL_FACE, &bValue);
-	if (!bValue)
-		s.lastCull = CullState_None;
+	else
+		assert("Invalid cull state retreived" && 0);
 	checkOpenGLError("");
 
 	vec4i vp;
@@ -764,27 +751,27 @@ RenderState::State RenderState::currentState()
 
 	if ((blendSource == GL_SRC_ALPHA) && (blendDest == GL_ONE_MINUS_SRC_ALPHA))
 	{
-		s.lastBlend = Blend_Default;
+		s.lastBlend = BlendState_Default;
 	}
 	else if ((blendSource == GL_ONE) && (blendDest == GL_ONE_MINUS_SRC_ALPHA))
 	{
-		s.lastBlend = Blend_AlphaPremultiplied;
+		s.lastBlend = BlendState_AlphaPremultiplied;
 	}
 	else if ((blendSource == GL_ONE) && (blendDest == GL_ZERO))
 	{
-		s.lastBlend = Blend_Disabled;
+		s.lastBlend = BlendState_Disabled;
 	}
 	else if ((blendSource == GL_ONE) && (blendDest == GL_ONE))
 	{
-		s.lastBlend = Blend_Additive;
+		s.lastBlend = BlendState_Additive;
 	}
 	else if ((blendSource == GL_SRC_ALPHA) && (blendDest == GL_ONE))
 	{
-		s.lastBlend = Blend_AlphaAdditive;
+		s.lastBlend = BlendState_AlphaAdditive;
 	}
 	else if ((blendSource == GL_SRC_COLOR) && (blendDest == GL_ONE))
 	{
-		s.lastBlend = Blend_ColorAdditive;
+		s.lastBlend = BlendState_ColorAdditive;
 	}
 	else
 	{

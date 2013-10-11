@@ -11,18 +11,18 @@ namespace et
 {
 	enum BlendState
 	{
-		Blend_Disabled,
-		Blend_Current,
-		Blend_Default,
-		Blend_AlphaPremultiplied,
-		Blend_Additive,
-		Blend_AlphaAdditive,
-		Blend_ColorAdditive
+		BlendState_Disabled,
+		BlendState_Current,
+		BlendState_Default,
+		BlendState_AlphaPremultiplied,
+		BlendState_Additive,
+		BlendState_AlphaAdditive,
+		BlendState_ColorAdditive
 	};
 	
 	enum CullState
 	{
-		CullState_None,
+		CullState_Current,
 		CullState_Front,
 		CullState_Back
 	};
@@ -119,7 +119,6 @@ namespace et
 	
 	enum
 	{
-		MaxTextureUnits	= 8,
 		InvalidIndex = static_cast<IndexType>(-1)
 	};
 
