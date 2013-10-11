@@ -1,0 +1,20 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FontGen", "FontGen.vcxproj", "{AB8D6BA0-605E-417B-A4EC-D5103FC3A8BB}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{AB8D6BA0-605E-417B-A4EC-D5103FC3A8BB}.Debug|Win32.ActiveCfg = Debug|Win32
+		{AB8D6BA0-605E-417B-A4EC-D5103FC3A8BB}.Debug|Win32.Build.0 = Debug|Win32
+		{AB8D6BA0-605E-417B-A4EC-D5103FC3A8BB}.Release|Win32.ActiveCfg = Release|Win32
+		{AB8D6BA0-605E-417B-A4EC-D5103FC3A8BB}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

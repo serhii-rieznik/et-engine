@@ -1,0 +1,207 @@
+/*
+ * This file is part of `et engine`
+ * Copyright 2009-2013 by Sergey Reznik
+ * Please, do not modify content without approval.
+ *
+ */
+
+#include <et/core/datastorage.h>
+#include <et/core/stream.h>
+#include <et/core/tools.h>
+#include <et/core/filesystem.h>
+#include <et/core/cout.h>
+
+using namespace et;
+
+size_t et::streamSize(std::istream& s)
+{
+	std::streamoff currentPos = s.tellg();
+	
+	s.seekg(0, std::ios::end);
+	std::streamoff endPos = s.tellg();
+	s.seekg(currentPos, std::ios::beg);
+	
+	return static_cast<size_t>(endPos);
+}
+
+std::string et::loadTextFile(const std::string& fileName)
+{
+	InputStream file(fileName, StreamMode_Binary);
+	if (file.invalid()) return std::string();
+
+	StringDataStorage data(streamSize(file.stream()) + 1, 0);
+	file.stream().read(data.data(), static_cast<std::streamsize>(data.size()));
+	
+	return std::string(data.data());
+}
+
+std::string et::addTrailingSlash(const std::string& path)
+{
+	if (path.empty()) return path;
+
+	std::string::value_type t = *path.rbegin();
+	return ((t == invalidPathDelimiter) || (t == pathDelimiter)) ? path : path + pathDelimiter;
+}
+
+std::string et::replaceFileExt(const std::string& fileName, const std::string& newExt)
+{
+	std::string name = getFileName(fileName);
+	std::string path = getFilePath(fileName);
+
+	size_t dotPos = name.find_last_of(".");
+	if (dotPos == std::string::npos)
+		return fileName + newExt;
+
+	name.erase(dotPos);
+	return path + name + newExt;
+}
+
+std::string et::removeFileExt(const std::string& fileName)
+{
+	std::string name = getFileName(fileName);
+	std::string path = getFilePath(fileName);
+
+	size_t dotPos = name.find_last_of(".");
+	if (dotPos == std::string::npos)
+		return fileName;
+
+	name.erase(dotPos, name.length() - dotPos);
+	return path + name;
+}
+
+std::string& et::trim(std::string &str)
+{
+	size_t strSize = str.length();
+	if (!strSize) return str;
+
+	size_t leadingWhitespace = 0;
+	size_t trailingWhitespace = 0;
+	size_t pos = 0;
+	while ((pos < strSize) && isWhitespaceChar(str[pos++])) 
+		++leadingWhitespace;
+
+	pos = strSize - 1;
+	while ((pos > 0) && isWhitespaceChar(str[pos--])) 
+		++trailingWhitespace;
+
+	if (leadingWhitespace)
+		str.erase(0, leadingWhitespace);
+
+	if (trailingWhitespace)
+		str.erase(str.length() - trailingWhitespace);
+
+	return str;
+}
+
+std::string et::getFilePath(const std::string& name)
+{
+	std::string::size_type p = normalizeFilePath(name).find_last_of(pathDelimiter);
+	return (p == std::string::npos) ? std::string() : name.substr(0, ++p);
+}
+
+std::string et::getFileName(const std::string& fullPath)
+{
+	std::string::size_type p = normalizeFilePath(fullPath).find_last_of(pathDelimiter);
+	return (p  == std::string::npos) ? fullPath : fullPath.substr(p + 1);
+}
+
+std::string et::removeUpDir(std::string name)
+{
+	std::string::size_type dotsPos = name.find("..");
+	if (dotsPos != std::string::npos)
+		name = getFilePath( name.substr(0, dotsPos - 1) ) + name.substr(dotsPos + 3);
+	return name;
+}
+
+std::string et::normalizeFilePath(std::string s)
+{
+	ET_ITERATE(s, char&, i, if (i == invalidPathDelimiter) i = pathDelimiter);
+	return s;
+}
+
+std::string et::getFileExt(std::string name)
+{
+	size_t dotPos = name.find_last_of('.');
+	return (dotPos == std::string::npos) ? "" : name.substr(++dotPos);
+}
+
+float et::extractFloat(std::string& s)
+{
+	size_t len = s.length();
+	const char* data = s.c_str();
+	bool hasMinus = data[0] == '-';
+	bool dotFound = false;
+	size_t offset = static_cast<size_t>(hasMinus);
+	float value = 0.0f;
+	float scale = 1.0f;
+	for (; offset < len; ++offset)
+	{
+		char c = data[offset];
+		if (((c >= '0') && (c <= '9')) || (c == '.'))
+		{
+			if (c == '.')
+			{
+				if (dotFound) break;
+				dotFound = true;
+				scale = 0.1f;
+			}
+			else 
+			{
+				float cValue = static_cast<float>(c - '0');
+				if (dotFound)
+				{
+					value += cValue * scale;
+					scale /= 10.0f;
+				}
+				else
+				{
+					value = value * 10.0f + cValue;
+					scale *= 10.0f;
+				}
+			}
+		}
+		else 
+		{
+			break;
+		}
+	}
+
+	s.erase(0, offset);
+	return hasMinus ? -value : value;
+}
+
+StringList et::split(const std::string& s, const std::string& delim)
+{
+	StringList result;
+	
+	size_t startIndex = 0;
+	size_t separatorIndex = s.find_first_of(delim, startIndex);
+
+	while (separatorIndex != std::string::npos)
+	{
+		result.push_back(s.substr(startIndex, separatorIndex - startIndex));
+		startIndex = separatorIndex + 1;
+		separatorIndex = s.find_first_of(delim, startIndex);
+	}
+
+	if (startIndex < s.size())
+		result.push_back(s.substr(startIndex));
+
+	return result;
+}
+
+std::ostream& et::operator << (std::ostream& stream, const StringList& list)
+{
+	stream << "{" << std::endl;
+	ET_ITERATE(list, auto, i, stream << "\t" << i << std::endl);
+	stream << "}" << std::endl;
+	
+	return stream;
+}
+
+std::string et::removeWhitespace(const std::string& s)
+{
+	StringDataStorage result(s.size() + 1, 0);
+	ET_ITERATE(s, auto, c, if (!isWhitespaceChar(c)) result.push_back(c));
+	return std::string(result.data());
+}

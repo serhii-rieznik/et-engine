@@ -1,0 +1,277 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		5C1538F51557B21800B02941 /* atlas.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5C1538F41557B21800B02941 /* atlas.cpp */; };
+		5C1538FB1557B27B00B02941 /* pngloader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5C1538F91557B27B00B02941 /* pngloader.cpp */; };
+		5C15393C1557B2C500B02941 /* tools.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5C15393B1557B2C500B02941 /* tools.cpp */; };
+		5C15393E1557B2D500B02941 /* imageoperations.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5C15393D1557B2D500B02941 /* imageoperations.cpp */; };
+		5C1539401557B2F800B02941 /* imagewriter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5C15393F1557B2F800B02941 /* imagewriter.cpp */; };
+		5C1539421557B3FB00B02941 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5C1539411557B3FB00B02941 /* Foundation.framework */; };
+		5C54F52216D4DCE9008BF134 /* atomiccounter.unix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5C54F52116D4DCE9008BF134 /* atomiccounter.unix.cpp */; };
+		5C54F52416D4DCF6008BF134 /* libpng.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5C54F52316D4DCF6008BF134 /* libpng.a */; };
+		5C54F52616D4DD00008BF134 /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 5C54F52516D4DD00008BF134 /* libz.dylib */; };
+		5C6DAE7A166F600E0000CE97 /* textureatlaswriter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5C6DAE79166F600E0000CE97 /* textureatlaswriter.cpp */; };
+		5C6DAE7C166F60150000CE97 /* tools.apple.mm in Sources */ = {isa = PBXBuildFile; fileRef = 5C6DAE7B166F60150000CE97 /* tools.apple.mm */; };
+		5C6DAE80166F607A0000CE97 /* geometry.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5C6DAE7F166F607A0000CE97 /* geometry.cpp */; };
+		5C6DAE82166F60AA0000CE97 /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5C6DAE81166F60AA0000CE97 /* AppKit.framework */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		5C1538E01557B1EC00B02941 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = /usr/share/man/man1/;
+			dstSubfolderSpec = 0;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 1;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		5C1538E21557B1EC00B02941 /* Atlas */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = Atlas; sourceTree = BUILT_PRODUCTS_DIR; };
+		5C1538F41557B21800B02941 /* atlas.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = atlas.cpp; sourceTree = "<group>"; };
+		5C1538F91557B27B00B02941 /* pngloader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = pngloader.cpp; path = ../../src/imaging/pngloader.cpp; sourceTree = "<group>"; };
+		5C15393B1557B2C500B02941 /* tools.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = tools.cpp; path = ../../src/core/tools.cpp; sourceTree = "<group>"; };
+		5C15393D1557B2D500B02941 /* imageoperations.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = imageoperations.cpp; path = ../../src/imaging/imageoperations.cpp; sourceTree = "<group>"; };
+		5C15393F1557B2F800B02941 /* imagewriter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = imagewriter.cpp; path = ../../src/imaging/imagewriter.cpp; sourceTree = "<group>"; };
+		5C1539411557B3FB00B02941 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		5C54F52116D4DCE9008BF134 /* atomiccounter.unix.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = atomiccounter.unix.cpp; path = "../../src/platform-unix/atomiccounter.unix.cpp"; sourceTree = "<group>"; };
+		5C54F52316D4DCF6008BF134 /* libpng.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libpng.a; path = ../../lib/osx/libpng.a; sourceTree = "<group>"; };
+		5C54F52516D4DD00008BF134 /* libz.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.dylib; path = usr/lib/libz.dylib; sourceTree = SDKROOT; };
+		5C6DAE79166F600E0000CE97 /* textureatlaswriter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = textureatlaswriter.cpp; path = ../../src/gui/textureatlaswriter.cpp; sourceTree = "<group>"; };
+		5C6DAE7B166F60150000CE97 /* tools.apple.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = tools.apple.mm; path = "../../src/platform-apple/tools.apple.mm"; sourceTree = "<group>"; };
+		5C6DAE7F166F607A0000CE97 /* geometry.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = geometry.cpp; path = ../../src/geometry/geometry.cpp; sourceTree = "<group>"; };
+		5C6DAE81166F60AA0000CE97 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		5C1538DF1557B1EC00B02941 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				5C54F52616D4DD00008BF134 /* libz.dylib in Frameworks */,
+				5C6DAE82166F60AA0000CE97 /* AppKit.framework in Frameworks */,
+				5C1539421557B3FB00B02941 /* Foundation.framework in Frameworks */,
+				5C54F52416D4DCF6008BF134 /* libpng.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		5C1538D71557B1EB00B02941 = {
+			isa = PBXGroup;
+			children = (
+				5C1538F41557B21800B02941 /* atlas.cpp */,
+				5C1538F61557B25600B02941 /* Engine */,
+				5C1538E31557B1EC00B02941 /* Products */,
+				5C54F52716D4DD0C008BF134 /* Frameworks */,
+			);
+			sourceTree = "<group>";
+		};
+		5C1538E31557B1EC00B02941 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				5C1538E21557B1EC00B02941 /* Atlas */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		5C1538F61557B25600B02941 /* Engine */ = {
+			isa = PBXGroup;
+			children = (
+				5C54F52116D4DCE9008BF134 /* atomiccounter.unix.cpp */,
+				5C6DAE7F166F607A0000CE97 /* geometry.cpp */,
+				5C15393F1557B2F800B02941 /* imagewriter.cpp */,
+				5C15393D1557B2D500B02941 /* imageoperations.cpp */,
+				5C15393B1557B2C500B02941 /* tools.cpp */,
+				5C1538F91557B27B00B02941 /* pngloader.cpp */,
+				5C6DAE79166F600E0000CE97 /* textureatlaswriter.cpp */,
+				5C6DAE7B166F60150000CE97 /* tools.apple.mm */,
+			);
+			name = Engine;
+			sourceTree = "<group>";
+		};
+		5C54F52716D4DD0C008BF134 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				5C54F52316D4DCF6008BF134 /* libpng.a */,
+				5C54F52516D4DD00008BF134 /* libz.dylib */,
+				5C6DAE81166F60AA0000CE97 /* AppKit.framework */,
+				5C1539411557B3FB00B02941 /* Foundation.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		5C1538E11557B1EC00B02941 /* Atlas */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 5C1538EC1557B1EC00B02941 /* Build configuration list for PBXNativeTarget "Atlas" */;
+			buildPhases = (
+				5C1538DE1557B1EC00B02941 /* Sources */,
+				5C1538DF1557B1EC00B02941 /* Frameworks */,
+				5C1538E01557B1EC00B02941 /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Atlas;
+			productName = Atlas;
+			productReference = 5C1538E21557B1EC00B02941 /* Atlas */;
+			productType = "com.apple.product-type.tool";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		5C1538D91557B1EB00B02941 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0430;
+			};
+			buildConfigurationList = 5C1538DC1557B1EB00B02941 /* Build configuration list for PBXProject "Atlas" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 5C1538D71557B1EB00B02941;
+			productRefGroup = 5C1538E31557B1EC00B02941 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				5C1538E11557B1EC00B02941 /* Atlas */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		5C1538DE1557B1EC00B02941 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				5C1538F51557B21800B02941 /* atlas.cpp in Sources */,
+				5C1538FB1557B27B00B02941 /* pngloader.cpp in Sources */,
+				5C15393C1557B2C500B02941 /* tools.cpp in Sources */,
+				5C15393E1557B2D500B02941 /* imageoperations.cpp in Sources */,
+				5C1539401557B2F800B02941 /* imagewriter.cpp in Sources */,
+				5C6DAE7A166F600E0000CE97 /* textureatlaswriter.cpp in Sources */,
+				5C6DAE7C166F60150000CE97 /* tools.apple.mm in Sources */,
+				5C6DAE80166F607A0000CE97 /* geometry.cpp in Sources */,
+				5C54F52216D4DCE9008BF134 /* atomiccounter.unix.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		5C1538EA1557B1EC00B02941 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		5C1538EB1557B1EC00B02941 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		5C1538ED1557B1EC00B02941 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
+				CLANG_WARN_CXX0X_EXTENSIONS = NO;
+				HEADER_SEARCH_PATHS = $PROJECT_DIR/../../include/;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/../../lib/osx\"",
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		5C1538EE1557B1EC00B02941 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
+				CLANG_WARN_CXX0X_EXTENSIONS = NO;
+				HEADER_SEARCH_PATHS = $PROJECT_DIR/../../include/;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/../../lib/osx\"",
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		5C1538DC1557B1EB00B02941 /* Build configuration list for PBXProject "Atlas" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				5C1538EA1557B1EC00B02941 /* Debug */,
+				5C1538EB1557B1EC00B02941 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		5C1538EC1557B1EC00B02941 /* Build configuration list for PBXNativeTarget "Atlas" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				5C1538ED1557B1EC00B02941 /* Debug */,
+				5C1538EE1557B1EC00B02941 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 5C1538D91557B1EB00B02941 /* Project object */;
+}

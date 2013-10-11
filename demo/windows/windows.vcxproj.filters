@@ -1,0 +1,749 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Source Files\ui">
+      <UniqueIdentifier>{52f978d5-3343-4d67-9192-8955a6e030aa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Engine\headers">
+      <UniqueIdentifier>{bed50185-7a68-408c-9146-bcf7341a29c8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\source">
+      <UniqueIdentifier>{545f6ff6-67c1-442b-8012-2154c8730ed6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Sample">
+      <UniqueIdentifier>{331909ea-f393-4860-936f-d68fc44ad86f}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\source\main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\maincontroller.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\ui\mainmenu.cpp">
+      <Filter>Source Files\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\ui\resourcemanager.cpp">
+      <Filter>Source Files\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\apiobjects\framebufferfactory.cpp">
+      <Filter>Engine\source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\apiobjects\indexbufferdata.cpp">
+      <Filter>Engine\source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\apiobjects\programfactory.cpp">
+      <Filter>Engine\source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\apiobjects\texturefactory.cpp">
+      <Filter>Engine\source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\apiobjects\textureloadingthread.cpp">
+      <Filter>Engine\source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\apiobjects\vertexarrayobjectdata.cpp">
+      <Filter>Engine\source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\apiobjects\vertexbufferdata.cpp">
+      <Filter>Engine\source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\apiobjects\vertexbufferfactory.cpp">
+      <Filter>Engine\source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\app\appevironment.cpp">
+      <Filter>Engine\source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\app\application.cpp">
+      <Filter>Engine\source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\app\events.cpp">
+      <Filter>Engine\source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\app\invocation.cpp">
+      <Filter>Engine\source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\app\runloop.cpp">
+      <Filter>Engine\source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\camera\camera.cpp">
+      <Filter>Engine\source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\camera\frustum.cpp">
+      <Filter>Engine\source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\collision\aabb.cpp">
+      <Filter>Engine\source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\collision\collision.cpp">
+      <Filter>Engine\source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\core\plist.cpp">
+      <Filter>Engine\source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\core\tools.cpp">
+      <Filter>Engine\source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\core\transformable.cpp">
+      <Filter>Engine\source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\geometry\geometry.cpp">
+      <Filter>Engine\source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\geometry\rectplacer.cpp">
+      <Filter>Engine\source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\gui\button.cpp">
+      <Filter>Engine\source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\gui\carousel.cpp">
+      <Filter>Engine\source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\gui\element2d.cpp">
+      <Filter>Engine\source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\gui\element3d.cpp">
+      <Filter>Engine\source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\gui\font.cpp">
+      <Filter>Engine\source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\gui\gui.cpp">
+      <Filter>Engine\source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\gui\guibase.cpp">
+      <Filter>Engine\source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\gui\guirenderer.cpp">
+      <Filter>Engine\source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\gui\imageview.cpp">
+      <Filter>Engine\source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\gui\label.cpp">
+      <Filter>Engine\source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\gui\layout.cpp">
+      <Filter>Engine\source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\gui\listbox.cpp">
+      <Filter>Engine\source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\gui\messageview.cpp">
+      <Filter>Engine\source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\gui\renderingelement.cpp">
+      <Filter>Engine\source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\gui\scroll.cpp">
+      <Filter>Engine\source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\gui\textfield.cpp">
+      <Filter>Engine\source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\gui\textureatlas.cpp">
+      <Filter>Engine\source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\gui\textureatlaswriter.cpp">
+      <Filter>Engine\source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\imaging\ddsloader.cpp">
+      <Filter>Engine\source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\imaging\imageoperations.cpp">
+      <Filter>Engine\source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\imaging\imagewriter.cpp">
+      <Filter>Engine\source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\imaging\jpgloader.cpp">
+      <Filter>Engine\source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\imaging\pngloader.cpp">
+      <Filter>Engine\source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\imaging\pvrloader.cpp">
+      <Filter>Engine\source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\input\gestures.cpp">
+      <Filter>Engine\source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\input\input.cpp">
+      <Filter>Engine\source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\opengl\opengl.common.cpp">
+      <Filter>Engine\source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\opengl\openglcaps.cpp">
+      <Filter>Engine\source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\platform-win\application.win.cpp">
+      <Filter>Engine\source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\platform-win\charactergenerator.win.cpp">
+      <Filter>Engine\source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\platform-win\criticalsection.win.cpp">
+      <Filter>Engine\source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\platform-win\fontgen.win.cpp">
+      <Filter>Engine\source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\platform-win\input.win.cpp">
+      <Filter>Engine\source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\platform-win\locale.win.cpp">
+      <Filter>Engine\source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\platform-win\location.win.cpp">
+      <Filter>Engine\source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\platform-win\mutex.win.cpp">
+      <Filter>Engine\source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\platform-win\opengl.win.cpp">
+      <Filter>Engine\source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\platform-win\orientation.win.cpp">
+      <Filter>Engine\source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\platform-win\platformtools.win.cpp">
+      <Filter>Engine\source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\platform-win\rendercontext.win.cpp">
+      <Filter>Engine\source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\platform-win\sound.openal.win.cpp">
+      <Filter>Engine\source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\platform-win\thread.win.cpp">
+      <Filter>Engine\source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\platform-win\threading.win.cpp">
+      <Filter>Engine\source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\platform-win\tools.win.cpp">
+      <Filter>Engine\source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\platform-win\videocapture.win.cpp">
+      <Filter>Engine\source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\primitives\primitives.cpp">
+      <Filter>Engine\source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\rendering\renderer.cpp">
+      <Filter>Engine\source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\rendering\rendering.cpp">
+      <Filter>Engine\source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\rendering\renderstate.cpp">
+      <Filter>Engine\source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\resources\textureloader.cpp">
+      <Filter>Engine\source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\tasks\taskpool.cpp">
+      <Filter>Engine\source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\timers\notifytimer.cpp">
+      <Filter>Engine\source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\timers\sequence.cpp">
+      <Filter>Engine\source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\timers\timedobject.cpp">
+      <Filter>Engine\source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\timers\timerpool.cpp">
+      <Filter>Engine\source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\vertexbuffer\indexarray.cpp">
+      <Filter>Engine\source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\vertexbuffer\vertexarray.cpp">
+      <Filter>Engine\source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\vertexbuffer\vertexdatachunk.cpp">
+      <Filter>Engine\source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\vertexbuffer\vertexdeclaration.cpp">
+      <Filter>Engine\source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\platform-win\atomiccounter.win.cpp">
+      <Filter>Engine\source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\rendering\rendercontext.cpp">
+      <Filter>Engine\source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\core\log.cpp">
+      <Filter>Engine\source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\core\stream.cpp">
+      <Filter>Engine\source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\sample\sample.cpp">
+      <Filter>Source Files\Sample</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\apiobjects\texture.cpp">
+      <Filter>Engine\source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\core\objectscache.cpp">
+      <Filter>Engine\source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\apiobjects\framebuffer.cpp">
+      <Filter>Engine\source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\apiobjects\program.cpp">
+      <Filter>Engine\source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\app\backgroundthread.cpp">
+      <Filter>Engine\source</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\source\maincontroller.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ui\mainmenu.h">
+      <Filter>Source Files\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ui\resourcemanager.h">
+      <Filter>Source Files\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\apiobjects\apiobject.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\apiobjects\apiobjectfactory.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\apiobjects\framebuffer.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\apiobjects\framebufferdata.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\apiobjects\framebufferfactory.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\apiobjects\indexbuffer.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\apiobjects\indexbufferdata.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\apiobjects\program.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\apiobjects\programdata.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\apiobjects\programfactory.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\apiobjects\texture.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\apiobjects\texturecache.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\apiobjects\texturedata.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\apiobjects\texturedescription.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\apiobjects\texturefactory.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\apiobjects\textureloadingthread.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\apiobjects\vertexarrayobject.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\apiobjects\vertexarrayobjectdata.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\apiobjects\vertexbuffer.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\apiobjects\vertexbufferdata.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\apiobjects\vertexbufferfactory.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\app\appevironment.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\app\application.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\app\applicationdelegate.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\app\applicationnotifier.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\app\events.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\app\events.inl.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\app\invocation.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\app\runloop.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\camera\camera.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\camera\frustum.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\collision\aabb.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\collision\collision.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\collision\obb.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\collision\sphere.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\core\autoptr.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\core\autovalue.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\core\constants.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\core\containers.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\core\containersbase.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\core\datastorage.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\core\debug.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\core\et.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\core\flags.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\core\hierarchy.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\core\intrusiveptr.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\core\plist.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\core\properties.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\core\rawdataaccessor.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\core\serialization.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\core\sharedptr.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\core\singleton.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\core\staticdatastorage.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\core\tools.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\core\transformable.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\core\types.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\geometry\equations.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\geometry\geometry.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\geometry\line2d.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\geometry\matrix3.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\geometry\matrix4.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\geometry\parallelepiped.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\geometry\plane.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\geometry\quaternion.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\geometry\ray.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\geometry\rect.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\geometry\rectplacer.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\geometry\segment2d.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\geometry\segment3d.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\geometry\splines.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\geometry\splines.inl.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\geometry\triangle.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\geometry\vector2.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\geometry\vector3.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\geometry\vector4.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\gui\button.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\gui\carousel.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\gui\charactergenerator.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\gui\element2d.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\gui\element3d.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\gui\font.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\gui\fontbase.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\gui\fontgen.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\gui\fullscreenelement.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\gui\gui.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\gui\guibase.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\gui\guibaseclasses.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\gui\guibaseconst.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\gui\guirenderer.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\gui\imageview.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\gui\label.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\gui\layout.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\gui\listbox.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\gui\messageview.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\gui\renderingelement.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\gui\scroll.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\gui\skin.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\gui\textfield.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\gui\textureatlas.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\gui\textureatlaswriter.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\imaging\ddsloader.const.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\imaging\ddsloader.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\imaging\imageoperations.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\imaging\imagewriter.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\imaging\jpgloader.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\imaging\pngloader.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\imaging\pvrloader.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\input\gestures.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\input\input.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\opengl\opengl.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\opengl\openglcaps.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\platform\compileoptions.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\platform\platform.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\platform\platformtools.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\platform-win\kinect.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\platform-win\opengl.win.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\primitives\primitives.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\rendercontext.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\rendercontextparams.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\renderer.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\rendering.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\renderstate.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\resources\textureloader.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\tasks\taskpool.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\tasks\tasks.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\threading\criticalsection.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\threading\mutex.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\threading\referencecounter.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\threading\thread.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\threading\threading.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\timers\animator.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\timers\inertialvalue.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\timers\intervaltimer.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\timers\notifytimer.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\timers\sequence.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\timers\timedobject.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\timers\timerpool.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\vertexbuffer\indexarray.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\vertexbuffer\vertexarray.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\vertexbuffer\vertexdatachunk.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\vertexbuffer\vertexdeclaration.h">
+      <Filter>Engine\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\sample\sample.h">
+      <Filter>Source Files\Sample</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
