@@ -9,7 +9,7 @@ Supported platforms:
 - OS X;
 - Windows;
 - Android (still porting);
-- 
+
 Features:
 -------------
 - wrappers for OpenGL and OpenGL ES objects;
