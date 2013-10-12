@@ -24,24 +24,17 @@ namespace et
 		InertialValue(const T& val) :
 			_velocity(0), _value(val), _deccelerationRate(1.0f), _time(0.0f),
 			_precision(std::numeric_limits<float>::epsilon()) { }
-
-		const T& velocity() const
-			{ return _velocity; }
 		
-		const T& value() const
-			{ return _value; }
-		
-		void setVelocity(const T& t)
-			{ _velocity = t; }
+		ET_DECLARE_PROPERTY_GET_REF_SET_REF(T, value, setValue)
+		ET_DECLARE_PROPERTY_GET_REF_SET_REF(T, velocity, setVelocity)
+		ET_DECLARE_PROPERTY_GET_REF_SET_REF(float, deccelerationRate, setDeccelerationRate)
 
+	public:
 		void addVelocity(const T& t)
 			{ _velocity += t; }
 
 		void scaleVelocity(const T& t)
 			{ _velocity *= t; }
-
-		void setValue(const T& v)
-			{ _value = v;}
 
 		void addValue(const T& v)
 			{ _value += v;}
@@ -55,33 +48,11 @@ namespace et
 			_time = actualTime();
 		}
 
-		InertialValue<T>& operator = (const T& v) 
-		{
-			_value = v;
-			return *this;
-		}
-
-		InertialValue<T>& operator *= (const T& v)
-		{
-			_value *= v;
-			return *this;
-		}
-
-		InertialValue<T>& operator += (const T& v)
-		{
-			_value += v;
-			return *this;
-		}
-
-		void setDeccelerationRate(float value)
-			{ _deccelerationRate = etMax(0.0f, value); }
-
 	public:
 		ET_DECLARE_EVENT0(updated)
 		ET_DECLARE_EVENT1(valueUpdated, const T&)
 
 	private:
-
 		void startUpdates(TimerPool* timerPool = nullptr) override
 			{ TimedObject::startUpdates(timerPool); }
 
@@ -102,9 +73,6 @@ namespace et
 		}
 
 	private:
-		T _velocity;
-		T _value;
-		float _deccelerationRate;
 		float _time;
 		float _precision;
 	};

@@ -47,14 +47,14 @@ void et::excludeFileFromICloudBackup(const std::string& path)
 	}
 }
 
-void et::saveImageToPhotos(const std::string& path, void(*callback)(bool))
+void et::saveImageToPhotos(const std::string& path, void* context, void(*callback)(bool, void*))
 {
 	ALAssetsLibrary* library = [[ALAssetsLibrary alloc] init];
 	
 	[library writeImageDataToSavedPhotosAlbum:[NSData dataWithContentsOfFile:[NSString stringWithUTF8String:path.c_str()]]
 		metadata:nil completionBlock:^(NSURL *assetURL, NSError *error)
 	{
-		callback(error == nil);
+		callback(error == nil, context);
 		if (error != nil)
 		{
 			NSLog(@"Unable to save image %s to Saved Photos Album:\n%@", path.c_str(), error);
@@ -66,7 +66,7 @@ void et::saveImageToPhotos(const std::string& path, void(*callback)(bool))
 #endif
 }
 
-void et::shareFile(const std::string& path, const std::string& scheme)
+void et::shareFile(const std::string& path, const std::string& scheme, bool displayOptions)
 {
 	if (sharedInteractionController == nil)
 		sharedInteractionController = [[UIDocumentInteractionController alloc] init];
@@ -81,10 +81,20 @@ void et::shareFile(const std::string& path, const std::string& scheme)
 	
 	sharedInteractionController.UTI = [NSString stringWithUTF8String:scheme.c_str()];
 	sharedInteractionController.URL = [NSURL fileURLWithPath:[NSString stringWithUTF8String:path.c_str()]];
-	[sharedInteractionController presentOptionsMenuFromRect:presentRect inView:handle.view animated:YES];
+	
+	if (displayOptions)
+		[sharedInteractionController presentOptionsMenuFromRect:presentRect inView:handle.view animated:YES];
+	else
+		[sharedInteractionController presentOpenInMenuFromRect:presentRect inView:handle.view animated:YES];
 }
 
 std::string et::selectFile(const StringList&, SelectFileMode, const std::string&)
 {
 	return std::string();
+}
+
+bool et::canOpenURL(const std::string& s)
+{
+	return [[UIApplication sharedApplication]
+		canOpenURL:[NSURL URLWithString:[NSString stringWithUTF8String:s.c_str()]]];
 }
