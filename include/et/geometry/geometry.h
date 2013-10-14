@@ -476,6 +476,10 @@ namespace et
 	inline vec2 vector2ToFloat(const vector2<T>& v)
 		{ return vec2(static_cast<float>(v.x), static_cast<float>(v.y)); }
 
+	template <typename T>
+	inline vec3 vector3ToFloat(const vector3<T>& v)
+		{ return vec3(static_cast<float>(v.x), static_cast<float>(v.y), static_cast<float>(v.z)); }
+	
 	quaternion matrixToQuaternion(const mat3& m);
 	quaternion matrixToQuaternion(const mat4& m);
 

@@ -593,7 +593,7 @@ RenderState::State RenderState::currentState()
 	int maxTextureUnits = 0;
 	glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &maxTextureUnits);
 	
-	for (GLenum i = 0; i < maxTextureUnits; ++i)
+	for (int i = 0; i < maxTextureUnits; ++i)
 	{
 		glActiveTexture(GL_TEXTURE0 + i);
 		
