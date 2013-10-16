@@ -684,8 +684,7 @@ RenderState::State RenderState::currentState()
 		(cValue[2] * ColorMask_Blue) | (cValue[3] * ColorMask_Alpha);
 	checkOpenGLError("");
 
-	glGetBooleanv(GL_SCISSOR_TEST, &bValue);
-	s.clipEnabled = bValue > 0;
+	s.clipEnabled = glIsEnabled(GL_SCISSOR_TEST);
 	checkOpenGLError("");
 
 	value = 0;
@@ -736,9 +735,7 @@ RenderState::State RenderState::currentState()
 	// TODO: get this from state, too lazy now.
 	s.wireframe = false;
 	
-	value = 0;
-	glGetIntegerv(GL_BLEND, &value);
-	s.blendEnabled = value != 0;
+	s.blendEnabled = glIsEnabled(GL_BLEND);
 	checkOpenGLError("");
 	
 	int blendDest = 0;
