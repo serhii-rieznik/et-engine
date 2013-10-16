@@ -147,7 +147,7 @@ Texture TextureFactory::genNoiseTexture(const vec2i& size, bool norm, const std:
 		vec4 rand_f = vec4(randomFloat(-1.0f, 1.0f), randomFloat(-1.0f, 1.0f),
 			randomFloat(-1.0f, 1.0f), randomFloat(-1.0f, 1.0f));
 		
-		randata[i] = vec4f_to_4ub(norm ? vec4(rand_f.xyz().normalize(), rand_f.w) : rand_f);
+		randata[i] = vec4f_to_4ub(norm ? vec4(rand_f.xyz().normalized(), rand_f.w) : rand_f);
 	}
 
 	TextureDescription::Pointer desc(new TextureDescription);

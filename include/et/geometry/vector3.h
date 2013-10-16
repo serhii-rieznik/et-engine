@@ -125,7 +125,7 @@ namespace et
 		const vector2<T>& xy() const
 			{ return *((vector2<T>*)(c)); }
 		
-		vector3 normalize()
+		void normalize()
 		{
 			T lenSquare = dotSelf();
 			if (lenSquare > 0)
@@ -135,7 +135,20 @@ namespace et
 				y /= lenSquare;
 				z /= lenSquare;
 			}
-			return *this;
+		}
+		
+		vector3<T> normalized() const
+		{
+			T lenSquare = dotSelf();
+			if (lenSquare > 0)
+			{
+				lenSquare = std::sqrt(lenSquare);
+				return vector3<T>(x / lenSquare, y / lenSquare, z / lenSquare);
+			}
+			else
+			{
+				return *this;
+			}
 		}
 
 		bool operator == (const vector3<T>& r) const

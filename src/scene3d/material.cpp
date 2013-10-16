@@ -24,7 +24,9 @@ static const Texture _emptyTexture;
 static const std::string _emptyString;
 static const vec4 _emptyVector;
 
-static const char* kMaterial = "material";
+static const char* etMaterialCstr = "material";
+static const char* etNameCstr = "name";
+
 static const char* kDefaultValues = "default_values";
 static const char* kCustomValues = "custom_values";
 static const char* kType = "type";
@@ -37,7 +39,6 @@ static const char* kFloat = "float";
 static const char* kVector = "vector";
 static const char* kTexture = "texture";
 static const char* kString = "string";
-static const char* kName = "name";
 static const char* kVersion = "version";
 static const char* kDepthWrite = "depth_write";
 static const char* kBlend = "blend";
@@ -145,8 +146,8 @@ void MaterialData::serializeReadable(std::ostream& s) const
 {
 	s << "<?xml version=\"1.0\" encoding='UTF-8'?>" << std::endl;
 
-	START_BLOCK(kMaterial, "",
-		keyValue(s, kName, name());
+	START_BLOCK(etMaterialCstr, "",
+		keyValue(s, etNameCstr, name());
 		keyValue(s, kVersion, MaterialCurrentVersion);
 		keyValue(s, kKey, intToStr(this));
 		keyValue(s, kBlend, blendState());
@@ -234,7 +235,7 @@ void MaterialData::serializeReadable(std::ostream& s) const
 	});
 
 	END_BLOCK(kCustomValues, "\t")
-	END_BLOCK(kMaterial, "");
+	END_BLOCK(etMaterialCstr, "");
 }
 
 void MaterialData::serializeBinary(std::ostream& stream) const
@@ -457,7 +458,7 @@ void MaterialData::loadProperties(xmlNode* root)
 		xmlChar* value = xmlNodeListGetString(prop->doc, prop->children, 1);
 		const char* pName = reinterpret_cast<const char*>(prop->name);
 		const char* pValue = reinterpret_cast<const char*>(value);
-		if (strcmp(pName, kName) == 0)
+		if (strcmp(pName, etNameCstr) == 0)
 			setName(std::string(pValue));
 		else if (strcmp(pName, kDepthWrite) == 0)
 			_depthWriteEnabled = strToBool(pValue);

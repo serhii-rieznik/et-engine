@@ -349,7 +349,7 @@ bool et::intersect::sphereSphere(const Sphere& s1, const Sphere& s2, vec3* amoun
 	bool collised = (distance <= sqr(radiusSum));
 
 	if (amount && collised)
-		*amount = dv.normalize() * (radiusSum - std::sqrt(distance));
+		*amount = dv.normalized() * (radiusSum - std::sqrt(distance));
 
 	return collised;
 }
@@ -436,7 +436,7 @@ bool et::intersect::sphereTriangle(const vec3& sphereCenter, const float radius,
 
 	if (distanceSqr > std::numeric_limits<float>::epsilon())
 	{
-		normal = contactToCentre.normalize();
+		normal = contactToCentre.normalized();
 		penetration = radius - sqrtf(distanceSqr);
 	} 
 	else
