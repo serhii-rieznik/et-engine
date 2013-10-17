@@ -457,11 +457,11 @@ void Framebuffer::resolveMultisampledTo(Framebuffer::Pointer framebuffer)
 	
 	_rc->renderState().bindReadFramebuffer(_id);
 	_rc->renderState().bindDrawFramebuffer(framebuffer->glID());
-
-#if (ET_PLATFORM_IOS)
+	
+#if (ET_OPENGLES && !defined(GL_ES_VERSION_3_0))
 	
 	glResolveMultisampleFramebufferAPPLE();
-	checkOpenGLError("glResolveMultisampleFramebufferAPPLE");
+	checkOpenGLError("glResolveMultisampleFramebuffer");
 	
 #else
 	

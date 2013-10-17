@@ -28,7 +28,7 @@ ProgramFactory::ProgramFactory(RenderContext* rc) : APIObjectFactory(rc)
 		"#define etHighp	highp\n";
 #else
 	_commonHeader = 
-		"#version " + openGLCapabilites().glslVersion() + "\n"
+		"#version " + openGLCapabilites().glslVersionShortString() + "\n"
 		"#define etLowp\n"
 		"#define etMediump\n"
 		"#define etHighp\n";

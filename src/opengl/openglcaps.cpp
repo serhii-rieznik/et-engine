@@ -13,31 +13,47 @@ using namespace et;
 void OpenGLCapabilites::checkCaps()
 {
 	const char* glv = reinterpret_cast<const char*>(glGetString(GL_VERSION));
-	const char* glslv = reinterpret_cast<const char*>(glGetString(GL_SHADING_LANGUAGE_VERSION));
-	
+	_versionShortString = std::string();
+	_versionString = std::string(glv ? glv : "<Unknown OpenGL version>");
+	if (glv != nullptr)
+	{
+		do
+		{
+			if ((_versionShortString.size() > 0) && (*glv == ET_SPACE)) break;
+			
+			if ((*glv >= '0') && (*glv <= '9'))
+				_versionShortString.push_back(*glv);
+		}
+		while (*glv++);
+	}
+	while (_versionShortString.size() < 3)
+		_versionShortString.push_back('0');
 	checkOpenGLError("OpenGLCapabilites::checkCaps");
 	
-	_glslVersion = std::string();
-	_openGlVersion = std::string(glv ? glv : "<Unknown OpenGL version>");
+	const char* glslv = reinterpret_cast<const char*>(glGetString(GL_SHADING_LANGUAGE_VERSION));
+	_glslVersionShortString = std::string();
 	_glslVersionString = std::string(glslv ? glslv : "<Unknown GLSL version>");
-
 	if (glslv != nullptr)
 	{
 		do
 		{
-			if ((_glslVersion.size() > 0) && (*glslv == ET_SPACE)) break;
+			if ((_glslVersionShortString.size() > 0) && (*glslv == ET_SPACE)) break;
 
 			if ((*glslv >= '0') && (*glslv <= '9'))
-				_glslVersion.push_back(*glslv);
+				_glslVersionShortString.push_back(*glslv);
 		}
 		while (*glslv++);
 	}
 
-	if (_glslVersion.size() < 3)
-		_glslVersion.push_back('0');
-	
-	_version = strToInt(_glslVersion) < 130 ? OpenGLVersion_Old : OpenGLVersion_New;
+	while (_glslVersionShortString.size() < 3)
+		_glslVersionShortString.push_back('0');
 
+	std::string lowercaseVersion = _versionString;
+	lowercase(lowercaseVersion);
+	
+	_version = (strToInt(_glslVersionShortString) < 130) || (lowercaseVersion.find("es") != std::string::npos) ?
+		OpenGLVersion_Old : OpenGLVersion_New;
+	
 	int maxSize = 0;
 	glGetIntegerv(GL_MAX_CUBE_MAP_TEXTURE_SIZE, &maxSize);
 	_maxCubemapTextureSize = static_cast<size_t>(maxSize);
@@ -71,6 +87,6 @@ void OpenGLCapabilites::checkCaps()
 	}
 #endif
 	
-	log::info("[OpenGLCapabilites] Version: %s, GLSL version: %s (%s)", _openGlVersion.c_str(),
-		_glslVersionString.c_str(), _glslVersion.c_str());
+	log::info("[OpenGLCapabilites] Version: %s (%s), GLSL version: %s (%s)", _versionString.c_str(),
+		_versionShortString.c_str(), _glslVersionString.c_str(), _glslVersionShortString.c_str());
 };

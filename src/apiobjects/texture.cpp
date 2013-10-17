@@ -8,6 +8,7 @@
 #include <et/core/tools.h>
 #include <et/resources/textureloader.h>
 #include <et/rendering/rendercontext.h>
+#include <et/opengl/openglcaps.h>
 
 using namespace et;
 
@@ -64,8 +65,15 @@ void TextureData::setWrap(RenderContext* rc, TextureWrap s, TextureWrap t, Textu
 	checkOpenGLError("glTexParameteri<WRAP_T> - %s", name().c_str());
 	
 #if defined(GL_TEXTURE_WRAP_R)
-	glTexParameteri(_desc->target, GL_TEXTURE_WRAP_R, textureWrapValue(_wrap.z));
-	checkOpenGLError("glTexParameteri<WRAP_R> - %s", name().c_str()); 
+#
+#	if (ET_OPENGLES)
+	if (openGLCapabilites().versionShortString() > "200")
+#	endif
+	{
+		glTexParameteri(_desc->target, GL_TEXTURE_WRAP_R, textureWrapValue(_wrap.z));
+		checkOpenGLError("glTexParameteri<WRAP_R> - %s", name().c_str());
+	}
+#
 #endif	
 }
 

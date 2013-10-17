@@ -40,11 +40,17 @@ namespace et
 		OpenGLVersion version() const
 			{ return _version; }
 
-		const std::string& glslVersion() const
-			{ return _glslVersion; }
+		const std::string& versionString() const
+			{ return _versionString; }
 
-		const std::string& glslVersionString() const
+		const std::string& versionShortString() const
+			{ return _versionShortString; }
+		
+		const std::string& glslVersion() const
 			{ return _glslVersionString; }
+		
+		const std::string& glslVersionShortString() const
+			{ return _glslVersionShortString; }
 
 		size_t maxCubemapTextureSize() const
 			{ return _maxCubemapTextureSize;}
@@ -52,9 +58,10 @@ namespace et
 		void checkCaps();
 
 	private:
-		std::string _openGlVersion;
+		std::string _versionString;
+		std::string _versionShortString;
 		std::string _glslVersionString;
-		std::string _glslVersion;
+		std::string _glslVersionShortString;
 
 		size_t _maxCubemapTextureSize = 0;
 

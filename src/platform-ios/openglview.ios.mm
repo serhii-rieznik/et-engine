@@ -34,6 +34,7 @@ using namespace et;
 	
 	BOOL _keyboardAllowed;
 	BOOL _multisampled;
+	BOOL _isOpenGLES3;
 }
 
 - (void)performInitializationWithParameters:(const RenderContextParameters&)params;
@@ -119,6 +120,12 @@ using namespace et;
 {
     if (_context == newContext) return;
 	
+#if defined(GL_ES_VERSION_3_0)
+	_isOpenGLES3 = (newContext.API == kEAGLRenderingAPIOpenGLES3);
+#else
+	_isOpenGLES3 = false;
+#endif
+	
 #if (ET_OBJC_ARC_ENABLED)
 	_context = newContext;
 #else
@@ -144,8 +151,22 @@ using namespace et;
 		_rc->renderState().bindReadFramebuffer(_multisampledFramebuffer->glID());
 		_rc->renderState().bindDrawFramebuffer(_mainFramebuffer->glID());
 		
+#if defined(GL_ES_VERSION_3_0)
+		if (_isOpenGLES3)
+		{
+			glBlitFramebuffer(0, 0, _multisampledFramebuffer->size().x, _multisampledFramebuffer->size().y,
+				0, 0, _mainFramebuffer->size().x, _mainFramebuffer->size().y, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+			checkOpenGLError("glBlitFramebuffer");
+		}
+		else
+		{
+			glResolveMultisampleFramebufferAPPLE();
+			checkOpenGLError("glResolveMultisampleFramebuffer");
+		}
+#else
 		glResolveMultisampleFramebufferAPPLE();
-		checkOpenGLError("glResolveMultisampleFramebufferAPPLE");
+		checkOpenGLError("glResolveMultisampleFramebuffer");
+#endif
 	}
 	
 	const GLenum discards[]  = { GL_DEPTH_ATTACHMENT, GL_COLOR_ATTACHMENT0 };

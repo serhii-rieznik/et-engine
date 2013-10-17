@@ -517,7 +517,7 @@ void et::etTexImage2D(uint32_t target, int level, int internalformat, GLsizei wi
 	glTexImage2D(target, level, internalformat, width, height, border, format, type, pixels);
 
 #if (ET_DEBUG)
-	checkOpenGLError("glTexImage2D(%s, %d, %s, %d, %d, %d, %s, %s, %, 0x%8X)",
+	checkOpenGLError("glTexImage2D(%s, %d, %s, %d, %d, %d, %s, %s, %, 0x%08X)",
 		glTexTargetToString(target).c_str(), level, glInternalFormatToString(internalformat).c_str(),
 		width, height, border, glInternalFormatToString(static_cast<int32_t>(format)).c_str(), glTypeToString(type).c_str(),
 		pixels);
@@ -610,6 +610,8 @@ size_t et::bitsPerPixelForTextureFormat(uint32_t internalFormat, uint32_t type)
 		}
 			
 		case GL_DEPTH_COMPONENT:
+		case GL_DEPTH_COMPONENT16:
+		case GL_DEPTH_COMPONENT24:
 			return bitsPerPixelForType(type);
 			
 		default:

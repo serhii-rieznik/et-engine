@@ -50,7 +50,12 @@ extern NSString* etKeyboardNotRequiredNotification;
 
 - (BOOL)performInitialization
 {
+#if defined(GL_ES_VERSION_3_0)
+	_context = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES3];
+	if (_context == nil)
+#endif
 	_context = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2];
+	
 	_glView = [[etOpenGLView alloc] initWithFrame:[[UIScreen mainScreen] bounds] parameters:_params];
 	
 	if (!_context)

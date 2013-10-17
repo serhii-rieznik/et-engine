@@ -43,29 +43,37 @@
 #
 #elif ET_PLATFORM_IOS
 #
-#	include <OpenGLES/ES2/gl.h>
-#	include <OpenGLES/ES2/glext.h>
+#	if (0 && defined(__IPHONE_7_0))
+#		include <OpenGLES/ES3/gl.h>
+#		include <OpenGLES/ES3/glext.h>
+#	else
+#		include <OpenGLES/ES2/gl.h>
+#		include <OpenGLES/ES2/glext.h>
+#	endif
 #
-#	define ET_OPENGLES								1
+#	define ET_OPENGLES									1
 #
 #	if !defined(GL_DEPTH_COMPONENT24)
-#		define GL_DEPTH_COMPONENT24					GL_DEPTH_COMPONENT24_OES
+#		define GL_DEPTH_COMPONENT24						GL_DEPTH_COMPONENT24_OES
 #	endif
 #
 #	if !defined(GL_HALF_FLOAT)
-#		define GL_HALF_FLOAT						GL_HALF_FLOAT_OES
+#		define GL_HALF_FLOAT							GL_HALF_FLOAT_OES
 #	endif
 #
 #	if !defined(GL_RGBA8)
-#		define GL_RGBA8								GL_RGBA8_OES
+#		define GL_RGBA8									GL_RGBA8_OES
 #	endif
 #
-#	define glGenVertexArrays						glGenVertexArraysOES
-#	define glBindVertexArray						glBindVertexArrayOES
-#	define glIsVertexArray							glIsVertexArrayOES
-#	define glDeleteVertexArrays						glDeleteVertexArraysOES
-#	define glClearDepth								glClearDepthf
-#	define glRenderbufferStorageMultisample			glRenderbufferStorageMultisampleAPPLE
+#	if !defined(GL_ES_VERSION_3_0)
+#		define glGenVertexArrays						glGenVertexArraysOES
+#		define glBindVertexArray						glBindVertexArrayOES
+#		define glIsVertexArray							glIsVertexArrayOES
+#		define glDeleteVertexArrays						glDeleteVertexArraysOES
+#		define glRenderbufferStorageMultisample			glRenderbufferStorageMultisampleAPPLE
+#	endif
+#
+#	define glClearDepth									glClearDepthf
 #
 #	if !defined(GL_TEXTURE_MAX_LEVEL)
 #		define GL_TEXTURE_MAX_LEVEL						GL_TEXTURE_MAX_LEVEL_APPLE
@@ -150,7 +158,7 @@
 #
 #endif
 
-#if defined(GL_ARB_vertex_array_object) || defined(GL_OES_vertex_array_object)
+#if defined(GL_ES_VERSION_3_0) || defined(GL_ARB_vertex_array_object) || defined(GL_OES_vertex_array_object)
 #	define ET_SUPPORT_VERTEX_ARRAY_OBJECTS	1
 #else
 #	error Vertex Array Objects are not supported on selected platform
