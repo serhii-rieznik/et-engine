@@ -206,13 +206,9 @@ extern NSString* etKeyboardNotRequiredNotification;
 - (void)onNotificationRecevied:(NSNotification*)notification
 {
 	if ([notification.name isEqualToString:etKeyboardRequiredNotification])
-	{
-		[self resignFirstResponder];
-	}
+		[self performSelectorOnMainThread:@selector(resignFirstResponder) withObject:nil waitUntilDone:NO];
 	else if ([notification.name isEqualToString:etKeyboardNotRequiredNotification])
-	{
-		[self becomeFirstResponder];
-	}
+		[self performSelectorOnMainThread:@selector(becomeFirstResponder) withObject:nil waitUntilDone:NO];
 }
 
 @end
