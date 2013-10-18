@@ -17,7 +17,7 @@ LOCAL_SRC_FILES += \
 	$(SOURCE_PATH)/ui/resourcemanager.cpp
 
 LOCAL_LDLIBS := -llog -landroid -lz -lGLESv2
-LOCAL_STATIC_LIBRARIES := android_native_app_glue et png jpeg
+LOCAL_STATIC_LIBRARIES := android_native_app_glue et png
 
 include $(BUILD_SHARED_LIBRARY)
 
