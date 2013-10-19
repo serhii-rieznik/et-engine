@@ -247,8 +247,13 @@ void DDSLoader::loadInfoFromStream(std::istream& source, TextureDescription& des
         {
             desc.channels = header.ddspf.dwRGBBitCount / 8;
             desc.bitsPerPixel = header.ddspf.dwRGBBitCount;
-            desc.format = desc.channels == 3 ? GL_RGB : GL_RGBA;
-            desc.internalformat = static_cast<int32_t>(desc.format);
+
+            desc.internalformat = (desc.channels == 3) ? GL_RGB : GL_RGBA;
+			if (header.ddspf.dwBBitMask == 255)
+				desc.format = (desc.channels == 3) ? GL_BGR : GL_BGRA;
+			else
+				desc.format == desc.internalformat;
+
             desc.type = GL_UNSIGNED_BYTE;
             break;
         }
