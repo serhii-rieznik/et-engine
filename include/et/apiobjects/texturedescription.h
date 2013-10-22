@@ -35,7 +35,7 @@ namespace et
 			vec2i result = size;
 			for (size_t i = 0; i < level; ++i)
 				result /= 2;
-			return size;
+			return result;
 		}
 
 		size_t dataSizeForMipLevel(size_t level)
