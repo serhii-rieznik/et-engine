@@ -7,8 +7,6 @@
 
 #pragma once
 
-#include <et/core/intrusiveptr.h>
-
 namespace et
 {
 	class Object : public Shared

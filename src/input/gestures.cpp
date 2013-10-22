@@ -5,6 +5,7 @@
  *
  */
 
+#include <et/geometry/geometry.h>
 #include <et/app/application.h>
 #include <et/input/gestures.h>
 

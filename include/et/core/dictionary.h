@@ -127,6 +127,12 @@ namespace et
 		ArrayValue(ValueBase::Pointer p) :
 			ValuePointer<ArrayValue::ValueType, ValueClass_Array>(p) { }
 		
+		ArrayValue& operator = (const ArrayValue& r)
+		{
+			ValuePointer<std::vector<ValueBase::Pointer>, ValueClass_Array>::operator = (r);
+			return *this;
+		}
+		
 	public:
 		void printContent() const;
 	};
@@ -148,6 +154,12 @@ namespace et
 		
 		Dictionary(ValueBase::Pointer p) :
 			ValuePointer<Dictionary::ValueType, ValueClass_Dictionary>(p) { }
+		
+		Dictionary& operator = (const Dictionary& r)
+		{
+			ValuePointer<std::map<std::string, ValueBase::Pointer>, ValueClass_Dictionary>::operator = (r);
+			return *this;
+		}
 		
 	public:
 		void setStringForKey(const std::string& key, StringValue value)

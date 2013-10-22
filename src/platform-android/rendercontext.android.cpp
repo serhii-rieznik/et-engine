@@ -38,7 +38,7 @@ RenderContext::RenderContext(const RenderContextParameters& params, Application*
 	_renderState.setRenderContext(this);
 	_programFactory = new ProgramFactory(this);
 	_textureFactory = new TextureFactory(this);
-	_framebufferFactory = new FramebufferFactory(this, _textureFactory.ptr());
+	_framebufferFactory = new FramebufferFactory(this);
 	_vertexBufferFactory = new VertexBufferFactory(_renderState);
 }
 

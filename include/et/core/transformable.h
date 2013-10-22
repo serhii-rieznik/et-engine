@@ -7,18 +7,16 @@
 
 #pragma once
 
-#include <et/geometry/geometry.h>
-
 namespace et
 {
 	class MatrixTransformable
 	{ 
 	public:
-		MatrixTransformable() : _transform(identityMatrix)
-			{ }
+		MatrixTransformable() :
+			_transform(identityMatrix) { }
 
-		MatrixTransformable(const mat4& t) : _transform(t)
-			{ }
+		MatrixTransformable(const mat4& t) :
+			_transform(t) { }
 
 		virtual ~MatrixTransformable() { }
 

@@ -7,7 +7,6 @@
 
 #include <pthread.h>
 #include <unistd.h>
-#include <et/threading/atomiccounter.h>
 #include <et/threading/thread.h>
 
 namespace et
@@ -34,7 +33,7 @@ namespace et
 using namespace et;
 
 ThreadPrivate::ThreadPrivate() :
-	thread(nullptr), threadId(0)
+	thread(0), threadId(0)
 {
 	attrib = { };
 	suspendMutex = { };

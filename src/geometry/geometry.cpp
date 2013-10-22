@@ -165,17 +165,16 @@ vec3ub et::vec3fto3ublinear(const vec3& fv)
 		static_cast<unsigned char>(clamp(fv.x * 255.0f, 0.0f, 255.0f)), 
 		static_cast<unsigned char>(clamp(fv.y * 255.0f, 0.0f, 255.0f)),
 		static_cast<unsigned char>(clamp(fv.z * 255.0f, 0.0f, 255.0f)));
-
 }
 
 vec4ub et::vec4f_to_4ub(const vec4 &fv)
 {
-	return vec4ub( (unsigned char)(clamp<float>(0.5f + 0.5f * fv.x, 0.0, 1.0) * 255), 
+	return vec4ub(
+		(unsigned char)(clamp<float>(0.5f + 0.5f * fv.x, 0.0, 1.0) * 255),
 		(unsigned char)(clamp<float>(0.5f + 0.5f * fv.y, 0.0, 1.0) * 255), 
 		(unsigned char)(clamp<float>(0.5f + 0.5f * fv.z, 0.0, 1.0) * 255),
 		(unsigned char)(clamp<float>(0.5f + 0.5f * fv.z, 0.0, 1.0) * 255) );
 }
-
 
 mat4 et::rotation2DMatrix(float angle)
 {	

@@ -6,7 +6,7 @@
  */
 
 #include <algorithm>
-
+#include <et/geometry/geometry.h>
 #include <et/imaging/imageoperations.h>
 
 using namespace et;

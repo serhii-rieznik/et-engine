@@ -12,6 +12,5 @@ LOCAL_SRC_FILES := alAuxEffectSlot.c alBuffer.c alDatabuffer.c alEffect.c alErro
 	alcModulator.c alcReverb.c alcRing.c alcThread.c ALu.c android.cpp bs2b.c null.c 
 
 LOCAL_CFLAGS := -DAL_BUILD_LIBRARY -DAL_ALEXT_PROTOTYPES
-LOCAL_LDLIBS := -llog -Wl,-s
 
 include $(BUILD_STATIC_LIBRARY)

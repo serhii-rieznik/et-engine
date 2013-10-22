@@ -6,7 +6,7 @@
  */
 
 #include <et/core/objectscache.h>
-#include <et/core/filesystem.h>
+#include <et/geometry/geometry.h>
 #include <et/rendering/rendercontext.h>
 #include <et/opengl/openglcaps.h>
 #include <et/threading/threading.h>

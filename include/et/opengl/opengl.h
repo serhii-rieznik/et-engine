@@ -110,13 +110,11 @@
 #elif (ET_PLATFORM_ANDROID)
 #
 #	include <EGL/egl.h>
-#	include <GLES2/gl2.h>
-#	include <GLES2/gl2ext.h>
+#	include <GLES3/gl3.h>
+#	include <GLES3/gl3ext.h>
+#	include <GLES3/gl3platform.h>
 #
 #	define ET_OPENGLES								1
-#
-#	define GL_DEPTH_COMPONENT24						GL_DEPTH_COMPONENT24_OES
-#	define GL_HALF_FLOAT							GL_HALF_FLOAT_OES
 #
 #	define glClearDepth								glClearDepthf
 #

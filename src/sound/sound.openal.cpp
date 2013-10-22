@@ -7,7 +7,6 @@
 
 #include <iostream>
 #include <assert.h>
-#include <et/geometry/geometry.h>
 #include <et/core/tools.h>
 #include <et/core/containers.h>
 #include <et/sound/openal.h>

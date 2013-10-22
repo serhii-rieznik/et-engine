@@ -52,8 +52,11 @@ namespace et
 		const std::string& glslVersionShortString() const
 			{ return _glslVersionShortString; }
 
-		size_t maxCubemapTextureSize() const
+		uint32_t maxCubemapTextureSize() const
 			{ return _maxCubemapTextureSize;}
+		
+		uint32_t maxSamples() const
+			{ return _maxSamples; }
 		
 		void checkCaps();
 
@@ -63,7 +66,8 @@ namespace et
 		std::string _glslVersionString;
 		std::string _glslVersionShortString;
 
-		size_t _maxCubemapTextureSize = 0;
+		uint32_t _maxCubemapTextureSize = 0;
+		uint32_t _maxSamples = 0;
 
 		OpenGLVersion _version = OpenGLVersion_unknown;
 	};

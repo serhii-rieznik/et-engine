@@ -8,7 +8,6 @@
 #pragma once
 
 #include <et/app/events.h>
-#include <et/geometry/geometry.h>
 
 namespace et
 {

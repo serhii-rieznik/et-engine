@@ -6,7 +6,7 @@
  */
 
 #include <et/core/tools.h>
-#include <et/core/stream.h>
+#include <et/geometry/geometry.h>
 #include <et/opengl/opengl.h>
 #include <et/imaging/pvrloader.h>
 

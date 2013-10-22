@@ -8,7 +8,6 @@
 #pragma once
 
 #include <et/core/containers.h>
-#include <et/geometry/geometry.h>
 #include <et/vertexbuffer/indexarray.h>
 #include <et/vertexbuffer/vertexarray.h>
 #include <et/apiobjects/vertexbuffer.h>

@@ -7,7 +7,6 @@
 
 #include <fstream>
 #include <et/core/et.h>
-#include <et/core/stream.h>
 
 #if (ET_PLATFORM_ANDROID)
 #
@@ -37,7 +36,8 @@ InputStream::InputStream() : _private(new InputStreamPrivate)
 {
 }
 
-InputStream::InputStream(const std::string& file, StreamMode mode) : _private(new InputStreamPrivate)
+InputStream::InputStream(const std::string& file, StreamMode mode) :
+	_private(new InputStreamPrivate)
 {
 	std::ios::openmode openMode = std::ios::in;
 	

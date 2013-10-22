@@ -7,6 +7,8 @@
 
 #pragma once
 
+#include <cstdint>
+
 namespace et
 {
 	enum BlendState
@@ -104,7 +106,7 @@ namespace et
 		Usage_max
 	};
 	
-	enum IndexArrayFormat : size_t
+	enum IndexArrayFormat : uint32_t
 	{
 		IndexArrayFormat_Undefined  = 0,
 		IndexArrayFormat_8bit = 1,

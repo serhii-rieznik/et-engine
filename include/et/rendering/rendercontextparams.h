@@ -7,8 +7,6 @@
 
 #pragma once
 
-#include <et/geometry/geometry.h>
-
 namespace et
 {
 	vec2i nativeScreenSize();

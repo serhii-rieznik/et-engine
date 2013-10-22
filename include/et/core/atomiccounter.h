@@ -7,22 +7,14 @@
 
 #pragma once
 
-#include <et/core/et.h>
-
 namespace et
 {
 #if (ET_PLATFORM_IOS || ET_PLATFORM_MAC || ET_PLATFORM_ANDROID)
-#
 	typedef int AtomicCounterType;
-#
 #elif (ET_PLATFORM_WIN)
-#
 	typedef long AtomicCounterType;
-#
 #else
-#
 #	error AtomicCounterType is not defined
-#
 #endif
 	
 	class AtomicCounter

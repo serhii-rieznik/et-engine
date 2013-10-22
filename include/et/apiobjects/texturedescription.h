@@ -7,9 +7,7 @@
 
 #pragma once
 
-#include <et/core/object.h>
 #include <et/core/containers.h>
-#include <et/geometry/geometry.h>
 
 namespace et
 {
@@ -33,7 +31,12 @@ namespace et
 
 	public:
 		vec2i sizeForMipLevel(size_t level)
-			{ return size / intPower(2, level); }
+		{
+			vec2i result = size;
+			for (size_t i = 0; i < level; ++i)
+				result /= 2;
+			return size;
+		}
 
 		size_t dataSizeForMipLevel(size_t level)
 		{

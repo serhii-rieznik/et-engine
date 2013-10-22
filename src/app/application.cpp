@@ -10,6 +10,11 @@
 
 using namespace et;
 
+namespace et
+{
+	uint32_t randomInteger(uint32_t limit);
+}
+
 IApplicationDelegate* et::Application::_delegate = nullptr;
 
 Application::Application() :

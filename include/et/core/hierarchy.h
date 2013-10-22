@@ -7,9 +7,6 @@
 
 #pragma once
 
-#include <list>
-#include <et/core/object.h>
-
 namespace et
 {
 	template <typename T, typename BASE>

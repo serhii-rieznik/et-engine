@@ -7,7 +7,6 @@
 
 #pragma once
 
-#include <et/core/et.h>
 #include <et/geometry/geometry.h>
 
 namespace et

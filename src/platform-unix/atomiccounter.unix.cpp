@@ -14,8 +14,6 @@
 #	include <libkern/OSAtomic.h>
 #endif
 
-#include <et/threading/atomiccounter.h>
-
 using namespace et;
 
 AtomicCounter::AtomicCounter() : _counter(0)
@@ -48,7 +46,11 @@ AtomicBool::AtomicBool() :
 bool AtomicBool::operator = (bool b)
 {
 	assert((_value & validMask) == 0);
+#if (ET_PLATFORM_ANDROID)
+	__atomic_swap(b, &_value);
+#else
 	OSAtomicCompareAndSwap32Barrier(_value, AtomicCounterType(b), &_value);
+#endif
 	return (_value != 0);
 }
 

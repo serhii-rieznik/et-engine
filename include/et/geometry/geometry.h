@@ -7,46 +7,17 @@
 
 #pragma once
 
-#include <et/geometry/vector4.h>
-#include <et/geometry/matrix3.h>
-#include <et/geometry/matrix4.h>
+#include <et/core/et.h>
 #include <et/geometry/ray.h>
 #include <et/geometry/triangle.h>
-#include <et/geometry/rect.h>
 #include <et/geometry/segment2d.h>
 #include <et/geometry/segment3d.h>
 #include <et/geometry/plane.h>
-#include <et/geometry/quaternion.h>
 #include <et/geometry/parallelepiped.h>
 #include <et/geometry/equations.h>
 
 namespace et
 {
-	typedef vector2<float> vec2;
-	typedef vector3<float> vec3;
-	typedef vector4<float> vec4;
-	
-	typedef vector2<int> vec2i;
-	typedef vector3<int> vec3i;
-	typedef vector4<int> vec4i;
-	
-	typedef vector2<size_t> vec2sz;
-	typedef vector3<size_t> vec3sz;
-	typedef vector4<size_t> vec4sz;
-	
-	typedef vector2<unsigned char> vec2ub;
-	typedef vector3<unsigned char> vec3ub;
-	typedef vector4<unsigned char> vec4ub;
-	
-	typedef matrix3<float> mat3;
-	typedef matrix4<float> mat4;
-	
-	typedef matrix3<int> mat3i;
-	typedef matrix4<int> mat4i;
-	
-	typedef Quaternion<float> quaternion;
-	typedef Rect<float> rect;
-	typedef Rect<int> recti;
 	typedef Parallelepiped<float> parallelepiped;
 	
 	typedef Line2d<float> line2d;
@@ -59,13 +30,6 @@ namespace et
 	
 	typedef Triangle<float> triangle;
 	typedef Plane<float> plane;
-
-	extern const vec3 unitX;
-	extern const vec3 unitY;
-	extern const vec3 unitZ;
-	extern const mat3 identityMatrix3;
-	extern const mat4 identityMatrix;
-	extern const mat4 lightProjectionMatrix;
 	
 	template<typename T>
 	inline T sqr(T value) 
@@ -91,14 +55,6 @@ namespace et
 	
 	inline vector4<int> absv(const vector4<int>& value) 
 		{ return vector4<int>(std::abs(value.x), std::abs(value.y), std::abs(value.z), std::abs(value.w)); }
-	
-	template <typename T>
-	inline T etMin(const T& v1, const T& v2)
-		{ return (v1 < v2) ? v1 : v2; }
-	
-	template <typename T>
-	inline T etMax(const T& v1, const T& v2)
-		{ return (v1 > v2) ? v1 : v2; }
 
 	template<typename T>
 	inline vector2<T> maxv(const vector2<T>& v1, const vector2<T>& v2) 
@@ -162,10 +118,6 @@ namespace et
 
 	inline float length(float v)
 		{ return std::abs(v); }
-
-	template<typename T>
-	inline T clamp(T value, T min, T max)
-		{ return (value < min) ? min : (value > max) ? max : value; }
 
 	inline float mix(float v1, float v2, float t)
 		{ return v1 * (1.0f - t) + v2 * t; }
@@ -465,10 +417,8 @@ namespace et
 	inline T intPower(T value, size_t power)
 	{
 		T result = static_cast<T>(1);
-		
 		for (size_t i = 1; i <= power; ++i)
 			result *= value;
-		
 		return result;
 	}
 	

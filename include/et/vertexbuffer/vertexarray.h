@@ -7,7 +7,6 @@
 
 #pragma once
 
-#include <et/core/object.h>
 #include <et/vertexbuffer/vertexdeclaration.h>
 #include <et/vertexbuffer/vertexdatachunk.h>
 

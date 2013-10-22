@@ -5,12 +5,13 @@
 *
 */
 
+#include <et/geometry/geometry.h>
 #include <et/core/transformable.h>
 
 using namespace et;
 
-ComponentTransformable::ComponentTransformable() : _cachedTransform(identityMatrix), 
-	_translation(0.0f), _scale(1.0f), _orientation(), _flags(0)
+ComponentTransformable::ComponentTransformable() :
+	_cachedTransform(identityMatrix), _translation(0.0f), _scale(1.0f), _orientation(), _flags(0)
 {
 }
 

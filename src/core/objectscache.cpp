@@ -5,7 +5,6 @@
  *
  */
 
-#include <et/core/filesystem.h>
 #include <et/core/objectscache.h>
 
 using namespace et;

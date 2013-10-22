@@ -7,7 +7,6 @@
 
 #include <et/core/plist.h>
 #include <et/core/tools.h>
-#include <et/core/stream.h>
 
 using namespace et;
 // using namespace et::plist;

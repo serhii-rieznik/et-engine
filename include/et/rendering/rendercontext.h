@@ -9,18 +9,15 @@
 
 #include <et/core/et.h>
 #include <et/core/objectscache.h>
-
-#include <et/timers/notifytimer.h>
-#include <et/app/events.h>
-
 #include <et/rendering/rendercontextparams.h>
 #include <et/rendering/renderer.h>
 #include <et/rendering/renderstate.h>
-
 #include <et/apiobjects/programfactory.h>
 #include <et/apiobjects/texturefactory.h>
 #include <et/apiobjects/framebufferfactory.h>
 #include <et/apiobjects/vertexbufferfactory.h>
+#include <et/timers/notifytimer.h>
+#include <et/app/events.h>
 
 namespace et
 {

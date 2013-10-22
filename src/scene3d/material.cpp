@@ -8,9 +8,7 @@
 #include <libxml/tree.h>
 #include <libxml/parser.h>
 
-#include <et/core/stream.h>
 #include <et/core/serialization.h>
-#include <et/core/filesystem.h>
 #include <et/core/tools.h>
 #include <et/core/cout.h>
 

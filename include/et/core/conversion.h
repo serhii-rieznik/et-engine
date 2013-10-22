@@ -8,7 +8,6 @@
 #pragma once
 
 #include <et/geometry/geometry.h>
-#include <et/core/dictionary.h>
 
 namespace et
 {

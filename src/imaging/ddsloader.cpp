@@ -5,7 +5,6 @@
  *
  */
 
-#include <et/core/stream.h>
 #include <et/imaging/ddsloader.h>
 #include <et/opengl/opengl.h>
 
@@ -119,12 +118,12 @@ void DDSLoader::loadInfoFromStream(std::istream& source, TextureDescription& des
             desc.bitsPerPixel = header.ddspf.dwRGBBitCount;
             desc.internalformat = (desc.channels == 3) ? GL_RGB : GL_RGBA;
 			
-#if defined(GL_BGR)
+#if defined(GL_BGR) && defined(GL_BGRA)
 			desc.format = (header.ddspf.dwBBitMask == 255) ?
 				((desc.channels == 3) ? GL_BGR : GL_BGRA) : desc.internalformat;
 #else
 			desc.format = (header.ddspf.dwBBitMask == 255) ?
-				((desc.channels == 3) ? GL_RGB : GL_BGRA) : desc.internalformat;
+				((desc.channels == 3) ? GL_RGB : GL_RGBA) : desc.internalformat;
 #endif
             desc.type = GL_UNSIGNED_BYTE;
             break;

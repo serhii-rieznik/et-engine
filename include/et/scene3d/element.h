@@ -9,7 +9,7 @@
 
 #include <set>
 #include <typeinfo>
-#include <et/core/hierarchy.h>
+#include <et/core/et.h>
 #include <et/core/flags.h>
 #include <et/core/transformable.h>
 #include <et/core/serialization.h>

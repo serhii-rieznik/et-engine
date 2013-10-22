@@ -6,7 +6,7 @@
  */
 
 #include <Windows.h>
-#include <et/threading/atomiccounter.h>
+#include <et/core/et.h>
 
 using namespace et;
 

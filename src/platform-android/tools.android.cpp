@@ -7,6 +7,7 @@
 
 #include <dirent.h>
 #include <errno.h>
+#include <unistd.h>
 #include <sys/time.h>
 #include <sys/stat.h>
 
@@ -32,12 +33,12 @@ uint64_t queryActualTime()
 	static_cast<uint64_t>(tv.tv_usec) / 1000;
 }
 
-float et::queryTime()
+float et::queryContiniousTimeInSeconds()
 {
-	return static_cast<float>(queryTimeMSec()) / 1000.0f;
+	return static_cast<float>(queryContiniousTimeInMilliSeconds()) / 1000.0f;
 }
 
-uint64_t et::queryTimeMSec()
+uint64_t et::queryContiniousTimeInMilliSeconds()
 {
 	if (!startTimeInitialized)
 	{
@@ -46,6 +47,13 @@ uint64_t et::queryTimeMSec()
 	};
 	
 	return queryActualTime() - startTime;
+}
+
+uint64_t et::queryCurrentTimeInMicroSeconds()
+{
+	timeval tv = { };
+	gettimeofday(&tv, 0);
+	return static_cast<uint64_t>(tv.tv_sec) * 1000000 + static_cast<uint64_t>(tv.tv_usec);
 }
 
 std::string et::applicationPath()
@@ -75,7 +83,7 @@ std::string et::applicationPackagePath()
     return result;
 }
 
-std::string et::applicationTemporaryBaseFolder()
+std::string et::temporaryBaseFolder()
 {
     return std::string();
 }
@@ -160,12 +168,12 @@ bool et::folderExists(const std::string& name)
 	}
 }
 
-std::string et::applicationLibraryBaseFolder()
+std::string et::libraryBaseFolder()
 {
 	return addTrailingSlash(std::string(et::sharedAndroidApplication()->activity->internalDataPath));
 }
 
-std::string et::applicationDocumentsBaseFolder()
+std::string et::documentsBaseFolder()
 {
 	return addTrailingSlash(std::string(et::sharedAndroidApplication()->activity->internalDataPath));
 }
@@ -251,11 +259,11 @@ et::vec2i et::nativeScreenSize()
 	return vec2i(0);
 }
 
-unsigned long et::getFileDate(const std::string& path)
+int64_t et::getFileDate(const std::string& path)
 {
 	struct stat s = { };
 	stat(path.c_str(), &s);
-	return static_cast<unsigned long>(s.st_mtime_nsec / 1000000);
+	return static_cast<int64_t>(s.st_mtime_nsec / 1000000);
 }
 
 void et::getFolderContent(const std::string& path, std::vector<std::string>& aList)

@@ -35,9 +35,11 @@
 #elif (ET_PLATFORM_APPLE)
 #
 #	define ET_CALL_FUNCTION					__PRETTY_FUNCTION__
+#
 #	define ET_SUPPORT_RANGE_BASED_FOR		(__has_feature(cxx_range_for) || __has_extension(cxx_range_for))
 #	define ET_SUPPORT_INITIALIZER_LIST		(__has_feature(cxx_generalized_initializers) || __has_extension(cxx_generalized_initializers))
 #	define ET_SUPPORT_VARIADIC_TEMPLATES	(__has_feature(cxx_variadic_templates) || __has_extension(cxx_variadic_templates))
+#
 #	define ET_OBJC_ARC_ENABLED				(__has_feature(objc_arc))
 #
 #	if (ET_PLATFORM_MAC)
@@ -50,9 +52,15 @@
 #elif (ET_PLATFORM_ANDROID)
 #
 #	define ET_CALL_FUNCTION					__PRETTY_FUNCTION__
+#
 #	define ET_SUPPORT_RANGE_BASED_FOR		(__has_feature(cxx_range_for) || __has_extension(cxx_range_for))
 #	define ET_SUPPORT_INITIALIZER_LIST		(__has_feature(cxx_generalized_initializers) || __has_extension(cxx_generalized_initializers))
 #	define ET_SUPPORT_VARIADIC_TEMPLATES	(__has_feature(cxx_variadic_templates) || __has_extension(cxx_variadic_templates))
+#
+#	define ET_OBJC_ARC_ENABLED				0
+#
+#	define ET_DEPRECATED					__attribute__((deprecated))
+#	define ET_FORMAT_FUNCTION				__attribute__((format(printf, 1, 2)))
 #
 #else
 #

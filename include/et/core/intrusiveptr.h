@@ -7,8 +7,6 @@
 
 #pragma once
 
-#include <et/threading/atomiccounter.h>
-
 namespace et
 {
 	#define ET_DECLARE_POINTER(T)					typedef et::IntrusivePtr<T> Pointer; \

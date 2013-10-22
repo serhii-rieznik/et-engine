@@ -5,8 +5,9 @@
  *
  */
 
-#include <et/opengl/opengl.h>
 #include <et/core/containers.h>
+#include <et/geometry/geometry.h>
+#include <et/opengl/opengl.h>
 #include <et/primitives/primitives.h>
 
 using namespace et;

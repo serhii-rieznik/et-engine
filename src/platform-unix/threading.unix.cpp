@@ -6,7 +6,6 @@
  */
 
 #include <pthread.h>
-#include <execinfo.h>
 #include <et/threading/threading.h>
 
 using namespace et;

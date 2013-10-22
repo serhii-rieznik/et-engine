@@ -353,7 +353,8 @@ void Framebuffer::createOrUpdateColorRenderbuffer()
 	
 	_rc->renderState().bindFramebuffer(_id);
 	_rc->renderState().bindRenderbuffer(_colorRenderbuffer);
-	
+
+#if (!ET_PLATFORM_ANDROID)
 	if (_description.numSamples > 1)
 	{
 		glRenderbufferStorageMultisample(GL_RENDERBUFFER, _description.numSamples,
@@ -361,6 +362,7 @@ void Framebuffer::createOrUpdateColorRenderbuffer()
 		checkOpenGLError("glRenderbufferStorageMultisample");
 	}
 	else
+#endif
 	{
 		glRenderbufferStorage(GL_RENDERBUFFER, _description.colorInternalformat,
 			_description.size.x, _description.size.y);
@@ -381,6 +383,7 @@ void Framebuffer::createOrUpdateDepthRenderbuffer()
 	_rc->renderState().bindFramebuffer(_id);
 	_rc->renderState().bindRenderbuffer(_depthRenderbuffer);
 	
+#if (!ET_PLATFORM_ANDROID)
 	if (_description.numSamples > 1)
 	{
 		glRenderbufferStorageMultisample(GL_RENDERBUFFER, _description.numSamples,
@@ -388,6 +391,7 @@ void Framebuffer::createOrUpdateDepthRenderbuffer()
 		checkOpenGLError("glRenderbufferStorageMultisample");
 	}
 	else
+#endif
 	{
 		glRenderbufferStorage(GL_RENDERBUFFER, _description.depthInternalformat,
 			_description.size.x, _description.size.y);
@@ -458,10 +462,14 @@ void Framebuffer::resolveMultisampledTo(Framebuffer::Pointer framebuffer)
 	_rc->renderState().bindReadFramebuffer(_id);
 	_rc->renderState().bindDrawFramebuffer(framebuffer->glID());
 	
-#if (ET_OPENGLES && !defined(GL_ES_VERSION_3_0))
-	
+#if (ET_PLATFORM_IOS)
+
 	glResolveMultisampleFramebufferAPPLE();
 	checkOpenGLError("glResolveMultisampleFramebuffer");
+	
+#elif (ET_PLATFORM_ANDROID)
+	
+	assert(false);
 	
 #else
 	

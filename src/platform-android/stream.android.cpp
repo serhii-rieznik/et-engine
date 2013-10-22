@@ -7,6 +7,7 @@
 
 #include <sstream>
 #include <fstream>
+#include <unistd.h>
 #include <sys/stat.h>
 #include <libzip/zip.h>
 

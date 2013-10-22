@@ -8,7 +8,6 @@
 #include <Windows.h>
 #include <WinUser.h>
 
-#include <et/core/filesystem.h>
 #include <et/opengl/opengl.h>
 #include <et/opengl/openglcaps.h>
 #include <et/app/application.h>

@@ -10,6 +10,9 @@
 #if (ET_PLATFORM_MAC || ET_PLATFORM_IOS)
 #	include <OpenAL/al.h>
 #	include <OpenAL/alc.h>
+#elif (ET_PLATFORM_ANDROID)
+#	include <oal/al.h>
+#	include <oal/alc.h>
 #elif (ET_PLATFORM_WIN)
 #	include <oal\al.h>
 #	include <oal\alc.h>

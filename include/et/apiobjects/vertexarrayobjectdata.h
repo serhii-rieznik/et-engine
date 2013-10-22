@@ -7,7 +7,6 @@
 
 #pragma once
 
-#include <et/core/object.h>
 #include <et/apiobjects/vertexbuffer.h>
 #include <et/apiobjects/indexbuffer.h>
 

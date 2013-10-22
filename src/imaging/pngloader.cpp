@@ -6,7 +6,6 @@
  */
 
 #include <libpng/png.h>
-#include <et/core/stream.h>
 #include <et/opengl/opengl.h>
 #include <et/imaging/pngloader.h>
 

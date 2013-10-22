@@ -79,6 +79,19 @@
 #	define ET_KEY_DOWN					125
 #	define ET_KEY_UP					126
 #
+#elif (ET_PLATFORM_ANDROID)
+#
+#	define ET_KEY_RETURN				13
+#	define ET_KEY_TAB					9
+#	define ET_KEY_SPACE					32
+#	define ET_KEY_ESCAPE				27
+#	define ET_KEY_BACKSPACE				8
+#
+#	define ET_KEY_LEFT					123
+#	define ET_KEY_RIGHT					124
+#	define ET_KEY_DOWN					125
+#	define ET_KEY_UP					126
+#
 #endif
 
 #define ET_DEFAULT_DELIMITER			';'

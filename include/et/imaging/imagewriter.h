@@ -8,7 +8,6 @@
 #pragma once
 
 #include <et/core/containers.h>
-#include <et/geometry/geometry.h>
 
 namespace et
 {
@@ -23,9 +22,9 @@ namespace et
 		static std::string extensionForImageFormat(ImageFormat fmt);
 
 		static bool writeImageToFile(const std::string& fileName, const BinaryDataStorage& data,
-									 const vec2i& size, int components, int bitsPerComponent, ImageFormat fmt, bool flip);
+			const vec2i& size, int components, int bitsPerComponent, ImageFormat fmt, bool flip);
 		
 		static bool writeImageToBuffer(BinaryDataStorage& buffer, const BinaryDataStorage& data,
-									 const vec2i& size, int components, int bitsPerComponent, ImageFormat fmt, bool flip);
+			const vec2i& size, int components, int bitsPerComponent, ImageFormat fmt, bool flip);
 	};
 }

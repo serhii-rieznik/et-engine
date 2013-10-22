@@ -7,7 +7,6 @@
 
 #pragma once
 
-#include <et/core/object.h>
 #include <et/vertexbuffer/vertexarray.h>
 
 namespace et

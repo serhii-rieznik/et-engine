@@ -5,8 +5,8 @@
  *
  */
 
-#include <typeinfo>
-#include <et/core/tools.h>
+#include <et/core/et.h>
+#include <et/core/dictionary.h>
 
 using namespace et;
 

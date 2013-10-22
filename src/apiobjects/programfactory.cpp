@@ -5,8 +5,6 @@
  *
  */
 
-#include <et/core/stream.h>
-#include <et/core/filesystem.h>
 #include <et/app/application.h>
 #include <et/opengl/openglcaps.h>
 #include <et/rendering/rendercontext.h>

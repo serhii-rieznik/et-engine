@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include <et/core/object.h>
+#include <et/core/et.h>
 #include <et/threading/criticalsection.h>
 #include <et/timers/timedobject.h>
 

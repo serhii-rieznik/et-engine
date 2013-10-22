@@ -8,7 +8,6 @@
 #include <iostream>
 #include <Windows.h>
 #include <et/core/tools.h>
-#include <et/threading/atomiccounter.h>
 #include <et/threading/thread.h>
 
 namespace et

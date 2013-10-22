@@ -6,8 +6,10 @@
  */
 
 #import <QuartzCore/QuartzCore.h>
-#import <et/platform-ios/openglview.h>
-#import <et/rendering/rendercontext.h>
+
+#include <et/opengl/openglcaps.h>
+#include <et/platform-ios/openglview.h>
+#include <et/rendering/rendercontext.h>
 
 extern NSString* etKeyboardRequiredNotification;
 extern NSString* etKeyboardNotRequiredNotification;
@@ -232,14 +234,11 @@ using namespace et;
 		
 		if (_multisampled)
 		{
-			int maxSamples = 0;
-			glGetIntegerv(GL_MAX_SAMPLES, &maxSamples);
-			
 			if (_multisampledFramebuffer.invalid())
 			{
 				_multisampledFramebuffer = _rc->framebufferFactory().createFramebuffer(size,
 					"et-multisampled-framebuffer", colorFormat, GL_RGBA, GL_UNSIGNED_BYTE,
-					depthFormat, GL_DEPTH_COMPONENT, GL_UNSIGNED_INT, true, maxSamples);
+					depthFormat, GL_DEPTH_COMPONENT, GL_UNSIGNED_INT, true, openGLCapabilites().maxSamples());
 			}
 			else
 			{

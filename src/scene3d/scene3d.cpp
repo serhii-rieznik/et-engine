@@ -6,8 +6,6 @@
  */
 
 #include <fstream>
-#include <et/core/filesystem.h>
-#include <et/core/stream.h>
 #include <et/rendering/rendercontext.h>
 #include <et/scene3d/scene3d.h>
 #include <et/scene3d/serialization.h>
@@ -112,8 +110,8 @@ void Scene::deserializeAsync(std::istream& stream, RenderContext* rc, ObjectsCac
 void Scene::deserializeAsync(const std::string& filename, RenderContext* rc, ObjectsCache& tc, 
 	ElementFactory* factory)
 {
-	std::ifstream file(filename.c_str(), std::ios::binary | std::ios::in);
-	deserializeAsync(file, rc, tc, factory, getFilePath(filename));
+	InputStream file(filename, StreamMode_Binary);
+	deserializeAsync(file.stream(), rc, tc, factory, getFilePath(filename));
 }
 
 bool Scene::deserialize(std::istream& stream, RenderContext* rc, ObjectsCache& tc,
@@ -237,8 +235,8 @@ void Scene::serialize(const std::string& filename, s3d::StorageFormat fmt)
 bool Scene::deserialize(const std::string& filename, RenderContext* rc, ObjectsCache& tc,
 	ElementFactory* factory)
 {
-	std::ifstream file(filename.c_str(), std::ios::binary | std::ios::in);
-	bool success = deserialize(file, rc, tc, factory, getFilePath(filename));
+	InputStream file(filename, StreamMode_Binary);
+	bool success = deserialize(file.stream(), rc, tc, factory, getFilePath(filename));
 
 	if (!success)
 		log::error("Unable to load scene from file: %s", filename.c_str());

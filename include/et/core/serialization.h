@@ -10,7 +10,6 @@
 #include <ostream>
 
 #include <et/core/containers.h>
-#include <et/geometry/geometry.h>
 
 namespace et
 {
@@ -26,7 +25,7 @@ namespace et
 		stream.write(reinterpret_cast<const char*>(&value), sizeof(value));
 	}
 
-#if (!ET_PLATFORM_WIN32)
+#if (ET_PLATFORM_APPLE)
 	inline void serializeInt(std::ostream& stream, size_t value)
 		{ serializeInt(stream, static_cast<uint32_t>(value)); }
 #endif

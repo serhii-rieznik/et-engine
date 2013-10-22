@@ -5,8 +5,8 @@
  *
  */
 
-#include <OpenAL/al.h>
-#include <OpenAL/alc.h>
+#include <oal/al.h>
+#include <oal/alc.h>
 #include <et/platform-android/nativeactivity.h>
 #include <et/sound/sound.h>
 

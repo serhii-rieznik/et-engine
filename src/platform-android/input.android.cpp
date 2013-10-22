@@ -9,13 +9,18 @@
 
 using namespace et;
 
-PointerInputInfo Input::currentPointer() const
+namespace et
 {
-	return PointerInputInfo(PointerType_None, vec2(0.0f), vec2(0.0f), vec2(0.0f), 0,
-		queryTime(), PointerOrigin_Touchscreen);
+	float queryContiniousTimeInSeconds();
 }
 
-bool Input::canGetCurrentPointerInfo() const
+PointerInputInfo Input::currentPointer()
+{
+	return PointerInputInfo(PointerType_None, vec2(0.0f), vec2(0.0f), vec2(0.0f), 0,
+		queryContiniousTimeInSeconds(), PointerOrigin_Touchscreen);
+}
+
+bool Input::canGetCurrentPointerInfo()
 {
 	return false;
 }

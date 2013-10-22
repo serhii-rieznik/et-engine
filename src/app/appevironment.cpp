@@ -5,7 +5,6 @@
  *
  */
 
-#include <et/core/filesystem.h>
 #include <et/app/application.h>
 #include <et/app/appevironment.h>
 

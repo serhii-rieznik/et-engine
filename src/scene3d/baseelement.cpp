@@ -189,7 +189,7 @@ void Element::duplicateBasePropertiesToObject(Element* object)
 
 void Element::serialize(std::ostream&, SceneVersion)
 {
-	log::error("Serialization method isn't defined for %s", typeid(*this).name());
+	log::error("Serialization method was not overloaded");
 #if (ET_DEBUG)
 	abort();
 #endif
@@ -197,7 +197,7 @@ void Element::serialize(std::ostream&, SceneVersion)
 
 void Element::deserialize(std::istream&, ElementFactory*, SceneVersion)
 {
-	log::error("Deserialization method isn't defined for %s", typeid(*this).name());
+	log::error("Deserialization method was not overloaded");
 #if (ET_DEBUG)
 	abort();
 #endif

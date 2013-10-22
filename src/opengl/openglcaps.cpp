@@ -56,11 +56,14 @@ void OpenGLCapabilites::checkCaps()
 	
 	int maxSize = 0;
 	glGetIntegerv(GL_MAX_CUBE_MAP_TEXTURE_SIZE, &maxSize);
-	_maxCubemapTextureSize = static_cast<size_t>(maxSize);
+	_maxCubemapTextureSize = static_cast<uint32_t>(maxSize);
+
+	int maxSamples = 0;
+	glGetIntegerv(GL_MAX_SAMPLES, &maxSamples);
+	_maxSamples = static_cast<uint32_t>(maxSamples);
 	
 	int maxUnits = 0;
 	glGetIntegerv(GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS, &maxUnits);
-	
 	if (maxUnits > 0)
 		setFlag(OpenGLFeature_VertexTextureFetch);
 

@@ -9,7 +9,6 @@
 #include <sys/stat.h>
 #include <et/core/datastorage.h>
 #include <et/core/tools.h>
-#include <et/core/filesystem.h>
 
 #if (ET_PLATFORM_MAC)
 #	include <AppKit/NSWorkspace.h>
