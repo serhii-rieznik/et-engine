@@ -91,6 +91,17 @@ std::string& et::trim(std::string &str)
 	return str;
 }
 
+std::string et::capitalize(std::string v)
+{
+	v[0] = ::toupper(v[0]);
+	for (size_t i = 1; i < v.length(); ++i)
+	{
+		if (v[i-1] == ET_SPACE)
+			v[i] = ::toupper(v[i]);
+	}
+	return v;
+}
+
 std::string et::getFilePath(const std::string& name)
 {
 	std::string::size_type p = normalizeFilePath(name).find_last_of(pathDelimiter);

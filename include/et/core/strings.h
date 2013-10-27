@@ -61,6 +61,8 @@ namespace et
 	
 	float extractFloat(std::string& s);
 	
+	std::string capitalize(std::string);
+	
 	std::string& trim(std::string &str);
 	std::string removeWhitespace(const std::string&);
 	StringList split(const std::string& s, const std::string& delim);

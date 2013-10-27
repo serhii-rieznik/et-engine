@@ -316,10 +316,11 @@ namespace et
 
 		vector3<T> rotationMultiply(const vector3<T>& v) const
 		{
-			return vector3<T>(
-				mat[0].x * v.x + mat[1].x * v.y + mat[2].x * v.z, 
-				mat[0].y * v.x + mat[1].y * v.y + mat[2].y * v.z,
-				mat[0].z * v.x + mat[1].z * v.y + mat[2].z * v.z);
+			const vector4<T>& c0 = mat[0];
+			const vector4<T>& c1 = mat[1];
+			const vector4<T>& c2 = mat[2];
+			return vector3<T>(c0.x * v.x + c1.x * v.y + c2.x * v.z, c0.y * v.x + c1.y * v.y + c2.y * v.z,
+				c0.z * v.x + c1.z * v.y + c2.z * v.z);
 		}
 
 		matrix4<T> inverse() const

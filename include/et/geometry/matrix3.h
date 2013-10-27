@@ -64,6 +64,14 @@ namespace et
 		const T& operator() (size_t i) const
 			{ return *(&mat[0].x + i); }
 		
+		matrix3<T>& operator += (const matrix3<T>& r)
+		{
+			mat[0] += r.mat[0];
+			mat[1] += r.mat[1];
+			mat[2] += r.mat[2];
+			return *this;
+		}
+		
 		T determinant()
 		{
 			T a10 = mat[1].x;
