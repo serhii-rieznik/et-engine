@@ -13,12 +13,8 @@
 
 namespace et
 {
-	namespace ios
+	namespace mac
 	{
-		void saveImageToPhotos(const std::string& path, std::function<void(bool)> callback);
-		
-		void excludeFileFromICloudBackup(const std::string&);
-		void shareFile(const std::string& path, const std::string& scheme, bool displayOptions);
 		bool canOpenURL(const std::string&);
 	}
 }

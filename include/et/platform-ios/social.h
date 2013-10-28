@@ -11,12 +11,12 @@
 
 namespace et
 {
-	class Twitter
+	namespace social
 	{
-	public:
-		static bool canTweet();
+		bool canTweet();
+		bool canPostToFacebook();
 		
-	public:
 		void tweet(const std::string& text, const std::string& pathToImage, const std::string& url);
-	};
+		void postToFacebook(const std::string& text, const std::string& pathToImage, const std::string& url);
+	}
 }
