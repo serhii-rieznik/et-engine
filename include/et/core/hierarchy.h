@@ -89,7 +89,7 @@ namespace et
 		bool notFound = true;
 		for (auto i = _children.begin(), e = _children.end(); i != e; ++i)
 		{
-			if (*i == c)
+			if (i->ptr() == c)
 			{
 				notFound = false;
 				break;
@@ -109,7 +109,7 @@ namespace et
 		
 		for (auto i = _children.begin(), e = _children.end(); i != e; ++i)
 		{
-			if (*i == c)
+			if (i->ptr() == c)
 			{
 				_children.erase(i);
 				found = true;
@@ -126,7 +126,7 @@ namespace et
 	{
 		for (auto i = _children.begin(), e = _children.end(); i != e; ++i)
 		{
-			if (*i == c)
+			if (i->ptr() == c)
 			{
 				_children.erase(i);
 				_children.push_back(typename Hierarchy<T, BASE>::BasePointer(c));
@@ -140,7 +140,7 @@ namespace et
 	{
 		for (auto i = _children.begin(), e = _children.end(); i != e; ++i)
 		{
-			if (*i == c)
+			if (i->ptr() == c)
 			{
 				_children.erase(i);
 				_children.push_front(typename Hierarchy<T, BASE>::BasePointer(c));

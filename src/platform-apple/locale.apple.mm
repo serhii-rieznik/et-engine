@@ -12,7 +12,7 @@
 
 using namespace et;
 
-std::string Locale::time()
+std::string locale::time()
 {
 	NSDateFormatter* formatter = [[NSDateFormatter alloc] init];
 	
@@ -26,7 +26,7 @@ std::string Locale::time()
 	return std::string([[formatter stringFromDate:[NSDate date]] cStringUsingEncoding:NSUTF8StringEncoding]);
 }
 
-std::string Locale::date()
+std::string locale::date()
 {
 	NSDateFormatter* formatter = [[NSDateFormatter alloc] init];
 	
@@ -40,24 +40,8 @@ std::string Locale::date()
 	return std::string([[formatter stringFromDate:[NSDate date]] cStringUsingEncoding:NSUTF8StringEncoding]);
 }
 
-size_t Locale::currentLocale()
+size_t locale::currentLocale()
 {
     NSString* localeId = [[NSLocale preferredLanguages] objectAtIndex:0];
-	std::string mbcs = [localeId cStringUsingEncoding:NSUTF8StringEncoding];
-	lowercase(mbcs);
-	
-	int32_t result = 0;
-
-	if (mbcs.size() > 0)
-		result |= mbcs[0];
-	
-	if (mbcs.size() > 1)
-		result |= mbcs[1] << 8;
-	
-	if ((mbcs.size() >= 5) && ((mbcs[2] == '-') || (mbcs[2] == '_')))
-		result |= (mbcs[3] << 16) | (mbcs[4] << 24);
-	else
-		result |= (result & 0xffff) << 16;
-
-	return static_cast<size_t>(result);
+	return localeToIdentifier([localeId cStringUsingEncoding:NSUTF8StringEncoding]);
 }

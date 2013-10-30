@@ -14,20 +14,9 @@ const char CommentChar = '/';
 const char KeyChar = '\"';
 const char NewLineChar = '\n';
 
-std::string Locale::localeLanguage(size_t locale)
+Locale::Locale() :
+	_locale(locale::currentLocale())
 {
-	char lang[3] = { static_cast<char>(locale & 0x000000ff),
-		static_cast<char>((locale & 0x0000ff00) >> 8), 0 };
-	
-	return std::string(lang);
-}
-
-std::string Locale::localeSubLanguage(size_t locale)
-{
-	char lang[3] = { static_cast<char>((locale & 0x00ff0000) >> 16),
-		static_cast<char>((locale & 0xff000000) >> 24), 0 };
-	
-	return std::string(lang);
 }
 
 bool Locale::loadLanguageFile(const std::string& fileName)
@@ -44,8 +33,7 @@ bool Locale::loadLanguageFile(const std::string& fileName)
 
 bool Locale::loadCurrentLanguageFile(const std::string& rootFolder, const std::string& extension)
 {
-	size_t cLocale = Locale::currentLocale();
-	std::string lang = Locale::localeLanguage(cLocale);
+	std::string lang = locale::localeLanguage(_locale);
 	std::string fileName = addTrailingSlash(rootFolder) + lang + extension;
 	if (fileExists(fileName))
 	{
@@ -54,7 +42,7 @@ bool Locale::loadCurrentLanguageFile(const std::string& rootFolder, const std::s
 	}
 	else
 	{
-		std::string subLang = Locale::localeSubLanguage(cLocale);
+		std::string subLang = locale::localeSubLanguage(_locale);
 		fileName = addTrailingSlash(rootFolder) + subLang + extension;
 		if (fileExists(fileName))
 		{
@@ -78,8 +66,18 @@ bool Locale::loadCurrentLanguageFile(const std::string& rootFolder, const std::s
 
 std::string Locale::localizedString(const std::string& key)
 {
+	if (key.empty()) return key;
+	
 	auto i = _localeMap.find(key);
-	return (i == _localeMap.end()) ? key : i->second;
+	if (i == _localeMap.end())
+	{
+		log::warning("Missing localized value for key %s", key.c_str());
+		return key;
+	}
+	else
+	{
+		return i->second;
+	}
 }
 
 void Locale::parseLanguageFile(const std::string& fileName)
@@ -174,7 +172,7 @@ size_t Locale::parseKey(const StringDataStorage& data, size_t index)
 	std::string value(valueLenght, 0);
 	for (size_t j = 0; j < valueLenght; ++j)
 	{
-		if ((data[valueStart+j] == '\\') && (i+1 < valueLenght))
+		if ((data[valueStart+j] == '\\') && (j + 1 < valueLenght))
 		{
 			++j;
 			if (data[valueStart+j] == 'n')
@@ -220,7 +218,13 @@ size_t Locale::parseComment(const StringDataStorage& data, size_t index)
 	}
 }
 
-void Locale::printKeyValues()
+void Locale::setCurrentLocale(const std::string& l)
+{
+	assert(l.size() >= 2);
+	_locale = locale::localeToIdentifier(l);
+}
+
+void Locale::printContent()
 {
 	for (auto& i : _localeMap)
 	{
@@ -234,4 +238,40 @@ void Locale::printKeyValues()
 std::string et::localized(const std::string& key)
 {
 	return Locale::instance().localizedString(key); 
+}
+
+size_t locale::localeToIdentifier(const std::string& mbcs)
+{
+	lowercase(mbcs);
+	
+	int32_t result = 0;
+	
+	if (mbcs.size() > 0)
+		result |= mbcs[0];
+	
+	if (mbcs.size() > 1)
+		result |= mbcs[1] << 8;
+	
+	if ((mbcs.size() >= 5) && ((mbcs[2] == '-') || (mbcs[2] == '_')))
+		result |= (mbcs[3] << 16) | (mbcs[4] << 24);
+	else
+		result |= (result & 0xffff) << 16;
+	
+	return static_cast<size_t>(result);
+}
+
+std::string locale::localeLanguage(size_t locale)
+{
+	char lang[3] = { static_cast<char>(locale & 0x000000ff),
+		static_cast<char>((locale & 0x0000ff00) >> 8), 0 };
+	
+	return std::string(lang);
+}
+
+std::string locale::localeSubLanguage(size_t locale)
+{
+	char lang[3] = { static_cast<char>((locale & 0x00ff0000) >> 16),
+		static_cast<char>((locale & 0xff000000) >> 24), 0 };
+	
+	return std::string(lang);
 }
