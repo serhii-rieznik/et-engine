@@ -189,14 +189,6 @@ void Track::init(Description::Pointer data)
 	size_t numSamples = data->data.dataSize() / sampleSize;
 	size_t actualDataSize = numSamples * sampleSize;
 
-	if (actualDataSize != data->data.dataSize())
-	{
-		size_t remain = data->data.dataSize() % sampleSize;
-		std::cout << data->origin() << std::endl <<
-			"\tincorrect audio data size: " << data->data.dataSize() << ", should be: " << actualDataSize << 
-			" to fit " << numSamples << " samples (" << remain << " bytes remained)." <<  std::endl;
-	}
-
 	alBufferData(_private->buffer, static_cast<ALenum>(data->format), data->data.data(),
 		static_cast<ALsizei>(actualDataSize), static_cast<ALsizei>(data->sampleRate));
 	
@@ -326,14 +318,16 @@ bool Player::playing() const
 void Player::setPan(float pan)
 {
 	if (_currentTrack.invalid()) return;
+	
 	if (_currentTrack->channels() > 1)
 	{
-		std::cout << "Unable to set pan for stereo sound: " << _currentTrack->_private->desc->origin() << std::endl;
-		return;
+		log::warning("Unable to set pan for stereo sound: %s", _currentTrack->_private->desc->origin().c_str());
 	}
-
-	alSource3f(_private->source, AL_POSITION, pan, 0.0f, 0.0f);
-	checkOpenALError("alSource3f(..., AL_POSITION, ");
+	else
+	{
+		alSource3f(_private->source, AL_POSITION, pan, 0.0f, 0.0f);
+		checkOpenALError("alSource3f(..., AL_POSITION, ");
+	}
 }
 
 /*

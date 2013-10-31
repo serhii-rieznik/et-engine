@@ -27,7 +27,7 @@ bool Locale::loadLanguageFile(const std::string& fileName)
 		return true;
 	}
 
-	std::cout << "Unable to load language file `" << fileName << "`" << std::endl;
+	log::error("Unable to load language file: %s", fileName.c_str());
 	return false;
 }
 
@@ -60,7 +60,7 @@ bool Locale::loadCurrentLanguageFile(const std::string& rootFolder, const std::s
 		}
 	}
 	
-	std::cout << "Unable to locate language file `" << fileName << "` in folder " << rootFolder << std::endl;
+	log::error("Unable to locate language file %s in folder %s", fileName.c_str(), rootFolder.c_str());
 	return false;
 }
 
@@ -180,7 +180,7 @@ size_t Locale::parseKey(const StringDataStorage& data, size_t index)
 			else if (data[valueStart+j] == '\\')
 				value[index] = '\\';
 			else
-				std::cout << "Unsupported sequence: \\" << data[valueStart+j] << std::endl;
+				log::error("Unsupported sequence in locale file: \\%c", data[valueStart+j]);
 		}
 		else
 		{
@@ -213,7 +213,7 @@ size_t Locale::parseComment(const StringDataStorage& data, size_t index)
 	}
 	else
 	{
-		std::cout << "Unsupported comment format in language file";
+		log::error("Unsupported comment format in language file");
 		return index;
 	}
 }
@@ -226,13 +226,9 @@ void Locale::setCurrentLocale(const std::string& l)
 
 void Locale::printContent()
 {
-	for (auto& i : _localeMap)
-	{
-		const std::string& key = i.first;
-		std::string& value = i.second;
-		std::cout << key.size() << " / " << value.size() << " -> " << key << " -> " << value << std::endl;
-		std::cout.flush();
-	}
+	log::info("Locale: ");
+	for (const auto& i : _localeMap)
+		log::info("%s = %s", i.first.c_str(), i.second.c_str());
 }
 
 std::string et::localized(const std::string& key)

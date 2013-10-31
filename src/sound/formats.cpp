@@ -134,7 +134,7 @@ Description::Pointer et::audio::loadWAVFile(const std::string& fileName)
 	InputStream file(fileName, StreamMode_Binary);
 	if (file.invalid())
 	{
-		std::cout << "Unable to load WAV from file " << fileName << std::endl;
+		log::info("Unable to load WAV from file: %s", fileName.c_str());
 		return Description::Pointer();
 	}
 
