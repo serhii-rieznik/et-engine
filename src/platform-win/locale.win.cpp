@@ -13,7 +13,7 @@
 
 using namespace et;
 
-std::string Locale::time()
+std::string locale::time()
 {
 	SYSTEMTIME st = { };
 	GetSystemTime(&st);
@@ -24,7 +24,7 @@ std::string Locale::time()
 	return unicodeToUtf8(buffer.data());
 }
 
-std::string Locale::date()
+std::string locale::date()
 {
 	SYSTEMTIME st = { };
 	GetSystemTime(&st);
@@ -35,7 +35,7 @@ std::string Locale::date()
 	return unicodeToUtf8(buffer.data());
 }
 
-size_t Locale::currentLocale()
+size_t locale::currentLocale()
 {
 	wchar_t localeName[256] = { };
 	wchar_t localeData[256] = { };

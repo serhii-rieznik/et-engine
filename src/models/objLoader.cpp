@@ -335,7 +335,7 @@ void OBJLoader::loadMaterials(const std::string& fileName, bool async, ObjectsCa
 		}
 		else if (key == 'k')
 		{
-			if (lastMaterial == 0)
+			if (lastMaterial.invalid())
 			{
 				getLine(materialFile, line);
 			}
@@ -508,7 +508,7 @@ void OBJLoader::loadMaterials(const std::string& fileName, bool async, ObjectsCa
 		}
 		else if (key == 'i')
 		{
-			if (lastMaterial == 0)
+			if (lastMaterial.invalid() == 0)
 			{
 				getLine(materialFile, line);
 			}

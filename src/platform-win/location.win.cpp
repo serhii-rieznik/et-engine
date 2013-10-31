@@ -1,4 +1,5 @@
 #include <et/app/application.h>
+#include <et/geometry/geometry.h>
 #include <et/timers/notifytimer.h>
 #include <et/sensor/location.h>
 
