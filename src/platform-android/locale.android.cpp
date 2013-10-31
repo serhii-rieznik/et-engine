@@ -12,17 +12,17 @@
 
 using namespace et;
 
-std::string Locale::time()
+std::string locale::time()
 {
 	return std::string();
 }
 
-std::string Locale::date()
+std::string locale::date()
 {
 	return std::string();
 }
 
-size_t Locale::currentLocale()
+size_t locale::currentLocale()
 {
 	std::string mbcs("en_US");
 	lowercase(mbcs);
