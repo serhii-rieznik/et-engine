@@ -535,7 +535,7 @@ void RenderState::setClip(bool enable, const recti& clip)
 	if (clip != _currentState.clipRect)
 	{
 		_currentState.clipRect = clip;
-		glScissor(clip.left, clip.top, clip.width, clip.height);
+		glScissor(clip.left, clip.top, etMax(0, clip.width), etMax(0, clip.height));
 	}
 	
 	checkOpenGLError("RenderState::setClip");
