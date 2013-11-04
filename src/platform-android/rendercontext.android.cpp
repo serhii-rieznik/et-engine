@@ -16,9 +16,11 @@ using namespace et;
 class et::RenderContextPrivate
 {
 public:
-	RenderContextPrivate();
+	RenderContextPrivate(RenderContext* rc);
 
 public:
+	RenderContext* renderContext;
+	
     EGLDisplay display;
     EGLSurface surface;
     EGLContext context;
@@ -30,9 +32,9 @@ RenderContext::RenderContext(const RenderContextParameters& params, Application*
 	_app(app), _programFactory(0), _textureFactory(0), _framebufferFactory(0), _vertexBufferFactory(0),
 	_renderer(0), _screenScaleFactor(0)
 {
-	_private = new RenderContextPrivate();
+	_private = new RenderContextPrivate(this);
+	
 	openGLCapabilites().checkCaps();
-
 	updateScreenScale(_private->surfaceSize);
 	
 	_renderState.setRenderContext(this);
@@ -40,6 +42,8 @@ RenderContext::RenderContext(const RenderContextParameters& params, Application*
 	_textureFactory = new TextureFactory(this);
 	_framebufferFactory = new FramebufferFactory(this);
 	_vertexBufferFactory = new VertexBufferFactory(_renderState);
+	
+	_renderState.setDefaultFramebuffer(_framebufferFactory->createFramebufferWrapper(0, "default-fbo"));
 }
 
 RenderContext::~RenderContext()
@@ -64,13 +68,18 @@ size_t RenderContext::renderingContextHandle()
 
 void RenderContext::beginRender()
 {
-	OpenGLCounters::reset();
 	checkOpenGLError("RenderContext::beginRender");
+	
+	OpenGLCounters::reset();
+	
+	_renderState.bindDefaultFramebuffer();
 }
 
 void RenderContext::endRender()
 {
 	checkOpenGLError("RenderContext::endRender");
+	
+	_renderState.bindDefaultFramebuffer();
 	eglSwapBuffers(_private->display, _private->surface);
 
 	++_info.averageFramePerSecond;
@@ -84,12 +93,13 @@ void RenderContext::endRender()
  *
  */
 
-RenderContextPrivate::RenderContextPrivate()
+RenderContextPrivate::RenderContextPrivate(RenderContext* rc)
 {
     const EGLint attribs[] =
 	{
 		EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
 		EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
+		EGL_DEPTH_SIZE, 16,
 		EGL_BLUE_SIZE, 8,
 		EGL_GREEN_SIZE, 8,
 		EGL_RED_SIZE, 8,
@@ -105,23 +115,51 @@ RenderContextPrivate::RenderContextPrivate()
 	EGLint format = 0;
     EGLint numConfigs = 0;
     EGLConfig config = 0;
+	EGLint major = 0;
+	EGLint minor = 0;
 
 	display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
 	
-    eglInitialize(display, 0, 0);
-    eglChooseConfig(display, attribs, &config, 1, &numConfigs);
+	if (eglInitialize(display, &major, &minor) == EGL_FALSE)
+	{
+		assert("eglInitialize failed." && false);
+		return;
+	}
+	
+	log::info("EGL initialised to version: %d.%d", major, minor);
+	
+	if (eglChooseConfig(display, attribs, &config, 1, &numConfigs) == EGL_FALSE)
+	{
+		assert("eglChooseConfig failed." && false);
+		return;
+	}
+	
     eglGetConfigAttrib(display, config, EGL_NATIVE_VISUAL_ID, &format);
 
 	android_app* sharedApplication = reinterpret_cast<android_app*>(application().renderingContextHandle());
     ANativeWindow_setBuffersGeometry(sharedApplication->window, 0, 0, format);
 
-    surface = eglCreateWindowSurface(display, config, sharedApplication->window, NULL);
-    context = eglCreateContext(display, config, NULL, contextAttribs);
+    surface = eglCreateWindowSurface(display, config, sharedApplication->window, nullptr);
+	if (surface == nullptr)
+	{
+		assert("eglCreateWindowSurface failed." && false);
+		return;
+	}
 	
-    if (eglMakeCurrent(display, surface, surface, context) == EGL_FALSE) return;
-
+    context = eglCreateContext(display, config, nullptr, contextAttribs);
+	if (context == nullptr)
+	{
+		assert("eglCreateContext failed." && false);
+		return;
+	}
+	
+    if (eglMakeCurrent(display, surface, surface, context) == EGL_FALSE)
+	{
+		assert("eglMakeCurrent failed." && false);
+		return;
+	}
+	
     eglQuerySurface(display, surface, EGL_WIDTH, &surfaceSize.x);
     eglQuerySurface(display, surface, EGL_HEIGHT, &surfaceSize.y);
-
 	log::info("INITIALIZED: width = %d, height = %d", surfaceSize.x, surfaceSize.y);
 }
