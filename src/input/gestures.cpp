@@ -12,8 +12,8 @@
 using namespace et;
 
 GesturesRecognizer::GesturesRecognizer(bool automaticMode) : InputHandler(automaticMode),
-	_clickThreshold(0.2f), _doubleClickThreshold(0.25f), _holdThreshold(1.0f),
-	_singlePointerType(0), _actualTime(0.0f), _clickStartTime(0.0f), _expectClick(false),
+	_clickThreshold(0.2f), _doubleClickTemporalThreshold(0.25f), _doubleClickSpatialThreshold(0.075),
+	_holdThreshold(1.0f), _singlePointerType(0), _actualTime(0.0f), _clickStartTime(0.0f), _expectClick(false),
 	_expectDoubleClick(false), _clickTimeoutActive(false)
 {
 }
@@ -71,14 +71,21 @@ void GesturesRecognizer::onPointerPressed(et::PointerInputInfo pi)
 	
 	if (_pointers.size() == 1)
 	{
+		float currentTime = mainTimerPool()->actualTime();
+		float deltaTime = currentTime - _actualTime;
+		vec2 deltaPosition = pi.normalizedPos - _singlePointerPosition;
+		
+		bool doubleClickFailedByTime = deltaTime > _doubleClickTemporalThreshold;
+		bool doubleClickFailedByDistance = deltaPosition.length() > _doubleClickSpatialThreshold;
+		
+		if (_clickTimeoutActive && doubleClickFailedByDistance)
+			click.invoke(_singlePointerPosition, _singlePointerType);
+		
 		_singlePointerType = pi.type;
 		_singlePointerPosition = pi.normalizedPos;
-		float currentTime = mainTimerPool()->actualTime();
-		float dt = currentTime - _actualTime;
-		
-		_clickTimeoutActive = false;
-		_expectClick = dt > _doubleClickThreshold;
+		_expectClick = doubleClickFailedByTime || (_clickTimeoutActive && doubleClickFailedByDistance);
 		_expectDoubleClick = !_expectClick;
+		_clickTimeoutActive = false;
 
 		if (_expectClick)
 			_clickStartTime = currentTime;

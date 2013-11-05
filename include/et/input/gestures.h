@@ -21,7 +21,8 @@ namespace et
 
 	public:
 		ET_DECLARE_PROPERTY_GET_COPY_SET_COPY(float, clickThreshold, setClickThreshold)
-		ET_DECLARE_PROPERTY_GET_COPY_SET_COPY(float, doubleClickThreshold, setDoubleClickThreshold)
+		ET_DECLARE_PROPERTY_GET_COPY_SET_COPY(float, doubleClickTemporalThreshold, setDoubleClickTemporalThreshold)
+		ET_DECLARE_PROPERTY_GET_COPY_SET_COPY(float, doubleClickSpatialThreshold, setDoubleClickSpatialThreshold)
 		ET_DECLARE_PROPERTY_GET_COPY_SET_COPY(float, holdThreshold, setHoldThreshold)
 
 	public:
