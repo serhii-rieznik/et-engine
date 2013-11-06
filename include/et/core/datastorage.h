@@ -95,7 +95,7 @@ namespace et
 			{ assert(mutableData()); return reinterpret_cast<char*>(_mutableData); }
 		
 		T& operator [] (int aIndex)
-			{ assert(mutableData() && (aIndex > 0) && (aIndex < static_cast<int>(_size))); return _mutableData[aIndex]; }
+			{ assert(mutableData() && (aIndex >= 0) && (aIndex < static_cast<int>(_size))); return _mutableData[aIndex]; }
 		
 		T& operator [] (size_t aIndex)
 			{ assert(mutableData() && (aIndex < _size)); return _mutableData[aIndex]; }
