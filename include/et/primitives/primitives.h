@@ -58,7 +58,7 @@ namespace et
 		void smoothTangents(VertexArray::Pointer data, const IndexArray::Pointer& buffer,
 			IndexType first, IndexType last);
 		
-		void createIcosahedron(VertexArray::Pointer data, float radius);
+		void createIcosahedron(VertexArray::Pointer data, float radius, bool top = true, bool middle = true, bool bottom = true);
 		
 		void tesselateTriangles(VertexArray::Pointer data);
 		void tesselateTriangles(VertexArray::Pointer data, IndexArray::Pointer indexArray);

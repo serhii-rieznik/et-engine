@@ -65,8 +65,8 @@
 #
 #endif
 
-#define ET_TOCONSTCHAR_IMPL(a)	#a
-#define ET_TOCONSTCHAR(a)		ET_TOCONSTCHAR_IMPL(a)
+#define ET_TO_CONST_CHAR_IMPL(a)	#a
+#define ET_TO_CONST_CHAR(a)			ET_TO_CONST_CHAR_IMPL(a)
 
 namespace et
 {

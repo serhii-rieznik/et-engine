@@ -615,7 +615,7 @@ size_t et::bitsPerPixelForTextureFormat(uint32_t internalFormat, uint32_t type)
 		case GL_DEPTH_COMPONENT16:
 		case GL_DEPTH_COMPONENT24:
 			return bitsPerPixelForType(type);
-			
+
 		case GL_RGB32F:
 			return 3 * bitsPerPixelForType(type);
 			

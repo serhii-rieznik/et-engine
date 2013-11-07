@@ -54,7 +54,7 @@ ALCcontext* getSharedContext();
 void checkOpenALErrorEx(const char* caller, const char* file, const char* line, const char* tag);
 
 #if (ET_DEBUG)
-#   define checkOpenALError(tag) checkOpenALErrorEx(ET_CALL_FUNCTION, __FILE__, ET_TOCONSTCHAR(__LINE__), tag)
+#   define checkOpenALError(tag) checkOpenALErrorEx(ET_CALL_FUNCTION, __FILE__, ET_TO_CONST_CHAR(__LINE__), tag)
 #else
 #   define checkOpenALError(tag)
 #endif

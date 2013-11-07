@@ -65,6 +65,14 @@
 #		define GL_RGBA8									GL_RGBA8_OES
 #	endif
 #
+#	if !defined(GL_RGB32F)
+#		define GL_RGB32F								GL_RGB32F_EXT
+#	endif
+#
+#	if !defined(GL_RGBA32F)
+#		define GL_RGBA32F								GL_RGBA32F_EXT
+#	endif
+#
 #	if !defined(GL_ES_VERSION_3_0)
 #		define glGenVertexArrays						glGenVertexArraysOES
 #		define glBindVertexArray						glBindVertexArrayOES
@@ -147,7 +155,7 @@
 #
 #	define ET_ENABLE_OPENGL_COUNTERS	1
 #	define checkOpenGLError(...) \
-		checkOpenGLErrorEx(ET_CALL_FUNCTION, __FILE__, ET_TOCONSTCHAR(__LINE__), __VA_ARGS__);
+		checkOpenGLErrorEx(ET_CALL_FUNCTION, __FILE__, ET_TO_CONST_CHAR(__LINE__), __VA_ARGS__);
 #
 #else
 #

@@ -586,7 +586,7 @@ void primitives::smoothTangents(VertexArray::Pointer data, const IndexArray::Poi
 		tan[i] = normalize(tanSmooth[i]);
 }
 
-void primitives::createIcosahedron(VertexArray::Pointer data, float radius)
+void primitives::createIcosahedron(VertexArray::Pointer data, float radius, bool top, bool middle, bool bottom)
 {
 	VertexDataChunk posChunk = data->chunk(Usage_Position);
 	VertexDataChunk nrmChunk = data->chunk(Usage_Normal);
@@ -616,10 +616,12 @@ void primitives::createIcosahedron(VertexArray::Pointer data, float radius)
 		vec3( u,  v, 0.0f),
 		vec3(-u, -v, 0.0f),
 		vec3( u, -v, 0.0f),
+		
 		vec3(0.0f, -u,  v),
 		vec3(0.0f,  u,  v),
 		vec3(0.0f, -u, -v),
 		vec3(0.0f,  u, -v),
+		
 		vec3( v, 0.0f, -u),
 		vec3( v, 0.0f,  u),
 		vec3(-v, 0.0f, -u),
@@ -628,37 +630,47 @@ void primitives::createIcosahedron(VertexArray::Pointer data, float radius)
 	
 	size_t k = 0;
 	
-#define ET_ADD_IH_TRIANGLE(c1, c2, c3) { \
-		pos[k] = corners[c1]; pos[k+1] = corners[c2]; pos[k+2] = corners[c3]; \
-		if (hasNormals) nrm[k+0] = nrm[k+1] = nrm[k+2] = \
-			triangle(corners[c1], corners[c2], corners[c3]).normalizedNormal(); \
-		k += 3; } \
+#define ET_ADD_IH_TRIANGLE(c1, c2, c3) \
+	{ \
+		pos[k] = corners[c1]; \
+		pos[k+1] = corners[c2]; \
+		pos[k+2] = corners[c3]; \
+		if (hasNormals) \
+			nrm[k+0] = nrm[k+1] = nrm[k+2] = triangle(corners[c1], corners[c2], corners[c3]).normalizedNormal(); \
+		k += 3; \
+	}
 
-	// top cap
-	ET_ADD_IH_TRIANGLE(0, 11, 5);
-	ET_ADD_IH_TRIANGLE(0, 5, 1);
-	ET_ADD_IH_TRIANGLE(0, 1, 7);
-	ET_ADD_IH_TRIANGLE(0, 7, 10);
-	ET_ADD_IH_TRIANGLE(0, 10, 11);
+	if (top)
+	{
+		ET_ADD_IH_TRIANGLE(0, 11, 5);
+		ET_ADD_IH_TRIANGLE(0, 5, 1);
+		ET_ADD_IH_TRIANGLE(0, 1, 7);
+		ET_ADD_IH_TRIANGLE(0, 7, 10);
+		ET_ADD_IH_TRIANGLE(0, 10, 11);
+	}
 
-	// middle
-	ET_ADD_IH_TRIANGLE(1, 5, 9);
-	ET_ADD_IH_TRIANGLE(4, 9, 5);
-	ET_ADD_IH_TRIANGLE(5, 11, 4);
-	ET_ADD_IH_TRIANGLE(2, 4, 11);
-	ET_ADD_IH_TRIANGLE(11, 10, 2);
-	ET_ADD_IH_TRIANGLE(6, 2, 10);
-	ET_ADD_IH_TRIANGLE(10, 7, 6);
-	ET_ADD_IH_TRIANGLE(8, 6, 7);
-	ET_ADD_IH_TRIANGLE(7, 1, 8);
-	ET_ADD_IH_TRIANGLE(9, 8, 1);
+	if (middle)
+	{
+		ET_ADD_IH_TRIANGLE(1, 5, 9);
+		ET_ADD_IH_TRIANGLE(4, 9, 5);
+		ET_ADD_IH_TRIANGLE(5, 11, 4);
+		ET_ADD_IH_TRIANGLE(2, 4, 11);
+		ET_ADD_IH_TRIANGLE(11, 10, 2);
+		ET_ADD_IH_TRIANGLE(6, 2, 10);
+		ET_ADD_IH_TRIANGLE(10, 7, 6);
+		ET_ADD_IH_TRIANGLE(8, 6, 7);
+		ET_ADD_IH_TRIANGLE(7, 1, 8);
+		ET_ADD_IH_TRIANGLE(9, 8, 1);
+	}
 
-	// bottom cap
-	ET_ADD_IH_TRIANGLE(3, 9, 4);
-	ET_ADD_IH_TRIANGLE(3, 4, 2);
-	ET_ADD_IH_TRIANGLE(3, 2, 6);
-	ET_ADD_IH_TRIANGLE(3, 6, 8);
-	ET_ADD_IH_TRIANGLE(3, 8, 9);
+	if (bottom)
+	{
+		ET_ADD_IH_TRIANGLE(3, 9, 4);
+		ET_ADD_IH_TRIANGLE(3, 4, 2);
+		ET_ADD_IH_TRIANGLE(3, 2, 6);
+		ET_ADD_IH_TRIANGLE(3, 6, 8);
+		ET_ADD_IH_TRIANGLE(3, 8, 9);
+	}
 
 #undef ET_ADD_IH_TRIANGLE
 }
@@ -784,7 +796,9 @@ void primitives::tesselateTriangles(VertexArray::Pointer data, IndexArray::Point
 uint64_t vectorHash(const vec3& v)
 {
 	char raw[256] = { };
-	int symbols = sprintf(raw, "%.3f_%0.3f_%0.3f_%0.3f_%0.3f_%0.3f", v.x, v.y, v.z, v.x * v.y, v.x * v.z, v.y * v.z);
+	
+	int symbols = sprintf(raw, "%.3f%0.3f%0.3f%0.3f%0.3f%0.3f%0.3f%0.3f",
+		v.x, v.y, v.z, v.x * v.y, v.x * v.z, v.y * v.z, v.x + v.y + v.z, v.x - v.y - v.z);
 	
 	uint64_t* ptr = reinterpret_cast<uint64_t*>(raw);
 	uint64_t* end = ptr + symbols / sizeof(uint64_t) + 1;
