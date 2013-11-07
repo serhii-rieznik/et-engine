@@ -573,6 +573,8 @@ size_t et::bitsPerPixelForType(uint32_t type)
 		case GL_INT:
 			return 32;
 			
+		case GL_FLOAT:
+			return 32;
 			
 		default:
 			assert("Not yet implemented for this type." && false);
@@ -613,6 +615,12 @@ size_t et::bitsPerPixelForTextureFormat(uint32_t internalFormat, uint32_t type)
 		case GL_DEPTH_COMPONENT16:
 		case GL_DEPTH_COMPONENT24:
 			return bitsPerPixelForType(type);
+			
+		case GL_RGB32F:
+			return 3 * bitsPerPixelForType(type);
+			
+		case GL_RGBA32F:
+			return 3 * bitsPerPixelForType(type);
 			
 		default:
 			assert("Not yet implemented for this format." && false);
