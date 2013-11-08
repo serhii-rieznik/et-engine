@@ -200,6 +200,9 @@ namespace et
 		/*
 		 * Service
 		 */
+		const State& actualState() const
+			{ return _currentState; }
+		
 		static State currentState();
 		
 	protected:

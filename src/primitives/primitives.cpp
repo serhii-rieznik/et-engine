@@ -597,15 +597,10 @@ void primitives::createIcosahedron(VertexArray::Pointer data, float radius, bool
 	(void)hasPosition;
 	
 	size_t offset = data->size();
-	data->fitToSize(60);
+	data->fitToSize(15 * ((top ? 1 : 0) + (middle ? 2 : 0 ) + (bottom ? 1 : 0)));
 	
-	RawDataAcessor<vec3> nrm;
 	RawDataAcessor<vec3> pos = posChunk.accessData<vec3>(offset);
-	for (size_t i = 0; i < pos.size(); ++i)
-		pos[i] = vec3(0.0f);
-	
-	if (hasNormals)
-		nrm = nrmChunk.accessData<vec3>(offset);
+	RawDataAcessor<vec3> nrm = nrmChunk.accessData<vec3>(offset);
 		
 	float u = radius;
 	float v = radius * (1.0f + std::sqrt(5.0f)) / 2.0f;
@@ -616,12 +611,10 @@ void primitives::createIcosahedron(VertexArray::Pointer data, float radius, bool
 		vec3( u,  v, 0.0f),
 		vec3(-u, -v, 0.0f),
 		vec3( u, -v, 0.0f),
-		
 		vec3(0.0f, -u,  v),
 		vec3(0.0f,  u,  v),
 		vec3(0.0f, -u, -v),
 		vec3(0.0f,  u, -v),
-		
 		vec3( v, 0.0f, -u),
 		vec3( v, 0.0f,  u),
 		vec3(-v, 0.0f, -u),
@@ -629,7 +622,6 @@ void primitives::createIcosahedron(VertexArray::Pointer data, float radius, bool
 	};
 	
 	size_t k = 0;
-	
 #define ET_ADD_IH_TRIANGLE(c1, c2, c3) \
 	{ \
 		pos[k] = corners[c1]; \
