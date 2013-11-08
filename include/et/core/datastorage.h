@@ -109,6 +109,12 @@ namespace et
 		T* element_ptr(size_t aIndex)
 			{ assert(aIndex < _size); return (_mutableData + aIndex); }
 		
+		T* begin()
+			{ assert(mutableData()); return _mutableData; }
+
+		T* end()
+			{ assert(mutableData()); return _mutableData + _size; }
+					 
 		/*
 		 * const accessors
 		 */
@@ -133,6 +139,12 @@ namespace et
 		const T* element_ptr(size_t i) const
 			{ assert(i < _size); return _immutableData + i; }
 		
+		const T* begin() const
+			{ return _immutableData; }
+				  
+		const T* end() const
+			{ return _immutableData + _size; }
+					 
 		const size_t size() const
 			{ return _size; }
 		

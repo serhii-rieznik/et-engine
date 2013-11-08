@@ -236,7 +236,7 @@ void Camera::unlockUpVector()
 	_lockUpVector = false;
 }
 
-Camera Camera::reflected(const plane& pl)
+Camera Camera::reflected(const plane& pl) const
 {
 	Camera result(*this);
 	

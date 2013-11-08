@@ -91,7 +91,7 @@ namespace et
 		void setProjectionMatrix(const mat4& m)
 			{ _projectionMatrix = m; projectionUpdated(); }
 
-		Camera reflected(const plane&);
+		Camera reflected(const plane&) const;
 
 		vec3 project(const vec3&) const;
 		vec3 unproject(const vec3&) const;
