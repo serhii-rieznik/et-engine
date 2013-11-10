@@ -12,7 +12,7 @@
 using namespace et;
 
 GesturesRecognizer::GesturesRecognizer(bool automaticMode) : InputHandler(automaticMode),
-	_clickThreshold(0.2f), _doubleClickTemporalThreshold(0.25f), _doubleClickSpatialThreshold(0.075),
+	_clickThreshold(0.2f), _doubleClickTemporalThreshold(0.25f), _doubleClickSpatialThreshold(0.075f),
 	_holdThreshold(1.0f), _singlePointerType(0), _actualTime(0.0f), _clickStartTime(0.0f), _expectClick(false),
 	_expectDoubleClick(false), _clickTimeoutActive(false)
 {
