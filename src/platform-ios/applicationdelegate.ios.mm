@@ -105,10 +105,6 @@ extern etOpenGLViewController* sharedOpenGLViewController;
 			[sharedOpenGLViewController endRender];
 		}
 	}
-	else
-	{
-		CFRunLoopStop([[NSRunLoop currentRunLoop] getCFRunLoop]);
-	}
 }
 
 - (void)renderThread
@@ -139,10 +135,15 @@ extern etOpenGLViewController* sharedOpenGLViewController;
 
 - (void)beginUpdates
 {
-	if (_updating || (_renderThread != nil)) return;
-	
-	_renderThread = [[NSThread alloc] initWithTarget:self selector:@selector(renderThread) object:nil];
-	[_renderThread start];
+	if (_renderThread == nil)
+	{
+		_renderThread = [[NSThread alloc] initWithTarget:self selector:@selector(renderThread) object:nil];
+		[_renderThread start];
+	}
+	else
+	{
+		_updating = true;
+	}
 }
 
 - (void)endUpdates
