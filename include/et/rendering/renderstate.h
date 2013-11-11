@@ -148,6 +148,9 @@ namespace et
 		/*
 		 * State
 		 */
+		uint32_t boundFramebuffer() const
+			{ return _currentState.boundFramebuffer; }
+		
 		bool blendEnabled() const
 			{ return _currentState.blendEnabled; }
 
@@ -174,7 +177,16 @@ namespace et
 
 		size_t colorMask() const
 			{ return _currentState.colorMask; }
+		
+		bool cullEnabled() const
+			{ return _currentState.cullEnabled; }
 
+		CullState cullState() const
+			{ return _currentState.lastCull; }
+		
+		vec4 clearColor() const
+			{ return _currentState.clearColor; }
+		
 		void setBlend(bool enable, BlendState blend = BlendState_Current);
 		void setCulling(bool enabled, CullState cull = CullState_Current);
 		void setDepthTest(bool enable);
