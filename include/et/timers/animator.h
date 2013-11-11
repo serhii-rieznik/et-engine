@@ -51,20 +51,21 @@ namespace et
 	public:
 		Animator() :
 			BaseAnimator(nullptr, 0, TimerPool::Pointer()), _from(), _to(), _value(nullptr),
-			_startTime(0.0f), _duration(0.0f) { }
+			_startTime(0.0f), _duration(0.0f) { _interpolationFunction = [](float t) { return t; }; }
 		
 		Animator(const TimerPool::Pointer& tp) :
 			BaseAnimator(nullptr, 0, tp), _from(), _to(), _value(nullptr),
-			_startTime(0.0f), _duration(0.0f) { }
+			_startTime(0.0f), _duration(0.0f) { _interpolationFunction = [](float t) { return t; }; }
 
 		Animator(AnimatorDelegate* delegate, int tag, const TimerPool::Pointer& tp) :
 			BaseAnimator(delegate, tag, tp), _from(), _to(), _value(nullptr),
-			_startTime(0.0f), _duration(0.0f) { }
+			_startTime(0.0f), _duration(0.0f) { _interpolationFunction = [](float t) { return t; }; }
 
 		Animator(AnimatorDelegate* delegate, T* value, const T& from, const T& to, float duration,
 			int tag, const TimerPool::Pointer& tp) : BaseAnimator(delegate, tag, tp), _from(), _to(),
 			_value(nullptr), _startTime(0.0f), _duration(0.0f)
 		{
+			_interpolationFunction = [](float t) { return t; };
 			animate(value, from, to, duration);
 		}
 
@@ -83,6 +84,12 @@ namespace et
 			
 			_startTime = actualTime();
 		};
+		
+		template <typename F>
+		void setInterpolationFunction(F func)
+		{
+			_interpolationFunction = func;
+		}
 		
 		ET_DECLARE_EVENT0(updated);
 		ET_DECLARE_EVENT0(finished);
@@ -107,7 +114,8 @@ namespace et
 			}
 			else 
 			{
-				*_value = _from * (1.0f - dt) + _to * dt;
+				float interpolated = _interpolationFunction(dt);
+				*_value = _from * (1.0f - interpolated) + _to * interpolated;
 				
 				if (delegate())
 					delegate()->animatorUpdated(this);
@@ -116,6 +124,7 @@ namespace et
 		}
 
 	private:
+		std::function<float(float)> _interpolationFunction;
 		T _from;
 		T _to;
 		T* _value;
