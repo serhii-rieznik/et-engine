@@ -71,7 +71,6 @@ namespace et
 		void animate(T* value, const T& from, const T& to, float duration)
 		{
 			assert(timerPool().valid());
-			startUpdates(timerPool().ptr());
 
 			*value = from;
 
@@ -79,6 +78,9 @@ namespace et
 			_to = to;
 			_value = value;
 			_duration = duration;
+			
+			startUpdates(timerPool().ptr());
+			
 			_startTime = actualTime();
 		};
 		
