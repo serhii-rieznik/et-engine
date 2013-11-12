@@ -33,6 +33,16 @@ void OpenGLCounters::reset()
 	bindVertexArrayObjectCounter = 0;
 }
 
+OpenGLDebugScope::OpenGLDebugScope(const std::string& info)
+{
+	glPushGroupMarkerEXT(static_cast<GLsizei>(info.size()), info.c_str());
+}
+
+OpenGLDebugScope::~OpenGLDebugScope()
+{
+	glPopGroupMarkerEXT();
+}
+
 std::string et::glErrorToString(uint32_t error)
 {
 	switch (error)

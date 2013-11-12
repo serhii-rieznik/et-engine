@@ -170,6 +170,8 @@
 #	error Vertex Array Objects are not supported on selected platform
 #endif
 
+#define ET_OPENGL_DEBUG_FUNCTION_SCOPE		OpenGLDebugScope etOpenGLDebugScope(ET_CALL_FUNCTION);
+
 namespace et
 {
 	enum VertexAttributeType
@@ -195,6 +197,12 @@ namespace et
 		static size_t useProgramCounter;
 		static size_t bindVertexArrayObjectCounter;
 		static void reset();
+	};
+	
+	struct OpenGLDebugScope
+	{
+		OpenGLDebugScope(const std::string&);
+		~OpenGLDebugScope();
 	};
 
 	void checkOpenGLErrorEx(const char* caller, const char* fileName, const char* line, const char* tag, ...);
