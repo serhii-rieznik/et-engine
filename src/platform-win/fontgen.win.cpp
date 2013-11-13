@@ -93,7 +93,7 @@ FontGeneratorResult FontGenerator::generate(ImageFormat fmt)
 		float lineHeight = 0.0f;
 		float y_pos = characterOffset;
 		x_pos = characterOffset;
-		textureSize.x = roundToHighestPowerOfTow(static_cast<size_t>(textureWidth));
+		textureSize.x = roundToHighestPowerOfTwo(static_cast<size_t>(textureWidth));
 		textureWidth = static_cast<float>(textureSize.x);
 		for (CharDescriptorList::iterator i = chars.begin(), e = chars.end(); i != e; ++i)
 		{
@@ -108,7 +108,7 @@ FontGeneratorResult FontGenerator::generate(ImageFormat fmt)
 			x_pos += i->size.x + characterOffset;
 			lineHeight = etMax(i->size.y, lineHeight);
 		}
-		textureSize.y = roundToHighestPowerOfTow( static_cast<size_t>(y_pos + lineHeight + characterOffset) );
+		textureSize.y = roundToHighestPowerOfTwo( static_cast<size_t>(y_pos + lineHeight + characterOffset) );
 
 		foundOptimal = textureSize.y / textureSize.x <= 1;
 

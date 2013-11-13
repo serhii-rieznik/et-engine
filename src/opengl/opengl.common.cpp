@@ -35,12 +35,16 @@ void OpenGLCounters::reset()
 
 OpenGLDebugScope::OpenGLDebugScope(const std::string& info)
 {
+#if defined(GL_EXT_debug_marker)
 	glPushGroupMarkerEXT(static_cast<GLsizei>(info.size()), info.c_str());
+#endif
 }
 
 OpenGLDebugScope::~OpenGLDebugScope()
 {
+#if defined(GL_EXT_debug_marker)
 	glPopGroupMarkerEXT();
+#endif
 }
 
 std::string et::glErrorToString(uint32_t error)

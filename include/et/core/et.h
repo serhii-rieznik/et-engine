@@ -19,6 +19,7 @@
 #include <list>
 #include <map>
 #include <limits>
+#include <functional>
 
 #include <iosfwd>
 #include <iostream>
