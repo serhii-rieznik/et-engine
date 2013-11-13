@@ -30,7 +30,7 @@ namespace et
 	
 	size_t streamSize(std::istream& s);
 	
- 	inline size_t roundToHighestPowerOfTow(size_t x)
+ 	inline size_t roundToHighestPowerOfTwo(size_t x)
 	{
 		x = x - 1;
 		x |= (x >> 1);
