@@ -154,13 +154,17 @@
 #if (ET_DEBUG)
 #
 #	define ET_ENABLE_OPENGL_COUNTERS	1
-#	define checkOpenGLError(...) \
-		checkOpenGLErrorEx(ET_CALL_FUNCTION, __FILE__, ET_TO_CONST_CHAR(__LINE__), __VA_ARGS__);
+#
+#	define checkOpenGLError(...)		checkOpenGLErrorEx(ET_CALL_FUNCTION, __FILE__, \
+											ET_TO_CONST_CHAR(__LINE__), __VA_ARGS__);
+#
+#	define ET_OPENGL_DEBUG_SCOPE_IN_DEBUG		OpenGLDebugScope etOpenGLDebugScope(ET_CALL_FUNCTION);
 #
 #else
 #
 #	define ET_ENABLE_OPENGL_COUNTERS	0
 #	define checkOpenGLError(...)
+#	define ET_OPENGL_DEBUG_SCOPE_IN_DEBUG		
 #
 #endif
 
@@ -170,7 +174,7 @@
 #	error Vertex Array Objects are not supported on selected platform
 #endif
 
-#define ET_OPENGL_DEBUG_FUNCTION_SCOPE		OpenGLDebugScope etOpenGLDebugScope(ET_CALL_FUNCTION);
+#define ET_OPENGL_DEBUG_SCOPE		OpenGLDebugScope etOpenGLDebugScope(ET_CALL_FUNCTION);
 
 namespace et
 {
