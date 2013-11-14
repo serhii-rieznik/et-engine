@@ -149,7 +149,7 @@ void printArray(ArrayValue arr, const std::string& tabs)
 		else if (i->valueClass() == ValueClass_String)
 		{
 			StringValue val = i;
-			log::info("%s%s", tabs.c_str(), val->content.c_str());
+			log::info("%s\"%s\"", tabs.c_str(), val->content.c_str());
 		}
 		else if (i->valueClass() == ValueClass_Array)
 		{
@@ -184,7 +184,7 @@ void printDictionary(Dictionary dict, const std::string& tabs)
 		else if (i.second->valueClass() == ValueClass_String)
 		{
 			StringValue val = i.second;
-			log::info("%s%s = %s", tabs.c_str(), i.first.c_str(), val->content.c_str());
+			log::info("%s%s = \"%s\"", tabs.c_str(), i.first.c_str(), val->content.c_str());
 		}
 		else if (i.second->valueClass() == ValueClass_Array)
 		{
