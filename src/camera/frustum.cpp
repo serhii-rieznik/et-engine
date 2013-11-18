@@ -28,7 +28,7 @@ Frustum::Frustum(const mat4& mvp)
 
 bool Frustum::containSphere(const Sphere& sphere) const
 {
-	for (FrustumPlane p = FrustumPlane_Right; p < FrustumPlane_max; ++p)
+	for (size_t p = FrustumPlane_Right; p < FrustumPlane_max; ++p)
 	{
 		if (_data[p].dot(vec4(sphere.center(), 1.0f)) + sphere.radius() <= 0.0f)
 			return false;

@@ -43,13 +43,8 @@
 #
 #elif ET_PLATFORM_IOS
 #
-#	if (0 && defined(__IPHONE_7_0))
-#		include <OpenGLES/ES3/gl.h>
-#		include <OpenGLES/ES3/glext.h>
-#	else
-#		include <OpenGLES/ES2/gl.h>
-#		include <OpenGLES/ES2/glext.h>
-#	endif
+#	include <OpenGLES/ES2/gl.h>
+#	include <OpenGLES/ES2/glext.h>
 #
 #	define ET_OPENGLES									1
 #
@@ -82,6 +77,7 @@
 #	endif
 #
 #	define glClearDepth									glClearDepthf
+#	define glDepthRange									glDepthRangef
 #
 #	if !defined(GL_TEXTURE_MAX_LEVEL)
 #		define GL_TEXTURE_MAX_LEVEL						GL_TEXTURE_MAX_LEVEL_APPLE
