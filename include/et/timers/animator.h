@@ -44,28 +44,35 @@ namespace et
 	};
 
 	typedef std::vector<BaseAnimator*> AnimatorList;
+	
+	template <typename T>
+	inline T linearInterpolationFunction(const T& from, const T& to, float t)
+		{ return from * (1.0f - t) + to * t; }
 
+	inline float linearFunction(float t)
+		{ return t; }
+	
 	template <typename T>
 	class Animator : public BaseAnimator
 	{
 	public:
 		Animator() :
 			BaseAnimator(nullptr, 0, TimerPool::Pointer()), _from(), _to(), _value(nullptr),
-			_startTime(0.0f), _duration(0.0f) { _interpolationFunction = [](float t) { return t; }; }
+			_startTime(0.0f), _duration(0.0f) { initDefaultInterpolators(); }
 		
 		Animator(const TimerPool::Pointer& tp) :
 			BaseAnimator(nullptr, 0, tp), _from(), _to(), _value(nullptr),
-			_startTime(0.0f), _duration(0.0f) { _interpolationFunction = [](float t) { return t; }; }
-
+			_startTime(0.0f), _duration(0.0f) { initDefaultInterpolators(); }
+		
 		Animator(AnimatorDelegate* delegate, int tag, const TimerPool::Pointer& tp) :
-			BaseAnimator(delegate, tag, tp), _from(), _to(), _value(nullptr),
-			_startTime(0.0f), _duration(0.0f) { _interpolationFunction = [](float t) { return t; }; }
+			BaseAnimator(delegate, tag, tp), _from(), _to(), _value(nullptr), _startTime(0.0f),
+			_duration(0.0f) { initDefaultInterpolators(); }
 
 		Animator(AnimatorDelegate* delegate, T* value, const T& from, const T& to, float duration,
 			int tag, const TimerPool::Pointer& tp) : BaseAnimator(delegate, tag, tp), _from(), _to(),
 			_value(nullptr), _startTime(0.0f), _duration(0.0f)
 		{
-			_interpolationFunction = [](float t) { return t; };
+			initDefaultInterpolators();
 			animate(value, from, to, duration);
 		}
 
@@ -86,15 +93,23 @@ namespace et
 		};
 		
 		template <typename F>
-		void setInterpolationFunction(F func)
-		{
-			_interpolationFunction = func;
-		}
+		void setTimeInterpolationFunction(F func)
+			{ _timeInterpolationFunction = func; }
+
+		template <typename F>
+		void setValueInterpolationFunction(F func)
+			{ _valueInterpolationFunction = func; }
 		
 		ET_DECLARE_EVENT0(updated);
 		ET_DECLARE_EVENT0(finished);
 		
 	private:
+		void initDefaultInterpolators()
+		{
+			_timeInterpolationFunction = linearFunction;
+			_valueInterpolationFunction = linearInterpolationFunction<T>;
+		}
+		
 		void update(float t)
 		{
 			float dt = (t - _startTime) / _duration;
@@ -104,30 +119,36 @@ namespace et
 				
 				if (delegate())
 					delegate()->animatorUpdated(this);
+				
 				updated.invoke();
 				
 				cancelUpdates();
 				
 				if (delegate())
 					delegate()->animatorFinished(this);
+				
 				finished.invoke();
 			}
 			else 
 			{
-				float interpolated = _interpolationFunction(dt);
-				*_value = _from * (1.0f - interpolated) + _to * interpolated;
+				*_value = _valueInterpolationFunction(_from, _to, _timeInterpolationFunction(dt));
 				
 				if (delegate())
 					delegate()->animatorUpdated(this);
+				
 				updated.invoke();
 			}
 		}
 
 	private:
-		std::function<float(float)> _interpolationFunction;
+		std::function<float(float)> _timeInterpolationFunction;
+		std::function<T(const T&, const T&, float)> _valueInterpolationFunction;
+		
 		T _from;
 		T _to;
+		
 		T* _value;
+		
 		float _startTime;
 		float _duration;
 	};
