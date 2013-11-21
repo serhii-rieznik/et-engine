@@ -102,6 +102,7 @@
 																t& operator = (const t&) { return *this; }
 																	
 #define ET_COMPOSE_UINT32(A, B, C, D)					(D | (C << 8) | (B << 16) | (A << 24))
+#define ET_COMPOSE_UINT32_INVERTED(A, B, C, D)			(A | (B << 8) | (C << 16) | (D << 24))
 
 
 namespace et

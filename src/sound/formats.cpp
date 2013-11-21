@@ -7,51 +7,17 @@
 
 #include <et/core/tools.h>
 #include <et/core/stream.h>
-#include <et/sound/openal.h>
 #include <et/sound/formats.h>
 
 using namespace et;
 using namespace et::audio;
 
-union ChunkIdentifier
-{
-	char cID[4];
-	unsigned char ucID[4];
-	uint32_t nID;
-};
+const uint32_t AIFFCommonChunkID = ET_COMPOSE_UINT32('C', 'O', 'M', 'M');
+const uint32_t AIFFUncompressedDataChunkID = ET_COMPOSE_UINT32('S', 'S', 'N', 'D');
+const uint32_t AIFFCompressedDataChunkID = ET_COMPOSE_UINT32('C', 'S', 'N', 'D');
 
-struct AudioFileChunk
-{
-	ChunkIdentifier id;
-	uint32_t size;
-};
-
-const uint32_t AIFFCommonChunkID = 'MMOC';
-const uint32_t AIFFUncompressedDataChunkID = 'DNSS';
-const uint32_t AIFFCompressedDataChunkID = 'DNSC';
-
-const uint32_t WAVFileChunkID = 'FFIR';
-const uint32_t WAVDataChunkID = 'atad';
-const uint32_t WAVFormatChunkID = ' tmf';
-
+/*
 #pragma pack(1)
-
-struct WAVFileChunk
-{
-	ChunkIdentifier id;
-	uint32_t chunkSize;
-	char format[4];
-};
-
-struct WAVFormatChunk
-{
-	uint16_t audioFormat;
-	uint16_t numChannels;
-	uint32_t sampleRate;
-	uint32_t byteRate;
-	uint16_t blockAlign;
-	uint16_t bitsPerSample;
-};
 
 struct AIFFFileChunk
 {
@@ -85,109 +51,9 @@ struct AIFFSoundDataChunk
 uint32_t swapEndiannes(uint32_t i);
 uint16_t swapEndiannes(uint16_t i);
 void swapEndiannes(unsigned char* data, size_t dataSize);
-double _af_convert_from_ieee_extended (const unsigned char *bytes);
+double _af_convert_from_ieee_extended(const unsigned char *bytes);
 
 #pragma pack()
-
-size_t et::audio::openALFormatFromChannelsAndBitDepth(size_t numChannels, size_t bitDepth)
-{
-	if (numChannels == 1)
-	{
-		if (bitDepth == 8)
-		{
-			return AL_FORMAT_MONO8;
-		}
-		else if (bitDepth == 16)
-		{
-			return AL_FORMAT_MONO16;
-		}
-		else 
-		{
-			assert(false && "Unsupported format in WAV file");
-		}
-	}
-	else if (numChannels == 2)
-	{
-		if (bitDepth == 8)
-		{
-			return AL_FORMAT_STEREO8;
-		}
-		else if (bitDepth == 16)
-		{
-			return AL_FORMAT_STEREO16;
-		}
-		else 
-		{
-			assert(false && "Unsupported format in WAV file");
-		}
-	}
-	else 
-	{
-		assert(false && "Unsupported number of channels in WAV file");
-	}
-
-	return 0;
-}
-
-Description::Pointer et::audio::loadWAVFile(const std::string& fileName)
-{
-	InputStream file(fileName, StreamMode_Binary);
-	if (file.invalid())
-	{
-		log::info("Unable to load WAV from file: %s", fileName.c_str());
-		return Description::Pointer();
-	}
-
-	WAVFileChunk fileChunk = { };
-	file.stream().read(reinterpret_cast<char*>(&fileChunk), sizeof(fileChunk));
-	if (fileChunk.id.nID != WAVFileChunkID)
-		return Description::Pointer();
-
-	Description* result = 0;
-
-	while (!file.stream().eof() && file.stream().good())
-	{
-		AudioFileChunk chunk = { };
-		file.stream().read(reinterpret_cast<char*>(&chunk), sizeof(chunk));
-
-		if (chunk.id.nID == WAVFormatChunkID)
-		{
-			WAVFormatChunk fmt = { };
-			file.stream().read(reinterpret_cast<char*>(&fmt), sizeof(fmt));
-
-			result = new Description;
-			result->setOrigin(fileName);
-			result->sampleRate = fmt.sampleRate;
-			result->channels = fmt.numChannels;
-			result->bitDepth = fmt.bitsPerSample;
-			result->format = openALFormatFromChannelsAndBitDepth(result->channels, result->bitDepth);
-		}
-		else if ((chunk.id.nID == WAVDataChunkID) && (result != nullptr))
-		{
-			result->data.resize(chunk.size);
-			result->duration = static_cast<float>(result->data.dataSize()) / (
-				static_cast<float>(result->sampleRate * result->channels * result->bitDepth / 8));
-			file.stream().read(result->data.binary(), chunk.size);
-		}
-		else if (chunk.size > 0)
-		{
-			BinaryDataStorage data(static_cast<size_t>(chunk.size));
-			file.stream().read(data.binary(), chunk.size);
-		}
-		else 
-		{
-			break;
-		}
-	}
-
-	return Description::Pointer(result);
-}
-
-Description::Pointer et::audio::loadCAFFile(const std::string&)
-{
-	assert(false && "CAF is not currently supported");
-	return Description::Pointer();
-}
 
 Description::Pointer et::audio::loadAIFFile(const std::string& fileName)
 {
@@ -249,31 +115,7 @@ Description::Pointer et::audio::loadAIFFile(const std::string& fileName)
 
 	return Description::Pointer(result);
 }
-
-Description::Pointer et::audio::loadFile(const std::string& fileName)
-{
-	size_t dotPos = fileName.rfind('.');
-	if (dotPos == std::string::npos)
-		return Description::Pointer();
-
-	std::string ext = fileName.substr(dotPos);
-	lowercase(ext);
-
-	if (ext == ".wav")
-	{
-		return loadWAVFile(fileName);
-	}
-	else if (ext == ".caf")
-	{
-		return loadCAFFile(fileName);
-	}
-	else if ((ext == ".aif") || (ext == ".aiff") || (ext == ".aifc"))
-	{
-		return loadAIFFile(fileName);
-	}
-
-	return Description::Pointer();
-}
+*/
 
 /*
  * Service functions
@@ -305,6 +147,7 @@ void swapEndiannes(unsigned char* data, size_t dataSize)
 }
 
 #define UnsignedToFloat(u) (((double) ((long) (u - 2147483647L - 1))) + 2147483648.0)
+
 double _af_convert_from_ieee_extended (const unsigned char *bytes)
 {
 	double			f;

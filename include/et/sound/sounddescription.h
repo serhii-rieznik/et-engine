@@ -6,7 +6,7 @@
  */
 
 #pragma once
-
+/*
 #include <et/core/containers.h>
 
 namespace et
@@ -18,19 +18,37 @@ namespace et
 		public:
 			ET_DECLARE_POINTER(Description)
 			
+			enum
+			{
+				MaximumBufferSize = 10240
+			};
+						
 		public:
-			Description() :	
-				duration(0.0f), format(0), channels(0), bitDepth(0), sampleRate(0) { }
+			Description(InputStream::Pointer);
+			
+		private:
+			float duration = 0.0f;
 
-		public:
-			float duration;
+			size_t format = 0;
+			size_t channels = 0;
+			size_t bitDepth = 0;
+			size_t sampleRate = 0;
+			
+			size_t dataSize = 0;
+			
+			BinaryDataStorage readData(size_t amount);
 
-			size_t format;
-			size_t channels;
-			size_t bitDepth;
-			size_t sampleRate;
-
-			BinaryDataStorage data;
+		private:
+			enum SourceType
+			{
+				SourceType_PCM,
+				SourceType_CompressedOGG,
+			};
+			
+		private:
+			InputStream::Pointer stream;
+			SourceType _sourceType = SourceType;
 		};
 	};
 }
+*/

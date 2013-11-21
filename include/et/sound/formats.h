@@ -13,12 +13,12 @@ namespace et
 {
 	namespace audio
 	{
+/*
 		Description::Pointer loadWAVFile(const std::string&);
 		Description::Pointer loadCAFFile(const std::string&);
 		Description::Pointer loadAIFFile(const std::string&);
 
 		Description::Pointer loadFile(const std::string&);
-		
-		size_t openALFormatFromChannelsAndBitDepth(size_t numChannels, size_t bitDepth);
+*/
 	}
 }

@@ -47,11 +47,7 @@ namespace et
 		virtual ThreadResult main();
 
 	private:
-		Thread(const Thread&)
-			{ }
-
-		Thread& operator = (const Thread&)
-			{ return *this; }
+		ET_DENY_COPY(Thread)
 
 	private:
 		friend class ThreadPrivate;
