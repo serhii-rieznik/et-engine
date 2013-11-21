@@ -115,11 +115,7 @@ Description::Pointer et::audio::loadAIFFile(const std::string& fileName)
 
 	return Description::Pointer(result);
 }
-*/
 
-/*
- * Service functions
- */
 uint32_t swapEndiannes(uint32_t i)
 {
 	unsigned char b1 = static_cast<unsigned char>((i & 0x000000ff) >> 0);
@@ -172,7 +168,7 @@ double _af_convert_from_ieee_extended (const unsigned char *bytes)
 	}
 	else
 	{
-		if (expon == 0x7FFF) /* Infinity or NaN */
+		if (expon == 0x7FFF)
 		{
 			f = HUGE_VAL;
 		}
@@ -186,3 +182,4 @@ double _af_convert_from_ieee_extended (const unsigned char *bytes)
 	
 	return (bytes[0] & 0x80) ? -f : f;
 }
+*/
