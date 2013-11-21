@@ -59,6 +59,7 @@ namespace et
 		ET_DECLARE_EVENT2(cancelled, vec2, PointerType)
 		
 		ET_DECLARE_EVENT2(click, vec2, PointerType)
+		ET_DECLARE_EVENT0(clickCancelled)
 		ET_DECLARE_EVENT2(doubleClick, vec2, PointerType)
 
 		ET_DECLARE_EVENT0(hold)

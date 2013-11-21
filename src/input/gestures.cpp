@@ -138,6 +138,9 @@ void GesturesRecognizer::onPointerMoved(et::PointerInputInfo pi)
 			handlePointersMovement();
 	}
 	
+	if (_expectClick)
+		clickCancelled.invokeInMainRunLoop();
+	
 	cancelWaitingForClicks();
 }
 
