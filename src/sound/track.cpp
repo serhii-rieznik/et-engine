@@ -417,8 +417,6 @@ bool TrackPrivate::fillNextOGGBuffer()
 	BinaryDataStorage data(pcmBufferSize, 0);
 	auto& inStream = stream->stream();
 	
-	auto readFrom = ov_pcm_tell(&oggFile);
-	
 	long bytesRead = 0;
 	while (bytesRead < pcmBufferSize)
 	{
@@ -439,10 +437,7 @@ bool TrackPrivate::fillNextOGGBuffer()
 			break;
 		}
 	}
-	auto readTo = ov_pcm_tell(&oggFile);
-	
-	log::info("Reading ogg from: %lld to %lld, %ld bytes read.", readFrom, readTo, bytesRead);
-	
+		
 	pcmReadOffset += bytesRead;
 	if (bytesRead > 0)
 	{
