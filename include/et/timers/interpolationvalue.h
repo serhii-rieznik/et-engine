@@ -55,9 +55,12 @@ namespace et
 		void step(float dt)
 		{
 			_latestDelta = (_targetValue - _value) * dt;
-			_value += _latestDelta;
-			valueUpdated.invoke(_value);
-			updated.invoke();
+			if (length(_latestDelta) > 0.0)
+			{
+				_value += _latestDelta;
+				valueUpdated.invoke(_value);
+				updated.invoke();
+			}
 		}
 		
 	private:

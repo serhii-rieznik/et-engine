@@ -41,6 +41,8 @@ namespace et
 			{ return _sourceTag; }
 
 		void setData(const IndexArray::Pointer& i);
+		
+		void overridePrimitiveType(PrimitiveType);
 
 	private:
 		void setProperties(const IndexArray::Pointer& i);

@@ -187,7 +187,7 @@ void FBXLoaderPrivate::loadTextures()
 			{
 				originalName = removeFileExt(getFileName(fileName));
 	
-				fileName = TextureLoader::resolveFileName(_folder + originalName);
+				fileName = application().environment().resolveScalableFileName(_folder + originalName, _rc->screenScaleFactor());
 				shouldLoad = fileExists(fileName);
 
 				if (!shouldLoad)
@@ -707,7 +707,7 @@ StringList FBXLoaderPrivate::loadNodeProperties(FbxNode* node)
 			{
 				if (isNewLineChar(c))
 				{
-					if (line.offset())
+					if (line.lastElementIndex())
 						result.push_back(line.binary());
 					
 					line.setOffset(0);
@@ -719,7 +719,7 @@ StringList FBXLoaderPrivate::loadNodeProperties(FbxNode* node)
 				}
 			}
 
-			if (line.offset())
+			if (line.lastElementIndex())
 				result.push_back(line.data());
 		}
 
@@ -748,6 +748,6 @@ s3d::ElementContainer::Pointer FBXLoader::load(RenderContext* rc, ObjectsCache& 
 	if (loader->import(_filename))
 		result = loader->parse();
 
-	mainRunLoop().addTask(new DeletionTask<FBXLoaderPrivate>(loader));
+	mainRunLoop().addTask(new DeletionTask<FBXLoaderPrivate>(loader), 0.0f);
 	return result;
 }

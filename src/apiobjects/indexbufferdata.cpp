@@ -85,3 +85,9 @@ void IndexBufferData::setData(const IndexArray::Pointer& i)
 {
 	build(i);
 }
+
+void IndexBufferData::overridePrimitiveType(PrimitiveType pt)
+{
+	_primitiveType = primitiveTypeValue(pt);
+	
+}
