@@ -59,13 +59,13 @@ namespace et
 			size_t pcmBufferSize = 0;
 			
 			ALsizei sampleRate = 0;
-			ALuint buffers[BuffersCount] = { };
+			ALuint buffers[BuffersCount];
 			
 			int bufferIndex = 0;
 			int buffersCount = 0;
 			
-			OggVorbis_File oggFile = { };
-			ov_callbacks oggCallbacks = { };
+			OggVorbis_File oggFile;
+			ov_callbacks oggCallbacks;
 			size_t oggStartPosition = 0;
 			
 			SourceFormat sourceFormat = SourceFormat_Undefined;
@@ -172,7 +172,7 @@ void Track::rewind()
 
 void Track::preloadBuffers()
 {
-	for (size_t i = 0; i < _private->buffersCount; ++i)
+	for (int i = 0; i < _private->buffersCount; ++i)
 		_private->fillNextBuffer();
 }
 
@@ -221,6 +221,10 @@ const uint32_t WAVFormatChunkID = ET_COMPOSE_UINT32_INVERTED('f', 'm', 't', ' ')
 
 TrackPrivate::TrackPrivate()
 {
+	etFillMemory(&buffers, 0, sizeof(buffers));
+	etFillMemory(&oggFile, 0, sizeof(oggFile));
+	etFillMemory(&oggCallbacks, 0, sizeof(oggCallbacks));
+
 	oggCallbacks.read_func = [](void* ptr, size_t size, size_t nmemb, void* datasource) -> size_t
 	{
 		InputStream* stream = reinterpret_cast<InputStream*>(datasource);
@@ -228,7 +232,7 @@ TrackPrivate::TrackPrivate()
 		if (stream->valid())
 			stream->stream().read(reinterpret_cast<char*>(ptr), size * nmemb);
 		
-		return stream->valid() ? stream->stream().gcount() : 0;
+		return static_cast<size_t>(stream->valid() ? stream->stream().gcount() : 0);
 	};
 	
 	
@@ -355,7 +359,7 @@ bool TrackPrivate::fillNextPCMBuffer()
 	BinaryDataStorage data(pcmBufferSize, 0);
 	auto& inStream = stream->stream();
 	inStream.read(data.binary(), etMin(pcmBufferSize, pcmDataSize - pcmReadOffset));
-	pcmReadOffset += inStream.gcount();
+	pcmReadOffset += static_cast<size_t>(inStream.gcount());
 	
 	ALsizei bytesRead = static_cast<ALsizei>(inStream.gcount());
 	if (bytesRead > 0)
@@ -417,7 +421,7 @@ bool TrackPrivate::fillNextOGGBuffer()
 	BinaryDataStorage data(pcmBufferSize, 0);
 	auto& inStream = stream->stream();
 	
-	long bytesRead = 0;
+	size_t bytesRead = 0;
 	while (bytesRead < pcmBufferSize)
 	{
 		int section = -1;
@@ -425,7 +429,7 @@ bool TrackPrivate::fillNextOGGBuffer()
 		
 		if (lastRead > 0)
 		{
-			bytesRead += lastRead;
+			bytesRead += static_cast<size_t>(lastRead);
 		}
 		else if (lastRead < 0)
 		{
