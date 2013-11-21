@@ -123,30 +123,25 @@ namespace et
 		{ return v1 * (1.0f - t) + v2 * t; }
 
 	template<typename T>
-	inline vector4<T> mix(vector4<T> v1, vector4<T> v2, T t)
+	inline vector4<T> mix(const vector4<T>& v1, const vector4<T>& v2, T t)
 	{
 		T nt = 1 - t;
-		return vector4<T>(v1.x * nt + v2.x * t,
-						  v1.y * nt + v2.y * t,
-						  v1.z * nt + v2.z * t,
-						  v1.w * nt + v2.w * t);
+		return vector4<T>(v1.x * nt + v2.x * t, v1.y * nt + v2.y * t, v1.z * nt + v2.z * t,
+			v1.w * nt + v2.w * t);
 	}
 
 	template<typename T>
-	inline vector3<T> mix(vector3<T> v1, vector3<T> v2, T t)
+	inline vector3<T> mix(const vector3<T>& v1, const vector3<T>& v2, T t)
 	{ 
 		T nt = 1 - t;
-		return vector3<T>(v1.x * nt + v2.x * t,
-						  v1.y * nt + v2.y * t,
-						  v1.z * nt + v2.z * t);
+		return vector3<T>(v1.x * nt + v2.x * t, v1.y * nt + v2.y * t, v1.z * nt + v2.z * t);
 	}
 
 	template<typename T>
-	inline vector2<T> mix(vector2<T> v1, vector2<T> v2, T t)
+	inline vector2<T> mix(const vector2<T>& v1, const vector2<T>& v2, T t)
 	{
 		T nt = 1 - t;
-		return vector2<T>(v1.x * nt + v2.x * t,
-						  v1.y * nt + v2.y * t);
+		return vector2<T>(v1.x * nt + v2.x * t, v1.y * nt + v2.y * t);
 	}
 
 	template<typename T>
