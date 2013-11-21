@@ -57,13 +57,14 @@ std::string et::applicationPath()
 
 bool et::fileExists(const std::string& name)
 {
-	return GetFileAttributes(name.c_str()) != INVALID_FILE_ATTRIBUTES;
+	auto attr = GetFileAttributes(name.c_str());
+	return (attr != INVALID_FILE_ATTRIBUTES) && ((attr & FILE_ATTRIBUTE_DIRECTORY) != FILE_ATTRIBUTE_DIRECTORY);
 }
 
 bool et::folderExists(const std::string& folder)
 {
-	auto fa = GetFileAttributes(folder.c_str());
-	return (fa != INVALID_FILE_ATTRIBUTES) && ((fa & FILE_ATTRIBUTE_DIRECTORY) == FILE_ATTRIBUTE_DIRECTORY);
+	auto attr = GetFileAttributes(folder.c_str());
+	return (attr != INVALID_FILE_ATTRIBUTES) && ((attr & FILE_ATTRIBUTE_DIRECTORY) == FILE_ATTRIBUTE_DIRECTORY);
 }
 
 void et::findFiles(const std::string& folder, const std::string& mask, bool recursive, StringList& list)
