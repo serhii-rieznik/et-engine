@@ -18,6 +18,7 @@ namespace et
 #	define ET_DECLARE_EVENT2(name, arg1type, arg2type)				et::Event2<arg1type, arg2type> name;
 #	define ET_CONNECT_EVENT(name, methodName)						name.connect(this, &methodName);
 #	define ET_CONNECT_EVENT_TO_OBJECT(name, object, methodName)		name.connect(object, &methodName);
+#	define ET_CONNECT_EVENT_TO_FUNCTION(name, func)					name.connect(func);
 #	define ET_CONNECT_EVENT_TO_EVENT(name, event)					name.connect(event);
 
 	class EventReceiver;
@@ -107,6 +108,37 @@ namespace et
 		void (RecevierType::*_receiverMethod)();
 		RecevierType* _receiver;
 	};
+	
+	template <typename C>
+	class Event0DirectConnection : public Event0ConnectionBase
+	{
+	public:
+		Event0DirectConnection(C func) :
+			_func(func) { }
+		
+		EventReceiver* receiver()
+			{ return nullptr; }
+		
+		void invoke()
+			{ _func(); }
+		
+		void invokeInMainRunLoop(float delay = 0.0f)
+		{
+			Invocation i;
+			i.setTarget(_func);
+			i.invokeInMainRunLoop(delay);
+		}
+		
+		void invokeInBackground(float delay = 0.0f)
+		{
+			Invocation i;
+			i.setTarget(_func);
+			i.invokeInBackground(delay);
+		}
+		
+	private:
+		C _func;
+	};
 
 	class Event0 : public Event, public Event0ConnectionBase
 	{
@@ -116,8 +148,12 @@ namespace et
 
 		template <typename R>
 		void connect(R* receiver, void (R::*receiverMethod)());
-		void connect(Event0& e);
+		
+		template <typename F>
+		void connect(F func);
 
+		void connect(Event0& e);
+		
 		template <typename R>
 		void disconnect(R* receiver);
 
@@ -180,6 +216,37 @@ namespace et
 		ReceiverType* _receiver;
 	};
 
+	template <typename F, typename ArgType>
+	class Event1DirectConnection : public Event1ConnectionBase<ArgType>
+	{
+	public:
+		Event1DirectConnection(F f) :
+			_func(f) { };
+		
+		EventReceiver* receiver()
+			{ return nullptr; }
+		
+		void invoke(ArgType arg)
+			{ _func(arg); }
+		
+		void invokeInMainRunLoop(ArgType arg, float delay)
+		{
+			Invocation1 i;
+			i.setTarget<F, ArgType>(_func, arg);
+			i.invokeInMainRunLoop(delay);
+		}
+		
+		void invokeInBackground(ArgType arg, float delay)
+		{
+			Invocation1 i;
+			i.setTarget<F, ArgType>(_func, arg);
+			i.invokeInBackground(delay);
+		}
+		
+	private:
+		F _func;
+	};
+	
 	template <typename ArgType>
 	class Event1 : public Event, public Event1ConnectionBase<ArgType>
 	{
@@ -189,8 +256,12 @@ namespace et
 
 		template <typename ReceiverType>
 		void connect(ReceiverType* receiver, void (ReceiverType::*receiverMethod)(ArgType));
-		void connect(Event1& e);
+		
+		template <typename F>
+		void connect(F);
 
+		void connect(Event1&);
+		
 		template <typename ReceiverType>
 		void disconnect(ReceiverType* receiver);
 

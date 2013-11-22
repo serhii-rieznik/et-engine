@@ -60,15 +60,39 @@ namespace et
 			{ return new InvocationTarget(_object, _method); }
 
 	private:
+		ET_DENY_COPY(InvocationTarget)
+		
+	private:
 		T* _object;
 		void(T::*_method)();
+	};
+	
+	template <typename F>
+	class DirectInvocationTarget : public PureInvocationTarget
+	{
+	public:
+		DirectInvocationTarget(F f) :
+			_func(f) { }
+		
+		void invoke()
+			{ _func(); }
+		
+		PureInvocationTarget* copy()
+			{ return new DirectInvocationTarget<F>(_func); }
+		
+	private:
+		ET_DENY_COPY(DirectInvocationTarget)
+		
+	private:
+		F _func;
 	};
 
 	template <typename T, typename A1>
 	class Invocation1Target : public PureInvocationTarget
 	{
 	public:
-		Invocation1Target(T* o, void(T::*m)(A1), A1 p1) : _object(o), _method(m), _param(p1) { }
+		Invocation1Target(T* o, void(T::*m)(A1), A1 p1) :
+			_object(o), _method(m), _param(p1) { }
 
 		void invoke()
 			{ (_object->*_method)(_param); }
@@ -80,8 +104,7 @@ namespace et
 			{ return new Invocation1Target(_object, _method, _param); }
 
 	private:
-		Invocation1Target operator = (const Invocation1Target&) 
-			{ return *this; }
+		ET_DENY_COPY(Invocation1Target)
 
 	private:
 		T* _object;
@@ -89,6 +112,30 @@ namespace et
 		A1 _param;
 	};
 
+	template <typename F, typename A1>
+	class DirectInvocation1Target : public PureInvocationTarget
+	{
+	public:
+		DirectInvocation1Target(F func, A1 p1) :
+			_func(func), _param(p1) { }
+		
+		void invoke()
+			{ _func(_param); }
+		
+		void setParameter(A1 p1)
+			{ _param = p1; }
+		
+		PureInvocationTarget* copy()
+			{ return new DirectInvocation1Target(_func, _param); }
+		
+	private:
+		ET_DENY_COPY(DirectInvocation1Target)
+		
+	private:
+		F _func;
+		A1 _param;
+	};
+	
 	template <typename T, typename A1, typename A2>
 	class Invocation2Target : public PureInvocationTarget
 	{
@@ -130,6 +177,10 @@ namespace et
 		template <typename T>
 		void setTarget(T* o, void(T::*m)())
 			{ assert(o); _target = new InvocationTarget<T>(o, m); }
+		
+		template <typename F>
+		void setTarget(F func)
+			{ _target = new DirectInvocationTarget<F>(func); }
 
 	private:
 		AutoPtr<PureInvocationTarget> _target;
@@ -147,9 +198,16 @@ namespace et
 		void setTarget(T* o, void(T::*m)(A1), A1 param)
 			{ assert(o); _target = new Invocation1Target<T, A1>(o, m, param); }
 
+		template <typename F, typename A1>
+		void setTarget(F func, A1 param)
+			{ _target = new DirectInvocation1Target<F, A1>(func, param); }
+		
 		template <typename T, typename A1>
 		void setParameter(A1 p)
-			{ (static_cast<Invocation1Target<T, A1>*>(_target.ptr()))->setParameter(p); }
+		{
+			assert(_target.valid());
+			(static_cast<Invocation1Target<T, A1>*>(_target.ptr()))->setParameter(p);
+		}
 	};
 
 	class Invocation2 : public PureInvocation
