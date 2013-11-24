@@ -27,9 +27,9 @@ using namespace et;
 using namespace et::audio;
 
 StreamingThread::StreamingThread() :
-	Thread(true), _private(new StreamingThreadPrivate)
+	Thread(false), _private(new StreamingThreadPrivate)
 {
-	
+	run();
 }
 
 ThreadResult StreamingThread::main()
