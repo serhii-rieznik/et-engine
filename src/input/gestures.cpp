@@ -14,7 +14,7 @@ using namespace et;
 GesturesRecognizer::GesturesRecognizer(bool automaticMode) : InputHandler(automaticMode),
 	_clickThreshold(0.2f), _doubleClickTemporalThreshold(0.25f), _doubleClickSpatialThreshold(0.075f),
 	_holdThreshold(1.0f), _singlePointerType(0), _actualTime(0.0f), _clickStartTime(0.0f), _expectClick(false),
-	_expectDoubleClick(false), _clickTimeoutActive(false)
+	_expectDoubleClick(false), _clickTimeoutActive(false), _lockGestures(true), _gesture(RecognizedGesture_NoGesture)
 {
 }
 
@@ -36,25 +36,57 @@ void GesturesRecognizer::handlePointersMovement()
 		
 		vec2 dir1 = currentPositions[0] - previousPositions[0];
 		vec2 dir2 = currentPositions[1] - previousPositions[1];
-		float direction = dot(normalize(dir1), normalize(dir2));
+		vec2 center = 0.5f * (previousPositions[0] + previousPositions[1]);
+		
+		float zoomValue = (currentPositions[0] - currentPositions[1]).length() /
+			(previousPositions[0] - previousPositions[1]).length();
+		
+		float angle = 0.5f * (outerProduct(dir1, previousPositions[0] - center) +
+			outerProduct(dir2, previousPositions[1] - center));
+		
+		RecognizedGesture gesture = _gesture;
+		if (gesture == RecognizedGesture_NoGesture)
+		{
+			float direction = dot(normalize(dir1), normalize(dir2));
+			if (direction < -0.5f)
+			{
+				gesture = (std::abs(angle / (zoomValue - 1.0f)) > 0.1f) ?
+					RecognizedGesture_Rotate : RecognizedGesture_Zoom;
+			}
+			else if (direction > 0.5f)
+			{
+				gesture = RecognizedGesture_Swipe;
+			}
+		}
+		
+		switch (gesture)
+		{
+			case RecognizedGesture_Zoom:
+			{
+				zoomAroundPoint.invoke(zoomValue, center);
+				zoom.invoke(zoomValue);
+				break;
+			}
+				
+			case RecognizedGesture_Rotate:
+			{
+				rotate.invoke(angle);
+				break;
+			}
+				
+			case RecognizedGesture_Swipe:
+			{
+				swipe.invoke(0.5f * (dir1 + dir2), 2);
+				break;
+			}
 
-		if (direction < -0.5f) // handle zoom gesture
-		{
-			float currentDistance = (currentPositions[0] - currentPositions[1]).length();
-			float previousDistance = (previousPositions[0] - previousPositions[1]).length();
-			float zoomValue = currentDistance / previousDistance;
-			
-			vec2 center = 0.5f * (previousPositions[0] + previousPositions[1]);
-			float angle1 = outerProduct(dir1, previousPositions[0] - center);
-			float angle2 = outerProduct(dir2, previousPositions[1] - center);
-			rotate.invoke(0.5f * (angle1 + angle2));
-			zoomAroundPoint.invoke(zoomValue, center);
-			zoom.invoke(zoomValue);
+			default:
+				break;
 		}
-		else if (direction > 0.5f) // handle swipe gesture
-		{
-			swipe.invoke(0.5f * (dir1 + dir2), 2);
-		}
+		
+		if (_lockGestures)
+			_gesture = gesture;
+
     }
     else 
     {
@@ -148,7 +180,9 @@ void GesturesRecognizer::onPointerReleased(et::PointerInputInfo pi)
 {
 	pointerReleased.invoke(pi);
 
+	_gesture = RecognizedGesture_NoGesture;
 	_pointers.erase(pi.id);
+	
 	released.invoke(pi.normalizedPos, pi.type);
 	stopWaitingForClicks();
 }

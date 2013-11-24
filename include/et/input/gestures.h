@@ -18,6 +18,9 @@ namespace et
 		
 		size_t pointersCount() const
 			{ return _pointers.size(); }
+		
+		void setShouldLockGestures(bool lock)
+			{ _lockGestures = lock; }
 
 	public:
 		ET_DECLARE_PROPERTY_GET_COPY_SET_COPY(float, clickThreshold, setClickThreshold)
@@ -85,12 +88,9 @@ namespace et
 		void startWaitingForClicks();
 		void stopWaitingForClicks();
 		void cancelWaitingForClicks();
-
-		GesturesRecognizer(const GesturesRecognizer&) : InputHandler(false)
-			{ }
 		
-		GesturesRecognizer& operator = (const GesturesRecognizer&)
-			{ return *this; }
+	private:
+		ET_DENY_COPY(GesturesRecognizer)
 
 	private:
 		struct PointersInputDelta
@@ -106,14 +106,27 @@ namespace et
 				current(c), previous(p), moved(false) { }
 		};
         typedef std::map<size_t, PointersInputDelta> PointersInputDeltaMap;
+		
+		enum RecognizedGesture
+		{
+			RecognizedGesture_NoGesture,
+			RecognizedGesture_Zoom,
+			RecognizedGesture_Rotate,
+			RecognizedGesture_Swipe,
+		};
 
 		PointersInputDeltaMap _pointers;
 		PointerType _singlePointerType;
 		vec2 _singlePointerPosition;
+		
 		float _actualTime;
 		float _clickStartTime;
+		
 		bool _expectClick;
 		bool _expectDoubleClick;
 		bool _clickTimeoutActive;
+		bool _lockGestures;
+		
+		RecognizedGesture _gesture;
 	};
 }
