@@ -64,7 +64,7 @@ Framebuffer::Framebuffer(RenderContext* rc, const FramebufferDescription& desc,
 
 	if (hasDepth)
 	{
-		if (_description.colorIsRenderbuffer)
+		if (_description.depthIsRenderbuffer)
 		{
 			createOrUpdateDepthRenderbuffer();
 		}
