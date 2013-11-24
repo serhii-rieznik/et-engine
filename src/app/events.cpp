@@ -36,8 +36,10 @@ void EventReceiver::eventDisconnected(Event* e)
  *
  */
 
-Event0::Event0() : _invoking(false)
+Event0::Event0() :
+	_invoking(false)
 {
+	
 }
 
 Event0::~Event0()
@@ -57,7 +59,7 @@ Event0::~Event0()
 void Event0::connect(Event0& e)
 {
 	if (&e != this)
-		_connections.push_back(&e);
+	_connections.push_back(&e);
 }
 
 void Event0::cleanup()
@@ -86,7 +88,6 @@ void Event0::invoke()
 void Event0::invokeInMainRunLoop(float delay)
 {
 	cleanup();
-	
 	for (auto& i : _connections)
 		i->invokeInMainRunLoop(delay);
 }

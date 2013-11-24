@@ -23,7 +23,7 @@ Event0Connection<T>::Event0Connection(T* receiver, void(T::*func)()) :
 */
 
 template <typename R>
-void Event0::connect(R* receiver, void (R::*receiverMethod)())
+inline void Event0::connect(R* receiver, void (R::*receiverMethod)())
 {
 	for (auto& connection : _connections)
 	{
@@ -36,6 +36,12 @@ void Event0::connect(R* receiver, void (R::*receiverMethod)())
 
 	_connections.push_back(new Event0Connection<R>(receiver, receiverMethod));
 	receiver->eventConnected(this);
+}
+
+template <typename F>
+inline void Event0::connect(F func)
+{
+	_connections.push_back(new Event0DirectConnection<F>(func));
 }
 
 template <typename R>
@@ -93,6 +99,13 @@ inline void Event1<ArgType>::connect(ReceiverType* receiver, void (ReceiverType:
 
 	_connections.push_back(new Event1Connection<ReceiverType, ArgType>(receiver, receiverMethod));
 	receiver->eventConnected(this);
+}
+
+template <typename ArgType>
+template <typename F>
+inline void Event1<ArgType>::connect(F func)
+{
+	_connections.push_back(new Event1DirectConnection<F, ArgType>(func));
 }
 
 template <typename ArgType>
