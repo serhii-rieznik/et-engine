@@ -31,6 +31,9 @@ namespace et
 			float radius() const
 				{ return _radius; }
 
+			const vec3& center() const
+				{ return _center; }
+
 			const CollisionData& triangles() const
 				{ return _data; }
 
