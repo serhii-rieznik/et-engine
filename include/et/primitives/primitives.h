@@ -58,11 +58,16 @@ namespace et
 		void smoothTangents(VertexArray::Pointer data, const IndexArray::Pointer& buffer,
 			IndexType first, IndexType last);
 		
+		void createCube(VertexArray::Pointer data, float radius);
+		void createOctahedron(VertexArray::Pointer data, float radius);
+		void createDodecahedron(VertexArray::Pointer data, float radius);
 		void createIcosahedron(VertexArray::Pointer data, float radius, bool top = true, bool middle = true, bool bottom = true);
 		
 		void tesselateTriangles(VertexArray::Pointer data);
 		void tesselateTriangles(VertexArray::Pointer data, IndexArray::Pointer indexArray);
 		
-		VertexArray::Pointer buildIndexArray(VertexArray::Pointer data, IndexArray::Pointer indexArray);
+		VertexArray::Pointer buildLinearIndexArray(VertexArray::Pointer data, IndexArray::Pointer indexArray);
+		
+		VertexArray::Pointer linearizeTrianglesIndexArray(VertexArray::Pointer data, IndexArray::Pointer indexArray);
 	}
 }

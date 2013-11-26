@@ -586,6 +586,211 @@ void primitives::smoothTangents(VertexArray::Pointer data, const IndexArray::Poi
 		tan[i] = normalize(tanSmooth[i]);
 }
 
+#define ET_ADD_TRIANGLE(c1, c2, c3) \
+	{ \
+		pos[ k ] = corners[c1]; \
+		pos[k+1] = corners[c2]; \
+		pos[k+2] = corners[c3]; \
+		if (hasNormals) \
+		{ \
+			nrm[k+0] = nrm[k+1] = nrm[k+2] = \
+				triangle(corners[c1], corners[c2], corners[c3]).normalizedNormal(); \
+		} \
+		k += 3; \
+	}
+
+
+void primitives::createCube(VertexArray::Pointer data, float radius)
+{
+	VertexDataChunk posChunk = data->chunk(Usage_Position);
+	VertexDataChunk nrmChunk = data->chunk(Usage_Normal);
+	bool hasPosition = posChunk.valid() && (posChunk->type() == Type_Vec3);
+	bool hasNormals = nrmChunk.valid() && (nrmChunk->type() == Type_Vec3);
+	
+	assert(hasPosition);
+	(void)hasPosition;
+	
+	size_t offset = data->size();
+	data->fitToSize(12 * 3);
+	
+	RawDataAcessor<vec3> pos = posChunk.accessData<vec3>(offset);
+	RawDataAcessor<vec3> nrm = nrmChunk.accessData<vec3>(offset);
+	
+	float d = radius * INV_SQRT_3;
+	
+	vec3 corners[8] =
+	{
+		vec3(-d,  d, -d),
+		vec3( d,  d, -d),
+		vec3(-d,  d,  d),
+		vec3( d,  d,  d),
+
+		vec3(-d, -d, -d),
+		vec3( d, -d, -d),
+		vec3(-d, -d,  d),
+		vec3( d, -d,  d),
+};
+	
+	size_t k = 0;
+	
+	ET_ADD_TRIANGLE(0, 1, 4)
+	ET_ADD_TRIANGLE(1, 3, 5)
+	ET_ADD_TRIANGLE(1, 5, 4)
+	ET_ADD_TRIANGLE(3, 0, 2)
+	ET_ADD_TRIANGLE(3, 1, 0)
+	ET_ADD_TRIANGLE(3, 7, 5)
+	ET_ADD_TRIANGLE(4, 2, 0)
+	ET_ADD_TRIANGLE(4, 5, 7)
+	ET_ADD_TRIANGLE(4, 6, 2)
+	ET_ADD_TRIANGLE(4, 7, 6)
+	ET_ADD_TRIANGLE(6, 3, 2)
+	ET_ADD_TRIANGLE(6, 7, 3)
+}
+
+void primitives::createOctahedron(VertexArray::Pointer data, float radius)
+{
+	VertexDataChunk posChunk = data->chunk(Usage_Position);
+	VertexDataChunk nrmChunk = data->chunk(Usage_Normal);
+	bool hasPosition = posChunk.valid() && (posChunk->type() == Type_Vec3);
+	bool hasNormals = nrmChunk.valid() && (nrmChunk->type() == Type_Vec3);
+	
+	assert(hasPosition);
+	(void)hasPosition;
+	
+	size_t offset = data->size();
+	data->fitToSize(24);
+					
+	RawDataAcessor<vec3> pos = posChunk.accessData<vec3>(offset);
+	RawDataAcessor<vec3> nrm = nrmChunk.accessData<vec3>(offset);
+	
+	float d = 0.5f * SQRT_2 * radius;
+	
+	vec3 corners[6] =
+	{
+		vec3(0.0f,    d, 0.0f),
+		vec3(  -d, 0.0f,    d),
+		vec3(  -d, 0.0f,   -d),
+		vec3(   d, 0.0f,    d),
+		vec3(   d, 0.0f,   -d),
+		vec3(0.0f,   -d, 0.0f)
+	};
+	
+	size_t k = 0;
+	ET_ADD_TRIANGLE(0, 2, 1)
+	ET_ADD_TRIANGLE(0, 4, 2)
+	ET_ADD_TRIANGLE(0, 3, 4)
+	ET_ADD_TRIANGLE(0, 1, 3)
+	ET_ADD_TRIANGLE(1, 2, 5)
+	ET_ADD_TRIANGLE(2, 4, 5)
+	ET_ADD_TRIANGLE(4, 3, 5)
+	ET_ADD_TRIANGLE(3, 1, 5)
+}
+
+void primitives::createDodecahedron(VertexArray::Pointer data, float radius)
+{
+	VertexDataChunk posChunk = data->chunk(Usage_Position);
+	VertexDataChunk nrmChunk = data->chunk(Usage_Normal);
+	bool hasPosition = posChunk.valid() && (posChunk->type() == Type_Vec3);
+	bool hasNormals = nrmChunk.valid() && (nrmChunk->type() == Type_Vec3);
+	
+	assert(hasPosition);
+	(void)hasPosition;
+	
+	size_t offset = data->size();
+	data->fitToSize(180);
+	
+	RawDataAcessor<vec3> pos = posChunk.accessData<vec3>(offset);
+	RawDataAcessor<vec3> nrm = nrmChunk.accessData<vec3>(offset);
+		
+	float alpha = radius * std::sqrt(2.0f / (3.0f + std::sqrt(5.0f)));
+	float beta = radius * (1.0 + std::sqrt(6.0f / (3.0f + std::sqrt(5.0)) - 2.0f + 2.0f * std::sqrt(2.0f / (3.0f + std::sqrt(5.0f)))));
+	
+	vec3 dodec[20];
+	
+	dodec[0][0] = -alpha; dodec[0][1] = 0; dodec[0][2] = beta;
+	dodec[1][0] = alpha; dodec[1][1] = 0; dodec[1][2] = beta;
+	dodec[2][0] = -radius; dodec[2][1] = -radius; dodec[2][2] = -radius;
+	dodec[3][0] = -radius; dodec[3][1] = -radius; dodec[3][2] = radius;
+	dodec[4][0] = -radius; dodec[4][1] = radius; dodec[4][2] = -radius;
+	dodec[5][0] = -radius; dodec[5][1] = radius; dodec[5][2] = radius;
+	dodec[6][0] = radius; dodec[6][1] = -radius; dodec[6][2] = -radius;
+	dodec[7][0] = radius; dodec[7][1] = -radius; dodec[7][2] = radius;
+	dodec[8][0] = radius; dodec[8][1] = radius; dodec[8][2] = -radius;
+	dodec[9][0] = radius; dodec[9][1] = radius; dodec[9][2] = radius;
+	dodec[10][0] = beta; dodec[10][1] = alpha; dodec[10][2] = 0.0f;
+	dodec[11][0] = beta; dodec[11][1] = -alpha; dodec[11][2] = 0.0f;
+	dodec[12][0] = -beta; dodec[12][1] = alpha; dodec[12][2] = 0.0f;
+	dodec[13][0] = -beta; dodec[13][1] = -alpha; dodec[13][2] = 0.0f;
+	dodec[14][0] = -alpha; dodec[14][1] = 0.0f; dodec[14][2] = -beta;
+	dodec[15][0] = alpha; dodec[15][1] = 0.0f; dodec[15][2] = -beta;
+	dodec[16][0] = 0.0f; dodec[16][1] = beta; dodec[16][2] = alpha;
+	dodec[17][0] = 0.0f; dodec[17][1] = beta; dodec[17][2] = -alpha;
+	dodec[18][0] = 0.0f; dodec[18][1] = -beta; dodec[18][2] = alpha;
+	dodec[19][0] = 0.0f; dodec[19][1] = -beta; dodec[19][2] = -alpha;
+	
+#define ET_PUSH_PENTAGON(v0, v1, v2, v3, v4) \
+	{ \
+		vec3 c = 0.2f * (dodec[v0] + dodec[v1] + dodec[v2] + dodec[v3] + dodec[v4]); \
+		if (hasNormals) \
+		{ \
+			triangle t(dodec[v0], dodec[v1], dodec[v2]); \
+			vec3 n = t.normalizedNormal(); \
+			pos[k] = c; nrm[k++] = n; \
+			pos[k] = dodec[v0]; nrm[k++] = n; \
+			pos[k] = dodec[v1]; nrm[k++] = n; \
+			pos[k] = c; nrm[k++] = n; \
+			pos[k] = dodec[v1]; nrm[k++] = n; \
+			pos[k] = dodec[v2]; nrm[k++] = n; \
+			pos[k] = c; nrm[k++] = n; \
+			pos[k] = dodec[v2]; nrm[k++] = n; \
+			pos[k] = dodec[v3]; nrm[k++] = n; \
+			pos[k] = c; nrm[k++] = n; \
+			pos[k] = dodec[v3]; nrm[k++] = n; \
+			pos[k] = dodec[v4]; nrm[k++] = n; \
+			pos[k] = c; nrm[k++] = n; \
+			pos[k] = dodec[v4]; nrm[k++] = n; \
+			pos[k] = dodec[v0]; nrm[k++] = n; \
+		} \
+		else \
+		{ \
+			pos[k++] = c; \
+			pos[k++] = dodec[v0];\
+			pos[k++] = dodec[v1];\
+			pos[k++] = c;\
+			pos[k++] = dodec[v1];\
+			pos[k++] = dodec[v2];\
+			pos[k++] = c;\
+			pos[k++] = dodec[v2];\
+			pos[k++] = dodec[v3];\
+			pos[k++] = c;\
+			pos[k++] = dodec[v3];\
+			pos[k++] = dodec[v4];\
+			pos[k++] = c;\
+			pos[k++] = dodec[v4];\
+			pos[k++] = dodec[v0];\
+		} \
+	}
+	
+	size_t k = 0;
+	ET_PUSH_PENTAGON(0, 1, 9, 16, 5)
+	ET_PUSH_PENTAGON(1, 0, 3, 18, 7)
+	ET_PUSH_PENTAGON(1, 7, 11, 10, 9)
+	
+	ET_PUSH_PENTAGON(11, 7, 18, 19, 6)
+	ET_PUSH_PENTAGON(8, 17, 16, 9, 10)
+	ET_PUSH_PENTAGON(2, 14, 15, 6, 19)
+	
+	ET_PUSH_PENTAGON(2, 13, 12, 4, 14)
+	ET_PUSH_PENTAGON(2, 19, 18, 3, 13)
+	ET_PUSH_PENTAGON(3, 0, 5, 12, 13)
+	
+	ET_PUSH_PENTAGON(6, 15, 8, 10, 11)
+	ET_PUSH_PENTAGON(4, 17, 8, 15, 14)
+	ET_PUSH_PENTAGON(4, 12, 5, 16, 17)
+	
+#undef ET_PUSH_PENTAGON
+}
+
 void primitives::createIcosahedron(VertexArray::Pointer data, float radius, bool top, bool middle, bool bottom)
 {
 	VertexDataChunk posChunk = data->chunk(Usage_Position);
@@ -603,7 +808,7 @@ void primitives::createIcosahedron(VertexArray::Pointer data, float radius, bool
 	RawDataAcessor<vec3> nrm = nrmChunk.accessData<vec3>(offset);
 		
 	float u = radius;
-	float v = radius * (1.0f + std::sqrt(5.0f)) / 2.0f;
+	float v = radius * GOLDEN_RATIO;
 	
 	vec3 corners[12] =
 	{
@@ -622,50 +827,42 @@ void primitives::createIcosahedron(VertexArray::Pointer data, float radius, bool
 	};
 	
 	size_t k = 0;
-#define ET_ADD_IH_TRIANGLE(c1, c2, c3) \
-	{ \
-		pos[k] = corners[c1]; \
-		pos[k+1] = corners[c2]; \
-		pos[k+2] = corners[c3]; \
-		if (hasNormals) \
-			nrm[k+0] = nrm[k+1] = nrm[k+2] = triangle(corners[c1], corners[c2], corners[c3]).normalizedNormal(); \
-		k += 3; \
-	}
 
 	if (top)
 	{
-		ET_ADD_IH_TRIANGLE(0, 11, 5);
-		ET_ADD_IH_TRIANGLE(0, 5, 1);
-		ET_ADD_IH_TRIANGLE(0, 1, 7);
-		ET_ADD_IH_TRIANGLE(0, 7, 10);
-		ET_ADD_IH_TRIANGLE(0, 10, 11);
+		ET_ADD_TRIANGLE(0, 11, 5);
+		ET_ADD_TRIANGLE(0, 5, 1);
+		ET_ADD_TRIANGLE(0, 1, 7);
+		ET_ADD_TRIANGLE(0, 7, 10);
+		ET_ADD_TRIANGLE(0, 10, 11);
 	}
 
 	if (middle)
 	{
-		ET_ADD_IH_TRIANGLE(1, 5, 9);
-		ET_ADD_IH_TRIANGLE(4, 9, 5);
-		ET_ADD_IH_TRIANGLE(5, 11, 4);
-		ET_ADD_IH_TRIANGLE(2, 4, 11);
-		ET_ADD_IH_TRIANGLE(11, 10, 2);
-		ET_ADD_IH_TRIANGLE(6, 2, 10);
-		ET_ADD_IH_TRIANGLE(10, 7, 6);
-		ET_ADD_IH_TRIANGLE(8, 6, 7);
-		ET_ADD_IH_TRIANGLE(7, 1, 8);
-		ET_ADD_IH_TRIANGLE(9, 8, 1);
+		ET_ADD_TRIANGLE(1, 5, 9);
+		ET_ADD_TRIANGLE(4, 9, 5);
+		ET_ADD_TRIANGLE(5, 11, 4);
+		ET_ADD_TRIANGLE(2, 4, 11);
+		ET_ADD_TRIANGLE(11, 10, 2);
+		ET_ADD_TRIANGLE(6, 2, 10);
+		ET_ADD_TRIANGLE(10, 7, 6);
+		ET_ADD_TRIANGLE(8, 6, 7);
+		ET_ADD_TRIANGLE(7, 1, 8);
+		ET_ADD_TRIANGLE(9, 8, 1);
 	}
 
 	if (bottom)
 	{
-		ET_ADD_IH_TRIANGLE(3, 9, 4);
-		ET_ADD_IH_TRIANGLE(3, 4, 2);
-		ET_ADD_IH_TRIANGLE(3, 2, 6);
-		ET_ADD_IH_TRIANGLE(3, 6, 8);
-		ET_ADD_IH_TRIANGLE(3, 8, 9);
+		ET_ADD_TRIANGLE(3, 9, 4);
+		ET_ADD_TRIANGLE(3, 4, 2);
+		ET_ADD_TRIANGLE(3, 2, 6);
+		ET_ADD_TRIANGLE(3, 6, 8);
+		ET_ADD_TRIANGLE(3, 8, 9);
 	}
 
-#undef ET_ADD_IH_TRIANGLE
 }
+
+#undef ET_ADD_TRIANGLE
 
 void primitives::tesselateTriangles(VertexArray::Pointer data)
 {
@@ -799,17 +996,17 @@ uint64_t vectorHash(const vec3& v)
 	return result;
 }
 
-VertexArray::Pointer primitives::buildIndexArray(VertexArray::Pointer data, IndexArray::Pointer indexArray)
+VertexArray::Pointer primitives::buildLinearIndexArray(VertexArray::Pointer vertexArray, IndexArray::Pointer indexArray)
 {
 	/*
 	 * Count unique vertices
 	 */
-	size_t dataSize = data->size();
+	size_t dataSize = vertexArray->size();
 	std::map<uint64_t, size_t> countMap;
 	std::vector<uint64_t> hashes;
-	hashes.reserve(data->size());
+	hashes.reserve(vertexArray->size());
 	
-	auto oldPos = data->chunk(Usage_Position).accessData<vec3>(0);
+	auto oldPos = vertexArray->chunk(Usage_Position).accessData<vec3>(0);
 	for (size_t i = 0; i < dataSize; ++i)
 	{
 		uint64_t hash = vectorHash(oldPos[i]);
@@ -819,7 +1016,7 @@ VertexArray::Pointer primitives::buildIndexArray(VertexArray::Pointer data, Inde
 	
 	indexArray->resizeToFit(dataSize);
 	
-	VertexArray::Pointer result(new VertexArray(data->decl(), countMap.size()));
+	VertexArray::Pointer result(new VertexArray(vertexArray->decl(), countMap.size()));
 	auto newPos = result->chunk(Usage_Position).accessData<vec3>(0);
 
 	std::map<uint64_t, size_t> indexMap;
@@ -838,5 +1035,29 @@ VertexArray::Pointer primitives::buildIndexArray(VertexArray::Pointer data, Inde
 		}
 	}
 	
+	return result;
+}
+
+VertexArray::Pointer primitives::linearizeTrianglesIndexArray(VertexArray::Pointer data, IndexArray::Pointer indexArray)
+{
+	assert(indexArray->primitiveType() == PrimitiveType_Triangles);
+	VertexDeclaration decl = data->decl();
+	VertexArray::Pointer result(new VertexArray(data->decl(), 3 * indexArray->primitivesCount()));
+	for (auto& e : decl.elements())
+	{
+		// TODO : support different types
+		if (e.type() == Type_Vec3)
+		{
+			auto oldValues = data->chunk(e.usage()).accessData<vec3>(0);
+			auto newValues = result->chunk(e.usage()).accessData<vec3>(0);
+			size_t i = 0;
+			for (auto p : indexArray.reference())
+			{
+				newValues[i++] = oldValues[p[0]];
+				newValues[i++] = oldValues[p[1]];
+				newValues[i++] = oldValues[p[2]];
+			}
+		}
+	}
 	return result;
 }
