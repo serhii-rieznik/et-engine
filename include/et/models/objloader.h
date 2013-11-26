@@ -14,39 +14,44 @@
 
 #include <et/apiobjects/vertexbuffer.h>
 #include <et/scene3d/mesh.h>
+#include <et/scene3d/supportmesh.h>
 #include <et/scene3d/material.h>
 #include <et/rendering/rendercontext.h>
 
 namespace et
 {
-
-	class OBJLoader;
-	class OBJLoaderThread : public Thread
-	{
-	public:
-		ThreadResult main();
-
-	private:
-		OBJLoaderThread(OBJLoader*, ObjectsCache&);
-
-	private:
-		friend class OBJLoader;
-		OBJLoader* _owner;
-		ObjectsCache& _cache;
-	};
-	
+	class OBJLoaderThread;
 	class OBJLoader
 	{
 	public:
-		struct OBJVertex
+		enum Options
 		{
-			int v[3];
-			inline int& operator [] (int i) { return v[i]; }
+			Option_SupportMeshes = 0x01,
+			Option_SwapYwithZ = 0x02,
 		};
 
-		typedef std::vector<vec3> vec3List;
-		typedef std::vector<vec2> vec2List;
-		typedef std::vector<OBJVertex> VertexList;
+	public:
+		OBJLoader(RenderContext* rc, const std::string& inFile);
+		~OBJLoader();
+
+		s3d::ElementContainer::Pointer load(ObjectsCache& cahce, size_t options);
+		void loadAsync(ObjectsCache& cahce);
+
+		ET_DECLARE_EVENT1(loaded, s3d::ElementContainer::Pointer)
+
+	private:
+		struct OBJVertex
+		{
+			size_t numVertices;
+
+			int vertices[4];
+
+			int& operator [] (size_t i) 
+				{ assert(i < numVertices); return vertices[i]; }
+
+			OBJVertex() : numVertices(0)
+				{ etFillMemory(vertices, 0, sizeof(vertices)); }
+		};
 
 		struct OBJMeshIndexBounds
 		{
@@ -59,11 +64,16 @@ namespace et
 				name(n), start(s), count(c), material(m) { }
 		};
 		typedef std::vector<OBJMeshIndexBounds> OBJMeshIndexBoundsList;
+		typedef std::vector<OBJVertex> VertexList;
 
 		struct OBJFace
 		{
 			int smoothingGroupIndex;
+
 			VertexList vertices;
+
+			OBJFace() : 
+				smoothingGroupIndex(0) { }
 		};
 		typedef std::vector<OBJFace> FaceList;
 
@@ -73,16 +83,10 @@ namespace et
 			std::string material;
 			FaceList faces;
 		};
+
 		typedef std::vector<OBJGroup*> GroupList;
-
-	public:
-		OBJLoader(RenderContext* rc, const std::string& inFile);
-		~OBJLoader();
-
-		s3d::ElementContainer::Pointer load(ObjectsCache& cahce);
-		void loadAsync(ObjectsCache& cahce);
-
-		ET_DECLARE_EVENT1(loaded, s3d::ElementContainer::Pointer)
+		typedef std::vector<vec3> vec3List;
+		typedef std::vector<vec2> vec2List;
 
 	private:
 		void loadData(bool async, ObjectsCache& cache);
@@ -115,60 +119,9 @@ namespace et
 		vec2List texCoords;
 		GroupList groups;
 
+		size_t _loadOptions;
 		int lastSmoothGroup;
 		int lastGroupId_;
 		bool canConvert;
 	};
-
-	namespace obj
-	{
-
-		inline std::istream& operator >> (std::istream& stream, OBJLoader::OBJVertex& value) 
-		{
-			value[0] = value[1] = value[2] = -1;
-
-			stream >> value[0];
-			char delim = static_cast<char>(stream.peek());
-			if (stream.peek() == '/')
-			{
-				stream >> delim;
-				if (stream.peek() != '/')
-					stream >> value[1];
-			}
-			delim = static_cast<char>(stream.peek());
-			{
-				stream >> delim;
-				if (stream.peek() != '/')
-					stream >> value[2];
-			}
-			for (int i = 0; i < 3; ++i)
-				value[i] = value[i] - 1; 
-
-			return stream;
-		}
-
-		inline std::istream& operator >> (std::istream& stream, vec2& value) 
-		{
-			stream >> value.x >> value.y;
-			return stream;
-		}
-
-		inline std::istream& operator >> (std::istream& stream, vec3& value) 
-		{
-			stream >> value.x >> value.y >> value.z;
-			return stream;
-		}
-
-		inline std::istream& operator >> (std::istream& stream, vec4& value) 
-		{
-			stream >> value.x >> value.y >> value.z;
-
-			if (stream.peek() == ' ')
-				stream >> value.w;
-			else
-				value.w = 1.0;
-
-			return stream;
-		}
-	}
 }

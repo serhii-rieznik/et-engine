@@ -8,19 +8,57 @@
 #include <sstream>
 #include <iostream>
 
+#include <et/app/application.h>
 #include <et/core/conversion.h>
 #include <et/core/filesystem.h>
-#include <et/models/objloader.h>
 #include <et/apiobjects/vertexbuffer.h>
-#include <et/primitives/primitives.h>
-#include <et/app/application.h>
+#include <et/models/objloader.h>
 
 using namespace et;
 using namespace et::s3d;
-using namespace et::obj;
 
-OBJLoaderThread::OBJLoaderThread(OBJLoader* owner, ObjectsCache& cache) : Thread(false), 
-	_owner(owner), _cache(cache)
+namespace et
+{
+	class OBJLoaderThread : public Thread
+	{
+	public:
+		ThreadResult main();
+
+	private:
+		OBJLoaderThread(OBJLoader*, ObjectsCache&);
+
+	private:
+		friend class OBJLoader;
+		OBJLoader* _owner;
+		ObjectsCache& _cache;
+	};
+}
+
+inline std::istream& operator >> (std::istream& stream, vec2& value)
+{
+	stream >> value.x >> value.y;
+	return stream;
+}
+
+inline std::istream& operator >> (std::istream& stream, vec3& value)
+{
+	stream >> value.x >> value.y >> value.z;
+	return stream;
+}
+
+inline std::istream& operator >> (std::istream& stream, vec4& value)
+{
+	stream >> value.x >> value.y >> value.z;
+
+	if (stream.peek() == ' ')
+		stream >> value.w;
+	else
+		value.w = 1.0;
+
+	return stream;
+}
+OBJLoaderThread::OBJLoaderThread(OBJLoader* owner, ObjectsCache& cache) : 
+	Thread(false), _owner(owner), _cache(cache)
 {
 	run();
 }
@@ -28,6 +66,7 @@ OBJLoaderThread::OBJLoaderThread(OBJLoader* owner, ObjectsCache& cache) : Thread
 ThreadResult OBJLoaderThread::main()
 {
 	_owner->loadData(true, _cache);
+
 	_owner->processLoadedData();
 
 	Invocation i;
@@ -43,7 +82,7 @@ ThreadResult OBJLoaderThread::main()
 
 OBJLoader::OBJLoader(RenderContext* rc, const std::string& inFile) : _rc(rc),
 	inputFileName(application().environment().findFile(inFile).c_str()), 
-	inputFile(inputFileName.c_str()), lastGroup(0)
+	inputFile(inputFileName.c_str()), lastGroup(0), _loadOptions(0)
 {
 	inputFilePath = getFilePath(inputFileName);
 	canConvert = !inputFile.fail();
@@ -166,27 +205,26 @@ void OBJLoader::loadData(bool async, ObjectsCache& cache)
 		}
 		else if (key == 'f') // faces
 		{
-			OBJVertex vertex;
 			OBJFace face;
-			
-			inputFile >> vertex;
-			face.smoothingGroupIndex = lastSmoothGroup;
-			face.vertices.push_back(vertex);
-			
-			int numF = 1;
-			char delim = static_cast<char>(inputFile.peek());
-			while ((numF < 3) && (delim == ' '))
+			std::string line;
+			std::getline(inputFile, line);
+			trim(line);
+
+			auto faces = split(line, " ");
+			assert((faces.size() > 2) && (faces.size() < 6));
+
+			for (auto inFace : faces)
 			{
-				inputFile >> vertex;
+				OBJVertex vertex;
+				auto indexes = split(inFace, "/");
+				vertex.numVertices = indexes.size();
+
+				size_t i = 0;
+				for (auto index : indexes)
+					vertex[i++] = strToInt(index);
+
 				face.vertices.push_back(vertex);
-				delim = static_cast<char>(inputFile.peek());
-				++numF;
 			}
-			getLine(inputFile, line);
-			
-			if (!lastGroup)
-				lastGroup = new OBJGroup;
-			
 			lastGroup->faces.push_back(face);
 		}
 		else if (key == 'v')
@@ -207,12 +245,20 @@ void OBJLoader::loadData(bool async, ObjectsCache& cache)
 			{
 				vec3 vertex;
 				inputFile >> subKey >> vertex;
+
+				if (_loadOptions && Option_SwapYwithZ)
+					std::swap(vertex.y, vertex.z);
+
 				normals.push_back(vertex);
 			}
 			else if (subKey == 32)
 			{
 				vec3 vertex;
 				inputFile >> vertex;
+
+				if (_loadOptions && Option_SwapYwithZ)
+					std::swap(vertex.y, vertex.z);
+
 				vertices.push_back(vertex);
 			}
 			else
@@ -241,8 +287,10 @@ void OBJLoader::loadData(bool async, ObjectsCache& cache)
 
 }
 
-s3d::ElementContainer::Pointer OBJLoader::load(ObjectsCache& cache)
+s3d::ElementContainer::Pointer OBJLoader::load(ObjectsCache& cache, size_t options)
 {
+	_loadOptions = options;
+
 	loadData(false, cache);
 	processLoadedData();
 
@@ -587,10 +635,27 @@ void OBJLoader::loadMaterials(const std::string& fileName, bool async, ObjectsCa
 void OBJLoader::processLoadedData()
 {
 	size_t totalTriangles = 0;
-	for (size_t g = 0; g < groups.size(); ++g)
-		totalTriangles += groups[g]->faces.size();
+
+	for (const auto& group : groups)
+	{
+		for (const auto& face : group->faces)
+		{
+			if (face.vertices.size() == 3)
+			{
+				++totalTriangles;
+			}
+			else if (face.vertices.size() == 4)
+			{
+				totalTriangles += 2;
+			}
+			else if (face.vertices.size() == 5)
+			{
+				totalTriangles += 3;
+			}
+		}
+	}
 	
-	size_t totalVertices = totalTriangles * 3;
+	size_t totalVertices = 3 * totalTriangles;
 	
 	bool hasNormals = normals.size() > 0;
 	bool hasTexCoords = texCoords.size() > 0;
@@ -607,6 +672,7 @@ void OBJLoader::processLoadedData()
 	IndexArrayFormat fmt = IndexArrayFormat_8bit;
 	if (totalVertices > 255)
 		fmt = IndexArrayFormat_16bit;
+
 	if (totalVertices > 65535)
 		fmt = IndexArrayFormat_32bit;
 		
@@ -614,49 +680,70 @@ void OBJLoader::processLoadedData()
 	_indices->linearize(totalVertices);
 
 	_vertexData.reset(new VertexArray(decl, totalVertices));
-	VertexDataChunk pos_c = _vertexData->chunk(Usage_Position);
-	VertexDataChunk norm_c = _vertexData->chunk(Usage_Normal);
-	VertexDataChunk tex_c = _vertexData->chunk(Usage_TexCoord0);
-	RawDataAcessor<vec3> pos = pos_c.valid() ? pos_c.accessData<vec3>(0) : RawDataAcessor<vec3>();
-	RawDataAcessor<vec3> norm = norm_c.valid() ? norm_c.accessData<vec3>(0) : RawDataAcessor<vec3>();
-	RawDataAcessor<vec2> tex = tex_c.valid() ? tex_c.accessData<vec2>(0) : RawDataAcessor<vec2>();
-		
+	
+	RawDataAcessor<vec3> pos = _vertexData->chunk(Usage_Position).accessData<vec3>(0);
+	RawDataAcessor<vec3> norm = _vertexData->chunk(Usage_Normal).accessData<vec3>(0);
+	RawDataAcessor<vec2> tex = _vertexData->chunk(Usage_TexCoord0).accessData<vec2>(0);
+
+#define PUSH_VERTEX(vertex) \
+	{ \
+		size_t posIndex = (vertex)[0] - 1; \
+		pos[index] = vertices[posIndex]; \
+		if (hasTexCoords) \
+		{ \
+			size_t texIndex = (vertex)[1] - 1; \
+			tex[index] = texCoords[texIndex]; \
+		} \
+		if (hasNormals) \
+		{ \
+			size_t normIndex = (vertex)[2] - 1; \
+			norm[index] = normals[normIndex]; \
+		} \
+		++index; \
+	}
+
 	size_t index = 0;
-	for (GroupList::iterator gi = groups.begin(), ge = groups.end(); gi != ge; ++gi)
+	for (auto group : groups)
 	{
 		IndexType startIndex = static_cast<IndexType>(index);
-		for (FaceList::iterator fi = (*gi)->faces.begin(), fe = (*gi)->faces.end(); fi != fe; ++fi)
+		for (auto face : group->faces)
 		{
-			for (VertexList::iterator vi = fi->vertices.begin(), ve = fi->vertices.end(); vi != ve; ++vi)
-			{
-				size_t v_id = vi->v[0];
-				size_t t_id = vi->v[1];
-				size_t n_id = vi->v[2];
-					
-				pos[index] = vertices[v_id];
-					
-				if (hasNormals)
-					norm[index] = normals[n_id];
-					
-				if (hasTexCoords)
-					tex[index] = texCoords[t_id];
+			PUSH_VERTEX(face.vertices[0]);
+			PUSH_VERTEX(face.vertices[1]);
+			PUSH_VERTEX(face.vertices[2]);
 
-				++index;
+			if (face.vertices.size() == 4)
+			{
+				PUSH_VERTEX(face.vertices[0]);
+				PUSH_VERTEX(face.vertices[2]);
+				PUSH_VERTEX(face.vertices[3]);
+			}
+			else if (face.vertices.size() == 5)
+			{
+				PUSH_VERTEX(face.vertices[2]);
+				PUSH_VERTEX(face.vertices[3]);
+				PUSH_VERTEX(face.vertices[4]);
+
+				PUSH_VERTEX(face.vertices[2]);
+				PUSH_VERTEX(face.vertices[4]);
+				PUSH_VERTEX(face.vertices[0]);
 			}
 		}
 			
 		Material m;
 		for (Material::List::iterator mi = materials.begin(), me = materials.end(); mi != me; ++mi)
 		{
-			if ((*mi)->name() == (*gi)->material)
+			if ((*mi)->name() == group->material)
 			{
 				m = *mi;
 				break;
 			}
 		}
 			
-		_meshes.push_back(OBJMeshIndexBounds((*gi)->name, startIndex, index - startIndex, m));
+		_meshes.push_back(OBJMeshIndexBounds(group->name, startIndex, index - startIndex, m));
 	}
+
+#undef PUSH_VERTEX
 }
 
 s3d::ElementContainer::Pointer OBJLoader::generateVertexBuffers()
@@ -664,11 +751,22 @@ s3d::ElementContainer::Pointer OBJLoader::generateVertexBuffers()
 	s3d::ElementContainer::Pointer result(new ElementContainer(inputFileName, 0));
 
 	VertexArrayObject vao = _rc->vertexBufferFactory().createVertexArrayObject("model-vao");
+
 	vao->setBuffers(_rc->vertexBufferFactory().createVertexBuffer("model-vb", _vertexData, BufferDrawType_Static),
-					_rc->vertexBufferFactory().createIndexBuffer("model-ib", _indices, BufferDrawType_Static));
+		_rc->vertexBufferFactory().createIndexBuffer("model-ib", _indices, BufferDrawType_Static));
 
 	for (OBJMeshIndexBoundsList::iterator i = _meshes.begin(), e = _meshes.end(); i != e; ++i)
-		new Mesh(i->name, vao, i->material, i->start, i->count, result.ptr());
+	{
+		if (_loadOptions & Option_SupportMeshes)
+		{
+			auto mesh = new SupportMesh(i->name, vao, i->material, i->start, i->count, result.ptr());
+			mesh->fillCollisionData(_vertexData, _indices);
+		}
+		else 
+		{
+			new Mesh(i->name, vao, i->material, i->start, i->count, result.ptr());
+		}
+	}
 
 	return result;
 }

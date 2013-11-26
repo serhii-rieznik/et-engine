@@ -703,7 +703,9 @@ void primitives::createDodecahedron(VertexArray::Pointer data, float radius)
 	RawDataAcessor<vec3> nrm = nrmChunk.accessData<vec3>(offset);
 		
 	float alpha = radius * std::sqrt(2.0f / (3.0f + std::sqrt(5.0f)));
-	float beta = radius * (1.0 + std::sqrt(6.0f / (3.0f + std::sqrt(5.0)) - 2.0f + 2.0f * std::sqrt(2.0f / (3.0f + std::sqrt(5.0f)))));
+
+	float beta = radius * (1.0 + std::sqrt(6.0f / (3.0f + std::sqrt(5.0f)) -
+		2.0f + 2.0f * std::sqrt(2.0f / (3.0f + std::sqrt(5.0f)))));
 	
 	vec3 dodec[20];
 	
