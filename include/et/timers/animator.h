@@ -57,38 +57,37 @@ namespace et
 	{
 	public:
 		Animator() :
-			BaseAnimator(nullptr, 0, TimerPool::Pointer()), _from(), _to(), _value(nullptr),
+			BaseAnimator(nullptr, 0, TimerPool::Pointer()), _from(), _to(), _value(), _valuePointer(nullptr),
 			_startTime(0.0f), _duration(0.0f) { initDefaultInterpolators(); }
 		
 		Animator(const TimerPool::Pointer& tp) :
-			BaseAnimator(nullptr, 0, tp), _from(), _to(), _value(nullptr),
+			BaseAnimator(nullptr, 0, tp), _from(), _to(), _value(), _valuePointer(nullptr),
 			_startTime(0.0f), _duration(0.0f) { initDefaultInterpolators(); }
 		
 		Animator(AnimatorDelegate* delegate, int tag, const TimerPool::Pointer& tp) :
-			BaseAnimator(delegate, tag, tp), _from(), _to(), _value(nullptr), _startTime(0.0f),
-			_duration(0.0f) { initDefaultInterpolators(); }
+			BaseAnimator(delegate, tag, tp), _from(), _to(), _value(), _valuePointer(nullptr),
+			_startTime(0.0f), _duration(0.0f) { initDefaultInterpolators(); }
 
 		Animator(AnimatorDelegate* delegate, T* value, const T& from, const T& to, float duration,
 			int tag, const TimerPool::Pointer& tp) : BaseAnimator(delegate, tag, tp), _from(), _to(),
-			_value(nullptr), _startTime(0.0f), _duration(0.0f)
+			_value(), _valuePointer(nullptr), _startTime(0.0f), _duration(0.0f)
 		{
 			initDefaultInterpolators();
 			animate(value, from, to, duration);
 		}
 
+		const T& value() const
+			{ return _value; }
+		
 		void animate(T* value, const T& from, const T& to, float duration)
 		{
 			assert(timerPool().valid());
-
-			*value = from;
-
+			_valuePointer = value;
+			_value = from;
 			_from = from;
 			_to = to;
-			_value = value;
 			_duration = duration;
-			
 			startUpdates(timerPool().ptr());
-			
 			_startTime = actualTime();
 		};
 		
@@ -115,7 +114,10 @@ namespace et
 			float dt = (t - _startTime) / _duration;
 			if (dt >= 1.0f)
 			{
-				*_value = _to;
+				_value = _to;
+				
+				if (_valuePointer)
+					*_valuePointer = _value;
 				
 				if (delegate())
 					delegate()->animatorUpdated(this);
@@ -131,7 +133,10 @@ namespace et
 			}
 			else 
 			{
-				*_value = _valueInterpolationFunction(_from, _to, _timeInterpolationFunction(dt));
+				_value = _valueInterpolationFunction(_from, _to, _timeInterpolationFunction(dt));
+				
+				if (_valuePointer)
+					*_valuePointer = _value;
 				
 				if (delegate())
 					delegate()->animatorUpdated(this);
@@ -146,8 +151,9 @@ namespace et
 		
 		T _from;
 		T _to;
+		T _value;
 		
-		T* _value;
+		T* _valuePointer;
 		
 		float _startTime;
 		float _duration;
