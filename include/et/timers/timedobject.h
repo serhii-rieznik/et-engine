@@ -12,10 +12,12 @@
 namespace et
 {
 	class TimerPool;
-	class TimedObject 
+	class TimedObject
 	{
 	public:
 		TimedObject();
+		
+		virtual ~TimedObject();
 
 		virtual bool running() const
 			{ return _running; }
@@ -28,9 +30,7 @@ namespace et
 
 	protected:
 		friend class TimerPool;
-		friend class TimedObjectDeletionTask;
 
-		virtual ~TimedObject();
 		virtual void startUpdates(TimerPool* timerPool = 0);
 		virtual void update(float) {  }
 
@@ -40,17 +40,5 @@ namespace et
 		TimerPool* _owner;
 		bool _running;
 		bool _released;
-	};
-
-	class TimedObjectDeletionTask : public Task
-	{
-	public:
-		TimedObjectDeletionTask(TimedObject* obj) : _object(obj) { }
-
-		void execute()
-			{ delete _object; }
-
-	private:
-		TimedObject* _object;
 	};
 }

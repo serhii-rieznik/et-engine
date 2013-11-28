@@ -7,7 +7,6 @@
 
 #pragma once
 
-#include <algorithm>
 #include <et/app/invocation.h>
 
 namespace et
@@ -21,15 +20,8 @@ namespace et
 #	define ET_CONNECT_EVENT_TO_FUNCTION(name, func)					name.connect(func);
 #	define ET_CONNECT_EVENT_TO_EVENT(name, event)					name.connect(event);
 
-	class EventReceiver;
-
-	class Event
-	{
-	public:
-		virtual ~Event() { }
-		virtual void receiverDisconnected(EventReceiver* receiver) = 0;
-	};
-
+	class Event;
+	
 	class EventReceiver
 	{
 	public:
@@ -39,10 +31,16 @@ namespace et
 		void eventDisconnected(Event* e);
 
 	private:
-		typedef std::vector<Event*> EventList;
-		EventList _events;
+		std::vector<Event*> _events;
 	};
 
+	class Event
+	{
+	public:
+		virtual ~Event() { }
+		virtual void receiverDisconnected(EventReceiver* receiver) = 0;
+	};
+	
 	class EventConnectionBase
 	{
 	public:

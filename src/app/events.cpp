@@ -19,7 +19,7 @@ void EventReceiver::eventConnected(Event* e)
 
 EventReceiver::~EventReceiver() 
 {
-	for (auto& i : _events)
+	for (auto i : _events)
 		i->receiverDisconnected(this);
 }
 
