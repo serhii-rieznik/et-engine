@@ -16,12 +16,17 @@ namespace et
         {
 		public:     
 			ALuint source = 0;
+			bool playingLooped = false;
+			int buffersProcessed = 0;
 		};
     }
 }
 
 using namespace et;
 using namespace et::audio;
+
+extern ALCdevice* getSharedDevice();
+extern ALCcontext* getSharedContext();
 
 Player::Player() : 
 	_private(new PlayerPrivate), _volumeAnimator(mainTimerPool())
@@ -68,11 +73,54 @@ void Player::init()
 
 void Player::play(bool looped)
 {
-	alSourcei(_private->source, AL_LOOPING, looped ? AL_TRUE : AL_FALSE);
-    checkOpenALError("alSourcei(..., AL_LOOPING, ...)");
-	
-	alSourcePlay(_private->source);
-    checkOpenALError("alSourcePlay");
+	int state = 0;
+	alGetSourcei(_private->source, AL_SOURCE_STATE, &state);
+	if (state == AL_PLAYING)
+	{
+		
+	}
+	else if (state == AL_PAUSED)
+	{
+		alSourcePlay(_private->source);
+		checkOpenALError("alSourcePlay");
+	}
+	else if ((state == AL_INITIAL) || (state == AL_STOPPED))
+	{
+		int queued = 0;
+		alGetSourcei(_private->source, AL_BUFFERS_QUEUED, &queued);
+		while (queued--)
+		{
+			ALuint buffer = 0;
+			alSourceUnqueueBuffers(_private->source, queued, &buffer);
+			checkOpenALError("alSourceUnqueueBuffers");
+		}
+		
+		_private->buffersProcessed = 0;
+		_private->playingLooped = looped;
+		
+		_track->preloadBuffers();
+		
+		if (_track->streamed())
+		{
+			alSourceQueueBuffers(_private->source, _track->actualBuffersCount(), _track->buffers());
+			checkOpenALError("alSourceQueueBuffers(.., %d, %u)", _track->actualBuffersCount(), _track->buffers());
+		}
+		else
+		{
+			alSourcei(_private->source, AL_BUFFER, _track->buffer());
+			checkOpenALError("alSourcei(.., AL_BUFFER, ...)");
+		}
+		
+		alSourcei(_private->source, AL_LOOPING, looped ? AL_TRUE : AL_FALSE);
+		checkOpenALError("alSourcei(..., AL_LOOPING, ...)");
+		
+		alSourcePlay(_private->source);
+		checkOpenALError("alSourcePlay");
+		
+		retain();
+		manager().streamingThread().addPlayer(Player::Pointer(this));
+		release();
+	}
 }
 
 void Player::play(Track::Pointer track, bool looped)
@@ -95,6 +143,15 @@ void Player::stop()
 	
 	alSourceStop(_private->source);
     checkOpenALError("alSourceStop");
+	
+	alSourcei(_private->source, AL_BUFFER, 0);
+	checkOpenALError("alSourcei");
+	
+	if (_track.valid())
+		_track->rewind();
+	
+	_private->playingLooped = false;
+	_private->buffersProcessed = 0;
 }
 
 void Player::rewind()
@@ -106,25 +163,7 @@ void Player::rewind()
 void Player::linkTrack(Track::Pointer track)
 {
     stop();
-    
 	_track = track;
-	_track->rewind();
-	_track->preloadBuffers();
-	
-	if (_track->streamed())
-	{
-		alSourceQueueBuffers(_private->source, _track->buffersCount(), _track->buffers());
-		checkOpenALError("alSourceQueueBuffers(.., %d, %u)", _track->buffersCount(), _track->buffers());
-		
-		retain();
-		manager().streamingThread().addPlayer(Player::Pointer(this));
-		release();
-	}
-	else
-	{
-		alSourcei(_private->source, AL_BUFFER, _track->buffer());
-		checkOpenALError("alSourcei(.., AL_BUFFER, ...)");
-	}
 }
 
 void Player::setVolume(float value, float duration)
@@ -182,25 +221,38 @@ unsigned int Player::source() const
 	return _private->source;
 }
 
-bool Player::loadNextBuffers(int processed, int remaining)
+void Player::buffersProcessed(int processed)
 {
-	while (processed > 0)
+	checkOpenALError(ET_CALL_FUNCTION);
+	_private->buffersProcessed += processed;
+	
+	while (processed--)
 	{
 		ALuint buffer = 0;
 		alSourceUnqueueBuffers(_private->source, 1, &buffer);
 		checkOpenALError("alSourceUnqueueBuffers");
-		
-		buffer = _track->loadNextBuffer();
+	}
+	
+	int remaining = 0;
+	alGetSourcei(_private->source, AL_BUFFERS_QUEUED, &remaining);
+	
+	bool shouldLoadNextBuffer = _private->playingLooped ||
+		((_private->buffersProcessed + remaining) < _track->totalBuffersCount());
+	
+	if (shouldLoadNextBuffer)
+	{
+		ALuint buffer = _track->loadNextBuffer();
 		if (buffer > 0)
 		{
 			alSourceQueueBuffers(_private->source, 1, &buffer);
 			checkOpenALError("alSourceQueueBuffers");
 		}
-		
-		--processed;
 	}
-		
-	return true;
+	else if (remaining == 0)
+	{
+		stop();
+		finished.invokeInMainRunLoop(this);
+	}
 }
 
 void Player::onVolumeUpdated()
@@ -216,4 +268,13 @@ void Player::setVolume(float v)
 	alSourcef(_private->source, AL_GAIN, std::exp(exponentFactor * (1.0f - _volume)));
 	
 	checkOpenALError("alSourcei(.., AL_GAIN, ...)");
+}
+
+void Player::samplesProcessed(int d)
+{
+	if ((d == track()->samples()) && !_private->playingLooped)
+	{
+		stop();
+		finished.invokeInMainRunLoop(this);
+	}
 }

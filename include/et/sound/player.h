@@ -41,7 +41,7 @@ namespace et
 			
 			unsigned int source() const;
 			
-			bool loadNextBuffers(int processed, int remaining);
+			ET_DECLARE_EVENT1(finished, Player*)
 
         private:
 			Player();
@@ -55,8 +55,12 @@ namespace et
 			void onVolumeUpdated();
 			void setVolume(float);
             
+			void buffersProcessed(int processed);
+			void samplesProcessed(int);
+			
         private:
 			friend class Manager;
+			friend class StreamingThread;
 
 		private:
             PlayerPrivate* _private;

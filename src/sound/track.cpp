@@ -15,6 +15,7 @@ namespace et
     namespace audio
     {
 		const int BuffersCount = 3;
+		const int BufferDuration = 4;
 		
         class TrackPrivate
         {
@@ -63,6 +64,7 @@ namespace et
 			
 			int bufferIndex = 0;
 			int buffersCount = 0;
+			int totalBuffers = 0;
 			
 			OggVorbis_File oggFile;
 			ov_callbacks oggCallbacks;
@@ -85,31 +87,34 @@ void checkOGGError(long, const char*);
 Track::Track(const std::string& fileName) :
 	_private(new TrackPrivate)
 {
-	_private->owner = this;
+	setName(fileName);
 	setOrigin(fileName);
+	
+	_private->owner = this;
 		
 	_private->stream = InputStream::Pointer::create(fileName, StreamMode_Binary);
-	if (_private->stream.invalid())
+	if (_private->stream->invalid())
 	{
 		log::error("Unable to load file %s", fileName.c_str());
-		return;
 	}
-	
-	size_t dotPos = fileName.rfind('.');
-	std::string ext = fileName.substr(dotPos);
-	lowercase(ext);
-	
-	if (ext == ".wav")
+	else
 	{
-		_private->loadWAVE();
-	}
-	else if ((ext == ".aif") || (ext == ".aiff") || (ext == ".aifc"))
-	{
+		size_t dotPos = fileName.rfind('.');
+		std::string ext = fileName.substr(dotPos);
+		lowercase(ext);
 		
-	}
-	else if (ext == ".ogg")
-	{
-		_private->loadOGG();
+		if (ext == ".wav")
+		{
+			_private->loadWAVE();
+		}
+		else if (ext == ".ogg")
+		{
+			_private->loadOGG();
+		}
+		else
+		{
+			log::error("Unsupported sound file extension %s", ext.c_str());
+		}
 	}
 }
 
@@ -138,6 +143,21 @@ size_t Track::bitDepth() const
 	return _private->bitDepth;
 }
 
+size_t Track::samples() const
+{
+	return _private->numSamples;
+}
+
+int Track::totalBuffersCount() const
+{
+	return _private->totalBuffers;
+}
+
+int Track::actualBuffersCount() const
+{
+	return _private->buffersCount;
+}
+
 unsigned int Track::buffer() const
 {
 	return _private->buffers[0];
@@ -146,11 +166,6 @@ unsigned int Track::buffer() const
 unsigned int* Track::buffers() const
 {
 	return _private->buffers;
-}
-
-int Track::buffersCount() const
-{
-	return _private->buffersCount;
 }
 
 bool Track::streamed() const
@@ -181,7 +196,9 @@ void Track::preloadBuffers()
  * Track private
  *
  */
-#pragma pack(1)
+
+extern ALCdevice* getSharedDevice();
+extern ALCcontext* getSharedContext();
 
 union ChunkIdentifier
 {
@@ -194,7 +211,7 @@ struct WAVFileChunk
 {
 	ChunkIdentifier id;
 	uint32_t chunkSize;
-	char format[4];
+	uint32_t format;
 };
 
 struct AudioFileChunk
@@ -212,8 +229,6 @@ struct WAVFormatChunk
 	uint16_t blockAlign;
 	uint16_t bitsPerSample;
 };
-
-#pragma pack()
 
 const uint32_t WAVFileChunkID = ET_COMPOSE_UINT32_INVERTED('R', 'I', 'F', 'F');
 const uint32_t WAVDataChunkID = ET_COMPOSE_UINT32_INVERTED('d', 'a', 't', 'a');
@@ -303,10 +318,17 @@ void TrackPrivate::loadWAVE()
 	inStream.read(reinterpret_cast<char*>(&fileChunk), sizeof(fileChunk));
 	
 	if (fileChunk.id.nID != WAVFileChunkID) return;
-	
+
 	AudioFileChunk chunk = { };
-	inStream.read(reinterpret_cast<char*>(&chunk), sizeof(chunk));
-	if (chunk.id.nID != WAVFormatChunkID)
+	do
+	{
+		inStream.read(reinterpret_cast<char*>(&chunk), sizeof(chunk));
+		if (chunk.id.nID != WAVFormatChunkID)
+			inStream.seekg(chunk.size, std::ios::cur);
+	}
+	while ((chunk.id.nID != WAVFormatChunkID) && !inStream.eof());
+	
+	if (inStream.eof())
 	{
 		log::error("%s is not a WAV file", owner->origin().c_str());
 		return;
@@ -314,6 +336,7 @@ void TrackPrivate::loadWAVE()
 	
 	WAVFormatChunk fmt = { };
 	inStream.read(reinterpret_cast<char*>(&fmt), sizeof(fmt));
+	inStream.seekg(chunk.size - sizeof(fmt), std::ios::cur);
 	
 	do
 	{
@@ -321,25 +344,31 @@ void TrackPrivate::loadWAVE()
 		if (chunk.id.nID != WAVDataChunkID)
 			inStream.seekg(chunk.size, std::ios::cur);
 	}
-	while (chunk.id.nID != WAVDataChunkID);
+	while ((chunk.id.nID != WAVDataChunkID) && !inStream.eof());
+	
+	if (inStream.eof())
+	{
+		log::error("%s is invalid WAV file", owner->origin().c_str());
+		return;
+	}
 	
 	sampleRate = fmt.sampleRate;
 	channels = fmt.numChannels;
 	bitDepth = fmt.bitsPerSample;
 	format = openALFormatFromChannelsAndBitDepth(channels, bitDepth);
+	sampleSize = channels * bitDepth / 8;
 	
-	size_t oneSecondSize = sampleRate * channels * bitDepth / 8;
+	size_t oneSecondSize = sampleRate * sampleSize;
 	
 	duration = static_cast<float>(chunk.size) / static_cast<float>(oneSecondSize);
-	sampleSize = bitDepth * channels;
 	numSamples = chunk.size / sampleSize;
 	
-	pcmBufferSize = 3 * oneSecondSize;
+	pcmBufferSize = BufferDuration * oneSecondSize;
 	pcmDataSize = numSamples * sampleSize;
 	pcmStartPosition = static_cast<size_t>(inStream.tellg());
 	pcmReadOffset = 0;
-
-	buffersCount = etMin(BuffersCount, static_cast<int>(1 + pcmDataSize / pcmBufferSize));
+	totalBuffers = static_cast<int>(1 + pcmDataSize / pcmBufferSize);
+	buffersCount = etMin(BuffersCount, totalBuffers);
 	alGenBuffers(buffersCount, buffers);
 	checkOpenALError("alGenBuffers(%d, ...)", buffersCount);
 	
@@ -356,6 +385,8 @@ void TrackPrivate::rewindPCM()
 
 bool TrackPrivate::fillNextPCMBuffer()
 {
+	checkOpenALError("fillNextPCMBuffer");
+	
 	BinaryDataStorage data(pcmBufferSize, 0);
 	auto& inStream = stream->stream();
 	inStream.read(data.binary(), etMin(pcmBufferSize, pcmDataSize - pcmReadOffset));
@@ -380,12 +411,14 @@ bool TrackPrivate::fillNextPCMBuffer()
  */
 void TrackPrivate::loadOGG()
 {
-	int result = ov_open_callbacks(stream.ptr(), &oggFile, nullptr, -1, oggCallbacks);
+	int result = ov_test_callbacks(stream.ptr(), &oggFile, nullptr, -1, oggCallbacks);
 	if (result < 0)
 	{
-		checkOGGError(result, "ov_open_callbacks");
+		checkOGGError(result, "ov_test_callbacks");
 		return;
 	}
+	
+	ov_test_open(&oggFile);
 
 	int streamId = -1;
 	vorbis_info* info = ov_info(&oggFile, streamId);
@@ -393,23 +426,22 @@ void TrackPrivate::loadOGG()
 	bitDepth = 16;
 	sampleRate = static_cast<ALsizei>(info->rate);
 	channels = info->channels;
+	sampleSize = channels * bitDepth / 8;
 	
 	format = openALFormatFromChannelsAndBitDepth(channels, bitDepth);
 	
-	size_t oneSecondSize = sampleRate * channels * bitDepth / 8;
+	size_t oneSecondSize = sampleRate * sampleSize;
 	size_t computedDataSize = static_cast<size_t>(sizeof(float) * ov_pcm_total(&oggFile, streamId));
 	
-	sampleSize = bitDepth * channels;
 	numSamples = computedDataSize / sampleSize;
 	pcmDataSize = numSamples * sampleSize;
-	pcmBufferSize = 3 * oneSecondSize;
+	pcmBufferSize = BufferDuration * oneSecondSize;
 	pcmStartPosition = static_cast<size_t>(ov_pcm_tell(&oggFile));
 	oggStartPosition = static_cast<size_t>(ov_raw_tell(&oggFile));
 	pcmReadOffset = 0;
-	
 	duration = static_cast<float>(pcmDataSize) / static_cast<float>(oneSecondSize);
-	
-	buffersCount = etMin(BuffersCount, static_cast<int>(1 + pcmDataSize / pcmBufferSize));
+	totalBuffers = static_cast<int>(1 + pcmDataSize / pcmBufferSize);
+	buffersCount = etMin(BuffersCount, totalBuffers);
 	alGenBuffers(buffersCount, buffers);
 	checkOpenALError("alGenBuffers(%d, ...)", buffersCount);
 	
@@ -447,7 +479,6 @@ bool TrackPrivate::fillNextOGGBuffer()
 	{
 		alBufferData(buffers[bufferIndex], static_cast<ALenum>(format), data.data(),
 			static_cast<ALsizei>(bytesRead), sampleRate);
-		
 		checkOpenALError("alBufferData");
 		
 		bufferIndex = (bufferIndex + 1) % buffersCount;

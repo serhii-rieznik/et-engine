@@ -7,8 +7,6 @@
 
 #pragma once
 
-#include <et/sound/formats.h>
-
 namespace et
 {
     namespace audio
@@ -27,6 +25,10 @@ namespace et
 			size_t channels() const;
 			size_t sampleRate() const;
 			size_t bitDepth() const;
+			size_t samples() const;
+			
+			int totalBuffersCount() const;
+			int actualBuffersCount() const;
 			
 			bool streamed() const;
 			unsigned int loadNextBuffer();
@@ -42,7 +44,6 @@ namespace et
 		private:
 			unsigned int buffer() const;
 			unsigned int* buffers() const;
-			int buffersCount() const;
             
 		private:
 			friend class Player;

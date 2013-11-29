@@ -49,14 +49,21 @@ ThreadResult StreamingThread::main()
 		
 		for (Player::Pointer& player : _private->playersList)
 		{
-			ALint processedBuffers = 0;
-			ALint queuedBuffers = 0;
-			alGetSourcei(player->source(), AL_BUFFERS_PROCESSED, &processedBuffers);
-			alGetSourcei(player->source(), AL_BUFFERS_QUEUED, &queuedBuffers);
-			player->loadNextBuffers(processedBuffers, queuedBuffers);
+			if (player->track()->streamed())
+			{
+				ALint processedBuffers = 0;
+				alGetSourcei(player->source(), AL_BUFFERS_PROCESSED, &processedBuffers);
+				
+				if (processedBuffers > 0)
+					player->buffersProcessed(processedBuffers);
+			}
+			
+			int sampleOffset = 0;
+			alGetSourcei(player->source(), AL_SAMPLE_OFFSET, &sampleOffset);
+			player->samplesProcessed(sampleOffset);
 		}
 		
-		sleepMSec(100);
+		sleepMSec(50);
 	}
 	
 	return 0;
@@ -71,7 +78,11 @@ void StreamingThread::addPlayer(Player::Pointer player)
 	{
 		i = std::find(_private->playersToAdd.begin(), _private->playersToAdd.end(), player);
 		if (i == _private->playersToAdd.end())
-			_private->playersList.push_back(player);
+			_private->playersToAdd.push_back(player);
+		
+		i = std::find(_private->playersToRemove.begin(), _private->playersToRemove.end(), player);
+		if (i != _private->playersToRemove.end())
+			_private->playersToRemove.erase(i);
 	}
 }
 
@@ -85,5 +96,9 @@ void StreamingThread::removePlayer(PlayerPointer player)
 		i = std::find(_private->playersToRemove.begin(), _private->playersToRemove.end(), player);
 		if (i == _private->playersToRemove.end())
 			_private->playersToRemove.push_back(player);
+		
+		i = std::find(_private->playersToAdd.begin(), _private->playersToAdd.end(), player);
+		if (i != _private->playersToAdd.end())
+			_private->playersToAdd.erase(i);
 	}
 };

@@ -171,12 +171,12 @@ size_t et::audio::openALFormatFromChannelsAndBitDepth(size_t numChannels, size_t
 		}
 		else
 		{
-			assert(false && "Unsupported format in WAV file");
+			assert(false && "Unsupported audio format.");
 		}
 	}
 	else
 	{
-		assert(false && "Unsupported number of channels in WAV file");
+		assert(false && "Unsupported number of channels in audio.");
 	}
 	
 	return 0;
