@@ -20,6 +20,7 @@
 #include <map>
 #include <limits>
 #include <functional>
+#include <algorithm>
 
 #include <iosfwd>
 #include <iostream>
