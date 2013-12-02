@@ -94,6 +94,7 @@ void Player::play(bool looped)
 			alSourceUnqueueBuffers(_private->source, queued, &buffer);
 			checkOpenALError("alSourceUnqueueBuffers");
 		}
+		alSourcei(_private->source, AL_BUFFER, 0);
 		
 		_private->buffersProcessed = 0;
 		_private->playingLooped = looped;

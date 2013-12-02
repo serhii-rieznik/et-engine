@@ -36,24 +36,24 @@ ThreadResult StreamingThread::main()
 {
 	while (running())
 	{
-		CriticalSectionScope scope(_private->csLock);
-		
-		for (auto& p : _private->playersToAdd)
-			_private->playersList.push_back(p);
+		{
+			CriticalSectionScope scope(_private->csLock);
 
-		for (auto& p : _private->playersToRemove)
-			_private->playersList.remove(p);
-		
-		_private->playersToAdd.clear();
-		_private->playersToRemove.clear();
-		
+			for (auto& p : _private->playersToAdd)
+				_private->playersList.push_back(p);
+			for (auto& p : _private->playersToRemove)
+				_private->playersList.remove(p);
+
+			_private->playersToAdd.clear();
+			_private->playersToRemove.clear();
+		}
+
 		for (Player::Pointer& player : _private->playersList)
 		{
 			if (player->track()->streamed())
 			{
 				ALint processedBuffers = 0;
 				alGetSourcei(player->source(), AL_BUFFERS_PROCESSED, &processedBuffers);
-				
 				if (processedBuffers > 0)
 					player->buffersProcessed(processedBuffers);
 			}
