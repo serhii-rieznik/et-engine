@@ -14,8 +14,10 @@ using namespace et;
 GesturesRecognizer::GesturesRecognizer(bool automaticMode) : InputHandler(automaticMode),
 	_clickThreshold(0.2f), _doubleClickTemporalThreshold(0.25f), _doubleClickSpatialThreshold(0.075f),
 	_holdThreshold(1.0f), _singlePointerType(0), _actualTime(0.0f), _clickStartTime(0.0f), _expectClick(false),
-	_expectDoubleClick(false), _clickTimeoutActive(false), _lockGestures(true), _gesture(RecognizedGesture_NoGesture)
+	_expectDoubleClick(false), _clickTimeoutActive(false), _lockGestures(true),
+	_recognizedGestures(RecognizedGesture_All), _gesture(RecognizedGesture_NoGesture)
 {
+	
 }
 
 void GesturesRecognizer::handlePointersMovement()
@@ -50,10 +52,24 @@ void GesturesRecognizer::handlePointersMovement()
 			float direction = dot(normalize(dir1), normalize(dir2));
 			if (direction < -0.5f)
 			{
-				gesture = (std::abs(angle / (zoomValue - 1.0f)) > 0.1f) ?
-					RecognizedGesture_Rotate : RecognizedGesture_Zoom;
+				bool catchZoom = (_recognizedGestures & RecognizedGesture_Zoom) == RecognizedGesture_Zoom;
+				bool catchRotate = (_recognizedGestures & RecognizedGesture_Rotate) == RecognizedGesture_Rotate;
+
+				if (catchZoom && catchRotate)
+				{
+					gesture = (std::abs(angle / (zoomValue - 1.0f)) > 0.1f) ?
+						RecognizedGesture_Rotate : RecognizedGesture_Zoom;
+				}
+				else if (catchZoom)
+				{
+					gesture = RecognizedGesture_Zoom;
+				}
+				else if (catchRotate)
+				{
+					gesture = RecognizedGesture_Rotate;
+				}
 			}
-			else if (direction > 0.5f)
+			else if ((direction > 0.5f) && (_recognizedGestures & RecognizedGesture_Swipe))
 			{
 				gesture = RecognizedGesture_Swipe;
 			}
@@ -251,4 +267,12 @@ void GesturesRecognizer::onGesturePerformed(GestureInputInfo i)
 	
 	if (i.mask & GestureTypeMask_Rotate)
 		rotate.invokeInMainRunLoop(i.values.w);
+}
+
+void GesturesRecognizer::setRecognizedGestures(size_t values)
+{
+	_recognizedGestures = values;
+	
+	if ((values & _gesture) == 0)
+		_gesture = RecognizedGesture_NoGesture;
 }

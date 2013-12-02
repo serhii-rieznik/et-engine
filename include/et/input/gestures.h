@@ -11,6 +11,15 @@
 
 namespace et
 {
+	enum RecognizedGesture
+	{
+		RecognizedGesture_NoGesture = 0x00,
+		RecognizedGesture_Zoom = 0x01,
+		RecognizedGesture_Rotate = 0x02,
+		RecognizedGesture_Swipe = 0x04,
+		RecognizedGesture_All = RecognizedGesture_Zoom | RecognizedGesture_Rotate | RecognizedGesture_Swipe
+	};
+	
 	class GesturesRecognizer : private InputHandler, private TimedObject
 	{
 	public:
@@ -21,6 +30,8 @@ namespace et
 		
 		void setShouldLockGestures(bool lock)
 			{ _lockGestures = lock; }
+		
+		void setRecognizedGestures(size_t);
 
 	public:
 		ET_DECLARE_PROPERTY_GET_COPY_SET_COPY(float, clickThreshold, setClickThreshold)
@@ -107,17 +118,11 @@ namespace et
 		};
         typedef std::map<size_t, PointersInputDelta> PointersInputDeltaMap;
 		
-		enum RecognizedGesture
-		{
-			RecognizedGesture_NoGesture,
-			RecognizedGesture_Zoom,
-			RecognizedGesture_Rotate,
-			RecognizedGesture_Swipe,
-		};
-
 		PointersInputDeltaMap _pointers;
 		PointerType _singlePointerType;
 		vec2 _singlePointerPosition;
+		
+		size_t _recognizedGestures;
 		
 		float _actualTime;
 		float _clickStartTime;
