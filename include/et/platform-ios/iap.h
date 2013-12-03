@@ -27,6 +27,20 @@ namespace et
         virtual void purchasesManagerDidFinishRestoringPurchases() { }
         virtual void purchasesManagerDidFailToRestorePurchases() { }
     };
+	
+	struct PurchaseInfo
+	{
+		std::string description;
+		std::string title;
+		std::string identifier;
+		std::string currency;
+		std::string currencySymbol;
+		
+		float price;
+		
+		PurchaseInfo() :
+			price(0.0f) { }
+	};
     
     class PurchasesManager
     {
@@ -34,12 +48,11 @@ namespace et
         typedef std::set<std::string> ProductsSet;
         
     public:
-        PurchasesManager();
-        ~PurchasesManager();
-        
         void checkAvailableProducts(const ProductsSet& products, PurchasesManagerDelegate* delegate);
 		void restoreTransactions(PurchasesManagerDelegate* delegate);
 		
         bool purchaseProduct(const std::string& product, PurchasesManagerDelegate* delegate);
+		
+		PurchaseInfo purchaseInfoForProduct(const std::string&);
     };
 }

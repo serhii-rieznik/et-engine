@@ -25,6 +25,8 @@ using namespace et;
 
 - (void)verifyReceiptForProduct:(NSString*)product data:(NSData*)receipt delegate:(PurchasesManagerDelegate*)delegate;
 
+- (PurchaseInfo)purchaseInfoForProduct:(NSString*)product;
+
 @end
 
 /*
@@ -153,6 +155,29 @@ static ObjCPurchasesManager* sharedInstance = nil;
 	}
 	
 	return validPurchase;
+}
+
+- (PurchaseInfo)purchaseInfoForProduct:(NSString*)product
+{
+	PurchaseInfo result;
+	for (SKProduct* p in _availableProducts)
+	{
+		if ([p.productIdentifier isEqualToString:product])
+		{
+			NSString* currency = [p.priceLocale objectForKey:NSLocaleCurrencyCode];
+			NSString* currencySymbol = [p.priceLocale objectForKey:NSLocaleCurrencySymbol];
+			
+			result.identifier = [p.productIdentifier UTF8String];
+			result.description = [p.localizedDescription UTF8String];
+			result.title = [p.localizedTitle UTF8String];
+			result.price = [p.price floatValue];
+			result.currency = [currency UTF8String];
+			result.currencySymbol = [currencySymbol UTF8String];
+			
+			return result;
+		}
+	}
+	return result;
 }
 
 - (void)restorePurchasesWithDelegate:(PurchasesManagerDelegate*)delegate
@@ -381,16 +406,15 @@ static ObjCPurchasesManager* sharedInstance = nil;
 
 - (void)paymentQueue:(SKPaymentQueue *)queue updatedTransactions:(NSArray *)transactions
 {
-    NSLog(@"Updating transactions: %@", transactions);
-    
-	for (SKPaymentTransaction* t in transactions)
+ 	for (SKPaymentTransaction* t in transactions)
 	{
 		NSString* productId = t.payment.productIdentifier;
-        const char* productIdcStr = [productId cStringUsingEncoding:NSASCIIStringEncoding];
 		SKPaymentTransactionState state = t.transactionState;
 		
 		if ((_productIdentifier == nil) || [productId isEqualToString:_productIdentifier])
 		{
+			const char* productIdcStr = [productId cStringUsingEncoding:NSASCIIStringEncoding];
+			
 			switch (state)
 			{
 				case SKPaymentTransactionStateRestored:
@@ -417,12 +441,12 @@ static ObjCPurchasesManager* sharedInstance = nil;
 				default:
 					break;
 			}
-		}
-		
-		if (state != SKPaymentTransactionStatePurchasing)
-		{
-			NSLog(@"Finishing transaction: %@", _productIdentifier);
-			[[SKPaymentQueue defaultQueue] finishTransaction:t];
+			
+			if (state != SKPaymentTransactionStatePurchasing)
+			{
+				NSLog(@"Finishing transaction: %@", _productIdentifier);
+				[[SKPaymentQueue defaultQueue] finishTransaction:t];
+			}
 		}
 	}
 }
@@ -430,14 +454,16 @@ static ObjCPurchasesManager* sharedInstance = nil;
 - (void)paymentQueue:(SKPaymentQueue *)queue restoreCompletedTransactionsFailedWithError:(NSError *)error
 {
 	_delegate->purchasesManagerDidFailToRestorePurchases();
+	[[ObjCPurchasesManager sharedManager] removePayment:self];
 }
 
 - (void)paymentQueueRestoreCompletedTransactionsFinished:(SKPaymentQueue *)queue
 {
 	_delegate->purchasesManagerDidFinishRestoringPurchases();
+	[[ObjCPurchasesManager sharedManager] removePayment:self];
 }
 
-- (void)paymentQueue:(SKPaymentQueue *)queue removedTransactions:(NSArray *)transactions
+- (void)paymentQueue:(SKPaymentQueue *)queue removedTransactions:(NSArray*)transactions
 {
 	[[ObjCPurchasesManager sharedManager] removePayment:self];
 }
@@ -447,14 +473,6 @@ static ObjCPurchasesManager* sharedInstance = nil;
 /*
  * C++ stuff
  */
-
-PurchasesManager::PurchasesManager()
-{
-}
-
-PurchasesManager::~PurchasesManager()
-{
-}
 
 void PurchasesManager::checkAvailableProducts(const ProductsSet& products, PurchasesManagerDelegate* delegate)
 {
@@ -474,4 +492,9 @@ bool PurchasesManager::purchaseProduct(const std::string& product, PurchasesMana
 void PurchasesManager::restoreTransactions(PurchasesManagerDelegate* delegate)
 {
     return [[ObjCPurchasesManager sharedManager] restorePurchasesWithDelegate:delegate];
+}
+
+PurchaseInfo PurchasesManager::purchaseInfoForProduct(const std::string& pId)
+{
+	return [[ObjCPurchasesManager sharedManager] purchaseInfoForProduct:[NSString stringWithUTF8String:pId.c_str()]];
 }

@@ -23,7 +23,7 @@ AtomicCounter::AtomicCounter() : _counter(0)
 AtomicCounterType AtomicCounter::retain()
 {
 #if (ET_PLATFORM_ANDROID)
-	return __atomic_dec(&_counter);
+	return __atomic_inc(&_counter);
 #else
 	return OSAtomicIncrement32(&_counter);
 #endif
