@@ -104,6 +104,22 @@
 #define ET_COMPOSE_UINT32(A, B, C, D)					(D | (C << 8) | (B << 16) | (A << 24))
 #define ET_COMPOSE_UINT32_INVERTED(A, B, C, D)			(A | (B << 8) | (C << 16) | (D << 24))
 
+#if (ET_DEBUG)
+#
+#	define ET_ASSERT(C)	\
+	{ \
+		if ((C) == false) \
+		{ \
+			log::warning("Condition: "#C"\nfailed at: %s [%d]", __FILE__, __LINE__); \
+			abort(); \
+		} \
+	}
+#
+#else
+#
+#	define ET_ASSERT(C)
+#
+#endif
 
 namespace et
 {
