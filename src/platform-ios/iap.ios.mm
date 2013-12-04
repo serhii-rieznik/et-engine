@@ -10,491 +10,189 @@
 
 using namespace et;
 
-/*
- * ObjC wrapper
- */
+@interface SharedPurchasesManager : NSObject <SKPaymentTransactionObserver, SKProductsRequestDelegate>
+{
+	NSMutableDictionary* _availableProducts;
+}
 
-@interface ObjCPurchasesManager : NSObject
++ (instancetype)sharedInstance;
 
-+ (ObjCPurchasesManager*)sharedManager;
-+ (BOOL)purchasesEnabled;
+- (void)startProductRequestWithIdentifiers:(const PurchasesManager::ProductsSet&)products;
 
-- (void)checkAvailableProducts:(NSSet*)products delegate:(PurchasesManagerDelegate*)delegate;
-- (BOOL)purchaseProduct:(NSString*)product delegate:(PurchasesManagerDelegate*)delegate;
-- (void)restorePurchasesWithDelegate:(PurchasesManagerDelegate*)delegate;
+- (PurchaseInfo)purchaseInfoForIdentifier:(const std::string&)identifier;
 
-- (void)verifyReceiptForProduct:(NSString*)product data:(NSData*)receipt delegate:(PurchasesManagerDelegate*)delegate;
-
-- (PurchaseInfo)purchaseInfoForProduct:(NSString*)product;
+- (BOOL)purchaseProduct:(const std::string&)identifier;
 
 @end
 
-/*
- * Product Request Wrapper
- */
-#pragma mark - Product Request Wrapper
-
-@interface ProductRequest : NSObject<SKProductsRequestDelegate>
+PurchasesManager::PurchasesManager()
 {
-	SKProductsRequest* _request;
-	PurchasesManagerDelegate* _delegate;
+	
 }
 
-- (id)initWithDelegate:(et::PurchasesManagerDelegate*)delegate productIdentifiers:(NSSet*)products;
-
-@end
-
-/*
- * Payment Wrapper
- */
-#pragma mark - Payment Wrapper
-
-@interface Payment : NSObject<SKPaymentTransactionObserver> 
-{
-	PurchasesManagerDelegate* _delegate;
-	NSString* _productIdentifier;
-}
-
-- (id)initWithDelegateAndRestorePurchases:(et::PurchasesManagerDelegate*)delegate;
-- (id)initWithDelegate:(et::PurchasesManagerDelegate*)delegate product:(SKProduct*)product;
-
-@end
-
-/*
- * Purchases Manager private methods
- */
-#pragma mark - Purchases Manager private methods
-
-@interface ObjCPurchasesManager() 
-{
-	NSMutableArray* _requests;
-	NSMutableArray* _payments;
-	NSMutableArray* _availableProducts;
-}
-
-- (void)addAvailableProduct:(SKProduct*)product;
-
-- (void)removeRequest:(ProductRequest*)req;
-- (void)removePayment:(Payment*)p;
-
-- (void)internalVerityReciept:(NSDictionary*)objects;
-- (void)internalRecieptVerified:(NSDictionary*)objects;
-
-@end
-
-/*
- * @implementation ObjCPurchasesManager
- */
-#pragma mark - @implementation ObjCPurchasesManager
-
-@implementation ObjCPurchasesManager
-
-static ObjCPurchasesManager* sharedInstance = nil;
-
-+ (ObjCPurchasesManager*)sharedManager
-{
-	if (sharedInstance == nil)
-		sharedInstance = [[ObjCPurchasesManager alloc] init];
-	return sharedInstance;
-}
-
-+ (BOOL)purchasesEnabled
+bool PurchasesManager::purchasesEnabled()
 {
 	return [SKPaymentQueue canMakePayments];
 }
 
-#if (!ET_OBJC_ARC_ENABLED)
-- (id)retain { return self; }
-- (oneway void) release { }
-- (NSUInteger)retainCount { return LONG_MAX; }
-#endif
+void PurchasesManager::checkAvailableProducts(const ProductsSet& products)
+{
+	[[SharedPurchasesManager sharedInstance] startProductRequestWithIdentifiers:products];
+}
+
+PurchaseInfo PurchasesManager::purchaseInfoForProduct(const std::string& pId)
+{
+	return [[SharedPurchasesManager sharedInstance] purchaseInfoForIdentifier:pId];
+}
+
+bool PurchasesManager::purchaseProduct(const std::string& product)
+{
+	return [[SharedPurchasesManager sharedInstance] purchaseProduct:product];
+}
+
+void PurchasesManager::restorePurchases()
+{
+	[[SKPaymentQueue defaultQueue] restoreCompletedTransactions];
+}
+
+/*
+ * Obj-C implementation
+ */
+@implementation SharedPurchasesManager
+
++ (instancetype)sharedInstance
+{
+	static SharedPurchasesManager* _sharedInstance = nil;
+	static dispatch_once_t onceToken = 0;
+	dispatch_once(&onceToken, ^{
+		_sharedInstance = [[SharedPurchasesManager alloc] init];
+	});
+	return _sharedInstance;
+}
 
 - (id)init
 {
 	self = [super init];
 	if (self)
 	{
-		_requests = [[NSMutableArray alloc] init];
-		_payments = [[NSMutableArray alloc] init];
-		_availableProducts = [[NSMutableArray alloc] init];
+		_availableProducts = [[NSMutableDictionary alloc] init];
+		[[SKPaymentQueue defaultQueue] addTransactionObserver:self];
 	}
 	return self;
 }
 
-- (void)checkAvailableProducts:(NSSet*)products delegate:(PurchasesManagerDelegate*)delegate
+- (void)startProductRequestWithIdentifiers:(const PurchasesManager::ProductsSet&)products
 {
-	ProductRequest* req = [[ProductRequest alloc] initWithDelegate:delegate productIdentifiers:products]; 
-	[_requests addObject:req];
+	NSMutableSet* identifiers = [NSMutableSet set];
 	
-#if (!ET_OBJC_ARC_ENABLED)
-	[req release];
-#endif
+	for (const auto& p : products)
+		[identifiers addObject:[NSString stringWithUTF8String:p.c_str()]];
+	
+	SKProductsRequest* request = [[SKProductsRequest alloc] initWithProductIdentifiers:identifiers];
+	[request setDelegate:self];
+	[request start];
 }
 
-- (BOOL)purchaseProduct:(NSString*)product delegate:(PurchasesManagerDelegate*)delegate
-{
-    SKProduct* availableProduct = nil;
-	BOOL validPurchase = NO;
-	for (SKProduct* p in _availableProducts)
-	{
-		if ([p.productIdentifier isEqualToString:product])
-		{
-            availableProduct = p;
-			validPurchase = YES;
-			break;
-		}
-	}
-    
-	if (validPurchase)
-	{
-		Payment* payment = [[Payment alloc] initWithDelegate:delegate product:availableProduct];
-		[_payments addObject:payment];
-#if (!ET_OBJC_ARC_ENABLED)
-		[payment release];
-#endif
-	}
-	
-	return validPurchase;
-}
-
-- (PurchaseInfo)purchaseInfoForProduct:(NSString*)product
+- (PurchaseInfo)purchaseInfoForIdentifier:(const std::string&)identifier
 {
 	PurchaseInfo result;
-	for (SKProduct* p in _availableProducts)
+	SKProduct* product = [_availableProducts objectForKey:[NSString stringWithUTF8String:identifier.c_str()]];
+	if (product != nil)
 	{
-		if ([p.productIdentifier isEqualToString:product])
-		{
-			NSString* currency = [p.priceLocale objectForKey:NSLocaleCurrencyCode];
-			NSString* currencySymbol = [p.priceLocale objectForKey:NSLocaleCurrencySymbol];
-			
-			result.identifier = [p.productIdentifier UTF8String];
-			result.description = [p.localizedDescription UTF8String];
-			result.title = [p.localizedTitle UTF8String];
-			result.price = [p.price floatValue];
-			result.currency = [currency UTF8String];
-			result.currencySymbol = [currencySymbol UTF8String];
-			
-			return result;
-		}
+		NSString* currency = [product.priceLocale objectForKey:NSLocaleCurrencyCode];
+		NSString* currencySymbol = [product.priceLocale objectForKey:NSLocaleCurrencySymbol];
+		
+		result.identifier = [product.productIdentifier UTF8String];
+		result.description = [product.localizedDescription UTF8String];
+		result.title = [product.localizedTitle UTF8String];
+		result.price = [product.price floatValue];
+		result.currency = [currency UTF8String];
+		result.currencySymbol = [currencySymbol UTF8String];
 	}
 	return result;
 }
 
-- (void)restorePurchasesWithDelegate:(PurchasesManagerDelegate*)delegate
+- (BOOL)purchaseProduct:(const std::string&)identifier
 {
-	Payment* p = [[Payment alloc] initWithDelegateAndRestorePurchases:delegate];
-	[_payments addObject:p];
-	
-#if (!ET_OBJC_ARC_ENABLED)
-	[p release];
-#endif
-}
+	SKProduct* product = [_availableProducts objectForKey:[NSString stringWithUTF8String:identifier.c_str()]];
+	if (product == nil)
+		return NO;
 
-- (void)removeRequest:(ProductRequest*)req
-{
-	[_requests removeObject:req];
+	[[SKPaymentQueue defaultQueue] addPayment:[SKPayment paymentWithProduct:product]];
+	return YES;
 }
-
-- (void)removePayment:(Payment*)p
-{
-	[_payments removeObject:p];
-}
-
-- (void)addAvailableProduct:(SKProduct*)product
-{
-	[_availableProducts addObject:product];
-}
-
-- (void)internalVerityReciept:(NSDictionary*)objects
-{
-/*    
-    NSString* product = [objects objectForKey:@"kProduct"];
-    NSData* data = [objects objectForKey:@"kData"];
-    NSObject* delegate = [objects objectForKey:@"kDelegate"];
-    NSNumber* result = nil;
-    
-#if defined(ET_PRODUCTION_BUILD)
-    NSString *urlsting = @"https://buy.itunes.apple.com/verifyReceipt";
-#else    
-    #warning ObjCPurchasesManager is connecting to the sandbox environment
-    NSString* urlsting = @"https://sandbox.itunes.apple.com/verifyReceipt";
-#endif    
-    
-    NSMutableURLRequest* request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:urlsting]];
-    NSString *json = [NSString stringWithFormat:@"{\"receipt-data\":\"%@\"}", 
-                      [data base64EncodingWithLineLength:[data length]]];
-    NSString* length = [NSString stringWithFormat:@"%d", [json length]];	
-    
-    [request setHTTPBody:[json dataUsingEncoding:NSUTF8StringEncoding]];
-    [request setHTTPMethod:@"POST"];		
-    [request setValue:@"application/x-www-form-urlencoded" forHTTPHeaderField:@"Content-Type"];
-    [request setValue:length forHTTPHeaderField:@"Content-Length"];	
-    
-    NSError* requestError = nil;
-    NSError* readingError = nil;
-    NSHTTPURLResponse* requestResponse = nil;
-    
-    NSData* responseData = [NSURLConnection sendSynchronousRequest:request returningResponse:&requestResponse error:&requestError];  
-    if ((responseData == nil) || (requestError != nil))
-    {
-        result = [NSNumber numberWithBool:NO];
-    }
-    else 
-    {
-        id response = [NSJSONSerialization JSONObjectWithData:responseData options:0 error:&readingError];
-        if ((response == nil) || (readingError != nil) || ![response isKindOfClass:[NSDictionary class]])
-        {
-            result = [NSNumber numberWithBool:NO];
-        }
-        else 
-        {
-            NSNumber* status = [response objectForKey:@"status"];
-            if (status == nil)
-            {
-                result = [NSNumber numberWithBool:NO];
-            }
-            else 
-            {
-                NSDictionary* receipt = [response objectForKey:@"receipt"];
-                if (receipt == nil)
-                {
-                    result = [NSNumber numberWithBool:NO];
-                }
-                else 
-                {
-                    NSString* productId = [receipt objectForKey:@"product_id"];
-                    if (productId == nil)
-                    {
-                        result = [NSNumber numberWithBool:NO];
-                    }
-                    else
-                    {
-                        BOOL sameProduct = [productId isEqualToString:product];
-                        BOOL statusValidated = [status intValue] == 0;
-                        result = [NSNumber numberWithBool:statusValidated && sameProduct];
-                    }
-                }
-            }
-        }
-    }
-    
-    NSDictionary* resultObjects = [NSDictionary dictionaryWithObjectsAndKeys:product, @"kProduct", result, @"kResult", delegate, @"kDelegate", nil];
-    [self performSelectorOnMainThread:@selector(internalRecieptVerified:) withObject:resultObjects waitUntilDone:YES];
-*/ 
-}
-
-- (void)verifyReceiptForProduct:(NSString*)product data:(NSData*)receipt delegate:(PurchasesManagerDelegate*)delegate
-{
-/*    
-    NSDictionary* objects = [NSDictionary dictionaryWithObjectsAndKeys:
-                             product, @"kProduct", receipt, @"kData", 
-                             [NSNumber numberWithUnsignedLongLong:reinterpret_cast<unsigned long long>(delegate)], @"kDelegate", nil];
-    [self performSelectorInBackground:@selector(internalVerityReciept:) withObject:objects];
-*/ 
-}
-
-- (void)internalRecieptVerified:(NSDictionary*)objects
-{
-/*    
-    NSString* product = [objects objectForKey:@"kProduct"];
-    NSNumber* result = [objects objectForKey:@"kResult"];
-    PurchasesManagerDelegate* delegate = reinterpret_cast<PurchasesManagerDelegate*>([[objects objectForKey:@"kDelegate"] unsignedLongLongValue]);
-    if ([delegate respondsToSelector:@selector(ObjCPurchasesManagerDidVerifyReceiptForProduct:successful:)])
-        [delegate ObjCPurchasesManagerDidVerifyReceiptForProduct:product successful:[result boolValue]];
-*/ 
-}
-
-@end
 
 /*
- * @implementation ProductRequest
+ * Product request delegate
  */
-#pragma mark - @implementation ProductRequest
-
-@implementation ProductRequest
-
-- (id)initWithDelegate:(PurchasesManagerDelegate*)delegate productIdentifiers:(NSSet*)products
-{
-	self = [super init];
-	if (self)
-	{
-		_delegate = delegate;
-		
-		SKProductsRequest* req = [[SKProductsRequest alloc] initWithProductIdentifiers:products];
-		req.delegate = self;
-		[req start];
-	}
-	return self;
-}
-
-- (void)productsRequest:(SKProductsRequest *)request didReceiveResponse:(SKProductsResponse *)response
+- (void)productsRequest:(SKProductsRequest*)request didReceiveResponse:(SKProductsResponse*)response
 {
     StringList checkedProducts;
     
 	for (SKProduct* p in response.products)
-    {
-		[[ObjCPurchasesManager sharedManager] addAvailableProduct:p];
-        checkedProducts.push_back([p.productIdentifier cStringUsingEncoding:NSASCIIStringEncoding]);
+	{
+		NSString* identifier = p.productIdentifier;
+		[_availableProducts setObject:p forKey:identifier];
+		checkedProducts.push_back(std::string([identifier UTF8String]));
 	}
-    
-    _delegate->purchasesManagerDidCheckAvailableProducts(checkedProducts);
-}
-
-- (void)requestDidFinish:(SKRequest *)request
-{
-	[[ObjCPurchasesManager sharedManager] removeRequest:self];
+	
+	PurchasesManager::instance().availableProductsChecked.invokeInMainRunLoop(checkedProducts);
 }
 
 - (void)request:(SKRequest *)request didFailWithError:(NSError *)error
 {
-    _delegate->purchasesManagerDidFailToCheckAvailableProducts();
-	[[ObjCPurchasesManager sharedManager] removeRequest:self];
+	PurchasesManager::instance().failedToCheckAvailableProducts.invokeInMainRunLoop();
 }
-
-@end
-
 
 /*
- * @implementation Payment
+ * Transaction observer delegate
  */
-#pragma mark - @implementation Payment
-
-@implementation Payment
-
-- (id)initWithDelegate:(PurchasesManagerDelegate*)delegate product:(SKProduct*)product
+- (void)paymentQueue:(SKPaymentQueue*)queue updatedTransactions:(NSArray*)transactions
 {
-	self = [super init];
-	if (self)
-	{
-		_delegate = delegate;
-		_productIdentifier = product.productIdentifier;
-		
-#if (!ET_OBJC_ARC_ENABLED)
-		[_productIdentifier retain];
-#endif
-		
-		SKPayment* payment = [SKMutablePayment paymentWithProduct:product];
-		
-		[[SKPaymentQueue defaultQueue] addTransactionObserver:self];
-		[[SKPaymentQueue defaultQueue] addPayment:payment];
-	}
-	return self;
-}
-
-- (id)initWithDelegateAndRestorePurchases:(PurchasesManagerDelegate*)delegate
-{
-	self = [super init];
-	if (self)
-	{
-		_delegate = delegate;
-		_productIdentifier = nil;
-		[[SKPaymentQueue defaultQueue] addTransactionObserver:self];
-		[[SKPaymentQueue defaultQueue] restoreCompletedTransactions];
-	}
-	return self;
-}
-
-- (void)dealloc
-{
-	[[SKPaymentQueue defaultQueue] removeTransactionObserver:self];
+	NSMutableArray* transactionsToFinish = [NSMutableArray array];
 	
-#if (!ET_OBJC_ARC_ENABLED)
-	[_productIdentifier release];
-	[super dealloc];
-#endif
-}
-
-- (void)paymentQueue:(SKPaymentQueue *)queue updatedTransactions:(NSArray *)transactions
-{
- 	for (SKPaymentTransaction* t in transactions)
+	for (SKPaymentTransaction* transaction in transactions)
 	{
-		NSString* productId = t.payment.productIdentifier;
-		SKPaymentTransactionState state = t.transactionState;
+		SKPaymentTransactionState state = transaction.transactionState;
 		
-		if ((_productIdentifier == nil) || [productId isEqualToString:_productIdentifier])
+		if (state == SKPaymentTransactionStatePurchased)
 		{
-			const char* productIdcStr = [productId cStringUsingEncoding:NSASCIIStringEncoding];
-			
-			switch (state)
-			{
-				case SKPaymentTransactionStateRestored:
-				{
-                    NSLog(@"SKPaymentTransactionStateRestored: %@", productId);
-                    _delegate->purchasesManagerDidRestorePurchasedProduct(productIdcStr);
-					break;
-				}
-                    
-				case SKPaymentTransactionStatePurchased:
-				{
-                    NSLog(@"SKPaymentTransactionStatePurchased: %@", productId);
-                    _delegate->purchasesManagerDidPurchaseProduct(productIdcStr);
-					break;
-				}
-					
-				case SKPaymentTransactionStateFailed:
-				{
-                    NSLog(@"SKPaymentTransactionStateFailed: %@", productId);
-                    _delegate->purchasesManagerDidFailToPurchaseProduct(productIdcStr);
-					break;
-				}
-                    
-				default:
-					break;
-			}
-			
-			if (state != SKPaymentTransactionStatePurchasing)
-			{
-				NSLog(@"Finishing transaction: %@", _productIdentifier);
-				[[SKPaymentQueue defaultQueue] finishTransaction:t];
-			}
+			std::string productId([transaction.payment.productIdentifier UTF8String]);
+			PurchasesManager::instance().productPurchased.invokeInMainRunLoop(productId);
+			NSLog(@"Purchased: %@", transaction.payment.productIdentifier);
 		}
+		else if (state == SKPaymentTransactionStateRestored)
+		{
+			std::string productId([transaction.originalTransaction.payment.productIdentifier UTF8String]);
+			PurchasesManager::instance().purchaseRestored.invokeInMainRunLoop(productId);
+			NSLog(@"Restored: %@", transaction.payment.productIdentifier);
+		}
+		else if (state == SKPaymentTransactionStateFailed)
+		{
+			std::string productId([transaction.payment.productIdentifier UTF8String]);
+			PurchasesManager::instance().failedToPurchaseProduct.invokeInMainRunLoop(productId);
+			NSLog(@"Failed: %@", transaction.payment.productIdentifier);
+		}
+		
+		if (state != SKPaymentTransactionStatePurchasing)
+			[transactionsToFinish addObject:transaction];
 	}
+	
+	dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^
+	{
+		for (SKPaymentTransaction* transaction in transactionsToFinish)
+			[[SKPaymentQueue defaultQueue] finishTransaction:transaction];
+	});
 }
 
-- (void)paymentQueue:(SKPaymentQueue *)queue restoreCompletedTransactionsFailedWithError:(NSError *)error
+- (void)paymentQueue:(SKPaymentQueue*)queue restoreCompletedTransactionsFailedWithError:(NSError*)error
 {
-	_delegate->purchasesManagerDidFailToRestorePurchases();
-	[[ObjCPurchasesManager sharedManager] removePayment:self];
+	PurchasesManager::instance().failedToRestorePurchases.invokeInMainRunLoop();
 }
 
-- (void)paymentQueueRestoreCompletedTransactionsFinished:(SKPaymentQueue *)queue
+- (void)paymentQueueRestoreCompletedTransactionsFinished:(SKPaymentQueue*)queue
 {
-	_delegate->purchasesManagerDidFinishRestoringPurchases();
-	[[ObjCPurchasesManager sharedManager] removePayment:self];
-}
-
-- (void)paymentQueue:(SKPaymentQueue *)queue removedTransactions:(NSArray*)transactions
-{
-	[[ObjCPurchasesManager sharedManager] removePayment:self];
+	PurchasesManager::instance().restoringPurchasesFinished.invokeInMainRunLoop();
 }
 
 @end
-
-/*
- * C++ stuff
- */
-
-void PurchasesManager::checkAvailableProducts(const ProductsSet& products, PurchasesManagerDelegate* delegate)
-{
-    NSMutableSet* objcSet = [NSMutableSet set];
-    for (ProductsSet::const_iterator i = products.begin(), e = products.end(); i != e; ++i)
-        [objcSet addObject:[NSString stringWithCString:i->c_str() encoding:NSASCIIStringEncoding]];
-    
-    [[ObjCPurchasesManager sharedManager] checkAvailableProducts:objcSet delegate:delegate];
-}
-
-bool PurchasesManager::purchaseProduct(const std::string& product, PurchasesManagerDelegate* delegate)
-{
-    NSString* objcString = [NSString stringWithCString:product.c_str() encoding:NSASCIIStringEncoding];
-    return [[ObjCPurchasesManager sharedManager] purchaseProduct:objcString delegate:delegate];
-}
-
-void PurchasesManager::restoreTransactions(PurchasesManagerDelegate* delegate)
-{
-    return [[ObjCPurchasesManager sharedManager] restorePurchasesWithDelegate:delegate];
-}
-
-PurchaseInfo PurchasesManager::purchaseInfoForProduct(const std::string& pId)
-{
-	return [[ObjCPurchasesManager sharedManager] purchaseInfoForProduct:[NSString stringWithUTF8String:pId.c_str()]];
-}
