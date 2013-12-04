@@ -159,19 +159,16 @@ void PurchasesManager::restorePurchases()
 		{
 			std::string productId([transaction.payment.productIdentifier UTF8String]);
 			PurchasesManager::instance().productPurchased.invokeInMainRunLoop(productId);
-			NSLog(@"Purchased: %@", transaction.payment.productIdentifier);
 		}
 		else if (state == SKPaymentTransactionStateRestored)
 		{
 			std::string productId([transaction.originalTransaction.payment.productIdentifier UTF8String]);
 			PurchasesManager::instance().purchaseRestored.invokeInMainRunLoop(productId);
-			NSLog(@"Restored: %@", transaction.payment.productIdentifier);
 		}
 		else if (state == SKPaymentTransactionStateFailed)
 		{
 			std::string productId([transaction.payment.productIdentifier UTF8String]);
 			PurchasesManager::instance().failedToPurchaseProduct.invokeInMainRunLoop(productId);
-			NSLog(@"Failed: %@", transaction.payment.productIdentifier);
 		}
 		
 		if (state != SKPaymentTransactionStatePurchasing)
