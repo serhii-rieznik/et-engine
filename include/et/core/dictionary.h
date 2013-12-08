@@ -162,20 +162,23 @@ namespace et
 		}
 		
 	public:
+		void setObjectForKey(const std::string& key, ValueBase::Pointer value)
+			{ setValueForKey<ValueBase::Pointer>(key, value); }
+
 		void setStringForKey(const std::string& key, StringValue value)
-			{ setValueForKey<StringValue, ValueClass_String>(key, value); }
+			{ setValueForKey<StringValue>(key, value); }
 
 		void setIntegerForKey(const std::string& key, IntegerValue value)
-			{ setValueForKey<IntegerValue, ValueClass_Integer>(key, value); }
+			{ setValueForKey<IntegerValue>(key, value); }
 
 		void setFloatForKey(const std::string& key, FloatValue value)
-			{ setValueForKey<FloatValue, ValueClass_Float>(key, value); }
+			{ setValueForKey<FloatValue>(key, value); }
 		
 		void setArrayForKey(const std::string& key, ArrayValue value)
-			{ setValueForKey<ArrayValue, ValueClass_Array>(key, value); }
+			{ setValueForKey<ArrayValue>(key, value); }
 
 		void setDictionaryForKey(const std::string& key, Dictionary value)
-			{ setValueForKey<Dictionary, ValueClass_Dictionary>(key, value); }
+			{ setValueForKey<Dictionary>(key, value); }
 
 		void setFloatForKeyPath(const StringList& keyPath, FloatValue value)
 			{ setValueForKeyPath<FloatValue, ValueClass_Float>(keyPath, value); }
@@ -233,7 +236,7 @@ namespace et
 		void addKeyPathsFromHolder(ValueBase::Pointer holder, const std::string& baseKeyPath,
 			StringList& keyPaths) const;
 		
-		template <typename T, ValueClass C>
+		template <typename T>
 		void setValueForKey(const std::string& key, const T& value)
 			{ this->reference().content[key] = value; }
 
