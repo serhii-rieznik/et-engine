@@ -14,6 +14,7 @@
 
 #include <functional>
 #include <sys/xattr.h>
+#include <sys/utsname.h>
 #include <et/app/application.h>
 #include <et/app/applicationnotifier.h>
 #include <et/platform/platformtools.h>
@@ -100,6 +101,12 @@ void et::ios::saveImageToPhotos(const std::string& path, std::function<void(bool
 #endif
 }
 
+std::string et::ios::hardwareIdentifier()
+{
+	struct utsname name = { };
+	uname(&name);
+	return lowercase(std::string(name.machine));
+}
 
 /*
  * Obj-C stuff

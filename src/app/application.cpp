@@ -129,10 +129,7 @@ void Application::setActive(bool active)
 void Application::contextResized(const vec2i& size)
 {
 	if (_running && _active)
-	{
 		_delegate->applicationWillResizeContext(size);
-		performRendering();
-	}
 }
 
 float Application::cpuLoad() const

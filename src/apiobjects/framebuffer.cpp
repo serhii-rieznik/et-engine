@@ -25,11 +25,11 @@ Framebuffer::Framebuffer(RenderContext* rc, const FramebufferDescription& desc,
 
 	_rc->renderState().bindFramebuffer(_id);
 
-	bool hasColor = (_description.colorFormat != 0) && (_description.colorInternalformat != 0) &&
-		(_description.colorType != 0) && (_description.numColorRenderTargets > 0);
+	bool hasColor = (_description.numColorRenderTargets > 0) && (_description.colorInternalformat != 0) &&
+		(_description.colorIsRenderbuffer || ((_description.colorFormat != 0)  && (_description.colorType != 0)));
 	
-	bool hasDepth = (_description.depthFormat != 0) && (_description.depthInternalformat != 0) &&
-		(_description.depthType != 0);
+	bool hasDepth = (_description.depthInternalformat != 0) &&
+		(_description.depthIsRenderbuffer || ((_description.depthFormat != 0)  && (_description.depthType != 0)));
 	
 	if (hasColor)
 	{
@@ -464,6 +464,8 @@ void Framebuffer::resolveMultisampledTo(Framebuffer::Pointer framebuffer)
 	
 #if (ET_PLATFORM_IOS)
 
+	const GLenum discards[]  = { GL_DEPTH_ATTACHMENT, GL_COLOR_ATTACHMENT0 };
+	glDiscardFramebufferEXT(GL_READ_FRAMEBUFFER, 2, discards);
 	glResolveMultisampleFramebufferAPPLE();
 	checkOpenGLError("glResolveMultisampleFramebuffer");
 	

@@ -79,7 +79,7 @@ void et::checkOpenGLErrorEx(const char* caller, const char* fileName, const char
 			buffer, glErrorToString(error).c_str());
 
 #if defined(ET_STOP_ON_OPENGL_ERROR)
-		assert(false && "Check stdout for details.");
+		abort();
 #endif
 	}
 }
@@ -176,10 +176,12 @@ std::string et::glInternalFormatToString(int format)
 	{
 		CASE_VALUE(GL_DEPTH_COMPONENT)
 		CASE_VALUE(GL_DEPTH_COMPONENT16)
-		CASE_VALUE(GL_RGB5_A1)
+			
 		CASE_VALUE(GL_RGB)
 		CASE_VALUE(GL_RGBA)
 		CASE_VALUE(GL_RGBA4)
+		CASE_VALUE(GL_RGB565)
+		CASE_VALUE(GL_RGB5_A1)
 
 #if defined(GL_DEPTH_COMPONENT24)
 		CASE_VALUE(GL_DEPTH_COMPONENT24)
@@ -635,6 +637,9 @@ size_t et::bitsPerPixelForTextureFormat(uint32_t internalFormat, uint32_t type)
 			
 		case GL_RGBA32F:
 			return 3 * bitsPerPixelForType(type);
+			
+		case GL_RGB565:
+			return 2;
 			
 		default:
 			assert("Not yet implemented for this format." && false);

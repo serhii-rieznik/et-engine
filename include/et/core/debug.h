@@ -114,10 +114,12 @@
 			abort(); \
 		} \
 	}
+#	define ET_FAIL(MSG) { log::error(#MSG"\nfailed at: %s [%d]", __FILE__, __LINE__); }
 #
 #else
 #
 #	define ET_ASSERT(C)
+#	define ET_FAIL(MSG)
 #
 #endif
 

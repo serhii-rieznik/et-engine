@@ -20,5 +20,7 @@ namespace et
 		void excludeFileFromICloudBackup(const std::string&);
 		void shareFile(const std::string& path, const std::string& scheme, bool displayOptions);
 		bool canOpenURL(const std::string&);
+		
+		std::string hardwareIdentifier();
 	}
 }

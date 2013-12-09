@@ -34,6 +34,27 @@ Framebuffer::Pointer FramebufferFactory::createFramebuffer(const vec2i& size, co
 	return Framebuffer::Pointer(new Framebuffer(renderContext(), desc, id));
 }
 
+Framebuffer::Pointer FramebufferFactory::createMultisampledFramebuffer(const vec2i& size, int32_t samples,
+	const std::string& objectId, int32_t colorInternalformat, int32_t depthInternalformat)
+{
+	FramebufferDescription desc;
+	
+	desc.size = size;
+	desc.colorInternalformat = colorInternalformat;
+	desc.depthInternalformat = depthInternalformat;
+	desc.colorFormat = 0;
+	desc.colorType = 0;
+	desc.depthFormat = 0;
+	desc.depthType = 0;
+	desc.numColorRenderTargets = 1;
+	desc.numSamples = samples;
+	desc.colorIsRenderbuffer = true;
+	desc.depthIsRenderbuffer = true;
+	
+	return Framebuffer::Pointer(new Framebuffer(renderContext(), desc, objectId));
+}
+
+
 Framebuffer::Pointer FramebufferFactory::createCubemapFramebuffer(size_t size, const std::string& id,
 	int32_t colorInternalformat, uint32_t colorFormat, uint32_t colorType, int32_t depthInternalformat,
 	uint32_t depthFormat, uint32_t depthType)
