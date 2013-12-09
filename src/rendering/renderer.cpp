@@ -136,8 +136,14 @@ void Renderer::renderTexture(const Texture& texture, const vec2i& position, cons
 void Renderer::drawElements(const IndexBuffer& ib, size_t first, size_t count)
 {
 	assert(ib.valid());
-	
 	etDrawElements(ib->primitiveType(), static_cast<GLsizei>(count), ib->dataType(), ib->indexOffset(first));
+}
+
+void Renderer::drawElementsInstanced(const IndexBuffer& ib, size_t first, size_t count, size_t instances)
+{
+	assert(ib.valid());
+	etDrawElementsInstanced(ib->primitiveType(), static_cast<GLsizei>(count), ib->dataType(),
+		ib->indexOffset(first), static_cast<GLsizei>(instances));
 }
 
 void Renderer::drawElements(PrimitiveType primitiveType, const IndexBuffer& ib, size_t first, size_t count)

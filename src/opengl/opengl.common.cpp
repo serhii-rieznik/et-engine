@@ -307,6 +307,18 @@ std::string et::glPrimitiveTypeToString(uint32_t value)
 	}
 }
 
+void et::etDrawElementsInstanced(uint32_t mode, GLsizei count, uint32_t type, const GLvoid* indices,
+	GLsizei instanceCount)
+{
+	glDrawElementsInstanced(mode, count, type, indices, instanceCount);
+	checkOpenGLError("glDrawElementsInstanced(%d, %d, %u, %08x, %d)", mode, count, type, indices, instanceCount);
+	
+#	if ET_ENABLE_OPENGL_COUNTERS
+	OpenGLCounters::primitiveCounter += instanceCount * primitiveCount(mode, static_cast<size_t>(count));
+	++OpenGLCounters::DIPCounter;
+#	endif
+}
+
 #if defined(GL_ARB_draw_elements_base_vertex)
 void et::etDrawElementsBaseVertex(uint32_t mode, GLsizei count, uint32_t type, const GLvoid* indices, int base)
 {

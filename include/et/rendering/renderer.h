@@ -33,6 +33,7 @@ namespace et
 		void drawElements(PrimitiveType primitiveType, const IndexBuffer& ib, size_t first, size_t count);
 		void drawAllElements(const IndexBuffer& ib);
 
+		void drawElementsInstanced(const IndexBuffer& ib, size_t first, size_t count, size_t instances);
 		void drawElementsBaseIndex(const VertexArrayObject& vao, int base, size_t first, size_t count);
 
 		vec2 windowCoordinatesToScene(const vec2i& coord);

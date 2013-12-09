@@ -97,6 +97,9 @@ namespace et
 		void setUniform(int nLoc, uint32_t, const vec4& value, bool force = false);
 		void setUniform(int nLoc, uint32_t, const mat3& value, bool force = false);
 		void setUniform(int nLoc, uint32_t, const mat4& value, bool force = false);
+
+		void setUniform(int nLoc, uint32_t, const vec4* value, size_t amount);
+		void setUniform(int nLoc, uint32_t, const mat4* value, size_t amount);
 		
 		template <typename T>
 		void setUniform(const std::string& name, const T& value)
@@ -106,6 +109,14 @@ namespace et
 				setUniform(i->second.location, i->second.type, value);
 		}
 
+		template <typename T>
+		void setUniform(const std::string& name, const T* value, size_t amount)
+		{
+			auto i = findUniform(name);
+			if (i != _uniforms.end())
+				setUniform(i->second.location, i->second.type, value, amount);
+		}
+		
 		template <typename T>
 		void setUniform(const ProgramUniform& u, const T& value)
 			{ setUniform(u.location, u.type, value); }

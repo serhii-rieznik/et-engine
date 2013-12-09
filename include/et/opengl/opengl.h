@@ -48,6 +48,17 @@
 #
 #	define ET_OPENGLES									1
 #
+#	if !defined(GL_ES_VERSION_3_0)
+#		define glGenVertexArrays						glGenVertexArraysOES
+#		define glBindVertexArray						glBindVertexArrayOES
+#		define glIsVertexArray							glIsVertexArrayOES
+#		define glDeleteVertexArrays						glDeleteVertexArraysOES
+#		define glRenderbufferStorageMultisample			glRenderbufferStorageMultisampleAPPLE
+#		define glDrawElementsInstanced					glDrawElementsInstancedEXT
+#		define glClearDepth								glClearDepthf
+#		define glDepthRange								glDepthRangef
+#	endif
+#
 #	if !defined(GL_DEPTH_COMPONENT24)
 #		define GL_DEPTH_COMPONENT24						GL_DEPTH_COMPONENT24_OES
 #	endif
@@ -67,17 +78,6 @@
 #	if !defined(GL_RGBA32F)
 #		define GL_RGBA32F								GL_RGBA32F_EXT
 #	endif
-#
-#	if !defined(GL_ES_VERSION_3_0)
-#		define glGenVertexArrays						glGenVertexArraysOES
-#		define glBindVertexArray						glBindVertexArrayOES
-#		define glIsVertexArray							glIsVertexArrayOES
-#		define glDeleteVertexArrays						glDeleteVertexArraysOES
-#		define glRenderbufferStorageMultisample			glRenderbufferStorageMultisampleAPPLE
-#	endif
-#
-#	define glClearDepth									glClearDepthf
-#	define glDepthRange									glDepthRangef
 #
 #	if !defined(GL_TEXTURE_MAX_LEVEL)
 #		define GL_TEXTURE_MAX_LEVEL						GL_TEXTURE_MAX_LEVEL_APPLE
@@ -221,6 +221,7 @@ namespace et
 
 	void etViewport(int x, int y, GLsizei width, GLsizei height);
 	void etDrawElements(uint32_t mode, GLsizei count, uint32_t type, const GLvoid* indices);
+	void etDrawElementsInstanced(uint32_t mode, GLsizei count, uint32_t type, const GLvoid* indices, GLsizei instanceCount);
 	void etDrawElementsBaseVertex(uint32_t mode, GLsizei count, uint32_t type, const GLvoid* indices, int base);
 	void etBindTexture(uint32_t target, uint32_t texture);
 	void etBindBuffer(uint32_t target, uint32_t buffer);
