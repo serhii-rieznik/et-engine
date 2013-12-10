@@ -392,29 +392,35 @@ void Program::validate() const
  * Uniform setters
  */
 
-void Program::setUniform(int nLoc, uint32_t, const int value)
+void Program::setUniform(int nLoc, uint32_t type, const int value, bool)
 {
 	if (nLoc == -1) return;
 	
+	assert((type == GL_INT) || (type == GL_SAMPLER_2D) || (type == GL_SAMPLER_CUBE));
 	assert(loaded());
+	
 	glUniform1i(nLoc, value);
 	checkOpenGLError("setUniform - int");
 }
 
-void Program::setUniform(int nLoc, uint32_t, const unsigned int value)
+void Program::setUniform(int nLoc, uint32_t type, const unsigned int value, bool)
 {
 	if (nLoc == -1) return;
 	
+	assert((type == GL_INT) || (type == GL_SAMPLER_2D) || (type == GL_SAMPLER_CUBE));
 	assert(loaded());
+	
 	glUniform1i(nLoc, static_cast<GLint>(value));
 	checkOpenGLError("setUniform - unsigned int");
 }
 
-void Program::setUniform(int nLoc, uint32_t, const unsigned long value)
+void Program::setUniform(int nLoc, uint32_t type, const unsigned long value, bool)
 {
 	if (nLoc == -1) return;
 	
+	assert((type == GL_INT) || (type == GL_SAMPLER_2D) || (type == GL_SAMPLER_CUBE));
 	assert(loaded());
+	
 	glUniform1i(nLoc, static_cast<GLint>(value));
 	checkOpenGLError("setUniform - unsigned long");
 }
@@ -486,6 +492,19 @@ void Program::setUniform(int nLoc, uint32_t type, const vec4& value, bool forced
 	checkOpenGLError("setUniform - vec4");
 }
 
+void Program::setUniformDirectly(int nLoc, uint32_t type, const vec4& value)
+{
+	if (nLoc == -1) return;
+	
+	(void)type;
+	assert(type == GL_FLOAT_VEC4);
+	assert(loaded());
+	
+	glUniform4fv(nLoc, 1, value.data());
+	
+	checkOpenGLError("setUniform - vec4");
+}
+
 void Program::setUniform(int nLoc, uint32_t type, const mat3& value, bool forced)
 {
 	if (nLoc == -1) return;
@@ -516,6 +535,19 @@ void Program::setUniform(int nLoc, uint32_t type, const mat4& value, bool forced
 		_mat4Cache[nLoc] = value;
 		glUniformMatrix4fv(nLoc, 1, 0, value.data());
 	}
+	
+	checkOpenGLError("setUniform - mat4");
+}
+
+void Program::setUniformDirectly(int nLoc, uint32_t type, const mat4& value)
+{
+	if (nLoc == -1) return;
+	
+	(void)type;
+	assert(type == GL_FLOAT_MAT4);
+	assert(loaded());
+	
+	glUniformMatrix4fv(nLoc, 1, 0, value.data());
 	
 	checkOpenGLError("setUniform - mat4");
 }

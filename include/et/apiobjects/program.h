@@ -87,26 +87,31 @@ namespace et
 
 		void setCameraProperties(const Camera& cam);
 
-		void setUniform(int nLoc, uint32_t, const int value);
-		void setUniform(int nLoc, uint32_t, const unsigned int value);
-		void setUniform(int nLoc, uint32_t, const unsigned long value);
+		void setUniform(int, uint32_t, const int, bool);
+		void setUniform(int, uint32_t, const unsigned int, bool);
+		void setUniform(int, uint32_t, const unsigned long, bool);
 		
-		void setUniform(int nLoc, uint32_t, const float value, bool force = false);
-		void setUniform(int nLoc, uint32_t, const vec2& value, bool force = false);
-		void setUniform(int nLoc, uint32_t, const vec3& value, bool force = false);
-		void setUniform(int nLoc, uint32_t, const vec4& value, bool force = false);
-		void setUniform(int nLoc, uint32_t, const mat3& value, bool force = false);
-		void setUniform(int nLoc, uint32_t, const mat4& value, bool force = false);
+		void setUniform(int, uint32_t, const float, bool force = false);
+		
+		void setUniform(int, uint32_t, const vec2&, bool force = false);
+		void setUniform(int, uint32_t, const vec3&, bool force = false);
+		void setUniform(int, uint32_t, const vec4&, bool force = false);
+		
+		void setUniform(int, uint32_t, const mat3&, bool force = false);
+		void setUniform(int, uint32_t, const mat4&, bool force = false);
 
-		void setUniform(int nLoc, uint32_t, const vec4* value, size_t amount);
-		void setUniform(int nLoc, uint32_t, const mat4* value, size_t amount);
+		void setUniform(int, uint32_t, const vec4* value, size_t amount);
+		void setUniform(int, uint32_t, const mat4* value, size_t amount);
+
+		void setUniformDirectly(int, uint32_t, const vec4&);
+		void setUniformDirectly(int, uint32_t, const mat4& value);
 		
 		template <typename T>
-		void setUniform(const std::string& name, const T& value)
+		void setUniform(const std::string& name, const T& value, bool force = false)
 		{
 			auto i = findUniform(name);
 			if (i != _uniforms.end())
-				setUniform(i->second.location, i->second.type, value);
+				setUniform(i->second.location, i->second.type, value, force);
 		}
 
 		template <typename T>
@@ -118,8 +123,16 @@ namespace et
 		}
 		
 		template <typename T>
-		void setUniform(const ProgramUniform& u, const T& value)
-			{ setUniform(u.location, u.type, value); }
+		void setUniform(const ProgramUniform& u, const T& value, bool force = false)
+			{ setUniform(u.location, u.type, value, force); }
+
+		template <typename T>
+		void setUniformDirectly(const ProgramUniform& u, const T& value)
+			{ setUniformDirectly(u.location, u.type, value); }
+		
+		template <typename T>
+		void setUniform(const ProgramUniform& u, const T* value, size_t amount)
+			{ setUniform(u.location, u.type, value, amount); }
 		
 		void buildProgram(const std::string& vertex_source, const std::string& geom_source,
 			const std::string& frag_source);

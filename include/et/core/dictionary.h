@@ -217,7 +217,8 @@ namespace et
 		
 		ValueClass valueClassForKey(const std::string&) const;
 		
-		ValueBase::Pointer baseValueForKeyPath(const std::vector<std::string>& key) const;
+		ValueBase::Pointer objectForKey(const std::string& key) const;
+		ValueBase::Pointer objectForKeyPath(const std::vector<std::string>& key) const;
 		
 		bool empty() const
 			{ return reference().content.empty(); }
@@ -243,20 +244,23 @@ namespace et
 		template <typename T, ValueClass C>
 		void setValueForKeyPath(const StringList& keyPath, const T& value)
 		{
-			auto v = baseValueForKeyPath(keyPath);
+			auto v = objectForKeyPath(keyPath);
 			if (v.invalid() || (v->valueClass() != C)) return;
 			T(v)->content = value->content;
+		}
+
+		template <typename T, ValueClass C>
+		ValuePointer<T, C> valueForKey(const std::string& key, ValuePointer<T, C> def) const
+		{
+			auto i = objectForKey(key);
+			return (i.invalid() || (i->valueClass() != C)) ? def : ValuePointer<T, C>(i);
 		}
 		
 		template <typename T, ValueClass C>
 		ValuePointer<T, C> valueForKeyPath(const std::vector<std::string>& key, ValuePointer<T, C> def) const
 		{
-			auto i = baseValueForKeyPath(key);
+			auto i = objectForKeyPath(key);
 			return (i.invalid() || (i->valueClass() != C)) ? def : ValuePointer<T, C>(i);
 		}
-		
-		template <typename T, ValueClass C>
-		ValuePointer<T, C> valueForKey(const std::string& key, ValuePointer<T, C> def) const
-			{ return valueForKeyPath(std::vector<std::string>(1, key), def); }
 	};
 }

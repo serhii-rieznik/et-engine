@@ -180,8 +180,15 @@ std::string et::glInternalFormatToString(int format)
 		CASE_VALUE(GL_RGB)
 		CASE_VALUE(GL_RGBA)
 		CASE_VALUE(GL_RGBA4)
-		CASE_VALUE(GL_RGB565)
 		CASE_VALUE(GL_RGB5_A1)
+			
+#if defined(GL_RGB4)
+		CASE_VALUE(GL_RGB4)
+#endif
+			
+#if defined(GL_RGB565)
+		CASE_VALUE(GL_RGB565)
+#endif
 
 #if defined(GL_DEPTH_COMPONENT24)
 		CASE_VALUE(GL_DEPTH_COMPONENT24)
@@ -223,16 +230,12 @@ std::string et::glInternalFormatToString(int format)
 	CASE_VALUE(GL_RGBA16F)
 #endif
 			
-#if defined(GL_RGBA16F)
+#if defined(GL_RGBA32F)
 	CASE_VALUE(GL_RGBA32F)
 #endif
 			
 #if defined(GL_RGB32F)
 	CASE_VALUE(GL_RGB32F)
-#endif
-
-#if defined(GL_RGB4)
-	CASE_VALUE(GL_RGB4)
 #endif
 
 #if defined(GL_R11F_G11F_B10F)
@@ -650,8 +653,10 @@ size_t et::bitsPerPixelForTextureFormat(uint32_t internalFormat, uint32_t type)
 		case GL_RGBA32F:
 			return 3 * bitsPerPixelForType(type);
 			
+#if defined(GL_RGB565)
 		case GL_RGB565:
 			return 2;
+#endif
 			
 		default:
 			assert("Not yet implemented for this format." && false);

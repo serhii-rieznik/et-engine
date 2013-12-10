@@ -58,6 +58,8 @@ namespace et
 		uint32_t maxSamples() const
 			{ return _maxSamples; }
 		
+		bool hasExtension(const std::string&);
+		
 		void checkCaps();
 
 	private:
@@ -65,6 +67,8 @@ namespace et
 		std::string _versionShortString;
 		std::string _glslVersionString;
 		std::string _glslVersionShortString;
+		
+		std::map<std::string, int> _extensions;
 
 		uint32_t _maxCubemapTextureSize = 0;
 		uint32_t _maxSamples = 0;

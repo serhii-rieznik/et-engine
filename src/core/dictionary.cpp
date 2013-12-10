@@ -74,15 +74,20 @@ ValueBase::Pointer Dictionary::baseValueForKeyPathInHolder(const std::vector<std
 	return ValueBase::Pointer();
 }
 
-ValueBase::Pointer Dictionary::baseValueForKeyPath(const std::vector<std::string>& path) const
+ValueBase::Pointer Dictionary::objectForKeyPath(const std::vector<std::string>& path) const
 {
 	assert(path.size() > 0);
 	return baseValueForKeyPathInHolder(path, *this);
 }
 
+ValueBase::Pointer Dictionary::objectForKey(const std::string& key) const
+{
+	return hasKey(key) ? reference().content.at(key) : ValueBase::Pointer();
+}
+
 bool Dictionary::valueForKeyPathIsClassOf(const std::vector<std::string>& key, ValueClass c) const
 {
-	auto v = baseValueForKeyPath(key);
+	auto v = objectForKeyPath(key);
 	return v.valid() && (v->valueClass() == c);
 }
 
@@ -93,7 +98,7 @@ bool Dictionary::hasKey(const std::string& key) const
 
 ValueClass Dictionary::valueClassForKey(const std::string& key) const
 {
-	return hasKey(key) ? baseValueForKeyPath(StringList(1, key))->valueClass() : ValueClass_Invalid;
+	return hasKey(key) ? objectForKeyPath(StringList(1, key))->valueClass() : ValueClass_Invalid;
 }
 
 StringList Dictionary::allKeyPaths()

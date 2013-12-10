@@ -87,10 +87,11 @@ void RenderState::setActiveTextureUnit(uint32_t unit, bool force)
 
 void RenderState::bindTexture(uint32_t unit, uint32_t texture, uint32_t target, bool force)
 {
-	setActiveTextureUnit(unit, force);
 	if (force || (_currentState.boundTextures[target][unit] != texture))
 	{
 		_currentState.boundTextures[target][unit] = texture;
+		
+		setActiveTextureUnit(unit, force);
 		etBindTexture(target, texture);
 	}
 }

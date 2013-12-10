@@ -110,7 +110,7 @@
 	{ \
 		if ((C) == false) \
 		{ \
-			log::warning("Condition: "#C"\nfailed at: %s [%d]", __FILE__, __LINE__); \
+			et::log::warning("Condition: "#C"\nfailed at: %s [%d]", __FILE__, __LINE__); \
 			abort(); \
 		} \
 	}

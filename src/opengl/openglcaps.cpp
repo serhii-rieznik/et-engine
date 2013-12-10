@@ -10,6 +10,11 @@
 
 using namespace et;
 
+bool OpenGLCapabilites::hasExtension(const std::string& e)
+{
+	return _extensions.count(lowercase(e)) > 0;
+}
+
 void OpenGLCapabilites::checkCaps()
 {
 	const char* glv = reinterpret_cast<const char*>(glGetString(GL_VERSION));
@@ -53,6 +58,33 @@ void OpenGLCapabilites::checkCaps()
 	
 	_version = (strToInt(_glslVersionShortString) < 130) || (lowercaseVersion.find("es") != std::string::npos) ?
 		OpenGLVersion_Old : OpenGLVersion_New;
+	
+	const char* ext = reinterpret_cast<const char*>(glGetString(GL_EXTENSIONS));
+	if (ext != nullptr)
+	{
+		std::string extString(ext);
+		
+		size_t spacePosition = 0;
+		do
+		{
+			spacePosition = extString.find(ET_SPACE);
+			if (spacePosition == std::string::npos)
+				break;
+			
+			std::string extension = lowercase(extString.substr(0, spacePosition));
+			_extensions[extension] = 1;
+			extString.erase(0, spacePosition + 1);
+		}
+		while ((extString.size() > 0) && (spacePosition != std::string::npos));
+		
+		trim(extString);
+		
+		if (extString.size() > 0)
+		{
+			lowercase(extString);
+			_extensions[extString] = 1;
+		}
+	}
 	
 	int maxSize = 0;
 	glGetIntegerv(GL_MAX_CUBE_MAP_TEXTURE_SIZE, &maxSize);
