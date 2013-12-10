@@ -186,16 +186,30 @@ void PVRLoader::loadInfoFromV3Header(const PVRHeader3& header, const BinaryDataS
 	if (pixelFormat == PVRVersion3Format_RGB)
 	{
 		desc.compressed = false;
-        desc.bitsPerPixel = 24;
 		desc.channels = 3;
         desc.format = GL_RGB;
 		desc.internalformat = GL_RGB;
+		
+		if ((header.channelType == PVRChannelType_UnsignedByte) || (header.channelType == PVRChannelType_UnsignedByteNorm))
+		{
+			desc.type = GL_UNSIGNED_BYTE;
+			desc.bitsPerPixel = desc.channels * bitsPerPixelForType(desc.type);
+		}
+		else if ((header.channelType == PVRChannelType_UnsignedShort) || (header.channelType == PVRChannelType_UnsignedShortNorm))
+		{
+			desc.type = GL_UNSIGNED_SHORT_5_6_5;
+			desc.bitsPerPixel = bitsPerPixelForType(desc.type);
+		}
+		else
+		{
+			ET_ASSERT("Invalid channel type for RGB format");
+		}
 	}
 	else if (pixelFormat == PVRVersion3Format_RGBA)
 	{
 		desc.compressed = false;
-        desc.bitsPerPixel = 32;
 		desc.channels = 4;
+        desc.bitsPerPixel = desc.channels * bitsPerPixelForType(desc.type);
         desc.format = GL_RGBA;
 		desc.internalformat = GL_RGBA;
 	}

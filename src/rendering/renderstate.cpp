@@ -81,7 +81,9 @@ void RenderState::setActiveTextureUnit(uint32_t unit, bool force)
 	if ((unit != _currentState.activeTextureUnit) || force)
 	{
 		_currentState.activeTextureUnit = unit;
+		
 		glActiveTexture(GL_TEXTURE0 + _currentState.activeTextureUnit);
+		checkOpenGLError("glActiveTexture(GL_TEXTURE0 + %u)", _currentState.activeTextureUnit);
 	}
 }
 
