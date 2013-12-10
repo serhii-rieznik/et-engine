@@ -19,7 +19,8 @@ enum PVRFormat
 	PVRVersion3Format_PVRTC_4bpp_RGB = 2,
 	PVRVersion3Format_PVRTC_4bpp_RGBA = 3,
 	
-	PVRVersion3Format_RGBA = ET_COMPOSE_UINT32('a', 'b', 'g', 'r'),
+	PVRVersion3Format_RGB = ET_COMPOSE_UINT32_INVERTED('r', 'g', 'b',  0),
+	PVRVersion3Format_RGBA = ET_COMPOSE_UINT32_INVERTED('r', 'g', 'b', 'a'),
 	
 	PVRVersion3Format_mask = 0xffffffff,
     
@@ -182,7 +183,15 @@ void PVRLoader::loadInfoFromV3Header(const PVRHeader3& header, const BinaryDataS
 	}
 	else 
 #endif		
-	if (pixelFormat == PVRVersion3Format_RGBA)
+	if (pixelFormat == PVRVersion3Format_RGB)
+	{
+		desc.compressed = false;
+        desc.bitsPerPixel = 24;
+		desc.channels = 3;
+        desc.format = GL_RGB;
+		desc.internalformat = GL_RGB;
+	}
+	else if (pixelFormat == PVRVersion3Format_RGBA)
 	{
 		desc.compressed = false;
         desc.bitsPerPixel = 32;
@@ -192,7 +201,18 @@ void PVRLoader::loadInfoFromV3Header(const PVRHeader3& header, const BinaryDataS
 	}
 	else
 	{
-		log::error("Unresolved PVR pixel format: %lld", header.pixelFormat);
+		if ((header.pixelFormat & 0x000000ff) >= 32)
+		{
+			log::error("Unresolved PVR pixel format: %lld (%c%c%c%c)", header.pixelFormat,
+					   static_cast<char>((header.pixelFormat & 0x000000ff) >> 0),
+					   static_cast<char>((header.pixelFormat & 0x0000ff00) >> 8),
+					   static_cast<char>((header.pixelFormat & 0x00ff0000) >> 16),
+					   static_cast<char>((header.pixelFormat & 0xff000000) >> 24));
+		}
+		else
+		{
+			log::error("Unresolved PVR pixel format: %lld", header.pixelFormat);
+		}
 	}
 }
 
