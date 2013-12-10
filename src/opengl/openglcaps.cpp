@@ -60,7 +60,9 @@ void OpenGLCapabilites::checkCaps()
 		OpenGLVersion_Old : OpenGLVersion_New;
 	
 	const char* ext = nullptr;
+#if defined(GL_NUM_EXTENSIONS)
 	if (_version == OpenGLVersion_Old)
+#endif
 	{
 		ext = reinterpret_cast<const char*>(glGetString(GL_EXTENSIONS));
 		checkOpenGLError("glGetString(GL_EXTENSIONS)");
@@ -91,6 +93,7 @@ void OpenGLCapabilites::checkCaps()
 			}
 		}
 	}
+#if defined(GL_NUM_EXTENSIONS)
 	else
 	{
 		int numExtensions = 0;
@@ -102,6 +105,7 @@ void OpenGLCapabilites::checkCaps()
 			_extensions[lowercase(ext)] = 1;
 		}
 	}
+#endif
 	
 	int maxSize = 0;
 	glGetIntegerv(GL_MAX_CUBE_MAP_TEXTURE_SIZE, &maxSize);
