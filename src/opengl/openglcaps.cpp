@@ -59,43 +59,63 @@ void OpenGLCapabilites::checkCaps()
 	_version = (strToInt(_glslVersionShortString) < 130) || (lowercaseVersion.find("es") != std::string::npos) ?
 		OpenGLVersion_Old : OpenGLVersion_New;
 	
-	const char* ext = reinterpret_cast<const char*>(glGetString(GL_EXTENSIONS));
-	if (ext != nullptr)
+	const char* ext = nullptr;
+	if (_version == OpenGLVersion_Old)
 	{
-		std::string extString(ext);
+		ext = reinterpret_cast<const char*>(glGetString(GL_EXTENSIONS));
+		checkOpenGLError("glGetString(GL_EXTENSIONS)");
 		
-		size_t spacePosition = 0;
-		do
+		if (ext != nullptr)
 		{
-			spacePosition = extString.find(ET_SPACE);
-			if (spacePosition == std::string::npos)
-				break;
+			std::string extString(ext);
 			
-			std::string extension = lowercase(extString.substr(0, spacePosition));
-			_extensions[extension] = 1;
-			extString.erase(0, spacePosition + 1);
+			size_t spacePosition = 0;
+			do
+			{
+				spacePosition = extString.find(ET_SPACE);
+				if (spacePosition == std::string::npos)
+					break;
+				
+				std::string extension = lowercase(extString.substr(0, spacePosition));
+				_extensions[extension] = 1;
+				extString.erase(0, spacePosition + 1);
+			}
+			while ((extString.size() > 0) && (spacePosition != std::string::npos));
+			
+			trim(extString);
+			
+			if (extString.size() > 0)
+			{
+				lowercase(extString);
+				_extensions[extString] = 1;
+			}
 		}
-		while ((extString.size() > 0) && (spacePosition != std::string::npos));
-		
-		trim(extString);
-		
-		if (extString.size() > 0)
+	}
+	else
+	{
+		int numExtensions = 0;
+		glGetIntegerv(GL_NUM_EXTENSIONS, &numExtensions);
+		checkOpenGLError("glGetIntegerv(GL_NUM_EXTENSIONS, ...");
+		for (int i = 0; i < numExtensions; ++i)
 		{
-			lowercase(extString);
-			_extensions[extString] = 1;
+			ext = reinterpret_cast<const char*>(glGetStringi(GL_EXTENSIONS, i));
+			_extensions[lowercase(ext)] = 1;
 		}
 	}
 	
 	int maxSize = 0;
 	glGetIntegerv(GL_MAX_CUBE_MAP_TEXTURE_SIZE, &maxSize);
+	checkOpenGLError("glGetIntegerv(GL_MAX_CUBE_MAP_TEXTURE_SIZE, ...");
 	_maxCubemapTextureSize = static_cast<uint32_t>(maxSize);
 
 	int maxSamples = 0;
 	glGetIntegerv(GL_MAX_SAMPLES, &maxSamples);
+	checkOpenGLError("glGetIntegerv(GL_MAX_SAMPLES, ...");
 	_maxSamples = static_cast<uint32_t>(maxSamples);
 	
 	int maxUnits = 0;
 	glGetIntegerv(GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS, &maxUnits);
+	checkOpenGLError("glGetIntegerv(GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS, ...");
 	if (maxUnits > 0)
 		setFlag(OpenGLFeature_VertexTextureFetch);
 

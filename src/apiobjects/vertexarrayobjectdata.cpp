@@ -45,6 +45,7 @@ void VertexArrayObjectData::init()
 		_rs.bindVertexArray(_vao);
 	}
 #endif
+	
 	_rs.bindBuffers(_vb, _ib, true);
 }
 
