@@ -404,8 +404,8 @@ namespace et
 
 	inline void normalizeAngle(float& angle)
 	{
-		while (angle > DOUBLE_PI) angle -= DOUBLE_PI;
-		while (angle < DOUBLE_PI) angle += DOUBLE_PI;
+		while (angle < -PI) angle += DOUBLE_PI;
+		while (angle > PI) angle -= DOUBLE_PI;
 	}
 	
 	template <typename T>
