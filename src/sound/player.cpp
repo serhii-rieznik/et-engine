@@ -77,7 +77,6 @@ void Player::play(bool looped)
 	alGetSourcei(_private->source, AL_SOURCE_STATE, &state);
 	if (state == AL_PLAYING)
 	{
-		
 	}
 	else if (state == AL_PAUSED)
 	{

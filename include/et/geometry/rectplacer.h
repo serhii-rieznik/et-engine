@@ -25,6 +25,9 @@ namespace et
 			{ return _placedItems; }
 		
 		void addPlacedRect(const rect&);
+		
+		const vec2i& contextSize() const
+			{ return _contextSize; }
 
 	private:
 		vec2i _contextSize;

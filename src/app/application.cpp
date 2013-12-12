@@ -17,9 +17,9 @@ namespace et
 
 IApplicationDelegate* et::Application::_delegate = nullptr;
 
-Application::Application() :
-	_renderContext(nullptr), _exitCode(0), _lastQueuedTimeMSec(queryContiniousTimeInMilliSeconds()),
-	_fpsLimitMSec(0), _fpsLimitMSecFractPart(0)
+Application::Application() : _renderContext(nullptr), _exitCode(0),
+	_lastQueuedTimeMSec(queryContiniousTimeInMilliSeconds()),
+	_fpsLimitMSec(0), _fpsLimitMSecFractPart(0), _postResizeOnActivate(false)
 {
 	threading();
 	
@@ -114,6 +114,13 @@ void Application::setActive(bool active)
 			resume();
 
 		_delegate->applicationWillActivate();
+		
+		if (_postResizeOnActivate)
+		{
+			_delegate->applicationWillResizeContext(_renderContext->sizei());
+			_postResizeOnActivate = false;
+		}
+		
 		platformActivate();
 	}
 	else
@@ -128,8 +135,13 @@ void Application::setActive(bool active)
 
 void Application::contextResized(const vec2i& size)
 {
-	if (_running && _active)
-		_delegate->applicationWillResizeContext(size);
+	if (_running)
+	{
+		if (_active)
+			_delegate->applicationWillResizeContext(size);
+		else
+			_postResizeOnActivate = true;
+	}
 }
 
 float Application::cpuLoad() const

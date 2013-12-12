@@ -270,6 +270,10 @@ void TextureData::updatePartialDataDirectly(RenderContext* rc, const vec2i& offs
 		generateTexture(rc);
 	
     rc->renderState().bindTexture(defaultBindingUnit, _glID, _desc->target);
+	
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+	checkOpenGLError("glPixelStorei");
+	
 	glTexSubImage2D(_desc->target, 0, offset.x, offset.y, aSize.x, aSize.y, _desc->format, _desc->type, data);
 	checkOpenGLError("glTexSubImage2D");
 }

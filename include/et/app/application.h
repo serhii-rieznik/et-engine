@@ -141,6 +141,7 @@ namespace et
 		uint64_t _fpsLimitMSecFractPart;
 		
 		int _exitCode;
+		bool _postResizeOnActivate;
 	};
 
 	inline Application& application()

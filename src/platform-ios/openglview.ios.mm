@@ -10,6 +10,7 @@
 #include <et/opengl/openglcaps.h>
 #include <et/platform-ios/openglview.h>
 #include <et/rendering/rendercontext.h>
+#include <et/app/applicationnotifier.h>
 
 extern NSString* etKeyboardRequiredNotification;
 extern NSString* etKeyboardNotRequiredNotification;
@@ -28,11 +29,11 @@ using namespace et;
     EAGLContext* _context;
 	NSMutableCharacterSet* allowedCharacters;
 	
-	et::Framebuffer::Pointer _mainFramebuffer;
-	et::Framebuffer::Pointer _multisampledFramebuffer;
+	Framebuffer::Pointer _mainFramebuffer;
+	Framebuffer::Pointer _multisampledFramebuffer;
 	
-	et::RenderContext* _rc;
-	et::RenderContextNotifier* _rcNotifier;
+	RenderContext* _rc;
+	RenderContextNotifier _rcNotifier;
 	
 	BOOL _keyboardAllowed;
 	BOOL _multisampled;
@@ -81,7 +82,6 @@ using namespace et;
 - (void)dealloc
 {
     [self deleteFramebuffer];
-	delete _rcNotifier;
 	
 #if (!ET_OBJC_ARC_ENABLED)
     [_context release];
@@ -92,7 +92,6 @@ using namespace et;
 - (void)performInitializationWithParameters:(const RenderContextParameters&)params
 {
 	_multisampled = params.multisamplingQuality == MultisamplingQuality_Best;
-	_rcNotifier = new RenderContextNotifier;
 	
 	CAEAGLLayer* eaglLayer = (CAEAGLLayer*)self.layer;
 	
@@ -194,41 +193,42 @@ using namespace et;
 		glLayer.contentsScale = [[UIScreen mainScreen] scale];
 		self.contentScaleFactor = glLayer.contentsScale;
 		
+		int colorFormat = GL_RGBA8;
+		int depthFormat = GL_DEPTH_COMPONENT16;
+		
 		vec2i size(static_cast<int>(glLayer.bounds.size.width * glLayer.contentsScale),
 			static_cast<int>(glLayer.bounds.size.height * glLayer.contentsScale));
+		
+		GLuint colorRenderBuffer = 0;
 		
 		if (_mainFramebuffer.invalid())
 		{
 			_mainFramebuffer = _rc->framebufferFactory().createFramebuffer(size, "et-main-fbo", 0, 0,
-				0, GL_DEPTH_COMPONENT16, GL_DEPTH_COMPONENT, GL_UNSIGNED_INT, true, false);
-			
-			GLuint colorRenderbuffer = 0;
-			glGenRenderbuffers(1, &colorRenderbuffer);
-			_rc->renderState().bindRenderbuffer(colorRenderbuffer);
-			if (![_context renderbufferStorage:GL_RENDERBUFFER fromDrawable:glLayer])
-			{
-				log::error("Unable to create render buffer.");
-				assert(false);
-			}
-			_mainFramebuffer->setColorRenderbuffer(colorRenderbuffer);
+				0, depthFormat, GL_DEPTH_COMPONENT, GL_UNSIGNED_INT, true, false);
+			glGenRenderbuffers(1, &colorRenderBuffer);
 		}
 		else
 		{
 			_rc->renderState().bindFramebuffer(_mainFramebuffer);
-			_rc->renderState().bindRenderbuffer(_mainFramebuffer->colorRenderbuffer());
-			if (![_context renderbufferStorage:GL_RENDERBUFFER fromDrawable:glLayer])
-			{
-				log::error("Unable to create render buffer.");
-				assert(false);
-			}
-			_mainFramebuffer->resize(size);
+			colorRenderBuffer = _mainFramebuffer->colorRenderbuffer();
 		}
 		
-		int colorFormat = GL_RGBA8;
-		_rc->renderState().bindRenderbuffer(_mainFramebuffer->colorRenderbuffer());
-		glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_INTERNAL_FORMAT, &colorFormat);
+		_rc->renderState().bindRenderbuffer(colorRenderBuffer);
+		if (![_context renderbufferStorage:GL_RENDERBUFFER fromDrawable:glLayer])
+			ET_FAIL("Unable to create render buffer.");
+		_mainFramebuffer->setColorRenderbuffer(colorRenderBuffer);
 		
-		int depthFormat = GL_DEPTH_COMPONENT16;
+		glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_WIDTH, &size.x);
+		checkOpenGLError("glGetRenderbufferParameteriv");
+		
+		glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_HEIGHT, &size.y);
+		checkOpenGLError("glGetRenderbufferParameteriv");
+		
+		glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_INTERNAL_FORMAT, &colorFormat);
+		checkOpenGLError("glGetRenderbufferParameteriv");
+
+		_mainFramebuffer->resize(size);
+		
 		_rc->renderState().bindRenderbuffer(_mainFramebuffer->depthRenderbuffer());
 		glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_INTERNAL_FORMAT, &depthFormat);
 		
@@ -247,8 +247,9 @@ using namespace et;
 		}
 		
 		_rc->renderState().setDefaultFramebuffer([self defaultFramebuffer]);
+		
 		[self beginRender];
-		_rcNotifier->resized(size, _rc);
+		_rcNotifier.resized(size, _rc);
 		[self endRender];
 	}
 }

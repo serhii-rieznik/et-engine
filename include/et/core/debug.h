@@ -108,13 +108,13 @@
 #
 #	define ET_ASSERT(C)	\
 	{ \
-		if ((C) == false) \
+		if (!(C)) \
 		{ \
 			et::log::warning("Condition: "#C"\nfailed at: %s [%d]", __FILE__, __LINE__); \
 			abort(); \
 		} \
 	}
-#	define ET_FAIL(MSG) { log::error(#MSG"\nfailed at: %s [%d]", __FILE__, __LINE__); }
+#	define ET_FAIL(MSG) { log::error(#MSG"\nfailed at: %s [%d]", __FILE__, __LINE__); abort(); }
 #
 #else
 #

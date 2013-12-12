@@ -28,6 +28,7 @@ extern NSString* etKeyboardNotRequiredNotification;
 
 @implementation etOpenGLViewController
 
+@synthesize autorotationEnabled = _autorotationEnabled;
 @synthesize context = _context;
 
 - (id)initWithParameters:(RenderContextParameters)params
@@ -36,6 +37,7 @@ extern NSString* etKeyboardNotRequiredNotification;
 	
 	if (self)
 	{
+		_autorotationEnabled = true;
 		_params = params;
 		
 		BOOL initialized = [self performInitialization];
@@ -124,50 +126,52 @@ extern NSString* etKeyboardNotRequiredNotification;
 
 - (BOOL)shouldAutorotate
 {
-	return (_params.supportedInterfaceOrientations > 0);
+	return /*_autorotationEnabled && */ (_params.supportedInterfaceOrientations > 0);
 }
 
 - (NSUInteger)supportedInterfaceOrientations
 {
 	NSUInteger result = 0;
 	
-	if (_params.supportedInterfaceOrientations & InterfaceOrientation_Portrait)
-		result += UIInterfaceOrientationMaskPortrait;
-	if (_params.supportedInterfaceOrientations & InterfaceOrientation_PortraitUpsideDown)
-		result += UIInterfaceOrientationMaskPortraitUpsideDown;
-	if (_params.supportedInterfaceOrientations & InterfaceOrientation_LandscapeLeft)
-		result += UIInterfaceOrientationMaskLandscapeLeft;
-	if (_params.supportedInterfaceOrientations & InterfaceOrientation_LandscapeRight)
-		result += UIInterfaceOrientationMaskLandscapeRight;
+//	if (_autorotationEnabled)
+	{
+		if (_params.supportedInterfaceOrientations & InterfaceOrientation_Portrait)
+			result += UIInterfaceOrientationMaskPortrait;
+		if (_params.supportedInterfaceOrientations & InterfaceOrientation_PortraitUpsideDown)
+			result += UIInterfaceOrientationMaskPortraitUpsideDown;
+		if (_params.supportedInterfaceOrientations & InterfaceOrientation_LandscapeLeft)
+			result += UIInterfaceOrientationMaskLandscapeLeft;
+		if (_params.supportedInterfaceOrientations & InterfaceOrientation_LandscapeRight)
+			result += UIInterfaceOrientationMaskLandscapeRight;
+	}
 	
 	return result;
 }
 
 #endif
 
-#if defined(__IPHONE_7_0)
-
 - (BOOL)prefersStatusBarHidden
 {
 	return YES;
 }
 
-#endif
-
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation
 {
-    if ((toInterfaceOrientation == UIInterfaceOrientationLandscapeLeft) &&
-        (_params.supportedInterfaceOrientations & InterfaceOrientation_LandscapeLeft)) return YES;
-    
-    if ((toInterfaceOrientation == UIInterfaceOrientationLandscapeRight) &&
-        (_params.supportedInterfaceOrientations & InterfaceOrientation_LandscapeRight)) return YES;
-    
-    if ((toInterfaceOrientation == UIInterfaceOrientationPortrait) &&
-        (_params.supportedInterfaceOrientations & InterfaceOrientation_Portrait)) return YES;
-    
-    if ((toInterfaceOrientation == UIInterfaceOrientationPortraitUpsideDown) &&
-        (_params.supportedInterfaceOrientations & InterfaceOrientation_PortraitUpsideDown)) return YES;
-    
+//	if (_autorotationEnabled)
+	{
+		if ((toInterfaceOrientation == UIInterfaceOrientationLandscapeLeft) &&
+			(_params.supportedInterfaceOrientations & InterfaceOrientation_LandscapeLeft)) return YES;
+		
+		if ((toInterfaceOrientation == UIInterfaceOrientationLandscapeRight) &&
+			(_params.supportedInterfaceOrientations & InterfaceOrientation_LandscapeRight)) return YES;
+		
+		if ((toInterfaceOrientation == UIInterfaceOrientationPortrait) &&
+			(_params.supportedInterfaceOrientations & InterfaceOrientation_Portrait)) return YES;
+		
+		if ((toInterfaceOrientation == UIInterfaceOrientationPortraitUpsideDown) &&
+			(_params.supportedInterfaceOrientations & InterfaceOrientation_PortraitUpsideDown)) return YES;
+    }
+	
     return NO;
 }
 
@@ -181,16 +185,39 @@ extern NSString* etKeyboardNotRequiredNotification;
 	[_glView endRender];
 }
 
-- (void)presentModalViewController:(UIViewController *)modalViewController animated:(BOOL)animated
+- (void)presentViewController:(UIViewController*)viewControllerToPresent animated:(BOOL)flag completion:(void(^)())completion
 {
+	_autorotationEnabled = NO;
 	_notifier.notifyDeactivated();
+	
+	[super presentViewController:viewControllerToPresent animated:flag completion:completion];
+}
+
+- (void)dismissViewControllerAnimated:(BOOL)flag completion:(void (^)())completion
+{
+	_autorotationEnabled = YES;
+	_notifier.notifyActivated();
+	
+	[super dismissViewControllerAnimated:flag completion:completion];
+}
+
+/*
+ * Modal - depreacted
+ */
+- (void)presentModalViewController:(UIViewController*)modalViewController animated:(BOOL)animated
+{
+	_autorotationEnabled = NO;
+	_notifier.notifyDeactivated();
+	
 	[super presentModalViewController:modalViewController animated:animated];
 }
 
 - (void)dismissModalViewControllerAnimated:(BOOL)animated
 {
-	[super dismissModalViewControllerAnimated:animated];
+	_autorotationEnabled = YES;
 	_notifier.notifyActivated();
+	
+	[super dismissModalViewControllerAnimated:animated];
 }
 
 - (BOOL)canBecomeFirstResponder
