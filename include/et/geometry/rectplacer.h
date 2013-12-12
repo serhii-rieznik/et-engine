@@ -18,10 +18,13 @@ namespace et
 
 	public:
 		RectPlacer(const vec2i& contextSize, bool addSpace);
+		
 		bool place(const vec2i& size, rect& placedPosition);
 
 		const RectList& placedItems() const 
 			{ return _placedItems; }
+		
+		void addPlacedRect(const rect&);
 
 	private:
 		vec2i _contextSize;

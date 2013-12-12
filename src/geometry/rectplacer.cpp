@@ -9,9 +9,15 @@
 
 using namespace et;
 
-RectPlacer::RectPlacer(const vec2i& contextSize, bool addSpace) : _contextSize(contextSize), _addSpace(addSpace)
+RectPlacer::RectPlacer(const vec2i& contextSize, bool addSpace) :
+	_contextSize(contextSize), _addSpace(addSpace)
 {
 
+}
+
+void RectPlacer::addPlacedRect(const rect& r)
+{
+	_placedItems.push_back(r);
 }
 
 bool RectPlacer::place(const vec2i& size, rect& placedPosition)

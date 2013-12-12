@@ -57,8 +57,8 @@ void TextureData::setWrap(RenderContext* rc, TextureWrap s, TextureWrap t, Textu
 	_wrap = vector3<TextureWrap>(s, t, r);
 
 	rc->renderState().bindTexture(defaultBindingUnit, _glID, _desc->target);
-
-	glTexParameteri(_desc->target, GL_TEXTURE_WRAP_S, textureWrapValue(_wrap.x)); 
+	
+	glTexParameteri(_desc->target, GL_TEXTURE_WRAP_S, textureWrapValue(_wrap.x));
 	checkOpenGLError("glTexParameteri<WRAP_S> - %s", name().c_str());
 	
 	glTexParameteri(_desc->target, GL_TEXTURE_WRAP_T, textureWrapValue(_wrap.y));
@@ -259,15 +259,18 @@ void TextureData::updateDataDirectly(RenderContext* rc, const vec2i& size, char*
 }
 
 void TextureData::updatePartialDataDirectly(RenderContext* rc, const vec2i& offset,
-	const vec2i& size, char* data, size_t)
+	const vec2i& aSize, char* data, size_t)
 {
-	assert((_desc->target == GL_TEXTURE_2D) && !_desc->compressed);
+	ET_ASSERT((_desc->target == GL_TEXTURE_2D) && !_desc->compressed);
+	ET_ASSERT((offset.x > 0) && (offset.y > 0));
+	ET_ASSERT((offset.x + aSize.x) < _desc->size.x);
+	ET_ASSERT((offset.y + aSize.y) < _desc->size.y);
 	
 	if (_glID == 0)
 		generateTexture(rc);
 	
     rc->renderState().bindTexture(defaultBindingUnit, _glID, _desc->target);
-	glTexSubImage2D(_desc->target, 0, offset.x, offset.y, size.x, size.y, _desc->format, _desc->type, data);
+	glTexSubImage2D(_desc->target, 0, offset.x, offset.y, aSize.x, aSize.y, _desc->format, _desc->type, data);
 	checkOpenGLError("glTexSubImage2D");
 }
 
