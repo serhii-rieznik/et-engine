@@ -16,7 +16,15 @@
 
 using namespace et;
 
-AtomicCounter::AtomicCounter() : _counter(0)
+#if ET_DEBUG
+
+	static const AtomicCounterType validMask =
+		static_cast<AtomicCounterType>(0xfffffffc);
+
+#endif
+
+AtomicCounter::AtomicCounter() :
+	_counter(0)
 {
 }
 
@@ -43,7 +51,7 @@ AtomicBool::AtomicBool() :
 
 bool AtomicBool::operator = (bool b)
 {
-	assert((_value & validMask) == 0);
+	ET_ASSERT((_value & validMask) == 0);
 #if (ET_PLATFORM_ANDROID)
 	__atomic_swap(b, &_value);
 #else
@@ -51,10 +59,6 @@ bool AtomicBool::operator = (bool b)
 #endif
 	return (_value != 0);
 }
-
-#if ET_DEBUG
-	static const AtomicCounterType validMask = static_cast<AtomicCounterType>(0xfffffffc);
-#endif
 
 bool AtomicBool::operator == (bool b)
 	{ ET_ASSERT((_value & validMask) == 0); return b == (_value != 0); }
