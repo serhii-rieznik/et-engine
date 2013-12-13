@@ -11,16 +11,13 @@
 
 namespace et
 {
-
-	class PNGLoader
+	namespace png
 	{
-	public:
-		static void loadInfoFromStream(std::istream& stream, TextureDescription& desc);
-		static void loadInfoFromFile(const std::string& path, TextureDescription& desc);
-
-		static void loadFromStream(std::istream& stream, TextureDescription& desc, bool flip);
-		static void loadFromFile(const std::string& path, TextureDescription& desc, bool flip);
-	};
-
+		void loadInfoFromStream(std::istream& stream, TextureDescription& desc);
+		void loadFromStream(std::istream& stream, TextureDescription& desc, bool flip);
+		
+		void loadInfoFromFile(const std::string& path, TextureDescription& desc);
+		void loadFromFile(const std::string& path, TextureDescription& desc, bool flip);
+	}
 }
 

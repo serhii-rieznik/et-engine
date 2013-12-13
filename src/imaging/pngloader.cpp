@@ -18,7 +18,7 @@ void streamReadData(png_structp pngPtr, png_bytep data, png_size_t length);
 void handlePngError(png_structp, png_const_charp);
 void handlePngWarning(png_structp, png_const_charp);
 
-void PNGLoader::loadInfoFromStream(std::istream& source, TextureDescription& desc)
+void et::png::loadInfoFromStream(std::istream& source, TextureDescription& desc)
 {
 	static const int PNGSIGSIZE = 8;
 
@@ -56,7 +56,7 @@ void PNGLoader::loadInfoFromStream(std::istream& source, TextureDescription& des
 	png_destroy_read_struct(&pngPtr, 0, 0);
 }
 
-void PNGLoader::loadFromStream(std::istream& source, TextureDescription& desc, bool flip)
+void et::png::loadFromStream(std::istream& source, TextureDescription& desc, bool flip)
 {
 	static const int PNGSIGSIZE = 8;
 
@@ -126,7 +126,7 @@ void PNGLoader::loadFromStream(std::istream& source, TextureDescription& desc, b
 	delete [] rowPtrs;
 }
 
-void PNGLoader::loadFromFile(const std::string& path, TextureDescription& desc, bool flip)
+void et::png::loadFromFile(const std::string& path, TextureDescription& desc, bool flip)
 {
 	InputStream file(path, StreamMode_Binary);
 	if (file.valid())
@@ -136,7 +136,7 @@ void PNGLoader::loadFromFile(const std::string& path, TextureDescription& desc, 
 	}
 }
 
-void PNGLoader::loadInfoFromFile(const std::string& path, TextureDescription& desc)
+void et::png::loadInfoFromFile(const std::string& path, TextureDescription& desc)
 {
 	InputStream file(path, StreamMode_Binary);
 	if (file.valid())

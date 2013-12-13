@@ -86,7 +86,7 @@ namespace et
 const unsigned int PVRFormatMask = 0xff;
 const unsigned int PVRHeaderV3Version = 0x03525650;
 
-void PVRLoader::loadInfoFromV2Header(const PVRHeader2& header, TextureDescription& desc)
+void loadInfoFromV2Header(const PVRHeader2& header, TextureDescription& desc)
 {
 	desc.size = vec2i(header.dwWidth, header.dwHeight);
 	desc.type = GL_UNSIGNED_BYTE;
@@ -126,7 +126,7 @@ void PVRLoader::loadInfoFromV2Header(const PVRHeader2& header, TextureDescriptio
 	}
 }
 
-void PVRLoader::loadInfoFromV3Header(const PVRHeader3& header, const BinaryDataStorage&, TextureDescription& desc)
+void loadInfoFromV3Header(const PVRHeader3& header, const BinaryDataStorage&, TextureDescription& desc)
 {
 	desc.layersCount = header.numFaces;
 	assert((desc.layersCount == 1) || (desc.layersCount == 6));
@@ -232,7 +232,7 @@ void PVRLoader::loadInfoFromV3Header(const PVRHeader3& header, const BinaryDataS
 
 static const unsigned int pvrHeader2 = ET_COMPOSE_UINT32('!', 'R', 'V', 'P');
 
-void PVRLoader::loadInfoFromStream(std::istream& stream, TextureDescription& desc)
+void pvr::loadInfoFromStream(std::istream& stream, TextureDescription& desc)
 {
     std::istream::off_type offset = stream.tellg();
 	
@@ -243,7 +243,7 @@ void PVRLoader::loadInfoFromStream(std::istream& stream, TextureDescription& des
 	stream.read(reinterpret_cast<char*>(&header2), sizeof(header2));
 	if (header2.dwPVR == pvrHeader2)
     {
-        PVRLoader::loadInfoFromV2Header(header2, desc);
+		loadInfoFromV2Header(header2, desc);
     }
     else 
     {
@@ -260,7 +260,7 @@ void PVRLoader::loadInfoFromStream(std::istream& stream, TextureDescription& des
 				stream.read(meta.binary(), header3.metaDataSize);
 			}
 			
-            PVRLoader::loadInfoFromV3Header(header3, meta, desc);
+			loadInfoFromV3Header(header3, meta, desc);
         }
         else
 		{
@@ -269,7 +269,7 @@ void PVRLoader::loadInfoFromStream(std::istream& stream, TextureDescription& des
     }
 }
 
-void PVRLoader::loadInfoFromFile(const std::string& path, TextureDescription& desc)
+void pvr::loadInfoFromFile(const std::string& path, TextureDescription& desc)
 {
 	InputStream file(path, StreamMode_Binary);
 	if (file.valid())
@@ -279,7 +279,7 @@ void PVRLoader::loadInfoFromFile(const std::string& path, TextureDescription& de
 	}
 }
 
-void PVRLoader::loadFromStream(std::istream& stream, TextureDescription& desc)
+void pvr::loadFromStream(std::istream& stream, TextureDescription& desc)
 {
 	loadInfoFromStream(stream, desc);
 	
@@ -287,7 +287,7 @@ void PVRLoader::loadFromStream(std::istream& stream, TextureDescription& desc)
 	stream.read(desc.data.binary(), static_cast<std::streamsize>(desc.data.dataSize()));
 }
 
-void PVRLoader::loadFromFile(const std::string& path, TextureDescription& desc)
+void pvr::loadFromFile(const std::string& path, TextureDescription& desc)
 {
 	InputStream file(path, StreamMode_Binary);
 	if (file.valid())

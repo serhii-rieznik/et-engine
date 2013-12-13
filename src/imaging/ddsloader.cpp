@@ -200,14 +200,23 @@ struct DDS_HEADER_DXT10
 
 const uint32_t DDS_HEADER_ID = ET_COMPOSE_UINT32(' ', 'S', 'D', 'D');
 
-const uint32_t FOURCC_DXT1 = ET_COMPOSE_UINT32('1', 'T', 'X', 'D');
-const uint32_t FOURCC_DXT3 = ET_COMPOSE_UINT32('3', 'T', 'X', 'D');
-const uint32_t FOURCC_DXT5 = ET_COMPOSE_UINT32('5', 'T', 'X', 'D');
-const uint32_t FOURCC_ATI1 = ET_COMPOSE_UINT32('1', 'I', 'T', 'A');
-const uint32_t FOURCC_ATI2 = ET_COMPOSE_UINT32('1', 'I', 'T', 'A');
-const uint32_t FOURCC_DX10 = ET_COMPOSE_UINT32('0', '1', 'X', 'D');
+#if defined(GL_COMPRESSED_RGB_S3TC_DXT1_EXT)
+	const uint32_t FOURCC_DXT1 = ET_COMPOSE_UINT32('1', 'T', 'X', 'D');
+#endif
 
-void DDSLoader::loadInfoFromStream(std::istream& source, TextureDescription& desc)
+#if defined(GL_COMPRESSED_RGBA_S3TC_DXT3_EXT)
+	const uint32_t FOURCC_DXT3 = ET_COMPOSE_UINT32('3', 'T', 'X', 'D');
+#endif
+
+#if defined(GL_COMPRESSED_RGBA_S3TC_DXT5_EXT)
+	const uint32_t FOURCC_DXT5 = ET_COMPOSE_UINT32('5', 'T', 'X', 'D');
+#endif
+
+#if defined(GL_COMPRESSED_RG_RGTC2)
+	const uint32_t FOURCC_ATI2 = ET_COMPOSE_UINT32('1', 'I', 'T', 'A');
+#endif
+
+void dds::loadInfoFromStream(std::istream& source, TextureDescription& desc)
 {
 	uint32_t headerId = 0;
 	source.read((char*)&headerId, sizeof(headerId));
@@ -355,6 +364,7 @@ void DDSLoader::loadInfoFromStream(std::istream& source, TextureDescription& des
 			break;
 		}
 #endif
+			
 #if defined(GL_COMPRESSED_RGB_S3TC_DXT1_EXT)
 		case FOURCC_DXT1:
 		{
@@ -417,7 +427,7 @@ void DDSLoader::loadInfoFromStream(std::istream& source, TextureDescription& des
 	};
 }
 
-void DDSLoader::loadFromStream(std::istream& source, TextureDescription& desc)
+void dds::loadFromStream(std::istream& source, TextureDescription& desc)
 {
 	if (source.fail())
 	{
@@ -435,7 +445,7 @@ void DDSLoader::loadFromStream(std::istream& source, TextureDescription& desc)
 	}
 }
 
-void DDSLoader::loadFromFile(const std::string& path, TextureDescription& desc)
+void dds::loadFromFile(const std::string& path, TextureDescription& desc)
 {
 	InputStream file(path, StreamMode_Binary);
 	if (file.valid())
@@ -445,7 +455,7 @@ void DDSLoader::loadFromFile(const std::string& path, TextureDescription& desc)
 	}
 }
 
-void DDSLoader::loadInfoFromFile(const std::string& path, TextureDescription& desc)
+void dds::loadInfoFromFile(const std::string& path, TextureDescription& desc)
 {
 	InputStream file(path, StreamMode_Binary);
 	if (file.valid())

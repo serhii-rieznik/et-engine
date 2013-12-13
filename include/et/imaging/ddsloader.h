@@ -12,13 +12,12 @@
 
 namespace et
 {
-	class DDSLoader
+	namespace dds
 	{
-	public:
-		static void loadFromStream(std::istream& stream, TextureDescription& desc);
-		static void loadFromFile(const std::string& path, TextureDescription& desc);
+		void loadFromStream(std::istream& stream, TextureDescription& desc);
+		void loadFromFile(const std::string& path, TextureDescription& desc);
 
-		static void loadInfoFromStream(std::istream& stream, TextureDescription& desc);
-		static void loadInfoFromFile(const std::string& path, TextureDescription& desc);
-	};
+		void loadInfoFromStream(std::istream& stream, TextureDescription& desc);
+		void loadInfoFromFile(const std::string& path, TextureDescription& desc);
+	}
 }

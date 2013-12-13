@@ -9,10 +9,6 @@
 #include <et/core/tools.h>
 
 using namespace et;
-// using namespace et::plist;
-
-const char charOpeningTag = '<';
-const char charClosingTag = '>';
 
 static const std::string keyOpen = "<key>";
 static const std::string keyClose = "</key>";
