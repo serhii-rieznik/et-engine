@@ -7,13 +7,14 @@
 
 #import <UIKit/UIKit.h>
 #import <Social/Social.h>
-#import <Twitter/Twitter.h>
+
 #include <et/app/application.h>
-#include <et/app/applicationnotifier.h>
 #include <et/platform-ios/social.h>
 
 using namespace et;
 using namespace social;
+
+Event1<bool> et::social::notifications::sharingFinished = Event1<bool>();
 
 @interface SocialController : NSObject
 
@@ -88,27 +89,27 @@ void et::social::postToFacebook(const std::string& text, const std::string& path
 
 - (void)shareWithOptions:(NSDictionary*)d
 {
-	SLComposeViewController* tw = [SLComposeViewController composeViewControllerForServiceType:[d objectForKey:@"service"]];
+	SLComposeViewController* composer =
+		[SLComposeViewController composeViewControllerForServiceType:[d objectForKey:@"service"]];
 	
 	if ([d objectForKey:@"text"] != nil)
-		[tw setInitialText:[d objectForKey:@"text"]];
+		[composer setInitialText:[d objectForKey:@"text"]];
 	
 	if ([d objectForKey:@"image"] != nil)
-		[tw addImage:[UIImage imageWithContentsOfFile:[d objectForKey:@"image"]]];
+		[composer addImage:[UIImage imageWithContentsOfFile:[d objectForKey:@"image"]]];
 		 
 	 if ([d objectForKey:@"image"] != nil)
-		 [tw addURL:[d objectForKey:@"url"]];
+		 [composer addURL:[d objectForKey:@"url"]];
 	
-	tw.completionHandler = ^(TWTweetComposeViewControllerResult result)
+	composer.completionHandler = ^(SLComposeViewControllerResult result)
 	{
-		ApplicationNotifier().notifyActivated();
+		notifications::sharingFinished.invokeInMainRunLoop(result == SLComposeViewControllerResultDone);
 		UIViewController* vc = reinterpret_cast<UIViewController*>(et::application().renderingContextHandle());
 		[vc dismissViewControllerAnimated:YES completion:nil];
 	};
 	
-	ApplicationNotifier().notifyDeactivated();
 	UIViewController* vc = reinterpret_cast<UIViewController*>(et::application().renderingContextHandle());
-	[vc presentViewController:tw animated:YES completion:nil];
+	[vc presentViewController:composer animated:YES completion:nil];
 }
 
 

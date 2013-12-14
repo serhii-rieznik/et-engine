@@ -275,7 +275,9 @@ void TextureData::updatePartialDataDirectly(RenderContext* rc, const vec2i& offs
 	checkOpenGLError("glPixelStorei");
 	
 	glTexSubImage2D(_desc->target, 0, offset.x, offset.y, aSize.x, aSize.y, _desc->format, _desc->type, data);
-	checkOpenGLError("glTexSubImage2D");
+	checkOpenGLError("glTexSubImage2D(%s, 0, %d, %d, %d, %d, %s, %s, 0x%016x)",
+		glTexTargetToString(_desc->target).c_str(), offset.x, offset.y, aSize.x, aSize.y,
+		glInternalFormatToString(_desc->format).c_str(), glTypeToString(_desc->type).c_str(), data);
 }
 
 void TextureData::generateMipMaps(RenderContext* rc)

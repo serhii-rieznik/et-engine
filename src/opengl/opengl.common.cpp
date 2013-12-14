@@ -11,7 +11,7 @@
 
 using namespace et;
 
-#define ET_STOP_ON_OPENGL_ERROR			1
+#define ET_STOP_ON_OPENGL_ERROR			0
 #define CASE_VALUE(V)					case V: return #V;
 
 size_t OpenGLCounters::primitiveCounter = 0;
@@ -78,7 +78,7 @@ void et::checkOpenGLErrorEx(const char* caller, const char* fileName, const char
 		log::error("[%s:%s] %s\n{\n\ttag = %s\n\terr = %s\n}\n", fileName, line, caller,
 			buffer, glErrorToString(error).c_str());
 
-#if defined(ET_STOP_ON_OPENGL_ERROR)
+#if (ET_STOP_ON_OPENGL_ERROR)
 		abort();
 #endif
 	}
