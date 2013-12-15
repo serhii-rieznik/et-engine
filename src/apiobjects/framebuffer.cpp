@@ -405,11 +405,11 @@ void Framebuffer::resize(const vec2i& sz)
 {
 	_description.size = sz;
 	
-	bool hasColor = (_description.colorFormat != 0) && (_description.colorInternalformat != 0) &&
-		(_description.colorType != 0) && (_description.numColorRenderTargets > 0);
+	bool hasColor = (_description.colorInternalformat != 0) && (_description.colorIsRenderbuffer ||
+		((_description.colorFormat != 0) && (_description.colorType != 0) && (_description.numColorRenderTargets > 0)));
 	
-	bool hasDepth = (_description.depthFormat != 0) && (_description.depthInternalformat != 0) &&
-		(_description.depthType != 0);
+	bool hasDepth = (_description.depthInternalformat != 0) && (_description.depthIsRenderbuffer ||
+		((_description.depthFormat != 0) && (_description.depthType != 0)));
 
 	if (hasColor)
 	{
