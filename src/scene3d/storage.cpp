@@ -70,7 +70,7 @@ void Scene3dStorage::serialize(std::ostream& stream, SceneVersion)
 void Scene3dStorage::deserialize(std::istream& stream, ElementFactory*, SceneVersion)
 {
 	int value = deserializeInt(stream);
-	assert(value == 0);
+	ET_ASSERT(value == 0);
 	(void)(value);
 }
 

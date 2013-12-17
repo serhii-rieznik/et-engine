@@ -42,46 +42,46 @@ void Converter::applicationDidLoad(RenderContext* rc)
 	gui::Image imgSelectedPressedState(uiTexture, gui::ImageDescriptor(vec2(192.0f, 32.0f), vec2(32.0f), defOffset));
 
 	gui::Button::Pointer btnOpen(new gui::Button("Open", _mainFont, _mainLayout.ptr()));
-	btnOpen->setBackgroundForState(imgNormalState, gui::ElementState_Default);
-	btnOpen->setBackgroundForState(imgHoverState, gui::ElementState_Hovered);
-	btnOpen->setBackgroundForState(imgPressedState, gui::ElementState_Pressed);
+	btnOpen->setBackgroundForState(imgNormalState, gui::State_Default);
+	btnOpen->setBackgroundForState(imgHoverState, gui::State_Hovered);
+	btnOpen->setBackgroundForState(imgPressedState, gui::State_Pressed);
 	btnOpen->clicked.connect(this, &Converter::onBtnOpenClick);
 
 	gui::Button::Pointer btnSaveBin(new gui::Button("Save (etm)", _mainFont, _mainLayout.ptr()));
 	btnSaveBin->tag = 1;
-	btnSaveBin->setBackgroundForState(imgNormalState, gui::ElementState_Default);
-	btnSaveBin->setBackgroundForState(imgHoverState, gui::ElementState_Hovered);
-	btnSaveBin->setBackgroundForState(imgPressedState, gui::ElementState_Pressed);
+	btnSaveBin->setBackgroundForState(imgNormalState, gui::State_Default);
+	btnSaveBin->setBackgroundForState(imgHoverState, gui::State_Hovered);
+	btnSaveBin->setBackgroundForState(imgPressedState, gui::State_Pressed);
 	btnSaveBin->setPosition(btnOpen->size().x, 0.0f);
 	btnSaveBin->clicked.connect(this, &Converter::onBtnSaveClick);
 
 	gui::Button::Pointer btnSaveHRM(new gui::Button("Save (etm+xml)", _mainFont, _mainLayout.ptr()));
 	btnSaveHRM->tag = 2;
-	btnSaveHRM->setBackgroundForState(imgNormalState, gui::ElementState_Default);
-	btnSaveHRM->setBackgroundForState(imgHoverState, gui::ElementState_Hovered);
-	btnSaveHRM->setBackgroundForState(imgPressedState, gui::ElementState_Pressed);
+	btnSaveHRM->setBackgroundForState(imgNormalState, gui::State_Default);
+	btnSaveHRM->setBackgroundForState(imgHoverState, gui::State_Hovered);
+	btnSaveHRM->setBackgroundForState(imgPressedState, gui::State_Pressed);
 	btnSaveHRM->setPosition(btnOpen->size().x + btnSaveBin->size().x, 0.0f);
 	btnSaveHRM->clicked.connect(this, &Converter::onBtnSaveClick);
 
 	_btnDrawNormalMeshes = gui::Button::Pointer(new gui::Button("Normal", _mainFont, _mainLayout.ptr()));
-	_btnDrawNormalMeshes->setBackgroundForState(imgNormalState, gui::ElementState_Default);
-	_btnDrawNormalMeshes->setBackgroundForState(imgHoverState, gui::ElementState_Hovered);
-	_btnDrawNormalMeshes->setBackgroundForState(imgPressedState, gui::ElementState_Pressed);
-	_btnDrawNormalMeshes->setBackgroundForState(imgSelectedNormalState, gui::ElementState_Selected);
-	_btnDrawNormalMeshes->setBackgroundForState(imgSelectedHoverState, gui::ElementState_SelectedHovered);
-	_btnDrawNormalMeshes->setBackgroundForState(imgSelectedPressedState, gui::ElementState_SelectedPressed);
+	_btnDrawNormalMeshes->setBackgroundForState(imgNormalState, gui::State_Default);
+	_btnDrawNormalMeshes->setBackgroundForState(imgHoverState, gui::State_Hovered);
+	_btnDrawNormalMeshes->setBackgroundForState(imgPressedState, gui::State_Pressed);
+	_btnDrawNormalMeshes->setBackgroundForState(imgSelectedNormalState, gui::State_Selected);
+	_btnDrawNormalMeshes->setBackgroundForState(imgSelectedHoverState, gui::State_SelectedHovered);
+	_btnDrawNormalMeshes->setBackgroundForState(imgSelectedPressedState, gui::State_SelectedPressed);
 	_btnDrawNormalMeshes->setPivotPoint(vec2(1.0f));
 	_btnDrawNormalMeshes->setPosition(_rc->size());
 	_btnDrawNormalMeshes->setType(gui::Button::Type_CheckButton);
 	_btnDrawNormalMeshes->setSelected(true);
 
 	_btnDrawSupportMeshes = gui::Button::Pointer(new gui::Button("Support", _mainFont, _mainLayout.ptr()));
-	_btnDrawSupportMeshes->setBackgroundForState(imgNormalState, gui::ElementState_Default);
-	_btnDrawSupportMeshes->setBackgroundForState(imgHoverState, gui::ElementState_Hovered);
-	_btnDrawSupportMeshes->setBackgroundForState(imgPressedState, gui::ElementState_Pressed);
-	_btnDrawSupportMeshes->setBackgroundForState(imgSelectedNormalState, gui::ElementState_Selected);
-	_btnDrawSupportMeshes->setBackgroundForState(imgSelectedHoverState, gui::ElementState_SelectedHovered);
-	_btnDrawSupportMeshes->setBackgroundForState(imgSelectedPressedState, gui::ElementState_SelectedPressed);
+	_btnDrawSupportMeshes->setBackgroundForState(imgNormalState, gui::State_Default);
+	_btnDrawSupportMeshes->setBackgroundForState(imgHoverState, gui::State_Hovered);
+	_btnDrawSupportMeshes->setBackgroundForState(imgPressedState, gui::State_Pressed);
+	_btnDrawSupportMeshes->setBackgroundForState(imgSelectedNormalState, gui::State_Selected);
+	_btnDrawSupportMeshes->setBackgroundForState(imgSelectedHoverState, gui::State_SelectedHovered);
+	_btnDrawSupportMeshes->setBackgroundForState(imgSelectedPressedState, gui::State_SelectedPressed);
 	_btnDrawSupportMeshes->setPivotPoint(vec2(1.0f));
 	_btnDrawSupportMeshes->setPosition(_rc->size() - vec2(_btnDrawNormalMeshes->size().x, 0.0f));
 	_btnDrawSupportMeshes->setType(gui::Button::Type_CheckButton);
@@ -104,7 +104,9 @@ void Converter::applicationDidLoad(RenderContext* rc)
 	_camera.perspectiveProjection(QUARTER_PI, rc->size().aspect(), 1.0f, 2000.0f);
 	_camera.lookAt(fromSpherical(_vAngle.value().x, _vAngle.value().y) * _vDistance.value());
 
-	_defaultProgram = rc->programFactory().loadProgram("shaders/default.program");
+	ObjectsCache localCache;
+	
+	_defaultProgram = rc->programFactory().loadProgram("shaders/default.program", localCache);
 	_defaultProgram->setPrimaryLightPosition(500.0f * vec3(0.0f, 1.0f, 0.0f));
 	_defaultProgram->setUniform("diffuseMap", 0);
 	_defaultProgram->setUniform("specularMap", 1);
@@ -113,7 +115,7 @@ void Converter::applicationDidLoad(RenderContext* rc)
 	rc->renderState().setClearColor(vec4(0.25f));
 	rc->renderState().setDepthTest(true);
 	rc->renderState().setDepthMask(true);
-	rc->renderState().setBlend(true, Blend_Default);
+	rc->renderState().setBlend(true, BlendState_Default);
 	
 	const std::string& lp = application().launchParameter(1);
 	if (fileExists(lp))
@@ -211,7 +213,7 @@ void Converter::onBtnOpenClick(et::gui::Button*)
 	StringList types;
 	types.push_back("fbx");
 	types.push_back("etm");
-	std::string fileName = selectFile(types, SelectFileMode_Open);
+	std::string fileName = selectFile(types, SelectFileMode_Open, std::string());
 	
 	Invocation1 i;
 	i.setTarget(this, &Converter::performLoading, fileName);
@@ -223,7 +225,7 @@ void Converter::onBtnOpenClick(et::gui::Button*)
 
 void Converter::onBtnSaveClick(et::gui::Button* b)
 {
-	std::string fileName = selectFile(StringList(), SelectFileMode_Save);
+	std::string fileName = selectFile(StringList(), SelectFileMode_Save, _scene.name());
 	
 	Invocation1 i;
 

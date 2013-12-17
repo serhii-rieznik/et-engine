@@ -53,14 +53,18 @@ void Mesh::setIndexBuffer(IndexBuffer ib)
 
 void Mesh::setVertexArrayObject(VertexArrayObject vao)
 {
-	assert(vao.valid());
+	ET_ASSERT(vao.valid());
 	_vao = vao;
 }
 
 void Mesh::serialize(std::ostream& stream, SceneVersion version)
 {
-	std::string vbId = (_vao.valid() && _vao->vertexBuffer().valid()) ? intToStr(_vao->vertexBuffer()->sourceTag()) : "0";
-	std::string ibId = (_vao.valid() && _vao->indexBuffer().valid()) ? intToStr(_vao->indexBuffer()->sourceTag()) : "0";
+	std::string vbId = (_vao.valid() && _vao->vertexBuffer().valid()) ?
+		intToStr(_vao->vertexBuffer()->sourceTag() & 0xffffffff) : "0";
+	
+	std::string ibId = (_vao.valid() && _vao->indexBuffer().valid()) ?
+		intToStr(_vao->indexBuffer()->sourceTag() & 0xffffffff) : "0";
+	
 	std::string ibName = "ib-" + ibId;
 	std::string vbName = "vb-" + vbId;
 	std::string vaoName = "vao-" + vbId + "-" + ibId;
@@ -68,8 +72,7 @@ void Mesh::serialize(std::ostream& stream, SceneVersion version)
 	serializeString(stream, vaoName);
 	serializeString(stream, vbName);
 	serializeString(stream, ibName);
-    size_t mPtr = reinterpret_cast<size_t>(material().ptr()) & 0xffffffff;
-	serializeInt(stream, static_cast<int>(mPtr));
+	serializeInt(stream, reinterpret_cast<size_t>(material().ptr()) & 0xffffffff);
 
 	serializeInt(stream, _startIndex);
 	serializeInt(stream, _numIndexes);

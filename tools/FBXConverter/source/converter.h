@@ -50,8 +50,8 @@ namespace fbxc
 		et::ObjectsCache _texCache;
 		et::GesturesRecognizer _gestures;
 		et::AutoPtr<et::gui::Gui> _gui;
-		et::s3d::Scene3d _scene;
-		et::Program _defaultProgram;
+		et::s3d::Scene _scene;
+		et::Program::Pointer _defaultProgram;
 		et::Camera _camera;
 
 		et::IntrusivePtr<MainLayout> _mainLayout;

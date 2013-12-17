@@ -23,7 +23,7 @@ void main()
 	vLightWS = vCamera - transVertex.xyz;
 	vViewWS = vCamera - transVertex.xyz;
 	
-	vColor = dot(Color, Color) > 0.0 ? Color : vec4(1.0);
+	vColor = vec4(1.0);//dot(Color.xyz, Color.xyz) < 0.01 ? vec4(1.0) : Color;
 
 	TexCoord  = TexCoord0;
 	gl_Position = mModelViewProjection * transVertex;

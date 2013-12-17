@@ -3,9 +3,22 @@
 <plist version="1.0">
 <dict>
 	<key>BuildMachineOSBuild</key>
-	<string>12E40</string>
+	<string>13B42</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
+	<key>CFBundleDocumentTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeExtensions</key>
+			<array>
+				<string>fbx</string>
+			</array>
+			<key>CFBundleTypeName</key>
+			<string>FBX Model</string>
+			<key>CFBundleTypeRole</key>
+			<string>Viewer</string>
+		</dict>
+	</array>
 	<key>CFBundleExecutable</key>
 	<string>FBXConverter</string>
 	<key>CFBundleIdentifier</key>
@@ -23,19 +36,19 @@
 	<key>CFBundleVersion</key>
 	<string>1</string>
 	<key>DTCompiler</key>
-	<string></string>
+	<string>com.apple.compilers.llvm.clang.1_0</string>
 	<key>DTPlatformBuild</key>
-	<string>4H1003</string>
+	<string>5B71f</string>
 	<key>DTPlatformVersion</key>
 	<string>GM</string>
 	<key>DTSDKBuild</key>
-	<string>12D75</string>
+	<string>13A595</string>
 	<key>DTSDKName</key>
-	<string>macosx10.8</string>
+	<string>macosx10.9</string>
 	<key>DTXcode</key>
-	<string>0462</string>
+	<string>0510</string>
 	<key>DTXcodeBuild</key>
-	<string>4H1003</string>
+	<string>5B71f</string>
 	<key>LSApplicationCategoryType</key>
 	<string>public.app-category.developer-tools</string>
 	<key>LSMinimumSystemVersion</key>

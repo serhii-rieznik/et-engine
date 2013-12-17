@@ -5,12 +5,11 @@
  *
  */
 
+#include <et/geometry/geometry.h>
 #include <et/gui/element2d.h>
 
 using namespace et;
 using namespace et::gui;
-
-const float minimalVisibleAlpha = 1.0f / 1000.0f;
 
 ET_DECLARE_GUI_ELEMENT_CLASS(Element2d)
 

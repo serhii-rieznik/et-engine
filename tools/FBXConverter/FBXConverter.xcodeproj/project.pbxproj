@@ -7,26 +7,36 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		5C5128AC1681FA2500ED9B96 /* libjpeg.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5C5128AA1681FA2500ED9B96 /* libjpeg.a */; };
 		5C5128AD1681FA2500ED9B96 /* libpng.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5C5128AB1681FA2500ED9B96 /* libpng.a */; };
 		5C72A8361759E4B900B49611 /* objectscache.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5C72A8351759E4B900B49611 /* objectscache.cpp */; };
 		A50D32DC1720AAB0001D31B3 /* atomiccounter.unix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A50D32DB1720AAB0001D31B3 /* atomiccounter.unix.cpp */; };
 		A50D32E11720AC42001D31B3 /* log.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A50D32DF1720AC42001D31B3 /* log.cpp */; };
 		A50D32E21720AC42001D31B3 /* stream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A50D32E01720AC42001D31B3 /* stream.cpp */; };
 		A50D32E41720AC51001D31B3 /* rendercontext.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A50D32E31720AC51001D31B3 /* rendercontext.cpp */; };
-		A5225D5D1782E20200C880BB /* libfbxsdk.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = A5225D5C1782E20200C880BB /* libfbxsdk.dylib */; };
 		A53B4F3116811FA900C6B8EC /* libiconv.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = A53B4F3016811FA900C6B8EC /* libiconv.dylib */; };
 		A53B4F331681212F00C6B8EC /* platformtools.mac.mm in Sources */ = {isa = PBXBuildFile; fileRef = A53B4F321681212F00C6B8EC /* platformtools.mac.mm */; };
 		A53B4F351681220500C6B8EC /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A53B4F341681220500C6B8EC /* main.cpp */; };
 		A53B4F421681247300C6B8EC /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = A53B4F411681247300C6B8EC /* libz.dylib */; };
 		A53B4F441681256B00C6B8EC /* data in Resources */ = {isa = PBXBuildFile; fileRef = A53B4F431681256B00C6B8EC /* data */; };
+		A55A6F5C1860BFD60010936D /* libfbxsdk.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A55A6F5B1860BFD60010936D /* libfbxsdk.a */; };
+		A55A6F5F1860C03B0010936D /* framebuffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A55A6F5D1860C03B0010936D /* framebuffer.cpp */; };
+		A55A6F601860C03B0010936D /* program.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A55A6F5E1860C03B0010936D /* program.cpp */; };
+		A55A6F621860C0510010936D /* conversion.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A55A6F611860C0510010936D /* conversion.cpp */; };
+		A55A6F641860C0600010936D /* backgroundthread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A55A6F631860C0600010936D /* backgroundthread.cpp */; };
+		A55A6F6F1860C0730010936D /* baseelement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A55A6F661860C0730010936D /* baseelement.cpp */; };
+		A55A6F701860C0730010936D /* cameraelement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A55A6F671860C0730010936D /* cameraelement.cpp */; };
+		A55A6F711860C0730010936D /* lightelement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A55A6F681860C0730010936D /* lightelement.cpp */; };
+		A55A6F721860C0730010936D /* material.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A55A6F691860C0730010936D /* material.cpp */; };
+		A55A6F731860C0730010936D /* mesh.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A55A6F6A1860C0730010936D /* mesh.cpp */; };
+		A55A6F741860C0730010936D /* scene3d.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A55A6F6B1860C0730010936D /* scene3d.cpp */; };
+		A55A6F751860C0730010936D /* serialization.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A55A6F6C1860C0730010936D /* serialization.cpp */; };
+		A55A6F761860C0730010936D /* storage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A55A6F6D1860C0730010936D /* storage.cpp */; };
+		A55A6F771860C0730010936D /* supportmesh.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A55A6F6E1860C0730010936D /* supportmesh.cpp */; };
 		A5963FDB1739B55A00837C6C /* libxml2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = A5963FDA1739B55A00837C6C /* libxml2.dylib */; };
 		A5A23E2F16811838001B3E98 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A5A23E2E16811838001B3E98 /* Cocoa.framework */; };
 		A5A23E5616811900001B3E98 /* converter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5A23E5416811900001B3E98 /* converter.cpp */; };
-		A5A23ED316811978001B3E98 /* framebufferdata.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5A23E5C16811978001B3E98 /* framebufferdata.cpp */; };
 		A5A23ED416811978001B3E98 /* framebufferfactory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5A23E5D16811978001B3E98 /* framebufferfactory.cpp */; };
 		A5A23ED516811978001B3E98 /* indexbufferdata.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5A23E5E16811978001B3E98 /* indexbufferdata.cpp */; };
-		A5A23ED616811978001B3E98 /* programdata.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5A23E5F16811978001B3E98 /* programdata.cpp */; };
 		A5A23ED716811978001B3E98 /* programfactory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5A23E6016811978001B3E98 /* programfactory.cpp */; };
 		A5A23ED916811978001B3E98 /* texture.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5A23E6216811978001B3E98 /* texture.cpp */; };
 		A5A23EDA16811978001B3E98 /* texturefactory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5A23E6316811978001B3E98 /* texturefactory.cpp */; };
@@ -41,9 +51,7 @@
 		A5A23EE316811978001B3E98 /* runloop.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5A23E6D16811978001B3E98 /* runloop.cpp */; };
 		A5A23EE416811978001B3E98 /* camera.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5A23E6F16811978001B3E98 /* camera.cpp */; };
 		A5A23EE516811978001B3E98 /* frustum.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5A23E7016811978001B3E98 /* frustum.cpp */; };
-		A5A23EE616811978001B3E98 /* aabb.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5A23E7216811978001B3E98 /* aabb.cpp */; };
 		A5A23EE716811978001B3E98 /* collision.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5A23E7316811978001B3E98 /* collision.cpp */; };
-		A5A23EE816811978001B3E98 /* debug.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5A23E7516811978001B3E98 /* debug.cpp */; };
 		A5A23EE916811978001B3E98 /* plist.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5A23E7616811978001B3E98 /* plist.cpp */; };
 		A5A23EEA16811978001B3E98 /* tools.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5A23E7716811978001B3E98 /* tools.cpp */; };
 		A5A23EEB16811978001B3E98 /* transformable.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5A23E7816811978001B3E98 /* transformable.cpp */; };
@@ -69,13 +77,11 @@
 		A5A23F0116811978001B3E98 /* ddsloader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5A23E9116811978001B3E98 /* ddsloader.cpp */; };
 		A5A23F0216811978001B3E98 /* imageoperations.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5A23E9216811978001B3E98 /* imageoperations.cpp */; };
 		A5A23F0316811978001B3E98 /* imagewriter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5A23E9316811978001B3E98 /* imagewriter.cpp */; };
-		A5A23F0416811978001B3E98 /* jpgloader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5A23E9416811978001B3E98 /* jpgloader.cpp */; };
 		A5A23F0516811978001B3E98 /* pngloader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5A23E9516811978001B3E98 /* pngloader.cpp */; };
 		A5A23F0616811978001B3E98 /* pvrloader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5A23E9616811978001B3E98 /* pvrloader.cpp */; };
 		A5A23F0716811978001B3E98 /* gestures.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5A23E9816811978001B3E98 /* gestures.cpp */; };
 		A5A23F0816811978001B3E98 /* input.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5A23E9916811978001B3E98 /* input.cpp */; };
 		A5A23F0916811978001B3E98 /* locale.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5A23E9B16811978001B3E98 /* locale.cpp */; };
-		A5A23F0A16811978001B3E98 /* 3dsloader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5A23E9D16811978001B3E98 /* 3dsloader.cpp */; };
 		A5A23F0B16811978001B3E98 /* fbxloader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5A23E9E16811978001B3E98 /* fbxloader.cpp */; };
 		A5A23F0C16811978001B3E98 /* objLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5A23E9F16811978001B3E98 /* objLoader.cpp */; };
 		A5A23F0D16811978001B3E98 /* opengl.common.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5A23EA116811978001B3E98 /* opengl.common.cpp */; };
@@ -95,14 +101,6 @@
 		A5A23F1D16811978001B3E98 /* rendering.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5A23EB616811978001B3E98 /* rendering.cpp */; };
 		A5A23F1E16811978001B3E98 /* renderstate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5A23EB716811978001B3E98 /* renderstate.cpp */; };
 		A5A23F1F16811978001B3E98 /* textureloader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5A23EB916811978001B3E98 /* textureloader.cpp */; };
-		A5A23F2016811978001B3E98 /* cameraelement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5A23EBB16811978001B3E98 /* cameraelement.cpp */; };
-		A5A23F2116811978001B3E98 /* element.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5A23EBC16811978001B3E98 /* element.cpp */; };
-		A5A23F2216811978001B3E98 /* material.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5A23EBD16811978001B3E98 /* material.cpp */; };
-		A5A23F2316811978001B3E98 /* mesh.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5A23EBE16811978001B3E98 /* mesh.cpp */; };
-		A5A23F2416811978001B3E98 /* scene3d.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5A23EBF16811978001B3E98 /* scene3d.cpp */; };
-		A5A23F2516811978001B3E98 /* serialization.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5A23EC016811978001B3E98 /* serialization.cpp */; };
-		A5A23F2616811978001B3E98 /* storage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5A23EC116811978001B3E98 /* storage.cpp */; };
-		A5A23F2716811978001B3E98 /* supportmesh.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5A23EC216811978001B3E98 /* supportmesh.cpp */; };
 		A5A23F2A16811978001B3E98 /* taskpool.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5A23EC716811978001B3E98 /* taskpool.cpp */; };
 		A5A23F2B16811978001B3E98 /* notifytimer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5A23EC916811978001B3E98 /* notifytimer.cpp */; };
 		A5A23F2C16811978001B3E98 /* sequence.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5A23ECA16811978001B3E98 /* sequence.cpp */; };
@@ -117,19 +115,31 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		5C5128AA1681FA2500ED9B96 /* libjpeg.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libjpeg.a; path = ../../lib/osx/libjpeg.a; sourceTree = "<group>"; };
 		5C5128AB1681FA2500ED9B96 /* libpng.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libpng.a; path = ../../lib/osx/libpng.a; sourceTree = "<group>"; };
 		5C72A8351759E4B900B49611 /* objectscache.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = objectscache.cpp; sourceTree = "<group>"; };
 		A50D32DB1720AAB0001D31B3 /* atomiccounter.unix.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = atomiccounter.unix.cpp; sourceTree = "<group>"; };
 		A50D32DF1720AC42001D31B3 /* log.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = log.cpp; sourceTree = "<group>"; };
 		A50D32E01720AC42001D31B3 /* stream.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = stream.cpp; sourceTree = "<group>"; };
 		A50D32E31720AC51001D31B3 /* rendercontext.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = rendercontext.cpp; sourceTree = "<group>"; };
-		A5225D5C1782E20200C880BB /* libfbxsdk.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libfbxsdk.dylib; path = ../../../../SDK/FBXSDK/lib/gcc4/ub/release/libfbxsdk.dylib; sourceTree = "<group>"; };
 		A53B4F3016811FA900C6B8EC /* libiconv.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libiconv.dylib; path = usr/lib/libiconv.dylib; sourceTree = SDKROOT; };
 		A53B4F321681212F00C6B8EC /* platformtools.mac.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = platformtools.mac.mm; sourceTree = "<group>"; };
 		A53B4F341681220500C6B8EC /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		A53B4F411681247300C6B8EC /* libz.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.dylib; path = usr/lib/libz.dylib; sourceTree = SDKROOT; };
 		A53B4F431681256B00C6B8EC /* data */ = {isa = PBXFileReference; lastKnownFileType = folder; path = data; sourceTree = "<group>"; };
+		A55A6F5B1860BFD60010936D /* libfbxsdk.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libfbxsdk.a; path = ../../../../../../../../SDK/FBX/lib/clang/ub/release/libfbxsdk.a; sourceTree = "<group>"; };
+		A55A6F5D1860C03B0010936D /* framebuffer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = framebuffer.cpp; sourceTree = "<group>"; };
+		A55A6F5E1860C03B0010936D /* program.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = program.cpp; sourceTree = "<group>"; };
+		A55A6F611860C0510010936D /* conversion.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = conversion.cpp; sourceTree = "<group>"; };
+		A55A6F631860C0600010936D /* backgroundthread.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = backgroundthread.cpp; sourceTree = "<group>"; };
+		A55A6F661860C0730010936D /* baseelement.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = baseelement.cpp; sourceTree = "<group>"; };
+		A55A6F671860C0730010936D /* cameraelement.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = cameraelement.cpp; sourceTree = "<group>"; };
+		A55A6F681860C0730010936D /* lightelement.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = lightelement.cpp; sourceTree = "<group>"; };
+		A55A6F691860C0730010936D /* material.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = material.cpp; sourceTree = "<group>"; };
+		A55A6F6A1860C0730010936D /* mesh.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = mesh.cpp; sourceTree = "<group>"; };
+		A55A6F6B1860C0730010936D /* scene3d.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = scene3d.cpp; sourceTree = "<group>"; };
+		A55A6F6C1860C0730010936D /* serialization.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = serialization.cpp; sourceTree = "<group>"; };
+		A55A6F6D1860C0730010936D /* storage.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = storage.cpp; sourceTree = "<group>"; };
+		A55A6F6E1860C0730010936D /* supportmesh.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = supportmesh.cpp; sourceTree = "<group>"; };
 		A5963FDA1739B55A00837C6C /* libxml2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libxml2.dylib; path = usr/lib/libxml2.dylib; sourceTree = SDKROOT; };
 		A5A23E2A16811838001B3E98 /* FBXConverter.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FBXConverter.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A5A23E2E16811838001B3E98 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
@@ -140,10 +150,8 @@
 		A5A23E51168118A4001B3E98 /* FBXConverter-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "FBXConverter-Info.plist"; sourceTree = SOURCE_ROOT; };
 		A5A23E5416811900001B3E98 /* converter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = converter.cpp; path = source/converter.cpp; sourceTree = "<group>"; };
 		A5A23E5516811900001B3E98 /* converter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = converter.h; path = source/converter.h; sourceTree = "<group>"; };
-		A5A23E5C16811978001B3E98 /* framebufferdata.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = framebufferdata.cpp; sourceTree = "<group>"; };
 		A5A23E5D16811978001B3E98 /* framebufferfactory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = framebufferfactory.cpp; sourceTree = "<group>"; };
 		A5A23E5E16811978001B3E98 /* indexbufferdata.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = indexbufferdata.cpp; sourceTree = "<group>"; };
-		A5A23E5F16811978001B3E98 /* programdata.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = programdata.cpp; sourceTree = "<group>"; };
 		A5A23E6016811978001B3E98 /* programfactory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = programfactory.cpp; sourceTree = "<group>"; };
 		A5A23E6216811978001B3E98 /* texture.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = texture.cpp; sourceTree = "<group>"; };
 		A5A23E6316811978001B3E98 /* texturefactory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = texturefactory.cpp; sourceTree = "<group>"; };
@@ -158,9 +166,7 @@
 		A5A23E6D16811978001B3E98 /* runloop.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = runloop.cpp; sourceTree = "<group>"; };
 		A5A23E6F16811978001B3E98 /* camera.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = camera.cpp; sourceTree = "<group>"; };
 		A5A23E7016811978001B3E98 /* frustum.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = frustum.cpp; sourceTree = "<group>"; };
-		A5A23E7216811978001B3E98 /* aabb.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = aabb.cpp; sourceTree = "<group>"; };
 		A5A23E7316811978001B3E98 /* collision.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = collision.cpp; sourceTree = "<group>"; };
-		A5A23E7516811978001B3E98 /* debug.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = debug.cpp; sourceTree = "<group>"; };
 		A5A23E7616811978001B3E98 /* plist.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = plist.cpp; sourceTree = "<group>"; };
 		A5A23E7716811978001B3E98 /* tools.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = tools.cpp; sourceTree = "<group>"; };
 		A5A23E7816811978001B3E98 /* transformable.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = transformable.cpp; sourceTree = "<group>"; };
@@ -186,13 +192,11 @@
 		A5A23E9116811978001B3E98 /* ddsloader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ddsloader.cpp; sourceTree = "<group>"; };
 		A5A23E9216811978001B3E98 /* imageoperations.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = imageoperations.cpp; sourceTree = "<group>"; };
 		A5A23E9316811978001B3E98 /* imagewriter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = imagewriter.cpp; sourceTree = "<group>"; };
-		A5A23E9416811978001B3E98 /* jpgloader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = jpgloader.cpp; sourceTree = "<group>"; };
 		A5A23E9516811978001B3E98 /* pngloader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = pngloader.cpp; sourceTree = "<group>"; };
 		A5A23E9616811978001B3E98 /* pvrloader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = pvrloader.cpp; sourceTree = "<group>"; };
 		A5A23E9816811978001B3E98 /* gestures.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = gestures.cpp; sourceTree = "<group>"; };
 		A5A23E9916811978001B3E98 /* input.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = input.cpp; sourceTree = "<group>"; };
 		A5A23E9B16811978001B3E98 /* locale.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = locale.cpp; sourceTree = "<group>"; };
-		A5A23E9D16811978001B3E98 /* 3dsloader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = 3dsloader.cpp; sourceTree = "<group>"; };
 		A5A23E9E16811978001B3E98 /* fbxloader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = fbxloader.cpp; sourceTree = "<group>"; };
 		A5A23E9F16811978001B3E98 /* objLoader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = objLoader.cpp; sourceTree = "<group>"; };
 		A5A23EA116811978001B3E98 /* opengl.common.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = opengl.common.cpp; sourceTree = "<group>"; };
@@ -212,14 +216,6 @@
 		A5A23EB616811978001B3E98 /* rendering.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = rendering.cpp; sourceTree = "<group>"; };
 		A5A23EB716811978001B3E98 /* renderstate.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = renderstate.cpp; sourceTree = "<group>"; };
 		A5A23EB916811978001B3E98 /* textureloader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = textureloader.cpp; sourceTree = "<group>"; };
-		A5A23EBB16811978001B3E98 /* cameraelement.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = cameraelement.cpp; sourceTree = "<group>"; };
-		A5A23EBC16811978001B3E98 /* element.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = element.cpp; sourceTree = "<group>"; };
-		A5A23EBD16811978001B3E98 /* material.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = material.cpp; sourceTree = "<group>"; };
-		A5A23EBE16811978001B3E98 /* mesh.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = mesh.cpp; sourceTree = "<group>"; };
-		A5A23EBF16811978001B3E98 /* scene3d.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = scene3d.cpp; sourceTree = "<group>"; };
-		A5A23EC016811978001B3E98 /* serialization.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = serialization.cpp; sourceTree = "<group>"; };
-		A5A23EC116811978001B3E98 /* storage.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = storage.cpp; sourceTree = "<group>"; };
-		A5A23EC216811978001B3E98 /* supportmesh.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = supportmesh.cpp; sourceTree = "<group>"; };
 		A5A23EC716811978001B3E98 /* taskpool.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = taskpool.cpp; sourceTree = "<group>"; };
 		A5A23EC916811978001B3E98 /* notifytimer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = notifytimer.cpp; sourceTree = "<group>"; };
 		A5A23ECA16811978001B3E98 /* sequence.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = sequence.cpp; sourceTree = "<group>"; };
@@ -244,15 +240,31 @@
 				A5A23F3616811EC3001B3E98 /* OpenGL.framework in Frameworks */,
 				A5A23F3416811EBF001B3E98 /* QuartzCore.framework in Frameworks */,
 				A5A23E2F16811838001B3E98 /* Cocoa.framework in Frameworks */,
-				5C5128AC1681FA2500ED9B96 /* libjpeg.a in Frameworks */,
+				A55A6F5C1860BFD60010936D /* libfbxsdk.a in Frameworks */,
 				5C5128AD1681FA2500ED9B96 /* libpng.a in Frameworks */,
-				A5225D5D1782E20200C880BB /* libfbxsdk.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		A55A6F651860C0730010936D /* scene3d */ = {
+			isa = PBXGroup;
+			children = (
+				A55A6F661860C0730010936D /* baseelement.cpp */,
+				A55A6F671860C0730010936D /* cameraelement.cpp */,
+				A55A6F681860C0730010936D /* lightelement.cpp */,
+				A55A6F691860C0730010936D /* material.cpp */,
+				A55A6F6A1860C0730010936D /* mesh.cpp */,
+				A55A6F6B1860C0730010936D /* scene3d.cpp */,
+				A55A6F6C1860C0730010936D /* serialization.cpp */,
+				A55A6F6D1860C0730010936D /* storage.cpp */,
+				A55A6F6E1860C0730010936D /* supportmesh.cpp */,
+			);
+			name = scene3d;
+			path = ../../src/scene3d;
+			sourceTree = "<group>";
+		};
 		A5A23E1F16811838001B3E98 = {
 			isa = PBXGroup;
 			children = (
@@ -276,12 +288,11 @@
 		A5A23E2D16811838001B3E98 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				A5225D5C1782E20200C880BB /* libfbxsdk.dylib */,
 				A53B4F411681247300C6B8EC /* libz.dylib */,
 				A53B4F3016811FA900C6B8EC /* libiconv.dylib */,
 				A5963FDA1739B55A00837C6C /* libxml2.dylib */,
-				5C5128AA1681FA2500ED9B96 /* libjpeg.a */,
 				5C5128AB1681FA2500ED9B96 /* libpng.a */,
+				A55A6F5B1860BFD60010936D /* libfbxsdk.a */,
 				A5A23E3116811838001B3E98 /* AppKit.framework */,
 				A5A23E3216811838001B3E98 /* CoreData.framework */,
 				A5A23E3316811838001B3E98 /* Foundation.framework */,
@@ -340,9 +351,9 @@
 				A5A23EA616811978001B3E98 /* platform-mac */,
 				A5A23EAC16811978001B3E98 /* platform-unix */,
 				A5A23EB216811978001B3E98 /* primitives */,
+				A55A6F651860C0730010936D /* scene3d */,
 				A5A23EB416811978001B3E98 /* rendering */,
 				A5A23EB816811978001B3E98 /* resources */,
-				A5A23EBA16811978001B3E98 /* scene3d */,
 				A5A23EC616811978001B3E98 /* tasks */,
 				A5A23EC816811978001B3E98 /* timers */,
 				A5A23ECD16811978001B3E98 /* vertexbuffer */,
@@ -360,10 +371,10 @@
 		A5A23E5A16811978001B3E98 /* apiobjects */ = {
 			isa = PBXGroup;
 			children = (
-				A5A23E5C16811978001B3E98 /* framebufferdata.cpp */,
+				A55A6F5D1860C03B0010936D /* framebuffer.cpp */,
+				A55A6F5E1860C03B0010936D /* program.cpp */,
 				A5A23E5D16811978001B3E98 /* framebufferfactory.cpp */,
 				A5A23E5E16811978001B3E98 /* indexbufferdata.cpp */,
-				A5A23E5F16811978001B3E98 /* programdata.cpp */,
 				A5A23E6016811978001B3E98 /* programfactory.cpp */,
 				A5A23E6216811978001B3E98 /* texture.cpp */,
 				A5A23E6316811978001B3E98 /* texturefactory.cpp */,
@@ -381,6 +392,7 @@
 			children = (
 				A5A23E6916811978001B3E98 /* appevironment.cpp */,
 				A5A23E6A16811978001B3E98 /* application.cpp */,
+				A55A6F631860C0600010936D /* backgroundthread.cpp */,
 				A5A23E6B16811978001B3E98 /* events.cpp */,
 				A5A23E6C16811978001B3E98 /* invocation.cpp */,
 				A5A23E6D16811978001B3E98 /* runloop.cpp */,
@@ -402,7 +414,6 @@
 		A5A23E7116811978001B3E98 /* collision */ = {
 			isa = PBXGroup;
 			children = (
-				A5A23E7216811978001B3E98 /* aabb.cpp */,
 				A5A23E7316811978001B3E98 /* collision.cpp */,
 			);
 			name = collision;
@@ -412,10 +423,10 @@
 		A5A23E7416811978001B3E98 /* core */ = {
 			isa = PBXGroup;
 			children = (
+				A55A6F611860C0510010936D /* conversion.cpp */,
 				5C72A8351759E4B900B49611 /* objectscache.cpp */,
 				A50D32DF1720AC42001D31B3 /* log.cpp */,
 				A50D32E01720AC42001D31B3 /* stream.cpp */,
-				A5A23E7516811978001B3E98 /* debug.cpp */,
 				A5A23E7616811978001B3E98 /* plist.cpp */,
 				A5A23E7716811978001B3E98 /* tools.cpp */,
 				A5A23E7816811978001B3E98 /* transformable.cpp */,
@@ -465,7 +476,6 @@
 				A5A23E9116811978001B3E98 /* ddsloader.cpp */,
 				A5A23E9216811978001B3E98 /* imageoperations.cpp */,
 				A5A23E9316811978001B3E98 /* imagewriter.cpp */,
-				A5A23E9416811978001B3E98 /* jpgloader.cpp */,
 				A5A23E9516811978001B3E98 /* pngloader.cpp */,
 				A5A23E9616811978001B3E98 /* pvrloader.cpp */,
 			);
@@ -495,7 +505,6 @@
 		A5A23E9C16811978001B3E98 /* models */ = {
 			isa = PBXGroup;
 			children = (
-				A5A23E9D16811978001B3E98 /* 3dsloader.cpp */,
 				A5A23E9E16811978001B3E98 /* fbxloader.cpp */,
 				A5A23E9F16811978001B3E98 /* objLoader.cpp */,
 			);
@@ -577,22 +586,6 @@
 			);
 			name = resources;
 			path = ../../src/resources;
-			sourceTree = "<group>";
-		};
-		A5A23EBA16811978001B3E98 /* scene3d */ = {
-			isa = PBXGroup;
-			children = (
-				A5A23EBB16811978001B3E98 /* cameraelement.cpp */,
-				A5A23EBC16811978001B3E98 /* element.cpp */,
-				A5A23EBD16811978001B3E98 /* material.cpp */,
-				A5A23EBE16811978001B3E98 /* mesh.cpp */,
-				A5A23EBF16811978001B3E98 /* scene3d.cpp */,
-				A5A23EC016811978001B3E98 /* serialization.cpp */,
-				A5A23EC116811978001B3E98 /* storage.cpp */,
-				A5A23EC216811978001B3E98 /* supportmesh.cpp */,
-			);
-			name = scene3d;
-			path = ../../src/scene3d;
 			sourceTree = "<group>";
 		};
 		A5A23EC616811978001B3E98 /* tasks */ = {
@@ -691,29 +684,31 @@
 			buildActionMask = 2147483647;
 			files = (
 				A5A23E5616811900001B3E98 /* converter.cpp in Sources */,
-				A5A23ED316811978001B3E98 /* framebufferdata.cpp in Sources */,
 				A5A23ED416811978001B3E98 /* framebufferfactory.cpp in Sources */,
+				A55A6F5F1860C03B0010936D /* framebuffer.cpp in Sources */,
 				A5A23ED516811978001B3E98 /* indexbufferdata.cpp in Sources */,
-				A5A23ED616811978001B3E98 /* programdata.cpp in Sources */,
 				A5A23ED716811978001B3E98 /* programfactory.cpp in Sources */,
 				A5A23ED916811978001B3E98 /* texture.cpp in Sources */,
 				A5A23EDA16811978001B3E98 /* texturefactory.cpp in Sources */,
 				A5A23EDB16811978001B3E98 /* textureloadingthread.cpp in Sources */,
 				A5A23EDC16811978001B3E98 /* vertexarrayobjectdata.cpp in Sources */,
 				A5A23EDD16811978001B3E98 /* vertexbufferdata.cpp in Sources */,
+				A55A6F771860C0730010936D /* supportmesh.cpp in Sources */,
 				A5A23EDE16811978001B3E98 /* vertexbufferfactory.cpp in Sources */,
 				A5A23EDF16811978001B3E98 /* appevironment.cpp in Sources */,
+				A55A6F761860C0730010936D /* storage.cpp in Sources */,
 				A5A23EE016811978001B3E98 /* application.cpp in Sources */,
 				A5A23EE116811978001B3E98 /* events.cpp in Sources */,
 				A5A23EE216811978001B3E98 /* invocation.cpp in Sources */,
 				A5A23EE316811978001B3E98 /* runloop.cpp in Sources */,
 				A5A23EE416811978001B3E98 /* camera.cpp in Sources */,
+				A55A6F711860C0730010936D /* lightelement.cpp in Sources */,
 				A5A23EE516811978001B3E98 /* frustum.cpp in Sources */,
-				A5A23EE616811978001B3E98 /* aabb.cpp in Sources */,
+				A55A6F621860C0510010936D /* conversion.cpp in Sources */,
 				A5A23EE716811978001B3E98 /* collision.cpp in Sources */,
-				A5A23EE816811978001B3E98 /* debug.cpp in Sources */,
 				A5A23EE916811978001B3E98 /* plist.cpp in Sources */,
 				A5A23EEA16811978001B3E98 /* tools.cpp in Sources */,
+				A55A6F741860C0730010936D /* scene3d.cpp in Sources */,
 				A5A23EEB16811978001B3E98 /* transformable.cpp in Sources */,
 				A5A23EEC16811978001B3E98 /* geometry.cpp in Sources */,
 				A5A23EED16811978001B3E98 /* rectplacer.cpp in Sources */,
@@ -737,16 +732,17 @@
 				A5A23F0116811978001B3E98 /* ddsloader.cpp in Sources */,
 				A5A23F0216811978001B3E98 /* imageoperations.cpp in Sources */,
 				A5A23F0316811978001B3E98 /* imagewriter.cpp in Sources */,
-				A5A23F0416811978001B3E98 /* jpgloader.cpp in Sources */,
 				A5A23F0516811978001B3E98 /* pngloader.cpp in Sources */,
+				A55A6F701860C0730010936D /* cameraelement.cpp in Sources */,
 				A5A23F0616811978001B3E98 /* pvrloader.cpp in Sources */,
 				A5A23F0716811978001B3E98 /* gestures.cpp in Sources */,
 				A5A23F0816811978001B3E98 /* input.cpp in Sources */,
 				A5A23F0916811978001B3E98 /* locale.cpp in Sources */,
-				A5A23F0A16811978001B3E98 /* 3dsloader.cpp in Sources */,
 				A5A23F0B16811978001B3E98 /* fbxloader.cpp in Sources */,
+				A55A6F751860C0730010936D /* serialization.cpp in Sources */,
 				A5A23F0C16811978001B3E98 /* objLoader.cpp in Sources */,
 				A5A23F0D16811978001B3E98 /* opengl.common.cpp in Sources */,
+				A55A6F6F1860C0730010936D /* baseelement.cpp in Sources */,
 				A5A23F0E16811978001B3E98 /* openglcaps.cpp in Sources */,
 				A5A23F0F16811978001B3E98 /* locale.apple.mm in Sources */,
 				A5A23F1016811978001B3E98 /* tools.apple.mm in Sources */,
@@ -763,19 +759,14 @@
 				A5A23F1D16811978001B3E98 /* rendering.cpp in Sources */,
 				A5A23F1E16811978001B3E98 /* renderstate.cpp in Sources */,
 				A5A23F1F16811978001B3E98 /* textureloader.cpp in Sources */,
-				A5A23F2016811978001B3E98 /* cameraelement.cpp in Sources */,
-				A5A23F2116811978001B3E98 /* element.cpp in Sources */,
-				A5A23F2216811978001B3E98 /* material.cpp in Sources */,
-				A5A23F2316811978001B3E98 /* mesh.cpp in Sources */,
-				A5A23F2416811978001B3E98 /* scene3d.cpp in Sources */,
-				A5A23F2516811978001B3E98 /* serialization.cpp in Sources */,
-				A5A23F2616811978001B3E98 /* storage.cpp in Sources */,
-				A5A23F2716811978001B3E98 /* supportmesh.cpp in Sources */,
+				A55A6F641860C0600010936D /* backgroundthread.cpp in Sources */,
 				A5A23F2A16811978001B3E98 /* taskpool.cpp in Sources */,
+				A55A6F601860C03B0010936D /* program.cpp in Sources */,
 				A5A23F2B16811978001B3E98 /* notifytimer.cpp in Sources */,
 				A5A23F2C16811978001B3E98 /* sequence.cpp in Sources */,
 				A5A23F2D16811978001B3E98 /* timedobject.cpp in Sources */,
 				A5A23F2E16811978001B3E98 /* timerpool.cpp in Sources */,
+				A55A6F721860C0730010936D /* material.cpp in Sources */,
 				A5A23F2F16811978001B3E98 /* indexarray.cpp in Sources */,
 				A5A23F3016811978001B3E98 /* vertexarray.cpp in Sources */,
 				A5A23F3116811978001B3E98 /* vertexdatachunk.cpp in Sources */,
@@ -786,6 +777,7 @@
 				A50D32E11720AC42001D31B3 /* log.cpp in Sources */,
 				A50D32E21720AC42001D31B3 /* stream.cpp in Sources */,
 				A50D32E41720AC51001D31B3 /* rendercontext.cpp in Sources */,
+				A55A6F731860C0730010936D /* mesh.cpp in Sources */,
 				5C72A8361759E4B900B49611 /* objectscache.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -847,9 +839,6 @@
 		A5A23E4916811838001B3E98 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
-				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
-				CLANG_CXX_LIBRARY = "libstdc++";
 				COMBINE_HIDPI_IMAGES = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "$PROJECT_DIR/FBXConverter-Prefix.pch";
@@ -860,14 +849,13 @@
 				);
 				HEADER_SEARCH_PATHS = (
 					$PROJECT_DIR/../../include,
-					"~/SDK/FBXSDK/include",
+					/SDK/FBX/include,
 				);
 				INFOPLIST_FILE = "$PROJECT_DIR/FBXConverter-Info.plist";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					"\"$(SRCROOT)/../../lib/osx\"",
-					"\"$(SRCROOT)\"",
-					"\"$(SRCROOT)/../../../../SDK/FBXSDK/lib/gcc4/ub/release\"",
+					/SDK/FBX/lib/clang/ub/release,
+					$PROJECT_DIR/../../lib/osx,
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = app;
@@ -877,9 +865,6 @@
 		A5A23E4A16811838001B3E98 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
-				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
-				CLANG_CXX_LIBRARY = "libstdc++";
 				COMBINE_HIDPI_IMAGES = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "$PROJECT_DIR/FBXConverter-Prefix.pch";
@@ -889,14 +874,13 @@
 				);
 				HEADER_SEARCH_PATHS = (
 					$PROJECT_DIR/../../include,
-					"~/SDK/FBXSDK/include",
+					/SDK/FBX/include,
 				);
 				INFOPLIST_FILE = "$PROJECT_DIR/FBXConverter-Info.plist";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					"\"$(SRCROOT)/../../lib/osx\"",
-					"\"$(SRCROOT)\"",
-					"\"$(SRCROOT)/../../../../SDK/FBXSDK/lib/gcc4/ub/release\"",
+					/SDK/FBX/lib/clang/ub/release,
+					$PROJECT_DIR/../../lib/osx,
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = app;

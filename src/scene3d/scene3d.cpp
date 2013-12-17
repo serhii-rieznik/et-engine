@@ -83,17 +83,14 @@ void Scene::serialize(std::ostream& stream, StorageFormat fmt, const std::string
 		serializeInt(stream, s->vertexArrays().size());
 		for (auto& vi : s->vertexArrays())
 		{
-            size_t viPtr = reinterpret_cast<size_t>(vi.ptr()) & 0xffffffff;
-            serializeInt(stream, static_cast<int>(viPtr));
+            serializeInt(stream, reinterpret_cast<size_t>(vi.ptr()) & 0xffffffff);
 			vi->serialize(stream);
 		}
 
 		IndexArray::Pointer ia = s->indexArray();
-
 		serializeChunk(stream, HeaderIndexArrays);
 		serializeInt(stream, 1);
-        size_t iaPtr = reinterpret_cast<size_t>(ia.ptr()) & 0xffffffff;
-        serializeInt(stream, static_cast<int>(iaPtr));
+        serializeInt(stream, reinterpret_cast<size_t>(ia.ptr()) & 0xffffffff);
 		ia->serialize(stream);
 	}
 
@@ -208,7 +205,9 @@ void Scene::buildAPIObjects(Scene3dStorage::Pointer p, RenderContext* rc)
 	{
 		std::string vbName = "vb-" + intToStr(static_cast<size_t>(i->tag));
 		std::string ibName = "ib-" + intToStr(static_cast<size_t>(p->indexArray()->tag));
-		std::string vaoName = "vao-" + ibName + "-" + vbName;
+		
+		std::string vaoName = "vao-" + intToStr(static_cast<size_t>(i->tag)) +
+			"-" + intToStr(static_cast<size_t>(p->indexArray()->tag));
 		
 		VertexArrayObject vao = rc->vertexBufferFactory().createVertexArrayObject(vaoName);
 		VertexBuffer vb = rc->vertexBufferFactory().createVertexBuffer(vbName, i, BufferDrawType_Static);
@@ -344,7 +343,7 @@ bool Scene::performDeserialization(std::istream& stream, RenderContext* rc, Obje
 			{
 				numStorages = deserializeUInt(stream);
 			}
-			else if (storageVersion == StorageVersion_1_0_1)
+			else if (storageVersion >= StorageVersion_1_0_1)
 			{
 				format = static_cast<StorageFormat>(deserializeInt(stream));
 				numStorages = deserializeUInt(stream);

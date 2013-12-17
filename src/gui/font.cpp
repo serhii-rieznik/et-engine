@@ -5,8 +5,7 @@
  *
  */
 
-#include <et/core/stream.h>
-#include <et/core/filesystem.h>
+#include <et/core/et.h>
 #include <et/core/serialization.h>
 #include <et/core/conversion.h>
 #include <et/app/application.h>

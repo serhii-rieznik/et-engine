@@ -189,7 +189,7 @@ void GuiRenderer::beginRender(RenderContext* rc)
 	_blendState = rc->renderState().blendState();
 	_depthMask = rc->renderState().depthMask();
 	
-	rc->renderState().setBlend(true, Blend_Default);
+	rc->renderState().setBlend(true, BlendState_Default);
 	rc->renderState().bindProgram(_guiProgram);
 }
 
