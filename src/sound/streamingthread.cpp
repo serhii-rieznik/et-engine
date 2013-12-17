@@ -51,16 +51,9 @@ ThreadResult StreamingThread::main()
 		for (Player::Pointer& player : _private->playersList)
 		{
 			if (player->track()->streamed())
-			{
-				ALint processedBuffers = 0;
-				alGetSourcei(player->source(), AL_BUFFERS_PROCESSED, &processedBuffers);
-				if (processedBuffers > 0)
-					player->buffersProcessed(processedBuffers);
-			}
+				player->handleProcessedBuffers();
 			
-			int sampleOffset = 0;
-			alGetSourcei(player->source(), AL_SAMPLE_OFFSET, &sampleOffset);
-			player->samplesProcessed(sampleOffset);
+			player->handleProcessedSamples();
 		}
 		
 		sleepMSec(50);

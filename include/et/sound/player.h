@@ -55,8 +55,8 @@ namespace et
 			void onVolumeUpdated();
 			void setVolume(float);
             
-			void buffersProcessed(int processed);
-			void samplesProcessed(int);
+			void handleProcessedBuffers();
+			void handleProcessedSamples();
 			
         private:
 			friend class Manager;

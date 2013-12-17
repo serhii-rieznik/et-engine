@@ -133,12 +133,12 @@ void et::audio::checkOpenALErrorEx(const char* caller, const char* file, const c
 		
 		if (alcError != AL_NO_ERROR)
 		{
-			log::error("OpenAL ALC error: %s\n%s [%s, %s]: %s\n", alcGetString(sharedDevice, alcError),
+			log::error("OpenAL ALC error: %s\n%s [%s, %s]: %s", alcGetString(sharedDevice, alcError),
 				file, line, caller, buffer);
 		}
 		
 		if (alError != AL_NO_ERROR)
-			log::error("OpenAL error: %s\n%s[%s]: %s\n", alGetString(alError), file, line, buffer);
+			log::error("OpenAL error: %s\n%s[%s]: %s", alGetString(alError), file, line, buffer);
 	}
 }
 
