@@ -11,7 +11,7 @@
 
 using namespace et;
 
-#define ET_STOP_ON_OPENGL_ERROR			0
+#define ET_STOP_ON_OPENGL_ERROR			1
 #define CASE_VALUE(V)					case V: return #V;
 
 size_t OpenGLCounters::primitiveCounter = 0;
