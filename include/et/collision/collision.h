@@ -46,7 +46,7 @@ namespace et
 		/*
 		 * Ray intersections
 		 */
-		bool raySphere(const ray3d& r, const Sphere& s, vec3* intersection_pt);
+		bool raySphere(const ray3d& r, const Sphere& s, vec3* ip1, vec3* ip2 = nullptr);
 		bool rayPlane(const ray3d& r, const plane& p, vec3* intersection_pt);
 		bool raySegment(const ray2d&, const segment2d&, vec2* intersectionPoint);
 		

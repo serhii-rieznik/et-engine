@@ -165,7 +165,7 @@ bool et::pointInsideTriangle(const vec3& p, const triangle& t, const vec3& n)
 	return ((r1 > 0) && (r2 > 0) && (r3 > 0)) || ((r1 <= 0) && (r2 <= 0) && (r3 <= 0));
 }
 
-bool et::intersect::raySphere(const ray3d& r, const Sphere& s, vec3* intersection_pt)
+bool et::intersect::raySphere(const ray3d& r, const Sphere& s, vec3* ip1, vec3* ip2)
 {
 	vec3 dv = r.origin - s.center();
 	float b = 2.0f * dot(r.direction, dv);
@@ -173,16 +173,15 @@ bool et::intersect::raySphere(const ray3d& r, const Sphere& s, vec3* intersectio
 	float d = b * b - 4.0f * c;
 
 	if (d < 0.0) return false;
+	
+	d = std::sqrt(d);
 
-	if (intersection_pt)
-	{
-		float sqrt_d = sqrtf(d);
-		float t0 = sqrt_d - b;
-		float t1 = -b - sqrt_d;
-		float t = (t0 < t1) ? t0 : t1;
-		*intersection_pt = r.origin + 0.5f * t * r.direction;
-	}
+	if (ip1)
+		*ip1 = r.origin + 0.5f * (-b - d) * r.direction;
 
+	if (ip2)
+		*ip2 = r.origin + 0.5f * (-b + d) * r.direction;
+	
 	return true;
 }
 
