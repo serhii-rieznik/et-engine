@@ -85,10 +85,10 @@ RenderContext::RenderContext(const RenderContextParameters& inParams, Applicatio
 		openGLCapabilites().checkCaps();
 
 		_renderState.setRenderContext(this);
-		_programFactory = new ProgramFactory(this);
-		_textureFactory = new TextureFactory(this);
-		_framebufferFactory = new FramebufferFactory(this);
-		_vertexBufferFactory = new VertexBufferFactory(_renderState);
+		_programFactory = ProgramFactory::Pointer(new ProgramFactory(this));
+		_textureFactory = TextureFactory::Pointer(new TextureFactory(this));
+		_framebufferFactory = FramebufferFactory::Pointer(new FramebufferFactory(this));
+		_vertexBufferFactory = VertexBufferFactory::Pointer(new VertexBufferFactory(this));
 
 		_renderState.setDefaultFramebuffer(_framebufferFactory->createFramebufferWrapper(0, "default-fbo"));
 		
@@ -98,17 +98,13 @@ RenderContext::RenderContext(const RenderContextParameters& inParams, Applicatio
 
 RenderContext::~RenderContext()
 {
-	_vertexBufferFactory.release();
-	_framebufferFactory.release();
-	_textureFactory.release();
-	_programFactory.release();
 	_renderState.setDefaultFramebuffer(Framebuffer::Pointer());
 	delete _private;
 }
 
 void RenderContext::init()
 {
-	_renderer = new Renderer(this);
+	_renderer = Renderer::Pointer::create(this);
 
 	RECT r = { };
 	GetClientRect(_private->primaryContext.hWnd, &r);
