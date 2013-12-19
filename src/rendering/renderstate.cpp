@@ -23,16 +23,16 @@ RenderState::State::State() :
 	enabledVertexAttributes.fill(0);
 }
 
-PreservedRenderStateScope::PreservedRenderStateScope(RenderState& rs, bool shouldApplyBefore) : 
-	_rs(rs), _state(RenderState::currentState())
+PreservedRenderStateScope::PreservedRenderStateScope(RenderContext* rc, bool shouldApplyBefore) :
+	_rc(rc), _state(RenderState::currentState())
 {
 	if (shouldApplyBefore)
-		_rs.applyState(_state);
+		_rc->renderState().applyState(_state);
 }
 
 PreservedRenderStateScope::~PreservedRenderStateScope()
 {
-	_rs.applyState(_state);
+	_rc->renderState().applyState(_state);
 }
 
 void RenderState::setRenderContext(RenderContext* rc)
@@ -41,13 +41,14 @@ void RenderState::setRenderContext(RenderContext* rc)
 	
 	_currentState = RenderState::currentState();
 	
-	char zero[] = { 0, 0, 0, 0 };
+	unsigned char blackColor[] = { 0, 0, 0, 255 };
 	bindTexture(0, 0, GL_TEXTURE_2D, true);
+	
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	etTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, &zero);
+	etTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, &blackColor);
 	
 	bindTexture(_currentState.activeTextureUnit,
 		_currentState.boundTextures[GL_TEXTURE_2D][_currentState.activeTextureUnit], GL_TEXTURE_2D);

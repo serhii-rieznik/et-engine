@@ -5,13 +5,13 @@
  *
  */
 
-#include <et/rendering/renderstate.h>
+#include <et/rendering/rendercontext.h>
 #include <et/apiobjects/indexbufferdata.h>
 
 using namespace et;
 
-IndexBufferData::IndexBufferData(RenderState& rs, IndexArray::Pointer i, BufferDrawType drawType,
-	const std::string& aName) : Object(aName), _rs(rs), _size(i->actualSize()), _sourceTag(0),
+IndexBufferData::IndexBufferData(RenderContext* rc, IndexArray::Pointer i, BufferDrawType drawType,
+	const std::string& aName) : Object(aName), _rc(rc), _size(i->actualSize()), _sourceTag(0),
 	_indexBuffer(0), _dataType(0), _primitiveType(0), _format(IndexArrayFormat_Undefined), _drawType(drawType)
 {
 	build(i);
@@ -22,7 +22,7 @@ IndexBufferData::~IndexBufferData()
 	if (_indexBuffer != 0)
 		glDeleteBuffers(1, &_indexBuffer);
 
-	_rs.indexBufferDeleted(_indexBuffer);
+	_rc->renderState().indexBufferDeleted(_indexBuffer);
 }
 
 void IndexBufferData::setProperties(const IndexArray::Pointer& i)
@@ -70,7 +70,7 @@ void IndexBufferData::internal_setData(const unsigned char* data, size_t size)
 {
 	if (size > 0)
 	{
-		_rs.bindBuffer(GL_ELEMENT_ARRAY_BUFFER, _indexBuffer);
+		_rc->renderState().bindBuffer(GL_ELEMENT_ARRAY_BUFFER, _indexBuffer);
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, static_cast<GLsizeiptr>(size), data, drawTypeValue(_drawType));
 		checkOpenGLError("glBufferData(GL_ELEMENT_ARRAY_BUFFER, %u, 0x%08X, ..,)", size, data);
 	}

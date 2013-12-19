@@ -17,6 +17,9 @@ namespace et
 	class TextureFactory : public APIObjectFactory, public TextureLoadingThreadDelegate, public ObjectLoader
 	{
 	public:
+		ET_DECLARE_POINTER(TextureFactory)
+		
+	public:
 		~TextureFactory();
 		
 		Texture loadTexture(const std::string& file, ObjectsCache& cache, bool async = false,

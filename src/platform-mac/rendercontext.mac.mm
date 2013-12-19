@@ -97,25 +97,19 @@ RenderContext::RenderContext(const RenderContextParameters& inParams, Applicatio
 	_renderState.setRenderContext(this);
 	_renderState.setMainViewportSize(_params.contextSize);
 	
-	_textureFactory = new TextureFactory(this);
-	_framebufferFactory = new FramebufferFactory(this);
-	_programFactory = new ProgramFactory(this);
-	_vertexBufferFactory = new VertexBufferFactory(_renderState);
+	_textureFactory = TextureFactory::Pointer(new TextureFactory(this));
+	_framebufferFactory = FramebufferFactory::Pointer(new FramebufferFactory(this));
+	_programFactory = ProgramFactory::Pointer(new ProgramFactory(this));
+	_vertexBufferFactory = VertexBufferFactory::Pointer(new VertexBufferFactory(this));
 
 	_renderState.setDefaultFramebuffer(_framebufferFactory->createFramebufferWrapper(0));
-	
-	_renderer = new Renderer(this);
+	_renderer = Renderer::Pointer::create(this);
 	
 	ET_CONNECT_EVENT(_fpsTimer.expired, RenderContext::onFPSTimerExpired)
 }
 
 RenderContext::~RenderContext()
 {
-	_renderer.release();
-	_textureFactory.release();
-	_vertexBufferFactory.release();
-	_programFactory.release();
-	_framebufferFactory.release();
 	delete _private;
 }
 

@@ -12,16 +12,11 @@
 
 namespace et
 {
-	enum ShaderType
-	{
-		ShaderType_Vertex,
-		ShaderType_Geometry,
-		ShaderType_Fragment,
-	};
-	
-	class RenderContext;
 	class ProgramFactory : public APIObjectFactory, public ObjectLoader
 	{
+	public:
+		ET_DECLARE_POINTER(ProgramFactory)
+		
 	public:
 		ProgramFactory(RenderContext* rc);
 		~ProgramFactory();
@@ -38,6 +33,15 @@ namespace et
 		Program ::Pointer genProgram(const std::string& name, const std::string& vs, const std::string& gs,
 			const std::string& fs, const StringList& defines = StringList(), const std::string& workFolder = ".");
 
+	private:
+		
+		enum ShaderType
+		{
+			ShaderType_Vertex,
+			ShaderType_Geometry,
+			ShaderType_Fragment,
+		};
+		
 	private:
 		void parseSourceCode(ShaderType type, std::string& code,
 			const StringList& defines, const std::string& workFolder);

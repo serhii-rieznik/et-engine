@@ -40,9 +40,9 @@ namespace et
 		ET_DECLARE_POINTER(Program)
 
 	public:
-		Program(RenderState& rs);
+		Program(RenderContext*);
 		
-		Program(RenderState& rs, const std::string& vertexShader, const std::string& geometryShader,
+		Program(RenderContext*, const std::string& vertexShader, const std::string& geometryShader,
 			const std::string& fragmentShader, const std::string& objName, const std::string& origin,
 			const StringList& defines);
 
@@ -146,8 +146,8 @@ namespace et
 		int link();
 
 	private:
-		RenderState& _rs;
-
+		RenderContext* _rc;
+		
 		uint32_t _glID;
 		
 		UniformMap _uniforms;

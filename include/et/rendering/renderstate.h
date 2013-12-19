@@ -242,15 +242,14 @@ namespace et
 	class PreservedRenderStateScope
 	{
 	public:
-		PreservedRenderStateScope(RenderState& rs, bool shouldApplyBefore);
+		PreservedRenderStateScope(RenderContext*, bool shouldApplyBefore);
 		~PreservedRenderStateScope();
 
 	private:
-		PreservedRenderStateScope& operator = (const PreservedRenderStateScope&)
-			{ return *this; }
+		ET_DENY_COPY(PreservedRenderStateScope)
 		
 	private:
-		RenderState& _rs;
+		RenderContext* _rc;
 		RenderState::State _state;
 	};
 

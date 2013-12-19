@@ -173,6 +173,59 @@ void FBXLoaderPrivate::loadTextures()
 		FbxFileTexture* fileTexture = FbxCast<FbxFileTexture>(scene->GetTexture(i));
 		if (fileTexture && !fileTexture->GetUserDataPtr())
 		{
+			std::string fileName = normalizeFilePath(std::string(fileTexture->GetFileName()));
+			
+			std::string ext = lowercase(getFileExt(fileName));
+			if ((ext != ".png") && (ext != ".dds") && (ext != ".pvr"))
+			{
+				std::string basePath = getFilePath(fileName);
+				std::string baseName = removeFileExt(getFileName(fileName));
+				
+				if (fileExists(baseName + ".pvr"))
+					fileName = baseName + ".pvr";
+				if (fileExists(basePath + baseName + ".pvr"))
+					fileName = basePath + baseName + ".pvr";
+				if (fileExists(_folder + baseName + ".pvr"))
+					fileName = _folder + baseName + ".pvr";
+
+				if (fileExists(baseName + ".dds"))
+					fileName = baseName + ".dds";
+				if (fileExists(basePath + baseName + ".dds"))
+					fileName = basePath + baseName + ".dds";
+				if (fileExists(_folder + baseName + ".dds"))
+					fileName = _folder + baseName + ".dds";
+				
+				if (fileExists(baseName + ".png"))
+					fileName = baseName + ".png";
+				if (fileExists(basePath + baseName + ".png"))
+					fileName = basePath + baseName + ".png";
+				if (fileExists(_folder + baseName + ".png"))
+					fileName = _folder + baseName + ".png";
+			}
+						
+			Texture texture;
+			if (fileExists(fileName))
+			{
+				texture = _rc->textureFactory().loadTexture(fileName, _texCache);
+				texture->setOrigin(getFileName(fileName));
+			}
+			else
+			{
+				BinaryDataStorage randomTextureData(4, 255);
+				for (size_t i = 0; i < 3; ++i)
+					randomTextureData[i] = rand() % 256;
+				
+				texture = _rc->textureFactory().genTexture(GL_TEXTURE_2D, GL_RGBA, vec2i(1), GL_RGBA,
+					GL_UNSIGNED_BYTE, randomTextureData, fileName);
+				texture->setOrigin(fileName);
+				
+				_texCache.manage(texture, _rc->textureFactoryPointer());
+			}
+			fileTexture->SetUserDataPtr(texture.ptr());
+		}
+	}
+			
+/*
 			bool shouldLoad = false;
 			
 			std::string originalName;
@@ -204,8 +257,7 @@ void FBXLoaderPrivate::loadTextures()
 					fileTexture->SetUserDataPtr(texture.ptr());
 				}
 			}
-		}
-	}
+*/
 }
 
 void FBXLoaderPrivate::loadNode(FbxNode* node, s3d::Element::Pointer parent)

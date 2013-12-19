@@ -227,15 +227,17 @@ Program::Pointer ProgramFactory::loadProgram(const std::string& file, ObjectsCac
 	std::string frag_shader;
 
 	StringList sourceFiles = loadProgramSources(file, vertex_shader, geom_shader, frag_shader);
+	
 	if (sourceFiles.empty())
-		return Program::Pointer::create(renderContext()->renderState());
+		return Program::Pointer::create(renderContext());
 	
 	std::string workFolder = getFilePath(file);
+	
 	parseSourceCode(ShaderType_Vertex, vertex_shader, defines, workFolder);
 	parseSourceCode(ShaderType_Geometry, geom_shader, defines, workFolder);
 	parseSourceCode(ShaderType_Fragment, frag_shader, defines, workFolder);
 	
-	Program::Pointer program(new Program(renderContext()->renderState(), vertex_shader, geom_shader,
+	Program::Pointer program(new Program(renderContext(), vertex_shader, geom_shader,
 		frag_shader, getFileName(file), file, defines));
 	
 	for (auto& s : sourceFiles)
@@ -262,7 +264,7 @@ Program::Pointer ProgramFactory::genProgram(const std::string& name, const std::
 	parseSourceCode(ShaderType_Geometry, gs, defines, workFolder);
 	parseSourceCode(ShaderType_Fragment, fs, defines, workFolder);
 	
-	return Program::Pointer::create(renderContext()->renderState(), vs, gs, fs, name, name, defines);
+	return Program::Pointer::create(renderContext(), vs, gs, fs, name, name, defines);
 }
 
 Program ::Pointer ProgramFactory::genProgram(const std::string& name, const std::string& vertexshader,
@@ -274,7 +276,7 @@ Program ::Pointer ProgramFactory::genProgram(const std::string& name, const std:
 	parseSourceCode(ShaderType_Vertex, vs, defines, workFolder);
 	parseSourceCode(ShaderType_Fragment, fs, defines, workFolder);
 	
-	return Program::Pointer::create(renderContext()->renderState(), vs, std::string(), fs, name, name, defines);
+	return Program::Pointer::create(renderContext(), vs, std::string(), fs, name, name, defines);
 }
 
 void ProgramFactory::parseSourceCode(ShaderType type, std::string& source, const StringList& defines,

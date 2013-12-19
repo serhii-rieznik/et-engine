@@ -14,15 +14,15 @@ using namespace et;
 
 static const std::string etNoShader = "none";
 
-Program::Program(RenderState& rs) : _glID(0), _rs(rs),
+Program::Program(RenderContext* rc) : _glID(0), _rc(rc),
 	_mModelViewLocation(-1), _mModelViewProjectionLocation(-1), _vCameraLocation(-1),
 	_vPrimaryLightLocation(-1), _mLightProjectionMatrixLocation(-1), _mTransformLocation(-1)
 {
 }
 
-Program::Program(RenderState& rs, const std::string& vertexShader, const std::string& geometryShader,
+Program::Program(RenderContext* rc, const std::string& vertexShader, const std::string& geometryShader,
 	const std::string& fragmentShader, const std::string& objName, const std::string& origin,
-	const StringList& defines) : LoadableObject(objName, origin), _glID(0), _rs(rs), _mModelViewLocation(-1),
+	const StringList& defines) : LoadableObject(objName, origin), _glID(0), _rc(rc), _mModelViewLocation(-1),
 	_mModelViewProjectionLocation(-1), _vCameraLocation(-1), _vPrimaryLightLocation(-1),
 	_mLightProjectionMatrixLocation(-1), _mTransformLocation(-1), _defines(defines)
 {
@@ -37,7 +37,7 @@ Program::~Program()
 		checkOpenGLError("glDeleteProgram: %s", name().c_str());
 	}
 
-	_rs.programDeleted(_glID);
+	_rc->renderState().programDeleted(_glID);
 }
 
 UniformMap::const_iterator Program::findUniform(const std::string& name) const
@@ -281,7 +281,7 @@ void Program::buildProgram(const std::string& vertex_source, const std::string& 
 			glBindAttribLocation(_glID, static_cast<GLuint>(i.usage), i.name.c_str());
 
 		linkStatus = link();
-		_rs.bindProgram(_glID, true);
+		_rc->renderState().bindProgram(_glID, true);
 
 		if (linkStatus == GL_TRUE)
 		{

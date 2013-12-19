@@ -12,8 +12,11 @@
 namespace et
 {
 	class RenderContext;
-	class Renderer
+	class Renderer : public Shared
 	{
+	public:
+		ET_DECLARE_POINTER(Renderer)
+		
 	public: 
 		Renderer(RenderContext*);
 		~Renderer();

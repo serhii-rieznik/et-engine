@@ -16,10 +16,10 @@ namespace et
 	class VertexArrayObjectData : public Object
 	{
 	public:
-		VertexArrayObjectData(RenderState& rs, VertexBuffer vb, IndexBuffer ib,
+		VertexArrayObjectData(RenderContext*, VertexBuffer, IndexBuffer,
 			const std::string& name = std::string());
 		
-		VertexArrayObjectData(RenderState& rs, const std::string& name = std::string());
+		VertexArrayObjectData(RenderContext*, const std::string& name = std::string());
 		
 		~VertexArrayObjectData();
 
@@ -46,7 +46,7 @@ namespace et
 		void init();
 
 	private:
-		RenderState& _rs;
+		RenderContext* _rc;
 		VertexBuffer _vb;
 		IndexBuffer _ib;
 		uint32_t _vao;

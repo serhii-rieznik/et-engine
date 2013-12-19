@@ -7,19 +7,20 @@
 
 #pragma once
 
+#include <et/apiobjects/apiobjectfactory.h>
 #include <et/apiobjects/vertexarrayobject.h>
 
 namespace et
 {
-
-	class RenderState;
 	class VertexDeclaration;
 
-	class VertexBufferFactory
+	class VertexBufferFactory : public APIObjectFactory, public ObjectLoader
 	{
 	public:
-		VertexBufferFactory(RenderState& rs) :
-			_rs(rs) { }
+		ET_DECLARE_POINTER(VertexBufferFactory)
+		
+	public:
+		VertexBufferFactory(RenderContext* rc);
 
 		VertexBuffer createVertexBuffer(const std::string& name,
 			VertexArray::Pointer data, BufferDrawType drawType);
@@ -34,13 +35,9 @@ namespace et
 			IndexArray::Pointer indexData, BufferDrawType indexDrawType);
 
 	private:
-		VertexBufferFactory(const VertexBufferFactory& r) : _rs(r._rs)
-			{ }
-
-		VertexBufferFactory& operator = (const VertexBufferFactory&)
-			{ return *this; }
-
-		RenderState& _rs;
+		ET_DENY_COPY(VertexBufferFactory)
+		
+		void reloadObject(LoadableObject::Pointer, ObjectsCache&) { /* TODO */ }
 	};
 
 }

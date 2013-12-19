@@ -16,7 +16,7 @@ namespace et
 	class VertexBufferData : public Object
 	{
 	public:
-		VertexBufferData(RenderState& rs, const VertexArray::Description& desc,
+		VertexBufferData(RenderContext* rc, const VertexArray::Description& desc,
 			BufferDrawType vertexDrawType, const std::string& name = std::string());
 
 		~VertexBufferData();
@@ -42,11 +42,11 @@ namespace et
 			{ return _sourceTag; }
 
 	private:
-		VertexBufferData(RenderState& rs, const VertexDeclaration& decl, const void* vertexData,
+		VertexBufferData(RenderContext* rc, const VertexDeclaration& decl, const void* vertexData,
 			size_t vertexDataSize, BufferDrawType vertexDrawType, const std::string& name = std::string());
 
 	private:
-		RenderState& _rs;
+		RenderContext* _rc;
 		uint32_t _vertexBuffer;
 		VertexDeclaration _decl;
 		size_t _dataSize;

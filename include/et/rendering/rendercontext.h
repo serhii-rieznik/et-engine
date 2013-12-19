@@ -71,12 +71,18 @@ namespace et
 
 		TextureFactory& textureFactory()
 			{ return _textureFactory.reference(); }
-
+		
 		FramebufferFactory& framebufferFactory()
 			{ return _framebufferFactory.reference(); }
 
 		VertexBufferFactory& vertexBufferFactory()
 			{ return _vertexBufferFactory.reference(); }
+		
+		/*
+		 * Access to factories by pointers
+		 */
+		TextureFactory::Pointer textureFactoryPointer()
+			{ return _textureFactory; }
 
 		size_t lastFPSValue() const
 			{ return _info.averageFramePerSecond; }
@@ -117,12 +123,11 @@ namespace et
 
 		RenderState _renderState;
 
-		AutoPtr<ProgramFactory> _programFactory;
-		AutoPtr<TextureFactory> _textureFactory;
-		AutoPtr<FramebufferFactory> _framebufferFactory;
-		AutoPtr<VertexBufferFactory> _vertexBufferFactory;
-
-		AutoPtr<Renderer> _renderer;
+		ProgramFactory::Pointer _programFactory;
+		TextureFactory::Pointer _textureFactory;
+		FramebufferFactory::Pointer _framebufferFactory;
+		VertexBufferFactory::Pointer _vertexBufferFactory;
+		Renderer::Pointer _renderer;
 		
 		size_t _screenScaleFactor;
 	};

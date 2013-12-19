@@ -15,7 +15,7 @@ namespace et
 	class IndexBufferData : public Object
 	{
 	public:
-		IndexBufferData(RenderState& rs, IndexArray::Pointer i, BufferDrawType drawType,
+		IndexBufferData(RenderContext* rc, IndexArray::Pointer i, BufferDrawType drawType,
 			const std::string& name = std::string());
 		
 		~IndexBufferData();
@@ -51,7 +51,7 @@ namespace et
 		void internal_setData(const unsigned char* data, size_t size);
 
 	private:
-		RenderState& _rs;
+		RenderContext* _rc;
 		size_t _size;
 		size_t _sourceTag;
 		uint32_t _indexBuffer;

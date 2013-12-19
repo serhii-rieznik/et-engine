@@ -215,12 +215,20 @@ void Converter::onBtnOpenClick(et::gui::Button*)
 	types.push_back("etm");
 	std::string fileName = selectFile(types, SelectFileMode_Open, std::string());
 	
-	Invocation1 i;
-	i.setTarget(this, &Converter::performLoading, fileName);
-	i.invokeInMainRunLoop();
-	
-	_labStatus->setText("Loading...");
-	_scene.clear();
+	if (fileExists(fileName))
+	{
+		_scene.clear();
+		
+		Invocation1 i;
+		i.setTarget(this, &Converter::performLoading, fileName);
+		i.invokeInMainRunLoop();
+		
+		_labStatus->setText("Loading...");
+	}
+	else
+	{
+		_labStatus->setText("No file selected or unable to locate selected file");
+	}
 }
 
 void Converter::onBtnSaveClick(et::gui::Button* b)
