@@ -39,6 +39,7 @@ namespace et
 		VertexDataChunk chunk(VertexAttributeUsage usage);
 		Description generateDescription() const;
 		
+		void resize(size_t size);
 		void increase(size_t size);
 		void fitToSize(size_t size);
 		

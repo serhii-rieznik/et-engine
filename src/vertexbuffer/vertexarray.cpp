@@ -98,26 +98,23 @@ VertexDataChunk VertexArray::chunk(VertexAttributeUsage usage)
 	return VertexDataChunk();
 }
 
-void VertexArray::increase(size_t count)
+void VertexArray::resize(size_t size)
 {
-	_size += count;
-	
+	_size = size;
 	for (auto& i :_chunks)
 		i->fitToSize(_size);
-
 	_smoothing->fitToSize(_size);
+}
+
+void VertexArray::increase(size_t count)
+{
+	resize(_size + count);
 }
 
 void VertexArray::fitToSize(size_t count)
 {
-	if (_size >= count) return;
-
-	_size = count;
-	
-	for (auto& i :_chunks)
-		i->fitToSize(count);
-
-	_smoothing->fitToSize(_size);
+	if (_size < count)
+		resize(count);
 }
 
 void VertexArray::serialize(std::ostream& stream)
