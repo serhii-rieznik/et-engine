@@ -15,16 +15,15 @@ namespace et
     namespace audio
     {
 		class Player;
-		typedef IntrusivePtr<Player> PlayerPointer;
-		
 		class StreamingThreadPrivate;
 		class StreamingThread : public Thread
 		{
 		public:
 			StreamingThread();
+			~StreamingThread();
 			
-			void addPlayer(PlayerPointer);
-			void removePlayer(PlayerPointer);
+			void addPlayer(Player*);
+			void removePlayer(Player*);
 			
 		private:
 			ThreadResult main();

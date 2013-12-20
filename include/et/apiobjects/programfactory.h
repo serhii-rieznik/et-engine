@@ -12,7 +12,8 @@
 
 namespace et
 {
-	class ProgramFactory : public APIObjectFactory, public ObjectLoader
+	class ProgramFactoryPrivate;
+	class ProgramFactory : public APIObjectFactory
 	{
 	public:
 		ET_DECLARE_POINTER(ProgramFactory)
@@ -43,6 +44,8 @@ namespace et
 		};
 		
 	private:
+		friend class ProgramFactoryPrivate;
+		
 		void parseSourceCode(ShaderType type, std::string& code,
 			const StringList& defines, const std::string& workFolder);
 		
@@ -56,5 +59,6 @@ namespace et
 		std::string _commonHeader;
 		std::string _fragShaderHeader;
 		std::string _vertShaderHeader;
+		ProgramFactoryPrivate* _private;
 	};
 }

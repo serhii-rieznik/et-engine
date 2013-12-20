@@ -13,7 +13,7 @@ namespace et
 {
 	class RenderContext;
 
-	class APIObjectFactory
+	class APIObjectFactory : public Shared
 	{
 	protected:
 		APIObjectFactory(RenderContext* rc) :

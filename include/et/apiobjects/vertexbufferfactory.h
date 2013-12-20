@@ -14,7 +14,7 @@ namespace et
 {
 	class VertexDeclaration;
 
-	class VertexBufferFactory : public APIObjectFactory, public ObjectLoader
+	class VertexBufferFactory : public APIObjectFactory
 	{
 	public:
 		ET_DECLARE_POINTER(VertexBufferFactory)
@@ -36,8 +36,6 @@ namespace et
 
 	private:
 		ET_DENY_COPY(VertexBufferFactory)
-		
-		void reloadObject(LoadableObject::Pointer, ObjectsCache&) { /* TODO */ }
 	};
 
 }

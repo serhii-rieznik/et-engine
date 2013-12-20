@@ -16,21 +16,39 @@
 
 using namespace et;
 
+class et::TextureFactoryPrivate
+{
+public:
+	struct Loader : public ObjectLoader
+	{
+		TextureFactory* owner;
+
+		Loader(TextureFactory* aOwner) : 
+			owner(aOwner) { }
+
+		void reloadObject(LoadableObject::Pointer o, ObjectsCache& c)
+			{ owner->reloadObject(o, c); }
+	};
+
+	IntrusivePtr<Loader> loader;
+
+	TextureFactoryPrivate(TextureFactory* owner) : 
+		loader(new Loader(owner)) { } 
+};
+
 TextureFactory::TextureFactory(RenderContext* rc) :
 	APIObjectFactory(rc)
 {
-	_loader = ObjectLoader::Pointer(this);
+	_private = new TextureFactoryPrivate(this);
 	_loadingThread = new TextureLoadingThread(this);
-	retain();
 }
 
 TextureFactory::~TextureFactory()
 {
 	_loadingThread->stop();
 	_loadingThread->waitForTermination();
-	
-	_loader.reset(nullptr);
-	release();
+
+	delete _private;
 }
 
 Texture TextureFactory::loadTexture(const std::string& fileName, ObjectsCache& cache,
@@ -62,7 +80,7 @@ Texture TextureFactory::loadTexture(const std::string& fileName, ObjectsCache& c
 			bool calledFromAnotherThread = Threading::currentThread() != threading().renderingThread();
 			
 			texture = Texture(new TextureData(renderContext(), desc, desc->origin(), async || calledFromAnotherThread));
-			cache.manage(texture, ObjectLoader::Pointer(this));
+			cache.manage(texture, _private->loader);
 			
 			if (async)
 				_loadingThread->addRequest(desc->origin(), texture, delegate);
@@ -252,7 +270,7 @@ Texture TextureFactory::loadTexturesToCubemap(const std::string& posx, const std
 	for (size_t i = 0; i < 6; ++i)
 		result->addOrigin(layers[i]->origin());
 	
-	cache.manage(result, ObjectLoader::Pointer(this));
+	cache.manage(result, _private->loader);
 	
 	return result;
 }

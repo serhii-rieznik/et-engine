@@ -98,7 +98,6 @@ RenderContext::RenderContext(const RenderContextParameters& inParams, Applicatio
 
 RenderContext::~RenderContext()
 {
-	_renderState.setDefaultFramebuffer(Framebuffer::Pointer());
 	delete _private;
 }
 

@@ -14,7 +14,8 @@
 
 namespace et
 {
-	class TextureFactory : public APIObjectFactory, public TextureLoadingThreadDelegate, public ObjectLoader
+	class TextureFactoryPrivate;
+	class TextureFactory : public APIObjectFactory, public TextureLoadingThreadDelegate
 	{
 	public:
 		ET_DECLARE_POINTER(TextureFactory)
@@ -45,11 +46,12 @@ namespace et
 
 	private:
 		friend class RenderContext;
-		
+		friend class TextureFactoryPrivate;
+
 		TextureFactory(RenderContext*);
 
-		TextureFactory(const TextureFactory&) : APIObjectFactory(0)
-			{ }
+		TextureFactory(const TextureFactory&) :
+			APIObjectFactory(nullptr) { }
 
 		TextureFactory& operator = (const TextureFactory&)
 			{ return *this; }
@@ -58,6 +60,8 @@ namespace et
 		
 	private:
 		AutoPtr<TextureLoadingThread> _loadingThread;
+		TextureFactoryPrivate* _private;
+
 		CriticalSection _csTextureLoading;
 		ObjectLoader::Pointer _loader;
 	};

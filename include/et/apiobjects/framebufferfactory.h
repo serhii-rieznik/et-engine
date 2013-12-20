@@ -15,7 +15,7 @@ namespace et
 {
 	class RenderState;
 	
-	class FramebufferFactory : public APIObjectFactory, public ObjectLoader
+	class FramebufferFactory : public APIObjectFactory
 	{
 	public:
 		ET_DECLARE_POINTER(FramebufferFactory)
@@ -43,8 +43,6 @@ namespace et
 
 	private:
 		ET_DENY_COPY(FramebufferFactory)
-		
-		void reloadObject(LoadableObject::Pointer, ObjectsCache&) { /* TODO */ }
 	};
 
 }

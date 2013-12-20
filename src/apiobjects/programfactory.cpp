@@ -12,13 +12,33 @@
 
 using namespace et;
 
+class et::ProgramFactoryPrivate 
+{
+public:
+	struct Loader : public ObjectLoader
+	{
+		ProgramFactory* owner;
+
+		Loader(ProgramFactory* aOwner) :
+			owner(aOwner) { }
+
+		void reloadObject(LoadableObject::Pointer o, ObjectsCache& c)
+			{ owner->reloadObject(o, c); }
+
+	};
+
+	IntrusivePtr<Loader> loader;
+
+	ProgramFactoryPrivate(ProgramFactory* owner) : 
+		loader(new Loader(owner)) { }
+};
+
 StringList parseDefinesString(std::string defines, std::string separators = ",; \t");
 
 ProgramFactory::ProgramFactory(RenderContext* rc) : APIObjectFactory(rc)
 {
-	retain();
-	_objectLoader = ObjectLoader::Pointer(this);
-	
+	_private = new ProgramFactoryPrivate(this);
+
 #if (ET_OPENGLES)	
 	_commonHeader = 
 		"#define etLowp		lowp\n"
@@ -89,8 +109,7 @@ ProgramFactory::ProgramFactory(RenderContext* rc) : APIObjectFactory(rc)
 
 ProgramFactory::~ProgramFactory()
 {
-	_objectLoader.reset(nullptr);
-	release();
+	delete _private;
 }
 
 StringList ProgramFactory::loadProgramSources(const std::string& file, std::string& vertex_shader,
@@ -243,7 +262,7 @@ Program::Pointer ProgramFactory::loadProgram(const std::string& file, ObjectsCac
 	for (auto& s : sourceFiles)
 		program->addOrigin(s);
 	
-	cache.manage(program, _objectLoader);
+	cache.manage(program, _private->loader);
 	return program;
 }
 

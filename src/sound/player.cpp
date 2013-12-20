@@ -118,9 +118,7 @@ void Player::play(bool looped)
 		alSourcePlay(_private->source);
 		checkOpenALError("alSourcePlay");
 		
-		retain();
-		manager().streamingThread().addPlayer(Player::Pointer(this));
-		release();
+		manager().streamingThread().addPlayer(this);
 	}
 }
 
@@ -138,9 +136,7 @@ void Player::pause()
 
 void Player::stop()
 {
-	retain();
-	manager().streamingThread().removePlayer(Player::Pointer(this));
-	release();
+	manager().streamingThread().removePlayer(this);
 	
 	alSourceStop(_private->source);
     checkOpenALError("alSourceStop");
