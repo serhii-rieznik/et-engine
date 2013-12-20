@@ -10,18 +10,36 @@
 
 using namespace et;
 
-AtomicCounter::AtomicCounter() : _counter(0)
-	{ }
+AtomicCounter::AtomicCounter() :
+_counter(0)
+{
+#if (ET_DEBUG)
+	notifyOnRetain = false;
+	notifyOnRelease = false;
+#endif
+}
 
 AtomicCounterType AtomicCounter::retain()
-	{ return InterlockedIncrement(&_counter); }
+{
+#if (ET_DEBUG)
+	if (notifyOnRetain)
+		_CrtDbgBreak();
+#endif
+
+	return InterlockedIncrement(&_counter); 
+}
 
 AtomicCounterType AtomicCounter::release()
-	{ return InterlockedDecrement(&_counter); }
+{
+#if (ET_DEBUG)
+	if (notifyOnRelease)
+		_CrtDbgBreak();
+#endif
+
+	return InterlockedDecrement(&_counter);
+}
 
 static const AtomicCounterType validMask = static_cast<AtomicCounterType>(0xfffffffc);
-
-
 
 AtomicBool::AtomicBool() : 
 	_value(0) { }

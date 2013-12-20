@@ -28,6 +28,11 @@ namespace et
 		volatile const AtomicCounterType& atomicCounterValue() const
 			{ return _counter; }
 
+#if (ET_DEBUG)
+		volatile bool notifyOnRetain;
+		volatile bool notifyOnRelease;
+#endif
+
 	private:
 		ET_DENY_COPY(AtomicCounter)
 		

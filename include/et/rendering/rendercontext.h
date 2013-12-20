@@ -97,8 +97,8 @@ namespace et
 		ET_DECLARE_EVENT1(screenScaleFactorChanged, size_t)
 
 	private:
-		RenderContext(RenderContext*) : _private(0), _app(0), 
-			_programFactory(0), _textureFactory(0), _framebufferFactory(0), _vertexBufferFactory(0),
+		RenderContext(RenderContext*) : _private(nullptr), _app(nullptr), _programFactory(nullptr),
+			_textureFactory(nullptr), _framebufferFactory(nullptr), _vertexBufferFactory(nullptr),
 			_screenScaleFactor(1) { }
 
 		RenderContext* operator = (const RenderContext*) 
