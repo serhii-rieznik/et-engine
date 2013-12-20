@@ -74,13 +74,9 @@ Event1<ArgType>::~Event1()
 {
 	for (auto& connection : _connections)
 	{
-		if (connection->receiver())
-		{
-			if (!connection->removed())
-				connection->receiver()->eventDisconnected(this);
-
-			delete connection;
-		}
+		if ((connection->receiver() != nullptr) && !connection->removed())
+			connection->receiver()->eventDisconnected(this);
+		delete connection;
 	}
 }
 
@@ -206,13 +202,10 @@ Event2<Arg1Type, Arg2Type>::~Event2()
 {
 	for (auto& connection : _connections)
 	{
-		if (connection->receiver())
-		{
-			if (!connection->removed())
-				connection->receiver()->eventDisconnected(this);
+		if ((connection->receiver() != nullptr) && !connection->removed())
+			connection->receiver()->eventDisconnected(this);
 
-			delete connection;
-		}
+		delete connection;
 	}
 }
 

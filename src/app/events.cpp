@@ -46,13 +46,9 @@ Event0::~Event0()
 {
 	for (auto& connection : _connections)
 	{
-		if (connection->receiver())
-		{
-			if (!connection->removed())
-				connection->receiver()->eventDisconnected(this);
-
-			delete connection;
-		}
+		if ((connection->receiver() != nullptr) && !connection->removed())
+			connection->receiver()->eventDisconnected(this);
+		delete connection;
 	}
 }
 
