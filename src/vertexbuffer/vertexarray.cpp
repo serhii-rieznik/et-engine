@@ -101,9 +101,11 @@ VertexDataChunk VertexArray::chunk(VertexAttributeUsage usage)
 void VertexArray::resize(size_t size)
 {
 	_size = size;
+	
 	for (auto& i :_chunks)
-		i->fitToSize(_size);
-	_smoothing->fitToSize(_size);
+		i->resize(_size);
+	
+	_smoothing->resize(_size);
 }
 
 void VertexArray::increase(size_t count)

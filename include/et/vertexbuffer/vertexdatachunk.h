@@ -18,7 +18,8 @@ namespace et
 		VertexDataChunkData(std::istream& stream);
 		VertexDataChunkData(VertexAttributeUsage usage, VertexAttributeType type, size_t size);
 
-		void fitToSize(size_t size);
+		void resize(size_t);
+		void fitToSize(size_t);
 
 		char* data()
 			{ return _data.binary(); }

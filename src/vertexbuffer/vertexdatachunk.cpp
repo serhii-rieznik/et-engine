@@ -34,9 +34,15 @@ void VertexDataChunkData::serialize(std::ostream& stream)
 	stream.write(_data.binary(), static_cast<std::streamsize>(_data.dataSize()));
 }
 
+void VertexDataChunkData::resize(size_t sz)
+{
+	_data.resize(typeSize() * sz);
+}
+
 void VertexDataChunkData::fitToSize(size_t count)
 {
-	_data.fitToSize(typeSize() * count);
+	if (_data.dataSize() < typeSize() * count)
+		resize(count);
 }
 
 void VertexDataChunkData::copyTo(VertexDataChunkData& c)
