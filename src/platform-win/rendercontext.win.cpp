@@ -376,9 +376,8 @@ bool RenderContextPrivate::initOpenGL(const RenderContextParameters& params)
 		if (params.openGLTargetVersion.x >= 3)
 		{
 			attrib_list[6] = WGL_CONTEXT_PROFILE_MASK_ARB;
-
-			attrib_list[7] = params.openGLCoreProfile * WGL_CONTEXT_CORE_PROFILE_BIT_ARB | 
-							 params.openGLCompatibilityProfile * WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB;
+			attrib_list[7] = (params.openGLProfile == OpenGLProfile_Core) ?
+				WGL_CONTEXT_CORE_PROFILE_BIT_ARB : WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB;
 		}
 
 		primaryContext.hGLRC = wglCreateContextAttribsARB(primaryContext.hDC, 0, attrib_list);
