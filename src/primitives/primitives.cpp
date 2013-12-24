@@ -989,8 +989,10 @@ uint64_t vectorHash(const vec3& v)
 /* */
 	char raw[256] = { };
 	
-	int symbols = sprintf(raw, "%.2f%0.2f%0.2f%0.3f%0.3f%0.3f%0.3f%0.3f",
-		v.x, v.y, v.z, v.x * v.y, v.x * v.z, v.y * v.z, v.x + v.y + v.z, v.x - v.y - v.z);
+	int64_t ix = static_cast<int64_t>(100.0f * v.x) * 174763;
+	int64_t iy = static_cast<int64_t>(100.0f * v.y) * 478441;
+	int64_t iz = static_cast<int64_t>(100.0f * v.z) * 720743;
+	int symbols = sprintf(raw, "%lld%lld%lld", ix, iy, iz);
 	
 	uint64_t* ptr = reinterpret_cast<uint64_t*>(raw);
 	uint64_t* end = ptr + symbols / sizeof(uint64_t) + 1;
@@ -1000,13 +1002,6 @@ uint64_t vectorHash(const vec3& v)
 		result ^= *ptr++;
 	
 	return result;
-	
-/*
-	uint64_t p1 = static_cast<uint64_t>(v.x * 73856093.0f);
-	uint64_t p2 = static_cast<uint64_t>(v.y * 32452843.0f);
-	uint64_t p3 = static_cast<uint64_t>(v.z * 83492791.0f);
-	return (p1 ^ p2 ^ p3) % 15999;
-*/
 }
 
 VertexArray::Pointer primitives::buildLinearIndexArray(VertexArray::Pointer vertexArray, IndexArray::Pointer indexArray)
@@ -1072,6 +1067,7 @@ VertexArray::Pointer primitives::buildLinearIndexArray(VertexArray::Pointer vert
 VertexArray::Pointer primitives::linearizeTrianglesIndexArray(VertexArray::Pointer data, IndexArray::Pointer indexArray)
 {
 	ET_ASSERT(indexArray->primitiveType() == PrimitiveType_Triangles);
+	
 	VertexDeclaration decl = data->decl();
 	VertexArray::Pointer result(new VertexArray(data->decl(), 3 * indexArray->primitivesCount()));
 	for (auto& e : decl.elements())
@@ -1081,6 +1077,18 @@ VertexArray::Pointer primitives::linearizeTrianglesIndexArray(VertexArray::Point
 		{
 			auto oldValues = data->chunk(e.usage()).accessData<vec3>(0);
 			auto newValues = result->chunk(e.usage()).accessData<vec3>(0);
+			size_t i = 0;
+			for (auto p : indexArray.reference())
+			{
+				newValues[i++] = oldValues[p[0]];
+				newValues[i++] = oldValues[p[1]];
+				newValues[i++] = oldValues[p[2]];
+			}
+		}
+		else if (e.type() == Type_Vec2)
+		{
+			auto oldValues = data->chunk(e.usage()).accessData<vec2>(0);
+			auto newValues = result->chunk(e.usage()).accessData<vec2>(0);
 			size_t i = 0;
 			for (auto p : indexArray.reference())
 			{
