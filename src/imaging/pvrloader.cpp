@@ -9,258 +9,64 @@
 #include <et/geometry/geometry.h>
 #include <et/opengl/opengl.h>
 #include <et/imaging/pvrloader.h>
+#include <pvr/PVRTTexture.h>
+#include <pvr/PVRTDecompress.h>
 
 using namespace et;
 
-enum PVRFormat
-{
-	PVRVersion3Format_PVRTC_2bpp_RGB = 0,
-	PVRVersion3Format_PVRTC_2bpp_RGBA = 1,
-	PVRVersion3Format_PVRTC_4bpp_RGB = 2,
-	PVRVersion3Format_PVRTC_4bpp_RGBA = 3,
-	
-	PVRVersion3Format_RGB = ET_COMPOSE_UINT32_INVERTED('r', 'g', 'b',  0),
-	PVRVersion3Format_RGBA = ET_COMPOSE_UINT32_INVERTED('r', 'g', 'b', 'a'),
-	
-	PVRVersion3Format_mask = 0xffffffff,
-    
-	PVRVersion2Format_PVRTC2 = 0x18,
-	PVRVersion2Format_PVRTC4 = 0x19
-};
+uint32_t getBitsPerPixel(PVRTuint64 u64PixelFormat);
+void parseTextureFormat(const PVRTextureHeaderV3& sTextureHeader, TextureDescription& desc, bool& shouldDecompress);
 
-enum PVRChannelType
+void loadInfoFromV3Header(const PVRTextureHeaderV3& header, const BinaryDataStorage&,
+	TextureDescription& desc, bool& shouldDecompress)
 {
-    PVRChannelType_UnsignedByteNorm = 0,
-    PVRChannelType_UnsignedByte = 2,
-    
-    PVRChannelType_UnsignedShortNorm = 4,
-    PVRChannelType_UnsignedShort = 6,
-    
-    PVRChannelType_UnsignedIntNorm = 8,
-    PVRChannelType_UnsignedInt = 10,
-};
-
-namespace et
-{
-    struct PVRHeader2
-    {
-        unsigned int dwHeaderSize;		/* size of the structure */
-        int dwHeight;					/* height of surface to be created */
-        int dwWidth;					/* width of input surface */
-        unsigned int dwMipMapCount;		/* number of MIP-map levels requested */
-        unsigned int dwpfFlags;			/* pixel format flags */
-        unsigned int dwDataSize;		/* Size of the compress data */
-        unsigned int dwBitCount;		/* number of bits per pixel */
-        unsigned int dwRBitMask;		/* mask for red bit */
-        unsigned int dwGBitMask;		/* mask for green bits */
-        unsigned int dwBBitMask;		/* mask for blue bits */
-        unsigned int dwAlphaBitMask;	/* mask for alpha channel */
-        unsigned int dwPVR;				/* should be 'P' 'V' 'R' '!' */
-        unsigned int dwNumSurfs;		/* number of slices for volume textures or skyboxes */
-    };
-    
-    struct PVRHeader3
-    {
-        unsigned int version;			
-        unsigned int flags;		  
-        uint64_t pixelFormat;		
-        unsigned int colourSpace;		
-        unsigned int channelType;		
-        int height;
-        int width;		  
-        unsigned int depth;		  
-        unsigned int numSurfaces;		
-        unsigned int numFaces;	   
-        unsigned int numMipmaps;	 
-        unsigned int metaDataSize;   
-    };
-	
-	struct PVRHeader3Meta
-	{
-		char fourCC[4];
-		uint32_t key;
-		uint32_t dataSize;
-	};
-}
-
-const unsigned int PVRFormatMask = 0xff;
-const unsigned int PVRHeaderV3Version = 0x03525650;
-
-void loadInfoFromV2Header(const PVRHeader2& header, TextureDescription& desc)
-{
-	desc.size = vec2i(header.dwWidth, header.dwHeight);
-	desc.type = GL_UNSIGNED_BYTE;
-	desc.bitsPerPixel = header.dwBitCount;
-	desc.mipMapCount = header.dwMipMapCount ? header.dwMipMapCount : 1;
-	desc.format = header.dwAlphaBitMask ? GL_RGBA : GL_RGB;
-	desc.layersCount = 1;
-    
-	if (desc.mipMapCount > 1)
-	{
-		int lastLevelScale = intPower(2, desc.mipMapCount);
-		while ((desc.size.x / lastLevelScale < 4) && (desc.size.y / lastLevelScale < 4))
-		{
-			desc.mipMapCount--;
-			lastLevelScale = intPower(2, desc.mipMapCount);
-		}
-	}
-    
-	size_t format = header.dwpfFlags & PVRFormatMask;
-#if defined(GL_COMPRESSED_RGBA_PVRTC_2BPPV1_IMG)	
-	if (format == PVRVersion2Format_PVRTC2)
-	{
-		desc.compressed = true;
-		desc.channels = 3 + header.dwAlphaBitMask;
-		desc.internalformat = header.dwAlphaBitMask ? GL_COMPRESSED_RGBA_PVRTC_2BPPV1_IMG : GL_COMPRESSED_RGB_PVRTC_2BPPV1_IMG;
-	}
-	else if (format == PVRVersion2Format_PVRTC4)
-	{
-		desc.compressed = true;
-		desc.channels = 3 + header.dwAlphaBitMask;
-		desc.internalformat = header.dwAlphaBitMask ? GL_COMPRESSED_RGBA_PVRTC_4BPPV1_IMG : GL_COMPRESSED_RGB_PVRTC_4BPPV1_IMG;
-	}
-	else
-#endif	
-	{
-		log::warning("Unresolved PVR format: %lu", format);
-	}
-}
-
-void loadInfoFromV3Header(const PVRHeader3& header, const BinaryDataStorage&, TextureDescription& desc)
-{
-	desc.layersCount = header.numFaces;
+	desc.layersCount = header.u32NumFaces;
 	assert((desc.layersCount == 1) || (desc.layersCount == 6));
 
-	desc.size = vec2i(header.width, header.height);
-	desc.mipMapCount = header.numMipmaps ? header.numMipmaps : 1;
+	desc.size = vec2i(header.u32Width, header.u32Height);
+	desc.mipMapCount = (header.u32MIPMapCount > 0) ? header.u32MIPMapCount : 1;
 	
 	if (desc.layersCount == 6)
 		desc.target = GL_TEXTURE_CUBE_MAP;
-
-    if ((header.channelType == PVRChannelType_UnsignedByte) || (header.channelType == PVRChannelType_UnsignedByteNorm))
-        desc.type = GL_UNSIGNED_BYTE;
-    else if ((header.channelType == PVRChannelType_UnsignedShort) || (header.channelType == PVRChannelType_UnsignedShortNorm))
-        desc.type = GL_UNSIGNED_SHORT;
-    else if ((header.channelType == PVRChannelType_UnsignedInt) || (header.channelType == PVRChannelType_UnsignedIntNorm))
-        desc.type = GL_UNSIGNED_INT;
-    else 
-        log::error("Unsupported PVR channel type: %u", header.channelType);
 	
-	size_t pixelFormat = header.pixelFormat & PVRVersion3Format_mask;
-	
-#if defined(GL_COMPRESSED_RGBA_PVRTC_2BPPV1_IMG)	
-    if (pixelFormat == PVRVersion3Format_PVRTC_2bpp_RGB)
-	{
-		desc.compressed = true;
-		desc.channels = 3;
-        desc.bitsPerPixel = 2;
-        desc.format = GL_RGB;
-		desc.internalformat = GL_COMPRESSED_RGB_PVRTC_2BPPV1_IMG;
-	}
-    else if (pixelFormat == PVRVersion3Format_PVRTC_2bpp_RGBA)
-	{
-		desc.compressed = true;
-		desc.channels = 4;
-        desc.bitsPerPixel = 2;
-        desc.format = GL_RGBA;
-		desc.internalformat = GL_COMPRESSED_RGBA_PVRTC_2BPPV1_IMG;
-	}
-    else if (pixelFormat == PVRVersion3Format_PVRTC_4bpp_RGB)
-	{
-		desc.compressed = true;
-		desc.channels = 3;
-        desc.bitsPerPixel = 4;
-        desc.format = GL_RGB;
-		desc.internalformat = GL_COMPRESSED_RGB_PVRTC_4BPPV1_IMG;
-	}
-    else if (pixelFormat == PVRVersion3Format_PVRTC_4bpp_RGBA)
-	{
-		desc.compressed = true;
-        desc.bitsPerPixel = 4;
-		desc.channels = 4;
-        desc.format = GL_RGBA;
-		desc.internalformat = GL_COMPRESSED_RGBA_PVRTC_4BPPV1_IMG;
-	}
-	else 
-#endif		
-	if (pixelFormat == PVRVersion3Format_RGB)
-	{
-		desc.compressed = false;
-		desc.channels = 3;
-        desc.format = GL_RGB;
-		desc.internalformat = GL_RGB;
-		
-		if ((header.channelType == PVRChannelType_UnsignedByte) || (header.channelType == PVRChannelType_UnsignedByteNorm))
-		{
-			desc.type = GL_UNSIGNED_BYTE;
-			desc.bitsPerPixel = desc.channels * bitsPerPixelForType(desc.type);
-		}
-		else if ((header.channelType == PVRChannelType_UnsignedShort) || (header.channelType == PVRChannelType_UnsignedShortNorm))
-		{
-			desc.type = GL_UNSIGNED_SHORT_5_6_5;
-			desc.bitsPerPixel = bitsPerPixelForType(desc.type);
-		}
-		else
-		{
-			ET_ASSERT("Invalid channel type for RGB format");
-		}
-	}
-	else if (pixelFormat == PVRVersion3Format_RGBA)
-	{
-		desc.compressed = false;
-		desc.channels = 4;
-        desc.bitsPerPixel = desc.channels * bitsPerPixelForType(desc.type);
-        desc.format = GL_RGBA;
-		desc.internalformat = GL_RGBA;
-	}
-	else
-	{
-		if ((header.pixelFormat & 0x000000ff) >= 32)
-		{
-			log::error("Unresolved PVR pixel format: %lld (%c%c%c%c)", header.pixelFormat,
-					   static_cast<char>((header.pixelFormat & 0x000000ff) >> 0),
-					   static_cast<char>((header.pixelFormat & 0x0000ff00) >> 8),
-					   static_cast<char>((header.pixelFormat & 0x00ff0000) >> 16),
-					   static_cast<char>((header.pixelFormat & 0xff000000) >> 24));
-		}
-		else
-		{
-			log::error("Unresolved PVR pixel format: %lld", header.pixelFormat);
-		}
-	}
+	desc.bitsPerPixel = getBitsPerPixel(header.u64PixelFormat);
+	parseTextureFormat(header, desc, shouldDecompress);
 }
 
-static const unsigned int pvrHeader2 = ET_COMPOSE_UINT32('!', 'R', 'V', 'P');
-
-void pvr::loadInfoFromStream(std::istream& stream, TextureDescription& desc)
+void pvr::loadInfoFromStream(std::istream& stream, TextureDescription& desc, bool* shouldDecompress)
 {
     std::istream::off_type offset = stream.tellg();
 	
 	desc.minimalDataSize = 32;
 	desc.dataLayout = TextureDataLayout_MipsFirst;
     
-	PVRHeader2 header2 = { };
+	PVR_Texture_Header header2 = { };
 	stream.read(reinterpret_cast<char*>(&header2), sizeof(header2));
-	if (header2.dwPVR == pvrHeader2)
+	if (header2.dwPVR == ET_COMPOSE_UINT32_INVERTED('P', 'V', 'R', '!'))
     {
-		loadInfoFromV2Header(header2, desc);
+		ET_FAIL("Legacy PVR files are not supported anymore.")
     }
     else 
     {
         stream.seekg(offset, std::ios_base::beg);
-        PVRHeader3 header3 = { };
+        PVRTextureHeaderV3 header3 = { };
 		BinaryDataStorage meta;
         stream.read(reinterpret_cast<char*>(&header3), sizeof(header3));
         
-        if (header3.version == PVRHeaderV3Version)
+        if (header3.u32Version == PVRTEX3_IDENT)
         {
-			if (header3.metaDataSize > 0)
+			if (header3.u32MetaDataSize > 0)
 			{
-				meta.resize(header3.metaDataSize);
-				stream.read(meta.binary(), header3.metaDataSize);
+				meta.resize(header3.u32MetaDataSize);
+				stream.read(meta.binary(), header3.u32MetaDataSize);
 			}
 			
-			loadInfoFromV3Header(header3, meta, desc);
+			bool decompress = false;
+			
+			loadInfoFromV3Header(header3, meta, desc, decompress);
+			
+			if (shouldDecompress)
+				*shouldDecompress = decompress;
         }
         else
 		{
@@ -269,22 +75,36 @@ void pvr::loadInfoFromStream(std::istream& stream, TextureDescription& desc)
     }
 }
 
-void pvr::loadInfoFromFile(const std::string& path, TextureDescription& desc)
+void pvr::loadFromStream(std::istream& stream, TextureDescription& desc)
+{
+	bool decompress = false;
+	loadInfoFromStream(stream, desc, &decompress);
+	desc.data.resize(desc.layersCount * desc.dataSizeForAllMipLevels());
+	stream.read(desc.data.binary(), static_cast<std::streamsize>(desc.data.dataSize()));
+	
+	if (decompress)
+	{
+		BinaryDataStorage rgbaData(desc.size.square() * 4, 255);
+		
+		PVRTDecompressPVRTC(desc.data.data(), (desc.bitsPerPixel == 2), desc.size.x, desc.size.y, rgbaData.data());
+		
+		desc.mipMapCount = 1;
+		desc.format = GL_RGBA;
+		desc.internalformat = GL_RGBA;
+		desc.type = GL_UNSIGNED_BYTE;
+		desc.compressed = false;
+		desc.data = rgbaData;
+	}
+}
+
+void pvr::loadInfoFromFile(const std::string& path, TextureDescription& desc, bool* shouldDecompress)
 {
 	InputStream file(path, StreamMode_Binary);
 	if (file.valid())
 	{
 		desc.setOrigin(path);
-		loadInfoFromStream(file.stream(), desc);
+		loadInfoFromStream(file.stream(), desc, shouldDecompress);
 	}
-}
-
-void pvr::loadFromStream(std::istream& stream, TextureDescription& desc)
-{
-	loadInfoFromStream(stream, desc);
-	
-	desc.data.resize(desc.layersCount * desc.dataSizeForAllMipLevels());
-	stream.read(desc.data.binary(), static_cast<std::streamsize>(desc.data.dataSize()));
 }
 
 void pvr::loadFromFile(const std::string& path, TextureDescription& desc)
@@ -295,4 +115,349 @@ void pvr::loadFromFile(const std::string& path, TextureDescription& desc)
 		desc.setOrigin(path);
 		loadFromStream(file.stream(), desc);
 	}
+}
+
+/*
+ * Service functions
+ */
+
+// Generate a 4 channel PixelID.
+#define PVRTGENPIXELID4(C1Name, C2Name, C3Name, C4Name, C1Bits, C2Bits, C3Bits, C4Bits) \
+	(((PVRTuint64)C1Name) + ((PVRTuint64)C2Name << 8) + ((PVRTuint64)C3Name << 16) + ((PVRTuint64)C4Name << 24) + \
+	((PVRTuint64)C1Bits << 32) + ((PVRTuint64)C2Bits << 40) + ((PVRTuint64)C3Bits << 48) + ((PVRTuint64)C4Bits << 56))
+
+// Generate a 1 channel PixelID.
+#define PVRTGENPIXELID3(C1Name, C2Name, C3Name, C1Bits, C2Bits, C3Bits) \
+	(PVRTGENPIXELID4(C1Name, C2Name, C3Name, 0, C1Bits, C2Bits, C3Bits, 0))
+
+// Generate a 2 channel PixelID.
+#define PVRTGENPIXELID2(C1Name, C2Name, C1Bits, C2Bits) \
+	(PVRTGENPIXELID4(C1Name, C2Name, 0, 0, C1Bits, C2Bits, 0, 0))
+
+// Generate a 3 channel PixelID.
+#define PVRTGENPIXELID1(C1Name, C1Bits) \
+	(PVRTGENPIXELID4(C1Name, 0, 0, 0, C1Bits, 0, 0, 0))
+
+void parseTextureFormat(const PVRTextureHeaderV3& sTextureHeader, TextureDescription& desc, bool& shouldDecompress)
+{
+	PVRTuint64 PixelFormat = sTextureHeader.u64PixelFormat;
+	EPVRTVariableType ChannelType = static_cast<EPVRTVariableType>(sTextureHeader.u32ChannelType);
+		
+	if ((PixelFormat & PVRTEX_PFHIGHMASK) == 0)
+	{
+		desc.type = GL_UNSIGNED_BYTE;
+		switch (PixelFormat)
+		{
+			case ePVRTPF_PVRTCI_2bpp_RGB:
+			{
+				desc.channels = 3;
+				desc.format = GL_RGB;
+				
+#if defined(GL_COMPRESSED_RGB_PVRTC_2BPPV1_IMG)
+				desc.internalformat = GL_COMPRESSED_RGB_PVRTC_2BPPV1_IMG;
+				desc.compressed = true;
+#else
+				shouldDecompress = true;
+#endif
+				return;
+			}
+			case ePVRTPF_PVRTCI_2bpp_RGBA:
+			{
+				desc.channels = 4;
+				desc.format = GL_RGBA;
+				
+#if defined(GL_COMPRESSED_RGBA_PVRTC_2BPPV1_IMG)
+				desc.internalformat = GL_COMPRESSED_RGBA_PVRTC_2BPPV1_IMG;
+				desc.compressed = true;
+#else
+				shouldDecompress = true;
+#endif
+				return;
+			}
+			case ePVRTPF_PVRTCI_4bpp_RGB:
+			{
+				desc.channels = 3;
+				desc.format = GL_RGB;
+				
+#if defined(GL_COMPRESSED_RGB_PVRTC_4BPPV1_IMG)
+				desc.internalformat = GL_COMPRESSED_RGB_PVRTC_4BPPV1_IMG;
+				desc.compressed = true;
+#else
+				shouldDecompress = true;
+#endif
+				return;
+			}
+			case ePVRTPF_PVRTCI_4bpp_RGBA:
+			{
+				desc.channels = 4;
+				desc.format = GL_RGBA;
+				
+#if defined(GL_COMPRESSED_RGBA_PVRTC_2BPPVGL_COMPRESSED_RGBA_PVRTC_4BPPV1_IMG_IMG)
+				desc.internalformat = GL_COMPRESSED_RGBA_PVRTC_4BPPV1_IMG;
+				desc.compressed = true;
+#else
+				shouldDecompress = true;
+#endif
+				return;
+			}
+			default:
+				ET_FAIL("Invalid compressed format")
+		}
+	}
+	else
+	{
+		desc.compressed = false;
+		
+		switch (ChannelType)
+		{
+			case ePVRTVarTypeFloat:
+			{
+				switch (PixelFormat)
+				{
+					case PVRTGENPIXELID4('r','g','b','a',16,16,16,16):
+					{
+						desc.type = GL_HALF_FLOAT;
+						desc.format = GL_RGBA;
+						desc.internalformat = GL_RGBA;
+						desc.channels = 4;
+						return;
+					}
+						
+					case PVRTGENPIXELID3('r','g','b',16,16,16):
+					{
+						desc.type = GL_HALF_FLOAT;
+						desc.format = GL_RGB;
+						desc.internalformat = GL_RGB;
+						desc.channels = 3;
+						return;
+					}
+						
+#if defined(GL_LUMINANCE_ALPHA)
+					case PVRTGENPIXELID2('l','a',16,16):
+					{
+						desc.type = GL_HALF_FLOAT;
+						desc.format = GL_LUMINANCE_ALPHA;
+						desc.internalformat = GL_LUMINANCE_ALPHA;
+						desc.channels = 2;
+						return;
+					}
+#endif
+						
+#if defined(GL_LUMINANCE)
+					case PVRTGENPIXELID1('l',16):
+					{
+						desc.type = GL_HALF_FLOAT;
+						desc.format = GL_LUMINANCE;
+						desc.internalformat = GL_LUMINANCE;
+						desc.channels = 1;
+						return;
+					}
+#endif
+						
+					case PVRTGENPIXELID1('a',16):
+					{
+						desc.type = GL_HALF_FLOAT;
+						desc.format = GL_ALPHA;
+						desc.internalformat = GL_ALPHA;
+						desc.channels = 1;
+						return;
+					}
+					case PVRTGENPIXELID4('r','g','b','a',32,32,32,32):
+					{
+						desc.type = GL_FLOAT;
+						desc.format = GL_RGBA;
+						desc.internalformat = GL_RGBA;
+						desc.channels = 4;
+						return;
+					}
+					case PVRTGENPIXELID3('r','g','b',32,32,32):
+					{
+						desc.type = GL_FLOAT;
+						desc.format = GL_RGB;
+						desc.internalformat = GL_RGB;
+						desc.channels = 3;
+						return;
+					}
+						
+#if defined(GL_LUMINANCE_ALPHA)
+					case PVRTGENPIXELID2('l','a',32,32):
+					{
+						desc.type = GL_FLOAT;
+						desc.format = GL_LUMINANCE_ALPHA;
+						desc.internalformat = GL_LUMINANCE_ALPHA;
+						desc.channels = 2;
+						return;
+					}
+#endif
+						
+#if defined(GL_LUMINANCE)
+					case PVRTGENPIXELID1('l',32):
+					{
+						desc.type = GL_FLOAT;
+						desc.format = GL_LUMINANCE;
+						desc.internalformat = GL_LUMINANCE;
+						desc.channels = 1;
+						return;
+					}
+#endif
+						
+					case PVRTGENPIXELID1('a',32):
+					{
+						desc.type = GL_FLOAT;
+						desc.format = GL_ALPHA;
+						desc.internalformat = GL_ALPHA;
+						desc.channels = 1;
+						return;
+					}
+				}
+				break;
+			}
+			case ePVRTVarTypeUnsignedByteNorm:
+			{
+				desc.type = GL_UNSIGNED_BYTE;
+				switch (PixelFormat)
+				{
+					case PVRTGENPIXELID4('r','g','b','a',8,8,8,8):
+					{
+						desc.format = GL_RGBA;
+						desc.internalformat = GL_RGBA;
+						desc.channels = 4;
+						return;
+					}
+					case PVRTGENPIXELID3('r','g','b',8,8,8):
+					{
+						desc.format = GL_RGB;
+						desc.internalformat = GL_RGB;
+						desc.channels = 3;
+						return;
+					}
+						
+#if defined(GL_LUMINANCE_ALPHA)
+					case PVRTGENPIXELID2('l','a',8,8):
+					{
+						desc.format = GL_LUMINANCE_ALPHA;
+						desc.internalformat = GL_LUMINANCE_ALPHA;
+						desc.channels = 2;
+						return;
+					}
+#endif
+						
+#if defined(GL_LUMINANCE)
+					case PVRTGENPIXELID1('l',8):
+					{
+						desc.format = GL_LUMINANCE;
+						desc.internalformat = GL_LUMINANCE;
+						desc.channels = 1;
+						return;
+					}
+#endif
+						
+					case PVRTGENPIXELID1('a',8):
+					{
+						desc.format = GL_BGRA;
+						desc.internalformat = GL_ALPHA;
+						desc.channels = 1;
+						return;
+					}
+					case PVRTGENPIXELID4('b','g','r','a',8,8,8,8):
+					{
+						desc.format = GL_BGRA;
+						desc.internalformat = GL_BGRA;
+						desc.channels = 4;
+						return;
+					}
+				}
+				break;
+			}
+			case ePVRTVarTypeUnsignedShortNorm:
+			{
+				switch (PixelFormat)
+				{
+					case PVRTGENPIXELID4('r','g','b','a',4,4,4,4):
+					{
+						desc.type = GL_UNSIGNED_SHORT_4_4_4_4;
+						desc.format = GL_RGBA;
+						desc.internalformat = GL_RGBA;
+						desc.channels = 4;
+						return;
+					}
+					case PVRTGENPIXELID4('r','g','b','a',5,5,5,1):
+					{
+						desc.type = GL_UNSIGNED_SHORT_5_5_5_1;
+						desc.format = GL_RGBA;
+						desc.internalformat = GL_RGBA;
+						desc.channels = 4;
+						return;
+					}
+					case PVRTGENPIXELID3('r','g','b',5,6,5):
+					{
+						desc.type = GL_UNSIGNED_SHORT_5_6_5;
+						desc.format = GL_RGB;
+						desc.internalformat = GL_RGB;
+						desc.channels = 3;
+						return;
+					}
+				}
+				break;
+			}
+			default:
+				return;
+		}
+	}
+}
+
+uint32_t getBitsPerPixel(PVRTuint64 u64PixelFormat)
+{
+	if (u64PixelFormat & PVRTEX_PFHIGHMASK)
+	{
+		PVRTuint8* PixelFormatChar = reinterpret_cast<PVRTuint8*>(&u64PixelFormat);
+		return PixelFormatChar[4] + PixelFormatChar[5] + PixelFormatChar[6] + PixelFormatChar[7];
+	}
+	else
+	{
+		switch (u64PixelFormat)
+		{
+			case ePVRTPF_BW1bpp:
+				return 1;
+				
+			case ePVRTPF_PVRTCI_2bpp_RGB:
+			case ePVRTPF_PVRTCI_2bpp_RGBA:
+			case ePVRTPF_PVRTCII_2bpp:
+				return 2;
+				
+			case ePVRTPF_PVRTCI_4bpp_RGB:
+			case ePVRTPF_PVRTCI_4bpp_RGBA:
+			case ePVRTPF_PVRTCII_4bpp:
+			case ePVRTPF_ETC1:
+			case ePVRTPF_EAC_R11:
+			case ePVRTPF_ETC2_RGB:
+			case ePVRTPF_ETC2_RGB_A1:
+			case ePVRTPF_DXT1:
+			case ePVRTPF_BC4:
+				return 4;
+				
+			case ePVRTPF_DXT2:
+			case ePVRTPF_DXT3:
+			case ePVRTPF_DXT4:
+			case ePVRTPF_DXT5:
+			case ePVRTPF_BC5:
+			case ePVRTPF_EAC_RG11:
+			case ePVRTPF_ETC2_RGBA:
+				return 8;
+				
+			case ePVRTPF_YUY2:
+			case ePVRTPF_UYVY:
+			case ePVRTPF_RGBG8888:
+			case ePVRTPF_GRGB8888:
+				return 16;
+				
+			case ePVRTPF_SharedExponentR9G9B9E5:
+				return 32;
+				
+			default:
+				ET_FAIL("Invalid pixel format.");
+		}
+	}
+	
+	return 0;
 }

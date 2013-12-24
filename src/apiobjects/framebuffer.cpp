@@ -482,6 +482,16 @@ void Framebuffer::resolveMultisampledTo(Framebuffer::Pointer framebuffer)
 #endif
 }
 
+void Framebuffer::invalidate()
+{
+#if (ET_PLATFORM_IOS)
+	_rc->renderState().bindFramebuffer(_id);
+	const GLenum discards[]  = { GL_DEPTH_ATTACHMENT, GL_COLOR_ATTACHMENT0 };
+	glDiscardFramebufferEXT(GL_READ_FRAMEBUFFER, 2, discards);
+	checkOpenGLError("glDiscardFramebufferEXT");
+#endif
+}
+
 void Framebuffer::setColorRenderbuffer(uint32_t r)
 {
 	_colorRenderbuffer = r;

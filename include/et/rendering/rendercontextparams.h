@@ -14,8 +14,13 @@ namespace et
 	enum MultisamplingQuality
 	{
 		MultisamplingQuality_None,
-		MultisamplingQuality_Best,
-		MultisamplingQuality_max
+		MultisamplingQuality_Best
+	};
+	
+	enum OpenGLProfile
+	{
+		OpenGLProfile_Core,
+		OpenGLProfile_Compatibility
 	};
     
     enum InterfaceOrientation
@@ -40,13 +45,11 @@ namespace et
 		vec2i openGLTargetVersion;
 
 		MultisamplingQuality multisamplingQuality = MultisamplingQuality_Best;
-
+		OpenGLProfile openGLProfile = OpenGLProfile_Core;
+		
 		bool openGLForwardContext = true;
-		bool openGLCoreProfile = true;
-		bool openGLCompatibilityProfile = false;
-		
 		bool multipleTouch = true;
-		
+
 		size_t swapInterval = 1;
         size_t supportedInterfaceOrientations = InterfaceOrientation_Any;
 

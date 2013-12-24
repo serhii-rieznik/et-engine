@@ -541,9 +541,9 @@ void et::etCompressedTexImage2D(uint32_t target, int level, uint32_t internalfor
 }
 
 void et::etTexImage2D(uint32_t target, int level, int internalformat, GLsizei width, GLsizei height,
-	int border, uint32_t format, uint32_t type, const GLvoid * pixels)
+	int border, uint32_t format, uint32_t type, const GLvoid* pixels)
 {
-	assert(pixels);
+	ET_ASSERT(pixels);
 	
 	glTexImage2D(target, level, internalformat, width, height, border, format, type, pixels);
 

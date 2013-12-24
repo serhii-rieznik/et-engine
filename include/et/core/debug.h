@@ -110,16 +110,16 @@
 	{ \
 		if (!(C)) \
 		{ \
-			et::log::warning("Condition: "#C"\nfailed at: %s [%d]", __FILE__, __LINE__); \
+			et::log::warning("Condition: %s\nfailed at: %s [%d]", (#C), __FILE__, __LINE__); \
 			abort(); \
 		} \
 	}
-#	define ET_FAIL(MSG) { log::error(#MSG"\nfailed at: %s [%d]", __FILE__, __LINE__); abort(); }
+#	define ET_FAIL(MSG) { log::error("%s\noccurred at: %s [%d]", (#MSG), __FILE__, __LINE__); abort(); }
 #
 #else
 #
-#	define ET_ASSERT(C)
-#	define ET_FAIL(MSG)
+#	define ET_ASSERT(C)	{ }
+#	define ET_FAIL(MSG)	{ }
 #
 #endif
 

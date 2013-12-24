@@ -29,7 +29,7 @@ IndexType primitives::indexCountForRegularMesh(const vec2i& meshSize, PrimitiveT
 			return static_cast<IndexType>(((meshSize.y > 1) ? meshSize.y - 1 : 1) * (2 * meshSize.x + 1) - 1);
 			
 		default:
-			assert("Unimplemented" && 0);
+			ET_FAIL("Unsupported element type")
 	}
 
 	return 0;
@@ -40,7 +40,7 @@ void primitives::createPhotonMap(VertexArray::Pointer buffer, const vec2i& densi
 	buffer->increase(static_cast<size_t>(density.square()));
 	
 	VertexDataChunk chunk = buffer->chunk(Usage_Position);
-	assert(chunk->type() == Type_Vec2);
+	ET_ASSERT(chunk->type() == Type_Vec2);
 	
 	RawDataAcessor<vec2> data = chunk.accessData<vec2>(0);
 	
@@ -423,21 +423,21 @@ IndexType primitives::buildTrianglesIndexes(IndexArray& buffer, const vec2i& dim
 IndexType primitives::buildTrianglesIndexes(IndexArray::Pointer buffer, const vec2i& dim,
 	IndexType vertexOffset, IndexType indexOffset)
 {
-	assert(buffer.valid());
+	ET_ASSERT(buffer.valid());
 	return buildTrianglesIndexes(buffer.reference(), dim, vertexOffset, indexOffset);
 }
 
 IndexType primitives::buildTriangleStripIndexes(IndexArray::Pointer buffer, const vec2i& dim,
 	IndexType vertexOffset, IndexType indexOffset)
 {
-	assert(buffer.valid());
+	ET_ASSERT(buffer.valid());
 	return buildTriangleStripIndexes(buffer.reference(), dim, vertexOffset, indexOffset);
 }
 
 void primitives::calculateNormals(VertexArray::Pointer data, const IndexArray::Pointer& buffer,
 	IndexType first, IndexType last)
 {
-	assert(first < last);
+	ET_ASSERT(first < last);
 
 	VertexDataChunk posChunk = data->chunk(Usage_Position);
 	VertexDataChunk nrmChunk = data->chunk(Usage_Normal);
@@ -482,7 +482,7 @@ void primitives::calculateNormals(VertexArray::Pointer data, const IndexArray::P
 void primitives::calculateTangents(VertexArray::Pointer data, const IndexArray::Pointer& buffer,
 	IndexType first, IndexType last)
 {
-	assert(first < last);
+	ET_ASSERT(first < last);
 	
 	VertexDataChunk posChunk = data->chunk(Usage_Position);
 	VertexDataChunk nrmChunk = data->chunk(Usage_Normal);
@@ -556,7 +556,7 @@ void primitives::calculateTangents(VertexArray::Pointer data, const IndexArray::
 void primitives::smoothTangents(VertexArray::Pointer data, const IndexArray::Pointer&,
 	IndexType first, IndexType last)
 {
-	assert(first < last);
+	ET_ASSERT(first < last);
 	
 	VertexDataChunk posChunk = data->chunk(Usage_Position);
 	VertexDataChunk tanChunk = data->chunk(Usage_Tangent);
@@ -607,7 +607,7 @@ void primitives::createCube(VertexArray::Pointer data, float radius)
 	bool hasPosition = posChunk.valid() && (posChunk->type() == Type_Vec3);
 	bool hasNormals = nrmChunk.valid() && (nrmChunk->type() == Type_Vec3);
 	
-	assert(hasPosition);
+	ET_ASSERT(hasPosition);
 	(void)hasPosition;
 	
 	size_t offset = data->size();
@@ -654,7 +654,7 @@ void primitives::createOctahedron(VertexArray::Pointer data, float radius)
 	bool hasPosition = posChunk.valid() && (posChunk->type() == Type_Vec3);
 	bool hasNormals = nrmChunk.valid() && (nrmChunk->type() == Type_Vec3);
 	
-	assert(hasPosition);
+	ET_ASSERT(hasPosition);
 	(void)hasPosition;
 	
 	size_t offset = data->size();
@@ -693,7 +693,7 @@ void primitives::createDodecahedron(VertexArray::Pointer data, float radius)
 	bool hasPosition = posChunk.valid() && (posChunk->type() == Type_Vec3);
 	bool hasNormals = nrmChunk.valid() && (nrmChunk->type() == Type_Vec3);
 	
-	assert(hasPosition);
+	ET_ASSERT(hasPosition);
 	(void)hasPosition;
 	
 	size_t offset = data->size();
@@ -800,7 +800,7 @@ void primitives::createIcosahedron(VertexArray::Pointer data, float radius, bool
 	bool hasPosition = posChunk.valid() && (posChunk->type() == Type_Vec3);
 	bool hasNormals = nrmChunk.valid() && (nrmChunk->type() == Type_Vec3);
 
-	assert(hasPosition);
+	ET_ASSERT(hasPosition);
 	(void)hasPosition;
 	
 	size_t offset = data->size();
@@ -868,7 +868,7 @@ void primitives::createIcosahedron(VertexArray::Pointer data, float radius, bool
 
 void primitives::tesselateTriangles(VertexArray::Pointer data)
 {
-	assert((data->size() % 3 == 0) && "VertexArray should have integer number of triangles.");
+	ET_ASSERT((data->size() % 3 == 0) && "VertexArray should have integer number of triangles.");
 	
 	bool hasPosition = data->chunk(Usage_Position).valid() &&
 		(data->chunk(Usage_Position)->type() == Type_Vec3);
@@ -876,7 +876,7 @@ void primitives::tesselateTriangles(VertexArray::Pointer data)
 	bool hasNormals = data->chunk(Usage_Normal).valid() &&
 		(data->chunk(Usage_Normal)->type() == Type_Vec3);
 	
-	assert(hasPosition);
+	ET_ASSERT(hasPosition);
 	(void)hasPosition;
 	
 	VertexArray::Pointer oldData(data->duplicate());
@@ -928,7 +928,7 @@ void primitives::tesselateTriangles(VertexArray::Pointer data)
 
 void primitives::tesselateTriangles(VertexArray::Pointer data, IndexArray::Pointer indexArray)
 {
-	assert(indexArray->primitiveType() == PrimitiveType_Triangles);
+	ET_ASSERT(indexArray->primitiveType() == PrimitiveType_Triangles);
 		   
 	bool hasPosition = data->chunk(Usage_Position).valid() &&
 	(data->chunk(Usage_Position)->type() == Type_Vec3);
@@ -936,7 +936,7 @@ void primitives::tesselateTriangles(VertexArray::Pointer data, IndexArray::Point
 	bool hasNormals = data->chunk(Usage_Normal).valid() &&
 	(data->chunk(Usage_Normal)->type() == Type_Vec3);
 	
-	assert(hasPosition);
+	ET_ASSERT(hasPosition);
 	(void)hasPosition;
 	
 	VertexArray::Pointer oldData(data->duplicate());
@@ -986,16 +986,27 @@ void primitives::tesselateTriangles(VertexArray::Pointer data, IndexArray::Point
 
 uint64_t vectorHash(const vec3& v)
 {
+/* */
 	char raw[256] = { };
 	
-	int symbols = sprintf(raw, "%.3f%0.3f%0.3f%0.3f%0.3f%0.3f%0.3f%0.3f",
+	int symbols = sprintf(raw, "%.2f%0.2f%0.2f%0.3f%0.3f%0.3f%0.3f%0.3f",
 		v.x, v.y, v.z, v.x * v.y, v.x * v.z, v.y * v.z, v.x + v.y + v.z, v.x - v.y - v.z);
 	
 	uint64_t* ptr = reinterpret_cast<uint64_t*>(raw);
 	uint64_t* end = ptr + symbols / sizeof(uint64_t) + 1;
 	uint64_t result = *ptr++;
-	while (ptr != end) result ^= *ptr++;
+	
+	while (ptr != end)
+		result ^= *ptr++;
+	
 	return result;
+	
+/*
+	uint64_t p1 = static_cast<uint64_t>(v.x * 73856093.0f);
+	uint64_t p2 = static_cast<uint64_t>(v.y * 32452843.0f);
+	uint64_t p3 = static_cast<uint64_t>(v.z * 83492791.0f);
+	return (p1 ^ p2 ^ p3) % 15999;
+*/
 }
 
 VertexArray::Pointer primitives::buildLinearIndexArray(VertexArray::Pointer vertexArray, IndexArray::Pointer indexArray)
@@ -1009,6 +1020,8 @@ VertexArray::Pointer primitives::buildLinearIndexArray(VertexArray::Pointer vert
 	hashes.reserve(vertexArray->size());
 	
 	auto oldPos = vertexArray->chunk(Usage_Position).accessData<vec3>(0);
+	auto oldNrm = vertexArray->chunk(Usage_Normal).accessData<vec3>(0);
+	
 	for (size_t i = 0; i < dataSize; ++i)
 	{
 		uint64_t hash = vectorHash(oldPos[i]);
@@ -1020,7 +1033,10 @@ VertexArray::Pointer primitives::buildLinearIndexArray(VertexArray::Pointer vert
 	
 	VertexArray::Pointer result(new VertexArray(vertexArray->decl(), countMap.size()));
 	auto newPos = result->chunk(Usage_Position).accessData<vec3>(0);
-
+	auto newNrm = result->chunk(Usage_Normal).accessData<vec3>(0);
+	
+	bool hasNormals = newNrm.valid();
+	
 	std::map<uint64_t, size_t> indexMap;
 	for (size_t i = 0; i < dataSize; ++i)
 	{
@@ -1028,13 +1044,26 @@ VertexArray::Pointer primitives::buildLinearIndexArray(VertexArray::Pointer vert
 		if (indexMap.count(hash) == 0)
 		{
 			newPos[indexMap.size()] = oldPos[i];
+			
+			if (hasNormals)
+				newNrm[indexMap.size()] = oldNrm[i];
+			
 			indexArray->setIndex(static_cast<IndexType>(indexMap.size()), i);
 			indexMap[hash] = indexMap.size();
 		}
 		else
 		{
+			if (hasNormals)
+				newNrm[indexMap[hash]] += oldNrm[i];
+			
 			indexArray->setIndex(static_cast<IndexType>(indexMap[hash]), i);
 		}
+	}
+	
+	if (hasNormals)
+	{
+		for (size_t i = 0; i < newNrm.size(); ++i)
+			newNrm[i].normalize();
 	}
 	
 	return result;
@@ -1042,7 +1071,7 @@ VertexArray::Pointer primitives::buildLinearIndexArray(VertexArray::Pointer vert
 
 VertexArray::Pointer primitives::linearizeTrianglesIndexArray(VertexArray::Pointer data, IndexArray::Pointer indexArray)
 {
-	assert(indexArray->primitiveType() == PrimitiveType_Triangles);
+	ET_ASSERT(indexArray->primitiveType() == PrimitiveType_Triangles);
 	VertexDeclaration decl = data->decl();
 	VertexArray::Pointer result(new VertexArray(data->decl(), 3 * indexArray->primitivesCount()));
 	for (auto& e : decl.elements())

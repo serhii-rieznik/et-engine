@@ -176,8 +176,8 @@ RenderContextPrivate::RenderContextPrivate(RenderContext*, RenderContextParamete
 	{
 		pixelFormatAttributes[lastEntry++] = NSOpenGLPFAOpenGLProfile;
 		
-		pixelFormatAttributes[lastEntry++] =
-			params.openGLCoreProfile ? NSOpenGLProfileVersion3_2Core : NSOpenGLProfileVersionLegacy;
+		pixelFormatAttributes[lastEntry++] = (params.openGLProfile == OpenGLProfile_Core) ?
+			NSOpenGLProfileVersion3_2Core : NSOpenGLProfileVersionLegacy;
 		
 		profileEntry = lastEntry - 1;
 	}

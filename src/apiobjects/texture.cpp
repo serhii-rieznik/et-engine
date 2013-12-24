@@ -140,7 +140,7 @@ void TextureData::buildData(const char* aDataPtr, size_t aDataSize)
 #if defined(GL_TEXTURE_1D)
 	if (_desc->target == GL_TEXTURE_1D)
 	{
-		if (_desc->compressed && aDataSize)
+		if (_desc->compressed && (aDataSize > 0))
 		{
 			etCompressedTexImage1D(_desc->target, 0, static_cast<uint32_t>(_desc->internalformat),
 				_desc->size.x, 0, static_cast<GLsizei>(aDataSize), aDataPtr);
@@ -207,20 +207,36 @@ void TextureData::buildData(const char* aDataPtr, size_t aDataSize)
 
 void TextureData::build(RenderContext* rc)
 {
-	assert(_desc.valid());
-	setOrigin(_desc->origin());
+	ET_ASSERT(_desc.valid());
+	
+	if (_desc->size.square() <= 0)
+	{
+		log::warning("Texture %s has invalid dimensions.", _desc->origin().c_str());
+		return;
+	}
+	
+	if (_desc->internalformat == 0)
+	{
+		log::warning("Texture %s has invalid format.", _desc->origin().c_str());
+		return;
+	}
 
-	if ((_desc->size.square() == 0) || (_desc->internalformat == 0) || (_desc->type == 0)) return;
+	if (_desc->type == 0)
+	{
+		log::warning("Texture %s has invalid type.", _desc->origin().c_str());
+		return;
+	}
 
 	_texel = vec2( 1.0f / static_cast<float>(_desc->size.x), 1.0f / static_cast<float>(_desc->size.y) );
 	
 	_filtration.x = (_desc->mipMapCount > 1) ?
-		TextureFiltration_LinearMipMapLinear : TextureFiltration_Linear;
-
+		TextureFiltration_NearestMipMapLinear : TextureFiltration_Linear;
+	
 	_filtration.y = TextureFiltration_Linear;
 
 	rc->renderState().bindTexture(defaultBindingUnit, _glID, _desc->target, true);
 
+	setOrigin(_desc->origin());
 	setFiltration(rc, _filtration.x, _filtration.y);
 	setWrap(rc, _wrap.x, _wrap.y, _wrap.z);
 

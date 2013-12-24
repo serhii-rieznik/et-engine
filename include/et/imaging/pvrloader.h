@@ -13,8 +13,8 @@ namespace et
 {
 	namespace pvr
 	{
-		void loadInfoFromStream(std::istream& stream, TextureDescription& desc);
-		void loadInfoFromFile(const std::string& path, TextureDescription& desc);
+		void loadInfoFromStream(std::istream& stream, TextureDescription& desc, bool* shouldDecompress = nullptr);
+		void loadInfoFromFile(const std::string& path, TextureDescription& desc, bool* shouldDecompress = nullptr);
 
 		void loadFromStream(std::istream& stream, TextureDescription& desc);
 		void loadFromFile(const std::string& path, TextureDescription& desc);

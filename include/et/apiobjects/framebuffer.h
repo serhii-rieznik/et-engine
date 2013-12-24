@@ -96,6 +96,7 @@ namespace et
 		void forceSize(const vec2i&);
 		
 		void resolveMultisampledTo(Framebuffer::Pointer);
+		void invalidate();
 
 	private:
 		friend class FramebufferFactory;
