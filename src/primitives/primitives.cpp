@@ -875,6 +875,9 @@ void primitives::tesselateTriangles(VertexArray::Pointer data)
 	
 	bool hasNormals = data->chunk(Usage_Normal).valid() &&
 		(data->chunk(Usage_Normal)->type() == Type_Vec3);
+
+	bool hasColor = data->chunk(Usage_Color).valid() &&
+		(data->chunk(Usage_Color)->type() == Type_Vec4);
 	
 	ET_ASSERT(hasPosition);
 	(void)hasPosition;
@@ -883,8 +886,10 @@ void primitives::tesselateTriangles(VertexArray::Pointer data)
 	
 	VertexDataChunk oldPos = oldData->chunk(Usage_Position);
 	VertexDataChunk oldNrm = oldData->chunk(Usage_Normal);
+	VertexDataChunk oldClr = oldData->chunk(Usage_Color);
 	VertexDataChunk newPos = data->chunk(Usage_Position);
 	VertexDataChunk newNrm = data->chunk(Usage_Normal);
+	VertexDataChunk newClr = data->chunk(Usage_Color);
 	
 	size_t numVertices = data->size();
 	size_t numTriangles = numVertices / 3;
@@ -892,36 +897,60 @@ void primitives::tesselateTriangles(VertexArray::Pointer data)
 	data->fitToSize(12 * numTriangles);
 	RawDataAcessor<vec3> opos = oldPos.accessData<vec3>(0);
 	RawDataAcessor<vec3> npos = newPos.accessData<vec3>(0);
-	RawDataAcessor<vec3> onrm = hasNormals ? oldNrm.accessData<vec3>(0) : RawDataAcessor<vec3>();
-	RawDataAcessor<vec3> nnrm = hasNormals ? newNrm.accessData<vec3>(0) : RawDataAcessor<vec3>();
+	RawDataAcessor<vec3> onrm = oldNrm.accessData<vec3>(0);
+	RawDataAcessor<vec3> nnrm = newNrm.accessData<vec3>(0);
+	RawDataAcessor<vec4> oclr = oldClr.accessData<vec4>(0);
+	RawDataAcessor<vec4> nclr = newClr.accessData<vec4>(0);
 	
 	size_t i = 0;
 	size_t np = 0;
 	size_t nn = 0;
+	size_t nc = 0;
 	while (i < numVertices)
 	{
 		const vec3& a = opos[i++];
 		const vec3& b = opos[i++];
 		const vec3& c = opos[i++];
+		
 		vec3 u = 0.5f * (a + b);
 		vec3 v = 0.5f * (b + c);
 		vec3 w = 0.5f * (c + a);
+		
 		npos[np++] = a; npos[np++] = u; npos[np++] = w;
 		npos[np++] = u; npos[np++] = b; npos[np++] = v;
 		npos[np++] = w; npos[np++] = v; npos[np++] = c;
 		npos[np++] = w; npos[np++] = u; npos[np++] = v;
+		
 		if (hasNormals)
 		{
-			const vec3& na = onrm[i-3];
-			const vec3& nb = onrm[i-2];
-			const vec3& nc = onrm[i-1];
+			const vec3& na = onrm[i - 3];
+			const vec3& nb = onrm[i - 2];
+			const vec3& nc = onrm[i - 1];
+			
 			vec3 nu = normalize(na + nb);
 			vec3 nv = normalize(nb + nc);
 			vec3 nw = normalize(nc + na);
+			
 			nnrm[nn++] = na; nnrm[nn++] = nu; nnrm[nn++] = nw;
 			nnrm[nn++] = nu; nnrm[nn++] = nb; nnrm[nn++] = nv;
 			nnrm[nn++] = nw; nnrm[nn++] = nv; nnrm[nn++] = nc;
 			nnrm[nn++] = nw; nnrm[nn++] = nu; nnrm[nn++] = nv;
+		}
+		
+		if (hasColor)
+		{
+			const vec4& ca = oclr[i - 3];
+			const vec4& cb = oclr[i - 2];
+			const vec4& cc = oclr[i - 1];
+			
+			vec4 cu = 0.5f * (ca + cb);
+			vec4 cv = 0.5f * (cb + cc);
+			vec4 cw = 0.5f * (cc + ca);
+			
+			nclr[nc++] = ca; nclr[nc++] = cu; nclr[nc++] = cw;
+			nclr[nc++] = cu; nclr[nc++] = cb; nclr[nc++] = cv;
+			nclr[nc++] = cw; nclr[nc++] = cv; nclr[nc++] = cc;
+			nclr[nc++] = cw; nclr[nc++] = cu; nclr[nc++] = cv;
 		}
 	}
 }
@@ -1016,6 +1045,7 @@ VertexArray::Pointer primitives::buildLinearIndexArray(VertexArray::Pointer vert
 	
 	auto oldPos = vertexArray->chunk(Usage_Position).accessData<vec3>(0);
 	auto oldNrm = vertexArray->chunk(Usage_Normal).accessData<vec3>(0);
+	auto oldClr = vertexArray->chunk(Usage_Color).accessData<vec4>(0);
 	
 	for (size_t i = 0; i < dataSize; ++i)
 	{
@@ -1027,10 +1057,13 @@ VertexArray::Pointer primitives::buildLinearIndexArray(VertexArray::Pointer vert
 	indexArray->resizeToFit(dataSize);
 	
 	VertexArray::Pointer result(new VertexArray(vertexArray->decl(), countMap.size()));
+	
 	auto newPos = result->chunk(Usage_Position).accessData<vec3>(0);
 	auto newNrm = result->chunk(Usage_Normal).accessData<vec3>(0);
+	auto newClr = result->chunk(Usage_Color).accessData<vec4>(0);
 	
 	bool hasNormals = newNrm.valid();
+	bool hasColor = newClr.valid();
 	
 	std::map<uint64_t, size_t> indexMap;
 	for (size_t i = 0; i < dataSize; ++i)
@@ -1043,6 +1076,9 @@ VertexArray::Pointer primitives::buildLinearIndexArray(VertexArray::Pointer vert
 			if (hasNormals)
 				newNrm[indexMap.size()] = oldNrm[i];
 			
+			if (hasColor)
+				newClr[indexMap.size()] = oldClr[i];
+			
 			indexArray->setIndex(static_cast<IndexType>(indexMap.size()), i);
 			indexMap[hash] = indexMap.size();
 		}
@@ -1050,6 +1086,9 @@ VertexArray::Pointer primitives::buildLinearIndexArray(VertexArray::Pointer vert
 		{
 			if (hasNormals)
 				newNrm[indexMap[hash]] += oldNrm[i];
+			
+			if (hasColor)
+				newClr[indexMap[hash]] = 0.5f * (newClr[indexMap[hash]] + oldClr[i]);
 			
 			indexArray->setIndex(static_cast<IndexType>(indexMap[hash]), i);
 		}
@@ -1073,7 +1112,19 @@ VertexArray::Pointer primitives::linearizeTrianglesIndexArray(VertexArray::Point
 	for (auto& e : decl.elements())
 	{
 		// TODO : support different types
-		if (e.type() == Type_Vec3)
+		if (e.type() == Type_Vec4)
+		{
+			auto oldValues = data->chunk(e.usage()).accessData<vec4>(0);
+			auto newValues = result->chunk(e.usage()).accessData<vec4>(0);
+			size_t i = 0;
+			for (auto p : indexArray.reference())
+			{
+				newValues[i++] = oldValues[p[0]];
+				newValues[i++] = oldValues[p[1]];
+				newValues[i++] = oldValues[p[2]];
+			}
+		}
+		else if (e.type() == Type_Vec3)
 		{
 			auto oldValues = data->chunk(e.usage()).accessData<vec3>(0);
 			auto newValues = result->chunk(e.usage()).accessData<vec3>(0);

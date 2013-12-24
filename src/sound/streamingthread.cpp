@@ -35,6 +35,9 @@ StreamingThread::StreamingThread() :
 
 StreamingThread::~StreamingThread()
 {
+	{
+		CriticalSectionScope scope(_private->csLock);
+	}
 	delete _private;
 }
 
