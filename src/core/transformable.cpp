@@ -144,7 +144,7 @@ void ComponentTransformable::setTransformDirectly(const mat4& m)
 {
 	_cachedTransform = m;
 	_flags |= Flag_ShouldDecompose;
-	_flags &= ~Flag_Valid;
+	invalidateTransform();
 }
 
 const vec3& ComponentTransformable::translation() const
