@@ -63,8 +63,8 @@ namespace et
 		void createDodecahedron(VertexArray::Pointer data, float radius);
 		void createIcosahedron(VertexArray::Pointer data, float radius, bool top = true, bool middle = true, bool bottom = true);
 		
-		void tesselateTriangles(VertexArray::Pointer data);
-		void tesselateTriangles(VertexArray::Pointer data, IndexArray::Pointer indexArray);
+		void tesselateTriangles(VertexArray::Pointer data, const vec3& aspect = vec3(0.5f));
+		void tesselateTriangles(VertexArray::Pointer data, IndexArray::Pointer indexArray, const vec3& aspect = vec3(0.5f));
 		
 		VertexArray::Pointer buildLinearIndexArray(VertexArray::Pointer data, IndexArray::Pointer indexArray);
 		

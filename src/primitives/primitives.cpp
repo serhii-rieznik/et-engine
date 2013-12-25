@@ -866,10 +866,10 @@ void primitives::createIcosahedron(VertexArray::Pointer data, float radius, bool
 
 #undef ET_ADD_TRIANGLE
 
-void primitives::tesselateTriangles(VertexArray::Pointer data)
+void primitives::tesselateTriangles(VertexArray::Pointer data, IndexArray::Pointer indexArray, const vec3& aspect)
 {
-	ET_ASSERT((data->size() % 3 == 0) && "VertexArray should have integer number of triangles.");
-	
+	ET_ASSERT(indexArray->primitiveType() == PrimitiveType_Triangles);
+		   
 	bool hasPosition = data->chunk(Usage_Position).valid() &&
 		(data->chunk(Usage_Position)->type() == Type_Vec3);
 	
@@ -891,10 +891,10 @@ void primitives::tesselateTriangles(VertexArray::Pointer data)
 	VertexDataChunk newNrm = data->chunk(Usage_Normal);
 	VertexDataChunk newClr = data->chunk(Usage_Color);
 	
-	size_t numVertices = data->size();
-	size_t numTriangles = numVertices / 3;
-
+	size_t numTriangles = indexArray->primitivesCount();
+	
 	data->fitToSize(12 * numTriangles);
+	
 	RawDataAcessor<vec3> opos = oldPos.accessData<vec3>(0);
 	RawDataAcessor<vec3> npos = newPos.accessData<vec3>(0);
 	RawDataAcessor<vec3> onrm = oldNrm.accessData<vec3>(0);
@@ -902,20 +902,18 @@ void primitives::tesselateTriangles(VertexArray::Pointer data)
 	RawDataAcessor<vec4> oclr = oldClr.accessData<vec4>(0);
 	RawDataAcessor<vec4> nclr = newClr.accessData<vec4>(0);
 	
-	size_t i = 0;
 	size_t np = 0;
 	size_t nn = 0;
 	size_t nc = 0;
-	while (i < numVertices)
+	for (auto i = indexArray->begin(), e = indexArray->end(); i != e; ++i)
 	{
-		const vec3& a = opos[i++];
-		const vec3& b = opos[i++];
-		const vec3& c = opos[i++];
+		const vec3& a = opos[i[0]];
+		const vec3& b = opos[i[1]];
+		const vec3& c = opos[i[2]];
 		
-		vec3 u = 0.5f * (a + b);
-		vec3 v = 0.5f * (b + c);
-		vec3 w = 0.5f * (c + a);
-		
+		vec3 u = mix(a, b, aspect.x);
+		vec3 v = mix(b, c, aspect.y);
+		vec3 w = mix(c, a, aspect.z);
 		npos[np++] = a; npos[np++] = u; npos[np++] = w;
 		npos[np++] = u; npos[np++] = b; npos[np++] = v;
 		npos[np++] = w; npos[np++] = v; npos[np++] = c;
@@ -923,13 +921,13 @@ void primitives::tesselateTriangles(VertexArray::Pointer data)
 		
 		if (hasNormals)
 		{
-			const vec3& na = onrm[i - 3];
-			const vec3& nb = onrm[i - 2];
-			const vec3& nc = onrm[i - 1];
+			const vec3& na = onrm[i[0]];
+			const vec3& nb = onrm[i[1]];
+			const vec3& nc = onrm[i[2]];
 			
-			vec3 nu = normalize(na + nb);
-			vec3 nv = normalize(nb + nc);
-			vec3 nw = normalize(nc + na);
+			vec3 nu = normalize(mix(na, nb, aspect.x));
+			vec3 nv = normalize(mix(nb, nc, aspect.y));
+			vec3 nw = normalize(mix(nc, na, aspect.z));
 			
 			nnrm[nn++] = na; nnrm[nn++] = nu; nnrm[nn++] = nw;
 			nnrm[nn++] = nu; nnrm[nn++] = nb; nnrm[nn++] = nv;
@@ -939,78 +937,28 @@ void primitives::tesselateTriangles(VertexArray::Pointer data)
 		
 		if (hasColor)
 		{
-			const vec4& ca = oclr[i - 3];
-			const vec4& cb = oclr[i - 2];
-			const vec4& cc = oclr[i - 1];
+			const vec4& ca = oclr[i[0]];
+			const vec4& cb = oclr[i[1]];
+			const vec4& cc = oclr[i[2]];
 			
-			vec4 cu = 0.5f * (ca + cb);
-			vec4 cv = 0.5f * (cb + cc);
-			vec4 cw = 0.5f * (cc + ca);
+			vec4 cu = mix(ca, cb, aspect.x);
+			vec4 cv = mix(cb, cc, aspect.x);
+			vec4 cw = mix(cc, ca, aspect.x);
 			
 			nclr[nc++] = ca; nclr[nc++] = cu; nclr[nc++] = cw;
 			nclr[nc++] = cu; nclr[nc++] = cb; nclr[nc++] = cv;
 			nclr[nc++] = cw; nclr[nc++] = cv; nclr[nc++] = cc;
 			nclr[nc++] = cw; nclr[nc++] = cu; nclr[nc++] = cv;
 		}
+		
 	}
 }
 
-void primitives::tesselateTriangles(VertexArray::Pointer data, IndexArray::Pointer indexArray)
+void primitives::tesselateTriangles(VertexArray::Pointer data, const vec3& aspect)
 {
-	ET_ASSERT(indexArray->primitiveType() == PrimitiveType_Triangles);
-		   
-	bool hasPosition = data->chunk(Usage_Position).valid() &&
-	(data->chunk(Usage_Position)->type() == Type_Vec3);
-	
-	bool hasNormals = data->chunk(Usage_Normal).valid() &&
-	(data->chunk(Usage_Normal)->type() == Type_Vec3);
-	
-	ET_ASSERT(hasPosition);
-	(void)hasPosition;
-	
-	VertexArray::Pointer oldData(data->duplicate());
-	
-	VertexDataChunk oldPos = oldData->chunk(Usage_Position);
-	VertexDataChunk oldNrm = oldData->chunk(Usage_Normal);
-	VertexDataChunk newPos = data->chunk(Usage_Position);
-	VertexDataChunk newNrm = data->chunk(Usage_Normal);
-	
-	size_t numTriangles = indexArray->primitivesCount();
-	
-	data->fitToSize(12 * numTriangles);
-	RawDataAcessor<vec3> opos = oldPos.accessData<vec3>(0);
-	RawDataAcessor<vec3> npos = newPos.accessData<vec3>(0);
-	RawDataAcessor<vec3> onrm = hasNormals ? oldNrm.accessData<vec3>(0) : RawDataAcessor<vec3>();
-	RawDataAcessor<vec3> nnrm = hasNormals ? newNrm.accessData<vec3>(0) : RawDataAcessor<vec3>();
-	
-	size_t np = 0;
-	size_t nn = 0;
-	for (auto i = indexArray->begin(), e = indexArray->end(); i != e; ++i)
-	{
-		const vec3& a = opos[i[0]];
-		const vec3& b = opos[i[1]];
-		const vec3& c = opos[i[2]];
-		vec3 u = 0.5f * (a + b);
-		vec3 v = 0.5f * (b + c);
-		vec3 w = 0.5f * (c + a);
-		npos[np++] = a; npos[np++] = u; npos[np++] = w;
-		npos[np++] = u; npos[np++] = b; npos[np++] = v;
-		npos[np++] = w; npos[np++] = v; npos[np++] = c;
-		npos[np++] = w; npos[np++] = u; npos[np++] = v;
-		if (hasNormals)
-		{
-			const vec3& na = onrm[i[0]];
-			const vec3& nb = onrm[i[1]];
-			const vec3& nc = onrm[i[2]];
-			vec3 nu = normalize(na + nb);
-			vec3 nv = normalize(nb + nc);
-			vec3 nw = normalize(nc + na);
-			nnrm[nn++] = na; nnrm[nn++] = nu; nnrm[nn++] = nw;
-			nnrm[nn++] = nu; nnrm[nn++] = nb; nnrm[nn++] = nv;
-			nnrm[nn++] = nw; nnrm[nn++] = nv; nnrm[nn++] = nc;
-			nnrm[nn++] = nw; nnrm[nn++] = nu; nnrm[nn++] = nv;
-		}
-	}
+	IndexArray::Pointer linearIndices(new IndexArray(IndexArrayFormat_32bit, data->size(), PrimitiveType_Triangles));
+	linearIndices->linearize(data->size());
+	tesselateTriangles(data, linearIndices, aspect);
 }
 
 uint64_t vectorHash(const vec3& v)
@@ -1111,7 +1059,6 @@ VertexArray::Pointer primitives::linearizeTrianglesIndexArray(VertexArray::Point
 	VertexArray::Pointer result(new VertexArray(data->decl(), 3 * indexArray->primitivesCount()));
 	for (auto& e : decl.elements())
 	{
-		// TODO : support different types
 		if (e.type() == Type_Vec4)
 		{
 			auto oldValues = data->chunk(e.usage()).accessData<vec4>(0);
