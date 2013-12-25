@@ -464,8 +464,6 @@ void Framebuffer::resolveMultisampledTo(Framebuffer::Pointer framebuffer)
 	
 #if (ET_PLATFORM_IOS)
 
-	const GLenum discards[]  = { GL_DEPTH_ATTACHMENT, GL_COLOR_ATTACHMENT0 };
-	glDiscardFramebufferEXT(GL_READ_FRAMEBUFFER, 2, discards);
 	glResolveMultisampleFramebufferAPPLE();
 	checkOpenGLError("glResolveMultisampleFramebuffer");
 	
@@ -482,12 +480,21 @@ void Framebuffer::resolveMultisampledTo(Framebuffer::Pointer framebuffer)
 #endif
 }
 
-void Framebuffer::invalidate()
+void Framebuffer::invalidate(bool color, bool depth)
 {
 #if (ET_PLATFORM_IOS)
 	_rc->renderState().bindFramebuffer(_id);
-	const GLenum discards[]  = { GL_DEPTH_ATTACHMENT, GL_COLOR_ATTACHMENT0 };
-	glDiscardFramebufferEXT(GL_READ_FRAMEBUFFER, 2, discards);
+	
+	size_t numDiscards = 0;
+	GLenum discards[2] = { };
+	
+	if (color)
+		discards[numDiscards++] = GL_COLOR_ATTACHMENT0;
+	
+	if (depth)
+		discards[numDiscards++] = GL_DEPTH_ATTACHMENT;
+	
+	glDiscardFramebufferEXT(GL_READ_FRAMEBUFFER, numDiscards, discards);
 	checkOpenGLError("glDiscardFramebufferEXT");
 #endif
 }

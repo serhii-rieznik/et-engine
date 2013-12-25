@@ -657,6 +657,16 @@ size_t et::bitsPerPixelForTextureFormat(uint32_t internalFormat, uint32_t type)
 		case GL_RGB565:
 			return 2;
 #endif
+
+#if defined(GL_LUMINANCE)
+		case GL_LUMINANCE:
+			return bitsPerPixelForType(type);
+#endif
+
+#if defined(GL_LUMINANCE_ALPHA)
+		case GL_LUMINANCE_ALPHA:
+			return bitsPerPixelForType(type);
+#endif
 			
 		default:
 			assert("Not yet implemented for this format." && false);

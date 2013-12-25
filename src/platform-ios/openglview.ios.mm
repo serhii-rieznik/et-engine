@@ -145,37 +145,17 @@ using namespace et;
 {
 	checkOpenGLError("endRender");
 	
-	_rc->renderState().bindDefaultFramebuffer();
-	
 	if (_multisampled)
 	{
-		_rc->renderState().bindReadFramebuffer(_multisampledFramebuffer->glID());
-		_rc->renderState().bindDrawFramebuffer(_mainFramebuffer->glID());
-		
-#if defined(GL_ES_VERSION_3_0)
-		if (_isOpenGLES3)
-		{
-			glBlitFramebuffer(0, 0, _multisampledFramebuffer->size().x, _multisampledFramebuffer->size().y,
-				0, 0, _mainFramebuffer->size().x, _mainFramebuffer->size().y, GL_COLOR_BUFFER_BIT, GL_LINEAR);
-			checkOpenGLError("glBlitFramebuffer");
-		}
-		else
-		{
-			glResolveMultisampleFramebufferAPPLE();
-			checkOpenGLError("glResolveMultisampleFramebuffer");
-		}
-#else
-		glResolveMultisampleFramebufferAPPLE();
-		checkOpenGLError("glResolveMultisampleFramebuffer");
-#endif
+		_multisampledFramebuffer->invalidate(false, true);
+		_multisampledFramebuffer->resolveMultisampledTo(_mainFramebuffer);
+		_multisampledFramebuffer->invalidate(true, false);
 	}
-	
-	const GLenum discards[]  = { GL_DEPTH_ATTACHMENT, GL_COLOR_ATTACHMENT0 };
-	glDiscardFramebufferEXT(GL_READ_FRAMEBUFFER, (_multisampled ? 2 : 1), discards);
-	checkOpenGLError("glDiscardFramebufferEXT");
-	
+		
 	_rc->renderState().bindFramebuffer(_mainFramebuffer);
 	_rc->renderState().bindRenderbuffer(_mainFramebuffer->colorRenderbuffer());
+	_mainFramebuffer->invalidate(false, true);
+	
 	[_context presentRenderbuffer:GL_RENDERBUFFER];
 	checkOpenGLError("[_context presentRenderbuffer:GL_RENDERBUFFER]");
 	
