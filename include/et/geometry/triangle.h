@@ -44,14 +44,8 @@ namespace et
 		const vector3<T>& normalizedNormal() const
 			{ return _normal; }
 
-		T square()
-		{
-			T a = _edge2to1.length();
-			T b = _edge3to1.length();
-			T c = _edge3to2.length();
-			T p = (a + b + c) / static_cast<T>(2);
-			return std::sqrt(p * (p - a) * (p - b) * (p - c));
-		}
+		T square() const
+			{ return cross(_edge2to1, _edge3to1).length() / static_cast<T>(2); }
 
 	private:
 		
@@ -60,7 +54,8 @@ namespace et
 			_edge2to1 = _v2 - _v1;
 			_edge3to1 = _v3 - _v1;
 			_edge3to2 = _v3 - _v2;
-			_normal = normalize(cross(_edge2to1, _edge3to1));
+			_normal = cross(_edge2to1, _edge3to1);
+			_normal.normalize();
 		}
 
 	private:
