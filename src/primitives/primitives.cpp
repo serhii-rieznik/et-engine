@@ -961,7 +961,7 @@ void primitives::tesselateTriangles(VertexArray::Pointer data, const vec3& aspec
 	tesselateTriangles(data, linearIndices, aspect);
 }
 
-uint64_t vectorHash(const vec3& v)
+uint64_t primitives::vector3Hash(const vec3& v)
 {
 /* */
 	char raw[256] = { };
@@ -997,7 +997,7 @@ VertexArray::Pointer primitives::buildLinearIndexArray(VertexArray::Pointer vert
 	
 	for (size_t i = 0; i < dataSize; ++i)
 	{
-		uint64_t hash = vectorHash(oldPos[i]);
+		uint64_t hash = vector3Hash(oldPos[i]);
 		countMap[hash] = 0;
 		hashes.push_back(hash);
 	}

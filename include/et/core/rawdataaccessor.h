@@ -32,7 +32,7 @@ namespace et
 		}
 
 		T& operator [] (size_t i)
-			{ assert(i < _size); return *(reinterpret_cast<T*>(_data + i * _stride + _offset)); }
+			{ ET_ASSERT(i < _size); return *(reinterpret_cast<T*>(_data + i * _stride + _offset)); }
 
 		T& operator [] (int i)
 			{ return operator [] (static_cast<size_t>(i)); }

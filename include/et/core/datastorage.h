@@ -89,31 +89,31 @@ namespace et
 		 * mutable accessors
 		 */
 		T* data()
-			{ assert(mutableData()); return _mutableData; }
+			{ ET_ASSERT(mutableData()); return _mutableData; }
 		
 		char* binary()
-			{ assert(mutableData()); return reinterpret_cast<char*>(_mutableData); }
+			{ ET_ASSERT(mutableData()); return reinterpret_cast<char*>(_mutableData); }
 		
 		T& operator [] (int aIndex)
-			{ assert(mutableData() && (aIndex >= 0) && (aIndex < static_cast<int>(_size))); return _mutableData[aIndex]; }
+			{ ET_ASSERT(mutableData() && (aIndex >= 0) && (aIndex < static_cast<int>(_size))); return _mutableData[aIndex]; }
 		
 		T& operator [] (size_t aIndex)
-			{ assert(mutableData() && (aIndex < _size)); return _mutableData[aIndex]; }
+			{ ET_ASSERT(mutableData() && (aIndex < _size)); return _mutableData[aIndex]; }
 		
 		T& current()
-			{ assert(mutableData() && (_lastElementIndex < _size)); return _mutableData[_lastElementIndex]; }
+			{ ET_ASSERT(mutableData() && (_lastElementIndex < _size)); return _mutableData[_lastElementIndex]; }
 
 		T* current_ptr()
-			{ assert(mutableData() && (_lastElementIndex < _size)); return _mutableData + _lastElementIndex; }
+			{ ET_ASSERT(mutableData() && (_lastElementIndex < _size)); return _mutableData + _lastElementIndex; }
 		
 		T* element_ptr(size_t aIndex)
-			{ assert(aIndex < _size); return (_mutableData + aIndex); }
+			{ ET_ASSERT(aIndex < _size); return (_mutableData + aIndex); }
 		
 		T* begin()
-			{ assert(mutableData()); return _mutableData; }
+			{ ET_ASSERT(mutableData()); return _mutableData; }
 
 		T* end()
-			{ assert(mutableData()); return _mutableData + _size; }
+			{ ET_ASSERT(mutableData()); return _mutableData + _size; }
 					 
 		/*
 		 * const accessors
@@ -125,19 +125,19 @@ namespace et
 			{ return reinterpret_cast<const char*>(_immutableData); }
 
 		const T& operator [] (int i) const
-			{ assert((i >= 0) && (i < static_cast<int>(_size))); return _immutableData[i]; }
+			{ ET_ASSERT((i >= 0) && (i < static_cast<int>(_size))); return _immutableData[i]; }
 
 		const T& operator [] (size_t i) const
-			{ assert(i < _size); return _immutableData[i]; }
+			{ ET_ASSERT(i < _size); return _immutableData[i]; }
 		
 		const T& current() const
-			{ assert(_lastElementIndex < _size); return _immutableData[_lastElementIndex]; }
+			{ ET_ASSERT(_lastElementIndex < _size); return _immutableData[_lastElementIndex]; }
 
 		const T* current_ptr() const
-			{ assert(_lastElementIndex < _size); return _immutableData + _lastElementIndex; }
+			{ ET_ASSERT(_lastElementIndex < _size); return _immutableData + _lastElementIndex; }
 		
 		const T* element_ptr(size_t i) const
-			{ assert(i < _size); return _immutableData + i; }
+			{ ET_ASSERT(i < _size); return _immutableData + i; }
 		
 		const T* begin() const
 			{ return _immutableData; }
@@ -164,7 +164,7 @@ namespace et
 		 * modifiers
 		 */
 		void fill(int value)
-			{ assert(mutableData()); etFillMemory(_mutableData, value, _dataSize); }
+			{ ET_ASSERT(mutableData()); etFillMemory(_mutableData, value, _dataSize); }
 		
 		void resize(size_t size)
 		{
@@ -195,14 +195,14 @@ namespace et
 		
 		void push_back(const T& value)
 		{
-			assert(mutableData());
-			assert((_lastElementIndex < _size) && "Do no use push back to increase capacity of DataStorage");
+			ET_ASSERT(mutableData());
+			ET_ASSERT((_lastElementIndex < _size) && "Do no use push back to increase capacity of DataStorage");
 			_mutableData[_lastElementIndex++] = value;
 		}
 		
 		void append(const T* values, size_t count)
 		{
-			assert(mutableData());
+			ET_ASSERT(mutableData());
 			
 			size_t currentSize = _size;
 			resize(_size + count);
@@ -211,8 +211,8 @@ namespace et
 		
 		void appendData(void* ptr, size_t dataSize)
 		{
-			assert(mutableData());
-			assert(ptr);
+			ET_ASSERT(mutableData());
+			ET_ASSERT(ptr);
 			
 			size_t currentSize = _size;
 			size_t numElements = dataSize / sizeof(T) + ((dataSize % sizeof(T) > 0) ? 1 : 0);
@@ -241,10 +241,10 @@ namespace et
 			{ return _lastElementIndex; }
 		
 		void applyOffset(size_t o)
-			{  assert(mutableData()); _lastElementIndex += o; }
+			{ ET_ASSERT(mutableData()); _lastElementIndex += o; }
 
 		void setOffset(size_t o) 
-			{ assert(mutableData()); _lastElementIndex = o; }
+			{ ET_ASSERT(mutableData()); _lastElementIndex = o; }
 
 	private:
 		enum

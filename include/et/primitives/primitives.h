@@ -69,5 +69,7 @@ namespace et
 		VertexArray::Pointer buildLinearIndexArray(VertexArray::Pointer data, IndexArray::Pointer indexArray);
 		
 		VertexArray::Pointer linearizeTrianglesIndexArray(VertexArray::Pointer data, IndexArray::Pointer indexArray);
+		
+		uint64_t vector3Hash(const vec3&);
 	}
 }
