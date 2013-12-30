@@ -40,7 +40,7 @@ namespace et
 		
 		Texture createTextureWrapper(uint32_t texture, const vec2i& size, const std::string& aName);
 
-		void textureLoadingThreadDidLoadTextureData(TextureLoadingRequest* request);
+		ObjectLoader::Pointer objectLoader();
 		
 		ET_DECLARE_EVENT1(textureDidLoad, Texture)
 
@@ -57,6 +57,8 @@ namespace et
 			{ return *this; }
 		
 		void reloadObject(LoadableObject::Pointer, ObjectsCache&);
+		
+		void textureLoadingThreadDidLoadTextureData(TextureLoadingRequest* request);
 		
 	private:
 		AutoPtr<TextureLoadingThread> _loadingThread;

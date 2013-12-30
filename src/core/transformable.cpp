@@ -121,10 +121,10 @@ void ComponentTransformable::setTransform(const mat4& originalMatrix)
 			"\ttranslation: (%f %f %f)\n"
 			"\tdeviation: %f\n"
 			"\toriginal matrix and result matrices:\n"
-			 "\t\t(%3.5f\t%3.5f\t%3.5f\t%3.5f)\t(%3.5f\t%3.5f\t%3.5f\t%3.5f)\n"
-			 "\t\t(%3.5f\t%3.5f\t%3.5f\t%3.5f)\t(%3.5f\t%3.5f\t%3.5f\t%3.5f)\n"
-			 "\t\t(%3.5f\t%3.5f\t%3.5f\t%3.5f)\t(%3.5f\t%3.5f\t%3.5f\t%3.5f)\n"
-			 "\t\t(%3.5f\t%3.5f\t%3.5f\t%3.5f)\t(%3.5f\t%3.5f\t%3.5f\t%3.5f)\n"
+			 "\t\t(%03.4f\t%03.4f\t%03.4f\t%03.4f)\t(%03.4f\t%03.4f\t%03.4f\t%03.4f)\n"
+			 "\t\t(%03.4f\t%03.4f\t%03.4f\t%03.4f)\t(%03.4f\t%03.4f\t%03.4f\t%03.4f)\n"
+			 "\t\t(%03.4f\t%03.4f\t%03.4f\t%03.4f)\t(%03.4f\t%03.4f\t%03.4f\t%03.4f)\n"
+			 "\t\t(%03.4f\t%03.4f\t%03.4f\t%03.4f)\t(%03.4f\t%03.4f\t%03.4f\t%03.4f)\n"
 			"}", _scale.x, _scale.y, _scale.z, _orientation.scalar,
 			_orientation.vector.x, _orientation.vector.y, _orientation.vector.z,
 			_translation.x, _translation.y, _translation.z, deviation,

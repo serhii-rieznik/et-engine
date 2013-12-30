@@ -77,12 +77,6 @@ namespace et
 
 		VertexBufferFactory& vertexBufferFactory()
 			{ return _vertexBufferFactory.reference(); }
-		
-		/*
-		 * Access to factories by pointers
-		 */
-		TextureFactory::Pointer textureFactoryPointer()
-			{ return _textureFactory; }
 
 		size_t lastFPSValue() const
 			{ return _info.averageFramePerSecond; }

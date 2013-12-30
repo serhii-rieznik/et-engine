@@ -5,12 +5,16 @@
 using namespace fbxc;
 using namespace et;
 
-Converter::Converter() : _rc(0)
+const float invocationDelayTime = 1.0f / 3.0f;
+
+Converter::Converter() :
+	_rc(nullptr)
 {
 }
 
 void Converter::setRenderContextParameters(RenderContextParameters& p)
 {
+	p.multisamplingQuality = MultisamplingQuality_Best;
 	p.contextSize = vec2i(1024, 640);
 }
 
@@ -82,18 +86,31 @@ void Converter::applicationDidLoad(RenderContext* rc)
 	_btnDrawSupportMeshes->setBackgroundForState(imgSelectedNormalState, gui::State_Selected);
 	_btnDrawSupportMeshes->setBackgroundForState(imgSelectedHoverState, gui::State_SelectedHovered);
 	_btnDrawSupportMeshes->setBackgroundForState(imgSelectedPressedState, gui::State_SelectedPressed);
-	_btnDrawSupportMeshes->setPivotPoint(vec2(1.0f));
-	_btnDrawSupportMeshes->setPosition(_rc->size() - vec2(_btnDrawNormalMeshes->size().x, 0.0f));
+	_btnDrawSupportMeshes->setPivotPoint(vec2(1.0f, 0.0f));
+	_btnDrawSupportMeshes->setPosition(_btnDrawNormalMeshes->origin());
 	_btnDrawSupportMeshes->setType(gui::Button::Type_CheckButton);
 	_btnDrawSupportMeshes->setSelected(true);
 
-	_vDistance.setValue(200.0f);
+	_btnWireframe = gui::Button::Pointer(new gui::Button("Wireframe", _mainFont, _mainLayout.ptr()));
+	_btnWireframe->setBackgroundForState(imgNormalState, gui::State_Default);
+	_btnWireframe->setBackgroundForState(imgHoverState, gui::State_Hovered);
+	_btnWireframe->setBackgroundForState(imgPressedState, gui::State_Pressed);
+	_btnWireframe->setBackgroundForState(imgSelectedNormalState, gui::State_Selected);
+	_btnWireframe->setBackgroundForState(imgSelectedHoverState, gui::State_SelectedHovered);
+	_btnWireframe->setBackgroundForState(imgSelectedPressedState, gui::State_SelectedPressed);
+	_btnWireframe->setPivotPoint(vec2(1.0f, 0.0f));
+	_btnWireframe->setPosition(_btnDrawSupportMeshes->origin());
+	_btnWireframe->setType(gui::Button::Type_CheckButton);
+	_btnWireframe->setSelected(false);
+	
+	_vDistance.setTargetValue(300.0f);
 	_vDistance.updated.connect(this, &Converter::onCameraUpdated);
+	_vDistance.finishInterpolation();
 	_vDistance.run();
 
-	_vAngle.setValue(vec2(QUARTER_PI));
-	_vAngle.setDeccelerationRate(5.0f);
+	_vAngle.setTargetValue(vec2(QUARTER_PI));
 	_vAngle.updated.connect(this, &Converter::onCameraUpdated);
+	_vAngle.finishInterpolation();
 	_vAngle.run();
 
 	_labStatus = gui::Label::Pointer(new gui::Label("Status", _mainFont, _mainLayout.ptr()));
@@ -101,7 +118,7 @@ void Converter::applicationDidLoad(RenderContext* rc)
 	_labStatus->setPosition(0.0f, _rc->size().y);
 	_labStatus->setText("Ready.");
 
-	_camera.perspectiveProjection(QUARTER_PI, rc->size().aspect(), 1.0f, 2000.0f);
+	_camera.perspectiveProjection(QUARTER_PI, rc->size().aspect(), 1.0f, 2048.0f);
 	_camera.lookAt(fromSpherical(_vAngle.value().x, _vAngle.value().y) * _vDistance.value());
 
 	ObjectsCache localCache;
@@ -122,12 +139,8 @@ void Converter::applicationDidLoad(RenderContext* rc)
 	{
 		Invocation1 i;
 		i.setTarget(this, &Converter::performLoading, lp);
-		i.invokeInMainRunLoop();
+		i.invokeInMainRunLoop(invocationDelayTime);
 	}
-}
-
-void Converter::applicationWillTerminate()
-{
 }
 
 void Converter::renderMeshList(RenderContext* rc, const s3d::Element::List& meshes)
@@ -138,14 +151,17 @@ void Converter::renderMeshList(RenderContext* rc, const s3d::Element::List& mesh
 		if (mesh->active())
 		{
 			s3d::Material& m = mesh->material();
+			
 			_defaultProgram->setUniform("ambientColor", m->getVector(MaterialParameter_AmbientColor));
 			_defaultProgram->setUniform("diffuseColor", m->getVector(MaterialParameter_DiffuseColor));
 			_defaultProgram->setUniform("specularColor", m->getVector(MaterialParameter_SpecularColor));
 			_defaultProgram->setUniform("roughness", m->getFloat(MaterialParameter_Roughness));
 			_defaultProgram->setUniform("mTransform", mesh->finalTransform());
+			
 			rc->renderState().bindTexture(0, mesh->material()->getTexture(MaterialParameter_DiffuseMap));
 			rc->renderState().bindTexture(1, mesh->material()->getTexture(MaterialParameter_SpecularMap));
 			rc->renderState().bindTexture(2, mesh->material()->getTexture(MaterialParameter_NormalMap));
+			
 			rc->renderState().bindVertexArray(mesh->vertexArrayObject());
 			rc->renderer()->drawElements(mesh->indexBuffer(), mesh->startIndex(), mesh->numIndexes());
 		}
@@ -168,17 +184,18 @@ void Converter::render(RenderContext* rc)
 {
 	rc->renderer()->clear();
 
+	rc->renderState().setWireframeRendering(_btnWireframe->selected());
 	performSceneRendering();
+	rc->renderState().setWireframeRendering(false);
 	
 	_gui->render(rc);
 }
 
-void Converter::idle(float)
-{
-}
-
 void Converter::onPointerPressed(et::PointerInputInfo p)
 {
+	_vDistance.cancelInterpolation();
+	_vAngle.cancelInterpolation();
+	
 	_gui->pointerPressed(p);
 }
 
@@ -194,18 +211,20 @@ void Converter::onPointerReleased(et::PointerInputInfo p)
 
 void Converter::onZoom(float z)
 {
-	_vDistance.addVelocity(0.1f * _vDistance.value() * (1.0f - z));
+	_vDistance.addTargetValue(z);
 }
 
 void Converter::onDrag(et::vec2 v, et::PointerType)
 {
-	_vAngle.addVelocity(0.25f * vec2(-v.y, v.x));
+	_vAngle.addTargetValue(0.25f * vec2(-v.y, v.x));
 }
 
 void Converter::onScroll(et::vec2 s, et::PointerOrigin o)
 {
 	if (o == PointerOrigin_Mouse)
-		onZoom(1.0f + 0.5f * s.y);
+		onZoom(s.y);
+	else if (o == PointerOrigin_Trackpad)
+		onZoom(100.0f * s.y);
 }
 
 void Converter::onBtnOpenClick(et::gui::Button*)
@@ -221,7 +240,7 @@ void Converter::onBtnOpenClick(et::gui::Button*)
 		
 		Invocation1 i;
 		i.setTarget(this, &Converter::performLoading, fileName);
-		i.invokeInMainRunLoop();
+		i.invokeInMainRunLoop(invocationDelayTime);
 		
 		_labStatus->setText("Loading...");
 	}
@@ -240,7 +259,7 @@ void Converter::onBtnSaveClick(et::gui::Button* b)
 	i.setTarget(this, (b->tag == 1 ? &Converter::performBinarySaving :
 		&Converter::performBinaryWithReadableMaterialsSaving), fileName);
 	
-	i.invokeInMainRunLoop();
+	i.invokeInMainRunLoop(invocationDelayTime);
 	
 	_labStatus->setText("Saving...");
 }

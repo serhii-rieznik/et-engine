@@ -18,6 +18,10 @@
 		A53B4F351681220500C6B8EC /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A53B4F341681220500C6B8EC /* main.cpp */; };
 		A53B4F421681247300C6B8EC /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = A53B4F411681247300C6B8EC /* libz.dylib */; };
 		A53B4F441681256B00C6B8EC /* data in Resources */ = {isa = PBXBuildFile; fileRef = A53B4F431681256B00C6B8EC /* data */; };
+		A551189C1870D7EF0093E334 /* libfbxsdk.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = A551189B1870D7EF0093E334 /* libfbxsdk.dylib */; };
+		A551189F1870D8180093E334 /* libfbxsdk.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = A551189B1870D7EF0093E334 /* libfbxsdk.dylib */; };
+		A55118A11870D8FB0093E334 /* pvrdecompressor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A55118A01870D8FB0093E334 /* pvrdecompressor.cpp */; };
+		A55118A41870F2330093E334 /* animation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A55118A31870F2330093E334 /* animation.cpp */; };
 		A55A6F5C1860BFD60010936D /* libfbxsdk.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A55A6F5B1860BFD60010936D /* libfbxsdk.a */; };
 		A55A6F5F1860C03B0010936D /* framebuffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A55A6F5D1860C03B0010936D /* framebuffer.cpp */; };
 		A55A6F601860C03B0010936D /* program.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A55A6F5E1860C03B0010936D /* program.cpp */; };
@@ -114,6 +118,19 @@
 		A5A23F3616811EC3001B3E98 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A5A23F3516811EC3001B3E98 /* OpenGL.framework */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		A551189E1870D80C0093E334 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 12;
+			dstPath = "";
+			dstSubfolderSpec = 6;
+			files = (
+				A551189F1870D8180093E334 /* libfbxsdk.dylib in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
 		5C5128AB1681FA2500ED9B96 /* libpng.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libpng.a; path = ../../lib/osx/libpng.a; sourceTree = "<group>"; };
 		5C72A8351759E4B900B49611 /* objectscache.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = objectscache.cpp; sourceTree = "<group>"; };
@@ -126,6 +143,20 @@
 		A53B4F341681220500C6B8EC /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		A53B4F411681247300C6B8EC /* libz.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.dylib; path = usr/lib/libz.dylib; sourceTree = SDKROOT; };
 		A53B4F431681256B00C6B8EC /* data */ = {isa = PBXFileReference; lastKnownFileType = folder; path = data; sourceTree = "<group>"; };
+		A551189B1870D7EF0093E334 /* libfbxsdk.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libfbxsdk.dylib; path = ../../../../../../../../SDK/FBX/lib/clang/ub/release/libfbxsdk.dylib; sourceTree = "<group>"; };
+		A55118A01870D8FB0093E334 /* pvrdecompressor.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = pvrdecompressor.cpp; sourceTree = "<group>"; };
+		A55118A31870F2330093E334 /* animation.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = animation.cpp; sourceTree = "<group>"; };
+		A55118A61870F24D0093E334 /* animation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = animation.h; sourceTree = "<group>"; };
+		A55118A71870F24D0093E334 /* cameraelement.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cameraelement.h; sourceTree = "<group>"; };
+		A55118A81870F24D0093E334 /* element.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = element.h; sourceTree = "<group>"; };
+		A55118A91870F24D0093E334 /* lightelement.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = lightelement.h; sourceTree = "<group>"; };
+		A55118AA1870F24D0093E334 /* material.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = material.h; sourceTree = "<group>"; };
+		A55118AB1870F24D0093E334 /* material.parameters.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = material.parameters.h; sourceTree = "<group>"; };
+		A55118AC1870F24D0093E334 /* mesh.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = mesh.h; sourceTree = "<group>"; };
+		A55118AD1870F24D0093E334 /* scene3d.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = scene3d.h; sourceTree = "<group>"; };
+		A55118AE1870F24D0093E334 /* serialization.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = serialization.h; sourceTree = "<group>"; };
+		A55118AF1870F24D0093E334 /* storage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = storage.h; sourceTree = "<group>"; };
+		A55118B01870F24D0093E334 /* supportmesh.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = supportmesh.h; sourceTree = "<group>"; };
 		A55A6F5B1860BFD60010936D /* libfbxsdk.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libfbxsdk.a; path = ../../../../../../../../SDK/FBX/lib/clang/ub/release/libfbxsdk.a; sourceTree = "<group>"; };
 		A55A6F5D1860C03B0010936D /* framebuffer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = framebuffer.cpp; sourceTree = "<group>"; };
 		A55A6F5E1860C03B0010936D /* program.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = program.cpp; sourceTree = "<group>"; };
@@ -235,6 +266,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				A5963FDB1739B55A00837C6C /* libxml2.dylib in Frameworks */,
+				A551189C1870D7EF0093E334 /* libfbxsdk.dylib in Frameworks */,
 				A53B4F421681247300C6B8EC /* libz.dylib in Frameworks */,
 				A53B4F3116811FA900C6B8EC /* libiconv.dylib in Frameworks */,
 				A5A23F3616811EC3001B3E98 /* OpenGL.framework in Frameworks */,
@@ -248,9 +280,29 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		A55118A51870F24D0093E334 /* scene3d */ = {
+			isa = PBXGroup;
+			children = (
+				A55118A61870F24D0093E334 /* animation.h */,
+				A55118A71870F24D0093E334 /* cameraelement.h */,
+				A55118A81870F24D0093E334 /* element.h */,
+				A55118A91870F24D0093E334 /* lightelement.h */,
+				A55118AA1870F24D0093E334 /* material.h */,
+				A55118AB1870F24D0093E334 /* material.parameters.h */,
+				A55118AC1870F24D0093E334 /* mesh.h */,
+				A55118AD1870F24D0093E334 /* scene3d.h */,
+				A55118AE1870F24D0093E334 /* serialization.h */,
+				A55118AF1870F24D0093E334 /* storage.h */,
+				A55118B01870F24D0093E334 /* supportmesh.h */,
+			);
+			name = scene3d;
+			path = ../../include/et/scene3d;
+			sourceTree = "<group>";
+		};
 		A55A6F651860C0730010936D /* scene3d */ = {
 			isa = PBXGroup;
 			children = (
+				A55118A31870F2330093E334 /* animation.cpp */,
 				A55A6F661860C0730010936D /* baseelement.cpp */,
 				A55A6F671860C0730010936D /* cameraelement.cpp */,
 				A55A6F681860C0730010936D /* lightelement.cpp */,
@@ -293,6 +345,7 @@
 				A5963FDA1739B55A00837C6C /* libxml2.dylib */,
 				5C5128AB1681FA2500ED9B96 /* libpng.a */,
 				A55A6F5B1860BFD60010936D /* libfbxsdk.a */,
+				A551189B1870D7EF0093E334 /* libfbxsdk.dylib */,
 				A5A23E3116811838001B3E98 /* AppKit.framework */,
 				A5A23E3216811838001B3E98 /* CoreData.framework */,
 				A5A23E3316811838001B3E98 /* Foundation.framework */,
@@ -364,6 +417,7 @@
 		A5A23E591681194D001B3E98 /* Headers */ = {
 			isa = PBXGroup;
 			children = (
+				A55118A51870F24D0093E334 /* scene3d */,
 			);
 			name = Headers;
 			sourceTree = "<group>";
@@ -473,11 +527,12 @@
 		A5A23E9016811978001B3E98 /* imaging */ = {
 			isa = PBXGroup;
 			children = (
+				A5A23E9616811978001B3E98 /* pvrloader.cpp */,
+				A55118A01870D8FB0093E334 /* pvrdecompressor.cpp */,
 				A5A23E9116811978001B3E98 /* ddsloader.cpp */,
 				A5A23E9216811978001B3E98 /* imageoperations.cpp */,
 				A5A23E9316811978001B3E98 /* imagewriter.cpp */,
 				A5A23E9516811978001B3E98 /* pngloader.cpp */,
-				A5A23E9616811978001B3E98 /* pvrloader.cpp */,
 			);
 			name = imaging;
 			path = ../../src/imaging;
@@ -628,9 +683,11 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = A5A23E4816811838001B3E98 /* Build configuration list for PBXNativeTarget "FBXConverter" */;
 			buildPhases = (
+				A55118A21870DD9D0093E334 /* ShellScript */,
 				A5A23E2616811838001B3E98 /* Sources */,
 				A5A23E2716811838001B3E98 /* Frameworks */,
 				A5A23E2816811838001B3E98 /* Resources */,
+				A551189E1870D80C0093E334 /* CopyFiles */,
 			);
 			buildRules = (
 			);
@@ -678,6 +735,22 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
+/* Begin PBXShellScriptBuildPhase section */
+		A55118A21870DD9D0093E334 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "find \"${PROJECT_DIR}/data/.\" -exec touch {} \\;\n";
+		};
+/* End PBXShellScriptBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		A5A23E2616811838001B3E98 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
@@ -719,6 +792,7 @@
 				A5A23EF316811978001B3E98 /* gui.cpp in Sources */,
 				A5A23EF416811978001B3E98 /* guibase.cpp in Sources */,
 				A5A23EF516811978001B3E98 /* guirenderer.cpp in Sources */,
+				A55118A11870D8FB0093E334 /* pvrdecompressor.cpp in Sources */,
 				A5A23EF616811978001B3E98 /* imageview.cpp in Sources */,
 				A5A23EF816811978001B3E98 /* label.cpp in Sources */,
 				A5A23EF916811978001B3E98 /* layout.cpp in Sources */,
@@ -770,6 +844,7 @@
 				A5A23F2F16811978001B3E98 /* indexarray.cpp in Sources */,
 				A5A23F3016811978001B3E98 /* vertexarray.cpp in Sources */,
 				A5A23F3116811978001B3E98 /* vertexdatachunk.cpp in Sources */,
+				A55118A41870F2330093E334 /* animation.cpp in Sources */,
 				A5A23F3216811978001B3E98 /* vertexdeclaration.cpp in Sources */,
 				A53B4F331681212F00C6B8EC /* platformtools.mac.mm in Sources */,
 				A53B4F351681220500C6B8EC /* main.cpp in Sources */,

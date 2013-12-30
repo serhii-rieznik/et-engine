@@ -12,9 +12,10 @@
 #include <et/rendering/rendercontext.h>
 #include <et/apiobjects/vertexbuffer.h>
 #include <et/vertexbuffer/IndexArray.h>
-#include <et/primitives/primitives.h>
 #include <et/resources/textureloader.h>
 #include <et/scene3d/supportmesh.h>
+#include <et/scene3d/animation.h>
+
 #include <et/models/fbxloader.h>
 
 using namespace FBXSDK_NAMESPACE;
@@ -37,7 +38,10 @@ namespace et
 		FbxImporter* importer;
 		FbxScene* scene;
 
+		s3d::Element::Pointer rootNode;
 		s3d::Scene3dStorage::Pointer storage;
+		
+		std::vector<s3d::Animation> animations;
 		
 	public:
 		FBXLoaderPrivate(RenderContext* rc, ObjectsCache& ObjectsCache);
@@ -46,8 +50,13 @@ namespace et
 		s3d::ElementContainer::Pointer parse();
 
 		bool import(const std::string& filename);
+		
+		void loadAnimations();
+		
 		void loadTextures();
+		
 		void loadNode(FbxNode* node, s3d::Element::Pointer parent);
+		
 		void buildVertexBuffers(RenderContext* rc, s3d::Element::Pointer root);
 
 		s3d::Mesh::Pointer loadMesh(FbxMesh* mesh, s3d::Element::Pointer parent,
@@ -141,28 +150,81 @@ bool FBXLoaderPrivate::import(const std::string& filename)
 
 s3d::ElementContainer::Pointer FBXLoaderPrivate::parse()
 {
-	s3d::ElementContainer::Pointer result(new s3d::ElementContainer("_fbx", 0));
-	storage = s3d::Scene3dStorage::Pointer(new s3d::Scene3dStorage("_fbx_storage", result.ptr()));
-
-	FbxAxisSystem targetAxisSystem(FbxAxisSystem::eYAxis, FbxAxisSystem::eParityOdd,
-		FbxAxisSystem::eRightHanded);
-
-	int upAxis = scene->GetGlobalSettings().GetOriginalUpAxis();
-	if (upAxis != 1)
-		targetAxisSystem.ConvertScene(scene);
+	rootNode.reset(nullptr);
+	storage = s3d::Scene3dStorage::Pointer::create(std::string(), nullptr);
+	
+	FbxAxisSystem sceneAxisSystem = scene->GetGlobalSettings().GetAxisSystem();
+	FbxAxisSystem openglAxisSystem(FbxAxisSystem::eOpenGL);
+	
+	if (sceneAxisSystem != openglAxisSystem)
+		openglAxisSystem.ConvertScene(scene);
 
 	FbxSystemUnit sceneSystemUnit = scene->GetGlobalSettings().GetOriginalSystemUnit();
 	if (sceneSystemUnit.GetScaleFactor() != 1.0f)
 		FbxSystemUnit::cm.ConvertScene(scene);
-
-	FbxNode* root = scene->GetRootNode(); 
-	root->ResetPivotSetAndConvertAnimation();
-
+	
+	FbxGeometryConverter geometryConverter(manager);
+	geometryConverter.Triangulate(scene, true);
+	
+	scene->GetRootNode()->ResetPivotSetAndConvertAnimation();
+	
+	loadAnimations();
 	loadTextures();
-	loadNode(root, result);
-	buildVertexBuffers(_rc, result);
+	loadNode(scene->GetRootNode(), rootNode);
+	buildVertexBuffers(_rc, rootNode);
+	
+	storage->setName(rootNode->name());
+	storage->setParent(rootNode.ptr());
 
-	return result;
+	return rootNode;
+}
+
+void FBXLoaderPrivate::loadAnimations()
+{
+	FbxArray<FbxPose*> scenePoses;
+	for (int i = 0; i < scene->GetPoseCount(); ++i)
+		scenePoses.Add(scene->GetPose(i));
+	
+	FbxArray<FbxString*> sceneAnimations;
+	scene->FillAnimStackNameArray(sceneAnimations);
+	animations.reserve(sceneAnimations.Size());
+	
+	for (int i = 0; i < sceneAnimations.Size(); ++i)
+	{
+		auto fbxString = sceneAnimations[i];
+		FbxAnimStack* stack = scene->FindMember<FbxAnimStack>(fbxString->Buffer());
+		if (stack == nullptr) continue;
+		
+		manager->GetAnimationEvaluator()->SetContext(stack);
+		
+		FbxTimeSpan timeSpan(0, 0);
+		FbxTakeInfo* takeInfo = scene->GetTakeInfo(*fbxString);
+		if (takeInfo == nullptr)
+			scene->GetGlobalSettings().GetTimelineDefaultTimeSpan(timeSpan);
+		else
+			timeSpan = takeInfo->mLocalTimeSpan;
+		
+		float start = static_cast<float>(timeSpan.GetStart().GetSecondDouble());
+		float stop = static_cast<float>(timeSpan.GetStop().GetSecondDouble());
+		log::info("Animation stack: %s (from %f to %f)", fbxString->Buffer(), start, stop);
+		
+		FbxAnimLayer* layer = stack->GetMember<FbxAnimLayer>();
+		FbxAnimCurve* curve = scene->GetRootNode()->LclTranslation.GetCurve(layer);
+		if (curve)
+		{
+			int keys = curve->KeyGetCount();
+			for (int i = 0; i < keys; ++i)
+			{
+				float time = static_cast<float>(curve->KeyGetTime(i).GetSecondDouble());
+				float value = curve->KeyGetValue(i);
+				
+				log::info("%f / %f", time, value);
+			}
+		}
+		
+		animations.push_back(s3d::Animation(fbxString->Buffer()));
+	}
+	FbxArrayDelete(sceneAnimations);
 }
 
 void FBXLoaderPrivate::loadTextures()
@@ -187,14 +249,12 @@ void FBXLoaderPrivate::loadTextures()
 					fileName = basePath + baseName + ".pvr";
 				if (fileExists(_folder + baseName + ".pvr"))
 					fileName = _folder + baseName + ".pvr";
-
 				if (fileExists(baseName + ".dds"))
 					fileName = baseName + ".dds";
 				if (fileExists(basePath + baseName + ".dds"))
 					fileName = basePath + baseName + ".dds";
 				if (fileExists(_folder + baseName + ".dds"))
 					fileName = _folder + baseName + ".dds";
-				
 				if (fileExists(baseName + ".png"))
 					fileName = baseName + ".png";
 				if (fileExists(basePath + baseName + ".png"))
@@ -206,11 +266,15 @@ void FBXLoaderPrivate::loadTextures()
 			Texture texture;
 			if (fileExists(fileName))
 			{
+				log::info("Loading texture: %s", fileName.c_str());
+				
 				texture = _rc->textureFactory().loadTexture(fileName, _texCache);
 				texture->setOrigin(getFileName(fileName));
 			}
 			else
 			{
+				log::info("Unable to load texture: %s", fileName.c_str());
+				
 				BinaryDataStorage randomTextureData(4, 255);
 				for (size_t i = 0; i < 3; ++i)
 					randomTextureData[i] = rand() % 256;
@@ -219,52 +283,20 @@ void FBXLoaderPrivate::loadTextures()
 					GL_UNSIGNED_BYTE, randomTextureData, fileName);
 				texture->setOrigin(fileName);
 				
-				_texCache.manage(texture, _rc->textureFactoryPointer());
+				_texCache.manage(texture, _rc->textureFactory().objectLoader());
 			}
 			fileTexture->SetUserDataPtr(texture.ptr());
 		}
 	}
-			
-/*
-			bool shouldLoad = false;
-			
-			std::string originalName;
-			std::string fileName = normalizeFilePath(std::string(fileTexture->GetFileName()));
-			
-			if (fileExists(fileName))
-			{
-				originalName = getFileName(fileName);
-				shouldLoad = true;
-			}
-			else if (getFileExt(fileName).size())
-			{
-				originalName = removeFileExt(getFileName(fileName));
-	
-				fileName = application().environment().resolveScalableFileName(_folder + originalName, _rc->screenScaleFactor());
-				shouldLoad = fileExists(fileName);
-
-				if (!shouldLoad)
-					log::warning("Unable to resolve file name for texture:\n\t%s", fileName.c_str());
-			}
-
-			if (shouldLoad)
-			{
-				Texture texture = _rc->textureFactory().loadTexture(fileName, _texCache);
-				if (texture.valid())
-				{
-					texture->setOrigin(originalName);
-					storage->addTexture(texture);
-					fileTexture->SetUserDataPtr(texture.ptr());
-				}
-			}
-*/
 }
 
 void FBXLoaderPrivate::loadNode(FbxNode* node, s3d::Element::Pointer parent)
 {
-	s3d::Material::List materials;
+	std::string nodeName(node->GetName());
 	StringList props = loadNodeProperties(node);
 
+	s3d::Material::List materials;
+	
 	const int lMaterialCount = node->GetMaterialCount();
 	for (int lMaterialIndex = 0; lMaterialIndex < lMaterialCount; ++lMaterialIndex)
 	{
@@ -291,56 +323,49 @@ void FBXLoaderPrivate::loadNode(FbxNode* node, s3d::Element::Pointer parent)
 		if (lNodeAttribute->GetAttributeType() == FbxNodeAttribute::eMesh)
 		{
 			FbxMesh* mesh = node->GetMesh();
-
-			if (!mesh->IsTriangleMesh())
+			if (mesh->IsTriangleMesh())
 			{
-				log::info("Triangulating %s ...", node->GetName());
-				FbxGeometryConverter lConverter(node->GetFbxManager());
-				lConverter.Triangulate(node->GetScene(), true);
-				mesh = node->GetMesh();
-			}
-		
-			s3d::Mesh* storedElement = static_cast<s3d::Mesh*>(mesh->GetUserDataPtr());
-
-			if (storedElement == nullptr)
-			{
-				createdElement = loadMesh(mesh, parent, materials, props);
-				mesh->SetUserDataPtr(createdElement.ptr());
+				s3d::Mesh* storedElement = static_cast<s3d::Mesh*>(mesh->GetUserDataPtr());
+				
+				if (storedElement == nullptr)
+				{
+					createdElement = loadMesh(mesh, parent, materials, props);
+					mesh->SetUserDataPtr(createdElement.ptr());
+				}
+				else
+				{
+					createdElement.reset(storedElement->duplicate());
+				}
 			}
 			else
 			{
-				s3d::Mesh* instance = nullptr;
-				if (storedElement->type() == s3d::ElementType_Mesh)
-					 instance = storedElement->duplicate();
-				else if (storedElement->type() == s3d::ElementType_SupportMesh)
-					instance = static_cast<s3d::SupportMesh*>(storedElement->duplicate());
-				createdElement.reset(instance);
+				log::warning("Non-triangle meshes are not supported and should not be present in scene.");
 			}
 		}
 	}
-
-	if (createdElement.invalid())
+	else if (parent.invalid() && rootNode.invalid())
 	{
-		createdElement =
-			s3d::ElementContainer::Pointer(new s3d::ElementContainer(node->GetName(), parent.ptr()));
+		rootNode = s3d::ElementContainer::Pointer::create(nodeName, nullptr);
+		createdElement = rootNode;
 	}
+	
+	if (createdElement.invalid())
+		createdElement = s3d::ElementContainer::Pointer::create(nodeName, parent.ptr());
 
-	const FbxMatrix& fbxTransform = node->EvaluateLocalTransform();
+	FbxAMatrix& fbxTransform = node->EvaluateLocalTransform();
+	
 	mat4 transform;
 	for (int v = 0; v < 4; ++v)
-	{
 		for (int u = 0; u < 4; ++u)
 			transform[v][u] = static_cast<float>(fbxTransform.Get(v, u));
-	}
-
-	createdElement->setTransform(transform);
-	createdElement->setName(node->GetName());
 	
-	ET_ITERATE(props, auto, p,
+	createdElement->setTransform(transform);
+	
+	for (const auto& p : props)
 	{
 		if (!createdElement->hasPropertyString(p))
 			createdElement->addPropertyString(p);
-	})
+	}
 
 	int lChildCount = node->GetChildCount();
 	for (int lChildIndex = 0; lChildIndex < lChildCount; ++lChildIndex)
@@ -453,7 +478,7 @@ s3d::Mesh::Pointer FBXLoaderPrivate::loadMesh(FbxMesh* mesh, s3d::Element::Point
 
 	size_t lodIndex = 0;
 	bool support = false;
-	ET_ITERATE(params, auto, p,
+	for (auto p : params)
 	{
 		lowercase(p);
 		p.erase(std::remove_if(p.begin(), p.end(), [](char c){ return isWhitespaceChar(c); } ), p.end());
@@ -469,7 +494,7 @@ s3d::Mesh::Pointer FBXLoaderPrivate::loadMesh(FbxMesh* mesh, s3d::Element::Point
 			std::string prop = p.substr(s_lodMeshProperty.size());
 			lodIndex = strToInt(trim(prop));
 		}
-	})
+	}
 
 	int lPolygonCount = mesh->GetPolygonCount();
 	int lPolygonVertexCount = lPolygonCount * 3;
@@ -483,13 +508,13 @@ s3d::Mesh::Pointer FBXLoaderPrivate::loadMesh(FbxMesh* mesh, s3d::Element::Point
 	{
 		numMaterials = 1;
 		FbxGeometryElement::EMappingMode mapping = material->GetMappingMode();
-		assert((mapping == FbxGeometryElement::eAllSame) || (mapping == FbxGeometryElement::eByPolygon));
+		ET_ASSERT((mapping == FbxGeometryElement::eAllSame) || (mapping == FbxGeometryElement::eByPolygon));
 
 		isContainer = mapping == FbxGeometryElement::eByPolygon;
 		if (isContainer)
 		{
 			materialIndices = &mesh->GetElementMaterial()->GetIndexArray();
-			assert(materialIndices->GetCount() == lPolygonCount);
+			ET_ASSERT(materialIndices->GetCount() == lPolygonCount);
 			for (int i = 0; i < materialIndices->GetCount(); ++i)
 				numMaterials = etMax(numMaterials, materialIndices->GetAt(i) + 1);
 		}
@@ -621,7 +646,9 @@ s3d::Mesh::Pointer FBXLoaderPrivate::loadMesh(FbxMesh* mesh, s3d::Element::Point
 			meshElement->setStartIndex(static_cast<IndexType>(indexOffset));
 			meshElement->setMaterial(materials.at(m));
 			
-			ET_ITERATE(aParent->properties(), auto, prop, meshElement->addPropertyString(prop))
+			const auto& props = aParent->properties();
+			for (const auto& prop : props)
+				meshElement->addPropertyString(prop);
 
 			for (int lPolygonIndex = 0; lPolygonIndex < lPolygonCount; ++lPolygonIndex)
 			{
@@ -715,34 +742,29 @@ void FBXLoaderPrivate::buildVertexBuffers(RenderContext* rc, s3d::Element::Point
 
 	std::vector<VertexArrayObject> vertexArrayObjects;
 	VertexArrayList& vertexArrays = storage->vertexArrays();
-	ET_ITERATE(vertexArrays, auto, i,
+	for (const auto& i : vertexArrays)
 	{
 		VertexArrayObject vao = rc->vertexBufferFactory().createVertexArrayObject("fbx-vao");
 		VertexBuffer vb = rc->vertexBufferFactory().createVertexBuffer("fbx-v", i, BufferDrawType_Static);
 		vao->setBuffers(vb, primaryIndexBuffer);
 		vertexArrayObjects.push_back(vao);
-	})
+	}
 
 	s3d::Element::List meshes = root->childrenOfType(s3d::ElementType_Mesh);
-	ET_ITERATE(meshes, auto, i,
+	for (auto& i : meshes)
 	{
 		s3d::Mesh* mesh = static_cast<s3d::Mesh*>(i.ptr());
 		mesh->setVertexArrayObject(vertexArrayObjects[mesh->tag]);
-	})
-
-	ET_ITERATE(meshes, auto, i,
-	{
-		s3d::Mesh* mesh = static_cast<s3d::Mesh*>(i.ptr());
 		mesh->cleanupLodChildren();
-	})
-
+	}
+	
 	meshes = root->childrenOfType(s3d::ElementType_SupportMesh);
-	ET_ITERATE(meshes, auto, i,
+	for (auto& i : meshes)
 	{
 		s3d::SupportMesh* mesh = static_cast<s3d::SupportMesh*>(i.ptr());
 		mesh->setVertexArrayObject(vertexArrayObjects[mesh->tag]);
 		mesh->fillCollisionData(vertexArrays[mesh->tag], storage->indexArray());
-	})
+	}
 
 	rc->renderState().bindVertexArray(0);
 	rc->renderState().bindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);

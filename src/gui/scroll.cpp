@@ -390,7 +390,11 @@ void Scroll::adjustContentSize()
 {
 	vec2 size;
 	
-	ET_ITERATE(children(), auto&, ptr, if (ptr->visible()) size = maxv(size, ptr->origin() + ptr->size()))
+	for (auto& ptr : children())
+	{
+		if (ptr->visible())
+			size = maxv(size, ptr->origin() + ptr->size());
+	}
 
 	setContentSize(size);
 }

@@ -51,6 +51,11 @@ TextureFactory::~TextureFactory()
 	delete _private;
 }
 
+ObjectLoader::Pointer TextureFactory::objectLoader()
+{
+	return _private->loader;
+}
+
 Texture TextureFactory::loadTexture(const std::string& fileName, ObjectsCache& cache,
 	bool async, TextureLoaderDelegate* delegate)
 {

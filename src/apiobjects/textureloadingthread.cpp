@@ -78,8 +78,7 @@ ThreadResult TextureLoadingThread::main()
 			req->textureDescription = loadTexture(req->fileName);
 
 			Invocation1 invocation;
-			invocation.setTarget(_delegate,
-				&TextureLoadingThreadDelegate::textureLoadingThreadDidLoadTextureData, req);
+			invocation.setTarget(_delegate, &TextureLoadingThreadDelegate::textureLoadingThreadDidLoadTextureData, req);
 			invocation.invokeInMainRunLoop();
 		}
 		else

@@ -1,7 +1,7 @@
 #include <et/app/application.h>
 #include <et/gui/gui.h>
 #include <et/scene3d/scene3d.h>
-#include <et/timers/inertialvalue.h>
+#include <et/timers/interpolationvalue.h>
 #include <et/input/gestures.h>
 
 namespace fbxc
@@ -21,10 +21,7 @@ namespace fbxc
 
 		void setRenderContextParameters(et::RenderContextParameters&);
 		void applicationDidLoad(et::RenderContext*);
-		void applicationWillTerminate();
-
 		void render(et::RenderContext*);
-		void idle(float);
 
 	private:
 
@@ -60,8 +57,9 @@ namespace fbxc
 		et::gui::Label::Pointer _labStatus;
 		et::gui::Button::Pointer _btnDrawNormalMeshes;
 		et::gui::Button::Pointer _btnDrawSupportMeshes;
+		et::gui::Button::Pointer _btnWireframe;
 
-		et::InertialValue<float> _vDistance;
-		et::InertialValue<et::vec2> _vAngle;
+		et::InterpolationValue<float> _vDistance;
+		et::InterpolationValue<et::vec2> _vAngle;
 	};
 }
