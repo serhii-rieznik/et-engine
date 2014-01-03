@@ -46,7 +46,7 @@ namespace et
 			void addTexture(Texture t)
 				{ _textures.push_back(t); }
 
-			void addMaterial(Material m)
+			void addMaterial(Material::Pointer m)
 				{ _materials.push_back(m); }
 
 			void addVertexArray(const VertexArray::Pointer& va);

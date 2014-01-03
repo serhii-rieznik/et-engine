@@ -16,7 +16,7 @@ SupportMesh::SupportMesh(const std::string& name, Element* parent) : Mesh(name, 
 
 }
 
-SupportMesh::SupportMesh(const std::string& name, const VertexArrayObject& ib, const Material& material,
+SupportMesh::SupportMesh(const std::string& name, const VertexArrayObject& ib, const Material::Pointer& material,
 	IndexType startIndex, size_t numIndexes, Element* parent) : Mesh(name, ib, material, startIndex, numIndexes, parent),
 	_data(numIndexes / 3), _cachedFinalTransformScale(0.0f), _inverseTransformValid(false)
 {

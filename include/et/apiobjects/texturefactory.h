@@ -42,6 +42,7 @@ namespace et
 
 		ObjectLoader::Pointer objectLoader();
 		
+		ET_DECLARE_EVENT1(textureDidStartLoading, Texture)
 		ET_DECLARE_EVENT1(textureDidLoad, Texture)
 
 	private:

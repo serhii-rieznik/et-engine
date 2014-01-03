@@ -134,12 +134,14 @@ Scene3dStorage::Pointer Scene::deserializeStorage(std::istream& stream, RenderCo
 		if (chunkEqualTo(readChunk, HeaderMaterials))
 		{
 			size_t numMaterials = deserializeUInt(stream);
-
+			_materialsToLoad.setValue(static_cast<AtomicCounterType>(numMaterials));
+			
 			if (fmt == StorageFormat_Binary)
 			{
 				for (size_t i = 0; i < numMaterials; ++i)
 				{
-					Material m;
+					Material::Pointer m;
+					ET_CONNECT_EVENT(m->loaded, Scene::onMaterialLoaded);
 					m->tag = deserializeInt(stream);
 					m->deserialize(stream, rc, tc, basePath, StorageFormat_Binary, async);
 					result->addMaterial(m);
@@ -149,7 +151,8 @@ Scene3dStorage::Pointer Scene::deserializeStorage(std::istream& stream, RenderCo
 			{
 				for (size_t i = 0; i < numMaterials; ++i)
 				{
-					Material m;
+					Material::Pointer m;
+					ET_CONNECT_EVENT(m->loaded, Scene::onMaterialLoaded);
 					m->tag = deserializeInt(stream);
 					m->setOrigin(basePath + getFileName(deserializeString(stream)));
 
@@ -157,6 +160,8 @@ Scene3dStorage::Pointer Scene::deserializeStorage(std::istream& stream, RenderCo
 					
 					if (mStream.valid())
 						m->deserialize(mStream.stream(), rc, tc, basePath, fmt, async);
+					else
+						onMaterialLoaded(nullptr);
 
 					result->addMaterial(m);
 					tc.manage(m, ObjectLoader::Pointer());
@@ -272,7 +277,7 @@ Element::Pointer Scene::createElementOfType(size_t type, Element* parent)
 	}
 }
 
-Material Scene::materialWithId(int id)
+Material::Pointer Scene::materialWithId(int id)
 {
 	Element::List storages = childrenOfType(ElementType_Storage);
 	for (auto si = storages.begin(), se = storages.end(); si != se; ++si)
@@ -285,7 +290,27 @@ Material Scene::materialWithId(int id)
 		}
 	}
 	
-	return Material();
+	return Material::Pointer();
+}
+
+void Scene::onMaterialLoaded(Material*)
+{
+	ET_ASSERT(_materialsToLoad.atomicCounterValue() > 0)
+	
+	_materialsToLoad.release();
+	
+	if (_materialsToLoad.atomicCounterValue()== 0)
+		allMaterialsLoaded();
+}
+
+void Scene::allMaterialsLoaded()
+{
+	ET_ASSERT(_componentsToLoad.atomicCounterValue() > 0)
+	
+	_componentsToLoad.release();
+	
+	if (_componentsToLoad.atomicCounterValue() == 0)
+		deserializationFinished.invoke(true);
 }
 
 VertexArrayObject Scene::vaoWithIdentifiers(const std::string& vbid, const std::string& ibid)
@@ -300,7 +325,6 @@ VertexArrayObject Scene::vaoWithIdentifiers(const std::string& vbid, const std::
 }
 
 #define INVOKE_FAIL		{ if (async) { deserializationFinished.invoke(false); } return false; }
-#define INVOKE_SUCCESS	{ return true; }
 
 bool Scene::performDeserialization(std::istream& stream, RenderContext* rc, ObjectsCache& tc,
 		ElementFactory* factory, const std::string& basePath, bool async)
@@ -328,6 +352,7 @@ bool Scene::performDeserialization(std::istream& stream, RenderContext* rc, Obje
 		INVOKE_FAIL
 	}
 
+	_componentsToLoad.setValue(2);
 	volatile bool readCompleted = false;
 	while (!readCompleted)
 	{
@@ -367,7 +392,11 @@ bool Scene::performDeserialization(std::istream& stream, RenderContext* rc, Obje
 			readCompleted = true;
 		}
 	}
+	_componentsToLoad.release();
+	
+	if (_componentsToLoad.atomicCounterValue() == 0)
+		deserializationFinished.invoke(true);
 
 	_externalFactory = nullptr;
-	INVOKE_SUCCESS
+	return true;
 }

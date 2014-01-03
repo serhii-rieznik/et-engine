@@ -7,6 +7,8 @@
 
 #pragma once
 
+#include <et/app/events.h>
+#include <et/apiobjects/textureloadingthread.h>
 #include <et/rendering/renderstate.h>
 #include <et/scene3d/serialization.h>
 #include <et/scene3d/material.parameters.h>
@@ -17,10 +19,22 @@ namespace et
 {
 	namespace s3d
 	{
-		class MaterialData : public LoadableObject
+		class Material : public LoadableObject, public TextureLoaderDelegate
 		{
 		public:
-			MaterialData();
+			struct Pointer : public IntrusivePtr<Material>
+			{
+				Pointer() :
+					IntrusivePtr<Material>(new Material()) { }
+				
+				explicit Pointer(Material* data) :
+					IntrusivePtr<Material>(data) { }
+			};
+			
+			typedef std::vector<Material::Pointer> List;
+
+		public:
+			Material();
 			
 			const int getInt(size_t param) const;
 			const float getFloat(size_t param) const;
@@ -47,7 +61,9 @@ namespace et
 
 			void clear();
 			
-			MaterialData* duplicate() const;
+			Material* duplicate() const;
+			
+			ET_DECLARE_EVENT1(loaded, Material*)
 			
 		public:
 			ET_DECLARE_PROPERTY_GET_COPY_SET_COPY(BlendState, blendState, setBlendState)
@@ -62,31 +78,28 @@ namespace et
 			void serializeBinary(std::ostream& stream) const;
 			void serializeReadable(std::ostream& stream) const;
 
-			void deserialize1(std::istream& stream, RenderContext* rc, ObjectsCache& cache,
-				const std::string& texturesBasePath, bool async);
-
-			void deserialize2(std::istream& stream, RenderContext* rc, ObjectsCache& cache,
-				const std::string& texturesBasePath, bool async);
-
-			void deserialize3(std::istream& stream, RenderContext* rc, ObjectsCache& cache,
-				const std::string& texturesBasePath, bool async);
+			void deserializeBinary(std::istream& stream, RenderContext* rc, ObjectsCache& cache,
+				const std::string& basePath, bool async);
+			
+			void deserializeReadable(std::istream& stream, RenderContext* rc, ObjectsCache& cache,
+				const std::string& basePath, bool async);
 
 			/*
 			 * Loading from XML
 			 */
-			void deserialize3FromXml(std::istream& stream, RenderContext* rc, ObjectsCache& cache,
-				const std::string& texturesBasePath, bool async);
-
 			void loadProperties(xmlNode*);
 
-			void loadDefaultValues(xmlNode*, RenderContext* rc, ObjectsCache& cache,
-				const std::string& basePath, bool async);
-			
-			void loadDefaultValue(xmlNode*, MaterialParameters, RenderContext* rc, ObjectsCache& cache,
-				const std::string& basePath, bool async);
+			void loadDefaultValues(xmlNode*, RenderContext* rc, ObjectsCache& cache, bool async);
+			void loadDefaultValue(xmlNode*, MaterialParameters, RenderContext* rc, ObjectsCache& cache, bool async);
 
+			/*
+			 * Textures loading stuff
+			 */
 			Texture loadTexture(RenderContext* rc, const std::string& path,
 				const std::string& basePath, ObjectsCache& cache, bool async);
+			
+			void textureDidStartLoading(Texture);
+			void textureDidLoad(Texture);
 
 		private:
 			RenderContext* _rc;
@@ -102,21 +115,10 @@ namespace et
 			CustomVectorParameters _customVectorParameters;
 			CustomTextureParameters _customTextureParameters;
 			CustomStringParameters _customStringParameters;
+			
+			std::map<size_t, std::string> _texturesToLoad;
 		};
-
-		class Material : public IntrusivePtr<MaterialData>
-		{
-		public:
-			typedef std::vector<Material> List;
-
-		public:
-			Material() :
-				IntrusivePtr<MaterialData>(new MaterialData()) { }
-
-			explicit Material(MaterialData* data) :
-				IntrusivePtr<MaterialData>(data) { }
-		};
-
+		
 		typedef ObjectsCache MaterialCache;
 	}
 }

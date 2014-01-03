@@ -93,7 +93,7 @@ void Scene3dStorage::flush()
 	Material::List::iterator mi = _materials.begin();
 	while (mi != _materials.end())
 	{
-		MaterialData* ptr = mi->ptr();
+		Material* ptr = mi->ptr();
 		if (ptr->atomicCounterValue() == 1)
 		{
 			mi = _materials.erase(mi);

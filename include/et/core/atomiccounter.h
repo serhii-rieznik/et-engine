@@ -24,6 +24,8 @@ namespace et
 		
 		AtomicCounterType retain();
 		AtomicCounterType release();
+		
+		void setValue(AtomicCounterType);
 
 		volatile const AtomicCounterType& atomicCounterValue() const
 			{ return _counter; }

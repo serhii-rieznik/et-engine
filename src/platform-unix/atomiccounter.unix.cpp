@@ -46,6 +46,16 @@ AtomicCounterType AtomicCounter::release()
 #endif
 }
 
+void AtomicCounter::setValue(AtomicCounterType value)
+{
+#if (ET_PLATFORM_ANDROID)
+#	error WRITE SOMETHING HERE
+#else
+	OSAtomicCompareAndSwap32(_counter, value, &_counter);
+#endif
+	
+}
+
 AtomicBool::AtomicBool() :
 	_value(0) { }
 

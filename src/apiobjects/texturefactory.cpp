@@ -100,14 +100,25 @@ Texture TextureFactory::loadTexture(const std::string& fileName, ObjectsCache& c
 		if (cachedFileProperty != newProperty)
 			reloadObject(texture, cache);
 	
-		if (async && (delegate != nullptr))
+		if (async)
 		{
-			Invocation1 i;
-			i.setTarget(delegate, &TextureLoaderDelegate::textureDidStartLoading, texture);
-			i.invokeInMainRunLoop();
-			i.setTarget(delegate, &TextureLoaderDelegate::textureDidLoad, texture);
-			i.invokeInMainRunLoop();
+			textureDidStartLoading.invokeInMainRunLoop(texture);
+			if (delegate != nullptr)
+			{
+				Invocation1 i;
+				i.setTarget(delegate, &TextureLoaderDelegate::textureDidStartLoading, texture);
+				i.invokeInMainRunLoop();
+			}
+			
+			textureDidLoad.invokeInMainRunLoop(texture);
+			if (delegate != nullptr)
+			{
+				Invocation1 i;
+				i.setTarget(delegate, &TextureLoaderDelegate::textureDidLoad, texture);
+				i.invokeInMainRunLoop();
+			}
 		}
+
 	}
    
 	return texture;

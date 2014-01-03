@@ -93,9 +93,13 @@ ThreadResult TextureLoadingThread::main()
 void TextureLoadingThread::addRequest(const std::string& fileName, Texture texture,
 	TextureLoaderDelegate* delegate)
 {
-	if (delegate != nullptr)
-		delegate->textureDidStartLoading(texture);
-
+	if (delegate)
+	{
+		Invocation1 i;
+		i.setTarget(delegate, &TextureLoaderDelegate::textureDidStartLoading, texture);
+		i.invokeInMainRunLoop();
+	}
+	
 	CriticalSectionScope lock(_requestsCriticalSection);
 	_requests.push(new TextureLoadingRequest(fileName, texture, delegate));
 

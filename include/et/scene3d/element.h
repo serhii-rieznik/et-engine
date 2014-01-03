@@ -148,16 +148,16 @@ namespace et
 			ET_DECLARE_POINTER(RenderableElement)
 			
 		public:
-			RenderableElement(const std::string& name, Element* parent) : Element(name, parent),
-				_visible(true) { setFlag(Flag_Renderable); }
+			RenderableElement(const std::string& name, Element* parent) :
+				Element(name, parent), _visible(true) { setFlag(Flag_Renderable); }
 
-			Material& material() 
+			Material::Pointer material()
 				{ return _material; }
 
-			const Material& material() const
+			const Material::Pointer& material() const
 				{ return _material; }
 
-			void setMaterial(const Material& material)
+			void setMaterial(const Material::Pointer& material)
 				{ _material = material; }
 
 			bool visible() const
@@ -167,14 +167,14 @@ namespace et
 				{ _visible = visible; }
 			
 		private:
-			Material _material;
+			Material::Pointer _material;
 			bool _visible;
 		};
 
 		class ElementFactory
 		{
 		public:
-			virtual Material materialWithId(int id) = 0;
+			virtual Material::Pointer materialWithId(int id) = 0;
 
 			virtual VertexArrayObject vaoWithIdentifiers(const std::string& vbid,
 				const std::string& ibid) = 0;

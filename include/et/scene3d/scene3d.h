@@ -20,7 +20,7 @@ namespace et
 {
 	namespace s3d
 	{
-		class Scene : public ElementContainer, public ElementFactory
+		class Scene : public EventReceiver, public ElementContainer, public ElementFactory
 		{
 		public:
 			Scene(const std::string& name = "scene");
@@ -48,7 +48,7 @@ namespace et
 				ElementFactory* factory);
 
 		public:
-			ET_DECLARE_EVENT1(deserializationFinished, size_t)
+			ET_DECLARE_EVENT1(deserializationFinished, bool)
 
 		private:
 			bool performDeserialization(std::istream& stream, RenderContext* rc, ObjectsCache& tc,
@@ -60,17 +60,22 @@ namespace et
 				ObjectsCache& tc, const std::string& basePath, StorageFormat fmt, bool async);
 			
 			Element::Pointer createElementOfType(size_t type, Element* parent);
-			Material materialWithId(int id);
+			Material::Pointer materialWithId(int id);
 
 			VertexBuffer vertexBufferWithId(const std::string& id);
 			IndexBuffer indexBufferWithId(const std::string& id);
 			VertexArrayObject vaoWithIdentifiers(const std::string& vbid, const std::string& ibid);
+			
+			void onMaterialLoaded(Material*);
+			void allMaterialsLoaded();
 
 		private:
 			ElementFactory* _externalFactory;
 			VertexBufferList _vertexBuffers;
 			IndexBufferList _indexBuffers;
 			VertexArrayObjectList _vaos;
+			AtomicCounter _materialsToLoad;
+			AtomicCounter _componentsToLoad;
 		};
 	}
 }

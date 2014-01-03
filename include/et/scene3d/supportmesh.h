@@ -22,7 +22,7 @@ namespace et
 
 		public:
 			SupportMesh(const std::string& name = defaultMeshName, Element* parent = 0);
-			SupportMesh(const std::string& name, const VertexArrayObject& ib, const Material& material,
+			SupportMesh(const std::string& name, const VertexArrayObject& ib, const Material::Pointer& material,
 				IndexType startIndex, size_t numIndexes, Element* parent = 0);
 
 			ElementType type() const 
