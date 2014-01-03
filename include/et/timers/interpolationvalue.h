@@ -46,6 +46,9 @@ namespace et
 		void addTargetValue(const T& value)
 			{ _targetValue += value; }
 		
+		void resetLatestDelta()
+			{ _latestDelta = T(0); }
+		
 	private:
 		void update(float t)
 		{

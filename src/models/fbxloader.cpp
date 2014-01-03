@@ -561,7 +561,8 @@ s3d::Mesh::Pointer FBXLoaderPrivate::loadMesh(FbxMesh* mesh, s3d::Element::Point
 	if (hasColor)
 		decl.push_back(Usage_Color, Type_Vec4);
 	
-	if (mesh->GetElementUV()->GetMappingMode() != FbxGeometryElement::eNone)
+	auto uv = mesh->GetElementUV();
+	if ((uv != nullptr) && (uv->GetMappingMode() != FbxGeometryElement::eNone))
 	{
 		for (size_t i = 0; i < uvChannels; ++i)
 			decl.push_back(static_cast<VertexAttributeUsage>(Usage_TexCoord0 + i), Type_Vec2);
