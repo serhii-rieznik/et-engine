@@ -58,9 +58,9 @@ namespace et
 			std::string name;
 			IndexType start;
 			size_t count;
-			s3d::Material material;
+			s3d::Material::Pointer material;
 
-			OBJMeshIndexBounds(const std::string& n, IndexType s, size_t c, s3d::Material m) :
+			OBJMeshIndexBounds(const std::string& n, IndexType s, size_t c, s3d::Material::Pointer m) :
 				name(n), start(s), count(c), material(m) { }
 		};
 		typedef std::vector<OBJMeshIndexBounds> OBJMeshIndexBoundsList;
