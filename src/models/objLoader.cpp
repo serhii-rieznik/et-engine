@@ -601,7 +601,7 @@ void OBJLoader::loadMaterials(const std::string& fileName, bool async, ObjectsCa
 				
 				if (newmtl == "wmtl")
 				{
-					lastMaterial = Material();
+					lastMaterial = Material::Pointer();
 					materials.push_back(lastMaterial);
 					std::string name;
 					materialFile >> name;
@@ -730,7 +730,7 @@ void OBJLoader::processLoadedData()
 			}
 		}
 			
-		Material m;
+		Material::Pointer m;
 		for (Material::List::iterator mi = materials.begin(), me = materials.end(); mi != me; ++mi)
 		{
 			if ((*mi)->name() == group->material)

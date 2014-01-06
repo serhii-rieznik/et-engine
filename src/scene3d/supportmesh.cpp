@@ -90,8 +90,7 @@ SupportMesh* SupportMesh::duplicate()
 
 Sphere SupportMesh::sphere() 
 {
-	const vec3& s = scale();
-	return Sphere(finalTransform() * _center, etMax(s.x, etMax(s.y, s.z)) * _radius);
+	return Sphere(finalTransform() * _center, finalTransformScale() * _radius);
 }
 
 AABB SupportMesh::aabb()
@@ -170,6 +169,6 @@ float SupportMesh::finalTransformScale()
 void SupportMesh::buildInverseTransform()
 {
 	_cachedInverseTransform = Element::finalTransform().inverse();
-	_cachedFinalTransformScale = 1.0f / powf(_cachedInverseTransform.mat3().determinant(), 1.0f / 3.0f);
+	_cachedFinalTransformScale = 1.0f / std::pow(std::abs(_cachedInverseTransform.mat3().determinant()), 1.0f / 3.0f);
 	_inverseTransformValid = true;
 }

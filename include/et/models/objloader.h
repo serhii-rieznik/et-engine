@@ -108,7 +108,7 @@ namespace et
 		std::ifstream materialFile;
 
 		OBJGroup* lastGroup;
-		s3d::Material lastMaterial;
+		s3d::Material::Pointer lastMaterial;
 		s3d::Material::List materials;
 		OBJMeshIndexBoundsList _meshes;
         IndexArray::Pointer _indices;

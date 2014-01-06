@@ -39,6 +39,11 @@ AtomicCounterType AtomicCounter::release()
 	return InterlockedDecrement(&_counter);
 }
 
+void AtomicCounter::setValue(AtomicCounterType v)
+{
+	InterlockedExchange(&_counter, v);
+}
+
 static const AtomicCounterType validMask = static_cast<AtomicCounterType>(0xfffffffc);
 
 AtomicBool::AtomicBool() : 
