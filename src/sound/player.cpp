@@ -265,11 +265,8 @@ void Player::onVolumeUpdated()
 
 void Player::setVolume(float v)
 {
-	static const float exponentFactor = std::log(0.001f);
-
 	_volume = etMax(0.0f, etMin(1.0f, v));
-	alSourcef(_private->source, AL_GAIN, std::exp(exponentFactor * (1.0f - _volume)));
-	
+	alSourcef(_private->source, AL_GAIN, _volume);
 	checkOpenALError("alSourcei(.., AL_GAIN, ...)");
 }
 
