@@ -62,12 +62,12 @@ namespace et
 		s3d::Mesh::Pointer loadMesh(FbxMesh* mesh, s3d::Element::Pointer parent,
 			const s3d::Material::List& materials, const StringList& params);
 
-		s3d::Material loadMaterial(FbxSurfaceMaterial* material);
+		s3d::Material::Pointer loadMaterial(FbxSurfaceMaterial* material);
 
-		void loadMaterialValue(s3d::Material& m, size_t propName,
+		void loadMaterialValue(s3d::Material::Pointer m, size_t propName,
 			FbxSurfaceMaterial* fbxm, const char* fbxprop);
 		
-		void loadMaterialTextureValue(s3d::Material& m, size_t propName,
+		void loadMaterialTextureValue(s3d::Material::Pointer m, size_t propName,
 			FbxSurfaceMaterial* fbxm, const char* fbxprop);
 
 		StringList loadNodeProperties(FbxNode* node);
@@ -301,17 +301,17 @@ void FBXLoaderPrivate::loadNode(FbxNode* node, s3d::Element::Pointer parent)
 	for (int lMaterialIndex = 0; lMaterialIndex < lMaterialCount; ++lMaterialIndex)
 	{
 		FbxSurfaceMaterial* lMaterial = node->GetMaterial(lMaterialIndex);
-		s3d::MaterialData* storedMaterial = static_cast<s3d::MaterialData*>(lMaterial->GetUserDataPtr());
-		if (storedMaterial == 0)
+		s3d::Material* storedMaterial = static_cast<s3d::Material*>(lMaterial->GetUserDataPtr());
+		if (storedMaterial == nullptr)
 		{
-			s3d::Material m = loadMaterial(lMaterial);
+			s3d::Material::Pointer m = loadMaterial(lMaterial);
 			materials.push_back(m);
 			storage->addMaterial(m);
 			lMaterial->SetUserDataPtr(m.ptr());
 		}
 		else
 		{
-			materials.push_back(s3d::Material(storedMaterial));
+			materials.push_back(s3d::Material::Pointer(storedMaterial));
 		}
 	}
 
@@ -372,7 +372,7 @@ void FBXLoaderPrivate::loadNode(FbxNode* node, s3d::Element::Pointer parent)
 		loadNode(node->GetChild(lChildIndex), createdElement);
 }
 
-void FBXLoaderPrivate::loadMaterialTextureValue(s3d::Material& m, size_t propName,
+void FBXLoaderPrivate::loadMaterialTextureValue(s3d::Material::Pointer m, size_t propName,
 	FbxSurfaceMaterial* fbxm, const char* fbxprop)
 {
 	FbxProperty value = fbxm->FindProperty(fbxprop);
@@ -391,7 +391,7 @@ void FBXLoaderPrivate::loadMaterialTextureValue(s3d::Material& m, size_t propNam
 	}
 }
 
-void FBXLoaderPrivate::loadMaterialValue(s3d::Material& m, size_t propName,
+void FBXLoaderPrivate::loadMaterialValue(s3d::Material::Pointer m, size_t propName,
 	FbxSurfaceMaterial* fbxm, const char* fbxprop)
 {
 	const FbxProperty value = fbxm->FindProperty(fbxprop);
@@ -434,9 +434,9 @@ void FBXLoaderPrivate::loadMaterialValue(s3d::Material& m, size_t propName,
 	}
 }
 
-s3d::Material FBXLoaderPrivate::loadMaterial(FbxSurfaceMaterial* mat)
+s3d::Material::Pointer FBXLoaderPrivate::loadMaterial(FbxSurfaceMaterial* mat)
 {
-	s3d::Material m;
+	s3d::Material::Pointer m;
 
 	m->setName(mat->GetName());
 

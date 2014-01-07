@@ -150,7 +150,7 @@ void Converter::renderMeshList(RenderContext* rc, const s3d::Element::List& mesh
 		s3d::Mesh::Pointer mesh = *i;
 		if (mesh->active())
 		{
-			s3d::Material& m = mesh->material();
+			const s3d::Material::Pointer& m = mesh->material();
 			
 			_defaultProgram->setUniform("ambientColor", m->getVector(MaterialParameter_AmbientColor));
 			_defaultProgram->setUniform("diffuseColor", m->getVector(MaterialParameter_DiffuseColor));

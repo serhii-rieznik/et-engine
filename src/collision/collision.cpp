@@ -239,7 +239,7 @@ bool et::intersect::segmentPlane(const segment3d& s, const plane& p, vec3* inter
 	if (d >= 0.0f) return false;
 
 	float t = dot(p.normal(), p.planePoint() - s.start) / d;
-	if ((t <= 0.0f) || (t > 1.0f)) return false;
+	if ((t < 0.0f) || (t > 1.0f)) return false;
 
 	if (intersection_pt)
 		*intersection_pt = s.start + t * ds;
@@ -250,13 +250,15 @@ bool et::intersect::segmentPlane(const segment3d& s, const plane& p, vec3* inter
 bool et::intersect::segmentTriangle(const segment3d& s, const triangle& t, vec3* intersection_pt)
 {
 	vec3 ip;
-	if (!segmentPlane(s, plane(t), &ip)) return false;
 
-	if (pointInsideTriangle(ip, t))
+	if (segmentPlane(s, plane(t), &ip))
 	{
-		if (intersection_pt)
-			*intersection_pt = ip;
-		return true;
+		if (pointInsideTriangle(ip, t))
+		{
+			if (intersection_pt)
+				*intersection_pt = ip;
+			return true;
+		}
 	}
 
 	return false;

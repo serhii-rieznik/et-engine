@@ -16,12 +16,6 @@
     <ClCompile Include="FBXConverter.cpp">
       <Filter>Файлы исходного кода</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\models\3dsloader.cpp">
-      <Filter>engine</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\collision\aabb.cpp">
-      <Filter>engine</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\app\appevironment.cpp">
       <Filter>engine</Filter>
     </ClCompile>
@@ -52,9 +46,6 @@
     <ClCompile Include="..\..\src\imaging\ddsloader.cpp">
       <Filter>engine</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\scene3d\element.cpp">
-      <Filter>engine</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\gui\element2d.cpp">
       <Filter>engine</Filter>
     </ClCompile>
@@ -71,9 +62,6 @@
       <Filter>engine</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\platform-win\fontgen.win.cpp">
-      <Filter>engine</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\apiobjects\framebufferdata.cpp">
       <Filter>engine</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\apiobjects\framebufferfactory.cpp">
@@ -119,9 +107,6 @@
       <Filter>engine</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\app\invocation.cpp">
-      <Filter>engine</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\imaging\jpgloader.cpp">
       <Filter>engine</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\gui\label.cpp">
@@ -179,9 +164,6 @@
       <Filter>engine</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\primitives\primitives.cpp">
-      <Filter>engine</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\apiobjects\programdata.cpp">
       <Filter>engine</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\apiobjects\programfactory.cpp">
@@ -308,6 +290,27 @@
       <Filter>engine</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\apiobjects\texture.cpp">
+      <Filter>engine</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\apiobjects\framebuffer.cpp">
+      <Filter>engine</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\apiobjects\program.cpp">
+      <Filter>engine</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\app\backgroundthread.cpp">
+      <Filter>engine</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\imaging\pvrdecompressor.cpp">
+      <Filter>engine</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\core\conversion.cpp">
+      <Filter>engine</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scene3d\baseelement.cpp">
+      <Filter>engine</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scene3d\animation.cpp">
       <Filter>engine</Filter>
     </ClCompile>
   </ItemGroup>
