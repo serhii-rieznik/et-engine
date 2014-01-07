@@ -62,6 +62,8 @@ extern etOpenGLViewController* sharedOpenGLViewController;
 - (void)applicationWillResignActive:(UIApplication *)application
 {
 	(void)application;
+	
+	_updating = false;
 	_notifier.notifyDeactivated();
 }
 
