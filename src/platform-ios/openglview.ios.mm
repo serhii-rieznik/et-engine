@@ -272,8 +272,6 @@ using namespace et;
 
 - (void)touchesBegan:(NSSet*)touches withEvent:(UIEvent*)event
 {
-	log::info(ET_CALL_FUNCTION);
-	
 	(void)event;
 	for (UITouch* touch in touches)
 		Input::PointerInputSource().pointerPressed([self touchToPointerInputInfo:touch]);
@@ -288,8 +286,6 @@ using namespace et;
 
 - (void)touchesEnded:(NSSet*)touches withEvent:(UIEvent*)event
 {
-	log::info(ET_CALL_FUNCTION);
-	
 	(void)event;
 	for (UITouch* touch in touches)
 		Input::PointerInputSource().pointerReleased([self touchToPointerInputInfo:touch]);
@@ -297,8 +293,6 @@ using namespace et;
 
 - (void)touchesCancelled:(NSSet*)touches withEvent:(UIEvent*)event
 {
-	log::info(ET_CALL_FUNCTION);
-	
 	(void)event;
 	for (UITouch* touch in touches)
 		Input::PointerInputSource().pointerCancelled([self touchToPointerInputInfo:touch]);
