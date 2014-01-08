@@ -34,17 +34,17 @@ void TaskPool::addTask(Task* t, float delay)
 	}
 }
 
-void TaskPool::update(float t)
+void TaskPool::update(float currentTime)
 {
 	joinTasks();
 	
-	_lastTime = t;
+	_lastTime = currentTime;
 	
 	auto i = _tasks.begin();
 	while (i != _tasks.end())
 	{
 		Task* task = (*i);
-		if (t >= task->executionTime())
+		if (_lastTime >= task->executionTime())
 		{
 			task->execute();
 			delete task;
@@ -66,9 +66,7 @@ bool TaskPool::hasTasks()
 void TaskPool::joinTasks()
 {
 	CriticalSectionScope lock(_csModifying);
-	if (_tasksToAdd.size())
-	{
-		_tasks.insert(_tasks.end(), _tasksToAdd.begin(), _tasksToAdd.end());
-		_tasksToAdd.clear();
-	}
+	
+	if (!_tasksToAdd.empty())
+		_tasks.splice(_tasks.end(), _tasksToAdd);
 }

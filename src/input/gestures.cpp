@@ -208,6 +208,7 @@ void GesturesRecognizer::onPointerCancelled(et::PointerInputInfo pi)
 	pointerCancelled.invoke(pi);
 
 	_pointers.erase(pi.id);
+	
 	cancelled.invoke(pi.normalizedPos, pi.type);
 	cancelWaitingForClicks();
 }

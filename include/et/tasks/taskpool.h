@@ -22,9 +22,11 @@ namespace et
 		void addTask(Task* t, float delay = 0.0f);
 		
 		bool hasTasks();
-		
+				
 	private:
 		void joinTasks();
+		
+		ET_DENY_COPY(TaskPool)
 		
 	private:
 		CriticalSection _csModifying;

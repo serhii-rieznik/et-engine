@@ -35,6 +35,8 @@ using namespace et;
 	RenderContext* _rc;
 	RenderContextNotifier _rcNotifier;
 	
+	float _scaleFactor;
+	
 	BOOL _keyboardAllowed;
 	BOOL _multisampled;
 	BOOL _isOpenGLES3;
@@ -45,6 +47,7 @@ using namespace et;
 - (void)createFramebuffer;
 - (void)deleteFramebuffer;
 - (void)onNotificationRecevied:(NSNotification*)notification;
+- (PointerInputInfo)touchToPointerInputInfo:(UITouch*)touch;
 
 @end
 
@@ -166,12 +169,14 @@ using namespace et;
 {
 	@synchronized(_context)
 	{
+		_scaleFactor = [[UIScreen mainScreen] scale];
 		[EAGLContext setCurrentContext:_context];
 		
 		CAEAGLLayer* glLayer = (CAEAGLLayer*)self.layer;
 		glLayer.opaque = YES;
-		glLayer.contentsScale = [[UIScreen mainScreen] scale];
-		self.contentScaleFactor = glLayer.contentsScale;
+		glLayer.contentsScale = _scaleFactor;
+		
+		self.contentScaleFactor = _scaleFactor;
 		
 		int colorFormat = GL_RGBA8;
 		int depthFormat = GL_DEPTH_COMPONENT16;
@@ -250,116 +255,53 @@ using namespace et;
 	return _multisampled ? _multisampledFramebuffer : _mainFramebuffer;
 }
 
-- (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
+- (PointerInputInfo)touchToPointerInputInfo:(UITouch*)touch
 {
-	(void)event;
-	float scale = self.contentScaleFactor;
-	CGSize ownSize = self.bounds.size;
-	ownSize.width *= scale;
-	ownSize.height *= scale;
+	CGRect ownFrame = self.bounds;
+	CGPoint touchPoint = [touch locationInView:self];
 	
-	for (UITouch* touch in touches)
-	{
-		CGPoint touchPoint = [touch locationInView:self];
-		touchPoint.x *= scale;
-		touchPoint.y *= scale;
-		
-		PointerInputInfo pt;
-		pt.id = [touch hash];
-		pt.pos = vec2(touchPoint.x, touchPoint.y);
-		pt.scroll = vec2(0.0f);
-		pt.timestamp = static_cast<float>(touch.timestamp);
-		pt.type = PointerType_General;
-		
-		float nx = 2.0f * pt.pos.x / ownSize.width - 1.0f;
-		float ny = 1.0f - 2.0f * pt.pos.y / ownSize.height;
-		pt.normalizedPos = vec2(nx, ny);
-		Input::PointerInputSource().pointerPressed(pt);
-	}
+	float nx = 2.0f * touchPoint.x / ownFrame.size.width - 1.0f;
+	float ny = 1.0f - 2.0f * touchPoint.y / ownFrame.size.height;
+	
+	touchPoint.x *= _scaleFactor;
+	touchPoint.y *= _scaleFactor;
+
+	return PointerInputInfo(PointerType_General, vec2(touchPoint.x, touchPoint.y), vec2(nx, ny), vec2(0.0f),
+		[touch hash], mainTimerPool()->actualTime(), PointerOrigin_Touchscreen);
 }
 
-- (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent*)event
+- (void)touchesBegan:(NSSet*)touches withEvent:(UIEvent*)event
 {
-	(void)event;
-	float scale = self.contentScaleFactor;
-	CGSize ownSize = self.bounds.size;
-	ownSize.width *= scale;
-	ownSize.height *= scale;
+	log::info(ET_CALL_FUNCTION);
 	
+	(void)event;
 	for (UITouch* touch in touches)
-	{
-		CGPoint touchPoint = [touch locationInView:self];
-		touchPoint.x *= scale;
-		touchPoint.y *= scale;
-
-		PointerInputInfo pt;
-		pt.id = [touch hash];
-		pt.pos = vec2(touchPoint.x, touchPoint.y);
-		pt.scroll = vec2(0.0f);
-		pt.timestamp = static_cast<float>(touch.timestamp);
-		pt.type = PointerType_General;
-		
-		float nx = 2.0f * pt.pos.x / ownSize.width - 1.0f;
-		float ny = 1.0f - 2.0f * pt.pos.y / ownSize.height;
-		pt.normalizedPos = vec2(nx, ny);
-		Input::PointerInputSource().pointerMoved(pt);
-	}
+		Input::PointerInputSource().pointerPressed([self touchToPointerInputInfo:touch]);
 }
 
-- (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event
+- (void)touchesMoved:(NSSet*)touches withEvent:(UIEvent*)event
 {
 	(void)event;
-	float scale = self.contentScaleFactor;
-	CGSize ownSize = self.bounds.size;
-	ownSize.width *= scale;
-	ownSize.height *= scale;
-	
 	for (UITouch* touch in touches)
-	{
-		CGPoint touchPoint = [touch locationInView:self];
-		touchPoint.x *= scale;
-		touchPoint.y *= scale;
-		
-		PointerInputInfo pt;
-		pt.id = [touch hash];
-		pt.pos = vec2(touchPoint.x, touchPoint.y);
-		pt.scroll = vec2(0.0f);
-		pt.timestamp = static_cast<float>(touch.timestamp);
-		pt.type = PointerType_General;
-		
-		float nx = 2.0f * pt.pos.x / ownSize.width - 1.0f;
-		float ny = 1.0f - 2.0f * pt.pos.y / ownSize.height;
-		pt.normalizedPos = vec2(nx, ny);
-		Input::PointerInputSource().pointerReleased(pt);
-	}
+		Input::PointerInputSource().pointerMoved([self touchToPointerInputInfo:touch]);
 }
 
-- (void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event
+- (void)touchesEnded:(NSSet*)touches withEvent:(UIEvent*)event
 {
-	(void)event;
-	float scale = self.contentScaleFactor;
-	CGSize ownSize = self.bounds.size;
-	ownSize.width *= scale;
-	ownSize.height *= scale;
+	log::info(ET_CALL_FUNCTION);
 	
+	(void)event;
 	for (UITouch* touch in touches)
-	{
-		CGPoint touchPoint = [touch locationInView:self];
-		touchPoint.x *= scale;
-		touchPoint.y *= scale;
-		
-		PointerInputInfo pt;
-		pt.id = [touch hash];
-		pt.pos = vec2(touchPoint.x, touchPoint.y);
-		pt.scroll = vec2(0.0f);
-		pt.timestamp = static_cast<float>(touch.timestamp);
-		pt.type = PointerType_General;
-		
-		float nx = 2.0f * pt.pos.x / ownSize.width - 1.0f;
-		float ny = 1.0f - 2.0f * pt.pos.y / ownSize.height;
-		pt.normalizedPos = vec2(nx, ny);
-		Input::PointerInputSource().pointerCancelled(pt);
-	}
+		Input::PointerInputSource().pointerReleased([self touchToPointerInputInfo:touch]);
+}
+
+- (void)touchesCancelled:(NSSet*)touches withEvent:(UIEvent*)event
+{
+	log::info(ET_CALL_FUNCTION);
+	
+	(void)event;
+	for (UITouch* touch in touches)
+		Input::PointerInputSource().pointerCancelled([self touchToPointerInputInfo:touch]);
 }
 
 - (void)onNotificationRecevied:(NSNotification*)notification
