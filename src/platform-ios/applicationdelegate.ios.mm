@@ -125,7 +125,15 @@ extern etOpenGLViewController* sharedOpenGLViewController;
 		_updating = true;
 		[_displayLink addToRunLoop:[NSRunLoop currentRunLoop] forMode:NSRunLoopCommonModes];
 		
-		CFRunLoopRun();
+		try
+		{
+			CFRunLoopRun();
+		}
+		catch (std::exception e)
+		{
+			log::info("Terminating due to std::exception: %s", e.what());
+			abort();
+		}
 		
 		[_displayLink invalidate];
 		_displayLink = nil;

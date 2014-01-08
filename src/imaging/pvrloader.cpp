@@ -192,7 +192,7 @@ void parseTextureFormat(const PVRTextureHeaderV3& sTextureHeader, TextureDescrip
 				desc.channels = 4;
 				desc.format = GL_RGBA;
 				
-#if defined(GL_COMPRESSED_RGBA_PVRTC_2BPPVGL_COMPRESSED_RGBA_PVRTC_4BPPV1_IMG_IMG)
+#if defined(GL_COMPRESSED_RGBA_PVRTC_4BPPV1_IMG)
 				desc.internalformat = GL_COMPRESSED_RGBA_PVRTC_4BPPV1_IMG;
 				desc.compressed = true;
 #else

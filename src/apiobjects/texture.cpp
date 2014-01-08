@@ -230,8 +230,7 @@ void TextureData::build(RenderContext* rc)
 	_texel = vec2( 1.0f / static_cast<float>(_desc->size.x), 1.0f / static_cast<float>(_desc->size.y) );
 	
 	_filtration.x = (_desc->mipMapCount > 1) ?
-		TextureFiltration_NearestMipMapLinear : TextureFiltration_Linear;
-	
+		TextureFiltration_LinearMipMapLinear : TextureFiltration_Linear;
 	_filtration.y = TextureFiltration_Linear;
 
 	rc->renderState().bindTexture(defaultBindingUnit, _glID, _desc->target, true);
