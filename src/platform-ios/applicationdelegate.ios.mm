@@ -152,19 +152,13 @@ extern etOpenGLViewController* sharedOpenGLViewController;
 	}
 	else
 	{
-		@synchronized(sharedOpenGLViewController.context)
-		{
-			_updating = true;
-		}
+		_updating = true;
 	}
 }
 
 - (void)endUpdates
 {
-	@synchronized(sharedOpenGLViewController.context)
-	{
-		_updating = false;
-	}
+	_updating = false;
 }
 
 #if defined(__IPHONE_6_0)
