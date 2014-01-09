@@ -141,7 +141,9 @@ using namespace et;
 - (void)beginRender
 {
 	[EAGLContext setCurrentContext:_context];
-	_rc->renderState().bindDefaultFramebuffer();
+	
+	if (_rc->parameters().bindDefaultFramebufferEachFrame)
+		_rc->renderState().bindDefaultFramebuffer();
 }
 
 - (void)endRender
