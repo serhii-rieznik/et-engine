@@ -176,97 +176,102 @@ std::string et::glInternalFormatToString(int format)
 	{
 		CASE_VALUE(GL_DEPTH_COMPONENT)
 		CASE_VALUE(GL_DEPTH_COMPONENT16)
-			
+		
 		CASE_VALUE(GL_RGB)
 		CASE_VALUE(GL_RGBA)
 		CASE_VALUE(GL_RGBA4)
 		CASE_VALUE(GL_RGB5_A1)
-			
+		
+#if defined(GL_RG32F)
+		CASE_VALUE(GL_RG32F)
+#endif
+		
+#if defined(GL_RGB32F)
+		CASE_VALUE(GL_RGB32F)
+#endif
+		
+#if defined(GL_RGBA32F)
+		CASE_VALUE(GL_RGBA32F)
+#endif
+		
 #if defined(GL_RGB4)
 		CASE_VALUE(GL_RGB4)
 #endif
-			
+		
 #if defined(GL_RGB565)
 		CASE_VALUE(GL_RGB565)
 #endif
-
+		
 #if defined(GL_DEPTH_COMPONENT24)
 		CASE_VALUE(GL_DEPTH_COMPONENT24)
 #endif
-
+		
 #if defined(GL_BGRA)
 		CASE_VALUE(GL_BGRA)
 #endif
-
+		
 #if defined (GL_LUMINANCE)
 		CASE_VALUE(GL_LUMINANCE)
 #endif
-
+		
 #if defined (GL_LUMINANCE_ALPHA)
 		CASE_VALUE(GL_LUMINANCE_ALPHA)
 #endif
-
+		
 #if defined(GL_RGB8) && (GL_RGB8 != GL_RGB)
 		CASE_VALUE(GL_RGB8)
 #endif
-
+		
 #if defined(GL_RGBA8) && (GL_RGBA8 != GL_RGBA)
 		CASE_VALUE(GL_RGBA8)
 #endif
-
+		
 #if defined(GL_INTENSITY)
-	CASE_VALUE(GL_INTENSITY)
-	CASE_VALUE(GL_INTENSITY8)
-	CASE_VALUE(GL_INTENSITY16)
-	CASE_VALUE(GL_LUMINANCE8)
-	CASE_VALUE(GL_LUMINANCE16)
+		CASE_VALUE(GL_INTENSITY)
+		CASE_VALUE(GL_INTENSITY8)
+		CASE_VALUE(GL_INTENSITY16)
+		CASE_VALUE(GL_LUMINANCE8)
+		CASE_VALUE(GL_LUMINANCE16)
 #endif
-
+		
 #if defined(GL_RGB16F)
-	CASE_VALUE(GL_RGB16F)
+		CASE_VALUE(GL_RGB16F)
 #endif
-			
+		
 #if defined(GL_RGBA16F)
-	CASE_VALUE(GL_RGBA16F)
+		CASE_VALUE(GL_RGBA16F)
 #endif
-			
-#if defined(GL_RGBA32F)
-	CASE_VALUE(GL_RGBA32F)
-#endif
-			
-#if defined(GL_RGB32F)
-	CASE_VALUE(GL_RGB32F)
-#endif
-
+		
+		
 #if defined(GL_R11F_G11F_B10F)
-	CASE_VALUE(GL_R11F_G11F_B10F)
+		CASE_VALUE(GL_R11F_G11F_B10F)
 #endif
 		
 #if defined(GL_COMPRESSED_RGB_S3TC_DXT1_EXT)
-	CASE_VALUE(GL_COMPRESSED_RGB_S3TC_DXT1_EXT)
+		CASE_VALUE(GL_COMPRESSED_RGB_S3TC_DXT1_EXT)
 #endif
-
+		
 #if defined(GL_COMPRESSED_RGBA_S3TC_DXT1_EXT)
-	CASE_VALUE(GL_COMPRESSED_RGBA_S3TC_DXT1_EXT)
+		CASE_VALUE(GL_COMPRESSED_RGBA_S3TC_DXT1_EXT)
 #endif
-
+		
 #if defined(GL_COMPRESSED_RGBA_S3TC_DXT3_EXT)
-	CASE_VALUE(GL_COMPRESSED_RGBA_S3TC_DXT3_EXT)
+		CASE_VALUE(GL_COMPRESSED_RGBA_S3TC_DXT3_EXT)
 #endif
-			
+		
 #if defined(GL_COMPRESSED_RGBA_S3TC_DXT5_EXT)
-	CASE_VALUE(GL_COMPRESSED_RGBA_S3TC_DXT5_EXT)
+		CASE_VALUE(GL_COMPRESSED_RGBA_S3TC_DXT5_EXT)
 #endif
-			
+		
 #if defined(GL_COMPRESSED_RG_RGTC2)
-	CASE_VALUE(GL_COMPRESSED_RG_RGTC2)
+		CASE_VALUE(GL_COMPRESSED_RG_RGTC2)
 #endif
-			
+		
 #if defined(GL_COMPRESSED_RGB_PVRTC_2BPPV1_IMG)
-	CASE_VALUE(GL_COMPRESSED_RGB_PVRTC_2BPPV1_IMG)
-	CASE_VALUE(GL_COMPRESSED_RGB_PVRTC_4BPPV1_IMG)
-	CASE_VALUE(GL_COMPRESSED_RGBA_PVRTC_2BPPV1_IMG)
-	CASE_VALUE(GL_COMPRESSED_RGBA_PVRTC_4BPPV1_IMG)
+		CASE_VALUE(GL_COMPRESSED_RGB_PVRTC_2BPPV1_IMG)
+		CASE_VALUE(GL_COMPRESSED_RGB_PVRTC_4BPPV1_IMG)
+		CASE_VALUE(GL_COMPRESSED_RGBA_PVRTC_2BPPV1_IMG)
+		CASE_VALUE(GL_COMPRESSED_RGBA_PVRTC_4BPPV1_IMG)
 #endif
 
 	default:
@@ -607,6 +612,9 @@ size_t et::bitsPerPixelForType(uint32_t type)
 		case GL_FLOAT:
 			return 32;
 			
+		case GL_HALF_FLOAT:
+			return 16;
+			
 		default:
 			assert("Not yet implemented for this type." && false);
 			return 0;
@@ -651,7 +659,27 @@ size_t et::bitsPerPixelForTextureFormat(uint32_t internalFormat, uint32_t type)
 			return 3 * bitsPerPixelForType(type);
 			
 		case GL_RGBA32F:
+			return 4 * bitsPerPixelForType(type);
+			
+#if defined(GL_RGB16F)
+		case GL_RGB16F:
 			return 3 * bitsPerPixelForType(type);
+#endif
+			
+#if defined(GL_RGBA16F)
+		case GL_RGBA16F:
+			return 4 * bitsPerPixelForType(type);
+#endif
+			
+#if defined(GL_R32F)
+		case GL_R32F:
+			return bitsPerPixelForType(type);
+#endif
+
+#if defined(GL_RG32F)
+		case GL_RG32F:
+			return 2 * bitsPerPixelForType(type);
+#endif
 			
 #if defined(GL_RGB565)
 		case GL_RGB565:
@@ -669,7 +697,7 @@ size_t et::bitsPerPixelForTextureFormat(uint32_t internalFormat, uint32_t type)
 #endif
 			
 		default:
-			assert("Not yet implemented for this format." && false);
+			ET_FAIL("Not yet implemented for this format");
 			return 0;
 	}
 }

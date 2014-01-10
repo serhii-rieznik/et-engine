@@ -71,12 +71,20 @@
 #		define GL_RGBA8									GL_RGBA8_OES
 #	endif
 #
-#	if !defined(GL_RGB32F)
+#	if !defined(GL_RGB32F) && defined(GL_RGB32F_EXT)
 #		define GL_RGB32F								GL_RGB32F_EXT
 #	endif
 #
-#	if !defined(GL_RGBA32F)
+#	if !defined(GL_RGBA32F) && defined(GL_RGBA32F_EXT)
 #		define GL_RGBA32F								GL_RGBA32F_EXT
+#	endif
+#
+#	if !defined(GL_RG32F) && defined(GL_RG32F_EXT)
+#		define GL_RG32F									GL_RG32F_EXT
+#	endif
+#
+#	if !defined(GL_R32F) && defined(GL_R32F_EXT)
+#		define GL_R32F									GL_R32F_EXT
 #	endif
 #
 #	if !defined(GL_TEXTURE_MAX_LEVEL)

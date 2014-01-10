@@ -295,8 +295,7 @@ void Framebuffer::setCurrentRenderTarget(const Texture& texture, uint32_t target
 
 void Framebuffer::setCurrentRenderTarget(size_t index)
 {
-	assert(index < _numTargets);
-	assert(_renderTargets[index].valid());
+	ET_ASSERT((index < _numTargets) && _renderTargets[index].valid());
 	setCurrentRenderTarget(_renderTargets[index]);
 }
 

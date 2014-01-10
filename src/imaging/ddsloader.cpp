@@ -323,7 +323,7 @@ void dds::loadInfoFromStream(std::istream& source, TextureDescription& desc)
 			desc.channels = 1;
 			desc.bitsPerPixel = 32 * desc.channels;
 			desc.internalformat = GL_R32F;
-			desc.format = GL_RED;
+			desc.format = GL_RGBA;
 			desc.type = GL_FLOAT;
 			break;
 		}
@@ -335,7 +335,7 @@ void dds::loadInfoFromStream(std::istream& source, TextureDescription& desc)
 			desc.channels = 2;
 			desc.bitsPerPixel = 32 * desc.channels;
 			desc.internalformat = GL_RG32F;
-			desc.format = GL_RG;
+			desc.format = GL_RGBA;
 			desc.type = GL_FLOAT;
 			break;
 		}
