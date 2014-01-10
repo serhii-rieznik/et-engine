@@ -561,11 +561,21 @@ Texture Material::loadTexture(RenderContext* rc, const std::string& path, const 
 {
 	if (path.empty()) return Texture();
 
-	Texture t = rc->textureFactory().loadTexture(normalizeFilePath(path), cache, async, this);
-	if (t.invalid())
+	Texture t;
+	if (fileExists(path))
+	{
+		t = rc->textureFactory().loadTexture(normalizeFilePath(path), cache, async, this);
+	}
+	else
 	{
 		std::string relativePath = normalizeFilePath(basePath + getFileName(path));
-		t = rc->textureFactory().loadTexture(relativePath, cache, async, this);
+		if (fileExists(relativePath))
+			t = rc->textureFactory().loadTexture(relativePath, cache, async, this);
+	}
+	
+	if (t.invalid())
+	{
+		log::info("Unable to locate texture %s for material %s", path.c_str(), name().c_str());
 	}
 
 	return t;
