@@ -90,7 +90,7 @@ Texture TextureFactory::loadTexture(const std::string& fileName, ObjectsCache& c
 			if (async)
 				_loadingThread->addRequest(desc->origin(), texture, delegate);
 			else if (calledFromAnotherThread)
-				assert(false && "ERROR: Unable to load texture synchronously from non-rendering thread.");
+				ET_FAIL("ERROR: Unable to load texture synchronously from non-rendering thread.");
 		}
 		
 	}
