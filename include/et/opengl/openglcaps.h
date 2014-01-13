@@ -52,6 +52,9 @@ namespace et
 		const std::string& glslVersionShortString() const
 			{ return _glslVersionShortString; }
 
+		uint32_t maxTextureSize() const
+			{ return _maxTextureSize;}
+		
 		uint32_t maxCubemapTextureSize() const
 			{ return _maxCubemapTextureSize;}
 		
@@ -70,6 +73,7 @@ namespace et
 		
 		std::map<std::string, int> _extensions;
 
+		uint32_t _maxTextureSize = 0;
 		uint32_t _maxCubemapTextureSize = 0;
 		uint32_t _maxSamples = 0;
 

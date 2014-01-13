@@ -112,6 +112,11 @@ void OpenGLCapabilites::checkCaps()
 	checkOpenGLError("glGetIntegerv(GL_MAX_CUBE_MAP_TEXTURE_SIZE, ...");
 	_maxCubemapTextureSize = static_cast<uint32_t>(maxSize);
 
+	maxSize = 0;
+	glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxSize);
+	checkOpenGLError("glGetIntegerv(GL_MAX_TEXTURE_SIZE, ...");
+	_maxTextureSize = static_cast<uint32_t>(maxSize);
+	
 	int maxSamples = 0;
 	glGetIntegerv(GL_MAX_SAMPLES, &maxSamples);
 	checkOpenGLError("glGetIntegerv(GL_MAX_SAMPLES, ...");
