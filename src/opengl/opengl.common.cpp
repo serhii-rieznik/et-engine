@@ -660,6 +660,21 @@ size_t et::bitsPerPixelForTextureFormat(uint32_t internalFormat, uint32_t type)
 			
 		case GL_RGBA32F:
 			return 4 * bitsPerPixelForType(type);
+
+#if defined(GL_RED)
+		case GL_RED:
+			return bitsPerPixelForType(type);
+#endif
+			
+#if defined(GL_RG)
+		case GL_RG:
+			return 2 * bitsPerPixelForType(type);
+#endif
+			
+#if defined(GL_RG16F)
+		case GL_RG16F:
+			return 2 * bitsPerPixelForType(type);
+#endif
 			
 #if defined(GL_RGB16F)
 		case GL_RGB16F:

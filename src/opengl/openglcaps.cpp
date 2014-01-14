@@ -55,13 +55,17 @@ void OpenGLCapabilites::checkCaps()
 
 	std::string lowercaseVersion = _versionString;
 	lowercase(lowercaseVersion);
+
+	int intVersion = strToInt(_glslVersionShortString);
 	
-	_version = (strToInt(_glslVersionShortString) < 130) || (lowercaseVersion.find("es") != std::string::npos) ?
-		OpenGLVersion_Old : OpenGLVersion_New;
+	_isOpenGLES = lowercaseVersion.find("es") != std::string::npos;
+	
+	_version = (intVersion < 130) || (_isOpenGLES && (intVersion < 300)) ?
+		OpenGLVersion_2x : OpenGLVersion_3x;
 	
 	const char* ext = nullptr;
 #if defined(GL_NUM_EXTENSIONS)
-	if (_version == OpenGLVersion_Old)
+	if (_version == OpenGLVersion_2x)
 #endif
 	{
 		ext = reinterpret_cast<const char*>(glGetString(GL_EXTENSIONS));

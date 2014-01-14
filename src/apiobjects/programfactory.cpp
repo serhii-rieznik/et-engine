@@ -40,19 +40,33 @@ ProgramFactory::ProgramFactory(RenderContext* rc) : APIObjectFactory(rc)
 	_private = new ProgramFactoryPrivate(this);
 
 #if (ET_OPENGLES)	
-	_commonHeader = 
+	
+	_commonHeader =
 		"#define etLowp		lowp\n"
 		"#define etMediump	mediump\n"
 		"#define etHighp	highp\n";
+
+	if (openGLCapabilites().versionShortString() == "300")
+	{
+		_commonHeader = "#version " + openGLCapabilites().glslVersionShortString() + " es\n" +
+			_commonHeader + "#define ET_OPENGL_ES_3\n";
+	}
+	else
+	{
+		_commonHeader += "#define ET_OPENGL_ES_2\n";
+	}
+	
 #else
+	
 	_commonHeader = 
 		"#version " + openGLCapabilites().glslVersionShortString() + "\n"
 		"#define etLowp\n"
 		"#define etMediump\n"
 		"#define etHighp\n";
+	
 #endif
 
-	if (openGLCapabilites().version() == OpenGLVersion_Old)
+	if (openGLCapabilites().version() == OpenGLVersion_2x)
 	{
 		_fragShaderHeader = 
 			"#define etTexture2D		texture2D\n"
@@ -90,7 +104,7 @@ ProgramFactory::ProgramFactory(RenderContext* rc) : APIObjectFactory(rc)
 			"#define etTextureCubeLod	textureLod\n"
 			"#define etFragmentIn		in\n"
 			"#define etFragmentOut		FragColor\n"
-			"out vec4 FragColor;\n"
+			"out etHighp vec4 FragColor;\n"
 			;
 
 		_vertShaderHeader = 

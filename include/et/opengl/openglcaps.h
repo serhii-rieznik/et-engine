@@ -16,8 +16,8 @@ namespace et
 	enum OpenGLVersion
 	{
 		OpenGLVersion_unknown,
-		OpenGLVersion_Old,
-		OpenGLVersion_New,
+		OpenGLVersion_2x,
+		OpenGLVersion_3x,
 		OpenGLVersion_max
 	};
 	
@@ -36,6 +36,9 @@ namespace et
 	public:
 		bool hasFeature(OpenGLFeature value)
 			{ return hasFlag(value); }
+		
+		bool isOpenGLES() const
+			{ return _isOpenGLES; }
 	
 		OpenGLVersion version() const
 			{ return _version; }
@@ -78,6 +81,7 @@ namespace et
 		uint32_t _maxSamples = 0;
 
 		OpenGLVersion _version = OpenGLVersion_unknown;
+		bool _isOpenGLES = false;
 	};
 	
 	inline OpenGLCapabilites& openGLCapabilites()

@@ -552,6 +552,30 @@ void Program::setUniformDirectly(int nLoc, uint32_t type, const mat4& value)
 	checkOpenGLError("setUniform - mat4");
 }
 
+void Program::setUniform(int nLoc, uint32_t type, const vec2* value, size_t amount)
+{
+	if (nLoc == -1) return;
+	
+	(void)type;
+	assert(type == GL_FLOAT_VEC2);
+	assert(loaded());
+	
+	glUniform2fv(nLoc, static_cast<GLsizei>(amount), value->data());
+	checkOpenGLError("setUniform - vec2*");
+}
+
+void Program::setUniform(int nLoc, uint32_t type, const vec3* value, size_t amount)
+{
+	if (nLoc == -1) return;
+	
+	(void)type;
+	assert(type == GL_FLOAT_VEC3);
+	assert(loaded());
+	
+	glUniform3fv(nLoc, static_cast<GLsizei>(amount), value->data());
+	checkOpenGLError("setUniform - vec3*");
+}
+
 void Program::setUniform(int nLoc, uint32_t type, const vec4* value, size_t amount)
 {
 	if (nLoc == -1) return;

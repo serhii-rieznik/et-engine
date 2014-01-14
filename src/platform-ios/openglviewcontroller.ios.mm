@@ -60,7 +60,7 @@ extern NSString* etKeyboardNotRequiredNotification;
 	
 	_glView = [[etOpenGLView alloc] initWithFrame:[[UIScreen mainScreen] bounds] parameters:_params];
 	
-	if (!_context)
+	if (_context == nil)
 	{
 		NSLog(@"Failed to create ES context");
 		return NO;

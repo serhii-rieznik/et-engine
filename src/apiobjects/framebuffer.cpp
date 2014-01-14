@@ -71,7 +71,7 @@ Framebuffer::Framebuffer(RenderContext* rc, const FramebufferDescription& desc,
 		else 
 		{
 			Texture d;
-			if (_description.isCubemap && (openGLCapabilites().version() == OpenGLVersion_New))
+			if (_description.isCubemap && (openGLCapabilites().version() == OpenGLVersion_2x))
 			{
 				d = _rc->textureFactory().genCubeTexture(_description.depthInternalformat, _description.size.x,
 					_description.depthFormat, _description.depthType, name() + "_depth");
@@ -158,21 +158,23 @@ bool Framebuffer::checkStatus()
 
 bool Framebuffer::addRenderTarget(const Texture& rt)
 {
-	if (!rt.valid() || (rt->size() != _description.size)) return false;
+	if (rt.invalid() || (rt->size() != _description.size)) return false;
 	assert(glIsTexture(rt->glID()));
 
 	_rc->renderState().bindFramebuffer(_id);
 
-	if (openGLCapabilites().version() == OpenGLVersion_New)
+#if defined(GL_VERSION_3_2)
+	if (openGLCapabilites().version() == OpenGLVersion_3x)
 	{
 		glFramebufferTexture(GL_FRAMEBUFFER, colorAttachments[_numTargets], rt->glID(), 0);
 		checkOpenGLError("glFramebufferTexture(...) - %s", name().c_str());
 	}
 	else
+#endif
 	{
 		if (rt->target() == GL_TEXTURE_2D)
 		{
-			glFramebufferTexture2D(GL_FRAMEBUFFER, colorAttachments[_numTargets], GL_TEXTURE_2D, rt->glID(), 0);
+			glFramebufferTexture2D(GL_FRAMEBUFFER, colorAttachments[_numTargets], rt->target(), rt->glID(), 0);
 			checkOpenGLError("glFramebufferTexture2D(...) - %s", name().c_str());
 		}
 		else if (rt->target() == GL_TEXTURE_CUBE_MAP)
@@ -193,17 +195,19 @@ bool Framebuffer::addRenderTarget(const Texture& rt)
 
 void Framebuffer::setDepthTarget(const Texture& rt)
 {
-	if (!rt.valid() || (rt->size() != _description.size)) return;
+	if (rt.invalid() || (rt->size() != _description.size)) return;
 
 	_depthBuffer = rt;
 	_rc->renderState().bindFramebuffer(_id);
 
-	if (openGLCapabilites().version() == OpenGLVersion_New)
+#if defined(GL_VERSION_3_2)
+	if (openGLCapabilites().version() == OpenGLVersion_3x)
 	{
 		glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, rt->glID(), 0);
 		checkOpenGLError("glFramebufferTexture");
 	}
 	else
+#endif
 	{
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, rt->glID(), 0);
 		checkOpenGLError("glFramebufferTexture2D");
@@ -213,7 +217,7 @@ void Framebuffer::setDepthTarget(const Texture& rt)
 
 void Framebuffer::setDepthTarget(const Texture& texture, uint32_t target)
 {
-	if (!texture.valid() || (texture->size() != _description.size)) return;
+	if (texture.invalid() || (texture->size() != _description.size)) return;
 	
 	_rc->renderState().bindFramebuffer(_id);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, target, texture->glID(), 0);
@@ -252,12 +256,14 @@ void Framebuffer::setCurrentRenderTarget(const Texture& texture)
 	assert(texture.valid());
 	
 	_rc->renderState().bindFramebuffer(_id);
-	if (openGLCapabilites().version() == OpenGLVersion_New)
+#if defined(GL_VERSION_3_2)
+	if (openGLCapabilites().version() == OpenGLVersion_3x)
 	{
 		glFramebufferTexture(GL_FRAMEBUFFER, colorAttachments[0], texture->glID(), 0);
 		checkOpenGLError("glFramebufferTexture");
 	}
 	else
+#endif
 	{
 		glFramebufferTexture2D(GL_FRAMEBUFFER, colorAttachments[0], texture->target(), texture->glID(), 0);
 		checkOpenGLError("glFramebufferTexture2D");
@@ -269,12 +275,14 @@ void Framebuffer::setCurrentRenderTarget(const Texture& texture, uint32_t target
 	assert(texture.valid());
 	_rc->renderState().bindFramebuffer(_id);
 
-	if (openGLCapabilites().version() == OpenGLVersion_New)
+#if defined(GL_VERSION_3_2)
+	if (openGLCapabilites().version() == OpenGLVersion_3x)
 	{
 		glFramebufferTexture(GL_FRAMEBUFFER, colorAttachments[0], texture->glID(), 0);
 		checkOpenGLError("glFramebufferTexture");
 	}
 	else
+#endif
 	{
 		if (target == GL_TEXTURE_CUBE_MAP)
 		{
@@ -334,7 +342,7 @@ void Framebuffer::setCurrentCubemapFace(uint32_t faceIndex)
 	
 	if (_depthBuffer.valid())
 	{
-		if (openGLCapabilites().version() == OpenGLVersion_Old)
+		if (openGLCapabilites().version() == OpenGLVersion_2x)
 			target = GL_TEXTURE_2D;
 		
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, target, _depthBuffer->glID(), 0);
@@ -456,15 +464,23 @@ void Framebuffer::forceSize(const vec2i& sz)
 
 void Framebuffer::resolveMultisampledTo(Framebuffer::Pointer framebuffer)
 {
-	_rc->renderState().bindFramebuffer(_id);
-	
 	_rc->renderState().bindReadFramebuffer(_id);
 	_rc->renderState().bindDrawFramebuffer(framebuffer->glID());
 	
 #if (ET_PLATFORM_IOS)
 
-	glResolveMultisampleFramebufferAPPLE();
-	checkOpenGLError("glResolveMultisampleFramebuffer");
+#	if defined(GL_ES_VERSION_3_0)
+	
+		glBlitFramebuffer(0, 0, _description.size.x, _description.size.y, 0, 0, framebuffer->size().x,
+			framebuffer->size().y, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+		checkOpenGLError("glBlitFramebuffer");
+	
+#	else
+	
+		glResolveMultisampleFramebufferAPPLE();
+		checkOpenGLError("glResolveMultisampleFramebuffer");
+	
+#	endif
 	
 #elif (ET_PLATFORM_ANDROID)
 	
@@ -482,7 +498,7 @@ void Framebuffer::resolveMultisampledTo(Framebuffer::Pointer framebuffer)
 void Framebuffer::invalidate(bool color, bool depth)
 {
 #if (ET_PLATFORM_IOS)
-	_rc->renderState().bindFramebuffer(_id);
+	_rc->renderState().bindReadFramebuffer(_id);
 	
 	size_t numDiscards = 0;
 	GLenum discards[2] = { };
@@ -493,8 +509,14 @@ void Framebuffer::invalidate(bool color, bool depth)
 	if (depth)
 		discards[numDiscards++] = GL_DEPTH_ATTACHMENT;
 	
-	glDiscardFramebufferEXT(GL_READ_FRAMEBUFFER, numDiscards, discards);
-	checkOpenGLError("glDiscardFramebufferEXT");
+#	if defined(GL_ES_VERSION_3_0)
+		glInvalidateFramebuffer(GL_FRAMEBUFFER, numDiscards, discards);
+		checkOpenGLError("glInvalidateFramebuffer");
+#	else
+		glDiscardFramebufferEXT(GL_READ_FRAMEBUFFER, numDiscards, discards);
+		checkOpenGLError("glDiscardFramebufferEXT");
+#	endif
+	
 #endif
 }
 

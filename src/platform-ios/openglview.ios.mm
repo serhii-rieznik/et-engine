@@ -39,7 +39,6 @@ using namespace et;
 	
 	BOOL _keyboardAllowed;
 	BOOL _multisampled;
-	BOOL _isOpenGLES3;
 }
 
 - (void)performInitializationWithParameters:(const RenderContextParameters&)params;
@@ -123,12 +122,6 @@ using namespace et;
 - (void)setContext:(EAGLContext*)newContext
 {
     if (_context == newContext) return;
-	
-#if defined(GL_ES_VERSION_3_0)
-	_isOpenGLES3 = (newContext.API == kEAGLRenderingAPIOpenGLES3);
-#else
-	_isOpenGLES3 = false;
-#endif
 	
 #if (ET_OBJC_ARC_ENABLED)
 	_context = newContext;

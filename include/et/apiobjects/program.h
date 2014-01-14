@@ -100,6 +100,8 @@ namespace et
 		void setUniform(int, uint32_t, const mat3&, bool force = false);
 		void setUniform(int, uint32_t, const mat4&, bool force = false);
 
+		void setUniform(int, uint32_t, const vec2* value, size_t amount);
+		void setUniform(int, uint32_t, const vec3* value, size_t amount);
 		void setUniform(int, uint32_t, const vec4* value, size_t amount);
 		void setUniform(int, uint32_t, const mat4* value, size_t amount);
 

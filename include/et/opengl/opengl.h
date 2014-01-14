@@ -55,12 +55,21 @@
 #		define glDeleteVertexArrays						glDeleteVertexArraysOES
 #		define glRenderbufferStorageMultisample			glRenderbufferStorageMultisampleAPPLE
 #		define glDrawElementsInstanced					glDrawElementsInstancedEXT
-#		define glClearDepth								glClearDepthf
-#		define glDepthRange								glDepthRangef
 #	endif
+#
+#	define glClearDepth									glClearDepthf
+#	define glDepthRange									glDepthRangef
 #
 #	if !defined(GL_DEPTH_COMPONENT24)
 #		define GL_DEPTH_COMPONENT24						GL_DEPTH_COMPONENT24_OES
+#	endif
+#
+#	if !defined(GL_RED) && defined(GL_RED_EXT)
+#		define GL_RED									GL_RED_EXT
+#	endif
+#
+#	if !defined(GL_RG) && defined(GL_RG_EXT)
+#		define GL_RG									GL_RG_EXT
 #	endif
 #
 #	if !defined(GL_HALF_FLOAT)
@@ -71,12 +80,12 @@
 #		define GL_RGBA8									GL_RGBA8_OES
 #	endif
 #
-#	if !defined(GL_RGB32F) && defined(GL_RGB32F_EXT)
-#		define GL_RGB32F								GL_RGB32F_EXT
-#	endif
-#
 #	if !defined(GL_RGBA32F) && defined(GL_RGBA32F_EXT)
 #		define GL_RGBA32F								GL_RGBA32F_EXT
+#	endif
+#
+#	if !defined(GL_RGB32F) && defined(GL_RGB32F_EXT)
+#		define GL_RGB32F								GL_RGB32F_EXT
 #	endif
 #
 #	if !defined(GL_RG32F) && defined(GL_RG32F_EXT)
@@ -85,6 +94,22 @@
 #
 #	if !defined(GL_R32F) && defined(GL_R32F_EXT)
 #		define GL_R32F									GL_R32F_EXT
+#	endif
+#
+#	if !defined(GL_RGBA162F) && defined(GL_RGBA16F_EXT)
+#		define GL_RGBA16F								GL_RGBA16F_EXT
+#	endif
+#
+#	if !defined(GL_RGB16F) && defined(GL_RGB16F_EXT)
+#		define GL_RGB16F								GL_RGB16F_EXT
+#	endif
+#
+#	if !defined(GL_RG16F) && defined(GL_RG16F_EXT)
+#		define GL_RG16F									GL_RG16F_EXT
+#	endif
+#
+#	if !defined(GL_R16F) && defined(GL_R16F_EXT)
+#		define GL_R16F									GL_R16F_EXT
 #	endif
 #
 #	if !defined(GL_TEXTURE_MAX_LEVEL)
@@ -133,13 +158,6 @@
 #else
 #
 #	error Platform is not defined
-#
-#endif
-
-#if !defined(GL_VERSION_3_2)
-#
-#	define glFramebufferTexture(target, attachment, texture, level) \
-			glFramebufferTexture2D(target, attachment, GL_TEXTURE_2D, texture, level)
 #
 #endif
 

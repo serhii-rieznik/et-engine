@@ -7,8 +7,6 @@
 #pragma once
 
 #import <UIKit/UIKit.h>
-#import <OpenGLES/ES2/gl.h>
-#import <OpenGLES/ES2/glext.h>
 #import <et/apiobjects/framebuffer.h>
 #import <et/input/input.h>
 #import <et/rendering/rendercontextparams.h>

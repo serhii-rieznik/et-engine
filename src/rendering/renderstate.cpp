@@ -205,7 +205,9 @@ void RenderState::bindFramebuffer(uint32_t framebuffer, bool force)
 
 void RenderState::bindFramebuffer(uint32_t framebuffer, uint32_t target, bool force)
 {
-	if (force || (_currentState.boundFramebuffer != framebuffer))
+	if (force || (_currentState.boundFramebuffer != framebuffer) ||
+		(_currentState.boundDrawFramebuffer != framebuffer) ||
+		(_currentState.boundReadFramebuffer != framebuffer))
 	{
 		_currentState.boundDrawFramebuffer = framebuffer;
 		_currentState.boundReadFramebuffer = framebuffer;
