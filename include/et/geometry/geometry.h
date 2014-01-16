@@ -210,7 +210,7 @@ namespace et
 
 	template <typename T>
 	inline T dot(const vector3<T>& v1, const vector3<T>& v2)
-	{ return v1.x*v2.x + v1.y*v2.y + v1.z*v2.z; }
+		{ return v1.x*v2.x + v1.y*v2.y + v1.z*v2.z; }
 
 	template <typename T>
 	inline T dot(const vector4<T>& v1, const vector4<T>& v2)
