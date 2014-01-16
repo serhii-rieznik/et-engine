@@ -36,20 +36,16 @@ void GesturesRecognizer::handlePointersMovement()
 			++index;
         }
 		
-		vec2 dir1 = currentPositions[0] - previousPositions[0];
-		vec2 dir2 = currentPositions[1] - previousPositions[1];
+		vec2 dir0 = currentPositions[0] - previousPositions[0];
+		vec2 dir1 = currentPositions[1] - previousPositions[1];
 		vec2 center = 0.5f * (previousPositions[0] + previousPositions[1]);
-		
-		float zoomValue = (currentPositions[0] - currentPositions[1]).length() /
-			(previousPositions[0] - previousPositions[1]).length();
-		
-		float angle = 0.5f * (outerProduct(dir1, previousPositions[0] - center) +
-			outerProduct(dir2, previousPositions[1] - center));
 		
 		RecognizedGesture gesture = _gesture;
 		if (gesture == RecognizedGesture_NoGesture)
 		{
-			float direction = dot(normalize(dir1), normalize(dir2));
+			vec2 nDir0 = normalize(dir0);
+			vec2 nDir1 = normalize(dir1);
+			float direction = dot(nDir0, nDir1);
 			if (direction < -0.5f)
 			{
 				bool catchZoom = (_recognizedGestures & RecognizedGesture_Zoom) == RecognizedGesture_Zoom;
@@ -57,8 +53,9 @@ void GesturesRecognizer::handlePointersMovement()
 
 				if (catchZoom && catchRotate)
 				{
-					gesture = (std::abs(angle / (zoomValue - 1.0f)) > 0.1f) ?
-						RecognizedGesture_Rotate : RecognizedGesture_Zoom;
+					float aspect = std::abs(dot(nDir0, normalize(previousPositions[0] - center))) +
+						std::abs(dot(nDir1, normalize(previousPositions[1] - center)));
+					gesture = (aspect > SQRT_3) ? RecognizedGesture_Zoom : RecognizedGesture_Rotate;
 				}
 				else if (catchZoom)
 				{
@@ -79,6 +76,9 @@ void GesturesRecognizer::handlePointersMovement()
 		{
 			case RecognizedGesture_Zoom:
 			{
+				float zoomValue = (currentPositions[0] - currentPositions[1]).length() /
+					(previousPositions[0] - previousPositions[1]).length();
+				
 				zoomAroundPoint.invoke(zoomValue, center);
 				zoom.invoke(zoomValue);
 				break;
@@ -86,13 +86,18 @@ void GesturesRecognizer::handlePointersMovement()
 				
 			case RecognizedGesture_Rotate:
 			{
-				rotate.invoke(angle);
+				vec2 centerToCurrent0 = currentPositions[0] - center;
+				vec2 centerToCurrent1 = currentPositions[1] - center;
+				float angle0 = std::atan2(dir0.length(), centerToCurrent0.length());
+				float angle1 = std::atan2(dir1.length(), centerToCurrent1.length());
+				float angleValue = (outerProduct(centerToCurrent0, dir0) < 0.0f ? 0.5f : -0.5f) * (angle0 + angle1);
+				rotate.invoke(angleValue);
 				break;
 			}
 				
 			case RecognizedGesture_Swipe:
 			{
-				swipe.invoke(0.5f * (dir1 + dir2), 2);
+				swipe.invoke(0.5f * (dir0 + dir1), 2);
 				break;
 			}
 
