@@ -472,7 +472,7 @@ void Framebuffer::invalidate(bool color, bool depth)
 #if (ET_PLATFORM_IOS)
 	_rc->renderState().bindReadFramebuffer(_id);
 	
-	size_t numDiscards = 0;
+	GLsizei numDiscards = 0;
 	GLenum discards[2] = { };
 	
 	if (color)
