@@ -108,6 +108,11 @@ std::string et::ios::hardwareIdentifier()
 	return lowercase(std::string(name.machine));
 }
 
+bool et::ios::runningOnIPad()
+{
+	return UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad;
+}
+
 /*
  * Obj-C stuff
  */

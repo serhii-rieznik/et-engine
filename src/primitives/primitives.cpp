@@ -227,7 +227,7 @@ void primitives::createSquarePlane(VertexArray::Pointer data, const vec3& normal
 	bool hasTex = tex.valid();
 
 	vec3 angles = toSpherical(normal);
-	angles += vec3(-HALF_PI, HALF_PI, 0.0);
+	angles += vec3(-HALF_PI, HALF_PI, 0.0f);
 
 	vec3 normalized = normalize(normal);
 	vec3 o2 = fromSpherical(angles.y, angles.x);
@@ -330,7 +330,7 @@ IndexArray::Pointer primitives::createCirclePlane(VertexArray::Pointer data, con
 	auto nrm = data->chunk(Usage_Normal).accessData<vec3>(0);
 	
 	vec3 angles = toSpherical(normal);
-	angles += vec3(-HALF_PI, HALF_PI, 0.0);
+	angles += vec3(-HALF_PI, HALF_PI, 0.0f);
 	
 	vec3 normalized = normalize(normal);
 	vec3 o2 = fromSpherical(angles.y, angles.x);

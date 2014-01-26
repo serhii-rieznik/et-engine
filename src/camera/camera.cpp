@@ -22,10 +22,10 @@ void Camera::lookAt(const vec3& pos, const vec3& point, const vec3& up)
 	vec3 u = s.cross(d).normalized();
 	vec3 e(-dot(s, pos), -dot(u, pos), dot(d, pos));
 
-	_modelViewMatrix[0] = vec4(s.x, u.x, -d.x, 0.0);
-	_modelViewMatrix[1] = vec4(s.y, u.y, -d.y, 0.0);
-	_modelViewMatrix[2] = vec4(s.z, u.z, -d.z, 0.0);
-	_modelViewMatrix[3] = vec4(e.x, e.y,  e.z, 1.0);
+	_modelViewMatrix[0] = vec4(s.x, u.x, -d.x, 0.0f);
+	_modelViewMatrix[1] = vec4(s.y, u.y, -d.y, 0.0f);
+	_modelViewMatrix[2] = vec4(s.z, u.z, -d.z, 0.0f);
+	_modelViewMatrix[3] = vec4(e.x, e.y,  e.z, 1.0f);
 
 	modelViewUpdated();
 }
@@ -112,10 +112,10 @@ void Camera::setDirection(const vec3& d)
 	vec3 s = normalize(d.cross(u));
 	vec3 p = position();
 	vec3 e(-dot(s, p), -dot(u, p), dot(d, p));
-	_modelViewMatrix[0] = vec4(s.x, u.x, -d.x, 0.0);
-	_modelViewMatrix[1] = vec4(s.y, u.y, -d.y, 0.0);
-	_modelViewMatrix[2] = vec4(s.z, u.z, -d.z, 0.0);
-	_modelViewMatrix[3] = vec4(e.x, e.y,  e.z, 1.0);
+	_modelViewMatrix[0] = vec4(s.x, u.x, -d.x, 0.0f);
+	_modelViewMatrix[1] = vec4(s.y, u.y, -d.y, 0.0f);
+	_modelViewMatrix[2] = vec4(s.z, u.z, -d.z, 0.0f);
+	_modelViewMatrix[3] = vec4(e.x, e.y,  e.z, 1.0f);
 	modelViewUpdated();
 }
 
@@ -125,10 +125,10 @@ void Camera::setSide(const vec3& s)
 	vec3 d = normalize(s.cross(u));
 	vec3 p = position();
 	vec3 e(-dot(s, p), -dot(u, p), dot(d, p));
-	_modelViewMatrix[0] = vec4(s.x, u.x, -d.x, 0.0);
-	_modelViewMatrix[1] = vec4(s.y, u.y, -d.y, 0.0);
-	_modelViewMatrix[2] = vec4(s.z, u.z, -d.z, 0.0);
-	_modelViewMatrix[3] = vec4(e.x, e.y,  e.z, 1.0);
+	_modelViewMatrix[0] = vec4(s.x, u.x, -d.x, 0.0f);
+	_modelViewMatrix[1] = vec4(s.y, u.y, -d.y, 0.0f);
+	_modelViewMatrix[2] = vec4(s.z, u.z, -d.z, 0.0f);
+	_modelViewMatrix[3] = vec4(e.x, e.y,  e.z, 1.0f);
 	modelViewUpdated();
 }
 
@@ -169,7 +169,7 @@ float Camera::heading() const
 
 void Camera::move(const vec3& dp)
 {
-	_modelViewMatrix[3] += vec4(_modelViewMatrix.rotationMultiply(dp), 0.0);
+	_modelViewMatrix[3] += vec4(_modelViewMatrix.rotationMultiply(dp), 0.0f);
 	modelViewUpdated();
 }
 
@@ -188,7 +188,7 @@ void Camera::rotate(const quaternion& q)
 ray3d Camera::castRay(const vec2& pt) const
 {
 	vec3 pos = position();
-	return ray3d(pos, normalize(unproject(vec3(pt, 1.0)) - pos));
+	return ray3d(pos, normalize(unproject(vec3(pt, 1.0f)) - pos));
 }
 
 void Camera::modelViewUpdated()
@@ -201,10 +201,10 @@ void Camera::modelViewUpdated()
 		vec3 s = normalize(d.cross(_upLocked));
 		vec3 u = normalize(s.cross(d));
 		vec3 e(-dot(s, p), -dot(u, p), dot(d, p));
-		_modelViewMatrix[0] = vec4(s.x, u.x, -d.x, 0.0);
-		_modelViewMatrix[1] = vec4(s.y, u.y, -d.y, 0.0);
-		_modelViewMatrix[2] = vec4(s.z, u.z, -d.z, 0.0);
-		_modelViewMatrix[3] = vec4(e.x, e.y,  e.z, 1.0);
+		_modelViewMatrix[0] = vec4(s.x, u.x, -d.x, 0.0f);
+		_modelViewMatrix[1] = vec4(s.y, u.y, -d.y, 0.0f);
+		_modelViewMatrix[2] = vec4(s.z, u.z, -d.z, 0.0f);
+		_modelViewMatrix[3] = vec4(e.x, e.y,  e.z, 1.0f);
 		_inverseModelViewMatrix = _modelViewMatrix.inverse();
 
 	}

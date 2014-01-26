@@ -22,5 +22,7 @@ namespace et
 		bool canOpenURL(const std::string&);
 		
 		std::string hardwareIdentifier();
+		
+		bool runningOnIPad();
 	}
 }

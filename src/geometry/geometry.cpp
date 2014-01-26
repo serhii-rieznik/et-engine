@@ -153,9 +153,9 @@ vec3 et::removeMatrixScale(mat3& mat)
 vec3ub et::vec3fto3ubscaled(const vec3 &fv)
 {
 	return vec3ub(
-		static_cast<unsigned char>(clamp<float>(0.5f + 0.5f * fv.x, 0.0, 1.0) * 255.0f), 
-		static_cast<unsigned char>(clamp<float>(0.5f + 0.5f * fv.y, 0.0, 1.0) * 255.0f),
-		static_cast<unsigned char>(clamp<float>(0.5f + 0.5f * fv.z, 0.0, 1.0) * 255.0f));
+		static_cast<unsigned char>(clamp<float>(0.5f + 0.5f * fv.x, 0.0, 1.0f) * 255.0f), 
+		static_cast<unsigned char>(clamp<float>(0.5f + 0.5f * fv.y, 0.0, 1.0f) * 255.0f),
+		static_cast<unsigned char>(clamp<float>(0.5f + 0.5f * fv.z, 0.0, 1.0f) * 255.0f));
 
 }
 
@@ -170,10 +170,10 @@ vec3ub et::vec3fto3ublinear(const vec3& fv)
 vec4ub et::vec4f_to_4ub(const vec4 &fv)
 {
 	return vec4ub(
-		(unsigned char)(clamp<float>(0.5f + 0.5f * fv.x, 0.0, 1.0) * 255),
-		(unsigned char)(clamp<float>(0.5f + 0.5f * fv.y, 0.0, 1.0) * 255), 
-		(unsigned char)(clamp<float>(0.5f + 0.5f * fv.z, 0.0, 1.0) * 255),
-		(unsigned char)(clamp<float>(0.5f + 0.5f * fv.z, 0.0, 1.0) * 255) );
+		(unsigned char)(clamp<float>(0.5f + 0.5f * fv.x, 0.0, 1.0f) * 255),
+		(unsigned char)(clamp<float>(0.5f + 0.5f * fv.y, 0.0, 1.0f) * 255), 
+		(unsigned char)(clamp<float>(0.5f + 0.5f * fv.z, 0.0, 1.0f) * 255),
+		(unsigned char)(clamp<float>(0.5f + 0.5f * fv.z, 0.0, 1.0f) * 255) );
 }
 
 mat4 et::rotation2DMatrix(float angle)

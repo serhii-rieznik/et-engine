@@ -64,7 +64,7 @@ namespace et
 			mat[0] = vector4<T>(m[0], 0.0f);
 			mat[1] = vector4<T>(m[1], 0.0f);
 			mat[2] = vector4<T>(m[2], 0.0f);
-			mat[3] = vector4<T>(0.0f, 0.0f, 0.0f, 1.0);
+			mat[3] = vector4<T>(0.0f, 0.0f, 0.0f, 1.0f);
 		}
 
 		matrix4& operator = (const matrix4<T>& c)

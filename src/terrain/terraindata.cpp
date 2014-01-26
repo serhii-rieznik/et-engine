@@ -103,8 +103,8 @@ void TerrainData::generateVertexData(const FloatDataStorage& hm)
 			++gridPos.y;
 		}
 
-		nrm[i] = vec3(0.0, 0.0, 0.0);
-		tan[i] = vec3(0.0, 0.0, 0.0);
+		nrm[i] = vec3(0.0f);
+		tan[i] = vec3(0.0f);
 	}
 
 	_bounds = AABB(0.5f * (_minVertex + _maxVertex), _maxVertex - _minVertex);
