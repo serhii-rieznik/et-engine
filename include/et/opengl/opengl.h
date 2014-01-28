@@ -148,12 +148,16 @@
 #
 #	include <EGL/egl.h>
 #	include <GLES3/gl3.h>
-#	include <GLES3/gl3ext.h>
 #	include <GLES3/gl3platform.h>
+#	include <GLES2/gl2ext.h>
 #
 #	define ET_OPENGLES								1
 #
 #	define glClearDepth								glClearDepthf
+#	define glDepthRange								glDepthRangef
+#	if !defined(GL_BGRA)
+#		define GL_BGRA								GL_BGRA_EXT
+#	endif
 #
 #else
 #

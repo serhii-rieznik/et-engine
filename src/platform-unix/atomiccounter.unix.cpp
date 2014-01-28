@@ -48,10 +48,10 @@ AtomicCounterType AtomicCounter::release()
 
 void AtomicCounter::setValue(AtomicCounterType value)
 {
-#if (ET_PLATFORM_ANDROID)
-#	error WRITE SOMETHING HERE
-#else
+#if (ET_PLATFORM_APPLE)
 	OSAtomicCompareAndSwap32(_counter, value, &_counter);
+#else
+	__sync_val_compare_and_swap(&_counter, _counter, value);
 #endif
 	
 }

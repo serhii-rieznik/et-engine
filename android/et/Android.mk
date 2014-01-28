@@ -56,6 +56,7 @@ LOCAL_SRC_FILES += $(SOURCE_PATH)/imaging/imageoperations.cpp
 LOCAL_SRC_FILES += $(SOURCE_PATH)/imaging/imagewriter.cpp
 LOCAL_SRC_FILES += $(SOURCE_PATH)/imaging/pngloader.cpp
 LOCAL_SRC_FILES += $(SOURCE_PATH)/imaging/pvrloader.cpp
+LOCAL_SRC_FILES += $(SOURCE_PATH)/imaging/pvrdecompressor.cpp
 
 LOCAL_SRC_FILES += $(SOURCE_PATH)/tasks/taskpool.cpp
 
@@ -110,17 +111,21 @@ LOCAL_SRC_FILES += $(SOURCE_PATH)/platform-unix/tools.unix.cpp
 LOCAL_SRC_FILES += $(SOURCE_PATH)/geometry/geometry.cpp
 LOCAL_SRC_FILES += $(SOURCE_PATH)/geometry/rectplacer.cpp
 
-LOCAL_SRC_FILES += $(SOURCE_PATH)/sound/formats.cpp
-LOCAL_SRC_FILES += $(SOURCE_PATH)/sound/sound.openal.cpp
+LOCAL_SRC_FILES += $(SOURCE_PATH)/sound/player.cpp
+LOCAL_SRC_FILES += $(SOURCE_PATH)/sound/sound.cpp
+LOCAL_SRC_FILES += $(SOURCE_PATH)/sound/streamingthread.cpp
+LOCAL_SRC_FILES += $(SOURCE_PATH)/sound/track.cpp
 
-LOCAL_STATIC_LIBRARIES := android_native_app_glue libpng libzip libxml libcurl openal
+LOCAL_STATIC_LIBRARIES := android_native_app_glue openal libpng libzip libxml libcurl libogg libvorbis
 
 include $(BUILD_STATIC_LIBRARY)
 
 $(call import-add-path, $(LOCAL_PATH))
+$(call import-module, openal)
 $(call import-module, libpng)
 $(call import-module, libzip)
 $(call import-module, libxml)
 $(call import-module, libcurl)
-$(call import-module, openal)
+$(call import-module, libogg)
+$(call import-module, libvorbis)
 

@@ -140,6 +140,10 @@ namespace et
 				deserializeGeneralParameters(stream, version);
 				deserializeChildren(stream, factory, version);
 			}
+			
+		protected:
+			void invalidateTransform()
+				{ Element::invalidateTransform(); }
 		};
 
 		class RenderableElement : public Element

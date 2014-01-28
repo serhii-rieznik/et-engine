@@ -148,7 +148,7 @@ void ObjectsCache::flush()
 	}
 	
 	if (objectsErased > 0)
-		log::info("[ObjectsCache] %lu objects flushed.", objectsErased);
+		log::info("[ObjectsCache] %llu objects flushed.", static_cast<uint64_t>(objectsErased));
 }
 
 void ObjectsCache::startMonitoring()
@@ -229,5 +229,5 @@ void ObjectsCache::performUpdate()
 
 void ObjectsCache::report()
 {
-	log::info("[ObjectsCache] Contains %lu objects", _objects.size());
+	log::info("[ObjectsCache] Contains %llu objects", static_cast<uint64_t>(_objects.size()));
 }
