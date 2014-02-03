@@ -14,6 +14,7 @@
 #include <AppKit/NSTrackingArea.h>
 #include <CoreVideo/CVDisplayLink.h>
 
+#include <et/platform-apple/objc.h>
 #include <et/opengl/openglcaps.h>
 #include <et/input/input.h>
 #include <et/app/applicationnotifier.h>
@@ -235,9 +236,7 @@ RenderContextPrivate::RenderContextPrivate(RenderContext*, RenderContextParamete
 		}
 	}
 	
-#if (!ET_OBJC_ARC_ENABLED)
-	[pixelFormat autorelease];
-#endif
+	(void)ET_OBJC_AUTORELEASE(pixelFormat);
 	
 	NSUInteger windowMask = NSBorderlessWindowMask;
 	
@@ -296,13 +295,9 @@ RenderContextPrivate::RenderContextPrivate(RenderContext*, RenderContextParamete
 	openGlView->rcPrivate = this;
 	[openGlView setWantsBestResolutionOpenGLSurface:YES];
 	
-	openGlContext = [openGlView openGLContext];
+	openGlContext = ET_OBJC_RETAIN([openGlView openGLContext]);
 	[openGlContext makeCurrentContext];
-	
-#if (!ET_OBJC_ARC_ENABLED)
-	[openGlContext retain];
-#endif
-	
+		
 	cglObject = static_cast<CGLContextObj>([openGlContext CGLContextObj]);
 	
 	const int swap = static_cast<int>(params.swapInterval);
@@ -321,15 +316,10 @@ RenderContextPrivate::RenderContextPrivate(RenderContext*, RenderContextParamete
 
 RenderContextPrivate::~RenderContextPrivate()
 {
-#if (!ET_OBJC_ARC_ENABLED)
-	[openGlView release];
-	[openGlContext release];
-	[windowDelegate release];
-#endif
-	openGlView = nil;
-	openGlContext = nil;
+	ET_OBJC_RELEASE(openGlView);
+	ET_OBJC_RELEASE(openGlContext);
+	ET_OBJC_RELEASE(windowDelegate);
 	mainWindow = nil;
-	windowDelegate = nil;
 }
 
 void RenderContextPrivate::run()
@@ -538,12 +528,8 @@ CVReturn cvDisplayLinkOutputCallback(CVDisplayLinkRef, const CVTimeStamp*, const
 	if (_trackingArea)
 		[self removeTrackingArea:_trackingArea];
 	
-	_trackingArea = [[NSTrackingArea alloc] initWithRect:[self bounds]
-		options:NSTrackingMouseMoved | NSTrackingActiveAlways owner:self userInfo:nil];
-
-#if (!ET_OBJC_ARC_ENABLED)
-	[_trackingArea autorelease];
-#endif
+	_trackingArea = ET_OBJC_AUTORELEASE([[NSTrackingArea alloc] initWithRect:[self bounds]
+		options:NSTrackingMouseMoved | NSTrackingActiveAlways owner:self userInfo:nil]);
 	
 	[self addTrackingArea:_trackingArea];
 	

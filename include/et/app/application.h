@@ -93,14 +93,14 @@ namespace et
 		
 		void stop();
 		
+		int platformRun(int, char* []);
+		
 		void platformInit();
 		void platformFinalize();
 		void platformActivate();
 		void platformDeactivate();
 		void platformSuspend();
 		void platformResume();
-
-		int platformRun();
 		
 		void terminated();
 		

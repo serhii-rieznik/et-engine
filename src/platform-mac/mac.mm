@@ -5,6 +5,8 @@
  *
  */
 
+#include <Foundation/NSString.h>
+#include <Foundation/NSURL.h>
 #include <AppKit/NSWorkspace.h>
 #include <et/platform-mac/mac.h>
 

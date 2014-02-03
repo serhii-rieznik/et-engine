@@ -1,7 +1,8 @@
 #include <AppKit/AppKit.h>
-#include <et/rendering/rendercontext.h>
+#include <et/platform-apple/objc.h>
 #include <et/geometry/rectplacer.h>
 #include <et/gui/charactergenerator.h>
+#include <et/rendering/rendercontext.h>
 #include <et/imaging/imagewriter.h>
 
 using namespace et;
@@ -53,10 +54,11 @@ CharDescriptor CharacterGenerator::generateCharacter(int value, bool)
 {
 	wchar_t string[2] = { value, 0 };
 	
-	NSString* wString = [[NSString alloc] initWithBytesNoCopy:string length:sizeof(string)
-		encoding:NSUTF32LittleEndianStringEncoding freeWhenDone:NO];
+	NSString* wString = ET_OBJC_AUTORELEASE([[NSString alloc] initWithBytesNoCopy:string length:sizeof(string)
+		encoding:NSUTF32LittleEndianStringEncoding freeWhenDone:NO]);
 
-	NSMutableAttributedString* attrString = [[NSMutableAttributedString alloc] initWithString:wString];
+	NSMutableAttributedString* attrString =
+		ET_OBJC_AUTORELEASE([[NSMutableAttributedString alloc] initWithString:wString]);
 
 	NSRange wholeString = NSMakeRange(0, [attrString length]);
 	[attrString addAttribute:NSFontAttributeName value:_private->font range:wholeString];
@@ -84,10 +86,6 @@ CharDescriptor CharacterGenerator::generateCharacter(int value, bool)
 		desc.uvSize = desc.size / _texture->sizeFloat();
 	}
 
-#if (!ET_OBJC_ARC_ENABLED)
-	[attrString release];
-	[wString release];
-#endif
 	_chars[value] = desc;
 	return desc;
 }
@@ -96,10 +94,11 @@ CharDescriptor CharacterGenerator::generateBoldCharacter(int value, bool)
 {
 	wchar_t string[2] = { value, 0 };
 
-	NSString* wString = [[NSString alloc] initWithBytesNoCopy:string length:sizeof(string)
-		encoding:NSUTF32LittleEndianStringEncoding freeWhenDone:NO];
+	NSString* wString = ET_OBJC_AUTORELEASE([[NSString alloc] initWithBytesNoCopy:string length:sizeof(string)
+		encoding:NSUTF32LittleEndianStringEncoding freeWhenDone:NO]);
 
-	NSMutableAttributedString* attrString = [[NSMutableAttributedString alloc] initWithString:wString];
+	NSMutableAttributedString* attrString =
+		ET_OBJC_AUTORELEASE([[NSMutableAttributedString alloc] initWithString:wString]);
 
 	NSRange wholeString = NSMakeRange(0, [attrString length]);
 	[attrString addAttribute:NSFontAttributeName value:_private->boldFont range:wholeString];
@@ -126,11 +125,6 @@ CharDescriptor CharacterGenerator::generateBoldCharacter(int value, bool)
 		desc.uvOrigin = _texture->getTexCoord(desc.origin);
 		desc.uvSize = desc.size / _texture->sizeFloat();
 	}
-
-#if (!ET_OBJC_ARC_ENABLED)
-	[attrString release];
-	[wString release];
-#endif
 	
 	_boldChars[value] = desc;
 	return desc;
@@ -146,33 +140,29 @@ CharacterGeneratorPrivate::CharacterGeneratorPrivate(const std::string& face,
 {
     NSString* cFace = [NSString stringWithCString:face.c_str() encoding:NSUTF8StringEncoding];
 	
-	font = [[NSFontManager sharedFontManager] fontWithFamily:cFace traits:0 weight:0 size:size];
+	font = ET_OBJC_RETAIN([[NSFontManager sharedFontManager] fontWithFamily:cFace traits:0 weight:0 size:size]);
 		
 	if (font == nil)
 	{
 		log::error("Font %s not found. Using default font (Arial)", face.c_str());
-		font = [[NSFontManager sharedFontManager] fontWithFamily:@"Arial" traits:0 weight:0 size:size];
+		font = ET_OBJC_RETAIN([[NSFontManager sharedFontManager]
+			fontWithFamily:@"Arial" traits:0 weight:0 size:size]);
 	}
 	assert(font);
 	
-	boldFont = [[NSFontManager sharedFontManager] fontWithFamily:cFace traits:NSBoldFontMask
-		weight:0 size:size];
+	boldFont = ET_OBJC_RETAIN([[NSFontManager sharedFontManager] fontWithFamily:cFace traits:NSBoldFontMask
+		weight:0 size:size]);
 	
 	if (boldFont == nil)
 	{
 		log::error("Font %s not found. Using default font (Arial)", face.c_str());
-		boldFont = [[NSFontManager sharedFontManager] fontWithFamily:@"Arial" traits:0 weight:0 size:size];
+		boldFont = ET_OBJC_RETAIN([[NSFontManager sharedFontManager]
+			fontWithFamily:@"Arial" traits:0 weight:0 size:size]);
 	}
 	assert(boldFont);
 
-	whiteColor = [NSColor whiteColor];
-	
-#if (!ET_OBJC_ARC_ENABLED)
-	[font retain];
-	[boldFont retain];
-	[whiteColor retain];
-#endif
-		
+	whiteColor = ET_OBJC_RETAIN([NSColor whiteColor]);
+			
 	colorSpace = CGColorSpaceCreateDeviceRGB();
 	assert(colorSpace);
 }
@@ -180,12 +170,9 @@ CharacterGeneratorPrivate::CharacterGeneratorPrivate(const std::string& face,
 CharacterGeneratorPrivate::~CharacterGeneratorPrivate()
 {
 	CGColorSpaceRelease(colorSpace);
-
-#if (!ET_OBJC_ARC_ENABLED)
-	[whiteColor release];
-    [font release];
-	[boldFont release];
-#endif
+	ET_OBJC_RELEASE(whiteColor);
+    ET_OBJC_RELEASE(font);
+	ET_OBJC_RELEASE(boldFont);
 }
 
 void CharacterGeneratorPrivate::updateTexture(RenderContext* rc, const vec2i& position,

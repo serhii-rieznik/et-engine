@@ -5,21 +5,21 @@
 *
 */
 
+#include <Foundation/NSArray.h>
+#include <Foundation/NSDate.h>
 #include <Foundation/NSDateFormatter.h>
+#include <Foundation/NSLocale.h>
+#include <Foundation/NSString.h>
 #include <et/core/tools.h>
 #include <et/core/containers.h>
 #include <et/locale/locale.h>
+#include <et/platform-apple/objc.h>
 
 using namespace et;
 
 std::string locale::time()
 {
-	NSDateFormatter* formatter = [[NSDateFormatter alloc] init];
-	
-#if (!ET_OBJC_ARC_ENABLED)
-	[formatter autorelease];
-#endif
-	
+	NSDateFormatter* formatter = ET_OBJC_AUTORELEASE([[NSDateFormatter alloc] init]);
 	[formatter setTimeStyle:NSDateFormatterMediumStyle];
 	[formatter setDateStyle:NSDateFormatterNoStyle];
 	[formatter setLocale:[NSLocale currentLocale]];
@@ -28,12 +28,7 @@ std::string locale::time()
 
 std::string locale::date()
 {
-	NSDateFormatter* formatter = [[NSDateFormatter alloc] init];
-	
-#if (!ET_OBJC_ARC_ENABLED)
-	[formatter autorelease];
-#endif
-	
+	NSDateFormatter* formatter = ET_OBJC_AUTORELEASE([[NSDateFormatter alloc] init]);
 	[formatter setTimeStyle:NSDateFormatterNoStyle];
 	[formatter setDateStyle:NSDateFormatterMediumStyle];
 	[formatter setLocale:[NSLocale currentLocale]];

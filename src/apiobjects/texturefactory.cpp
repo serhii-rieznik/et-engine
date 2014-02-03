@@ -10,7 +10,7 @@
 #include <et/rendering/rendercontext.h>
 #include <et/opengl/openglcaps.h>
 #include <et/threading/threading.h>
-#include <et/resources/textureloader.h>
+#include <et/imaging/textureloader.h>
 #include <et/apiobjects/texturefactory.h>
 #include <et/app/application.h>
 

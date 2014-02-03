@@ -6,7 +6,6 @@
  */
 
 #include <et/core/tools.h>
-#include <et/resources/textureloader.h>
 #include <et/rendering/rendercontext.h>
 #include <et/opengl/openglcaps.h>
 

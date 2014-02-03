@@ -9,8 +9,13 @@
 #include <sys/stat.h>
 #include <et/core/datastorage.h>
 #include <et/core/tools.h>
+#include <et/platform-apple/objc.h>
 
 #if (ET_PLATFORM_MAC)
+#	include <Foundation/NSFileManager.h>
+#	include <Foundation/NSPredicate.h>
+#	include <Foundation/NSString.h>
+#	include <Foundation/NSURL.h>
 #	include <AppKit/NSWorkspace.h>
 #	include <AppKit/NSScreen.h>
 #elif (ET_PLATFORM_IOS)
@@ -21,8 +26,10 @@
 static uint64_t startTime = 0;
 static bool startTimeInitialized = false;
 
-char et::pathDelimiter = '/';
-char et::invalidPathDelimiter = '\\';
+const char et::pathDelimiter = '/';
+const char et::invalidPathDelimiter = '\\';
+
+const std::string kDefaultBundleId = "com.cheetek.et-engine.application";
 
 uint64_t queryActualTime();
 
@@ -93,25 +100,17 @@ std::string et::applicationDataFolder()
 
 bool et::fileExists(const std::string& name)
 {
-    NSString* fileName = [[NSString alloc] initWithUTF8String:name.c_str()];
-	
 	BOOL isDir = NO;
+    NSString* fileName = ET_OBJC_AUTORELEASE([[NSString alloc] initWithUTF8String:name.c_str()]);
     BOOL exists = [[NSFileManager defaultManager] fileExistsAtPath:fileName isDirectory:&isDir];
-#if (!ET_OBJC_ARC_ENABLED)
-    [fileName release];
-#endif
     return exists && !isDir;
 }
 
 bool et::folderExists(const std::string& name)
 {
-    NSString* fileName = [[NSString alloc] initWithUTF8String:name.c_str()];
-	
 	BOOL isDir = NO;
+    NSString* fileName = ET_OBJC_AUTORELEASE([[NSString alloc] initWithUTF8String:name.c_str()]);
 	BOOL exists = [[NSFileManager defaultManager] fileExistsAtPath:fileName isDirectory:&isDir];
-#if (!ET_OBJC_ARC_ENABLED)
-    [fileName release];
-#endif
 	return exists && isDir;
 }
 
@@ -269,12 +268,8 @@ void et::openUrl(const std::string& url)
 
 std::string et::unicodeToUtf8(const std::wstring& w)
 {
-	NSString* s = [[NSString alloc] initWithBytes:w.c_str() length:w.length() * sizeof(wchar_t)
-		encoding:NSUTF32LittleEndianStringEncoding];
-	
-#if (!ET_OBJC_ARC_ENABLED)
-	[s autorelease];
-#endif
+	NSString* s = ET_OBJC_AUTORELEASE([[NSString alloc] initWithBytes:w.c_str() length:w.length() * sizeof(wchar_t)
+		encoding:NSUTF32LittleEndianStringEncoding]);
 	
 	if (s == nil)
 	{
@@ -332,8 +327,10 @@ std::wstring et::utf8ToUnicode(const std::string& mbcs)
 
 std::string et::applicationIdentifierForCurrentProject()
 {
-	CFBundleRef mainBundle = CFBundleGetMainBundle();
-	return std::string(CFStringGetCStringPtr(CFBundleGetIdentifier(mainBundle), kCFStringEncodingMacRoman));
+	CFStringRef bundleId = CFBundleGetIdentifier(CFBundleGetMainBundle());
+	
+	return (bundleId == nil) ? kDefaultBundleId :
+		std::string(CFStringGetCStringPtr(bundleId, kCFStringEncodingMacRoman));
 }
 
 et::vec2i et::nativeScreenSize()

@@ -6,8 +6,8 @@
 */
 
 #include <et/apiobjects/textureloadingthread.h>
-#include <et/resources/textureloader.h>
 #include <et/app/invocation.h>
+#include <et/imaging/textureloader.h>
 
 using namespace et;
 

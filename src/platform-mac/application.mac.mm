@@ -8,6 +8,8 @@
 #include <AppKit/NSApplication.h>
 #include <AppKit/NSMenu.h>
 #include <AppKit/NSWindow.h>
+
+#include <et/platform-apple/objc.h>
 #include <et/app/applicationnotifier.h>
 
 using namespace et;
@@ -51,13 +53,11 @@ void Application::loaded()
 	[applicationMenu addItem:quitItem];
 	[applicationMenuItem setSubmenu:applicationMenu];
 	
-#if (!ET_OBJC_ARC_ENABLED)
-	[mainMenu autorelease];
-	[applicationMenuItem autorelease];
-	[quitItem autorelease];
-	[applicationMenu autorelease];
-#endif
-		
+	(void)ET_OBJC_AUTORELEASE(mainMenu);
+	(void)ET_OBJC_AUTORELEASE(applicationMenuItem);
+	(void)ET_OBJC_AUTORELEASE(quitItem);
+	(void)ET_OBJC_AUTORELEASE(applicationMenu);
+			
 	enterRunLoop();
 }
 
@@ -91,21 +91,16 @@ void Application::platformInit()
 	_env.updateDocumentsFolder(_identifier);
 }
 
-int Application::platformRun()
+int Application::platformRun(int argc, char* argv[])
 {
 	@autoreleasepool
 	{
-		etApplicationDelegate* delegate = [[etApplicationDelegate alloc] init];
-		
+		etApplicationDelegate* delegate = ET_OBJC_AUTORELEASE([[etApplicationDelegate alloc] init]);
 		[[NSApplication sharedApplication] setDelegate:delegate];
 		[[NSApplication sharedApplication] run];
-		
-#if (!ET_OBJC_ARC_ENABLED)
-		[delegate release];
-#endif
-		
-		return 0;
 	}
+	
+	return 0;
 }
 
 void Application::platformFinalize()

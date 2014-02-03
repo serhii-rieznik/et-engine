@@ -59,7 +59,7 @@ int Application::run(int argc, char* argv[])
 	for (int i = 0; i < argc; ++i)
 		_launchParameters.push_back(argv[i]);
 
-	return platformRun();
+	return platformRun(argc, argv);
 }
 
 void Application::performRendering()

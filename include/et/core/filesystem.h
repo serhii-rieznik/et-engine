@@ -13,8 +13,8 @@
 
 namespace et
 {
-	extern char pathDelimiter;
-	extern char invalidPathDelimiter;
+	extern const char pathDelimiter;
+	extern const char invalidPathDelimiter;
 	
 	std::string applicationPath();
 	std::string applicationPackagePath();

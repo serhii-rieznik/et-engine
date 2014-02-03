@@ -6,7 +6,7 @@
  */
 
 #include <et/opengl/opengl.h>
-#include <et/resources/textureloader.h>
+#include <et/imaging/textureloader.h>
 #include <et/imaging/pngloader.h>
 #include <et/imaging/ddsloader.h>
 #include <et/imaging/pvrloader.h>
