@@ -57,7 +57,7 @@ void Application::platformResume()
 	[appDelegate beginUpdates];
 }
 
-int Application::platformRun()
+int Application::platformRun(int argc, char* argv[])
 {
 #if defined(ET_EMBEDDED_APPLICATION)
 	
@@ -74,7 +74,7 @@ int Application::platformRun()
 		@try
 		{
 			NSString* delegateClass = NSStringFromClass([etApplicationDelegate class]);
-			return UIApplicationMain(1, (char*[]){ appNameData.data(), nil }, nil, delegateClass);
+			return UIApplicationMain(argc, argv, nil, delegateClass);
 		}
 		@catch (NSException *exception)
 		{
