@@ -10,6 +10,7 @@
 #include <et/imaging/pngloader.h>
 #include <et/imaging/ddsloader.h>
 #include <et/imaging/pvrloader.h>
+#include <et/imaging/hdrloader.h>
 
 using namespace et;
 
@@ -41,6 +42,13 @@ TextureDescription::Pointer et::loadTextureDescription(const std::string& fileNa
 		desc->setOrigin(fileName);
 		pvr::loadInfoFromFile(fileName, *desc);
 	}
+	else if (ext == "hdr")
+	{
+		desc = new TextureDescription;
+		desc->target = GL_TEXTURE_2D;
+		desc->setOrigin(fileName);
+		hdr::loadInfoFromFile(fileName, *desc);
+	}
 	else if ((ext == "jpg") || (ext == "jpeg"))
 	{
 		assert("JPEG is not supported anymore" && false);
@@ -61,8 +69,9 @@ TextureDescription::Pointer et::loadTexture(const std::string& fileName)
 		return TextureDescription::Pointer();
 	
 	std::string ext = getFileExt(fileName);
-	TextureDescription* desc = nullptr;
+	lowercase(ext);
 	
+	TextureDescription* desc = nullptr;
 	if (ext == "png")
 	{
 		desc = new TextureDescription;
@@ -74,13 +83,22 @@ TextureDescription::Pointer et::loadTexture(const std::string& fileName)
 	{
 		desc = new TextureDescription;
 		desc->target = GL_TEXTURE_2D;
+		desc->setOrigin(fileName);
 		dds::loadFromFile(fileName, *desc);
 	}
 	else if (ext == "pvr")
 	{
 		desc = new TextureDescription;
 		desc->target = GL_TEXTURE_2D;
+		desc->setOrigin(fileName);
 		pvr::loadFromFile(fileName, *desc);
+	}
+	else if (ext == "hdr")
+	{
+		desc = new TextureDescription;
+		desc->target = GL_TEXTURE_2D;
+		desc->setOrigin(fileName);
+		hdr::loadFromFile(fileName, *desc);
 	}
 	else if ((ext == "jpg") || (ext == "jpeg"))
 	{
