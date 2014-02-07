@@ -20,9 +20,8 @@ using namespace std;
 static uint64_t startTime = 0;
 static bool startTimeInitialized = false;
 
-char et::pathDelimiter = '/';
-char et::invalidPathDelimiter = '\\';
-
+const char et::pathDelimiter = '/';
+const char et::invalidPathDelimiter = '\\';
 
 uint64_t queryActualTime()
 {

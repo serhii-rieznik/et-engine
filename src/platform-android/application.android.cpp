@@ -291,7 +291,7 @@ void Application::platformInit()
 	_env.updateDocumentsFolder(_identifier);
 }
 
-int Application::platformRun()
+int Application::platformRun(int argc, char* argv[])
 {
 	_renderingContextHandle = reinterpret_cast<size_t>(_sharedApplication);
 	

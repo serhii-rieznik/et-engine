@@ -51,7 +51,7 @@
 #
 #endif
 
-#if defined(DEBUG) || defined(_DEBUG)
+#if defined(DEBUG) || defined(_DEBUG) || defined(NDK_DEBUG)
 #
 #	if defined(NDEBUG)
 #		error DEBUG and NDEBUG can not be defined simultaneously

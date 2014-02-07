@@ -57,6 +57,7 @@ LOCAL_SRC_FILES += $(SOURCE_PATH)/imaging/imagewriter.cpp
 LOCAL_SRC_FILES += $(SOURCE_PATH)/imaging/pngloader.cpp
 LOCAL_SRC_FILES += $(SOURCE_PATH)/imaging/pvrloader.cpp
 LOCAL_SRC_FILES += $(SOURCE_PATH)/imaging/pvrdecompressor.cpp
+LOCAL_SRC_FILES += $(SOURCE_PATH)/imaging/textureloader.cpp
 
 LOCAL_SRC_FILES += $(SOURCE_PATH)/tasks/taskpool.cpp
 
@@ -64,8 +65,6 @@ LOCAL_SRC_FILES += $(SOURCE_PATH)/timers/notifytimer.cpp
 LOCAL_SRC_FILES += $(SOURCE_PATH)/timers/sequence.cpp
 LOCAL_SRC_FILES += $(SOURCE_PATH)/timers/timedobject.cpp
 LOCAL_SRC_FILES += $(SOURCE_PATH)/timers/timerpool.cpp
-
-LOCAL_SRC_FILES += $(SOURCE_PATH)/resources/textureloader.cpp
 
 LOCAL_SRC_FILES += $(SOURCE_PATH)/apiobjects/framebuffer.cpp
 LOCAL_SRC_FILES += $(SOURCE_PATH)/apiobjects/framebufferfactory.cpp
