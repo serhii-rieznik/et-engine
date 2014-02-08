@@ -45,8 +45,8 @@ float et::queryContiniousTimeInSeconds()
 	return static_cast<float>(queryContiniousTimeInMilliSeconds()) / 1000.0f;
 } 
 
-char et::pathDelimiter = '\\';
-char et::invalidPathDelimiter = '/';
+const char et::pathDelimiter = '\\';
+const char et::invalidPathDelimiter = '/';
 
 std::string et::applicationPath()
 {

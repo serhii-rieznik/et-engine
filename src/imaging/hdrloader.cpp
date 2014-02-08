@@ -107,7 +107,7 @@ void et::hdr::loadFromStream(std::istream& source, TextureDescription& desc)
 	
 	desc.data = BinaryDataStorage(desc.size.square() * desc.bitsPerPixel / 8, 0);
 	vec4* floats = reinterpret_cast<vec4*>(desc.data.binary());
-	for (size_t i = 0; i < desc.size.square(); ++i)
+	for (int i = 0; i < desc.size.square(); ++i)
 		*floats++ = rgbeToFloat(reinterpret_cast<RGBEEntry*>(rgbeData.element_ptr(i * 4)));
 	
 #else
