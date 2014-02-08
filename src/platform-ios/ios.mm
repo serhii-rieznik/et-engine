@@ -108,6 +108,11 @@ std::string et::ios::hardwareIdentifier()
 	return lowercase(std::string(name.machine));
 }
 
+std::string et::ios::systemVersion()
+{
+	return std::string([[[UIDevice currentDevice] systemVersion] UTF8String]);
+}
+
 bool et::ios::runningOnIPad()
 {
 	return UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad;

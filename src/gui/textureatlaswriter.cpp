@@ -128,9 +128,6 @@ bool TextureAtlasWriter::placeImage(TextureDescription::Pointer image, TextureAt
 	return false;
 }
 
-inline bool textureNameSort(const TextureAtlasWriter::ImageItem& i1, const TextureAtlasWriter::ImageItem& i2)
-	{ return i1.image->origin() < i2.image->origin(); }
-
 void TextureAtlasWriter::writeToFile(const std::string& fileName, const char* textureNamePattern)
 {
 	std::string path = addTrailingSlash(getFilePath(fileName));
@@ -160,7 +157,6 @@ void TextureAtlasWriter::writeToFile(const std::string& fileName, const char* te
 			if (sIndex.length() < 2)
 				sIndex = "0" + sIndex;
 			
-			std::string newFile = replaceFileExt(texName, ".layout" + sIndex + ".png");
 			std::string name = removeFileExt(getFileName(ii->image->origin()));
 
 			vec4 offset;
@@ -172,17 +168,22 @@ void TextureAtlasWriter::writeToFile(const std::string& fileName, const char* te
 				while (params.length())
 				{
 					size_t dPos = params.find_first_of("-");
-					if (dPos == std::string::npos)
-					{
-						log::error("Unable to parse all image parameters: `%s`", params.c_str());
-						break;
-					}
+					if (dPos == std::string::npos) break;
 
-					std::string token = params.substr(0, dPos+1);
-					params.erase(0, dPos+1);
+					std::string token = params.substr(0, dPos + 1);
+					params.erase(0, dPos + 1);
+					
 					if (token == "offset-")
 					{
 						offset = strToVector4(params);
+						for (size_t i = 0; i < 4; ++i)
+						{
+							if (offset[i] < 1.0f)
+							{
+								offset[i] *= (i % 2 == 0) ? static_cast<float>(image.size.x) :
+									static_cast<float>(image.size.y);
+							}
+						}
 					}
 					else 
 					{

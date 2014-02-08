@@ -438,10 +438,6 @@ namespace et
 	
 	float signOrZero(float s);
 	float signNoZero(float s);
-	
-	vec3ub vec3fto3ubscaled(const vec3 &fv);
-	vec3ub vec3fto3ublinear(const vec3& fv);
-	vec4ub vec4f_to_4ub(const vec4 &fv);
 
 	mat4 rotation2DMatrix(float angle);
 	mat4 transform2DMatrix(float a, const vec2& scale, const vec2& translate);

@@ -303,10 +303,9 @@ void ImageOperations::normalMapFilter(BinaryDataStorage& data, const vec2i& size
 
 			vec3 produce = normalize(cross(du, dv));
 
-			vec3ub result = vec3fto3ubscaled(produce);
-			data[c00+0] = result.x;
-			data[c00+1] = result.y;
-			data[c00+2] = result.z;
+			data[c00+0] = static_cast<unsigned char>(255.0f * (0.5f + 0.5f * produce.x));
+			data[c00+1] = static_cast<unsigned char>(255.0f * (0.5f + 0.5f * produce.y));
+			data[c00+2] = static_cast<unsigned char>(255.0f * (0.5f + 0.5f * produce.z));
 		}
 	}
 }

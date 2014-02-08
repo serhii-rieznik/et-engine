@@ -82,11 +82,11 @@ int main(int argc, char* argv[])
 	for (auto i : fileList)
 	{
 		TextureDescription::Pointer desc(new TextureDescription);
-		PNGLoader::loadInfoFromFile(i, desc.reference());
+		png::loadInfoFromFile(i, desc.reference());
 		if ((desc->size.x > outputSize) || (desc->size.y > outputSize))
 		{
-			std::cout << "ERROR: image " << i << " is larger (" << desc->size << ") than output size (" <<
-				outputSize << ";" << outputSize << "), please use -size option" << std::endl;
+			log::error("Image %s is larger (%d x %d) than ouput size (%d x %d), use -size option",
+					   i.c_str(), desc->size.x, desc->size.y, outputSize, outputSize);
 			return 0;
 		}
 		textureDescriptors.push_back(desc);
@@ -113,15 +113,20 @@ int main(int argc, char* argv[])
 			}
 		}
 
-		texture.texture->size.x = roundToHighestPowerOfTow(texture.maxWidth);
-		texture.texture->size.y = roundToHighestPowerOfTow(texture.maxHeight);
+		texture.texture->size.x = static_cast<int>(roundToHighestPowerOfTwo(texture.maxWidth));
+		texture.texture->size.y = static_cast<int>(roundToHighestPowerOfTwo(texture.maxHeight));
 	}
 
 	for (TextureAtlasWriter::TextureAtlasItemList::const_iterator i = placer.items().begin(), e = placer.items().end(); i != e; ++i)
 	{
 		std::cout << "Texture: " << i->texture->size.x << "x" << i->texture->size.y << ":" << std::endl;
+		
 		for (TextureAtlasWriter::ImageItemList::const_iterator ii = i->images.begin(), ie = i->images.end(); ii != ie; ++ii)
-			std::cout << "\t" << ii->place.origin << "\t|\t" << ii->place.size << "\t|\t" << ii->image->source << std::endl;
+		{
+			log::info("(% 5d, % 5d) | (% 5d % 5d) | %s", static_cast<int>(ii->place.origin.x),
+				static_cast<int>(ii->place.origin.y), static_cast<int>(ii->place.size.x),
+				static_cast<int>(ii->place.size.y), ii->image->origin().c_str());
+		}
 	}
 
 	placer.writeToFile(outFile, pattern.c_str());
