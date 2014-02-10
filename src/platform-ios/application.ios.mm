@@ -87,8 +87,6 @@ int Application::platformRun(int argc, char* argv[])
 
 void Application::loaded()
 {
-	application().delegate()->setApplicationParameters(_parameters);
-	
 	float scale = [[UIScreen mainScreen] scale];
 	CGRect winBounds = [[UIScreen mainScreen] bounds];
 	
