@@ -179,6 +179,8 @@ size_t Locale::parseKey(const StringDataStorage& data, size_t index)
 				value[index] = 0x0a;
 			else if (data[valueStart+j] == '\\')
 				value[index] = '\\';
+			else if (data[valueStart+j] == '"')
+				value[index] = '"';
 			else
 				log::error("Unsupported sequence in locale file: \\%c", data[valueStart+j]);
 		}

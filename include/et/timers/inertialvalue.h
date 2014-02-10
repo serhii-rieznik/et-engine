@@ -17,17 +17,18 @@ namespace et
 	{
 	public:
 		InertialValue() : 
-			_velocity(0), _value(0), _deccelerationRate(1.0f), _time(0.0f),
+			_velocity(0), _value(0), _deccelerationRate(1.0f), _latestDelta(0), _time(0.0f),
 			_precision(std::numeric_limits<float>::epsilon()) { }
 
 		InertialValue(const T& val) :
-			_velocity(0), _value(val), _deccelerationRate(1.0f), _time(0.0f),
+			_velocity(0), _value(val), _deccelerationRate(1.0f), _latestDelta(0), _time(0.0f),
 			_precision(std::numeric_limits<float>::epsilon()) { }
 		
 		ET_DECLARE_PROPERTY_GET_REF_SET_REF(T, value, setValue)
 		ET_DECLARE_PROPERTY_GET_REF_SET_REF(T, velocity, setVelocity)
 		ET_DECLARE_PROPERTY_GET_REF_SET_REF(float, deccelerationRate, setDeccelerationRate)
-
+		ET_DECLARE_PROPERTY_GET_REF(T, latestDelta)
+		
 	public:
 		void addVelocity(const T& t)
 			{ _velocity += t; }
@@ -60,10 +61,11 @@ namespace et
 			float dt = _deccelerationRate * (t - _time);
 			_velocity *= etMax(0.0f, 1.0f - dt);
 			
-			T dValue = dt * _velocity;
-			if (length(dValue) > _precision)
+			_latestDelta = dt * _velocity;
+			
+			if (length(_latestDelta) > _precision)
 			{
-				_value += dValue;
+				_value += _latestDelta;
 				valueUpdated.invoke(_value);
 				updated.invoke();
 			}
