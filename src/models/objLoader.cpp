@@ -217,6 +217,7 @@ void OBJLoader::loadData(bool async, ObjectsCache& cache)
 			{
 				OBJVertex vertex;
 				auto indexes = split(inFace, "/");
+								
 				vertex.numVertices = indexes.size();
 
 				size_t i = 0;
@@ -708,9 +709,9 @@ void OBJLoader::processLoadedData()
 		IndexType startIndex = static_cast<IndexType>(index);
 		for (auto face : group->faces)
 		{
-			PUSH_VERTEX(face.vertices[0]);
-			PUSH_VERTEX(face.vertices[1]);
 			PUSH_VERTEX(face.vertices[2]);
+			PUSH_VERTEX(face.vertices[1]);
+			PUSH_VERTEX(face.vertices[0]);
 
 			if (face.vertices.size() == 4)
 			{
