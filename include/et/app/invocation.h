@@ -166,6 +166,31 @@ namespace et
 		A2 _p2;
 	};
 
+	template <typename F, typename A1, typename A2>
+	class DirectInvocation2Target : public PureInvocationTarget
+	{
+	public:
+		DirectInvocation2Target(F func, A1 p1, A2 p2) :
+			_func(func), _param1(p1), _param2(p2) { }
+		
+		void invoke()
+			{ _func(_param1, _param2); }
+		
+		void setParameters(A1 p1, A2 p2)
+			{ _param1 = p1; _param2 = p2; }
+		
+		PureInvocationTarget* copy()
+			{ return new DirectInvocation2Target(_func, _param1, _param2); }
+		
+	private:
+		ET_DENY_COPY(DirectInvocation2Target)
+		
+	private:
+		F _func;
+		A1 _param1;
+		A2 _param2;
+	};
+	
 	class Invocation : public PureInvocation
 	{
 	public:
@@ -220,8 +245,12 @@ namespace et
 
 		template <typename T, typename A1, typename A2>
 		void setTarget(T* o, void(T::*m)(A1, A2), A1 p1, A2 p2)
-			{ assert(o); _target = new Invocation2Target<T, A1, A2>(o, m, p1, p2); }
+			{ ET_ASSERT(o != nullptr); _target = new Invocation2Target<T, A1, A2>(o, m, p1, p2); }
 
+		template <typename F, typename A1, typename A2>
+		void setTarget(F func, A1 param1, A2 param2)
+			{ _target = new DirectInvocation2Target<F, A1, A2>(func, param1, param2); }
+		
 		template <typename T, typename A1, typename A2>
 		void setParameters(A1 p1, A2 p2)
 			{ (static_cast<Invocation2Target<T, A1, A2>*>(_target.ptr()))->setParameters(p1, p2); }

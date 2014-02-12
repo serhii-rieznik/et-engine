@@ -220,6 +220,13 @@ inline void Event2<Arg1Type, Arg2Type>::connect(ReceiverType* receiver,
 	receiver->eventConnected(this);
 }
 
+template <typename ArgType1, typename ArgType2>
+template <typename F>
+inline void Event2<ArgType1, ArgType2>::connect(F func)
+{
+	_connections.push_back(new Event2DirectConnection<F, ArgType1, ArgType2>(func));
+}
+
 template <typename Arg1Type, typename Arg2Type>
 template <typename ReceiverType>
 inline void Event2<Arg1Type, Arg2Type>::disconnect(ReceiverType* receiver)

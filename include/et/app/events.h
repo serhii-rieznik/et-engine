@@ -317,6 +317,37 @@ namespace et
 		void (ReceiverType::*_receiverMethod)(Arg1Type, Arg2Type);
 		ReceiverType* _receiver;
 	};
+	
+	template <typename F, typename ArgType1, typename ArgType2>
+	class Event2DirectConnection : public Event2ConnectionBase<ArgType1, ArgType2>
+	{
+	public:
+		Event2DirectConnection(F f) :
+			_func(f) { };
+		
+		EventReceiver* receiver()
+			{ return nullptr; }
+		
+		void invoke(ArgType1 arg1, ArgType2 arg2)
+			{ _func(arg1, arg2); }
+		
+		void invokeInMainRunLoop(ArgType1 arg1, ArgType2 arg2, float delay)
+		{
+			Invocation2 i;
+			i.setTarget<F, ArgType1, ArgType2>(_func, arg1, arg2);
+			i.invokeInMainRunLoop(delay);
+		}
+		
+		void invokeInBackground(ArgType1 arg1, ArgType2 arg2, float delay)
+		{
+			Invocation2 i;
+			i.setTarget<F, ArgType1, ArgType2>(_func, arg1, arg2);
+			i.invokeInBackground(delay);
+		}
+		
+	private:
+		F _func;
+	};
 
 	template <typename Arg1Type, typename Arg2Type>
 	class Event2 : public Event, public Event2ConnectionBase<Arg1Type, Arg2Type>
@@ -328,6 +359,9 @@ namespace et
 		template <typename ReceiverType>
 		void connect(ReceiverType* receiver, void (ReceiverType::*receiverMethod)(Arg1Type, Arg2Type));
 
+		template <typename F>
+		void connect(F);
+		
 		template <typename ReceiverType>
 		void disconnect(ReceiverType* receiver);
 
