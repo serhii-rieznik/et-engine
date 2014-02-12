@@ -68,7 +68,7 @@ ValueBase::Pointer Dictionary::baseValueForKeyPathInHolder(const std::vector<std
 	}
 	else
 	{
-		assert(false);
+		ET_FAIL("Invalid value class.");
 	}
 	
 	return ValueBase::Pointer();

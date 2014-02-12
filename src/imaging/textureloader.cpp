@@ -51,7 +51,7 @@ TextureDescription::Pointer et::loadTextureDescription(const std::string& fileNa
 	}
 	else if ((ext == "jpg") || (ext == "jpeg"))
 	{
-		assert("JPEG is not supported anymore" && false);
+		ET_FAIL("JPEG is not supported anymore");
 	}
 	
 	if ((desc != nullptr) && initWithZero)
@@ -102,7 +102,7 @@ TextureDescription::Pointer et::loadTexture(const std::string& fileName)
 	}
 	else if ((ext == "jpg") || (ext == "jpeg"))
 	{
-		assert("JPEG is not supported anymore" && false);
+		ET_FAIL("JPEG is not supported anymore");
 	}
 	
 	return TextureDescription::Pointer(desc);

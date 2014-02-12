@@ -159,7 +159,7 @@ bool Framebuffer::checkStatus()
 bool Framebuffer::addRenderTarget(const Texture& rt)
 {
 	if (rt.invalid() || (rt->size() != _description.size)) return false;
-	assert(glIsTexture(rt->glID()));
+	ET_ASSERT(glIsTexture(rt->glID()));
 
 	_rc->renderState().bindFramebuffer(_id);
 

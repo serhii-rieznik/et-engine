@@ -97,7 +97,7 @@ quaternion et::matrixToQuaternion(const mat3& r)
 	}
 	else
 	{
-		assert(false && "Unable to convert matrix to quaternion");
+		ET_FAIL("Unable to convert matrix to quaternion");
 	}
 
 	return normalize(quaternion(q0, q1, q2, q3));
@@ -124,9 +124,9 @@ vec3 et::removeMatrixScale(mat3& mat)
 
 	float lengths[3] = { c0.length(), c1.length(), c2.length() };
 	
-	assert(lengths[0] > 0.0f);
-	assert(lengths[1] > 0.0f);
-	assert(lengths[2] > 0.0f);
+	ET_ASSERT(lengths[0] > 0.0f);
+	ET_ASSERT(lengths[1] > 0.0f);
+	ET_ASSERT(lengths[2] > 0.0f);
 
 	if (mat.determinant() < 0.0f)
 	{
@@ -189,7 +189,7 @@ mat3 et::rotation2DMatrix3(float angle)
 template <>
 vector2<float> et::bezierCurve(const std::vector< vector2<float> >& points, float time)
 {
-	assert(points.size() > 0);
+	ET_ASSERT(points.size() > 0);
 	
 	if (points.size() == 1)
 		return points.front();

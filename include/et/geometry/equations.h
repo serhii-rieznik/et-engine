@@ -14,7 +14,7 @@ inline bool within(T value, T lowerBound, T upperBound)
 template <typename T, typename F>
 inline T resolveUsingDichotomy(T lowerBound, T upperBound, T precision, F func)
 {
-	assert(upperBound > lowerBound);
+	ET_ASSERT(upperBound > lowerBound);
 	
 	if (within(func(upperBound), -precision, precision))
 		return upperBound;

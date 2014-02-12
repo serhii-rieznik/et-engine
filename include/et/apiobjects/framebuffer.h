@@ -84,7 +84,7 @@ namespace et
 			{ return _depthRenderbuffer; }
 
 		Texture renderTarget(size_t index = 0) const
-			{ assert(index < MaxRenderTargets); return _renderTargets[index]; }
+			{ ET_ASSERT(index < MaxRenderTargets); return _renderTargets[index]; }
 		
 		Texture depthBuffer() const
 			{ return _depthBuffer; }

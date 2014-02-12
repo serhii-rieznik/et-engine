@@ -122,6 +122,6 @@ void VertexDeclaration::deserialize(std::istream& stream)
 		push_back(VertexElement(usage, type, stride, offset));
 	}
 
-	assert(_totalSize == totalSize);
+	ET_ASSERT(_totalSize == totalSize);
 	(void)(totalSize);
 }

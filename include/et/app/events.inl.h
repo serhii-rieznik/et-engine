@@ -105,13 +105,6 @@ inline void Event1<ArgType>::connect(F func)
 }
 
 template <typename ArgType>
-inline void Event1<ArgType>::connect(Event1& e)
-{
-	if (&e != this)
-		_connections.push_back(&e);
-}
-
-template <typename ArgType>
 template <typename ReceiverType>
 inline void Event1<ArgType>::disconnect(ReceiverType* receiver)
 {
@@ -225,13 +218,6 @@ inline void Event2<Arg1Type, Arg2Type>::connect(ReceiverType* receiver,
 
 	_connections.push_back(new Event2Connection<ReceiverType, Arg1Type, Arg2Type>(receiver, receiverMethod));
 	receiver->eventConnected(this);
-}
-
-template <typename Arg1Type, typename Arg2Type>
-inline void Event2<Arg1Type, Arg2Type>::connect(Event2<Arg1Type, Arg2Type>& e)
-{
-	if (&e != this)
-		_connections.push_back(&e);
 }
 
 template <typename Arg1Type, typename Arg2Type>

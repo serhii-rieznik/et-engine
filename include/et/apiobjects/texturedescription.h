@@ -85,7 +85,7 @@ namespace et
 			}
 			else
 			{
-				assert("Invalid data layout" && false);
+				ET_FAIL("Invalid data layout");
 			}
 			
 			return result;

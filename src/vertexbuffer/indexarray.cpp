@@ -219,7 +219,7 @@ void IndexArray::PrimitiveIterator::configure(IndexType p)
 		}
 
 		default:
-			assert("Unsupported PrimitiveType value" && 0);
+			ET_FAIL("Unsupported PrimitiveType value");
 	}
 }
 
@@ -285,6 +285,6 @@ void IndexArray::deserialize(std::istream& stream)
 	}
 	else
 	{
-		assert("Unrecognized index array version" && false);
+		ET_FAIL("Unrecognized index array version");
 	}
 }

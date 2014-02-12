@@ -36,7 +36,7 @@ std::string et::selectFile(const StringList&, SelectFileMode mode, const std::st
 	else if (mode == SelectFileMode_Save)
 		selector = @selector(saveFile);
 	else
-		assert("Invalid SelectFieMode value" && 0);
+		ET_FAIL("Invalid SelectFieMode value");
 	
 	FilePicker* picker = ET_OBJC_AUTORELEASE([[FilePicker alloc]
 		initWithDefaultName:[NSString stringWithUTF8String:defaultName.c_str()]]);

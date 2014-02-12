@@ -274,7 +274,7 @@ void ImageOperations::applyMatrixFilter(BinaryDataStorage& data, const vec2i& si
 
 void ImageOperations::normalMapFilter(BinaryDataStorage& data, const vec2i& size, int components, const vec2& scale)
 {
-	assert(components > 2);
+	ET_ASSERT(components > 2);
 
 	vec2 fScale = scale / 255.0f;
 	BinaryDataStorage source(data);

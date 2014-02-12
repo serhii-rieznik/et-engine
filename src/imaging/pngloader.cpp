@@ -206,7 +206,7 @@ void parseFormat(TextureDescription& desc, png_structp pngPtr, png_infop infoPtr
 			}
 			else
 			{
-				assert("Unsupported PNG format" && false);
+				ET_FAIL("Unsupported PNG format");
 			}
 #elif defined(GL_R8) && defined(GL_R16)
 			if (bpp == 8)
@@ -265,7 +265,7 @@ void parseFormat(TextureDescription& desc, png_structp pngPtr, png_infop infoPtr
 		}
 
 		default: 
-			assert("Unknown texture format" && 0);
+			ET_FAIL("Unknown texture format");
 	}
 }
 

@@ -38,7 +38,7 @@ AppEnvironment::AppEnvironment() :
 
 const std::string& AppEnvironment::applicationDocumentsFolder() const
 {
-	assert(!_documentsFolder.empty());
+	ET_ASSERT(!_documentsFolder.empty());
 	return _documentsFolder;
 }
 
@@ -48,13 +48,13 @@ void AppEnvironment::updateDocumentsFolder(const ApplicationIdentifier& i)
 	if (!folderExists(_documentsFolder))
 		createDirectory(_documentsFolder, true);
 
-	assert(folderExists(_documentsFolder));
+	ET_ASSERT(folderExists(_documentsFolder));
 
 	_documentsFolder += addTrailingSlash(i.applicationName);
 	if (!folderExists(_documentsFolder))
 		createDirectory(_documentsFolder, true);
 
-	assert(folderExists(_documentsFolder));
+	ET_ASSERT(folderExists(_documentsFolder));
 }
 
 void AppEnvironment::addSearchPath(const std::string& path)
@@ -112,7 +112,7 @@ bool AppEnvironment::expandFileName(std::string& name) const
 
 std::string AppEnvironment::resolveScalableFileName(const std::string& name, size_t scale) const
 {
-	assert(scale > 0);
+	ET_ASSERT(scale > 0);
 	std::string foundFile = findFile(name);
 
 	if ((foundFile.find_last_of("@") != std::string::npos) && fileExists(foundFile))

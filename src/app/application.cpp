@@ -47,7 +47,7 @@ IApplicationDelegate* Application::delegate()
 	if (_delegate == nullptr)
 	{
 		_delegate = initApplicationDelegate();
-		assert(_delegate);
+		ET_ASSERT(_delegate);
 		_identifier = _delegate->applicationIdentifier();
 	}
     
@@ -71,7 +71,7 @@ void Application::performRendering()
 
 void Application::idle()
 {
-	assert(_running);
+	ET_ASSERT(_running);
 
 	uint64_t currentTime = queryContiniousTimeInMilliSeconds();
 	uint64_t elapsedTime = currentTime - _lastQueuedTimeMSec;
@@ -163,7 +163,7 @@ void Application::suspend()
 
 void Application::resume()
 {
-	assert(_suspended && "Should be suspended.");
+	ET_ASSERT(_suspended && "Should be suspended.");
 
 	delegate()->applicationWillResume();
 	

@@ -616,7 +616,7 @@ size_t et::bitsPerPixelForType(uint32_t type)
 			return 16;
 			
 		default:
-			assert("Not yet implemented for this type." && false);
+			ET_FAIL("Not yet implemented for this type.");
 			return 0;
 	}
 }

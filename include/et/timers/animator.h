@@ -70,7 +70,7 @@ namespace et
 		
 		void animate(T* value, const T& from, const T& to, float duration)
 		{
-			assert(timerPool().valid());
+			ET_ASSERT(timerPool().valid());
 			_valuePointer = value;
 			_value = from;
 			_from = from;

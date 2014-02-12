@@ -148,7 +148,7 @@ CharacterGeneratorPrivate::CharacterGeneratorPrivate(const std::string& face,
 		font = ET_OBJC_RETAIN([[NSFontManager sharedFontManager]
 			fontWithFamily:@"Arial" traits:0 weight:0 size:size]);
 	}
-	assert(font);
+	ET_ASSERT(font);
 	
 	boldFont = ET_OBJC_RETAIN([[NSFontManager sharedFontManager] fontWithFamily:cFace traits:NSBoldFontMask
 		weight:0 size:size]);
@@ -159,12 +159,12 @@ CharacterGeneratorPrivate::CharacterGeneratorPrivate(const std::string& face,
 		boldFont = ET_OBJC_RETAIN([[NSFontManager sharedFontManager]
 			fontWithFamily:@"Arial" traits:0 weight:0 size:size]);
 	}
-	assert(boldFont);
+	ET_ASSERT(boldFont);
 
 	whiteColor = ET_OBJC_RETAIN([NSColor whiteColor]);
 			
 	colorSpace = CGColorSpaceCreateDeviceRGB();
-	assert(colorSpace);
+	ET_ASSERT(colorSpace);
 }
 
 CharacterGeneratorPrivate::~CharacterGeneratorPrivate()
@@ -188,7 +188,7 @@ void CharacterGeneratorPrivate::renderCharacter(NSAttributedString* value,
 	CGContextRef context = CGBitmapContextCreateWithData(data.data(), static_cast<size_t>(size.x),
 		static_cast<size_t>(size.y), 8, 4 * static_cast<size_t>(size.x), colorSpace,
 		kCGImageAlphaPremultipliedLast, nil, nil);
-	assert(context);
+	ET_ASSERT(context);
 
 	NSGraphicsContext* aContext = [NSGraphicsContext graphicsContextWithGraphicsPort:context flipped:YES];
 	[NSGraphicsContext setCurrentContext:aContext];

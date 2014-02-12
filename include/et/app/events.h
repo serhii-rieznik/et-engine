@@ -15,10 +15,10 @@ namespace et
 #	define ET_DECLARE_EVENT0(name)									et::Event0 name;
 #	define ET_DECLARE_EVENT1(name, argtype)							et::Event1<argtype> name;
 #	define ET_DECLARE_EVENT2(name, arg1type, arg2type)				et::Event2<arg1type, arg2type> name;
+	
 #	define ET_CONNECT_EVENT(name, methodName)						name.connect(this, &methodName);
+	
 #	define ET_CONNECT_EVENT_TO_OBJECT(name, object, methodName)		name.connect(object, &methodName);
-#	define ET_CONNECT_EVENT_TO_FUNCTION(name, func)					name.connect(func);
-#	define ET_CONNECT_EVENT_TO_EVENT(name, event)					name.connect(event);
 
 	class Event;
 	
@@ -149,8 +149,6 @@ namespace et
 		
 		template <typename F>
 		void connect(F func);
-
-		void connect(Event0& e);
 		
 		template <typename R>
 		void disconnect(R* receiver);
@@ -158,7 +156,7 @@ namespace et
 		void receiverDisconnected(EventReceiver* r);
 		void invoke();
 		void invokeInMainRunLoop(float delay = 0.0f);
-
+		
 	private:
 		EventReceiver* receiver() 
 			{ return 0; }
@@ -258,24 +256,22 @@ namespace et
 		template <typename F>
 		void connect(F);
 
-		void connect(Event1&);
-		
 		template <typename ReceiverType>
 		void disconnect(ReceiverType* receiver);
 
 		void receiverDisconnected(EventReceiver* r);
 		void invoke(ArgType arg);
 		void invokeInMainRunLoop(ArgType arg, float delay = 0.0f);
-
+		
 	private:
 		void cleanup();
 
 		EventReceiver* receiver() 
-			{ return 0; }
+			{ return nullptr; }
 
 	private:
-		typedef std::vector<Event1ConnectionBase<ArgType>*> ConnectionList;
-		ConnectionList _connections; 
+		typedef std::vector< Event1ConnectionBase<ArgType>* > ConnectionList;
+		ConnectionList _connections;
 		bool _invoking;
 	};
 
@@ -331,7 +327,6 @@ namespace et
 
 		template <typename ReceiverType>
 		void connect(ReceiverType* receiver, void (ReceiverType::*receiverMethod)(Arg1Type, Arg2Type));
-		void connect(Event2& e);
 
 		template <typename ReceiverType>
 		void disconnect(ReceiverType* receiver);

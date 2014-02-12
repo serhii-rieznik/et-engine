@@ -24,12 +24,21 @@ using namespace et;
 #endif
 
 AtomicCounter::AtomicCounter() :
+#if (ET_DEBUG)
+	notifyOnRetain(false),
+	notifyOnRelease(false),
+#endif
 	_counter(0)
 {
 }
 
 AtomicCounterType AtomicCounter::retain()
 {
+#if (ET_DEBUG)
+	if (notifyOnRetain)
+		{ __asm__("int $3"); }
+#endif
+	
 #if (ET_PLATFORM_ANDROID)
 	return __atomic_inc(&_counter);
 #else
@@ -39,6 +48,11 @@ AtomicCounterType AtomicCounter::retain()
 
 AtomicCounterType AtomicCounter::release()
 {
+#if (ET_DEBUG)
+	if (notifyOnRelease)
+		{ __asm__("int $3"); }
+#endif
+	
 #if (ET_PLATFORM_ANDROID)
 	return __atomic_dec(&_counter);
 #else

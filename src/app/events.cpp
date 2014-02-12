@@ -52,12 +52,6 @@ Event0::~Event0()
 	}
 }
 
-void Event0::connect(Event0& e)
-{
-	if (&e != this)
-	_connections.push_back(&e);
-}
-
 void Event0::cleanup()
 {
 	auto i = remove_if(_connections.begin(), _connections.end(), shouldRemoveConnection);

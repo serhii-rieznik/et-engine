@@ -70,10 +70,10 @@ VertexArray::Description VertexArray::generateDescription() const
 			for (size_t j = 0; j < numElements; ++j)
 			{
 				size_t dstPtrOffset = chunkOffset + j * offset;
-				assert(dstPtrOffset < desc.data.dataSize());
+				ET_ASSERT(dstPtrOffset < desc.data.dataSize());
 				char* dstPtr = ptr0 + dstPtrOffset;
 				size_t srcPtrOffset = j * chunk->typeSize();
-				assert(srcPtrOffset < chunkDataSize);
+				ET_ASSERT(srcPtrOffset < chunkDataSize);
 				const char* srcPtr = chunkData + srcPtrOffset;
 				etCopyMemory(dstPtr, srcPtr, chunk->typeSize());
 			}
@@ -147,7 +147,7 @@ void VertexArray::deserialize(std::istream& stream)
 	}
 	else
 	{
-		assert("Unrecognized vertex array version" && false);
+		ET_FAIL("Unrecognized vertex array version");
 	}
 }
 
