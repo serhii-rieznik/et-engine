@@ -17,15 +17,21 @@ TextureData::TextureData(RenderContext* rc, TextureDescription::Pointer desc,
 	const std::string& id, bool deferred) : LoadableObject(id, desc->origin()),
 	_glID(0), _desc(desc), _own(true)
 {
-	if (deferred) return;
-	
 #if (ET_OPENGLES)
 	if (!(isPowerOfTwo(desc->size.x) && isPowerOfTwo(desc->size.y)))
 		_wrap = vector3<TextureWrap>(TextureWrap_ClampToEdge);
 #endif
 	
 	generateTexture(rc);
-	build(rc);
+	
+	if (deferred)
+	{
+		rc->renderState().bindTexture(defaultBindingUnit, _glID, desc->target, true);
+	}
+	else
+	{
+		build(rc);
+	}
 }
 
 TextureData::TextureData(RenderContext*, uint32_t texture, const vec2i& size, const std::string& name) :
