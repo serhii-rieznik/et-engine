@@ -27,8 +27,7 @@ namespace et
 		class Layout;
 		
 		typedef Hierarchy<Element, Object> ElementHierarchy;
-		class Element : public ElementHierarchy, public FlagsHolder, public EventReceiver,
-			public TimedObject, public AnimatorDelegate
+		class Element : public ElementHierarchy, public FlagsHolder, public EventReceiver, public TimedObject
 		{
 		public:
 			typedef IntrusivePtr<Element> Pointer;
