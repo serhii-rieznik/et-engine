@@ -11,6 +11,7 @@
 #include <et/imaging/ddsloader.h>
 #include <et/imaging/pvrloader.h>
 #include <et/imaging/hdrloader.h>
+#include <et/imaging/jpegloader.h>
 
 using namespace et;
 
@@ -51,7 +52,10 @@ TextureDescription::Pointer et::loadTextureDescription(const std::string& fileNa
 	}
 	else if ((ext == "jpg") || (ext == "jpeg"))
 	{
-		ET_FAIL("JPEG is not supported anymore");
+		desc = new TextureDescription;
+		desc->target = GL_TEXTURE_2D;
+		desc->setOrigin(fileName);
+		jpeg::loadInfoFromFile(fileName, *desc);
 	}
 	
 	if ((desc != nullptr) && initWithZero)
@@ -102,7 +106,10 @@ TextureDescription::Pointer et::loadTexture(const std::string& fileName)
 	}
 	else if ((ext == "jpg") || (ext == "jpeg"))
 	{
-		ET_FAIL("JPEG is not supported anymore");
+		desc = new TextureDescription;
+		desc->target = GL_TEXTURE_2D;
+		desc->setOrigin(fileName);
+		jpeg::loadFromFile(fileName, *desc);
 	}
 	
 	return TextureDescription::Pointer(desc);
