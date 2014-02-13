@@ -1,5 +1,4 @@
 #include <et/core/tools.h>
-#include <et/gui/guibase.h>
 #include <et/imaging/pngloader.h>
 #include <et/gui/textureatlaswriter.h>
 
@@ -13,9 +12,6 @@ void printHelp()
 		"\tOPTIONAL: -pattern <PATTERN>, default: texture_%d.png" << std::endl <<
 		"\tOPTIONAL: -nospace, default off - don't add one pixel space between images in atlas." << std::endl;
 }
-
-inline bool sortFunc(const TextureDescription::Pointer& d1, const TextureDescription::Pointer& d2)
-	{ return d1->size.square() > d2->size.square(); }
 
 int main(int argc, char* argv[])
 {
@@ -66,7 +62,6 @@ int main(int argc, char* argv[])
 			outputSize = strToInt(std::string(argv[i+1]));
 			++i;
 		}
-
 	}
 
 	if (!hasRoot || !hasOutput)
@@ -74,7 +69,7 @@ int main(int argc, char* argv[])
 		printHelp();
 		return 0;
 	}
-	
+		
 	StringList fileList;
 	TextureDescription::List textureDescriptors;
 	findFiles(rootFolder, "*.png", true, fileList);	
@@ -83,23 +78,27 @@ int main(int argc, char* argv[])
 	{
 		TextureDescription::Pointer desc(new TextureDescription);
 		png::loadInfoFromFile(i, desc.reference());
+		
 		if ((desc->size.x > outputSize) || (desc->size.y > outputSize))
 		{
 			log::error("Image %s is larger (%d x %d) than ouput size (%d x %d), use -size option",
-					   i.c_str(), desc->size.x, desc->size.y, outputSize, outputSize);
+				i.c_str(), desc->size.x, desc->size.y, outputSize, outputSize);
 			return 0;
 		}
 		textureDescriptors.push_back(desc);
 	}
-	std::sort(textureDescriptors.begin(), textureDescriptors.end(), sortFunc);
+	
+	std::sort(textureDescriptors.begin(), textureDescriptors.end(), [](const TextureDescription::Pointer& d1,
+		const TextureDescription::Pointer& d2) { return d1->size.square() > d2->size.square(); });
 
 	TextureAtlasWriter placer(addSpace);
 	while (textureDescriptors.size())
 	{
-		TextureAtlasWriter::TextureAtlasItem& texture = placer.addItem(vec2i(outputSize));
+		TextureAtlasWriter::TextureAtlasItem& texture = placer.addItem( vec2i(outputSize) );
 		TextureDescription::List::iterator i = textureDescriptors.begin();
 
 		int placedItems = 0;
+		
 		while (i != textureDescriptors.end())
 		{
 			if (placer.placeImage(*i, texture))
@@ -112,11 +111,11 @@ int main(int argc, char* argv[])
 				++i;
 			}
 		}
-
+		
 		texture.texture->size.x = static_cast<int>(roundToHighestPowerOfTwo(texture.maxWidth));
 		texture.texture->size.y = static_cast<int>(roundToHighestPowerOfTwo(texture.maxHeight));
 	}
-
+	
 	for (TextureAtlasWriter::TextureAtlasItemList::const_iterator i = placer.items().begin(), e = placer.items().end(); i != e; ++i)
 	{
 		std::cout << "Texture: " << i->texture->size.x << "x" << i->texture->size.y << ":" << std::endl;

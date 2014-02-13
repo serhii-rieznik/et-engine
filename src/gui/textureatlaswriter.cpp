@@ -25,6 +25,7 @@ TextureAtlasWriter::TextureAtlasItem& TextureAtlasWriter::addItem(const vec2i& t
 	TextureAtlasItem& item = _items.back();
 	item.texture = et::TextureDescription::Pointer(new et::TextureDescription);
 	item.texture->size = textureSize;
+	
 	return item;
 }
 
@@ -96,9 +97,15 @@ bool TextureAtlasWriter::placeImage(TextureDescription::Pointer image, TextureAt
 			
 			return true;
 		}
+	}
 
+	for (ImageItemList::iterator i = item.images.begin(), e = item.images.end(); i != e; ++i)
+	{
+		desc.origin = i->place.origin + vec2(i->place.size.x, 0.0f);
 		desc.origin = i->place.origin + vec2(0.0f, i->place.size.y);
-		placed = (desc.origin.x + w <= item.texture->size.x) && (desc.origin.y + h <= item.texture->size.y);
+		
+		bool placed = (desc.origin.x + w <= item.texture->size.x) && (desc.origin.y + h <= item.texture->size.y);
+		
 		if (placed)
 		{
 			for (ImageItemList::iterator ii = item.images.begin(); ii != e; ++ii)
@@ -114,13 +121,10 @@ bool TextureAtlasWriter::placeImage(TextureDescription::Pointer image, TextureAt
 		if (placed)
 		{
 			item.images.push_back(ImageItem(image, desc));
-
-			if (desc.origin.x + desc.size.x > item.maxWidth) 
+			if (desc.origin.x + desc.size.x > item.maxWidth)
 				item.maxWidth = static_cast<int>(desc.origin.x + desc.size.x) - xOffset;
-
-			if (desc.origin.y + desc.size.y > item.maxHeight) 
+			if (desc.origin.y + desc.size.y > item.maxHeight)
 				item.maxHeight = static_cast<int>(desc.origin.y + desc.size.y) - yOffset;
-
 			return true;
 		}
 	}
