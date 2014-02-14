@@ -138,7 +138,9 @@ extern etOpenGLViewController* sharedOpenGLViewController;
 		[_displayLink invalidate];
 		_displayLink = nil;
 		
+#if (!ET_OBJC_ARC_ENABLED)
 		[_renderThread release];
+#endif
 		_renderThread = nil;
 	}
 }

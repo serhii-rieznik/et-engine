@@ -107,8 +107,13 @@ void et::jpeg::loadInfoFromStream(std::istream& source, TextureDescription& desc
 	{
 		case JCS_GRAYSCALE:
 		{
+#		if defined(GL_LUMINANCE)
+			desc.internalformat = GL_LUMINANCE;
+			desc.format = GL_LUMINANCE;
+#		else
 			desc.internalformat = GL_R8;
 			desc.format = GL_RED;
+#		endif
 			break;
 		}
 			
@@ -174,8 +179,13 @@ void et::jpeg::loadFromStream(std::istream& source, TextureDescription& desc)
 	{
 		case JCS_GRAYSCALE:
 		{
+#		if defined(GL_LUMINANCE)
+			desc.internalformat = GL_LUMINANCE;
+			desc.format = GL_LUMINANCE;
+#		else
 			desc.internalformat = GL_R8;
 			desc.format = GL_RED;
+#		endif
 			break;
 		}
 			

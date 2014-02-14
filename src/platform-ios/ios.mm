@@ -135,7 +135,7 @@ bool et::ios::runningOnIPad()
 
 - (void)presentDocumentController:(NSNumber*)option
 {
-	UIViewController* handle = (__bridge UIViewController*)(application().renderingContextHandle());
+	UIViewController* handle = (__bridge UIViewController*)((void*)application().renderingContextHandle());
 	
 	CGRect presentRect = handle.view.bounds;
 	presentRect.origin.y = presentRect.size.height - 1.0f;
