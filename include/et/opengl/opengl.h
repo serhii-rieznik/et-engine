@@ -12,7 +12,7 @@
 
 #if ET_PLATFORM_WIN
 #
-#	include <et/platform-win/opengl.win.h>
+#	include <et\platform-win\glee.h>
 #
 #	define ET_OPENGLES								0
 #

@@ -183,6 +183,11 @@ bool et::removeFile(const std::string& path)
 	return DeleteFile(path.c_str()) != 0;
 }
 
+bool et::removeDirectory(const std::string& name)
+{
+	return RemoveDirectory(name.c_str()) != 0;
+}
+
 void et::findSubfolders(const std::string& folder, bool recursive, StringList& list)
 {
 	std::string normalizedFolder = addTrailingSlash(folder);

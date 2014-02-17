@@ -5,10 +5,10 @@
  *
  */
 
-#include <setjmp.h>
-#include <libjpeg/jpeglib.h>
 #include <et/opengl/opengl.h>
 #include <et/imaging/jpegloader.h>
+#include <libjpeg/jpeglib.h>
+#include <setjmp.h>
 
 using namespace et;
 
@@ -43,7 +43,7 @@ boolean fill_buffer(j_decompress_ptr cinfo)
     auto src = (jpegStreamWrapper*)(cinfo->src);
 	src->stream->read(reinterpret_cast<char*>(src->buffer), jpegBufferSize);
     src->pub.next_input_byte = src->buffer;
-	src->pub.bytes_in_buffer = src->stream->gcount();
+	src->pub.bytes_in_buffer = static_cast<size_t>(src->stream->gcount());
     return TRUE;
 }
 
@@ -107,12 +107,12 @@ void et::jpeg::loadInfoFromStream(std::istream& source, TextureDescription& desc
 	{
 		case JCS_GRAYSCALE:
 		{
-#		if defined(GL_LUMINANCE)
-			desc.internalformat = GL_LUMINANCE;
-			desc.format = GL_LUMINANCE;
-#		else
+#		if defined(GL_R8)
 			desc.internalformat = GL_R8;
 			desc.format = GL_RED;
+#		else
+			desc.internalformat = GL_LUMINANCE;
+			desc.format = GL_LUMINANCE;
 #		endif
 			break;
 		}
@@ -179,12 +179,12 @@ void et::jpeg::loadFromStream(std::istream& source, TextureDescription& desc)
 	{
 		case JCS_GRAYSCALE:
 		{
-#		if defined(GL_LUMINANCE)
-			desc.internalformat = GL_LUMINANCE;
-			desc.format = GL_LUMINANCE;
-#		else
+#		if defined(GL_R8)
 			desc.internalformat = GL_R8;
 			desc.format = GL_RED;
+#		else
+			desc.internalformat = GL_LUMINANCE;
+			desc.format = GL_LUMINANCE;
 #		endif
 			break;
 		}

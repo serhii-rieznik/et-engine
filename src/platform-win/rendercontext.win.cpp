@@ -299,9 +299,9 @@ bool RenderContextPrivate::initOpenGL(const RenderContextParameters& params)
 	RenderContextData dummy = createDummyContext(dummyWindow);
 	if (!dummy.initialized)	return false;
 
-	wglChoosePixelFormatARB = (PFNWGLCHOOSEPIXELFORMATARBPROC)(wglGetProcAddress("wglChoosePixelFormatARB"));
-	wglCreateContextAttribsARB = (PFNWGLCREATECONTEXTATTRIBSARBPROC)wglGetProcAddress("wglCreateContextAttribsARB");
-	wglMakeContextCurrentARB = (PFNWGLMAKECONTEXTCURRENTARBPROC)wglGetProcAddress("wglMakeContextCurrentARB");
+	wglChoosePixelFormatARB = (GLEEPFNWGLCHOOSEPIXELFORMATARBPROC)(wglGetProcAddress("wglChoosePixelFormatARB"));
+	wglCreateContextAttribsARB = (GLEEPFNWGLCREATECONTEXTATTRIBSARBPROC)wglGetProcAddress("wglCreateContextAttribsARB");
+	wglMakeContextCurrentARB = (GLEEPFNWGLMAKECONTEXTCURRENTARBPROC)wglGetProcAddress("wglMakeContextCurrentARB");
 
 	PIXELFORMATDESCRIPTOR pfd = { };
 	pfd.nSize = sizeof(pfd);
@@ -428,10 +428,7 @@ bool RenderContextPrivate::initOpenGL(const RenderContextParameters& params)
 		}
 	}
 
-	glgInit();
-	glgInitExts();
-
-	validateExtensions();
+	GLeeInit();
 
 	checkOpenGLError("RenderContextPrivate::initOpenGL");
 

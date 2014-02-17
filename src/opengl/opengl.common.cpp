@@ -587,7 +587,6 @@ void et::validateExtensions()
 	ET_VALIDATE_GLFUNC_EXT(glGenerateMipmap);
 	ET_VALIDATE_GLFUNC_EXT(glBlitFramebuffer);
 	ET_VALIDATE_GLFUNC_EXT(glRenderbufferStorageMultisample);
-	ET_VALIDATE_GLFUNC_EXT(glFramebufferTextureLayer);
 }
 
 size_t et::bitsPerPixelForType(uint32_t type)

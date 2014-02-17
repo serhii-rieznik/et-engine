@@ -282,7 +282,7 @@ void TextureData::updatePartialDataDirectly(RenderContext* rc, const vec2i& offs
 	const vec2i& aSize, char* data, size_t)
 {
 	ET_ASSERT((_desc->target == GL_TEXTURE_2D) && !_desc->compressed);
-	ET_ASSERT((offset.x > 0) && (offset.y > 0));
+	ET_ASSERT((offset.x >= 0) && (offset.y >= 0));
 	ET_ASSERT((offset.x + aSize.x) < _desc->size.x);
 	ET_ASSERT((offset.y + aSize.y) < _desc->size.y);
 	
