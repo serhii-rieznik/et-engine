@@ -452,14 +452,24 @@ static void pvrtcGetDecompressedPixels(const PVRTCWord& P, const PVRTCWord& Q,
 		{
 			PVRTint32 mod = getModulationValues(i32ModulationValues,i32ModulationModes,x+ui32WordWidth/2,y+ui32WordHeight/2,ui8Bpp);
 			bool punchthroughAlpha=false;
-			if (mod>10) {punchthroughAlpha=true; mod-=10;}
+			if (mod > 10)
+			{
+				punchthroughAlpha = true; 
+				mod -= 10;
+			}
+
+			size_t index = y * ui32WordWidth + x;
 
 			Pixel128S result;				
-			result.red   = (upscaledColourA[y*ui32WordWidth+x].red * (8-mod) + upscaledColourB[y*ui32WordWidth+x].red * mod) / 8;
-			result.green = (upscaledColourA[y*ui32WordWidth+x].green * (8-mod) + upscaledColourB[y*ui32WordWidth+x].green * mod) / 8;
-			result.blue  = (upscaledColourA[y*ui32WordWidth+x].blue * (8-mod) + upscaledColourB[y*ui32WordWidth+x].blue * mod) / 8;
-			if (punchthroughAlpha) result.alpha = 0;
-			else result.alpha = (upscaledColourA[y*ui32WordWidth+x].alpha * (8-mod) + upscaledColourB[y*ui32WordWidth+x].alpha * mod) / 8;
+
+			result.red = (upscaledColourA[index].red * (8 - mod) + upscaledColourB[index].red * mod) / 8;
+
+			result.green = (upscaledColourA[index].green * (8 - mod) + upscaledColourB[index].green * mod) / 8;
+
+			result.blue = (upscaledColourA[index].blue * (8 - mod) + upscaledColourB[index].blue * mod) / 8;
+
+			result.alpha = punchthroughAlpha ? 0 :
+				(upscaledColourA[index].alpha * (8 - mod) + upscaledColourB[index].alpha * mod) / 8;
 
 			//Convert the 32bit precision result to 8 bit per channel colour.
 			if (ui8Bpp==2)
