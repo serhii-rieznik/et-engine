@@ -73,16 +73,16 @@
 #
 #elif (ET_PLATFORM_WIN)
 #
-#	define ET_KEY_RETURN				13
-#	define ET_KEY_TAB					9
-#	define ET_KEY_SPACE					32
-#	define ET_KEY_ESCAPE				27
-#	define ET_KEY_BACKSPACE				8
+#	define ET_KEY_RETURN				VK_RETURN
+#	define ET_KEY_TAB					VK_TAB
+#	define ET_KEY_SPACE					VK_SPACE
+#	define ET_KEY_ESCAPE				VK_ESCAPE
+#	define ET_KEY_BACKSPACE				VK_BACK
 #
-#	define ET_KEY_LEFT					123
-#	define ET_KEY_RIGHT					124
-#	define ET_KEY_DOWN					125
-#	define ET_KEY_UP					126
+#	define ET_KEY_LEFT					VK_LEFT
+#	define ET_KEY_RIGHT					VK_RIGHT
+#	define ET_KEY_DOWN					VK_DOWN
+#	define ET_KEY_UP					VK_UP
 #
 #elif (ET_PLATFORM_ANDROID)
 #

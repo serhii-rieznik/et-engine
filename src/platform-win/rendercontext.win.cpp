@@ -537,9 +537,14 @@ RenderContextData& RenderContextData::release()
 union internal_PointerInputInfo
 {
 	LPARAM lParam;
-	struct { short x, y; };
+	struct 
+	{
+		short x;
+		short y; 
+	};
 
-	internal_PointerInputInfo(LPARAM p) : lParam(p) { }
+	internal_PointerInputInfo(LPARAM p) : 
+		lParam(p) { }
 };
 
 union internal_KeyInputInfo
@@ -721,10 +726,13 @@ LRESULT CALLBACK mainWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			internal_PointerInputInfo p(lParam);
 			float s = static_cast<float>(GET_WHEEL_DELTA_WPARAM(wParam)) / static_cast<float>(WHEEL_DELTA);
 
-			vec2 pt(static_cast<float>(p.x), static_cast<float>(p.y));
+			POINT aPoint = { p.x, p.y };
+			ScreenToClient(hWnd, &aPoint);
+
+			vec2 pt(static_cast<float>(aPoint.x), static_cast<float>(aPoint.y));
 			vec2 normPt(2.0f * pt.x / viewportSize.x - 1.0f, 1.0f - 2.0f * pt.y / viewportSize.y);
 
-			handler->pointerScrolled(PointerInputInfo(PointerType_MiddleButton, pt, normPt, vec2(0.0f, s),
+			handler->pointerScrolled(PointerInputInfo(PointerType_MiddleButton, pt, normPt, vec2(s),
 				PointerType_MiddleButton, mainRunLoop().time(), PointerOrigin_Mouse));
 
 			return 0;
