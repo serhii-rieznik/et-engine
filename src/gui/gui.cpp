@@ -366,61 +366,17 @@ bool Gui::animatingTransition()
  * Layout Entry
  */
 
-Gui::LayoutEntryObject::LayoutEntryObject(Gui* own, RenderContext* rc, Layout::Pointer l) :  owner(own),
-	layout(l), animator(0),  offsetAlpha(0.0f, 0.0f, 1.0f), state(Gui::LayoutEntryObject::State_Still)
+Gui::LayoutEntryObject::LayoutEntryObject(Gui* own, RenderContext* rc, Layout::Pointer l) :
+	animator(l->timerPool()), layout(l), offsetAlpha(0.0f, 0.0f, 1.0f), state(Gui::LayoutEntryObject::State_Still)
 {
 	l->initRenderingElement(rc);
-}
-
-Gui::LayoutEntryObject::LayoutEntryObject(Gui::LayoutEntryObject&& l) : 
-	owner(l.owner), layout(l.layout), animator(l.animator.extract()), 
-	offsetAlpha(l.offsetAlpha), state(Gui::LayoutEntryObject::State_Still)
-{
-	moveDelegate();
-}
-
-Gui::LayoutEntryObject::LayoutEntryObject(Gui::LayoutEntryObject& l) : 
-	owner(l.owner), layout(l.layout), animator(l.animator.extract()), 
-	offsetAlpha(l.offsetAlpha), state(Gui::LayoutEntryObject::State_Still)
-{
-	moveDelegate();
-}
-
-Gui::LayoutEntryObject& Gui::LayoutEntryObject::operator = (Gui::LayoutEntryObject& l)
-{
-	owner = l.owner;
-	layout = l.layout;
-	animator = l.animator.extract();
-	offsetAlpha = l.offsetAlpha;
-	state = l.state;
-	moveDelegate();
-	return *this; 
-}
-
-void Gui::LayoutEntryObject::moveDelegate()
-{
-	if (animator.valid())
-		animator->setDelegate(0);
+	animator.finished.connect([this, own](){ own->layoutEntryTransitionFinished(this); });
 }
 
 void Gui::LayoutEntryObject::animateTo(const vec3& oa, float duration, State s)
 {
 	state = s;
-
-	if (animator.valid())
-		animator.extract()->destroy();
-
-	animator = new Vector3Animator(this, &offsetAlpha, offsetAlpha, oa, duration, 0, mainTimerPool());
-}
-
-void Gui::LayoutEntryObject::animatorUpdated(BaseAnimator*)
-{
-}
-
-void Gui::LayoutEntryObject::animatorFinished(BaseAnimator*)
-{
-	animator.extract()->destroy();
-	owner->layoutEntryTransitionFinished(this);
+	animator.animate(&offsetAlpha, offsetAlpha, oa, duration);
 }
 
 void Gui::showMessageView(MessageView::Pointer mv, size_t animationFlags, float duration)

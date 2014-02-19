@@ -12,7 +12,7 @@
 #include <et/rendering/rendercontext.h>
 #include <et/apiobjects/vertexbuffer.h>
 #include <et/vertexbuffer/IndexArray.h>
-#include <et/resources/textureloader.h>
+#include <et/imaging/textureloader.h>
 #include <et/scene3d/supportmesh.h>
 #include <et/scene3d/animation.h>
 
@@ -269,7 +269,8 @@ void FBXLoaderPrivate::loadTextures()
 				log::info("Loading texture: %s", fileName.c_str());
 				
 				texture = _rc->textureFactory().loadTexture(fileName, _texCache);
-				texture->setOrigin(getFileName(fileName));
+				if (texture.valid())
+					texture->setOrigin(getFileName(fileName));
 			}
 			else
 			{

@@ -36,6 +36,9 @@
 		A55A6F751860C0730010936D /* serialization.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A55A6F6C1860C0730010936D /* serialization.cpp */; };
 		A55A6F761860C0730010936D /* storage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A55A6F6D1860C0730010936D /* storage.cpp */; };
 		A55A6F771860C0730010936D /* supportmesh.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A55A6F6E1860C0730010936D /* supportmesh.cpp */; };
+		A57D10C918B3DA6D009546CC /* jpegloader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A57D10C718B3DA6D009546CC /* jpegloader.cpp */; };
+		A57D10CA18B3DA6D009546CC /* textureloader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A57D10C818B3DA6D009546CC /* textureloader.cpp */; };
+		A57D10CC18B3DB13009546CC /* hdrloader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A57D10CB18B3DB13009546CC /* hdrloader.cpp */; };
 		A5963FDB1739B55A00837C6C /* libxml2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = A5963FDA1739B55A00837C6C /* libxml2.dylib */; };
 		A5A23E2F16811838001B3E98 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A5A23E2E16811838001B3E98 /* Cocoa.framework */; };
 		A5A23E5616811900001B3E98 /* converter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5A23E5416811900001B3E98 /* converter.cpp */; };
@@ -104,7 +107,6 @@
 		A5A23F1C16811978001B3E98 /* renderer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5A23EB516811978001B3E98 /* renderer.cpp */; };
 		A5A23F1D16811978001B3E98 /* rendering.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5A23EB616811978001B3E98 /* rendering.cpp */; };
 		A5A23F1E16811978001B3E98 /* renderstate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5A23EB716811978001B3E98 /* renderstate.cpp */; };
-		A5A23F1F16811978001B3E98 /* textureloader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5A23EB916811978001B3E98 /* textureloader.cpp */; };
 		A5A23F2A16811978001B3E98 /* taskpool.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5A23EC716811978001B3E98 /* taskpool.cpp */; };
 		A5A23F2B16811978001B3E98 /* notifytimer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5A23EC916811978001B3E98 /* notifytimer.cpp */; };
 		A5A23F2C16811978001B3E98 /* sequence.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5A23ECA16811978001B3E98 /* sequence.cpp */; };
@@ -171,6 +173,9 @@
 		A55A6F6C1860C0730010936D /* serialization.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = serialization.cpp; sourceTree = "<group>"; };
 		A55A6F6D1860C0730010936D /* storage.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = storage.cpp; sourceTree = "<group>"; };
 		A55A6F6E1860C0730010936D /* supportmesh.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = supportmesh.cpp; sourceTree = "<group>"; };
+		A57D10C718B3DA6D009546CC /* jpegloader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = jpegloader.cpp; sourceTree = "<group>"; };
+		A57D10C818B3DA6D009546CC /* textureloader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = textureloader.cpp; sourceTree = "<group>"; };
+		A57D10CB18B3DB13009546CC /* hdrloader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = hdrloader.cpp; sourceTree = "<group>"; };
 		A5963FDA1739B55A00837C6C /* libxml2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libxml2.dylib; path = usr/lib/libxml2.dylib; sourceTree = SDKROOT; };
 		A5A23E2A16811838001B3E98 /* FBXConverter.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FBXConverter.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A5A23E2E16811838001B3E98 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
@@ -246,7 +251,6 @@
 		A5A23EB516811978001B3E98 /* renderer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = renderer.cpp; sourceTree = "<group>"; };
 		A5A23EB616811978001B3E98 /* rendering.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = rendering.cpp; sourceTree = "<group>"; };
 		A5A23EB716811978001B3E98 /* renderstate.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = renderstate.cpp; sourceTree = "<group>"; };
-		A5A23EB916811978001B3E98 /* textureloader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = textureloader.cpp; sourceTree = "<group>"; };
 		A5A23EC716811978001B3E98 /* taskpool.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = taskpool.cpp; sourceTree = "<group>"; };
 		A5A23EC916811978001B3E98 /* notifytimer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = notifytimer.cpp; sourceTree = "<group>"; };
 		A5A23ECA16811978001B3E98 /* sequence.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = sequence.cpp; sourceTree = "<group>"; };
@@ -527,6 +531,9 @@
 		A5A23E9016811978001B3E98 /* imaging */ = {
 			isa = PBXGroup;
 			children = (
+				A57D10CB18B3DB13009546CC /* hdrloader.cpp */,
+				A57D10C718B3DA6D009546CC /* jpegloader.cpp */,
+				A57D10C818B3DA6D009546CC /* textureloader.cpp */,
 				A5A23E9616811978001B3E98 /* pvrloader.cpp */,
 				A55118A01870D8FB0093E334 /* pvrdecompressor.cpp */,
 				A5A23E9116811978001B3E98 /* ddsloader.cpp */,
@@ -637,7 +644,6 @@
 		A5A23EB816811978001B3E98 /* resources */ = {
 			isa = PBXGroup;
 			children = (
-				A5A23EB916811978001B3E98 /* textureloader.cpp */,
 			);
 			name = resources;
 			path = ../../src/resources;
@@ -704,7 +710,7 @@
 		A5A23E2116811838001B3E98 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0450;
+				LastUpgradeCheck = 0510;
 				ORGANIZATIONNAME = Cheetek;
 			};
 			buildConfigurationList = A5A23E2416811838001B3E98 /* Build configuration list for PBXProject "FBXConverter" */;
@@ -794,6 +800,7 @@
 				A5A23EF516811978001B3E98 /* guirenderer.cpp in Sources */,
 				A55118A11870D8FB0093E334 /* pvrdecompressor.cpp in Sources */,
 				A5A23EF616811978001B3E98 /* imageview.cpp in Sources */,
+				A57D10CA18B3DA6D009546CC /* textureloader.cpp in Sources */,
 				A5A23EF816811978001B3E98 /* label.cpp in Sources */,
 				A5A23EF916811978001B3E98 /* layout.cpp in Sources */,
 				A5A23EFA16811978001B3E98 /* listbox.cpp in Sources */,
@@ -826,13 +833,14 @@
 				A5A23F1416811978001B3E98 /* rendercontext.mac.mm in Sources */,
 				A5A23F1616811978001B3E98 /* criticalsection.unix.cpp in Sources */,
 				A5A23F1716811978001B3E98 /* mutex.unix.cpp in Sources */,
+				A57D10CC18B3DB13009546CC /* hdrloader.cpp in Sources */,
 				A5A23F1916811978001B3E98 /* thread.unix.cpp in Sources */,
 				A5A23F1A16811978001B3E98 /* threading.unix.cpp in Sources */,
+				A57D10C918B3DA6D009546CC /* jpegloader.cpp in Sources */,
 				A5A23F1B16811978001B3E98 /* primitives.cpp in Sources */,
 				A5A23F1C16811978001B3E98 /* renderer.cpp in Sources */,
 				A5A23F1D16811978001B3E98 /* rendering.cpp in Sources */,
 				A5A23F1E16811978001B3E98 /* renderstate.cpp in Sources */,
-				A5A23F1F16811978001B3E98 /* textureloader.cpp in Sources */,
 				A55A6F641860C0600010936D /* backgroundthread.cpp in Sources */,
 				A5A23F2A16811978001B3E98 /* taskpool.cpp in Sources */,
 				A55A6F601860C03B0010936D /* program.cpp in Sources */,
@@ -864,7 +872,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_WARN_EMPTY_BODY = YES;
@@ -893,7 +900,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_WARN_EMPTY_BODY = YES;
@@ -932,6 +938,7 @@
 					/SDK/FBX/lib/clang/ub/release,
 					$PROJECT_DIR/../../lib/osx,
 				);
+				OTHER_LDFLAGS = "-ljpeg";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = app;
 			};
@@ -957,6 +964,7 @@
 					/SDK/FBX/lib/clang/ub/release,
 					$PROJECT_DIR/../../lib/osx,
 				);
+				OTHER_LDFLAGS = "-ljpeg";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = app;
 			};

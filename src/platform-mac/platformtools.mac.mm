@@ -11,26 +11,25 @@
 
 using namespace et;
 
+typedef void (^filePickerCallback)(__strong NSString* path);
+
 @interface FilePicker : NSObject
 {
 	NSString* _defaultName;
-	NSString* _result;
+	filePickerCallback _callback;
 }
 
-+ (FilePicker*)pickerWithDefaultName:(NSString*)name;
-- (instancetype)initWithDefaultName:(NSString*)name;
+- (instancetype)initWithDefaultName:(NSString*)name callback:(filePickerCallback)cb;
 
 - (void)openFile;
 - (void)saveFile;
-
-@property (nonatomic, readonly) NSString* result;
 
 @end
 
 std::string et::selectFile(const StringList&, SelectFileMode mode, const std::string& defaultName)
 {
 	SEL selector = nil;
-
+	
 	if (mode == SelectFileMode_Open)
 		selector = @selector(openFile);
 	else if (mode == SelectFileMode_Save)
@@ -38,30 +37,27 @@ std::string et::selectFile(const StringList&, SelectFileMode mode, const std::st
 	else
 		ET_FAIL("Invalid SelectFieMode value");
 	
-	FilePicker* picker = ET_OBJC_AUTORELEASE([[FilePicker alloc]
-		initWithDefaultName:[NSString stringWithUTF8String:defaultName.c_str()]]);
+	__strong __block std::string result;
 	
+	FilePicker* picker = ET_OBJC_AUTORELEASE([[FilePicker alloc]
+		initWithDefaultName:[NSString stringWithUTF8String:defaultName.c_str()] callback:^(__strong NSString* path)
+	{
+		result = std::string([path UTF8String]);
+	}]);
 	[picker performSelectorOnMainThread:selector withObject:nil waitUntilDone:YES];
 	
-	return [picker.result UTF8String];
+	return result;
 }
 
 @implementation FilePicker
 
-@synthesize result = _result;
-
-+ (FilePicker*)pickerWithDefaultName:(NSString*)name
-{
-	return ET_OBJC_AUTORELEASE([[FilePicker alloc] initWithDefaultName:name]);
-}
-
-- (instancetype)initWithDefaultName:(NSString*)name
+- (instancetype)initWithDefaultName:(NSString*)name callback:(filePickerCallback)cb
 {
 	self = [super init];
 	if (self)
 	{
 		_defaultName = name;
-		_result = nil;
+		_callback = cb;
 	}
 	return self;
 }
@@ -76,15 +72,21 @@ std::string et::selectFile(const StringList&, SelectFileMode mode, const std::st
 	[openDlg setResolvesAliases:YES];
 	[openDlg setAllowedFileTypes:nil];
 	
-	_result = ET_OBJC_RETAIN(([openDlg runModal] == NSOKButton) ?
+	NSString* result = ET_OBJC_RETAIN(([openDlg runModal] == NSOKButton) ?
 		[[[openDlg URLs] objectAtIndex:0] path] : [NSString string]);
+	
+	_callback(result);
 }
 
 - (void)saveFile
 {
 	NSSavePanel* saveDlg = [NSSavePanel savePanel];
 	[saveDlg setNameFieldStringValue:_defaultName];
-	_result = ET_OBJC_RETAIN(([saveDlg runModal] == NSOKButton) ? [[saveDlg URL] path] : [NSString string]);
+	
+	NSString* result = ET_OBJC_RETAIN(([saveDlg runModal] == NSOKButton) ?
+		[[saveDlg URL] path] : [NSString string]);
+	
+	_callback(result);
 }
 
 @end

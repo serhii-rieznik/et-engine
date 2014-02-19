@@ -48,9 +48,6 @@ namespace et
 			void pointerEntered(const PointerInputInfo&);
 			void pointerLeaved(const PointerInputInfo&);
 
-			void animatorUpdated(BaseAnimator*);
-			void animatorFinished(BaseAnimator*);
-
 			void hideText();
 			void revealText();
 
@@ -62,7 +59,7 @@ namespace et
 			GuiVertexList _backgroundVertices;
 			GuiVertexList _selectionVertices;
 			GuiVertexList _textVertices;
-			FloatAnimator* _textAlphaAnimator;
+			FloatAnimator _textAlphaAnimator;
 			size_t _selectedIndex;
 			float _textAlpha;
 			bool _pressed;

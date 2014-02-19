@@ -23,8 +23,6 @@ namespace et
 			Element2d(Element* parent, const std::string& name = std::string());
 			Element2d(const rect& frame, Element* parent, const std::string& name = std::string());
 
-			virtual ~Element2d();
-
 			virtual ElementRepresentation representation() const
 				{ return ElementRepresentation_2d; };
 
@@ -72,16 +70,12 @@ namespace et
 			const mat4& finalInverseTransform();
 			vec2 positionInElement(const vec2& p);
 
-			ET_DECLARE_EVENT2(elementAnimationFinished, Element2d*, AnimatedPropery)
-
 		protected:
+			void bindAnimators();
 			void buildFinalTransform();
 
 			mat4 transform();
 			float finalAlpha() const;
-
-			void animatorUpdated(BaseAnimator*);
-			void animatorFinished(BaseAnimator*);
 
 		private:
 			RectAnimator _frameAnimator;
