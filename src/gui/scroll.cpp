@@ -23,11 +23,13 @@ float bounceStopTreshold = 0.5f;
 ET_DECLARE_GUI_ELEMENT_CLASS(Scroll)
 
 Scroll::Scroll(Element2d* parent, const std::string& name) :
-	Element2d(parent, ET_GUI_PASS_NAME_TO_BASE_CLASS), _offsetAnimator(0, 0, mainTimerPool()),
+	Element2d(parent, ET_GUI_PASS_NAME_TO_BASE_CLASS), _offsetAnimator(mainTimerPool()),
 	_updateTime(0.0f), _scrollbarsAlpha(0.0f), _scrollbarsAlphaTarget(0.0f), _bounce(0),
 	_pointerCaptured(false), _manualScrolling(false)
 {
-	_offsetAnimator.setDelegate(this);
+	_offsetAnimator.updated.connect([this]()
+		{ setOffsetDirectly(_offset); });
+	
 	setFlag(Flag_HandlesChildEvents);
 	setFlag(Flag_ClipToBounds);
 	startUpdates();
@@ -485,19 +487,6 @@ void Scroll::setOffsetDirectly(const vec2& o)
 	
 	invalidateContent();
 	invalidateChildren();
-}
-
-void Scroll::animatorUpdated(BaseAnimator* a)
-{
-	if (a == &_offsetAnimator)
-		setOffsetDirectly(_offset);
-	
-	Element2d::animatorUpdated(a);
-}
-
-void Scroll::animatorFinished(BaseAnimator* a)
-{
-	Element2d::animatorFinished(a);
 }
 
 void Scroll::setBackgroundColor(const vec4& color)

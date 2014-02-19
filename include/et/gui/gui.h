@@ -120,7 +120,7 @@ namespace et
 			void internal_pushLayout(Layout::Pointer, AnimationDescriptor);
 			
 		private:
-			class LayoutEntryObject : public Shared, public AnimatorDelegate
+			class LayoutEntryObject : public Shared
 			{
 			public:
 				enum State
@@ -134,20 +134,9 @@ namespace et
 				LayoutEntryObject(Gui* own, RenderContext* rc, Layout::Pointer l);
 				void animateTo(const vec3& oa, float duration, State s);
 				
-			private:
-				LayoutEntryObject(LayoutEntryObject&& l);
-				LayoutEntryObject(LayoutEntryObject& l);
-				LayoutEntryObject& operator = (LayoutEntryObject& l);
-				
-			private:
-				void animatorUpdated(BaseAnimator*);
-				void animatorFinished(BaseAnimator*);
-				void moveDelegate();
-
 			public:
-				Gui* owner;
 				Layout::Pointer layout;
-				AutoPtr<Vector3Animator> animator;
+				Vector3Animator animator;
 				vec3 offsetAlpha;
 				State state;
 			};

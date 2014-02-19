@@ -70,10 +70,7 @@ namespace et
 			void broadcastCancelled(const PointerInputInfo&);
 			
 			void update(float t);
-			
-			void animatorUpdated(BaseAnimator*);
-			void animatorFinished(BaseAnimator*);
-			
+						
 			float scrollOutOfContentXSize() const;
 			float scrollOutOfContentYSize() const;
 

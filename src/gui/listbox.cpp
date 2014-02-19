@@ -20,10 +20,20 @@ static const size_t invalidSelectedIndex = static_cast<size_t>(-1);
 ET_DECLARE_GUI_ELEMENT_CLASS(ListboxPopup)
 
 ListboxPopup::ListboxPopup(Listbox* owner, const std::string& name) :
-	Element2d(owner, ET_GUI_PASS_NAME_TO_BASE_CLASS), _owner(owner), _textAlphaAnimator(0),
+	Element2d(owner, ET_GUI_PASS_NAME_TO_BASE_CLASS), _owner(owner), _textAlphaAnimator(timerPool()),
 	_selectedIndex(invalidSelectedIndex), _textAlpha(0.0f), _pressed(false)
 {
 	setFlag(Flag_RenderTopmost);
+	
+	_textAlphaAnimator.updated.connect([this]()
+	{
+		invalidateContent();
+	});
+	
+	_textAlphaAnimator.finished.connect([this]()
+	{
+		_owner->popupDidOpen();
+	});
 }
 
 void ListboxPopup::buildVertices(GuiRenderer& gr)
@@ -79,38 +89,14 @@ void ListboxPopup::buildVertices(GuiRenderer& gr)
 void ListboxPopup::revealText()
 {
 	hideText();
-
-	if (_textAlphaAnimator)
-		_textAlphaAnimator->destroy();
-
-	_textAlphaAnimator = new FloatAnimator(this, &_textAlpha, _textAlpha, 1.0f,
-		textRevealDuration, 0, timerPool());
+	
+	_textAlphaAnimator.animate(&_textAlpha, _textAlpha, 1.0f, textRevealDuration);
 }
 
 void ListboxPopup::hideText()
 {
 	_textAlpha = 0.0f;
 	invalidateContent();
-}
-
-void ListboxPopup::animatorUpdated(BaseAnimator* a)
-{
-	if (a == _textAlphaAnimator)
-		invalidateContent();
-
-	Element2d::animatorUpdated(a);
-}
-
-void ListboxPopup::animatorFinished(BaseAnimator* a)
-{
-	if (a == _textAlphaAnimator)
-	{
-		a->destroy();
-		_textAlphaAnimator = 0;
-		_owner->popupDidOpen();
-	}
-	else
-		Element2d::animatorFinished(a);
 }
 
 void ListboxPopup::addToRenderQueue(RenderContext*, GuiRenderer& gr)
@@ -178,8 +164,6 @@ Listbox::Listbox(Font font, Element2d* parent, const std::string& name) :
 {
 	_popup = ListboxPopup::Pointer(new ListboxPopup(this));
 	_popup->setVisible(false);
-	
-	ET_CONNECT_EVENT(_popup->elementAnimationFinished, Listbox::onPopupAnimationFinished)
 }
 
 void Listbox::setImage(const Image& img, ListboxState state)

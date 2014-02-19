@@ -8,7 +8,7 @@
 #include <sstream>
 #include <et/core/et.h>
 #include <et/app/application.h>
-#include <et/resources/textureloader.h>
+#include <et/imaging/textureloader.h>
 #include <et/gui/textureatlas.h>
 
 using namespace et;

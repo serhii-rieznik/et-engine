@@ -189,12 +189,6 @@ namespace et
 			virtual mat4 parentFinalTransform()
 				{ return parent() ? parent()->finalTransform() : identityMatrix; }
 
-			virtual void animatorUpdated(BaseAnimator*) 
-				{ /* virtual */ }
-
-			virtual void animatorFinished(BaseAnimator*) 
-				{ /* virtual */ }
-
 			virtual Layout* owner()
 				{ return parent() ? parent()->owner() : 0; }
 

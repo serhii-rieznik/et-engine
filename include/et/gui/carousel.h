@@ -122,9 +122,6 @@ namespace et
 			virtual bool visible() const
 				{ return _alpha > 0.0f; }
 
-			void animatorUpdated(BaseAnimator*);
-			void animatorFinished(BaseAnimator*);
-
 			ET_DECLARE_EVENT1(didSelectItem, CarouselItem::Pointer)
 			ET_DECLARE_EVENT1(itemClicked, CarouselItem::Pointer)
 
