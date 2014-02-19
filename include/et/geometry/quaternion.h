@@ -37,13 +37,13 @@ namespace et
 		const T& operator[](int i) const
 			{ return *(&scalar + i); }
 
-		Quaternion operator !()
+		Quaternion operator !() const
 			{ return Quaternion(scalar, -vector); }
 
-		Quaternion operator + (const Quaternion &q)
+		Quaternion operator + (const Quaternion &q) const
 			{ return Quaternion(scalar+q.scalar, vector+q.vector); }
 
-		Quaternion operator - (const Quaternion &q)
+		Quaternion operator - (const Quaternion &q) const
 			{ return Quaternion(scalar-q.scalar, vector-q.vector); }
 
 		Quaternion operator * (const Quaternion &q) const
@@ -86,28 +86,14 @@ namespace et
 
 		vector3<T> transform(const vector3<T> &v) const
 		{
-			Quaternion& thisOne = *this;
-			return (thisOne * Quaternion(v) * !thisOne).vector;
+			const Quaternion& thisOne = *this;
+			return (thisOne * Quaternion(v) * (!thisOne)).vector;
 		}
 
 		vector3<T> invtransform(const vector3<T> &v) const
 		{
-			Quaternion& thisOne = *this;
-			return (!thisOne * Quaternion(v) * thisOne).vector;
-		}
-
-		Quaternion<T>& operator += (const Quaternion &q)
-		{ 
-			scalar = +q.scalar; 
-			vector += q.vector; 
-			return *this;
-		}
-
-		Quaternion<T>& operator -= (const Quaternion &q) 
-		{
-			scalar = -q.scalar; 
-			vector -= q.vector; 
-			return *this;
+			const Quaternion& thisOne = *this;
+			return ((!thisOne) * Quaternion(v) * thisOne).vector;
 		}
 
 		Quaternion<T>& operator *= (const Quaternion &q) 
