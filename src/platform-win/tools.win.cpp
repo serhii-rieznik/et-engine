@@ -178,14 +178,34 @@ bool et::createDirectory(const std::string& name, bool recursive)
 	}
 }
 
-bool et::removeFile(const std::string& path)
+bool et::removeFile(const std::string& name)
 {
-	return DeleteFile(path.c_str()) != 0;
+	std::string doubleNullTerminated(name.size() + 1, 0);
+	std::copy(name.begin(), name.end(), doubleNullTerminated.begin());
+
+	SHFILEOPSTRUCT fop = {};
+
+	fop.hwnd = 0;
+	fop.wFunc = FO_DELETE;
+	fop.pFrom = doubleNullTerminated.c_str();
+	fop.fFlags = FOF_NO_UI;
+
+	return SHFileOperation(&fop) == 0;
 }
 
 bool et::removeDirectory(const std::string& name)
 {
-	return RemoveDirectory(name.c_str()) != 0;
+	std::string doubleNullTerminated(name.size() + 1, 0);
+	std::copy(name.begin(), name.end(), doubleNullTerminated.begin());
+	
+	SHFILEOPSTRUCT fop = { };
+
+	fop.hwnd = 0;
+	fop.wFunc = FO_DELETE;
+	fop.pFrom = doubleNullTerminated.c_str();
+	fop.fFlags = FOF_NO_UI;
+
+	return SHFileOperation(&fop) == 0;
 }
 
 void et::findSubfolders(const std::string& folder, bool recursive, StringList& list)
