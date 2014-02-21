@@ -37,7 +37,7 @@ std::string et::selectFile(const StringList&, SelectFileMode mode, const std::st
 	else
 		ET_FAIL("Invalid SelectFieMode value");
 	
-	__strong __block std::string result;
+	__block std::string result;
 	
 	FilePicker* picker = ET_OBJC_AUTORELEASE([[FilePicker alloc]
 		initWithDefaultName:[NSString stringWithUTF8String:defaultName.c_str()] callback:^(__strong NSString* path)
@@ -72,21 +72,14 @@ std::string et::selectFile(const StringList&, SelectFileMode mode, const std::st
 	[openDlg setResolvesAliases:YES];
 	[openDlg setAllowedFileTypes:nil];
 	
-	NSString* result = ET_OBJC_RETAIN(([openDlg runModal] == NSOKButton) ?
-		[[[openDlg URLs] objectAtIndex:0] path] : [NSString string]);
-	
-	_callback(result);
+	_callback([openDlg runModal] == NSOKButton ? [[[openDlg URLs] objectAtIndex:0] path] : [NSString string]);
 }
 
 - (void)saveFile
 {
 	NSSavePanel* saveDlg = [NSSavePanel savePanel];
 	[saveDlg setNameFieldStringValue:_defaultName];
-	
-	NSString* result = ET_OBJC_RETAIN(([saveDlg runModal] == NSOKButton) ?
-		[[saveDlg URL] path] : [NSString string]);
-	
-	_callback(result);
+	_callback([saveDlg runModal] == NSOKButton ? [[saveDlg URL] path] : [NSString string]);
 }
 
 @end

@@ -65,17 +65,17 @@ namespace et
 		
 #endif
 		
-		T* operator *() 
-			{ return _data; }
+		T* operator *()
+			{ ET_ASSERT(valid()); return _data; }
 
 		const T* operator *() const 
-			{ return _data; }
+			{ ET_ASSERT(valid()); return _data; }
 
 		T* operator -> ()
-			{ return _data; }
+			{ ET_ASSERT(valid()); return _data; }
 
 		const T* operator -> () const 
-			{ return _data; }
+			{ ET_ASSERT(valid()); return _data; }
 
 		T* ptr()
 			{ return _data; }
@@ -84,10 +84,10 @@ namespace et
 			{ return _data; }
 
 		T& reference()
-			{ return *_data; }
+			{ ET_ASSERT(valid()); return *_data; }
 
 		const T& reference() const
-			{ return *_data; }
+			{ ET_ASSERT(valid()); return *_data; }
 
 		bool invalid() const
 			{ return _data == nullptr; }
