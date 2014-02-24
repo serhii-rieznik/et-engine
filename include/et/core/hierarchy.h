@@ -128,8 +128,11 @@ namespace et
 		{
 			if (i->ptr() == c)
 			{
+				auto pointer = *i;
+
 				_children.erase(i);
-				_children.push_back(typename Hierarchy<T, BASE>::BasePointer(c));
+				_children.push_back(pointer);
+
 				break;
 			}
 		}
@@ -142,8 +145,11 @@ namespace et
 		{
 			if (i->ptr() == c)
 			{
+				auto pointer = *i;
+
 				_children.erase(i);
-				_children.push_front(typename Hierarchy<T, BASE>::BasePointer(c));
+				_children.push_front(pointer);
+
 				break;
 			}
 		}
