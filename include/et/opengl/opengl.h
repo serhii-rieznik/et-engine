@@ -76,6 +76,10 @@
 #		define GL_HALF_FLOAT							GL_HALF_FLOAT_OES
 #	endif
 #
+#	if !defined(GL_RGB8)
+#		define GL_RGB8									GL_RGB8_OES
+#	endif
+#
 #	if !defined(GL_RGBA8)
 #		define GL_RGBA8									GL_RGBA8_OES
 #	endif
