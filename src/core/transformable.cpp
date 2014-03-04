@@ -15,7 +15,7 @@ ComponentTransformable::ComponentTransformable() :
 {
 }
 
-mat4 ComponentTransformable::transform()
+const mat4& ComponentTransformable::transform()
 {
 	if (!transformValid())
 		buildTransform();
@@ -95,13 +95,14 @@ void ComponentTransformable::applyOrientation(const quaternion& q)
 
 const mat4& ComponentTransformable::cachedTransform() const
 {
-	assert(transformValid());
+	ET_ASSERT(transformValid());
 	return _cachedTransform; 
 }
 
 void ComponentTransformable::setTransform(const mat4& originalMatrix)
 {
 	_flags &= ~Flag_ShouldDecompose;
+	
 	decomposeMatrix(originalMatrix, _translation, _orientation, _scale);
 	invalidateTransform();
 
@@ -109,10 +110,13 @@ void ComponentTransformable::setTransform(const mat4& originalMatrix)
 	buildTransform();
 
 	float deviation = 0.0f;
+	
 	for (size_t v = 0; v < 4; ++v)
+	{
 		for (size_t u = 0; u < 4; ++u)
 			deviation += sqr(originalMatrix[v][u] - _cachedTransform[v][u]);
-
+	}
+	
 	if (deviation > 0.01f)
 	{
 		log::warning("Failed to decompose matrix\n{\n"

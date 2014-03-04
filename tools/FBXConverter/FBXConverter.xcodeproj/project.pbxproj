@@ -19,9 +19,9 @@
 		A53B4F421681247300C6B8EC /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = A53B4F411681247300C6B8EC /* libz.dylib */; };
 		A53B4F441681256B00C6B8EC /* data in Resources */ = {isa = PBXBuildFile; fileRef = A53B4F431681256B00C6B8EC /* data */; };
 		A551189C1870D7EF0093E334 /* libfbxsdk.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = A551189B1870D7EF0093E334 /* libfbxsdk.dylib */; };
-		A551189F1870D8180093E334 /* libfbxsdk.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = A551189B1870D7EF0093E334 /* libfbxsdk.dylib */; };
 		A55118A11870D8FB0093E334 /* pvrdecompressor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A55118A01870D8FB0093E334 /* pvrdecompressor.cpp */; };
 		A55118A41870F2330093E334 /* animation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A55118A31870F2330093E334 /* animation.cpp */; };
+		A555683818C611C100084B1F /* libfbxsdk.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = A551189B1870D7EF0093E334 /* libfbxsdk.dylib */; };
 		A55A6F5C1860BFD60010936D /* libfbxsdk.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A55A6F5B1860BFD60010936D /* libfbxsdk.a */; };
 		A55A6F5F1860C03B0010936D /* framebuffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A55A6F5D1860C03B0010936D /* framebuffer.cpp */; };
 		A55A6F601860C03B0010936D /* program.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A55A6F5E1860C03B0010936D /* program.cpp */; };
@@ -127,7 +127,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 6;
 			files = (
-				A551189F1870D8180093E334 /* libfbxsdk.dylib in CopyFiles */,
+				A555683818C611C100084B1F /* libfbxsdk.dylib in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -347,9 +347,9 @@
 				A53B4F411681247300C6B8EC /* libz.dylib */,
 				A53B4F3016811FA900C6B8EC /* libiconv.dylib */,
 				A5963FDA1739B55A00837C6C /* libxml2.dylib */,
+				A551189B1870D7EF0093E334 /* libfbxsdk.dylib */,
 				5C5128AB1681FA2500ED9B96 /* libpng.a */,
 				A55A6F5B1860BFD60010936D /* libfbxsdk.a */,
-				A551189B1870D7EF0093E334 /* libfbxsdk.dylib */,
 				A5A23E3116811838001B3E98 /* AppKit.framework */,
 				A5A23E3216811838001B3E98 /* CoreData.framework */,
 				A5A23E3316811838001B3E98 /* Foundation.framework */,

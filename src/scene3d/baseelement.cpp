@@ -25,18 +25,31 @@ void Element::setParent(Element* p)
 void Element::invalidateTransform()
 {
 	ComponentTransformable::invalidateTransform();
-	ET_ITERATE(children(), Element::Pointer&, i,
-	{
+	
+	for (auto i : children())
 		i->invalidateTransform();
-	});
 }
 
-mat4 Element::finalTransform()
+void Element::buildTransform()
+{
+	_cachedFinalTransform = parent() ?  transform() * parent()->finalTransform() : transform();
+	_cachedFinalInverseTransform = _cachedFinalTransform.inverse();
+}
+
+const mat4& Element::finalTransform()
 {
 	if (!transformValid())
-		_cachedFinalTransform = parent() ?  transform() * parent()->finalTransform() : transform();
-
+		buildTransform();
+	
 	return _cachedFinalTransform;
+}
+
+const mat4& Element::finalInverseTransform()
+{
+	if (!transformValid())
+		buildTransform();
+	
+	return _cachedFinalInverseTransform;
 }
 
 bool Element::isKindOf(ElementType t) const
@@ -211,4 +224,9 @@ void Element::setActive(bool active)
 bool Element::hasPropertyString(const std::string& s) const
 {
 	return _properites.find(s) != _properites.end();
+}
+
+void Element::addAnimation(const Animation& a)
+{
+	_animations.push_back(a);
 }

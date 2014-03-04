@@ -40,11 +40,14 @@ namespace et
 		Quaternion operator !() const
 			{ return Quaternion(scalar, -vector); }
 
+		Quaternion operator - () const
+			{ return Quaternion(-scalar, -vector); }
+		
 		Quaternion operator + (const Quaternion &q) const
-			{ return Quaternion(scalar+q.scalar, vector+q.vector); }
+			{ return Quaternion(scalar + q.scalar, vector + q.vector); }
 
 		Quaternion operator - (const Quaternion &q) const
-			{ return Quaternion(scalar-q.scalar, vector-q.vector); }
+			{ return Quaternion(scalar - q.scalar, vector - q.vector); }
 
 		Quaternion operator * (const Quaternion &q) const
 		{

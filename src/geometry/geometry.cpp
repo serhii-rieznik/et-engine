@@ -192,10 +192,19 @@ vector2<float> et::bezierCurve(const std::vector< vector2<float> >& points, floa
 	ET_ASSERT(points.size() > 0);
 	
 	if (points.size() == 1)
+	{
 		return points.front();
+	}
 	else if (points.size() == 2)
+	{
 		return mix(points.front(), points.back(), time);
-
+	}
+	else if (points.size() == 3)
+	{
+		float invTime = 1.0f - time;
+		return sqr(invTime) * points.front() + 2.0f * invTime * time * points.at(1) + sqr(time) * points.back();
+	}
+	
 	std::vector< vector2<float> > firstPoints(points.size() - 1);
 	std::vector< vector2<float> > lastPoints(points.size() - 1);
 	for (size_t i = 0; i < points.size() - 1; ++i)

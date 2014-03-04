@@ -42,9 +42,9 @@ namespace et
 		ComponentTransformable();
 		virtual ~ComponentTransformable() { }
 
-		mat4 transform();
+		const mat4& transform();
 		const mat4& cachedTransform() const;
-
+		
 		void setTransform(const mat4& m);
 		void setTransformDirectly(const mat4& m);
 
@@ -61,7 +61,7 @@ namespace et
 		
 		bool transformValid() const
 			{ return (_flags & Flag_Valid); }
-		
+				
 		const vec3& translation() const;
 		const vec3& scale();
 		const quaternion& orientation();

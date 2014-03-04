@@ -12,7 +12,6 @@ using namespace et::s3d;
 
 Animation::Animation()
 {
-	
 }
 
 Animation::Animation(const std::string& n) :
@@ -20,11 +19,59 @@ Animation::Animation(const std::string& n) :
 {
 }
 
-void Animation::addKeyFrame(float, const mat4&)
+void Animation::addKeyFrame(float t, const ComponentTransformable& c)
 {
+	_times.push_back(t);
+	_transformations.push_back(c);
 }
 
-const mat4& Animation::transformation(float)
+void Animation::setTimeRange(float start, float stop)
 {
-	return identityMatrix;
+	_startTime = start;
+	_stopTime = stop;
+	
+	// TODO : validate values stored in _times and _transformations
+}
+
+void Animation::setFrameRate(float r)
+{
+	_frameRate = r;
+}
+
+void Animation::transformation(float time, vec3& t, quaternion& o, vec3& s)
+{
+	float d = duration();
+	
+	while (time < _startTime)
+		time += d;
+	
+	while (time > _stopTime)
+		time -= d;
+	
+	auto lTime = std::lower_bound(_times.begin(), _times.end(), time);
+	auto uTime = std::upper_bound(_times.begin(), _times.end(), time);
+	
+	auto lTransform = _transformations.at(lTime - _times.begin());
+	auto uTransform = _transformations.at(uTime - _times.begin());
+	
+	float interolationFactor = (time - *lTime) / (*uTime - *lTime);
+	
+	t = mix(lTransform.translation(), uTransform.translation(), interolationFactor);
+	o = slerp(lTransform.orientation(), uTransform.orientation(), interolationFactor);
+	s = mix(lTransform.translation(), uTransform.translation(), interolationFactor);
+}
+
+mat4 Animation::transformation(float time)
+{
+	vec3 t;
+	quaternion o;
+	vec3 s;
+	
+	transformation(time, t, o, s);
+	
+	ComponentTransformable result;
+	result.setTranslation(t);
+	result.setOrientation(o);
+	result.setScale(s);
+	return result.transform();
 }

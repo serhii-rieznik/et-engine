@@ -10,17 +10,13 @@
 using namespace et;
 using namespace et::s3d;
 
-SupportMesh::SupportMesh(const std::string& name, Element* parent) : Mesh(name, parent),
-	_cachedFinalTransformScale(0.0f), _inverseTransformValid(false)
-{
-
-}
+SupportMesh::SupportMesh(const std::string& name, Element* parent) :
+	Mesh(name, parent), _radius(0.0f) { }
 
 SupportMesh::SupportMesh(const std::string& name, const VertexArrayObject& ib, const Material::Pointer& material,
-	IndexType startIndex, size_t numIndexes, Element* parent) : Mesh(name, ib, material, startIndex, numIndexes, parent),
-	_data(numIndexes / 3), _cachedFinalTransformScale(0.0f), _inverseTransformValid(false)
+	IndexType start, size_t num, Element* parent) : Mesh(name, ib, material, start, num, parent),
+	_data(num / 3, 0), _radius(0.0f)
 {
-
 }
 
 void SupportMesh::setNumIndexes(size_t num)
@@ -90,7 +86,8 @@ SupportMesh* SupportMesh::duplicate()
 
 Sphere SupportMesh::sphere() 
 {
-	return Sphere(finalTransform() * _center, finalTransformScale() * _radius);
+	float scale = 1.0f / std::pow(std::abs(finalInverseTransform().mat3().determinant()), 1.0f / 3.0f);
+	return Sphere(finalTransform() * _center, scale * _radius);
 }
 
 AABB SupportMesh::aabb()
@@ -139,36 +136,4 @@ void SupportMesh::deserialize(std::istream& stream, ElementFactory* factory, Sce
 	}
 
 	Mesh::deserialize(stream, factory, version);
-}
-
-mat4 SupportMesh::finalTransform()
-{
-	if (!transformValid())
-		_inverseTransformValid = false;
-
-	return Element::finalTransform();
-}
-
-
-mat4 SupportMesh::finalTransformInverse()
-{
-	if (!_inverseTransformValid)
-		buildInverseTransform();
-
-	return _cachedInverseTransform;
-}
-
-float SupportMesh::finalTransformScale()
-{
-	if (!_inverseTransformValid)
-		buildInverseTransform();
-
-	return _cachedFinalTransformScale;
-}
-
-void SupportMesh::buildInverseTransform()
-{
-	_cachedInverseTransform = Element::finalTransform().inverse();
-	_cachedFinalTransformScale = 1.0f / std::pow(std::abs(_cachedInverseTransform.mat3().determinant()), 1.0f / 3.0f);
-	_inverseTransformValid = true;
 }

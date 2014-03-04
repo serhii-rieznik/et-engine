@@ -143,6 +143,32 @@ namespace et
 		T nt = 1 - t;
 		return vector2<T>(v1.x * nt + v2.x * t, v1.y * nt + v2.y * t);
 	}
+	
+	template<typename T>
+	inline Quaternion<T> slerp(const Quaternion<T>& from, const Quaternion<T>& to, T t)
+	{
+		T cosom = dot(from.vector, to.vector) + from.scalar * to.scalar;
+		
+		Quaternion<T> temp = to;
+		if (cosom < 0.0f)
+		{
+			temp = -to;
+			cosom = -cosom;
+		}
+		
+		T scale0 = static_cast<T>(1) - t;
+		T scale1 = t;
+		
+		if ((static_cast<T>(1) - cosom) > static_cast<T>(1.0e-5))
+		{
+			T omega = std::acos(cosom);
+			T sinom = static_cast<T>(1) / sin(omega);
+			scale0 = sin((static_cast<T>(1) - t) * omega) * sinom;
+			scale1 = sin(t * omega) * sinom;
+		}
+		
+		return (scale0 * from) + (scale1 * temp);
+	}
 
 	template<typename T>
 	inline vector3<T>fromSpherical(T theta, T phi)
@@ -150,7 +176,7 @@ namespace et
 		T fCosTheta = std::cos(theta);
 		return vec3(fCosTheta * std::cos(phi), std::sin(theta), fCosTheta * std::sin(phi));
 	}
-
+	
 	template<typename T>
 	inline vector3<T>fromSphericalRotated(T theta, T phi)
 	{

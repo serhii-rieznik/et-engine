@@ -5,7 +5,6 @@
  *
  */
 
-#include <assert.h>
 #include <fbxsdk.h>
 
 #include <et/app/application.h>
@@ -14,8 +13,6 @@
 #include <et/vertexbuffer/IndexArray.h>
 #include <et/imaging/textureloader.h>
 #include <et/scene3d/supportmesh.h>
-#include <et/scene3d/animation.h>
-
 #include <et/models/fbxloader.h>
 
 using namespace FBXSDK_NAMESPACE;
@@ -37,11 +34,10 @@ namespace et
 		FbxManager* manager;
 		FbxImporter* importer;
 		FbxScene* scene;
+		FbxAnimLayer* sharedAnimationLayer;
 
 		s3d::Element::Pointer rootNode;
 		s3d::Scene3dStorage::Pointer storage;
-		
-		std::vector<s3d::Animation> animations;
 		
 	public:
 		FBXLoaderPrivate(RenderContext* rc, ObjectsCache& ObjectsCache);
@@ -52,10 +48,15 @@ namespace et
 		bool import(const std::string& filename);
 		
 		void loadAnimations();
-		
 		void loadTextures();
 		
+		/* 
+		 * Node loading
+		 */
 		void loadNode(FbxNode* node, s3d::Element::Pointer parent);
+		void loadNodeAnimations(FbxNode* node, s3d::Element::Pointer object);
+		s3d::Material::List loadNodeMaterials(FbxNode* node);
+		StringList loadNodeProperties(FbxNode* node);
 		
 		void buildVertexBuffers(RenderContext* rc, s3d::Element::Pointer root);
 
@@ -70,7 +71,6 @@ namespace et
 		void loadMaterialTextureValue(s3d::Material::Pointer m, size_t propName,
 			FbxSurfaceMaterial* fbxm, const char* fbxprop);
 
-		StringList loadNodeProperties(FbxNode* node);
 	};
 }
 
@@ -83,9 +83,9 @@ using namespace et;
  */
 
 FBXLoaderPrivate::FBXLoaderPrivate(RenderContext* rc, ObjectsCache& ObjectsCache) :
-	manager(FbxManager::Create()), _rc(rc), _texCache(ObjectsCache)
+	manager(FbxManager::Create()), _rc(rc), _texCache(ObjectsCache), importer(nullptr),
+	scene(FbxScene::Create(manager, 0)), sharedAnimationLayer(nullptr)
 {
-	scene = FbxScene::Create(manager, 0);
 }
 
 FBXLoaderPrivate::~FBXLoaderPrivate()
@@ -181,24 +181,21 @@ s3d::ElementContainer::Pointer FBXLoaderPrivate::parse()
 
 void FBXLoaderPrivate::loadAnimations()
 {
-	FbxArray<FbxPose*> scenePoses;
-	for (int i = 0; i < scene->GetPoseCount(); ++i)
-		scenePoses.Add(scene->GetPose(i));
-	
-	FbxArray<FbxString*> sceneAnimations;
-	scene->FillAnimStackNameArray(sceneAnimations);
-	animations.reserve(sceneAnimations.Size());
-	
-	for (int i = 0; i < sceneAnimations.Size(); ++i)
+	int numStacks = scene->GetSrcObjectCount<FbxAnimStack>();
+	if (numStacks > 0)
 	{
-		auto fbxString = sceneAnimations[i];
-		FbxAnimStack* stack = scene->FindMember<FbxAnimStack>(fbxString->Buffer());
-		if (stack == nullptr) continue;
-		
-		manager->GetAnimationEvaluator()->SetContext(stack);
-		
+		FbxAnimStack* stack = scene->GetSrcObject<FbxAnimStack>(0);
+		if (stack != nullptr)
+		{
+			int numLayers = stack->GetMemberCount<FbxAnimLayer>();
+			if (numLayers > 0)
+				sharedAnimationLayer = stack->GetMember<FbxAnimLayer>(0);
+		}
+	}
+		/*
 		FbxTimeSpan timeSpan(0, 0);
 		FbxTakeInfo* takeInfo = scene->GetTakeInfo(*fbxString);
+		
 		if (takeInfo == nullptr)
 			scene->GetGlobalSettings().GetTimelineDefaultTimeSpan(timeSpan);
 		else
@@ -208,7 +205,7 @@ void FBXLoaderPrivate::loadAnimations()
 		float stop = static_cast<float>(timeSpan.GetStop().GetSecondDouble());
 		log::info("Animation stack: %s (from %f to %f)", fbxString->Buffer(), start, stop);
 		
-		FbxAnimLayer* layer = stack->GetMember<FbxAnimLayer>();
+		}
 		FbxAnimCurve* curve = scene->GetRootNode()->LclTranslation.GetCurve(layer);
 		if (curve)
 		{
@@ -221,10 +218,7 @@ void FBXLoaderPrivate::loadAnimations()
 				log::info("%f / %f", time, value);
 			}
 		}
-		
-		animations.push_back(s3d::Animation(fbxString->Buffer()));
-	}
-	FbxArrayDelete(sceneAnimations);
+		*/
 }
 
 void FBXLoaderPrivate::loadTextures()
@@ -291,13 +285,9 @@ void FBXLoaderPrivate::loadTextures()
 	}
 }
 
-void FBXLoaderPrivate::loadNode(FbxNode* node, s3d::Element::Pointer parent)
+s3d::Material::List FBXLoaderPrivate::loadNodeMaterials(FbxNode* node)
 {
-	std::string nodeName(node->GetName());
-	StringList props = loadNodeProperties(node);
-
 	s3d::Material::List materials;
-	
 	const int lMaterialCount = node->GetMaterialCount();
 	for (int lMaterialIndex = 0; lMaterialIndex < lMaterialCount; ++lMaterialIndex)
 	{
@@ -315,9 +305,89 @@ void FBXLoaderPrivate::loadNode(FbxNode* node, s3d::Element::Pointer parent)
 			materials.push_back(s3d::Material::Pointer(storedMaterial));
 		}
 	}
+	return materials;
+}
 
+void FBXLoaderPrivate::loadNodeAnimations(FbxNode* node, s3d::Element::Pointer object)
+{
+	if (sharedAnimationLayer == nullptr) return;
+	
+	std::map<int, FbxTime> keyFramesToTime;
+	{
+		auto fillCurveMap = [&keyFramesToTime](FbxAnimCurveNode* curveNode)
+		{
+			if (curveNode)
+			{
+				for (int i = 0; i < curveNode->GetChannelsCount(); ++i)
+				{
+					auto curve = curveNode->GetCurve(i);
+					if (curve)
+					{
+						int keyFramesCount = curve->KeyGetCount();
+						for (int i = 0; i < keyFramesCount; ++i)
+							keyFramesToTime[i] = curve->KeyGetTime(i);
+					}
+				}
+			}
+		};
+		fillCurveMap(node->LclTranslation.GetCurveNode());
+		fillCurveMap(node->LclRotation.GetCurveNode());
+		fillCurveMap(node->LclScaling.GetCurveNode());
+	}
+	
+	if (keyFramesToTime.size() == 0)
+	{
+		log::info("Node %s has no animations.", node->GetName());
+		return;
+	}
+	else
+	{
+		log::info("Node %s has %zu frames in animation.", node->GetName(), keyFramesToTime.size());
+	}
+	
+	FbxTimeSpan pInterval;
+	node->GetAnimationInterval(pInterval);
+
+	auto eval = node->GetAnimationEvaluator();
+	
+	s3d::Animation a;
+	
+	a.setFrameRate(static_cast<float>(FbxTime::GetFrameRate(
+		node->GetScene()->GetGlobalSettings().GetTimeMode())));
+	
+	a.setTimeRange(static_cast<float>(keyFramesToTime.begin()->second.GetSecondDouble()),
+		static_cast<float>(keyFramesToTime.rbegin()->second.GetSecondDouble()));
+	
+	for (const auto& kf : keyFramesToTime)
+	{
+		auto t = eval->GetNodeLocalTranslation(node, kf.second);
+		auto r = eval->GetNodeLocalRotation(node, kf.second);
+		auto s = eval->GetNodeLocalScaling(node, kf.second);
+		
+		quaternion q = quaternion(static_cast<float>(r[0]) * TO_RADIANS, unitX) *
+			quaternion(static_cast<float>(r[1]) * TO_RADIANS, unitY) *
+			quaternion(static_cast<float>(r[2]) * TO_RADIANS, unitZ);
+		
+		ComponentTransformable transform;
+		
+		transform.setOrientation(q);
+		transform.setTranslation(vec3(static_cast<float>(t[0]), static_cast<float>(t[1]), static_cast<float>(t[2])));
+		transform.setScale(vec3(static_cast<float>(s[0]), static_cast<float>(s[1]), static_cast<float>(s[2])));
+		
+		a.addKeyFrame(static_cast<float>(kf.second.GetSecondDouble()), transform);
+	}
+	
+	object->addAnimation(a);
+}
+
+void FBXLoaderPrivate::loadNode(FbxNode* node, s3d::Element::Pointer parent)
+{
+	auto props = loadNodeProperties(node);
+	auto materials = loadNodeMaterials(node);
+	
 	s3d::Element::Pointer createdElement;
 
+	std::string nodeName(node->GetName());
 	FbxNodeAttribute* lNodeAttribute = node->GetNodeAttribute();
 	if (lNodeAttribute)
 	{
@@ -353,13 +423,13 @@ void FBXLoaderPrivate::loadNode(FbxNode* node, s3d::Element::Pointer parent)
 	if (createdElement.invalid())
 		createdElement = s3d::ElementContainer::Pointer::create(nodeName, parent.ptr());
 
-	FbxAMatrix& fbxTransform = node->EvaluateLocalTransform();
-	
 	mat4 transform;
+	FbxAMatrix& fbxTransform = node->EvaluateLocalTransform();
 	for (int v = 0; v < 4; ++v)
+	{
 		for (int u = 0; u < 4; ++u)
 			transform[v][u] = static_cast<float>(fbxTransform.Get(v, u));
-	
+	}
 	createdElement->setTransform(transform);
 	
 	for (const auto& p : props)
@@ -367,6 +437,8 @@ void FBXLoaderPrivate::loadNode(FbxNode* node, s3d::Element::Pointer parent)
 		if (!createdElement->hasPropertyString(p))
 			createdElement->addPropertyString(p);
 	}
+	
+	loadNodeAnimations(node, createdElement);
 
 	int lChildCount = node->GetChildCount();
 	for (int lChildIndex = 0; lChildIndex < lChildCount; ++lChildIndex)

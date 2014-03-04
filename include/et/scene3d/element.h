@@ -15,6 +15,7 @@
 #include <et/core/serialization.h>
 #include <et/scene3d/material.h>
 #include <et/scene3d/serialization.h>
+#include <et/scene3d/animation.h>
 
 namespace et
 {
@@ -62,7 +63,9 @@ namespace et
 
 			bool isKindOf(ElementType t) const;
 
-			virtual mat4 finalTransform();
+			const mat4& finalTransform();
+			const mat4& finalInverseTransform();
+			
 			void invalidateTransform();
 
 			void setParent(Element* p);
@@ -89,6 +92,8 @@ namespace et
 			
 			bool hasPropertyString(const std::string& s) const;
 			
+			void addAnimation(const Animation&);
+			
 		protected:
 			void serializeGeneralParameters(std::ostream& stream, SceneVersion version);
 			void serializeChildren(std::ostream& stream, SceneVersion version);
@@ -102,10 +107,15 @@ namespace et
 			Pointer childWithNameCallback(const std::string& name, Pointer root, ElementType ofType);
 			void childrenOfTypeCallback(ElementType t, Element::List& list, Pointer root) const;
 			void childrenHavingFlagCallback(size_t flag, Element::List& list, Pointer root);
+			
+			void buildTransform();
 
 		private:
 			std::set<std::string> _properites;
+			std::vector<Animation> _animations;
+			
 			mat4 _cachedFinalTransform;
+			mat4 _cachedFinalInverseTransform;
 			bool _active;
 		};
 

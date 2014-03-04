@@ -22,6 +22,7 @@ namespace et
 
 		public:
 			SupportMesh(const std::string& name = defaultMeshName, Element* parent = 0);
+			
 			SupportMesh(const std::string& name, const VertexArrayObject& ib, const Material::Pointer& material,
 				IndexType startIndex, size_t numIndexes, Element* parent = 0);
 
@@ -49,21 +50,14 @@ namespace et
 			void serialize(std::ostream& stream, SceneVersion version);
 			void deserialize(std::istream& stream, ElementFactory* factory, SceneVersion version);
 
-			mat4 finalTransform();
-			mat4 finalTransformInverse();
-			float finalTransformScale();
-
 		private:
 			void buildInverseTransform();
 
 		private:
-			mat4 _cachedInverseTransform;
 			CollisionData _data;
 			vec3 _size;
 			vec3 _center;
 			float _radius;
-			float _cachedFinalTransformScale;
-			bool _inverseTransformValid;
 		};
 	}
 }
