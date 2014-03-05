@@ -17,9 +17,10 @@
 
 using namespace FBXSDK_NAMESPACE;
 
-const std::string s_supportMeshProperty = "support=true";
-const std::string s_collisionMeshProperty = "collision=true";
-const std::string s_lodMeshProperty = "lod=";
+static const std::string s_supportMeshProperty = "support=true";
+static const std::string s_collisionMeshProperty = "collision=true";
+static const std::string s_lodMeshProperty = "lod=";
+static const float animationAnglesScale = -TO_RADIANS;
 
 namespace et
 {
@@ -358,22 +359,11 @@ void FBXLoaderPrivate::loadNodeAnimations(FbxNode* node, s3d::Element::Pointer o
 		auto r = eval->GetNodeLocalRotation(node, kf.second);
 		auto s = eval->GetNodeLocalScaling(node, kf.second);
 		
-		float rx = static_cast<float>(r[0]) * TO_RADIANS;
-		float ry = static_cast<float>(r[1]) * TO_RADIANS;
-		float rz = static_cast<float>(r[2]) * TO_RADIANS;
-		
-		ComponentTransformable transform;
-		
-		transform.setOrientation(quaternionFromAngels(rx, ry, rz));
-		transform.setTranslation(vec3(static_cast<float>(t[0]), static_cast<float>(t[1]), static_cast<float>(t[2])));
-		transform.setScale(vec3(static_cast<float>(s[0]), static_cast<float>(s[1]), static_cast<float>(s[2])));
-
-		log::info("TIME:\t%1.2g\tframe: %d\trotation: (%d, %d, %d, %d) -> (%f, %f, %f, %f)",
-			kf.second.GetSecondDouble(), kf.first, (int)r[0], (int)r[1], (int)r[2], (int)r[3],
-			transform.orientation().scalar, transform.orientation().vector.x, transform.orientation().vector.y,
-			transform.orientation().vector.z);
-		
-		a.addKeyFrame(static_cast<float>(kf.second.GetSecondDouble()), transform);
+		a.addKeyFrame(static_cast<float>(kf.second.GetSecondDouble()),
+			vec3(static_cast<float>(t[0]), static_cast<float>(t[1]), static_cast<float>(t[2])),
+			quaternionFromAngels(static_cast<float>(r[0]) * animationAnglesScale,
+				static_cast<float>(r[1]) * animationAnglesScale, static_cast<float>(r[2]) * animationAnglesScale),
+			vec3(static_cast<float>(s[0]), static_cast<float>(s[1]), static_cast<float>(s[2])));
 	}
 	
 	object->addAnimation(a);

@@ -162,6 +162,13 @@ void Element::serializeGeneralParameters(std::ostream& stream, SceneVersion vers
 		for (const auto& i : _properites)
 			serializeString(stream, i);
 	}
+	
+	if (version >= SceneVersion_1_0_4)
+	{
+		serializeInt(stream, _animations.size());
+		for (const auto& a : _animations)
+			a.serialize(stream);
+	}
 }
 
 void Element::deserializeGeneralParameters(std::istream& stream, SceneVersion version)
@@ -179,6 +186,17 @@ void Element::deserializeGeneralParameters(std::istream& stream, SceneVersion ve
 		size_t numProperties = deserializeUInt(stream);
 		for (size_t i = 0; i < numProperties; ++i)
 			_properites.insert(deserializeString(stream));
+	}
+	
+	if (version >= SceneVersion_1_0_4)
+	{
+		size_t numAnimations = deserializeUInt(stream);
+		_animations.reserve(numAnimations);
+		
+		for (size_t i = 0; i < numAnimations; ++i)
+			addAnimation(Animation(stream));
+		
+		animate();
 	}
 }
 
