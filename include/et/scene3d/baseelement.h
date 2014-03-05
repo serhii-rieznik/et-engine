@@ -59,6 +59,8 @@ namespace et
 			Element(const std::string& name, Element* parent);
 			
 			void animate();
+			
+			const Animation& defaultAnimation() const;
 
 			bool active() const
 				{ return _active; }
@@ -115,6 +117,7 @@ namespace et
 			void buildTransform();
 
 		private:
+			Animation _emptyAnimation;
 			NotifyTimer _animationTimer;
 			
 			std::set<std::string> _properites;

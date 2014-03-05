@@ -31,9 +31,10 @@ namespace et
 					time(t), translation(tr), orientation(o), scale(s) { }
 			};
 			
-			enum OutOfTimeMode
+			enum OutOfRangeMode
 			{
-				OutOfTimeMode_Loop
+				OutOfRangeMode_Loop,
+				OutOfRangeMode_Once
 			};
 			
 		public:
@@ -42,13 +43,24 @@ namespace et
 			
 			void addKeyFrame(float, const vec3&, const quaternion&, const vec3&);
 			
-			mat4 transformation(float);
+			mat4 transformation(float) const;
 			
-			void transformation(float, vec3&, quaternion&, vec3&);
+			void transformation(float, vec3&, quaternion&, vec3&) const;
 						
 			void setTimeRange(float, float);
 			
 			void setFrameRate(float);
+			
+			void setOutOfRangeMode(OutOfRangeMode);
+			
+			OutOfRangeMode outOfRangeMode() const
+				{ return _outOfRangeMode; }
+			
+			float startTime() const
+				{ return _startTime; }
+
+			float stopTime() const
+				{ return _stopTime; }
 			
 			float duration() const
 				{ return _stopTime - _startTime; }
@@ -63,7 +75,7 @@ namespace et
 			float _stopTime = 0.0f;
 			float _frameRate = 0.0f;
 			
-			OutOfTimeMode _outOfTimeMode = OutOfTimeMode_Loop;
+			OutOfRangeMode _outOfRangeMode = OutOfRangeMode_Loop;
 		};
 	}
 }

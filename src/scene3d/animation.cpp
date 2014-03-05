@@ -41,7 +41,7 @@ void Animation::setFrameRate(float r)
 	_frameRate = r;
 }
 
-void Animation::transformation(float time, vec3& t, quaternion& o, vec3& s)
+void Animation::transformation(float time, vec3& t, quaternion& o, vec3& s) const
 {
 	float d = duration();
 	if (d == 0.0f)
@@ -79,7 +79,7 @@ void Animation::transformation(float time, vec3& t, quaternion& o, vec3& s)
 	s = mix(lowerFrame.scale, upperFrame.scale, interolationFactor);
 }
 
-mat4 Animation::transformation(float time)
+mat4 Animation::transformation(float time) const
 {
 	vec3 t;
 	quaternion o;
@@ -101,7 +101,7 @@ void Animation::serialize(std::ostream& stream) const
 	serializeFloat(stream, _startTime);
 	serializeFloat(stream, _stopTime);
 	serializeFloat(stream, _frameRate);
-	serializeInt(stream, _outOfTimeMode);
+	serializeInt(stream, _outOfRangeMode);
 	serializeInt(stream, _frames.size());
 	for (const auto& frame : _frames)
 	{
@@ -124,7 +124,7 @@ void Animation::deserialize(std::istream& stream)
 		_startTime = deserializeFloat(stream);
 		_stopTime = deserializeFloat(stream);
 		_frameRate = deserializeFloat(stream);
-		_outOfTimeMode = static_cast<OutOfTimeMode>(deserializeInt(stream));
+		_outOfRangeMode = static_cast<OutOfRangeMode>(deserializeInt(stream));
 		
 		int numFrames = deserializeInt(stream);
 		
@@ -142,4 +142,9 @@ void Animation::deserialize(std::istream& stream)
 	{
 		stream.seekg(dataSize, std::ios_base::cur);
 	}
+}
+
+void Animation::setOutOfRangeMode(OutOfRangeMode mode)
+{
+	_outOfRangeMode = mode;
 }

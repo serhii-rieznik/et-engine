@@ -20,6 +20,7 @@ using namespace FBXSDK_NAMESPACE;
 static const std::string s_supportMeshProperty = "support=true";
 static const std::string s_collisionMeshProperty = "collision=true";
 static const std::string s_lodMeshProperty = "lod=";
+static const std::string s_AnimationProperty = "animation=";
 static const float animationAnglesScale = -TO_RADIANS;
 
 namespace et
@@ -55,7 +56,7 @@ namespace et
 		 * Node loading
 		 */
 		void loadNode(FbxNode* node, s3d::Element::Pointer parent);
-		void loadNodeAnimations(FbxNode* node, s3d::Element::Pointer object);
+		void loadNodeAnimations(FbxNode* node, s3d::Element::Pointer object, const StringList& props);
 		s3d::Material::List loadNodeMaterials(FbxNode* node);
 		StringList loadNodeProperties(FbxNode* node);
 		
@@ -309,7 +310,7 @@ s3d::Material::List FBXLoaderPrivate::loadNodeMaterials(FbxNode* node)
 	return materials;
 }
 
-void FBXLoaderPrivate::loadNodeAnimations(FbxNode* node, s3d::Element::Pointer object)
+void FBXLoaderPrivate::loadNodeAnimations(FbxNode* node, s3d::Element::Pointer object, const StringList& props)
 {
 	if (sharedAnimationLayer == nullptr) return;
 	
@@ -345,6 +346,26 @@ void FBXLoaderPrivate::loadNodeAnimations(FbxNode* node, s3d::Element::Pointer o
 	node->GetAnimationInterval(pInterval);
 
 	s3d::Animation a;
+	
+	s3d::Animation::OutOfRangeMode mode = s3d::Animation::OutOfRangeMode_Loop;
+	for (const auto& p : props)
+	{
+		if (p.find(s_AnimationProperty) == 0)
+		{
+			auto animType = p.substr(s_AnimationProperty.size());
+			if (animType == "once")
+			{
+				mode = s3d::Animation::OutOfRangeMode_Once;
+			}
+			else if (animType != "loop")
+			{
+				log::warning("Unknown animation mode in %s: %s", object->name().c_str(), animType.c_str());
+				mode = s3d::Animation::OutOfRangeMode_Loop;
+			}
+		}
+	}
+	
+	a.setOutOfRangeMode(mode);
 	
 	a.setFrameRate(static_cast<float>(FbxTime::GetFrameRate(
 		node->GetScene()->GetGlobalSettings().GetTimeMode())));
@@ -427,7 +448,7 @@ void FBXLoaderPrivate::loadNode(FbxNode* node, s3d::Element::Pointer parent)
 			createdElement->addPropertyString(p);
 	}
 	
-	loadNodeAnimations(node, createdElement);
+	loadNodeAnimations(node, createdElement, props);
 
 	int lChildCount = node->GetChildCount();
 	for (int lChildIndex = 0; lChildIndex < lChildCount; ++lChildIndex)
@@ -542,9 +563,6 @@ s3d::Mesh::Pointer FBXLoaderPrivate::loadMesh(FbxMesh* mesh, s3d::Element::Point
 	bool support = false;
 	for (auto p : params)
 	{
-		lowercase(p);
-		p.erase(std::remove_if(p.begin(), p.end(), [](char c){ return isWhitespaceChar(c); } ), p.end());
-
 		if ((p.find(s_collisionMeshProperty) == 0) || (p.find(s_supportMeshProperty) == 0))
 		{
 			support = true;
@@ -848,12 +866,13 @@ StringList FBXLoaderPrivate::loadNodeProperties(FbxNode* node)
 
 			char c = 0;
 			const char* strData = str.Buffer();
+			
 			while ((c = *strData++))
 			{
 				if (isNewLineChar(c))
 				{
 					if (line.lastElementIndex())
-						result.push_back(line.binary());
+						result.push_back(line.data());
 					
 					line.setOffset(0);
 					line.fill(0);
@@ -870,7 +889,13 @@ StringList FBXLoaderPrivate::loadNodeProperties(FbxNode* node)
 
 		prop = node->GetNextProperty(prop);
 	};
-
+	
+	for (auto& prop : result)
+	{
+		lowercase(prop);
+		prop.erase(std::remove_if(prop.begin(), prop.end(), [](char c) { return isWhitespaceChar(c); }), prop.end());
+	}
+	
 	return result;
 }
 

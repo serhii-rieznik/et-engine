@@ -20,8 +20,17 @@ Element::Element(const std::string& name, Element* parent) :
 	{
 		ET_ASSERT(!_animations.empty());
 		
-		float dt = timer->actualTime() - timer->startTime();
-		_animationTransform = _animations.front().transformation(dt);
+		const auto& a = _animations.front();
+		
+		float dt = a.startTime() + (timer->actualTime() - timer->startTime());
+		
+		if ((a.outOfRangeMode() == Animation::OutOfRangeMode_Once) && (dt > a.stopTime()))
+		{
+			dt = a.startTime();
+			timer->cancelUpdates();
+		}
+		
+		_animationTransform = a.transformation(dt);
 		
 		invalidateTransform();
 	});
@@ -195,8 +204,6 @@ void Element::deserializeGeneralParameters(std::istream& stream, SceneVersion ve
 		
 		for (size_t i = 0; i < numAnimations; ++i)
 			addAnimation(Animation(stream));
-		
-		animate();
 	}
 }
 
@@ -268,6 +275,7 @@ bool Element::hasPropertyString(const std::string& s) const
 void Element::addAnimation(const Animation& a)
 {
 	_animations.push_back(a);
+	_animationTransform = a.transformation(a.startTime());
 	setFlag(Flag_HasAnimations);
 }
 
@@ -276,4 +284,9 @@ void Element::animate()
 	if (_animations.empty()) return;
 	
 	_animationTimer.start(mainTimerPool(), 0.0f, NotifyTimer::RepeatForever);
+}
+
+const Animation& Element::defaultAnimation() const
+{
+	return _animations.empty() ? _emptyAnimation : _animations.front();
 }
