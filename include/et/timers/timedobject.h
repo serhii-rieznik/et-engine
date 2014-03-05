@@ -19,14 +19,19 @@ namespace et
 		
 		virtual ~TimedObject();
 
+		virtual void cancelUpdates();
+		virtual void destroy();
+
 		virtual bool running() const
 			{ return _running; }
 
 		bool released() const
 			{ return _released; }
-
-		virtual void cancelUpdates();
-		virtual void destroy();
+		
+		float startTime() const
+			{ return _startTime; }
+		
+		float actualTime();
 
 	protected:
 		friend class TimerPool;
@@ -34,10 +39,10 @@ namespace et
 		virtual void startUpdates(TimerPool* timerPool = 0);
 		virtual void update(float) {  }
 
-		float actualTime();
 
 	private:
 		TimerPool* _owner;
+		float _startTime;
 		bool _running;
 		bool _released;
 	};

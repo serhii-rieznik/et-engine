@@ -67,7 +67,7 @@ void Button::buildVertices(RenderContext*, GuiRenderer& gr)
 	}
 	else
 	{
-		assert("Uknown content mode" && 0);
+		ET_ASSERT("Uknown content mode" && 0);
 	}
 	
 	float contentGap = (imageSize.x > 0.0f) && (_textSize.x > 0.0f) ? 5.0f : 0.0f;

@@ -8,7 +8,7 @@
 #pragma once
 
 #include <et/camera/light.h>
-#include <et/scene3d/element.h>
+#include <et/scene3d/baseelement.h>
 
 namespace et
 {

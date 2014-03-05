@@ -124,7 +124,11 @@ std::string et::removeUpDir(std::string name)
 
 std::string et::normalizeFilePath(std::string s)
 {
-	ET_ITERATE(s, char&, i, if (i == invalidPathDelimiter) i = pathDelimiter);
+	for (char& i : s)
+	{
+		if (i == invalidPathDelimiter)
+			i = pathDelimiter;
+	}
 	return s;
 }
 
@@ -202,7 +206,8 @@ StringList et::split(const std::string& s, const std::string& delim)
 std::ostream& et::operator << (std::ostream& stream, const StringList& list)
 {
 	stream << "{" << std::endl;
-	ET_ITERATE(list, auto, i, stream << "\t" << i << std::endl);
+	for (const auto& i : list)
+		stream << "\t" << i << std::endl;
 	stream << "}" << std::endl;
 	
 	return stream;
@@ -211,6 +216,10 @@ std::ostream& et::operator << (std::ostream& stream, const StringList& list)
 std::string et::removeWhitespace(const std::string& s)
 {
 	StringDataStorage result(s.size() + 1, 0);
-	ET_ITERATE(s, auto, c, if (!isWhitespaceChar(c)) result.push_back(c));
+	for (char c : s)
+	{
+		if (!isWhitespaceChar(c))
+			result.push_back(c);
+	}
 	return std::string(result.data());
 }

@@ -12,7 +12,7 @@
 using namespace et;
 
 TimedObject::TimedObject() : 
-	_owner(0), _running(false), _released(false)
+	_owner(nullptr), _startTime(0.0f), _running(false), _released(false)
 {
 }
 
@@ -30,9 +30,11 @@ void TimedObject::startUpdates(TimerPool* timerPool)
 		_owner->detachTimedObject(this);
 
 	_running = true;
-
+	
 	_owner = (timerPool == nullptr) ? mainRunLoop().mainTimerPool().ptr() : timerPool;
-	_owner->attachTimedObject(this); 
+	_owner->attachTimedObject(this);
+	
+	_startTime = _owner->actualTime();
 }
 
 void TimedObject::cancelUpdates()
@@ -49,11 +51,12 @@ void TimedObject::destroy()
 
 	_running = false;
 	_released = true;
+	
 	(_owner ? _owner : mainTimerPool().ptr())->deleteTimedObjecct(this);
 }
 
 float TimedObject::actualTime()
 {
-	assert((_owner != nullptr) && "TimedObject isn't attached to timer pool");
+	ET_ASSERT((_owner != nullptr) && "TimedObject isn't attached to timer pool");
 	return _owner->actualTime();
 }

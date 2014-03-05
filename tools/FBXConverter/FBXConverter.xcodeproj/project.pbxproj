@@ -150,7 +150,7 @@
 		A55118A31870F2330093E334 /* animation.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = animation.cpp; sourceTree = "<group>"; };
 		A55118A61870F24D0093E334 /* animation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = animation.h; sourceTree = "<group>"; };
 		A55118A71870F24D0093E334 /* cameraelement.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cameraelement.h; sourceTree = "<group>"; };
-		A55118A81870F24D0093E334 /* element.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = element.h; sourceTree = "<group>"; };
+		A55118A81870F24D0093E334 /* baseelement.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = baseelement.h; sourceTree = "<group>"; };
 		A55118A91870F24D0093E334 /* lightelement.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = lightelement.h; sourceTree = "<group>"; };
 		A55118AA1870F24D0093E334 /* material.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = material.h; sourceTree = "<group>"; };
 		A55118AB1870F24D0093E334 /* material.parameters.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = material.parameters.h; sourceTree = "<group>"; };
@@ -289,7 +289,7 @@
 			children = (
 				A55118A61870F24D0093E334 /* animation.h */,
 				A55118A71870F24D0093E334 /* cameraelement.h */,
-				A55118A81870F24D0093E334 /* element.h */,
+				A55118A81870F24D0093E334 /* baseelement.h */,
 				A55118A91870F24D0093E334 /* lightelement.h */,
 				A55118AA1870F24D0093E334 /* material.h */,
 				A55118AB1870F24D0093E334 /* material.parameters.h */,

@@ -167,7 +167,10 @@ namespace et
 			scale1 = sin(t * omega) * sinom;
 		}
 		
-		return (scale0 * from) + (scale1 * temp);
+		Quaternion<T> result;
+		result.scalar = scale0 * from.scalar + scale1 * temp.scalar;
+		result.vector = scale0 * from.vector + scale1 * temp.vector;
+		return result;
 	}
 
 	template<typename T>
@@ -473,4 +476,6 @@ namespace et
 	vector2<T> bezierCurve(const std::vector< vector2<T> >& points, T time);
 	
 	vec3 circleFromPoints(const vec2& p1, const vec2& p2, const vec2& p3);
+	
+	quaternion quaternionFromAngels(float x, float y, float z);
 }

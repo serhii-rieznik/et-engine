@@ -13,6 +13,7 @@
 #include <et/core/flags.h>
 #include <et/core/transformable.h>
 #include <et/core/serialization.h>
+#include <et/timers/notifytimer.h>
 #include <et/scene3d/material.h>
 #include <et/scene3d/serialization.h>
 #include <et/scene3d/animation.h>
@@ -27,6 +28,7 @@ namespace et
 		enum Flags
 		{
 			Flag_Renderable = 0x0001,
+			Flag_HasAnimations = 0x0002
 		};
 
 		enum ElementType
@@ -55,6 +57,8 @@ namespace et
 
 		public:
 			Element(const std::string& name, Element* parent);
+			
+			void animate();
 
 			bool active() const
 				{ return _active; }
@@ -111,11 +115,15 @@ namespace et
 			void buildTransform();
 
 		private:
+			NotifyTimer _animationTimer;
+			
 			std::set<std::string> _properites;
 			std::vector<Animation> _animations;
 			
+			mat4 _animationTransform;
 			mat4 _cachedFinalTransform;
 			mat4 _cachedFinalInverseTransform;
+			
 			bool _active;
 		};
 

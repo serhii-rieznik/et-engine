@@ -248,3 +248,25 @@ vec3 et::circleFromPoints(const vec2& p1, const vec2& p2, const vec2& p3)
 	
 	return vec3(pos.x, pos.y, (pos - p2).length());
 }
+
+quaternion et::quaternionFromAngels(float yaw, float pitch, float roll)
+{
+    float yawOver2 = 0.5f * yaw;
+    float pitchOver2 = 0.5f * pitch;
+	float rollOver2 = 0.5f * roll;
+	
+    float cosYawOver2 = std::cos(yawOver2);
+    float cosPitchOver2 = std::cos(pitchOver2);
+    float cosRollOver2 = std::cos(rollOver2);
+	
+    float sinYawOver2 = std::sin(yawOver2);
+    float sinPitchOver2 = std::sin(pitchOver2);
+    float sinRollOver2 = std::sin(rollOver2);
+	
+    quaternion result;
+    result.scalar = cosYawOver2 * cosPitchOver2 * cosRollOver2 + sinYawOver2 * sinPitchOver2 * sinRollOver2;
+    result.vector.x = sinYawOver2 * cosPitchOver2 * cosRollOver2 - cosYawOver2 * sinPitchOver2 * sinRollOver2;
+    result.vector.y = cosYawOver2 * sinPitchOver2 * cosRollOver2 + sinYawOver2 * cosPitchOver2 * sinRollOver2;
+    result.vector.z = cosYawOver2 * cosPitchOver2 * sinRollOver2 - sinYawOver2 * sinPitchOver2 * cosRollOver2;
+	return result;
+}

@@ -10,7 +10,7 @@
 #include <et/vertexbuffer/vertexarray.h>
 #include <et/vertexbuffer/indexarray.h>
 #include <et/scene3d/material.h>
-#include <et/scene3d/element.h>
+#include <et/scene3d/baseelement.h>
 
 namespace et
 {

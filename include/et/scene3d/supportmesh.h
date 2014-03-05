@@ -49,6 +49,8 @@ namespace et
 
 			void serialize(std::ostream& stream, SceneVersion version);
 			void deserialize(std::istream& stream, ElementFactory* factory, SceneVersion version);
+			
+			float finalTransformScale();
 
 		private:
 			void buildInverseTransform();

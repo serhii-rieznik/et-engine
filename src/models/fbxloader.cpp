@@ -314,8 +314,9 @@ void FBXLoaderPrivate::loadNodeAnimations(FbxNode* node, s3d::Element::Pointer o
 	
 	std::map<int, FbxTime> keyFramesToTime;
 	{
-		auto fillCurveMap = [&keyFramesToTime](FbxAnimCurveNode* curveNode)
+		auto fillCurveMap = [&keyFramesToTime](FbxPropertyT<FbxDouble3> prop)
 		{
+			auto curveNode = prop.GetCurveNode();
 			if (curveNode)
 			{
 				for (int i = 0; i < curveNode->GetChannelsCount(); ++i)
@@ -330,26 +331,18 @@ void FBXLoaderPrivate::loadNodeAnimations(FbxNode* node, s3d::Element::Pointer o
 				}
 			}
 		};
-		fillCurveMap(node->LclTranslation.GetCurveNode());
-		fillCurveMap(node->LclRotation.GetCurveNode());
-		fillCurveMap(node->LclScaling.GetCurveNode());
+		fillCurveMap(node->LclTranslation);
+		fillCurveMap(node->LclRotation);
+		fillCurveMap(node->LclScaling);
 	}
 	
-	if (keyFramesToTime.size() == 0)
-	{
-		log::info("Node %s has no animations.", node->GetName());
-		return;
-	}
-	else
-	{
-		log::info("Node %s has %zu frames in animation.", node->GetName(), keyFramesToTime.size());
-	}
+	if (keyFramesToTime.size() == 0) return;
+	
+	log::info("Node %s has %zu frames in animation.", node->GetName(), keyFramesToTime.size());
 	
 	FbxTimeSpan pInterval;
 	node->GetAnimationInterval(pInterval);
 
-	auto eval = node->GetAnimationEvaluator();
-	
 	s3d::Animation a;
 	
 	a.setFrameRate(static_cast<float>(FbxTime::GetFrameRate(
@@ -358,21 +351,27 @@ void FBXLoaderPrivate::loadNodeAnimations(FbxNode* node, s3d::Element::Pointer o
 	a.setTimeRange(static_cast<float>(keyFramesToTime.begin()->second.GetSecondDouble()),
 		static_cast<float>(keyFramesToTime.rbegin()->second.GetSecondDouble()));
 	
+	auto eval = node->GetAnimationEvaluator();
 	for (const auto& kf : keyFramesToTime)
 	{
 		auto t = eval->GetNodeLocalTranslation(node, kf.second);
 		auto r = eval->GetNodeLocalRotation(node, kf.second);
 		auto s = eval->GetNodeLocalScaling(node, kf.second);
 		
-		quaternion q = quaternion(static_cast<float>(r[0]) * TO_RADIANS, unitX) *
-			quaternion(static_cast<float>(r[1]) * TO_RADIANS, unitY) *
-			quaternion(static_cast<float>(r[2]) * TO_RADIANS, unitZ);
+		float rx = static_cast<float>(r[0]) * TO_RADIANS;
+		float ry = static_cast<float>(r[1]) * TO_RADIANS;
+		float rz = static_cast<float>(r[2]) * TO_RADIANS;
 		
 		ComponentTransformable transform;
 		
-		transform.setOrientation(q);
+		transform.setOrientation(quaternionFromAngels(rx, ry, rz));
 		transform.setTranslation(vec3(static_cast<float>(t[0]), static_cast<float>(t[1]), static_cast<float>(t[2])));
 		transform.setScale(vec3(static_cast<float>(s[0]), static_cast<float>(s[1]), static_cast<float>(s[2])));
+
+		log::info("TIME:\t%1.2g\tframe: %d\trotation: (%d, %d, %d, %d) -> (%f, %f, %f, %f)",
+			kf.second.GetSecondDouble(), kf.first, (int)r[0], (int)r[1], (int)r[2], (int)r[3],
+			transform.orientation().scalar, transform.orientation().vector.x, transform.orientation().vector.y,
+			transform.orientation().vector.z);
 		
 		a.addKeyFrame(static_cast<float>(kf.second.GetSecondDouble()), transform);
 	}

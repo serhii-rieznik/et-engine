@@ -18,17 +18,17 @@ namespace et
 		Quaternion() :
 			scalar(static_cast<T>(1)), vector(static_cast<T>(0)) { }
 
-		Quaternion(const vector3<T>& v) :
-			scalar(static_cast<T>(0)), vector(v) { }
-
 		Quaternion(T s, T x, T y, T z) :
 			scalar(s), vector(x, y, z) { }
 
+		explicit Quaternion(const vector3<T>& axis) :
+			scalar(0), vector(axis) { }
+		
 		Quaternion(T angle, const vector3<T>& axis)
 		{
 			T half = angle  / static_cast<T>(2);
-			scalar = static_cast<T>(cos(half));
-			vector = static_cast<T>(sin(half)) * axis;
+			scalar = static_cast<T>(std::cos(half));
+			vector = static_cast<T>(std::sin(half)) * axis;
 		}
 
 		T& operator[](int i) 
@@ -38,17 +38,11 @@ namespace et
 			{ return *(&scalar + i); }
 
 		Quaternion operator !() const
-			{ return Quaternion(scalar, -vector); }
+			{ return Quaternion(scalar, -vector.x, -vector.y, -vector.z); }
 
 		Quaternion operator - () const
-			{ return Quaternion(-scalar, -vector); }
+			{ return Quaternion(-scalar, -vector.x, -vector.y, -vector.z); }
 		
-		Quaternion operator + (const Quaternion &q) const
-			{ return Quaternion(scalar + q.scalar, vector + q.vector); }
-
-		Quaternion operator - (const Quaternion &q) const
-			{ return Quaternion(scalar - q.scalar, vector - q.vector); }
-
 		Quaternion operator * (const Quaternion &q) const
 		{
 			Quaternion result;
@@ -110,20 +104,18 @@ namespace et
 
 		matrix4<T> toMatrix() const
 		{
-			T wx, wy, wz, xx, yy, yz, xy, xz, zz, x2, y2, z2;
-
-			x2 = vector.x + vector.x;
-			y2 = vector.y + vector.y;
-			z2 = vector.z + vector.z;
-			xx = vector.x * x2; xy = vector.x * y2; xz = vector.x * z2;
-			yy = vector.y * y2; yz = vector.y * z2; zz = vector.z * z2;
-			wx = scalar * x2; wy = scalar * y2; wz = scalar * z2;
-
+			T len = std::sqrt(vector.dotSelf() + scalar * scalar);
+			T qx = vector.x / len;
+			T qy = vector.y / len;
+			T qz = vector.z / len;
+			T qw = scalar / len;
+			T one = static_cast<T>(1);
+			T two = static_cast<T>(2);
 			return matrix4<T>(
-				vector4<T>(1.0f - (yy+zz), xy-wz , xz+wy , 0.0),
-				vector4<T>(xy+wz , 1.0f - (xx+zz), yz-wx , 0.0),
-				vector4<T>(xz-wy , yz+wx , 1.0f - (xx+yy), 0.0),
-				vector4<T>(0.0 , 0.0 , 0.0 , 1.0));
+				vector4<T>(one - two*qy*qy - two*qz*qz,       two*qx*qy - two*qz*qw,       two*qx*qz + two*qy*qw, 0.0f),
+				vector4<T>(      two*qx*qy + two*qz*qw, one - two*qx*qx - two*qz*qz,       two*qy*qz - two*qx*qw, 0.0f),
+				vector4<T>(      two*qx*qz - two*qy*qw,       two*qy*qz + two*qx*qw, one - two*qx*qx - two*qy*qy, 0.0f),
+				vector4<T>(                       0.0f,                        0.0f,                        0.0f, 1.0f));
 		}
 	};
 

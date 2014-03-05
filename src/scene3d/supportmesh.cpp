@@ -84,10 +84,14 @@ SupportMesh* SupportMesh::duplicate()
 	return result;
 }
 
+float SupportMesh::finalTransformScale()
+{
+	return 1.0f / std::pow(std::abs(finalInverseTransform().mat3().determinant()), 1.0f / 3.0f);
+}
+
 Sphere SupportMesh::sphere() 
 {
-	float scale = 1.0f / std::pow(std::abs(finalInverseTransform().mat3().determinant()), 1.0f / 3.0f);
-	return Sphere(finalTransform() * _center, scale * _radius);
+	return Sphere(finalTransform() * _center, finalTransformScale() * _radius);
 }
 
 AABB SupportMesh::aabb()

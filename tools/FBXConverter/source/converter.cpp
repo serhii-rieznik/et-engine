@@ -282,8 +282,13 @@ void Converter::performLoading(std::string path)
 		
 		if (loadedScene.valid())
 			loadedScene->setParent(&_scene);
-
 	}
+	
+	auto nodesWithAnimation = _scene.childrenHavingFlag(s3d::Flag_HasAnimations);
+	
+	for (auto& i : nodesWithAnimation)
+		i->animate();
+	
 	_labStatus->setText("Completed.");
 }
 

@@ -27,9 +27,10 @@ void Animation::addKeyFrame(float t, const ComponentTransformable& c)
 
 void Animation::setTimeRange(float start, float stop)
 {
+	ET_ASSERT(stop - start >= 0.0f);
+	
 	_startTime = start;
 	_stopTime = stop;
-	
 	// TODO : validate values stored in _times and _transformations
 }
 
@@ -41,24 +42,39 @@ void Animation::setFrameRate(float r)
 void Animation::transformation(float time, vec3& t, quaternion& o, vec3& s)
 {
 	float d = duration();
+	if (d == 0.0f)
+	{
+		auto mainTransform = _transformations.front();
+		t = mainTransform.translation();
+		o = mainTransform.orientation();
+		s = mainTransform.scale();
+		return;
+	}
 	
 	while (time < _startTime)
 		time += d;
 	
-	while (time > _stopTime)
+	while (time >= _stopTime)
 		time -= d;
 	
-	auto lTime = std::lower_bound(_times.begin(), _times.end(), time);
-	auto uTime = std::upper_bound(_times.begin(), _times.end(), time);
+	int nearestLowerFrame = static_cast<int>(_times.size()) - 1;
+	for (auto i = _times.rbegin(), e = _times.rend(); (i != e) && (nearestLowerFrame >= 0); ++i)
+	{
+		if (*i <= time) break;
+		--nearestLowerFrame;
+	}
+	int nearestUpperFrame = (nearestLowerFrame + 1 > _transformations.size()) ?
+		nearestLowerFrame : nearestLowerFrame + 1;
 	
-	auto lTransform = _transformations.at(lTime - _times.begin());
-	auto uTransform = _transformations.at(uTime - _times.begin());
+	auto lTransform = _transformations.at(nearestLowerFrame);
+	auto uTransform = _transformations.at(nearestUpperFrame);
 	
-	float interolationFactor = (time - *lTime) / (*uTime - *lTime);
+	float interolationFactor = (time - _times.at(nearestLowerFrame)) /
+		(_times.at(nearestUpperFrame) - _times.at(nearestLowerFrame));
 	
 	t = mix(lTransform.translation(), uTransform.translation(), interolationFactor);
 	o = slerp(lTransform.orientation(), uTransform.orientation(), interolationFactor);
-	s = mix(lTransform.translation(), uTransform.translation(), interolationFactor);
+	s = mix(lTransform.scale(), uTransform.scale(), interolationFactor);
 }
 
 mat4 Animation::transformation(float time)

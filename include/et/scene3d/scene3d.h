@@ -9,7 +9,7 @@
 
 #include <et/app/events.h>
 #include <et/core/objectscache.h>
-#include <et/scene3d/element.h>
+#include <et/scene3d/baseelement.h>
 #include <et/scene3d/storage.h>
 #include <et/scene3d/mesh.h>
 #include <et/scene3d/supportmesh.h>

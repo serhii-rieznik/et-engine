@@ -9,11 +9,10 @@
 
 using namespace et;
 
-NotifyTimer::NotifyTimer()
-{
-}
+NotifyTimer::NotifyTimer() :
+	_endTime(0.0f), _period(0.0f), _repeatCount(0) { }
 
-void NotifyTimer::start(TimerPool::Pointer tp, float period, int repeatCount)
+void NotifyTimer::start(TimerPool::Pointer tp, float period, int64_t repeatCount)
 {
 	startUpdates(tp.ptr());
 

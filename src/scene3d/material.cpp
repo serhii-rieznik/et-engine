@@ -260,26 +260,41 @@ void Material::serializeBinary(std::ostream& stream) const
 	}
 
 	serializeInt(stream, static_cast<int>(_customIntParameters.size()));
-	ET_ITERATE(_customIntParameters, auto&, i, serializeInt(stream, i.first);
-		serializeInt(stream, i.second))
+	for (const auto& i : _customIntParameters)
+	{
+		serializeInt(stream, i.first);
+		serializeInt(stream, i.second);
+	}
 
 	serializeInt(stream, static_cast<int>(_customFloatParameters.size()));
-	ET_ITERATE(_customFloatParameters, auto&, i, serializeInt(stream, i.first);
-		serializeFloat(stream, i.second))
+	for (const auto& i : _customFloatParameters)
+	{
+		serializeInt(stream, i.first);
+		serializeFloat(stream, i.second);
+	}
 
 	serializeInt(stream, static_cast<int>(_customVectorParameters.size()));
-	ET_ITERATE(_customVectorParameters, auto&, i, serializeInt(stream, i.first);
-		serializeVector(stream, i.second))
+	for (const auto& i : _customVectorParameters)
+	{
+		serializeInt(stream, i.first);
+		serializeVector(stream, i.second);
+	}
 
 	serializeInt(stream, static_cast<int>(_customTextureParameters.size()));
-	ET_ITERATE(_customTextureParameters, auto&, i, serializeInt(stream, i.first);
+	for (const auto& i : _customTextureParameters)
+	{
+		serializeInt(stream, i.first);
 		std::string path = i.second.valid() ? i.second->origin() : std::string();
 		serializeInt(stream, i.first);
-		serializeString(stream, path));
+		serializeString(stream, path);
+	}
 
 	serializeInt(stream, static_cast<int>(_customStringParameters.size()));
-	ET_ITERATE(_customStringParameters, auto&, i, serializeInt(stream, i.first);
-		serializeString(stream, i.second))
+	for (const auto& i : _customStringParameters)
+	{
+		serializeInt(stream, i.first);
+		serializeString(stream, i.second);
+	}
 }
 
 void Material::deserialize(std::istream& stream, RenderContext* rc, ObjectsCache& cache,
