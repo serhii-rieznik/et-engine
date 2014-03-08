@@ -36,10 +36,11 @@ std::string et::floatToTimeStr(float value, bool showMSec)
 	int minutes = seconds / 60;
 	seconds -= minutes * 60;
 	
-	hours = abs(hours);
-	minutes = abs(minutes);
-	seconds = abs(seconds);
-	mSec = abs(mSec);
+	hours = std::abs(hours);
+	minutes = std::abs(minutes);
+	seconds = std::abs(seconds);
+	mSec = std::abs(mSec);
+	
 	std::string sHours = intToStr(hours);
 	std::string sMin = intToStr(minutes);
 	std::string sSec = intToStr(seconds);
