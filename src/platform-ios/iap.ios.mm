@@ -139,9 +139,14 @@ void PurchasesManager::restorePurchases()
 	PurchasesManager::instance().availableProductsChecked.invokeInMainRunLoop(checkedProducts);
 }
 
-- (void)request:(SKRequest *)request didFailWithError:(NSError *)error
+- (void)request:(SKRequest*)request didFailWithError:(NSError *)error
 {
 	PurchasesManager::instance().failedToCheckAvailableProducts.invokeInMainRunLoop();
+}
+
+- (void)requestDidFinish:(SKRequest*)request
+{
+	
 }
 
 /*
