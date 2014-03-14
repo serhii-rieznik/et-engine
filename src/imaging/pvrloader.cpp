@@ -92,7 +92,7 @@ void pvr::loadFromStream(std::istream& stream, TextureDescription& desc)
 		desc.format = GL_RGBA;
 		desc.internalformat = GL_RGBA;
 		desc.type = GL_UNSIGNED_BYTE;
-		desc.compressed = false;
+		desc.compressed = 0;
 		desc.data = rgbaData;
 	}
 }
@@ -206,7 +206,7 @@ void parseTextureFormat(const PVRTextureHeaderV3& sTextureHeader, TextureDescrip
 	}
 	else
 	{
-		desc.compressed = false;
+		desc.compressed = 0;
 		
 		switch (ChannelType)
 		{

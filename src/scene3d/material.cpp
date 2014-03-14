@@ -600,15 +600,15 @@ void Material::clear()
 {
 	for (size_t i = 0; i < MaterialParameter_max; ++i)
 	{
-		_defaultIntParameters[i].set = false;
+		_defaultIntParameters[i].set = 0;
 		_defaultIntParameters[i].value = 0;
-		_defaultFloatParameters[i].set = false;
+		_defaultFloatParameters[i].set = 0;
 		_defaultFloatParameters[i].value = 0.0f;
-		_defaultVectorParameters[i].set = false;
+		_defaultVectorParameters[i].set = 0;
 		_defaultVectorParameters[i].value = vec4();
-		_defaultStringParameters[i].set = false;
+		_defaultStringParameters[i].set = 0;
 		_defaultStringParameters[i].value = std::string();
-		_defaultTextureParameters[i].set = false;
+		_defaultTextureParameters[i].set = 0;
 		_defaultTextureParameters[i].value = Texture();
 	}
 	

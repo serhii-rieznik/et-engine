@@ -145,7 +145,7 @@ StringList ProgramFactory::loadProgramSources(const std::string& file, std::stri
 	std::string s;
 	
 	InputStream progFile(filename, StreamMode_Binary);
-	while (!progFile.stream().eof())
+	while (!(progFile.stream().eof() || progFile.stream().fail()))
 	{
 		getline(progFile.stream(), s);
 		trim(s);

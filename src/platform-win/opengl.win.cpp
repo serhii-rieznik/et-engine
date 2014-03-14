@@ -21296,15 +21296,23 @@ void __GLeeExtList_init(ExtensionList *extList)
 
 void __GLeeExtList_clean(ExtensionList *extList)
 {
-	int a;
-	for (a = 0; a < extList->numNames; a++)
+	if (extList == nullptr) return;
+
+	if (extList->names != nullptr)
 	{
-		if (extList->names[a] != 0) free((void *)extList->names[a]);
+		for (int a = 0; a < extList->numNames; a++)
+		{
+			if (extList->names[a] != nullptr)
+				free(extList->names[a]);
+		}
+		free(extList->names);
 	}
-	if (extList->names != 0) free((void *)extList->names);
-	if (extList->lengths != 0) free((void *)extList->lengths);
-	extList->names = 0;
-	extList->lengths = 0;
+
+	if (extList->lengths != nullptr)
+		free(extList->lengths);
+
+	extList->names = nullptr;
+	extList->lengths = nullptr;
 	extList->numNames = 0;
 }
 
@@ -21371,12 +21379,11 @@ GLboolean __GLeeGetExtensions(ExtensionList* extList)
 	const char* platExtStr = __GLeeGetExtStrPlat();
 	if (platExtStr)
 	{
-		char* extStr = nullptr;
 		size_t l = strlen(platExtStr);
 		if ((l > 1) && (platExtStr[l - 1] != ' '))
 			++l;
 
-		extStr = (char*)malloc(l);
+		char* extStr = (char*)malloc(l);
 		memset(extStr, ' ', l);
 		memcpy(extStr, platExtStr, l - 1);
 
