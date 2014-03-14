@@ -454,6 +454,26 @@ namespace et
 	inline vec3 vector3ToFloat(const vector3<T>& v)
 		{ return vec3(static_cast<float>(v.x), static_cast<float>(v.y), static_cast<float>(v.z)); }
 	
+	template <typename T>
+	T bezierCurve(T* points, size_t size, float time)
+	{
+		ET_ASSERT((size > 0) && (points != nullptr))
+
+		if (size == 1)
+			return *points;
+		
+		if (size == 2)
+			return mix(*points, points[1], time);
+
+		if (size == 3)
+		{
+			float invTime = 1.0f - time;
+			return sqr(invTime) * points[0] + 2.0f * invTime * time * points[1] + sqr(time) * points[2];
+		}
+		
+		return mix(bezierCurve<T>(points, size-1, time), bezierCurve<T>(points+1, size-1, time), time);
+	}
+	
 	quaternion matrixToQuaternion(const mat3& m);
 	quaternion matrixToQuaternion(const mat4& m);
 
@@ -471,9 +491,6 @@ namespace et
 	mat4 rotation2DMatrix(float angle);
 	mat4 transform2DMatrix(float a, const vec2& scale, const vec2& translate);
 	mat3 rotation2DMatrix3(float angle);
-	
-	template <typename T>
-	vector2<T> bezierCurve(const std::vector< vector2<T> >& points, T time);
 	
 	vec3 circleFromPoints(const vec2& p1, const vec2& p2, const vec2& p3);
 	

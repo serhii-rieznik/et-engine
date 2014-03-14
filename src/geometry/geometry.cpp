@@ -186,35 +186,6 @@ mat3 et::rotation2DMatrix3(float angle)
 	return m;
 }
 
-template <>
-vector2<float> et::bezierCurve(const std::vector< vector2<float> >& points, float time)
-{
-	ET_ASSERT(points.size() > 0);
-	
-	if (points.size() == 1)
-	{
-		return points.front();
-	}
-	else if (points.size() == 2)
-	{
-		return mix(points.front(), points.back(), time);
-	}
-	else if (points.size() == 3)
-	{
-		float invTime = 1.0f - time;
-		return sqr(invTime) * points.front() + 2.0f * invTime * time * points.at(1) + sqr(time) * points.back();
-	}
-	
-	std::vector< vector2<float> > firstPoints(points.size() - 1);
-	std::vector< vector2<float> > lastPoints(points.size() - 1);
-	for (size_t i = 0; i < points.size() - 1; ++i)
-	{
-		firstPoints[i] = points[i];
-		lastPoints[i] = points[i+1];
-	}
-	return mix( bezierCurve(firstPoints, time), bezierCurve(lastPoints, time), time );
-}
-
 vec3 et::circleFromPoints(const vec2& p1, const vec2& p2, const vec2& p3)
 {
 	// determine if some of points are same

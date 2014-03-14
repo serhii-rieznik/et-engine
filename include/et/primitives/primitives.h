@@ -16,6 +16,8 @@ namespace et
 {
 	namespace primitives
 	{
+		size_t primitiveCountForIndexCount(size_t numIndexes, PrimitiveType geometryType);
+		
 		IndexType indexCountForRegularMesh(const vec2i& meshSize, PrimitiveType geometryType);
 
 		/*
