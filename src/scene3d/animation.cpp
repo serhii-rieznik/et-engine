@@ -65,7 +65,7 @@ void Animation::transformation(float time, vec3& t, quaternion& o, vec3& s) cons
 		if (i->time <= time) break;
 		--nearestLowerFrame;
 	}
-	int nearestUpperFrame = (nearestLowerFrame + 1 > _frames.size()) ?
+	int nearestUpperFrame = (static_cast<size_t>(nearestLowerFrame + 1) > _frames.size()) ?
 		nearestLowerFrame : nearestLowerFrame + 1;
 	
 	const auto& lowerFrame = _frames.at(nearestLowerFrame);
