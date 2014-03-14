@@ -13,7 +13,33 @@
 using namespace et;
 
 inline int getIndex(int u, int v, int u_sz, int v_sz)
-		{ return clamp<int>(u, 0, u_sz - 1) + clamp<int>(v, 0, v_sz - 1) * u_sz; }
+	{ return clamp<int>(u, 0, u_sz - 1) + clamp<int>(v, 0, v_sz - 1) * u_sz; }
+
+size_t primitives::primitiveCountForIndexCount(size_t numIndexes, PrimitiveType geometryType)
+{
+	switch (geometryType)
+	{
+		case PrimitiveType_Points:
+			return numIndexes;
+		
+		case PrimitiveType_Lines:
+			return numIndexes / 2;
+
+		case PrimitiveType_Triangles:
+			return numIndexes / 3;
+
+		case PrimitiveType_LineStrip:
+			return numIndexes - 1;
+
+		case PrimitiveType_TriangleStrips:
+			return numIndexes - 2;
+		
+		default:
+			ET_FAIL("Invalid PrimitiveType");
+	}
+	
+	return 0;
+}
 
 IndexType primitives::indexCountForRegularMesh(const vec2i& meshSize, PrimitiveType geometryType)
 {

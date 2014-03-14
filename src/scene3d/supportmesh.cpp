@@ -5,6 +5,7 @@
  *
  */
 
+#include <et/primitives/primitives.h>
 #include <et/scene3d/supportmesh.h>
 
 using namespace et;
@@ -30,18 +31,23 @@ void SupportMesh::fillCollisionData(VertexArray::Pointer v, IndexArray::Pointer 
 	RawDataAcessor<vec3> pos = v->chunk(Usage_Position).accessData<vec3>(0);
 
 	_data.setOffset(0);
-	size_t index = 0;
+	
 	vec3 minOffset;
 	vec3 maxOffset;
 	float distance = 0.0f;
 	IndexType iStart = startIndex() / 3;
 	IndexType iEnd = iStart + static_cast<IndexType>(numIndexes()) / 3;
+	
+	_data.resize(primitives::primitiveCountForIndexCount(numIndexes(), ind->primitiveType()));
+	
+	size_t index = 0;
 	for (IndexArray::PrimitiveIterator i = ind->primitive(iStart) , e = ind->primitive(iEnd); i != e; ++i)
 	{
 		IndexArray::Primitive& p = *i;
 		const vec3& p0 = pos[p[0]];
 		const vec3& p1 = pos[p[1]];
 		const vec3& p2 = pos[p[2]];
+		
 		_data.push_back(triangle(p0, p1, p2));
 
 		if (index == 0)
@@ -49,6 +55,7 @@ void SupportMesh::fillCollisionData(VertexArray::Pointer v, IndexArray::Pointer 
 			minOffset = minv(p0, minv(p1, p2));
 			maxOffset = maxv(p0, maxv(p1, p2));
 			distance = etMax(p0.length(), etMax(p1.length(), p2.length()));
+			++index;
 		}
 		else
 		{
@@ -60,9 +67,8 @@ void SupportMesh::fillCollisionData(VertexArray::Pointer v, IndexArray::Pointer 
 			maxOffset = maxv(maxOffset, p2);
 			distance = etMax(p0.length(), etMax(p1.length(), p2.length()));
 		}
-		++index;
 	}
-
+	
 	_size = maxv(0.5f * (maxOffset - minOffset), vec3(std::numeric_limits<float>::epsilon()));
 	_center = 0.5f * (maxOffset + minOffset);
 	_radius = distance;
