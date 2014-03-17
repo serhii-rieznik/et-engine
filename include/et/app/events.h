@@ -59,7 +59,10 @@ namespace et
 			{ _removed = value; }
 
 		virtual EventReceiver* receiver() 
-			{ return 0; }
+			{ return nullptr; }
+		
+		virtual bool hasConnections()
+			{ return false; }
 
 	private:
 		bool _removed;
@@ -156,6 +159,9 @@ namespace et
 		void receiverDisconnected(EventReceiver* r);
 		void invoke();
 		void invokeInMainRunLoop(float delay = 0.0f);
+		
+		bool hasConnections()
+			{ return !_connections.empty(); }
 		
 	private:
 		EventReceiver* receiver() 
@@ -263,6 +269,9 @@ namespace et
 		void invoke(ArgType arg);
 		void invokeInMainRunLoop(ArgType arg, float delay = 0.0f);
 		
+		bool hasConnections()
+			{ return !_connections.empty(); }
+		
 	private:
 		void cleanup();
 
@@ -369,6 +378,9 @@ namespace et
 		void invoke(Arg1Type a1, Arg2Type a2);
 		void invokeInMainRunLoop(Arg1Type a1, Arg2Type a2, float delay = 0.0f);
 
+		bool hasConnections()
+			{ return !_connections.empty(); }
+		
 	private:
 		EventReceiver* receiver()
 			{ return nullptr; }
