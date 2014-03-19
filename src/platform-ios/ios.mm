@@ -33,6 +33,11 @@ using namespace et;
 
 static UIDocumentInteractionController* sharedInteractionController = nil;
 
+void et::ios::setIdleTimerEnabled(bool enabled)
+{
+	[[UIApplication sharedApplication] setIdleTimerDisabled:enabled ? YES : NO];
+}
+
 void et::ios::excludeFileFromICloudBackup(const std::string& path)
 {
 	NSURL* url = [NSURL fileURLWithPath:[NSString stringWithUTF8String:path.c_str()]];

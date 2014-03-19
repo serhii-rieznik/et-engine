@@ -15,6 +15,8 @@ namespace et
 {
 	namespace ios
 	{
+		void setIdleTimerEnabled(bool);
+		
 		void saveImageToPhotos(const std::string& path, std::function<void(bool)> callback);
 		
 		void excludeFileFromICloudBackup(const std::string&);
