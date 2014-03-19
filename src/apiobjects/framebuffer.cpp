@@ -300,7 +300,7 @@ void Framebuffer::setDrawBuffersCount(int count)
 
 void Framebuffer::setCurrentCubemapFace(uint32_t faceIndex)
 {
-	ET_ASSERT(_description.isCubemap);
+	ET_ASSERT(_description.isCubemap && (faceIndex < 6));
 	
 	_rc->renderState().bindFramebuffer(_id);
 	
