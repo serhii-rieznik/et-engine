@@ -742,7 +742,7 @@ bool Material::hasString(size_t param) const
 
 void Material::reloadObject(LoadableObject::Pointer obj, ObjectsCache& cache)
 {
-	assert(false);
+	ET_FAIL("Material reloading is disabled.");
 	
 	clear();
 	

@@ -5,6 +5,8 @@
  *
  */
 
+#include <mach/mach.h>
+
 #include <AppKit/NSApplication.h>
 #include <AppKit/NSMenu.h>
 #include <AppKit/NSWindow.h>
@@ -123,6 +125,14 @@ void Application::platformSuspend()
 
 void Application::platformResume()
 {
+}
+
+size_t Application::memoryUsage() const
+{
+	struct task_basic_info info = { };
+	mach_msg_type_number_t size = sizeof(info);
+	kern_return_t kerr = task_info(mach_task_self(), TASK_BASIC_INFO, (task_info_t)&info, &size);
+	return (kerr == KERN_SUCCESS) ? info.resident_size : 0;
 }
 
 /*
