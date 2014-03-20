@@ -36,7 +36,7 @@ void Input::pushKeyboardInputAction(size_t key, InputAction action)
 	}
 	else
 	{
-		assert(false);
+		ET_FAIL("Invalid keyboard action");
 	}
 }
 

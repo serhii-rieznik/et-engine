@@ -456,7 +456,7 @@ void Framebuffer::resolveMultisampledTo(Framebuffer::Pointer framebuffer)
 	
 #elif (ET_PLATFORM_ANDROID)
 	
-	assert(false);
+	ET_FAIL("Android is not supported yet.");
 	
 #else
 	
