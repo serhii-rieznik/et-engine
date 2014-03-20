@@ -626,7 +626,7 @@ void primitives::smoothTangents(VertexArray::Pointer data, const IndexArray::Poi
 	}
 
 
-void primitives::createCube(VertexArray::Pointer data, float radius)
+void primitives::createCube(VertexArray::Pointer data, float radius, const vec3& center)
 {
 	VertexDataChunk posChunk = data->chunk(Usage_Position);
 	VertexDataChunk nrmChunk = data->chunk(Usage_Normal);
@@ -646,16 +646,15 @@ void primitives::createCube(VertexArray::Pointer data, float radius)
 	
 	vec3 corners[8] =
 	{
-		vec3(-d,  d, -d),
-		vec3( d,  d, -d),
-		vec3(-d,  d,  d),
-		vec3( d,  d,  d),
-
-		vec3(-d, -d, -d),
-		vec3( d, -d, -d),
-		vec3(-d, -d,  d),
-		vec3( d, -d,  d),
-};
+		center + vec3(-d,  d, -d),
+		center + vec3( d,  d, -d),
+		center + vec3(-d,  d,  d),
+		center + vec3( d,  d,  d),
+		center + vec3(-d, -d, -d),
+		center + vec3( d, -d, -d),
+		center + vec3(-d, -d,  d),
+		center + vec3( d, -d,  d),
+	};
 	
 	size_t k = 0;
 	
