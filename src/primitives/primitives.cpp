@@ -637,7 +637,7 @@ void primitives::createCube(VertexArray::Pointer data, float radius)
 	(void)hasPosition;
 	
 	size_t offset = data->size();
-	data->fitToSize(12 * 3);
+	data->fitToSize(offset + 12 * 3);
 	
 	RawDataAcessor<vec3> pos = posChunk.accessData<vec3>(offset);
 	RawDataAcessor<vec3> nrm = nrmChunk.accessData<vec3>(offset);

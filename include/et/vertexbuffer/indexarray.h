@@ -26,6 +26,7 @@ namespace et
 		IndexArray(IndexArrayFormat format, size_t size, PrimitiveType primitiveType);
 		
 		void linearize(size_t size);
+		void linearize(size_t indexFrom, size_t indexTo, IndexType startIndex);
 
 		char* binary()
 			{ return _data.binary(); }

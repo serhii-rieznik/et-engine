@@ -37,10 +37,15 @@ IndexArray::IndexArray(IndexArrayFormat format, size_t size, PrimitiveType conte
 		linearize(size);
 }
 
+void IndexArray::linearize(size_t indexFrom, size_t indexTo, IndexType startIndex)
+{
+	for (size_t i = indexFrom; i < indexTo; ++i)
+		setIndex(startIndex++, i);
+}
+
 void IndexArray::linearize(size_t size)
 {
-	for (IndexType i = 0; i < size; ++i)
-		setIndex(i, i);
+	linearize(0, size, 0);
 }
 
 IndexType IndexArray::getIndex(size_t pos) const
