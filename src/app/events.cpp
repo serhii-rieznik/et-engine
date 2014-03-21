@@ -64,22 +64,18 @@ void Event0::invoke()
 	cleanup();
 
 	_invoking = true;
-
-	auto i = _connections.begin();
-	while (i != _connections.end())
-	{
-		(*i)->invoke();
-		++i;
-	}
-
+	for (auto& conn : _connections)
+		conn->invoke();
 	_invoking = false;
 }
 
 void Event0::invokeInMainRunLoop(float delay)
 {
 	cleanup();
+	_invoking = true;
 	for (auto& i : _connections)
 		i->invokeInMainRunLoop(delay);
+	_invoking = false;
 }
 
 void Event0::receiverDisconnected(EventReceiver* r)

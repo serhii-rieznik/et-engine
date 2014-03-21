@@ -6,7 +6,7 @@
  */
 
 inline bool shouldRemoveConnection(EventConnectionBase* b)
-	{ return b->removed(); }
+	{ return (b == nullptr) || b->removed(); }
 
 /*
 * Event0Connection
@@ -150,26 +150,22 @@ template <typename ArgType>
 inline void Event1<ArgType>::invoke(ArgType arg)
 {
 	cleanup();
-
-	auto i = _connections.begin();
-	while (i != _connections.end())
-	{
-		(*i)->invoke(arg);
-		++i;
-	}
+	
+	_invoking = true;
+	for (auto& conn : _connections)
+		conn->invoke(arg);
+	_invoking = false;
 }
 
 template <typename ArgType>
 inline void Event1<ArgType>::invokeInMainRunLoop(ArgType arg, float delay)
 {
 	cleanup();
-
-	auto i = _connections.begin();
-	while (i != _connections.end())
-	{
-		(*i)->invokeInMainRunLoop(arg, delay);
-		++i;
-	}
+	
+	_invoking = true;
+	for (auto& conn : _connections)
+		conn->invokeInMainRunLoop(arg, delay);
+	_invoking = false;
 }
 
 /*
@@ -265,34 +261,25 @@ template <typename Arg1Type, typename Arg2Type>
 inline void Event2<Arg1Type, Arg2Type>::invoke(Arg1Type a1, Arg2Type a2)
 {
 	auto i = remove_if(_connections.begin(), _connections.end(), shouldRemoveConnection);
-
 	if (i != _connections.end())
 		_connections.erase(i, _connections.end());
 
-	i = _connections.begin();
-	while (i != _connections.end())
-	{
-		(*i)->invoke(a1, a2);
-		if (_connections.size() == 0) return;
-
-		++i;
-	}
+	_invoking = true;
+	for (auto& conn : _connections)
+		conn->invoke(a1, a2);
+	_invoking = false;
 }
 
 template <typename Arg1Type, typename Arg2Type>
 inline void Event2<Arg1Type, Arg2Type>::invokeInMainRunLoop(Arg1Type a1, Arg2Type a2, float delay)
 {
 	auto i = remove_if(_connections.begin(), _connections.end(), shouldRemoveConnection);
-	
 	if (i != _connections.end())
 		_connections.erase(i, _connections.end());
 	
-	i = _connections.begin();
-	while (i != _connections.end())
-	{
-		(*i)->invokeInMainRunLoop(a1, a2, delay);
-		if (_connections.size() == 0) return;
-		
-		++i;
-	}
+	_invoking = true;
+	for (auto& conn : _connections)
+		conn->invokeInMainRunLoop(a1, a2, delay);
+	_invoking = false;
+
 }
