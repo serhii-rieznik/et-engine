@@ -76,7 +76,7 @@ void Scene::serialize(std::ostream& stream, StorageFormat fmt, const std::string
 		}
 		else
 		{
-			assert("Invalid storage format specified." && 0);
+			ET_FAIL("Invalid storage format specified.");
 		}
 
 		serializeChunk(stream, HeaderVertexArrays);
@@ -169,7 +169,7 @@ Scene3dStorage::Pointer Scene::deserializeStorage(std::istream& stream, RenderCo
 			}
 			else
 			{
-				assert("Invalid storage format specified" && false);
+				ET_FAIL("Invalid storage format specified");
 			}
 			materialsRead = true;
 		}
@@ -188,7 +188,7 @@ Scene3dStorage::Pointer Scene::deserializeStorage(std::istream& stream, RenderCo
 		else if (chunkEqualTo(readChunk, HeaderIndexArrays))
 		{
 			int num = deserializeInt(stream);
-			assert(num == 1);
+			ET_ASSERT(num == 1);
 			(void)(num);
 			result->indexArray()->tag = deserializeInt(stream);
 			result->indexArray()->deserialize(stream);

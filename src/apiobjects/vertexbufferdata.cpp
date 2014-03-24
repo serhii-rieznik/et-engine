@@ -47,6 +47,29 @@ void VertexBufferData::setData(const void* data, size_t dataSize)
 	checkOpenGLError("glBufferData(GL_ARRAY_BUFFER, %u, 0x%08X, %d)", _dataSize, data, _drawType);
 }
 
+void VertexBufferData::map(void** data, size_t offset, size_t dataSize, MapBufferMode mode)
+{
+	ET_ASSERT(data != nullptr);
+	
+	static const GLenum accessFlags[MapBufferMode_max] =
+		{ GL_MAP_READ_BIT, GL_MAP_WRITE_BIT, GL_MAP_READ_BIT | GL_MAP_WRITE_BIT };
+	
+	GLbitfield access = GL_MAP_UNSYNCHRONIZED_BIT | accessFlags[mode];
+	
+	if (mode == MapBufferMode_WriteOnly)
+		access |= GL_MAP_INVALIDATE_BUFFER_BIT;
+	
+	_rc->renderState().bindBuffer(GL_ARRAY_BUFFER, _vertexBuffer);
+	*data = glMapBufferRange(GL_ARRAY_BUFFER, offset, dataSize, access);
+	checkOpenGLError("glMapBufferRange(GL_ARRAY_BUFFER, %lu, %lu, %d)", offset, dataSize, mode);
+}
+
+void VertexBufferData::unmap()
+{
+	glUnmapBuffer(GL_ARRAY_BUFFER);
+	checkOpenGLError("glUnmapBuffer(GL_ARRAY_BUFFER)");
+}
+
 void VertexBufferData::serialize(std::ostream&)
 {
 	ET_FAIL("Unsupported");

@@ -115,13 +115,13 @@ static Pixel32 getColourB(PVRTuint32 u32ColourData)
  @Input			ui8Bpp				Number of bpp.
  @Description	Bilinear upscale from 2x2 pixels to 4x4/8x4 pixels (depending on PVRTC bpp mode).
 *************************************************************************/
-static void interpolateColours(Pixel32 P, Pixel32 Q, Pixel32 R, Pixel32 S, 
-						Pixel128S *pPixel, PVRTuint8 ui8Bpp)
+void interpolateColours(const Pixel32& P, const Pixel32& Q, const Pixel32& R, const Pixel32& S, Pixel128S* pPixel, PVRTuint8 ui8Bpp)
 {
-	PVRTuint32 ui32WordWidth=4;
-	PVRTuint32 ui32WordHeight=4;
-	if (ui8Bpp==2)
-		ui32WordWidth=8;
+	PVRTuint32 ui32WordWidth = 4;
+	PVRTuint32 ui32WordHeight = 4;
+	
+	if (ui8Bpp == 2)
+		ui32WordWidth = 8;
 
 	//Convert to int 32.
 	Pixel128S hP = {(PVRTint32)P.red,(PVRTint32)P.green,(PVRTint32)P.blue,(PVRTint32)P.alpha};
@@ -143,32 +143,32 @@ static void interpolateColours(Pixel32 P, Pixel32 Q, Pixel32 R, Pixel32 S,
 	hR.blue		*=	ui32WordWidth;
 	hR.alpha	*=	ui32WordWidth;
 	
-	if (ui8Bpp==2)
+	if (ui8Bpp == 2)
 	{
 		//Loop through pixels to achieve results.
-		for (unsigned int x=0; x < ui32WordWidth; x++)
+		size_t k = 0;
+		for (unsigned int x = 0; x < ui32WordWidth; x++)
 		{			
 			Pixel128S Result={4*hP.red, 4*hP.green, 4*hP.blue, 4*hP.alpha};
 			Pixel128S dY = {hR.red - hP.red, hR.green - hP.green, hR.blue - hP.blue, hR.alpha - hP.alpha};	
 
-			for (unsigned int y=0; y < ui32WordHeight; y++)				
+			for (unsigned int y = 0; y < ui32WordHeight; y++)
 			{
-				pPixel[y*ui32WordWidth+x].red   = (PVRTint32)((Result.red   >> 7) + (Result.red   >> 2));
-				pPixel[y*ui32WordWidth+x].green = (PVRTint32)((Result.green >> 7) + (Result.green >> 2));
-				pPixel[y*ui32WordWidth+x].blue  = (PVRTint32)((Result.blue  >> 7) + (Result.blue  >> 2));
-				pPixel[y*ui32WordWidth+x].alpha = (PVRTint32)((Result.alpha >> 5) + (Result.alpha >> 1));				
-
+				pPixel[k].red   = (PVRTint32)((Result.red   >> 7) + (Result.red   >> 2));
+				pPixel[k].green = (PVRTint32)((Result.green >> 7) + (Result.green >> 2));
+				pPixel[k].blue  = (PVRTint32)((Result.blue  >> 7) + (Result.blue  >> 2));
+				pPixel[k].alpha = (PVRTint32)((Result.alpha >> 5) + (Result.alpha >> 1));
 				Result.red		+= dY.red;
 				Result.green	+= dY.green;
 				Result.blue		+= dY.blue;
 				Result.alpha	+= dY.alpha;
+				++k;
 			}			
 
 			hP.red		+= QminusP.red;
 			hP.green	+= QminusP.green;
 			hP.blue		+= QminusP.blue;
 			hP.alpha	+= QminusP.alpha;
-
 			hR.red		+= SminusR.red;
 			hR.green	+= SminusR.green;
 			hR.blue		+= SminusR.blue;
@@ -177,23 +177,27 @@ static void interpolateColours(Pixel32 P, Pixel32 Q, Pixel32 R, Pixel32 S,
 	}
 	else
 	{
-		//Loop through pixels to achieve results.
-		for (unsigned int y=0; y < ui32WordHeight; y++)
+		// Loop through pixels to achieve results.
+		
+		size_t k = 0;
+ 		for (unsigned int y = 0; y < ui32WordHeight; y++)
 		{			
 			Pixel128S Result={4*hP.red, 4*hP.green, 4*hP.blue, 4*hP.alpha};
 			Pixel128S dY = {hR.red - hP.red, hR.green - hP.green, hR.blue - hP.blue, hR.alpha - hP.alpha};	
 
-			for (unsigned int x=0; x < ui32WordWidth; x++)				
+			for (unsigned int x = 0; x < ui32WordWidth; x++)
 			{
-				pPixel[y*ui32WordWidth+x].red   = (PVRTint32)((Result.red   >> 6) + (Result.red   >> 1));
-				pPixel[y*ui32WordWidth+x].green = (PVRTint32)((Result.green >> 6) + (Result.green >> 1));
-				pPixel[y*ui32WordWidth+x].blue  = (PVRTint32)((Result.blue  >> 6) + (Result.blue  >> 1));
-				pPixel[y*ui32WordWidth+x].alpha = (PVRTint32)((Result.alpha >> 4) + (Result.alpha));				
+				pPixel[k].red   = (PVRTint32)((Result.red   >> 6) + (Result.red   >> 1));
+				pPixel[k].green = (PVRTint32)((Result.green >> 6) + (Result.green >> 1));
+				pPixel[k].blue  = (PVRTint32)((Result.blue  >> 6) + (Result.blue  >> 1));
+				pPixel[k].alpha = (PVRTint32)((Result.alpha >> 4) + (Result.alpha));
 
 				Result.red += dY.red;
 				Result.green += dY.green;
 				Result.blue += dY.blue;
 				Result.alpha += dY.alpha;
+				
+				++k;
 			}			
 
 			hP.red += QminusP.red;

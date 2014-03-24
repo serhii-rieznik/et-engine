@@ -59,6 +59,9 @@
 #
 #	define glClearDepth									glClearDepthf
 #	define glDepthRange									glDepthRangef
+#	define glMapBufferRange								glMapBufferRangeEXT
+#	define glFlushMappedBufferRange						glFlushMappedBufferRangeEXT
+#	define glUnmapBuffer								glUnmapBufferOES
 #
 #	if !defined(GL_DEPTH_COMPONENT24)
 #		define GL_DEPTH_COMPONENT24						GL_DEPTH_COMPONENT24_OES
@@ -147,6 +150,27 @@
 #	if !defined(GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE)
 #		define GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE	GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE_APPLE
 #	endif
+#
+#	if !defined(GL_MAP_WRITE_BIT) && defined(GL_MAP_WRITE_BIT_EXT)
+#		define GL_MAP_WRITE_BIT GL_MAP_WRITE_BIT_EXT
+#	endif
+#
+#	if !defined(GL_MAP_READ_BIT) && defined(GL_MAP_READ_BIT_EXT)
+#		define GL_MAP_READ_BIT GL_MAP_READ_BIT_EXT
+#	endif
+#
+#	if !defined(GL_MAP_INVALIDATE_BUFFER_BIT) && defined(GL_MAP_INVALIDATE_BUFFER_BIT_EXT)
+#		define GL_MAP_INVALIDATE_BUFFER_BIT GL_MAP_INVALIDATE_BUFFER_BIT_EXT
+#	endif
+#
+#	if !defined(GL_MAP_FLUSH_EXPLICIT_BIT) && defined(GL_MAP_FLUSH_EXPLICIT_BIT_EXT)
+#		define GL_MAP_FLUSH_EXPLICIT_BIT GL_MAP_FLUSH_EXPLICIT_BIT_EXT
+#	endif
+#
+#	if !defined(GL_MAP_UNSYNCHRONIZED_BIT) && defined(GL_MAP_UNSYNCHRONIZED_BIT_EXT)
+#		define GL_MAP_UNSYNCHRONIZED_BIT GL_MAP_UNSYNCHRONIZED_BIT_EXT
+#	endif
+#
 #
 #elif (ET_PLATFORM_ANDROID)
 #

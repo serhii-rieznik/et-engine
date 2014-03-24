@@ -121,7 +121,7 @@ void Material::serialize(std::ostream& stream, StorageFormat format) const
 	else if (format == StorageFormat_HumanReadableMaterials)
 		serializeReadable(stream);
 	else
-		assert("Unknown storage format specified." && 0);
+		ET_FAIL("Unknown storage format specified.");
 }
 
 template <typename T>

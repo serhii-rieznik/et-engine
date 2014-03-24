@@ -506,10 +506,10 @@ uint32_t et::primitiveTypeValue(PrimitiveType t)
 #if (ET_OPENGLES)
 
 void et::etTexImage1D(uint32_t, int, int, GLsizei, int, uint32_t, uint32_t, const GLvoid*)
-	{ assert(false && "Call to glTexImage1D in OpenGL ES"); }
+	{ ET_FAIL("Call to glTexImage1D in OpenGL ES"); }
 
 void et::etCompressedTexImage1D(uint32_t, int, uint32_t, GLsizei, int, GLsizei, const GLvoid*)
-	{ assert(false && "Call to glCompressedTexImage1D in OpenGL ES"); }
+	{ ET_FAIL("Call to glCompressedTexImage1D in OpenGL ES"); }
 
 #else
 

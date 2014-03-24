@@ -117,13 +117,13 @@ namespace et
 		
 		DefaultMaterialEntry<T>& operator[] (size_t i)
 		{
-			assert(i < MaterialParameter_max);
+			ET_ASSERT(i < MaterialParameter_max);
 			return values[i];
 		}
 		
 		const DefaultMaterialEntry<T>& operator[] (size_t i) const
 		{
-			assert(i < MaterialParameter_max);
+			ET_ASSERT(i < MaterialParameter_max);
 			return values[i];
 		}
 		

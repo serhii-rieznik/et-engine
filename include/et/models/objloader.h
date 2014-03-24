@@ -47,7 +47,7 @@ namespace et
 			int vertices[4];
 
 			int& operator [] (size_t i) 
-				{ assert(i < numVertices); return vertices[i]; }
+				{ ET_ASSERT(i < numVertices); return vertices[i]; }
 
 			OBJVertex() : numVertices(0)
 				{ etFillMemory(vertices, 0, sizeof(vertices)); }

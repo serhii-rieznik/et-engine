@@ -125,7 +125,7 @@ void TextureData::compareRefToTexture(RenderContext* rc, bool enable, int32_t co
 #else
 
 void TextureData::compareRefToTexture(RenderContext*, bool, int32_t)
-	{ assert(false && "WARNING: GL_TEXTURE_COMPARE_MODE and GL_TEXTURE_COMPARE_FUNC are not defined."); }
+	{ ET_FAIL("GL_TEXTURE_COMPARE_MODE and GL_TEXTURE_COMPARE_FUNC are not defined."); }
 
 #endif
 

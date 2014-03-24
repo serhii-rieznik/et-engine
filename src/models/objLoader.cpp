@@ -211,7 +211,7 @@ void OBJLoader::loadData(bool async, ObjectsCache& cache)
 			trim(line);
 
 			auto faces = split(line, " ");
-			assert((faces.size() > 2) && (faces.size() < 6));
+			ET_ASSERT((faces.size() > 2) && (faces.size() < 6));
 
 			for (auto inFace : faces)
 			{

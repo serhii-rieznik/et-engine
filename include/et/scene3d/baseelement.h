@@ -38,6 +38,7 @@ namespace et
 			ElementType_SupportMesh,
 			ElementType_Camera,
 			ElementType_Light,
+			ElementType_ParticleSystem,
 			// ... to be addded ...
 			ElementType_Storage = 0xfe,
 			ElementType_Any = 0xff,

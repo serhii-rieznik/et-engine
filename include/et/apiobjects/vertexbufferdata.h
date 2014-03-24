@@ -16,6 +16,15 @@ namespace et
 	class VertexBufferData : public Object
 	{
 	public:
+		enum MapBufferMode
+		{
+			MapBufferMode_ReadOnly,
+			MapBufferMode_WriteOnly,
+			MapBufferMode_ReadWrite,
+			
+			MapBufferMode_max
+		};
+	public:
 		VertexBufferData(RenderContext* rc, const VertexArray::Description& desc,
 			BufferDrawType vertexDrawType, const std::string& name = std::string());
 
@@ -31,6 +40,9 @@ namespace et
 			{ return _decl; }
 
 		void setData(const void* data, size_t dataSize);
+		
+		void map(void** data, size_t offset, size_t dataSize, MapBufferMode mode);
+		void unmap();
 
 		void serialize(std::ostream& stream);
 		void deserialize(std::istream& stream);

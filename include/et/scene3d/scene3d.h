@@ -15,6 +15,7 @@
 #include <et/scene3d/supportmesh.h>
 #include <et/scene3d/cameraelement.h>
 #include <et/scene3d/lightelement.h>
+#include <et/scene3d/particlesystem.h>
 
 namespace et
 {
