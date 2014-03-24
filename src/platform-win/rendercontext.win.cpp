@@ -231,11 +231,11 @@ bool RenderContextPrivate::initWindow(RenderContextParameters& params, const App
 	wndClass.lpszClassName = "etWindowClass";
 
 	ATOM result = RegisterClassEx(&wndClass);
-	assert(result);
+	ET_ASSERT(result);
 	(void)result;
 
 	primaryContext.hWnd = createWindow(appParams.windowStyle, appParams.windowSize, params.contextSize);
-	assert(primaryContext.hWnd != nullptr);
+	ET_ASSERT(primaryContext.hWnd != nullptr);
 
 	SetWindowLong(primaryContext.hWnd, GWL_USERDATA, reinterpret_cast<LONG>(this));
 
