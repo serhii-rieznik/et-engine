@@ -7,20 +7,54 @@
 
 #pragma once
 
-#include <et/core/et.h>
-
 namespace et
 {
 	namespace log
 	{
-		void debug(const char*, ...) ET_FORMAT_FUNCTION;
-		void info(const char*, ...) ET_FORMAT_FUNCTION;
-		void warning(const char*, ...) ET_FORMAT_FUNCTION;
-		void error(const char*, ...) ET_FORMAT_FUNCTION;
+		class Output : public Shared
+		{
+		public:
+			ET_DECLARE_POINTER(Output)
+			
+		public:
+			virtual ~Output() { }
 
-		void debug(const wchar_t*, ...);
-		void info(const wchar_t*, ...);
-		void warning(const wchar_t*, ...);
-		void error(const wchar_t*, ...);
+			virtual void debug(const char*, va_list) { }
+			virtual void info(const char*, va_list) { }
+			virtual void warning(const char*, va_list) { }
+			virtual void error(const char*, va_list) { }
+		};
+		
+		void addOutput(Output::Pointer);
+		void removeOutput(Output::Pointer);
+		
+		class FileOutput : public Output
+		{
+		public:
+			ET_DECLARE_POINTER(FileOutput)
+			
+		public:
+			FileOutput(const std::string&);
+			FileOutput(FILE*);
+			
+			~FileOutput();
+			
+			void debug(const char*, va_list);
+			void info(const char*, va_list);
+			void warning(const char*, va_list);
+			void error(const char*, va_list);
+			
+		private:
+			FILE* _file = nullptr;
+		};
+
+		class ConsoleOutput : public FileOutput
+		{
+		public:
+			ET_DECLARE_POINTER(ConsoleOutput)
+			
+		public:
+			ConsoleOutput();
+		};
 	}
 }

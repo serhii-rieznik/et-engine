@@ -12,7 +12,6 @@
 #include <cstring>
 #include <cstddef>
 #include <cstdint>
-#include <cassert>
 
 #include <string>
 #include <vector>
@@ -32,20 +31,23 @@
 
 #include <et/platform/compileoptions.h>
 #include <et/platform/platform.h>
+
 #include <et/core/debug.h>
 #include <et/core/constants.h>
 #include <et/core/properties.h>
-#include <et/core/log.h>
 #include <et/core/strings.h>
+
 #include <et/core/autoptr.h>
 #include <et/core/atomiccounter.h>
 #include <et/core/intrusiveptr.h>
+
 #include <et/core/filesystem.h>
 #include <et/core/conversionbase.h>
 #include <et/core/object.h>
 #include <et/core/dictionary.h>
 #include <et/core/stream.h>
 #include <et/core/hierarchy.h>
+#include <et/core/log.h>
 
 #include <et/geometry/vector4.h>
 #include <et/geometry/matrix3.h>

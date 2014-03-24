@@ -76,7 +76,7 @@ ValueBase::Pointer Dictionary::baseValueForKeyPathInHolder(const std::vector<std
 
 ValueBase::Pointer Dictionary::objectForKeyPath(const std::vector<std::string>& path) const
 {
-	assert(path.size() > 0);
+	ET_ASSERT(path.size() > 0);
 	return baseValueForKeyPathInHolder(path, *this);
 }
 

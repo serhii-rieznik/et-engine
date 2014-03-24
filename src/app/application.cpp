@@ -23,6 +23,8 @@ Application::Application() : _renderContext(nullptr), _exitCode(0),
 {
 	threading();
 	
+	log::addOutput(log::ConsoleOutput::Pointer::create());
+	
 	delegate()->setApplicationParameters(_parameters);
 
 	platformInit();

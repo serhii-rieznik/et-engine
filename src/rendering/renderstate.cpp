@@ -110,7 +110,7 @@ void RenderState::bindProgram(uint32_t program, bool force)
 
 void RenderState::bindProgram(const Program::Pointer& prog, bool force)
 {
-	assert(prog.valid());
+	ET_ASSERT(prog.valid());
 	bindProgram(prog->glID(), force);
 }
 
@@ -391,7 +391,7 @@ void RenderState::setBlend(bool enable, BlendState blend)
 			}
 
 		default:
-			assert(false && "Unknown blend state.");
+			ET_ASSERT(false && "Unknown blend state.");
 		}
 	}
 }

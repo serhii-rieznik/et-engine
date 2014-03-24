@@ -251,7 +251,7 @@ void TextureData::build(RenderContext* rc)
 	checkOpenGLError("buildData");
 	
 	_desc->data.resize(0);
-	assert(glIsTexture(_glID));
+	ET_ASSERT(glIsTexture(_glID));
 }
 
 vec2 TextureData::getTexCoord(const vec2& vec, TextureOrigin origin) const

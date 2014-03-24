@@ -13,74 +13,90 @@
 #
 #endif
 
-#define JUST_DO_IT()					va_list args; va_start(args, format);\
-										vprintf(format, args);\
-										va_end(args);\
-										printf("\n"); fflush(stdout);
+#define PASS_TO_OUTPUTS(FUNC)			for (Output::Pointer out : logOutputs) \
+										{ \
+											va_list args; \
+											va_start(args, format); \
+											out->FUNC(format, args); \
+											va_end(args); \
+										}
 
-#define JUST_DO_IT_W()					va_list args; va_start(args, format);\
-										vwprintf(format, args);\
-										va_end(args);\
-										printf("\n"); fflush(stdout);
+using namespace et;
+using namespace log;
 
-#define DO_IT_WITH_PREFIX(PREFIX)		printf(PREFIX); \
-										va_list args; va_start(args, format);\
-										vprintf(format, args);\
-										va_end(args);\
-										printf("\n"); fflush(stdout);
+static std::vector<Output::Pointer> logOutputs;
 
-#define DO_IT_WITH_WPREFIX(PREFIX)		wprintf(PREFIX); \
-										va_list args; va_start(args, format);\
-										vwprintf(format, args);\
-										va_end(args);\
-										printf("\n"); fflush(stdout);
+void et::log::addOutput(Output::Pointer ptr)
+{
+	logOutputs.push_back(ptr);
+}
 
+void et::log::removeOutput(Output::Pointer ptr)
+{
+	logOutputs.erase(std::remove_if(logOutputs.begin(), logOutputs.end(),
+		[ptr](Output::Pointer out) { return out == ptr; }), logOutputs.end());
+}
 
-void et::log::debug(const char* format, ...)
+void et::log::debug(const char* format, ...) { PASS_TO_OUTPUTS(debug) }
+void et::log::info(const char* format, ...) { PASS_TO_OUTPUTS(info) }
+void et::log::warning(const char* format, ...) { PASS_TO_OUTPUTS(warning) }
+void et::log::error(const char* format, ...) { PASS_TO_OUTPUTS(error) }
+
+ConsoleOutput::ConsoleOutput() :
+	FileOutput(stdout)
+{
+}
+
+FileOutput::FileOutput(FILE* file) : _file(file)
+{
+	if (file == nullptr)
+	{
+		_file = stdout;
+		fprintf(_file, "Invalid file was provided to FileOutput, output will be redirected to console.");
+	}
+}
+
+FileOutput::FileOutput(const std::string& filename)
+{
+	_file = fopen(filename.c_str(), "w");
+	if (_file == nullptr)
+	{
+		printf("Unable to open %s for writing, output will be redirected to console.", filename.c_str());
+		_file = stdout;
+	}
+}
+
+FileOutput::~FileOutput()
+{
+	if ((_file != nullptr) && (_file != stdout))
+	{
+		fflush(_file);
+		fclose(_file);
+	}
+}
+
+void FileOutput::debug(const char* format, va_list args)
 {
 #if (ET_DEBUG)
-	JUST_DO_IT()
-#else
-	(void)format;
+	info(format, args);
 #endif
 }
 
-void et::log::info(const char* format, ...)
+void FileOutput::info(const char* format, va_list args)
 {
-	JUST_DO_IT()
+	vfprintf(_file, format, args);
+	fprintf(_file, "\n");
+	fflush(_file);
 }
 
-void et::log::warning(const char* format, ...)
+void FileOutput::warning(const char* format, va_list args)
 {
-	DO_IT_WITH_PREFIX("WARNING: ")
+	fprintf(_file, "WARNING: ");
+	info(format, args);
 }
 
-void et::log::error(const char* format, ...)
+void FileOutput::error(const char* format, va_list args)
 {
-	DO_IT_WITH_PREFIX("ERROR: ")
+	fprintf(_file, "ERROR: ");
+	info(format, args);
 }
-
-void et::log::debug(const wchar_t* format, ...)
-{
-#if (ET_DEBUG)
-	JUST_DO_IT_W()
-#else
-	(void)format;
-#endif
-}
-
-void et::log::info(const wchar_t* format, ...)
-{
-	JUST_DO_IT_W()
-}
-
-void et::log::warning(const wchar_t* format, ...)
-{
-	DO_IT_WITH_WPREFIX(L"WARNING: ")
-}
-
-void et::log::error(const wchar_t* format, ...)
-{
-	DO_IT_WITH_WPREFIX(L"ERROR: ")
-}
-

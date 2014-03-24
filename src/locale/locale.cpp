@@ -222,7 +222,7 @@ size_t Locale::parseComment(const StringDataStorage& data, size_t index)
 
 void Locale::setCurrentLocale(const std::string& l)
 {
-	assert(l.size() >= 2);
+	ET_ASSERT(l.size() >= 2);
 	_locale = locale::localeToIdentifier(l);
 }
 

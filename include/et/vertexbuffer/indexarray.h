@@ -80,10 +80,10 @@ namespace et
 			Primitive();
 			
 			size_t& operator [] (size_t i)
-				{ assert(i < VertexCount_max); return index[i]; }
+				{ ET_ASSERT(i < VertexCount_max); return index[i]; }
 
 			const size_t& operator [] (size_t i) const
-				{ assert(i < VertexCount_max); return index[i]; }
+				{ ET_ASSERT(i < VertexCount_max); return index[i]; }
 
 			bool operator == (const Primitive& p) const;
 			bool operator != (const Primitive& p) const;

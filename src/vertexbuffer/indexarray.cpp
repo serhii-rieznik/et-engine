@@ -50,7 +50,7 @@ void IndexArray::linearize(size_t size)
 
 IndexType IndexArray::getIndex(size_t pos) const
 {
-	assert(pos <= indexTypeMask[_format]);
+	ET_ASSERT(pos <= indexTypeMask[_format]);
 	return *reinterpret_cast<const IndexType*>(_data.element_ptr(pos * _format)) & indexTypeMask[_format];
 }
 
@@ -65,13 +65,13 @@ void IndexArray::setIndex(IndexType value, size_t pos)
 	}
 	else if (_format == IndexArrayFormat_16bit)
 	{
-		assert("Index value out of range" && (value < MaxShortIndex));
+		ET_ASSERT("Index value out of range" && (value < MaxShortIndex));
 		ShortIndexType* ptr = reinterpret_cast<ShortIndexType*>(elementPtr);
 		*ptr = static_cast<ShortIndexType>(value);
 	}
 	else if (_format == IndexArrayFormat_8bit)
 	{
-		assert("Index value out of range" && (value < MaxSmallIndex));
+		ET_ASSERT("Index value out of range" && (value < MaxSmallIndex));
 		SmallIndexType* ptr = reinterpret_cast<SmallIndexType*>(elementPtr);
 		*ptr = static_cast<SmallIndexType>(value);
 	}

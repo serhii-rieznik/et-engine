@@ -201,7 +201,7 @@ namespace et
 
 		template <typename T>
 		void setTarget(T* o, void(T::*m)())
-			{ assert(o); _target = new InvocationTarget<T>(o, m); }
+			{ ET_ASSERT(o != nullptr); _target = new InvocationTarget<T>(o, m); }
 		
 		template <typename F>
 		void setTarget(F func)
@@ -221,7 +221,7 @@ namespace et
 
 		template <typename T, typename A1>
 		void setTarget(T* o, void(T::*m)(A1), A1 param)
-			{ assert(o); _target = new Invocation1Target<T, A1>(o, m, param); }
+			{ ET_ASSERT(o != nullptr); _target = new Invocation1Target<T, A1>(o, m, param); }
 
 		template <typename F, typename A1>
 		void setTarget(F func, A1 param)
@@ -230,7 +230,7 @@ namespace et
 		template <typename T, typename A1>
 		void setParameter(A1 p)
 		{
-			assert(_target.valid());
+			ET_ASSERT(_target.valid());
 			(static_cast<Invocation1Target<T, A1>*>(_target.ptr()))->setParameter(p);
 		}
 	};

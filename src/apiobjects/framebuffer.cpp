@@ -254,7 +254,7 @@ void Framebuffer::setCurrentRenderTarget(const Texture& texture)
 
 void Framebuffer::setCurrentRenderTarget(const Texture& texture, uint32_t target)
 {
-	assert(texture.valid());
+	ET_ASSERT(texture.valid());
 	_rc->renderState().bindFramebuffer(_id);
 
 	if (target == GL_TEXTURE_CUBE_MAP)
@@ -283,7 +283,7 @@ void Framebuffer::setCurrentRenderTarget(size_t index)
 
 void Framebuffer::setDrawBuffersCount(int)
 {
-	assert(false && "glDrawBuffers is not supported in OpenGL ES");
+	ET_ASSERT(false && "glDrawBuffers is not supported in OpenGL ES");
 }
 
 #else

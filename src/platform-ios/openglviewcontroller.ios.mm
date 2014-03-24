@@ -42,7 +42,7 @@ extern NSString* etKeyboardNotRequiredNotification;
 		
 		BOOL initialized = [self performInitialization];
 		
-		assert(initialized);
+		ET_ASSERT(initialized);
 		(void)initialized;
 		
 		self.view = _glView;

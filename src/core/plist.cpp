@@ -120,7 +120,7 @@ void Reader::parseBuffer(BinaryDataStorage& buffer, DictionaryEntry<Dictionary>*
 
 	if (*ptr == 0)
 	{
-		assert(false && "Unable to parse plist");
+		ET_ASSERT(false && "Unable to parse plist");
 		return;
 	}
 
@@ -136,7 +136,7 @@ void Reader::parseBuffer(BinaryDataStorage& buffer, DictionaryEntry<Dictionary>*
 	std::string tag = readTag(ptr);
 	if (tag != keyDictionaryOpen)
 	{
-		assert(false && "Unable to parse plist");
+		ET_ASSERT(false && "Unable to parse plist");
 		return;
 	}
 
@@ -147,7 +147,7 @@ bool Reader::parseDictionary(char*& ptr, DictionaryEntry<Dictionary>* owner)
 {
 	if (!isOpeningTag(ptr[0])) 
 	{
-		assert(false && "Unable to parse plist");
+		ET_ASSERT(false && "Unable to parse plist");
 		return false;
 	}
 
@@ -157,7 +157,7 @@ bool Reader::parseDictionary(char*& ptr, DictionaryEntry<Dictionary>* owner)
 		std::string key;
 		if (!readKey(ptr, key))
 		{
-			assert(false && "Unable to parse plist");
+			ET_ASSERT(false && "Unable to parse plist");
 			return false;
 		}
 
@@ -169,7 +169,7 @@ bool Reader::parseDictionary(char*& ptr, DictionaryEntry<Dictionary>* owner)
 		else
 		{
 			log::error("Unable to read value for key: %s", key.c_str());
-			assert(false);
+			ET_ASSERT(false);
 		}
 
 		if (pickTag(ptr) == keyDictionaryClose)
@@ -236,7 +236,7 @@ bool Reader::parseValue(char*& ptr, DictionaryEntryBase** value)
 	else
 	{
 		log::error("Unable to read value of type: %s", valueType.c_str());
-		assert(false);
+		ET_ASSERT(false);
 	}
 	return false;
 }

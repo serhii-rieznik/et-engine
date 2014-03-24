@@ -16,7 +16,7 @@ Input::Input()
 
 void Input::pushKeyboardInputAction(const std::string& chars, InputAction action)
 {
-	assert(action == InputAction_Characters);
+	ET_ASSERT(action == InputAction_Characters);
 	(void)action;
 	
 	charactersEntered.invokeInMainRunLoop(chars);

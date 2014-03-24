@@ -36,10 +36,10 @@ namespace et
 			{ etFillMemory(data, value, dataSize()); }
 
 		T& operator [](size_t i)
-			{ assert(i < count); return data[i]; }
+			{ ET_ASSERT(i < count); return data[i]; }
 		
 		const T& operator [](size_t i) const
-			{ assert(i < count); return data[i]; }
+			{ ET_ASSERT(i < count); return data[i]; }
 
 		char* binary()
 			{ return reinterpret_cast<char*>(data); }
@@ -55,7 +55,7 @@ namespace et
 		
 		void copyFrom(const StaticDataStorage& r)
 		{
-			assert(r.size() == size() && "Can not copy from array with different size");
+			ET_ASSERT(r.size() == size() && "Can not copy from array with different size");
 			
 			size_t i = 0;
 			for (auto& value : r.data)

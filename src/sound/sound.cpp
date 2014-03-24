@@ -55,7 +55,7 @@ Manager::Manager() :
 	nativeInit();
     
 	ALboolean success = alcMakeContextCurrent(sharedContext);
-	assert(success); (void)success;
+	ET_ASSERT(success); (void)success;
 
 	alDistanceModel(AL_LINEAR_DISTANCE_CLAMPED);
 	checkOpenALError("alDistanceModel(AL_LINEAR_DISTANCE_CLAMPED)");
@@ -97,7 +97,7 @@ Track::Pointer Manager::loadTrack(const std::string& fileName)
 
 Player::Pointer Manager::genPlayer(Track::Pointer track)
 {
-	assert(track.valid());
+	ET_ASSERT(track.valid());
 	return Player::Pointer(new Player(track));
 }
 
@@ -156,7 +156,7 @@ size_t et::audio::openALFormatFromChannelsAndBitDepth(size_t numChannels, size_t
 		}
 		else
 		{
-			assert(false && "Unsupported format in WAV file");
+			ET_ASSERT(false && "Unsupported format in WAV file");
 		}
 	}
 	else if (numChannels == 2)
@@ -171,12 +171,12 @@ size_t et::audio::openALFormatFromChannelsAndBitDepth(size_t numChannels, size_t
 		}
 		else
 		{
-			assert(false && "Unsupported audio format.");
+			ET_ASSERT(false && "Unsupported audio format.");
 		}
 	}
 	else
 	{
-		assert(false && "Unsupported number of channels in audio.");
+		ET_ASSERT(false && "Unsupported number of channels in audio.");
 	}
 	
 	return 0;

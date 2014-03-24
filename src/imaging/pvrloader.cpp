@@ -21,7 +21,7 @@ void loadInfoFromV3Header(const PVRTextureHeaderV3& header, const BinaryDataStor
 	TextureDescription& desc, bool& shouldDecompress)
 {
 	desc.layersCount = header.u32NumFaces;
-	assert((desc.layersCount == 1) || (desc.layersCount == 6));
+	ET_ASSERT((desc.layersCount == 1) || (desc.layersCount == 6));
 
 	desc.size = vec2i(header.u32Width, header.u32Height);
 	desc.mipMapCount = (header.u32MIPMapCount > 0) ? header.u32MIPMapCount : 1;

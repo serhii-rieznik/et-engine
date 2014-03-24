@@ -15,13 +15,15 @@ namespace et
 {
 	inline void serializeInt(std::ostream& stream, int32_t value)
 	{
-		assert(stream.good());
+		ET_ASSERT(stream.good());
+		
 		stream.write(reinterpret_cast<const char*>(&value), sizeof(value));
 	}
 
 	inline void serializeInt(std::ostream& stream, uint32_t value)
 	{
-		assert(stream.good());
+		ET_ASSERT(stream.good());
+		
 		stream.write(reinterpret_cast<const char*>(&value), sizeof(value));
 	}
 
@@ -32,7 +34,7 @@ namespace et
     
 	inline int32_t deserializeInt(std::istream& stream)
 	{
-		assert(stream.good());
+		ET_ASSERT(stream.good());
 
 		int value = 0;
 		stream.read(reinterpret_cast<char*>(&value), sizeof(value)); 
@@ -41,7 +43,7 @@ namespace et
 	
 	inline uint32_t deserializeUInt(std::istream& stream)
 	{
-		assert(stream.good());
+		ET_ASSERT(stream.good());
 		
 		uint32_t value = 0;
 		stream.read(reinterpret_cast<char*>(&value), sizeof(value));
@@ -50,7 +52,7 @@ namespace et
 	
 	inline size_t deserializeSizeT(std::istream& stream)
 	{
-		assert(stream.good());
+		ET_ASSERT(stream.good());
 		
 		size_t value = 0;
 		stream.read(reinterpret_cast<char*>(&value), sizeof(uint32_t));
@@ -59,7 +61,7 @@ namespace et
 
 	inline void serializeString(std::ostream& stream, const std::string& s)
 	{
-		assert(stream.good());
+		ET_ASSERT(stream.good());
 
 		serializeInt(stream, s.size());
         
@@ -69,7 +71,7 @@ namespace et
 
 	inline std::string deserializeString(std::istream& stream)
 	{
-		assert(stream.good());
+		ET_ASSERT(stream.good());
 
 		int size = deserializeInt(stream);
 		if (size > 0)
@@ -84,14 +86,14 @@ namespace et
 
 	inline void serializeFloat(std::ostream& stream, float value)
 	{
-		assert(stream.good());
+		ET_ASSERT(stream.good());
 
 		stream.write(reinterpret_cast<const char*>(&value), sizeof(value));
 	}
 
 	inline float deserializeFloat(std::istream& stream)
 	{
-		assert(stream.good());
+		ET_ASSERT(stream.good());
 
 		float value = 0;
 		stream.read(reinterpret_cast<char*>(&value), sizeof(value)); 
@@ -101,7 +103,7 @@ namespace et
 	template <typename T>
 	inline void serializeVector(std::ostream& stream, const T& value)
 	{
-		assert(stream.good());
+		ET_ASSERT(stream.good());
 
 		stream.write(value.binary(), sizeof(value)); 
 	}
@@ -109,7 +111,7 @@ namespace et
 	template <typename T>
 	inline T deserializeVector(std::istream& stream)
 	{
-		assert(stream.good());
+		ET_ASSERT(stream.good());
 
 		T value;
 		stream.read(value.binary(), sizeof(value)); 
@@ -118,7 +120,7 @@ namespace et
 
 	inline void serializeQuaternion(std::ostream& stream, const quaternion& value)
 	{
-		assert(stream.good());
+		ET_ASSERT(stream.good());
 
 		serializeFloat(stream, value.scalar);
 		serializeVector(stream, value.vector);
@@ -126,7 +128,7 @@ namespace et
 
 	inline quaternion deserializeQuaternion(std::istream& stream)
 	{
-		assert(stream.good());
+		ET_ASSERT(stream.good());
 
 		quaternion result;
 		result.scalar = deserializeFloat(stream);
@@ -136,14 +138,14 @@ namespace et
 
 	inline void serializeMatrix(std::ostream& stream, const mat4& value)
 	{
-		assert(stream.good());
+		ET_ASSERT(stream.good());
 
 		stream.write(value.binary(), sizeof(value));
 	}
 
 	inline mat4 deserializeMatrix(std::istream& stream)
 	{
-		assert(stream.good());
+		ET_ASSERT(stream.good());
 
 		mat4 value;
 		stream.read(value.binary(), sizeof(value));

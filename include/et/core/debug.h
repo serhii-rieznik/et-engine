@@ -48,6 +48,7 @@
 #
 #	define ET_DEPRECATED					__attribute__((deprecated))
 #	define ET_FORMAT_FUNCTION				__attribute__((format(printf, 1, 2)))
+#	define ET_FORMAT_FUNCTION_IN_CLASS		__attribute__((format(printf, 2, 3)))
 #
 #elif (ET_PLATFORM_ANDROID)
 #
@@ -103,6 +104,17 @@
 																	
 #define ET_COMPOSE_UINT32(A, B, C, D)					(D | (C << 8) | (B << 16) | (A << 24))
 #define ET_COMPOSE_UINT32_INVERTED(A, B, C, D)			(A | (B << 8) | (C << 16) | (D << 24))
+																	
+namespace et
+{
+	namespace log
+	{
+		void debug(const char*, ...) ET_FORMAT_FUNCTION;
+		void info(const char*, ...) ET_FORMAT_FUNCTION;
+		void warning(const char*, ...) ET_FORMAT_FUNCTION;
+		void error(const char*, ...) ET_FORMAT_FUNCTION;
+	}
+}
 
 #if (ET_DEBUG)
 #

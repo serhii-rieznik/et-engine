@@ -42,13 +42,13 @@ Program::~Program()
 
 UniformMap::const_iterator Program::findUniform(const std::string& name) const
 {
-	assert(loaded());
+	ET_ASSERT(loaded());
 	return _uniforms.find(name);
 }
 
 int Program::getUniformLocation(const std::string& uniform) const
 {
-	assert(loaded());
+	ET_ASSERT(loaded());
 
 	auto i = findUniform(uniform);
 	return (i == _uniforms.end()) ? -1 : i->second.location;
@@ -56,7 +56,7 @@ int Program::getUniformLocation(const std::string& uniform) const
 
 uint32_t Program::getUniformType(const std::string& uniform) const
 {
-	assert(loaded());
+	ET_ASSERT(loaded());
 
 	auto i = findUniform(uniform);
 	return (i == _uniforms.end()) ? 0 : i->second.type;
@@ -64,7 +64,7 @@ uint32_t Program::getUniformType(const std::string& uniform) const
 
 ProgramUniform Program::getUniform(const std::string& uniform) const
 {
-	assert(loaded());
+	ET_ASSERT(loaded());
 
 	auto i = findUniform(uniform);
 	return (i == _uniforms.end()) ? ProgramUniform() : i->second;
@@ -102,7 +102,7 @@ void Program::setTransformMatrix(const mat4 &m, bool forced)
 
 void Program::setCameraProperties(const Camera& cam)
 {
-	assert(loaded());
+	ET_ASSERT(loaded());
 
 	setModelViewMatrix(cam.modelViewMatrix());
 	setMVPMatrix(cam.modelViewProjectionMatrix());
@@ -396,8 +396,8 @@ void Program::setUniform(int nLoc, uint32_t type, const int value, bool)
 {
 	if (nLoc == -1) return;
 	
-	assert((type == GL_INT) || (type == GL_SAMPLER_2D) || (type == GL_SAMPLER_CUBE));
-	assert(loaded());
+	ET_ASSERT((type == GL_INT) || (type == GL_SAMPLER_2D) || (type == GL_SAMPLER_CUBE));
+	ET_ASSERT(loaded());
 	
 	glUniform1i(nLoc, value);
 	checkOpenGLError("setUniform - int");
@@ -407,8 +407,8 @@ void Program::setUniform(int nLoc, uint32_t type, const unsigned int value, bool
 {
 	if (nLoc == -1) return;
 	
-	assert((type == GL_INT) || (type == GL_SAMPLER_2D) || (type == GL_SAMPLER_CUBE));
-	assert(loaded());
+	ET_ASSERT((type == GL_INT) || (type == GL_SAMPLER_2D) || (type == GL_SAMPLER_CUBE));
+	ET_ASSERT(loaded());
 	
 	glUniform1i(nLoc, static_cast<GLint>(value));
 	checkOpenGLError("setUniform - unsigned int");
@@ -418,8 +418,8 @@ void Program::setUniform(int nLoc, uint32_t type, const unsigned long value, boo
 {
 	if (nLoc == -1) return;
 	
-	assert((type == GL_INT) || (type == GL_SAMPLER_2D) || (type == GL_SAMPLER_CUBE));
-	assert(loaded());
+	ET_ASSERT((type == GL_INT) || (type == GL_SAMPLER_2D) || (type == GL_SAMPLER_CUBE));
+	ET_ASSERT(loaded());
 	
 	glUniform1i(nLoc, static_cast<GLint>(value));
 	checkOpenGLError("setUniform - unsigned long");
@@ -430,8 +430,8 @@ void Program::setUniform(int nLoc, uint32_t type, const float value, bool forced
 	if (nLoc == -1) return;
 	
 	(void)type;
-	assert(type == GL_FLOAT);
-	assert(loaded());
+	ET_ASSERT(type == GL_FLOAT);
+	ET_ASSERT(loaded());
 	
 	if (forced || ((_floatCache.count(nLoc) == 0) || (_floatCache[nLoc] != value)))
 	{
@@ -446,8 +446,8 @@ void Program::setUniform(int nLoc, uint32_t type, const vec2& value, bool forced
 	if (nLoc == -1) return;
 	
 	(void)type;
-	assert(type == GL_FLOAT_VEC2);
-	assert(loaded());
+	ET_ASSERT(type == GL_FLOAT_VEC2);
+	ET_ASSERT(loaded());
 	
 	if (forced || ((_vec2Cache.count(nLoc) == 0) || (_vec2Cache[nLoc] != value)))
 	{
@@ -463,8 +463,8 @@ void Program::setUniform(int nLoc, uint32_t type, const vec3& value, bool forced
 	if (nLoc == -1) return;
 	
 	(void)type;
-	assert(type == GL_FLOAT_VEC3);
-	assert(loaded());
+	ET_ASSERT(type == GL_FLOAT_VEC3);
+	ET_ASSERT(loaded());
 	
 	if (forced || ((_vec3Cache.count(nLoc) == 0) || (_vec3Cache[nLoc] != value)))
 	{
@@ -480,8 +480,8 @@ void Program::setUniform(int nLoc, uint32_t type, const vec4& value, bool forced
 	if (nLoc == -1) return;
 	
 	(void)type;
-	assert(type == GL_FLOAT_VEC4);
-	assert(loaded());
+	ET_ASSERT(type == GL_FLOAT_VEC4);
+	ET_ASSERT(loaded());
 	
 	if (forced || ((_vec4Cache.count(nLoc) == 0) || (_vec4Cache[nLoc] != value)))
 	{
@@ -497,8 +497,8 @@ void Program::setUniformDirectly(int nLoc, uint32_t type, const vec4& value)
 	if (nLoc == -1) return;
 	
 	(void)type;
-	assert(type == GL_FLOAT_VEC4);
-	assert(loaded());
+	ET_ASSERT(type == GL_FLOAT_VEC4);
+	ET_ASSERT(loaded());
 	
 	glUniform4fv(nLoc, 1, value.data());
 	
@@ -510,8 +510,8 @@ void Program::setUniform(int nLoc, uint32_t type, const mat3& value, bool forced
 	if (nLoc == -1) return;
 	
 	(void)type;
-	assert(type == GL_FLOAT_MAT3);
-	assert(loaded());
+	ET_ASSERT(type == GL_FLOAT_MAT3);
+	ET_ASSERT(loaded());
 	
 	if (forced || ((_mat3Cache.count(nLoc) == 0) || (_mat3Cache[nLoc] != value)))
 	{
@@ -527,8 +527,8 @@ void Program::setUniform(int nLoc, uint32_t type, const mat4& value, bool forced
 	if (nLoc == -1) return;
 	
 	(void)type;
-	assert(type == GL_FLOAT_MAT4);
-	assert(loaded());
+	ET_ASSERT(type == GL_FLOAT_MAT4);
+	ET_ASSERT(loaded());
 	
 	if (forced || ((_mat4Cache.count(nLoc) == 0) || (_mat4Cache[nLoc] != value)))
 	{
@@ -544,8 +544,8 @@ void Program::setUniformDirectly(int nLoc, uint32_t type, const mat4& value)
 	if (nLoc == -1) return;
 	
 	(void)type;
-	assert(type == GL_FLOAT_MAT4);
-	assert(loaded());
+	ET_ASSERT(type == GL_FLOAT_MAT4);
+	ET_ASSERT(loaded());
 	
 	glUniformMatrix4fv(nLoc, 1, 0, value.data());
 	
@@ -557,8 +557,8 @@ void Program::setUniform(int nLoc, uint32_t type, const vec2* value, size_t amou
 	if (nLoc == -1) return;
 	
 	(void)type;
-	assert(type == GL_FLOAT_VEC2);
-	assert(loaded());
+	ET_ASSERT(type == GL_FLOAT_VEC2);
+	ET_ASSERT(loaded());
 	
 	glUniform2fv(nLoc, static_cast<GLsizei>(amount), value->data());
 	checkOpenGLError("setUniform - vec2*");
@@ -569,8 +569,8 @@ void Program::setUniform(int nLoc, uint32_t type, const vec3* value, size_t amou
 	if (nLoc == -1) return;
 	
 	(void)type;
-	assert(type == GL_FLOAT_VEC3);
-	assert(loaded());
+	ET_ASSERT(type == GL_FLOAT_VEC3);
+	ET_ASSERT(loaded());
 	
 	glUniform3fv(nLoc, static_cast<GLsizei>(amount), value->data());
 	checkOpenGLError("setUniform - vec3*");
@@ -581,8 +581,8 @@ void Program::setUniform(int nLoc, uint32_t type, const vec4* value, size_t amou
 	if (nLoc == -1) return;
 	
 	(void)type;
-	assert(type == GL_FLOAT_VEC4);
-	assert(loaded());
+	ET_ASSERT(type == GL_FLOAT_VEC4);
+	ET_ASSERT(loaded());
 	
 	glUniform4fv(nLoc, static_cast<GLsizei>(amount), value->data());
 	checkOpenGLError("setUniform - vec4*");
@@ -593,8 +593,8 @@ void Program::setUniform(int nLoc, uint32_t type, const mat4* value, size_t amou
 	if (nLoc == -1) return;
 	
 	(void)type;
-	assert(type == GL_FLOAT_MAT4);
-	assert(loaded());
+	ET_ASSERT(type == GL_FLOAT_MAT4);
+	ET_ASSERT(loaded());
 	
 	glUniformMatrix4fv(nLoc, static_cast<GLsizei>(amount), 0, value->data());
 	checkOpenGLError("setUniform - mat4*");

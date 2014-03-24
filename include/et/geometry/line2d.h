@@ -72,7 +72,7 @@ namespace et
 	template <typename T>
 	vector2<T> Line2d<T>::slopeInterceptForm()
 	{
-		assert(std::abs(equation.y) > std::numeric_limits<T>::epsilon());
+		ET_ASSERT(std::abs(equation.y) > std::numeric_limits<T>::epsilon());
 		return vector2<T>(-equation.x / equation.y, -equation.z / equation.y);
 	}
 }

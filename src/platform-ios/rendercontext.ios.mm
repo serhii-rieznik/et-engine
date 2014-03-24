@@ -29,7 +29,7 @@ RenderContext::RenderContext(const RenderContextParameters& params, Application*
 	_params(params), _app(app), _programFactory(nullptr), _textureFactory(nullptr), _framebufferFactory(nullptr),
 	_vertexBufferFactory(nullptr), _renderer(nullptr), _private(new RenderContextPrivate(params))
 {
-	assert(sharedOpenGLViewController != nil);
+	ET_ASSERT(sharedOpenGLViewController != nil);
 	
      openGLCapabilites().checkCaps();
 

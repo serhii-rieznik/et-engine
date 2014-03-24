@@ -436,7 +436,7 @@ int32_t et::textureWrapValue(TextureWrap w)
 		case TextureWrap_MirrorRepeat:
 			return GL_MIRRORED_REPEAT;
 		default:
-			assert(false && "Unrecognized texture wrap.");
+			ET_ASSERT(false && "Unrecognized texture wrap.");
 	}
 	
 	return 0;
@@ -459,7 +459,7 @@ int32_t et::textureFiltrationValue(TextureFiltration f)
 		case TextureFiltration_LinearMipMapLinear:
 			return GL_LINEAR_MIPMAP_LINEAR;
 		default:
-			assert(false && "Unrecognized texture filtration.");
+			ET_ASSERT(false && "Unrecognized texture filtration.");
 	}
 	
 	return 0;
@@ -476,7 +476,7 @@ uint32_t et::drawTypeValue(BufferDrawType t)
 		case BufferDrawType_Stream:
 			return GL_STREAM_DRAW;
 		default:
-			assert(false && "Unrecognized draw type");
+			ET_ASSERT(false && "Unrecognized draw type");
 	}
 	
 	return 0;
@@ -497,7 +497,7 @@ uint32_t et::primitiveTypeValue(PrimitiveType t)
 		case PrimitiveType_TriangleStrips:
 			return GL_TRIANGLE_STRIP;
 		default:
-			assert(false && "Invalid PrimitiveType value");
+			ET_ASSERT(false && "Invalid PrimitiveType value");
 	}
 	
 	return 0;
