@@ -156,6 +156,14 @@ void Element::clear()
 	removeChildren();
 }
 
+void Element::clearRecursively()
+{
+	for (auto& c : children())
+		c->clearRecursively();
+	
+	clear();
+}
+
 void Element::serializeGeneralParameters(std::ostream& stream, SceneVersion version)
 {
 	serializeString(stream, name());

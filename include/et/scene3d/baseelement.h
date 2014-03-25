@@ -87,6 +87,7 @@ namespace et
 			virtual void deserialize(std::istream& stream, ElementFactory* factory, SceneVersion version);
 			
 			void clear();
+			void clearRecursively();
 
 			const std::set<std::string>& properties() const
 				{ return _properites; }

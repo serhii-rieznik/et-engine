@@ -329,6 +329,8 @@ VertexArrayObject Scene::vaoWithIdentifiers(const std::string& vbid, const std::
 bool Scene::performDeserialization(std::istream& stream, RenderContext* rc, ObjectsCache& tc,
 		ElementFactory* factory, const std::string& basePath, bool async)
 {
+	clearRecursively();
+	
 	if (stream.fail()) 
     {
 		log::error("Unable to deserialize scene from stream.");
