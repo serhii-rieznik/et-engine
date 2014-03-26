@@ -67,7 +67,6 @@ void ParticleSystem::onTimerUpdated(NotifyTimer* timer)
 	void* bufferData = nullptr;
 	
 	_rc->renderState().bindVertexArray(_vao);
-
 	_vao->vertexBuffer()->map(&bufferData, 0, _vertexData.data.dataSize(),
 		VertexBufferData::MapBufferMode_WriteOnly);
 	
@@ -77,21 +76,17 @@ void ParticleSystem::onTimerUpdated(NotifyTimer* timer)
 	RawDataAcessor<vec4> clr(reinterpret_cast<char*>(bufferData), _vertexData.data.dataSize() + clrOffset, _decl.dataSize(), clrOffset);
 	
 	_activeParticlesCount = 0;
-	
 	for (auto& p : _particles)
 	{
 		_updateFunction(p, currentTime, deltaTime);
 		
-		if (p.color.w > 0.0)
+		if ((currentTime - p.emitTime < p.lifeTime) && (p.color.w > 0.0))
 		{
 			pos[_activeParticlesCount] = p.position;
 			clr[_activeParticlesCount] = p.color;
 			++_activeParticlesCount;
 		}
 	}
-	
-	log::info("%zu particles", _activeParticlesCount);
-	
 	_vao->vertexBuffer()->unmap();
 }
 
@@ -115,3 +110,32 @@ bool ParticleSystem::emitParticle(const vec3& origin, const vec3& vel, const vec
 	
 	return false;
 }
+
+size_t ParticleSystem::emitParticles(const vec3* origins, const vec3* velocities, size_t count, const vec3& accel,
+	const vec4& color, float lifeTime, float lifeTimeVariation)
+{
+	float currentTime = _timer.actualTime();
+	
+	size_t particlesEmitted = 0;
+	
+	for (auto& p : _particles)
+	{
+		if (currentTime - p.emitTime > p.lifeTime)
+		{
+			p.position = origins[particlesEmitted];
+			p.velocity = velocities[particlesEmitted];
+			p.acceleration = accel;
+			p.color = color;
+			p.emitTime = currentTime;
+			p.lifeTime = lifeTime + randomFloat(-lifeTimeVariation, lifeTimeVariation);
+			
+			++particlesEmitted;
+			
+			if (particlesEmitted == count)
+				break;
+		}
+	}
+	
+	return particlesEmitted;
+}
+

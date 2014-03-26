@@ -46,7 +46,11 @@ namespace et
 			size_t activeParticlesCount() const
 				{ return _activeParticlesCount; }
 			
-			bool emitParticle(const vec3& origin, const vec3& vel, const vec3& accel, const vec4& color, float lifeTime);
+			bool emitParticle(const vec3& origin, const vec3& vel, const vec3& accel,
+				const vec4& color, float lifeTime);
+			
+			size_t emitParticles(const vec3* origins, const vec3* velocities, size_t count, const vec3& accel,
+				const vec4& color, float lifeTime, float lifeTimeVariation);
 			
 			template <typename F>
 			void setUpdateFunction(const F& func)
