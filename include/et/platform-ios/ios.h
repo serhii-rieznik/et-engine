@@ -27,5 +27,7 @@ namespace et
 		std::string systemVersion();
 		
 		bool runningOnIPad();
+		
+		bool musicIsPlaying();
 	}
 }

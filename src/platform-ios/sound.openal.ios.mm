@@ -7,7 +7,7 @@
 
 #include <OpenAL/al.h>
 #include <OpenAL/alc.h>
-#include <AudioToolbox/AudioToolbox.h>
+#include <AVFoundation/AVFoundation.h>
 #include <et/sound/sound.h>
 
 using namespace et;
@@ -17,20 +17,26 @@ extern ALCdevice* getSharedDevice();
 extern ALCcontext* getSharedContext();
 
 void etInterruptListener(void*, UInt32 inInterruptionState);
+bool activateAudioSession();
+bool deactivateAudioSession();
 
 void Manager::nativePreInit()
 {
+	NSError* err = nil;
+	[[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryAmbient error:&err];
+	
+	if (err != nil)
+		NSLog(@"Unable to set audio session category: %@", err);
 }
 
 void Manager::nativeInit()
 {
-	AudioSessionInitialize(nil, nil, etInterruptListener, nil);
-	AudioSessionSetActive(true);
+	activateAudioSession();
 }
 
 void Manager::nativeRelease()
 {
-	AudioSessionSetActive(false);
+	deactivateAudioSession();
 }
 
 void Manager::nativePostRelease()
@@ -40,25 +46,47 @@ void Manager::nativePostRelease()
 /*
  * Service functions
  */
+bool activateAudioSession()
+{
+	NSError* err = nil;
+	BOOL success = [[AVAudioSession sharedInstance] setActive:YES error:&err];
+	
+	if (err != nil)
+		NSLog(@"Unable to activate audio session: %@", err);
+	
+	return success ? true : false;
+}
+
+bool deactivateAudioSession()
+{
+	NSError* err = nil;
+	BOOL success = [[AVAudioSession sharedInstance] setActive:NO error:&err];
+	
+	if (err != nil)
+		NSLog(@"Unable to deactivate audio session: %@", err);
+	
+	return success ? true : false;
+}
+
 void etInterruptListener(void*, UInt32 inInterruptionState)
 {
 	if (inInterruptionState == kAudioSessionBeginInterruption)
 	{
-		AudioSessionSetActive(false);
-		alcMakeContextCurrent(0);
+		deactivateAudioSession();
+		alcMakeContextCurrent(nullptr);
 		alcSuspendContext(getSharedContext());
 	}
 	else if (inInterruptionState == kAudioSessionEndInterruption)
 	{
 		int restart = 0;
-		OSStatus error = AudioSessionSetActive(true);
-		while ((error != 0) && (++restart > 10))
+		bool success = activateAudioSession();
+		while (!success && (++restart > 10))
 		{
 			sleep(1);
-			error = AudioSessionSetActive(true);
+			success = activateAudioSession();
 		}
 		
-		if (error == 0)
+		if (success)
 		{
 			alcMakeContextCurrent(getSharedContext());
 			alcProcessContext(getSharedContext());
