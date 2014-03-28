@@ -294,6 +294,11 @@ void Element::animate()
 	_animationTimer.start(mainTimerPool(), 0.0f, NotifyTimer::RepeatForever);
 }
 
+Animation& Element::defaultAnimation()
+{
+	return _animations.empty() ? _emptyAnimation : _animations.front();
+}
+
 const Animation& Element::defaultAnimation() const
 {
 	return _animations.empty() ? _emptyAnimation : _animations.front();

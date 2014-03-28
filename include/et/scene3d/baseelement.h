@@ -61,6 +61,7 @@ namespace et
 			
 			void animate();
 			
+			Animation& defaultAnimation();
 			const Animation& defaultAnimation() const;
 
 			bool active() const
