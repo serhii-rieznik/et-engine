@@ -68,9 +68,6 @@ namespace et
 		bool suspended() const
 			{ return _suspended; }
 
-		size_t memoryUsage() const;
-		size_t availableMemory() const;
-
 		float cpuLoad() const;
 
 		void setTitle(const std::string& s);

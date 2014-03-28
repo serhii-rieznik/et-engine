@@ -57,7 +57,7 @@ namespace et
 		ApplicationParameters() :
 			windowStyle(WindowStyle_Caption), windowSize(WindowSize_Predefined),
 #endif
-		keepWindowAspectOnResize(false) { }
+		shouldSuspendOnDeactivate(true), keepWindowAspectOnResize(false) { }
 	};
 	
 	class IApplicationDelegate : virtual public EventReceiver

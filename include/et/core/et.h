@@ -34,6 +34,7 @@
 
 #include <et/core/debug.h>
 #include <et/core/constants.h>
+#include <et/core/memory.h>
 #include <et/core/properties.h>
 #include <et/core/strings.h>
 
