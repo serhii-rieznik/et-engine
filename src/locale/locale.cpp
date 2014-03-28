@@ -66,18 +66,11 @@ bool Locale::loadCurrentLanguageFile(const std::string& rootFolder, const std::s
 
 std::string Locale::localizedString(const std::string& key)
 {
-	if (key.empty()) return key;
+	if (key.empty())
+		return key;
 	
 	auto i = _localeMap.find(key);
-	if (i == _localeMap.end())
-	{
-		log::warning("Missing localized value for key %s", key.c_str());
-		return key;
-	}
-	else
-	{
-		return i->second;
-	}
+	return (i == _localeMap.end()) ? key : i->second;
 }
 
 void Locale::parseLanguageFile(const std::string& fileName)

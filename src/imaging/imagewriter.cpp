@@ -172,36 +172,34 @@ bool internal_writePNGtoFile(const std::string& fileName, const BinaryDataStorag
 			colorType = PNG_COLOR_TYPE_RGBA;
 			break;
 		}
+			
+		default:
+			ET_FAIL("Invalid components number.");
 	}
 	
 	png_uint_32 w = static_cast<png_uint_32>(size.x);
 	png_uint_32 h = static_cast<png_uint_32>(size.y);
+	int rowSize = size.x * components * bitsPerComponent / 8;
+	
 	png_set_IHDR(png_ptr, info_ptr, w, h, bitsPerComponent, colorType,
 				 PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_BASE);
 	
 	png_write_info(png_ptr, info_ptr);
-	png_bytep* row_pointers = new png_bytep[size.y];
-	
-	int rowSize = size.x * components * bitsPerComponent / 8;
 	
 	if (flip)
 	{
 		for (int y = 0; y < size.y; y++)
-			row_pointers[y] = (png_bytep)(&data[(size.y - 1 - y) * rowSize]);
+			png_write_row(png_ptr, (png_bytep)(&data[(size.y - 1 - y) * rowSize]));
 	}
 	else
 	{
 		for (int y = 0; y < size.y; y++)
-			row_pointers[y] = (png_bytep)(&data[y * rowSize]);
+			png_write_row(png_ptr, (png_bytep)(&data[y * rowSize]));
 	}
-	
-	png_write_image(png_ptr, row_pointers);
 	
 	png_write_end(png_ptr, NULL);
 	png_destroy_write_struct(&png_ptr, &info_ptr);
 	fclose(fp);
-	
-	delete [] row_pointers;
 	
 	return true;
 }
