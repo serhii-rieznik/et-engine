@@ -182,9 +182,13 @@ bool internal_writePNGtoFile(const std::string& fileName, const BinaryDataStorag
 	int rowSize = size.x * components * bitsPerComponent / 8;
 	
 	png_set_IHDR(png_ptr, info_ptr, w, h, bitsPerComponent, colorType,
-				 PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_BASE);
+		PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_BASE);
 	
 	png_write_info(png_ptr, info_ptr);
+
+	png_set_compression_level(png_ptr, 3);
+	png_set_compression_strategy(png_ptr, 0);
+	png_set_filter(png_ptr, 0, PNG_ALL_FILTERS);
 	
 	if (flip)
 	{
