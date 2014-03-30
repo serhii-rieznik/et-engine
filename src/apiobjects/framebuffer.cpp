@@ -60,6 +60,7 @@ Framebuffer::Framebuffer(RenderContext* rc, const FramebufferDescription& desc,
 				addRenderTarget(c);
 			}
 		}
+		checkStatus();
 	}
 
 	if (hasDepth)
@@ -91,6 +92,7 @@ Framebuffer::Framebuffer(RenderContext* rc, const FramebufferDescription& desc,
 				setDepthTarget(d);
 			}
 		}
+		checkStatus();
 	}
 
 #if (!ET_OPENGLES)
@@ -100,9 +102,6 @@ Framebuffer::Framebuffer(RenderContext* rc, const FramebufferDescription& desc,
 		glDrawBuffer(GL_NONE);
 	}
 #endif
-	
-	if (hasColor || hasDepth)
-		checkStatus();
 }
 
 Framebuffer::Framebuffer(RenderContext* rc, uint32_t fboId, const std::string& aName) :

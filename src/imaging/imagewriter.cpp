@@ -188,7 +188,7 @@ bool internal_writePNGtoFile(const std::string& fileName, const BinaryDataStorag
 
 	png_set_compression_level(png_ptr, 3);
 	png_set_compression_strategy(png_ptr, 0);
-	png_set_filter(png_ptr, 0, PNG_ALL_FILTERS);
+	png_set_filter(png_ptr, 0, PNG_NO_FILTERS);
 	
 	if (flip)
 	{

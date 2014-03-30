@@ -52,6 +52,11 @@ namespace et
 		{
 		public:
 			ET_DECLARE_POINTER(ConsoleOutput)
+
+			void debug(const char*, va_list);
+			void info(const char*, va_list);
+			void warning(const char*, va_list);
+			void error(const char*, va_list);
 			
 		public:
 			ConsoleOutput();

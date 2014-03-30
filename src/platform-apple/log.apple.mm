@@ -7,19 +7,13 @@
 
 #include <et/core/et.h>
 
-#if (ET_PLATFORM_ANDROID)
-#
-#	error Please include platform-android implementation instead
-#
-#endif
-
-#define PASS_TO_OUTPUTS(FUNC)			for (Output::Pointer out : logOutputs) \
-										{ \
-											va_list args; \
-											va_start(args, format); \
-											out->FUNC(format, args); \
-											va_end(args); \
-										}
+#define PASS_TO_OUTPUTS(FUNC)		for (Output::Pointer output : logOutputs) \
+									{ \
+										va_list args; \
+										va_start(args, format); \
+										output->FUNC(format, args); \
+										va_end(args); \
+									}
 
 using namespace et;
 using namespace log;
@@ -45,6 +39,29 @@ void et::log::error(const char* format, ...) { PASS_TO_OUTPUTS(error) }
 ConsoleOutput::ConsoleOutput() :
 	FileOutput(stdout)
 {
+	
+}
+
+void ConsoleOutput::debug(const char* fmt, va_list args)
+{
+#if (ET_DEBUG)
+	info(fmt, args);
+#endif
+}
+
+void ConsoleOutput::info(const char* fmt, va_list args)
+{
+	NSLogv([NSString stringWithUTF8String:fmt], args);
+}
+
+void ConsoleOutput::warning(const char* fmt, va_list args)
+{
+	NSLogv([NSString stringWithFormat:@"WARNING: %s", fmt], args);
+}
+
+void ConsoleOutput::error(const char* fmt, va_list args)
+{
+	NSLogv([NSString stringWithFormat:@"ERROR: %s", fmt], args);
 }
 
 FileOutput::FileOutput(FILE* file) : _file(file)
