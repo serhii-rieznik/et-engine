@@ -6,7 +6,6 @@
  */
 
 #include <Windows.h>
-#include <Psapi.h>
 #include <et/app/application.h>
 
 using namespace et;
@@ -192,11 +191,4 @@ void Application::alert(const std::string& title, const std::string& message, Al
 void Application::setTitle(const std::string& s)
 {
 	SendMessage(reinterpret_cast<HWND>(_renderingContextHandle), WM_SETTEXT, 0, reinterpret_cast<LPARAM>(s.c_str()));
-}
-
-size_t Application::memoryUsage() const
-{
-	PROCESS_MEMORY_COUNTERS pmc = { sizeof(PROCESS_MEMORY_COUNTERS) };
-	GetProcessMemoryInfo(GetCurrentProcess(), &pmc, pmc.cb);
-	return pmc.WorkingSetSize;
 }
