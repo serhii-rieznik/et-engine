@@ -1,53 +1,120 @@
 /*
  * This file is part of `et engine`
- * Copyright 2009-2012 by Sergey Reznik
- * Please, do not modify contents without approval.
+ * Copyright 2009-2013 by Sergey Reznik
+ * Please, do not modify content without approval.
  *
  */
 
-#include <et/platform-android/nativeactivity.h>
 #include <et/core/et.h>
+#include <et/platform-android/nativeactivity.h>
 
-#define JUST_DO_IT(LEVEL)	va_list args;\
-							va_start(args, format);\
-							__android_log_vprint(LEVEL, "et", format, args);\
-							va_end(args);
+#define PASS_TO_OUTPUTS(FUNC)		for (Output::Pointer output : logOutputs) \
+									{ \
+										va_list args; \
+										va_start(args, format); \
+										output->FUNC(format, args); \
+										va_end(args); \
+									}
 
+using namespace et;
+using namespace log;
 
-void et::log::debug(const char* format, ...)
+static std::vector<Output::Pointer> logOutputs;
+
+void et::log::addOutput(Output::Pointer ptr)
+{
+	logOutputs.push_back(ptr);
+}
+
+void et::log::removeOutput(Output::Pointer ptr)
+{
+	logOutputs.erase(std::remove_if(logOutputs.begin(), logOutputs.end(),
+		[ptr](Output::Pointer out) { return out == ptr; }), logOutputs.end());
+}
+
+void et::log::debug(const char* format, ...) { PASS_TO_OUTPUTS(debug) }
+void et::log::info(const char* format, ...) { PASS_TO_OUTPUTS(info) }
+void et::log::warning(const char* format, ...) { PASS_TO_OUTPUTS(warning) }
+void et::log::error(const char* format, ...) { PASS_TO_OUTPUTS(error) }
+
+ConsoleOutput::ConsoleOutput() :
+	FileOutput(stdout)
+{
+	
+}
+
+void ConsoleOutput::debug(const char* format, va_list args)
 {
 #if (ET_DEBUG)
-	JUST_DO_IT(ANDROID_LOG_DEBUG)
+	__android_log_vprint(ANDROID_LOG_DEBUG, "et", format, args);
 #endif
 }
 
-void et::log::info(const char* format, ...)
+void ConsoleOutput::info(const char* format, va_list args)
 {
-	JUST_DO_IT(ANDROID_LOG_INFO)
+	__android_log_vprint(ANDROID_LOG_INFO, "et", format, args);
 }
 
-void et::log::warning(const char* format, ...)
+void ConsoleOutput::warning(const char* format, va_list args)
 {
-	JUST_DO_IT(ANDROID_LOG_WARN)
+	__android_log_vprint(ANDROID_LOG_WARN, "et", format, args);
 }
 
-void et::log::error(const char* format, ...)
+void ConsoleOutput::error(const char* format, va_list args)
 {
-	JUST_DO_IT(ANDROID_LOG_ERROR)
+	__android_log_vprint(ANDROID_LOG_ERROR, "et", format, args);
 }
 
-void et::log::debug(const wchar_t* format, ...)
+FileOutput::FileOutput(FILE* file) : _file(file)
 {
+	if (file == nullptr)
+	{
+		_file = stdout;
+		fprintf(_file, "Invalid file was provided to FileOutput, output will be redirected to console.");
+	}
 }
 
-void et::log::info(const wchar_t* format, ...)
+FileOutput::FileOutput(const std::string& filename)
 {
+	_file = fopen(filename.c_str(), "w");
+	if (_file == nullptr)
+	{
+		printf("Unable to open %s for writing, output will be redirected to console.", filename.c_str());
+		_file = stdout;
+	}
 }
 
-void et::log::warning(const wchar_t* format, ...)
+FileOutput::~FileOutput()
 {
+	if ((_file != nullptr) && (_file != stdout))
+	{
+		fflush(_file);
+		fclose(_file);
+	}
 }
 
-void et::log::error(const wchar_t* format, ...)
+void FileOutput::debug(const char* format, va_list args)
 {
+#if (ET_DEBUG)
+	info(format, args);
+#endif
+}
+
+void FileOutput::info(const char* format, va_list args)
+{
+	vfprintf(_file, format, args);
+	fprintf(_file, "\n");
+	fflush(_file);
+}
+
+void FileOutput::warning(const char* format, va_list args)
+{
+	fprintf(_file, "WARNING: ");
+	info(format, args);
+}
+
+void FileOutput::error(const char* format, va_list args)
+{
+	fprintf(_file, "ERROR: ");
+	info(format, args);
 }

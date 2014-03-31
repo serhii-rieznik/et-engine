@@ -174,7 +174,7 @@ int32_t handleMotionInpit(android_app* app, AInputEvent* event)
 				return 1;
 
 			default:
-				assert("Should not get here" && 0);
+				ET_FAIL("Should not get here");
 		}
 	}
 
@@ -255,7 +255,7 @@ void Application::loaded()
 void Application::enterRunLoop()
 {
 	log::info("Application::enterRunLoop()");
-	assert(_sharedApplication != nullptr);
+	ET_ASSERT(_sharedApplication != nullptr);
 
 	_active = false;
 	_running = true;

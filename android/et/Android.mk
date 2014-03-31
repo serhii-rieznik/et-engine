@@ -2,6 +2,43 @@ LOCAL_PATH := $(call my-dir)
 
 INCLUDE_PATH := ../../include/
 SOURCE_PATH := ../../src/
+LIB_PATH := ../../lib/android/
+
+include $(CLEAR_VARS)
+LOCAL_MODULE    := libpng
+LOCAL_SRC_FILES := $(LIB_PATH)/libpng.a
+include $(PREBUILT_STATIC_LIBRARY)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE    := libjpeg
+LOCAL_SRC_FILES := $(LIB_PATH)/libjpeg.a
+include $(PREBUILT_STATIC_LIBRARY)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE    := libzip
+LOCAL_SRC_FILES := $(LIB_PATH)/libzip.a
+include $(PREBUILT_STATIC_LIBRARY)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE    := libxml
+LOCAL_SRC_FILES := $(LIB_PATH)/libxml.a
+include $(PREBUILT_STATIC_LIBRARY)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE    := openal
+LOCAL_SRC_FILES := $(LIB_PATH)/libopenal.a
+include $(PREBUILT_STATIC_LIBRARY)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE    := libogg
+LOCAL_SRC_FILES := $(LIB_PATH)/libogg.a
+include $(PREBUILT_STATIC_LIBRARY)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE    := libvorbis
+LOCAL_SRC_FILES := $(LIB_PATH)/libvorbis.a
+LOCAL_STATIC_LIBRARIES := libogg
+include $(PREBUILT_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)
 
@@ -9,11 +46,11 @@ LOCAL_MODULE := et
 
 LOCAL_C_INCLUDES := $(LOCAL_PATH)/$(INCLUDE_PATH)
 
-LOCAL_CFLAGS := -UNDEBUG -DDEBUG
 LOCAL_CXXFLAGS := --std=c++11 $(LOCAL_CFLAGS)
 
 LOCAL_SRC_FILES += $(SOURCE_PATH)/networking/downloadmanager.cpp
 
+LOCAL_SRC_FILES += $(SOURCE_PATH)/platform-android/memory.android.cpp
 LOCAL_SRC_FILES += $(SOURCE_PATH)/platform-android/stream.android.cpp
 LOCAL_SRC_FILES += $(SOURCE_PATH)/platform-android/application.android.cpp
 LOCAL_SRC_FILES += $(SOURCE_PATH)/platform-android/tools.android.cpp
@@ -32,10 +69,12 @@ LOCAL_SRC_FILES += $(SOURCE_PATH)/core/objectscache.cpp
 LOCAL_SRC_FILES += $(SOURCE_PATH)/core/transformable.cpp
 LOCAL_SRC_FILES += $(SOURCE_PATH)/core/conversion.cpp
 
-LOCAL_SRC_FILES += $(SOURCE_PATH)/scene3d/cameraelement.cpp
+LOCAL_SRC_FILES += $(SOURCE_PATH)/scene3d/animation.cpp
 LOCAL_SRC_FILES += $(SOURCE_PATH)/scene3d/baseelement.cpp
+LOCAL_SRC_FILES += $(SOURCE_PATH)/scene3d/cameraelement.cpp
 LOCAL_SRC_FILES += $(SOURCE_PATH)/scene3d/material.cpp
 LOCAL_SRC_FILES += $(SOURCE_PATH)/scene3d/mesh.cpp
+LOCAL_SRC_FILES += $(SOURCE_PATH)/scene3d/particlesystem.cpp
 LOCAL_SRC_FILES += $(SOURCE_PATH)/scene3d/scene3d.cpp
 LOCAL_SRC_FILES += $(SOURCE_PATH)/scene3d/serialization.cpp
 LOCAL_SRC_FILES += $(SOURCE_PATH)/scene3d/storage.cpp
@@ -56,6 +95,8 @@ LOCAL_SRC_FILES += $(SOURCE_PATH)/imaging/imageoperations.cpp
 LOCAL_SRC_FILES += $(SOURCE_PATH)/imaging/imagewriter.cpp
 LOCAL_SRC_FILES += $(SOURCE_PATH)/imaging/pngloader.cpp
 LOCAL_SRC_FILES += $(SOURCE_PATH)/imaging/pvrloader.cpp
+LOCAL_SRC_FILES += $(SOURCE_PATH)/imaging/jpegloader.cpp
+LOCAL_SRC_FILES += $(SOURCE_PATH)/imaging/hdrloader.cpp
 LOCAL_SRC_FILES += $(SOURCE_PATH)/imaging/pvrdecompressor.cpp
 LOCAL_SRC_FILES += $(SOURCE_PATH)/imaging/textureloader.cpp
 
@@ -115,16 +156,6 @@ LOCAL_SRC_FILES += $(SOURCE_PATH)/sound/sound.cpp
 LOCAL_SRC_FILES += $(SOURCE_PATH)/sound/streamingthread.cpp
 LOCAL_SRC_FILES += $(SOURCE_PATH)/sound/track.cpp
 
-LOCAL_STATIC_LIBRARIES := android_native_app_glue openal libpng libzip libxml libcurl libogg libvorbis
+LOCAL_STATIC_LIBRARIES := android_native_app_glue openal libpng libzip libxml libcurl libvorbis libjpeg
 
 include $(BUILD_STATIC_LIBRARY)
-
-$(call import-add-path, $(LOCAL_PATH))
-$(call import-module, openal)
-$(call import-module, libpng)
-$(call import-module, libzip)
-$(call import-module, libxml)
-$(call import-module, libcurl)
-$(call import-module, libogg)
-$(call import-module, libvorbis)
-

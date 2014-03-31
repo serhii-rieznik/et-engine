@@ -356,22 +356,17 @@ void ProgramFactory::parseSourceCode(ShaderType type, std::string& source, const
 			
 			std::string include = "";
 			
-			if (fileExists(workFolder + ifname))
+			std::string baseName = removeUpDir(workFolder + ifname);
+			while (baseName.find("..") != std::string::npos)
+				baseName = removeUpDir(baseName);
+			
+			if (fileExists(baseName))
 			{
-				include = loadTextFile(workFolder + ifname);
+				include = loadTextFile(baseName);
 			}
 			else
 			{
-				ifname = application().environment().findFile(ifname);
-				if (fileExists(ifname))
-				{
-					include = loadTextFile(ifname);
-				}
-				else
-				{
-					log::error("failed to include %s, starting from folder %s",
-						ifname.c_str(), workFolder.c_str());
-				}
+				log::error("failed to include %s, starting from folder %s", ifname.c_str(), workFolder.c_str());
 			}
 			
 			source = before + include + after;
@@ -380,7 +375,6 @@ void ProgramFactory::parseSourceCode(ShaderType type, std::string& source, const
 		
 		hasIncludes = ip != std::string::npos;
 	}
-	
 }
 
 

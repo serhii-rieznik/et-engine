@@ -122,7 +122,7 @@ RenderContextPrivate::RenderContextPrivate(RenderContext* rc)
 	
 	if (eglInitialize(display, &major, &minor) == EGL_FALSE)
 	{
-		assert("eglInitialize failed." && false);
+		ET_FAIL("eglInitialize failed.");
 		return;
 	}
 	
@@ -130,7 +130,7 @@ RenderContextPrivate::RenderContextPrivate(RenderContext* rc)
 	
 	if (eglChooseConfig(display, attribs, &config, 1, &numConfigs) == EGL_FALSE)
 	{
-		assert("eglChooseConfig failed." && false);
+		ET_FAIL("eglChooseConfig failed.");
 		return;
 	}
 	
@@ -142,20 +142,20 @@ RenderContextPrivate::RenderContextPrivate(RenderContext* rc)
     surface = eglCreateWindowSurface(display, config, sharedApplication->window, nullptr);
 	if (surface == nullptr)
 	{
-		assert("eglCreateWindowSurface failed." && false);
+		ET_FAIL("eglCreateWindowSurface failed.");
 		return;
 	}
 	
     context = eglCreateContext(display, config, nullptr, contextAttribs);
 	if (context == nullptr)
 	{
-		assert("eglCreateContext failed." && false);
+		ET_FAIL("eglCreateContext failed.");
 		return;
 	}
 	
     if (eglMakeCurrent(display, surface, surface, context) == EGL_FALSE)
 	{
-		assert("eglMakeCurrent failed." && false);
+		ET_FAIL("eglMakeCurrent failed.");
 		return;
 	}
 	

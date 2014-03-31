@@ -5,7 +5,7 @@
  *
  */
 
-#include <et/core/log.h>
+#include <et/core/et.h>
 #include <et/platform-android/nativeactivity.h>
 
 using namespace et;
@@ -14,7 +14,7 @@ JNIEnv* et::attachToThread()
 {
 	log::info("Attaching to thread...");
 	
-    JNIEnv* env = nullptr; // et::sharedAndroidApplication()->activity->env;
+    JNIEnv* env = nullptr;
 	et::sharedAndroidApplication()->activity->vm->AttachCurrentThread(&env, nullptr);
 	
 	log::info("Seems to be attached, env = %08X", env);

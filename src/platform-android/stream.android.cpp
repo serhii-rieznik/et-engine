@@ -43,37 +43,45 @@ namespace et
 
 using namespace et;
 
-InputStream::InputStream() : _private(new InputStreamPrivate)
+InputStream::InputStream() :
+	_private(new InputStreamPrivate)
 {
 }
 
-InputStream::InputStream(const std::string& file, StreamMode mode) : _private(new InputStreamPrivate)
+InputStream::InputStream(const std::string& inFile, StreamMode mode) :
+	_private(new InputStreamPrivate)
 {
+	std::string normalizedPath;
+	do
+	{
+		normalizedPath = removeUpDir(inFile);
+	} while (normalizedPath.find("..") != std::string::npos);
+	
 	std::ios::openmode openMode = std::ios::in;
 	if (mode == StreamMode_Binary)
 		openMode |= std::ios::binary;
 	
 	zip* a = sharedAndroidZipArchive();
 
-	_private->zipFileIndex = zip_name_locate(a, file.c_str(), 0);
+	_private->zipFileIndex = zip_name_locate(a, normalizedPath.c_str(), 0);
 	if (_private->zipFileIndex == -1)
 	{
-		if (access(file.c_str(), 0) == 0)
+		if (access(normalizedPath.c_str(), 0) == 0)
 		{
 			struct stat status = { };
-			stat(file.c_str(), &status);
+			stat(normalizedPath.c_str(), &status);
 			if ((status.st_mode & S_IFREG) == S_IFREG)
 			{
-				_private->stream = new std::ifstream(file.c_str(), openMode);
+				_private->stream = new std::ifstream(normalizedPath.c_str(), openMode);
 			}
 			else
 			{
-				log::error("%s is not a file.", file.c_str());
+				log::error("%s is not a file.", normalizedPath.c_str());
 			}
 		}
 		else
 		{
-			log::error("Unable to open file %s", file.c_str());
+			log::error("Unable to open file %s", normalizedPath.c_str());
 		}
 	}
 	else
@@ -84,7 +92,7 @@ InputStream::InputStream(const std::string& file, StreamMode mode) : _private(ne
 		if (_private->zipFile == nullptr)
 		{
 			log::error("Unable to open file %s at index %d. Error: %s",
-				file.c_str(), _private->zipFileIndex, zip_strerror(a));
+				normalizedPath.c_str(), _private->zipFileIndex, zip_strerror(a));
 			return;
 		}
 		
@@ -95,7 +103,7 @@ InputStream::InputStream(const std::string& file, StreamMode mode) : _private(ne
 		int result = zip_stat_index(a, _private->zipFileIndex, 0, &stat);
 		if (stat.size == 0)
 		{
-			log::error("Unable to get file %s stats.", file.c_str());
+			log::error("Unable to get file %s stats.", normalizedPath.c_str());
 		}
 		else
 		{

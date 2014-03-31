@@ -455,7 +455,9 @@ void Framebuffer::resolveMultisampledTo(Framebuffer::Pointer framebuffer)
 	
 #elif (ET_PLATFORM_ANDROID)
 	
-	ET_FAIL("Android is not supported yet.");
+	glBlitFramebuffer(0, 0, _description.size.x, _description.size.y, 0, 0, framebuffer->size().x,
+		framebuffer->size().y, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+	checkOpenGLError("glBlitFramebuffer");
 	
 #else
 	

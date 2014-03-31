@@ -72,7 +72,7 @@ std::string et::applicationPackagePath()
 	
     jboolean isCopy = false;
     const char* cstr = env->GetStringUTFChars(reinterpret_cast<jstring>(codePath), &isCopy);
-	assert(cstr);
+	ET_ASSERT(cstr != nullptr);
 	
 	std::string result(cstr);
 	
@@ -254,8 +254,8 @@ std::string et::applicationIdentifierForCurrentProject()
 
 et::vec2i et::nativeScreenSize()
 {
-	assert(0 && "Not supported yet");
-	return vec2i(0);
+	ET_FAIL("Not supported yet");
+	return vec2i(1);
 }
 
 int64_t et::getFileDate(const std::string& path)

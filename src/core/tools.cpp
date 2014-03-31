@@ -117,8 +117,10 @@ std::string et::getFileName(const std::string& fullPath)
 std::string et::removeUpDir(std::string name)
 {
 	std::string::size_type dotsPos = name.find("..");
+	
 	if (dotsPos != std::string::npos)
-		name = getFilePath( name.substr(0, dotsPos - 1) ) + name.substr(dotsPos + 3);
+		name = getFilePath(name.substr(0, dotsPos - 1)) + name.substr(dotsPos + 3);
+	
 	return name;
 }
 

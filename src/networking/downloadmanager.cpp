@@ -197,7 +197,7 @@ DownloadRequest::DownloadRequest(const std::string& u, const std::string& d) :
 		createDirectory(folder, true);
 	
 	_destFile = fopen(_destination.c_str(), "wb");
-	assert(_destFile);
+	ET_ASSERT(_destFile != nullptr);
 }
 
 DownloadRequest::DownloadRequest(const std::string& u) :
@@ -217,7 +217,7 @@ void DownloadRequest::cleanup()
 
 size_t DownloadRequest::appendData(void* ptr, size_t n, size_t size)
 {
-	assert(ptr);
+	ET_ASSERT(ptr != nullptr);
 	size_t actualDataSize = n * size;
 
 	if (_destFile == nullptr)
