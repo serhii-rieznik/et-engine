@@ -53,11 +53,12 @@ namespace et
 #if (ET_PLATFORM_IOS || ET_PLATFORM_ANDROID)
 		ApplicationParameters() :
 			windowStyle(WindowStyle_Borderless), windowSize(WindowSize_Predefined),
+			shouldSuspendOnDeactivate(true), keepWindowAspectOnResize(false) { }
 #else
 		ApplicationParameters() :
 			windowStyle(WindowStyle_Caption), windowSize(WindowSize_Predefined),
+			shouldSuspendOnDeactivate(false), keepWindowAspectOnResize(false) { }
 #endif
-		shouldSuspendOnDeactivate(true), keepWindowAspectOnResize(false) { }
 	};
 	
 	class IApplicationDelegate : virtual public EventReceiver

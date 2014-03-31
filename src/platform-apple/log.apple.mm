@@ -6,6 +6,7 @@
  */
 
 #include <et/core/et.h>
+#include <Foundation/NSString.h>
 
 #define PASS_TO_OUTPUTS(FUNC)		for (Output::Pointer output : logOutputs) \
 									{ \
