@@ -63,8 +63,7 @@ ValueBase::Pointer Dictionary::baseValueForKeyPathInHolder(const std::vector<std
 	else if (holder->valueClass() == ValueClass_Integer)
 	{
 		IntegerValue number(holder);
-		log::warning("Trying to extract subvalue `%s` from number %d.", path.front().c_str(),
-			number->content);
+		log::warning("Trying to extract subvalue `%s` from number %lld.", path.front().c_str(), number->content);
 	}
 	else
 	{
@@ -144,7 +143,7 @@ void printArray(ArrayValue arr, const std::string& tabs)
 		if (i->valueClass() == ValueClass_Integer)
 		{
 			IntegerValue val = i;
-			log::info("%s%d", tabs.c_str(), val->content);
+			log::info("%s%lld", tabs.c_str(), val->content);
 		}
 		if (i->valueClass() == ValueClass_Float)
 		{
@@ -179,7 +178,7 @@ void printDictionary(Dictionary dict, const std::string& tabs)
 		if (i.second->valueClass() == ValueClass_Integer)
 		{
 			IntegerValue val = i.second;
-			log::info("%s%s = %d", tabs.c_str(), i.first.c_str(), val->content);
+			log::info("%s%s = %lld", tabs.c_str(), i.first.c_str(), val->content);
 		}
 		else if (i.second->valueClass() == ValueClass_Float)
 		{

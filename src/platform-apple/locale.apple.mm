@@ -35,6 +35,18 @@ std::string locale::date()
 	return std::string([[formatter stringFromDate:[NSDate date]] cStringUsingEncoding:NSUTF8StringEncoding]);
 }
 
+std::string locale::dateTimeFromTimestamp(uint64_t interval)
+{
+	NSDate* date = [NSDate dateWithTimeIntervalSince1970:interval / 1000];
+	
+	NSDateFormatter* formatter = ET_OBJC_AUTORELEASE([[NSDateFormatter alloc] init]);
+	[formatter setTimeStyle:NSDateFormatterMediumStyle];
+	[formatter setDateStyle:NSDateFormatterMediumStyle];
+	[formatter setLocale:[NSLocale currentLocale]];
+	return std::string([[formatter stringFromDate:date] cStringUsingEncoding:NSUTF8StringEncoding]);
+	
+}
+
 size_t locale::currentLocale()
 {
     NSString* localeId = [[NSLocale preferredLanguages] objectAtIndex:0];

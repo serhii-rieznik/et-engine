@@ -47,6 +47,8 @@ namespace et
 		std::string localeLanguage(size_t locale);
 		std::string localeSubLanguage(size_t locale);
 		
+		std::string dateTimeFromTimestamp(uint64_t);
+
 		size_t currentLocale();
 		size_t localeToIdentifier(const std::string&);
 	}

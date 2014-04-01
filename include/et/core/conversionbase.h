@@ -37,6 +37,13 @@ namespace et
 		return buffer;
 	}
 
+	inline std::string intToStr(int64_t value)
+	{
+		char buffer[64] = { };
+		sprintf(buffer, "%lld", value);
+		return buffer;
+	}
+	
 	inline std::string intToStr(uint64_t value)
 	{
 		char buffer[64] = { };

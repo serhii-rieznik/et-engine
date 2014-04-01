@@ -79,7 +79,7 @@ namespace et
 	};
 	
 	typedef ValuePointer<float, ValueClass_Float> FloatValue;
-	typedef ValuePointer<int, ValueClass_Integer> IntegerValue;
+	typedef ValuePointer<int64_t, ValueClass_Integer> IntegerValue;
 	
 	class StringValue : public ValuePointer<std::string, ValueClass_String>
 	{
