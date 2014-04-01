@@ -129,6 +129,7 @@ int Application::platformRun(int argc, char* argv[])
 		_lastQueuedTimeMSec = queryContiniousTimeInMilliSeconds();
 
 		enterRunLoop(); 
+
 		terminated();
 
 		delete _delegate, _delegate = nullptr;
