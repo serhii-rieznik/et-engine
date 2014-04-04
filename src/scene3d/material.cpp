@@ -589,9 +589,7 @@ Texture Material::loadTexture(RenderContext* rc, const std::string& path, const 
 	}
 	
 	if (t.invalid())
-	{
-		log::info("Unable to locate texture %s for material %s", path.c_str(), name().c_str());
-	}
+		log::error("Unable to locate texture %s for material %s", path.c_str(), name().c_str());
 
 	return t;
 }
@@ -624,7 +622,6 @@ void Material::clear()
  * Setters / getters
  *
  */
-
 const int Material::getInt(size_t param) const
 {
 	if (param < MaterialParameter_max)

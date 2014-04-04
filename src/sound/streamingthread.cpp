@@ -59,7 +59,7 @@ ThreadResult StreamingThread::main()
 
 		for (Player* player : _private->playersList)
 		{
-			if (player->track()->streamed())
+			if (player->track().valid() && player->track()->streamed())
 				player->handleProcessedBuffers();
 			
 			player->handleProcessedSamples();

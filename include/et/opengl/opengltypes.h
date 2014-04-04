@@ -102,6 +102,8 @@ namespace et
 		Usage_TexCoord2,
 		Usage_TexCoord3,
 		Usage_Smoothing,
+		
+		Usage_InstanceId,
 
 		Usage_max
 	};

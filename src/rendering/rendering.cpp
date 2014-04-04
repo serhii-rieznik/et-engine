@@ -13,11 +13,12 @@ namespace et
 	const std::string VertexAttributeUsageNames[Usage_max] = 
 	{ 
 		"Vertex", "Normal", "Color", "Tangent", "Binormal",
-		"TexCoord0", "TexCoord1", "TexCoord2", "TexCoord3"
+		"TexCoord0", "TexCoord1", "TexCoord2", "TexCoord3",
+		"gl_InstanceID"
 	};
 
 	const size_t VertexAttributeUsageMasks[Usage_max] = 
-		{ 0x01, 0x02, 0x04, 0x08,	0x10, 0x20, 0x40, 0x80, 0x100, 0x200, };
+		{ 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x100, 0x200, 0x0 };
 
 	VertexAttributeUsage stringToVertexAttribute(const std::string& s)
 	{
