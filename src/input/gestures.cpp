@@ -179,18 +179,22 @@ void GesturesRecognizer::onPointerMoved(et::PointerInputInfo pi)
 
 	if (_pointers.size() == 1)
 	{
-		bool shouldCancelClick = false;
+		bool hasPressedPointer = (_singlePointer.id != 0);
+		bool shouldPerformMovement = !hasPressedPointer;
 		
-		if (pi.id == _singlePointer.id)
+		if (hasPressedPointer && (pi.id == _singlePointer.id))
 		{
 			float len = (pi.normalizedPos - _singlePointer.normalizedPos).dotSelf();
-			shouldCancelClick = (len >= sqr(_clickSpatialThreshold));
+			shouldPerformMovement = (len >= sqr(_clickSpatialThreshold));
 		}
 		
-		if (shouldCancelClick)
+		if (shouldPerformMovement)
 		{
-			cancelWaitingForClicks();
-			clickCancelled.invoke();
+			if (hasPressedPointer)
+			{
+				cancelWaitingForClicks();
+				clickCancelled.invoke();
+			}
 			
 			_pointers[pi.id].moved = true;
 			_pointers[pi.id].previous = _pointers[pi.id].current;
