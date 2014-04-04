@@ -65,7 +65,7 @@ void et::ios::excludeFileFromICloudBackup(const std::string& path)
 	}
 }
 
-void et::ios::shareFile(const std::string& path, const std::string& scheme, bool displayOptions)
+void et::ios::shareFile(const std::string& path, const std::string& scheme, Dictionary options, bool displayOptions)
 {
 	if (sharedInteractionController == nil)
 	{
@@ -74,6 +74,30 @@ void et::ios::shareFile(const std::string& path, const std::string& scheme, bool
 	}
 	sharedInteractionController.UTI = [NSString stringWithUTF8String:scheme.c_str()];
 	sharedInteractionController.URL = [NSURL fileURLWithPath:[NSString stringWithUTF8String:path.c_str()]];
+	
+	NSMutableDictionary* annotation = [NSMutableDictionary dictionary];
+	for (const auto& kv : options->content)
+	{
+		if (kv.second->valueClass() == ValueClass_String)
+		{
+			StringValue sValue(kv.second);
+			[annotation setObject:[NSString stringWithUTF8String:sValue->content.c_str()]
+				forKey:[NSString stringWithUTF8String:kv.first.c_str()]];
+		}
+		else if (kv.second->valueClass() == ValueClass_Integer)
+		{
+			IntegerValue iValue(kv.second);
+			[annotation setObject:[NSNumber numberWithLongLong:iValue->content]
+				forKey:[NSString stringWithUTF8String:kv.first.c_str()]];
+		}
+		else if (kv.second->valueClass() == ValueClass_Float)
+		{
+			IntegerValue fValue(kv.second);
+			[annotation setObject:[NSNumber numberWithFloat:fValue->content]
+				forKey:[NSString stringWithUTF8String:kv.first.c_str()]];
+		}
+	}
+	sharedInteractionController.annotation = annotation;
 	
 	[[InteractorControllerHandler sharedInteractorControllerHandler]
 		performSelectorOnMainThread:@selector(presentDocumentController:) withObject:[NSNumber numberWithInt:displayOptions] waitUntilDone:YES];
