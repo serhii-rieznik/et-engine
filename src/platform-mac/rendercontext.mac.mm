@@ -436,7 +436,7 @@ CVReturn cvDisplayLinkOutputCallback(CVDisplayLinkRef, const CVTimeStamp*, const
 		1.0f - 2.0f * p.y / static_cast<float>(ownFrame.size.height));
 
 	return PointerInputInfo(type, p, np, vec2(0.0f), static_cast<size_t>([theEvent eventNumber]),
-		static_cast<float>([theEvent timestamp]), PointerOrigin_Any);
+		mainTimerPool()->actualTime(), PointerOrigin_Any);
 }
 
 - (void)mouseDown:(NSEvent *)theEvent

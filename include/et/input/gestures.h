@@ -23,6 +23,11 @@ namespace et
 	class GesturesRecognizer : private InputHandler, private TimedObject
 	{
 	public:
+		static const float defaultClickTemporalThreshold;
+		static const float defaultClickSpatialTreshold;
+		static const float defaultHoldTemporalThreshold;
+		
+	public:
 		GesturesRecognizer(bool automaticMode = true);
 		
 		size_t pointersCount() const
@@ -34,10 +39,10 @@ namespace et
 		void setRecognizedGestures(size_t);
 
 	public:
-		ET_DECLARE_PROPERTY_GET_COPY_SET_COPY(float, clickThreshold, setClickThreshold)
-		ET_DECLARE_PROPERTY_GET_COPY_SET_COPY(float, doubleClickTemporalThreshold, setDoubleClickTemporalThreshold)
-		ET_DECLARE_PROPERTY_GET_COPY_SET_COPY(float, doubleClickSpatialThreshold, setDoubleClickSpatialThreshold)
-		ET_DECLARE_PROPERTY_GET_COPY_SET_COPY(float, holdThreshold, setHoldThreshold)
+		ET_DECLARE_PROPERTY_GET_COPY_SET_COPY(float, clickTemporalThreshold, setClickTemporalThreshold)
+		ET_DECLARE_PROPERTY_GET_COPY_SET_COPY(float, clickSpatialThreshold, setClickSpatialThreshold)
+				
+		ET_DECLARE_PROPERTY_GET_COPY_SET_COPY(float, holdTemporalThreshold, setHoldTemporalThreshold)
 
 	public:
 		ET_DECLARE_EVENT1(rotate, float)
@@ -72,9 +77,10 @@ namespace et
 		ET_DECLARE_EVENT2(released, vec2, PointerType)
 		ET_DECLARE_EVENT2(cancelled, vec2, PointerType)
 		
-		ET_DECLARE_EVENT2(click, vec2, PointerType)
+		ET_DECLARE_EVENT1(click, const PointerInputInfo&)
 		ET_DECLARE_EVENT0(clickCancelled)
-		ET_DECLARE_EVENT2(doubleClick, vec2, PointerType)
+		
+		ET_DECLARE_EVENT1(doubleClick, const PointerInputInfo&)
 
 		ET_DECLARE_EVENT0(hold)
 
@@ -94,44 +100,33 @@ namespace et
 		void onGesturePerformed(GestureInputInfo);
 
 	private:
+		ET_DENY_COPY(GesturesRecognizer)
+		
 		void update(float);
 		void handlePointersMovement();
-		void startWaitingForClicks();
-		void stopWaitingForClicks();
 		void cancelWaitingForClicks();
 		
-	private:
-		ET_DENY_COPY(GesturesRecognizer)
-
 	private:
 		struct PointersInputDelta
 		{
 			PointerInputInfo current;
 			PointerInputInfo previous;
-			bool moved;
+			bool moved = false;
 
-			PointersInputDelta() : moved(false)
-				{ } 
+			PointersInputDelta() { }
 
 			PointersInputDelta(const PointerInputInfo& c, const PointerInputInfo& p) : 
-				current(c), previous(p), moved(false) { }
+				current(c), previous(p) { }
 		};
         typedef std::map<size_t, PointersInputDelta> PointersInputDeltaMap;
-		
+
+	private:
 		PointersInputDeltaMap _pointers;
-		PointerType _singlePointerType;
-		vec2 _singlePointerPosition;
-		
-		size_t _recognizedGestures;
-		
-		float _actualTime;
-		float _clickStartTime;
-		
-		bool _expectClick;
-		bool _expectDoubleClick;
-		bool _clickTimeoutActive;
-		bool _lockGestures;
-		
-		RecognizedGesture _gesture;
+		PointerInputInfo _singlePointer;
+		size_t _recognizedGestures = RecognizedGesture_All;
+		RecognizedGesture _gesture = RecognizedGesture_NoGesture;
+		bool _shouldPerformClick = false;
+		bool _shouldPerformDoubleClick = false;
+		bool _lockGestures = true;
 	};
 }

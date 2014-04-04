@@ -11,13 +11,15 @@
 
 using namespace et;
 
+const float GesturesRecognizer::defaultClickTemporalThreshold = 0.25f;
+const float GesturesRecognizer::defaultClickSpatialTreshold = 0.015f;
+const float GesturesRecognizer::defaultHoldTemporalThreshold = 1.0f;
+
 GesturesRecognizer::GesturesRecognizer(bool automaticMode) : InputHandler(automaticMode),
-	_clickThreshold(0.2f), _doubleClickTemporalThreshold(0.25f), _doubleClickSpatialThreshold(0.075f),
-	_holdThreshold(1.0f), _singlePointerType(0), _actualTime(0.0f), _clickStartTime(0.0f), _expectClick(false),
-	_expectDoubleClick(false), _clickTimeoutActive(false), _lockGestures(true),
-	_recognizedGestures(RecognizedGesture_All), _gesture(RecognizedGesture_NoGesture)
+	_clickTemporalThreshold(defaultClickTemporalThreshold),
+	_clickSpatialThreshold(defaultClickSpatialTreshold),
+	_holdTemporalThreshold(defaultHoldTemporalThreshold)
 {
-	
 }
 
 void GesturesRecognizer::handlePointersMovement()
@@ -109,10 +111,23 @@ void GesturesRecognizer::handlePointersMovement()
 			_gesture = gesture;
 
     }
-    else 
-    {
-        
-    }
+}
+
+void GesturesRecognizer::cancelWaitingForClicks()
+{
+	_shouldPerformClick = false;
+	_shouldPerformDoubleClick = false;
+	_singlePointer = PointerInputInfo();
+	cancelUpdates();
+}
+
+void GesturesRecognizer::update(float t)
+{
+	if (t - _singlePointer.timestamp >= _clickTemporalThreshold)
+	{
+		click.invoke(_singlePointer);
+		cancelWaitingForClicks();
+	}
 }
 
 void GesturesRecognizer::onPointerPressed(et::PointerInputInfo pi)
@@ -124,29 +139,34 @@ void GesturesRecognizer::onPointerPressed(et::PointerInputInfo pi)
 	
 	if (_pointers.size() == 1)
 	{
-		float currentTime = mainTimerPool()->actualTime();
-		float deltaTime = currentTime - _actualTime;
-		vec2 deltaPosition = pi.normalizedPos - _singlePointerPosition;
+		if (_shouldPerformClick)
+		{
+			float dp = (pi.normalizedPos - _singlePointer.normalizedPos).dotSelf();
+			if (dp <= sqr(_clickSpatialThreshold))
+			{
+				_shouldPerformClick = false;
+				_shouldPerformDoubleClick = true;
+			}
+			else
+			{
+				click.invoke(_singlePointer);
+				
+				_singlePointer = pi;
+				_shouldPerformClick = true;
+				_shouldPerformDoubleClick = false;
+			}
+		}
+		else
+		{
+			_shouldPerformClick = true;
+			_singlePointer = pi;
+		}
 		
-		bool doubleClickFailedByTime = deltaTime > _doubleClickTemporalThreshold;
-		bool doubleClickFailedByDistance = deltaPosition.length() > _doubleClickSpatialThreshold;
-		
-		if (_clickTimeoutActive && doubleClickFailedByDistance)
-			click.invoke(_singlePointerPosition, _singlePointerType);
-		
-		_singlePointerType = pi.type;
-		_singlePointerPosition = pi.normalizedPos;
-		_expectClick = doubleClickFailedByTime || (_clickTimeoutActive && doubleClickFailedByDistance);
-		_expectDoubleClick = !_expectClick;
-		_clickTimeoutActive = false;
-
-		if (_expectClick)
-			_clickStartTime = currentTime;
-		
-		startWaitingForClicks();
+		_singlePointer.id = pi.id;
 	}
 	else
 	{
+		_singlePointer = PointerInputInfo();
 		cancelWaitingForClicks();
 	}
 }
@@ -154,29 +174,50 @@ void GesturesRecognizer::onPointerPressed(et::PointerInputInfo pi)
 void GesturesRecognizer::onPointerMoved(et::PointerInputInfo pi)
 {
 	pointerMoved.invoke(pi);
-	if (_pointers.count(pi.id) == 0) return;
-
-	_pointers[pi.id].moved = true;
-	_pointers[pi.id].previous = _pointers[pi.id].current;
-	_pointers[pi.id].current = pi;
+	
+	if ((pi.id == 0) || (_pointers.count(pi.id) == 0)) return;
 
 	if (_pointers.size() == 1)
 	{
-		const PointerInputInfo& pPrev = _pointers[pi.id].previous; 
-		const PointerInputInfo& pCurr = _pointers[pi.id].current; 
+		bool shouldCancelClick = false;
+		
+		if (pi.id == _singlePointer.id)
+		{
+			float len = (pi.normalizedPos - _singlePointer.normalizedPos).dotSelf();
+			shouldCancelClick = (len >= sqr(_clickSpatialThreshold));
+		}
+		
+		if (shouldCancelClick)
+		{
+			cancelWaitingForClicks();
+			clickCancelled.invoke();
+			
+			_pointers[pi.id].moved = true;
+			_pointers[pi.id].previous = _pointers[pi.id].current;
+			_pointers[pi.id].current = pi;
+			
+			const PointerInputInfo& pPrev = _pointers[pi.id].previous;
+			const PointerInputInfo& pCurr = _pointers[pi.id].current; 
 
-		vec2 offset = pCurr.normalizedPos - pPrev.normalizedPos;
-		vec2 speed = offset / etMax(0.01f, pCurr.timestamp - pPrev.timestamp);
-		
-		moved.invoke(pi.normalizedPos, pi.type);
-		
-		if (pCurr.type == PointerType_General)
-			dragWithGeneralPointer.invokeInMainRunLoop(speed, offset);
-		
-		drag.invoke(speed, pi.type);
+			vec2 offset = pCurr.normalizedPos - pPrev.normalizedPos;
+			vec2 speed = offset / etMax(0.01f, pCurr.timestamp - pPrev.timestamp);
+			
+			moved.invoke(pi.normalizedPos, pi.type);
+			
+			if (pCurr.type == PointerType_General)
+				dragWithGeneralPointer.invokeInMainRunLoop(speed, offset);
+			
+			drag.invoke(speed, pi.type);
+		}
 	}
 	else
 	{
+		cancelWaitingForClicks();
+		
+		_pointers[pi.id].moved = true;
+		_pointers[pi.id].previous = _pointers[pi.id].current;
+		_pointers[pi.id].current = pi;
+		
 		bool allMoved = true;
 		for (auto& p : _pointers)
 		{
@@ -190,11 +231,6 @@ void GesturesRecognizer::onPointerMoved(et::PointerInputInfo pi)
 		if (allMoved)
 			handlePointersMovement();
 	}
-	
-	if (_expectClick)
-		clickCancelled.invokeInMainRunLoop();
-	
-	cancelWaitingForClicks();
 }
 
 void GesturesRecognizer::onPointerReleased(et::PointerInputInfo pi)
@@ -205,62 +241,49 @@ void GesturesRecognizer::onPointerReleased(et::PointerInputInfo pi)
 	_pointers.erase(pi.id);
 	
 	released.invoke(pi.normalizedPos, pi.type);
-	stopWaitingForClicks();
+	
+	if (pi.id == _singlePointer.id)
+	{
+		if ((pi.normalizedPos - _singlePointer.normalizedPos).dotSelf() > sqr(_clickSpatialThreshold))
+		{
+			cancelWaitingForClicks();
+		}
+		else if (_shouldPerformClick)
+		{
+			float dt = pi.timestamp - _singlePointer.timestamp;
+			if ((dt > _clickTemporalThreshold))
+			{
+				click.invoke(_singlePointer);
+				cancelWaitingForClicks();
+			}
+			else
+			{
+				startUpdates();
+			}
+		}
+		else if (_shouldPerformDoubleClick)
+		{
+			doubleClick.invoke(_singlePointer);
+			cancelWaitingForClicks();
+		}
+	}
 }
 
 void GesturesRecognizer::onPointerCancelled(et::PointerInputInfo pi)
 {
 	pointerCancelled.invoke(pi);
-
-	_pointers.erase(pi.id);
 	
+	_pointers.erase(pi.id);
 	cancelled.invoke(pi.normalizedPos, pi.type);
-	cancelWaitingForClicks();
+	
+	if (pi.id == _singlePointer.id)
+		cancelWaitingForClicks();
 }
 
 void GesturesRecognizer::onPointerScrolled(et::PointerInputInfo i)
 {
 	pointerScrolled.invoke(i);
 	scroll.invoke(i.scroll, i.origin);
-}
-
-void GesturesRecognizer::update(float t)
-{
-	if (_clickTimeoutActive && (t >= _clickStartTime + _clickThreshold))
-	{
-		click.invoke(_singlePointerPosition, _singlePointerType);
-		cancelUpdates();
-		_clickTimeoutActive = false;
-	}
-	
-	_actualTime = t;
-}
-
-void GesturesRecognizer::startWaitingForClicks()
-{
-	startUpdates();
-}
-
-void GesturesRecognizer::stopWaitingForClicks()
-{
-	if (_expectDoubleClick)
-	{
-		doubleClick.invoke(_singlePointerPosition, _singlePointerType);
-		_expectDoubleClick = false;
-		_expectClick = false;
-		cancelUpdates();
-	}
-	else if (_expectClick)
-	{
-		_clickTimeoutActive = true;
-	}
-}
-
-void GesturesRecognizer::cancelWaitingForClicks()
-{
-	_expectClick = false;
-	_expectDoubleClick = false;
-	cancelUpdates();
 }
 
 void GesturesRecognizer::onGesturePerformed(GestureInputInfo i)

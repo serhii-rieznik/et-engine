@@ -70,6 +70,9 @@ namespace et
 
 	inline long strToLong(const std::string& value)
 		{ return std::atol(value.c_str()); }
+
+	inline long long strToLongLong(const std::string& value)
+		{ return std::atoll(value.c_str()); }
 	
 	inline double strToDouble(const std::string& value)
 		{ return std::atof(value.c_str()); }
