@@ -585,7 +585,15 @@ Texture Material::loadTexture(RenderContext* rc, const std::string& path, const 
 	{
 		std::string relativePath = normalizeFilePath(basePath + getFileName(path));
 		if (fileExists(relativePath))
+		{
 			t = rc->textureFactory().loadTexture(relativePath, cache, async, this);
+		}
+		else
+		{
+			relativePath = normalizeFilePath(basePath + path);
+			if (fileExists(relativePath))
+				t = rc->textureFactory().loadTexture(relativePath, cache, async, this);
+		}
 	}
 	
 	if (t.invalid())

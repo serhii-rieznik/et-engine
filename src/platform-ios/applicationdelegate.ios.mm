@@ -98,14 +98,16 @@ extern etOpenGLViewController* sharedOpenGLViewController;
 
 - (void)tick
 {
-	if (_updating)
+	if (!_updating) return;
+	
+	@synchronized(sharedOpenGLViewController.context)
 	{
-		@synchronized(sharedOpenGLViewController.context)
-		{
-			[sharedOpenGLViewController beginRender];
-			_notifier.notifyIdle();
+		[sharedOpenGLViewController beginRender];
+		
+		_notifier.notifyIdle();
+		
+		if (_updating)
 			[sharedOpenGLViewController endRender];
-		}
 	}
 }
 
