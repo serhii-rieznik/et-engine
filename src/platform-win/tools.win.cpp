@@ -43,7 +43,14 @@ uint64_t et::queryContiniousTimeInMilliSeconds()
 float et::queryContiniousTimeInSeconds()
 {
 	return static_cast<float>(queryContiniousTimeInMilliSeconds()) / 1000.0f;
-} 
+}
+
+uint64_t et::queryCurrentTimeInMicroSeconds()
+{
+	LARGE_INTEGER c = { };
+	QueryPerformanceCounter(&c);
+	return 1000000 * c.QuadPart / performanceFrequency;
+}
 
 const char et::pathDelimiter = '\\';
 const char et::invalidPathDelimiter = '/';
