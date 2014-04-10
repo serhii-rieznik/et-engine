@@ -62,7 +62,7 @@ void GuiRenderer::pushClipRect(const recti& value)
 
 void GuiRenderer::popClipRect()
 {
-	assert(_clip.size() > 1);
+	ET_ASSERT(_clip.size() > 1);
 	_clip.pop();
 }
 
@@ -151,8 +151,8 @@ GuiVertexPointer GuiRenderer::allocateVertices(size_t count, const Texture& inTe
 	
 	_renderingElement->_vertexList.applyOffset(count);
 
-	assert(i0 < _renderingElement->_vertexList.size());
-	assert(i0 * _renderingElement->_vertexList.typeSize() < _renderingElement->_vertexList.dataSize());
+	ET_ASSERT(i0 < _renderingElement->_vertexList.size());
+	ET_ASSERT(i0 * _renderingElement->_vertexList.typeSize() < _renderingElement->_vertexList.dataSize());
 
 	return _renderingElement->_vertexList.element_ptr(i0);
 }

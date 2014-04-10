@@ -352,7 +352,7 @@ CharDescriptorList FontData::parseString(const std::wstring& s)
 					}
 					else 
 					{
-						log::warning(L"Unknown tag `%s` passed in string: %s", tag.c_str(), s.c_str());
+						log::warning("Unknown tag `%S` passed in string: %S", tag.c_str(), s.c_str());
 					}
 				}
 				else
@@ -369,7 +369,7 @@ CharDescriptorList FontData::parseString(const std::wstring& s)
 					}
 					else
 					{
-						log::warning(L"Unknown tag `%s` passed in string: %s", tag.c_str(), s.c_str());
+						log::warning("Unknown tag `%S` passed in string: %S", tag.c_str(), s.c_str());
 					}
 				}
 				readingTag = false;

@@ -72,9 +72,11 @@ void MainController::pointerPressed(et::vec2, et::PointerType)
 
 void MainController::onDrag(vec2 p, PointerType t)
 {
+#if (!ET_PLATFORM_IOS)
 	if (t == PointerType_General)
 		_sample.panCamera(5.0f * p);
 	else
+#endif
 		_sample.dragCamera(p);
 }
 
@@ -95,10 +97,10 @@ void MainController::onKeyPressed(size_t key)
 {
 	int upCase = ::toupper(static_cast<int>(key & 0xffffffff));
 
-	if (upCase == ET_O)
+	if (upCase == 'O')
 		_sample.toggleObserving();
 
-	if (upCase == ET_W)
+	if (upCase == 'W')
 		_sample.toggleWireframe();
 }
 

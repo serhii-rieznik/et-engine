@@ -72,7 +72,7 @@ void MessageView::layout(const vec2& sz)
 	bool hasImage = _imgImage->texture().valid() && (imageSize.dotSelf() > 0.0f);
 	bool hasButtons = hasFirstButton() || hasSecondButton();
 	
-	assert(!(hasText && hasImage) && "Unsupported MessageView parameters specified");
+	ET_ASSERT(!(hasText && hasImage) && "Unsupported MessageView parameters specified");
 	
 	float extraElements = static_cast<float>(hasTitle) + static_cast<float>(hasText || hasImage) + static_cast<float>(hasButtons);
 	float gapsOffset = 2.0f + 0.5f * etMax(0.0f, extraElements - 1.0f);

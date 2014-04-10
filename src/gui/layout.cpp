@@ -307,7 +307,7 @@ void Layout::setCurrentElement(const PointerInputInfo& p, Element* e)
 
 void Layout::performDragging(const PointerInputInfo& p)
 {
-	assert(_dragging);
+	ET_ASSERT(_dragging);
 	
 	vec2 currentPos = _capturedElement->positionInElement(p.pos);
 	vec2 delta = currentPos - _dragInitialOffset;
