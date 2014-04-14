@@ -87,6 +87,9 @@ namespace et
 
 		void setCameraProperties(const Camera& cam);
 
+		const UniformMap& uniforms() const 
+			{ return _uniforms; }
+
 		void setUniform(int, uint32_t, const int, bool);
 		void setUniform(int, uint32_t, const unsigned int, bool);
 		void setUniform(int, uint32_t, const unsigned long, bool);
