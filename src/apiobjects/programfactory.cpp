@@ -324,7 +324,7 @@ void ProgramFactory::parseSourceCode(ShaderType type, std::string& source, const
 	else if (type == ShaderType_Fragment)
 		header += _fragShaderHeader;
 
-	for (auto& i : defines)
+	for (const auto& i : defines)
 		header += "\n#define " + i;
 
 	source = header + "\n" + source;

@@ -5,9 +5,12 @@
  *
  */
 
-#include <OpenAL/al.h>
-#include <OpenAL/alc.h>
-#include <AVFoundation/AVFoundation.h>
+#import <OpenAL/al.h>
+#import <OpenAL/alc.h>
+#import <AVFoundation/AVFoundation.h>
+#import <MediaPlayer/MPMusicPlayerController.h>
+
+#include <et/platform-ios/ios.h>
 #include <et/sound/sound.h>
 
 using namespace et;
@@ -92,4 +95,12 @@ void etInterruptListener(void*, UInt32 inInterruptionState)
 			alcProcessContext(getSharedContext());
 		}
 	}
+}
+
+bool et::ios::musicIsPlaying()
+{
+	MPMediaItem* item = [[MPMusicPlayerController iPodMusicPlayer] nowPlayingItem];
+	if (item == nil)
+		return false;
+	return ([[MPMusicPlayerController iPodMusicPlayer] playbackState] == MPMusicPlaybackStatePlaying);
 }

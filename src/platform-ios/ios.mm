@@ -11,7 +11,6 @@
 #import <UIKit/UIViewController.h>
 #import <UIKit/UIDocumentInteractionController.h>
 #import <AssetsLibrary/AssetsLibrary.h>
-#import <MediaPlayer/MPMusicPlayerController.h>
 
 #include <functional>
 #include <sys/xattr.h>
@@ -146,16 +145,6 @@ std::string et::ios::systemVersion()
 bool et::ios::runningOnIPad()
 {
 	return UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad;
-}
-
-bool et::ios::musicIsPlaying()
-{
-	MPMediaItem* item = [[MPMusicPlayerController iPodMusicPlayer] nowPlayingItem];
-	
-	if (item == nil)
-		return false;
-	
-	return ([[MPMusicPlayerController iPodMusicPlayer] playbackState] == MPMusicPlaybackStatePlaying);
 }
 
 /*
