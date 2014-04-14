@@ -736,15 +736,13 @@ int PVRTDecompressPVRTC(const void *pCompressedData,
 	int retval = pvrtcDecompress((PVRTuint8*)pCompressedData,pDecompressedData,XTrueDim,YTrueDim,(Do2bitMode==1?2:4));
 
 	//If the dimensions were too small, then copy the new buffer back into the output buffer.
-	if(XTrueDim!=XDim || YTrueDim!=YDim)
+	if (XTrueDim!=XDim || YTrueDim!=YDim)
 	{
 		//Loop through all the required pixels.
-		for (int x=0; x<XDim; ++x)
+		for (int x=0; x < XDim; ++x)
 		{
-			for (int y=0; y<YDim; ++y)
-			{
-				((Pixel32*)pResultImage)[x+y*XDim]=pDecompressedData[x+y*XTrueDim];
-			}
+			for (int y=0; y < YDim; ++y)
+				((Pixel32*)pResultImage)[x+y*XDim] = pDecompressedData[x+y*XTrueDim];
 		}
 
 		//Free the temporary buffer.

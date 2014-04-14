@@ -54,14 +54,14 @@ namespace et
 	inline std::string intToStr(void* value)
 	{
 		char buffer[32] = { };
-		sprintf(buffer, "%08zX", reinterpret_cast<size_t>(value));
+		sprintf(buffer, "%08llX", reinterpret_cast<uint64_t>(value));
 		return buffer;
 	}
 
 	inline std::string intToStr(const void* value)
 	{
 		char buffer[32] = { };
-		sprintf(buffer, "%08zX", reinterpret_cast<size_t>(value));
+		sprintf(buffer, "%08llX", reinterpret_cast<uint64_t>(value));
 		return buffer;
 	}
 
