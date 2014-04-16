@@ -9,6 +9,7 @@
 #import <Social/Social.h>
 
 #include <et/app/application.h>
+#include <et/platform-apple/objc.h>
 #include <et/platform-ios/social.h>
 
 using namespace et;
@@ -49,8 +50,8 @@ void et::social::tweet(const std::string& text, const std::string& pathToImage, 
 	
 	[[SocialController sharedSocialController] performSelectorOnMainThread:@selector(shareWithOptions:)
 		withObject:values waitUntilDone:YES];
-	
-	[values release];
+
+	ET_OBJC_RELEASE(values)
 }
 
 void et::social::postToFacebook(const std::string& text, const std::string& pathToImage, const std::string& url)
@@ -69,7 +70,7 @@ void et::social::postToFacebook(const std::string& text, const std::string& path
 	[[SocialController sharedSocialController] performSelectorOnMainThread:@selector(shareWithOptions:)
 		withObject:values waitUntilDone:YES];
 	
-	[values release];
+	ET_OBJC_RELEASE(values)
 }
 
 /*
@@ -104,11 +105,13 @@ void et::social::postToFacebook(const std::string& text, const std::string& path
 	composer.completionHandler = ^(SLComposeViewControllerResult result)
 	{
 		notifications::sharingFinished.invokeInMainRunLoop(result == SLComposeViewControllerResultDone);
-		UIViewController* vc = reinterpret_cast<UIViewController*>(et::application().renderingContextHandle());
+		UIViewController* vc = (__bridge UIViewController*)
+			reinterpret_cast<void*>(et::application().renderingContextHandle());
 		[vc dismissViewControllerAnimated:YES completion:nil];
 	};
 	
-	UIViewController* vc = reinterpret_cast<UIViewController*>(et::application().renderingContextHandle());
+	UIViewController* vc = (__bridge UIViewController*)
+		reinterpret_cast<void*>(et::application().renderingContextHandle());
 	[vc presentViewController:composer animated:YES completion:nil];
 }
 
