@@ -74,6 +74,8 @@ namespace et
 			const mat4& finalTransform();
 			const mat4& finalInverseTransform();
 			
+			const mat4& localTransform();
+			
 			void invalidateTransform();
 
 			void setParent(Element* p);
@@ -127,6 +129,7 @@ namespace et
 			std::vector<Animation> _animations;
 			
 			mat4 _animationTransform;
+			mat4 _cachedLocalTransform;
 			mat4 _cachedFinalTransform;
 			mat4 _cachedFinalInverseTransform;
 			

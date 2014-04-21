@@ -44,6 +44,7 @@ void Animation::setFrameRate(float r)
 void Animation::transformation(float time, vec3& t, quaternion& o, vec3& s) const
 {
 	float d = duration();
+	
 	if (d == 0.0f)
 	{
 		auto mainTransform = _frames.front();
@@ -53,11 +54,27 @@ void Animation::transformation(float time, vec3& t, quaternion& o, vec3& s) cons
 		return;
 	}
 	
-	while (time < _startTime)
-		time += d;
+	switch (_outOfRangeMode)
+	{
+		case OutOfRangeMode_Loop:
+		{
+			float timeAspect = time / d;
+			time = _startTime + d * (timeAspect - std::floor(timeAspect));
+			break;
+		}
+			
+		case OutOfRangeMode_PingPong:
+		{
+			float timeAspect = time / d;
+			time = _startTime + d * (1.0f - 2.0f * std::abs(0.5f * (timeAspect - 1.0f) - std::floor(0.5f * timeAspect)));
+			break;
+		}
+			
+		default:
+			break;
+	}
 	
-	while (time >= _stopTime)
-		time -= d;
+	time = clamp(time, _startTime, _stopTime);
 	
 	int nearestLowerFrame = static_cast<int>(_frames.size()) - 1;
 	for (auto i = _frames.rbegin(), e = _frames.rend(); (i != e) && (nearestLowerFrame >= 0); ++i)
@@ -65,18 +82,23 @@ void Animation::transformation(float time, vec3& t, quaternion& o, vec3& s) cons
 		if (i->time <= time) break;
 		--nearestLowerFrame;
 	}
-	int nearestUpperFrame = (static_cast<size_t>(nearestLowerFrame + 1) > _frames.size()) ?
-		nearestLowerFrame : nearestLowerFrame + 1;
 	
-	const auto& lowerFrame = _frames.at(nearestLowerFrame);
-	const auto& upperFrame = _frames.at(nearestUpperFrame);
-		
-	float interolationFactor =
-		(time - lowerFrame.time) / (lowerFrame.time - upperFrame.time);
-	
-	t = mix(lowerFrame.translation, upperFrame.translation, interolationFactor);
-	o = slerp(lowerFrame.orientation, upperFrame.orientation, interolationFactor);
-	s = mix(lowerFrame.scale, upperFrame.scale, interolationFactor);
+	if (static_cast<size_t>(nearestLowerFrame + 1) >= _frames.size())
+	{
+		const auto& frame = _frames.at(nearestLowerFrame);
+		t = frame.translation;
+		o = frame.orientation;
+		s = frame.scale;
+	}
+	else
+	{
+		const auto& lowerFrame = _frames.at(nearestLowerFrame);
+		const auto& upperFrame = _frames.at(nearestLowerFrame + 1);
+		float interolationFactor = (time - lowerFrame.time) / (lowerFrame.time - upperFrame.time);
+		t = mix(lowerFrame.translation, upperFrame.translation, interolationFactor);
+		o = slerp(lowerFrame.orientation, upperFrame.orientation, interolationFactor);
+		s = mix(lowerFrame.scale, upperFrame.scale, interolationFactor);
+	}
 }
 
 mat4 Animation::transformation(float time) const

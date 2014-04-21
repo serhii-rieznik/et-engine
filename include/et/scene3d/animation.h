@@ -34,7 +34,8 @@ namespace et
 			enum OutOfRangeMode
 			{
 				OutOfRangeMode_Loop,
-				OutOfRangeMode_Once
+				OutOfRangeMode_Once,
+				OutOfRangeMode_PingPong
 			};
 			
 		public:

@@ -10,7 +10,6 @@
 		5C5128AD1681FA2500ED9B96 /* libpng.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5C5128AB1681FA2500ED9B96 /* libpng.a */; };
 		5C72A8361759E4B900B49611 /* objectscache.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5C72A8351759E4B900B49611 /* objectscache.cpp */; };
 		A50D32DC1720AAB0001D31B3 /* atomiccounter.unix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A50D32DB1720AAB0001D31B3 /* atomiccounter.unix.cpp */; };
-		A50D32E11720AC42001D31B3 /* log.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A50D32DF1720AC42001D31B3 /* log.cpp */; };
 		A50D32E21720AC42001D31B3 /* stream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A50D32E01720AC42001D31B3 /* stream.cpp */; };
 		A50D32E41720AC51001D31B3 /* rendercontext.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A50D32E31720AC51001D31B3 /* rendercontext.cpp */; };
 		A53B4F3116811FA900C6B8EC /* libiconv.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = A53B4F3016811FA900C6B8EC /* libiconv.dylib */; };
@@ -36,6 +35,7 @@
 		A55A6F751860C0730010936D /* serialization.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A55A6F6C1860C0730010936D /* serialization.cpp */; };
 		A55A6F761860C0730010936D /* storage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A55A6F6D1860C0730010936D /* storage.cpp */; };
 		A55A6F771860C0730010936D /* supportmesh.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A55A6F6E1860C0730010936D /* supportmesh.cpp */; };
+		A577231F1905930B008ACBE4 /* log.apple.mm in Sources */ = {isa = PBXBuildFile; fileRef = A577231E1905930B008ACBE4 /* log.apple.mm */; };
 		A57D10C918B3DA6D009546CC /* jpegloader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A57D10C718B3DA6D009546CC /* jpegloader.cpp */; };
 		A57D10CA18B3DA6D009546CC /* textureloader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A57D10C818B3DA6D009546CC /* textureloader.cpp */; };
 		A57D10CC18B3DB13009546CC /* hdrloader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A57D10CB18B3DB13009546CC /* hdrloader.cpp */; };
@@ -137,7 +137,6 @@
 		5C5128AB1681FA2500ED9B96 /* libpng.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libpng.a; path = ../../lib/osx/libpng.a; sourceTree = "<group>"; };
 		5C72A8351759E4B900B49611 /* objectscache.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = objectscache.cpp; sourceTree = "<group>"; };
 		A50D32DB1720AAB0001D31B3 /* atomiccounter.unix.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = atomiccounter.unix.cpp; sourceTree = "<group>"; };
-		A50D32DF1720AC42001D31B3 /* log.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = log.cpp; sourceTree = "<group>"; };
 		A50D32E01720AC42001D31B3 /* stream.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = stream.cpp; sourceTree = "<group>"; };
 		A50D32E31720AC51001D31B3 /* rendercontext.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = rendercontext.cpp; sourceTree = "<group>"; };
 		A53B4F3016811FA900C6B8EC /* libiconv.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libiconv.dylib; path = usr/lib/libiconv.dylib; sourceTree = SDKROOT; };
@@ -173,6 +172,7 @@
 		A55A6F6C1860C0730010936D /* serialization.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = serialization.cpp; sourceTree = "<group>"; };
 		A55A6F6D1860C0730010936D /* storage.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = storage.cpp; sourceTree = "<group>"; };
 		A55A6F6E1860C0730010936D /* supportmesh.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = supportmesh.cpp; sourceTree = "<group>"; };
+		A577231E1905930B008ACBE4 /* log.apple.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = log.apple.mm; sourceTree = "<group>"; };
 		A57D10C718B3DA6D009546CC /* jpegloader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = jpegloader.cpp; sourceTree = "<group>"; };
 		A57D10C818B3DA6D009546CC /* textureloader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = textureloader.cpp; sourceTree = "<group>"; };
 		A57D10CB18B3DB13009546CC /* hdrloader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = hdrloader.cpp; sourceTree = "<group>"; };
@@ -483,7 +483,6 @@
 			children = (
 				A55A6F611860C0510010936D /* conversion.cpp */,
 				5C72A8351759E4B900B49611 /* objectscache.cpp */,
-				A50D32DF1720AC42001D31B3 /* log.cpp */,
 				A50D32E01720AC42001D31B3 /* stream.cpp */,
 				A5A23E7616811978001B3E98 /* plist.cpp */,
 				A5A23E7716811978001B3E98 /* tools.cpp */,
@@ -587,6 +586,7 @@
 		A5A23EA316811978001B3E98 /* platform-apple */ = {
 			isa = PBXGroup;
 			children = (
+				A577231E1905930B008ACBE4 /* log.apple.mm */,
 				A5A23EA416811978001B3E98 /* locale.apple.mm */,
 				A5A23EA516811978001B3E98 /* tools.apple.mm */,
 			);
@@ -796,6 +796,7 @@
 				A5A23EF116811978001B3E98 /* element3d.cpp in Sources */,
 				A5A23EF216811978001B3E98 /* font.cpp in Sources */,
 				A5A23EF316811978001B3E98 /* gui.cpp in Sources */,
+				A577231F1905930B008ACBE4 /* log.apple.mm in Sources */,
 				A5A23EF416811978001B3E98 /* guibase.cpp in Sources */,
 				A5A23EF516811978001B3E98 /* guirenderer.cpp in Sources */,
 				A55118A11870D8FB0093E334 /* pvrdecompressor.cpp in Sources */,
@@ -857,7 +858,6 @@
 				A53B4F331681212F00C6B8EC /* platformtools.mac.mm in Sources */,
 				A53B4F351681220500C6B8EC /* main.cpp in Sources */,
 				A50D32DC1720AAB0001D31B3 /* atomiccounter.unix.cpp in Sources */,
-				A50D32E11720AC42001D31B3 /* log.cpp in Sources */,
 				A50D32E21720AC42001D31B3 /* stream.cpp in Sources */,
 				A50D32E41720AC51001D31B3 /* rendercontext.cpp in Sources */,
 				A55A6F731860C0730010936D /* mesh.cpp in Sources */,

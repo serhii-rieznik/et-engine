@@ -285,11 +285,9 @@ void Converter::performLoading(std::string path)
 	}
 	
 	auto nodesWithAnimation = _scene.childrenHavingFlag(s3d::Flag_HasAnimations);
+	
 	for (auto& i : nodesWithAnimation)
-	{
-		if (i->defaultAnimation().outOfRangeMode() == s3d::Animation::OutOfRangeMode_Loop)
-			i->animate();
-	}
+		i->animate();
 	
 	_labStatus->setText("Completed.");
 }

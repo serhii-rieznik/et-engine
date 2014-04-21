@@ -52,12 +52,18 @@ void Element::invalidateTransform()
 
 void Element::buildTransform()
 {
-	_cachedFinalTransform = _animations.empty() ? transform() : _animationTransform;
+	_cachedFinalTransform = localTransform();
 	
 	if (parent() != nullptr)
 		_cachedFinalTransform *= parent()->finalTransform();
 	
 	_cachedFinalInverseTransform = _cachedFinalTransform.inverse();
+}
+
+const mat4& Element::localTransform()
+{
+	_cachedLocalTransform = _animations.empty() ? transform() : _animationTransform;
+	return _cachedLocalTransform;
 }
 
 const mat4& Element::finalTransform()
@@ -284,6 +290,7 @@ void Element::addAnimation(const Animation& a)
 {
 	_animations.push_back(a);
 	_animationTransform = a.transformation(a.startTime());
+	
 	setFlag(Flag_HasAnimations);
 }
 

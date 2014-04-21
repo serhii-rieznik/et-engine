@@ -357,6 +357,10 @@ void FBXLoaderPrivate::loadNodeAnimations(FbxNode* node, s3d::Element::Pointer o
 			{
 				mode = s3d::Animation::OutOfRangeMode_Once;
 			}
+			if (animType == "pingpong")
+			{
+				mode = s3d::Animation::OutOfRangeMode_PingPong;
+			}
 			else if (animType != "loop")
 			{
 				log::warning("Unknown animation mode in %s: %s", object->name().c_str(), animType.c_str());
