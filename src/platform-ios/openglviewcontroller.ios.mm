@@ -121,12 +121,6 @@ extern NSString* etKeyboardNotRequiredNotification;
 	_context = nil;	
 }
 
-- (void)willAnimateRotationToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation duration:(NSTimeInterval)duration
-{
-	log::info("animate: %ld (%g)", toInterfaceOrientation, duration);
-	[super willAnimateRotationToInterfaceOrientation:toInterfaceOrientation duration:duration];
-}
-
 - (NSUInteger)supportedInterfaceOrientations
 {
 	NSUInteger result = 0;
