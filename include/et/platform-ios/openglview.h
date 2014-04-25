@@ -22,5 +22,6 @@
 - (const et::Framebuffer::Pointer&)defaultFramebuffer;
 
 @property (nonatomic, retain) EAGLContext* context;
+@property (atomic, assign) BOOL suspended;
 
 @end

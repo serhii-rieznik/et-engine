@@ -26,11 +26,10 @@ using namespace et;
 @interface etApplicationDelegate()
 {
 	et::ApplicationNotifier _notifier;
-	AtomicBool _updating;
 	
 	UIWindow* _window;
-	CADisplayLink* _displayLink;
 	NSThread* _renderThread;
+	CADisplayLink* _displayLink;
 }
 
 @end
@@ -63,7 +62,7 @@ extern etOpenGLViewController* sharedOpenGLViewController;
 {
 	(void)application;
 	
-	_updating = false;
+	[sharedOpenGLViewController setSuspended:YES];
 	_notifier.notifyDeactivated();
 }
 
@@ -93,21 +92,19 @@ extern etOpenGLViewController* sharedOpenGLViewController;
 
 - (BOOL)updating
 {
-	return _updating;
+	return ![sharedOpenGLViewController suspended];
 }
 
 - (void)tick
 {
-	if (!_updating) return;
-	
-	@synchronized(sharedOpenGLViewController.context)
+	if (!sharedOpenGLViewController.suspended)
 	{
-		[sharedOpenGLViewController beginRender];
-		
-		_notifier.notifyIdle();
-		
-		if (_updating)
+		@synchronized(sharedOpenGLViewController.context)
+		{
+			[sharedOpenGLViewController beginRender];
+			_notifier.notifyIdle();
 			[sharedOpenGLViewController endRender];
+		}
 	}
 }
 
@@ -124,7 +121,7 @@ extern etOpenGLViewController* sharedOpenGLViewController;
 		if (renderContextParameters.swapInterval > 0)
 			[_displayLink setFrameInterval:renderContextParameters.swapInterval];
 		
-		_updating = true;
+		[sharedOpenGLViewController setSuspended:NO];
 		[_displayLink addToRunLoop:[NSRunLoop currentRunLoop] forMode:NSRunLoopCommonModes];
 		
 		try
@@ -156,16 +153,14 @@ extern etOpenGLViewController* sharedOpenGLViewController;
 	}
 	else
 	{
-		_updating = true;
+		[sharedOpenGLViewController setSuspended:NO];
 	}
 }
 
 - (void)endUpdates
 {
-	_updating = false;
+	[sharedOpenGLViewController setSuspended:YES];
 }
-
-#if defined(__IPHONE_6_0)
 
 - (NSUInteger)application:(UIApplication*)application supportedInterfaceOrientationsForWindow:(UIWindow *)window
 {
@@ -174,11 +169,9 @@ extern etOpenGLViewController* sharedOpenGLViewController;
 	
 	void* handle = reinterpret_cast<void*>(et::application().renderingContextHandle());
 	UIViewController* vc = (__bridge UIViewController*)(handle);
+	
 	return [vc supportedInterfaceOrientations];
 }
-
-#endif
-
 
 - (BOOL)application:(UIApplication*)application openURL:(NSURL*)url
 	sourceApplication:(NSString*)sourceApplication annotation:(id)annotation

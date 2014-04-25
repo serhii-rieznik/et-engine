@@ -23,7 +23,7 @@
 - (void)beginRender;
 - (void)endRender;
 
-@property (nonatomic, assign) BOOL autorotationEnabled;
 @property (atomic, readonly) EAGLContext* context;
+@property (atomic, assign) BOOL suspended;
 
 @end

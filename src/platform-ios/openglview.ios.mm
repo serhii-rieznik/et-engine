@@ -53,6 +53,7 @@ using namespace et;
 @implementation etOpenGLView
 
 @synthesize context = _context;
+@synthesize suspended = _suspended;
 
 + (Class)layerClass
 {
@@ -98,6 +99,7 @@ using namespace et;
 	CAEAGLLayer* eaglLayer = (CAEAGLLayer*)self.layer;
 	
 	eaglLayer.opaque = YES;
+	
 	eaglLayer.drawableProperties = [NSDictionary dictionaryWithObjectsAndKeys:
 		[NSNumber numberWithBool:NO], kEAGLDrawablePropertyRetainedBacking,
 		kEAGLColorFormatRGBA8, kEAGLDrawablePropertyColorFormat, nil];
@@ -133,6 +135,8 @@ using namespace et;
 
 - (void)beginRender
 {
+	if (_suspended) return;
+	
 	[EAGLContext setCurrentContext:_context];
 	
 	if (_rc->parameters().bindDefaultFramebufferEachFrame)
@@ -141,6 +145,8 @@ using namespace et;
 
 - (void)endRender
 {
+	if (_suspended) return;
+	
 	checkOpenGLError("endRender");
 	
 	if (_multisampled)

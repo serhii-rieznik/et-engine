@@ -28,8 +28,8 @@ extern NSString* etKeyboardNotRequiredNotification;
 
 @implementation etOpenGLViewController
 
-@synthesize autorotationEnabled = _autorotationEnabled;
 @synthesize context = _context;
+@synthesize suspended = _suspended;
 
 - (id)initWithParameters:(RenderContextParameters)params
 {
@@ -37,7 +37,6 @@ extern NSString* etKeyboardNotRequiredNotification;
 	
 	if (self)
 	{
-		_autorotationEnabled = true;
 		_params = params;
 		
 		BOOL initialized = [self performInitialization];
@@ -122,33 +121,35 @@ extern NSString* etKeyboardNotRequiredNotification;
 	_context = nil;	
 }
 
-#if defined(__IPHONE_6_0)
-
-- (BOOL)shouldAutorotate
+- (void)willAnimateRotationToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation duration:(NSTimeInterval)duration
 {
-	return /*_autorotationEnabled && */ (_params.supportedInterfaceOrientations > 0);
+	log::info("animate: %ld (%g)", toInterfaceOrientation, duration);
+	[super willAnimateRotationToInterfaceOrientation:toInterfaceOrientation duration:duration];
 }
 
 - (NSUInteger)supportedInterfaceOrientations
 {
 	NSUInteger result = 0;
 	
-//	if (_autorotationEnabled)
-	{
-		if (_params.supportedInterfaceOrientations & InterfaceOrientation_Portrait)
-			result += UIInterfaceOrientationMaskPortrait;
-		if (_params.supportedInterfaceOrientations & InterfaceOrientation_PortraitUpsideDown)
-			result += UIInterfaceOrientationMaskPortraitUpsideDown;
-		if (_params.supportedInterfaceOrientations & InterfaceOrientation_LandscapeLeft)
-			result += UIInterfaceOrientationMaskLandscapeLeft;
-		if (_params.supportedInterfaceOrientations & InterfaceOrientation_LandscapeRight)
-			result += UIInterfaceOrientationMaskLandscapeRight;
-	}
+	if (_params.supportedInterfaceOrientations & InterfaceOrientation_Portrait)
+		result += UIInterfaceOrientationMaskPortrait;
+	
+	if (_params.supportedInterfaceOrientations & InterfaceOrientation_PortraitUpsideDown)
+		result += UIInterfaceOrientationMaskPortraitUpsideDown;
+	
+	if (_params.supportedInterfaceOrientations & InterfaceOrientation_LandscapeLeft)
+		result += UIInterfaceOrientationMaskLandscapeLeft;
+	
+	if (_params.supportedInterfaceOrientations & InterfaceOrientation_LandscapeRight)
+		result += UIInterfaceOrientationMaskLandscapeRight;
 	
 	return result;
 }
 
-#endif
+- (BOOL)shouldAutorotate
+{
+	return _params.supportedInterfaceOrientations != 0;
+}
 
 - (BOOL)prefersStatusBarHidden
 {
@@ -157,20 +158,17 @@ extern NSString* etKeyboardNotRequiredNotification;
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation
 {
-//	if (_autorotationEnabled)
-	{
-		if ((toInterfaceOrientation == UIInterfaceOrientationLandscapeLeft) &&
-			(_params.supportedInterfaceOrientations & InterfaceOrientation_LandscapeLeft)) return YES;
-		
-		if ((toInterfaceOrientation == UIInterfaceOrientationLandscapeRight) &&
-			(_params.supportedInterfaceOrientations & InterfaceOrientation_LandscapeRight)) return YES;
-		
-		if ((toInterfaceOrientation == UIInterfaceOrientationPortrait) &&
-			(_params.supportedInterfaceOrientations & InterfaceOrientation_Portrait)) return YES;
-		
-		if ((toInterfaceOrientation == UIInterfaceOrientationPortraitUpsideDown) &&
-			(_params.supportedInterfaceOrientations & InterfaceOrientation_PortraitUpsideDown)) return YES;
-    }
+	if ((toInterfaceOrientation == UIInterfaceOrientationLandscapeLeft) &&
+		(_params.supportedInterfaceOrientations & InterfaceOrientation_LandscapeLeft)) return YES;
+	
+	if ((toInterfaceOrientation == UIInterfaceOrientationLandscapeRight) &&
+		(_params.supportedInterfaceOrientations & InterfaceOrientation_LandscapeRight)) return YES;
+	
+	if ((toInterfaceOrientation == UIInterfaceOrientationPortrait) &&
+		(_params.supportedInterfaceOrientations & InterfaceOrientation_Portrait)) return YES;
+	
+	if ((toInterfaceOrientation == UIInterfaceOrientationPortraitUpsideDown) &&
+		(_params.supportedInterfaceOrientations & InterfaceOrientation_PortraitUpsideDown)) return YES;
 	
     return NO;
 }
@@ -187,17 +185,13 @@ extern NSString* etKeyboardNotRequiredNotification;
 
 - (void)presentViewController:(UIViewController*)viewControllerToPresent animated:(BOOL)flag completion:(void(^)())completion
 {
-	_autorotationEnabled = NO;
 	_notifier.notifyDeactivated();
-	
 	[super presentViewController:viewControllerToPresent animated:flag completion:completion];
 }
 
 - (void)dismissViewControllerAnimated:(BOOL)flag completion:(void (^)())completion
 {
-	_autorotationEnabled = YES;
 	_notifier.notifyActivated();
-	
 	[super dismissViewControllerAnimated:flag completion:completion];
 }
 
@@ -206,17 +200,13 @@ extern NSString* etKeyboardNotRequiredNotification;
  */
 - (void)presentModalViewController:(UIViewController*)modalViewController animated:(BOOL)animated
 {
-	_autorotationEnabled = NO;
 	_notifier.notifyDeactivated();
-	
 	[super presentModalViewController:modalViewController animated:animated];
 }
 
 - (void)dismissModalViewControllerAnimated:(BOOL)animated
 {
-	_autorotationEnabled = YES;
 	_notifier.notifyActivated();
-	
 	[super dismissModalViewControllerAnimated:animated];
 }
 
@@ -241,6 +231,16 @@ extern NSString* etKeyboardNotRequiredNotification;
 		[self performSelectorOnMainThread:@selector(resignFirstResponder) withObject:nil waitUntilDone:NO];
 	else if ([notification.name isEqualToString:etKeyboardNotRequiredNotification])
 		[self performSelectorOnMainThread:@selector(becomeFirstResponder) withObject:nil waitUntilDone:NO];
+}
+
+- (void)setSuspended:(BOOL)suspended
+{
+	_glView.suspended = suspended;
+}
+
+- (BOOL)suspended
+{
+	return _glView.suspended;
 }
 
 @end
