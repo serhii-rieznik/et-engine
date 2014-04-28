@@ -25,6 +25,7 @@ namespace et
 		
 		std::string hardwareIdentifier();
 		std::string systemVersion();
+		std::string bundleVersion();
 		
 		bool runningOnIPad();
 		

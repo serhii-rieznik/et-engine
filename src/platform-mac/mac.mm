@@ -7,6 +7,7 @@
 
 #include <Foundation/NSString.h>
 #include <Foundation/NSURL.h>
+#include <Foundation/NSBundle.h>
 #include <AppKit/NSWorkspace.h>
 #include <et/platform-mac/mac.h>
 
@@ -16,4 +17,10 @@ bool et::mac::canOpenURL(const std::string& s)
 {
 	return [[NSWorkspace sharedWorkspace] URLForApplicationToOpenURL:
 		[NSURL URLWithString:[NSString stringWithUTF8String:s.c_str()]]] != nil;
+}
+
+std::string et::mac::bundleVersion()
+{
+	NSString* versionString = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleShortVersionString"];
+	return versionString == nil ? std::string() : std::string([versionString UTF8String]);
 }

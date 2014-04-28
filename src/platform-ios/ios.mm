@@ -147,6 +147,11 @@ bool et::ios::runningOnIPad()
 	return UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad;
 }
 
+std::string et::ios::bundleVersion()
+{
+	NSString* versionString = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleShortVersionString"];
+	return versionString == nil ? std::string() : std::string([versionString UTF8String]);
+}
 /*
  * Obj-C stuff
  */
