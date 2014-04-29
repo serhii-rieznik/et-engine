@@ -8,7 +8,8 @@ include $(CLEAR_VARS)
 LOCAL_MODULE := demo
 
 LOCAL_C_INCLUDES := $(ENGINE_INCLUDES_PATH)
-LOCAL_CXXFLAGS := --std=c++11
+
+LOCAL_CPPFLAGS += --std=c++11
 
 LOCAL_SRC_FILES += \
 	$(SOURCE_PATH)/main.cpp \
