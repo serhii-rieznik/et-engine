@@ -1,3 +1,1 @@
-NDK_TOOLCHAIN_VERSION = clang
 APP_MODULES := et
-APP_PLATFORM := android-10

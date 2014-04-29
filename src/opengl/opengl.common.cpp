@@ -206,7 +206,7 @@ std::string et::glInternalFormatToString(int format)
 		CASE_VALUE(GL_DEPTH_COMPONENT24)
 #endif
 		
-#if defined(GL_BGRA)
+#if defined(GL_BGRA) && (GL_BGRA != GL_RGBA)
 		CASE_VALUE(GL_BGRA)
 #endif
 		
