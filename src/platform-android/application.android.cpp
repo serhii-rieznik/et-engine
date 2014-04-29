@@ -126,22 +126,31 @@ PointerInputInfo pointerInfoFromEvent(AInputEvent* event, int index, const vec2&
 		queryContiniousTimeInSeconds(), PointerOrigin_Touchscreen);
 }
 
-int32_t handleMotionInpit(android_app* app, AInputEvent* event)
+int32_t handleMotionInput(android_app* app, AInputEvent* event)
 {
 	RenderContext* rc = sharedApplicationNotifier.accessRenderContext();
+	if (rc == nullptr) return 1;
 	
 	int32_t action = AMotionEvent_getAction(event) & AMOTION_EVENT_ACTION_MASK;
+	if (action > AMOTION_EVENT_ACTION_POINTER_UP)
+	{
+		log::warning("Unsupported event action: %d", action);
+		return 1;
+	}
+	
 	int32_t src = AInputEvent_getSource(event);
-
-	if ((rc == nullptr) || (src != AINPUT_SOURCE_TOUCHSCREEN) || (action > AMOTION_EVENT_ACTION_POINTER_UP)) return 1;
-
+	if (src != AINPUT_SOURCE_TOUCHSCREEN)
+	{
+		log::warning("Unsupported event source: %d", src);
+		return 1;
+	}
+	
+	static Input::PointerInputSource inputSource;
+	
 	int32_t numPointers = AMotionEvent_getPointerCount(event);
-
-	Input::PointerInputSource inputSource;
 	for (int p = 0; p < numPointers; ++p)
 	{
-		int pointerId = p;
-		PointerInputInfo info = pointerInfoFromEvent(event, pointerId, rc->size());
+		PointerInputInfo info = pointerInfoFromEvent(event, p, rc->size());
 		switch (action)
 		{
 			case AMOTION_EVENT_ACTION_POINTER_DOWN:
@@ -174,7 +183,7 @@ int32_t handleMotionInpit(android_app* app, AInputEvent* event)
 				return 1;
 
 			default:
-				ET_FAIL("Should not get here");
+				ET_FAIL("Invalid motion action.");
 		}
 	}
 
@@ -188,6 +197,7 @@ int32_t handleKeyInput(android_app* app, AInputEvent* event)
 
 	if (action == AKEY_EVENT_ACTION_DOWN)
 	{
+		
 	}
 	else if (action == AKEY_EVENT_ACTION_UP)
 	{
@@ -207,14 +217,17 @@ int32_t handleKeyInput(android_app* app, AInputEvent* event)
 
 int32_t handleInput(android_app* app, AInputEvent* event)
 {
-	int32_t eventType = AInputEvent_getType(event);
-
-    if (eventType == AINPUT_EVENT_TYPE_KEY)
-		return handleKeyInput(app, event);
-	else if (eventType == AINPUT_EVENT_TYPE_MOTION)
-		return handleMotionInpit(app, event);
-
-    return 0;
+	switch (AInputEvent_getType(event))
+	{
+		case AINPUT_EVENT_TYPE_KEY:
+			return handleKeyInput(app, event);
+			
+		case AINPUT_EVENT_TYPE_MOTION:
+			return handleMotionInput(app, event);
+			
+		default:
+			return 0;
+	}
 }
 
 void processEvents()
@@ -250,6 +263,8 @@ void Application::loaded()
 	delegate()->applicationDidLoad(_renderContext);
 
 	applicationLoaded = true;
+	
+	delegate()->applicationWillResizeContext(_renderContext->sizei());
 }
 
 void Application::enterRunLoop()

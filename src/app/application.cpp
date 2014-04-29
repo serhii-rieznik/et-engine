@@ -58,6 +58,10 @@ IApplicationDelegate* Application::delegate()
 
 int Application::run(int argc, char* argv[])
 {
+#if (ET_DEBUG)
+	log::info("[et-engine] Version: %d.%d, running in debug mode.", ET_MAJOR_VERSION, ET_MINOR_VERSION);
+#endif
+	
 	for (int i = 0; i < argc; ++i)
 		_launchParameters.push_back(argv[i]);
 

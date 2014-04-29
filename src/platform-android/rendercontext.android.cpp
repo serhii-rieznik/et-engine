@@ -161,5 +161,4 @@ RenderContextPrivate::RenderContextPrivate(RenderContext* rc)
 	
     eglQuerySurface(display, surface, EGL_WIDTH, &surfaceSize.x);
     eglQuerySurface(display, surface, EGL_HEIGHT, &surfaceSize.y);
-	log::info("INITIALIZED: width = %d, height = %d", surfaceSize.x, surfaceSize.y);
 }
