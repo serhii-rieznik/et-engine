@@ -108,7 +108,7 @@ RenderContextPrivate::RenderContextPrivate(RenderContext* rc)
     };
 
 	const EGLint contextAttribs[] = {
-		EGL_CONTEXT_CLIENT_VERSION, 2,
+		EGL_CONTEXT_CLIENT_VERSION, 3,
 		EGL_NONE
 	};
 

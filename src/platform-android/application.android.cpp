@@ -111,17 +111,17 @@ void handleCommand(android_app* app, int32_t cmd)
 		THIS_CASE(APP_CMD_STOP)
 				  
 		default:
-			log::info("WARNING!!! handleCommand: ANOTHER COMMAND (%d)", cmd);
+			log::error("Unhandled command: %d", cmd);
     }
 }
 
 PointerInputInfo pointerInfoFromEvent(AInputEvent* event, int index, const vec2& contextSize)
 {
-	int32_t pid = AMotionEvent_getPointerId(event, index);
-	
+	int32_t pid = 1 + AMotionEvent_getPointerId(event, index);
+		
 	vec2 pos = floorv(vec2(AMotionEvent_getX(event, index), AMotionEvent_getY(event, index)));
 	vec2 normalizedPos = vec2(2.0f, -2.0f) * pos / contextSize - vec2(1.0f, -1.0f);
-
+	
 	return PointerInputInfo(PointerType_General, pos, normalizedPos, vec2(0.0f), pid,
 		queryContiniousTimeInSeconds(), PointerOrigin_Touchscreen);
 }
