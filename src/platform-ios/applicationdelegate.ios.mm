@@ -18,6 +18,8 @@
 #include <et/app/application.h>
 #include <et/app/applicationnotifier.h>
 #include <et/threading/threading.h>
+#include <et/threading/mutex.h>
+#include <et/platform-apple/objc.h>
 #include <et/platform-ios/applicationdelegate.h>
 #include <et/platform-ios/openglviewcontroller.h>
 
@@ -26,10 +28,13 @@ using namespace et;
 @interface etApplicationDelegate()
 {
 	et::ApplicationNotifier _notifier;
+	et::Mutex _firstRenderLock;
+	BOOL _shouldUnlockRenderLock;
 	
 	UIWindow* _window;
 	NSThread* _renderThread;
 	CADisplayLink* _displayLink;
+	
 }
 
 @end
@@ -54,6 +59,9 @@ extern etOpenGLViewController* sharedOpenGLViewController;
 		[_window setRootViewController:sharedOpenGLViewController];
 		[_window makeKeyAndVisible];
 	}
+
+	_shouldUnlockRenderLock = YES;
+	_firstRenderLock.lock();
 	
     return YES;
 }
@@ -104,6 +112,15 @@ extern etOpenGLViewController* sharedOpenGLViewController;
 			[sharedOpenGLViewController beginRender];
 			_notifier.notifyIdle();
 			[sharedOpenGLViewController endRender];
+		}
+		
+		if (_shouldUnlockRenderLock)
+		{
+			dispatch_async(dispatch_get_main_queue(), ^
+			{
+				_firstRenderLock.unlock();
+				_shouldUnlockRenderLock= NO;
+			});
 		}
 	}
 }

@@ -21,7 +21,8 @@ namespace et
 
 using namespace et;
 
-Mutex::Mutex() : _private(new MutexPrivate)
+Mutex::Mutex() :
+	_private(new MutexPrivate)
 {
 	pthread_mutexattr_t attrib = { };
 	pthread_mutexattr_init(&attrib);

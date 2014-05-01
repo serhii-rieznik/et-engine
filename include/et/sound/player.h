@@ -52,8 +52,7 @@ namespace et
 			void init();
 			void linkTrack(Track::Pointer);
 			
-			void onVolumeUpdated();
-			void setVolume(float);
+			void setActualVolume(float);
             
 			void handleProcessedBuffers();
 			void handleProcessedSamples();

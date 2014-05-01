@@ -53,7 +53,7 @@ Player::~Player()
 
 void Player::init()
 {
-	ET_CONNECT_EVENT(_volumeAnimator.updated, Player::onVolumeUpdated)
+	_volumeAnimator.updated.connect([this]() { this->setActualVolume(_volumeAnimator.value()); });
 
 	alGenSources(1, &_private->source);
     checkOpenALError("alGenSources");
@@ -61,7 +61,7 @@ void Player::init()
 	alSourcef(_private->source, AL_PITCH, 1.0f);
     checkOpenALError("alSourcef(..., AL_PITCH, ...)");
 
-	setVolume(1.0f);
+	setActualVolume(1.0f);
 	
 	vec3 nullVector;
 	alSourcefv(_private->source, AL_POSITION, nullVector.data());
@@ -165,11 +165,10 @@ void Player::linkTrack(Track::Pointer track)
 
 void Player::setVolume(float value, float duration)
 {
-	_volumeAnimator.cancelUpdates();
-	
 	if (duration == 0.0f)
 	{
-		setVolume(value);
+		_volumeAnimator.cancelUpdates();
+		setActualVolume(value);
 	}
 	else
 	{
@@ -258,14 +257,10 @@ void Player::handleProcessedBuffers()
 	}
 }
 
-void Player::onVolumeUpdated()
-{
-	setVolume(_volume);
-}
 
-void Player::setVolume(float v)
+void Player::setActualVolume(float v)
 {
-	_volume = etMax(0.0f, etMin(1.0f, v));
+	_volume = clamp(v, 0.0f, 1.0f);	
 	alSourcef(_private->source, AL_GAIN, _volume);
 	checkOpenALError("alSourcei(.., AL_GAIN, ...)");
 }
