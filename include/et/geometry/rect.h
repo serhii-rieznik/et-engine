@@ -40,7 +40,13 @@ namespace et
 		const T& operator [](int i) const
 			{ return c[i]; }
 
-		const vector2<T>& origin() const 
+		T& operator [](size_t i)
+			{ return c[i]; }
+		
+		const T& operator [](size_t i) const
+			{ return c[i]; }
+		
+		const vector2<T>& origin() const
 			{ return *(reinterpret_cast<const vector2<T>*>(c)); }
 
 		const vector2<T>& size() const 

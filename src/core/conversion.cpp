@@ -187,6 +187,16 @@ ArrayValue et::vec4ToArray(const vec4& v)
 	return result;
 }
 
+ArrayValue et::rectToArray(const rect& v)
+{
+	ArrayValue result;
+	result->content.push_back(FloatValue(v.left));
+	result->content.push_back(FloatValue(v.top));
+	result->content.push_back(FloatValue(v.width));
+	result->content.push_back(FloatValue(v.height));
+	return result;
+}
+
 vec2 et::arrayToVec2(ArrayValue a)
 {
 	vec2 result;
@@ -222,6 +232,23 @@ vec3 et::arrayToVec3(ArrayValue a)
 vec4 et::arrayToVec4(ArrayValue a)
 {
 	vec4 result;
+	size_t index = 0;
+	for (auto v : a->content)
+	{
+		if (v->valueClass() == ValueClass_Float)
+			result[index++] = FloatValue(v)->content;
+		else if (v->valueClass() == ValueClass_Integer)
+			result[index++] = static_cast<float>(IntegerValue(v)->content);
+		
+		if (index >= 4) break;
+	}
+	return result;
+}
+
+
+rect et::arrayToRect(ArrayValue a)
+{
+	rect result;
 	size_t index = 0;
 	for (auto v : a->content)
 	{

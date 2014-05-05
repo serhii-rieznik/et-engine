@@ -14,6 +14,7 @@
 #include <et/imaging/pngloader.h>
 #include <et/imaging/imageoperations.h>
 #include <et/gui/textureatlaswriter.h>
+#include <et-ext/json/json.h>
 
 using namespace et;
 using namespace et::gui;
@@ -135,8 +136,9 @@ bool TextureAtlasWriter::placeImage(TextureDescription::Pointer image, TextureAt
 void TextureAtlasWriter::writeToFile(const std::string& fileName, const char* textureNamePattern)
 {
 	std::string path = addTrailingSlash(getFilePath(fileName));
-	std::ofstream descFile(fileName.c_str());
-
+	ArrayValue textures;
+	ArrayValue images;
+	
 	int textureIndex = 0;
 	for (TextureAtlasItemList::iterator i = _items.begin(), e = _items.end(); i != e; ++i, ++textureIndex)
 	{
@@ -146,15 +148,18 @@ void TextureAtlasWriter::writeToFile(const std::string& fileName, const char* te
 		char textureName[1024] = { };
 		sprintf(textureName, textureNamePattern, textureIndex);
 		std::string texName = path + std::string(textureName);
-		descFile << "texture: " << textureName << std::endl;
-
+		std::string texId = removeFileExt(textureName);
+		
+		Dictionary texture;
+		texture.setStringForKey("filename", textureName);
+		texture.setStringForKey("id", texId);
+		textures->content.push_back(texture);
+		
 		int index = 0;
 		for (ImageItemList::iterator ii = i->images.begin(), ie = i->images.end(); ii != ie; ++ii, ++index)
 		{
 			TextureDescription image;
 			png::loadFromFile(ii->image->origin(), image, true);
-
-			vec2i iOrigin(static_cast<int>(ii->place.origin.x), static_cast<int>(ii->place.origin.y));
 
 			std::string sIndex = intToStr(index);
 			
@@ -196,12 +201,14 @@ void TextureAtlasWriter::writeToFile(const std::string& fileName, const char* te
 					}
 				}
 			}
-
-			descFile << "image: { name: \"" << name << "\" "
-				"texture: \"" << textureName << "\"" << " "
-				"rect: \"" << iOrigin << ";" << image.size << "\" "
-				"offset: \""  << offset <<  "\" }" << std::endl;
-
+			
+			Dictionary imageDictionary;
+			imageDictionary.setStringForKey("name", name);
+			imageDictionary.setStringForKey("texture", texId);
+			imageDictionary.setArrayForKey("rect", rectToArray(ii->place.rectangle()));
+			imageDictionary.setArrayForKey("offset", vec4ToArray(offset));
+			images->content.push_back(imageDictionary);
+			
 			int components = 0;
 			switch (image.format)
 			{
@@ -221,13 +228,22 @@ void TextureAtlasWriter::writeToFile(const std::string& fileName, const char* te
 
 			if (components)
 			{
-				ImageOperations::transfer(image.data, image.size, components,
-					data, i->texture->size, 4, iOrigin);
+				ImageOperations::transfer(image.data, image.size, components, data, i->texture->size, 4,
+					vec2i(static_cast<int>(ii->place.origin.x), static_cast<int>(ii->place.origin.y)));
 			}
 		}
 
 		ImageWriter::writeImageToFile(texName, data, i->texture->size, 4, 8, ImageFormat_PNG, true);
 	}
+	
+	Dictionary output;
+	output.setArrayForKey("textures", textures);
+	output.setArrayForKey("images", images);
+	
+	std::ofstream outFile(fileName.c_str());
+	outFile << json::serialize(output, true);
+	outFile.flush();
+	outFile.close();
 }
 
 

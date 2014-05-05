@@ -7,15 +7,15 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		A53A632C1918144E00F7D910 /* log.apple.mm in Sources */ = {isa = PBXBuildFile; fileRef = A53A632B1918144E00F7D910 /* log.apple.mm */; };
+		A53A63301918146F00F7D910 /* json.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A53A632F1918146F00F7D910 /* json.cpp */; };
 		A5B5ABF318A586380073873B /* atlas.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5B5ABF218A586380073873B /* atlas.cpp */; };
 		A5B5ABF618A587770073873B /* atomiccounter.unix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5B5ABF518A587770073873B /* atomiccounter.unix.cpp */; };
-		A5B5ABF818A587830073873B /* log.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5B5ABF718A587830073873B /* log.cpp */; };
 		A5B5ABFA18A5879B0073873B /* tools.apple.mm in Sources */ = {isa = PBXBuildFile; fileRef = A5B5ABF918A5879B0073873B /* tools.apple.mm */; };
 		A5B5ABFC18A587AC0073873B /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A5B5ABFB18A587AC0073873B /* Foundation.framework */; };
 		A5B5ABFE18A587B20073873B /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A5B5ABFD18A587B20073873B /* AppKit.framework */; };
 		A5B5AC0018A587BF0073873B /* textureatlaswriter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5B5ABFF18A587BF0073873B /* textureatlaswriter.cpp */; };
 		A5B5AC0218A587CD0073873B /* imagewriter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5B5AC0118A587CD0073873B /* imagewriter.cpp */; };
-		A5B5AC0418A587EA0073873B /* libpng.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A5B5AC0318A587EA0073873B /* libpng.a */; };
 		A5B5AC0618A588160073873B /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = A5B5AC0518A588160073873B /* libz.dylib */; };
 		A5B5AC0818A588210073873B /* pngloader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5B5AC0718A588210073873B /* pngloader.cpp */; };
 		A5B5AC0A18A5887B0073873B /* stream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5B5AC0918A5887B0073873B /* stream.cpp */; };
@@ -37,16 +37,16 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		A53A632B1918144E00F7D910 /* log.apple.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = log.apple.mm; path = "../../src/platform-apple/log.apple.mm"; sourceTree = "<group>"; };
+		A53A632F1918146F00F7D910 /* json.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = json.cpp; sourceTree = "<group>"; };
 		A5B5ABE618A586230073873B /* atlas */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = atlas; sourceTree = BUILT_PRODUCTS_DIR; };
 		A5B5ABF218A586380073873B /* atlas.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = atlas.cpp; sourceTree = "<group>"; };
 		A5B5ABF518A587770073873B /* atomiccounter.unix.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = atomiccounter.unix.cpp; path = "../../src/platform-unix/atomiccounter.unix.cpp"; sourceTree = "<group>"; };
-		A5B5ABF718A587830073873B /* log.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = log.cpp; path = ../../src/core/log.cpp; sourceTree = "<group>"; };
 		A5B5ABF918A5879B0073873B /* tools.apple.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = tools.apple.mm; path = "../../src/platform-apple/tools.apple.mm"; sourceTree = "<group>"; };
 		A5B5ABFB18A587AC0073873B /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		A5B5ABFD18A587B20073873B /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
 		A5B5ABFF18A587BF0073873B /* textureatlaswriter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = textureatlaswriter.cpp; path = ../../src/gui/textureatlaswriter.cpp; sourceTree = "<group>"; };
 		A5B5AC0118A587CD0073873B /* imagewriter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = imagewriter.cpp; path = ../../src/imaging/imagewriter.cpp; sourceTree = "<group>"; };
-		A5B5AC0318A587EA0073873B /* libpng.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libpng.a; path = ../../lib/osx/libpng.a; sourceTree = "<group>"; };
 		A5B5AC0518A588160073873B /* libz.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.dylib; path = usr/lib/libz.dylib; sourceTree = SDKROOT; };
 		A5B5AC0718A588210073873B /* pngloader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = pngloader.cpp; path = ../../src/imaging/pngloader.cpp; sourceTree = "<group>"; };
 		A5B5AC0918A5887B0073873B /* stream.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = stream.cpp; path = ../../src/core/stream.cpp; sourceTree = "<group>"; };
@@ -61,7 +61,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				A5B5AC0618A588160073873B /* libz.dylib in Frameworks */,
-				A5B5AC0418A587EA0073873B /* libpng.a in Frameworks */,
 				A5B5ABFE18A587B20073873B /* AppKit.framework in Frameworks */,
 				A5B5ABFC18A587AC0073873B /* Foundation.framework in Frameworks */,
 			);
@@ -70,15 +69,32 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		A5B5ABDD18A586230073873B = {
+		A53A632A1918118E00F7D910 /* libs */ = {
 			isa = PBXGroup;
 			children = (
 				A5B5AC0518A588160073873B /* libz.dylib */,
-				A5B5AC0318A587EA0073873B /* libpng.a */,
 				A5B5ABFD18A587B20073873B /* AppKit.framework */,
 				A5B5ABFB18A587AC0073873B /* Foundation.framework */,
+			);
+			name = libs;
+			sourceTree = "<group>";
+		};
+		A53A632E1918146F00F7D910 /* engine-ext */ = {
+			isa = PBXGroup;
+			children = (
+				A53A632F1918146F00F7D910 /* json.cpp */,
+			);
+			name = "engine-ext";
+			path = "../../../engine-ext/src/json";
+			sourceTree = "<group>";
+		};
+		A5B5ABDD18A586230073873B = {
+			isa = PBXGroup;
+			children = (
 				A5B5ABF218A586380073873B /* atlas.cpp */,
+				A53A632E1918146F00F7D910 /* engine-ext */,
 				A5B5ABF418A5863A0073873B /* engine */,
+				A53A632A1918118E00F7D910 /* libs */,
 				A5B5ABE718A586230073873B /* Products */,
 			);
 			sourceTree = "<group>";
@@ -94,6 +110,7 @@
 		A5B5ABF418A5863A0073873B /* engine */ = {
 			isa = PBXGroup;
 			children = (
+				A53A632B1918144E00F7D910 /* log.apple.mm */,
 				A5B5AC0F18A588A00073873B /* imageoperations.cpp */,
 				A5B5AC0D18A588950073873B /* conversion.cpp */,
 				A5B5AC0B18A5888A0073873B /* tools.cpp */,
@@ -102,7 +119,6 @@
 				A5B5AC0118A587CD0073873B /* imagewriter.cpp */,
 				A5B5ABFF18A587BF0073873B /* textureatlaswriter.cpp */,
 				A5B5ABF518A587770073873B /* atomiccounter.unix.cpp */,
-				A5B5ABF718A587830073873B /* log.cpp */,
 				A5B5ABF918A5879B0073873B /* tools.apple.mm */,
 			);
 			name = engine;
@@ -161,7 +177,6 @@
 			files = (
 				A5B5AC0218A587CD0073873B /* imagewriter.cpp in Sources */,
 				A5B5AC0018A587BF0073873B /* textureatlaswriter.cpp in Sources */,
-				A5B5ABF818A587830073873B /* log.cpp in Sources */,
 				A5B5ABF618A587770073873B /* atomiccounter.unix.cpp in Sources */,
 				A5B5AC1018A588A00073873B /* imageoperations.cpp in Sources */,
 				A5B5AC0818A588210073873B /* pngloader.cpp in Sources */,
@@ -169,7 +184,9 @@
 				A5B5ABFA18A5879B0073873B /* tools.apple.mm in Sources */,
 				A5B5AC0A18A5887B0073873B /* stream.cpp in Sources */,
 				A5B5AC0C18A5888A0073873B /* tools.cpp in Sources */,
+				A53A632C1918144E00F7D910 /* log.apple.mm in Sources */,
 				A5B5AC0E18A588950073873B /* conversion.cpp in Sources */,
+				A53A63301918146F00F7D910 /* json.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -250,13 +267,18 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				HEADER_SEARCH_PATHS = (
-					"\"/Applications/Xcode51-Beta4.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include\"",
 					"$(inherited)",
 					"\"$PROJECT_DIR/../../include/\"",
+					"\"$PROJECT_DIR/../../../engine-ext/include/\"",
 				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$PROJECT_DIR/../../lib/osx\"",
+					"\"$PROJECT_DIR/../../../engine-ext/lib/osx\"",
+				);
+				OTHER_LDFLAGS = (
+					"-lpng",
+					"-ljansson",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -266,13 +288,18 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				HEADER_SEARCH_PATHS = (
-					"\"/Applications/Xcode51-Beta4.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include\"",
 					"$(inherited)",
 					"\"$PROJECT_DIR/../../include/\"",
+					"\"$PROJECT_DIR/../../../engine-ext/include/\"",
 				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$PROJECT_DIR/../../lib/osx\"",
+					"\"$PROJECT_DIR/../../../engine-ext/lib/osx\"",
+				);
+				OTHER_LDFLAGS = (
+					"-lpng",
+					"-ljansson",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};

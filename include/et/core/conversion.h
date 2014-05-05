@@ -20,8 +20,10 @@ namespace et
 	ArrayValue vec2ToArray(const vec2&);
 	ArrayValue vec3ToArray(const vec3&);
 	ArrayValue vec4ToArray(const vec4&);
+	ArrayValue rectToArray(const rect&);
 	
 	vec2 arrayToVec2(ArrayValue);
 	vec3 arrayToVec3(ArrayValue);
 	vec4 arrayToVec4(ArrayValue);
+	rect arrayToRect(ArrayValue);
 }
