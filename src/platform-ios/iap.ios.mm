@@ -23,7 +23,18 @@ using namespace et;
 
 - (BOOL)purchaseProduct:(const std::string&)identifier;
 
+- (void)validateTransaction:(SKPaymentTransaction*)transaction;
+
+- (BOOL)parseValidationResponseFromBundle:(NSDictionary*)response forTransaction:(SKPaymentTransaction*)transaction;
+- (BOOL)parseValidationResponseFromTransaction:(NSDictionary*)response forTransaction:(SKPaymentTransaction*)transaction;
+
+@property (nonatomic, assign) BOOL shouldVerifyReceipts;
+@property (nonatomic, strong) NSString* verificationServer;
+
 @end
+
+const std::string PurchasesManager::defaultVerificationServer = "https://buy.itunes.apple.com/verifyReceipt";
+const std::string PurchasesManager::defaultVerificationSandboxServer = "https://sandbox.itunes.apple.com/verifyReceipt";
 
 PurchasesManager::PurchasesManager()
 {
@@ -33,6 +44,12 @@ PurchasesManager::PurchasesManager()
 bool PurchasesManager::purchasesEnabled()
 {
 	return [SKPaymentQueue canMakePayments];
+}
+
+void PurchasesManager::setShouldVerifyReceipts(bool verify, const std::string& server)
+{
+	[[SharedPurchasesManager sharedInstance] setVerificationServer:[NSString stringWithUTF8String:server.c_str()]];
+	[[SharedPurchasesManager sharedInstance] setShouldVerifyReceipts:verify ? YES : NO];
 }
 
 void PurchasesManager::checkAvailableProducts(const ProductsSet& products)
@@ -59,6 +76,9 @@ void PurchasesManager::restorePurchases()
  * Obj-C implementation
  */
 @implementation SharedPurchasesManager
+
+@synthesize shouldVerifyReceipts = _shouldVerifyReceipts;
+@synthesize verificationServer = _verificationServer;
 
 + (instancetype)sharedInstance
 {
@@ -146,7 +166,145 @@ void PurchasesManager::restorePurchases()
 
 - (void)requestDidFinish:(SKRequest*)request
 {
+}
+
+- (BOOL)parseValidationResponseFromTransaction:(NSDictionary*)response forTransaction:(SKPaymentTransaction*)transaction
+{
+	/*
+	{
+		receipt =     {
+			bid = "com.cloudgears.kubik";
+			bvrs = "1.0";
+			"item_id" = 871095982;
+			"original_purchase_date" = "2014-05-05 16:11:01 Etc/GMT";
+			"original_purchase_date_ms" = 1399306261316;
+			"original_purchase_date_pst" = "2014-05-05 09:11:01 America/Los_Angeles";
+			"original_transaction_id" = 1000000109714902;
+			"product_id" = "com.cloudgears.kubik.coins.large";
+			"purchase_date" = "2014-05-05 16:11:01 Etc/GMT";
+			"purchase_date_ms" = 1399306261316;
+			"purchase_date_pst" = "2014-05-05 09:11:01 America/Los_Angeles";
+			quantity = 1;
+			"transaction_id" = 1000000109714902;
+			"unique_identifier" = fa3ec72a834764cd268ab65dad892ab9e36fd51b;
+			"unique_vendor_identifier" = "911744A8-9229-4C27-8E0F-DE2FA414FE7C";
+		};
+		status = 0;
+	}
+	*/
 	
+	NSNumber* status = [response objectForKey:@"status"];
+	if ((status == nil) || ([status integerValue] != 0))
+		return NO;
+	
+	NSDictionary* receipt = [response objectForKey:@"receipt"];
+	if (receipt == nil)
+		return NO;
+	
+	NSString* bundleId = [receipt objectForKey:@"bid"];
+	if (![bundleId isEqualToString:[[NSBundle mainBundle] bundleIdentifier]])
+		return NO;
+	
+	NSString* productId = [receipt objectForKey:@"product_id"];
+	if (![productId isEqualToString:transaction.payment.productIdentifier])
+		return NO;
+	
+	NSString* transactionId = [receipt objectForKey:@"transaction_id"];
+	if (![transactionId isEqualToString:transaction.transactionIdentifier])
+		return NO;
+	
+	return YES;
+}
+
+- (BOOL)parseValidationResponseFromBundle:(NSDictionary*)response forTransaction:(SKPaymentTransaction*)transaction
+{
+	NSNumber* status = [response objectForKey:@"status"];
+	if ((status == nil) || ([status integerValue] != 0))
+		return NO;
+	
+	NSDictionary* receipt = [response objectForKey:@"receipt"];
+	if (receipt == nil)
+		return NO;
+	
+	NSString* bundleId = [receipt objectForKey:@"bundle_id"];
+	if (![bundleId isEqualToString:[[NSBundle mainBundle] bundleIdentifier]])
+		return NO;
+	
+	NSArray* iaps = [receipt objectForKey:@"in_app"];
+	if (iaps == nil)
+		return NO;
+	
+	for (NSDictionary* iap in iaps)
+	{
+		NSString* productId = [iap objectForKey:@"product_id"];
+		if ([productId isEqualToString:transaction.payment.productIdentifier])
+		{
+			NSString* transactionId = [iap objectForKey:@"transaction_id"];
+			if ([transactionId isEqualToString:transaction.transactionIdentifier])
+			{
+				return YES;
+			}
+		}
+	}
+	
+	return NO;
+}
+
+- (void)validateTransaction:(SKPaymentTransaction*)transaction
+{
+	BOOL usingBundleReceipt = NO; // [[NSBundle mainBundle] respondsToSelector:@selector(appStoreReceiptURL)];
+	
+	NSData* receipt = usingBundleReceipt ?
+		[NSData dataWithContentsOfURL:[[NSBundle mainBundle] appStoreReceiptURL]] : transaction.transactionReceipt;
+	
+	if (receipt == nil)
+	{
+		PurchasesManager::instance().failedToPurchaseProduct.invokeInMainRunLoop(
+			std::string([transaction.payment.productIdentifier UTF8String]));
+		return;
+	}
+		
+	NSError* error = nil;
+	NSDictionary *requestContents = @{ @"receipt-data" : [receipt base64EncodedStringWithOptions:0] };
+	NSData* requestData = [NSJSONSerialization dataWithJSONObject:requestContents options:0 error:&error];
+	
+	NSURL* url = [NSURL URLWithString:_verificationServer];
+	NSMutableURLRequest* request = [NSMutableURLRequest requestWithURL:url];
+	[request setHTTPMethod:@"POST"];
+	[request setHTTPBody:requestData];
+	
+	NSOperationQueue* queue = [[NSOperationQueue alloc] init];
+	[NSURLConnection sendAsynchronousRequest:request queue:queue
+		completionHandler:^(NSURLResponse* response, NSData* data, NSError* connectionError)
+	{
+		std::string productId([transaction.payment.productIdentifier UTF8String]);
+		
+		if (connectionError == nil)
+		{
+			NSError* error = nil;
+			NSDictionary* values = [NSJSONSerialization JSONObjectWithData:data options:0 error:&error];
+			if ((values != nil) && (error == nil))
+			{
+				BOOL validationPassed = usingBundleReceipt ?
+					[self parseValidationResponseFromBundle:values forTransaction:transaction] :
+					[self parseValidationResponseFromTransaction:values forTransaction:transaction];
+				
+				if (validationPassed)
+					PurchasesManager::instance().productPurchased.invokeInMainRunLoop(productId);
+				else
+					PurchasesManager::instance().failedToPurchaseProduct.invokeInMainRunLoop(productId);
+			}
+			else
+			{
+				PurchasesManager::instance().failedToPurchaseProduct.invokeInMainRunLoop(productId);
+				return;
+			}
+		}
+		else
+		{
+			PurchasesManager::instance().failedToPurchaseProduct.invokeInMainRunLoop(productId);
+		}
+	}];
 }
 
 /*
@@ -162,8 +320,16 @@ void PurchasesManager::restorePurchases()
 		
 		if (state == SKPaymentTransactionStatePurchased)
 		{
-			std::string productId([transaction.payment.productIdentifier UTF8String]);
-			PurchasesManager::instance().productPurchased.invokeInMainRunLoop(productId);
+			if (_shouldVerifyReceipts)
+			{
+				ET_ASSERT(_verificationServer != nil);
+				[self validateTransaction:transaction];
+			}
+			else
+			{
+				std::string productId([transaction.payment.productIdentifier UTF8String]);
+				PurchasesManager::instance().productPurchased.invokeInMainRunLoop(productId);
+			}
 		}
 		else if (state == SKPaymentTransactionStateRestored)
 		{

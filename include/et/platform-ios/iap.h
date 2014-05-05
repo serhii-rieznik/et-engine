@@ -33,8 +33,13 @@ namespace et
         typedef std::set<std::string> ProductsSet;
 		
 		static bool purchasesEnabled();
+		
+		static const std::string defaultVerificationServer;
+		static const std::string defaultVerificationSandboxServer;
         
     public:
+		void setShouldVerifyReceipts(bool, const std::string&);
+		
         void checkAvailableProducts(const ProductsSet& products);
 		void restorePurchases();
 		
