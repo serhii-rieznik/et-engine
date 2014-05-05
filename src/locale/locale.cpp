@@ -33,8 +33,11 @@ bool Locale::loadLanguageFile(const std::string& fileName)
 
 bool Locale::loadCurrentLanguageFile(const std::string& rootFolder, const std::string& extension)
 {
+	std::string basePath = addTrailingSlash(rootFolder);
 	std::string lang = locale::localeLanguage(_locale);
-	std::string fileName = addTrailingSlash(rootFolder) + lang + extension;
+	std::string subLang = locale::localeSubLanguage(_locale);
+	
+	std::string fileName = basePath + lang + "-" + subLang + extension;
 	if (fileExists(fileName))
 	{
 		parseLanguageFile(fileName);
@@ -42,8 +45,7 @@ bool Locale::loadCurrentLanguageFile(const std::string& rootFolder, const std::s
 	}
 	else
 	{
-		std::string subLang = locale::localeSubLanguage(_locale);
-		fileName = addTrailingSlash(rootFolder) + subLang + extension;
+		fileName = basePath + lang + extension;
 		if (fileExists(fileName))
 		{
 			parseLanguageFile(fileName);
@@ -231,20 +233,20 @@ std::string et::localized(const std::string& key)
 	return Locale::instance().localizedString(key); 
 }
 
-size_t locale::localeToIdentifier(const std::string& mbcs)
+size_t locale::localeToIdentifier(const std::string& localeId)
 {
-	lowercase(mbcs);
+	auto lowCase = lowercase(localeId);
 	
 	int32_t result = 0;
 	
-	if (mbcs.size() > 0)
-		result |= mbcs[0];
+	if (lowCase.size() > 0)
+		result |= lowCase[0];
 	
-	if (mbcs.size() > 1)
-		result |= mbcs[1] << 8;
+	if (lowCase.size() > 1)
+		result |= lowCase[1] << 8;
 	
-	if ((mbcs.size() >= 5) && ((mbcs[2] == '-') || (mbcs[2] == '_')))
-		result |= (mbcs[3] << 16) | (mbcs[4] << 24);
+	if ((lowCase.size() >= 5) && ((lowCase[2] == '-') || (lowCase[2] == '_')))
+		result |= (lowCase[3] << 16) | (lowCase[4] << 24);
 	else
 		result |= (result & 0xffff) << 16;
 	
