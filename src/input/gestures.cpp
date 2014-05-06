@@ -12,7 +12,7 @@
 using namespace et;
 
 const float GesturesRecognizer::defaultClickTemporalThreshold = 0.25f;
-const float GesturesRecognizer::defaultClickSpatialTreshold = 0.015f;
+const float GesturesRecognizer::defaultClickSpatialTreshold = std::sqrt(50.0f);
 const float GesturesRecognizer::defaultHoldTemporalThreshold = 1.0f;
 
 GesturesRecognizer::GesturesRecognizer(bool automaticMode) : InputHandler(automaticMode),
@@ -135,14 +135,14 @@ void GesturesRecognizer::onPointerPressed(et::PointerInputInfo pi)
 	pointerPressed.invoke(pi);
 
 	_pointers[pi.id] = PointersInputDelta(pi, pi);
+	
 	pressed.invoke(pi.normalizedPos, pi.type);
 	
 	if (_pointers.size() == 1)
 	{
 		if (_shouldPerformClick)
 		{
-			float dp = (pi.normalizedPos - _singlePointer.normalizedPos).dotSelf();
-			if (dp <= sqr(_clickSpatialThreshold))
+			if ((pi.pos - _singlePointer.pos).dotSelf() <= sqr(_clickSpatialThreshold))
 			{
 				_shouldPerformClick = false;
 				_shouldPerformDoubleClick = true;
@@ -184,7 +184,7 @@ void GesturesRecognizer::onPointerMoved(et::PointerInputInfo pi)
 		
 		if (hasPressedPointer && (pi.id == _singlePointer.id))
 		{
-			float len = (pi.normalizedPos - _singlePointer.normalizedPos).dotSelf();
+			float len = (pi.pos - _singlePointer.pos).dotSelf();
 			shouldPerformMovement = (len >= sqr(_clickSpatialThreshold));
 		}
 		
