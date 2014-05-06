@@ -7,7 +7,7 @@
 
 #include <et/app/application.h>
 #include <et/camera/camera.h>
-#include <et/rendering/rendering.h>
+#include <et/rendering/rendercontext.h>
 #include <et/apiobjects/program.h>
 
 using namespace et;

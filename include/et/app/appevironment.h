@@ -12,38 +12,30 @@
 namespace et
 {
 	struct ApplicationIdentifier;
-	
-	class AppEnvironment
+		
+	class Environment
 	{
 	public: 
-		AppEnvironment();
-
+		Environment();
+				
+		const std::string& applicationDocumentsFolder() const
+			{ ET_ASSERT(!_documentsFolder.empty()); return _documentsFolder; }
+		
 		const std::string& applicationPath() const
-			{ return _appPath; }
-
+			{ ET_ASSERT(!_appPath.empty()); return _appPath; }
+		
 		const std::string& applicationInputDataFolder() const
-			{ return _dataFolder; }
-
+			{ ET_ASSERT(!_dataFolder.empty()); return _dataFolder; }
+		
 		const std::string& applicationPackagePath() const
-			{ return _appPackagePath; }
-
-		void addSearchPath(const std::string& path);
-		void addRelativeSearchPath(const std::string& path);
+			{ ET_ASSERT(!_appPackagePath.empty()); return _appPackagePath; }
 		
-		std::string findFile(const std::string& name) const;
-		std::string findFolder(const std::string& name) const;
-		std::string resolveScalableFileName(const std::string& name, size_t scale) const;
-
-		bool expandFileName(std::string& name) const;
-		
-		const std::string& applicationDocumentsFolder() const;
 		void updateDocumentsFolder(const ApplicationIdentifier& i);
-
+		
 	private:
 		std::string _appPath;
 		std::string _appPackagePath;
 		std::string _dataFolder;
 		std::string _documentsFolder;
-		StringList _searchPath;
 	};
 }

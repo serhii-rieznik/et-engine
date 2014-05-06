@@ -61,16 +61,6 @@ void Application::loaded()
 	enterRunLoop();
 }
 
-void Application::enterRunLoop()
-{
-	_running = true;
-	
-	delegate()->applicationDidLoad(_renderContext);
-	setActive(true);
-	
-	_renderContext->init();
-}
-
 void Application::quit(int)
 {
 	[[NSApplication sharedApplication] terminate:nil];

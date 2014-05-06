@@ -97,10 +97,7 @@ Element::Pointer Element::childWithName(const std::string& name, ElementType ofT
 	}
 
 	if (assertFail)
-	{
-		log::error("Unable to find child with name: %s", name.c_str());
-		ET_ASSERT("Unable to find child" && 0);
-	}
+		ET_FAIL_FMT("Unable to find child: %s", name.c_str());
 
 	return Element::Pointer();
 }

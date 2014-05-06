@@ -131,7 +131,7 @@ StringList ProgramFactory::loadProgramSources(const std::string& file, std::stri
 {
 	StringList sources;
 	
-	std::string filename = application().environment().findFile(file);
+	std::string filename = application().resolveFileName(file);
 	if (!fileExists(filename))
 	{
 		log::error("Unable to find file: %s", file.c_str());
@@ -178,10 +178,10 @@ StringList ProgramFactory::loadProgramSources(const std::string& file, std::stri
 	std::string fName = programFolder + vertex_source;
 	
 	if (!fileExists(fName))
-		fName = application().environment().findFile(fName);
+		fName = application().resolveFileName(fName);
 	
 	if (!fileExists(fName))
-		fName = application().environment().findFile(vertex_source);
+		fName = application().resolveFileName(vertex_source);
 	
 	if (fileExists(fName))
 	{
@@ -194,10 +194,10 @@ StringList ProgramFactory::loadProgramSources(const std::string& file, std::stri
 	{
 		fName = programFolder + geometry_source;
 		if (!fileExists(fName))
-			fName = application().environment().findFile(fName);
+			fName = application().resolveFileName(fName);
 		
 		if (!fileExists(fName))
-			fName = application().environment().findFile(geometry_source);
+			fName = application().resolveFileName(geometry_source);
 		
 		if (fileExists(fName))
 		{
@@ -209,10 +209,10 @@ StringList ProgramFactory::loadProgramSources(const std::string& file, std::stri
 	fName = programFolder + fragment_source;
 	
 	if (!fileExists(fName))
-		fName = application().environment().findFile(fName);
+		fName = application().resolveFileName(fName);
 	
 	if (!fileExists(fName))
-		fName = application().environment().findFile(fragment_source);
+		fName = application().resolveFileName(fragment_source);
 	
 	if (fileExists(fName))
 	{
@@ -282,7 +282,7 @@ Program::Pointer ProgramFactory::loadProgram(const std::string& file, ObjectsCac
 
 Program::Pointer ProgramFactory::loadProgram(const std::string& file, ObjectsCache& cache, const std::string& defines)
 {
-	return loadProgram(application().environment().findFile(file), cache, parseDefinesString(defines));
+	return loadProgram(application().resolveFileName(file), cache, parseDefinesString(defines));
 }
 
 Program::Pointer ProgramFactory::genProgram(const std::string& name, const std::string& vertexshader,

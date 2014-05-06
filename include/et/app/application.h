@@ -13,7 +13,7 @@
 #include <et/app/appevironment.h>
 #include <et/app/applicationdelegate.h>
 #include <et/app/backgroundthread.h>
-#include <et/rendering/rendercontext.h>
+#include <et/app/pathresolver.h>
 
 namespace et
 {
@@ -30,6 +30,7 @@ namespace et
 
 	public: 
 		int run(int argc, char* argv[]);
+		
 		void quit(int exitCode = 0);
 
 		IApplicationDelegate* delegate();
@@ -44,7 +45,7 @@ namespace et
 		size_t renderingContextHandle() const
 			{ return _renderingContextHandle; }
 
-		AppEnvironment& environment()
+		Environment& environment()
 			{ return _env; }
 
 		const ApplicationParameters& parameters() const
@@ -69,6 +70,16 @@ namespace et
 			{ return _suspended; }
 
 		float cpuLoad() const;
+		
+		std::string resolveFileName(const std::string&);
+		std::string resolveFolderName(const std::string&);
+		std::set<std::string> resolveFolderNames(const std::string&);
+		
+		void pushSearchPath(const std::string&);
+		void pushSearchPaths(const std::set<std::string>&);
+		void popSearchPaths(size_t = 1);
+		
+		void setPathResolver(PathResolver::Pointer);
 
 		void setTitle(const std::string& s);
 		void setFrameRateLimit(size_t value);
@@ -101,7 +112,12 @@ namespace et
 		void platformSuspend();
 		void platformResume();
 		
+		void loaded();
 		void terminated();
+		
+		void enterRunLoop();
+		void idle();
+		void updateTimers(float dt);
 		
 	private:
 		friend class ApplicationNotifier;
@@ -109,13 +125,11 @@ namespace et
 		Application();
 		~Application();
 
-		ET_SINGLETON_COPY_DENY(Application)
-
-		void enterRunLoop();
-		void idle();
-		void updateTimers(float dt);
+		Application(const Application&) = delete;
+		Application(Application&&) = delete;
+		Application& operator = (const Application&) = delete;
 		
-		void loaded();
+		friend class et::Singleton<Application>;
 
 	private:
 		static IApplicationDelegate* _delegate;
@@ -123,7 +137,11 @@ namespace et
 		ApplicationParameters _parameters;
 		ApplicationIdentifier _identifier;
 		RenderContext* _renderContext;
-		AppEnvironment _env;
+		
+		Environment _env;
+		StandardPathResolver _standardPathResolver;
+		PathResolver::Pointer _customPathResolver;
+		
 		RunLoop _runLoop;
 		BackgroundThread _backgroundThread;
 

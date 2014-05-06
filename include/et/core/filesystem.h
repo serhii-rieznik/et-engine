@@ -40,6 +40,7 @@ namespace et
 	int64_t getFileDate(const std::string& path);
 	
 	std::string getFilePath(const std::string& name);
+	std::string getFileFolder(const std::string& name);
 	std::string getFileName(const std::string& fullPath);
 	std::string getFileExt(std::string name);
 	

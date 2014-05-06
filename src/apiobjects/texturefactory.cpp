@@ -33,7 +33,17 @@ public:
 	IntrusivePtr<Loader> loader;
 
 	TextureFactoryPrivate(TextureFactory* owner) : 
-		loader(new Loader(owner)) { } 
+		loader(new Loader(owner))
+	{
+		supportedExtensions.push_back("png");
+		supportedExtensions.push_back("pvr");
+		supportedExtensions.push_back("jpg");
+		supportedExtensions.push_back("jpeg");
+		supportedExtensions.push_back("dds");
+		supportedExtensions.push_back("hdr");
+	}
+	
+	StringList supportedExtensions;
 };
 
 TextureFactory::TextureFactory(RenderContext* rc) :
@@ -64,13 +74,24 @@ Texture TextureFactory::loadTexture(const std::string& fileName, ObjectsCache& c
 	
 	CriticalSectionScope lock(_csTextureLoading);
 	
-	std::string file = application().environment().resolveScalableFileName(fileName,
-		renderContext()->screenScaleFactor());
+	auto file = application().resolveFileName(fileName);
 	
 	if (!fileExists(file))
 	{
-		log::error("Unable to find texture file: %s", file.c_str());
-		return Texture();
+		auto fileExt = lowercase(getFileExt(fileName));
+		for (const auto& ext : _private->supportedExtensions)
+		{
+			if (ext == fileExt) continue;
+			
+			file = replaceFileExt(fileName, "." + ext);
+			file = application().resolveFileName(file);
+			
+			if (fileExists(file))
+				break;
+		}
+		
+		if (!fileExists(file))
+			return Texture();
 	}
 	
 	uint64_t cachedFileProperty = 0;
@@ -225,12 +246,12 @@ Texture TextureFactory::loadTexturesToCubemap(const std::string& posx, const std
 {
 	TextureDescription::Pointer layers[6] = 
 	{
-		et::loadTexture(application().environment().resolveScalableFileName(posx, renderContext()->screenScaleFactor())),
-		et::loadTexture(application().environment().resolveScalableFileName(negx, renderContext()->screenScaleFactor())),
-		et::loadTexture(application().environment().resolveScalableFileName(negy, renderContext()->screenScaleFactor())),
-		et::loadTexture(application().environment().resolveScalableFileName(posy, renderContext()->screenScaleFactor())),
-		et::loadTexture(application().environment().resolveScalableFileName(posz, renderContext()->screenScaleFactor())),
-		et::loadTexture(application().environment().resolveScalableFileName(negz, renderContext()->screenScaleFactor()))
+		et::loadTexture(application().resolveFileName(posx)),
+		et::loadTexture(application().resolveFileName(negx)),
+		et::loadTexture(application().resolveFileName(negy)),
+		et::loadTexture(application().resolveFileName(posy)),
+		et::loadTexture(application().resolveFileName(posz)),
+		et::loadTexture(application().resolveFileName(negz))
 	};
 
 	int maxCubemapSize = static_cast<int>(openGLCapabilites().maxCubemapTextureSize());

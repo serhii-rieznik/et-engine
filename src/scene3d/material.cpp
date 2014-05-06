@@ -12,6 +12,7 @@
 #include <et/core/tools.h>
 #include <et/core/cout.h>
 
+#include <et/app/application.h>
 #include <et/rendering/rendercontext.h>
 #include <et/scene3d/material.h>
 
@@ -576,10 +577,15 @@ Texture Material::loadTexture(RenderContext* rc, const std::string& path, const 
 {
 	if (path.empty()) return Texture();
 
-	Texture t;
+	auto paths = application().resolveFolderNames(basePath);
+	application().pushSearchPaths(paths);
+	Texture t = rc->textureFactory().loadTexture(normalizeFilePath(path), cache, async, this);
+	application().popSearchPaths(paths.size());
+	
+	/*
 	if (fileExists(path))
 	{
-		t = rc->textureFactory().loadTexture(normalizeFilePath(path), cache, async, this);
+		t ;
 	}
 	else
 	{
@@ -595,9 +601,7 @@ Texture Material::loadTexture(RenderContext* rc, const std::string& path, const 
 				t = rc->textureFactory().loadTexture(relativePath, cache, async, this);
 		}
 	}
-	
-	if (t.invalid())
-		log::error("Unable to locate texture %s for material %s", path.c_str(), name().c_str());
+	*/
 
 	return t;
 }

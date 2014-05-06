@@ -6,6 +6,7 @@
  */
 
 #include <fstream>
+#include <et/app/application.h>
 #include <et/rendering/rendercontext.h>
 #include <et/scene3d/scene3d.h>
 #include <et/scene3d/serialization.h>
@@ -153,8 +154,9 @@ Scene3dStorage::Pointer Scene::deserializeStorage(std::istream& stream, RenderCo
 				{
 					Material::Pointer m;
 					ET_CONNECT_EVENT(m->loaded, Scene::onMaterialLoaded);
+					
 					m->tag = deserializeInt(stream);
-					m->setOrigin(basePath + getFileName(deserializeString(stream)));
+					m->setOrigin(application().resolveFileName(basePath + getFileName(deserializeString(stream))));
 
 					InputStream mStream(m->origin(), StreamMode_Text);
 					
@@ -239,7 +241,11 @@ void Scene::serialize(const std::string& filename, s3d::StorageFormat fmt)
 bool Scene::deserialize(const std::string& filename, RenderContext* rc, ObjectsCache& tc,
 	ElementFactory* factory)
 {
-	InputStream file(filename, StreamMode_Binary);
+	InputStream file(application().resolveFileName(filename), StreamMode_Binary);
+	
+	if (file.invalid())
+		return false;
+	
 	bool success = deserialize(file.stream(), rc, tc, factory, getFilePath(filename));
 
 	if (!success)

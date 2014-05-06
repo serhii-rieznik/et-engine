@@ -35,10 +35,20 @@ std::string et::loadTextFile(const std::string& fileName)
 
 std::string et::addTrailingSlash(const std::string& path)
 {
-	if (path.empty()) return path;
-
-	std::string::value_type t = *path.rbegin();
-	return ((t == invalidPathDelimiter) || (t == pathDelimiter)) ? path : path + pathDelimiter;
+	if (path.empty() || (path.back() == pathDelimiter))
+	{
+		return path;
+	}
+	else if (path.back() == invalidPathDelimiter)
+	{
+		auto result = path;
+		*result.rbegin() = pathDelimiter;
+		return result;
+	}
+	else
+	{
+		return path + pathDelimiter;
+	}
 }
 
 std::string et::replaceFileExt(const std::string& fileName, const std::string& newExt)
@@ -106,6 +116,12 @@ std::string et::getFilePath(const std::string& name)
 {
 	std::string::size_type p = normalizeFilePath(name).find_last_of(pathDelimiter);
 	return (p == std::string::npos) ? std::string() : name.substr(0, ++p);
+}
+
+std::string et::getFileFolder(const std::string& name)
+{
+	std::string::size_type p = normalizeFilePath(name).find_last_of(pathDelimiter);
+	return (p == std::string::npos) ? std::string() : name.substr(0, p);
 }
 
 std::string et::getFileName(const std::string& fullPath)

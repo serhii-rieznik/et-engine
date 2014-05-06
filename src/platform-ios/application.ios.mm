@@ -8,6 +8,7 @@
 #include <et/app/application.h>
 #include <et/opengl/opengl.h>
 #include <et/platform-ios/applicationdelegate.h>
+#include <et/rendering/rendercontext.h>
 
 #if defined(ET_EMBEDDED_APPLICATION)
 #	include <et/opengl/openglcaps.h>
@@ -95,18 +96,10 @@ void Application::loaded()
 	
 	_renderContext = new RenderContext(renderContextParams, this);
 	_renderingContextHandle = _renderContext->renderingContextHandle();
-	_runLoop.update(_lastQueuedTimeMSec);
-	_renderContext->init();
-    
-    enterRunLoop();
-}
-
-void Application::enterRunLoop()
-{
-	_running = true;
 	
-	delegate()->applicationDidLoad(_renderContext);
-	setActive(true);
+    enterRunLoop();
+	
+	_runLoop.update(_lastQueuedTimeMSec);
 }
 
 void Application::quit(int exitCode)

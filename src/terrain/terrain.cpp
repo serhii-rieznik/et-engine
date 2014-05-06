@@ -486,10 +486,10 @@ void Terrain::loadFromStream(std::istream& stream, const vec2i& dimension, Terra
 
 void Terrain::loadFromRAWFile(const std::string& fileName, const vec2i& dimension, TerrainData::Format format)
 {
-	std::ifstream rawFile(application().environment().findFile(fileName).c_str(), std::ios_base::binary);
-	if (rawFile.fail()) return;
-
-	loadFromStream(rawFile, dimension, format);
+	std::ifstream rawFile(application().resolveFileName(fileName), std::ios_base::binary);
+	
+	if (rawFile.good())
+		loadFromStream(rawFile, dimension, format);
 }
 
 void Terrain::generateBuffer()

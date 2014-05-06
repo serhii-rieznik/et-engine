@@ -5,7 +5,6 @@
  *
  */
 
-#include <sstream>
 #include <iostream>
 
 #include <et/app/application.h>
@@ -81,13 +80,11 @@ ThreadResult OBJLoaderThread::main()
  */
 
 OBJLoader::OBJLoader(RenderContext* rc, const std::string& inFile) : _rc(rc),
-	inputFileName(application().environment().findFile(inFile).c_str()), 
+	inputFileName(application().resolveFileName(inFile).c_str()),
 	inputFile(inputFileName.c_str()), lastGroup(0), _loadOptions(0)
 {
 	inputFilePath = getFilePath(inputFileName);
 	canConvert = !inputFile.fail();
-	
-	application().environment().addSearchPath(inputFilePath);
 	
 	if (!canConvert)
 		std::cout << "Can't open file for input: " << inFile << std::endl;
@@ -307,9 +304,13 @@ void OBJLoader::loadAsync(ObjectsCache& cache)
 
 void OBJLoader::loadMaterials(const std::string& fileName, bool async, ObjectsCache& cache)
 {
-	std::string filePath = application().environment().findFile(fileName);
+	application().pushSearchPath(inputFilePath);
+	
+	std::string filePath = application().resolveFileName(fileName);
 	if (!fileExists(filePath))
-		filePath = application().environment().findFile(inputFilePath + fileName);
+		filePath = application().resolveFileName(inputFilePath + fileName);
+	
+	application().popSearchPaths();
 	
 	materialFile.open(filePath.c_str());
 	if (!materialFile.is_open())

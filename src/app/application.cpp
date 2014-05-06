@@ -6,6 +6,7 @@
  */
 
 #include <et/threading/threading.h>
+#include <et/rendering/rendercontext.h>
 #include <et/app/application.h>
 
 using namespace et;
@@ -66,6 +67,18 @@ int Application::run(int argc, char* argv[])
 		_launchParameters.push_back(argv[i]);
 
 	return platformRun(argc, argv);
+}
+
+void Application::enterRunLoop()
+{
+	_running = true;
+	
+	_standardPathResolver.setRenderContext(_renderContext);
+	delegate()->applicationDidLoad(_renderContext);
+	
+	_renderContext->init();
+	
+	setActive(true);
 }
 
 void Application::performRendering()
@@ -191,3 +204,63 @@ void Application::terminated()
 {
 	_delegate->applicationWillTerminate();
 }
+
+std::string Application::resolveFileName(const std::string& path)
+{
+	std::string result;
+	
+	if (_customPathResolver.valid())
+		result = _customPathResolver->resolveFilePath(path);
+	
+	if (!fileExists(result))
+		result = _standardPathResolver.resolveFilePath(path);
+	
+	return result;
+}
+
+std::string Application::resolveFolderName(const std::string& path)
+{
+	std::string result;
+	
+	if (_customPathResolver.valid())
+		result = _customPathResolver->resolveFolderPath(path);
+	
+	if (!folderExists(result))
+		result = _standardPathResolver.resolveFolderPath(path);
+	
+	return result;
+}
+
+std::set<std::string> Application::resolveFolderNames(const std::string& path)
+{
+	std::set<std::string> result;
+	
+	if (_customPathResolver.valid())
+		result = _customPathResolver->resolveFolderPaths(path);
+	
+	auto standard = _standardPathResolver.resolveFolderPaths(path);
+	result.insert(standard.begin(), standard.end());
+	
+	return result;
+}
+
+void Application::pushSearchPath(const std::string& path)
+{
+	_standardPathResolver.pushSearchPath(path);
+}
+
+void Application::pushSearchPaths(const std::set<std::string>& paths)
+{
+	_standardPathResolver.pushSearchPaths(paths);
+}
+
+void Application::popSearchPaths(size_t amount)
+{
+	_standardPathResolver.popSearchPaths(amount);
+}
+
+void Application::setPathResolver(PathResolver::Pointer resolver)
+{
+	_customPathResolver = resolver;
+}
+
