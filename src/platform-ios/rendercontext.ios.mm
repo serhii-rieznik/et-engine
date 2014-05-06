@@ -39,6 +39,7 @@ RenderContext::RenderContext(const RenderContextParameters& params, Application*
 	_textureFactory = TextureFactory::Pointer(new TextureFactory(this));
 	_framebufferFactory = FramebufferFactory::Pointer(new FramebufferFactory(this));
 	_vertexBufferFactory = VertexBufferFactory::Pointer(new VertexBufferFactory(this));
+	_renderer = Renderer::Pointer::create(this);
 	
 	CGSize screenSize = [[[UIApplication sharedApplication] delegate] window].frame.size;
 	float screenScale = [[UIScreen mainScreen] scale];
@@ -58,9 +59,7 @@ RenderContext::~RenderContext()
 
 void RenderContext::init()
 {
-	_renderer = Renderer::Pointer::create(this);
-	
-#if !defined(ET_EMBEDDED_APPLICATION)	
+#if !defined(ET_EMBEDDED_APPLICATION)
 	[sharedOpenGLViewController setRenderContext:this];
 #endif
 	

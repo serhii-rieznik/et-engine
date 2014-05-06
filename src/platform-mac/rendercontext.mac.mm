@@ -116,7 +116,7 @@ RenderContext::~RenderContext()
 
 void RenderContext::init()
 {
-	_fpsTimer.start(mainTimerPool(), 1.0f, -1);
+	_fpsTimer.start(mainTimerPool(), 1.0f, NotifyTimer::RepeatForever);
 	_private->run();
 }
 

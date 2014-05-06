@@ -19,6 +19,8 @@
 using namespace et;
 using namespace et::gui;
 
+const int defaultSpacing = 1;
+
 TextureAtlasWriter::TextureAtlasItem& TextureAtlasWriter::addItem(const vec2i& textureSize)
 {
 	_items.push_back(TextureAtlasItem());
@@ -32,39 +34,34 @@ TextureAtlasWriter::TextureAtlasItem& TextureAtlasWriter::addItem(const vec2i& t
 
 bool TextureAtlasWriter::placeImage(TextureDescription::Pointer image, TextureAtlasItem& item)
 {
-	int w = image->size.x;
-	int h = image->size.y;
-
-	int xOffset = 0;
-	int yOffset = 0;
+	vec2i sz = image->size;
+	vec2i offset;
 
 	if (_addSpace)
 	{
-		if (w < item.texture->size.x - 1)
+		if (sz.x + defaultSpacing < item.texture->size.x)
 		{
-			w++;
-			xOffset = 1;
+			sz.x += defaultSpacing;
+			offset.x = defaultSpacing;
 		}
 
-		if (h < item.texture->size.y - 1)
+		if (sz.y + defaultSpacing < item.texture->size.y)
 		{
-			h++;
-			yOffset = 1;
+			sz.y += defaultSpacing;
+			offset.y = defaultSpacing;
 		}
 	}
-
-	vec2 size(static_cast<float>(w), static_cast<float>(h));
-	gui::ImageDescriptor desc(vec2(0.0f), size);
+	gui::ImageDescriptor desc(vec2(0.0f), vector2ToFloat(sz));
 
 	if (item.images.size() == 0)
 	{
 		item.images.push_back(ImageItem(image, desc));
 
 		if (desc.origin.x + desc.size.x > item.maxWidth) 
-			item.maxWidth = static_cast<int>(desc.origin.x + desc.size.x) - xOffset;
+			item.maxWidth = static_cast<int>(desc.origin.x + desc.size.x) - offset.x;
 
 		if (desc.origin.y + desc.size.y > item.maxHeight) 
-			item.maxHeight = static_cast<int>(desc.origin.y + desc.size.y) - yOffset;
+			item.maxHeight = static_cast<int>(desc.origin.y + desc.size.y) - offset.y;
 
 		return true;
 	}
@@ -73,7 +70,7 @@ bool TextureAtlasWriter::placeImage(TextureDescription::Pointer image, TextureAt
 	{
 		desc.origin = i->place.origin + vec2(i->place.size.x, 0.0f);
 
-		bool placed = (desc.origin.x + w <= item.texture->size.x) && (desc.origin.y + h <= item.texture->size.y);
+		bool placed = (desc.origin.x + sz.x <= item.texture->size.x) && (desc.origin.y + sz.y <= item.texture->size.y);
 		if (placed)
 		{
 			for (ImageItemList::iterator ii = item.images.begin(); ii != e; ++ii)
@@ -91,10 +88,10 @@ bool TextureAtlasWriter::placeImage(TextureDescription::Pointer image, TextureAt
 			item.images.push_back(ImageItem(image, desc));
 
 			if (desc.origin.x + desc.size.x > item.maxWidth) 
-				item.maxWidth = static_cast<int>(desc.origin.x + desc.size.x) - xOffset;
+				item.maxWidth = static_cast<int>(desc.origin.x + desc.size.x) - offset.x;
 
 			if (desc.origin.y + desc.size.y > item.maxHeight) 
-				item.maxHeight = static_cast<int>(desc.origin.y + desc.size.y) - yOffset;
+				item.maxHeight = static_cast<int>(desc.origin.y + desc.size.y) - offset.y;
 			
 			return true;
 		}
@@ -105,8 +102,7 @@ bool TextureAtlasWriter::placeImage(TextureDescription::Pointer image, TextureAt
 		desc.origin = i->place.origin + vec2(i->place.size.x, 0.0f);
 		desc.origin = i->place.origin + vec2(0.0f, i->place.size.y);
 		
-		bool placed = (desc.origin.x + w <= item.texture->size.x) && (desc.origin.y + h <= item.texture->size.y);
-		
+		bool placed = (desc.origin.x + sz.x <= item.texture->size.x) && (desc.origin.y + sz.y <= item.texture->size.y);
 		if (placed)
 		{
 			for (ImageItemList::iterator ii = item.images.begin(); ii != e; ++ii)
@@ -122,10 +118,13 @@ bool TextureAtlasWriter::placeImage(TextureDescription::Pointer image, TextureAt
 		if (placed)
 		{
 			item.images.push_back(ImageItem(image, desc));
+			
 			if (desc.origin.x + desc.size.x > item.maxWidth)
-				item.maxWidth = static_cast<int>(desc.origin.x + desc.size.x) - xOffset;
+				item.maxWidth = static_cast<int>(desc.origin.x + desc.size.x) - offset.x;
+			
 			if (desc.origin.y + desc.size.y > item.maxHeight)
-				item.maxHeight = static_cast<int>(desc.origin.y + desc.size.y) - yOffset;
+				item.maxHeight = static_cast<int>(desc.origin.y + desc.size.y) - offset.y;
+			
 			return true;
 		}
 	}
@@ -135,6 +134,8 @@ bool TextureAtlasWriter::placeImage(TextureDescription::Pointer image, TextureAt
 
 void TextureAtlasWriter::writeToFile(const std::string& fileName, const char* textureNamePattern)
 {
+	vec2 spacing = _addSpace ? vector2ToFloat(vec2i(defaultSpacing)) : vec2(0.0f);
+	
 	std::string path = addTrailingSlash(getFilePath(fileName));
 	ArrayValue textures;
 	ArrayValue images;
@@ -156,17 +157,17 @@ void TextureAtlasWriter::writeToFile(const std::string& fileName, const char* te
 		textures->content.push_back(texture);
 		
 		int index = 0;
-		for (ImageItemList::iterator ii = i->images.begin(), ie = i->images.end(); ii != ie; ++ii, ++index)
+		for (const auto& ii : i->images)
 		{
 			TextureDescription image;
-			png::loadFromFile(ii->image->origin(), image, true);
+			png::loadFromFile(ii.image->origin(), image, true);
 
 			std::string sIndex = intToStr(index);
 			
 			if (sIndex.length() < 2)
 				sIndex = "0" + sIndex;
 			
-			std::string name = removeFileExt(getFileName(ii->image->origin()));
+			std::string name = removeFileExt(getFileName(ii.image->origin()));
 
 			vec4 offset;
 			size_t delimPos = name.find_first_of("~");
@@ -205,7 +206,7 @@ void TextureAtlasWriter::writeToFile(const std::string& fileName, const char* te
 			Dictionary imageDictionary;
 			imageDictionary.setStringForKey("name", name);
 			imageDictionary.setStringForKey("texture", texId);
-			imageDictionary.setArrayForKey("rect", rectToArray(ii->place.rectangle()));
+			imageDictionary.setArrayForKey("rect", rectToArray(rect(ii.place.origin, ii.place.size - spacing)));
 			imageDictionary.setArrayForKey("offset", vec4ToArray(offset));
 			images->content.push_back(imageDictionary);
 			
@@ -229,8 +230,10 @@ void TextureAtlasWriter::writeToFile(const std::string& fileName, const char* te
 			if (components)
 			{
 				ImageOperations::transfer(image.data, image.size, components, data, i->texture->size, 4,
-					vec2i(static_cast<int>(ii->place.origin.x), static_cast<int>(ii->place.origin.y)));
+					vec2i(static_cast<int>(ii.place.origin.x), static_cast<int>(ii.place.origin.y)));
 			}
+			
+			++index;
 		}
 
 		ImageWriter::writeImageToFile(texName, data, i->texture->size, 4, 8, ImageFormat_PNG, true);
@@ -245,5 +248,3 @@ void TextureAtlasWriter::writeToFile(const std::string& fileName, const char* te
 	outFile.flush();
 	outFile.close();
 }
-
-

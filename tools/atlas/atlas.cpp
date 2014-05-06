@@ -6,15 +6,17 @@ using namespace et;
 
 void printHelp()
 {
-	std::cout << "Using: " << std::endl <<
-		"atlas -root <ROOT FOLDER> -out <OUTPUT FILE>" << std::endl << 
-		"\tOPTIONAL: -size <SIZE>, default: 1024 - size of the output atlas" << std::endl <<
-		"\tOPTIONAL: -pattern <PATTERN>, default: texture_%d.png" << std::endl <<
-		"\tOPTIONAL: -nospace, default off - don't add one pixel space between images in atlas." << std::endl;
+	log::info("Using:\n"
+		"atlas -root <ROOT FOLDER> -out <OUTPUT FILE>\n"
+		"\tOPTIONAL: -size <SIZE>, default: 1024 - size of the output atlas\n"
+		"\tOPTIONAL: -pattern <PATTERN>, default: texture_%%d.png\n"
+		"\tOPTIONAL: -nospace, default off - don't add one pixel space between images in atlas.");
 }
 
 int main(int argc, char* argv[])
 {
+	log::addOutput(log::ConsoleOutput::Pointer::create());
+	
 	bool hasPattern = false;
 	bool hasRoot = false;
 	bool hasOutput = false;
@@ -37,7 +39,7 @@ int main(int argc, char* argv[])
 			}
 			else
 			{
-				std::cout << "ERROR: root folder not found" << std::endl;
+				log::error("Root folder not found: %s", rootFolder.c_str());
 				return 0;
 			}
 		}
@@ -94,7 +96,7 @@ int main(int argc, char* argv[])
 	TextureAtlasWriter placer(addSpace);
 	while (textureDescriptors.size())
 	{
-		TextureAtlasWriter::TextureAtlasItem& texture = placer.addItem( vec2i(outputSize) );
+		TextureAtlasWriter::TextureAtlasItem& texture = placer.addItem(vec2i(outputSize));
 		TextureDescription::List::iterator i = textureDescriptors.begin();
 
 		int placedItems = 0;
@@ -116,15 +118,15 @@ int main(int argc, char* argv[])
 		texture.texture->size.y = static_cast<int>(roundToHighestPowerOfTwo(texture.maxHeight));
 	}
 	
-	for (TextureAtlasWriter::TextureAtlasItemList::const_iterator i = placer.items().begin(), e = placer.items().end(); i != e; ++i)
+	for (const auto i : placer.items())
 	{
-		std::cout << "Texture: " << i->texture->size.x << "x" << i->texture->size.y << ":" << std::endl;
+		log::info("Texture: %d x %d", i.texture->size.x, i.texture->size.y);
 		
-		for (TextureAtlasWriter::ImageItemList::const_iterator ii = i->images.begin(), ie = i->images.end(); ii != ie; ++ii)
+		for (const auto& ii : i.images)
 		{
-			log::info("(% 5d, % 5d) | (% 5d % 5d) | %s", static_cast<int>(ii->place.origin.x),
-				static_cast<int>(ii->place.origin.y), static_cast<int>(ii->place.size.x),
-				static_cast<int>(ii->place.size.y), ii->image->origin().c_str());
+			log::info("(% 5d, % 5d) | (% 5d % 5d) | %s", static_cast<int>(ii.place.origin.x),
+				static_cast<int>(ii.place.origin.y), static_cast<int>(ii.place.size.x),
+				static_cast<int>(ii.place.size.y), getFileName(ii.image->origin()).c_str());
 		}
 	}
 
