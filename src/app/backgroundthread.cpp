@@ -18,7 +18,9 @@ void BackgroundRunLoop::setOwner(BackgroundThread* owner)
 
 void BackgroundRunLoop::addTask(Task* t, float delay)
 {
+	RunLoop::update(queryContiniousTimeInMilliSeconds());
 	RunLoop::addTask(t, delay);
+	
 	_owner->resume();
 }
 
