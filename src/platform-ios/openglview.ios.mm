@@ -53,7 +53,6 @@ using namespace et;
 @implementation etOpenGLView
 
 @synthesize context = _context;
-@synthesize suspended = _suspended;
 
 + (Class)layerClass
 {
@@ -135,8 +134,6 @@ using namespace et;
 
 - (void)beginRender
 {
-	if (_suspended) return;
-	
 	[EAGLContext setCurrentContext:_context];
 	
 	if (_rc->parameters().bindDefaultFramebufferEachFrame)
@@ -145,8 +142,6 @@ using namespace et;
 
 - (void)endRender
 {
-	if (_suspended) return;
-	
 	checkOpenGLError("endRender");
 	
 	if (_multisampled)

@@ -20,7 +20,6 @@ namespace et
 @property (nonatomic, retain) UIWindow* window;
 
 - (void)beginUpdates;
-- (BOOL)updating;
 - (void)endUpdates;
 
 @end

@@ -227,14 +227,4 @@ extern NSString* etKeyboardNotRequiredNotification;
 		[self performSelectorOnMainThread:@selector(becomeFirstResponder) withObject:nil waitUntilDone:NO];
 }
 
-- (void)setSuspended:(BOOL)suspended
-{
-	_glView.suspended = suspended;
-}
-
-- (BOOL)suspended
-{
-	return _glView.suspended;
-}
-
 @end

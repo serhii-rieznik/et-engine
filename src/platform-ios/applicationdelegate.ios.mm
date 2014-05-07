@@ -68,9 +68,9 @@ extern etOpenGLViewController* sharedOpenGLViewController;
 
 - (void)applicationWillResignActive:(UIApplication *)application
 {
-	(void)application;
+	[self endUpdates];
 	
-	[sharedOpenGLViewController setSuspended:YES];
+	(void)application;
 	_notifier.notifyDeactivated();
 }
 
@@ -170,13 +170,19 @@ extern etOpenGLViewController* sharedOpenGLViewController;
 	}
 	else
 	{
-		[sharedOpenGLViewController setSuspended:NO];
+		@synchronized(sharedOpenGLViewController.context)
+		{
+			[sharedOpenGLViewController setSuspended:NO];
+		}
 	}
 }
 
 - (void)endUpdates
 {
-	[sharedOpenGLViewController setSuspended:YES];
+	@synchronized(sharedOpenGLViewController.context)
+	{
+		[sharedOpenGLViewController setSuspended:YES];
+	}
 }
 
 - (NSUInteger)application:(UIApplication*)application supportedInterfaceOrientationsForWindow:(UIWindow *)window

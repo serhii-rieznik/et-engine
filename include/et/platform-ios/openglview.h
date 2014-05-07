@@ -16,12 +16,12 @@
 - (id)initWithFrame:(CGRect)frame parameters:(et::RenderContextParameters&)params;
 
 - (void)setRenderContext:(et::RenderContext*)rc;
+
 - (void)beginRender;
 - (void)endRender;
 
 - (const et::Framebuffer::Pointer&)defaultFramebuffer;
 
 @property (nonatomic, retain) EAGLContext* context;
-@property (atomic, assign) BOOL suspended;
 
 @end
