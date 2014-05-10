@@ -43,7 +43,7 @@ namespace et
 		bool hasTasks()
 			{ return _taskPool.hasTasks(); }
 
-	private:
+	protected:
 		void updateTime(uint64_t t);
 
 	private:
