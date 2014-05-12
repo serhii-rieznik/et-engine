@@ -30,7 +30,9 @@ namespace et
 		TimerPool::Pointer mainTimerPool()
 			{ return _timerPools.front(); }
 		
+		void updateTime(uint64_t t);
 		void update(uint64_t t);
+
 		void pause();
 		void resume();
 
@@ -42,9 +44,6 @@ namespace et
 		
 		bool hasTasks()
 			{ return _taskPool.hasTasks(); }
-
-	protected:
-		void updateTime(uint64_t t);
 
 	private:
 		std::vector<TimerPool::Pointer> _timerPools;

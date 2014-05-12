@@ -14,13 +14,12 @@ const std::string kRadianceHeader = "#?RADIANCE";
 const std::string kRadianceFormatEntry = "FORMAT=";
 const std::string kRadiance32Bit_RLE_RGBE = "32-BIT_RLE_RGBE";
 
-typedef unsigned char RGBEEntry[4];
+// typedef unsigned char RGBEEntry[4];
 
 #define CONVERT_RGBE	1
 
-void readScanline(std::istream&, int width, RGBEEntry* data);
-void readScanlineLegacy(std::istream&, int width, RGBEEntry* data);
-vec4 rgbeToFloat(RGBEEntry*);
+unsigned char* readScanline(unsigned char*, int, vec4ub*);
+vec4 rgbeToFloat(const vec4ub&);
 
 void et::hdr::loadInfoFromStream(std::istream& source, TextureDescription& desc)
 {
@@ -70,8 +69,6 @@ void et::hdr::loadInfoFromStream(std::istream& source, TextureDescription& desc)
 		ws = line.substr(xpos + 1);
 	}
 	
-	log::info("W: %s, H: %s", ws.c_str(), hs.c_str());
-	
 	desc.size.x = strToInt(ws);
 	desc.size.y = strToInt(hs);
 	
@@ -97,27 +94,39 @@ void et::hdr::loadInfoFromStream(std::istream& source, TextureDescription& desc)
 void et::hdr::loadFromStream(std::istream& source, TextureDescription& desc)
 {
 	loadInfoFromStream(source, desc);
-	
+
+	if ((desc.size.x < 8) || (desc.size.x > 0x7fff))
+		ET_FAIL("Unsupported HDR format.");
+
+	auto sourcePos = source.tellg();
+
+	size_t rowSize = desc.size.x * 4;
+	size_t maxDataSize = 8 * desc.size.square();
+	BinaryDataStorage inData(maxDataSize, 0);
+	source.read(inData.binary(), maxDataSize);
+	auto ptr = inData.begin();
+
 #if (CONVERT_RGBE)
-	
-	size_t rowSize = desc.size.x * 4;
 	BinaryDataStorage rgbeData(desc.size.y * rowSize, 0);
-	for (int y = 0; y < desc.size.y; ++y)
-		readScanline(source, desc.size.x, reinterpret_cast<RGBEEntry*>(rgbeData.element_ptr((desc.size.y - 1 - y) * rowSize)));
-	
-	desc.data = BinaryDataStorage(desc.size.square() * desc.bitsPerPixel / 8, 0);
-	vec4* floats = reinterpret_cast<vec4*>(desc.data.binary());
-	for (int i = 0; i < desc.size.square(); ++i)
-		*floats++ = rgbeToFloat(reinterpret_cast<RGBEEntry*>(rgbeData.element_ptr(i * 4)));
-	
+	auto& scanlineData = rgbeData;
 #else
-	
-	size_t rowSize = desc.size.x * 4;
 	desc.data.resize(desc.size.y * rowSize);
-	for (int y = 0; y < desc.size.y; ++y)
-		readScanline(source, desc.size.x, reinterpret_cast<RGBEEntry*>(desc.data.element_ptr((desc.size.y - 1 - y) * rowSize)));
-	
+	auto& scanlineData = desc.data;
 #endif
+
+	for (int y = 0; y < desc.size.y; ++y)
+		ptr = readScanline(ptr, desc.size.x, reinterpret_cast<vec4ub*>(scanlineData.element_ptr((desc.size.y - 1 - y) * rowSize)));
+
+#if (CONVERT_RGBE)
+	desc.data.resize(desc.size.square() * desc.bitsPerPixel / 8);
+	vec4* floats = reinterpret_cast<vec4*>(desc.data.binary());
+	vec4ub* rgbe = reinterpret_cast<vec4ub*>(rgbeData.begin());
+	for (int i = 0; i < desc.size.square(); ++i)
+		*floats++ = rgbeToFloat(*rgbe++);
+#endif
+
+	decltype(sourcePos) dataSize = ptr - inData.begin();
+	source.seekg(sourcePos + dataSize, std::ios::beg);
 }
 
 void et::hdr::loadFromFile(const std::string& path, TextureDescription& desc)
@@ -144,82 +153,52 @@ void et::hdr::loadInfoFromFile(const std::string& path, TextureDescription& desc
  * Internal stuff
  */
 
-#define R			0
-#define G			1
-#define B			2
-#define E			3
-
-#define  MINELEN	8				// minimum scanline length for encoding
-#define  MAXELEN	0x7fff			// maximum scanline length for encoding
-
-void readScanline(std::istream& file, int width, RGBEEntry* scanline)
+unsigned char* readScanline(unsigned char* ptr, int width, vec4ub* scanline)
 {
-	if ((width < MINELEN) || (width > MAXELEN))
+	if (*ptr++ == 2)
 	{
-		return readScanlineLegacy(file, width, scanline);
-		return;
-	}
-	
-	int i = file.get();
-	if (i != 2)
-	{
-		file.seekg(-1, std::ios_base::cur);
-		readScanlineLegacy(file, width, scanline);
-		return;
-	}
-	scanline[0][G] = file.get();
-	scanline[0][B] = file.get();
-	
-	i = file.get();
-	
-	if ((scanline[0][G] != 2) || (scanline[0][B] & 128))
-	{
-		scanline[0][R] = 2;
-		scanline[0][E] = i;
-		return readScanlineLegacy(file, width - 1, scanline + 1);
-	}
-	
-	for (i = 0; i < 4; i++)
-	{
-	    for (int j = 0; j < width;)
+		scanline->y = *ptr++;
+		scanline->z = *ptr++;
+
+		++ptr;
+
+		for (int i = 0; i < 4; ++i)
 		{
-			unsigned char code = file.get();
-			if (code > 128)
+			for (int j = 0; j < width;)
 			{
-			    code &= 127;
-			    unsigned char val = file.get();
-			    while (code--)
-					scanline[j++][i] = val;
-			}
-			else
-			{
-			    while (code--)
-					scanline[j++][i] = file.get();
+				unsigned char code = *ptr++;
+				if (code > 128)
+				{
+					code &= 127;
+					unsigned char val = *ptr++;
+					while (code--)
+						scanline[j++][i] = val;
+				}
+				else
+				{
+					while (code--)
+						scanline[j++][i] = *ptr++;
+				}
 			}
 		}
-    }
+	}
+	else
+	{
+		ET_FAIL("Legacy scanlines are not supported");
+	}
+
+	return ptr;
 }
 
-void readScanlineLegacy(std::istream&, int width, RGBEEntry* data)
+inline float convertComponent(char expo, unsigned char val)
 {
-	ET_FAIL("Not implemented.");
+	return (expo > 0) ? static_cast<float>(val * (1 << expo)) : 
+		static_cast<float>(val) / static_cast<float>(1 << -expo);
 }
 
-float convertComponent(int expo, int val)
+vec4 rgbeToFloat(const vec4ub& data)
 {
-	float v = static_cast<float>(val) / 256.0f;
-	float d = std::pow(2.0f, static_cast<float>(expo));
-	return v * d;
-}
-
-vec4 rgbeToFloat(RGBEEntry* scan)
-{
-	vec4 result;
-	
-	int expo = scan[0][E] - 128;
-	result.x = convertComponent(expo, scan[0][R]);
-	result.y = convertComponent(expo, scan[0][G]);
-	result.z = convertComponent(expo, scan[0][B]);
-	result.w = 1.0;
-	return result;
+	char expo = data.w - 128;
+	return vec4(convertComponent(expo, data.x), convertComponent(expo, data.y),
+		convertComponent(expo, data.z), 256.0f) / 256.0f;
 }

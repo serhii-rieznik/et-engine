@@ -6,6 +6,7 @@
  */
 
 #include <Windows.h>
+#include <et/rendering/rendercontext.h>
 #include <et/app/application.h>
 
 using namespace et;
@@ -112,50 +113,37 @@ int Application::platformRun(int argc, char* argv[])
 	RenderContextParameters params;
 	delegate()->setRenderContextParameters(params); 
 
+	_lastQueuedTimeMSec = queryContiniousTimeInMilliSeconds();
+	_runLoop.updateTime(_lastQueuedTimeMSec);
+
 	_renderContext = new RenderContext(params, this);
 	if (_renderContext->valid())
 	{
-		_active = true;
-
-		_lastQueuedTimeMSec = queryContiniousTimeInMilliSeconds();
-		_runLoop.update(_lastQueuedTimeMSec);
-
 		_renderingContextHandle = _renderContext->renderingContextHandle();
-		_renderContext->init();
-
-		_delegate->applicationDidLoad(_renderContext);
+		enterRunLoop();
 		_delegate->applicationWillResizeContext(_renderContext->sizei());
 
-		_lastQueuedTimeMSec = queryContiniousTimeInMilliSeconds();
-
-		enterRunLoop(); 
-
-		terminated();
-
-		delete _delegate, _delegate = nullptr;
-		delete _renderContext, _renderContext = nullptr;
+		MSG msg = { };
+		while (_running)
+		{
+			if (PeekMessage(&msg, 0, 0, 0, PM_REMOVE))
+			{
+				TranslateMessage(&msg);
+				DispatchMessage(&msg);
+			}
+			else
+			{
+				idle();
+			}
+		}
 	}
+
+	terminated();
+
+	delete _delegate, _delegate = nullptr;
+	delete _renderContext, _renderContext = nullptr;
 
 	return _exitCode;
-}
-
-void Application::enterRunLoop()
-{
-	MSG msg = { };
-
-	_running = true;
-	while (_running)
-	{
-		if (PeekMessage(&msg, 0, 0, 0, PM_REMOVE))
-		{
-			TranslateMessage(&msg);
-			DispatchMessage(&msg);
-		}
-		else
-		{
-			idle();
-		}
-	}
 }
 
 void Application::quit(int exitCode)
