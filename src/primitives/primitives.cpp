@@ -347,7 +347,7 @@ void primitives::createSquarePlane(VertexArray::Pointer data, const vec3& normal
 }
 
 IndexArray::Pointer primitives::createCirclePlane(VertexArray::Pointer data, const vec3& normal, float radius,
-	size_t density, const vec3& center, const vec2& texCoordScale, const vec2& texCoordOffset)
+	size_t density, const vec3& center, const vec2&, const vec2&)
 {
 	IndexArray::Pointer result = IndexArray::Pointer::create(IndexArrayFormat_16bit, 3 * density, PrimitiveType_Triangles);
 	
@@ -371,7 +371,7 @@ IndexArray::Pointer primitives::createCirclePlane(VertexArray::Pointer data, con
 	float da = DOUBLE_PI / (static_cast<float>(density - 1));
 	for (size_t i = 1; i < density; ++i)
 	{
-		pos[i] = center + (o1 * cos(angle) - o2 * sin(angle)) * radius;
+		pos[i] = center + (o1 * std::cos(angle) - o2 * std::sin(angle)) * radius;
 		nrm[i] = normal;
 		result->setIndex(0, index++);
 		result->setIndex(static_cast<IndexType>(i), index++);
@@ -927,9 +927,10 @@ void primitives::tesselateTriangles(VertexArray::Pointer data, IndexArray::Point
 	RawDataAcessor<vec4> oclr = oldClr.accessData<vec4>(0);
 	RawDataAcessor<vec4> nclr = newClr.accessData<vec4>(0);
 	
-	size_t np = 0;
-	size_t nn = 0;
-	size_t nc = 0;
+	size_t nump = 0;
+	size_t numn = 0;
+	size_t numc = 0;
+	
 	for (auto i = indexArray->begin(), e = indexArray->end(); i != e; ++i)
 	{
 		const vec3& a = opos[i[0]];
@@ -939,10 +940,10 @@ void primitives::tesselateTriangles(VertexArray::Pointer data, IndexArray::Point
 		vec3 u = mix(a, b, aspect.x);
 		vec3 v = mix(b, c, aspect.y);
 		vec3 w = mix(c, a, aspect.z);
-		npos[np++] = a; npos[np++] = u; npos[np++] = w;
-		npos[np++] = u; npos[np++] = b; npos[np++] = v;
-		npos[np++] = w; npos[np++] = v; npos[np++] = c;
-		npos[np++] = w; npos[np++] = u; npos[np++] = v;
+		npos[nump++] = a; npos[nump++] = u; npos[nump++] = w;
+		npos[nump++] = u; npos[nump++] = b; npos[nump++] = v;
+		npos[nump++] = w; npos[nump++] = v; npos[nump++] = c;
+		npos[nump++] = w; npos[nump++] = u; npos[nump++] = v;
 		
 		if (hasNormals)
 		{
@@ -954,10 +955,10 @@ void primitives::tesselateTriangles(VertexArray::Pointer data, IndexArray::Point
 			vec3 nv = normalize(mix(nb, nc, aspect.y));
 			vec3 nw = normalize(mix(nc, na, aspect.z));
 			
-			nnrm[nn++] = na; nnrm[nn++] = nu; nnrm[nn++] = nw;
-			nnrm[nn++] = nu; nnrm[nn++] = nb; nnrm[nn++] = nv;
-			nnrm[nn++] = nw; nnrm[nn++] = nv; nnrm[nn++] = nc;
-			nnrm[nn++] = nw; nnrm[nn++] = nu; nnrm[nn++] = nv;
+			nnrm[numn++] = na; nnrm[numn++] = nu; nnrm[numn++] = nw;
+			nnrm[numn++] = nu; nnrm[numn++] = nb; nnrm[numn++] = nv;
+			nnrm[numn++] = nw; nnrm[numn++] = nv; nnrm[numn++] = nc;
+			nnrm[numn++] = nw; nnrm[numn++] = nu; nnrm[numn++] = nv;
 		}
 		
 		if (hasColor)
@@ -970,10 +971,10 @@ void primitives::tesselateTriangles(VertexArray::Pointer data, IndexArray::Point
 			vec4 cv = mix(cb, cc, aspect.x);
 			vec4 cw = mix(cc, ca, aspect.x);
 			
-			nclr[nc++] = ca; nclr[nc++] = cu; nclr[nc++] = cw;
-			nclr[nc++] = cu; nclr[nc++] = cb; nclr[nc++] = cv;
-			nclr[nc++] = cw; nclr[nc++] = cv; nclr[nc++] = cc;
-			nclr[nc++] = cw; nclr[nc++] = cu; nclr[nc++] = cv;
+			nclr[numc++] = ca; nclr[numc++] = cu; nclr[numc++] = cw;
+			nclr[numc++] = cu; nclr[numc++] = cb; nclr[numc++] = cv;
+			nclr[numc++] = cw; nclr[numc++] = cv; nclr[numc++] = cc;
+			nclr[numc++] = cw; nclr[numc++] = cu; nclr[numc++] = cv;
 		}
 		
 	}

@@ -153,5 +153,4 @@ namespace et
 	template <typename T>
 	inline vector4<T> operator * (T value, const vector4<T>& vec) 
 		{ return vector4<T>(vec.x * value, vec.y * value, vec.z * value, vec.w * value); }
-
 }

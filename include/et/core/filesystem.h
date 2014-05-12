@@ -37,7 +37,7 @@ namespace et
 	void findSubfolders(const std::string& folder, bool recursive, StringList& list);
 	void openUrl(const std::string& url);
 
-	int64_t getFileDate(const std::string& path);
+	uint64_t getFileDate(const std::string& path);
 	
 	std::string getFilePath(const std::string& name);
 	std::string getFileFolder(const std::string& name);

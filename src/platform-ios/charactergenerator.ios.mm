@@ -133,7 +133,7 @@ CharacterGeneratorPrivate::CharacterGeneratorPrivate(const std::string& face,
 		log::warning("Font %s not found, using system font.", face.c_str());
 		_font = [UIFont systemFontOfSize:static_cast<float>(size)];
 	}
-	assert(_font);
+	ET_ASSERT(_font);
 	
     _boldFont = [UIFont fontWithName:cBoldFace size:static_cast<float>(size)];
 	if (_boldFont == nil)
@@ -141,7 +141,7 @@ CharacterGeneratorPrivate::CharacterGeneratorPrivate(const std::string& face,
 		log::warning("Font %s not found, using system bold font.", boldFace.c_str());
 		_boldFont = [UIFont boldSystemFontOfSize:static_cast<float>(size)];
 	}
-	assert(_boldFont);
+	ET_ASSERT(_boldFont);
 	
 #if (!ET_OBJC_ARC_ENABLED)
     [_font retain];
@@ -168,11 +168,11 @@ void CharacterGeneratorPrivate::renderCharacter(NSString* value, const vec2i& si
 	bool bold, BinaryDataStorage& data)
 {
 	CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
-	assert(colorSpace);
+	ET_ASSERT(colorSpace);
 	
 	CGContextRef context = CGBitmapContextCreateWithData(data.data(), size.x, size.y, 8,
 		4 * size.x, colorSpace, kCGImageAlphaPremultipliedLast, 0, 0);
-	assert(context);
+	ET_ASSERT(context);
 	
 	CGContextSetTextDrawingMode(context, kCGTextFill);
 	CGContextSetFillColorWithColor(context, [[UIColor whiteColor] CGColor]);

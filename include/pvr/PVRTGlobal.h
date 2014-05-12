@@ -276,7 +276,7 @@ inline unsigned int PVRTByteSwap32(unsigned int ui32Long)
 *****************************************************************************/
 inline unsigned short PVRTByteSwap16(unsigned short ui16Short)
 {
-	return (ui16Short>>8) | (ui16Short<<8);
+	return ((ui16Short >> 8) | (ui16Short << 8)) & 0xffff;
 }
 
 /*!***************************************************************************

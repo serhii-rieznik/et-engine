@@ -352,7 +352,7 @@ et::vec2i et::nativeScreenSize()
 #endif
 }
 
-int64_t et::getFileDate(const std::string& path)
+uint64_t et::getFileDate(const std::string& path)
 {
 	struct stat s = { };
 	stat(path.c_str(), &s);

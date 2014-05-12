@@ -25,10 +25,7 @@ static const IndexType indexTypeMask[IndexArrayFormat_max] = {
 	0xffffffff, // IndexArrayFormat_32bit = 4
 };
 
-size_t verifyDataSize(size_t amount, IndexArrayFormat format)
-{
-	return format * ((format == IndexArrayFormat_32bit) ? amount : (1 + amount / 4) * 4);
-}
+size_t verifyDataSize(size_t amount, IndexArrayFormat format);
 
 IndexArray::IndexArray(IndexArrayFormat format, size_t size, PrimitiveType content) : tag(0),
 	_data(verifyDataSize(size, format)), _actualSize(0), _format(format), _primitiveType(content)
@@ -293,3 +290,9 @@ void IndexArray::deserialize(std::istream& stream)
 		ET_FAIL("Unrecognized index array version");
 	}
 }
+
+/*
+ * Service functions
+ */
+size_t verifyDataSize(size_t amount, IndexArrayFormat format)
+	{ return format * ((format == IndexArrayFormat_32bit) ? amount : (1 + amount / 4) * 4); }

@@ -81,7 +81,7 @@ void Application::platformInit()
 	_env.updateDocumentsFolder(_identifier);
 }
 
-int Application::platformRun(int argc, char* argv[])
+int Application::platformRun(int, char*[])
 {
 	@autoreleasepool
 	{

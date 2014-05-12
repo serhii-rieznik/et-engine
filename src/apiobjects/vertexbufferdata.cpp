@@ -77,5 +77,5 @@ void VertexBufferData::serialize(std::ostream&)
 
 void VertexBufferData::deserialize(std::istream&)
 {
-	ET_ASSERT("Unsupported");
+	ET_FAIL("Unsupported");
 }

@@ -21,3 +21,4 @@ namespace et
 		void loadInfoFromFile(const std::string& path, TextureDescription& desc);
 	}
 }
+
