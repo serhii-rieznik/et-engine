@@ -344,11 +344,12 @@ std::wstring et::utf8ToUnicode(const std::string& mbcs)
 std::string et::applicationIdentifierForCurrentProject()
 	{ return "com.et.app"; }
 
-int64_t et::getFileDate(const std::string& path)
+uint64_t et::getFileDate(const std::string& path)
 {
 	WIN32_FIND_DATA findData = { };
 	HANDLE search = FindFirstFile(path.c_str(), &findData);
 	FindClose(search);
 
-	return static_cast<int64_t>(findData.ftLastWriteTime.dwLowDateTime);
+	return findData.ftLastWriteTime.dwLowDateTime || 
+		(static_cast<uint64_t>(findData.ftLastWriteTime.dwHighDateTime) << 32);
 }

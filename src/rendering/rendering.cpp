@@ -14,7 +14,7 @@ namespace et
 	{ 
 		"Vertex", "Normal", "Color", "Tangent", "Binormal",
 		"TexCoord0", "TexCoord1", "TexCoord2", "TexCoord3",
-		"gl_InstanceID"
+		"SmoothingGroup", "gl_InstanceID"
 	};
 
 	const size_t VertexAttributeUsageMasks[Usage_max] = 

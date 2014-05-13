@@ -278,9 +278,16 @@ void Program::buildProgram(const std::string& vertex_source, const std::string& 
 		}
 
 		for (auto& i : _attributes)
-			glBindAttribLocation(_glID, static_cast<GLuint>(i.usage), i.name.c_str());
+		{
+			if (i.usage != Usage_InstanceId)
+			{
+				glBindAttribLocation(_glID, static_cast<GLuint>(i.usage), i.name.c_str());
+				checkOpenGLError("glBindAttribLocation - %s", i.name.c_str());
+			}
+		}
 
 		linkStatus = link();
+
 		_rc->renderState().bindProgram(_glID, true);
 
 		if (linkStatus == GL_TRUE)

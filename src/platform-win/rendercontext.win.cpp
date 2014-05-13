@@ -89,6 +89,7 @@ RenderContext::RenderContext(const RenderContextParameters& inParams, Applicatio
 		_textureFactory = TextureFactory::Pointer(new TextureFactory(this));
 		_framebufferFactory = FramebufferFactory::Pointer(new FramebufferFactory(this));
 		_vertexBufferFactory = VertexBufferFactory::Pointer(new VertexBufferFactory(this));
+		_renderer = Renderer::Pointer::create(this);
 
 		_renderState.setDefaultFramebuffer(_framebufferFactory->createFramebufferWrapper(0, "default-fbo"));
 		
@@ -103,8 +104,6 @@ RenderContext::~RenderContext()
 
 void RenderContext::init()
 {
-	_renderer = Renderer::Pointer::create(this);
-
 	RECT r = { };
 	GetClientRect(_private->primaryContext.hWnd, &r);
 	_renderState.setMainViewportSize(vec2i(r.right - r.left, r.bottom - r.top));
