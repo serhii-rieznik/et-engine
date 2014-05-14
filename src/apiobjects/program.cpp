@@ -279,7 +279,7 @@ void Program::buildProgram(const std::string& vertex_source, const std::string& 
 
 		for (auto& i : _attributes)
 		{
-			if (i.usage != Usage_InstanceId)
+			if ((i.usage != Usage_InstanceId) && (i.usage != Usage_InstanceIdExt))
 			{
 				glBindAttribLocation(_glID, static_cast<GLuint>(i.usage), i.name.c_str());
 				checkOpenGLError("glBindAttribLocation - %s", i.name.c_str());
