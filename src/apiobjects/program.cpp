@@ -403,6 +403,7 @@ void Program::setUniform(int nLoc, uint32_t type, const int value, bool)
 {
 	if (nLoc == -1) return;
 	
+	(void)type;
 	ET_ASSERT((type == GL_INT) || (type == GL_SAMPLER_2D) || (type == GL_SAMPLER_CUBE));
 	ET_ASSERT(loaded());
 	
@@ -414,6 +415,7 @@ void Program::setUniform(int nLoc, uint32_t type, const unsigned int value, bool
 {
 	if (nLoc == -1) return;
 	
+	(void)type;
 	ET_ASSERT((type == GL_INT) || (type == GL_SAMPLER_2D) || (type == GL_SAMPLER_CUBE));
 	ET_ASSERT(loaded());
 	
@@ -425,6 +427,7 @@ void Program::setUniform(int nLoc, uint32_t type, const unsigned long value, boo
 {
 	if (nLoc == -1) return;
 	
+	(void)type;
 	ET_ASSERT((type == GL_INT) || (type == GL_SAMPLER_2D) || (type == GL_SAMPLER_CUBE));
 	ET_ASSERT(loaded());
 	

@@ -47,6 +47,9 @@ void ConsoleOutput::debug(const char* fmt, va_list args)
 {
 #if (ET_DEBUG)
 	info(fmt, args);
+#else
+	(void)fmt;
+	(void)args;
 #endif
 }
 
@@ -97,6 +100,9 @@ void FileOutput::debug(const char* format, va_list args)
 {
 #if (ET_DEBUG)
 	info(format, args);
+#else
+	(void)format;
+	(void)args;
 #endif
 }
 

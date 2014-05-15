@@ -141,6 +141,7 @@ void parseTextureFormat(const PVRTextureHeaderV3& sTextureHeader, TextureDescrip
 #if defined(GL_COMPRESSED_RGB_PVRTC_2BPPV1_IMG) && (ET_PLATFORM_IOS)
 				desc.internalformat = GL_COMPRESSED_RGB_PVRTC_2BPPV1_IMG;
 				desc.compressed = true;
+				shouldDecompress = false;
 #else
 				shouldDecompress = true;
 #endif
@@ -154,6 +155,7 @@ void parseTextureFormat(const PVRTextureHeaderV3& sTextureHeader, TextureDescrip
 #if defined(GL_COMPRESSED_RGBA_PVRTC_2BPPV1_IMG) && (ET_PLATFORM_IOS)
 				desc.internalformat = GL_COMPRESSED_RGBA_PVRTC_2BPPV1_IMG;
 				desc.compressed = true;
+				shouldDecompress = false;
 #else
 				shouldDecompress = true;
 #endif
@@ -167,6 +169,7 @@ void parseTextureFormat(const PVRTextureHeaderV3& sTextureHeader, TextureDescrip
 #if defined(GL_COMPRESSED_RGB_PVRTC_4BPPV1_IMG) && (ET_PLATFORM_IOS)
 				desc.internalformat = GL_COMPRESSED_RGB_PVRTC_4BPPV1_IMG;
 				desc.compressed = true;
+				shouldDecompress = false;
 #else
 				shouldDecompress = true;
 #endif
@@ -180,6 +183,7 @@ void parseTextureFormat(const PVRTextureHeaderV3& sTextureHeader, TextureDescrip
 #if defined(GL_COMPRESSED_RGBA_PVRTC_4BPPV1_IMG) && (ET_PLATFORM_IOS)
 				desc.internalformat = GL_COMPRESSED_RGBA_PVRTC_4BPPV1_IMG;
 				desc.compressed = true;
+				shouldDecompress = false;
 #else
 				shouldDecompress = true;
 #endif
