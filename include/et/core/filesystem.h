@@ -31,6 +31,7 @@ namespace et
 	bool createDirectory(const std::string& name, bool intermediates);
 	bool removeDirectory(const std::string& name);
 	bool removeFile(const std::string& name);
+	bool copyFile(const std::string& fromName, const std::string& toName);
 	
 	void getFolderContent(const std::string& folder, StringList& list);
 	void findFiles(const std::string& folder, const std::string& mask, bool recursive, StringList& list);

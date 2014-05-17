@@ -49,7 +49,7 @@ void et::social::tweet(const std::string& text, const std::string& pathToImage, 
 		[values setObject:[NSURL URLWithString:[NSString stringWithUTF8String:url.c_str()]] forKey:@"url"];
 	
 	[[SocialController sharedSocialController] performSelectorOnMainThread:@selector(shareWithOptions:)
-		withObject:values waitUntilDone:YES];
+		withObject:values waitUntilDone:NO];
 
 	ET_OBJC_RELEASE(values)
 }
@@ -68,13 +68,13 @@ void et::social::postToFacebook(const std::string& text, const std::string& path
 		[values setObject:[NSURL URLWithString:[NSString stringWithUTF8String:url.c_str()]] forKey:@"url"];
 	
 	[[SocialController sharedSocialController] performSelectorOnMainThread:@selector(shareWithOptions:)
-		withObject:values waitUntilDone:YES];
+		withObject:values waitUntilDone:NO];
 	
 	ET_OBJC_RELEASE(values)
 }
 
 /*
- *
+ * Social Controller
  */
 @implementation SocialController
 

@@ -99,7 +99,8 @@ void et::ios::shareFile(const std::string& path, const std::string& scheme, Dict
 	sharedInteractionController.annotation = annotation;
 	
 	[[InteractorControllerHandler sharedInteractorControllerHandler]
-		performSelectorOnMainThread:@selector(presentDocumentController:) withObject:[NSNumber numberWithInt:displayOptions] waitUntilDone:YES];
+		performSelectorOnMainThread:@selector(presentDocumentController:)
+		withObject:[NSNumber numberWithInt:displayOptions] waitUntilDone:NO];
 }
 
 std::string et::selectFile(const StringList&, SelectFileMode, const std::string&)
