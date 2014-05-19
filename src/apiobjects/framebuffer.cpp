@@ -381,6 +381,8 @@ void Framebuffer::createOrUpdateDepthRenderbuffer()
 
 void Framebuffer::resize(const vec2i& sz)
 {
+	if (_description.size == sz) return;
+	
 	_description.size = sz;
 	
 	bool hasColor = (_description.colorInternalformat != 0) && (_description.colorIsRenderbuffer ||
