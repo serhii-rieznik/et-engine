@@ -20,7 +20,7 @@ namespace et
         class TrackPrivate
         {
 		public:
-			TrackPrivate();
+			TrackPrivate(const std::string& filename);
 			~TrackPrivate();
 			
 			void loadWAVE();
@@ -45,6 +45,7 @@ namespace et
 			Track* owner = nullptr;
 			
 			InputStream::Pointer stream;
+			const std::string& _filename;
 			
 			float duration = 0.0f;
 			
@@ -78,14 +79,14 @@ namespace et
 using namespace et;
 using namespace et::audio;
 
-void checkOGGError(long, const char*);
+void checkOGGError(long, const char*, const char* filename);
 
 /*
  * Track implementation
  */ 
 
 Track::Track(const std::string& fileName) :
-	_private(new TrackPrivate)
+	_private(new TrackPrivate(fileName))
 {
 	setName(fileName);
 	setOrigin(fileName);
@@ -234,7 +235,8 @@ const uint32_t WAVFileChunkID = ET_COMPOSE_UINT32_INVERTED('R', 'I', 'F', 'F');
 const uint32_t WAVDataChunkID = ET_COMPOSE_UINT32_INVERTED('d', 'a', 't', 'a');
 const uint32_t WAVFormatChunkID = ET_COMPOSE_UINT32_INVERTED('f', 'm', 't', ' ');
 
-TrackPrivate::TrackPrivate()
+TrackPrivate::TrackPrivate(const std::string& filename) :
+	_filename(filename)
 {
 	etFillMemory(&buffers, 0, sizeof(buffers));
 	etFillMemory(&oggFile, 0, sizeof(oggFile));
@@ -414,7 +416,7 @@ void TrackPrivate::loadOGG()
 	int result = ov_test_callbacks(stream.ptr(), &oggFile, nullptr, -1, oggCallbacks);
 	if (result < 0)
 	{
-		checkOGGError(result, "ov_test_callbacks");
+		checkOGGError(result, "ov_test_callbacks", _filename.c_str());
 		return;
 	}
 	
@@ -465,7 +467,7 @@ bool TrackPrivate::fillNextOGGBuffer()
 		}
 		else if (lastRead < 0)
 		{
-			checkOGGError(lastRead, "ov_read");
+			checkOGGError(lastRead, "ov_read", _filename.c_str());
 			break;
 		}
 		else
@@ -497,7 +499,7 @@ void TrackPrivate::rewindOGG()
 	if (ov_seekable(&oggFile))
 	{
 		long result = ov_raw_seek(&oggFile, oggStartPosition);
-		checkOGGError(result, "ov_raw_seek");
+		checkOGGError(result, "ov_raw_seek", _filename.c_str());
 	}
 	else
 	{
@@ -512,7 +514,7 @@ void TrackPrivate::rewindOGG()
  * Service functions
  */
 #define CASEOF(A) case A: { log::error("OGG error %s at %s", #A, tag); return; }
-void checkOGGError(long code, const char* tag)
+void checkOGGError(long code, const char* tag, const char* filename)
 {
 	switch (code)
 	{
@@ -535,7 +537,7 @@ void checkOGGError(long code, const char* tag)
 		CASEOF(OV_ENOSEEK)
 			
 		default:
-			log::error("Unknown OGG error: %ld at %s", code, tag);
+			log::error("Unknown OGG error: %ld at %s\nTrack: %s", code, tag, filename);
 			break;
 	}
 }

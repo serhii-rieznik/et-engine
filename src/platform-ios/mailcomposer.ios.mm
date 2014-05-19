@@ -7,6 +7,7 @@
 
 #include <MessageUI/MessageUI.h>
 #include <et/app/application.h>
+#include <et/platform-apple/objc.h>
 #include <et/platform-ios/mailcomposer.h>
 
 using namespace et;
@@ -30,6 +31,8 @@ public:
 
 - (id)initWithPrivatePtr:(MailComposerPrivate*)p;
 - (void)setPrivatePtr:(MailComposerPrivate*)p;
+
+- (void)present;
 
 @end
 
@@ -64,10 +67,20 @@ MailComposerProxy* _sharedInstance = nil;
 - (void)mailComposeController:(MFMailComposeViewController *)controller
 	didFinishWithResult:(MFMailComposeResult)result error:(NSError *)error
 {
-	UIViewController* mainViewController =
-		reinterpret_cast<UIViewController*>(application().renderingContextHandle());
+	UIViewController* mainViewController = (__bridge UIViewController*)
+		reinterpret_cast<void*>(application().renderingContextHandle());
+	[mainViewController dismissViewControllerAnimated:YES completion:nil];
+}
+
+- (void)present
+{
+	UIViewController* mainViewController = (__bridge UIViewController*)
+		reinterpret_cast<void*>(application().renderingContextHandle());
 	
-	[mainViewController dismissModalViewControllerAnimated:YES];
+	[mainViewController presentViewController:_private->viewController animated:YES completion:^{
+		(void)(ET_OBJC_AUTORELEASE(_private->viewController));
+		_private->viewController = nil;
+	}];
 }
 						   
 @end
@@ -78,14 +91,14 @@ MailComposerProxy* _sharedInstance = nil;
  *
  */
 
-MailComposer::MailComposer() : _private(new MailComposerPrivate())
+MailComposer::MailComposer() :
+	_private(new MailComposerPrivate())
 {
-	
 }
 
 MailComposer::~MailComposer()
 {
-	[MailComposerProxy sharedInstanceWithPrivatePtr:0];
+	[MailComposerProxy sharedInstanceWithPrivatePtr:nullptr];
 	delete _private;
 }
 
@@ -110,7 +123,7 @@ void MailComposer::composeEmail(const std::string& recepient, const std::string&
 
 void MailComposer::attachFile(const std::string& attachmentFileName)
 {
-	assert(_private->viewController);
+	ET_ASSERT(_private->viewController);
 
 	NSData* data = [NSData dataWithContentsOfFile:
 		[NSString stringWithUTF8String:attachmentFileName.c_str()]];
@@ -125,16 +138,13 @@ void MailComposer::attachFile(const std::string& attachmentFileName)
 
 void MailComposer::present()
 {
-	UIViewController* mainViewController =
-		reinterpret_cast<UIViewController*>(application().renderingContextHandle());
+	ET_ASSERT(_private->viewController);
 	
-	[mainViewController presentModalViewController:
-		[_private->viewController autorelease] animated:YES];
-	
-	_private->viewController = nil;
+	MailComposerProxy* proxy = [MailComposerProxy sharedInstanceWithPrivatePtr:_private];
+	[proxy performSelectorOnMainThread:@selector(present) withObject:nil waitUntilDone:NO];
 }
 
-bool MailComposer::canSendEmail() const
+bool MailComposer::canSendEmail()
 {
 	return [MFMailComposeViewController canSendMail];
 }
