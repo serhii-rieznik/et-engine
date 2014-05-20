@@ -193,14 +193,16 @@ void printDictionary(Dictionary dict, const std::string& tabs)
 		else if (i.second->valueClass() == ValueClass_Array)
 		{
 			ArrayValue val = i.second;
-			log::info("%s%s =\n%s{", tabs.c_str(), i.first.c_str(), tabs.c_str());
+			log::info("%s%s =", tabs.c_str(), i.first.c_str());
+			log::info("%s{", tabs.c_str());
 			printArray(val, tabs + "\t");
 			log::info("%s}", tabs.c_str());
 		}
 		else if (i.second->valueClass() == ValueClass_Dictionary)
 		{
 			Dictionary val = i.second;
-			log::info("%s%s =\n%s<", tabs.c_str(), i.first.c_str(), tabs.c_str());
+			log::info("%s%s =", tabs.c_str(), i.first.c_str());
+			log::info("%s<", tabs.c_str());
 			printDictionary(val, tabs + "\t");
 			log::info("%s>", tabs.c_str());
 		}

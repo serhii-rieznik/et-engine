@@ -5,8 +5,11 @@
  *
  */
 
-#include <et/core/et.h>
 #include <Foundation/NSString.h>
+#include <Foundation/NSFileHandle.h>
+
+#include <et/core/et.h>
+#include <et/platform-apple/objc.h>
 
 #define PASS_TO_OUTPUTS(FUNC)		for (Output::Pointer output : logOutputs) \
 									{ \
@@ -55,7 +58,7 @@ void ConsoleOutput::debug(const char* fmt, va_list args)
 
 void ConsoleOutput::info(const char* fmt, va_list args)
 {
-	NSLogv([NSString stringWithUTF8String:fmt], args);
+	NSLogv([NSString stringWithFormat:@"%s", fmt], args);
 }
 
 void ConsoleOutput::warning(const char* fmt, va_list args)
