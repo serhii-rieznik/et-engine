@@ -96,10 +96,9 @@ void Application::loaded()
 	
 	_renderContext = new RenderContext(renderContextParams, this);
 	_renderingContextHandle = _renderContext->renderingContextHandle();
+	_runLoop.updateTime(_lastQueuedTimeMSec);
 	
     enterRunLoop();
-	
-	_runLoop.update(_lastQueuedTimeMSec);
 }
 
 void Application::quit(int exitCode)

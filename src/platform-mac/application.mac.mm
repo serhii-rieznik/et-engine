@@ -31,7 +31,7 @@ using namespace et;
 void Application::loaded()
 {
 	_lastQueuedTimeMSec = queryContiniousTimeInMilliSeconds();
-	_runLoop.update(_lastQueuedTimeMSec);
+	_runLoop.updateTime(_lastQueuedTimeMSec);
 	
 	delegate()->setApplicationParameters(_parameters);
 	
@@ -58,6 +58,7 @@ void Application::loaded()
 	(void)ET_OBJC_AUTORELEASE(quitItem);
 	(void)ET_OBJC_AUTORELEASE(applicationMenu);
 			
+	_runLoop.updateTime(_lastQueuedTimeMSec);
 	enterRunLoop();
 }
 
