@@ -198,27 +198,20 @@ void Material::serializeReadable(std::ostream& s) const
 
 	START_BLOCK(kCustomValues, "\t", ; )
 
-	ET_ITERATE(_customIntParameters, auto&, i, SINGLE_BLOCK(kValue, "\t\t",
-		keyValue(s, kType, kInt);
-		keyValue(s, kKey, i.first);
-		keyValue(s, kValue, i.second)))
+	for (const auto& i : _customIntParameters)
+		SINGLE_BLOCK(kValue, "\t\t", keyValue(s, kType, kInt); keyValue(s, kKey, i.first); keyValue(s, kValue, i.second))
 
-	ET_ITERATE(_customFloatParameters, auto&, i, SINGLE_BLOCK(kValue, "\t\t",
-		keyValue(s, kType, kFloat);
-		keyValue(s, kKey, i.first);
-		keyValue(s, kValue, i.second)))
+	for (const auto& i : _customFloatParameters)
+		SINGLE_BLOCK(kValue, "\t\t", keyValue(s, kType, kFloat); keyValue(s, kKey, i.first); keyValue(s, kValue, i.second))
 
-	ET_ITERATE(_customVectorParameters, auto&, i, SINGLE_BLOCK(kValue, "\t\t",
-		keyValue(s, kType, kVector);
-		keyValue(s, kKey, i.first);
-		keyValue(s, kValue, i.second)))
+	for (const auto& i : _customVectorParameters)
+		SINGLE_BLOCK(kValue, "\t\t", keyValue(s, kType, kVector); keyValue(s, kKey, i.first); keyValue(s, kValue, i.second))
 
-	ET_ITERATE(_customStringParameters, auto&, i, SINGLE_BLOCK(kValue, "\t\t",
-		keyValue(s, kType, kString);
-		keyValue(s, kKey, i.first);
-		keyValue(s, kValue, i.second)))
+	for (const auto& i : _customStringParameters)
+		SINGLE_BLOCK(kValue, "\t\t", keyValue(s, kType, kString); keyValue(s, kKey, i.first); keyValue(s, kValue, i.second))
 
-	ET_ITERATE(_customTextureParameters, auto&, i, {
+	for (const auto& i : _customTextureParameters)
+	{
 		if (i.second.valid())
 		{
 			SINGLE_BLOCK(kValue, "\t\t",
@@ -226,7 +219,7 @@ void Material::serializeReadable(std::ostream& s) const
 				keyValue(s, kKey, i.first);
 				keyValue(s, kValue, i.second->origin()))
 		}
-	});
+	};
 
 	END_BLOCK(kCustomValues, "\t")
 	END_BLOCK(etMaterialCstr, "");

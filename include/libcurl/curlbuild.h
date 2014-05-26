@@ -1,4 +1,3 @@
-/* include/curl/curlbuild.h.  Generated from curlbuild.h.in by configure.  */
 #ifndef __CURL_CURLBUILD_H
 #define __CURL_CURLBUILD_H
 /***************************************************************************
@@ -8,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -115,89 +114,84 @@
 /* Configure process defines this to 1 when it finds out that system  */
 /* header file ws2tcpip.h must be included by the external interface. */
 /* #undef CURL_PULL_WS2TCPIP_H */
-
-#if defined(_WIN32)
+#ifdef CURL_PULL_WS2TCPIP_H
 #  ifndef WIN32_LEAN_AND_MEAN
 #    define WIN32_LEAN_AND_MEAN
 #  endif
-// #  include <winsock2.h>
-// #  include <ws2tcpip.h>
+#  include <windows.h>
+#  include <winsock2.h>
+#  include <ws2tcpip.h>
 #endif
 
 /* Configure process defines this to 1 when it finds out that system   */
 /* header file sys/types.h must be included by the external interface. */
-#define CURL_PULL_SYS_TYPES_H 1
-
+#define CURL_PULL_SYS_TYPES_H
 #ifdef CURL_PULL_SYS_TYPES_H
 #  include <sys/types.h>
 #endif
 
 /* Configure process defines this to 1 when it finds out that system */
 /* header file stdint.h must be included by the external interface.  */
-/* #undef CURL_PULL_STDINT_H */
+#define CURL_PULL_STDINT_H
 #ifdef CURL_PULL_STDINT_H
 #  include <stdint.h>
 #endif
 
 /* Configure process defines this to 1 when it finds out that system  */
 /* header file inttypes.h must be included by the external interface. */
-/* #undef CURL_PULL_INTTYPES_H */
+#define CURL_PULL_INTTYPES_H
 #ifdef CURL_PULL_INTTYPES_H
 #  include <inttypes.h>
 #endif
 
 /* Configure process defines this to 1 when it finds out that system    */
 /* header file sys/socket.h must be included by the external interface. */
-
-#if !defined(_WIN32)
-#	define CURL_PULL_SYS_SOCKET_H 1
-#endif
-
+#define CURL_PULL_SYS_SOCKET_H
 #ifdef CURL_PULL_SYS_SOCKET_H
 #  include <sys/socket.h>
 #endif
 
 /* Configure process defines this to 1 when it finds out that system  */
 /* header file sys/poll.h must be included by the external interface. */
-/* #undef CURL_PULL_SYS_POLL_H */
+#define CURL_PULL_SYS_POLL_H
 #ifdef CURL_PULL_SYS_POLL_H
 #  include <sys/poll.h>
 #endif
 
 /* The size of `long', as computed by sizeof. */
-#define CURL_SIZEOF_LONG			sizeof(long)
+#define CURL_SIZEOF_LONG 8
 
 /* Integral data type used for curl_socklen_t. */
-#define CURL_TYPEOF_CURL_SOCKLEN_T	socklen_t
+#define CURL_TYPEOF_CURL_SOCKLEN_T socklen_t
 
 /* The size of `curl_socklen_t', as computed by sizeof. */
-#define CURL_SIZEOF_CURL_SOCKLEN_T	(sizeof(curl_socklen_t))
+#define CURL_SIZEOF_CURL_SOCKLEN_T 4
 
 /* Data type definition of curl_socklen_t. */
-typedef CURL_TYPEOF_CURL_SOCKLEN_T	curl_socklen_t;
+typedef CURL_TYPEOF_CURL_SOCKLEN_T curl_socklen_t;
 
 /* Signed integral data type used for curl_off_t. */
-#define CURL_TYPEOF_CURL_OFF_T long
+#define CURL_TYPEOF_CURL_OFF_T long long
 
 /* Data type definition of curl_off_t. */
-typedef CURL_TYPEOF_CURL_OFF_T	curl_off_t;
+typedef CURL_TYPEOF_CURL_OFF_T curl_off_t;
 
 /* curl_off_t formatting string directive without "%" conversion specifier. */
-#define CURL_FORMAT_CURL_OFF_T "ld"
+#define CURL_FORMAT_CURL_OFF_T "lld"
 
 /* unsigned curl_off_t formatting string without "%" conversion specifier. */
-#define CURL_FORMAT_CURL_OFF_TU	"lu"
+#define CURL_FORMAT_CURL_OFF_TU "llu"
 
 /* curl_off_t formatting string directive with "%" conversion specifier. */
-#define CURL_FORMAT_OFF_T		"%ld"
+#define CURL_FORMAT_OFF_T "%lld"
 
 /* The size of `curl_off_t', as computed by sizeof. */
-#define CURL_SIZEOF_CURL_OFF_T	sizeof(curl_off_t)
+#define CURL_SIZEOF_CURL_OFF_T 8
 
 /* curl_off_t constant suffix. */
-#define CURL_SUFFIX_CURL_OFF_T L
+#define CURL_SUFFIX_CURL_OFF_T LL
 
 /* unsigned curl_off_t constant suffix. */
-#define CURL_SUFFIX_CURL_OFF_TU UL
+#define CURL_SUFFIX_CURL_OFF_TU ULL
 
 #endif /* __CURL_CURLBUILD_H */
