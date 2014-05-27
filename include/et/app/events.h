@@ -77,6 +77,7 @@ namespace et
 	public:
 		virtual void invoke() = 0;
 		virtual void invokeInMainRunLoop(float delay) = 0;
+		virtual void invokeInBackground(float delay) = 0;
 	};
 
 	template <typename RecevierType>
@@ -159,6 +160,7 @@ namespace et
 		void receiverDisconnected(EventReceiver* r);
 		void invoke();
 		void invokeInMainRunLoop(float delay = 0.0f);
+		void invokeInBackground(float delay = 0.0f);
 		
 		bool hasConnections()
 			{ return !_connections.empty(); }

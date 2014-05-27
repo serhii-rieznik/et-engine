@@ -39,6 +39,9 @@ namespace et
 		RunLoop& mainRunLoop()
 			{ return _runLoop; }
 
+		BackgroundThread& backgroundThread()
+			{ return _backgroundThread; }
+
 		RunLoop& backgroundRunLoop()
 			{ return _backgroundThread.runLoop(); }
 		
