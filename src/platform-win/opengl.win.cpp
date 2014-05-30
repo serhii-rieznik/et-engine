@@ -21366,14 +21366,40 @@ int __GLeeGetVersionNumber(char *versionStr)
 
 GLboolean __GLeeGetExtensions(ExtensionList* extList)
 {
+	glGetError();
+
 	int ne = 0;
 	glGetIntegerv(GL_NUM_EXTENSIONS, &ne);
 
-	for (int i = 0; i < ne; ++i)
+	if ((glGetError() != GL_NO_ERROR) || (ne > 0))
 	{
-		const char* extString = reinterpret_cast<const char*>(glGetStringi(GL_EXTENSIONS, i));
+		for (int i = 0; i < ne; ++i)
+		{
+			const char* extString = reinterpret_cast<const char*>(glGetStringi(GL_EXTENSIONS, i));
+			if (extString)
+				__GLeeExtList_add(extList, extString);
+		}
+	}
+	else 
+	{
+		const char* extString = reinterpret_cast<const char*>(glGetString(GL_EXTENSIONS));
 		if (extString)
-			__GLeeExtList_add(extList, extString);
+		{
+			int len = strlen(extString);
+			char* exts = strdup(extString);
+			char* i = exts + len - 1;
+			while (len > 0)
+			{
+				if (*i == 32)
+				{
+					__GLeeExtList_add(extList, i+1);
+					*i = 0;
+				}
+				--len;
+				--i;
+			}
+			__GLeeExtList_add(extList, exts);
+		}
 	}
 
 	const char* platExtStr = __GLeeGetExtStrPlat();
