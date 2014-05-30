@@ -120,7 +120,8 @@ void et::findFiles(const std::string& folder, const std::string& mask, bool recu
 
 	if (recursive)
 	{
-		ET_ITERATE(folderList, const std::string&, i, findFiles(i, mask, recursive, list))
+		for (const std::string& i : folderList)
+			findFiles(i, mask, recursive, list);
 	}
 }
 
@@ -242,7 +243,8 @@ void et::findSubfolders(const std::string& folder, bool recursive, StringList& l
 
 	if (recursive)
 	{
-		ET_ITERATE(folderList, const std::string&, i, findSubfolders(i, true, list))
+		for (const std::string& i : folderList)
+			findSubfolders(i, true, list);
 	}
 
 	list.insert(list.end(), folderList.begin(), folderList.end());

@@ -312,4 +312,5 @@ namespace et
 	
 	size_t bitsPerPixelForType(uint32_t type);
 	size_t bitsPerPixelForTextureFormat(uint32_t internalFormat, uint32_t type);
+	size_t channelsForTextureFormat(uint32_t internalFormat);
 }
