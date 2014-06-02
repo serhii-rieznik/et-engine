@@ -5,6 +5,7 @@
  *
  */
 
+#include <et/opengl/openglcaps.h>
 #include <et/rendering/rendercontext.h>
 #include <et/apiobjects/vertexbufferdata.h>
 
@@ -51,17 +52,29 @@ void VertexBufferData::map(void** data, size_t offset, size_t dataSize, MapBuffe
 {
 	ET_ASSERT(data != nullptr);
 	
-	static const GLenum accessFlags[MapBufferMode_max] =
+	static const GLenum accessFlags2x[MapBufferMode_max] =
+		{ GL_READ_ONLY, GL_WRITE_ONLY, GL_READ_WRITE };
+	
+	static const GLenum accessFlags3x[MapBufferMode_max] =
 		{ GL_MAP_READ_BIT, GL_MAP_WRITE_BIT, GL_MAP_READ_BIT | GL_MAP_WRITE_BIT };
 	
-	GLbitfield access = GL_MAP_UNSYNCHRONIZED_BIT | accessFlags[mode];
-	
-	if (mode == MapBufferMode_WriteOnly)
-		access |= GL_MAP_INVALIDATE_BUFFER_BIT;
-	
 	_rc->renderState().bindBuffer(GL_ARRAY_BUFFER, _vertexBuffer);
-	*data = glMapBufferRange(GL_ARRAY_BUFFER, offset, dataSize, access);
-	checkOpenGLError("glMapBufferRange(GL_ARRAY_BUFFER, %lu, %lu, %d)", offset, dataSize, mode);
+	
+	if (openGLCapabilites().version() == OpenGLVersion_3x)
+	{
+		GLbitfield access = GL_MAP_UNSYNCHRONIZED_BIT | accessFlags3x[mode];
+	
+		if (mode == MapBufferMode_WriteOnly)
+			access |= GL_MAP_INVALIDATE_BUFFER_BIT;
+
+		*data = glMapBufferRange(GL_ARRAY_BUFFER, offset, dataSize, access);
+		checkOpenGLError("glMapBufferRange(GL_ARRAY_BUFFER, %lu, %lu, %d)", offset, dataSize, mode);
+	}
+	else
+	{
+		*data = reinterpret_cast<uint8_t*>(glMapBuffer(GL_ARRAY_BUFFER, accessFlags2x[mode])) + offset;
+		checkOpenGLError("glMapBuffer(GL_ARRAY_BUFFER, %d)", mode);
+	}
 }
 
 void VertexBufferData::unmap()

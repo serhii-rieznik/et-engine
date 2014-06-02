@@ -171,7 +171,9 @@ void RenderState::bindBuffers(const VertexBuffer& vb, const IndexBuffer& ib, boo
 
 void RenderState::bindVertexArray(uint32_t buffer)
 {
-	if ((_currentState.boundVertexArrayObject != buffer) && openGLCapabilites().hasFeature(OpenGLFeature_VertexArrayObjects))
+	ET_ASSERT(openGLCapabilites().hasFeature(OpenGLFeature_VertexArrayObjects));
+	
+	if (_currentState.boundVertexArrayObject != buffer)
 	{
 		_currentState.boundVertexArrayObject = buffer;
 		etBindVertexArray(buffer);
@@ -180,12 +182,24 @@ void RenderState::bindVertexArray(uint32_t buffer)
 
 void RenderState::bindVertexArray(const VertexArrayObject& vao)
 {
-	bindVertexArray(vao.valid() ? vao->glID() : 0);
+	if (openGLCapabilites().hasFeature(OpenGLFeature_VertexArrayObjects))
+	{
+		bindVertexArray(vao.valid() ? vao->glID() : 0);
+	}
+	else
+	{
+		if (vao.valid())
+			bindBuffers(vao->vertexBuffer(), vao->indexBuffer());
+		else
+			bindBuffers(VertexBuffer(), IndexBuffer());
+	}
 }
 
 void RenderState::resetBufferBindings()
 {
-	bindVertexArray(0);
+	if (openGLCapabilites().hasFeature(OpenGLFeature_VertexArrayObjects))
+		bindVertexArray(0);
+	
 	bindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	bindBuffer(GL_ARRAY_BUFFER, 0);
 }
@@ -398,7 +412,7 @@ void RenderState::setBlend(bool enable, BlendState blend)
 
 void RenderState::vertexArrayDeleted(uint32_t buffer)
 {
-	if (_currentState.boundVertexArrayObject == buffer)
+	if ((_currentState.boundVertexArrayObject == buffer) && openGLCapabilites().hasFeature(OpenGLFeature_VertexArrayObjects))
 		bindVertexArray(0);
 }
 
