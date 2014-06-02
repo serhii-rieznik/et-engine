@@ -203,6 +203,25 @@ bool et::removeFile(const std::string& name)
 	return SHFileOperation(&fop) == 0;
 }
 
+bool et::copyFile(const std::string& from, const std::string& to)
+{
+	std::string fromNullTerminated(from.size() + 1, 0);
+	std::copy(from.begin(), from.end(), fromNullTerminated.begin());
+
+	std::string toNullTerminated(to.size() + 1, 0);
+	std::copy(to.begin(), to.end(), toNullTerminated.begin());
+
+	SHFILEOPSTRUCT fop = {};
+
+	fop.hwnd = 0;
+	fop.wFunc = FO_COPY;
+	fop.pFrom = fromNullTerminated.c_str();
+	fop.pTo = toNullTerminated.c_str();
+	fop.fFlags = FOF_NO_UI;
+
+	return SHFileOperation(&fop) == 0;
+}
+
 bool et::removeDirectory(const std::string& name)
 {
 	std::string doubleNullTerminated(name.size() + 1, 0);
