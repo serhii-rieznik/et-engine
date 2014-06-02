@@ -53,20 +53,29 @@ void VertexArrayObjectData::setBuffers(VertexBuffer vb, IndexBuffer ib)
 {
 	_vb = vb;
 	_ib = ib;
-	_rc->renderState().bindVertexArray(_vao);
+	
+	if (openGLCapabilites().hasFeature(OpenGLFeature_VertexArrayObjects))
+		_rc->renderState().bindVertexArray(_vao);
+	
 	_rc->renderState().bindBuffers(_vb, _ib, true);
 }
 
 void VertexArrayObjectData::setVertexBuffer(VertexBuffer vb)
 {
 	_vb = vb;
-	_rc->renderState().bindVertexArray(_vao);
+	
+	if (openGLCapabilites().hasFeature(OpenGLFeature_VertexArrayObjects))
+		_rc->renderState().bindVertexArray(_vao);
+	
 	_rc->renderState().bindBuffers(_vb, _ib, true);
 }
 
 void VertexArrayObjectData::setIndexBuffer(IndexBuffer ib)
 {
 	_ib = ib;
-	_rc->renderState().bindVertexArray(_vao);
+	
+	if (openGLCapabilites().hasFeature(OpenGLFeature_VertexArrayObjects))
+		_rc->renderState().bindVertexArray(_vao);
+	
 	_rc->renderState().bindBuffers(_vb, _ib, true);
 }

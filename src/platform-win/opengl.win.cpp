@@ -16074,6 +16074,7 @@ GLuint __GLeeLink_GL_ARB_draw_instanced(void)
 GLuint __GLeeLink_GL_ARB_framebuffer_object(void)
 {
 	GLint nLinked = 0;
+
 #ifdef __GLEE_GL_ARB_framebuffer_object
 	if ((GLeeFuncPtr_glIsRenderbuffer = (GLEEPFNGLISRENDERBUFFERPROC)__GLeeGetProcAddress("glIsRenderbuffer")) != 0) nLinked++;
 	if ((GLeeFuncPtr_glBindRenderbuffer = (GLEEPFNGLBINDRENDERBUFFERPROC)__GLeeGetProcAddress("glBindRenderbuffer")) != 0) nLinked++;
@@ -16096,8 +16097,10 @@ GLuint __GLeeLink_GL_ARB_framebuffer_object(void)
 	if ((GLeeFuncPtr_glRenderbufferStorageMultisample = (GLEEPFNGLRENDERBUFFERSTORAGEMULTISAMPLEPROC)__GLeeGetProcAddress("glRenderbufferStorageMultisample")) != 0) nLinked++;
 	if ((GLeeFuncPtr_glFramebufferTextureLayer = (GLEEPFNGLFRAMEBUFFERTEXTURELAYERPROC)__GLeeGetProcAddress("glFramebufferTextureLayer")) != 0) nLinked++;
 #endif
+
 	if (nLinked == 20) return GLEE_LINK_COMPLETE;
 	if (nLinked == 0) return GLEE_LINK_FAIL;
+
 	return GLEE_LINK_PARTIAL;
 }
 
@@ -18980,6 +18983,7 @@ GLuint __GLeeLink_GL_NV_vertex_program3(void) { return GLEE_LINK_COMPLETE; }
 GLuint __GLeeLink_GL_EXT_framebuffer_object(void)
 {
 	GLint nLinked = 0;
+
 #ifdef __GLEE_GL_EXT_framebuffer_object
 	if ((GLeeFuncPtr_glIsRenderbufferEXT = (GLEEPFNGLISRENDERBUFFEREXTPROC)__GLeeGetProcAddress("glIsRenderbufferEXT")) != 0) nLinked++;
 	if ((GLeeFuncPtr_glBindRenderbufferEXT = (GLEEPFNGLBINDRENDERBUFFEREXTPROC)__GLeeGetProcAddress("glBindRenderbufferEXT")) != 0) nLinked++;
@@ -18999,6 +19003,7 @@ GLuint __GLeeLink_GL_EXT_framebuffer_object(void)
 	if ((GLeeFuncPtr_glGetFramebufferAttachmentParameterivEXT = (GLEEPFNGLGETFRAMEBUFFERATTACHMENTPARAMETERIVEXTPROC)__GLeeGetProcAddress("glGetFramebufferAttachmentParameterivEXT")) != 0) nLinked++;
 	if ((GLeeFuncPtr_glGenerateMipmapEXT = (GLEEPFNGLGENERATEMIPMAPEXTPROC)__GLeeGetProcAddress("glGenerateMipmapEXT")) != 0) nLinked++;
 #endif
+
 	if (nLinked == 17) return GLEE_LINK_COMPLETE;
 	if (nLinked == 0) return GLEE_LINK_FAIL;
 	return GLEE_LINK_PARTIAL;
@@ -21371,7 +21376,7 @@ GLboolean __GLeeGetExtensions(ExtensionList* extList)
 	int ne = 0;
 	glGetIntegerv(GL_NUM_EXTENSIONS, &ne);
 
-	if ((glGetError() != GL_NO_ERROR) || (ne > 0))
+	if ((glGetError() == GL_NO_ERROR) && (ne > 0))
 	{
 		for (int i = 0; i < ne; ++i)
 		{
