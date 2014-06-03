@@ -209,7 +209,7 @@ namespace et
 			etCopyMemory(&_mutableData[currentSize], values, count * sizeof(T));
 		}
 		
-		void appendData(void* ptr, size_t dataSize)
+		void appendData(const void* ptr, size_t dataSize)
 		{
 			ET_ASSERT(mutableData());
 			ET_ASSERT(ptr);
