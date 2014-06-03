@@ -52,9 +52,6 @@ void VertexBufferData::map(void** data, size_t offset, size_t dataSize, MapBuffe
 {
 	ET_ASSERT(data != nullptr);
 	
-	static const GLenum accessFlags2x[MapBufferMode_max] =
-		{ GL_READ_ONLY, GL_WRITE_ONLY, GL_READ_WRITE };
-	
 	static const GLenum accessFlags3x[MapBufferMode_max] =
 		{ GL_MAP_READ_BIT, GL_MAP_WRITE_BIT, GL_MAP_READ_BIT | GL_MAP_WRITE_BIT };
 	
@@ -70,11 +67,20 @@ void VertexBufferData::map(void** data, size_t offset, size_t dataSize, MapBuffe
 		*data = glMapBufferRange(GL_ARRAY_BUFFER, offset, dataSize, access);
 		checkOpenGLError("glMapBufferRange(GL_ARRAY_BUFFER, %lu, %lu, %d)", offset, dataSize, mode);
 	}
+#if defined(GL_READ_ONLY) && defined(GL_WRITE_ONLY) && defined(GL_READ_WRITE)
 	else
 	{
+		static const GLenum accessFlags2x[MapBufferMode_max] =
+			{ GL_READ_ONLY, GL_WRITE_ONLY, GL_READ_WRITE };
+		
 		*data = reinterpret_cast<uint8_t*>(glMapBuffer(GL_ARRAY_BUFFER, accessFlags2x[mode])) + offset;
 		checkOpenGLError("glMapBuffer(GL_ARRAY_BUFFER, %d)", mode);
 	}
+#else
+	{
+		log::error("Invalid call to glMapBuffer.");
+	}
+#endif
 }
 
 void VertexBufferData::unmap()
