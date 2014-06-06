@@ -420,7 +420,7 @@ void Framebuffer::resize(const vec2i& sz)
 		{
 			auto desc = _depthBuffer->description();
 			desc->size = sz;
-			desc->data.resize(desc->dataSizeForAllMipLevels());
+			desc->data.resize(desc->layersCount * desc->dataSizeForAllMipLevels());
 			_depthBuffer->updateData(_rc, desc);
 			setDepthTarget(_depthBuffer);
 		}

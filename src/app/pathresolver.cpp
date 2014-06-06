@@ -183,7 +183,7 @@ std::string StandardPathResolver::resolveFolderPath(const std::string& input)
 
 void StandardPathResolver::pushSearchPath(const std::string& path)
 {
-	_searchPath.emplace_front(addTrailingSlash(normalizeFilePath(path)));
+	_searchPath.push_front(addTrailingSlash(normalizeFilePath(path)));
 }
 
 void StandardPathResolver::pushSearchPaths(const std::set<std::string>& paths)
