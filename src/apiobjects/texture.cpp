@@ -22,14 +22,9 @@ TextureData::TextureData(RenderContext* rc, TextureDescription::Pointer desc,
 		_wrap = vector3<TextureWrap>(TextureWrap_ClampToEdge);
 #endif
 	
-	generateTexture(rc);
-	
-	if (deferred)
+	if (!deferred)
 	{
-		rc->renderState().bindTexture(defaultBindingUnit, _glID, desc->target, true);
-	}
-	else
-	{
+		generateTexture(rc);
 		build(rc);
 	}
 }
