@@ -628,7 +628,11 @@ size_t et::channelsForTextureFormat(uint32_t internalFormat)
 	case GL_DEPTH_COMPONENT16:
 	case GL_ONE:
 	case GL_RED:
-
+			
+#if defined(GL_LUMINANCE)
+	case GL_LUMINANCE:
+#endif
+			
 #if defined(GL_R8)
 	case GL_R8:
 #endif
@@ -639,7 +643,7 @@ size_t et::channelsForTextureFormat(uint32_t internalFormat)
 
 	case GL_RGBA:
 		return 4;
-
+			
 	default:
 		ET_FAIL_FMT("Channels not defined for format %u", internalFormat);
 		return 0;
