@@ -22,7 +22,6 @@ PointerInputInfo Input::currentPointer()
 	
 	NSWindow* keyWindow = [[NSApplication sharedApplication] keyWindow];
 	NSRect frame = [keyWindow contentRectForFrameRect:[keyWindow frame]];
-//	NSPoint location = [keyWindow convertScreenToBase:[NSEvent mouseLocation]];
 	location = [keyWindow convertRectFromScreen:NSMakeRect(location.x, location.y, 1.0f, 1.0f)].origin;
 	
 	PointerInputInfo result;

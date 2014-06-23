@@ -745,13 +745,14 @@ bool Material::hasString(size_t param) const
 void Material::reloadObject(LoadableObject::Pointer obj, ObjectsCache& cache)
 {
 	ET_FAIL("Material reloading is disabled.");
-	
+	/*
 	clear();
 	
 	InputStream stream(obj->origin(), StreamMode_Text);
 	
 	if (stream.valid())
 		deserializeReadable(stream.stream(), nullptr, cache, getFilePath(obj->origin()), false);
+	*/
 }
 
 void Material::textureDidStartLoading(Texture t)
