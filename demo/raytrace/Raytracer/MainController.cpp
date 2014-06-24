@@ -11,7 +11,7 @@
 using namespace et;
 using namespace rt;
 
-const vec2 samplesPerScreen = vec2(1280.0f / 4.0f, 800.0f / 4.0f);
+const vec2 samplesPerScreen = vec2(1280.0f / 8.0f, 800.0f / 8.0f);
 
 et::IApplicationDelegate* Application::initApplicationDelegate()
 	{ return new MainController(); }
@@ -33,13 +33,16 @@ void MainController::updateTitle()
 
 void MainController::applicationDidLoad(et::RenderContext* rc)
 {
+#if (ET_PLATFORM_WIN)
+	application().pushSearchPath("..\\Data");
+#endif
 	_bounces = _productionBounces;
 	
 	updateTitle();
 	
 	rc->renderingInfoUpdated.connect([this](const et::RenderingInfo& info)
 	{
-		log::info("FPS: %zu", info.averageFramePerSecond);
+		log::info("FPS: %lld", (int64_t)info.averageFramePerSecond);
 	});
 	
 	rc->renderState().setDepthMask(false);
@@ -55,7 +58,7 @@ void MainController::applicationDidLoad(et::RenderContext* rc)
 		_mainCamera.lookAt(70.0f * fromSpherical(_cameraAngles.value().y, _cameraAngles.value().x), vec3(5.0f, -30.0f, -30.0f));
 	});
 	
-	_cameraAngles.setTargetValue(vec2(HALF_PI + 10.0 * TO_RADIANS, 15.5 * TO_RADIANS));
+	_cameraAngles.setTargetValue(vec2(HALF_PI + 10.0f * TO_RADIANS, 15.5f * TO_RADIANS));
 	_cameraAngles.finishInterpolation();
 	_cameraAngles.run();
 	_cameraAngles.updated.invoke();
@@ -104,7 +107,7 @@ void MainController::applicationDidLoad(et::RenderContext* rc)
 	
 	// right
 	_planes.push_back(vec4(-1.0f, 0.0f, 0.0f, d));
-	_planeColors.push_back(3.0f * vec4(0.3, 0.2f, 0.1f, 0.0f));
+	_planeColors.push_back(3.0f * vec4(0.3f, 0.2f, 0.1f, 0.0f));
 	
 	// top
 	_planes.push_back(vec4(0.0f, -1.0f, 0.0f, d));
