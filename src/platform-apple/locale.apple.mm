@@ -44,11 +44,10 @@ std::string locale::dateTimeFromTimestamp(uint64_t interval)
 	[formatter setDateStyle:NSDateFormatterMediumStyle];
 	[formatter setLocale:[NSLocale currentLocale]];
 	return std::string([[formatter stringFromDate:date] cStringUsingEncoding:NSUTF8StringEncoding]);
-	
 }
 
-size_t locale::currentLocale()
+std::string locale::currentLocale()
 {
-    NSString* localeId = [[NSLocale preferredLanguages] objectAtIndex:0];
-	return localeToIdentifier([localeId cStringUsingEncoding:NSUTF8StringEncoding]);
+    NSString* localeId = [[[NSLocale preferredLanguages] objectAtIndex:0] lowercaseString];
+	return std::string([localeId cStringUsingEncoding:NSUTF8StringEncoding]);
 }

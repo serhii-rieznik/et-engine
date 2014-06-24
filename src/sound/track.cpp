@@ -244,12 +244,16 @@ TrackPrivate::TrackPrivate(const std::string& filename) :
 
 	oggCallbacks.read_func = [](void* ptr, size_t size, size_t nmemb, void* datasource) -> size_t
 	{
+		std::streamsize dataRead = 0;
+		
 		InputStream* stream = reinterpret_cast<InputStream*>(datasource);
-		
 		if (stream->valid())
+		{
 			stream->stream().read(reinterpret_cast<char*>(ptr), size * nmemb);
+			return stream->stream().gcount();
+		}
 		
-		return static_cast<size_t>(stream->valid() ? stream->stream().gcount() : 0);
+		return static_cast<size_t>(dataRead);
 	};
 	
 	
@@ -266,7 +270,7 @@ TrackPrivate::TrackPrivate(const std::string& filename) :
 	oggCallbacks.tell_func = [](void* datasource) -> long
 	{
 		InputStream* stream = reinterpret_cast<InputStream*>(datasource);
-		return static_cast<long>(stream->stream().tellg());
+		return stream->valid() ? static_cast<long>(stream->stream().tellg()) : 0;
 	};
 }
 

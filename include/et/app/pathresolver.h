@@ -58,8 +58,8 @@ namespace et
 		std::string _cachedLanguage;
 		std::string _cachedScreenScale;
 		std::string _baseFolder;
+		std::string _cachedLocale;
 		
-		size_t _cachedLocale = 0;
 		size_t _cachedScreenScaleFactor = 0;
 	};
 }
