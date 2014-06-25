@@ -15,7 +15,7 @@ const char KeyChar = '\"';
 const char NewLineChar = '\n';
 
 Locale::Locale() :
-	_locale(locale::currentLocale())
+	_currentLocale(locale::currentLocale())
 {
 }
 
@@ -34,8 +34,8 @@ bool Locale::loadLanguageFile(const std::string& fileName)
 bool Locale::loadCurrentLanguageFile(const std::string& rootFolder, const std::string& extension)
 {
 	std::string basePath = addTrailingSlash(rootFolder);
-	std::string lang = locale::localeLanguage(_locale);
-	std::string subLang = locale::localeSubLanguage(_locale);
+	std::string lang = locale::localeLanguage(_currentLocale);
+	std::string subLang = locale::localeSubLanguage(_currentLocale);
 	
 	std::string fileName = basePath + lang + "-" + subLang + extension;
 	if (fileExists(fileName))
@@ -135,6 +135,8 @@ void Locale::parseLanguageFile(const std::string& fileName)
 	i = 0;
 	while (source[i] && (i < source.size()) && source[i+1])
 		i = (source[i] == KeyChar) ? parseKey(source, i+1) : ++i;
+	
+	localeLoaded.invokeInMainRunLoop(_currentLocale);
 }
 
 size_t Locale::parseKey(const StringDataStorage& data, size_t index)
@@ -217,13 +219,13 @@ size_t Locale::parseComment(const StringDataStorage& data, size_t index)
 
 void Locale::setCurrentLocale(const std::string& l)
 {
-	ET_ASSERT(l.size() >= 2);
-	_locale = locale::localeToIdentifier(l);
+	_currentLocale = l;
 }
 
 void Locale::printContent()
 {
-	log::info("Locale: ");
+	log::info("Locale:");
+	
 	for (const auto& i : _localeMap)
 		log::info("%s = %s", i.first.c_str(), i.second.c_str());
 }
@@ -233,38 +235,14 @@ std::string et::localized(const std::string& key)
 	return Locale::instance().localizedString(key); 
 }
 
-size_t locale::localeToIdentifier(const std::string& localeId)
+std::string locale::localeLanguage(const std::string& key)
 {
-	auto lowCase = lowercase(localeId);
-	
-	int32_t result = 0;
-	
-	if (lowCase.size() > 0)
-		result |= lowCase[0];
-	
-	if (lowCase.size() > 1)
-		result |= lowCase[1] << 8;
-	
-	if ((lowCase.size() >= 5) && ((lowCase[2] == '-') || (lowCase[2] == '_')))
-		result |= (lowCase[3] << 16) | (lowCase[4] << 24);
-	else
-		result |= (result & 0xffff) << 16;
-	
-	return static_cast<size_t>(result);
+	auto dashPos = key.find('-');
+	return (dashPos == std::string::npos) ? key : key.substr(0, dashPos);
 }
 
-std::string locale::localeLanguage(size_t locale)
+std::string locale::localeSubLanguage(const std::string& key)
 {
-	char lang[3] = { static_cast<char>(locale & 0x000000ff),
-		static_cast<char>((locale & 0x0000ff00) >> 8), 0 };
-	
-	return std::string(lang);
-}
-
-std::string locale::localeSubLanguage(size_t locale)
-{
-	char lang[3] = { static_cast<char>((locale & 0x00ff0000) >> 16),
-		static_cast<char>((locale & 0xff000000) >> 24), 0 };
-	
-	return std::string(lang);
+	auto dashPos = key.find('-');
+	return (dashPos == std::string::npos) ? std::string() : key.substr(dashPos + 1);
 }
