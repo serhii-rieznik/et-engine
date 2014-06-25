@@ -11,7 +11,7 @@
 using namespace et;
 using namespace rt;
 
-const vec2 samplesPerScreen = vec2(1280.0f / 4.0f, 800.0f / 4.0f);
+const vec2 samplesPerScreen = vec2(16.0f);
 
 et::IApplicationDelegate* Application::initApplicationDelegate()
 	{ return new MainController(); }
@@ -21,7 +21,7 @@ et::ApplicationIdentifier MainController::applicationIdentifier() const
 
 void MainController::setRenderContextParameters(et::RenderContextParameters& p)
 {
-	p.contextSize = vec2i(1280, 800);
+	p.contextSize = vec2i(512);
 	p.contextBaseSize = p.contextSize;
 	p.swapInterval = 1;
 }
@@ -83,27 +83,38 @@ void MainController::applicationDidLoad(et::RenderContext* rc)
 	_initialOffset = _offset;
 
 	float d = -40.0f;
-	float r1 = 12.0f;
-	float r2 = 9.0f;
 	float r3 = 5.0f;
+	float ballsPerRow = 6.0f;
 	
 	_lightPosition = vec3(0.0f, -0.5f * d, 0.75f * d);
 	
-	_spheres.push_back(vec4(-1.25f * r1, d + r1, -r1, r1));
-	_sphereColors.push_back(vec4(1.0f, 0.5f, 0.5f, 0.0f));
+	vec3 pos(d + 2.0f * r3);
+	vec3 pos0 = pos;
+	vec3 delta(-2.0f * d / ballsPerRow);
 	
-	_spheres.push_back(vec4(r2, d + r2, r2, r2));
-	_sphereColors.push_back(vec4(0.5f, 1.5f, 1.0f, 0.0f));
+	for (int i = 0; i < 50; ++i)
+	{
+		_spheres.push_back(vec4(pos, r3));
+		_sphereColors.push_back(vec4(randomFloat(0.5f, 1.5f), randomFloat(0.5f, 1.5f), randomFloat(0.5f, 1.5f), 0.0f));
+		pos.x += delta.x;
+		if (pos.x >= -d - r3)
+		{
+			pos.x = pos0.x;
+			pos.z += delta.z;
+			if (pos.z >= -d - r3)
+			{
+				pos.z = pos0.z;
+				pos.y += delta.y;
+			}
+		}
+	}
 
-	_spheres.push_back(vec4(-d - r3, d + r3, d + r3, r3));
-	_sphereColors.push_back(vec4(0.5f, 0.5f, 1.0f, 0.0f));
-	
 	// left
-	_planes.push_back(vec4(1.0f, 0.0f, 0.0f, d));
+	_planes.push_back(vec4(normalize(vec3(1.0f, 0.25f, 0.0f)), d));
 	_planeColors.push_back(3.0f * vec4(0.1f, 0.2f, 0.3f, 0.0f));
 	
 	// right
-	_planes.push_back(vec4(-1.0f, 0.0f, 0.0f, d));
+	_planes.push_back(vec4(normalize(vec3(-1.0f, 0.25f, 0.0f)), d));
 	_planeColors.push_back(3.0f * vec4(0.3, 0.2f, 0.1f, 0.0f));
 	
 	// top
@@ -115,11 +126,11 @@ void MainController::applicationDidLoad(et::RenderContext* rc)
 	_planeColors.push_back(vec4(1.0f/3.0f, 0.0f));
 
 	// back
-	_planes.push_back(vec4(0.0f, 0.0f, 1.0f, d));
+	_planes.push_back(vec4(normalize(vec3(0.0f, 0.25f, 1.0f)), d));
 	_planeColors.push_back(vec4(0.75f, 0.0f));
 	
 	// front
-	_planes.push_back(vec4(0.0f, 0.0f, -1.0f, d));
+	_planes.push_back(vec4(normalize(vec3(0.0f, 0.25f, -1.0f)), d));
 	_planeColors.push_back(vec4(3.0f/3.0f, 0.0f));
 }
 
