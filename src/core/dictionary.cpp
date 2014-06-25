@@ -10,7 +10,7 @@
 
 using namespace et;
 
-void printDictionary(Dictionary dict, const std::string& tabs);
+void printDictionary(const Dictionary& dict, const std::string& tabs);
 void printArray(ArrayValue arr, const std::string& tabs);
 
 void Dictionary::printContent() const
@@ -171,7 +171,7 @@ void printArray(ArrayValue arr, const std::string& tabs)
 	}
 }
 
-void printDictionary(Dictionary dict, const std::string& tabs)
+void printDictionary(const Dictionary& dict, const std::string& tabs)
 {
 	for (auto i : dict->content)
 	{

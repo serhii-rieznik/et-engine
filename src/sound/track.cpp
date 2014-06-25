@@ -45,7 +45,7 @@ namespace et
 			Track* owner = nullptr;
 			
 			InputStream::Pointer stream;
-			const std::string& _filename;
+			std::string _filename;
 			
 			float duration = 0.0f;
 			
@@ -250,7 +250,7 @@ TrackPrivate::TrackPrivate(const std::string& filename) :
 		if (stream->valid())
 		{
 			stream->stream().read(reinterpret_cast<char*>(ptr), size * nmemb);
-			return stream->stream().gcount();
+			dataRead = stream->stream().gcount();
 		}
 		
 		return static_cast<size_t>(dataRead);
@@ -456,6 +456,9 @@ void TrackPrivate::loadOGG()
 
 bool TrackPrivate::fillNextOGGBuffer()
 {
+	if (stream.invalid())
+		return false;
+	
 	BinaryDataStorage data(pcmBufferSize, 0);
 	auto& inStream = stream->stream();
 	
@@ -498,6 +501,8 @@ bool TrackPrivate::fillNextOGGBuffer()
 
 void TrackPrivate::rewindOGG()
 {
+	if (stream.invalid()) return;
+	
 	stream->stream().clear();
 
 	if (ov_seekable(&oggFile))
