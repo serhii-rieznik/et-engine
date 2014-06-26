@@ -247,7 +247,7 @@ TrackPrivate::TrackPrivate(const std::string& filename) :
 		std::streamsize dataRead = 0;
 		
 		InputStream* stream = reinterpret_cast<InputStream*>(datasource);
-		if (stream->valid())
+		if (stream->valid() && stream->stream().good())
 		{
 			stream->stream().read(reinterpret_cast<char*>(ptr), size * nmemb);
 			dataRead = stream->stream().gcount();
@@ -261,7 +261,7 @@ TrackPrivate::TrackPrivate(const std::string& filename) :
 	{
 		InputStream* stream = reinterpret_cast<InputStream*>(datasource);
 		
-		if (stream->valid())
+		if (stream->valid() && stream->stream().good())
 			stream->stream().seekg(p1, static_cast<std::ios::seekdir>(p2));
 		
 		return stream->valid() ? 0 : -1;
@@ -270,7 +270,7 @@ TrackPrivate::TrackPrivate(const std::string& filename) :
 	oggCallbacks.tell_func = [](void* datasource) -> long
 	{
 		InputStream* stream = reinterpret_cast<InputStream*>(datasource);
-		return stream->valid() ? static_cast<long>(stream->stream().tellg()) : 0;
+		return (stream->valid() && stream->stream().good()) ? static_cast<long>(stream->stream().tellg()) : 0;
 	};
 }
 
