@@ -13,7 +13,7 @@
 using namespace et;
 using namespace rt;
 
-const vec2i frameSize = vec2i(1280, 800);
+const vec2i frameSize = vec2i(1920, 1200);
 
 const vec2i rectSize = vec2i(80);
 
