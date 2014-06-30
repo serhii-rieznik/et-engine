@@ -6,7 +6,9 @@ uniform sampler2D noiseTexture;
 
 uniform mat4 mModelViewProjectionInverse;
 uniform vec3 vCamera;
-uniform vec3 vPrimaryLight;
+
+uniform vec4 lightColor;
+uniform vec4 lightSphere;
 
 uniform vec4 planes[MAX_OBJECTS];
 uniform vec4 spheres[MAX_OBJECTS];
@@ -17,11 +19,12 @@ uniform vec4 sphereColors[MAX_OBJECTS];
 uniform int numPlanes;
 uniform int numSpheres;
 uniform int maxBounces;
+uniform int maxSamples;
+
+uniform float exposure;
 
 etFragmentIn vec2 vertex;
 
-const float lightSphereRadius = 10.0f;
-const vec4 lightColor = vec4(25.0);
 const int missingObjectIndex = -1;
 const int lightObjectIndex = -2;
 
@@ -96,13 +99,13 @@ int findFirstIntersection(in vec3 origin, in vec3 direction, out vec3 intersecti
 	}
 	
 #if (ENABLE_SPHERICAL_LIGHT)
-	if (raySphere(origin, direction, vec4(vPrimaryLight, lightSphereRadius), point, incidence))
+	if (raySphere(origin, direction, lightSphere, point, incidence))
 	{
 		if (dot(incidence, incidence) < minDistance)
 		{
 			color = lightColor;
 			intersectionPoint = point;
-			normal = intersectionPoint - vPrimaryLight.xyz;
+			normal = intersectionPoint - lightSphere.xyz;
 			result = lightObjectIndex;
 		}
 	}
@@ -112,7 +115,7 @@ int findFirstIntersection(in vec3 origin, in vec3 direction, out vec3 intersecti
 	return result;
 }
 
-vec4 computeColorSequence(in vec3 origin, in vec3 direction)
+vec4 computeColorSequence(in vec3 origin, in vec3 direction, in float t, in vec4 startColor)
 {
 	vec3 hitPoint;
 	vec3 hitNormal;
@@ -121,29 +124,23 @@ vec4 computeColorSequence(in vec3 origin, in vec3 direction)
 	int bounces = 0;
 	int objectIndex = 0;
 	
-	vec4 result = vec4(1.0);
+	vec4 result = startColor;
 	
 	while ((bounces < maxBounces) && (objectIndex >= 0))
 	{
 		objectIndex = findFirstIntersection(origin, direction, hitPoint, hitNormal, hitColor);
+		result *= hitColor;
 		direction = normalize(reflect(hitPoint - origin, hitNormal));
 		origin = hitPoint;
-		result *= hitColor;
 		++bounces;
 	}
-
+	
 	result.w = 1.0;
 	return result;
 }
 
-vec4 computeDiffuseColor(in vec3 point, in vec3 normal, float t)
+vec4 computeFirstBounce(in vec3 point, in vec3 normal, float t, in vec4 startColor)
 {
-#if (PRODUCTION_RENDER)
-	const int maxSamples = 2048;
-#else
-	int maxSamples = 2 * maxBounces * maxBounces;
-#endif
-	
 	vec3 samplingNormal = normal;
 	
 	vec4 result = vec4(0.0);
@@ -152,7 +149,7 @@ vec4 computeDiffuseColor(in vec3 point, in vec3 normal, float t)
 		vec3 randomNormal = normalize(etTexture2D(noiseTexture, t * (point.xy - samplingNormal.yz + samplingNormal.zx)).xyz - 0.5);
 		float LdotN = dot(randomNormal, normal);
 		samplingNormal = sign(LdotN) * randomNormal;
-		result += abs(LdotN) * computeColorSequence(point, samplingNormal);
+		result += abs(LdotN) * computeColorSequence(point, samplingNormal, t, startColor);
 	}
 	
 	return result / result.w;
@@ -164,7 +161,7 @@ vec4 pathTrace(in vec3 origin, in vec3 direction, in float t)
 	vec3 hitNormal;
 	vec4 hitColor;
 	findFirstIntersection(origin, direction, hitPoint, hitNormal, hitColor);
-	return 1.0 - exp(-0.5 * (hitColor * computeDiffuseColor(hitPoint, hitNormal, t)));
+	return 1.0 - exp(-exposure * computeFirstBounce(hitPoint, hitNormal, t, hitColor));
 }
 	
 vec4 performPT(vec2 coord, float t)

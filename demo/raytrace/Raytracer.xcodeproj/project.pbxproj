@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		A54349AA195D969D002DF03A /* RaytraceThread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A54349A9195D969D002DF03A /* RaytraceThread.cpp */; };
+		A54349AC195D9726002DF03A /* RaytraceScene.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A54349AB195D9726002DF03A /* RaytraceScene.cpp */; };
+		A54349B0195D9AEB002DF03A /* Raytracer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A54349AF195D9AEB002DF03A /* Raytracer.cpp */; };
 		A5D3D36C1955B14000E621A7 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5D3D36B1955B14000E621A7 /* main.cpp */; };
 		A5D3D3751955B2A800E621A7 /* MainController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5D3D3741955B2A800E621A7 /* MainController.cpp */; };
 		A5D3D4801955B4AE00E621A7 /* framebuffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5D3D4141955B4AE00E621A7 /* framebuffer.cpp */; };
@@ -119,6 +122,12 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		A54349A8195D967B002DF03A /* RaytraceThread.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RaytraceThread.h; sourceTree = "<group>"; };
+		A54349A9195D969D002DF03A /* RaytraceThread.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = RaytraceThread.cpp; sourceTree = "<group>"; };
+		A54349AB195D9726002DF03A /* RaytraceScene.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = RaytraceScene.cpp; sourceTree = "<group>"; };
+		A54349AD195D972D002DF03A /* RaytraceScene.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RaytraceScene.h; sourceTree = "<group>"; };
+		A54349AE195D9AE5002DF03A /* Raytracer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Raytracer.h; sourceTree = "<group>"; };
+		A54349AF195D9AEB002DF03A /* Raytracer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Raytracer.cpp; sourceTree = "<group>"; };
 		A5D3D3681955B14000E621A7 /* Raytracer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Raytracer.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A5D3D36B1955B14000E621A7 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		A5D3D3731955B29E00E621A7 /* MainController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MainController.h; sourceTree = "<group>"; };
@@ -392,8 +401,14 @@
 			isa = PBXGroup;
 			children = (
 				A5D3D36B1955B14000E621A7 /* main.cpp */,
+				A54349AD195D972D002DF03A /* RaytraceScene.h */,
+				A54349AB195D9726002DF03A /* RaytraceScene.cpp */,
 				A5D3D3731955B29E00E621A7 /* MainController.h */,
 				A5D3D3741955B2A800E621A7 /* MainController.cpp */,
+				A54349A8195D967B002DF03A /* RaytraceThread.h */,
+				A54349A9195D969D002DF03A /* RaytraceThread.cpp */,
+				A54349AE195D9AE5002DF03A /* Raytracer.h */,
+				A54349AF195D9AEB002DF03A /* Raytracer.cpp */,
 				A5D3D4E61955B62500E621A7 /* Info.plist */,
 			);
 			path = Raytracer;
@@ -1113,6 +1128,7 @@
 				A5D3D48E1955B4AE00E621A7 /* events.cpp in Sources */,
 				A5D3D4C71955B4AE00E621A7 /* cameraelement.cpp in Sources */,
 				A5D3D4971955B4AE00E621A7 /* dictionary.cpp in Sources */,
+				A54349AA195D969D002DF03A /* RaytraceThread.cpp in Sources */,
 				A5D3D4BC1955B4AE00E621A7 /* mutex.unix.cpp in Sources */,
 				A5D3D4841955B4AE00E621A7 /* programfactory.cpp in Sources */,
 				A5D3D4C91955B4AE00E621A7 /* material.cpp in Sources */,
@@ -1125,6 +1141,7 @@
 				A5D3D4D51955B4AE00E621A7 /* indexarray.cpp in Sources */,
 				A5D3D4CA1955B4AE00E621A7 /* mesh.cpp in Sources */,
 				A5D3D4CF1955B4AE00E621A7 /* supportmesh.cpp in Sources */,
+				A54349AC195D9726002DF03A /* RaytraceScene.cpp in Sources */,
 				A5D3D4961955B4AE00E621A7 /* conversion.cpp in Sources */,
 				A5D3D4A31955B4AE00E621A7 /* jpegloader.cpp in Sources */,
 				A5D3D4A51955B4AE00E621A7 /* pvrdecompressor.cpp in Sources */,
@@ -1144,6 +1161,7 @@
 				A5D3D48F1955B4AE00E621A7 /* invocation.cpp in Sources */,
 				A5D3D4821955B4AE00E621A7 /* indexbufferdata.cpp in Sources */,
 				A5D3D4B91955B4AE00E621A7 /* sound.openal.mac.mm in Sources */,
+				A54349B0195D9AEB002DF03A /* Raytracer.cpp in Sources */,
 				A5D3D4A91955B4AE00E621A7 /* input.cpp in Sources */,
 				A5D3D48D1955B4AE00E621A7 /* backgroundthread.cpp in Sources */,
 				A5D3D4A81955B4AE00E621A7 /* gestures.cpp in Sources */,
@@ -1247,6 +1265,7 @@
 		A5D3D3701955B14000E621A7 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					"/Applications/Xcode6-Beta2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include",
@@ -1270,6 +1289,7 @@
 		A5D3D3711955B14000E621A7 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					"/Applications/Xcode6-Beta2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include",
