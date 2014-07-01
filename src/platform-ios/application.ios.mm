@@ -34,26 +34,34 @@ void Application::platformFinalize()
 
 void Application::platformActivate()
 {
+#if !defined(ET_EMBEDDED_APPLICATION)
 	etApplicationDelegate* appDelegate = [[UIApplication sharedApplication] delegate];
 	[appDelegate beginUpdates];
+#endif
 }
 
 void Application::platformDeactivate()
 {
+#if !defined(ET_EMBEDDED_APPLICATION)
 	etApplicationDelegate* appDelegate = [[UIApplication sharedApplication] delegate];
 	[appDelegate endUpdates];
+#endif
 }
 
 void Application::platformSuspend()
 {
+#if !defined(ET_EMBEDDED_APPLICATION)
 	etApplicationDelegate* appDelegate = [[UIApplication sharedApplication] delegate];
 	[appDelegate endUpdates];
+#endif
 }
 
 void Application::platformResume()
 {
+#if !defined(ET_EMBEDDED_APPLICATION)
 	etApplicationDelegate* appDelegate = [[UIApplication sharedApplication] delegate];
 	[appDelegate beginUpdates];
+#endif
 }
 
 int Application::platformRun(int argc, char* argv[])

@@ -110,8 +110,22 @@ Framebuffer::Framebuffer(RenderContext* rc, uint32_t fboId, const std::string& a
 	if (glIsFramebuffer(fboId))
 	{
 		rc->renderState().bindFramebuffer(fboId);
-		glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_WIDTH, &_description.size.x);
-		glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_HEIGHT, &_description.size.y);
+		
+		GLint attachmentType = 0;
+		glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE, &attachmentType);
+		checkOpenGLError("glGetFramebufferAttachmentParameteriv(GL_RENDERBUFFER, GL_COLOR_ATTACHMENT0, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE, ...)");
+		
+		if (attachmentType == GL_RENDERBUFFER)
+		{
+			glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_WIDTH, &_description.size.x);
+			checkOpenGLError("glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_WIDTH, ...)");
+			glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_HEIGHT, &_description.size.y);
+			checkOpenGLError("glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_HEIGHT, ...)");
+		}
+		else if (attachmentType == GL_TEXTURE)
+		{
+			log::info("Unable to determine Framebuffer %s dimensions.", aName.c_str());
+		}
 	}
 	else if (fboId == 0)
 	{

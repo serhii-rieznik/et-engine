@@ -5,6 +5,7 @@
  *
  */
 
+#include <et/opengl/opengl.h>
 #include <et/app/application.h>
 #include <et/platform-ios/imagepicker.h>
 
