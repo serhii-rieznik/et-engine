@@ -18,8 +18,6 @@ vec4 performRaytracing(const RaytraceScene& scene, const ray3d& ray);
 vec4 computeColorSequence(const RaytraceScene& scene, ray3d ray, const SceneObject& object,
 	int lightBounce, std::vector<SceneObject>& hits);
 
-vec4 computeBounce(const RaytraceScene& scene, const ray3d& ray, const SceneObject& object, int lightBounce);
-
 int findNearestIntersection(const RaytraceScene& scene, const ray3d& ray, vec4& color, vec3& normal, vec3& point);
 int findNearestIntersection(const RaytraceScene& scene, const ray3d& ray, vec3& normal, vec3& point);
 
@@ -86,30 +84,6 @@ int findNearestIntersection(const RaytraceScene& scene, const ray3d& ray, vec4& 
 	
 	if (result != RaytraceScene::missingObject)
 		normal.normalize();
-	
-	return result;
-}
-
-vec4 computeColorSequence(const RaytraceScene& scene, ray3d ray, const SceneObject& object, int lightBounce, std::vector<SceneObject>& hits)
-{
-	return vec4(0.0f);
-}
-
-vec4 computeBounce(const RaytraceScene& scene, const ray3d& ray, const SceneObject& object, int lightBounce)
-{
-	if (lightBounce >= scene.options.bounces)
-		return object.color;
-	
-	ray3d sampleRay(ray);
-	vec4 result = vec4(0.0);
-	
-	std::vector<SceneObject> hits;
-	for (int i = 0; i < scene.options.samples; ++i)
-	{
-		sampleRay.direction = randomVectorOnHemisphere(ray.direction, object.roughness);
-		result += dot(sampleRay.direction, ray.direction) *
-			computeColorSequence(scene, sampleRay, object, lightBounce, hits);
-	}
 	
 	return result;
 }
