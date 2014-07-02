@@ -7,6 +7,7 @@
 
 #include <Windows.h>
 #include <Shlobj.h>
+#include <ShellAPI.h>
 #include <et/core/tools.h>
 #include <et/core/filesystem.h>
 #include <et/core/containers.h>

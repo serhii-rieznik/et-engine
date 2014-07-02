@@ -6,6 +6,7 @@
  */
 
 #include <Windows.h>
+#include <CommDlg.h>
 #include <et/platform/platformtools.h>
 
 using namespace et;

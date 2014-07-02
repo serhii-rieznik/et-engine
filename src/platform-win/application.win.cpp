@@ -6,6 +6,7 @@
  */
 
 #include <Windows.h>
+#include <MMSystem.h>
 #include <et/rendering/rendercontext.h>
 #include <et/app/application.h>
 
