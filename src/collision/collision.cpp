@@ -201,19 +201,17 @@ bool et::intersect::rayPlane(const ray3d& r, const plane& p, vec3* intersection_
 bool et::intersect::rayTriangle(const ray3d& r, const triangle& t, vec3* intersection_pt)
 {
 	float d = dot(r.direction, t.normalizedNormal());
-	if (d >= 0.0f) return false;
-	
-	float a = dot(t.normalizedNormal(), (t.normalizedNormal() * dot(t.normalizedNormal(), t.v1())) - r.origin) / d;
-	if (a <= 0.0f) return false;
-	
-	vec3 ip = r.origin + a * r.direction;
-	if (pointInsideTriangle(ip, t))
+	if (d < 0.0f)
 	{
-		if (intersection_pt)
-			*intersection_pt = ip;
-		return true;
+		float a = dot(t.normalizedNormal(), (t.normalizedNormal() * dot(t.normalizedNormal(), t.v1())) - r.origin) / d;
+		vec3 ip = r.origin + a * r.direction;
+		if (pointInsideTriangle(ip, t))
+		{
+			if (intersection_pt)
+				*intersection_pt = ip;
+			return true;
+		}
 	}
-
 	return false;
 }
 

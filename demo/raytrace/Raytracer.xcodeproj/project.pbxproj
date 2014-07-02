@@ -403,12 +403,12 @@
 				A5D3D36B1955B14000E621A7 /* main.cpp */,
 				A54349AD195D972D002DF03A /* RaytraceScene.h */,
 				A54349AB195D9726002DF03A /* RaytraceScene.cpp */,
+				A54349AE195D9AE5002DF03A /* Raytracer.h */,
+				A54349AF195D9AEB002DF03A /* Raytracer.cpp */,
 				A5D3D3731955B29E00E621A7 /* MainController.h */,
 				A5D3D3741955B2A800E621A7 /* MainController.cpp */,
 				A54349A8195D967B002DF03A /* RaytraceThread.h */,
 				A54349A9195D969D002DF03A /* RaytraceThread.cpp */,
-				A54349AE195D9AE5002DF03A /* Raytracer.h */,
-				A54349AF195D9AEB002DF03A /* Raytracer.cpp */,
 				A5D3D4E61955B62500E621A7 /* Info.plist */,
 			);
 			path = Raytracer;
@@ -1290,6 +1290,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COMBINE_HIDPI_IMAGES = YES;
+				GCC_OPTIMIZATION_LEVEL = fast;
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					"/Applications/Xcode6-Beta2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include",

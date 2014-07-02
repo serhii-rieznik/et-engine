@@ -12,18 +12,42 @@
 
 namespace rt
 {
+	struct Intersection
+	{
+	public:
+		enum : int
+		{
+			missingObject = -1
+		};
+		
+		typedef std::vector<Intersection> List;
+		
+	public:
+		int objectIndex = missingObject;
+		
+		et::ray3d outgoingRay;
+		et::vec3 hitPoint;
+		et::vec3 hitNormal;
+		
+		Intersection() { }
+		
+		Intersection(int o) :
+			objectIndex(o) { }
+	};
+	
 	struct SceneObject
 	{
 		enum Class
 		{
 			Class_None,
 			Class_Sphere,
-			Class_SphericalLight,
 			Class_Plane,
+			Class_Triangle,
 		};
 		
 		Class objectClass = Class_None;
 		
+		et::triangle tri;
 		et::vec4 equation;
 		et::vec4 color;
 		et::vec4 emissive;
@@ -37,6 +61,12 @@ namespace rt
 		{
 			roughness = color.w;
 		}
+
+		SceneObject(Class cls, const et::vec3& p1, const et::vec3& p2, const et::vec3& p3, const et::vec4& c,
+			const et::vec4& em) : objectClass(cls), tri(p1, p2, p3), color(c), emissive(em)
+		{
+			roughness = color.w;
+		}
 		
 		bool intersectsRay(const et::ray3d&, et::vec3& point) const;
 		et::vec3 normalFromPoint(const et::vec3&) const;
@@ -47,11 +77,6 @@ namespace rt
 	struct RaytraceScene
 	{
 	public:
-		enum : int
-		{
-			missingObject = -1
-		};
-		
 		RaytraceScene();
 		
 		const SceneObject& objectAtIndex(int) const;
@@ -73,7 +98,7 @@ namespace rt
 		{
 			int samples = 16;
 			int bounces = 10;
-			float exposure = 1.0f;
+			float exposure = 1.5f;
 			
 		} options;
 		

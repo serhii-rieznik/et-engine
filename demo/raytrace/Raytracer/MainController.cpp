@@ -13,7 +13,7 @@
 using namespace et;
 using namespace rt;
 
-const vec2i frameSize = vec2i(1920, 1200);
+const vec2i frameSize = vec2i(1280, 800);
 
 const vec2i rectSize = vec2i(80);
 
@@ -38,7 +38,8 @@ void MainController::setRenderContextParameters(et::RenderContextParameters& p)
 
 void MainController::updateTitle()
 {
-	application().setTitle("Bounces: " + intToStr(_scene.options.bounces));
+	application().setTitle("B/s: " + intToStr(_scene.options.bounces) +
+		"/" + intToStr(_scene.options.samples));
 }
 
 void MainController::applicationDidLoad(et::RenderContext* rc)
@@ -49,12 +50,11 @@ void MainController::applicationDidLoad(et::RenderContext* rc)
 	
 	_scene.options.bounces = _productionBounces;
 	_scene.options.samples = _productionSamples;
+	_scene.options.exposure = 1.0f;
 	updateTitle();
 	
-	rc->renderingInfoUpdated.connect([this](const et::RenderingInfo& info)
-	{
-		log::info("FPS: %lld", (int64_t)info.averageFramePerSecond);
-	});
+//	rc->renderingInfoUpdated.connect([this](const et::RenderingInfo& info)
+//	{ log::info("FPS: %lld", (int64_t)info.averageFramePerSecond); });
 	
 	rc->renderState().setDepthMask(false);
 	
@@ -81,14 +81,13 @@ void MainController::applicationDidLoad(et::RenderContext* rc)
 	
 	_cameraAngles.updated.connect([this]()
 	{
-		_scene.camera.lookAt(70.0f * fromSpherical(_cameraAngles.value().y, _cameraAngles.value().x) - vec3(0.0f, 5.0f, 0.0f),
-			vec3(7.5f, -16.0f, -0.0f));
+		_scene.camera.lookAt(120.0f * fromSpherical(_cameraAngles.value().y, _cameraAngles.value().x));
 		
 		if (!_enableGPURaytracing && (_scene.options.bounces == _previewBounces))
 			startCPUTracing();
 	});
 	
-	_cameraAngles.setTargetValue(vec2(-HALF_PI + 10.0f * TO_RADIANS, 15.5f * TO_RADIANS));
+	_cameraAngles.setTargetValue(vec2(HALF_PI, 0.0f));
 	_cameraAngles.finishInterpolation();
 	_cameraAngles.run();
 	_cameraAngles.updated.invoke();
@@ -106,7 +105,7 @@ void MainController::applicationDidLoad(et::RenderContext* rc)
 	});
 	
 	for (size_t i = 0; i < 4; ++i)
-		_threads.emplace_back(new RaytraceThread(this));
+		_threads.push_back(new RaytraceThread(this));
 	
 	_scale = vec2(1.0f) / samplesPerScreen;
 	_offset = vec2(-1.0f) + _scale;
@@ -303,7 +302,7 @@ void MainController::startCPUTracing()
 
 bool MainController::shouldAntialias()
 {
-	return (_scene.options.samples != _previewSamples);
+	return true;
 }
 
 void MainController::renderFinished()
@@ -320,7 +319,7 @@ void MainController::renderFinished()
 	auto renderTime = floatToStr(mainTimerPool()->actualTime() - _startTime, 2.0f);
 	
 	std::string fn = application().environment().applicationDocumentsFolder() + "result (" +
-		renderTime + " sec, " + intToStr(4 * _scene.options.samples) + " samples per pixel).png";
+		renderTime + " sec, " + intToStr(_scene.options.samples) + " samples per pixel).png";
 	
 	ImageWriter::writeImageToFile(fn, BinaryDataStorage(reinterpret_cast<unsigned char*>(_textureData.binary()),
 		_textureData.dataSize()), frameSize, 4, 8, ImageFormat_PNG, true);

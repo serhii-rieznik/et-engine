@@ -13,10 +13,12 @@ using namespace et;
 
 bool SceneObject::intersectsRay(const et::ray3d& ray, et::vec3& point) const
 {
-	if ((objectClass == Class_Sphere) || (objectClass == Class_SphericalLight))
+	if (objectClass == Class_Sphere)
 		return intersect::raySphere(ray, Sphere(equation.xyz(), equation.w), &point);
 	else if (objectClass == Class_Plane)
 		return intersect::rayPlane(ray, plane(equation), &point);
+	else if (objectClass == Class_Triangle)
+		return intersect::rayTriangle(ray, tri, &point);
 	
 	return false;
 }
@@ -25,77 +27,124 @@ et::vec3 SceneObject::normalFromPoint(const vec3& pt) const
 {
 	if (objectClass == Class_Plane)
 		return equation.xyz();
-	
-	if ((objectClass == Class_Sphere) || (objectClass == Class_SphericalLight))
-		return pt - equation.xyz();
+	else if (objectClass == Class_Sphere)
+		return normalize(pt - equation.xyz());
+	else if (objectClass == Class_Triangle)
+		return tri.normalizedNormal();
 		
 	return vec3(0.0f);
 }
 
 RaytraceScene::RaytraceScene()
 {
-	vec3 boxSize(60.0f, 25.0f, 35.0f);
-	float r = 8.0f;
+	float r = 15.0f;
+	vec3 boxSize(50.0f, 30.0f, 60.0f);
 
-	camera.perspectiveProjection(QUARTER_PI, 1.0f, 1.0f, 1024.0f);
-	camera.lookAt(vec3(0.0f, 0.0f, 2.0f * boxSize.z));
+	// sphere
+	objects.push_back(SceneObject(SceneObject::Class_Sphere, vec4(boxSize.x - r, -boxSize.y + r, boxSize.z - r, r),
+		vec4(0.25f, 0.5f, 1.0f, 0.0f), vec4(0.0f)));
+
+	// sphere
+	objects.push_back(SceneObject(SceneObject::Class_Sphere, vec4(r - boxSize.x, -boxSize.y + r, 0.0f, r),
+		vec4(1.0f, 0.5f, 0.25f, 0.0f), vec4(0.0f)));
+
+	// focus spheres
+	float h = 5.0f;
+	float z = -boxSize.z + h;
+	float x = boxSize.x - h;
+	while (z < boxSize.z)
+	{
+		objects.push_back(SceneObject(SceneObject::Class_Sphere, vec4(x, -boxSize.y + h, z, h),
+			vec4(1.0f, 1.0f, 1.0f, 0.0f), vec4(0.0f)));
+		z += 2.25f * h;
+		x -= (boxSize.z / boxSize.x) * h;
+	}
+	
+	float l = 1.0f;
+	int i = 0;
+	z = -boxSize.z + 2.0f * l;
+	float dz = 2.0f * (boxSize.z - 2.0f * l) / 10.0f;
+	float dx = 2.0f * (boxSize.x - 2.0f * l) / 10.0f;
+	while (z < boxSize.z - 2.0f * l)
+	{
+		x = -boxSize.x + l * (2.0f + ((i++ % 2 == 0) ? 0.0f : 0.5f * dx));
 		
-	lightSphere = vec4(-boxSize.x, boxSize.y + 0.1f * r, 0.75f * boxSize.z, 2.0f * r);
-	lightColor = vec4(30.0f, 35.0f, 45.0f, 1.0f);
-	objects.push_back(SceneObject(SceneObject::Class_SphericalLight, lightSphere, vec4(0.0f), lightColor));
-
-	lightSphere = vec4(boxSize.x + r, boxSize.y + 0.1f * r, 0.75f * boxSize.z, 2.0f * r);
-	lightColor = vec4(45.0f, 35.0f, 30.0f, 1.0f);
-	objects.push_back(SceneObject(SceneObject::Class_SphericalLight, lightSphere, vec4(0.0f), lightColor));
-	
-	float a = 0.0f;
-	float da = DOUBLE_PI / 3.0f;
-	spheres.push_back(vec4(4.0f * r * std::cos(a), -boxSize.y + r, 2.0f * r * std::sin(a), r)); a += da;
-	sphereColors.push_back(vec4(1.0f, 0.5f, 0.25f, 0.2f));
-	objects.push_back(SceneObject(SceneObject::Class_Sphere, spheres.back(), sphereColors.back(), vec4(0.0f)));
-
-	spheres.push_back(vec4(2.0f * r * std::cos(a), -boxSize.y + 1.5f * r, 2.0f * r * std::sin(a), 1.5f * r)); a += da;
-	sphereColors.push_back(vec4(0.25f, 1.0f, 0.5f, 0.015f));
-	objects.push_back(SceneObject(SceneObject::Class_Sphere, spheres.back(), sphereColors.back(), vec4(0.0f)));
-	
-	spheres.push_back(vec4(4.0f * r * std::cos(a), -boxSize.y + 0.75f * r, 2.0f * r * std::sin(a), 0.75f * r)); a += da;
-	sphereColors.push_back(vec4(0.5f, 0.25f, 1.0f, 0.75f));
-	objects.push_back(SceneObject(SceneObject::Class_Sphere, spheres.back(), sphereColors.back(), vec4(0.0f)));
-
-	// left
-	planes.push_back(vec4(1.0f, 0.0f, 0.0f, -boxSize.x));
-	planeColors.push_back(vec4(0.25f, 0.5f, 1.0f, 0.999915f));
-	objects.push_back(SceneObject(SceneObject::Class_Plane, planes.back(), planeColors.back(), vec4(0.0f)));
-	
-	// right
-	planes.push_back(vec4(-1.0f, 0.0f, 0.0f, -boxSize.x));
-	planeColors.push_back(vec4(1.0f, 0.5f, 0.25f, 0.9999915f));
-	objects.push_back(SceneObject(SceneObject::Class_Plane, planes.back(), planeColors.back(), vec4(0.0f)));
+		while (x < boxSize.x - 2.0f * l)
+		{
+			objects.push_back(SceneObject(SceneObject::Class_Sphere,vec4(x, boxSize.y, z, l), vec4(0.0f),
+				10.0f * vec4(randomFloat(3.0f, 10.0f), randomFloat(3.0f, 10.0f), randomFloat(3.0f, 10.0f), 1.0f)));
+			
+			x += dx;
+		}
+		z += dz;
+	}
 	
 	// top
-	planes.push_back(vec4(0.0f, -1.0f, 0.0f, -boxSize.y));
-	planeColors.push_back(vec4(1.0f, 0.9999915f));
-	objects.push_back(SceneObject(SceneObject::Class_Plane, planes.back(), planeColors.back(), vec4(0.0f)));
+	objects.push_back(SceneObject(SceneObject::Class_Triangle,
+		vec3(-boxSize.x, boxSize.y,  boxSize.z),
+		vec3(-boxSize.x, boxSize.y, -boxSize.z),
+		vec3( boxSize.x, boxSize.y, -boxSize.z), vec4(1.0f, 0.5f), vec4(0.0f)));
+	objects.push_back(SceneObject(SceneObject::Class_Triangle,
+		vec3( boxSize.x, boxSize.y,  boxSize.z),
+		vec3(-boxSize.x, boxSize.y,  boxSize.z),
+		vec3( boxSize.x, boxSize.y, -boxSize.z), vec4(1.0f, 0.5f), vec4(0.0f)));
 	
 	// bottom
-	planes.push_back(vec4(0.0f, 1.0f, 0.0f, -boxSize.y));
-	planeColors.push_back(vec4(1.0f/3.0f, 0.5f));
-	objects.push_back(SceneObject(SceneObject::Class_Plane, planes.back(), planeColors.back(), vec4(0.0f)));
+	objects.push_back(SceneObject(SceneObject::Class_Triangle,
+		vec3(-boxSize.x, -boxSize.y,  boxSize.z),
+		vec3( boxSize.x, -boxSize.y, -boxSize.z),
+		vec3(-boxSize.x, -boxSize.y, -boxSize.z), vec4(2.0/3.0f, 0.25f), vec4(0.0f)));
+	objects.push_back(SceneObject(SceneObject::Class_Triangle,
+		vec3(-boxSize.x, -boxSize.y,  boxSize.z),
+		vec3( boxSize.x, -boxSize.y,  boxSize.z),
+		vec3( boxSize.x, -boxSize.y, -boxSize.z), vec4(2.0/3.0f, 0.25f), vec4(0.0f)));
+
+	// left
+	objects.push_back(SceneObject(SceneObject::Class_Triangle,
+		vec3( boxSize.x, -boxSize.y,  boxSize.z),
+		vec3( boxSize.x,  boxSize.y, -boxSize.z),
+		vec3( boxSize.x, -boxSize.y, -boxSize.z), vec4(1.0f, 0.5f, 0.5f, 0.15f), vec4(0.0f)));
+	objects.push_back(SceneObject(SceneObject::Class_Triangle,
+		vec3( boxSize.x, -boxSize.y,  boxSize.z),
+		vec3( boxSize.x,  boxSize.y,  boxSize.z),
+		vec3( boxSize.x,  boxSize.y, -boxSize.z), vec4(1.0f, 0.5f, 0.5f, 0.15f), vec4(0.0f)));
+	
+	// right
+	objects.push_back(SceneObject(SceneObject::Class_Triangle,
+		vec3(-boxSize.x, -boxSize.y,  boxSize.z),
+		vec3(-boxSize.x, -boxSize.y, -boxSize.z),
+		vec3(-boxSize.x,  boxSize.y, -boxSize.z), vec4(0.5f, 1.0f, 0.5f, 0.15f), vec4(0.0f)));
+	objects.push_back(SceneObject(SceneObject::Class_Triangle,
+		vec3(-boxSize.x,  boxSize.y,  boxSize.z),
+		vec3(-boxSize.x, -boxSize.y,  boxSize.z),
+		vec3(-boxSize.x,  boxSize.y, -boxSize.z), vec4(0.5f, 1.0f, 0.5f, 0.15f), vec4(0.0f)));
 	
 	// back
-	planes.push_back(vec4(0.0f, 0.0f, 1.0f, -boxSize.z));
-	planeColors.push_back(vec4(0.75f, 0.999915f));
-	objects.push_back(SceneObject(SceneObject::Class_Plane, planes.back(), planeColors.back(), vec4(0.0f)));
+	objects.push_back(SceneObject(SceneObject::Class_Triangle,
+		vec3(-boxSize.x,  boxSize.y, -boxSize.z),
+		vec3(-boxSize.x, -boxSize.y, -boxSize.z),
+		vec3( boxSize.x, -boxSize.y, -boxSize.z), vec4(0.75f, 0.2f), vec4(0.0f)));
+	objects.push_back(SceneObject(SceneObject::Class_Triangle,
+		vec3( boxSize.x,  boxSize.y, -boxSize.z),
+		vec3(-boxSize.x,  boxSize.y, -boxSize.z),
+		vec3( boxSize.x, -boxSize.y, -boxSize.z), vec4(0.75f, 0.2f), vec4(0.0f)));
 	
 	// front
-	planes.push_back(vec4(0.0f, 0.0f, -1.0f, -boxSize.z));
-	planeColors.push_back(vec4(0.75f, 1.0f, 1.0f, 1.0f));
-	objects.push_back(SceneObject(SceneObject::Class_Plane, planes.back(), planeColors.back(), vec4(0.0f)));
+	objects.push_back(SceneObject(SceneObject::Class_Triangle,
+		vec3(-boxSize.x,  boxSize.y, boxSize.z),
+		vec3( boxSize.x, -boxSize.y, boxSize.z),
+		vec3(-boxSize.x, -boxSize.y, boxSize.z), vec4(0.75f, 0.2f), vec4(0.0f)));
+	objects.push_back(SceneObject(SceneObject::Class_Triangle,
+		vec3(-boxSize.x,  boxSize.y, boxSize.z),
+		vec3( boxSize.x,  boxSize.y, boxSize.z),
+		vec3( boxSize.x, -boxSize.y, boxSize.z), vec4(0.75f, 0.2f), vec4(0.0f)));
+
+	camera.perspectiveProjection(QUARTER_PI, 1.0f, 1.0f, 1024.0f);
 }
 
 const SceneObject& RaytraceScene::objectAtIndex(int i) const
 {
-	if ((i == missingObject) || (i >= objects.size()))
+	if ((i == Intersection::missingObject) || (i >= objects.size()))
 		return emptyObject;
 		
 	return objects.at(i);
