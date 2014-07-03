@@ -106,6 +106,8 @@
 		A5D3D4E21955B54700E621A7 /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = A5D3D4E11955B54700E621A7 /* libz.dylib */; };
 		A5D3D4E41955B54A00E621A7 /* libxml2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = A5D3D4E31955B54A00E621A7 /* libxml2.dylib */; };
 		A5D3D4EB1955B87500E621A7 /* programs in CopyFiles */ = {isa = PBXBuildFile; fileRef = A5D3D4EA1955B85600E621A7 /* programs */; };
+		A5F1F72A1965D53500D24712 /* objLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5F1F7281965D53500D24712 /* objLoader.cpp */; };
+		A5F1F72B1965D55000D24712 /* models in CopyFiles */ = {isa = PBXBuildFile; fileRef = A5F1F7241965D48200D24712 /* models */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -115,6 +117,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 7;
 			files = (
+				A5F1F72B1965D55000D24712 /* models in CopyFiles */,
 				A5D3D4EB1955B87500E621A7 /* programs in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -358,6 +361,8 @@
 		A5D3D4E31955B54A00E621A7 /* libxml2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libxml2.dylib; path = usr/lib/libxml2.dylib; sourceTree = SDKROOT; };
 		A5D3D4E61955B62500E621A7 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		A5D3D4EA1955B85600E621A7 /* programs */ = {isa = PBXFileReference; lastKnownFileType = folder; name = programs; path = Data/programs; sourceTree = "<group>"; };
+		A5F1F7241965D48200D24712 /* models */ = {isa = PBXFileReference; lastKnownFileType = folder; name = models; path = Data/models; sourceTree = "<group>"; };
+		A5F1F7281965D53500D24712 /* objLoader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = objLoader.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -380,9 +385,9 @@
 		A5D3D35F1955B14000E621A7 = {
 			isa = PBXGroup;
 			children = (
+				A5F1F7241965D48200D24712 /* models */,
 				A5D3D4EA1955B85600E621A7 /* programs */,
 				A5D3D3721955B28100E621A7 /* et */,
-				A5D3D3761955B46200E621A7 /* et-ext */,
 				A5D3D36A1955B14000E621A7 /* Raytracer */,
 				A5D3D4E51955B55000E621A7 /* Frameworks */,
 				A5D3D3691955B14000E621A7 /* Products */,
@@ -421,13 +426,6 @@
 				A5D3D4111955B49200E621A7 /* include */,
 			);
 			name = et;
-			sourceTree = "<group>";
-		};
-		A5D3D3761955B46200E621A7 /* et-ext */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			name = "et-ext";
 			sourceTree = "<group>";
 		};
 		A5D3D3771955B48900E621A7 /* apiobjects */ = {
@@ -742,6 +740,7 @@
 		A5D3D4121955B49C00E621A7 /* src */ = {
 			isa = PBXGroup;
 			children = (
+				A5F1F7261965D53500D24712 /* models */,
 				A5D3D4131955B4AE00E621A7 /* apiobjects */,
 				A5D3D41F1955B4AE00E621A7 /* app */,
 				A5D3D4271955B4AE00E621A7 /* camera */,
@@ -1017,6 +1016,15 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
+		A5F1F7261965D53500D24712 /* models */ = {
+			isa = PBXGroup;
+			children = (
+				A5F1F7281965D53500D24712 /* objLoader.cpp */,
+			);
+			name = models;
+			path = ../../src/models;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -1146,6 +1154,7 @@
 				A5D3D4A31955B4AE00E621A7 /* jpegloader.cpp in Sources */,
 				A5D3D4A51955B4AE00E621A7 /* pvrdecompressor.cpp in Sources */,
 				A5D3D4891955B4AE00E621A7 /* vertexbufferdata.cpp in Sources */,
+				A5F1F72A1965D53500D24712 /* objLoader.cpp in Sources */,
 				A5D3D4D41955B4AE00E621A7 /* timerpool.cpp in Sources */,
 				A5D3D4C21955B4AE00E621A7 /* renderer.cpp in Sources */,
 				A5D3D4B71955B4AE00E621A7 /* platformtools.mac.mm in Sources */,

@@ -6,6 +6,8 @@
 //  Copyright (c) 2014 Cheetek. All rights reserved.
 //
 
+#include <et/app/application.h>
+#include <et/models/objloader.h>
 #include "RaytraceScene.h"
 
 using namespace rt;
@@ -35,11 +37,34 @@ et::vec3 SceneObject::normalFromPoint(const vec3& pt) const
 	return vec3(0.0f);
 }
 
-RaytraceScene::RaytraceScene()
+void RaytraceScene::load(et::RenderContext* rc)
 {
-	float r = 15.0f;
 	vec3 boxSize(50.0f, 30.0f, 60.0f);
-
+	
+	float scale = 9.0f;
+	float offset = -boxSize.y / scale;
+	
+	ObjectsCache localCache;
+	OBJLoader loader(rc, application().resolveFileName("models/gnome.obj"));
+	auto container = loader.load(localCache, OBJLoader::Option_SupportMeshes);
+	auto meshes = container->childrenOfType(s3d::ElementType_SupportMesh);
+	for (s3d::SupportMesh::Pointer mesh : meshes)
+	{
+		log::info("%s", mesh->name().c_str());
+		for (const auto& tri : mesh->triangles())
+		{
+			vec3 a1(tri.v1().x, tri.v1().z + offset, tri.v1().y);
+			vec3 a2(tri.v2().x, tri.v2().z + offset, tri.v2().y);
+			vec3 a3(tri.v3().x, tri.v3().z + offset, tri.v3().y);
+			
+			objects.push_back(SceneObject(SceneObject::Class_Triangle, scale * a3,
+				scale * a2, scale * a1, vec4(1.0f), vec4(0.0f)));
+		}
+	}
+	
+	/*
+	float r = 15.0f;
+	 
 	// sphere
 	objects.push_back(SceneObject(SceneObject::Class_Sphere, vec4(boxSize.x - r, -boxSize.y + r, boxSize.z - r, r),
 		vec4(0.25f, 0.5f, 1.0f, 0.0f), vec4(0.0f)));
@@ -59,25 +84,26 @@ RaytraceScene::RaytraceScene()
 		z += 2.25f * h;
 		x -= (boxSize.z / boxSize.x) * h;
 	}
-	
-	float l = 1.0f;
+	*/
+	float l = 3.0f;
 	int i = 0;
-	z = -boxSize.z + 2.0f * l;
-	float dz = 2.0f * (boxSize.z - 2.0f * l) / 10.0f;
-	float dx = 2.0f * (boxSize.x - 2.0f * l) / 10.0f;
+	float z = -boxSize.z + 2.0f * l;
+	float dz = 3.0f * (boxSize.z - 2.0f * l) / 10.0f;
+	float dx = 3.0f * (boxSize.x - 2.0f * l) / 10.0f;
 	while (z < boxSize.z - 2.0f * l)
 	{
-		x = -boxSize.x + l * (2.0f + ((i++ % 2 == 0) ? 0.0f : 0.5f * dx));
+		float x = -boxSize.x + l * (2.0f + ((i++ % 2 == 0) ? 0.0f : 0.5f * dx));
 		
 		while (x < boxSize.x - 2.0f * l)
 		{
 			objects.push_back(SceneObject(SceneObject::Class_Sphere,vec4(x, boxSize.y, z, l), vec4(0.0f),
-				10.0f * vec4(randomFloat(3.0f, 10.0f), randomFloat(3.0f, 10.0f), randomFloat(3.0f, 10.0f), 1.0f)));
+				5.0f * vec4(randomFloat(3.0f, 10.0f), randomFloat(3.0f, 10.0f), randomFloat(3.0f, 10.0f), 1.0f)));
 			
 			x += dx;
 		}
 		z += dz;
 	}
+	// */
 	
 	// top
 	objects.push_back(SceneObject(SceneObject::Class_Triangle,

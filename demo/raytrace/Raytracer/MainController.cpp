@@ -13,9 +13,9 @@
 using namespace et;
 using namespace rt;
 
-const vec2i frameSize = vec2i(1280, 800);
+const vec2i frameSize = vec2i(512, 320);
 
-const vec2i rectSize = vec2i(80);
+const vec2i rectSize = vec2i(8);
 
 const vec2i frameParts = vec2i(frameSize.x / rectSize.x, frameSize.y / rectSize.y);
 
@@ -57,6 +57,8 @@ void MainController::applicationDidLoad(et::RenderContext* rc)
 //	{ log::info("FPS: %lld", (int64_t)info.averageFramePerSecond); });
 	
 	rc->renderState().setDepthMask(false);
+	
+	_scene.load(rc);
 	
 	ObjectsCache localCache;
 	_mainProgram = rc->programFactory().loadProgram("programs/main.program", localCache);
@@ -134,7 +136,10 @@ bool MainController::fetchNewRenderRect(et::vec2i& origin, et::vec2i& size)
 	if (_renderRects.empty()) return false;
 	
 	auto i = _renderRects.begin();
-	std::advance(i, rand() % _renderRects.size());
+	if (_renderRects.size() / 4 > 0)
+		std::advance(i, _renderRects.size() / 2 + rand() % (_renderRects.size() / 4));
+	else
+		std::advance(i, _renderRects.size() / 2);
 	
 	origin = i->origin();
 	size = i->size();

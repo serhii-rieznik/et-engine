@@ -77,11 +77,13 @@ namespace rt
 	struct RaytraceScene
 	{
 	public:
-		RaytraceScene();
+		void load(et::RenderContext*);
 		
 		const SceneObject& objectAtIndex(int) const;
 		
 	public:
+		et::RenderContext* _rc;
+		
 		et::Camera camera;
 		
 		et::vec4 lightSphere;

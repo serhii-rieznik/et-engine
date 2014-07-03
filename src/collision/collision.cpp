@@ -60,8 +60,8 @@ vec3 et::worldCoordinatesFromBarycentric(const vec2& b, const triangle& t)
 
 vec3 et::closestPointOnTriangle(const vec3& sourcePosition, const triangle& triangle)
 {
-	vec3 edge0 = triangle.edge2to1(); // .v2 - triangle.v1;
-	vec3 edge1 = triangle.edge3to1(); // .v3 - triangle.v1;
+	vec3 edge0 = triangle.edge2to1();
+	vec3 edge1 = triangle.edge3to1();
 	vec3 v0 = triangle.v1() - sourcePosition;
 
 	float a = dot(edge0, edge0);
@@ -149,11 +149,10 @@ vec3 et::closestPointOnTriangle(const vec3& sourcePosition, const triangle& tria
 	return triangle.v1() + s * edge0 + t * edge1;
 }
 
-
 bool et::pointInsideTriangle(const vec3& p, const triangle& t)
 {
 	vec2 b = barycentricCoordinates(p, t);
-	return (b.x >= 0.0f) && (b.x <= 1.0f) && (b.y >= 0.0f) && (b.y <= 1.0f) && (b.x + b.y < 1.0f);
+	return (b.x >= 0.0f) && (b.y >= 0.0f) && (b.x + b.y < 1.0f);
 }
 
 bool et::pointInsideTriangle(const vec3& p, const triangle& t, const vec3& n)

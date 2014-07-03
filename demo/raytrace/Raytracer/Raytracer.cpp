@@ -112,9 +112,6 @@ vec4 gatherBouncesRecursive(const RaytraceScene& scene, const ray3d& ray, int de
 	
 	if (obj.objectClass == SceneObject::Class_None)
 		return vec4(1.0);
-		
-//	if (obj.emissive.x > 0.0f)
-//		return obj.emissive;
 	
 	vec3 newDirection;
 	float scale = 0.0f;
@@ -145,7 +142,7 @@ void rt::raytrace(const RaytraceScene& scene, const et::vec2i& imageSize, const 
 	vec3 ce2 = cross(ce1, centerRay.direction).normalized();
 	
 	float focalDistance = 0.775f * scene.camera.position().length();
-	float aperture = 7.5f;
+	float aperture = 0.0f;
 	
 	plane focalPlane(scene.camera.direction(), (scene.camera.position() - scene.camera.direction() * focalDistance).length());
  
@@ -174,19 +171,22 @@ void rt::raytrace(const RaytraceScene& scene, const et::vec2i& imageSize, const 
 			for (int sample = 0; sample < scene.options.samples; ++sample)
 			{
 				vec2 fpixel = (vector2ToFloat(pixel) + vec2(0.5f)) * dudv - vec2(1.0f);
-				
 				ray3d r = scene.camera.castRay(fpixel + subPixel * vec2(randomFloat(-1.0f, 1.0f), randomFloat(-1.0f, 1.0f)));
 				
-				vec3 focal;
-				intersect::rayPlane(r, focalPlane, &focal);
-				
-				float rd = randomFloat(0.0f, aperture);
-				float ra = randomFloat(-PI, PI);
-				vec3 cameraJitter = r.origin + rd * (ce1 * std::sin(ra) + ce2 * std::cos(ra));
-				
-				ray3d finalRay(cameraJitter, normalize(focal - cameraJitter));
-				
-				result += gatherBouncesRecursive(scene, finalRay, 0);
+				if (aperture > 0.0f)
+				{
+					vec3 focal;
+					intersect::rayPlane(r, focalPlane, &focal);
+					float rd = randomFloat(0.0f, aperture);
+					float ra = randomFloat(-PI, PI);
+					vec3 cameraJitter = r.origin + rd * (ce1 * std::sin(ra) + ce2 * std::cos(ra));
+					ray3d finalRay(cameraJitter, normalize(focal - cameraJitter));
+					result += gatherBouncesRecursive(scene, finalRay, 0);
+				}
+				else
+				{
+					result += gatherBouncesRecursive(scene, r, 0);
+				}
 			}
 			
 			result *= -scene.options.exposure / static_cast<float>(scene.options.samples);

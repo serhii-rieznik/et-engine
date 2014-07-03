@@ -75,11 +75,11 @@ namespace rt
 		
 		float _startTime = 0.0f;
 		
-		int _previewBounces = 4;
-		int _previewSamples = 12;
+		int _previewBounces = 3;
+		int _previewSamples = 4;
 		
-		int _productionBounces = 12;
-		int _productionSamples = 1536;
+		int _productionBounces = 16;
+		int _productionSamples = 512;
 		
 		bool _shouldRender = true;
 		bool _interactiveRendering = false;
