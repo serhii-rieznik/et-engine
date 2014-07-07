@@ -69,38 +69,12 @@
 #
 #endif
 
-#if !defined(ET_SUPPORT_RANGE_BASED_FOR)
-#
-#	error Please define if compiler supports range based for
-#
-#endif
-
-#if (ET_SUPPORT_RANGE_BASED_FOR)
-#
-#	define ET_START_ITERATION(container, type, variable)	for (type variable : container) {
-#
-#	define ET_END_ITERATION									}
-#
-#else 
-#
-#	define ET_START_ITERATION(container, type, variable)	for (auto variable##I = container.begin(), variable##E = container.end();\
-																variable##I != variable##E; ++variable##I) { type variable = *variable##I;
-#
-#	define ET_END_ITERATION									}
-#
-#endif
-
-
-#define ET_ITERATE(container, type, variable, expression)	ET_START_ITERATION(container, type, variable)\
-																expression;\
-															ET_END_ITERATION
-
 #define ET_LOG_MEMORY_OPERATIONS							0
 
 #define ET_DENY_COPY(t)										private:\
-																t(const t&) { }\
-																t(t&&) { }\
-																t& operator = (const t&) { return *this; }
+																t(const t&) = delete;\
+																t(t&&) = delete;\
+																t& operator = (const t&) = delete;
 																	
 #define ET_COMPOSE_UINT32(A, B, C, D)					(D | (C << 8) | (B << 16) | (A << 24))
 #define ET_COMPOSE_UINT32_INVERTED(A, B, C, D)			(A | (B << 8) | (C << 16) | (D << 24))

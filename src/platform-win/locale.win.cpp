@@ -58,7 +58,7 @@ std::string locale::dateTimeFromTimestamp(uint64_t t)
 	return unicodeToUtf8(dateBuffer.data()) + " " + unicodeToUtf8(timeBuffer.data());
 }
 
-size_t locale::currentLocale()
+std::string locale::currentLocale()
 {
 	wchar_t localeName[256] = { };
 	wchar_t localeData[256] = { };
@@ -90,15 +90,5 @@ size_t locale::currentLocale()
 		return 0;
 	}
 
-	std::string mbcs = unicodeToUtf8(localeData);
-
-	size_t result = 0;
-
-	if ((mbcs.size() == 5) && (mbcs[2] == '-'))
-	{
-		lowercase(mbcs);
-		result = mbcs[0] | (mbcs[1] << 8) | (mbcs[3] << 16) | (mbcs[4] << 24);
-	}
-
-	return result;
+	return lowercase(unicodeToUtf8(localeData));
 }

@@ -47,7 +47,7 @@ extern etOpenGLViewController* sharedOpenGLViewController;
 
 - (BOOL)application:(UIApplication*)anApplication didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
-	(void)application;
+	(void)anApplication;
 	(void)launchOptions;
 
 	@synchronized(self)

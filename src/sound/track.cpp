@@ -20,7 +20,7 @@ namespace et
         class TrackPrivate
         {
 		public:
-			TrackPrivate();
+			TrackPrivate(const std::string& filename);
 			~TrackPrivate();
 			
 			void loadWAVE();
@@ -45,6 +45,7 @@ namespace et
 			Track* owner = nullptr;
 			
 			InputStream::Pointer stream;
+			std::string _filename;
 			
 			float duration = 0.0f;
 			
@@ -78,14 +79,14 @@ namespace et
 using namespace et;
 using namespace et::audio;
 
-void checkOGGError(long, const char*);
+void checkOGGError(long, const char*, const char* filename);
 
 /*
  * Track implementation
  */ 
 
 Track::Track(const std::string& fileName) :
-	_private(new TrackPrivate)
+	_private(new TrackPrivate(fileName))
 {
 	setName(fileName);
 	setOrigin(fileName);
@@ -234,7 +235,8 @@ const uint32_t WAVFileChunkID = ET_COMPOSE_UINT32_INVERTED('R', 'I', 'F', 'F');
 const uint32_t WAVDataChunkID = ET_COMPOSE_UINT32_INVERTED('d', 'a', 't', 'a');
 const uint32_t WAVFormatChunkID = ET_COMPOSE_UINT32_INVERTED('f', 'm', 't', ' ');
 
-TrackPrivate::TrackPrivate()
+TrackPrivate::TrackPrivate(const std::string& filename) :
+	_filename(filename)
 {
 	etFillMemory(&buffers, 0, sizeof(buffers));
 	etFillMemory(&oggFile, 0, sizeof(oggFile));
@@ -242,12 +244,16 @@ TrackPrivate::TrackPrivate()
 
 	oggCallbacks.read_func = [](void* ptr, size_t size, size_t nmemb, void* datasource) -> size_t
 	{
+		std::streamsize dataRead = 0;
+		
 		InputStream* stream = reinterpret_cast<InputStream*>(datasource);
-		
-		if (stream->valid())
+		if (stream->valid() && stream->stream().good())
+		{
 			stream->stream().read(reinterpret_cast<char*>(ptr), size * nmemb);
+			dataRead = stream->stream().gcount();
+		}
 		
-		return static_cast<size_t>(stream->valid() ? stream->stream().gcount() : 0);
+		return static_cast<size_t>(dataRead);
 	};
 	
 	
@@ -255,7 +261,7 @@ TrackPrivate::TrackPrivate()
 	{
 		InputStream* stream = reinterpret_cast<InputStream*>(datasource);
 		
-		if (stream->valid())
+		if (stream->valid() && stream->stream().good())
 			stream->stream().seekg(p1, static_cast<std::ios::seekdir>(p2));
 		
 		return stream->valid() ? 0 : -1;
@@ -264,7 +270,7 @@ TrackPrivate::TrackPrivate()
 	oggCallbacks.tell_func = [](void* datasource) -> long
 	{
 		InputStream* stream = reinterpret_cast<InputStream*>(datasource);
-		return static_cast<long>(stream->stream().tellg());
+		return (stream->valid() && stream->stream().good()) ? static_cast<long>(stream->stream().tellg()) : 0;
 	};
 }
 
@@ -414,7 +420,7 @@ void TrackPrivate::loadOGG()
 	int result = ov_test_callbacks(stream.ptr(), &oggFile, nullptr, -1, oggCallbacks);
 	if (result < 0)
 	{
-		checkOGGError(result, "ov_test_callbacks");
+		checkOGGError(result, "ov_test_callbacks", _filename.c_str());
 		return;
 	}
 	
@@ -450,6 +456,9 @@ void TrackPrivate::loadOGG()
 
 bool TrackPrivate::fillNextOGGBuffer()
 {
+	if (stream.invalid())
+		return false;
+	
 	BinaryDataStorage data(pcmBufferSize, 0);
 	auto& inStream = stream->stream();
 	
@@ -465,7 +474,7 @@ bool TrackPrivate::fillNextOGGBuffer()
 		}
 		else if (lastRead < 0)
 		{
-			checkOGGError(lastRead, "ov_read");
+			checkOGGError(lastRead, "ov_read", _filename.c_str());
 			break;
 		}
 		else
@@ -492,12 +501,14 @@ bool TrackPrivate::fillNextOGGBuffer()
 
 void TrackPrivate::rewindOGG()
 {
+	if (stream.invalid()) return;
+	
 	stream->stream().clear();
 
 	if (ov_seekable(&oggFile))
 	{
 		long result = ov_raw_seek(&oggFile, oggStartPosition);
-		checkOGGError(result, "ov_raw_seek");
+		checkOGGError(result, "ov_raw_seek", _filename.c_str());
 	}
 	else
 	{
@@ -512,7 +523,7 @@ void TrackPrivate::rewindOGG()
  * Service functions
  */
 #define CASEOF(A) case A: { log::error("OGG error %s at %s", #A, tag); return; }
-void checkOGGError(long code, const char* tag)
+void checkOGGError(long code, const char* tag, const char* filename)
 {
 	switch (code)
 	{
@@ -535,7 +546,7 @@ void checkOGGError(long code, const char* tag)
 		CASEOF(OV_ENOSEEK)
 			
 		default:
-			log::error("Unknown OGG error: %ld at %s", code, tag);
+			log::error("Unknown OGG error: %ld at %s\nTrack: %s", code, tag, filename);
 			break;
 	}
 }

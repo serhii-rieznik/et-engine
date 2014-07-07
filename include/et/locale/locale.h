@@ -9,6 +9,7 @@
 
 #include <et/core/singleton.h>
 #include <et/core/containers.h>
+#include <et/app/events.h>
 
 namespace et
 {
@@ -23,6 +24,11 @@ namespace et
 		std::string localizedString(const std::string& key);
 		
 		void printContent();
+		
+		const std::string& currentLocale() const
+			{ return _currentLocale; }
+		
+		ET_DECLARE_EVENT1(localeLoaded, std::string)
 
 	private:
 		Locale();
@@ -37,20 +43,19 @@ namespace et
 	private:
 		typedef std::map<std::string, std::string> LocaleMap;
 		LocaleMap _localeMap;
-		size_t _locale;
+		std::string _currentLocale;
 	};
 	
 	namespace locale
 	{
 		std::string time();
 		std::string date();
-		std::string localeLanguage(size_t locale);
-		std::string localeSubLanguage(size_t locale);
+		std::string localeLanguage(const std::string&);
+		std::string localeSubLanguage(const std::string&);
 		
 		std::string dateTimeFromTimestamp(uint64_t);
 
-		size_t currentLocale();
-		size_t localeToIdentifier(const std::string&);
+		std::string currentLocale();
 	}
 	
 	std::string localized(const std::string& key);

@@ -63,11 +63,11 @@ static etApplication* _sharedInstance = nil;
 	RenderState::State state = RenderState::currentState();
 	GLint defaultFrameBufferId = state.boundFramebuffer;
 
-	application().run(0, 0);
+	application().run(0, nullptr);
 
 	Framebuffer::Pointer defaultFrameBuffer =
 		[self renderContext]->framebufferFactory().createFramebufferWrapper(defaultFrameBufferId);
-
+	
 	vec2i contextSize(view.bounds.size.width, view.bounds.size.height);
 	defaultFrameBuffer->forceSize(contextSize);
 
@@ -91,6 +91,7 @@ static etApplication* _sharedInstance = nil;
 - (void)dealloc
 {
 	application().quit();
+	
 #if (!ET_OBJC_ARC_ENABLED)
 	[super dealloc];
 #endif

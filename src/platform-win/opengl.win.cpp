@@ -16074,6 +16074,7 @@ GLuint __GLeeLink_GL_ARB_draw_instanced(void)
 GLuint __GLeeLink_GL_ARB_framebuffer_object(void)
 {
 	GLint nLinked = 0;
+
 #ifdef __GLEE_GL_ARB_framebuffer_object
 	if ((GLeeFuncPtr_glIsRenderbuffer = (GLEEPFNGLISRENDERBUFFERPROC)__GLeeGetProcAddress("glIsRenderbuffer")) != 0) nLinked++;
 	if ((GLeeFuncPtr_glBindRenderbuffer = (GLEEPFNGLBINDRENDERBUFFERPROC)__GLeeGetProcAddress("glBindRenderbuffer")) != 0) nLinked++;
@@ -16096,8 +16097,10 @@ GLuint __GLeeLink_GL_ARB_framebuffer_object(void)
 	if ((GLeeFuncPtr_glRenderbufferStorageMultisample = (GLEEPFNGLRENDERBUFFERSTORAGEMULTISAMPLEPROC)__GLeeGetProcAddress("glRenderbufferStorageMultisample")) != 0) nLinked++;
 	if ((GLeeFuncPtr_glFramebufferTextureLayer = (GLEEPFNGLFRAMEBUFFERTEXTURELAYERPROC)__GLeeGetProcAddress("glFramebufferTextureLayer")) != 0) nLinked++;
 #endif
+
 	if (nLinked == 20) return GLEE_LINK_COMPLETE;
 	if (nLinked == 0) return GLEE_LINK_FAIL;
+
 	return GLEE_LINK_PARTIAL;
 }
 
@@ -18980,6 +18983,7 @@ GLuint __GLeeLink_GL_NV_vertex_program3(void) { return GLEE_LINK_COMPLETE; }
 GLuint __GLeeLink_GL_EXT_framebuffer_object(void)
 {
 	GLint nLinked = 0;
+
 #ifdef __GLEE_GL_EXT_framebuffer_object
 	if ((GLeeFuncPtr_glIsRenderbufferEXT = (GLEEPFNGLISRENDERBUFFEREXTPROC)__GLeeGetProcAddress("glIsRenderbufferEXT")) != 0) nLinked++;
 	if ((GLeeFuncPtr_glBindRenderbufferEXT = (GLEEPFNGLBINDRENDERBUFFEREXTPROC)__GLeeGetProcAddress("glBindRenderbufferEXT")) != 0) nLinked++;
@@ -18999,6 +19003,7 @@ GLuint __GLeeLink_GL_EXT_framebuffer_object(void)
 	if ((GLeeFuncPtr_glGetFramebufferAttachmentParameterivEXT = (GLEEPFNGLGETFRAMEBUFFERATTACHMENTPARAMETERIVEXTPROC)__GLeeGetProcAddress("glGetFramebufferAttachmentParameterivEXT")) != 0) nLinked++;
 	if ((GLeeFuncPtr_glGenerateMipmapEXT = (GLEEPFNGLGENERATEMIPMAPEXTPROC)__GLeeGetProcAddress("glGenerateMipmapEXT")) != 0) nLinked++;
 #endif
+
 	if (nLinked == 17) return GLEE_LINK_COMPLETE;
 	if (nLinked == 0) return GLEE_LINK_FAIL;
 	return GLEE_LINK_PARTIAL;
@@ -21366,14 +21371,40 @@ int __GLeeGetVersionNumber(char *versionStr)
 
 GLboolean __GLeeGetExtensions(ExtensionList* extList)
 {
+	glGetError();
+
 	int ne = 0;
 	glGetIntegerv(GL_NUM_EXTENSIONS, &ne);
 
-	for (int i = 0; i < ne; ++i)
+	if ((glGetError() == GL_NO_ERROR) && (ne > 0))
 	{
-		const char* extString = reinterpret_cast<const char*>(glGetStringi(GL_EXTENSIONS, i));
+		for (int i = 0; i < ne; ++i)
+		{
+			const char* extString = reinterpret_cast<const char*>(glGetStringi(GL_EXTENSIONS, i));
+			if (extString)
+				__GLeeExtList_add(extList, extString);
+		}
+	}
+	else 
+	{
+		const char* extString = reinterpret_cast<const char*>(glGetString(GL_EXTENSIONS));
 		if (extString)
-			__GLeeExtList_add(extList, extString);
+		{
+			int len = strlen(extString);
+			char* exts = strdup(extString);
+			char* i = exts + len - 1;
+			while (len > 0)
+			{
+				if (*i == 32)
+				{
+					__GLeeExtList_add(extList, i+1);
+					*i = 0;
+				}
+				--len;
+				--i;
+			}
+			__GLeeExtList_add(extList, exts);
+		}
 	}
 
 	const char* platExtStr = __GLeeGetExtStrPlat();

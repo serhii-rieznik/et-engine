@@ -103,11 +103,11 @@ std::string& et::trim(std::string &str)
 
 std::string et::capitalize(std::string v)
 {
-	v[0] = ::toupper(v[0]);
+	v[0] = ::toupper(v[0]) & 0xff;
 	for (size_t i = 1; i < v.length(); ++i)
 	{
 		if (v[i-1] == ET_SPACE)
-			v[i] = ::toupper(v[i]);
+			v[i] = ::toupper(v[i]) & 0xff;
 	}
 	return v;
 }

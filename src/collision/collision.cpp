@@ -60,8 +60,8 @@ vec3 et::worldCoordinatesFromBarycentric(const vec2& b, const triangle& t)
 
 vec3 et::closestPointOnTriangle(const vec3& sourcePosition, const triangle& triangle)
 {
-	vec3 edge0 = triangle.edge2to1(); // .v2 - triangle.v1;
-	vec3 edge1 = triangle.edge3to1(); // .v3 - triangle.v1;
+	vec3 edge0 = triangle.edge2to1();
+	vec3 edge1 = triangle.edge3to1();
 	vec3 v0 = triangle.v1() - sourcePosition;
 
 	float a = dot(edge0, edge0);
@@ -149,11 +149,10 @@ vec3 et::closestPointOnTriangle(const vec3& sourcePosition, const triangle& tria
 	return triangle.v1() + s * edge0 + t * edge1;
 }
 
-
 bool et::pointInsideTriangle(const vec3& p, const triangle& t)
 {
 	vec2 b = barycentricCoordinates(p, t);
-	return (b.x >= 0.0f) && (b.x <= 1.0f) && (b.y >= 0.0f) && (b.y <= 1.0f) && (b.x + b.y < 1.0f);
+	return (b.x >= 0.0f) && (b.y >= 0.0f) && (b.x + b.y < 1.0f);
 }
 
 bool et::pointInsideTriangle(const vec3& p, const triangle& t, const vec3& n)
@@ -168,19 +167,20 @@ bool et::pointInsideTriangle(const vec3& p, const triangle& t, const vec3& n)
 bool et::intersect::raySphere(const ray3d& r, const Sphere& s, vec3* ip1, vec3* ip2)
 {
 	vec3 dv = r.origin - s.center();
-	float b = 2.0f * dot(r.direction, dv);
-	float c = dv.dotSelf() - sqr(s.radius());
-	float d = b * b - 4.0f * c;
-
+	
+	float b = dot(r.direction, dv);
+	if (b > 0.0) return false;
+	
+	float d = sqr(b) - dv.dotSelf() + sqr(s.radius());
 	if (d < 0.0f) return false;
 	
 	d = std::sqrt(d);
-
+	
 	if (ip1)
-		*ip1 = r.origin + 0.5f * (-b - d) * r.direction;
-
+		*ip1 = r.origin - (b + d) * r.direction;
+	
 	if (ip2)
-		*ip2 = r.origin + 0.5f * (-b + d) * r.direction;
+		*ip2 = r.origin + (d - b) * r.direction;
 	
 	return true;
 }
@@ -188,35 +188,29 @@ bool et::intersect::raySphere(const ray3d& r, const Sphere& s, vec3* ip1, vec3* 
 bool et::intersect::rayPlane(const ray3d& r, const plane& p, vec3* intersection_pt)
 {
 	float d = dot(r.direction, p.normal());
-	if (d >= 0.0f) return false;
-
-	float t = dot(p.normal(), p.planePoint() - r.origin) / d;
-
-	if (t <= 0.0f)
-		return false;
-
-	if (intersection_pt)
-		*intersection_pt = r.origin + t * r.direction;
-
-	return true;
+	if (d < 0.0f)
+	{
+		if (intersection_pt)
+			*intersection_pt = r.origin + r.direction * dot(p.normal(), p.planePoint() - r.origin) / d;
+		return true;
+	}
+	return false;
 }
 
 bool et::intersect::rayTriangle(const ray3d& r, const triangle& t, vec3* intersection_pt)
 {
 	float d = dot(r.direction, t.normalizedNormal());
-	if (d >= 0.0f) return false;
-	
-	float a = dot(t.normalizedNormal(), (t.normalizedNormal() * dot(t.normalizedNormal(), t.v1())) - r.origin) / d;
-	if (a <= 0.0f) return false;
-	
-	vec3 ip = r.origin + a * r.direction;
-	if (pointInsideTriangle(ip, t))
+	if (d < 0.0f)
 	{
-		if (intersection_pt)
-			*intersection_pt = ip;
-		return true;
+		float a = dot(t.normalizedNormal(), (t.normalizedNormal() * dot(t.normalizedNormal(), t.v1())) - r.origin) / d;
+		vec3 ip = r.origin + a * r.direction;
+		if (pointInsideTriangle(ip, t))
+		{
+			if (intersection_pt)
+				*intersection_pt = ip;
+			return true;
+		}
 	}
-
 	return false;
 }
 

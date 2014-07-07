@@ -22,32 +22,35 @@ namespace et
 			T c[4];
 		};
 
-		vector4() : x(0), y(0), z(0), w(0)
-			{ }
+		vector4() :
+			x(0), y(0), z(0), w(0) { }
 
-		vector4(const vector4& c) : x(c.x), y(c.y), z(c.z), w(c.w)
-			{ }
+		vector4(const vector4& c) :
+			x(c.x), y(c.y), z(c.z), w(c.w) { }
 
-		vector4(vector4&& c) : x(c.x), y(c.y), z(c.z), w(c.w)
-			{ }
+		vector4(vector4&& c) :
+			x(c.x), y(c.y), z(c.z), w(c.w) { }
 		
-		explicit vector4(T s) : x(s), y(s), z(s), w(s)
-			{ }
+		explicit vector4(T s) :
+			x(s), y(s), z(s), w(s) { }
 
-		vector4(const vector2<T>& v1, const vector2<T>& v2) : x(v1.x), y (v1.y), z(v2.x), w(v2.y)
-			{ }
+		vector4(T c, T a) :
+			x(c), y(c), z(c), w(a) { }
+		
+		vector4(const vector2<T>& v1, const vector2<T>& v2) :
+			x(v1.x), y (v1.y), z(v2.x), w(v2.y) { }
 
-		vector4(const vector2<T>& v2, T _z, T _w) : x(v2.x), y(v2.y), z(_z), w(_w)
-			{ }
+		vector4(const vector2<T>& v2, T _z, T _w) :
+			x(v2.x), y(v2.y), z(_z), w(_w) { }
 
-		vector4(const vector3<T>& v3, T _w) : x(v3.x), y(v3.y), z(v3.z), w(_w)
-			{ }
+		vector4(const vector3<T>& v3, T _w) :
+			x(v3.x), y(v3.y), z(v3.z), w(_w) { }
 
-		explicit vector4(const vector3<T>& v3) : x(v3.x), y(v3.y), z(v3.z), w(0)
-			{ }
+		explicit vector4(const vector3<T>& v3) :
+			x(v3.x), y(v3.y), z(v3.z), w(0) { }
 
-		vector4(T _x, T _y, T _z, T _w) : x(_x), y(_y), z(_z), w(_w)
-			{ }
+		vector4(T _x, T _y, T _z, T _w) :
+			x(_x), y(_y), z(_z), w(_w) { }
 
 		T* data()
 			{ return c; }
@@ -153,5 +156,4 @@ namespace et
 	template <typename T>
 	inline vector4<T> operator * (T value, const vector4<T>& vec) 
 		{ return vector4<T>(vec.x * value, vec.y * value, vec.z * value, vec.w * value); }
-
 }

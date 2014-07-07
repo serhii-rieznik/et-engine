@@ -291,6 +291,13 @@ void Element::addAnimation(const Animation& a)
 	setFlag(Flag_HasAnimations);
 }
 
+void Element::removeAnimations()
+{
+	_animations.clear();
+	removeFlag(Flag_HasAnimations);
+	invalidateTransform();
+}
+
 void Element::animate()
 {
 	if (_animations.empty()) return;

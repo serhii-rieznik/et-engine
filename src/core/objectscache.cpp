@@ -177,7 +177,7 @@ void ObjectsCache::update(float t)
 	}
 }
 
-int64_t ObjectsCache::getFileProperty(const std::string& p)
+uint64_t ObjectsCache::getFileProperty(const std::string& p)
 {
 	return getFileDate(p);
 }
@@ -212,7 +212,7 @@ void ObjectsCache::performUpdate()
 				
 				for (auto i : p.identifiers)
 				{
-					int64_t prop = getFileProperty(i.first);
+					uint64_t prop = getFileProperty(i.first);
 					if (prop != i.second)
 					{
 						i.second = prop;

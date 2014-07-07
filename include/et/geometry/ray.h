@@ -19,6 +19,9 @@ namespace et
 		vector3<T> direction;
 
 	public:
+		Ray3d()
+			{ }
+		
 		Ray3d(const vector3<T>& o, const vector3<T>& d) :
 			origin(o), direction(d) { }
 	};

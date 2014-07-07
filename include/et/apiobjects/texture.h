@@ -33,10 +33,10 @@ namespace et
 		vec2 getTexCoord(const vec2& ivec, TextureOrigin origin = TextureOrigin_TopLeft) const;
 
 		void updateData(RenderContext* rc, TextureDescription::Pointer desc);
-		void updateDataDirectly(RenderContext* rc, const vec2i& size, char* data, size_t dataSize);
+		void updateDataDirectly(RenderContext* rc, const vec2i& size, const char* data, size_t dataSize);
 
 		void updatePartialDataDirectly(RenderContext* rc, const vec2i& offset, const vec2i& size,
-			char* data, size_t dataSize);
+			const char* data, size_t dataSize);
 
 		uint32_t glID() const
 			{ return _glID; }

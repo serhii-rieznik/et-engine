@@ -278,9 +278,16 @@ void Program::buildProgram(const std::string& vertex_source, const std::string& 
 		}
 
 		for (auto& i : _attributes)
-			glBindAttribLocation(_glID, static_cast<GLuint>(i.usage), i.name.c_str());
+		{
+			if ((i.usage != Usage_InstanceId) && (i.usage != Usage_InstanceIdExt))
+			{
+				glBindAttribLocation(_glID, static_cast<GLuint>(i.usage), i.name.c_str());
+				checkOpenGLError("glBindAttribLocation - %s", i.name.c_str());
+			}
+		}
 
 		linkStatus = link();
+
 		_rc->renderState().bindProgram(_glID, true);
 
 		if (linkStatus == GL_TRUE)
@@ -396,6 +403,7 @@ void Program::setUniform(int nLoc, uint32_t type, const int value, bool)
 {
 	if (nLoc == -1) return;
 	
+	(void)type;
 	ET_ASSERT((type == GL_INT) || (type == GL_SAMPLER_2D) || (type == GL_SAMPLER_CUBE));
 	ET_ASSERT(loaded());
 	
@@ -407,6 +415,7 @@ void Program::setUniform(int nLoc, uint32_t type, const unsigned int value, bool
 {
 	if (nLoc == -1) return;
 	
+	(void)type;
 	ET_ASSERT((type == GL_INT) || (type == GL_SAMPLER_2D) || (type == GL_SAMPLER_CUBE));
 	ET_ASSERT(loaded());
 	
@@ -418,6 +427,7 @@ void Program::setUniform(int nLoc, uint32_t type, const unsigned long value, boo
 {
 	if (nLoc == -1) return;
 	
+	(void)type;
 	ET_ASSERT((type == GL_INT) || (type == GL_SAMPLER_2D) || (type == GL_SAMPLER_CUBE));
 	ET_ASSERT(loaded());
 	

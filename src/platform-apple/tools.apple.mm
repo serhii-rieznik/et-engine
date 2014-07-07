@@ -182,6 +182,24 @@ bool et::removeFile(const std::string& name)
 	return result;
 }
 
+bool et::copyFile(const std::string& fromName, const std::string& toName)
+{
+	NSError* error = nil;
+	
+	NSString* fileFrom = [NSString stringWithUTF8String:fromName.c_str()];
+	NSString* fileTo = [NSString stringWithUTF8String:toName.c_str()];
+	
+	if ([[NSFileManager defaultManager] fileExistsAtPath:fileTo])
+		removeFile(toName);
+
+	BOOL result = [[NSFileManager defaultManager] copyItemAtPath:fileFrom toPath:fileTo error:&error];
+	
+	if (error)
+		NSLog(@"Unable to copy file from %s to %s, error: %@", fromName.c_str(), toName.c_str(), error);
+	
+	return result;
+}
+
 void et::getFolderContent(const std::string& folder, StringList& list)
 {
 	NSError* err = nil;
@@ -352,7 +370,7 @@ et::vec2i et::nativeScreenSize()
 #endif
 }
 
-int64_t et::getFileDate(const std::string& path)
+uint64_t et::getFileDate(const std::string& path)
 {
 	struct stat s = { };
 	stat(path.c_str(), &s);

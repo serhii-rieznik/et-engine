@@ -27,46 +27,11 @@ struct jpegStreamWrapper
 	unsigned char buffer[jpegBufferSize];
 };
 
-void my_error_exit (j_common_ptr cinfo)
-{
-	jpegErrorManager* myerr = reinterpret_cast<jpegErrorManager*>(cinfo->err);
-	(*cinfo->err->output_message)(cinfo);
-	longjmp(myerr->setjmp_buffer, 1);
-}
-
-void init_source(j_decompress_ptr cinfo)
-{
-}
-
-boolean fill_buffer(j_decompress_ptr cinfo)
-{
-    auto src = (jpegStreamWrapper*)(cinfo->src);
-	src->stream->read(reinterpret_cast<char*>(src->buffer), jpegBufferSize);
-    src->pub.next_input_byte = src->buffer;
-	src->pub.bytes_in_buffer = static_cast<size_t>(src->stream->gcount());
-    return TRUE;
-}
-
-void skip(j_decompress_ptr cinfo, long count)
-{
-    auto src = (jpegStreamWrapper*)(cinfo->src);
-	
-	long bytesToAdjust = etMin(static_cast<long>(src->pub.bytes_in_buffer), count);
-	long bytesToSkip = etMax(0l, count - bytesToAdjust);
-	
-	if (bytesToAdjust > 0)
-	{
-		src->pub.next_input_byte += bytesToAdjust;
-		src->pub.bytes_in_buffer -= bytesToAdjust;
-	}
-	
-	if (bytesToSkip > 0)
-		src->stream->seekg(bytesToSkip, std::ios::cur);
-}
-
-void term(j_decompress_ptr cinfo)
-{
-}
+void skip(j_decompress_ptr cinfo, long count);
+boolean fill_buffer(j_decompress_ptr cinfo);
+void init_source(j_decompress_ptr cinfo);
+void my_error_exit(j_common_ptr cinfo);
+void term(j_decompress_ptr cinfo);
 
 void et::jpeg::loadInfoFromStream(std::istream& source, TextureDescription& desc)
 {
@@ -241,4 +206,48 @@ void et::jpeg::loadInfoFromFile(const std::string& path, TextureDescription& des
 		desc.setOrigin(path);
 		loadInfoFromStream(file.stream(), desc);
 	}
+}
+
+/*
+ * Service functions
+ */
+void my_error_exit(j_common_ptr cinfo)
+{
+	jpegErrorManager* myerr = reinterpret_cast<jpegErrorManager*>(cinfo->err);
+	(*cinfo->err->output_message)(cinfo);
+	longjmp(myerr->setjmp_buffer, 1);
+}
+
+void init_source(j_decompress_ptr)
+{
+}
+
+boolean fill_buffer(j_decompress_ptr cinfo)
+{
+    auto src = (jpegStreamWrapper*)(cinfo->src);
+	src->stream->read(reinterpret_cast<char*>(src->buffer), jpegBufferSize);
+    src->pub.next_input_byte = src->buffer;
+	src->pub.bytes_in_buffer = static_cast<size_t>(src->stream->gcount());
+    return TRUE;
+}
+
+void skip(j_decompress_ptr cinfo, long count)
+{
+    auto src = (jpegStreamWrapper*)(cinfo->src);
+	
+	long bytesToAdjust = etMin(static_cast<long>(src->pub.bytes_in_buffer), count);
+	long bytesToSkip = etMax(0l, count - bytesToAdjust);
+	
+	if (bytesToAdjust > 0)
+	{
+		src->pub.next_input_byte += bytesToAdjust;
+		src->pub.bytes_in_buffer -= bytesToAdjust;
+	}
+	
+	if (bytesToSkip > 0)
+		src->stream->seekg(bytesToSkip, std::ios::cur);
+}
+
+void term(j_decompress_ptr)
+{
 }

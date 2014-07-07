@@ -181,81 +181,9 @@ std::string StandardPathResolver::resolveFolderPath(const std::string& input)
 	return input;
 }
 
-/*
-std::string StandardPathResolver::resolveFilePath(const std::string& path)
-{
-	std::string result;
-	
-	if (!fileExists(result))
-	{
-		for (auto& i : _searchPath)
-		{
-			std::string currentName = i + path;
-			if (fileExists(currentName))
-				return currentName;
-		}
-	}
-	
-	if (!fileExists(result))
-		log::warning("Unable to resolve file path: %s", path.c_str());
-	
-	return result;
-}
-
-std::string StandardPathResolver::resolveFolderPath(const std::string& path)
-{
-	std::string result;
-		
-	if (!fileExists(result))
-	{
-		for (auto& i : _searchPath)
-		{
-			std::string currentName = i + path;
-			if (folderExists(currentName))
-				return currentName;
-		}	}
-	
-	if (!folderExists(result))
-		log::warning("Unable to resolve folder path: %s", path.c_str());
-	
-	return result;
-}
-
-std::string StandardPathResolver::resolveScalableFileName(const std::string& name, size_t scale)
-{
-	ET_ASSERT(scale > 0);
-	
-	std::string foundFile = resolveFilePath(name);
-	
-	if ((foundFile.find_last_of("@") != std::string::npos) && fileExists(foundFile))
-		return foundFile;
-	
-	std::string baseName = removeFileExt(foundFile);
-	std::string ext = getFileExt(foundFile);
-	
-	while (scale >= 1)
-	{
-		std::string newFile = resolveFilePath(baseName + "@" + intToStr(scale) + "x." + ext);
-		if (fileExists(newFile))
-			return newFile;
-		
-		if (scale == 1)
-		{
-			newFile = resolveFilePath(baseName + "." + ext);
-			if (fileExists(newFile))
-				return newFile;
-		}
-		
-		scale -= 1;
-	}
-	
-	return foundFile;
-}
-*/
-
 void StandardPathResolver::pushSearchPath(const std::string& path)
 {
-	_searchPath.emplace_front(addTrailingSlash(normalizeFilePath(path)));
+	_searchPath.push_front(addTrailingSlash(normalizeFilePath(path)));
 }
 
 void StandardPathResolver::pushSearchPaths(const std::set<std::string>& paths)

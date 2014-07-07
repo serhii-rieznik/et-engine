@@ -42,7 +42,7 @@ RenderContext::RenderContext(const RenderContextParameters& params, Application*
 	_renderer = Renderer::Pointer::create(this);
 	
 	CGSize screenSize = [[[UIApplication sharedApplication] delegate] window].frame.size;
-	float screenScale = [[UIScreen mainScreen] scale];
+	auto screenScale = [[UIScreen mainScreen] scale];
 	
 	vec2i contextSize(static_cast<int>(screenScale * screenSize.width),
 		static_cast<int>(screenScale * screenSize.height));

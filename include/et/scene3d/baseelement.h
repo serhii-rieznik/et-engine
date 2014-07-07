@@ -105,6 +105,8 @@ namespace et
 			
 			void addAnimation(const Animation&);
 			
+			void removeAnimations();
+			
 		protected:
 			void serializeGeneralParameters(std::ostream& stream, SceneVersion version);
 			void serializeChildren(std::ostream& stream, SceneVersion version);

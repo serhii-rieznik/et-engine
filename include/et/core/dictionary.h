@@ -36,7 +36,7 @@ namespace et
 	class Value : public ValueBase
 	{
 	public:
-		typedef et::IntrusivePtr<Value<T, C>> Pointer;
+		typedef et::IntrusivePtr< Value<T, C> > Pointer;
 		
 	public:
 		T content;

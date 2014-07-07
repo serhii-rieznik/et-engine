@@ -620,6 +620,36 @@ size_t et::bitsPerPixelForType(uint32_t type)
 	}
 }
 
+size_t et::channelsForTextureFormat(uint32_t internalFormat)
+{
+	switch (internalFormat)
+	{
+	case GL_DEPTH_COMPONENT:
+	case GL_DEPTH_COMPONENT16:
+	case GL_ONE:
+	case GL_RED:
+			
+#if defined(GL_LUMINANCE)
+	case GL_LUMINANCE:
+#endif
+			
+#if defined(GL_R8)
+	case GL_R8:
+#endif
+		return 1;
+
+	case GL_RGB:
+		return 3;
+
+	case GL_RGBA:
+		return 4;
+			
+	default:
+		ET_FAIL_FMT("Channels not defined for format %u", internalFormat);
+		return 0;
+	}
+}
+
 size_t et::bitsPerPixelForTextureFormat(uint32_t internalFormat, uint32_t type)
 {
 	switch (internalFormat)
@@ -660,6 +690,11 @@ size_t et::bitsPerPixelForTextureFormat(uint32_t internalFormat, uint32_t type)
 		case GL_RGBA32F:
 			return 4 * bitsPerPixelForType(type);
 
+#if defined(GL_R8)
+		case GL_R8:
+			return bitsPerPixelForType(type);
+#endif
+			
 #if defined(GL_RED)
 		case GL_RED:
 			return bitsPerPixelForType(type);

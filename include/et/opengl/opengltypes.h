@@ -104,6 +104,7 @@ namespace et
 		Usage_Smoothing,
 		
 		Usage_InstanceId,
+		Usage_InstanceIdExt,
 
 		Usage_max
 	};

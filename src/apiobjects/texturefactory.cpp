@@ -161,6 +161,7 @@ Texture TextureFactory::genTexture(uint32_t target, int32_t internalformat, cons
 	desc->mipMapCount = 1;
 	desc->layersCount = 1;
 	desc->bitsPerPixel = bitsPerPixelForTextureFormat(internalformat, type);
+	desc->channels = channelsForTextureFormat(internalformat);
 	
 	desc->data = data;
 	

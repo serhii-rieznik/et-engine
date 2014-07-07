@@ -110,8 +110,22 @@ Framebuffer::Framebuffer(RenderContext* rc, uint32_t fboId, const std::string& a
 	if (glIsFramebuffer(fboId))
 	{
 		rc->renderState().bindFramebuffer(fboId);
-		glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_WIDTH, &_description.size.x);
-		glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_HEIGHT, &_description.size.y);
+		
+		GLint attachmentType = 0;
+		glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE, &attachmentType);
+		checkOpenGLError("glGetFramebufferAttachmentParameteriv(GL_RENDERBUFFER, GL_COLOR_ATTACHMENT0, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE, ...)");
+		
+		if (attachmentType == GL_RENDERBUFFER)
+		{
+			glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_WIDTH, &_description.size.x);
+			checkOpenGLError("glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_WIDTH, ...)");
+			glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_HEIGHT, &_description.size.y);
+			checkOpenGLError("glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_HEIGHT, ...)");
+		}
+		else if (attachmentType == GL_TEXTURE)
+		{
+			log::info("Unable to determine Framebuffer %s dimensions.", aName.c_str());
+		}
 	}
 	else if (fboId == 0)
 	{
@@ -381,6 +395,8 @@ void Framebuffer::createOrUpdateDepthRenderbuffer()
 
 void Framebuffer::resize(const vec2i& sz)
 {
+	if (_description.size == sz) return;
+	
 	_description.size = sz;
 	
 	bool hasColor = (_description.colorInternalformat != 0) && (_description.colorIsRenderbuffer ||
@@ -418,7 +434,7 @@ void Framebuffer::resize(const vec2i& sz)
 		{
 			auto desc = _depthBuffer->description();
 			desc->size = sz;
-			desc->data.resize(desc->dataSizeForAllMipLevels());
+			desc->data.resize(desc->layersCount * desc->dataSizeForAllMipLevels());
 			_depthBuffer->updateData(_rc, desc);
 			setDepthTarget(_depthBuffer);
 		}
@@ -489,7 +505,9 @@ void Framebuffer::invalidate(bool color, bool depth)
 		glDiscardFramebufferEXT(GL_READ_FRAMEBUFFER, numDiscards, discards);
 		checkOpenGLError("glDiscardFramebufferEXT");
 #	endif
-	
+#else
+	(void)color;
+	(void)depth;
 #endif
 }
 

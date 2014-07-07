@@ -99,7 +99,8 @@ void et::ios::shareFile(const std::string& path, const std::string& scheme, Dict
 	sharedInteractionController.annotation = annotation;
 	
 	[[InteractorControllerHandler sharedInteractorControllerHandler]
-		performSelectorOnMainThread:@selector(presentDocumentController:) withObject:[NSNumber numberWithInt:displayOptions] waitUntilDone:YES];
+		performSelectorOnMainThread:@selector(presentDocumentController:)
+		withObject:[NSNumber numberWithInt:displayOptions] waitUntilDone:NO];
 }
 
 std::string et::selectFile(const StringList&, SelectFileMode, const std::string&)
@@ -118,9 +119,10 @@ void et::ios::saveImageToPhotos(const std::string& path, std::function<void(bool
 	ALAssetsLibrary* library = [[ALAssetsLibrary alloc] init];
 	
 	[library writeImageDataToSavedPhotosAlbum:[NSData dataWithContentsOfFile:[NSString stringWithUTF8String:path.c_str()]]
-		metadata:nil completionBlock:^(NSURL *assetURL, NSError *error)
+		metadata:nil completionBlock:^(NSURL*, NSError* error)
 	{
 		callback(error == nil);
+		
 		if (error != nil)
 			NSLog(@"Unable to save image %s to Saved Photos Album:\n%@", path.c_str(), error);
 	}];
@@ -183,23 +185,27 @@ std::string et::ios::bundleVersion()
 		[sharedInteractionController presentOpenInMenuFromRect:presentRect inView:handle.view animated:YES];
 }
 
-- (void)documentInteractionControllerWillPresentOpenInMenu:(UIDocumentInteractionController *)controller
+- (void)documentInteractionControllerWillPresentOpenInMenu:(UIDocumentInteractionController*)controller
 {
+	(void)controller;
 	ApplicationNotifier().notifyDeactivated();
 }
 
-- (void)documentInteractionControllerDidDismissOpenInMenu:(UIDocumentInteractionController *)controller
+- (void)documentInteractionControllerDidDismissOpenInMenu:(UIDocumentInteractionController*)controller
 {
+	(void)controller;
 	ApplicationNotifier().notifyActivated();
 }
 
-- (void)documentInteractionControllerWillPresentOptionsMenu:(UIDocumentInteractionController *)controller
+- (void)documentInteractionControllerWillPresentOptionsMenu:(UIDocumentInteractionController*)controller
 {
+	(void)controller;
 	ApplicationNotifier().notifyDeactivated();
 }
 
-- (void)documentInteractionControllerDidDismissOptionsMenu:(UIDocumentInteractionController *)controller
+- (void)documentInteractionControllerDidDismissOptionsMenu:(UIDocumentInteractionController*)controller
 {
+	(void)controller;
 	ApplicationNotifier().notifyActivated();
 }
 

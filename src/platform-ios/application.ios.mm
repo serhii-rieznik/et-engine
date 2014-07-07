@@ -34,26 +34,34 @@ void Application::platformFinalize()
 
 void Application::platformActivate()
 {
+#if !defined(ET_EMBEDDED_APPLICATION)
 	etApplicationDelegate* appDelegate = [[UIApplication sharedApplication] delegate];
 	[appDelegate beginUpdates];
+#endif
 }
 
 void Application::platformDeactivate()
 {
+#if !defined(ET_EMBEDDED_APPLICATION)
 	etApplicationDelegate* appDelegate = [[UIApplication sharedApplication] delegate];
 	[appDelegate endUpdates];
+#endif
 }
 
 void Application::platformSuspend()
 {
+#if !defined(ET_EMBEDDED_APPLICATION)
 	etApplicationDelegate* appDelegate = [[UIApplication sharedApplication] delegate];
 	[appDelegate endUpdates];
+#endif
 }
 
 void Application::platformResume()
 {
+#if !defined(ET_EMBEDDED_APPLICATION)
 	etApplicationDelegate* appDelegate = [[UIApplication sharedApplication] delegate];
 	[appDelegate beginUpdates];
+#endif
 }
 
 int Application::platformRun(int argc, char* argv[])
@@ -86,7 +94,7 @@ int Application::platformRun(int argc, char* argv[])
 
 void Application::loaded()
 {
-	float scale = [[UIScreen mainScreen] scale];
+	auto scale = [[UIScreen mainScreen] scale];
 	CGRect winBounds = [[UIScreen mainScreen] bounds];
 	
 	RenderContextParameters renderContextParams;
@@ -96,10 +104,9 @@ void Application::loaded()
 	
 	_renderContext = new RenderContext(renderContextParams, this);
 	_renderingContextHandle = _renderContext->renderingContextHandle();
+	_runLoop.updateTime(_lastQueuedTimeMSec);
 	
     enterRunLoop();
-	
-	_runLoop.update(_lastQueuedTimeMSec);
 }
 
 void Application::quit(int exitCode)

@@ -284,15 +284,25 @@ namespace et
  * 1
  */
 	
-#define ET_INVOKE_THIS_CLASS_METHOD1(CLASS, METHOD, P1)	\
-		{ Invocation1 _aInvocation1;\
-		_aInvocation1.setTarget(this, &CLASS::METHOD, P1);\
+#define ET_INVOKE_THIS_CLASS_METHOD1(CLASS, METHOD, P1) \
+		{ Invocation1 _aInvocation1; \
+		_aInvocation1.setTarget(this, &CLASS::METHOD, P1); \
 		_aInvocation1.invokeInMainRunLoop(); }
 
 #define ET_INVOKE_THIS_CLASS_METHOD1_DELAYED(CLASS, METHOD, P1, DELAY) \
 		{ Invocation1 _aInvocation1; \
 		_aInvocation1.setTarget(this, &CLASS::METHOD, P1); \
 		_aInvocation1.invokeInMainRunLoop(DELAY); }
+	
+#define ET_INVOKE_THIS_CLASS_METHOD1_IN_BACKGROUND(CLASS, METHOD, P1) \
+		{ Invocation1 _aInvocation;\
+		_aInvocation.setTarget(this, &CLASS::METHOD, P1);\
+		_aInvocation.invokeInBackground(); }
+
+#define ET_INVOKE_THIS_CLASS_METHOD1_IN_BACKGROUND_DELAYED(CLASS, METHOD, P1, DELAY) \
+		{ Invocation1 _aInvocation;\
+		_aInvocation.setTarget(this, &CLASS::METHOD, P1);\
+		_aInvocation.invokeInBackground(DELAY); }
 
 /*
  * 2

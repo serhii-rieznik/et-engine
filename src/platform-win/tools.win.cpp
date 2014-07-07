@@ -7,6 +7,7 @@
 
 #include <Windows.h>
 #include <Shlobj.h>
+#include <ShellAPI.h>
 #include <et/core/tools.h>
 #include <et/core/filesystem.h>
 #include <et/core/containers.h>
@@ -120,7 +121,8 @@ void et::findFiles(const std::string& folder, const std::string& mask, bool recu
 
 	if (recursive)
 	{
-		ET_ITERATE(folderList, const std::string&, i, findFiles(i, mask, recursive, list))
+		for (const std::string& i : folderList)
+			findFiles(i, mask, recursive, list);
 	}
 }
 
@@ -202,6 +204,25 @@ bool et::removeFile(const std::string& name)
 	return SHFileOperation(&fop) == 0;
 }
 
+bool et::copyFile(const std::string& from, const std::string& to)
+{
+	std::string fromNullTerminated(from.size() + 1, 0);
+	std::copy(from.begin(), from.end(), fromNullTerminated.begin());
+
+	std::string toNullTerminated(to.size() + 1, 0);
+	std::copy(to.begin(), to.end(), toNullTerminated.begin());
+
+	SHFILEOPSTRUCT fop = {};
+
+	fop.hwnd = 0;
+	fop.wFunc = FO_COPY;
+	fop.pFrom = fromNullTerminated.c_str();
+	fop.pTo = toNullTerminated.c_str();
+	fop.fFlags = FOF_NO_UI;
+
+	return SHFileOperation(&fop) == 0;
+}
+
 bool et::removeDirectory(const std::string& name)
 {
 	std::string doubleNullTerminated(name.size() + 1, 0);
@@ -242,7 +263,8 @@ void et::findSubfolders(const std::string& folder, bool recursive, StringList& l
 
 	if (recursive)
 	{
-		ET_ITERATE(folderList, const std::string&, i, findSubfolders(i, true, list))
+		for (const std::string& i : folderList)
+			findSubfolders(i, true, list);
 	}
 
 	list.insert(list.end(), folderList.begin(), folderList.end());
@@ -344,11 +366,12 @@ std::wstring et::utf8ToUnicode(const std::string& mbcs)
 std::string et::applicationIdentifierForCurrentProject()
 	{ return "com.et.app"; }
 
-int64_t et::getFileDate(const std::string& path)
+uint64_t et::getFileDate(const std::string& path)
 {
 	WIN32_FIND_DATA findData = { };
 	HANDLE search = FindFirstFile(path.c_str(), &findData);
 	FindClose(search);
 
-	return static_cast<int64_t>(findData.ftLastWriteTime.dwLowDateTime);
+	return findData.ftLastWriteTime.dwLowDateTime || 
+		(static_cast<uint64_t>(findData.ftLastWriteTime.dwHighDateTime) << 32);
 }

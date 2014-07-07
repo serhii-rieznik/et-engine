@@ -15,23 +15,8 @@
 using namespace et;
 
 uint32_t getBitsPerPixel(PVRTuint64 u64PixelFormat);
-void parseTextureFormat(const PVRTextureHeaderV3& sTextureHeader, TextureDescription& desc, bool& shouldDecompress);
-
-void loadInfoFromV3Header(const PVRTextureHeaderV3& header, const BinaryDataStorage&,
-	TextureDescription& desc, bool& shouldDecompress)
-{
-	desc.layersCount = header.u32NumFaces;
-	ET_ASSERT((desc.layersCount == 1) || (desc.layersCount == 6));
-
-	desc.size = vec2i(header.u32Width, header.u32Height);
-	desc.mipMapCount = (header.u32MIPMapCount > 0) ? header.u32MIPMapCount : 1;
-	
-	if (desc.layersCount == 6)
-		desc.target = GL_TEXTURE_CUBE_MAP;
-	
-	desc.bitsPerPixel = getBitsPerPixel(header.u64PixelFormat);
-	parseTextureFormat(header, desc, shouldDecompress);
-}
+void parseTextureFormat(const PVRTextureHeaderV3&, TextureDescription&, bool&);
+void loadInfoFromV3Header(const PVRTextureHeaderV3&, const BinaryDataStorage&, TextureDescription&, bool&);
 
 void pvr::loadInfoFromStream(std::istream& stream, TextureDescription& desc, bool* shouldDecompress)
 {
@@ -156,6 +141,7 @@ void parseTextureFormat(const PVRTextureHeaderV3& sTextureHeader, TextureDescrip
 #if defined(GL_COMPRESSED_RGB_PVRTC_2BPPV1_IMG) && (ET_PLATFORM_IOS)
 				desc.internalformat = GL_COMPRESSED_RGB_PVRTC_2BPPV1_IMG;
 				desc.compressed = true;
+				shouldDecompress = false;
 #else
 				shouldDecompress = true;
 #endif
@@ -169,6 +155,7 @@ void parseTextureFormat(const PVRTextureHeaderV3& sTextureHeader, TextureDescrip
 #if defined(GL_COMPRESSED_RGBA_PVRTC_2BPPV1_IMG) && (ET_PLATFORM_IOS)
 				desc.internalformat = GL_COMPRESSED_RGBA_PVRTC_2BPPV1_IMG;
 				desc.compressed = true;
+				shouldDecompress = false;
 #else
 				shouldDecompress = true;
 #endif
@@ -182,6 +169,7 @@ void parseTextureFormat(const PVRTextureHeaderV3& sTextureHeader, TextureDescrip
 #if defined(GL_COMPRESSED_RGB_PVRTC_4BPPV1_IMG) && (ET_PLATFORM_IOS)
 				desc.internalformat = GL_COMPRESSED_RGB_PVRTC_4BPPV1_IMG;
 				desc.compressed = true;
+				shouldDecompress = false;
 #else
 				shouldDecompress = true;
 #endif
@@ -195,6 +183,7 @@ void parseTextureFormat(const PVRTextureHeaderV3& sTextureHeader, TextureDescrip
 #if defined(GL_COMPRESSED_RGBA_PVRTC_4BPPV1_IMG) && (ET_PLATFORM_IOS)
 				desc.internalformat = GL_COMPRESSED_RGBA_PVRTC_4BPPV1_IMG;
 				desc.compressed = true;
+				shouldDecompress = false;
 #else
 				shouldDecompress = true;
 #endif
@@ -460,4 +449,20 @@ uint32_t getBitsPerPixel(PVRTuint64 u64PixelFormat)
 	}
 	
 	return 0;
+}
+
+void loadInfoFromV3Header(const PVRTextureHeaderV3& header, const BinaryDataStorage&,
+	TextureDescription& desc, bool& shouldDecompress)
+{
+	desc.layersCount = header.u32NumFaces;
+	ET_ASSERT((desc.layersCount == 1) || (desc.layersCount == 6));
+	
+	desc.size = vec2i(header.u32Width, header.u32Height);
+	desc.mipMapCount = (header.u32MIPMapCount > 0) ? header.u32MIPMapCount : 1;
+	
+	if (desc.layersCount == 6)
+		desc.target = GL_TEXTURE_CUBE_MAP;
+	
+	desc.bitsPerPixel = getBitsPerPixel(header.u64PixelFormat);
+	parseTextureFormat(header, desc, shouldDecompress);
 }

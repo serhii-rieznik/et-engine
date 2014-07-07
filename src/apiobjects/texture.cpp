@@ -22,14 +22,9 @@ TextureData::TextureData(RenderContext* rc, TextureDescription::Pointer desc,
 		_wrap = vector3<TextureWrap>(TextureWrap_ClampToEdge);
 #endif
 	
-	generateTexture(rc);
-	
-	if (deferred)
+	if (!deferred)
 	{
-		rc->renderState().bindTexture(defaultBindingUnit, _glID, desc->target, true);
-	}
-	else
-	{
+		generateTexture(rc);
 		build(rc);
 	}
 }
@@ -268,7 +263,7 @@ void TextureData::updateData(RenderContext* rc, TextureDescription::Pointer desc
 	build(rc);
 }
 
-void TextureData::updateDataDirectly(RenderContext* rc, const vec2i& size, char* data, size_t dataSize)
+void TextureData::updateDataDirectly(RenderContext* rc, const vec2i& size, const char* data, size_t dataSize)
 {
 	if (_glID == 0)
 		generateTexture(rc);
@@ -279,7 +274,7 @@ void TextureData::updateDataDirectly(RenderContext* rc, const vec2i& size, char*
 }
 
 void TextureData::updatePartialDataDirectly(RenderContext* rc, const vec2i& offset,
-	const vec2i& aSize, char* data, size_t)
+	const vec2i& aSize, const char* data, size_t)
 {
 	ET_ASSERT((_desc->target == GL_TEXTURE_2D) && !_desc->compressed);
 	ET_ASSERT((offset.x >= 0) && (offset.y >= 0));

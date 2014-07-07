@@ -43,8 +43,6 @@ typedef struct {
   long   (*tell_func)  (void *datasource);
 } ov_callbacks;
 
-#define OV_EXCLUDE_STATIC_CALLBACKS
-	
 #ifndef OV_EXCLUDE_STATIC_CALLBACKS
 
 /* a few sets of convenient callbacks, especially for use under
@@ -60,7 +58,7 @@ static int _ov_header_fseek_wrap(FILE *f,ogg_int64_t off,int whence){
 #elif defined (_WIN32)
   return _fseeki64(f,off,whence);
 #else
-  return fseek(f,off,whence);
+  return fseeko(f, off, whence);
 #endif
 }
 

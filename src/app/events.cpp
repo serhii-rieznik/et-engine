@@ -72,9 +72,20 @@ void Event0::invoke()
 void Event0::invokeInMainRunLoop(float delay)
 {
 	cleanup();
+	
 	_invoking = true;
 	for (auto& i : _connections)
 		i->invokeInMainRunLoop(delay);
+	_invoking = false;
+}
+
+void Event0::invokeInBackground(float delay)
+{
+	cleanup();
+	
+	_invoking = true;
+	for (auto& i : _connections)
+		i->invokeInBackground(delay);
 	_invoking = false;
 }
 

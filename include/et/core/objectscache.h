@@ -32,7 +32,7 @@ namespace et
 		void stopMonitoring();
 		void report();
 		
-		int64_t getFileProperty(const std::string& p);
+		uint64_t getFileProperty(const std::string& p);
 		uint64_t getObjectProperty(LoadableObject::Pointer);
 
 	private:
@@ -46,7 +46,7 @@ namespace et
 		{
 			LoadableObject::Pointer object;
 			ObjectLoader::Pointer loader;
-			std::map<std::string, int64_t> identifiers;
+			std::map<std::string, uint64_t> identifiers;
 			
 			ObjectProperty() { }
 			

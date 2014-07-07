@@ -46,7 +46,10 @@ struct PVRTCWord
 struct PVRTCWordIndices
 {
 	int P[2], Q[2], R[2], S[2];
-};	
+};
+
+void interpolateColours(const Pixel32&, const Pixel32&, const Pixel32&, const Pixel32&, Pixel128S*, PVRTuint8);
+
 /********************************************************************************/
 /*!***********************************************************************
  @Function		getColourA
@@ -853,9 +856,9 @@ static int ETCTextureDecompress(const void * const pSrcData, const int &x, const
 				green1 = green1 + (green1>>5);	// copy bits to lower sig
 				blue1 = blue1 + (blue1>>5);	// copy bits to lower sig
 
-				red2 = (red2<<3) +(red2>>2);	// copy bits to lower sig
-				green2 = (green2<<3) + (green2>>2);	// copy bits to lower sig
-				blue2 = (blue2<<3) + (blue2>>2);	// copy bits to lower sig
+				red2 = ((red2<<3) +(red2>>2)) & 0xff;	// copy bits to lower sig
+				green2 = ((green2<<3) + (green2>>2)) & 0xff;	// copy bits to lower sig
+				blue2 = ((blue2<<3) + (blue2>>2)) & 0xff;	// copy bits to lower sig
 			}
 			else
 			{	// individual mode 4 + 4 colour bits

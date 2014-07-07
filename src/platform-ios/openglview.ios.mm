@@ -165,7 +165,7 @@ using namespace et;
 {
 	@synchronized(_context)
 	{
-		_scaleFactor = [[UIScreen mainScreen] scale];
+		_scaleFactor = static_cast<float>([[UIScreen mainScreen] scale]);
 		[EAGLContext setCurrentContext:_context];
 		
 		CAEAGLLayer* glLayer = (CAEAGLLayer*)self.layer;
@@ -256,14 +256,14 @@ using namespace et;
 	CGRect ownFrame = self.bounds;
 	CGPoint touchPoint = [touch locationInView:self];
 	
-	float nx = 2.0f * touchPoint.x / ownFrame.size.width - 1.0f;
-	float ny = 1.0f - 2.0f * touchPoint.y / ownFrame.size.height;
+	float nx = 2.0f * static_cast<float>(touchPoint.x / ownFrame.size.width) - 1.0f;
+	float ny = 1.0f - 2.0f * static_cast<float>(touchPoint.y / ownFrame.size.height);
 	
 	touchPoint.x *= _scaleFactor;
 	touchPoint.y *= _scaleFactor;
 
-	return PointerInputInfo(PointerType_General, vec2(touchPoint.x, touchPoint.y), vec2(nx, ny), vec2(0.0f),
-		[touch hash], mainTimerPool()->actualTime(), PointerOrigin_Touchscreen);
+	return PointerInputInfo(PointerType_General, vec2(static_cast<float>(touchPoint.x), static_cast<float>(touchPoint.y)),
+		vec2(nx, ny), vec2(0.0f), [touch hash], mainTimerPool()->actualTime(), PointerOrigin_Touchscreen);
 }
 
 - (void)touchesBegan:(NSSet*)touches withEvent:(UIEvent*)event
