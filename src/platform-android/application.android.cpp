@@ -257,31 +257,6 @@ void Application::loaded()
 	delegate()->setRenderContextParameters(parameters);
 	
 	_renderContext = new RenderContext(parameters, this);
-	_renderContext->init();
-
-	_active = true;
-	delegate()->applicationDidLoad(_renderContext);
-
-	applicationLoaded = true;
-	
-	delegate()->applicationWillResizeContext(_renderContext->sizei());
-}
-
-void Application::enterRunLoop()
-{
-	log::info("Application::enterRunLoop()");
-	ET_ASSERT(_sharedApplication != nullptr);
-
-	_active = false;
-	_running = true;
-	
-	while (_sharedApplication->destroyRequested == 0)
-	{
-		processEvents();
-		
-		if (_active)
-			idle();
-    }
 }
 
 void Application::quit(int exitCode)
@@ -297,7 +272,7 @@ void Application::setTitle(const std::string &s)
 }
 
 void Application::alert(const std::string&, const std::string&, AlertType)
-{	
+{
 }
 
 void Application::platformInit()
@@ -310,8 +285,19 @@ int Application::platformRun(int argc, char* argv[])
 {
 	_renderingContextHandle = reinterpret_cast<size_t>(_sharedApplication);
 	
-	log::info("Application::platformRun()");
+	applicationLoaded = true;
 	enterRunLoop();
+	
+	delegate()->applicationWillResizeContext(_renderContext->sizei());
+	
+	while (_sharedApplication->destroyRequested == 0)
+	{
+		processEvents();
+		
+		if (_active)
+			idle();
+	}
+	
 	return 0;
 }
 

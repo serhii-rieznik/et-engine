@@ -63,12 +63,13 @@ LOCAL_SRC_FILES += $(SOURCE_PATH)/platform-android/charactergenerator.android.cp
 LOCAL_SRC_FILES += $(SOURCE_PATH)/platform-android/sound.openal.android.cpp
 LOCAL_SRC_FILES += $(SOURCE_PATH)/platform-android/nativeactivity.android.cpp
 
-LOCAL_SRC_FILES += $(SOURCE_PATH)/core/plist.cpp
-LOCAL_SRC_FILES += $(SOURCE_PATH)/core/dictionary.cpp
-LOCAL_SRC_FILES += $(SOURCE_PATH)/core/tools.cpp
-LOCAL_SRC_FILES += $(SOURCE_PATH)/core/objectscache.cpp
-LOCAL_SRC_FILES += $(SOURCE_PATH)/core/transformable.cpp
+LOCAL_SRC_FILES += $(SOURCE_PATH)/core/base64.cpp
 LOCAL_SRC_FILES += $(SOURCE_PATH)/core/conversion.cpp
+LOCAL_SRC_FILES += $(SOURCE_PATH)/core/dictionary.cpp
+LOCAL_SRC_FILES += $(SOURCE_PATH)/core/objectscache.cpp
+LOCAL_SRC_FILES += $(SOURCE_PATH)/core/plist.cpp
+LOCAL_SRC_FILES += $(SOURCE_PATH)/core/tools.cpp
+LOCAL_SRC_FILES += $(SOURCE_PATH)/core/transformable.cpp
 
 LOCAL_SRC_FILES += $(SOURCE_PATH)/scene3d/animation.cpp
 LOCAL_SRC_FILES += $(SOURCE_PATH)/scene3d/baseelement.cpp
@@ -139,6 +140,7 @@ LOCAL_SRC_FILES += $(SOURCE_PATH)/app/application.cpp
 LOCAL_SRC_FILES += $(SOURCE_PATH)/app/events.cpp
 LOCAL_SRC_FILES += $(SOURCE_PATH)/app/invocation.cpp
 LOCAL_SRC_FILES += $(SOURCE_PATH)/app/runloop.cpp
+LOCAL_SRC_FILES += $(SOURCE_PATH)/app/pathresolver.cpp
 
 LOCAL_SRC_FILES += $(SOURCE_PATH)/collision/collision.cpp
 
