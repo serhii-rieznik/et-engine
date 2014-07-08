@@ -16,6 +16,12 @@ TimedObject::TimedObject() :
 {
 }
 
+TimedObject::TimedObject(TimerPool* tp) :
+	_owner(tp), _startTime(0.0f), _running(false), _released(false)
+{
+
+}
+
 TimedObject::~TimedObject()
 {
 	if (_owner)

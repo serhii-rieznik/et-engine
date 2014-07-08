@@ -109,7 +109,7 @@ void RenderContext::init()
 	_renderState.setMainViewportSize(vec2i(r.right - r.left, r.bottom - r.top));
 
 	_fpsTimer.expired.connect(this, &RenderContext::onFPSTimerExpired);
-	_fpsTimer.start(mainTimerPool(), 1.0f, -1);
+	_fpsTimer.start(mainTimerPool().ptr(), 1.0f, -1);
 }
 
 bool RenderContext::valid()
@@ -226,7 +226,7 @@ bool RenderContextPrivate::initWindow(RenderContextParameters& params, const App
 	wndClass.style = CS_OWNDC;
 	wndClass.lpfnWndProc = mainWndProc;
 	wndClass.hInstance = hInstance;
-	wndClass.hCursor = LoadCursor(0, IDC_ARROW);
+	wndClass.hCursor = LoadCursor(nullptr, IDC_ARROW);
 	wndClass.lpszClassName = "etWindowClass";
 
 	ATOM result = RegisterClassEx(&wndClass);
@@ -241,9 +241,6 @@ bool RenderContextPrivate::initWindow(RenderContextParameters& params, const App
 	ShowWindow(primaryContext.hWnd, SW_SHOW);
 	SetForegroundWindow(primaryContext.hWnd);
 	SetFocus(primaryContext.hWnd);
-
-	if ((appParams.windowStyle & WindowStyle_Caption) == WindowStyle_Caption)
-		SetCapture(primaryContext.hWnd);
 
 	if (appParams.windowSize == WindowSize_Fullscreen)
 	{

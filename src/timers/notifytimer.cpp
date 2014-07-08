@@ -12,13 +12,20 @@ using namespace et;
 NotifyTimer::NotifyTimer() :
 	_endTime(0.0f), _period(0.0f), _repeatCount(0) { }
 
-void NotifyTimer::start(TimerPool::Pointer tp, float period, int64_t repeatCount)
+void NotifyTimer::start(TimerPool* tp, float period, int64_t repeatCount)
 {
-	startUpdates(tp.ptr());
+	ET_ASSERT(tp != nullptr);
+
+	startUpdates(tp);
 
 	_period = period;
 	_repeatCount = repeatCount;
 	_endTime = actualTime() + period;
+}
+
+void NotifyTimer::start(TimerPool::Pointer tp, float period, int64_t repeatCount)
+{
+	start(tp.ptr(), period, repeatCount);
 }
 
 void NotifyTimer::update(float t)

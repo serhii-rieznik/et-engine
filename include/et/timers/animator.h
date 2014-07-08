@@ -16,21 +16,15 @@ namespace et
 	class BaseAnimator : public TimedObject
 	{
 	public:
-		BaseAnimator(const TimerPool::Pointer& tp) :
-			_tag(0), _timerPool(tp) { }
+		BaseAnimator(TimerPool* tp) :
+			TimedObject(tp), _tag(0) { }
 
 	public:
 		ET_DECLARE_PROPERTY_GET_COPY_SET_COPY(int, tag, setTag)
 
 	protected:
-		BaseAnimator(int aTag, const TimerPool::Pointer& tp) :
-			 _tag(aTag), _timerPool(tp) { }
-
-		TimerPool::Pointer timerPool()
-			{ return _timerPool; }
-
-	protected:
-		TimerPool::Pointer _timerPool;
+		BaseAnimator(int aTag, TimerPool* tp) :
+			TimedObject(tp), _tag(aTag) { }
 	};
 
 	typedef std::vector<BaseAnimator*> AnimatorList;
@@ -47,19 +41,43 @@ namespace et
 	{
 	public:
 		Animator() :
-			BaseAnimator(0, TimerPool::Pointer()), _from(), _to(), _value(), _valuePointer(nullptr),
+			BaseAnimator(0, nullptr), _from(), _to(), _value(), _valuePointer(nullptr),
 			_startTime(0.0f), _duration(0.0f) { initDefaultInterpolators(); }
 		
-		Animator(const TimerPool::Pointer& tp) :
+		/*
+		 * Just Timer Pool
+		 */
+		Animator(TimerPool* tp) :
 			BaseAnimator(0, tp), _from(), _to(), _value(), _valuePointer(nullptr),
 			_startTime(0.0f), _duration(0.0f) { initDefaultInterpolators(); }
-		
-		Animator(int tag, const TimerPool::Pointer& tp) :
+
+		Animator(TimerPool::Pointer tp) :
+			BaseAnimator(0, tp.ptr()), _from(), _to(), _value(), _valuePointer(nullptr),
+			_startTime(0.0f), _duration(0.0f) { initDefaultInterpolators(); }
+
+		/*
+		 * Tag and Timer Pool
+		 */
+		Animator(int tag, TimerPool* tp) :
 			BaseAnimator(tag, tp), _from(), _to(), _value(), _valuePointer(nullptr),
 			_startTime(0.0f), _duration(0.0f) { initDefaultInterpolators(); }
 
-		Animator(T* value, const T& from, const T& to, float duration, int tag, const TimerPool::Pointer& tp) :
+		Animator(int tag, TimerPool::Pointer tp) :
+			BaseAnimator(tag, tp.ptr()), _from(), _to(), _value(), _valuePointer(nullptr),
+			_startTime(0.0f), _duration(0.0f) { initDefaultInterpolators(); }
+
+		/*
+		 * All properties
+		 */
+		Animator(T* value, const T& from, const T& to, float duration, int tag, TimerPool* tp) :
 			BaseAnimator(tag, tp), _from(), _to(), _value(), _valuePointer(nullptr), _startTime(0.0f), _duration(0.0f)
+		{
+			initDefaultInterpolators();
+			animate(value, from, to, duration);
+		}
+
+		Animator(T* value, const T& from, const T& to, float duration, int tag, TimerPool::Pointer tp) :
+			BaseAnimator(tag, tp.ptr()), _from(), _to(), _value(), _valuePointer(nullptr), _startTime(0.0f), _duration(0.0f)
 		{
 			initDefaultInterpolators();
 			animate(value, from, to, duration);
@@ -70,13 +88,15 @@ namespace et
 		
 		void animate(T* value, const T& from, const T& to, float duration)
 		{
-			ET_ASSERT(timerPool().valid());
+			ET_ASSERT(timerPool() != nullptr);
+
 			_valuePointer = value;
 			_value = from;
 			_from = from;
 			_to = to;
 			_duration = duration;
-			startUpdates(timerPool().ptr());
+
+			startUpdates(timerPool());
 			_startTime = actualTime();
 		};
 		

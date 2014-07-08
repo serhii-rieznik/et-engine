@@ -24,6 +24,7 @@ namespace et
 	public:
 		NotifyTimer();
 
+		void start(TimerPool*, float period, int64_t repeatCount = DontRepear);
 		void start(TimerPool::Pointer, float period, int64_t repeatCount = DontRepear);
 		void update(float);
 
