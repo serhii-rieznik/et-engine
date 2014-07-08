@@ -71,13 +71,24 @@ extern etOpenGLViewController* sharedOpenGLViewController;
 	[self endUpdates];
 	
 	(void)application;
-	_notifier.notifyDeactivated();
+	
+	@synchronized(sharedOpenGLViewController.context)
+	{
+		[sharedOpenGLViewController beginRender];
+		_notifier.notifyDeactivated();
+	}
+	
 }
 
 - (void)applicationDidBecomeActive:(UIApplication *)application
 {
 	(void)application;
-	_notifier.notifyActivated();
+	
+	@synchronized(sharedOpenGLViewController.context)
+	{
+		[sharedOpenGLViewController beginRender];
+		_notifier.notifyActivated();
+	}
 }
 
 - (void)applicationWillTerminate:(UIApplication *)application

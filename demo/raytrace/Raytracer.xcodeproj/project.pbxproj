@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		A54349AA195D969D002DF03A /* RaytraceThread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A54349A9195D969D002DF03A /* RaytraceThread.cpp */; };
+		A54349AC195D9726002DF03A /* RaytraceScene.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A54349AB195D9726002DF03A /* RaytraceScene.cpp */; };
+		A54349B0195D9AEB002DF03A /* Raytracer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A54349AF195D9AEB002DF03A /* Raytracer.cpp */; };
 		A5D3D36C1955B14000E621A7 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5D3D36B1955B14000E621A7 /* main.cpp */; };
 		A5D3D3751955B2A800E621A7 /* MainController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5D3D3741955B2A800E621A7 /* MainController.cpp */; };
 		A5D3D4801955B4AE00E621A7 /* framebuffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5D3D4141955B4AE00E621A7 /* framebuffer.cpp */; };
@@ -103,6 +106,8 @@
 		A5D3D4E21955B54700E621A7 /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = A5D3D4E11955B54700E621A7 /* libz.dylib */; };
 		A5D3D4E41955B54A00E621A7 /* libxml2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = A5D3D4E31955B54A00E621A7 /* libxml2.dylib */; };
 		A5D3D4EB1955B87500E621A7 /* programs in CopyFiles */ = {isa = PBXBuildFile; fileRef = A5D3D4EA1955B85600E621A7 /* programs */; };
+		A5F1F72A1965D53500D24712 /* objLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5F1F7281965D53500D24712 /* objLoader.cpp */; };
+		A5F1F72B1965D55000D24712 /* models in CopyFiles */ = {isa = PBXBuildFile; fileRef = A5F1F7241965D48200D24712 /* models */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -112,6 +117,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 7;
 			files = (
+				A5F1F72B1965D55000D24712 /* models in CopyFiles */,
 				A5D3D4EB1955B87500E621A7 /* programs in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -119,6 +125,12 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		A54349A8195D967B002DF03A /* RaytraceThread.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RaytraceThread.h; sourceTree = "<group>"; };
+		A54349A9195D969D002DF03A /* RaytraceThread.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = RaytraceThread.cpp; sourceTree = "<group>"; };
+		A54349AB195D9726002DF03A /* RaytraceScene.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = RaytraceScene.cpp; sourceTree = "<group>"; };
+		A54349AD195D972D002DF03A /* RaytraceScene.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RaytraceScene.h; sourceTree = "<group>"; };
+		A54349AE195D9AE5002DF03A /* Raytracer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Raytracer.h; sourceTree = "<group>"; };
+		A54349AF195D9AEB002DF03A /* Raytracer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Raytracer.cpp; sourceTree = "<group>"; };
 		A5D3D3681955B14000E621A7 /* Raytracer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Raytracer.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A5D3D36B1955B14000E621A7 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		A5D3D3731955B29E00E621A7 /* MainController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MainController.h; sourceTree = "<group>"; };
@@ -349,6 +361,8 @@
 		A5D3D4E31955B54A00E621A7 /* libxml2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libxml2.dylib; path = usr/lib/libxml2.dylib; sourceTree = SDKROOT; };
 		A5D3D4E61955B62500E621A7 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		A5D3D4EA1955B85600E621A7 /* programs */ = {isa = PBXFileReference; lastKnownFileType = folder; name = programs; path = Data/programs; sourceTree = "<group>"; };
+		A5F1F7241965D48200D24712 /* models */ = {isa = PBXFileReference; lastKnownFileType = folder; name = models; path = Data/models; sourceTree = "<group>"; };
+		A5F1F7281965D53500D24712 /* objLoader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = objLoader.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -371,9 +385,9 @@
 		A5D3D35F1955B14000E621A7 = {
 			isa = PBXGroup;
 			children = (
+				A5F1F7241965D48200D24712 /* models */,
 				A5D3D4EA1955B85600E621A7 /* programs */,
 				A5D3D3721955B28100E621A7 /* et */,
-				A5D3D3761955B46200E621A7 /* et-ext */,
 				A5D3D36A1955B14000E621A7 /* Raytracer */,
 				A5D3D4E51955B55000E621A7 /* Frameworks */,
 				A5D3D3691955B14000E621A7 /* Products */,
@@ -392,8 +406,14 @@
 			isa = PBXGroup;
 			children = (
 				A5D3D36B1955B14000E621A7 /* main.cpp */,
+				A54349AD195D972D002DF03A /* RaytraceScene.h */,
+				A54349AB195D9726002DF03A /* RaytraceScene.cpp */,
+				A54349AE195D9AE5002DF03A /* Raytracer.h */,
+				A54349AF195D9AEB002DF03A /* Raytracer.cpp */,
 				A5D3D3731955B29E00E621A7 /* MainController.h */,
 				A5D3D3741955B2A800E621A7 /* MainController.cpp */,
+				A54349A8195D967B002DF03A /* RaytraceThread.h */,
+				A54349A9195D969D002DF03A /* RaytraceThread.cpp */,
 				A5D3D4E61955B62500E621A7 /* Info.plist */,
 			);
 			path = Raytracer;
@@ -406,13 +426,6 @@
 				A5D3D4111955B49200E621A7 /* include */,
 			);
 			name = et;
-			sourceTree = "<group>";
-		};
-		A5D3D3761955B46200E621A7 /* et-ext */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			name = "et-ext";
 			sourceTree = "<group>";
 		};
 		A5D3D3771955B48900E621A7 /* apiobjects */ = {
@@ -727,6 +740,7 @@
 		A5D3D4121955B49C00E621A7 /* src */ = {
 			isa = PBXGroup;
 			children = (
+				A5F1F7261965D53500D24712 /* models */,
 				A5D3D4131955B4AE00E621A7 /* apiobjects */,
 				A5D3D41F1955B4AE00E621A7 /* app */,
 				A5D3D4271955B4AE00E621A7 /* camera */,
@@ -1002,6 +1016,15 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
+		A5F1F7261965D53500D24712 /* models */ = {
+			isa = PBXGroup;
+			children = (
+				A5F1F7281965D53500D24712 /* objLoader.cpp */,
+			);
+			name = models;
+			path = ../../src/models;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -1113,6 +1136,7 @@
 				A5D3D48E1955B4AE00E621A7 /* events.cpp in Sources */,
 				A5D3D4C71955B4AE00E621A7 /* cameraelement.cpp in Sources */,
 				A5D3D4971955B4AE00E621A7 /* dictionary.cpp in Sources */,
+				A54349AA195D969D002DF03A /* RaytraceThread.cpp in Sources */,
 				A5D3D4BC1955B4AE00E621A7 /* mutex.unix.cpp in Sources */,
 				A5D3D4841955B4AE00E621A7 /* programfactory.cpp in Sources */,
 				A5D3D4C91955B4AE00E621A7 /* material.cpp in Sources */,
@@ -1125,10 +1149,12 @@
 				A5D3D4D51955B4AE00E621A7 /* indexarray.cpp in Sources */,
 				A5D3D4CA1955B4AE00E621A7 /* mesh.cpp in Sources */,
 				A5D3D4CF1955B4AE00E621A7 /* supportmesh.cpp in Sources */,
+				A54349AC195D9726002DF03A /* RaytraceScene.cpp in Sources */,
 				A5D3D4961955B4AE00E621A7 /* conversion.cpp in Sources */,
 				A5D3D4A31955B4AE00E621A7 /* jpegloader.cpp in Sources */,
 				A5D3D4A51955B4AE00E621A7 /* pvrdecompressor.cpp in Sources */,
 				A5D3D4891955B4AE00E621A7 /* vertexbufferdata.cpp in Sources */,
+				A5F1F72A1965D53500D24712 /* objLoader.cpp in Sources */,
 				A5D3D4D41955B4AE00E621A7 /* timerpool.cpp in Sources */,
 				A5D3D4C21955B4AE00E621A7 /* renderer.cpp in Sources */,
 				A5D3D4B71955B4AE00E621A7 /* platformtools.mac.mm in Sources */,
@@ -1144,6 +1170,7 @@
 				A5D3D48F1955B4AE00E621A7 /* invocation.cpp in Sources */,
 				A5D3D4821955B4AE00E621A7 /* indexbufferdata.cpp in Sources */,
 				A5D3D4B91955B4AE00E621A7 /* sound.openal.mac.mm in Sources */,
+				A54349B0195D9AEB002DF03A /* Raytracer.cpp in Sources */,
 				A5D3D4A91955B4AE00E621A7 /* input.cpp in Sources */,
 				A5D3D48D1955B4AE00E621A7 /* backgroundthread.cpp in Sources */,
 				A5D3D4A81955B4AE00E621A7 /* gestures.cpp in Sources */,
@@ -1247,6 +1274,7 @@
 		A5D3D3701955B14000E621A7 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					"/Applications/Xcode6-Beta2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include",
@@ -1270,6 +1298,8 @@
 		A5D3D3711955B14000E621A7 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_OPTIMIZATION_LEVEL = fast;
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					"/Applications/Xcode6-Beta2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include",

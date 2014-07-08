@@ -15,14 +15,20 @@
 #include <et/app/application.h>
 #include <et/timers/interpolationvalue.h>
 
+#include "RaytraceScene.h"
+#include "RaytraceThread.h"
+
 namespace rt
 {
-	class MainController : public et::IApplicationDelegate, public et::InputHandler
+	class MainController : public et::IApplicationDelegate, public et::InputHandler, public RaytraceThreadDelegate
 	{
 		et::ApplicationIdentifier applicationIdentifier() const;
 		void setRenderContextParameters(et::RenderContextParameters&);
+		
 		void applicationDidLoad(et::RenderContext*);
 		void applicationWillResizeContext(const et::vec2i&);
+		void applicationWillTerminate();
+		
 		void render(et::RenderContext*);
 		void idle(float);
 		
@@ -33,32 +39,53 @@ namespace rt
 		void restartOnlineRendering();
 		void restartOfflineRendering();
 		
+		void updateTextureData();
+		
+		void startCPUTracing();
+		void renderFinished();
+		bool shouldAntialias();
+		
 	private:
-		et::Camera _mainCamera;
+		et::vec2i imageSize();
+		const RaytraceScene& scene();
+		OutputFunction outputFunction();
+		
+		bool fetchNewRenderRect(et::vec2i& origin, et::vec2i& size);
+		
+	private:
 		et::GesturesRecognizer _gestures;
 		et::InterpolationValue<et::vec2> _cameraAngles;
 		
 		et::Program::Pointer _mainProgram;
 		et::Texture _noise;
+		
 		et::vec2 _initialScale;
 		et::vec2 _initialOffset;
 		et::vec2 _scale;
 		et::vec2 _offset;
-		et::vec3 _lightPosition;
 		
-		std::vector<et::vec4> _planes;
-		std::vector<et::vec4> _planeColors;
-		std::vector<et::vec4> _planeProps;
-
-		std::vector<et::vec4> _spheres;
-		std::vector<et::vec4> _sphereColors;
-		std::vector<et::vec4> _sphereProps;
+		et::Texture _result;
+		et::DataStorage<et::vec4ub> _textureData;
 		
-		int _bounces = 1;
-		int _previewBounces = 1;
-		int _productionBounces = 10;
+		RaytraceScene _scene;
+		std::vector<RaytraceThread*> _threads;
+		std::vector<et::recti> _renderRects;
+		OutputFunction _outputFunction;
+		et::CriticalSection _csLock;
+		
+		float _startTime = 0.0f;
+		
+		int _previewBounces = 3;
+		int _previewSamples = 4;
+		
+		int _productionBounces = 16;
+		int _productionSamples = 512;
 		
 		bool _shouldRender = true;
 		bool _interactiveRendering = false;
+		bool _shouldUpdateTexture = true;
+		bool _enableGPURaytracing = false;
+		
+		bool _rendering = false;
 	};
 }

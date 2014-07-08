@@ -486,13 +486,23 @@ void RenderState::setCulling(bool enabled, CullState cull)
 	if (_currentState.cullEnabled != enabled)
 	{
 		_currentState.cullEnabled = enabled;
-		(enabled ? glEnable : glDisable)(GL_CULL_FACE);
+		if (_currentState.cullEnabled)
+		{
+			glEnable(GL_CULL_FACE);
+			checkOpenGLError("glEnable(GL_CULL_FACE)");
+		}
+		else
+		{
+			glDisable(GL_CULL_FACE);
+			checkOpenGLError("glDisable(GL_CULL_FACE)");
+		}
 	}
 	
 	if ((cull != CullState_Current) && (_currentState.lastCull != cull))
 	{
 		_currentState.lastCull = cull;
 		glCullFace(cull == CullState_Back ? GL_BACK : GL_FRONT);
+		checkOpenGLError(cull == CullState_Back ? "glCullFace(GL_BACK)" : "glCullFace(GL_FRONT)");
 	}
 }
 

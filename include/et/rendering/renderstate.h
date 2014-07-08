@@ -150,6 +150,9 @@ namespace et
 		 */
 		uint32_t boundFramebuffer() const
 			{ return _currentState.boundFramebuffer; }
+
+		uint32_t boundRenderbuffer() const
+			{ return _currentState.boundRenderbuffer; }
 		
 		bool blendEnabled() const
 			{ return _currentState.blendEnabled; }

@@ -42,11 +42,14 @@ float et::signNoZero(float s)
 
 uint32_t et::randomInteger(uint32_t limit)
 {
+	/*
 #if (ET_PLATFORM_APPLE)
 	return arc4random() % limit;
 #else
 	return rand() % limit;
 #endif
+	 */
+	return rand() % limit;
 }
 
 vec3 et::randVector(float sx, float sy, float sz)
