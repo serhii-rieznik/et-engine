@@ -38,7 +38,7 @@ namespace et
 		static const std::string defaultVerificationSandboxServer;
         
     public:
-		void setShouldVerifyReceipts(bool, const std::string&);
+		void setShouldVerifyReceipts(bool);
 		
         void checkAvailableProducts(const ProductsSet& products);
 		void restorePurchases();

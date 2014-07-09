@@ -29,7 +29,6 @@ using namespace et;
 - (BOOL)parseValidationResponseFromTransaction:(NSDictionary*)response forTransaction:(SKPaymentTransaction*)transaction;
 
 @property (nonatomic, assign) BOOL shouldVerifyReceipts;
-@property (nonatomic, strong) NSString* verificationServer;
 
 @end
 
@@ -46,9 +45,8 @@ bool PurchasesManager::purchasesEnabled()
 	return [SKPaymentQueue canMakePayments];
 }
 
-void PurchasesManager::setShouldVerifyReceipts(bool verify, const std::string& server)
+void PurchasesManager::setShouldVerifyReceipts(bool verify)
 {
-	[[SharedPurchasesManager sharedInstance] setVerificationServer:[NSString stringWithUTF8String:server.c_str()]];
 	[[SharedPurchasesManager sharedInstance] setShouldVerifyReceipts:verify ? YES : NO];
 }
 
@@ -78,7 +76,6 @@ void PurchasesManager::restorePurchases()
 @implementation SharedPurchasesManager
 
 @synthesize shouldVerifyReceipts = _shouldVerifyReceipts;
-@synthesize verificationServer = _verificationServer;
 
 + (instancetype)sharedInstance
 {
@@ -166,6 +163,7 @@ void PurchasesManager::restorePurchases()
 
 - (void)requestDidFinish:(SKRequest*)request
 {
+	
 }
 
 - (BOOL)parseValidationResponseFromTransaction:(NSDictionary*)response forTransaction:(SKPaymentTransaction*)transaction
@@ -241,9 +239,7 @@ void PurchasesManager::restorePurchases()
 		{
 			NSString* transactionId = [iap objectForKey:@"transaction_id"];
 			if ([transactionId isEqualToString:transaction.transactionIdentifier])
-			{
 				return YES;
-			}
 		}
 	}
 	
@@ -265,10 +261,18 @@ void PurchasesManager::restorePurchases()
 	}
 		
 	NSError* error = nil;
-	NSDictionary *requestContents = @{ @"receipt-data" : [receipt base64EncodedStringWithOptions:0] };
+	NSDictionary* requestContents = @{ @"receipt-data" : [receipt base64EncodedStringWithOptions:0] };
 	NSData* requestData = [NSJSONSerialization dataWithJSONObject:requestContents options:0 error:&error];
 	
-	NSURL* url = [NSURL URLWithString:_verificationServer];
+	[self verifyRequestData:requestData
+		withServer:[NSString stringWithUTF8String:PurchasesManager::defaultVerificationServer.c_str()]
+		transaction:transaction usingBundleReceipt:usingBundleReceipt];
+}
+
+-(void)verifyRequestData:(NSData*)requestData withServer:(NSString*)server
+	transaction:(SKPaymentTransaction*)transaction usingBundleReceipt:(BOOL)usingBundleReceipt
+{
+	NSURL* url = [NSURL URLWithString:server];
 	NSMutableURLRequest* request = [NSMutableURLRequest requestWithURL:url];
 	[request setHTTPMethod:@"POST"];
 	[request setHTTPBody:requestData];
@@ -283,7 +287,17 @@ void PurchasesManager::restorePurchases()
 		{
 			NSError* error = nil;
 			NSDictionary* values = [NSJSONSerialization JSONObjectWithData:data options:0 error:&error];
-			if ((values != nil) && (error == nil))
+			
+			if ([[values objectForKey:@"status"] integerValue] == 21007)
+			{
+				dispatch_async(dispatch_get_main_queue(), ^
+				{
+					[self verifyRequestData:requestData
+						withServer:[NSString stringWithUTF8String:PurchasesManager::defaultVerificationSandboxServer.c_str()]
+						transaction:transaction usingBundleReceipt:usingBundleReceipt];
+				});
+			}
+			else if ((values != nil) && (error == nil))
 			{
 				BOOL validationPassed = usingBundleReceipt ?
 					[self parseValidationResponseFromBundle:values forTransaction:transaction] :
@@ -297,7 +311,6 @@ void PurchasesManager::restorePurchases()
 			else
 			{
 				PurchasesManager::instance().failedToPurchaseProduct.invokeInMainRunLoop(productId);
-				return;
 			}
 		}
 		else
@@ -322,13 +335,12 @@ void PurchasesManager::restorePurchases()
 		{
 			if (_shouldVerifyReceipts)
 			{
-				ET_ASSERT(_verificationServer != nil);
 				[self validateTransaction:transaction];
 			}
 			else
 			{
-				std::string productId([transaction.payment.productIdentifier UTF8String]);
-				PurchasesManager::instance().productPurchased.invokeInMainRunLoop(productId);
+				PurchasesManager::instance().productPurchased.invokeInMainRunLoop(
+					std::string([transaction.payment.productIdentifier UTF8String]));
 			}
 		}
 		else if (state == SKPaymentTransactionStateRestored)
