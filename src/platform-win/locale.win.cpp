@@ -87,7 +87,7 @@ std::string locale::currentLocale()
 			std::cout << "Unknown GetLocaleInfoEx error" << std::endl;
 		}
 
-		return 0;
+		return std::string("en");
 	}
 
 	return lowercase(unicodeToUtf8(localeData));

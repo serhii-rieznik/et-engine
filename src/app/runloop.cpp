@@ -17,6 +17,10 @@ RunLoop::RunLoop() :
 	attachTimerPool(TimerPool::Pointer::create(this));
 }
 
+RunLoop::~RunLoop()
+{
+}
+
 void RunLoop::update(uint64_t t)
 {
 	updateTime(t);
@@ -34,16 +38,16 @@ void RunLoop::addTask(Task* t, float delay)
 	_taskPool.addTask(t, delay);
 }
 
-void RunLoop::attachTimerPool(TimerPool::Pointer pool)
+void RunLoop::attachTimerPool(const TimerPool::Pointer& pool)
 {
 	if (std::find(_timerPools.begin(), _timerPools.end(), pool) == _timerPools.end())
 	{
-		pool->setOwner(this);
 		_timerPools.push_back(pool);
+		_timerPools.back()->setOwner(this);
 	}
 }
 
-void RunLoop::detachTimerPool(TimerPool::Pointer pool)
+void RunLoop::detachTimerPool(const TimerPool::Pointer& pool)
 {
 	auto i = _timerPools.begin();
 	while (i != _timerPools.end())
@@ -51,7 +55,7 @@ void RunLoop::detachTimerPool(TimerPool::Pointer pool)
 		auto& p = *i;
 		if (p == pool)
 		{
-			pool->setOwner(0);
+			p->setOwner(nullptr);
 			_timerPools.erase(i);
 			break;
 		}

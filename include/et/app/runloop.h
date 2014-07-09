@@ -19,7 +19,7 @@ namespace et
 		
 	public:
 		RunLoop();
-		virtual ~RunLoop() { }
+		virtual ~RunLoop();
 		
 		float time() const
 			{ return _time; }
@@ -27,7 +27,7 @@ namespace et
 		uint64_t timeMSec() const
 			{ return _actualTimeMSec; }
 
-		TimerPool::Pointer mainTimerPool()
+		TimerPool::Pointer& mainTimerPool()
 			{ return _timerPools.front(); }
 		
 		void updateTime(uint64_t t);
@@ -36,8 +36,8 @@ namespace et
 		void pause();
 		void resume();
 
-		void attachTimerPool(TimerPool::Pointer pool);
-		void detachTimerPool(TimerPool::Pointer pool);
+		void attachTimerPool(const TimerPool::Pointer&);
+		void detachTimerPool(const TimerPool::Pointer&);
 		void detachAllTimerPools();
 
 		virtual void addTask(Task*, float);
