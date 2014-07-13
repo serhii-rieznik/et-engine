@@ -54,54 +54,6 @@ Intersection findNearestIntersection(const RaytraceScene& scene, const ray3d& ra
 	return result;
 }
 
-int findNearestIntersection(const RaytraceScene& scene, const ray3d& ray, vec4& color, vec3& normal, vec3& point)
-{
-	color = vec4(0.0f);
-	normal = vec3(0.0f);
-	
-	int index = 0;
-	int result = Intersection::missingObject;
-	
-	float distance = std::numeric_limits<float>::max();
-	for (const auto& obj : scene.objects)
-	{
-		vec3 pt;
-		if (obj.intersectsRay(ray, pt))
-		{
-			float d = (pt - ray.origin).dotSelf();
-			if (d < distance)
-			{
-				result = index;
-				distance = d;
-				point = pt;
-				color = obj.color;
-				normal = obj.normalFromPoint(pt);
-			}
-		}
-		
-		++index;
-	}
-	
-	if (result != Intersection::missingObject)
-		normal.normalize();
-	
-	return result;
-}
-
-void gatherBounces(const RaytraceScene& scene, ray3d ray, Intersection::List& hits)
-{
-	auto intersection = findNearestIntersection(scene, ray);
-	
-	while (hits.size() < scene.options.bounces)
-	{
-		intersection.outgoingRay = ray3d(intersection.hitPoint, randomDiffuseVector(intersection.hitNormal));
-		hits.push_back(intersection);
-		intersection = findNearestIntersection(scene, intersection.outgoingRay);
-	}
-	
-	hits.push_back(intersection);
-}
-
 vec4 gatherBouncesRecursive(const RaytraceScene& scene, const ray3d& ray, int depth)
 {
 	if (depth >= scene.options.bounces)
@@ -110,24 +62,26 @@ vec4 gatherBouncesRecursive(const RaytraceScene& scene, const ray3d& ray, int de
 	auto i = findNearestIntersection(scene, ray);
 	const auto& obj = scene.objectAtIndex(i.objectIndex);
 	
-	if (obj.objectClass == SceneObject::Class_None)
-		return vec4(1.0);
-	
 	vec3 newDirection;
 	float scale = 0.0f;
-	if (randomFloat(0.0f, 1.0f) > obj.roughness)
+	const SceneMaterial& mat = scene.materialAtIndex(obj.materialId);
+	
+	if (randomFloat(0.0f, 1.0f) > mat.roughness)
 	{
-		newDirection = randomSpecularVector(ray.direction, i.hitNormal, obj.roughness);
+		newDirection = randomSpecularVector(ray.direction, i.hitNormal, mat.roughness);
 		scale = dot(newDirection, reflect(ray.direction, i.hitNormal));
+		
+		return mat.emissiveColor +
+			scale * (mat.reflectiveColor * gatherBouncesRecursive(scene, ray3d(i.hitPoint, newDirection), depth + 1));
 	}
 	else
 	{
 		newDirection = randomDiffuseVector(i.hitNormal);
 		scale = dot(newDirection, i.hitNormal);
+		
+		return mat.emissiveColor +
+			scale * (mat.diffuseColor * gatherBouncesRecursive(scene, ray3d(i.hitPoint, newDirection), depth + 1));
 	}
-	
-	return obj.emissive +
-		scale * (obj.color * gatherBouncesRecursive(scene, ray3d(i.hitPoint, newDirection), depth + 1));
 }
 
 void rt::raytrace(const RaytraceScene& scene, const et::vec2i& imageSize, const et::vec2i& origin,
@@ -141,9 +95,14 @@ void rt::raytrace(const RaytraceScene& scene, const et::vec2i& imageSize, const 
 	vec3 ce1 = cross(centerRay.direction, centerRay.direction.x > 0.1f ? unitY : unitX).normalized();
 	vec3 ce2 = cross(ce1, centerRay.direction).normalized();
 	
-	float focalDistance = 0.775f * scene.camera.position().length();
-	float aperture = 0.0f;
+	auto it = findNearestIntersection(scene, centerRay);
 	
+	float aperture = 12.0f;
+	int apertureBlades = 5;
+	float deltaAngleForAppertureBlades = DOUBLE_PI / static_cast<float>(apertureBlades);
+	float initialAngleForAppertureBlades = 0.5f * deltaAngleForAppertureBlades;
+	
+	float focalDistance = length(it.hitPoint - centerRay.origin);
 	plane focalPlane(scene.camera.direction(), (scene.camera.position() - scene.camera.direction() * focalDistance).length());
  
 	for (pixel.y = origin.y; pixel.y < origin.y + size.y; ++pixel.y)
@@ -177,11 +136,15 @@ void rt::raytrace(const RaytraceScene& scene, const et::vec2i& imageSize, const 
 				{
 					vec3 focal;
 					intersect::rayPlane(r, focalPlane, &focal);
-					float rd = randomFloat(0.0f, aperture);
-					float ra = randomFloat(-PI, PI);
-					vec3 cameraJitter = r.origin + rd * (ce1 * std::sin(ra) + ce2 * std::cos(ra));
-					ray3d finalRay(cameraJitter, normalize(focal - cameraJitter));
-					result += gatherBouncesRecursive(scene, finalRay, 0);
+
+					float ra1 = initialAngleForAppertureBlades + static_cast<float>(randomInteger(apertureBlades)) * deltaAngleForAppertureBlades;
+					float ra2 = ra1 + deltaAngleForAppertureBlades;
+					float rd = aperture * std::sqrt(randomFloat(0.0f, 1.0f));
+					
+					vec3 o1 = rd * (ce1 * std::sin(ra1) + ce2 * std::cos(ra1));
+					vec3 o2 = rd * (ce1 * std::sin(ra2) + ce2 * std::cos(ra2));
+					vec3 cameraJitter = r.origin + mix(o1, o2, randomFloat(0.0f, 1.0f));
+					result += gatherBouncesRecursive(scene, ray3d(cameraJitter, normalize(focal - cameraJitter)), 0);
 				}
 				else
 				{

@@ -39,9 +39,10 @@ et::vec3 SceneObject::normalFromPoint(const vec3& pt) const
 
 void RaytraceScene::load(et::RenderContext* rc)
 {
-	vec3 boxSize(50.0f, 30.0f, 60.0f);
+	vec3 boxSize(50.0f, 35.0f, 60.0f);
 	
-	float scale = 9.0f;
+	/*
+	float scale = 12.0f;
 	float offset = -boxSize.y / scale;
 	
 	ObjectsCache localCache;
@@ -50,120 +51,123 @@ void RaytraceScene::load(et::RenderContext* rc)
 	auto meshes = container->childrenOfType(s3d::ElementType_SupportMesh);
 	for (s3d::SupportMesh::Pointer mesh : meshes)
 	{
-		log::info("%s", mesh->name().c_str());
 		for (const auto& tri : mesh->triangles())
 		{
 			vec3 a1(tri.v1().x, tri.v1().z + offset, tri.v1().y);
 			vec3 a2(tri.v2().x, tri.v2().z + offset, tri.v2().y);
 			vec3 a3(tri.v3().x, tri.v3().z + offset, tri.v3().y);
-			
 			objects.push_back(SceneObject(SceneObject::Class_Triangle, scale * a3,
-				scale * a2, scale * a1, vec4(1.0f), vec4(0.0f)));
+				scale * a2, scale * a1, vec4(1.0f, 1.0f, 1.0f, 0.0f), vec4(0.0f)));
 		}
-	}
-	
-	/*
-	float r = 15.0f;
-	 
-	// sphere
-	objects.push_back(SceneObject(SceneObject::Class_Sphere, vec4(boxSize.x - r, -boxSize.y + r, boxSize.z - r, r),
-		vec4(0.25f, 0.5f, 1.0f, 0.0f), vec4(0.0f)));
-
-	// sphere
-	objects.push_back(SceneObject(SceneObject::Class_Sphere, vec4(r - boxSize.x, -boxSize.y + r, 0.0f, r),
-		vec4(1.0f, 0.5f, 0.25f, 0.0f), vec4(0.0f)));
-
-	// focus spheres
-	float h = 5.0f;
-	float z = -boxSize.z + h;
-	float x = boxSize.x - h;
-	while (z < boxSize.z)
-	{
-		objects.push_back(SceneObject(SceneObject::Class_Sphere, vec4(x, -boxSize.y + h, z, h),
-			vec4(1.0f, 1.0f, 1.0f, 0.0f), vec4(0.0f)));
-		z += 2.25f * h;
-		x -= (boxSize.z / boxSize.x) * h;
 	}
 	*/
-	float l = 3.0f;
-	int i = 0;
-	float z = -boxSize.z + 2.0f * l;
-	float dz = 3.0f * (boxSize.z - 2.0f * l) / 10.0f;
-	float dx = 3.0f * (boxSize.x - 2.0f * l) / 10.0f;
-	while (z < boxSize.z - 2.0f * l)
+	
+	float r0 = boxSize.length() / 4.0f;
+	float r1 = 1.25f * r0;
+	
+	materials.push_back(SceneMaterial(vec4(1.0f), vec4(1.00f, 0.5f, 0.25f, 0.0f), vec4(0.0f), 0.05f));
+	objects.push_back(SceneObject(SceneObject::Class_Sphere,
+		vec4(-boxSize.x + r0, -boxSize.y + r0, -boxSize.z + r0, r0), 0));
+	
+	materials.push_back(SceneMaterial(vec4(1.0f), vec4(0.25f, 0.5f, 1.00f, 0.0f), vec4(0.0f), 0.15f));
+	objects.push_back(SceneObject(SceneObject::Class_Sphere,
+		vec4( boxSize.x - r1, -boxSize.y + r1, 0.0f, r1), 1));
+	
+	materials.push_back(SceneMaterial(vec4(0.0f), vec4(0.0f), vec4(33.0f), 0.0f));
+	
+	float r = 5.0f;
+	vec3i lightsPerWall(3, 1, 4);
+	vec3 dp = 2.0f * (boxSize - vec3(r)) / vector3ToFloat(lightsPerWall - vec3i(1));
+	for (int i = 0; i < lightsPerWall.x; ++i)
 	{
-		float x = -boxSize.x + l * (2.0f + ((i++ % 2 == 0) ? 0.0f : 0.5f * dx));
-		
-		while (x < boxSize.x - 2.0f * l)
-		{
-			objects.push_back(SceneObject(SceneObject::Class_Sphere,vec4(x, boxSize.y, z, l), vec4(0.0f),
-				5.0f * vec4(randomFloat(3.0f, 10.0f), randomFloat(3.0f, 10.0f), randomFloat(3.0f, 10.0f), 1.0f)));
-			
-			x += dx;
-		}
-		z += dz;
+		objects.push_back(SceneObject(SceneObject::Class_Sphere,
+			vec4(r - boxSize.x + dp.x * static_cast<float>(i), boxSize.y - r, -boxSize.z + r, r), 2));
+		objects.push_back(SceneObject(SceneObject::Class_Sphere,
+			vec4(r - boxSize.x + dp.x * static_cast<float>(i), boxSize.y - r,  boxSize.z - r, r), 2));
 	}
-	// */
+	
+	for (int i = 0; i < lightsPerWall.z; ++i)
+	{
+		objects.push_back(SceneObject(SceneObject::Class_Sphere,
+			vec4(-boxSize.x + r, boxSize.y - r, -boxSize.z + dp.z * static_cast<float>(i), r), 2));
+		objects.push_back(SceneObject(SceneObject::Class_Sphere,
+			vec4( boxSize.x - r, boxSize.y - r, -boxSize.z + dp.z * static_cast<float>(i), r), 2));
+	}
+	
+	int lastMaterial = static_cast<int>(materials.size());
+	materials.push_back(SceneMaterial(vec4(1.0f), vec4(1.0f), vec4(0.0f), 0.9f));
 	
 	// top
 	objects.push_back(SceneObject(SceneObject::Class_Triangle,
 		vec3(-boxSize.x, boxSize.y,  boxSize.z),
 		vec3(-boxSize.x, boxSize.y, -boxSize.z),
-		vec3( boxSize.x, boxSize.y, -boxSize.z), vec4(1.0f, 0.5f), vec4(0.0f)));
+		vec3( boxSize.x, boxSize.y, -boxSize.z), lastMaterial));
 	objects.push_back(SceneObject(SceneObject::Class_Triangle,
 		vec3( boxSize.x, boxSize.y,  boxSize.z),
 		vec3(-boxSize.x, boxSize.y,  boxSize.z),
-		vec3( boxSize.x, boxSize.y, -boxSize.z), vec4(1.0f, 0.5f), vec4(0.0f)));
+		vec3( boxSize.x, boxSize.y, -boxSize.z), lastMaterial));
+	
+	lastMaterial = static_cast<int>(materials.size());
+	materials.push_back(SceneMaterial(vec4(2.0f/3.0f), vec4(1.0f), vec4(0.0f), 0.9f));
 	
 	// bottom
 	objects.push_back(SceneObject(SceneObject::Class_Triangle,
 		vec3(-boxSize.x, -boxSize.y,  boxSize.z),
 		vec3( boxSize.x, -boxSize.y, -boxSize.z),
-		vec3(-boxSize.x, -boxSize.y, -boxSize.z), vec4(2.0/3.0f, 0.25f), vec4(0.0f)));
+		vec3(-boxSize.x, -boxSize.y, -boxSize.z), lastMaterial));
 	objects.push_back(SceneObject(SceneObject::Class_Triangle,
 		vec3(-boxSize.x, -boxSize.y,  boxSize.z),
 		vec3( boxSize.x, -boxSize.y,  boxSize.z),
-		vec3( boxSize.x, -boxSize.y, -boxSize.z), vec4(2.0/3.0f, 0.25f), vec4(0.0f)));
+		vec3( boxSize.x, -boxSize.y, -boxSize.z), lastMaterial));
 
+	lastMaterial = static_cast<int>(materials.size());
+	materials.push_back(SceneMaterial(vec4(1.0f, 1.0f/3.0f, 1.0f/3.0f, 0.0f), vec4(1.0f), vec4(0.0f), 0.9f));
+	
 	// left
 	objects.push_back(SceneObject(SceneObject::Class_Triangle,
 		vec3( boxSize.x, -boxSize.y,  boxSize.z),
 		vec3( boxSize.x,  boxSize.y, -boxSize.z),
-		vec3( boxSize.x, -boxSize.y, -boxSize.z), vec4(1.0f, 0.5f, 0.5f, 0.15f), vec4(0.0f)));
+		vec3( boxSize.x, -boxSize.y, -boxSize.z), lastMaterial));
 	objects.push_back(SceneObject(SceneObject::Class_Triangle,
 		vec3( boxSize.x, -boxSize.y,  boxSize.z),
 		vec3( boxSize.x,  boxSize.y,  boxSize.z),
-		vec3( boxSize.x,  boxSize.y, -boxSize.z), vec4(1.0f, 0.5f, 0.5f, 0.15f), vec4(0.0f)));
+		vec3( boxSize.x,  boxSize.y, -boxSize.z), lastMaterial));
+	
+	lastMaterial = static_cast<int>(materials.size());
+	materials.push_back(SceneMaterial(vec4(1.0f/3.0f, 1.0f, 1.0f/3.0f, 0.0f), vec4(1.0f), vec4(0.0f), 0.9f));
 	
 	// right
 	objects.push_back(SceneObject(SceneObject::Class_Triangle,
 		vec3(-boxSize.x, -boxSize.y,  boxSize.z),
 		vec3(-boxSize.x, -boxSize.y, -boxSize.z),
-		vec3(-boxSize.x,  boxSize.y, -boxSize.z), vec4(0.5f, 1.0f, 0.5f, 0.15f), vec4(0.0f)));
+		vec3(-boxSize.x,  boxSize.y, -boxSize.z), lastMaterial));
 	objects.push_back(SceneObject(SceneObject::Class_Triangle,
 		vec3(-boxSize.x,  boxSize.y,  boxSize.z),
 		vec3(-boxSize.x, -boxSize.y,  boxSize.z),
-		vec3(-boxSize.x,  boxSize.y, -boxSize.z), vec4(0.5f, 1.0f, 0.5f, 0.15f), vec4(0.0f)));
+		vec3(-boxSize.x,  boxSize.y, -boxSize.z), lastMaterial));
+	
+	lastMaterial = static_cast<int>(materials.size());
+	materials.push_back(SceneMaterial(vec4(0.75f), vec4(1.0f), vec4(0.0f), 0.9f));
 	
 	// back
 	objects.push_back(SceneObject(SceneObject::Class_Triangle,
 		vec3(-boxSize.x,  boxSize.y, -boxSize.z),
 		vec3(-boxSize.x, -boxSize.y, -boxSize.z),
-		vec3( boxSize.x, -boxSize.y, -boxSize.z), vec4(0.75f, 0.2f), vec4(0.0f)));
+		vec3( boxSize.x, -boxSize.y, -boxSize.z), lastMaterial));
 	objects.push_back(SceneObject(SceneObject::Class_Triangle,
 		vec3( boxSize.x,  boxSize.y, -boxSize.z),
 		vec3(-boxSize.x,  boxSize.y, -boxSize.z),
-		vec3( boxSize.x, -boxSize.y, -boxSize.z), vec4(0.75f, 0.2f), vec4(0.0f)));
+		vec3( boxSize.x, -boxSize.y, -boxSize.z), lastMaterial));
 	
 	// front
 	objects.push_back(SceneObject(SceneObject::Class_Triangle,
 		vec3(-boxSize.x,  boxSize.y, boxSize.z),
 		vec3( boxSize.x, -boxSize.y, boxSize.z),
-		vec3(-boxSize.x, -boxSize.y, boxSize.z), vec4(0.75f, 0.2f), vec4(0.0f)));
+		vec3(-boxSize.x, -boxSize.y, boxSize.z), lastMaterial));
 	objects.push_back(SceneObject(SceneObject::Class_Triangle,
 		vec3(-boxSize.x,  boxSize.y, boxSize.z),
 		vec3( boxSize.x,  boxSize.y, boxSize.z),
-		vec3( boxSize.x, -boxSize.y, boxSize.z), vec4(0.75f, 0.2f), vec4(0.0f)));
+		vec3( boxSize.x, -boxSize.y, boxSize.z), lastMaterial));
 
 	camera.perspectiveProjection(QUARTER_PI, 1.0f, 1.0f, 1024.0f);
 }
@@ -174,4 +178,12 @@ const SceneObject& RaytraceScene::objectAtIndex(int i) const
 		return emptyObject;
 		
 	return objects.at(i);
+}
+
+const SceneMaterial& RaytraceScene::materialAtIndex(int i) const
+{
+	if ((i == Intersection::missingObject) || (i >= materials.size()))
+		return defaultMaterial;
+	
+	return materials.at(i);
 }

@@ -78,8 +78,8 @@ namespace rt
 		int _previewBounces = 3;
 		int _previewSamples = 4;
 		
-		int _productionBounces = 16;
-		int _productionSamples = 512;
+		int _productionBounces = 12;
+		int _productionSamples = 768;
 		
 		bool _shouldRender = true;
 		bool _interactiveRendering = false;

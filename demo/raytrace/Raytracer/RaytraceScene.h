@@ -26,6 +26,7 @@ namespace rt
 		int objectIndex = missingObject;
 		
 		et::ray3d outgoingRay;
+		
 		et::vec3 hitPoint;
 		et::vec3 hitNormal;
 		
@@ -33,6 +34,21 @@ namespace rt
 		
 		Intersection(int o) :
 			objectIndex(o) { }
+	};
+	
+	struct SceneMaterial
+	{
+		et::vec4 diffuseColor = et::vec4(0.5f);
+		et::vec4 reflectiveColor = et::vec4(1.0f);
+		et::vec4 emissiveColor = et::vec4(0.5f);
+		
+		float roughness = 1.0f;
+		
+		SceneMaterial()
+			{ }
+		
+		SceneMaterial(const et::vec4& d, const et::vec4& refl, const et::vec4& e, float rg) :
+			diffuseColor(d), reflectiveColor(refl), emissiveColor(e), roughness(rg) { }
 	};
 	
 	struct SceneObject
@@ -49,29 +65,24 @@ namespace rt
 		
 		et::triangle tri;
 		et::vec4 equation;
-		et::vec4 color;
-		et::vec4 emissive;
-		float roughness = 1.0f;
+		int materialId = Intersection::missingObject;
 		
+		size_t objectId = 0;
+
+	public:
 		SceneObject()
 			{ }
 		
-		SceneObject(Class cls, const et::vec4& eq, const et::vec4& c, const et::vec4& em) :
-			objectClass(cls), equation(eq), color(c), emissive(em)
-		{
-			roughness = color.w;
-		}
+		SceneObject(Class cls, const et::vec4& eq, int mat) :
+			objectClass(cls), equation(eq), materialId(mat) { }
 
-		SceneObject(Class cls, const et::vec3& p1, const et::vec3& p2, const et::vec3& p3, const et::vec4& c,
-			const et::vec4& em) : objectClass(cls), tri(p1, p2, p3), color(c), emissive(em)
-		{
-			roughness = color.w;
-		}
+		SceneObject(Class cls, const et::vec3& p1, const et::vec3& p2, const et::vec3& p3, int mat) :
+			objectClass(cls), tri(p1, p2, p3), materialId(mat) { }
 		
+	public:
 		bool intersectsRay(const et::ray3d&, et::vec3& point) const;
-		et::vec3 normalFromPoint(const et::vec3&) const;
 		
-		size_t objectId = 0;
+		et::vec3 normalFromPoint(const et::vec3&) const;
 	};
 	
 	struct RaytraceScene
@@ -80,21 +91,15 @@ namespace rt
 		void load(et::RenderContext*);
 		
 		const SceneObject& objectAtIndex(int) const;
+		const SceneMaterial& materialAtIndex(int) const;
 		
 	public:
 		et::RenderContext* _rc;
 		
 		et::Camera camera;
 		
-		et::vec4 lightSphere;
-		et::vec4 lightColor;
-		
 		std::vector<SceneObject> objects;
-		
-		std::vector<et::vec4> planes;
-		std::vector<et::vec4> planeColors;
-		std::vector<et::vec4> spheres;
-		std::vector<et::vec4> sphereColors;
+		std::vector<SceneMaterial> materials;
 		
 		struct
 		{
@@ -105,5 +110,6 @@ namespace rt
 		} options;
 		
 		SceneObject emptyObject;
+		SceneMaterial defaultMaterial;
 	};
 }

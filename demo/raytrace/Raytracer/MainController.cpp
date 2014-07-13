@@ -15,7 +15,7 @@ using namespace rt;
 
 const vec2i frameSize = vec2i(512, 320);
 
-const vec2i rectSize = vec2i(8);
+const vec2i rectSize = vec2i(16);
 
 const vec2i frameParts = vec2i(frameSize.x / rectSize.x, frameSize.y / rectSize.y);
 
@@ -171,6 +171,7 @@ void MainController::applicationWillResizeContext(const et::vec2i& sz)
 
 void MainController::performRender(et::RenderContext* rc)
 {
+	/*
 	rc->renderState().bindTexture(0, _noise);
 	rc->renderState().bindProgram(_mainProgram);
 	
@@ -184,18 +185,8 @@ void MainController::performRender(et::RenderContext* rc)
 	_mainProgram->setUniform("maxSamples", _scene.options.samples);
 	_mainProgram->setUniform("exposure", _scene.options.exposure);
 	
-	_mainProgram->setUniform("lightSphere", _scene.lightSphere);
-	_mainProgram->setUniform("lightColor", _scene.lightColor);
-	
-	_mainProgram->setUniform("numPlanes", etMin(_scene.planeColors.size(), _scene.planes.size()));
-	_mainProgram->setUniform<vec4>("planes[0]", _scene.planes.data(), _scene.planes.size());
-	_mainProgram->setUniform<vec4>("planeColors[0]", _scene.planeColors.data(), _scene.planeColors.size());
-	
-	_mainProgram->setUniform("numSpheres", _scene.spheres.size());
-	_mainProgram->setUniform<vec4>("spheres[0]", _scene.spheres.data(), _scene.spheres.size());
-	_mainProgram->setUniform<vec4>("sphereColors[0]", _scene.sphereColors.data(), _scene.sphereColors.size());
-	
 	rc->renderer()->fullscreenPass();
+	*/
 }
 
 void MainController::render(et::RenderContext* rc)
