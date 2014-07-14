@@ -42,13 +42,14 @@ namespace rt
 		et::vec4 reflectiveColor = et::vec4(1.0f);
 		et::vec4 emissiveColor = et::vec4(0.5f);
 		
+		float refractiveIndex = 0.0f;
 		float roughness = 1.0f;
 		
 		SceneMaterial()
 			{ }
 		
-		SceneMaterial(const et::vec4& d, const et::vec4& refl, const et::vec4& e, float rg) :
-			diffuseColor(d), reflectiveColor(refl), emissiveColor(e), roughness(rg) { }
+		SceneMaterial(const et::vec4& d, const et::vec4& refl, const et::vec4& e, float rg, float ior = 0.0f) :
+			diffuseColor(d), reflectiveColor(refl), emissiveColor(e), roughness(rg), refractiveIndex(ior) { }
 	};
 	
 	struct SceneObject

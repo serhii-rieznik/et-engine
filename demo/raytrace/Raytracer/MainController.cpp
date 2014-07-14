@@ -13,13 +13,15 @@
 using namespace et;
 using namespace rt;
 
-const vec2i frameSize = vec2i(512, 320);
+const vec2i frameSize = vec2i(1280, 800); // vec2i(512, 320);
 
-const vec2i rectSize = vec2i(16);
+const vec2i rectSize = vec2i(20);
 
 const vec2i frameParts = vec2i(frameSize.x / rectSize.x, frameSize.y / rectSize.y);
 
 const vec2 samplesPerScreen = vec2(static_cast<float>(frameParts.x), static_cast<float>(frameParts.y));
+
+const size_t numThreads = 4;
 
 et::IApplicationDelegate* Application::initApplicationDelegate()
 	{ return new MainController(); }
@@ -106,7 +108,7 @@ void MainController::applicationDidLoad(et::RenderContext* rc)
 		_cameraAngles.finishInterpolation();
 	});
 	
-	for (size_t i = 0; i < 4; ++i)
+	for (size_t i = 0; i < numThreads; ++i)
 		_threads.push_back(new RaytraceThread(this));
 	
 	_scale = vec2(1.0f) / samplesPerScreen;
