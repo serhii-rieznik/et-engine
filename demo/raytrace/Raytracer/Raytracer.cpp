@@ -9,10 +9,6 @@
 #include <et/collision/collision.h>
 #include "Raytracer.h"
 
-#include <Accelerate/Accelerate.h>
-
-#include <pmmintrin.h>
-
 using namespace rt;
 using namespace et;
 
@@ -200,11 +196,18 @@ vec3 randomVectorOnHemisphere(const vec3& w, float distribution)
 {
 	float cr1 = 0.0f;
 	float sr1 = 0.0f;
-	float r2 = randomFloat(0.0f, distribution);
 
-	__sincosf(randomFloat(-PI, PI), &sr1, &cr1);
+	float r2 = randomFloat(0.0f, distribution);
+	float ra = randomFloat(-PI, PI);
+
+#if (ET_PLATFORM_WIN)
+	cr1 = std::cos(ra);
+	sr1 = std::sin(ra);
+#else
+	__sincosf(ra, &sr1, &cr1);
+#endif
+
 	vec3 u = cross((std::abs(w.x) > 0.1f) ? unitY : unitX, w).normalized();
-	
 	return (u * cr1 + cross(w, u) * sr1) * std::sqrt(r2) + w * std::sqrt(1.0f - r2);
 }
 
@@ -233,7 +236,7 @@ vec3 randomRefractedVector(const vec3& incidence, const vec3& normal, float eta,
 
 float calculateRefractiveCoefficient(const vec3& incidence, const vec3& normal, float eta)
 {
-	return 1.0 - sqr(eta) * (1.0 - sqr(dot(normal, incidence)));
+	return 1.0f - sqr(eta) * (1.0f - sqr(dot(normal, incidence)));
 }
 
 float phong(const vec3& incidence, const vec3& reflected, const vec3& normal, float exponent)
@@ -246,7 +249,7 @@ float computeFresnelTerm(const vec3& incidence, const vec3& normal, float indexO
 {
 	float eta = indexOfRefraction * dot(incidence, normal);
 	float eta2 = eta * eta;
-	float beta = 1.0 - indexOfRefraction * indexOfRefraction;
+	float beta = 1.0f - indexOfRefraction * indexOfRefraction;
 	float result = 1.0f + 2.0f * (eta2 + eta * sqrt(beta + eta2)) / beta;
 	return clamp(result * result, 0.0f, 1.0f);
 }

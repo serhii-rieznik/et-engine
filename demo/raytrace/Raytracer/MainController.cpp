@@ -6,6 +6,7 @@
 //  Copyright (c) 2014 Cheetek. All rights reserved.
 //
 
+#include <ctime>
 #include <et/imaging/imagewriter.h>
 #include "Raytracer.h"
 #include "MainController.h"
@@ -13,7 +14,7 @@
 using namespace et;
 using namespace rt;
 
-const vec2i frameSize = vec2i(1280, 800) / 2; // vec2i(512, 320);
+const vec2i frameSize = vec2i(1280, 800); // vec2i(512, 320);
 
 const vec2i rectSize = vec2i(20);
 

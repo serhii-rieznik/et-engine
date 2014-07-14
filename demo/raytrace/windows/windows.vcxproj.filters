@@ -250,9 +250,30 @@
     <ClCompile Include="..\..\..\src\locale\locale.cpp">
       <Filter>et</Filter>
     </ClCompile>
+    <ClCompile Include="..\Raytracer\Raytracer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Raytracer\RaytraceScene.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Raytracer\RaytraceThread.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\collision\collision.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Raytracer\MainController.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Raytracer\Raytracer.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Raytracer\RaytraceScene.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Raytracer\RaytraceThread.h">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>

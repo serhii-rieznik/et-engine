@@ -79,6 +79,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>opengl32.lib;jpeg.lib;libpng16.lib;libxml2.lib;zlib.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <IgnoreSpecificDefaultLibraries>LIBCMT.lib</IgnoreSpecificDefaultLibraries>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -102,6 +103,7 @@
     <ClCompile Include="..\..\..\src\app\runloop.cpp" />
     <ClCompile Include="..\..\..\src\camera\camera.cpp" />
     <ClCompile Include="..\..\..\src\camera\frustum.cpp" />
+    <ClCompile Include="..\..\..\src\collision\collision.cpp" />
     <ClCompile Include="..\..\..\src\core\base64.cpp" />
     <ClCompile Include="..\..\..\src\core\conversion.cpp" />
     <ClCompile Include="..\..\..\src\core\dictionary.cpp" />
@@ -162,9 +164,15 @@
     <ClCompile Include="..\..\..\src\vertexbuffer\vertexdeclaration.cpp" />
     <ClCompile Include="..\Raytracer\main.cpp" />
     <ClCompile Include="..\Raytracer\MainController.cpp" />
+    <ClCompile Include="..\Raytracer\Raytracer.cpp" />
+    <ClCompile Include="..\Raytracer\RaytraceScene.cpp" />
+    <ClCompile Include="..\Raytracer\RaytraceThread.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Raytracer\MainController.h" />
+    <ClInclude Include="..\Raytracer\Raytracer.h" />
+    <ClInclude Include="..\Raytracer\RaytraceScene.h" />
+    <ClInclude Include="..\Raytracer\RaytraceThread.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

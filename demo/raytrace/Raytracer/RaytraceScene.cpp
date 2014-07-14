@@ -156,7 +156,7 @@ void RaytraceScene::load(et::RenderContext* rc)
 
 const SceneObject& RaytraceScene::objectAtIndex(int i) const
 {
-	if ((i == Intersection::missingObject) || (i >= objects.size()))
+	if ((i == Intersection::missingObject) || (i >= static_cast<int>(objects.size())))
 		return emptyObject;
 		
 	return objects.at(i);
@@ -164,7 +164,7 @@ const SceneObject& RaytraceScene::objectAtIndex(int i) const
 
 const SceneMaterial& RaytraceScene::materialAtIndex(int i) const
 {
-	if ((i == Intersection::missingObject) || (i >= materials.size()))
+	if ((i == Intersection::missingObject) || (i >=  static_cast<int>(materials.size())))
 		return defaultMaterial;
 	
 	return materials.at(i);
