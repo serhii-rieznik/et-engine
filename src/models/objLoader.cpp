@@ -244,7 +244,7 @@ void OBJLoader::loadData(bool async, ObjectsCache& cache)
 				vec3 vertex;
 				inputFile >> subKey >> vertex;
 
-				if (_loadOptions && Option_SwapYwithZ)
+				if ((_loadOptions & Option_SwapYwithZ) == Option_SwapYwithZ)
 					std::swap(vertex.y, vertex.z);
 
 				normals.push_back(vertex);
@@ -254,7 +254,7 @@ void OBJLoader::loadData(bool async, ObjectsCache& cache)
 				vec3 vertex;
 				inputFile >> vertex;
 
-				if (_loadOptions && Option_SwapYwithZ)
+				if ((_loadOptions & Option_SwapYwithZ) == Option_SwapYwithZ)
 					std::swap(vertex.y, vertex.z);
 
 				vertices.push_back(vertex);
