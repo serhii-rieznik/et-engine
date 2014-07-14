@@ -51,18 +51,19 @@ void RaytraceScene::load(et::RenderContext* rc)
 	
 	float r0 = 25.0f;
 	float r1 = 10.0f;
+	float r2 = 15.0f;
 	
-	materials.push_back(SceneMaterial(vec4(1.0f, 0.5f, 0.25f, 0.0f), vec4(1.0f), vec4(0.0f), 0.10f, 2.48417f));
+	materials.push_back(SceneMaterial(vec4(0.5f, 1.0f, 0.5f, 1.0f), vec4(1.0f), vec4(0.0f), 0.25f, 2.48417f));
 	materials.push_back(SceneMaterial(vec4(1.0f), vec4(1.0f), vec4(0.0f), 0.00f, 2.48417f));
-	materials.push_back(SceneMaterial(vec4(0.25f, 0.5f, 1.0f, 0.0f), vec4(1.0f), vec4(0.0f), 0.05f, 2.48417f));
+	materials.push_back(SceneMaterial(vec4(0.5f, 0.5f, 1.0f, 1.0f), vec4(1.0f), vec4(0.0f), 0.10f, 2.48417f));
 	
-	materials.push_back(SceneMaterial(vec4(1.0f, 1.0f, 0.75f, 0.0f), vec4(1.0f), vec4(0.0f), 0.20f, 2.48417f));
-	
+	materials.push_back(SceneMaterial(vec4(1.0f, 0.75f, 0.5f, 1.0f), vec4(0.5f, 0.75f, 1.0f, 1.0f), vec4(0.0f), 0.05f, 2.48417f));
+
 	objects.push_back(SceneObject(SceneObject::Class_Sphere, vec4(-boxSize.x +        r1, -boxSize.y + r1, -boxSize.z + 2.0f * r1, r1), 0));
-	objects.push_back(SceneObject(SceneObject::Class_Sphere, vec4(-boxSize.x + 2.0f * r1, -boxSize.y + r1,	                 0.0f, r1), 1));
 	objects.push_back(SceneObject(SceneObject::Class_Sphere, vec4(-boxSize.x +        r1, -boxSize.y + r1,  boxSize.z - 2.0f * r1, r1), 2));
-	
-	objects.push_back(SceneObject(SceneObject::Class_Sphere, vec4( boxSize.x - 1.5f * r0, -boxSize.y + r0, 0.0f, r0), 3));
+
+	objects.push_back(SceneObject(SceneObject::Class_Sphere, vec4(-boxSize.x + 1.75f * r2, -boxSize.y + r2,	0.0f, r2), 1));
+	objects.push_back(SceneObject(SceneObject::Class_Sphere, vec4( boxSize.x - 1.25f * r0, -boxSize.y + r0, 0.0f, r0), 3));
 	
 	int lastMaterial = static_cast<int>(materials.size());
 	materials.push_back(SceneMaterial(vec4(1.0f), vec4(1.0f), vec4(0.0f), 1.0f));

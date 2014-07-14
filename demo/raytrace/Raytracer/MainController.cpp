@@ -13,7 +13,7 @@
 using namespace et;
 using namespace rt;
 
-const vec2i frameSize = vec2i(1280, 800); // vec2i(512, 320);
+const vec2i frameSize = vec2i(1280, 800) / 2; // vec2i(512, 320);
 
 const vec2i rectSize = vec2i(20);
 
@@ -21,7 +21,11 @@ const vec2i frameParts = vec2i(frameSize.x / rectSize.x, frameSize.y / rectSize.
 
 const vec2 samplesPerScreen = vec2(static_cast<float>(frameParts.x), static_cast<float>(frameParts.y));
 
-const size_t numThreads = 4;
+#if (ET_DEBUG)
+	const size_t numThreads = 1;
+#else
+	const size_t numThreads = 4;
+#endif
 
 et::IApplicationDelegate* Application::initApplicationDelegate()
 	{ return new MainController(); }

@@ -48,8 +48,8 @@ namespace rt
 		SceneMaterial()
 			{ }
 		
-		SceneMaterial(const et::vec4& d, const et::vec4& refl, const et::vec4& e, float rg, float ior = 0.0f) :
-			diffuseColor(d), reflectiveColor(refl), emissiveColor(e), roughness(rg), refractiveIndex(ior) { }
+		SceneMaterial(const et::vec4& kD, const et::vec4& kR, const et::vec4& kE, float rg, float ior = 0.0f) :
+			diffuseColor(kD), reflectiveColor(kR), emissiveColor(kE), roughness(rg), refractiveIndex(ior) { }
 	};
 	
 	struct SceneObject
@@ -98,6 +98,9 @@ namespace rt
 		et::RenderContext* _rc;
 		
 		et::Camera camera;
+		
+		float apertureSize = 0.0f;
+		uint32_t apertureBlades = 5;
 		
 		std::vector<SceneObject> objects;
 		std::vector<SceneMaterial> materials;

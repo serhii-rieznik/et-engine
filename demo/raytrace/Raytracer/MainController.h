@@ -79,7 +79,7 @@ namespace rt
 		int _previewSamples = 20;
 		
 		int _productionBounces = 16;
-		int _productionSamples = 2048;
+		int _productionSamples = 1024;
 		
 		bool _shouldRender = true;
 		bool _interactiveRendering = false;

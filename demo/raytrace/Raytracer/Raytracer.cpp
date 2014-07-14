@@ -27,12 +27,13 @@ float calculateRefractiveCoefficient(const vec3& incidence, const vec3& normal, 
 float computeFresnelTerm(const vec3& incidence, const vec3& normal, float indexOfRefraction);
 float phong(const vec3& incidence, const vec3& reflected, const vec3& normal, float exponent);
 
+vec4 gatherBouncesRecursive(const RaytraceScene& scene, const ray3d& ray, int depth, int currentObject);
 vec4 performRaytracing(const RaytraceScene& scene, const ray3d& ray);
 
 vec4 computeColorSequence(const RaytraceScene& scene, ray3d ray, const SceneObject& object,
 	int lightBounce, std::vector<SceneObject>& hits);
 
-const float defaultIndexOfRefraction = 1.0f;
+const float defaultRefractiveIndex = 1.0f;
 
 Intersection findNearestIntersection(const RaytraceScene& scene, const ray3d& ray)
 {
@@ -61,10 +62,10 @@ Intersection findNearestIntersection(const RaytraceScene& scene, const ray3d& ra
 	return result;
 }
 
-vec4 gatherBouncesRecursive(const RaytraceScene& scene, const ray3d& ray, int depth, float currentIOR)
+vec4 gatherBouncesRecursive(const RaytraceScene& scene, const ray3d& ray, int depth, int currentObject)
 {
 	if (depth >= scene.options.bounces)
-		return vec4(0.0f);
+		return vec4(0.0f, 0.0f, 0.0f, 0.0f);
 	
 	auto i = findNearestIntersection(scene, ray);
 	const auto& obj = scene.objectAtIndex(i.objectIndex);
@@ -72,34 +73,30 @@ vec4 gatherBouncesRecursive(const RaytraceScene& scene, const ray3d& ray, int de
 	
 	if (mat.refractiveIndex > 0.0f)
 	{
-		bool insideObject = sqr(currentIOR - defaultIndexOfRefraction) > 0.001f;
-		
-		float newIOR = insideObject ? defaultIndexOfRefraction : defaultIndexOfRefraction / mat.refractiveIndex;
-		
-		vec3 newNormal = insideObject ? -i.hitNormal : i.hitNormal;
-		float k = calculateRefractiveCoefficient(ray.direction, newNormal, newIOR);
+		bool enteringObject = currentObject == Intersection::missingObject;
+		vec3 targetNormal = enteringObject ? i.hitNormal : -i.hitNormal;
+		float eta = enteringObject ? (defaultRefractiveIndex / mat.refractiveIndex) : (mat.refractiveIndex / defaultRefractiveIndex);
+		float k = calculateRefractiveCoefficient(ray.direction, targetNormal, eta);
 		if (k < 0.0f) // total internal reflection
 		{
-//			vec3 reflectedRay = randomReflectedVector(ray.direction, newNormal, mat.roughness);
-//			vec4 reflectedColor = dot(reflectedRay, reflect(ray.direction, newNormal)) * (mat.reflectiveColor *
-//				gatherBouncesRecursive(scene, ray3d(i.hitPoint, reflectedRay), depth + 1, currentIOR));
-			return vec4(0.0f, 0.0f, 1000.0f, 0.0f); // mat.emissiveColor + reflectedColor;
+			vec3 reflectedRay = randomReflectedVector(ray.direction, targetNormal, mat.roughness);
+			return mat.emissiveColor + dot(reflectedRay, reflect(ray.direction, targetNormal)) *
+			(mat.reflectiveColor * gatherBouncesRecursive(scene, ray3d(i.hitPoint, reflectedRay), depth + 1, currentObject));
 		}
 		else
 		{
-			if (randomFloat(0.0f, 1.0f) > computeFresnelTerm(-ray.direction, i.hitNormal, newIOR))
+			float fresnel = computeFresnelTerm(ray.direction, targetNormal, eta);
+			if (randomFloat(0.0f, 1.0f) <= fresnel)
 			{
-				vec3 reflectedRay = randomReflectedVector(ray.direction, newNormal, mat.roughness);
-				float reflectionScale = dot(reflectedRay, reflect(ray.direction, newNormal));
-				return mat.emissiveColor + reflectionScale *
-					(mat.reflectiveColor * gatherBouncesRecursive(scene, ray3d(i.hitPoint, reflectedRay), depth + 1, currentIOR));
+				vec3 reflectedRay = randomReflectedVector(ray.direction, targetNormal, mat.roughness);
+				return mat.emissiveColor + dot(reflectedRay, reflect(ray.direction, targetNormal)) *
+					(mat.reflectiveColor * gatherBouncesRecursive(scene, ray3d(i.hitPoint, reflectedRay), depth + 1, currentObject));
 			}
 			else
 			{
-				vec3 refractedRay = randomRefractedVector(ray.direction, newNormal, newIOR, k, mat.roughness);
-				float refractionScale = dot(refractedRay, refract(ray.direction, newNormal, newIOR, k));
-				return mat.emissiveColor + refractionScale *
-					(mat.diffuseColor * gatherBouncesRecursive(scene, ray3d(i.hitPoint, refractedRay), depth + 1, newIOR));
+				vec3 refractedRay = randomRefractedVector(ray.direction, targetNormal, eta, k, mat.roughness);
+				return mat.emissiveColor + dot(refractedRay, refract(ray.direction, targetNormal, eta, k)) *
+					(mat.diffuseColor * gatherBouncesRecursive(scene, ray3d(i.hitPoint, refractedRay), depth + 1, enteringObject ? i.objectIndex : Intersection::missingObject));
 			}
 		}
 	}
@@ -109,15 +106,17 @@ vec4 gatherBouncesRecursive(const RaytraceScene& scene, const ray3d& ray, int de
 		float scale = dot(reflectedRay, reflect(ray.direction, i.hitNormal));
 		
 		return mat.emissiveColor +
-			scale * (mat.reflectiveColor * gatherBouncesRecursive(scene, ray3d(i.hitPoint, reflectedRay), depth + 1, currentIOR));
+			scale * (mat.reflectiveColor * gatherBouncesRecursive(scene, ray3d(i.hitPoint, reflectedRay), depth + 1, currentObject));
 	}
 	else
 	{
 		vec3 newDirection = randomDiffuseVector(i.hitNormal);
 		float scale = dot(newDirection, i.hitNormal);
 		return mat.emissiveColor +
-			scale * (mat.diffuseColor * gatherBouncesRecursive(scene, ray3d(i.hitPoint, newDirection), depth + 1, currentIOR));
+			scale * (mat.diffuseColor * gatherBouncesRecursive(scene, ray3d(i.hitPoint, newDirection), depth + 1, currentObject));
 	}
+	
+	return vec4(0.0f);
 }
 
 void rt::raytrace(const RaytraceScene& scene, const et::vec2i& imageSize, const et::vec2i& origin,
@@ -133,9 +132,7 @@ void rt::raytrace(const RaytraceScene& scene, const et::vec2i& imageSize, const 
 	
 	auto it = findNearestIntersection(scene, centerRay);
 	
-	float aperture = 4.0f;
-	int apertureBlades = 5;
-	float deltaAngleForAppertureBlades = DOUBLE_PI / static_cast<float>(apertureBlades);
+	float deltaAngleForAppertureBlades = DOUBLE_PI / static_cast<float>(scene.apertureBlades);
 	float initialAngleForAppertureBlades = 0.5f * deltaAngleForAppertureBlades;
 	float focalDistance = length(it.hitPoint - centerRay.origin);
 	plane focalPlane(scene.camera.direction(), (scene.camera.position() - scene.camera.direction() * focalDistance).length());
@@ -167,23 +164,23 @@ void rt::raytrace(const RaytraceScene& scene, const et::vec2i& imageSize, const 
 				vec2 fpixel = (vector2ToFloat(pixel) + vec2(0.5f)) * dudv - vec2(1.0f);
 				ray3d r = scene.camera.castRay(fpixel + subPixel * vec2(randomFloat(-1.0f, 1.0f), randomFloat(-1.0f, 1.0f)));
 				
-				if (aperture > 0.0f)
+				if (scene.apertureSize > 0.0f)
 				{
 					vec3 focal;
 					intersect::rayPlane(r, focalPlane, &focal);
 
-					float ra1 = initialAngleForAppertureBlades + static_cast<float>(randomInteger(apertureBlades)) * deltaAngleForAppertureBlades;
+					float ra1 = initialAngleForAppertureBlades + static_cast<float>(randomInteger(scene.apertureBlades)) * deltaAngleForAppertureBlades;
 					float ra2 = ra1 + deltaAngleForAppertureBlades;
-					float rd = aperture * std::sqrt(randomFloat(0.0f, 1.0f));
+					float rd = scene.apertureSize * std::sqrt(randomFloat(0.0f, 1.0f));
 					
 					vec3 o1 = rd * (ce1 * std::sin(ra1) + ce2 * std::cos(ra1));
 					vec3 o2 = rd * (ce1 * std::sin(ra2) + ce2 * std::cos(ra2));
 					vec3 cameraJitter = r.origin + mix(o1, o2, randomFloat(0.0f, 1.0f));
-					result += gatherBouncesRecursive(scene, ray3d(cameraJitter, normalize(focal - cameraJitter)), 0, defaultIndexOfRefraction);
+					result += gatherBouncesRecursive(scene, ray3d(cameraJitter, normalize(focal - cameraJitter)), 0, Intersection::missingObject);
 				}
 				else
 				{
-					result += gatherBouncesRecursive(scene, r, 0, defaultIndexOfRefraction);
+					result += gatherBouncesRecursive(scene, r, 0, Intersection::missingObject);
 				}
 			}
 			
@@ -250,6 +247,6 @@ float computeFresnelTerm(const vec3& incidence, const vec3& normal, float indexO
 	float eta = indexOfRefraction * dot(incidence, normal);
 	float eta2 = eta * eta;
 	float beta = 1.0 - indexOfRefraction * indexOfRefraction;
-	float result = 1.0f + 2.0f * (eta2 - eta * sqrt(beta + eta2)) / beta;
+	float result = 1.0f + 2.0f * (eta2 + eta * sqrt(beta + eta2)) / beta;
 	return clamp(result * result, 0.0f, 1.0f);
 }
