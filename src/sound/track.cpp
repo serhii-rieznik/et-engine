@@ -246,11 +246,11 @@ TrackPrivate::TrackPrivate(const std::string& filename) :
 	{
 		std::streamsize dataRead = 0;
 		
-		InputStream* stream = reinterpret_cast<InputStream*>(datasource);
-		if (stream->valid() && stream->stream().good())
+		InputStream* astream = reinterpret_cast<InputStream*>(datasource);
+		if (astream->valid() && astream->stream().good())
 		{
-			stream->stream().read(reinterpret_cast<char*>(ptr), size * nmemb);
-			dataRead = stream->stream().gcount();
+			astream->stream().read(reinterpret_cast<char*>(ptr), size * nmemb);
+			dataRead = astream->stream().gcount();
 		}
 		
 		return static_cast<size_t>(dataRead);
@@ -259,18 +259,18 @@ TrackPrivate::TrackPrivate(const std::string& filename) :
 	
 	oggCallbacks.seek_func = [](void* datasource, ogg_int64_t p1, int p2) -> int
 	{
-		InputStream* stream = reinterpret_cast<InputStream*>(datasource);
+		InputStream* astream = reinterpret_cast<InputStream*>(datasource);
 		
-		if (stream->valid() && stream->stream().good())
-			stream->stream().seekg(p1, static_cast<std::ios::seekdir>(p2));
+		if (astream->valid() && astream->stream().good())
+			astream->stream().seekg(p1, static_cast<std::ios::seekdir>(p2));
 		
-		return stream->valid() ? 0 : -1;
+		return astream->valid() ? 0 : -1;
 	};
 	
 	oggCallbacks.tell_func = [](void* datasource) -> long
 	{
-		InputStream* stream = reinterpret_cast<InputStream*>(datasource);
-		return (stream->valid() && stream->stream().good()) ? static_cast<long>(stream->stream().tellg()) : 0;
+		InputStream* astream = reinterpret_cast<InputStream*>(datasource);
+		return (astream->valid() && astream->stream().good()) ? static_cast<long>(astream->stream().tellg()) : 0;
 	};
 }
 
