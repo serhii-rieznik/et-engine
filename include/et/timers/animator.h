@@ -85,7 +85,7 @@ namespace et
 
 		const T& value() const
 			{ return _value; }
-		
+
 		void animate(T* value, const T& from, const T& to, float duration)
 		{
 			ET_ASSERT(timerPool() != nullptr);
@@ -99,6 +99,9 @@ namespace et
 			startUpdates(timerPool());
 			_startTime = actualTime();
 		};
+		
+		void animate(const T& from, const T& to, float duration)
+			{ animate(nullptr, from, to, duration); }
 		
 		template <typename F>
 		void setTimeInterpolationFunction(F func)
