@@ -14,9 +14,12 @@ const std::string kRadianceHeader = "#?RADIANCE";
 const std::string kRadianceFormatEntry = "FORMAT=";
 const std::string kRadiance32Bit_RLE_RGBE = "32-BIT_RLE_RGBE";
 
-// typedef unsigned char RGBEEntry[4];
+static bool shouldConvertRGBEToFloat = true;
 
-#define CONVERT_RGBE	1
+void et::hdr::setShouldConvertRGBEToFloat(bool value)
+{
+	shouldConvertRGBEToFloat = value;
+}
 
 unsigned char* readScanline(unsigned char*, int, vec4ub*);
 vec4 rgbeToFloat(const vec4ub&);
@@ -75,15 +78,18 @@ void et::hdr::loadInfoFromStream(std::istream& source, TextureDescription& desc)
 	desc.target = GL_TEXTURE_2D;
 	desc.format = GL_RGBA;
 	
-#if (CONVERT_RGBE)
-	desc.internalformat = GL_RGBA32F;
-	desc.type = GL_FLOAT;
-	desc.bitsPerPixel = 128;
-#else
-	desc.internalformat = GL_RGBA;
-	desc.type = GL_UNSIGNED_BYTE;
-	desc.bitsPerPixel = 32;
-#endif
+	if (shouldConvertRGBEToFloat)
+	{
+		desc.internalformat = GL_RGBA32F;
+		desc.type = GL_FLOAT;
+		desc.bitsPerPixel = 128;
+	}
+	else
+	{
+		desc.internalformat = GL_RGBA;
+		desc.type = GL_UNSIGNED_BYTE;
+		desc.bitsPerPixel = 32;
+	}
 	
 	desc.mipMapCount = 1;
 	desc.compressed = 0;
@@ -106,25 +112,29 @@ void et::hdr::loadFromStream(std::istream& source, TextureDescription& desc)
 	source.read(inData.binary(), maxDataSize);
 	auto ptr = inData.begin();
 
-#if (CONVERT_RGBE)
-	BinaryDataStorage rgbeData(desc.size.y * rowSize, 0);
-	auto& scanlineData = rgbeData;
-#else
-	desc.data.resize(desc.size.y * rowSize);
-	auto& scanlineData = desc.data;
-#endif
+	if (shouldConvertRGBEToFloat)
+	{
+		BinaryDataStorage rgbeData(desc.size.y * rowSize, 0);
 
-	for (int y = 0; y < desc.size.y; ++y)
-		ptr = readScanline(ptr, desc.size.x, reinterpret_cast<vec4ub*>(scanlineData.element_ptr((desc.size.y - 1 - y) * rowSize)));
-
-#if (CONVERT_RGBE)
-	desc.data.resize(desc.size.square() * desc.bitsPerPixel / 8);
-	vec4* floats = reinterpret_cast<vec4*>(desc.data.binary());
-	vec4ub* rgbe = reinterpret_cast<vec4ub*>(rgbeData.begin());
-	for (int i = 0; i < desc.size.square(); ++i)
-		*floats++ = rgbeToFloat(*rgbe++);
-#endif
-
+		for (int y = 0; y < desc.size.y; ++y)
+			ptr = readScanline(ptr, desc.size.x, reinterpret_cast<vec4ub*>(rgbeData.element_ptr((desc.size.y - 1 - y) * rowSize)));
+		
+		desc.data.resize(desc.size.square() * desc.bitsPerPixel / 8);
+		
+		vec4* floats = reinterpret_cast<vec4*>(desc.data.binary());
+		vec4ub* rgbe = reinterpret_cast<vec4ub*>(rgbeData.begin());
+		for (int i = 0; i < desc.size.square(); ++i)
+			*floats++ = rgbeToFloat(*rgbe++);
+		
+	}
+	else
+	{
+		desc.data.resize(desc.size.y * rowSize);
+		for (int y = 0; y < desc.size.y; ++y)
+			ptr = readScanline(ptr, desc.size.x, reinterpret_cast<vec4ub*>(desc.data.element_ptr((desc.size.y - 1 - y) * rowSize)));
+	}
+	
+	
 	decltype(sourcePos) dataSize = ptr - inData.begin();
 	source.seekg(sourcePos + dataSize, std::ios::beg);
 }

@@ -13,6 +13,8 @@ namespace et
 {
 	namespace hdr
 	{
+		void setShouldConvertRGBEToFloat(bool);
+		
 		void loadInfoFromStream(std::istream& stream, TextureDescription& desc);
 		void loadFromStream(std::istream& stream, TextureDescription& desc);
 		
