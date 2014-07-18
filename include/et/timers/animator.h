@@ -88,6 +88,18 @@ namespace et
 
 		void animate(T* value, const T& from, const T& to, float duration)
 		{
+			if (duration == 0.0f)
+			{
+				_value = to;
+				
+				if (value != nullptr)
+					*value = _value;
+				
+				updated.invoke();
+				finished.invoke();
+				return;
+			}
+			
 			ET_ASSERT(timerPool() != nullptr);
 
 			_valuePointer = value;
@@ -102,6 +114,9 @@ namespace et
 		
 		void animate(const T& from, const T& to, float duration)
 			{ animate(nullptr, from, to, duration); }
+
+		void animate(const T& to, float duration)
+			{ animate(nullptr, _value, to, duration); }
 		
 		template <typename F>
 		void setTimeInterpolationFunction(F func)
