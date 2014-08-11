@@ -6,6 +6,7 @@
  */
 
 #include <AppKit/NSWindow.h>
+#include <AppKit/NSWindowController.h>
 #include <AppKit/NSAlert.h>
 #include <AppKit/NSOpenGL.h>
 #include <AppKit/NSOpenGLView.h>
@@ -238,15 +239,23 @@ RenderContextPrivate::RenderContextPrivate(RenderContext*, RenderContextParamete
 	
 	(void)ET_OBJC_AUTORELEASE(pixelFormat);
 	
-	NSUInteger windowMask = NSBorderlessWindowMask;
+	NSUInteger windowMask = NSBorderlessWindowMask | NSClosableWindowMask;
+
+#if defined(__MAC_10_10)
+	windowMask |= NSFullSizeContentViewWindowMask;
+#endif
 	
 	if (appParams.windowSize != WindowSize_Fullscreen)
 	{
 		if (appParams.windowStyle & WindowStyle_Caption)
-			windowMask |= NSTitledWindowMask | NSClosableWindowMask | NSMiniaturizableWindowMask;
+			windowMask |= NSTitledWindowMask | NSMiniaturizableWindowMask;
 		
 		if (appParams.windowStyle & WindowStyle_Sizable)
 			windowMask |= NSResizableWindowMask;
+	}
+	else
+	{
+		windowMask |= NSFullScreenWindowMask;
 	}
 	
 	NSScreen* mainScreen = [NSScreen mainScreen];
@@ -267,10 +276,18 @@ RenderContextPrivate::RenderContextPrivate(RenderContext*, RenderContextParamete
 	}
 	else
 	{
+		if (appParams.windowStyle == WindowStyle_Borderless)
+			[[NSApplication sharedApplication] setPresentationOptions:NSApplicationPresentationAutoHideDock];
+		
 		contentRect = NSMakeRect(0.5f * (visibleRect.size.width - params.contextSize.x),
 			visibleRect.origin.y + 0.5f * (visibleRect.size.height - params.contextSize.y),
 			params.contextSize.x, params.contextSize.y);
 	}
+	
+	contentRect.origin.x = std::floor(contentRect.origin.x);
+	contentRect.origin.y = std::floor(contentRect.origin.y);
+	contentRect.size.width = std::floor(contentRect.size.width);
+	contentRect.size.height = std::floor(contentRect.size.height);
 	
 	mainWindow = [[etOpenGLWindow alloc] initWithContentRect:contentRect
 		styleMask:windowMask backing:NSBackingStoreBuffered defer:YES];
@@ -307,11 +324,13 @@ RenderContextPrivate::RenderContextPrivate(RenderContext*, RenderContextParamete
 	{
 		[mainWindow setHidesOnDeactivate:YES];
 		[mainWindow setLevel:NSMainMenuWindowLevel + 1];
-		[openGlContext setFullScreen];
 	}
 	
 	[mainWindow setContentView:openGlView];
 	[mainWindow makeKeyAndOrderFront:[NSApplication sharedApplication]];
+	[mainWindow orderFrontRegardless];
+	
+	[[NSApplication sharedApplication] activateIgnoringOtherApps:YES];
 }
 
 RenderContextPrivate::~RenderContextPrivate()
@@ -554,6 +573,16 @@ CVReturn cvDisplayLinkOutputCallback(CVDisplayLinkRef, const CVTimeStamp*, const
 		[allowedCharacters formUnionWithCharacterSet:[NSCharacterSet whitespaceCharacterSet]];
 	}
 	return self;
+}
+
+- (BOOL)canBecomeKeyWindow
+{
+	return YES;
+}
+
+- (BOOL)canBecomeMainWindow
+{
+	return YES;
 }
 
 - (void)keyDown:(NSEvent*)theEvent
