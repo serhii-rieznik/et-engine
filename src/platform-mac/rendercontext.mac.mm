@@ -240,10 +240,6 @@ RenderContextPrivate::RenderContextPrivate(RenderContext*, RenderContextParamete
 	(void)ET_OBJC_AUTORELEASE(pixelFormat);
 	
 	NSUInteger windowMask = NSBorderlessWindowMask | NSClosableWindowMask;
-
-#if defined(__MAC_10_10)
-	windowMask |= NSFullSizeContentViewWindowMask;
-#endif
 	
 	if (appParams.windowSize != WindowSize_Fullscreen)
 	{

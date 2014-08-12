@@ -9,6 +9,7 @@
 #pragma once
 
 #include <et/camera/camera.h>
+#include <et/scene3d/scene3d.h>
 
 namespace rt
 {
@@ -60,12 +61,14 @@ namespace rt
 			Class_Sphere,
 			Class_Plane,
 			Class_Triangle,
+			Class_Mesh,
 		};
 		
 		Class objectClass = Class_None;
 		
 		et::triangle tri;
 		et::vec4 equation;
+		et::DataStorage<et::triangle> mesh;
 		int materialId = Intersection::missingObject;
 		
 		size_t objectId = 0;
@@ -77,11 +80,16 @@ namespace rt
 		SceneObject(Class cls, const et::vec4& eq, int mat) :
 			objectClass(cls), equation(eq), materialId(mat) { }
 
-		SceneObject(Class cls, const et::vec3& p1, const et::vec3& p2, const et::vec3& p3, int mat) :
-			objectClass(cls), tri(p1, p2, p3), materialId(mat) { }
+		SceneObject(const et::triangle& t, int mat) :
+			objectClass(Class_Triangle), tri(t), materialId(mat) { }
+
+		SceneObject(const et::vec3& p1, const et::vec3& p2, const et::vec3& p3, int mat) :
+			objectClass(Class_Triangle), tri(p1, p2, p3), materialId(mat) { }
+		
+		SceneObject(const et::s3d::SupportMesh::Pointer& m, int mat);
 		
 	public:
-		bool intersectsRay(const et::ray3d&, et::vec3& point) const;
+		bool intersectsRay(const et::ray3d&, et::vec3& point, et::vec3& normal) const;
 		
 		et::vec3 normalFromPoint(const et::vec3&) const;
 	};
@@ -101,6 +109,9 @@ namespace rt
 		
 		float apertureSize = 0.0f;
 		uint32_t apertureBlades = 5;
+		
+		et::vec4 ambientColor = et::vec4(0.0f);
+		et::TextureDescription::Pointer environmentMap;
 		
 		std::vector<SceneObject> objects;
 		std::vector<SceneMaterial> materials;

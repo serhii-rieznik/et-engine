@@ -25,9 +25,7 @@ float phong(const vec3& incidence, const vec3& reflected, const vec3& normal, fl
 
 vec4 gatherBouncesRecursive(const RaytraceScene& scene, const ray3d& ray, int depth, int currentObject);
 vec4 performRaytracing(const RaytraceScene& scene, const ray3d& ray);
-
-vec4 computeColorSequence(const RaytraceScene& scene, ray3d ray, const SceneObject& object,
-	int lightBounce, std::vector<SceneObject>& hits);
+vec4 sampleEnvironmentColor(const RaytraceScene& scene, const ray3d& r);
 
 const float defaultRefractiveIndex = 1.0f;
 
@@ -37,11 +35,12 @@ Intersection findNearestIntersection(const RaytraceScene& scene, const ray3d& ra
 	
 	int index = 0;
 	vec3 hitPoint;
+	vec3 hitNormal;
 	
 	float distance = std::numeric_limits<float>::max();
 	for (const auto& obj : scene.objects)
 	{
-		if (obj.intersectsRay(ray, hitPoint))
+		if (obj.intersectsRay(ray, hitPoint, hitNormal))
 		{
 			float d = (hitPoint - ray.origin).dotSelf();
 			if (d < distance)
@@ -49,13 +48,55 @@ Intersection findNearestIntersection(const RaytraceScene& scene, const ray3d& ra
 				distance = d;
 				result = index;
 				result.hitPoint = hitPoint;
+				result.hitNormal = hitNormal;
 			}
 		}
 		++index;
 	}
 	
-	result.hitNormal = scene.objectAtIndex(result.objectIndex).normalFromPoint(result.hitPoint);
 	return result;
+}
+
+vec2 anglesToTexCoord(const vec2& angles)
+{
+	return vec2(angles.x / DOUBLE_PI + 0.5f, angles.y / PI + 0.5f);
+}
+
+vec4 sampleTexture(const TextureDescription::Pointer& tex, vec2i texCoord)
+{
+	if (texCoord.x >= tex->size.x) texCoord.x -= tex->size.x;
+	if (texCoord.x < 0) texCoord.x += tex->size.x;
+	
+	if (texCoord.y >= tex->size.y) texCoord.y -= tex->size.y;
+	if (texCoord.y < 0) texCoord.y += tex->size.y;
+	
+	const vec4* colors = reinterpret_cast<const vec4*>(tex->data.binary());
+	return colors[texCoord.x + texCoord.y * tex->size.x];
+}
+
+vec4 sampleEnvironmentColor(const RaytraceScene& scene, const ray3d& r)
+{
+	if (scene.environmentMap.invalid())
+		return scene.ambientColor;
+	
+	if (scene.environmentMap->bitsPerPixel != 128)
+		exit(3);
+	
+	vec3 sp = toSpherical(r.direction);
+	vec2 tc = anglesToTexCoord(sp.xy()) * vector2ToFloat(scene.environmentMap->size);
+	vec2 dudv = tc - floorv(tc);
+	
+	vec2i baseTexCoord(static_cast<int>(tc.x), static_cast<int>(tc.y));
+	
+	vec4 c00 = sampleTexture(scene.environmentMap, baseTexCoord);
+	vec4 c10 = sampleTexture(scene.environmentMap, baseTexCoord + vec2i(1, 0));
+	vec4 c01 = sampleTexture(scene.environmentMap, baseTexCoord + vec2i(0, 1));
+	vec4 c11 = sampleTexture(scene.environmentMap, baseTexCoord + vec2i(1, 1));
+	
+	vec4 topRow = mix(c00, c10, dudv.x);
+	vec4 bottomRow = mix(c01, c11, dudv.x);
+	
+	return scene.ambientColor * mix(topRow, bottomRow, dudv.y);
 }
 
 vec4 gatherBouncesRecursive(const RaytraceScene& scene, const ray3d& ray, int depth, int currentObject)
@@ -64,6 +105,9 @@ vec4 gatherBouncesRecursive(const RaytraceScene& scene, const ray3d& ray, int de
 		return vec4(0.0f, 0.0f, 0.0f, 0.0f);
 	
 	auto i = findNearestIntersection(scene, ray);
+	if (i.objectIndex == Intersection::missingObject)
+		return sampleEnvironmentColor(scene, ray);
+	
 	const auto& obj = scene.objectAtIndex(i.objectIndex);
 	const SceneMaterial& mat = scene.materialAtIndex(obj.materialId);
 	

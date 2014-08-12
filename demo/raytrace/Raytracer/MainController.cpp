@@ -14,7 +14,7 @@
 using namespace et;
 using namespace rt;
 
-const vec2i frameSize = vec2i(1280, 800); // vec2i(512, 320);
+const vec2i frameSize = vec2i(1280, 800) / 2; // vec2i(512, 320);
 
 const vec2i rectSize = vec2i(20);
 
@@ -90,7 +90,7 @@ void MainController::applicationDidLoad(et::RenderContext* rc)
 	
 	_cameraAngles.updated.connect([this]()
 	{
-		_scene.camera.lookAt(120.0f * fromSpherical(_cameraAngles.value().y, _cameraAngles.value().x));
+		_scene.camera.lookAt(150.0f * fromSpherical(_cameraAngles.value().y, _cameraAngles.value().x));
 		
 		if (!_enableGPURaytracing && (_scene.options.bounces == _previewBounces))
 			startCPUTracing();
