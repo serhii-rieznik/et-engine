@@ -81,6 +81,7 @@ namespace et
 		void pushSearchPath(const std::string&);
 		void pushSearchPaths(const std::set<std::string>&);
 		void popSearchPaths(size_t = 1);
+		void setShouldSilentPathResolverErrors(bool);
 		
 		void setPathResolver(PathResolver::Pointer);
 

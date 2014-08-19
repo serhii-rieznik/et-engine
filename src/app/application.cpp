@@ -264,3 +264,7 @@ void Application::setPathResolver(PathResolver::Pointer resolver)
 	_customPathResolver = resolver;
 }
 
+void Application::setShouldSilentPathResolverErrors(bool e)
+{
+	_standardPathResolver.setSilentErrors(e);
+}

@@ -257,7 +257,6 @@ void Player::handleProcessedBuffers()
 	}
 }
 
-
 void Player::setActualVolume(float v)
 {
 	_volume = clamp(v, 0.0f, 1.0f);	
@@ -267,11 +266,13 @@ void Player::setActualVolume(float v)
 
 void Player::handleProcessedSamples()
 {
+	if (_track.invalid()) return;
+	
 	int sampleOffset = 0;
 	alGetSourcei(_private->source, AL_SAMPLE_OFFSET, &sampleOffset);
 	checkOpenALError("alGetSourcei(%d, AL_SAMPLE_OFFSET, %d)", _private->source, sampleOffset);
 	
-	if ((sampleOffset == static_cast<int>(track()->samples())) && !_private->playingLooped)
+	if ((sampleOffset == static_cast<int>(_track->samples())) && !_private->playingLooped)
 	{
 		stop();
 		finished.invokeInMainRunLoop(this);

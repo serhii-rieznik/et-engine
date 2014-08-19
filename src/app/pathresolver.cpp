@@ -100,9 +100,9 @@ std::string StandardPathResolver::resolveFilePath(const std::string& input)
 	
 	popSearchPaths(paths.size());
 	
-	if (!fileExists(suggested))
+	if (!_silentErrors && !fileExists(suggested))
 		log::warning("Unable to resolve file name: %s", input.c_str());
-	
+
 	return suggested;
 }
 

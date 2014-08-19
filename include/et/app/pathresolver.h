@@ -46,6 +46,9 @@ namespace et
 		
 		void popSearchPaths(size_t = 1);
 		
+		void setSilentErrors(bool e)
+			{ _silentErrors = e; }
+		
 	private:
 		void validateCaches();
 		
@@ -61,5 +64,6 @@ namespace et
 		std::string _cachedLocale;
 		
 		size_t _cachedScreenScaleFactor = 0;
+		bool _silentErrors = false;
 	};
 }
