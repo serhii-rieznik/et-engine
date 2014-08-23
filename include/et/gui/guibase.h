@@ -193,7 +193,7 @@ namespace et
 				{ return parent() ? parent()->owner() : 0; }
 
 			void startUpdates();
-			TimerPool::Pointer timerPool();
+			TimerPool* timerPool() override;
 
 			void layoutChildren();
 

@@ -9,6 +9,7 @@
 #include <et/core/serialization.h>
 #include <et/core/conversion.h>
 #include <et/app/application.h>
+#include <et/rendering/rendercontext.h>
 #include <et/gui/font.h>
 
 using namespace et;
@@ -38,8 +39,7 @@ void FontData::loadFromFile(RenderContext* rc, const std::string& fileName, Obje
 	_boldChars.clear();
 	_texture = Texture();
 
-	std::string resolvedFileName =
-		application().environment().resolveScalableFileName(fileName, rc->screenScaleFactor());
+	std::string resolvedFileName = application().resolveFileName(fileName);
 
 	InputStream fontFile(resolvedFileName, StreamMode_Binary);
 	if (fontFile.invalid()) return;

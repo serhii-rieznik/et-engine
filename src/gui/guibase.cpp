@@ -87,9 +87,9 @@ void Element::startUpdates()
 	TimedObject::startUpdates();
 }
 
-TimerPool::Pointer Element::timerPool()
+TimerPool* Element::timerPool()
 {
-	return mainTimerPool();
+	return mainTimerPool().ptr();
 }
 
 void Element::layoutChildren()

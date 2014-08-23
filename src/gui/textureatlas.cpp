@@ -8,6 +8,7 @@
 #include <sstream>
 #include <et/core/et.h>
 #include <et/app/application.h>
+#include <et/rendering/rendercontext.h>
 #include <et/imaging/textureloader.h>
 #include <et/gui/textureatlas.h>
 
@@ -30,9 +31,8 @@ TextureAtlas::TextureAtlas(RenderContext* rc, const std::string& filename, Objec
 
 void TextureAtlas::loadFromFile(RenderContext* rc, const std::string& filename, ObjectsCache& cache)
 {
-	std::string resolvedFileName =
-		application().environment().resolveScalableFileName(filename, rc->screenScaleFactor());
-
+	std::string resolvedFileName = application().resolveFileName(filename);
+	
 	InputStream descFile(resolvedFileName, StreamMode_Text);
 	if (descFile.invalid()) return;
 
@@ -50,10 +50,10 @@ void TextureAtlas::loadFromFile(RenderContext* rc, const std::string& filename, 
 		if (token == "texture:")
 		{
 			std::string textureId = trim(line);
-			std::string textureName = application().environment().resolveScalableFileName(textureId, 1);
+			std::string textureName = application().resolveFileName(textureId);
 			
 			if (!fileExists(textureName))
-				textureName = application().environment().resolveScalableFileName(filePath + textureId, 1);
+				textureName = application().resolveFileName(filePath + textureId);
 			
 			_textures[textureId] = rc->textureFactory().loadTexture(textureName, cache);
 			_textures[textureId]->setWrap(rc, TextureWrap_ClampToEdge, TextureWrap_ClampToEdge);

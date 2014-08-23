@@ -6,6 +6,7 @@
  */
 
 #include <et/app/application.h>
+#include <et/rendering/rendercontext.h>
 #include <et/gui/scroll.h>
 #include <et/gui/guirenderer.h>
 

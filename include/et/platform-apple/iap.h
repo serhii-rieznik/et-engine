@@ -13,22 +13,26 @@
 
 namespace et
 {
-	struct PurchaseInfo
-	{
-		std::string description;
-		std::string title;
-		std::string identifier;
-		std::string currency;
-		std::string currencySymbol;
-		
-		float price;
-		
-		PurchaseInfo() :
-			price(0.0f) { }
-	};
-    
     class PurchasesManager : public Singleton<PurchasesManager>
     {
+	public:
+		struct Product
+		{
+			std::string description;
+			std::string title;
+			std::string identifier;
+			std::string currency;
+			std::string currencySymbol;
+			float price = 0.0f;
+		};
+		
+		struct Transaction
+		{
+			std::string productId;
+			std::string originalTransactionId;
+			std::string transactionId;
+		};
+		
     public:
         typedef std::set<std::string> ProductsSet;
 		
@@ -45,16 +49,18 @@ namespace et
 		
         bool purchaseProduct(const std::string& product);
 		
-		PurchaseInfo purchaseInfoForProduct(const std::string&);
+		Product productForIdentifier(const std::string&);
+		
+		Dictionary receiptData() const;
 		
 	public:
 		ET_DECLARE_EVENT1(availableProductsChecked, StringList)
 		ET_DECLARE_EVENT0(failedToCheckAvailableProducts)
 
-		ET_DECLARE_EVENT1(productPurchased, std::string)
+		ET_DECLARE_EVENT1(productPurchased, Transaction)
 		ET_DECLARE_EVENT1(failedToPurchaseProduct, std::string)
 		
-		ET_DECLARE_EVENT1(purchaseRestored, std::string)
+		ET_DECLARE_EVENT1(purchaseRestored, Transaction)
 		ET_DECLARE_EVENT0(restoringPurchasesFinished)
 		ET_DECLARE_EVENT0(failedToRestorePurchases)
 		
