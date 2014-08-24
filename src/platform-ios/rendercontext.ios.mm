@@ -29,7 +29,9 @@ RenderContext::RenderContext(const RenderContextParameters& params, Application*
 	_params(params), _app(app), _programFactory(nullptr), _textureFactory(nullptr), _framebufferFactory(nullptr),
 	_vertexBufferFactory(nullptr), _renderer(nullptr), _private(new RenderContextPrivate(params))
 {
+#if !defined(ET_EMBEDDED_APPLICATION)
 	ET_ASSERT(sharedOpenGLViewController != nil);
+#endif
 	
      openGLCapabilites().checkCaps();
 
@@ -69,11 +71,7 @@ void RenderContext::init()
 
 size_t RenderContext::renderingContextHandle()
 {
-#if defined(ET_EMBEDDED_APPLICATION)	
-	return 0;
-#else	
 	return reinterpret_cast<size_t>(sharedOpenGLViewController);
-#endif	
 }
 
 void RenderContext::beginRender()
@@ -96,5 +94,7 @@ void RenderContext::endRender()
  */
 RenderContextPrivate::RenderContextPrivate(const RenderContextParameters& params)
 {
+#if !defined(ET_EMBEDDED_APPLICATION)
 	sharedOpenGLViewController = [[etOpenGLViewController alloc] initWithParameters:params];
+#endif
 }

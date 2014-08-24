@@ -50,6 +50,7 @@ extern etOpenGLViewController* sharedOpenGLViewController;
 	(void)anApplication;
 	(void)launchOptions;
 
+#if !defined(ET_EMBEDDED_APPLICATION)
 	@synchronized(self)
 	{
 		_window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
@@ -62,6 +63,7 @@ extern etOpenGLViewController* sharedOpenGLViewController;
 
 	_shouldUnlockRenderLock = YES;
 	_firstRenderLock.lock();
+#endif
 	
     return YES;
 }
@@ -72,23 +74,26 @@ extern etOpenGLViewController* sharedOpenGLViewController;
 	
 	(void)application;
 	
+#if !defined(ET_EMBEDDED_APPLICATION)
 	@synchronized(sharedOpenGLViewController.context)
 	{
 		[sharedOpenGLViewController beginRender];
 		_notifier.notifyDeactivated();
 	}
-	
+#endif
 }
 
 - (void)applicationDidBecomeActive:(UIApplication *)application
 {
 	(void)application;
 	
+#if !defined(ET_EMBEDDED_APPLICATION)
 	@synchronized(sharedOpenGLViewController.context)
 	{
 		[sharedOpenGLViewController beginRender];
 		_notifier.notifyActivated();
 	}
+#endif
 }
 
 - (void)applicationWillTerminate:(UIApplication *)application
@@ -111,11 +116,16 @@ extern etOpenGLViewController* sharedOpenGLViewController;
 
 - (BOOL)updating
 {
+#if defined(ET_EMBEDDED_APPLICATION)
+	return YES;
+#else
 	return ![sharedOpenGLViewController suspended];
+#endif
 }
 
 - (void)tick
 {
+#if !defined(ET_EMBEDDED_APPLICATION)
 	if (!sharedOpenGLViewController.suspended)
 	{
 		@synchronized(sharedOpenGLViewController.context)
@@ -134,6 +144,7 @@ extern etOpenGLViewController* sharedOpenGLViewController;
 			});
 		}
 	}
+#endif
 }
 
 - (void)renderThread
@@ -181,19 +192,23 @@ extern etOpenGLViewController* sharedOpenGLViewController;
 	}
 	else
 	{
+#if !defined(ET_EMBEDDED_APPLICATION)
 		@synchronized(sharedOpenGLViewController.context)
 		{
 			[sharedOpenGLViewController setSuspended:NO];
 		}
+#endif
 	}
 }
 
 - (void)endUpdates
 {
+#if !defined(ET_EMBEDDED_APPLICATION)
 	@synchronized(sharedOpenGLViewController.context)
 	{
 		[sharedOpenGLViewController setSuspended:YES];
 	}
+#endif
 }
 
 - (NSUInteger)application:(UIApplication*)application supportedInterfaceOrientationsForWindow:(UIWindow *)window
