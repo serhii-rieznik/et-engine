@@ -98,6 +98,8 @@ vec4 et::strToVector4(const std::string& s, const std::string& delimiter)
 
 int et::hexCharacterToInt(int c)
 {
+	c = tolower(c);
+	
 	if ((c >= '0') && (c <= '9')) 
 		return c - '0';
 	else if ((c >= 'a') && (c <= 'f')) 
