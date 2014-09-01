@@ -628,16 +628,33 @@ size_t et::channelsForTextureFormat(uint32_t internalFormat)
 	case GL_DEPTH_COMPONENT16:
 	case GL_ONE:
 	case GL_RED:
+		return 1;
 			
 #if defined(GL_LUMINANCE)
 	case GL_LUMINANCE:
+		return 1;
 #endif
 			
 #if defined(GL_R8)
 	case GL_R8:
-#endif
 		return 1;
+#endif
 
+#if defined(GL_R32F)
+	case GL_R32F:
+		return 1;
+#endif
+			
+#if defined(GL_RG32F)
+	case GL_RG32F:
+		return 2;
+#endif
+
+#if defined(GL_RGB32F)
+	case GL_RGB32F:
+		return 3;
+#endif
+			
 	case GL_RGB:
 		return 3;
 
