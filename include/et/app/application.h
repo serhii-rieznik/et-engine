@@ -89,6 +89,7 @@ namespace et
 		void setFrameRateLimit(size_t value);
 
 		void alert(const std::string& title, const std::string& message, AlertType type = AlertType_Information);
+		void requestUserAttention();
 		
 	private:
 		friend class RenderContext;

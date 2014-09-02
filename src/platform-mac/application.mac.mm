@@ -116,6 +116,11 @@ void Application::platformResume()
 {
 }
 
+void Application::requestUserAttention()
+{
+	[NSApp requestUserAttention:NSCriticalRequest];
+}
+
 /*
  *
  * etApplicationDelegate implementation
