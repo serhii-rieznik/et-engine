@@ -272,9 +272,6 @@ RenderContextPrivate::RenderContextPrivate(RenderContext*, RenderContextParamete
 	}
 	else
 	{
-		if (appParams.windowStyle == WindowStyle_Borderless)
-			[[NSApplication sharedApplication] setPresentationOptions:NSApplicationPresentationAutoHideDock];
-		
 		contentRect = NSMakeRect(0.5f * (visibleRect.size.width - params.contextSize.x),
 			visibleRect.origin.y + 0.5f * (visibleRect.size.height - params.contextSize.y),
 			params.contextSize.x, params.contextSize.y);
@@ -300,6 +297,8 @@ RenderContextPrivate::RenderContextPrivate(RenderContext*, RenderContextParamete
 	
 	windowDelegate = [[etWindowDelegate alloc] init];
 	windowDelegate->rcPrivate = this;
+
+	[mainWindow setCollectionBehavior:NSWindowCollectionBehaviorFullScreenPrimary];
 	[mainWindow setDelegate:windowDelegate];
 	[mainWindow setOpaque:YES];
 	
@@ -373,6 +372,8 @@ void RenderContextPrivate::performUpdateAndRender()
 	[openGlContext makeCurrentContext];
 	CGLLockContext(cglObject);
 	
+	Threading::setRenderingThread(Threading::currentThread());
+	
 	windowDelegate->applicationNotifier.notifyIdle();
 	
 	CGLFlushDrawable(cglObject);
@@ -383,9 +384,7 @@ int RenderContextPrivate::displayLinkSynchronized()
 {
 	if (firstSync)
 	{
-		ThreadId currentThread = Threading::currentThread();
-		Threading::setMainThread(currentThread);
-		Threading::setRenderingThread(currentThread);
+		Threading::setMainThread(Threading::currentThread());
 		firstSync = false;
 		
 		if (resizeScheduled)
@@ -437,6 +436,16 @@ CVReturn cvDisplayLinkOutputCallback(CVDisplayLinkRef, const CVTimeStamp*, const
  * OpenGL View implementation
  */
 @implementation etOpenGLView
+
+- (BOOL)canBecomeKeyView
+{
+	return YES;
+}
+
+- (BOOL)acceptsFirstResponder
+{
+	return YES;
+}
 
 - (PointerInputInfo)mousePointerInfo:(NSEvent*)theEvent withType:(PointerType)type;
 {
@@ -531,7 +540,7 @@ CVReturn cvDisplayLinkOutputCallback(CVDisplayLinkRef, const CVTimeStamp*, const
 - (void)drawRect:(NSRect)dirtyRect
 {
 	(void)dirtyRect;
-	
+
 	if (rcPrivate->canPerformOperations())
 		rcPrivate->performUpdateAndRender();
 }

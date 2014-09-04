@@ -59,6 +59,11 @@ using namespace et;
     return [CAEAGLLayer class];
 }
 
+- (BOOL)isOpaque
+{
+	return YES;
+}
+
 - (id)initWithFrame:(CGRect)frame parameters:(et::RenderContextParameters&)params
 {
 	self = [super initWithFrame:frame];
