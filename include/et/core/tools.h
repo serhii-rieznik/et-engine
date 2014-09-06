@@ -22,6 +22,8 @@ namespace et
 	 * For Retina screens returns size in points
 	 */
 	vec2i nativeScreenSize();
+
+	vec2i availableScreenSize();
 	
 	/**
 	 * Reads application identifier from package

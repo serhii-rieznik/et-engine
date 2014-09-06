@@ -370,6 +370,21 @@ et::vec2i et::nativeScreenSize()
 #endif
 }
 
+et::vec2i et::availableScreenSize()
+{
+#if (ET_PLATFORM_IOS)
+	
+	return nativeScreenSize();
+	
+#else 
+	
+	auto size = [[NSScreen mainScreen] visibleFrame].size;
+	return vec2i(static_cast<int>(size.width), static_cast<int>(size.height));
+	
+#endif
+	
+}
+
 uint64_t et::getFileDate(const std::string& path)
 {
 	struct stat s = { };
