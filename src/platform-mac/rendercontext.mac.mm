@@ -71,7 +71,6 @@ public:
 	
 private:
 	etWindowDelegate* windowDelegate = nil;
-	etOpenGLView* openGlView = nil;
 	etOpenGLWindow* mainWindow = nil;
 	
 	NSOpenGLPixelFormat* pixelFormat = nil;
@@ -283,7 +282,7 @@ RenderContextPrivate::RenderContextPrivate(RenderContext*, RenderContextParamete
 	contentRect.size.height = std::floor(contentRect.size.height);
 	
 	mainWindow = [[etOpenGLWindow alloc] initWithContentRect:contentRect
-		styleMask:windowMask backing:NSBackingStoreBuffered defer:YES];
+		styleMask:windowMask backing:NSBackingStoreBuffered defer:NO];
 	
 	if (appParams.keepWindowAspectOnResize)
 		[mainWindow setContentAspectRatio:contentRect.size];
@@ -298,30 +297,25 @@ RenderContextPrivate::RenderContextPrivate(RenderContext*, RenderContextParamete
 	windowDelegate = [[etWindowDelegate alloc] init];
 	windowDelegate->rcPrivate = this;
 
+	etOpenGLView* openGlView = [[etOpenGLView alloc] init];
+	[openGlView setWantsBestResolutionOpenGLSurface:YES];
+	openGlView->rcPrivate = this;
+	
 	[mainWindow setCollectionBehavior:NSWindowCollectionBehaviorFullScreenPrimary];
 	[mainWindow setDelegate:windowDelegate];
 	[mainWindow setOpaque:YES];
+	[mainWindow setContentView:openGlView];
 	
-	openGlView = [[etOpenGLView alloc] initWithFrame:NSMakeRect(0.0f, 0.0f, contentRect.size.width,
-		contentRect.size.height) pixelFormat:pixelFormat];
-	openGlView->rcPrivate = this;
-	[openGlView setWantsBestResolutionOpenGLSurface:YES];
-	
-	openGlContext = ET_OBJC_RETAIN([openGlView openGLContext]);
+	openGlContext = [[NSOpenGLContext alloc] initWithFormat:pixelFormat shareContext:nil];
 	[openGlContext makeCurrentContext];
+	
+	[openGlView setOpenGLContext:openGlContext];
 		
 	cglObject = static_cast<CGLContextObj>([openGlContext CGLContextObj]);
 	
 	const int swap = static_cast<int>(params.swapInterval);
 	CGLSetParameter(cglObject, kCGLCPSwapInterval, &swap);
 	
-	if (appParams.windowSize == WindowSize_Fullscreen)
-	{
-		[mainWindow setHidesOnDeactivate:YES];
-		[mainWindow setLevel:NSMainMenuWindowLevel + 1];
-	}
-	
-	[mainWindow setContentView:openGlView];
 	[mainWindow makeKeyAndOrderFront:[NSApplication sharedApplication]];
 	[mainWindow orderFrontRegardless];
 	
@@ -330,7 +324,6 @@ RenderContextPrivate::RenderContextPrivate(RenderContext*, RenderContextParamete
 
 RenderContextPrivate::~RenderContextPrivate()
 {
-	ET_OBJC_RELEASE(openGlView);
 	ET_OBJC_RELEASE(openGlContext);
 	ET_OBJC_RELEASE(windowDelegate);
 	mainWindow = nil;
@@ -449,9 +442,8 @@ CVReturn cvDisplayLinkOutputCallback(CVDisplayLinkRef, const CVTimeStamp*, const
 
 - (PointerInputInfo)mousePointerInfo:(NSEvent*)theEvent withType:(PointerType)type;
 {
-	NSRect ownFrame = self.frame;
-	
-	NSPoint nativePoint = [theEvent locationInWindow];
+	NSRect ownFrame = [self convertRectToBacking:self.frame];
+	NSPoint nativePoint = [self convertPointToBacking:[theEvent locationInWindow]];
 	
 	vec2 p(static_cast<float>(nativePoint.x),
 		static_cast<float>(ownFrame.size.height - nativePoint.y));
@@ -500,8 +492,8 @@ CVReturn cvDisplayLinkOutputCallback(CVDisplayLinkRef, const CVTimeStamp*, const
 
 - (void)scrollWheel:(NSEvent *)theEvent
 {
-	NSRect ownFrame = self.frame;
-	NSPoint nativePoint = [theEvent locationInWindow];
+	NSRect ownFrame = [self convertRectToBacking:self.frame];
+	NSPoint nativePoint = [self convertPointToBacking:[theEvent locationInWindow]];
 
 	vec2 p(static_cast<float>(nativePoint.x),
 		static_cast<float>(ownFrame.size.height - nativePoint.y));
@@ -557,7 +549,7 @@ CVReturn cvDisplayLinkOutputCallback(CVDisplayLinkRef, const CVTimeStamp*, const
 	
 	[self addTrackingArea:_trackingArea];
 	
-	rcPrivate->resize(self.bounds.size);
+	rcPrivate->resize([self convertRectToBacking:self.bounds].size);
 }
 
 @end

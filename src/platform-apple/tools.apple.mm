@@ -9,6 +9,7 @@
 #include <sys/stat.h>
 #include <et/core/datastorage.h>
 #include <et/core/tools.h>
+#include <et/core/hardware.h>
 #include <et/platform-apple/objc.h>
 
 #if (ET_PLATFORM_MAC)
@@ -61,6 +62,13 @@ uint64_t queryActualTime()
 	timeval tv = { };
 	gettimeofday(&tv, 0);
 	return static_cast<uint64_t>(tv.tv_sec) * 1000 + static_cast<uint64_t>(tv.tv_usec) / 1000;
+}
+
+uint64_t et::getFileDate(const std::string& path)
+{
+	struct stat s = { };
+	stat(path.c_str(), &s);
+	return s.st_mtimespec.tv_sec;
 }
 
 std::string et::applicationPath()
@@ -363,7 +371,7 @@ et::vec2i et::nativeScreenSize()
 		return vec2i(static_cast<int>(size.width), static_cast<int>(size.height));
 	
 #else
-
+	
 	NSSize size = [[NSScreen mainScreen] frame].size;
 	return vec2i(static_cast<int>(size.width), static_cast<int>(size.height));
 
@@ -385,9 +393,35 @@ et::vec2i et::availableScreenSize()
 	
 }
 
-uint64_t et::getFileDate(const std::string& path)
+et::Screen nsScreenToScreen(NSScreen* screen);
+
+et::Screen et::currentScreen()
 {
-	struct stat s = { };
-	stat(path.c_str(), &s);
-	return s.st_mtimespec.tv_sec;
+	return nsScreenToScreen([NSScreen mainScreen]);
+}
+
+std::vector<et::Screen> et::availableScreens()
+{
+	std::vector<et::Screen> result;
+	
+	for (NSScreen* screen in [NSScreen screens])
+		result.push_back(nsScreenToScreen(screen));
+	
+	return result;
+}
+
+et::Screen nsScreenToScreen(NSScreen* screen)
+{
+	NSRect frame = [screen frame];
+	NSRect available = [screen visibleFrame];
+	
+	int scaleFactor = static_cast<int>([screen backingScaleFactor]);
+	
+	auto aFrame = et::recti(static_cast<int>(frame.origin.x), static_cast<int>(frame.origin.y),
+		static_cast<int>(frame.size.width), static_cast<int>(frame.size.height));
+	
+	auto aAvailable = et::recti(static_cast<int>(available.origin.x), static_cast<int>(available.origin.y),
+		static_cast<int>(available.size.width), static_cast<int>(available.size.height));
+	
+	return et::Screen(aFrame, aAvailable, scaleFactor);
 }

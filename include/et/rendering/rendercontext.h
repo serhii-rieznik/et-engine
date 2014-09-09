@@ -123,7 +123,8 @@ namespace et
 		VertexBufferFactory::Pointer _vertexBufferFactory;
 		Renderer::Pointer _renderer;
 		
-		size_t _screenScaleFactor;
+		size_t _screenScaleFactor = 1;
+		size_t _maxScreenScaleFactor = 2;
 	};
 
 }

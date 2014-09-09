@@ -30,6 +30,7 @@ void RenderContext::onFPSTimerExpired(NotifyTimer*)
 void RenderContext::resized(const vec2i& sz)
 {
 	updateScreenScale(sz);
+	
 	_renderState.setMainViewportSize(sz);
 	
 	if (_app->running())
@@ -44,6 +45,6 @@ void RenderContext::updateScreenScale(const vec2i& screenSize)
 	size_t newScale = static_cast<size_t>((maxDimension - 1) / (3 * maxBaseSize / 2) + 1);
 	if (newScale == _screenScaleFactor) return;
 	
-	_screenScaleFactor = newScale;
+	_screenScaleFactor = etMin(_maxScreenScaleFactor, newScale);
 	screenScaleFactorChanged.invoke(_screenScaleFactor);
 }
