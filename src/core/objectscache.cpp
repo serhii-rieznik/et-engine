@@ -117,18 +117,18 @@ void ObjectsCache::clear()
 
 void ObjectsCache::flush()
 {
-	size_t objectsErased = 0;
 	CriticalSectionScope lock(_lock);
-	auto i = _objects.begin();
-	while (i != _objects.end())
+	
+	size_t objectsErased = 0;
+	
+	for (auto& lv : _objects)
 	{
-		auto obj = i->second.begin();
-		while (obj != i->second.end())
+		auto obj = lv.second.begin();
+		while (obj != lv.second.end())
 		{
 			if (obj->object->atomicCounterValue() == 1)
 			{
-				auto toErase = obj++;
-				i->second.erase(toErase);
+				obj = lv.second.erase(obj);
 				++objectsErased;
 			}
 			else
@@ -136,15 +136,19 @@ void ObjectsCache::flush()
 				++obj;
 			}
 		}
-		
+	}
+	
+	auto i = _objects.begin();
+	while (i != _objects.end())
+	{
 		if (i->second.empty())
 		{
-			auto j = i++;
-			_objects.erase(i);
-			i = j;
+			i = _objects.erase(i);
 		}
 		else
+		{
 			++i;
+		}
 	}
 	
 	if (objectsErased > 0)
