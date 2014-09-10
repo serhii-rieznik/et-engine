@@ -41,7 +41,6 @@ std::string et::floatToTimeStr(float value, bool showMSec)
 	seconds = std::abs(seconds);
 	mSec = std::abs(mSec);
 	
-	std::string sHours = intToStr(hours);
 	std::string sMin = intToStr(minutes);
 	std::string sSec = intToStr(seconds);
 	std::string sMSec = intToStr(mSec);
@@ -63,7 +62,19 @@ std::string et::floatToTimeStr(float value, bool showMSec)
 	std::string result;
 
 	if (hours > 0)
-		result = sHours + ":" + sMin + ":" + sSec;
+	{
+		if (hours > 24)
+		{
+			auto days = hours / 24;
+			hours -= 24 * days;
+			
+			result = intToStr(days) + ", " + intToStr(hours) + ":" + sMin + ":" + sSec;
+		}
+		else
+		{
+			result = intToStr(hours) + ":" + sMin + ":" + sSec;
+		}
+	}
 	else
 		result = sMin + ":" + sSec;
 
