@@ -150,3 +150,7 @@ void Application::setTitle(const std::string&)
 {
 	
 }
+
+void Application::requestUserAttention()
+{
+}

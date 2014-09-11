@@ -429,7 +429,7 @@ std::vector<et::Screen> et::availableScreens()
 }
 
 #if (ET_PLATFORM_IOS)
-	et::Screen nsScreenToScreen(UIScreen* screen)
+	et::Screen uiScreenToScreen(UIScreen* screen)
 	{
 		CGRect frame = [screen bounds];
 		CGRect available = frame;
