@@ -399,30 +399,49 @@ et::vec2i et::availableScreenSize()
 	
 }
 
-et::Screen nsScreenToScreen(NSScreen* screen);
+#if (ET_PLATFORM_IOS)
+	et::Screen uiScreenToScreen(UIScreen* screen);
+#else
+	et::Screen nsScreenToScreen(NSScreen* screen);
+#endif
 
 et::Screen et::currentScreen()
 {
+#if (ET_PLATFORM_IOS)
+	return uiScreenToScreen([UIScreen mainScreen]);
+#else
 	return nsScreenToScreen([NSScreen mainScreen]);
+#endif
 }
 
 std::vector<et::Screen> et::availableScreens()
 {
 	std::vector<et::Screen> result;
 	
+#if (ET_PLATFORM_IOS)
+	for (UIScreen* screen in [UIScreen screens])
+		result.push_back(uiScreenToScreen(screen));
+#else
 	for (NSScreen* screen in [NSScreen screens])
 		result.push_back(nsScreenToScreen(screen));
-	
+#endif
 	return result;
 }
 
-et::Screen nsScreenToScreen(NSScreen* screen)
-{
-	NSRect frame = [screen frame];
-	NSRect available = [screen visibleFrame];
-	
-	int scaleFactor = static_cast<int>([screen backingScaleFactor]);
-	
+#if (ET_PLATFORM_IOS)
+	et::Screen nsScreenToScreen(UIScreen* screen)
+	{
+		CGRect frame = [screen bounds];
+		CGRect available = frame;
+		int scaleFactor = static_cast<int>([screen scale]);
+#else
+	et::Screen nsScreenToScreen(NSScreen* screen)
+	{
+		NSRect frame = [screen frame];
+		NSRect available = [screen visibleFrame];
+		int scaleFactor = static_cast<int>([screen backingScaleFactor]);
+#endif
+		
 	auto aFrame = et::recti(static_cast<int>(frame.origin.x), static_cast<int>(frame.origin.y),
 		static_cast<int>(frame.size.width), static_cast<int>(frame.size.height));
 	

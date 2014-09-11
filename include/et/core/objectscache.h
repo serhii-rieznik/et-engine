@@ -48,13 +48,15 @@ namespace et
 			ObjectLoader::Pointer loader;
 			std::map<std::string, uint64_t> identifiers;
 			
-			ObjectProperty() { }
+			ObjectProperty()
+				{ }
 			
 			ObjectProperty(LoadableObject::Pointer o, ObjectLoader::Pointer l) :
 				object(o), loader(l) { }
 		};
+		
 		typedef std::vector<ObjectProperty> ObjectPropertyList;
-		typedef std::map<const std::string, ObjectPropertyList> ObjectMap;
+		typedef std::map<std::string, ObjectPropertyList> ObjectMap;
 
 		CriticalSection _lock;
 		ObjectMap _objects;
