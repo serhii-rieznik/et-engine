@@ -13,7 +13,7 @@
 #include <et/core/tools.h>
 #include <et/core/containers.h>
 #include <et/locale/locale.h>
-#include <et/platform-apple/objc.h>
+#include <et/platform-apple/apple.h>
 
 using namespace et;
 

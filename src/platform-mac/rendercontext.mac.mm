@@ -15,7 +15,7 @@
 #include <AppKit/NSTrackingArea.h>
 #include <CoreVideo/CVDisplayLink.h>
 
-#include <et/platform-apple/objc.h>
+#include <et/platform-apple/apple.h>
 #include <et/opengl/openglcaps.h>
 #include <et/input/input.h>
 #include <et/app/applicationnotifier.h>

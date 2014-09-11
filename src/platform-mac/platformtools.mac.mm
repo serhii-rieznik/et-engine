@@ -6,7 +6,7 @@
  */
 
 #include <AppKit/NSOpenPanel.h>
-#include <et/platform-apple/objc.h>
+#include <et/platform-apple/apple.h>
 #include <et/platform/platformtools.h>
 
 using namespace et;

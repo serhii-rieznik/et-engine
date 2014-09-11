@@ -9,7 +9,7 @@
 #include <Foundation/NSFileHandle.h>
 
 #include <et/core/et.h>
-#include <et/platform-apple/objc.h>
+#include <et/platform-apple/apple.h>
 
 #define PASS_TO_OUTPUTS(FUNC)		for (Output::Pointer output : logOutputs) \
 									{ \

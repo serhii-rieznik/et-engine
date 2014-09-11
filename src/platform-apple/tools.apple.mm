@@ -10,7 +10,7 @@
 #include <et/core/datastorage.h>
 #include <et/core/tools.h>
 #include <et/core/hardware.h>
-#include <et/platform-apple/objc.h>
+#include <et/platform-apple/apple.h>
 
 #if (ET_PLATFORM_MAC)
 #	include <Foundation/NSFileManager.h>
@@ -357,6 +357,12 @@ std::string et::applicationIdentifierForCurrentProject()
 	
 	return (bundleId == nil) ? kDefaultBundleId :
 		std::string(CFStringGetCStringPtr(bundleId, kCFStringEncodingMacRoman));
+}
+
+std::string et::bundleVersion()
+{
+	NSString* versionString = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleShortVersionString"];
+	return versionString == nil ? std::string() : std::string([versionString UTF8String]);
 }
 
 et::vec2i et::nativeScreenSize()

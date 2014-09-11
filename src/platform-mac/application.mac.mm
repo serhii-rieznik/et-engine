@@ -9,7 +9,7 @@
 #include <AppKit/NSMenu.h>
 #include <AppKit/NSWindow.h>
 
-#include <et/platform-apple/objc.h>
+#include <et/platform-apple/apple.h>
 #include <et/app/applicationnotifier.h>
 
 using namespace et;

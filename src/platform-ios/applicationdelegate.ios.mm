@@ -19,7 +19,7 @@
 #include <et/app/applicationnotifier.h>
 #include <et/threading/threading.h>
 #include <et/threading/mutex.h>
-#include <et/platform-apple/objc.h>
+#include <et/platform-apple/apple.h>
 #include <et/platform-ios/applicationdelegate.h>
 #include <et/platform-ios/openglviewcontroller.h>
 
