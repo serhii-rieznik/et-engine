@@ -5,10 +5,12 @@
  *
  */
 
+#include <et/app/application.h>
+
+#if (ET_PLATFORM_IOS)
+
 #import <UIKit/UIKit.h>
 #import <Social/Social.h>
-
-#include <et/app/application.h>
 #include <et/platform-apple/objc.h>
 #include <et/platform-ios/social.h>
 
@@ -117,3 +119,5 @@ void et::social::postToFacebook(const std::string& text, const std::string& path
 
 
 @end
+
+#endif // ET_PLATFORM_IOS

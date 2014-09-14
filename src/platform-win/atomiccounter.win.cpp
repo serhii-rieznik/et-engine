@@ -1,12 +1,15 @@
 /*
  * This file is part of `et engine`
- * Copyright 2009-2013 by Sergey Reznik
+ * Copyright 2009-2014 by Sergey Reznik
  * Please, do not modify content without approval.
  *
  */
 
-#include <Windows.h>
 #include <et/core/et.h>
+
+#if (ET_PLATFORM_WIN)
+
+#include <Windows.h>
 
 using namespace et;
 
@@ -85,3 +88,5 @@ AtomicBool::operator bool() const
 	ET_ASSERT((_value & validMask) == 0); 
 	return (_value != 0);
 }
+
+#endif // ET_PLATFORM_WIN

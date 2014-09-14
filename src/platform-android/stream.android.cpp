@@ -1,19 +1,21 @@
 /*
 * This file is part of `et engine`
-* Copyright 2009-2013 by Sergey Reznik
+* Copyright 2009-2014 by Sergey Reznik
 * Please, do not modify content without approval.
 *
 */
+
+#include <et/core/et.h>
+#include <et/core/stream.h>
+#include <et/core/containers.h>
+
+#if (ET_PLATFORM_ANDROID)
 
 #include <sstream>
 #include <fstream>
 #include <unistd.h>
 #include <sys/stat.h>
 #include <libzip/zip.h>
-
-#include <et/core/et.h>
-#include <et/core/stream.h>
-#include <et/core/containers.h>
 
 namespace et
 {
@@ -136,3 +138,5 @@ std::istream& InputStream::stream()
 	
 	return *_private->stream;
 }
+
+#endif // ET_PLATFORM_ANDROID

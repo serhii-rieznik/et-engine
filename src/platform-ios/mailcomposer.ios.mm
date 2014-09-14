@@ -5,8 +5,11 @@
  *
  */
 
-#include <MessageUI/MessageUI.h>
 #include <et/app/application.h>
+
+#if (ET_PLATFORM_IOS)
+
+#include <MessageUI/MessageUI.h>
 #include <et/platform-apple/objc.h>
 #include <et/platform-ios/mailcomposer.h>
 
@@ -148,3 +151,5 @@ bool MailComposer::canSendEmail()
 {
 	return [MFMailComposeViewController canSendMail];
 }
+
+#endif // ET_PLATFORM_IOS

@@ -1,6 +1,16 @@
-#include <CoreLocation/CoreLocation.h>
+/*
+ * This file is part of `et engine`
+ * Copyright 2009-2014 by Sergey Reznik
+ * Please, do not modify content without approval.
+ *
+ */
 
 #include <et/sensor/location.h>
+
+#if (ET_PLATFORM_IOS)
+
+#include <CoreLocation/CoreLocation.h>
+#include <et/platform-apple/apple.h>
 
 @interface LocationManagerProxy : NSObject<CLLocationManagerDelegate>
 {
@@ -30,15 +40,19 @@ namespace et
         
         ~LocationManagerPrivate()
         {
-            [_proxy release];
+			ET_OBJC_RELEASE(_proxy);
         }
         
 		void setEnabled(bool e)
 		{
 			if (enabled == e) return;
+			
 			enabled = e;
-            
-            [_proxy.man performSelector:(enabled ? @selector(startUpdatingLocation) : @selector(stopUpdatingLocation))];
+			
+			if (enabled)
+				[_proxy.man startUpdatingLocation];
+			else
+				[_proxy.man stopUpdatingLocation];
 		}
 
 	public:
@@ -72,8 +86,11 @@ using namespace et;
 
 - (void)dealloc
 {
-    [_man release];
+	ET_OBJC_RELEASE(_man);
+	
+#if (!ET_OBJC_ARC_ENABLED)
     [super dealloc];
+#endif
 }
 
 - (void)locationManager:(CLLocationManager *)manager didUpdateToLocation:(CLLocation *)newLocation fromLocation:(CLLocation *)oldLocation
@@ -113,3 +130,5 @@ bool LocationManager::enabled() const
 {
 	return _private->enabled;
 }
+
+#endif // ET_PLATFORM_IOS

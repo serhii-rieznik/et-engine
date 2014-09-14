@@ -1,16 +1,18 @@
 /*
  * This file is part of `et engine`
- * Copyright 2009-2013 by Sergey Reznik
+ * Copyright 2009-2014 by Sergey Reznik
  * Please, do not modify content without approval.
  *
  */
 
+#include <et/platform-apple/apple.h>
+#include <et/app/applicationnotifier.h>
+
+#if (ET_PLATFORM_MAC)
+
 #include <AppKit/NSApplication.h>
 #include <AppKit/NSMenu.h>
 #include <AppKit/NSWindow.h>
-
-#include <et/platform-apple/apple.h>
-#include <et/app/applicationnotifier.h>
 
 using namespace et;
 
@@ -52,6 +54,8 @@ void Application::loaded()
 	NSMenu* applicationMenu = [[NSMenu allocWithZone:[NSMenu menuZone]] init];
 	[applicationMenu addItem:quitItem];
 	[applicationMenuItem setSubmenu:applicationMenu];
+	
+	[[NSApplication sharedApplication] setActivationPolicy:NSApplicationActivationPolicyRegular];
 	
 	(void)ET_OBJC_AUTORELEASE(mainMenu);
 	(void)ET_OBJC_AUTORELEASE(applicationMenuItem);
@@ -172,3 +176,5 @@ void Application::requestUserAttention()
 }
 
 @end
+
+#endif // ET_PLATFORM_MAC

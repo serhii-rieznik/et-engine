@@ -5,11 +5,14 @@
  *
  */
 
-#include <et/platform-android/nativeactivity.h>
 #include <et/geometry/geometry.h>
 #include <et/input/input.h>
 #include <et/app/application.h>
 #include <et/app/applicationnotifier.h>
+
+#if (ET_PLATFORM_ANDROID)
+
+#include <et/platform-android/nativeactivity.h>
 
 /**
  *
@@ -331,3 +334,5 @@ void Application::platformResume()
 {
 	log::info("Application::platformResume()");
 }
+
+#endif // ET_PLATFORM_ANDROID

@@ -1,5 +1,16 @@
-#include <CoreMotion/CoreMotion.h>
+/*
+ * This file is part of `et engine`
+ * Copyright 2009-2012 by Sergey Reznik
+ * Please, do not modify contents without approval.
+ *
+ */
+
 #include <et/sensor/orientation.h>
+
+#if (ET_PLATFORM_IOS)
+
+#include <CoreMotion/CoreMotion.h>
+#include <et/platform-apple/apple.h>
 
 namespace et
 {
@@ -32,8 +43,8 @@ namespace et
 		
 		~OrientationManagerPrivate()
 		{
-			[_motionManager release];
-			[_oq release];
+			ET_OBJC_RELEASE(_motionManager);
+			ET_OBJC_RELEASE(_oq);
 		}
 		
 		void update()
@@ -112,10 +123,10 @@ namespace et
 using namespace et;
 
 bool OrientationManager::accelerometerAvailable()
-	{ return [[[CMMotionManager alloc] init] autorelease].accelerometerAvailable; }
+	{ return ET_OBJC_AUTORELEASE([[CMMotionManager alloc] init]).accelerometerAvailable; }
 
 bool OrientationManager::gyroscopeAvailable()
-	{ return [[[CMMotionManager alloc] init] autorelease].gyroAvailable; }
+	{ return ET_OBJC_AUTORELEASE([[CMMotionManager alloc] init]).gyroAvailable; }
 
 OrientationManager::OrientationManager() : _private(new OrientationManagerPrivate)
 	{ _private->manager = this; }
@@ -134,3 +145,5 @@ void OrientationManager::setGyroscopeEnabled(bool e)
 
 bool OrientationManager::gyroscopeEnabled() const
 	{ return _private->gyroEnabled; }
+
+#endif // ET_PLATFORM_IOS

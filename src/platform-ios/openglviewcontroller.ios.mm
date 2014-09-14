@@ -1,13 +1,16 @@
 /*
  * This file is part of `et engine`
- * Copyright 2009-2013 by Sergey Reznik
+ * Copyright 2009-2014 by Sergey Reznik
  * Please, do not modify content without approval.
  *
  */
 
+#import <et/app/applicationnotifier.h>
+
+#if (ET_PLATFORM_IOS)
+
 #import <QuartzCore/QuartzCore.h>
 #import <et/platform-ios/openglviewcontroller.h>
-#import <et/app/applicationnotifier.h>
 
 using namespace et;
 
@@ -235,3 +238,5 @@ extern NSString* etKeyboardNotRequiredNotification;
 }
 
 @end
+
+#endif // ET_PLATFORM_IOS

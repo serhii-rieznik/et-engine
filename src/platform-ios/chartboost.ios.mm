@@ -7,6 +7,9 @@
 
 #include <et/app/application.h>
 #include <et/app/applicationnotifier.h>
+
+#if (ET_HAVE_CHARTBOOST)
+
 #include <chartboost.h>
 #include "chartboost.ios.h"
 
@@ -174,3 +177,7 @@ void ChartBoostProxy::showMoreGames()
 }
 
 @end
+
+#else 
+#	warning define ET_HAVE_CHARTBOOST to compile Chartboost
+#endif // ET_HAVE_CHARTBOOST

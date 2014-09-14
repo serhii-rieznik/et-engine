@@ -1,9 +1,12 @@
-#include <Windows.h>
 #include <et/geometry/rectplacer.h>
 #include <et/gui/charactergenerator.h>
 #include <et/rendering/rendercontext.h>
 #include <et/imaging/imagewriter.h>
 #include <et/timers/intervaltimer.h>
+
+#if (ET_PLATFORM_WIN)
+
+#include <Windows.h>
 
 using namespace et;
 using namespace et::gui;
@@ -175,3 +178,5 @@ void CharacterGeneratorPrivate::renderCharacter(int value, bool bold, const vec2
 	DeleteObject(bitmap);
 	DeleteDC(dc);
 }
+
+#endif // PLATFORM_WIN

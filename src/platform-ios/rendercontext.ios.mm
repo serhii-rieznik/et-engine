@@ -1,6 +1,6 @@
 /*
  * This file is part of `et engine`
- * Copyright 2009-2013 by Sergey Reznik
+ * Copyright 2009-2014 by Sergey Reznik
  * Please, do not modify content without approval.
  *
  */
@@ -10,6 +10,9 @@
 #include <et/app/application.h>
 #include <et/rendering/renderer.h>
 #include <et/opengl/openglcaps.h>
+
+#if (ET_PLATFORM_IOS)
+
 #include <et/platform-ios/openglviewcontroller.h>
 
 using namespace et;
@@ -98,3 +101,5 @@ RenderContextPrivate::RenderContextPrivate(const RenderContextParameters& params
 	sharedOpenGLViewController = [[etOpenGLViewController alloc] initWithParameters:params];
 #endif
 }
+
+#endif // ET_PLATFORM_IOS

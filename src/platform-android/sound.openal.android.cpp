@@ -5,10 +5,13 @@
  *
  */
 
+#include <et/sound/sound.h>
+
+#if (ET_PLATFORM_ANDROID)
+
 #include <oal/al.h>
 #include <oal/alc.h>
 #include <et/platform-android/nativeactivity.h>
-#include <et/sound/sound.h>
 
 using namespace et;
 using namespace audio;
@@ -37,3 +40,5 @@ void Manager::nativeRelease()
 void Manager::nativePostRelease()
 {
 }
+
+#endif // ET_PLATFORM_ANDROID

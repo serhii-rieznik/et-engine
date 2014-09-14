@@ -5,18 +5,15 @@
  *
  */
 
+#if (ET_PLATFORM_IOS)
+
 #include <UIKit/UIPrintInteractionController.h>
 #include <et/platform-ios/printer.h>
 
 using namespace et;
 
-Printer::Printer() : _private(nullptr)
-{
-}
-
-Printer::~Printer()
-{
-}
+Printer::Printer() :
+	_private(nullptr) { }
 
 void Printer::printImageFromFile(const std::string& s)
 {
@@ -24,3 +21,5 @@ void Printer::printImageFromFile(const std::string& s)
 	[[UIPrintInteractionController sharedPrintController] setPrintingItem:image];
 	[[UIPrintInteractionController sharedPrintController] presentAnimated:YES completionHandler:nil];
 }
+
+#endif // ET_PLATFORM_IOS

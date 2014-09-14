@@ -6,6 +6,9 @@
  */
 
 #include <et/core/et.h>
+
+#if (ET_PLATFORM_ANDROID)
+
 #include <et/platform-android/nativeactivity.h>
 
 using namespace et;
@@ -31,3 +34,5 @@ void et::detachFromThread()
 {
 	et::sharedAndroidApplication()->activity->vm->DetachCurrentThread();
 }
+
+#endif // ET_PLATFORM_ANDROID

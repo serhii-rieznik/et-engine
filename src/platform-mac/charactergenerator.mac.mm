@@ -1,8 +1,11 @@
+#include <et/rendering/rendercontext.h>
+
+#if (ET_PLATFORM_MAC)
+
 #include <AppKit/AppKit.h>
 #include <et/platform-apple/objc.h>
 #include <et/geometry/rectplacer.h>
 #include <et/gui/charactergenerator.h>
-#include <et/rendering/rendercontext.h>
 #include <et/imaging/imagewriter.h>
 
 using namespace et;
@@ -203,3 +206,5 @@ void CharacterGeneratorPrivate::renderCharacter(NSAttributedString* value,
 	while (ptr != endPtr)
 		*ptr++ |= 0x00FFFFFF;
 }
+
+#endif // ET_PLATFORM_MAC

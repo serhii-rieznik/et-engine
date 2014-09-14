@@ -1,9 +1,16 @@
 /*
  * This file is part of `et engine`
- * Copyright 2009-2013 by Sergey Reznik
+ * Copyright 2009-2014 by Sergey Reznik
  * Please, do not modify content without approval.
  *
  */
+
+#include <et/app/application.h>
+#include <et/app/applicationnotifier.h>
+#include <et/threading/threading.h>
+#include <et/threading/mutex.h>
+
+#if (ET_PLATFORM_IOS)
 
 #include <QuartzCore/QuartzCore.h>
 
@@ -15,10 +22,6 @@
 #	include <GooglePlus/GooglePlus.h>
 #endif
 
-#include <et/app/application.h>
-#include <et/app/applicationnotifier.h>
-#include <et/threading/threading.h>
-#include <et/threading/mutex.h>
 #include <et/platform-apple/apple.h>
 #include <et/platform-ios/applicationdelegate.h>
 #include <et/platform-ios/openglviewcontroller.h>
@@ -251,3 +254,5 @@ extern etOpenGLViewController* sharedOpenGLViewController;
 
 
 @end
+
+#endif // ET_PLATFORM_IOS

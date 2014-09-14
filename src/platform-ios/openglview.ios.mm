@@ -1,16 +1,18 @@
 /*
  * This file is part of `et engine`
- * Copyright 2009-2013 by Sergey Reznik
+ * Copyright 2009-2014 by Sergey Reznik
  * Please, do not modify content without approval.
  *
  */
 
-#import <QuartzCore/QuartzCore.h>
-
 #include <et/opengl/openglcaps.h>
-#include <et/platform-ios/openglview.h>
 #include <et/rendering/rendercontext.h>
 #include <et/app/applicationnotifier.h>
+
+#if (ET_PLATFORM_IOS)
+
+#include <QuartzCore/QuartzCore.h>
+#include <et/platform-ios/openglview.h>
 
 extern NSString* etKeyboardRequiredNotification;
 extern NSString* etKeyboardNotRequiredNotification;
@@ -346,3 +348,5 @@ using namespace et;
 }
 
 @end
+
+#endif // ET_PLATFORM_IOS

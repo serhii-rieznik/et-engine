@@ -7,10 +7,6 @@
 
 #pragma once
 
-#include <et/platform-ios/iap.h>
-#include <et/platform-ios/imagepicker.h>
-#include <et/platform-ios/mailcomposer.h>
-
 namespace et
 {
 	namespace mac

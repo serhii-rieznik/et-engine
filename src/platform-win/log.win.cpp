@@ -1,11 +1,13 @@
 /*
  * This file is part of `et engine`
- * Copyright 2009-2013 by Sergey Reznik
+ * Copyright 2009-2014 by Sergey Reznik
  * Please, do not modify content without approval.
  *
  */
 
 #include <et/core/et.h>
+
+#if (ET_PLATFORM_WIN)
 
 #define PASS_TO_OUTPUTS(FUNC)		for (Output::Pointer output : logOutputs) \
 									{ \
@@ -114,3 +116,5 @@ void FileOutput::error(const char* format, va_list args)
 	fprintf(_file, "ERROR: ");
 	info(format, args);
 }
+
+#endif // ET_PLATFORM_WIN

@@ -1,9 +1,13 @@
 /*
  * This file is part of `et engine`
- * Copyright 2009-2013 by Sergey Reznik
+ * Copyright 2009-2014 by Sergey Reznik
  * Please, do not modify content without approval.
  *
  */
+
+#include <et/rendering/rendercontext.h>
+
+#if (ET_PLATFORM_MAC)
 
 #include <AppKit/NSWindow.h>
 #include <AppKit/NSWindowController.h>
@@ -20,7 +24,6 @@
 #include <et/input/input.h>
 #include <et/app/applicationnotifier.h>
 #include <et/threading/threading.h>
-#include <et/rendering/rendercontext.h>
 
 using namespace et;
 
@@ -613,3 +616,5 @@ CVReturn cvDisplayLinkOutputCallback(CVDisplayLinkRef, const CVTimeStamp*, const
 }
 
 @end
+
+#endif // ET_PLATFORM_MAC

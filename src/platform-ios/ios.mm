@@ -5,6 +5,12 @@
  *
  */
 
+#include <et/app/application.h>
+#include <et/app/applicationnotifier.h>
+#include <et/platform/platformtools.h>
+
+#if (ET_PLATFORM_IOS)
+
 #import <UIKit/UIDevice.h>
 #import <UIKit/UIView.h>
 #import <UIKit/UIWindow.h>
@@ -15,9 +21,6 @@
 #include <functional>
 #include <sys/xattr.h>
 #include <sys/utsname.h>
-#include <et/app/application.h>
-#include <et/app/applicationnotifier.h>
-#include <et/platform/platformtools.h>
 #include <et/platform-ios/ios.h>
 
 @interface InteractorControllerHandler : NSObject <UIDocumentInteractionControllerDelegate>
@@ -205,3 +208,5 @@ bool et::ios::runningOnIPad()
 }
 
 @end
+
+#endif // ET_PLATFORM_IOS

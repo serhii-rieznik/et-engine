@@ -5,13 +5,16 @@
  *
  */
 
+#include <et/sound/sound.h>
+
+#if (ET_PLATFORM_IOS)
+
 #import <OpenAL/al.h>
 #import <OpenAL/alc.h>
 #import <AVFoundation/AVFoundation.h>
 #import <MediaPlayer/MPMusicPlayerController.h>
 
 #include <et/platform-ios/ios.h>
-#include <et/sound/sound.h>
 
 using namespace et;
 using namespace audio;
@@ -104,3 +107,5 @@ bool et::ios::musicIsPlaying()
 		return false;
 	return ([[MPMusicPlayerController iPodMusicPlayer] playbackState] == MPMusicPlaybackStatePlaying);
 }
+
+#endif // ET_PLATFORM_IOS

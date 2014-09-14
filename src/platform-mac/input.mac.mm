@@ -1,16 +1,18 @@
 /*
  * This file is part of `et engine`
- * Copyright 2009-2013 by Sergey Reznik
+ * Copyright 2009-2014 by Sergey Reznik
  * Please, do not modify content without approval.
  *
  */
 
+#include <et/core/tools.h>
+#include <et/input/input.h>
+
+#if (ET_PLATFORM_MAC)
+
 #include <AppKit/NSApplication.h>
 #include <AppKit/NSWindow.h>
 #include <AppKit/NSView.h>
-
-#include <et/core/tools.h>
-#include <et/input/input.h>
 
 using namespace et;
 
@@ -48,3 +50,5 @@ void Input::activateSoftwareKeyboard()
 void Input::deactivateSoftwareKeyboard()
 {
 }
+
+#endif // ET_PLATFORM_MAC

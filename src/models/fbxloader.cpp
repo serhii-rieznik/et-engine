@@ -5,6 +5,8 @@
  *
  */
 
+#if defined(ET_HAVE_FBX_SDK)
+
 #include <fbxsdk.h>
 
 #include <et/app/application.h>
@@ -925,3 +927,8 @@ s3d::ElementContainer::Pointer FBXLoader::load(RenderContext* rc, ObjectsCache& 
 	mainRunLoop().addTask(new DeletionTask<FBXLoaderPrivate>(loader), 0.0f);
 	return result;
 }
+
+#else // ET_HAVE_FBX_SDK
+#	warning Define ET_HAVE_FBX_SDK to compile FBXLoader
+#endif
+

@@ -5,9 +5,11 @@
  *
  */
 
-#include <cocos2d.h>
-
 #include <et/app/applicationnotifier.h>
+
+#if defined(ET_HAVE_COCOS)
+
+#include <cocos2d.h>
 #include <et/platform-ios/embeddedapplication.h>
 
 using namespace et;
@@ -125,3 +127,7 @@ static etApplication* _sharedInstance = nil;
 }
 
 @end
+
+#else
+#	warning define ET_HAVE_COCOS to compile Cocos platform
+#endif // ET_HAVE_COCOS

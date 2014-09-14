@@ -7,6 +7,8 @@
 
 #include <et/input/input.h>
 
+#if (ET_PLATFORM_ANDROID)
+
 using namespace et;
 
 namespace et
@@ -32,3 +34,5 @@ void Input::activateSoftwareKeyboard()
 void Input::deactivateSoftwareKeyboard()
 {
 }
+
+#endif // ET_PLATFORM_ANDROID

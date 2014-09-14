@@ -5,11 +5,15 @@
  *
  */
 
+#include <et/core/et.h>
+
+#if (ET_PLATFORM_MAC)
+
+#include <et/platform-mac/mac.h>
 #include <Foundation/NSString.h>
 #include <Foundation/NSURL.h>
 #include <Foundation/NSBundle.h>
 #include <AppKit/NSWorkspace.h>
-#include <et/platform-mac/mac.h>
 
 using namespace et;
 
@@ -24,3 +28,5 @@ std::string et::mac::bundleVersion()
 	NSString* versionString = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleShortVersionString"];
 	return versionString == nil ? std::string() : std::string([versionString UTF8String]);
 }
+
+#endif // ET_PLATFORM_MAC

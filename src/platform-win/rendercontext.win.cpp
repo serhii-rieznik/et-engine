@@ -1,12 +1,9 @@
 /*
  * This file is part of `et engine`
- * Copyright 2009-2013 by Sergey Reznik
+ * Copyright 2009-2014 by Sergey Reznik
  * Please, do not modify content without approval.
  *
  */
-
-#include <Windows.h>
-#include <WinUser.h>
 
 #include <et/opengl/opengl.h>
 #include <et/opengl/openglcaps.h>
@@ -16,6 +13,11 @@
 #include <et/rendering/renderer.h>
 #include <et/input/input.h>
 #include <et/core/cout.h>
+
+#if (ET_PLATFORM_WIN)
+
+#include <Windows.h>
+#include <WinUser.h>
 
 using namespace et;
 
@@ -762,3 +764,5 @@ LRESULT CALLBACK mainWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		return DefWindowProc(hWnd, uMsg, wParam, lParam); 
 	}
 }
+
+#endif // ET_PLATFORM_WIN

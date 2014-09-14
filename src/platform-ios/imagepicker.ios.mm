@@ -7,7 +7,14 @@
 
 #include <et/opengl/opengl.h>
 #include <et/app/application.h>
+
+#if (ET_PLATFORM_IOS)
+
+#include <UIKit/UIImage.h>
+#include <UIKit/UIImagePickerController.h>
+#include <UIKit/UIPopoverController.h>
 #include <et/platform-ios/imagepicker.h>
+#include <et/platform-apple/apple.h>
 
 @interface UIImagePickerWorkaround : UIImagePickerController
 
@@ -69,7 +76,7 @@ ImagePickerPrivate::ImagePickerPrivate()
 
 ImagePickerPrivate::~ImagePickerPrivate()
 {
-	[proxy release];
+	ET_OBJC_RELEASE(proxy)
 }
 
 void ImagePickerPrivate::pick(ImagePickerSource s)
@@ -105,13 +112,17 @@ void ImagePickerPrivate::pick(ImagePickerSource s)
 
 - (void)dealloc
 {
-	[_picker release];
+	ET_OBJC_RELEASE(_picker)
+	
+#if (!ET_OBJC_ARC_ENABLED)
 	[super dealloc];
+#endif
 }
 
 - (void)pick:(et::ImagePickerSource)source
 {
-	UIViewController* vc = reinterpret_cast<UIViewController*>(application().renderingContextHandle());
+	void* vcptr = reinterpret_cast<void*>(application().renderingContextHandle());
+	UIViewController* vc = (__bridge UIViewController*)vcptr;
 	
 	if (_picker == nil)
 	{
@@ -126,7 +137,7 @@ void ImagePickerPrivate::pick(ImagePickerSource s)
 	}
 	else if (source == ImagePickerSource_Camera)
 	{
-		assert(cameraAvailable);
+		ET_ASSERT(cameraAvailable);
 		_picker.sourceType = UIImagePickerControllerSourceTypeCamera;
 	}
 	else if (source == ImagePickerSource_PreferCamera)
@@ -136,12 +147,13 @@ void ImagePickerPrivate::pick(ImagePickerSource s)
 	}
 	else
 	{
-		assert(0 && "Unsupported ImagePickerSource value");
+		ET_FAIL_FMT("Unsupported ImagePickerSource value: %d", source);
 	}
 	
 	if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
 	{
-		[_popover release];
+		ET_OBJC_RELEASE(_popover)
+
 		_popover = [[UIPopoverController alloc] initWithContentViewController:_picker];
 		
 		CGRect frame = vc.view.bounds;
@@ -154,7 +166,7 @@ void ImagePickerPrivate::pick(ImagePickerSource s)
 	}
 	else
 	{
-		assert(0 && "Not implemented yet");
+		ET_FAIL("Not implemented yet");
 	}
 }
 
@@ -184,8 +196,8 @@ void ImagePickerPrivate::pick(ImagePickerSource s)
 		CGImageRef cgImage = [image CGImage];
 		
 		TextureDescription::Pointer result(new TextureDescription);
-		result->size.x = CGImageGetWidth(cgImage);
-		result->size.y = CGImageGetHeight(cgImage);
+		result->size.x = (int)CGImageGetWidth(cgImage);
+		result->size.y = (int)CGImageGetHeight(cgImage);
 		result->target = GL_TEXTURE_2D;
 		result->internalformat = GL_RGBA;
 		result->format = GL_RGBA;
@@ -221,11 +233,15 @@ void ImagePickerPrivate::pick(ImagePickerSource s)
 	if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
 	{
 		[_popover dismissPopoverAnimated:YES];
-		[_popover autorelease], _popover = nil;
+		
+#if (!ET_OBJC_ARC_ENABLED)
+		[_popover autorelease];
+#endif
+		_popover = nil;
 	}
 	else
 	{
-		assert(0 && "Not implemented yet");
+		ET_FAIL("Not implemented yet");
 	}
 }
 
@@ -234,11 +250,15 @@ void ImagePickerPrivate::pick(ImagePickerSource s)
 	if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
 	{
 		[_popover dismissPopoverAnimated:YES];
-		[_popover autorelease], _popover = nil;
+		
+#if (!ET_OBJC_ARC_ENABLED)
+		[_popover autorelease];
+#endif
+		_popover = nil;
 	}
 	else
 	{
-		assert(0 && "Not implemented yet");
+		ET_FAIL("Not implemented yet");
 	}
 }
 
@@ -246,20 +266,22 @@ void ImagePickerPrivate::pick(ImagePickerSource s)
 
 @implementation UIImagePickerWorkaround
 
-#if defined(__IPHONE_6_0)
-
 - (BOOL)shouldAutorotate
 {
-	UIViewController* vc = reinterpret_cast<UIViewController*>(application().renderingContextHandle());
+	void* vcptr = reinterpret_cast<void*>(application().renderingContextHandle());
+	UIViewController* vc = (__bridge UIViewController*)vcptr;
+	
 	return [vc shouldAutorotate];
 }
 
 - (NSUInteger)supportedInterfaceOrientations
 {
-	UIViewController* vc = reinterpret_cast<UIViewController*>(application().renderingContextHandle());
+	void* vcptr = reinterpret_cast<void*>(application().renderingContextHandle());
+	UIViewController* vc = (__bridge UIViewController*)vcptr;
+	
 	return [vc supportedInterfaceOrientations];
 }
 
-#endif
-
 @end
+
+#endif // ET_PLATFORM_IOS

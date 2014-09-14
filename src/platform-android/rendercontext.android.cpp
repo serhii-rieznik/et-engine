@@ -5,11 +5,13 @@
  *
  */
 
-#include <et/platform-android/nativeactivity.h>
-
 #include <et/app/application.h>
 #include <et/opengl/openglcaps.h>
 #include <et/rendering/rendercontext.h>
+
+#if (ET_PLATFORM_ANDROID)
+
+#include <et/platform-android/nativeactivity.h>
 
 using namespace et;
 
@@ -162,3 +164,5 @@ RenderContextPrivate::RenderContextPrivate(RenderContext* rc)
     eglQuerySurface(display, surface, EGL_WIDTH, &surfaceSize.x);
     eglQuerySurface(display, surface, EGL_HEIGHT, &surfaceSize.y);
 }
+
+#endif // ET_PLATFORM_ANDROID

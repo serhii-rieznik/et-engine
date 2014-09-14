@@ -1,13 +1,16 @@
 /*
  * This file is part of `et engine`
- * Copyright 2009-2013 by Sergey Reznik
+ * Copyright 2009-2014 by Sergey Reznik
  * Please, do not modify content without approval.
  *
  */
 
+#include <et/platform/platformtools.h>
+
+#if (ET_PLATFORM_WIN)
+
 #include <Windows.h>
 #include <CommDlg.h>
-#include <et/platform/platformtools.h>
 
 using namespace et;
 
@@ -30,3 +33,5 @@ std::string et::selectFile(const StringList&, SelectFileMode mode, const std::st
 	else 
 		return GetSaveFileName(&of) ? std::string(filename) : std::string();
 }
+
+#endif // ET_PLATFORM_WIN

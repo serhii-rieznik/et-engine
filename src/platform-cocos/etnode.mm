@@ -5,9 +5,12 @@
  *
  */
 
-#include <ccGLState.h>
-#include <et/platform-cocos/etnode.h>
 #include <et/app/applicationnotifier.h>
+
+#if defined(ET_HAVE_COCOS)
+
+#include <et/platform-cocos/etnode.h>
+#include <ccGLState.h>
 
 using namespace et;
 
@@ -55,3 +58,7 @@ using namespace et;
 }
 
 @end
+
+#else
+#	warning define ET_HAVE_COCOS to compile Cocos platform
+#endif // ET_HAVE_COCOS

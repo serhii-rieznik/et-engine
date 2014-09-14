@@ -3,6 +3,8 @@
 #include <et/gui/charactergenerator.h>
 #include <et/imaging/imagewriter.h>
 
+#if (ET_PLATFORM_ANDROID)
+
 using namespace et;
 using namespace et::gui;
 
@@ -38,3 +40,5 @@ CharDescriptor CharacterGenerator::generateBoldCharacter(int value, bool updateT
 	_boldChars[value] = desc;
 	return desc;
 }
+
+#endif // ET_PLATFORM_ANDROID

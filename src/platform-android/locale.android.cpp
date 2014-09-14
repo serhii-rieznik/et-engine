@@ -10,6 +10,8 @@
 #include <et/core/containers.h>
 #include <et/locale/locale.h>
 
+#if (ET_PLATFORM_ANDROID)
+
 using namespace et;
 
 std::string locale::time()
@@ -22,23 +24,9 @@ std::string locale::date()
 	return std::string();
 }
 
-size_t locale::currentLocale()
+std::string locale::currentLocale()
 {
-	std::string mbcs("en_US");
-	lowercase(mbcs);
-	
-	size_t result = 0;
-
-	if (mbcs.size() > 0)
-		result |= mbcs[0];
-	
-	if (mbcs.size() > 1)
-		result |= mbcs[1] << 8;
-	
-	if ((mbcs.size() >= 5) && ((mbcs[2] == '-') || (mbcs[2] == '_')))
-		result |= (mbcs[3] << 16) | (mbcs[4] << 24);
-	else
-		result |= (result & 0xffff) << 16;
-
-	return result;
+	return "en-US";
 }
+
+#endif // ET_PLATFORM_ANDROID

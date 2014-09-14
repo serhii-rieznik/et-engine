@@ -1,16 +1,19 @@
 /*
  * This file is part of `et engine`
- * Copyright 2009-2013 by Sergey Reznik
+ * Copyright 2009-2014 by Sergey Reznik
  * Please, do not modify content without approval.
  *
  */
 
-#include <Windows.h>
-#include <Shlobj.h>
-#include <ShellAPI.h>
 #include <et/core/tools.h>
 #include <et/core/filesystem.h>
 #include <et/core/containers.h>
+
+#if (ET_PLATFORM_WIN)
+
+#include <Windows.h>
+#include <Shlobj.h>
+#include <ShellAPI.h>
 
 static bool shouldInitializeTime = true;
 static uint64_t performanceFrequency = 0;
@@ -375,3 +378,5 @@ uint64_t et::getFileDate(const std::string& path)
 	return findData.ftLastWriteTime.dwLowDateTime || 
 		(static_cast<uint64_t>(findData.ftLastWriteTime.dwHighDateTime) << 32);
 }
+
+#endif // ET_PLATFORM_WIN

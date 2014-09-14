@@ -1,14 +1,17 @@
 /*
  * This file is part of `et engine`
- * Copyright 2009-2013 by Sergey Reznik
+ * Copyright 2009-2014 by Sergey Reznik
  * Please, do not modify content without approval.
  *
  */
 
-#include <Windows.h>
-#include <MMSystem.h>
 #include <et/rendering/rendercontext.h>
 #include <et/app/application.h>
+
+#if (ET_PLATFORM_WIN)
+
+#include <Windows.h>
+#include <MMSystem.h>
 
 using namespace et;
 
@@ -182,3 +185,5 @@ void Application::setTitle(const std::string& s)
 {
 	SendMessage(reinterpret_cast<HWND>(_renderingContextHandle), WM_SETTEXT, 0, reinterpret_cast<LPARAM>(s.c_str()));
 }
+
+#endif //ET_PLATFORM_WIN

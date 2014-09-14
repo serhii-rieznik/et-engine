@@ -5,14 +5,17 @@
  *
  */
 
+#include <et/core/tools.h>
+#include <et/core/datastorage.h>
+
+#if (ET_PLATFORM_ANDROID)
+
 #include <dirent.h>
 #include <errno.h>
 #include <unistd.h>
 #include <sys/time.h>
 #include <sys/stat.h>
 
-#include <et/core/tools.h>
-#include <et/core/datastorage.h>
 #include <et/platform-android/nativeactivity.h>
 
 using namespace std;
@@ -306,3 +309,5 @@ void et::getFolderContent(const std::string& path, std::vector<std::string>& aLi
 		closedir (dir);
 	}
 }
+
+#endif

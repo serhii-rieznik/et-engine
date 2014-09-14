@@ -1,12 +1,20 @@
-#include <UIKit/UIFont.h>
-#include <UIKit/UIStringDrawing.h>
-#include <UIKit/UIColor.h>
-#include <UIKit/UIGraphics.h>
-
+/*
+ * This file is part of `et engine`
+ * Copyright 2009-2014 by Sergey Reznik
+ * Please, do not modify content without approval.
+ *
+ */
 #include <et/rendering/rendercontext.h>
 #include <et/geometry/rectplacer.h>
 #include <et/gui/charactergenerator.h>
 #include <et/imaging/imagewriter.h>
+
+#if (ET_PLATFORM_IOS)
+
+#include <UIKit/UIFont.h>
+#include <UIKit/UIStringDrawing.h>
+#include <UIKit/UIColor.h>
+#include <UIKit/UIGraphics.h>
 
 using namespace et;
 using namespace et::gui;
@@ -195,3 +203,5 @@ void CharacterGeneratorPrivate::renderCharacter(NSString* value, const vec2i& si
 		*ptr++ |= 0x00FFFFFF;
 	}
 }
+
+#endif // ET_PLATFORM_IOS

@@ -5,10 +5,13 @@
  *
  */
 
+#include <et/sensor/videocapture.h>
+
+#if (ET_PLATFORM_IOS)
+
 #import <CoreVideo/CoreVideo.h>
 #import <AVFoundation/AVFoundation.h>
-
-#include <et/sensor/videocapture.h>
+#include <et/platform-apple/apple.h>
 
 @class VideoCaptureProxy;
 
@@ -165,18 +168,21 @@ VideoCapturePrivate::VideoCapturePrivate(VideoCapture* owner, VideoCaptureQualit
 VideoCapturePrivate::~VideoCapturePrivate()
 {
     stop();
-    
-	[_session release];
-	[_proxy release];
+	
+	ET_OBJC_RELEASE(_session)
+	ET_OBJC_RELEASE(_proxy)
 }
 
 void VideoCapturePrivate::handleSampleBuffer(CMSampleBufferRef sampleBuffer)
 {
 	CVImageBufferRef imageBuffer = CMSampleBufferGetImageBuffer(sampleBuffer);
-	assert(CVPixelBufferLockBaseAddress(imageBuffer, 0) == kCVReturnSuccess);
+	ET_ASSERT(CVPixelBufferLockBaseAddress(imageBuffer, 0) == kCVReturnSuccess);
 	
 	VideoFrameData data;
-	data.dimensions = vec2i(CVPixelBufferGetWidth(imageBuffer), CVPixelBufferGetHeight(imageBuffer));
+	
+	data.dimensions = vec2i(static_cast<int>(CVPixelBufferGetWidth(imageBuffer)),
+		static_cast<int>(CVPixelBufferGetHeight(imageBuffer)));
+	
 	data.data = static_cast<char*>(CVPixelBufferGetBaseAddress(imageBuffer));
 	data.dataSize = CVPixelBufferGetDataSize(imageBuffer);
 	data.rowSize = CVPixelBufferGetBytesPerRow(imageBuffer);
@@ -305,3 +311,5 @@ void VideoCapturePrivate::endConfiguration()
 	if (_configurationCounter == 0)
 		[_session commitConfiguration];
 }
+
+#endif // ET_PLATFORM_IOS

@@ -1,13 +1,16 @@
 /*
  * This file is part of `et engine`
- * Copyright 2009-2013 by Sergey Reznik
+ * Copyright 2009-2014 by Sergey Reznik
  * Please, do not modify content without approval.
  *
  */
 
+#include <et/threading/threading.h>
+
+#if (ET_PLATFORM_WIN)
+
 #include <Windows.h>
 #include <Pdh.h>
-#include <et/threading/threading.h>
 
 using namespace et;
 
@@ -63,3 +66,5 @@ float Threading::cpuUsage()
 
 	return static_cast<float>(dSys - dIdle) / static_cast<float>(dSys) * 100.0f;
 }
+
+#endif // ET_PLATFORM_WIN

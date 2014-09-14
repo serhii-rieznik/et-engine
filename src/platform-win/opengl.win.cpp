@@ -5,6 +5,10 @@
 *
 */
 
+#include <et/core/et.h>
+
+#if (ET_PLATFORM_WIN)
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -24280,3 +24284,5 @@ GLEE_EXTERN GLboolean GLeeInit(void)
 	__GLeeExtList_clean(&extensionNames);
 	return GL_TRUE;
 }
+
+#endif // ET_PLATFORM_WIN

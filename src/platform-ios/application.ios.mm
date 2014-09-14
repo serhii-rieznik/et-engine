@@ -1,11 +1,14 @@
  /*
  * This file is part of `et engine`
- * Copyright 2009-2013 by Sergey Reznik
+ * Copyright 2009-2014 by Sergey Reznik
  * Please, do not modify content without approval.
  *
  */
 
 #include <et/app/application.h>
+
+#if (ET_PLATFORM_IOS)
+
 #include <et/opengl/opengl.h>
 #include <et/platform-ios/applicationdelegate.h>
 #include <et/rendering/rendercontext.h>
@@ -140,7 +143,7 @@ void Application::alert(const std::string& title, const std::string& message, Al
 		cancelButtonTitle:@"Close" otherButtonTitles:nil];
 	
 	[alert show];
-	
+
 #if (!ET_OBJC_ARC_ENABLED)
 	[alert release];
 #endif
@@ -154,3 +157,5 @@ void Application::setTitle(const std::string&)
 void Application::requestUserAttention()
 {
 }
+
+#endif // ET_PLATFORM_IOS)

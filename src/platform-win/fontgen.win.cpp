@@ -1,16 +1,18 @@
 /*
  * This file is part of `et engine`
- * Copyright 2009-2013 by Sergey Reznik
+ * Copyright 2009-2014 by Sergey Reznik
  * Please, do not modify content without approval.
  *
  */
 
-#include <Windows.h>
-
-#include <fstream>
 #include <et/core/serialization.h>
 #include <et/core/tools.h>
 #include <et/gui/fontgen.h>
+
+#if (ET_PLATFORM_WIN)
+
+#include <fstream>
+#include <Windows.h>
 
 using namespace et;
 using namespace et::gui;
@@ -227,3 +229,5 @@ void FontGenerator::setOutputFile(const std::string& fileName)
 	_outFile = fileName;
 	_outFileSet = true;
 }
+
+#endif // ET_PLATFORM_WIN

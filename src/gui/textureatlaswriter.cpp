@@ -1,6 +1,6 @@
 /*
  * This file is part of `et engine`
- * Copyright 2009-2013 by Sergey Reznik
+ * Copyright 2009-2014 by Sergey Reznik
  * Please, do not modify content without approval.
  *
  */
@@ -14,7 +14,6 @@
 #include <et/imaging/pngloader.h>
 #include <et/imaging/imageoperations.h>
 #include <et/gui/textureatlaswriter.h>
-#include <et-ext/json/json.h>
 
 using namespace et;
 using namespace et::gui;
@@ -242,9 +241,7 @@ void TextureAtlasWriter::writeToFile(const std::string& fileName, const char* te
 	Dictionary output;
 	output.setArrayForKey("textures", textures);
 	output.setArrayForKey("images", images);
+	output.printContent();
 	
-	std::ofstream outFile(fileName.c_str());
-	outFile << json::serialize(output, true);
-	outFile.flush();
-	outFile.close();
+	ET_FAIL("Serialization method not implemented")
 }
