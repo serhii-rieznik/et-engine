@@ -303,8 +303,10 @@ RenderContextPrivate::RenderContextPrivate(RenderContext*, RenderContextParamete
 	etOpenGLView* openGlView = [[etOpenGLView alloc] init];
 	[openGlView setWantsBestResolutionOpenGLSurface:YES];
 	openGlView->rcPrivate = this;
+
+	if (appParams.windowStyle & WindowStyle_Sizable)
+		[mainWindow setCollectionBehavior:NSWindowCollectionBehaviorFullScreenPrimary];
 	
-	[mainWindow setCollectionBehavior:NSWindowCollectionBehaviorFullScreenPrimary];
 	[mainWindow setDelegate:windowDelegate];
 	[mainWindow setOpaque:YES];
 	[mainWindow setContentView:openGlView];
