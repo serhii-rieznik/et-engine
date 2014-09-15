@@ -379,4 +379,29 @@ uint64_t et::getFileDate(const std::string& path)
 		(static_cast<uint64_t>(findData.ftLastWriteTime.dwHighDateTime) << 32);
 }
 
+std::vector<et::Screen> et::availableScreens()
+{
+	std::vector<et::Screen> result;
+	
+	EnumDisplayMonitors(nullptr, nullptr, [](HMONITOR hMonitor, HDC hdcMonitor, LPRECT lprcMonitor, LPARAM dwData) -> BOOL
+	{
+		MONITORINFO info = { sizeof(MONITORINFO) };
+
+		GetMonitorInfo(hMonitor,  &info);
+
+		recti screenRect(info.rcMonitor.left, info.rcMonitor.top, info.rcMonitor.right - info.rcMonitor.left,
+			info.rcMonitor.bottom - info.rcMonitor.top);
+
+		recti workarea(info.rcWork.left, info.rcWork.top, info.rcWork.right - info.rcWork.left,
+			info.rcWork.bottom - info.rcWork.top);
+
+		std::vector<et::Screen>* r = reinterpret_cast<std::vector<et::Screen>*>(dwData);
+		r->emplace_back(screenRect, workarea, 1);
+		return 1;
+	}, 
+	reinterpret_cast<LPARAM>(&result));
+
+	return result;
+}
+
 #endif // ET_PLATFORM_WIN

@@ -249,6 +249,11 @@ void Application::pushSearchPath(const std::string& path)
 	_standardPathResolver.pushSearchPath(path);
 }
 
+void Application::pushRelativeSearchPath(const std::string& path)
+{
+	_standardPathResolver.pushRelativeSearchPath(path);
+}
+
 void Application::pushSearchPaths(const std::set<std::string>& paths)
 {
 	_standardPathResolver.pushSearchPaths(paths);

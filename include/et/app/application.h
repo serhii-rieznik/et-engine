@@ -79,6 +79,7 @@ namespace et
 		std::set<std::string> resolveFolderNames(const std::string&);
 		
 		void pushSearchPath(const std::string&);
+		void pushRelativeSearchPath(const std::string&);
 		void pushSearchPaths(const std::set<std::string>&);
 		void popSearchPaths(size_t = 1);
 		void setShouldSilentPathResolverErrors(bool);

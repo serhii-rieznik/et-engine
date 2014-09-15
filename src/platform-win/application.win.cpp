@@ -13,6 +13,13 @@
 #include <Windows.h>
 #include <MMSystem.h>
 
+#if defined(min)
+#	undef min
+#endif
+#if defined(max)
+#	undef max
+#endif
+
 using namespace et;
 
 #if defined(_MSC_VER)
@@ -184,6 +191,16 @@ void Application::alert(const std::string& title, const std::string& message, Al
 void Application::setTitle(const std::string& s)
 {
 	SendMessage(reinterpret_cast<HWND>(_renderingContextHandle), WM_SETTEXT, 0, reinterpret_cast<LPARAM>(s.c_str()));
+}
+
+void Application::requestUserAttention()
+{
+	FLASHWINFO fi = { };
+	fi.cbSize = sizeof(fi);
+	fi.dwFlags = FLASHW_ALL | FLASHW_TIMERNOFG;
+	fi.hwnd = reinterpret_cast<HWND>(application().renderingContextHandle());
+	fi.uCount = std::numeric_limits<UINT>::max();
+	FlashWindowEx(&fi);
 }
 
 #endif //ET_PLATFORM_WIN
