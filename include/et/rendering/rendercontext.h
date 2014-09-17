@@ -125,6 +125,7 @@ namespace et
 		
 		size_t _screenScaleFactor = 1;
 		size_t _maxScreenScaleFactor = 2;
+		bool _screenScaleFactorSet = false;
 	};
 
 }

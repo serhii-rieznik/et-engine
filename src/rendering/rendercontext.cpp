@@ -39,6 +39,8 @@ void RenderContext::resized(const vec2i& sz)
 
 void RenderContext::updateScreenScale(const vec2i& screenSize)
 {
+	if (_screenScaleFactorSet && _params.lockScreenScaleToInitial) return;
+	
 	int maxDimension = etMax(screenSize.x, screenSize.y);
 	int maxBaseSize = etMax(_params.contextBaseSize.x, _params.contextBaseSize.y);
 	
@@ -46,5 +48,7 @@ void RenderContext::updateScreenScale(const vec2i& screenSize)
 	if (newScale == _screenScaleFactor) return;
 	
 	_screenScaleFactor = etMin(_maxScreenScaleFactor, newScale);
+	_screenScaleFactorSet = true;
+	
 	screenScaleFactorChanged.invoke(_screenScaleFactor);
 }

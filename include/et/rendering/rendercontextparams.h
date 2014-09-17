@@ -50,6 +50,7 @@ namespace et
 		bool openGLForwardContext = true;
 		bool multipleTouch = true;
 		bool bindDefaultFramebufferEachFrame = true;
+		bool lockScreenScaleToInitial = true;
 
 		size_t swapInterval = 1;
         size_t supportedInterfaceOrientations = InterfaceOrientation_Any;
