@@ -19,6 +19,7 @@ namespace et
 		BlendState_AlphaPremultiplied,
 		BlendState_Additive,
 		BlendState_AlphaAdditive,
+		BlendState_AlphaMultiplicative,
 		BlendState_ColorAdditive
 	};
 	

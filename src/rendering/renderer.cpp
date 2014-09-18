@@ -110,16 +110,16 @@ void Renderer::renderTexture(const Texture& texture, const vec2& position, const
 	fullscreenPass();
 }
 
-vec2 Renderer::windowCoordinatesToScene(const vec2i& coord)
+vec2 Renderer::currentViewportCoordinatesToScene(const vec2i& coord)
 {
-	const vec2& vpSize = _rc->size();
+	const vec2& vpSize = vector2ToFloat(_rc->renderState().viewportSize());
 	return vec2(2.0f * static_cast<float>(coord.x) / vpSize.x - 1.0f,
 		1.0f - 2.0f * static_cast<float>(coord.y) / vpSize.y );
 }
 
-vec2 Renderer::windowSizeToScene(const vec2i& size)
+vec2 Renderer::currentViewportSizeToScene(const vec2i& size)
 {
-	const vec2& vpSize = _rc->size();
+	const vec2& vpSize = vector2ToFloat(_rc->renderState().viewportSize());
 	return vec2(2.0f * static_cast<float>(size.x) / vpSize.x, 2.0f * static_cast<float>(size.y) / vpSize.y);
 }
 
@@ -130,7 +130,7 @@ void Renderer::renderTexture(const Texture& texture, const vec2i& position, cons
 	vec2i sz;
 	sz.x = (size.x == -1) ? texture->width() : size.x;
 	sz.y = (size.y == -1) ? texture->height() : size.y;
-	renderTexture(texture, windowCoordinatesToScene(position + vec2i(0, sz.y)), windowSizeToScene(sz));
+	renderTexture(texture, currentViewportCoordinatesToScene(position + vec2i(0, sz.y)), currentViewportSizeToScene(sz));
 }
 
 void Renderer::drawElements(const IndexBuffer& ib, size_t first, size_t count)

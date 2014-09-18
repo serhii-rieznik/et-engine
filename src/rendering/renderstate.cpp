@@ -392,6 +392,12 @@ void RenderState::setBlend(bool enable, BlendState blend)
 				break;
 			}
 				
+		case BlendState_AlphaMultiplicative:
+			{
+				glBlendFunc(GL_ZERO, GL_SRC_ALPHA);
+				break;
+			}
+				
 		case BlendState_AlphaPremultiplied:
 			{
 				glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
