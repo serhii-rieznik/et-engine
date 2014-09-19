@@ -96,10 +96,11 @@ RenderContext::RenderContext(const RenderContextParameters& inParams, Applicatio
 	_private = new RenderContextPrivate(this, _params, app->parameters());
 	
 	openGLCapabilites().checkCaps();
-	updateScreenScale(_params.contextSize);
 	
 	_renderState.setRenderContext(this);
-	_renderState.setMainViewportSize(_params.contextSize);
+	_renderState.setMainViewportSize(_renderState.viewportSize());
+	
+	updateScreenScale(_renderState.viewportSize());
 	
 	_textureFactory = TextureFactory::Pointer(new TextureFactory(this));
 	_framebufferFactory = FramebufferFactory::Pointer(new FramebufferFactory(this));
@@ -384,14 +385,17 @@ int RenderContextPrivate::displayLinkSynchronized()
 	{
 		Threading::setMainThread(Threading::currentThread());
 		firstSync = false;
-		
-		if (resizeScheduled)
-			resize(scheduledSize);
 	}
+
 	
 	if (application().running() && !application().suspended())
+	{
+		if (resizeScheduled)
+			resize(scheduledSize);
+		
 		performUpdateAndRender();
-
+	}
+	
 	return kCVReturnSuccess;
 }
 
