@@ -36,7 +36,7 @@ ValueBase::Pointer Dictionary::baseValueForKeyPathInHolder(const std::vector<std
 		auto value = dictionary->content.find(path.front());
 		
 		if (value == dictionary->content.end())
-			return ValueBase::Pointer();
+			return Dictionary();
 		
 		return (path.size() == 1) ? value->second : baseValueForKeyPathInHolder(
 			std::vector<std::string>(path.begin() + 1, path.end()), value->second);
@@ -47,10 +47,9 @@ ValueBase::Pointer Dictionary::baseValueForKeyPathInHolder(const std::vector<std
 		ArrayValue array(holder);
 		
 		if (index >= array->content.size())
-			return ValueBase::Pointer();
+			return ArrayValue();
 		
 		ValueBase::Pointer value = array->content.at(index);
-		
 		return (path.size() == 1) ? value : baseValueForKeyPathInHolder(
 			std::vector<std::string>(path.begin() + 1, path.end()), value);
 	}
