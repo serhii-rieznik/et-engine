@@ -173,7 +173,7 @@ void Renderer::drawElements(PrimitiveType primitiveType, const IndexBuffer& ib, 
 void Renderer::drawAllElements(const IndexBuffer& ib)
 {
 #if !defined(ET_CONSOLE_APPLICATION)
-	ET_ASSERT(ib.valid();
+	ET_ASSERT(ib.valid());
 	etDrawElements(ib->primitiveType(), static_cast<GLsizei>(ib->size()), ib->dataType(), nullptr);
 #endif
 }
