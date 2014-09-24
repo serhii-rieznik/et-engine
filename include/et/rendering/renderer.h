@@ -19,7 +19,6 @@ namespace et
 		
 	public: 
 		Renderer(RenderContext*);
-		~Renderer();
 
 		void clear(bool color = true, bool depth = true);
 

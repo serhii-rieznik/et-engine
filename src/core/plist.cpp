@@ -10,6 +10,7 @@
 
 using namespace et;
 
+/*
 static const std::string keyOpen = "<key>";
 static const std::string keyClose = "</key>";
 static const std::string keyDictionaryOpen = "<dict>";
@@ -22,7 +23,7 @@ static const std::string keyBoolTrue = "<true/>";
 static const std::string keyBoolFalse = "<false/>";
 static const std::string keyIntegerOpen = "<integer>";
 static const std::string keyIntegerClose = "</integer>";
-/*
+
 DictionaryEntry<Dictionary>::Pointer Reader::load(const std::string& filename)
 {
 	DictionaryEntry<Dictionary>::Pointer result(new DictionaryEntry<Dictionary>);

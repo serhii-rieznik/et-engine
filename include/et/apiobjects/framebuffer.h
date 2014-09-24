@@ -52,7 +52,7 @@ namespace et
 	public:
 		~Framebuffer();
 
-		bool addRenderTarget(const Texture& texture);
+		void addRenderTarget(const Texture& texture);
 		void addSameRendertarget();
 
 		void setDepthTarget(const Texture& texture);

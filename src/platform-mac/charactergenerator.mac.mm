@@ -42,10 +42,11 @@ CharacterGenerator::CharacterGenerator(RenderContext* rc, const std::string& fac
 	const std::string& boldFace, size_t size) : _rc(rc),
 	_private(new CharacterGeneratorPrivate(face, boldFace, size)), _face(face), _size(size)
 {
+#if !defined(ET_CONSOLE_APPLICATION)
 	BinaryDataStorage emptyData(defaultTextureSize * defaultTextureSize * 4, 0);
-	
 	_texture = _rc->textureFactory().genTexture(GL_TEXTURE_2D, GL_RGBA, vec2i(defaultTextureSize),
-												GL_RGBA, GL_UNSIGNED_BYTE, emptyData, face + "font");
+		GL_RGBA, GL_UNSIGNED_BYTE, emptyData, face + "font");
+#endif
 }
 
 CharacterGenerator::~CharacterGenerator()
@@ -55,6 +56,9 @@ CharacterGenerator::~CharacterGenerator()
 
 CharDescriptor CharacterGenerator::generateCharacter(int value, bool)
 {
+	CharDescriptor desc(value);
+	
+#if !defined(ET_CONSOLE_APPLICATION)
 	wchar_t string[2] = { value, 0 };
 	
 	NSString* wString = ET_OBJC_AUTORELEASE([[NSString alloc] initWithBytesNoCopy:string length:sizeof(string)
@@ -71,7 +75,6 @@ CharDescriptor CharacterGenerator::generateCharacter(int value, bool)
 	vec2i charSize = vec2i(static_cast<int>(characterSize.width),
         static_cast<int>(characterSize.height));
 	
-	CharDescriptor desc(value);
 	
 	if (charSize.square() > 0)
 	{
@@ -90,11 +93,16 @@ CharDescriptor CharacterGenerator::generateCharacter(int value, bool)
 	}
 
 	_chars[value] = desc;
+#endif
+	
 	return desc;
 }
 
 CharDescriptor CharacterGenerator::generateBoldCharacter(int value, bool)
 {
+	CharDescriptor desc(value, CharParameter_Bold);
+	
+#if !defined(ET_CONSOLE_APPLICATION)
 	wchar_t string[2] = { value, 0 };
 
 	NSString* wString = ET_OBJC_AUTORELEASE([[NSString alloc] initWithBytesNoCopy:string length:sizeof(string)
@@ -111,7 +119,6 @@ CharDescriptor CharacterGenerator::generateBoldCharacter(int value, bool)
 	vec2i charSize = vec2i(static_cast<int>(characterSize.width),
         static_cast<int>(characterSize.height));
 	
-	CharDescriptor desc(value, CharParameter_Bold);
 	if (charSize.square() > 0)
 	{
 		BinaryDataStorage data(charSize.square() * 4, 0);
@@ -130,6 +137,8 @@ CharDescriptor CharacterGenerator::generateBoldCharacter(int value, bool)
 	}
 	
 	_boldChars[value] = desc;
+#endif
+	
 	return desc;
 }
 
@@ -141,6 +150,7 @@ CharacterGeneratorPrivate::CharacterGeneratorPrivate(const std::string& face,
 	const std::string&, size_t size) : fontFace(face), fontSize(size),
 	_placer(vec2i(defaultTextureSize), true)
 {
+#if !defined(ET_CONSOLE_APPLICATION)
     NSString* cFace = [NSString stringWithCString:face.c_str() encoding:NSUTF8StringEncoding];
 	
 	font = ET_OBJC_RETAIN([[NSFontManager sharedFontManager] fontWithFamily:cFace traits:0 weight:0 size:size]);
@@ -168,14 +178,17 @@ CharacterGeneratorPrivate::CharacterGeneratorPrivate(const std::string& face,
 			
 	colorSpace = CGColorSpaceCreateDeviceRGB();
 	ET_ASSERT(colorSpace);
+#endif
 }
 
 CharacterGeneratorPrivate::~CharacterGeneratorPrivate()
 {
+#if !defined(ET_CONSOLE_APPLICATION)
 	CGColorSpaceRelease(colorSpace);
 	ET_OBJC_RELEASE(whiteColor);
     ET_OBJC_RELEASE(font);
 	ET_OBJC_RELEASE(boldFont);
+#endif
 }
 
 void CharacterGeneratorPrivate::updateTexture(RenderContext* rc, const vec2i& position,
@@ -188,6 +201,7 @@ void CharacterGeneratorPrivate::updateTexture(RenderContext* rc, const vec2i& po
 void CharacterGeneratorPrivate::renderCharacter(NSAttributedString* value,
 	const vec2i& size, NSFont*, BinaryDataStorage& data)
 {
+#if !defined(ET_CONSOLE_APPLICATION)
 	CGContextRef context = CGBitmapContextCreateWithData(data.data(), static_cast<size_t>(size.x),
 		static_cast<size_t>(size.y), 8, 4 * static_cast<size_t>(size.x), colorSpace,
 		kCGImageAlphaPremultipliedLast, nil, nil);
@@ -205,6 +219,7 @@ void CharacterGeneratorPrivate::renderCharacter(NSAttributedString* value,
 	unsigned int* endPtr = ptr + data.dataSize() / 4;
 	while (ptr != endPtr)
 		*ptr++ |= 0x00FFFFFF;
+#endif
 }
 
 #endif // ET_PLATFORM_MAC

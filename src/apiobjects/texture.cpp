@@ -11,27 +11,34 @@
 
 using namespace et;
 
-static const int defaultBindingUnit = 7;
+#if !defined(ET_CONSOLE_APPLICATION)
+	static const int defaultBindingUnit = 7;
+#endif
 
 TextureData::TextureData(RenderContext* rc, TextureDescription::Pointer desc,
 	const std::string& id, bool deferred) : LoadableObject(id, desc->origin()),
 	_glID(0), _desc(desc), _own(true)
 {
-#if (ET_OPENGLES)
+#if defined(ET_CONSOLE_APPLICATION)
+	ET_FAIL("Attempt to create Texture in console application.")
+#else
+#	if (ET_OPENGLES)
 	if (!(isPowerOfTwo(desc->size.x) && isPowerOfTwo(desc->size.y)))
 		_wrap = vector3<TextureWrap>(TextureWrap_ClampToEdge);
-#endif
+#	endif
 	
 	if (!deferred)
 	{
 		generateTexture(rc);
 		build(rc);
 	}
+#endif
 }
 
 TextureData::TextureData(RenderContext*, uint32_t texture, const vec2i& size, const std::string& name) :
 	LoadableObject(name), _glID(texture), _own(false), _desc(new TextureDescription)
 {
+#if !defined(ET_CONSOLE_APPLICATION)
 	if (glIsTexture(texture))
 	{
 		_desc->target = GL_TEXTURE_2D;
@@ -44,16 +51,20 @@ TextureData::TextureData(RenderContext*, uint32_t texture, const vec2i& size, co
 	{
 		_glID = 0;
 	}
+#endif
 }
 
 TextureData::~TextureData()
 {
+#if !defined(ET_CONSOLE_APPLICATION)
 	if (_own && (_glID != 0) && glIsTexture(_glID))
 		glDeleteTextures(1, &_glID);
+#endif
 }
 
 void TextureData::setWrap(RenderContext* rc, TextureWrap s, TextureWrap t, TextureWrap r)
 {
+#if !defined(ET_CONSOLE_APPLICATION)
 	_wrap = vector3<TextureWrap>(s, t, r);
 
 	rc->renderState().bindTexture(defaultBindingUnit, _glID, _desc->target);
@@ -64,8 +75,7 @@ void TextureData::setWrap(RenderContext* rc, TextureWrap s, TextureWrap t, Textu
 	glTexParameteri(_desc->target, GL_TEXTURE_WRAP_T, textureWrapValue(_wrap.y));
 	checkOpenGLError("glTexParameteri<WRAP_T> - %s", name().c_str());
 	
-#if defined(GL_TEXTURE_WRAP_R)
-#
+#	if defined(GL_TEXTURE_WRAP_R)
 #	if (ET_OPENGLES)
 	if (openGLCapabilites().versionShortString() > "200")
 #	endif
@@ -73,13 +83,14 @@ void TextureData::setWrap(RenderContext* rc, TextureWrap s, TextureWrap t, Textu
 		glTexParameteri(_desc->target, GL_TEXTURE_WRAP_R, textureWrapValue(_wrap.z));
 		checkOpenGLError("glTexParameteri<WRAP_R> - %s", name().c_str());
 	}
-#
-#endif	
+#	endif
+#endif
 }
 
 void TextureData::setFiltration(RenderContext* rc, TextureFiltration minFiltration,
 	TextureFiltration magFiltration)
 {
+#if !defined(ET_CONSOLE_APPLICATION)
 	rc->renderState().bindTexture(defaultBindingUnit, _glID, _desc->target);
 
 	_filtration = vector2<TextureFiltration>(minFiltration, magFiltration);
@@ -94,13 +105,14 @@ void TextureData::setFiltration(RenderContext* rc, TextureFiltration minFiltrati
 	checkOpenGLError("glTexParameteri<GL_TEXTURE_MIN_FILTER> - %s", name().c_str());
 	
 	glTexParameteri(_desc->target, GL_TEXTURE_MAG_FILTER, textureFiltrationValue(_filtration.y)); 
-	checkOpenGLError("glTexParameteri<GL_TEXTURE_MAG_FILTER> - %s", name().c_str()); 
+	checkOpenGLError("glTexParameteri<GL_TEXTURE_MAG_FILTER> - %s", name().c_str());
+#endif
 }
 
 #if defined(GL_TEXTURE_COMPARE_MODE) && defined(GL_TEXTURE_COMPARE_FUNC)
-
 void TextureData::compareRefToTexture(RenderContext* rc, bool enable, int32_t compareFunc)
 {
+#if !defined(ET_CONSOLE_APPLICATION)
 	rc->renderState().bindTexture(defaultBindingUnit, _glID, _desc->target);
 	if (enable)
 	{
@@ -115,25 +127,26 @@ void TextureData::compareRefToTexture(RenderContext* rc, bool enable, int32_t co
 		glTexParameteri(_desc->target, GL_TEXTURE_COMPARE_MODE, GL_NONE);
 		checkOpenGLError("glTexParameteri(_target, GL_TEXTURE_COMPARE_MODE, GL_NONE) - %s", name().c_str());
 	}
+#endif
 }
-
 #else
-
 void TextureData::compareRefToTexture(RenderContext*, bool, int32_t)
 	{ ET_FAIL("GL_TEXTURE_COMPARE_MODE and GL_TEXTURE_COMPARE_FUNC are not defined."); }
-
 #endif
 
 void TextureData::generateTexture(RenderContext*)
 {
+#if !defined(ET_CONSOLE_APPLICATION)
 	if (!glIsTexture(_glID))
 		glGenTextures(1, &_glID);
 
 	checkOpenGLError("TextureData::generateTexture - %s", name().c_str());
+#endif
 }
 
 void TextureData::buildData(const char* aDataPtr, size_t aDataSize)
 {
+#if !defined(ET_CONSOLE_APPLICATION)
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 	checkOpenGLError("glPixelStorei");
 
@@ -203,10 +216,12 @@ void TextureData::buildData(const char* aDataPtr, size_t aDataSize)
 	{
 		log::error("Unsupported texture target specified: glTexTargetToString(_target)");
 	}
+#endif
 }
 
 void TextureData::build(RenderContext* rc)
 {
+#if !defined(ET_CONSOLE_APPLICATION)
 	ET_ASSERT(_desc.valid());
 	
 	if (_desc->size.square() <= 0)
@@ -247,6 +262,7 @@ void TextureData::build(RenderContext* rc)
 	
 	_desc->data.resize(0);
 	ET_ASSERT(glIsTexture(_glID));
+#endif
 }
 
 vec2 TextureData::getTexCoord(const vec2& vec, TextureOrigin origin) const
@@ -258,24 +274,29 @@ vec2 TextureData::getTexCoord(const vec2& vec, TextureOrigin origin) const
 
 void TextureData::updateData(RenderContext* rc, TextureDescription::Pointer desc)
 {
+#if !defined(ET_CONSOLE_APPLICATION)
 	_desc = desc;
 	generateTexture(rc);
 	build(rc);
+#endif
 }
 
 void TextureData::updateDataDirectly(RenderContext* rc, const vec2i& size, const char* data, size_t dataSize)
 {
+#if !defined(ET_CONSOLE_APPLICATION)
 	if (_glID == 0)
 		generateTexture(rc);
 
     _desc->size = size;
     rc->renderState().bindTexture(defaultBindingUnit, _glID, _desc->target);
 	buildData(data, dataSize);
+#endif
 }
 
 void TextureData::updatePartialDataDirectly(RenderContext* rc, const vec2i& offset,
 	const vec2i& aSize, const char* data, size_t)
 {
+#if !defined(ET_CONSOLE_APPLICATION)
 	ET_ASSERT((_desc->target == GL_TEXTURE_2D) && !_desc->compressed);
 	ET_ASSERT((offset.x >= 0) && (offset.y >= 0));
 	ET_ASSERT((offset.x + aSize.x) < _desc->size.x);
@@ -293,18 +314,21 @@ void TextureData::updatePartialDataDirectly(RenderContext* rc, const vec2i& offs
 	checkOpenGLError("glTexSubImage2D(%s, 0, %d, %d, %d, %d, %s, %s, 0x%016x)",
 		glTexTargetToString(_desc->target).c_str(), offset.x, offset.y, aSize.x, aSize.y,
 		glInternalFormatToString(_desc->format).c_str(), glTypeToString(_desc->type).c_str(), data);
+#endif
 }
 
 void TextureData::generateMipMaps(RenderContext* rc)
 {
+#if !defined(ET_CONSOLE_APPLICATION)
     rc->renderState().bindTexture(defaultBindingUnit, _glID, _desc->target);
 	glGenerateMipmap(_desc->target);
 	checkOpenGLError("glGenerateMipmap");
+#endif
 }
 
 void TextureData::setMaxLod(RenderContext* rc, size_t value)
 {
-#if defined(GL_TEXTURE_MAX_LEVEL)
+#if defined(GL_TEXTURE_MAX_LEVEL) && !defined(ET_CONSOLE_APPLICATION)
     rc->renderState().bindTexture(defaultBindingUnit, _glID, _desc->target);
 	glTexParameteri(_desc->target, GL_TEXTURE_MAX_LEVEL, static_cast<GLint>(value));
 	checkOpenGLError("TextureData::setMaxLod - %s", name().c_str());

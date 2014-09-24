@@ -282,13 +282,13 @@ void et::findSubfolders(const std::string& folder, bool recursive, std::vector<s
 
 void et::openUrl(const std::string& url)
 {
-	if (url.size() == 0) return;
-	
-	NSURL* aUrl = [NSURL URLWithString:[NSString stringWithUTF8String:url.c_str()]];
+	if (url.empty()) return;
 	
 #if (ET_PLATFORM_IOS)
+	NSURL* aUrl = [NSURL URLWithString:[NSString stringWithUTF8String:url.c_str()]];
 	[[UIApplication sharedApplication] openURL:aUrl];
-#else
+#elif !defined(ET_CONSOLE_APPLICATION)
+	NSURL* aUrl = [NSURL URLWithString:[NSString stringWithUTF8String:url.c_str()]];
 	[[NSWorkspace sharedWorkspace] openURL:aUrl];
 #endif
 }
@@ -379,9 +379,13 @@ et::vec2i et::nativeScreenSize()
 	
 #else
 	
+#	if defined(ET_CONSOLE_APPLICATION)
+	return vec2i(0);
+#	else
 	NSSize size = [[NSScreen mainScreen] frame].size;
 	return vec2i(static_cast<int>(size.width), static_cast<int>(size.height));
-
+#endif
+	
 #endif
 }
 
@@ -393,8 +397,12 @@ et::vec2i et::availableScreenSize()
 	
 #else 
 	
+#	if defined(ET_CONSOLE_APPLICATION)
+	return vec2i(0);
+#	else
 	auto size = [[NSScreen mainScreen] visibleFrame].size;
 	return vec2i(static_cast<int>(size.width), static_cast<int>(size.height));
+#	endif
 	
 #endif
 	
@@ -411,7 +419,11 @@ et::Screen et::currentScreen()
 #if (ET_PLATFORM_IOS)
 	return uiScreenToScreen([UIScreen mainScreen]);
 #else
+#	if defined(ET_CONSOLE_APPLICATION)
+	return et::Screen();
+#	else
 	return nsScreenToScreen([NSScreen mainScreen]);
+#	endif
 #endif
 }
 
@@ -423,24 +435,34 @@ std::vector<et::Screen> et::availableScreens()
 	for (UIScreen* screen in [UIScreen screens])
 		result.push_back(uiScreenToScreen(screen));
 #else
+#	if !defined(ET_CONSOLE_APPLICATION)
 	for (NSScreen* screen in [NSScreen screens])
 		result.push_back(nsScreenToScreen(screen));
+#	endif
 #endif
+	
 	return result;
 }
 
 #if (ET_PLATFORM_IOS)
-	et::Screen uiScreenToScreen(UIScreen* screen)
-	{
-		CGRect frame = [screen bounds];
-		CGRect available = frame;
-		int scaleFactor = static_cast<int>([screen scale]);
+et::Screen uiScreenToScreen(UIScreen* screen)
+{
+	CGRect frame = [screen bounds];
+	CGRect available = frame;
+	int scaleFactor = static_cast<int>([screen scale]);
 #else
-	et::Screen nsScreenToScreen(NSScreen* screen)
-	{
-		NSRect frame = [screen frame];
-		NSRect available = [screen visibleFrame];
-		int scaleFactor = static_cast<int>([screen backingScaleFactor]);
+et::Screen nsScreenToScreen(NSScreen* screen)
+{
+#	if defined(ET_CONSOLE_APPLICATION)
+	NSRect frame = NSMakeRect(0.0, 0.0, 0.0, 0.0);
+	NSRect available = NSMakeRect(0.0, 0.0, 0.0, 0.0);
+	int scaleFactor = 1;
+#	else
+	NSRect frame = [screen frame];
+	NSRect available = [screen visibleFrame];
+	int scaleFactor = static_cast<int>([screen backingScaleFactor]);
+#	endif
+	
 #endif
 		
 	auto aFrame = et::recti(static_cast<int>(frame.origin.x), static_cast<int>(frame.origin.y),

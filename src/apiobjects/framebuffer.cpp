@@ -18,6 +18,9 @@ Framebuffer::Framebuffer(RenderContext* rc, const FramebufferDescription& desc,
 	const std::string& aName) : Object(aName), _rc(rc), _description(desc),
 	_id(0), _numTargets(0), _colorRenderbuffer(0), _depthRenderbuffer(0)
 {
+#if defined(ET_CONSOLE_APPLICATION)
+	ET_FAIL("Attempt to create Framebuffer in console application.");
+#else
 	checkOpenGLError("Framebuffer::Framebuffer %s", name().c_str());
 
 	glGenFramebuffers(1, &_id);
@@ -95,18 +98,20 @@ Framebuffer::Framebuffer(RenderContext* rc, const FramebufferDescription& desc,
 		checkStatus();
 	}
 
-#if (!ET_OPENGLES)
+#	if (!ET_OPENGLES)
 	if (!hasColor)
 	{
 		glReadBuffer(GL_NONE);
 		glDrawBuffer(GL_NONE);
 	}
+#	endif
 #endif
 }
 
 Framebuffer::Framebuffer(RenderContext* rc, uint32_t fboId, const std::string& aName) :
 	Object(aName), _rc(rc), _id(fboId), _numTargets(0), _colorRenderbuffer(0), _depthRenderbuffer(0)
 {
+#if !defined(ET_CONSOLE_APPLICATION)
 	if (glIsFramebuffer(fboId))
 	{
 		rc->renderState().bindFramebuffer(fboId);
@@ -131,10 +136,12 @@ Framebuffer::Framebuffer(RenderContext* rc, uint32_t fboId, const std::string& a
 	{
 		_description.size = rc->sizei();
 	}
+#endif
 }
 
 Framebuffer::~Framebuffer()
 {
+#if !defined(ET_CONSOLE_APPLICATION)
 	if (_colorRenderbuffer && glIsRenderbuffer(_colorRenderbuffer))
 	{
 		glDeleteRenderbuffers(1, &_colorRenderbuffer);
@@ -154,11 +161,12 @@ Framebuffer::~Framebuffer()
 	}
 
 	_rc->renderState().frameBufferDeleted(_id);
+#endif
 }
 
 bool Framebuffer::checkStatus()
 {
-#if (ET_DEBUG)
+#if (!defined(ET_CONSOLE_APPLICATION) && ET_DEBUG)
 	_rc->renderState().bindFramebuffer(_id);
 	uint32_t status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 	if (status != GL_FRAMEBUFFER_COMPLETE)
@@ -169,9 +177,10 @@ bool Framebuffer::checkStatus()
 #endif
 }
 
-bool Framebuffer::addRenderTarget(const Texture& rt)
+void Framebuffer::addRenderTarget(const Texture& rt)
 {
-	if (rt.invalid() || (rt->size() != _description.size)) return false;
+#if !defined(ET_CONSOLE_APPLICATION)
+	if (rt.invalid() || (rt->size() != _description.size)) return;
 	ET_ASSERT(glIsTexture(rt->glID()));
 
 	_rc->renderState().bindFramebuffer(_id);
@@ -192,12 +201,13 @@ bool Framebuffer::addRenderTarget(const Texture& rt)
 	}
 
 	_renderTargets[_numTargets++] = rt;
-
-	return checkStatus();
+	checkStatus();
+#endif
 }
 
 void Framebuffer::setDepthTarget(const Texture& rt)
 {
+#if !defined(ET_CONSOLE_APPLICATION)
 	if (rt.invalid() || (rt->size() != _description.size)) return;
 
 	_depthBuffer = rt;
@@ -218,19 +228,23 @@ void Framebuffer::setDepthTarget(const Texture& rt)
 			checkOpenGLError("glFramebufferTexture2D(...) - %s", name().c_str());
 		}
 	}
+#endif
 }
 
 void Framebuffer::setDepthTarget(const Texture& texture, uint32_t target)
 {
+#if !defined(ET_CONSOLE_APPLICATION)
 	if (texture.invalid() || (texture->size() != _description.size)) return;
 	
 	_rc->renderState().bindFramebuffer(_id);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, target, texture->glID(), 0);
 	checkOpenGLError("glFramebufferTexture2D(...) - %s", name().c_str());
+#endif
 }
 
 void Framebuffer::addSameRendertarget()
 {
+#if !defined(ET_CONSOLE_APPLICATION)
 	if (_numTargets == 0) return;
 
 	Texture& prev = _renderTargets[_numTargets - 1];
@@ -254,19 +268,23 @@ void Framebuffer::addSameRendertarget()
 	
 	c->setWrap(_rc, TextureWrap_ClampToEdge, TextureWrap_ClampToEdge);
 	addRenderTarget(c);
+#endif 
 }
 
 void Framebuffer::setCurrentRenderTarget(const Texture& texture)
 {
+#if !defined(ET_CONSOLE_APPLICATION)
 	ET_ASSERT(texture.valid());
 	
 	_rc->renderState().bindFramebuffer(_id);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, texture->target(), texture->glID(), 0);
 	checkOpenGLError("glFramebufferTexture2D");
+#endif
 }
 
 void Framebuffer::setCurrentRenderTarget(const Texture& texture, uint32_t target)
 {
+#if !defined(ET_CONSOLE_APPLICATION)
 	ET_ASSERT(texture.valid());
 	_rc->renderState().bindFramebuffer(_id);
 
@@ -284,35 +302,35 @@ void Framebuffer::setCurrentRenderTarget(const Texture& texture, uint32_t target
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, target, texture->glID(), 0);
 		checkOpenGLError("glFramebufferTexture2D");
 	}
+#endif
 }
 
 void Framebuffer::setCurrentRenderTarget(size_t index)
 {
+#if !defined(ET_CONSOLE_APPLICATION)
 	ET_ASSERT((index < _numTargets) && _renderTargets[index].valid());
 	setCurrentRenderTarget(_renderTargets[index]);
+#endif
 }
 
 #if (ET_OPENGLES)
-
 void Framebuffer::setDrawBuffersCount(int)
-{
-	ET_ASSERT(false && "glDrawBuffers is not supported in OpenGL ES");
-}
-
+	{ ET_FAIL("glDrawBuffers is not supported in OpenGL ES"); }
 #else
-
 void Framebuffer::setDrawBuffersCount(int count)
 {
+#	if !defined(ET_CONSOLE_APPLICATION)
 	_rc->renderState().bindFramebuffer(_id);
 	glDrawBuffers(count, colorAttachments);
 	checkOpenGLError("Framebuffer::setDrawBuffersCount -> glDrawBuffers - %s", name().c_str());
 	checkStatus();
+#	endif
 }
-
 #endif
 
 void Framebuffer::setCurrentCubemapFace(uint32_t faceIndex)
 {
+#if !defined(ET_CONSOLE_APPLICATION)
 	ET_ASSERT(_description.isCubemap && (faceIndex < 6));
 	
 	_rc->renderState().bindFramebuffer(_id);
@@ -333,10 +351,12 @@ void Framebuffer::setCurrentCubemapFace(uint32_t faceIndex)
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, target, _depthBuffer->glID(), 0);
 		checkOpenGLError("setCurrentCubemapFace -> depth");
 	}
+#endif
 }
 
 void Framebuffer::createOrUpdateColorRenderbuffer()
 {
+#if !defined(ET_CONSOLE_APPLICATION)
 	if (!glIsRenderbuffer(_colorRenderbuffer))
 	{
 		glGenRenderbuffers(1, &_colorRenderbuffer);
@@ -346,7 +366,7 @@ void Framebuffer::createOrUpdateColorRenderbuffer()
 	_rc->renderState().bindFramebuffer(_id);
 	_rc->renderState().bindRenderbuffer(_colorRenderbuffer);
 
-#if (!ET_PLATFORM_ANDROID)
+#	if (!ET_PLATFORM_ANDROID)
 	if (_description.numSamples > 1)
 	{
 		glRenderbufferStorageMultisample(GL_RENDERBUFFER, _description.numSamples,
@@ -354,7 +374,7 @@ void Framebuffer::createOrUpdateColorRenderbuffer()
 		checkOpenGLError("glRenderbufferStorageMultisample");
 	}
 	else
-#endif
+#	endif
 	{
 		glRenderbufferStorage(GL_RENDERBUFFER, _description.colorInternalformat,
 			_description.size.x, _description.size.y);
@@ -362,10 +382,12 @@ void Framebuffer::createOrUpdateColorRenderbuffer()
 	}
 	
 	setColorRenderbuffer(_colorRenderbuffer);
+#endif
 }
 
 void Framebuffer::createOrUpdateDepthRenderbuffer()
 {
+#if !defined(ET_CONSOLE_APPLICATION)
 	if (!glIsRenderbuffer(_depthRenderbuffer))
 	{
 		glGenRenderbuffers(1, &_depthRenderbuffer);
@@ -375,7 +397,7 @@ void Framebuffer::createOrUpdateDepthRenderbuffer()
 	_rc->renderState().bindFramebuffer(_id);
 	_rc->renderState().bindRenderbuffer(_depthRenderbuffer);
 	
-#if (!ET_PLATFORM_ANDROID)
+#	if (!ET_PLATFORM_ANDROID)
 	if (_description.numSamples > 1)
 	{
 		glRenderbufferStorageMultisample(GL_RENDERBUFFER, _description.numSamples,
@@ -383,7 +405,7 @@ void Framebuffer::createOrUpdateDepthRenderbuffer()
 		checkOpenGLError("glRenderbufferStorageMultisample");
 	}
 	else
-#endif
+#	endif
 	{
 		glRenderbufferStorage(GL_RENDERBUFFER, _description.depthInternalformat,
 			_description.size.x, _description.size.y);
@@ -391,10 +413,12 @@ void Framebuffer::createOrUpdateDepthRenderbuffer()
 	}
 	
 	setDepthRenderbuffer(_depthRenderbuffer);
+#endif
 }
 
 void Framebuffer::resize(const vec2i& sz)
 {
+#if !defined(ET_CONSOLE_APPLICATION)
 	if (_description.size == sz) return;
 	
 	_description.size = sz;
@@ -442,6 +466,7 @@ void Framebuffer::resize(const vec2i& sz)
 	
 	if (hasColor || hasDepth)
 		checkStatus();
+#endif
 }
 
 void Framebuffer::forceSize(const vec2i& sz)
@@ -451,42 +476,36 @@ void Framebuffer::forceSize(const vec2i& sz)
 
 void Framebuffer::resolveMultisampledTo(Framebuffer::Pointer framebuffer)
 {
+#if !defined(ET_CONSOLE_APPLICATION)
 	_rc->renderState().bindReadFramebuffer(_id);
 	_rc->renderState().bindDrawFramebuffer(framebuffer->glID());
 	
-#if (ET_PLATFORM_IOS)
+#	if (ET_PLATFORM_IOS)
 
 #	if defined(GL_ES_VERSION_3_0)
-	
 		glBlitFramebuffer(0, 0, _description.size.x, _description.size.y, 0, 0, framebuffer->size().x,
 			framebuffer->size().y, GL_COLOR_BUFFER_BIT, GL_NEAREST);
 		checkOpenGLError("glBlitFramebuffer");
-	
 #	else
-	
 		glResolveMultisampleFramebufferAPPLE();
 		checkOpenGLError("glResolveMultisampleFramebuffer");
-	
 #	endif
-	
-#elif (ET_PLATFORM_ANDROID)
-	
-	glBlitFramebuffer(0, 0, _description.size.x, _description.size.y, 0, 0, framebuffer->size().x,
-		framebuffer->size().y, GL_COLOR_BUFFER_BIT, GL_NEAREST);
-	checkOpenGLError("glBlitFramebuffer");
-	
-#else
-	
-	glBlitFramebuffer(0, 0, _description.size.x, _description.size.y, 0, 0, framebuffer->size().x,
-		framebuffer->size().y, GL_COLOR_BUFFER_BIT, GL_NEAREST);
-	checkOpenGLError("glBlitFramebuffer");
+#	elif (ET_PLATFORM_ANDROID)
+		glBlitFramebuffer(0, 0, _description.size.x, _description.size.y, 0, 0, framebuffer->size().x,
+			framebuffer->size().y, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+		checkOpenGLError("glBlitFramebuffer");
+#	else
+		glBlitFramebuffer(0, 0, _description.size.x, _description.size.y, 0, 0, framebuffer->size().x,
+			framebuffer->size().y, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+		checkOpenGLError("glBlitFramebuffer");
+#	endif
 	
 #endif
 }
 
 void Framebuffer::invalidate(bool color, bool depth)
 {
-#if (ET_PLATFORM_IOS)
+#if (ET_PLATFORM_IOS) && !defined(ET_CONSOLE_APPLICATION)
 	_rc->renderState().bindReadFramebuffer(_id);
 	
 	GLsizei numDiscards = 0;
@@ -513,16 +532,20 @@ void Framebuffer::invalidate(bool color, bool depth)
 
 void Framebuffer::setColorRenderbuffer(uint32_t r)
 {
+#if !defined(ET_CONSOLE_APPLICATION)
 	_colorRenderbuffer = r;
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, _colorRenderbuffer);
 	checkOpenGLError("glFramebufferRenderbuffer");
+#endif
 }
 
 void Framebuffer::setDepthRenderbuffer(uint32_t r)
 {
+#if !defined(ET_CONSOLE_APPLICATION)
 	_depthRenderbuffer = r;
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, _depthRenderbuffer);
 	checkOpenGLError("glFramebufferRenderbuffer");
+#endif
 }
 
 /*

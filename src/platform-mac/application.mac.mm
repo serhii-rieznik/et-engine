@@ -42,6 +42,7 @@ void Application::loaded()
 	
 	_renderContext = new RenderContext(parameters, this);
 	
+#if !defined(ET_CONSOLE_APPLICATION)
 	NSMenu* mainMenu = [[NSMenu allocWithZone:[NSMenu menuZone]] init];
 	NSMenuItem* applicationMenuItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] init];
 	[mainMenu addItem:applicationMenuItem];
@@ -56,25 +57,30 @@ void Application::loaded()
 	[applicationMenuItem setSubmenu:applicationMenu];
 	
 	[[NSApplication sharedApplication] setActivationPolicy:NSApplicationActivationPolicyRegular];
-	
+
 	(void)ET_OBJC_AUTORELEASE(mainMenu);
 	(void)ET_OBJC_AUTORELEASE(applicationMenuItem);
 	(void)ET_OBJC_AUTORELEASE(quitItem);
 	(void)ET_OBJC_AUTORELEASE(applicationMenu);
-			
+#endif
+	
 	_runLoop.updateTime(_lastQueuedTimeMSec);
 	enterRunLoop();
 }
 
 void Application::quit(int)
 {
+#if !defined(ET_CONSOLE_APPLICATION)
 	[[NSApplication sharedApplication] terminate:nil];
+#endif
 }
 
 void Application::setTitle(const std::string &s)
 {
+#if !defined(ET_CONSOLE_APPLICATION)
 	NSWindow* mainWindow = [[[NSApplication sharedApplication] windows] objectAtIndex:0];
 	[mainWindow setTitle:[NSString stringWithUTF8String:s.c_str()]];
+#endif
 }
 
 void Application::alert(const std::string&, const std::string&, AlertType)
@@ -90,11 +96,14 @@ int Application::platformRun(int, char*[])
 {
 	@autoreleasepool
 	{
+#if defined(ET_CONSOLE_APPLICATION)
+		
+#else
 		etApplicationDelegate* delegate = ET_OBJC_AUTORELEASE([[etApplicationDelegate alloc] init]);
 		[[NSApplication sharedApplication] setDelegate:delegate];
 		[[NSApplication sharedApplication] run];
+#endif
 	}
-	
 	return 0;
 }
 
@@ -122,7 +131,9 @@ void Application::platformResume()
 
 void Application::requestUserAttention()
 {
-	[NSApp requestUserAttention:NSCriticalRequest];
+#if !defined(ET_CONSOLE_APPLICATION)
+	[[NSApplication sharedApplication] requestUserAttention:NSCriticalRequest];
+#endif
 }
 
 /*
@@ -169,7 +180,7 @@ void Application::requestUserAttention()
 	_notifier.notifyTerminated();
 }
 
-- (BOOL)applicationShouldTerminateAfterLastWindowClosed:(NSApplication *)sender
+- (BOOL)applicationShouldTerminateAfterLastWindowClosed:(NSApplication*)sender
 {
     (void)sender;
 	return YES;

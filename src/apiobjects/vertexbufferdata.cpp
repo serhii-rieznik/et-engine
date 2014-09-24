@@ -15,28 +15,38 @@ VertexBufferData::VertexBufferData(RenderContext* rc, const VertexArray::Descrip
 	BufferDrawType vertexDrawType, const std::string& aName) : Object(aName), _rc(rc), _vertexBuffer(0),
 	_decl(desc.declaration), _dataSize(0), _sourceTag(0), _drawType(vertexDrawType)
 {
+#if defined(ET_CONSOLE_APPLICATION)
+	ET_FAIL("Attempt to create VertexBuffer in console application.")
+#else
 	glGenBuffers(1, &_vertexBuffer);
 	setData(desc.data.data(), desc.data.dataSize());
+#endif
 }
 
 VertexBufferData::VertexBufferData(RenderContext* rc, const VertexDeclaration& decl, const void* vertexData,
 	size_t vertexDataSize, BufferDrawType vertexDrawType, const std::string& aName) : Object(aName), _rc(rc),
 	_vertexBuffer(0), _decl(decl), _dataSize(0), _sourceTag(0), _drawType(vertexDrawType)
 {
+#if defined(ET_CONSOLE_APPLICATION)
+	ET_FAIL("Attempt to create VertexBuffer in console application.")
+#else
 	glGenBuffers(1, &_vertexBuffer);
 	setData(vertexData, vertexDataSize);
+#endif
 }
 
 VertexBufferData::~VertexBufferData()
 {
+#if !defined(ET_CONSOLE_APPLICATION)
 	if (_vertexBuffer)
 		glDeleteBuffers(1, &_vertexBuffer);
-
 	_rc->renderState().vertexBufferDeleted(_vertexBuffer);
+#endif
 }
 
 void VertexBufferData::setData(const void* data, size_t dataSize)
 {
+#if !defined(ET_CONSOLE_APPLICATION)
 	_rc->renderState().bindBuffer(GL_ARRAY_BUFFER, _vertexBuffer);
 	
 	glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>(_dataSize), nullptr, drawTypeValue(_drawType));
@@ -46,10 +56,12 @@ void VertexBufferData::setData(const void* data, size_t dataSize)
 	
 	glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>(_dataSize), data, drawTypeValue(_drawType));
 	checkOpenGLError("glBufferData(GL_ARRAY_BUFFER, %u, 0x%08X, %d)", _dataSize, data, _drawType);
+#endif
 }
 
 void VertexBufferData::map(void** data, size_t offset, size_t dataSize, MapBufferMode mode)
 {
+#if !defined(ET_CONSOLE_APPLICATION)
 	ET_ASSERT(data != nullptr);
 	
 	static const GLenum accessFlags3x[MapBufferMode_max] =
@@ -57,7 +69,7 @@ void VertexBufferData::map(void** data, size_t offset, size_t dataSize, MapBuffe
 	
 	_rc->renderState().bindBuffer(GL_ARRAY_BUFFER, _vertexBuffer);
 	
-#if defined(GL_ARB_map_buffer_range) || defined(GL_EXT_map_buffer_range)
+#	if defined(GL_ARB_map_buffer_range) || defined(GL_EXT_map_buffer_range)
 	
 	GLbitfield access = GL_MAP_UNSYNCHRONIZED_BIT | accessFlags3x[mode];
 	
@@ -67,7 +79,7 @@ void VertexBufferData::map(void** data, size_t offset, size_t dataSize, MapBuffe
 	*data = glMapBufferRange(GL_ARRAY_BUFFER, offset, dataSize, access);
 	checkOpenGLError("glMapBufferRange(GL_ARRAY_BUFFER, %lu, %lu, %d)", offset, dataSize, mode);
 
-#elif defined(GL_READ_ONLY) && defined(GL_WRITE_ONLY) && defined(GL_READ_WRITE)
+#	elif defined(GL_READ_ONLY) && defined(GL_WRITE_ONLY) && defined(GL_READ_WRITE)
 	
 	static const GLenum accessFlags2x[MapBufferMode_max] =
 		{ GL_READ_ONLY, GL_WRITE_ONLY, GL_READ_WRITE };
@@ -75,15 +87,18 @@ void VertexBufferData::map(void** data, size_t offset, size_t dataSize, MapBuffe
 	*data = reinterpret_cast<uint8_t*>(glMapBuffer(GL_ARRAY_BUFFER, accessFlags2x[mode])) + offset;
 	checkOpenGLError("glMapBuffer(GL_ARRAY_BUFFER, %d)", mode);
 	
-#else
+#	else
 	log::error("Invalid call to glMapBuffer.");
+#	endif
 #endif
 }
 
 void VertexBufferData::unmap()
 {
+#if !defined(ET_CONSOLE_APPLICATION)
 	glUnmapBuffer(GL_ARRAY_BUFFER);
 	checkOpenGLError("glUnmapBuffer(GL_ARRAY_BUFFER)");
+#endif
 }
 
 void VertexBufferData::serialize(std::ostream&)

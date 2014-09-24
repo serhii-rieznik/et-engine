@@ -17,10 +17,19 @@
 using namespace et;
 
 bool Input::canGetCurrentPointerInfo()
-	{ return true; }
+{
+#if defined(ET_CONSOLE_APPLICATION)
+	return false;
+#else
+	return true;
+#endif
+}
 
 PointerInputInfo Input::currentPointer()
 {
+	PointerInputInfo result;
+	
+#if !defined(ET_CONSOLE_APPLICATION)
 	NSPoint location = [NSEvent mouseLocation];
 	NSWindow* keyWindow = [[NSApplication sharedApplication] keyWindow];
 	
@@ -30,8 +39,6 @@ PointerInputInfo Input::currentPointer()
 	location = [keyWindow.contentView convertPointToBacking:
 		[keyWindow convertRectFromScreen:NSMakeRect(location.x, location.y, 1.0f, 1.0f)].origin];
 	
-	PointerInputInfo result;
-	
 	result.timestamp = queryContiniousTimeInSeconds();
 	
 	result.pos = vec2(static_cast<float>(location.x),
@@ -39,6 +46,7 @@ PointerInputInfo Input::currentPointer()
 	
 	result.normalizedPos = result.pos /
 		vec2(static_cast<float>(frame.size.width), static_cast<float>(frame.size.height));
+#endif
 	
 	return result;
 }

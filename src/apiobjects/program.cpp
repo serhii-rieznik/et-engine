@@ -18,6 +18,9 @@ Program::Program(RenderContext* rc) : _glID(0), _rc(rc),
 	_mModelViewLocation(-1), _mModelViewProjectionLocation(-1), _vCameraLocation(-1),
 	_vPrimaryLightLocation(-1), _mLightProjectionMatrixLocation(-1), _mTransformLocation(-1)
 {
+#if defined(ET_CONSOLE_APPLICATION)
+	ET_FAIL("Attempt to create Program in console application");
+#endif
 }
 
 Program::Program(RenderContext* rc, const std::string& vertexShader, const std::string& geometryShader,
@@ -26,11 +29,16 @@ Program::Program(RenderContext* rc, const std::string& vertexShader, const std::
 	_mModelViewProjectionLocation(-1), _vCameraLocation(-1), _vPrimaryLightLocation(-1),
 	_mLightProjectionMatrixLocation(-1), _mTransformLocation(-1), _defines(defines)
 {
+#if defined(ET_CONSOLE_APPLICATION)
+	ET_FAIL("Attempt to create Program in console application");
+#else
 	buildProgram(vertexShader, geometryShader, fragmentShader);
+#endif
 }
 
 Program::~Program()
 {
+#if !defined(ET_CONSOLE_APPLICATION)
 	if ((_glID != 0) && glIsProgram(_glID))
 	{
 		glDeleteProgram(_glID);
@@ -38,6 +46,7 @@ Program::~Program()
 	}
 
 	_rc->renderState().programDeleted(_glID);
+#endif
 }
 
 UniformMap::const_iterator Program::findUniform(const std::string& name) const
@@ -120,10 +129,12 @@ void Program::buildProgram(const std::string& vertex_source, const std::string& 
 	_mat4Cache.clear();
 	_uniforms.clear();
 	
-#if (ET_OPENGLES)
+#if !defined(ET_CONSOLE_APPLICATION)
+
+#	if (ET_OPENGLES)
 	if (geom_source.length() && (geom_source != etNoShader))
 		log::info("[Program] Geometry shader skipped in OpenGL ES");
-#endif
+#	endif
 	
 	checkOpenGLError("[Program] buildProgram - %s", name().c_str());
 
@@ -169,7 +180,7 @@ void Program::buildProgram(const std::string& vertex_source, const std::string& 
 
 	uint32_t GeometryShader = 0;
 
-#if defined(GL_GEOMETRY_SHADER)
+#	if defined(GL_GEOMETRY_SHADER)
 	if ((geom_source.length() > 0) && (geom_source != etNoShader)) 
 	{
 		GeometryShader = glCreateShader(GL_GEOMETRY_SHADER);
@@ -200,7 +211,7 @@ void Program::buildProgram(const std::string& vertex_source, const std::string& 
 			checkOpenGLError("glAttachShader<GEOM> - %s", name().c_str());
 		} 
 	} 
-#endif
+#	endif
 
 	///////////////////////////////////////////////// FRAGMENT
 	uint32_t FragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
@@ -232,7 +243,7 @@ void Program::buildProgram(const std::string& vertex_source, const std::string& 
 		glAttachShader(_glID, FragmentShader);
 		checkOpenGLError("glAttachShader<FRAG> - %s", name().c_str());
 
-#if defined(GL_VERSION_3_0)
+#	if defined(GL_VERSION_3_0)
 		if (glBindFragDataLocation != nullptr)
 		{
 			glBindFragDataLocation(_glID, 0, "FragColor");
@@ -250,7 +261,7 @@ void Program::buildProgram(const std::string& vertex_source, const std::string& 
 			glBindFragDataLocation(_glID, 4, "FragColor4");
 			checkOpenGLError("glBindFragDataLocation<color4> - %s", name().c_str());
 		}
-#endif
+#	endif
 	} 
 
 	int linkStatus = link();
@@ -363,12 +374,15 @@ void Program::buildProgram(const std::string& vertex_source, const std::string& 
 		checkOpenGLError("Delete fragment shader");
 	}
 
-	checkOpenGLError("Program::buildProgram -> end"); 
+	checkOpenGLError("Program::buildProgram -> end");
+#endif
 }
 
 int Program::link()
 {
 	int result = 0;
+	
+#if !defined(ET_CONSOLE_APPLICATION)
 	int nLogLen = 0;
 
 	glLinkProgram(_glID);
@@ -387,7 +401,8 @@ int Program::link()
 		checkOpenGLError("glGetProgramInfoLog<LINK> - %s", name().c_str());
 		log::error("Program %s link log:\n%s", name().c_str(), infoLog.data());
 	}
-
+#endif
+	
 	return result;
 }
 
@@ -401,6 +416,7 @@ void Program::validate() const
 
 void Program::setUniform(int nLoc, uint32_t type, const int value, bool)
 {
+#if !defined(ET_CONSOLE_APPLICATION)
 	if (nLoc == -1) return;
 	
 	(void)type;
@@ -409,10 +425,12 @@ void Program::setUniform(int nLoc, uint32_t type, const int value, bool)
 	
 	glUniform1i(nLoc, value);
 	checkOpenGLError("setUniform - int");
+#endif
 }
 
 void Program::setUniform(int nLoc, uint32_t type, const unsigned int value, bool)
 {
+#if !defined(ET_CONSOLE_APPLICATION)
 	if (nLoc == -1) return;
 	
 	(void)type;
@@ -421,10 +439,12 @@ void Program::setUniform(int nLoc, uint32_t type, const unsigned int value, bool
 	
 	glUniform1i(nLoc, static_cast<GLint>(value));
 	checkOpenGLError("setUniform - unsigned int");
+#endif
 }
 
 void Program::setUniform(int nLoc, uint32_t type, const unsigned long value, bool)
 {
+#if !defined(ET_CONSOLE_APPLICATION)
 	if (nLoc == -1) return;
 	
 	(void)type;
@@ -433,10 +453,12 @@ void Program::setUniform(int nLoc, uint32_t type, const unsigned long value, boo
 	
 	glUniform1i(nLoc, static_cast<GLint>(value));
 	checkOpenGLError("setUniform - unsigned long");
+#endif
 }
 
 void Program::setUniform(int nLoc, uint32_t type, const float value, bool forced)
 {
+#if !defined(ET_CONSOLE_APPLICATION)
 	if (nLoc == -1) return;
 	
 	(void)type;
@@ -449,10 +471,12 @@ void Program::setUniform(int nLoc, uint32_t type, const float value, bool forced
 		glUniform1f(nLoc, value);
 		checkOpenGLError("setUniform - float");
 	}
+#endif
 }
 
 void Program::setUniform(int nLoc, uint32_t type, const vec2& value, bool forced)
 {
+#if !defined(ET_CONSOLE_APPLICATION)
 	if (nLoc == -1) return;
 	
 	(void)type;
@@ -466,10 +490,12 @@ void Program::setUniform(int nLoc, uint32_t type, const vec2& value, bool forced
 	}
 	
 	checkOpenGLError("setUniform - vec2");
+#endif
 }
 
 void Program::setUniform(int nLoc, uint32_t type, const vec3& value, bool forced)
 {
+#if !defined(ET_CONSOLE_APPLICATION)
 	if (nLoc == -1) return;
 	
 	(void)type;
@@ -483,10 +509,12 @@ void Program::setUniform(int nLoc, uint32_t type, const vec3& value, bool forced
 	}
 	
 	checkOpenGLError("setUniform - vec3");
+#endif
 }
 
 void Program::setUniform(int nLoc, uint32_t type, const vec4& value, bool forced)
 {
+#if !defined(ET_CONSOLE_APPLICATION)
 	if (nLoc == -1) return;
 	
 	(void)type;
@@ -500,10 +528,12 @@ void Program::setUniform(int nLoc, uint32_t type, const vec4& value, bool forced
 	}
 	
 	checkOpenGLError("setUniform - vec4");
+#endif
 }
 
 void Program::setUniformDirectly(int nLoc, uint32_t type, const vec4& value)
 {
+#if !defined(ET_CONSOLE_APPLICATION)
 	if (nLoc == -1) return;
 	
 	(void)type;
@@ -513,10 +543,12 @@ void Program::setUniformDirectly(int nLoc, uint32_t type, const vec4& value)
 	glUniform4fv(nLoc, 1, value.data());
 	
 	checkOpenGLError("setUniform - vec4");
+#endif
 }
 
 void Program::setUniform(int nLoc, uint32_t type, const mat3& value, bool forced)
 {
+#if !defined(ET_CONSOLE_APPLICATION)
 	if (nLoc == -1) return;
 	
 	(void)type;
@@ -530,10 +562,12 @@ void Program::setUniform(int nLoc, uint32_t type, const mat3& value, bool forced
 	}
 	
 	checkOpenGLError("setUniform - mat3");
+#endif
 }
 
 void Program::setUniform(int nLoc, uint32_t type, const mat4& value, bool forced)
 {
+#if !defined(ET_CONSOLE_APPLICATION)
 	if (nLoc == -1) return;
 	
 	(void)type;
@@ -547,10 +581,12 @@ void Program::setUniform(int nLoc, uint32_t type, const mat4& value, bool forced
 	}
 	
 	checkOpenGLError("setUniform - mat4");
+#endif
 }
 
 void Program::setUniformDirectly(int nLoc, uint32_t type, const mat4& value)
 {
+#if !defined(ET_CONSOLE_APPLICATION)
 	if (nLoc == -1) return;
 	
 	(void)type;
@@ -560,10 +596,12 @@ void Program::setUniformDirectly(int nLoc, uint32_t type, const mat4& value)
 	glUniformMatrix4fv(nLoc, 1, 0, value.data());
 	
 	checkOpenGLError("setUniform - mat4");
+#endif
 }
 
 void Program::setUniform(int nLoc, uint32_t type, const vec2* value, size_t amount)
 {
+#if !defined(ET_CONSOLE_APPLICATION)
 	if (nLoc == -1) return;
 	
 	(void)type;
@@ -572,10 +610,12 @@ void Program::setUniform(int nLoc, uint32_t type, const vec2* value, size_t amou
 	
 	glUniform2fv(nLoc, static_cast<GLsizei>(amount), value->data());
 	checkOpenGLError("setUniform - vec2*");
+#endif
 }
 
 void Program::setUniform(int nLoc, uint32_t type, const vec3* value, size_t amount)
 {
+#if !defined(ET_CONSOLE_APPLICATION)
 	if (nLoc == -1) return;
 	
 	(void)type;
@@ -584,10 +624,12 @@ void Program::setUniform(int nLoc, uint32_t type, const vec3* value, size_t amou
 	
 	glUniform3fv(nLoc, static_cast<GLsizei>(amount), value->data());
 	checkOpenGLError("setUniform - vec3*");
+#endif
 }
 
 void Program::setUniform(int nLoc, uint32_t type, const vec4* value, size_t amount)
 {
+#if !defined(ET_CONSOLE_APPLICATION)
 	if (nLoc == -1) return;
 	
 	(void)type;
@@ -596,10 +638,12 @@ void Program::setUniform(int nLoc, uint32_t type, const vec4* value, size_t amou
 	
 	glUniform4fv(nLoc, static_cast<GLsizei>(amount), value->data());
 	checkOpenGLError("setUniform - vec4*");
+#endif
 }
 
 void Program::setUniform(int nLoc, uint32_t type, const mat4* value, size_t amount)
 {
+#if !defined(ET_CONSOLE_APPLICATION)
 	if (nLoc == -1) return;
 	
 	(void)type;
@@ -608,4 +652,5 @@ void Program::setUniform(int nLoc, uint32_t type, const mat4* value, size_t amou
 	
 	glUniformMatrix4fv(nLoc, static_cast<GLsizei>(amount), 0, value->data());
 	checkOpenGLError("setUniform - mat4*");
+#endif
 }

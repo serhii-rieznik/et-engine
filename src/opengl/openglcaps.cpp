@@ -17,6 +17,9 @@ bool OpenGLCapabilites::hasExtension(const std::string& e)
 
 void OpenGLCapabilites::checkCaps()
 {
+#if defined(ET_CONSOLE_APPLICATION)
+	log::info("[OpenGLCapabilites] Rendering disabled in console application.");
+#else
 	const char* glv = reinterpret_cast<const char*>(glGetString(GL_VERSION));
 	_versionShortString = std::string();
 	_versionString = std::string(glv ? glv : "<Unknown OpenGL version>");
@@ -64,9 +67,9 @@ void OpenGLCapabilites::checkCaps()
 		OpenGLVersion_2x : OpenGLVersion_3x;
 	
 	const char* ext = nullptr;
-#if defined(GL_NUM_EXTENSIONS)
+#	if defined(GL_NUM_EXTENSIONS)
 	if (_version == OpenGLVersion_2x)
-#endif
+#	endif
 	{
 		ext = reinterpret_cast<const char*>(glGetString(GL_EXTENSIONS));
 		checkOpenGLError("glGetString(GL_EXTENSIONS)");
@@ -97,7 +100,8 @@ void OpenGLCapabilites::checkCaps()
 			}
 		}
 	}
-#if defined(GL_NUM_EXTENSIONS)
+	
+#	if defined(GL_NUM_EXTENSIONS)
 	else
 	{
 		int numExtensions = 0;
@@ -109,7 +113,7 @@ void OpenGLCapabilites::checkCaps()
 			_extensions[lowercase(ext)] = 1;
 		}
 	}
-#endif
+#	endif
 	
 	int maxSize = 0;
 	glGetIntegerv(GL_MAX_CUBE_MAP_TEXTURE_SIZE, &maxSize);
@@ -132,14 +136,14 @@ void OpenGLCapabilites::checkCaps()
 	if (maxUnits > 0)
 		setFlag(OpenGLFeature_VertexTextureFetch);
 
-#if defined(GL_ARB_draw_elements_base_vertex)
+#	if defined(GL_ARB_draw_elements_base_vertex)
 	setFlag(OpenGLFeature_DrawElementsBaseVertex);
-#endif
+#	endif
 	
 	if (glGenerateMipmap != nullptr)
 		setFlag(OpenGLFeature_MipMapGeneration);
 	
-#if (ET_SUPPORT_VERTEX_ARRAY_OBJECTS)
+#	if (ET_SUPPORT_VERTEX_ARRAY_OBJECTS)
 	bool stillSupport = (glGenVertexArrays != nullptr) && (glDeleteVertexArrays != nullptr)
 		&& (glBindVertexArray != nullptr) && (glIsVertexArray != nullptr);
 	
@@ -153,8 +157,9 @@ void OpenGLCapabilites::checkCaps()
 			setFlag(OpenGLFeature_VertexArrayObjects);
 		}
 	}
-#endif
+#	endif
 	
 	log::info("[OpenGLCapabilites] Version: %s (%s), GLSL version: %s (%s)", _versionString.c_str(),
 		_versionShortString.c_str(), _glslVersionString.c_str(), _glslVersionShortString.c_str());
+#endif
 };
