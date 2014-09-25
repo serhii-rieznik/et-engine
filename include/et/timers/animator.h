@@ -8,6 +8,7 @@
 #pragma once
 
 #include <et/app/events.h>
+#include <et/geometry/geometry.h>
 #include <et/timers/timedobject.h>
 #include <et/timers/timerpool.h>
 
@@ -67,6 +68,17 @@ namespace et
 			_startTime(0.0f), _duration(0.0f) { initDefaultInterpolators(); }
 
 		/*
+		 * Value and Timer Pool
+		 */
+		Animator(const T& value, TimerPool* tp) :
+			BaseAnimator(0, tp), _from(), _to(), _value(value), _valuePointer(nullptr),
+			_startTime(0.0f), _duration(0.0f) { initDefaultInterpolators(); }
+		
+		Animator(const T& value, TimerPool::Pointer tp) :
+			BaseAnimator(0, tp.ptr()), _from(), _to(), _value(value), _valuePointer(nullptr),
+			_startTime(0.0f), _duration(0.0f) { initDefaultInterpolators(); }
+		
+		/*
 		 * All properties
 		 */
 		Animator(T* value, const T& from, const T& to, float duration, int tag, TimerPool* tp) :
@@ -97,19 +109,20 @@ namespace et
 				
 				updated.invoke();
 				finished.invoke();
-				return;
 			}
-			
-			ET_ASSERT(timerPool() != nullptr);
+			else
+			{
+				ET_ASSERT(timerPool() != nullptr);
 
-			_valuePointer = value;
-			_value = from;
-			_from = from;
-			_to = to;
-			_duration = duration;
+				_valuePointer = value;
+				_value = from;
+				_from = from;
+				_to = to;
+				_duration = duration;
 
-			startUpdates(timerPool());
-			_startTime = actualTime();
+				startUpdates(timerPool());
+				_startTime = actualTime();
+			}
 		};
 		
 		void animate(const T& from, const T& to, float duration)

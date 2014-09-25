@@ -119,30 +119,30 @@ namespace et
 	inline float length(float v)
 		{ return std::abs(v); }
 
-	inline float mix(float v1, float v2, float t)
-		{ return v1 * (1.0f - t) + v2 * t; }
-
 	template<typename T>
-	inline vector4<T> mix(const vector4<T>& v1, const vector4<T>& v2, T t)
+	inline vector4<T> mix(const vector4<T>& v1, const vector4<T>& v2, const T& t)
 	{
-		T nt = 1 - t;
+		T nt = T(1) - t;
 		return vector4<T>(v1.x * nt + v2.x * t, v1.y * nt + v2.y * t, v1.z * nt + v2.z * t,
 			v1.w * nt + v2.w * t);
 	}
 
 	template<typename T>
-	inline vector3<T> mix(const vector3<T>& v1, const vector3<T>& v2, T t)
+	inline vector3<T> mix(const vector3<T>& v1, const vector3<T>& v2, const T& t)
 	{ 
-		T nt = 1 - t;
+		T nt = T(1) - t;
 		return vector3<T>(v1.x * nt + v2.x * t, v1.y * nt + v2.y * t, v1.z * nt + v2.z * t);
 	}
 
 	template<typename T>
-	inline vector2<T> mix(const vector2<T>& v1, const vector2<T>& v2, T t)
+	inline vector2<T> mix(const vector2<T>& v1, const vector2<T>& v2, const T& t)
 	{
-		T nt = 1 - t;
+		T nt = T(1) - t;
 		return vector2<T>(v1.x * nt + v2.x * t, v1.y * nt + v2.y * t);
 	}
+	
+	inline float mix(float v1, float v2, float t)
+		{ return v1 * (1.0f - t) + v2 * t; }
 	
 	template<typename T>
 	inline Quaternion<T> slerp(const Quaternion<T>& from, const Quaternion<T>& to, T t)
