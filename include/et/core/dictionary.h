@@ -17,6 +17,7 @@ namespace et
 		
 		ValueClass_Float,
 		ValueClass_Integer,
+		ValueClass_Boolean,
 		ValueClass_String,
 		ValueClass_Array,
 		ValueClass_Dictionary,
@@ -80,6 +81,7 @@ namespace et
 	
 	typedef ValuePointer<float, ValueClass_Float> FloatValue;
 	typedef ValuePointer<int64_t, ValueClass_Integer> IntegerValue;
+	typedef ValuePointer<int, ValueClass_Boolean> BooleanValue;
 	
 	class StringValue : public ValuePointer<std::string, ValueClass_String>
 	{
@@ -171,6 +173,9 @@ namespace et
 		void setIntegerForKey(const std::string& key, IntegerValue value)
 			{ setValueForKey<IntegerValue>(key, value); }
 
+		void setBooleanForKey(const std::string& key, BooleanValue value)
+			{ setValueForKey<BooleanValue>(key, value); }
+		
 		void setFloatForKey(const std::string& key, FloatValue value)
 			{ setValueForKey<FloatValue>(key, value); }
 		
