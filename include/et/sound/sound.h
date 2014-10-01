@@ -19,8 +19,6 @@ namespace et
         class Manager : public Singleton<Manager>
         {
         public:
-			~Manager();
-
 			Track::Pointer loadTrack(const std::string& fileName);
 
 			Player::Pointer genPlayer(Track::Pointer track);
@@ -28,6 +26,7 @@ namespace et
 
         private:
             Manager();
+			~Manager();
 			
 			void nativePreInit();
 			void nativeInit();

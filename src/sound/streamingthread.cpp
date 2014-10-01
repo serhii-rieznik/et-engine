@@ -33,12 +33,10 @@ StreamingThread::StreamingThread() :
 	run();
 }
 
-StreamingThread::~StreamingThread()
+void StreamingThread::release()
 {
-	{
-		CriticalSectionScope scope(_private->csLock);
-	}
 	delete _private;
+	_private = nullptr;
 }
 
 ThreadResult StreamingThread::main()
@@ -67,12 +65,19 @@ ThreadResult StreamingThread::main()
 		
 		sleepMSec(50);
 	}
+
+	CriticalSectionScope scope(_private->csLock);
+	_private->playersToAdd.clear();
+	_private->playersToRemove.clear();
+	_private->playersList.clear();
 	
 	return 0;
 }
 
 void StreamingThread::addPlayer(Player* player)
 {
+	if (_private == nullptr) return;
+	
 	CriticalSectionScope scope(_private->csLock);
 	
 	auto i = std::find(_private->playersList.begin(), _private->playersList.end(), player);
@@ -90,6 +95,8 @@ void StreamingThread::addPlayer(Player* player)
 
 void StreamingThread::removePlayer(Player* player)
 {
+	if (_private == nullptr) return;
+	
 	CriticalSectionScope scope(_private->csLock);
 	
 	auto i = std::find(_private->playersList.begin(), _private->playersList.end(), player);

@@ -20,7 +20,8 @@ namespace et
 		{
 		public:
 			StreamingThread();
-			~StreamingThread();
+			
+			void release();
 			
 			void addPlayer(Player*);
 			void removePlayer(Player*);

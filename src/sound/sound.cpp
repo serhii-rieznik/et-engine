@@ -76,6 +76,7 @@ Manager::~Manager()
 {
 	_streamingThread.stop();
 	_streamingThread.waitForTermination();
+	_streamingThread.release();
 	
 	if (sharedDevice == nullptr) return;
 	
