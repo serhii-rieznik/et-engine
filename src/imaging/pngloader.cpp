@@ -198,7 +198,10 @@ void parseFormat(TextureDescription& desc, png_structp pngPtr, png_infop infoPtr
 	{
 		case 1:
 		{
-#if defined(GL_LUMINANCE)
+#if defined(GL_ARB_texture_rg) && defined(GL_R8) && defined(GL_R16)
+			desc.internalformat = (bpp == 16) ? GL_R16 : GL_R8;
+			desc.format = GL_RED;
+#elif defined(GL_LUMINANCE)
 			if (bpp == 8)
 			{
 				desc.internalformat = GL_LUMINANCE;
@@ -208,16 +211,6 @@ void parseFormat(TextureDescription& desc, png_structp pngPtr, png_infop infoPtr
 			{
 				ET_FAIL("Unsupported PNG format");
 			}
-#elif defined(GL_R8) && defined(GL_R16)
-			if (bpp == 8)
-			{
-				desc.internalformat = GL_R8;
-			}
-			else if (bpp == 16)
-			{
-				desc.internalformat = GL_R16;
-			}
-			desc.format = GL_RED;
 #else
 #			error Unable to resolve OpenGL format for 1-channel texture
 #endif
@@ -227,15 +220,11 @@ void parseFormat(TextureDescription& desc, png_structp pngPtr, png_infop infoPtr
 		case 2:
 		{
 #if defined(GL_RG8) && defined(GL_RG16)
-
 			desc.internalformat = (bpp == 16) ? GL_RG16 : GL_RG8;
 			desc.format = GL_RG;
-
 #elif defined(GL_LUMINANCE_ALPHA)
-
 			desc.internalformat = GL_LUMINANCE_ALPHA;
 			desc.format = GL_LUMINANCE_ALPHA;
-
 #else
 #			error Unable to resolve OpenGL format for 1-channel texture
 #endif
