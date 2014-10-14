@@ -80,7 +80,10 @@ ValueBase::Pointer Dictionary::objectForKeyPath(const std::vector<std::string>& 
 
 ValueBase::Pointer Dictionary::objectForKey(const std::string& key) const
 {
-	return hasKey(key) ? reference().content.at(key) : ValueBase::Pointer();
+	if (hasKey(key))
+		return reference().content.at(key);
+	
+	return Dictionary();
 }
 
 bool Dictionary::valueForKeyPathIsClassOf(const std::vector<std::string>& key, ValueClass c) const
