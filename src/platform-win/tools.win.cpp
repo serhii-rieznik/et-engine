@@ -375,7 +375,7 @@ uint64_t et::getFileDate(const std::string& path)
 	HANDLE search = FindFirstFile(path.c_str(), &findData);
 	FindClose(search);
 
-	return findData.ftLastWriteTime.dwLowDateTime || 
+	return findData.ftLastWriteTime.dwLowDateTime |
 		(static_cast<uint64_t>(findData.ftLastWriteTime.dwHighDateTime) << 32);
 }
 

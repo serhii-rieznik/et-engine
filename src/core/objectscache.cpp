@@ -221,6 +221,7 @@ void ObjectsCache::performUpdate()
 					{
 						i.second = prop;
 						shouldReload = true;
+						break;
 					}
 				}
 				
