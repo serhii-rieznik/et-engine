@@ -53,7 +53,8 @@ Player::~Player()
 
 void Player::init()
 {
-	_volumeAnimator.updated.connect([this]() { this->setActualVolume(_volumeAnimator.value()); });
+	_volumeAnimator.animate(1.0f, 0.0f);
+	_volumeAnimator.updated.connect([this]() { setActualVolume(_volumeAnimator.value()); });
 
 	alGenSources(1, &_private->source);
     checkOpenALError("alGenSources");
@@ -165,15 +166,7 @@ void Player::linkTrack(Track::Pointer track)
 
 void Player::setVolume(float value, float duration)
 {
-	if (duration == 0.0f)
-	{
-		_volumeAnimator.cancelUpdates();
-		setActualVolume(value);
-	}
-	else
-	{
-		_volumeAnimator.animate(&_volume, _volume, value, duration);
-	}
+	_volumeAnimator.animate(value, duration);
 }
 
 float Player::position() const
@@ -259,8 +252,7 @@ void Player::handleProcessedBuffers()
 
 void Player::setActualVolume(float v)
 {
-	_volume = clamp(v, 0.0f, 1.0f);	
-	alSourcef(_private->source, AL_GAIN, _volume);
+	alSourcef(_private->source, AL_GAIN, clamp(v, 0.0f, 1.0f));
 	checkOpenALError("alSourcei(.., AL_GAIN, ...)");
 }
 

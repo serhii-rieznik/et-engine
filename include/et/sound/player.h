@@ -66,7 +66,6 @@ namespace et
 			Track::Pointer _track;
 			
 			FloatAnimator _volumeAnimator;
-			float _volume = 1.0f;
         };
 	}
 }
