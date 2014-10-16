@@ -28,22 +28,22 @@ namespace et
 		List& children();
 		const List& children() const;
 
-		virtual void bringToFront(T* c);
-		virtual void sendToBack(T* c);
+		virtual void bringToFront(T*);
+		virtual void sendToBack(T*);
 
 	protected:
+		virtual void childRemoved(T*) { }
 		void removeChildren();
 
 	private:
 		bool addChild(T* c);
-		bool removeChild(T* c);
-
-	private:
 		void pushChild(T* c);
+		
+		bool removeChild(T* c);
 		void removeParent();
 
 	private:
-		T* _parent;
+		T* _parent = nullptr;
 		List _children;
 	};
 
@@ -111,12 +111,13 @@ namespace et
 		{
 			if (i->ptr() == c)
 			{
+				childRemoved(c);
+				
 				_children.erase(i);
 				found = true;
 				break;
 			}
 		}
-
 
 		return found;
 	}
