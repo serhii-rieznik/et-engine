@@ -17,9 +17,9 @@ namespace et
 		public:
 			CriticalSection csLock;
 
-			std::list<Player*> playersList;
-			std::list<Player*> playersToAdd;
-			std::list<Player*> playersToRemove;
+			std::list<Player::Pointer> playersList;
+			std::list<Player::Pointer> playersToAdd;
+			std::list<Player::Pointer> playersToRemove;
 		};
 	}
 }
@@ -48,6 +48,7 @@ ThreadResult StreamingThread::main()
 
 			for (auto& p : _private->playersToAdd)
 				_private->playersList.push_back(p);
+			
 			for (auto& p : _private->playersToRemove)
 				_private->playersList.remove(p);
 
@@ -55,7 +56,7 @@ ThreadResult StreamingThread::main()
 			_private->playersToRemove.clear();
 		}
 
-		for (Player* player : _private->playersList)
+		for (auto player : _private->playersList)
 		{
 			if (player->track().valid() && player->track()->streamed())
 				player->handleProcessedBuffers();
@@ -74,7 +75,7 @@ ThreadResult StreamingThread::main()
 	return 0;
 }
 
-void StreamingThread::addPlayer(Player* player)
+void StreamingThread::addPlayer(Player::Pointer player)
 {
 	if (_private == nullptr) return;
 	
@@ -93,7 +94,7 @@ void StreamingThread::addPlayer(Player* player)
 	}
 }
 
-void StreamingThread::removePlayer(Player* player)
+void StreamingThread::removePlayer(Player::Pointer player)
 {
 	if (_private == nullptr) return;
 	

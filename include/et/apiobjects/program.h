@@ -94,7 +94,8 @@ namespace et
 		void setUniform(int, uint32_t, const uint32_t, bool);
 		void setUniform(int, uint32_t, const int64_t, bool);
 		void setUniform(int, uint32_t, const uint64_t, bool);
-
+		void setUniform(int, uint32_t, const unsigned long, bool);
+		
 		void setUniform(int, uint32_t, const float, bool force = false);
 		
 		void setUniform(int, uint32_t, const vec2&, bool force = false);

@@ -470,6 +470,20 @@ void Program::setUniform(int nLoc, uint32_t type, uint64_t value, bool)
 #endif
 }
 
+void Program::setUniform(int nLoc, uint32_t type, const unsigned long value, bool)
+{
+#if !defined(ET_CONSOLE_APPLICATION)
+	if (nLoc == -1) return;
+	
+	(void)type;
+	ET_ASSERT((type == GL_INT) || (type == GL_SAMPLER_2D) || (type == GL_SAMPLER_CUBE));
+	ET_ASSERT(loaded());
+	
+	glUniform1i(nLoc, static_cast<GLint>(value));
+	checkOpenGLError("setUniform - unsigned int");
+#endif
+}
+
 void Program::setUniform(int nLoc, uint32_t type, const float value, bool forced)
 {
 #if !defined(ET_CONSOLE_APPLICATION)

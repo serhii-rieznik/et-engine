@@ -15,6 +15,8 @@ namespace et
     namespace audio
     {
 		class Player;
+		typedef IntrusivePtr<Player> PlayerPointer;
+		
 		class StreamingThreadPrivate;
 		class StreamingThread : public Thread
 		{
@@ -23,14 +25,14 @@ namespace et
 			
 			void release();
 			
-			void addPlayer(Player*);
-			void removePlayer(Player*);
+			void addPlayer(PlayerPointer);
+			void removePlayer(PlayerPointer);
 			
 		private:
 			ThreadResult main();
 			
 		private:
-			StreamingThreadPrivate* _private;
+			StreamingThreadPrivate* _private = nullptr;
 		};
 	}
 }

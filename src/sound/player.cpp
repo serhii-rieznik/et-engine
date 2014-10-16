@@ -119,7 +119,7 @@ void Player::play(bool looped)
 		alSourcePlay(_private->source);
 		checkOpenALError("alSourcePlay");
 		
-		manager().streamingThread().addPlayer(this);
+		manager().streamingThread().addPlayer(Player::Pointer(this));
 	}
 }
 
@@ -137,7 +137,8 @@ void Player::pause()
 
 void Player::stop()
 {
-	manager().streamingThread().removePlayer(this);
+	if (atomicCounterValue() > 0)
+		manager().streamingThread().removePlayer(Player::Pointer(this));
 	
 	alSourceStop(_private->source);
     checkOpenALError("alSourceStop");

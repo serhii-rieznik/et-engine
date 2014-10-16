@@ -25,6 +25,12 @@ namespace et
 		stream.write(reinterpret_cast<const char*>(&value), sizeof(value));
 	}
 
+	inline void serializeInt(std::ostream& stream, long value)
+		{ serializeInt(stream, static_cast<int32_t>(value & 0xffffffff)); }
+	
+	inline void serializeInt(std::ostream& stream, unsigned long value)
+		{ serializeInt(stream, static_cast<uint32_t>(value & 0xfffffff)); }
+	
 	inline void serializeInt(std::ostream& stream, int64_t value)
 		{ serializeInt(stream, static_cast<int32_t>(value & 0xffffffff)); }
 
