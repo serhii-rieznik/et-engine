@@ -21280,8 +21280,8 @@ void initWGLLoadFunctions(void)
  *****************************************************************/
 typedef struct
 {
-	char ** names;
-	int * lengths;
+	char** names;
+	size_t* lengths;
 	int numNames;
 }ExtensionList;
 
@@ -21327,17 +21327,17 @@ void __GLeeExtList_clean(ExtensionList *extList)
 
 void __GLeeExtList_add(ExtensionList *extList, const char * extName)
 {
-	int length = strlen(extName) + 1;
+	auto length = strlen(extName) + 1;
 	int i = extList->numNames;
 	int n = i + 1;
 	if (i == 0)
 	{
-		extList->lengths = (int *)malloc(sizeof(int));
+		extList->lengths = (size_t*)malloc(sizeof(int));
 		extList->names = (char **)malloc(sizeof(char *));
 	}
 	else
 	{
-		extList->lengths = (int *)realloc((void *)extList->lengths, n*sizeof(int));
+		extList->lengths = (size_t*)realloc((void *)extList->lengths, n*sizeof(int));
 		extList->names = (char **)realloc((void *)extList->names, n*sizeof(char *));
 	}
 	extList->names[i] = strdup(extName);
@@ -21394,7 +21394,7 @@ GLboolean __GLeeGetExtensions(ExtensionList* extList)
 		const char* extString = reinterpret_cast<const char*>(glGetString(GL_EXTENSIONS));
 		if (extString)
 		{
-			int len = strlen(extString);
+			auto len = strlen(extString);
 			char* exts = strdup(extString);
 			char* i = exts + len - 1;
 			while (len > 0)
@@ -21495,7 +21495,7 @@ GLEE_EXTERN GLint GLeeForceLink(const char * extensionName)
 {
 	int type = 0;
 	int extNum;
-	int len = strlen(extensionName);
+	auto len = strlen(extensionName);
 	if (len < 5) return GLEE_LINK_FAIL;
 	if (!__GLeeInitedLoadFunctions)
 	{

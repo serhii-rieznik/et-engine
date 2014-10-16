@@ -139,7 +139,7 @@ vec3 et::removeMatrixScale(mat3& mat)
 			etMin(c1.x, etMin(c1.y, c1.z)),
 			etMin(c2.x, etMin(c2.y, c2.z))
 		};
-		long offset = std::min_element(minValues, minValues + 3) - minValues;
+		auto offset = std::min_element(minValues, minValues + 3) - minValues;
 		lengths[offset] = -lengths[offset];
 	}
 

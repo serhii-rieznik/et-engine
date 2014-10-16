@@ -37,6 +37,8 @@ OpenGLDebugScope::OpenGLDebugScope(const std::string& info)
 {
 #if defined(GL_EXT_debug_marker) && !defined(ET_CONSOLE_APPLICATION)
 	glPushGroupMarkerEXT(static_cast<GLsizei>(info.size()), info.c_str());
+#else
+	(void)info;
 #endif
 }
 

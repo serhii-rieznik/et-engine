@@ -169,7 +169,7 @@ IndexArray::PrimitiveIterator IndexArray::primitive(IndexType index) const
 IndexArray::Primitive::Primitive()
 {
 	for (size_t i = 0; i < IndexArray::Primitive::VertexCount_max; ++i)
-		index[i] = InvalidIndex;
+		index[i] = static_cast<size_t>(InvalidIndex);
 }
 
 bool IndexArray::Primitive::operator == (const Primitive& p) const
@@ -197,8 +197,8 @@ void IndexArray::PrimitiveIterator::configure(IndexType p)
 		case PrimitiveType_Points:
 		{
 			_primitive[0] = (p < cap) ? _ib->getIndex(p) : InvalidIndex;
-			_primitive[1] = InvalidIndex;
-			_primitive[2] = InvalidIndex;
+			_primitive[1] = static_cast<IndexType>(InvalidIndex);
+			_primitive[2] = static_cast<IndexType>(InvalidIndex);
 			break;
 		}
 			
@@ -207,7 +207,7 @@ void IndexArray::PrimitiveIterator::configure(IndexType p)
 		{
 			_primitive[0] = (p < cap) ? _ib->getIndex(p) : InvalidIndex; ++p;
 			_primitive[1] = (p < cap) ? _ib->getIndex(p) : InvalidIndex;
-			_primitive[2] = InvalidIndex;
+			_primitive[2] = static_cast<IndexType>(InvalidIndex);
 			break;
 		}
 

@@ -16,22 +16,21 @@ namespace et
 	inline void serializeInt(std::ostream& stream, int32_t value)
 	{
 		ET_ASSERT(stream.good());
-		
 		stream.write(reinterpret_cast<const char*>(&value), sizeof(value));
 	}
 
 	inline void serializeInt(std::ostream& stream, uint32_t value)
 	{
 		ET_ASSERT(stream.good());
-		
 		stream.write(reinterpret_cast<const char*>(&value), sizeof(value));
 	}
 
-#if (ET_PLATFORM_APPLE)
-	inline void serializeInt(std::ostream& stream, size_t value)
-		{ serializeInt(stream, static_cast<uint32_t>(value)); }
-#endif
-    
+	inline void serializeInt(std::ostream& stream, int64_t value)
+		{ serializeInt(stream, static_cast<int32_t>(value & 0xffffffff)); }
+
+	inline void serializeInt(std::ostream& stream, uint64_t value)
+		{ serializeInt(stream, static_cast<uint32_t>(value & 0xffffffff)); }
+
 	inline int32_t deserializeInt(std::istream& stream)
 	{
 		ET_ASSERT(stream.good());

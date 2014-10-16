@@ -23,7 +23,7 @@ std::string locale::time()
 
 	int bufferSize = GetTimeFormatEx(LOCALE_NAME_SYSTEM_DEFAULT, 0, &st, 0, 0, 0);
 	DataStorage<wchar_t> buffer(bufferSize + 1, 0);
-	GetTimeFormatEx(LOCALE_NAME_SYSTEM_DEFAULT, 0, &st, 0, buffer.data(), buffer.size());
+	GetTimeFormatEx(LOCALE_NAME_SYSTEM_DEFAULT, 0, &st, 0, buffer.data(), static_cast<int>(buffer.size()));
 	return unicodeToUtf8(buffer.data());
 }
 
@@ -34,7 +34,7 @@ std::string locale::date()
 
 	int bufferSize = GetDateFormatEx(LOCALE_NAME_SYSTEM_DEFAULT, DATE_LONGDATE, &st, 0, 0, 0, 0);
 	DataStorage<wchar_t> buffer(bufferSize + 1, 0);
-	GetDateFormatEx(LOCALE_NAME_SYSTEM_DEFAULT, DATE_LONGDATE, &st, 0, buffer.data(), buffer.size(), 0);
+	GetDateFormatEx(LOCALE_NAME_SYSTEM_DEFAULT, DATE_LONGDATE, &st, 0, buffer.data(), static_cast<int>(buffer.size()), 0);
 	return unicodeToUtf8(buffer.data());
 }
 
@@ -53,10 +53,10 @@ std::string locale::dateTimeFromTimestamp(uint64_t t)
 	int timeBufferSize = GetTimeFormatEx(LOCALE_NAME_SYSTEM_DEFAULT, 0, &st, 0, 0, 0);
 
 	DataStorage<wchar_t> dateBuffer(dateBufferSize + 1, 0);
-	GetDateFormatEx(LOCALE_NAME_SYSTEM_DEFAULT, DATE_SHORTDATE, &st, 0, dateBuffer.data(), dateBuffer.size(), 0);
+	GetDateFormatEx(LOCALE_NAME_SYSTEM_DEFAULT, DATE_SHORTDATE, &st, 0, dateBuffer.data(), static_cast<int>(dateBuffer.size()), 0);
 
-	DataStorage<wchar_t> timeBuffer(dateBufferSize + 1, 0);
-	GetTimeFormatEx(LOCALE_NAME_SYSTEM_DEFAULT, 0, &st, 0, timeBuffer.data(), timeBuffer.size());
+	DataStorage<wchar_t> timeBuffer(timeBufferSize + 1, 0);
+	GetTimeFormatEx(LOCALE_NAME_SYSTEM_DEFAULT, 0, &st, 0, timeBuffer.data(), static_cast<int>(timeBuffer.size()));
 
 	return unicodeToUtf8(dateBuffer.data()) + " " + unicodeToUtf8(timeBuffer.data());
 }

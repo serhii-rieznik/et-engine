@@ -414,7 +414,7 @@ void Program::validate() const
  * Uniform setters
  */
 
-void Program::setUniform(int nLoc, uint32_t type, const int value, bool)
+void Program::setUniform(int nLoc, uint32_t type, int32_t value, bool)
 {
 #if !defined(ET_CONSOLE_APPLICATION)
 	if (nLoc == -1) return;
@@ -428,7 +428,7 @@ void Program::setUniform(int nLoc, uint32_t type, const int value, bool)
 #endif
 }
 
-void Program::setUniform(int nLoc, uint32_t type, const unsigned int value, bool)
+void Program::setUniform(int nLoc, uint32_t type, uint32_t value, bool)
 {
 #if !defined(ET_CONSOLE_APPLICATION)
 	if (nLoc == -1) return;
@@ -442,7 +442,7 @@ void Program::setUniform(int nLoc, uint32_t type, const unsigned int value, bool
 #endif
 }
 
-void Program::setUniform(int nLoc, uint32_t type, const unsigned long value, bool)
+void Program::setUniform(int nLoc, uint32_t type, int64_t value, bool)
 {
 #if !defined(ET_CONSOLE_APPLICATION)
 	if (nLoc == -1) return;
@@ -451,6 +451,20 @@ void Program::setUniform(int nLoc, uint32_t type, const unsigned long value, boo
 	ET_ASSERT((type == GL_INT) || (type == GL_SAMPLER_2D) || (type == GL_SAMPLER_CUBE));
 	ET_ASSERT(loaded());
 	
+	glUniform1i(nLoc, static_cast<GLint>(value));
+	checkOpenGLError("setUniform - unsigned long");
+#endif
+}
+
+void Program::setUniform(int nLoc, uint32_t type, uint64_t value, bool)
+{
+#if !defined(ET_CONSOLE_APPLICATION)
+	if (nLoc == -1) return;
+
+	(void)type;
+	ET_ASSERT((type == GL_INT) || (type == GL_SAMPLER_2D) || (type == GL_SAMPLER_CUBE));
+	ET_ASSERT(loaded());
+
 	glUniform1i(nLoc, static_cast<GLint>(value));
 	checkOpenGLError("setUniform - unsigned long");
 #endif

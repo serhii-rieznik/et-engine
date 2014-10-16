@@ -325,7 +325,7 @@ std::string et::unicodeToUtf8(const std::wstring& w)
 		return std::string();
 
 	DataStorage<char> result(mbcWidth + 1, 0);
-	WideCharToMultiByte(CP_UTF8, 0, w.c_str(), -1, result.data(), result.size(), 0, 0);
+	WideCharToMultiByte(CP_UTF8, 0, w.c_str(), -1, result.data(), static_cast<int>(result.size()), 0, 0);
 
 	return std::string(result.data());
 }
@@ -361,7 +361,7 @@ std::wstring et::utf8ToUnicode(const std::string& mbcs)
 	}
 
 	DataStorage<wchar_t> result(uWidth + 1, 0);
-	MultiByteToWideChar(CP_UTF8, 0, mbcs.c_str(), -1, result.data(), result.size());
+	MultiByteToWideChar(CP_UTF8, 0, mbcs.c_str(), -1, result.data(), static_cast<int>(result.size()));
 
 	return std::wstring(result.data());
 }
@@ -383,7 +383,7 @@ std::vector<et::Screen> et::availableScreens()
 {
 	std::vector<et::Screen> result;
 	
-	EnumDisplayMonitors(nullptr, nullptr, [](HMONITOR hMonitor, HDC hdcMonitor, LPRECT lprcMonitor, LPARAM dwData) -> BOOL
+	EnumDisplayMonitors(nullptr, nullptr, [](HMONITOR hMonitor, HDC, LPRECT, LPARAM dwData) -> BOOL
 	{
 		MONITORINFO info = { sizeof(MONITORINFO) };
 

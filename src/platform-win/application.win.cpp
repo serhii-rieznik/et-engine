@@ -119,7 +119,7 @@ void Application::platformDeactivate()
 	timeEndPeriod(1);
 }
 
-int Application::platformRun(int argc, char* argv[])
+int Application::platformRun(int, char*[])
 {
 	RenderContextParameters params;
 	delegate()->setRenderContextParameters(params); 

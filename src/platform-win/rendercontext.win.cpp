@@ -238,7 +238,8 @@ bool RenderContextPrivate::initWindow(RenderContextParameters& params, const App
 	primaryContext.hWnd = createWindow(appParams.windowStyle, appParams.windowSize, params.contextSize);
 	ET_ASSERT(primaryContext.hWnd != nullptr);
 
-	SetWindowLong(primaryContext.hWnd, GWL_USERDATA, reinterpret_cast<LONG>(this));
+	// SetWindowLong(primaryContext.hWnd, GWL_USERDATA, reinterpret_cast<LONG>(this));
+	SetWindowLongPtr(primaryContext.hWnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
 
 	ShowWindow(primaryContext.hWnd, SW_SHOW);
 	SetForegroundWindow(primaryContext.hWnd);
@@ -291,7 +292,8 @@ RenderContextData RenderContextPrivate::createDummyContext(HWND hWnd)
 
 bool RenderContextPrivate::initOpenGL(const RenderContextParameters& params)
 {
-	HWND dummyWindow = createWindow(WindowStyle_Borderless, WindowSize_Predefined, vec2i(0));
+	vec2i dummySize;
+	HWND dummyWindow = createWindow(WindowStyle_Borderless, WindowSize_Predefined, dummySize);
 	if (dummyWindow == nullptr) return false;
 
 	RenderContextData dummy = createDummyContext(dummyWindow);
@@ -432,7 +434,7 @@ bool RenderContextPrivate::initOpenGL(const RenderContextParameters& params)
 
 	if (wglSwapIntervalEXT) 
 	{
-		wglSwapIntervalEXT(params.swapInterval);
+		wglSwapIntervalEXT(static_cast<int>(params.swapInterval));
 		checkOpenGLError("RenderContextPrivate::initOpenGL -> wglSwapIntervalEXT");
 	}
 
