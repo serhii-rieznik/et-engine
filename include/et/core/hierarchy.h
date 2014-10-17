@@ -158,7 +158,12 @@ namespace et
 
 	template <typename T, typename BASE>
 	void Hierarchy<T, BASE>::removeChildren()
-		{ _children.clear(); }
+	{
+		for (auto c : _children)
+			c->removeParent();
+		
+		_children.clear();
+	}
 
 	template <typename T, typename BASE>
 	inline T* Hierarchy<T, BASE>::parent()

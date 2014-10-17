@@ -80,6 +80,9 @@ namespace et
 	inline float strToFloat(const std::string& value)
 		{ return static_cast<float>(strToDouble(value)); }
 
+	inline float strToFloat(const std::wstring& value)
+		{ return std::wcstof(value.c_str(), nullptr); }
+	
 	inline bool strToBool(std::string s)
 	{
 		for (auto& c : s)
