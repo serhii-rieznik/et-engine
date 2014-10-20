@@ -152,6 +152,8 @@ std::string et::normalizeFilePath(std::string s)
 
 std::string et::getFileExt(std::string name)
 {
+	name = normalizeFilePath(name);
+
 	size_t dotPos = name.find_last_of('.');
 	if (dotPos == std::string::npos)
 		return std::string();
