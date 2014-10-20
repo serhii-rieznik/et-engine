@@ -130,63 +130,79 @@ void parseTextureFormat(const PVRTextureHeaderV3& sTextureHeader, TextureDescrip
 		
 	if ((PixelFormat & PVRTEX_PFHIGHMASK) == 0)
 	{
+		shouldDecompress = true;
 		desc.type = GL_UNSIGNED_BYTE;
+		
+#	if defined(GL_EXT_pvrtc_sRGB)
+		auto colorSpace = sTextureHeader.u32ColourSpace;
+#	endif
+		
 		switch (PixelFormat)
 		{
 			case ePVRTPF_PVRTCI_2bpp_RGB:
 			{
 				desc.channels = 3;
 				desc.format = GL_RGB;
-				
-#if defined(GL_COMPRESSED_RGB_PVRTC_2BPPV1_IMG) && (ET_PLATFORM_IOS)
-				desc.internalformat = GL_COMPRESSED_RGB_PVRTC_2BPPV1_IMG;
+#			if defined(GL_IMG_texture_compression_pvrtc)
+#				if defined(GL_EXT_pvrtc_sRGB)
+					desc.internalformat = (colorSpace == ePVRTCSpacesRGB) ?
+						GL_COMPRESSED_SRGB_PVRTC_2BPPV1_EXT : GL_COMPRESSED_RGB_PVRTC_2BPPV1_IMG;
+#				else
+					desc.internalformat = GL_COMPRESSED_RGB_PVRTC_2BPPV1_IMG;
+#				endif
 				desc.compressed = true;
 				shouldDecompress = false;
-#else
-				shouldDecompress = true;
-#endif
+#			endif
 				return;
 			}
 			case ePVRTPF_PVRTCI_2bpp_RGBA:
 			{
 				desc.channels = 4;
 				desc.format = GL_RGBA;
-				
-#if defined(GL_COMPRESSED_RGBA_PVRTC_2BPPV1_IMG) && (ET_PLATFORM_IOS)
-				desc.internalformat = GL_COMPRESSED_RGBA_PVRTC_2BPPV1_IMG;
+#			if defined(GL_IMG_texture_compression_pvrtc)
+#				if defined(GL_EXT_pvrtc_sRGB)
+					desc.internalformat = (colorSpace == ePVRTCSpacesRGB) ?
+						GL_COMPRESSED_SRGB_ALPHA_PVRTC_2BPPV1_EXT : GL_COMPRESSED_RGBA_PVRTC_2BPPV1_IMG;
+#				else
+					desc.internalformat = GL_COMPRESSED_RGBA_PVRTC_2BPPV1_IMG;
+#				endif
 				desc.compressed = true;
 				shouldDecompress = false;
-#else
-				shouldDecompress = true;
-#endif
+#			endif
 				return;
 			}
 			case ePVRTPF_PVRTCI_4bpp_RGB:
 			{
 				desc.channels = 3;
 				desc.format = GL_RGB;
-				
-#if defined(GL_COMPRESSED_RGB_PVRTC_4BPPV1_IMG) && (ET_PLATFORM_IOS)
-				desc.internalformat = GL_COMPRESSED_RGB_PVRTC_4BPPV1_IMG;
+#			if defined(GL_IMG_texture_compression_pvrtc)
+#				if defined(GL_EXT_pvrtc_sRGB)
+					desc.internalformat = (colorSpace == ePVRTCSpacesRGB) ?
+						GL_COMPRESSED_SRGB_PVRTC_4BPPV1_EXT : GL_COMPRESSED_RGB_PVRTC_4BPPV1_IMG;
+#				else
+					desc.internalformat = GL_COMPRESSED_RGB_PVRTC_4BPPV1_IMG;
+#				endif
 				desc.compressed = true;
 				shouldDecompress = false;
-#else
-				shouldDecompress = true;
-#endif
+#			endif
 				return;
 			}
 			case ePVRTPF_PVRTCI_4bpp_RGBA:
 			{
 				desc.channels = 4;
 				desc.format = GL_RGBA;
-				
-#if defined(GL_COMPRESSED_RGBA_PVRTC_4BPPV1_IMG) && (ET_PLATFORM_IOS)
-				desc.internalformat = GL_COMPRESSED_RGBA_PVRTC_4BPPV1_IMG;
+#			if defined(GL_IMG_texture_compression_pvrtc)
+#				if defined(GL_EXT_pvrtc_sRGB)
+					desc.internalformat = (colorSpace == ePVRTCSpacesRGB) ?
+						GL_COMPRESSED_SRGB_ALPHA_PVRTC_4BPPV1_EXT : GL_COMPRESSED_RGBA_PVRTC_4BPPV1_IMG;
+#				else
+					desc.internalformat = GL_COMPRESSED_RGBA_PVRTC_4BPPV1_IMG;
+#				endif
 				desc.compressed = true;
 				shouldDecompress = false;
-#else
+#			else
 				shouldDecompress = true;
-#endif
+#			endif
 				return;
 			}
 			default:
@@ -221,7 +237,7 @@ void parseTextureFormat(const PVRTextureHeaderV3& sTextureHeader, TextureDescrip
 						return;
 					}
 						
-#if defined(GL_LUMINANCE_ALPHA)
+#				if defined(GL_LUMINANCE_ALPHA)
 					case PVRTGENPIXELID2('l','a',16,16):
 					{
 						desc.type = GL_HALF_FLOAT;
@@ -230,9 +246,9 @@ void parseTextureFormat(const PVRTextureHeaderV3& sTextureHeader, TextureDescrip
 						desc.channels = 2;
 						return;
 					}
-#endif
+#				endif
 						
-#if defined(GL_LUMINANCE)
+#				if defined(GL_LUMINANCE)
 					case PVRTGENPIXELID1('l',16):
 					{
 						desc.type = GL_HALF_FLOAT;
@@ -241,7 +257,7 @@ void parseTextureFormat(const PVRTextureHeaderV3& sTextureHeader, TextureDescrip
 						desc.channels = 1;
 						return;
 					}
-#endif
+#				endif
 						
 					case PVRTGENPIXELID1('a',16):
 					{
@@ -268,7 +284,7 @@ void parseTextureFormat(const PVRTextureHeaderV3& sTextureHeader, TextureDescrip
 						return;
 					}
 						
-#if defined(GL_LUMINANCE_ALPHA)
+#				if defined(GL_LUMINANCE_ALPHA)
 					case PVRTGENPIXELID2('l','a',32,32):
 					{
 						desc.type = GL_FLOAT;
@@ -277,9 +293,9 @@ void parseTextureFormat(const PVRTextureHeaderV3& sTextureHeader, TextureDescrip
 						desc.channels = 2;
 						return;
 					}
-#endif
+#				endif
 						
-#if defined(GL_LUMINANCE)
+#				if defined(GL_LUMINANCE)
 					case PVRTGENPIXELID1('l',32):
 					{
 						desc.type = GL_FLOAT;
@@ -288,7 +304,7 @@ void parseTextureFormat(const PVRTextureHeaderV3& sTextureHeader, TextureDescrip
 						desc.channels = 1;
 						return;
 					}
-#endif
+#				endif
 						
 					case PVRTGENPIXELID1('a',32):
 					{
@@ -321,7 +337,7 @@ void parseTextureFormat(const PVRTextureHeaderV3& sTextureHeader, TextureDescrip
 						return;
 					}
 						
-#if defined(GL_LUMINANCE_ALPHA)
+#				if defined(GL_LUMINANCE_ALPHA)
 					case PVRTGENPIXELID2('l','a',8,8):
 					{
 						desc.format = GL_LUMINANCE_ALPHA;
@@ -329,9 +345,9 @@ void parseTextureFormat(const PVRTextureHeaderV3& sTextureHeader, TextureDescrip
 						desc.channels = 2;
 						return;
 					}
-#endif
+#				endif
 						
-#if defined(GL_LUMINANCE)
+#				if defined(GL_LUMINANCE)
 					case PVRTGENPIXELID1('l',8):
 					{
 						desc.format = GL_LUMINANCE;
@@ -339,7 +355,7 @@ void parseTextureFormat(const PVRTextureHeaderV3& sTextureHeader, TextureDescrip
 						desc.channels = 1;
 						return;
 					}
-#endif
+#				endif
 						
 					case PVRTGENPIXELID1('a',8):
 					{
