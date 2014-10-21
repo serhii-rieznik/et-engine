@@ -152,8 +152,20 @@ std::string et::normalizeFilePath(std::string s)
 
 std::string et::getFileExt(std::string name)
 {
+	name = normalizeFilePath(name);
+
 	size_t dotPos = name.find_last_of('.');
-	return (dotPos == std::string::npos) ? "" : name.substr(++dotPos);
+	if (dotPos == std::string::npos)
+		return std::string();
+	
+	size_t slashPos = name.find_last_of(pathDelimiter);
+	if (slashPos == std::string::npos)
+		return name.substr(dotPos + 1);
+	
+	if (dotPos > slashPos)
+		return name.substr(dotPos + 1);
+	
+	return std::string();
 }
 
 float et::extractFloat(std::string& s)

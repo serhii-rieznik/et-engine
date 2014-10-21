@@ -43,27 +43,36 @@ ConsoleOutput::ConsoleOutput() :
 {
 }
 
-void ConsoleOutput::debug(const char* fmt, va_list args)
+void ConsoleOutput::debug(const char* format, va_list args)
 {
-	FileOutput::debug(fmt, args);
+#if (ET_DEBUG)
+	info(format, args);
+#endif
 }
 
-void ConsoleOutput::info(const char* fmt, va_list args)
+void ConsoleOutput::info(const char* format, va_list args)
 {
-	FileOutput::info(fmt, args);
+	static char storage[2048] = {};
+	int pos = vsnprintf(storage, 2048, format, args);
+	storage[pos++] = '\n';
+	storage[pos++] = 0;
+	OutputDebugString(storage);
 }
 
 void ConsoleOutput::warning(const char* fmt, va_list args)
 {
-	FileOutput::warning(fmt, args);
+	OutputDebugString("WARNING: ");
+	info(fmt, args);
 }
 
 void ConsoleOutput::error(const char* fmt, va_list args)
 {
-	FileOutput::error(fmt, args);
+	OutputDebugString("ERROR: ");
+	info(fmt, args);
 }
 
-FileOutput::FileOutput(FILE* file) : _file(file)
+FileOutput::FileOutput(FILE* file) :
+	_file(file)
 {
 	if (file == nullptr)
 	{
@@ -100,7 +109,7 @@ void FileOutput::debug(const char* format, va_list args)
 
 void FileOutput::info(const char* format, va_list args)
 {
-	vfprintf(_file, format, args);
+	fprintf(_file, format, args);
 	fprintf(_file, "\n");
 	fflush(_file);
 }
