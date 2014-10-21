@@ -40,9 +40,9 @@ void Application::loaded()
 	RenderContextParameters parameters;
 	delegate()->setRenderContextParameters(parameters);
 	
+#if !defined(ET_CONSOLE_APPLICATION)
 	_renderContext = new RenderContext(parameters, this);
 	
-#if !defined(ET_CONSOLE_APPLICATION)
 	NSMenu* mainMenu = [[NSMenu allocWithZone:[NSMenu menuZone]] init];
 	NSMenuItem* applicationMenuItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] init];
 	[mainMenu addItem:applicationMenuItem];
@@ -94,17 +94,22 @@ void Application::platformInit()
 
 int Application::platformRun(int, char*[])
 {
+#if defined(ET_CONSOLE_APPLICATION)
+	
+	loaded();
+	
+#else
+	
 	@autoreleasepool
 	{
-#if defined(ET_CONSOLE_APPLICATION)
-		
-#else
 		etApplicationDelegate* delegate = ET_OBJC_AUTORELEASE([[etApplicationDelegate alloc] init]);
 		[[NSApplication sharedApplication] setDelegate:delegate];
 		[[NSApplication sharedApplication] run];
-#endif
 	}
-	return 0;
+	
+#endif
+	
+	return _exitCode;
 }
 
 void Application::platformFinalize()

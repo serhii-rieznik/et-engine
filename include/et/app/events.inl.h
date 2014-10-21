@@ -9,8 +9,8 @@ inline bool shouldRemoveConnection(EventConnectionBase* b)
 	{ return (b == nullptr) || b->removed(); }
 
 /*
-* Event0Connection
-*/
+ * Event0Connection
+ */
 
 template <typename T>
 Event0Connection<T>::Event0Connection(T* receiver, void(T::*func)()) :  
@@ -19,8 +19,8 @@ Event0Connection<T>::Event0Connection(T* receiver, void(T::*func)()) :
 }
 
 /*
-* Event0
-*/
+ * Event0
+ */
 
 template <typename R>
 inline void Event0::connect(R* receiver, void (R::*receiverMethod)())
@@ -64,11 +64,6 @@ Event1Connection<ReceiverType, ArgType>::Event1Connection(ReceiverType* receiver
 /*
 * Event1
 */
-template <typename ArgType>
-Event1<ArgType>::Event1() : _invoking(false)
-{
-}
-
 template <typename ArgType>
 Event1<ArgType>::~Event1()
 {
@@ -181,11 +176,6 @@ Event2Connection<ReceiverType, Arg1Type, Arg2Type>::Event2Connection(ReceiverTyp
 /*
 * Event2
 */
-template <typename Arg1Type, typename Arg2Type>
-Event2<Arg1Type, Arg2Type>::Event2() : _invoking(false)
-{
-}
-
 template <typename Arg1Type, typename Arg2Type>
 Event2<Arg1Type, Arg2Type>::~Event2()
 {

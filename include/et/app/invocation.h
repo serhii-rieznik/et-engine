@@ -26,7 +26,9 @@ namespace et
 	class PureInvocation
 	{
 	public:
-		PureInvocation() : _target(0) { };
+		PureInvocation() :
+			_target(nullptr) { };
+		
 		virtual ~PureInvocation() { };
 
 		virtual void invoke() = 0;
@@ -41,10 +43,11 @@ namespace et
 	public:
 		InvocationTask(PureInvocationTarget* invocation);
 		~InvocationTask();
+		
 		void execute();
 
 	private:
-		PureInvocationTarget* _invocation;
+		PureInvocationTarget* _invocation = nullptr;
 	};
 
 	template <typename T>
@@ -63,8 +66,8 @@ namespace et
 		ET_DENY_COPY(InvocationTarget)
 		
 	private:
-		T* _object;
-		void(T::*_method)();
+		T* _object = nullptr;
+		void (T::*_method)();
 	};
 	
 	template <typename F>
@@ -107,8 +110,8 @@ namespace et
 		ET_DENY_COPY(Invocation1Target)
 
 	private:
-		T* _object;
-		void(T::*_method)(A1);
+		T* _object = nullptr;
+		void (T::*_method)(A1);
 		A1 _param;
 	};
 
@@ -160,8 +163,8 @@ namespace et
 			{ return *this; }
 
 	private:
-		T* _object;
-		void(T::*_method)(A1, A2);
+		T* _object = nullptr;
+		void (T::*_method)(A1, A2);
 		A1 _p1;
 		A2 _p2;
 	};
@@ -206,9 +209,6 @@ namespace et
 		template <typename F>
 		void setTarget(F func)
 			{ _target = new DirectInvocationTarget<F>(func); }
-
-	private:
-		AutoPtr<PureInvocationTarget> _target;
 	};
 
 	class Invocation1 : public PureInvocation

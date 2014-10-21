@@ -142,7 +142,7 @@ namespace et
 		
 		ApplicationParameters _parameters;
 		ApplicationIdentifier _identifier;
-		RenderContext* _renderContext;
+		RenderContext* _renderContext = nullptr;
 		
 		Environment _env;
 		StandardPathResolver _standardPathResolver;
@@ -158,13 +158,13 @@ namespace et
 		AtomicBool _active;
 		AtomicBool _suspended;
 		
-		size_t _renderingContextHandle;
-		uint64_t _lastQueuedTimeMSec;
-		uint64_t _fpsLimitMSec;
-		uint64_t _fpsLimitMSecFractPart;
+		size_t _renderingContextHandle = 0;
+		uint64_t _lastQueuedTimeMSec = 0;
+		uint64_t _fpsLimitMSec = 15;
+		uint64_t _fpsLimitMSecFractPart = 0;
 		
-		int _exitCode;
-		bool _postResizeOnActivate;
+		int _exitCode = 0;
+		bool _postResizeOnActivate = false;
 	};
 
 	inline Application& application()

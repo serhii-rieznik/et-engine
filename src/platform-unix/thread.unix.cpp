@@ -157,5 +157,5 @@ void Thread::sleep(float seconds)
 
 void Thread::sleepMSec(uint64_t msec)
 {
-	usleep(static_cast<useconds_t>(msec) * 1000);
+	usleep(static_cast<useconds_t>(msec * 1000));
 }

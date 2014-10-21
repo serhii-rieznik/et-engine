@@ -39,14 +39,14 @@ namespace et
 	public:
 		virtual ~Event() { }
 		virtual void receiverDisconnected(EventReceiver* receiver) = 0;
+		
+	protected:
+		AtomicBool _invoking;
 	};
 	
 	class EventConnectionBase
 	{
 	public:
-		EventConnectionBase() : 
-		  _removed(false) { }
-
 		virtual ~EventConnectionBase() { }
 
 		bool removed() const
@@ -64,8 +64,8 @@ namespace et
 		virtual bool hasConnections()
 			{ return false; }
 
-	private:
-		bool _removed;
+	protected:
+		AtomicBool _removed;
 	};
 
 	/*
@@ -145,7 +145,6 @@ namespace et
 	class Event0 : public Event, public Event0ConnectionBase
 	{
 	public:
-		Event0();
 		~Event0();
 
 		template <typename R>
@@ -167,20 +166,18 @@ namespace et
 		
 	private:
 		EventReceiver* receiver() 
-			{ return 0; }
+			{ return nullptr; }
 
 		void cleanup();
 
 	private:
 		typedef std::vector<Event0ConnectionBase*> ConnectionList;
 		ConnectionList _connections; 
-		bool _invoking;
 	};
 
 	/*
 	* Event 1
 	*/
-
 	template <typename ArgType>
 	class Event1ConnectionBase : public EventConnectionBase
 	{
@@ -217,7 +214,7 @@ namespace et
 
 	private:
 		void (ReceiverType::*_receiverMethod)(ArgType);
-		ReceiverType* _receiver;
+		ReceiverType* _receiver = nullptr;
 	};
 
 	template <typename F, typename ArgType>
@@ -255,7 +252,6 @@ namespace et
 	class Event1 : public Event, public Event1ConnectionBase<ArgType>
 	{
 	public:
-		Event1();
 		~Event1();
 
 		template <typename ReceiverType>
@@ -283,7 +279,6 @@ namespace et
 	private:
 		typedef std::vector< Event1ConnectionBase<ArgType>* > ConnectionList;
 		ConnectionList _connections;
-		bool _invoking;
 	};
 
 	/*
@@ -326,7 +321,7 @@ namespace et
 
 	private:
 		void (ReceiverType::*_receiverMethod)(Arg1Type, Arg2Type);
-		ReceiverType* _receiver;
+		ReceiverType* _receiver = nullptr;
 	};
 	
 	template <typename F, typename ArgType1, typename ArgType2>
@@ -364,7 +359,6 @@ namespace et
 	class Event2 : public Event, public Event2ConnectionBase<Arg1Type, Arg2Type>
 	{
 	public:
-		Event2();
 		~Event2();
 
 		template <typename ReceiverType>
@@ -390,9 +384,7 @@ namespace et
 	private:
 		typedef std::vector<Event2ConnectionBase<Arg1Type, Arg2Type>*> ConnectionList;
 		ConnectionList _connections; 
-		bool _invoking;
 	};
 
-#include <et/app/events.inl.h>
-
+#	include <et/app/events.inl.h>
 }

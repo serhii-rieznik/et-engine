@@ -58,17 +58,34 @@ void ConsoleOutput::debug(const char* fmt, va_list args)
 
 void ConsoleOutput::info(const char* fmt, va_list args)
 {
+#if defined(ET_DENY_NSLOG)
+	vprintf(fmt, args);
+	printf("\n");
+#else
 	NSLogv([NSString stringWithFormat:@"%s", fmt], args);
+#endif
 }
 
 void ConsoleOutput::warning(const char* fmt, va_list args)
 {
+#if defined(ET_DENY_NSLOG)
+	printf("WARNING: ");
+	vprintf(fmt, args);
+	printf("\n");
+#else
 	NSLogv([NSString stringWithFormat:@"WARNING: %s", fmt], args);
+#endif
 }
 
 void ConsoleOutput::error(const char* fmt, va_list args)
 {
+#if defined(ET_DENY_NSLOG)
+	printf("ERROR: ");
+	vprintf(fmt, args);
+	printf("\n");
+#else
 	NSLogv([NSString stringWithFormat:@"ERROR: %s", fmt], args);
+#endif
 }
 
 FileOutput::FileOutput(FILE* file) : _file(file)

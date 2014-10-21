@@ -18,10 +18,10 @@ namespace et
 
 IApplicationDelegate* et::Application::_delegate = nullptr;
 
-Application::Application() : _renderContext(nullptr), _exitCode(0),
-	_lastQueuedTimeMSec(queryContiniousTimeInMilliSeconds()),
-	_fpsLimitMSec(0), _fpsLimitMSecFractPart(0), _postResizeOnActivate(false)
+Application::Application()
 {
+	_lastQueuedTimeMSec = queryContiniousTimeInMilliSeconds();
+	
 	threading();
 
 	log::addOutput(log::ConsoleOutput::Pointer::create());
@@ -82,9 +82,20 @@ void Application::enterRunLoop()
 	_standardPathResolver.setRenderContext(_renderContext);
 	delegate()->applicationDidLoad(_renderContext);
 	
-	_renderContext->init();
+#if defined(ET_CONSOLE_APPLICATION)
 	
 	setActive(true);
+	
+	while (_running)
+		idle();
+	
+	terminated();
+#else
+	
+	_renderContext->init();
+	setActive(true);
+	
+#endif
 }
 
 void Application::performRendering()
@@ -107,7 +118,10 @@ void Application::idle()
 		{
 			_runLoop.update(currentTime);
 			_delegate->idle(_runLoop.mainTimerPool()->actualTime());
+			
+#		if !defined(ET_CONSOLE_APPLICATION)
 			performRendering();
+#		endif
 		}
 		
 		_lastQueuedTimeMSec = queryContiniousTimeInMilliSeconds();

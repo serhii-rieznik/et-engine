@@ -35,13 +35,6 @@ void EventReceiver::eventDisconnected(Event* e)
  * Event0
  *
  */
-
-Event0::Event0() :
-	_invoking(false)
-{
-	
-}
-
 Event0::~Event0()
 {
 	for (auto& connection : _connections)

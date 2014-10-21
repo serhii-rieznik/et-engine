@@ -74,17 +74,22 @@ uint64_t et::getFileDate(const std::string& path)
 
 std::string et::applicationPath()
 {
-    char result[256] = { };
-    
-    CFURLRef bUrl = CFBundleCopyBundleURL(CFBundleGetMainBundle());
-    CFURLGetFileSystemRepresentation(bUrl, true, reinterpret_cast<UInt8*>(result), 256);
-    CFRelease(bUrl);
-    
-    size_t i = 0;
-    while ((i < 256) && result[++i]) { };
-    result[i] = '/';
-    
-    return std::string(result);
+	static std::string result;
+	if (result.empty())
+	{
+		char buffer[256] = { };
+		
+		CFURLRef bUrl = CFBundleCopyBundleURL(CFBundleGetMainBundle());
+		CFURLGetFileSystemRepresentation(bUrl, true, reinterpret_cast<UInt8*>(buffer), 256);
+		CFRelease(bUrl);
+		
+		size_t i = 0;
+		while ((i < 256) && buffer[++i]);
+		buffer[i] = '/';
+		
+		result = std::string(buffer);
+	}
+    return result;
 }
 
 std::string et::applicationPackagePath()
@@ -94,17 +99,23 @@ std::string et::applicationPackagePath()
 
 std::string et::applicationDataFolder()
 {
-    char result[256] = { };
-    
-	CFURLRef bUrl = CFBundleCopyResourcesDirectoryURL(CFBundleGetMainBundle());
-    CFURLGetFileSystemRepresentation(bUrl, true, reinterpret_cast<UInt8*>(result), 256);
-    CFRelease(bUrl);
-    
-    size_t i = 0;
-    while ((i < 256) && result[++i]) { };
-    result[i] = '/';
-    
-	return std::string(result);
+	static std::string result;
+	if (result.empty())
+	{
+		char buffer[512] = { };
+		
+		CFURLRef bUrl = CFBundleCopyResourcesDirectoryURL(CFBundleGetMainBundle());
+		CFURLGetFileSystemRepresentation(bUrl, true, reinterpret_cast<UInt8*>(buffer), 256);
+		CFRelease(bUrl);
+		
+		size_t i = 0;
+		while ((i < 256) && buffer[++i]);
+		buffer[i] = '/';
+		
+		result = std::string(buffer);
+	}
+	
+	return result;
 }
 
 bool et::fileExists(const std::string& name)
