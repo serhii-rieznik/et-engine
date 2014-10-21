@@ -68,10 +68,14 @@ void Application::loaded()
 	enterRunLoop();
 }
 
-void Application::quit(int)
+void Application::quit(int code)
 {
-#if !defined(ET_CONSOLE_APPLICATION)
+#if defined(ET_CONSOLE_APPLICATION)
+	_running = false;
+	_exitCode = code;
+#else
 	[[NSApplication sharedApplication] terminate:nil];
+	(void)code;
 #endif
 }
 
