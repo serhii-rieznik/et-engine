@@ -12,8 +12,15 @@
 
 using namespace et;
 
-TimerPool::TimerPool(RunLoop* owner) : _owner(owner)
+TimerPool::TimerPool(RunLoop* owner) :
+	_owner(owner)
 {
+}
+
+bool TimerPool::hasObjects()
+{
+	CriticalSectionScope lock(_lock);
+	return !(_timedObjects.empty() && _queue.empty());
 }
 
 void TimerPool::attachTimedObject(TimedObject* obj)

@@ -28,14 +28,14 @@ using namespace et::audio;
 extern ALCdevice* getSharedDevice();
 extern ALCcontext* getSharedContext();
 
-Player::Player() : 
-	_private(new PlayerPrivate), _volumeAnimator(mainTimerPool())
+Player::Player() :
+	_private(new PlayerPrivate), _volumeAnimator(currentTimerPool())
 {
 	init();
 }
 
 Player::Player(Track::Pointer track) : 
-	_private(new PlayerPrivate), _volumeAnimator(mainTimerPool())
+	_private(new PlayerPrivate), _volumeAnimator(currentTimerPool())
 {
 	init();
 	linkTrack(track);
@@ -54,7 +54,8 @@ Player::~Player()
 void Player::init()
 {
 	_volumeAnimator.animate(1.0f, 0.0f);
-	_volumeAnimator.updated.connect([this]() { setActualVolume(_volumeAnimator.value()); });
+	_volumeAnimator.updated.connect([this]()
+		{ setActualVolume(_volumeAnimator.value()); });
 
 	alGenSources(1, &_private->source);
     checkOpenALError("alGenSources");

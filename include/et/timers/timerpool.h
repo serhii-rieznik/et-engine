@@ -33,6 +33,8 @@ namespace et
 
 		void setOwner(RunLoop* owner)
 			{ _owner = owner; }
+		
+		bool hasObjects();
 
 	private:
 		ET_DENY_COPY(TimerPool)

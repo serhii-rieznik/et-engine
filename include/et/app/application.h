@@ -167,15 +167,21 @@ namespace et
 		bool _postResizeOnActivate = false;
 	};
 
+	/*
+	 * currentRunLoop - returns background run loop if called in background and mainRunLoop otherwise
+	 */
+	RunLoop& currentRunLoop();
+	TimerPool::Pointer currentTimerPool();
+	
 	inline Application& application()
 		{ return Application::instance(); }
 
 	inline RunLoop& mainRunLoop()
 		{ return Application::instance().mainRunLoop(); }
 
-	inline TimerPool::Pointer& mainTimerPool()
-		{ return Application::instance().mainRunLoop().mainTimerPool(); }
-
 	inline RunLoop& backgroundRunLoop()
 		{ return Application::instance().backgroundRunLoop(); }
+	
+	inline TimerPool::Pointer& mainTimerPool()
+		{ return Application::instance().mainRunLoop().firstTimerPool(); }
 }

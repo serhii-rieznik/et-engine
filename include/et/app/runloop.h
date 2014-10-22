@@ -27,7 +27,7 @@ namespace et
 		uint64_t timeMSec() const
 			{ return _actualTimeMSec; }
 
-		TimerPool::Pointer& mainTimerPool()
+		TimerPool::Pointer& firstTimerPool()
 			{ return _timerPools.front(); }
 		
 		void updateTime(uint64_t t);

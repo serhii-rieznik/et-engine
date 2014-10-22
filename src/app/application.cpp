@@ -121,7 +121,7 @@ void Application::idle()
 		if (!_suspended)
 		{
 			_runLoop.update(currentTime);
-			_delegate->idle(_runLoop.mainTimerPool()->actualTime());
+			_delegate->idle(_runLoop.firstTimerPool()->actualTime());
 			
 #		if !defined(ET_CONSOLE_APPLICATION)
 			performRendering();
@@ -296,4 +296,20 @@ void Application::setPathResolver(PathResolver::Pointer resolver)
 void Application::setShouldSilentPathResolverErrors(bool e)
 {
 	_standardPathResolver.setSilentErrors(e);
+}
+
+/*
+ * Service
+ */
+RunLoop& et::currentRunLoop()
+{
+	if (Threading::currentThread() == application().backgroundThread().id())
+		return application().backgroundRunLoop();
+	
+	return mainRunLoop();
+}
+
+TimerPool::Pointer et::currentTimerPool()
+{
+	return currentRunLoop().firstTimerPool();
 }
