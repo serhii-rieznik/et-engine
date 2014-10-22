@@ -100,9 +100,13 @@ void Application::enterRunLoop()
 
 void Application::performRendering()
 {
+#if defined(ET_CONSOLE_APPLICATION)
+	
+#else
 	_renderContext->beginRender();
 	_delegate->render(_renderContext);
 	_renderContext->endRender();
+#endif
 }
 
 void Application::idle()
