@@ -53,6 +53,8 @@ void Sample::loadPrograms(et::RenderContext* rc)
 	_program->setUniform("cloudsTexture", 0);
 
 	_frustumProgram = rc->programFactory().loadProgram("data/shaders/lines.program", _cache);
+	
+	_modelProgram = rc->programFactory().loadProgram("data/shaders/model.program", _cache);
 }
 
 void Sample::initCamera(et::RenderContext* rc)
@@ -116,9 +118,24 @@ void Sample::render(et::RenderContext* rc)
 		rc->renderState().bindTexture(0, _texture);
 		rc->renderState().bindVertexArray(_vao);
 		rc->renderer()->drawAllElements(_vao->indexBuffer());
+		
 		rc->renderState().setWireframeRendering(false);
 	}
 
+	if (_model.valid())
+	{
+		rc->renderState().setWireframeRendering(_wireframe);
+		rc->renderState().setCulling(CullState_Back);
+		rc->renderState().bindVertexArray(_model);
+		rc->renderState().bindProgram(_modelProgram);
+		_modelProgram->setCameraProperties(cam);
+		_modelProgram->setCameraPosition(_camera.position());
+		_modelProgram->setPrimaryLightPosition(_camera.position());
+		_modelProgram->setUniform("center", _camera.position() - 6.0f * _camera.direction() - vec3(0.0f, 1.0f, 0.0f));
+		rc->renderer()->drawAllElements(_model->indexBuffer());
+		rc->renderState().setWireframeRendering(false);
+	}
+	
 	if (_observing)
 	{
 		rc->renderState().bindProgram(_frustumProgram);
@@ -299,4 +316,9 @@ void Sample::toggleObserving()
 void Sample::toggleWireframe()
 {
 	_wireframe = !_wireframe;
+}
+
+void Sample::setModelToDraw(const et::VertexArrayObject& m)
+{
+	_model = m;
 }

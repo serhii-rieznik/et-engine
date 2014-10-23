@@ -1,3 +1,5 @@
+#include <et/models/objloader.h>
+#include <et/primitives/primitives.h>
 #include "maincontroller.h"
 
 using namespace et;
@@ -16,20 +18,46 @@ void MainController::setRenderContextParameters(et::RenderContextParameters& p)
 
 void MainController::applicationDidLoad(et::RenderContext* rc)
 {
-	_resourceManager.load(rc);
-	_gui = gui::Gui::Pointer(new gui::Gui(rc));
-
-	_mainMenu = MainMenuLayout::Pointer(new MainMenuLayout(rc, _resourceManager));
-	_gui->pushLayout(_mainMenu);
-
+	rc->renderState().setClearColor(vec4(0.25f));
+	
 	_sample.prepare(rc);
 
 	ET_CONNECT_EVENT(_gestures.pressed, MainController::pointerPressed)
 	
-	ET_CONNECT_EVENT(input().keyPressed, MainController::onKeyPressed)
+	ET_CONNECT_EVENT(input().charactersEntered, MainController::onCharactersEntered)
 	ET_CONNECT_EVENT(_gestures.drag, MainController::onDrag)
 	ET_CONNECT_EVENT(_gestures.zoom, MainController::onZoom)
 	ET_CONNECT_EVENT(_gestures.scroll, MainController::onScroll)
+	
+	ObjectsCache localCache;
+	OBJLoader loader(rc, "data/models/bunny.obj");
+	auto container = loader.load(localCache, OBJLoader::Option_SupportMeshes);
+	s3d::SupportMesh::Pointer mesh = container->childrenOfType(s3d::ElementType_SupportMesh).front();
+	
+	if (mesh.valid())
+	{
+		const auto& tris = mesh->triangles();
+		
+		VertexDeclaration decl(true, Usage_Position, Type_Vec3);
+		decl.push_back(Usage_Normal, Type_Vec3);
+		
+		VertexArray::Pointer vdata = VertexArray::Pointer::create(decl, 3 * tris.size());
+		
+		size_t i = 0;
+		auto verts = vdata->chunk(Usage_Position).accessData<vec3>(0);
+		for (const auto& t : tris)
+		{
+			verts[i++] = t.v3();
+			verts[i++] = t.v2();
+			verts[i++] = t.v1();
+		}
+		IndexArray::Pointer idata = IndexArray::Pointer::create(IndexArrayFormat_32bit, 0, PrimitiveType_Triangles);
+		vdata = primitives::buildLinearIndexArray(vdata, idata);
+		primitives::calculateNormals(vdata, idata, 0, idata->primitivesCount());
+		
+		_sample.setModelToDraw(rc->vertexBufferFactory().createVertexArrayObject("model", vdata, BufferDrawType_Static,
+			idata, BufferDrawType_Static));
+	}
 }
 
 void MainController::applicationWillTerminate()
@@ -39,8 +67,6 @@ void MainController::applicationWillTerminate()
 
 void MainController::applicationWillResizeContext(const et::vec2i& sz)
 {
-	vec2 fsz(static_cast<float>(sz.x), static_cast<float>(sz.y));
-	_gui->layout(fsz);
 }
 
 void MainController::applicationWillActivate()
@@ -57,7 +83,6 @@ void MainController::render(et::RenderContext* rc)
 {
 	rc->renderer()->clear();
 	_sample.render(rc);
-	_gui->render(rc);
 }
 
 void MainController::idle(float)
@@ -93,9 +118,9 @@ void MainController::onZoom(float v)
 	_sample.zoom(v);
 }
 
-void MainController::onKeyPressed(size_t key)
+void MainController::onCharactersEntered(std::string chars)
 {
-	int upCase = ::toupper(static_cast<int>(key & 0xffffffff));
+	int upCase = ::toupper(static_cast<int>(chars.front() & 0xffffffff));
 
 	if (upCase == 'O')
 		_sample.toggleObserving();

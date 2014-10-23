@@ -172,7 +172,7 @@ void OBJLoader::loadData(bool async, ObjectsCache& cache)
 			
 			if (usemtl.compare("semtl") == 0) 
 			{
-				if (lastGroup == 0)
+				if (lastGroup == nullptr)
 				{
 					lastGroup = new OBJGroup();
 					groups.push_back(lastGroup);
@@ -189,7 +189,7 @@ void OBJLoader::loadData(bool async, ObjectsCache& cache)
 		}
 		else if (key == 's') // smoothing group
 		{
-			if (lastGroup == 0)
+			if (lastGroup == nullptr)
 			{
 				lastGroup = new OBJGroup();
 				groups.push_back(lastGroup);
@@ -223,6 +223,13 @@ void OBJLoader::loadData(bool async, ObjectsCache& cache)
 
 				face.vertices.push_back(vertex);
 			}
+			
+			if (lastGroup == nullptr)
+			{
+				lastGroup = new OBJGroup;
+				groups.push_back(lastGroup);
+			}
+			
 			lastGroup->faces.push_back(face);
 		}
 		else if (key == 'v')

@@ -1,28 +1,20 @@
-etHighp vec2 CookTorrance(etHighp  vec3 _normal, etHighp vec3 _light, etHighp vec3 _view, etHighp float _roughness)
+float CookTorrance(vec3 n, vec3 l, vec3 v, float r)
 {
-	etHighp float NdotL = max( dot( _normal, _light ), 0.0 );
-	etHighp float Rs = 0.0;
-	
-	if (_roughness > 0.0)
+	float NdotL = dot(n, l);
+	if (NdotL > 0.0)
 	{
-		etHighp vec3 half_vec = normalize( _view + _light );
+		vec3 h = normalize(v + l);
 		
-		etHighp float NdotV = max( dot( _normal, _view ), 0.0 );
-		etHighp float NdotH = max( dot( _normal, half_vec ), 1.0e-7 );
-		etHighp float VdotH = max( dot( _view, half_vec ), 1.0e-7 );
-		
-		etHighp float geometric = 2.0 * NdotH / VdotH;
-		geometric = min( 1.0, geometric * min(NdotV, NdotL) );
-		
-		etHighp float r_sq = _roughness * _roughness;
-		etHighp float NdotH_sq = NdotH * NdotH;
-		etHighp float NdotH_sq_r = 1.0 / (NdotH_sq * r_sq);
-		etHighp float roughness_exp = (NdotH_sq - 1.0) * ( NdotH_sq_r );
-		etHighp float roughness = 0.25 * exp(roughness_exp) * NdotH_sq_r / NdotH_sq;
-		etHighp float fresnel = 1.0 / (1.0 + NdotV);
-		
-		Rs = fresnel * geometric * roughness / (NdotV + 1.0e-7);
+		float NdotV = dot(n, v);
+		float NdotH = dot(n, h);
+		float VdotH = dot(v, h);
+		float NdotH2 = NdotH * NdotH;
+		float NdotH2r2 = NdotH2 * r * r;
+		float roughness_exp = (NdotH2 - 1.0) / NdotH2r2;
+		float roughness = 0.25 * exp(roughness_exp) / (NdotH2r2 * NdotH2);
+		float fresnel = 1.0 / (NdotV + 1.0);
+		float geometric = min(1.0, 2.0 * NdotH * min(NdotV, NdotL) / VdotH);
+		return geometric * roughness * fresnel / NdotV;
 	}
-	
-	return vec2(NdotL, min(1.0, Rs));
+	return 0.0;
 }

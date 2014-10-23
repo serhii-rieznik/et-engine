@@ -8,6 +8,7 @@
 
 #pragma once
 
+#include <et/camera/camera.h>
 #include <et/rendering/rendercontext.h>
 #include <et/timers/inertialvalue.h>
 
@@ -23,6 +24,8 @@ namespace demo
 		void dragCamera(const et::vec2&);
 		void panCamera(const et::vec2&);
 		void zoom(float);
+		
+		void setModelToDraw(const et::VertexArrayObject&);
 
 		void toggleObserving();
 		void toggleWireframe();
@@ -46,6 +49,7 @@ namespace demo
 
 		et::VertexArrayObject _vao;
 		et::VertexArrayObject _frustumGeometry;
+		et::VertexArrayObject _model;
 
 		et::Camera _camera;
 		et::Camera _observingCamera;
@@ -53,6 +57,7 @@ namespace demo
 
 		et::Program::Pointer _program;
 		et::Program::Pointer _frustumProgram;
+		et::Program::Pointer _modelProgram;
 		et::Texture _texture;
 
 		et::InertialValue<et::vec2> _cameraAngles;

@@ -2,7 +2,6 @@
 
 #include <et/app/application.h>
 #include <et/input/gestures.h>
-#include "ui/mainmenu.h"
 #include "sample/sample.h"
 
 namespace demo
@@ -28,18 +27,14 @@ namespace demo
 		void onDrag(et::vec2, et::PointerType);
 		void onScroll(et::vec2, et::PointerOrigin);
 		void onZoom(float);
-		void onKeyPressed(size_t);
-
+		void onCharactersEntered(std::string chars);
+		
 		void pointerPressed(et::vec2, et::PointerType);
 		
 	private:
-		ResourceManager _resourceManager;
-
 		et::ObjectsCache _mainTextureCache;
-		et::gui::Gui::Pointer _gui;
 		et::GesturesRecognizer _gestures;
-
-		MainMenuLayout::Pointer _mainMenu;
+		et::VertexArrayObject _sphere;
 		Sample _sample;
 	};
 }

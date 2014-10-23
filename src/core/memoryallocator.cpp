@@ -7,8 +7,8 @@
 //
 
 #include <et/core/et.h>
+#include <et/core/memoryallocator.h>
 #include <et/threading/criticalsection.h>
-#include "MemoryAllocator.h"
 
 namespace et
 {

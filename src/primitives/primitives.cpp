@@ -478,27 +478,29 @@ void primitives::calculateNormals(VertexArray::Pointer data, const IndexArray::P
 	RawDataAcessor<vec3> nrm = nrmChunk.accessData<vec3>(0);
 	RawDataAcessor<vec3> pos = posChunk.accessData<vec3>(0);
 	
-	for (auto i = buffer->primitive(first), e = buffer->primitive(last); i != e; ++i)
+	const auto& e = buffer->primitive(last);
+	
+	for (auto i = buffer->primitive(first); i != e; ++i)
 	{
-		auto p = (*i);
+		const auto& p = (*i);
 		nrm[p[0]] = vec3(0.0f);
 		nrm[p[1]] = vec3(0.0f);
 		nrm[p[2]] = vec3(0.0f);
 	}
 
-	for (auto i = buffer->primitive(first), e = buffer->primitive(last); i != e; ++i)
+	for (auto i = buffer->primitive(first); i != e; ++i)
 	{
-		auto p = (*i);
+		const auto& p = (*i);
 		triangle t(pos[p[0]], pos[p[1]], pos[p[2]]);
 		vec3 n = t.normalizedNormal() * t.square();
 		nrm[p[0]] += n;
 		nrm[p[1]] += n;
 		nrm[p[2]] += n;
 	}
-
-	for (auto i = buffer->primitive(first), e = buffer->primitive(last); i != e; ++i)
+	
+	for (auto i = buffer->primitive(first); i != e; ++i)
 	{
-		auto p = (*i);
+		const auto& p = (*i);
 		nrm[p[0]].normalize();
 		nrm[p[1]].normalize();
 		nrm[p[2]].normalize();
@@ -989,13 +991,12 @@ void primitives::tesselateTriangles(VertexArray::Pointer data, const vec3& aspec
 
 uint64_t primitives::vector3Hash(const vec3& v)
 {
-/* */
 	char raw[256] = { };
 	
-	int64_t ix = static_cast<int64_t>(100.0f * v.x) * 174763;
-	int64_t iy = static_cast<int64_t>(100.0f * v.y) * 478441;
-	int64_t iz = static_cast<int64_t>(100.0f * v.z) * 720743;
-	int symbols = sprintf(raw, "%lld%lld%lld", ix, iy, iz);
+	int64_t ix = static_cast<int64_t>(174763.0f * v.x);
+	int64_t iy = static_cast<int64_t>(478441.0f * v.y);
+	int64_t iz = static_cast<int64_t>(720743.0f * v.z);
+	int symbols = sprintf(raw, "%lld%lld%lld%lld", ix, iy, iz, ix+iy+iz);
 	
 	uint64_t* ptr = reinterpret_cast<uint64_t*>(raw);
 	uint64_t* end = ptr + symbols / sizeof(uint64_t) + 1;
