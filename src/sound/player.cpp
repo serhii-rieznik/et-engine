@@ -61,16 +61,16 @@ void Player::init()
     checkOpenALError("alGenSources");
 
 	alSourcef(_private->source, AL_PITCH, 1.0f);
-    checkOpenALError("alSourcef(..., AL_PITCH, ...)");
+    checkOpenALError("alSourcef(%u, AL_PITCH, 1.0f)", _private->source);
 
 	setActualVolume(1.0f);
 	
 	vec3 nullVector;
 	alSourcefv(_private->source, AL_POSITION, nullVector.data());
-    checkOpenALError("alSourcefv(..., AL_POSITION, ...)");
+    checkOpenALError("alSourcefv(%u, AL_POSITION, ...)", _private->source);
 	
 	alSourcefv(_private->source, AL_VELOCITY, nullVector.data());
-    checkOpenALError("alSourcefv(..., AL_VELOCITY, ...)");
+    checkOpenALError("alSourcefv(%u, AL_VELOCITY, ...)", _private->source);
 }
 
 void Player::play(bool looped)
@@ -96,6 +96,7 @@ void Player::play(bool looped)
 			checkOpenALError("alSourceUnqueueBuffers");
 		}
 		alSourcei(_private->source, AL_BUFFER, 0);
+		checkOpenALError("alSourcei(%u, AL_BUFFER, 0)", _private->source);
 		
 		_private->buffersProcessed = 0;
 		_private->playingLooped = looped;
@@ -105,16 +106,16 @@ void Player::play(bool looped)
 		if (_track->streamed())
 		{
 			alSourceQueueBuffers(_private->source, _track->actualBuffersCount(), _track->buffers());
-			checkOpenALError("alSourceQueueBuffers(.., %d, %u)", _track->actualBuffersCount(), _track->buffers());
+			checkOpenALError("alSourceQueueBuffers(%u, %d, %u)", _private->source, _track->actualBuffersCount(), _track->buffers());
 			alSourcei(_private->source, AL_LOOPING, AL_FALSE);
-			checkOpenALError("alSourcei(..., AL_LOOPING, ...)");
+			checkOpenALError("alSourcei(%u, AL_LOOPING, AL_FALSE)", _private->source);
 		}
 		else
 		{
 			alSourcei(_private->source, AL_BUFFER, _track->buffer());
-			checkOpenALError("alSourcei(.., AL_BUFFER, ...)");
+			checkOpenALError("alSourcei(%u, AL_BUFFER, %u)", _private->source, _track->buffer());
 			alSourcei(_private->source, AL_LOOPING, looped ? AL_TRUE : AL_FALSE);
-			checkOpenALError("alSourcei(..., AL_LOOPING, ...)");
+			checkOpenALError("alSourcei(%u, AL_LOOPING, ...)", _private->source);
 		}
 		
 		alSourcePlay(_private->source);
@@ -145,7 +146,7 @@ void Player::stop()
     checkOpenALError("alSourceStop");
 	
 	alSourcei(_private->source, AL_BUFFER, 0);
-	checkOpenALError("alSourcei");
+	checkOpenALError("alSourcei(..., AL_BUFFER, 0)");
 	
 	if (_track.valid())
 		_track->rewind();
@@ -177,7 +178,7 @@ float Player::position() const
 
 	float sampleOffset = 0.0f;
 	alGetSourcef(_private->source, AL_SAMPLE_OFFSET, &sampleOffset);
-	checkOpenALError("alGetSourcef(..., AL_SAMPLE_OFFSET, ");
+	checkOpenALError("alGetSourcef(%u, AL_SAMPLE_OFFSET, %f)", _private->source, sampleOffset);
 
 	return sampleOffset / static_cast<float>(_track->sampleRate());
 }
@@ -203,7 +204,7 @@ void Player::setPan(float pan)
 	else
 	{
 		alSource3f(_private->source, AL_POSITION, pan, 0.0f, 0.0f);
-		checkOpenALError("alSource3f(..., AL_POSITION, ");
+		checkOpenALError("alSource3f(%u, AL_POSITION, %f, 0.0f, 0.0f)", _private->source, pan);
 	}
 }
 
@@ -255,7 +256,7 @@ void Player::handleProcessedBuffers()
 void Player::setActualVolume(float v)
 {
 	alSourcef(_private->source, AL_GAIN, clamp(v, 0.0f, 1.0f));
-	checkOpenALError("alSourcei(.., AL_GAIN, ...)");
+	checkOpenALError("alSourcef(.., AL_GAIN, ...)");
 }
 
 void Player::handleProcessedSamples()
