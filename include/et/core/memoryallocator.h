@@ -1,42 +1,96 @@
-//
-//  MemoryAllocator.h
-//  etConsoleApplication
-//
-//  Created by Sergey Reznik on 18/10/2014.
-//  Copyright (c) 2014 Cheetek. All rights reserved.
-//
+/*
+ * This file is part of `et engine`
+ * Copyright 2009-2014 by Sergey Reznik
+ * Please, do not modify content without approval.
+ *
+ */
+
 
 #pragma once
 
-#include <cstddef>
+#if !defined(ET_CORE_INCLUDES)
+#	error "Do not include this file directly, it is automatically included in et.h"
+#endif
 
 namespace et
 {
-	class MemoryAllocatorPrivate;
-	class MemoryAllocator
+	class MemoryAllocatorBase
 	{
 	public:
-		MemoryAllocator();
+		MemoryAllocatorBase() { }
+		virtual ~MemoryAllocatorBase() { }
 		
-		~MemoryAllocator();
+		virtual void* alloc(size_t) = 0;
+		virtual void free(void*) = 0;
+		
+		virtual void printInfo() const = 0;
+		
+	private:
+		ET_DENY_COPY(MemoryAllocatorBase)
+	};
+	
+	class ObjectFactory
+	{
+	public:
+		ObjectFactory()
+			{ }
+		
+		ObjectFactory(MemoryAllocatorBase* al) :
+			_allocator(al) { }
+		
+		void setAllocator(MemoryAllocatorBase* al)
+			{ _allocator = al; }
+		
+		MemoryAllocatorBase* allocator()
+			{ return _allocator; }
+
+		const MemoryAllocatorBase* allocator() const
+			{ return _allocator; }
+		
+		template <typename O, typename ... args>
+		O* createObject(args&&...a)
+		{
+			ET_ASSERT(_allocator != nullptr);
+			return new (_allocator->alloc(sizeof(O))) O(a...);\
+		}
+		
+		template <typename O>
+		void deleteObject(O* obj)
+		{
+			ET_ASSERT(_allocator != nullptr);
+			obj->~O();
+			_allocator->free(obj);
+		}
+		
+	private:
+		ET_DENY_COPY(ObjectFactory)
+		
+	private:
+		MemoryAllocatorBase* _allocator = nullptr;
+	};
+	
+	class DefaultMemoryAllocator : public MemoryAllocatorBase
+	{
+		void* alloc(size_t sz)
+			{ return malloc(sz); }
+		
+		void free(void* ptr)
+			{ ::free(ptr); }
+		
+		void printInfo() const
+			{ log::info("Not available for DefaultMemoryAllocator"); }
+	};
+	
+	class BlockMemoryAllocatorPrivate;
+	class BlockMemoryAllocator : public MemoryAllocatorBase
+	{
+	public:
+		BlockMemoryAllocator();
+		~BlockMemoryAllocator();
 		
 		void* alloc(size_t);
 		void free(void*);
-		
-		template <typename T, typename ... args>
-		T* createObject(args&&...a)
-		{
-			return new (alloc(sizeof(T))) T(a...);
-		}
-		
-		template <typename T>
-		void deleteObject(T* t)
-		{
-			t->~T();
-			free(t);
-		}
-		
-		void printInfo();
+		void printInfo() const;
 				
 	private:
 		enum
@@ -44,12 +98,11 @@ namespace et
 			PrivateEstimatedSize = 32,
 		};
 		
-		MemoryAllocator(const MemoryAllocator&) = delete;
-		MemoryAllocator(MemoryAllocator&&) = delete;
-		MemoryAllocator& operator = (const MemoryAllocator&) = delete;
-		
-	private:
-		MemoryAllocatorPrivate* _private = nullptr;
+		BlockMemoryAllocatorPrivate* _private = nullptr;
 		char _privateData[PrivateEstimatedSize];
 	};
+	
+	ObjectFactory& sharedObjectFactory();
+	DefaultMemoryAllocator& sharedDefaultAllocator();
+	BlockMemoryAllocator& sharedBlockAllocator();
 }

@@ -51,6 +51,19 @@ void Sample::loadPrograms(et::RenderContext* rc)
 {
 	_program = rc->programFactory().loadProgram("data/shaders/pgrid.program", _cache);
 	_program->setUniform("cloudsTexture", 0);
+	
+	GLint numUniforms = 0;
+	glGetProgramiv(_program->glID(), GL_ACTIVE_UNIFORMS, &numUniforms);
+	
+	for (GLuint uniformIndex = 0; uniformIndex < (GLuint)numUniforms; ++uniformIndex)
+	{
+		GLsizei uniformNameLength = 0;
+		GLchar uniformName[1024] = { };
+		glGetActiveUniformName(_program->glID(), uniformIndex, 1024, &uniformNameLength, uniformName);
+		GLint testIndex = glGetUniformLocation(_program->glID(), uniformName);
+		
+		log::info("Uniform #%u, name: %s, location: %d", uniformIndex, uniformName, testIndex);
+	}
 
 	_frustumProgram = rc->programFactory().loadProgram("data/shaders/lines.program", _cache);
 	

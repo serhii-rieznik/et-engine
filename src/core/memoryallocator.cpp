@@ -1,22 +1,33 @@
- //
-//  MemoryAllocator.cpp
-//  etConsoleApplication
-//
-//  Created by Sergey Reznik on 18/10/2014.
-//  Copyright (c) 2014 Cheetek. All rights reserved.
-//
+/*
+ * This file is part of `et engine`
+ * Copyright 2009-2014 by Sergey Reznik
+ * Please, do not modify content without approval.
+ *
+ */
 
 #include <et/core/et.h>
-#include <et/core/memoryallocator.h>
 #include <et/threading/criticalsection.h>
 
 namespace et
 {
+	static DefaultMemoryAllocator defaultMemoryAllocator;
+	static BlockMemoryAllocator blockMemoryAllocator;
+	static ObjectFactory objectFactory(&blockMemoryAllocator);
+	
+	DefaultMemoryAllocator& sharedDefaultAllocator()
+		{ return defaultMemoryAllocator; }
+	
+	BlockMemoryAllocator& sharedBlockAllocator()
+		{ return blockMemoryAllocator; }
+	
+	ObjectFactory& sharedObjectFactory()
+		{ return objectFactory; }
+	
 	enum : uint32_t
 	{
 		allocatedValue = 0x00000000,
 		notAllocatedValue = 0xffffffff,
-		defaultChunkSize = 16 * (1024*1024),
+		defaultChunkSize = 32 * (1024*1024),
 		minimumAllocationSize = 32,
 	};
 
@@ -65,7 +76,7 @@ namespace et
 		
 	private:
 		MemoryChunk(const MemoryChunk&) = delete;
-		MemoryChunk& operator = (const MemoryAllocator&) = delete;
+		MemoryChunk& operator = (const BlockMemoryAllocator&) = delete;
 		
 		void compressFrom(char*);
 		
@@ -79,10 +90,10 @@ namespace et
 		char* allocatedMemoryEnd = nullptr;
 	};
 	
-	class MemoryAllocatorPrivate
+	class BlockMemoryAllocatorPrivate
 	{
 	public:
-		MemoryAllocatorPrivate();
+		BlockMemoryAllocatorPrivate();
 		
 		void* alloc(uint32_t);
 		void free(void*);
@@ -110,36 +121,36 @@ inline uint32_t alignDownTo(uint32_t sz, uint32_t al)
 	return sz & (~(al-1));
 }
 
-MemoryAllocator::MemoryAllocator()
+BlockMemoryAllocator::BlockMemoryAllocator()
 {
-	static_assert(sizeof(MemoryAllocatorPrivate) <= PrivateEstimatedSize,
+	static_assert(sizeof(BlockMemoryAllocatorPrivate) <= PrivateEstimatedSize,
 		"Insufficient storage for MemoryAllocatorPrivate");
 	
-	_private = new(_privateData) MemoryAllocatorPrivate;
+	_private = new(_privateData) BlockMemoryAllocatorPrivate;
 }
 
-MemoryAllocator::~MemoryAllocator()
-	{ _private->~MemoryAllocatorPrivate(); }
+BlockMemoryAllocator::~BlockMemoryAllocator()
+	{ _private->~BlockMemoryAllocatorPrivate(); }
 
-void* MemoryAllocator::alloc(size_t sz)
+void* BlockMemoryAllocator::alloc(size_t sz)
 	{ return _private->alloc(alignUpTo(sz & 0xffffffff, minimumAllocationSize)); }
 
-void MemoryAllocator::free(void* ptr)
+void BlockMemoryAllocator::free(void* ptr)
 	{ _private->free(ptr); }
 
-void MemoryAllocator::printInfo()
+void BlockMemoryAllocator::printInfo() const
 	{ _private->printInfo(); }
 
 /*
  * Private
  */
 
-MemoryAllocatorPrivate::MemoryAllocatorPrivate()
+BlockMemoryAllocatorPrivate::BlockMemoryAllocatorPrivate()
 {
 	_chunks.emplace_back(defaultChunkSize);
 }
 
-void* MemoryAllocatorPrivate::alloc(uint32_t allocSize)
+void* BlockMemoryAllocatorPrivate::alloc(uint32_t allocSize)
 {
 	CriticalSectionScope lock(_csLock);
 	
@@ -156,7 +167,7 @@ void* MemoryAllocatorPrivate::alloc(uint32_t allocSize)
 	return result;
 }
 
-void MemoryAllocatorPrivate::free(void* ptr)
+void BlockMemoryAllocatorPrivate::free(void* ptr)
 {
 	if (ptr == nullptr) return;
 	
@@ -169,10 +180,10 @@ void MemoryAllocatorPrivate::free(void* ptr)
 			return;
 	}
 	
-	ET_FAIL("Failed to free pointer");
+	ET_FAIL_FMT("Pointer being freed (0x%016llx) was not allocated via this allocator.", (int64_t)ptr);
 }
 
-void MemoryAllocatorPrivate::printInfo()
+void BlockMemoryAllocatorPrivate::printInfo()
 {
 	log::info("Memory allocator has %zu chunks:", _chunks.size());
 	log::info("{");
@@ -291,7 +302,6 @@ bool MemoryChunk::free(char* ptr)
 		++i;
 	}
 	
-	ET_ASSERT("Failed to free pointer");
 	return false;
 }
 

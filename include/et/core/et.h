@@ -37,6 +37,7 @@
 #include <et/core/memory.h>
 #include <et/core/properties.h>
 #include <et/core/strings.h>
+#include <et/core/memoryallocator.h>
 
 #include <et/core/autoptr.h>
 #include <et/core/atomiccounter.h>
@@ -55,6 +56,8 @@
 #include <et/geometry/matrix4.h>
 #include <et/geometry/quaternion.h>
 #include <et/geometry/rect.h>
+
+#undef ET_CORE_INCLUDES
 
 namespace et
 {
@@ -104,5 +107,3 @@ namespace et
 	extern const mat4 identityMatrix;
 	extern const mat4 lightProjectionMatrix;
 }
-
-#undef ET_CORE_INCLUDES

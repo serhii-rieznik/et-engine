@@ -33,6 +33,7 @@ namespace et
 		std::istream& stream();
 
 	private:
-		InputStreamPrivate* _private;
+		InputStreamPrivate* _private = nullptr;
+		char _privateData[16];
 	};
 }

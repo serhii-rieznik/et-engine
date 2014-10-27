@@ -19,25 +19,24 @@ namespace et
 	class InputStreamPrivate
 	{
 	public:
-		InputStreamPrivate() : stream(0)
-			{ }
-		
 		~InputStreamPrivate()
 			{ delete stream; }
 
 	public:
-		std::istream* stream;
+		std::istream* stream = nullptr;
 	};
 }
 
 using namespace et;
 
-InputStream::InputStream() : _private(new InputStreamPrivate)
+InputStream::InputStream() :
+	_private(new (_privateData) InputStreamPrivate)
 {
+	static_assert(sizeof(_privateData) >= sizeof(InputStreamPrivate), "Invalid configuration");
 }
 
 InputStream::InputStream(const std::string& file, StreamMode mode) :
-	_private(new InputStreamPrivate)
+	_private(new (_privateData) InputStreamPrivate)
 {
 	std::ios::openmode openMode = std::ios::in;
 	
