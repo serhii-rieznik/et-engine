@@ -27,10 +27,4 @@ bool et::mac::canOpenURL(const std::string& s)
 #endif
 }
 
-std::string et::mac::bundleVersion()
-{
-	NSString* versionString = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleShortVersionString"];
-	return versionString == nil ? std::string() : std::string([versionString UTF8String]);
-}
-
 #endif // ET_PLATFORM_MAC

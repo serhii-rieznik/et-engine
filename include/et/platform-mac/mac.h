@@ -12,6 +12,5 @@ namespace et
 	namespace mac
 	{
 		bool canOpenURL(const std::string&);
-		std::string bundleVersion();
 	}
 }

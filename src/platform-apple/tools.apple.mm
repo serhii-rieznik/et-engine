@@ -371,6 +371,13 @@ std::string et::applicationIdentifierForCurrentProject()
 		std::string(CFStringGetCStringPtr(bundleId, kCFStringEncodingMacRoman));
 }
 
+std::string et::bundleVersion()
+{
+	NSString* versionString = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleShortVersionString"];
+	return versionString == nil ? std::string() : std::string([versionString UTF8String]);
+}
+
+
 et::vec2i et::nativeScreenSize()
 {
 #if (ET_PLATFORM_IOS)
