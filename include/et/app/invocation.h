@@ -7,7 +7,6 @@
 
 #pragma once
 
-#include <et/core/autoptr.h>
 #include <et/app/runloop.h>
 #include <et/tasks/tasks.h>
 

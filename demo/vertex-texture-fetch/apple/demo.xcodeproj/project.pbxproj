@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		A512D46A1A018715001D92E4 /* et.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A512D4681A018715001D92E4 /* et.cpp */; };
+		A512D46B1A018715001D92E4 /* et.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A512D4681A018715001D92E4 /* et.cpp */; };
+		A512D46C1A018715001D92E4 /* memoryallocator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A512D4691A018715001D92E4 /* memoryallocator.cpp */; };
+		A512D46D1A018715001D92E4 /* memoryallocator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A512D4691A018715001D92E4 /* memoryallocator.cpp */; };
 		A527115B177839BE0072ECEC /* libxml2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = A527115A177839BE0072ECEC /* libxml2.dylib */; };
 		A527115F177839DA0072ECEC /* sample.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A527115D177839DA0072ECEC /* sample.cpp */; };
 		A527116117783A180072ECEC /* data in Resources */ = {isa = PBXBuildFile; fileRef = A527116017783A180072ECEC /* data */; };
@@ -58,12 +62,8 @@
 		A5607A0D19F9673D0078AD31 /* conversion.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A560793619F9673D0078AD31 /* conversion.cpp */; };
 		A5607A0E19F9673D0078AD31 /* dictionary.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A560793719F9673D0078AD31 /* dictionary.cpp */; };
 		A5607A0F19F9673D0078AD31 /* dictionary.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A560793719F9673D0078AD31 /* dictionary.cpp */; };
-		A5607A1019F9673D0078AD31 /* memoryallocator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A560793819F9673D0078AD31 /* memoryallocator.cpp */; };
-		A5607A1119F9673D0078AD31 /* memoryallocator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A560793819F9673D0078AD31 /* memoryallocator.cpp */; };
 		A5607A1219F9673D0078AD31 /* objectscache.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A560793919F9673D0078AD31 /* objectscache.cpp */; };
 		A5607A1319F9673D0078AD31 /* objectscache.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A560793919F9673D0078AD31 /* objectscache.cpp */; };
-		A5607A1419F9673D0078AD31 /* plist.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A560793A19F9673D0078AD31 /* plist.cpp */; };
-		A5607A1519F9673D0078AD31 /* plist.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A560793A19F9673D0078AD31 /* plist.cpp */; };
 		A5607A1619F9673D0078AD31 /* stream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A560793B19F9673D0078AD31 /* stream.cpp */; };
 		A5607A1719F9673D0078AD31 /* stream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A560793B19F9673D0078AD31 /* stream.cpp */; };
 		A5607A1819F9673D0078AD31 /* tools.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A560793C19F9673D0078AD31 /* tools.cpp */; };
@@ -262,6 +262,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		A512D4681A018715001D92E4 /* et.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = et.cpp; sourceTree = "<group>"; };
+		A512D4691A018715001D92E4 /* memoryallocator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = memoryallocator.cpp; sourceTree = "<group>"; };
 		A527115A177839BE0072ECEC /* libxml2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libxml2.dylib; path = usr/lib/libxml2.dylib; sourceTree = SDKROOT; };
 		A527115D177839DA0072ECEC /* sample.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = sample.cpp; sourceTree = "<group>"; };
 		A527115E177839DA0072ECEC /* sample.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sample.h; sourceTree = "<group>"; };
@@ -290,9 +292,7 @@
 		A560793519F9673D0078AD31 /* base64.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = base64.cpp; sourceTree = "<group>"; };
 		A560793619F9673D0078AD31 /* conversion.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = conversion.cpp; sourceTree = "<group>"; };
 		A560793719F9673D0078AD31 /* dictionary.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = dictionary.cpp; sourceTree = "<group>"; };
-		A560793819F9673D0078AD31 /* memoryallocator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = memoryallocator.cpp; sourceTree = "<group>"; };
 		A560793919F9673D0078AD31 /* objectscache.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = objectscache.cpp; sourceTree = "<group>"; };
-		A560793A19F9673D0078AD31 /* plist.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = plist.cpp; sourceTree = "<group>"; };
 		A560793B19F9673D0078AD31 /* stream.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = stream.cpp; sourceTree = "<group>"; };
 		A560793C19F9673D0078AD31 /* tools.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = tools.cpp; sourceTree = "<group>"; };
 		A560793D19F9673D0078AD31 /* transformable.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = transformable.cpp; sourceTree = "<group>"; };
@@ -533,12 +533,12 @@
 		A560793419F9673D0078AD31 /* core */ = {
 			isa = PBXGroup;
 			children = (
+				A512D4681A018715001D92E4 /* et.cpp */,
+				A512D4691A018715001D92E4 /* memoryallocator.cpp */,
 				A560793519F9673D0078AD31 /* base64.cpp */,
 				A560793619F9673D0078AD31 /* conversion.cpp */,
 				A560793719F9673D0078AD31 /* dictionary.cpp */,
-				A560793819F9673D0078AD31 /* memoryallocator.cpp */,
 				A560793919F9673D0078AD31 /* objectscache.cpp */,
-				A560793A19F9673D0078AD31 /* plist.cpp */,
 				A560793B19F9673D0078AD31 /* stream.cpp */,
 				A560793C19F9673D0078AD31 /* tools.cpp */,
 				A560793D19F9673D0078AD31 /* transformable.cpp */,
@@ -955,7 +955,6 @@
 				A5607AC119F9673D0078AD31 /* criticalsection.unix.cpp in Sources */,
 				A5607B2319F9673D0078AD31 /* notifytimer.cpp in Sources */,
 				A5607A2F19F9673D0078AD31 /* guirenderer.cpp in Sources */,
-				A5607A1519F9673D0078AD31 /* plist.cpp in Sources */,
 				A5607A3D19F9673D0078AD31 /* scroll.cpp in Sources */,
 				A5607A0919F9673D0078AD31 /* collision.cpp in Sources */,
 				A5607A0F19F9673D0078AD31 /* dictionary.cpp in Sources */,
@@ -999,6 +998,7 @@
 				A5607AC319F9673D0078AD31 /* mutex.unix.cpp in Sources */,
 				A5607B2D19F9673D0078AD31 /* vertexarray.cpp in Sources */,
 				A5607A8319F9673D0078AD31 /* log.apple.mm in Sources */,
+				A512D46B1A018715001D92E4 /* et.cpp in Sources */,
 				A5607A1719F9673D0078AD31 /* stream.cpp in Sources */,
 				A5607A8519F9673D0078AD31 /* memory.apple.mm in Sources */,
 				A5607A6719F9673D0078AD31 /* openglcaps.cpp in Sources */,
@@ -1013,6 +1013,7 @@
 				A5607A2D19F9673D0078AD31 /* guibase.cpp in Sources */,
 				A5607AF719F9673D0078AD31 /* rendercontext.cpp in Sources */,
 				A5607AF519F9673D0078AD31 /* primitives.cpp in Sources */,
+				A512D46D1A018715001D92E4 /* memoryallocator.cpp in Sources */,
 				A5607B0319F9673D0078AD31 /* cameraelement.cpp in Sources */,
 				A5607B0919F9673D0078AD31 /* mesh.cpp in Sources */,
 				A5607AC719F9673D0078AD31 /* threading.unix.cpp in Sources */,
@@ -1036,7 +1037,6 @@
 				A5607B1119F9673D0078AD31 /* storage.cpp in Sources */,
 				A5607B2B19F9673D0078AD31 /* indexarray.cpp in Sources */,
 				A5607A2919F9673D0078AD31 /* fullscreenelement.cpp in Sources */,
-				A5607A1119F9673D0078AD31 /* memoryallocator.cpp in Sources */,
 				A56079EB19F9673D0078AD31 /* texture.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1071,6 +1071,7 @@
 				A5607A0419F9673D0078AD31 /* camera.cpp in Sources */,
 				A5607B0619F9673D0078AD31 /* material.cpp in Sources */,
 				A5607A5419F9673D0078AD31 /* pvrloader.cpp in Sources */,
+				A512D46A1A018715001D92E4 /* et.cpp in Sources */,
 				A5607B2619F9673D0078AD31 /* timedobject.cpp in Sources */,
 				A5607AC419F9673D0078AD31 /* thread.unix.cpp in Sources */,
 				A5607A4A19F9673D0078AD31 /* imageoperations.cpp in Sources */,
@@ -1078,7 +1079,6 @@
 				A5607B2219F9673D0078AD31 /* notifytimer.cpp in Sources */,
 				A5607A2E19F9673D0078AD31 /* guirenderer.cpp in Sources */,
 				A5607A9619F9673D0078AD31 /* imagepicker.ios.mm in Sources */,
-				A5607A1419F9673D0078AD31 /* plist.cpp in Sources */,
 				A5607A3C19F9673D0078AD31 /* scroll.cpp in Sources */,
 				A5607A0819F9673D0078AD31 /* collision.cpp in Sources */,
 				A5607A0E19F9673D0078AD31 /* dictionary.cpp in Sources */,
@@ -1121,6 +1121,7 @@
 				A5607B0019F9673D0078AD31 /* baseelement.cpp in Sources */,
 				A5607A0A19F9673D0078AD31 /* base64.cpp in Sources */,
 				A5607AAA19F9673D0078AD31 /* social.ios.mm in Sources */,
+				A512D46C1A018715001D92E4 /* memoryallocator.cpp in Sources */,
 				A56079F419F9673D0078AD31 /* vertexbufferfactory.cpp in Sources */,
 				A5607AC219F9673D0078AD31 /* mutex.unix.cpp in Sources */,
 				A5607B2C19F9673D0078AD31 /* vertexarray.cpp in Sources */,
@@ -1164,7 +1165,6 @@
 				A5607B1019F9673D0078AD31 /* storage.cpp in Sources */,
 				A5607B2A19F9673D0078AD31 /* indexarray.cpp in Sources */,
 				A5607A2819F9673D0078AD31 /* fullscreenelement.cpp in Sources */,
-				A5607A1019F9673D0078AD31 /* memoryallocator.cpp in Sources */,
 				A56079EA19F9673D0078AD31 /* texture.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

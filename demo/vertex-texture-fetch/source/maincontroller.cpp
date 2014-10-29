@@ -133,4 +133,4 @@ ApplicationIdentifier MainController::applicationIdentifier() const
 	{ return ApplicationIdentifier(applicationIdentifierForCurrentProject(), "Cheetek", "Test"); }
 
 IApplicationDelegate* Application::initApplicationDelegate()
-	{ return new MainController; }
+	{ return sharedObjectFactory().createObject<MainController>(); }

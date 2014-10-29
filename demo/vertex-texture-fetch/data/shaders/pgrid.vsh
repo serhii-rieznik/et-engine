@@ -31,18 +31,23 @@ float sampleHeight(in vec2 tc1, in float sideScale, in float heightScale)
 
 vec3 calculateNormal(in vec2 tc1, in float centerHeight, in float scale, in float sideScale, in float heightScale)
 {
-	float hpx = sampleHeight(tc1 - sideDir, sideScale, heightScale);
-	float hpy = sampleHeight(tc1 - frontDir, sideScale, heightScale);
-	float hnx = sampleHeight(tc1 + sideDir, sideScale, heightScale);
-	float hny = sampleHeight(tc1 + frontDir, sideScale, heightScale);
+	float px = sampleHeight(tc1 - sideDir, sideScale, heightScale);
+	float nx = sampleHeight(tc1 + sideDir, sideScale, heightScale);
+	
+	float py = sampleHeight(tc1 - frontDir, sideScale, heightScale);
+	float ny = sampleHeight(tc1 + frontDir, sideScale, heightScale);
 
-	vec3 n1 = cross(
-		vec3(sideScale * frontDir.x, scale * (hpy - centerHeight), sideScale * frontDir.y),
-		vec3(sideScale * sideDir.x, scale * (centerHeight - hpx), sideScale * sideDir.y));
+	vec3 n1 = cross
+	(
+		vec3(sideScale * frontDir.x, scale * (centerHeight - py), sideScale * frontDir.y),
+		vec3(sideScale * sideDir.x, scale * (px - centerHeight), sideScale * sideDir.y)
+	);
 
-	vec3 n2 = cross(
-		vec3(-sideScale * frontDir.x, scale * (centerHeight - hny), -sideScale * frontDir.y),
-		vec3(-sideScale * sideDir.x, scale * (centerHeight - hnx), -sideScale * sideDir.y));
+	vec3 n2 = cross
+	(
+		vec3(sideScale * frontDir.x, scale * (ny - centerHeight), sideScale * frontDir.y),
+		vec3(sideScale * sideDir.x, scale * (centerHeight - nx), sideScale * sideDir.y)
+	 );
 		
 	return normalize(n1 + n2);
 }

@@ -5,6 +5,7 @@
  *
  */
 
+#include <et/core/et.h>
 #include <et/threading/criticalsection.h>
 #include <et/sound/sound.h>
 

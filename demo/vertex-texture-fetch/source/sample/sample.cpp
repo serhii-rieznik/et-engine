@@ -272,7 +272,7 @@ void Sample::createFrustumGeometry(et::RenderContext* rc)
 {
 	VertexDeclaration decl(false, Usage_Position, Type_Vec3);
 	decl.push_back(Usage_Color, Type_Vec4);
-	_frustumLinesData = VertexArray::Pointer(new VertexArray(decl, 2 * _frustumLines.size()));
+	_frustumLinesData = VertexArray::Pointer::create(decl, 2 * _frustumLines.size());
 	
 	IndexArray ai(IndexArrayFormat_8bit, 4 * numFrustumLines, PrimitiveType_Lines);
 	size_t k = 0;
