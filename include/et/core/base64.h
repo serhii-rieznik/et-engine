@@ -15,5 +15,6 @@ namespace et
 	{
 		size_t decodedDataSize(const std::string&);
 		BinaryDataStorage decode(const std::string&);
+		std::string encode(const BinaryDataStorage&);
 	}
 }

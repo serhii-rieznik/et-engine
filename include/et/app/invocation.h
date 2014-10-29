@@ -197,6 +197,16 @@ namespace et
 	class Invocation : public PureInvocation
 	{
 	public:
+		Invocation() { }
+		
+		template <typename F>
+		Invocation(F func)
+			{ setTarget<F>(func); }
+		
+		template <typename T>
+		Invocation(T* o, void(T::*m)())
+			{ setTarget<T>(o, m); }
+		
 		void invoke();
 		void invokeInMainRunLoop(float delay = 0.0f);
 		void invokeInBackground(float delay = 0.0f);
