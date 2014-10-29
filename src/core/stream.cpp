@@ -20,7 +20,9 @@ namespace et
 	{
 	public:
 		~InputStreamPrivate()
-			{ delete stream; }
+		{
+			sharedObjectFactory().deleteObject(stream);
+		}
 
 	public:
 		std::istream* stream = nullptr;
@@ -29,33 +31,33 @@ namespace et
 
 using namespace et;
 
-InputStream::InputStream() :
-	_private(new (_privateData) InputStreamPrivate)
+InputStream::InputStream()
 {
-	static_assert(sizeof(_privateData) >= sizeof(InputStreamPrivate), "Invalid configuration");
+	ET_PIMPL_INIT(InputStream)
 }
 
-InputStream::InputStream(const std::string& file, StreamMode mode) :
-	_private(new (_privateData) InputStreamPrivate)
+InputStream::InputStream(const std::string& file, StreamMode mode)
 {
+	ET_PIMPL_INIT(InputStream)
+	
 	std::ios::openmode openMode = std::ios::in;
 	
 	if (mode == StreamMode_Binary)
 		openMode |= std::ios::binary;
 	
-	_private->stream = new std::ifstream(file.c_str(), openMode);
+	_private->stream = sharedObjectFactory().createObject<std::ifstream>(file.c_str(), openMode);
 
 	if (_private->stream->fail())
 	{
 		log::error("Unable to load file: %s", file.c_str());
-		delete _private->stream;
+		sharedObjectFactory().deleteObject(_private->stream);
 		_private->stream = nullptr;
 	}
 }
 
 InputStream::~InputStream()
 {
-	delete _private;
+	ET_PIMPL_FINALIZE(InputStream)
 }
 
 bool InputStream::valid()

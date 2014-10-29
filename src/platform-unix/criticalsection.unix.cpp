@@ -5,9 +5,12 @@
  *
  */
 
+#include <et/core/et.h>
+
+#if (!ET_PLATFORM_WIN)
+
 #include <errno.h>
 #include <pthread.h>
-#include <et/core/et.h>
 #include <et/threading/criticalsection.h>
 
 namespace et
@@ -21,8 +24,10 @@ namespace et
 
 using namespace et;
 
-CriticalSection::CriticalSection() : _private(new CriticalSectionPrivate)
+CriticalSection::CriticalSection()
 {
+	ET_PIMPL_INIT(CriticalSection)
+	
 	pthread_mutexattr_t attrib = { };
 	pthread_mutexattr_init(&attrib);
 	pthread_mutexattr_settype(&attrib, PTHREAD_MUTEX_RECURSIVE);
@@ -35,7 +40,8 @@ CriticalSection::CriticalSection() : _private(new CriticalSectionPrivate)
 CriticalSection::~CriticalSection()
 {
 	pthread_mutex_destroy(&_private->mutex);
-	delete _private;
+
+	ET_PIMPL_FINALIZE(CriticalSection)
 }
 
 void CriticalSection::enter()
@@ -51,3 +57,5 @@ void CriticalSection::leave()
 	if (result == EPERM)
 		log::warning("Mutex already unlocked or was locked from another thread.");
 }
+
+#endif // !ET_PLATFORM_WIN

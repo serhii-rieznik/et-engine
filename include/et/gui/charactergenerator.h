@@ -58,7 +58,7 @@ namespace et
 
 		private:
 			RenderContext* _rc;
-			CharacterGeneratorPrivate* _private;
+			ET_DECLARE_PIMPL(CharacterGenerator, 128)
 
 			Texture _texture;
 			CharDescriptorMap _chars;

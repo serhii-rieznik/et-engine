@@ -5,8 +5,9 @@
  *
  */
 
-
 #include <et/core/et.h>
+
+#if (!ET_PLATFORM_WIN)
 
 #if (ET_PLATFORM_ANDROID)
 #	include <sys/atomics.h>
@@ -17,10 +18,10 @@
 using namespace et;
 
 #if ET_DEBUG
-
-	static const AtomicCounterType validMask =
-		static_cast<AtomicCounterType>(0xfffffffc);
-
+	enum : AtomicCounterType
+	{
+		validMask = static_cast<AtomicCounterType>(0xfffffffc)
+	};
 #endif
 
 AtomicCounter::AtomicCounter() :
@@ -34,9 +35,16 @@ AtomicCounter::AtomicCounter() :
 
 AtomicCounterType AtomicCounter::retain()
 {
-#if (ET_PLATFORM_MAC && ET_DEBUG)
+#if (ET_DEBUG)
+	
 	if (notifyOnRetain)
-		{ __asm__("int $3"); }
+	{
+#	if (ET_PLATFORM_MAC)
+		__asm__("int $3");
+#	elif (ET_PLATFORM_IOS)
+		printf("retain %d\n", _counter);
+#	endif
+	}
 #endif
 	
 #if (ET_PLATFORM_ANDROID)
@@ -48,11 +56,17 @@ AtomicCounterType AtomicCounter::retain()
 
 AtomicCounterType AtomicCounter::release()
 {
-#if (ET_PLATFORM_MAC && ET_DEBUG)
+#if (ET_DEBUG)
 	if (notifyOnRelease)
-		{ __asm__("int $3"); }
+	{
+#	if (ET_PLATFORM_MAC)
+		__asm__("int $3");
+#	elif (ET_PLATFORM_IOS)
+		printf("release %d\n", _counter);
+#	endif
+	}
 #endif
-	
+
 #if (ET_PLATFORM_ANDROID)
 	return __atomic_dec(&_counter);
 #else
@@ -98,3 +112,5 @@ bool AtomicBool::operator != (const AtomicBool& r)
 
 AtomicBool::operator bool() const
 	{ ET_ASSERT((_value & validMask) == 0); return (_value != 0); }
+
+#endif // !ET_PLATFORM_WIN

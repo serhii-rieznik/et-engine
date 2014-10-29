@@ -21,7 +21,6 @@ namespace et
 		virtual ~TimedObject();
 
 		virtual void cancelUpdates();
-		virtual void destroy();
 
 		virtual bool running() const
 			{ return _running; }
@@ -45,7 +44,7 @@ namespace et
 
 	private:
 		TimerPool* _owner = nullptr;
-		float _startTime = 0;
+		float _startTime = 0.0f;
 		bool _running = false;
 		bool _released = false;
 	};

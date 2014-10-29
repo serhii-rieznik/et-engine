@@ -152,7 +152,7 @@ namespace et
 
 			ElementContainer* duplicate()
 			{
-				ElementContainer* result = new ElementContainer(name(), parent());
+				ElementContainer* result = sharedObjectFactory().createObject<ElementContainer>(name(), parent());
 				duplicateChildrenToObject(result);
 				result->tag = tag;
 				return result; 

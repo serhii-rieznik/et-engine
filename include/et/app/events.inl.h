@@ -34,14 +34,14 @@ inline void Event0::connect(R* receiver, void (R::*receiverMethod)())
 		}
 	}
 
-	_connections.push_back(new Event0Connection<R>(receiver, receiverMethod));
+	_connections.push_back(sharedObjectFactory().createObject<Event0Connection<R>>(receiver, receiverMethod));
 	receiver->eventConnected(this);
 }
 
 template <typename F>
 inline void Event0::connect(F func)
 {
-	_connections.push_back(new Event0DirectConnection<F>(func));
+	_connections.push_back(sharedObjectFactory().createObject<Event0DirectConnection<F>>(func));
 }
 
 template <typename R>
@@ -71,7 +71,7 @@ Event1<ArgType>::~Event1()
 	{
 		if ((connection->receiver() != nullptr) && !connection->removed())
 			connection->receiver()->eventDisconnected(this);
-		delete connection;
+		sharedObjectFactory().deleteObject(connection);
 	}
 }
 
@@ -88,7 +88,7 @@ inline void Event1<ArgType>::connect(ReceiverType* receiver, void (ReceiverType:
 		}
 	}
 
-	_connections.push_back(new Event1Connection<ReceiverType, ArgType>(receiver, receiverMethod));
+	_connections.push_back(sharedObjectFactory().createObject<Event1Connection<ReceiverType, ArgType>>(receiver, receiverMethod));
 	receiver->eventConnected(this);
 }
 
@@ -96,7 +96,7 @@ template <typename ArgType>
 template <typename F>
 inline void Event1<ArgType>::connect(F func)
 {
-	_connections.push_back(new Event1DirectConnection<F, ArgType>(func));
+	_connections.push_back(sharedObjectFactory().createObject<Event1DirectConnection<F, ArgType>>(func));
 }
 
 template <typename ArgType>
@@ -122,7 +122,7 @@ inline void Event1<ArgType>::receiverDisconnected(EventReceiver* r)
 			}
 			else
 			{
-				delete (*i);
+				sharedObjectFactory().deleteObject(*i);
 				i = _connections.erase(i);
 			}
 		}
@@ -184,7 +184,7 @@ Event2<Arg1Type, Arg2Type>::~Event2()
 		if ((connection->receiver() != nullptr) && !connection->removed())
 			connection->receiver()->eventDisconnected(this);
 
-		delete connection;
+		sharedObjectFactory().deleteObject(connection);
 	}
 }
 
@@ -202,7 +202,9 @@ inline void Event2<Arg1Type, Arg2Type>::connect(ReceiverType* receiver,
 		}
 	}
 
-	_connections.push_back(new Event2Connection<ReceiverType, Arg1Type, Arg2Type>(receiver, receiverMethod));
+	_connections.push_back(sharedObjectFactory().createObject
+		<Event2Connection<ReceiverType, Arg1Type, Arg2Type>>(receiver, receiverMethod));
+	
 	receiver->eventConnected(this);
 }
 
@@ -210,7 +212,7 @@ template <typename ArgType1, typename ArgType2>
 template <typename F>
 inline void Event2<ArgType1, ArgType2>::connect(F func)
 {
-	_connections.push_back(new Event2DirectConnection<F, ArgType1, ArgType2>(func));
+	_connections.push_back(sharedObjectFactory().createObject<Event2DirectConnection<F, ArgType1, ArgType2>>(func));
 }
 
 template <typename Arg1Type, typename Arg2Type>
@@ -236,7 +238,7 @@ inline void Event2<Arg1Type, Arg2Type>::receiverDisconnected(EventReceiver* r)
 			}
 			else
 			{
-				delete (*i);
+				sharedObjectFactory().deleteObject(*i);
 				i = _connections.erase(i);
 			}
 		}

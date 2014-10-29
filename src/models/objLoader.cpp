@@ -21,10 +21,9 @@ namespace et
 	class OBJLoaderThread : public Thread
 	{
 	public:
-		ThreadResult main();
-
-	private:
 		OBJLoaderThread(OBJLoader*, ObjectsCache&);
+		
+		ThreadResult main();
 
 	private:
 		friend class OBJLoader;
@@ -56,6 +55,9 @@ inline std::istream& operator >> (std::istream& stream, vec4& value)
 
 	return stream;
 }
+
+void getLine(std::ifstream& stream, std::string& line);
+
 OBJLoaderThread::OBJLoaderThread(OBJLoader* owner, ObjectsCache& cache) : 
 	Thread(false), _owner(owner), _cache(cache)
 {
@@ -92,28 +94,20 @@ OBJLoader::OBJLoader(RenderContext* rc, const std::string& inFile) : _rc(rc),
 
 OBJLoader::~OBJLoader()
 {
+	if (_thread.valid())
+	{
+		_thread->stop();
+		_thread->waitForTermination();
+	}
+	
 	for (GroupList::iterator gi = groups.begin(), ge = groups.end(); gi != ge; ++gi)
-		delete (*gi);
+		sharedObjectFactory().deleteObject(*gi);
 	
 	if (inputFile.is_open())
 		inputFile.close();
 	
 	if (materialFile.is_open())
 		materialFile.close();
-}
-
-void getLine(std::ifstream& stream, std::string& line)
-{
-	std::getline(stream, line);
-	
-	if (line.size() > 0) 
-	{
-		if (line[line.size() - 1] == '\r')
-			line.erase(line.end() - 1);
-		
-		while ((line.size() > 0) && (line[0] == ' '))
-			line = line.substr(1, line.size() - 1);
-	}
 }
 
 void OBJLoader::loadData(bool async, ObjectsCache& cache)
@@ -154,7 +148,7 @@ void OBJLoader::loadData(bool async, ObjectsCache& cache)
 		}
 		else if (key == 'g') // group
 		{
-			lastGroup = new OBJGroup;
+			lastGroup = sharedObjectFactory().createObject<OBJGroup>();
 			groups.push_back(lastGroup);
 			
 			getLine(inputFile, line);
@@ -174,7 +168,7 @@ void OBJLoader::loadData(bool async, ObjectsCache& cache)
 			{
 				if (lastGroup == nullptr)
 				{
-					lastGroup = new OBJGroup();
+					lastGroup = sharedObjectFactory().createObject<OBJGroup>();
 					groups.push_back(lastGroup);
 					lastGroup->name = "group" + intToStr(lastGroupId_);
 					++lastGroupId_;
@@ -191,7 +185,7 @@ void OBJLoader::loadData(bool async, ObjectsCache& cache)
 		{
 			if (lastGroup == nullptr)
 			{
-				lastGroup = new OBJGroup();
+				lastGroup = sharedObjectFactory().createObject<OBJGroup>();
 				groups.push_back(lastGroup);
 				lastGroup->name = "group" + intToStr(lastGroupId_);
 				++lastGroupId_;
@@ -203,7 +197,6 @@ void OBJLoader::loadData(bool async, ObjectsCache& cache)
 		else if (key == 'f') // faces
 		{
 			OBJFace face;
-			std::string line;
 			std::getline(inputFile, line);
 			trim(line);
 
@@ -226,7 +219,7 @@ void OBJLoader::loadData(bool async, ObjectsCache& cache)
 			
 			if (lastGroup == nullptr)
 			{
-				lastGroup = new OBJGroup;
+				lastGroup = sharedObjectFactory().createObject<OBJGroup>();
 				groups.push_back(lastGroup);
 			}
 			
@@ -306,7 +299,7 @@ s3d::ElementContainer::Pointer OBJLoader::load(ObjectsCache& cache, size_t optio
 
 void OBJLoader::loadAsync(ObjectsCache& cache)
 {
-	_thread = new OBJLoaderThread(this, cache);
+	_thread = sharedObjectFactory().createObject<OBJLoaderThread>(this, cache);
 }
 
 void OBJLoader::loadMaterials(const std::string& fileName, bool async, ObjectsCache& cache)
@@ -685,10 +678,10 @@ void OBJLoader::processLoadedData()
 	if (totalVertices > 65535)
 		fmt = IndexArrayFormat_32bit;
 		
-	_indices = IndexArray::Pointer(new IndexArray(fmt, totalVertices, PrimitiveType_Triangles));
+	_indices = IndexArray::Pointer::create(fmt, totalVertices, PrimitiveType_Triangles);
 	_indices->linearize(totalVertices);
 
-	_vertexData.reset(new VertexArray(decl, totalVertices));
+	_vertexData = VertexArray::Pointer::create(decl, totalVertices);
 	
 	RawDataAcessor<vec3> pos = _vertexData->chunk(Usage_Position).accessData<vec3>(0);
 	RawDataAcessor<vec3> norm = _vertexData->chunk(Usage_Normal).accessData<vec3>(0);
@@ -757,7 +750,7 @@ void OBJLoader::processLoadedData()
 
 s3d::ElementContainer::Pointer OBJLoader::generateVertexBuffers()
 {
-	s3d::ElementContainer::Pointer result(new ElementContainer(inputFileName, 0));
+	s3d::ElementContainer::Pointer result = s3d::ElementContainer::Pointer::create(inputFileName, nullptr);
 
 	VertexArrayObject vao = _rc->vertexBufferFactory().createVertexArrayObject("model-vao");
 
@@ -768,12 +761,12 @@ s3d::ElementContainer::Pointer OBJLoader::generateVertexBuffers()
 	{
 		if (_loadOptions & Option_SupportMeshes)
 		{
-			auto mesh = new SupportMesh(i->name, vao, i->material, i->start, i->count, result.ptr());
+			auto mesh = SupportMesh::Pointer::create(i->name, vao, i->material, i->start, i->count, result.ptr());
 			mesh->fillCollisionData(_vertexData, _indices);
 		}
 		else 
 		{
-			new Mesh(i->name, vao, i->material, i->start, i->count, result.ptr());
+			Mesh::Pointer::create(i->name, vao, i->material, i->start, i->count, result.ptr());
 		}
 	}
 
@@ -783,4 +776,21 @@ s3d::ElementContainer::Pointer OBJLoader::generateVertexBuffers()
 void OBJLoader::threadFinished()
 {
 	loaded.invoke(generateVertexBuffers());
+}
+
+/*
+ * Service
+ */
+void getLine(std::ifstream& stream, std::string& line)
+{
+	std::getline(stream, line);
+	
+	if (line.size() > 0)
+	{
+		if (line[line.size() - 1] == '\r')
+			line.erase(line.end() - 1);
+		
+		while ((line.size() > 0) && (line[0] == ' '))
+			line = line.substr(1, line.size() - 1);
+	}
 }

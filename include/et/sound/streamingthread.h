@@ -32,7 +32,7 @@ namespace et
 			ThreadResult main();
 			
 		private:
-			StreamingThreadPrivate* _private = nullptr;
+			ET_DECLARE_PIMPL(StreamingThread, 256)
 		};
 	}
 }

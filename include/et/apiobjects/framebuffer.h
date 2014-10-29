@@ -50,6 +50,8 @@ namespace et
 		};
 		
 	public:
+		Framebuffer(RenderContext* rc, const FramebufferDescription& desc, const std::string& name);
+		Framebuffer(RenderContext* rc, uint32_t fboId, const std::string& name);
 		~Framebuffer();
 
 		void addRenderTarget(const Texture& texture);
@@ -100,9 +102,6 @@ namespace et
 
 	private:
 		friend class FramebufferFactory;
-		
-		Framebuffer(RenderContext* rc, const FramebufferDescription& desc, const std::string& name);
-		Framebuffer(RenderContext* rc, uint32_t fboId, const std::string& name);
 
 		void createOrUpdateColorRenderbuffer();
 		void createOrUpdateDepthRenderbuffer();

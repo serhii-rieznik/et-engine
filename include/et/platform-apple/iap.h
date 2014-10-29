@@ -13,7 +13,7 @@
 
 namespace et
 {
-    class PurchasesManager : public Singleton<PurchasesManager>
+    class PurchasesManager
     {
 	public:
 		struct Product
@@ -66,6 +66,10 @@ namespace et
 		
 	private:
 		PurchasesManager();
-		ET_SINGLETON_COPY_DENY(PurchasesManager)
+		ET_DENY_COPY(PurchasesManager)
+		
+		friend PurchasesManager& sharedPurchasesManager();
     };
+	
+	PurchasesManager& sharedPurchasesManager();
 }

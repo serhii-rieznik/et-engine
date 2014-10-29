@@ -28,15 +28,15 @@ using namespace et;
 using namespace et::audio;
 
 StreamingThread::StreamingThread() :
-	Thread(false), _private(new StreamingThreadPrivate)
+	Thread(false)
 {
+	ET_PIMPL_INIT(StreamingThread)
 	run();
 }
 
 void StreamingThread::release()
 {
-	delete _private;
-	_private = nullptr;
+	ET_PIMPL_FINALIZE(StreamingThread)
 }
 
 ThreadResult StreamingThread::main()
@@ -77,7 +77,7 @@ ThreadResult StreamingThread::main()
 
 void StreamingThread::addPlayer(Player::Pointer player)
 {
-	if (_private == nullptr) return;
+	ET_ASSERT(_private != nullptr)
 	
 	CriticalSectionScope scope(_private->csLock);
 	
@@ -96,7 +96,7 @@ void StreamingThread::addPlayer(Player::Pointer player)
 
 void StreamingThread::removePlayer(Player::Pointer player)
 {
-	if (_private == nullptr) return;
+	ET_ASSERT(_private != nullptr)
 	
 	CriticalSectionScope scope(_private->csLock);
 	

@@ -27,6 +27,8 @@ namespace et
 		ET_DECLARE_EVENT1(failed, DownloadRequest::Pointer);
 
 	public:
+		DownloadRequest(const std::string&, const std::string&);
+		DownloadRequest(const std::string&);
 		~DownloadRequest();
 
 		uint64_t totalSize() const
@@ -46,17 +48,13 @@ namespace et
 		friend size_t writeCallback(void*, size_t, size_t, DownloadRequest*);
 		friend int progessCallback(void*, double, double, double, double);
 		
-	private:
-		DownloadRequest(const std::string&, const std::string&);
-		DownloadRequest(const std::string&);
-		
 		size_t appendData(void* ptr, size_t, size_t);
 		void cleanup();
 
 	private:
-		FILE* _destFile;
-		uint64_t _totalSize;
-		uint64_t _downloaded;
+		FILE* _destFile = nullptr;
+		uint64_t _totalSize = 0;
+		uint64_t _downloaded = 0;
 	};
 	
 	class DownloadManager : public et::Singleton<DownloadManager>
@@ -76,6 +74,6 @@ namespace et
 		ET_SINGLETON_COPY_DENY(DownloadManager)
 		
 	private:
-		DownloadManagerPrivate* _private;
+		ET_DECLARE_PIMPL(DownloadManager, 512)
 	};
 }

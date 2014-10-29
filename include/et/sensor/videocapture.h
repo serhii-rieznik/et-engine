@@ -62,6 +62,6 @@ namespace et
 		
 	private:
 		friend class VideoCapturePrivate;
-		VideoCapturePrivate* _private;
+		ET_DECLARE_PIMPL(VideoCapture, 32)
 	};
 }

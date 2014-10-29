@@ -97,7 +97,7 @@ void Application::platformInit()
 
 void Application::platformFinalize()
 {
-	delete _renderContext;
+	sharedObjectFactory().deleteObject(_renderContext);
 	_renderContext = nullptr;
 }
 
@@ -127,7 +127,7 @@ int Application::platformRun(int, char*[])
 	_lastQueuedTimeMSec = queryContiniousTimeInMilliSeconds();
 	_runLoop.updateTime(_lastQueuedTimeMSec);
 
-	_renderContext = new RenderContext(params, this);
+	_renderContext = sharedObjectFactory().createObject<RenderContext>(params, this);
 	if (_renderContext->valid())
 	{
 		_renderingContextHandle = _renderContext->renderingContextHandle();
@@ -151,8 +151,11 @@ int Application::platformRun(int, char*[])
 
 	terminated();
 
-	delete _delegate, _delegate = nullptr;
-	delete _renderContext, _renderContext = nullptr;
+	sharedObjectFactory().deleteObject(_delegate);
+	sharedObjectFactory().deleteObject(_renderContext);
+
+	_delegate = nullptr;
+	_renderContext = nullptr;
 
 	return _exitCode;
 }

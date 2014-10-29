@@ -14,14 +14,13 @@ using namespace et::gui;
 MessageView::MessageView(const std::string& title, const std::string& text, Font font, const Image& bgImage,
 						 const std::string& button1title, const std::string& button2title)
 {
-	_imgBackground = ImageView::Pointer(new ImageView(bgImage, backgroundFade().ptr()));
-	
-	_imgImage = ImageView::Pointer(new ImageView(Texture(), _imgBackground.ptr()));
-	_text = Label::Pointer(new Label(text, font, _imgBackground.ptr()));
-	_title = Label::Pointer(new Label("<b>" + title + "</b>", font, _imgBackground.ptr()));
-	_button1 = Button::Pointer(new Button(button1title, font, _imgBackground.ptr()));
-	_button2 = Button::Pointer(new Button(button2title, font, _imgBackground.ptr()));
-	_buttonCommon = Button::Pointer(new Button(std::string(), font, backgroundFade().ptr()));
+	_imgBackground = ImageView::Pointer::create(bgImage, backgroundFade().ptr());
+	_imgImage = ImageView::Pointer::create(Texture(), _imgBackground.ptr());
+	_text = Label::Pointer::create(text, font, _imgBackground.ptr());
+	_title = Label::Pointer::create("<b>" + title + "</b>", font, _imgBackground.ptr());
+	_button1 = Button::Pointer::create(button1title, font, _imgBackground.ptr());
+	_button2 = Button::Pointer::create(button2title, font, _imgBackground.ptr());
+	_buttonCommon = Button::Pointer::create(std::string(), font, backgroundFade().ptr());
 	
 	_imgBackground->setPivotPoint(vec2(0.5f));
 	

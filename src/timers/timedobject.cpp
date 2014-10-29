@@ -51,16 +51,6 @@ void TimedObject::cancelUpdates()
 		_owner->detachTimedObject(this);
 }
 
-void TimedObject::destroy()
-{
-	if (_released) return;
-
-	_running = false;
-	_released = true;
-	
-	(_owner ? _owner : mainTimerPool().ptr())->deleteTimedObjecct(this);
-}
-
 float TimedObject::actualTime()
 {
 	ET_ASSERT((_owner != nullptr) && "TimedObject isn't attached to timer pool");

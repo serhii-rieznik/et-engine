@@ -91,12 +91,9 @@ namespace et
 		ET_DECLARE_EVENT1(screenScaleFactorChanged, size_t)
 
 	private:
-		RenderContext(RenderContext*) : _private(nullptr), _app(nullptr), _programFactory(nullptr),
-			_textureFactory(nullptr), _framebufferFactory(nullptr), _vertexBufferFactory(nullptr),
-			_screenScaleFactor(1) { }
-
-		RenderContext* operator = (const RenderContext*) 
-			{ return this; }
+		RenderContext(RenderContext&&) = delete;
+		RenderContext(const RenderContext&) = delete;
+		RenderContext& operator = (const RenderContext&) = delete;
 
 		void onFPSTimerExpired(NotifyTimer* t);
 		void resized(const vec2i&);
@@ -107,11 +104,11 @@ namespace et
 		friend class RenderContextNotifier;
 		friend class ApplicationNotifier;
 
-		RenderContextPrivate* _private;
+		ET_DECLARE_PIMPL(RenderContext, 128)
 
 		RenderContextParameters _params;
 
-		Application* _app;
+		Application* _app = nullptr;
 		NotifyTimer _fpsTimer;
 		RenderingInfo _info;
 

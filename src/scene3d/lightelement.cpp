@@ -10,14 +10,14 @@
 using namespace et;
 using namespace et::s3d;
 
-LightElement::LightElement(const std::string& name, Element* parent) : Element(name, parent)
+LightElement::LightElement(const std::string& name, Element* parent) :
+	Element(name, parent)
 {
-
 }
 
 LightElement* LightElement::duplicate()
 {
-	LightElement* result = new LightElement(name(), parent());
+	LightElement* result = sharedObjectFactory().createObject<LightElement>(name(), parent());
 
 	duplicateBasePropertiesToObject(result);
 	duplicateChildrenToObject(result);

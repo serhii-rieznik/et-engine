@@ -347,7 +347,7 @@ void Program::buildProgram(const std::string& vertex_source, const std::string& 
 		}
 
 		glDeleteShader(VertexShader);
-		checkOpenGLError("Delete vertex shader");
+		checkOpenGLError("glDeleteShader(VertexShader)");
 	}
 
 	if (GeometryShader != 0)
@@ -359,7 +359,7 @@ void Program::buildProgram(const std::string& vertex_source, const std::string& 
 		}
 		
 		glDeleteShader(GeometryShader);
-		checkOpenGLError("Delete geometry shader");
+		checkOpenGLError("glDeleteShader(GeometryShader)");
 	}
 	
 	if (FragmentShader != 0)
@@ -371,7 +371,7 @@ void Program::buildProgram(const std::string& vertex_source, const std::string& 
 		}
 		
 		glDeleteShader(FragmentShader);
-		checkOpenGLError("Delete fragment shader");
+		checkOpenGLError("glDeleteShader(FragmentShader)");
 	}
 
 	checkOpenGLError("Program::buildProgram -> end");

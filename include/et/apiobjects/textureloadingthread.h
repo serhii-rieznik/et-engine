@@ -78,7 +78,5 @@ namespace et
 		TextureLoadingThreadDelegate* _delegate;
 		TextureLoadingRequestQueue _requests;
 		CriticalSection _requestsCriticalSection;
-		
-		volatile bool _running;
 	};
 }

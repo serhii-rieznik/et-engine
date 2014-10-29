@@ -75,22 +75,21 @@ private:
 RenderContext::RenderContext(const RenderContextParameters& inParams, Application* app) : _params(inParams), _app(app),
 	_programFactory(0), _textureFactory(0), _framebufferFactory(0), _vertexBufferFactory(0), _renderer(0)
 {
-	_private = new RenderContextPrivate(this, _params, app->parameters());
+	ET_PIMPL_INIT(RenderContext, this, _params, app->parameters())
 
 	if (_private->failed)
 	{
-		delete _private;
-		_private = 0;
+		ET_PIMPL_FINALIZE(RenderContext)
 	}
 	else 
 	{
 		openGLCapabilites().checkCaps();
 
 		_renderState.setRenderContext(this);
-		_programFactory = ProgramFactory::Pointer(new ProgramFactory(this));
-		_textureFactory = TextureFactory::Pointer(new TextureFactory(this));
-		_framebufferFactory = FramebufferFactory::Pointer(new FramebufferFactory(this));
-		_vertexBufferFactory = VertexBufferFactory::Pointer(new VertexBufferFactory(this));
+		_programFactory = ProgramFactory::Pointer::create(this);
+		_textureFactory = TextureFactory::Pointer::create(this);
+		_framebufferFactory = FramebufferFactory::Pointer::create(this);
+		_vertexBufferFactory = VertexBufferFactory::Pointer::create(this);
 		_renderer = Renderer::Pointer::create(this);
 
 		_renderState.setDefaultFramebuffer(_framebufferFactory->createFramebufferWrapper(0, "default-fbo"));
@@ -101,7 +100,7 @@ RenderContext::RenderContext(const RenderContextParameters& inParams, Applicatio
 
 RenderContext::~RenderContext()
 {
-	delete _private;
+	ET_PIMPL_FINALIZE(RenderContext)
 }
 
 void RenderContext::init()

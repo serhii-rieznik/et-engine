@@ -18,6 +18,7 @@ namespace et
 			ET_DECLARE_POINTER(Track)
             
 		public:
+			Track(const std::string& fileName);
 			~Track();
 
 			float duration() const;
@@ -37,20 +38,15 @@ namespace et
 			void rewind();
 			
 		private:
-            Track(const std::string& fileName);
-
-			ET_DENY_COPY(Track)
-
-		private:
 			unsigned int buffer() const;
 			unsigned int* buffers() const;
-            
+			
 		private:
 			friend class Player;
 			friend class Manager;
 			
-		private:
-           TrackPrivate* _private;
+			ET_DENY_COPY(Track)
+			ET_DECLARE_PIMPL(Track, 1536)
         };
 	}
 }

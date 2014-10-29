@@ -29,14 +29,17 @@ extern ALCdevice* getSharedDevice();
 extern ALCcontext* getSharedContext();
 
 Player::Player() :
-	_private(new PlayerPrivate), _volumeAnimator(currentTimerPool())
+	_volumeAnimator(currentTimerPool())
 {
+	ET_PIMPL_INIT(Player)
 	init();
 }
 
 Player::Player(Track::Pointer track) : 
-	_private(new PlayerPrivate), _volumeAnimator(currentTimerPool())
+	_volumeAnimator(currentTimerPool())
 {
+	ET_PIMPL_INIT(Player)
+	
 	init();
 	linkTrack(track);
 }
@@ -48,7 +51,7 @@ Player::~Player()
 	alDeleteSources(1, &_private->source);
     checkOpenALError("alDeleteSources");
 
-	delete _private;
+	ET_PIMPL_FINALIZE(Player)
 }
 
 void Player::init()

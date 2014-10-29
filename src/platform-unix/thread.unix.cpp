@@ -5,9 +5,12 @@
  *
  */
 
+#include <et/threading/thread.h>
+
+#if (!ET_PLATFORM_WIN)
+
 #include <pthread.h>
 #include <unistd.h>
-#include <et/threading/thread.h>
 
 namespace et
 {
@@ -24,9 +27,9 @@ namespace et
 		pthread_t thread;
 		pthread_mutex_t suspendMutex;
 		pthread_cond_t suspend;
-		ThreadId threadId;
 		AtomicBool running;
 		AtomicBool suspended;
+		ThreadId threadId = 0;
 	};
 }
 
@@ -60,21 +63,22 @@ void* ThreadPrivate::threadProc(void* context)
 	return reinterpret_cast<void*>(thread->main());
 }
 
-Thread::Thread() :
-	_private(new ThreadPrivate)
+Thread::Thread()
 {
+	ET_PIMPL_INIT(Thread)
 }
 
-Thread::Thread(bool start) :
-	_private(new ThreadPrivate)
+Thread::Thread(bool start)
 {
+	ET_PIMPL_INIT(Thread)
+	
 	if (start)
 		run();
 }
 
 Thread::~Thread()
 {
-	delete _private;
+	ET_PIMPL_FINALIZE(Thread)
 }
 
 void Thread::run()
@@ -159,3 +163,5 @@ void Thread::sleepMSec(uint64_t msec)
 {
 	usleep(static_cast<useconds_t>(msec * 1000));
 }
+
+#endif // !ET_PLATFORM_WIN

@@ -11,18 +11,6 @@
 
 namespace et
 {
-	class VertexArrayObject : public IntrusivePtr<VertexArrayObjectData>
-	{
-	public:
-		VertexArrayObject() :
-			IntrusivePtr<VertexArrayObjectData>() { }
-
-	private:
-		friend class VertexBufferFactory;
-
-		VertexArrayObject(VertexArrayObjectData* data) :
-			IntrusivePtr<VertexArrayObjectData>(data) { }
-	};
-
+	typedef IntrusivePtr<VertexArrayObjectData> VertexArrayObject;
 	typedef std::vector<VertexArrayObject> VertexArrayObjectList;
 }

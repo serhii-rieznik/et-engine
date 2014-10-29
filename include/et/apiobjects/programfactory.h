@@ -35,7 +35,6 @@ namespace et
 			const std::string& fs, const StringList& defines = StringList(), const std::string& workFolder = ".");
 
 	private:
-		
 		enum ShaderType
 		{
 			ShaderType_Vertex,
@@ -44,6 +43,7 @@ namespace et
 		};
 		
 	private:
+		ET_DENY_COPY(ProgramFactory)
 		friend class ProgramFactoryPrivate;
 		
 		void parseSourceCode(ShaderType type, std::string& code,
@@ -59,6 +59,7 @@ namespace et
 		std::string _commonHeader;
 		std::string _fragShaderHeader;
 		std::string _vertShaderHeader;
-		ProgramFactoryPrivate* _private;
+		
+		ET_DECLARE_PIMPL(ProgramFactory, 32)
 	};
 }

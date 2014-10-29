@@ -8,14 +8,12 @@ namespace et
 	class LocationManagerPrivate : public EventReceiver
 	{
 	public:
-		LocationManagerPrivate(bool e) : _man(0), _defaultLocation(49.980171f, 36.349479f, 0.0f, 0.0f), enabled(false)
+		LocationManagerPrivate(LocationManager* m, bool e) :
+			_man(m), _defaultLocation(49.980171f, 36.349479f, 0.0f, 0.0f), enabled(false)
 		{ 
 			_timer.expired.connect(this, &LocationManagerPrivate::timerExpired);
 			setEnabled(e);
 		};
-
-		void setOwner(LocationManager* m)
-			{ _man = m; }
 
 		void setEnabled(bool e)
 		{
@@ -37,23 +35,23 @@ namespace et
 		}
 
 	public:
-		LocationManager* _man;
+		LocationManager* _man = nullptr;
 		NotifyTimer _timer;
 		Location _defaultLocation;
-		bool enabled;
+		bool enabled = false;
 	};
 }
 
 using namespace et;
 
-LocationManager::LocationManager() : _private(new LocationManagerPrivate(false))
+LocationManager::LocationManager()
 {
-	_private->setOwner(this);
+	ET_PIMPL_INIT(LocationManager, this, false)
 }
 
 LocationManager::~LocationManager()
 {
-	delete _private;
+	ET_PIMPL_FINALIZE(LocationManager)
 }
 
 void LocationManager::setEnabled(bool e)

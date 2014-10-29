@@ -35,14 +35,14 @@ namespace et
 
 using namespace et;
 
-Mutex::Mutex() : 
-	_private(new MutexPrivate)
+Mutex::Mutex()
 {
+	ET_PIMPL_INIT(Mutex)
 }
 
 Mutex::~Mutex()
 {
-	delete _private;
+	ET_PIMPL_FINALIZE(Mutex)
 }
 
 void Mutex::lock()

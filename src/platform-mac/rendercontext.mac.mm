@@ -101,7 +101,7 @@ RenderContext::RenderContext(const RenderContextParameters& inParams, Applicatio
 	_app(app), _programFactory(nullptr), _textureFactory(nullptr), _framebufferFactory(nullptr),
 	_vertexBufferFactory(nullptr), _renderer(nullptr), _screenScaleFactor(1)
 {
-	_private = new RenderContextPrivate(this, _params, app->parameters());
+	ET_PIMPL_INIT(RenderContext, this, _params, app->parameters())
 	
 #if !defined(ET_CONSOLE_APPLICATION)
 	openGLCapabilites().checkCaps();
@@ -112,10 +112,10 @@ RenderContext::RenderContext(const RenderContextParameters& inParams, Applicatio
 	
 	updateScreenScale(_renderState.viewportSize());
 	
-	_textureFactory = TextureFactory::Pointer(new TextureFactory(this));
-	_framebufferFactory = FramebufferFactory::Pointer(new FramebufferFactory(this));
-	_programFactory = ProgramFactory::Pointer(new ProgramFactory(this));
-	_vertexBufferFactory = VertexBufferFactory::Pointer(new VertexBufferFactory(this));
+	_textureFactory = TextureFactory::Pointer::create(this);
+	_framebufferFactory = FramebufferFactory::Pointer::create(this);
+	_programFactory = ProgramFactory::Pointer::create(this);
+	_vertexBufferFactory = VertexBufferFactory::Pointer::create(this);
 
 #if !defined(ET_CONSOLE_APPLICATION)
 	_renderState.setDefaultFramebuffer(_framebufferFactory->createFramebufferWrapper(0));
@@ -128,7 +128,7 @@ RenderContext::RenderContext(const RenderContextParameters& inParams, Applicatio
 
 RenderContext::~RenderContext()
 {
-	delete _private;
+	ET_PIMPL_FINALIZE(RenderContext)
 }
 
 void RenderContext::init()

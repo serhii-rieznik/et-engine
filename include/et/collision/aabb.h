@@ -20,11 +20,11 @@ namespace et
 		AABBCorner_RightUpNear,
 		AABBCorner_LeftDownNear,
 		AABBCorner_RightDownNear,
-		AABBCorner_max
+		AABBCorner_max,
+		
+		AABBCorner_First = AABBCorner_LeftUpFar
 	};
-
-	static const AABBCorner AABBCorner_First = AABBCorner_LeftUpFar;
-
+	
 	struct AABB
 	{
 		typedef vec4 AABBCorners[AABBCorner_max];

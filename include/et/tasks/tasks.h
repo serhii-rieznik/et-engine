@@ -13,10 +13,9 @@ namespace et
 {
 	class Task
 	{
-	protected:
-		Task() : _executionTime(0.0f) { }
+	public:
 		virtual ~Task()	{ }
-
+		
 		virtual void execute() = 0;
 
 	private:
@@ -29,20 +28,8 @@ namespace et
 		friend class TaskPool;
 
 	private:
-		float _executionTime;
+		float _executionTime = 0.0f;
 	};
-	typedef std::list<Task*> TaskList;
-
-	template <typename T>
-	class DeletionTask : public Task
-	{
-	public:
-		DeletionTask(T* obj) : _object(obj) { }
-
-		void execute()
-			{ delete _object; }
-
-	private:
-		T* _object;
-	};
+	
+	typedef std::vector<Task*> TaskList;
 }

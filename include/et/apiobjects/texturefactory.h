@@ -21,6 +21,7 @@ namespace et
 		ET_DECLARE_POINTER(TextureFactory)
 		
 	public:
+		TextureFactory(RenderContext*);
 		~TextureFactory();
 		
 		Texture loadTexture(const std::string& file, ObjectsCache& cache, bool async = false,
@@ -46,24 +47,18 @@ namespace et
 		ET_DECLARE_EVENT1(textureDidLoad, Texture)
 
 	private:
+		ET_DENY_COPY(TextureFactory)
+		
 		friend class RenderContext;
 		friend class TextureFactoryPrivate;
-
-		TextureFactory(RenderContext*);
-
-		TextureFactory(const TextureFactory&) :
-			APIObjectFactory(nullptr) { }
-
-		TextureFactory& operator = (const TextureFactory&)
-			{ return *this; }
 		
 		void reloadObject(LoadableObject::Pointer, ObjectsCache&);
-		
 		void textureLoadingThreadDidLoadTextureData(TextureLoadingRequest* request);
 		
 	private:
 		AutoPtr<TextureLoadingThread> _loadingThread;
-		TextureFactoryPrivate* _private;
+		
+		ET_DECLARE_PIMPL(TextureFactory, 64)
 
 		CriticalSection _csTextureLoading;
 		ObjectLoader::Pointer _loader;

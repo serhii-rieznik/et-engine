@@ -59,12 +59,10 @@ namespace et
 			{ }
 
 		VertexDataChunk(std::istream& stream) : 
-			IntrusivePtr<VertexDataChunkData>(new VertexDataChunkData(stream))
-			{ }
+			IntrusivePtr<VertexDataChunkData>(sharedObjectFactory().createObject<VertexDataChunkData>(stream)) { }
 
 		VertexDataChunk(VertexAttributeUsage usage, VertexAttributeType type, size_t size) : 
-			IntrusivePtr<VertexDataChunkData>(new VertexDataChunkData(usage, type, size))
-			{ }
+			IntrusivePtr<VertexDataChunkData>(sharedObjectFactory().createObject<VertexDataChunkData>(usage, type, size)) { }
 
 		template <typename T>
 		RawDataAcessor<T> accessData(size_t elementOffset) 

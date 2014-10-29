@@ -17,7 +17,7 @@ class et::ProgramFactoryPrivate
 public:
 	struct Loader : public ObjectLoader
 	{
-		ProgramFactory* owner;
+		ProgramFactory* owner = nullptr;
 
 		Loader(ProgramFactory* aOwner) :
 			owner(aOwner) { }
@@ -30,14 +30,14 @@ public:
 	IntrusivePtr<Loader> loader;
 
 	ProgramFactoryPrivate(ProgramFactory* owner) : 
-		loader(new Loader(owner)) { }
+		loader(sharedObjectFactory().createObject<Loader>(owner)) { }
 };
 
 StringList parseDefinesString(std::string defines, std::string separators = ",; \t");
 
 ProgramFactory::ProgramFactory(RenderContext* rc) : APIObjectFactory(rc)
 {
-	_private = new ProgramFactoryPrivate(this);
+	ET_PIMPL_INIT(ProgramFactory, this)
 
 #if (ET_OPENGLES)	
 	
@@ -123,7 +123,7 @@ ProgramFactory::ProgramFactory(RenderContext* rc) : APIObjectFactory(rc)
 
 ProgramFactory::~ProgramFactory()
 {
-	delete _private;
+	ET_PIMPL_FINALIZE(ProgramFactory)
 }
 
 StringList ProgramFactory::loadProgramSources(const std::string& file, std::string& vertex_shader,
@@ -270,8 +270,8 @@ Program::Pointer ProgramFactory::loadProgram(const std::string& file, ObjectsCac
 	parseSourceCode(ShaderType_Geometry, geom_shader, defines, workFolder);
 	parseSourceCode(ShaderType_Fragment, frag_shader, defines, workFolder);
 	
-	Program::Pointer program(new Program(renderContext(), vertex_shader, geom_shader,
-		frag_shader, getFileName(file), file, defines));
+	Program::Pointer program = Program::Pointer::create(renderContext(), vertex_shader, geom_shader,
+		frag_shader, getFileName(file), file, defines);
 	
 	for (auto& s : sourceFiles)
 		program->addOrigin(s);

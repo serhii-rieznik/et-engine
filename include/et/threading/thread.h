@@ -51,6 +51,7 @@ namespace et
 
 	private:
 		friend class ThreadPrivate;
-		ThreadPrivate* _private;
+		
+		ET_DECLARE_PIMPL(Thread, 256)
 	};
 }

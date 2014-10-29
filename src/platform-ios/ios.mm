@@ -11,6 +11,7 @@
 
 #if (ET_PLATFORM_IOS)
 
+#import <objc/runtime.h>
 #import <UIKit/UIDevice.h>
 #import <UIKit/UIView.h>
 #import <UIKit/UIWindow.h>
@@ -30,7 +31,6 @@
 - (void)presentDocumentController:(NSNumber*)option;
 
 @end
-
 
 using namespace et;
 

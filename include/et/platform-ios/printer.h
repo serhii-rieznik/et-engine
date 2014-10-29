@@ -11,16 +11,8 @@
 
 namespace et
 {
-	class PrinterPrivate;
-	class Printer
+	namespace printer
 	{
-	public:
-		Printer();
-		~Printer();
-
 		void printImageFromFile(const std::string&);
-		
-	private:
-		PrinterPrivate* _private;
-	};
+	}
 }

@@ -36,7 +36,7 @@ namespace et
 		friend class MailComposerPrivate;
 		
 	private:
-		MailComposerPrivate* _private;
+		ET_DECLARE_PIMPL(MailComposer, 32)
 	};
 	
 	inline MailComposer& mailComposer()

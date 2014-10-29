@@ -19,7 +19,8 @@ namespace et
 		public:
 			FontData();
 			FontData(RenderContext* rc, const std::string& fileName, ObjectsCache& cache);
-			FontData(const CharacterGenerator::Pointer& generator);
+			FontData(const CharacterGenerator::Pointer&);
+			
 			~FontData();
 
 			void loadFromFile(RenderContext* rc, const std::string& fileName, ObjectsCache& cache);
@@ -58,21 +59,9 @@ namespace et
 			std::string _face;
 			et::vec2 _biggestChar;
 			et::vec2 _biggestBoldChar;
-			size_t _size;
+ 			size_t _size = 0;
 		};
 
-		class Font : public IntrusivePtr<FontData>
-		{
-		public:
-			Font() : IntrusivePtr<FontData>(0) 
-				{ }
-
-			Font(RenderContext* rc, const std::string& fileName, ObjectsCache& cache) : 
-				IntrusivePtr<FontData>(new FontData(rc, fileName, cache)) { }
-
-			Font(const CharacterGenerator::Pointer& generator) : 
-				IntrusivePtr<FontData>(new FontData(generator)) { }
-		};
-
+		typedef IntrusivePtr<FontData> Font;
 	}
 }

@@ -7,7 +7,7 @@
 
 #include <et/core/et.h>
 
-#if defined(ET_PLATFORM_WIN)
+#if (ET_PLATFORM_WIN && ET_HAVE_KINECT_SDK)
 
 #include <iostream>
 #include <Windows.h>
@@ -80,21 +80,25 @@ vec2i Kinect::depthFrameSize()
 	return vec2i(320, 240);
 }
 
-Kinect::Kinect(KinectDelegate* delegate) : _delegate(delegate), _private(0)
+Kinect::Kinect(KinectDelegate* delegate) :
+	_delegate(delegate)
 {
 	_deviceAvailable = Kinect::deviceAvailable();
-	if (_deviceAvailable) 
-		_private = new KinectPrivate(this);
+	
+	if (_deviceAvailable)
+	{
+		ET_PIMPL_INIT(Kinect, this);
+	}
 }
 
 Kinect::~Kinect()
 {
-	delete _private;
+	ET_PIMPL_FINALIZE(Kinect)
 }
 
 /*
-* Kinect private
-*/
+ * Kinect private
+ */
 
 KinectPrivate::KinectPrivate(Kinect* k) : _kinect(k), _thread(0), _threadStopEvent(0), 
 	_kinectImageNextFrameEvent(0), _kinectDepthNextFrameEvent(0), _kinectSkeletonNextFrameEvent(0),
@@ -322,4 +326,8 @@ void KinectPrivate::parseDepthData(KinectDepthData data, const vec2i& dimensions
 	}
 }
 
+#else 
+#	if (ET_PLATFORM_WIN)
+#		pragma message("Define ET_HAVE_KINECT_SDK to compile")
+#	endif
 #endif

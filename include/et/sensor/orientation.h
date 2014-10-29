@@ -68,6 +68,6 @@ namespace et
 		ET_DECLARE_EVENT1(gyroscopeDataUpdated, GyroscopeData)
 
 	private:
-		OrientationManagerPrivate* _private;
+		ET_DECLARE_PIMPL(OrientationManager, 384)
 	};
 }

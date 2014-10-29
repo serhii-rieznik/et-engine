@@ -94,10 +94,10 @@ namespace et
 
 	private:
 		friend class KinectPrivate;
+		ET_DECLARE_PIMPL(Kinect, 32)
 
-		KinectDelegate* _delegate;
-		KinectPrivate* _private;
-		bool _deviceAvailable;
+		KinectDelegate* _delegate = nullptr;
+		bool _deviceAvailable = false;
 	};
 
 }

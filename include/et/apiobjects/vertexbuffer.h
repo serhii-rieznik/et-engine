@@ -11,18 +11,6 @@
 
 namespace et
 {
-	class VertexBuffer : public IntrusivePtr<VertexBufferData>
-	{
-	public:
-		VertexBuffer() :
-			IntrusivePtr<VertexBufferData>(nullptr) { }
-		
-	private:
-		friend class VertexBufferFactory;
-
-		VertexBuffer(VertexBufferData* data) :
-			IntrusivePtr<VertexBufferData>(data) { }
-	};
-
+	typedef IntrusivePtr<VertexBufferData> VertexBuffer;
 	typedef std::vector<VertexBuffer> VertexBufferList;
 }

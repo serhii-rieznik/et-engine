@@ -367,7 +367,7 @@ public:
 
 		for (int level = 1; level < Terrain::LodLevel_max; ++level)
 		{
-			for (int var = 0; var < TerrainLODLevels::LOD::VARIATIONS; ++var)
+			for (size_t var = 0; var < TerrainLODLevels::LOD::VARIATIONS; ++var)
 			{
 				TerrainLODLevels::LODVariation variation;
 				variation._definition = var;
@@ -453,12 +453,11 @@ Terrain::~Terrain()
 void Terrain::releaseData()
 {
 	for (ChunkIterator i = _chunks.begin(), e = _chunks.end(); i != e; ++i)
-		delete *i;
-
+		sharedObjectFactory().deleteObject(*i);
 	_chunks.clear();
 
-	delete _lods;
-	_lods = 0;
+	sharedObjectFactory().deleteObject(_lods);
+	_lods = nullptr;
 }
 
 void Terrain::render(RenderContext* rc)
@@ -481,7 +480,7 @@ void Terrain::loadFromData(const TerrainDataRef& data)
 
 void Terrain::loadFromStream(std::istream& stream, const vec2i& dimension, TerrainData::Format format)
 {
-	loadFromData(TerrainDataRef(new TerrainData(_delegate, stream, dimension, format)));
+	loadFromData(TerrainDataRef::create(_delegate, stream, dimension, format));
 }
 
 void Terrain::loadFromRAWFile(const std::string& fileName, const vec2i& dimension, TerrainData::Format format)
@@ -496,8 +495,8 @@ void Terrain::generateBuffer()
 {
 	releaseData();
 	
-	IndexArray::Pointer indices(new IndexArray(IndexArrayFormat_16bit, 0, PrimitiveType_Triangles));
-	_lods = new TerrainLODLevels(indices, this);
+	IndexArray::Pointer indices = IndexArray::Pointer::create(IndexArrayFormat_16bit, 0, PrimitiveType_Triangles);
+	_lods = sharedObjectFactory().createObject<TerrainLODLevels>(indices, this);
 	generateChunks();
 	indices->compact();
 
@@ -518,7 +517,8 @@ void Terrain::generateChunks()
 	{
 		for (int x = 0; x < _chunkSizes.x; ++x, ++totalChunks)
 		{
-			TerrainChunk* c = new TerrainChunk(totalChunks, this, x * ET_TERRAIN_CHUNK_SIZE, z * ET_TERRAIN_CHUNK_SIZE);
+			TerrainChunk* c = sharedObjectFactory().createObject<TerrainChunk>(totalChunks, this,
+				x * ET_TERRAIN_CHUNK_SIZE, z * ET_TERRAIN_CHUNK_SIZE);
 			_chunks.push_back(c);
 		}
 	}

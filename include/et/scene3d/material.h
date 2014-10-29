@@ -25,7 +25,7 @@ namespace et
 			struct Pointer : public IntrusivePtr<Material>
 			{
 				Pointer() :
-					IntrusivePtr<Material>(new Material()) { }
+					IntrusivePtr<Material>(sharedObjectFactory().createObject<Material>()) { }
 				
 				explicit Pointer(Material* data) :
 					IntrusivePtr<Material>(data) { }

@@ -7,14 +7,12 @@ namespace et
 	class OrientationManagerPrivate : public EventReceiver
 	{
 	public:
-		OrientationManagerPrivate() : _man(0), accelEnabled(false), gyroEnabled(false)
+		OrientationManagerPrivate(OrientationManager* m) :
+			_man(m), accelEnabled(false), gyroEnabled(false)
 		{
 			_timerAccel.expired.connect(this, &OrientationManagerPrivate::onTimerExpired);
 			_timerGyro.expired.connect(this, &OrientationManagerPrivate::onTimerExpired);
 		}
-
-		void setManager(OrientationManager* man)
-			{ _man = man; }
 
 		void setGyroEnabled(bool e)
 		{
@@ -56,20 +54,24 @@ namespace et
 
 		AccelerometerData _defaultAcceleration;
 		GyroscopeData _defaultGyro;
-		OrientationManager* _man;
+		OrientationManager* _man = nullptr;
 		
-		bool accelEnabled;
-		bool gyroEnabled;
+		bool accelEnabled = false;
+		bool gyroEnabled = false;
 	};
 }
 
 using namespace et;
 
-OrientationManager::OrientationManager() : _private(new OrientationManagerPrivate)
-	{ _private->setManager(this); }
+OrientationManager::OrientationManager()
+{
+	ET_PIMPL_INIT(OrientationManager, this);
+}
 
 OrientationManager::~OrientationManager()
-	{ delete _private; }
+{
+	ET_PIMPL_FINALIZE(OrientationManager)
+}
 
 void OrientationManager::setAccelerometerEnabled(bool e)
 	{ _private->setAccelEnabled(e); }

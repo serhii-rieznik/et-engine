@@ -33,8 +33,8 @@ namespace et
 		}
 		
 	public:
-		OrientationManagerPrivate() :
-			manager(0), accelEnabled(false), gyroEnabled(false), updating(false)
+		OrientationManagerPrivate(OrientationManager* m) :
+			manager(m), accelEnabled(false), gyroEnabled(false), updating(false)
 		{
 			_oq = [[NSOperationQueue alloc] init];
 			_motionManager = [[CMMotionManager alloc] init];
@@ -110,13 +110,13 @@ namespace et
 		}
 		
 	public:
-		NSOperationQueue* _oq;
-		CMMotionManager* _motionManager;
-		OrientationManager* manager;
+		NSOperationQueue* _oq = nil;
+		CMMotionManager* _motionManager = nil;
+		OrientationManager* manager = nullptr;
 		
-		bool accelEnabled;
-		bool gyroEnabled;
-		bool updating;
+		bool accelEnabled = false;
+		bool gyroEnabled = false;
+		bool updating = false;
 	};
 }
 
@@ -128,11 +128,15 @@ bool OrientationManager::accelerometerAvailable()
 bool OrientationManager::gyroscopeAvailable()
 	{ return ET_OBJC_AUTORELEASE([[CMMotionManager alloc] init]).gyroAvailable; }
 
-OrientationManager::OrientationManager() : _private(new OrientationManagerPrivate)
-	{ _private->manager = this; }
+OrientationManager::OrientationManager()
+{
+	ET_PIMPL_INIT(OrientationManager, this)
+}
 
 OrientationManager::~OrientationManager()
-	{ delete _private; }
+{
+	ET_PIMPL_FINALIZE(OrientationManager)
+}
 
 void OrientationManager::setAccelerometerEnabled(bool e)
 	{ _private->setAccelEnabled(e); }

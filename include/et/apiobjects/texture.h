@@ -17,6 +17,8 @@ namespace et
 	class TextureData : public LoadableObject
 	{
 	public:
+		TextureData(RenderContext* rc, const TextureDescription::Pointer&, const std::string&, bool deferred);
+		TextureData(RenderContext* rc, uint32_t texture, const vec2i& size, const std::string& name);
 		~TextureData();
 
 		void setWrap(RenderContext* rc, TextureWrap s, TextureWrap t,
@@ -72,14 +74,6 @@ namespace et
 			{ return _desc; }
 
 	private:
-		friend class TextureFactory;
-
-		TextureData(RenderContext* rc, TextureDescription::Pointer desc,
-			const std::string& id, bool deferred);
-
-		TextureData(RenderContext* rc, uint32_t texture, const vec2i& size,
-			const std::string& name);
-
 		void generateTexture(RenderContext* rc);
 		void build(RenderContext* rc);
         void buildData(const char* ptr, size_t dataSize);
@@ -90,7 +84,7 @@ namespace et
 		vector3<TextureWrap> _wrap;
 		vector2<TextureFiltration> _filtration;
 		vec2 _texel;
-		bool _own;
+		bool _own = false;
 	};
 
 	typedef IntrusivePtr<TextureData> Texture;

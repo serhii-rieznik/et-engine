@@ -30,8 +30,10 @@ public:
 
 RenderContext::RenderContext(const RenderContextParameters& params, Application* app) :
 	_params(params), _app(app), _programFactory(nullptr), _textureFactory(nullptr), _framebufferFactory(nullptr),
-	_vertexBufferFactory(nullptr), _renderer(nullptr), _private(new RenderContextPrivate(params))
+	_vertexBufferFactory(nullptr), _renderer(nullptr)
 {
+	ET_PIMPL_INIT(RenderContext, params)
+	
 #if !defined(ET_EMBEDDED_APPLICATION)
 	ET_ASSERT(sharedOpenGLViewController != nil);
 #endif
@@ -40,10 +42,10 @@ RenderContext::RenderContext(const RenderContextParameters& params, Application*
 
 	_renderState.setRenderContext(this);
 	
-	_programFactory = ProgramFactory::Pointer(new ProgramFactory(this));
-	_textureFactory = TextureFactory::Pointer(new TextureFactory(this));
-	_framebufferFactory = FramebufferFactory::Pointer(new FramebufferFactory(this));
-	_vertexBufferFactory = VertexBufferFactory::Pointer(new VertexBufferFactory(this));
+	_programFactory = ProgramFactory::Pointer::create(this);
+	_textureFactory = TextureFactory::Pointer::create(this);
+	_framebufferFactory = FramebufferFactory::Pointer::create(this);
+	_vertexBufferFactory = VertexBufferFactory::Pointer::create(this);
 	_renderer = Renderer::Pointer::create(this);
 	
 	CGSize screenSize = [[[UIApplication sharedApplication] delegate] window].frame.size;
@@ -58,8 +60,7 @@ RenderContext::RenderContext(const RenderContextParameters& params, Application*
 
 RenderContext::~RenderContext()
 {
-	delete _private;
-	_private = nullptr;
+	ET_PIMPL_FINALIZE(RenderContext)
 }
 
 void RenderContext::init()

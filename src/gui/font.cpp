@@ -15,7 +15,8 @@
 using namespace et;
 using namespace et::gui;
 
-FontData::FontData() : _size(0)
+FontData::FontData() :
+	_size(0)
 {
 }
 

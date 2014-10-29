@@ -29,7 +29,6 @@ namespace et
 
 		void attachTimedObject(TimedObject* obj);
 		void detachTimedObject(TimedObject* obj);
-		void deleteTimedObjecct(TimedObject* obj);
 
 		void setOwner(RunLoop* owner)
 			{ _owner = owner; }

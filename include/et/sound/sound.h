@@ -43,8 +43,9 @@ namespace et
             friend class ManagerPrivate;
 			friend class Player;
 			
+			ET_DECLARE_PIMPL(Manager, 32)
+			
 			StreamingThread _streamingThread;
-            ManagerPrivate* _private;
         };
 
 		inline Manager& manager()

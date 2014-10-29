@@ -12,11 +12,14 @@ using namespace et;
 
 @interface SharedPurchasesManager : NSObject <SKPaymentTransactionObserver, SKProductsRequestDelegate>
 {
+	PurchasesManager* _pm;
 	NSMutableDictionary* _availableProducts;
+	BOOL _shouldVerifyReceipts;
 }
 
 + (instancetype)sharedInstance;
 
+- (void)setPurchasesManager:(PurchasesManager*)pm;
 - (void)startProductRequestWithIdentifiers:(const PurchasesManager::ProductsSet&)products;
 
 - (PurchasesManager::Product)productForIdentifier:(const std::string&)identifier;
@@ -36,9 +39,15 @@ using namespace et;
 const std::string PurchasesManager::defaultVerificationServer = "https://buy.itunes.apple.com/verifyReceipt";
 const std::string PurchasesManager::defaultVerificationSandboxServer = "https://sandbox.itunes.apple.com/verifyReceipt";
 
+PurchasesManager& et::sharedPurchasesManager()
+{
+	static PurchasesManager pm;
+	return pm;
+}
+
 PurchasesManager::PurchasesManager()
 {
-	
+	[[SharedPurchasesManager sharedInstance] setPurchasesManager:this];
 }
 
 bool PurchasesManager::purchasesEnabled()
@@ -112,6 +121,11 @@ Dictionary PurchasesManager::receiptData() const
 	return self;
 }
 
+- (void)setPurchasesManager:(PurchasesManager*)pm
+{
+	_pm = pm;
+}
+
 - (void)startProductRequestWithIdentifiers:(const PurchasesManager::ProductsSet&)products
 {
 	NSMutableSet* identifiers = [NSMutableSet set];
@@ -182,14 +196,14 @@ Dictionary PurchasesManager::receiptData() const
 		checkedProducts.push_back(std::string([identifier UTF8String]));
 	}
 	
-	PurchasesManager::instance().availableProductsChecked.invokeInMainRunLoop(checkedProducts);
+	_pm->availableProductsChecked.invokeInMainRunLoop(checkedProducts);
 }
 
 - (void)request:(SKRequest*)request didFailWithError:(NSError *)error
 {
 	(void)request;
 	(void)error;
-	PurchasesManager::instance().failedToCheckAvailableProducts.invokeInMainRunLoop();
+	_pm->failedToCheckAvailableProducts.invokeInMainRunLoop();
 }
 
 - (void)requestDidFinish:(SKRequest*)request
@@ -262,7 +276,7 @@ Dictionary PurchasesManager::receiptData() const
 	
 	if (receipt == nil)
 	{
-		PurchasesManager::instance().failedToPurchaseProduct.invokeInMainRunLoop(
+		_pm->failedToPurchaseProduct.invokeInMainRunLoop(
 			std::string([transaction.payment.productIdentifier UTF8String]));
 		return;
 	}
@@ -312,20 +326,20 @@ Dictionary PurchasesManager::receiptData() const
 				
 				if (validationPassed)
 				{
-					PurchasesManager::instance().productPurchased.invokeInMainRunLoop(
+					_pm->productPurchased.invokeInMainRunLoop(
 						[self transactionFromSKPaymentTransaction:transaction]);
 				}
 				else
-					PurchasesManager::instance().failedToPurchaseProduct.invokeInMainRunLoop(productId);
+					_pm->failedToPurchaseProduct.invokeInMainRunLoop(productId);
 			}
 			else
 			{
-				PurchasesManager::instance().failedToPurchaseProduct.invokeInMainRunLoop(productId);
+				_pm->failedToPurchaseProduct.invokeInMainRunLoop(productId);
 			}
 		}
 		else
 		{
-			PurchasesManager::instance().failedToPurchaseProduct.invokeInMainRunLoop(productId);
+			_pm->failedToPurchaseProduct.invokeInMainRunLoop(productId);
 		}
 	}];
 }
@@ -350,19 +364,19 @@ Dictionary PurchasesManager::receiptData() const
 			}
 			else
 			{
-				PurchasesManager::instance().productPurchased.invokeInMainRunLoop(
+				_pm->productPurchased.invokeInMainRunLoop(
 					[self transactionFromSKPaymentTransaction:transaction]);
 			}
 		}
 		else if (state == SKPaymentTransactionStateRestored)
 		{
-			PurchasesManager::instance().purchaseRestored.invokeInMainRunLoop(
+			_pm->purchaseRestored.invokeInMainRunLoop(
 				[self transactionFromSKPaymentTransaction:transaction]);
 		}
 		else if (state == SKPaymentTransactionStateFailed)
 		{
 			std::string productId([transaction.payment.productIdentifier UTF8String]);
-			PurchasesManager::instance().failedToPurchaseProduct.invokeInMainRunLoop(productId);
+			_pm->failedToPurchaseProduct.invokeInMainRunLoop(productId);
 		}
 		
 		if (state != SKPaymentTransactionStatePurchasing)
@@ -380,13 +394,13 @@ Dictionary PurchasesManager::receiptData() const
 {
 	(void)queue;
 	(void)error;
-	PurchasesManager::instance().failedToRestorePurchases.invokeInMainRunLoop();
+	_pm->failedToRestorePurchases.invokeInMainRunLoop();
 }
 
 - (void)paymentQueueRestoreCompletedTransactionsFinished:(SKPaymentQueue*)queue
 {
 	(void)queue;
-	PurchasesManager::instance().restoringPurchasesFinished.invokeInMainRunLoop();
+	_pm->restoringPurchasesFinished.invokeInMainRunLoop();
 }
 
 @end

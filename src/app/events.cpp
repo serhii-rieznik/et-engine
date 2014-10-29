@@ -41,7 +41,7 @@ Event0::~Event0()
 	{
 		if ((connection->receiver() != nullptr) && !connection->removed())
 			connection->receiver()->eventDisconnected(this);
-		delete connection;
+		sharedObjectFactory().deleteObject(connection);
 	}
 }
 
@@ -96,7 +96,7 @@ void Event0::receiverDisconnected(EventReceiver* r)
 			}
 			else
 			{
-				delete (*i);
+				sharedObjectFactory().deleteObject(*i);
 				i = _connections.erase(i);
 			}
 		}

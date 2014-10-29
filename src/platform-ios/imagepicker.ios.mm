@@ -50,15 +50,15 @@ namespace et
 
 using namespace et;
 
-ImagePicker::ImagePicker() :
-	_private(new ImagePickerPrivate)
+ImagePicker::ImagePicker()
 {
+	ET_PIMPL_INIT(ImagePicker)
 	_private->owner = this;
 }
 
 ImagePicker::~ImagePicker()
 {
-	delete _private;
+	ET_PIMPL_FINALIZE(ImagePicker)
 }
 
 void ImagePicker::selectImage(ImagePickerSource source)
@@ -195,7 +195,7 @@ void ImagePickerPrivate::pick(ImagePickerSource s)
 	{
 		CGImageRef cgImage = [image CGImage];
 		
-		TextureDescription::Pointer result(new TextureDescription);
+		TextureDescription::Pointer result = TextureDescription::Pointer::create();
 		result->size.x = (int)CGImageGetWidth(cgImage);
 		result->size.y = (int)CGImageGetHeight(cgImage);
 		result->target = GL_TEXTURE_2D;

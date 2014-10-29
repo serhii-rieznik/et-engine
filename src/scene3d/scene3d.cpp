@@ -121,7 +121,7 @@ bool Scene::deserialize(std::istream& stream, RenderContext* rc, ObjectsCache& t
 Scene3dStorage::Pointer Scene::deserializeStorage(std::istream& stream, RenderContext* rc,
 	ObjectsCache& tc, const std::string& basePath, StorageFormat fmt, bool async)
 {
-	Scene3dStorage::Pointer result(new Scene3dStorage("storage", 0));
+	Scene3dStorage::Pointer result = Scene3dStorage::Pointer::create("storage", nullptr);
 
 	volatile bool materialsRead = false;
 	volatile bool vertexArraysRead = false;
@@ -180,7 +180,7 @@ Scene3dStorage::Pointer Scene::deserializeStorage(std::istream& stream, RenderCo
 			size_t numVertexArrays = deserializeUInt(stream);
 			for (size_t i = 0; i < numVertexArrays; ++i)
 			{
-				VertexArray::Pointer va(new VertexArray());
+				VertexArray::Pointer va = VertexArray::Pointer::create();
 				va->tag = deserializeInt(stream);
 				va->deserialize(stream);
 				result->addVertexArray(va);

@@ -23,6 +23,8 @@ namespace et
 		virtual void* alloc(size_t) = 0;
 		virtual void free(void*) = 0;
 		
+		virtual bool validatePointer(void*, bool abortOnFail = true) = 0;
+		
 		virtual void printInfo() const = 0;
 		
 	private:
@@ -58,8 +60,15 @@ namespace et
 		void deleteObject(O* obj)
 		{
 			ET_ASSERT(_allocator != nullptr);
-			obj->~O();
-			_allocator->free(obj);
+			if (obj != nullptr)
+			{
+#			if (ET_DEBUG)
+				_allocator->validatePointer(obj);
+#			endif
+				
+				obj->~O();
+				_allocator->free(obj);
+			}
 		}
 		
 	private:
@@ -77,6 +86,9 @@ namespace et
 		void free(void* ptr)
 			{ ::free(ptr); }
 		
+		bool validatePointer(void*, bool = true)
+			{ return true; }
+		
 		void printInfo() const
 			{ log::info("Not available for DefaultMemoryAllocator"); }
 	};
@@ -90,19 +102,11 @@ namespace et
 		
 		void* alloc(size_t);
 		void free(void*);
+		bool validatePointer(void*, bool = true);
 		void printInfo() const;
 				
 	private:
-		enum
-		{
-			PrivateEstimatedSize = 32,
-		};
-		
 		BlockMemoryAllocatorPrivate* _private = nullptr;
-		char _privateData[PrivateEstimatedSize];
+		char _privateData[256];
 	};
-	
-	ObjectFactory& sharedObjectFactory();
-	DefaultMemoryAllocator& sharedDefaultAllocator();
-	BlockMemoryAllocator& sharedBlockAllocator();
 }

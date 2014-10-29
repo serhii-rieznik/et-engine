@@ -76,8 +76,8 @@ void SupportMesh::fillCollisionData(VertexArray::Pointer v, IndexArray::Pointer 
 
 SupportMesh* SupportMesh::duplicate()
 {
-	SupportMesh* result = new SupportMesh(name(), vertexArrayObject(), material(), startIndex(),
-		numIndexes(), parent());
+	SupportMesh* result = sharedObjectFactory().createObject<SupportMesh>(name(), vertexArrayObject(),
+		material(), startIndex(), numIndexes(), parent());
 
 	duplicateBasePropertiesToObject(result);
 	duplicateChildrenToObject(result);

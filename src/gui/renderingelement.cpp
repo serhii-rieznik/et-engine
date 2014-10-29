@@ -11,18 +11,17 @@
 using namespace et;
 using namespace et::gui;
 
-RenderingElement::RenderingElement(RenderContext* rc) : _rs(rc->renderState()),
-	_indexArray(new IndexArray(IndexArrayFormat_16bit, 0, PrimitiveType_Triangles)), _changed(false)
+RenderingElement::RenderingElement(RenderContext* rc) :
+	_rs(rc->renderState()), _changed(false)
 {
+	_indexArray = IndexArray::Pointer::create(IndexArrayFormat_16bit, 0, PrimitiveType_Triangles);
+	
 	VertexDeclaration decl(true, Usage_Position, Type_Vec3);
 	decl.push_back(Usage_TexCoord0, Type_Vec4);
 	decl.push_back(Usage_Color, Type_Vec4);
 	
-	std::string nameId = intToStr(reinterpret_cast<size_t>(this)) + "-vao";
-
-	_vao = rc->vertexBufferFactory().createVertexArrayObject(nameId,
-		VertexArray::Pointer(new VertexArray(decl, true)), BufferDrawType_Stream,
-		_indexArray, BufferDrawType_Static);
+	_vao = rc->vertexBufferFactory().createVertexArrayObject(intToStr(reinterpret_cast<size_t>(this)) + "-vao",
+		VertexArray::Pointer::create(decl, true), BufferDrawType_Stream, _indexArray, BufferDrawType_Static);
 }
 
 void RenderingElement::clear()

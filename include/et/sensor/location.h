@@ -13,15 +13,17 @@ namespace et
 {
 	struct Location
 	{
-		float latitude;
-		float longitude;
-		float altitude;
-		float timestamp;
+		float latitude = 0.0f;
+		float longitude = 0.0f;
+		float altitude = 0.0f;
+		float timestamp = 0.0f;
 
 		Location() : 
 			latitude(0.0f), longitude(0.0f), altitude(0.0f), timestamp(0.0f) { }
+		
 		Location(float lat, float lon, float t) : 
 			latitude(lat), longitude(lon), altitude(0.0f), timestamp(t) { }
+		
 		Location(float lat, float lon, float alt, float t) : 
 			latitude(lat), longitude(lon), altitude(alt), timestamp(t) { }
 	};
@@ -39,7 +41,6 @@ namespace et
 		ET_DECLARE_EVENT1(locationUpdated, Location);
 
 	private:
-		LocationManagerPrivate* _private;
+		ET_DECLARE_PIMPL(LocationManager, 192)
 	};
-
 }

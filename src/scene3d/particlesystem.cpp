@@ -40,7 +40,7 @@ ParticleSystem::ParticleSystem(RenderContext* rc, size_t maxSize, const std::str
 	_vao = rc->vertexBufferFactory().createVertexArrayObject(name, va, BufferDrawType_Stream, ia, BufferDrawType_Static);
 	_vertexData = va->generateDescription();
 	
-	_updateFunction = [](Particle& p, float t, float dt)
+	_updateFunction = [](Particle& p, float, float dt)
 	{
 		p.velocity += dt * p.acceleration;
 		p.position += dt * p.velocity;

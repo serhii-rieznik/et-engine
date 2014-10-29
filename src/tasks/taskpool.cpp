@@ -19,7 +19,7 @@ TaskPool::~TaskPool()
 	CriticalSectionScope lock(_csModifying);
 	
 	for (auto i : _tasks)
-		delete i;
+		sharedObjectFactory().deleteObject(i);
 }
 
 void TaskPool::addTask(Task* t, float delay)
@@ -47,7 +47,7 @@ void TaskPool::update(float currentTime)
 		if (_lastTime >= task->executionTime())
 		{
 			task->execute();
-			delete task;
+			sharedObjectFactory().deleteObject(task);
 			i = _tasks.erase(i);
 		}
 		else
@@ -60,7 +60,7 @@ void TaskPool::update(float currentTime)
 bool TaskPool::hasTasks()
 {
 	CriticalSectionScope lock(_csModifying);
-	return (_tasks.size() + _tasksToAdd.size()) > 0;
+	return !(_tasks.empty() && _tasksToAdd.empty());
 }
 
 void TaskPool::joinTasks()
@@ -68,5 +68,8 @@ void TaskPool::joinTasks()
 	CriticalSectionScope lock(_csModifying);
 	
 	if (!_tasksToAdd.empty())
-		_tasks.splice(_tasks.end(), _tasksToAdd);
+	{
+		_tasks.insert(_tasks.end(), _tasksToAdd.begin(), _tasksToAdd.end());
+		_tasksToAdd.clear();
+	}
 }

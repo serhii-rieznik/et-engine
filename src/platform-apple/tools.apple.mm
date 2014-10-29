@@ -184,7 +184,7 @@ bool et::removeDirectory(const std::string& name)
 	BOOL result = [[NSFileManager defaultManager] removeItemAtPath:path error:&error];
 	
 	if (error)
-		NSLog(@"Unable to delete directory at %@, error: %@", path, error);
+		NSLog(@"Unable to remove directory at %@, error: %@", path, error);
 	
 	return result;
 }
@@ -197,7 +197,7 @@ bool et::removeFile(const std::string& name)
 	BOOL result = [[NSFileManager defaultManager] removeItemAtPath:path error:&error];
 	
 	if (error)
-		NSLog(@"Unable to delete file at %@, error: %@", path, error);
+		NSLog(@"Unable to remove file at %@, error: %@", path, error);
 	
 	return result;
 }

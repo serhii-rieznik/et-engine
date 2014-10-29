@@ -23,7 +23,7 @@ namespace et
 			BinaryDataStorage data;
 		};
 
-		int tag;
+		int tag = 0;
 
 	public:
 		VertexArray();

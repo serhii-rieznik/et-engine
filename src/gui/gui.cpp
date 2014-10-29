@@ -18,9 +18,9 @@ static const bool shouldSaveFillRate = false;
 #endif
 
 Gui::Gui(RenderContext* rc) : _rc(rc),  _renderer(rc, shouldSaveFillRate),
-	_renderingElementBackground(new RenderingElement(rc)),
 	_background(Texture(), 0), _backgroundValid(true)
 {
+	_renderingElementBackground = RenderingElement::Pointer::create(rc);
 	_background.setPivotPoint(vec2(0.5f));
 	_background.setContentMode(ImageView::ContentMode_Fill);
 	layout(rc->size());
@@ -217,9 +217,8 @@ void Gui::internal_replaceLayout(LayoutPair l, AnimationDescriptor desc)
 	}
 	else 
 	{
-		LayoutEntry newEntry(new LayoutEntryObject(this, _rc, l.newLayout));
+		LayoutEntry newEntry = LayoutEntry::create(this, _rc, l.newLayout);
 		_layouts.insert(i, newEntry);
-
 		animateLayoutAppearing(l.newLayout, newEntry.ptr(), desc.flags, desc.duration);
 	}
 }
@@ -254,7 +253,7 @@ void Gui::internal_pushLayout(Layout::Pointer newLayout, AnimationDescriptor des
 	if (hasLayout(newLayout))
 		internal_removeLayout(newLayout, AnimationDescriptor());
 
-	_layouts.push_back(LayoutEntry(new LayoutEntryObject(this, _rc, newLayout)));
+	_layouts.push_back(LayoutEntry::create(this, _rc, newLayout));
 	animateLayoutAppearing(newLayout, _layouts.back().ptr(), desc.flags, desc.duration);
 }
 

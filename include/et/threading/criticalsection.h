@@ -20,7 +20,7 @@ namespace et
 		void leave();
 
 	private:
-		CriticalSectionPrivate* _private;
+		ET_DECLARE_PIMPL(CriticalSection, 64);
 	};
 
 	class CriticalSectionScope

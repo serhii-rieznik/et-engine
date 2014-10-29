@@ -15,9 +15,8 @@ using namespace et;
 	static const int defaultBindingUnit = 7;
 #endif
 
-TextureData::TextureData(RenderContext* rc, TextureDescription::Pointer desc,
-	const std::string& id, bool deferred) : LoadableObject(id, desc->origin()),
-	_glID(0), _desc(desc), _own(true)
+TextureData::TextureData(RenderContext* rc, const TextureDescription::Pointer& desc, const std::string& id,
+	bool deferred) : LoadableObject(id, desc->origin()), _glID(0), _desc(desc), _own(true)
 {
 #if defined(ET_CONSOLE_APPLICATION)
 	ET_FAIL("Attempt to create Texture in console application.")
@@ -36,7 +35,7 @@ TextureData::TextureData(RenderContext* rc, TextureDescription::Pointer desc,
 }
 
 TextureData::TextureData(RenderContext*, uint32_t texture, const vec2i& size, const std::string& name) :
-	LoadableObject(name), _glID(texture), _own(false), _desc(new TextureDescription)
+	LoadableObject(name), _glID(texture), _own(false), _desc(sharedObjectFactory().createObject<TextureDescription>())
 {
 #if !defined(ET_CONSOLE_APPLICATION)
 	if (glIsTexture(texture))

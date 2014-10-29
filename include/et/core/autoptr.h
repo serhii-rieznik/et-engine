@@ -9,24 +9,23 @@
 
 namespace et
 {
+	ObjectFactory& sharedObjectFactory();
+	
 	template <typename T>
 	class AutoPtr
 	{
 	public: 
-		AutoPtr() : _data(0) 
-			{ }
+		AutoPtr() :
+			_data(nullptr) { }
 
-		explicit AutoPtr(T* d) : _data(d)
-			{ } 
+		explicit AutoPtr(T* d) :
+			_data(d) { }
 
-		AutoPtr(AutoPtr&& p) : _data(p.extract())
-			{ } 
+		AutoPtr(AutoPtr&& p) :
+			_data(p.extract()) { }
 
 		~AutoPtr()
-		{ 
-			delete _data;
-			_data = 0;
-		}
+			{ release(); }
 
 		AutoPtr& operator = (T* p)
 		{
@@ -56,14 +55,14 @@ namespace et
 		T* extract()
 		{
 			T* value = _data;
-			_data = 0;
+			_data = nullptr;
 			return value;
 		}
 
 		void release()
 		{
-			delete _data;
-			_data = 0;
+			sharedObjectFactory().deleteObject(_data);
+			_data = nullptr;
 		}
 
 		T* operator -> ()
@@ -79,14 +78,11 @@ namespace et
 			{ return _data != nullptr; }
 
 	private:
-		AutoPtr(const AutoPtr<T>&) : _data(0)
-			{ }
-
-		AutoPtr& operator = (const AutoPtr<T>&)
-			{ return *this; }
+		AutoPtr(const AutoPtr<T>&) = delete;
+		AutoPtr& operator = (const AutoPtr<T>&) = delete;
 
 	private:
-		T* _data;
+		T* _data = nullptr;
 	};
 
 }

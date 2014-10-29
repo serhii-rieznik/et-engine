@@ -61,7 +61,7 @@ void TerrainData::generateVertexData(const FloatDataStorage& hm)
 	decl.push_back(Usage_TexCoord0, Type_Vec2);
 	decl.push_back(Usage_Tangent, Type_Vec3);
 
-	_vertexData.reset(new VertexArray(decl, _dimension.square()));
+	_vertexData = VertexArray::Pointer::create(decl, _dimension.square());
 
 	RawDataAcessor<vec3> pos = _vertexData->chunk(Usage_Position).accessData<vec3>(0);
 	RawDataAcessor<vec3> nrm = _vertexData->chunk(Usage_Normal).accessData<vec3>(0);
@@ -110,7 +110,7 @@ void TerrainData::generateVertexData(const FloatDataStorage& hm)
 	_bounds = AABB(0.5f * (_minVertex + _maxVertex), _maxVertex - _minVertex);
 
 	IndexType numTriangles = primitives::indexCountForRegularMesh(_dimension, PrimitiveType_Triangles);
-	IndexArray::Pointer tempIB(new IndexArray(IndexArrayFormat_32bit, numTriangles, PrimitiveType_Triangles));
+	IndexArray::Pointer tempIB = IndexArray::Pointer::create(IndexArrayFormat_32bit, numTriangles, PrimitiveType_Triangles);
 	
 	primitives::buildTrianglesIndexes(tempIB, _dimension, 0, 0);
 	primitives::calculateNormals(_vertexData, tempIB, 0, numTriangles);

@@ -46,15 +46,15 @@ DWORD WINAPI ThreadPrivate::threadProc(LPVOID lpParameter)
  * Thread
  */
 
-Thread::Thread() : 
-	_private(new ThreadPrivate())
+Thread::Thread()
 {
+	ET_PIMPL_INIT(Thread)
 	_private->activityEvent = CreateEvent(0, false, false, 0);
 }
 
-Thread::Thread(bool runImmediately) :
-	_private(new ThreadPrivate())
+Thread::Thread(bool runImmediately)
 {
+	ET_PIMPL_INIT(Thread)
 	_private->activityEvent = CreateEvent(0, false, false, 0);
 
 	if (runImmediately)
@@ -65,7 +65,8 @@ Thread::~Thread()
 {
 	terminate();
 	CloseHandle(_private->activityEvent);
-	delete _private;
+
+	ET_PIMPL_FINALIZE(Thread)
 }
 
 void Thread::run()

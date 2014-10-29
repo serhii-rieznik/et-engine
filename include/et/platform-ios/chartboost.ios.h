@@ -17,6 +17,7 @@ namespace et
 	{
 	public:
 		ChartBoostProxy();
+		~ChartBoostProxy()
 		
 		void start(const std::string& identifier, const std::string& signature);
 		
@@ -25,6 +26,6 @@ namespace et
 		void showMoreGames();
 		
 	private:
-		ChartBoostProxyPrivate* _private;
+		ET_DECLARE_PIMPL(ChartBoostProxy, 32)
 	};
 }

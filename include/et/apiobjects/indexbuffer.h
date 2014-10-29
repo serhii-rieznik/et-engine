@@ -11,18 +11,6 @@
 
 namespace et
 {
-	class IndexBuffer : public IntrusivePtr<IndexBufferData>
-	{
-	public:
-		IndexBuffer() :
-			IntrusivePtr<IndexBufferData>(nullptr) { }
-		
-	private:
-		friend class VertexBufferFactory;
-		
-		IndexBuffer(IndexBufferData* data) :
-			IntrusivePtr<IndexBufferData>(data) { }
-	};
-
+	typedef IntrusivePtr<IndexBufferData> IndexBuffer;
 	typedef std::vector<IndexBuffer> IndexBufferList;
 }

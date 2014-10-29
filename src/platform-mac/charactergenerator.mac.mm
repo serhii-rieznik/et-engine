@@ -27,21 +27,22 @@ public:
 	
 public:
 	std::string fontFace;
-	size_t fontSize;
+	size_t fontSize = 0;
 	
 	RectPlacer _placer;
 	
-	NSFont* font;
-	NSFont* boldFont;
-	NSColor* whiteColor;
+	NSFont* font = nil;
+	NSFont* boldFont = nil;
+	NSColor* whiteColor = nil;
 
-	CGColorSpaceRef colorSpace;
+	CGColorSpaceRef colorSpace = nullptr;
 };
 
 CharacterGenerator::CharacterGenerator(RenderContext* rc, const std::string& face,
-	const std::string& boldFace, size_t size) : _rc(rc),
-	_private(new CharacterGeneratorPrivate(face, boldFace, size)), _face(face), _size(size)
+	const std::string& boldFace, size_t size) : _rc(rc), _face(face), _size(size)
 {
+	ET_PIMPL_INIT(CharacterGenerator, face, boldFace, size)
+	
 #if !defined(ET_CONSOLE_APPLICATION)
 	BinaryDataStorage emptyData(defaultTextureSize * defaultTextureSize * 4, 0);
 	_texture = _rc->textureFactory().genTexture(GL_TEXTURE_2D, GL_RGBA, vec2i(defaultTextureSize),
@@ -51,7 +52,7 @@ CharacterGenerator::CharacterGenerator(RenderContext* rc, const std::string& fac
 
 CharacterGenerator::~CharacterGenerator()
 {
-	delete _private;
+	ET_PIMPL_FINALIZE(CharacterGenerator)
 }
 
 CharDescriptor CharacterGenerator::generateCharacter(int value, bool)

@@ -21,6 +21,9 @@ namespace et
 			ET_DECLARE_POINTER(Player)
 
 		public:
+			Player();
+			Player(Track::Pointer track);
+			
 			~Player();
 
 			void play(bool looped = false);
@@ -44,9 +47,6 @@ namespace et
 			ET_DECLARE_EVENT1(finished, Player*)
 
         private:
-			Player();
-            Player(Track::Pointer track);
-			
 			ET_DENY_COPY(Player)
 
 			void init();
@@ -62,9 +62,9 @@ namespace et
 			friend class StreamingThread;
 
 		private:
-            PlayerPrivate* _private;
-			Track::Pointer _track;
+			ET_DECLARE_PIMPL(Player, 32)
 			
+			Track::Pointer _track;
 			FloatAnimator _volumeAnimator;
         };
 	}

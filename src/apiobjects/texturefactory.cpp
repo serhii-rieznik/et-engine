@@ -14,43 +14,47 @@
 #include <et/apiobjects/texturefactory.h>
 #include <et/app/application.h>
 
-using namespace et;
-
-class et::TextureFactoryPrivate
+namespace et
 {
-public:
-	struct Loader : public ObjectLoader
+	class TextureFactoryPrivate
 	{
-		TextureFactory* owner;
-
-		Loader(TextureFactory* aOwner) : 
+	public:
+		struct Loader : public ObjectLoader
+		{
+			TextureFactory* owner;
+			
+			Loader(TextureFactory* aOwner) :
 			owner(aOwner) { }
-
-		void reloadObject(LoadableObject::Pointer o, ObjectsCache& c)
+			
+			void reloadObject(LoadableObject::Pointer o, ObjectsCache& c)
 			{ owner->reloadObject(o, c); }
+		};
+		
+		TextureFactoryPrivate(TextureFactory* owner) :
+		loader(sharedObjectFactory().createObject<Loader>(owner))
+		{
+			supportedExtensions.push_back("png");
+			supportedExtensions.push_back("pvr");
+			supportedExtensions.push_back("jpg");
+			supportedExtensions.push_back("jpeg");
+			supportedExtensions.push_back("dds");
+			supportedExtensions.push_back("hdr");
+		}
+		
+	public:
+		IntrusivePtr<Loader> loader;
+		StringList supportedExtensions;
 	};
+}
 
-	IntrusivePtr<Loader> loader;
-
-	TextureFactoryPrivate(TextureFactory* owner) : 
-		loader(new Loader(owner))
-	{
-		supportedExtensions.push_back("png");
-		supportedExtensions.push_back("pvr");
-		supportedExtensions.push_back("jpg");
-		supportedExtensions.push_back("jpeg");
-		supportedExtensions.push_back("dds");
-		supportedExtensions.push_back("hdr");
-	}
-	
-	StringList supportedExtensions;
-};
+using namespace et;
 
 TextureFactory::TextureFactory(RenderContext* rc) :
 	APIObjectFactory(rc)
 {
-	_private = new TextureFactoryPrivate(this);
-	_loadingThread = new TextureLoadingThread(this);
+	ET_PIMPL_INIT(TextureFactory, this)
+	
+	_loadingThread = sharedObjectFactory().createObject<TextureLoadingThread>(this);
 }
 
 TextureFactory::~TextureFactory()
@@ -58,7 +62,7 @@ TextureFactory::~TextureFactory()
 	_loadingThread->stop();
 	_loadingThread->waitForTermination();
 
-	delete _private;
+	ET_PIMPL_FINALIZE(TextureFactory)
 }
 
 ObjectLoader::Pointer TextureFactory::objectLoader()
@@ -105,7 +109,7 @@ Texture TextureFactory::loadTexture(const std::string& fileName, ObjectsCache& c
 		{
 			bool calledFromAnotherThread = Threading::currentThread() != threading().renderingThread();
 			
-			texture = Texture(new TextureData(renderContext(), desc, desc->origin(), async || calledFromAnotherThread));
+			texture = Texture::create(renderContext(), desc, desc->origin(), async || calledFromAnotherThread);
 			cache.manage(texture, _private->loader);
 			
 			if (async)
@@ -148,7 +152,7 @@ Texture TextureFactory::loadTexture(const std::string& fileName, ObjectsCache& c
 Texture TextureFactory::genTexture(uint32_t target, int32_t internalformat, const vec2i& size,
 	uint32_t format, uint32_t type, const BinaryDataStorage& data, const std::string& id)
 {
-	TextureDescription::Pointer desc(new TextureDescription);
+	TextureDescription::Pointer desc = TextureDescription::Pointer::create();
 	
 	desc->target = target;
 	
@@ -165,13 +169,13 @@ Texture TextureFactory::genTexture(uint32_t target, int32_t internalformat, cons
 	
 	desc->data = data;
 	
-	return Texture(new TextureData(renderContext(), desc, id, false));
+	return Texture::create(renderContext(), desc, id, false);
 }
 
 Texture TextureFactory::genCubeTexture(int32_t internalformat, GLsizei size, uint32_t format, uint32_t type,
 	const std::string& id)
 {
-	TextureDescription::Pointer desc(new TextureDescription);
+	TextureDescription::Pointer desc = TextureDescription::Pointer::create();
 	
 	desc->target = GL_TEXTURE_CUBE_MAP;
 	
@@ -187,12 +191,12 @@ Texture TextureFactory::genCubeTexture(int32_t internalformat, GLsizei size, uin
 	
 	desc->data = BinaryDataStorage(desc->layersCount * desc->dataSizeForAllMipLevels(), 0);
 	
-	return Texture(new TextureData(renderContext(), desc, id, false));
+	return Texture::create(renderContext(), desc, id, false);
 }
 
 Texture TextureFactory::genTexture(TextureDescription::Pointer desc)
 {
-	return Texture(new TextureData(renderContext(), desc, desc->origin(), false));
+	return Texture::create(renderContext(), desc, desc->origin(), false);
 }
 
 Texture TextureFactory::genNoiseTexture(const vec2i& size, bool norm, const std::string& id)
@@ -212,7 +216,7 @@ Texture TextureFactory::genNoiseTexture(const vec2i& size, bool norm, const std:
 		randata[i].w = static_cast<unsigned char>(255.0f * clamp(0.5f + 0.5f * rand_f.w, 0.0f, 1.0f));
 	}
 
-	TextureDescription::Pointer desc(new TextureDescription);
+	TextureDescription::Pointer desc = TextureDescription::Pointer::create();
 	desc->data = BinaryDataStorage(4 * size.square());
 	desc->target = GL_TEXTURE_2D;
 	desc->format = GL_RGBA;
@@ -225,7 +229,7 @@ Texture TextureFactory::genNoiseTexture(const vec2i& size, bool norm, const std:
     
 	etCopyMemory(desc->data.data(), randata.data(), randata.dataSize());
 
-	return Texture(new TextureData(renderContext(), desc, id, false));
+	return Texture::create(renderContext(), desc, id, false);
 }
 
 void TextureFactory::textureLoadingThreadDidLoadTextureData(TextureLoadingRequest* request)
@@ -238,7 +242,7 @@ void TextureFactory::textureLoadingThreadDidLoadTextureData(TextureLoadingReques
 	if (request->delegate)
 		request->delegate->textureDidLoad(request->texture);
 
-	delete request;
+	sharedObjectFactory().deleteObject(request);
 }
 
 Texture TextureFactory::loadTexturesToCubemap(const std::string& posx, const std::string& negx,
@@ -294,7 +298,7 @@ Texture TextureFactory::loadTexturesToCubemap(const std::string& posx, const std
 	}
 
 	size_t layerSize = layers[0]->dataSizeForAllMipLevels();
-	TextureDescription::Pointer desc(new TextureDescription);
+	TextureDescription::Pointer desc = TextureDescription::Pointer::create();
 	desc->target = GL_TEXTURE_CUBE_MAP;
 	desc->layersCount = 6;
 	desc->bitsPerPixel = layers[0]->bitsPerPixel;
@@ -309,7 +313,7 @@ Texture TextureFactory::loadTexturesToCubemap(const std::string& posx, const std
 	for (size_t l = 0; l < desc->layersCount; ++l)
 		etCopyMemory(desc->data.element_ptr(l * layerSize), layers[l]->data.element_ptr(0), layerSize);
 
-	Texture result(new TextureData(renderContext(), desc, texId, false));
+	Texture result = Texture::create(renderContext(), desc, texId, false);
 	
 	for (size_t i = 0; i < 6; ++i)
 		result->addOrigin(layers[i]->origin());
@@ -321,7 +325,7 @@ Texture TextureFactory::loadTexturesToCubemap(const std::string& posx, const std
 
 Texture TextureFactory::createTextureWrapper(uint32_t texture, const vec2i& size, const std::string& name)
 {
-	return Texture(new TextureData(renderContext(), texture, size, name));
+	return Texture::create(renderContext(), texture, size, name);
 }
 
 void TextureFactory::reloadObject(LoadableObject::Pointer object, ObjectsCache&)

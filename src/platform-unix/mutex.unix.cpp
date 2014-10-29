@@ -5,9 +5,12 @@
  *
  */
 
+#include <et/core/et.h>
+
+#if (!ET_PLATFORM_WIN)
+
 #include <errno.h>
 #include <pthread.h>
-#include <et/core/et.h>
 #include <et/threading/mutex.h>
 
 namespace et
@@ -21,9 +24,10 @@ namespace et
 
 using namespace et;
 
-Mutex::Mutex() :
-	_private(new MutexPrivate)
+Mutex::Mutex()
 {
+	ET_PIMPL_INIT(Mutex)
+	
 	pthread_mutexattr_t attrib = { };
 	pthread_mutexattr_init(&attrib);
 	pthread_mutexattr_settype(&attrib, PTHREAD_MUTEX_ERRORCHECK);
@@ -36,7 +40,8 @@ Mutex::Mutex() :
 Mutex::~Mutex()
 {
 	pthread_mutex_destroy(&_private->mutex);
-	delete _private;
+	
+	ET_PIMPL_FINALIZE(Mutex)
 }
 
 void Mutex::lock()
@@ -52,3 +57,5 @@ void Mutex::unlock()
 	if (result == EPERM)
 		log::error("Mutex already unlocked or was locked from another thread.");
 }
+
+#endif // !ET_PLATFORM_WIN

@@ -34,7 +34,7 @@ namespace et
 		void quit(int exitCode = 0);
 
 		IApplicationDelegate* delegate();
-		static IApplicationDelegate* initApplicationDelegate();
+		IApplicationDelegate* initApplicationDelegate();
 
 		RunLoop& mainRunLoop()
 			{ return _runLoop; }
@@ -138,11 +138,11 @@ namespace et
 		friend class et::Singleton<Application>;
 
 	private:
-		static IApplicationDelegate* _delegate;
-		
 		ApplicationParameters _parameters;
 		ApplicationIdentifier _identifier;
+		
 		RenderContext* _renderContext = nullptr;
+		IApplicationDelegate* _delegate = nullptr;
 		
 		Environment _env;
 		StandardPathResolver _standardPathResolver;

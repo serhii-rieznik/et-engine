@@ -19,52 +19,55 @@ TextureDescription::Pointer et::loadTextureDescription(const std::string& fileNa
 {
 	if (!fileExists(fileName))
 		return TextureDescription::Pointer();
+
+	TextureDescription::Pointer desc;
 	
 	std::string ext = getFileExt(fileName);
-	TextureDescription* desc = nullptr;
+	lowercase(ext);
+	
 	if (ext == "png")
 	{
-		desc = new TextureDescription;
+		desc = TextureDescription::Pointer::create();
 		desc->target = GL_TEXTURE_2D;
 		desc->setOrigin(fileName);
-		png::loadInfoFromFile(fileName, *desc);
+		png::loadInfoFromFile(fileName, desc.reference());
 	}
 	else if (ext == "dds")
 	{
-		desc = new TextureDescription;
+		desc = TextureDescription::Pointer::create();
 		desc->target = GL_TEXTURE_2D;
 		desc->setOrigin(fileName);
-		dds::loadInfoFromFile(fileName, *desc);
+		dds::loadInfoFromFile(fileName, desc.reference());
 	}
 	else if (ext == "pvr")
 	{
-		desc = new TextureDescription;
+		desc = TextureDescription::Pointer::create();
 		desc->target = GL_TEXTURE_2D;
 		desc->setOrigin(fileName);
-		pvr::loadInfoFromFile(fileName, *desc);
+		pvr::loadInfoFromFile(fileName, desc.reference());
 	}
 	else if (ext == "hdr")
 	{
-		desc = new TextureDescription;
+		desc = TextureDescription::Pointer::create();
 		desc->target = GL_TEXTURE_2D;
 		desc->setOrigin(fileName);
-		hdr::loadInfoFromFile(fileName, *desc);
+		hdr::loadInfoFromFile(fileName, desc.reference());
 	}
 	else if ((ext == "jpg") || (ext == "jpeg"))
 	{
-		desc = new TextureDescription;
+		desc = TextureDescription::Pointer::create();
 		desc->target = GL_TEXTURE_2D;
 		desc->setOrigin(fileName);
-		jpeg::loadInfoFromFile(fileName, *desc);
+		jpeg::loadInfoFromFile(fileName, desc.reference());
 	}
 	
-	if ((desc != nullptr) && initWithZero)
+	if (desc.valid() && initWithZero)
 	{
 		desc->data = BinaryDataStorage(desc->dataSizeForAllMipLevels());
 		desc->data.fill(0);
 	}
 	
-	return TextureDescription::Pointer(desc);
+	return desc;
 }
 
 TextureDescription::Pointer et::loadTexture(const std::string& fileName)
@@ -72,45 +75,46 @@ TextureDescription::Pointer et::loadTexture(const std::string& fileName)
 	if (!fileExists(fileName))
 		return TextureDescription::Pointer();
 	
+	TextureDescription::Pointer desc;
+	
 	std::string ext = getFileExt(fileName);
 	lowercase(ext);
 	
-	TextureDescription* desc = nullptr;
 	if (ext == "png")
 	{
-		desc = new TextureDescription;
+		desc = TextureDescription::Pointer::create();
 		desc->target = GL_TEXTURE_2D;
 		desc->setOrigin(fileName);
-		png::loadFromFile(fileName, *desc, true);
+		png::loadFromFile(fileName, desc.reference(), true);
 	}
 	else if (ext == "dds")
 	{
-		desc = new TextureDescription;
+		desc = TextureDescription::Pointer::create();
 		desc->target = GL_TEXTURE_2D;
 		desc->setOrigin(fileName);
-		dds::loadFromFile(fileName, *desc);
+		dds::loadFromFile(fileName, desc.reference());
 	}
 	else if (ext == "pvr")
 	{
-		desc = new TextureDescription;
+		desc = TextureDescription::Pointer::create();
 		desc->target = GL_TEXTURE_2D;
 		desc->setOrigin(fileName);
-		pvr::loadFromFile(fileName, *desc);
+		pvr::loadFromFile(fileName, desc.reference());
 	}
 	else if (ext == "hdr")
 	{
-		desc = new TextureDescription;
+		desc = TextureDescription::Pointer::create();
 		desc->target = GL_TEXTURE_2D;
 		desc->setOrigin(fileName);
-		hdr::loadFromFile(fileName, *desc);
+		hdr::loadFromFile(fileName, desc.reference());
 	}
 	else if ((ext == "jpg") || (ext == "jpeg"))
 	{
-		desc = new TextureDescription;
+		desc = TextureDescription::Pointer::create();
 		desc->target = GL_TEXTURE_2D;
 		desc->setOrigin(fileName);
-		jpeg::loadFromFile(fileName, *desc);
+		jpeg::loadFromFile(fileName, desc.reference());
 	}
 	
-	return TextureDescription::Pointer(desc);
+	return desc;
 }

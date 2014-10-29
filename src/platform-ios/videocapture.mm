@@ -77,10 +77,14 @@ using namespace et;
 @end
 
 VideoCapture::VideoCapture(VideoCaptureQuality q)
-	{ _private = new VideoCapturePrivate(this, q); }
+{
+	ET_PIMPL_INIT(VideoCapture, this, q);
+}
 
 VideoCapture::~VideoCapture()
-	{ delete _private; }
+{
+	ET_PIMPL_FINALIZE(VideoCapture)
+}
 
 void VideoCapture::run()
     { _private->run(); }

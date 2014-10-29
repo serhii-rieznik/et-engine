@@ -61,10 +61,10 @@ namespace et
 		
 	public:
 		ValuePointer() :
-			Value<T, C>::Pointer(new Value<T, C>()) { }
+			Value<T, C>::Pointer(sharedObjectFactory().createObject<Value<T, C>>()) { }
 		
 		ValuePointer(const T& r) :
-			Value<T, C>::Pointer(new Value<T, C>(r)) { }
+			Value<T, C>::Pointer(sharedObjectFactory().createObject<Value<T, C>>(r)) { }
 
 		ValuePointer(const typename Value<T, C>::Pointer& p) :
 			Value<T, C>::Pointer(p) { }

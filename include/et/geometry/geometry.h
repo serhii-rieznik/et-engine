@@ -162,9 +162,9 @@ namespace et
 		if ((static_cast<T>(1) - cosom) > static_cast<T>(1.0e-5))
 		{
 			T omega = std::acos(cosom);
-			T sinom = static_cast<T>(1) / sin(omega);
-			scale0 = sin((static_cast<T>(1) - t) * omega) * sinom;
-			scale1 = sin(t * omega) * sinom;
+			T sinom = static_cast<T>(1) / std::sin(omega);
+			scale0 = std::sin((static_cast<T>(1) - t) * omega) * sinom;
+			scale1 = std::sin(t * omega) * sinom;
 		}
 		
 		Quaternion<T> result;

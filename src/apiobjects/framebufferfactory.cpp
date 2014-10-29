@@ -31,7 +31,7 @@ Framebuffer::Pointer FramebufferFactory::createFramebuffer(const vec2i& size, co
 	desc.colorIsRenderbuffer = (samples > 1) || useRenderbuffers;
 	desc.depthIsRenderbuffer = (samples > 1) || useRenderbuffers;
 	
-	return Framebuffer::Pointer(new Framebuffer(renderContext(), desc, id));
+	return Framebuffer::Pointer::create(renderContext(), desc, id);
 }
 
 Framebuffer::Pointer FramebufferFactory::createMultisampledFramebuffer(const vec2i& size, int32_t samples,
@@ -51,7 +51,7 @@ Framebuffer::Pointer FramebufferFactory::createMultisampledFramebuffer(const vec
 	desc.colorIsRenderbuffer = true;
 	desc.depthIsRenderbuffer = true;
 	
-	return Framebuffer::Pointer(new Framebuffer(renderContext(), desc, objectId));
+	return Framebuffer::Pointer::create(renderContext(), desc, objectId);
 }
 
 
@@ -76,10 +76,10 @@ Framebuffer::Pointer FramebufferFactory::createCubemapFramebuffer(size_t size, c
 
 	desc.isCubemap = true;
 	
-	return Framebuffer::Pointer(new Framebuffer(renderContext(), desc, id));
+	return Framebuffer::Pointer::create(renderContext(), desc, id);
 }
 
 Framebuffer::Pointer FramebufferFactory::createFramebufferWrapper(uint32_t fbo, const std::string& id)
 {
-	return Framebuffer::Pointer(new Framebuffer(renderContext(), fbo, id));
+	return Framebuffer::Pointer::create(renderContext(), fbo, id);
 }

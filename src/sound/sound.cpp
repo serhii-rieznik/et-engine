@@ -30,9 +30,9 @@ static ALCcontext* sharedContext = nullptr;
 ALCdevice* getSharedDevice();
 ALCcontext* getSharedContext();
 
-Manager::Manager() :
-	_private(new ManagerPrivate)
+Manager::Manager()
 {
+	ET_PIMPL_INIT(Manager)
 	nativePreInit();
 	
 	const char* defaultDeviceSpecifier = alcGetString(nullptr, ALC_DEFAULT_DEVICE_SPECIFIER);
@@ -84,27 +84,27 @@ Manager::~Manager()
 	alcMakeContextCurrent(0);
 	alcDestroyContext(sharedContext);
 	alcCloseDevice(sharedDevice);
-	delete _private;
-    
-    sharedDevice = nullptr;
 	
+	ET_PIMPL_FINALIZE(Manager)
+	
+    sharedDevice = nullptr;
 	nativePostRelease();
 }
 
 Track::Pointer Manager::loadTrack(const std::string& fileName)
 {
-	return Track::Pointer(new Track(fileName));
+	return Track::Pointer::create(fileName);
 }
 
 Player::Pointer Manager::genPlayer(Track::Pointer track)
 {
 	ET_ASSERT(track.valid());
-	return Player::Pointer(new Player(track));
+	return Player::Pointer::create(track);
 }
 
 Player::Pointer Manager::genPlayer()
 {
-	return Player::Pointer(new Player);
+	return Player::Pointer::create();
 }
 
 /*

@@ -94,7 +94,7 @@ Material::Material() :
 
 Material* Material::duplicate() const
 {
-	Material* m = new Material();
+	Material* m = sharedObjectFactory().createObject<Material>();
 	
 	m->tag = tag;
 	m->setName(name());
@@ -330,8 +330,7 @@ void Material::deserialize(std::istream& stream, RenderContext* rc, ObjectsCache
 		setTexture(p.first, loadTexture(rc, p.second, basePath, cache, async));
 }
 
-void Material::deserializeBinary(std::istream& stream, RenderContext* rc, ObjectsCache& cache,
-	const std::string& basePath, bool async)
+void Material::deserializeBinary(std::istream& stream, RenderContext*, ObjectsCache&, const std::string&, bool)
 {
 	size_t numParameters = deserializeUInt(stream);
 	for (size_t i = 0; i < numParameters; ++i)
@@ -450,8 +449,7 @@ void Material::loadDefaultValues(xmlNode* node, RenderContext* rc, ObjectsCache&
 	}
 }
 
-void Material::loadDefaultValue(xmlNode* node, MaterialParameters param, RenderContext* rc,
-	ObjectsCache& cache, bool async)
+void Material::loadDefaultValue(xmlNode* node, MaterialParameters param, RenderContext*, ObjectsCache&, bool)
 {
 	std::string type;
 	std::string value;
@@ -513,7 +511,7 @@ void Material::loadDefaultValue(xmlNode* node, MaterialParameters param, RenderC
 }
 
 void Material::deserializeReadable(std::istream& stream, RenderContext* rc, ObjectsCache& cache,
-	const std::string& basePath, bool async)
+	const std::string&, bool async)
 {
 	_texturesToLoad.clear();
 	
@@ -742,7 +740,7 @@ bool Material::hasString(size_t param) const
 		(_customStringParameters.find(param) != _customStringParameters.end()); 
 }
 
-void Material::reloadObject(LoadableObject::Pointer obj, ObjectsCache& cache)
+void Material::reloadObject(LoadableObject::Pointer, ObjectsCache&)
 {
 	ET_FAIL("Material reloading is disabled.");
 	/*
@@ -789,7 +787,7 @@ void Material::textureDidLoad(Texture t)
 {
 	ET_ASSERT(t.valid())
 	
-	size_t invalidParameter(-1);
+	size_t invalidParameter = static_cast<size_t>(-1);
 	size_t param = invalidParameter;
 	
 	for (size_t i = 0; i < MaterialParameter_max; ++i)

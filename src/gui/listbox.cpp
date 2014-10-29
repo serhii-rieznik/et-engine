@@ -162,7 +162,7 @@ Listbox::Listbox(Font font, Element2d* parent, const std::string& name) :
 	_contentOffset(0.0f), _selectedIndex(invalidSelectedIndex), _direction(ListboxPopupDirection_Bottom),
 	_popupOpened(false), _popupOpening(false), _popupValid(false)
 {
-	_popup = ListboxPopup::Pointer(new ListboxPopup(this));
+	_popup = ListboxPopup::Pointer::create(this);
 	_popup->setVisible(false);
 }
 

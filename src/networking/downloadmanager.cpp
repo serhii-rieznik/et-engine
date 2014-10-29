@@ -37,18 +37,17 @@ private:
 class et::DownloadManagerPrivate
 {
 public:
-	DownloadManager* owner;
-	DownloadThread* thread;
+	DownloadManager* owner = nullptr;
+	DownloadThread thread;
 	
 public:
 	DownloadManagerPrivate(DownloadManager* o) :
-		owner(o), thread(new DownloadThread(o)) { }
+		owner(o), thread(o) { }
 	
 	~DownloadManagerPrivate()
 	{
-		thread->stop();
-		thread->waitForTermination();
-		delete thread;
+		thread.stop();
+		thread.waitForTermination();
 	}
 };
 
@@ -60,26 +59,26 @@ public:
 
 DownloadManager::DownloadManager()
 {
-	_private = new DownloadManagerPrivate(this);
+	ET_PIMPL_INIT(DownloadManager, this)
 }
 
 DownloadManager::~DownloadManager()
 {
-	delete _private;
+	ET_PIMPL_FINALIZE(DownloadManager)
 }
 
 DownloadRequest::Pointer DownloadManager::downloadFile(const std::string& url,
 	const std::string& destination)
 {
-	DownloadRequest::Pointer request(new DownloadRequest(url, destination));
-	_private->thread->pushRequest(request);
+	DownloadRequest::Pointer request = DownloadRequest::Pointer::create(url, destination);
+	_private->thread.pushRequest(request);
 	return request;
 }
 
 DownloadRequest::Pointer DownloadManager::downloadFile(const std::string& url)
 {
-	DownloadRequest::Pointer request(new DownloadRequest(url));
-	_private->thread->pushRequest(request);
+	DownloadRequest::Pointer request = DownloadRequest::Pointer::create(url);
+	_private->thread.pushRequest(request);
 	return request;
 }
 

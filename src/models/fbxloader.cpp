@@ -607,10 +607,11 @@ s3d::Mesh::Pointer FBXLoaderPrivate::loadMesh(FbxMesh* mesh, s3d::Element::Point
 	}
 
 	s3d::Mesh::Pointer element;
+	
 	if (support)
-		element = s3d::SupportMesh::Pointer(new s3d::SupportMesh(meshName, parent.ptr()));
+		element = s3d::SupportMesh::Pointer::create(meshName, parent.ptr());
 	else
-		element = s3d::Mesh::Pointer(new s3d::Mesh(meshName, parent.ptr()));
+		element = s3d::Mesh::Pointer::Pointer(meshName, parent.ptr());
 	
 	size_t uvChannels = mesh->GetElementUVCount();
 
@@ -724,9 +725,9 @@ s3d::Mesh::Pointer FBXLoaderPrivate::loadMesh(FbxMesh* mesh, s3d::Element::Point
 			else
 			{
 				if (support)
-					meshElement = s3d::SupportMesh::Pointer(new s3d::SupportMesh(aName, aParent));
+					meshElement = s3d::SupportMesh::Pointer::create(aName, aParent);
 				else
-					meshElement = s3d::Mesh::Pointer(new s3d::Mesh(aName, aParent));
+					meshElement = s3d::Mesh::Pointer::Pointer::create(aName, aParent);
 			}
 
 			meshElement->tag = vbIndex;
@@ -919,16 +920,25 @@ FBXLoader::FBXLoader(const std::string& filename) :
 s3d::ElementContainer::Pointer FBXLoader::load(RenderContext* rc, ObjectsCache& ObjectsCache)
 {
 	s3d::ElementContainer::Pointer result;
-	FBXLoaderPrivate* loader = new FBXLoaderPrivate(rc, ObjectsCache);
+	FBXLoaderPrivate* loader = sharedObjectFactory().createObject<FBXLoaderPrivate>(rc, ObjectsCache);
 
 	if (loader->import(_filename))
 		result = loader->parse();
 
-	mainRunLoop().addTask(new DeletionTask<FBXLoaderPrivate>(loader), 0.0f);
+	Invocation i;
+	i.setTarget([loader]()
+	{
+		sharedObjectFactory().deleteObject(loader);
+	});
+	i.invokeInMainRunLoop();
+	
 	return result;
 }
 
 #else // ET_HAVE_FBX_SDK
-#	warning Define ET_HAVE_FBX_SDK to compile FBXLoader
+#	if (ET_PLATFORM_WIN)
+#		pragma message ("Define ET_HAVE_FBX_SDK to compile FBXLoader")
+#	else
+#		warning Define ET_HAVE_FBX_SDK to compile FBXLoader
+#	endif
 #endif
-

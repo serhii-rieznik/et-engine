@@ -272,45 +272,6 @@ void et::findSubfolders(const std::string& folder, bool recursive, StringList& l
 
 	list.insert(list.end(), folderList.begin(), folderList.end());
 }
-/*
-std::string et::selectFile(const StringList& mask)
-{
-	size_t maskLen = 1;
-	ET_ITERATE(mask, const std::string&, i, maskLen += i.size() + 1)
-
-	char result[MAX_PATH] = { };
-	char* filter = new char[maskLen];
-	memset(filter, 0, maskLen);
-
-	size_t offset = 0;
-	ET_ITERATE(mask, const std::string&, i,
-	{
-		memcpy(filter + offset, i.data(), i.size());
-		offset += i.size() + 1;
-	})
-
-	OPENFILENAME ofn = { };
-	ofn.lStructSize = sizeof(ofn);
-	ofn.hInstance = GetModuleHandle(0);
-	ofn.lpstrFilter = filter;
-	ofn.Flags = OFN_DONTADDTORECENT | OFN_ENABLESIZING | OFN_EXPLORER | OFN_NOCHANGEDIR | OFN_PATHMUSTEXIST;
-	ofn.lpstrFile = result;
-	ofn.nMaxFile = MAX_PATH;
-
-	GetOpenFileName(&ofn);
-
-	delete [] filter;
-	return std::string(result);
-}
-
-std::string et::selectFile(const std::string& description, const std::string& ext)
-{
-	StringList m;
-	m.push_back(description);
-	m.push_back(ext);
-	return selectFile(m);
-}
-*/
 
 void et::openUrl(const std::string& url)
 {

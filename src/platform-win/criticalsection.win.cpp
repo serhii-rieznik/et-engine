@@ -36,13 +36,14 @@ namespace et
 
 using namespace et;
 
-CriticalSection::CriticalSection() : _private(new CriticalSectionPrivate)
+CriticalSection::CriticalSection()
 {
+	ET_PIMPL_INIT(CriticalSection)
 }
 
 CriticalSection::~CriticalSection() 
 {
-	delete _private;
+	ET_PIMPL_FINALIZE(CriticalSection)
 }
 
 void CriticalSection::enter()

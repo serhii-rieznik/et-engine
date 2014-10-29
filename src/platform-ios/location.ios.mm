@@ -111,14 +111,15 @@ using namespace et;
 
 @end
 
-LocationManager::LocationManager() : _private(new LocationManagerPrivate(false))
+LocationManager::LocationManager()
 {
+	ET_PIMPL_INIT(LocationManager, this)
 	_private->manager = this;
 }
 
 LocationManager::~LocationManager()
 {
-	delete _private;
+	ET_PIMPL_FINALIZE(LocationManager)
 }
 
 void LocationManager::setEnabled(bool e)

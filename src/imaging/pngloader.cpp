@@ -93,22 +93,22 @@ void et::png::loadFromStream(std::istream& source, TextureDescription& desc, boo
 	png_read_info(pngPtr, infoPtr); 
 	parseFormat(desc, pngPtr, infoPtr, &rowBytes);
 
-	desc.data = BinaryDataStorage(static_cast<size_t>(desc.size.square()) * desc.bitsPerPixel / 8);
-	png_bytepp rowPtrs = new png_bytep[desc.size.y]; 
+	desc.data.resize(static_cast<size_t>(desc.size.square()) * desc.bitsPerPixel / 8);
+	png_bytepp row_pointers = reinterpret_cast<png_bytepp>(sharedObjectFactory().allocator()->alloc(sizeof(png_bytep) * desc.size.y));
 	png_bytep ptr0 = desc.data.data();
 	
 	if (flip)
 	{
 		for (png_size_t i = 0, e = static_cast<png_size_t>(desc.size.y); i < e; ++i)
-			rowPtrs[i] = ptr0 + (e - 1 - i) * rowBytes;
+			row_pointers[i] = ptr0 + (e - 1 - i) * rowBytes;
 	}
 	else
 	{
 		for (png_size_t i = 0, e = static_cast<png_size_t>(desc.size.y); i < e; ++i)
-			rowPtrs[i] = ptr0 + i * rowBytes;
+			row_pointers[i] = ptr0 + i * rowBytes;
 	}
 
-	png_read_image(pngPtr, rowPtrs); 
+	png_read_image(pngPtr, row_pointers);
 
 	png_destroy_info_struct(pngPtr, &infoPtr);
 	png_destroy_read_struct(&pngPtr, 0, 0);
@@ -123,7 +123,7 @@ void et::png::loadFromStream(std::istream& source, TextureDescription& desc, boo
 		}
 	}
 
-	delete [] rowPtrs;
+	sharedObjectFactory().allocator()->free(row_pointers);
 }
 
 void et::png::loadFromFile(const std::string& path, TextureDescription& desc, bool flip)

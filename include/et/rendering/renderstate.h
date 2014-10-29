@@ -13,11 +13,15 @@
 namespace et
 {
 	class RenderContext;
-	class VertexBuffer;
-	class IndexBuffer;
-	class VertexArrayObject;
+	class VertexBufferData;
+	class VertexArrayObjectData;
+	class IndexBufferData;
 	class VertexDeclaration;
 	class VertexElement;
+	
+	typedef IntrusivePtr<IndexBufferData> IndexBuffer;
+	typedef IntrusivePtr<VertexBufferData> VertexBuffer;
+	typedef IntrusivePtr<VertexArrayObjectData> VertexArrayObject;
 
 	class RenderState
 	{

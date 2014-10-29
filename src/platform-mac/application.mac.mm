@@ -34,14 +34,12 @@ void Application::loaded()
 {
 	_lastQueuedTimeMSec = queryContiniousTimeInMilliSeconds();
 	_runLoop.updateTime(_lastQueuedTimeMSec);
-	
-	delegate()->setApplicationParameters(_parameters);
-	
+		
 	RenderContextParameters parameters;
 	delegate()->setRenderContextParameters(parameters);
 	
 #if !defined(ET_CONSOLE_APPLICATION)
-	_renderContext = new RenderContext(parameters, this);
+	_renderContext = sharedObjectFactory().createObject<RenderContext>(parameters, this);
 	
 	NSMenu* mainMenu = [[NSMenu allocWithZone:[NSMenu menuZone]] init];
 	NSMenuItem* applicationMenuItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] init];
@@ -118,8 +116,11 @@ int Application::platformRun(int, char*[])
 
 void Application::platformFinalize()
 {
-	delete _delegate, _delegate = nullptr;
-	delete _renderContext, _renderContext = nullptr;
+	sharedObjectFactory().deleteObject(_delegate);
+	sharedObjectFactory().deleteObject(_renderContext);
+	
+	_renderContext = nullptr;
+	_delegate = nullptr;
 }
 
 void Application::platformActivate()

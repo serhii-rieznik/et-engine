@@ -94,15 +94,15 @@ MailComposerProxy* _sharedInstance = nil;
  *
  */
 
-MailComposer::MailComposer() :
-	_private(new MailComposerPrivate())
+MailComposer::MailComposer()
 {
+	ET_PIMPL_INIT(MailComposer)
 }
 
 MailComposer::~MailComposer()
 {
 	[MailComposerProxy sharedInstanceWithPrivatePtr:nullptr];
-	delete _private;
+	ET_PIMPL_FINALIZE(MailComposer)
 }
 
 void MailComposer::composeEmail(const std::string& recepient, const std::string& title,

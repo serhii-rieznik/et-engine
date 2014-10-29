@@ -25,9 +25,22 @@
 #include <iostream>
 
 #define ET_MAJOR_VERSION		0
-#define ET_MINOR_VERSION		4
+#define ET_MINOR_VERSION		7
 
 #define ET_CORE_INCLUDES
+
+#define ET_DECLARE_PIMPL(T, SZ)		private:\
+										T##Private* _private = nullptr; \
+										char _privateData[SZ];
+
+#define ET_PIMPL_INIT(T, ...)		static_assert(sizeof(_privateData) >= sizeof(T##Private), "Invalid configuration"); \
+									memset(_privateData, 0, sizeof(_privateData)); \
+									_private = new (_privateData) T##Private(__VA_ARGS__);
+
+#define ET_PIMPL_FINALIZE(T)		if (_private) \
+										_private->~T##Private(); \
+									_private = nullptr; \
+									memset(_privateData, 0, sizeof(_privateData));
 
 #include <et/platform/compileoptions.h>
 #include <et/platform/platform.h>
@@ -99,6 +112,19 @@ namespace et
 	template<typename T>
 	inline T clamp(T value, T min, T max)
 		{ return (value < min) ? min : (value > max) ? max : value; }
+	
+	struct SharedEngineObjects
+	{
+		ObjectFactory objectFactory;
+		BlockMemoryAllocator blockMemoryAllocator;
+		std::vector<log::Output::Pointer> logOutputs;
+		
+		SharedEngineObjects();
+	};
+	
+	ObjectFactory& sharedObjectFactory();
+	BlockMemoryAllocator& sharedBlockAllocator();
+	std::vector<log::Output::Pointer>& sharedLogOutputs();
 	
 	extern const vec3 unitX;
 	extern const vec3 unitY;

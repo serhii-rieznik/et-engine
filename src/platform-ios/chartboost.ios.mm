@@ -34,12 +34,17 @@ public:
 	}
 	
 public:
-	ChartBoostProxyDelegate* _chartBoostDelegate;
+	ChartBoostProxyDelegate* _chartBoostDelegate = nil;
 };
 
 ChartBoostProxy::ChartBoostProxy()
 {
-	_private = new ChartBoostProxyPrivate();
+	ET_PIMPL_INIT(ChartBoostProxy)
+}
+
+ChartBoostProxy::~ChartBoostProxy()
+{
+	ET_PIMPL_FINALIZE(ChartBoostProxy)
 }
 
 void ChartBoostProxy::start(const std::string& identifier, const std::string& signature)

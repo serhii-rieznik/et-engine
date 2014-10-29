@@ -153,7 +153,7 @@ void VertexArray::deserialize(std::istream& stream)
 
 VertexArray* VertexArray::duplicate()
 {
-	VertexArray* result = new VertexArray(_decl, _size);
+	VertexArray* result = sharedObjectFactory().createObject<VertexArray>(_decl, _size);
 	
 	for (auto& c : _chunks)
 		c->copyTo(result->chunk(c->usage()).reference());

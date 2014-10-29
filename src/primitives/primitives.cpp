@@ -984,7 +984,8 @@ void primitives::tesselateTriangles(VertexArray::Pointer data, IndexArray::Point
 
 void primitives::tesselateTriangles(VertexArray::Pointer data, const vec3& aspect)
 {
-	IndexArray::Pointer linearIndices(new IndexArray(IndexArrayFormat_32bit, data->size(), PrimitiveType_Triangles));
+	IndexArray::Pointer linearIndices = IndexArray::Pointer::create(IndexArrayFormat_32bit,
+		data->size(), PrimitiveType_Triangles);
 	linearIndices->linearize(data->size());
 	tesselateTriangles(data, linearIndices, aspect);
 }
@@ -1031,7 +1032,7 @@ VertexArray::Pointer primitives::buildLinearIndexArray(VertexArray::Pointer vert
 	
 	indexArray->resizeToFit(dataSize);
 	
-	VertexArray::Pointer result(new VertexArray(vertexArray->decl(), countMap.size()));
+	VertexArray::Pointer result = VertexArray::Pointer::create(vertexArray->decl(), countMap.size());
 	
 	auto newPos = result->chunk(Usage_Position).accessData<vec3>(0);
 	auto newNrm = result->chunk(Usage_Normal).accessData<vec3>(0);
@@ -1083,7 +1084,7 @@ VertexArray::Pointer primitives::linearizeTrianglesIndexArray(VertexArray::Point
 	ET_ASSERT(indexArray->primitiveType() == PrimitiveType_Triangles);
 	
 	VertexDeclaration decl = data->decl();
-	VertexArray::Pointer result(new VertexArray(data->decl(), 3 * indexArray->primitivesCount()));
+	VertexArray::Pointer result = VertexArray::Pointer::create(data->decl(), 3 * indexArray->primitivesCount());
 	for (auto& e : decl.elements())
 	{
 		if (e.type() == Type_Vec4)

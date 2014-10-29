@@ -100,11 +100,6 @@ void TimerPool::update(float t)
 	_updating = false;
 }
 
-void TimerPool::deleteTimedObjecct(TimedObject* obj)
-{
-	_owner->addTask(new DeletionTask<TimedObject>(obj), 0.0f);
-}
-
 float TimerPool::actualTime() const
 {
 	return _owner->time();

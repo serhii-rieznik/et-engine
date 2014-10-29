@@ -63,6 +63,7 @@ static etApplication* _sharedInstance = nil;
 {
 	ET_ASSERT(_loaded == NO);
 	ET_ASSERT([EAGLContext currentContext] != nil)
+	(void)viewController;
 	
 	RenderState::State state = RenderState::currentState();
 	GLint defaultFrameBufferId = state.boundFramebuffer;
@@ -72,7 +73,7 @@ static etApplication* _sharedInstance = nil;
 	Framebuffer::Pointer defaultFrameBuffer =
 		[self renderContext]->framebufferFactory().createFramebufferWrapper(defaultFrameBufferId);
 	
-	vec2i contextSize(view.bounds.size.width, view.bounds.size.height);
+	vec2i contextSize(static_cast<int>(view.bounds.size.width), static_cast<int>(view.bounds.size.height));
 	defaultFrameBuffer->forceSize(contextSize);
 
 	_notifier.accessRenderContext()->renderState().setDefaultFramebuffer(defaultFrameBuffer);
@@ -85,6 +86,8 @@ static etApplication* _sharedInstance = nil;
 - (void)unloadedInViewController:(UIViewController*)viewController
 {
 	ET_ASSERT(_loaded)
+	(void)viewController;
+	
 	application().quit();
 	_loaded = NO;
 }

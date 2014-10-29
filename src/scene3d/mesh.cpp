@@ -31,7 +31,8 @@ Mesh::Mesh(const std::string& name, const VertexArrayObject& vao, const Material
 
 Mesh* Mesh::duplicate()
 {
-	Mesh* result = new Mesh(name(), _vao, material(), _startIndex, _numIndexes, parent());
+	Mesh* result = sharedObjectFactory().createObject<Mesh>(name(), _vao, material(),
+		_startIndex, _numIndexes, parent());
 	
 	duplicateBasePropertiesToObject(result);
 	duplicateChildrenToObject(result);

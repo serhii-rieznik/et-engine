@@ -5,8 +5,11 @@
  *
  */
 
-#include <pthread.h>
 #include <et/threading/threading.h>
+
+#if (!ET_PLATFORM_WIN)
+
+#include <pthread.h>
 
 using namespace et;
 
@@ -43,3 +46,5 @@ float Threading::cpuUsage()
 {
 	return 0.0f;
 }
+
+#endif // !ET_PLATFORM_WIN

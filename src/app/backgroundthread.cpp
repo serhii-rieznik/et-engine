@@ -33,9 +33,14 @@ ThreadResult BackgroundThread::main()
 	while (running())
 	{
 		if (_runLoop.hasTasks() || _runLoop.firstTimerPool()->hasObjects())
+		{
 			_runLoop.update(queryContiniousTimeInMilliSeconds());
+			Thread::sleepMSec(1);
+		}
 		else
+		{
 			suspend();
+		}
 	}
 	
 	return 0;

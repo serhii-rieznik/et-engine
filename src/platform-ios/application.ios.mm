@@ -31,8 +31,11 @@ void Application::platformInit()
 
 void Application::platformFinalize()
 {
-	delete _delegate, _delegate = nullptr;
-	delete _renderContext, _delegate = nullptr;
+	sharedObjectFactory().deleteObject(_delegate);
+	sharedObjectFactory().deleteObject(_renderContext);
+	
+	_renderContext = nullptr;
+	_delegate = nullptr;
 }
 
 void Application::platformActivate()
@@ -105,7 +108,7 @@ void Application::loaded()
 	renderContextParams.contextSize.y = static_cast<int>(winBounds.size.height * scale);
 	delegate()->setRenderContextParameters(renderContextParams);
 	
-	_renderContext = new RenderContext(renderContextParams, this);
+	_renderContext = sharedObjectFactory().createObject<RenderContext>(renderContextParams, this);
 	_renderingContextHandle = _renderContext->renderingContextHandle();
 	_runLoop.updateTime(_lastQueuedTimeMSec);
 	
@@ -121,11 +124,11 @@ void Application::quit(int exitCode)
 	setActive(false);
 	terminated();
 	
-	delete _delegate;
-	delete _renderContext;
+	sharedObjectFactory().deleteObject(_delegate);
+	sharedObjectFactory().deleteObject(_renderContext);
 	
-	_delegate = 0;
-	_renderContext = 0;
+	_delegate = nullptr;
+	_renderContext = nullptr;
 	
 #else	
 	

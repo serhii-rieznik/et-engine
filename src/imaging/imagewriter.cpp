@@ -105,7 +105,7 @@ bool internal_writePNGtoBuffer(BinaryDataStorage& buffer, const BinaryDataStorag
 	png_set_IHDR(png_ptr, info_ptr, w, h, bitsPerComponent, colorType,
 				 PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_BASE);
 	
-	png_bytep* row_pointers = new png_bytep[size.y];
+	png_bytep* row_pointers = reinterpret_cast<png_bytep*>(sharedObjectFactory().allocator()->alloc(sizeof(png_bytep) * size.y));
 	
 	int rowSize = size.x * components * bitsPerComponent / 8;
 	
@@ -128,7 +128,7 @@ bool internal_writePNGtoBuffer(BinaryDataStorage& buffer, const BinaryDataStorag
 	
 	png_destroy_write_struct(&png_ptr, &info_ptr);
 	
-	delete [] row_pointers;
+	sharedObjectFactory().allocator()->free(row_pointers);
 	return true;
 }
 

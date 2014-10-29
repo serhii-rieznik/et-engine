@@ -20,7 +20,7 @@ namespace et
 		void unlock();
 
 	private:
-		MutexPrivate* _private;
+		ET_DECLARE_PIMPL(Mutex, 64)
 	};
 
 	class MutexScope

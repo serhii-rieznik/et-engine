@@ -380,7 +380,7 @@ void Layout::collectTopmostElements(Element* element)
 void Layout::initRenderingElement(et::RenderContext* rc)
 {
 	if (_renderingElement.invalid())
-		_renderingElement = RenderingElement::Pointer(new RenderingElement(rc));
+		_renderingElement = RenderingElement::Pointer::create(rc);
 }
 
 vec2 Layout::contentSize()
@@ -396,7 +396,7 @@ vec2 Layout::contentSize()
 
 ModalLayout::ModalLayout()
 {
-	_backgroundFade = ImageView::Pointer(new ImageView(Texture(), this));
+	_backgroundFade = ImageView::Pointer::create(Texture(), this);
 	_backgroundFade->setBackgroundColor(vec4(0.0f, 0.0f, 0.0f, 0.25f));
 	_backgroundFade->fillParent();
 }

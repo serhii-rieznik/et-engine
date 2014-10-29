@@ -25,7 +25,7 @@ TextureAtlasWriter::TextureAtlasItem& TextureAtlasWriter::addItem(const vec2i& t
 	_items.push_back(TextureAtlasItem());
 	
 	TextureAtlasItem& item = _items.back();
-	item.texture = et::TextureDescription::Pointer(new et::TextureDescription);
+	item.texture = et::TextureDescription::Pointer::create();
 	item.texture->size = textureSize;
 	
 	return item;
@@ -185,11 +185,11 @@ void TextureAtlasWriter::writeToFile(const std::string& fileName, const char* te
 					if (token == "offset-")
 					{
 						offset = strToVector4(params);
-						for (size_t i = 0; i < 4; ++i)
+						for (size_t q = 0; q < 4; ++q)
 						{
-							if (offset[i] < 1.0f)
+							if (offset[q] < 1.0f)
 							{
-								offset[i] *= (i % 2 == 0) ? static_cast<float>(image.size.x) :
+								offset[q] *= (q % 2 == 0) ? static_cast<float>(image.size.x) :
 									static_cast<float>(image.size.y);
 							}
 						}
