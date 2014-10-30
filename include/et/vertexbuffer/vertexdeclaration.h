@@ -104,11 +104,10 @@ namespace et
 		void deserialize(std::istream& stream);
 
 	private:  
-		static VertexElement _empty;
 		VertexElementList _list;
-		size_t _totalSize;
-		size_t _usageMask;
-		bool _interleaved;
+		size_t _totalSize = 0;
+		size_t _usageMask = 0;
+		bool _interleaved = true;
 	};
 
 }

@@ -20,8 +20,8 @@ namespace et
 		defaultChunkSize = 16 * megabytes,
 		minimumAllocationSize = 64,
 		maximumAllocationStatisticsSize = (2048 + minimumAllocationSize) / minimumAllocationSize,
-		smallMemoryBlockSize = 64,
-		smallMemoryBlocksCount = 8 * megabytes / (smallMemoryBlockSize + 4),
+		smallMemoryBlockSize = 128,
+		smallMemoryBlocksCount = 65536,
 	};
 
 	struct MemoryChunkInfo
@@ -348,7 +348,7 @@ MemoryChunk::MemoryChunk(uint32_t capacity)
 MemoryChunk::~MemoryChunk()
 {
 	if (allocatedMemoryBegin)
-		free(allocatedMemoryBegin);
+		::free(allocatedMemoryBegin);
 }
 
 bool MemoryChunk::allocate(uint32_t sizeToAllocate, void*& result)
@@ -483,7 +483,7 @@ BlockMemorySmallBlockAllocator::BlockMemorySmallBlockAllocator()
 
 BlockMemorySmallBlockAllocator::~BlockMemorySmallBlockAllocator()
 {
-	free(blocks);
+	::free(blocks);
 }
 
 void* BlockMemorySmallBlockAllocator::allocate()

@@ -12,7 +12,7 @@
 using namespace et;
 using namespace et::s3d;
 
-ParticleSystem::ParticleSystem(RenderContext* rc, size_t maxSize, const std::string& name, Element* parent) :
+ParticleSystem::ParticleSystem(RenderContext* rc, size_t maxSize, const std::string& name, Element2d* parent) :
 	Element(name, parent), _rc(rc), _decl(true, Usage_Position, Type_Vec3)
 {
 	_decl.push_back(Usage_Color, Type_Vec4);

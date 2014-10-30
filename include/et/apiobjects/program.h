@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <unordered_map>
 #include <et/opengl/opengltypes.h>
 
 namespace et
@@ -29,7 +30,7 @@ namespace et
 			name(aName), usage(aUsage) { }
 	};
 
-	typedef std::map<std::string, ProgramUniform> UniformMap;
+	typedef std::unordered_map<std::string, ProgramUniform> UniformMap;
 
 	class Camera;
 	class RenderState;

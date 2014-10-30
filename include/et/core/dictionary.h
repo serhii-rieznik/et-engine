@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <unordered_map>
 #include <et/core/intrusiveptr.h>
 
 namespace et
@@ -139,7 +140,7 @@ namespace et
 		void printContent() const;
 	};
 	
-	class Dictionary : public ValuePointer<std::map<std::string, ValueBase::Pointer>, ValueClass_Dictionary>
+	class Dictionary : public ValuePointer<std::unordered_map<std::string, ValueBase::Pointer>, ValueClass_Dictionary>
 	{
 	public:
 		Dictionary() :
@@ -159,7 +160,7 @@ namespace et
 		
 		Dictionary& operator = (const Dictionary& r)
 		{
-			ValuePointer<std::map<std::string, ValueBase::Pointer>, ValueClass_Dictionary>::operator = (r);
+			ValuePointer<std::unordered_map<std::string, ValueBase::Pointer>, ValueClass_Dictionary>::operator = (r);
 			return *this;
 		}
 		

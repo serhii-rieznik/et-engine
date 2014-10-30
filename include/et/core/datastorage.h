@@ -15,44 +15,72 @@ namespace et
 	class DataStorage : public ContainerBase<T>
 	{
 	public:
-		typedef T DataFormat;
-
-		DataStorage() :  _mutableData(nullptr), _size(0), _dataSize(0), _lastElementIndex(0),
+		DataStorage() :
+			_mutableData(nullptr), _size(0), _dataSize(0), _lastElementIndex(0),
 			_flags(DataStorageFlag_OwnsMutableData) { }
 		
-		explicit DataStorage(size_t size) : _mutableData(nullptr), _size(0), _dataSize(0),
-			_lastElementIndex(0), _flags(DataStorageFlag_OwnsMutableData) { resize(size); }
-
-		explicit DataStorage(int size) : _mutableData(nullptr), _size(0), _dataSize(0),
-			_lastElementIndex(0), _flags(DataStorageFlag_OwnsMutableData) { resize(static_cast<size_t>(size)); }
-		
-		DataStorage(size_t size, int initValue) : _mutableData(nullptr), _size(0), _dataSize(0),
-			_lastElementIndex(0), _flags(DataStorageFlag_OwnsMutableData)
+		explicit DataStorage(size_t size) :
+			_mutableData(nullptr), _size(0), _dataSize(0), _lastElementIndex(0),
+			_flags(DataStorageFlag_OwnsMutableData)
+		{
+			resize(size);
+		}
+/*
+		explicit DataStorage(int size) :
+			_mutableData(nullptr), _size(0), _dataSize(0), _lastElementIndex(0),
+			_flags(DataStorageFlag_OwnsMutableData)
+		{
+			resize(static_cast<size_t>(size));
+		}
+*/
+		DataStorage(size_t size, int initValue) :
+			_mutableData(nullptr), _size(0), _dataSize(0), _lastElementIndex(0),
+			_flags(DataStorageFlag_OwnsMutableData)
 		{
 			resize(size); 
 			fill(initValue);
 		}
-
-		DataStorage(int size, int initValue) : _mutableData(nullptr), _size(0), _dataSize(0),
-			_lastElementIndex(0), _flags(DataStorageFlag_OwnsMutableData)
+/*
+		DataStorage(int size, int initValue) :
+			_mutableData(nullptr), _size(0), _dataSize(0), _lastElementIndex(0), _flags(DataStorageFlag_OwnsMutableData)
 		{
 			resize(static_cast<size_t>(size));
 			fill(initValue);
 		}
-		
-		DataStorage(const DataStorage& copy) : _mutableData(nullptr), _size(0), _dataSize(0),
-			_lastElementIndex(0), _flags(DataStorageFlag_OwnsMutableData)
+*/
+		DataStorage(const DataStorage& copy) :
+			_mutableData(nullptr), _size(0), _dataSize(0), _lastElementIndex(0), _flags(DataStorageFlag_OwnsMutableData)
 		{
 			resize(copy.size());
+			
 			if (copy.size() > 0)
 				etCopyMemory(_mutableData, copy.data(), copy.dataSize());
 		}
 		
-		DataStorage(T* data, size_t dataSize) : _mutableData(data), _size(dataSize / sizeof(T)),
-			_dataSize(dataSize), _lastElementIndex(0), _flags(DataStorageFlag_Mutable) { }
+		DataStorage(DataStorage&& mv)
+		{
+			_size = mv._size;
+			_dataSize = mv._dataSize;
+			_lastElementIndex = mv._lastElementIndex;
+			_flags = mv._flags;
+			_mutableData = mv._mutableData;
+			_immutableData = mv._immutableData;
 
-		DataStorage(const T* data, size_t dataSize) : _immutableData(data), _size(dataSize / sizeof(T)),
-			_dataSize(dataSize), _lastElementIndex(0), _flags(0) { }
+			mv._size = 0;
+			mv._dataSize = 0;
+			mv._lastElementIndex = 0;
+			mv._flags = 0;
+			mv._mutableData = nullptr;
+			mv._immutableData = nullptr;
+		}
+		
+		DataStorage(T* data, size_t dataSize) :
+			_mutableData(data), _size(dataSize / sizeof(T)), _dataSize(dataSize), _lastElementIndex(0),
+			_flags(DataStorageFlag_Mutable) { }
+
+		DataStorage(const T* data, size_t dataSize) :
+			_immutableData(data), _size(dataSize / sizeof(T)), _dataSize(dataSize), _lastElementIndex(0),
+			_flags(0) { }
 		
 		~DataStorage()
 			{ resize(0); }
@@ -263,15 +291,15 @@ namespace et
 	private:
 		union
 		{
-			T* _mutableData;
+			T* _mutableData = nullptr;
 			const T* _immutableData;
 		};
 		
 	private:
-		size_t _size;
-		size_t _dataSize;
-		size_t _lastElementIndex;
-		size_t _flags;
+		size_t _size = 0;
+		size_t _dataSize = 0;
+		size_t _lastElementIndex = 0;
+		size_t _flags = 0;
 	};
 
 	typedef DataStorage<float> FloatDataStorage;

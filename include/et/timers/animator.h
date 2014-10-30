@@ -108,6 +108,8 @@ namespace et
 					*value = _value;
 				
 				updated.invoke();
+				cancelUpdates();
+				
 				finished.invoke();
 			}
 			else
@@ -160,7 +162,9 @@ namespace et
 					*_valuePointer = _value;
 								
 				updated.invoke();
+				
 				cancelUpdates();
+				
 				finished.invoke();
 			}
 			else 
@@ -189,5 +193,9 @@ namespace et
 	};
 
 	typedef Animator<float> FloatAnimator;
-
+	typedef Animator<vec2> Vector2Animator;
+	typedef Animator<vec3> Vector3Animator;
+	typedef Animator<vec4> Vector4Animator;
+	typedef Animator<mat4> MatrixAnimator;
+	typedef Animator<rect> RectAnimator;
 }

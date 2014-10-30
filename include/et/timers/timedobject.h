@@ -36,12 +36,11 @@ namespace et
 	protected:
 		friend class TimerPool;
 
-		virtual void startUpdates(TimerPool* timerPool = nullptr);
 		virtual void update(float) {  }
-
-		virtual TimerPool* timerPool()
-			{ return _owner; }
-
+		
+		virtual void startUpdates(TimerPool* timerPool = nullptr);
+		virtual TimerPool* timerPool();
+		
 	private:
 		TimerPool* _owner = nullptr;
 		float _startTime = 0.0f;

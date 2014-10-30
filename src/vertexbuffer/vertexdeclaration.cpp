@@ -11,7 +11,7 @@
 
 using namespace et;
 
-VertexElement VertexDeclaration::_empty;
+static VertexElement _emptyVertexElement;
 
 VertexDeclaration::VertexDeclaration() :
 	_interleaved(true), _totalSize(0), _usageMask(0) { }
@@ -64,7 +64,7 @@ void VertexDeclaration::clear()
 
 const VertexElement& VertexDeclaration::element(size_t i) const
 {
-	return (i >= _list.size()) ? _empty : _list[i];
+	return (i >= _list.size()) ? _emptyVertexElement : _list[i];
 }
 
 const VertexElement& VertexDeclaration::elementForUsage(VertexAttributeUsage u) const
@@ -75,7 +75,7 @@ const VertexElement& VertexDeclaration::elementForUsage(VertexAttributeUsage u) 
 			return e;
 	};
 
-	return _empty;
+	return _emptyVertexElement;
 }
 
 bool VertexDeclaration::operator == (const VertexDeclaration& r) const
