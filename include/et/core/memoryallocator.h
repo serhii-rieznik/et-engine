@@ -109,4 +109,5 @@ namespace et
 		BlockMemoryAllocatorPrivate* _private = nullptr;
 		char _privateData[256];
 	};
+	
 }

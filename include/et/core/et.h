@@ -113,18 +113,22 @@ namespace et
 	inline T clamp(T value, T min, T max)
 		{ return (value < min) ? min : (value > max) ? max : value; }
 	
-	struct SharedEngineObjects
-	{
-		ObjectFactory objectFactory;
-		BlockMemoryAllocator blockMemoryAllocator;
-		std::vector<log::Output::Pointer> logOutputs;
-		
-		SharedEngineObjects();
-	};
 	
 	ObjectFactory& sharedObjectFactory();
 	BlockMemoryAllocator& sharedBlockAllocator();
 	std::vector<log::Output::Pointer>& sharedLogOutputs();
+	
+	template <typename T>
+	struct SharedBlockAllocatorSTDProxy
+	{
+		typedef T value_type;
+		
+		value_type* allocate(size_t sz)
+		{ return reinterpret_cast<value_type*>(sharedBlockAllocator().alloc(sz)); }
+		
+		void deallocate(void* ptr, size_t sz)
+		{ sharedBlockAllocator().free(ptr); }
+	};
 	
 	extern const vec3 unitX;
 	extern const vec3 unitY;
