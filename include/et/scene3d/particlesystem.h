@@ -30,7 +30,7 @@ namespace et
 			ET_DECLARE_POINTER(ParticleSystem)
 						
 		public:
-			ParticleSystem(RenderContext*, size_t, const std::string&, Element2d*);
+			ParticleSystem(RenderContext*, size_t, const std::string&, Element*);
 			
 			ElementType type() const
 				{ return ElementType_ParticleSystem; }
