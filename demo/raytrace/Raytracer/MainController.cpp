@@ -29,7 +29,7 @@ const vec2 samplesPerScreen = vec2(static_cast<float>(frameParts.x), static_cast
 #endif
 
 et::IApplicationDelegate* Application::initApplicationDelegate()
-	{ return new MainController(); }
+	{ return sharedObjectFactory().createObject<MainController>(); }
 
 et::ApplicationIdentifier MainController::applicationIdentifier() const
 	{ return ApplicationIdentifier(applicationIdentifierForCurrentProject(), "Cheetek", "Raytrace"); }
@@ -72,7 +72,6 @@ void MainController::applicationDidLoad(et::RenderContext* rc)
 	_mainProgram->setUniform("noiseTexture", 0);
 	
 	_noise = rc->textureFactory().genNoiseTexture(vec2i(512), true, "tex_noise");
-	_result = rc->textureFactory().genNoiseTexture(frameSize, true, "result-texture");
 	
 	_textureData.resize(frameSize.square());
 	_textureData.fill(255);
@@ -114,7 +113,7 @@ void MainController::applicationDidLoad(et::RenderContext* rc)
 	});
 	
 	for (size_t i = 0; i < numThreads; ++i)
-		_threads.push_back(new RaytraceThread(this));
+		_threads.push_back(sharedObjectFactory().createObject<RaytraceThread>(this));
 	
 	_scale = vec2(1.0f) / samplesPerScreen;
 	_offset = vec2(-1.0f) + _scale;
@@ -132,8 +131,7 @@ void MainController::applicationWillTerminate()
 	{
 		t->stop();
 		t->waitForTermination();
-		
-		delete t;
+		sharedObjectFactory().deleteObject(t);
 	}
 }
 

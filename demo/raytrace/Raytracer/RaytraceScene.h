@@ -21,7 +21,7 @@ namespace rt
 			missingObject = -1
 		};
 		
-		typedef std::vector<Intersection> List;
+		typedef std::vector<Intersection, et::SharedBlockAllocatorSTDProxy<Intersection>> List;
 		
 	public:
 		int objectIndex = missingObject;
@@ -113,8 +113,8 @@ namespace rt
 		et::vec4 ambientColor = et::vec4(0.0f);
 		et::TextureDescription::Pointer environmentMap;
 		
-		std::vector<SceneObject> objects;
-		std::vector<SceneMaterial> materials;
+		std::vector<SceneObject, et::SharedBlockAllocatorSTDProxy<SceneObject>> objects;
+		std::vector<SceneMaterial, et::SharedBlockAllocatorSTDProxy<SceneMaterial>> materials;
 		
 		struct
 		{

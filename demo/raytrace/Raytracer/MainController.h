@@ -68,8 +68,8 @@ namespace rt
 		et::DataStorage<et::vec4ub> _textureData;
 		
 		RaytraceScene _scene;
-		std::vector<RaytraceThread*> _threads;
-		std::vector<et::recti> _renderRects;
+		std::vector<RaytraceThread*, et::SharedBlockAllocatorSTDProxy<RaytraceThread*>> _threads;
+		std::vector<et::recti, et::SharedBlockAllocatorSTDProxy<et::recti>> _renderRects;
 		OutputFunction _outputFunction;
 		et::CriticalSection _csLock;
 		

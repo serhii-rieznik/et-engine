@@ -123,11 +123,21 @@ namespace et
 	{
 		typedef T value_type;
 		
-		value_type* allocate(size_t sz)
-		{ return reinterpret_cast<value_type*>(sharedBlockAllocator().alloc(sz)); }
+		typedef T* pointer;
+		typedef T& reference;
 		
-		void deallocate(void* ptr, size_t sz)
-		{ sharedBlockAllocator().free(ptr); }
+		typedef const T* const_pointer;
+		typedef const T& const_reference;
+		
+		pointer allocate(size_t n)
+		{
+			return reinterpret_cast<pointer>(sharedBlockAllocator().alloc(n * sizeof(T)));
+		}
+		
+		void deallocate(void* ptr, size_t n)
+		{
+			sharedBlockAllocator().free(ptr);
+		}
 	};
 	
 	extern const vec3 unitX;
