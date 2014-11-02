@@ -264,49 +264,48 @@ void BlockMemoryAllocatorPrivate::free(void* ptr)
 
 void BlockMemoryAllocatorPrivate::printInfo()
 {
-	log::info("Memory allocator has %zu chunks:", _chunks.size());
-	
 #if (ET_DEBUG)
-		log::info("{");
-		for (auto& chunk : _chunks)
+	log::info("Memory allocator has %zu chunks:", _chunks.size());
+	log::info("{");
+	for (auto& chunk : _chunks)
+	{
+		log::info("\t{");
+		for (uint32_t i = 0; i < maximumAllocationStatisticsSize - 1; ++i)
 		{
-			log::info("\t{");
-			for (uint32_t i = 0; i < maximumAllocationStatisticsSize - 1; ++i)
+			if (chunk.allocationStatistics[i] > 0)
 			{
-				if (chunk.allocationStatistics[i] > 0)
-				{
-					log::info("\t\t%04u-%04u : live: %u (alloc: %u, freed: %u)", i * minimumAllocationSize,
-						(i+1) * minimumAllocationSize, chunk.allocationStatistics[i] - chunk.deallocationStatistics[i],
-						chunk.allocationStatistics[i], chunk.deallocationStatistics[i]);
-				}
+				log::info("\t\t%04u-%04u : live: %u (alloc: %u, freed: %u)", i * minimumAllocationSize,
+					(i+1) * minimumAllocationSize, chunk.allocationStatistics[i] - chunk.deallocationStatistics[i],
+					chunk.allocationStatistics[i], chunk.deallocationStatistics[i]);
 			}
-			
-			auto j = (maximumAllocationStatisticsSize - 1);
-			if (chunk.allocationStatistics[j] > 0)
-			{
-				log::info("\t\t%04u-.... : live: %u (alloc: %u, freed: %u)", j * minimumAllocationSize,
-					chunk.allocationStatistics[j] - chunk.deallocationStatistics[j],
-					chunk.allocationStatistics[j], chunk.deallocationStatistics[j]);
-			}
-			
-			uint32_t allocatedMemory = 0;
-			auto i = chunk.firstInfo;
-			while (i < chunk.lastInfo)
-			{
-				allocatedMemory += (i->length & (~i->allocated));
-				++i;
-			}
-			log::info("\t\t------------");
-			log::info("\t\tTotal memory used: %u (%uKb, %uMb) of %u (%uKb, %uMb)", allocatedMemory, allocatedMemory / 1024,
-				allocatedMemory / megabytes, chunk.size, chunk.size / 1024, chunk.size / megabytes);
-			log::info("\t}");
 		}
 		
+		auto j = (maximumAllocationStatisticsSize - 1);
+		if (chunk.allocationStatistics[j] > 0)
+		{
+			log::info("\t\t%04u-.... : live: %u (alloc: %u, freed: %u)", j * minimumAllocationSize,
+				chunk.allocationStatistics[j] - chunk.deallocationStatistics[j],
+				chunk.allocationStatistics[j], chunk.deallocationStatistics[j]);
+		}
+		
+		uint32_t allocatedMemory = 0;
+		auto i = chunk.firstInfo;
+		while (i < chunk.lastInfo)
+		{
+			allocatedMemory += (i->length & (~i->allocated));
+			++i;
+		}
+		log::info("\t\t------------");
+		log::info("\t\tTotal memory used: %u (%uKb, %uMb) of %u (%uKb, %uMb)", allocatedMemory, allocatedMemory / 1024,
+			allocatedMemory / megabytes, chunk.size, chunk.size / 1024, chunk.size / megabytes);
+		log::info("\t}");
+	}
+	
 #	if ET_ENABLE_SMALL_MEMORY_BLOCKS
 		uint32_t allocatedBlocks = 0;
 		for (auto i = _smallBlockAllocator.firstBlock; i != _smallBlockAllocator.lastBlock; ++i)
 			allocatedBlocks += i->allocated;
-
+		
 		log::info("\tsmall memory block allocator:");
 		log::info("\t{");
 		log::info("\t\tallocated blocks : %u", allocatedBlocks);
@@ -314,9 +313,8 @@ void BlockMemoryAllocatorPrivate::printInfo()
 			(int64_t)(_smallBlockAllocator.lastBlock - _smallBlockAllocator.firstBlock));
 		log::info("\t}");
 #	endif
-	
-#endif
 	log::info("}");
+#endif
 }
 
 /*
