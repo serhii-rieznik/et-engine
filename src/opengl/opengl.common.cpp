@@ -507,23 +507,7 @@ uint32_t et::drawTypeValue(BufferDrawType t)
 
 uint32_t et::primitiveTypeValue(PrimitiveType t)
 {
-	switch (t)
-	{
-		case PrimitiveType_Points:
-			return GL_POINTS;
-		case PrimitiveType_Lines:
-			return GL_LINES;
-		case PrimitiveType_LineStrip:
-			return GL_LINE_STRIP;
-		case PrimitiveType_Triangles:
-			return GL_TRIANGLES;
-		case PrimitiveType_TriangleStrips:
-			return GL_TRIANGLE_STRIP;
-		default:
-			ET_FAIL("Invalid PrimitiveType value");
-	}
-	
-	return 0;
+	return t;
 }
 
 #if (ET_OPENGLES)

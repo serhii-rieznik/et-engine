@@ -7,8 +7,8 @@
 
 #pragma once
 
-#include <et/opengl/opengltypes.h>
 #include <et/apiobjects/texturedescription.h>
+#include <et/opengl/opengl.h>
 
 namespace et
 {

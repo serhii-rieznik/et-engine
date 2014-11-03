@@ -108,7 +108,7 @@ void et::ios::shareFile(const std::string& path, const std::string& scheme, Dict
 
 std::string et::selectFile(const StringList&, SelectFileMode, const std::string&)
 {
-	return std::string();
+	return emptyString;
 }
 
 bool et::ios::canOpenURL(const std::string& s)

@@ -244,5 +244,5 @@ std::string locale::localeLanguage(const std::string& key)
 std::string locale::localeSubLanguage(const std::string& key)
 {
 	auto dashPos = key.find('-');
-	return (dashPos == std::string::npos) ? std::string() : key.substr(dashPos + 1);
+	return (dashPos == std::string::npos) ? emptyString : key.substr(dashPos + 1);
 }

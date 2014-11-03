@@ -21,7 +21,7 @@ void OpenGLCapabilites::checkCaps()
 	log::info("[OpenGLCapabilites] Rendering disabled in console application.");
 #else
 	const char* glv = reinterpret_cast<const char*>(glGetString(GL_VERSION));
-	_versionShortString = std::string();
+	_versionShortString = emptyString;
 	_versionString = std::string(glv ? glv : "<Unknown OpenGL version>");
 	if (glv != nullptr)
 	{
@@ -39,7 +39,7 @@ void OpenGLCapabilites::checkCaps()
 	checkOpenGLError("OpenGLCapabilites::checkCaps");
 	
 	const char* glslv = reinterpret_cast<const char*>(glGetString(GL_SHADING_LANGUAGE_VERSION));
-	_glslVersionShortString = std::string();
+	_glslVersionShortString = emptyString;
 	_glslVersionString = std::string(glslv ? glslv : "<Unknown GLSL version>");
 	if (glslv != nullptr)
 	{

@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <unordered_map>
 #include <et/core/et.h>
 #include <et/threading/criticalsection.h>
 #include <et/timers/timedobject.h>
@@ -46,8 +47,8 @@ namespace et
 		{
 			LoadableObject::Pointer object;
 			ObjectLoader::Pointer loader;
-			std::map<std::string, uint64_t> identifiers;
-			
+			std::unordered_map<std::string, uint64_t> identifiers;
+
 			ObjectProperty()
 				{ }
 			
@@ -55,11 +56,23 @@ namespace et
 				object(o), loader(l) { }
 		};
 		
-		typedef std::vector<ObjectProperty> ObjectPropertyList;
-		typedef std::map<std::string, ObjectPropertyList> ObjectMap;
+		typedef std::vector
+		<
+			ObjectProperty,
+			SharedBlockAllocatorSTDProxy<ObjectProperty>
+		> ObjectPropertyList;
+		
+		typedef std::unordered_map
+		<
+			std::string,
+			ObjectPropertyList,
+			std::hash<std::string>,
+			std::equal_to<std::string>,
+			SharedBlockAllocatorSTDProxy< std::pair<const std::string, ObjectPropertyList> >
+		> ObjectMap;
 
 		CriticalSection _lock;
 		ObjectMap _objects;
-		float _updateTime;
+		float _updateTime = 0.0f;
 	};
 }

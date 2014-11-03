@@ -8,7 +8,7 @@
 #pragma once
 
 #include <unordered_map>
-#include <et/opengl/opengltypes.h>
+#include <et/opengl/opengl.h>
 
 namespace et
 {

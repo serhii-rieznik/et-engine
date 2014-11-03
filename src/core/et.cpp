@@ -9,11 +9,14 @@
 
 using namespace et;
 
+const std::string et::emptyString;
+
 static struct SharedEngineObjects
 {
 	ObjectFactory objectFactory;
 	BlockMemoryAllocator blockMemoryAllocator;
 	std::vector<log::Output::Pointer> logOutputs;
+	
 	SharedEngineObjects();
 }
 sharedEngineObjects;

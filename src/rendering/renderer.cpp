@@ -161,12 +161,11 @@ void Renderer::drawElementsInstanced(const IndexBuffer& ib, size_t first, size_t
 #endif
 }
 
-void Renderer::drawElements(PrimitiveType primitiveType, const IndexBuffer& ib, size_t first, size_t count)
+void Renderer::drawElements(uint32_t primitiveType, const IndexBuffer& ib, size_t first, size_t count)
 {
 #if !defined(ET_CONSOLE_APPLICATION)
 	ET_ASSERT(ib.valid());
-	etDrawElements(primitiveTypeValue(primitiveType), static_cast<GLsizei>(count),
-		ib->dataType(), ib->indexOffset(first));
+	etDrawElements(primitiveType, static_cast<GLsizei>(count), ib->dataType(), ib->indexOffset(first));
 #endif
 }
 

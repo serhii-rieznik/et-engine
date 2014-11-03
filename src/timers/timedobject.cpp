@@ -58,6 +58,5 @@ void TimedObject::cancelUpdates()
 
 float TimedObject::actualTime()
 {
-	ET_ASSERT((_owner != nullptr) && "TimedObject isn't attached to timer pool");
-	return _owner->actualTime();
+	return timerPool()->actualTime();
 }

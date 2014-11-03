@@ -148,4 +148,6 @@ namespace et
 	extern const mat3 identityMatrix3;
 	extern const mat4 identityMatrix;
 	extern const mat4 lightProjectionMatrix;
+	
+	extern const std::string emptyString;
 }

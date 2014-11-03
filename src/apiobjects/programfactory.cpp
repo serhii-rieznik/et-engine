@@ -309,7 +309,7 @@ Program ::Pointer ProgramFactory::genProgram(const std::string& name, const std:
 	parseSourceCode(ShaderType_Vertex, vs, defines, workFolder);
 	parseSourceCode(ShaderType_Fragment, fs, defines, workFolder);
 	
-	return Program::Pointer::create(renderContext(), vs, std::string(), fs, name, name, defines);
+	return Program::Pointer::create(renderContext(), vs, emptyString, fs, name, name, defines);
 }
 
 void ProgramFactory::parseSourceCode(ShaderType type, std::string& source, const StringList& defines,

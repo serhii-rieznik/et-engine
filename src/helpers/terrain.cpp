@@ -9,7 +9,7 @@
 #include <et/core/tools.h>
 #include <et/app/application.h>
 #include <et/primitives/primitives.h>
-#include <et/terrain/terrain.h>
+#include <et/helpers/terrain.h>
 #include <et/timers/intervaltimer.h>
 
 using namespace et;

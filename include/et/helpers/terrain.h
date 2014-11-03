@@ -11,7 +11,7 @@
 #include <et/collision/collision.h>
 #include <et/primitives/primitives.h>
 #include <et/rendering/rendercontext.h>
-#include <et/terrain/terraindata.h>
+#include <et/helpers/terraindata.h>
 
 namespace et
 {

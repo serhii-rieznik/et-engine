@@ -8,8 +8,6 @@
 #include <et/core/et.h>
 #include <et/threading/criticalsection.h>
 
-#define ET_ENABLE_SMALL_MEMORY_BLOCKS	1
-
 namespace et
 {
 	enum : uint32_t
@@ -18,10 +16,9 @@ namespace et
 		allocatedValue = 0x00000000,
 		notAllocatedValue = 0xffffffff,
 		defaultChunkSize = 16 * megabytes,
-		minimumAllocationSize = 64,
-		maximumAllocationStatisticsSize = (2048 + minimumAllocationSize) / minimumAllocationSize,
-		smallMemoryBlockSize = 128,
-		smallMemoryBlocksCount = 65536,
+		minimumAllocationSize = 16,
+		minimumAllocationStatisticsSize = 96,
+		maximumAllocationStatisticsSize = (uint32_t)((2048 + minimumAllocationStatisticsSize) / minimumAllocationStatisticsSize)
 	};
 
 	struct MemoryChunkInfo
@@ -86,36 +83,108 @@ namespace et
 		char* allocatedMemoryEnd = nullptr;
 		
 #if (ET_DEBUG)
-		uint32_t allocationStatistics[maximumAllocationStatisticsSize];
-		uint32_t deallocationStatistics[maximumAllocationStatisticsSize];
+		StaticDataStorage<uint32_t, maximumAllocationStatisticsSize> allocationStatistics;
+		StaticDataStorage<uint32_t, maximumAllocationStatisticsSize> deallocationStatistics;
 		bool breakOnAllocation = false;
 #endif
 	};
 	
-	struct SmallMemoryBlock
-	{
-		uint32_t allocated = 0;
-		char data[smallMemoryBlockSize];
-	};
 	
+	template <int blockSize>
 	class BlockMemorySmallBlockAllocator
 	{
 	public:
-		BlockMemorySmallBlockAllocator();
-		~BlockMemorySmallBlockAllocator();
+		BlockMemorySmallBlockAllocator()
+		{
+			auto sizeToAllocate = blocksCount * sizeof(SmallMemoryBlock);
+			blocks = reinterpret_cast<SmallMemoryBlock*>(calloc(1, sizeToAllocate));
+			firstBlock = blocks;
+			currentBlock = firstBlock;
+			lastBlock = firstBlock + blocksCount;
+		}
 		
-		void* allocate();
-		void free(void*);
+		~BlockMemorySmallBlockAllocator()
+		{
+			log::ConsoleOutput lOut;
+			for (auto i = firstBlock; i != lastBlock; ++i)
+			{
+				if (i->allocated)
+					lOut.info("Memory leak detected: %d bytes, offset %lld", blockSize, (int64_t)(i - firstBlock));
+			}
+			::free(blocks);
+		}
 		
-		bool containsPointer(void*);
+		bool allocate(void*& result)
+		{
+			auto startBlock = currentBlock;
+			
+			while (currentBlock->allocated)
+			{
+				currentBlock = advance(currentBlock);
+				if (currentBlock == startBlock)
+				{
+					_haveFreeBlocks = false;
+					log::warning("Small memory block (%d) filled.", blockSize);
+					return false;
+				}
+			}
+			
+			currentBlock->allocated = 1;
+			
+			result = currentBlock->data;
+			currentBlock = advance(currentBlock);
+			
+			return true;
+		}
 		
-		SmallMemoryBlock* advance(SmallMemoryBlock*);
+		void free(void* ptr)
+		{
+			SmallMemoryBlock* block = reinterpret_cast<SmallMemoryBlock*>(reinterpret_cast<char*>(ptr) - 4);
+			
+			if ((ptr < firstBlock) || (ptr > lastBlock))
+				ET_FAIL_FMT("Pointer being freed (0x%016llx) was not allocated via this allocator.", (int64_t)ptr);
+			
+			block->allocated = 0;
+			
+			if (_haveFreeBlocks == false)
+				currentBlock = block;
+
+			_haveFreeBlocks = true;
+		}
+		
+		bool containsPointer(void* ptr)
+		{
+			SmallMemoryBlock* block = reinterpret_cast<SmallMemoryBlock*>(reinterpret_cast<char*>(ptr) - 4);
+			return (block >= firstBlock) && (block < lastBlock);
+		}
+		
+		bool haveFreeBlocks()
+			{ return _haveFreeBlocks; }
+		
+	private:
+		enum
+		{
+			blocksCount = 8 * megabytes / (blockSize + 4)
+		};
+		
+		struct SmallMemoryBlock
+		{
+			uint32_t allocated = 0;
+			char data[blockSize];
+		};
+		
+		SmallMemoryBlock* advance(SmallMemoryBlock* b)
+		{
+			++b;
+			return (b == lastBlock) ? firstBlock : b;
+		}
 		
 	public:
 		SmallMemoryBlock* blocks = nullptr;
 		SmallMemoryBlock* firstBlock = nullptr;
 		SmallMemoryBlock* lastBlock = nullptr;
 		SmallMemoryBlock* currentBlock = nullptr;
+		bool _haveFreeBlocks = true;
 	};
 	
 	class BlockMemoryAllocatorPrivate
@@ -134,9 +203,8 @@ namespace et
 		CriticalSection _csLock;
 		std::list<MemoryChunk> _chunks;
 		
-#if ET_ENABLE_SMALL_MEMORY_BLOCKS
-		BlockMemorySmallBlockAllocator _smallBlockAllocator;
-#endif
+		BlockMemorySmallBlockAllocator<48> _allocator48;
+		BlockMemorySmallBlockAllocator<96> _allocator96;
 	};
 }
 
@@ -191,23 +259,35 @@ void* BlockMemoryAllocatorPrivate::alloc(uint32_t allocSize)
 	CriticalSectionScope lock(_csLock);
 	
 	void* result = nullptr;
-#if ET_ENABLE_SMALL_MEMORY_BLOCKS
-	if (allocSize <= smallMemoryBlockSize)
+	
+	auto allocScale = (allocSize - 1) / 48;
+	switch (allocScale)
 	{
-		result = _smallBlockAllocator.allocate();
-	}
-	else
-#endif
-	{
-		for (MemoryChunk& chunk : _chunks)
+		case 0 :
 		{
-			if (chunk.allocate(allocSize, result))
+			if (_allocator48.haveFreeBlocks() && _allocator48.allocate(result))
 				return result;
 		}
-		
-		_chunks.emplace_back(alignUpTo(allocSize, defaultChunkSize));
-		_chunks.back().allocate(allocSize, result);
+			
+		case 1 :
+		{
+			if (_allocator96.haveFreeBlocks() && _allocator96.allocate(result))
+				return result;
+		}
+			
+		default:
+		{
+			for (MemoryChunk& chunk : _chunks)
+			{
+				if (chunk.allocate(allocSize, result))
+					return result;
+			}
+			
+			_chunks.emplace_back(alignUpTo(allocSize, defaultChunkSize));
+			_chunks.back().allocate(allocSize, result);
+		}
 	}
+	
 	return result;
 }
 
@@ -218,10 +298,12 @@ bool BlockMemoryAllocatorPrivate::validate(void* ptr, bool abortOnFail)
 	
 	CriticalSectionScope lock(_csLock);
 	
-#if ET_ENABLE_SMALL_MEMORY_BLOCKS
-	if (_smallBlockAllocator.containsPointer(ptr))
+	if (_allocator48.containsPointer(ptr))
 		return true;
-#endif
+	
+	if (_allocator96.containsPointer(ptr))
+		return true;
+
 	auto charPtr = static_cast<char*>(ptr);
 	for (MemoryChunk& chunk : _chunks)
 	{
@@ -243,13 +325,15 @@ void BlockMemoryAllocatorPrivate::free(void* ptr)
 	
 	CriticalSectionScope lock(_csLock);
 	
-#if ET_ENABLE_SMALL_MEMORY_BLOCKS
-	if (_smallBlockAllocator.containsPointer(ptr))
+	if (_allocator48.containsPointer(ptr))
 	{
-		_smallBlockAllocator.free(ptr);
+		_allocator48.free(ptr);
+	}
+	else if (_allocator96.containsPointer(ptr))
+	{
+		_allocator96.free(ptr);
 	}
 	else
-#endif
 	{
 		auto charPtr = static_cast<char*>(ptr);
 		for (MemoryChunk& chunk : _chunks)
@@ -264,18 +348,18 @@ void BlockMemoryAllocatorPrivate::free(void* ptr)
 
 void BlockMemoryAllocatorPrivate::printInfo()
 {
-#if (ET_DEBUG)
 	log::info("Memory allocator has %zu chunks:", _chunks.size());
 	log::info("{");
 	for (auto& chunk : _chunks)
 	{
 		log::info("\t{");
+#	if (ET_DEBUG)
 		for (uint32_t i = 0; i < maximumAllocationStatisticsSize - 1; ++i)
 		{
 			if (chunk.allocationStatistics[i] > 0)
 			{
-				log::info("\t\t%04u-%04u : live: %u (alloc: %u, freed: %u)", i * minimumAllocationSize,
-					(i+1) * minimumAllocationSize, chunk.allocationStatistics[i] - chunk.deallocationStatistics[i],
+				log::info("\t\t%04u-%04u : live: %u (alloc: %u, freed: %u)", i * minimumAllocationStatisticsSize,
+					(i+1) * minimumAllocationStatisticsSize, chunk.allocationStatistics[i] - chunk.deallocationStatistics[i],
 					chunk.allocationStatistics[i], chunk.deallocationStatistics[i]);
 			}
 		}
@@ -283,10 +367,12 @@ void BlockMemoryAllocatorPrivate::printInfo()
 		auto j = (maximumAllocationStatisticsSize - 1);
 		if (chunk.allocationStatistics[j] > 0)
 		{
-			log::info("\t\t%04u-.... : live: %u (alloc: %u, freed: %u)", j * minimumAllocationSize,
+			log::info("\t\t%04u-.... : live: %u (alloc: %u, freed: %u)", j * minimumAllocationStatisticsSize,
 				chunk.allocationStatistics[j] - chunk.deallocationStatistics[j],
 				chunk.allocationStatistics[j], chunk.deallocationStatistics[j]);
 		}
+		log::info("\t\t------------");
+#	endif
 		
 		uint32_t allocatedMemory = 0;
 		auto i = chunk.firstInfo;
@@ -295,26 +381,28 @@ void BlockMemoryAllocatorPrivate::printInfo()
 			allocatedMemory += (i->length & (~i->allocated));
 			++i;
 		}
-		log::info("\t\t------------");
 		log::info("\t\tTotal memory used: %u (%uKb, %uMb) of %u (%uKb, %uMb)", allocatedMemory, allocatedMemory / 1024,
 			allocatedMemory / megabytes, chunk.size, chunk.size / 1024, chunk.size / megabytes);
 		log::info("\t}");
 	}
 	
-#	if ET_ENABLE_SMALL_MEMORY_BLOCKS
-		uint32_t allocatedBlocks = 0;
-		for (auto i = _smallBlockAllocator.firstBlock; i != _smallBlockAllocator.lastBlock; ++i)
-			allocatedBlocks += i->allocated;
-		
-		log::info("\tsmall memory block allocator:");
-		log::info("\t{");
-		log::info("\t\tallocated blocks : %u", allocatedBlocks);
-		log::info("\t\tcurrent offset : %lld of %lld", (int64_t)(_smallBlockAllocator.currentBlock - _smallBlockAllocator.firstBlock),
-			(int64_t)(_smallBlockAllocator.lastBlock - _smallBlockAllocator.firstBlock));
-		log::info("\t}");
-#	endif
+	uint32_t allocatedBlocks = 0;
+
+	log::info("\t0...48 bytes {");
+	allocatedBlocks = 0;
+	for (auto i = _allocator48.firstBlock; i != _allocator48.lastBlock; ++i) allocatedBlocks += i->allocated;
+	log::info("\t\tallocated blocks : %u of %lld", allocatedBlocks, (int64_t)(_allocator48.lastBlock - _allocator48.firstBlock));
+	log::info("\t\tcurrent offset : %lld", (int64_t)(_allocator48.currentBlock - _allocator48.firstBlock));
+	log::info("\t},");
+	
+	log::info("\t48...96 {");
+	allocatedBlocks = 0;
+	for (auto i = _allocator96.firstBlock; i != _allocator96.lastBlock; ++i) allocatedBlocks += i->allocated;
+	log::info("\t\tallocated blocks : %u of %lld", allocatedBlocks,  (int64_t)(_allocator96.lastBlock - _allocator96.firstBlock));
+	log::info("\t\tcurrent offset : %lld", (int64_t)(_allocator96.currentBlock - _allocator96.firstBlock));
+	log::info("\t}");
+	
 	log::info("}");
-#endif
 }
 
 /*
@@ -323,15 +411,13 @@ void BlockMemoryAllocatorPrivate::printInfo()
 MemoryChunk::MemoryChunk(uint32_t capacity)
 {
 #if (ET_DEBUG)
-	memset(allocationStatistics, 0, sizeof(allocationStatistics));
-	memset(deallocationStatistics, 0, sizeof(deallocationStatistics));
+	allocationStatistics.fill(0);
+	deallocationStatistics.fill(0);
 #endif
 	
 	size = capacity;
 	
-	auto maxPossibleInfoChunks = (capacity / minimumAllocationSize);
-	
-	actualDataOffset = (maxPossibleInfoChunks + 1) * sizeof(MemoryChunkInfo);
+	actualDataOffset = (capacity / minimumAllocationSize + 1) * sizeof(MemoryChunkInfo);
 	allocatedMemoryBegin = static_cast<char*>(malloc(actualDataOffset + capacity));
 	allocatedMemoryEnd = allocatedMemoryBegin + actualDataOffset + capacity;
 	firstInfo = reinterpret_cast<MemoryChunkInfo*>(allocatedMemoryBegin);
@@ -343,10 +429,29 @@ MemoryChunk::MemoryChunk(uint32_t capacity)
 	lastInfo = firstInfo + 1;
 }
 
+template <typename ...args>
+void printlog(const char* fmt, args&... a)
+{
+	printf(fmt, a...);
+}
+
 MemoryChunk::~MemoryChunk()
 {
 	if (allocatedMemoryBegin)
+	{
+		log::ConsoleOutput lOut;
+		
+		MemoryChunkInfo* info = firstInfo;
+		while (info < lastInfo)
+		{
+			if (info->allocated == allocatedValue)
+				lOut.info("Memory leak detected: %u bytes\n", info->length);
+			
+			++info;
+		}
+		
 		::free(allocatedMemoryBegin);
+	}
 }
 
 bool MemoryChunk::allocate(uint32_t sizeToAllocate, void*& result)
@@ -383,7 +488,7 @@ bool MemoryChunk::allocate(uint32_t sizeToAllocate, void*& result)
 			result = allocatedMemoryBegin + actualDataOffset + info->begin;
 			
 #		if (ET_DEBUG)
-			uint32_t allocIndex = etMin(uint32_t(maximumAllocationStatisticsSize), sizeToAllocate / minimumAllocationSize) - 1;
+			uint32_t allocIndex = etMin(maximumAllocationStatisticsSize - 1, sizeToAllocate / minimumAllocationStatisticsSize);
 			++allocationStatistics[allocIndex];
 			if (breakOnAllocation)
 				log::info("Allocated %u bytes (%uKb, %uMb)", sizeToAllocate, sizeToAllocate / 1024, sizeToAllocate / megabytes);
@@ -427,7 +532,7 @@ bool MemoryChunk::free(char* ptr)
 			i->allocated = notAllocatedValue;
 			
 #		if ET_DEBUG
-			uint32_t deallocIndex = etMin(uint32_t(maximumAllocationStatisticsSize), i->length / minimumAllocationSize) - 1;
+			uint32_t deallocIndex = etMin(maximumAllocationStatisticsSize - 1, i->length / minimumAllocationStatisticsSize);
 			++deallocationStatistics[deallocIndex];
 			if (breakOnAllocation)
 				log::info("Deallocated %u bytes (%uKb, %uMb)", i->length, i->length / 1024, i->length / megabytes);
@@ -467,58 +572,4 @@ void MemoryChunk::compress()
 			++i;
 		}
 	}
-}
-
-BlockMemorySmallBlockAllocator::BlockMemorySmallBlockAllocator()
-{
-	auto sizeToAllocate = smallMemoryBlocksCount * sizeof(SmallMemoryBlock);
-	blocks = reinterpret_cast<SmallMemoryBlock*>(calloc(1, sizeToAllocate));
-	firstBlock = blocks;
-	currentBlock = firstBlock;
-	
-	lastBlock = firstBlock + smallMemoryBlocksCount;
-}
-
-BlockMemorySmallBlockAllocator::~BlockMemorySmallBlockAllocator()
-{
-	::free(blocks);
-}
-
-void* BlockMemorySmallBlockAllocator::allocate()
-{
-	auto startBlock = currentBlock;
-	
-	while (currentBlock->allocated)
-	{
-		currentBlock = advance(currentBlock);
-		if (currentBlock == startBlock)
-			ET_FAIL("Failed to allocate small memory block.");
-	}
-	
-	currentBlock->allocated = true;
-	void* result = currentBlock->data;
-	currentBlock = advance(currentBlock);
-	return result;
-}
-
-bool BlockMemorySmallBlockAllocator::containsPointer(void* ptr)
-{
-	SmallMemoryBlock* block = reinterpret_cast<SmallMemoryBlock*>(reinterpret_cast<char*>(ptr) - 4);
-	return (block >= firstBlock) && (block < lastBlock);
-}
-
-void BlockMemorySmallBlockAllocator::free(void* ptr)
-{
-	SmallMemoryBlock* block = reinterpret_cast<SmallMemoryBlock*>(reinterpret_cast<char*>(ptr) - 4);
-	
-	if ((ptr < firstBlock) || (ptr > lastBlock))
-		ET_FAIL_FMT("Pointer being freed (0x%016llx) was not allocated via this allocator.", (int64_t)ptr);
-	
-	block->allocated = 0;
-}
-
-SmallMemoryBlock* BlockMemorySmallBlockAllocator::advance(SmallMemoryBlock* b)
-{
-	++b;
-	return (b == lastBlock) ? firstBlock : b;
 }

@@ -6,8 +6,9 @@
  */
 
 #include <et/collision/collision.h>
-#include <et/terrain/terrain.h>
 #include <et/timers/intervaltimer.h>
+#include <et/primitives/primitives.h>
+#include <et/helpers/terraindata.h>
 
 using namespace et;
 

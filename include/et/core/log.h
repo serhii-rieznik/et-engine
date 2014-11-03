@@ -58,6 +58,14 @@ namespace et
 			void warning(const char*, va_list);
 			void error(const char*, va_list);
 			
+			void info(const char* format, ...)
+			{
+				va_list args;
+				va_start(args, format);
+				info(format, args);
+				va_end(args);
+			}
+			
 		public:
 			ConsoleOutput();
 		};

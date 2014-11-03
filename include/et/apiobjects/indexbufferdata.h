@@ -16,7 +16,7 @@ namespace et
 	{
 	public:
 		IndexBufferData(RenderContext* rc, IndexArray::Pointer i, BufferDrawType drawType,
-			const std::string& name = std::string());
+			const std::string& name = emptyString);
 		
 		~IndexBufferData();
 

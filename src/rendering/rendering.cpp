@@ -32,7 +32,7 @@ namespace et
 	}
 
 	std::string vertexAttributeToString(VertexAttributeUsage va)
-		{ return (va < Usage_max) ? VertexAttributeUsageNames[va] : std::string(); }
+		{ return (va < Usage_max) ? VertexAttributeUsageNames[va] : emptyString; }
 
 	size_t vertexAttributeTypeComponents(VertexAttributeType t)
 	{

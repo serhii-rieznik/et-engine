@@ -8,7 +8,6 @@
 #pragma once
 
 #include <et/core/et.h>
-#include <et/opengl/opengltypes.h>
 
 #if ET_PLATFORM_WIN
 #
@@ -234,6 +233,10 @@
 #endif
 
 #define ET_OPENGL_DEBUG_SCOPE		OpenGLDebugScope etOpenGLDebugScope(ET_CALL_FUNCTION);
+
+#define ET_OPENGL_INCLUDES
+#	include <et/opengl/opengltypes.h>
+#undef ET_OPENGL_INCLUDES
 
 namespace et
 {

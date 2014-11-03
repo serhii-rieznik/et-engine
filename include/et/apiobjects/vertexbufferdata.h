@@ -26,7 +26,7 @@ namespace et
 		};
 	public:
 		VertexBufferData(RenderContext* rc, const VertexArray::Description& desc,
-			BufferDrawType vertexDrawType, const std::string& name = std::string());
+			BufferDrawType vertexDrawType, const std::string& name = emptyString);
 
 		~VertexBufferData();
 	
@@ -55,7 +55,7 @@ namespace et
 
 	private:
 		VertexBufferData(RenderContext* rc, const VertexDeclaration& decl, const void* vertexData,
-			size_t vertexDataSize, BufferDrawType vertexDrawType, const std::string& name = std::string());
+			size_t vertexDataSize, BufferDrawType vertexDrawType, const std::string& name = emptyString);
 
 	private:
 		RenderContext* _rc;

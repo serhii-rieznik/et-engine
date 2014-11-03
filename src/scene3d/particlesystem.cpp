@@ -13,14 +13,9 @@ using namespace et;
 using namespace et::s3d;
 
 ParticleSystem::ParticleSystem(RenderContext* rc, size_t maxSize, const std::string& name, Element* parent) :
-	Element(name, parent), _rc(rc), _decl(true, Usage_Position, Type_Vec3)
+	Element(name, parent), _rc(rc), _decl(true, Usage_Position, Type_Vec3), _emitter(maxSize)
 {
 	_decl.push_back(Usage_Color, Type_Vec4);
-	
-	/*
-	 * Init particles vector
-	 */
-	_particles.resize(maxSize);
 
 	/*
 	 * Init geometry
@@ -31,7 +26,7 @@ ParticleSystem::ParticleSystem(RenderContext* rc, size_t maxSize, const std::str
 	auto clr = va->chunk(Usage_Color).accessData<vec4>(0);
 	for (size_t i = 0; i < pos.size(); ++i)
 	{
-		const auto& p = _particles.at(i);
+		const auto& p = _emitter.particle(i);
 		pos[i] = p.position;
 		clr[i] = p.color;
 	}
@@ -40,14 +35,15 @@ ParticleSystem::ParticleSystem(RenderContext* rc, size_t maxSize, const std::str
 	_vao = rc->vertexBufferFactory().createVertexArrayObject(name, va, BufferDrawType_Stream, ia, BufferDrawType_Static);
 	_vertexData = va->generateDescription();
 	
-	_updateFunction = [](Particle& p, float, float dt)
+	/*
+	_updateFunction = [](particles::PointSprite& p, float, float dt)
 	{
 		p.velocity += dt * p.acceleration;
 		p.position += dt * p.velocity;
 	};
+	*/
 	
 	_timer.expired.connect(this, &ParticleSystem::onTimerUpdated);
-	_updateTime = mainTimerPool()->actualTime();
 	_timer.start(mainTimerPool(), 0.0f, NotifyTimer::RepeatForever);
 }
 
@@ -59,61 +55,38 @@ ParticleSystem* ParticleSystem::duplicate()
 
 void ParticleSystem::onTimerUpdated(NotifyTimer* timer)
 {
-	float currentTime = timer->actualTime();
-	float deltaTime = currentTime - _updateTime;
-	
-	_updateTime = currentTime;
+	_emitter.update(timer->actualTime());
 	
 	void* bufferData = nullptr;
-	
-	_rc->renderState().bindVertexArray(_vao);
-	_vao->vertexBuffer()->map(&bufferData, 0, _vertexData.data.dataSize(),
-		VertexBufferData::MapBufferMode_WriteOnly);
-	
+
 	auto posOffset = _decl.elementForUsage(Usage_Position).offset();
 	auto clrOffset = _decl.elementForUsage(Usage_Color).offset();
 	RawDataAcessor<vec3> pos(reinterpret_cast<char*>(bufferData), _vertexData.data.dataSize(), _decl.dataSize(), posOffset);
 	RawDataAcessor<vec4> clr(reinterpret_cast<char*>(bufferData), _vertexData.data.dataSize() + clrOffset, _decl.dataSize(), clrOffset);
 	
-	_activeParticlesCount = 0;
-	for (auto& p : _particles)
+	_rc->renderState().bindVertexArray(_vao);
+	
+	_vao->vertexBuffer()->map(&bufferData, 0, _vertexData.data.dataSize(), VertexBufferData::MapBufferMode_WriteOnly);
+	for (size_t i = 0; i < _emitter.activeParticlesCount(); ++i)
 	{
-		_updateFunction(p, currentTime, deltaTime);
-		
-		if ((currentTime - p.emitTime < p.lifeTime) && (p.color.w > 0.0))
-		{
-			pos[_activeParticlesCount] = p.position;
-			clr[_activeParticlesCount] = p.color;
-			++_activeParticlesCount;
-		}
+		const auto& p = _emitter.particle(i);
+		pos[i] = p.position;
+		clr[i] = p.color;
 	}
 	_vao->vertexBuffer()->unmap();
 }
 
 bool ParticleSystem::emitParticle(const vec3& origin, const vec3& vel, const vec3& accel, const vec4& color, float lifeTime)
 {
-	float currentTime = _timer.actualTime();
-	
-	for (auto& p : _particles)
-	{
-		if (currentTime - p.emitTime > p.lifeTime)
-		{
-			p.position = origin;
-			p.velocity = vel;
-			p.acceleration = accel;
-			p.color = color;
-			p.emitTime = currentTime;
-			p.lifeTime = lifeTime;
-			return true;
-		}
-	}
-	
-	return false;
+	return _emitter.emit(origin, vel, accel, color, _timer.actualTime(), lifeTime);
 }
 
-size_t ParticleSystem::emitParticles(const vec3* origins, const vec3* velocities, size_t count, const vec3& accel,
-	const vec4& color, float lifeTime, float lifeTimeVariation)
+size_t ParticleSystem::emitParticles(const vec3*, const vec3*, size_t, const vec3&, const vec4&, float, float)
 {
+	ET_FAIL("Disabled");
+	return 0;
+	
+	/*
 	float currentTime = _timer.actualTime();
 	
 	size_t particlesEmitted = 0;
@@ -135,7 +108,6 @@ size_t ParticleSystem::emitParticles(const vec3* origins, const vec3* velocities
 				break;
 		}
 	}
-	
-	return particlesEmitted;
+	*/
 }
 

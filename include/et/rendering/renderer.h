@@ -32,7 +32,7 @@ namespace et
 		void renderTexture(const Texture&, const vec2i& position, const vec2i& size = vec2i(-1));
 
 		void drawElements(const IndexBuffer& ib, size_t first, size_t count);
-		void drawElements(PrimitiveType primitiveType, const IndexBuffer& ib, size_t first, size_t count);
+		void drawElements(uint32_t primitiveType, const IndexBuffer& ib, size_t first, size_t count);
 		void drawAllElements(const IndexBuffer& ib);
 
 		void drawElementsInstanced(const IndexBuffer& ib, size_t first, size_t count, size_t instances);

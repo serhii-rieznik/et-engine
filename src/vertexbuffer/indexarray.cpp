@@ -235,15 +235,16 @@ IndexArray::PrimitiveIterator& IndexArray::PrimitiveIterator::operator = (const 
 
 IndexArray::PrimitiveIterator& IndexArray::PrimitiveIterator::operator ++()
 {
-	static const IndexType primitiveOffset[PrimitiveType_max] =
+	static const std::map<uint32_t, IndexType> primitiveOffset =
 	{
-		1, // PrimitiveType_Points,
-		1, // PrimitiveType_Lines,
-		3, // PrimitiveType_Triangles,
-		1, // PrimitiveType_TriangleStrips,
-		1, // PrimitiveType_LineStrip,
+		{ PrimitiveType_Points, 1 },
+		{ PrimitiveType_Lines, 2 },
+		{ PrimitiveType_Triangles, 3 },
+		{ PrimitiveType_TriangleStrips, 1 },
+		{ PrimitiveType_LineStrip, 1 },
 	};
-	configure(_pos += primitiveOffset[_ib->primitiveType()]);
+	
+	configure(_pos += primitiveOffset.at(_ib->primitiveType()));
 	return *this;
 }
 

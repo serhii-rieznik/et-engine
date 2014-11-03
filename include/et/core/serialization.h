@@ -86,7 +86,7 @@ namespace et
 			return std::string(value.binary());
 		}
 
-		return std::string();
+		return emptyString;
 	}
 
 	inline void serializeFloat(std::ostream& stream, float value)

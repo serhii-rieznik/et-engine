@@ -7,23 +7,13 @@
 
 #pragma once
 
+#include <et/helpers/particles.h>
 #include <et/scene3d/baseelement.h>
 
 namespace et
 {
 	namespace s3d
 	{
-		struct Particle
-		{
-			vec3 position;
-			vec3 velocity;
-			vec3 acceleration;
-			vec4 color;
-			
-			float emitTime = 0.0f;
-			float lifeTime = 0.0f;
-		};
-		
 		class ParticleSystem : public Element, public EventReceiver
 		{
 		public:
@@ -44,7 +34,7 @@ namespace et
 				{ return _vao->indexBuffer(); }
 			
 			size_t activeParticlesCount() const
-				{ return _activeParticlesCount; }
+				{ return _emitter.activeParticlesCount(); }
 			
 			bool emitParticle(const vec3& origin, const vec3& vel, const vec3& accel,
 				const vec4& color, float lifeTime);
@@ -54,7 +44,7 @@ namespace et
 			
 			template <typename F>
 			void setUpdateFunction(const F& func)
-				{ _updateFunction = func; }
+				{ _emitter.setUpdateFunction(func); }
 			
 		private:
 			void onTimerUpdated(NotifyTimer*);
@@ -66,13 +56,8 @@ namespace et
 			VertexDeclaration _decl;
 			VertexArray::Description _vertexData;
 			
+			particles::PointSpriteEmitter _emitter;
 			NotifyTimer _timer;
-			
-			std::vector<Particle> _particles;
-			std::function<void(Particle&, float, float)> _updateFunction;
-			
-			float _updateTime = 0.0f;
-			size_t _activeParticlesCount = 0;
 		};
 	}
 }

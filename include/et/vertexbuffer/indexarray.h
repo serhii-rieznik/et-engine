@@ -8,7 +8,7 @@
 #pragma once
 
 #include <et/core/containers.h>
-#include <et/opengl/opengltypes.h>
+#include <et/opengl/opengl.h>
 
 namespace et
 {

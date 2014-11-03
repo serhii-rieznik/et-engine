@@ -100,16 +100,15 @@ namespace et
 			abort(); \
 		} \
 	}
-#	define ET_FAIL(MSG)				{ log::error("%s\noccurred at: %s [%d]", (#MSG), __FILE__, __LINE__); abort(); }
-#	define ET_FAIL_FMT(FMT, ...)	{ log::error(FMT"\noccurred at %s [%d]", __VA_ARGS__, __FILE__, __LINE__); abort(); }
 #
 #else
 #
 #	define ET_ASSERT(C)				{ }
-#	define ET_FAIL(MSG)				{ }
-#	define ET_FAIL_FMT(MSG, ...)	{ }
 #
 #endif
+
+#define ET_FAIL(MSG)				{ log::error("%s\noccurred at: %s [%d]", (#MSG), __FILE__, __LINE__); abort(); }
+#define ET_FAIL_FMT(FMT, ...)		{ log::error(FMT"\noccurred at %s [%d]", __VA_ARGS__, __FILE__, __LINE__); abort(); }
 
 namespace et
 {

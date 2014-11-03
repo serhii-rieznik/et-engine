@@ -24,22 +24,22 @@ namespace et
 		FramebufferFactory(RenderContext* rc) :
 			APIObjectFactory(rc) { }
 
-		Framebuffer::Pointer createFramebuffer(const vec2i& size, const std::string& objectId = std::string(),
+		Framebuffer::Pointer createFramebuffer(const vec2i& size, const std::string& objectId = emptyString,
 			int32_t colorInternalformat = GL_RGBA, uint32_t colorFormat = GL_RGBA,
 			uint32_t colorType = GL_UNSIGNED_BYTE, int32_t depthInternalformat = GL_DEPTH_COMPONENT,
 			uint32_t depthFormat = GL_DEPTH_COMPONENT, uint32_t depthType = GL_UNSIGNED_INT,
 			bool useRenderbuffers = false, int32_t samples = 0);
 
 		Framebuffer::Pointer createMultisampledFramebuffer(const vec2i& size, int32_t samples,
-			const std::string& objectId = std::string(), int32_t colorInternalformat = GL_RGBA8,
+			const std::string& objectId = emptyString, int32_t colorInternalformat = GL_RGBA8,
 			int32_t depthInternalformat = GL_DEPTH_COMPONENT16);
 		
-		Framebuffer::Pointer createCubemapFramebuffer(size_t size, const std::string& objectId = std::string(),
+		Framebuffer::Pointer createCubemapFramebuffer(size_t size, const std::string& objectId = emptyString,
 			int32_t colorInternalformat = GL_RGBA, uint32_t colorFormat = GL_RGBA,
 			uint32_t colorType = GL_UNSIGNED_BYTE, int32_t depthInternalformat = GL_DEPTH_COMPONENT,
 			uint32_t depthFormat = GL_DEPTH_COMPONENT, uint32_t depthType = GL_UNSIGNED_INT);
 
-		Framebuffer::Pointer createFramebufferWrapper(uint32_t fbo, const std::string& objectId = std::string());
+		Framebuffer::Pointer createFramebufferWrapper(uint32_t fbo, const std::string& objectId = emptyString);
 
 	private:
 		ET_DENY_COPY(FramebufferFactory)

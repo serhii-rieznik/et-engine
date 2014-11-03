@@ -17,9 +17,9 @@ namespace et
 	{
 	public:
 		VertexArrayObjectData(RenderContext*, VertexBuffer, IndexBuffer,
-			const std::string& name = std::string());
+			const std::string& name = emptyString);
 		
-		VertexArrayObjectData(RenderContext*, const std::string& name = std::string());
+		VertexArrayObjectData(RenderContext*, const std::string& name = emptyString);
 		
 		~VertexArrayObjectData();
 

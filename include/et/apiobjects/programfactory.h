@@ -23,7 +23,7 @@ namespace et
 		~ProgramFactory();
 
 		Program::Pointer loadProgram(const std::string& file, ObjectsCache&,
-			const std::string& defines = std::string());
+			const std::string& defines = emptyString);
 
 		Program::Pointer loadProgram(const std::string& file, ObjectsCache&,
 			const StringList& defines);

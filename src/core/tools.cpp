@@ -25,7 +25,7 @@ size_t et::streamSize(std::istream& s)
 std::string et::loadTextFile(const std::string& fileName)
 {
 	InputStream file(fileName, StreamMode_Binary);
-	if (file.invalid()) return std::string();
+	if (file.invalid()) return emptyString;
 
 	StringDataStorage data(streamSize(file.stream()) + 1, 0);
 	file.stream().read(data.data(), static_cast<std::streamsize>(data.size()));
@@ -115,13 +115,13 @@ std::string et::capitalize(std::string v)
 std::string et::getFilePath(const std::string& name)
 {
 	std::string::size_type p = normalizeFilePath(name).find_last_of(pathDelimiter);
-	return (p == std::string::npos) ? std::string() : name.substr(0, ++p);
+	return (p == std::string::npos) ? emptyString : name.substr(0, ++p);
 }
 
 std::string et::getFileFolder(const std::string& name)
 {
 	std::string::size_type p = normalizeFilePath(name).find_last_of(pathDelimiter);
-	return (p == std::string::npos) ? std::string() : name.substr(0, p);
+	return (p == std::string::npos) ? emptyString : name.substr(0, p);
 }
 
 std::string et::getFileName(const std::string& fullPath)
@@ -156,7 +156,7 @@ std::string et::getFileExt(std::string name)
 
 	size_t dotPos = name.find_last_of('.');
 	if (dotPos == std::string::npos)
-		return std::string();
+		return emptyString;
 	
 	size_t slashPos = name.find_last_of(pathDelimiter);
 	if (slashPos == std::string::npos)
@@ -165,7 +165,7 @@ std::string et::getFileExt(std::string name)
 	if (dotPos > slashPos)
 		return name.substr(dotPos + 1);
 	
-	return std::string();
+	return emptyString;
 }
 
 float et::extractFloat(std::string& s)

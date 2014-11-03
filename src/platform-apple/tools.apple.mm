@@ -312,13 +312,13 @@ std::string et::unicodeToUtf8(const std::wstring& w)
 	if (s == nil)
 	{
 		NSLog(@"Unable to convert wstring to NSString.");
-		return std::string();
+		return emptyString;
 	}
 	
 	if (![s canBeConvertedToEncoding:NSUTF8StringEncoding])
 	{
 		NSLog(@"Unable to convert %@ to NSUTF8StringEncoding", s);
-		return std::string();
+		return emptyString;
 	}
 	
 	NSUInteger actualLength = 0;
@@ -374,7 +374,7 @@ std::string et::applicationIdentifierForCurrentProject()
 std::string et::bundleVersion()
 {
 	NSString* versionString = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleShortVersionString"];
-	return versionString == nil ? std::string() : std::string([versionString UTF8String]);
+	return versionString == nil ? emptyString : std::string([versionString UTF8String]);
 }
 
 

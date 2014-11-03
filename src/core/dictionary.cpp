@@ -105,13 +105,13 @@ ValueClass Dictionary::valueClassForKey(const std::string& key) const
 StringList Dictionary::allKeyPaths()
 {
 	StringList result;
-	addKeyPathsFromHolder(*this, std::string(), result);
+	addKeyPathsFromHolder(*this, emptyString, result);
 	return result;
 }
 
 void Dictionary::addKeyPathsFromHolder(ValueBase::Pointer holder, const std::string& baseKeyPath, StringList& keyPaths) const
 {
-	std::string nextKeyPath = baseKeyPath.empty() ? std::string() : (baseKeyPath + "/");
+	std::string nextKeyPath = baseKeyPath.empty() ? emptyString : (baseKeyPath + "/");
 	if (holder->valueClass() == ValueClass_Dictionary)
 	{
 		Dictionary d(holder);

@@ -40,7 +40,7 @@ void StandardPathResolver::validateCaches()
 		_cachedScreenScaleFactor = _rc->screenScaleFactor();
 		
 		_cachedScreenScale = (_cachedScreenScaleFactor > 1) ?
-			"@" + intToStr(_cachedScreenScaleFactor) + "x" : std::string();
+			"@" + intToStr(_cachedScreenScaleFactor) + "x" : emptyString;
 	}
 }
 
