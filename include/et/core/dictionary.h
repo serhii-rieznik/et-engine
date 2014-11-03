@@ -59,6 +59,7 @@ namespace et
 	{
 	public:
 		typedef T ValueType;
+		typedef typename Value<T, C>::Pointer PointerType;
 		
 	public:
 		ValuePointer() :
@@ -112,7 +113,7 @@ namespace et
 			{ return reference().content.empty(); }
 	};
 	
-	class ArrayValue : public ValuePointer<std::vector<ValueBase::Pointer>, ValueClass_Array>
+	class ArrayValue : public ValuePointer<std::vector<ValueBase::Pointer, SharedBlockAllocatorSTDProxy<ValueBase::Pointer>>, ValueClass_Array>
 	{
 	public:
 		ArrayValue() :
@@ -132,7 +133,7 @@ namespace et
 		
 		ArrayValue& operator = (const ArrayValue& r)
 		{
-			ValuePointer<std::vector<ValueBase::Pointer>, ValueClass_Array>::operator = (r);
+			PointerType::operator = (r);
 			return *this;
 		}
 		
@@ -140,7 +141,9 @@ namespace et
 		void printContent() const;
 	};
 	
-	class Dictionary : public ValuePointer<std::unordered_map<std::string, ValueBase::Pointer>, ValueClass_Dictionary>
+	class Dictionary : public ValuePointer<std::unordered_map<std::string, ValueBase::Pointer,
+		std::hash<std::string>, std::equal_to<std::string>,
+		SharedBlockAllocatorSTDProxy<std::pair<const std::string, ValueBase::Pointer>>>, ValueClass_Dictionary>
 	{
 	public:
 		Dictionary() :
@@ -160,7 +163,7 @@ namespace et
 		
 		Dictionary& operator = (const Dictionary& r)
 		{
-			ValuePointer<std::unordered_map<std::string, ValueBase::Pointer>, ValueClass_Dictionary>::operator = (r);
+			PointerType::operator = (r);
 			return *this;
 		}
 		

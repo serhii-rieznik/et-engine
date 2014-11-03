@@ -48,21 +48,50 @@
 #include <et/core/debug.h>
 #include <et/core/constants.h>
 #include <et/core/memory.h>
-#include <et/core/properties.h>
-#include <et/core/strings.h>
 #include <et/core/memoryallocator.h>
-
 #include <et/core/autoptr.h>
 #include <et/core/atomiccounter.h>
 #include <et/core/intrusiveptr.h>
+#include <et/core/log.h>
+
+namespace et
+{
+	ObjectFactory& sharedObjectFactory();
+	BlockMemoryAllocator& sharedBlockAllocator();
+	std::vector<log::Output::Pointer>& sharedLogOutputs();
+	
+	template <typename T>
+	struct SharedBlockAllocatorSTDProxy
+	{
+		typedef T value_type;
+		
+		typedef T* pointer;
+		typedef T& reference;
+		
+		typedef const T* const_pointer;
+		typedef const T& const_reference;
+		
+		pointer allocate(size_t n)
+		{
+			return reinterpret_cast<pointer>(sharedBlockAllocator().alloc(n * sizeof(T)));
+		}
+		
+		void deallocate(void* ptr, size_t)
+		{
+			sharedBlockAllocator().free(ptr);
+		}
+	};
+}
+
+#include <et/core/properties.h>
+#include <et/core/strings.h>
 
 #include <et/core/filesystem.h>
 #include <et/core/conversionbase.h>
 #include <et/core/object.h>
-#include <et/core/dictionary.h>
 #include <et/core/stream.h>
 #include <et/core/hierarchy.h>
-#include <et/core/log.h>
+#include <et/core/dictionary.h>
 
 #include <et/geometry/vector4.h>
 #include <et/geometry/matrix3.h>
@@ -112,33 +141,6 @@ namespace et
 	template<typename T>
 	inline T clamp(T value, T min, T max)
 		{ return (value < min) ? min : (value > max) ? max : value; }
-	
-	
-	ObjectFactory& sharedObjectFactory();
-	BlockMemoryAllocator& sharedBlockAllocator();
-	std::vector<log::Output::Pointer>& sharedLogOutputs();
-	
-	template <typename T>
-	struct SharedBlockAllocatorSTDProxy
-	{
-		typedef T value_type;
-		
-		typedef T* pointer;
-		typedef T& reference;
-		
-		typedef const T* const_pointer;
-		typedef const T& const_reference;
-		
-		pointer allocate(size_t n)
-		{
-			return reinterpret_cast<pointer>(sharedBlockAllocator().alloc(n * sizeof(T)));
-		}
-		
-		void deallocate(void* ptr, size_t n)
-		{
-			sharedBlockAllocator().free(ptr);
-		}
-	};
 	
 	extern const vec3 unitX;
 	extern const vec3 unitY;

@@ -6,9 +6,58 @@
 */
 
 #include <mach/mach.h>
+#include <objc/runtime.h>
 #include <et/core/memory.h>
 
 using namespace et;
+
+/*
+ 
+BlockMemoryAllocator& getSharedObjCAllocator();
+
+@interface NSObject(Allocator)
+
++ (instancetype)allocWithZone:(_NSZone*)zone;
+
+@end
+
+@implementation NSObject(Allocator)
+
++ (instancetype)allocWithZone:(_NSZone*)zone
+{
+	(void)zone;
+	size_t sizeToAlloc = class_getInstanceSize([self class]);
+	
+	void* allocatedMemory = getSharedObjCAllocator().alloc(sizeToAlloc);
+	memset(allocatedMemory, 0, sizeToAlloc);
+	
+	id resultObject = objc_constructInstance([self class], allocatedMemory);
+	return resultObject;
+}
+
+- (void)dealloc
+{
+	objc_destructInstance(self);
+	
+	if (getSharedObjCAllocator().validatePointer(self, false))
+	{
+		getSharedObjCAllocator().free(self);
+	}
+	else
+	{
+		::free(self);
+	}
+}
+
+@end
+
+BlockMemoryAllocator& getSharedObjCAllocator()
+{
+	static BlockMemoryAllocator instance;
+	return instance;
+}
+ 
+*/
 
 size_t et::memoryUsage()
 {
