@@ -29,6 +29,32 @@ vec4 sampleEnvironmentColor(const RaytraceScene& scene, const ray3d& r);
 
 const float defaultRefractiveIndex = 1.0f;
 
+float randomFloatFrom0to1()
+{
+	static float values[256] = { };
+	static bool shouldInitialize = true;
+	if (shouldInitialize)
+	{
+		for (int i = 0; i < 256; ++i)
+			values[i] = randomFloat(0.0f, 1.0f);
+		shouldInitialize = false;
+	}
+	return values[rand() % 256];
+}
+
+float randomFloatFrom1to1()
+{
+	static float values[512] = { };
+	static bool shouldInitialize = true;
+	if (shouldInitialize)
+	{
+		for (int i = 0; i < 512; ++i)
+			values[i] = randomFloat(-1.0f, 1.0f);
+		shouldInitialize = false;
+	}
+	return values[rand() % 256];
+}
+
 Intersection findNearestIntersection(const RaytraceScene& scene, const ray3d& ray)
 {
 	Intersection result;
@@ -126,7 +152,7 @@ vec4 gatherBouncesRecursive(const RaytraceScene& scene, const ray3d& ray, int de
 		else
 		{
 			float fresnel = computeFresnelTerm(ray.direction, targetNormal, eta);
-			if (randomFloat(0.0f, 1.0f) <= fresnel)
+			if (randomFloatFrom0to1() <= fresnel)
 			{
 				vec3 reflectedRay = randomReflectedVector(ray.direction, targetNormal, mat.roughness);
 				return mat.emissiveColor + dot(reflectedRay, reflect(ray.direction, targetNormal)) *
@@ -140,7 +166,7 @@ vec4 gatherBouncesRecursive(const RaytraceScene& scene, const ray3d& ray, int de
 			}
 		}
 	}
-	else if (randomFloat(0.0f, 1.0f) > mat.roughness)
+	else if (randomFloatFrom0to1() > mat.roughness)
 	{
 		vec3 reflectedRay = randomReflectedVector(ray.direction, i.hitNormal, mat.roughness);
 		float scale = dot(reflectedRay, reflect(ray.direction, i.hitNormal));
@@ -202,21 +228,36 @@ void rt::raytrace(const RaytraceScene& scene, const et::vec2i& imageSize, const 
 			for (int sample = 0; sample < scene.options.samples; ++sample)
 			{
 				vec2 fpixel = (vector2ToFloat(pixel) + vec2(0.5f)) * dudv - vec2(1.0f);
-				ray3d r = scene.camera.castRay(fpixel + subPixel * vec2(randomFloat(-1.0f, 1.0f), randomFloat(-1.0f, 1.0f)));
+				ray3d r = scene.camera.castRay(fpixel + subPixel * vec2(randomFloatFrom1to1(), randomFloatFrom1to1()));
 				
 				if (scene.apertureSize > 0.0f)
 				{
 					vec3 focal;
 					intersect::rayPlane(r, focalPlane, &focal);
 
-					float ra1 = initialAngleForAppertureBlades + static_cast<float>(randomInteger(scene.apertureBlades)) * deltaAngleForAppertureBlades;
+					float ra1 = initialAngleForAppertureBlades + static_cast<float>(rand() % scene.apertureBlades) * deltaAngleForAppertureBlades;
 					float ra2 = ra1 + deltaAngleForAppertureBlades;
-					float rd = scene.apertureSize * std::sqrt(randomFloat(0.0f, 1.0f));
+					float rd = scene.apertureSize * std::sqrt(randomFloatFrom0to1());
+	
+					float cra1 = 0.0f;
+					float sra1 = 0.0f;
+					float cra2 = 0.0f;
+					float sra2 = 0.0f;
 					
-					vec3 o1 = rd * (ce1 * std::sin(ra1) + ce2 * std::cos(ra1));
-					vec3 o2 = rd * (ce1 * std::sin(ra2) + ce2 * std::cos(ra2));
-					vec3 cameraJitter = r.origin + mix(o1, o2, randomFloat(0.0f, 1.0f));
-					result += gatherBouncesRecursive(scene, ray3d(cameraJitter, normalize(focal - cameraJitter)), 0, Intersection::missingObject);
+#				if (ET_PLATFORM_WIN)
+					cra1 = std::cos(ra1);
+					sra1 = std::sin(ra1);
+					cra2 = std::cos(ra2);
+					sra2 = std::sin(ra2);
+#				else
+					__sincosf(ra1, &sra1, &cra1);
+					__sincosf(ra2, &sra2, &cra2);
+#				endif
+					
+					vec3 o1 = rd * (ce1 * sra1 + ce2 * cra1);
+					vec3 o2 = rd * (ce1 * sra2 + ce2 * cra2);
+					vec3 cameraJitter = r.origin + mix(o1, o2, randomFloatFrom0to1());
+					result += gatherBouncesRecursive(scene, ray3d(cameraJitter, (focal - cameraJitter).normalized()), 0, Intersection::missingObject);
 				}
 				else
 				{
@@ -241,8 +282,8 @@ vec3 randomVectorOnHemisphere(const vec3& w, float distribution)
 	float cr1 = 0.0f;
 	float sr1 = 0.0f;
 
-	float r2 = randomFloat(0.0f, distribution);
-	float ra = randomFloat(-PI, PI);
+	float r2 = distribution * randomFloatFrom0to1();
+	float ra = PI * randomFloatFrom1to1();
 
 #if (ET_PLATFORM_WIN)
 	cr1 = std::cos(ra);
