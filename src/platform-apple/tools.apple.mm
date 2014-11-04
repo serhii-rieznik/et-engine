@@ -77,14 +77,14 @@ std::string et::applicationPath()
 	static std::string result;
 	if (result.empty())
 	{
-		char buffer[256] = { };
+		char buffer[512] = { };
 		
 		CFURLRef bUrl = CFBundleCopyBundleURL(CFBundleGetMainBundle());
 		CFURLGetFileSystemRepresentation(bUrl, true, reinterpret_cast<UInt8*>(buffer), 256);
 		CFRelease(bUrl);
 		
 		size_t i = 0;
-		while ((i < 256) && buffer[++i]);
+		while ((i < sizeof(buffer)) && buffer[++i]);
 		buffer[i] = '/';
 		
 		result = std::string(buffer);
@@ -109,7 +109,7 @@ std::string et::applicationDataFolder()
 		CFRelease(bUrl);
 		
 		size_t i = 0;
-		while ((i < 256) && buffer[++i]);
+		while ((i < sizeof(buffer)) && buffer[++i]);
 		buffer[i] = '/';
 		
 		result = std::string(buffer);
