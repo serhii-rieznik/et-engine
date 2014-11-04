@@ -61,7 +61,7 @@ namespace et
 	std::vector<log::Output::Pointer>& sharedLogOutputs();
 	
 	template <typename T>
-	struct SharedBlockAllocatorSTDProxy
+	struct SharedBlockAllocatorSTDProxy : public std::allocator<T>
 	{
 		typedef T value_type;
 		

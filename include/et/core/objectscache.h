@@ -58,8 +58,7 @@ namespace et
 		
 		typedef std::vector
 		<
-			ObjectProperty,
-			SharedBlockAllocatorSTDProxy<ObjectProperty>
+			ObjectProperty
 		> ObjectPropertyList;
 		
 		typedef std::unordered_map
