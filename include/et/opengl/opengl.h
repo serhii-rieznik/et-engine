@@ -60,6 +60,7 @@
 #	define glDepthRange									glDepthRangef
 #	define glMapBufferRange								glMapBufferRangeEXT
 #	define glFlushMappedBufferRange						glFlushMappedBufferRangeEXT
+#	define glMapBuffer									glMapBufferOES
 #	define glUnmapBuffer								glUnmapBufferOES
 #
 #	if !defined(GL_DEPTH_COMPONENT24)
@@ -156,6 +157,10 @@
 #
 #	if !defined(GL_MAP_READ_BIT) && defined(GL_MAP_READ_BIT_EXT)
 #		define GL_MAP_READ_BIT GL_MAP_READ_BIT_EXT
+#	endif
+#
+#	if !defined(GL_WRITE_ONLY) && defined(GL_WRITE_ONLY_OES)
+#		define GL_WRITE_ONLY GL_WRITE_ONLY_OES
 #	endif
 #
 #	if !defined(GL_MAP_INVALIDATE_BUFFER_BIT) && defined(GL_MAP_INVALIDATE_BUFFER_BIT_EXT)

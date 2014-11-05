@@ -59,41 +59,60 @@ void VertexBufferData::setData(const void* data, size_t dataSize)
 #endif
 }
 
-void VertexBufferData::map(void** data, size_t offset, size_t dataSize, MapBufferMode mode)
+void* VertexBufferData::map(size_t offset, size_t dataSize, MapBufferMode mode)
 {
+	void* result = nullptr;
+	
 #if !defined(ET_CONSOLE_APPLICATION)
-	
-	ET_ASSERT(data != nullptr);
-	
-	static const GLenum accessFlags3x[MapBufferMode_max] =
-		{ GL_MAP_READ_BIT, GL_MAP_WRITE_BIT, GL_MAP_READ_BIT | GL_MAP_WRITE_BIT };
-	
+		
 	_rc->renderState().bindBuffer(GL_ARRAY_BUFFER, _vertexBuffer);
 	
+	static const GLenum accessFlags2x[MapBufferMode_max] =
+	{
+#	if defined(GL_READ_ONLY)
+		GL_READ_ONLY,
+#	else
+		0,
+#	endif
+		
+		GL_WRITE_ONLY,
+		
+#	if defined(GL_READ_WRITE)
+		GL_READ_WRITE
+#	else
+		0
+#	endif
+	};
+
+	bool shouldUseMapBuffer = true;
+
 #	if defined(GL_ARB_map_buffer_range) || defined(GL_EXT_map_buffer_range)
+
+		static const GLenum accessFlags3x[MapBufferMode_max] =
+			{ GL_MAP_READ_BIT, GL_MAP_WRITE_BIT, GL_MAP_READ_BIT | GL_MAP_WRITE_BIT };
 	
-		GLbitfield access = GL_MAP_UNSYNCHRONIZED_BIT | accessFlags3x[mode];
-		
-		if (mode == MapBufferMode_WriteOnly)
-			access |= GL_MAP_INVALIDATE_BUFFER_BIT;
-		
-		*data = glMapBufferRange(GL_ARRAY_BUFFER, offset, dataSize, access);
+		result = glMapBufferRange(GL_ARRAY_BUFFER, offset, dataSize, accessFlags3x[mode]);
 		checkOpenGLError("glMapBufferRange(GL_ARRAY_BUFFER, %lu, %lu, %d)", offset, dataSize, mode);
 
-#	elif defined(GL_READ_ONLY) && defined(GL_WRITE_ONLY) && defined(GL_READ_WRITE)
-	
-		static const GLenum accessFlags2x[MapBufferMode_max] =
-			{ GL_READ_ONLY, GL_WRITE_ONLY, GL_READ_WRITE };
-		
-		*data = reinterpret_cast<uint8_t*>(glMapBuffer(GL_ARRAY_BUFFER, accessFlags2x[mode])) + offset;
-		checkOpenGLError("glMapBuffer(GL_ARRAY_BUFFER, %d)", mode);
-	
-#	else
-	
-		log::error("Invalid call to glMapBuffer.");
+		shouldUseMapBuffer = (result == nullptr);
+
 #	endif
-	
+
+	if (shouldUseMapBuffer)
+	{
+		if (accessFlags2x == 0)
+		{
+			log::error("glMapBuffer access flag %d is not supported.", mode);
+			return nullptr;
+		}
+		
+		result = reinterpret_cast<uint8_t*>(glMapBuffer(GL_ARRAY_BUFFER, accessFlags2x[mode])) + offset;
+		checkOpenGLError("glMapBuffer(GL_ARRAY_BUFFER, %d)", mode);
+	}
+
 #endif
+
+	return result;
 }
 
 void VertexBufferData::unmap()

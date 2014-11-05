@@ -41,7 +41,7 @@ namespace et
 
 		void setData(const void* data, size_t dataSize);
 		
-		void map(void** data, size_t offset, size_t dataSize, MapBufferMode mode);
+		void* map(size_t offset, size_t dataSize, MapBufferMode mode);
 		void unmap();
 
 		void serialize(std::ostream& stream);
