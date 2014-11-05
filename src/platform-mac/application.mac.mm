@@ -46,12 +46,20 @@ void Application::loaded()
 	[mainMenu addItem:applicationMenuItem];
 	[[NSApplication sharedApplication] setMainMenu:mainMenu];
 	
+	NSMenu* applicationMenu = [[NSMenu allocWithZone:[NSMenu menuZone]] init];
+	
+	if ((application().parameters().windowStyle & WindowStyle_Sizable) == WindowStyle_Sizable)
+	{
+		NSMenuItem* fullScreen = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:@""
+			action:@selector(toggleFullScreen:) keyEquivalent:@"f"];
+		[applicationMenu addItem:fullScreen];
+	}
+	
 	NSString* quitTitle = [NSString stringWithFormat:@"Quit %@", [[NSProcessInfo processInfo] processName]];
 	NSMenuItem* quitItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:quitTitle
 		action:@selector(terminate:) keyEquivalent:@"q"];
-	
-	NSMenu* applicationMenu = [[NSMenu allocWithZone:[NSMenu menuZone]] init];
 	[applicationMenu addItem:quitItem];
+	
 	[applicationMenuItem setSubmenu:applicationMenu];
 	
 	[[NSApplication sharedApplication] setActivationPolicy:NSApplicationActivationPolicyRegular];
@@ -72,7 +80,7 @@ void Application::quit(int code)
 	_running = false;
 	_exitCode = code;
 #else
-	[[NSApplication sharedApplication] terminate:nil];
+	[[NSApplication sharedApplication] performSelectorOnMainThread:@selector(terminate:) withObject:nil waitUntilDone:NO];
 	(void)code;
 #endif
 }
