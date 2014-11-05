@@ -214,6 +214,14 @@
 #
 #endif
 
+#if !defined(GL_READ_ONLY)
+#	define GL_READ_ONLY 0
+#endif
+
+#if !defined(GL_READ_WRITE)
+#	define GL_READ_WRITE 0
+#endif
+
 #if (ET_DEBUG)
 #
 #	define ET_ENABLE_OPENGL_COUNTERS	1

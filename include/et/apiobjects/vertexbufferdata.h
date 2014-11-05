@@ -58,12 +58,13 @@ namespace et
 			size_t vertexDataSize, BufferDrawType vertexDrawType, const std::string& name = emptyString);
 
 	private:
-		RenderContext* _rc;
+		RenderContext* _rc = nullptr;
 		uint32_t _vertexBuffer;
 		VertexDeclaration _decl;
-		size_t _dataSize;
-		size_t _sourceTag;
-		BufferDrawType _drawType;
+		AtomicBool _mapped;
+		size_t _dataSize = 0;
+		size_t _sourceTag = 0;
+		BufferDrawType _drawType = BufferDrawType_Static;
 	};
 
 }

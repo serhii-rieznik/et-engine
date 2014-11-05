@@ -61,6 +61,9 @@ void VertexBufferData::setData(const void* data, size_t dataSize)
 
 void* VertexBufferData::map(size_t offset, size_t dataSize, MapBufferMode mode)
 {
+	ET_ASSERT(!_mapped)
+	ET_ASSERT(dataSize > 0)
+
 	void* result = nullptr;
 	
 #if !defined(ET_CONSOLE_APPLICATION)
@@ -68,21 +71,7 @@ void* VertexBufferData::map(size_t offset, size_t dataSize, MapBufferMode mode)
 	_rc->renderState().bindBuffer(GL_ARRAY_BUFFER, _vertexBuffer);
 	
 	static const GLenum accessFlags2x[MapBufferMode_max] =
-	{
-#	if defined(GL_READ_ONLY)
-		GL_READ_ONLY,
-#	else
-		0,
-#	endif
-		
-		GL_WRITE_ONLY,
-		
-#	if defined(GL_READ_WRITE)
-		GL_READ_WRITE
-#	else
-		0
-#	endif
-	};
+		{ GL_READ_ONLY, GL_WRITE_ONLY, GL_READ_WRITE };
 
 	bool shouldUseMapBuffer = true;
 
@@ -110,6 +99,8 @@ void* VertexBufferData::map(size_t offset, size_t dataSize, MapBufferMode mode)
 		checkOpenGLError("glMapBuffer(GL_ARRAY_BUFFER, %d)", mode);
 	}
 
+	_mapped = true;
+
 #endif
 
 	return result;
@@ -120,6 +111,8 @@ void VertexBufferData::unmap()
 #if !defined(ET_CONSOLE_APPLICATION)
 	glUnmapBuffer(GL_ARRAY_BUFFER);
 	checkOpenGLError("glUnmapBuffer(GL_ARRAY_BUFFER)");
+
+	_mapped = false;
 #endif
 }
 

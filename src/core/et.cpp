@@ -24,7 +24,6 @@ sharedEngineObjects;
 SharedEngineObjects::SharedEngineObjects()
 {
 	objectFactory.setAllocator(&blockMemoryAllocator);
-	log::addOutput(log::ConsoleOutput::Pointer::create());
 }
 
 BlockMemoryAllocator& et::sharedBlockAllocator()

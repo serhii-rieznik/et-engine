@@ -18,11 +18,12 @@ namespace et
 
 Application::Application()
 {
+	sharedObjectFactory();
+	log::addOutput(log::ConsoleOutput::Pointer::create());
+
 	_lastQueuedTimeMSec = queryContiniousTimeInMilliSeconds();
 	
 	threading();
-	sharedBlockAllocator();
-	sharedObjectFactory();
 
 	delegate()->setApplicationParameters(_parameters);
 
