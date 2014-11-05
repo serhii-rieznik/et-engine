@@ -197,7 +197,7 @@ HWND RenderContextPrivate::createWindow(size_t style, WindowSize windowSize, vec
 	size = vec2i(windowRect.right, windowRect.bottom);
 	vec2i actualSize = size;
 
-	if (windowSize == WindowSize_Predefined)
+	if (windowSize != WindowSize_Fullscreen)
 	{
 		if ((windowStyle & WS_CAPTION) == WS_CAPTION)
 		{
