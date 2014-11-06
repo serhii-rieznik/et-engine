@@ -112,6 +112,17 @@ std::string et::capitalize(std::string v)
 	return v;
 }
 
+bool et::isUtf8String(const std::string& s)
+{
+	for (auto c : s)
+	{
+		if ((c & 0x80) != 0)
+			return true;
+	}
+	
+	return false;
+}
+
 std::string et::getFilePath(const std::string& name)
 {
 	std::string::size_type p = normalizeFilePath(name).find_last_of(pathDelimiter);

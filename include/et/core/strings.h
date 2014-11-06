@@ -59,10 +59,11 @@ namespace et
 		return str;
 	}
 	
-	float extractFloat(std::string& s);
+	bool isUtf8String(const std::string&);
+
+	float extractFloat(std::string&);
 	
 	std::string capitalize(std::string);
-	
 	std::string& trim(std::string &str);
 	std::string removeWhitespace(const std::string&);
 	StringList split(const std::string& s, const std::string& delim);
