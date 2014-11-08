@@ -549,7 +549,7 @@ union internal_PointerInputInfo
 union internal_KeyInputInfo
 {
 	WPARAM wParam;
-	struct { char code, unused1, unused2, unused3; };
+	struct { unsigned char code, unused1, unused2, unused3; };
 
 	internal_KeyInputInfo(WPARAM p) : 
 		wParam(p) { }
@@ -692,11 +692,12 @@ LRESULT CALLBACK mainWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 	case WM_CHAR:
 		{
-			internal_KeyInputInfo k(wParam);
-			if (k.code >= ET_SPACE)
+			if (wParam >= ET_SPACE)
 			{
-				char chars[2] = {k.code, 0};
-				handler->charactersEntered(std::string(chars));
+				wchar_t wChars[4] = {	};
+				char chars[2] = { static_cast<char>(wParam), 0 };
+				MultiByteToWideChar(GetACP(), CP_ACP, chars, 1, wChars, 4);
+				handler->charactersEntered(unicodeToUtf8(wChars) );
 			}
 			return 0;
 		}
