@@ -51,13 +51,13 @@ namespace et
 		void internal_setData(const unsigned char* data, size_t size);
 
 	private:
-		RenderContext* _rc;
-		size_t _size;
-		size_t _sourceTag;
-		uint32_t _indexBuffer;
-		uint32_t _dataType;
-		uint32_t _primitiveType;
-		IndexArrayFormat _format;
-		BufferDrawType _drawType;
+		RenderContext* _rc = nullptr;
+		size_t _size = 0;
+		size_t _sourceTag = 0;
+		uint32_t _indexBuffer = 0;
+		uint32_t _dataType = 0;
+		uint32_t _primitiveType = 0;
+		IndexArrayFormat _format = IndexArrayFormat_16bit;
+		BufferDrawType _drawType = BufferDrawType_Static;
 	};
 }

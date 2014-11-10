@@ -7,6 +7,7 @@
 
 #include <et/core/et.h>
 #include <et/threading/criticalsection.h>
+#include <et/core/staticdatastorage.h>
 
 namespace et
 {

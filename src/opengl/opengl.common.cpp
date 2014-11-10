@@ -507,7 +507,16 @@ uint32_t et::drawTypeValue(BufferDrawType t)
 
 uint32_t et::primitiveTypeValue(PrimitiveType t)
 {
-	return t;
+	ET_ASSERT((t >= 0) && (t <= PrimitiveType_max))
+	static const uint32_t conversion[PrimitiveType_max] =
+	{
+		GL_POINTS,
+		GL_LINES,
+		GL_TRIANGLES,
+		GL_TRIANGLE_STRIP,
+		GL_LINE_STRIP
+	};
+	return conversion[t];
 }
 
 #if (ET_OPENGLES)

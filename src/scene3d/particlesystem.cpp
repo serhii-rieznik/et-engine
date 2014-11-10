@@ -35,14 +35,6 @@ ParticleSystem::ParticleSystem(RenderContext* rc, size_t maxSize, const std::str
 	_vao = rc->vertexBufferFactory().createVertexArrayObject(name, va, BufferDrawType_Stream, ia, BufferDrawType_Static);
 	_vertexData = va->generateDescription();
 	
-	/*
-	_updateFunction = [](particles::PointSprite& p, float, float dt)
-	{
-		p.velocity += dt * p.acceleration;
-		p.position += dt * p.velocity;
-	};
-	*/
-	
 	_timer.expired.connect(this, &ParticleSystem::onTimerUpdated);
 	_timer.start(mainTimerPool(), 0.0f, NotifyTimer::RepeatForever);
 }
@@ -66,7 +58,7 @@ void ParticleSystem::onTimerUpdated(NotifyTimer* timer)
 	
 	_rc->renderState().bindVertexArray(_vao);
 	
-	_vao->vertexBuffer()->map(&bufferData, 0, _vertexData.data.dataSize(), VertexBufferData::MapBufferMode_WriteOnly);
+	bufferData = _vao->vertexBuffer()->map(0, _vertexData.data.dataSize(), VertexBufferData::MapBufferMode_WriteOnly);
 	for (size_t i = 0; i < _emitter.activeParticlesCount(); ++i)
 	{
 		const auto& p = _emitter.particle(i);
@@ -78,36 +70,23 @@ void ParticleSystem::onTimerUpdated(NotifyTimer* timer)
 
 bool ParticleSystem::emitParticle(const vec3& origin, const vec3& vel, const vec3& accel, const vec4& color, float lifeTime)
 {
-	return _emitter.emit(origin, vel, accel, color, _timer.actualTime(), lifeTime);
+	_emitter.base().position = origin;
+	_emitter.base().velocity = vel;
+	_emitter.base().acceleration = accel;
+	_emitter.base().color = color;
+	_emitter.base().lifeTime = lifeTime;
+	
+	return _emitter.emit(1, mainTimerPool()->actualTime()) == 1;
 }
 
-size_t ParticleSystem::emitParticles(const vec3*, const vec3*, size_t, const vec3&, const vec4&, float, float)
+size_t ParticleSystem::emitParticles(const vec3* o, const vec3* v, size_t amount, const vec3& accel, const vec4& clr, float lt)
 {
-	ET_FAIL("Disabled");
-	return 0;
-	
-	/*
-	float currentTime = _timer.actualTime();
-	
-	size_t particlesEmitted = 0;
-	
-	for (auto& p : _particles)
+	size_t emitted = 0;
+	for (; emitted < amount; ++emitted)
 	{
-		if (currentTime - p.emitTime > p.lifeTime)
-		{
-			p.position = origins[particlesEmitted];
-			p.velocity = velocities[particlesEmitted];
-			p.acceleration = accel;
-			p.color = color;
-			p.emitTime = currentTime;
-			p.lifeTime = lifeTime + randomFloat(-lifeTimeVariation, lifeTimeVariation);
-			
-			++particlesEmitted;
-			
-			if (particlesEmitted == count)
-				break;
-		}
+		if (!emitParticle(o[emitted], v[emitted], accel, clr, lt))
+			break;
 	}
-	*/
+	return emitted;
 }
 

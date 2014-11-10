@@ -12,6 +12,9 @@
 
 namespace et
 {
+	vec3 randVector(float, float, float);
+	float randomFloat(float, float);
+
 	namespace particles
 	{
 		struct PointSprite

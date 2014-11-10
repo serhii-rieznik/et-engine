@@ -83,11 +83,11 @@ namespace et
 	
 	enum PrimitiveType
 	{
-		PrimitiveType_Points = GL_POINTS,
-		PrimitiveType_Lines = GL_LINES,
-		PrimitiveType_Triangles = GL_TRIANGLES,
-		PrimitiveType_TriangleStrips = GL_TRIANGLE_STRIP,
-		PrimitiveType_LineStrip = GL_LINE_STRIP,
+		PrimitiveType_Points,
+		PrimitiveType_Lines,
+		PrimitiveType_Triangles,
+		PrimitiveType_TriangleStrips,
+		PrimitiveType_LineStrip,
 		PrimitiveType_max
 	};
 

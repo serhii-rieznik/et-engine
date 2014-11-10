@@ -75,8 +75,13 @@ void primitives::createPhotonMap(VertexArray::Pointer buffer, const vec2i& densi
 
 	size_t k = 0;
 	for (int i = 0; i < density.y; ++i)
+	{
 		for (int j = 0; j < density.x; ++j)
-			data[k++] = vec2(vec2(j * texel.x, i * texel.y) + dxdy);
+		{
+			vec2 randomDev(2.0f * randomFloat(-dxdy.x, dxdy.x) / 3.0f, 2.0f * randomFloat(-dxdy.y, dxdy.y) / 3.0f);
+			data[k++] = vec2(vec2(j * texel.x, i * texel.y) + dxdy + randomDev);
+		}
+	}
 }
 
 void primitives::createSphere(VertexArray::Pointer data, float radius, const vec2i& density,

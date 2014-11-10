@@ -20,7 +20,7 @@ namespace et
 		static const IndexType MaxShortIndex;
 		static const IndexType MaxSmallIndex;
 
-		int tag;
+		int tag = 0;
 
 	public:
 		IndexArray(IndexArrayFormat format, size_t size, PrimitiveType primitiveType);
@@ -139,10 +139,10 @@ namespace et
 		
 	private:
 		BinaryDataStorage _data;
-		size_t _actualSize;
-		IndexArrayFormat _format;
-		PrimitiveType _primitiveType;
-		IndexType* _rawData;
+		size_t _actualSize = 0;
+		IndexArrayFormat _format = IndexArrayFormat_16bit;
+		PrimitiveType _primitiveType = PrimitiveType_Points;
+		IndexType* _rawData = nullptr;
 	};
 
 	typedef std::vector<IndexArray::Pointer> IndexArrayList;
