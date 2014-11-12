@@ -26,9 +26,9 @@ void SupportMesh::setNumIndexes(size_t num)
 	_data.fitToSize(num / 3);
 }
 
-void SupportMesh::fillCollisionData(VertexArray::Pointer v, IndexArray::Pointer ind)
+void SupportMesh::fillCollisionData(const VertexArray::Pointer& vertexArray, const IndexArray::Pointer& indexArray)
 {
-	RawDataAcessor<vec3> pos = v->chunk(Usage_Position).accessData<vec3>(0);
+	const RawDataAcessor<vec3> pos = vertexArray->chunk(Usage_Position).accessData<vec3>(0);
 
 	_data.setOffset(0);
 	
@@ -38,12 +38,12 @@ void SupportMesh::fillCollisionData(VertexArray::Pointer v, IndexArray::Pointer 
 	IndexType iStart = startIndex() / 3;
 	IndexType iEnd = iStart + static_cast<IndexType>(numIndexes()) / 3;
 	
-	_data.resize(primitives::primitiveCountForIndexCount(numIndexes(), ind->primitiveType()));
+	_data.resize(primitives::primitiveCountForIndexCount(numIndexes(), indexArray->primitiveType()));
 	
 	size_t index = 0;
-	for (IndexArray::PrimitiveIterator i = ind->primitive(iStart) , e = ind->primitive(iEnd); i != e; ++i)
+	for (IndexArray::PrimitiveIterator i = indexArray->primitive(iStart), e = indexArray->primitive(iEnd); i != e; ++i)
 	{
-		IndexArray::Primitive& p = *i;
+		const IndexArray::Primitive& p = *i;
 		const vec3& p0 = pos[p[0]];
 		const vec3& p1 = pos[p[1]];
 		const vec3& p2 = pos[p[2]];

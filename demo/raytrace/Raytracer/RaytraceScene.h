@@ -69,7 +69,7 @@ namespace rt
 		et::triangle tri;
 		et::vec4 equation;
 		et::DataStorage<et::triangle> mesh;
-		int materialId = Intersection::missingObject;
+		size_t materialId = static_cast<size_t>(Intersection::missingObject);
 		
 		size_t objectId = 0;
 
@@ -77,16 +77,16 @@ namespace rt
 		SceneObject()
 			{ }
 		
-		SceneObject(Class cls, const et::vec4& eq, int mat) :
+		SceneObject(Class cls, const et::vec4& eq, size_t mat) :
 			objectClass(cls), equation(eq), materialId(mat) { }
 
-		SceneObject(const et::triangle& t, int mat) :
+		SceneObject(const et::triangle& t, size_t mat) :
 			objectClass(Class_Triangle), tri(t), materialId(mat) { }
 
-		SceneObject(const et::vec3& p1, const et::vec3& p2, const et::vec3& p3, int mat) :
+		SceneObject(const et::vec3& p1, const et::vec3& p2, const et::vec3& p3, size_t mat) :
 			objectClass(Class_Triangle), tri(p1, p2, p3), materialId(mat) { }
 		
-		SceneObject(const et::s3d::SupportMesh::Pointer& m, int mat);
+		SceneObject(const et::s3d::SupportMesh::Pointer& m, size_t mat);
 		
 	public:
 		bool intersectsRay(const et::ray3d&, et::vec3& point, et::vec3& normal) const;
@@ -100,14 +100,14 @@ namespace rt
 		void load(et::RenderContext*);
 		
 		const SceneObject& objectAtIndex(int) const;
-		const SceneMaterial& materialAtIndex(int) const;
+		const SceneMaterial& materialAtIndex(size_t) const;
 		
 	public:
 		et::RenderContext* _rc;
 		
 		et::Camera camera;
 		
-		float apertureSize = 0.0f;
+		float apertureSize = 1.0f / 2.8f;
 		uint32_t apertureBlades = 5;
 		
 		et::vec4 ambientColor = et::vec4(0.0f);

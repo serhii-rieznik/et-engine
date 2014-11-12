@@ -70,6 +70,13 @@ namespace et
 			return valid() ? RawDataAcessor<T>(ptr()->data(), ptr()->dataSize(), ptr()->typeSize(),
 				elementOffset * ptr()->typeSize()) : RawDataAcessor<T>();
 		}
+		
+		template <typename T>
+		const RawDataAcessor<T> accessData(size_t elementOffset) const
+		{
+			return valid() ? RawDataAcessor<T>(ptr()->data(), ptr()->dataSize(), ptr()->typeSize(),
+				elementOffset * ptr()->typeSize()) : RawDataAcessor<T>();
+		}
 	};
 
 	typedef std::vector<VertexDataChunk> VertexDataChunkList;

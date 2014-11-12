@@ -39,14 +39,17 @@ namespace et
 				{ return _data; }
 
 			void setNumIndexes(size_t num);
-			void fillCollisionData(VertexArray::Pointer v, IndexArray::Pointer i);
+			void fillCollisionData(const VertexArray::Pointer& v, const IndexArray::Pointer& i);
 
 			SupportMesh* duplicate();
 
 			Sphere sphere();
 			AABB aabb();
 			OBB obb();
-
+			
+			const vec3& size() const
+				{ return _size; }
+			
 			void serialize(std::ostream& stream, SceneVersion version);
 			void deserialize(std::istream& stream, ElementFactory* factory, SceneVersion version);
 			

@@ -42,13 +42,15 @@ namespace et
 	private:
 		struct OBJVertex
 		{
-			size_t numVertices;
+			size_t numVertices = 0;
+			size_t vertices[4];
 
-			int vertices[4];
-
-			int& operator [] (size_t i) 
+			size_t& operator [] (size_t i)
 				{ ET_ASSERT(i < numVertices); return vertices[i]; }
 
+			const size_t& operator [] (size_t i) const
+				{ ET_ASSERT(i < numVertices); return vertices[i]; }
+			
 			OBJVertex() : numVertices(0)
 				{ etFillMemory(vertices, 0, sizeof(vertices)); }
 		};

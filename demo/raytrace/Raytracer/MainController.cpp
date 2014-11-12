@@ -60,9 +60,6 @@ void MainController::applicationDidLoad(et::RenderContext* rc)
 	_scene.options.exposure = 1.0f;
 	updateTitle();
 	
-//	rc->renderingInfoUpdated.connect([this](const et::RenderingInfo& info)
-//	{ log::info("FPS: %lld", (int64_t)info.averageFramePerSecond); });
-	
 	rc->renderState().setDepthMask(false);
 	
 	_scene.load(rc);
@@ -89,7 +86,7 @@ void MainController::applicationDidLoad(et::RenderContext* rc)
 	
 	_cameraAngles.updated.connect([this]()
 	{
-		_scene.camera.lookAt(150.0f * fromSpherical(_cameraAngles.value().y, _cameraAngles.value().x));
+		_scene.camera.lookAt(4.0f * fromSpherical(_cameraAngles.value().y, _cameraAngles.value().x), unitY);
 		
 		if (!_enableGPURaytracing && (_scene.options.bounces == _previewBounces))
 			startCPUTracing();

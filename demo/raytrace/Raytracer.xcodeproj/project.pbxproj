@@ -13,6 +13,7 @@
 		A54349AA195D969D002DF03A /* RaytraceThread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A54349A9195D969D002DF03A /* RaytraceThread.cpp */; };
 		A54349AC195D9726002DF03A /* RaytraceScene.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A54349AB195D9726002DF03A /* RaytraceScene.cpp */; };
 		A54349B0195D9AEB002DF03A /* Raytracer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A54349AF195D9AEB002DF03A /* Raytracer.cpp */; };
+		A5657EB61A13FDBE00C39562 /* objloader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5657EB41A13FDBE00C39562 /* objloader.cpp */; };
 		A5D3D36C1955B14000E621A7 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5D3D36B1955B14000E621A7 /* main.cpp */; };
 		A5D3D3751955B2A800E621A7 /* MainController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5D3D3741955B2A800E621A7 /* MainController.cpp */; };
 		A5D3D4DA1955B51100E621A7 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A5D3D4D91955B51100E621A7 /* CoreGraphics.framework */; };
@@ -136,6 +137,7 @@
 		A54349AD195D972D002DF03A /* RaytraceScene.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RaytraceScene.h; sourceTree = "<group>"; };
 		A54349AE195D9AE5002DF03A /* Raytracer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Raytracer.h; sourceTree = "<group>"; };
 		A54349AF195D9AEB002DF03A /* Raytracer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Raytracer.cpp; sourceTree = "<group>"; };
+		A5657EB41A13FDBE00C39562 /* objloader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = objloader.cpp; sourceTree = "<group>"; };
 		A5D3D3681955B14000E621A7 /* Raytracer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Raytracer.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A5D3D36B1955B14000E621A7 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		A5D3D3731955B29E00E621A7 /* MainController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MainController.h; sourceTree = "<group>"; };
@@ -254,6 +256,15 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		A5657EB21A13FDBE00C39562 /* models */ = {
+			isa = PBXGroup;
+			children = (
+				A5657EB41A13FDBE00C39562 /* objloader.cpp */,
+			);
+			name = models;
+			path = ../../src/models;
+			sourceTree = "<group>";
+		};
 		A5D3D35F1955B14000E621A7 = {
 			isa = PBXGroup;
 			children = (
@@ -295,6 +306,7 @@
 		A5D3D3721955B28100E621A7 /* et */ = {
 			isa = PBXGroup;
 			children = (
+				A5657EB21A13FDBE00C39562 /* models */,
 				A5FE18EC199A272F00825A24 /* apiobjects */,
 				A5FE18F8199A272F00825A24 /* app */,
 				A5FE1900199A272F00825A24 /* camera */,
@@ -696,6 +708,7 @@
 				A5D3D36C1955B14000E621A7 /* main.cpp in Sources */,
 				A5FE19A9199A277400825A24 /* input.cpp in Sources */,
 				A5FE197F199A272F00825A24 /* application.mac.mm in Sources */,
+				A5657EB61A13FDBE00C39562 /* objloader.cpp in Sources */,
 				A5FE1952199A272F00825A24 /* framebufferfactory.cpp in Sources */,
 				A5FE197D199A272F00825A24 /* memory.apple.mm in Sources */,
 				A5FE199C199A272F00825A24 /* taskpool.cpp in Sources */,

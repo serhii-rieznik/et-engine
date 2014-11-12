@@ -34,25 +34,55 @@ namespace et
 
 inline std::istream& operator >> (std::istream& stream, vec2& value)
 {
-	stream >> value.x >> value.y;
+	std::string ln;
+	std::getline(stream, ln);
+	trim(ln);
+	
+	auto values = split(ln, " ");
+	
+	size_t comp = 0;
+	for (const auto& val : values)
+	{
+		if (comp < 2)
+			value[comp++] = strToFloat(val);
+	}
+	
 	return stream;
 }
 
 inline std::istream& operator >> (std::istream& stream, vec3& value)
 {
-	stream >> value.x >> value.y >> value.z;
+	std::string ln;
+	std::getline(stream, ln);
+	trim(ln);
+	
+	auto values = split(ln, " ");
+	
+	size_t comp = 0;
+	for (const auto& val : values)
+	{
+		if ((comp < 3) && !val.empty())
+			value[comp++] = strToFloat(val);
+	}
+	
 	return stream;
 }
 
 inline std::istream& operator >> (std::istream& stream, vec4& value)
 {
-	stream >> value.x >> value.y >> value.z;
-
-	if (stream.peek() == ' ')
-		stream >> value.w;
-	else
-		value.w = 1.0;
-
+	std::string ln;
+	std::getline(stream, ln);
+	trim(ln);
+	
+	auto values = split(ln, " ");
+	
+	size_t comp = 0;
+	for (const auto& val : values)
+	{
+		if (comp < 4)
+			value[comp++] = strToFloat(val);
+	}
+	
 	return stream;
 }
 
@@ -212,8 +242,21 @@ void OBJLoader::loadData(bool async, ObjectsCache& cache)
 
 				size_t i = 0;
 				for (auto index : indexes)
-					vertex[i++] = strToInt(index);
-
+				{
+					auto iValue = strToInt(index);
+					
+					if (iValue < 0)
+					{
+						size_t szValue = static_cast<size_t>(-iValue);
+						ET_ASSERT(szValue <= vertices.size());
+						vertex[i++] = 1 + vertices.size() - szValue;
+					}
+					else
+					{
+						vertex[i++] = iValue;
+					}
+				}
+				
 				face.vertices.push_back(vertex);
 			}
 			
@@ -249,7 +292,7 @@ void OBJLoader::loadData(bool async, ObjectsCache& cache)
 
 				normals.push_back(vertex);
 			}
-			else if (subKey == 32)
+			else if (isWhitespaceChar(subKey))
 			{
 				vec3 vertex;
 				inputFile >> vertex;
@@ -272,17 +315,6 @@ void OBJLoader::loadData(bool async, ObjectsCache& cache)
 		}
 		
 	}
-/*	
-	cout << "Conversion result:\n";
-	cout << vertices.size() << " vertices\n";
-	cout << texCoords.size() << " texture coords\n";
-	cout << normals.size() << " normals\n";
-	cout << groups.size() << " groups:\n";
-	
-	for (GroupList::iterator i = groups.begin(), e = groups.end(); i != e; ++i)
-		cout << "\t" << (*i)->name << ", with material " << (*i)->material << " and " << (*i)->faces.size() << " faces.\n";
-*/	
-
 }
 
 s3d::ElementContainer::Pointer OBJLoader::load(ObjectsCache& cache, size_t options)
@@ -391,7 +423,7 @@ void OBJLoader::loadMaterials(const std::string& fileName, bool async, ObjectsCa
 			}
 			else
 			{
-				char next;
+				char next = 0;
 				materialFile >> next;
 				next = static_cast<char>(tolower(next));
 				
@@ -558,7 +590,7 @@ void OBJLoader::loadMaterials(const std::string& fileName, bool async, ObjectsCa
 		}
 		else if (key == 'i')
 		{
-			if (lastMaterial.invalid() == 0)
+			if (lastMaterial.invalid())
 			{
 				getLine(materialFile, line);
 			}
@@ -569,7 +601,7 @@ void OBJLoader::loadMaterials(const std::string& fileName, bool async, ObjectsCa
 				lowercase(illum);
 				if (illum == "llum")
 				{              
-					int value;
+					int value = 0;
 					materialFile >> value;
 					lastMaterial->setInt(MaterialParameter_ShadingModel, value);
 				}
@@ -581,13 +613,13 @@ void OBJLoader::loadMaterials(const std::string& fileName, bool async, ObjectsCa
 		}
 		else if (key == 'n')
 		{
-			char next;
+			char next = 0;
 			materialFile >> next;
 			next = static_cast<char>(tolower(next));
 			
 			if (next == 's')
 			{
-				float value;
+				float value = 0.0f;
 				materialFile >> value;
 				lastMaterial->setFloat(MaterialParameter_Roughness, value);
 			}
@@ -678,41 +710,37 @@ void OBJLoader::processLoadedData()
 	if (totalVertices > 65535)
 		fmt = IndexArrayFormat_32bit;
 		
+	_vertexData = VertexArray::Pointer::create(decl, totalVertices);
 	_indices = IndexArray::Pointer::create(fmt, totalVertices, PrimitiveType_Triangles);
+	
 	_indices->linearize(totalVertices);
 
-	_vertexData = VertexArray::Pointer::create(decl, totalVertices);
-	
 	RawDataAcessor<vec3> pos = _vertexData->chunk(Usage_Position).accessData<vec3>(0);
 	RawDataAcessor<vec3> norm = _vertexData->chunk(Usage_Normal).accessData<vec3>(0);
 	RawDataAcessor<vec2> tex = _vertexData->chunk(Usage_TexCoord0).accessData<vec2>(0);
-
-#define PUSH_VERTEX(vertex) \
-	{ \
-		size_t posIndex = (vertex)[0] - 1; \
-		pos[index] = vertices[posIndex]; \
-		if (hasTexCoords) \
-		{ \
-			size_t texIndex = (vertex)[1] - 1; \
-			tex[index] = texCoords[texIndex]; \
-		} \
-		if (hasNormals) \
-		{ \
-			size_t normIndex = (vertex)[2] - 1; \
-			norm[index] = normals[normIndex]; \
-		} \
-		++index; \
-	}
-
 	size_t index = 0;
+	
+	auto PUSH_VERTEX = [this, &pos, &norm, &tex, &index, hasTexCoords, hasNormals](const OBJVertex& vertex)
+	{
+		pos[index] = vertices[vertex[0] - 1];
+		
+		if (hasTexCoords)
+			tex[index] = texCoords[vertex[1] - 1];
+
+		if (hasNormals)
+			norm[index] = normals[vertex[2] - 1];
+
+		++index;
+	};
+
 	for (auto group : groups)
 	{
 		IndexType startIndex = static_cast<IndexType>(index);
 		for (auto face : group->faces)
 		{
-			PUSH_VERTEX(face.vertices[2]);
-			PUSH_VERTEX(face.vertices[1]);
 			PUSH_VERTEX(face.vertices[0]);
+			PUSH_VERTEX(face.vertices[1]);
+			PUSH_VERTEX(face.vertices[2]);
 
 			if (face.vertices.size() == 4)
 			{
@@ -742,7 +770,7 @@ void OBJLoader::processLoadedData()
 			}
 		}
 			
-		_meshes.push_back(OBJMeshIndexBounds(group->name, startIndex, index - startIndex, m));
+		_meshes.emplace_back(group->name, startIndex, index - startIndex, m);
 	}
 
 #undef PUSH_VERTEX
@@ -757,16 +785,16 @@ s3d::ElementContainer::Pointer OBJLoader::generateVertexBuffers()
 	vao->setBuffers(_rc->vertexBufferFactory().createVertexBuffer("model-vb", _vertexData, BufferDrawType_Static),
 		_rc->vertexBufferFactory().createIndexBuffer("model-ib", _indices, BufferDrawType_Static));
 
-	for (OBJMeshIndexBoundsList::iterator i = _meshes.begin(), e = _meshes.end(); i != e; ++i)
+	for (const auto& i : _meshes)
 	{
 		if (_loadOptions & Option_SupportMeshes)
 		{
-			auto mesh = SupportMesh::Pointer::create(i->name, vao, i->material, i->start, i->count, result.ptr());
+			auto mesh = SupportMesh::Pointer::create(i.name, vao, i.material, i.start, i.count, result.ptr());
 			mesh->fillCollisionData(_vertexData, _indices);
 		}
 		else 
 		{
-			Mesh::Pointer::create(i->name, vao, i->material, i->start, i->count, result.ptr());
+			Mesh::Pointer::create(i.name, vao, i.material, i.start, i.count, result.ptr());
 		}
 	}
 

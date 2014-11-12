@@ -87,6 +87,17 @@ VertexArray::Description VertexArray::generateDescription() const
 	return desc;
 }
 
+const VertexDataChunk VertexArray::chunk(VertexAttributeUsage usage) const
+{
+	for (auto& i : _chunks)
+	{
+		if (i->usage() == usage)
+			return i;
+	}
+	
+	return VertexDataChunk();
+}
+
 VertexDataChunk VertexArray::chunk(VertexAttributeUsage usage)
 {
 	for (auto& i : _chunks)
