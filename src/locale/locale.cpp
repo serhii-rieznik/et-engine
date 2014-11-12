@@ -66,18 +66,36 @@ bool Locale::loadCurrentLanguageFile(const std::string& rootFolder, const std::s
 	return false;
 }
 
+std::string Locale::localizedStringFromObject(const ValueBase::Pointer& obj, const std::string& def)
+{
+	if (obj->valueClass() == ValueClass_String)
+	{
+		return StringValue(obj)->content;
+	}
+	else if (obj->valueClass() == ValueClass_Array)
+	{
+		ArrayValue arr(obj);
+		return arr->content.empty() ? def : localizedStringFromObject(arr->content.front(), def);
+	}
+	
+	log::error("Invalid locale key %s, of type: %d", def.c_str(), obj->valueClass());
+	
+	return def;
+}
+
+bool Locale::hasKey(const std::string& key)
+{
+	return _localeMap->content.count(key) > 0;
+}
+
 std::string Locale::localizedString(const std::string& key)
 {
-	if (key.empty())
-		return key;
-	
-	auto i = _localeMap.find(key);
-	return (i == _localeMap.end()) ? key : i->second;
+	return hasKey(key) ? localizedStringFromObject(_localeMap.objectForKey(key), key) : key;
 }
 
 void Locale::parseLanguageFile(const std::string& fileName)
 {
-	_localeMap.clear();
+	_localeMap->content.clear();
 
 	InputStream file(fileName, StreamMode_Binary);
 	if (file.invalid()) return;
@@ -190,7 +208,7 @@ size_t Locale::parseKey(const StringDataStorage& data, size_t index)
 	}
 	value.resize(index);
 	
-	_localeMap[key] = value;
+	_localeMap.setStringForKey(key, value);
 	
 	return i + 1;
 }
@@ -222,12 +240,18 @@ void Locale::setCurrentLocale(const std::string& l)
 	_currentLocale = l;
 }
 
+void Locale::appendLocalization(const et::Dictionary& l)
+{
+	for (const auto& o : l->content)
+		_localeMap.setObjectForKey(o.first, o.second);
+}
+
 void Locale::printContent()
 {
 	log::info("Locale:");
 	
-	for (const auto& i : _localeMap)
-		log::info("%s = %s", i.first.c_str(), i.second.c_str());
+	for (const auto& i : _localeMap->content)
+		log::info("%s = %s", i.first.c_str(), StringValue(i.second)->content.c_str());
 }
 
 std::string et::localized(const std::string& key)

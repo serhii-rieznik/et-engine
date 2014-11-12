@@ -21,6 +21,10 @@ namespace et
 		bool loadCurrentLanguageFile(const std::string& rootFolder, const std::string& extension = ".lang");
 		bool loadLanguageFile(const std::string& fileName);
 		
+		void appendLocalization(const et::Dictionary&);
+		
+		bool hasKey(const std::string& key);
+
 		std::string localizedString(const std::string& key);
 		
 		void printContent();
@@ -37,12 +41,13 @@ namespace et
 		
 		size_t parseComment(const StringDataStorage& data, size_t index);
 		size_t parseKey(const StringDataStorage& data, size_t index);
+		
+		std::string localizedStringFromObject(const ValueBase::Pointer&, const std::string&);
 
 		ET_SINGLETON_COPY_DENY(Locale)
 		
 	private:
-		typedef std::map<std::string, std::string> LocaleMap;
-		LocaleMap _localeMap;
+		Dictionary _localeMap;
 		std::string _currentLocale;
 	};
 	

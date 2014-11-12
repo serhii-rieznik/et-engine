@@ -77,7 +77,7 @@ std::string et::removeFileExt(const std::string& fileName)
 	return path + name;
 }
 
-std::string& et::trim(std::string &str)
+std::string& et::trim(std::string& str)
 {
 	size_t strSize = str.length();
 	if (!strSize) return str;
