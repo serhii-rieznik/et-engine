@@ -18,29 +18,32 @@ namespace et
 	public:
 		void setCurrentLocale(const std::string&);
 		
+		bool resolveLanguageFileName(std::string& fileName, const std::string& rootFolder, const std::string& extension = ".lang");
 		bool loadCurrentLanguageFile(const std::string& rootFolder, const std::string& extension = ".lang");
+		bool appendCurrentLanguageFile(const std::string& rootFolder, const std::string& extension = ".lang");
 		bool loadLanguageFile(const std::string& fileName);
+		bool hasKey(const std::string& key);
 		
 		void appendLocalization(const et::Dictionary&);
-		
-		bool hasKey(const std::string& key);
+		void printContent();
 
 		std::string localizedString(const std::string& key);
-		
-		void printContent();
 		
 		const std::string& currentLocale() const
 			{ return _currentLocale; }
 		
+		const Dictionary& localeDictionary() const
+			{ return _localeMap; }
+		
 		ET_DECLARE_EVENT1(localeLoaded, std::string)
-
+		
 	private:
 		Locale();
 		
-		void parseLanguageFile(const std::string& name);
+		Dictionary parseLanguageFile(const std::string& name);
 		
 		size_t parseComment(const StringDataStorage& data, size_t index);
-		size_t parseKey(const StringDataStorage& data, size_t index);
+		size_t parseKey(const StringDataStorage& data, size_t index, Dictionary&);
 		
 		std::string localizedStringFromObject(const ValueBase::Pointer&, const std::string&);
 

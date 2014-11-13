@@ -81,7 +81,7 @@ namespace et
 		TextureFiltration_max
 	};
 	
-	enum PrimitiveType
+	enum PrimitiveType : uint32_t
 	{
 		PrimitiveType_Points,
 		PrimitiveType_Lines,

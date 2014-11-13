@@ -48,6 +48,6 @@ std::string locale::dateTimeFromTimestamp(uint64_t interval)
 
 std::string locale::currentLocale()
 {
-    NSString* localeId = [[[NSLocale preferredLanguages] objectAtIndex:0] lowercaseString];
+    NSString* localeId = [[[[NSBundle mainBundle] preferredLocalizations] objectAtIndex:0] lowercaseString];
 	return std::string([localeId cStringUsingEncoding:NSUTF8StringEncoding]);
 }

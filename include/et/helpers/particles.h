@@ -76,7 +76,13 @@ namespace et
 			size_t capacity()
 				{ return _particles.size(); }
 			
-			const P& particle(size_t i)
+			P& particle(size_t i)
+			{
+				ET_ASSERT(i < _particles.size());
+				return _particles.at(i);
+			}
+			
+			const P& particle(size_t i) const
 			{
 				ET_ASSERT(i < _particles.size());
 				return _particles.at(i);

@@ -7,12 +7,14 @@
 
 #include <et/core/tools.h>
 #include <et/locale/locale.h>
+#include <et-ext/json/json.h>
 
 using namespace et;
 
 const char CommentChar = '/';
 const char KeyChar = '\"';
 const char NewLineChar = '\n';
+const std::string kDefaultLocale = "en";
 
 Locale::Locale() :
 	_currentLocale(locale::currentLocale())
@@ -24,6 +26,7 @@ bool Locale::loadLanguageFile(const std::string& fileName)
 	if (fileExists(fileName))
 	{
 		parseLanguageFile(fileName);
+		localeLoaded.invokeInMainRunLoop(_currentLocale);
 		return true;
 	}
 
@@ -31,38 +34,51 @@ bool Locale::loadLanguageFile(const std::string& fileName)
 	return false;
 }
 
-bool Locale::loadCurrentLanguageFile(const std::string& rootFolder, const std::string& extension)
+bool Locale::resolveLanguageFileName(std::string& fileName, const std::string& rootFolder, const std::string& extension)
 {
 	std::string basePath = addTrailingSlash(rootFolder);
 	std::string lang = locale::localeLanguage(_currentLocale);
 	std::string subLang = locale::localeSubLanguage(_currentLocale);
 	
-	std::string fileName = basePath + lang + "-" + subLang + extension;
-	if (fileExists(fileName))
+	if (!subLang.empty())
 	{
-		parseLanguageFile(fileName);
-		return true;
-	}
-	else
-	{
-		fileName = basePath + lang + extension;
+		fileName = basePath + lang + "-" + subLang + extension;
 		if (fileExists(fileName))
-		{
-			parseLanguageFile(fileName);
 			return true;
-		}
-		else
-		{
-			fileName = addTrailingSlash(rootFolder) + "en" + extension;
-			if (fileExists(fileName))
-			{
-				parseLanguageFile(fileName);
-				return true;
-			}
-		}
 	}
 	
-	log::error("Unable to locate language file %s in folder %s", fileName.c_str(), rootFolder.c_str());
+	fileName = basePath + lang + extension;
+	if (fileExists(fileName))
+		return true;
+	
+	if (lang != kDefaultLocale)
+	{
+		fileName = addTrailingSlash(rootFolder) + kDefaultLocale + extension;
+		return fileExists(fileName);
+	}
+	
+	return false;
+}
+
+bool Locale::loadCurrentLanguageFile(const std::string& rootFolder, const std::string& extension)
+{
+	std::string fileName;
+	if (resolveLanguageFileName(fileName, rootFolder, extension))
+	{
+		_localeMap = parseLanguageFile(fileName);
+		return true;
+	}
+	return false;
+}
+
+bool Locale::appendCurrentLanguageFile(const std::string& rootFolder, const std::string& extension)
+{
+	std::string fileName;
+	if (resolveLanguageFileName(fileName, rootFolder, extension))
+	{
+		appendLocalization(parseLanguageFile(fileName));
+		return true;
+	}
 	return false;
 }
 
@@ -90,38 +106,57 @@ bool Locale::hasKey(const std::string& key)
 
 std::string Locale::localizedString(const std::string& key)
 {
-	return hasKey(key) ? localizedStringFromObject(_localeMap.objectForKey(key), key) : key;
+	return (!key.empty() && hasKey(key)) ?
+		localizedStringFromObject(_localeMap.objectForKey(key), key) : key;
 }
 
-void Locale::parseLanguageFile(const std::string& fileName)
+et::Dictionary Locale::parseLanguageFile(const std::string& fileName)
 {
-	_localeMap->content.clear();
-
-	InputStream file(fileName, StreamMode_Binary);
-	if (file.invalid()) return;
-
-	StringDataStorage raw(streamSize(file.stream()) + 1, 0);
-	file.stream().read(raw.data(), raw.size());
-
-	StringDataStorage keyValues(raw.size(), 0);
-
+	et::Dictionary result;
+	
+	StringDataStorage fileContent;
+	{
+		InputStream file(fileName, StreamMode_Binary);
+		if (file.valid())
+		{
+			fileContent.resize(streamSize(file.stream()) + 1);
+			fileContent.fill(0);
+			file.stream().read(fileContent.data(), fileContent.size());
+		}
+	}
+	
+	if (fileContent.size() == 0)
+		return result;
+	
+	/*
+	 * Try to parse JSON
+	 */
+	ValueClass vc = ValueClass_Invalid;
+	auto object = json::deserialize(fileContent.binary(), vc, false);
+	if (vc == ValueClass_Dictionary)
+		return object;
+	
+	/*
+	 * Parse custom format
+	 */
+	StringDataStorage keyValues(fileContent.size(), 0);
 	size_t i = 0;
 	bool inQuote = false;
-	while ((i < raw.size()) && raw[i])
+	while ((i < fileContent.size()) && fileContent[i])
 	{
 		size_t prevChar = i > 0 ? i - 1 : 0;
-		if ((raw[i] == CommentChar) && (raw[prevChar] == NewLineChar))
+		if ((fileContent[i] == CommentChar) && (fileContent[prevChar] == NewLineChar))
 		{
 			inQuote = false;
-			i = parseComment(raw, i+1);
+			i = parseComment(fileContent, i+1);
 		}
 		else 
 		{
-			if (raw[i] == KeyChar)
+			if (fileContent[i] == KeyChar)
 				inQuote = !inQuote;
 
-			if (inQuote || !isWhitespaceChar(raw[i]))
-				keyValues.push_back(raw[i]);
+			if (inQuote || !isWhitespaceChar(fileContent[i]))
+				keyValues.push_back(fileContent[i]);
 			
 			++i;
 		}
@@ -152,12 +187,12 @@ void Locale::parseLanguageFile(const std::string& fileName)
 	
 	i = 0;
 	while (source[i] && (i < source.size()) && source[i+1])
-		i = (source[i] == KeyChar) ? parseKey(source, i+1) : ++i;
+		i = (source[i] == KeyChar) ? parseKey(source, i+1, result) : ++i;
 	
-	localeLoaded.invokeInMainRunLoop(_currentLocale);
+	return result;
 }
 
-size_t Locale::parseKey(const StringDataStorage& data, size_t index)
+size_t Locale::parseKey(const StringDataStorage& data, size_t index, Dictionary& values)
 {
 	size_t keyEnd = 0;
 	size_t valueStart = 0;
@@ -208,7 +243,7 @@ size_t Locale::parseKey(const StringDataStorage& data, size_t index)
 	}
 	value.resize(index);
 	
-	_localeMap.setStringForKey(key, value);
+	values.setStringForKey(key, value);
 	
 	return i + 1;
 }
