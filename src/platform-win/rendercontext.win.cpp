@@ -696,7 +696,7 @@ LRESULT CALLBACK mainWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			{
 				wchar_t wChars[4] = {	};
 				char chars[2] = { static_cast<char>(wParam), 0 };
-				MultiByteToWideChar(CP_ACP, MB_PRECOMPOSED, chars, 1, wChars, 4);
+				MultiByteToWideChar(CP_THREAD_ACP, MB_PRECOMPOSED, chars, 1, wChars, 4);
 				handler->charactersEntered(unicodeToUtf8(wChars) );
 			}
 			return 0;
