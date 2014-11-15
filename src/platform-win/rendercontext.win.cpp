@@ -45,7 +45,7 @@ public:
 public:
 	bool failed;
 	HINSTANCE hInstance;
-	WNDCLASSEX wndClass;
+	WNDCLASSEXW wndClass;
 
 	RenderContextData primaryContext;
 	RenderContextData dummyContext;
@@ -208,8 +208,8 @@ HWND RenderContextPrivate::createWindow(size_t style, WindowSize windowSize, vec
 		windowRect.top = workareaRect.top + (workareaSize.y - windowRect.bottom) / 2;
 	}
 
-	HWND window = CreateWindowExA(WS_EX_APPWINDOW, wndClass.lpszClassName, 
-		application().identifier().applicationName.c_str(), windowStyle, 
+	HWND window = CreateWindowExW(WS_EX_APPWINDOW, wndClass.lpszClassName, 
+		utf8ToUnicode(application().identifier().applicationName).c_str(), windowStyle, 
 		windowRect.left, windowRect.top, actualSize.x, actualSize.y, 0, 0, hInstance, 0);
 
 	GetClientRect(window, &windowRect);
@@ -228,16 +228,15 @@ bool RenderContextPrivate::initWindow(RenderContextParameters& params, const App
 	wndClass.lpfnWndProc = mainWndProc;
 	wndClass.hInstance = hInstance;
 	wndClass.hCursor = LoadCursor(nullptr, IDC_ARROW);
-	wndClass.lpszClassName = "etWindowClass";
+	wndClass.lpszClassName = L"etWindowClass";
 
-	ATOM result = RegisterClassEx(&wndClass);
+	ATOM result = RegisterClassExW(&wndClass);
 	ET_ASSERT(result);
 	(void)result;
 
 	primaryContext.hWnd = createWindow(appParams.windowStyle, appParams.windowSize, params.contextSize);
 	ET_ASSERT(primaryContext.hWnd != nullptr);
 
-	// SetWindowLong(primaryContext.hWnd, GWL_USERDATA, reinterpret_cast<LONG>(this));
 	SetWindowLongPtr(primaryContext.hWnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
 
 	ShowWindow(primaryContext.hWnd, SW_SHOW);
@@ -486,7 +485,7 @@ int RenderContextPrivate::choosePixelFormat(HDC aDC, PIXELFORMATDESCRIPTOR* pfd)
 RenderContextPrivate::~RenderContextPrivate()
 {
 	primaryContext.release();
-	UnregisterClassA(wndClass.lpszClassName, hInstance);
+	UnregisterClassW(wndClass.lpszClassName, hInstance);
 }
 
 bool RenderContextPrivate::shouldPostMovementMessage(int x, int y)
@@ -690,14 +689,22 @@ LRESULT CALLBACK mainWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			return 0;
 		}
 
+	case WM_UNICHAR:
+	{
+		if (wParam >= ET_SPACE)
+		{
+			wchar_t wChars[2] = { static_cast<wchar_t>(wParam), 0 };
+			handler->charactersEntered(unicodeToUtf8(wChars));
+		}
+		return 0;
+	}
+
 	case WM_CHAR:
 		{
 			if (wParam >= ET_SPACE)
 			{
-				wchar_t wChars[4] = {	};
-				char chars[2] = { static_cast<char>(wParam), 0 };
-				MultiByteToWideChar(CP_THREAD_ACP, MB_PRECOMPOSED, chars, 1, wChars, 4);
-				handler->charactersEntered(unicodeToUtf8(wChars) );
+				wchar_t wChars[2] = { static_cast<wchar_t>(wParam), 0 };
+				handler->charactersEntered(unicodeToUtf8(wChars));
 			}
 			return 0;
 		}

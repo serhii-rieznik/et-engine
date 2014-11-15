@@ -137,10 +137,10 @@ int Application::platformRun(int, char*[])
 		MSG msg = { };
 		while (_running)
 		{
-			if (PeekMessage(&msg, 0, 0, 0, PM_REMOVE))
+			if (PeekMessageW(&msg, 0, 0, 0, PM_REMOVE))
 			{
 				TranslateMessage(&msg);
-				DispatchMessage(&msg);
+				DispatchMessageW(&msg);
 			}
 			else
 			{
