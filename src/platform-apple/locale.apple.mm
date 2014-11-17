@@ -10,6 +10,7 @@
 #include <Foundation/NSDateFormatter.h>
 #include <Foundation/NSLocale.h>
 #include <Foundation/NSString.h>
+#include <Foundation/NSBundle.h>
 #include <et/core/tools.h>
 #include <et/core/containers.h>
 #include <et/locale/locale.h>

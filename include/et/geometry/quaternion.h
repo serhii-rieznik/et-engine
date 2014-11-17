@@ -93,7 +93,7 @@ namespace et
 			return ((!thisOne) * Quaternion(v) * thisOne).vector;
 		}
 
-		Quaternion<T>& operator *= (const Quaternion &q) 
+		Quaternion& operator *= (const Quaternion &q)
 		{
 			T s = scalar * q.scalar - dot(vector, q.vector);
 			vector3<T> v = vector.cross(q.vector) + scalar * q.vector + q.scalar * vector;
@@ -104,18 +104,21 @@ namespace et
 
 		matrix4<T> toMatrix() const
 		{
+			static const T one = static_cast<T>(1);
+			static const T two = static_cast<T>(2);
+			
 			T len = std::sqrt(vector.dotSelf() + scalar * scalar);
 			T qx = vector.x / len;
 			T qy = vector.y / len;
 			T qz = vector.z / len;
 			T qw = scalar / len;
-			T one = static_cast<T>(1);
-			T two = static_cast<T>(2);
-			return matrix4<T>(
+			return matrix4<T>
+			(
 				vector4<T>(one - two*qy*qy - two*qz*qz,       two*qx*qy - two*qz*qw,       two*qx*qz + two*qy*qw, 0.0f),
 				vector4<T>(      two*qx*qy + two*qz*qw, one - two*qx*qx - two*qz*qz,       two*qy*qz - two*qx*qw, 0.0f),
 				vector4<T>(      two*qx*qz - two*qy*qw,       two*qy*qz + two*qx*qw, one - two*qx*qx - two*qy*qy, 0.0f),
-				vector4<T>(                       0.0f,                        0.0f,                        0.0f, 1.0f));
+				vector4<T>(                       0.0f,                        0.0f,                        0.0f, 1.0f)
+			);
 		}
 	};
 

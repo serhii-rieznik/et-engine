@@ -55,9 +55,6 @@
     <ClCompile Include="..\..\..\src\core\objectscache.cpp">
       <Filter>et</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\core\plist.cpp">
-      <Filter>et</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\core\stream.cpp">
       <Filter>et</Filter>
     </ClCompile>
@@ -250,16 +247,64 @@
     <ClCompile Include="..\..\..\src\locale\locale.cpp">
       <Filter>et</Filter>
     </ClCompile>
-    <ClCompile Include="..\Raytracer\Raytracer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Raytracer\RaytraceScene.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Raytracer\RaytraceThread.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\collision\collision.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Raytracer\raytracer\Raytracer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Raytracer\raytracer\RaytraceScene.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Raytracer\raytracer\RaytraceThread.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Raytracer\raytracer\SceneIntersection.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Raytracer\raytracer\SceneObject.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\core\memoryallocator.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\core\et.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\scene3d\animation.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\scene3d\baseelement.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\scene3d\cameraelement.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\scene3d\lightelement.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\scene3d\material.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\scene3d\mesh.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\scene3d\particlesystem.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\scene3d\scene3d.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\scene3d\serialization.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\scene3d\storage.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\scene3d\supportmesh.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\models\objloader.cpp">
       <Filter>et</Filter>
     </ClCompile>
   </ItemGroup>
@@ -267,13 +312,22 @@
     <ClInclude Include="..\Raytracer\MainController.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\Raytracer\Raytracer.h">
+    <ClInclude Include="..\Raytracer\raytracer\Raytracer.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\Raytracer\RaytraceScene.h">
+    <ClInclude Include="..\Raytracer\raytracer\RaytraceScene.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\Raytracer\RaytraceThread.h">
+    <ClInclude Include="..\Raytracer\raytracer\RaytraceThread.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Raytracer\raytracer\SceneIntersection.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Raytracer\raytracer\SceneMaterial.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Raytracer\raytracer\SceneObject.h">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>

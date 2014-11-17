@@ -10,9 +10,11 @@
 		A512D4641A018544001D92E4 /* et.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A512D4621A018544001D92E4 /* et.cpp */; };
 		A512D4651A018544001D92E4 /* memoryallocator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A512D4631A018544001D92E4 /* memoryallocator.cpp */; };
 		A512D4671A0186A9001D92E4 /* textures in CopyFiles */ = {isa = PBXBuildFile; fileRef = A512D4661A018656001D92E4 /* textures */; };
-		A54349AA195D969D002DF03A /* RaytraceThread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A54349A9195D969D002DF03A /* RaytraceThread.cpp */; };
-		A54349AC195D9726002DF03A /* RaytraceScene.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A54349AB195D9726002DF03A /* RaytraceScene.cpp */; };
-		A54349B0195D9AEB002DF03A /* Raytracer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A54349AF195D9AEB002DF03A /* Raytracer.cpp */; };
+		A531F00D1A194F140062DFEC /* SceneObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A531F00B1A194F140062DFEC /* SceneObject.cpp */; };
+		A531F0171A194F280062DFEC /* Raytracer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A531F00F1A194F280062DFEC /* Raytracer.cpp */; };
+		A531F0181A194F280062DFEC /* RaytraceScene.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A531F0111A194F280062DFEC /* RaytraceScene.cpp */; };
+		A531F0191A194F280062DFEC /* RaytraceThread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A531F0131A194F280062DFEC /* RaytraceThread.cpp */; };
+		A531F01D1A194FD20062DFEC /* SceneIntersection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A531F01B1A194FD20062DFEC /* SceneIntersection.cpp */; };
 		A5657EB61A13FDBE00C39562 /* objloader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5657EB41A13FDBE00C39562 /* objloader.cpp */; };
 		A5D3D36C1955B14000E621A7 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5D3D36B1955B14000E621A7 /* main.cpp */; };
 		A5D3D3751955B2A800E621A7 /* MainController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5D3D3741955B2A800E621A7 /* MainController.cpp */; };
@@ -131,12 +133,74 @@
 		A512D4621A018544001D92E4 /* et.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = et.cpp; sourceTree = "<group>"; };
 		A512D4631A018544001D92E4 /* memoryallocator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = memoryallocator.cpp; sourceTree = "<group>"; };
 		A512D4661A018656001D92E4 /* textures */ = {isa = PBXFileReference; lastKnownFileType = folder; name = textures; path = Data/textures; sourceTree = "<group>"; };
-		A54349A8195D967B002DF03A /* RaytraceThread.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RaytraceThread.h; sourceTree = "<group>"; };
-		A54349A9195D969D002DF03A /* RaytraceThread.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = RaytraceThread.cpp; sourceTree = "<group>"; };
-		A54349AB195D9726002DF03A /* RaytraceScene.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = RaytraceScene.cpp; sourceTree = "<group>"; };
-		A54349AD195D972D002DF03A /* RaytraceScene.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RaytraceScene.h; sourceTree = "<group>"; };
-		A54349AE195D9AE5002DF03A /* Raytracer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Raytracer.h; sourceTree = "<group>"; };
-		A54349AF195D9AEB002DF03A /* Raytracer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Raytracer.cpp; sourceTree = "<group>"; };
+		A531F00B1A194F140062DFEC /* SceneObject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SceneObject.cpp; path = raytracer/SceneObject.cpp; sourceTree = "<group>"; };
+		A531F00C1A194F140062DFEC /* SceneObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SceneObject.h; path = raytracer/SceneObject.h; sourceTree = "<group>"; };
+		A531F00F1A194F280062DFEC /* Raytracer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Raytracer.cpp; sourceTree = "<group>"; };
+		A531F0101A194F280062DFEC /* Raytracer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Raytracer.h; sourceTree = "<group>"; };
+		A531F0111A194F280062DFEC /* RaytraceScene.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = RaytraceScene.cpp; sourceTree = "<group>"; };
+		A531F0121A194F280062DFEC /* RaytraceScene.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RaytraceScene.h; sourceTree = "<group>"; };
+		A531F0131A194F280062DFEC /* RaytraceThread.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = RaytraceThread.cpp; sourceTree = "<group>"; };
+		A531F0141A194F280062DFEC /* RaytraceThread.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RaytraceThread.h; sourceTree = "<group>"; };
+		A531F0151A194F280062DFEC /* SceneObject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SceneObject.cpp; sourceTree = "<group>"; };
+		A531F0161A194F280062DFEC /* SceneObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SceneObject.h; sourceTree = "<group>"; };
+		A531F01B1A194FD20062DFEC /* SceneIntersection.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SceneIntersection.cpp; sourceTree = "<group>"; };
+		A531F01C1A194FD20062DFEC /* SceneIntersection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SceneIntersection.h; sourceTree = "<group>"; };
+		A531F01E1A19509C0062DFEC /* SceneMaterial.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SceneMaterial.h; sourceTree = "<group>"; };
+		A531F0231A1983F80062DFEC /* equations.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = equations.h; sourceTree = "<group>"; };
+		A531F0241A1983F80062DFEC /* geometry.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = geometry.h; sourceTree = "<group>"; };
+		A531F0251A1983F80062DFEC /* line2d.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = line2d.h; sourceTree = "<group>"; };
+		A531F0261A1983F80062DFEC /* matrix3.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = matrix3.h; sourceTree = "<group>"; };
+		A531F0271A1983F80062DFEC /* matrix4.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = matrix4.h; sourceTree = "<group>"; };
+		A531F0281A1983F80062DFEC /* parallelepiped.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = parallelepiped.h; sourceTree = "<group>"; };
+		A531F0291A1983F80062DFEC /* plane.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = plane.h; sourceTree = "<group>"; };
+		A531F02A1A1983F80062DFEC /* quaternion.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = quaternion.h; sourceTree = "<group>"; };
+		A531F02B1A1983F80062DFEC /* ray.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ray.h; sourceTree = "<group>"; };
+		A531F02C1A1983F80062DFEC /* rect.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = rect.h; sourceTree = "<group>"; };
+		A531F02D1A1983F80062DFEC /* rectplacer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = rectplacer.h; sourceTree = "<group>"; };
+		A531F02E1A1983F80062DFEC /* segment2d.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = segment2d.h; sourceTree = "<group>"; };
+		A531F02F1A1983F80062DFEC /* segment3d.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = segment3d.h; sourceTree = "<group>"; };
+		A531F0301A1983F80062DFEC /* splines.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = splines.h; sourceTree = "<group>"; };
+		A531F0311A1983F80062DFEC /* splines.inl.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = splines.inl.h; sourceTree = "<group>"; };
+		A531F0321A1983F80062DFEC /* triangle.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = triangle.h; sourceTree = "<group>"; };
+		A531F0331A1983F80062DFEC /* vector2.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = vector2.h; sourceTree = "<group>"; };
+		A531F0341A1983F80062DFEC /* vector3.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = vector3.h; sourceTree = "<group>"; };
+		A531F0351A1983F80062DFEC /* vector4.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = vector4.h; sourceTree = "<group>"; };
+		A531F0371A19F6BB0062DFEC /* atomiccounter.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = atomiccounter.h; sourceTree = "<group>"; };
+		A531F0381A19F6BB0062DFEC /* autoptr.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = autoptr.h; sourceTree = "<group>"; };
+		A531F0391A19F6BB0062DFEC /* autovalue.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = autovalue.h; sourceTree = "<group>"; };
+		A531F03A1A19F6BB0062DFEC /* base64.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = base64.h; sourceTree = "<group>"; };
+		A531F03B1A19F6BB0062DFEC /* constants.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = constants.h; sourceTree = "<group>"; };
+		A531F03C1A19F6BB0062DFEC /* containers.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = containers.h; sourceTree = "<group>"; };
+		A531F03D1A19F6BB0062DFEC /* containersbase.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = containersbase.h; sourceTree = "<group>"; };
+		A531F03E1A19F6BB0062DFEC /* conversion.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = conversion.h; sourceTree = "<group>"; };
+		A531F03F1A19F6BB0062DFEC /* conversionbase.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = conversionbase.h; sourceTree = "<group>"; };
+		A531F0401A19F6BB0062DFEC /* cout.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = cout.h; sourceTree = "<group>"; };
+		A531F0411A19F6BB0062DFEC /* datastorage.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = datastorage.h; sourceTree = "<group>"; };
+		A531F0421A19F6BB0062DFEC /* debug.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = debug.h; sourceTree = "<group>"; };
+		A531F0431A19F6BB0062DFEC /* dictionary.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = dictionary.h; sourceTree = "<group>"; };
+		A531F0441A19F6BB0062DFEC /* et.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = et.h; sourceTree = "<group>"; };
+		A531F0451A19F6BB0062DFEC /* filesystem.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = filesystem.h; sourceTree = "<group>"; };
+		A531F0461A19F6BB0062DFEC /* flags.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = flags.h; sourceTree = "<group>"; };
+		A531F0471A19F6BB0062DFEC /* hardware.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = hardware.h; sourceTree = "<group>"; };
+		A531F0481A19F6BB0062DFEC /* hierarchy.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = hierarchy.h; sourceTree = "<group>"; };
+		A531F0491A19F6BB0062DFEC /* intrusiveptr.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = intrusiveptr.h; sourceTree = "<group>"; };
+		A531F04A1A19F6BB0062DFEC /* log.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = log.h; sourceTree = "<group>"; };
+		A531F04B1A19F6BB0062DFEC /* memory.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = memory.h; sourceTree = "<group>"; };
+		A531F04C1A19F6BB0062DFEC /* memoryallocator.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = memoryallocator.h; sourceTree = "<group>"; };
+		A531F04D1A19F6BB0062DFEC /* object.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = object.h; sourceTree = "<group>"; };
+		A531F04E1A19F6BB0062DFEC /* objectscache.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = objectscache.h; sourceTree = "<group>"; };
+		A531F04F1A19F6BB0062DFEC /* plist.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = plist.h; sourceTree = "<group>"; };
+		A531F0501A19F6BB0062DFEC /* properties.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = properties.h; sourceTree = "<group>"; };
+		A531F0511A19F6BB0062DFEC /* rawdataaccessor.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = rawdataaccessor.h; sourceTree = "<group>"; };
+		A531F0521A19F6BB0062DFEC /* serialization.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = serialization.h; sourceTree = "<group>"; };
+		A531F0531A19F6BB0062DFEC /* sharedptr.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = sharedptr.h; sourceTree = "<group>"; };
+		A531F0541A19F6BB0062DFEC /* singleton.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = singleton.h; sourceTree = "<group>"; };
+		A531F0551A19F6BB0062DFEC /* staticdatastorage.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = staticdatastorage.h; sourceTree = "<group>"; };
+		A531F0561A19F6BB0062DFEC /* stream.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = stream.h; sourceTree = "<group>"; };
+		A531F0571A19F6BB0062DFEC /* strings.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = strings.h; sourceTree = "<group>"; };
+		A531F0581A19F6BB0062DFEC /* tools.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = tools.h; sourceTree = "<group>"; };
+		A531F0591A19F6BB0062DFEC /* transformable.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = transformable.h; sourceTree = "<group>"; };
+		A531F05A1A19F6BB0062DFEC /* types.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = types.h; sourceTree = "<group>"; };
 		A5657EB41A13FDBE00C39562 /* objloader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = objloader.cpp; sourceTree = "<group>"; };
 		A5D3D3681955B14000E621A7 /* Raytracer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Raytracer.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A5D3D36B1955B14000E621A7 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
@@ -256,54 +320,25 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		A5657EB21A13FDBE00C39562 /* models */ = {
+		A531F00E1A194F280062DFEC /* raytracer */ = {
 			isa = PBXGroup;
 			children = (
-				A5657EB41A13FDBE00C39562 /* objloader.cpp */,
+				A531F0121A194F280062DFEC /* RaytraceScene.h */,
+				A531F0111A194F280062DFEC /* RaytraceScene.cpp */,
+				A531F0101A194F280062DFEC /* Raytracer.h */,
+				A531F00F1A194F280062DFEC /* Raytracer.cpp */,
+				A531F0141A194F280062DFEC /* RaytraceThread.h */,
+				A531F0131A194F280062DFEC /* RaytraceThread.cpp */,
+				A531F0161A194F280062DFEC /* SceneObject.h */,
+				A531F0151A194F280062DFEC /* SceneObject.cpp */,
+				A531F01C1A194FD20062DFEC /* SceneIntersection.h */,
+				A531F01B1A194FD20062DFEC /* SceneIntersection.cpp */,
+				A531F01E1A19509C0062DFEC /* SceneMaterial.h */,
 			);
-			name = models;
-			path = ../../src/models;
+			path = raytracer;
 			sourceTree = "<group>";
 		};
-		A5D3D35F1955B14000E621A7 = {
-			isa = PBXGroup;
-			children = (
-				A512D4661A018656001D92E4 /* textures */,
-				A5F1F7241965D48200D24712 /* models */,
-				A5D3D4EA1955B85600E621A7 /* programs */,
-				A5D3D3721955B28100E621A7 /* et */,
-				A5D3D36A1955B14000E621A7 /* Raytracer */,
-				A5D3D4E51955B55000E621A7 /* Frameworks */,
-				A5D3D3691955B14000E621A7 /* Products */,
-			);
-			sourceTree = "<group>";
-		};
-		A5D3D3691955B14000E621A7 /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				A5D3D3681955B14000E621A7 /* Raytracer.app */,
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
-		A5D3D36A1955B14000E621A7 /* Raytracer */ = {
-			isa = PBXGroup;
-			children = (
-				A5D3D36B1955B14000E621A7 /* main.cpp */,
-				A54349AD195D972D002DF03A /* RaytraceScene.h */,
-				A54349AB195D9726002DF03A /* RaytraceScene.cpp */,
-				A54349AE195D9AE5002DF03A /* Raytracer.h */,
-				A54349AF195D9AEB002DF03A /* Raytracer.cpp */,
-				A5D3D3731955B29E00E621A7 /* MainController.h */,
-				A5D3D3741955B2A800E621A7 /* MainController.cpp */,
-				A54349A8195D967B002DF03A /* RaytraceThread.h */,
-				A54349A9195D969D002DF03A /* RaytraceThread.cpp */,
-				A5D3D4E61955B62500E621A7 /* Info.plist */,
-			);
-			path = Raytracer;
-			sourceTree = "<group>";
-		};
-		A5D3D3721955B28100E621A7 /* et */ = {
+		A531F0201A1983DD0062DFEC /* source */ = {
 			isa = PBXGroup;
 			children = (
 				A5657EB21A13FDBE00C39562 /* models */,
@@ -326,6 +361,140 @@
 				A5FE1945199A272F00825A24 /* tasks */,
 				A5FE1947199A272F00825A24 /* timers */,
 				A5FE194C199A272F00825A24 /* vertexbuffer */,
+			);
+			name = source;
+			sourceTree = "<group>";
+		};
+		A531F0211A1983E40062DFEC /* include */ = {
+			isa = PBXGroup;
+			children = (
+				A531F0361A19F6BB0062DFEC /* core */,
+				A531F0221A1983F80062DFEC /* geometry */,
+			);
+			name = include;
+			sourceTree = "<group>";
+		};
+		A531F0221A1983F80062DFEC /* geometry */ = {
+			isa = PBXGroup;
+			children = (
+				A531F0231A1983F80062DFEC /* equations.h */,
+				A531F0241A1983F80062DFEC /* geometry.h */,
+				A531F0251A1983F80062DFEC /* line2d.h */,
+				A531F0261A1983F80062DFEC /* matrix3.h */,
+				A531F0271A1983F80062DFEC /* matrix4.h */,
+				A531F0281A1983F80062DFEC /* parallelepiped.h */,
+				A531F0291A1983F80062DFEC /* plane.h */,
+				A531F02A1A1983F80062DFEC /* quaternion.h */,
+				A531F02B1A1983F80062DFEC /* ray.h */,
+				A531F02C1A1983F80062DFEC /* rect.h */,
+				A531F02D1A1983F80062DFEC /* rectplacer.h */,
+				A531F02E1A1983F80062DFEC /* segment2d.h */,
+				A531F02F1A1983F80062DFEC /* segment3d.h */,
+				A531F0301A1983F80062DFEC /* splines.h */,
+				A531F0311A1983F80062DFEC /* splines.inl.h */,
+				A531F0321A1983F80062DFEC /* triangle.h */,
+				A531F0331A1983F80062DFEC /* vector2.h */,
+				A531F0341A1983F80062DFEC /* vector3.h */,
+				A531F0351A1983F80062DFEC /* vector4.h */,
+			);
+			name = geometry;
+			path = ../../include/et/geometry;
+			sourceTree = "<group>";
+		};
+		A531F0361A19F6BB0062DFEC /* core */ = {
+			isa = PBXGroup;
+			children = (
+				A531F0371A19F6BB0062DFEC /* atomiccounter.h */,
+				A531F0381A19F6BB0062DFEC /* autoptr.h */,
+				A531F0391A19F6BB0062DFEC /* autovalue.h */,
+				A531F03A1A19F6BB0062DFEC /* base64.h */,
+				A531F03B1A19F6BB0062DFEC /* constants.h */,
+				A531F03C1A19F6BB0062DFEC /* containers.h */,
+				A531F03D1A19F6BB0062DFEC /* containersbase.h */,
+				A531F03E1A19F6BB0062DFEC /* conversion.h */,
+				A531F03F1A19F6BB0062DFEC /* conversionbase.h */,
+				A531F0401A19F6BB0062DFEC /* cout.h */,
+				A531F0411A19F6BB0062DFEC /* datastorage.h */,
+				A531F0421A19F6BB0062DFEC /* debug.h */,
+				A531F0431A19F6BB0062DFEC /* dictionary.h */,
+				A531F0441A19F6BB0062DFEC /* et.h */,
+				A531F0451A19F6BB0062DFEC /* filesystem.h */,
+				A531F0461A19F6BB0062DFEC /* flags.h */,
+				A531F0471A19F6BB0062DFEC /* hardware.h */,
+				A531F0481A19F6BB0062DFEC /* hierarchy.h */,
+				A531F0491A19F6BB0062DFEC /* intrusiveptr.h */,
+				A531F04A1A19F6BB0062DFEC /* log.h */,
+				A531F04B1A19F6BB0062DFEC /* memory.h */,
+				A531F04C1A19F6BB0062DFEC /* memoryallocator.h */,
+				A531F04D1A19F6BB0062DFEC /* object.h */,
+				A531F04E1A19F6BB0062DFEC /* objectscache.h */,
+				A531F04F1A19F6BB0062DFEC /* plist.h */,
+				A531F0501A19F6BB0062DFEC /* properties.h */,
+				A531F0511A19F6BB0062DFEC /* rawdataaccessor.h */,
+				A531F0521A19F6BB0062DFEC /* serialization.h */,
+				A531F0531A19F6BB0062DFEC /* sharedptr.h */,
+				A531F0541A19F6BB0062DFEC /* singleton.h */,
+				A531F0551A19F6BB0062DFEC /* staticdatastorage.h */,
+				A531F0561A19F6BB0062DFEC /* stream.h */,
+				A531F0571A19F6BB0062DFEC /* strings.h */,
+				A531F0581A19F6BB0062DFEC /* tools.h */,
+				A531F0591A19F6BB0062DFEC /* transformable.h */,
+				A531F05A1A19F6BB0062DFEC /* types.h */,
+			);
+			name = core;
+			path = ../../include/et/core;
+			sourceTree = "<group>";
+		};
+		A5657EB21A13FDBE00C39562 /* models */ = {
+			isa = PBXGroup;
+			children = (
+				A5657EB41A13FDBE00C39562 /* objloader.cpp */,
+			);
+			name = models;
+			path = ../../src/models;
+			sourceTree = "<group>";
+		};
+		A5D3D35F1955B14000E621A7 = {
+			isa = PBXGroup;
+			children = (
+				A512D4661A018656001D92E4 /* textures */,
+				A5F1F7241965D48200D24712 /* models */,
+				A5D3D4EA1955B85600E621A7 /* programs */,
+				A5D3D3721955B28100E621A7 /* et */,
+				A5D3D36A1955B14000E621A7 /* source */,
+				A5D3D4E51955B55000E621A7 /* Frameworks */,
+				A5D3D3691955B14000E621A7 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		A5D3D3691955B14000E621A7 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				A5D3D3681955B14000E621A7 /* Raytracer.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		A5D3D36A1955B14000E621A7 /* source */ = {
+			isa = PBXGroup;
+			children = (
+				A531F00E1A194F280062DFEC /* raytracer */,
+				A5D3D36B1955B14000E621A7 /* main.cpp */,
+				A5D3D3731955B29E00E621A7 /* MainController.h */,
+				A5D3D3741955B2A800E621A7 /* MainController.cpp */,
+				A5D3D4E61955B62500E621A7 /* Info.plist */,
+				A531F00B1A194F140062DFEC /* SceneObject.cpp */,
+				A531F00C1A194F140062DFEC /* SceneObject.h */,
+			);
+			name = source;
+			path = Raytracer;
+			sourceTree = "<group>";
+		};
+		A5D3D3721955B28100E621A7 /* et */ = {
+			isa = PBXGroup;
+			children = (
+				A531F0211A1983E40062DFEC /* include */,
+				A531F0201A1983DD0062DFEC /* source */,
 			);
 			name = et;
 			sourceTree = "<group>";
@@ -647,7 +816,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "echo \"Touching $PROJECT_DIR/Data/ ...\"\ntouch -c -m \"$PROJECT_DIR/Data/\"\n\necho \"Touching $PROJECT_DIR/Data/programs ...\"\ntouch -c -m \"$PROJECT_DIR/Data/programs\"";
+			shellScript = "touch -c -m \"$PROJECT_DIR/Data/programs\"\ntouch -c -m \"$PROJECT_DIR/Data/models\"\ntouch -c -m \"$PROJECT_DIR/Data/textures\"\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -659,6 +828,7 @@
 				A5FE198F199A272F00825A24 /* rendering.cpp in Sources */,
 				A5FE1973199A272F00825A24 /* imagewriter.cpp in Sources */,
 				A5FE1983199A272F00825A24 /* platformtools.mac.mm in Sources */,
+				A531F0171A194F280062DFEC /* Raytracer.cpp in Sources */,
 				A5FE195F199A272F00825A24 /* events.cpp in Sources */,
 				A5FE195C199A272F00825A24 /* appevironment.cpp in Sources */,
 				A5FE1989199A272F00825A24 /* thread.unix.cpp in Sources */,
@@ -673,6 +843,7 @@
 				A5FE199E199A272F00825A24 /* sequence.cpp in Sources */,
 				A5FE1965199A272F00825A24 /* collision.cpp in Sources */,
 				A5FE196B199A272F00825A24 /* stream.cpp in Sources */,
+				A531F0191A194F280062DFEC /* RaytraceThread.cpp in Sources */,
 				A5FE1977199A272F00825A24 /* pvrloader.cpp in Sources */,
 				A5FE1987199A272F00825A24 /* criticalsection.unix.cpp in Sources */,
 				A5FE199D199A272F00825A24 /* notifytimer.cpp in Sources */,
@@ -693,17 +864,19 @@
 				A5FE1984199A272F00825A24 /* rendercontext.mac.mm in Sources */,
 				A5FE1985199A272F00825A24 /* sound.openal.mac.mm in Sources */,
 				A5FE1951199A272F00825A24 /* framebuffer.cpp in Sources */,
-				A54349AA195D969D002DF03A /* RaytraceThread.cpp in Sources */,
+				A531F00D1A194F140062DFEC /* SceneObject.cpp in Sources */,
 				A5FE195A199A272F00825A24 /* vertexbufferdata.cpp in Sources */,
 				A5FE1960199A272F00825A24 /* invocation.cpp in Sources */,
 				A5FE198A199A272F00825A24 /* threading.unix.cpp in Sources */,
 				A5FE197B199A272F00825A24 /* locale.apple.mm in Sources */,
+				A531F0181A194F280062DFEC /* RaytraceScene.cpp in Sources */,
 				A5FE1966199A272F00825A24 /* base64.cpp in Sources */,
 				A5FE1969199A272F00825A24 /* objectscache.cpp in Sources */,
 				A5FE198B199A272F00825A24 /* tools.unix.cpp in Sources */,
 				A5FE195B199A272F00825A24 /* vertexbufferfactory.cpp in Sources */,
 				A5FE1976199A272F00825A24 /* pvrdecompressor.cpp in Sources */,
 				A5FE1990199A272F00825A24 /* renderstate.cpp in Sources */,
+				A531F01D1A194FD20062DFEC /* SceneIntersection.cpp in Sources */,
 				A512D4641A018544001D92E4 /* et.cpp in Sources */,
 				A5D3D36C1955B14000E621A7 /* main.cpp in Sources */,
 				A5FE19A9199A277400825A24 /* input.cpp in Sources */,
@@ -719,7 +892,6 @@
 				A5FE1972199A272F00825A24 /* imageoperations.cpp in Sources */,
 				A5FE1957199A272F00825A24 /* texturefactory.cpp in Sources */,
 				A5FE1962199A272F00825A24 /* runloop.cpp in Sources */,
-				A54349AC195D9726002DF03A /* RaytraceScene.cpp in Sources */,
 				A5FE19A2199A272F00825A24 /* vertexarray.cpp in Sources */,
 				A5FE1961199A272F00825A24 /* pathresolver.cpp in Sources */,
 				A5FE19A1199A272F00825A24 /* indexarray.cpp in Sources */,
@@ -735,7 +907,6 @@
 				A5FE196C199A272F00825A24 /* tools.cpp in Sources */,
 				A5FE1993199A272F00825A24 /* cameraelement.cpp in Sources */,
 				A5FE197C199A272F00825A24 /* log.apple.mm in Sources */,
-				A54349B0195D9AEB002DF03A /* Raytracer.cpp in Sources */,
 				A5FE1959199A272F00825A24 /* vertexarrayobjectdata.cpp in Sources */,
 				A5FE197A199A272F00825A24 /* openglcaps.cpp in Sources */,
 				A5FE1997199A272F00825A24 /* particlesystem.cpp in Sources */,
@@ -833,6 +1004,7 @@
 		A5D3D3701955B14000E621A7 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_X86_VECTOR_INSTRUCTIONS = ssse3;
 				COMBINE_HIDPI_IMAGES = YES;
 				HEADER_SEARCH_PATHS = "\"$PROJECT_DIR/../../include\"";
 				INFOPLIST_FILE = "$(SRCROOT)/Raytracer/Info.plist";
@@ -849,6 +1021,7 @@
 		A5D3D3711955B14000E621A7 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_X86_VECTOR_INSTRUCTIONS = ssse3;
 				COMBINE_HIDPI_IMAGES = YES;
 				GCC_OPTIMIZATION_LEVEL = fast;
 				HEADER_SEARCH_PATHS = "\"$PROJECT_DIR/../../include\"";

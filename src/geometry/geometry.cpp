@@ -223,11 +223,12 @@ quaternion et::quaternionFromAngels(float yaw, float pitch, float roll)
 	float rollOver2 = 0.5f * roll;
 	
     float cosYawOver2 = std::cos(yawOver2);
-    float cosPitchOver2 = std::cos(pitchOver2);
-    float cosRollOver2 = std::cos(rollOver2);
+	float sinYawOver2 = std::sin(yawOver2);
 	
-    float sinYawOver2 = std::sin(yawOver2);
-    float sinPitchOver2 = std::sin(pitchOver2);
+    float cosPitchOver2 = std::cos(pitchOver2);
+	float sinPitchOver2 = std::sin(pitchOver2);
+	
+    float cosRollOver2 = std::cos(rollOver2);
     float sinRollOver2 = std::sin(rollOver2);
 	
     quaternion result;

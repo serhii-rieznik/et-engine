@@ -72,15 +72,17 @@ namespace et
 		typedef const T& const_reference;
 		
 		pointer allocate(size_t n)
-		{
-			return reinterpret_cast<pointer>(sharedBlockAllocator().alloc(n * sizeof(T)));
-		}
+			{ return reinterpret_cast<pointer>(sharedBlockAllocator().alloc(n * sizeof(T))); }
 		
 		void deallocate(void* ptr, size_t)
-		{
-			sharedBlockAllocator().free(ptr);
-		}
+			{ sharedBlockAllocator().free(ptr); }
 	};
+
+	template <int a> struct AlignedTo;
+	template <> struct ET_ALIGNED(4) AlignedTo<4>{ };
+	template <> struct ET_ALIGNED(8) AlignedTo<8>{ };
+	template <> struct ET_ALIGNED(16) AlignedTo<16>{ };
+	template <> struct ET_ALIGNED(32) AlignedTo<32>{ };
 }
 
 #include <et/core/properties.h>

@@ -21,14 +21,14 @@ namespace et
 		Plane()
 			{ }
 
-		explicit Plane(const vector4<T>& eq) : equation(eq)
-			{ } 
+		explicit Plane(const vector4<T>& eq) :
+			equation(eq) { }
 
-		Plane(const vector3<T>& normal, float distance) : equation(normal, distance)
-			{ }
+		Plane(const vector3<T>& normal, float distance) :
+			equation(normal, distance) { }
 		
-		Plane(float nx, float ny, float nz, float distance) : equation(nx, ny, nz, distance)
-			{ }
+		Plane(float nx, float ny, float nz, float distance) :
+			equation(nx, ny, nz, distance) { }
 
 		Plane(const Triangle<T>& t) : equation(t.normalizedNormal(), 0.0)
 			{ equation.w = dot(equation.xyz(), t.v1()); }
@@ -50,6 +50,6 @@ namespace et
 		
 		vector3<T> reflect(const vector3<T>& point) const
 			{ return point - static_cast<T>(2) * (dot(normal(), point) * normal() - distance() * normal()); };
+		
 	};
-
 }

@@ -39,20 +39,23 @@ bool Frustum::containSphere(const Sphere& sphere) const
 
 bool Frustum::containAABB(const AABB& aabb) const
 {
-	for (FrustumPlane p = FrustumPlane_Right; p < FrustumPlane_max; ++p)
+	for (size_t p = FrustumPlane_Right; p < FrustumPlane_max; ++p)
 	{
-		const vec4 plane = _data[p];
-
-		if (aabb.corners[0].dot(plane) > 0) continue;
-		if (aabb.corners[1].dot(plane) > 0) continue;
-		if (aabb.corners[2].dot(plane) > 0) continue;
-		if (aabb.corners[3].dot(plane) > 0) continue;
-		if (aabb.corners[4].dot(plane) > 0) continue;
-		if (aabb.corners[5].dot(plane) > 0) continue;
-		if (aabb.corners[6].dot(plane) > 0) continue;
-		if (aabb.corners[7].dot(plane) > 0) continue;
-
-		return false;
+		const vec4& plane = _data[p];
+		
+		bool sholdReturn = true;
+		
+		for (size_t c = AABBCorner_First; c < AABBCorner_max; ++c)
+		{
+			if (dot(vec4(aabb.corners[0], 1.0f), plane) > 0.0f)
+			{
+				sholdReturn = false;
+				break;
+			}
+		}
+		
+		if (sholdReturn)
+			return false;
 	}
 
 	return true;
@@ -60,5 +63,6 @@ bool Frustum::containAABB(const AABB& aabb) const
 
 bool Frustum::containOBB(const OBB&) const
 {
+	ET_FAIL("Not implemented")
 	return false;
 }

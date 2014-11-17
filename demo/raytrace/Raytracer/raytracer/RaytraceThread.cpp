@@ -11,8 +11,8 @@
 using namespace et;
 using namespace rt;
 
-RaytraceThread::RaytraceThread(RaytraceThreadDelegate* d) : Thread(true),
-	_delegate(d)
+RaytraceThread::RaytraceThread(RaytraceThreadDelegate* d) :
+	Thread(true), _delegate(d)
 {
 	
 }

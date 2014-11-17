@@ -14,36 +14,32 @@ namespace et
 	template<typename T>
 	struct matrix4
 	{
-		vector4<T> mat[4];
-
-		matrix4() 
-		{ }
-
-		matrix4(const matrix4<T>& c)
+	public:
+		enum : size_t
 		{
-			mat[0] = c[0];
-			mat[1] = c[1];
-			mat[2] = c[2];
-			mat[3] = c[3];
-		}
+			Rows = 4,
+			ComponentSize = sizeof(T),
+			RowSize = Rows * vector4<T>::ComponentSize
+		};
+		
+		typedef vector4<T> RowType;
+		
+	public:
+		RowType mat[Rows];
 
-		matrix4(matrix4<T>&& c)
-		{
-			mat[0] = c[0];
-			mat[1] = c[1];
-			mat[2] = c[2];
-			mat[3] = c[3];
-		}
-
+	public:
+		matrix4()
+			{ }
+		
 		explicit matrix4(T s)
 		{
-			mat[0] = vector4<T>(   s, 0.0f, 0.0f, 0.0f);
-			mat[1] = vector4<T>(0.0f,    s, 0.0f, 0.0f);
-			mat[2] = vector4<T>(0.0f, 0.0f,    s, 0.0f);
-			mat[3] = vector4<T>(0.0f, 0.0f, 0.0f,    s);
+			mat[0] = RowType(s, 0, 0, 0);
+			mat[1] = RowType(0, s, 0, 0);
+			mat[2] = RowType(0, 0, s, 0);
+			mat[3] = RowType(0, 0, 0, s);
 		}
 
-		matrix4(const vector4<T>& c0, const vector4<T>& c1, const vector4<T>& c2, const vector4<T>& c3)
+		matrix4(const RowType& c0, const RowType& c1, const RowType& c2, const RowType& c3)
 		{
 			mat[0] = c0;
 			mat[1] = c1;
@@ -53,30 +49,21 @@ namespace et
 
 		matrix4(const matrix3<T>& transform, const vector3<T>& translation, bool explicitTranslation)
 		{
-			mat[0] = vec4(transform[0], 0);
-			mat[1] = vec4(transform[1], 0);
-			mat[2] = vec4(transform[2], 0);
-			mat[3] = vec4(explicitTranslation ? translation : transform * translation, 1);
+			mat[0] = RowType(transform[0], 0);
+			mat[1] = RowType(transform[1], 0);
+			mat[2] = RowType(transform[2], 0);
+			mat[3] = RowType(explicitTranslation ? translation : transform * translation, T(1));
 		}
 
 		explicit matrix4(const matrix3<T>& m)
 		{
-			mat[0] = vector4<T>(m[0], 0.0f);
-			mat[1] = vector4<T>(m[1], 0.0f);
-			mat[2] = vector4<T>(m[2], 0.0f);
-			mat[3] = vector4<T>(0.0f, 0.0f, 0.0f, 1.0f);
+			mat[0] = RowType(m[0], 0.0f);
+			mat[1] = RowType(m[1], 0.0f);
+			mat[2] = RowType(m[2], 0.0f);
+			mat[3] = RowType(0.0f, 0.0f, 0.0f, 1.0f);
 		}
 
-		matrix4& operator = (const matrix4<T>& c)
-		{
-			mat[0] = c[0];
-			mat[1] = c[1];
-			mat[2] = c[2];
-			mat[3] = c[3];
-			return *this;
-		}
-		
-		matrix4 operator = (matrix4<T>&& c)
+		matrix4& operator = (const matrix4& c)
 		{
 			mat[0] = c[0];
 			mat[1] = c[1];
@@ -103,10 +90,10 @@ namespace et
 		const T& operator () (int i) const
 			{ return *(mat[0].data() + i); }
 
-		vector4<T>& operator [] (int i)
+		RowType& operator [] (int i)
 			{ return mat[i];}
 
-		const vector4<T>& operator [] (int i) const
+		const RowType& operator [] (int i) const
 			{ return mat[i];}
 
 		T& operator () (size_t i)
@@ -115,20 +102,20 @@ namespace et
 		const T& operator () (size_t i) const
 			{ return *(mat[0].data() + i); }
 		
-		vector4<T>& operator [] (size_t i)
+		RowType& operator [] (size_t i)
 			{ return mat[i];}
 		
-		const vector4<T>& operator [] (size_t i) const
+		const RowType& operator [] (size_t i) const
 			{ return mat[i];}
 		
-		vector4<T> column(int c) const
-			{ return vector4<T>( mat[0][c], mat[1][c], mat[2][c], mat[3][c]); }
+		RowType column(int c) const
+			{ return RowType( mat[0][c], mat[1][c], mat[2][c], mat[3][c]); }
 
 		matrix4 operator * (T s) const
-			{ return matrix4<T>(mat[0] * s, mat[1] * s, mat[2] * s, mat[3] * s); }
+			{ return matrix4(mat[0] * s, mat[1] * s, mat[2] * s, mat[3] * s); }
 
 		matrix4 operator / (T s) const
-			{ return matrix4<T>(mat[0] / s, mat[1] / s, mat[2] / s, mat[3] / s); }
+			{ return matrix4(mat[0] / s, mat[1] / s, mat[2] / s, mat[3] / s); }
 
 		matrix4 operator + (const matrix4& m) const
 			{ return matrix4(mat[0] + m.mat[0], mat[1] + m.mat[1], mat[2] + m.mat[2], mat[3] + m.mat[3]); }
@@ -155,9 +142,9 @@ namespace et
 			return (w*w > 0) ? r / w : r;
 		}
 
-		vector4<T> operator * (const vector4<T>& v) const
+		RowType operator * (const RowType& v) const
 		{
-			return vector4<T>(
+			return RowType(
 				mat[0].x * v.x + mat[1].x * v.y + mat[2].x * v.z + mat[3].x * v.w,
 				mat[0].y * v.x + mat[1].y * v.y + mat[2].y * v.z + mat[3].y * v.w,
 				mat[0].z * v.x + mat[1].z * v.y + mat[2].z * v.z + mat[3].z * v.w,
@@ -184,7 +171,7 @@ namespace et
 
 		matrix4& operator *= (const matrix4& m)
 		{
-			vector4<T> r0, r1, r2, r3;
+			RowType r0, r1, r2, r3;
 
 			r0.x = mat[0].x*m.mat[0].x + mat[0].y*m.mat[1].x + mat[0].z*m.mat[2].x + mat[0].w*m.mat[3].x;
 			r0.y = mat[0].x*m.mat[0].y + mat[0].y*m.mat[1].y + mat[0].z*m.mat[2].y + mat[0].w*m.mat[3].y;
@@ -213,7 +200,7 @@ namespace et
 
 		matrix4 operator * (const matrix4& m) const
 		{
-			vector4<T> r0, r1, r2, r3;
+			RowType r0, r1, r2, r3;
 
 			r0.x = mat[0].x*m.mat[0].x + mat[0].y*m.mat[1].x + mat[0].z*m.mat[2].x + mat[0].w*m.mat[3].x;
 			r0.y = mat[0].x*m.mat[0].y + mat[0].y*m.mat[1].y + mat[0].z*m.mat[2].y + mat[0].w*m.mat[3].y;
@@ -235,16 +222,16 @@ namespace et
 			r3.z = mat[3].x*m.mat[0].z + mat[3].y*m.mat[1].z + mat[3].z*m.mat[2].z + mat[3].w*m.mat[3].z;
 			r3.w = mat[3].x*m.mat[0].w + mat[3].y*m.mat[1].w + mat[3].z*m.mat[2].w + mat[3].w*m.mat[3].w;
 
-			return matrix4<T>(r0, r1, r2, r3);  
+			return matrix4(r0, r1, r2, r3);  
 		}
 
-		bool operator == (const matrix4<T>& m) const
+		bool operator == (const matrix4& m) const
 		{
 			return (mat[0] == m.mat[0]) && (mat[1] == m.mat[1]) &&
 				(mat[2] == m.mat[2]) && (mat[3] == m.mat[3]);
 		}
 
-		bool operator != (const matrix4<T>& m) const
+		bool operator != (const matrix4& m) const
 		{
 			return (mat[0] != m.mat[0]) || (mat[1] != m.mat[1]) ||
 				(mat[2] != m.mat[2]) || (mat[3] != m.mat[3]);
@@ -256,10 +243,10 @@ namespace et
 			const T& a20 = mat[2].x; const T& a21 = mat[2].y; const T& a22 = mat[2].z; const T& a23 = mat[2].w; 
 			const T& a30 = mat[3].x; const T& a31 = mat[3].y; const T& a32 = mat[3].z; const T& a33 = mat[3].w;
 
-			return mat[0].x * (a11 * (a22*a33 - a23*a32) +	a12 * (a31*a23 - a21*a33) + a13 * (a21*a32 - a22*a31))+
-					mat[0].y * (a10 * (a23*a32 - a22*a33) +	a20 * (a12*a33 - a13*a32) + a30 * (a13*a22 - a12*a23))+
-					mat[0].z * (a10 * (a21*a33 - a31*a23) +	a11 * (a30*a23 - a20*a33) +	a13 * (a20*a31 - a21*a30))+ 
-					mat[0].w * (a10 * (a22*a31 - a21*a32) +	a11 * (a20*a32 - a30*a22) +	a12 * (a21*a30 - a20*a31));
+			return mat[0].x * (a11 * (a22*a33 - a23*a32) +	a12 * (a31*a23 - a21*a33) + a13 * (a21*a32 - a22*a31)) +
+				   mat[0].y * (a10 * (a23*a32 - a22*a33) +	a20 * (a12*a33 - a13*a32) + a30 * (a13*a22 - a12*a23)) +
+				   mat[0].z * (a10 * (a21*a33 - a31*a23) +	a11 * (a30*a23 - a20*a33) +	a13 * (a20*a31 - a21*a30)) +
+				   mat[0].w * (a10 * (a22*a31 - a21*a32) +	a11 * (a20*a32 - a30*a22) +	a12 * (a21*a30 - a20*a31));
 		}
 
 		matrix3<T> mat3() const
@@ -287,9 +274,9 @@ namespace et
 			return m;
 		}
 
-		matrix4<T> adjugateMatrix() const
+		matrix4 adjugateMatrix() const
 		{
-			matrix4<T> m;
+			matrix4 m;
 
 			m[0].x = subMatrix(0, 0).determinant();
 			m[0].y = -subMatrix(1, 0).determinant();
@@ -316,17 +303,17 @@ namespace et
 
 		vector3<T> rotationMultiply(const vector3<T>& v) const
 		{
-			const vector4<T>& c0 = mat[0];
-			const vector4<T>& c1 = mat[1];
-			const vector4<T>& c2 = mat[2];
+			const RowType& c0 = mat[0];
+			const RowType& c1 = mat[1];
+			const RowType& c2 = mat[2];
 			return vector3<T>(c0.x * v.x + c1.x * v.y + c2.x * v.z, c0.y * v.x + c1.y * v.y + c2.y * v.z,
 				c0.z * v.x + c1.z * v.y + c2.z * v.z);
 		}
 
-		matrix4<T> inverse() const
+		matrix4 inverse() const
 		{
 			T det = determinant();
-			return (det * det > 0) ? adjugateMatrix() / det : matrix4<T>(0);
+			return (det * det > 0) ? adjugateMatrix() / det : matrix4(0);
 		}
 
 		bool isModelViewMatrix()
@@ -348,9 +335,9 @@ namespace et
 
 		matrix4 scaleWithPreservedPosition(const vector3<T>& p)
 		{
-			vector4<T> r1 = vector4<T>(mat[0].xyz() * p, mat[0].w);
-			vector4<T> r2 = vector4<T>(mat[1].xyz() * p, mat[1].w);
-			vector4<T> r3 = vector4<T>(mat[2].xyz() * p, mat[2].w);
+			RowType r1 = RowType(mat[0].xyz() * p, mat[0].w);
+			RowType r2 = RowType(mat[1].xyz() * p, mat[1].w);
+			RowType r3 = RowType(mat[2].xyz() * p, mat[2].w);
 			return matrix4(r1, r2, r3, mat[3]);
 		}
 	};

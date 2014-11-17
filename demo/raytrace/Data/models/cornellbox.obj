@@ -9,51 +9,60 @@
 # http://www.graphics.cornell.edu/online/box/data.html
 #
 
-mtllib CornellBox-Original.mtl
+mtllib cornellbox.mtl
 
 ## Object floor
 g floor
 usemtl floor
-v  -1.01  0.00   0.99
-v   1.00  0.00   0.99
-v   1.00  0.00  -1.04
-v  -0.99  0.00  -1.04
+v  -1.00  0.00   1.00
+v   1.00  0.00   1.00
+v   1.00  0.00  -1.00
+v  -1.00  0.00  -1.00
 f -4 -3 -2 -1
 
 ## Object ceiling 
 g ceiling
 usemtl ceiling
-v  -1.02  1.99   0.99
-v  -1.02  1.99  -1.04
-v   1.00  1.99  -1.04
-v   1.00  1.99   0.99
+v  -1.02  2.00  1.00
+v  -1.02  2.00 -1.00
+v   1.00  2.00 -1.00
+v   1.00  2.00  1.00
 f -4 -3 -2 -1
 
 ## Object backwall  
 g backWall
 usemtl backWall
-v  -0.99  0.00  -1.04
-v   1.00  0.00  -1.04
-v   1.00  1.99  -1.04
-v  -1.02  1.99  -1.04
+v   1.00  0.00  1.00
+v  -1.00  0.00  1.00
+v  -1.00  2.00 1.00
+v   1.02  2.00 1.00
+f -4 -3 -2 -1
+
+## Object frontwall
+g frontWall
+usemtl frontWall
+v  -1.00  0.00  -1.00
+v   1.00  0.00  -1.00
+v   1.00  2.00 -1.00
+v  -1.02  2.00 -1.00
 f -4 -3 -2 -1
 
 ## Object rightwall 
 g rightWall
 usemtl rightWall
-v	1.00  0.00  -1.04
-v	1.00  0.00   0.99
-v	1.00  1.99   0.99
-v	1.00  1.99  -1.04
+v	1.00  0.00  -1.00
+v	1.00  0.00   1.00
+v	1.00  2.00  1.00
+v	1.00  2.00 -1.00
 f -4 -3 -2 -1
 
 ## Object leftWall   
 g leftWall
 usemtl leftWall
-v  -1.01  0.00   0.99
-v  -0.99  0.00  -1.04
-v  -1.02  1.99  -1.04
-v  -1.02  1.99   0.99
+v  -1.00  0.00   1.00
+v  -1.00  0.00  -1.00
+v  -1.02  2.00 -1.00
+v  -1.02  2.00  1.00
 f -4 -3 -2 -1
 
 ## Object shortBox 
@@ -139,8 +148,8 @@ f -8 -7 -6 -5
 ## Object light
 g light
 usemtl light
-v	-0.24  1.98   0.16
-v	-0.24  1.98  -0.22
-v	 0.23  1.98  -0.22
-v	 0.23  1.98   0.16
+v	-0.24  1.99  0.16
+v	-0.24  1.99 -0.22
+v	 0.23  1.99 -0.22
+v	 0.23  1.99  0.16
 f -4 -3 -2 -1

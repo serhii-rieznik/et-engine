@@ -44,7 +44,7 @@ namespace et
 		{ return vector3<T>(std::abs(value.x), std::abs(value.y), std::abs(value.z)); }
 
 	template<typename T>
-	inline vector4<T> absv(const vector4<T>& value) 
+	inline vector4<T> absv(const vector4<T>& value)
 		{ return vector4<T>(std::abs(value.x), std::abs(value.y), std::abs(value.z), std::abs(value.w)); }
 
 	inline vector2<int> absv(const vector2<int>& value) 
@@ -53,8 +53,8 @@ namespace et
 	inline vector3<int> absv(const vector3<int>& value) 
 		{ return vector3<int>(std::abs(value.x), std::abs(value.y), std::abs(value.z)); }
 	
-	inline vector4<int> absv(const vector4<int>& value) 
-		{ return vector4<int>(std::abs(value.x), std::abs(value.y), std::abs(value.z), std::abs(value.w)); }
+	inline vec4i absv(const vec4i& value)
+		{ return vec4i(std::abs(value.x), std::abs(value.y), std::abs(value.z), std::abs(value.w)); }
 
 	template<typename T>
 	inline vector2<T> maxv(const vector2<T>& v1, const vector2<T>& v2) 
@@ -65,7 +65,7 @@ namespace et
 		{ return vector3<T>(etMax(v1.x, v2.x), etMax(v1.y, v2.y), etMax(v1.z, v2.z)); }
 
 	template<typename T>
-	inline vector4<T> maxv(const vector4<T>& v1, const vector4<T>& v2) 
+	inline vector4<T> maxv(const vector4<T>& v1, const vector4<T>& v2)
 		{ return vector4<T>(etMax(v1.x, v2.x), etMax(v1.y, v2.y), etMax(v1.z, v2.z), etMax(v1.w, v2.w)); }
 
 	template<typename T>
@@ -77,7 +77,7 @@ namespace et
 		{ return vector3<T>(etMin(v1.x, v2.x), etMin(v1.y, v2.y), etMin(v1.z, v2.z)); }
 
 	template<typename T>
-	inline vector4<T> minv(const vector4<T>& v1, const vector4<T>& v2) 
+	inline vector4<T> minv(const vector4<T>& v1, const vector4<T>& v2)
 		{ return vector4<T>(etMin(v1.x, v2.x), etMin(v1.y, v2.y), etMin(v1.z, v2.z), etMin(v1.w, v2.w)); }
 
 	template <typename T>
@@ -123,8 +123,8 @@ namespace et
 	inline vector4<T> mix(const vector4<T>& v1, const vector4<T>& v2, const T& t)
 	{
 		T nt = T(1) - t;
-		return vector4<T>(v1.x * nt + v2.x * t, v1.y * nt + v2.y * t, v1.z * nt + v2.z * t,
-			v1.w * nt + v2.w * t);
+		return vector4<T>(v1.x * nt + v2.x * t, v1.y * nt + v2.y * t,
+			v1.z * nt + v2.z * t, v1.w * nt + v2.w * t);
 	}
 
 	template<typename T>
@@ -209,21 +209,21 @@ namespace et
 	}
 
 	template <typename T>
-	inline vector4<T> normalize(const vector4<T>& v) 
+	inline vector4<T> normalize(const vector4<T>& v)
 	{ 
 		T l = v.dotSelf();
 		return (l > 0) ? v / std::sqrt(l) : vector4<T>(0);
 	}
 
 	template <typename T>
-	inline Quaternion<T> normalize(const Quaternion<T>& q) 
+	inline Quaternion<T> normalize(const Quaternion<T>& q)
 	{ 
 		T l = q.length();
 		return (l > 0) ? q / std::sqrt(l) : Quaternion<T>();
 	}
 
 	template <typename T>
-	inline vector4<T> normalizePlane(const vector4<T>& v) 
+	inline vector4<T> normalizePlane(const vector4<T>& v)
 	{ 
 		T l = v.xyz().dotSelf();
 		return (l > 0) ? v / std::sqrt(l) : vector4<T>(0);
@@ -383,7 +383,7 @@ namespace et
 	}
 	
 	template <typename T>
-	inline matrix4<T> orientationForNormal(const vector3<T>& n) 
+	inline matrix4<T> orientationForNormal(const vector3<T>& n)
 	{
 		vector3<T> up = normalize(n);
 		T theta = asin(up.y) - static_cast<T>(HALF_PI);
@@ -407,7 +407,7 @@ namespace et
 	inline vector2<T> operator * (const matrix4<T>& m, const vector2<T>& v)
 	{
 		return vector2<T>(m[0][0] * v.x + m[1][0] * v.y + m[3][0],
-						  m[0][1] * v.x + m[1][1] * v.y + m[3][1]);
+			m[0][1] * v.x + m[1][1] * v.y + m[3][1]);
 	}
 
 	inline mat4 translationMatrix(const vec3& v)

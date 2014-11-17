@@ -6,6 +6,7 @@
  */
 
 #include <et/core/et.h>
+#include <Windows.h>
 
 #if (ET_PLATFORM_WIN)
 

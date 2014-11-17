@@ -56,6 +56,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -72,6 +73,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -79,7 +81,8 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>opengl32.lib;jpeg.lib;libpng16.lib;libxml2.lib;zlib.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <IgnoreSpecificDefaultLibraries>LIBCMT.lib</IgnoreSpecificDefaultLibraries>
+      <IgnoreSpecificDefaultLibraries>
+      </IgnoreSpecificDefaultLibraries>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -107,8 +110,9 @@
     <ClCompile Include="..\..\..\src\core\base64.cpp" />
     <ClCompile Include="..\..\..\src\core\conversion.cpp" />
     <ClCompile Include="..\..\..\src\core\dictionary.cpp" />
+    <ClCompile Include="..\..\..\src\core\et.cpp" />
+    <ClCompile Include="..\..\..\src\core\memoryallocator.cpp" />
     <ClCompile Include="..\..\..\src\core\objectscache.cpp" />
-    <ClCompile Include="..\..\..\src\core\plist.cpp" />
     <ClCompile Include="..\..\..\src\core\stream.cpp" />
     <ClCompile Include="..\..\..\src\core\tools.cpp" />
     <ClCompile Include="..\..\..\src\core\transformable.cpp" />
@@ -126,6 +130,7 @@
     <ClCompile Include="..\..\..\src\input\gestures.cpp" />
     <ClCompile Include="..\..\..\src\input\input.cpp" />
     <ClCompile Include="..\..\..\src\locale\locale.cpp" />
+    <ClCompile Include="..\..\..\src\models\objloader.cpp" />
     <ClCompile Include="..\..\..\src\opengl\opengl.common.cpp" />
     <ClCompile Include="..\..\..\src\opengl\openglcaps.cpp" />
     <ClCompile Include="..\..\..\src\platform-win\application.win.cpp" />
@@ -153,6 +158,17 @@
     <ClCompile Include="..\..\..\src\rendering\renderer.cpp" />
     <ClCompile Include="..\..\..\src\rendering\rendering.cpp" />
     <ClCompile Include="..\..\..\src\rendering\renderstate.cpp" />
+    <ClCompile Include="..\..\..\src\scene3d\animation.cpp" />
+    <ClCompile Include="..\..\..\src\scene3d\baseelement.cpp" />
+    <ClCompile Include="..\..\..\src\scene3d\cameraelement.cpp" />
+    <ClCompile Include="..\..\..\src\scene3d\lightelement.cpp" />
+    <ClCompile Include="..\..\..\src\scene3d\material.cpp" />
+    <ClCompile Include="..\..\..\src\scene3d\mesh.cpp" />
+    <ClCompile Include="..\..\..\src\scene3d\particlesystem.cpp" />
+    <ClCompile Include="..\..\..\src\scene3d\scene3d.cpp" />
+    <ClCompile Include="..\..\..\src\scene3d\serialization.cpp" />
+    <ClCompile Include="..\..\..\src\scene3d\storage.cpp" />
+    <ClCompile Include="..\..\..\src\scene3d\supportmesh.cpp" />
     <ClCompile Include="..\..\..\src\tasks\taskpool.cpp" />
     <ClCompile Include="..\..\..\src\timers\notifytimer.cpp" />
     <ClCompile Include="..\..\..\src\timers\sequence.cpp" />
@@ -164,15 +180,20 @@
     <ClCompile Include="..\..\..\src\vertexbuffer\vertexdeclaration.cpp" />
     <ClCompile Include="..\Raytracer\main.cpp" />
     <ClCompile Include="..\Raytracer\MainController.cpp" />
-    <ClCompile Include="..\Raytracer\Raytracer.cpp" />
-    <ClCompile Include="..\Raytracer\RaytraceScene.cpp" />
-    <ClCompile Include="..\Raytracer\RaytraceThread.cpp" />
+    <ClCompile Include="..\Raytracer\raytracer\Raytracer.cpp" />
+    <ClCompile Include="..\Raytracer\raytracer\RaytraceScene.cpp" />
+    <ClCompile Include="..\Raytracer\raytracer\RaytraceThread.cpp" />
+    <ClCompile Include="..\Raytracer\raytracer\SceneIntersection.cpp" />
+    <ClCompile Include="..\Raytracer\raytracer\SceneObject.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Raytracer\MainController.h" />
-    <ClInclude Include="..\Raytracer\Raytracer.h" />
-    <ClInclude Include="..\Raytracer\RaytraceScene.h" />
-    <ClInclude Include="..\Raytracer\RaytraceThread.h" />
+    <ClInclude Include="..\Raytracer\raytracer\Raytracer.h" />
+    <ClInclude Include="..\Raytracer\raytracer\RaytraceScene.h" />
+    <ClInclude Include="..\Raytracer\raytracer\RaytraceThread.h" />
+    <ClInclude Include="..\Raytracer\raytracer\SceneIntersection.h" />
+    <ClInclude Include="..\Raytracer\raytracer\SceneMaterial.h" />
+    <ClInclude Include="..\Raytracer\raytracer\SceneObject.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

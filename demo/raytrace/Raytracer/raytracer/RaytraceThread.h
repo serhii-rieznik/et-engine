@@ -19,15 +19,15 @@ namespace rt
 		virtual ~RaytraceThreadDelegate() { }
 		
 		virtual bool fetchNewRenderRect(et::vec2i& origin, et::vec2i& size) = 0;
-		virtual et::vec2i imageSize() = 0;
-		
-		virtual const RaytraceScene& scene() = 0;
+		virtual bool shouldAntialias() = 0;
 		
 		virtual OutputFunction outputFunction() = 0;
 		
+		virtual et::vec2i imageSize() = 0;
+		
 		virtual void renderFinished() = 0;
 		
-		virtual bool shouldAntialias() = 0;
+		virtual const RaytraceScene& scene() = 0;
 	};
 	
 	class RaytraceThread : public et::Thread
@@ -45,6 +45,6 @@ namespace rt
 		
 	private:
 		RaytraceThreadDelegate* _delegate;
-		bool _rendering = false;
+		et::AtomicBool _rendering;
 	};
 }

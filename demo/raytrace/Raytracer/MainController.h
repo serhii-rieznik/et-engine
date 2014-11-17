@@ -15,8 +15,8 @@
 #include <et/app/application.h>
 #include <et/timers/interpolationvalue.h>
 
-#include "RaytraceScene.h"
-#include "RaytraceThread.h"
+#include "raytracer/RaytraceScene.h"
+#include "raytracer/RaytraceThread.h"
 
 namespace rt
 {
@@ -75,11 +75,11 @@ namespace rt
 		
 		float _startTime = 0.0f;
 		
-		int _previewBounces = 6;
-		int _previewSamples = 8;
+		size_t _previewSamples = 16;
+		size_t _previewBounces = 4;
 		
-		int _productionBounces = 12;
-		int _productionSamples = 512;
+		size_t _productionSamples = 512;
+		size_t _productionBounces = 12;
 		
 		bool _shouldRender = true;
 		bool _interactiveRendering = false;

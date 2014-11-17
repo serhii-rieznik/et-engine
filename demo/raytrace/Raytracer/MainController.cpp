@@ -8,7 +8,7 @@
 
 #include <ctime>
 #include <et/imaging/imagewriter.h>
-#include "Raytracer.h"
+#include "raytracer/Raytracer.h"
 #include "MainController.h"
 
 using namespace et;
@@ -86,7 +86,7 @@ void MainController::applicationDidLoad(et::RenderContext* rc)
 	
 	_cameraAngles.updated.connect([this]()
 	{
-		_scene.camera.lookAt(4.0f * fromSpherical(_cameraAngles.value().y, _cameraAngles.value().x), unitY);
+		_scene.camera.lookAt(4.0f * fromSpherical(_cameraAngles.value().y, _cameraAngles.value().x), vec3(0.0f, 1.0f, 0.0f));
 		
 		if (!_enableGPURaytracing && (_scene.options.bounces == _previewBounces))
 			startCPUTracing();
@@ -231,7 +231,7 @@ void MainController::idle(float)
 void MainController::onKeyPressed(size_t key)
 {
 	if (key == ET_KEY_UP)
-		_productionBounces = etMin(49, _productionBounces + 1);
+		_productionBounces = etMin(size_t(49), _productionBounces + 1);
 	else if (key == ET_KEY_DOWN)
 		_productionBounces = etMax(_previewBounces + 1, _productionBounces - 1);
 	
@@ -314,7 +314,7 @@ void MainController::renderFinished()
 			return;
 	}
 	
-	auto renderTime = floatToStr(mainTimerPool()->actualTime() - _startTime, 2.0f);
+	auto renderTime = floatToStr(mainTimerPool()->actualTime() - _startTime, 2);
 	
 	std::string fn = application().environment().applicationDocumentsFolder() + "result (" +
 		renderTime + " sec, " + intToStr(_scene.options.samples) + " samples per pixel).png";

@@ -12,16 +12,27 @@
 
 namespace et 
 {
-
 	template <typename T>
 	struct vector4
 	{
-		union
+	public:
+		typedef T ComponentsType;
+		
+		enum : size_t
+		{
+			ComponentSize = sizeof(ComponentsType),
+			ComponentsCount = 4,
+			Size = ComponentsCount * ComponentSize
+		};
+		
+	public:
+		union ET_ALIGNED(Size)
 		{
 			struct { T x, y, z, w; };
 			T c[4];
 		};
-
+		
+	public:
 		vector4() :
 			x(0), y(0), z(0), w(0) { }
 
@@ -77,10 +88,10 @@ namespace et
 			{ return c[i] ;}
 
 		vector4 operator -()
-			{ return vector4<T>(-x, -y, -z, -w); }
+			{ return vector4(-x, -y, -z, -w); }
 
 		const vector4 operator -() const
-			{ return vector4<T>(-x, -y, -z, -w); }
+			{ return vector4(-x, -y, -z, -w); }
 
 		vector4 operator * (T v) const
 			{ return vector4(x * v, y * v, z * v, w * v); }
@@ -139,21 +150,20 @@ namespace et
 		const vector2<T>& zw() const
 			{ return *(reinterpret_cast<vector2<T>*>(c+2)); }
 		
-		T dot(const vector4<T>& vector) const
+		T dot(const vector4& vector) const
 			{ return x*vector.x + y*vector.y + z*vector.z + w*vector.w; }
 
 		T dotSelf() const
 			{ return x*x + y*y + z*z + w*w; }
 
-		bool operator == (const vector4<T>& r) const
+		bool operator == (const vector4& r) const
 			{ return (x == r.x) && (y == r.y) && (z == r.z) && (w == r.w); }
 
-		bool operator != (const vector4<T>& r) const
+		bool operator != (const vector4& r) const
 			{ return (x != r.x) || (y != r.y) || (z != r.z) || (w != r.w); }
-
 	};
 
 	template <typename T>
-	inline vector4<T> operator * (T value, const vector4<T>& vec) 
+	inline vector4<T> operator * (T value, const vector4<T>& vec)
 		{ return vector4<T>(vec.x * value, vec.y * value, vec.z * value, vec.w * value); }
 }

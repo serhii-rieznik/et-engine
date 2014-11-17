@@ -27,7 +27,7 @@ namespace et
 	
 	struct AABB
 	{
-		typedef vec4 AABBCorners[AABBCorner_max];
+		typedef vec3 AABBCorners[AABBCorner_max];
 
 		vec3 center;
 		vec3 dimension;
@@ -39,21 +39,21 @@ namespace et
 		AABB(const vec3& aCenter, const vec3& aDimension) :
 			center(aCenter), dimension(aDimension)
 		{
-			corners[AABBCorner_LeftDownFar] = vec4(center + vec3(-dimension.x, -dimension.y, -dimension.z), 1.0f);
-			corners[AABBCorner_RightDownFar] = vec4(center + vec3(+dimension.x, -dimension.y, -dimension.z), 1.0f);
-			corners[AABBCorner_LeftUpFar] = vec4(center + vec3(-dimension.x, +dimension.y, -dimension.z), 1.0f);
-			corners[AABBCorner_RightUpFar] = vec4(center + vec3(+dimension.x, +dimension.y, -dimension.z), 1.0f);
-			corners[AABBCorner_LeftDownNear] = vec4(center + vec3(-dimension.x, -dimension.y, +dimension.z), 1.0f);
-			corners[AABBCorner_RightDownNear] = vec4(center + vec3(+dimension.x, -dimension.y, +dimension.z), 1.0f);
-			corners[AABBCorner_LeftUpNear] = vec4(center + vec3(-dimension.x, +dimension.y, +dimension.z), 1.0f);
-			corners[AABBCorner_RightUpNear] = vec4(center + vec3(+dimension.x, +dimension.y, +dimension.z), 1.0f);
+			corners[AABBCorner_LeftDownFar]   = center + vec3(-dimension.x, -dimension.y, -dimension.z);
+			corners[AABBCorner_RightDownFar]  = center + vec3( dimension.x, -dimension.y, -dimension.z);
+			corners[AABBCorner_LeftUpFar]     = center + vec3(-dimension.x,  dimension.y, -dimension.z);
+			corners[AABBCorner_RightUpFar]    = center + vec3( dimension.x,  dimension.y, -dimension.z);
+			corners[AABBCorner_LeftDownNear]  = center + vec3(-dimension.x, -dimension.y,  dimension.z);
+			corners[AABBCorner_RightDownNear] = center + vec3( dimension.x, -dimension.y,  dimension.z);
+			corners[AABBCorner_LeftUpNear]    = center + vec3(-dimension.x,  dimension.y,  dimension.z);
+			corners[AABBCorner_RightUpNear]   = center + vec3( dimension.x,  dimension.y,  dimension.z);
 		}
 
-		vec3 minVertex() const
-			{ return center - dimension; }
+		const vec3& minVertex() const
+			{ return corners[AABBCorner_LeftDownFar]; }
 
-		vec3 maxVertex() const
-			{ return center + dimension; }
+		const vec3& maxVertex() const
+			{ return corners[AABBCorner_RightUpNear]; }
 	};
 
 }

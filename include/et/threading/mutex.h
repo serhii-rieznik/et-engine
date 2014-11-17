@@ -7,6 +7,8 @@
 
 #pragma once
 
+#include <et/core/et.h>
+
 namespace et
 {
 	class MutexPrivate;

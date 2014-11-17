@@ -418,8 +418,25 @@ MemoryChunk::MemoryChunk(uint32_t capacity)
 	
 	size = capacity;
 	
-	actualDataOffset = (capacity / minimumAllocationSize + 1) * sizeof(MemoryChunkInfo);
-	allocatedMemoryBegin = static_cast<char*>(malloc(actualDataOffset + capacity));
+	actualDataOffset = alignUpTo((capacity / minimumAllocationSize + 1) * sizeof(MemoryChunkInfo), minimumAllocationSize);
+	size_t sizeToAllocate = alignUpTo(actualDataOffset + capacity, minimumAllocationSize);
+	
+#if (ET_PLATFORM_APPLE)
+	
+	void* allocatedPtr = nullptr;
+	posix_memalign(&allocatedPtr, minimumAllocationSize, sizeToAllocate);
+	allocatedMemoryBegin = static_cast<char*>(allocatedPtr);
+	
+#elif (ET_PLATFORM_WIN)
+	
+	allocatedMemoryBegin = static_cast<char*>(_aligned_malloc(sizeToAllocate, minimumAllocationSize));
+	
+#else
+#
+#	error Use any available aligned malloc
+#
+#endif
+	
 	allocatedMemoryEnd = allocatedMemoryBegin + actualDataOffset + capacity;
 	firstInfo = reinterpret_cast<MemoryChunkInfo*>(allocatedMemoryBegin);
 	
@@ -451,7 +468,11 @@ MemoryChunk::~MemoryChunk()
 			++info;
 		}
 		
+#	if (ET_PLATFORM_WIN)
+		_aligned_free(allocatedMemoryBegin);
+#	else
 		::free(allocatedMemoryBegin);
+#	endif
 	}
 }
 
