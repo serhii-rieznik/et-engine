@@ -80,8 +80,14 @@ void* VertexBufferData::map(size_t offset, size_t dataSize, MapBufferMode mode)
 		static const GLenum accessFlags3x[MapBufferMode_max] =
 			{ GL_MAP_READ_BIT, GL_MAP_WRITE_BIT, GL_MAP_READ_BIT | GL_MAP_WRITE_BIT };
 	
+#	if (ET_DEBUG)
+		GLint bufferSize = 0;
+		glGetBufferParameteriv(GL_ARRAY_BUFFER, GL_BUFFER_SIZE, &bufferSize);
+		ET_ASSERT(offset + dataSize <= static_cast<size_t>(bufferSize));
+#	endif
+	
 		result = glMapBufferRange(GL_ARRAY_BUFFER, offset, dataSize, accessFlags3x[mode]);
-		checkOpenGLError("glMapBufferRange(GL_ARRAY_BUFFER, %lu, %lu, %d)", offset, dataSize, mode);
+		checkOpenGLError("glMapBufferRange(GL_ARRAY_BUFFER, %lu, %lu, %d)", offset, dataSize, (int)mode);
 
 		shouldUseMapBuffer = (result == nullptr);
 

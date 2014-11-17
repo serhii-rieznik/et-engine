@@ -7,12 +7,7 @@
 
 #include <et/core/tools.h>
 #include <et/locale/locale.h>
-
-#define ET_DISABLE_JSON_SUPPORT		1
-
-#if (!ET_DISABLE_JSON_SUPPORT)
-#	include <et-ext/json/json.h>
-#endif
+#include <et/json/json.h>
 
 using namespace et;
 
@@ -133,7 +128,6 @@ et::Dictionary Locale::parseLanguageFile(const std::string& fileName)
 	if (fileContent.size() == 0)
 		return result;
 
-#if (!ET_DISABLE_JSON_SUPPORT)
 	/*
 	 * Try to parse JSON
 	 */
@@ -141,7 +135,6 @@ et::Dictionary Locale::parseLanguageFile(const std::string& fileName)
 	auto object = json::deserialize(fileContent.binary(), vc, false);
 	if (vc == ValueClass_Dictionary)
 		return object;
-#endif
 	
 	/*
 	 * Parse custom format

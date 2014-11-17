@@ -26,7 +26,11 @@ namespace et
 		};
 		
 	public:
-		union ET_ALIGNED(Size)
+		
+		union
+#		if (ET_ENABLE_VEC4_ALIGN)
+			ET_ALIGNED(Size)
+#		endif
 		{
 			struct { T x, y, z, w; };
 			T c[4];
