@@ -226,6 +226,22 @@ vec2 et::arrayToVec2(ArrayValue a)
 	return result;
 }
 
+vec2i et::arrayToVec2i(ArrayValue a)
+{
+	vec2i result;
+	size_t index = 0;
+	for (auto v : a->content)
+	{
+		if (v->valueClass() == ValueClass_Float)
+			result[index++] = static_cast<int>(FloatValue(v)->content);
+		else if (v->valueClass() == ValueClass_Integer)
+			result[index++] = static_cast<int>(IntegerValue(v)->content);
+		
+		if (index >= 2) break;
+	}
+	return result;
+}
+
 vec3 et::arrayToVec3(ArrayValue a)
 {
 	vec3 result;

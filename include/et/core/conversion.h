@@ -23,6 +23,8 @@ namespace et
 	ArrayValue rectToArray(const rect&);
 	
 	vec2 arrayToVec2(ArrayValue);
+	vec2i arrayToVec2i(ArrayValue);
+	
 	vec3 arrayToVec3(ArrayValue);
 	vec4 arrayToVec4(ArrayValue);
 	rect arrayToRect(ArrayValue);

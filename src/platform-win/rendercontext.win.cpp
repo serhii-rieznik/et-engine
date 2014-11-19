@@ -208,8 +208,8 @@ HWND RenderContextPrivate::createWindow(size_t style, WindowSize windowSize, vec
 		windowRect.top = workareaRect.top + (workareaSize.y - windowRect.bottom) / 2;
 	}
 
-	HWND window = CreateWindowExW(WS_EX_APPWINDOW, wndClass.lpszClassName, 
-		utf8ToUnicode(application().identifier().applicationName).c_str(), windowStyle, 
+	auto title = utf8ToUnicode(application().identifier().applicationName);
+	HWND window = CreateWindowExW(WS_EX_APPWINDOW, wndClass.lpszClassName, title.c_str(), windowStyle, 
 		windowRect.left, windowRect.top, actualSize.x, actualSize.y, 0, 0, hInstance, 0);
 
 	GetClientRect(window, &windowRect);
@@ -589,7 +589,7 @@ LRESULT CALLBACK mainWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 #endif
 
 	if (handler == 0)
-		return DefWindowProc(hWnd, uMsg, wParam, lParam);
+		return DefWindowProcW(hWnd, uMsg, wParam, lParam);
 
 	vec2 viewportSize = handler->renderContext()->size();
 

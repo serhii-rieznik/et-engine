@@ -7,6 +7,8 @@
 
 #pragma once
 
+#include <cstdarg>
+
 namespace et
 {
 	namespace log
