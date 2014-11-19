@@ -36,11 +36,11 @@ namespace et
 			size_t activeParticlesCount() const
 				{ return _emitter.activeParticlesCount(); }
 			
-			bool emitParticle(const vec3& origin, const vec3& vel, const vec3& accel,
-				const vec4& color, float lifeTime);
+			particles::PointSpriteEmitter& emitter()
+				{ return _emitter; }
 			
-			size_t emitParticles(const vec3* origins, const vec3* velocities, size_t count, const vec3& accel,
-				const vec4& color, float lifeTime);
+			const particles::PointSpriteEmitter& emitter() const
+				{ return _emitter; }
 			
 			template <typename F>
 			void setUpdateFunction(const F& func)

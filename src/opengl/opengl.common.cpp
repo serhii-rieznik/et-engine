@@ -679,6 +679,11 @@ size_t et::channelsForTextureFormat(uint32_t internalFormat)
 		return 3;
 #endif
 			
+#if defined(GL_RGBA32F)
+	case GL_RGBA32F:
+		return 4;
+#endif
+			
 	case GL_RGB:
 		return 3;
 

@@ -49,16 +49,15 @@ void ParticleSystem::onTimerUpdated(NotifyTimer* timer)
 {
 	_emitter.update(timer->actualTime());
 	
-	void* bufferData = nullptr;
+	_rc->renderState().bindVertexArray(_vao);
+	void* bufferData = bufferData = _vao->vertexBuffer()->map(0, _vertexData.data.dataSize(), VertexBufferData::MapBufferMode_WriteOnly);
 
 	auto posOffset = _decl.elementForUsage(Usage_Position).offset();
 	auto clrOffset = _decl.elementForUsage(Usage_Color).offset();
+	
 	RawDataAcessor<vec3> pos(reinterpret_cast<char*>(bufferData), _vertexData.data.dataSize(), _decl.dataSize(), posOffset);
 	RawDataAcessor<vec4> clr(reinterpret_cast<char*>(bufferData), _vertexData.data.dataSize() + clrOffset, _decl.dataSize(), clrOffset);
 	
-	_rc->renderState().bindVertexArray(_vao);
-	
-	bufferData = _vao->vertexBuffer()->map(0, _vertexData.data.dataSize(), VertexBufferData::MapBufferMode_WriteOnly);
 	for (size_t i = 0; i < _emitter.activeParticlesCount(); ++i)
 	{
 		const auto& p = _emitter.particle(i);
@@ -67,26 +66,3 @@ void ParticleSystem::onTimerUpdated(NotifyTimer* timer)
 	}
 	_vao->vertexBuffer()->unmap();
 }
-
-bool ParticleSystem::emitParticle(const vec3& origin, const vec3& vel, const vec3& accel, const vec4& color, float lifeTime)
-{
-	_emitter.base().position = origin;
-	_emitter.base().velocity = vel;
-	_emitter.base().acceleration = accel;
-	_emitter.base().color = color;
-	_emitter.base().lifeTime = lifeTime;
-	
-	return _emitter.emit(1, mainTimerPool()->actualTime()) == 1;
-}
-
-size_t ParticleSystem::emitParticles(const vec3* o, const vec3* v, size_t amount, const vec3& accel, const vec4& clr, float lt)
-{
-	size_t emitted = 0;
-	for (; emitted < amount; ++emitted)
-	{
-		if (!emitParticle(o[emitted], v[emitted], accel, clr, lt))
-			break;
-	}
-	return emitted;
-}
-

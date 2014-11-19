@@ -167,20 +167,20 @@ namespace et
 				
 				for (size_t i = 0; i < _activeParticles; ++i)
 				{
-					auto& particle = _particles.at(i);
+					auto& aParticle = _particles.at(i);
 					
-					_updateFunction(particle, t, dt);
+					_updateFunction(aParticle, t, dt);
 					
-					if ((t - particle.emitTime) > particle.lifeTime)
+					if ((t - aParticle.emitTime) > aParticle.lifeTime)
 					{
 						if (_autoRenewParticles)
 						{
-							particle = _variationFunction(_base, _variation, t);
-							_updateFunction(particle, t, 0.0f);
+							aParticle = _variationFunction(_base, _variation, t);
+							_updateFunction(aParticle, t, 0.0f);
 						}
 						else
 						{
-							std::swap(particle, _particles.at(_activeParticles - 1));
+							std::swap(aParticle, _particles.at(_activeParticles - 1));
 							_activeParticles--;
 						}
 					}
