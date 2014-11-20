@@ -25,14 +25,17 @@ void StandardPathResolver::validateCaches()
 {
 	ET_ASSERT(_rc != nullptr)
 	
-	if (locale::currentLocale() != _cachedLocale)
+	if (Locale::instance().currentLocale() != _cachedLocale)
 	{
-		_cachedLocale = locale::currentLocale();
+		_cachedLocale = Locale::instance().currentLocale();
 		
 		_cachedLang = "." + locale::localeLanguage(_cachedLocale);
 		_cachedSubLang = locale::localeSubLanguage(_cachedLocale);
 		
-		_cachedLanguage = _cachedLang + "-" + _cachedSubLang;
+		_cachedLanguage = _cachedLang;
+		
+		if (!_cachedSubLang.empty())
+			_cachedLanguage += "-" + _cachedSubLang;
 	}
 	
 	if (_rc->screenScaleFactor() != _cachedScreenScaleFactor)
