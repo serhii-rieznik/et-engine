@@ -38,13 +38,9 @@ void StandardPathResolver::validateCaches()
 			_cachedLanguage += "-" + _cachedSubLang;
 	}
 	
-	if (_rc->screenScaleFactor() != _cachedScreenScaleFactor)
-	{
-		_cachedScreenScaleFactor = _rc->screenScaleFactor();
-		
-		_cachedScreenScale = (_cachedScreenScaleFactor > 1) ?
-			"@" + intToStr(_cachedScreenScaleFactor) + "x" : emptyString;
-	}
+	_cachedScreenScaleFactor = _rc->screenScaleFactor();
+	_cachedScreenScale = (_cachedScreenScaleFactor > 1) ?
+		"@" + intToStr(_cachedScreenScaleFactor) + "x" : emptyString;
 }
 
 std::string StandardPathResolver::resolveFilePath(const std::string& input)
@@ -73,6 +69,11 @@ std::string StandardPathResolver::resolveFilePath(const std::string& input)
 
 			// path/file@Sx.ln.ext
 			suggested = baseName + _cachedScreenScale + _cachedLang + ext;
+			if (fileExists(suggested))
+				break;
+			
+			// path/file@Sx.ext
+			suggested = baseName + _cachedScreenScale + ext;
 			if (fileExists(suggested))
 				break;
 		}

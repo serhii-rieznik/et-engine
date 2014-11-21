@@ -97,6 +97,9 @@ namespace et
 
 		const T& value() const
 			{ return _value; }
+		
+		void setValue(const T& v)
+			{ _value = v; }
 
 		void animate(T* value, const T& from, const T& to, float duration)
 		{
