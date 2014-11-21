@@ -81,14 +81,14 @@ CharDescriptor CharacterGenerator::generateCharacter(int value, bool)
 	{
 		BinaryDataStorage data(charSize.square() * 4, 0);
 		
-		rect textureRect;
+		recti textureRect;
 		_private->_placer.place(charSize + vec2i(2), textureRect);
 		_private->renderCharacter(attrString, charSize, _private->font, data);
 		_private->updateTexture(_rc, vec2i(static_cast<int>(textureRect.left + 1.0f),
 			static_cast<int>(textureRect.top + 1.0f)), charSize, _texture, data);
 
-		desc.origin = textureRect.origin() + vec2(1.0f);
-		desc.size = textureRect.size() - vec2(2.0f);
+		desc.origin = vector2ToFloat(textureRect.origin() + vec2i(1));
+		desc.size = vector2ToFloat(textureRect.size() - vec2i(2));
 		desc.uvOrigin = _texture->getTexCoord(desc.origin);
 		desc.uvSize = desc.size / _texture->sizeFloat();
 	}
@@ -124,15 +124,15 @@ CharDescriptor CharacterGenerator::generateBoldCharacter(int value, bool)
 	{
 		BinaryDataStorage data(charSize.square() * 4, 0);
 
-		rect textureRect;
+		recti textureRect;
 		
 		_private->_placer.place(charSize + vec2i(2), textureRect);
 		_private->renderCharacter(attrString, charSize, _private->font, data);
 		_private->updateTexture(_rc, vec2i(static_cast<int>(textureRect.left + 1.0f),
 			static_cast<int>(textureRect.top + 1.0f)), charSize, _texture, data);
 
-		desc.origin = textureRect.origin() + vec2(1.0f);
-		desc.size = textureRect.size() - vec2(2.0f);
+		desc.origin = vector2ToFloat(textureRect.origin() + vec2i(1));
+		desc.size = vector2ToFloat(textureRect.size() - vec2i(2));
 		desc.uvOrigin = _texture->getTexCoord(desc.origin);
 		desc.uvSize = desc.size / _texture->sizeFloat();
 	}

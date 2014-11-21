@@ -14,17 +14,17 @@ namespace et
 	class RectPlacer
 	{
 	public:
-		typedef std::vector<rect> RectList;
+		typedef std::vector<recti> RectList;
 
 	public:
 		RectPlacer(const vec2i& contextSize, bool addSpace);
 		
-		bool place(const vec2i& size, rect& placedPosition);
+		bool place(const vec2i& size, recti& placedPosition);
 
 		const RectList& placedItems() const 
 			{ return _placedItems; }
 		
-		void addPlacedRect(const rect&);
+		void addPlacedRect(const recti&);
 		
 		const vec2i& contextSize() const
 			{ return _contextSize; }
