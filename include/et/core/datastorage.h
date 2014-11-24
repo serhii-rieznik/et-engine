@@ -194,18 +194,18 @@ namespace et
 		void fill(int value)
 			{ ET_ASSERT(mutableData()); etFillMemory(_mutableData, value, _dataSize); }
 		
-		void resize(size_t size)
+		void resize(size_t newSize)
 		{
-			if (_size == size) return;
+			if (_size == newSize) return;
 			
 			T* new_data = nullptr;
-			size_t min_size = (size < _size) ? size : _size;
-			_size = size;
+			size_t min_size = (newSize < _size) ? newSize : _size;
+			_size = newSize;
 			_dataSize = _size * sizeof(T);
 			
-			if (size > 0)
+			if (newSize > 0)
 			{
-				new_data = reinterpret_cast<T*>(sharedObjectFactory().allocator()->alloc(sizeof(T) * size));
+				new_data = reinterpret_cast<T*>(sharedObjectFactory().allocator()->alloc(sizeof(T) * newSize));
 				if (min_size > 0)
 					etCopyMemory(new_data, _immutableData, min_size * sizeof(T));
 			}

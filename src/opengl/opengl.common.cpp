@@ -189,7 +189,15 @@ std::string et::glInternalFormatToString(int format)
 		CASE_VALUE(GL_RGBA)
 		CASE_VALUE(GL_RGBA4)
 		CASE_VALUE(GL_RGB5_A1)
-		
+			
+#if defined(GL_R8)
+		CASE_VALUE(GL_R8)
+#endif
+
+#if defined(GL_RG8)
+		CASE_VALUE(GL_RG8)
+#endif
+			
 #if defined(GL_RG32F)
 		CASE_VALUE(GL_RG32F)
 #endif
