@@ -53,6 +53,8 @@ namespace et
 		ValueClass valueClass() const
 			{ return C; }
 	};
+	
+	typedef std::function<void(ValueBase::Pointer)> ValueCallbackFunction;
 		
 	template <typename T, ValueClass C>
 	class ValuePointer : public Value<T, C>::Pointer
@@ -79,6 +81,9 @@ namespace et
 		
 		const T& value() const
 			{ return this->reference().content; }
+		
+		virtual void performRecursive(ValueCallbackFunction func)
+			{ func(*this); }
 	};
 	
 	typedef ValuePointer<float, ValueClass_Float> FloatValue;
@@ -137,6 +142,8 @@ namespace et
 			return *this;
 		}
 		
+		inline void performRecursive(ValueCallbackFunction func);
+		
 	public:
 		void printContent() const;
 	};
@@ -191,7 +198,9 @@ namespace et
 
 		void setFloatForKeyPath(const StringList& keyPath, FloatValue value)
 			{ setValueForKeyPath<FloatValue, ValueClass_Float>(keyPath, value); }
-				
+		
+		inline void performRecursive(ValueCallbackFunction func);
+		
 	public:
 		IntegerValue integerForKey(const std::string& key, IntegerValue def = IntegerValue()) const
 			{ return valueForKey<IntegerValue::ValueType, ValueClass_Integer>(key, def); }
@@ -272,4 +281,47 @@ namespace et
 			return (i.invalid() || (i->valueClass() != C)) ? def : ValuePointer<T, C>(i);
 		}
 	};
+	
+	inline void ArrayValue::performRecursive(ValueCallbackFunction func)
+	{
+		func(*this);
+		
+		for (auto& cp : reference().content)
+		{
+			if (cp->valueClass() == ValueClass_Dictionary)
+			{
+				Dictionary(cp).performRecursive(func);
+			}
+			else if (cp->valueClass() == ValueClass_Array)
+			{
+				ArrayValue(cp).performRecursive(func);
+			}
+			else
+			{
+				ValuePointer(cp).performRecursive(func);
+			}
+		}
+	}
+	
+	inline void Dictionary::performRecursive(ValueCallbackFunction func)
+	{
+		func(*this);
+		
+		for (auto& cp : reference().content)
+		{
+			if (cp.second->valueClass() == ValueClass_Dictionary)
+			{
+				Dictionary(cp.second).performRecursive(func);
+			}
+			else if (cp.second->valueClass() == ValueClass_Array)
+			{
+				ArrayValue(cp.second).performRecursive(func);
+			}
+			else
+			{
+				ValuePointer(cp.second).performRecursive(func);
+			}
+		}
+	}
 }
+
