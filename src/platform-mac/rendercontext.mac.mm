@@ -90,7 +90,6 @@ private:
 	NSOpenGLPixelFormat* pixelFormat = nil;
 	NSOpenGLContext* openGlContext = nil;
 	CVDisplayLinkRef displayLink = nullptr;
-	CGLContextObj cglObject = nullptr;
 	NSSize scheduledSize = { };
 	bool firstSync = true;
 	bool resizeScheduled = false;
@@ -330,11 +329,9 @@ RenderContextPrivate::RenderContextPrivate(RenderContext*, RenderContextParamete
 	[openGlContext makeCurrentContext];
 	
 	[openGlView setOpenGLContext:openGlContext];
-		
-	cglObject = static_cast<CGLContextObj>([openGlContext CGLContextObj]);
-	
+
 	const int swap = static_cast<int>(params.swapInterval);
-	CGLSetParameter(cglObject, kCGLCPSwapInterval, &swap);
+	[openGlContext setValues:&swap forParameter:NSOpenGLCPSwapInterval];
 	
 	[mainWindow makeKeyAndOrderFront:[NSApplication sharedApplication]];
 	[mainWindow orderFrontRegardless];
@@ -370,8 +367,8 @@ void RenderContextPrivate::run()
 
 		CVDisplayLinkSetOutputCallback(displayLink, cvDisplayLinkOutputCallback, this);
 		
-		CVDisplayLinkSetCurrentCGDisplayFromOpenGLContext(displayLink, cglObject,
-			static_cast<CGLPixelFormatObj>([pixelFormat CGLPixelFormatObj]));
+		CVDisplayLinkSetCurrentCGDisplayFromOpenGLContext(displayLink,
+			[openGlContext CGLContextObj], [pixelFormat CGLPixelFormatObj]);
 	}
 	
 	CVDisplayLinkStart(displayLink);
@@ -390,15 +387,15 @@ void RenderContextPrivate::stop()
 void RenderContextPrivate::performUpdateAndRender()
 {
 #if !defined(ET_CONSOLE_APPLICATION)
+	[openGlContext lock];
 	[openGlContext makeCurrentContext];
-	CGLLockContext(cglObject);
 	
 	Threading::setRenderingThread(Threading::currentThread());
 	
 	windowDelegate->applicationNotifier.notifyIdle();
 	
-	CGLFlushDrawable(cglObject);
-	CGLUnlockContext(cglObject);
+	[openGlContext flushBuffer];
+	[openGlContext unlock];
 #endif
 }
 
@@ -427,8 +424,8 @@ void RenderContextPrivate::resize(const NSSize& sz)
 #if !defined(ET_CONSOLE_APPLICATION)
 	if (canPerformOperations())
 	{
+		[openGlContext lock];
 		[openGlContext makeCurrentContext];
-		CGLLockContext(cglObject);
 		
 		vec2i newSize(static_cast<int>(sz.width), static_cast<int>(sz.height));
 		
@@ -436,7 +433,7 @@ void RenderContextPrivate::resize(const NSSize& sz)
 		notifier.accessRenderContext()->renderState().defaultFramebuffer()->resize(newSize);
 		notifier.notifyResize(newSize);
 		
-		CGLUnlockContext(cglObject);
+		[openGlContext unlock];
 		resizeScheduled = false;
 	}
 	else
