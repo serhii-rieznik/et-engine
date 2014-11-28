@@ -28,6 +28,7 @@ namespace et
 		{
 			Option_SupportMeshes = 0x01,
 			Option_SwapYwithZ = 0x02,
+			Option_ReverseTriangles = 0x04,
 		};
 
 	public:
@@ -121,9 +122,9 @@ namespace et
 		vec2List texCoords;
 		GroupList groups;
 
-		size_t _loadOptions;
-		int lastSmoothGroup;
-		int lastGroupId_;
-		bool canConvert;
+		size_t _loadOptions = 0;
+		int lastSmoothGroup = 0;
+		int lastGroupId_ = 0;
+		bool canConvert = false;
 	};
 }

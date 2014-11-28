@@ -90,6 +90,9 @@ namespace et
 		
 		Texture depthBuffer() const
 			{ return _depthBuffer; }
+		
+		bool isCubemap() const
+			{ return _description.isCubemap; }
 				
 		void setColorRenderbuffer(uint32_t);
 		void setDepthRenderbuffer(uint32_t);

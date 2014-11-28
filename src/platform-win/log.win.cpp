@@ -6,9 +6,10 @@
  */
 
 #include <et/core/et.h>
-#include <Windows.h>
 
 #if (ET_PLATFORM_WIN)
+
+#include <Windows.h>
 
 #define PASS_TO_OUTPUTS(FUNC)		for (Output::Pointer output : logOutputs) \
 									{ \

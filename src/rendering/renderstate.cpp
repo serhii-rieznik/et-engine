@@ -712,7 +712,7 @@ RenderState::State RenderState::currentState()
 		
 		value = 0;
 		glGetIntegerv(GL_TEXTURE_BINDING_CUBE_MAP, &value);
-		s.boundTextures[GL_TEXTURE_BINDING_CUBE_MAP][i] = value;
+		s.boundTextures[GL_TEXTURE_CUBE_MAP][i] = value;
 	}
 	
 	glActiveTexture(GL_TEXTURE0 + s.activeTextureUnit);

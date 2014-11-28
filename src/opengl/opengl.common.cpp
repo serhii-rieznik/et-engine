@@ -384,7 +384,7 @@ void et::etBindTexture(uint32_t target, uint32_t texture)
 {
 #if !defined(ET_CONSOLE_APPLICATION)
 	glBindTexture(target, texture);
-	checkOpenGLError("glBindTexture(%u, %d)", target, texture);
+	checkOpenGLError("glBindTexture(%s, %d)", glTexTargetToString(target).c_str(), texture);
 
 #	if ET_ENABLE_OPENGL_COUNTERS
 	++OpenGLCounters::bindTextureCounter;

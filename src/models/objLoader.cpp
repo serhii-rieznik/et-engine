@@ -390,7 +390,7 @@ void OBJLoader::loadMaterials(const std::string& fileName, bool async, ObjectsCa
 					lowercase(bumpId);
 					if (bumpId.compare("-bm") == 0)
 					{
-						float value;
+						float value = 0.0f;
 						materialFile >> value;
 						lastMaterial->setFloat(MaterialParameter_BumpFactor, value);
 						
@@ -460,13 +460,13 @@ void OBJLoader::loadMaterials(const std::string& fileName, bool async, ObjectsCa
 		}
 		else if (key == 't')
 		{
-			char next;
+			char next = 0;
 			materialFile >> next;
 			next = static_cast<char>(tolower(next));
 			
 			if (next == 'r')
 			{
-				float value;
+				float value = 0.0f;
 				materialFile >> value;
 				lastMaterial->setFloat(MaterialParameter_Transparency, value);
 			}
@@ -487,7 +487,7 @@ void OBJLoader::loadMaterials(const std::string& fileName, bool async, ObjectsCa
 			
 			if (strcmp(map, "ap_") == 0)
 			{
-				char mapId;
+				char mapId = 0;
 				materialFile >> mapId;
 				mapId = static_cast<char>(tolower(mapId));
 				
@@ -718,6 +718,7 @@ void OBJLoader::processLoadedData()
 	RawDataAcessor<vec3> pos = _vertexData->chunk(Usage_Position).accessData<vec3>(0);
 	RawDataAcessor<vec3> norm = _vertexData->chunk(Usage_Normal).accessData<vec3>(0);
 	RawDataAcessor<vec2> tex = _vertexData->chunk(Usage_TexCoord0).accessData<vec2>(0);
+	
 	size_t index = 0;
 	
 	auto PUSH_VERTEX = [this, &pos, &norm, &tex, &index, hasTexCoords, hasNormals](const OBJVertex& vertex)
@@ -732,16 +733,27 @@ void OBJLoader::processLoadedData()
 
 		++index;
 	};
+	
+	bool shouldReverse = (_loadOptions & Option_ReverseTriangles) == Option_ReverseTriangles;
 
 	for (auto group : groups)
 	{
 		IndexType startIndex = static_cast<IndexType>(index);
 		for (auto face : group->faces)
 		{
-			PUSH_VERTEX(face.vertices[0]);
-			PUSH_VERTEX(face.vertices[1]);
-			PUSH_VERTEX(face.vertices[2]);
-
+			if (shouldReverse)
+			{
+				PUSH_VERTEX(face.vertices[2]);
+				PUSH_VERTEX(face.vertices[1]);
+				PUSH_VERTEX(face.vertices[0]);
+			}
+			else
+			{
+				PUSH_VERTEX(face.vertices[0]);
+				PUSH_VERTEX(face.vertices[1]);
+				PUSH_VERTEX(face.vertices[2]);
+			}
+			
 			if (face.vertices.size() == 4)
 			{
 				PUSH_VERTEX(face.vertices[0]);
