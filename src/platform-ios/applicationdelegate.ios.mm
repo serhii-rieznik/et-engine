@@ -31,6 +31,7 @@ using namespace et;
 @interface etApplicationDelegate()
 {
 	et::ApplicationNotifier _notifier;
+	CriticalSection _csRender;
 	
 	UIWindow* _window;
 	NSThread* _renderThread;
@@ -64,9 +65,7 @@ extern etOpenGLViewController* sharedOpenGLViewController;
 	}
 
 	_shouldUnlockRenderLock = YES;
-	
-//	while (_shouldUnlockRenderLock)
-//		[NSThread sleepForTimeInterval:1.0];
+	_csRender.enter();
 #endif
 	
     return YES;
@@ -132,7 +131,11 @@ extern etOpenGLViewController* sharedOpenGLViewController;
 	if (sharedOpenGLViewController.suspended) return;
 	
 #if !defined(ET_EMBEDDED_APPLICATION)
-	_shouldUnlockRenderLock = NO;
+	if (_shouldUnlockRenderLock)
+	{
+		_shouldUnlockRenderLock = NO;
+		_csRender.leave();
+	}
 	
 	@synchronized(sharedOpenGLViewController.context)
 	{

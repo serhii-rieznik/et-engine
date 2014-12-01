@@ -23,7 +23,6 @@ class et::RenderContextPrivate
 {
 public:
 	RenderContextPrivate(const RenderContextParameters& params);
-	
 	RenderContext* owner = nullptr;
 	uint64_t frameDuration = 0;
 };
