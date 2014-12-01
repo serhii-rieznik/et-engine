@@ -31,13 +31,12 @@ using namespace et;
 @interface etApplicationDelegate()
 {
 	et::ApplicationNotifier _notifier;
-	et::Mutex _firstRenderLock;
-	BOOL _shouldUnlockRenderLock;
 	
 	UIWindow* _window;
 	NSThread* _renderThread;
 	CADisplayLink* _displayLink;
 	
+	BOOL _shouldUnlockRenderLock;
 }
 
 @end
@@ -65,7 +64,9 @@ extern etOpenGLViewController* sharedOpenGLViewController;
 	}
 
 	_shouldUnlockRenderLock = YES;
-	_firstRenderLock.lock();
+	
+//	while (_shouldUnlockRenderLock)
+//		[NSThread sleepForTimeInterval:1.0];
 #endif
 	
     return YES;
@@ -128,24 +129,16 @@ extern etOpenGLViewController* sharedOpenGLViewController;
 
 - (void)tick
 {
+	if (sharedOpenGLViewController.suspended) return;
+	
 #if !defined(ET_EMBEDDED_APPLICATION)
-	if (!sharedOpenGLViewController.suspended)
+	_shouldUnlockRenderLock = NO;
+	
+	@synchronized(sharedOpenGLViewController.context)
 	{
-		@synchronized(sharedOpenGLViewController.context)
-		{
-			[sharedOpenGLViewController beginRender];
-			_notifier.notifyIdle();
-			[sharedOpenGLViewController endRender];
-		}
-		
-		if (_shouldUnlockRenderLock)
-		{
-			dispatch_sync(dispatch_get_main_queue(), ^
-			{
-				_firstRenderLock.unlock();
-				_shouldUnlockRenderLock= NO;
-			});
-		}
+		[sharedOpenGLViewController beginRender];
+		_notifier.notifyIdle();
+		[sharedOpenGLViewController endRender];
 	}
 #endif
 }

@@ -137,6 +137,8 @@ using namespace et;
 	[_context release];
 	_context = [newContext retain];
 #endif
+	
+	[self createFramebuffer];
 }
 
 - (void)beginRender
@@ -172,8 +174,9 @@ using namespace et;
 {
 	@synchronized(_context)
 	{
-		_scaleFactor = static_cast<float>([[UIScreen mainScreen] scale]);
 		[EAGLContext setCurrentContext:_context];
+		
+		_scaleFactor = static_cast<float>([[UIScreen mainScreen] scale]);
 		
 		CAEAGLLayer* glLayer = (CAEAGLLayer*)self.layer;
 		glLayer.opaque = YES;
