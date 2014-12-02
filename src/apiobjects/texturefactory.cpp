@@ -104,7 +104,14 @@ Texture TextureFactory::loadTexture(const std::string& fileName, ObjectsCache& c
 	{
 		TextureDescription::Pointer desc =
 			async ? et::loadTextureDescription(file, false) : et::loadTexture(file);
-
+		
+		int maxTextureSize = static_cast<int>(openGLCapabilites().maxTextureSize());
+		if ((desc->size.x > maxTextureSize) || (desc->size.y > maxTextureSize))
+		{
+			log::warning("Attempt to load texture with dimensions (%d x %d) larger than max allowed (%d)",
+				desc->size.x, desc->size.y, maxTextureSize);
+		}
+		
 		if (desc.valid())
 		{
 			bool calledFromAnotherThread = Threading::currentThread() != threading().renderingThread();

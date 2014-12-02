@@ -137,8 +137,6 @@ using namespace et;
 	[_context release];
 	_context = [newContext retain];
 #endif
-	
-	[self createFramebuffer];
 }
 
 - (void)beginRender
@@ -306,12 +304,12 @@ using namespace et;
 
 - (void)onNotificationRecevied:(NSNotification*)notification
 {
-	if ([notification.name isEqualToString:etKeyboardRequiredNotification])
+	if (!_keyboardAllowed && [notification.name isEqualToString:etKeyboardRequiredNotification])
 	{
 		_keyboardAllowed = YES;
 		[self performSelectorOnMainThread:@selector(becomeFirstResponder) withObject:nil waitUntilDone:NO];
 	}
-	else if ([notification.name isEqualToString:etKeyboardNotRequiredNotification])
+	else if (_keyboardAllowed && [notification.name isEqualToString:etKeyboardNotRequiredNotification])
 	{
 		[self performSelectorOnMainThread:@selector(resignFirstResponder) withObject:nil waitUntilDone:NO];
 		_keyboardAllowed = NO;
