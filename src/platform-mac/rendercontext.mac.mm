@@ -387,15 +387,18 @@ void RenderContextPrivate::stop()
 void RenderContextPrivate::performUpdateAndRender()
 {
 #if !defined(ET_CONSOLE_APPLICATION)
-	[openGlContext lock];
-	[openGlContext makeCurrentContext];
-	
-	Threading::setRenderingThread(Threading::currentThread());
-	
-	windowDelegate->applicationNotifier.notifyIdle();
-	
-	[openGlContext flushBuffer];
-	[openGlContext unlock];
+	if (windowDelegate->applicationNotifier.shouldPerformRendering())
+	{
+		[openGlContext lock];
+		[openGlContext makeCurrentContext];
+		
+		Threading::setRenderingThread(Threading::currentThread());
+		
+		windowDelegate->applicationNotifier.notifyIdle();
+		
+		[openGlContext flushBuffer];
+		[openGlContext unlock];
+	}
 #endif
 }
 

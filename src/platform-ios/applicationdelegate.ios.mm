@@ -129,9 +129,12 @@ extern etOpenGLViewController* sharedOpenGLViewController;
 #if !defined(ET_EMBEDDED_APPLICATION)
 	@synchronized(sharedOpenGLViewController.context)
 	{
-		[sharedOpenGLViewController beginRender];
-		_notifier.notifyIdle();
-		[sharedOpenGLViewController endRender];
+		if (_notifier.shouldPerformRendering())
+		{
+			[sharedOpenGLViewController beginRender];
+			_notifier.notifyIdle();
+			[sharedOpenGLViewController endRender];
+		}
 	}
 #endif
 }

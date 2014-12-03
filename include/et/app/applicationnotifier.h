@@ -19,7 +19,7 @@ namespace et
 			{ application().loaded(); }
 		
 		void notifyIdle()
-			{ application().idle(); }
+			{ application().performUpdateAndRender(); }
 		
 		void notifyActivated()
 			{ application().setActive(true); }
@@ -41,6 +41,9 @@ namespace et
 		
 		void notifyResize(const et::vec2i& sz)
 			{ application().renderContext()->resized(sz); }
+		
+		bool shouldPerformRendering()
+			{ return application().shouldPerformRendering(); }
 		
 		RenderContext* accessRenderContext()
 			{ return application().renderContext(); }

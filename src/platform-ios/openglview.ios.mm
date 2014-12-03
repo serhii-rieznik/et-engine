@@ -1,3 +1,4 @@
+
 /*
  * This file is part of `et engine`
  * Copyright 2009-2014 by Sergey Reznik
@@ -164,8 +165,6 @@ using namespace et;
 	
 	[_context presentRenderbuffer:GL_RENDERBUFFER];
 	checkOpenGLError("[_context presentRenderbuffer:GL_RENDERBUFFER]");
-	
-	[EAGLContext setCurrentContext:nil];
 }
 
 - (void)createFramebuffer

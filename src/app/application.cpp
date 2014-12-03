@@ -108,34 +108,36 @@ void Application::performRendering()
 #endif
 }
 
-void Application::idle()
+bool Application::shouldPerformRendering()
 {
-	ET_ASSERT(_running);
-
 	uint64_t currentTime = queryContiniousTimeInMilliSeconds();
 	uint64_t elapsedTime = currentTime - _lastQueuedTimeMSec;
-
-	if (elapsedTime >= _fpsLimitMSec)
-	{
-		if (!_suspended)
-		{
-			_runLoop.update(currentTime);
-			_delegate->idle(_runLoop.firstTimerPool()->actualTime());
-			
-#		if !defined(ET_CONSOLE_APPLICATION)
-			performRendering();
-#		endif
-		}
-		
-		_lastQueuedTimeMSec = queryContiniousTimeInMilliSeconds();
-	}
-	else 
+	
+	if (elapsedTime < _fpsLimitMSec)
 	{
 		uint64_t sleepInterval = (_fpsLimitMSec - elapsedTime) +
 			(randomInteger(1000) > _fpsLimitMSecFractPart ? 0 : static_cast<uint64_t>(-1));
 		
 		Thread::sleepMSec(sleepInterval);
+		
+		return false;
 	}
+	
+	_lastQueuedTimeMSec = queryContiniousTimeInMilliSeconds();
+	
+	return !_suspended;
+}
+
+void Application::performUpdateAndRender()
+{
+	ET_ASSERT(_running && !_suspended);
+	
+	_runLoop.update(_lastQueuedTimeMSec);
+	_delegate->idle(_runLoop.firstTimerPool()->actualTime());
+	
+#if !defined(ET_CONSOLE_APPLICATION)
+	performRendering();
+#endif
 }
 
 void Application::setFrameRateLimit(size_t value)

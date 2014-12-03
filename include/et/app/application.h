@@ -122,7 +122,10 @@ namespace et
 		void terminated();
 		
 		void enterRunLoop();
-		void idle();
+		
+		bool shouldPerformRendering();
+		void performUpdateAndRender();
+		
 		void updateTimers(float dt);
 		
 	private:
