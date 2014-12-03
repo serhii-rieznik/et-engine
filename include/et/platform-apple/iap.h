@@ -58,7 +58,7 @@ namespace et
 		ET_DECLARE_EVENT0(failedToCheckAvailableProducts)
 
 		ET_DECLARE_EVENT1(productPurchased, Transaction)
-		ET_DECLARE_EVENT1(failedToPurchaseProduct, std::string)
+		ET_DECLARE_EVENT2(failedToPurchaseProduct, std::string, std::string)
 		
 		ET_DECLARE_EVENT1(purchaseRestored, Transaction)
 		ET_DECLARE_EVENT0(restoringPurchasesFinished)

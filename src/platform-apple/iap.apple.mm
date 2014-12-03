@@ -276,8 +276,8 @@ Dictionary PurchasesManager::receiptData() const
 	
 	if (receipt == nil)
 	{
-		_pm->failedToPurchaseProduct.invokeInMainRunLoop(
-			std::string([transaction.payment.productIdentifier UTF8String]));
+		std::string trId([transaction.payment.productIdentifier UTF8String]);
+		_pm->failedToPurchaseProduct.invokeInMainRunLoop(trId, emptyString);
 		return;
 	}
 		
@@ -330,16 +330,16 @@ Dictionary PurchasesManager::receiptData() const
 						[self transactionFromSKPaymentTransaction:transaction]);
 				}
 				else
-					_pm->failedToPurchaseProduct.invokeInMainRunLoop(productId);
+					_pm->failedToPurchaseProduct.invokeInMainRunLoop(productId, emptyString);
 			}
 			else
 			{
-				_pm->failedToPurchaseProduct.invokeInMainRunLoop(productId);
+				_pm->failedToPurchaseProduct.invokeInMainRunLoop(productId, emptyString);
 			}
 		}
 		else
 		{
-			_pm->failedToPurchaseProduct.invokeInMainRunLoop(productId);
+			_pm->failedToPurchaseProduct.invokeInMainRunLoop(productId, emptyString);
 		}
 	}];
 }
@@ -376,7 +376,8 @@ Dictionary PurchasesManager::receiptData() const
 		else if (state == SKPaymentTransactionStateFailed)
 		{
 			std::string productId([transaction.payment.productIdentifier UTF8String]);
-			_pm->failedToPurchaseProduct.invokeInMainRunLoop(productId);
+			std::string errorText([transaction.error.localizedDescription UTF8String]);
+			_pm->failedToPurchaseProduct.invokeInMainRunLoop(productId, errorText);
 		}
 		
 		if (state != SKPaymentTransactionStatePurchasing)

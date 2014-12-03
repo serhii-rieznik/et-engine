@@ -49,7 +49,7 @@ InputStream::InputStream(const std::string& file, StreamMode mode)
 
 	if (_private->stream->fail())
 	{
-		log::error("Unable to load file: %s", file.c_str());
+		log::error("Unable to open file: %s", file.c_str());
 		sharedObjectFactory().deleteObject(_private->stream);
 		_private->stream = nullptr;
 	}
