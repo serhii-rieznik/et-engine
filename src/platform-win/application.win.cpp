@@ -142,9 +142,9 @@ int Application::platformRun(int, char*[])
 				TranslateMessage(&msg);
 				DispatchMessageW(&msg);
 			}
-			else
+			else if (shouldPerformRendering())
 			{
-				idle();
+				performUpdateAndRender();
 			}
 		}
 	}
