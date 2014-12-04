@@ -198,6 +198,8 @@ namespace et
 		
 		bool validate(void*, bool abortOnFail = true);
 		
+		void flushUnusedBlocks();
+		
 		void printInfo();
 		
 	private:
@@ -245,6 +247,9 @@ bool BlockMemoryAllocator::validatePointer(void* ptr, bool abortOnFail)
 
 void BlockMemoryAllocator::printInfo() const
 	{ _private->printInfo(); }
+
+void BlockMemoryAllocator::flushUnusedBlocks()
+	{ _private->flushUnusedBlocks(); }
 
 /*
  * Private
@@ -318,6 +323,46 @@ bool BlockMemoryAllocatorPrivate::validate(void* ptr, bool abortOnFail)
 	}
 	
 	return false;
+}
+
+void BlockMemoryAllocatorPrivate::flushUnusedBlocks()
+{
+	CriticalSectionScope lock(_csLock);
+	
+	uint32_t blocksFlushed = 0;
+	uint32_t memoryReleased = 0;
+	
+	auto i = _chunks.begin();
+	while (i != _chunks.end())
+	{
+		bool shouldRemove = true;
+		auto first = i->firstInfo;
+		while (first != i->lastInfo)
+		{
+			if (first->allocated == allocatedValue)
+			{
+				shouldRemove = false;
+				break;
+			}
+			++first;
+		}
+		
+		if (shouldRemove)
+		{
+			memoryReleased += i->size;
+			i = _chunks.erase(i);
+			++blocksFlushed;
+		}
+		else
+		{
+			++i;
+		}
+	}
+	
+	if (blocksFlushed > 0)
+	{
+		log::info("[BlockMemoryAllocator] %u blocks flushed, total memory released: %u", blocksFlushed, memoryReleased);
+	}
 }
 
 void BlockMemoryAllocatorPrivate::free(void* ptr)

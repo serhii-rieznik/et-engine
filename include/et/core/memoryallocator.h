@@ -104,6 +104,8 @@ namespace et
 		void free(void*);
 		bool validatePointer(void*, bool = true);
 		void printInfo() const;
+		
+		void flushUnusedBlocks();
 				
 	private:
 		BlockMemoryAllocatorPrivate* _private = nullptr;
