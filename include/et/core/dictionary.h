@@ -136,6 +136,9 @@ namespace et
 		ArrayValue(ValueBase::Pointer p) :
 			ValuePointer<ArrayValue::ValueType, ValueClass_Array>(p) { }
 		
+		ArrayValue(const ValuePointer::ValueType& c) :
+			ValuePointer<ArrayValue::ValueType, ValueClass_Array>( ) { reference().content = c; }
+		
 		ArrayValue& operator = (const ArrayValue& r)
 		{
 			PointerType::operator = (r);
@@ -167,6 +170,9 @@ namespace et
 		
 		Dictionary(ValueBase::Pointer p) :
 			ValuePointer<Dictionary::ValueType, ValueClass_Dictionary>(p) { }
+		
+		Dictionary(const ValuePointer::ValueType& c) :
+			ValuePointer<Dictionary::ValueType, ValueClass_Dictionary>( ) { reference().content = c; }
 		
 		Dictionary& operator = (const Dictionary& r)
 		{
