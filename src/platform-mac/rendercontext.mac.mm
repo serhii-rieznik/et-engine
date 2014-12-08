@@ -88,7 +88,7 @@ private:
 	etWindowDelegate* windowDelegate = nil;
 	etOpenGLWindow* mainWindow = nil;
 	NSOpenGLPixelFormat* pixelFormat = nil;
-	NSOpenGLContext* openGlContext = nil;
+	CGLContextObj cOpenGLContext = nullptr;
 	CVDisplayLinkRef displayLink = nullptr;
 	NSSize scheduledSize = { };
 	bool firstSync = true;
@@ -325,13 +325,13 @@ RenderContextPrivate::RenderContextPrivate(RenderContext*, RenderContextParamete
 	[mainWindow setOpaque:YES];
 	[mainWindow setContentView:openGlView];
 	
-	openGlContext = [[NSOpenGLContext alloc] initWithFormat:pixelFormat shareContext:nil];
-	[openGlContext makeCurrentContext];
+	[openGlView setOpenGLContext:[[NSOpenGLContext alloc] initWithFormat:pixelFormat shareContext:nil]];
+	cOpenGLContext = [[openGlView openGLContext] CGLContextObj];
 	
-	[openGlView setOpenGLContext:openGlContext];
-
 	const int swap = static_cast<int>(params.swapInterval);
-	[openGlContext setValues:&swap forParameter:NSOpenGLCPSwapInterval];
+	
+	CGLSetCurrentContext(cOpenGLContext);
+	CGLSetParameter(cOpenGLContext, kCGLCPSwapInterval, &swap);
 	
 	[mainWindow makeKeyAndOrderFront:[NSApplication sharedApplication]];
 	[mainWindow orderFrontRegardless];
@@ -343,10 +343,10 @@ RenderContextPrivate::RenderContextPrivate(RenderContext*, RenderContextParamete
 RenderContextPrivate::~RenderContextPrivate()
 {
 #if !defined(ET_CONSOLE_APPLICATION)
-	ET_OBJC_RELEASE(openGlContext);
 	ET_OBJC_RELEASE(windowDelegate);
-	mainWindow = nil;
 #endif
+	
+	mainWindow = nil;
 }
 
 void RenderContextPrivate::run()
@@ -366,9 +366,7 @@ void RenderContextPrivate::run()
 		}
 
 		CVDisplayLinkSetOutputCallback(displayLink, cvDisplayLinkOutputCallback, this);
-		
-		CVDisplayLinkSetCurrentCGDisplayFromOpenGLContext(displayLink,
-			[openGlContext CGLContextObj], [pixelFormat CGLPixelFormatObj]);
+		CVDisplayLinkSetCurrentCGDisplayFromOpenGLContext(displayLink, cOpenGLContext, [pixelFormat CGLPixelFormatObj]);
 	}
 	
 	CVDisplayLinkStart(displayLink);
@@ -389,15 +387,14 @@ void RenderContextPrivate::performUpdateAndRender()
 #if !defined(ET_CONSOLE_APPLICATION)
 	if (windowDelegate->applicationNotifier.shouldPerformRendering())
 	{
-		[openGlContext lock];
-		[openGlContext makeCurrentContext];
+		CGLLockContext(cOpenGLContext);
+		CGLSetCurrentContext(cOpenGLContext);
 		
 		Threading::setRenderingThread(Threading::currentThread());
-		
 		windowDelegate->applicationNotifier.notifyIdle();
 		
-		[openGlContext flushBuffer];
-		[openGlContext unlock];
+		CGLFlushDrawable(cOpenGLContext);
+		CGLUnlockContext(cOpenGLContext);
 	}
 #endif
 }
@@ -427,8 +424,10 @@ void RenderContextPrivate::resize(const NSSize& sz)
 #if !defined(ET_CONSOLE_APPLICATION)
 	if (canPerformOperations())
 	{
-		[openGlContext lock];
-		[openGlContext makeCurrentContext];
+		CGLLockContext(cOpenGLContext);
+		CGLSetCurrentContext(cOpenGLContext);
+		
+		Threading::setRenderingThread(Threading::currentThread());
 		
 		vec2i newSize(static_cast<int>(sz.width), static_cast<int>(sz.height));
 		
@@ -436,7 +435,8 @@ void RenderContextPrivate::resize(const NSSize& sz)
 		notifier.accessRenderContext()->renderState().defaultFramebuffer()->resize(newSize);
 		notifier.notifyResize(newSize);
 		
-		[openGlContext unlock];
+		CGLUnlockContext(cOpenGLContext);
+		
 		resizeScheduled = false;
 	}
 	else
