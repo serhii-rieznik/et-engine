@@ -34,20 +34,27 @@ VertexArrayObjectData::VertexArrayObjectData(RenderContext* rc, const std::strin
 VertexArrayObjectData::~VertexArrayObjectData()
 {
 #if !defined(ET_CONSOLE_APPLICATION)
+	
 #	if (ET_SUPPORT_VERTEX_ARRAY_OBJECTS)
-	if (openGLCapabilites().hasFeature(OpenGLFeature_VertexArrayObjects))
+	if (_vao && openGLCapabilites().hasFeature(OpenGLFeature_VertexArrayObjects))
 	{
-		if (_vao && glIsVertexArray(_vao))
-			glDeleteVertexArrays(1, &_vao);
+		_rc->renderState().bindVertexArray(_vao);
+		
+		_rc->renderState().vertexArrayDeleted(_vao,
+			(_vb.valid() ? _vb->glID() : 0), (_ib.valid() ? _ib->glID() : 0));
+		
+		glDeleteVertexArrays(1, &_vao);
+		checkOpenGLError("glDeleteVertexArrays");
 	}
 #	endif
-	_rc->renderState().vertexArrayDeleted(_vao);
+	
 #endif
 }
 
 void VertexArrayObjectData::init()
 {
 #if !defined(ET_CONSOLE_APPLICATION)
+	
 #	if (ET_SUPPORT_VERTEX_ARRAY_OBJECTS)
 	if (openGLCapabilites().hasFeature(OpenGLFeature_VertexArrayObjects))
 	{
@@ -56,7 +63,9 @@ void VertexArrayObjectData::init()
 		_rc->renderState().bindVertexArray(_vao);
 	}
 #	endif
+	
 	_rc->renderState().bindBuffers(_vb, _ib, true);
+	
 #endif
 }
 

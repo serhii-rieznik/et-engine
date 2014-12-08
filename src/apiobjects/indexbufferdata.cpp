@@ -24,10 +24,10 @@ IndexBufferData::IndexBufferData(RenderContext* rc, IndexArray::Pointer i, Buffe
 IndexBufferData::~IndexBufferData()
 {
 #if !defined(ET_CONSOLE_APPLICATION)
+	_rc->renderState().indexBufferDeleted(_indexBuffer);
+	
 	if (_indexBuffer != 0)
 		glDeleteBuffers(1, &_indexBuffer);
-
-	_rc->renderState().indexBufferDeleted(_indexBuffer);
 #endif
 }
 

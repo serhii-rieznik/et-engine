@@ -39,13 +39,13 @@ Program::Program(RenderContext* rc, const std::string& vertexShader, const std::
 Program::~Program()
 {
 #if !defined(ET_CONSOLE_APPLICATION)
+	_rc->renderState().programDeleted(_glID);
+	
 	if ((_glID != 0) && glIsProgram(_glID))
 	{
 		glDeleteProgram(_glID);
 		checkOpenGLError("glDeleteProgram: %s", name().c_str());
 	}
-
-	_rc->renderState().programDeleted(_glID);
 #endif
 }
 

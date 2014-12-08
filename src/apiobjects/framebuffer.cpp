@@ -142,6 +142,8 @@ Framebuffer::Framebuffer(RenderContext* rc, uint32_t fboId, const std::string& a
 Framebuffer::~Framebuffer()
 {
 #if !defined(ET_CONSOLE_APPLICATION)
+	_rc->renderState().frameBufferDeleted(_id);
+	
 	if (_colorRenderbuffer && glIsRenderbuffer(_colorRenderbuffer))
 	{
 		glDeleteRenderbuffers(1, &_colorRenderbuffer);
@@ -159,8 +161,6 @@ Framebuffer::~Framebuffer()
 		glDeleteFramebuffers(1, &_id);
 		checkOpenGLError("glDeleteFramebuffers");
 	}
-
-	_rc->renderState().frameBufferDeleted(_id);
 #endif
 }
 

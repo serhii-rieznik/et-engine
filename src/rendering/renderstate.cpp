@@ -135,12 +135,12 @@ void RenderState::bindBuffer(uint32_t target, uint32_t buffer, bool force)
 	{
 		_currentState.boundArrayBuffer = buffer;
 		etBindBuffer(target, buffer);
-	} 
+	}
 	else if ((target == GL_ELEMENT_ARRAY_BUFFER) && (force || (_currentState.boundElementArrayBuffer != buffer)))
 	{ 
 		_currentState.boundElementArrayBuffer = buffer;
 		etBindBuffer(target, buffer);
-	} 
+	}
 	else if ((target != GL_ARRAY_BUFFER) && (target != GL_ELEMENT_ARRAY_BUFFER))
 	{
 		log::warning("Trying to bind buffer %u to unknown target %u", buffer, target);
@@ -174,7 +174,7 @@ void RenderState::bindBuffer(const VertexBuffer& buf, bool force)
 {
 #if !defined(ET_CONSOLE_APPLICATION)
 	bindBuffer(GL_ARRAY_BUFFER, buf.valid() ? buf->glID() : 0, force);
-
+	
 	if (buf.valid()) 
 		setVertexAttributes(buf->declaration(), force);
 #endif
@@ -466,10 +466,16 @@ void RenderState::setBlend(bool enable, BlendState blend)
 #endif
 }
 
-void RenderState::vertexArrayDeleted(uint32_t buffer)
+void RenderState::vertexArrayDeleted(uint32_t buffer, uint32_t vb, uint32_t ib)
 {
-	if ((_currentState.boundVertexArrayObject == buffer) && openGLCapabilites().hasFeature(OpenGLFeature_VertexArrayObjects))
+	if (openGLCapabilites().hasFeature(OpenGLFeature_VertexArrayObjects))
+	{
+		ET_ASSERT(_currentState.boundVertexArrayObject == buffer)
+		
+		bindBuffer(GL_ARRAY_BUFFER, 0, true);
+		bindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0, true);
 		bindVertexArray(0);
+	}
 }
 
 void RenderState::vertexBufferDeleted(uint32_t buffer)

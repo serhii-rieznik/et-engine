@@ -38,9 +38,10 @@ VertexBufferData::VertexBufferData(RenderContext* rc, const VertexDeclaration& d
 VertexBufferData::~VertexBufferData()
 {
 #if !defined(ET_CONSOLE_APPLICATION)
+	_rc->renderState().vertexBufferDeleted(_vertexBuffer);
+	
 	if (_vertexBuffer)
 		glDeleteBuffers(1, &_vertexBuffer);
-	_rc->renderState().vertexBufferDeleted(_vertexBuffer);
 #endif
 }
 

@@ -209,12 +209,12 @@ namespace et
 		/*
 		 * Deletion handlers
 		 */
-		void programDeleted(uint32_t program);
-		void textureDeleted(uint32_t texture);
-		void vertexArrayDeleted(uint32_t buffer);
-		void vertexBufferDeleted(uint32_t buffer);
-		void indexBufferDeleted(uint32_t buffer);
-		void frameBufferDeleted(uint32_t buffer);
+		void programDeleted(uint32_t);
+		void textureDeleted(uint32_t);
+		void vertexArrayDeleted(uint32_t, uint32_t, uint32_t);
+		void vertexBufferDeleted(uint32_t);
+		void indexBufferDeleted(uint32_t);
+		void frameBufferDeleted(uint32_t);
 
 		/*
 		 * Service
