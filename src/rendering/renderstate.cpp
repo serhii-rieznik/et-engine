@@ -466,7 +466,7 @@ void RenderState::setBlend(bool enable, BlendState blend)
 #endif
 }
 
-void RenderState::vertexArrayDeleted(uint32_t buffer, uint32_t vb, uint32_t ib)
+void RenderState::vertexArrayDeleted(uint32_t, uint32_t, uint32_t)
 {
 	if (openGLCapabilites().hasFeature(OpenGLFeature_VertexArrayObjects))
 	{
