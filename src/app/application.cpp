@@ -86,7 +86,7 @@ void Application::enterRunLoop()
 	setActive(true);
 	
 	while (_running)
-		idle();
+		performUpdateAndRender();
 	
 	terminated();
 #else

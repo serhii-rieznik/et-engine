@@ -13,20 +13,49 @@ namespace et
 {
 	enum : uint32_t
 	{
+		
+#	if (ET_DEBUG)
+		minimumAllocationStatisticsSize = 96,
+		maximumAllocationStatisticsSize = (uint32_t)((2048 + minimumAllocationStatisticsSize) / minimumAllocationStatisticsSize),
+#	endif
+
 		megabytes = 1024 * 1024,
 		allocatedValue = 0x00000000,
 		notAllocatedValue = 0xffffffff,
 		defaultChunkSize = 16 * megabytes,
-		minimumAllocationSize = 16,
-		minimumAllocationStatisticsSize = 96,
-		maximumAllocationStatisticsSize = (uint32_t)((2048 + minimumAllocationStatisticsSize) / minimumAllocationStatisticsSize)
+		minimumAllocationSize = 32,
 	};
 
 	struct MemoryChunkInfo
 	{
-		uint32_t allocated = notAllocatedValue;
-		uint32_t begin = 0;
-		uint32_t length = 0;
+		union
+		{
+			struct
+			{
+				uint32_t allocated = notAllocatedValue;
+				uint32_t begin = 0;
+				uint32_t length = 0;
+				uint32_t dummy = 0;
+			};
+			
+			struct
+			{
+				uint64_t v0;
+				uint64_t v1;
+			};
+		};
+		
+		void swapWith(MemoryChunkInfo* info)
+		{
+			auto& iv0 = info->v0;
+			auto& iv1 = info->v1;
+			v0 = v0 ^ iv0;
+			iv0 = v0 ^ iv0;
+			v0 = v0 ^ iv0;
+			v1 = v1 ^ iv1;
+			iv1 = v1 ^ iv1;
+			v1 = v1 ^ iv1;
+		}
 	};
 	
 	class MemoryChunk
@@ -92,10 +121,10 @@ namespace et
 	
 	
 	template <int blockSize>
-	class BlockMemorySmallBlockAllocator
+	class SmallMemoryBlockAllocator
 	{
 	public:
-		BlockMemorySmallBlockAllocator()
+		SmallMemoryBlockAllocator()
 		{
 			auto sizeToAllocate = blocksCount * sizeof(SmallMemoryBlock);
 			blocks = reinterpret_cast<SmallMemoryBlock*>(calloc(1, sizeToAllocate));
@@ -104,7 +133,7 @@ namespace et
 			lastBlock = firstBlock + blocksCount;
 		}
 		
-		~BlockMemorySmallBlockAllocator()
+		~SmallMemoryBlockAllocator()
 		{
 			log::ConsoleOutput lOut;
 			for (auto i = firstBlock; i != lastBlock; ++i)
@@ -206,8 +235,8 @@ namespace et
 		CriticalSection _csLock;
 		std::list<MemoryChunk> _chunks;
 		
-		BlockMemorySmallBlockAllocator<48> _allocator48;
-		BlockMemorySmallBlockAllocator<96> _allocator96;
+		SmallMemoryBlockAllocator<48> _allocator48;
+		SmallMemoryBlockAllocator<96> _allocator96;
 	};
 }
 
@@ -434,14 +463,16 @@ void BlockMemoryAllocatorPrivate::printInfo()
 	
 	uint32_t allocatedBlocks = 0;
 
-	log::info("\t0...48 bytes {");
+	log::info("\t0...48 bytes");
+	log::info("\t{");
 	allocatedBlocks = 0;
 	for (auto i = _allocator48.firstBlock; i != _allocator48.lastBlock; ++i) allocatedBlocks += i->allocated;
 	log::info("\t\tallocated blocks : %u of %lld", allocatedBlocks, (int64_t)(_allocator48.lastBlock - _allocator48.firstBlock));
 	log::info("\t\tcurrent offset : %lld", (int64_t)(_allocator48.currentBlock - _allocator48.firstBlock));
 	log::info("\t},");
 	
-	log::info("\t48...96 {");
+	log::info("\t48...96");
+	log::info("\t{");
 	allocatedBlocks = 0;
 	for (auto i = _allocator96.firstBlock; i != _allocator96.lastBlock; ++i) allocatedBlocks += i->allocated;
 	log::info("\t\tallocated blocks : %u of %lld", allocatedBlocks,  (int64_t)(_allocator96.lastBlock - _allocator96.firstBlock));
@@ -536,14 +567,16 @@ bool MemoryChunk::allocate(uint32_t sizeToAllocate, void*& result)
 			if (remaining > minimumAllocationSize)
 			{
 				auto nextInfo = info + 1;
+				
 				if (nextInfo >= lastInfo) // last one reached
 				{
 					lastInfo = nextInfo + 1;
 				}
 				else
 				{
-					for (auto i = lastInfo; i > nextInfo; --i)
-						std::swap(*(i-1), *i);
+					for (auto i = lastInfo, prev = lastInfo - 1; i > nextInfo; --i, --prev)
+						prev->swapWith(i);
+					
 					++lastInfo;
 				}
 				
@@ -617,6 +650,7 @@ bool MemoryChunk::free(char* ptr)
 void MemoryChunk::compress()
 {
 	auto i = firstInfo;
+	
 	while (i < lastInfo)
 	{
 		if (i->allocated == notAllocatedValue)
@@ -625,8 +659,11 @@ void MemoryChunk::compress()
 			if ((nextInfo < lastInfo) && (nextInfo->allocated == notAllocatedValue))
 			{
 				i->length += nextInfo->length;
-				for (auto j = nextInfo; j < lastInfo; ++j)
-					std::swap(*(j+1), *j);
+				
+				auto next = nextInfo + 1;
+				while (nextInfo < lastInfo)
+					(nextInfo++)->swapWith(next++);
+				
 				--lastInfo;
 			}
 			else
