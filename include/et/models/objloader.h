@@ -84,11 +84,16 @@ namespace et
 			std::string name;
 			std::string material;
 			FaceList faces;
+			
+			OBJGroup()
+				{ }
+			
+			OBJGroup(const std::string& aName) :
+				name(aName) { }
+			
+			OBJGroup(const std::string& aName, const std::string& aMat) :
+				name(aName), material(aMat) { }
 		};
-
-		typedef std::vector<OBJGroup*> GroupList;
-		typedef std::vector<vec3> vec3List;
-		typedef std::vector<vec2> vec2List;
 
 	private:
 		void loadData(bool async, ObjectsCache& cache);
@@ -101,7 +106,7 @@ namespace et
 	private:
 		friend class OBJLoaderThread;
 
-		RenderContext* _rc;
+		RenderContext* _rc = nullptr;
 		AutoPtr<OBJLoaderThread> _thread;
 
 		std::string inputFileName;
@@ -109,9 +114,8 @@ namespace et
 		std::ifstream inputFile;
 		std::ifstream materialFile;
 
-		OBJGroup* lastGroup;
-		s3d::Material::Pointer lastMaterial;
-		s3d::Material::List materials;
+		s3d::Material::Pointer _lastMaterial;
+		s3d::Material::List _materials;
 		OBJMeshIndexBoundsList _meshes;
         IndexArray::Pointer _indices;
 		VertexArray::Pointer _vertexData;
@@ -119,11 +123,11 @@ namespace et
 		std::vector<et::vec3, et::SharedBlockAllocatorSTDProxy<et::vec3>> _vertices;
 		std::vector<et::vec3, et::SharedBlockAllocatorSTDProxy<et::vec3>> _normals;
 		std::vector<et::vec2, et::SharedBlockAllocatorSTDProxy<et::vec2>> _texCoords;
-		GroupList groups;
+		std::vector<OBJGroup*,et::SharedBlockAllocatorSTDProxy<OBJGroup*>> _groups;
 
+		OBJGroup* lastGroup = nullptr;
 		size_t _loadOptions = 0;
-		int lastSmoothGroup = 0;
-		int lastGroupId_ = 0;
-		bool canConvert = false;
+		int _lastSmoothGroup = 0;
+		int _lastGroupId = 0;
 	};
 }

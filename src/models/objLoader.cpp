@@ -127,8 +127,10 @@ OBJLoader::~OBJLoader()
 		_thread->waitForTermination();
 	}
 	
-	for (GroupList::iterator gi = groups.begin(), ge = groups.end(); gi != ge; ++gi)
-		sharedObjectFactory().deleteObject(*gi);
+	for (auto group : _groups)
+		sharedObjectFactory().deleteObject(group);
+	
+	_groups.clear();
 	
 	if (inputFile.is_open())
 		inputFile.close();
@@ -175,15 +177,11 @@ void OBJLoader::loadData(bool async, ObjectsCache& cache)
 		}
 		else if (key == 'g') // group
 		{
-			lastGroup = sharedObjectFactory().createObject<OBJGroup>();
-			groups.push_back(lastGroup);
-			
 			getLine(inputFile, line);
+			trim(line);
 			
-			std::string lineStr(line);
-			trim(lineStr);
-			
-			lastGroup->name = lineStr;
+			lastGroup = sharedObjectFactory().createObject<OBJGroup>(line);
+			_groups.push_back(lastGroup);
 		}
 		else if (key == 'u') // group's material
 		{
@@ -196,32 +194,15 @@ void OBJLoader::loadData(bool async, ObjectsCache& cache)
 				std::string materialId;
 				inputFile >> materialId;
 				
-				if (lastGroup == nullptr)
-				{
-					lastGroup = sharedObjectFactory().createObject<OBJGroup>();
-					lastGroup->material = materialId;
-					lastGroup->name = "group-" + intToStr(lastGroupId_++) + "-" + materialId;
-					
-					groups.push_back(lastGroup);
-					
-					log::info("[OBJLoader] group created, because 'usemtl' found without group: %s",
-						lastGroup->name.c_str());
-				}
-				
-				if (lastGroup->material.empty())
+				if ((lastGroup != nullptr) && (lastGroup->material.empty() || lastGroup->material == materialId))
 				{
 					lastGroup->material = materialId;
 				}
-				else if (lastGroup->material != materialId)
+				else
 				{
-					lastGroup = sharedObjectFactory().createObject<OBJGroup>();
-					lastGroup->name = "group-" + intToStr(lastGroupId_++) + "-" + materialId;
-					lastGroup->material = materialId;
-					
-					groups.push_back(lastGroup);
-					
-					log::info("[OBJLoader] group created, because 'usemtl' found inside group with other material: %s",
-						lastGroup->name.c_str());
+					auto groupName = "group-" + intToStr(_lastGroupId++) + "-" + materialId;
+					lastGroup = sharedObjectFactory().createObject<OBJGroup>(groupName, materialId);
+					_groups.push_back(lastGroup);
 				}
 			}
 			else
@@ -233,14 +214,11 @@ void OBJLoader::loadData(bool async, ObjectsCache& cache)
 		{
 			if (lastGroup == nullptr)
 			{
-				lastGroup = sharedObjectFactory().createObject<OBJGroup>();
-				groups.push_back(lastGroup);
-				lastGroup->name = "group" + intToStr(lastGroupId_);
-				++lastGroupId_;
-				std::cout << "Group created: " << lastGroupId_;
+				lastGroup = sharedObjectFactory().createObject<OBJGroup>("group-" + intToStr(_lastGroupId++));
+				_groups.push_back(lastGroup);
 			}
 			getLine(inputFile, line);
-			lastSmoothGroup = (line.compare("off") == 0) ? 0 : strToInt(line);
+			_lastSmoothGroup = (line.compare("off") == 0) ? 0 : strToInt(line);
 		}
 		else if (key == 'f') // faces
 		{
@@ -280,8 +258,8 @@ void OBJLoader::loadData(bool async, ObjectsCache& cache)
 			
 			if (lastGroup == nullptr)
 			{
-				lastGroup = sharedObjectFactory().createObject<OBJGroup>();
-				groups.push_back(lastGroup);
+				lastGroup = sharedObjectFactory().createObject<OBJGroup>("group-" + intToStr(_lastGroupId++));
+				_groups.push_back(lastGroup);
 			}
 			
 			lastGroup->faces.push_back(face);
@@ -401,10 +379,10 @@ void OBJLoader::loadMaterials(const std::string& fileName, bool async, ObjectsCa
 					{
 						float value = 0.0f;
 						materialFile >> value;
-						lastMaterial->setFloat(MaterialParameter_BumpFactor, value);
+						_lastMaterial->setFloat(MaterialParameter_BumpFactor, value);
 						
 						getLine(materialFile, line);
-						lastMaterial->setTexture(MaterialParameter_NormalMap, _rc->textureFactory().loadTexture(line, cache, async));
+						_lastMaterial->setTexture(MaterialParameter_NormalMap, _rc->textureFactory().loadTexture(line, cache, async));
 					}
 					else
 					{
@@ -415,7 +393,7 @@ void OBJLoader::loadMaterials(const std::string& fileName, bool async, ObjectsCa
 				else
 				{
 					getLine(materialFile, line);
-					lastMaterial->setTexture(MaterialParameter_NormalMap, _rc->textureFactory().loadTexture(line, cache, async) );
+					_lastMaterial->setTexture(MaterialParameter_NormalMap, _rc->textureFactory().loadTexture(line, cache, async) );
 				}
 			}
 			else
@@ -426,7 +404,7 @@ void OBJLoader::loadMaterials(const std::string& fileName, bool async, ObjectsCa
 		}
 		else if (key == 'k')
 		{
-			if (lastMaterial.invalid())
+			if (_lastMaterial.invalid())
 			{
 				getLine(materialFile, line);
 			}
@@ -440,25 +418,25 @@ void OBJLoader::loadMaterials(const std::string& fileName, bool async, ObjectsCa
 				{
 					vec4 value;
 					materialFile >> value;
-					lastMaterial->setVector(MaterialParameter_AmbientColor, value);
+					_lastMaterial->setVector(MaterialParameter_AmbientColor, value);
 				} 
 				else if (next == 'd')
 				{
 					vec4 value;
 					materialFile >> value;
-					lastMaterial->setVector(MaterialParameter_DiffuseColor, value);
+					_lastMaterial->setVector(MaterialParameter_DiffuseColor, value);
 				} 
 				else if (next == 's')
 				{
 					vec4 value;
 					materialFile >> value;
-					lastMaterial->setVector(MaterialParameter_SpecularColor, value);
+					_lastMaterial->setVector(MaterialParameter_SpecularColor, value);
 				} 
 				else if (next == 'e')
 				{
 					vec4 value;
 					materialFile >> value;
-					lastMaterial->setVector(MaterialParameter_EmissiveColor, value);
+					_lastMaterial->setVector(MaterialParameter_EmissiveColor, value);
 				} 
 				else
 				{
@@ -477,7 +455,7 @@ void OBJLoader::loadMaterials(const std::string& fileName, bool async, ObjectsCa
 			{
 				float value = 0.0f;
 				materialFile >> value;
-				lastMaterial->setFloat(MaterialParameter_Transparency, value);
+				_lastMaterial->setFloat(MaterialParameter_Transparency, value);
 			}
 			else if (next == 'f') // skip
 			{
@@ -509,22 +487,22 @@ void OBJLoader::loadMaterials(const std::string& fileName, bool async, ObjectsCa
 					if (subId == 'd')
 					{
 						getLine(materialFile, line);
-						lastMaterial->setTexture(MaterialParameter_DiffuseMap, _rc->textureFactory().loadTexture(line, cache, async) );
+						_lastMaterial->setTexture(MaterialParameter_DiffuseMap, _rc->textureFactory().loadTexture(line, cache, async) );
 					}
 					else if (subId == 'a')
 					{
 						getLine(materialFile, line);
-						lastMaterial->setTexture(MaterialParameter_AmbientMap, _rc->textureFactory().loadTexture(line, cache, async) );
+						_lastMaterial->setTexture(MaterialParameter_AmbientMap, _rc->textureFactory().loadTexture(line, cache, async) );
 					}
 					else if (subId == 's')
 					{
 						getLine(materialFile, line);
-						lastMaterial->setTexture(MaterialParameter_SpecularMap, _rc->textureFactory().loadTexture(line, cache, async) );
+						_lastMaterial->setTexture(MaterialParameter_SpecularMap, _rc->textureFactory().loadTexture(line, cache, async) );
 					}
 					else if (subId == 'e')
 					{
 						getLine(materialFile, line);
-						lastMaterial->setTexture(MaterialParameter_EmissiveMap, _rc->textureFactory().loadTexture(line, cache, async) );
+						_lastMaterial->setTexture(MaterialParameter_EmissiveMap, _rc->textureFactory().loadTexture(line, cache, async) );
 					}
 					else
 					{
@@ -558,10 +536,10 @@ void OBJLoader::loadMaterials(const std::string& fileName, bool async, ObjectsCa
 							{
 								float value;
 								materialFile >> value;
-								lastMaterial->setFloat(MaterialParameter_BumpFactor, value);
+								_lastMaterial->setFloat(MaterialParameter_BumpFactor, value);
 								
 								getLine(materialFile, line);
-								lastMaterial->setTexture(MaterialParameter_NormalMap, _rc->textureFactory().loadTexture(line, cache, async));
+								_lastMaterial->setTexture(MaterialParameter_NormalMap, _rc->textureFactory().loadTexture(line, cache, async));
 							}
 							else
 							{
@@ -572,7 +550,7 @@ void OBJLoader::loadMaterials(const std::string& fileName, bool async, ObjectsCa
 						else
 						{
 							getLine(materialFile, line);
-							lastMaterial->setTexture(MaterialParameter_NormalMap, _rc->textureFactory().loadTexture(line, cache, async) );
+							_lastMaterial->setTexture(MaterialParameter_NormalMap, _rc->textureFactory().loadTexture(line, cache, async) );
 						}
 					}
 					else
@@ -583,7 +561,7 @@ void OBJLoader::loadMaterials(const std::string& fileName, bool async, ObjectsCa
 				else if (mapId == 'd')
 				{
 					getLine(materialFile, line);
-					lastMaterial->setTexture(MaterialParameter_TransparencyMap, _rc->textureFactory().loadTexture(line, cache, async) );
+					_lastMaterial->setTexture(MaterialParameter_TransparencyMap, _rc->textureFactory().loadTexture(line, cache, async) );
 				}
 				else
 				{
@@ -604,7 +582,7 @@ void OBJLoader::loadMaterials(const std::string& fileName, bool async, ObjectsCa
 		}
 		else if (key == 'i')
 		{
-			if (lastMaterial.invalid())
+			if (_lastMaterial.invalid())
 			{
 				getLine(materialFile, line);
 			}
@@ -617,7 +595,7 @@ void OBJLoader::loadMaterials(const std::string& fileName, bool async, ObjectsCa
 				{              
 					int value = 0;
 					materialFile >> value;
-					lastMaterial->setInt(MaterialParameter_ShadingModel, value);
+					_lastMaterial->setInt(MaterialParameter_ShadingModel, value);
 				}
 				else
 				{
@@ -635,7 +613,7 @@ void OBJLoader::loadMaterials(const std::string& fileName, bool async, ObjectsCa
 			{
 				float value = 0.0f;
 				materialFile >> value;
-				lastMaterial->setFloat(MaterialParameter_Roughness, value);
+				_lastMaterial->setFloat(MaterialParameter_Roughness, value);
 			}
 			else if (next == 'i')
 			{
@@ -649,11 +627,13 @@ void OBJLoader::loadMaterials(const std::string& fileName, bool async, ObjectsCa
 				
 				if (newmtl == "wmtl")
 				{
-					lastMaterial = Material::Pointer();
-					materials.push_back(lastMaterial);
 					std::string name;
 					materialFile >> name;
-					lastMaterial->setName(name);
+					
+					_lastMaterial = Material::Pointer();
+					_lastMaterial->setName(name);
+					
+					_materials.push_back(_lastMaterial);
 				}
 				else
 				{
@@ -684,7 +664,7 @@ void OBJLoader::processLoadedData()
 {
 	size_t totalTriangles = 0;
 
-	for (const auto& group : groups)
+	for (const auto& group : _groups)
 	{
 		for (const auto& face : group->faces)
 			totalTriangles += face.vertices.size() - 2;
@@ -744,7 +724,7 @@ void OBJLoader::processLoadedData()
 		++index;
 	};
 	
-	for (auto group : groups)
+	for (auto group : _groups)
 	{
 		IndexType startIndex = static_cast<IndexType>(index);
 		for (auto face : group->faces)
@@ -759,11 +739,11 @@ void OBJLoader::processLoadedData()
 		}
 			
 		Material::Pointer m;
-		for (Material::List::iterator mi = materials.begin(), me = materials.end(); mi != me; ++mi)
+		for (auto mat : _materials)
 		{
-			if ((*mi)->name() == group->material)
+			if (mat->name() == group->material)
 			{
-				m = *mi;
+				m = mat;
 				break;
 			}
 		}
