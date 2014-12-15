@@ -144,8 +144,8 @@ namespace et
 			ET_DECLARE_POINTER(ElementContainer)
 			
 		public:
-			ElementContainer(const std::string& name, Element* parent) : Element(name, parent) 
-				{ }
+			ElementContainer(const std::string& name, Element* parent) :
+				Element(name, parent) { }
 
 			ElementType type() const 
 				{ return ElementType_Container; }
@@ -182,9 +182,9 @@ namespace et
 			
 		public:
 			RenderableElement(const std::string& name, Element* parent) :
-				Element(name, parent), _visible(true) { setFlag(Flag_Renderable); }
+				Element(name, parent) { setFlag(Flag_Renderable); }
 
-			Material::Pointer material()
+			Material::Pointer& material()
 				{ return _material; }
 
 			const Material::Pointer& material() const
@@ -201,7 +201,7 @@ namespace et
 			
 		private:
 			Material::Pointer _material;
-			bool _visible;
+			bool _visible = true;
 		};
 
 		class ElementFactory

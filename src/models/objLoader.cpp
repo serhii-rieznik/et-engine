@@ -5,8 +5,6 @@
  *
  */
 
-#include <iostream>
-
 #include <et/app/application.h>
 #include <et/core/conversion.h>
 #include <et/core/filesystem.h>
@@ -116,10 +114,9 @@ OBJLoader::OBJLoader(RenderContext* rc, const std::string& inFile) : _rc(rc),
 	inputFile(inputFileName.c_str()), lastGroup(0), _loadOptions(0)
 {
 	inputFilePath = getFilePath(inputFileName);
-	canConvert = !inputFile.fail();
 	
-	if (!canConvert)
-		std::cout << "Can't open file for input: " << inFile << std::endl;
+	if (inputFile.fail())
+		log::info("Unable to open file %s", inputFileName.c_str());
 }
 
 OBJLoader::~OBJLoader()
@@ -196,15 +193,36 @@ void OBJLoader::loadData(bool async, ObjectsCache& cache)
 			
 			if (usemtl.compare("semtl") == 0) 
 			{
+				std::string materialId;
+				inputFile >> materialId;
+				
 				if (lastGroup == nullptr)
 				{
 					lastGroup = sharedObjectFactory().createObject<OBJGroup>();
+					lastGroup->material = materialId;
+					lastGroup->name = "group-" + intToStr(lastGroupId_++) + "-" + materialId;
+					
 					groups.push_back(lastGroup);
-					lastGroup->name = "group" + intToStr(lastGroupId_);
-					++lastGroupId_;
-					std::cout << "Group created: " << lastGroupId_;
+					
+					log::info("[OBJLoader] group created, because 'usemtl' found without group: %s",
+						lastGroup->name.c_str());
 				}
-				inputFile >> lastGroup->material;
+				
+				if (lastGroup->material.empty())
+				{
+					lastGroup->material = materialId;
+				}
+				else if (lastGroup->material != materialId)
+				{
+					lastGroup = sharedObjectFactory().createObject<OBJGroup>();
+					lastGroup->name = "group-" + intToStr(lastGroupId_++) + "-" + materialId;
+					lastGroup->material = materialId;
+					
+					groups.push_back(lastGroup);
+					
+					log::info("[OBJLoader] group created, because 'usemtl' found inside group with other material: %s",
+						lastGroup->name.c_str());
+				}
 			}
 			else
 			{
@@ -248,12 +266,12 @@ void OBJLoader::loadData(bool async, ObjectsCache& cache)
 					if (iValue < 0)
 					{
 						size_t szValue = static_cast<size_t>(-iValue);
-						ET_ASSERT(szValue <= vertices.size());
-						vertex[i++] = 1 + vertices.size() - szValue;
+						ET_ASSERT(szValue <= _vertices.size());
+						vertex[i++] = _vertices.size() - szValue;
 					}
 					else
 					{
-						vertex[i++] = iValue;
+						vertex[i++] = iValue - 1;
 					}
 				}
 				
@@ -276,11 +294,7 @@ void OBJLoader::loadData(bool async, ObjectsCache& cache)
 			{
 				vec2 vertex;
 				inputFile >> subKey >> vertex;
-				texCoords.push_back(vertex);
-				
-				if (!((inputFile.peek() == '\r') || (inputFile.peek() == '\n')) )
-					getLine(inputFile, line);
-				
+				_texCoords.push_back(vertex);
 			}
 			else if (subKey == 'n')
 			{
@@ -290,7 +304,7 @@ void OBJLoader::loadData(bool async, ObjectsCache& cache)
 				if ((_loadOptions & Option_SwapYwithZ) == Option_SwapYwithZ)
 					std::swap(vertex.y, vertex.z);
 
-				normals.push_back(vertex);
+				_normals.push_back(vertex);
 			}
 			else if (isWhitespaceChar(subKey))
 			{
@@ -300,7 +314,7 @@ void OBJLoader::loadData(bool async, ObjectsCache& cache)
 				if ((_loadOptions & Option_SwapYwithZ) == Option_SwapYwithZ)
 					std::swap(vertex.y, vertex.z);
 
-				vertices.push_back(vertex);
+				_vertices.push_back(vertex);
 			}
 			else
 			{
@@ -337,12 +351,7 @@ void OBJLoader::loadAsync(ObjectsCache& cache)
 void OBJLoader::loadMaterials(const std::string& fileName, bool async, ObjectsCache& cache)
 {
 	application().pushSearchPath(inputFilePath);
-	
 	std::string filePath = application().resolveFileName(fileName);
-	if (!fileExists(filePath))
-		filePath = application().resolveFileName(inputFilePath + fileName);
-	
-	application().popSearchPaths();
 	
 	materialFile.open(filePath.c_str());
 	if (!materialFile.is_open())
@@ -482,7 +491,7 @@ void OBJLoader::loadMaterials(const std::string& fileName, bool async, ObjectsCa
 		}
 		else if (key == 'm')
 		{
-			char map[4] = {};
+			char map[4] = { };
 			materialFile >> map[0] >> map[1] >> map[2];
 			
 			if (strcmp(map, "ap_") == 0)
@@ -500,22 +509,22 @@ void OBJLoader::loadMaterials(const std::string& fileName, bool async, ObjectsCa
 					if (subId == 'd')
 					{
 						getLine(materialFile, line);
-						lastMaterial->setTexture( MaterialParameter_DiffuseMap, _rc->textureFactory().loadTexture(line, cache, async) );
+						lastMaterial->setTexture(MaterialParameter_DiffuseMap, _rc->textureFactory().loadTexture(line, cache, async) );
 					}
 					else if (subId == 'a')
 					{
 						getLine(materialFile, line);
-						lastMaterial->setTexture( MaterialParameter_AmbientMap, _rc->textureFactory().loadTexture(line, cache, async) );
+						lastMaterial->setTexture(MaterialParameter_AmbientMap, _rc->textureFactory().loadTexture(line, cache, async) );
 					}
 					else if (subId == 's')
 					{
 						getLine(materialFile, line);
-						lastMaterial->setTexture( MaterialParameter_SpecularMap, _rc->textureFactory().loadTexture(line, cache, async) );
+						lastMaterial->setTexture(MaterialParameter_SpecularMap, _rc->textureFactory().loadTexture(line, cache, async) );
 					}
 					else if (subId == 'e')
 					{
 						getLine(materialFile, line);
-						lastMaterial->setTexture( MaterialParameter_EmissiveMap, _rc->textureFactory().loadTexture(line, cache, async) );
+						lastMaterial->setTexture(MaterialParameter_EmissiveMap, _rc->textureFactory().loadTexture(line, cache, async) );
 					}
 					else
 					{
@@ -563,13 +572,18 @@ void OBJLoader::loadMaterials(const std::string& fileName, bool async, ObjectsCa
 						else
 						{
 							getLine(materialFile, line);
-							lastMaterial->setTexture( MaterialParameter_NormalMap, _rc->textureFactory().loadTexture(line, cache, async) );
+							lastMaterial->setTexture(MaterialParameter_NormalMap, _rc->textureFactory().loadTexture(line, cache, async) );
 						}
 					}
 					else
 					{
 						std::cout << "Unknown map type: " << mapId << bump << std::endl;
 					}
+				}
+				else if (mapId == 'd')
+				{
+					getLine(materialFile, line);
+					lastMaterial->setTexture(MaterialParameter_TransparencyMap, _rc->textureFactory().loadTexture(line, cache, async) );
 				}
 				else
 				{
@@ -662,8 +676,8 @@ void OBJLoader::loadMaterials(const std::string& fileName, bool async, ObjectsCa
 		
 	}
 	
-	std::cout << "Materials loaded.\n";
 	materialFile.close();
+	application().popSearchPaths();
 }
 
 void OBJLoader::processLoadedData()
@@ -673,26 +687,13 @@ void OBJLoader::processLoadedData()
 	for (const auto& group : groups)
 	{
 		for (const auto& face : group->faces)
-		{
-			if (face.vertices.size() == 3)
-			{
-				++totalTriangles;
-			}
-			else if (face.vertices.size() == 4)
-			{
-				totalTriangles += 2;
-			}
-			else if (face.vertices.size() == 5)
-			{
-				totalTriangles += 3;
-			}
-		}
+			totalTriangles += face.vertices.size() - 2;
 	}
 	
 	size_t totalVertices = 3 * totalTriangles;
 	
-	bool hasNormals = normals.size() > 0;
-	bool hasTexCoords = texCoords.size() > 0;
+	bool hasNormals = _normals.size() > 0;
+	bool hasTexCoords = _texCoords.size() > 0;
 		
 	VertexDeclaration decl(true);
 	decl.push_back(Usage_Position, Type_Vec3);
@@ -723,52 +724,37 @@ void OBJLoader::processLoadedData()
 	
 	auto PUSH_VERTEX = [this, &pos, &norm, &tex, &index, hasTexCoords, hasNormals](const OBJVertex& vertex)
 	{
-		pos[index] = vertices[vertex[0] - 1];
+		{
+			ET_ASSERT(vertex[0] < _vertices.size());
+			pos[index] = _vertices[vertex[0]];
+		}
 		
 		if (hasTexCoords)
-			tex[index] = texCoords[vertex[1] - 1];
-
+		{
+			ET_ASSERT(vertex[1] < _texCoords.size());
+			tex[index] = _texCoords[vertex[1]];
+		}
+		
 		if (hasNormals)
-			norm[index] = normals[vertex[2] - 1];
-
+		{
+			ET_ASSERT(vertex[2] < _normals.size());
+			norm[index] = _normals[vertex[2]];
+		}
+		
 		++index;
 	};
 	
-	bool shouldReverse = (_loadOptions & Option_ReverseTriangles) == Option_ReverseTriangles;
-
 	for (auto group : groups)
 	{
 		IndexType startIndex = static_cast<IndexType>(index);
 		for (auto face : group->faces)
 		{
-			if (shouldReverse)
-			{
-				PUSH_VERTEX(face.vertices[2]);
-				PUSH_VERTEX(face.vertices[1]);
-				PUSH_VERTEX(face.vertices[0]);
-			}
-			else
+			size_t numTriangles = face.vertices.size() - 2;
+			for (size_t i = 1; i <= numTriangles; ++i)
 			{
 				PUSH_VERTEX(face.vertices[0]);
-				PUSH_VERTEX(face.vertices[1]);
-				PUSH_VERTEX(face.vertices[2]);
-			}
-			
-			if (face.vertices.size() == 4)
-			{
-				PUSH_VERTEX(face.vertices[0]);
-				PUSH_VERTEX(face.vertices[2]);
-				PUSH_VERTEX(face.vertices[3]);
-			}
-			else if (face.vertices.size() == 5)
-			{
-				PUSH_VERTEX(face.vertices[2]);
-				PUSH_VERTEX(face.vertices[3]);
-				PUSH_VERTEX(face.vertices[4]);
-
-				PUSH_VERTEX(face.vertices[2]);
-				PUSH_VERTEX(face.vertices[4]);
-				PUSH_VERTEX(face.vertices[0]);
+				PUSH_VERTEX(face.vertices[i]);
+				PUSH_VERTEX(face.vertices[i+1]);
 			}
 		}
 			

@@ -109,13 +109,13 @@ void Camera::setPosition(const vec3& p)
 void Camera::setDirection(const vec3& d)
 {
 	vec3 u = up();
-	vec3 s = normalize(d.cross(u));
+	vec3 s = cross(u, d).normalized();
 	vec3 p = position();
-	vec3 e(-dot(s, p), -dot(u, p), dot(d, p));
-	_modelViewMatrix[0] = vec4(s.x, u.x, -d.x, 0.0f);
-	_modelViewMatrix[1] = vec4(s.y, u.y, -d.y, 0.0f);
-	_modelViewMatrix[2] = vec4(s.z, u.z, -d.z, 0.0f);
-	_modelViewMatrix[3] = vec4(e.x, e.y,  e.z, 1.0f);
+	vec3 e(-dot(s, p), -dot(u, p), -dot(d, p));
+	_modelViewMatrix[0] = vec4(s.x, u.x, d.x, 0.0f);
+	_modelViewMatrix[1] = vec4(s.y, u.y, d.y, 0.0f);
+	_modelViewMatrix[2] = vec4(s.z, u.z, d.z, 0.0f);
+	_modelViewMatrix[3] = vec4(e.x, e.y, e.z, 1.0f);
 	modelViewUpdated();
 }
 

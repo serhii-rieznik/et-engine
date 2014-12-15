@@ -636,6 +636,14 @@ CVReturn cvDisplayLinkOutputCallback(CVDisplayLinkRef, const CVTimeStamp*, const
 	Input::KeyboardInputSource().keyReleased(theEvent.keyCode);
 }
 
+- (void)flagsChanged:(NSEvent*)theEvent
+{
+	if (theEvent.modifierFlags & NSDeviceIndependentModifierFlagsMask)
+		Input::KeyboardInputSource().keyPressed(theEvent.keyCode);
+	else
+		Input::KeyboardInputSource().keyReleased(theEvent.keyCode);
+}
+
 @end
 
 @implementation etWindowDelegate

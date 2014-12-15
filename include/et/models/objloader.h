@@ -8,7 +8,6 @@
 #pragma once
 
 #include <string>
-#include <iostream>
 #include <fstream>
 #include <vector>
 
@@ -44,7 +43,7 @@ namespace et
 		struct OBJVertex
 		{
 			size_t numVertices = 0;
-			size_t vertices[4];
+			StaticDataStorage<size_t, 3> vertices;
 
 			size_t& operator [] (size_t i)
 				{ ET_ASSERT(i < numVertices); return vertices[i]; }
@@ -53,7 +52,7 @@ namespace et
 				{ ET_ASSERT(i < numVertices); return vertices[i]; }
 			
 			OBJVertex() : numVertices(0)
-				{ etFillMemory(vertices, 0, sizeof(vertices)); }
+				{ vertices.fill(0); }
 		};
 
 		struct OBJMeshIndexBounds
@@ -117,9 +116,9 @@ namespace et
         IndexArray::Pointer _indices;
 		VertexArray::Pointer _vertexData;
 
-		vec3List vertices;
-		vec3List normals;
-		vec2List texCoords;
+		std::vector<et::vec3, et::SharedBlockAllocatorSTDProxy<et::vec3>> _vertices;
+		std::vector<et::vec3, et::SharedBlockAllocatorSTDProxy<et::vec3>> _normals;
+		std::vector<et::vec2, et::SharedBlockAllocatorSTDProxy<et::vec2>> _texCoords;
 		GroupList groups;
 
 		size_t _loadOptions = 0;

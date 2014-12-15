@@ -25,6 +25,7 @@ namespace et
 		MaterialParameter_NormalMap,
 		MaterialParameter_BumpMap,
 		MaterialParameter_ReflectionMap,
+		MaterialParameter_TransparencyMap,
 		
 		MaterialParameter_AmbientFactor,
 		MaterialParameter_DiffuseFactor,

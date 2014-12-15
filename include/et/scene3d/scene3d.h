@@ -24,6 +24,9 @@ namespace et
 		class Scene : public EventReceiver, public ElementContainer, public ElementFactory
 		{
 		public:
+			ET_DECLARE_POINTER(Scene)
+			
+		public:
 			Scene(const std::string& name = "scene");
 
 			/*
