@@ -10,6 +10,7 @@
 #if defined(ET_HAVE_COCOS)
 
 #include <cocos2d.h>
+#include <UIKit/UIDevice.h>
 #include <et/platform-ios/embeddedapplication.h>
 
 using namespace et;
@@ -18,6 +19,7 @@ using namespace et;
 {
 	ApplicationNotifier _notifier;
 	BOOL _loaded;
+	BOOL _shouldAdjustFrameSizeToLandscape;
 }
 
 @end
@@ -48,6 +50,7 @@ static etApplication* _sharedInstance = nil;
 	if (self)
 	{
 		_loaded = NO;
+		_shouldAdjustFrameSizeToLandscape = [[[UIDevice currentDevice] systemVersion] characterAtIndex:0] <= '7';
 	}
 	return self;
 }
@@ -101,6 +104,11 @@ static etApplication* _sharedInstance = nil;
 		CGRect frame = { };
 		NSValue* value = [change objectForKey:@"new"];
 		[value getValue:&frame];
+		
+		bool isLandscape = UIInterfaceOrientationIsLandscape([CCDirector sharedDirector].interfaceOrientation);
+		
+		if (_shouldAdjustFrameSizeToLandscape && isLandscape)
+			frame.size = CGSizeMake(frame.size.height, frame.size.width);
 		
 		vec2i size(static_cast<int>(scaleFactor * frame.size.width),
 			static_cast<int>(scaleFactor * frame.size.height));
