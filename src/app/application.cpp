@@ -111,8 +111,15 @@ void Application::performRendering()
 bool Application::shouldPerformRendering()
 {
 	uint64_t currentTime = queryContiniousTimeInMilliSeconds();
-	uint64_t elapsedTime = currentTime - _lastQueuedTimeMSec;
 	
+#if defined(ET_EMBEDDED_APPLICATION)
+	
+	_lastQueuedTimeMSec = currentTime;
+	return true;
+	
+#else
+	
+	uint64_t elapsedTime = currentTime - _lastQueuedTimeMSec;
 	if (elapsedTime < _fpsLimitMSec)
 	{
 		uint64_t sleepInterval = (_fpsLimitMSec - elapsedTime) +
@@ -122,10 +129,11 @@ bool Application::shouldPerformRendering()
 		
 		return false;
 	}
-	
 	_lastQueuedTimeMSec = queryContiniousTimeInMilliSeconds();
 	
 	return !_suspended;
+	
+#endif
 }
 
 void Application::performUpdateAndRender()

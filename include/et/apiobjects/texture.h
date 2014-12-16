@@ -75,6 +75,7 @@ namespace et
 
 	private:
 		void generateTexture(RenderContext* rc);
+		void buildProperies();
 		void build(RenderContext* rc);
         void buildData(const char* ptr, size_t dataSize);
 

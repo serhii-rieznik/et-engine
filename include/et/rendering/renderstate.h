@@ -117,19 +117,19 @@ namespace et
 		void bindFramebuffer(uint32_t framebuffer, bool force = false);
 		void bindFramebuffer(const Framebuffer::Pointer& fbo, bool force = false);
 		
-		void bindRenderbuffer(uint32_t);
+		void bindRenderbuffer(uint32_t, bool force = false);
 
 		/*
 		 * Textures
 		 */
 		void setActiveTextureUnit(uint32_t unit, bool force = false);
 		void bindTexture(uint32_t unit, uint32_t texture, uint32_t target, bool force = false);
-		void bindTexture(uint32_t unit, const Texture& texture);
+		void bindTexture(uint32_t unit, const Texture& texture, bool force = false);
 
 		/*
 		 * Programs
 		 */
-		void bindProgram(uint32_t program, bool force);
+		void bindProgram(uint32_t program, bool force = false);
 		void bindProgram(const Program::Pointer& prog, bool force = false);
 
 		/*
@@ -137,17 +137,17 @@ namespace et
 		 */
 		void resetBufferBindings();
 		void bindBuffer(uint32_t target, uint32_t buffer, bool force = false);
-		void bindVertexArray(uint32_t buffer);
+		void bindVertexArray(uint32_t buffer, bool force = false);
 
 		void bindBuffer(const VertexBuffer& buf, bool force = false);
 		void bindBuffer(const IndexBuffer& buf, bool force = false);
 		void bindBuffers(const VertexBuffer& vb, const IndexBuffer& ib, bool force = false);
-		void bindVertexArray(const VertexArrayObject& vao);
+		void bindVertexArray(const VertexArrayObject& vao, bool force = false);
 
 		void setVertexAttributes(const VertexDeclaration& decl, bool force = false);
-		void setVertexAttributesBaseIndex(const VertexDeclaration& decl, size_t index);
-		void setVertexAttribEnabled(uint32_t attrib, bool enabled, bool foce = false);
-		void setVertexAttribPointer(const VertexElement& e, size_t baseIndex);
+		void setVertexAttributesBaseIndex(const VertexDeclaration& decl, size_t index, bool force = false);
+		void setVertexAttribEnabled(uint32_t attrib, bool enabled, bool force = false);
+		void setVertexAttribPointer(const VertexElement& e, size_t baseIndex, bool force = false);
 
 		/*
 		 * State
@@ -194,17 +194,17 @@ namespace et
 		vec4 clearColor() const
 			{ return _currentState.clearColor; }
 		
-		void setBlend(bool enable, BlendState blend = BlendState_Current);
-		void setCulling(bool enabled, CullState cull = CullState_Current);
-		void setDepthTest(bool enable);
-		void setDepthFunc(DepthFunc func);
-		void setDepthMask(bool enable);
-		void setPolygonOffsetFill(bool enabled, float factor = 0.0f, float units = 0.0f);
-		void setWireframeRendering(bool wire);
-		void setClearColor(const vec4& color);
-		void setColorMask(size_t mask);
-		void setClearDepth(float depth);
-		void setClip(bool enable, const recti& clip);
+		void setBlend(bool enable, BlendState blend = BlendState_Current, bool force = false);
+		void setCulling(bool enabled, CullState cull = CullState_Current, bool force = false);
+		void setDepthTest(bool enable, bool force = false);
+		void setDepthFunc(DepthFunc func, bool force = false);
+		void setDepthMask(bool enable, bool force = false);
+		void setPolygonOffsetFill(bool enabled, float factor = 0.0f, float units = 0.0f, bool force = false);
+		void setWireframeRendering(bool wire, bool force = false);
+		void setClearColor(const vec4& color, bool force = false);
+		void setColorMask(size_t mask, bool force = false);
+		void setClearDepth(float depth, bool force = false);
+		void setClip(bool enable, const recti& clip, bool force = false);
 
 		/*
 		 * Deletion handlers

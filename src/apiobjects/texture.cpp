@@ -19,18 +19,26 @@ TextureData::TextureData(RenderContext* rc, const TextureDescription::Pointer& d
 	bool deferred) : LoadableObject(id, desc->origin()), _glID(0), _desc(desc), _own(true)
 {
 #if defined(ET_CONSOLE_APPLICATION)
+
 	ET_FAIL("Attempt to create Texture in console application.")
+
 #else
+
 #	if (ET_OPENGLES)
 	if (!(isPowerOfTwo(desc->size.x) && isPowerOfTwo(desc->size.y)))
 		_wrap = vector3<TextureWrap>(TextureWrap_ClampToEdge);
 #	endif
 	
-	if (!deferred)
+	if (deferred)
+	{
+		buildProperies();
+	}
+	else
 	{
 		generateTexture(rc);
 		build(rc);
 	}
+	
 #endif
 }
 
@@ -40,11 +48,12 @@ TextureData::TextureData(RenderContext*, uint32_t texture, const vec2i& size, co
 #if !defined(ET_CONSOLE_APPLICATION)
 	if (glIsTexture(texture))
 	{
+		_desc->setOrigin(name);
 		_desc->target = GL_TEXTURE_2D;
 		_desc->size = size;
 		_desc->mipMapCount = 1;
-		_texel.x = 1.0f / static_cast<float>(size.x);
-		_texel.y = 1.0f / static_cast<float>(size.y);
+		
+		buildProperies();
 	}
 	else
 	{
@@ -218,6 +227,15 @@ void TextureData::buildData(const char* aDataPtr, size_t aDataSize)
 #endif
 }
 
+void TextureData::buildProperies()
+{
+	setOrigin(_desc->origin());
+	
+	_texel = vec2(1.0f / static_cast<float>(_desc->size.x), 1.0f / static_cast<float>(_desc->size.y) );
+	_filtration.x = (_desc->mipMapCount > 1) ? TextureFiltration_LinearMipMapLinear : TextureFiltration_Linear;
+	_filtration.y = TextureFiltration_Linear;
+}
+
 void TextureData::build(RenderContext* rc)
 {
 #if !defined(ET_CONSOLE_APPLICATION)
@@ -241,15 +259,10 @@ void TextureData::build(RenderContext* rc)
 		return;
 	}
 
-	_texel = vec2( 1.0f / static_cast<float>(_desc->size.x), 1.0f / static_cast<float>(_desc->size.y) );
-	
-	_filtration.x = (_desc->mipMapCount > 1) ?
-		TextureFiltration_LinearMipMapLinear : TextureFiltration_Linear;
-	_filtration.y = TextureFiltration_Linear;
+	buildProperies();
 
 	rc->renderState().bindTexture(defaultBindingUnit, _glID, _desc->target, true);
 
-	setOrigin(_desc->origin());
 	setFiltration(rc, _filtration.x, _filtration.y);
 	setWrap(rc, _wrap.x, _wrap.y, _wrap.z);
 

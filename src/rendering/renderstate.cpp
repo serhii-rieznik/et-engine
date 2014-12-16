@@ -158,14 +158,14 @@ void RenderState::setVertexAttributes(const VertexDeclaration& decl, bool force)
 #endif
 }
 
-void RenderState::setVertexAttributesBaseIndex(const VertexDeclaration& decl, size_t index)
+void RenderState::setVertexAttributesBaseIndex(const VertexDeclaration& decl, size_t index, bool force)
 {
 #if !defined(ET_CONSOLE_APPLICATION)
 	for (size_t i = 0; i < decl.numElements(); ++i)
 	{
 		const VertexElement& e = decl.element(i);
 		size_t dataOffset = index * (decl.interleaved() ? decl.dataSize() : vertexAttributeTypeSize(e.type()) );
-		setVertexAttribPointer(e, dataOffset);
+		setVertexAttribPointer(e, dataOffset, force);
 	}
 #endif
 }
@@ -191,12 +191,12 @@ void RenderState::bindBuffers(const VertexBuffer& vb, const IndexBuffer& ib, boo
 	bindBuffer(ib, force);
 }
 
-void RenderState::bindVertexArray(uint32_t buffer)
+void RenderState::bindVertexArray(uint32_t buffer, bool force)
 {
 #if !defined(ET_CONSOLE_APPLICATION)
 	ET_ASSERT(openGLCapabilites().hasFeature(OpenGLFeature_VertexArrayObjects));
 	
-	if (_currentState.boundVertexArrayObject != buffer)
+	if (force || (_currentState.boundVertexArrayObject != buffer))
 	{
 		_currentState.boundVertexArrayObject = buffer;
 		etBindVertexArray(buffer);
@@ -204,19 +204,19 @@ void RenderState::bindVertexArray(uint32_t buffer)
 #endif
 }
 
-void RenderState::bindVertexArray(const VertexArrayObject& vao)
+void RenderState::bindVertexArray(const VertexArrayObject& vao, bool force)
 {
 #if !defined(ET_CONSOLE_APPLICATION)
 	if (openGLCapabilites().hasFeature(OpenGLFeature_VertexArrayObjects))
 	{
-		bindVertexArray(vao.valid() ? vao->glID() : 0);
+		bindVertexArray(vao.valid() ? vao->glID() : 0, force);
 	}
 	else
 	{
 		if (vao.valid())
-			bindBuffers(vao->vertexBuffer(), vao->indexBuffer());
+			bindBuffers(vao->vertexBuffer(), vao->indexBuffer(), force);
 		else
-			bindBuffers(VertexBuffer(), IndexBuffer());
+			bindBuffers(VertexBuffer(), IndexBuffer(), force);
 	}
 #endif
 }
@@ -232,13 +232,17 @@ void RenderState::resetBufferBindings()
 #endif
 }
 
-void RenderState::bindTexture(uint32_t unit, const Texture& texture)
+void RenderState::bindTexture(uint32_t unit, const Texture& texture, bool force)
 {
 #if !defined(ET_CONSOLE_APPLICATION)
 	if (texture.valid())
-		bindTexture(unit, texture->glID(), texture->target());
+	{
+		bindTexture(unit, texture->glID(), texture->target(), force);
+	}
 	else
-		bindTexture(unit, 0, GL_TEXTURE_2D);
+	{
+		bindTexture(unit, 0, GL_TEXTURE_2D, force);
+	}
 #endif
 }
 
@@ -296,20 +300,20 @@ void RenderState::bindFramebuffer(const Framebuffer::Pointer& fbo, bool force)
 	if (fbo.valid())
 	{
 		bindFramebuffer(fbo->glID(), GL_FRAMEBUFFER, force);
-		setViewportSize(fbo->size());
+		setViewportSize(fbo->size(), force);
 	}
 	else 
 	{
 		bindFramebuffer(0, GL_FRAMEBUFFER, force);
-		setViewportSize(_currentState.mainViewportSize);
+		setViewportSize(_currentState.mainViewportSize, force);
 	}
 #endif
 }
 
-void RenderState::bindRenderbuffer(uint32_t renderbuffer)
+void RenderState::bindRenderbuffer(uint32_t renderbuffer, bool force)
 {
 #if !defined(ET_CONSOLE_APPLICATION)
-	if (_currentState.boundRenderbuffer != renderbuffer)
+	if (force || (_currentState.boundRenderbuffer != renderbuffer))
 	{
 		_currentState.boundRenderbuffer = renderbuffer;
 		glBindRenderbuffer(GL_RENDERBUFFER, renderbuffer);
@@ -333,86 +337,90 @@ void RenderState::bindDefaultFramebuffer(bool force)
 	bindFramebuffer(_defaultFramebuffer, force);
 }
 
-void RenderState::setDepthMask(bool enable)
+void RenderState::setDepthMask(bool enable, bool force)
 {
 #if !defined(ET_CONSOLE_APPLICATION)
-	if (_currentState.depthMask == enable) return;
-	
-	_currentState.depthMask = enable;
-	glDepthMask(enable);
-#endif
-}
-
-void RenderState::setDepthTest(bool enable)
-{
-#if !defined(ET_CONSOLE_APPLICATION)
-	if (enable == _currentState.depthTestEnabled) return;
-
-	_currentState.depthTestEnabled = enable;
-	(enable ? glEnable : glDisable)(GL_DEPTH_TEST);
-#endif
-}
-
-void RenderState::setDepthFunc(DepthFunc func)
-{
-#if !defined(ET_CONSOLE_APPLICATION)
-	if (func == _currentState.lastDepthFunc) return;
-
-	_currentState.lastDepthFunc = func;
-	switch (_currentState.lastDepthFunc)
+	if (force || (_currentState.depthMask != enable))
 	{
-	case DepthFunc_Less:
-		{
-			glDepthFunc(GL_LESS);
-			break;
-		}
-			
-	case DepthFunc_LessOrEqual:
-		{
-			glDepthFunc(GL_LEQUAL);
-			break;
-		}
-
-	case DepthFunc_Equal:
-		{
-			glDepthFunc(GL_EQUAL);
-			break;
-		}
-			
-	case DepthFunc_GreaterOrEqual:
-		{
-			glDepthFunc(GL_GEQUAL);
-			break;
-		}
-			
-	case DepthFunc_Greater:
-		{
-			glDepthFunc(GL_GREATER);
-			break;
-		}
-			
-	case DepthFunc_Always:
-		{
-			glDepthFunc(GL_ALWAYS);
-			break;
-		}
-
-		default:
-			ET_FAIL("Invalid DepthFunc value");
+		_currentState.depthMask = enable;
+		glDepthMask(enable);
 	}
 #endif
 }
 
-void RenderState::setBlend(bool enable, BlendState blend)
+void RenderState::setDepthTest(bool enable, bool force)
 {
 #if !defined(ET_CONSOLE_APPLICATION)
-	if (_currentState.blendEnabled != enable)
+	if (force || (enable != _currentState.depthTestEnabled))
+	{
+		_currentState.depthTestEnabled = enable;
+		(enable ? glEnable : glDisable)(GL_DEPTH_TEST);
+	}
+#endif
+}
+
+void RenderState::setDepthFunc(DepthFunc func, bool force)
+{
+#if !defined(ET_CONSOLE_APPLICATION)
+	if (force || (func != _currentState.lastDepthFunc))
+	{
+		_currentState.lastDepthFunc = func;
+		
+		switch (_currentState.lastDepthFunc)
+		{
+			case DepthFunc_Less:
+			{
+				glDepthFunc(GL_LESS);
+				break;
+			}
+				
+			case DepthFunc_LessOrEqual:
+			{
+				glDepthFunc(GL_LEQUAL);
+				break;
+			}
+				
+			case DepthFunc_Equal:
+			{
+				glDepthFunc(GL_EQUAL);
+				break;
+			}
+				
+			case DepthFunc_GreaterOrEqual:
+			{
+				glDepthFunc(GL_GEQUAL);
+				break;
+			}
+				
+			case DepthFunc_Greater:
+			{
+				glDepthFunc(GL_GREATER);
+				break;
+			}
+				
+			case DepthFunc_Always:
+			{
+				glDepthFunc(GL_ALWAYS);
+				break;
+			}
+				
+			default:
+				ET_FAIL("Invalid DepthFunc value");
+		}
+	}
+#endif
+}
+
+void RenderState::setBlend(bool enable, BlendState blend, bool force)
+{
+#if !defined(ET_CONSOLE_APPLICATION)
+	if (force || (_currentState.blendEnabled != enable))
 	{
 		_currentState.blendEnabled = enable;
 		(enable ? glEnable : glDisable)(GL_BLEND);
 	}
 
-	if ((_currentState.lastBlend != blend) && (blend != BlendState_Current))
+	if ((force || (_currentState.lastBlend != blend)) && (blend != BlendState_Current))
 	{
 		_currentState.lastBlend = blend;
 		switch (blend)
@@ -540,9 +548,11 @@ void RenderState::setVertexAttribEnabled(uint32_t attrib, bool enabled, bool for
 #endif
 }
 
-void RenderState::setVertexAttribPointer(const VertexElement& e, size_t baseIndex)
+void RenderState::setVertexAttribPointer(const VertexElement& e, size_t baseIndex, bool force)
 {
 #if !defined(ET_CONSOLE_APPLICATION)
+	(void)force;
+	
 	glVertexAttribPointer(e.usage(), static_cast<GLint>(e.components()), e.dataType(), false, e.stride(),
 		reinterpret_cast<GLvoid*>(e.offset() + baseIndex));
 
@@ -550,10 +560,10 @@ void RenderState::setVertexAttribPointer(const VertexElement& e, size_t baseInde
 #endif
 }
 
-void RenderState::setCulling(bool enabled, CullState cull)
+void RenderState::setCulling(bool enabled, CullState cull, bool force)
 {
 #if !defined(ET_CONSOLE_APPLICATION)
-	if (_currentState.cullEnabled != enabled)
+	if (force || (_currentState.cullEnabled != enabled))
 	{
 		_currentState.cullEnabled = enabled;
 		if (_currentState.cullEnabled)
@@ -568,7 +578,7 @@ void RenderState::setCulling(bool enabled, CullState cull)
 		}
 	}
 	
-	if ((cull != CullState_Current) && (_currentState.lastCull != cull))
+	if ((cull != CullState_Current) && (force || (_currentState.lastCull != cull)))
 	{
 		_currentState.lastCull = cull;
 		glCullFace(cull == CullState_Back ? GL_BACK : GL_FRONT);
@@ -577,10 +587,10 @@ void RenderState::setCulling(bool enabled, CullState cull)
 #endif
 }
 
-void RenderState::setPolygonOffsetFill(bool enabled, float factor, float units)
+void RenderState::setPolygonOffsetFill(bool enabled, float factor, float units, bool force)
 {
 #if !defined(ET_CONSOLE_APPLICATION)
-	if (_currentState.polygonOffsetFillEnabled != enabled)
+	if (force || (_currentState.polygonOffsetFillEnabled != enabled))
 	{
 		_currentState.polygonOffsetFillEnabled = enabled;
 		(enabled ? glEnable : glDisable)(GL_POLYGON_OFFSET_FILL);
@@ -592,10 +602,10 @@ void RenderState::setPolygonOffsetFill(bool enabled, float factor, float units)
 #endif
 }
 
-void RenderState::setWireframeRendering(bool wire)
+void RenderState::setWireframeRendering(bool wire, bool force)
 {
 #if !defined(ET_CONSOLE_APPLICATION)
-	if (_currentState.wireframe != wire)
+	if (force || (_currentState.wireframe != wire))
 	{
 #		if (!ET_OPENGLES)
 		_currentState.wireframe = wire;
@@ -605,52 +615,60 @@ void RenderState::setWireframeRendering(bool wire)
 #endif
 }
 
-void RenderState::setClearColor(const vec4& color)
+void RenderState::setClearColor(const vec4& color, bool force)
 {
 #if !defined(ET_CONSOLE_APPLICATION)
-	_currentState.clearColor = color;
-	glClearColor(color.x, color.y, color.z, color.w);
+	if (force || ((_currentState.clearColor - color).dotSelf() > std::numeric_limits<float>::epsilon()))
+	{
+		_currentState.clearColor = color;
+		glClearColor(color.x, color.y, color.z, color.w);
+		checkOpenGLError("RenderState::glClearColor");
+	}
 #endif
 }
 
-void RenderState::setColorMask(size_t mask)
+void RenderState::setColorMask(size_t mask, bool force)
 {
 #if !defined(ET_CONSOLE_APPLICATION)
-	if (_currentState.colorMask == mask) return;
-
-	_currentState.colorMask = mask;
-	glColorMask(mask & ColorMask_Red, mask & ColorMask_Green, mask & ColorMask_Blue, mask & ColorMask_Alpha);
+	if (force || (_currentState.colorMask != mask))
+	{
+		_currentState.colorMask = mask;
+		glColorMask(mask & ColorMask_Red, mask & ColorMask_Green, mask & ColorMask_Blue, mask & ColorMask_Alpha);
+		checkOpenGLError("RenderState::setColorMask");
+	}
 #endif
 }
 
-void RenderState::setClearDepth(float depth)
+void RenderState::setClearDepth(float depth, bool force)
 {
 #if !defined(ET_CONSOLE_APPLICATION)
-	if (_currentState.clearDepth == depth) return;
+	if (force || (_currentState.clearDepth != depth))
+	{
+		_currentState.clearDepth = depth;
+		glClearDepth(depth);
+		checkOpenGLError("RenderState::setClearDepth");
+	}
+#endif
+}
+
+void RenderState::setClip(bool enable, const recti& clip, bool force)
+{
+#if !defined(ET_CONSOLE_APPLICATION)
 	
-	_currentState.clearDepth = depth;
-	glClearDepth(depth);
-	
-	checkOpenGLError("RenderState::setClearDepth");
-#endif
-}
-
-void RenderState::setClip(bool enable, const recti& clip)
-{
-#if !defined(ET_CONSOLE_APPLICATION)
-	if (enable != _currentState.clipEnabled)
+	if (force || (enable != _currentState.clipEnabled))
 	{
 		_currentState.clipEnabled = enable;
 		(_currentState.clipEnabled ? glEnable : glDisable)(GL_SCISSOR_TEST);
+		checkOpenGLError("RenderState::setClip");
 	}
 
-	if (clip != _currentState.clipRect)
+	if (force || (clip != _currentState.clipRect))
 	{
 		_currentState.clipRect = clip;
 		glScissor(clip.left, clip.top, etMax(0, clip.width), etMax(0, clip.height));
+		checkOpenGLError("RenderState::setClip - glScissor");
 	}
 	
-	checkOpenGLError("RenderState::setClip");
 #endif
 }
 
@@ -662,35 +680,32 @@ void RenderState::reset()
 void RenderState::applyState(const RenderState::State& s)
 {
 #if !defined(ET_CONSOLE_APPLICATION)
-	setClearColor(s.clearColor);
-	setColorMask(s.colorMask);
-	setBlend(s.blendEnabled, s.lastBlend);
-	setDepthFunc(s.lastDepthFunc);
-	setDepthMask(s.depthMask);
-	setDepthTest(s.depthTestEnabled);
-	setPolygonOffsetFill(s.polygonOffsetFillEnabled, s.polygonOffsetFactor, s.polygonOffsetUnits);
-	setWireframeRendering(s.wireframe);
-	setCulling(s.cullEnabled, s.lastCull);
-	setViewportSize(s.viewportSize);
+	setClearColor(s.clearColor, true);
+	setColorMask(s.colorMask, true);
+	setBlend(s.blendEnabled, s.lastBlend, true);
+	setDepthFunc(s.lastDepthFunc, true);
+	setDepthMask(s.depthMask, true);
+	setDepthTest(s.depthTestEnabled, true);
+	setPolygonOffsetFill(s.polygonOffsetFillEnabled, s.polygonOffsetFactor, s.polygonOffsetUnits, true);
+	setWireframeRendering(s.wireframe, true);
+	setCulling(s.cullEnabled, s.lastCull, true);
+	setViewportSize(s.viewportSize, true);
 	bindFramebuffer(s.boundFramebuffer, true);
 	bindProgram(s.boundProgram, true);
-	bindVertexArray(s.boundVertexArrayObject);
+	bindVertexArray(s.boundVertexArrayObject, true);
 	bindBuffer(GL_ELEMENT_ARRAY_BUFFER, s.boundElementArrayBuffer, true);
 	bindBuffer(GL_ARRAY_BUFFER, s.boundArrayBuffer, true);
 	
 	for (auto& target : s.boundTextures)
 	{
 		for (auto& unit : target.second)
-			bindTexture(unit.first, unit.second, target.first);
+			bindTexture(unit.first, unit.second, target.first, true);
 	}
 	
 	for (uint32_t i = 0; i < Usage_max; ++i)
-	{
-		bool enabled = s.enabledVertexAttributes[i] != 0;
-		setVertexAttribEnabled(i, enabled, false);
-	}
+		setVertexAttribEnabled(i, (s.enabledVertexAttributes[i] != 0), true);
 	
-	setActiveTextureUnit(s.activeTextureUnit);
+	setActiveTextureUnit(s.activeTextureUnit, true);
 #endif
 }
 
@@ -755,21 +770,20 @@ RenderState::State RenderState::currentState()
 	s.boundRenderbuffer = static_cast<uint32_t>(value);
 	checkOpenGLError("");
 	
-#	if (ET_SUPPORT_VERTEX_ARRAY_OBJECTS)
+#if (ET_SUPPORT_VERTEX_ARRAY_OBJECTS)
 	value = 0;
 	glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &value);
 	s.boundVertexArrayObject = static_cast<uint32_t>(value);
 	checkOpenGLError("");
+#endif
 	
-	value = 0;
-	for (uint32_t i = 0; (i < Usage_max) && (s.boundVertexArrayObject != 0); ++i)
+	for (uint32_t i = 0; i < Usage_max; ++i)
 	{
 		int enabled = 0;
 		glGetVertexAttribiv(i, GL_VERTEX_ATTRIB_ARRAY_ENABLED, &enabled);
 		s.enabledVertexAttributes[i] = (enabled > 0);
 	}
 	checkOpenGLError("");
-#	endif
 	
 	value = 0;
 	glGetIntegerv(GL_CURRENT_PROGRAM, &value);
@@ -781,7 +795,7 @@ RenderState::State RenderState::currentState()
 
 	s.depthTestEnabled = glIsEnabled(GL_DEPTH_TEST) != 0;
 	s.polygonOffsetFillEnabled = glIsEnabled(GL_POLYGON_OFFSET_FILL) != 0;
-	s.cullEnabled = glIsBuffer(GL_CULL_FACE) != 0;
+	s.cullEnabled = glIsEnabled(GL_CULL_FACE) != 0;
 	
 	glGetFloatv(GL_POLYGON_OFFSET_FACTOR, &s.polygonOffsetFactor);
 	checkOpenGLError("");

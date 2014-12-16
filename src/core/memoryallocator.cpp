@@ -49,12 +49,14 @@ namespace et
 		{
 			auto& iv0 = info->v0;
 			auto& iv1 = info->v1;
-			v0 = v0 ^ iv0;
-			iv0 = v0 ^ iv0;
-			v0 = v0 ^ iv0;
-			v1 = v1 ^ iv1;
-			iv1 = v1 ^ iv1;
-			v1 = v1 ^ iv1;
+			
+			v0 ^= iv0;
+			iv0 ^= v0;
+			v0 ^= iv0;
+			
+			v1 ^= iv1;
+			iv1 ^= v1;
+			v1 ^= iv1;
 		}
 	};
 	

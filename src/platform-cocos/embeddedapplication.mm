@@ -62,6 +62,7 @@ static etApplication* _sharedInstance = nil;
 	int defaultFramebuffer = [[view valueForKey:@"renderer_"] defaultFrameBuffer];
 
 	application().run(0, 0);
+	
 	_notifier.accessRenderContext()->renderState().setDefaultFramebuffer(
 		[self renderContext]->framebufferFactory().createFramebufferWrapper(defaultFramebuffer));
 
@@ -101,18 +102,11 @@ static etApplication* _sharedInstance = nil;
 		NSValue* value = [change objectForKey:@"new"];
 		[value getValue:&frame];
 		
-		if (UIInterfaceOrientationIsLandscape([CCDirector sharedDirector].interfaceOrientation))
-			frame.size = CGSizeMake(frame.size.height, frame.size.width);
-
 		vec2i size(static_cast<int>(scaleFactor * frame.size.width),
 			static_cast<int>(scaleFactor * frame.size.height));
 		
-		RenderContext* rc = _notifier.accessRenderContext();
-		if (rc->sizei() != size)
-		{
-			rc->renderState().defaultFramebuffer()->forceSize(size);
-			_notifier.notifyResize(size);
-		}
+		_notifier.accessRenderContext()->renderState().defaultFramebuffer()->forceSize(size);
+		_notifier.notifyResize(size);
 	}
 }
 

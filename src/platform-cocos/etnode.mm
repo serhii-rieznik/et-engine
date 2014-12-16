@@ -38,7 +38,9 @@ using namespace et;
 - (void)draw
 {
 	PreservedRenderStateScope lock(_notifier.accessRenderContext(), true);
-	_notifier.notifyIdle();
+	
+	if (_notifier.shouldPerformRendering())
+		_notifier.notifyIdle();
 }
 
 @end
