@@ -27,11 +27,13 @@ struct jpegStreamWrapper
 	unsigned char buffer[jpegBufferSize];
 };
 
-void skip(j_decompress_ptr cinfo, long count);
 boolean fill_buffer(j_decompress_ptr cinfo);
+
+void skip(j_decompress_ptr cinfo, long count);
 void init_source(j_decompress_ptr cinfo);
 void my_error_exit(j_common_ptr cinfo);
 void term(j_decompress_ptr cinfo);
+void loadInfoFromHeader(TextureDescription& desc, jpeg_decompress_struct& cinfo);
 
 void et::jpeg::loadInfoFromStream(std::istream& source, TextureDescription& desc)
 {
@@ -63,44 +65,11 @@ void et::jpeg::loadInfoFromStream(std::istream& source, TextureDescription& desc
     streamWrapper->pub.next_input_byte = nullptr; /* until buffer loaded */
 	
 	jpeg_read_header(&cinfo, TRUE);
+	jpeg_start_decompress(&cinfo);
 	
-	desc.size = vec2i(cinfo.output_width, cinfo.output_height);
-	desc.bitsPerPixel = 8 * cinfo.output_components;
-	desc.channels = cinfo.output_components;
+	loadInfoFromHeader(desc, cinfo);
 	
-	switch (cinfo.out_color_space)
-	{
-		case JCS_GRAYSCALE:
-		{
-#		if defined(GL_R8)
-			desc.internalformat = GL_R8;
-			desc.format = GL_RED;
-#		else
-			desc.internalformat = GL_LUMINANCE;
-			desc.format = GL_LUMINANCE;
-#		endif
-			break;
-		}
-			
-		case JCS_CMYK:
-		{
-			desc.internalformat = GL_RGBA;
-			desc.format = GL_RGBA;
-			break;
-		}
-			
-		default:
-		{
-			desc.internalformat = GL_RGB;
-			desc.format = GL_RGB;
-			break;
-		}
-	}
-	
-	desc.type = GL_UNSIGNED_BYTE;
-	desc.mipMapCount = 1;
-	desc.layersCount = 1;
-	
+	jpeg_finish_decompress(&cinfo);
 	jpeg_destroy_decompress(&cinfo);
 }
 
@@ -136,42 +105,7 @@ void et::jpeg::loadFromStream(std::istream& source, TextureDescription& desc)
 	jpeg_read_header(&cinfo, TRUE);
 	jpeg_start_decompress(&cinfo);
 	
-	desc.size = vec2i(cinfo.output_width, cinfo.output_height);
-	desc.bitsPerPixel = 8 * cinfo.output_components;
-	desc.channels = cinfo.output_components;
-	
-	switch (cinfo.out_color_space)
-	{
-		case JCS_GRAYSCALE:
-		{
-#		if defined(GL_R8)
-			desc.internalformat = GL_R8;
-			desc.format = GL_RED;
-#		else
-			desc.internalformat = GL_LUMINANCE;
-			desc.format = GL_LUMINANCE;
-#		endif
-			break;
-		}
-			
-		case JCS_CMYK:
-		{
-			desc.internalformat = GL_RGBA;
-			desc.format = GL_RGBA;
-			break;
-		}
-			
-		default:
-		{
-			desc.internalformat = GL_RGB;
-			desc.format = GL_RGB;
-			break;
-		}
-	}
-	
-	desc.type = GL_UNSIGNED_BYTE;
-	desc.mipMapCount = 1;
-	desc.layersCount = 1;
+	loadInfoFromHeader(desc, cinfo);
 	
 	auto row_stride = cinfo.output_width * cinfo.output_components;
 	desc.data.resize(row_stride * cinfo.output_height);
@@ -250,4 +184,45 @@ void skip(j_decompress_ptr cinfo, long count)
 
 void term(j_decompress_ptr)
 {
+	
+}
+
+void loadInfoFromHeader(TextureDescription& desc, jpeg_decompress_struct& cinfo)
+{
+	desc.size.x = cinfo.output_width;
+	desc.size.y = cinfo.output_height;
+	desc.channels = cinfo.out_color_components;
+	desc.bitsPerPixel = 8 * cinfo.output_components;
+	desc.mipMapCount = 1;
+	desc.layersCount = 1;
+	desc.type = GL_UNSIGNED_BYTE;
+	
+	switch (cinfo.out_color_space)
+	{
+		case JCS_GRAYSCALE:
+		{
+#		if defined(GL_R8)
+			desc.internalformat = GL_R8;
+			desc.format = GL_RED;
+#		else
+			desc.internalformat = GL_LUMINANCE;
+			desc.format = GL_LUMINANCE;
+#		endif
+			break;
+		}
+			
+		case JCS_CMYK:
+		{
+			desc.internalformat = GL_RGBA;
+			desc.format = GL_RGBA;
+			break;
+		}
+			
+		default:
+		{
+			desc.internalformat = GL_RGB;
+			desc.format = GL_RGB;
+			break;
+		}
+	}
 }

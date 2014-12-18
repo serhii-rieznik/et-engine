@@ -453,6 +453,10 @@ namespace et
 	template <typename T>
 	inline vec3 vector3ToFloat(const vector3<T>& v)
 		{ return vec3(static_cast<float>(v.x), static_cast<float>(v.y), static_cast<float>(v.z)); }
+
+	template <typename T>
+	inline vec4 vector4ToFloat(const vector4<T>& v)
+		{ return vec4(static_cast<float>(v.x), static_cast<float>(v.y), static_cast<float>(v.z), static_cast<float>(v.w)); }
 	
 	template <typename T>
 	T bezierCurve(T* points, size_t size, float time)

@@ -25,16 +25,16 @@ Renderer::Renderer(RenderContext* rc) :
 	checkOpenGLError("Renderer::Renderer", 0);
 
 	IndexArray::Pointer ib = IndexArray::Pointer::create(IndexArrayFormat_16bit, 4, PrimitiveType_TriangleStrips);
-	VertexArray::Pointer vb = VertexArray::Pointer::create(VertexDeclaration(false, Usage_Position, Type_Vec2), 4);
+	ib->linearize(4);
 	
+	VertexArray::Pointer vb = VertexArray::Pointer::create(VertexDeclaration(false, Usage_Position, Type_Vec2), 4);
 	RawDataAcessor<vec2> pos = vb->chunk(Usage_Position).accessData<vec2>(0);
 	pos[0] = vec2(-1.0f, -1.0f);
 	pos[1] = vec2( 1.0f, -1.0f);
 	pos[2] = vec2(-1.0f,  1.0f);
 	pos[3] = vec2( 1.0f,  1.0f);
-	ib->linearize(4);
 
-	_fullscreenQuadVao = rc->vertexBufferFactory().createVertexArrayObject("__internal_fullscreen_vao", 
+	_fullscreenQuadVao = rc->vertexBufferFactory().createVertexArrayObject("__et__internal__fullscreen_vao__",
 		vb, BufferDrawType_Static, ib, BufferDrawType_Static);
 
 	_fullscreenProgram = rc->programFactory().genProgram("__et__fullscreeen__program__",

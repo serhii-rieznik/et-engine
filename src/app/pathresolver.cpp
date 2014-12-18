@@ -198,6 +198,7 @@ void StandardPathResolver::pushSearchPaths(const std::set<std::string>& paths)
 void StandardPathResolver::pushRelativeSearchPath(const std::string& path)
 {
 	_searchPath.emplace_front(addTrailingSlash(normalizeFilePath(application().environment().applicationPath() + path)));
+	_searchPath.emplace_front(addTrailingSlash(normalizeFilePath(application().environment().applicationInputDataFolder() + path)));
 }
 
 void StandardPathResolver::popSearchPaths(size_t amount)

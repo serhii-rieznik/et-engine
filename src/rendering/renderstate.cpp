@@ -777,13 +777,19 @@ RenderState::State RenderState::currentState()
 	checkOpenGLError("");
 #endif
 	
-	for (uint32_t i = 0; i < Usage_max; ++i)
+	bool shouldLoadVertexAttribs = (openGLCapabilites().version() == OpenGLVersion_2x) ||
+		(s.boundVertexArrayObject != 0);
+	
+	if (shouldLoadVertexAttribs)
 	{
-		int enabled = 0;
-		glGetVertexAttribiv(i, GL_VERTEX_ATTRIB_ARRAY_ENABLED, &enabled);
-		s.enabledVertexAttributes[i] = (enabled > 0);
+		for (uint32_t i = 0; i < Usage_max; ++i)
+		{
+			int enabled = 0;
+			glGetVertexAttribiv(i, GL_VERTEX_ATTRIB_ARRAY_ENABLED, &enabled);
+			s.enabledVertexAttributes[i] = (enabled > 0);
+			checkOpenGLError("glGetVertexAttribiv");
+		}
 	}
-	checkOpenGLError("");
 	
 	value = 0;
 	glGetIntegerv(GL_CURRENT_PROGRAM, &value);
