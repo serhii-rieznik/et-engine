@@ -77,6 +77,7 @@ namespace et
 			const mat4& localTransform();
 			
 			void invalidateTransform();
+			virtual void transformInvalidated() { }
 
 			void setParent(Element* p);
 
@@ -115,7 +116,7 @@ namespace et
 
 			void duplicateChildrenToObject(Element* object);
 			void duplicateBasePropertiesToObject(Element* object);
-
+			
 		private:
 			Pointer childWithNameCallback(const std::string& name, Pointer root, ElementType ofType);
 			void childrenOfTypeCallback(ElementType t, Element::List& list, Pointer root) const;
@@ -169,10 +170,6 @@ namespace et
 				deserializeGeneralParameters(stream, version);
 				deserializeChildren(stream, factory, version);
 			}
-			
-		protected:
-			void invalidateTransform()
-				{ Element::invalidateTransform(); }
 		};
 
 		class RenderableElement : public Element

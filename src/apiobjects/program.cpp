@@ -242,27 +242,7 @@ void Program::buildProgram(const std::string& vertex_source, const std::string& 
 	{
 		glAttachShader(_glID, FragmentShader);
 		checkOpenGLError("glAttachShader<FRAG> - %s", name().c_str());
-
-#	if defined(GL_VERSION_3_0)
-		if (glBindFragDataLocation != nullptr)
-		{
-			glBindFragDataLocation(_glID, 0, "FragColor");
-			checkOpenGLError("glBindFragDataLocation<color0> - %s", name().c_str());
-			
-			glBindFragDataLocation(_glID, 1, "FragColor1");
-			checkOpenGLError("glBindFragDataLocation<color1> - %s", name().c_str());
-			
-			glBindFragDataLocation(_glID, 2, "FragColor2");
-			checkOpenGLError("glBindFragDataLocation<color2> - %s", name().c_str());
-			
-			glBindFragDataLocation(_glID, 3, "FragColor3");
-			checkOpenGLError("glBindFragDataLocation<color3> - %s", name().c_str());
-			
-			glBindFragDataLocation(_glID, 4, "FragColor4");
-			checkOpenGLError("glBindFragDataLocation<color4> - %s", name().c_str());
-		}
-#	endif
-	} 
+	}
 
 	int linkStatus = link();
 
@@ -297,6 +277,26 @@ void Program::buildProgram(const std::string& vertex_source, const std::string& 
 			}
 		}
 
+#	if defined(GL_VERSION_3_0)
+		if (glBindFragDataLocation != nullptr)
+		{
+			glBindFragDataLocation(_glID, 0, "FragColor0");
+			checkOpenGLError("glBindFragDataLocation<color0> - %s", name().c_str());
+			
+			glBindFragDataLocation(_glID, 1, "FragColor1");
+			checkOpenGLError("glBindFragDataLocation<color1> - %s", name().c_str());
+			
+			glBindFragDataLocation(_glID, 2, "FragColor2");
+			checkOpenGLError("glBindFragDataLocation<color2> - %s", name().c_str());
+			
+			glBindFragDataLocation(_glID, 3, "FragColor3");
+			checkOpenGLError("glBindFragDataLocation<color3> - %s", name().c_str());
+			
+			glBindFragDataLocation(_glID, 4, "FragColor4");
+			checkOpenGLError("glBindFragDataLocation<color4> - %s", name().c_str());
+		}
+#	endif
+		
 		linkStatus = link();
 
 		_rc->renderState().bindProgram(_glID, true);
@@ -424,7 +424,7 @@ void Program::setUniform(int nLoc, uint32_t type, int32_t value, bool)
 	ET_ASSERT(loaded());
 	
 	glUniform1i(nLoc, value);
-	checkOpenGLError("setUniform - int");
+	checkOpenGLError("glUniform1i");
 #endif
 }
 
@@ -438,7 +438,7 @@ void Program::setUniform(int nLoc, uint32_t type, uint32_t value, bool)
 	ET_ASSERT(loaded());
 	
 	glUniform1i(nLoc, static_cast<GLint>(value));
-	checkOpenGLError("setUniform - unsigned int");
+	checkOpenGLError("glUniform1i");
 #endif
 }
 
@@ -452,7 +452,7 @@ void Program::setUniform(int nLoc, uint32_t type, int64_t value, bool)
 	ET_ASSERT(loaded());
 	
 	glUniform1i(nLoc, static_cast<GLint>(value));
-	checkOpenGLError("setUniform - unsigned long");
+	checkOpenGLError("glUniform1i");
 #endif
 }
 
@@ -466,7 +466,7 @@ void Program::setUniform(int nLoc, uint32_t type, uint64_t value, bool)
 	ET_ASSERT(loaded());
 
 	glUniform1i(nLoc, static_cast<GLint>(value));
-	checkOpenGLError("setUniform - unsigned long");
+	checkOpenGLError("glUniform1i");
 #endif
 }
 
@@ -480,7 +480,7 @@ void Program::setUniform(int nLoc, uint32_t type, const unsigned long value, boo
 	ET_ASSERT(loaded());
 	
 	glUniform1i(nLoc, static_cast<GLint>(value));
-	checkOpenGLError("setUniform - unsigned int");
+	checkOpenGLError("glUniform1i");
 #endif
 }
 
@@ -497,7 +497,7 @@ void Program::setUniform(int nLoc, uint32_t type, const float value, bool forced
 	{
 		_floatCache[nLoc] = value;
 		glUniform1f(nLoc, value);
-		checkOpenGLError("setUniform - float");
+		checkOpenGLError("glUniform1f");
 	}
 #endif
 }
@@ -515,9 +515,9 @@ void Program::setUniform(int nLoc, uint32_t type, const vec2& value, bool forced
 	{
 		_vec2Cache[nLoc] = value;
 		glUniform2fv(nLoc, 1, value.data());
+		checkOpenGLError("glUniform2fv");
 	}
 	
-	checkOpenGLError("setUniform - vec2");
 #endif
 }
 
@@ -534,9 +534,9 @@ void Program::setUniform(int nLoc, uint32_t type, const vec3& value, bool forced
 	{
 		_vec3Cache[nLoc] = value;
 		glUniform3fv(nLoc, 1, value.data());
+		checkOpenGLError("glUniform3fv");
 	}
 	
-	checkOpenGLError("setUniform - vec3");
 #endif
 }
 
@@ -553,9 +553,9 @@ void Program::setUniform(int nLoc, uint32_t type, const vec4& value, bool forced
 	{
 		_vec4Cache[nLoc] = value;
 		glUniform4fv(nLoc, 1, value.data());
+		checkOpenGLError("glUniform4fv");
 	}
 	
-	checkOpenGLError("setUniform - vec4");
 #endif
 }
 
@@ -569,8 +569,7 @@ void Program::setUniformDirectly(int nLoc, uint32_t type, const vec4& value)
 	ET_ASSERT(loaded());
 	
 	glUniform4fv(nLoc, 1, value.data());
-	
-	checkOpenGLError("setUniform - vec4");
+	checkOpenGLError("glUniform4fv");
 #endif
 }
 
@@ -587,9 +586,9 @@ void Program::setUniform(int nLoc, uint32_t type, const mat3& value, bool forced
 	{
 		_mat3Cache[nLoc] = value;
 		glUniformMatrix3fv(nLoc, 1, 0, value.data());
+		checkOpenGLError("glUniformMatrix3fv");
 	}
 	
-	checkOpenGLError("setUniform - mat3");
 #endif
 }
 
@@ -606,9 +605,9 @@ void Program::setUniform(int nLoc, uint32_t type, const mat4& value, bool forced
 	{
 		_mat4Cache[nLoc] = value;
 		glUniformMatrix4fv(nLoc, 1, 0, value.data());
+		checkOpenGLError("glUniformMatrix4fv");
 	}
 	
-	checkOpenGLError("setUniform - mat4");
 #endif
 }
 
@@ -622,8 +621,7 @@ void Program::setUniformDirectly(int nLoc, uint32_t type, const mat4& value)
 	ET_ASSERT(loaded());
 	
 	glUniformMatrix4fv(nLoc, 1, 0, value.data());
-	
-	checkOpenGLError("setUniform - mat4");
+	checkOpenGLError("glUniformMatrix4fv");
 #endif
 }
 
@@ -637,7 +635,7 @@ void Program::setUniform(int nLoc, uint32_t type, const vec2* value, size_t amou
 	ET_ASSERT(loaded());
 	
 	glUniform2fv(nLoc, static_cast<GLsizei>(amount), value->data());
-	checkOpenGLError("setUniform - vec2*");
+	checkOpenGLError("glUniform2fv");
 #endif
 }
 
@@ -651,7 +649,7 @@ void Program::setUniform(int nLoc, uint32_t type, const vec3* value, size_t amou
 	ET_ASSERT(loaded());
 	
 	glUniform3fv(nLoc, static_cast<GLsizei>(amount), value->data());
-	checkOpenGLError("setUniform - vec3*");
+	checkOpenGLError("glUniform3fv");
 #endif
 }
 
@@ -665,7 +663,7 @@ void Program::setUniform(int nLoc, uint32_t type, const vec4* value, size_t amou
 	ET_ASSERT(loaded());
 	
 	glUniform4fv(nLoc, static_cast<GLsizei>(amount), value->data());
-	checkOpenGLError("setUniform - vec4*");
+	checkOpenGLError("glUniform4fv");
 #endif
 }
 
@@ -679,6 +677,6 @@ void Program::setUniform(int nLoc, uint32_t type, const mat4* value, size_t amou
 	ET_ASSERT(loaded());
 	
 	glUniformMatrix4fv(nLoc, static_cast<GLsizei>(amount), 0, value->data());
-	checkOpenGLError("setUniform - mat4*");
+	checkOpenGLError("glUniformMatrix4fv");
 #endif
 }

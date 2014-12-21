@@ -224,7 +224,6 @@
 
 #if (ET_DEBUG)
 #
-#	define ET_ENABLE_OPENGL_COUNTERS	1
 #
 #	define checkOpenGLError(...)		et::checkOpenGLErrorEx(ET_CALL_FUNCTION, __FILE__, \
 											ET_TO_CONST_CHAR(__LINE__), __VA_ARGS__);
@@ -233,11 +232,12 @@
 #
 #else
 #
-#	define ET_ENABLE_OPENGL_COUNTERS	0
 #	define checkOpenGLError(...)
 #	define ET_OPENGL_DEBUG_SCOPE_IN_DEBUG		
 #
 #endif
+
+#define ET_ENABLE_OPENGL_COUNTERS	1
 
 #if defined(GL_ES_VERSION_3_0) || defined(GL_ARB_vertex_array_object) || defined(GL_OES_vertex_array_object)
 #	define ET_SUPPORT_VERTEX_ARRAY_OBJECTS	1
@@ -329,4 +329,7 @@ namespace et
 	size_t bitsPerPixelForType(uint32_t type);
 	size_t bitsPerPixelForTextureFormat(uint32_t internalFormat, uint32_t type);
 	size_t channelsForTextureFormat(uint32_t internalFormat);
+	
+	const uint32_t* drawBufferTargets();
+	uint32_t drawBufferTarget(size_t);
 }

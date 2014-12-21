@@ -32,18 +32,21 @@ void Camera::lookAt(const vec3& pos, const vec3& point, const vec3& up)
 
 const mat4& Camera::perspectiveProjection(float fov, float aspect, float zNear, float zFar)
 {
+	_zFar = zFar;
+	_zNear = zNear;
+	
 	_projectionMatrix = identityMatrix;
 
 	float fHalfFOV = 0.5f * fov;
 	float cotan = std::cos(fHalfFOV) / std::sin(fHalfFOV);
-	float dz = zFar - zNear;
+	float dz = _zFar - _zNear;
 
 	_projectionMatrix[0][0] = cotan / aspect;
 	_projectionMatrix[1][1] = cotan;
-	_projectionMatrix[2][2] = -(zFar + zNear) / dz;
+	_projectionMatrix[2][2] = -(_zFar + _zNear) / dz;
 	_projectionMatrix[3][3] =  0.0f;
 	_projectionMatrix[2][3] = -1.0f;
-	_projectionMatrix[3][2] = -2.0f * zNear * zFar / dz;
+	_projectionMatrix[3][2] = -2.0f * (_zNear * _zFar) / dz;
 
 	projectionUpdated();
 	return _projectionMatrix;

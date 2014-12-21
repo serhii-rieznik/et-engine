@@ -104,6 +104,7 @@
 		A5D8EC3D1A3CDF5F00E3620B /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A5D8EC3C1A3CDF5E00E3620B /* AppKit.framework */; };
 		A5D8EC401A3CE18900E3620B /* MainController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5D8EC3E1A3CE18900E3620B /* MainController.cpp */; };
 		A5D8EC431A3CE2EE00E3620B /* data in Resources */ = {isa = PBXBuildFile; fileRef = A5D8EC421A3CE2EE00E3620B /* data */; };
+		A5E9A7D21A438A6D00768222 /* tgaloader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5E9A7D01A43851700768222 /* tgaloader.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -357,6 +358,8 @@
 		A5D8EC3E1A3CE18900E3620B /* MainController.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MainController.cpp; sourceTree = "<group>"; };
 		A5D8EC3F1A3CE18900E3620B /* MainController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MainController.h; sourceTree = "<group>"; };
 		A5D8EC421A3CE2EE00E3620B /* data */ = {isa = PBXFileReference; lastKnownFileType = folder; name = data; path = ../data; sourceTree = "<group>"; };
+		A5E9A7CF1A43850100768222 /* tgaloader.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = tgaloader.h; sourceTree = "<group>"; };
+		A5E9A7D01A43851700768222 /* tgaloader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = tgaloader.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -543,6 +546,7 @@
 				A5D8EAEE1A3CDBDD00E3620B /* pvrdecompressor.cpp */,
 				A5D8EAEF1A3CDBDD00E3620B /* pvrloader.cpp */,
 				A5D8EAF01A3CDBDD00E3620B /* textureloader.cpp */,
+				A5E9A7D01A43851700768222 /* tgaloader.cpp */,
 			);
 			name = imaging;
 			path = ../../../src/imaging;
@@ -866,6 +870,7 @@
 		A5D8EBEB1A3CDC0000E3620B /* imaging */ = {
 			isa = PBXGroup;
 			children = (
+				A5E9A7CF1A43850100768222 /* tgaloader.h */,
 				A5D8EBEC1A3CDC0000E3620B /* ddsloader.h */,
 				A5D8EBED1A3CDC0000E3620B /* hdrloader.h */,
 				A5D8EBEE1A3CDC0000E3620B /* imageoperations.h */,
@@ -1179,6 +1184,7 @@
 				A5D8EB6F1A3CDBDD00E3620B /* thread.unix.cpp in Sources */,
 				A5D8EB391A3CDBDD00E3620B /* vertexbufferdata.cpp in Sources */,
 				A5D8EB471A3CDBDD00E3620B /* dictionary.cpp in Sources */,
+				A5E9A7D21A438A6D00768222 /* tgaloader.cpp in Sources */,
 				A5D8EB4A1A3CDBDD00E3620B /* objectscache.cpp in Sources */,
 				A5D8EB891A3CDBDD00E3620B /* vertexdatachunk.cpp in Sources */,
 				A5D8EB6E1A3CDBDD00E3620B /* mutex.unix.cpp in Sources */,

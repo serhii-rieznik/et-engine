@@ -314,6 +314,7 @@ s3d::ElementContainer::Pointer OBJLoader::load(ObjectsCache& cache, size_t optio
 	_loadOptions = options;
 
 	loadData(false, cache);
+	
 	processLoadedData();
 
 	s3d::ElementContainer::Pointer result = generateVertexBuffers();
@@ -675,22 +676,16 @@ void OBJLoader::processLoadedData()
 	bool hasNormals = _normals.size() > 0;
 	bool hasTexCoords = _texCoords.size() > 0;
 		
-	VertexDeclaration decl(true);
-	decl.push_back(Usage_Position, Type_Vec3);
-		
+	VertexDeclaration decl(true, Usage_Position, Type_Vec3);
+	
 	if (hasNormals)
 		decl.push_back(Usage_Normal, Type_Vec3);
 
 	if (hasTexCoords)
 		decl.push_back(Usage_TexCoord0, Type_Vec2);
 		
-	IndexArrayFormat fmt = IndexArrayFormat_8bit;
-	if (totalVertices > 255)
-		fmt = IndexArrayFormat_16bit;
-
-	if (totalVertices > 65535)
-		fmt = IndexArrayFormat_32bit;
-		
+	IndexArrayFormat fmt = (totalVertices > 65535) ? IndexArrayFormat_32bit : IndexArrayFormat_16bit;
+	
 	_vertexData = VertexArray::Pointer::create(decl, totalVertices);
 	_indices = IndexArray::Pointer::create(fmt, totalVertices, PrimitiveType_Triangles);
 	
@@ -702,11 +697,11 @@ void OBJLoader::processLoadedData()
 	
 	size_t index = 0;
 	
-	auto PUSH_VERTEX = [this, &pos, &norm, &tex, &index, hasTexCoords, hasNormals](const OBJVertex& vertex)
+	auto PUSH_VERTEX = [this, &pos, &norm, &tex, &index, hasTexCoords, hasNormals](const OBJVertex& vertex, const vec3& offset)
 	{
 		{
 			ET_ASSERT(vertex[0] < _vertices.size());
-			pos[index] = _vertices[vertex[0]];
+			pos[index] = _vertices[vertex[0]] - offset;
 		}
 		
 		if (hasTexCoords)
@@ -727,18 +722,42 @@ void OBJLoader::processLoadedData()
 	for (auto group : _groups)
 	{
 		IndexType startIndex = static_cast<IndexType>(index);
+		
+		vec3 center;
+		
+		if (_loadOptions & Option_CalculateTransforms)
+		{
+			size_t totalVertices = 0;
+			
+			for (auto face : group->faces)
+			{
+				size_t numTriangles = face.vertices.size() - 2;
+				for (size_t i = 1; i <= numTriangles; ++i)
+				{
+					center += _vertices[face.vertices[0][0]];
+					center += _vertices[face.vertices[i][0]];
+					center += _vertices[face.vertices[i+1][0]];
+					totalVertices += 3;
+				}
+			}
+			
+			if (totalVertices > 0.0f)
+				center /= static_cast<float>(totalVertices);
+		}
+		
 		for (auto face : group->faces)
 		{
 			size_t numTriangles = face.vertices.size() - 2;
 			for (size_t i = 1; i <= numTriangles; ++i)
 			{
-				PUSH_VERTEX(face.vertices[0]);
-				PUSH_VERTEX(face.vertices[i]);
-				PUSH_VERTEX(face.vertices[i+1]);
+				PUSH_VERTEX(face.vertices[0], center);
+				PUSH_VERTEX(face.vertices[i], center);
+				PUSH_VERTEX(face.vertices[i+1], center);
 			}
 		}
 			
 		Material::Pointer m;
+		
 		for (auto mat : _materials)
 		{
 			if (mat->name() == group->material)
@@ -748,16 +767,22 @@ void OBJLoader::processLoadedData()
 			}
 		}
 			
-		_meshes.emplace_back(group->name, startIndex, index - startIndex, m);
+		_meshes.emplace_back(group->name, startIndex, index - startIndex, m, center);
 	}
-
-#undef PUSH_VERTEX
 }
 
 s3d::ElementContainer::Pointer OBJLoader::generateVertexBuffers()
 {
 	s3d::ElementContainer::Pointer result = s3d::ElementContainer::Pointer::create(inputFileName, nullptr);
 
+	_storage = s3d::Scene3dStorage::Pointer::create(getFileName(inputFileName) + "-storage", result.ptr());
+	_storage->addVertexArray(_vertexData);
+	_storage->setIndexArray(_indices);
+	
+	for (auto m : _materials)
+		_storage->addMaterial(m);
+	
+	
 	VertexArrayObject vao = _rc->vertexBufferFactory().createVertexArrayObject("model-vao");
 
 	vao->setBuffers(_rc->vertexBufferFactory().createVertexBuffer("model-vb", _vertexData, BufferDrawType_Static),
@@ -765,15 +790,20 @@ s3d::ElementContainer::Pointer OBJLoader::generateVertexBuffers()
 
 	for (const auto& i : _meshes)
 	{
+		s3d::Element::Pointer object;
+		
 		if (_loadOptions & Option_SupportMeshes)
 		{
 			auto mesh = SupportMesh::Pointer::create(i.name, vao, i.material, i.start, i.count, result.ptr());
 			mesh->fillCollisionData(_vertexData, _indices);
+			object = mesh;
 		}
 		else 
 		{
-			Mesh::Pointer::create(i.name, vao, i.material, i.start, i.count, result.ptr());
+			object = Mesh::Pointer::create(i.name, vao, i.material, i.start, i.count, result.ptr());
 		}
+		
+		object->setTranslation(i.center);
 	}
 
 	return result;

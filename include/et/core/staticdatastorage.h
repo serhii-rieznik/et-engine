@@ -61,9 +61,15 @@ namespace et
 			for (auto& value : r.data)
 				data[i++] = value;
 		}
+
+		const T* begin() const
+			{ return data; }
 		
 		T* begin()
 			{ return data; }
+
+		const T* end() const
+			{ return data + count; }
 		
 		T* end()
 			{ return data + count; }

@@ -48,6 +48,8 @@ void Element::invalidateTransform()
 	
 	for (auto i : children())
 		i->invalidateTransform();
+	
+	transformInvalidated();
 }
 
 void Element::buildTransform()

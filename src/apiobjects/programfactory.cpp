@@ -78,6 +78,7 @@ ProgramFactory::ProgramFactory(RenderContext* rc) : APIObjectFactory(rc)
 			"#define etTextureCubeLod	textureCubeLod\n"
 			"#define etFragmentIn		varying\n"
 			"#define etFragmentOut		gl_FragColor\n"
+			"#define etFragmentOut1		gl_FragData[1]\n"
 			;
 
 		_vertShaderHeader =
@@ -103,8 +104,10 @@ ProgramFactory::ProgramFactory(RenderContext* rc) : APIObjectFactory(rc)
 			"#define etTextureCube		texture\n"
 			"#define etTextureCubeLod	textureLod\n"
 			"#define etFragmentIn		in\n"
-			"#define etFragmentOut		FragColor\n"
-			"out etHighp vec4 FragColor;\n"
+			"#define etFragmentOut		FragColor0\n"
+			"#define etFragmentOut1		FragColor1\n"
+			"out etHighp vec4 FragColor0;\n"
+			"out etHighp vec4 FragColor1;\n"
 			;
 
 		_vertShaderHeader = 

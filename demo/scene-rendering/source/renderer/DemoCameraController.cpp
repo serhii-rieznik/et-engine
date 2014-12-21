@@ -15,10 +15,10 @@ using namespace demo;
 
 CameraController::CameraController()
 {
-	_mainCamera.lookAt(vec3(-2.0f, 100.0f, 0.0f), vec3(0.0f, 100.0f, 0.0f));
+	_mainCamera.lookAt(vec3(500.0f, 200.0f, 0.0f), vec3(0.0f, 0.0f, 0.0f));
 	_mainCamera.lockUpVector(unitY);
 	
-	_observerCamera.lookAt(vec3(4096.0f));
+	_observerCamera.lookAt(vec3(3072.0f));
 	
 	_updateTimer.expired.connect([this](et::NotifyTimer*)
 	{

@@ -125,9 +125,10 @@ namespace et
 	typedef uint16_t ShortIndexType;
 	typedef uint8_t SmallIndexType;
 	
-	enum
+	enum : uint32_t
 	{
-		InvalidIndex = static_cast<IndexType>(-1)
+		InvalidIndex = static_cast<IndexType>(-1),
+		MaxDrawBuffers = 8
 	};
 
 }

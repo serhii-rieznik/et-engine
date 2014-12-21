@@ -34,6 +34,12 @@ namespace et
 
 		const quaternion orientation() const
 			{ return matrixToQuaternion(_modelViewMatrix.mat3()); }
+		
+		float zNear() const
+			{ return _zNear; }
+		
+		float zFar() const
+			{ return _zFar; }
 
 		vec3 direction() const;
 		void setDirection(const vec3& d);
@@ -115,7 +121,9 @@ namespace et
 		Frustum _frustum;
 
 		vec3 _upLocked;
-		bool _lockUpVector;
+		float _zNear = 0.0f;
+		float _zFar = 0.0f;
+		bool _lockUpVector = false;
 	};
 
 	typedef StaticDataStorage<mat4, 6> CubemapProjectionMatrixArray;

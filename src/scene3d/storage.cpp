@@ -22,6 +22,11 @@ void Scene3dStorage::addVertexArray(const VertexArray::Pointer& va)
 	_vertexArrays.push_back(va);
 }
 
+void Scene3dStorage::setIndexArray(const IndexArray::Pointer& ia)
+{
+	_indexArray = ia;
+}
+
 VertexArray::Pointer Scene3dStorage::addVertexArrayWithDeclaration(const VertexDeclaration& decl, size_t size)
 {
 	_vertexArrays.push_back(VertexArray::Pointer::create(decl, size));

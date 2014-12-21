@@ -44,7 +44,7 @@ namespace et
 			SupportMesh* duplicate();
 
 			Sphere sphere();
-			AABB aabb();
+			const AABB& aabb();
 			OBB obb();
 			
 			const vec3& size() const
@@ -56,13 +56,17 @@ namespace et
 			float finalTransformScale();
 
 		private:
+			void transformInvalidated() override;
 			void buildInverseTransform();
 
 		private:
 			CollisionData _data;
+			AABB _cachedAABB;
+			
 			vec3 _size;
 			vec3 _center;
-			float _radius;
+			float _radius = 0.0f;
+			bool _shouldBuildAABB = true;
 		};
 	}
 }

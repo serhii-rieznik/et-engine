@@ -69,7 +69,7 @@ void SupportMesh::fillCollisionData(const VertexArray::Pointer& vertexArray, con
 		}
 	}
 	
-	_size = maxv(0.5f * (maxOffset - minOffset), vec3(std::numeric_limits<float>::epsilon()));
+	_size = maxv(maxOffset - minOffset, vec3(std::numeric_limits<float>::epsilon()));
 	_center = 0.5f * (maxOffset + minOffset);
 	_radius = distance;
 }
@@ -100,10 +100,16 @@ Sphere SupportMesh::sphere()
 	return Sphere(finalTransform() * _center, finalTransformScale() * _radius);
 }
 
-AABB SupportMesh::aabb()
+const AABB& SupportMesh::aabb()
 {
-	mat4 ft = finalTransform();
-	return AABB(ft * _center, absv(ft.rotationMultiply(_size)));
+	if (_shouldBuildAABB)
+	{
+		const mat4& ft = finalTransform();
+		_cachedAABB = AABB(ft * _center, absv(ft.rotationMultiply(_size)));
+		_shouldBuildAABB = false;
+	}
+	
+	return _cachedAABB;
 }
 
 OBB SupportMesh::obb()
@@ -146,4 +152,9 @@ void SupportMesh::deserialize(std::istream& stream, ElementFactory* factory, Sce
 	}
 
 	Mesh::deserialize(stream, factory, version);
+}
+
+void SupportMesh::transformInvalidated()
+{
+	_shouldBuildAABB = true;
 }

@@ -569,7 +569,7 @@ void et::etCompressedTexImage2D(uint32_t target, int level, uint32_t internalfor
 	glCompressedTexImage2D(target, level, internalformat, width, height, border, imageSize, data);
 
 #	if (ET_DEBUG)
-	checkOpenGLError("glCompressedTexImage2D(%s, %d, %s, %d, %d, %d, %d, 0x%8X)",
+	checkOpenGLError("glCompressedTexImage2D(%s, %d, %s, %d, %d, %d, %d, 0x%016X)",
 		glTexTargetToString(target).c_str(), level, glInternalFormatToString(static_cast<int32_t>(internalformat)).c_str(),
 		width, height, border, imageSize, data);
 #	endif
@@ -703,6 +703,65 @@ size_t et::channelsForTextureFormat(uint32_t internalFormat)
 		return 0;
 	}
 }
+
+const uint32_t* et::drawBufferTargets()
+{
+	static const uint32_t colorAttachmentValues[et::MaxDrawBuffers] =
+	{
+		GL_COLOR_ATTACHMENT0,
+		
+#	if defined(GL_COLOR_ATTACHMENT1)
+		GL_COLOR_ATTACHMENT1,
+#	else
+		GL_COLOR_ATTACHMENT0,
+#	endif
+		
+#	if defined(GL_COLOR_ATTACHMENT2)
+		GL_COLOR_ATTACHMENT2,
+#	else
+		GL_COLOR_ATTACHMENT0,
+#	endif
+		
+#	if defined(GL_COLOR_ATTACHMENT3)
+		GL_COLOR_ATTACHMENT3,
+#	else
+		GL_COLOR_ATTACHMENT0,
+#	endif
+		
+#	if defined(GL_COLOR_ATTACHMENT4)
+		GL_COLOR_ATTACHMENT4,
+#	else
+		GL_COLOR_ATTACHMENT0,
+#	endif
+		
+#	if defined(GL_COLOR_ATTACHMENT5)
+		GL_COLOR_ATTACHMENT5,
+#	else
+		GL_COLOR_ATTACHMENT0,
+#	endif
+		
+#	if defined(GL_COLOR_ATTACHMENT6)
+		GL_COLOR_ATTACHMENT6,
+#	else
+		GL_COLOR_ATTACHMENT0,
+#	endif
+		
+#	if defined(GL_COLOR_ATTACHMENT7)
+		GL_COLOR_ATTACHMENT7,
+#	else
+		GL_COLOR_ATTACHMENT0,
+#	endif
+	};
+	
+	return colorAttachmentValues;
+}
+
+uint32_t et::drawBufferTarget(size_t i)
+{
+	ET_ASSERT(i < MaxDrawBuffers)
+	return *(drawBufferTargets() + i);
+}
+
 
 size_t et::bitsPerPixelForTextureFormat(uint32_t internalFormat, uint32_t type)
 {

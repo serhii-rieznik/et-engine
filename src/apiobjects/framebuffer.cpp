@@ -12,11 +12,9 @@
 using namespace et;
 
 extern std::string FramebufferStatusToString(uint32_t status);
-extern const uint32_t colorAttachments[Framebuffer::MaxRenderTargets];
 
 Framebuffer::Framebuffer(RenderContext* rc, const FramebufferDescription& desc,
-	const std::string& aName) : Object(aName), _rc(rc), _description(desc),
-	_id(0), _numTargets(0), _colorRenderbuffer(0), _depthRenderbuffer(0)
+	const std::string& aName) : Object(aName), _rc(rc), _description(desc)
 {
 #if defined(ET_CONSOLE_APPLICATION)
 	ET_FAIL("Attempt to create Framebuffer in console application.");
@@ -109,7 +107,7 @@ Framebuffer::Framebuffer(RenderContext* rc, const FramebufferDescription& desc,
 }
 
 Framebuffer::Framebuffer(RenderContext* rc, uint32_t fboId, const std::string& aName) :
-	Object(aName), _rc(rc), _id(fboId), _numTargets(0), _colorRenderbuffer(0), _depthRenderbuffer(0)
+	Object(aName), _rc(rc), _id(fboId)
 {
 #if !defined(ET_CONSOLE_APPLICATION)
 	if (glIsFramebuffer(fboId))
@@ -184,23 +182,24 @@ void Framebuffer::addRenderTarget(const Texture& rt)
 	ET_ASSERT(glIsTexture(rt->glID()));
 
 	_rc->renderState().bindFramebuffer(_id);
+	
+	auto target = drawBufferTarget(_renderTargets.size());
 
 	if (rt->target() == GL_TEXTURE_2D)
 	{
-		glFramebufferTexture2D(GL_FRAMEBUFFER, colorAttachments[_numTargets], rt->target(), rt->glID(), 0);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, target, rt->target(), rt->glID(), 0);
 		checkOpenGLError("glFramebufferTexture2D(...) - %s", name().c_str());
 	}
 	else if (rt->target() == GL_TEXTURE_CUBE_MAP)
 	{
 		for (GLenum i = 0; i < 6; ++i)
 		{
-			glFramebufferTexture2D(GL_FRAMEBUFFER, colorAttachments[_numTargets], 
-				GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, rt->glID(), 0);
+			glFramebufferTexture2D(GL_FRAMEBUFFER, target, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, rt->glID(), 0);
 			checkOpenGLError("glFramebufferTexture2D(...) - %s", name().c_str());
 		}
 	}
-
-	_renderTargets[_numTargets++] = rt;
+	
+	_renderTargets.push_back(rt);
 	checkStatus();
 #endif
 }
@@ -245,25 +244,25 @@ void Framebuffer::setDepthTarget(const Texture& texture, uint32_t target)
 void Framebuffer::addSameRendertarget()
 {
 #if !defined(ET_CONSOLE_APPLICATION)
-	if (_numTargets == 0) return;
-
-	Texture& prev = _renderTargets[_numTargets - 1];
-
-	std::string texName = name() + "_color_" + intToStr(_numTargets);
+	if (_renderTargets.empty()) return;
+		
+	Texture basic = _renderTargets.front();
+	
+	std::string texName = name() + "_color_" + intToStr(_renderTargets.size() + 1);
 	
 	Texture c;
 	if (_description.isCubemap)
 	{
-		c = _rc->textureFactory().genCubeTexture(prev->internalFormat(), prev->width(),
-			prev->format(), prev->dataType(), texName);
+		c = _rc->textureFactory().genCubeTexture(basic->internalFormat(), basic->width(),
+			basic->format(), basic->dataType(), texName);
 	}
 	else
 	{
-		BinaryDataStorage emptyData(prev->size().square() *
-			bitsPerPixelForTextureFormat(prev->internalFormat(), prev->dataType()) / 8, 0);
+		BinaryDataStorage emptyData(basic->size().square() *
+			bitsPerPixelForTextureFormat(basic->internalFormat(), basic->dataType()) / 8, 0);
 		
-		c = _rc->textureFactory().genTexture(prev->target(), prev->internalFormat(),
-			prev->size(), prev->format(), prev->dataType(), emptyData, texName);
+		c = _rc->textureFactory().genTexture(basic->target(), basic->internalFormat(),
+			basic->size(), basic->format(), basic->dataType(), emptyData, texName);
 	}
 	
 	c->setWrap(_rc, TextureWrap_ClampToEdge, TextureWrap_ClampToEdge);
@@ -312,21 +311,6 @@ void Framebuffer::setCurrentRenderTarget(size_t index)
 	setCurrentRenderTarget(_renderTargets[index]);
 #endif
 }
-
-#if (ET_OPENGLES)
-void Framebuffer::setDrawBuffersCount(int)
-	{ ET_FAIL("glDrawBuffers is not supported in OpenGL ES"); }
-#else
-void Framebuffer::setDrawBuffersCount(int count)
-{
-#	if !defined(ET_CONSOLE_APPLICATION)
-	_rc->renderState().bindFramebuffer(_id);
-	glDrawBuffers(count, colorAttachments);
-	checkOpenGLError("Framebuffer::setDrawBuffersCount -> glDrawBuffers - %s", name().c_str());
-	checkStatus();
-#	endif
-}
-#endif
 
 void Framebuffer::setCurrentCubemapFace(uint32_t faceIndex)
 {
@@ -435,15 +419,16 @@ void Framebuffer::resize(const vec2i& sz)
 		{
 			createOrUpdateColorRenderbuffer();
 		}
-		else if (_numTargets > 0)
+		else
 		{
-			for (size_t i = 0; i < _numTargets; ++i)
+			for (auto rt : _renderTargets)
 			{
-				TextureDescription::Pointer desc = _renderTargets[i]->description();
+				TextureDescription::Pointer desc = rt->description();
 				desc->size = sz;
 				desc->data.resize(desc->layersCount * desc->dataSizeForAllMipLevels());
-				_renderTargets[i]->updateData(_rc, desc);
-				setCurrentRenderTarget(_renderTargets[i], _renderTargets[i]->target());
+				rt->updateData(_rc, desc);
+				setCurrentRenderTarget(rt, rt->target());
+				
 			}
 		}
 	}
@@ -506,6 +491,7 @@ void Framebuffer::resolveMultisampledTo(Framebuffer::Pointer framebuffer)
 void Framebuffer::invalidate(bool color, bool depth)
 {
 #if (ET_PLATFORM_IOS) && !defined(ET_CONSOLE_APPLICATION)
+	
 	_rc->renderState().bindReadFramebuffer(_id);
 	
 	GLsizei numDiscards = 0;
@@ -524,6 +510,7 @@ void Framebuffer::invalidate(bool color, bool depth)
 		glDiscardFramebufferEXT(GL_READ_FRAMEBUFFER, numDiscards, discards);
 		checkOpenGLError("glDiscardFramebufferEXT");
 #	endif
+	
 #else
 	(void)color;
 	(void)depth;
@@ -546,6 +533,14 @@ void Framebuffer::setDepthRenderbuffer(uint32_t r)
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, _depthRenderbuffer);
 	checkOpenGLError("glFramebufferRenderbuffer");
 #endif
+}
+
+void Framebuffer::setDrawBuffersCount(int32_t value)
+{
+	_drawBuffers = value;
+	
+	if (_rc->renderState().actualState().boundFramebuffer == _id)
+		_rc->renderState().setDrawBuffersCount(value);
 }
 
 /*
@@ -596,50 +591,3 @@ std::string FramebufferStatusToString(uint32_t status)
 			return "Unknown FBO status " + intToStr(status);
 	}
 }
-
-const uint32_t colorAttachments[Framebuffer::MaxRenderTargets] =
-{
-	GL_COLOR_ATTACHMENT0,
-	
-#if defined(GL_COLOR_ATTACHMENT1)
-	GL_COLOR_ATTACHMENT1,
-#else
-	GL_COLOR_ATTACHMENT0,
-#endif
-	
-#if defined(GL_COLOR_ATTACHMENT2)
-	GL_COLOR_ATTACHMENT2,
-#else
-	GL_COLOR_ATTACHMENT0,
-#endif
-	
-#if defined(GL_COLOR_ATTACHMENT3)
-	GL_COLOR_ATTACHMENT3,
-#else
-	GL_COLOR_ATTACHMENT0,
-#endif
-	
-#if defined(GL_COLOR_ATTACHMENT4)
-	GL_COLOR_ATTACHMENT4,
-#else
-	GL_COLOR_ATTACHMENT0,
-#endif
-	
-#if defined(GL_COLOR_ATTACHMENT5)
-	GL_COLOR_ATTACHMENT5,
-#else
-	GL_COLOR_ATTACHMENT0,
-#endif
-	
-#if defined(GL_COLOR_ATTACHMENT6)
-	GL_COLOR_ATTACHMENT6,
-#else
-	GL_COLOR_ATTACHMENT0,
-#endif
-	
-#if defined(GL_COLOR_ATTACHMENT7)
-	GL_COLOR_ATTACHMENT7,
-#else
-	GL_COLOR_ATTACHMENT0,
-#endif
-};

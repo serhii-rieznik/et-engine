@@ -25,6 +25,12 @@ namespace demo
 
 		et::Camera& camera()
 			{ return _mainCamera; }
+
+		const et::Camera& observerCamera() const
+			{ return _observerCamera; }
+		
+		et::Camera& observerCamera()
+			{ return _observerCamera; }
 		
 		void adjustCameraToNextContextSize(const et::vec2&);
 		

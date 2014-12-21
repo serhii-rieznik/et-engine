@@ -36,19 +36,20 @@ namespace et
 			TargetToUnitTextureMap boundTextures;
 			
 			StaticDataStorage<size_t, Usage_max> enabledVertexAttributes;
+			StaticDataStorage<size_t, MaxDrawBuffers> drawBuffers;
 			
-			uint32_t activeTextureUnit;
+			uint32_t activeTextureUnit = 0;
 			
-			uint32_t boundFramebuffer;
-			uint32_t boundReadFramebuffer;
-			uint32_t boundDrawFramebuffer;
-			uint32_t boundRenderbuffer;
+			uint32_t boundFramebuffer = 0;
+			uint32_t boundReadFramebuffer = 0;
+			uint32_t boundDrawFramebuffer = 0;
+			uint32_t boundRenderbuffer = 0;
 			
-			uint32_t boundArrayBuffer;
-			uint32_t boundElementArrayBuffer;
-			uint32_t boundVertexArrayObject;
+			uint32_t boundArrayBuffer = 0;
+			uint32_t boundElementArrayBuffer = 0;
+			uint32_t boundVertexArrayObject = 0;
 			
-			uint32_t boundProgram;
+			uint32_t boundProgram = 0;
 			
 			recti clipRect;
 			vec2i mainViewportSize;
@@ -57,23 +58,24 @@ namespace et
 			vec2 viewportSizeFloat;
 
 			vec4 clearColor;
-			size_t colorMask;
-			float clearDepth;
 			
-			float polygonOffsetFactor;
-			float polygonOffsetUnits;
+			size_t colorMask = 0;
+			float clearDepth = false;
 			
-			bool blendEnabled;
-			bool depthTestEnabled;
-			bool depthMask;
-			bool polygonOffsetFillEnabled;
-			bool wireframe;
-			bool clipEnabled;
-			bool cullEnabled;
+			float polygonOffsetFactor = 0.0f;
+			float polygonOffsetUnits = 0.0f;
+			
+			bool blendEnabled = false;
+			bool depthTestEnabled = false;
+			bool depthMask = false;
+			bool polygonOffsetFillEnabled = false;
+			bool wireframe = false;
+			bool clipEnabled = false;
+			bool cullEnabled = false;
 
-			BlendState lastBlend;
-			CullState lastCull;
-			DepthFunc lastDepthFunc;		
+			BlendState lastBlend = BlendState_Current;
+			CullState lastCull = CullState_Current;
+			DepthFunc lastDepthFunc = DepthFunc_Less;
 			
 			State();
 		};
@@ -118,6 +120,8 @@ namespace et
 		void bindFramebuffer(const Framebuffer::Pointer& fbo, bool force = false);
 		
 		void bindRenderbuffer(uint32_t, bool force = false);
+		
+		void setDrawBuffersCount(int32_t);
 
 		/*
 		 * Textures

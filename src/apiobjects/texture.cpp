@@ -243,19 +243,19 @@ void TextureData::build(RenderContext* rc)
 	
 	if (_desc->size.square() <= 0)
 	{
-		log::warning("Texture %s has invalid dimensions.", _desc->origin().c_str());
+		log::warning("Texture '%s' has invalid dimensions.", _desc->origin().c_str());
 		return;
 	}
 	
 	if (_desc->internalformat == 0)
 	{
-		log::warning("Texture %s has invalid format.", _desc->origin().c_str());
+		log::warning("Texture '%s' has invalid format.", _desc->origin().c_str());
 		return;
 	}
 
 	if (_desc->type == 0)
 	{
-		log::warning("Texture %s has invalid type.", _desc->origin().c_str());
+		log::warning("Texture '%s' has invalid type.", _desc->origin().c_str());
 		return;
 	}
 

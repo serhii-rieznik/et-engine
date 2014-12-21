@@ -22,6 +22,7 @@ void MainController::setRenderContextParameters(et::RenderContextParameters& par
 {
 	params.contextSize = vec2i(1024, 768);
 	params.contextBaseSize = params.contextSize;
+	params.multisamplingQuality = MultisamplingQuality_Best;
 }
 
 void MainController::applicationDidLoad(et::RenderContext* rc)
@@ -43,7 +44,7 @@ void MainController::applicationDidLoad(et::RenderContext* rc)
 	_renderer.init(rc);
 	_cameraController.init(rc);
 	
-	auto loadedScene = _loader.loadFromFile(application().resolveFileName("data/models/sponza.obj"));
+	auto loadedScene = _loader.loadFromFile(application().resolveFileName("data/models/crytek/sponza.etm"));
 	_renderer.setScene(loadedScene);
 	
 	connectInputEvents();
@@ -69,8 +70,7 @@ void MainController::connectInputEvents()
 
 void MainController::render(et::RenderContext* rc)
 {
-	rc->renderer()->clear();
-	_renderer.render(_cameraController.camera());
+	_renderer.render(_cameraController.camera(), _cameraController.observerCamera(), false);
 }
 
 et::IApplicationDelegate* et::Application::initApplicationDelegate()

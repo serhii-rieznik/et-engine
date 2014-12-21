@@ -23,20 +23,19 @@ namespace et
 		FrustumPlane_max
 	};
 
-	typedef StaticDataStorage<vec4, FrustumPlane_max> FrustumData;
-
 	class Frustum
 	{
 	public:
 		Frustum();
 		Frustum(const mat4& mvpMatrix);
 
-		bool containSphere(const Sphere& sphere) const;
-		bool containAABB(const AABB& aabb) const;
-		bool containOBB(const OBB& obb) const;
+		bool containsSphere(const Sphere& sphere) const;
+		bool containsAABB(const AABB& aabb) const;
+		bool containsOBB(const OBB& obb) const;
 
 	private:
-		FrustumData _data;
+		StaticDataStorage<vec4, FrustumPlane_max> _planes;
+		StaticDataStorage<vec4, 8> _corners;
 	};
 
 }

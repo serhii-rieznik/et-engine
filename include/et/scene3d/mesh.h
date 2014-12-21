@@ -59,6 +59,15 @@ namespace et
 			void attachLod(size_t level, Mesh::Pointer mesh);
 
 			void setLod(size_t level);
+			
+			const std::string& vaoName() const
+				{ return _vaoName; }
+			
+			const std::string& vbName() const
+				{ return _vbName; }
+			
+			const std::string& ibName() const
+				{ return _ibName; }
 
 		private:
 			Mesh* currentLod();
@@ -70,6 +79,9 @@ namespace et
 			IndexType _startIndex;
 			size_t _numIndexes;
 			size_t _selectedLod;
+			std::string _vaoName;
+			std::string _vbName;
+			std::string _ibName;
 		};
 	}
 }

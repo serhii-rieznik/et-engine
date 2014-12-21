@@ -44,16 +44,12 @@ namespace et
 	public:
 		ET_DECLARE_POINTER(Framebuffer)
 		
-		enum
-		{
-			MaxRenderTargets = 8
-		};
-		
 	public:
 		Framebuffer(RenderContext* rc, const FramebufferDescription& desc, const std::string& name);
 		Framebuffer(RenderContext* rc, uint32_t fboId, const std::string& name);
+		
 		~Framebuffer();
-
+		
 		void addRenderTarget(const Texture& texture);
 		void addSameRendertarget();
 
@@ -65,16 +61,19 @@ namespace et
 		void setCurrentRenderTarget(size_t index);
 		
 		void setCurrentCubemapFace(uint32_t faceIndex);
+		
+		void setDrawBuffersCount(int32_t value);
 
 		bool checkStatus();
-		
-		void setDrawBuffersCount(int c);
-		
+				
 		size_t numRendertargets() const
-			{ return _numTargets; }
+			{ return _renderTargets.size(); }
 
 		uint32_t glID() const
 			{ return _id; }
+		
+		int32_t drawBuffersCount() const
+			{ return _drawBuffers; }
 
 		vec2i size() const
 			{ return _description.size; }
@@ -86,7 +85,7 @@ namespace et
 			{ return _depthRenderbuffer; }
 
 		Texture renderTarget(size_t index = 0) const
-			{ ET_ASSERT(index < MaxRenderTargets); return _renderTargets[index]; }
+			{ ET_ASSERT(index < _renderTargets.size()); return _renderTargets.at(index); }
 		
 		Texture depthBuffer() const
 			{ return _depthBuffer; }
@@ -113,14 +112,13 @@ namespace et
 		RenderContext* _rc;
 		FramebufferDescription _description;
 		
-		Texture _renderTargets[MaxRenderTargets];
+		std::vector<Texture> _renderTargets;
 		Texture _depthBuffer;
-
-		size_t _numTargets;
 		
-		uint32_t _id;
-		uint32_t _colorRenderbuffer;
-		uint32_t _depthRenderbuffer;
+		uint32_t _id = 0;
+		uint32_t _colorRenderbuffer = 0;
+		uint32_t _depthRenderbuffer = 0;
+		int32_t _drawBuffers = 1;
 	};
 
 }

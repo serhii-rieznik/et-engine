@@ -6,7 +6,7 @@
  */
 
 #include <et/imaging/ddsloader.h>
-#include <et/opengl/opengl.h>
+#include <et/opengl/openglcaps.h>
 
 using namespace et;
 
@@ -442,6 +442,12 @@ void dds::loadFromStream(std::istream& source, TextureDescription& desc)
 	{
 		desc.data = BinaryDataStorage(dataSize);
 		source.read(desc.data.binary(), static_cast<std::streamsize>(dataSize));
+	}
+	
+	while ((desc.mipMapCount > 1) && ((desc.sizeForMipLevel(desc.mipMapCount - 1).x <= 4) ||
+		(desc.sizeForMipLevel(desc.mipMapCount - 1).x <= 4)))
+	{
+		--desc.mipMapCount;
 	}
 }
 

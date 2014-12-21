@@ -91,12 +91,12 @@ void Mesh::serialize(std::ostream& stream, SceneVersion version)
 
 void Mesh::deserialize(std::istream& stream, ElementFactory* factory, SceneVersion version)
 {
-	std::string vaoName = deserializeString(stream);
-	std::string vbName = deserializeString(stream);
-	std::string ibName = deserializeString(stream);
+	_vaoName = deserializeString(stream);
+	_vbName = deserializeString(stream);
+	_ibName = deserializeString(stream);
 
 	setMaterial(factory->materialWithId(deserializeInt(stream)));
-	setVertexArrayObject(factory->vaoWithIdentifiers(vbName, ibName));
+	setVertexArrayObject(factory->vaoWithIdentifiers(_vbName, _ibName));
 
 	_startIndex = deserializeUInt(stream);
 	_numIndexes = deserializeUInt(stream);

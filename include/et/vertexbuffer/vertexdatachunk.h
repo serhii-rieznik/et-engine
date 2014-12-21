@@ -44,7 +44,7 @@ namespace et
 
 		void serialize(std::ostream& stream);
 		
-		void copyTo(VertexDataChunkData&);
+		void copyTo(VertexDataChunkData&) const;
 
 	private:
 		VertexAttributeUsage _usage;

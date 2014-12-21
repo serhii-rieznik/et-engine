@@ -7,14 +7,12 @@
 
 #pragma once
 
-#include <string>
 #include <fstream>
-#include <vector>
-
 #include <et/apiobjects/vertexbuffer.h>
 #include <et/scene3d/mesh.h>
 #include <et/scene3d/supportmesh.h>
 #include <et/scene3d/material.h>
+#include <et/scene3d/storage.h>
 #include <et/rendering/rendercontext.h>
 
 namespace et
@@ -28,6 +26,7 @@ namespace et
 			Option_SupportMeshes = 0x01,
 			Option_SwapYwithZ = 0x02,
 			Option_ReverseTriangles = 0x04,
+			Option_CalculateTransforms = 0x80,
 		};
 
 	public:
@@ -60,10 +59,11 @@ namespace et
 			std::string name;
 			IndexType start;
 			size_t count;
+			et::vec3 center;
 			s3d::Material::Pointer material;
 
-			OBJMeshIndexBounds(const std::string& n, IndexType s, size_t c, s3d::Material::Pointer m) :
-				name(n), start(s), count(c), material(m) { }
+			OBJMeshIndexBounds(const std::string& n, IndexType s, size_t c, s3d::Material::Pointer m, const vec3& aCenter) :
+				name(n), start(s), count(c), material(m), center(aCenter) { }
 		};
 		typedef std::vector<OBJMeshIndexBounds> OBJMeshIndexBoundsList;
 		typedef std::vector<OBJVertex> VertexList;
@@ -114,6 +114,7 @@ namespace et
 		std::ifstream inputFile;
 		std::ifstream materialFile;
 
+		s3d::Scene3dStorage::Pointer _storage;
 		s3d::Material::Pointer _lastMaterial;
 		s3d::Material::List _materials;
 		OBJMeshIndexBoundsList _meshes;

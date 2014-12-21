@@ -51,6 +51,15 @@ namespace et
 			void deserializeAsync(const std::string& filename, RenderContext* rc, ObjectsCache& tc,
 				ElementFactory* factory);
 
+			/*
+			 * Access to content
+			 */
+			VertexBuffer vertexBufferWithId(const std::string& id);
+			
+			IndexBuffer indexBufferWithId(const std::string& id);
+			
+			VertexArrayObject vaoWithIdentifiers(const std::string& vbid, const std::string& ibid);
+			
 		public:
 			ET_DECLARE_EVENT1(deserializationFinished, bool)
 
@@ -66,10 +75,6 @@ namespace et
 			Element::Pointer createElementOfType(size_t type, Element* parent);
 			Material::Pointer materialWithId(int id);
 
-			VertexBuffer vertexBufferWithId(const std::string& id);
-			IndexBuffer indexBufferWithId(const std::string& id);
-			VertexArrayObject vaoWithIdentifiers(const std::string& vbid, const std::string& ibid);
-			
 			void onMaterialLoaded(Material*);
 			void allMaterialsLoaded();
 

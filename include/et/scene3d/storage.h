@@ -49,10 +49,13 @@ namespace et
 			void addMaterial(Material::Pointer m)
 				{ _materials.push_back(m); }
 
-			void addVertexArray(const VertexArray::Pointer& va);
+			void addVertexArray(const VertexArray::Pointer&);
+			void setIndexArray(const IndexArray::Pointer&);
+			
 			VertexArray::Pointer addVertexArrayWithDeclaration(const VertexDeclaration& decl, size_t size);
 			VertexArray::Pointer vertexArrayWithDeclaration(const VertexDeclaration& decl);
 			VertexArray::Pointer vertexArrayWithDeclarationForAppendingSize(const VertexDeclaration& decl, size_t size);
+			
 			int indexOfVertexArray(const VertexArray::Pointer& va);
 			
 			void flush();

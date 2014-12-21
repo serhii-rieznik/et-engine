@@ -34,11 +34,12 @@ namespace et
 		loader(sharedObjectFactory().createObject<Loader>(owner))
 		{
 			supportedExtensions.push_back("png");
+			supportedExtensions.push_back("dds");
 			supportedExtensions.push_back("pvr");
 			supportedExtensions.push_back("jpg");
-			supportedExtensions.push_back("jpeg");
-			supportedExtensions.push_back("dds");
+			supportedExtensions.push_back("tga");
 			supportedExtensions.push_back("hdr");
+			supportedExtensions.push_back("jpeg");
 		}
 		
 	public:

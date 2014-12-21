@@ -45,7 +45,7 @@ void VertexDataChunkData::fitToSize(size_t count)
 		resize(count);
 }
 
-void VertexDataChunkData::copyTo(VertexDataChunkData& c)
+void VertexDataChunkData::copyTo(VertexDataChunkData& c) const
 {
 	c._usage = _usage;
 	c._type = _type;

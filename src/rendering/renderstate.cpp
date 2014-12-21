@@ -12,15 +12,10 @@
 
 using namespace et;
 
-RenderState::State::State() :
-	activeTextureUnit(0), boundFramebuffer(0), boundReadFramebuffer(0), boundDrawFramebuffer(0),
-	boundRenderbuffer(0), boundArrayBuffer(0), boundElementArrayBuffer(0), boundVertexArrayObject(0),
-	boundProgram(0), clearColor(0.0f), colorMask(ColorMask_RGBA), clearDepth(1.0f), polygonOffsetFactor(0.0f),
-	polygonOffsetUnits(0.0f), blendEnabled(false), depthTestEnabled(false), depthMask(true),
-	polygonOffsetFillEnabled(false), wireframe(false), lastBlend(BlendState_Disabled), lastCull(CullState_Current),
-	lastDepthFunc(DepthFunc_Less), cullEnabled(false)
+RenderState::State::State()
 {
 	enabledVertexAttributes.fill(0);
+	drawBuffers.fill(0);
 }
 
 PreservedRenderStateScope::PreservedRenderStateScope(RenderContext* rc, bool shouldApplyBefore) :
@@ -301,6 +296,7 @@ void RenderState::bindFramebuffer(const Framebuffer::Pointer& fbo, bool force)
 	{
 		bindFramebuffer(fbo->glID(), GL_FRAMEBUFFER, force);
 		setViewportSize(fbo->size(), force);
+		setDrawBuffersCount(fbo->drawBuffersCount());
 	}
 	else 
 	{
@@ -335,6 +331,15 @@ void RenderState::setDefaultFramebuffer(const Framebuffer::Pointer& framebuffer)
 void RenderState::bindDefaultFramebuffer(bool force)
 {
 	bindFramebuffer(_defaultFramebuffer, force);
+	setDrawBuffersCount(1);
+}
+
+void RenderState::setDrawBuffersCount(int32_t count)
+{
+#if !defined(ET_CONSOLE_APPLICATION)
+	glDrawBuffers(count, drawBufferTargets());
+	checkOpenGLError("glDrawBuffers(%d, ...)", count);
+#endif
 }
 
 void RenderState::setDepthMask(bool enable, bool force)
@@ -715,8 +720,20 @@ RenderState::State RenderState::currentState()
 	
 #if !defined(ET_CONSOLE_APPLICATION)
 	checkOpenGLError("currentState()");
-
+	
 	int value = 0;
+	int maxDrawBuffers = 0;
+	glGetIntegerv(GL_MAX_DRAW_BUFFERS, &maxDrawBuffers);
+	checkOpenGLError("");
+	
+	for (int i = 0; i < maxDrawBuffers; ++i)
+	{
+		glGetIntegerv(GL_DRAW_BUFFER0 + i, &value);
+		s.drawBuffers[i] = value;
+		checkOpenGLError("");
+	}
+
+	value = 0;
 	glGetIntegerv(GL_ACTIVE_TEXTURE, &value);
 	s.activeTextureUnit = static_cast<uint32_t>(value - GL_TEXTURE0);
 	checkOpenGLError("");
