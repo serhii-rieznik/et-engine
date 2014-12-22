@@ -307,8 +307,10 @@ void Framebuffer::setCurrentRenderTarget(const Texture& texture, uint32_t target
 void Framebuffer::setCurrentRenderTarget(size_t index)
 {
 #if !defined(ET_CONSOLE_APPLICATION)
-	ET_ASSERT((index < _numTargets) && _renderTargets[index].valid());
-	setCurrentRenderTarget(_renderTargets[index]);
+	ET_ASSERT(index < _renderTargets.size());
+	ET_ASSERT(_renderTargets[index].valid());
+	
+	setCurrentRenderTarget(_renderTargets.at(index));
 #endif
 }
 
