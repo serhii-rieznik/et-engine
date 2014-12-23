@@ -32,10 +32,10 @@ namespace et
 		{
 			struct
 			{
-				uint32_t allocated = notAllocatedValue;
-				uint32_t begin = 0;
-				uint32_t length = 0;
-				uint32_t dummy = 0;
+				uint32_t allocated;
+				uint32_t begin;
+				uint32_t length;
+				uint32_t dummy;
 			};
 			
 			struct
@@ -44,16 +44,17 @@ namespace et
 				uint64_t v1;
 			};
 		};
+
+		MemoryChunkInfo() : 
+			allocated(notAllocatedValue), begin(0), length(0), dummy(0) { }
 		
 		void swapWith(MemoryChunkInfo* info)
 		{
 			auto& iv0 = info->v0;
 			auto& iv1 = info->v1;
-			
 			v0 ^= iv0;
 			iv0 ^= v0;
 			v0 ^= iv0;
-			
 			v1 ^= iv1;
 			iv1 ^= v1;
 			v1 ^= iv1;

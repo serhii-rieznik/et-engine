@@ -16,16 +16,6 @@ struct TGADescription
 	uint16_t height;
 	uint8_t bitsPerPixel;
 	uint8_t dummy;
-/*
-	GLubyte header[6];
-	GLuint bytesPerPixel = 0;						
-	GLuint imageSize = 0;
-	GLuint temp = 0;
-	GLuint type = 0;
-	GLuint height = 0;
-	GLuint width = 0;
-	GLuint Bpp = 0;
-*/
 };
 
 typedef GLubyte TGAHeader[12];
@@ -33,72 +23,6 @@ TGAHeader uTGAcompare = {0,0, 2,0,0,0,0,0,0,0,0,0};
 TGAHeader cTGAcompare = {0,0,10,0,0,0,0,0,0,0,0,0};
 
 /*
-bool LoadUncompressedTGA(Texture * texture, char * filename, FILE * fTGA)	// Load an uncompressed TGA (note, much of this code is based on NeHe's
-{																			// TGA Loading code nehe.gamedev.net)
-	if(fread(tga.header, sizeof(tga.header), 1, fTGA) == 0)					// Read TGA header
-	{
-		MessageBox(NULL, "Could not read info header", "ERROR", MB_OK);		// Display error
-		if(fTGA != NULL)													// if file is still open
-		{
-			fclose(fTGA);													// Close it
-		}
-		return false;														// Return failular
-	}
-	
-	texture->width  = tga.header[1] * 256 + tga.header[0];					// Determine The TGA Width	(highbyte*256+lowbyte)
-	texture->height = tga.header[3] * 256 + tga.header[2];					// Determine The TGA Height	(highbyte*256+lowbyte)
-	texture->bpp	= tga.header[4];										// Determine the bits per pixel
-	tga.Width		= texture->width;										// Copy width into local structure
-	tga.Height		= texture->height;										// Copy height into local structure
-	tga.Bpp			= texture->bpp;											// Copy BPP into local structure
-	
-	if((texture->width <= 0) || (texture->height <= 0) || ((texture->bpp != 24) && (texture->bpp !=32)))	// Make sure all information is valid
-	{
-		MessageBox(NULL, "Invalid texture information", "ERROR", MB_OK);	// Display Error
-		if(fTGA != NULL)													// Check if file is still open
-		{
-			fclose(fTGA);													// If so, close it
-		}
-		return false;														// Return failed
-	}
-	
-	if(texture->bpp == 24)													// If the BPP of the image is 24...
-		texture->type	= GL_RGB;											// Set Image type to GL_RGB
-	else																	// Else if its 32 BPP
-		texture->type	= GL_RGBA;											// Set image type to GL_RGBA
-	
-	tga.bytesPerPixel	= (tga.Bpp / 8);									// Compute the number of BYTES per pixel
-	tga.imageSize		= (tga.bytesPerPixel * tga.Width * tga.Height);		// Compute the total amout ofmemory needed to store data
-	texture->imageData	= (GLubyte *)malloc(tga.imageSize);					// Allocate that much memory
-	
-	if(texture->imageData == NULL)											// If no space was allocated
-	{
-		MessageBox(NULL, "Could not allocate memory for image", "ERROR", MB_OK);	// Display Error
-		fclose(fTGA);														// Close the file
-		return false;														// Return failed
-	}
-	
-	if(fread(texture->imageData, 1, tga.imageSize, fTGA) != tga.imageSize)	// Attempt to read image data
-	{
-		MessageBox(NULL, "Could not read image data", "ERROR", MB_OK);		// Display Error
-		if(texture->imageData != NULL)										// If imagedata has data in it
-		{
-			free(texture->imageData);										// Delete data from memory
-		}
-		fclose(fTGA);														// Close file
-		return false;														// Return failed
-	}
-	
-	// Byte Swapping Optimized By Steve Thomas
-	for(GLuint cswap = 0; cswap < (int)tga.imageSize; cswap += tga.bytesPerPixel)
-	{
-		texture->imageData[cswap] ^= texture->imageData[cswap+2] ^= texture->imageData[cswap] ^= texture->imageData[cswap+2];
-	}
-	
-	fclose(fTGA);															// Close file
-	return true;															// Return success
-}
-
  *
  * Taken from NeHe Lesson 33
  *
@@ -266,7 +190,7 @@ bool LoadCompressedTGA(Texture * texture, char * filename, FILE * fTGA)		// Load
 }
 */
 
-void et::tga::loadInfoFromStream(std::istream& source, TextureDescription& desc)
+void et::tga::loadInfoFromStream(std::istream&, TextureDescription&)
 {
 	ET_FAIL("Not implemented");
 }
