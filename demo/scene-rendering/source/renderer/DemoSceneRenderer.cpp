@@ -6,6 +6,7 @@
 //  Copyright (c) 2014 Cheetek. All rights reserved.
 //
 
+#include <et/app/application.h>
 #include <et/rendering/rendercontext.h>
 #include <et/primitives/primitives.h>
 #include "DemoSceneRenderer.h"
@@ -18,27 +19,33 @@ using namespace demo;
 extern const std::string basicVertexShader;
 extern const std::string basicFragmentShader;
 
+const float baseFrameTime = 1.0f / 30.0f;
+
 enum
 {
-	diffuseTextureUnit,
-	transparencyTextureUnit,
-	normalTextureUnit,
-	depthTextureUnit,
-	noiseTextureUnit,
-	occlusionTextureUnit
+	diffuseTextureUnit = 0,
+	normalTextureUnit = 1,
+	transparencyTextureUnit = 2,
+	depthTextureUnit = 3,
+	noiseTextureUnit = 4,
+	occlusionTextureUnit = 5,
 };
 
 void SceneRenderer::init(et::RenderContext* rc)
 {
 	_rc = rc;
 	
-	_finalBuffer = rc->framebufferFactory().createFramebuffer(rc->sizei(), "final-buffer",
+	_finalBuffers[0] = rc->framebufferFactory().createFramebuffer(rc->sizei(), "final-buffer-1",
+		GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE, 0, 0, 0);
+	
+	_finalBuffers[1] = rc->framebufferFactory().createFramebuffer(rc->sizei(), "final-buffer-2",
 		GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE, 0, 0, 0);
 	
 	_geometryBuffer = rc->framebufferFactory().createFramebuffer(rc->sizei(), "geometry-buffer");
+	
 	_geometryBuffer->addSameRendertarget();
 	
-	_downsampledBuffer = rc->framebufferFactory().createFramebuffer(rc->sizei(), "downsampled-buffer",
+	_downsampledBuffer = rc->framebufferFactory().createFramebuffer(rc->sizei() / 2, "downsampled-buffer",
 		GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE, 0, 0, 0);
 	_downsampledBuffer->addSameRendertarget();
 	
@@ -50,7 +57,7 @@ void SceneRenderer::init(et::RenderContext* rc)
 	for (size_t i = 0; i < 10; ++i)
 	{
 		float t = (static_cast<float>(i) / 9.0f) * 1500.0f - 750.0f;
-		_lightPositions.push_back(vec3(t, 5.0f, 0.0f));
+		_lightPositions.push_back(vec3(t, randomFloat(5.0f, 200.0f), 0.0f));
 	}
 	
 	BinaryDataStorage normalData(4, 128);
@@ -67,6 +74,10 @@ void SceneRenderer::init(et::RenderContext* rc)
 
 	programs.fxaa = _rc->programFactory().loadProgram("data/shaders/fxaa.program", localCache);
 	programs.fxaa->setUniform("texture_color", diffuseTextureUnit);
+
+	programs.motionBlur = _rc->programFactory().loadProgram("data/shaders/motionblur.program", localCache);
+	programs.motionBlur->setUniform("texture_diffuse", diffuseTextureUnit);
+	programs.motionBlur->setUniform("texture_depth", depthTextureUnit);
 	
 	programs.ambientOcclusion = _rc->programFactory().loadProgram("data/shaders/ao.program", localCache);
 	programs.ambientOcclusion->setUniform("texture_depth", depthTextureUnit);
@@ -233,10 +244,12 @@ void SceneRenderer::computeAmbientOcclusion(const et::Camera& cam)
 	
 	rs.bindProgram(programs.ambientOcclusion);
 	programs.ambientOcclusion->setUniform("clipPlanes", vec2(cam.zNear(), cam.zFar()));
+	programs.ambientOcclusion->setUniform("texCoordScales", vec2(-cam.inverseProjectionMatrix()[0][0], -cam.inverseProjectionMatrix()[1][1]));
 	rn->fullscreenPass();
 	
 	rs.bindProgram(programs.ambientOcclusionBlur);
 	programs.ambientOcclusionBlur->setUniform("clipPlanes", vec2(cam.zNear(), cam.zFar()));
+	programs.ambientOcclusionBlur->setUniform("texCoordScales", vec2(-cam.inverseProjectionMatrix()[0][0], -cam.inverseProjectionMatrix()[1][1]));
 	
 	_downsampledBuffer->setCurrentRenderTarget(1);
 	rs.bindTexture(diffuseTextureUnit, _downsampledBuffer->renderTarget(0));
@@ -256,8 +269,27 @@ void SceneRenderer::computeAmbientOcclusion(const et::Camera& cam)
 	rn->fullscreenPass();
 }
 
+void SceneRenderer::handlePressedKey(size_t key)
+{
+}
+
 void SceneRenderer::render(const et::Camera& cam, const et::Camera& observer, bool obs)
 {
+	float currentTime = mainTimerPool()->actualTime();
+	
+	if (_updateTime == 0.0f)
+		_updateTime = currentTime - 1.0f / 30.0f;
+	
+	float dt = currentTime - _updateTime;
+	
+	_updateTime = currentTime;
+	
+	if (_shouldSetPreviousProjectionMatrix)
+	{
+		_previousProjectionMatrix = cam.modelViewProjectionMatrix();
+		_shouldSetPreviousProjectionMatrix = false;
+	}
+	
 	auto& rs = _rc->renderState();
 	auto rn = _rc->renderer();
 	
@@ -267,15 +299,21 @@ void SceneRenderer::render(const et::Camera& cam, const et::Camera& observer, bo
 	computeAmbientOcclusion(cam);
 	
 	std::vector<vec3> viewSpaceLightPosition(_lightPositions.size());
+	
 	for (size_t i = 0; i < _lightPositions.size(); ++i)
+	{
+		_lightPositions.at(i).z = (i % 2 == 0) ? (std::cos(currentTime) * 225.0f) : (std::sin(currentTime) * 175.0f);
 		viewSpaceLightPosition[i] = cam.modelViewMatrix() * _lightPositions.at(i);
+	}
 	
-	rs.bindFramebuffer(_finalBuffer);
+	rs.bindFramebuffer(_finalBuffers[_finalBufferIndex]);
 	rs.bindProgram(programs.final);
-	
+		
+	programs.final->setCameraProperties(cam);
 	programs.final->setUniform<vec3>("lightPositions[0]", viewSpaceLightPosition.data(), viewSpaceLightPosition.size());
 	programs.final->setUniform("lightsCount", viewSpaceLightPosition.size());
 	programs.final->setUniform("clipPlanes", vec2(cam.zNear(), cam.zFar()));
+	programs.final->setUniform("texCoordScales", vec2(-cam.inverseProjectionMatrix()[0][0], -cam.inverseProjectionMatrix()[1][1]));
 	
 	rs.bindTexture(diffuseTextureUnit, _geometryBuffer->renderTarget(0));
 	rs.bindTexture(normalTextureUnit, _geometryBuffer->renderTarget(1));
@@ -283,9 +321,20 @@ void SceneRenderer::render(const et::Camera& cam, const et::Camera& observer, bo
 	rs.bindTexture(occlusionTextureUnit, _downsampledBuffer->renderTarget(1));
 	rn->fullscreenPass();
 	
+	rs.bindFramebuffer(_finalBuffers[1 - _finalBufferIndex]);
+	rs.bindProgram(programs.motionBlur);
+	rs.bindTexture(diffuseTextureUnit, _finalBuffers[_finalBufferIndex]->renderTarget());
+	rs.bindTexture(depthTextureUnit, _geometryBuffer->depthBuffer());
+	programs.motionBlur->setUniform("mModelViewInverseToPrevious", cam.inverseModelViewProjectionMatrix() * _previousProjectionMatrix);
+	programs.motionBlur->setUniform("motionDistanceScale", 2.5f * (dt / baseFrameTime));
+	rn->fullscreenPass();
+	
 	rs.bindDefaultFramebuffer();
 	rs.bindProgram(programs.fxaa);
-	rs.bindTexture(diffuseTextureUnit, _finalBuffer->renderTarget());
-	programs.fxaa->setUniform("texel", _finalBuffer->renderTarget()->texel());
+	rs.bindTexture(diffuseTextureUnit, _finalBuffers[1 - _finalBufferIndex]->renderTarget());
+	programs.fxaa->setUniform("texel", _finalBuffers[1 - _finalBufferIndex]->renderTarget()->texel());
 	rn->fullscreenPass();
+
+	_previousProjectionMatrix = cam.modelViewProjectionMatrix();
+	_finalBufferIndex = 1 - _finalBufferIndex;
 }

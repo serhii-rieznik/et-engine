@@ -2,7 +2,7 @@ uniform vec2 direction;
 
 etVertexIn vec2 Vertex;
 
-#define NUM_SAMPLES	4
+#define NUM_SAMPLES		6
 
 etVertexOut vec2 CenterTexCoord;
 etVertexOut vec3 PreviousTexCoords[NUM_SAMPLES];
@@ -22,12 +22,6 @@ void main()
 		NextTexCoords[i] = NextTexCoords[i-1] + vec3(direction, dw);
 		PreviousTexCoords[i] = PreviousTexCoords[i-1] - vec3(direction, dw);
 	}
-/*
-	PreviousTexCoords[2] = PreviousTexCoords[1] - vec3(direction, dw);
-	PreviousTexCoords[3] = PreviousTexCoords[2] - vec3(direction, dw);
-	NextTexCoords[2] = NextTexCoords[1] + vec3(direction, dw);
-	NextTexCoords[3] = NextTexCoords[2] + vec3(direction, dw);
-*/
 	
 	gl_Position = vec4(Vertex, 0.0, 1.0);
 }
