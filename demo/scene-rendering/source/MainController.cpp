@@ -55,6 +55,7 @@ void MainController::connectInputEvents()
 	input().keyPressed.connect([this](size_t key)
 	{
 		_cameraController.handlePressedKey(key);
+		_renderer.handlePressedKey(key);
 	});
 	
 	input().keyReleased.connect([this](size_t key)

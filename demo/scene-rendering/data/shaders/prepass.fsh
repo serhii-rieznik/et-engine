@@ -9,6 +9,8 @@ etFragmentIn vec3 vTBNr0;
 etFragmentIn vec3 vTBNr1;
 etFragmentIn vec3 vTBNr2;
 
+#include "include/normals.fsh"
+
 void main()
 {
 	if (etTexture2D(texture_mask, TexCoord).x < 0.5) discard;
@@ -21,5 +23,5 @@ void main()
 	outNormal.z = dot(sampledNormal, vTBNr2);
 	
 	etFragmentOut = etTexture2D(texture_diffuse, TexCoord);
-	etFragmentOut1 = vec4(0.5 + 0.5 * outNormal, 1.0);
+	etFragmentOut1 = vec4(encodeNormal(outNormal), 0.0, 0.0);
 }

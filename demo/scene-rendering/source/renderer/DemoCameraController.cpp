@@ -37,7 +37,7 @@ void CameraController::init(et::RenderContext* rc)
 
 void CameraController::adjustCameraToNextContextSize(const et::vec2& sz)
 {
-	_mainCamera.perspectiveProjection(QUARTER_PI, sz.aspect(), 1.0f, 8192.0f);
+	_mainCamera.perspectiveProjection(QUARTER_PI, sz.aspect(), 1.0f, 4096.0f);
 	_observerCamera.perspectiveProjection(QUARTER_PI, sz.aspect(), 1.0f, 8192.0f);
 }
 

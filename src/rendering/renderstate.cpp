@@ -295,8 +295,11 @@ void RenderState::bindFramebuffer(const Framebuffer::Pointer& fbo, bool force)
 	if (fbo.valid())
 	{
 		bindFramebuffer(fbo->glID(), GL_FRAMEBUFFER, force);
+		
 		setViewportSize(fbo->size(), force);
-		setDrawBuffersCount(fbo->drawBuffersCount());
+		
+		if (fbo->hasRenderTargets())
+			setDrawBuffersCount(fbo->drawBuffersCount());
 	}
 	else 
 	{
@@ -331,7 +334,7 @@ void RenderState::setDefaultFramebuffer(const Framebuffer::Pointer& framebuffer)
 void RenderState::bindDefaultFramebuffer(bool force)
 {
 	bindFramebuffer(_defaultFramebuffer, force);
-	setDrawBuffersCount(1);
+//	setDrawBuffersCount(1);
 }
 
 void RenderState::setDrawBuffersCount(int32_t count)
