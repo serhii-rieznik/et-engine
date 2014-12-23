@@ -83,6 +83,9 @@ namespace et
 		
 		uint32_t depthRenderbuffer() const
 			{ return _depthRenderbuffer; }
+		
+		bool hasRenderTargets() const
+			{ return !_renderTargets.empty(); }
 
 		Texture renderTarget(size_t index = 0) const
 			{ ET_ASSERT(index < _renderTargets.size()); return _renderTargets.at(index); }
