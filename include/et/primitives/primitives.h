@@ -52,7 +52,7 @@ namespace et
 			const vec2& texCoordOffset = vec2(0.0f));
 		
 		void calculateNormals(VertexArray::Pointer data, const IndexArray::Pointer& buffer,
-			IndexType first, IndexType last);
+			size_t first, size_t last);
 		
 		void calculateTangents(VertexArray::Pointer data, const IndexArray::Pointer& buffer,
 			IndexType first, IndexType last);

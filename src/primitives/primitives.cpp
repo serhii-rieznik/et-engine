@@ -465,8 +465,7 @@ IndexType primitives::buildTriangleStripIndexes(IndexArray::Pointer buffer, cons
 	return buildTriangleStripIndexes(buffer.reference(), dim, vertexOffset, indexOffset);
 }
 
-void primitives::calculateNormals(VertexArray::Pointer data, const IndexArray::Pointer& buffer,
-	IndexType first, IndexType last)
+void primitives::calculateNormals(VertexArray::Pointer data, const IndexArray::Pointer& buffer, size_t first, size_t last)
 {
 	ET_ASSERT(first < last);
 

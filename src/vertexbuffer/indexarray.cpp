@@ -132,9 +132,9 @@ IndexArray::PrimitiveIterator IndexArray::end() const
 	return IndexArray::PrimitiveIterator(this, capacity());
 }
 
-IndexArray::PrimitiveIterator IndexArray::primitive(IndexType index) const
+IndexArray::PrimitiveIterator IndexArray::primitive(size_t index) const
 {
-	IndexType primitiveIndex = 0;
+	size_t primitiveIndex = 0;
 	switch (_primitiveType)
 	{
 		case PrimitiveType_Lines:
@@ -182,15 +182,15 @@ bool IndexArray::Primitive::operator != (const Primitive& p) const
 	return (p.index[0] != index[0]) || (p.index[1] != index[1]) || (p.index[2] != index[2]);
 }
 
-IndexArray::PrimitiveIterator::PrimitiveIterator(const IndexArray* ib, IndexType p) :
+IndexArray::PrimitiveIterator::PrimitiveIterator(const IndexArray* ib, size_t p) :
 	_ib(ib), _pos(p)
 {
 	configure(_pos);
 }
 
-void IndexArray::PrimitiveIterator::configure(IndexType p)
+void IndexArray::PrimitiveIterator::configure(size_t p)
 {
-	IndexType cap = static_cast<IndexType>(_ib->_actualSize);
+	size_t cap = _ib->_actualSize;
 	
 	switch (_ib->primitiveType())
 	{

@@ -122,20 +122,20 @@ namespace et
 		private:
 			friend class IndexArray;
 
-			PrimitiveIterator(const IndexArray* ib, IndexType p);
-			void configure(IndexType p);
+			PrimitiveIterator(const IndexArray* ib, size_t p);
+			void configure(size_t p);
 
 			PrimitiveIterator& operator = (const PrimitiveIterator& p);
 
 		private:
-			const IndexArray* _ib;
+			const IndexArray* _ib = nullptr;
 			Primitive _primitive;
-			IndexType _pos;
+			size_t _pos = 0;
 		};
 
 		PrimitiveIterator begin() const;
 		PrimitiveIterator end() const;
-		PrimitiveIterator primitive(IndexType index) const;
+		PrimitiveIterator primitive(size_t index) const;
 		
 	private:
 		BinaryDataStorage _data;

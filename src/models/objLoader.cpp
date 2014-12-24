@@ -9,6 +9,7 @@
 #include <et/core/conversion.h>
 #include <et/core/filesystem.h>
 #include <et/apiobjects/vertexbuffer.h>
+#include <et/primitives/primitives.h>
 #include <et/models/objloader.h>
 
 using namespace et;
@@ -678,8 +679,7 @@ void OBJLoader::processLoadedData()
 		
 	VertexDeclaration decl(true, Usage_Position, Type_Vec3);
 	
-	if (hasNormals)
-		decl.push_back(Usage_Normal, Type_Vec3);
+	decl.push_back(Usage_Normal, Type_Vec3);
 
 	if (hasTexCoords)
 		decl.push_back(Usage_TexCoord0, Type_Vec2);
@@ -721,7 +721,7 @@ void OBJLoader::processLoadedData()
 	
 	for (auto group : _groups)
 	{
-		IndexType startIndex = static_cast<IndexType>(index);
+		size_t startIndex = index;
 		
 		vec3 center;
 		
@@ -755,7 +755,7 @@ void OBJLoader::processLoadedData()
 				PUSH_VERTEX(face.vertices[i+1], center);
 			}
 		}
-			
+		
 		Material::Pointer m;
 		
 		for (auto mat : _materials)
@@ -766,9 +766,12 @@ void OBJLoader::processLoadedData()
 				break;
 			}
 		}
-			
+		
 		_meshes.emplace_back(group->name, startIndex, index - startIndex, m, center);
 	}
+	
+	if (!hasNormals)
+		primitives::calculateNormals(_vertexData, _indices, 0, _indices->primitivesCount());
 }
 
 s3d::ElementContainer::Pointer OBJLoader::generateVertexBuffers()
