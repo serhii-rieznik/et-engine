@@ -326,7 +326,7 @@ void SceneRenderer::render(const et::Camera& cam, const et::Camera& observer, bo
 	rs.bindTexture(diffuseTextureUnit, _finalBuffers[_finalBufferIndex]->renderTarget());
 	rs.bindTexture(depthTextureUnit, _geometryBuffer->depthBuffer());
 	programs.motionBlur->setUniform("mModelViewInverseToPrevious", cam.inverseModelViewProjectionMatrix() * _previousProjectionMatrix);
-	programs.motionBlur->setUniform("motionDistanceScale", 2.5f * (dt / baseFrameTime));
+	programs.motionBlur->setUniform("motionDistanceScale", 0.5f * (dt / baseFrameTime));
 	rn->fullscreenPass();
 	
 	rs.bindDefaultFramebuffer();

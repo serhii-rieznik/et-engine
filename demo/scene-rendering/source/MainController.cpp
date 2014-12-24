@@ -27,6 +27,12 @@ void MainController::setRenderContextParameters(et::RenderContextParameters& par
 
 void MainController::applicationDidLoad(et::RenderContext* rc)
 {
+#if (ET_PLATFORM_WIN)
+	application().pushRelativeSearchPath("..");
+	application().pushRelativeSearchPath("..\\..");
+	application().pushRelativeSearchPath("..\\..\\..");
+#endif
+
 	rc->renderState().setClearColor(vec4(0.25f, 0.0f));
 	
 	rc->renderingInfoUpdated.connect([this](const et::RenderingInfo& info)

@@ -1,0 +1,193 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{EB1EACDF-7581-44C4-945B-4B9A969C69BF}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>windows</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+    <IncludePath>$(SolutionDir)..\..\..\include\;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)..\..\..\lib\win;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+    <IncludePath>$(SolutionDir)..\..\..\include\;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)..\..\..\lib\win;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;ET_DISABLE_JSON;_DEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>libxml2.lib;jpeg.lib;opengl32.lib;libpng16.lib;zlib.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;ET_DISABLE_JSON;NDEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>libxml2.lib;jpeg.lib;opengl32.lib;libpng16.lib;zlib.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\src\apiobjects\framebuffer.cpp" />
+    <ClCompile Include="..\..\..\src\apiobjects\framebufferfactory.cpp" />
+    <ClCompile Include="..\..\..\src\apiobjects\indexbufferdata.cpp" />
+    <ClCompile Include="..\..\..\src\apiobjects\program.cpp" />
+    <ClCompile Include="..\..\..\src\apiobjects\programfactory.cpp" />
+    <ClCompile Include="..\..\..\src\apiobjects\texture.cpp" />
+    <ClCompile Include="..\..\..\src\apiobjects\texturefactory.cpp" />
+    <ClCompile Include="..\..\..\src\apiobjects\textureloadingthread.cpp" />
+    <ClCompile Include="..\..\..\src\apiobjects\vertexarrayobjectdata.cpp" />
+    <ClCompile Include="..\..\..\src\apiobjects\vertexbufferdata.cpp" />
+    <ClCompile Include="..\..\..\src\apiobjects\vertexbufferfactory.cpp" />
+    <ClCompile Include="..\..\..\src\app\appevironment.cpp" />
+    <ClCompile Include="..\..\..\src\app\application.cpp" />
+    <ClCompile Include="..\..\..\src\app\backgroundthread.cpp" />
+    <ClCompile Include="..\..\..\src\app\events.cpp" />
+    <ClCompile Include="..\..\..\src\app\invocation.cpp" />
+    <ClCompile Include="..\..\..\src\app\pathresolver.cpp" />
+    <ClCompile Include="..\..\..\src\app\runloop.cpp" />
+    <ClCompile Include="..\..\..\src\camera\camera.cpp" />
+    <ClCompile Include="..\..\..\src\camera\frustum.cpp" />
+    <ClCompile Include="..\..\..\src\collision\collision.cpp" />
+    <ClCompile Include="..\..\..\src\core\base64.cpp" />
+    <ClCompile Include="..\..\..\src\core\conversion.cpp" />
+    <ClCompile Include="..\..\..\src\core\dictionary.cpp" />
+    <ClCompile Include="..\..\..\src\core\et.cpp" />
+    <ClCompile Include="..\..\..\src\core\memoryallocator.cpp" />
+    <ClCompile Include="..\..\..\src\core\objectscache.cpp" />
+    <ClCompile Include="..\..\..\src\core\stream.cpp" />
+    <ClCompile Include="..\..\..\src\core\tools.cpp" />
+    <ClCompile Include="..\..\..\src\core\transformable.cpp" />
+    <ClCompile Include="..\..\..\src\geometry\geometry.cpp" />
+    <ClCompile Include="..\..\..\src\geometry\rectplacer.cpp" />
+    <ClCompile Include="..\..\..\src\imaging\ddsloader.cpp" />
+    <ClCompile Include="..\..\..\src\imaging\hdrloader.cpp" />
+    <ClCompile Include="..\..\..\src\imaging\imageoperations.cpp" />
+    <ClCompile Include="..\..\..\src\imaging\imagewriter.cpp" />
+    <ClCompile Include="..\..\..\src\imaging\jpegloader.cpp" />
+    <ClCompile Include="..\..\..\src\imaging\pngloader.cpp" />
+    <ClCompile Include="..\..\..\src\imaging\pvrdecompressor.cpp" />
+    <ClCompile Include="..\..\..\src\imaging\pvrloader.cpp" />
+    <ClCompile Include="..\..\..\src\imaging\textureloader.cpp" />
+    <ClCompile Include="..\..\..\src\imaging\tgaloader.cpp" />
+    <ClCompile Include="..\..\..\src\input\gestures.cpp" />
+    <ClCompile Include="..\..\..\src\input\input.cpp" />
+    <ClCompile Include="..\..\..\src\locale\locale.cpp" />
+    <ClCompile Include="..\..\..\src\models\objLoader.cpp" />
+    <ClCompile Include="..\..\..\src\opengl\opengl.common.cpp" />
+    <ClCompile Include="..\..\..\src\opengl\openglcaps.cpp" />
+    <ClCompile Include="..\..\..\src\platform-win\application.win.cpp" />
+    <ClCompile Include="..\..\..\src\platform-win\atomiccounter.win.cpp" />
+    <ClCompile Include="..\..\..\src\platform-win\criticalsection.win.cpp" />
+    <ClCompile Include="..\..\..\src\platform-win\input.win.cpp" />
+    <ClCompile Include="..\..\..\src\platform-win\locale.win.cpp" />
+    <ClCompile Include="..\..\..\src\platform-win\location.win.cpp" />
+    <ClCompile Include="..\..\..\src\platform-win\log.win.cpp" />
+    <ClCompile Include="..\..\..\src\platform-win\memory.win.cpp" />
+    <ClCompile Include="..\..\..\src\platform-win\mutex.win.cpp" />
+    <ClCompile Include="..\..\..\src\platform-win\opengl.win.cpp" />
+    <ClCompile Include="..\..\..\src\platform-win\orientation.win.cpp" />
+    <ClCompile Include="..\..\..\src\platform-win\platformtools.win.cpp" />
+    <ClCompile Include="..\..\..\src\platform-win\rendercontext.win.cpp" />
+    <ClCompile Include="..\..\..\src\platform-win\sound.openal.win.cpp" />
+    <ClCompile Include="..\..\..\src\platform-win\thread.win.cpp" />
+    <ClCompile Include="..\..\..\src\platform-win\threading.win.cpp" />
+    <ClCompile Include="..\..\..\src\platform-win\tools.win.cpp" />
+    <ClCompile Include="..\..\..\src\platform-win\videocapture.win.cpp" />
+    <ClCompile Include="..\..\..\src\primitives\primitives.cpp" />
+    <ClCompile Include="..\..\..\src\rendering\rendercontext.cpp" />
+    <ClCompile Include="..\..\..\src\rendering\renderer.cpp" />
+    <ClCompile Include="..\..\..\src\rendering\rendering.cpp" />
+    <ClCompile Include="..\..\..\src\rendering\renderstate.cpp" />
+    <ClCompile Include="..\..\..\src\scene3d\animation.cpp" />
+    <ClCompile Include="..\..\..\src\scene3d\baseelement.cpp" />
+    <ClCompile Include="..\..\..\src\scene3d\cameraelement.cpp" />
+    <ClCompile Include="..\..\..\src\scene3d\lightelement.cpp" />
+    <ClCompile Include="..\..\..\src\scene3d\material.cpp" />
+    <ClCompile Include="..\..\..\src\scene3d\mesh.cpp" />
+    <ClCompile Include="..\..\..\src\scene3d\particlesystem.cpp" />
+    <ClCompile Include="..\..\..\src\scene3d\scene3d.cpp" />
+    <ClCompile Include="..\..\..\src\scene3d\serialization.cpp" />
+    <ClCompile Include="..\..\..\src\scene3d\storage.cpp" />
+    <ClCompile Include="..\..\..\src\scene3d\supportmesh.cpp" />
+    <ClCompile Include="..\..\..\src\tasks\taskpool.cpp" />
+    <ClCompile Include="..\..\..\src\timers\notifytimer.cpp" />
+    <ClCompile Include="..\..\..\src\timers\sequence.cpp" />
+    <ClCompile Include="..\..\..\src\timers\timedobject.cpp" />
+    <ClCompile Include="..\..\..\src\timers\timerpool.cpp" />
+    <ClCompile Include="..\..\..\src\vertexbuffer\indexarray.cpp" />
+    <ClCompile Include="..\..\..\src\vertexbuffer\vertexarray.cpp" />
+    <ClCompile Include="..\..\..\src\vertexbuffer\vertexdatachunk.cpp" />
+    <ClCompile Include="..\..\..\src\vertexbuffer\vertexdeclaration.cpp" />
+    <ClCompile Include="..\source\main.cpp" />
+    <ClCompile Include="..\source\MainController.cpp" />
+    <ClCompile Include="..\source\renderer\DemoCameraController.cpp" />
+    <ClCompile Include="..\source\renderer\DemoSceneLoader.cpp" />
+    <ClCompile Include="..\source\renderer\DemoSceneRenderer.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\source\MainController.h" />
+    <ClInclude Include="..\source\renderer\DemoCameraController.h" />
+    <ClInclude Include="..\source\renderer\DemoSceneLoader.h" />
+    <ClInclude Include="..\source\renderer\DemoSceneRenderer.h" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

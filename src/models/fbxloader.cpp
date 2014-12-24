@@ -5,11 +5,12 @@
  *
  */
 
+#include <et/app/application.h>
+
 #if defined(ET_HAVE_FBX_SDK)
 
 #include <fbxsdk.h>
 
-#include <et/app/application.h>
 #include <et/rendering/rendercontext.h>
 #include <et/apiobjects/vertexbuffer.h>
 #include <et/vertexbuffer/IndexArray.h>

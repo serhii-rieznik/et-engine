@@ -84,11 +84,17 @@
 #	define ET_KEY_SPACE					VK_SPACE
 #	define ET_KEY_ESCAPE				VK_ESCAPE
 #	define ET_KEY_BACKSPACE				VK_BACK
+#	define ET_KEY_SHIFT					VK_SHIFT
 #
 #	define ET_KEY_LEFT					VK_LEFT
 #	define ET_KEY_RIGHT					VK_RIGHT
 #	define ET_KEY_DOWN					VK_DOWN
 #	define ET_KEY_UP					VK_UP
+#
+#	define ET_KEY_A						'A'	
+#	define ET_KEY_S						'S'	
+#	define ET_KEY_D						'D'	
+#	define ET_KEY_W						'W'	
 #
 #elif (ET_PLATFORM_ANDROID)
 #
