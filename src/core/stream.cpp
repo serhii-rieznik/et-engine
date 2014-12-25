@@ -5,7 +5,6 @@
 *
 */
 
-#include <fstream>
 #include <et/core/et.h>
 
 #if (ET_PLATFORM_ANDROID)

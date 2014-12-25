@@ -5,7 +5,6 @@
  *
  */
 
-#include <fstream>
 #include <libpng/png.h>
 #include <et/imaging/imagewriter.h>
 

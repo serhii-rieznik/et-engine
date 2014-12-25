@@ -23,6 +23,7 @@
 
 #include <iosfwd>
 #include <iostream>
+#include <fstream>
 
 #define ET_MAJOR_VERSION		0
 #define ET_MINOR_VERSION		7

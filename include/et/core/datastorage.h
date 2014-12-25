@@ -25,14 +25,7 @@ namespace et
 		{
 			resize(size);
 		}
-/*
-		explicit DataStorage(int size) :
-			_mutableData(nullptr), _size(0), _dataSize(0), _lastElementIndex(0),
-			_flags(DataStorageFlag_OwnsMutableData)
-		{
-			resize(static_cast<size_t>(size));
-		}
-*/
+
 		DataStorage(size_t size, int initValue) :
 			_mutableData(nullptr), _size(0), _dataSize(0), _lastElementIndex(0),
 			_flags(DataStorageFlag_OwnsMutableData)
@@ -40,14 +33,7 @@ namespace et
 			resize(size); 
 			fill(initValue);
 		}
-/*
-		DataStorage(int size, int initValue) :
-			_mutableData(nullptr), _size(0), _dataSize(0), _lastElementIndex(0), _flags(DataStorageFlag_OwnsMutableData)
-		{
-			resize(static_cast<size_t>(size));
-			fill(initValue);
-		}
-*/
+
 		DataStorage(const DataStorage& copy) :
 			_mutableData(nullptr), _size(0), _dataSize(0), _lastElementIndex(0), _flags(DataStorageFlag_OwnsMutableData)
 		{
@@ -273,6 +259,44 @@ namespace et
 
 		void setOffset(size_t o) 
 			{ ET_ASSERT(mutableData()); _lastElementIndex = o; }
+		
+	public:
+		/*
+		 * Filesystem
+		 */
+		bool writeToFile(const std::string& fileName, bool atomically = true) const
+		{
+			auto targetFileName = fileName;
+			
+			if (atomically)
+			{
+				int64_t hash = ::time(nullptr) ^ reinterpret_cast<int64_t>(&fileName);
+				targetFileName += intToStr(hash ^ 0xdeadbeefaaaaaaaa);
+			}
+
+			std::ofstream fOut(targetFileName, std::ios::out | std::ios::binary);
+			
+			if (fOut.fail())
+				return false;
+			
+			fOut.write(binary(), _dataSize);
+			fOut.flush();
+			fOut.close();
+			
+			if (atomically)
+			{
+				if (::rename(targetFileName.c_str(), fileName.c_str()))
+				{
+					if (::remove(fileName.c_str()))
+						return false;
+					
+					if (::rename(targetFileName.c_str(), fileName.c_str()))
+						return false;
+				}
+			}
+			
+			return true;
+		}
 
 	private:
 		enum
