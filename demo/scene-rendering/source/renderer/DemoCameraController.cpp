@@ -15,7 +15,7 @@ using namespace demo;
 
 CameraController::CameraController()
 {
-	_mainCamera.lookAt(vec3(500.0f, 200.0f, 0.0f), vec3(0.0f, 0.0f, 0.0f));
+	_mainCamera.lookAt(vec3(-500.0f, 100.0f, 0.0f), vec3(0.0f, 100.0f, 0.0f));
 	_mainCamera.lockUpVector(unitY);
 	
 	_observerCamera.lookAt(vec3(3072.0f));
@@ -37,7 +37,7 @@ void CameraController::init(et::RenderContext* rc)
 
 void CameraController::adjustCameraToNextContextSize(const et::vec2& sz)
 {
-	_mainCamera.perspectiveProjection(QUARTER_PI, sz.aspect(), 1.0f, 4096.0f);
+	_mainCamera.perspectiveProjection(QUARTER_PI, sz.aspect(), 10.0f, 3072.0f);
 	_observerCamera.perspectiveProjection(QUARTER_PI, sz.aspect(), 1.0f, 8192.0f);
 }
 

@@ -2,12 +2,15 @@ uniform sampler2D texture_diffuse;
 uniform sampler2D texture_normal;
 uniform sampler2D texture_mask;
 
+uniform vec4 diffuseColor;
+
 etFragmentIn vec2 TexCoord;
 
 etFragmentIn vec3 vNormalWS;
 etFragmentIn vec3 vTBNr0;
 etFragmentIn vec3 vTBNr1;
 etFragmentIn vec3 vTBNr2;
+etFragmentIn float tangentValue;
 
 #include "include/normals.fsh"
 
@@ -22,6 +25,9 @@ void main()
 	outNormal.y = dot(sampledNormal, vTBNr1);
 	outNormal.z = dot(sampledNormal, vTBNr2);
 	
-	etFragmentOut = etTexture2D(texture_diffuse, TexCoord);
-	etFragmentOut1 = vec4(encodeNormal(outNormal), 0.0, 0.0);
+	etFragmentOut = vec4(diffuseColor.xyz * etTexture2D(texture_diffuse, TexCoord).xyz, 1.0);
+	
+	vec3 mNormal = mix(vNormalWS, outNormal, tangentValue);
+	
+	etFragmentOut1 = vec4(encodeNormal(vNormalWS), 0.0, 0.0);
 }

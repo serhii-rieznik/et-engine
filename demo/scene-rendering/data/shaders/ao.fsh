@@ -7,17 +7,12 @@ etFragmentIn vec2 NormalizedTexCoord;
 etFragmentIn vec2 TexCoord;
 etFragmentIn vec2 NoiseTexCoord;
 
-#define	NUM_SAMPLES			32
-#define SAMPLE_SIZE			128.0
+#define	NUM_SAMPLES					32
+#define SAMPLE_SIZE					50.0
+#define DEPTH_DIFFERENCE_SCALE		1.0
 
 #include "include/viewspace.fsh"
 #include "include/normals.fsh"
-
-vec3 randomVectorOnHemisphere(in vec3 normal, in vec3 noise)
-{
-	vec3 n = normalize(noise - 0.5);
-	return n * sign(dot(n, normal));
-}
 
 vec4 performRaytracingInViewSpace(in vec3 vp, in vec3 vn, in vec4 noise)
 {
@@ -28,7 +23,7 @@ vec4 performRaytracingInViewSpace(in vec3 vp, in vec3 vn, in vec4 noise)
 	if (sampledDepth > projected.z)
 		return vec4(0.0);
 	
-	float depthDifference = inversesqrt(1.0 - projected.z) - inversesqrt(1.0 - sampledDepth);
+	float depthDifference = DEPTH_DIFFERENCE_SCALE * (inversesqrt(1.0 - projected.z) - inversesqrt(1.0 - sampledDepth));
 	float occlusion = (1.0 - noise.w) / (1.0 + depthDifference * depthDifference);
 	return etTexture2D(texture_diffuse, projected.xy) * occlusion;
 }

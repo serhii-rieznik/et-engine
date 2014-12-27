@@ -662,6 +662,21 @@ size_t et::channelsForTextureFormat(uint32_t internalFormat)
 	case GL_RED:
 		return 1;
 			
+#if defined(GL_DEPTH_COMPONENT24)
+	case GL_DEPTH_COMPONENT24:
+		return 1;
+#endif
+			
+#if defined(GL_DEPTH_COMPONENT32)
+	case GL_DEPTH_COMPONENT32:
+		return 1;
+#endif
+			
+#if defined(GL_DEPTH_COMPONENT32F)
+	case GL_DEPTH_COMPONENT32F:
+		return 1;
+#endif
+			
 #if defined(GL_LUMINANCE)
 	case GL_LUMINANCE:
 		return 1;
@@ -795,6 +810,7 @@ size_t et::bitsPerPixelForTextureFormat(uint32_t internalFormat, uint32_t type)
 		case GL_DEPTH_COMPONENT:
 		case GL_DEPTH_COMPONENT16:
 		case GL_DEPTH_COMPONENT24:
+		case GL_DEPTH_COMPONENT32:
 			return bitsPerPixelForType(type);
 
 		case GL_RGB32F:
@@ -803,6 +819,11 @@ size_t et::bitsPerPixelForTextureFormat(uint32_t internalFormat, uint32_t type)
 		case GL_RGBA32F:
 			return 4 * bitsPerPixelForType(type);
 
+#if defined(GL_DEPTH_COMPONENT32F)
+		case GL_DEPTH_COMPONENT32F:
+			return bitsPerPixelForType(type);
+#endif
+			
 #if defined(GL_R8)
 		case GL_R8:
 			return bitsPerPixelForType(type);

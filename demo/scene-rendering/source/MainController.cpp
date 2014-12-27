@@ -50,7 +50,10 @@ void MainController::applicationDidLoad(et::RenderContext* rc)
 	_renderer.init(rc);
 	_cameraController.init(rc);
 	
+//	auto loadedScene = _loader.loadFromFile(application().resolveFileName("data/models/sibenik/sibenik.obj"));
+	
 	auto loadedScene = _loader.loadFromFile(application().resolveFileName("data/models/crytek/sponza.etm"));
+	
 	_renderer.setScene(loadedScene);
 	
 	connectInputEvents();

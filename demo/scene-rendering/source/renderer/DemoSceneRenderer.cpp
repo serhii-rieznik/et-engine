@@ -41,8 +41,8 @@ void SceneRenderer::init(et::RenderContext* rc)
 	_finalBuffers[1] = rc->framebufferFactory().createFramebuffer(rc->sizei(), "final-buffer-2",
 		GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE, 0, 0, 0);
 	
-	_geometryBuffer = rc->framebufferFactory().createFramebuffer(rc->sizei(), "geometry-buffer");
-	
+	_geometryBuffer = rc->framebufferFactory().createFramebuffer(rc->sizei(), "geometry-buffer",
+		GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE, GL_DEPTH_COMPONENT32, GL_DEPTH_COMPONENT, GL_UNSIGNED_INT);
 	_geometryBuffer->addSameRendertarget();
 	
 	_downsampledBuffer = rc->framebufferFactory().createFramebuffer(rc->sizei() / 2, "downsampled-buffer",
@@ -97,6 +97,8 @@ void SceneRenderer::init(et::RenderContext* rc)
 	programs.final->setUniform("texture_normal", normalTextureUnit);
 	programs.final->setUniform("texture_depth", depthTextureUnit);
 	programs.final->setUniform("texture_occlusion", occlusionTextureUnit);
+	programs.final->setUniform("texture_noise", noiseTextureUnit);
+	programs.final->setUniform("noiseTextureScale", vector2ToFloat(_downsampledBuffer->size()) / _noiseTexture->sizeFloat());
 	
 	{
 		VertexDeclaration decl(true, Usage_Position, Type_Vec3);
@@ -200,7 +202,10 @@ void SceneRenderer::renderToGeometryBuffer(const et::Camera& cam)
 		if (cam.frustum().containsAABB(e->aabb()))
 		{
 			const auto& mat = e->material();
+			
 			programs.prepass->setTransformMatrix(e->finalTransform());
+			programs.prepass->setUniform("diffuseColor", mat->getVector(MaterialParameter_DiffuseColor));
+			
 			rs.bindVertexArray(e->vertexArrayObject());
 			
 			if (mat->hasTexture(MaterialParameter_DiffuseMap))
@@ -319,8 +324,9 @@ void SceneRenderer::render(const et::Camera& cam, const et::Camera& observer, bo
 	rs.bindTexture(normalTextureUnit, _geometryBuffer->renderTarget(1));
 	rs.bindTexture(depthTextureUnit, _geometryBuffer->depthBuffer());
 	rs.bindTexture(occlusionTextureUnit, _downsampledBuffer->renderTarget(1));
+	rs.bindTexture(noiseTextureUnit, _noiseTexture);
 	rn->fullscreenPass();
-	
+/*
 	rs.bindFramebuffer(_finalBuffers[1 - _finalBufferIndex]);
 	rs.bindProgram(programs.motionBlur);
 	rs.bindTexture(diffuseTextureUnit, _finalBuffers[_finalBufferIndex]->renderTarget());
@@ -328,11 +334,12 @@ void SceneRenderer::render(const et::Camera& cam, const et::Camera& observer, bo
 	programs.motionBlur->setUniform("mModelViewInverseToPrevious", cam.inverseModelViewProjectionMatrix() * _previousProjectionMatrix);
 	programs.motionBlur->setUniform("motionDistanceScale", 0.5f * (dt / baseFrameTime));
 	rn->fullscreenPass();
+*/
 	
 	rs.bindDefaultFramebuffer();
 	rs.bindProgram(programs.fxaa);
-	rs.bindTexture(diffuseTextureUnit, _finalBuffers[1 - _finalBufferIndex]->renderTarget());
-	programs.fxaa->setUniform("texel", _finalBuffers[1 - _finalBufferIndex]->renderTarget()->texel());
+	rs.bindTexture(diffuseTextureUnit, _finalBuffers[_finalBufferIndex]->renderTarget());
+	programs.fxaa->setUniform("texel", _finalBuffers[_finalBufferIndex]->renderTarget()->texel());
 	rn->fullscreenPass();
 
 	_previousProjectionMatrix = cam.modelViewProjectionMatrix();

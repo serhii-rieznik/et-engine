@@ -3,7 +3,7 @@ uniform sampler2D texture_normal;
 uniform sampler2D texture_depth;
 
 #define NUM_SAMPLES				6
-#define DEPTH_DIFFERENCE_SCALE	0.05
+#define DEPTH_DIFFERENCE_SCALE	0.75
 
 #include "include/normals.fsh"
 #include "include/viewspace.fsh"
@@ -18,6 +18,7 @@ void main()
 	float centerDepthSample = DEPTH_DIFFERENCE_SCALE / (1.0 - etTexture2D(texture_depth, CenterTexCoord).x);
 	
 	float totalWeight = 1.0;
+	
 	vec4 result = etTexture2D(texture_color, CenterTexCoord);
 	
 //*
