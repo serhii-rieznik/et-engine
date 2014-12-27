@@ -340,8 +340,12 @@ void RenderState::bindDefaultFramebuffer(bool force)
 void RenderState::setDrawBuffersCount(int32_t count)
 {
 #if !defined(ET_CONSOLE_APPLICATION)
-	glDrawBuffers(count, drawBufferTargets());
-	checkOpenGLError("glDrawBuffers(%d, ...)", count);
+	
+#	if defined(GL3_PROTOTYPES)
+		glDrawBuffers(count, drawBufferTargets());
+		checkOpenGLError("glDrawBuffers(%d, ...)", count);
+#	endif
+	
 #endif
 }
 
@@ -725,17 +729,20 @@ RenderState::State RenderState::currentState()
 	checkOpenGLError("currentState()");
 	
 	int value = 0;
-	int maxDrawBuffers = 0;
-	glGetIntegerv(GL_MAX_DRAW_BUFFERS, &maxDrawBuffers);
-	checkOpenGLError("");
 	
-	for (int i = 0; i < maxDrawBuffers; ++i)
-	{
-		glGetIntegerv(GL_DRAW_BUFFER0 + i, &value);
-		s.drawBuffers[i] = value;
+#	if defined(GL3_PROTOTYPES)
+		int maxDrawBuffers = 0;
+		glGetIntegerv(GL_MAX_DRAW_BUFFERS, &maxDrawBuffers);
 		checkOpenGLError("");
-	}
-
+		
+		for (int i = 0; i < maxDrawBuffers; ++i)
+		{
+			glGetIntegerv(GL_DRAW_BUFFER0 + i, &value);
+			s.drawBuffers[i] = value;
+			checkOpenGLError("");
+		}
+#	endif
+	
 	value = 0;
 	glGetIntegerv(GL_ACTIVE_TEXTURE, &value);
 	s.activeTextureUnit = static_cast<uint32_t>(value - GL_TEXTURE0);
