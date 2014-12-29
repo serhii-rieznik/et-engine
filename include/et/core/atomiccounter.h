@@ -46,6 +46,7 @@ namespace et
 	{
 	public:
 		AtomicBool();
+		AtomicBool(bool);
 		
 		bool operator = (bool b);
 		

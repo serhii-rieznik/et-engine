@@ -19,7 +19,15 @@ bool internal_writePNGtoBuffer(BinaryDataStorage& buffer, const BinaryDataStorag
 void internal_func_writePNGtoBuffer(png_structp png_ptr, png_bytep data, png_size_t length);
 void internal_func_PNGflush(png_structp png_ptr);
 
-bool ImageWriter::writeImageToFile(const std::string& fileName, const BinaryDataStorage& data,
+static float compressionLevels[ImageFormat_max] = { 0.5f };
+
+void et::setCompressionLevelForImageFormat(ImageFormat fmt, float value)
+{
+	ET_ASSERT(fmt < ImageFormat_max);
+	compressionLevels[fmt] = value;
+}
+
+bool et::writeImageToFile(const std::string& fileName, const BinaryDataStorage& data,
 	const vec2i& size, int components, int bitsPerComponent, ImageFormat fmt, bool flip)
 {
 	switch (fmt)
@@ -32,7 +40,7 @@ bool ImageWriter::writeImageToFile(const std::string& fileName, const BinaryData
 	}
 }
 
-bool ImageWriter::writeImageToBuffer(BinaryDataStorage& buffer, const BinaryDataStorage& data,
+bool et::writeImageToBuffer(BinaryDataStorage& buffer, const BinaryDataStorage& data,
 	const vec2i& size, int components, int bitsPerComponent, ImageFormat fmt, bool flip)
 {
 	switch (fmt)
@@ -46,15 +54,17 @@ bool ImageWriter::writeImageToBuffer(BinaryDataStorage& buffer, const BinaryData
 	
 }
 
-std::string ImageWriter::extensionForImageFormat(ImageFormat fmt)
+std::string et::extensionForImageFormat(ImageFormat fmt)
 {
+	ET_ASSERT(fmt < ImageFormat_max)
+	
 	switch (fmt)
 	{
 	case ImageFormat_PNG:
 		return ".png";
 
 	default:
-		return ".unrecognizedimageformat";
+		return ".image";
 	}
 }
 
@@ -101,8 +111,11 @@ bool internal_writePNGtoBuffer(BinaryDataStorage& buffer, const BinaryDataStorag
 	
 	png_uint_32 w = static_cast<png_uint_32>(size.x);
 	png_uint_32 h = static_cast<png_uint_32>(size.y);
+	
 	png_set_IHDR(png_ptr, info_ptr, w, h, bitsPerComponent, colorType,
-				 PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_BASE);
+		PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_BASE);
+	
+	png_set_compression_level(png_ptr, static_cast<int>(9.0f * clamp(compressionLevels[ImageFormat_PNG], 0.0f, 1.0f) + 0.5f));
 	
 	png_bytep* row_pointers = reinterpret_cast<png_bytep*>(sharedObjectFactory().allocator()->alloc(sizeof(png_bytep) * size.y));
 	
@@ -183,11 +196,9 @@ bool internal_writePNGtoFile(const std::string& fileName, const BinaryDataStorag
 	png_set_IHDR(png_ptr, info_ptr, w, h, bitsPerComponent, colorType,
 		PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_BASE);
 	
+	png_set_compression_level(png_ptr, static_cast<int>(9.0f * clamp(compressionLevels[ImageFormat_PNG], 0.0f, 1.0f) + 0.5f));
+	
 	png_write_info(png_ptr, info_ptr);
-
-	png_set_compression_level(png_ptr, 3);
-	png_set_compression_strategy(png_ptr, 0);
-	png_set_filter(png_ptr, 0, PNG_NO_FILTERS);
 	
 	if (flip)
 	{

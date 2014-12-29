@@ -296,12 +296,20 @@ void et::openUrl(const std::string& url)
 	if (url.empty()) return;
 	
 #if (ET_PLATFORM_IOS)
-	NSURL* aUrl = [NSURL URLWithString:[NSString stringWithUTF8String:url.c_str()]];
-	[[UIApplication sharedApplication] openURL:aUrl];
+#
+#	define URLProcessor [UIApplication sharedApplication]
+#
 #elif !defined(ET_CONSOLE_APPLICATION)
-	NSURL* aUrl = [NSURL URLWithString:[NSString stringWithUTF8String:url.c_str()]];
-	[[NSWorkspace sharedWorkspace] openURL:aUrl];
+#
+#	define URLProcessor [NSWorkspace sharedWorkspace]
+#
 #endif
+	
+	NSString* urlString = [NSString stringWithUTF8String:url.c_str()];
+	NSURL* aUrl = fileExists(url) ? [NSURL fileURLWithPath:urlString] : [NSURL URLWithString:urlString];
+	[URLProcessor openURL:aUrl];
+	
+#undef URLProcessor
 }
 
 std::string et::unicodeToUtf8(const std::wstring& w)

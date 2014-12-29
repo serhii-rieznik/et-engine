@@ -351,7 +351,8 @@ bool BlockMemoryAllocatorPrivate::validate(void* ptr, bool abortOnFail)
 	
 	if (abortOnFail)
 	{
-		ET_FAIL_FMT("Pointer being freed (0x%016llx) was not allocated via this allocator.", (int64_t)ptr);
+		uint64_t address = reinterpret_cast<uint64_t>(ptr);
+		ET_FAIL_FMT("Pointer being freed (0x%016llx) was not allocated via this allocator.", address);
 	}
 	
 	return false;
@@ -632,17 +633,24 @@ bool MemoryChunk::free(char* ptr)
 	{
 		if (i->begin == offset)
 		{
-			i->allocated = notAllocatedValue;
-			
-#		if ET_DEBUG
-			uint32_t deallocIndex = etMin(maximumAllocationStatisticsSize - 1, i->length / minimumAllocationStatisticsSize);
-			++deallocationStatistics[deallocIndex];
-			if (breakOnAllocation)
-				log::info("Deallocated %u bytes (%uKb, %uMb)", i->length, i->length / 1024, i->length / megabytes);
-#		endif
-			
-			compress();
-			return true;
+			if (i->allocated == notAllocatedValue)
+			{
+				ET_FAIL_FMT("Pointer being freed (0x%016llx) was already deleted from this memory chunk.", reinterpret_cast<uint64_t>(ptr));
+				return false;
+			}
+			else
+			{
+#			if ET_DEBUG
+				uint32_t deallocIndex = etMin(maximumAllocationStatisticsSize - 1, i->length / minimumAllocationStatisticsSize);
+				++deallocationStatistics[deallocIndex];
+				if (breakOnAllocation)
+					log::info("Deallocated %u bytes (%uKb, %uMb)", i->length, i->length / 1024, i->length / megabytes);
+#			endif
+				
+				i->allocated = notAllocatedValue;
+				compress();
+				return true;
+			}
 		}
 		++i;
 	}

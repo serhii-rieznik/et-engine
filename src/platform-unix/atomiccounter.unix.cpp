@@ -87,6 +87,9 @@ void AtomicCounter::setValue(AtomicCounterType value)
 AtomicBool::AtomicBool() :
 	_value(0) { }
 
+AtomicBool::AtomicBool(bool v) :
+	_value(v ? 1 : 0) { }
+
 bool AtomicBool::operator = (bool b)
 {
 	ET_ASSERT((_value & validMask) == 0);
