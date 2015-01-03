@@ -8,6 +8,7 @@
 #pragma once
 
 #include <unordered_map>
+#include <et/rendering/rendering.h>
 
 namespace et
 {
