@@ -7,7 +7,6 @@
 
 #pragma once
 
-#include <et/opengl/opengl.h>
 #include <et/apiobjects/apiobjectfactory.h>
 #include <et/apiobjects/framebuffer.h>
 
@@ -24,20 +23,26 @@ namespace et
 		FramebufferFactory(RenderContext* rc) :
 			APIObjectFactory(rc) { }
 
-		Framebuffer::Pointer createFramebuffer(const vec2i& size, const std::string& objectId = emptyString,
-			int32_t colorInternalformat = GL_RGBA, uint32_t colorFormat = GL_RGBA,
-			uint32_t colorType = GL_UNSIGNED_BYTE, int32_t depthInternalformat = GL_DEPTH_COMPONENT,
-			uint32_t depthFormat = GL_DEPTH_COMPONENT, uint32_t depthType = GL_UNSIGNED_INT,
+		Framebuffer::Pointer createFramebuffer(const vec2i& size, const std::string& name = emptyString,
+			TextureFormat colorInternalformat = TextureFormat::RGBA,
+			TextureFormat colorFormat = TextureFormat::RGBA,
+			DataType colorType = DataType::UnsignedChar,
+			TextureFormat depthInternalformat = TextureFormat::Depth,
+			TextureFormat depthFormat = TextureFormat::Depth,
+			DataType depthType = DataType::UnsignedInt,
 			bool useRenderbuffers = false, int32_t samples = 0);
 
 		Framebuffer::Pointer createMultisampledFramebuffer(const vec2i& size, int32_t samples,
-			const std::string& objectId = emptyString, int32_t colorInternalformat = GL_RGBA8,
-			int32_t depthInternalformat = GL_DEPTH_COMPONENT16);
+			const std::string& name = emptyString, TextureFormat colorInternalformat = TextureFormat::RGBA8,
+			TextureFormat depthInternalformat = TextureFormat::Depth16);
 		
 		Framebuffer::Pointer createCubemapFramebuffer(size_t size, const std::string& objectId = emptyString,
-			int32_t colorInternalformat = GL_RGBA, uint32_t colorFormat = GL_RGBA,
-			uint32_t colorType = GL_UNSIGNED_BYTE, int32_t depthInternalformat = GL_DEPTH_COMPONENT,
-			uint32_t depthFormat = GL_DEPTH_COMPONENT, uint32_t depthType = GL_UNSIGNED_INT);
+			TextureFormat colorInternalformat = TextureFormat::RGBA,
+			TextureFormat colorFormat = TextureFormat::RGBA,
+			DataType colorType = DataType::UnsignedChar,
+			TextureFormat depthInternalformat = TextureFormat::Depth,
+			TextureFormat depthFormat = TextureFormat::Depth,
+			DataType depthType = DataType::UnsignedInt);
 
 		Framebuffer::Pointer createFramebufferWrapper(uint32_t fbo, const std::string& objectId = emptyString);
 

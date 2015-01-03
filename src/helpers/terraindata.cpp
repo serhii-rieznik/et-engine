@@ -57,17 +57,17 @@ void TerrainData::generateVertexData(const FloatDataStorage& hm)
 	float z = 0.0f;
 
 	VertexDeclaration decl(true);
-	decl.push_back(Usage_Position, Type_Vec3);
-	decl.push_back(Usage_Normal, Type_Vec3);
-	decl.push_back(Usage_TexCoord0, Type_Vec2);
-	decl.push_back(Usage_Tangent, Type_Vec3);
+	decl.push_back(VertexAttributeUsage::Position, VertexAttributeType::Vec3);
+	decl.push_back(VertexAttributeUsage::Normal, VertexAttributeType::Vec3);
+	decl.push_back(VertexAttributeUsage::TexCoord0, VertexAttributeType::Vec2);
+	decl.push_back(VertexAttributeUsage::Tangent, VertexAttributeType::Vec3);
 
 	_vertexData = VertexArray::Pointer::create(decl, _dimension.square());
 
-	RawDataAcessor<vec3> pos = _vertexData->chunk(Usage_Position).accessData<vec3>(0);
-	RawDataAcessor<vec3> nrm = _vertexData->chunk(Usage_Normal).accessData<vec3>(0);
-	RawDataAcessor<vec3> tan = _vertexData->chunk(Usage_Tangent).accessData<vec3>(0);
-	RawDataAcessor<vec2> texc = _vertexData->chunk(Usage_TexCoord0).accessData<vec2>(0);
+	RawDataAcessor<vec3> pos = _vertexData->chunk(VertexAttributeUsage::Position).accessData<vec3>(0);
+	RawDataAcessor<vec3> nrm = _vertexData->chunk(VertexAttributeUsage::Normal).accessData<vec3>(0);
+	RawDataAcessor<vec3> tan = _vertexData->chunk(VertexAttributeUsage::Tangent).accessData<vec3>(0);
+	RawDataAcessor<vec2> texc = _vertexData->chunk(VertexAttributeUsage::TexCoord0).accessData<vec2>(0);
 
 	_positions.resize(hm.size());
 	_positions.setOffset(0);
@@ -110,8 +110,8 @@ void TerrainData::generateVertexData(const FloatDataStorage& hm)
 
 	_bounds = AABB(0.5f * (_minVertex + _maxVertex), _maxVertex - _minVertex);
 
-	IndexType numTriangles = primitives::indexCountForRegularMesh(_dimension, PrimitiveType_Triangles);
-	IndexArray::Pointer tempIB = IndexArray::Pointer::create(IndexArrayFormat_32bit, numTriangles, PrimitiveType_Triangles);
+	uint32_t numTriangles = primitives::indexCountForRegularMesh(_dimension, PrimitiveType::Triangles);
+	IndexArray::Pointer tempIB = IndexArray::Pointer::create(IndexArrayFormat::Format_32bit, numTriangles, PrimitiveType::Triangles);
 	
 	primitives::buildTrianglesIndexes(tempIB, _dimension, 0, 0);
 	primitives::calculateNormals(_vertexData, tempIB, 0, numTriangles);

@@ -8,7 +8,6 @@
 #pragma once
 
 #include <et/apiobjects/texturedescription.h>
-#include <et/opengl/opengl.h>
 
 namespace et
 {
@@ -17,42 +16,43 @@ namespace et
 	class TextureData : public LoadableObject
 	{
 	public:
-		TextureData(RenderContext* rc, const TextureDescription::Pointer&, const std::string&, bool deferred);
-		TextureData(RenderContext* rc, uint32_t texture, const vec2i& size, const std::string& name);
+		TextureData(RenderContext*, const TextureDescription::Pointer&, const std::string&, bool deferred);
+		TextureData(RenderContext*, uint32_t texture, const vec2i& size, const std::string& name);
 		~TextureData();
 
-		void setWrap(RenderContext* rc, TextureWrap s, TextureWrap t,
-			TextureWrap r = TextureWrap_ClampToEdge);
+		void setWrap(RenderContext*, TextureWrap s, TextureWrap t,
+			TextureWrap r = TextureWrap::ClampToEdge);
 
-		void setFiltration(RenderContext* rc, TextureFiltration minFiltration,
+		void setFiltration(RenderContext*, TextureFiltration minFiltration,
 			TextureFiltration magFiltration);
 
-		void setMaxLod(RenderContext* rc, size_t value);
+		void setMaxLod(RenderContext*, size_t value);
+		void setAnisotropyLevel(RenderContext*, float);
 
-		void compareRefToTexture(RenderContext* rc, bool enable, int32_t compareFunc);
+		void compareRefToTexture(RenderContext*, bool enable, int32_t compareFunc);
 		void generateMipMaps(RenderContext* rc);
 
-		vec2 getTexCoord(const vec2& ivec, TextureOrigin origin = TextureOrigin_TopLeft) const;
+		vec2 getTexCoord(const vec2& ivec, TextureOrigin origin = TextureOrigin::TopLeft) const;
 
-		void updateData(RenderContext* rc, TextureDescription::Pointer desc);
-		void updateDataDirectly(RenderContext* rc, const vec2i& size, const char* data, size_t dataSize);
+		void updateData(RenderContext*, TextureDescription::Pointer desc);
+		void updateDataDirectly(RenderContext*, const vec2i& size, const char* data, size_t dataSize);
 
-		void updatePartialDataDirectly(RenderContext* rc, const vec2i& offset, const vec2i& size,
+		void updatePartialDataDirectly(RenderContext*, const vec2i& offset, const vec2i& size,
 			const char* data, size_t dataSize);
 
 		uint32_t glID() const
 			{ return _glID; }
 
-		int32_t internalFormat() const
+		TextureFormat internalFormat() const
 			{ return _desc->internalformat; }
 
-		uint32_t format() const
+		TextureFormat format() const
 			{ return _desc->format; }
 
-		uint32_t dataType() const
+		DataType dataType() const
 			{ return _desc->type; }
 
-		uint32_t target() const
+		TextureTarget target() const
 			{ return _desc->target; }
 
 		int width() const
@@ -80,7 +80,7 @@ namespace et
         void buildData(const char* ptr, size_t dataSize);
 
 	private:
-		uint32_t _glID;
+		uint32_t _glID = 0;
 		TextureDescription::Pointer _desc;
 		vector3<TextureWrap> _wrap;
 		vector2<TextureFiltration> _filtration;

@@ -6,28 +6,29 @@
  */
 
 #include <et/core/objectscache.h>
-#include <et/geometry/geometry.h>
+#include <et/app/application.h>
 #include <et/rendering/rendercontext.h>
 #include <et/opengl/openglcaps.h>
-#include <et/threading/threading.h>
 #include <et/imaging/textureloader.h>
+#include <et/threading/threading.h>
 #include <et/apiobjects/texturefactory.h>
-#include <et/app/application.h>
 
 namespace et
 {
+	float randomFloat(float, float);
+
 	class TextureFactoryPrivate
 	{
 	public:
 		struct Loader : public ObjectLoader
 		{
-			TextureFactory* owner;
+			TextureFactory* owner = nullptr;
 			
 			Loader(TextureFactory* aOwner) :
-			owner(aOwner) { }
+				owner(aOwner) { }
 			
 			void reloadObject(LoadableObject::Pointer o, ObjectsCache& c)
-			{ owner->reloadObject(o, c); }
+				{ owner->reloadObject(o, c); }
 		};
 		
 		TextureFactoryPrivate(TextureFactory* owner) :
@@ -157,8 +158,8 @@ Texture TextureFactory::loadTexture(const std::string& fileName, ObjectsCache& c
 	return texture;
 }
 
-Texture TextureFactory::genTexture(uint32_t target, int32_t internalformat, const vec2i& size,
-	uint32_t format, uint32_t type, const BinaryDataStorage& data, const std::string& id)
+Texture TextureFactory::genTexture(TextureTarget target, TextureFormat internalformat, const vec2i& size,
+	TextureFormat format, DataType type, const BinaryDataStorage& data, const std::string& id)
 {
 	TextureDescription::Pointer desc = TextureDescription::Pointer::create();
 	
@@ -180,12 +181,12 @@ Texture TextureFactory::genTexture(uint32_t target, int32_t internalformat, cons
 	return Texture::create(renderContext(), desc, id, false);
 }
 
-Texture TextureFactory::genCubeTexture(int32_t internalformat, GLsizei size, uint32_t format, uint32_t type,
-	const std::string& id)
+Texture TextureFactory::genCubeTexture(TextureFormat internalformat, uint32_t size, TextureFormat format,
+	DataType type, const std::string& id)
 {
 	TextureDescription::Pointer desc = TextureDescription::Pointer::create();
 	
-	desc->target = GL_TEXTURE_CUBE_MAP;
+	desc->target = TextureTarget::Texture_Cube;
 	
 	desc->format = format;
 	desc->internalformat = internalformat;
@@ -226,10 +227,10 @@ Texture TextureFactory::genNoiseTexture(const vec2i& size, bool norm, const std:
 
 	TextureDescription::Pointer desc = TextureDescription::Pointer::create();
 	desc->data = BinaryDataStorage(4 * size.square());
-	desc->target = GL_TEXTURE_2D;
-	desc->format = GL_RGBA;
-	desc->internalformat = GL_RGBA;
-	desc->type = GL_UNSIGNED_BYTE;
+	desc->target = TextureTarget::Texture_2D;
+	desc->internalformat = TextureFormat::RGBA;
+	desc->format = TextureFormat::RGBA;
+	desc->type = DataType::UnsignedChar;
 	desc->size = size;
 	desc->mipMapCount = 1;
 	desc->layersCount = 1;
@@ -307,7 +308,7 @@ Texture TextureFactory::loadTexturesToCubemap(const std::string& posx, const std
 
 	size_t layerSize = layers[0]->dataSizeForAllMipLevels();
 	TextureDescription::Pointer desc = TextureDescription::Pointer::create();
-	desc->target = GL_TEXTURE_CUBE_MAP;
+	desc->target = TextureTarget::Texture_Cube;
 	desc->layersCount = 6;
 	desc->bitsPerPixel = layers[0]->bitsPerPixel;
 	desc->channels = layers[0]->channels;
@@ -318,6 +319,7 @@ Texture TextureFactory::loadTexturesToCubemap(const std::string& posx, const std
 	desc->size = layers[0]->size;
 	desc->type = layers[0]->type;
 	desc->data.resize(desc->layersCount * layerSize);
+	
 	for (size_t l = 0; l < desc->layersCount; ++l)
 		etCopyMemory(desc->data.element_ptr(l * layerSize), layers[l]->data.element_ptr(0), layerSize);
 

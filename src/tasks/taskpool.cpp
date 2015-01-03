@@ -5,7 +5,6 @@
  *
  */
 
-#include <algorithm>
 #include <et/tasks/taskpool.h>
 
 using namespace et;

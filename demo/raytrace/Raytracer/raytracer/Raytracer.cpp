@@ -6,6 +6,7 @@
 //  Copyright (c) 2014 Cheetek. All rights reserved.
 //
 
+#include <stack>
 #include <emmintrin.h>
 
 #include <et/collision/collision.h>
@@ -17,6 +18,12 @@ using namespace et;
 #undef min
 #undef max
 
+#if (ET_ENABLE_VEC4_ALIGN == 0)
+#	error Compile with ET_ENABLE_VEC4_ALIGN enabled
+#endif
+
+typedef std::deque<float, et::SharedBlockAllocatorSTDProxy<float>> IndexOfRefractionDeque;
+
 vec3 randomVectorOnHemisphere(const vec3& base, float distribution);
 
 vec3 randomDiffuseVector(const vec3& normal);
@@ -27,7 +34,11 @@ vec3 refract(const vec3& incidence, const vec3& normal, float eta, float k);
 float calculateRefractiveCoefficient(const vec3& incidence, const vec3& normal, float eta);
 float computeFresnelTerm(const vec3& incidence, const vec3& normal, float indexOfRefraction);
 
-vec4 gatherBouncesRecursive(const RaytraceScene& scene, const ray3d& ray, size_t depth, size_t currentObject);
+vec4 gatherBouncesRecursive(const RaytraceScene& scene, const ray3d& ray, size_t depth, IndexOfRefractionDeque& mediumIORs);
+
+vec4 computeReflection(const RaytraceScene& scene, const SceneMaterial& mat, const vec3& rayDirection,
+	const vec3& startPoint, const vec3& startNormal, size_t depth, IndexOfRefractionDeque& mediumIORs);
+
 vec4 performRaytracing(const RaytraceScene& scene, const ray3d& ray);
 vec4 sampleEnvironmentColor(const RaytraceScene& scene, const ray3d& r);
 
@@ -74,14 +85,14 @@ inline vec2 floori2(const vec2& v)
 	__m128 a = _mm_set_ps(0.0f, 0.0f, v.y, v.x);
 	__m128 fval = _mm_cvtepi32_ps(_mm_cvttps_epi32(a));
 	
-	__declspec(align(16)) vec4 result;
+	vec4 result;
 	_mm_store_ps(result.c, _mm_sub_ps(fval, _mm_and_ps(_mm_cmplt_ps(a, fval), one)));
 	return result.xy();
 }
 
 inline vec2 fracti2(const vec2& v)
 {
-	__declspec(align(16)) vec4 result;
+	vec4 result;
 	__m128 a = _mm_set_ps(0.0f, 0.0f, v.y, v.x);
 	_mm_store_ps(result.c, _mm_sub_ps(a, _mm_cvtepi32_ps(_mm_cvttps_epi32(a))));
 	return result.xy();
@@ -110,10 +121,10 @@ inline float randomFloatFrom1to1()
 			values[i] = randomFloat(-1.0f, 1.0f);
 		shouldInitialize = false;
 	}
-	return values[rand() % 256];
+	return values[rand() % 512];
 }
 
-SceneIntersection findNearestIntersection(const RaytraceScene& scene, const ray3d& ray)
+SceneIntersection findNearestIntersection(const RaytraceScene& scene, const ray3d& inRay)
 {
 	SceneIntersection result;
 	
@@ -121,12 +132,14 @@ SceneIntersection findNearestIntersection(const RaytraceScene& scene, const ray3
 	vec3 point;
 	vec3 normal;
 	
+	ray3d adjustedRay(inRay.origin + 0.00001f * inRay.direction, inRay.direction);
+	
 	float latestDistance = std::numeric_limits<float>::max();
 	for (const auto& obj : scene.objects)
 	{
-		if (obj->intersects(ray, point, normal))
+		if (obj->intersects(adjustedRay, point, normal))
 		{
-			float hitDistance = (point - ray.origin).dotSelf();
+			float hitDistance = (point - inRay.origin).dotSelf();
 			if (hitDistance < latestDistance)
 			{
 				latestDistance = hitDistance;
@@ -144,17 +157,10 @@ SceneIntersection findNearestIntersection(const RaytraceScene& scene, const ray3
 vec4 sampleTexture(const TextureDescription::Pointer& tex, vec2i texCoord)
 {
 	{
-		while (texCoord.x >= tex->size.x)
-			texCoord.x -= tex->size.x;
-		
-		while (texCoord.x < 0)
-			texCoord.x += tex->size.x;
-		
-		while (texCoord.y >= tex->size.y)
-			texCoord.y -= tex->size.y;
-		
-		while (texCoord.y < 0)
-			texCoord.y += tex->size.y;
+		while (texCoord.x >= tex->size.x) texCoord.x -= tex->size.x;
+		while (texCoord.y >= tex->size.y) texCoord.y -= tex->size.y;
+		while (texCoord.x < 0) texCoord.x += tex->size.x;
+		while (texCoord.y < 0) texCoord.y += tex->size.y;
 	}
 	
 	const vec4* rawData = reinterpret_cast<const vec4*>(tex->data.binary());
@@ -184,88 +190,92 @@ vec4 sampleEnvironmentColor(const RaytraceScene& scene, const ray3d& r)
 	return mul(scene.ambientColor, mixi(mixi(c00, c10, dudv.x), mixi(c01, c11, dudv.x), dudv.y));
 }
 
-vec4 gatherBouncesRecursive(const RaytraceScene& scene, const ray3d& ray, size_t depth, size_t currentObject)
+vec4 computeReflection(const RaytraceScene& scene, const SceneMaterial& mat, const vec3& rayDirection,
+	const vec3& startPoint, const vec3& startNormal, size_t depth, IndexOfRefractionDeque& mediumIORs)
+{
+	vec3 ideal;
+	vec3 reflectedRay = randomReflectedVector(rayDirection, startNormal, mat.roughness, ideal);
+	auto deepBounce = gatherBouncesRecursive(scene, ray3d(startPoint, reflectedRay), depth, mediumIORs);
+	mul(deepBounce, dot(reflectedRay, ideal));
+	return add(mat.emissiveColor, mul(mat.reflectiveColor, deepBounce));
+}
+
+vec4 gatherBouncesRecursive(const RaytraceScene& scene, const ray3d& ray, size_t depth, IndexOfRefractionDeque& mediumIORs)
 {
 	if (depth >= scene.options.bounces)
-		return vec4(0.0f, 0.0f, 0.0f, 0.0f);
+		return vec4(0.0f);
 	
 	auto i = findNearestIntersection(scene, ray);
+	
 	if (i.hitObjectIndex == MissingObjectIndex)
 		return sampleEnvironmentColor(scene, ray);
-	
-	ET_ASSERT(dot(i.hitNormal, ray.direction) < 0.0f)
-	
-//	return vec4(0.5f * i.hitNormal + vec3(0.5f), 1.0f);
-//	return vec4(-dot(i.hitNormal, ray.direction));
 	
 	const auto& obj = scene.objectAtIndex(i.hitObjectIndex);
 	SceneMaterial mat = scene.materialAtIndex(obj->materialId());
 	
 	if (mat.refractiveIndex > 0.0f)
 	{
-		return mat.diffuseColor;
-		/*
-		const float defaultRefractiveIndex = 1.0f;
-		 
-		bool enteringObject = (currentObject == MissingObjectIndex);
-		vec3 targetNormal = enteringObject ? i.hitNormal : -i.hitNormal;
-		float eta = enteringObject ? (defaultRefractiveIndex / mat.refractiveIndex) : (mat.refractiveIndex / defaultRefractiveIndex);
-		float k = calculateRefractiveCoefficient(ray.direction, targetNormal, eta);
-		if (k < 0.0f) // total internal reflection
+		bool enteringMaterial = dot(ray.direction, i.hitNormal) < 0.0f;
+		bool hasNonDefaultIOR = (mediumIORs.size() > 1);
+		
+		float currentIOR = 1.0f;
+		float targetIOR = 1.0f;
+		
+		if (enteringMaterial)
 		{
-			vec3 ideal;
-			vec3 reflectedRay = randomReflectedVector(ray.direction, targetNormal, mat.roughness, ideal);
-			
-			ET_ASSERT(dot(reflectedRay, ideal) > 0.0f)
-			
-			return mat.emissiveColor + dot(reflectedRay, ideal) *
-				(mat.reflectiveColor * gatherBouncesRecursive(scene, ray3d(i.hitPoint, reflectedRay), depth + 1, currentObject));
+			currentIOR = mediumIORs.back();
+			targetIOR = mat.refractiveIndex;
 		}
 		else
 		{
-			float fresnel = computeFresnelTerm(ray.direction, targetNormal, eta);
-			if (randomFloatFrom0to1() <= fresnel)
+			currentIOR = mat.refractiveIndex;
+			targetIOR = hasNonDefaultIOR ? *(mediumIORs.crbegin() + 1) : mediumIORs.back();
+			i.hitNormal *= -1.0f;
+		}
+		
+		float eta = currentIOR / targetIOR;
+		float k = calculateRefractiveCoefficient(ray.direction, i.hitNormal, eta);
+		
+		if (k < 0.0f) // reflect to the current medium
+		{
+			return computeReflection(scene, mat, ray.direction, i.hitPoint, i.hitNormal, depth + 1, mediumIORs);
+		}
+		else
+		{
+			float fresnel = computeFresnelTerm(ray.direction, i.hitNormal, eta);
+			
+			if (randomFloatFrom0to1() < fresnel) // reflect to the current medium
 			{
-				vec3 ideal;
-				vec3 reflectedRay = randomReflectedVector(ray.direction, targetNormal, mat.roughness, ideal);
-				
-				ET_ASSERT(dot(reflectedRay, ideal) > 0.0f)
-				
-				return mat.emissiveColor + dot(reflectedRay, ideal) *
-					(mat.reflectiveColor * gatherBouncesRecursive(scene, ray3d(i.hitPoint, reflectedRay), depth + 1, currentObject));
+				return computeReflection(scene, mat, ray.direction, i.hitPoint, i.hitNormal, depth + 1, mediumIORs);
 			}
-			else
+			else // perform refraction
 			{
+				if (enteringMaterial)
+					mediumIORs.push_back(targetIOR);
+				else if (hasNonDefaultIOR)
+					mediumIORs.pop_back();
+				
 				vec3 ideal;
-				vec3 refractedRay = randomRefractedVector(ray.direction, targetNormal, eta, k, mat.roughness, ideal);
-				
-				ET_ASSERT(dot(refractedRay, ideal) > 0.0f)
-				
-				return mat.emissiveColor + dot(refractedRay, ideal) *
-					(mat.diffuseColor * gatherBouncesRecursive(scene, ray3d(i.hitPoint, refractedRay), depth + 1,
-					enteringObject ? i.hitObjectIndex : MissingObjectIndex));
+				vec3 refractedRay = randomRefractedVector(ray.direction, i.hitNormal, eta, k, mat.roughness, ideal);
+				auto deepBounce = gatherBouncesRecursive(scene, ray3d(i.hitPoint, refractedRay), depth + 1, mediumIORs);
+				mul(deepBounce, dot(refractedRay, ideal));
+				return add(mat.emissiveColor, mul(mat.diffuseColor, deepBounce));
 			}
 		}
-		*/
 	}
 	else if (randomFloatFrom0to1() > mat.roughness)
 	{
-		vec3 ideal;
-		vec3 reflectedRay = randomReflectedVector(ray.direction, i.hitNormal, mat.roughness, ideal);
-		
-		auto deepBounce = gatherBouncesRecursive(scene, ray3d(i.hitPoint, reflectedRay), depth + 1, currentObject);
-		mul(deepBounce, dot(reflectedRay, ideal));
-		return add(mat.emissiveColor, mul(mat.reflectiveColor, deepBounce));
+		return computeReflection(scene, mat, ray.direction, i.hitPoint, i.hitNormal, depth + 1, mediumIORs);
 	}
 	else
 	{
 		vec3 direction = randomDiffuseVector(i.hitNormal);
-		auto deepBounce = gatherBouncesRecursive(scene, ray3d(i.hitPoint, direction), depth + 1, currentObject);
+		auto deepBounce = gatherBouncesRecursive(scene, ray3d(i.hitPoint, direction), depth + 1, mediumIORs);
 		mul(deepBounce, dot(direction, i.hitNormal));
 		return add(mat.emissiveColor, mul(mat.diffuseColor, deepBounce));
 	}
 	
-	return vec4(0.0f);
+	return vec4(1000.0f, 0.0f, 1000.0f, 0.0f);
 }
 
 void rt::raytrace(const RaytraceScene& scene, const et::vec2i& imageSize, const et::vec2i& origin,
@@ -285,22 +295,24 @@ void rt::raytrace(const RaytraceScene& scene, const et::vec2i& imageSize, const 
 	float initialAngleForAppertureBlades = 0.5f * deltaAngleForAppertureBlades;
 	float focalDistance = length(it.hitPoint - centerRay.origin);
 	plane focalPlane(scene.camera.direction(), (scene.camera.position() - scene.camera.direction() * focalDistance).length());
- 
+	
 	for (pixel.y = origin.y; pixel.y < origin.y + size.y; ++pixel.y)
 	{
 		pixel.x = origin.x;
 		output(pixel, vec4(1.0f, 0.0f, 0.0f, 1.0f));
 		pixel.x = origin.x + size.x - 1;
-		output(pixel, vec4(1.0f, 0.0f, 0.0f, 1.0f));
+		output(pixel, vec4(0.0f, 1.0f, 0.0f, 1.0f));
 	}
 
 	for (pixel.x = origin.x; pixel.x < origin.x + size.x; ++pixel.x)
 	{
 		pixel.y = origin.y;
-		output(pixel, vec4(1.0f, 0.0f, 0.0f, 1.0f));
+		output(pixel, vec4(0.0f, 0.0f, 1.0f, 1.0f));
 		pixel.y = origin.y + size.y - 1;
-		output(pixel, vec4(1.0f, 0.0f, 0.0f, 1.0f));
+		output(pixel, vec4(1.0f, 0.0f, 1.0f, 1.0f));
 	}
+	
+	IndexOfRefractionDeque iorDeque;
 	
 	for (pixel.y = origin.y; pixel.y < origin.y + size.y; ++pixel.y)
 	{
@@ -312,7 +324,7 @@ void rt::raytrace(const RaytraceScene& scene, const et::vec2i& imageSize, const 
 			{
 				vec2 fpixel = (vector2ToFloat(pixel) + vec2(0.5f)) * dudv - vec2(1.0f);
 				ray3d r = scene.camera.castRay(fpixel + subPixel * vec2(randomFloatFrom1to1(), randomFloatFrom1to1()));
-				
+
 				if (scene.apertureSize > 0.0f)
 				{
 					vec3 focal;
@@ -339,12 +351,13 @@ void rt::raytrace(const RaytraceScene& scene, const et::vec2i& imageSize, const 
 					vec3 o1 = rd * (ce1 * sra1 + ce2 * cra1);
 					vec3 o2 = rd * (ce1 * sra2 + ce2 * cra2);
 					vec3 cameraJitter = r.origin + mix(o1, o2, randomFloatFrom0to1());
-					result += gatherBouncesRecursive(scene, ray3d(cameraJitter, (focal - cameraJitter).normalized()), 0, MissingObjectIndex);
+					
+					r = ray3d(cameraJitter, (focal - cameraJitter).normalized());
 				}
-				else
-				{
-					result += gatherBouncesRecursive(scene, r, 0, MissingObjectIndex);
-				}
+			
+				iorDeque.clear();
+				iorDeque.push_back(1.0f);
+				result += gatherBouncesRecursive(scene, r, 0, iorDeque);
 			}
 			
 			result *= -scene.options.exposure / static_cast<float>(scene.options.samples);
@@ -353,6 +366,7 @@ void rt::raytrace(const RaytraceScene& scene, const et::vec2i& imageSize, const 
 			output(pixel, result);
 		}
 	}
+	
 }
 
 /*
@@ -362,6 +376,8 @@ void rt::raytrace(const RaytraceScene& scene, const et::vec2i& imageSize, const 
  */
 vec3 randomVectorOnHemisphere(const vec3& normal, float distribution)
 {
+	static const vec3 crossVector = vec3(1.0f, 1.0f, 1.0f);
+	
 	float cr1 = 0.0f;
 	float sr1 = 0.0f;
 
@@ -375,8 +391,8 @@ vec3 randomVectorOnHemisphere(const vec3& normal, float distribution)
 	__sincosf(ra, &sr1, &cr1);
 #endif
 
-	vec3 u = cross((std::abs(normal.x) > 0.1f) ? unitY : unitX, normal).normalized();
-	return (u * cr1 + cross(normal, u) * sr1) * std::sqrt(r2) + normal * std::sqrt(1.0f - r2);
+	vec3 u = cross(crossVector, normal).normalize();
+	return (std::sqrt(r2) * (u * cr1 + cross(normal, u) * sr1) + std::sqrt(1.0f - r2) * normal).normalize();
 }
 
 vec3 randomDiffuseVector(const vec3& normal)
@@ -387,16 +403,7 @@ vec3 randomDiffuseVector(const vec3& normal)
 vec3 randomReflectedVector(const vec3& incidence, const vec3& normal, float roughness, vec3& idealReflection)
 {
 	idealReflection = reflect(incidence, normal);
-	
-	float rValue = std::sin(HALF_PI * roughness);
-	vec3 result;
-	do
-	{
-		result = randomVectorOnHemisphere(idealReflection, rValue);
-	}
-	while (dot(result, normal) <= 0.0f);
-	
-	return result;
+	return randomVectorOnHemisphere(idealReflection, std::sin(HALF_PI * roughness));
 }
 
 vec3 refract(const vec3& incidence, const vec3& normal, float eta, float k)

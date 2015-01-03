@@ -8,7 +8,7 @@
 #pragma once
 
 #include <et/core/containers.h>
-#include <et/opengl/opengl.h>
+#include <et/rendering/rendering.h>
 
 namespace et
 {
@@ -17,8 +17,9 @@ namespace et
 	public:
 		ET_DECLARE_POINTER(IndexArray)
 		
-		static const IndexType MaxShortIndex;
-		static const IndexType MaxSmallIndex;
+		static const uint32_t MaxIndex;
+		static const uint16_t MaxShortIndex;
+		static const uint8_t MaxSmallIndex;
 
 		int tag = 0;
 
@@ -26,7 +27,7 @@ namespace et
 		IndexArray(IndexArrayFormat format, size_t size, PrimitiveType primitiveType);
 		
 		void linearize(size_t size);
-		void linearize(size_t indexFrom, size_t indexTo, IndexType startIndex);
+		void linearize(size_t indexFrom, size_t indexTo, uint32_t startIndex);
 
 		char* binary()
 			{ return _data.binary(); }
@@ -37,8 +38,8 @@ namespace et
 		size_t dataSize() const
 			{ return _data.dataSize(); }
 
-		IndexType capacity() const
-			{ return static_cast<IndexType>(_data.dataSize()) / _format; }
+		uint32_t capacity() const
+			{ return static_cast<uint32_t>(_data.dataSize()) / static_cast<uint32_t>(_format); }
 
 		IndexArrayFormat format() const
 			{ return _format; }
@@ -54,9 +55,9 @@ namespace et
 
 		size_t primitivesCount() const;
 
-		IndexType getIndex(size_t pos) const;
-		void setIndex(IndexType value, size_t pos);
-		void push_back(IndexType value);
+		uint32_t getIndex(size_t pos) const;
+		void setIndex(uint32_t value, size_t pos);
+		void push_back(uint32_t value);
 
 		void resize(size_t count);
 		void resizeToFit(size_t count);
@@ -140,9 +141,9 @@ namespace et
 	private:
 		BinaryDataStorage _data;
 		size_t _actualSize = 0;
-		IndexArrayFormat _format = IndexArrayFormat_16bit;
-		PrimitiveType _primitiveType = PrimitiveType_Points;
-		IndexType* _rawData = nullptr;
+		IndexArrayFormat _format = IndexArrayFormat::Format_16bit;
+		PrimitiveType _primitiveType = PrimitiveType::Points;
+		uint32_t* _rawData = nullptr;
 	};
 
 	typedef std::vector<IndexArray::Pointer> IndexArrayList;

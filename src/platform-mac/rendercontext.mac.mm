@@ -20,6 +20,7 @@
 #include <CoreVideo/CVDisplayLink.h>
 
 #include <et/platform-apple/apple.h>
+#include <et/opengl/opengl.h>
 #include <et/opengl/openglcaps.h>
 #include <et/input/input.h>
 #include <et/app/applicationnotifier.h>
@@ -657,6 +658,6 @@ CVReturn cvDisplayLinkOutputCallback(CVDisplayLinkRef, const CVTimeStamp*, const
 
 @end
 
-#endif
+#endif // !ET_CONSOLE_APPLICATION
 
 #endif // ET_PLATFORM_MAC

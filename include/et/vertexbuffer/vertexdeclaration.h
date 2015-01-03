@@ -11,15 +11,21 @@
 
 namespace et
 {
+	VertexAttributeType openglTypeToVertexAttributeType(uint32_t);
+	
 	class VertexElement
 	{
 	public:
-		VertexElement() : 
-			_usage(Usage_Undefined), _type(Type_Undefined), _stride(0), _offset(0), _components(0), _dataType(0) { }
-
-		VertexElement(VertexAttributeUsage aUsage, VertexAttributeType aType, int aStride = 0, size_t aOffset = 0) : 
-			_usage(aUsage), _type(aType), _stride(aStride), _offset(aOffset),
-			_components(vertexAttributeTypeComponents(aType)), _dataType(vertexAttributeTypeDataType(aType)) { }
+		VertexElement()
+			{ }
+		
+		VertexElement(VertexAttributeUsage aUsage, VertexAttributeType aType, uint32_t aStride = 0,
+			uint32_t aOffset = 0) : _usage(aUsage), _stride(aStride), _offset(aOffset)
+		{
+			_type = (aType < VertexAttributeType::max) ? aType : openglTypeToVertexAttributeType(static_cast<uint32_t>(aType));
+			_components = vertexAttributeTypeComponents(_type);
+			_dataType = vertexAttributeTypeDataType(_type);
+		}
 
 		bool operator == (const VertexElement& r) const
 			{ return (_usage == r._usage) && (_type == r._type) && (_stride == r._stride) && (_offset == r._offset); }
@@ -36,28 +42,28 @@ namespace et
 		VertexAttributeType type() const
 			{ return _type; } 
 
-		int stride() const
+		uint32_t stride() const
 			{ return _stride; }
 
-		size_t offset() const
+		uint32_t offset() const
 			{ return _offset; }
 
-		size_t components() const
+		uint32_t components() const
 			{ return _components; }
 
-		uint32_t dataType() const
+		DataType dataType() const
 			{ return _dataType; }
 
 		void setStride(int s)
 			{ _stride = s; }
 
 	private:
-		VertexAttributeUsage _usage;
-		VertexAttributeType _type; 
-		int _stride;
-		size_t _offset;
-		size_t _components;
-		uint32_t _dataType;
+		VertexAttributeUsage _usage = VertexAttributeUsage::Position;
+		VertexAttributeType _type = VertexAttributeType::Float;
+		DataType _dataType = DataType::Float;
+		uint32_t _stride = 0;
+		uint32_t _offset = 0;
+		uint32_t _components = 0;
 	};
 
 	typedef std::vector<VertexElement> VertexElementList;
@@ -89,7 +95,7 @@ namespace et
 		size_t numElements() const
 			{ return _list.size(); }
 
-		size_t dataSize() const
+		uint32_t dataSize() const
 			{ return _totalSize; }
 
 		bool interleaved() const
@@ -105,8 +111,8 @@ namespace et
 
 	private:  
 		VertexElementList _list;
-		size_t _totalSize = 0;
-		size_t _usageMask = 0;
+		uint32_t _totalSize = 0;
+		uint32_t _usageMask = 0;
 		bool _interleaved = true;
 	};
 

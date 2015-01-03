@@ -8,8 +8,8 @@
 #pragma once
 
 #include <et/core/singleton.h>
-#include <et/opengl/opengl.h>
 #include <et/core/flags.h>
+#include <et/rendering/rendering.h>
 
 namespace et
 {
@@ -64,7 +64,13 @@ namespace et
 		uint32_t maxSamples() const
 			{ return _maxSamples; }
 		
+		float maxAnisotropyLevel() const
+			{ return _maxAnisotropyLevel; }
+		
 		bool hasExtension(const std::string&);
+		
+		bool supportTextureFormat(TextureFormat fmt) const
+			{ return (_textureFormatSupport.count(fmt) > 0) && (_textureFormatSupport.at(fmt) != 0); }
 		
 		void checkCaps();
 
@@ -79,7 +85,9 @@ namespace et
 		uint32_t _maxTextureSize = 0;
 		uint32_t _maxCubemapTextureSize = 0;
 		uint32_t _maxSamples = 0;
+		float _maxAnisotropyLevel = 0.0f;
 
+		std::map<TextureFormat, uint32_t> _textureFormatSupport;
 		OpenGLVersion _version = OpenGLVersion_unknown;
 		bool _isOpenGLES = false;
 	};

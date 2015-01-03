@@ -5,7 +5,6 @@
  *
  */
 
-#include <et/opengl/opengl.h>
 #include <et/imaging/textureloader.h>
 #include <et/imaging/pngloader.h>
 #include <et/imaging/ddsloader.h>
@@ -28,37 +27,37 @@ TextureDescription::Pointer et::loadTextureDescription(const std::string& fileNa
 	
 	if (ext == "png")
 	{
-		desc->target = GL_TEXTURE_2D;
+		desc->target = TextureTarget::Texture_2D;
 		desc->setOrigin(fileName);
 		png::loadInfoFromFile(fileName, desc.reference());
 	}
 	else if (ext == "dds")
 	{
-		desc->target = GL_TEXTURE_2D;
+		desc->target = TextureTarget::Texture_2D;
 		desc->setOrigin(fileName);
 		dds::loadInfoFromFile(fileName, desc.reference());
 	}
 	else if (ext == "tga")
 	{
-		desc->target = GL_TEXTURE_2D;
+		desc->target = TextureTarget::Texture_2D;
 		desc->setOrigin(fileName);
 		tga::loadInfoFromFile(fileName, desc.reference());
 	}
 	else if (ext == "pvr")
 	{
-		desc->target = GL_TEXTURE_2D;
+		desc->target = TextureTarget::Texture_2D;
 		desc->setOrigin(fileName);
 		pvr::loadInfoFromFile(fileName, desc.reference());
 	}
 	else if (ext == "hdr")
 	{
-		desc->target = GL_TEXTURE_2D;
+		desc->target = TextureTarget::Texture_2D;
 		desc->setOrigin(fileName);
 		hdr::loadInfoFromFile(fileName, desc.reference());
 	}
 	else if ((ext == "jpg") || (ext == "jpeg"))
 	{
-		desc->target = GL_TEXTURE_2D;
+		desc->target = TextureTarget::Texture_2D;
 		desc->setOrigin(fileName);
 		jpeg::loadInfoFromFile(fileName, desc.reference());
 	}
@@ -88,37 +87,37 @@ TextureDescription::Pointer et::loadTexture(const std::string& fileName)
 	
 	if (ext == "png")
 	{
-		desc->target = GL_TEXTURE_2D;
+		desc->target = TextureTarget::Texture_2D;
 		desc->setOrigin(fileName);
 		png::loadFromFile(fileName, desc.reference(), true);
 	}
 	else if (ext == "dds")
 	{
-		desc->target = GL_TEXTURE_2D;
+		desc->target = TextureTarget::Texture_2D;
 		desc->setOrigin(fileName);
 		dds::loadFromFile(fileName, desc.reference());
 	}
 	else if (ext == "tga")
 	{
-		desc->target = GL_TEXTURE_2D;
+		desc->target = TextureTarget::Texture_2D;
 		desc->setOrigin(fileName);
 		tga::loadFromFile(fileName, desc.reference());
 	}
 	else if (ext == "pvr")
 	{
-		desc->target = GL_TEXTURE_2D;
+		desc->target = TextureTarget::Texture_2D;
 		desc->setOrigin(fileName);
 		pvr::loadFromFile(fileName, desc.reference());
 	}
 	else if (ext == "hdr")
 	{
-		desc->target = GL_TEXTURE_2D;
+		desc->target = TextureTarget::Texture_2D;
 		desc->setOrigin(fileName);
 		hdr::loadFromFile(fileName, desc.reference());
 	}
 	else if ((ext == "jpg") || (ext == "jpeg"))
 	{
-		desc->target = GL_TEXTURE_2D;
+		desc->target = TextureTarget::Texture_2D;
 		desc->setOrigin(fileName);
 		jpeg::loadFromFile(fileName, desc.reference());
 	}

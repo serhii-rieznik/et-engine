@@ -39,16 +39,14 @@ float et::distanceSquareFromPointToLine(const vec3& p, const vec3& l0, const vec
 	return diff.dotSelf();
 }
 
-vec2 et::barycentricCoordinates(const vec3& p, const triangle& t)
+vec2 et::barycentricCoordinates(vec3 v2, const triangle& t)
 {
-	vec3 v0 = t.edge3to1();
-	vec3 v1 = t.edge2to1();
-	vec3 v2 = p - t.v1();
-	float dot00 = dot(v0, v0);
-	float dot01 = dot(v0, v1);
-	float dot02 = dot(v0, v2);
-	float dot11 = dot(v1, v1);
-	float dot12 = dot(v1, v2);
+	v2 -= t.v1();
+	float dot00 = dot(t.edge3to1(), t.edge3to1());
+	float dot01 = dot(t.edge3to1(), t.edge2to1());
+	float dot02 = dot(t.edge3to1(), v2);
+	float dot11 = dot(t.edge2to1(), t.edge2to1());
+	float dot12 = dot(t.edge2to1(), v2);
 	float invDenom = 1.0f / (dot00 * dot11 - dot01 * dot01);
 	return vec2((dot11 * dot02 - dot01 * dot12) * invDenom, (dot00 * dot12 - dot01 * dot02) * invDenom);
 }
@@ -217,6 +215,37 @@ bool et::intersect::rayTriangle(const ray3d& r, const triangle& t, vec3* interse
 	}
 	
 	return false;
+}
+
+bool et::intersect::rayTriangleTwoSided(const ray3d& ray, const triangle& tri, vec3* intersection_pt)
+{
+	static const float epsilon = 0.00001f;
+	
+	vec3 h = cross(ray.direction, tri.edge3to1());
+	float a = dot(tri.edge2to1(), h);
+	
+	if (std::abs(a) < epsilon)
+		return false;
+	
+	vec3 s = ray.origin - tri.v1();
+	
+	float u = dot(s, h) / a;
+	
+	if ((u < 0.0) || (u > 1.0))
+		return false;
+	
+	vec3 q = cross(s, tri.edge2to1());
+	float v = dot(ray.direction, q) / a;
+	
+	if ((v < 0.0) || (u + v > 1.0))
+		return false;
+	
+	float t = dot(tri.edge3to1(), q) / a;
+	
+	if (intersection_pt)
+		*intersection_pt = ray.origin + t * ray.direction;
+	
+	return (t > epsilon);
 }
 
 bool et::intersect::rayTriangles(const ray3d& r, const triangle* triangles, size_t triangleCount,

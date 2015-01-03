@@ -125,7 +125,7 @@ namespace et
 		const vector2<T>& xy() const
 			{ return *((vector2<T>*)(c)); }
 		
-		void normalize()
+		vector3<T>& normalize()
 		{
 			T lenSquare = dotSelf();
 			if (lenSquare > 0)
@@ -135,6 +135,7 @@ namespace et
 				y /= lenSquare;
 				z /= lenSquare;
 			}
+			return *this;
 		}
 		
 		vector3<T> normalized() const

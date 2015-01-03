@@ -5,7 +5,6 @@
  *
  */
 
-#include <et/opengl/opengl.h>
 #include <et/imaging/hdrloader.h>
 
 using namespace et;
@@ -75,26 +74,26 @@ void et::hdr::loadInfoFromStream(std::istream& source, TextureDescription& desc)
 	desc.size.x = strToInt(ws);
 	desc.size.y = strToInt(hs);
 	
-	desc.target = GL_TEXTURE_2D;
-	desc.format = GL_RGBA;
+	desc.target = TextureTarget::Texture_2D;
+	desc.format = TextureFormat::RGB;
 	
 	if (shouldConvertRGBEToFloat)
 	{
-		desc.internalformat = GL_RGBA32F;
-		desc.type = GL_FLOAT;
+		desc.internalformat = TextureFormat::RGBA32F;
+		desc.type = DataType::Float;
 		desc.bitsPerPixel = 128;
 	}
 	else
 	{
-		desc.internalformat = GL_RGBA;
-		desc.type = GL_UNSIGNED_BYTE;
+		desc.internalformat = TextureFormat::RGBA;
+		desc.type = DataType::UnsignedChar;
 		desc.bitsPerPixel = 32;
 	}
 	
-	desc.mipMapCount = 1;
-	desc.compressed = 0;
 	desc.channels = 4;
+	desc.mipMapCount = 1;
 	desc.layersCount = 1;
+	desc.compressed = 0;
 }
 
 void et::hdr::loadFromStream(std::istream& source, TextureDescription& desc)

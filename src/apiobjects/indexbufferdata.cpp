@@ -5,6 +5,7 @@
  *
  */
 
+#include <et/opengl/opengl.h>
 #include <et/rendering/rendercontext.h>
 #include <et/apiobjects/indexbufferdata.h>
 
@@ -12,7 +13,7 @@ using namespace et;
 
 IndexBufferData::IndexBufferData(RenderContext* rc, IndexArray::Pointer i, BufferDrawType drawType,
 	const std::string& aName) : Object(aName), _rc(rc), _size(i->actualSize()), _sourceTag(0),
-	_indexBuffer(0), _dataType(0), _primitiveType(0), _format(IndexArrayFormat_Undefined), _drawType(drawType)
+	_indexBuffer(0), _drawType(drawType)
 {
 #if defined(ET_CONSOLE_APPLICATION)
 	ET_FAIL("Attempt to create IndexBuffer in console application.")
@@ -34,31 +35,35 @@ IndexBufferData::~IndexBufferData()
 void IndexBufferData::setProperties(const IndexArray::Pointer& i)
 {
 #if !defined(ET_CONSOLE_APPLICATION)
+	
 	_size = i->actualSize();
+	_primitiveType = i->primitiveType();
 	_format = i->format();
 
-	switch (i->format())
+	switch (_format)
 	{
-		case IndexArrayFormat_8bit:
+		case IndexArrayFormat::Format_8bit:
 		{
-			_dataType = GL_UNSIGNED_BYTE;
+			_dataType = DataType::UnsignedChar;
 			break;
 		}
-		case IndexArrayFormat_16bit:
+			
+		case IndexArrayFormat::Format_16bit:
 		{
-			_dataType = GL_UNSIGNED_SHORT;
+			_dataType = DataType::UnsignedShort;
 			break;
 		}
-		case IndexArrayFormat_32bit:
+			
+		case IndexArrayFormat::Format_32bit:
 		{
-			_dataType = GL_UNSIGNED_INT;
+			_dataType = DataType::UnsignedInt;
 			break;
 		}
+			
 		default:
-			ET_FAIL("Invalud IndexArrayFormat value");
+			ET_FAIL_FMT("Invalid IndexArrayFormat value: %u", static_cast<uint32_t>(_format));
 	}
-
-	_primitiveType = primitiveTypeValue(i->primitiveType());
+	
 #endif
 }
 
@@ -72,7 +77,7 @@ void IndexBufferData::build(const IndexArray::Pointer& i)
 	}
 
 	setProperties(i);
-	internal_setData(i->data(), i->format() * _size);
+	internal_setData(i->data(), static_cast<size_t>(i->format()) * _size);
 #endif
 }
 
@@ -89,7 +94,7 @@ void IndexBufferData::internal_setData(const unsigned char* data, size_t size)
 
 void* IndexBufferData::indexOffset(size_t offset) const
 {
-	return reinterpret_cast<void*>(_format * offset);
+	return reinterpret_cast<void*>(static_cast<size_t>(_format) * offset);
 }
 
 void IndexBufferData::setData(const IndexArray::Pointer& i)
@@ -101,5 +106,5 @@ void IndexBufferData::setData(const IndexArray::Pointer& i)
 
 void IndexBufferData::overridePrimitiveType(PrimitiveType pt)
 {
-	_primitiveType = primitiveTypeValue(pt);
+	_primitiveType = pt;
 }

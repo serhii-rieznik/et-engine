@@ -9,6 +9,7 @@
 #include <et/app/application.h>
 #include <et/rendering/rendercontext.h>
 #include <et/primitives/primitives.h>
+#include <et/opengl/openglcaps.h>
 #include "DemoSceneRenderer.h"
 
 using namespace et;
@@ -18,8 +19,6 @@ using namespace demo;
 
 extern const std::string basicVertexShader;
 extern const std::string basicFragmentShader;
-
-const float baseFrameTime = 1.0f / 30.0f;
 
 enum
 {
@@ -36,21 +35,20 @@ void SceneRenderer::init(et::RenderContext* rc)
 	_rc = rc;
 	
 	_finalBuffers[0] = rc->framebufferFactory().createFramebuffer(rc->sizei(), "final-buffer-1",
-		GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE, 0, 0, 0);
+		TextureFormat::RGBA, TextureFormat::RGBA, DataType::UnsignedChar, TextureFormat::Invalid);
 	
 	_finalBuffers[1] = rc->framebufferFactory().createFramebuffer(rc->sizei(), "final-buffer-2",
-		GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE, 0, 0, 0);
+		TextureFormat::RGBA, TextureFormat::RGBA, DataType::UnsignedChar, TextureFormat::Invalid);
 	
-	_geometryBuffer = rc->framebufferFactory().createFramebuffer(rc->sizei(), "geometry-buffer",
-		GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE, GL_DEPTH_COMPONENT32, GL_DEPTH_COMPONENT, GL_UNSIGNED_INT);
+	_geometryBuffer = rc->framebufferFactory().createFramebuffer(rc->sizei(), "geometry-buffer");
 	_geometryBuffer->addSameRendertarget();
 	
 	_downsampledBuffer = rc->framebufferFactory().createFramebuffer(rc->sizei() / 2, "downsampled-buffer",
-		GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE, 0, 0, 0);
+		TextureFormat::RGBA, TextureFormat::RGBA, DataType::UnsignedChar, TextureFormat::Invalid);
 	_downsampledBuffer->addSameRendertarget();
 	
-	_defaultTexture = _rc->textureFactory().genTexture(GL_TEXTURE_2D, GL_RGBA, vec2i(1), GL_RGBA,
-		GL_UNSIGNED_BYTE, BinaryDataStorage(4, 255), "white-texture");
+	_defaultTexture = _rc->textureFactory().genTexture(TextureTarget::Texture_2D, TextureFormat::RGBA,
+		vec2i(1), TextureFormat::RGBA, DataType::UnsignedChar, BinaryDataStorage(4, 255), "white-texture");
 	
 	_noiseTexture = _rc->textureFactory().genNoiseTexture(vec2i(256), true, "noise-texture");
 	
@@ -63,8 +61,8 @@ void SceneRenderer::init(et::RenderContext* rc)
 	BinaryDataStorage normalData(4, 128);
 	normalData[2] = 255;
 	
-	_defaultNormalTexture = _rc->textureFactory().genTexture(GL_TEXTURE_2D, GL_RGBA, vec2i(1), GL_RGBA,
-		GL_UNSIGNED_BYTE, normalData, "normal-texture");
+	_defaultNormalTexture = _rc->textureFactory().genTexture(TextureTarget::Texture_2D, TextureFormat::RGBA,
+		vec2i(1), TextureFormat::RGBA, DataType::UnsignedChar, normalData, "normal-texture");
 	
 	ObjectsCache localCache;
 	programs.prepass = _rc->programFactory().loadProgram("data/shaders/prepass.program", localCache);
@@ -101,40 +99,40 @@ void SceneRenderer::init(et::RenderContext* rc)
 	programs.final->setUniform("noiseTextureScale", vector2ToFloat(_downsampledBuffer->size()) / _noiseTexture->sizeFloat());
 	
 	{
-		VertexDeclaration decl(true, Usage_Position, Type_Vec3);
-		decl.push_back(Usage_TexCoord0, Type_Vec3);
-		decl.push_back(Usage_Normal, Type_Vec3);
-		decl.push_back(Usage_Tangent, Type_Vec3);
+		VertexDeclaration decl(true, VertexAttributeUsage::Position, VertexAttributeType::Vec3);
+		decl.push_back(VertexAttributeUsage::TexCoord0, VertexAttributeType::Vec3);
+		decl.push_back(VertexAttributeUsage::Normal, VertexAttributeType::Vec3);
+		decl.push_back(VertexAttributeUsage::Tangent, VertexAttributeType::Vec3);
 		
 		VertexArray::Pointer va = VertexArray::Pointer::create(decl, 0);
 		primitives::createCube(va, 10.0f);
-		IndexArray::Pointer ia = IndexArray::Pointer::create(IndexArrayFormat_16bit, va->size(), PrimitiveType_Triangles);
+		IndexArray::Pointer ia = IndexArray::Pointer::create(IndexArrayFormat::Format_16bit, va->size(), PrimitiveType::Triangles);
 		ia->linearize(va->size());
 		
-		primitives::calculateTangents(va, ia, 0, IndexType(ia->primitivesCount()));
+		primitives::calculateTangents(va, ia, 0, static_cast<uint32_t>(ia->primitivesCount()));
 		
 		_cubeMesh = rc->vertexBufferFactory().createVertexArrayObject("debug-cube", va,
-			BufferDrawType_Static, ia, BufferDrawType_Static);
+			BufferDrawType::Static, ia, BufferDrawType::Static);
 	}
 	
 	{
 		vec2i planeDensity(5);
-		VertexDeclaration decl(true, Usage_Position, Type_Vec3);
-		decl.push_back(Usage_TexCoord0, Type_Vec3);
-		decl.push_back(Usage_Normal, Type_Vec3);
-		decl.push_back(Usage_Tangent, Type_Vec3);
+		VertexDeclaration decl(true, VertexAttributeUsage::Position, VertexAttributeType::Vec3);
+		decl.push_back(VertexAttributeUsage::TexCoord0, VertexAttributeType::Vec3);
+		decl.push_back(VertexAttributeUsage::Normal, VertexAttributeType::Vec3);
+		decl.push_back(VertexAttributeUsage::Tangent, VertexAttributeType::Vec3);
 		
 		VertexArray::Pointer va = VertexArray::Pointer::create(decl, 0);
 		
-		IndexArray::Pointer ia = IndexArray::Pointer::create(IndexArrayFormat_16bit,
-			primitives::indexCountForRegularMesh(planeDensity, PrimitiveType_TriangleStrips), PrimitiveType_TriangleStrips);
+		IndexArray::Pointer ia = IndexArray::Pointer::create(IndexArrayFormat::Format_16bit,
+			primitives::indexCountForRegularMesh(planeDensity, PrimitiveType::TriangleStrips), PrimitiveType::TriangleStrips);
 		
 		primitives::createSquarePlane(va, -unitY, vec2(500.0f), planeDensity, vec3(0.0, -50.0f, 0.0f));
 		primitives::buildTriangleStripIndexes(ia, planeDensity, 0, 0);
-		primitives::calculateTangents(va, ia, 0, IndexType(ia->primitivesCount()));
+		primitives::calculateTangents(va, ia, 0, static_cast<uint32_t>(ia->primitivesCount()));
 		
 		_planeMesh = rc->vertexBufferFactory().createVertexArrayObject("debug-plane", va,
-			BufferDrawType_Static, ia, BufferDrawType_Static);
+			BufferDrawType::Static, ia, BufferDrawType::Static);
 	}
 }
 
@@ -153,14 +151,9 @@ void SceneRenderer::setScene(et::s3d::Scene::Pointer aScene)
 		auto mat = e->material();
 		for (size_t i = MaterialParameter_AmbientMap; i < MaterialParameter_AmbientFactor; ++i)
 		{
-			if (mat->hasTexture(i))
-			{
-				Texture t = mat->getTexture(i);
-				_rc->renderState().bindTexture(0, t);
-				float maxAnisotropy = 0.0f;
-				glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &maxAnisotropy);
-				glTexParameterf(t->target(), GL_TEXTURE_MAX_ANISOTROPY_EXT, maxAnisotropy);
-			}
+			Texture tex = mat->getTexture(i);
+			if (tex.valid())
+				tex->setAnisotropyLevel(_rc, openGLCapabilites().maxAnisotropyLevel());
 		}
 	}
 	
@@ -175,9 +168,8 @@ void SceneRenderer::renderToGeometryBuffer(const et::Camera& cam)
 	rs.setDepthMask(true);
 	rs.setDepthTest(true);
 	
-	glEnable(GL_SAMPLE_ALPHA_TO_COVERAGE);
-	checkOpenGLError("glEnable(GL_SAMPLE_ALPHA_TO_COVERAGE)");
-	
+	rs.setSampleAlphaToCoverage(true);
+		
 	rs.bindFramebuffer(_geometryBuffer);
 	rn->clear(true, true);
 
@@ -227,8 +219,7 @@ void SceneRenderer::renderToGeometryBuffer(const et::Camera& cam)
 		}
 	}
 // */
-	glDisable(GL_SAMPLE_ALPHA_TO_COVERAGE);
-	checkOpenGLError("glDisable(GL_SAMPLE_ALPHA_TO_COVERAGE)");
+	rs.setSampleAlphaToCoverage(false);
 }
 
 void SceneRenderer::computeAmbientOcclusion(const et::Camera& cam)
@@ -285,7 +276,7 @@ void SceneRenderer::render(const et::Camera& cam, const et::Camera& observer, bo
 	if (_updateTime == 0.0f)
 		_updateTime = currentTime - 1.0f / 30.0f;
 	
-	float dt = currentTime - _updateTime;
+//	float dt = currentTime - _updateTime;
 	
 	_updateTime = currentTime;
 	
@@ -315,6 +306,7 @@ void SceneRenderer::render(const et::Camera& cam, const et::Camera& observer, bo
 	rs.bindProgram(programs.final);
 		
 	programs.final->setCameraProperties(cam);
+	programs.final->setUniform("mProjection", cam.projectionMatrix());
 	programs.final->setUniform<vec3>("lightPositions[0]", viewSpaceLightPosition.data(), viewSpaceLightPosition.size());
 	programs.final->setUniform("lightsCount", viewSpaceLightPosition.size());
 	programs.final->setUniform("clipPlanes", vec2(cam.zNear(), cam.zFar()));

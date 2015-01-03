@@ -49,6 +49,275 @@ OpenGLDebugScope::~OpenGLDebugScope()
 #endif
 }
 
+uint32_t et::vertexAttributeTypeValue(VertexAttributeType value)
+{
+	ET_ASSERT(value < VertexAttributeType::max)
+	
+	static const uint32_t valuesMap[VertexAttributeType_max] =
+	{
+		GL_FLOAT,
+		GL_FLOAT_VEC2,
+		GL_FLOAT_VEC3,
+		GL_FLOAT_VEC4,
+		GL_FLOAT_MAT3,
+		GL_FLOAT_MAT4,
+		GL_INT
+	};
+	
+	return valuesMap[static_cast<uint32_t>(value)];
+}
+
+VertexAttributeType et::openglTypeToVertexAttributeType(uint32_t value)
+{
+	switch (value)
+	{
+		case GL_FLOAT:
+			return VertexAttributeType::Float;
+			
+		case GL_FLOAT_VEC2:
+			return VertexAttributeType::Vec2;
+			
+		case GL_FLOAT_VEC3:
+			return VertexAttributeType::Vec3;
+			
+		case GL_FLOAT_VEC4:
+			return VertexAttributeType::Vec4;
+			
+		case GL_FLOAT_MAT3:
+			return VertexAttributeType::Mat3;
+			
+		case GL_FLOAT_MAT4:
+			return VertexAttributeType::Mat4;
+			
+		case GL_INT:
+			return VertexAttributeType::Int;
+			
+		default:
+			ET_FAIL_FMT("Unsupported OpenGL type %u (0x%X)", value, value);
+	}
+}
+
+#define ET_SAMPLE_VALUE_FROM_MAP 	{ \
+										uint32_t intValue = static_cast<uint32_t>(value); \
+										ET_ASSERT(valuesMap[intValue] != 0); \
+										return valuesMap[intValue]; \
+									}
+
+uint32_t et::textureFormatValue(TextureFormat value)
+{
+	static const uint32_t valuesMap[TextureFormat_max] =
+	{
+		0, // Invalid,
+		
+		GL_RED, // R,
+		
+		GL_R8, //R8,
+		
+#	if defined(GL_RG16)
+		GL_R16, //R16,
+#	else
+		0,
+#	endif
+
+		GL_R16F, //R16F,
+		
+		GL_R32F, //R32F,
+		
+		GL_RG, //RG,
+		
+		GL_RG8, //RG8,
+		
+#	if defined(GL_RG16)
+		GL_RG16, //RG16,
+#	else
+		0,
+#	endif
+
+		GL_RG16F, //RG16F,
+		
+		GL_RG32F, //RG32F,
+		
+		GL_RGB, //RGB,
+		
+		GL_RGB8, //RGB8,
+		
+#	if defined(GL_RGBA16)
+		GL_RGB16, //RGB16,
+#	else
+		0,
+#	endif
+		
+		GL_RGB16F, //RGB16F,
+		
+		GL_RGB32F, //RGB32F,
+		
+#	if defined(GL_BGR)
+		GL_BGR, //BGR,
+#	else
+		GL_RGB, // for BGR,
+#	endif
+		
+		GL_RGBA, //RGBA,
+		
+		GL_RGBA8, //RGBA8,
+		
+#	if defined(GL_RGBA16)
+		GL_RGBA16, //RGBA16,
+#	else
+		0,
+#	endif
+		
+		GL_RGBA16F, //RGBA16F,
+		
+		GL_RGBA32F, //RGBA32F,
+		
+		GL_BGRA, //BGRA,
+		
+#	if defined(GL_COMPRESSED_RGB_S3TC_DXT1_EXT)
+		GL_COMPRESSED_RGB_S3TC_DXT1_EXT, //DXT1_RGB,
+#	else
+		0,
+#	endif
+		
+#	if defined(GL_COMPRESSED_RGBA_S3TC_DXT1_EXT)
+		GL_COMPRESSED_RGBA_S3TC_DXT1_EXT, //DXT1_RGBA,
+#	else
+		0,
+#	endif
+		
+#	if defined(GL_COMPRESSED_RGBA_S3TC_DXT3_EXT)
+		GL_COMPRESSED_RGBA_S3TC_DXT3_EXT, //DXT3,
+#	else
+		0,
+#	endif
+		
+#	if defined(GL_COMPRESSED_RGBA_S3TC_DXT5_EXT)
+		GL_COMPRESSED_RGBA_S3TC_DXT5_EXT, //DXT5,
+#	else
+		0,
+#	endif
+		
+#	if defined(GL_COMPRESSED_RG_RGTC2)
+		GL_COMPRESSED_RG_RGTC2, //RGTC2,
+#	else
+		0,
+#	endif
+		
+		GL_DEPTH_COMPONENT, //Depth,
+		GL_DEPTH_COMPONENT16, //Depth16,
+		GL_DEPTH_COMPONENT24, //Depth24,
+		
+#	if defined(GL_DEPTH_COMPONENT32)
+		GL_DEPTH_COMPONENT32, //Depth32,
+#	else
+		0,
+#	endif
+		
+#	if defined(GL_DEPTH_COMPONENT32F)
+		GL_DEPTH_COMPONENT32F, //Depth32F,
+#	else
+		0,
+#	endif
+
+#	if defined(GL_COMPRESSED_RGB_PVRTC_2BPPV1_IMG)
+		GL_COMPRESSED_RGB_PVRTC_2BPPV1_IMG, // PVR_2bpp_RGB,
+#	else
+		0,
+#	endif
+
+#	if defined(GL_COMPRESSED_SRGB_PVRTC_2BPPV1_EXT)
+		GL_COMPRESSED_SRGB_PVRTC_2BPPV1_EXT, // PVR_2bpp_sRGB,
+#	else
+		0,
+#	endif
+
+#	if defined(GL_COMPRESSED_RGBA_PVRTC_2BPPV1_IMG)
+		GL_COMPRESSED_RGBA_PVRTC_2BPPV1_IMG, // PVR_2bpp_RGBA,
+#	else
+		0,
+#	endif
+
+#	if defined(GL_COMPRESSED_SRGB_ALPHA_PVRTC_2BPPV1_EXT)
+		GL_COMPRESSED_SRGB_ALPHA_PVRTC_2BPPV1_EXT, // PVR_2bpp_sRGBA,
+#	else
+		0,
+#	endif
+		
+#	if defined(GL_COMPRESSED_RGB_PVRTC_4BPPV1_IMG)
+		GL_COMPRESSED_RGB_PVRTC_4BPPV1_IMG, // PVR_4bpp_RGB,
+#	else
+		0,
+#	endif
+
+#	if defined(GL_COMPRESSED_SRGB_PVRTC_4BPPV1_EXT)
+		GL_COMPRESSED_SRGB_PVRTC_4BPPV1_EXT, // PVR_4bpp_sRGB,
+#	else
+		0,
+#	endif
+
+#	if defined(GL_COMPRESSED_RGBA_PVRTC_4BPPV1_IMG)
+		GL_COMPRESSED_RGBA_PVRTC_4BPPV1_IMG, // PVR_4bpp_RGBA,
+#	else
+		0,
+#	endif
+
+#	if defined(GL_COMPRESSED_SRGB_ALPHA_PVRTC_4BPPV1_EXT)
+		GL_COMPRESSED_SRGB_ALPHA_PVRTC_4BPPV1_EXT, // PVR_4bpp_sRGBA,
+#	else
+		0,
+#	endif
+	};
+
+	ET_SAMPLE_VALUE_FROM_MAP
+}
+
+uint32_t et::textureTargetValue(TextureTarget value)
+{
+	static const uint32_t valuesMap[TextureTarget_max] =
+	{
+#	if defined(GL_TEXTURE_1D)
+		GL_TEXTURE_1D,
+#	else
+		GL_TEXTURE_2D,
+#	endif
+		
+		GL_TEXTURE_2D,
+		
+		GL_TEXTURE_CUBE_MAP,
+	};
+	
+	ET_SAMPLE_VALUE_FROM_MAP
+}
+
+uint32_t et::dataTypeValue(DataType value)
+{
+	ET_ASSERT(value < DataType::max);
+
+	static const uint32_t valuesMap[DataType_max] =
+	{
+		GL_BYTE, // Char
+		GL_UNSIGNED_BYTE, // UnsignedChar
+		GL_SHORT, // Short
+		GL_UNSIGNED_SHORT, // UnsignedShort
+		GL_INT, // Int
+		GL_UNSIGNED_INT, // UnsignedInt
+		GL_HALF_FLOAT, // Half
+		GL_FLOAT, // Float
+		
+#	if defined(GL_DOUBLE)
+		GL_DOUBLE, // Double
+#	else
+		GL_FLOAT, // Float
+#	endif
+		
+		GL_UNSIGNED_SHORT_4_4_4_4, // UnsignedShort_4444
+		GL_UNSIGNED_SHORT_5_5_5_1, // UnsignedShort_5551
+		GL_UNSIGNED_SHORT_5_6_5, // UnsignedShort_565
+	};
+	
+	ET_SAMPLE_VALUE_FROM_MAP
+}
+
 std::string et::glErrorToString(uint32_t error)
 {
 	switch (error)
@@ -225,15 +494,7 @@ std::string et::glInternalFormatToString(int format)
 #if defined(GL_BGRA) && (GL_BGRA != GL_RGBA)
 		CASE_VALUE(GL_BGRA)
 #endif
-		
-#if defined (GL_LUMINANCE)
-		CASE_VALUE(GL_LUMINANCE)
-#endif
-		
-#if defined (GL_LUMINANCE_ALPHA)
-		CASE_VALUE(GL_LUMINANCE_ALPHA)
-#endif
-		
+			
 #if defined(GL_RGB8) && (GL_RGB8 != GL_RGB)
 		CASE_VALUE(GL_RGB8)
 #endif
@@ -241,15 +502,7 @@ std::string et::glInternalFormatToString(int format)
 #if defined(GL_RGBA8) && (GL_RGBA8 != GL_RGBA)
 		CASE_VALUE(GL_RGBA8)
 #endif
-		
-#if defined(GL_INTENSITY)
-		CASE_VALUE(GL_INTENSITY)
-		CASE_VALUE(GL_INTENSITY8)
-		CASE_VALUE(GL_INTENSITY16)
-		CASE_VALUE(GL_LUMINANCE8)
-		CASE_VALUE(GL_LUMINANCE16)
-#endif
-		
+			
 #if defined(GL_RGB16F)
 		CASE_VALUE(GL_RGB16F)
 #endif
@@ -257,7 +510,6 @@ std::string et::glInternalFormatToString(int format)
 #if defined(GL_RGBA16F)
 		CASE_VALUE(GL_RGBA16F)
 #endif
-		
 		
 #if defined(GL_R11F_G11F_B10F)
 		CASE_VALUE(GL_R11F_G11F_B10F)
@@ -436,7 +688,6 @@ void et::etUseProgram(uint32_t program)
 #endif
 }
 
-#if (ET_SUPPORT_VERTEX_ARRAY_OBJECTS)
 void et::etBindVertexArray(uint32_t arr)
 {
 #if !defined(ET_CONSOLE_APPLICATION)
@@ -448,23 +699,16 @@ void et::etBindVertexArray(uint32_t arr)
 #	endif
 #endif
 }
-#else
-void et::etBindVertexArray(uint32_t)
-{
-	log::warning("Call to glBindVertexArray without defined "
-		"GL_ARB_vertex_array_object or GL_OES_vertex_array_object");
-}
-#endif
 
 int32_t et::textureWrapValue(TextureWrap w)
 {
 	switch (w)
 	{
-		case TextureWrap_Repeat:
+		case TextureWrap::Repeat:
 			return GL_REPEAT;
-		case TextureWrap_ClampToEdge:
+		case TextureWrap::ClampToEdge:
 			return GL_CLAMP_TO_EDGE;
-		case TextureWrap_MirrorRepeat:
+		case TextureWrap::MirrorRepeat:
 			return GL_MIRRORED_REPEAT;
 		default:
 			ET_FAIL("Unrecognized texture wrap.");
@@ -477,17 +721,17 @@ int32_t et::textureFiltrationValue(TextureFiltration f)
 {
 	switch (f)
 	{
-		case TextureFiltration_Nearest:
+		case TextureFiltration::Nearest:
 			return GL_NEAREST;
-		case TextureFiltration_Linear:
+		case TextureFiltration::Linear:
 			return GL_LINEAR;
-		case TextureFiltration_NearestMipMapNearest:
+		case TextureFiltration::NearestMipMapNearest:
 			return GL_NEAREST_MIPMAP_NEAREST;
-		case TextureFiltration_NearestMipMapLinear:
+		case TextureFiltration::NearestMipMapLinear:
 			return GL_NEAREST_MIPMAP_LINEAR;
-		case TextureFiltration_LinearMipMapNearest:
+		case TextureFiltration::LinearMipMapNearest:
 			return GL_LINEAR_MIPMAP_NEAREST;
-		case TextureFiltration_LinearMipMapLinear:
+		case TextureFiltration::LinearMipMapLinear:
 			return GL_LINEAR_MIPMAP_LINEAR;
 		default:
 			ET_FAIL("Unrecognized texture filtration.");
@@ -500,11 +744,11 @@ uint32_t et::drawTypeValue(BufferDrawType t)
 {
 	switch (t)
 	{
-		case BufferDrawType_Static:
+		case BufferDrawType::Static:
 			return GL_STATIC_DRAW;
-		case BufferDrawType_Dynamic:
+		case BufferDrawType::Dynamic:
 			return GL_DYNAMIC_DRAW;
-		case BufferDrawType_Stream:
+		case BufferDrawType::Stream:
 			return GL_STREAM_DRAW;
 		default:
 			ET_FAIL("Unrecognized draw type");
@@ -515,8 +759,9 @@ uint32_t et::drawTypeValue(BufferDrawType t)
 
 uint32_t et::primitiveTypeValue(PrimitiveType t)
 {
-	ET_ASSERT((t >= 0) && (t <= PrimitiveType_max))
-	static const uint32_t conversion[PrimitiveType_max] =
+	ET_ASSERT((t >= PrimitiveType::Points) && (t <= PrimitiveType::max))
+	
+	static const uint32_t conversion[static_cast<uint32_t>(PrimitiveType::max)] =
 	{
 		GL_POINTS,
 		GL_LINES,
@@ -524,7 +769,8 @@ uint32_t et::primitiveTypeValue(PrimitiveType t)
 		GL_TRIANGLE_STRIP,
 		GL_LINE_STRIP
 	};
-	return conversion[t];
+	
+	return conversion[static_cast<uint32_t>(t)];
 }
 
 #if (ET_OPENGLES)
@@ -586,7 +832,7 @@ void et::etTexImage2D(uint32_t target, int level, int internalformat, GLsizei wi
 #	if (ET_DEBUG)
 	checkOpenGLError("glTexImage2D(%s, %d, %s, %d, %d, %d, %s, %s, %, 0x%08X)",
 		glTexTargetToString(target).c_str(), level, glInternalFormatToString(internalformat).c_str(),
-		width, height, border, glInternalFormatToString(static_cast<int32_t>(format)).c_str(), glTypeToString(type).c_str(),
+		width, height, border, glInternalFormatToString(format).c_str(), glTypeToString(type).c_str(),
 		pixels);
 #	endif
 #endif
@@ -619,104 +865,6 @@ void et::validateExtensions()
 	ET_VALIDATE_GLFUNC_EXT(glGenerateMipmap);
 	ET_VALIDATE_GLFUNC_EXT(glBlitFramebuffer);
 	ET_VALIDATE_GLFUNC_EXT(glRenderbufferStorageMultisample);
-}
-
-size_t et::bitsPerPixelForType(uint32_t type)
-{
-	switch (type)
-	{
-		case GL_UNSIGNED_BYTE:
-		case GL_BYTE:
-			return 8;
-			
-		case GL_UNSIGNED_SHORT_5_6_5:
-		case GL_UNSIGNED_SHORT_4_4_4_4:
-		case GL_UNSIGNED_SHORT_5_5_5_1:
-		case GL_UNSIGNED_SHORT:
-		case GL_SHORT:
-			return 16;
-
-		case GL_UNSIGNED_INT:
-		case GL_INT:
-			return 32;
-			
-		case GL_FLOAT:
-			return 32;
-			
-		case GL_HALF_FLOAT:
-			return 16;
-			
-		default:
-			ET_FAIL("Not yet implemented for this type.");
-			return 0;
-	}
-}
-
-size_t et::channelsForTextureFormat(uint32_t internalFormat)
-{
-	switch (internalFormat)
-	{
-	case GL_DEPTH_COMPONENT:
-	case GL_DEPTH_COMPONENT16:
-	case GL_ONE:
-	case GL_RED:
-		return 1;
-			
-#if defined(GL_DEPTH_COMPONENT24)
-	case GL_DEPTH_COMPONENT24:
-		return 1;
-#endif
-			
-#if defined(GL_DEPTH_COMPONENT32)
-	case GL_DEPTH_COMPONENT32:
-		return 1;
-#endif
-			
-#if defined(GL_DEPTH_COMPONENT32F)
-	case GL_DEPTH_COMPONENT32F:
-		return 1;
-#endif
-			
-#if defined(GL_LUMINANCE)
-	case GL_LUMINANCE:
-		return 1;
-#endif
-			
-#if defined(GL_R8)
-	case GL_R8:
-		return 1;
-#endif
-
-#if defined(GL_R32F)
-	case GL_R32F:
-		return 1;
-#endif
-			
-#if defined(GL_RG32F)
-	case GL_RG32F:
-		return 2;
-#endif
-
-#if defined(GL_RGB32F)
-	case GL_RGB32F:
-		return 3;
-#endif
-			
-#if defined(GL_RGBA32F)
-	case GL_RGBA32F:
-		return 4;
-#endif
-			
-	case GL_RGB:
-		return 3;
-
-	case GL_RGBA:
-		return 4;
-			
-	default:
-		ET_FAIL_FMT("Channels not defined for format %u", internalFormat);
-		return 0;
-	}
 }
 
 const uint32_t* et::drawBufferTargets()
@@ -775,112 +923,4 @@ uint32_t et::drawBufferTarget(size_t i)
 {
 	ET_ASSERT(i < MaxDrawBuffers)
 	return *(drawBufferTargets() + i);
-}
-
-
-size_t et::bitsPerPixelForTextureFormat(uint32_t internalFormat, uint32_t type)
-{
-	switch (internalFormat)
-	{
-		case GL_RGB:
-		{
-			switch (type)
-			{
-				case GL_UNSIGNED_SHORT_5_6_5:
-					return bitsPerPixelForType(type);
-					
-				default:
-					return 3 * bitsPerPixelForType(type);
-			}
-		}
-			
-		case GL_RGBA:
-		{
-			switch (type)
-			{
-				case GL_UNSIGNED_SHORT_5_5_5_1:
-				case GL_UNSIGNED_SHORT_4_4_4_4:
-					return bitsPerPixelForType(type);
-					
-				default:
-					return 4 * bitsPerPixelForType(type);
-			}
-		}
-			
-		case GL_DEPTH_COMPONENT:
-		case GL_DEPTH_COMPONENT16:
-		case GL_DEPTH_COMPONENT24:
-		case GL_DEPTH_COMPONENT32:
-			return bitsPerPixelForType(type);
-
-		case GL_RGB32F:
-			return 3 * bitsPerPixelForType(type);
-			
-		case GL_RGBA32F:
-			return 4 * bitsPerPixelForType(type);
-
-#if defined(GL_DEPTH_COMPONENT32F)
-		case GL_DEPTH_COMPONENT32F:
-			return bitsPerPixelForType(type);
-#endif
-			
-#if defined(GL_R8)
-		case GL_R8:
-			return bitsPerPixelForType(type);
-#endif
-			
-#if defined(GL_RED)
-		case GL_RED:
-			return bitsPerPixelForType(type);
-#endif
-			
-#if defined(GL_RG)
-		case GL_RG:
-			return 2 * bitsPerPixelForType(type);
-#endif
-			
-#if defined(GL_RG16F)
-		case GL_RG16F:
-			return 2 * bitsPerPixelForType(type);
-#endif
-			
-#if defined(GL_RGB16F)
-		case GL_RGB16F:
-			return 3 * bitsPerPixelForType(type);
-#endif
-			
-#if defined(GL_RGBA16F)
-		case GL_RGBA16F:
-			return 4 * bitsPerPixelForType(type);
-#endif
-			
-#if defined(GL_R32F)
-		case GL_R32F:
-			return bitsPerPixelForType(type);
-#endif
-
-#if defined(GL_RG32F)
-		case GL_RG32F:
-			return 2 * bitsPerPixelForType(type);
-#endif
-			
-#if defined(GL_RGB565)
-		case GL_RGB565:
-			return 2;
-#endif
-
-#if defined(GL_LUMINANCE)
-		case GL_LUMINANCE:
-			return bitsPerPixelForType(type);
-#endif
-
-#if defined(GL_LUMINANCE_ALPHA)
-		case GL_LUMINANCE_ALPHA:
-			return bitsPerPixelForType(type);
-#endif
-			
-		default:
-			ET_FAIL("Not yet implemented for this format");
-			return 0;
-	}
 }

@@ -68,7 +68,7 @@ namespace et
 		AtomicBool _mapped;
 		size_t _dataSize = 0;
 		size_t _sourceTag = 0;
-		BufferDrawType _drawType = BufferDrawType_Static;
+		BufferDrawType _drawType = BufferDrawType::Static;
 	};
 
 }

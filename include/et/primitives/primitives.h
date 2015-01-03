@@ -10,7 +10,6 @@
 #include <et/core/containers.h>
 #include <et/vertexbuffer/indexarray.h>
 #include <et/vertexbuffer/vertexarray.h>
-#include <et/apiobjects/vertexbuffer.h>
 
 namespace et
 {
@@ -18,19 +17,19 @@ namespace et
 	{
 		size_t primitiveCountForIndexCount(size_t numIndexes, PrimitiveType geometryType);
 		
-		IndexType indexCountForRegularMesh(const vec2i& meshSize, PrimitiveType geometryType);
+		uint32_t indexCountForRegularMesh(const vec2i& meshSize, PrimitiveType geometryType);
 
 		/*
 		 * Index array stuff
 		 */
-		IndexType buildTrianglesIndexes(IndexArray& buffer, const vec2i& dim,
-			IndexType vertexOffset, IndexType indexOffset);
-		IndexType buildTriangleStripIndexes(IndexArray& buffer, const vec2i& dim,
-			IndexType vertexOffset, IndexType indexOffset);
-		IndexType buildTrianglesIndexes(IndexArray::Pointer buffer, const vec2i& dim,
-			IndexType vertexOffset, IndexType indexOffset);
-		IndexType buildTriangleStripIndexes(IndexArray::Pointer buffer, const vec2i& dim,
-			IndexType vertexOffset, IndexType indexOffset);
+		uint32_t buildTrianglesIndexes(IndexArray& buffer, const vec2i& dim,
+			uint32_t vertexOffset, uint32_t indexOffset);
+		uint32_t buildTriangleStripIndexes(IndexArray& buffer, const vec2i& dim,
+			uint32_t vertexOffset, uint32_t indexOffset);
+		uint32_t buildTrianglesIndexes(IndexArray::Pointer buffer, const vec2i& dim,
+			uint32_t vertexOffset, uint32_t indexOffset);
+		uint32_t buildTriangleStripIndexes(IndexArray::Pointer buffer, const vec2i& dim,
+			uint32_t vertexOffset, uint32_t indexOffset);
 
 		void createPhotonMap(VertexArray::Pointer data, const vec2i& density);
 
@@ -55,10 +54,10 @@ namespace et
 			size_t first, size_t last);
 		
 		void calculateTangents(VertexArray::Pointer data, const IndexArray::Pointer& buffer,
-			IndexType first, IndexType last);
+			uint32_t first, uint32_t last);
 		
 		void smoothTangents(VertexArray::Pointer data, const IndexArray::Pointer& buffer,
-			IndexType first, IndexType last);
+			uint32_t first, uint32_t last);
 		
 		void createCube(VertexArray::Pointer data, float radius, const vec3& center = vec3(0.0f));
 		void createOctahedron(VertexArray::Pointer data, float radius);

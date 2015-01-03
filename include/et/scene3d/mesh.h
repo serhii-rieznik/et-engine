@@ -26,7 +26,7 @@ namespace et
 			Mesh(const std::string& name = defaultMeshName, Element* parent = 0);
 
 			Mesh(const std::string& name, const VertexArrayObject& ib, const Material::Pointer& material,
-				IndexType startIndex, size_t numIndexes, Element* parent = 0);
+				uint32_t startIndex, size_t numIndexes, Element* parent = 0);
 
 			ElementType type() const 
 				{ return ElementType_Mesh; }
@@ -42,8 +42,8 @@ namespace et
 			IndexBuffer& indexBuffer();
 			const IndexBuffer& indexBuffer() const;
 
-			IndexType startIndex() const;
-			void setStartIndex(IndexType index);
+			uint32_t startIndex() const;
+			void setStartIndex(uint32_t index);
 			
 			size_t numIndexes() const;
 			virtual void setNumIndexes(size_t num);
@@ -76,7 +76,7 @@ namespace et
 		private:
 			VertexArrayObject _vao;
 			LodMap _lods;
-			IndexType _startIndex;
+			uint32_t _startIndex;
 			size_t _numIndexes;
 			size_t _selectedLod;
 			std::string _vaoName;

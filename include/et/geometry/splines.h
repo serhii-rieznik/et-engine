@@ -213,5 +213,5 @@ namespace et
 		bool _closedTrajectory;
 	};
 
-	#include <et/geometry/splines.inl.h>
+#	include <et/geometry/splines.inl.h>
 }

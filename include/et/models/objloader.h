@@ -57,12 +57,12 @@ namespace et
 		struct OBJMeshIndexBounds
 		{
 			std::string name;
-			IndexType start;
+			uint32_t start;
 			size_t count;
 			et::vec3 center;
 			s3d::Material::Pointer material;
 
-			OBJMeshIndexBounds(const std::string& n, IndexType s, size_t c, s3d::Material::Pointer m, const vec3& aCenter) :
+			OBJMeshIndexBounds(const std::string& n, uint32_t s, size_t c, s3d::Material::Pointer m, const vec3& aCenter) :
 				name(n), start(s), count(c), material(m), center(aCenter) { }
 		};
 		typedef std::vector<OBJMeshIndexBounds> OBJMeshIndexBoundsList;

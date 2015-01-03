@@ -51,16 +51,17 @@ et::s3d::Scene::Pointer SceneLoader::loadFromFile(const std::string& fileName)
 		{
 			auto decl = va->decl();
 			
-			if (!decl.has(Usage_Tangent))
+			if (!decl.has(VertexAttributeUsage::Tangent))
 			{
-				decl.push_back(Usage_Tangent, Type_Vec3);
+				decl.push_back(VertexAttributeUsage::Tangent, VertexAttributeType::Vec3);
 				
 				VertexArray::Pointer updated = VertexArray::Pointer::create(decl, va->size());
 				
 				for (auto& c : va->chunks())
 					c->copyTo(updated->chunk(c->usage()).reference());
 				
-				primitives::calculateTangents(updated, storage->indexArray(), 0, IndexType(storage->indexArray()->primitivesCount()));
+				primitives::calculateTangents(updated, storage->indexArray(), 0,
+					static_cast<uint32_t>(storage->indexArray()->primitivesCount()));
 				
 				for (s3d::Mesh::Pointer mesh : meshes)
 				{
@@ -69,7 +70,7 @@ et::s3d::Scene::Pointer SceneLoader::loadFromFile(const std::string& fileName)
 					if (vao.valid())
 					{
 						_rc->renderState().bindVertexArray(vao);
-						vao->setVertexBuffer(_rc->vertexBufferFactory().createVertexBuffer(va->name(), updated, BufferDrawType_Static));
+						vao->setVertexBuffer(_rc->vertexBufferFactory().createVertexBuffer(va->name(), updated, BufferDrawType::Static));
 					}
 				}
 				

@@ -14,7 +14,7 @@
 using namespace et;
 using namespace rt;
 
-const vec2i frameSize = vec2i(1280, 800) / 2; // vec2i(512, 320);
+const vec2i frameSize = vec2i(1280, 800) / 2;
 
 const vec2i rectSize = vec2i(20);
 
@@ -81,18 +81,20 @@ void MainController::applicationDidLoad(et::RenderContext* rc)
 		_textureData[index].z = static_cast<unsigned char>(255.0f * clamp(color.z, 0.0f, 1.0f));
 	};
 	
-	_result = rc->textureFactory().genTexture(GL_TEXTURE_2D, GL_RGBA, frameSize, GL_RGBA, GL_UNSIGNED_BYTE,
-		BinaryDataStorage(reinterpret_cast<unsigned char*>(_textureData.binary()), _textureData.dataSize()), "result-texture");
+	BinaryDataStorage textureData(reinterpret_cast<unsigned char*>(_textureData.binary()), _textureData.dataSize());
+	_result = rc->textureFactory().genTexture(TextureTarget::Texture_2D, TextureFormat::RGBA8, frameSize,
+		TextureFormat::RGBA, DataType::UnsignedChar, textureData, "result-texture");
 	
 	_cameraAngles.updated.connect([this]()
 	{
-		_scene.camera.lookAt(4.0f * fromSpherical(_cameraAngles.value().y, _cameraAngles.value().x), vec3(0.0f, 1.0f, 0.0f));
+		vec3 origin = 60.0f * fromSpherical(_cameraAngles.value().y, _cameraAngles.value().x);
+		_scene.camera.lookAt(origin, 5.0f * unitY);
 		
 		if (!_enableGPURaytracing && (_scene.options.bounces == _previewBounces))
 			startCPUTracing();
 	});
 	
-	_cameraAngles.setTargetValue(vec2(HALF_PI, 0.0f));
+	_cameraAngles.setTargetValue(vec2(HALF_PI + DEG_30, 37.5f * TO_RADIANS));
 	_cameraAngles.finishInterpolation();
 	_cameraAngles.run();
 	_cameraAngles.updated.invoke();
@@ -173,22 +175,6 @@ void MainController::applicationWillResizeContext(const et::vec2i& sz)
 
 void MainController::performRender(et::RenderContext* rc)
 {
-	/*
-	rc->renderState().bindTexture(0, _noise);
-	rc->renderState().bindProgram(_mainProgram);
-	
-	_mainProgram->setCameraProperties(_scene.camera);
-	
-	_mainProgram->setUniform("scale", _scale);
-	_mainProgram->setUniform("offset", _offset);
-	_mainProgram->setUniform("mModelViewProjectionInverse", _scene.camera.inverseModelViewProjectionMatrix());
-	
-	_mainProgram->setUniform("maxBounces", _scene.options.bounces);
-	_mainProgram->setUniform("maxSamples", _scene.options.samples);
-	_mainProgram->setUniform("exposure", _scene.options.exposure);
-	
-	rc->renderer()->fullscreenPass();
-	*/
 }
 
 void MainController::render(et::RenderContext* rc)
@@ -319,6 +305,6 @@ void MainController::renderFinished()
 	std::string fn = application().environment().applicationDocumentsFolder() + "result (" +
 		renderTime + " sec, " + intToStr(_scene.options.samples) + " samples per pixel).png";
 	
-	ImageWriter::writeImageToFile(fn, BinaryDataStorage(reinterpret_cast<unsigned char*>(_textureData.binary()),
+	writeImageToFile(fn, BinaryDataStorage(reinterpret_cast<unsigned char*>(_textureData.binary()),
 		_textureData.dataSize()), frameSize, 4, 8, ImageFormat_PNG, true);
 }

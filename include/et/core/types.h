@@ -9,9 +9,9 @@
 
 namespace et
 {
-	typedef unsigned int IndexType;
-	typedef unsigned short ShortIndexType;
-	typedef unsigned char SmallIndexType;
+	typedef unsigned int uint32_t;
+	typedef unsigned short uint16_t;
+	typedef unsigned char uint8_t;
 
-	static const IndexType InvalidIndex = static_cast<IndexType>(-1);
+	static const uint32_t InvalidIndex = static_cast<uint32_t>(-1);
 }

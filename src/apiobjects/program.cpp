@@ -5,6 +5,7 @@
  *
  */
 
+#include <et/opengl/opengl.h>
 #include <et/app/application.h>
 #include <et/camera/camera.h>
 #include <et/rendering/rendercontext.h>
@@ -49,7 +50,7 @@ Program::~Program()
 #endif
 }
 
-UniformMap::const_iterator Program::findUniform(const std::string& name) const
+Program::UniformMap::const_iterator Program::findUniform(const std::string& name) const
 {
 	ET_ASSERT(loaded());
 	return _uniforms.find(name);
@@ -71,12 +72,12 @@ uint32_t Program::getUniformType(const std::string& uniform) const
 	return (i == _uniforms.end()) ? 0 : i->second.type;
 }
 
-ProgramUniform Program::getUniform(const std::string& uniform) const
+Program::Uniform Program::getUniform(const std::string& uniform) const
 {
 	ET_ASSERT(loaded());
 
 	auto i = findUniform(uniform);
-	return (i == _uniforms.end()) ? ProgramUniform() : i->second;
+	return (i == _uniforms.end()) ? Program::Uniform() : i->second;
 }
 
 void Program::setModelViewMatrix(const mat4& m, bool forced)
@@ -260,17 +261,12 @@ void Program::buildProgram(const std::string& vertex_source, const std::string& 
 			StringDataStorage name(maxNameLength, 0);
 			glGetActiveAttrib(_glID, i, maxNameLength, &nameLength, &attribSize, &attribType, name.data());
 
-			VertexAttributeUsage v = stringToVertexAttribute(name.data());
-
-			if (v != Usage_Undefined)
-				_attributes.push_back(ProgramAttrib(name.data(), v));
-			else
-				log::warning("Undefined vertex attribute: %s", name.data());
+			_attributes.emplace_back(name.data(), stringToVertexAttribute(name.data()));
 		}
 
 		for (auto& i : _attributes)
 		{
-			if ((i.usage != Usage_InstanceId) && (i.usage != Usage_InstanceIdExt))
+			if ((i.usage != VertexAttributeUsage::InstanceId) && (i.usage != VertexAttributeUsage::InstanceIdExt))
 			{
 				glBindAttribLocation(_glID, static_cast<GLuint>(i.usage), i.name.c_str());
 				checkOpenGLError("glBindAttribLocation - %s", i.name.c_str());
@@ -312,7 +308,7 @@ void Program::buildProgram(const std::string& vertex_source, const std::string& 
 				int uSize = 0;
 				GLsizei uLenght = 0;
 				StringDataStorage name(maxNameLength, 0);
-				ProgramUniform P;
+				Program::Uniform P;
 				glGetActiveUniform(_glID, i, maxNameLength, &uLenght, &uSize, &P.type, name.binary());
 				P.location = glGetUniformLocation(_glID, name.binary());
 				_uniforms[name.binary()] = P;

@@ -20,10 +20,10 @@ namespace et
 		
 		~IndexBufferData();
 
-		uint32_t primitiveType() const
+		PrimitiveType primitiveType() const
 			{ return _primitiveType; }
 		
-		uint32_t dataType() const
+		DataType dataType() const
 			{ return _dataType; }
 
 		void* indexOffset(size_t offset) const;
@@ -55,9 +55,9 @@ namespace et
 		size_t _size = 0;
 		size_t _sourceTag = 0;
 		uint32_t _indexBuffer = 0;
-		uint32_t _dataType = 0;
-		uint32_t _primitiveType = 0;
-		IndexArrayFormat _format = IndexArrayFormat_16bit;
-		BufferDrawType _drawType = BufferDrawType_Static;
+		DataType _dataType = DataType::UnsignedChar;
+		PrimitiveType _primitiveType = PrimitiveType::Points;
+		IndexArrayFormat _format = IndexArrayFormat::Format_16bit;
+		BufferDrawType _drawType = BufferDrawType::Static;
 	};
 }

@@ -23,7 +23,7 @@ Mesh::Mesh(const std::string& name, Element* parent) : RenderableElement(name, p
 }
 
 Mesh::Mesh(const std::string& name, const VertexArrayObject& vao, const Material::Pointer& material,
-	IndexType startIndex, size_t numIndexes, Element* parent) : RenderableElement(name, parent), _vao(vao),
+	uint32_t startIndex, size_t numIndexes, Element* parent) : RenderableElement(name, parent), _vao(vao),
 	_startIndex(startIndex), _numIndexes(numIndexes), _selectedLod(0)
 {
 	setMaterial(material);
@@ -163,7 +163,7 @@ const IndexBuffer& Mesh::indexBuffer() const
 	return vao.valid() ? vao->indexBuffer() : _emptyIndexBuffer; 
 }
 
-IndexType Mesh::startIndex() const 
+uint32_t Mesh::startIndex() const 
 {
 	return currentLod()->_startIndex; 
 }
@@ -173,7 +173,7 @@ size_t Mesh::numIndexes() const
 	return currentLod()->_numIndexes; 
 }
 
-void Mesh::setStartIndex(IndexType index)
+void Mesh::setStartIndex(uint32_t index)
 {
 	currentLod()->_startIndex = index; 
 }

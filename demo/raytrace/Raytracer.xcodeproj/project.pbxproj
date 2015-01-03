@@ -10,11 +10,12 @@
 		A512D4641A018544001D92E4 /* et.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A512D4621A018544001D92E4 /* et.cpp */; };
 		A512D4651A018544001D92E4 /* memoryallocator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A512D4631A018544001D92E4 /* memoryallocator.cpp */; };
 		A512D4671A0186A9001D92E4 /* textures in CopyFiles */ = {isa = PBXBuildFile; fileRef = A512D4661A018656001D92E4 /* textures */; };
-		A531F00D1A194F140062DFEC /* SceneObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A531F00B1A194F140062DFEC /* SceneObject.cpp */; };
-		A531F0171A194F280062DFEC /* Raytracer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A531F00F1A194F280062DFEC /* Raytracer.cpp */; };
-		A531F0181A194F280062DFEC /* RaytraceScene.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A531F0111A194F280062DFEC /* RaytraceScene.cpp */; };
-		A531F0191A194F280062DFEC /* RaytraceThread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A531F0131A194F280062DFEC /* RaytraceThread.cpp */; };
-		A531F01D1A194FD20062DFEC /* SceneIntersection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A531F01B1A194FD20062DFEC /* SceneIntersection.cpp */; };
+		A5182B531A535D4D00078F2C /* tgaloader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5182B521A535D4D00078F2C /* tgaloader.cpp */; };
+		A5182B5F1A53638900078F2C /* Raytracer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5182B541A53638900078F2C /* Raytracer.cpp */; };
+		A5182B601A53638900078F2C /* RaytraceScene.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5182B561A53638900078F2C /* RaytraceScene.cpp */; };
+		A5182B611A53638900078F2C /* RaytraceThread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5182B581A53638900078F2C /* RaytraceThread.cpp */; };
+		A5182B621A53638900078F2C /* SceneIntersection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5182B5A1A53638900078F2C /* SceneIntersection.cpp */; };
+		A5182B631A53638900078F2C /* SceneObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5182B5D1A53638900078F2C /* SceneObject.cpp */; };
 		A5657EB61A13FDBE00C39562 /* objloader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5657EB41A13FDBE00C39562 /* objloader.cpp */; };
 		A5D3D36C1955B14000E621A7 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5D3D36B1955B14000E621A7 /* main.cpp */; };
 		A5D3D3751955B2A800E621A7 /* MainController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5D3D3741955B2A800E621A7 /* MainController.cpp */; };
@@ -72,7 +73,6 @@
 		A5FE197D199A272F00825A24 /* memory.apple.mm in Sources */ = {isa = PBXBuildFile; fileRef = A5FE1921199A272F00825A24 /* memory.apple.mm */; };
 		A5FE197E199A272F00825A24 /* tools.apple.mm in Sources */ = {isa = PBXBuildFile; fileRef = A5FE1922199A272F00825A24 /* tools.apple.mm */; };
 		A5FE197F199A272F00825A24 /* application.mac.mm in Sources */ = {isa = PBXBuildFile; fileRef = A5FE1924199A272F00825A24 /* application.mac.mm */; };
-		A5FE1980199A272F00825A24 /* charactergenerator.mac.mm in Sources */ = {isa = PBXBuildFile; fileRef = A5FE1925199A272F00825A24 /* charactergenerator.mac.mm */; };
 		A5FE1981199A272F00825A24 /* input.mac.mm in Sources */ = {isa = PBXBuildFile; fileRef = A5FE1926199A272F00825A24 /* input.mac.mm */; };
 		A5FE1982199A272F00825A24 /* mac.mm in Sources */ = {isa = PBXBuildFile; fileRef = A5FE1927199A272F00825A24 /* mac.mm */; };
 		A5FE1983199A272F00825A24 /* platformtools.mac.mm in Sources */ = {isa = PBXBuildFile; fileRef = A5FE1928199A272F00825A24 /* platformtools.mac.mm */; };
@@ -133,19 +133,18 @@
 		A512D4621A018544001D92E4 /* et.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = et.cpp; sourceTree = "<group>"; };
 		A512D4631A018544001D92E4 /* memoryallocator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = memoryallocator.cpp; sourceTree = "<group>"; };
 		A512D4661A018656001D92E4 /* textures */ = {isa = PBXFileReference; lastKnownFileType = folder; name = textures; path = Data/textures; sourceTree = "<group>"; };
-		A531F00B1A194F140062DFEC /* SceneObject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SceneObject.cpp; path = raytracer/SceneObject.cpp; sourceTree = "<group>"; };
-		A531F00C1A194F140062DFEC /* SceneObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SceneObject.h; path = raytracer/SceneObject.h; sourceTree = "<group>"; };
-		A531F00F1A194F280062DFEC /* Raytracer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Raytracer.cpp; sourceTree = "<group>"; };
-		A531F0101A194F280062DFEC /* Raytracer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Raytracer.h; sourceTree = "<group>"; };
-		A531F0111A194F280062DFEC /* RaytraceScene.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = RaytraceScene.cpp; sourceTree = "<group>"; };
-		A531F0121A194F280062DFEC /* RaytraceScene.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RaytraceScene.h; sourceTree = "<group>"; };
-		A531F0131A194F280062DFEC /* RaytraceThread.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = RaytraceThread.cpp; sourceTree = "<group>"; };
-		A531F0141A194F280062DFEC /* RaytraceThread.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RaytraceThread.h; sourceTree = "<group>"; };
-		A531F0151A194F280062DFEC /* SceneObject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SceneObject.cpp; sourceTree = "<group>"; };
-		A531F0161A194F280062DFEC /* SceneObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SceneObject.h; sourceTree = "<group>"; };
-		A531F01B1A194FD20062DFEC /* SceneIntersection.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SceneIntersection.cpp; sourceTree = "<group>"; };
-		A531F01C1A194FD20062DFEC /* SceneIntersection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SceneIntersection.h; sourceTree = "<group>"; };
-		A531F01E1A19509C0062DFEC /* SceneMaterial.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SceneMaterial.h; sourceTree = "<group>"; };
+		A5182B521A535D4D00078F2C /* tgaloader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = tgaloader.cpp; sourceTree = "<group>"; };
+		A5182B541A53638900078F2C /* Raytracer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Raytracer.cpp; sourceTree = "<group>"; };
+		A5182B551A53638900078F2C /* Raytracer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Raytracer.h; sourceTree = "<group>"; };
+		A5182B561A53638900078F2C /* RaytraceScene.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = RaytraceScene.cpp; sourceTree = "<group>"; };
+		A5182B571A53638900078F2C /* RaytraceScene.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RaytraceScene.h; sourceTree = "<group>"; };
+		A5182B581A53638900078F2C /* RaytraceThread.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = RaytraceThread.cpp; sourceTree = "<group>"; };
+		A5182B591A53638900078F2C /* RaytraceThread.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RaytraceThread.h; sourceTree = "<group>"; };
+		A5182B5A1A53638900078F2C /* SceneIntersection.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SceneIntersection.cpp; sourceTree = "<group>"; };
+		A5182B5B1A53638900078F2C /* SceneIntersection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SceneIntersection.h; sourceTree = "<group>"; };
+		A5182B5C1A53638900078F2C /* SceneMaterial.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SceneMaterial.h; sourceTree = "<group>"; };
+		A5182B5D1A53638900078F2C /* SceneObject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SceneObject.cpp; sourceTree = "<group>"; };
+		A5182B5E1A53638900078F2C /* SceneObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SceneObject.h; sourceTree = "<group>"; };
 		A531F0231A1983F80062DFEC /* equations.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = equations.h; sourceTree = "<group>"; };
 		A531F0241A1983F80062DFEC /* geometry.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = geometry.h; sourceTree = "<group>"; };
 		A531F0251A1983F80062DFEC /* line2d.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = line2d.h; sourceTree = "<group>"; };
@@ -261,7 +260,6 @@
 		A5FE1921199A272F00825A24 /* memory.apple.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = memory.apple.mm; sourceTree = "<group>"; };
 		A5FE1922199A272F00825A24 /* tools.apple.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = tools.apple.mm; sourceTree = "<group>"; };
 		A5FE1924199A272F00825A24 /* application.mac.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = application.mac.mm; sourceTree = "<group>"; };
-		A5FE1925199A272F00825A24 /* charactergenerator.mac.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = charactergenerator.mac.mm; sourceTree = "<group>"; };
 		A5FE1926199A272F00825A24 /* input.mac.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = input.mac.mm; sourceTree = "<group>"; };
 		A5FE1927199A272F00825A24 /* mac.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = mac.mm; sourceTree = "<group>"; };
 		A5FE1928199A272F00825A24 /* platformtools.mac.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = platformtools.mac.mm; sourceTree = "<group>"; };
@@ -323,17 +321,17 @@
 		A531F00E1A194F280062DFEC /* raytracer */ = {
 			isa = PBXGroup;
 			children = (
-				A531F0121A194F280062DFEC /* RaytraceScene.h */,
-				A531F0111A194F280062DFEC /* RaytraceScene.cpp */,
-				A531F0101A194F280062DFEC /* Raytracer.h */,
-				A531F00F1A194F280062DFEC /* Raytracer.cpp */,
-				A531F0141A194F280062DFEC /* RaytraceThread.h */,
-				A531F0131A194F280062DFEC /* RaytraceThread.cpp */,
-				A531F0161A194F280062DFEC /* SceneObject.h */,
-				A531F0151A194F280062DFEC /* SceneObject.cpp */,
-				A531F01C1A194FD20062DFEC /* SceneIntersection.h */,
-				A531F01B1A194FD20062DFEC /* SceneIntersection.cpp */,
-				A531F01E1A19509C0062DFEC /* SceneMaterial.h */,
+				A5182B541A53638900078F2C /* Raytracer.cpp */,
+				A5182B551A53638900078F2C /* Raytracer.h */,
+				A5182B561A53638900078F2C /* RaytraceScene.cpp */,
+				A5182B571A53638900078F2C /* RaytraceScene.h */,
+				A5182B581A53638900078F2C /* RaytraceThread.cpp */,
+				A5182B591A53638900078F2C /* RaytraceThread.h */,
+				A5182B5A1A53638900078F2C /* SceneIntersection.cpp */,
+				A5182B5B1A53638900078F2C /* SceneIntersection.h */,
+				A5182B5C1A53638900078F2C /* SceneMaterial.h */,
+				A5182B5D1A53638900078F2C /* SceneObject.cpp */,
+				A5182B5E1A53638900078F2C /* SceneObject.h */,
 			);
 			path = raytracer;
 			sourceTree = "<group>";
@@ -479,12 +477,10 @@
 			isa = PBXGroup;
 			children = (
 				A531F00E1A194F280062DFEC /* raytracer */,
-				A5D3D36B1955B14000E621A7 /* main.cpp */,
 				A5D3D3731955B29E00E621A7 /* MainController.h */,
 				A5D3D3741955B2A800E621A7 /* MainController.cpp */,
+				A5D3D36B1955B14000E621A7 /* main.cpp */,
 				A5D3D4E61955B62500E621A7 /* Info.plist */,
-				A531F00B1A194F140062DFEC /* SceneObject.cpp */,
-				A531F00C1A194F140062DFEC /* SceneObject.h */,
 			);
 			name = source;
 			path = Raytracer;
@@ -595,6 +591,7 @@
 		A5FE1911199A272F00825A24 /* imaging */ = {
 			isa = PBXGroup;
 			children = (
+				A5182B521A535D4D00078F2C /* tgaloader.cpp */,
 				A5FE1912199A272F00825A24 /* ddsloader.cpp */,
 				A5FE1913199A272F00825A24 /* hdrloader.cpp */,
 				A5FE1914199A272F00825A24 /* imageoperations.cpp */,
@@ -635,7 +632,6 @@
 			isa = PBXGroup;
 			children = (
 				A5FE1924199A272F00825A24 /* application.mac.mm */,
-				A5FE1925199A272F00825A24 /* charactergenerator.mac.mm */,
 				A5FE1926199A272F00825A24 /* input.mac.mm */,
 				A5FE1927199A272F00825A24 /* mac.mm */,
 				A5FE1928199A272F00825A24 /* platformtools.mac.mm */,
@@ -828,7 +824,6 @@
 				A5FE198F199A272F00825A24 /* rendering.cpp in Sources */,
 				A5FE1973199A272F00825A24 /* imagewriter.cpp in Sources */,
 				A5FE1983199A272F00825A24 /* platformtools.mac.mm in Sources */,
-				A531F0171A194F280062DFEC /* Raytracer.cpp in Sources */,
 				A5FE195F199A272F00825A24 /* events.cpp in Sources */,
 				A5FE195C199A272F00825A24 /* appevironment.cpp in Sources */,
 				A5FE1989199A272F00825A24 /* thread.unix.cpp in Sources */,
@@ -843,7 +838,6 @@
 				A5FE199E199A272F00825A24 /* sequence.cpp in Sources */,
 				A5FE1965199A272F00825A24 /* collision.cpp in Sources */,
 				A5FE196B199A272F00825A24 /* stream.cpp in Sources */,
-				A531F0191A194F280062DFEC /* RaytraceThread.cpp in Sources */,
 				A5FE1977199A272F00825A24 /* pvrloader.cpp in Sources */,
 				A5FE1987199A272F00825A24 /* criticalsection.unix.cpp in Sources */,
 				A5FE199D199A272F00825A24 /* notifytimer.cpp in Sources */,
@@ -864,19 +858,20 @@
 				A5FE1984199A272F00825A24 /* rendercontext.mac.mm in Sources */,
 				A5FE1985199A272F00825A24 /* sound.openal.mac.mm in Sources */,
 				A5FE1951199A272F00825A24 /* framebuffer.cpp in Sources */,
-				A531F00D1A194F140062DFEC /* SceneObject.cpp in Sources */,
+				A5182B631A53638900078F2C /* SceneObject.cpp in Sources */,
 				A5FE195A199A272F00825A24 /* vertexbufferdata.cpp in Sources */,
 				A5FE1960199A272F00825A24 /* invocation.cpp in Sources */,
+				A5182B601A53638900078F2C /* RaytraceScene.cpp in Sources */,
 				A5FE198A199A272F00825A24 /* threading.unix.cpp in Sources */,
 				A5FE197B199A272F00825A24 /* locale.apple.mm in Sources */,
-				A531F0181A194F280062DFEC /* RaytraceScene.cpp in Sources */,
 				A5FE1966199A272F00825A24 /* base64.cpp in Sources */,
 				A5FE1969199A272F00825A24 /* objectscache.cpp in Sources */,
+				A5182B611A53638900078F2C /* RaytraceThread.cpp in Sources */,
 				A5FE198B199A272F00825A24 /* tools.unix.cpp in Sources */,
 				A5FE195B199A272F00825A24 /* vertexbufferfactory.cpp in Sources */,
+				A5182B531A535D4D00078F2C /* tgaloader.cpp in Sources */,
 				A5FE1976199A272F00825A24 /* pvrdecompressor.cpp in Sources */,
 				A5FE1990199A272F00825A24 /* renderstate.cpp in Sources */,
-				A531F01D1A194FD20062DFEC /* SceneIntersection.cpp in Sources */,
 				A512D4641A018544001D92E4 /* et.cpp in Sources */,
 				A5D3D36C1955B14000E621A7 /* main.cpp in Sources */,
 				A5FE19A9199A277400825A24 /* input.cpp in Sources */,
@@ -893,14 +888,15 @@
 				A5FE1957199A272F00825A24 /* texturefactory.cpp in Sources */,
 				A5FE1962199A272F00825A24 /* runloop.cpp in Sources */,
 				A5FE19A2199A272F00825A24 /* vertexarray.cpp in Sources */,
+				A5182B621A53638900078F2C /* SceneIntersection.cpp in Sources */,
 				A5FE1961199A272F00825A24 /* pathresolver.cpp in Sources */,
 				A5FE19A1199A272F00825A24 /* indexarray.cpp in Sources */,
 				A5FE1986199A272F00825A24 /* atomiccounter.unix.cpp in Sources */,
-				A5FE1980199A272F00825A24 /* charactergenerator.mac.mm in Sources */,
 				A5FE1975199A272F00825A24 /* pngloader.cpp in Sources */,
 				A5FE195D199A272F00825A24 /* application.cpp in Sources */,
 				A512D4651A018544001D92E4 /* memoryallocator.cpp in Sources */,
 				A5FE1994199A272F00825A24 /* lightelement.cpp in Sources */,
+				A5182B5F1A53638900078F2C /* Raytracer.cpp in Sources */,
 				A5FE195E199A272F00825A24 /* backgroundthread.cpp in Sources */,
 				A5FE197E199A272F00825A24 /* tools.apple.mm in Sources */,
 				A5FE1992199A272F00825A24 /* baseelement.cpp in Sources */,
@@ -950,6 +946,8 @@
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
+					"ET_ENABLE_VEC4_ALIGN=1",
+					"ET_DISABLE_JSON=1",
 					"DEBUG=1",
 					"$(inherited)",
 				);
@@ -989,6 +987,11 @@
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"ET_ENABLE_VEC4_ALIGN=1",
+					"ET_DISABLE_JSON=1",
+					NDEBUG,
+				);
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
 				GCC_WARN_UNDECLARED_SELECTOR = YES;

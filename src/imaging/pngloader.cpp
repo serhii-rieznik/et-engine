@@ -6,7 +6,6 @@
  */
 
 #include <libpng/png.h>
-#include <et/opengl/opengl.h>
 #include <et/imaging/pngloader.h>
 
 using namespace et;
@@ -188,8 +187,8 @@ void parseFormat(TextureDescription& desc, png_structp pngPtr, png_infop infoPtr
 	png_get_IHDR(pngPtr, infoPtr, (png_uint_32p)&desc.size.x, (png_uint_32p)&desc.size.y, 
 				 &bpp, &color_type, &interlace_method, &compression, &filter);
 	
-	desc.bitsPerPixel = desc.channels * static_cast<size_t>(bpp);
-	desc.type = (bpp == 16) ? GL_UNSIGNED_SHORT : GL_UNSIGNED_BYTE;
+	desc.bitsPerPixel = desc.channels * static_cast<uint32_t>(bpp);
+	desc.type = (bpp == 16) ? DataType::UnsignedShort : DataType::UnsignedChar;
 	
 	if (rowBytes)
 		*rowBytes = png_get_rowbytes(pngPtr, infoPtr);
@@ -198,63 +197,34 @@ void parseFormat(TextureDescription& desc, png_structp pngPtr, png_infop infoPtr
 	{
 		case 1:
 		{
-#if defined(GL_ARB_texture_rg) && defined(GL_R8) && defined(GL_R16)
-			desc.internalformat = (bpp == 16) ? GL_R16 : GL_R8;
-			desc.format = GL_RED;
-#elif defined(GL_LUMINANCE)
-			if (bpp == 8)
-			{
-				desc.internalformat = GL_LUMINANCE;
-				desc.format = GL_LUMINANCE;
-			}
-			else
-			{
-				ET_FAIL("Unsupported PNG format");
-			}
-#else
-#			error Unable to resolve OpenGL format for 1-channel texture
-#endif
+			desc.internalformat = (bpp == 16) ? TextureFormat::R16 : TextureFormat::R;
+			desc.format = TextureFormat::R;
 			break;
 		};
 
 		case 2:
 		{
-#if defined(GL_RG8) && defined(GL_RG16)
-			desc.internalformat = (bpp == 16) ? GL_RG16 : GL_RG8;
-			desc.format = GL_RG;
-#elif defined(GL_LUMINANCE_ALPHA)
-			desc.internalformat = GL_LUMINANCE_ALPHA;
-			desc.format = GL_LUMINANCE_ALPHA;
-#else
-#			error Unable to resolve OpenGL format for 1-channel texture
-#endif
+			desc.internalformat = (bpp == 16) ? TextureFormat::RG16 : TextureFormat::RG;
+			desc.format = TextureFormat::RG;
 			break;
 		}
 
 		case 3:
 		{
-#if defined(GL_RGB16)
-			desc.internalformat = (bpp == 16) ? GL_RGB16 : GL_RGB;
-#else
-			desc.internalformat = GL_RGB;
-#endif
-			desc.format = GL_RGB;
+			desc.internalformat = (bpp == 16) ? TextureFormat::RGB16 : TextureFormat::RGB;
+			desc.format = TextureFormat::RGB;
 			break;
 		}
 
 		case 4:
 		{ 
-#if defined(GL_RGBA16)
-			desc.internalformat = (bpp == 16) ? GL_RGBA16 : GL_RGBA;
-#else
-			desc.internalformat = GL_RGBA;
-#endif
-			desc.format = GL_RGBA;
+			desc.internalformat = (bpp == 16) ? TextureFormat::RGBA16 : TextureFormat::RGBA;
+			desc.format = TextureFormat::RGBA;
 			break;
 		}
 
 		default: 
-			ET_FAIL("Unknown texture format");
+			ET_FAIL_FMT("Unknown PNG texture format with %u channels", desc.channels);
 	}
 }
 
@@ -271,6 +241,4 @@ void handlePngError(png_structp, png_const_charp e)
 
 void handlePngWarning(png_structp, png_const_charp)
 {
-//	supress warnings
-//	log::warning("[PNGLoader] %s", e);
 }

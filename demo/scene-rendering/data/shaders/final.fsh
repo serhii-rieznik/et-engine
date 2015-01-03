@@ -28,7 +28,8 @@ float computeFresnelTerm(in float VdotN, in float indexOfRefraction)
 	return clamp(result * result, 0.0, 1.0);
 }
 
-#define REFLECTION_SAMPLES	25
+#define REFLECTION_SAMPLES	20
+#define STEPS_PER_SAMPLE	3
 
 void main()
 {
@@ -44,7 +45,7 @@ void main()
 	vec3 reflectedVector = reflect(vView, normalSample);
 	
 	float VdotN = max(0.0, -dot(normalSample, vView));
-	float fresnel = computeFresnelTerm(VdotN, 1.0 / 1.32);
+	float fresnel = computeFresnelTerm(VdotN, 1.0 / 1.3132);
 	
 	vec3 reflectionPoint = vec3(0.0);
 	vec4 reflectionSample = vec4(0.0);
@@ -54,9 +55,9 @@ void main()
 	
 	for (int s = 0; s < REFLECTION_SAMPLES; ++s)
 	{
-		vec3 randomDirection = randomVectorOnHemisphereWithScale(reflectedVector, noiseSample.xyz, 8.5);
+		vec3 randomDirection = randomVectorOnHemisphereWithScale(reflectedVector, noiseSample.xyz, 15.0);
 		
-		for (int i = 0; i < 3; ++i)
+		for (int i = 0; i < STEPS_PER_SAMPLE; ++i)
 		{
 			reflectionPoint = viewSpacePosition + randomDirection * reflectionDistance;
 			vec3 projected = projectViewSpacePosition(reflectionPoint);
@@ -66,13 +67,13 @@ void main()
 		
 		reflectionPoint = viewSpacePosition + randomDirection * reflectionDistance;
 		vec3 finalProjecttion = projectViewSpacePosition(reflectionPoint);
-		
 		reflectionSample += etTexture2D(texture_diffuse, finalProjecttion.xy);
 		noiseSample = etTexture2D(texture_noise, NoiseTexCoord + noiseSample.yz);
 	}
 	
-	diffuseSample = mix(diffuseSample, reflectionSample / float(REFLECTION_SAMPLES), fresnel);
-
+	float reflectionsScale = sqrt((1.0 - abs(NormalizedTexCoord.x)) * (1.0 - abs(NormalizedTexCoord.y)));
+	diffuseSample = mix(diffuseSample, reflectionSample / float(REFLECTION_SAMPLES), reflectionsScale * fresnel);
+	
 	float lighting = 0.0;
 
 	for (int i = 0; i < lightsCount; ++i)

@@ -5,7 +5,6 @@
  *
  */
 
-#include <algorithm>
 #include <et/core/serialization.h>
 #include <et/vertexbuffer/vertexdeclaration.h>
 
@@ -101,8 +100,8 @@ void VertexDeclaration::serialize(std::ostream& stream)
 	serializeInt(stream, static_cast<int>(_list.size()));
 	for (auto& i : _list)
 	{
-		serializeInt(stream, i.usage());
-		serializeInt(stream, i.type());
+		serializeInt(stream, static_cast<uint32_t>(i.usage()));
+		serializeInt(stream, static_cast<uint32_t>(i.type()));
 		serializeInt(stream, i.stride());
 		serializeInt(stream, static_cast<int>(i.offset()));
 	}
@@ -111,14 +110,16 @@ void VertexDeclaration::serialize(std::ostream& stream)
 void VertexDeclaration::deserialize(std::istream& stream)
 {
 	_interleaved = deserializeInt(stream) != 0;
-	size_t totalSize = static_cast<size_t>(deserializeInt(stream));
-	size_t listSize = deserializeUInt(stream);
+	uint32_t totalSize = deserializeUInt(stream);
+	uint32_t listSize = deserializeUInt(stream);
 	for (size_t i = 0; i < listSize; ++i)
 	{
 		VertexAttributeUsage usage = static_cast<VertexAttributeUsage>(deserializeInt(stream));
 		VertexAttributeType type = static_cast<VertexAttributeType>(deserializeInt(stream));
-		int stride = deserializeInt(stream);
-		size_t offset = deserializeUInt(stream);
+		
+		uint32_t stride = deserializeInt(stream);
+		uint32_t offset = deserializeUInt(stream);
+		
 		push_back(VertexElement(usage, type, stride, offset));
 	}
 

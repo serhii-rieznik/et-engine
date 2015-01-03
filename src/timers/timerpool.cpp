@@ -5,7 +5,6 @@
  *
  */
 
-#include <algorithm>
 #include <et/app/application.h>
 #include <et/timers/timerpool.h>
 #include <et/timers/timedobject.h>

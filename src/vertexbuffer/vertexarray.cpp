@@ -13,11 +13,11 @@ using namespace et;
 const int VertexArrayId_1 = ET_COMPOSE_UINT32('V', 'A', 'V', '1');
 const int VertexArrayCurrentId = VertexArrayId_1;
 
-VertexArray::VertexArray() :
-	tag(0), _decl(true), _size(0), _smoothing(Usage_Smoothing, Type_Int, 0) { }
+VertexArray::VertexArray() : tag(0), _decl(true), _size(0),
+	_smoothing(VertexAttributeUsage::Smoothing, VertexAttributeType::Int, 0) { }
 
 VertexArray::VertexArray(const VertexDeclaration& decl, size_t size) : tag(0), _decl(decl.interleaved()),
-	_size(size), _smoothing(Usage_Smoothing, Type_Int, size)
+	_size(size), _smoothing(VertexAttributeUsage::Smoothing, VertexAttributeType::Int, size)
 {
 	for (size_t i = 0; i < decl.numElements(); ++i)
 	{
@@ -28,7 +28,7 @@ VertexArray::VertexArray(const VertexDeclaration& decl, size_t size) : tag(0), _
 }
 
 VertexArray::VertexArray(const VertexDeclaration& decl, int size) : tag(0), _decl(decl.interleaved()),
-	_size(static_cast<size_t>(size)), _smoothing(Usage_Smoothing, Type_Int, _size)
+	_size(static_cast<size_t>(size)), _smoothing(VertexAttributeUsage::Smoothing, VertexAttributeType::Int, _size)
 {
 	for (size_t i = 0; i < decl.numElements(); ++i)
 	{
@@ -40,8 +40,8 @@ VertexArray::VertexArray(const VertexDeclaration& decl, int size) : tag(0), _dec
 
 VertexArray::Description VertexArray::generateDescription() const
 {
-	size_t dataSize = 0;
-	size_t offset = 0;
+	uint32_t dataSize = 0;
+	uint32_t offset = 0;
 
 	Description desc;
 	desc.declaration = VertexDeclaration(_decl.interleaved());
@@ -49,7 +49,7 @@ VertexArray::Description VertexArray::generateDescription() const
 	for (auto& chunk : _chunks)
 	{
 		int t_stride = _decl.interleaved() ? static_cast<int>(_decl.dataSize()) : 0;
-		size_t t_offset = _decl.interleaved() ? offset : static_cast<size_t>(dataSize);
+		uint32_t t_offset = _decl.interleaved() ? offset : dataSize;
 		desc.declaration.push_back(VertexElement(chunk->usage(), chunk->type(), t_stride, t_offset));
 		dataSize += chunk->dataSize();
 		offset += chunk->typeSize();
@@ -147,13 +147,18 @@ void VertexArray::serialize(std::ostream& stream)
 void VertexArray::deserialize(std::istream& stream)
 {
 	int id = deserializeInt(stream);
+	
 	if (id == VertexArrayId_1)
 	{
 		_decl.deserialize(stream);
+		
 		_size = deserializeSizeT(stream);
+		
 		size_t numChunks = deserializeSizeT(stream);
+		
 		for (size_t i = 0; i < numChunks; ++i)
 			_chunks.push_back(VertexDataChunk(stream));
+		
 		_smoothing = VertexDataChunk(stream);
 	}
 	else

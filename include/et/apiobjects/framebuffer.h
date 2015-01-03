@@ -18,25 +18,20 @@ namespace et
 	{
 		vec2i size;
 
-		size_t numColorRenderTargets;
-		int32_t numSamples;
+		size_t numColorRenderTargets = 0;
+		int32_t numSamples = 0;
 
-		int32_t colorInternalformat;
-		uint32_t colorFormat;
-		uint32_t colorType;
-
-		int32_t depthInternalformat;
-		uint32_t depthFormat;
-		uint32_t depthType;
+		TextureFormat colorInternalformat = TextureFormat::Invalid;
+		TextureFormat colorFormat = TextureFormat::Invalid;
+		DataType colorType = DataType::UnsignedChar;
 		
-		bool colorIsRenderbuffer;
-		bool depthIsRenderbuffer;
-		bool isCubemap;
-
-		FramebufferDescription() :
-			numColorRenderTargets(0), numSamples(0), colorInternalformat(0), colorFormat(0),
-			colorType(0), depthInternalformat(0), depthFormat(0), depthType(0), colorIsRenderbuffer(false),
-			depthIsRenderbuffer(false), isCubemap(false) { }
+		TextureFormat depthInternalformat = TextureFormat::Invalid;
+		TextureFormat depthFormat = TextureFormat::Invalid;
+		DataType depthType = DataType::UnsignedChar;
+		
+		bool colorIsRenderbuffer = false;
+		bool depthIsRenderbuffer = false;
+		bool isCubemap = false;
 	};
 
 	class Framebuffer : public Object
@@ -57,7 +52,7 @@ namespace et
 		void setDepthTarget(const Texture& texture, uint32_t target);
 
 		void setCurrentRenderTarget(const Texture& texture);
-		void setCurrentRenderTarget(const Texture& texture, uint32_t target);
+		void setCurrentRenderTarget(const Texture& texture, TextureTarget target);
 		void setCurrentRenderTarget(size_t index);
 		
 		void setCurrentCubemapFace(uint32_t faceIndex);

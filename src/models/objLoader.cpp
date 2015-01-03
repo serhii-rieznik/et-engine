@@ -677,23 +677,23 @@ void OBJLoader::processLoadedData()
 	bool hasNormals = _normals.size() > 0;
 	bool hasTexCoords = _texCoords.size() > 0;
 		
-	VertexDeclaration decl(true, Usage_Position, Type_Vec3);
+	VertexDeclaration decl(true, VertexAttributeUsage::Position, VertexAttributeType::Vec3);
 	
-	decl.push_back(Usage_Normal, Type_Vec3);
+	decl.push_back(VertexAttributeUsage::Normal, VertexAttributeType::Vec3);
 
 	if (hasTexCoords)
-		decl.push_back(Usage_TexCoord0, Type_Vec2);
+		decl.push_back(VertexAttributeUsage::TexCoord0, VertexAttributeType::Vec2);
 		
-	IndexArrayFormat fmt = (totalVertices > 65535) ? IndexArrayFormat_32bit : IndexArrayFormat_16bit;
+	IndexArrayFormat fmt = (totalVertices > 65535) ? IndexArrayFormat::Format_32bit : IndexArrayFormat::Format_16bit;
 	
 	_vertexData = VertexArray::Pointer::create(decl, totalVertices);
-	_indices = IndexArray::Pointer::create(fmt, totalVertices, PrimitiveType_Triangles);
+	_indices = IndexArray::Pointer::create(fmt, totalVertices, PrimitiveType::Triangles);
 	
 	_indices->linearize(totalVertices);
 
-	RawDataAcessor<vec3> pos = _vertexData->chunk(Usage_Position).accessData<vec3>(0);
-	RawDataAcessor<vec3> norm = _vertexData->chunk(Usage_Normal).accessData<vec3>(0);
-	RawDataAcessor<vec2> tex = _vertexData->chunk(Usage_TexCoord0).accessData<vec2>(0);
+	RawDataAcessor<vec3> pos = _vertexData->chunk(VertexAttributeUsage::Position).accessData<vec3>(0);
+	RawDataAcessor<vec3> norm = _vertexData->chunk(VertexAttributeUsage::Normal).accessData<vec3>(0);
+	RawDataAcessor<vec2> tex = _vertexData->chunk(VertexAttributeUsage::TexCoord0).accessData<vec2>(0);
 	
 	size_t index = 0;
 	
@@ -788,8 +788,8 @@ s3d::ElementContainer::Pointer OBJLoader::generateVertexBuffers()
 	
 	VertexArrayObject vao = _rc->vertexBufferFactory().createVertexArrayObject("model-vao");
 
-	vao->setBuffers(_rc->vertexBufferFactory().createVertexBuffer("model-vb", _vertexData, BufferDrawType_Static),
-		_rc->vertexBufferFactory().createIndexBuffer("model-ib", _indices, BufferDrawType_Static));
+	vao->setBuffers(_rc->vertexBufferFactory().createVertexBuffer("model-vb", _vertexData, BufferDrawType::Static),
+		_rc->vertexBufferFactory().createIndexBuffer("model-ib", _indices, BufferDrawType::Static));
 
 	for (const auto& i : _meshes)
 	{

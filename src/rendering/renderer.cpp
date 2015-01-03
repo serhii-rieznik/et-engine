@@ -5,6 +5,7 @@
  *
  */
 
+#include <et/opengl/opengl.h>
 #include <et/opengl/openglcaps.h>
 #include <et/rendering/rendercontext.h>
 #include <et/rendering/renderer.h>
@@ -24,18 +25,21 @@ Renderer::Renderer(RenderContext* rc) :
 #if !defined(ET_CONSOLE_APPLICATION)
 	checkOpenGLError("Renderer::Renderer", 0);
 
-	IndexArray::Pointer ib = IndexArray::Pointer::create(IndexArrayFormat_16bit, 4, PrimitiveType_TriangleStrips);
+	IndexArray::Pointer ib = IndexArray::Pointer::create(IndexArrayFormat::Format_16bit, 4, PrimitiveType::TriangleStrips);
+	
 	ib->linearize(4);
 	
-	VertexArray::Pointer vb = VertexArray::Pointer::create(VertexDeclaration(false, Usage_Position, Type_Vec2), 4);
-	RawDataAcessor<vec2> pos = vb->chunk(Usage_Position).accessData<vec2>(0);
+	VertexArray::Pointer vb = VertexArray::Pointer::create(VertexDeclaration(false,
+		VertexAttributeUsage::Position, VertexAttributeType::Vec2), 4);
+	
+	RawDataAcessor<vec2> pos = vb->chunk(VertexAttributeUsage::Position).accessData<vec2>(0);
 	pos[0] = vec2(-1.0f, -1.0f);
 	pos[1] = vec2( 1.0f, -1.0f);
 	pos[2] = vec2(-1.0f,  1.0f);
 	pos[3] = vec2( 1.0f,  1.0f);
 
 	_fullscreenQuadVao = rc->vertexBufferFactory().createVertexArrayObject("__et__internal__fullscreen_vao__",
-		vb, BufferDrawType_Static, ib, BufferDrawType_Static);
+		vb, BufferDrawType::Static, ib, BufferDrawType::Static);
 
 	_fullscreenProgram = rc->programFactory().genProgram("__et__fullscreeen__program__",
 		fullscreen_vertex_shader, copy_fragment_shader);
@@ -51,7 +55,7 @@ Renderer::Renderer(RenderContext* rc) :
 	_fullscreenScaledProgram->setUniform("color_texture", _defaultTextureBindingUnit);
 	_fullScreenScaledProgram_PSUniform = _fullscreenScaledProgram->getUniform("vScale");
 
-	_scaledProgram = rc->programFactory().genProgram("__et____scaled_program__",
+	_scaledProgram = rc->programFactory().genProgram("__et__scaled_program__",
 		scaled_copy_vertex_shader, copy_fragment_shader);
 	_scaledProgram->setUniform("color_texture", _defaultTextureBindingUnit);
 	_scaledProgram_PSUniform = _scaledProgram->getUniform("PositionScale");
@@ -62,8 +66,8 @@ Renderer::Renderer(RenderContext* rc) :
 void Renderer::clear(bool color, bool depth)
 {
 #if !defined(ET_CONSOLE_APPLICATION)
-	ET_ASSERT(!depth || (depth && _rc->renderState().depthMask()));
-	ET_ASSERT(!color || (color && (_rc->renderState().colorMask() != ColorMask_None)));
+	ET_ASSERT(!depth || (depth && _rc->renderState().depthMask()))
+	ET_ASSERT(!color || (color && (_rc->renderState().colorMask() != static_cast<size_t>(ColorMask::None))))
 	
 	GLbitfield clearMask = (color * GL_COLOR_BUFFER_BIT) + (depth * GL_DEPTH_BUFFER_BIT);
 
@@ -148,7 +152,9 @@ void Renderer::drawElements(const IndexBuffer& ib, size_t first, size_t count)
 {
 #if !defined(ET_CONSOLE_APPLICATION)
 	ET_ASSERT(ib.valid());
-	etDrawElements(ib->primitiveType(), static_cast<GLsizei>(count), ib->dataType(), ib->indexOffset(first));
+	
+	etDrawElements(primitiveTypeValue(ib->primitiveType()), static_cast<GLsizei>(count),
+		dataTypeValue(ib->dataType()), ib->indexOffset(first));
 #endif
 }
 
@@ -156,16 +162,19 @@ void Renderer::drawElementsInstanced(const IndexBuffer& ib, size_t first, size_t
 {
 #if !defined(ET_CONSOLE_APPLICATION)
 	ET_ASSERT(ib.valid());
-	etDrawElementsInstanced(ib->primitiveType(), static_cast<GLsizei>(count), ib->dataType(),
-		ib->indexOffset(first), static_cast<GLsizei>(instances));
+	
+	etDrawElementsInstanced(primitiveTypeValue(ib->primitiveType()), static_cast<GLsizei>(count),
+		dataTypeValue(ib->dataType()), ib->indexOffset(first), static_cast<GLsizei>(instances));
 #endif
 }
 
-void Renderer::drawElements(uint32_t primitiveType, const IndexBuffer& ib, size_t first, size_t count)
+void Renderer::drawElements(PrimitiveType pt, const IndexBuffer& ib, size_t first, size_t count)
 {
 #if !defined(ET_CONSOLE_APPLICATION)
 	ET_ASSERT(ib.valid());
-	etDrawElements(primitiveType, static_cast<GLsizei>(count), ib->dataType(), ib->indexOffset(first));
+	
+	etDrawElements(primitiveTypeValue(pt), static_cast<GLsizei>(count), dataTypeValue(ib->dataType()),
+		ib->indexOffset(first));
 #endif
 }
 
@@ -173,30 +182,36 @@ void Renderer::drawAllElements(const IndexBuffer& ib)
 {
 #if !defined(ET_CONSOLE_APPLICATION)
 	ET_ASSERT(ib.valid());
-	etDrawElements(ib->primitiveType(), static_cast<GLsizei>(ib->size()), ib->dataType(), nullptr);
+	
+	etDrawElements(primitiveTypeValue(ib->primitiveType()), static_cast<GLsizei>(ib->size()),
+		dataTypeValue(ib->dataType()), nullptr);
 #endif
 }
 
 void Renderer::drawElementsBaseIndex(const VertexArrayObject& vao, int base, size_t first, size_t count)
 {
 #if !defined(ET_CONSOLE_APPLICATION)
+	ET_ASSERT(vao->indexBuffer().valid());
+	
 	const IndexBuffer& ib = vao->indexBuffer();
-	const VertexBuffer& vb = vao->vertexBuffer();
-	if (!ib.valid() || !vb.valid()) return;
 
 #	if (ET_OPENGLES)
 	
+	ET_ASSERT(vao->vertexBuffer().valid());
+	
+	const VertexBuffer& vb = vao->vertexBuffer();
 	RenderState& rs = _rc->renderState();
 	rs.bindVertexArray(vao);
 	rs.bindBuffer(vb);
 	rs.setVertexAttributesBaseIndex(vb->declaration(), base);
-	etDrawElements(ib->primitiveType(), static_cast<GLsizei>(count),
-		ib->dataType(), ib->indexOffset(first));
+	
+	etDrawElements(primitiveTypeValue(ib->primitiveType()), static_cast<GLsizei>(count),
+		dataTypeValue(ib->dataType()), ib->indexOffset(first));
 	
 #	else
 	
-	etDrawElementsBaseVertex(ib->primitiveType(), static_cast<GLsizei>(count),
-		ib->dataType(), ib->indexOffset(first), base);
+	etDrawElementsBaseVertex(primitiveTypeValue(ib->primitiveType()), static_cast<GLsizei>(count),
+		dataTypeValue(ib->dataType()), ib->indexOffset(first), base);
 	
 #	endif	
 #endif

@@ -87,7 +87,7 @@ inline size_t keyToMaterialParameter(const std::string& k)
 }
 
 Material::Material() :
-	LoadableObject("default"),_blendState(BlendState_Disabled), _depthWriteEnabled(true), tag(0)
+	LoadableObject("default"),_blendState(BlendState::Disabled), _depthWriteEnabled(true), tag(0)
 {
 	setVector(MaterialParameter_DiffuseColor, vec4(1.0f));
 }
@@ -128,6 +128,10 @@ void Material::serialize(std::ostream& stream, StorageFormat format) const
 template <typename T>
 void keyValue(std::ostream& s, const std::string& key, const T& value)
 	{ s << " " << key << "=\"" << value << "\""; }
+
+template <>
+void keyValue(std::ostream& s, const std::string& key, const BlendState& value)
+	{ s << " " << key << "=\"" << static_cast<uint32_t>(value) << "\""; }
 
 #define START_BLOCK(NAME, TABS, E)	{ s << TABS << "<" << NAME; { E; } s << ">" << std::endl; }
 
@@ -229,8 +233,8 @@ void Material::serializeBinary(std::ostream& stream) const
 {
 	serializeInt(stream, MaterialCurrentVersion);
 	serializeString(stream, name());
-	serializeInt(stream, blendState());
-	serializeInt(stream, depthWriteEnabled());
+	serializeInt(stream, static_cast<uint32_t>(blendState()));
+	serializeInt(stream, static_cast<uint32_t>(depthWriteEnabled()));
 
 	serializeInt(stream, MaterialParameter_max);
 	for (size_t i = 0; i < MaterialParameter_max; ++i)

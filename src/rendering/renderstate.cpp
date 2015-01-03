@@ -5,6 +5,7 @@
  *
  */
 
+#include <et/opengl/opengl.h>
 #include <et/opengl/openglcaps.h>
 #include <et/vertexbuffer/vertexdeclaration.h>
 #include <et/rendering/rendercontext.h>
@@ -36,18 +37,19 @@ void RenderState::setRenderContext(RenderContext* rc)
 	
 #if !defined(ET_CONSOLE_APPLICATION)
 	_currentState = RenderState::currentState();
-	
+		
 	unsigned char blackColor[] = { 0, 0, 0, 255 };
-	bindTexture(0, 0, GL_TEXTURE_2D, true);
+	bindTexture(0, 0, TextureTarget::Texture_2D, true);
 	
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	
 	etTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, &blackColor);
 	
-	bindTexture(_currentState.activeTextureUnit,
-		_currentState.boundTextures[GL_TEXTURE_2D][_currentState.activeTextureUnit], GL_TEXTURE_2D);
+	auto currentUnit = _currentState.boundTextures[TextureTarget::Texture_2D][_currentState.activeTextureUnit];
+	bindTexture(_currentState.activeTextureUnit, currentUnit, TextureTarget::Texture_2D);
 #endif
 }
 
@@ -91,7 +93,7 @@ void RenderState::setActiveTextureUnit(uint32_t unit, bool force)
 #endif
 }
 
-void RenderState::bindTexture(uint32_t unit, uint32_t texture, uint32_t target, bool force)
+void RenderState::bindTexture(uint32_t unit, uint32_t texture, TextureTarget target, bool force)
 {
 #if !defined(ET_CONSOLE_APPLICATION)
 	setActiveTextureUnit(unit, force);
@@ -99,7 +101,7 @@ void RenderState::bindTexture(uint32_t unit, uint32_t texture, uint32_t target, 
 	if (force || (_currentState.boundTextures[target][unit] != texture))
 	{
 		_currentState.boundTextures[target][unit] = texture;
-		etBindTexture(target, texture);
+		etBindTexture(textureTargetValue(target), texture);
 	}
 #endif
 }
@@ -146,9 +148,9 @@ void RenderState::bindBuffer(uint32_t target, uint32_t buffer, bool force)
 void RenderState::setVertexAttributes(const VertexDeclaration& decl, bool force)
 {
 #if !defined(ET_CONSOLE_APPLICATION)
-	for (VertexAttributeUsage usage = Usage_Position; usage < Usage_max; usage = VertexAttributeUsage(usage + 1))
-		setVertexAttribEnabled(usage, decl.has(usage), force);
-
+	for (uint32_t i = 0; i < VertexAttributeUsage_max; ++i)
+		setVertexAttribEnabled(i, decl.has(static_cast<VertexAttributeUsage>(i)), force);
+	
 	setVertexAttributesBaseIndex(decl, 0);
 #endif
 }
@@ -159,7 +161,7 @@ void RenderState::setVertexAttributesBaseIndex(const VertexDeclaration& decl, si
 	for (size_t i = 0; i < decl.numElements(); ++i)
 	{
 		const VertexElement& e = decl.element(i);
-		size_t dataOffset = index * (decl.interleaved() ? decl.dataSize() : vertexAttributeTypeSize(e.type()) );
+		size_t dataOffset = index * (decl.interleaved() ? decl.dataSize() : vertexAttributeTypeSize(e.type()));
 		setVertexAttribPointer(e, dataOffset, force);
 	}
 #endif
@@ -231,13 +233,9 @@ void RenderState::bindTexture(uint32_t unit, const Texture& texture, bool force)
 {
 #if !defined(ET_CONSOLE_APPLICATION)
 	if (texture.valid())
-	{
 		bindTexture(unit, texture->glID(), texture->target(), force);
-	}
 	else
-	{
-		bindTexture(unit, 0, GL_TEXTURE_2D, force);
-	}
+		bindTexture(unit, 0, TextureTarget::Texture_2D, force);
 #endif
 }
 
@@ -380,37 +378,37 @@ void RenderState::setDepthFunc(DepthFunc func, bool force)
 		
 		switch (_currentState.lastDepthFunc)
 		{
-			case DepthFunc_Less:
+			case DepthFunc::Less:
 			{
 				glDepthFunc(GL_LESS);
 				break;
 			}
 				
-			case DepthFunc_LessOrEqual:
+			case DepthFunc::LessOrEqual:
 			{
 				glDepthFunc(GL_LEQUAL);
 				break;
 			}
 				
-			case DepthFunc_Equal:
+			case DepthFunc::Equal:
 			{
 				glDepthFunc(GL_EQUAL);
 				break;
 			}
 				
-			case DepthFunc_GreaterOrEqual:
+			case DepthFunc::GreaterOrEqual:
 			{
 				glDepthFunc(GL_GEQUAL);
 				break;
 			}
 				
-			case DepthFunc_Greater:
+			case DepthFunc::Greater:
 			{
 				glDepthFunc(GL_GREATER);
 				break;
 			}
 				
-			case DepthFunc_Always:
+			case DepthFunc::Always:
 			{
 				glDepthFunc(GL_ALWAYS);
 				break;
@@ -432,48 +430,48 @@ void RenderState::setBlend(bool enable, BlendState blend, bool force)
 		(enable ? glEnable : glDisable)(GL_BLEND);
 	}
 
-	if ((force || (_currentState.lastBlend != blend)) && (blend != BlendState_Current))
+	if ((force || (_currentState.lastBlend != blend)) && (blend != BlendState::Current))
 	{
 		_currentState.lastBlend = blend;
 		switch (blend)
 		{  
-		case BlendState_Disabled: 
+		case BlendState::Disabled: 
 			{
 				glBlendFunc(GL_ONE, GL_ZERO); 
 				break;
 			}
 
-		case BlendState_Default: 
+		case BlendState::Default: 
 			{
 				glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); 
 				break;
 			}
 
-		case BlendState_Additive: 
+		case BlendState::Additive: 
 			{
 				glBlendFunc(GL_ONE, GL_ONE); 
 				break;
 			}
 
-		case BlendState_AlphaAdditive: 
+		case BlendState::AlphaAdditive: 
 			{
 				glBlendFunc(GL_SRC_ALPHA, GL_ONE); 
 				break;
 			}
 				
-		case BlendState_AlphaMultiplicative:
+		case BlendState::AlphaMultiplicative:
 			{
 				glBlendFunc(GL_ZERO, GL_SRC_ALPHA);
 				break;
 			}
 				
-		case BlendState_AlphaPremultiplied:
+		case BlendState::AlphaPremultiplied:
 			{
 				glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 				break;
 			}
 
-		case BlendState_ColorAdditive: 
+		case BlendState::ColorAdditive: 
 			{
 				glBlendFunc(GL_SRC_COLOR, GL_ONE); 
 				break;
@@ -565,8 +563,8 @@ void RenderState::setVertexAttribPointer(const VertexElement& e, size_t baseInde
 #if !defined(ET_CONSOLE_APPLICATION)
 	(void)force;
 	
-	glVertexAttribPointer(e.usage(), static_cast<GLint>(e.components()), e.dataType(), false, e.stride(),
-		reinterpret_cast<GLvoid*>(e.offset() + baseIndex));
+	glVertexAttribPointer(GLuint(e.usage()), static_cast<GLint>(e.components()), dataTypeValue(e.dataType()), false,
+		e.stride(), reinterpret_cast<GLvoid*>(e.offset() + baseIndex));
 
 	checkOpenGLError("glVertexAttribPointer");
 #endif
@@ -590,11 +588,11 @@ void RenderState::setCulling(bool enabled, CullState cull, bool force)
 		}
 	}
 	
-	if ((cull != CullState_Current) && (force || (_currentState.lastCull != cull)))
+	if ((cull != CullState::Current) && (force || (_currentState.lastCull != cull)))
 	{
 		_currentState.lastCull = cull;
-		glCullFace(cull == CullState_Back ? GL_BACK : GL_FRONT);
-		checkOpenGLError(cull == CullState_Back ? "glCullFace(GL_BACK)" : "glCullFace(GL_FRONT)");
+		glCullFace(cull == CullState::Back ? GL_BACK : GL_FRONT);
+		checkOpenGLError(cull == CullState::Back ? "glCullFace(GL_BACK)" : "glCullFace(GL_FRONT)");
 	}
 #endif
 }
@@ -639,13 +637,25 @@ void RenderState::setClearColor(const vec4& color, bool force)
 #endif
 }
 
+void RenderState::setColorMask(ColorMask mask, bool force)
+{
+#if !defined(ET_CONSOLE_APPLICATION)
+	setColorMask(static_cast<size_t>(mask), force);
+#endif
+}
+
 void RenderState::setColorMask(size_t mask, bool force)
 {
 #if !defined(ET_CONSOLE_APPLICATION)
 	if (force || (_currentState.colorMask != mask))
 	{
 		_currentState.colorMask = mask;
-		glColorMask(mask & ColorMask_Red, mask & ColorMask_Green, mask & ColorMask_Blue, mask & ColorMask_Alpha);
+		
+		GLboolean redEnabled = (mask & static_cast<size_t>(ColorMask::Red)) != 0;
+		GLboolean greenEnabled = (mask & static_cast<size_t>(ColorMask::Green)) != 0;
+		GLboolean blueEnabled = (mask & static_cast<size_t>(ColorMask::Blue)) != 0;
+		GLboolean alphaEnabled = (mask & static_cast<size_t>(ColorMask::Alpha)) != 0;
+		glColorMask(redEnabled, greenEnabled, blueEnabled, alphaEnabled);
 		checkOpenGLError("RenderState::setColorMask");
 	}
 #endif
@@ -684,6 +694,16 @@ void RenderState::setClip(bool enable, const recti& clip, bool force)
 #endif
 }
 
+void RenderState::setSampleAlphaToCoverage(bool enable, bool force)
+{
+	if (force || (_currentState.alphaToCoverage != enable))
+	{
+		_currentState.alphaToCoverage = enable;
+		(enable ? glEnable : glDisable)(GL_SAMPLE_ALPHA_TO_COVERAGE);
+		checkOpenGLError("setSampleAlphaToCoverage(%s)", enable ? "true" : "false");
+	}
+}
+
 void RenderState::reset()
 {
 	applyState(RenderState::State());
@@ -714,7 +734,7 @@ void RenderState::applyState(const RenderState::State& s)
 			bindTexture(unit.first, unit.second, target.first, true);
 	}
 	
-	for (uint32_t i = 0; i < Usage_max; ++i)
+	for (uint32_t i = 0, e = static_cast<uint32_t>(VertexAttributeUsage::max); i < e; ++i)
 		setVertexAttribEnabled(i, (s.enabledVertexAttributes[i] != 0), true);
 	
 	setActiveTextureUnit(s.activeTextureUnit, true);
@@ -757,11 +777,11 @@ RenderState::State RenderState::currentState()
 		
 		value = 0;
 		glGetIntegerv(GL_TEXTURE_BINDING_2D, &value);
-		s.boundTextures[GL_TEXTURE_2D][i] = value;
+		s.boundTextures[TextureTarget::Texture_2D][i] = value;
 		
 		value = 0;
 		glGetIntegerv(GL_TEXTURE_BINDING_CUBE_MAP, &value);
-		s.boundTextures[GL_TEXTURE_CUBE_MAP][i] = value;
+		s.boundTextures[TextureTarget::Texture_Cube][i] = value;
 	}
 	
 	glActiveTexture(GL_TEXTURE0 + s.activeTextureUnit);
@@ -797,25 +817,20 @@ RenderState::State RenderState::currentState()
 	s.boundRenderbuffer = static_cast<uint32_t>(value);
 	checkOpenGLError("");
 	
-#if (ET_SUPPORT_VERTEX_ARRAY_OBJECTS)
 	value = 0;
 	glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &value);
 	s.boundVertexArrayObject = static_cast<uint32_t>(value);
 	checkOpenGLError("");
-#endif
 	
 	bool shouldLoadVertexAttribs = (openGLCapabilites().version() == OpenGLVersion_2x) ||
 		(s.boundVertexArrayObject != 0);
 	
-	if (shouldLoadVertexAttribs)
+	for (uint32_t i = 0, e = static_cast<uint32_t>(VertexAttributeUsage::max); shouldLoadVertexAttribs && (i < e); ++i)
 	{
-		for (uint32_t i = 0; i < Usage_max; ++i)
-		{
-			int enabled = 0;
-			glGetVertexAttribiv(i, GL_VERTEX_ATTRIB_ARRAY_ENABLED, &enabled);
-			s.enabledVertexAttributes[i] = (enabled > 0);
-			checkOpenGLError("glGetVertexAttribiv");
-		}
+		int enabled = 0;
+		glGetVertexAttribiv(i, GL_VERTEX_ATTRIB_ARRAY_ENABLED, &enabled);
+		s.enabledVertexAttributes[i] = (enabled > 0);
+		checkOpenGLError("glGetVertexAttribiv");
 	}
 	
 	value = 0;
@@ -829,6 +844,7 @@ RenderState::State RenderState::currentState()
 	s.depthTestEnabled = glIsEnabled(GL_DEPTH_TEST) != 0;
 	s.polygonOffsetFillEnabled = glIsEnabled(GL_POLYGON_OFFSET_FILL) != 0;
 	s.cullEnabled = glIsEnabled(GL_CULL_FACE) != 0;
+	s.alphaToCoverage = glIsEnabled(GL_SAMPLE_ALPHA_TO_COVERAGE) != 0;
 	
 	glGetFloatv(GL_POLYGON_OFFSET_FACTOR, &s.polygonOffsetFactor);
 	checkOpenGLError("");
@@ -843,8 +859,8 @@ RenderState::State RenderState::currentState()
 
 	GLboolean cValue[4] = { };
 	glGetBooleanv(GL_COLOR_WRITEMASK, cValue);
-	s.colorMask = (cValue[0] * ColorMask_Red) | (cValue[1] * ColorMask_Green) |
-		(cValue[2] * ColorMask_Blue) | (cValue[3] * ColorMask_Alpha);
+	s.colorMask = (cValue[0] * static_cast<size_t>(ColorMask::Red)) | (cValue[1] * static_cast<size_t>(ColorMask::Green)) |
+		(cValue[2] * static_cast<size_t>(ColorMask::Blue)) | (cValue[3] * static_cast<size_t>(ColorMask::Alpha));
 	checkOpenGLError("");
 
 	s.clipEnabled = glIsEnabled(GL_SCISSOR_TEST) != 0;
@@ -853,9 +869,9 @@ RenderState::State RenderState::currentState()
 	value = 0;
 	glGetIntegerv(GL_CULL_FACE_MODE, &value);
 	if (value == GL_FRONT)
-		s.lastCull = CullState_Front;
+		s.lastCull = CullState::Front;
 	else if (value == GL_BACK)
-		s.lastCull = CullState_Back;
+		s.lastCull = CullState::Back;
 	else
 		ET_FAIL("Invalid cull state retreived");
 	checkOpenGLError("");
@@ -873,19 +889,19 @@ RenderState::State RenderState::currentState()
 	checkOpenGLError("");
 	
 	if (value == GL_NEVER)
-		s.lastDepthFunc = DepthFunc_Never;
+		s.lastDepthFunc = DepthFunc::Never;
 	if (value == GL_LESS)
-		s.lastDepthFunc = DepthFunc_Less;
+		s.lastDepthFunc = DepthFunc::Less;
 	else if (value == GL_LEQUAL)
-		s.lastDepthFunc = DepthFunc_LessOrEqual;
+		s.lastDepthFunc = DepthFunc::LessOrEqual;
 	else if (value == GL_EQUAL)
-		s.lastDepthFunc = DepthFunc_Equal;
+		s.lastDepthFunc = DepthFunc::Equal;
 	else if (value == GL_GEQUAL)
-		s.lastDepthFunc = DepthFunc_GreaterOrEqual;
+		s.lastDepthFunc = DepthFunc::GreaterOrEqual;
 	else if (value == GL_GREATER)
-		s.lastDepthFunc = DepthFunc_Greater;
+		s.lastDepthFunc = DepthFunc::Greater;
 	else if (value == GL_ALWAYS)
-		s.lastDepthFunc = DepthFunc_Always;
+		s.lastDepthFunc = DepthFunc::Always;
 	else
 		ET_FAIL("Unknown GL_DEPTH_FUNC value");
 
@@ -911,27 +927,27 @@ RenderState::State RenderState::currentState()
 
 	if ((blendSource == GL_SRC_ALPHA) && (blendDest == GL_ONE_MINUS_SRC_ALPHA))
 	{
-		s.lastBlend = BlendState_Default;
+		s.lastBlend = BlendState::Default;
 	}
 	else if ((blendSource == GL_ONE) && (blendDest == GL_ONE_MINUS_SRC_ALPHA))
 	{
-		s.lastBlend = BlendState_AlphaPremultiplied;
+		s.lastBlend = BlendState::AlphaPremultiplied;
 	}
 	else if ((blendSource == GL_ONE) && (blendDest == GL_ZERO))
 	{
-		s.lastBlend = BlendState_Disabled;
+		s.lastBlend = BlendState::Disabled;
 	}
 	else if ((blendSource == GL_ONE) && (blendDest == GL_ONE))
 	{
-		s.lastBlend = BlendState_Additive;
+		s.lastBlend = BlendState::Additive;
 	}
 	else if ((blendSource == GL_SRC_ALPHA) && (blendDest == GL_ONE))
 	{
-		s.lastBlend = BlendState_AlphaAdditive;
+		s.lastBlend = BlendState::AlphaAdditive;
 	}
 	else if ((blendSource == GL_SRC_COLOR) && (blendDest == GL_ONE))
 	{
-		s.lastBlend = BlendState_ColorAdditive;
+		s.lastBlend = BlendState::ColorAdditive;
 	}
 	else
 	{

@@ -8,21 +8,10 @@
 #pragma once
 
 #include <et/core/containers.h>
+#include <et/rendering/rendering.h>
 
 namespace et
 {
-	enum TextureOrigin
-	{
-		TextureOrigin_TopLeft,
-		TextureOrigin_BottomLeft
-	};
-	
-	enum TextureDataLayout
-	{
-		TextureDataLayout_FacesFirst,
-		TextureDataLayout_MipsFirst
-	};
-
 	class TextureDescription : public LoadableObject
 	{  
 	public:
@@ -55,7 +44,7 @@ namespace et
 
 		size_t dataOffsetForLayer(size_t layer, size_t level)
 		{
-			if (dataLayout == TextureDataLayout_FacesFirst)
+			if (dataLayout == TextureDataLayout::FacesFirst)
 			{
 				return dataSizeForAllMipLevels() * ((layer < layersCount) ?
 					layer : (layersCount > 0 ? layersCount - 1 : 0));
@@ -71,13 +60,13 @@ namespace et
 		size_t dataOffsetForMipLevel(size_t level, size_t layer)
 		{
 			size_t result = 0;
-			if (dataLayout == TextureDataLayout_FacesFirst)
+			if (dataLayout == TextureDataLayout::FacesFirst)
 			{
 				result = dataOffsetForLayer(layer, 0);
 				for (size_t i = 0; i < level; ++i)
 					result += dataSizeForMipLevel(i);
 			}
-			else if (dataLayout == TextureDataLayout_MipsFirst)
+			else if (dataLayout == TextureDataLayout::MipsFirst)
 			{
 				result = dataOffsetForLayer(layer, level);
 				for (size_t l = 0; l < level; ++l)
@@ -92,7 +81,7 @@ namespace et
 		}
 		
 		bool valid() const
-			{ return internalformat && format && (size.square() > 0); }
+			{ return (size.square() > 0); }
 
 	public:
 		BinaryDataStorage data;
@@ -100,19 +89,20 @@ namespace et
 		vec2i size;
 		vec2i minimalSizeForCompressedFormat;
 		
-		uint32_t target = 0;
-		int32_t internalformat = 0;
-		uint32_t format = 0;
-		uint32_t type = 0;
 		uint32_t compressed = 0;
+		uint32_t bitsPerPixel = 0;
+		uint32_t channels = 0;
+		uint32_t mipMapCount = 0;
+		uint32_t layersCount = 0;
 		
-		size_t bitsPerPixel = 0;
-		size_t channels = 0;
-		size_t mipMapCount = 0;
-		size_t layersCount = 0;
 		size_t minimalDataSize = 0;
 		
-		TextureDataLayout dataLayout = TextureDataLayout_FacesFirst;
+		TextureTarget target = TextureTarget::Texture_2D;
+		TextureFormat internalformat = TextureFormat::Invalid;
+		TextureFormat format = TextureFormat::Invalid;
+		DataType type = DataType::UnsignedChar;
+		
+		TextureDataLayout dataLayout = TextureDataLayout::FacesFirst;
 	};
 
 }

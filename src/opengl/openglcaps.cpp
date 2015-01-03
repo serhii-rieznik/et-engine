@@ -6,6 +6,7 @@
  */
 
 #include <et/core/tools.h>
+#include <et/opengl/opengl.h>
 #include <et/opengl/openglcaps.h>
 
 using namespace et;
@@ -18,8 +19,11 @@ bool OpenGLCapabilites::hasExtension(const std::string& e)
 void OpenGLCapabilites::checkCaps()
 {
 #if defined(ET_CONSOLE_APPLICATION)
+	
 	log::info("[OpenGLCapabilites] Rendering disabled in console application.");
+	
 #else
+	
 	const char* glv = reinterpret_cast<const char*>(glGetString(GL_VERSION));
 	_versionShortString = emptyString;
 	_versionString = std::string(glv ? glv : "<Unknown OpenGL version>");
@@ -67,9 +71,10 @@ void OpenGLCapabilites::checkCaps()
 		OpenGLVersion_2x : OpenGLVersion_3x;
 	
 	const char* ext = nullptr;
-#	if defined(GL_NUM_EXTENSIONS)
+	
+#if defined(GL_NUM_EXTENSIONS)
 	if (_version == OpenGLVersion_2x)
-#	endif
+#endif
 	{
 		ext = reinterpret_cast<const char*>(glGetString(GL_EXTENSIONS));
 		checkOpenGLError("glGetString(GL_EXTENSIONS)");
@@ -100,8 +105,7 @@ void OpenGLCapabilites::checkCaps()
 			}
 		}
 	}
-	
-#	if defined(GL_NUM_EXTENSIONS)
+#if defined(GL_NUM_EXTENSIONS)
 	else
 	{
 		int numExtensions = 0;
@@ -113,7 +117,7 @@ void OpenGLCapabilites::checkCaps()
 			_extensions[lowercase(ext)] = 1;
 		}
 	}
-#	endif
+#endif
 	
 	int maxSize = 0;
 	glGetIntegerv(GL_MAX_CUBE_MAP_TEXTURE_SIZE, &maxSize);
@@ -130,24 +134,26 @@ void OpenGLCapabilites::checkCaps()
 	checkOpenGLError("glGetIntegerv(GL_MAX_SAMPLES, ...");
 	_maxSamples = static_cast<uint32_t>(maxSamples);
 	
+	glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &_maxAnisotropyLevel);
+	checkOpenGLError("glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, %f", _maxAnisotropyLevel);
+	
 	int maxUnits = 0;
 	glGetIntegerv(GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS, &maxUnits);
 	checkOpenGLError("glGetIntegerv(GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS, ...");
 	if (maxUnits > 0)
 		setFlag(OpenGLFeature_VertexTextureFetch);
 
-#	if defined(GL_ARB_draw_elements_base_vertex)
+#if defined(GL_ARB_draw_elements_base_vertex)
 	setFlag(OpenGLFeature_DrawElementsBaseVertex);
-#	endif
+#endif
 	
 	if (glGenerateMipmap != nullptr)
 		setFlag(OpenGLFeature_MipMapGeneration);
 	
-#	if (ET_SUPPORT_VERTEX_ARRAY_OBJECTS)
-	bool stillSupport = (glGenVertexArrays != nullptr) && (glDeleteVertexArrays != nullptr)
+	bool supportVertexArrays = (glGenVertexArrays != nullptr) && (glDeleteVertexArrays != nullptr)
 		&& (glBindVertexArray != nullptr) && (glIsVertexArray != nullptr);
 	
-	if (stillSupport)
+	if (supportVertexArrays)
 	{
 		uint32_t testArray = 0;
 		glGenVertexArrays(1, &testArray);
@@ -157,7 +163,31 @@ void OpenGLCapabilites::checkCaps()
 			setFlag(OpenGLFeature_VertexArrayObjects);
 		}
 	}
-#	endif
+	
+#if (GL_IMG_texture_compression_pvrtc)
+	_textureFormatSupport[TextureFormat::PVR_2bpp_RGB] = 1;
+	_textureFormatSupport[TextureFormat::PVR_2bpp_RGBA] = 1;
+	_textureFormatSupport[TextureFormat::PVR_4bpp_RGB] = 1;
+	_textureFormatSupport[TextureFormat::PVR_4bpp_RGBA] = 1;
+#endif
+	
+#if (GL_EXT_pvrtc_sRGB)
+	_textureFormatSupport[TextureFormat::PVR_2bpp_sRGB] = 1;
+	_textureFormatSupport[TextureFormat::PVR_2bpp_sRGBA] = 1;
+	_textureFormatSupport[TextureFormat::PVR_4bpp_sRGB] = 1;
+	_textureFormatSupport[TextureFormat::PVR_4bpp_sRGBA] = 1;
+#endif
+	
+#if (GL_EXT_texture_compression_s3tc)
+	_textureFormatSupport[TextureFormat::DXT1_RGB] = 1;
+	_textureFormatSupport[TextureFormat::DXT1_RGBA] = 1;
+	_textureFormatSupport[TextureFormat::DXT3] = 1;
+	_textureFormatSupport[TextureFormat::DXT5] = 1;
+#endif
+	
+#if (GL_ARB_texture_compression_rgtc)
+	_textureFormatSupport[TextureFormat::RGTC2] = 1;
+#endif
 	
 	log::info("[OpenGLCapabilites] Version: %s (%s), GLSL version: %s (%s)", _versionString.c_str(),
 		_versionShortString.c_str(), _glslVersionString.c_str(), _glslVersionShortString.c_str());

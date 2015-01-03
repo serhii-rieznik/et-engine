@@ -5,6 +5,7 @@
  *
  */
 
+#include <et/opengl/opengl.h>
 #include <et/opengl/openglcaps.h>
 #include <et/rendering/rendercontext.h>
 #include <et/apiobjects/vertexbufferdata.h>

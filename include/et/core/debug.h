@@ -45,10 +45,6 @@
 #	define ET_SUPPORT_VARIADIC_TEMPLATES	(__has_feature(cxx_variadic_templates) || __has_extension(cxx_variadic_templates))
 #	define ET_OBJC_ARC_ENABLED				(__has_feature(objc_arc))
 #
-#	if (ET_PLATFORM_MAC)
-#		define GL_DO_NOT_WARN_IF_MULTI_GL_VERSION_HEADERS_INCLUDED
-#	endif
-#
 #	define ET_DEPRECATED					__attribute__((deprecated))
 #	define ET_FORMAT_FUNCTION				__attribute__((format(printf, 1, 2)))
 #	define ET_FORMAT_FUNCTION_IN_CLASS		__attribute__((format(printf, 2, 3)))

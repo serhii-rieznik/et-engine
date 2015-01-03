@@ -61,7 +61,7 @@ namespace et
 		VertexArray* duplicate();
 		
 	private:
-		size_t _size;
+		size_t _size = 0;
 		VertexDeclaration _decl;
 		VertexDataChunkList _chunks;
 		VertexDataChunk _smoothing;

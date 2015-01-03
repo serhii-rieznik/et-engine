@@ -217,10 +217,10 @@ void Scene::buildAPIObjects(Scene3dStorage::Pointer p, RenderContext* rc)
 			"-" + intToStr(static_cast<size_t>(p->indexArray()->tag));
 		
 		VertexArrayObject vao = rc->vertexBufferFactory().createVertexArrayObject(vaoName);
-		VertexBuffer vb = rc->vertexBufferFactory().createVertexBuffer(vbName, i, BufferDrawType_Static);
+		VertexBuffer vb = rc->vertexBufferFactory().createVertexBuffer(vbName, i, BufferDrawType::Static);
 		if (!ib.valid())
 		{
-			ib = rc->vertexBufferFactory().createIndexBuffer(ibName, p->indexArray(), BufferDrawType_Static);
+			ib = rc->vertexBufferFactory().createIndexBuffer(ibName, p->indexArray(), BufferDrawType::Static);
 			_indexBuffers.push_back(ib);
 		}
 		vao->setBuffers(vb, ib);

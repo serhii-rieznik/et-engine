@@ -15,7 +15,7 @@ SupportMesh::SupportMesh(const std::string& name, Element* parent) :
 	Mesh(name, parent), _radius(0.0f) { }
 
 SupportMesh::SupportMesh(const std::string& name, const VertexArrayObject& ib, const Material::Pointer& material,
-	IndexType start, size_t num, Element* parent) : Mesh(name, ib, material, start, num, parent),
+	uint32_t start, size_t num, Element* parent) : Mesh(name, ib, material, start, num, parent),
 	_data(num / 3, 0), _radius(0.0f)
 {
 }
@@ -28,15 +28,15 @@ void SupportMesh::setNumIndexes(size_t num)
 
 void SupportMesh::fillCollisionData(const VertexArray::Pointer& vertexArray, const IndexArray::Pointer& indexArray)
 {
-	const RawDataAcessor<vec3> pos = vertexArray->chunk(Usage_Position).accessData<vec3>(0);
+	const RawDataAcessor<vec3> pos = vertexArray->chunk(VertexAttributeUsage::Position).accessData<vec3>(0);
 
 	_data.setOffset(0);
 	
 	vec3 minOffset;
 	vec3 maxOffset;
 	float distance = 0.0f;
-	IndexType iStart = startIndex() / 3;
-	IndexType iEnd = iStart + static_cast<IndexType>(numIndexes()) / 3;
+	uint32_t iStart = startIndex() / 3;
+	uint32_t iEnd = iStart + static_cast<uint32_t>(numIndexes()) / 3;
 	
 	_data.resize(primitives::primitiveCountForIndexCount(numIndexes(), indexArray->primitiveType()));
 	

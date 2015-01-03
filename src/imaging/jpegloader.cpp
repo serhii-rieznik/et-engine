@@ -5,7 +5,6 @@
  *
  */
 
-#include <et/opengl/opengl.h>
 #include <et/imaging/jpegloader.h>
 #include <libjpeg/jpeglib.h>
 #include <setjmp.h>
@@ -195,34 +194,20 @@ void loadInfoFromHeader(TextureDescription& desc, jpeg_decompress_struct& cinfo)
 	desc.bitsPerPixel = 8 * cinfo.output_components;
 	desc.mipMapCount = 1;
 	desc.layersCount = 1;
-	desc.type = GL_UNSIGNED_BYTE;
+	desc.type = DataType::UnsignedChar;
 	
-	switch (cinfo.out_color_space)
+	if (cinfo.out_color_space == JCS_GRAYSCALE)
 	{
-		case JCS_GRAYSCALE:
-		{
-#		if defined(GL_R8)
-			desc.internalformat = GL_R8;
-			desc.format = GL_RED;
-#		else
-			desc.internalformat = GL_LUMINANCE;
-			desc.format = GL_LUMINANCE;
-#		endif
-			break;
-		}
-			
-		case JCS_CMYK:
-		{
-			desc.internalformat = GL_RGBA;
-			desc.format = GL_RGBA;
-			break;
-		}
-			
-		default:
-		{
-			desc.internalformat = GL_RGB;
-			desc.format = GL_RGB;
-			break;
-		}
+		desc.internalformat = TextureFormat::R;
+		desc.format = TextureFormat::R;
+	}
+	else if (cinfo.out_color_space == JCS_RGB)
+	{
+		desc.internalformat = TextureFormat::RGB;
+		desc.format = TextureFormat::RGB;
+	}
+	else
+	{
+		ET_FAIL_FMT("Unsupported JPEG color space: %d", cinfo.out_color_space);
 	}
 }

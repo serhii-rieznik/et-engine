@@ -14,7 +14,7 @@ using namespace et::s3d;
 Scene3dStorage::Scene3dStorage(const std::string& name, Element* parent) : 
 	ElementContainer(name, parent)
 {
-	_indexArray = IndexArray::Pointer::create(IndexArrayFormat_16bit, 0, PrimitiveType_Triangles);
+	_indexArray = IndexArray::Pointer::create(IndexArrayFormat::Format_16bit, 0, PrimitiveType::Triangles);
 }
 
 void Scene3dStorage::addVertexArray(const VertexArray::Pointer& va)

@@ -7,7 +7,7 @@
 
 #include <et/app/application.h>
 
-#if defined(ET_HAVE_FBX_SDK)
+#if (ET_HAVE_FBX_SDK)
 
 #include <fbxsdk.h>
 
@@ -274,15 +274,8 @@ void FBXLoaderPrivate::loadTextures()
 			else
 			{
 				log::info("Unable to load texture: %s", fileName.c_str());
-				
-				BinaryDataStorage randomTextureData(4, 255);
-				for (size_t i = 0; i < 3; ++i)
-					randomTextureData[i] = rand() % 256;
-				
-				texture = _rc->textureFactory().genTexture(GL_TEXTURE_2D, GL_RGBA, vec2i(1), GL_RGBA,
-					GL_UNSIGNED_BYTE, randomTextureData, fileName);
+				texture = _rc->textureFactory().genNoiseTexture(vec2i(4), false, fileName);
 				texture->setOrigin(fileName);
-				
 				_texCache.manage(texture, _rc->textureFactory().objectLoader());
 			}
 			fileTexture->SetUserDataPtr(texture.ptr());
@@ -612,7 +605,7 @@ s3d::Mesh::Pointer FBXLoaderPrivate::loadMesh(FbxMesh* mesh, s3d::Element::Point
 	if (support)
 		element = s3d::SupportMesh::Pointer::create(meshName, parent.ptr());
 	else
-		element = s3d::Mesh::Pointer::Pointer(meshName, parent.ptr());
+		element = s3d::Mesh::Pointer::create(meshName, parent.ptr());
 	
 	size_t uvChannels = mesh->GetElementUVCount();
 
@@ -638,22 +631,25 @@ s3d::Mesh::Pointer FBXLoaderPrivate::loadMesh(FbxMesh* mesh, s3d::Element::Point
 	if (hasColor)
 		hasColor = vertexColor->GetMappingMode() == FbxGeometryElement::eByPolygonVertex;
 
-	VertexDeclaration decl(true, Usage_Position, Type_Vec3);
+	VertexDeclaration decl(true, VertexAttributeUsage::Position, VertexAttributeType::Vec3);
 
 	if (hasNormal)
-		decl.push_back(Usage_Normal, Type_Vec3);
+		decl.push_back(VertexAttributeUsage::Normal, VertexAttributeType::Vec3);
 
 	if (hasTangents)
-		decl.push_back(Usage_Tangent, Type_Vec3);
+		decl.push_back(VertexAttributeUsage::Tangent, VertexAttributeType::Vec3);
 
 	if (hasColor)
-		decl.push_back(Usage_Color, Type_Vec4);
+		decl.push_back(VertexAttributeUsage::Color, VertexAttributeType::Vec4);
 	
 	auto uv = mesh->GetElementUV();
 	if ((uv != nullptr) && (uv->GetMappingMode() != FbxGeometryElement::eNone))
 	{
-		for (size_t i = 0; i < uvChannels; ++i)
-			decl.push_back(static_cast<VertexAttributeUsage>(Usage_TexCoord0 + i), Type_Vec2);
+		for (uint32_t i = 0; i < uvChannels; ++i)
+		{
+			uint32_t usage = static_cast<uint32_t>(VertexAttributeUsage::TexCoord0) + i;
+			decl.push_back(static_cast<VertexAttributeUsage>(usage), VertexAttributeType::Vec2);
+		}
 	}
 
 	VertexArray::Pointer va = storage->vertexArrayWithDeclarationForAppendingSize(decl, lPolygonVertexCount);
@@ -664,16 +660,18 @@ s3d::Mesh::Pointer FBXLoaderPrivate::loadMesh(FbxMesh* mesh, s3d::Element::Point
 	IndexArray::Pointer ib = storage->indexArray();
 	ib->resizeToFit(ib->actualSize() + lPolygonCount * 3);
 
-	RawDataAcessor<vec3> pos = va->chunk(Usage_Position).accessData<vec3>(vertexBaseOffset);
-	RawDataAcessor<vec3> nrm = va->chunk(Usage_Normal).accessData<vec3>(vertexBaseOffset);
-	RawDataAcessor<vec3> tang = va->chunk(Usage_Tangent).accessData<vec3>(vertexBaseOffset);
-	RawDataAcessor<vec4> clr = va->chunk(Usage_Color).accessData<vec4>(vertexBaseOffset);
+	RawDataAcessor<vec3> pos = va->chunk(VertexAttributeUsage::Position).accessData<vec3>(vertexBaseOffset);
+	RawDataAcessor<vec3> nrm = va->chunk(VertexAttributeUsage::Normal).accessData<vec3>(vertexBaseOffset);
+	RawDataAcessor<vec3> tang = va->chunk(VertexAttributeUsage::Tangent).accessData<vec3>(vertexBaseOffset);
+	RawDataAcessor<vec4> clr = va->chunk(VertexAttributeUsage::Color).accessData<vec4>(vertexBaseOffset);
 	RawDataAcessor<int> smooth = va->smoothing().accessData<int>(vertexBaseOffset);
 	
 	std::vector<RawDataAcessor<vec2>> uvs;
-	for (size_t i = 0; i < uvChannels; ++i)
-		uvs.push_back(va->chunk(static_cast<VertexAttributeUsage>(Usage_TexCoord0 + i)).accessData<vec2>(vertexBaseOffset));
-
+	for (uint32_t i = 0; i < uvChannels; ++i)
+	{
+		uint32_t usage = static_cast<uint32_t>(VertexAttributeUsage::TexCoord0) + i;
+		uvs.push_back(va->chunk(static_cast<VertexAttributeUsage>(usage)).accessData<vec2>(vertexBaseOffset));
+	}
 	FbxStringList lUVNames;
 	mesh->GetUVSetNames(lUVNames);
 
@@ -728,11 +726,11 @@ s3d::Mesh::Pointer FBXLoaderPrivate::loadMesh(FbxMesh* mesh, s3d::Element::Point
 				if (support)
 					meshElement = s3d::SupportMesh::Pointer::create(aName, aParent);
 				else
-					meshElement = s3d::Mesh::Pointer::Pointer::create(aName, aParent);
+					meshElement = s3d::Mesh::Pointer::create(aName, aParent);
 			}
 
 			meshElement->tag = vbIndex;
-			meshElement->setStartIndex(static_cast<IndexType>(indexOffset));
+			meshElement->setStartIndex(static_cast<uint32_t>(indexOffset));
 			meshElement->setMaterial(materials.at(m));
 			
 			const auto& props = aParent->properties();
@@ -746,7 +744,7 @@ s3d::Mesh::Pointer FBXLoaderPrivate::loadMesh(FbxMesh* mesh, s3d::Element::Point
 					for (int lVerticeIndex = 0; lVerticeIndex < 3; ++lVerticeIndex)
 					{
 						const int lControlPointIndex = mesh->GetPolygonVertex(lPolygonIndex, lVerticeIndex);
-						ib->setIndex(static_cast<IndexType>(vertexBaseOffset + vertexCount), indexOffset);
+						ib->setIndex(static_cast<uint32_t>(vertexBaseOffset + vertexCount), indexOffset);
 
 						ET_FBX_LOADER_PUSH_VERTEX
 						ET_FBX_LOADER_PUSH_NORMAL
@@ -773,7 +771,7 @@ s3d::Mesh::Pointer FBXLoaderPrivate::loadMesh(FbxMesh* mesh, s3d::Element::Point
 		s3d::Mesh* me = static_cast<s3d::Mesh*>(element.ptr());
 
 		me->tag = vbIndex;
-		me->setStartIndex(static_cast<IndexType>(vertexBaseOffset));
+		me->setStartIndex(static_cast<uint32_t>(vertexBaseOffset));
 		me->setNumIndexes(lPolygonVertexCount);
 
 		if (materials.size())
@@ -784,7 +782,7 @@ s3d::Mesh::Pointer FBXLoaderPrivate::loadMesh(FbxMesh* mesh, s3d::Element::Point
 			for (int lVerticeIndex = 0; lVerticeIndex < 3; ++lVerticeIndex)
 			{
 				const int lControlPointIndex = mesh->GetPolygonVertex(lPolygonIndex, lVerticeIndex);
-				ib->setIndex(static_cast<IndexType>(vertexBaseOffset + vertexCount), indexOffset);
+				ib->setIndex(static_cast<uint32_t>(vertexBaseOffset + vertexCount), indexOffset);
 				
 				ET_FBX_LOADER_PUSH_VERTEX
 				ET_FBX_LOADER_PUSH_NORMAL
@@ -827,14 +825,14 @@ s3d::Mesh::Pointer FBXLoaderPrivate::loadMesh(FbxMesh* mesh, s3d::Element::Point
 void FBXLoaderPrivate::buildVertexBuffers(RenderContext* rc, s3d::Element::Pointer root)
 {
 	IndexBuffer primaryIndexBuffer =
-		rc->vertexBufferFactory().createIndexBuffer("fbx-i", storage->indexArray(), BufferDrawType_Static);
+		rc->vertexBufferFactory().createIndexBuffer("fbx-i", storage->indexArray(), BufferDrawType::Static);
 
 	std::vector<VertexArrayObject> vertexArrayObjects;
 	VertexArrayList& vertexArrays = storage->vertexArrays();
 	for (const auto& i : vertexArrays)
 	{
 		VertexArrayObject vao = rc->vertexBufferFactory().createVertexArrayObject("fbx-vao");
-		VertexBuffer vb = rc->vertexBufferFactory().createVertexBuffer("fbx-v", i, BufferDrawType_Static);
+		VertexBuffer vb = rc->vertexBufferFactory().createVertexBuffer("fbx-v", i, BufferDrawType::Static);
 		vao->setBuffers(vb, primaryIndexBuffer);
 		vertexArrayObjects.push_back(vao);
 	}
@@ -854,10 +852,6 @@ void FBXLoaderPrivate::buildVertexBuffers(RenderContext* rc, s3d::Element::Point
 		mesh->setVertexArrayObject(vertexArrayObjects[mesh->tag]);
 		mesh->fillCollisionData(vertexArrays[mesh->tag], storage->indexArray());
 	}
-
-	rc->renderState().bindVertexArray(0);
-	rc->renderState().bindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-	rc->renderState().bindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
 StringList FBXLoaderPrivate::loadNodeProperties(FbxNode* node)
@@ -940,6 +934,6 @@ s3d::ElementContainer::Pointer FBXLoader::load(RenderContext* rc, ObjectsCache& 
 #	if (ET_PLATFORM_WIN)
 #		pragma message ("Define ET_HAVE_FBX_SDK to compile FBXLoader")
 #	else
-#		warning Define ET_HAVE_FBX_SDK to compile FBXLoader
+#		warning Set ET_HAVE_FBX_SDK to 1 in order to compile FBXLoader
 #	endif
 #endif

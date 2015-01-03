@@ -54,6 +54,7 @@ namespace et
 		 * Ray-triangles intersections
 		 */
 		bool rayTriangle(const ray3d& r, const triangle& t, vec3* intersection_pt);
+		bool rayTriangleTwoSided(const ray3d& r, const triangle& t, vec3* intersection_pt);
 		bool rayTriangles(const ray3d& r, const triangle* triangles, size_t triangleCount, vec3* intersection_pt);
 
 		/*
@@ -69,7 +70,7 @@ namespace et
 		bool triangleTriangle(const triangle& t1, const triangle& t2);
 	}
 
-	vec2 barycentricCoordinates(const vec3& p, const triangle& t);
+	vec2 barycentricCoordinates(vec3, const triangle& t);
 	vec3 worldCoordinatesFromBarycentric(const vec2& b, const triangle& t);
 	vec3 closestPointOnTriangle(const vec3& p, const triangle& t);
 

@@ -8,30 +8,9 @@
 #pragma once
 
 #include <unordered_map>
-#include <et/opengl/opengl.h>
 
 namespace et
 {
-	struct ProgramUniform
-	{
-		uint32_t type;
-		int location;
-
-		ProgramUniform() :
-			type(0), location(-1) { }
-	};
-
-	struct ProgramAttrib
-	{
-		std::string name;
-		VertexAttributeUsage usage;
-		
-		ProgramAttrib(const std::string& aName, VertexAttributeUsage aUsage) :
-			name(aName), usage(aUsage) { }
-	};
-
-	typedef std::unordered_map<std::string, ProgramUniform> UniformMap;
-
 	class Camera;
 	class RenderState;
 	
@@ -40,6 +19,23 @@ namespace et
 	public:
 		ET_DECLARE_POINTER(Program)
 
+		struct Uniform
+		{
+			uint32_t type = 0;
+			int location = -1;
+		};
+		
+		struct Attribute
+		{
+			std::string name;
+			VertexAttributeUsage usage = VertexAttributeUsage::Position;
+			
+			Attribute(const std::string& aName, VertexAttributeUsage aUsage) :
+				name(aName), usage(aUsage) { }
+		};
+		
+		typedef std::unordered_map<std::string, Uniform> UniformMap;
+		
 	public:
 		Program(RenderContext*);
 		
@@ -51,7 +47,7 @@ namespace et
 
 		int getUniformLocation(const std::string& uniform) const;
 		uint32_t getUniformType(const std::string& uniform) const;
-		ProgramUniform getUniform(const std::string& uniform) const;
+		Program::Uniform getUniform(const std::string& uniform) const;
 
 		void validate() const;
 
@@ -88,7 +84,7 @@ namespace et
 
 		void setCameraProperties(const Camera& cam);
 
-		const UniformMap& uniforms() const 
+		const Program::UniformMap& uniforms() const 
 			{ return _uniforms; }
 
 		void setUniform(int, uint32_t, const int32_t, bool);
@@ -131,15 +127,15 @@ namespace et
 		}
 		
 		template <typename T>
-		void setUniform(const ProgramUniform& u, const T& value, bool force = false)
+		void setUniform(const Program::Uniform& u, const T& value, bool force = false)
 			{ setUniform(u.location, u.type, value, force); }
 
 		template <typename T>
-		void setUniformDirectly(const ProgramUniform& u, const T& value)
+		void setUniformDirectly(const Program::Uniform& u, const T& value)
 			{ setUniformDirectly(u.location, u.type, value); }
 		
 		template <typename T>
-		void setUniform(const ProgramUniform& u, const T* value, size_t amount)
+		void setUniform(const Program::Uniform& u, const T* value, size_t amount)
 			{ setUniform(u.location, u.type, value, amount); }
 		
 		void buildProgram(const std::string& vertex_source, const std::string& geom_source,
@@ -149,7 +145,7 @@ namespace et
 			{ return _defines; }
 
 	private:
-		UniformMap::const_iterator findUniform(const std::string& name) const;
+		Program::UniformMap::const_iterator findUniform(const std::string& name) const;
 		
 		int link();
 
@@ -158,8 +154,8 @@ namespace et
 		
 		uint32_t _glID;
 		
-		UniformMap _uniforms;
-		std::vector<ProgramAttrib> _attributes;
+		Program::UniformMap _uniforms;
+		std::vector<Attribute> _attributes;
 
 		int _mModelViewLocation;
 		int _mModelViewProjectionLocation;

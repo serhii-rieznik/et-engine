@@ -5,7 +5,6 @@
  *
  */
 
-#include <algorithm>
 #include <et/geometry/geometry.h>
 
 using namespace et;

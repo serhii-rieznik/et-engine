@@ -5,8 +5,9 @@
  *
  */
 
-#include <et/rendering/rendercontext.h>
+#include <et/opengl/opengl.h>
 #include <et/opengl/openglcaps.h>
+#include <et/rendering/rendercontext.h>
 #include <et/apiobjects/vertexarrayobjectdata.h>
 
 using namespace et;
@@ -34,8 +35,6 @@ VertexArrayObjectData::VertexArrayObjectData(RenderContext* rc, const std::strin
 VertexArrayObjectData::~VertexArrayObjectData()
 {
 #if !defined(ET_CONSOLE_APPLICATION)
-	
-#	if (ET_SUPPORT_VERTEX_ARRAY_OBJECTS)
 	if (_vao && openGLCapabilites().hasFeature(OpenGLFeature_VertexArrayObjects))
 	{
 		_rc->renderState().bindVertexArray(_vao);
@@ -46,26 +45,20 @@ VertexArrayObjectData::~VertexArrayObjectData()
 		glDeleteVertexArrays(1, &_vao);
 		checkOpenGLError("glDeleteVertexArrays");
 	}
-#	endif
-	
 #endif
 }
 
 void VertexArrayObjectData::init()
 {
 #if !defined(ET_CONSOLE_APPLICATION)
-	
-#	if (ET_SUPPORT_VERTEX_ARRAY_OBJECTS)
 	if (openGLCapabilites().hasFeature(OpenGLFeature_VertexArrayObjects))
 	{
 		glGenVertexArrays(1, &_vao);
 		checkOpenGLError("glGenVertexArrays in %s", name().c_str());
 		_rc->renderState().bindVertexArray(_vao);
 	}
-#	endif
 	
 	_rc->renderState().bindBuffers(_vb, _ib, true);
-	
 #endif
 }
 

@@ -7,7 +7,6 @@
 
 #include <et/core/containers.h>
 #include <et/geometry/geometry.h>
-#include <et/opengl/opengl.h>
 #include <et/primitives/primitives.h>
 
 using namespace et;
@@ -19,19 +18,19 @@ size_t primitives::primitiveCountForIndexCount(size_t numIndexes, PrimitiveType 
 {
 	switch (geometryType)
 	{
-		case PrimitiveType_Points:
+		case PrimitiveType::Points:
 			return numIndexes;
 		
-		case PrimitiveType_Lines:
+		case PrimitiveType::Lines:
 			return numIndexes / 2;
 
-		case PrimitiveType_Triangles:
+		case PrimitiveType::Triangles:
 			return numIndexes / 3;
 
-		case PrimitiveType_LineStrip:
+		case PrimitiveType::LineStrip:
 			return numIndexes - 1;
 
-		case PrimitiveType_TriangleStrips:
+		case PrimitiveType::TriangleStrips:
 			return numIndexes - 2;
 		
 		default:
@@ -41,18 +40,18 @@ size_t primitives::primitiveCountForIndexCount(size_t numIndexes, PrimitiveType 
 	return 0;
 }
 
-IndexType primitives::indexCountForRegularMesh(const vec2i& meshSize, PrimitiveType geometryType)
+uint32_t primitives::indexCountForRegularMesh(const vec2i& meshSize, PrimitiveType geometryType)
 {
 	switch (geometryType)
 	{
-		case PrimitiveType_Points:
-			return static_cast<IndexType>(meshSize.square());
+		case PrimitiveType::Points:
+			return static_cast<uint32_t>(meshSize.square());
 
-		case PrimitiveType_Triangles:
-			return static_cast<IndexType>(((meshSize.x > 1) ? meshSize.x - 1 : 1) * ((meshSize.y > 1) ? meshSize.y - 1 : 1) * 6);
+		case PrimitiveType::Triangles:
+			return static_cast<uint32_t>(((meshSize.x > 1) ? meshSize.x - 1 : 1) * ((meshSize.y > 1) ? meshSize.y - 1 : 1) * 6);
 
-		case PrimitiveType_TriangleStrips:
-			return static_cast<IndexType>(((meshSize.y > 1) ? meshSize.y - 1 : 1) * (2 * meshSize.x + 1) - 1);
+		case PrimitiveType::TriangleStrips:
+			return static_cast<uint32_t>(((meshSize.y > 1) ? meshSize.y - 1 : 1) * (2 * meshSize.x + 1) - 1);
 			
 		default:
 			ET_FAIL("Unsupported element type")
@@ -65,8 +64,8 @@ void primitives::createPhotonMap(VertexArray::Pointer buffer, const vec2i& densi
 {
 	buffer->increase(static_cast<size_t>(density.square()));
 	
-	VertexDataChunk chunk = buffer->chunk(Usage_Position);
-	ET_ASSERT(chunk->type() == Type_Vec2);
+	VertexDataChunk chunk = buffer->chunk(VertexAttributeUsage::Position);
+	ET_ASSERT(chunk->type() == VertexAttributeType::Vec2);
 	
 	RawDataAcessor<vec2> data = chunk.accessData<vec2>(0);
 	
@@ -90,9 +89,9 @@ void primitives::createSphere(VertexArray::Pointer data, float radius, const vec
 	size_t lastIndex = data->size();
 	data->increase(static_cast<size_t>(density.square()));
 
-	VertexDataChunk pos_c = data->chunk(Usage_Position);
-	VertexDataChunk norm_c = data->chunk(Usage_Normal);
-	VertexDataChunk tex_c = data->chunk(Usage_TexCoord0);
+	VertexDataChunk pos_c = data->chunk(VertexAttributeUsage::Position);
+	VertexDataChunk norm_c = data->chunk(VertexAttributeUsage::Normal);
+	VertexDataChunk tex_c = data->chunk(VertexAttributeUsage::TexCoord0);
 	RawDataAcessor<vec3> pos = pos_c.valid() ? pos_c.accessData<vec3>(lastIndex) : RawDataAcessor<vec3>();
 	RawDataAcessor<vec3> norm = norm_c.valid() ? norm_c.accessData<vec3>(lastIndex) : RawDataAcessor<vec3>();
 	RawDataAcessor<vec2> tex = tex_c.valid() ? tex_c.accessData<vec2>(lastIndex) : RawDataAcessor<vec2>();
@@ -139,9 +138,9 @@ void primitives::createTorus(VertexArray::Pointer data, float centralRadius, flo
 	size_t lastIndex = data->size();
 	data->increase(static_cast<size_t>(density.square()));
 
-	VertexDataChunk pos_c = data->chunk(Usage_Position);
-	VertexDataChunk norm_c = data->chunk(Usage_Normal);
-	VertexDataChunk tex_c = data->chunk(Usage_TexCoord0);
+	VertexDataChunk pos_c = data->chunk(VertexAttributeUsage::Position);
+	VertexDataChunk norm_c = data->chunk(VertexAttributeUsage::Normal);
+	VertexDataChunk tex_c = data->chunk(VertexAttributeUsage::TexCoord0);
 	RawDataAcessor<vec3> pos = pos_c.valid() ? pos_c.accessData<vec3>(lastIndex) : RawDataAcessor<vec3>();
 	RawDataAcessor<vec3> norm = norm_c.valid() ? norm_c.accessData<vec3>(lastIndex) : RawDataAcessor<vec3>();
 	RawDataAcessor<vec2> tex = tex_c.valid() ? tex_c.accessData<vec2>(lastIndex) : RawDataAcessor<vec2>();
@@ -197,9 +196,9 @@ void primitives::createCylinder(VertexArray::Pointer data, float radius, float h
 	size_t lastIndex = data->size();
 	data->increase(static_cast<size_t>(density.square()));
 
-	VertexDataChunk pos_c = data->chunk(Usage_Position);
-	VertexDataChunk norm_c = data->chunk(Usage_Normal);
-	VertexDataChunk tex_c = data->chunk(Usage_TexCoord0);
+	VertexDataChunk pos_c = data->chunk(VertexAttributeUsage::Position);
+	VertexDataChunk norm_c = data->chunk(VertexAttributeUsage::Normal);
+	VertexDataChunk tex_c = data->chunk(VertexAttributeUsage::TexCoord0);
 	RawDataAcessor<vec3> pos = pos_c.valid() ? pos_c.accessData<vec3>(lastIndex) : RawDataAcessor<vec3>();
 	RawDataAcessor<vec3> norm = norm_c.valid() ? norm_c.accessData<vec3>(lastIndex) : RawDataAcessor<vec3>();
 	RawDataAcessor<vec2> tex = tex_c.valid() ? tex_c.accessData<vec2>(lastIndex) : RawDataAcessor<vec2>();
@@ -246,9 +245,9 @@ void primitives::createSquarePlane(VertexArray::Pointer data, const vec3& normal
 	size_t lastIndex = data->size();
 	data->increase(static_cast<size_t>(density.square()));
 
-	VertexDataChunk pos_c = data->chunk(Usage_Position);
-	VertexDataChunk norm_c = data->chunk(Usage_Normal);
-	VertexDataChunk tex_c = data->chunk(Usage_TexCoord0);
+	VertexDataChunk pos_c = data->chunk(VertexAttributeUsage::Position);
+	VertexDataChunk norm_c = data->chunk(VertexAttributeUsage::Normal);
+	VertexDataChunk tex_c = data->chunk(VertexAttributeUsage::TexCoord0);
 	RawDataAcessor<vec3> pos = pos_c.valid() ? pos_c.accessData<vec3>(lastIndex) : RawDataAcessor<vec3>();
 	RawDataAcessor<vec3> norm = norm_c.valid() ? norm_c.accessData<vec3>(lastIndex) : RawDataAcessor<vec3>();
 	RawDataAcessor<vec2> tex = tex_c.valid() ? tex_c.accessData<vec2>(lastIndex) : RawDataAcessor<vec2>();
@@ -354,11 +353,11 @@ void primitives::createSquarePlane(VertexArray::Pointer data, const vec3& normal
 IndexArray::Pointer primitives::createCirclePlane(VertexArray::Pointer data, const vec3& normal, float radius,
 	size_t density, const vec3& center, const vec2&, const vec2&)
 {
-	IndexArray::Pointer result = IndexArray::Pointer::create(IndexArrayFormat_16bit, 3 * density, PrimitiveType_Triangles);
+	IndexArray::Pointer result = IndexArray::Pointer::create(IndexArrayFormat::Format_16bit, 3 * density, PrimitiveType::Triangles);
 	
 	data->fitToSize(1 + density);
-	auto pos = data->chunk(Usage_Position).accessData<vec3>(0);
-	auto nrm = data->chunk(Usage_Normal).accessData<vec3>(0);
+	auto pos = data->chunk(VertexAttributeUsage::Position).accessData<vec3>(0);
+	auto nrm = data->chunk(VertexAttributeUsage::Normal).accessData<vec3>(0);
 	
 	vec3 angles = toSpherical(normal);
 	angles += vec3(-HALF_PI, HALF_PI, 0.0f);
@@ -379,29 +378,29 @@ IndexArray::Pointer primitives::createCirclePlane(VertexArray::Pointer data, con
 		pos[i] = center + (o1 * std::cos(angle) - o2 * std::sin(angle)) * radius;
 		nrm[i] = normal;
 		result->setIndex(0, index++);
-		result->setIndex(static_cast<IndexType>(i), index++);
-		result->setIndex((i + 1 < density) ? static_cast<IndexType>(i + 1) : 1, index++);
+		result->setIndex(static_cast<uint32_t>(i), index++);
+		result->setIndex((i + 1 < density) ? static_cast<uint32_t>(i + 1) : 1, index++);
 		angle += da;
 	}
 		
 	return result;
 }
 
-IndexType primitives::buildTriangleStripIndexes(IndexArray& buffer, const vec2i& dim,
-	IndexType index0, IndexType offset)
+uint32_t primitives::buildTriangleStripIndexes(IndexArray& buffer, const vec2i& dim,
+	uint32_t index0, uint32_t offset)
 {
-	IndexType k = offset;
-	IndexType rowSize = static_cast<IndexType>(dim.x);
-	IndexType colSize = static_cast<IndexType>(dim.y);
+	uint32_t k = offset;
+	uint32_t rowSize = static_cast<uint32_t>(dim.x);
+	uint32_t colSize = static_cast<uint32_t>(dim.y);
 
-	for (IndexType v = 0; v < static_cast<IndexType>(dim.y - 1); ++v)
+	for (uint32_t v = 0; v < static_cast<uint32_t>(dim.y - 1); ++v)
 	{
-		IndexType thisRow = index0 + v * rowSize;
-		IndexType nextRow = thisRow + rowSize;
+		uint32_t thisRow = index0 + v * rowSize;
+		uint32_t nextRow = thisRow + rowSize;
 
 		if (v % 2 == 0)
 		{
-			for (IndexType u = 0; u < rowSize; ++u)
+			for (uint32_t u = 0; u < rowSize; ++u)
 			{
 				buffer.setIndex(u + thisRow, k++);
 				buffer.setIndex(u + nextRow, k++);
@@ -411,7 +410,7 @@ IndexType primitives::buildTriangleStripIndexes(IndexArray& buffer, const vec2i&
 		}
 		else
 		{
-			for (IndexType u = rowSize - 1; ; --u)
+			for (uint32_t u = rowSize - 1; ; --u)
 			{
 				buffer.setIndex(u + thisRow, k++);
 				buffer.setIndex(u + nextRow, k++);
@@ -426,18 +425,18 @@ IndexType primitives::buildTriangleStripIndexes(IndexArray& buffer, const vec2i&
 	return k; 
 }
 
-IndexType primitives::buildTrianglesIndexes(IndexArray& buffer, const vec2i& dim,
-	IndexType vertexOffset, IndexType indexOffset)
+uint32_t primitives::buildTrianglesIndexes(IndexArray& buffer, const vec2i& dim,
+	uint32_t vertexOffset, uint32_t indexOffset)
 {
-	IndexType k = indexOffset;
-	IndexType rowSize = static_cast<IndexType>(dim.x);
-	IndexType colSize = static_cast<IndexType>(dim.y);
+	uint32_t k = indexOffset;
+	uint32_t rowSize = static_cast<uint32_t>(dim.x);
+	uint32_t colSize = static_cast<uint32_t>(dim.y);
 
-	for (IndexType i = 0; i < colSize - 1; ++i)
+	for (uint32_t i = 0; i < colSize - 1; ++i)
 	{
-		for (IndexType j = 0; j < rowSize - 1; ++j)
+		for (uint32_t j = 0; j < rowSize - 1; ++j)
 		{
-			IndexType value = vertexOffset + j + i * rowSize;
+			uint32_t value = vertexOffset + j + i * rowSize;
 
 			buffer.setIndex(value, k++);
 			buffer.setIndex(value + rowSize, k++);
@@ -451,15 +450,15 @@ IndexType primitives::buildTrianglesIndexes(IndexArray& buffer, const vec2i& dim
 	return k;
 }
 
-IndexType primitives::buildTrianglesIndexes(IndexArray::Pointer buffer, const vec2i& dim,
-	IndexType vertexOffset, IndexType indexOffset)
+uint32_t primitives::buildTrianglesIndexes(IndexArray::Pointer buffer, const vec2i& dim,
+	uint32_t vertexOffset, uint32_t indexOffset)
 {
 	ET_ASSERT(buffer.valid());
 	return buildTrianglesIndexes(buffer.reference(), dim, vertexOffset, indexOffset);
 }
 
-IndexType primitives::buildTriangleStripIndexes(IndexArray::Pointer buffer, const vec2i& dim,
-	IndexType vertexOffset, IndexType indexOffset)
+uint32_t primitives::buildTriangleStripIndexes(IndexArray::Pointer buffer, const vec2i& dim,
+	uint32_t vertexOffset, uint32_t indexOffset)
 {
 	ET_ASSERT(buffer.valid());
 	return buildTriangleStripIndexes(buffer.reference(), dim, vertexOffset, indexOffset);
@@ -469,11 +468,11 @@ void primitives::calculateNormals(VertexArray::Pointer data, const IndexArray::P
 {
 	ET_ASSERT(first < last);
 
-	VertexDataChunk posChunk = data->chunk(Usage_Position);
-	VertexDataChunk nrmChunk = data->chunk(Usage_Normal);
+	VertexDataChunk posChunk = data->chunk(VertexAttributeUsage::Position);
+	VertexDataChunk nrmChunk = data->chunk(VertexAttributeUsage::Normal);
 
-	if (posChunk.invalid() || (posChunk->type() != Type_Vec3) || !nrmChunk.valid() ||
-		(nrmChunk->type() != Type_Vec3))
+	if (posChunk.invalid() || (posChunk->type() != VertexAttributeType::Vec3) || !nrmChunk.valid() ||
+		(nrmChunk->type() != VertexAttributeType::Vec3))
 	{
 		log::error("primitives::calculateNormals - data is invalid.");
 		return;
@@ -512,19 +511,19 @@ void primitives::calculateNormals(VertexArray::Pointer data, const IndexArray::P
 }
 
 void primitives::calculateTangents(VertexArray::Pointer data, const IndexArray::Pointer& buffer,
-	IndexType first, IndexType last)
+	uint32_t first, uint32_t last)
 {
 	ET_ASSERT(first < last);
 	
-	VertexDataChunk posChunk = data->chunk(Usage_Position);
-	VertexDataChunk nrmChunk = data->chunk(Usage_Normal);
-	VertexDataChunk uvChunk = data->chunk(Usage_TexCoord0);
-	VertexDataChunk tanChunk = data->chunk(Usage_Tangent);
+	VertexDataChunk posChunk = data->chunk(VertexAttributeUsage::Position);
+	VertexDataChunk nrmChunk = data->chunk(VertexAttributeUsage::Normal);
+	VertexDataChunk uvChunk = data->chunk(VertexAttributeUsage::TexCoord0);
+	VertexDataChunk tanChunk = data->chunk(VertexAttributeUsage::Tangent);
 	
-	if (posChunk.invalid() || (posChunk->type() != Type_Vec3) ||
-		nrmChunk.invalid() || (nrmChunk->type() != Type_Vec3) ||
-		tanChunk.invalid() || (tanChunk->type() != Type_Vec3) ||
-		uvChunk.invalid() || (uvChunk->type() != Type_Vec2))
+	if (posChunk.invalid() || (posChunk->type() != VertexAttributeType::Vec3) ||
+		nrmChunk.invalid() || (nrmChunk->type() != VertexAttributeType::Vec3) ||
+		tanChunk.invalid() || (tanChunk->type() != VertexAttributeType::Vec3) ||
+		uvChunk.invalid() || (uvChunk->type() != VertexAttributeType::Vec2))
 	{
 		log::error("primitives::calculateTangents - data is invalid.");
 		return;
@@ -586,15 +585,15 @@ void primitives::calculateTangents(VertexArray::Pointer data, const IndexArray::
 }
 
 void primitives::smoothTangents(VertexArray::Pointer data, const IndexArray::Pointer&,
-	IndexType first, IndexType last)
+	uint32_t first, uint32_t last)
 {
 	ET_ASSERT(first < last);
 	
-	VertexDataChunk posChunk = data->chunk(Usage_Position);
-	VertexDataChunk tanChunk = data->chunk(Usage_Tangent);
+	VertexDataChunk posChunk = data->chunk(VertexAttributeUsage::Position);
+	VertexDataChunk tanChunk = data->chunk(VertexAttributeUsage::Tangent);
 	
-	if (posChunk.invalid() || (posChunk->type() != Type_Vec3) || !tanChunk.valid() ||
-		(tanChunk->type() != Type_Vec3))
+	if (posChunk.invalid() || (posChunk->type() != VertexAttributeType::Vec3) || !tanChunk.valid() ||
+		(tanChunk->type() != VertexAttributeType::Vec3))
 	{
 		log::error("primitives::smoothTangents - data is invalid.");
 		return;
@@ -634,10 +633,10 @@ void primitives::smoothTangents(VertexArray::Pointer data, const IndexArray::Poi
 
 void primitives::createCube(VertexArray::Pointer data, float radius, const vec3& center)
 {
-	VertexDataChunk posChunk = data->chunk(Usage_Position);
-	VertexDataChunk nrmChunk = data->chunk(Usage_Normal);
-	bool hasPosition = posChunk.valid() && (posChunk->type() == Type_Vec3);
-	bool hasNormals = nrmChunk.valid() && (nrmChunk->type() == Type_Vec3);
+	VertexDataChunk posChunk = data->chunk(VertexAttributeUsage::Position);
+	VertexDataChunk nrmChunk = data->chunk(VertexAttributeUsage::Normal);
+	bool hasPosition = posChunk.valid() && (posChunk->type() == VertexAttributeType::Vec3);
+	bool hasNormals = nrmChunk.valid() && (nrmChunk->type() == VertexAttributeType::Vec3);
 	
 	ET_ASSERT(hasPosition);
 	(void)hasPosition;
@@ -680,10 +679,10 @@ void primitives::createCube(VertexArray::Pointer data, float radius, const vec3&
 
 void primitives::createOctahedron(VertexArray::Pointer data, float radius)
 {
-	VertexDataChunk posChunk = data->chunk(Usage_Position);
-	VertexDataChunk nrmChunk = data->chunk(Usage_Normal);
-	bool hasPosition = posChunk.valid() && (posChunk->type() == Type_Vec3);
-	bool hasNormals = nrmChunk.valid() && (nrmChunk->type() == Type_Vec3);
+	VertexDataChunk posChunk = data->chunk(VertexAttributeUsage::Position);
+	VertexDataChunk nrmChunk = data->chunk(VertexAttributeUsage::Normal);
+	bool hasPosition = posChunk.valid() && (posChunk->type() == VertexAttributeType::Vec3);
+	bool hasNormals = nrmChunk.valid() && (nrmChunk->type() == VertexAttributeType::Vec3);
 	
 	ET_ASSERT(hasPosition);
 	(void)hasPosition;
@@ -719,10 +718,10 @@ void primitives::createOctahedron(VertexArray::Pointer data, float radius)
 
 void primitives::createDodecahedron(VertexArray::Pointer data, float radius)
 {
-	VertexDataChunk posChunk = data->chunk(Usage_Position);
-	VertexDataChunk nrmChunk = data->chunk(Usage_Normal);
-	bool hasPosition = posChunk.valid() && (posChunk->type() == Type_Vec3);
-	bool hasNormals = nrmChunk.valid() && (nrmChunk->type() == Type_Vec3);
+	VertexDataChunk posChunk = data->chunk(VertexAttributeUsage::Position);
+	VertexDataChunk nrmChunk = data->chunk(VertexAttributeUsage::Normal);
+	bool hasPosition = posChunk.valid() && (posChunk->type() == VertexAttributeType::Vec3);
+	bool hasNormals = nrmChunk.valid() && (nrmChunk->type() == VertexAttributeType::Vec3);
 	
 	ET_ASSERT(hasPosition);
 	(void)hasPosition;
@@ -826,10 +825,10 @@ void primitives::createDodecahedron(VertexArray::Pointer data, float radius)
 
 void primitives::createIcosahedron(VertexArray::Pointer data, float radius, bool top, bool middle, bool bottom)
 {
-	VertexDataChunk posChunk = data->chunk(Usage_Position);
-	VertexDataChunk nrmChunk = data->chunk(Usage_Normal);
-	bool hasPosition = posChunk.valid() && (posChunk->type() == Type_Vec3);
-	bool hasNormals = nrmChunk.valid() && (nrmChunk->type() == Type_Vec3);
+	VertexDataChunk posChunk = data->chunk(VertexAttributeUsage::Position);
+	VertexDataChunk nrmChunk = data->chunk(VertexAttributeUsage::Normal);
+	bool hasPosition = posChunk.valid() && (posChunk->type() == VertexAttributeType::Vec3);
+	bool hasNormals = nrmChunk.valid() && (nrmChunk->type() == VertexAttributeType::Vec3);
 
 	ET_ASSERT(hasPosition);
 	(void)hasPosition;
@@ -899,28 +898,28 @@ void primitives::createIcosahedron(VertexArray::Pointer data, float radius, bool
 
 void primitives::tesselateTriangles(VertexArray::Pointer data, IndexArray::Pointer indexArray, const vec3& aspect)
 {
-	ET_ASSERT(indexArray->primitiveType() == PrimitiveType_Triangles);
+	ET_ASSERT(indexArray->primitiveType() == PrimitiveType::Triangles);
 		   
-	bool hasPosition = data->chunk(Usage_Position).valid() &&
-		(data->chunk(Usage_Position)->type() == Type_Vec3);
+	bool hasPosition = data->chunk(VertexAttributeUsage::Position).valid() &&
+		(data->chunk(VertexAttributeUsage::Position)->type() == VertexAttributeType::Vec3);
 	
-	bool hasNormals = data->chunk(Usage_Normal).valid() &&
-		(data->chunk(Usage_Normal)->type() == Type_Vec3);
+	bool hasNormals = data->chunk(VertexAttributeUsage::Normal).valid() &&
+		(data->chunk(VertexAttributeUsage::Normal)->type() == VertexAttributeType::Vec3);
 
-	bool hasColor = data->chunk(Usage_Color).valid() &&
-		(data->chunk(Usage_Color)->type() == Type_Vec4);
+	bool hasColor = data->chunk(VertexAttributeUsage::Color).valid() &&
+		(data->chunk(VertexAttributeUsage::Color)->type() == VertexAttributeType::Vec4);
 	
 	ET_ASSERT(hasPosition);
 	(void)hasPosition;
 	
 	VertexArray::Pointer oldData(data->duplicate());
 	
-	VertexDataChunk oldPos = oldData->chunk(Usage_Position);
-	VertexDataChunk oldNrm = oldData->chunk(Usage_Normal);
-	VertexDataChunk oldClr = oldData->chunk(Usage_Color);
-	VertexDataChunk newPos = data->chunk(Usage_Position);
-	VertexDataChunk newNrm = data->chunk(Usage_Normal);
-	VertexDataChunk newClr = data->chunk(Usage_Color);
+	VertexDataChunk oldPos = oldData->chunk(VertexAttributeUsage::Position);
+	VertexDataChunk oldNrm = oldData->chunk(VertexAttributeUsage::Normal);
+	VertexDataChunk oldClr = oldData->chunk(VertexAttributeUsage::Color);
+	VertexDataChunk newPos = data->chunk(VertexAttributeUsage::Position);
+	VertexDataChunk newNrm = data->chunk(VertexAttributeUsage::Normal);
+	VertexDataChunk newClr = data->chunk(VertexAttributeUsage::Color);
 	
 	size_t numTriangles = indexArray->primitivesCount();
 	
@@ -988,8 +987,8 @@ void primitives::tesselateTriangles(VertexArray::Pointer data, IndexArray::Point
 
 void primitives::tesselateTriangles(VertexArray::Pointer data, const vec3& aspect)
 {
-	IndexArray::Pointer linearIndices = IndexArray::Pointer::create(IndexArrayFormat_32bit,
-		data->size(), PrimitiveType_Triangles);
+	IndexArray::Pointer linearIndices = IndexArray::Pointer::create(IndexArrayFormat::Format_32bit,
+		data->size(), PrimitiveType::Triangles);
 	linearIndices->linearize(data->size());
 	tesselateTriangles(data, linearIndices, aspect);
 }
@@ -1023,9 +1022,9 @@ VertexArray::Pointer primitives::buildLinearIndexArray(VertexArray::Pointer vert
 	std::vector<uint64_t> hashes;
 	hashes.reserve(vertexArray->size());
 	
-	auto oldPos = vertexArray->chunk(Usage_Position).accessData<vec3>(0);
-	auto oldNrm = vertexArray->chunk(Usage_Normal).accessData<vec3>(0);
-	auto oldClr = vertexArray->chunk(Usage_Color).accessData<vec4>(0);
+	auto oldPos = vertexArray->chunk(VertexAttributeUsage::Position).accessData<vec3>(0);
+	auto oldNrm = vertexArray->chunk(VertexAttributeUsage::Normal).accessData<vec3>(0);
+	auto oldClr = vertexArray->chunk(VertexAttributeUsage::Color).accessData<vec4>(0);
 	
 	for (size_t i = 0; i < dataSize; ++i)
 	{
@@ -1038,9 +1037,9 @@ VertexArray::Pointer primitives::buildLinearIndexArray(VertexArray::Pointer vert
 	
 	VertexArray::Pointer result = VertexArray::Pointer::create(vertexArray->decl(), countMap.size());
 	
-	auto newPos = result->chunk(Usage_Position).accessData<vec3>(0);
-	auto newNrm = result->chunk(Usage_Normal).accessData<vec3>(0);
-	auto newClr = result->chunk(Usage_Color).accessData<vec4>(0);
+	auto newPos = result->chunk(VertexAttributeUsage::Position).accessData<vec3>(0);
+	auto newNrm = result->chunk(VertexAttributeUsage::Normal).accessData<vec3>(0);
+	auto newClr = result->chunk(VertexAttributeUsage::Color).accessData<vec4>(0);
 	
 	bool hasNormals = newNrm.valid();
 	bool hasColor = newClr.valid();
@@ -1059,7 +1058,7 @@ VertexArray::Pointer primitives::buildLinearIndexArray(VertexArray::Pointer vert
 			if (hasColor)
 				newClr[indexMap.size()] = oldClr[i];
 			
-			indexArray->setIndex(static_cast<IndexType>(indexMap.size()), i);
+			indexArray->setIndex(static_cast<uint32_t>(indexMap.size()), i);
 			indexMap[hash] = indexMap.size();
 		}
 		else
@@ -1070,7 +1069,7 @@ VertexArray::Pointer primitives::buildLinearIndexArray(VertexArray::Pointer vert
 			if (hasColor)
 				newClr[indexMap[hash]] = 0.5f * (newClr[indexMap[hash]] + oldClr[i]);
 			
-			indexArray->setIndex(static_cast<IndexType>(indexMap[hash]), i);
+			indexArray->setIndex(static_cast<uint32_t>(indexMap[hash]), i);
 		}
 	}
 	
@@ -1085,13 +1084,13 @@ VertexArray::Pointer primitives::buildLinearIndexArray(VertexArray::Pointer vert
 
 VertexArray::Pointer primitives::linearizeTrianglesIndexArray(VertexArray::Pointer data, IndexArray::Pointer indexArray)
 {
-	ET_ASSERT(indexArray->primitiveType() == PrimitiveType_Triangles);
+	ET_ASSERT(indexArray->primitiveType() == PrimitiveType::Triangles);
 	
 	VertexDeclaration decl = data->decl();
 	VertexArray::Pointer result = VertexArray::Pointer::create(data->decl(), 3 * indexArray->primitivesCount());
 	for (auto& e : decl.elements())
 	{
-		if (e.type() == Type_Vec4)
+		if (e.type() == VertexAttributeType::Vec4)
 		{
 			auto oldValues = data->chunk(e.usage()).accessData<vec4>(0);
 			auto newValues = result->chunk(e.usage()).accessData<vec4>(0);
@@ -1103,7 +1102,7 @@ VertexArray::Pointer primitives::linearizeTrianglesIndexArray(VertexArray::Point
 				newValues[i++] = oldValues[p[2]];
 			}
 		}
-		else if (e.type() == Type_Vec3)
+		else if (e.type() == VertexAttributeType::Vec3)
 		{
 			auto oldValues = data->chunk(e.usage()).accessData<vec3>(0);
 			auto newValues = result->chunk(e.usage()).accessData<vec3>(0);
@@ -1115,7 +1114,7 @@ VertexArray::Pointer primitives::linearizeTrianglesIndexArray(VertexArray::Point
 				newValues[i++] = oldValues[p[2]];
 			}
 		}
-		else if (e.type() == Type_Vec2)
+		else if (e.type() == VertexAttributeType::Vec2)
 		{
 			auto oldValues = data->chunk(e.usage()).accessData<vec2>(0);
 			auto newValues = result->chunk(e.usage()).accessData<vec2>(0);

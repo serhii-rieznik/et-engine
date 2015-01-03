@@ -47,8 +47,8 @@ namespace et
 		void copyTo(VertexDataChunkData&) const;
 
 	private:
-		VertexAttributeUsage _usage;
-		VertexAttributeType _type;
+		VertexAttributeUsage _usage = VertexAttributeUsage::Position;
+		VertexAttributeType _type = VertexAttributeType::Float;
 		BinaryDataStorage _data;
 	};
 

@@ -30,12 +30,12 @@ namespace et
 		{
 		public:
 			typedef std::map<uint32_t, uint32_t> UnitToTextureMap;
-			typedef std::map<uint32_t, UnitToTextureMap> TargetToUnitTextureMap;
+			typedef std::map<TextureTarget, UnitToTextureMap> TargetToUnitTextureMap;
 			
 		public:
 			TargetToUnitTextureMap boundTextures;
 			
-			StaticDataStorage<size_t, Usage_max> enabledVertexAttributes;
+			StaticDataStorage<size_t, static_cast<size_t>(VertexAttributeUsage::max)> enabledVertexAttributes;
 			StaticDataStorage<size_t, MaxDrawBuffers> drawBuffers;
 			
 			uint32_t activeTextureUnit = 0;
@@ -72,10 +72,11 @@ namespace et
 			bool wireframe = false;
 			bool clipEnabled = false;
 			bool cullEnabled = false;
+			bool alphaToCoverage = false;
 
-			BlendState lastBlend = BlendState_Current;
-			CullState lastCull = CullState_Current;
-			DepthFunc lastDepthFunc = DepthFunc_Less;
+			BlendState lastBlend = BlendState::Current;
+			CullState lastCull = CullState::Current;
+			DepthFunc lastDepthFunc = DepthFunc::Less;
 			
 			State();
 		};
@@ -127,7 +128,7 @@ namespace et
 		 * Textures
 		 */
 		void setActiveTextureUnit(uint32_t unit, bool force = false);
-		void bindTexture(uint32_t unit, uint32_t texture, uint32_t target, bool force = false);
+		void bindTexture(uint32_t unit, uint32_t texture, TextureTarget target, bool force = false);
 		void bindTexture(uint32_t unit, const Texture& texture, bool force = false);
 
 		/*
@@ -198,8 +199,8 @@ namespace et
 		vec4 clearColor() const
 			{ return _currentState.clearColor; }
 		
-		void setBlend(bool enable, BlendState blend = BlendState_Current, bool force = false);
-		void setCulling(bool enabled, CullState cull = CullState_Current, bool force = false);
+		void setBlend(bool enable, BlendState blend = BlendState::Current, bool force = false);
+		void setCulling(bool enabled, CullState cull = CullState::Current, bool force = false);
 		void setDepthTest(bool enable, bool force = false);
 		void setDepthFunc(DepthFunc func, bool force = false);
 		void setDepthMask(bool enable, bool force = false);
@@ -209,6 +210,9 @@ namespace et
 		void setColorMask(size_t mask, bool force = false);
 		void setClearDepth(float depth, bool force = false);
 		void setClip(bool enable, const recti& clip, bool force = false);
+		void setSampleAlphaToCoverage(bool enable, bool force = false);
+
+		void setColorMask(ColorMask mask, bool force = false);
 
 		/*
 		 * Deletion handlers

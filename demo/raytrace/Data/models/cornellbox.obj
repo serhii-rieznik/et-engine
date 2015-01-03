@@ -20,22 +20,13 @@ v   1.00  0.00  -1.00
 v  -1.00  0.00  -1.00
 f -4 -3 -2 -1
 
-## Object ceiling 
+## Object ceiling
 g ceiling
 usemtl ceiling
 v  -1.02  2.00  1.00
 v  -1.02  2.00 -1.00
 v   1.00  2.00 -1.00
 v   1.00  2.00  1.00
-f -4 -3 -2 -1
-
-## Object backwall  
-g backWall
-usemtl backWall
-v   1.00  0.00  1.00
-v  -1.00  0.00  1.00
-v  -1.00  2.00 1.00
-v   1.02  2.00 1.00
 f -4 -3 -2 -1
 
 ## Object frontwall
@@ -47,7 +38,7 @@ v   1.00  2.00 -1.00
 v  -1.02  2.00 -1.00
 f -4 -3 -2 -1
 
-## Object rightwall 
+## Object rightwall
 g rightWall
 usemtl rightWall
 v	1.00  0.00  -1.00
@@ -56,7 +47,7 @@ v	1.00  2.00  1.00
 v	1.00  2.00 -1.00
 f -4 -3 -2 -1
 
-## Object leftWall   
+## Object leftWall
 g leftWall
 usemtl leftWall
 v  -1.00  0.00   1.00
@@ -65,19 +56,19 @@ v  -1.02  2.00 -1.00
 v  -1.02  2.00  1.00
 f -4 -3 -2 -1
 
-## Object shortBox 
+## Object shortBox
 g shortBox
 usemtl shortBox
 # Top Face
-v	0.53  0.60   0.75 
-v	0.70  0.60   0.17  
+v	0.53  0.60   0.75
+v	0.70  0.60   0.17
 v	0.13  0.60   0.00
 v  -0.05  0.60   0.57
 f -4 -3 -2 -1
 # Left Face
 v  -0.05  0.00   0.57
 v  -0.05  0.60   0.57
-v   0.13  0.60   0.00 
+v   0.13  0.60   0.00
 v   0.13  0.00   0.00
 f -4 -3 -2 -1
 # Front Face
@@ -97,15 +88,15 @@ v	0.13  0.00   0.00
 v	0.13  0.60   0.00
 v	0.70  0.60   0.17
 v	0.70  0.00   0.17
-f -4 -3 -2 -1 
+f -4 -3 -2 -1
 # Bottom Face
-v	0.53  0.00   0.75 
-v	0.70  0.00   0.17  
+v	0.53  0.00   0.75
+v	0.70  0.00   0.17
 v	0.13  0.00   0.00
 v  -0.05  0.00   0.57
 f -12 -11 -10 -9
 
-## Object tallBox 
+## Object tallBox
 g tallBox
 usemtl tallBox
 # Top Face

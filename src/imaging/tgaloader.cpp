@@ -5,20 +5,19 @@
  *
  */
 
-#include <et/opengl/opengl.h>
 #include <et/imaging/tgaloader.h>
 
 using namespace et;
 
 struct TGADescription
 {
-	uint16_t width;
-	uint16_t height;
-	uint8_t bitsPerPixel;
-	uint8_t dummy;
+	uint16_t width = 0;
+	uint16_t height = 0;
+	uint8_t bitsPerPixel = 0;
+	uint8_t dummy = 0;
 };
 
-typedef GLubyte TGAHeader[12];
+typedef unsigned char TGAHeader[12];
 TGAHeader uTGAcompare = {0,0, 2,0,0,0,0,0,0,0,0,0};
 TGAHeader cTGAcompare = {0,0,10,0,0,0,0,0,0,0,0,0};
 
@@ -219,8 +218,8 @@ void et::tga::loadFromStream(std::istream& source, TextureDescription& desc)
 	TGADescription info = { };
 	source.read(reinterpret_cast<char*>(&info), sizeof(TGADescription));
 	
-	desc.target = GL_TEXTURE_2D;
-	desc.type = GL_UNSIGNED_BYTE;
+	desc.target = TextureTarget::Texture_2D;
+	desc.type = DataType::UnsignedChar;
 	desc.size.x = info.width;
 	desc.size.y = info.height;
 	desc.bitsPerPixel = info.bitsPerPixel;
@@ -230,13 +229,13 @@ void et::tga::loadFromStream(std::istream& source, TextureDescription& desc)
 
 	if (desc.channels == 3)
 	{
-		desc.internalformat = GL_RGB;
-		desc.format = GL_RGB;
+		desc.internalformat = TextureFormat::RGB;
+		desc.format = TextureFormat::RGB;
 	}
 	else if (desc.channels == 4)
 	{
-		desc.internalformat = GL_RGBA;
-		desc.format = GL_RGBA;
+		desc.internalformat = TextureFormat::RGBA;
+		desc.format = TextureFormat::RGBA;
 	}
 	else
 	{
