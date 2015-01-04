@@ -344,7 +344,7 @@ void RenderState::setDrawBuffersCount(int32_t count)
 {
 #if !defined(ET_CONSOLE_APPLICATION)
 	
-#	if defined(GL3_PROTOTYPES)
+#	if (GL_VERSION_2_0)
 		glDrawBuffers(count, drawBufferTargets());
 		checkOpenGLError("glDrawBuffers(%d, ...)", count);
 #	endif

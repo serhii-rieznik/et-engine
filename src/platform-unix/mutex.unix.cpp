@@ -5,13 +5,12 @@
  *
  */
 
-#include <et/core/et.h>
+#include <et/threading/mutex.h>
 
-#if (!ET_PLATFORM_WIN)
+#if (ET_PLATFORM_IOS | ET_PLATFORM_MAC | ET_PLATFORM_ANDROID)
 
 #include <errno.h>
 #include <pthread.h>
-#include <et/threading/mutex.h>
 
 namespace et
 {

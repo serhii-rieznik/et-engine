@@ -275,10 +275,6 @@ void SceneRenderer::render(const et::Camera& cam, const et::Camera& observer, bo
 	if (_updateTime == 0.0f)
 		_updateTime = currentTime - 1.0f / 30.0f;
 	
-//	float dt = currentTime - _updateTime;
-	
-	_updateTime = currentTime;
-	
 	if (_shouldSetPreviousProjectionMatrix)
 	{
 		_previousProjectionMatrix = cam.modelViewProjectionMatrix();
@@ -317,15 +313,16 @@ void SceneRenderer::render(const et::Camera& cam, const et::Camera& observer, bo
 	rs.bindTexture(occlusionTextureUnit, _downsampledBuffer->renderTarget(1));
 	rs.bindTexture(noiseTextureUnit, _noiseTexture);
 	rn->fullscreenPass();
-/*
+
+/*/
 	rs.bindFramebuffer(_finalBuffers[1 - _finalBufferIndex]);
 	rs.bindProgram(programs.motionBlur);
 	rs.bindTexture(diffuseTextureUnit, _finalBuffers[_finalBufferIndex]->renderTarget());
 	rs.bindTexture(depthTextureUnit, _geometryBuffer->depthBuffer());
 	programs.motionBlur->setUniform("mModelViewInverseToPrevious", cam.inverseModelViewProjectionMatrix() * _previousProjectionMatrix);
-	programs.motionBlur->setUniform("motionDistanceScale", 0.5f * (dt / baseFrameTime));
+	programs.motionBlur->setUniform("motionDistanceScale", 0.5f * (currentTime - _updateTime) / (1.0f / 30.0f));
 	rn->fullscreenPass();
-*/
+// */
 	
 	rs.bindDefaultFramebuffer();
 	rs.bindProgram(programs.fxaa);
@@ -335,4 +332,6 @@ void SceneRenderer::render(const et::Camera& cam, const et::Camera& observer, bo
 
 	_previousProjectionMatrix = cam.modelViewProjectionMatrix();
 	_finalBufferIndex = 1 - _finalBufferIndex;
+	_updateTime = currentTime;
+
 }

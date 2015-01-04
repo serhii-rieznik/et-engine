@@ -7,7 +7,7 @@
 
 #include <et/threading/thread.h>
 
-#if (!ET_PLATFORM_WIN)
+#if (ET_PLATFORM_IOS | ET_PLATFORM_MAC | ET_PLATFORM_ANDROID)
 
 #include <pthread.h>
 #include <unistd.h>

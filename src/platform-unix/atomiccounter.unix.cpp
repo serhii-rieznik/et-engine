@@ -7,7 +7,7 @@
 
 #include <et/core/et.h>
 
-#if (!ET_PLATFORM_WIN)
+#if (ET_PLATFORM_IOS | ET_PLATFORM_MAC | ET_PLATFORM_ANDROID)
 
 #if (ET_PLATFORM_ANDROID)
 #	include <sys/atomics.h>

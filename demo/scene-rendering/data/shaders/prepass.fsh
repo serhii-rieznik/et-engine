@@ -24,10 +24,8 @@ void main()
 	outNormal.x = dot(sampledNormal, vTBNr0);
 	outNormal.y = dot(sampledNormal, vTBNr1);
 	outNormal.z = dot(sampledNormal, vTBNr2);
-	
-	etFragmentOut = vec4(diffuseColor.xyz * etTexture2D(texture_diffuse, TexCoord).xyz, 1.0);
-	
 	vec3 mNormal = mix(vNormalWS, outNormal, tangentValue);
-	
+
+	etFragmentOut = vec4(diffuseColor.xyz * etTexture2D(texture_diffuse, TexCoord).xyz, 1.0);
 	etFragmentOut1 = vec4(encodeNormal(vNormalWS), 0.0, 0.0);
 }

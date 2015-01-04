@@ -22,14 +22,10 @@ LRESULT CALLBACK mainWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 struct RenderContextData
 {
-	bool initialized;
-	HWND hWnd;
-	HDC hDC;
-	HGLRC hGLRC;
-
-	RenderContextData() : 
-		initialized(false), hWnd(0), hDC(0), hGLRC(0) { }
-
+	bool initialized = false;
+	HWND hWnd = nullptr;
+	HDC hDC = nullptr;
+	HGLRC hGLRC = nullptr;
 	RenderContextData& release();
 };
 

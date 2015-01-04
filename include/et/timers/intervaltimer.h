@@ -14,7 +14,7 @@ namespace et
 	class IntervalTimer
 	{
 	public:
-		IntervalTimer(bool runNow) : _startTimeMSec(0), _endTimeMSec(0)
+		IntervalTimer(bool runNow = false)
 			{ if (runNow) run(); }
 
 		void run() 
@@ -35,8 +35,8 @@ namespace et
 			{ return static_cast<float>(queryContiniousTimeInMilliSeconds() - _runTimeMSec) / 1000.0f; }
 
 	private:
-		uint64_t _runTimeMSec;
-		uint64_t _startTimeMSec;
-		uint64_t _endTimeMSec;
+		uint64_t _runTimeMSec = 0;
+		uint64_t _startTimeMSec = 0;
+		uint64_t _endTimeMSec = 0;
 	};
 }
