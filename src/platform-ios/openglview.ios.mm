@@ -7,7 +7,6 @@
  */
 
 #include <et/opengl/opengl.h>
-#include <et/opengl/openglcaps.h>
 #include <et/rendering/rendercontext.h>
 #include <et/app/applicationnotifier.h>
 
@@ -219,7 +218,8 @@ using namespace et;
 			{
 				_multisampledFramebuffer = _rc->framebufferFactory().createFramebuffer(size,
 					"__et_multisampled_framebuffer__", TextureFormat::RGBA8, TextureFormat::RGBA, DataType::UnsignedChar,
-					TextureFormat::Depth16, TextureFormat::Depth, DataType::UnsignedInt, true, OpenGLCapabilities().maxSamples());
+					TextureFormat::Depth16, TextureFormat::Depth, DataType::UnsignedInt, true,
+					RenderingCapabilities::instance().maxSamples());
 			}
 			else
 			{

@@ -25,7 +25,6 @@ public:
 
 		void reloadObject(LoadableObject::Pointer o, ObjectsCache& c)
 			{ owner->reloadObject(o, c); }
-
 	};
 
 	IntrusivePtr<Loader> loader;
@@ -47,9 +46,9 @@ ProgramFactory::ProgramFactory(RenderContext* rc) : APIObjectFactory(rc)
 		"#define etMediump	mediump\n"
 		"#define etHighp	highp\n";
 
-	if (OpenGLCapabilities().versionShortString() == "300")
+	if (OpenGLCapabilities::instance().versionShortString() >= "300")
 	{
-		_commonHeader = "#version " + OpenGLCapabilities().glslVersionShortString() + " es\n" +
+		_commonHeader = "#version " + OpenGLCapabilities::instance().glslVersionShortString() + " es\n" +
 			_commonHeader + "#define ET_OPENGL_ES_3\n";
 	}
 	else

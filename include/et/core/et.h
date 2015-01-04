@@ -73,10 +73,10 @@ namespace et
 		typedef const T& const_reference;
 		
 		pointer allocate(size_t n)
-			{ return reinterpret_cast<pointer>(sharedBlockAllocator().alloc(n * sizeof(T))); }
+			{ return reinterpret_cast<pointer>(sharedBlockAllocator().allocate(n * sizeof(T))); }
 		
 		void deallocate(void* ptr, size_t)
-			{ sharedBlockAllocator().free(ptr); }
+			{ sharedBlockAllocator().release(ptr); }
 	};
 }
 
