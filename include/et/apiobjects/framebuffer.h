@@ -1,7 +1,7 @@
 /*
  * This file is part of `et engine`
- * Copyright 2009-2014 by Sergey Reznik
- * Please, do not modify content without approval.
+ * Copyright 2009-2015 by Sergey Reznik
+ * Please, modify content only if you know what are you doing.
  *
  */
 
@@ -34,7 +34,7 @@ namespace et
 		bool isCubemap = false;
 	};
 
-	class Framebuffer : public Object
+	class Framebuffer : public APIObject
 	{
 	public:
 		ET_DECLARE_POINTER(Framebuffer)
@@ -45,14 +45,14 @@ namespace et
 		
 		~Framebuffer();
 		
-		void addRenderTarget(const Texture& texture);
+		void addRenderTarget(const Texture::Pointer& texture);
 		void addSameRendertarget();
 
-		void setDepthTarget(const Texture& texture);
-		void setDepthTarget(const Texture& texture, uint32_t target);
+		void setDepthTarget(const Texture::Pointer& texture);
+		void setDepthTarget(const Texture::Pointer& texture, uint32_t target);
 
-		void setCurrentRenderTarget(const Texture& texture);
-		void setCurrentRenderTarget(const Texture& texture, TextureTarget target);
+		void setCurrentRenderTarget(const Texture::Pointer& texture);
+		void setCurrentRenderTarget(const Texture::Pointer& texture, TextureTarget target);
 		void setCurrentRenderTarget(size_t index);
 		
 		void setCurrentCubemapFace(uint32_t faceIndex);
@@ -63,9 +63,6 @@ namespace et
 				
 		size_t numRendertargets() const
 			{ return _renderTargets.size(); }
-
-		uint32_t glID() const
-			{ return _id; }
 		
 		int32_t drawBuffersCount() const
 			{ return _drawBuffers; }
@@ -82,10 +79,10 @@ namespace et
 		bool hasRenderTargets() const
 			{ return !_renderTargets.empty(); }
 
-		Texture renderTarget(size_t index = 0) const
+		Texture::Pointer renderTarget(size_t index = 0) const
 			{ ET_ASSERT(index < _renderTargets.size()); return _renderTargets.at(index); }
 		
-		Texture depthBuffer() const
+		Texture::Pointer depthBuffer() const
 			{ return _depthBuffer; }
 		
 		bool isCubemap() const
@@ -110,10 +107,9 @@ namespace et
 		RenderContext* _rc;
 		FramebufferDescription _description;
 		
-		std::vector<Texture> _renderTargets;
-		Texture _depthBuffer;
+		std::vector<Texture::Pointer> _renderTargets;
+		Texture::Pointer _depthBuffer;
 		
-		uint32_t _id = 0;
 		uint32_t _colorRenderbuffer = 0;
 		uint32_t _depthRenderbuffer = 0;
 		int32_t _drawBuffers = 1;

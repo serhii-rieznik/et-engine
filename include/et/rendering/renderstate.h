@@ -1,14 +1,17 @@
 /*
  * This file is part of `et engine`
- * Copyright 2009-2014 by Sergey Reznik
- * Please, do not modify content without approval.
+ * Copyright 2009-2015 by Sergey Reznik
+ * Please, modify content only if you know what are you doing.
  *
  */
 
 #pragma once
 
 #include <et/core/containers.h>
-#include <et/apiobjects/objects.h>
+#include <et/apiobjects/texture.h>
+#include <et/apiobjects/program.h>
+#include <et/apiobjects/framebuffer.h>
+#include <et/apiobjects/vertexarrayobject.h>
 
 namespace et
 {
@@ -129,7 +132,7 @@ namespace et
 		 */
 		void setActiveTextureUnit(uint32_t unit, bool force = false);
 		void bindTexture(uint32_t unit, uint32_t texture, TextureTarget target, bool force = false);
-		void bindTexture(uint32_t unit, const Texture& texture, bool force = false);
+		void bindTexture(uint32_t unit, const Texture::Pointer& texture, bool force = false);
 
 		/*
 		 * Programs
@@ -219,7 +222,7 @@ namespace et
 		 */
 		void programDeleted(uint32_t);
 		void textureDeleted(uint32_t);
-		void vertexArrayDeleted(uint32_t, uint32_t, uint32_t);
+		void vertexArrayDeleted(uint32_t);
 		void vertexBufferDeleted(uint32_t);
 		void indexBufferDeleted(uint32_t);
 		void frameBufferDeleted(uint32_t);

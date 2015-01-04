@@ -1,11 +1,10 @@
 /*
  * This file is part of `et engine`
- * Copyright 2009-2014 by Sergey Reznik
- * Please, do not modify content without approval.
+ * Copyright 2009-2015 by Sergey Reznik
+ * Please, modify content only if you know what are you doing.
  *
  */
 
-#include <fstream>
 #include <et/app/application.h>
 #include <et/rendering/rendercontext.h>
 #include <et/scene3d/scene3d.h>
@@ -259,26 +258,26 @@ Element::Pointer Scene::createElementOfType(size_t type, Element* parent)
 	switch (type)
 	{
 	case ElementType_Container:
-		return ElementContainer::Pointer::create(std::string(), parent);
+		return ElementContainer::Pointer::create(emptyString, parent);
 
 	case ElementType_Mesh:
-		return Mesh::Pointer::create(std::string(), parent);
+		return Mesh::Pointer::create(emptyString, parent);
 
 	case ElementType_SupportMesh:
-		return SupportMesh::Pointer::create(std::string(), parent);
+		return SupportMesh::Pointer::create(emptyString, parent);
 
 	case ElementType_Storage:
-		return Scene3dStorage::Pointer::create(std::string(), parent);
+		return Scene3dStorage::Pointer::create(emptyString, parent);
 
 	case ElementType_Camera:
-		return CameraElement::Pointer::create(std::string(), parent);
+		return CameraElement::Pointer::create(emptyString, parent);
 
 	default:
 		{
 			if (_externalFactory)
 				return _externalFactory->createElementOfType(type, parent);
 			else
-				return ElementContainer::Pointer::create(std::string(), parent);
+				return ElementContainer::Pointer::create(emptyString, parent);
 		}
 	}
 }

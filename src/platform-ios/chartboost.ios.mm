@@ -1,16 +1,16 @@
 /*
  * This file is part of `et engine`
- * Copyright 2009-2012 by Sergey Reznik
- * Please, do not modify contents without approval.
+ * Copyright 2009-2015 by Sergey Reznik
+ * Please, modify content only if you know what are you doing.
  *
  */
-
-#include <et/app/application.h>
-#include <et/app/applicationnotifier.h>
 
 #if (ET_HAVE_CHARTBOOST)
 
 #include <chartboost.h>
+
+#include <et/app/application.h>
+#include <et/app/applicationnotifier.h>
 #include "chartboost.ios.h"
 
 using namespace et;
@@ -184,5 +184,7 @@ void ChartBoostProxy::showMoreGames()
 @end
 
 #else 
+#
 #	warning define ET_HAVE_CHARTBOOST to compile Chartboost
+#
 #endif // ET_HAVE_CHARTBOOST

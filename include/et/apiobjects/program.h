@@ -1,13 +1,14 @@
 /*
  * This file is part of `et engine`
- * Copyright 2009-2014 by Sergey Reznik
- * Please, do not modify content without approval.
+ * Copyright 2009-2015 by Sergey Reznik
+ * Please, modify content only if you know what are you doing.
  *
  */
 
 #pragma once
 
 #include <unordered_map>
+#include <et/apiobjects/apiobject.h>
 #include <et/rendering/rendering.h>
 
 namespace et
@@ -15,7 +16,7 @@ namespace et
 	class Camera;
 	class RenderState;
 	
-	class Program : public LoadableObject
+	class Program : public APIObject
 	{
 	public:
 		ET_DECLARE_POINTER(Program)
@@ -51,13 +52,7 @@ namespace et
 		Program::Uniform getUniform(const std::string& uniform) const;
 
 		void validate() const;
-
-		uint32_t glID() const
-			{ return _glID; }
 		
-		bool loaded() const
-			{ return _glID != 0; }
-
 		int modelViewMatrixUniformLocation() const 
 			{ return _mModelViewLocation; }
 
@@ -152,8 +147,6 @@ namespace et
 
 	private:
 		RenderContext* _rc;
-		
-		uint32_t _glID;
 		
 		Program::UniformMap _uniforms;
 		std::vector<Attribute> _attributes;

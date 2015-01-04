@@ -1,7 +1,7 @@
 /*
  * This file is part of `et engine`
- * Copyright 2009-2014 by Sergey Reznik
- * Please, do not modify content without approval.
+ * Copyright 2009-2015 by Sergey Reznik
+ * Please, modify content only if you know what are you doing.
  *
  */
 
@@ -242,6 +242,15 @@ namespace et
 		max
 	};
 	
+	enum class MapBufferMode
+	{
+		ReadOnly,
+		WriteOnly,
+		ReadWrite,
+		
+		max
+	};
+	
 	enum : uint32_t
 	{
 		VertexAttributeUsage_max = static_cast<uint32_t>(VertexAttributeUsage::max),
@@ -251,6 +260,7 @@ namespace et
 
 		TextureTarget_max = static_cast<uint32_t>(TextureTarget::max),
 		TextureFormat_max = static_cast<uint32_t>(TextureFormat::max),
+		MapBufferMode_max = static_cast<uint32_t>(MapBufferMode::max),
 		
 		InvalidIndex = static_cast<uint32_t>(-1),
 		InvalidShortIndex = static_cast<uint16_t>(-1),

@@ -1,14 +1,9 @@
 /*
 * This file is part of `et engine`
-* Copyright 2009-2012 by Sergey Reznik
-* Please, do not modify contents without approval.
+* Copyright 2009-2015 by Sergey Reznik
+* Please, modify content only if you know what are you doing.
 *
 */
-
-#include <fstream>
-#include <et/core/tools.h>
-#include <et/core/containers.h>
-#include <et/locale/locale.h>
 
 #if (ET_PLATFORM_ANDROID)
 
@@ -16,12 +11,12 @@ using namespace et;
 
 std::string locale::time()
 {
-	return std::string();
+	return emptyString;
 }
 
 std::string locale::date()
 {
-	return std::string();
+	return emptyString;
 }
 
 std::string locale::currentLocale()

@@ -1,7 +1,7 @@
  /*
  * This file is part of `et engine`
- * Copyright 2009-2014 by Sergey Reznik
- * Please, do not modify content without approval.
+ * Copyright 2009-2015 by Sergey Reznik
+ * Please, modify content only if you know what are you doing.
  *
  */
 
@@ -13,9 +13,7 @@
 #include <et/platform-ios/applicationdelegate.h>
 #include <et/rendering/rendercontext.h>
 
-#if defined(ET_EMBEDDED_APPLICATION)
-#	include <et/opengl/openglcaps.h>
-#else
+#if !defined(ET_EMBEDDED_APPLICATION)
 #	include <et/platform-ios/openglviewcontroller.h>
 #endif
 

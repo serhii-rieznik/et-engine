@@ -1,11 +1,10 @@
 /*
  * This file is part of `et engine`
- * Copyright 2009-2012 by Sergey Reznik
- * Please, do not modify contents without approval.
+ * Copyright 2009-2015 by Sergey Reznik
+ * Please, modify content only if you know what are you doing.
  *
  */
 
-#include <et/opengl/opengl.h>
 #include <et/app/application.h>
 
 #if (ET_PLATFORM_IOS)
@@ -198,12 +197,12 @@ void ImagePickerPrivate::pick(ImagePickerSource s)
 		TextureDescription::Pointer result = TextureDescription::Pointer::create();
 		result->size.x = (int)CGImageGetWidth(cgImage);
 		result->size.y = (int)CGImageGetHeight(cgImage);
-		result->target = GL_TEXTURE_2D;
-		result->internalformat = GL_RGBA;
-		result->format = GL_RGBA;
-		result->type = GL_UNSIGNED_BYTE;
+		result->target = TextureTarget::Texture_2D;
+		result->internalformat = TextureFormat::RGBA;
+		result->format = TextureFormat::RGBA;
+		result->type = DataType::UnsignedChar;
 		result->compressed = false;
-		result->bitsPerPixel = CGImageGetBitsPerPixel(cgImage);
+		result->bitsPerPixel = 32;
 		result->channels = result->bitsPerPixel / CGImageGetBitsPerComponent(cgImage);
 		result->mipMapCount = 1;
 		result->layersCount = 1;

@@ -151,7 +151,7 @@ void SceneRenderer::setScene(et::s3d::Scene::Pointer aScene)
 		auto mat = e->material();
 		for (size_t i = MaterialParameter_AmbientMap; i < MaterialParameter_AmbientFactor; ++i)
 		{
-			Texture tex = mat->getTexture(i);
+			Texture::Pointer tex = mat->getTexture(i);
 			if (tex.valid())
 				tex->setAnisotropyLevel(_rc, openGLCapabilites().maxAnisotropyLevel());
 		}

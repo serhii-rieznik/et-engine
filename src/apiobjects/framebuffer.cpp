@@ -1,7 +1,7 @@
 /*
  * This file is part of `et engine`
- * Copyright 2009-2014 by Sergey Reznik
- * Please, do not modify content without approval.
+ * Copyright 2009-2015 by Sergey Reznik
+ * Please, modify content only if you know what are you doing.
  *
  */
 
@@ -15,17 +15,20 @@ using namespace et;
 extern std::string FramebufferStatusToString(uint32_t status);
 
 Framebuffer::Framebuffer(RenderContext* rc, const FramebufferDescription& desc,
-	const std::string& aName) : Object(aName), _rc(rc), _description(desc)
+	const std::string& aName) : APIObject(aName), _rc(rc), _description(desc)
 {
 #if defined(ET_CONSOLE_APPLICATION)
 	ET_FAIL("Attempt to create Framebuffer in console application.");
 #else
 	checkOpenGLError("Framebuffer::Framebuffer %s", name().c_str());
 
-	glGenFramebuffers(1, &_id);
+	uint32_t framebuffer = 0;
+	glGenFramebuffers(1, &framebuffer);
 	checkOpenGLError("Framebuffer::Framebuffer -> glGenFramebuffers");
+	
+	setAPIHandle(framebuffer);
 
-	_rc->renderState().bindFramebuffer(_id);
+	_rc->renderState().bindFramebuffer(framebuffer);
 
 	bool hasColor = (_description.numColorRenderTargets > 0) &&
 		(_description.colorInternalformat != TextureFormat::Invalid) &&
@@ -44,10 +47,10 @@ Framebuffer::Framebuffer(RenderContext* rc, const FramebufferDescription& desc,
 		{
 			for (size_t i = 0; i < _description.numColorRenderTargets; ++i)
 			{ 
-				Texture c;
+				Texture::Pointer target;
 				if (_description.isCubemap)
 				{
-					c = _rc->textureFactory().genCubeTexture(_description.colorInternalformat, _description.size.x,
+					target = _rc->textureFactory().genCubeTexture(_description.colorInternalformat, _description.size.x,
 						_description.colorFormat, _description.colorType, name() + "_color_" + intToStr(i));
 				}
 				else 
@@ -55,12 +58,12 @@ Framebuffer::Framebuffer(RenderContext* rc, const FramebufferDescription& desc,
 					size_t dataSize = _description.size.square() *
 						bitsPerPixelForTextureFormat(_description.colorInternalformat, _description.colorType) / 8;
 					
-					c = _rc->textureFactory().genTexture(TextureTarget::Texture_2D, _description.colorInternalformat,
+					target = _rc->textureFactory().genTexture(TextureTarget::Texture_2D, _description.colorInternalformat,
 						_description.size, _description.colorFormat, _description.colorType,
 						BinaryDataStorage(dataSize, 0), name() + "_color_" + intToStr(i));
 				}
-				c->setWrap(rc, TextureWrap::ClampToEdge, TextureWrap::ClampToEdge);
-				addRenderTarget(c);
+				target->setWrap(rc, TextureWrap::ClampToEdge, TextureWrap::ClampToEdge);
+				addRenderTarget(target);
 			}
 		}
 		checkStatus();
@@ -74,10 +77,10 @@ Framebuffer::Framebuffer(RenderContext* rc, const FramebufferDescription& desc,
 		}
 		else 
 		{
-			Texture d;
+			Texture::Pointer depthTarget;
 			if (_description.isCubemap && (openGLCapabilites().version() == OpenGLVersion_3x))
 			{
-				d = _rc->textureFactory().genCubeTexture(_description.depthInternalformat, _description.size.x,
+				depthTarget = _rc->textureFactory().genCubeTexture(_description.depthInternalformat, _description.size.x,
 					_description.depthFormat, _description.depthType, name() + "_depth");
 			}
 			else 
@@ -85,16 +88,12 @@ Framebuffer::Framebuffer(RenderContext* rc, const FramebufferDescription& desc,
 				size_t dataSize = _description.size.square() *
 					bitsPerPixelForTextureFormat(_description.depthInternalformat, _description.depthType) / 8;
 				
-				d = _rc->textureFactory().genTexture(TextureTarget::Texture_2D, _description.depthInternalformat,
+				depthTarget = _rc->textureFactory().genTexture(TextureTarget::Texture_2D, _description.depthInternalformat,
 					_description.size, _description.depthFormat, _description.depthType,
 					BinaryDataStorage(dataSize, 0), name() + "_depth");
 			}
-			
-			if (d.valid())
-			{
-				d->setWrap(rc, TextureWrap::ClampToEdge, TextureWrap::ClampToEdge);
-				setDepthTarget(d);
-			}
+			depthTarget->setWrap(rc, TextureWrap::ClampToEdge, TextureWrap::ClampToEdge);
+			setDepthTarget(depthTarget);
 		}
 		checkStatus();
 	}
@@ -106,15 +105,17 @@ Framebuffer::Framebuffer(RenderContext* rc, const FramebufferDescription& desc,
 		glDrawBuffer(GL_NONE);
 	}
 #	endif
+	
 #endif
 }
 
 Framebuffer::Framebuffer(RenderContext* rc, uint32_t fboId, const std::string& aName) :
-	Object(aName), _rc(rc), _id(fboId)
+	APIObject(aName), _rc(rc)
 {
 #if !defined(ET_CONSOLE_APPLICATION)
 	if (glIsFramebuffer(fboId))
 	{
+		setAPIHandle(fboId);
 		rc->renderState().bindFramebuffer(fboId);
 		
 		GLint attachmentType = 0;
@@ -143,7 +144,8 @@ Framebuffer::Framebuffer(RenderContext* rc, uint32_t fboId, const std::string& a
 Framebuffer::~Framebuffer()
 {
 #if !defined(ET_CONSOLE_APPLICATION)
-	_rc->renderState().frameBufferDeleted(_id);
+	uint32_t framebuffer = static_cast<uint32_t>(apiHandle());
+	_rc->renderState().frameBufferDeleted(framebuffer);
 	
 	if (_colorRenderbuffer && glIsRenderbuffer(_colorRenderbuffer))
 	{
@@ -157,9 +159,9 @@ Framebuffer::~Framebuffer()
 		checkOpenGLError("glDeleteRenderbuffers");
 	}
 	
-	if (glIsFramebuffer(_id))
+	if (glIsFramebuffer(framebuffer))
 	{
-		glDeleteFramebuffers(1, &_id);
+		glDeleteFramebuffers(1, &framebuffer);
 		checkOpenGLError("glDeleteFramebuffers");
 	}
 #endif
@@ -168,36 +170,41 @@ Framebuffer::~Framebuffer()
 bool Framebuffer::checkStatus()
 {
 #if (!defined(ET_CONSOLE_APPLICATION) && ET_DEBUG)
-	_rc->renderState().bindFramebuffer(_id);
+	_rc->renderState().bindFramebuffer(static_cast<uint32_t>(apiHandle()));
+	
 	uint32_t status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+	
 	if (status != GL_FRAMEBUFFER_COMPLETE)
 		log::error("%s for %s", FramebufferStatusToString(status).c_str(), name().c_str());
+	
 	return status == GL_FRAMEBUFFER_COMPLETE;
 #else
+	
 	return true;
+	
 #endif
 }
 
-void Framebuffer::addRenderTarget(const Texture& rt)
+void Framebuffer::addRenderTarget(const Texture::Pointer& rt)
 {
 #if !defined(ET_CONSOLE_APPLICATION)
 	if (rt.invalid() || (rt->size() != _description.size)) return;
-	ET_ASSERT(glIsTexture(rt->glID()));
+	ET_ASSERT(glIsTexture(static_cast<uint32_t>(rt->apiHandle())));
 
-	_rc->renderState().bindFramebuffer(_id);
+	_rc->renderState().bindFramebuffer(static_cast<uint32_t>(apiHandle()));
 	
 	auto target = drawBufferTarget(_renderTargets.size());
 
 	if (rt->target() == TextureTarget::Texture_2D)
 	{
-		glFramebufferTexture2D(GL_FRAMEBUFFER, target, GL_TEXTURE_2D, rt->glID(), 0);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, target, GL_TEXTURE_2D, static_cast<uint32_t>(rt->apiHandle()), 0);
 		checkOpenGLError("glFramebufferTexture2D(...) - %s", name().c_str());
 	}
 	else if (rt->target() == TextureTarget::Texture_Cube)
 	{
 		for (GLenum i = 0; i < 6; ++i)
 		{
-			glFramebufferTexture2D(GL_FRAMEBUFFER, target, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, rt->glID(), 0);
+			glFramebufferTexture2D(GL_FRAMEBUFFER, target, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, static_cast<uint32_t>(rt->apiHandle()), 0);
 			checkOpenGLError("glFramebufferTexture2D(...) - %s", name().c_str());
 		}
 	}
@@ -207,17 +214,17 @@ void Framebuffer::addRenderTarget(const Texture& rt)
 #endif
 }
 
-void Framebuffer::setDepthTarget(const Texture& rt)
+void Framebuffer::setDepthTarget(const Texture::Pointer& rt)
 {
 #if !defined(ET_CONSOLE_APPLICATION)
 	if (rt.invalid() || (rt->size() != _description.size)) return;
 
 	_depthBuffer = rt;
 	
-	_rc->renderState().bindFramebuffer(_id);
+	_rc->renderState().bindFramebuffer(static_cast<uint32_t>(apiHandle()));
 	if (_depthBuffer->target() == TextureTarget::Texture_2D)
 	{
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, _depthBuffer->glID(), 0);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, static_cast<uint32_t>(_depthBuffer->apiHandle()), 0);
 		checkOpenGLError("glFramebufferTexture2D");
 	}
 	else if (_depthBuffer->target() == TextureTarget::Texture_Cube)
@@ -225,20 +232,20 @@ void Framebuffer::setDepthTarget(const Texture& rt)
 		for (GLenum i = 0; i < 6; ++i)
 		{
 			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
-				GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, _depthBuffer->glID(), 0);
+				GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, static_cast<uint32_t>(_depthBuffer->apiHandle()), 0);
 			checkOpenGLError("glFramebufferTexture2D(...) - %s", name().c_str());
 		}
 	}
 #endif
 }
 
-void Framebuffer::setDepthTarget(const Texture& texture, uint32_t target)
+void Framebuffer::setDepthTarget(const Texture::Pointer& texture, uint32_t target)
 {
 #if !defined(ET_CONSOLE_APPLICATION)
 	if (texture.invalid() || (texture->size() != _description.size)) return;
 	
-	_rc->renderState().bindFramebuffer(_id);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, target, texture->glID(), 0);
+	_rc->renderState().bindFramebuffer(static_cast<uint32_t>(apiHandle()));
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, target, static_cast<uint32_t>(texture->apiHandle()), 0);
 	checkOpenGLError("glFramebufferTexture2D(...) - %s", name().c_str());
 #endif
 }
@@ -248,14 +255,14 @@ void Framebuffer::addSameRendertarget()
 #if !defined(ET_CONSOLE_APPLICATION)
 	if (_renderTargets.empty()) return;
 		
-	Texture basic = _renderTargets.front();
+	Texture::Pointer basic = _renderTargets.front();
 	
 	std::string texName = name() + "_color_" + intToStr(_renderTargets.size() + 1);
 	
-	Texture c;
+	Texture::Pointer target;
 	if (_description.isCubemap)
 	{
-		c = _rc->textureFactory().genCubeTexture(basic->internalFormat(), basic->width(),
+		target = _rc->textureFactory().genCubeTexture(basic->internalFormat(), basic->width(),
 			basic->format(), basic->dataType(), texName);
 	}
 	else
@@ -263,16 +270,16 @@ void Framebuffer::addSameRendertarget()
 		BinaryDataStorage emptyData(basic->size().square() *
 			bitsPerPixelForTextureFormat(basic->internalFormat(), basic->dataType()) / 8, 0);
 		
-		c = _rc->textureFactory().genTexture(basic->target(), basic->internalFormat(),
+		target = _rc->textureFactory().genTexture(basic->target(), basic->internalFormat(),
 			basic->size(), basic->format(), basic->dataType(), emptyData, texName);
 	}
 	
-	c->setWrap(_rc, TextureWrap::ClampToEdge, TextureWrap::ClampToEdge);
-	addRenderTarget(c);
+	target->setWrap(_rc, TextureWrap::ClampToEdge, TextureWrap::ClampToEdge);
+	addRenderTarget(target);
 #endif 
 }
 
-void Framebuffer::setCurrentRenderTarget(const Texture& texture)
+void Framebuffer::setCurrentRenderTarget(const Texture::Pointer& texture)
 {
 #if !defined(ET_CONSOLE_APPLICATION)
 	ET_ASSERT(texture.valid());
@@ -280,24 +287,24 @@ void Framebuffer::setCurrentRenderTarget(const Texture& texture)
 #endif
 }
 
-void Framebuffer::setCurrentRenderTarget(const Texture& texture, TextureTarget target)
+void Framebuffer::setCurrentRenderTarget(const Texture::Pointer& texture, TextureTarget target)
 {
 #if !defined(ET_CONSOLE_APPLICATION)
 	ET_ASSERT(texture.valid());
-	_rc->renderState().bindFramebuffer(_id);
+	_rc->renderState().bindFramebuffer(static_cast<uint32_t>(apiHandle()));
 
 	if (target == TextureTarget::Texture_Cube)
 	{
 		for (GLenum i = 0; i < 6; ++i)
 		{
 			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
-				GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, texture->glID(), 0);
+				GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, static_cast<uint32_t>(texture->apiHandle()), 0);
 			checkOpenGLError("glFramebufferTexture2D");
 		}
 	}
 	else if (target == TextureTarget::Texture_2D)
 	{
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture->glID(), 0);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, static_cast<uint32_t>(texture->apiHandle()), 0);
 		checkOpenGLError("glFramebufferTexture2D");
 	}
 	else
@@ -322,13 +329,13 @@ void Framebuffer::setCurrentCubemapFace(uint32_t faceIndex)
 #if !defined(ET_CONSOLE_APPLICATION)
 	ET_ASSERT(_description.isCubemap && (faceIndex < 6));
 	
-	_rc->renderState().bindFramebuffer(_id);
+	_rc->renderState().bindFramebuffer(static_cast<uint32_t>(apiHandle()));
 	
 	uint32_t target = GL_TEXTURE_CUBE_MAP_POSITIVE_X + faceIndex;
 	
 	if (_renderTargets[0].valid())
 	{
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, target, _renderTargets[0]->glID(), 0);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, target, static_cast<uint32_t>(_renderTargets[0]->apiHandle()), 0);
 		checkOpenGLError("setCurrentCubemapFace -> color");
 	}
 	
@@ -337,7 +344,7 @@ void Framebuffer::setCurrentCubemapFace(uint32_t faceIndex)
 		if (openGLCapabilites().version() == OpenGLVersion_2x)
 			target = GL_TEXTURE_2D;
 		
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, target, _depthBuffer->glID(), 0);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, target, static_cast<uint32_t>(_depthBuffer->apiHandle()), 0);
 		checkOpenGLError("setCurrentCubemapFace -> depth");
 	}
 #endif
@@ -352,7 +359,7 @@ void Framebuffer::createOrUpdateColorRenderbuffer()
 		checkOpenGLError("glGenRenderbuffers");
 	}
 	
-	_rc->renderState().bindFramebuffer(_id);
+	_rc->renderState().bindFramebuffer(static_cast<uint32_t>(apiHandle()));
 	_rc->renderState().bindRenderbuffer(_colorRenderbuffer);
 
 	if (_description.numSamples > 1)
@@ -381,7 +388,7 @@ void Framebuffer::createOrUpdateDepthRenderbuffer()
 		checkOpenGLError("glGenRenderbuffers");
 	}
 	
-	_rc->renderState().bindFramebuffer(_id);
+	_rc->renderState().bindFramebuffer(static_cast<uint32_t>(apiHandle()));
 	_rc->renderState().bindRenderbuffer(_depthRenderbuffer);
 	
 	if (_description.numSamples > 1)
@@ -464,8 +471,8 @@ void Framebuffer::forceSize(const vec2i& sz)
 void Framebuffer::resolveMultisampledTo(Framebuffer::Pointer framebuffer)
 {
 #if !defined(ET_CONSOLE_APPLICATION)
-	_rc->renderState().bindReadFramebuffer(_id);
-	_rc->renderState().bindDrawFramebuffer(framebuffer->glID());
+	_rc->renderState().bindReadFramebuffer(static_cast<uint32_t>(apiHandle()));
+	_rc->renderState().bindDrawFramebuffer(static_cast<uint32_t>(framebuffer->apiHandle()));
 	
 #	if (ET_PLATFORM_IOS)
 
@@ -494,7 +501,7 @@ void Framebuffer::invalidate(bool color, bool depth)
 {
 #if (ET_PLATFORM_IOS) && !defined(ET_CONSOLE_APPLICATION)
 	
-	_rc->renderState().bindReadFramebuffer(_id);
+	_rc->renderState().bindReadFramebuffer(static_cast<uint32_t>(apiHandle()));
 	
 	GLsizei numDiscards = 0;
 	GLenum discards[2] = { };
@@ -541,7 +548,7 @@ void Framebuffer::setDrawBuffersCount(int32_t value)
 {
 	_drawBuffers = value;
 	
-	if (_rc->renderState().actualState().boundFramebuffer == _id)
+	if (_rc->renderState().actualState().boundFramebuffer == apiHandle())
 		_rc->renderState().setDrawBuffersCount(value);
 }
 

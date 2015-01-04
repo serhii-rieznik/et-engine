@@ -1,7 +1,7 @@
 /*
  * This file is part of `et engine`
- * Copyright 2009-2014 by Sergey Reznik
- * Please, do not modify content without approval.
+ * Copyright 2009-2015 by Sergey Reznik
+ * Please, modify content only if you know what are you doing.
  *
  */
 
@@ -29,9 +29,9 @@ std::string et::selectFile(const StringList&, SelectFileMode mode, const std::st
 	of.nMaxFile = MAX_PATH;
 
 	if (mode == SelectFileMode_Open)
-		return GetOpenFileName(&of) ? std::string(filename) : std::string();
+		return GetOpenFileName(&of) ? std::string(filename) : emptyString;
 	else 
-		return GetSaveFileName(&of) ? std::string(filename) : std::string();
+		return GetSaveFileName(&of) ? std::string(filename) : emptyString;
 }
 
 #endif // ET_PLATFORM_WIN

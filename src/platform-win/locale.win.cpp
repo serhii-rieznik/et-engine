@@ -1,7 +1,7 @@
 /*
 * This file is part of `et engine`
-* Copyright 2009-2014 by Sergey Reznik
-* Please, do not modify content without approval.
+* Copyright 2009-2015 by Sergey Reznik
+* Please, modify content only if you know what are you doing.
 *
 */
 
@@ -11,7 +11,6 @@
 
 #if (ET_PLATFORM_WIN)
 
-#include <fstream>
 #include <Windows.h>
 
 using namespace et;

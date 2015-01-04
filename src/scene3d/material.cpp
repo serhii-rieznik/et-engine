@@ -1,17 +1,16 @@
 /*
 * This file is part of `et engine`
-* Copyright 2009-2014 by Sergey Reznik
-* Please, do not modify content without approval.
+* Copyright 2009-2015 by Sergey Reznik
+* Please, modify content only if you know what are you doing.
 *
 */
 
-#include <libxml/tree.h>
-#include <libxml/parser.h>
+#include <external/libxml/tree.h>
+#include <external/libxml/parser.h>
 
 #include <et/core/serialization.h>
 #include <et/core/tools.h>
 #include <et/core/cout.h>
-
 #include <et/app/application.h>
 #include <et/rendering/rendercontext.h>
 #include <et/scene3d/material.h>
@@ -19,7 +18,8 @@
 using namespace et;
 using namespace et::s3d;
 
-static const Texture _emptyTexture;
+static const Texture::Pointer _emptyTexture;
+
 static const std::string _emptyString;
 static const vec4 _emptyVector;
 
@@ -239,7 +239,7 @@ void Material::serializeBinary(std::ostream& stream) const
 	serializeInt(stream, MaterialParameter_max);
 	for (size_t i = 0; i < MaterialParameter_max; ++i)
 	{
-		const Texture& t = _defaultTextureParameters[i].value;
+		const Texture::Pointer& t = _defaultTextureParameters[i].value;
 
 		serializeInt(stream, _defaultIntParameters[i].set);
 		serializeInt(stream, _defaultIntParameters[i].value);
@@ -251,7 +251,7 @@ void Material::serializeBinary(std::ostream& stream) const
 		serializeVector(stream, _defaultVectorParameters[i].value);
 
 		serializeInt(stream, _defaultTextureParameters[i].set);
-		serializeString(stream, t.valid() ? t->origin() : std::string());
+		serializeString(stream, t.valid() ? t->origin() : emptyString);
 
 		serializeInt(stream, _defaultStringParameters[i].set);
 		serializeString(stream, _defaultStringParameters[i].value);
@@ -282,7 +282,7 @@ void Material::serializeBinary(std::ostream& stream) const
 	for (const auto& i : _customTextureParameters)
 	{
 		serializeInt(stream, i.first);
-		std::string path = i.second.valid() ? i.second->origin() : std::string();
+		std::string path = i.second.valid() ? i.second->origin() : emptyString;
 		serializeInt(stream, i.first);
 		serializeString(stream, path);
 	}
@@ -567,38 +567,18 @@ void Material::deserializeReadable(std::istream& stream, RenderContext* rc, Obje
 	xmlCleanupParser();
 }
 
-Texture Material::loadTexture(RenderContext* rc, const std::string& path, const std::string& basePath,
+Texture::Pointer Material::loadTexture(RenderContext* rc, const std::string& path, const std::string& basePath,
 	ObjectsCache& cache, bool async)
 {
-	if (path.empty()) return Texture();
+	if (path.empty())
+		return Texture::Pointer();
 
 	auto paths = application().resolveFolderNames(basePath);
 	application().pushSearchPaths(paths);
-	Texture t = rc->textureFactory().loadTexture(normalizeFilePath(path), cache, async, this);
+	auto result = rc->textureFactory().loadTexture(normalizeFilePath(path), cache, async, this);
 	application().popSearchPaths(paths.size());
 	
-	/*
-	if (fileExists(path))
-	{
-		t ;
-	}
-	else
-	{
-		std::string relativePath = normalizeFilePath(basePath + getFileName(path));
-		if (fileExists(relativePath))
-		{
-			t = rc->textureFactory().loadTexture(relativePath, cache, async, this);
-		}
-		else
-		{
-			relativePath = normalizeFilePath(basePath + path);
-			if (fileExists(relativePath))
-				t = rc->textureFactory().loadTexture(relativePath, cache, async, this);
-		}
-	}
-	*/
-
-	return t;
+	return result;
 }
 
 void Material::clear()
@@ -612,9 +592,9 @@ void Material::clear()
 		_defaultVectorParameters[i].set = 0;
 		_defaultVectorParameters[i].value = vec4();
 		_defaultStringParameters[i].set = 0;
-		_defaultStringParameters[i].value = std::string();
+		_defaultStringParameters[i].value = emptyString;
 		_defaultTextureParameters[i].set = 0;
-		_defaultTextureParameters[i].value = Texture();
+		_defaultTextureParameters[i].value = Texture::Pointer();
 	}
 	
 	_customIntParameters.clear();
@@ -665,7 +645,7 @@ const std::string& Material::getString(size_t param) const
 	return i == _customStringParameters.end() ? _emptyString : i->second; 
 }
 
-const Texture& Material::getTexture(size_t param) const 
+const Texture::Pointer& Material::getTexture(size_t param) const 
 { 
 	if (param < MaterialParameter_max)
 		return _defaultTextureParameters[param].value;
@@ -698,7 +678,7 @@ void Material::setVector(size_t param, const vec4& value)
 		_customVectorParameters[param] = value; 
 }
 
-void Material::setTexture(size_t param, const Texture& value)
+void Material::setTexture(size_t param, const Texture::Pointer& value)
 {
 	if (param < MaterialParameter_max)
 		_defaultTextureParameters[param] = value;
@@ -757,7 +737,7 @@ void Material::reloadObject(LoadableObject::Pointer, ObjectsCache&)
 	*/
 }
 
-void Material::textureDidStartLoading(Texture t)
+void Material::textureDidStartLoading(Texture::Pointer t)
 {
 	ET_ASSERT(t.valid())
 	
@@ -787,7 +767,7 @@ void Material::textureDidStartLoading(Texture t)
 #endif
 }
 
-void Material::textureDidLoad(Texture t)
+void Material::textureDidLoad(Texture::Pointer t)
 {
 	ET_ASSERT(t.valid())
 	

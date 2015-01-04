@@ -1,7 +1,7 @@
 /*
  * This file is part of `et engine`
- * Copyright 2009-2014 by Sergey Reznik
- * Please, do not modify content without approval.
+ * Copyright 2009-2015 by Sergey Reznik
+ * Please, modify content only if you know what are you doing.
  *
  */
 
@@ -79,7 +79,8 @@ namespace et
 	template <>
 	struct DefaultMaterialEntry<std::string> : public DefaultMaterialEntryBase<std::string>
 	{
-		DefaultMaterialEntry() : DefaultMaterialEntryBase(std::string()) { }
+		DefaultMaterialEntry() :
+			DefaultMaterialEntryBase(emptyString) { }
 		
 		DefaultMaterialEntry& operator = (const std::string& r)
 		{
@@ -101,9 +102,9 @@ namespace et
 	};
 	
 	template <>
-	struct DefaultMaterialEntry<Texture> : public DefaultMaterialEntryBase<Texture>
+	struct DefaultMaterialEntry<Texture::Pointer> : public DefaultMaterialEntryBase<Texture::Pointer>
 	{
-		DefaultMaterialEntry& operator = (const Texture& r)
+		DefaultMaterialEntry& operator = (const Texture::Pointer& r)
 		{
 			this->value = r;
 			this->set = r.valid();
@@ -139,13 +140,13 @@ namespace et
 	typedef std::map<size_t, int> CustomIntParameters;
 	typedef std::map<size_t, float> CustomFloatParameters;
 	typedef std::map<size_t, vec4> CustomVectorParameters;
-	typedef std::map<size_t, Texture> CustomTextureParameters;
+	typedef std::map<size_t, Texture::Pointer> CustomTextureParameters;
 	typedef std::map<size_t, std::string> CustomStringParameters;
 	
 	typedef DefaultParameters<int> DefaultIntParameters;
 	typedef DefaultParameters<float> DefaultFloatParameters;
 	typedef DefaultParameters<vec4> DefaultVectorParameters;
-	typedef DefaultParameters<Texture> DefaultTextureParameters;
+	typedef DefaultParameters<Texture::Pointer> DefaultTextureParameters;
 	typedef DefaultParameters<std::string> DefaultStringParameters;
 }
 

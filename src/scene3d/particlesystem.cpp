@@ -1,7 +1,7 @@
 /*
  * This file is part of `et engine`
- * Copyright 2009-2014 by Sergey Reznik
- * Please, do not modify content without approval.
+ * Copyright 2009-2015 by Sergey Reznik
+ * Please, modify content only if you know what are you doing.
  *
  */
 
@@ -51,7 +51,7 @@ void ParticleSystem::onTimerUpdated(NotifyTimer* timer)
 	_emitter.update(timer->actualTime());
 	
 	_rc->renderState().bindVertexArray(_vao);
-	void* bufferData = bufferData = _vao->vertexBuffer()->map(0, _vertexData.data.dataSize(), VertexBufferData::MapBufferMode_WriteOnly);
+	void* bufferData = bufferData = _vao->vertexBuffer()->map(0, _vertexData.data.dataSize(), MapBufferMode::WriteOnly);
 
 	auto posOffset = _decl.elementForUsage(VertexAttributeUsage::Position).offset();
 	auto clrOffset = _decl.elementForUsage(VertexAttributeUsage::Color).offset();

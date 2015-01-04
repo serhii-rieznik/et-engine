@@ -18,8 +18,8 @@
  * INCLUDES
  *****************************************************************************/
 #include <et/core/et.h>
-#include <pvr/PVRTTexture.h>
-#include <pvr/PVRTDecompress.h>
+#include <external/pvr/PVRTTexture.h>
+#include <external/pvr/PVRTDecompress.h>
 
 /***********************************************************
 				DECOMPRESSION ROUTINES

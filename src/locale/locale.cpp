@@ -1,16 +1,13 @@
 /*
 * This file is part of `et engine`
-* Copyright 2009-2014 by Sergey Reznik
-* Please, do not modify content without approval.
+* Copyright 2009-2015 by Sergey Reznik
+* Please, modify content only if you know what are you doing.
 *
 */
 
 #include <et/core/tools.h>
 #include <et/locale/locale.h>
-
-#if (!ET_DISABLE_JSON)
-#	include <et/json/json.h>
-#endif
+#include <et/json/json.h>
 
 using namespace et;
 
@@ -134,14 +131,10 @@ et::Dictionary Locale::parseLanguageFile(const std::string& fileName)
 	/*
 	 * Try to parse JSON
 	 */
-#if (ET_DISABLE_JSON == 0)
-	
 	ValueClass vc = ValueClass_Invalid;
 	auto object = json::deserialize(fileContent.binary(), vc, false);
 	if (vc == ValueClass_Dictionary)
 		return object;
-	
-#endif
 	
 	/*
 	 * Parse custom format

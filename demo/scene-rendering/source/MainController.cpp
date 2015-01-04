@@ -50,11 +50,12 @@ void MainController::applicationDidLoad(et::RenderContext* rc)
 	_renderer.init(rc);
 	_cameraController.init(rc);
 	
-//	auto loadedScene = _loader.loadFromFile(application().resolveFileName("data/models/sibenik/sibenik.obj"));
-	
-	auto loadedScene = _loader.loadFromFile(application().resolveFileName("data/models/crytek/sponza.etm"));
-	
+#if (ET_PLATFORM_MAC)
+	auto loadedScene = _loader.loadFromFile(application().resolveFileName("/Volumes/Development/SDK/Models/crytek/sponza.etm"));
 	_renderer.setScene(loadedScene);
+#elif (ET_PLATFORM_WIN)
+#	error Do something
+#endif
 	
 	connectInputEvents();
 }

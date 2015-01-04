@@ -1,7 +1,7 @@
 /*
  * This file is part of `et engine`
- * Copyright 2009-2014 by Sergey Reznik
- * Please, do not modify content without approval.
+ * Copyright 2009-2015 by Sergey Reznik
+ * Please, modify content only if you know what are you doing.
  *
  */
 
@@ -67,16 +67,21 @@ TextureFactory::~TextureFactory()
 	ET_PIMPL_FINALIZE(TextureFactory)
 }
 
+const StringList& TextureFactory::supportedTextureExtensions() const
+{
+	return _private->supportedExtensions;
+}
+
 ObjectLoader::Pointer TextureFactory::objectLoader()
 {
 	return _private->loader;
 }
 
-Texture TextureFactory::loadTexture(const std::string& fileName, ObjectsCache& cache,
+Texture::Pointer TextureFactory::loadTexture(const std::string& fileName, ObjectsCache& cache,
 	bool async, TextureLoaderDelegate* delegate)
 {
 	if (fileName.length() == 0)
-		return Texture();
+		return Texture::Pointer();
 	
 	CriticalSectionScope lock(_csTextureLoading);
 	
@@ -97,11 +102,11 @@ Texture TextureFactory::loadTexture(const std::string& fileName, ObjectsCache& c
 		}
 		
 		if (!fileExists(file))
-			return Texture();
+			return Texture::Pointer();
 	}
 	
 	uint64_t cachedFileProperty = 0;
-    Texture texture = cache.findAnyObject(file, &cachedFileProperty);
+    Texture::Pointer texture = cache.findAnyObject(file, &cachedFileProperty);
 	if (texture.invalid())
 	{
 		TextureDescription::Pointer desc =
@@ -118,7 +123,7 @@ Texture TextureFactory::loadTexture(const std::string& fileName, ObjectsCache& c
 		{
 			bool calledFromAnotherThread = Threading::currentThread() != threading().renderingThread();
 			
-			texture = Texture::create(renderContext(), desc, desc->origin(), async || calledFromAnotherThread);
+			texture = Texture::Pointer::create(renderContext(), desc, desc->origin(), async || calledFromAnotherThread);
 			cache.manage(texture, _private->loader);
 			
 			if (async)
@@ -158,7 +163,7 @@ Texture TextureFactory::loadTexture(const std::string& fileName, ObjectsCache& c
 	return texture;
 }
 
-Texture TextureFactory::genTexture(TextureTarget target, TextureFormat internalformat, const vec2i& size,
+Texture::Pointer TextureFactory::genTexture(TextureTarget target, TextureFormat internalformat, const vec2i& size,
 	TextureFormat format, DataType type, const BinaryDataStorage& data, const std::string& id)
 {
 	TextureDescription::Pointer desc = TextureDescription::Pointer::create();
@@ -178,10 +183,10 @@ Texture TextureFactory::genTexture(TextureTarget target, TextureFormat internalf
 	
 	desc->data = data;
 	
-	return Texture::create(renderContext(), desc, id, false);
+	return Texture::Pointer::create(renderContext(), desc, id, false);
 }
 
-Texture TextureFactory::genCubeTexture(TextureFormat internalformat, uint32_t size, TextureFormat format,
+Texture::Pointer TextureFactory::genCubeTexture(TextureFormat internalformat, uint32_t size, TextureFormat format,
 	DataType type, const std::string& id)
 {
 	TextureDescription::Pointer desc = TextureDescription::Pointer::create();
@@ -200,15 +205,15 @@ Texture TextureFactory::genCubeTexture(TextureFormat internalformat, uint32_t si
 	
 	desc->data = BinaryDataStorage(desc->layersCount * desc->dataSizeForAllMipLevels(), 0);
 	
-	return Texture::create(renderContext(), desc, id, false);
+	return Texture::Pointer::create(renderContext(), desc, id, false);
 }
 
-Texture TextureFactory::genTexture(TextureDescription::Pointer desc)
+Texture::Pointer TextureFactory::genTexture(TextureDescription::Pointer desc)
 {
-	return Texture::create(renderContext(), desc, desc->origin(), false);
+	return Texture::Pointer::create(renderContext(), desc, desc->origin(), false);
 }
 
-Texture TextureFactory::genNoiseTexture(const vec2i& size, bool norm, const std::string& id)
+Texture::Pointer TextureFactory::genNoiseTexture(const vec2i& size, bool norm, const std::string& id)
 {
 	DataStorage<vec4ub> randata(size.square());
 	for (size_t i = 0; i < randata.size(); ++i)
@@ -238,7 +243,7 @@ Texture TextureFactory::genNoiseTexture(const vec2i& size, bool norm, const std:
     
 	etCopyMemory(desc->data.data(), randata.data(), randata.dataSize());
 
-	return Texture::create(renderContext(), desc, id, false);
+	return Texture::Pointer::create(renderContext(), desc, id, false);
 }
 
 void TextureFactory::textureLoadingThreadDidLoadTextureData(TextureLoadingRequest* request)
@@ -254,7 +259,7 @@ void TextureFactory::textureLoadingThreadDidLoadTextureData(TextureLoadingReques
 	sharedObjectFactory().deleteObject(request);
 }
 
-Texture TextureFactory::loadTexturesToCubemap(const std::string& posx, const std::string& negx,
+Texture::Pointer TextureFactory::loadTexturesToCubemap(const std::string& posx, const std::string& negx,
 	const std::string& posy, const std::string& negy, const std::string& posz, const std::string& negz,
 	ObjectsCache& cache)
 {
@@ -278,13 +283,13 @@ Texture TextureFactory::loadTexturesToCubemap(const std::string& posx, const std
 			{
 				log::error("Cubemap %s size of (%d x %d) is larger than allowed %dx%d",
 					layers[l]->origin().c_str(), layers[l]->size.x, layers[l]->size.y, maxCubemapSize, maxCubemapSize);
-				return Texture();
+				return Texture::Pointer();
 			}
 		}
 		else
 		{
 			log::error("Unable to load cubemap face.");
-			return Texture();
+			return Texture::Pointer();
 		}
 	}
 
@@ -302,7 +307,7 @@ Texture TextureFactory::loadTexturesToCubemap(const std::string& posx, const std
 		{
 			log::error("Failed to load cubemap textures. Textures `%s` and `%s` aren't identical",
 				layers[l-1]->origin().c_str(), layers[l]->origin().c_str());
-			return Texture();
+			return Texture::Pointer();
 		}
 	}
 
@@ -323,7 +328,7 @@ Texture TextureFactory::loadTexturesToCubemap(const std::string& posx, const std
 	for (size_t l = 0; l < desc->layersCount; ++l)
 		etCopyMemory(desc->data.element_ptr(l * layerSize), layers[l]->data.element_ptr(0), layerSize);
 
-	Texture result = Texture::create(renderContext(), desc, texId, false);
+	Texture::Pointer result = Texture::Pointer::create(renderContext(), desc, texId, false);
 	
 	for (size_t i = 0; i < 6; ++i)
 		result->addOrigin(layers[i]->origin());
@@ -333,14 +338,15 @@ Texture TextureFactory::loadTexturesToCubemap(const std::string& posx, const std
 	return result;
 }
 
-Texture TextureFactory::createTextureWrapper(uint32_t texture, const vec2i& size, const std::string& name)
+Texture::Pointer TextureFactory::createTextureWrapper(uint32_t texture, const vec2i& size, const std::string& name)
 {
-	return Texture::create(renderContext(), texture, size, name);
+	return Texture::Pointer::create(renderContext(), texture, size, name);
 }
 
 void TextureFactory::reloadObject(LoadableObject::Pointer object, ObjectsCache&)
 {
 	TextureDescription::Pointer newData = et::loadTexture(object->origin());
+	
 	if (newData.valid())
-		Texture(object)->updateData(renderContext(), newData);
+		Texture::Pointer(object)->updateData(renderContext(), newData);
 }

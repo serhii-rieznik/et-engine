@@ -1,7 +1,7 @@
 /*
  * This file is part of `et engine`
- * Copyright 2009-2014 by Sergey Reznik
- * Please, do not modify content without approval.
+ * Copyright 2009-2015 by Sergey Reznik
+ * Please, modify content only if you know what are you doing.
  *
  */
 
@@ -19,15 +19,13 @@ namespace et
 		APIObjectFactory(RenderContext* rc) :
 			_rc(rc) { }
 
-		virtual ~APIObjectFactory()
-			{ }
+		virtual ~APIObjectFactory() { }
 
 		RenderContext* renderContext()
 			{ return _rc; }
 		
 	protected:
-		APIObjectFactory() :
-			_rc(nullptr) { abort(); }
+		APIObjectFactory() = delete;
 		
 		ET_DENY_COPY(APIObjectFactory)
 		

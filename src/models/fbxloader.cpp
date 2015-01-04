@@ -1,7 +1,7 @@
 /*
  * This file is part of `et engine`
- * Copyright 2009-2012 by Sergey Reznik
- * Please, do not modify contents without approval.
+ * Copyright 2009-2015 by Sergey Reznik
+ * Please, modify content only if you know what are you doing.
  *
  */
 
@@ -12,8 +12,7 @@
 #include <fbxsdk.h>
 
 #include <et/rendering/rendercontext.h>
-#include <et/apiobjects/vertexbuffer.h>
-#include <et/vertexbuffer/IndexArray.h>
+#include <et/vertexbuffer/indexarray.h>
 #include <et/imaging/textureloader.h>
 #include <et/scene3d/supportmesh.h>
 #include <et/models/fbxloader.h>
@@ -156,7 +155,7 @@ bool FBXLoaderPrivate::import(const std::string& filename)
 s3d::ElementContainer::Pointer FBXLoaderPrivate::parse()
 {
 	rootNode.reset(nullptr);
-	storage = s3d::Scene3dStorage::Pointer::create(std::string(), nullptr);
+	storage = s3d::Scene3dStorage::Pointer::create(emptyString, nullptr);
 	
 	FbxAxisSystem sceneAxisSystem = scene->GetGlobalSettings().GetAxisSystem();
 	FbxAxisSystem openglAxisSystem(FbxAxisSystem::eOpenGL);
@@ -235,41 +234,10 @@ void FBXLoaderPrivate::loadTextures()
 		if (fileTexture && !fileTexture->GetUserDataPtr())
 		{
 			std::string fileName = normalizeFilePath(std::string(fileTexture->GetFileName()));
-			
-			std::string ext = lowercase(getFileExt(fileName));
-			if ((ext != ".png") && (ext != ".dds") && (ext != ".pvr"))
+			Texture::Pointer texture = _rc->textureFactory().loadTexture(fileName, _texCache);
+			if (texture.valid())
 			{
-				std::string basePath = getFilePath(fileName);
-				std::string baseName = removeFileExt(getFileName(fileName));
-				
-				if (fileExists(baseName + ".pvr"))
-					fileName = baseName + ".pvr";
-				if (fileExists(basePath + baseName + ".pvr"))
-					fileName = basePath + baseName + ".pvr";
-				if (fileExists(_folder + baseName + ".pvr"))
-					fileName = _folder + baseName + ".pvr";
-				if (fileExists(baseName + ".dds"))
-					fileName = baseName + ".dds";
-				if (fileExists(basePath + baseName + ".dds"))
-					fileName = basePath + baseName + ".dds";
-				if (fileExists(_folder + baseName + ".dds"))
-					fileName = _folder + baseName + ".dds";
-				if (fileExists(baseName + ".png"))
-					fileName = baseName + ".png";
-				if (fileExists(basePath + baseName + ".png"))
-					fileName = basePath + baseName + ".png";
-				if (fileExists(_folder + baseName + ".png"))
-					fileName = _folder + baseName + ".png";
-			}
-						
-			Texture texture;
-			if (fileExists(fileName))
-			{
-				log::info("Loading texture: %s", fileName.c_str());
-				
-				texture = _rc->textureFactory().loadTexture(fileName, _texCache);
-				if (texture.valid())
-					texture->setOrigin(getFileName(fileName));
+				texture->setOrigin(getFileName(fileName));
 			}
 			else
 			{
@@ -467,8 +435,8 @@ void FBXLoaderPrivate::loadMaterialTextureValue(s3d::Material::Pointer m, size_t
 			FbxFileTexture* lTexture = value.GetSrcObject<FbxFileTexture>(0);
 			if (lTexture && lTexture->GetUserDataPtr())
 			{
-				TextureData* ptr = reinterpret_cast<TextureData*>(lTexture->GetUserDataPtr());
-				m->setTexture(propName, Texture(ptr));
+				Texture* ptr = reinterpret_cast<Texture*>(lTexture->GetUserDataPtr());
+				m->setTexture(propName, Texture::Pointer(ptr));
 			} 
 		}
 	}

@@ -1,7 +1,7 @@
 /*
  * This file is part of `et engine`
- * Copyright 2009-2014 by Sergey Reznik
- * Please, do not modify content without approval.
+ * Copyright 2009-2015 by Sergey Reznik
+ * Please, modify content only if you know what are you doing.
  *
  */
 
@@ -40,12 +40,12 @@ namespace et
 			const float getFloat(size_t param) const;
 			const vec4& getVector(size_t param) const;
 			const std::string& getString(size_t param) const;
-			const Texture& getTexture(size_t param) const;
+			const Texture::Pointer& getTexture(size_t param) const;
 
 			void setInt(size_t param, int value);
 			void setFloat(size_t param, float value);
 			void setVector(size_t param, const vec4& value);
-			void setTexture(size_t param, const Texture& value);
+			void setTexture(size_t param, const Texture::Pointer& value);
 			void setString(size_t param, const std::string& value);
 
 			bool hasInt(size_t param) const;
@@ -95,11 +95,11 @@ namespace et
 			/*
 			 * Textures loading stuff
 			 */
-			Texture loadTexture(RenderContext* rc, const std::string& path,
+			Texture::Pointer loadTexture(RenderContext* rc, const std::string& path,
 				const std::string& basePath, ObjectsCache& cache, bool async);
 			
-			void textureDidStartLoading(Texture);
-			void textureDidLoad(Texture);
+			void textureDidStartLoading(Texture::Pointer);
+			void textureDidLoad(Texture::Pointer);
 
 		private:
 			RenderContext* _rc;

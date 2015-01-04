@@ -1,12 +1,11 @@
 /*
  * This file is part of `et engine`
- * Copyright 2009-2014 by Sergey Reznik
- * Please, do not modify content without approval.
+ * Copyright 2009-2015 by Sergey Reznik
+ * Please, modify content only if you know what are you doing.
  *
  */
 
 #include <et/opengl/opengl.h>
-#include <et/opengl/openglcaps.h>
 #include <et/rendering/rendercontext.h>
 #include <et/rendering/renderer.h>
 #include <et/vertexbuffer/indexarray.h>
@@ -84,7 +83,7 @@ void Renderer::fullscreenPass()
 #endif
 }
 
-void Renderer::renderFullscreenTexture(const Texture& texture)
+void Renderer::renderFullscreenTexture(const Texture::Pointer& texture)
 {
 #if !defined(ET_CONSOLE_APPLICATION)
 	_rc->renderState().bindTexture(_defaultTextureBindingUnit, texture);
@@ -93,7 +92,7 @@ void Renderer::renderFullscreenTexture(const Texture& texture)
 #endif
 }
 
-void Renderer::renderFullscreenDepthTexture(const Texture& texture, float factor)
+void Renderer::renderFullscreenDepthTexture(const Texture::Pointer& texture, float factor)
 {
 #if !defined(ET_CONSOLE_APPLICATION)
 	_rc->renderState().bindTexture(_defaultTextureBindingUnit, texture);
@@ -103,7 +102,7 @@ void Renderer::renderFullscreenDepthTexture(const Texture& texture, float factor
 #endif
 }
 
-void Renderer::renderFullscreenTexture(const Texture& texture, const vec2& scale)
+void Renderer::renderFullscreenTexture(const Texture::Pointer& texture, const vec2& scale)
 {
 #if !defined(ET_CONSOLE_APPLICATION)
 	_rc->renderState().bindTexture(_defaultTextureBindingUnit, texture);
@@ -113,7 +112,7 @@ void Renderer::renderFullscreenTexture(const Texture& texture, const vec2& scale
 #endif
 }
 
-void Renderer::renderTexture(const Texture& texture, const vec2& position, const vec2& size)
+void Renderer::renderTexture(const Texture::Pointer& texture, const vec2& position, const vec2& size)
 {
 #if !defined(ET_CONSOLE_APPLICATION)
 	_rc->renderState().bindTexture(_defaultTextureBindingUnit, texture);
@@ -136,7 +135,7 @@ vec2 Renderer::currentViewportSizeToScene(const vec2i& size)
 	return vec2(2.0f * static_cast<float>(size.x) / vpSize.x, 2.0f * static_cast<float>(size.y) / vpSize.y);
 }
 
-void Renderer::renderTexture(const Texture& texture, const vec2i& position, const vec2i& size)
+void Renderer::renderTexture(const Texture::Pointer& texture, const vec2i& position, const vec2i& size)
 {
 #if !defined(ET_CONSOLE_APPLICATION)
 	if (texture.invalid()) return;
@@ -215,6 +214,22 @@ void Renderer::drawElementsBaseIndex(const VertexArrayObject& vao, int base, siz
 	
 #	endif	
 #endif
+}
+
+void Renderer::readFramebufferData(const vec2i& size, TextureFormat format, DataType dataType, BinaryDataStorage& data)
+{
+	size_t requiredSize = size.square() * bitsPerPixelForTextureFormat(format, dataType) / 8;
+	ET_ASSERT(data.size() >= requiredSize);
+	
+	glReadPixels(0, 0, size.x, size.y, textureFormatValue(format), dataTypeValue(dataType), data.data());
+	checkOpenGLError("glReadPixels");
+}
+
+BinaryDataStorage Renderer::readFramebufferData(const vec2i& size, TextureFormat format, DataType dataType)
+{
+	BinaryDataStorage result(size.square() * bitsPerPixelForTextureFormat(format, dataType));
+	readFramebufferData(size, format, dataType, result);
+	return result;
 }
 
 /*

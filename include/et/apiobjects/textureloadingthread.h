@@ -1,7 +1,7 @@
 /*
  * This file is part of `et engine`
- * Copyright 2009-2014 by Sergey Reznik
- * Please, do not modify content without approval.
+ * Copyright 2009-2015 by Sergey Reznik
+ * Please, modify content only if you know what are you doing.
  *
  */
 
@@ -22,8 +22,8 @@ namespace et
 	public:
 		virtual ~TextureLoaderDelegate();
 
-		virtual void textureDidStartLoading(Texture t) = 0;
-		virtual void textureDidLoad(Texture t) = 0;
+		virtual void textureDidStartLoading(Texture::Pointer t) = 0;
+		virtual void textureDidLoad(Texture::Pointer t) = 0;
 
 	private:
 		friend struct TextureLoadingRequest;
@@ -43,10 +43,10 @@ namespace et
 	{
 		std::string fileName;
 		TextureDescription::Pointer textureDescription;
-		Texture texture;
-		TextureLoaderDelegate* delegate;
+		Texture::Pointer texture;
+		TextureLoaderDelegate* delegate = nullptr;
 
-		TextureLoadingRequest(const std::string& name, const Texture& tex, TextureLoaderDelegate* d);
+		TextureLoadingRequest(const std::string& name, const Texture::Pointer& tex, TextureLoaderDelegate* d);
 		~TextureLoadingRequest();
 		
 		void discardDelegate();
@@ -68,7 +68,7 @@ namespace et
 		TextureLoadingThread(TextureLoadingThreadDelegate* delegate);
 		~TextureLoadingThread();
 
-		void addRequest(const std::string& fileName, Texture texture, TextureLoaderDelegate* delegate);
+		void addRequest(const std::string& fileName, Texture::Pointer texture, TextureLoaderDelegate* delegate);
 
 	private:
 		ThreadResult main();

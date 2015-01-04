@@ -1,7 +1,7 @@
 /*
  * This file is part of `et engine`
- * Copyright 2009-2012 by Sergey Reznik
- * Please, do not modify contents without approval.
+ * Copyright 2009-2015 by Sergey Reznik
+ * Please, modify content only if you know what are you doing.
  *
  */
 
@@ -87,7 +87,7 @@ std::string et::applicationPackagePath()
 
 std::string et::temporaryBaseFolder()
 {
-    return std::string();
+    return emptyString;
 }
 
 std::string et::applicationDataFolder()
@@ -242,7 +242,7 @@ void et::openUrl(const std::string& url)
 
 std::string et::unicodeToUtf8(const std::wstring& w)
 {
-	return std::string();
+	return emptyString;
 }
 
 std::wstring et::utf8ToUnicode(const std::string& mbcs)
@@ -252,7 +252,7 @@ std::wstring et::utf8ToUnicode(const std::string& mbcs)
 
 std::string et::applicationIdentifierForCurrentProject()
 {
-	return std::string();
+	return emptyString;
 }
 
 et::vec2i et::nativeScreenSize()

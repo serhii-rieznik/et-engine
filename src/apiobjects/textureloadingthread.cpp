@@ -1,7 +1,7 @@
 /*
 * This file is part of `et engine`
-* Copyright 2009-2014 by Sergey Reznik
-* Please, do not modify content without approval.
+* Copyright 2009-2015 by Sergey Reznik
+* Please, modify content only if you know what are you doing.
 *
 */
 
@@ -17,7 +17,7 @@ TextureLoaderDelegate::~TextureLoaderDelegate()
 		i->discardDelegate();
 }
 
-TextureLoadingRequest::TextureLoadingRequest(const std::string& name, const Texture& tex, TextureLoaderDelegate* d) :
+TextureLoadingRequest::TextureLoadingRequest(const std::string& name, const Texture::Pointer& tex, TextureLoaderDelegate* d) :
 	fileName(name), textureDescription(sharedObjectFactory().createObject<TextureDescription>()), texture(tex), delegate(d)
 {
 	if (delegate)
@@ -87,7 +87,7 @@ ThreadResult TextureLoadingThread::main()
 	return 0;
 }
 
-void TextureLoadingThread::addRequest(const std::string& fileName, Texture texture,
+void TextureLoadingThread::addRequest(const std::string& fileName, Texture::Pointer texture,
 	TextureLoaderDelegate* delegate)
 {
 	if (delegate)

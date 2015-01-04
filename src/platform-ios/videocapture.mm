@@ -1,7 +1,7 @@
 /*
  * This file is part of `et engine`
- * Copyright 2009-2012 by Sergey Reznik
- * Please, do not modify contents without approval.
+ * Copyright 2009-2015 by Sergey Reznik
+ * Please, modify content only if you know what are you doing.
  *
  */
 
@@ -154,18 +154,10 @@ VideoCapturePrivate::VideoCapturePrivate(VideoCapture* owner, VideoCaptureQualit
 	AVCaptureVideoDataOutput* _output = [[AVCaptureVideoDataOutput alloc] init];
 	_output.alwaysDiscardsLateVideoFrames = YES;
 	_output.videoSettings = [NSDictionary dictionaryWithObjectsAndKeys:
-							 [NSNumber numberWithInt:kCVPixelFormatType_32BGRA], kCVPixelBufferPixelFormatTypeKey, nil];
+		[NSNumber numberWithInt:kCVPixelFormatType_32BGRA], kCVPixelBufferPixelFormatTypeKey, nil];
 	
 	[_output setSampleBufferDelegate:_proxy queue:dispatch_get_main_queue()];
 	[_session addOutput:_output];
-	
-	AVCaptureConnection *conn = [_output connectionWithMediaType:AVMediaTypeVideo];
-	if (conn.supportsVideoMinFrameDuration)
-		conn.videoMinFrameDuration = CMTimeMake(1, 30);
-	
-	if (conn.supportsVideoMaxFrameDuration)
-		conn.videoMaxFrameDuration = CMTimeMake(1, 15);
-	
 	[_session startRunning];
 }
 

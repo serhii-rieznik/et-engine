@@ -1,7 +1,7 @@
 /*
  * This file is part of `et engine`
- * Copyright 2009-2014 by Sergey Reznik
- * Please, do not modify content without approval.
+ * Copyright 2009-2015 by Sergey Reznik
+ * Please, modify content only if you know what are you doing.
  *
  */
 
@@ -20,7 +20,6 @@ namespace et
 		{
 		public:
 			ET_DECLARE_POINTER(Scene3dStorage)
-			typedef std::vector<Texture> TextureList;
 
 		public:
 			Scene3dStorage(const std::string& name, Element* parent);
@@ -40,10 +39,10 @@ namespace et
 			Material::List& materials()
 				{ return _materials; }
 
-			TextureList& textures()
+			std::vector<Texture::Pointer>& textures()
 				{ return _textures; }
 
-			void addTexture(Texture t)
+			void addTexture(Texture::Pointer t)
 				{ _textures.push_back(t); }
 
 			void addMaterial(Material::Pointer m)
@@ -68,7 +67,7 @@ namespace et
 			VertexArrayList _vertexArrays;
 			IndexArray::Pointer _indexArray;
 			Material::List _materials;
-			TextureList _textures;
+			std::vector<Texture::Pointer> _textures;
 		};
 	}
 }

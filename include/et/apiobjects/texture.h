@@ -1,24 +1,28 @@
 /*
  * This file is part of `et engine`
- * Copyright 2009-2014 by Sergey Reznik
- * Please, do not modify content without approval.
+ * Copyright 2009-2015 by Sergey Reznik
+ * Please, modify content only if you know what are you doing.
  *
  */
 
 #pragma once
 
+#include <et/apiobjects/apiobject.h>
 #include <et/apiobjects/texturedescription.h>
 
 namespace et
 {
 	class RenderContext;
 
-	class TextureData : public LoadableObject
+	class Texture : public APIObject
 	{
 	public:
-		TextureData(RenderContext*, const TextureDescription::Pointer&, const std::string&, bool deferred);
-		TextureData(RenderContext*, uint32_t texture, const vec2i& size, const std::string& name);
-		~TextureData();
+		ET_DECLARE_POINTER(Texture)
+		
+	public:
+		Texture(RenderContext*, const TextureDescription::Pointer&, const std::string&, bool deferred);
+		Texture(RenderContext*, uint32_t texture, const vec2i& size, const std::string& name);
+		~Texture();
 
 		void setWrap(RenderContext*, TextureWrap s, TextureWrap t,
 			TextureWrap r = TextureWrap::ClampToEdge);
@@ -39,9 +43,6 @@ namespace et
 
 		void updatePartialDataDirectly(RenderContext*, const vec2i& offset, const vec2i& size,
 			const char* data, size_t dataSize);
-
-		uint32_t glID() const
-			{ return _glID; }
 
 		TextureFormat internalFormat() const
 			{ return _desc->internalformat; }
@@ -80,13 +81,10 @@ namespace et
         void buildData(const char* ptr, size_t dataSize);
 
 	private:
-		uint32_t _glID = 0;
 		TextureDescription::Pointer _desc;
 		vector3<TextureWrap> _wrap;
 		vector2<TextureFiltration> _filtration;
 		vec2 _texel;
 		bool _own = false;
 	};
-
-	typedef IntrusivePtr<TextureData> Texture;
 }

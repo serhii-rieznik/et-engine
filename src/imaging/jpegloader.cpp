@@ -1,12 +1,12 @@
 /*
  * This file is part of `et engine`
- * Copyright 2009-2014 by Sergey Reznik
- * Please, do not modify content without approval.
+ * Copyright 2009-2015 by Sergey Reznik
+ * Please, modify content only if you know what are you doing.
  *
  */
 
 #include <et/imaging/jpegloader.h>
-#include <libjpeg/jpeglib.h>
+#include <external/libjpeg/jpeglib.h>
 #include <setjmp.h>
 
 using namespace et;

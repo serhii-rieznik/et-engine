@@ -1,15 +1,16 @@
 /*
  * This file is part of `et engine`
- * Copyright 2009-2014 by Sergey Reznik
- * Please, do not modify content without approval.
+ * Copyright 2009-2015 by Sergey Reznik
+ * Please, modify content only if you know what are you doing.
  *
  */
+
+#include <external/pvr/PVRTTexture.h>
+#include <external/pvr/PVRTDecompress.h>
 
 #include <et/core/tools.h>
 #include <et/geometry/geometry.h>
 #include <et/imaging/pvrloader.h>
-#include <pvr/PVRTTexture.h>
-#include <pvr/PVRTDecompress.h>
 
 using namespace et;
 

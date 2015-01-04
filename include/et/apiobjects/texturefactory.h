@@ -1,7 +1,7 @@
 /*
  * This file is part of `et engine`
- * Copyright 2009-2014 by Sergey Reznik
- * Please, do not modify content without approval.
+ * Copyright 2009-2015 by Sergey Reznik
+ * Please, modify content only if you know what are you doing.
  *
  */
 
@@ -22,31 +22,34 @@ namespace et
 		
 	public:
 		TextureFactory(RenderContext*);
+		
 		~TextureFactory();
 		
-		Texture loadTexture(const std::string& file, ObjectsCache& cache, bool async = false,
+		Texture::Pointer loadTexture(const std::string& file, ObjectsCache& cache, bool async = false,
 			TextureLoaderDelegate* delegate = nullptr);
 
-		Texture loadTexturesToCubemap(const std::string& posx, const std::string& negx,
+		Texture::Pointer loadTexturesToCubemap(const std::string& posx, const std::string& negx,
 			const std::string& posy, const std::string& negy, const std::string& posz,
 			const std::string& negz, ObjectsCache& cache);
 
-		Texture genNoiseTexture(const vec2i& size, bool normalize, const std::string& aName);
+		Texture::Pointer genNoiseTexture(const vec2i& size, bool normalize, const std::string& aName);
 		
-		Texture genCubeTexture(TextureFormat internalformat, uint32_t size, TextureFormat format,
+		Texture::Pointer genCubeTexture(TextureFormat internalformat, uint32_t size, TextureFormat format,
 			DataType type, const std::string& aName);
 		
-		Texture genTexture(TextureDescription::Pointer desc);
+		Texture::Pointer genTexture(TextureDescription::Pointer desc);
 		
-		Texture genTexture(TextureTarget target, TextureFormat internalformat, const vec2i& size,
+		Texture::Pointer genTexture(TextureTarget target, TextureFormat internalformat, const vec2i& size,
 			TextureFormat format, DataType type, const BinaryDataStorage& data, const std::string& aName);
 		
-		Texture createTextureWrapper(uint32_t texture, const vec2i& size, const std::string& aName);
+		Texture::Pointer createTextureWrapper(uint32_t texture, const vec2i& size, const std::string& aName);
 
 		ObjectLoader::Pointer objectLoader();
 		
-		ET_DECLARE_EVENT1(textureDidStartLoading, Texture)
-		ET_DECLARE_EVENT1(textureDidLoad, Texture)
+		const StringList& supportedTextureExtensions() const;
+		
+		ET_DECLARE_EVENT1(textureDidStartLoading, Texture::Pointer)
+		ET_DECLARE_EVENT1(textureDidLoad, Texture::Pointer)
 
 	private:
 		ET_DENY_COPY(TextureFactory)

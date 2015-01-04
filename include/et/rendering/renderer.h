@@ -1,7 +1,7 @@
 /*
  * This file is part of `et engine`
- * Copyright 2009-2014 by Sergey Reznik
- * Please, do not modify content without approval.
+ * Copyright 2009-2015 by Sergey Reznik
+ * Please, modify content only if you know what are you doing.
  *
  */
 
@@ -23,13 +23,13 @@ namespace et
 		void clear(bool color = true, bool depth = true);
 
 		void fullscreenPass();
-		void renderFullscreenTexture(const Texture&);
-		void renderFullscreenTexture(const Texture&, const vec2& scale);
+		void renderFullscreenTexture(const Texture::Pointer&);
+		void renderFullscreenTexture(const Texture::Pointer&, const vec2& scale);
 
-		void renderFullscreenDepthTexture(const Texture&, float factor);
+		void renderFullscreenDepthTexture(const Texture::Pointer&, float factor);
 
-		void renderTexture(const Texture&, const vec2& position, const vec2& size);
-		void renderTexture(const Texture&, const vec2i& position, const vec2i& size = vec2i(-1));
+		void renderTexture(const Texture::Pointer&, const vec2& position, const vec2& size);
+		void renderTexture(const Texture::Pointer&, const vec2i& position, const vec2i& size = vec2i(-1));
 
 		void drawElements(const IndexBuffer& ib, size_t first, size_t count);
 		void drawElements(PrimitiveType primitiveType, const IndexBuffer& ib, size_t first, size_t count);
@@ -37,6 +37,9 @@ namespace et
 
 		void drawElementsInstanced(const IndexBuffer& ib, size_t first, size_t count, size_t instances);
 		void drawElementsBaseIndex(const VertexArrayObject& vao, int base, size_t first, size_t count);
+		
+		BinaryDataStorage readFramebufferData(const vec2i&, TextureFormat, DataType);
+		void readFramebufferData(const vec2i&, TextureFormat, DataType, BinaryDataStorage&);
 
 		vec2 currentViewportCoordinatesToScene(const vec2i& coord);
 		vec2 currentViewportSizeToScene(const vec2i& size);

@@ -47,9 +47,9 @@ namespace demo
 		std::vector<et::s3d::SupportMesh::Pointer> _allObjects;
 		std::vector<et::vec3> _lightPositions;
 		
-		et::Texture _noiseTexture;
-		et::Texture _defaultTexture;
-		et::Texture _defaultNormalTexture;
+		et::Texture::Pointer _noiseTexture;
+		et::Texture::Pointer _defaultTexture;
+		et::Texture::Pointer _defaultNormalTexture;
 		
 		et::VertexArrayObject _cubeMesh;
 		et::VertexArrayObject _planeMesh;

@@ -1,7 +1,7 @@
 /*
  * This file is part of `et engine`
- * Copyright 2009-2014 by Sergey Reznik
- * Please, do not modify content without approval.
+ * Copyright 2009-2015 by Sergey Reznik
+ * Please, modify content only if you know what are you doing.
  *
  */
 
@@ -62,7 +62,7 @@ void RenderState::setMainViewportSize(const vec2i& sz, bool force)
 	_currentState.mainViewportSizeFloat = vec2(static_cast<float>(sz.x), static_cast<float>(sz.y));
 
 	bool shouldSetViewport = (_currentState.boundFramebuffer == 0) ||
-		(_defaultFramebuffer.valid() && (_currentState.boundFramebuffer == _defaultFramebuffer->glID()));
+		(_defaultFramebuffer.valid() && (_currentState.boundFramebuffer == _defaultFramebuffer->apiHandle()));
 	
 	if (shouldSetViewport)
 		etViewport(0, 0, _currentState.mainViewportSize.x, _currentState.mainViewportSize.y);
@@ -121,7 +121,7 @@ void RenderState::bindProgram(const Program::Pointer& prog, bool force)
 {
 #if !defined(ET_CONSOLE_APPLICATION)
 	ET_ASSERT(prog.valid());
-	bindProgram(prog->glID(), force);
+	bindProgram(static_cast<uint32_t>(prog->apiHandle()), force);
 #endif
 }
 
@@ -167,19 +167,24 @@ void RenderState::setVertexAttributesBaseIndex(const VertexDeclaration& decl, si
 #endif
 }
 
-void RenderState::bindBuffer(const VertexBuffer& buf, bool force)
+void RenderState::bindBuffer(const VertexBuffer& buffer, bool force)
 {
 #if !defined(ET_CONSOLE_APPLICATION)
-	bindBuffer(GL_ARRAY_BUFFER, buf.valid() ? buf->glID() : 0, force);
-	
-	if (buf.valid()) 
-		setVertexAttributes(buf->declaration(), force);
+	if (buffer.valid())
+	{
+		bindBuffer(GL_ARRAY_BUFFER, static_cast<uint32_t>(buffer->apiHandle()), force);
+		setVertexAttributes(buffer->declaration(), force);
+	}
+	else
+	{
+		bindBuffer(GL_ARRAY_BUFFER, 0, force);
+	}
 #endif
 }
 
 void RenderState::bindBuffer(const IndexBuffer& buf, bool force)
 {
-	bindBuffer(GL_ELEMENT_ARRAY_BUFFER, buf.valid() ? buf->glID() : 0, force);
+	bindBuffer(GL_ELEMENT_ARRAY_BUFFER, buf.valid() ? static_cast<uint32_t>(buf->apiHandle()) : 0, force);
 }
 
 void RenderState::bindBuffers(const VertexBuffer& vb, const IndexBuffer& ib, bool force)
@@ -206,7 +211,7 @@ void RenderState::bindVertexArray(const VertexArrayObject& vao, bool force)
 #if !defined(ET_CONSOLE_APPLICATION)
 	if (openGLCapabilites().hasFeature(OpenGLFeature_VertexArrayObjects))
 	{
-		bindVertexArray(vao.valid() ? vao->glID() : 0, force);
+		bindVertexArray(vao.valid() ? static_cast<uint32_t>(vao->apiHandle()) : 0, force);
 	}
 	else
 	{
@@ -229,11 +234,11 @@ void RenderState::resetBufferBindings()
 #endif
 }
 
-void RenderState::bindTexture(uint32_t unit, const Texture& texture, bool force)
+void RenderState::bindTexture(uint32_t unit, const Texture::Pointer& texture, bool force)
 {
 #if !defined(ET_CONSOLE_APPLICATION)
 	if (texture.valid())
-		bindTexture(unit, texture->glID(), texture->target(), force);
+		bindTexture(unit, static_cast<uint32_t>(texture->apiHandle()), texture->target(), force);
 	else
 		bindTexture(unit, 0, TextureTarget::Texture_2D, force);
 #endif
@@ -292,7 +297,7 @@ void RenderState::bindFramebuffer(const Framebuffer::Pointer& fbo, bool force)
 #if !defined(ET_CONSOLE_APPLICATION)
 	if (fbo.valid())
 	{
-		bindFramebuffer(fbo->glID(), GL_FRAMEBUFFER, force);
+		bindFramebuffer(static_cast<uint32_t>(fbo->apiHandle()), GL_FRAMEBUFFER, force);
 		
 		setViewportSize(fbo->size(), force);
 		
@@ -484,7 +489,7 @@ void RenderState::setBlend(bool enable, BlendState blend, bool force)
 #endif
 }
 
-void RenderState::vertexArrayDeleted(uint32_t buffer, uint32_t, uint32_t)
+void RenderState::vertexArrayDeleted(uint32_t buffer)
 {
 	if (openGLCapabilites().hasFeature(OpenGLFeature_VertexArrayObjects))
 	{
@@ -530,7 +535,7 @@ void RenderState::textureDeleted(uint32_t texture)
 void RenderState::frameBufferDeleted(uint32_t buffer)
 {
 #if !defined(ET_CONSOLE_APPLICATION)
-	if (_defaultFramebuffer.valid() && (_defaultFramebuffer->glID() == buffer))
+	if (_defaultFramebuffer.valid() && (_defaultFramebuffer->apiHandle() == buffer))
 		_defaultFramebuffer = Framebuffer::Pointer();
 	
 	if (_currentState.boundFramebuffer == buffer)
