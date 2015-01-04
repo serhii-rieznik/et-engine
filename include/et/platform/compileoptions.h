@@ -17,6 +17,7 @@
 #	pragma warning(disable:4996)
 #	pragma warning(disable:4131)
 #	pragma warning(disable:4204)
+#	pragma warning(disable:4099)
 #
 #elif defined(__MACH__)
 #

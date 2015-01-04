@@ -15,5 +15,5 @@ namespace rt
 	typedef std::function<void(const et::vec2i& location, const et::vec4& color)> OutputFunction;
 	
 	void raytrace(const RaytraceScene&, const et::vec2i& imageSize,
-		const et::vec2i& origin, const et::vec2i& size, bool aa, OutputFunction output);
+		const et::vec2i& origin, const et::vec2i& size, OutputFunction);
 }

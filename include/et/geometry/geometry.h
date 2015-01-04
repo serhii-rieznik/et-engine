@@ -482,7 +482,7 @@ namespace et
 	quaternion matrixToQuaternion(const mat4& m);
 
 	vec3 removeMatrixScale(mat3& m);
-	void decomposeMatrix(mat4 mat, vec3& translation, quaternion& rotation, vec3& scale);
+	void decomposeMatrix(const mat4& mat, vec3& translation, quaternion& rotation, vec3& scale);
 	
 	vec3 randVector(float sx = 1.0f, float sy = 1.0f, float sz = 1.0f);
 	

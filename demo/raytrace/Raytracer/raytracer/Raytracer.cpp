@@ -15,9 +15,6 @@
 using namespace rt;
 using namespace et;
 
-#undef min
-#undef max
-
 #if (ET_ENABLE_VEC4_ALIGN == 0)
 #	error Compile with ET_ENABLE_VEC4_ALIGN enabled
 #endif
@@ -279,7 +276,7 @@ vec4 gatherBouncesRecursive(const RaytraceScene& scene, const ray3d& ray, size_t
 }
 
 void rt::raytrace(const RaytraceScene& scene, const et::vec2i& imageSize, const et::vec2i& origin,
-	const et::vec2i& size, bool aa, OutputFunction output)
+	const et::vec2i& size, OutputFunction outputFunction)
 {
 	vec2i pixel = origin;
 	vec2 dudv = vec2(2.0f) / vector2ToFloat(imageSize);
@@ -299,17 +296,17 @@ void rt::raytrace(const RaytraceScene& scene, const et::vec2i& imageSize, const 
 	for (pixel.y = origin.y; pixel.y < origin.y + size.y; ++pixel.y)
 	{
 		pixel.x = origin.x;
-		output(pixel, vec4(1.0f, 0.0f, 0.0f, 1.0f));
+		outputFunction(pixel, vec4(1.0f, 0.0f, 0.0f, 1.0f));
 		pixel.x = origin.x + size.x - 1;
-		output(pixel, vec4(0.0f, 1.0f, 0.0f, 1.0f));
+		outputFunction(pixel, vec4(0.0f, 1.0f, 0.0f, 1.0f));
 	}
 
 	for (pixel.x = origin.x; pixel.x < origin.x + size.x; ++pixel.x)
 	{
 		pixel.y = origin.y;
-		output(pixel, vec4(0.0f, 0.0f, 1.0f, 1.0f));
+		outputFunction(pixel, vec4(0.0f, 0.0f, 1.0f, 1.0f));
 		pixel.y = origin.y + size.y - 1;
-		output(pixel, vec4(1.0f, 0.0f, 1.0f, 1.0f));
+		outputFunction(pixel, vec4(1.0f, 0.0f, 1.0f, 1.0f));
 	}
 	
 	IndexOfRefractionDeque iorDeque;
@@ -363,7 +360,7 @@ void rt::raytrace(const RaytraceScene& scene, const et::vec2i& imageSize, const 
 			result *= -scene.options.exposure / static_cast<float>(scene.options.samples);
 			result = vec4(1.0f) - vec4(std::exp(result.x), std::exp(result.y), std::exp(result.z), 0.0f);
 			
-			output(pixel, result);
+			outputFunction(pixel, result);
 		}
 	}
 	

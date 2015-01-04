@@ -21,12 +21,12 @@ void RaytraceScene::load(et::RenderContext* rc)
 	
 	ambientColor = vec4(3.0f);
 	
-	environmentMap = loadTexture(application().resolveFileName("textures/background.hdr"));
+	environmentMap = loadTexture(application().resolveFileName("background.hdr"));
 	
 	camera.perspectiveProjection(QUARTER_PI, 1.0f, 1.0f, 1024.0f);
 		
 	ObjectsCache cache;
-	OBJLoader loader(rc, "models/spherevscube.obj");
+	OBJLoader loader(rc, "sphereincube.obj");
 	auto loadedModel = loader.load(cache, OBJLoader::Option_SupportMeshes);
 	auto meshes = loadedModel->childrenOfType(s3d::ElementType_SupportMesh);
 	

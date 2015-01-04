@@ -293,13 +293,13 @@ void GesturesRecognizer::onPointerScrolled(et::PointerInputInfo i)
 void GesturesRecognizer::onGesturePerformed(GestureInputInfo i)
 {
 	if (i.mask & GestureTypeMask_Zoom)
-		zoom.invoke(1.0f - i.values.z);
+		zoom.invoke(1.0f - i.zoom);
 
 	if (i.mask & GestureTypeMask_Swipe)
-		drag.invoke(i.values.xy(), PointerType_None);
+		drag.invoke(i.swipe, PointerType_None);
 	
 	if (i.mask & GestureTypeMask_Rotate)
-		rotate.invokeInMainRunLoop(i.values.w);
+		rotate.invokeInMainRunLoop(i.rotation);
 }
 
 void GesturesRecognizer::setRecognizedGestures(size_t values)

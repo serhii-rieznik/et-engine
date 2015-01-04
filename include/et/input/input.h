@@ -93,30 +93,27 @@ namespace et
 
 	struct GestureInputInfo
 	{
-		/*
-		 * x, y - swipe
-		 * z - zoom
-		 * w - rotation
-		 */
-		vec4 values;
-		size_t mask;
+		vec2 swipe;
+		float zoom = 0.0f;
+		float rotation = 0.0f;
+		size_t mask = 0;
 
-		GestureInputInfo() :
-			values(0.0f), mask(0) { }
-
-		GestureInputInfo(size_t m) : mask(m)
+		GestureInputInfo() 
 			{ }
+
+		GestureInputInfo(size_t m) : 
+			mask(m) { }
 
 		GestureInputInfo(size_t m, float v) : mask(m)
 		{
 			if (m & GestureTypeMask_Zoom)
-				values.z = v;
+				zoom = v;
 			else if (m & GestureTypeMask_Rotate)
-				values.w = v;
+				rotation = v;
 		}
 
 		GestureInputInfo(size_t m, float x, float y) :
-			values(x, y, 0.0f, 0.0f), mask(m) { }
+			swipe(x, y), mask(m) { }
 	};
 
 	class Input : public Singleton<Input>

@@ -28,8 +28,7 @@ et::ThreadResult RaytraceThread::main()
 		{
 			_rendering = true;
 			
-			raytrace(_delegate->scene(), _delegate->imageSize(), origin, size,
-				_delegate->shouldAntialias(), _delegate->outputFunction());
+			raytrace(_delegate->scene(), _delegate->imageSize(), origin, size, _delegate->outputFunction());
 			
 			_rendering = false;
 			

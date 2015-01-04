@@ -10,10 +10,20 @@
 #include <et/geometry/vector2.h>
 #include <et/geometry/vector3.h>
 
-namespace et 
+namespace et
 {
+	template <int> struct Vector4AlignHelper { };
+	template <> struct ET_ALIGNED( 4) Vector4AlignHelper<1> { };
+	template <> struct ET_ALIGNED( 8) Vector4AlignHelper<2> { };
+	template <> struct ET_ALIGNED(16) Vector4AlignHelper<4> { };
+	template <> struct ET_ALIGNED(32) Vector4AlignHelper<8> { };
+
 	template <typename T>
+#if (ET_ENABLE_VEC4_ALIGN)
+	struct vector4 : Vector4AlignHelper<sizeof(T)>
+#else
 	struct vector4
+#endif
 	{
 	public:
 		typedef T ComponentsType;
@@ -26,11 +36,7 @@ namespace et
 		};
 		
 	public:
-		
 		union
-#		if (ET_ENABLE_VEC4_ALIGN)
-			ET_ALIGNED(Size)
-#		endif
 		{
 			struct { T x, y, z, w; };
 			T c[4];

@@ -103,7 +103,7 @@ quaternion et::matrixToQuaternion(const mat4& r)
 	return matrixToQuaternion(r.mat3());
 }
 
-void et::decomposeMatrix(mat4 mat, vec3& translation, quaternion& rotation, vec3& scale)
+void et::decomposeMatrix(const mat4& mat, vec3& translation, quaternion& rotation, vec3& scale)
 {
 	mat3 rot = mat.mat3();
 	translation = mat[3].xyz();

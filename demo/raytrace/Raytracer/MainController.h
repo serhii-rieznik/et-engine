@@ -57,14 +57,14 @@ namespace rt
 		et::InterpolationValue<et::vec2> _cameraAngles;
 		
 		et::Program::Pointer _mainProgram;
-		et::Texture _noise;
+		et::Texture::Pointer _noise;
 		
 		et::vec2 _initialScale;
 		et::vec2 _initialOffset;
 		et::vec2 _scale;
 		et::vec2 _offset;
 		
-		et::Texture _result;
+		et::Texture::Pointer _result;
 		et::DataStorage<et::vec4ub> _textureData;
 		
 		RaytraceScene _scene;

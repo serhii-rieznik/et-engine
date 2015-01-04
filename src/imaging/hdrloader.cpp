@@ -106,31 +106,35 @@ void et::hdr::loadFromStream(std::istream& source, TextureDescription& desc)
 	auto sourcePos = source.tellg();
 
 	size_t rowSize = desc.size.x * 4;
-	size_t maxDataSize = 8 * desc.size.square();
+	size_t maxDataSize = desc.size.square() * desc.bitsPerPixel / 8;
 	BinaryDataStorage inData(maxDataSize, 0);
 	source.read(inData.binary(), maxDataSize);
 	auto ptr = inData.begin();
 
 	if (shouldConvertRGBEToFloat)
 	{
-		BinaryDataStorage rgbeData(desc.size.y * rowSize, 0);
+		desc.data.resize(desc.size.square() * sizeof(vec4));
+
+		DataStorage<vec4ub> rgbeData(desc.size.square(), 0);
+		DataStorage<vec4> floatDataWrapper(reinterpret_cast<vec4*>(desc.data.data()), desc.data.size());
 
 		for (int y = 0; y < desc.size.y; ++y)
-			ptr = readScanline(ptr, desc.size.x, reinterpret_cast<vec4ub*>(rgbeData.element_ptr((desc.size.y - 1 - y) * rowSize)));
-		
-		desc.data.resize(desc.size.square() * desc.bitsPerPixel / 8);
-		
-		vec4* floats = reinterpret_cast<vec4*>(desc.data.binary());
-		vec4ub* rgbe = reinterpret_cast<vec4ub*>(rgbeData.begin());
+		{
+			auto rowPtr = rgbeData.binary() + rowSize * (desc.size.y - 1 - y);
+			ptr = readScanline(ptr, desc.size.x, reinterpret_cast<vec4ub*>(rowPtr));
+		}
+
 		for (int i = 0; i < desc.size.square(); ++i)
-			*floats++ = rgbeToFloat(*rgbe++);
-		
+			floatDataWrapper[i] = rgbeToFloat(rgbeData[i]);
 	}
 	else
 	{
 		desc.data.resize(desc.size.y * rowSize);
 		for (int y = 0; y < desc.size.y; ++y)
-			ptr = readScanline(ptr, desc.size.x, reinterpret_cast<vec4ub*>(desc.data.element_ptr((desc.size.y - 1 - y) * rowSize)));
+		{
+			auto rowPtr = desc.data.element_ptr((desc.size.y - 1 - y) * rowSize);
+			ptr = readScanline(ptr, desc.size.x, reinterpret_cast<vec4ub*>(rowPtr));
+		}
 	}
 	
 	

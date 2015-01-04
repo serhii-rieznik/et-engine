@@ -32,19 +32,19 @@ namespace et
 		vec3 rate;
         vec3 orientation;
 		quaternion orientationQuaternion;
-		mat4 orientationMatrix;
+		mat3 orientationMatrix;
         
-		float timestamp;
-        float interval;
+		float timestamp = 0.0f;
+		float interval = 0.0f;
 
-		GyroscopeData() : 
-			timestamp(0.0f), interval(0.0f) { }
+		GyroscopeData() 
+			{ }
 
 		GyroscopeData(const vec3& r) : 
-			rate(r), timestamp(0.0f), interval(0.0f) { }
+			rate(r) { }
 
 		GyroscopeData(const vec3& r, float t) : 
-			rate(r), timestamp(t), interval(0.0f) { }
+			rate(r), timestamp(t) { }
 	};
 
 	class OrientationManagerPrivate;

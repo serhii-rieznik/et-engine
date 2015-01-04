@@ -20,6 +20,7 @@
 #		define ET_PLATFORM_WIN64		0
 #	endif
 #
+#	define NOMINMAX						1
 #	include <Windows.h>
 #
 #elif (TARGET_OS_IPHONE)

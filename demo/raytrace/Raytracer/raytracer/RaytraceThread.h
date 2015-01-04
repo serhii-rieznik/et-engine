@@ -19,7 +19,6 @@ namespace rt
 		virtual ~RaytraceThreadDelegate() { }
 		
 		virtual bool fetchNewRenderRect(et::vec2i& origin, et::vec2i& size) = 0;
-		virtual bool shouldAntialias() = 0;
 		
 		virtual OutputFunction outputFunction() = 0;
 		
@@ -44,7 +43,7 @@ namespace rt
 		RaytraceThread(const RaytraceThread&) = delete;
 		
 	private:
-		RaytraceThreadDelegate* _delegate;
+		RaytraceThreadDelegate* _delegate = nullptr;
 		et::AtomicBool _rendering;
 	};
 }

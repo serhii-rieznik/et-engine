@@ -41,6 +41,8 @@ void MainController::setRenderContextParameters(et::RenderContextParameters& p)
 	p.contextSize = frameSize;
 	p.contextBaseSize = p.contextSize;
 	p.swapInterval = 0;
+
+//	p.multisamplingQuality = MultisamplingQuality_None;
 }
 
 void MainController::updateTitle()
@@ -53,6 +55,8 @@ void MainController::applicationDidLoad(et::RenderContext* rc)
 {
 #if (ET_PLATFORM_WIN)
 	application().pushSearchPath("..\\Data");
+	application().pushSearchPath("Q:\\SDK\\Models");
+	application().pushSearchPath("Q:\\SDK\\Textures");
 #endif
 	
 	_scene.options.bounces = _productionBounces;
@@ -61,6 +65,7 @@ void MainController::applicationDidLoad(et::RenderContext* rc)
 	updateTitle();
 	
 	rc->renderState().setDepthMask(false);
+	rc->renderState().setDepthTest(false);
 	
 	_scene.load(rc);
 	
@@ -73,7 +78,7 @@ void MainController::applicationDidLoad(et::RenderContext* rc)
 	_textureData.resize(frameSize.square());
 	_textureData.fill(255);
 	
-	_outputFunction = [this](const vec2i& pixel, const vec4& color)
+	_outputFunction = [this](const vec2i& pixel, const vec4& color) mutable
 	{
 		size_t index = pixel.x + pixel.y * frameSize.x;
 		_textureData[index].x = static_cast<unsigned char>(255.0f * clamp(color.x, 0.0f, 1.0f));
@@ -82,7 +87,7 @@ void MainController::applicationDidLoad(et::RenderContext* rc)
 	};
 	
 	BinaryDataStorage textureData(reinterpret_cast<unsigned char*>(_textureData.binary()), _textureData.dataSize());
-	_result = rc->textureFactory().genTexture(TextureTarget::Texture_2D, TextureFormat::RGBA8, frameSize,
+	_result = rc->textureFactory().genTexture(TextureTarget::Texture_2D, TextureFormat::RGBA, frameSize,
 		TextureFormat::RGBA, DataType::UnsignedChar, textureData, "result-texture");
 	
 	_cameraAngles.updated.connect([this]()
@@ -284,14 +289,10 @@ void MainController::startCPUTracing()
 	}
 }
 
-bool MainController::shouldAntialias()
-{
-	return true;
-}
-
 void MainController::renderFinished()
 {
 	CriticalSectionScope lock(_csLock);
+
 	if (!_renderRects.empty()) return;
 	
 	for (auto rt : _threads)
