@@ -5,7 +5,7 @@
  *
  */
 
-#include <et/apiobjects/framebufferfactory.h>
+#include <et/rendering/framebufferfactory.h>
 
 using namespace et;
 

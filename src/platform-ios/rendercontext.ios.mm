@@ -37,7 +37,7 @@ RenderContext::RenderContext(const RenderContextParameters& params, Application*
 	ET_ASSERT(sharedOpenGLViewController != nil);
 #endif
 	
-     openGLCapabilites().checkCaps();
+	OpenGLCapabilities::instance().checkCaps();
 
 	_renderState.setRenderContext(this);
 	

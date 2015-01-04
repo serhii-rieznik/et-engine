@@ -64,7 +64,7 @@ public:
 
 		struct 
 		{
-			int _definition = 0;
+			int _definition;
 		};
 
 		inline int definition() 
@@ -73,8 +73,8 @@ public:
 				static_cast<int>(conjugateTop) << 2 | static_cast<int>(conjugateBottom) << 3;
 		}
 		
-		LODVariation()
-			{ }
+		LODVariation() : 
+			_definition(0) { }
 	};
 
 #define pushIndex(value) _buf->push_back(value)

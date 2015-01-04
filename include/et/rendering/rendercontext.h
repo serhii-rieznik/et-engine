@@ -12,10 +12,11 @@
 #include <et/rendering/rendercontextparams.h>
 #include <et/rendering/renderer.h>
 #include <et/rendering/renderstate.h>
-#include <et/apiobjects/programfactory.h>
-#include <et/apiobjects/texturefactory.h>
-#include <et/apiobjects/framebufferfactory.h>
-#include <et/apiobjects/vertexbufferfactory.h>
+#include <et/rendering/renderingcaps.h>
+#include <et/rendering/programfactory.h>
+#include <et/rendering/texturefactory.h>
+#include <et/rendering/framebufferfactory.h>
+#include <et/rendering/vertexbufferfactory.h>
 #include <et/timers/notifytimer.h>
 #include <et/app/events.h>
 

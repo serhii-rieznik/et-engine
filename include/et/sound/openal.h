@@ -16,8 +16,8 @@
 #	include <oal/al.h>
 #	include <oal/alc.h>
 #elif (ET_PLATFORM_WIN)
-#	include <oal\al.h>
-#	include <oal\alc.h>
+#	include <external\oal\al.h>
+#	include <external\oal\alc.h>
 #else
 #	error Unknown platform
 #endif

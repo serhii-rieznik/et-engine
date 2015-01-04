@@ -9,7 +9,6 @@
 
 #if (ET_PLATFORM_WIN)
 
-#include <Windows.h>
 #include <Pdh.h>
 
 using namespace et;

@@ -8,7 +8,7 @@
 #pragma once
 
 #include <et/app/events.h>
-#include <et/apiobjects/texturedescription.h>
+#include <et/imaging/texturedescription.h>
 
 namespace et
 {

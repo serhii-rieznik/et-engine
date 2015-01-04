@@ -20,12 +20,12 @@ namespace et
 		MemoryAllocatorBase() { }
 		virtual ~MemoryAllocatorBase() { }
 		
-		virtual void* alloc(size_t) = 0;
-		virtual void free(void*) = 0;
+		virtual void* allocate(size_t) = 0;
+		virtual void release(void* ptr) = 0;
 		
-		virtual bool validatePointer(void*, bool abortOnFail = true) = 0;
+		virtual bool validatePointer(void*, bool abortOnFail = true) { return false; }
 		
-		virtual void printInfo() const = 0;
+		virtual void printInfo() const { }
 		
 	private:
 		ET_DENY_COPY(MemoryAllocatorBase)
@@ -53,7 +53,7 @@ namespace et
 		O* createObject(args&&...a)
 		{
 			ET_ASSERT(_allocator != nullptr);
-			return new (_allocator->alloc(sizeof(O))) O(a...);\
+			return new (_allocator->allocate(sizeof(O))) O(a...);\
 		}
 		
 		template <typename O>
@@ -67,7 +67,7 @@ namespace et
 #			endif
 				
 				obj->~O();
-				_allocator->free(obj);
+				_allocator->release(obj);
 			}
 		}
 		
@@ -80,10 +80,10 @@ namespace et
 	
 	class DefaultMemoryAllocator : public MemoryAllocatorBase
 	{
-		void* alloc(size_t sz)
+		void* release(size_t sz)
 			{ return malloc(sz); }
 		
-		void free(void* ptr)
+		void release(void* ptr)
 			{ ::free(ptr); }
 		
 		bool validatePointer(void*, bool = true)
@@ -100,9 +100,11 @@ namespace et
 		BlockMemoryAllocator();
 		~BlockMemoryAllocator();
 		
-		void* alloc(size_t);
-		void free(void*);
+		void* allocate(size_t);
+		void release(void* ptr);
+
 		bool validatePointer(void*, bool = true);
+
 		void printInfo() const;
 		
 		void flushUnusedBlocks();

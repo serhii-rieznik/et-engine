@@ -11,8 +11,6 @@
 
 #if (ET_PLATFORM_WIN)
 
-#include <Windows.h>
-
 namespace et
 {
 	class ThreadPrivate

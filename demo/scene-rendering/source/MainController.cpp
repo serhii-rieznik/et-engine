@@ -54,7 +54,8 @@ void MainController::applicationDidLoad(et::RenderContext* rc)
 	auto loadedScene = _loader.loadFromFile(application().resolveFileName("/Volumes/Development/SDK/Models/crytek/sponza.etm"));
 	_renderer.setScene(loadedScene);
 #elif (ET_PLATFORM_WIN)
-#	error Do something
+	auto loadedScene = _loader.loadFromFile(application().resolveFileName("Q:\\SDK\\Models\\crytek\\sponza.etm"));
+	_renderer.setScene(loadedScene);
 #endif
 	
 	connectInputEvents();

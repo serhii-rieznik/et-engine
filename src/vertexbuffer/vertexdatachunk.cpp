@@ -8,12 +8,17 @@
 #include <et/core/serialization.h>
 #include <et/vertexbuffer/vertexdatachunk.h>
 
+namespace et
+{
+	VertexAttributeType openglTypeToVertexAttributeType(uint32_t);
+}
+
 using namespace et;
 
 VertexDataChunkData::VertexDataChunkData(VertexAttributeUsage aUsage, VertexAttributeType aType, size_t aSize) :
-	_usage(aUsage)
+	_usage(aUsage), _type(aType)
 {
-	_type = (aType < VertexAttributeType::max) ? aType : openglTypeToVertexAttributeType(static_cast<uint32_t>(aType));
+	ET_ASSERT(_type < VertexAttributeType::max);
 	
 	_data.resize(vertexAttributeTypeSize(_type) * aSize);
 	_data.fill(0);
@@ -28,6 +33,9 @@ VertexDataChunkData::VertexDataChunkData(std::istream& stream)
 	
 	stream.read(_data.binary(), static_cast<std::streamsize>(_data.dataSize()));
 	
+	/*
+	 * Support legacy values
+	 */
 	if (_type >= VertexAttributeType::max)
 		_type = openglTypeToVertexAttributeType(static_cast<uint32_t>(_type));
 }

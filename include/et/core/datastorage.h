@@ -191,7 +191,7 @@ namespace et
 			
 			if (newSize > 0)
 			{
-				new_data = reinterpret_cast<T*>(sharedObjectFactory().allocator()->alloc(sizeof(T) * newSize));
+				new_data = reinterpret_cast<T*>(sharedObjectFactory().allocator()->allocate(sizeof(T) * newSize));
 				if (min_size > 0)
 					etCopyMemory(new_data, _immutableData, min_size * sizeof(T));
 			}
@@ -201,7 +201,7 @@ namespace et
 			}
 			
 			if (ownsData())
-				sharedObjectFactory().allocator()->free(_mutableData);
+				sharedObjectFactory().allocator()->release(_mutableData);
 			
 			_flags |= DataStorageFlag_Mutable;
 			_mutableData = new_data;

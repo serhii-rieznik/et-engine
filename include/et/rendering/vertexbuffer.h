@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include <et/apiobjects/apiobject.h>
+#include <et/rendering/apiobject.h>
 #include <et/vertexbuffer/vertexarray.h>
 
 namespace et

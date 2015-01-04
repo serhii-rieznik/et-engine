@@ -8,7 +8,7 @@
 #pragma once
 
 #include <unordered_map>
-#include <et/apiobjects/apiobject.h>
+#include <et/rendering/apiobject.h>
 #include <et/rendering/rendering.h>
 
 namespace et

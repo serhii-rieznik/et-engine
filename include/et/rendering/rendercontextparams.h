@@ -17,12 +17,6 @@ namespace et
 		MultisamplingQuality_Best
 	};
 	
-	enum OpenGLProfile
-	{
-		OpenGLProfile_Core,
-		OpenGLProfile_Compatibility
-	};
-    
     enum InterfaceOrientation
     {
         InterfaceOrientation_Portrait = 0x01,
@@ -42,12 +36,8 @@ namespace et
 	
 	struct RenderContextParameters
 	{
-		vec2i openGLTargetVersion;
-
 		MultisamplingQuality multisamplingQuality = MultisamplingQuality_Best;
-		OpenGLProfile openGLProfile = OpenGLProfile_Core;
 		
-		bool openGLForwardContext = true;
 		bool multipleTouch = true;
 		bool bindDefaultFramebufferEachFrame = true;
 		bool lockScreenScaleToInitial = true;
@@ -60,14 +50,13 @@ namespace et
 
 		RenderContextParameters()
 		{
-#if defined(ET_PLATFORM_IOS)
+#		if defined(ET_PLATFORM_IOS)
 			contextSize = nativeScreenSize();
 			contextBaseSize = nativeScreenSize();
-#else
-			openGLTargetVersion = vec2i(4, 3);
+#		else
 			contextSize = vec2i(800, 600);
 			contextBaseSize = vec2i(800, 600);
-#endif
+#		endif
 		}
 	};
 }

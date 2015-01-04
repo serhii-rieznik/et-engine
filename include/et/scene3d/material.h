@@ -8,7 +8,7 @@
 #pragma once
 
 #include <et/app/events.h>
-#include <et/apiobjects/textureloadingthread.h>
+#include <et/imaging/textureloaderthread.h>
 #include <et/rendering/renderstate.h>
 #include <et/scene3d/serialization.h>
 #include <et/scene3d/material.parameters.h>

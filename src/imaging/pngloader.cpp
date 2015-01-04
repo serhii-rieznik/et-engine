@@ -93,7 +93,7 @@ void et::png::loadFromStream(std::istream& source, TextureDescription& desc, boo
 	parseFormat(desc, pngPtr, infoPtr, &rowBytes);
 
 	desc.data.resize(static_cast<size_t>(desc.size.square()) * desc.bitsPerPixel / 8);
-	png_bytepp row_pointers = reinterpret_cast<png_bytepp>(sharedObjectFactory().allocator()->alloc(sizeof(png_bytep) * desc.size.y));
+	png_bytepp row_pointers = reinterpret_cast<png_bytepp>(sharedObjectFactory().allocator()->allocate(sizeof(png_bytep) * desc.size.y));
 	png_bytep ptr0 = desc.data.data();
 	
 	if (flip)
@@ -122,7 +122,7 @@ void et::png::loadFromStream(std::istream& source, TextureDescription& desc, boo
 		}
 	}
 
-	sharedObjectFactory().allocator()->free(row_pointers);
+	sharedObjectFactory().allocator()->release(row_pointers);
 }
 
 void et::png::loadFromFile(const std::string& path, TextureDescription& desc, bool flip)

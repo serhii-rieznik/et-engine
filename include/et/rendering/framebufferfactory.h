@@ -7,8 +7,8 @@
 
 #pragma once
 
-#include <et/apiobjects/apiobjectfactory.h>
-#include <et/apiobjects/framebuffer.h>
+#include <et/rendering/apiobjectfactory.h>
+#include <et/rendering/framebuffer.h>
 
 namespace et
 {

@@ -7,8 +7,8 @@
 
 #pragma once
 
-#include <et/apiobjects/apiobject.h>
-#include <et/apiobjects/texturedescription.h>
+#include <et/rendering/apiobject.h>
+#include <et/imaging/texturedescription.h>
 
 namespace et
 {

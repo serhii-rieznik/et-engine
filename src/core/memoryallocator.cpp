@@ -268,10 +268,10 @@ BlockMemoryAllocator::~BlockMemoryAllocator()
 	ET_PIMPL_FINALIZE(BlockMemoryAllocator)
 }
 
-void* BlockMemoryAllocator::alloc(size_t sz)
+void* BlockMemoryAllocator::allocate(size_t sz)
 	{ return _private->alloc(alignUpTo(sz & 0xffffffff, minimumAllocationSize)); }
 
-void BlockMemoryAllocator::free(void* ptr)
+void BlockMemoryAllocator::release(void* ptr)
 	{ _private->free(ptr); }
 
 bool BlockMemoryAllocator::validatePointer(void* ptr, bool abortOnFail)

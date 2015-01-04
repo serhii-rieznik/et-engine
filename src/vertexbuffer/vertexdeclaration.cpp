@@ -8,9 +8,27 @@
 #include <et/core/serialization.h>
 #include <et/vertexbuffer/vertexdeclaration.h>
 
+namespace et
+{
+	VertexAttributeType openglTypeToVertexAttributeType(uint32_t);
+}
+
 using namespace et;
 
 static VertexElement _emptyVertexElement;
+
+VertexElement::VertexElement(VertexAttributeUsage aUsage, VertexAttributeType aType, uint32_t aStride,
+	uint32_t aOffset) : _usage(aUsage), _type(aType), _stride(aStride), _offset(aOffset)
+{
+	/*
+	 * Support legacy values
+	 */
+	if (_type >= VertexAttributeType::max)
+		_type = openglTypeToVertexAttributeType(static_cast<uint32_t>(_type));
+
+	_components = vertexAttributeTypeComponents(_type);
+	_dataType = vertexAttributeTypeDataType(_type);
+}
 
 VertexDeclaration::VertexDeclaration() :
 	_interleaved(true), _totalSize(0), _usageMask(0) { }

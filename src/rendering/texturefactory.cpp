@@ -7,11 +7,10 @@
 
 #include <et/core/objectscache.h>
 #include <et/app/application.h>
-#include <et/rendering/rendercontext.h>
-#include <et/opengl/openglcaps.h>
-#include <et/imaging/textureloader.h>
 #include <et/threading/threading.h>
-#include <et/apiobjects/texturefactory.h>
+#include <et/imaging/textureloader.h>
+#include <et/rendering/rendercontext.h>
+#include <et/rendering/texturefactory.h>
 
 namespace et
 {
@@ -112,7 +111,7 @@ Texture::Pointer TextureFactory::loadTexture(const std::string& fileName, Object
 		TextureDescription::Pointer desc =
 			async ? et::loadTextureDescription(file, false) : et::loadTexture(file);
 		
-		int maxTextureSize = static_cast<int>(openGLCapabilites().maxTextureSize());
+		int maxTextureSize = static_cast<int>(RenderingCapabilities::instance().maxTextureSize());
 		if ((desc->size.x > maxTextureSize) || (desc->size.y > maxTextureSize))
 		{
 			log::warning("Attempt to load texture with dimensions (%d x %d) larger than max allowed (%d)",
@@ -273,7 +272,7 @@ Texture::Pointer TextureFactory::loadTexturesToCubemap(const std::string& posx, 
 		et::loadTexture(application().resolveFileName(negz))
 	};
 
-	int maxCubemapSize = static_cast<int>(openGLCapabilites().maxCubemapTextureSize());
+	int maxCubemapSize = static_cast<int>(RenderingCapabilities::instance().maxCubemapTextureSize());
 	
 	for (size_t l = 0; l < 6; ++l)
 	{

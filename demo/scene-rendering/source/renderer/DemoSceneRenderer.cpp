@@ -9,7 +9,6 @@
 #include <et/app/application.h>
 #include <et/rendering/rendercontext.h>
 #include <et/primitives/primitives.h>
-#include <et/opengl/openglcaps.h>
 #include "DemoSceneRenderer.h"
 
 using namespace et;
@@ -153,7 +152,7 @@ void SceneRenderer::setScene(et::s3d::Scene::Pointer aScene)
 		{
 			Texture::Pointer tex = mat->getTexture(i);
 			if (tex.valid())
-				tex->setAnisotropyLevel(_rc, openGLCapabilites().maxAnisotropyLevel());
+				tex->setAnisotropyLevel(_rc, RenderingCapabilities::instance().maxAnisotropyLevel());
 		}
 	}
 	

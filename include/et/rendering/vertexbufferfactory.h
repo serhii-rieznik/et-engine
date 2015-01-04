@@ -7,8 +7,8 @@
 
 #pragma once
 
-#include <et/apiobjects/apiobjectfactory.h>
-#include <et/apiobjects/vertexarrayobject.h>
+#include <et/rendering/apiobjectfactory.h>
+#include <et/rendering/vertexarrayobject.h>
 
 namespace et
 {

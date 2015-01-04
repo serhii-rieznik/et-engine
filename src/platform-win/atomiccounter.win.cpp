@@ -9,8 +9,6 @@
 
 #if (ET_PLATFORM_WIN)
 
-#include <Windows.h>
-
 using namespace et;
 
 AtomicCounter::AtomicCounter() :

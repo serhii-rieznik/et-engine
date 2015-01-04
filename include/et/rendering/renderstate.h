@@ -8,10 +8,10 @@
 #pragma once
 
 #include <et/core/containers.h>
-#include <et/apiobjects/texture.h>
-#include <et/apiobjects/program.h>
-#include <et/apiobjects/framebuffer.h>
-#include <et/apiobjects/vertexarrayobject.h>
+#include <et/rendering/texture.h>
+#include <et/rendering/program.h>
+#include <et/rendering/framebuffer.h>
+#include <et/rendering/vertexarrayobject.h>
 
 namespace et
 {

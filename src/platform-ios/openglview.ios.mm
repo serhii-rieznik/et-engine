@@ -219,7 +219,7 @@ using namespace et;
 			{
 				_multisampledFramebuffer = _rc->framebufferFactory().createFramebuffer(size,
 					"__et_multisampled_framebuffer__", TextureFormat::RGBA8, TextureFormat::RGBA, DataType::UnsignedChar,
-					TextureFormat::Depth16, TextureFormat::Depth, DataType::UnsignedInt, true, openGLCapabilites().maxSamples());
+					TextureFormat::Depth16, TextureFormat::Depth, DataType::UnsignedInt, true, OpenGLCapabilities().maxSamples());
 			}
 			else
 			{

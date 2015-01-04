@@ -8,9 +8,9 @@
 #pragma once
 
 #include <et/app/events.h>
-#include <et/apiobjects/texture.h>
-#include <et/apiobjects/apiobjectfactory.h>
-#include <et/apiobjects/textureloadingthread.h>
+#include <et/rendering/texture.h>
+#include <et/rendering/apiobjectfactory.h>
+#include <et/imaging/textureloaderthread.h>
 
 namespace et
 {

@@ -13,39 +13,21 @@
 
 namespace et
 {
-	enum OpenGLVersion
+	class OpenGLCapabilities : public Singleton<OpenGLCapabilities>, private FlagsHolder
 	{
-		OpenGLVersion_unknown,
-		OpenGLVersion_2x,
-		OpenGLVersion_3x,
-		OpenGLVersion_max
-	};
-	
-	enum OpenGLFeature
-	{
-		OpenGLFeature_MipMapGeneration = 0x00000001,
-		OpenGLFeature_VertexAttribArrays = 0x00000002,
-		OpenGLFeature_VertexBufferObjects = 0x00000004,
-		OpenGLFeature_DrawElementsBaseVertex = 0x00000008,
-		OpenGLFeature_VertexArrayObjects = 0x00000010,
-		OpenGLFeature_VertexTextureFetch = 0x00000020,
-	};
-	
-	class OpenGLCapabilites : public Singleton<OpenGLCapabilites>, private FlagsHolder
-	{ 
 	public:
 		bool hasFeature(OpenGLFeature value)
 			{ return hasFlag(value); }
 		
 		bool isOpenGLES() const
 			{ return _isOpenGLES; }
-	
+		
 		OpenGLVersion version() const
 			{ return _version; }
-
+		
 		const std::string& versionString() const
 			{ return _versionString; }
-
+		
 		const std::string& versionShortString() const
 			{ return _versionShortString; }
 		
@@ -54,26 +36,14 @@ namespace et
 		
 		const std::string& glslVersionShortString() const
 			{ return _glslVersionShortString; }
-
-		uint32_t maxTextureSize() const
-			{ return _maxTextureSize;}
-		
-		uint32_t maxCubemapTextureSize() const
-			{ return _maxCubemapTextureSize;}
-		
-		uint32_t maxSamples() const
-			{ return _maxSamples; }
-		
-		float maxAnisotropyLevel() const
-			{ return _maxAnisotropyLevel; }
 		
 		bool hasExtension(const std::string&);
 		
-		bool supportTextureFormat(TextureFormat fmt) const
-			{ return (_textureFormatSupport.count(fmt) > 0) && (_textureFormatSupport.at(fmt) != 0); }
-		
 		void checkCaps();
-
+		
+	private:
+		ET_SINGLETON_CONSTRUCTORS(OpenGLCapabilities)
+		
 	private:
 		std::string _versionString;
 		std::string _versionShortString;
@@ -81,17 +51,8 @@ namespace et
 		std::string _glslVersionShortString;
 		
 		std::map<std::string, int> _extensions;
-
-		uint32_t _maxTextureSize = 0;
-		uint32_t _maxCubemapTextureSize = 0;
-		uint32_t _maxSamples = 0;
-		float _maxAnisotropyLevel = 0.0f;
-
-		std::map<TextureFormat, uint32_t> _textureFormatSupport;
-		OpenGLVersion _version = OpenGLVersion_unknown;
+		
+		OpenGLVersion _version = OpenGLVersion::Unknown;
 		bool _isOpenGLES = false;
 	};
-	
-	inline OpenGLCapabilites& openGLCapabilites()
-		{ return OpenGLCapabilites::instance(); }
 }

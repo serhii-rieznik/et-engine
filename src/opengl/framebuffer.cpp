@@ -7,7 +7,7 @@
 
 #include <et/opengl/opengl.h>
 #include <et/opengl/openglcaps.h>
-#include <et/apiobjects/framebuffer.h>
+#include <et/rendering/framebuffer.h>
 #include <et/rendering/rendercontext.h>
 
 using namespace et;
@@ -78,7 +78,7 @@ Framebuffer::Framebuffer(RenderContext* rc, const FramebufferDescription& desc,
 		else 
 		{
 			Texture::Pointer depthTarget;
-			if (_description.isCubemap && (openGLCapabilites().version() == OpenGLVersion_3x))
+			if (_description.isCubemap && (OpenGLCapabilities::instance().version() == OpenGLVersion::Version_3x))
 			{
 				depthTarget = _rc->textureFactory().genCubeTexture(_description.depthInternalformat, _description.size.x,
 					_description.depthFormat, _description.depthType, name() + "_depth");
@@ -341,7 +341,7 @@ void Framebuffer::setCurrentCubemapFace(uint32_t faceIndex)
 	
 	if (_depthBuffer.valid())
 	{
-		if (openGLCapabilites().version() == OpenGLVersion_2x)
+		if (OpenGLCapabilities::instance().version() == OpenGLVersion::Version_2x)
 			target = GL_TEXTURE_2D;
 		
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, target, static_cast<uint32_t>(_depthBuffer->apiHandle()), 0);

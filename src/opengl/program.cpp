@@ -9,7 +9,7 @@
 #include <et/app/application.h>
 #include <et/camera/camera.h>
 #include <et/rendering/rendercontext.h>
-#include <et/apiobjects/program.h>
+#include <et/rendering/program.h>
 
 using namespace et;
 
@@ -44,8 +44,11 @@ Program::~Program()
 	if (program != 0)
 	{
 		_rc->renderState().programDeleted(program);
-		glDeleteProgram(program);
-		checkOpenGLError("glDeleteProgram: %s", name().c_str());
+		if (glIsProgram(program))
+		{
+			glDeleteProgram(program);
+			checkOpenGLError("glDeleteProgram: %s", name().c_str());
+		}
 	}
 #endif
 }

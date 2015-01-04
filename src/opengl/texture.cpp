@@ -86,7 +86,7 @@ void Texture::setWrap(RenderContext* rc, TextureWrap s, TextureWrap t, TextureWr
 	
 #	if defined(GL_TEXTURE_WRAP_R)
 #		if (ET_OPENGLES)
-			if (openGLCapabilites().versionShortString() > "200")
+			if (OpenGLCapabilities().versionShortString() > "200")
 #		endif
 	{
 		glTexParameteri(targetValue, GL_TEXTURE_WRAP_R, textureWrapValue(_wrap.z));

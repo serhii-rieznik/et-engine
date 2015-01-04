@@ -5,7 +5,7 @@
  *
  */
 
-#include <et/apiobjects/vertexbufferfactory.h>
+#include <et/rendering/vertexbufferfactory.h>
 
 using namespace et;
 

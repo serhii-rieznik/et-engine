@@ -10,7 +10,6 @@
 
 #if (ET_PLATFORM_WIN)
 
-#include <Windows.h>
 #include <MMSystem.h>
 
 #if defined(min)
@@ -72,7 +71,7 @@ LONG WINAPI unhandledExceptionFilter(struct _EXCEPTION_POINTERS* info)
 	std::string excCode = exceptionCodeToString(info->ExceptionRecord->ExceptionCode);
 	std::string type = continuable ? "continuable" : "non-continuable";
 	log::info("Unhandled exception:\n code: %s\n type: %s\n address: 0x%08X", excCode.c_str(),
-			  type.c_str(), reinterpret_cast<uintptr_t>(info->ExceptionRecord->ExceptionAddress));
+		type.c_str(), reinterpret_cast<uintptr_t>(info->ExceptionRecord->ExceptionAddress));
 	
 	if (framesCaptured > 0)
 	{
@@ -88,6 +87,7 @@ void Application::platformInit()
 {
 #if (ET_DEBUG)
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+	_CrtSetBreakAlloc(297);
 #endif
 	
 	SetUnhandledExceptionFilter(unhandledExceptionFilter);

@@ -7,7 +7,7 @@
 #pragma once
 
 #import <UIKit/UIKit.h>
-#import <et/apiobjects/framebuffer.h>
+#import <et/rendering/framebuffer.h>
 #import <et/input/input.h>
 #import <et/rendering/rendercontextparams.h>
 

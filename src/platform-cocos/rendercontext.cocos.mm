@@ -35,7 +35,7 @@ RenderContext::RenderContext(const RenderContextParameters& params, Application*
 {
 	ET_PIMPL_INIT(RenderContext, params)
 	
-     openGLCapabilites().checkCaps();
+	OpenGLCapabilities::instance().checkCaps();
 
 	_renderState.setRenderContext(this);
 	

@@ -11,10 +11,6 @@
 using namespace et;
 using namespace et::json;
 
-#if (ET_DISABLE_JSON)
-#	warning ET_DISABLE_JSON is defined, while source is available
-#endif
-
 et::ValueBase::Pointer deserializeJson(const char*, size_t, ValueClass&, bool);
 
 ArrayValue deserializeArray(json_t* json);

@@ -16,9 +16,6 @@
 
 #if (ET_PLATFORM_WIN)
 
-#include <Windows.h>
-#include <WinUser.h>
-
 using namespace et;
 
 LRESULT CALLBACK mainWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
@@ -83,7 +80,7 @@ RenderContext::RenderContext(const RenderContextParameters& inParams, Applicatio
 	}
 	else 
 	{
-		openGLCapabilites().checkCaps();
+		OpenGLCapabilities::instance().checkCaps();
 
 		_renderState.setRenderContext(this);
 		_programFactory = ProgramFactory::Pointer::create(this);
@@ -100,6 +97,12 @@ RenderContext::RenderContext(const RenderContextParameters& inParams, Applicatio
 
 RenderContext::~RenderContext()
 {
+	_renderer.reset(nullptr);
+	_vertexBufferFactory.reset(nullptr);
+	_framebufferFactory.reset(nullptr);
+	_textureFactory.reset(nullptr);
+	_programFactory.reset(nullptr);
+
 	ET_PIMPL_FINALIZE(RenderContext)
 }
 
@@ -359,35 +362,27 @@ bool RenderContextPrivate::initOpenGL(const RenderContextParameters& params)
 	{
 		int attrib_list[] = 
 		{
-			WGL_CONTEXT_MAJOR_VERSION_ARB, 
-			params.openGLTargetVersion.x,
-
-			WGL_CONTEXT_MINOR_VERSION_ARB, 
-			params.openGLTargetVersion.y,
-
+			WGL_CONTEXT_MAJOR_VERSION_ARB, 4,
+			WGL_CONTEXT_MINOR_VERSION_ARB, 5,
 			WGL_CONTEXT_FLAGS_ARB, 
-			params.openGLForwardContext * WGL_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB,
-
+			WGL_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB,
 			0, 0, 0, 0
 		};
 
-		if (params.openGLTargetVersion.x >= 3)
-		{
-			attrib_list[6] = WGL_CONTEXT_PROFILE_MASK_ARB;
-			attrib_list[7] = (params.openGLProfile == OpenGLProfile_Core) ?
-				WGL_CONTEXT_CORE_PROFILE_BIT_ARB : WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB;
-		}
+		attrib_list[6] = WGL_CONTEXT_PROFILE_MASK_ARB;
+		attrib_list[7] = WGL_CONTEXT_CORE_PROFILE_BIT_ARB;
 
 		primaryContext.hGLRC = wglCreateContextAttribsARB(primaryContext.hDC, 0, attrib_list);
 		if (primaryContext.hGLRC == 0)
 		{
 			DWORD lastError = GetLastError();
+
 			if (lastError == ERROR_INVALID_VERSION_ARB)
-				std::cout << "Error creating context: ERROR_INVALID_VERSION_ARB. Requested: " << params.openGLTargetVersion << std::endl;
+				log::error("Error creating context: ERROR_INVALID_VERSION_ARB. Requested: %d.%d", attrib_list[1], attrib_list[3]);
 			else if (lastError == ERROR_INVALID_PROFILE_ARB)
-				std::cout << "Error creating context: ERROR_INVALID_PROFILE_ARB" << std::endl;
+				log::error("Error creating context: ERROR_INVALID_PROFILE_ARB");
 			else if (lastError == ERROR_INVALID_PROFILE_ARB)
-				std::cout << "Error creating context: ERROR_INVALID_PROFILE_ARB" << std::endl;
+				log::error("Error creating context: ERROR_INVALID_PROFILE_ARB");
 		}
 
 		while (primaryContext.hGLRC == 0)

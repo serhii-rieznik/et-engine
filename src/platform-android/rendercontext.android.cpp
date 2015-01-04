@@ -6,11 +6,12 @@
  */
 
 #include <et/app/application.h>
-#include <et/opengl/openglcaps.h>
-#include <et/rendering/rendercontext.h>
 
 #if (ET_PLATFORM_ANDROID)
 
+#include <et/opengl/opengl.h>
+#include <et/opengl/openglcaps.h>
+#include <et/rendering/rendercontext.h>
 #include <et/platform-android/nativeactivity.h>
 
 using namespace et;
@@ -36,7 +37,7 @@ RenderContext::RenderContext(const RenderContextParameters& params, Application*
 {
 	_private = new RenderContextPrivate(this);
 	
-	openGLCapabilites().checkCaps();
+	OpenGLCapabilities::instance().checkCaps();
 	updateScreenScale(_private->surfaceSize);
 	
 	_renderState.setRenderContext(this);

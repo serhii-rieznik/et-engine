@@ -35,7 +35,7 @@ VertexArrayObjectData::~VertexArrayObjectData()
 {
 #if !defined(ET_CONSOLE_APPLICATION)
 	uint32_t buffer = static_cast<uint32_t>(apiHandle());
-	if ((buffer != 0) && openGLCapabilites().hasFeature(OpenGLFeature_VertexArrayObjects))
+	if ((buffer != 0) && OpenGLCapabilities::instance().hasFeature(OpenGLFeature_VertexArrayObjects))
 	{
 		_rc->renderState().bindVertexArray(buffer);
 		_rc->renderState().vertexArrayDeleted(buffer);
@@ -48,7 +48,7 @@ VertexArrayObjectData::~VertexArrayObjectData()
 void VertexArrayObjectData::init()
 {
 #if !defined(ET_CONSOLE_APPLICATION)
-	if (openGLCapabilites().hasFeature(OpenGLFeature_VertexArrayObjects))
+	if (OpenGLCapabilities::instance().hasFeature(OpenGLFeature_VertexArrayObjects))
 	{
 		GLuint buffer = 0;
 		glGenVertexArrays(1, &buffer);
@@ -68,7 +68,7 @@ void VertexArrayObjectData::setBuffers(VertexBuffer vb, IndexBuffer ib)
 	_vb = vb;
 	_ib = ib;
 	
-	if (openGLCapabilites().hasFeature(OpenGLFeature_VertexArrayObjects))
+	if (OpenGLCapabilities::instance().hasFeature(OpenGLFeature_VertexArrayObjects))
 		_rc->renderState().bindVertexArray(static_cast<uint32_t>(apiHandle()));
 	
 	_rc->renderState().bindBuffers(_vb, _ib, true);
@@ -80,7 +80,7 @@ void VertexArrayObjectData::setVertexBuffer(VertexBuffer vb)
 #if !defined(ET_CONSOLE_APPLICATION)
 	_vb = vb;
 	
-	if (openGLCapabilites().hasFeature(OpenGLFeature_VertexArrayObjects))
+	if (OpenGLCapabilities::instance().hasFeature(OpenGLFeature_VertexArrayObjects))
 		_rc->renderState().bindVertexArray(static_cast<uint32_t>(apiHandle()));
 	
 	_rc->renderState().bindBuffers(_vb, _ib, true);
@@ -92,7 +92,7 @@ void VertexArrayObjectData::setIndexBuffer(IndexBuffer ib)
 #if !defined(ET_CONSOLE_APPLICATION)
 	_ib = ib;
 	
-	if (openGLCapabilites().hasFeature(OpenGLFeature_VertexArrayObjects))
+	if (OpenGLCapabilities::instance().hasFeature(OpenGLFeature_VertexArrayObjects))
 		_rc->renderState().bindVertexArray(static_cast<uint32_t>(apiHandle()));
 	
 	_rc->renderState().bindBuffers(_vb, _ib, true);

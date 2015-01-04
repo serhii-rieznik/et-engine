@@ -20,6 +20,8 @@
 #		define ET_PLATFORM_WIN64		0
 #	endif
 #
+#	include <Windows.h>
+#
 #elif (TARGET_OS_IPHONE)
 #
 #	define ET_PLATFORM_IOS				1

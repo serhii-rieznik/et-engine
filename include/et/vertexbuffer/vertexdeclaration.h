@@ -11,8 +11,6 @@
 
 namespace et
 {
-	VertexAttributeType openglTypeToVertexAttributeType(uint32_t);
-	
 	class VertexElement
 	{
 	public:
@@ -20,12 +18,7 @@ namespace et
 			{ }
 		
 		VertexElement(VertexAttributeUsage aUsage, VertexAttributeType aType, uint32_t aStride = 0,
-			uint32_t aOffset = 0) : _usage(aUsage), _stride(aStride), _offset(aOffset)
-		{
-			_type = (aType < VertexAttributeType::max) ? aType : openglTypeToVertexAttributeType(static_cast<uint32_t>(aType));
-			_components = vertexAttributeTypeComponents(_type);
-			_dataType = vertexAttributeTypeDataType(_type);
-		}
+			uint32_t aOffset = 0);
 
 		bool operator == (const VertexElement& r) const
 			{ return (_usage == r._usage) && (_type == r._type) && (_stride == r._stride) && (_offset == r._offset); }

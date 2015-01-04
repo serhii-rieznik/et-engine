@@ -109,6 +109,24 @@ namespace et
 		static void reset();
 	};
 	
+	enum class OpenGLVersion
+	{
+		Unknown,
+		Version_2x,
+		Version_3x,
+		max
+	};
+	
+	enum OpenGLFeature
+	{
+		OpenGLFeature_MipMapGeneration = 0x00000001,
+		OpenGLFeature_VertexAttribArrays = 0x00000002,
+		OpenGLFeature_VertexBufferObjects = 0x00000004,
+		OpenGLFeature_DrawElementsBaseVertex = 0x00000008,
+		OpenGLFeature_VertexArrayObjects = 0x00000010,
+		OpenGLFeature_VertexTextureFetch = 0x00000020,
+	};
+	
 	struct OpenGLDebugScope
 	{
 		OpenGLDebugScope(const std::string&);

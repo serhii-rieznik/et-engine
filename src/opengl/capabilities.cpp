@@ -8,19 +8,20 @@
 #include <et/core/tools.h>
 #include <et/opengl/opengl.h>
 #include <et/opengl/openglcaps.h>
+#include <et/rendering/renderingcaps.h>
 
 using namespace et;
 
-bool OpenGLCapabilites::hasExtension(const std::string& e)
+bool OpenGLCapabilities::hasExtension(const std::string& e)
 {
 	return _extensions.count(lowercase(e)) > 0;
 }
 
-void OpenGLCapabilites::checkCaps()
+void OpenGLCapabilities::checkCaps()
 {
 #if defined(ET_CONSOLE_APPLICATION)
 	
-	log::info("[OpenGLCapabilites] Rendering disabled in console application.");
+	log::info("[OpenGLCapabilities] Rendering disabled in console application.");
 	
 #else
 	
@@ -40,7 +41,7 @@ void OpenGLCapabilites::checkCaps()
 	}
 	while (_versionShortString.size() < 3)
 		_versionShortString.push_back('0');
-	checkOpenGLError("OpenGLCapabilites::checkCaps");
+	checkOpenGLError("OpenGLCapabilities::checkCaps");
 	
 	const char* glslv = reinterpret_cast<const char*>(glGetString(GL_SHADING_LANGUAGE_VERSION));
 	_glslVersionShortString = emptyString;
@@ -68,12 +69,12 @@ void OpenGLCapabilites::checkCaps()
 	_isOpenGLES = lowercaseVersion.find("es") != std::string::npos;
 	
 	_version = (intVersion < 130) || (_isOpenGLES && (intVersion < 300)) ?
-		OpenGLVersion_2x : OpenGLVersion_3x;
+		OpenGLVersion::Version_2x : OpenGLVersion::Version_3x;
 	
 	const char* ext = nullptr;
 	
 #if defined(GL_NUM_EXTENSIONS)
-	if (_version == OpenGLVersion_2x)
+	if (_version == OpenGLVersion::Version_2x)
 #endif
 	{
 		ext = reinterpret_cast<const char*>(glGetString(GL_EXTENSIONS));
@@ -119,24 +120,6 @@ void OpenGLCapabilites::checkCaps()
 	}
 #endif
 	
-	int maxSize = 0;
-	glGetIntegerv(GL_MAX_CUBE_MAP_TEXTURE_SIZE, &maxSize);
-	checkOpenGLError("glGetIntegerv(GL_MAX_CUBE_MAP_TEXTURE_SIZE, ...");
-	_maxCubemapTextureSize = static_cast<uint32_t>(maxSize);
-
-	maxSize = 0;
-	glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxSize);
-	checkOpenGLError("glGetIntegerv(GL_MAX_TEXTURE_SIZE, ...");
-	_maxTextureSize = static_cast<uint32_t>(maxSize);
-	
-	int maxSamples = 0;
-	glGetIntegerv(GL_MAX_SAMPLES, &maxSamples);
-	checkOpenGLError("glGetIntegerv(GL_MAX_SAMPLES, ...");
-	_maxSamples = static_cast<uint32_t>(maxSamples);
-	
-	glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &_maxAnisotropyLevel);
-	checkOpenGLError("glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, %f", _maxAnisotropyLevel);
-	
 	int maxUnits = 0;
 	glGetIntegerv(GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS, &maxUnits);
 	checkOpenGLError("glGetIntegerv(GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS, ...");
@@ -164,6 +147,15 @@ void OpenGLCapabilites::checkCaps()
 		}
 	}
 	
+	log::info("[OpenGLCapabilities] Version: %s (%s), GLSL version: %s (%s)", _versionString.c_str(),
+		_versionShortString.c_str(), _glslVersionString.c_str(), _glslVersionShortString.c_str());
+#endif
+	
+	RenderingCapabilities::instance().checkCaps();
+};
+
+void RenderingCapabilities::checkCaps()
+{
 #if (GL_IMG_texture_compression_pvrtc)
 	_textureFormatSupport[TextureFormat::PVR_2bpp_RGB] = 1;
 	_textureFormatSupport[TextureFormat::PVR_2bpp_RGBA] = 1;
@@ -189,7 +181,21 @@ void OpenGLCapabilites::checkCaps()
 	_textureFormatSupport[TextureFormat::RGTC2] = 1;
 #endif
 	
-	log::info("[OpenGLCapabilites] Version: %s (%s), GLSL version: %s (%s)", _versionString.c_str(),
-		_versionShortString.c_str(), _glslVersionString.c_str(), _glslVersionShortString.c_str());
-#endif
-};
+	int maxSize = 0;
+	glGetIntegerv(GL_MAX_CUBE_MAP_TEXTURE_SIZE, &maxSize);
+	checkOpenGLError("glGetIntegerv(GL_MAX_CUBE_MAP_TEXTURE_SIZE, ...");
+	_maxCubemapTextureSize = static_cast<uint32_t>(maxSize);
+	
+	maxSize = 0;
+	glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxSize);
+	checkOpenGLError("glGetIntegerv(GL_MAX_TEXTURE_SIZE, ...");
+	_maxTextureSize = static_cast<uint32_t>(maxSize);
+	
+	int maxSamples = 0;
+	glGetIntegerv(GL_MAX_SAMPLES, &maxSamples);
+	checkOpenGLError("glGetIntegerv(GL_MAX_SAMPLES, ...");
+	_maxSamples = static_cast<uint32_t>(maxSamples);
+	
+	glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &_maxAnisotropyLevel);
+	checkOpenGLError("glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, ...)", _maxAnisotropyLevel);
+}

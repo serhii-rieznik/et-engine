@@ -21408,6 +21408,7 @@ GLboolean __GLeeGetExtensions(ExtensionList* extList)
 				--i;
 			}
 			__GLeeExtList_add(extList, exts);
+			free(exts);
 		}
 	}
 

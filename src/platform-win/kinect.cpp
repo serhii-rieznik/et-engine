@@ -10,7 +10,6 @@
 #if (ET_PLATFORM_WIN && ET_HAVE_KINECT_SDK)
 
 #include <iostream>
-#include <Windows.h>
 #include <MSR_NuiApi.h>
 #include <et/platform-win/kinect.h>
 

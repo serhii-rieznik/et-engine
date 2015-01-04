@@ -196,7 +196,7 @@ void RenderState::bindBuffers(const VertexBuffer& vb, const IndexBuffer& ib, boo
 void RenderState::bindVertexArray(uint32_t buffer, bool force)
 {
 #if !defined(ET_CONSOLE_APPLICATION)
-	ET_ASSERT(openGLCapabilites().hasFeature(OpenGLFeature_VertexArrayObjects));
+	ET_ASSERT(OpenGLCapabilities::instance().hasFeature(OpenGLFeature_VertexArrayObjects));
 	
 	if (force || (_currentState.boundVertexArrayObject != buffer))
 	{
@@ -209,7 +209,7 @@ void RenderState::bindVertexArray(uint32_t buffer, bool force)
 void RenderState::bindVertexArray(const VertexArrayObject& vao, bool force)
 {
 #if !defined(ET_CONSOLE_APPLICATION)
-	if (openGLCapabilites().hasFeature(OpenGLFeature_VertexArrayObjects))
+	if (OpenGLCapabilities::instance().hasFeature(OpenGLFeature_VertexArrayObjects))
 	{
 		bindVertexArray(vao.valid() ? static_cast<uint32_t>(vao->apiHandle()) : 0, force);
 	}
@@ -226,7 +226,7 @@ void RenderState::bindVertexArray(const VertexArrayObject& vao, bool force)
 void RenderState::resetBufferBindings()
 {
 #if !defined(ET_CONSOLE_APPLICATION)
-	if (openGLCapabilites().hasFeature(OpenGLFeature_VertexArrayObjects))
+	if (OpenGLCapabilities::instance().hasFeature(OpenGLFeature_VertexArrayObjects))
 		bindVertexArray(0);
 	
 	bindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
@@ -491,7 +491,7 @@ void RenderState::setBlend(bool enable, BlendState blend, bool force)
 
 void RenderState::vertexArrayDeleted(uint32_t buffer)
 {
-	if (openGLCapabilites().hasFeature(OpenGLFeature_VertexArrayObjects))
+	if (OpenGLCapabilities::instance().hasFeature(OpenGLFeature_VertexArrayObjects))
 	{
 		ET_ASSERT(_currentState.boundVertexArrayObject == buffer)
 		(void)buffer;
@@ -827,7 +827,7 @@ RenderState::State RenderState::currentState()
 	s.boundVertexArrayObject = static_cast<uint32_t>(value);
 	checkOpenGLError("");
 	
-	bool shouldLoadVertexAttribs = (openGLCapabilites().version() == OpenGLVersion_2x) ||
+	bool shouldLoadVertexAttribs = (OpenGLCapabilities::instance().version() == OpenGLVersion::Version_2x) ||
 		(s.boundVertexArrayObject != 0);
 	
 	for (uint32_t i = 0, e = static_cast<uint32_t>(VertexAttributeUsage::max); shouldLoadVertexAttribs && (i < e); ++i)

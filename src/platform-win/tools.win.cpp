@@ -11,7 +11,6 @@
 
 #if (ET_PLATFORM_WIN)
 
-#include <Windows.h>
 #include <Shlobj.h>
 #include <ShellAPI.h>
 

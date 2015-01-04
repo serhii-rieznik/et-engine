@@ -9,9 +9,6 @@
 
 #if (ET_PLATFORM_WIN)
 
-#include <Windows.h>
-#include <iostream>
-
 namespace et
 {
 	class CriticalSectionPrivate

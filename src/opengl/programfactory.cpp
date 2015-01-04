@@ -6,9 +6,10 @@
  */
 
 #include <et/app/application.h>
+#include <et/opengl/opengl.h>
 #include <et/opengl/openglcaps.h>
 #include <et/rendering/rendercontext.h>
-#include <et/apiobjects/programfactory.h>
+#include <et/rendering/programfactory.h>
 
 using namespace et;
 
@@ -46,9 +47,9 @@ ProgramFactory::ProgramFactory(RenderContext* rc) : APIObjectFactory(rc)
 		"#define etMediump	mediump\n"
 		"#define etHighp	highp\n";
 
-	if (openGLCapabilites().versionShortString() == "300")
+	if (OpenGLCapabilities().versionShortString() == "300")
 	{
-		_commonHeader = "#version " + openGLCapabilites().glslVersionShortString() + " es\n" +
+		_commonHeader = "#version " + OpenGLCapabilities().glslVersionShortString() + " es\n" +
 			_commonHeader + "#define ET_OPENGL_ES_3\n";
 	}
 	else
@@ -59,14 +60,14 @@ ProgramFactory::ProgramFactory(RenderContext* rc) : APIObjectFactory(rc)
 #else
 	
 	_commonHeader = 
-		"#version " + openGLCapabilites().glslVersionShortString() + "\n"
+		"#version " + OpenGLCapabilities::instance().glslVersionShortString() + "\n"
 		"#define etLowp\n"
 		"#define etMediump\n"
 		"#define etHighp\n";
 	
 #endif
 
-	if (openGLCapabilites().version() == OpenGLVersion_2x)
+	if (OpenGLCapabilities::instance().version() == OpenGLVersion::Version_2x)
 	{
 		_fragShaderHeader = 
 			"#define etTexture2D		texture2D\n"

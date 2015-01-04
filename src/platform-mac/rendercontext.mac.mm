@@ -104,7 +104,7 @@ RenderContext::RenderContext(const RenderContextParameters& inParams, Applicatio
 	ET_PIMPL_INIT(RenderContext, this, _params, app->parameters())
 	
 #if !defined(ET_CONSOLE_APPLICATION)
-	openGLCapabilites().checkCaps();
+	OpenGLCapabilities::instance().checkCaps();
 #endif
 	
 	_renderState.setRenderContext(this);
@@ -190,16 +190,8 @@ RenderContextPrivate::RenderContextPrivate(RenderContext*, RenderContextParamete
 	size_t lastEntry = 0;
 	while (pixelFormatAttributes[++lastEntry] != 0);
 	
-	size_t profileEntry = 0;
-	if (params.openGLForwardContext)
-	{
-		pixelFormatAttributes[lastEntry++] = NSOpenGLPFAOpenGLProfile;
-		
-		pixelFormatAttributes[lastEntry++] = (params.openGLProfile == OpenGLProfile_Core) ?
-			NSOpenGLProfileVersion3_2Core : NSOpenGLProfileVersionLegacy;
-		
-		profileEntry = lastEntry - 1;
-	}
+	pixelFormatAttributes[lastEntry++] = NSOpenGLPFAOpenGLProfile;
+	pixelFormatAttributes[lastEntry++] = NSOpenGLProfileVersion3_2Core;
 	
 	size_t antialiasFirstEntry = 0;
 	size_t antialiasSamplesEntry = 0;
@@ -231,26 +223,10 @@ RenderContextPrivate::RenderContextPrivate(RenderContext*, RenderContextParamete
 		
 		if (pixelFormat == nil)
 		{
-			if (profileEntry > 0)
-			{
-				pixelFormatAttributes[profileEntry] = NSOpenGLProfileVersionLegacy;
-				pixelFormat = [[NSOpenGLPixelFormat alloc] initWithAttributes:pixelFormatAttributes];
-				
-				if (pixelFormat == nil)
-				{
-					[[NSAlert alertWithMessageText:@"Unable to init OpenGL context" defaultButton:@"Close"
-						alternateButton:nil otherButton:nil informativeTextWithFormat:
-						@"Unable to create NSOpenGLPixelFormat object, even without antialiasing and with legacy profile."] runModal];
-					exit(1);
-				}
-			}
-			else
-			{
-				[[NSAlert alertWithMessageText:@"Unable to init OpenGL context" defaultButton:@"Close"
-					alternateButton:nil otherButton:nil informativeTextWithFormat:
-					@"Unable to create NSOpenGLPixelFormat object, even without antialiasing."] runModal];
-				exit(1);
-			}
+			[[NSAlert alertWithMessageText:@"Unable to create and initialize rendering context"
+				defaultButton:@"Terminate" alternateButton:nil otherButton:nil informativeTextWithFormat:
+				@"Unable to create NSOpenGLPixelFormat object, application will now terminate."] runModal];
+			exit(1);
 		}
 	}
 	

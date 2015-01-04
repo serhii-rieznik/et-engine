@@ -6,11 +6,10 @@
  */
 
 #include <et/app/application.h>
-#include <et/input/input.h>
 
 #if (ET_PLATFORM_WIN)
 
-#include <Windows.h>
+#include <et/input/input.h>
 
 using namespace et;
 
