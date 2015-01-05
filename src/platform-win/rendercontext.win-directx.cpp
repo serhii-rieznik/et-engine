@@ -433,6 +433,7 @@ LRESULT CALLBACK mainWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	if (handler == 0)
 		return DefWindowProcW(hWnd, uMsg, wParam, lParam);
 
+	ApplicationNotifier notifier;
 	vec2 viewportSize = handler->renderContext()->size();
 
 	switch (uMsg)
@@ -589,8 +590,6 @@ LRESULT CALLBACK mainWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 	case WM_ACTIVATE:
 		{
-			ApplicationNotifier notifier;
-
 			if (wParam == WA_INACTIVE)
 				notifier.notifyDeactivated();
 			else
@@ -602,7 +601,7 @@ LRESULT CALLBACK mainWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	case WM_SIZE:
 		{
 			internal_SizeInfo size(lParam);
-			vec2i newSize(size.width, size.height);
+			notifier.notifyResize(vec2i(size.width, size.height));
 			return 0;
 		}
 

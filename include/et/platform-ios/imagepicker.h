@@ -12,11 +12,11 @@
 
 namespace et
 {
-	enum ImagePickerSource
+	enum class ImagePickerSource
 	{
-		ImagePickerSource_Camera,
-		ImagePickerSource_PhotoAlbum,
-		ImagePickerSource_PreferCamera
+		Camera,
+		PhotoAlbum,
+		PreferCamera
 	};
 	
 	class ImagePickerPrivate;
@@ -26,7 +26,7 @@ namespace et
 		ImagePicker();
 		~ImagePicker();
 		
-		void selectImage(ImagePickerSource source = ImagePickerSource_PreferCamera);
+		void selectImage(ImagePickerSource source = ImagePickerSource::PreferCamera);
 		
 		ET_DECLARE_EVENT1(imageSelected, TextureDescription::Pointer)
 		ET_DECLARE_EVENT0(cancelled)
