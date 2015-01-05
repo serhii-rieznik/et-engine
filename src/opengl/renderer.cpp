@@ -218,8 +218,7 @@ void Renderer::drawElementsBaseIndex(const VertexArrayObject& vao, int base, siz
 
 void Renderer::readFramebufferData(const vec2i& size, TextureFormat format, DataType dataType, BinaryDataStorage& data)
 {
-	size_t requiredSize = size.square() * bitsPerPixelForTextureFormat(format, dataType) / 8;
-	ET_ASSERT(data.size() >= requiredSize);
+	ET_ASSERT((8 * data.size()) >= (size.square() * bitsPerPixelForTextureFormat(format, dataType)));
 	
 	glReadPixels(0, 0, size.x, size.y, textureFormatValue(format), dataTypeValue(dataType), data.data());
 	checkOpenGLError("glReadPixels");

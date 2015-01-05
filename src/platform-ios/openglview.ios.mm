@@ -185,44 +185,19 @@ using namespace et;
 	CAEAGLLayer* glLayer = (CAEAGLLayer*)self.layer;
 	glLayer.opaque = YES;
 	glLayer.contentsScale = _scaleFactor;
-	
 	self.contentScaleFactor = _scaleFactor;
-	
-	int colorFormat = GL_RGBA8;
-	int depthFormat = GL_DEPTH_COMPONENT16;
 	
 	vec2i size(static_cast<int>(glLayer.bounds.size.width * glLayer.contentsScale),
 		static_cast<int>(glLayer.bounds.size.height * glLayer.contentsScale));
 	
-	GLuint colorRenderBuffer = 0;
+	uint32_t colorRenderBuffer = 0;
 	
 	if (_mainFramebuffer.invalid())
 	{
-<<<<<<< HEAD
-		[EAGLContext setCurrentContext:_context];
+		_mainFramebuffer = _rc->framebufferFactory().createFramebuffer(size, "et-main-fbo",
+			TextureFormat::Invalid, TextureFormat::Invalid, DataType::UnsignedChar,
+			TextureFormat::Depth16, TextureFormat::Depth, DataType::UnsignedInt, true, false);
 		
-		_scaleFactor = static_cast<float>([[UIScreen mainScreen] scale]);
-		
-		CAEAGLLayer* glLayer = (CAEAGLLayer*)self.layer;
-		glLayer.opaque = YES;
-		glLayer.contentsScale = _scaleFactor;
-		
-		self.contentScaleFactor = _scaleFactor;
-		
-		vec2i size(static_cast<int>(glLayer.bounds.size.width * glLayer.contentsScale),
-			static_cast<int>(glLayer.bounds.size.height * glLayer.contentsScale));
-		
-		GLuint colorRenderBuffer = 0;
-		
-		if (_mainFramebuffer.invalid())
-		{
-			_mainFramebuffer = _rc->framebufferFactory().createFramebuffer(size, "__et_main_framebuffer__",
-				TextureFormat::Invalid, TextureFormat::Invalid, DataType::UnsignedChar, TextureFormat::Depth16,
-				TextureFormat::Depth, DataType::UnsignedInt, true, false);
-			glGenRenderbuffers(1, &colorRenderBuffer);
-=======
-		_mainFramebuffer = _rc->framebufferFactory().createFramebuffer(size, "et-main-fbo", 0, 0,
-			0, depthFormat, GL_DEPTH_COMPONENT, GL_UNSIGNED_INT, true, false);
 		glGenRenderbuffers(1, &colorRenderBuffer);
 	}
 	else
@@ -230,12 +205,18 @@ using namespace et;
 		colorRenderBuffer = _mainFramebuffer->colorRenderbuffer();
 	}
 	
+	if (_multisampled && (_multisampledFramebuffer.invalid()))
+	{
+		_multisampledFramebuffer = _rc->framebufferFactory().createFramebuffer(size, "__et_ios_multisampled_framebuffer__",
+			TextureFormat::RGBA8, TextureFormat::RGBA, DataType::UnsignedChar, TextureFormat::Depth16,
+			TextureFormat::Depth, DataType::UnsignedInt, true, RenderingCapabilities::instance().maxSamples());
+	}
+	
 	_rc->renderState().bindFramebuffer(_mainFramebuffer, true);
 	_rc->renderState().bindRenderbuffer(colorRenderBuffer, true);
 	
 	if (![_context renderbufferStorage:GL_RENDERBUFFER fromDrawable:glLayer])
 		ET_FAIL("Unable to create render buffer.");
-	_mainFramebuffer->setColorRenderbuffer(colorRenderBuffer);
 	
 	glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_WIDTH, &size.x);
 	checkOpenGLError("glGetRenderbufferParameteriv");
@@ -243,65 +224,11 @@ using namespace et;
 	glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_HEIGHT, &size.y);
 	checkOpenGLError("glGetRenderbufferParameteriv");
 	
-	glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_INTERNAL_FORMAT, &colorFormat);
-	checkOpenGLError("glGetRenderbufferParameteriv");
-
+	_mainFramebuffer->setColorRenderbuffer(colorRenderBuffer);
 	_mainFramebuffer->resize(size);
 	
-	_rc->renderState().bindRenderbuffer(_mainFramebuffer->depthRenderbuffer(), true);
-	glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_INTERNAL_FORMAT, &depthFormat);
-	
 	if (_multisampled)
-	{
-		if (_multisampledFramebuffer.invalid())
-		{
-			_multisampledFramebuffer = _rc->framebufferFactory().createFramebuffer(size,
-				"et-multisampled-framebuffer", colorFormat, GL_RGBA, GL_UNSIGNED_BYTE,
-				depthFormat, GL_DEPTH_COMPONENT, GL_UNSIGNED_INT, true, openGLCapabilites().maxSamples());
->>>>>>> c3fa071d75891b4a54e1e82f3956d89b545da031
-		}
-		else
-		{
-			_multisampledFramebuffer->resize(size);
-		}
-<<<<<<< HEAD
-		
-		_rc->renderState().bindRenderbuffer(colorRenderBuffer);
-		if (![_context renderbufferStorage:GL_RENDERBUFFER fromDrawable:glLayer])
-			ET_FAIL("Unable to create render buffer.");
-		_mainFramebuffer->setColorRenderbuffer(colorRenderBuffer);
-		
-		glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_WIDTH, &size.x);
-		checkOpenGLError("glGetRenderbufferParameteriv");
-		
-		glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_HEIGHT, &size.y);
-		checkOpenGLError("glGetRenderbufferParameteriv");
-		
-		_mainFramebuffer->resize(size);
-		
-		if (_multisampled)
-		{
-			if (_multisampledFramebuffer.invalid())
-			{
-				_multisampledFramebuffer = _rc->framebufferFactory().createFramebuffer(size,
-					"__et_multisampled_framebuffer__", TextureFormat::RGBA8, TextureFormat::RGBA, DataType::UnsignedChar,
-					TextureFormat::Depth16, TextureFormat::Depth, DataType::UnsignedInt, true,
-					RenderingCapabilities::instance().maxSamples());
-			}
-			else
-			{
-				_multisampledFramebuffer->resize(size);
-			}
-		}
-		
-		_rc->renderState().setDefaultFramebuffer([self defaultFramebuffer]);
-		
-		[self beginRender];
-		_rcNotifier.resized(size, _rc);
-		[self endRender];
-=======
->>>>>>> c3fa071d75891b4a54e1e82f3956d89b545da031
-	}
+		_multisampledFramebuffer->resize(size);
 	
 	_rc->renderState().setDefaultFramebuffer([self defaultFramebuffer]);
 	_rcNotifier.resized(size, _rc);
