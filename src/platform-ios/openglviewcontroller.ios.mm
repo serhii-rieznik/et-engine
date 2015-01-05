@@ -189,14 +189,30 @@ extern NSString* etKeyboardNotRequiredNotification;
 
 - (void)presentViewController:(UIViewController*)viewControllerToPresent animated:(BOOL)flag completion:(void(^)())completion
 {
-	_notifier.notifyDeactivated();
-	[super presentViewController:viewControllerToPresent animated:flag completion:completion];
+	[super presentViewController:viewControllerToPresent animated:flag completion:^()
+	{
+		if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone)
+		{
+			_notifier.notifyDeactivated();
+		}
+		
+		if (completion)
+			completion();
+	}];
 }
 
 - (void)dismissViewControllerAnimated:(BOOL)flag completion:(void (^)())completion
 {
-	_notifier.notifyActivated();
-	[super dismissViewControllerAnimated:flag completion:completion];
+	[super dismissViewControllerAnimated:flag completion:^()
+	{
+		if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone)
+		{
+			_notifier.notifyActivated();
+		}
+		
+		if (completion)
+			completion();
+	}];
 }
 
 /*
