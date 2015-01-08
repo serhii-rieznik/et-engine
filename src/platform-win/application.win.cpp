@@ -180,7 +180,7 @@ void Application::alert(const std::string& title, const std::string& message, Al
 		break;
 	}
 
-	MessageBox(0, message.c_str(), title.c_str(), alType);
+	MessageBoxA(0, message.c_str(), title.c_str(), alType);
 }
 
 void Application::setTitle(const std::string& s)

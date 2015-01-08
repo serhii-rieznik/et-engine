@@ -15,10 +15,12 @@ using namespace et;
 
 std::string et::selectFile(const StringList&, SelectFileMode mode, const std::string& defaultName)
 {
+#	pragma message("DEAL WITH UNICODE HERE")
+
 	char filename[1024] = { };
 	etCopyMemory(filename, defaultName.c_str(), defaultName.length());
 
-	OPENFILENAME of = { };
+	OPENFILENAMEA of = { };
 	of.lStructSize = sizeof(of);
 	of.hwndOwner = 0;
 	of.hInstance = GetModuleHandle(0);
@@ -28,9 +30,9 @@ std::string et::selectFile(const StringList&, SelectFileMode mode, const std::st
 	of.nMaxFile = MAX_PATH;
 
 	if (mode == SelectFileMode_Open)
-		return GetOpenFileName(&of) ? std::string(filename) : emptyString;
+		return GetOpenFileNameA(&of) ? std::string(filename) : emptyString;
 	else 
-		return GetSaveFileName(&of) ? std::string(filename) : emptyString;
+		return GetSaveFileNameA(&of) ? std::string(filename) : emptyString;
 }
 
 #endif // ET_PLATFORM_WIN

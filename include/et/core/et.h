@@ -8,6 +8,7 @@
 #pragma once
 
 #include <cmath>
+#include <ctime>
 #include <cstdlib>
 #include <cstring>
 #include <cstddef>

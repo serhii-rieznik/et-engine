@@ -152,6 +152,9 @@ namespace et
 	uint32_t dataTypeValue(DataType);
 	uint32_t primitiveTypeValue(PrimitiveType);
 	
+	std::pair<uint32_t, uint32_t> blendStateValue(BlendState);
+	BlendState blendValuesToBlendState(int32_t source, int32_t dest);
+	
 	size_t primitiveCount(uint32_t mode, size_t count);
 
 	void etViewport(int x, int y, GLsizei width, GLsizei height);

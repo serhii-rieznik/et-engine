@@ -270,7 +270,7 @@ namespace et
 			
 			if (atomically)
 			{
-				int64_t hash = ::time(nullptr) ^ reinterpret_cast<int64_t>(&fileName);
+				int64_t hash = std::time(nullptr) ^ reinterpret_cast<int64_t>(&fileName);
 				targetFileName += intToStr(hash ^ 0xdeadbeefaaaaaaaa);
 			}
 

@@ -77,7 +77,8 @@ namespace et
 			bool cullEnabled = false;
 			bool alphaToCoverage = false;
 
-			BlendState lastBlend = BlendState::Current;
+			BlendState lastColorBlend = BlendState::Current;
+			BlendState lastAlphaBlend = BlendState::Current;
 			CullState lastCull = CullState::Current;
 			DepthFunc lastDepthFunc = DepthFunc::Less;
 			
@@ -169,9 +170,12 @@ namespace et
 		bool blendEnabled() const
 			{ return _currentState.blendEnabled; }
 
-		BlendState blendState() const
-			{ return _currentState.lastBlend; }
+		BlendState blendStateForColor() const
+			{ return _currentState.lastColorBlend; }
 
+		BlendState blendStateForAlpha() const
+		{ return _currentState.lastAlphaBlend; }
+		
 		bool depthTestEnabled() const 
 			{ return _currentState.depthTestEnabled; }
 
@@ -203,6 +207,10 @@ namespace et
 			{ return _currentState.clearColor; }
 		
 		void setBlend(bool enable, BlendState blend = BlendState::Current, bool force = false);
+		
+		void setSeparateBlend(bool enable, BlendState color = BlendState::Current,
+			BlendState alpha = BlendState::Current, bool force = false);
+		
 		void setCulling(bool enabled, CullState cull = CullState::Current, bool force = false);
 		void setDepthTest(bool enable, bool force = false);
 		void setDepthFunc(DepthFunc func, bool force = false);

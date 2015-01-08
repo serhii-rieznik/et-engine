@@ -7,7 +7,7 @@
 
 #include <et/rendering/rendercontext.h>
 
-#if (ET_PLATFORM_WIN)
+#if (ET_PLATFORM_WIN && ET_DIRECTX_RENDER)
 
 #include <d3d11.h>
 
@@ -610,4 +610,4 @@ LRESULT CALLBACK mainWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	}
 }
 
-#endif // ET_PLATFORM_WIN
+#endif // ET_PLATFORM_WIN && ET_DIRECTX_RENDER

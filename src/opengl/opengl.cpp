@@ -49,24 +49,6 @@ OpenGLDebugScope::~OpenGLDebugScope()
 #endif
 }
 
-uint32_t et::vertexAttributeTypeValue(VertexAttributeType value)
-{
-	ET_ASSERT(value < VertexAttributeType::max)
-	
-	static const uint32_t valuesMap[VertexAttributeType_max] =
-	{
-		GL_FLOAT,
-		GL_FLOAT_VEC2,
-		GL_FLOAT_VEC3,
-		GL_FLOAT_VEC4,
-		GL_FLOAT_MAT3,
-		GL_FLOAT_MAT4,
-		GL_INT
-	};
-	
-	return valuesMap[static_cast<uint32_t>(value)];
-}
-
 VertexAttributeType et::openglTypeToVertexAttributeType(uint32_t value)
 {
 	switch (value)
@@ -103,8 +85,60 @@ VertexAttributeType et::openglTypeToVertexAttributeType(uint32_t value)
 										return valuesMap[intValue]; \
 									}
 
+uint32_t et::vertexAttributeTypeValue(VertexAttributeType value)
+{
+	ET_ASSERT(value < VertexAttributeType::max)
+	
+	static const uint32_t valuesMap[VertexAttributeType_max] =
+	{
+		GL_FLOAT,
+		GL_FLOAT_VEC2,
+		GL_FLOAT_VEC3,
+		GL_FLOAT_VEC4,
+		GL_FLOAT_MAT3,
+		GL_FLOAT_MAT4,
+		GL_INT
+	};
+	ET_SAMPLE_VALUE_FROM_MAP
+}
+
+static const std::pair<uint32_t, uint32_t> blendStatesMap[BlendState_max] =
+{
+	{ GL_ONE, GL_ZERO }, // Disabled,
+	{ GL_ONE, GL_ZERO }, // Current,
+	{ GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA }, // Default,
+	{ GL_ONE, GL_ONE_MINUS_SRC_ALPHA}, // AlphaPremultiplied,
+	{ GL_ONE, GL_ONE }, // Additive,
+	{ GL_SRC_ALPHA, GL_ONE }, // AlphaAdditive,
+	{ GL_ZERO, GL_SRC_ALPHA }, // AlphaMultiplicative,
+	{ GL_SRC_COLOR, GL_ONE}, // ColorAdditive,
+	{ GL_ZERO, GL_ONE_MINUS_SRC_ALPHA } // AlphaInverseMultiplicative
+};
+
+std::pair<uint32_t, uint32_t> et::blendStateValue(BlendState value)
+{
+	ET_ASSERT(value < BlendState::max)
+	return blendStatesMap[static_cast<uint32_t>(value)];
+}
+
+BlendState et::blendValuesToBlendState(int32_t source, int32_t dest)
+{
+	size_t availableBlendModes = sizeof(blendStatesMap) / sizeof(blendStatesMap[0]);
+	
+	for (size_t i = 0; i < availableBlendModes; ++i)
+	{
+		if ((blendStatesMap[i].first == source) && (blendStatesMap[i].second == dest))
+			return static_cast<BlendState>(i);
+	}
+	
+	log::warning("Unsupported blend combination: %d, %d", source, dest);
+	return BlendState::Disabled;
+}
+
 uint32_t et::textureFormatValue(TextureFormat value)
 {
+	ET_ASSERT(value < TextureFormat::max)
+	
 	static const uint32_t valuesMap[TextureFormat_max] =
 	{
 		0, // Invalid,

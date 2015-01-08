@@ -56,18 +56,18 @@ void ConsoleOutput::info(const char* format, va_list args)
 	int pos = vsnprintf(storage, 2048, format, args);
 	storage[pos++] = '\n';
 	storage[pos++] = 0;
-	OutputDebugString(storage);
+	OutputDebugStringA(storage);
 }
 
 void ConsoleOutput::warning(const char* fmt, va_list args)
 {
-	OutputDebugString("WARNING: ");
+	OutputDebugStringA("WARNING: ");
 	info(fmt, args);
 }
 
 void ConsoleOutput::error(const char* fmt, va_list args)
 {
-	OutputDebugString("ERROR: ");
+	OutputDebugStringA("ERROR: ");
 	info(fmt, args);
 }
 

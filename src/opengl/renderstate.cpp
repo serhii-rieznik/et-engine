@@ -426,7 +426,7 @@ void RenderState::setDepthFunc(DepthFunc func, bool force)
 #endif
 }
 
-void RenderState::setBlend(bool enable, BlendState blend, bool force)
+void RenderState::setSeparateBlend(bool enable, BlendState color, BlendState alpha, bool force)
 {
 #if !defined(ET_CONSOLE_APPLICATION)
 	if (force || (_currentState.blendEnabled != enable))
@@ -434,59 +434,35 @@ void RenderState::setBlend(bool enable, BlendState blend, bool force)
 		_currentState.blendEnabled = enable;
 		(enable ? glEnable : glDisable)(GL_BLEND);
 	}
-
-	if ((force || (_currentState.lastBlend != blend)) && (blend != BlendState::Current))
+	
+	bool shouldSet = force;
+	
+	if (color != BlendState::Current)
 	{
-		_currentState.lastBlend = blend;
-		switch (blend)
-		{  
-		case BlendState::Disabled: 
-			{
-				glBlendFunc(GL_ONE, GL_ZERO); 
-				break;
-			}
+		shouldSet = true;
+		_currentState.lastColorBlend = color;
+	}
 
-		case BlendState::Default: 
-			{
-				glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); 
-				break;
-			}
-
-		case BlendState::Additive: 
-			{
-				glBlendFunc(GL_ONE, GL_ONE); 
-				break;
-			}
-
-		case BlendState::AlphaAdditive: 
-			{
-				glBlendFunc(GL_SRC_ALPHA, GL_ONE); 
-				break;
-			}
-				
-		case BlendState::AlphaMultiplicative:
-			{
-				glBlendFunc(GL_ZERO, GL_SRC_ALPHA);
-				break;
-			}
-				
-		case BlendState::AlphaPremultiplied:
-			{
-				glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-				break;
-			}
-
-		case BlendState::ColorAdditive: 
-			{
-				glBlendFunc(GL_SRC_COLOR, GL_ONE); 
-				break;
-			}
-
-		default:
-			ET_FAIL("Unknown blend state.");
-		}
+	if (alpha != BlendState::Current)
+	{
+		shouldSet = true;
+		_currentState.lastAlphaBlend = alpha;
+	}
+	
+	if (shouldSet)
+	{
+		std::pair<uint32_t, uint32_t> colorBlend = blendStateValue(_currentState.lastColorBlend);
+		std::pair<uint32_t, uint32_t> alphaBlend = blendStateValue(_currentState.lastAlphaBlend);
+		glBlendFuncSeparate(colorBlend.first, colorBlend.second, alphaBlend.first, alphaBlend.second);
+		checkOpenGLError("glBlendFuncSeparate(%u, %u, %u, %u)", colorBlend.first, colorBlend.second,
+			alphaBlend.first, alphaBlend.second);
 	}
 #endif
+}
+
+void RenderState::setBlend(bool enable, BlendState blend, bool force)
+{
+	setSeparateBlend(enable, blend, blend, force);
 }
 
 void RenderState::vertexArrayDeleted(uint32_t buffer)
@@ -719,7 +695,7 @@ void RenderState::applyState(const RenderState::State& s)
 #if !defined(ET_CONSOLE_APPLICATION)
 	setClearColor(s.clearColor, true);
 	setColorMask(s.colorMask, true);
-	setBlend(s.blendEnabled, s.lastBlend, true);
+	setSeparateBlend(s.blendEnabled, s.lastColorBlend, s.lastAlphaBlend, true);
 	setDepthFunc(s.lastDepthFunc, true);
 	setDepthMask(s.depthMask, true);
 	setDepthTest(s.depthTestEnabled, true);
@@ -922,45 +898,26 @@ RenderState::State RenderState::currentState()
 	s.blendEnabled = glIsEnabled(GL_BLEND) != 0;
 	checkOpenGLError("");
 	
+	int blendSource = 0;
+	glGetIntegerv(GL_BLEND_SRC_RGB, &blendSource);
+	checkOpenGLError("");
+	
 	int blendDest = 0;
 	glGetIntegerv(GL_BLEND_DST_RGB, &blendDest);
 	checkOpenGLError("");
 	
-	int blendSource = 0;
-	glGetIntegerv(GL_BLEND_SRC_RGB, &blendSource);
-	checkOpenGLError("");
+	s.lastColorBlend = blendValuesToBlendState(blendSource, blendDest);
 
-	if ((blendSource == GL_SRC_ALPHA) && (blendDest == GL_ONE_MINUS_SRC_ALPHA))
-	{
-		s.lastBlend = BlendState::Default;
-	}
-	else if ((blendSource == GL_ONE) && (blendDest == GL_ONE_MINUS_SRC_ALPHA))
-	{
-		s.lastBlend = BlendState::AlphaPremultiplied;
-	}
-	else if ((blendSource == GL_ONE) && (blendDest == GL_ZERO))
-	{
-		s.lastBlend = BlendState::Disabled;
-	}
-	else if ((blendSource == GL_ONE) && (blendDest == GL_ONE))
-	{
-		s.lastBlend = BlendState::Additive;
-	}
-	else if ((blendSource == GL_SRC_ALPHA) && (blendDest == GL_ONE))
-	{
-		s.lastBlend = BlendState::AlphaAdditive;
-	}
-	else if ((blendSource == GL_SRC_COLOR) && (blendDest == GL_ONE))
-	{
-		s.lastBlend = BlendState::ColorAdditive;
-	}
-	else
-	{
-		log::warning("Unsupported blend combination: %s and %s",
-			glBlendFuncToString(static_cast<uint32_t>(blendSource)).c_str(),
-			glBlendFuncToString(static_cast<uint32_t>(blendDest)).c_str());
-		ET_FAIL("Unsupported blend combination");
-	}
+	blendSource = 0;
+	glGetIntegerv(GL_BLEND_SRC_ALPHA, &blendSource);
+	checkOpenGLError("");
+	
+	blendDest = 0;
+	glGetIntegerv(GL_BLEND_DST_ALPHA, &blendDest);
+	checkOpenGLError("");
+	
+	s.lastAlphaBlend = blendValuesToBlendState(blendSource, blendDest);
 #endif
+	
 	return s;
 }

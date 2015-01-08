@@ -232,8 +232,8 @@ BinaryDataStorage Renderer::readFramebufferData(const vec2i& size, TextureFormat
 }
 
 /*
-* Default shaders
-*/
+ * Default shaders
+ */
 
 const std::string fullscreen_vertex_shader = 
 	"etVertexIn vec2 Vertex;"

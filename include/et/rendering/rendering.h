@@ -55,6 +55,7 @@ namespace et
 		AlphaAdditive,
 		AlphaMultiplicative,
 		ColorAdditive,
+		AlphaInverseMultiplicative,
 		
 		max
 	};
@@ -257,6 +258,7 @@ namespace et
 		VertexAttributeType_max = static_cast<uint32_t>(VertexAttributeType::max),
 		
 		DataType_max = static_cast<uint32_t>(DataType::max),
+		BlendState_max = static_cast<uint32_t>(BlendState::max),
 
 		TextureTarget_max = static_cast<uint32_t>(TextureTarget::max),
 		TextureFormat_max = static_cast<uint32_t>(TextureFormat::max),

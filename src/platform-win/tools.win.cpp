@@ -67,37 +67,35 @@ std::string et::applicationPath()
 
 bool et::fileExists(const std::string& name)
 {
-	auto attr = GetFileAttributes(name.c_str());
+	auto attr = GetFileAttributesW(utf8ToUnicode(name).c_str());
 	return (attr != INVALID_FILE_ATTRIBUTES) && ((attr & FILE_ATTRIBUTE_DIRECTORY) != FILE_ATTRIBUTE_DIRECTORY);
 }
 
 bool et::folderExists(const std::string& folder)
 {
-	auto attr = GetFileAttributes(folder.c_str());
+	auto attr = GetFileAttributesW(utf8ToUnicode(folder).c_str());
 	return (attr != INVALID_FILE_ATTRIBUTES) && ((attr & FILE_ATTRIBUTE_DIRECTORY) == FILE_ATTRIBUTE_DIRECTORY);
 }
 
 void et::findFiles(const std::string& folder, const std::string& mask, bool recursive, StringList& list)
 {
-	std::string normalizedFolder = addTrailingSlash(folder);
-	std::string searchPath = normalizedFolder + mask;
+	std::wstring normalizedFolder = utf8ToUnicode(addTrailingSlash(folder));
+	std::wstring searchPath = normalizedFolder + utf8ToUnicode(mask);
 
 	StringList folderList;
 	if (recursive)
 	{
-		std::string foldersSearchPath = normalizedFolder + "*.*";
-		WIN32_FIND_DATA folders = { };
-		HANDLE folderSearch = FindFirstFile(foldersSearchPath.c_str(), &folders);
+		std::wstring foldersSearchPath = normalizedFolder + L"*.*";
+		WIN32_FIND_DATAW folders = { };
+		HANDLE folderSearch = FindFirstFileW(foldersSearchPath.c_str(), &folders);
 		if (folderSearch != INVALID_HANDLE_VALUE)
 		{
 			do
 			{
-				if (strcmp(folders.cFileName, ".") && strcmp(folders.cFileName, "..") && 
-					((folders.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == FILE_ATTRIBUTE_DIRECTORY))
-				{
-					std::string folderName(folders.cFileName);
-					folderList.push_back(normalizedFolder + folderName);
-				}
+				bool isFolder = (folders.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == FILE_ATTRIBUTE_DIRECTORY;
+				std::wstring name(folders.cFileName);
+				if (isFolder && (name !=  L".") && (name != L".."))
+					folderList.push_back(unicodeToUtf8(normalizedFolder + name));
 			}
 			while (FindNextFile(folderSearch, &folders));
 			FindClose(folderSearch);
@@ -105,17 +103,14 @@ void et::findFiles(const std::string& folder, const std::string& mask, bool recu
 	}
 
 	WIN32_FIND_DATA data = { };
-	HANDLE search = FindFirstFile(searchPath.c_str(), &data);
-
+	HANDLE search = FindFirstFileW(searchPath.c_str(), &data);
 	if (search != INVALID_HANDLE_VALUE)
 	{
 		do
 		{
-			if (strcmp(data.cFileName, ".") && strcmp(data.cFileName, ".."))
-			{
-				std::string fileName(data.cFileName);
-				list.push_back(normalizedFolder + fileName);
-			}
+			std::wstring name(data.cFileName);
+			if ((name != L".") && (name != L".."))
+				list.push_back(unicodeToUtf8(normalizedFolder + name));
 		}
 		while (FindNextFile(search, &data));
 		FindClose(search);
@@ -130,16 +125,16 @@ void et::findFiles(const std::string& folder, const std::string& mask, bool recu
 
 std::string et::applicationPackagePath()
 {
-	char buffer[MAX_PATH] = { };
-	GetCurrentDirectory(MAX_PATH, buffer);
-	return addTrailingSlash(std::string(buffer));
+	wchar_t buffer[MAX_PATH] = { };
+	GetCurrentDirectoryW(MAX_PATH, buffer);
+	return addTrailingSlash(unicodeToUtf8(buffer));
 }
 
 std::string et::applicationDataFolder()
 {
-	char buffer[MAX_PATH] = { };
-	GetCurrentDirectory(MAX_PATH, buffer);
-	return addTrailingSlash(std::string(buffer));
+	wchar_t buffer[MAX_PATH] = { };
+	GetCurrentDirectoryW(MAX_PATH, buffer);
+	return addTrailingSlash(unicodeToUtf8(buffer));
 }
 
 std::string et::documentsBaseFolder()
@@ -180,41 +175,48 @@ bool et::createDirectory(const std::string& name, bool recursive)
 		{
 			path += dir + "\\";
 			if (!folderExists(path))
-				gotError |= ::CreateDirectory(path.c_str(), nullptr) == 0;
+			{
+				std::wstring wPath = utf8ToUnicode(path);
+				gotError |= ::CreateDirectoryW(wPath.c_str(), nullptr) == 0;
+			}
 		}
 
 		return !gotError;
 	}
 	else
 	{
-		return ::CreateDirectory(name.c_str(), nullptr) == 0;
+		return ::CreateDirectoryW(utf8ToUnicode(name).c_str(), nullptr) == 0;
 	}
 }
 
 bool et::removeFile(const std::string& name)
 {
+#	pragma message("DEAL WITH UNICODE HERE")
+
 	std::string doubleNullTerminated(name.size() + 1, 0);
 	std::copy(name.begin(), name.end(), doubleNullTerminated.begin());
 
-	SHFILEOPSTRUCT fop = {};
+	SHFILEOPSTRUCTA fop = {};
 
 	fop.hwnd = 0;
 	fop.wFunc = FO_DELETE;
 	fop.pFrom = doubleNullTerminated.c_str();
 	fop.fFlags = FOF_NO_UI;
 
-	return SHFileOperation(&fop) == 0;
+	return SHFileOperationA(&fop) == 0;
 }
 
 bool et::copyFile(const std::string& from, const std::string& to)
 {
+#	pragma message("DEAL WITH UNICODE HERE")
+
 	std::string fromNullTerminated(from.size() + 1, 0);
 	std::copy(from.begin(), from.end(), fromNullTerminated.begin());
 
 	std::string toNullTerminated(to.size() + 1, 0);
 	std::copy(to.begin(), to.end(), toNullTerminated.begin());
 
-	SHFILEOPSTRUCT fop = {};
+	SHFILEOPSTRUCTA fop = {};
 
 	fop.hwnd = 0;
 	fop.wFunc = FO_COPY;
@@ -222,42 +224,42 @@ bool et::copyFile(const std::string& from, const std::string& to)
 	fop.pTo = toNullTerminated.c_str();
 	fop.fFlags = FOF_NO_UI;
 
-	return SHFileOperation(&fop) == 0;
+	return SHFileOperationA(&fop) == 0;
 }
 
 bool et::removeDirectory(const std::string& name)
 {
+#	pragma message("DEAL WITH UNICODE HERE")
+
 	std::string doubleNullTerminated(name.size() + 1, 0);
 	std::copy(name.begin(), name.end(), doubleNullTerminated.begin());
 	
-	SHFILEOPSTRUCT fop = { };
+	SHFILEOPSTRUCTA fop = { };
 
 	fop.hwnd = 0;
 	fop.wFunc = FO_DELETE;
 	fop.pFrom = doubleNullTerminated.c_str();
 	fop.fFlags = FOF_NO_UI;
 
-	return SHFileOperation(&fop) == 0;
+	return SHFileOperationA(&fop) == 0;
 }
 
 void et::findSubfolders(const std::string& folder, bool recursive, StringList& list)
 {
-	std::string normalizedFolder = addTrailingSlash(folder);
-	std::string foldersSearchPath = normalizedFolder + "*.*";
+	std::wstring normalizedFolder = utf8ToUnicode(addTrailingSlash(folder));
+	std::wstring foldersSearchPath = normalizedFolder + L"*.*";
 	StringList folderList;
 
-	WIN32_FIND_DATA folders = { };
-	HANDLE folderSearch = FindFirstFile(foldersSearchPath.c_str(), &folders);
+	WIN32_FIND_DATAW folders = { };
+	HANDLE folderSearch = FindFirstFileW(foldersSearchPath.c_str(), &folders);
 	if (folderSearch != INVALID_HANDLE_VALUE)
 	{
 		do
 		{
-			if (strcmp(folders.cFileName, ".") && strcmp(folders.cFileName, "..") && 
-				((folders.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == FILE_ATTRIBUTE_DIRECTORY))
-			{
-				std::string folderName(folders.cFileName);
-				folderList.push_back(normalizedFolder + folderName + "\\");
-			}
+			std::wstring name(folders.cFileName);
+			bool isFolder = (folders.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == FILE_ATTRIBUTE_DIRECTORY;
+			if (isFolder && (name != L".") && (name != L".."))
+				folderList.push_back(unicodeToUtf8(normalizedFolder + name + L"\\"));
 		}
 		while (FindNextFile(folderSearch, &folders));
 		FindClose(folderSearch);
@@ -274,7 +276,7 @@ void et::findSubfolders(const std::string& folder, bool recursive, StringList& l
 
 void et::openUrl(const std::string& url)
 {
-	ShellExecute(0, "open", url.c_str(), 0, 0, SW_SHOWNORMAL);
+	ShellExecuteW(0, L"open", utf8ToUnicode(url).c_str(), 0, 0, SW_SHOWNORMAL);
 }
 
 std::string et::unicodeToUtf8(const std::wstring& w)
@@ -332,7 +334,7 @@ std::string et::applicationIdentifierForCurrentProject()
 uint64_t et::getFileDate(const std::string& path)
 {
 	WIN32_FIND_DATA findData = { };
-	HANDLE search = FindFirstFile(path.c_str(), &findData);
+	HANDLE search = FindFirstFile(utf8ToUnicode(path).c_str(), &findData);
 	FindClose(search);
 
 	return findData.ftLastWriteTime.dwLowDateTime |
