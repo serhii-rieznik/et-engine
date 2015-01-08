@@ -131,8 +131,26 @@ std::set<std::string> StandardPathResolver::resolveFolderPaths(const std::string
 	
 	for (const auto& path : _searchPath)
 	{
-		auto base = path + input;
+		auto base = normalizeFilePath(path + input);
+
+		if (base.back() == pathDelimiter)
+			base.pop_back();
 		
+		if (_cachedScreenScaleFactor > 0)
+		{
+			suggested = addTrailingSlash(base + _cachedScreenScale + _cachedLanguage);
+			if (fileExists(suggested))
+				result.insert(suggested);
+
+			suggested = addTrailingSlash(base + _cachedScreenScale + _cachedLang);
+			if (fileExists(suggested))
+				result.insert(suggested);
+
+			suggested = addTrailingSlash(base + _cachedScreenScale);
+			if (fileExists(suggested))
+				result.insert(suggested);
+		}
+
 		suggested = addTrailingSlash(base + _cachedLanguage);
 		if (folderExists(suggested))
 			result.insert(suggested);

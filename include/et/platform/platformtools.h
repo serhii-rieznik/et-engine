@@ -14,10 +14,10 @@ namespace et
 	inline bool platformHasHardwareKeyboard()
 		{ return CurrentPlatform != Platform_iOS; }
 
-	enum SelectFileMode
+	enum class SelectFileMode : uint32_t
 	{
-		SelectFileMode_Open,
-		SelectFileMode_Save
+		Open,
+		Save
 	};
 
 	std::string selectFile(const StringList& types, SelectFileMode mode, const std::string& defaultName);

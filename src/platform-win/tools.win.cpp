@@ -6,13 +6,16 @@
  */
 
 #include <et/core/tools.h>
-#include <et/core/filesystem.h>
-#include <et/core/containers.h>
 
 #if (ET_PLATFORM_WIN)
 
+#include <et/platform/platformtools.h>
+#include <et/core/filesystem.h>
+#include <et/core/containers.h>
+
 #include <Shlobj.h>
 #include <ShellAPI.h>
+#include <CommDlg.h>
 
 #if defined(_UNICODE)
 #	define ET_WIN_UNICODE					1
@@ -381,6 +384,24 @@ std::vector<et::Screen> et::availableScreens()
 	reinterpret_cast<LPARAM>(&result));
 
 	return result;
+}
+
+std::string et::selectFile(const StringList&, SelectFileMode mode, const std::string& defaultName)
+{
+	ET_CHAR_TYPE filename[MAX_PATH] = { };
+	etCopyMemory(filename, defaultName.c_str(), defaultName.length());
+
+	OPENFILENAMEA of = { };
+	of.lStructSize = sizeof(of);
+	of.hInstance = GetModuleHandle(nullptr);
+	of.lpstrFilter = ET_STRING_FROM_CONST_CHAR("All files\0*.*\0\0");
+	of.Flags = OFN_DONTADDTORECENT | OFN_ENABLESIZING | OFN_EXPLORER | OFN_NOCHANGEDIR | OFN_PATHMUSTEXIST;
+	of.lpstrFile = filename;
+	of.nMaxFile = MAX_PATH;
+
+	auto func = (mode == SelectFileMode::Save) ? GetSaveFileName : GetOpenFileName;
+
+	return func(&of) ? ET_STRING_TO_OUTPUT_TYPE(ET_STRING_TYPE(filename)) : emptyString;
 }
 
 #endif // ET_PLATFORM_WIN

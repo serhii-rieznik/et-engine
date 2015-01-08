@@ -52,11 +52,12 @@ void ConsoleOutput::debug(const char* format, va_list args)
 
 void ConsoleOutput::info(const char* format, va_list args)
 {
-	static char storage[2048] = {};
+	static char storage[2048] = { };
 	int pos = vsnprintf(storage, 2048, format, args);
 	storage[pos++] = '\n';
 	storage[pos++] = 0;
 	OutputDebugStringA(storage);
+	printf(storage);
 }
 
 void ConsoleOutput::warning(const char* fmt, va_list args)
