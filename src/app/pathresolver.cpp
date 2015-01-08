@@ -114,24 +114,29 @@ std::set<std::string> StandardPathResolver::resolveFolderPaths(const std::string
 {
 	validateCaches();
 
+	auto normalizedInput = normalizeFilePath(input);
+
+	if (normalizedInput.back() == pathDelimiter)
+		normalizedInput.pop_back();
+
 	std::set<std::string> result;
-	if (input.empty())
+	if (normalizedInput.empty())
 		result.insert(_baseFolder);
 	
-	auto suggested = addTrailingSlash(input + _cachedLanguage);
+	auto suggested = addTrailingSlash(normalizedInput + _cachedLanguage);
 	if (folderExists(suggested))
 		result.insert(suggested);
 	
-	suggested = addTrailingSlash(input + _cachedLang);
+	suggested = addTrailingSlash(normalizedInput + _cachedLang);
 	if (folderExists(suggested))
 		result.insert(suggested);
 	
-	if (folderExists(input))
-		result.insert(input);
+	if (folderExists(normalizedInput))
+		result.insert(addTrailingSlash(normalizedInput));
 	
 	for (const auto& path : _searchPath)
 	{
-		auto base = normalizeFilePath(path + input);
+		auto base = normalizeFilePath(path + normalizedInput);
 
 		if (base.back() == pathDelimiter)
 			base.pop_back();

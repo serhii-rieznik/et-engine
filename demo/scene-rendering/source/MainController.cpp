@@ -32,6 +32,8 @@ void MainController::applicationDidLoad(et::RenderContext* rc)
 	application().pushRelativeSearchPath("..\\..");
 	application().pushRelativeSearchPath("..\\..\\..");
 	application().pushSearchPath("Q:\\SDK\\Models\\");
+#elif (ET_PLATFORM_MAC)
+	application().pushSearchPath("/Volumes/Development/SDK/Models/");
 #endif
 
 	rc->renderState().setClearColor(vec4(0.25f, 0.0f));
@@ -51,14 +53,9 @@ void MainController::applicationDidLoad(et::RenderContext* rc)
 	_renderer.init(rc);
 	_cameraController.init(rc);
 	
-#if (ET_PLATFORM_MAC)
-	auto loadedScene = _loader.loadFromFile(application().resolveFileName("/Volumes/Development/SDK/Models/crytek/sponza.etm"));
+	auto loadedScene = _loader.loadFromFile(application().resolveFileName("crytek/sponza.etm"));
 	_renderer.setScene(loadedScene);
-#elif (ET_PLATFORM_WIN)
-	auto loadedScene = _loader.loadFromFile(application().resolveFileName("crytek\\sponza.etm"));
-	_renderer.setScene(loadedScene);
-#endif
-	
+
 	connectInputEvents();
 }
 
