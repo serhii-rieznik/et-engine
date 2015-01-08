@@ -219,9 +219,6 @@
     <ClCompile Include="..\..\..\src\platform-win\platformtools.win.cpp">
       <Filter>engine\src</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\platform-win\rendercontext.win.cpp">
-      <Filter>engine\src</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\platform-win\thread.win.cpp">
       <Filter>engine\src</Filter>
     </ClCompile>
@@ -310,6 +307,9 @@
       <Filter>engine\src</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\vertexbuffer\vertexdeclaration.cpp">
+      <Filter>engine\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\platform-win\rendercontext.win-opengl.cpp">
       <Filter>engine\src</Filter>
     </ClCompile>
   </ItemGroup>

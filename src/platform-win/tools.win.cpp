@@ -14,9 +14,30 @@
 #include <Shlobj.h>
 #include <ShellAPI.h>
 
+#if defined(_UNICODE)
+#	define ET_WIN_UNICODE					1
+#	define ET_CHAR_TYPE						wchar_t
+#	define ET_STRING_TYPE					std::wstring
+#	define ET_STRING_TO_PARAM_TYPE(str)		utf8ToUnicode(str)
+#	define ET_STRING_TO_OUTPUT_TYPE(str)	unicodeToUtf8(str)
+#	define ET_STRING_FROM_CONST_CHAR(str)	L##str
+#else
+#	define ET_WIN_UNICODE					0
+#	define ET_CHAR_TYPE						char
+#	define ET_STRING_TYPE					std::string
+#	define ET_STRING_TO_PARAM_TYPE(str)		str
+#	define ET_STRING_TO_OUTPUT_TYPE(str)	str
+#	define ET_STRING_FROM_CONST_CHAR(str)	str
+#endif
+
 static bool shouldInitializeTime = true;
+
 static uint64_t performanceFrequency = 0;
 static uint64_t initialCounter = 0;
+
+static const ET_STRING_TYPE currentFolder = ET_STRING_FROM_CONST_CHAR(".");
+static const ET_STRING_TYPE previousFolder = ET_STRING_FROM_CONST_CHAR("..");
+static const ET_STRING_TYPE allFilesMask = ET_STRING_FROM_CONST_CHAR("*.*");
 
 void initTime()
 {
@@ -67,35 +88,37 @@ std::string et::applicationPath()
 
 bool et::fileExists(const std::string& name)
 {
-	auto attr = GetFileAttributesW(utf8ToUnicode(name).c_str());
+	auto attr = GetFileAttributes(ET_STRING_TO_PARAM_TYPE(name).c_str());
 	return (attr != INVALID_FILE_ATTRIBUTES) && ((attr & FILE_ATTRIBUTE_DIRECTORY) != FILE_ATTRIBUTE_DIRECTORY);
 }
 
 bool et::folderExists(const std::string& folder)
 {
-	auto attr = GetFileAttributesW(utf8ToUnicode(folder).c_str());
+	auto attr = GetFileAttributes(ET_STRING_TO_PARAM_TYPE(folder).c_str());
 	return (attr != INVALID_FILE_ATTRIBUTES) && ((attr & FILE_ATTRIBUTE_DIRECTORY) == FILE_ATTRIBUTE_DIRECTORY);
 }
 
 void et::findFiles(const std::string& folder, const std::string& mask, bool recursive, StringList& list)
 {
-	std::wstring normalizedFolder = utf8ToUnicode(addTrailingSlash(folder));
-	std::wstring searchPath = normalizedFolder + utf8ToUnicode(mask);
+	ET_STRING_TYPE normalizedFolder = ET_STRING_TO_PARAM_TYPE(addTrailingSlash(folder));
+	ET_STRING_TYPE searchPath = normalizedFolder + ET_STRING_TO_PARAM_TYPE(mask);
 
 	StringList folderList;
 	if (recursive)
 	{
-		std::wstring foldersSearchPath = normalizedFolder + L"*.*";
-		WIN32_FIND_DATAW folders = { };
-		HANDLE folderSearch = FindFirstFileW(foldersSearchPath.c_str(), &folders);
+		ET_STRING_TYPE foldersSearchPath = normalizedFolder + allFilesMask;
+
+		WIN32_FIND_DATA folders = { };
+		HANDLE folderSearch = FindFirstFile(foldersSearchPath.c_str(), &folders);
 		if (folderSearch != INVALID_HANDLE_VALUE)
 		{
 			do
 			{
 				bool isFolder = (folders.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == FILE_ATTRIBUTE_DIRECTORY;
-				std::wstring name(folders.cFileName);
-				if (isFolder && (name !=  L".") && (name != L".."))
-					folderList.push_back(unicodeToUtf8(normalizedFolder + name));
+				ET_STRING_TYPE name(folders.cFileName);
+				if (isFolder && (name != currentFolder) && (name != previousFolder))
+					folderList.push_back(ET_STRING_TO_OUTPUT_TYPE(normalizedFolder + name));
+
 			}
 			while (FindNextFile(folderSearch, &folders));
 			FindClose(folderSearch);
@@ -103,14 +126,14 @@ void et::findFiles(const std::string& folder, const std::string& mask, bool recu
 	}
 
 	WIN32_FIND_DATA data = { };
-	HANDLE search = FindFirstFileW(searchPath.c_str(), &data);
+	HANDLE search = FindFirstFile(searchPath.c_str(), &data);
 	if (search != INVALID_HANDLE_VALUE)
 	{
 		do
 		{
-			std::wstring name(data.cFileName);
-			if ((name != L".") && (name != L".."))
-				list.push_back(unicodeToUtf8(normalizedFolder + name));
+			ET_STRING_TYPE name(data.cFileName);
+			if ((name != currentFolder) && (name != previousFolder))
+				list.push_back(ET_STRING_TO_OUTPUT_TYPE(normalizedFolder + name));
 		}
 		while (FindNextFile(search, &data));
 		FindClose(search);
@@ -125,16 +148,16 @@ void et::findFiles(const std::string& folder, const std::string& mask, bool recu
 
 std::string et::applicationPackagePath()
 {
-	wchar_t buffer[MAX_PATH] = { };
-	GetCurrentDirectoryW(MAX_PATH, buffer);
-	return addTrailingSlash(unicodeToUtf8(buffer));
+	ET_CHAR_TYPE buffer[MAX_PATH] = { };
+	GetCurrentDirectory(MAX_PATH, buffer);
+	return addTrailingSlash(ET_STRING_TO_OUTPUT_TYPE(buffer));
 }
 
 std::string et::applicationDataFolder()
 {
-	wchar_t buffer[MAX_PATH] = { };
-	GetCurrentDirectoryW(MAX_PATH, buffer);
-	return addTrailingSlash(unicodeToUtf8(buffer));
+	ET_CHAR_TYPE buffer[MAX_PATH] = { };
+	GetCurrentDirectory(MAX_PATH, buffer);
+	return addTrailingSlash(ET_STRING_TO_OUTPUT_TYPE(buffer));
 }
 
 std::string et::documentsBaseFolder()
@@ -175,91 +198,84 @@ bool et::createDirectory(const std::string& name, bool recursive)
 		{
 			path += dir + "\\";
 			if (!folderExists(path))
-			{
-				std::wstring wPath = utf8ToUnicode(path);
-				gotError |= ::CreateDirectoryW(wPath.c_str(), nullptr) == 0;
-			}
+				gotError |= ::CreateDirectory(ET_STRING_TO_PARAM_TYPE(path).c_str(), nullptr) == 0;
 		}
 
 		return !gotError;
 	}
-	else
-	{
-		return ::CreateDirectoryW(utf8ToUnicode(name).c_str(), nullptr) == 0;
-	}
+
+	return ::CreateDirectory(ET_STRING_TO_PARAM_TYPE(name).c_str(), nullptr) == 0;
 }
 
 bool et::removeFile(const std::string& name)
 {
-#	pragma message("DEAL WITH UNICODE HERE")
+	ET_STRING_TYPE aName = ET_STRING_TO_PARAM_TYPE(name);
+	aName.resize(aName.size() + 1);
+	aName.back() = 0;
 
-	std::string doubleNullTerminated(name.size() + 1, 0);
-	std::copy(name.begin(), name.end(), doubleNullTerminated.begin());
+	SHFILEOPSTRUCT fop = { };
 
-	SHFILEOPSTRUCTA fop = {};
-
-	fop.hwnd = 0;
 	fop.wFunc = FO_DELETE;
-	fop.pFrom = doubleNullTerminated.c_str();
+	fop.pFrom = aName.c_str();
 	fop.fFlags = FOF_NO_UI;
 
-	return SHFileOperationA(&fop) == 0;
+	return SHFileOperation(&fop) == 0;
 }
 
 bool et::copyFile(const std::string& from, const std::string& to)
 {
-#	pragma message("DEAL WITH UNICODE HERE")
+	ET_STRING_TYPE aFrom= ET_STRING_TO_PARAM_TYPE(from);
+	ET_STRING_TYPE aTo = ET_STRING_TO_PARAM_TYPE(to);
+	aFrom.resize(aFrom.size() + 1);
+	aTo.resize(aTo.size() + 1);
+	aFrom.back() = 0;
+	aTo.back() = 0;
 
-	std::string fromNullTerminated(from.size() + 1, 0);
-	std::copy(from.begin(), from.end(), fromNullTerminated.begin());
+	SHFILEOPSTRUCT fop = { };
 
-	std::string toNullTerminated(to.size() + 1, 0);
-	std::copy(to.begin(), to.end(), toNullTerminated.begin());
-
-	SHFILEOPSTRUCTA fop = {};
-
-	fop.hwnd = 0;
 	fop.wFunc = FO_COPY;
-	fop.pFrom = fromNullTerminated.c_str();
-	fop.pTo = toNullTerminated.c_str();
+	fop.pFrom = aFrom.c_str();
+	fop.pTo = aTo.c_str();
 	fop.fFlags = FOF_NO_UI;
 
-	return SHFileOperationA(&fop) == 0;
+	return SHFileOperation(&fop) == 0;
 }
 
 bool et::removeDirectory(const std::string& name)
 {
-#	pragma message("DEAL WITH UNICODE HERE")
+	ET_STRING_TYPE aName = ET_STRING_TO_PARAM_TYPE(name);
+	aName.resize(aName.size() + 1);
+	aName.back() = 0;
 
-	std::string doubleNullTerminated(name.size() + 1, 0);
-	std::copy(name.begin(), name.end(), doubleNullTerminated.begin());
-	
-	SHFILEOPSTRUCTA fop = { };
+	SHFILEOPSTRUCT fop = { };
 
-	fop.hwnd = 0;
 	fop.wFunc = FO_DELETE;
-	fop.pFrom = doubleNullTerminated.c_str();
+	fop.pFrom = aName.c_str();
 	fop.fFlags = FOF_NO_UI;
 
-	return SHFileOperationA(&fop) == 0;
+	return SHFileOperation(&fop) == 0;
 }
 
 void et::findSubfolders(const std::string& folder, bool recursive, StringList& list)
 {
-	std::wstring normalizedFolder = utf8ToUnicode(addTrailingSlash(folder));
-	std::wstring foldersSearchPath = normalizedFolder + L"*.*";
 	StringList folderList;
+	
+	ET_STRING_TYPE normalizedFolder = ET_STRING_TO_PARAM_TYPE(addTrailingSlash(folder));
+	ET_STRING_TYPE foldersSearchPath = normalizedFolder + allFilesMask;
 
-	WIN32_FIND_DATAW folders = { };
-	HANDLE folderSearch = FindFirstFileW(foldersSearchPath.c_str(), &folders);
+	WIN32_FIND_DATA folders = { };
+	HANDLE folderSearch = FindFirstFile(foldersSearchPath.c_str(), &folders);
 	if (folderSearch != INVALID_HANDLE_VALUE)
 	{
 		do
 		{
-			std::wstring name(folders.cFileName);
+			ET_STRING_TYPE name(folders.cFileName);
 			bool isFolder = (folders.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == FILE_ATTRIBUTE_DIRECTORY;
-			if (isFolder && (name != L".") && (name != L".."))
-				folderList.push_back(unicodeToUtf8(normalizedFolder + name + L"\\"));
+			if (isFolder && (name != currentFolder) && (name != previousFolder))
+			{
+				folderList.push_back(ET_STRING_TO_OUTPUT_TYPE(normalizedFolder + 
+					name + ET_STRING_FROM_CONST_CHAR("\\")));
+			}
 		}
 		while (FindNextFile(folderSearch, &folders));
 		FindClose(folderSearch);
@@ -276,7 +292,8 @@ void et::findSubfolders(const std::string& folder, bool recursive, StringList& l
 
 void et::openUrl(const std::string& url)
 {
-	ShellExecuteW(0, L"open", utf8ToUnicode(url).c_str(), 0, 0, SW_SHOWNORMAL);
+	ShellExecute(nullptr, ET_STRING_FROM_CONST_CHAR("open"), 
+		ET_STRING_TO_PARAM_TYPE(url).c_str(), 0, 0, SW_SHOWNORMAL);
 }
 
 std::string et::unicodeToUtf8(const std::wstring& w)
@@ -334,7 +351,7 @@ std::string et::applicationIdentifierForCurrentProject()
 uint64_t et::getFileDate(const std::string& path)
 {
 	WIN32_FIND_DATA findData = { };
-	HANDLE search = FindFirstFile(utf8ToUnicode(path).c_str(), &findData);
+	HANDLE search = FindFirstFile(ET_STRING_TO_PARAM_TYPE(path).c_str(), &findData);
 	FindClose(search);
 
 	return findData.ftLastWriteTime.dwLowDateTime |
