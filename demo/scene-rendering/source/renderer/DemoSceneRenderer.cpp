@@ -175,19 +175,20 @@ void SceneRenderer::renderToGeometryBuffer(const et::Camera& cam)
 	_geometryBuffer->setDrawBuffersCount(2);
 
 	rs.bindProgram(programs.prepass);
+	programs.prepass->setCameraProperties(cam);
+
+/*
 	rs.bindVertexArray(_cubeMesh);
 	rs.bindTexture(diffuseTextureUnit, _defaultTexture);
 	rs.setWireframeRendering(true);
-	
-	programs.prepass->setCameraProperties(cam);
 	for (const auto& l : _lightPositions)
 	{
 		programs.prepass->setTransformMatrix(translationMatrix(l));
 		rn->drawAllElements(_cubeMesh->indexBuffer());
 	}
-	
 	rs.setWireframeRendering(false);
-	
+*/	
+
 	for (s3d::SupportMesh::Pointer& e : _allObjects)
 	{
 		if (cam.frustum().containsAABB(e->aabb()))

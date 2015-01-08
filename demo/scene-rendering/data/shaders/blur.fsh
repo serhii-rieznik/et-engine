@@ -14,14 +14,12 @@ etFragmentIn vec3 PreviousTexCoords[NUM_SAMPLES];
 
 void main()
 {
-	vec3 centerNormalSample = decodeNormal(etTexture2D(texture_normal, CenterTexCoord).xy);
-	float centerDepthSample = DEPTH_DIFFERENCE_SCALE / (1.0 - etTexture2D(texture_depth, CenterTexCoord).x);
-	
 	float totalWeight = 1.0;
-	
 	vec4 result = etTexture2D(texture_color, CenterTexCoord);
 	
 //*
+	vec3 centerNormalSample = decodeNormal(etTexture2D(texture_normal, CenterTexCoord).xy);
+	float centerDepthSample = DEPTH_DIFFERENCE_SCALE / (1.0 - etTexture2D(texture_depth, CenterTexCoord).x);
 	for (int i = 0; i < NUM_SAMPLES; ++i)
 	{
 		float nextDepth = DEPTH_DIFFERENCE_SCALE / (1.0 - etTexture2D(texture_depth, NextTexCoords[i].xy).x);
