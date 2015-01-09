@@ -33,12 +33,12 @@ std::string et::selectFile(const StringList&, SelectFileMode mode, const std::st
 {
 	SEL selector = nil;
 	
-	if (mode == SelectFileMode_Open)
+	if (mode == SelectFileMode::Open)
 		selector = @selector(openFile);
-	else if (mode == SelectFileMode_Save)
+	else if (mode == SelectFileMode::Save)
 		selector = @selector(saveFile);
 	else
-		ET_FAIL("Invalid SelectFieMode value");
+		ET_FAIL("Invalid SelectFileMode value");
 	
 	__block std::string result;
 	

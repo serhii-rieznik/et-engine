@@ -56,6 +56,10 @@ void MainController::applicationDidLoad(et::RenderContext* rc)
 	application().pushSearchPath("Q:\\SDK\\");
 	application().pushSearchPath("Q:\\SDK\\Models");
 	application().pushSearchPath("Q:\\SDK\\Textures");
+#elif (ET_PLATFORM_MAC)
+	application().pushSearchPath("/Volumes/Development/SDK");
+	application().pushSearchPath("/Volumes/Development/SDK/Models");
+	application().pushSearchPath("/Volumes/Development/SDK/Textures");
 #endif
 	
 	_scene.options.bounces = _productionBounces;

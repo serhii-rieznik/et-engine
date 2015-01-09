@@ -30,7 +30,7 @@ using namespace et;
 
 #if !defined(ET_CONSOLE_APPLICATION)
 
-@interface etWindowDelegate : NSObject<NSWindowDelegate>
+@interface etWindowController : NSWindowController<NSWindowDelegate>
 {
 @public
 	ApplicationNotifier applicationNotifier;
@@ -86,7 +86,7 @@ public:
 	
 private:
 #if !defined(ET_CONSOLE_APPLICATION)
-	etWindowDelegate* windowDelegate = nil;
+	etWindowController* windowController = nil;
 	etOpenGLWindow* mainWindow = nil;
 	NSOpenGLPixelFormat* pixelFormat = nil;
 	CGLContextObj cOpenGLContext = nullptr;
@@ -278,6 +278,9 @@ RenderContextPrivate::RenderContextPrivate(RenderContext*, RenderContextParamete
 	mainWindow = [[etOpenGLWindow alloc] initWithContentRect:contentRect
 		styleMask:windowMask backing:NSBackingStoreBuffered defer:NO];
 	
+	windowController = [[etWindowController alloc] initWithWindow:mainWindow];
+	windowController->rcPrivate = this;
+	
 	if (appParams.keepWindowAspectOnResize)
 		[mainWindow setContentAspectRatio:contentRect.size];
 
@@ -288,9 +291,6 @@ RenderContextPrivate::RenderContextPrivate(RenderContext*, RenderContextParamete
 	params.contextSize = vec2i(static_cast<int>(contentRect.size.width),
 		static_cast<int>(contentRect.size.height));
 	
-	windowDelegate = [[etWindowDelegate alloc] init];
-	windowDelegate->rcPrivate = this;
-
 	etOpenGLView* openGlView = [[etOpenGLView alloc] init];
 	[openGlView setWantsBestResolutionOpenGLSurface:YES];
 	openGlView->rcPrivate = this;
@@ -298,7 +298,7 @@ RenderContextPrivate::RenderContextPrivate(RenderContext*, RenderContextParamete
 	if (appParams.windowStyle & WindowStyle_Sizable)
 		[mainWindow setCollectionBehavior:NSWindowCollectionBehaviorFullScreenPrimary];
 	
-	[mainWindow setDelegate:windowDelegate];
+	[mainWindow setDelegate:windowController];
 	[mainWindow setOpaque:YES];
 	[mainWindow setContentView:openGlView];
 	
@@ -320,7 +320,7 @@ RenderContextPrivate::RenderContextPrivate(RenderContext*, RenderContextParamete
 RenderContextPrivate::~RenderContextPrivate()
 {
 #if !defined(ET_CONSOLE_APPLICATION)
-	ET_OBJC_RELEASE(windowDelegate);
+	ET_OBJC_RELEASE(windowController);
 #endif
 	
 	mainWindow = nil;
@@ -362,13 +362,13 @@ void RenderContextPrivate::stop()
 void RenderContextPrivate::performUpdateAndRender()
 {
 #if !defined(ET_CONSOLE_APPLICATION)
-	if (windowDelegate->applicationNotifier.shouldPerformRendering())
+	if (windowController->applicationNotifier.shouldPerformRendering())
 	{
 		CGLLockContext(cOpenGLContext);
 		CGLSetCurrentContext(cOpenGLContext);
 		
 		Threading::setRenderingThread(Threading::currentThread());
-		windowDelegate->applicationNotifier.notifyIdle();
+		windowController->applicationNotifier.notifyIdle();
 		
 		CGLFlushDrawable(cOpenGLContext);
 		CGLUnlockContext(cOpenGLContext);
@@ -408,7 +408,7 @@ void RenderContextPrivate::resize(const NSSize& sz)
 		
 		vec2i newSize(static_cast<int>(sz.width), static_cast<int>(sz.height));
 		
-		auto& notifier = windowDelegate->applicationNotifier;
+		auto& notifier = windowController->applicationNotifier;
 		notifier.accessRenderContext()->renderState().defaultFramebuffer()->resize(newSize);
 		notifier.notifyResize(newSize);
 		
@@ -623,7 +623,12 @@ CVReturn cvDisplayLinkOutputCallback(CVDisplayLinkRef, const CVTimeStamp*, const
 
 @end
 
-@implementation etWindowDelegate
+@implementation etWindowController
+
+- (NSString*)windowTitleForDocumentDisplayName:(NSString *)displayName
+{
+	return nil;
+}
 
 - (void)windowWillClose:(NSNotification *)notification
 {

@@ -88,8 +88,13 @@ void Application::quit(int code)
 void Application::setTitle(const std::string &s)
 {
 #if !defined(ET_CONSOLE_APPLICATION)
-	NSWindow* mainWindow = [[[NSApplication sharedApplication] windows] objectAtIndex:0];
-	[mainWindow setTitle:[NSString stringWithUTF8String:s.c_str()]];
+	NSString* titleToSet = [NSString stringWithUTF8String:s.c_str()];
+	dispatch_async(dispatch_get_main_queue(),
+	^{
+		NSArray* allWindows = [[NSApplication sharedApplication] windows];
+		for (NSWindow* window in allWindows)
+			[window setTitle:titleToSet];
+	});
 #endif
 }
 
