@@ -214,14 +214,24 @@ void ObjectsCache::performUpdate()
 			{
 				bool shouldReload = false;
 				
-				for (auto i : p.identifiers)
+				const auto& origin = p.object->origin();
+				uint64_t originProp = getFileProperty(origin);
+				if (p.identifiers[origin] != originProp)
 				{
-					uint64_t prop = getFileProperty(i.first);
-					if (prop != i.second)
+					p.identifiers[origin] = originProp;
+					shouldReload = true;
+				}
+				else
+				{
+					for (const auto& dOrigin : p.object->distributedOrigins())
 					{
-						i.second = prop;
-						shouldReload = true;
-						break;
+						auto prop = getFileProperty(dOrigin);
+						if (p.identifiers[dOrigin] != prop)
+						{
+							p.identifiers[dOrigin] = prop;
+							shouldReload = true;
+							break;
+						}
 					}
 				}
 				
