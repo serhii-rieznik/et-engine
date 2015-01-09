@@ -24,7 +24,7 @@ namespace rt
 		
 		virtual et::vec2i imageSize() = 0;
 		
-		virtual void renderFinished() = 0;
+		virtual void renderFinished(uint64_t) = 0;
 		
 		virtual const RaytraceScene& scene() = 0;
 	};

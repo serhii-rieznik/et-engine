@@ -41,20 +41,19 @@ void MainController::setRenderContextParameters(et::RenderContextParameters& p)
 	p.contextSize = frameSize;
 	p.contextBaseSize = p.contextSize;
 	p.swapInterval = 0;
-
-//	p.multisamplingQuality = MultisamplingQuality_None;
 }
 
 void MainController::updateTitle()
 {
-	application().setTitle("B/s: " + intToStr(_scene.options.bounces) +
-		"/" + intToStr(_scene.options.samples));
+	application().setTitle(intToStr(_scene.options.bounces) + " bounces, " + intToStr(_scene.options.samples) +
+		" samples, remaining time: " + intToStr(_estimatedTime / 1000) + " sec. (" + intToStr(_estimatedTime / 60000) + " min.)");
 }
 
 void MainController::applicationDidLoad(et::RenderContext* rc)
 {
 #if (ET_PLATFORM_WIN)
 	application().pushSearchPath("..\\Data");
+	application().pushSearchPath("Q:\\SDK\\");
 	application().pushSearchPath("Q:\\SDK\\Models");
 	application().pushSearchPath("Q:\\SDK\\Textures");
 #endif
@@ -92,14 +91,14 @@ void MainController::applicationDidLoad(et::RenderContext* rc)
 	
 	_cameraAngles.updated.connect([this]()
 	{
-		vec3 origin = 60.0f * fromSpherical(_cameraAngles.value().y, _cameraAngles.value().x);
+		vec3 origin = 256.0f * fromSpherical(_cameraAngles.value().y, _cameraAngles.value().x);
 		_scene.camera.lookAt(origin, 5.0f * unitY);
 		
 		if (!_enableGPURaytracing && (_scene.options.bounces == _previewBounces))
 			startCPUTracing();
 	});
 	
-	_cameraAngles.setTargetValue(vec2(HALF_PI + DEG_30, 37.5f * TO_RADIANS));
+	_cameraAngles.setTargetValue(vec2(-(HALF_PI + DEG_30), 37.5f * TO_RADIANS));
 	_cameraAngles.finishInterpolation();
 	_cameraAngles.run();
 	_cameraAngles.updated.invoke();
@@ -144,11 +143,12 @@ bool MainController::fetchNewRenderRect(et::vec2i& origin, et::vec2i& size)
 	CriticalSectionScope lock(_csLock);
 	if (_renderRects.empty()) return false;
 	
+	int remainingRects = static_cast<int>(_renderRects.size());
+	int randomOffset = remainingRects / 2 + rand() % (2 * frameParts.x) - frameParts.x;
+	randomOffset = clamp(randomOffset, 0, remainingRects - 1);
+
 	auto i = _renderRects.begin();
-	if (_renderRects.size() / 4 > 0)
-		std::advance(i, _renderRects.size() / 2 + rand() % (_renderRects.size() / 4));
-	else
-		std::advance(i, _renderRects.size() / 2);
+	std::advance(i, static_cast<size_t>(randomOffset));
 	
 	origin = i->origin();
 	size = i->size();
@@ -175,7 +175,7 @@ OutputFunction MainController::outputFunction()
 
 void MainController::applicationWillResizeContext(const et::vec2i& sz)
 {
-	_scene.camera.perspectiveProjection(QUARTER_PI, vector2ToFloat(sz).aspect(), 1.0f, 1024.0f);
+	_scene.camera.perspectiveProjection(QUARTER_PI, vector2ToFloat(sz).aspect(), 1.0f, 2048.0f);
 }
 
 void MainController::performRender(et::RenderContext* rc)
@@ -233,6 +233,10 @@ void MainController::onKeyPressed(size_t key)
 void MainController::restartOnlineRendering()
 {
 	_rendering = true;
+
+	_estimatedTime = 0;
+	_maxElapsedTime = 0;
+
 	_startTime = mainTimerPool()->actualTime();
 	_scene.options.bounces = _previewBounces;
 	_scene.options.samples = _previewSamples;
@@ -257,6 +261,10 @@ void MainController::restartOnlineRendering()
 void MainController::restartOfflineRendering()
 {
 	_rendering = true;
+
+	_estimatedTime = 0;
+	_maxElapsedTime = 0;
+
 	_startTime = mainTimerPool()->actualTime();
 	_cameraAngles.finishInterpolation();
 	_scene.options.bounces = _productionBounces;
@@ -289,9 +297,21 @@ void MainController::startCPUTracing()
 	}
 }
 
-void MainController::renderFinished()
+void MainController::renderFinished(uint64_t elapsedTime)
 {
 	CriticalSectionScope lock(_csLock);
+
+	_maxElapsedTime += elapsedTime;
+
+	size_t remainingRects = _renderRects.size();
+	size_t totalRects = frameParts.square();
+
+	if (totalRects != remainingRects)
+	{
+		uint64_t averageTime = _maxElapsedTime / (totalRects - remainingRects);
+		_estimatedTime = remainingRects * averageTime;
+		updateTitle();
+	}
 
 	if (!_renderRects.empty()) return;
 	

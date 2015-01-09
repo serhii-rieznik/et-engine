@@ -17,7 +17,7 @@ using namespace rt;
 
 void RaytraceScene::load(et::RenderContext* rc)
 {
-	apertureSize = 0.125f;
+	apertureSize = 0.0f;
 	
 	ambientColor = vec4(3.0f);
 	
@@ -26,7 +26,7 @@ void RaytraceScene::load(et::RenderContext* rc)
 	camera.perspectiveProjection(QUARTER_PI, 1.0f, 1.0f, 1024.0f);
 		
 	ObjectsCache cache;
-	OBJLoader loader(rc, "sphereincube.obj");
+	OBJLoader loader(rc, "shaderart.obj");
 	auto loadedModel = loader.load(cache, OBJLoader::Option_SupportMeshes);
 	auto meshes = loadedModel->childrenOfType(s3d::ElementType_SupportMesh);
 	

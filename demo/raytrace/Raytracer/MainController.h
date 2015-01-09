@@ -42,7 +42,7 @@ namespace rt
 		void updateTextureData();
 		
 		void startCPUTracing();
-		void renderFinished();
+		void renderFinished(uint64_t);
 		bool shouldAntialias();
 		
 	private:
@@ -74,12 +74,15 @@ namespace rt
 		et::CriticalSection _csLock;
 		
 		float _startTime = 0.0f;
-		
-		size_t _previewSamples = 24;
-		size_t _previewBounces = 4;
-		
-		size_t _productionSamples = 484;
-		size_t _productionBounces = 32;
+
+		uint64_t _estimatedTime = 0;
+		uint64_t _maxElapsedTime = 0;
+
+		size_t _previewSamples = 4;
+		size_t _previewBounces = 2;
+
+		size_t _productionSamples = 128;
+		size_t _productionBounces = 16;
 		
 		bool _shouldRender = true;
 		bool _interactiveRendering = false;

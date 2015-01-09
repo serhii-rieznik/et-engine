@@ -107,7 +107,6 @@
     <ClCompile Include="..\..\..\src\core\transformable.cpp" />
     <ClCompile Include="..\..\..\src\geometry\geometry.cpp" />
     <ClCompile Include="..\..\..\src\geometry\rectplacer.cpp" />
-    <ClCompile Include="..\..\..\src\helpers\particles.cpp" />
     <ClCompile Include="..\..\..\src\helpers\terrain.cpp" />
     <ClCompile Include="..\..\..\src\helpers\terraindata.cpp" />
     <ClCompile Include="..\..\..\src\imaging\ddsloader.cpp" />
@@ -152,7 +151,6 @@
     <ClCompile Include="..\..\..\src\platform-unix\mutex.unix.cpp" />
     <ClCompile Include="..\..\..\src\platform-unix\thread.unix.cpp" />
     <ClCompile Include="..\..\..\src\platform-unix\threading.unix.cpp" />
-    <ClCompile Include="..\..\..\src\platform-unix\tools.unix.cpp" />
     <ClCompile Include="..\..\..\src\platform-win\application.win.cpp" />
     <ClCompile Include="..\..\..\src\platform-win\atomiccounter.win.cpp" />
     <ClCompile Include="..\..\..\src\platform-win\criticalsection.win.cpp" />
@@ -165,8 +163,7 @@
     <ClCompile Include="..\..\..\src\platform-win\mutex.win.cpp" />
     <ClCompile Include="..\..\..\src\platform-win\opengl.win.cpp" />
     <ClCompile Include="..\..\..\src\platform-win\orientation.win.cpp" />
-    <ClCompile Include="..\..\..\src\platform-win\platformtools.win.cpp" />
-    <ClCompile Include="..\..\..\src\platform-win\rendercontext.win.cpp" />
+    <ClCompile Include="..\..\..\src\platform-win\rendercontext.win-opengl.cpp" />
     <ClCompile Include="..\..\..\src\platform-win\sound.openal.win.cpp" />
     <ClCompile Include="..\..\..\src\platform-win\thread.win.cpp" />
     <ClCompile Include="..\..\..\src\platform-win\threading.win.cpp" />

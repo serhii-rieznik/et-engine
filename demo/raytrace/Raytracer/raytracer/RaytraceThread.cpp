@@ -6,6 +6,7 @@
 //  Copyright (c) 2014 Cheetek. All rights reserved.
 //
 
+#include <et/core/tools.h>
 #include "RaytraceThread.h"
 
 using namespace et;
@@ -26,13 +27,15 @@ et::ThreadResult RaytraceThread::main()
 		
 		if (_delegate->fetchNewRenderRect(origin, size))
 		{
+			auto currentTime = queryContiniousTimeInMilliSeconds();
+
 			_rendering = true;
-			
 			raytrace(_delegate->scene(), _delegate->imageSize(), origin, size, _delegate->outputFunction());
-			
 			_rendering = false;
+
+			auto elapsedTime = queryContiniousTimeInMilliSeconds() - currentTime;
 			
-			_delegate->renderFinished();
+			_delegate->renderFinished(elapsedTime);
 		}
 		else
 		{

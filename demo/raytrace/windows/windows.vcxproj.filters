@@ -103,9 +103,6 @@
     <ClCompile Include="..\..\..\src\geometry\rectplacer.cpp">
       <Filter>engine\source</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\helpers\particles.cpp">
-      <Filter>engine\source</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\helpers\terrain.cpp">
       <Filter>engine\source</Filter>
     </ClCompile>
@@ -238,9 +235,6 @@
     <ClCompile Include="..\..\..\src\platform-unix\threading.unix.cpp">
       <Filter>engine\source</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\platform-unix\tools.unix.cpp">
-      <Filter>engine\source</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\platform-win\application.win.cpp">
       <Filter>engine\source</Filter>
     </ClCompile>
@@ -275,12 +269,6 @@
       <Filter>engine\source</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\platform-win\orientation.win.cpp">
-      <Filter>engine\source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\platform-win\platformtools.win.cpp">
-      <Filter>engine\source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\platform-win\rendercontext.win.cpp">
       <Filter>engine\source</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\platform-win\sound.openal.win.cpp">
@@ -389,6 +377,9 @@
       <Filter>engine\source</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\vertexbuffer\vertexdeclaration.cpp">
+      <Filter>engine\source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\platform-win\rendercontext.win-opengl.cpp">
       <Filter>engine\source</Filter>
     </ClCompile>
   </ItemGroup>
