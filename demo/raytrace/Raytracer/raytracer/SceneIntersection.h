@@ -13,26 +13,25 @@
 
 namespace rt
 {
-	enum : size_t
-	{
-		MissingObjectIndex = (size_t)(-1)
-	};
-	
 	struct SceneIntersection
 	{
 	public:
 		SceneIntersection()
 			{ }
 		
-		SceneIntersection(size_t o) :
-			hitObjectIndex(o) { }
+		SceneIntersection(size_t m) :
+			materialIndex(m) { }
 		
 	public:
 		et::vec3 hitPoint;
 		et::vec3 hitNormal;
 		
-		size_t hitObjectIndex = MissingObjectIndex;
+		size_t materialIndex = 0;
+		
+		float rayDistance = std::numeric_limits<float>::max();
+		
+		bool objectHit = false;
 	};
 	
-	bool rayAABB(const et::ray3d&, const et::AABB&);
+	bool rayAABB(et::ray3d, const et::AABB&);
 }

@@ -35,6 +35,7 @@ void RaytraceScene::load(et::RenderContext* rc)
 		if (m->triangles().size() > 0)
 		{
 			auto mat = m->material();
+			
 			vec4 kD = mat->getVector(MaterialParameter_DiffuseColor);
 			vec4 kS = mat->getVector(MaterialParameter_SpecularColor);
 			vec4 kE = mat->getVector(MaterialParameter_EmissiveColor);
@@ -51,17 +52,53 @@ void RaytraceScene::load(et::RenderContext* rc)
 			log::info("}");
 			
 			materials.emplace_back(kD, kS, kE, Ns, Tr);
-			objects.emplace_back(sharedObjectFactory().createObject<MeshObject>(m, materials.size() - 1));
+			size_t materialIndex = materials.size() - 1;
+			size_t firstTriangleIndex = _triangles.lastElementIndex();
+			size_t numTriangles = m->triangles().size();
+			
+			_triangles.fitToSize(numTriangles);
+			
+			const auto& triangles = m->triangles();
+			
+			for (const auto& tri : triangles)
+				_triangles.push_back(SceneTriangle(tri, materialIndex));
+			
+			objects.push_back(sharedObjectFactory().createObject<MeshObject>(firstTriangleIndex, numTriangles, _triangles));
 		}
 	}
 }
 
-const SceneObject* RaytraceScene::objectAtIndex(size_t i) const
-{
-	return i < objects.size() ? objects.at(i) : &_dummyObject;
-}
-
 const SceneMaterial& RaytraceScene::materialAtIndex(size_t i) const
 {
-	return (i < materials.size()) ? materials.at(i) : _dummyMaterial;
+	if (i >= materials.size())
+		ET_FAIL("Invalid material index");
+	
+	return materials.at(i);
+}
+
+SceneIntersection RaytraceScene::findNearestIntersection(const et::ray3d& inRay) const
+{
+	SceneIntersection result;
+	
+	vec3 point;
+	vec3 normal;
+	size_t materialIndex = 0;
+	
+	for (const auto& obj : objects)
+	{
+		if (obj->intersects(inRay, point, normal, materialIndex))
+		{
+			float hitDistance = (point - inRay.origin).dotSelf();
+			if (hitDistance < result.rayDistance)
+			{
+				result.hitPoint = point;
+				result.hitNormal = normal;
+				result.rayDistance = hitDistance;
+				result.materialIndex = materialIndex;
+				result.objectHit = true;
+			}
+		}
+	}
+	
+	return result;
 }

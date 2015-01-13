@@ -16,4 +16,7 @@ namespace rt
 	
 	void raytrace(const RaytraceScene&, const et::vec2i& imageSize,
 		const et::vec2i& origin, const et::vec2i& size, OutputFunction);
+	
+	void raytracePreview(const RaytraceScene&, const et::vec2i& imageSize,
+		const et::vec2i& origin, const et::vec2i& size, OutputFunction);
 }

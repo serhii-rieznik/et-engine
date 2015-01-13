@@ -5,6 +5,7 @@
  *
  */
 
+#include <random>
 #include <et/geometry/geometry.h>
 
 using namespace et;
@@ -49,9 +50,14 @@ vec3 et::randVector(float sx, float sy, float sz)
 	return vec3(sx * randomFloat(-1.0f, 1.0f), sy * randomFloat(-1.0f, 1.0f), sz * randomFloat(-1.0f, 1.0f));
 }
 
+float et::randomFloat()
+{
+	return static_cast<float>(rand()) / fRandMax;
+}
+
 float et::randomFloat(float low, float up)
 {
-	return low + (up - low) * static_cast<float>(randomInteger()) / fRandMax;
+	return low + (up - low) * randomFloat();
 }
 
 quaternion et::matrixToQuaternion(const mat3& r)
@@ -236,4 +242,32 @@ quaternion et::quaternionFromAngels(float yaw, float pitch, float roll)
     result.vector.y = cosYawOver2 * sinPitchOver2 * cosRollOver2 + sinYawOver2 * cosPitchOver2 * sinRollOver2;
     result.vector.z = cosYawOver2 * cosPitchOver2 * sinRollOver2 - sinYawOver2 * sinPitchOver2 * cosRollOver2;
 	return result;
+}
+
+vec3 et::perpendicularVector(const vec3& normal)
+{
+	vec3 componentsLength(sqr(normal.x), sqr(normal.y), sqr(normal.z));
+	
+	if (componentsLength.x > 0.5f)
+	{
+		float scaleFactor = std::sqrt(componentsLength.z + componentsLength.x);
+		return vec3(normal.z / scaleFactor, 0.0f, -normal.x / scaleFactor);
+	}
+	else if (componentsLength.y > 0.5f)
+	{
+		float scaleFactor = std::sqrt(componentsLength.y + componentsLength.x);
+		return vec3(-normal.y / scaleFactor, normal.x / scaleFactor, 0.0f);
+	}
+	
+	float scaleFactor = std::sqrt(componentsLength.z + componentsLength.y);
+	return vec3(0.0f, -normal.z / scaleFactor, normal.y / scaleFactor);
+}
+
+vec3 et::randomVectorOnHemisphere(const vec3& normal, float distributionAngle)
+{
+	float phi = randomFloat() * DOUBLE_PI;
+	float theta = std::sin(randomFloat() * clamp(distributionAngle, 0.0f, HALF_PI));
+	vec3 u = perpendicularVector(normal);
+	return ((u * std::cos(phi) + cross(u, normal) * std::sin(phi)) * std::sqrt(theta) +
+		normal * std::sqrt(1.0f - theta)).normalized();
 }

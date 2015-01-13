@@ -487,7 +487,9 @@ namespace et
 	vec3 randVector(float sx = 1.0f, float sy = 1.0f, float sz = 1.0f);
 	
 	uint32_t randomInteger(uint32_t limit = RAND_MAX);
+	
 	float randomFloat(float low, float up);
+	float randomFloat();
 	
 	float signOrZero(float s);
 	float signNoZero(float s);
@@ -497,6 +499,8 @@ namespace et
 	mat3 rotation2DMatrix3(float angle);
 	
 	vec3 circleFromPoints(const vec2& p1, const vec2& p2, const vec2& p3);
+	vec3 perpendicularVector(const vec3&);
+	vec3 randomVectorOnHemisphere(const vec3& normal, float distributionAngle);
 	
 	quaternion quaternionFromAngels(float x, float y, float z);
 }
