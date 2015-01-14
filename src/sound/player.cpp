@@ -237,7 +237,7 @@ void Player::handleProcessedBuffers()
 		alGetSourcei(_private->source, AL_BUFFERS_QUEUED, &remaining);
 		
 		bool shouldLoadNextBuffer = _private->playingLooped ||
-		((_private->buffersProcessed + remaining) < _track->totalBuffersCount());
+			((_private->buffersProcessed + remaining) < _track->totalBuffersCount());
 		
 		if (shouldLoadNextBuffer)
 		{

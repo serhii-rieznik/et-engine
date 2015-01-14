@@ -58,7 +58,7 @@ static int _ov_header_fseek_wrap(FILE *f,ogg_int64_t off,int whence){
 #elif defined (_WIN32)
   return _fseeki64(f,off,whence);
 #else
-  return fseeko(f, off, whence);
+  return fseeko(f,off,whence);
 #endif
 }
 
