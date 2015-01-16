@@ -647,7 +647,7 @@ static int pvrtcDecompress(	PVRTuint8 *pCompressedData,
 	if (ui8Bpp==2)
 		ui32WordWidth=8;
 
-	PVRTuint32 *pWordMembers = (PVRTuint32 *)pCompressedData;
+	PVRTuint32 *pWordMembers = (PVRTuint32*)pCompressedData;
 	Pixel32 *pOutData = pDecompressedData;
 
 	// Calculate number of words

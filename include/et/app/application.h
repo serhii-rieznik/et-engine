@@ -17,6 +17,9 @@
 
 namespace et
 {
+	extern const std::string kSystemEventType;
+	extern const std::string kSystemEventRemoteNotificationStatusChanged;
+	
 	class ApplicationNotifier;
 	class Application : public Singleton<Application>,  public EventReceiver
 	{
@@ -91,6 +94,10 @@ namespace et
 
 		void alert(const std::string& title, const std::string& message, AlertType type = AlertType_Information);
 		void requestUserAttention();
+		
+		void enableRemoteNotifications();
+		
+		ET_DECLARE_EVENT1(systemEvent, Dictionary)
 		
 	private:
 		friend class RenderContext;

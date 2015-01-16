@@ -6,13 +6,15 @@
  */
 
 #include <et/platform-apple/apple.h>
-#include <et/app/applicationnotifier.h>
 
 #if (ET_PLATFORM_MAC)
 
 #include <AppKit/NSApplication.h>
 #include <AppKit/NSMenu.h>
 #include <AppKit/NSWindow.h>
+
+#include <et/core/base64.h>
+#include <et/app/applicationnotifier.h>
 
 using namespace et;
 
@@ -159,6 +161,12 @@ void Application::requestUserAttention()
 #endif
 }
 
+void Application::enableRemoteNotifications()
+{
+	[[NSApplication sharedApplication] registerForRemoteNotificationTypes:NSRemoteNotificationTypeBadge |
+		NSRemoteNotificationTypeSound | NSRemoteNotificationTypeAlert];
+}
+
 /*
  *
  * etApplicationDelegate implementation
@@ -167,37 +175,37 @@ void Application::requestUserAttention()
 
 @implementation etApplicationDelegate
 
-- (void)applicationDidFinishLaunching:(NSNotification *)notification
+- (void)applicationDidFinishLaunching:(NSNotification*)notification
 {
     (void)notification;
 	_notifier.notifyLoaded();
 }
 
-- (void)applicationWillBecomeActive:(NSNotification *)notification
+- (void)applicationWillBecomeActive:(NSNotification*)notification
 {
     (void)notification;
 	_notifier.notifyActivated();
 }
 
-- (void)applicationWillResignActive:(NSNotification *)notification
+- (void)applicationWillResignActive:(NSNotification*)notification
 {
     (void)notification;
 	_notifier.notifyDeactivated();
 }
 
-- (void)applicationDidHide:(NSNotification *)notification
+- (void)applicationDidHide:(NSNotification*)notification
 {
     (void)notification;
 	_notifier.notifyDeactivated();
 }
 
-- (void)applicationDidUnhide:(NSNotification *)notification
+- (void)applicationDidUnhide:(NSNotification*)notification
 {
     (void)notification;
 	_notifier.notifyActivated();
 }
 
-- (void)applicationWillTerminate:(NSNotification *)notification
+- (void)applicationWillTerminate:(NSNotification*)notification
 {
     (void)notification;
 	_notifier.notifyTerminated();
@@ -207,6 +215,27 @@ void Application::requestUserAttention()
 {
     (void)sender;
 	return YES;
+}
+
+- (void)application:(NSApplication *)application didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken
+{
+	BinaryDataStorage dataWrapper(reinterpret_cast<const unsigned char*>([deviceToken bytes]), [deviceToken length]);
+	
+	Dictionary event;
+	event.setStringForKey(kSystemEventType, kSystemEventRemoteNotificationStatusChanged);
+	event.setStringForKey("token", base64::encode(dataWrapper));
+	
+	et::application().systemEvent.invokeInMainRunLoop(event);
+}
+
+- (void)application:(NSApplication *)application didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
+{
+	Dictionary event;
+	
+	event.setStringForKey(kSystemEventType, kSystemEventRemoteNotificationStatusChanged);
+	event.setStringForKey("error", std::string([[error localizedDescription] UTF8String]));
+	
+	et::application().systemEvent.invokeInMainRunLoop(event);
 }
 
 @end

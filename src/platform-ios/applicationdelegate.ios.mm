@@ -5,6 +5,7 @@
  *
  */
 
+#include <et/core/base64.h>
 #include <et/app/application.h>
 #include <et/app/applicationnotifier.h>
 #include <et/threading/threading.h>
@@ -47,7 +48,7 @@ extern etOpenGLViewController* sharedOpenGLViewController;
 
 @synthesize window = _window;
 
-- (BOOL)application:(UIApplication*)anApplication didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
+- (BOOL)application:(UIApplication*)anApplication didFinishLaunchingWithOptions:(NSDictionary*)launchOptions
 {
 	(void)anApplication;
 	(void)launchOptions;
@@ -67,7 +68,7 @@ extern etOpenGLViewController* sharedOpenGLViewController;
     return YES;
 }
 
-- (void)applicationWillResignActive:(UIApplication *)application
+- (void)applicationWillResignActive:(UIApplication*)application
 {
 	[self endUpdates];
 	
@@ -82,7 +83,7 @@ extern etOpenGLViewController* sharedOpenGLViewController;
 #endif
 }
 
-- (void)applicationDidBecomeActive:(UIApplication *)application
+- (void)applicationDidBecomeActive:(UIApplication*)application
 {
 	(void)application;
 	
@@ -95,19 +96,19 @@ extern etOpenGLViewController* sharedOpenGLViewController;
 #endif
 }
 
-- (void)applicationWillTerminate:(UIApplication *)application
+- (void)applicationWillTerminate:(UIApplication*)application
 {
 	(void)application;
 	et::application().quit(0);
 }
 
-- (void)applicationDidEnterBackground:(UIApplication *)application
+- (void)applicationDidEnterBackground:(UIApplication*)application
 {
 	(void)application;
 	_notifier.notifySuspended();
 }
 
-- (void)applicationWillEnterForeground:(UIApplication *)application
+- (void)applicationWillEnterForeground:(UIApplication*)application
 {
 	(void)application;
 	_notifier.notifyResumed();
@@ -203,7 +204,39 @@ extern etOpenGLViewController* sharedOpenGLViewController;
 #endif
 }
 
-- (NSUInteger)application:(UIApplication*)application supportedInterfaceOrientationsForWindow:(UIWindow *)window
+- (void)application:(UIApplication*)application didRegisterUserNotificationSettings:(UIUserNotificationSettings*)notificationSettings
+{
+	[application registerForRemoteNotifications];
+}
+
+- (void)application:(UIApplication*)application handleActionWithIdentifier:(NSString*)identifier
+	forRemoteNotification:(NSDictionary*)userInfo completionHandler:(void(^)())completionHandler
+{
+	
+}
+
+- (void)application:(UIApplication*)application didRegisterForRemoteNotificationsWithDeviceToken:(NSData*)deviceToken
+{
+	BinaryDataStorage dataWrapper(reinterpret_cast<const unsigned char*>([deviceToken bytes]), [deviceToken length]);
+	
+	Dictionary event;
+	event.setStringForKey(kSystemEventType, kSystemEventRemoteNotificationStatusChanged);
+	event.setStringForKey("token", base64::encode(dataWrapper));
+	
+	et::application().systemEvent.invokeInMainRunLoop(event);
+}
+
+- (void)application:(UIApplication*)application didFailToRegisterForRemoteNotificationsWithError:(NSError*)error
+{
+	Dictionary event;
+	
+	event.setStringForKey(kSystemEventType, kSystemEventRemoteNotificationStatusChanged);
+	event.setStringForKey("error", std::string([[error localizedDescription] UTF8String]));
+	
+	et::application().systemEvent.invokeInMainRunLoop(event);
+}
+
+- (NSUInteger)application:(UIApplication*)application supportedInterfaceOrientationsForWindow:(UIWindow*)window
 {
 	(void)application;
 	(void)window;
@@ -228,7 +261,7 @@ extern etOpenGLViewController* sharedOpenGLViewController;
 #if defined(ET_SUPPORT_GOOGLE_PLUS)
 	if (!processed)
 	{
-		processed =[GPPURLHandler handleURL:url sourceApplication:sourceApplication
+		processed = [GPPURLHandler handleURL:url sourceApplication:sourceApplication
 			annotation:annotation];
 	}
 #endif

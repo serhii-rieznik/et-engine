@@ -467,42 +467,42 @@ CVReturn cvDisplayLinkOutputCallback(CVDisplayLinkRef, const CVTimeStamp*, const
 		mainTimerPool()->actualTime(), PointerOrigin_Any);
 }
 
-- (void)mouseDown:(NSEvent *)theEvent
+- (void)mouseDown:(NSEvent*)theEvent
 {
 	pointerInputSource.pointerPressed([self mousePointerInfo:theEvent withType:PointerType_General]);
 }
 
-- (void)mouseMoved:(NSEvent *)theEvent
+- (void)mouseMoved:(NSEvent*)theEvent
 {
 	pointerInputSource.pointerMoved([self mousePointerInfo:theEvent withType:PointerType_None]);
 }
 
-- (void)mouseDragged:(NSEvent *)theEvent
+- (void)mouseDragged:(NSEvent*)theEvent
 {
 	pointerInputSource.pointerMoved([self mousePointerInfo:theEvent withType:PointerType_General]);
 }
 
-- (void)mouseUp:(NSEvent *)theEvent
+- (void)mouseUp:(NSEvent*)theEvent
 {
 	pointerInputSource.pointerReleased([self mousePointerInfo:theEvent withType:PointerType_General]);
 }
 
-- (void)rightMouseDown:(NSEvent *)theEvent
+- (void)rightMouseDown:(NSEvent*)theEvent
 {
 	pointerInputSource.pointerPressed([self mousePointerInfo:theEvent withType:PointerType_RightButton]);
 }
 
-- (void)rightMouseDragged:(NSEvent *)theEvent
+- (void)rightMouseDragged:(NSEvent*)theEvent
 {
 	pointerInputSource.pointerMoved([self mousePointerInfo:theEvent withType:PointerType_RightButton]);
 }
 
-- (void)rightMouseUp:(NSEvent *)theEvent
+- (void)rightMouseUp:(NSEvent*)theEvent
 {
 	pointerInputSource.pointerReleased([self mousePointerInfo:theEvent withType:PointerType_RightButton]);
 }
 
-- (void)scrollWheel:(NSEvent *)theEvent
+- (void)scrollWheel:(NSEvent*)theEvent
 {
 	NSRect ownFrame = [self convertRectToBacking:self.frame];
 	NSPoint nativePoint = [self convertPointToBacking:[theEvent locationInWindow]];
@@ -523,19 +523,19 @@ CVReturn cvDisplayLinkOutputCallback(CVDisplayLinkRef, const CVTimeStamp*, const
 		scroll, [theEvent hash], static_cast<float>([theEvent timestamp]), origin));
 }
 
-- (void)magnifyWithEvent:(NSEvent *)event
+- (void)magnifyWithEvent:(NSEvent*)event
 {
 	gestureInputSource.gesturePerformed(
 		GestureInputInfo(GestureTypeMask_Zoom, static_cast<float>(event.magnification)));
 }
 
-- (void)swipeWithEvent:(NSEvent *)event
+- (void)swipeWithEvent:(NSEvent*)event
 {
 	gestureInputSource.gesturePerformed(GestureInputInfo(GestureTypeMask_Swipe,
 		static_cast<float>(event.deltaX), static_cast<float>(event.deltaY)));
 }
 
-- (void)rotateWithEvent:(NSEvent *)event
+- (void)rotateWithEvent:(NSEvent*)event
 {
 	gestureInputSource.gesturePerformed(
 		GestureInputInfo(GestureTypeMask_Rotate, event.rotation));
@@ -625,12 +625,12 @@ CVReturn cvDisplayLinkOutputCallback(CVDisplayLinkRef, const CVTimeStamp*, const
 
 @implementation etWindowController
 
-- (NSString*)windowTitleForDocumentDisplayName:(NSString *)displayName
+- (NSString*)windowTitleForDocumentDisplayName:(NSString*)displayName
 {
 	return nil;
 }
 
-- (void)windowWillClose:(NSNotification *)notification
+- (void)windowWillClose:(NSNotification*)notification
 {
 	(void)notification;
 	applicationNotifier.notifyStopped();
