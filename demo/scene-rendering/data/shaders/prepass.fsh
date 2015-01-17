@@ -27,5 +27,5 @@ void main()
 	vec3 mNormal = mix(vNormalWS, outNormal, tangentValue);
 
 	etFragmentOut = vec4(diffuseColor.xyz * etTexture2D(texture_diffuse, TexCoord).xyz, 1.0);
-	etFragmentOut1 = vec4(encodeNormal(vNormalWS), 0.0, 0.0);
+	etFragmentOut1 = vec4(encodeNormal(mNormal), 0.0, 0.0);
 }

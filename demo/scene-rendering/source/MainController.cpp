@@ -34,6 +34,7 @@ void MainController::applicationDidLoad(et::RenderContext* rc)
 	application().pushSearchPath("Q:\\SDK\\Models\\");
 	application().pushSearchPath("Q:\\SDK\\");
 #elif (ET_PLATFORM_MAC)
+	application().pushSearchPath("/Volumes/Development/SDK/");
 	application().pushSearchPath("/Volumes/Development/SDK/Models/");
 #endif
 
@@ -54,7 +55,7 @@ void MainController::applicationDidLoad(et::RenderContext* rc)
 	_renderer.init(rc);
 	_cameraController.init(rc);
 	
-	auto loadedScene = _loader.loadFromFile(application().resolveFileName("models/crytek/sponza.etm"));
+	auto loadedScene = _loader.loadFromFile(application().resolveFileName("crytek/sponza.etm"));
 	_renderer.setScene(loadedScene);
 
 	connectInputEvents();

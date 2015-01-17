@@ -3,14 +3,13 @@ uniform sampler2D texture_normal;
 uniform sampler2D texture_depth;
 uniform sampler2D texture_noise;
 
-etFragmentIn vec2 NormalizedTexCoord;
 etFragmentIn vec2 TexCoord;
 etFragmentIn vec2 NoiseTexCoord;
 
 #define	NUM_SAMPLES					64
 #define MIN_SAMPLE_SIZE				1.0
-#define SAMPLE_SIZE					33.333333
-#define DEPTH_DIFFERENCE_SCALE		2.5
+#define SAMPLE_SIZE					32.0
+#define DEPTH_DIFFERENCE_SCALE		3.3333
 
 #define COMPUTE_LIGHT_BOUNCE		1
 
@@ -50,9 +49,9 @@ void main()
 {
 	vec4 noiseSample = etTexture2D(texture_noise, NoiseTexCoord);
 	vec3 normalSample = decodeNormal(etTexture2D(texture_normal, TexCoord).xy);
-	
 	float depthSample = 2.0 * etTexture2D(texture_depth, TexCoord).x - 1.0;
-	vec3 viewSpacePosition = restoreViewSpacePosition(NormalizedTexCoord, depthSample);
+	
+	vec3 viewSpacePosition = restoreViewSpacePosition(2.0 * TexCoord - 1.0, depthSample);
 	
 #if (COMPUTE_LIGHT_BOUNCE)
 	vec4 environment = vec4(0.0);
@@ -69,6 +68,7 @@ void main()
 #if (COMPUTE_LIGHT_BOUNCE)
 	etFragmentOut = environment / float(NUM_SAMPLES);
 #else
-	etFragmentOut = vec4(0.0, 0.0, 0.0, environment / float(NUM_SAMPLES));
+	float occlusion = 1.0 - environment / float(NUM_SAMPLES);
+	etFragmentOut = vec4(occlusion);
 #endif
 }
