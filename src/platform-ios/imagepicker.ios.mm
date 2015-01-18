@@ -144,7 +144,7 @@ void ImagePickerPrivate::pick(ImagePickerSource s)
 	}
 }
 
-- (void)popoverController:(UIPopoverController *)popoverController willRepositionPopoverToRect:(inout CGRect *)rect inView:(inout UIView **)view
+- (void)popoverController:(UIPopoverController*)popoverController willRepositionPopoverToRect:(inout CGRect*)rect inView:(inout UIView **)view
 {
 	UIView* aView = *view;
 	*rect = CGRectMake(0.5f * aView.bounds.size.width, 0.5f * aView.bounds.size.height, 1.0f, 1.0f);
@@ -203,7 +203,7 @@ void ImagePickerPrivate::pick(ImagePickerSource s)
 	}
 }
 
-- (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary *)info
+- (void)imagePickerController:(UIImagePickerController*)picker didFinishPickingMediaWithInfo:(NSDictionary*)info
 {
 	UIImage* image = [info objectForKey:UIImagePickerControllerOriginalImage];
 	NSURL* imageUrl = [info objectForKey:UIImagePickerControllerReferenceURL];
@@ -297,7 +297,7 @@ void ImagePickerPrivate::pick(ImagePickerSource s)
 	}
 }
 
-- (void)imagePickerControllerDidCancel:(UIImagePickerController *)picker
+- (void)imagePickerControllerDidCancel:(UIImagePickerController*)picker
 {
 	if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
 	{
@@ -322,7 +322,7 @@ void ImagePickerPrivate::pick(ImagePickerSource s)
 	return YES;
 }
 
-- (UIViewController *)childViewControllerForStatusBarHidden
+- (UIViewController*)childViewControllerForStatusBarHidden
 {
 	return nil;
 }

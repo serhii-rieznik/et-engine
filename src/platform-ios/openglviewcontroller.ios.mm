@@ -235,7 +235,7 @@ extern NSString* etKeyboardNotRequiredNotification;
 	return YES;
 }
 
-- (void)motionBegan:(UIEventSubtype)motion withEvent:(UIEvent *)event
+- (void)motionBegan:(UIEventSubtype)motion withEvent:(UIEvent*)event
 {
 	if (motion == UIEventSubtypeMotionShake)
 	{

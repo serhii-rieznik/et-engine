@@ -14,7 +14,7 @@
 using namespace et;
 using namespace rt;
 
-const vec2i frameSize = vec2i(1280, 800) / 2;
+const vec2i frameSize = vec2i(1280, 800);
 
 const vec2i rectSize = vec2i(20);
 
@@ -95,14 +95,14 @@ void MainController::applicationDidLoad(et::RenderContext* rc)
 	
 	_cameraAngles.updated.connect([this]()
 	{
-		vec3 origin = 256.0f * fromSpherical(_cameraAngles.value().y, _cameraAngles.value().x);
+		vec3 origin = 263.5f * fromSpherical(_cameraAngles.value().y, _cameraAngles.value().x);
 		_scene.camera.lookAt(origin, 5.0f * unitY);
 		
 		if (!_enableGPURaytracing && (_scene.options.bounces == _previewBounces))
 			startCPUTracing();
 	});
 	
-	_cameraAngles.setTargetValue(vec2(-(HALF_PI + DEG_30), 37.5f * TO_RADIANS));
+	_cameraAngles.setTargetValue(vec2(HALF_PI - DEG_30 + PI, DEG_30));
 	_cameraAngles.finishInterpolation();
 	_cameraAngles.run();
 	_cameraAngles.updated.invoke();
@@ -142,10 +142,12 @@ void MainController::applicationWillTerminate()
 	}
 }
 
-bool MainController::fetchNewRenderRect(et::vec2i& origin, et::vec2i& size)
+bool MainController::fetchNewRenderRect(et::vec2i& origin, et::vec2i& size, bool& preview)
 {
 	CriticalSectionScope lock(_csLock);
 	if (_renderRects.empty()) return false;
+	
+	preview = (_scene.options.bounces == _previewBounces);
 	
 	int remainingRects = static_cast<int>(_renderRects.size());
 	int randomOffset = remainingRects / 2 + rand() % (2 * frameParts.x) - frameParts.x;

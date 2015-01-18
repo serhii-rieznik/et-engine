@@ -159,4 +159,32 @@ void Application::requestUserAttention()
 {
 }
 
+void Application::enableRemoteNotifications()
+{
+	NSUInteger notificationTypes = UIRemoteNotificationTypeBadge | UIRemoteNotificationTypeSound |
+		UIRemoteNotificationTypeAlert;
+	
+#if (__IPHONE_OS_VERSION_MIN_REQUIRED >= __IPHONE_8_0)
+	
+	UIUserNotificationSettings* settings = [UIUserNotificationSettings settingsForTypes:notificationTypes categories:nil];
+	[[UIApplication sharedApplication] registerForRemoteNotifications];
+	
+#else
+	
+	bool isIOS8OrLater = [[[UIDevice currentDevice] systemVersion] compare:@"8.0"
+		options:NSNumericSearch] == NSOrderedDescending;
+	
+	if (isIOS8OrLater)
+	{
+		UIUserNotificationSettings* settings = [UIUserNotificationSettings settingsForTypes:notificationTypes categories:nil];
+		[[UIApplication sharedApplication] registerUserNotificationSettings:settings];
+	}
+	else
+	{
+		[[UIApplication sharedApplication] registerForRemoteNotificationTypes:notificationTypes];
+	}
+	
+#endif
+}
+
 #endif // ET_PLATFORM_IOS)

@@ -19,9 +19,10 @@ namespace rt
 	{
 	public:
 		void load(et::RenderContext*);
-		
-		const SceneObject* objectAtIndex(size_t) const;
+				
 		const SceneMaterial& materialAtIndex(size_t) const;
+		
+		SceneIntersection findNearestIntersection(const et::ray3d&) const;
 		
 	public:
 		struct
@@ -35,13 +36,13 @@ namespace rt
 		et::vec4 ambientColor = et::vec4(0.0f);
 		
 		et::RenderContext* _rc = nullptr;
-		
-		std::vector<SceneObject*, et::SharedBlockAllocatorSTDProxy<SceneObject*>> objects;
-		std::vector<SceneMaterial, et::SharedBlockAllocatorSTDProxy<SceneMaterial>> materials;
-		
 		et::TextureDescription::Pointer environmentMap;
 		
-		DummyObject _dummyObject;
+		SceneTriangleList _triangles;
+		
+		std::vector<SceneMaterial, et::SharedBlockAllocatorSTDProxy<SceneMaterial>> materials;
+		std::vector<SceneObject*, et::SharedBlockAllocatorSTDProxy<SceneObject*>> objects;
+		
 		SceneMaterial _dummyMaterial;
 		
 		et::Camera camera;

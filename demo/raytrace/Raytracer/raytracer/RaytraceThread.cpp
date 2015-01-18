@@ -25,12 +25,18 @@ et::ThreadResult RaytraceThread::main()
 		vec2i size;
 		vec2i origin;
 		
-		if (_delegate->fetchNewRenderRect(origin, size))
+		bool preview = true;
+		if (_delegate->fetchNewRenderRect(origin, size, preview))
 		{
 			auto currentTime = queryContiniousTimeInMilliSeconds();
 
 			_rendering = true;
-			raytrace(_delegate->scene(), _delegate->imageSize(), origin, size, _delegate->outputFunction());
+			
+			if (preview)
+				raytracePreview(_delegate->scene(), _delegate->imageSize(), origin, size, _delegate->outputFunction());
+			else
+				raytrace(_delegate->scene(), _delegate->imageSize(), origin, size, _delegate->outputFunction());
+			
 			_rendering = false;
 
 			auto elapsedTime = queryContiniousTimeInMilliSeconds() - currentTime;

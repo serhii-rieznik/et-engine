@@ -50,7 +50,7 @@ namespace rt
 		const RaytraceScene& scene();
 		OutputFunction outputFunction();
 		
-		bool fetchNewRenderRect(et::vec2i& origin, et::vec2i& size);
+		bool fetchNewRenderRect(et::vec2i& origin, et::vec2i& size, bool& preview);
 		
 	private:
 		et::GesturesRecognizer _gestures;
@@ -79,10 +79,10 @@ namespace rt
 		uint64_t _maxElapsedTime = 0;
 
 		size_t _previewSamples = 4;
-		size_t _previewBounces = 2;
+		size_t _previewBounces = 1;
 
-		size_t _productionSamples = 128;
-		size_t _productionBounces = 16;
+		size_t _productionSamples = 512;
+		size_t _productionBounces = 64;
 		
 		bool _shouldRender = true;
 		bool _interactiveRendering = false;

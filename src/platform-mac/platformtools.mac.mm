@@ -63,7 +63,7 @@ std::string et::selectFile(const StringList& allowedTypes, SelectFileMode mode, 
 
 @implementation FilePicker
 
-- (instancetype)initWithDefaultName:(NSString*)name fileTypes:(NSArray *)fileTypes callback:(filePickerCallback)cb
+- (instancetype)initWithDefaultName:(NSString*)name fileTypes:(NSArray*)fileTypes callback:(filePickerCallback)cb
 {
 	self = [super init];
 	if (self)

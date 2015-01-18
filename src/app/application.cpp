@@ -322,3 +322,6 @@ TimerPool::Pointer et::currentTimerPool()
 {
 	return currentRunLoop().firstTimerPool();
 }
+
+const std::string et::kSystemEventType = "kSystemEventType";
+const std::string et::kSystemEventRemoteNotificationStatusChanged = "kSystemEventRemoteNotificationStatusChanged";

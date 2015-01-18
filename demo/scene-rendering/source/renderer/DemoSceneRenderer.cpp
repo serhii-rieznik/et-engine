@@ -42,7 +42,7 @@ void SceneRenderer::init(et::RenderContext* rc)
 	_geometryBuffer = rc->framebufferFactory().createFramebuffer(rc->sizei(), "geometry-buffer");
 	_geometryBuffer->addSameRendertarget();
 	
-	_downsampledBuffer = rc->framebufferFactory().createFramebuffer(rc->sizei() / 2, "downsampled-buffer",
+	_downsampledBuffer = rc->framebufferFactory().createFramebuffer(rc->sizei(), "downsampled-buffer",
 		TextureFormat::RGBA, TextureFormat::RGBA, DataType::UnsignedChar, TextureFormat::Invalid);
 	_downsampledBuffer->addSameRendertarget();
 	

@@ -494,8 +494,8 @@
 				A5D3D4EA1955B85600E621A7 /* programs */,
 				A5D3D3721955B28100E621A7 /* et */,
 				A5D3D36A1955B14000E621A7 /* source */,
-				A5D3D4E51955B55000E621A7 /* Frameworks */,
 				A5D3D3691955B14000E621A7 /* Products */,
+				A5D3D4E51955B55000E621A7 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};

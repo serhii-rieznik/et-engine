@@ -33,9 +33,9 @@ float computeFresnelTerm(in float VdotN, in float indexOfRefraction)
 
 void main()
 {
-	vec4 diffuseSample = etTexture2D(texture_diffuse, TexCoord);
 	vec4 occlusionSample = etTexture2D(texture_occlusion, TexCoord);
 //*
+	vec4 diffuseSample = etTexture2D(texture_diffuse, TexCoord);
 	float depthSample = 2.0 * etTexture2D(texture_depth, TexCoord).x - 1.0;
 	vec3 viewSpacePosition = restoreViewSpacePosition(NormalizedTexCoord, depthSample);
 	vec3 normalSample = decodeNormal(etTexture2D(texture_normal, TexCoord).xy);
@@ -87,9 +87,11 @@ void main()
 
 	vec4 lightBounce = mix(vec4(dot(occlusionSample, luma)), occlusionSample, 2.0);
 // */
-	float occlusion = pow(1.0 - occlusionSample.w, 4.0);
+	float occlusion = pow(1.0 - occlusionSample.w, 2.0);
 	
-	etFragmentOut = 
+	etFragmentOut =
+//	occlusionSample;
+//
 //		vec4(occlusion);
  		(ambientColor * occlusion + lighting) * diffuseSample * occlusion + lightBounce * lighting;
 }

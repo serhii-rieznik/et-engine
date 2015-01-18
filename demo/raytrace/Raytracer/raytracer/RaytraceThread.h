@@ -18,7 +18,7 @@ namespace rt
 	public:
 		virtual ~RaytraceThreadDelegate() { }
 		
-		virtual bool fetchNewRenderRect(et::vec2i& origin, et::vec2i& size) = 0;
+		virtual bool fetchNewRenderRect(et::vec2i& origin, et::vec2i& size, bool& preview) = 0;
 		
 		virtual OutputFunction outputFunction() = 0;
 		

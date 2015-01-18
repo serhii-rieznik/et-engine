@@ -419,17 +419,21 @@ bool TrackPrivate::fillNextPCMBuffer()
  */
 void TrackPrivate::loadOGG()
 {
-	int result = ov_test_callbacks(stream.ptr(), &oggFile, nullptr, -1, oggCallbacks);
+	int result = ov_open_callbacks(stream.ptr(), &oggFile, nullptr, -1, oggCallbacks);
 	if (result < 0)
 	{
-		checkOGGError(result, "ov_test_callbacks", _filename.c_str());
+		checkOGGError(result, "ov_open_callbacks", _filename.c_str());
 		return;
 	}
 	
-	ov_test_open(&oggFile);
-
 	int streamId = -1;
+	
 	vorbis_info* info = ov_info(&oggFile, streamId);
+	if (info == nullptr)
+	{
+		log::error("Unable to read OGG file: %s", _filename.c_str());
+		return;
+	}
 	
 	bitDepth = 16;
 	sampleRate = static_cast<ALsizei>(info->rate);
@@ -438,8 +442,10 @@ void TrackPrivate::loadOGG()
 	
 	format = openALFormatFromChannelsAndBitDepth(channels, bitDepth);
 	
+	int64_t totalPCMSamples = ov_pcm_total(&oggFile, streamId);
+	
 	size_t oneSecondSize = sampleRate * sampleSize;
-	size_t computedDataSize = static_cast<size_t>(sizeof(float) * ov_pcm_total(&oggFile, streamId));
+	size_t computedDataSize = static_cast<size_t>(sampleSize * totalPCMSamples);
 	
 	numSamples = computedDataSize / sampleSize;
 	pcmDataSize = numSamples * sampleSize;
@@ -524,7 +530,7 @@ void TrackPrivate::rewindOGG()
 /*
  * Service functions
  */
-#define CASEOF(A) case A: { log::error("OGG error %s at %s", #A, tag); return; }
+#define CASEOF(A) case A: { log::error("OGG error %s at %s\nTrack:%s", #A, tag, filename); return; }
 void checkOGGError(long code, const char* tag, const char* filename)
 {
 	switch (code)

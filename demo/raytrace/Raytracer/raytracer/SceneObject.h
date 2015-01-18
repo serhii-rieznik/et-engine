@@ -12,11 +12,25 @@
 
 namespace rt
 {
+	struct SceneTriangle
+	{
+		et::triangle tri;
+		size_t materialIndex = 0;
+		
+		SceneTriangle()
+			{ }
+		
+		SceneTriangle(const et::triangle& t, size_t m) :
+			tri(t), materialIndex(m) { }
+	};
+	
+	typedef et::DataStorage<SceneTriangle> SceneTriangleList;
+	
 	class SceneObject
 	{
 	public:
 		virtual ~SceneObject() { }
-		virtual bool intersects(const et::ray3d&, et::vec3&, et::vec3&) = 0;
+		virtual bool intersects(const et::ray3d&, et::vec3&, et::vec3&, size_t&) = 0;
 	
 	public:
 		SceneObject(size_t m) :
@@ -26,29 +40,23 @@ namespace rt
 			{ return _materialId; }
 
 	private:
-		size_t _materialId = MissingObjectIndex;
-	};
-	
-	class DummyObject : public SceneObject
-	{
-	public:
-		DummyObject() :
-			SceneObject(MissingObjectIndex) { }
-		
-		bool intersects(const et::ray3d&, et::vec3&, et::vec3&)
-			{ return false; }
+		size_t _materialId = 0;
 	};
 	
 	class MeshObject : public SceneObject
 	{
 	public:
-		MeshObject(const et::s3d::SupportMesh::Pointer& m, size_t mat);
+		MeshObject(size_t, size_t, const SceneTriangleList&);
 		
-		bool intersects(const et::ray3d&, et::vec3&, et::vec3&);
+		bool intersects(const et::ray3d&, et::vec3&, et::vec3&, size_t&);
 		
 	private:
-		et::s3d::SupportMesh::CollisionData _triangles;
-		et::Sphere _boundingSphere;
+		void buildBoundingBox();
+		
+	private:
+		const SceneTriangleList& _triangles;
+		size_t _firstTriangle = 0;
+		size_t _numTriangles = 0;
 		et::AABB _boundingBox;
 	};
 }
