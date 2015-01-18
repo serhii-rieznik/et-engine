@@ -74,22 +74,6 @@
 		A5FEA5A81A590F4E008B3419 /* log.apple.mm in Sources */ = {isa = PBXBuildFile; fileRef = A5FEA5071A590F4E008B3419 /* log.apple.mm */; };
 		A5FEA5A91A590F4E008B3419 /* memory.apple.mm in Sources */ = {isa = PBXBuildFile; fileRef = A5FEA5081A590F4E008B3419 /* memory.apple.mm */; };
 		A5FEA5AA1A590F4E008B3419 /* tools.apple.mm in Sources */ = {isa = PBXBuildFile; fileRef = A5FEA5091A590F4E008B3419 /* tools.apple.mm */; };
-		A5FEA5AF1A590F4E008B3419 /* application.ios.mm in Sources */ = {isa = PBXBuildFile; fileRef = A5FEA5101A590F4E008B3419 /* application.ios.mm */; };
-		A5FEA5B01A590F4E008B3419 /* applicationdelegate.ios.mm in Sources */ = {isa = PBXBuildFile; fileRef = A5FEA5111A590F4E008B3419 /* applicationdelegate.ios.mm */; };
-		A5FEA5B11A590F4E008B3419 /* chartboost.ios.mm in Sources */ = {isa = PBXBuildFile; fileRef = A5FEA5121A590F4E008B3419 /* chartboost.ios.mm */; };
-		A5FEA5B21A590F4E008B3419 /* embeddedapplication.mm in Sources */ = {isa = PBXBuildFile; fileRef = A5FEA5131A590F4E008B3419 /* embeddedapplication.mm */; };
-		A5FEA5B31A590F4E008B3419 /* imagepicker.ios.mm in Sources */ = {isa = PBXBuildFile; fileRef = A5FEA5141A590F4E008B3419 /* imagepicker.ios.mm */; };
-		A5FEA5B41A590F4E008B3419 /* input.ios.mm in Sources */ = {isa = PBXBuildFile; fileRef = A5FEA5151A590F4E008B3419 /* input.ios.mm */; };
-		A5FEA5B51A590F4E008B3419 /* ios.mm in Sources */ = {isa = PBXBuildFile; fileRef = A5FEA5161A590F4E008B3419 /* ios.mm */; };
-		A5FEA5B61A590F4E008B3419 /* location.ios.mm in Sources */ = {isa = PBXBuildFile; fileRef = A5FEA5171A590F4E008B3419 /* location.ios.mm */; };
-		A5FEA5B71A590F4E008B3419 /* mailcomposer.ios.mm in Sources */ = {isa = PBXBuildFile; fileRef = A5FEA5181A590F4E008B3419 /* mailcomposer.ios.mm */; };
-		A5FEA5B81A590F4E008B3419 /* openglview.ios.mm in Sources */ = {isa = PBXBuildFile; fileRef = A5FEA5191A590F4E008B3419 /* openglview.ios.mm */; };
-		A5FEA5B91A590F4E008B3419 /* openglviewcontroller.ios.mm in Sources */ = {isa = PBXBuildFile; fileRef = A5FEA51A1A590F4E008B3419 /* openglviewcontroller.ios.mm */; };
-		A5FEA5BA1A590F4E008B3419 /* orientation.ios.mm in Sources */ = {isa = PBXBuildFile; fileRef = A5FEA51B1A590F4E008B3419 /* orientation.ios.mm */; };
-		A5FEA5BB1A590F4E008B3419 /* printer.ios.mm in Sources */ = {isa = PBXBuildFile; fileRef = A5FEA51C1A590F4E008B3419 /* printer.ios.mm */; };
-		A5FEA5BC1A590F4E008B3419 /* rendercontext.ios.mm in Sources */ = {isa = PBXBuildFile; fileRef = A5FEA51D1A590F4E008B3419 /* rendercontext.ios.mm */; };
-		A5FEA5BD1A590F4E008B3419 /* social.ios.mm in Sources */ = {isa = PBXBuildFile; fileRef = A5FEA51E1A590F4E008B3419 /* social.ios.mm */; };
-		A5FEA5BF1A590F4E008B3419 /* videocapture.mm in Sources */ = {isa = PBXBuildFile; fileRef = A5FEA5201A590F4E008B3419 /* videocapture.mm */; };
 		A5FEA5C01A590F4E008B3419 /* application.mac.mm in Sources */ = {isa = PBXBuildFile; fileRef = A5FEA5221A590F4E008B3419 /* application.mac.mm */; };
 		A5FEA5C11A590F4E008B3419 /* input.mac.mm in Sources */ = {isa = PBXBuildFile; fileRef = A5FEA5231A590F4E008B3419 /* input.mac.mm */; };
 		A5FEA5C21A590F4E008B3419 /* mac.mm in Sources */ = {isa = PBXBuildFile; fileRef = A5FEA5241A590F4E008B3419 /* mac.mm */; };
@@ -264,17 +248,6 @@
 		A5FEA4051A590F4E008B3419 /* apple.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = apple.h; sourceTree = "<group>"; };
 		A5FEA4061A590F4E008B3419 /* iap.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = iap.h; sourceTree = "<group>"; };
 		A5FEA4071A590F4E008B3419 /* objc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = objc.h; sourceTree = "<group>"; };
-		A5FEA40B1A590F4E008B3419 /* applicationdelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = applicationdelegate.h; sourceTree = "<group>"; };
-		A5FEA40C1A590F4E008B3419 /* chartboost.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = chartboost.h; sourceTree = "<group>"; };
-		A5FEA40D1A590F4E008B3419 /* embeddedapplication.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = embeddedapplication.h; sourceTree = "<group>"; };
-		A5FEA40E1A590F4E008B3419 /* imagepicker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = imagepicker.h; sourceTree = "<group>"; };
-		A5FEA40F1A590F4E008B3419 /* ios.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ios.h; sourceTree = "<group>"; };
-		A5FEA4101A590F4E008B3419 /* mailcomposer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = mailcomposer.h; sourceTree = "<group>"; };
-		A5FEA4111A590F4E008B3419 /* opengl.ios.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = opengl.ios.h; sourceTree = "<group>"; };
-		A5FEA4121A590F4E008B3419 /* openglview.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = openglview.h; sourceTree = "<group>"; };
-		A5FEA4131A590F4E008B3419 /* openglviewcontroller.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = openglviewcontroller.h; sourceTree = "<group>"; };
-		A5FEA4141A590F4E008B3419 /* printer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = printer.h; sourceTree = "<group>"; };
-		A5FEA4151A590F4E008B3419 /* social.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = social.h; sourceTree = "<group>"; };
 		A5FEA4171A590F4E008B3419 /* mac.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = mac.h; sourceTree = "<group>"; };
 		A5FEA41C1A590F4E008B3419 /* primitives.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = primitives.h; sourceTree = "<group>"; };
 		A5FEA41E1A590F4E008B3419 /* apiobject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = apiobject.h; sourceTree = "<group>"; };
@@ -464,22 +437,6 @@
 		A5FEA5071A590F4E008B3419 /* log.apple.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = log.apple.mm; sourceTree = "<group>"; };
 		A5FEA5081A590F4E008B3419 /* memory.apple.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = memory.apple.mm; sourceTree = "<group>"; };
 		A5FEA5091A590F4E008B3419 /* tools.apple.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = tools.apple.mm; sourceTree = "<group>"; };
-		A5FEA5101A590F4E008B3419 /* application.ios.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = application.ios.mm; sourceTree = "<group>"; };
-		A5FEA5111A590F4E008B3419 /* applicationdelegate.ios.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = applicationdelegate.ios.mm; sourceTree = "<group>"; };
-		A5FEA5121A590F4E008B3419 /* chartboost.ios.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = chartboost.ios.mm; sourceTree = "<group>"; };
-		A5FEA5131A590F4E008B3419 /* embeddedapplication.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = embeddedapplication.mm; sourceTree = "<group>"; };
-		A5FEA5141A590F4E008B3419 /* imagepicker.ios.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = imagepicker.ios.mm; sourceTree = "<group>"; };
-		A5FEA5151A590F4E008B3419 /* input.ios.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = input.ios.mm; sourceTree = "<group>"; };
-		A5FEA5161A590F4E008B3419 /* ios.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ios.mm; sourceTree = "<group>"; };
-		A5FEA5171A590F4E008B3419 /* location.ios.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = location.ios.mm; sourceTree = "<group>"; };
-		A5FEA5181A590F4E008B3419 /* mailcomposer.ios.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = mailcomposer.ios.mm; sourceTree = "<group>"; };
-		A5FEA5191A590F4E008B3419 /* openglview.ios.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = openglview.ios.mm; sourceTree = "<group>"; };
-		A5FEA51A1A590F4E008B3419 /* openglviewcontroller.ios.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = openglviewcontroller.ios.mm; sourceTree = "<group>"; };
-		A5FEA51B1A590F4E008B3419 /* orientation.ios.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = orientation.ios.mm; sourceTree = "<group>"; };
-		A5FEA51C1A590F4E008B3419 /* printer.ios.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = printer.ios.mm; sourceTree = "<group>"; };
-		A5FEA51D1A590F4E008B3419 /* rendercontext.ios.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = rendercontext.ios.mm; sourceTree = "<group>"; };
-		A5FEA51E1A590F4E008B3419 /* social.ios.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = social.ios.mm; sourceTree = "<group>"; };
-		A5FEA5201A590F4E008B3419 /* videocapture.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = videocapture.mm; sourceTree = "<group>"; };
 		A5FEA5221A590F4E008B3419 /* application.mac.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = application.mac.mm; sourceTree = "<group>"; };
 		A5FEA5231A590F4E008B3419 /* input.mac.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = input.mac.mm; sourceTree = "<group>"; };
 		A5FEA5241A590F4E008B3419 /* mac.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = mac.mm; sourceTree = "<group>"; };
@@ -642,7 +599,6 @@
 				A5FEA3FB1A590F4E008B3419 /* opengl */,
 				A5FEA3FE1A590F4E008B3419 /* platform */,
 				A5FEA4041A590F4E008B3419 /* platform-apple */,
-				A5FEA40A1A590F4E008B3419 /* platform-ios */,
 				A5FEA4161A590F4E008B3419 /* platform-mac */,
 				A5FEA41B1A590F4E008B3419 /* primitives */,
 				A5FEA41D1A590F4E008B3419 /* rendering */,
@@ -853,24 +809,6 @@
 				A5FEA4071A590F4E008B3419 /* objc.h */,
 			);
 			path = "platform-apple";
-			sourceTree = "<group>";
-		};
-		A5FEA40A1A590F4E008B3419 /* platform-ios */ = {
-			isa = PBXGroup;
-			children = (
-				A5FEA40B1A590F4E008B3419 /* applicationdelegate.h */,
-				A5FEA40C1A590F4E008B3419 /* chartboost.h */,
-				A5FEA40D1A590F4E008B3419 /* embeddedapplication.h */,
-				A5FEA40E1A590F4E008B3419 /* imagepicker.h */,
-				A5FEA40F1A590F4E008B3419 /* ios.h */,
-				A5FEA4101A590F4E008B3419 /* mailcomposer.h */,
-				A5FEA4111A590F4E008B3419 /* opengl.ios.h */,
-				A5FEA4121A590F4E008B3419 /* openglview.h */,
-				A5FEA4131A590F4E008B3419 /* openglviewcontroller.h */,
-				A5FEA4141A590F4E008B3419 /* printer.h */,
-				A5FEA4151A590F4E008B3419 /* social.h */,
-			);
-			path = "platform-ios";
 			sourceTree = "<group>";
 		};
 		A5FEA4161A590F4E008B3419 /* platform-mac */ = {
@@ -1175,7 +1113,6 @@
 				A5FEA4EB1A590F4E008B3419 /* models */,
 				A5FEA4EE1A590F4E008B3419 /* opengl */,
 				A5FEA5041A590F4E008B3419 /* platform-apple */,
-				A5FEA50F1A590F4E008B3419 /* platform-ios */,
 				A5FEA5211A590F4E008B3419 /* platform-mac */,
 				A5FEA5281A590F4E008B3419 /* platform-unix */,
 				A5FEA5431A590F4E008B3419 /* primitives */,
@@ -1333,29 +1270,6 @@
 				A5FEA5091A590F4E008B3419 /* tools.apple.mm */,
 			);
 			path = "platform-apple";
-			sourceTree = "<group>";
-		};
-		A5FEA50F1A590F4E008B3419 /* platform-ios */ = {
-			isa = PBXGroup;
-			children = (
-				A5FEA5101A590F4E008B3419 /* application.ios.mm */,
-				A5FEA5111A590F4E008B3419 /* applicationdelegate.ios.mm */,
-				A5FEA5121A590F4E008B3419 /* chartboost.ios.mm */,
-				A5FEA5131A590F4E008B3419 /* embeddedapplication.mm */,
-				A5FEA5141A590F4E008B3419 /* imagepicker.ios.mm */,
-				A5FEA5151A590F4E008B3419 /* input.ios.mm */,
-				A5FEA5161A590F4E008B3419 /* ios.mm */,
-				A5FEA5171A590F4E008B3419 /* location.ios.mm */,
-				A5FEA5181A590F4E008B3419 /* mailcomposer.ios.mm */,
-				A5FEA5191A590F4E008B3419 /* openglview.ios.mm */,
-				A5FEA51A1A590F4E008B3419 /* openglviewcontroller.ios.mm */,
-				A5FEA51B1A590F4E008B3419 /* orientation.ios.mm */,
-				A5FEA51C1A590F4E008B3419 /* printer.ios.mm */,
-				A5FEA51D1A590F4E008B3419 /* rendercontext.ios.mm */,
-				A5FEA51E1A590F4E008B3419 /* social.ios.mm */,
-				A5FEA5201A590F4E008B3419 /* videocapture.mm */,
-			);
-			path = "platform-ios";
 			sourceTree = "<group>";
 		};
 		A5FEA5211A590F4E008B3419 /* platform-mac */ = {
@@ -1527,11 +1441,9 @@
 				A5FEA5E81A590F4E008B3419 /* baseelement.cpp in Sources */,
 				A5FEA58D1A590F4E008B3419 /* input.cpp in Sources */,
 				A5FEA5711A590F4E008B3419 /* camera.cpp in Sources */,
-				A5FEA5B71A590F4E008B3419 /* mailcomposer.ios.mm in Sources */,
 				A5FEA5E41A590F4E008B3419 /* texturefactory.cpp in Sources */,
 				A5FEA5881A590F4E008B3419 /* pvrdecompressor.cpp in Sources */,
 				A5FEA5EF1A590F4E008B3419 /* serialization.cpp in Sources */,
-				A5FEA5BA1A590F4E008B3419 /* orientation.ios.mm in Sources */,
 				A5FEA5F81A590F4E008B3419 /* sequence.cpp in Sources */,
 				A5FEA5F61A590F4E008B3419 /* taskpool.cpp in Sources */,
 				A5FEA57C1A590F4E008B3419 /* transformable.cpp in Sources */,
@@ -1539,8 +1451,6 @@
 				A5FEA5901A590F4E008B3419 /* fbxloader.cpp in Sources */,
 				A5FEA5751A590F4E008B3419 /* conversion.cpp in Sources */,
 				A5FEA5C01A590F4E008B3419 /* application.mac.mm in Sources */,
-				A5FEA5B31A590F4E008B3419 /* imagepicker.ios.mm in Sources */,
-				A5FEA5B41A590F4E008B3419 /* input.ios.mm in Sources */,
 				A5D8EABE1A3CD89300E3620B /* main.cpp in Sources */,
 				A5FEA58C1A590F4E008B3419 /* gestures.cpp in Sources */,
 				A5FEA5771A590F4E008B3419 /* et.cpp in Sources */,
@@ -1553,7 +1463,6 @@
 				A5FEA5EC1A590F4E008B3419 /* mesh.cpp in Sources */,
 				A5FEA5E51A590F4E008B3419 /* textureloadingthread.cpp in Sources */,
 				A5FEA5A71A590F4E008B3419 /* locale.apple.mm in Sources */,
-				A5FEA5B01A590F4E008B3419 /* applicationdelegate.ios.mm in Sources */,
 				A5FEA5921A590F4E008B3419 /* framebuffer.cpp in Sources */,
 				A5FEA5701A590F4E008B3419 /* runloop.cpp in Sources */,
 				A5FEA5C71A590F4E008B3419 /* criticalsection.unix.cpp in Sources */,
@@ -1561,7 +1470,6 @@
 				A5FEA5E71A590F4E008B3419 /* animation.cpp in Sources */,
 				A5FEA5791A590F4E008B3419 /* objectscache.cpp in Sources */,
 				A5FEA59B1A590F4E008B3419 /* vertexbuffer.cpp in Sources */,
-				A5FEA5B21A590F4E008B3419 /* embeddedapplication.mm in Sources */,
 				A5FEA5961A590F4E008B3419 /* program.cpp in Sources */,
 				A5FEA5841A590F4E008B3419 /* imageoperations.cpp in Sources */,
 				A5FEA5971A590F4E008B3419 /* renderer.cpp in Sources */,
@@ -1589,39 +1497,30 @@
 				A5FEA5E61A590F4E008B3419 /* vertexbufferfactory.cpp in Sources */,
 				A5FEA5981A590F4E008B3419 /* renderstate.cpp in Sources */,
 				A5FEA5851A590F4E008B3419 /* imagewriter.cpp in Sources */,
-				A5FEA5BC1A590F4E008B3419 /* rendercontext.ios.mm in Sources */,
 				A5FEA5F91A590F4E008B3419 /* timedobject.cpp in Sources */,
-				A5FEA5B91A590F4E008B3419 /* openglviewcontroller.ios.mm in Sources */,
 				A5FEA5E31A590F4E008B3419 /* rendering.cpp in Sources */,
 				A5FEA5ED1A590F4E008B3419 /* particlesystem.cpp in Sources */,
 				A5FEA5831A590F4E008B3419 /* hdrloader.cpp in Sources */,
 				A566F2831A3E761F00E5A513 /* DemoCameraController.cpp in Sources */,
 				A5FEA5871A590F4E008B3419 /* pngloader.cpp in Sources */,
 				A5FEA58F1A590F4E008B3419 /* locale.cpp in Sources */,
-				A5FEA5B51A590F4E008B3419 /* ios.mm in Sources */,
-				A5FEA5B81A590F4E008B3419 /* openglview.ios.mm in Sources */,
 				A5FEA5F11A590F4E008B3419 /* supportmesh.cpp in Sources */,
 				A5FEA5FB1A590F4E008B3419 /* indexarray.cpp in Sources */,
-				A5FEA5BF1A590F4E008B3419 /* videocapture.mm in Sources */,
 				A5FEA56A1A590F4E008B3419 /* appevironment.cpp in Sources */,
 				A5FEA5E91A590F4E008B3419 /* cameraelement.cpp in Sources */,
 				A5FEA5E21A590F4E008B3419 /* rendercontext.cpp in Sources */,
 				A5FEA5931A590F4E008B3419 /* indexbuffer.cpp in Sources */,
 				A5FEA57D1A590F4E008B3419 /* geometry.cpp in Sources */,
 				A5FEA5721A590F4E008B3419 /* frustum.cpp in Sources */,
-				A5FEA5B11A590F4E008B3419 /* chartboost.ios.mm in Sources */,
-				A5FEA5BD1A590F4E008B3419 /* social.ios.mm in Sources */,
 				A5FEA5FC1A590F4E008B3419 /* vertexarray.cpp in Sources */,
 				A5FEA5911A590F4E008B3419 /* objLoader.cpp in Sources */,
 				A5FEA56C1A590F4E008B3419 /* backgroundthread.cpp in Sources */,
 				A5FEA5F71A590F4E008B3419 /* notifytimer.cpp in Sources */,
 				A5FEA5FA1A590F4E008B3419 /* timerpool.cpp in Sources */,
-				A5FEA5BB1A590F4E008B3419 /* printer.ios.mm in Sources */,
 				A5FEA5C91A590F4E008B3419 /* thread.unix.cpp in Sources */,
 				A5FEA56B1A590F4E008B3419 /* application.cpp in Sources */,
 				A5FEA5C61A590F4E008B3419 /* atomiccounter.unix.cpp in Sources */,
 				A5FEA57E1A590F4E008B3419 /* rectplacer.cpp in Sources */,
-				A5FEA5AF1A590F4E008B3419 /* application.ios.mm in Sources */,
 				A5FEA5C81A590F4E008B3419 /* mutex.unix.cpp in Sources */,
 				A5FEA5781A590F4E008B3419 /* memoryallocator.cpp in Sources */,
 				A5FEA5AA1A590F4E008B3419 /* tools.apple.mm in Sources */,
@@ -1632,7 +1531,6 @@
 				A5FEA57B1A590F4E008B3419 /* tools.cpp in Sources */,
 				A5FEA5F01A590F4E008B3419 /* storage.cpp in Sources */,
 				A5FEA5951A590F4E008B3419 /* capabilities.cpp in Sources */,
-				A5FEA5B61A590F4E008B3419 /* location.ios.mm in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -6,12 +6,12 @@ uniform sampler2D texture_noise;
 etFragmentIn vec2 TexCoord;
 etFragmentIn vec2 NoiseTexCoord;
 
-#define	NUM_SAMPLES					64
-#define MIN_SAMPLE_SIZE				1.0
-#define SAMPLE_SIZE					32.0
-#define DEPTH_DIFFERENCE_SCALE		3.3333
+#define	NUM_SAMPLES					24
+#define MIN_SAMPLE_SIZE				0.05
+#define SAMPLE_SIZE					1.0
+#define DEPTH_DIFFERENCE_SCALE		5.0
 
-#define COMPUTE_LIGHT_BOUNCE		1
+#define COMPUTE_LIGHT_BOUNCE		0
 
 #include "include/viewspace.fsh"
 #include "include/normals.fsh"
@@ -36,7 +36,7 @@ etFragmentIn vec2 NoiseTexCoord;
 	}
 	
 	float depthDifference = DEPTH_DIFFERENCE_SCALE * (inversesqrt(1.0 - projected.z) - inversesqrt(1.0 - sampledDepth));
-	float occlusion = (1.0 - noise.w) / (1.0 + depthDifference * depthDifference);
+	float occlusion = dot(vn, randomNormal) * (1.0 - noise.w) / (1.0 + depthDifference * depthDifference);
 
 #if (COMPUTE_LIGHT_BOUNCE)
 	return etTexture2D(texture_diffuse, projected.xy) * occlusion;
@@ -68,7 +68,6 @@ void main()
 #if (COMPUTE_LIGHT_BOUNCE)
 	etFragmentOut = environment / float(NUM_SAMPLES);
 #else
-	float occlusion = 1.0 - environment / float(NUM_SAMPLES);
-	etFragmentOut = vec4(occlusion);
+	etFragmentOut = vec4(environment / float(NUM_SAMPLES));
 #endif
 }
