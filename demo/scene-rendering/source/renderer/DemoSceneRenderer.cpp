@@ -302,6 +302,7 @@ void SceneRenderer::render(const et::Camera& cam, const et::Camera& observer, bo
 	rs.bindProgram(programs.final);
 		
 	programs.final->setCameraProperties(cam);
+	programs.final->setUniform("texel", _geometryBuffer->renderTarget(0)->texel());
 	programs.final->setUniform("mProjection", cam.projectionMatrix());
 	programs.final->setUniform<vec3>("lightPositions[0]", viewSpaceLightPosition.data(), viewSpaceLightPosition.size());
 	programs.final->setUniform("lightsCount", viewSpaceLightPosition.size());
