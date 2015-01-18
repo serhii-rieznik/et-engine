@@ -134,8 +134,14 @@ void et::findFiles(const std::string& folder, const std::string& mask, bool recu
 	{
 		do
 		{
+			bool isAcceptable = 
+				((data.dwFileAttributes & FILE_ATTRIBUTE_NORMAL) == FILE_ATTRIBUTE_NORMAL) || 
+				((data.dwFileAttributes & FILE_ATTRIBUTE_ARCHIVE) == FILE_ATTRIBUTE_ARCHIVE) ||
+				((data.dwFileAttributes & FILE_ATTRIBUTE_READONLY) == FILE_ATTRIBUTE_READONLY);
+
 			ET_STRING_TYPE name(data.cFileName);
-			if ((name != currentFolder) && (name != previousFolder))
+
+			if (isAcceptable && (name != currentFolder) && (name != previousFolder))
 				list.push_back(ET_STRING_TO_OUTPUT_TYPE(normalizedFolder + name));
 		}
 		while (FindNextFile(search, &data));

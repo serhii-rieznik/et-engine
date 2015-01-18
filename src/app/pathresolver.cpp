@@ -116,7 +116,7 @@ std::set<std::string> StandardPathResolver::resolveFolderPaths(const std::string
 
 	auto normalizedInput = normalizeFilePath(input);
 
-	if (normalizedInput.back() == pathDelimiter)
+	if (!normalizedInput.empty() && normalizedInput.back() == pathDelimiter)
 		normalizedInput.pop_back();
 
 	std::set<std::string> result;
