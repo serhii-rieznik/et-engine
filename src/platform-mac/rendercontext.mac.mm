@@ -234,7 +234,7 @@ RenderContextPrivate::RenderContextPrivate(RenderContext*, RenderContextParamete
 	
 	NSUInteger windowMask = NSBorderlessWindowMask | NSClosableWindowMask;
 	
-	if (appParams.windowSize != WindowSize_Fullscreen)
+	if (appParams.windowSize != WindowSize::Fullscreen)
 	{
 		if (appParams.windowStyle & WindowStyle_Caption)
 			windowMask |= NSTitledWindowMask | NSMiniaturizableWindowMask;
@@ -251,11 +251,11 @@ RenderContextPrivate::RenderContextPrivate(RenderContext*, RenderContextParamete
 	NSRect visibleRect = [mainScreen visibleFrame];
 	
 	NSRect contentRect = { };
-	if (appParams.windowSize == WindowSize_FillWorkarea)
+	if (appParams.windowSize == WindowSize::FillWorkarea)
 	{
 		contentRect = [NSWindow contentRectForFrameRect:visibleRect styleMask:windowMask];
 	}
-	else if (appParams.windowSize == WindowSize_Fullscreen)
+	else if (appParams.windowSize == WindowSize::Fullscreen)
 	{
 		[[NSApplication sharedApplication] setPresentationOptions:NSApplicationPresentationAutoHideDock |
 			NSApplicationPresentationAutoHideMenuBar | NSApplicationPresentationFullScreen];

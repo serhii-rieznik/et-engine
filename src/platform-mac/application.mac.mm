@@ -175,8 +175,24 @@ void Application::enableRemoteNotifications()
 
 @implementation etApplicationDelegate
 
+- (void)handleURLEvent:(NSAppleEventDescriptor*)event withReplyEvent:(NSAppleEventDescriptor*)replyEvent
+{
+	NSString* url = [[event paramDescriptorForKeyword:keyDirectObject] stringValue];
+	if ([url length] > 0)
+	{
+		et::Dictionary systemEvent;
+		systemEvent.setStringForKey(kSystemEventType, kSystemEventOpenURL);
+		systemEvent.setStringForKey("url", std::string([url UTF8String]));
+		et::application().systemEvent.invokeInMainRunLoop(systemEvent);
+	}
+}
+
 - (void)applicationDidFinishLaunching:(NSNotification*)notification
 {
+	[[NSAppleEventManager sharedAppleEventManager] setEventHandler:self
+		andSelector:@selector(handleURLEvent:withReplyEvent:)
+		forEventClass:kInternetEventClass andEventID:kAEGetURL];
+	
     (void)notification;
 	_notifier.notifyLoaded();
 }

@@ -19,6 +19,7 @@ namespace et
 {
 	extern const std::string kSystemEventType;
 	extern const std::string kSystemEventRemoteNotificationStatusChanged;
+	extern const std::string kSystemEventOpenURL;
 	
 	class ApplicationNotifier;
 	class Application : public Singleton<Application>,  public EventReceiver

@@ -5,23 +5,16 @@
  *
  */
 
-#include <et/core/base64.h>
 #include <et/app/application.h>
-#include <et/app/applicationnotifier.h>
-#include <et/threading/threading.h>
-#include <et/threading/mutex.h>
 
 #if (ET_PLATFORM_IOS)
 
 #include <QuartzCore/QuartzCore.h>
 
-#if defined(ET_SUPPORT_FACEBOOK_SDK)
-#	include <FacebookSDK/FacebookSDK.h>
-#endif
-
-#if defined(ET_SUPPORT_GOOGLE_PLUS)
-#	include <GooglePlus/GooglePlus.h>
-#endif
+#include <et/core/base64.h>
+#include <et/app/applicationnotifier.h>
+#include <et/threading/threading.h>
+#include <et/threading/mutex.h>
 
 #include <et/platform-apple/apple.h>
 #include <et/platform-ios/applicationdelegate.h>
@@ -250,28 +243,17 @@ extern etOpenGLViewController* sharedOpenGLViewController;
 - (BOOL)application:(UIApplication*)application openURL:(NSURL*)url
 	sourceApplication:(NSString*)sourceApplication annotation:(id)annotation
 {
-	BOOL processed = NO;
-	
-#if defined(ET_SUPPORT_FACEBOOK_SDK)
-	
-    processed = [FBAppCall handleOpenURL:url sourceApplication:sourceApplication];
-	
-#endif
-	
-#if defined(ET_SUPPORT_GOOGLE_PLUS)
-	if (!processed)
+	NSString* urlString = [url absoluteString];
+	if ([urlString length] > 0)
 	{
-		processed = [GPPURLHandler handleURL:url sourceApplication:sourceApplication
-			annotation:annotation];
+		et::Dictionary systemEvent;
+		systemEvent.setStringForKey(kSystemEventType, kSystemEventOpenURL);
+		systemEvent.setStringForKey("url", std::string([urlString UTF8String]));
+		systemEvent.setStringForKey("source-application", [sourceApplication UTF8String]);
+		et::application().systemEvent.invokeInMainRunLoop(systemEvent);
 	}
-#endif
 	
-	(void)sourceApplication;
-	(void)application;
-	(void)annotation;
-	(void)url;
-	
-	return processed;
+	return YES;
 }
 
 
