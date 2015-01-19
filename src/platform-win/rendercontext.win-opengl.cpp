@@ -160,7 +160,7 @@ HWND RenderContextPrivate::createWindow(size_t style, WindowSize windowSize, vec
 { 
 	UINT windowStyle = WS_POPUP | WS_VISIBLE | WS_SYSMENU | WS_MINIMIZEBOX;
 
-	if (windowSize != WindowSize_Fullscreen)
+	if (windowSize != WindowSize::Fullscreen)
 	{
 		if ((style & WindowStyle_Caption) == WindowStyle_Caption)
 			windowStyle |= WS_CAPTION | WS_ACTIVECAPTION;
@@ -168,7 +168,7 @@ HWND RenderContextPrivate::createWindow(size_t style, WindowSize windowSize, vec
 		if ((style & WindowStyle_Sizable) == WindowStyle_Sizable)
 			windowStyle |= WS_SIZEBOX | WS_MAXIMIZEBOX;
 
-		if (windowSize == WindowSize_FillWorkarea)
+		if (windowSize == WindowSize::FillWorkarea)
 			windowStyle |= WS_MAXIMIZE;
 	}
 
@@ -177,12 +177,12 @@ HWND RenderContextPrivate::createWindow(size_t style, WindowSize windowSize, vec
 	SystemParametersInfo(SPI_GETWORKAREA, 0, (PVOID)&workareaRect, 0);
 	vec2i workareaSize(workareaRect.right - workareaRect.left, workareaRect.bottom - workareaRect.top);
 
-	if (windowSize == WindowSize_Fullscreen)
+	if (windowSize == WindowSize::Fullscreen)
 	{
 		windowRect.right = GetSystemMetrics(SM_CXSCREEN);
 		windowRect.bottom = GetSystemMetrics(SM_CYSCREEN);
 	}
-	else if (windowSize == WindowSize_FillWorkarea)
+	else if (windowSize == WindowSize::FillWorkarea)
 	{
 		windowRect.right = workareaSize.x;
 		windowRect.bottom = workareaSize.y;
@@ -196,7 +196,7 @@ HWND RenderContextPrivate::createWindow(size_t style, WindowSize windowSize, vec
 	size = vec2i(windowRect.right, windowRect.bottom);
 	vec2i actualSize = size;
 
-	if (windowSize != WindowSize_Fullscreen)
+	if (windowSize != WindowSize::Fullscreen)
 	{
 		if ((windowStyle & WS_CAPTION) == WS_CAPTION)
 		{
@@ -242,7 +242,7 @@ bool RenderContextPrivate::initWindow(RenderContextParameters& params, const App
 	SetForegroundWindow(primaryContext.hWnd);
 	SetFocus(primaryContext.hWnd);
 
-	if (appParams.windowSize == WindowSize_Fullscreen)
+	if (appParams.windowSize == WindowSize::Fullscreen)
 	{
 		DEVMODE dm = { };
 		EnumDisplaySettings(0, ENUM_CURRENT_SETTINGS, &dm);
@@ -290,7 +290,7 @@ RenderContextData RenderContextPrivate::createDummyContext(HWND hWnd)
 bool RenderContextPrivate::initOpenGL(const RenderContextParameters& params)
 {
 	vec2i dummySize;
-	HWND dummyWindow = createWindow(WindowStyle_Borderless, WindowSize_Predefined, dummySize);
+	HWND dummyWindow = createWindow(WindowStyle_Borderless, WindowSize::Predefined, dummySize);
 	if (dummyWindow == nullptr) return false;
 
 	RenderContextData dummy = createDummyContext(dummyWindow);

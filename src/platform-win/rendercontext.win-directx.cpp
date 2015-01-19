@@ -153,15 +153,15 @@ HWND RenderContextPrivate::createWindow(size_t style, WindowSize windowSize, vec
 { 
 	UINT windowStyle = WS_POPUP | WS_VISIBLE | WS_SYSMENU | WS_MINIMIZEBOX;
 
-	if (windowSize != WindowSize_Fullscreen)
+	if (windowSize != WindowSize::Fullscreen)
 	{
-		if ((style & WindowStyle_Caption) == WindowStyle_Caption)
+		if ((style & WindowStyle_Caption) == WindowStyle::Caption)
 			windowStyle |= WS_CAPTION | WS_ACTIVECAPTION;
 
-		if ((style & WindowStyle_Sizable) == WindowStyle_Sizable)
+		if ((style & WindowStyle_Sizable) == WindowStyle::Sizable)
 			windowStyle |= WS_SIZEBOX | WS_MAXIMIZEBOX;
 
-		if (windowSize == WindowSize_FillWorkarea)
+		if (windowSize == WindowSize::FillWorkarea)
 			windowStyle |= WS_MAXIMIZE;
 	}
 
@@ -175,7 +175,7 @@ HWND RenderContextPrivate::createWindow(size_t style, WindowSize windowSize, vec
 		windowRect.right = GetSystemMetrics(SM_CXSCREEN);
 		windowRect.bottom = GetSystemMetrics(SM_CYSCREEN);
 	}
-	else if (windowSize == WindowSize_FillWorkarea)
+	else if (windowSize == WindowSize::FillWorkarea)
 	{
 		windowRect.right = workareaSize.x;
 		windowRect.bottom = workareaSize.y;
@@ -189,7 +189,7 @@ HWND RenderContextPrivate::createWindow(size_t style, WindowSize windowSize, vec
 	size = vec2i(windowRect.right, windowRect.bottom);
 	vec2i actualSize = size;
 
-	if (windowSize != WindowSize_Fullscreen)
+	if (windowSize != WindowSize::Fullscreen)
 	{
 		if ((windowStyle & WS_CAPTION) == WS_CAPTION)
 		{
@@ -236,7 +236,7 @@ bool RenderContextPrivate::initWindow(RenderContextParameters& params, const App
 	SetForegroundWindow(primaryContext.hWnd);
 	SetFocus(primaryContext.hWnd);
 
-	if (appParams.windowSize == WindowSize_Fullscreen)
+	if (appParams.windowSize == WindowSize::Fullscreen)
 	{
 		DEVMODE dm = { };
 		EnumDisplaySettings(0, ENUM_CURRENT_SETTINGS, &dm);

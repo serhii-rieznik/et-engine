@@ -36,11 +36,11 @@ namespace et
 		WindowStyle_Sizable = 0x02,
 	};
 	
-	enum WindowSize
+	enum class WindowSize
 	{
-		WindowSize_Predefined,
-		WindowSize_FillWorkarea,
-		WindowSize_Fullscreen
+		Predefined,
+		FillWorkarea,
+		Fullscreen
 	};
 
 	struct ApplicationParameters
@@ -52,11 +52,11 @@ namespace et
 
 #if (ET_PLATFORM_IOS || ET_PLATFORM_ANDROID)
 		ApplicationParameters() :
-			windowStyle(WindowStyle_Borderless), windowSize(WindowSize_Predefined),
+			windowStyle(WindowStyle_Borderless), windowSize(WindowSize::Predefined),
 			shouldSuspendOnDeactivate(true), keepWindowAspectOnResize(false) { }
 #else
 		ApplicationParameters() :
-			windowStyle(WindowStyle_Caption), windowSize(WindowSize_Predefined),
+			windowStyle(WindowStyle_Caption), windowSize(WindowSize::Predefined),
 			shouldSuspendOnDeactivate(false), keepWindowAspectOnResize(false) { }
 #endif
 	};
