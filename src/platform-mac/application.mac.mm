@@ -12,6 +12,7 @@
 #include <AppKit/NSApplication.h>
 #include <AppKit/NSMenu.h>
 #include <AppKit/NSWindow.h>
+#include <AppKit/NSAlert.h>
 
 #include <et/core/base64.h>
 #include <et/app/applicationnotifier.h>
@@ -24,7 +25,9 @@ using namespace et;
 
 @interface etApplicationDelegate : NSObject<NSApplicationDelegate>
 {
+	NSMutableArray* _scheduledURLs;
 	ApplicationNotifier _notifier;
+	BOOL _launchingFinished;
 }
 
 @end
@@ -100,8 +103,13 @@ void Application::setTitle(const std::string &s)
 #endif
 }
 
-void Application::alert(const std::string&, const std::string&, AlertType)
-{	
+void Application::alert(const std::string& title, const std::string& message, AlertType)
+{
+	NSString* nsTitle = [NSString stringWithUTF8String:title.c_str()];
+	NSString* nsMessage = [NSString stringWithUTF8String:message.c_str()];
+	
+	[[NSAlert alertWithMessageText:nsTitle defaultButton:@"OK" alternateButton:nil otherButton:nil
+		informativeTextWithFormat:@"%@", nsMessage, nil] runModal];
 }
 
 void Application::platformInit()
@@ -175,26 +183,47 @@ void Application::enableRemoteNotifications()
 
 @implementation etApplicationDelegate
 
+- (void)handleURLEventWithURL:(NSString*)url
+{
+	et::Dictionary systemEvent;
+	systemEvent.setStringForKey(kSystemEventType, kSystemEventOpenURL);
+	systemEvent.setStringForKey("url", std::string([url UTF8String]));
+	et::application().systemEvent.invokeInMainRunLoop(systemEvent);
+}
+
 - (void)handleURLEvent:(NSAppleEventDescriptor*)event withReplyEvent:(NSAppleEventDescriptor*)replyEvent
 {
-	NSString* url = [[event paramDescriptorForKeyword:keyDirectObject] stringValue];
-	if ([url length] > 0)
-	{
-		et::Dictionary systemEvent;
-		systemEvent.setStringForKey(kSystemEventType, kSystemEventOpenURL);
-		systemEvent.setStringForKey("url", std::string([url UTF8String]));
-		et::application().systemEvent.invokeInMainRunLoop(systemEvent);
-	}
+	NSString* eventURL = [[event paramDescriptorForKeyword:keyDirectObject] stringValue];
+	if ([eventURL length] == 0) return;
+	
+	if (_launchingFinished)
+		[self handleURLEventWithURL:eventURL];
+	else
+		[_scheduledURLs addObject:eventURL];
+}
+
+- (void)applicationWillFinishLaunching:(NSNotification *)notification
+{
+	_launchingFinished = NO;
+	
+	_scheduledURLs = [[NSMutableArray alloc] init];
+	
+	[[NSAppleEventManager sharedAppleEventManager] setEventHandler:self
+		andSelector:@selector(handleURLEvent:withReplyEvent:)
+		forEventClass:kInternetEventClass andEventID:kAEGetURL];
+
+	et::application().systemEvent.invokeInMainRunLoop(Dictionary());
 }
 
 - (void)applicationDidFinishLaunching:(NSNotification*)notification
 {
-	[[NSAppleEventManager sharedAppleEventManager] setEventHandler:self
-		andSelector:@selector(handleURLEvent:withReplyEvent:)
-		forEventClass:kInternetEventClass andEventID:kAEGetURL];
-	
     (void)notification;
 	_notifier.notifyLoaded();
+	
+	_launchingFinished = YES;
+		
+	for (NSString* eventURL in _scheduledURLs)
+		[self handleURLEventWithURL:eventURL];
 }
 
 - (void)applicationWillBecomeActive:(NSNotification*)notification
