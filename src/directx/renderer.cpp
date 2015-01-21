@@ -6,6 +6,9 @@
  */
 
 #include <et/rendering/rendercontext.h>
+
+#if (ET_PLATFORM_WIN && ET_DIRECTX_RENDER)
+
 #include <et/rendering/renderer.h>
 #include <et/vertexbuffer/indexarray.h>
 
@@ -178,8 +181,8 @@ BinaryDataStorage Renderer::readFramebufferData(const vec2i& size, TextureFormat
 }
 
 /*
-* Default shaders
-*/
+ * Default shaders
+ */
 
 const std::string fullscreen_vertex_shader = "";
 const std::string fullscreen_scaled_vertex_shader = "";
@@ -198,3 +201,5 @@ namespace et
 		}
 	}
 }
+
+#endif // ET_PLATFORM_WIN && ET_DIRECTX_RENDER

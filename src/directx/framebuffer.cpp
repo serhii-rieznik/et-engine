@@ -5,8 +5,11 @@
  *
  */
 
-#include <et/rendering/framebuffer.h>
 #include <et/rendering/rendercontext.h>
+
+#if (ET_PLATFORM_WIN && ET_DIRECTX_RENDER)
+
+#include <et/rendering/framebuffer.h>
 
 using namespace et;
 
@@ -139,3 +142,5 @@ void Framebuffer::setDepthRenderbuffer(uint32_t r)
 void Framebuffer::setDrawBuffersCount(int32_t value)
 {
 }
+
+#endif // ET_PLATFORM_WIN && ET_DIRECTX_RENDER

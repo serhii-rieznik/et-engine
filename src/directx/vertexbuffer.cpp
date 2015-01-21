@@ -7,6 +7,8 @@
 
 #include <et/rendering/rendercontext.h>
 
+#if (ET_PLATFORM_WIN && ET_DIRECTX_RENDER)
+
 using namespace et;
 
 VertexBufferData::VertexBufferData(RenderContext* rc, const VertexArray::Description& desc,
@@ -77,3 +79,5 @@ void VertexBufferData::deserialize(std::istream&)
 {
 	ET_FAIL("Unsupported");
 }
+
+#endif // ET_PLATFORM_WIN && ET_DIRECTX_RENDER

@@ -7,6 +7,8 @@
 
 #include <et/rendering/rendercontext.h>
 
+#if (ET_PLATFORM_WIN && ET_DIRECTX_RENDER)
+
 using namespace et;
 
 IndexBufferData::IndexBufferData(RenderContext* rc, IndexArray::Pointer i, BufferDrawType drawType,
@@ -100,3 +102,5 @@ void IndexBufferData::overridePrimitiveType(PrimitiveType pt)
 {
 	_primitiveType = pt;
 }
+
+#endif // ET_PLATFORM_WIN && ET_DIRECTX_RENDER

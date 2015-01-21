@@ -6,6 +6,9 @@
  */
 
 #include <et/app/application.h>
+
+#if (ET_PLATFORM_WIN && ET_DIRECTX_RENDER)
+
 #include <et/rendering/rendercontext.h>
 #include <et/rendering/programfactory.h>
 
@@ -351,3 +354,5 @@ StringList parseDefinesString(std::string defines, std::string separators)
 	
 	return result;
 }
+
+#endif // ET_PLATFORM_WIN && ET_DIRECTX_RENDER

@@ -7,6 +7,8 @@
 
 #include <et/rendering/rendercontext.h>
 
+#if (ET_PLATFORM_WIN && ET_DIRECTX_RENDER)
+
 using namespace et;
 
 VertexArrayObjectData::VertexArrayObjectData(RenderContext* rc, VertexBuffer vb, IndexBuffer ib,
@@ -58,3 +60,5 @@ void VertexArrayObjectData::setIndexBuffer(IndexBuffer ib)
 #if !defined(ET_CONSOLE_APPLICATION)
 #endif
 }
+
+#endif // ET_PLATFORM_WIN && ET_DIRECTX_RENDER

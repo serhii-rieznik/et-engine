@@ -6,6 +6,9 @@
  */
 
 #include <et/app/application.h>
+
+#if (ET_PLATFORM_WIN && ET_DIRECTX_RENDER)
+
 #include <et/camera/camera.h>
 #include <et/rendering/rendercontext.h>
 #include <et/rendering/program.h>
@@ -234,3 +237,5 @@ void Program::setUniform(int nLoc, uint32_t type, const mat4* value, size_t amou
 #if !defined(ET_CONSOLE_APPLICATION)
 #endif
 }
+
+#endif // ET_PLATFORM_WIN && ET_DIRECTX_RENDER

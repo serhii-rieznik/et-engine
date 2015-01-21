@@ -5,8 +5,11 @@
  *
  */
 
-#include <et/core/tools.h>
 #include <et/rendering/rendercontext.h>
+
+#if (ET_PLATFORM_WIN && ET_DIRECTX_RENDER)
+
+#include <et/core/tools.h>
 
 using namespace et;
 
@@ -183,3 +186,5 @@ void Texture::setAnisotropyLevel(RenderContext* rc, float value)
 #if defined(GL_TEXTURE_MAX_ANISOTROPY_EXT) && !defined(ET_CONSOLE_APPLICATION)
 #endif
 }
+
+#endif // ET_PLATFORM_WIN && ET_DIRECTX_RENDER

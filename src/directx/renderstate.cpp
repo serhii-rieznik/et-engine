@@ -5,9 +5,12 @@
  *
  */
 
+#include <et/rendering/renderstate.h>
+
+#if (ET_PLATFORM_WIN && ET_DIRECTX_RENDER)
+
 #include <et/vertexbuffer/vertexdeclaration.h>
 #include <et/rendering/rendercontext.h>
-#include <et/rendering/renderstate.h>
 
 using namespace et;
 
@@ -339,3 +342,5 @@ RenderState::State RenderState::currentState()
 
 	return result;
 }
+
+#endif // ET_PLATFORM_WIN && ET_DIRECTX_RENDER

@@ -10,8 +10,11 @@
 
 using namespace et;
 
+#if (ET_PLATFORM_WIN && ET_DIRECTX_RENDER)
+
 void RenderingCapabilities::checkCaps()
 {
 
 }
 
+#endif // ET_PLATFORM_WIN && ET_DIRECTX_RENDER
