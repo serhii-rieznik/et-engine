@@ -15,6 +15,20 @@ namespace et
 	class DataStorage : public ContainerBase<T>
 	{
 	public:
+		typedef T DataType;
+		
+		typedef T* DataTypePointer;
+		typedef const T* DataTypeConstPointer;
+		
+		typedef T& DataTypeReference;
+		typedef const T& DataTypeConstReference;
+		
+		enum
+		{
+			DataTypeSize = sizeof(DataType)
+		};
+		
+	public:
 		DataStorage() :
 			_mutableData(nullptr), _size(0), _dataSize(0), _lastElementIndex(0),
 			_flags(DataStorageFlag_OwnsMutableData) { }
@@ -60,14 +74,14 @@ namespace et
 			mv._immutableData = nullptr;
 		}
 		
-		DataStorage(T* data, size_t dataSize) :
-			_mutableData(data), _size(dataSize / sizeof(T)), _dataSize(dataSize), _lastElementIndex(0),
+		DataStorage(DataTypePointer data, size_t dataSize) :
+			_mutableData(data), _size(dataSize / DataTypeSize), _dataSize(dataSize), _lastElementIndex(0),
 			_flags(DataStorageFlag_Mutable) { }
 
-		DataStorage(const T* data, size_t dataSize) :
-			_immutableData(data), _size(dataSize / sizeof(T)), _dataSize(dataSize), _lastElementIndex(0),
+		DataStorage(DataTypeConstPointer data, size_t dataSize) :
+			_immutableData(data), _size(dataSize / DataTypeSize), _dataSize(dataSize), _lastElementIndex(0),
 			_flags(0) { }
-		
+
 		~DataStorage()
 			{ resize(0); }
 
@@ -102,63 +116,66 @@ namespace et
 		/*
 		 * mutable accessors
 		 */
-		T* data()
+		DataTypePointer data()
 			{ ET_ASSERT(mutableData()); return _mutableData; }
 		
 		char* binary()
 			{ ET_ASSERT(mutableData()); return reinterpret_cast<char*>(_mutableData); }
 		
-		T& operator [] (int aIndex)
+		DataTypeReference operator [] (int aIndex)
 			{ ET_ASSERT(mutableData() && (aIndex >= 0) && (aIndex < static_cast<int>(_size))); return _mutableData[aIndex]; }
 		
-		T& operator [] (size_t aIndex)
+		DataTypeReference operator [] (size_t aIndex)
 			{ ET_ASSERT(mutableData() && (aIndex < _size)); return _mutableData[aIndex]; }
 		
-		T& current()
+		DataTypeReference current()
 			{ ET_ASSERT(mutableData() && (_lastElementIndex < _size)); return _mutableData[_lastElementIndex]; }
 
-		T* current_ptr()
+		DataTypePointer current_ptr()
 			{ ET_ASSERT(mutableData() && (_lastElementIndex < _size)); return _mutableData + _lastElementIndex; }
 		
-		T* element_ptr(size_t aIndex)
+		DataTypePointer element_ptr(size_t aIndex)
 			{ ET_ASSERT(aIndex < _size); return (_mutableData + aIndex); }
 		
-		T* begin()
+		DataTypePointer begin()
 			{ ET_ASSERT(mutableData()); return _mutableData; }
 
-		T* end()
+		DataTypePointer end()
 			{ ET_ASSERT(mutableData()); return _mutableData + _size; }
 					 
 		/*
 		 * const accessors
 		 */
-		const T* data() const
+		DataTypeConstPointer data() const
+			{ return constData(); }
+
+		DataTypeConstPointer constData() const
 			{ return _immutableData; }
-
-		const char* binary() const
-			{ return reinterpret_cast<const char*>(_immutableData); }
-
-		const T& operator [] (int i) const
+		
+		DataTypeConstReference operator [] (int i) const
 			{ ET_ASSERT((i >= 0) && (i < static_cast<int>(_size))); return _immutableData[i]; }
 
-		const T& operator [] (size_t i) const
+		DataTypeConstReference operator [] (size_t i) const
 			{ ET_ASSERT(i < _size); return _immutableData[i]; }
 		
-		const T& current() const
+		DataTypeConstReference current() const
 			{ ET_ASSERT(_lastElementIndex < _size); return _immutableData[_lastElementIndex]; }
 
-		const T* current_ptr() const
+		DataTypeConstPointer current_ptr() const
 			{ ET_ASSERT(_lastElementIndex < _size); return _immutableData + _lastElementIndex; }
 		
-		const T* element_ptr(size_t i) const
+		DataTypeConstPointer element_ptr(size_t i) const
 			{ ET_ASSERT(i < _size); return _immutableData + i; }
 		
-		const T* begin() const
+		DataTypeConstPointer begin() const
 			{ return _immutableData; }
 				  
-		const T* end() const
+		DataTypeConstPointer end() const
 			{ return _immutableData + _size; }
-					 
+		
+		const char* binary() const
+			{ return reinterpret_cast<const char*>(_immutableData); }
+		
 		const size_t size() const
 			{ return _size; }
 		
@@ -184,16 +201,16 @@ namespace et
 		{
 			if (_size == newSize) return;
 			
-			T* new_data = nullptr;
+			DataTypePointer new_data = nullptr;
 			size_t min_size = (newSize < _size) ? newSize : _size;
 			_size = newSize;
-			_dataSize = _size * sizeof(T);
+			_dataSize = _size * DataTypeSize;
 			
 			if (newSize > 0)
 			{
-				new_data = reinterpret_cast<T*>(sharedObjectFactory().allocator()->allocate(sizeof(T) * newSize));
+				new_data = reinterpret_cast<DataTypePointer>(sharedObjectFactory().allocator()->allocate(DataTypeSize * newSize));
 				if (min_size > 0)
-					etCopyMemory(new_data, _immutableData, min_size * sizeof(T));
+					etCopyMemory(new_data, _immutableData, min_size * DataTypeSize);
 			}
 			else
 			{
@@ -207,20 +224,20 @@ namespace et
 			_mutableData = new_data;
 		}
 		
-		void push_back(const T& value)
+		void push_back(DataTypeConstReference value)
 		{
 			ET_ASSERT(mutableData());
 			ET_ASSERT((_lastElementIndex < _size) && "Do no use push back to increase capacity of DataStorage");
 			_mutableData[_lastElementIndex++] = value;
 		}
 		
-		void append(const T* values, size_t count)
+		void append(DataTypeConstPointer values, size_t count)
 		{
 			ET_ASSERT(mutableData());
 			
 			size_t currentSize = _size;
 			resize(_size + count);
-			etCopyMemory(&_mutableData[currentSize], values, count * sizeof(T));
+			etCopyMemory(&_mutableData[currentSize], values, count * DataTypeSize);
 		}
 		
 		void appendData(const void* ptr, size_t dataSize)
@@ -229,14 +246,14 @@ namespace et
 			ET_ASSERT(ptr);
 			
 			size_t currentSize = _size;
-			size_t numElements = dataSize / sizeof(T) + ((dataSize % sizeof(T) > 0) ? 1 : 0);
+			size_t numElements = dataSize / DataTypeSize + ((dataSize % DataTypeSize > 0) ? 1 : 0);
 			resize(_size + numElements);
 			etCopyMemory(&_mutableData[currentSize], ptr, dataSize);
 		}
 		
-		T* extract()
+		DataTypePointer extract()
 		{
-			T* value = _mutableData;
+			DataTypePointer value = _mutableData;
 			_mutableData = nullptr;
 			_size = 0;
 			_dataSize = 0;
@@ -315,8 +332,8 @@ namespace et
 	private:
 		union
 		{
-			T* _mutableData = nullptr;
-			const T* _immutableData;
+			DataTypePointer _mutableData = nullptr;
+			DataTypeConstPointer _immutableData;
 		};
 		
 	private:

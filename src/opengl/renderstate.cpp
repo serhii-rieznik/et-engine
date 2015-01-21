@@ -618,13 +618,6 @@ void RenderState::setClearColor(const vec4& color, bool force)
 #endif
 }
 
-void RenderState::setColorMask(ColorMask mask, bool force)
-{
-#if !defined(ET_CONSOLE_APPLICATION)
-	setColorMask(static_cast<size_t>(mask), force);
-#endif
-}
-
 void RenderState::setColorMask(size_t mask, bool force)
 {
 #if !defined(ET_CONSOLE_APPLICATION)

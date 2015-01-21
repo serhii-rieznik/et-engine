@@ -82,7 +82,7 @@ namespace et
 		max
 	};
 	
-	enum class ColorMask : uint32_t
+	enum ColorMask : uint32_t
 	{
 		None = 0x00,
 		Red = 0x01,

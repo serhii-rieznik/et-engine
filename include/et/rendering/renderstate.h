@@ -223,8 +223,6 @@ namespace et
 		void setClip(bool enable, const recti& clip, bool force = false);
 		void setSampleAlphaToCoverage(bool enable, bool force = false);
 
-		void setColorMask(ColorMask mask, bool force = false);
-
 		/*
 		 * Deletion handlers
 		 */
