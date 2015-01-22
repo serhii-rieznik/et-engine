@@ -46,16 +46,17 @@ namespace et
 		/*
 		 * Ray intersections
 		 */
-		bool raySphere(const ray3d& r, const Sphere& s, vec3* ip1, vec3* ip2 = nullptr);
-		bool rayPlane(const ray3d& r, const plane& p, vec3* intersection_pt);
+		bool raySphere(const ray3d&, const Sphere& s, vec3* ip1, vec3* ip2 = nullptr);
+		bool rayPlane(const ray3d&, const plane& p, vec3* intersection_pt);
+		bool rayAABB(et::ray3d r, const et::AABB&);
 		bool raySegment(const ray2d&, const segment2d&, vec2* intersectionPoint);
 		
 		/*
 		 * Ray-triangles intersections
 		 */
-		bool rayTriangle(const ray3d& r, const triangle& t, vec3* intersection_pt);
-		bool rayTriangleTwoSided(const ray3d& r, const triangle& t, vec3* intersection_pt);
-		bool rayTriangles(const ray3d& r, const triangle* triangles, size_t triangleCount, vec3* intersection_pt);
+		bool rayTriangle(const ray3d&, const triangle& t, vec3* intersection_pt);
+		bool rayTriangleTwoSided(const ray3d&, const triangle& t, vec3* intersection_pt);
+		bool rayTriangles(const ray3d&, const triangle* triangles, size_t triangleCount, vec3* intersection_pt);
 
 		/*
 		 * Segmenet intersections
