@@ -15,9 +15,9 @@ namespace et
 	namespace social
 	{
 		bool canTweet();
-		bool canPostToFacebook();
-		
 		void tweet(const std::string& text, const std::string& pathToImage, const std::string& url);
+		
+		bool canPostToFacebook();
 		void postToFacebook(const std::string& text, const std::string& pathToImage, const std::string& url);
 		
 		struct notifications

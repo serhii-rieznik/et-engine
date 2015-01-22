@@ -39,21 +39,22 @@ bool et::social::canPostToFacebook()
 
 void et::social::tweet(const std::string& text, const std::string& pathToImage, const std::string& url)
 {
-	NSMutableDictionary* values = [[NSMutableDictionary alloc] initWithObjectsAndKeys:SLServiceTypeTwitter, @"service", nil];
+	__block NSMutableDictionary* values = [[NSMutableDictionary alloc] initWithObjectsAndKeys:SLServiceTypeTwitter, @"service", nil];
 	
-	if (text.size())
+	if (!text.empty())
 		[values setObject:[NSString stringWithUTF8String:text.c_str()] forKey:@"text"];
 	
-	if (pathToImage.size())
+	if (!pathToImage.empty())
 		[values setObject:[NSString stringWithUTF8String:pathToImage.c_str()] forKey:@"image"];
 	
-	if (url.size())
+	if (!url.empty())
 		[values setObject:[NSURL URLWithString:[NSString stringWithUTF8String:url.c_str()]] forKey:@"url"];
 	
-	[[SocialController sharedSocialController] performSelectorOnMainThread:@selector(shareWithOptions:)
-		withObject:values waitUntilDone:NO];
-
-	ET_OBJC_RELEASE(values)
+	dispatch_async(dispatch_get_main_queue(), ^
+	{
+		[[SocialController sharedSocialController] shareWithOptions:values];
+		ET_OBJC_RELEASE(values)
+	});
 }
 
 void et::social::postToFacebook(const std::string& text, const std::string& pathToImage, const std::string& url)
@@ -101,7 +102,7 @@ void et::social::postToFacebook(const std::string& text, const std::string& path
 	if ([d objectForKey:@"image"] != nil)
 		[composer addImage:[UIImage imageWithContentsOfFile:[d objectForKey:@"image"]]];
 		 
-	 if ([d objectForKey:@"image"] != nil)
+	 if ([d objectForKey:@"url"] != nil)
 		 [composer addURL:[d objectForKey:@"url"]];
 	
 	composer.completionHandler = ^(SLComposeViewControllerResult result)

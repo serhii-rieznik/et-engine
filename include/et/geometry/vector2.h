@@ -132,6 +132,11 @@ namespace et
 			}
 			return vector2();
 		}
+		
+		vector2 yx() const
+		{
+			return vector2(y, x);
+		}
 	};
 
 	template <typename T>
