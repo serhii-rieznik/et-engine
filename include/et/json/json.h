@@ -22,6 +22,7 @@ namespace et
 		std::string serialize(const et::Dictionary&, size_t = 0);
 		std::string serialize(const et::ArrayValue&, size_t = 0);
 		
+		et::ValueBase::Pointer deserialize(const char*, size_t, et::ValueClass&, bool printErrors = true);
 		et::ValueBase::Pointer deserialize(const char*, et::ValueClass&, bool printErrors = true);
 		et::ValueBase::Pointer deserialize(const std::string&, et::ValueClass&, bool printErrors = true);
 	}

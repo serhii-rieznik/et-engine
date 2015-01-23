@@ -670,12 +670,26 @@ void RenderState::setClip(bool enable, const recti& clip, bool force)
 
 void RenderState::setSampleAlphaToCoverage(bool enable, bool force)
 {
+#if !defined(ET_CONSOLE_APPLICATION)
 	if (force || (_currentState.alphaToCoverage != enable))
 	{
 		_currentState.alphaToCoverage = enable;
 		(enable ? glEnable : glDisable)(GL_SAMPLE_ALPHA_TO_COVERAGE);
 		checkOpenGLError("setSampleAlphaToCoverage(%s)", enable ? "true" : "false");
 	}
+#endif
+}
+
+void RenderState::setPointSizeControlInVertexShader(bool enable, bool force)
+{
+#if !defined(ET_CONSOLE_APPLICATION) && defined(GL_VERTEX_PROGRAM_POINT_SIZE)
+	if (force || (_currentState.pointSizeControlInVertexShaderEnabled != enable))
+	{
+		_currentState.pointSizeControlInVertexShaderEnabled = enable;
+		(enable ? glEnable : glDisable)(GL_VERTEX_PROGRAM_POINT_SIZE);
+		checkOpenGLError("setSampleAlphaToCoverage(%s)", enable ? "true" : "false");
+	}
+#endif
 }
 
 void RenderState::reset()
@@ -819,6 +833,10 @@ RenderState::State RenderState::currentState()
 	s.polygonOffsetFillEnabled = glIsEnabled(GL_POLYGON_OFFSET_FILL) != 0;
 	s.cullEnabled = glIsEnabled(GL_CULL_FACE) != 0;
 	s.alphaToCoverage = glIsEnabled(GL_SAMPLE_ALPHA_TO_COVERAGE) != 0;
+	
+#if defined(GL_VERTEX_PROGRAM_POINT_SIZE)
+	s.pointSizeControlInVertexShaderEnabled = glIsBuffer(GL_VERTEX_PROGRAM_POINT_SIZE) != 0;
+#endif
 	
 	glGetFloatv(GL_POLYGON_OFFSET_FACTOR, &s.polygonOffsetFactor);
 	checkOpenGLError("");

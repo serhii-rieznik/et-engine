@@ -64,6 +64,9 @@ std::string et::json::serialize(const et::ArrayValue& arr, size_t inFlags)
 	return serialized;
 }
 
+et::ValueBase::Pointer et::json::deserialize(const char* input, size_t len, ValueClass& c, bool printErrors)
+	{ return deserializeJson(input, len, c, printErrors); }
+
 et::ValueBase::Pointer et::json::deserialize(const char* input, ValueClass& c, bool printErrors)
 	{ return deserializeJson(input, strlen(input), c, printErrors); }
 

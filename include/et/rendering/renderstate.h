@@ -76,7 +76,8 @@ namespace et
 			bool clipEnabled = false;
 			bool cullEnabled = false;
 			bool alphaToCoverage = false;
-
+			bool pointSizeControlInVertexShaderEnabled = false;
+			
 			BlendState lastColorBlend = BlendState::Current;
 			BlendState lastAlphaBlend = BlendState::Current;
 			CullState lastCull = CullState::Current;
@@ -222,6 +223,7 @@ namespace et
 		void setClearDepth(float depth, bool force = false);
 		void setClip(bool enable, const recti& clip, bool force = false);
 		void setSampleAlphaToCoverage(bool enable, bool force = false);
+		void setPointSizeControlInVertexShader(bool enable, bool force = false);
 
 		/*
 		 * Deletion handlers

@@ -15,6 +15,7 @@
 #include <AppKit/NSAlert.h>
 
 #include <et/core/base64.h>
+#include <et/json/json.h>
 #include <et/app/applicationnotifier.h>
 
 using namespace et;
@@ -224,6 +225,12 @@ void Application::enableRemoteNotifications()
 		
 	for (NSString* eventURL in _scheduledURLs)
 		[self handleURLEventWithURL:eventURL];
+	
+	NSUserNotification* remoteNotification = [notification.userInfo objectForKeyedSubscript:NSApplicationLaunchUserNotificationKey];
+	if (remoteNotification != nil)
+	{
+		[self application:[NSApplication sharedApplication] didReceiveRemoteNotification:remoteNotification.userInfo];
+	}
 }
 
 - (void)applicationWillBecomeActive:(NSNotification*)notification
@@ -281,6 +288,34 @@ void Application::enableRemoteNotifications()
 	event.setStringForKey("error", std::string([[error localizedDescription] UTF8String]));
 	
 	et::application().systemEvent.invokeInMainRunLoop(event);
+}
+
+- (void)application:(NSApplication*)application didReceiveRemoteNotification:(NSDictionary*)userInfo
+{
+	NSError* error = nil;
+	NSData* jsonData = [NSJSONSerialization dataWithJSONObject:userInfo options:NSJSONWritingPrettyPrinted error:&error];
+	if (jsonData != nil)
+	{
+		Dictionary systemEvent;
+		systemEvent.setStringForKey(kSystemEventType, kSystemEventRemoteNotification);
+		
+		ValueClass vc = ValueClass_Invalid;
+		auto object = json::deserialize(reinterpret_cast<const char*>([jsonData bytes]), [jsonData length], vc);
+		if (vc == ValueClass_Invalid)
+		{
+			log::error("Unable to get remote notification info.");
+			systemEvent.setObjectForKey("info", Dictionary());
+		}
+		else
+		{
+			systemEvent.setObjectForKey("notification", object);
+		}
+		et::application().systemEvent.invokeInMainRunLoop(systemEvent);
+	}
+	else if (error != nil)
+	{
+		NSLog(@"Unable to convert remote notification info to JSON: %@", error);
+	}
 }
 
 @end

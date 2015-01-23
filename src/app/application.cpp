@@ -324,6 +324,6 @@ TimerPool::Pointer et::currentTimerPool()
 }
 
 const std::string et::kSystemEventType = "kSystemEventType";
+const std::string et::kSystemEventRemoteNotification = "kSystemEventRemoteNotification";
 const std::string et::kSystemEventRemoteNotificationStatusChanged = "kSystemEventRemoteNotificationStatusChanged";
 const std::string et::kSystemEventOpenURL = "kSystemEventOpenURL";
-

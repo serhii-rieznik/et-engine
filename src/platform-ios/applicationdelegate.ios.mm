@@ -12,6 +12,7 @@
 #include <QuartzCore/QuartzCore.h>
 
 #include <et/core/base64.h>
+#include <et/json/json.h>
 #include <et/app/applicationnotifier.h>
 #include <et/threading/threading.h>
 #include <et/threading/mutex.h>
@@ -45,7 +46,7 @@ extern etOpenGLViewController* sharedOpenGLViewController;
 {
 	(void)anApplication;
 	(void)launchOptions;
-
+	
 #if !defined(ET_EMBEDDED_APPLICATION)
 	@synchronized(self)
 	{
@@ -55,6 +56,12 @@ extern etOpenGLViewController* sharedOpenGLViewController;
 		
 		[_window setRootViewController:sharedOpenGLViewController];
 		[_window makeKeyAndVisible];
+		
+		NSDictionary* remoteNotification = [launchOptions objectForKey:UIApplicationLaunchOptionsRemoteNotificationKey];
+		if (remoteNotification != nil)
+		{
+			[self application:anApplication didReceiveRemoteNotification:remoteNotification];
+		}
 	}
 #endif
 	
@@ -256,6 +263,33 @@ extern etOpenGLViewController* sharedOpenGLViewController;
 	return YES;
 }
 
+- (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary*)userInfo
+{
+	NSError* error = nil;
+	NSData* jsonData = [NSJSONSerialization dataWithJSONObject:userInfo options:NSJSONWritingPrettyPrinted error:&error];
+	if (jsonData != nil)
+	{
+		Dictionary systemEvent;
+		systemEvent.setStringForKey(kSystemEventType, kSystemEventRemoteNotification);
+		
+		ValueClass vc = ValueClass_Invalid;
+		auto object = json::deserialize(reinterpret_cast<const char*>([jsonData bytes]), [jsonData length], vc);
+		if (vc == ValueClass_Invalid)
+		{
+			log::error("Unable to get remote notification info.");
+			systemEvent.setObjectForKey("info", Dictionary());
+		}
+		else
+		{
+			systemEvent.setObjectForKey("notification", object);
+		}
+		et::application().systemEvent.invokeInMainRunLoop(systemEvent);
+	}
+	else if (error != nil)
+	{
+		NSLog(@"Unable to convert remote notification info to JSON: %@", error);
+	}
+}
 
 @end
 
