@@ -50,6 +50,7 @@ const std::string materialKeys[MaterialParameter_max] =
 	std::string("diffuse_color"),		//	MaterialParameter_DiffuseColor,
 	std::string("specular_color"),		//	MaterialParameter_SpecularColor,
 	std::string("emissive_color"),		//	MaterialParameter_EmissiveColor,
+	
 	std::string("ambient_map"),			//	MaterialParameter_AmbientMap,
 	std::string("diffuse_map"),			//	MaterialParameter_DiffuseMap,
 	std::string("specular_map"),		//	MaterialParameter_SpecularMap,
@@ -57,6 +58,7 @@ const std::string materialKeys[MaterialParameter_max] =
 	std::string("normalmap_map"),		//	MaterialParameter_NormalMap,
 	std::string("bump_map"),			//	MaterialParameter_BumpMap,
 	std::string("reflection_map"),		//	MaterialParameter_ReflectionMap,
+	std::string("transparency_map"),	//	MaterialParameter_TransparencyMap,
 
 	std::string("ambient_factor"),		//	MaterialParameter_AmbientFactor,
 	std::string("diffuse_factor"),		//	MaterialParameter_DiffuseFactor,
