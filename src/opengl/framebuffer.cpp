@@ -435,6 +435,7 @@ void Framebuffer::resize(const vec2i& sz)
 				TextureDescription::Pointer desc = rt->description();
 				desc->size = sz;
 				desc->data.resize(desc->layersCount * desc->dataSizeForAllMipLevels());
+				desc->data.fill(0);
 				rt->updateData(_rc, desc);
 				setCurrentRenderTarget(rt, rt->target());
 				
@@ -453,6 +454,7 @@ void Framebuffer::resize(const vec2i& sz)
 			auto desc = _depthBuffer->description();
 			desc->size = sz;
 			desc->data.resize(desc->layersCount * desc->dataSizeForAllMipLevels());
+			desc->data.fill(0);
 			_depthBuffer->updateData(_rc, desc);
 			setDepthTarget(_depthBuffer);
 		}

@@ -401,10 +401,14 @@ bool TrackPrivate::fillNextPCMBuffer()
 	pcmReadOffset += static_cast<size_t>(inStream.gcount());
 	
 	ALsizei bytesRead = static_cast<ALsizei>(inStream.gcount());
+	
 	if (bytesRead > 0)
 	{
 		alBufferData(buffers[bufferIndex], static_cast<ALenum>(format), data.data(), bytesRead, sampleRate);
-		checkOpenALError("alBufferData");
+		
+		checkOpenALError("alBufferData(%d, %llu, 0x%08x, %llu, %llu) - PCM", buffers[bufferIndex],
+			uint64_t(format), data.data(), uint64_t(bytesRead), uint64_t(sampleRate));
+		
 		bufferIndex = (bufferIndex + 1) % buffersCount;
 	}
 	
@@ -468,7 +472,6 @@ bool TrackPrivate::fillNextOGGBuffer()
 		return false;
 	
 	BinaryDataStorage data(pcmBufferSize, 0);
-	auto& inStream = stream->stream();
 	
 	size_t bytesRead = 0;
 	while (bytesRead < pcmBufferSize)
@@ -491,17 +494,22 @@ bool TrackPrivate::fillNextOGGBuffer()
 		}
 	}
 		
-	pcmReadOffset += bytesRead;
+	pcmReadOffset = etMin(pcmReadOffset + bytesRead, pcmDataSize);
+	
 	if (bytesRead > 0)
 	{
+		checkOpenALError("Clear error");
+		
 		alBufferData(buffers[bufferIndex], static_cast<ALenum>(format), data.data(),
 			static_cast<ALsizei>(bytesRead), sampleRate);
-		checkOpenALError("alBufferData");
+		
+		checkOpenALError("alBufferData(%d, %llu, 0x%08x, %llu, %llu) - OGG", buffers[bufferIndex],
+			uint64_t(format), data.data(), uint64_t(bytesRead), uint64_t(sampleRate));
 		
 		bufferIndex = (bufferIndex + 1) % buffersCount;
 	}
 	
-	if ((pcmReadOffset >= pcmDataSize) || inStream.eof())
+	if (pcmReadOffset >= pcmDataSize)
 		rewindOGG();
 	
 	return (bytesRead > 0);

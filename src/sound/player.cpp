@@ -103,13 +103,15 @@ void Player::play(bool looped)
 		
 		_private->buffersProcessed = 0;
 		_private->playingLooped = looped;
-		
+
+		_track->rewind();
 		_track->preloadBuffers();
 		
 		if (_track->streamed())
 		{
 			alSourceQueueBuffers(_private->source, _track->actualBuffersCount(), _track->buffers());
 			checkOpenALError("alSourceQueueBuffers(%u, %d, %u)", _private->source, _track->actualBuffersCount(), _track->buffers());
+			
 			alSourcei(_private->source, AL_LOOPING, AL_FALSE);
 			checkOpenALError("alSourcei(%u, AL_LOOPING, AL_FALSE)", _private->source);
 		}
@@ -117,6 +119,7 @@ void Player::play(bool looped)
 		{
 			alSourcei(_private->source, AL_BUFFER, _track->buffer());
 			checkOpenALError("alSourcei(%u, AL_BUFFER, %u)", _private->source, _track->buffer());
+			
 			alSourcei(_private->source, AL_LOOPING, looped ? AL_TRUE : AL_FALSE);
 			checkOpenALError("alSourcei(%u, AL_LOOPING, ...)", _private->source);
 		}
@@ -147,6 +150,14 @@ void Player::stop()
 	
 	alSourceStop(_private->source);
     checkOpenALError("alSourceStop");
+	
+	int queued = 0;
+	alGetSourcei(_private->source, AL_BUFFERS_QUEUED, &queued);
+	checkOpenALError("alGetSourcei(..., AL_BUFFERS_QUEUED, ...)");
+	
+	ALuint buffers[16] = { };
+	alSourceUnqueueBuffers(_private->source, queued, buffers);
+	checkOpenALError("alSourceUnqueueBuffers(...)");
 	
 	alSourcei(_private->source, AL_BUFFER, 0);
 	checkOpenALError("alSourcei(..., AL_BUFFER, 0)");
