@@ -16,8 +16,6 @@ using namespace et;
 
 typedef void (^filePickerCallback)(__strong NSString* path);
 
-static NSString* rootFolder = @"/";
-
 @interface FilePicker : NSObject<NSOpenSavePanelDelegate>
 {
 	NSString* _defaultName;
