@@ -47,6 +47,7 @@ namespace et
 
 		vec2i contextSize;
 		vec2i contextBaseSize;
+		vec2i contextMinimumSize;
 
 		RenderContextParameters()
 		{

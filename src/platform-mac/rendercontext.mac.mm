@@ -283,6 +283,9 @@ RenderContextPrivate::RenderContextPrivate(RenderContext*, RenderContextParamete
 	
 	if (appParams.keepWindowAspectOnResize)
 		[mainWindow setContentAspectRatio:contentRect.size];
+	
+	[mainWindow setMinSize:NSMakeSize(static_cast<float>(params.contextMinimumSize.x),
+		static_cast<float>(params.contextMinimumSize.y))];
 
 #	if (ET_OBJC_ARC_ENABLED)
 	CFRetain((__bridge CFTypeRef)mainWindow);
