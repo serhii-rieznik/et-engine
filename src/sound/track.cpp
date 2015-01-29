@@ -473,11 +473,15 @@ bool TrackPrivate::fillNextOGGBuffer()
 	
 	BinaryDataStorage data(pcmBufferSize, 0);
 	
+	bool errorOccured = false;
+	
 	size_t bytesRead = 0;
 	while (bytesRead < pcmBufferSize)
 	{
 		int section = -1;
-		long lastRead = ov_read(&oggFile, data.binary() + bytesRead, static_cast<int>(pcmBufferSize - bytesRead), 0, 2, 1, &section);
+		int bytesToRead = etMin(4096, static_cast<int>(pcmBufferSize - bytesRead));
+		
+		long lastRead = ov_read(&oggFile, data.binary() + bytesRead, bytesToRead, 0, 2, 1, &section);
 		
 		if (lastRead > 0)
 		{
@@ -485,6 +489,7 @@ bool TrackPrivate::fillNextOGGBuffer()
 		}
 		else if (lastRead < 0)
 		{
+			errorOccured = true;
 			checkOGGError(lastRead, "ov_read", _filename.c_str());
 			break;
 		}
@@ -507,6 +512,11 @@ bool TrackPrivate::fillNextOGGBuffer()
 			uint64_t(format), data.data(), uint64_t(bytesRead), uint64_t(sampleRate));
 		
 		bufferIndex = (bufferIndex + 1) % buffersCount;
+	}
+	else if (!errorOccured)
+	{
+		rewindOGG();
+		return fillNextBuffer();
 	}
 	
 	if (pcmReadOffset >= pcmDataSize)

@@ -43,6 +43,7 @@ Renderer::Renderer(RenderContext* rc) :
 	_fullscreenProgram = rc->programFactory().genProgram("__et__fullscreeen__program__",
 		fullscreen_vertex_shader, copy_fragment_shader);
 	_fullscreenProgram->setUniform("color_texture", _defaultTextureBindingUnit);
+	_fullScreenProgram_TintUniform = _fullscreenProgram->getUniform("tint");
 
 	_fullscreenDepthProgram = rc->programFactory().genProgram("__et__fullscreeen__depth__program__",
 		fullscreen_vertex_shader, depth_fragment_shader);
@@ -53,11 +54,13 @@ Renderer::Renderer(RenderContext* rc) :
 		fullscreen_scaled_vertex_shader, copy_fragment_shader);
 	_fullscreenScaledProgram->setUniform("color_texture", _defaultTextureBindingUnit);
 	_fullScreenScaledProgram_PSUniform = _fullscreenScaledProgram->getUniform("vScale");
+	_fullScreenScaledProgram_TintUniform = _fullscreenScaledProgram->getUniform("tint");
 
 	_scaledProgram = rc->programFactory().genProgram("__et__scaled_program__",
 		scaled_copy_vertex_shader, copy_fragment_shader);
 	_scaledProgram->setUniform("color_texture", _defaultTextureBindingUnit);
 	_scaledProgram_PSUniform = _scaledProgram->getUniform("PositionScale");
+	_scaledProgram_TintUniform = _scaledProgram->getUniform("tint");
 	
 #endif
 }
@@ -83,11 +86,12 @@ void Renderer::fullscreenPass()
 #endif
 }
 
-void Renderer::renderFullscreenTexture(const Texture::Pointer& texture)
+void Renderer::renderFullscreenTexture(const Texture::Pointer& texture, const vec4& tint)
 {
 #if !defined(ET_CONSOLE_APPLICATION)
 	_rc->renderState().bindTexture(_defaultTextureBindingUnit, texture);
 	_rc->renderState().bindProgram(_fullscreenProgram);
+	_fullscreenProgram->setUniform(_fullScreenProgram_TintUniform, tint);
 	fullscreenPass();
 #endif
 }
@@ -102,22 +106,24 @@ void Renderer::renderFullscreenDepthTexture(const Texture::Pointer& texture, flo
 #endif
 }
 
-void Renderer::renderFullscreenTexture(const Texture::Pointer& texture, const vec2& scale)
+void Renderer::renderFullscreenTexture(const Texture::Pointer& texture, const vec2& scale, const vec4& tint)
 {
 #if !defined(ET_CONSOLE_APPLICATION)
 	_rc->renderState().bindTexture(_defaultTextureBindingUnit, texture);
 	_rc->renderState().bindProgram(_fullscreenScaledProgram);
 	_scaledProgram->setUniform(_fullScreenScaledProgram_PSUniform, scale);
+	_scaledProgram->setUniform(_fullScreenScaledProgram_TintUniform, tint);
 	fullscreenPass();
 #endif
 }
 
-void Renderer::renderTexture(const Texture::Pointer& texture, const vec2& position, const vec2& size)
+void Renderer::renderTexture(const Texture::Pointer& texture, const vec2& position, const vec2& size, const vec4& tint)
 {
 #if !defined(ET_CONSOLE_APPLICATION)
 	_rc->renderState().bindTexture(_defaultTextureBindingUnit, texture);
 	_rc->renderState().bindProgram(_scaledProgram);
 	_scaledProgram->setUniform(_scaledProgram_PSUniform, vec4(position, size));
+	_scaledProgram->setUniform(_scaledProgram_TintUniform, tint);
 	fullscreenPass();
 #endif
 }
@@ -135,7 +141,7 @@ vec2 Renderer::currentViewportSizeToScene(const vec2i& size)
 	return vec2(2.0f * static_cast<float>(size.x) / vpSize.x, 2.0f * static_cast<float>(size.y) / vpSize.y);
 }
 
-void Renderer::renderTexture(const Texture::Pointer& texture, const vec2i& position, const vec2i& size)
+void Renderer::renderTexture(const Texture::Pointer& texture, const vec2i& position, const vec2i& size, const vec4& tint)
 {
 #if !defined(ET_CONSOLE_APPLICATION)
 	if (texture.invalid()) return;
@@ -143,7 +149,7 @@ void Renderer::renderTexture(const Texture::Pointer& texture, const vec2i& posit
 	vec2i sz;
 	sz.x = (size.x == -1) ? texture->width() : size.x;
 	sz.y = (size.y == -1) ? texture->height() : size.y;
-	renderTexture(texture, currentViewportCoordinatesToScene(position + vec2i(0, sz.y)), currentViewportSizeToScene(sz));
+	renderTexture(texture, currentViewportCoordinatesToScene(position + vec2i(0, sz.y)), currentViewportSizeToScene(sz), tint);
 #endif
 }
 
@@ -235,43 +241,49 @@ BinaryDataStorage Renderer::readFramebufferData(const vec2i& size, TextureFormat
  * Default shaders
  */
 
-const std::string fullscreen_vertex_shader = 
-	"etVertexIn vec2 Vertex;"
-	"etVertexOut vec2 TexCoord;"
-	"void main() {"
-	"	TexCoord = 0.5 * Vertex + vec2(0.5);"
-	"	gl_Position = vec4(Vertex, 0.0, 1.0);"
-	"}";
+const std::string fullscreen_vertex_shader = R"(
+etVertexIn vec2 Vertex;
+etVertexOut vec2 TexCoord;
+void main()
+{
+	TexCoord = 0.5 * Vertex + vec2(0.5);
+	gl_Position = vec4(Vertex, 0.0, 1.0);
+})";
 
-const std::string fullscreen_scaled_vertex_shader = 
-	"uniform vec2 vScale;"
-	"etVertexIn vec2 Vertex;"
-	"etVertexOut vec2 TexCoord;"
-	"void main() {"
-	"	TexCoord = 0.5 * Vertex + vec2(0.5);"
-	"	gl_Position = vec4(vScale * Vertex, 0.0, 1.0);"
-	"}";
+const std::string fullscreen_scaled_vertex_shader = R"(
+uniform vec2 vScale;
+etVertexIn vec2 Vertex;
+etVertexOut vec2 TexCoord;
+void main()
+{
+	TexCoord = 0.5 * Vertex + vec2(0.5);
+	gl_Position = vec4(vScale * Vertex, 0.0, 1.0);
+})";
 
-const std::string scaled_copy_vertex_shader = 
-	"uniform vec4 PositionScale;"
-	"etVertexIn vec2 Vertex;"
-	"etVertexOut vec2 TexCoord;"
-	"void main() {"
-	"	TexCoord = 0.5 * Vertex + vec2(0.5);"
-	"	gl_Position = vec4(PositionScale.xy + TexCoord * PositionScale.zw, 0.0, 1.0);"
-	"}";
+const std::string scaled_copy_vertex_shader = R"(
+uniform vec4 PositionScale;
+etVertexIn vec2 Vertex;
+etVertexOut vec2 TexCoord;
+void main()
+{
+	TexCoord = 0.5 * Vertex + vec2(0.5);
+	gl_Position = vec4(PositionScale.xy + TexCoord * PositionScale.zw, 0.0, 1.0);
+})";
 
-const std::string copy_fragment_shader = 
-	"uniform sampler2D color_texture;"
-	"etFragmentIn etHighp vec2 TexCoord;"
-	"void main() {"
-	"	etFragmentOut = etTexture2D(color_texture, TexCoord);"
-	"}";
+const std::string copy_fragment_shader = R"(
+uniform etLowp sampler2D color_texture;
+uniform etLowp vec4 tint;
+etFragmentIn etHighp vec2 TexCoord;
+void main()
+{
+	etFragmentOut = tint * etTexture2D(color_texture, TexCoord);
+})";
 
-const std::string depth_fragment_shader =
-	"uniform etHighp sampler2D depth_texture;"
-	"uniform etHighp float factor;"
-	"etFragmentIn etHighp vec2 TexCoord;"
-	"void main() {"
-	"	etFragmentOut = pow(etTexture2D(depth_texture, TexCoord), vec4(factor));"
-	"}";
+const std::string depth_fragment_shader = R"(
+uniform etHighp sampler2D depth_texture;
+uniform etHighp float factor;
+etFragmentIn etHighp vec2 TexCoord;
+void main()
+{
+	etFragmentOut = pow(etTexture2D(depth_texture, TexCoord), vec4(factor));
+})";

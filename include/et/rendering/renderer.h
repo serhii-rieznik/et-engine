@@ -23,13 +23,17 @@ namespace et
 		void clear(bool color = true, bool depth = true);
 
 		void fullscreenPass();
-		void renderFullscreenTexture(const Texture::Pointer&);
-		void renderFullscreenTexture(const Texture::Pointer&, const vec2& scale);
+		
+		void renderFullscreenTexture(const Texture::Pointer&, const vec4& = vec4(1.0f));
+		void renderFullscreenTexture(const Texture::Pointer&, const vec2& scale, const vec4& = vec4(1.0f));
 
 		void renderFullscreenDepthTexture(const Texture::Pointer&, float factor);
 
-		void renderTexture(const Texture::Pointer&, const vec2& position, const vec2& size);
-		void renderTexture(const Texture::Pointer&, const vec2i& position, const vec2i& size = vec2i(-1));
+		void renderTexture(const Texture::Pointer&, const vec2& position, const vec2& size,
+			const vec4& = vec4(1.0f));
+		
+		void renderTexture(const Texture::Pointer&, const vec2i& position, const vec2i& size = vec2i(-1),
+			const vec4& = vec4(1.0f));
 
 		void drawElements(const IndexBuffer& ib, size_t first, size_t count);
 		void drawElements(PrimitiveType primitiveType, const IndexBuffer& ib, size_t first, size_t count);
@@ -61,7 +65,10 @@ namespace et
 		Program::Pointer _scaledProgram;
 
 		Program::Uniform _scaledProgram_PSUniform;
+		Program::Uniform _scaledProgram_TintUniform;
+		Program::Uniform _fullScreenProgram_TintUniform;
 		Program::Uniform _fullScreenScaledProgram_PSUniform;
+		Program::Uniform _fullScreenScaledProgram_TintUniform;
 		Program::Uniform _fullScreenDepthProgram_FactorUniform;
 	};
 }
