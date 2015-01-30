@@ -279,26 +279,6 @@ void Program::buildProgram(const std::string& vertex_source, const std::string& 
 				checkOpenGLError("glBindAttribLocation - %s", i.name.c_str());
 			}
 		}
-
-#	if defined(GL_VERSION_3_0)
-		if (glBindFragDataLocation != nullptr)
-		{
-			glBindFragDataLocation(program, 0, "FragColor0");
-			checkOpenGLError("glBindFragDataLocation<color0> - %s", name().c_str());
-			
-			glBindFragDataLocation(program, 1, "FragColor1");
-			checkOpenGLError("glBindFragDataLocation<color1> - %s", name().c_str());
-			
-			glBindFragDataLocation(program, 2, "FragColor2");
-			checkOpenGLError("glBindFragDataLocation<color2> - %s", name().c_str());
-			
-			glBindFragDataLocation(program, 3, "FragColor3");
-			checkOpenGLError("glBindFragDataLocation<color3> - %s", name().c_str());
-			
-			glBindFragDataLocation(program, 4, "FragColor4");
-			checkOpenGLError("glBindFragDataLocation<color4> - %s", name().c_str());
-		}
-#	endif
 		
 		linkStatus = link();
 

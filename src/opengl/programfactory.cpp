@@ -35,17 +35,23 @@ public:
 
 StringList parseDefinesString(std::string defines, std::string separators = ",; \t");
 
+extern const std::string openGl2VertexHeader;
+extern const std::string openGl3VertexHeader;
+
+extern const std::string openGl2FragmentHeader;
+extern const std::string openGl3FragmentHeader;
+
 ProgramFactory::ProgramFactory(RenderContext* rc) : APIObjectFactory(rc)
 {
 	ET_PIMPL_INIT(ProgramFactory, this)
 
 #if (ET_OPENGLES)	
-	
 	_commonHeader =
-		"#define etLowp		lowp\n"
-		"#define etMediump	mediump\n"
-		"#define etHighp	highp\n";
-
+		"#define etLowp			lowp\n"
+		"#define etMediump		mediump\n"
+		"#define etHighp		highp\n"
+		"#define ET_OPENGL_ES	1";
+	
 	if (OpenGLCapabilities::instance().versionShortString() >= "300")
 	{
 		_commonHeader = "#version " + OpenGLCapabilities::instance().glslVersionShortString() + " es\n" +
@@ -57,74 +63,22 @@ ProgramFactory::ProgramFactory(RenderContext* rc) : APIObjectFactory(rc)
 	}
 	
 #else
-	
-	_commonHeader = 
+	_commonHeader =
 		"#version " + OpenGLCapabilities::instance().glslVersionShortString() + "\n"
 		"#define etLowp\n"
 		"#define etMediump\n"
 		"#define etHighp\n";
-	
 #endif
 
 	if (OpenGLCapabilities::instance().version() == OpenGLVersion::Version_2x)
 	{
-		_fragShaderHeader = 
-			"#define etTexture2D		texture2D\n"
-			"#define etTexture2DLod		textureLod\n"
-			"#define etShadow2D			shadow2D\n"
-			"#define etTexture2DProj	texture2DProj\n"
-			"#define etShadow2DProj		shadow2DProj\n"
-			"#define etTextureCube		textureCube\n"
-			"#define etTextureCubeLod	textureCubeLod\n"
-			"#define etFragmentIn		varying\n"
-#		if (ET_OPENGLES)
-			"#define etFragmentOut		gl_FragColor\n"
-#		else
-			"#define etFragmentOut		gl_FragData[0]\n"
-			"#define etFragmentOut1		gl_FragData[1]\n"
-#		endif
-			;
-
-		_vertShaderHeader =
-			"#define etTexture2D		texture2D\n"
-			"#define etTexture2DLod		texture2DLod\n"
-			"#define etShadow2D			shadow2D\n"
-			"#define etTexture2DProj	texture2DProj\n"
-			"#define etShadow2DProj		shadow2DProj\n"
-			"#define etTextureCube		textureCube\n"
-			"#define etTextureCubeLod	textureCubeLod\n"
-			"#define etVertexIn			attribute\n"
-			"#define etVertexOut		varying\n"
-			;
+		_vertShaderHeader = openGl2VertexHeader;
+		_fragShaderHeader = openGl2FragmentHeader;
 	}
 	else
 	{
-		_fragShaderHeader = 
-			"#define etTexture2D		texture\n"
-			"#define etTexture2DLod		textureLod\n"
-			"#define etTexture2DProj	textureProj\n"
-			"#define etShadow2D			texture\n"
-			"#define etShadow2DProj		textureProj\n"
-			"#define etTextureCube		texture\n"
-			"#define etTextureCubeLod	textureLod\n"
-			"#define etFragmentIn		in\n"
-			"#define etFragmentOut		FragColor0\n"
-			"#define etFragmentOut1		FragColor1\n"
-			"out vec4 FragColor0;\n"
-			"out vec4 FragColor1;\n"
-			;
-
-		_vertShaderHeader = 
-			"#define etTexture2D		texture\n"
-			"#define etTexture2DLod		textureLod\n"
-			"#define etShadow2D			texture\n"
-			"#define etTexture2DProj	textureProj\n"
-			"#define etShadow2DProj		textureProj\n"
-			"#define etTextureCube		texture\n"
-			"#define etTextureCubeLod	textureLod\n"
-			"#define etVertexIn			in\n"
-			"#define etVertexOut		out\n"
-			;
+		_vertShaderHeader = openGl3VertexHeader;
+		_fragShaderHeader = openGl3FragmentHeader;
 	}
 }
 
@@ -331,9 +285,9 @@ void ProgramFactory::parseSourceCode(ShaderType type, std::string& source, const
 	else if (type == ShaderType_Fragment)
 		header += _fragShaderHeader;
 
-	for (const auto& i : defines)
-		header += "\n#define " + i;
-
+	for (const auto i : defines)
+		header += "\n" + i;
+	
 	source = header + "\n" + source;
 
 	std::string::size_type ip = source.find("#include");
@@ -407,6 +361,15 @@ StringList parseDefinesString(std::string defines, std::string separators)
 {
 	StringList result;
 	
+	auto addDefine = [&result](std::string& define)
+	{
+		if (define.empty()) return;
+		
+		std::transform(define.begin(), define.end(), define.begin(), [](char c)
+			{ return (c == '=') ? ' ' : c; });
+		result.push_back("#define " + define + "\n");
+	};
+	
 	if (separators.length() == 0)
 		separators = ",; \t";
 
@@ -426,18 +389,72 @@ StringList parseDefinesString(std::string defines, std::string separators)
 
 		if (separator_pos == std::string::npos)
 		{
-			result.push_back(defines);
+			addDefine(defines);
 			break;
 		}
 		else
 		{
 			std::string define = defines.substr(0, separator_pos);
 			defines.erase(0, separator_pos + 1);
-
-			if (define.size() > 0)
-				result.push_back(define);
+			addDefine(define);
 		}
 	}
 	
 	return result;
 }
+
+const std::string openGl2VertexHeader = R"(
+#define etShadow2D			shadow2D
+#define etTexture2D			texture2D
+#define etTextureCube		textureCube
+#define etShadow2DProj		shadow2DProj
+#define etTexture2DProj		texture2DProj
+#define etTexture2DLod		texture2DLod
+#define etTextureCubeLod	textureCubeLod
+#define etVertexIn			attribute
+#define etVertexOut			varying
+)";
+
+const std::string openGl3VertexHeader = R"(
+#define etShadow2D			texture
+#define etTexture2D			texture
+#define etTextureCube		texture
+#define etShadow2DProj		textureProj
+#define etTexture2DProj		textureProj
+#define etTexture2DLod		textureLod
+#define etTextureCubeLod	textureLod
+#define etVertexIn			in
+#define etVertexOut			out
+)";
+
+const std::string openGl2FragmentHeader = R"(
+#define etShadow2D			shadow2D
+#define etTexture2D			texture2D
+#define etTextureCube		textureCube
+#define etShadow2DProj		shadow2DProj
+#define etTexture2DProj		texture2DProj
+#define etTexture2DLod		textureLod
+#define etTextureCubeLod	textureCubeLod
+#define etFragmentIn		varying
+#define etFragmentOut		gl_FragColor
+#define etFragmentOut0		gl_FragData[0]
+#define etFragmentOut1		gl_FragData[1]
+#define etFragmentOut2		gl_FragData[2]
+#define etFragmentOut3		gl_FragData[3]
+)";
+
+const std::string openGl3FragmentHeader = R"(
+#define etShadow2D			texture
+#define etTexture2D			texture
+#define etTextureCube		texture
+#define etShadow2DProj		textureProj
+#define etTexture2DProj		textureProj
+#define etTexture2DLod		textureLod
+#define etTextureCubeLod	textureLod
+#define etFragmentIn		in
+#define etFragmentOut		etFragmentOut0
+layout (location = 0) out vec4 etFragmentOut0;
+layout (location = 1) out vec4 etFragmentOut1;
+layout (location = 2) out vec4 etFragmentOut2;
+layout (location = 3) out vec4 etFragmentOut3;
+)";
