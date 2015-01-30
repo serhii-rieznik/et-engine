@@ -399,12 +399,16 @@ int Program::link()
 	glGetProgramiv(program, GL_INFO_LOG_LENGTH, &nLogLen);
 	checkOpenGLError("glGetProgramiv<GL_INFO_LOG_LENGTH> - %s", name().c_str());
 
-	if ((result == GL_FALSE) && (nLogLen > 1))
+	if (nLogLen > 1)
 	{
 		StringDataStorage infoLog(nLogLen + 1, 0);
 		glGetProgramInfoLog(program, nLogLen, &nLogLen, infoLog.data());
 		checkOpenGLError("glGetProgramInfoLog<LINK> - %s", name().c_str());
-		log::error("Program %s link log:\n%s", name().c_str(), infoLog.data());
+		
+		if (result == GL_FALSE)
+			log::error("Program %s link log:\n%s", name().c_str(), infoLog.data());
+		else
+			log::warning("Program %s link log:\n%s", name().c_str(), infoLog.data());
 	}
 #endif
 	

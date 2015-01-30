@@ -337,7 +337,6 @@ void RenderState::setDefaultFramebuffer(const Framebuffer::Pointer& framebuffer)
 void RenderState::bindDefaultFramebuffer(bool force)
 {
 	bindFramebuffer(_defaultFramebuffer, force);
-//	setDrawBuffersCount(1);
 }
 
 void RenderState::setDrawBuffersCount(int32_t count)

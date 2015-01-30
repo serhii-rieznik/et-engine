@@ -102,16 +102,16 @@ ProgramFactory::ProgramFactory(RenderContext* rc) : APIObjectFactory(rc)
 		_fragShaderHeader = 
 			"#define etTexture2D		texture\n"
 			"#define etTexture2DLod		textureLod\n"
-			"#define etShadow2D			texture\n"
 			"#define etTexture2DProj	textureProj\n"
+			"#define etShadow2D			texture\n"
 			"#define etShadow2DProj		textureProj\n"
 			"#define etTextureCube		texture\n"
 			"#define etTextureCubeLod	textureLod\n"
 			"#define etFragmentIn		in\n"
 			"#define etFragmentOut		FragColor0\n"
 			"#define etFragmentOut1		FragColor1\n"
-			"out etHighp vec4 FragColor0;\n"
-			"out etHighp vec4 FragColor1;\n"
+			"out vec4 FragColor0;\n"
+			"out vec4 FragColor1;\n"
 			;
 
 		_vertShaderHeader = 

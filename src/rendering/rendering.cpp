@@ -109,6 +109,7 @@ namespace et
 			case TextureFormat::RGB16F:
 				return 48;
 				
+			case TextureFormat::RG32F:
 			case TextureFormat::RGBA16:
 			case TextureFormat::RGBA16F:
 				return 64;

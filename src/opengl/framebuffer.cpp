@@ -211,6 +211,8 @@ void Framebuffer::addRenderTarget(const Texture::Pointer& rt)
 	
 	_renderTargets.push_back(rt);
 	checkStatus();
+	
+	setDrawBuffersCount(_renderTargets.size() & 0xff);
 #endif
 }
 
