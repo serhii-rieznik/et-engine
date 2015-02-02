@@ -20,10 +20,22 @@ namespace et
 			ET_DECLARE_POINTER(Mesh)
 			
 			static const std::string defaultMeshName;
+			
+			struct SupportData
+			{
+				vec3 minMaxCenter;
+				vec3 averageCenter;
+				vec3 dimensions;
+			};
 
 		public:
 			Mesh(const std::string& = defaultMeshName, Element* = nullptr);
-			Mesh(const std::string&, const VertexArrayObject&, const Material::Pointer&, uint32_t, uint32_t, Element* = nullptr);
+			
+			Mesh(const std::string&, const VertexArrayObject&, const Material::Pointer&,
+				uint32_t, uint32_t, Element* = nullptr);
+			
+			Mesh(const std::string&, const VertexArrayObject&, const Material::Pointer&,
+				 uint32_t, uint32_t, const VertexStorage::Pointer&, const IndexArray::Pointer&, Element* = nullptr);
 
 			ElementType type() const 
 				{ return ElementType_Mesh; }
@@ -65,13 +77,28 @@ namespace et
 			
 			const std::string& ibName() const
 				{ return _ibName; }
+			
+			void calculateSupportData();
+			
+			const SupportData& supportData() const
+				{ return _supportData; }
 
+			const VertexStorage::Pointer& vertexStorage() const
+				{ return _vertexStorage; }
+			
+			const IndexArray::Pointer& indexArray() const
+				{ return _indexArray; }
+			
 		private:
 			Mesh* currentLod();
 			const Mesh* currentLod() const;
 
 		private:
 			VertexArrayObject _vao;
+			const VertexStorage::Pointer _vertexStorage;
+			const IndexArray::Pointer _indexArray;
+			
+			SupportData _supportData;
 			std::map<uint32_t, Mesh::Pointer> _lods;
 			uint32_t _startIndex = 0;
 			uint32_t _numIndexes = 0;

@@ -21,19 +21,16 @@ namespace et
 			typedef DataStorage<triangle> CollisionData;
 
 		public:
-			SupportMesh(const std::string& name = defaultMeshName, Element* parent = 0);
+			SupportMesh(const std::string& = defaultMeshName, Element* = nullptr);
 			
-			SupportMesh(const std::string& name, const VertexArrayObject& ib, const Material::Pointer& material,
-				uint32_t startIndex, uint32_t numIndexes, Element* parent = 0);
+			SupportMesh(const std::string&, const VertexArrayObject&, const Material::Pointer&,
+				uint32_t, uint32_t, const VertexStorage::Pointer&, const IndexArray::Pointer&, Element* = nullptr);
 
 			ElementType type() const 
 				{ return ElementType_SupportMesh; }
 
 			float radius() const
 				{ return _radius; }
-
-			const vec3& center() const
-				{ return _center; }
 
 			const CollisionData& triangles() const
 				{ return _data; }
@@ -48,9 +45,6 @@ namespace et
 			const AABB& aabb();
 			OBB obb();
 			
-			const vec3& size() const
-				{ return _size; }
-			
 			void serialize(std::ostream& stream, SceneVersion version);
 			void deserialize(std::istream& stream, ElementFactory* factory, SceneVersion version);
 			
@@ -63,9 +57,6 @@ namespace et
 		private:
 			CollisionData _data;
 			AABB _cachedAABB;
-			
-			vec3 _size;
-			vec3 _center;
 			float _radius = 0.0f;
 			bool _shouldBuildAABB = true;
 		};

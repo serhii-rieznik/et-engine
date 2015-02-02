@@ -9,7 +9,7 @@
 
 #include <et/core/et.h>
 #include <et/geometry/ray.h>
-#include <et/geometry/triangle.h>
+#include <et/geometry/triangleex.h>
 #include <et/geometry/segment2d.h>
 #include <et/geometry/segment3d.h>
 #include <et/geometry/plane.h>
@@ -29,6 +29,8 @@ namespace et
 	typedef Segment3d<float> segment3d;
 	
 	typedef Triangle<float> triangle;
+	typedef TriangleEx<float> triangleEx;
+	
 	typedef Plane<float> plane;
 	
 	template<typename T>

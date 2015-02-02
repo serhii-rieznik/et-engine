@@ -14,13 +14,16 @@ namespace rt
 {
 	struct SceneTriangle
 	{
-		et::triangle tri;
+		et::triangleEx tri;
 		size_t materialIndex = 0;
 		
 		SceneTriangle()
 			{ }
+
+		SceneTriangle(const et::vec3& v1, const et::vec3& v2, const et::vec3& v3, const et::vec3& n1,
+			const et::vec3& n2, const et::vec3& n3, size_t m) : tri(v1, v2, v3, n1, n2, n3), materialIndex(m) { }
 		
-		SceneTriangle(const et::triangle& t, size_t m) :
+		SceneTriangle(const et::triangleEx& t, size_t m) :
 			tri(t), materialIndex(m) { }
 	};
 	

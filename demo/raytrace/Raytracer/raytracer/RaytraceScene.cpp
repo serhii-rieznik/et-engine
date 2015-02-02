@@ -17,16 +17,16 @@ using namespace rt;
 
 void RaytraceScene::load(et::RenderContext* rc)
 {
-	apertureSize = 0.0f;
+	apertureSize = 1.0f / 22.0f;
 	
-	ambientColor = vec4(2.0f);
+	ambientColor = vec4(0.0f);
 	
-	environmentMap = loadTexture(application().resolveFileName("sun-fixed.hdr"));
+//	environmentMap = loadTexture(application().resolveFileName("sun-fixed.hdr"));
 	
 	camera.perspectiveProjection(QUARTER_PI, 1.0f, 1.0f, 1024.0f);
 		
 	ObjectsCache cache;
-	OBJLoader loader(rc, "sphere.obj");
+	OBJLoader loader(rc, "cornellbox.obj");
 	auto loadedModel = loader.load(cache, OBJLoader::Option_SupportMeshes);
 	auto meshes = loadedModel->childrenOfType(s3d::ElementType_SupportMesh);
 	
@@ -54,15 +54,24 @@ void RaytraceScene::load(et::RenderContext* rc)
 			materials.emplace_back(kD, kS, kE, Ns, Tr);
 			size_t materialIndex = materials.size() - 1;
 			size_t firstTriangleIndex = _triangles.lastElementIndex();
-			size_t numTriangles = m->triangles().size();
+			size_t numTriangles = m->numIndexes() / 3;
 			
 			_triangles.fitToSize(numTriangles);
 			
-			const auto& triangles = m->triangles();
+			const auto& vs = m->vertexStorage();
+			const auto pos = vs->accessData<VertexAttributeType::Vec3>(VertexAttributeUsage::Position, 0);
+			const auto nrm = vs->accessData<VertexAttributeType::Vec3>(VertexAttributeUsage::Normal, 0);
 			
-			for (const auto& tri : triangles)
-				_triangles.push_back(SceneTriangle(tri, materialIndex));
-			
+			size_t i0 = m->startIndex();
+			const auto& ia = m->indexArray();
+			for (uint32_t i = 0; i < numTriangles; ++i)
+			{
+				size_t v1 = ia->getIndex(i0 + 3*i+0);
+				size_t v2 = ia->getIndex(i0 + 3*i+1);
+				size_t v3 = ia->getIndex(i0 + 3*i+2);
+				_triangles.push_back(SceneTriangle(pos[v1], pos[v2], pos[v3], nrm[v1], nrm[v2], nrm[v3], materialIndex));
+			}
+
 			objects.push_back(sharedObjectFactory().createObject<MeshObject>(firstTriangleIndex, numTriangles, _triangles));
 		}
 	}

@@ -67,7 +67,7 @@ bool MeshObject::intersects(const et::ray3d& ray, et::vec3& point, et::vec3& nor
 	if (hitTriangle != nullptr)
 	{
 		matIndex = hitTriangle->materialIndex;
-		normal = hitTriangle->tri.normalizedNormal();
+		normal = hitTriangle->tri.interpolatedNormal(hitTriangle->tri.barycentric(point));
 		return true;
 	}
 	

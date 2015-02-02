@@ -58,40 +58,55 @@ namespace et
 	template <> class VertexDataAccessor<VertexAttributeType::Int> : public RawDataAcessor<uint32_t>
 	{
 	public:
+		VertexDataAccessor() { }
+		
 		VertexDataAccessor(const char* data, size_t dataSize, size_t stride, size_t offset) :
 			RawDataAcessor<uint32_t>(data, dataSize, stride, offset) { }
+		
 		VertexDataAccessor(char* data, size_t dataSize, size_t stride, size_t offset) :
 			RawDataAcessor<uint32_t>(data, dataSize, stride, offset) { }
 	};
 	template <> class VertexDataAccessor<VertexAttributeType::Vec2> : public RawDataAcessor<vec2>
 	{
 	public:
+		VertexDataAccessor() { }
+		
 		VertexDataAccessor(const char* data, size_t dataSize, size_t stride, size_t offset) :
 			RawDataAcessor<vec2>(data, dataSize, stride, offset) { }
+		
 		VertexDataAccessor(char* data, size_t dataSize, size_t stride, size_t offset) :
 			RawDataAcessor<vec2>(data, dataSize, stride, offset) { }
 	};
 	template <> class VertexDataAccessor<VertexAttributeType::Vec3> : public RawDataAcessor<vec3>
 	{
 	public:
+		VertexDataAccessor() { }
+		
 		VertexDataAccessor(const char* data, size_t dataSize, size_t stride, size_t offset) :
 			RawDataAcessor<vec3>(data, dataSize, stride, offset) { }
+
 		VertexDataAccessor(char* data, size_t dataSize, size_t stride, size_t offset) :
 			RawDataAcessor<vec3>(data, dataSize, stride, offset) { }
 	};
 	template <> class VertexDataAccessor<VertexAttributeType::Vec4> : public RawDataAcessor<vec4>
 	{
 	public:
+		VertexDataAccessor() { }
+		
 		VertexDataAccessor(const char* data, size_t dataSize, size_t stride, size_t offset) :
 			RawDataAcessor<vec4>(data, dataSize, stride, offset) { }
+
 		VertexDataAccessor(char* data, size_t dataSize, size_t stride, size_t offset) :
 			RawDataAcessor<vec4>(data, dataSize, stride, offset) { }
 	};
 	template <> class VertexDataAccessor<VertexAttributeType::Float> : public RawDataAcessor<float>
 	{
 	public:
+		VertexDataAccessor() { }
+		
 		VertexDataAccessor(const char* data, size_t dataSize, size_t stride, size_t offset) :
 			RawDataAcessor<float>(data, dataSize, stride, offset) { }
+
 		VertexDataAccessor(char* data, size_t dataSize, size_t stride, size_t offset) :
 			RawDataAcessor<float>(data, dataSize, stride, offset) { }
 	};

@@ -20,11 +20,61 @@ static VertexBuffer::Pointer _emptyVertexBuffer;
 Mesh::Mesh(const std::string& name, Element* parent) :
 	RenderableElement(name, parent) { }
 
-Mesh::Mesh(const std::string& name, const VertexArrayObject& vao, const Material::Pointer& material,
-	uint32_t startIndex, uint32_t numIndexes, Element* parent) : RenderableElement(name, parent), _vao(vao),
+Mesh::Mesh(const std::string& aName, const VertexArrayObject& vao, const Material::Pointer& mat,
+	uint32_t startIndex, uint32_t numIndexes, Element* parent) : RenderableElement(aName, parent), _vao(vao),
 	_startIndex(startIndex), _numIndexes(numIndexes)
 {
-	setMaterial(material);
+	setMaterial(mat);
+}
+
+Mesh::Mesh(const std::string& aName, const VertexArrayObject& vao, const Material::Pointer& mat,
+	uint32_t start, uint32_t num, const VertexStorage::Pointer& storage, const IndexArray::Pointer& ia,
+	Element* parent) : RenderableElement(aName, parent), _vao(vao), _startIndex(start), _numIndexes(num),
+	_vertexStorage(storage), _indexArray(ia)
+{
+	setMaterial(mat);
+	calculateSupportData();
+}
+
+void Mesh::calculateSupportData()
+{
+	_supportData.dimensions = vec3(0.0f);
+	_supportData.minMaxCenter = vec3(0.0f);
+	_supportData.averageCenter = vec3(0.0f);
+	
+	if (_vertexStorage.invalid())
+	{
+		log::warning("Unable to calculate support data for mesh, storage is invalid");
+		return;
+	}
+
+	if (_indexArray.invalid())
+	{
+		log::warning("Unable to calculate support data for mesh, index array is invalid");
+		return;
+	}
+	
+	if (!_vertexStorage->hasAttributeWithType(VertexAttributeUsage::Position, VertexAttributeType::Vec3))
+	{
+		log::warning("Unable to calculate support data for mesh, storage not containing position of type vec3");
+		return;
+	}
+	
+	vec3 minVertex( std::numeric_limits<float>::max());
+	vec3 maxVertex(-std::numeric_limits<float>::max());
+	const auto pos = _vertexStorage->accessData<VertexAttributeType::Vec3>(VertexAttributeUsage::Position, 0);
+	for (uint32_t i = 0; i < _numIndexes; ++i)
+	{
+		size_t index = _indexArray->getIndex(_startIndex + i);
+		const auto& v = pos[index];
+		minVertex = minv(minVertex, v);
+		maxVertex = maxv(maxVertex, v);
+		_supportData.averageCenter += v;
+	}
+	
+	_supportData.dimensions = maxVertex - minVertex;
+	_supportData.minMaxCenter = 0.5f * (minVertex + maxVertex);
+	_supportData.averageCenter /= static_cast<float>(_numIndexes);
 }
 
 Mesh* Mesh::duplicate()

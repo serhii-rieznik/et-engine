@@ -685,13 +685,20 @@ void OBJLoader::processLoadedData()
 	_indices->linearize(totalVertices);
 	
 	_vertexData = VertexStorage::Pointer::create(decl, totalVertices);
+
 	auto pos = _vertexData->accessData<VertexAttributeType::Vec3>(VertexAttributeUsage::Position, 0);
-	auto norm = _vertexData->accessData<VertexAttributeType::Vec3>(VertexAttributeUsage::Normal, 0);
-	auto tex = _vertexData->accessData<VertexAttributeType::Vec2>(VertexAttributeUsage::TexCoord0, 0);
+	
+	VertexDataAccessor<VertexAttributeType::Vec3> nrm;
+	if (_vertexData->hasAttributeWithType(VertexAttributeUsage::Normal, VertexAttributeType::Vec3))
+		nrm = _vertexData->accessData<VertexAttributeType::Vec3>(VertexAttributeUsage::Normal, 0);
+	
+	VertexDataAccessor<VertexAttributeType::Vec2> tex;
+	if (_vertexData->hasAttributeWithType(VertexAttributeUsage::TexCoord0, VertexAttributeType::Vec2))
+		tex = _vertexData->accessData<VertexAttributeType::Vec2>(VertexAttributeUsage::TexCoord0, 0);
 	
 	size_t index = 0;
 	
-	auto PUSH_VERTEX = [this, &pos, &norm, &tex, &index, hasTexCoords, hasNormals](const OBJVertex& vertex, const vec3& offset)
+	auto PUSH_VERTEX = [this, &pos, &nrm, &tex, &index, hasTexCoords, hasNormals](const OBJVertex& vertex, const vec3& offset)
 	{
 		{
 			ET_ASSERT(vertex[0] < _vertices.size());
@@ -707,7 +714,7 @@ void OBJLoader::processLoadedData()
 		if (hasNormals)
 		{
 			ET_ASSERT(vertex[2] < _normals.size());
-			norm[index] = _normals[vertex[2]];
+			nrm[index] = _normals[vertex[2]];
 		}
 		
 		++index;
@@ -788,13 +795,15 @@ s3d::ElementContainer::Pointer OBJLoader::generateVertexBuffers()
 		
 		if (_loadOptions & Option_SupportMeshes)
 		{
-			auto mesh = SupportMesh::Pointer::create(i.name, vao, i.material, i.start, i.count, result.ptr());
+			auto mesh = SupportMesh::Pointer::create(i.name, vao, i.material, i.start, i.count,
+				_vertexData, _indices, result.ptr());
 			mesh->fillCollisionData(_vertexData, _indices);
 			object = mesh;
 		}
 		else 
 		{
-			object = Mesh::Pointer::create(i.name, vao, i.material, i.start, i.count, result.ptr());
+			object = Mesh::Pointer::create(i.name, vao, i.material, i.start, i.count,
+				_vertexData, _indices, result.ptr());
 		}
 		
 		object->setTranslation(i.center);

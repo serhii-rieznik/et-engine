@@ -16,9 +16,10 @@ SupportMesh::SupportMesh(const std::string& name, Element* parent) :
 	Mesh(name, parent), _radius(0.0f) { }
 
 SupportMesh::SupportMesh(const std::string& name, const VertexArrayObject& ib, const Material::Pointer& material,
-	uint32_t start, uint32_t num, Element* parent) : Mesh(name, ib, material, start, num, parent),
-	_data(num / 3, 0), _radius(0.0f)
+	uint32_t start, uint32_t num, const VertexStorage::Pointer& storage, const IndexArray::Pointer& ia, Element* parent) :
+	Mesh(name, ib, material, start, num, storage, ia, parent), _data(num / 3, 0), _radius(0.0f)
 {
+	
 }
 
 void SupportMesh::setNumIndexes(uint32_t num)
@@ -70,8 +71,6 @@ void SupportMesh::fillCollisionData(const VertexStorage::Pointer& v, const Index
 		}
 	}
 	
-	_size = maxv(maxOffset - minOffset, vec3(std::numeric_limits<float>::epsilon()));
-	_center = 0.5f * (maxOffset + minOffset);
 	_radius = distance;
 }
 
@@ -118,21 +117,17 @@ void SupportMesh::fillCollisionData(const VertexArray::Pointer& vertexArray, con
 		}
 	}
 	
-	_size = maxv(maxOffset - minOffset, vec3(std::numeric_limits<float>::epsilon()));
-	_center = 0.5f * (maxOffset + minOffset);
 	_radius = distance;
 }
 
 SupportMesh* SupportMesh::duplicate()
 {
 	SupportMesh* result = sharedObjectFactory().createObject<SupportMesh>(name(), vertexArrayObject(),
-		material(), startIndex(), numIndexes(), parent());
+		material(), startIndex(), numIndexes(), vertexStorage(), indexArray(), parent());
 
 	duplicateBasePropertiesToObject(result);
 	duplicateChildrenToObject(result);
 
-	result->_size = _size;
-	result->_center = _center;
 	result->_radius = _radius;
 	result->_data = _data;
 	
@@ -146,7 +141,7 @@ float SupportMesh::finalTransformScale()
 
 Sphere SupportMesh::sphere() 
 {
-	return Sphere(finalTransform() * _center, finalTransformScale() * _radius);
+	return Sphere(finalTransform() * supportData().averageCenter, finalTransformScale() * _radius);
 }
 
 const AABB& SupportMesh::aabb()
@@ -154,7 +149,7 @@ const AABB& SupportMesh::aabb()
 	if (_shouldBuildAABB)
 	{
 		const mat4& ft = finalTransform();
-		_cachedAABB = AABB(ft * _center, absv(ft.rotationMultiply(_size)));
+		_cachedAABB = AABB(ft * supportData().averageCenter, absv(ft.rotationMultiply(0.5f * supportData().dimensions)));
 		_shouldBuildAABB = false;
 	}
 	
@@ -166,14 +161,14 @@ OBB SupportMesh::obb()
 	mat4 ft = finalTransform();
 	mat3 r = ft.mat3();
 	vec3 s = removeMatrixScale(r);
-	return OBB(ft * _center, s * _size, r);
+	return OBB(ft * supportData().averageCenter, 0.5f * s * supportData().dimensions, r);
 }
 
 void SupportMesh::serialize(std::ostream& stream, SceneVersion version)
 {
 	serializeFloat(stream, _radius);
-	serializeVector(stream, _size);
-	serializeVector(stream, _center);
+	serializeVector(stream, vec3(0.0f));
+	serializeVector(stream, vec3(0.0f));
 	serializeUInt64(stream, _data.size());
 	stream.write(_data.binary(), static_cast<std::streamsize>(_data.dataSize()));
 	Mesh::serialize(stream, version);
@@ -182,8 +177,9 @@ void SupportMesh::serialize(std::ostream& stream, SceneVersion version)
 void SupportMesh::deserialize(std::istream& stream, ElementFactory* factory, SceneVersion version)
 {
 	_radius = deserializeFloat(stream);
-	_size = deserializeVector<vec3>(stream);
-	_center = deserializeVector<vec3>(stream);
+	
+	deserializeVector<vec3>(stream);
+	deserializeVector<vec3>(stream);
 	
 	uint64_t dataSize = (version < SceneVersion_1_1_0) ? deserializeUInt32(stream) : deserializeUInt64(stream);
 	_data.resize(dataSize);
