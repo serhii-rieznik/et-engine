@@ -9,6 +9,7 @@
 #include <et/rendering/rendercontext.h>
 #include <et/rendering/renderer.h>
 #include <et/vertexbuffer/indexarray.h>
+#include <et/vertexbuffer/vertexstorage.h>
 
 using namespace et;
 
@@ -28,10 +29,10 @@ Renderer::Renderer(RenderContext* rc) :
 	
 	ib->linearize(4);
 	
-	VertexArray::Pointer vb = VertexArray::Pointer::create(VertexDeclaration(false,
+	VertexStorage::Pointer vb = VertexStorage::Pointer::create(VertexDeclaration(false,
 		VertexAttributeUsage::Position, VertexAttributeType::Vec2), 4);
 	
-	RawDataAcessor<vec2> pos = vb->chunk(VertexAttributeUsage::Position).accessData<vec2>(0);
+	auto pos = vb->accessData<VertexAttributeType::Vec2>(VertexAttributeUsage::Position, 0);
 	pos[0] = vec2(-1.0f, -1.0f);
 	pos[1] = vec2( 1.0f, -1.0f);
 	pos[2] = vec2(-1.0f,  1.0f);
@@ -204,7 +205,7 @@ void Renderer::drawElementsBaseIndex(const VertexArrayObject& vao, int base, siz
 	
 	ET_ASSERT(vao->vertexBuffer().valid());
 	
-	const VertexBuffer& vb = vao->vertexBuffer();
+	const VertexBuffer::Pointer& vb = vao->vertexBuffer();
 	RenderState& rs = _rc->renderState();
 	rs.bindVertexArray(vao);
 	rs.bindBuffer(vb);

@@ -17,6 +17,11 @@ Scene3dStorage::Scene3dStorage(const std::string& name, Element* parent) :
 	_indexArray = IndexArray::Pointer::create(IndexArrayFormat::Format_16bit, 0, PrimitiveType::Triangles);
 }
 
+void Scene3dStorage::addVertexStorage(const VertexStorage::Pointer& vs)
+{
+	_vertexStorages.push_back(vs);
+}
+
 void Scene3dStorage::addVertexArray(const VertexArray::Pointer& va)
 {
 	_vertexArrays.push_back(va);
@@ -35,10 +40,10 @@ VertexArray::Pointer Scene3dStorage::addVertexArrayWithDeclaration(const VertexD
 
 VertexArray::Pointer Scene3dStorage::vertexArrayWithDeclaration(const VertexDeclaration& decl)
 {
-	for (VertexArrayList::iterator i = _vertexArrays.begin(), e = _vertexArrays.end(); i != e; ++i)
+	for (const auto&  i : _vertexArrays)
 	{
-		if (((*i)->decl() == decl))
-			return *i;
+		if (i->decl() == decl)
+			return i;
 	}
 
 	return addVertexArrayWithDeclaration(decl, 0);
@@ -46,10 +51,10 @@ VertexArray::Pointer Scene3dStorage::vertexArrayWithDeclaration(const VertexDecl
 
 VertexArray::Pointer Scene3dStorage::vertexArrayWithDeclarationForAppendingSize(const VertexDeclaration& decl, size_t size)
 {
-	for (VertexArrayList::iterator i = _vertexArrays.begin(), e = _vertexArrays.end(); i != e; ++i)
+	for (const auto&  i : _vertexArrays)
 	{
-		if (((*i)->decl() == decl) && ((*i)->size() + size < IndexArray::MaxShortIndex))
-			return *i;
+		if ((i->decl() == decl) && (i->size() + size < IndexArray::MaxShortIndex))
+			return i;
 	}
 
 	return addVertexArrayWithDeclaration(decl, 0);
@@ -59,10 +64,12 @@ int Scene3dStorage::indexOfVertexArray(const VertexArray::Pointer& va)
 {
 	int index = 0;
 
-	for (VertexArrayList::iterator i = _vertexArrays.begin(), e = _vertexArrays.end(); i != e; ++i, ++index)
+	for (const auto&  i : _vertexArrays)
 	{
-		if (*i == va)
+		if (i == va)
 			return index;
+		
+		++index;
 	}
 
 	return -1;
@@ -70,19 +77,19 @@ int Scene3dStorage::indexOfVertexArray(const VertexArray::Pointer& va)
 
 void Scene3dStorage::serialize(std::ostream& stream, SceneVersion)
 {
-	serializeInt(stream, 0);
+	serializeUInt32(stream, 0);
 }
 
 void Scene3dStorage::deserialize(std::istream& stream, ElementFactory*, SceneVersion)
 {
-	int value = deserializeInt(stream);
+	uint32_t value = deserializeUInt32(stream);
 	ET_ASSERT(value == 0);
 	(void)(value);
 }
 
 void Scene3dStorage::flush()
 {
-	VertexArrayList::iterator vi = _vertexArrays.begin();
+	auto vi = _vertexArrays.begin();
 	while (vi != _vertexArrays.end())
 	{
 		VertexArray* ptr = vi->ptr();

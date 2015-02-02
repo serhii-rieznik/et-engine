@@ -10,6 +10,7 @@
 #include <et/core/containers.h>
 #include <et/vertexbuffer/indexarray.h>
 #include <et/vertexbuffer/vertexarray.h>
+#include <et/vertexbuffer/vertexstorage.h>
 
 namespace et
 {
@@ -51,6 +52,8 @@ namespace et
 			const vec2& texCoordOffset = vec2(0.0f));
 		
 		void calculateNormals(VertexArray::Pointer data, const IndexArray::Pointer& buffer,
+			size_t first, size_t last);
+		void calculateNormals(VertexStorage::Pointer data, const IndexArray::Pointer& buffer,
 			size_t first, size_t last);
 		
 		void calculateTangents(VertexArray::Pointer data, const IndexArray::Pointer& buffer,

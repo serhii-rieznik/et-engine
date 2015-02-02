@@ -47,7 +47,7 @@ namespace et
 	struct DefaultMaterialEntryBase
 	{
 		T value;
-		size_t set;
+		uint32_t set;
 		
 	public:
 		DefaultMaterialEntryBase& operator = (const DefaultMaterialEntryBase& r)
@@ -131,19 +131,19 @@ namespace et
 		
 		DefaultParameters& operator = (const DefaultParameters& r)
 		{
-			for (size_t i = 0; i < MaterialParameter_max; ++i)
+			for (uint32_t i = 0; i < MaterialParameter_max; ++i)
 				values[i] = r.values[i];
 			return *this;
 		}
 	};
 		
-	typedef std::map<size_t, int> CustomIntParameters;
-	typedef std::map<size_t, float> CustomFloatParameters;
-	typedef std::map<size_t, vec4> CustomVectorParameters;
-	typedef std::map<size_t, Texture::Pointer> CustomTextureParameters;
-	typedef std::map<size_t, std::string> CustomStringParameters;
+	typedef std::map<uint32_t, int32_t> CustomIntParameters;
+	typedef std::map<uint32_t, float> CustomFloatParameters;
+	typedef std::map<uint32_t, vec4> CustomVectorParameters;
+	typedef std::map<uint32_t, Texture::Pointer> CustomTextureParameters;
+	typedef std::map<uint32_t, std::string> CustomStringParameters;
 	
-	typedef DefaultParameters<int> DefaultIntParameters;
+	typedef DefaultParameters<int32_t> DefaultIntParameters;
 	typedef DefaultParameters<float> DefaultFloatParameters;
 	typedef DefaultParameters<vec4> DefaultVectorParameters;
 	typedef DefaultParameters<Texture::Pointer> DefaultTextureParameters;

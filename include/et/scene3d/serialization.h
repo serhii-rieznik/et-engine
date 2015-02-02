@@ -26,12 +26,14 @@ namespace et
 			SceneVersion_1_0_2 = 102,
 			SceneVersion_1_0_3 = 103,
 			SceneVersion_1_0_4 = 104,
+			SceneVersion_1_1_0 = 110,
 		};
 
 		enum StorageVersion
 		{
 			StorageVersion_1_0_0 = 100,
 			StorageVersion_1_0_1 = 101,
+			StorageVersion_1_1_0 = 110,
 		};
 
 		enum StorageFormat

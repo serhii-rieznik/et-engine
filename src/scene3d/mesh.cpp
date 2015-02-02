@@ -15,16 +15,14 @@ using namespace et::s3d;
 const std::string Mesh::defaultMeshName = "mesh";
 
 static IndexBuffer _emptyIndexBuffer;
-static VertexBuffer _emptyVertexBuffer;
+static VertexBuffer::Pointer _emptyVertexBuffer;
 
-Mesh::Mesh(const std::string& name, Element* parent) : RenderableElement(name, parent), 
-	_startIndex(0), _numIndexes(0), _selectedLod(0)
-{
-}
+Mesh::Mesh(const std::string& name, Element* parent) :
+	RenderableElement(name, parent) { }
 
 Mesh::Mesh(const std::string& name, const VertexArrayObject& vao, const Material::Pointer& material,
-	uint32_t startIndex, size_t numIndexes, Element* parent) : RenderableElement(name, parent), _vao(vao),
-	_startIndex(startIndex), _numIndexes(numIndexes), _selectedLod(0)
+	uint32_t startIndex, uint32_t numIndexes, Element* parent) : RenderableElement(name, parent), _vao(vao),
+	_startIndex(startIndex), _numIndexes(numIndexes)
 {
 	setMaterial(material);
 }
@@ -40,7 +38,7 @@ Mesh* Mesh::duplicate()
 	return result;
 }
 
-void Mesh::setVertexBuffer(VertexBuffer vb)
+void Mesh::setVertexBuffer(VertexBuffer::Pointer vb)
 {
 	if (_vao.valid())
 		_vao->setVertexBuffer(vb);
@@ -73,16 +71,17 @@ void Mesh::serialize(std::ostream& stream, SceneVersion version)
 	serializeString(stream, vaoName);
 	serializeString(stream, vbName);
 	serializeString(stream, ibName);
-	serializeInt(stream, reinterpret_cast<size_t>(material().ptr()) & 0xffffffff);
+	
+	serializeUInt64(stream, reinterpret_cast<uintptr_t>(material().ptr()));
+	
+	serializeUInt32(stream, _startIndex);
+	serializeUInt32(stream, _numIndexes);
 
-	serializeInt(stream, _startIndex);
-	serializeInt(stream, _numIndexes);
-
-	serializeInt(stream, _lods.size());
-	for (LodMap::iterator i = _lods.begin(), e = _lods.end(); i != e; ++i)
+	serializeUInt64(stream, _lods.size());
+	for (auto i : _lods)
 	{
-		serializeInt(stream, i->first);
-		i->second->serialize(stream, version);
+		serializeUInt32(stream, i.first);
+		i.second->serialize(stream, version);
 	}
 
 	serializeGeneralParameters(stream, version);
@@ -94,17 +93,19 @@ void Mesh::deserialize(std::istream& stream, ElementFactory* factory, SceneVersi
 	_vaoName = deserializeString(stream);
 	_vbName = deserializeString(stream);
 	_ibName = deserializeString(stream);
-
-	setMaterial(factory->materialWithId(deserializeInt(stream)));
+	
+	uint64_t materialId = (version < SceneVersion_1_1_0) ? deserializeUInt32(stream) : deserializeUInt64(stream);
+	setMaterial(factory->materialWithId(materialId));
+	
 	setVertexArrayObject(factory->vaoWithIdentifiers(_vbName, _ibName));
 
-	_startIndex = deserializeUInt(stream);
-	_numIndexes = deserializeUInt(stream);
+	_startIndex = deserializeUInt32(stream);
+	_numIndexes = deserializeUInt32(stream);
 
-	int numLods = deserializeInt(stream);
-	for (int i = 0; i < numLods; ++i)
+	uint64_t numLods = (version < SceneVersion_1_1_0) ? deserializeUInt32(stream) : deserializeUInt64(stream);
+	for (uint64_t i = 0; i < numLods; ++i)
 	{
-		size_t level = deserializeUInt(stream);
+		uint32_t level = deserializeUInt32(stream);
 		Mesh::Pointer p = factory->createElementOfType(ElementType_Mesh, 0);
 		p->deserialize(stream, factory, version);
 		attachLod(level, p);
@@ -114,7 +115,7 @@ void Mesh::deserialize(std::istream& stream, ElementFactory* factory, SceneVersi
 	deserializeChildren(stream, factory, version);
 }
 
-void Mesh::attachLod(size_t level, Mesh::Pointer mesh)
+void Mesh::attachLod(uint32_t level, Mesh::Pointer mesh)
 {
 	_lods[level] = mesh;
 	mesh->setActive(false);
@@ -122,10 +123,10 @@ void Mesh::attachLod(size_t level, Mesh::Pointer mesh)
 
 void Mesh::cleanupLodChildren()
 {
-	for (LodMap::iterator i = _lods.begin(), e = _lods.end(); i != e; ++i)
+	for (auto i : _lods)
 	{
-		if (i->second->parent() == this)
-			i->second->setParent(0);
+		if (i.second->parent() == this)
+			i.second->setParent(nullptr);
 	}
 }
 
@@ -139,13 +140,13 @@ const VertexArrayObject& Mesh::vertexArrayObject() const
 	return currentLod()->_vao; 
 }
 
-VertexBuffer& Mesh::vertexBuffer() 
+VertexBuffer::Pointer& Mesh::vertexBuffer() 
 {
 	VertexArrayObject& vao = vertexArrayObject();
 	return vao.valid() ? vao->vertexBuffer() : _emptyVertexBuffer; 
 }
 
-const VertexBuffer& Mesh::vertexBuffer() const
+const VertexBuffer::Pointer& Mesh::vertexBuffer() const
 {
 	const VertexArrayObject& vao = vertexArrayObject();
 	return vao.valid() ? vao->vertexBuffer() : _emptyVertexBuffer; 
@@ -168,7 +169,7 @@ uint32_t Mesh::startIndex() const
 	return currentLod()->_startIndex; 
 }
 
-size_t Mesh::numIndexes() const
+uint32_t Mesh::numIndexes() const
 {
 	return currentLod()->_numIndexes; 
 }
@@ -178,7 +179,7 @@ void Mesh::setStartIndex(uint32_t index)
 	currentLod()->_startIndex = index; 
 }
 
-void Mesh::setNumIndexes(size_t num)
+void Mesh::setNumIndexes(uint32_t num)
 {
 	currentLod()->_numIndexes = num; 
 }
@@ -195,12 +196,12 @@ Mesh* Mesh::currentLod()
 {
 	if (_selectedLod == 0) return this;
 
-	LodMap::iterator i = _lods.find(_selectedLod);
+	auto i = _lods.find(_selectedLod);
 	return (i == _lods.end()) ? this : i->second.ptr();
 }
 
-void Mesh::setLod(size_t level)
+void Mesh::setLod(uint32_t level)
 {
-	LodMap::iterator i = _lods.find(level);
+	auto i = _lods.find(level);
 	_selectedLod = (i == _lods.end()) ? 0 : level;
 }

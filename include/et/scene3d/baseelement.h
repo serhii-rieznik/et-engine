@@ -204,7 +204,7 @@ namespace et
 		class ElementFactory
 		{
 		public:
-			virtual Material::Pointer materialWithId(int id) = 0;
+			virtual Material::Pointer materialWithId(uint64_t) = 0;
 
 			virtual VertexArrayObject vaoWithIdentifiers(const std::string& vbid,
 				const std::string& ibid) = 0;

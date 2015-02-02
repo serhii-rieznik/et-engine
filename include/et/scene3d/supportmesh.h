@@ -24,7 +24,7 @@ namespace et
 			SupportMesh(const std::string& name = defaultMeshName, Element* parent = 0);
 			
 			SupportMesh(const std::string& name, const VertexArrayObject& ib, const Material::Pointer& material,
-				uint32_t startIndex, size_t numIndexes, Element* parent = 0);
+				uint32_t startIndex, uint32_t numIndexes, Element* parent = 0);
 
 			ElementType type() const 
 				{ return ElementType_SupportMesh; }
@@ -38,8 +38,9 @@ namespace et
 			const CollisionData& triangles() const
 				{ return _data; }
 
-			void setNumIndexes(size_t num);
+			void setNumIndexes(uint32_t num);
 			void fillCollisionData(const VertexArray::Pointer& v, const IndexArray::Pointer& i);
+			void fillCollisionData(const VertexStorage::Pointer& v, const IndexArray::Pointer& i);
 
 			SupportMesh* duplicate();
 

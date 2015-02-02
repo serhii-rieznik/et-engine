@@ -11,7 +11,7 @@
 
 using namespace et;
 
-VertexBufferData::VertexBufferData(RenderContext* rc, const VertexArray::Description& desc,
+VertexBuffer::VertexBuffer(RenderContext* rc, const VertexArray::Description& desc,
 	BufferDrawType vertexDrawType, const std::string& aName) : APIObject(aName), _rc(rc),
 	_decl(desc.declaration), _drawType(vertexDrawType)
 {
@@ -23,7 +23,7 @@ VertexBufferData::VertexBufferData(RenderContext* rc, const VertexArray::Descrip
 #endif
 }
 
-VertexBufferData::VertexBufferData(RenderContext* rc, const VertexDeclaration& decl, const void* vertexData,
+VertexBuffer::VertexBuffer(RenderContext* rc, const VertexDeclaration& decl, const void* vertexData,
 	size_t vertexDataSize, BufferDrawType vertexDrawType, const std::string& aName) : APIObject(aName), _rc(rc),
 	_decl(decl), _drawType(vertexDrawType)
 {
@@ -35,7 +35,7 @@ VertexBufferData::VertexBufferData(RenderContext* rc, const VertexDeclaration& d
 #endif
 }
 
-VertexBufferData::~VertexBufferData()
+VertexBuffer::~VertexBuffer()
 {
 #if !defined(ET_CONSOLE_APPLICATION)
 	uint32_t buffer = static_cast<uint32_t>(apiHandle());
@@ -46,14 +46,14 @@ VertexBufferData::~VertexBufferData()
 #endif
 }
 
-void VertexBufferData::setData(const void* data, size_t dataSize)
+void VertexBuffer::setData(const void* data, size_t dataSize)
 {
 #if !defined(ET_CONSOLE_APPLICATION)
 	_dataSize = dataSize;
 #endif
 }
 
-void* VertexBufferData::map(size_t offset, size_t dataSize, MapBufferMode mode)
+void* VertexBuffer::map(size_t offset, size_t dataSize, MapBufferMode mode)
 {
 	ET_ASSERT(!_mapped)
 	ET_ASSERT(dataSize > 0)
@@ -63,19 +63,19 @@ void* VertexBufferData::map(size_t offset, size_t dataSize, MapBufferMode mode)
 	return result;
 }
 
-void VertexBufferData::unmap()
+void VertexBuffer::unmap()
 {
 #if !defined(ET_CONSOLE_APPLICATION)
 	_mapped = false;
 #endif
 }
 
-void VertexBufferData::serialize(std::ostream&)
+void VertexBuffer::serialize(std::ostream&)
 {
 	ET_FAIL("Unsupported");
 }
 
-void VertexBufferData::deserialize(std::istream&)
+void VertexBuffer::deserialize(std::istream&)
 {
 	ET_FAIL("Unsupported");
 }

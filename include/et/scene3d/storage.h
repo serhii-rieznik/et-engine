@@ -9,6 +9,7 @@
 
 #include <et/vertexbuffer/vertexarray.h>
 #include <et/vertexbuffer/indexarray.h>
+#include <et/vertexbuffer/vertexstorage.h>
 #include <et/scene3d/material.h>
 #include <et/scene3d/baseelement.h>
 
@@ -48,6 +49,7 @@ namespace et
 			void addMaterial(Material::Pointer m)
 				{ _materials.push_back(m); }
 
+			void addVertexStorage(const VertexStorage::Pointer&);
 			void addVertexArray(const VertexArray::Pointer&);
 			void setIndexArray(const IndexArray::Pointer&);
 			
@@ -64,7 +66,8 @@ namespace et
 				{ return 0; }
 
 		private:
-			VertexArrayList _vertexArrays;
+			std::vector<VertexArray::Pointer> _vertexArrays;
+			std::vector<VertexStorage::Pointer> _vertexStorages;
 			IndexArray::Pointer _indexArray;
 			Material::List _materials;
 			std::vector<Texture::Pointer> _textures;

@@ -11,7 +11,7 @@
 
 using namespace et;
 
-VertexArrayObjectData::VertexArrayObjectData(RenderContext* rc, VertexBuffer vb, IndexBuffer ib,
+VertexArrayObjectData::VertexArrayObjectData(RenderContext* rc, VertexBuffer::Pointer vb, IndexBuffer ib,
 	const std::string& aName) : APIObject(aName), _rc(rc), _vb(vb), _ib(ib)
 {
 #if defined(ET_CONSOLE_APPLICATION)
@@ -43,13 +43,13 @@ void VertexArrayObjectData::init()
 #endif
 }
 
-void VertexArrayObjectData::setBuffers(VertexBuffer vb, IndexBuffer ib)
+void VertexArrayObjectData::setBuffers(VertexBuffer::Pointer vb, IndexBuffer ib)
 {
 #if !defined(ET_CONSOLE_APPLICATION)
 #endif
 }
 
-void VertexArrayObjectData::setVertexBuffer(VertexBuffer vb)
+void VertexArrayObjectData::setVertexBuffer(VertexBuffer::Pointer vb)
 {
 #if !defined(ET_CONSOLE_APPLICATION)
 #endif

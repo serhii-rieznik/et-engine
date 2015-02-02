@@ -16,17 +16,17 @@ namespace et
 	class VertexArrayObjectData : public APIObject
 	{
 	public:
-		VertexArrayObjectData(RenderContext*, VertexBuffer, IndexBuffer,
+		VertexArrayObjectData(RenderContext*, VertexBuffer::Pointer, IndexBuffer,
 			const std::string& name = emptyString);
 		
 		VertexArrayObjectData(RenderContext*, const std::string& name = emptyString);
 		
 		~VertexArrayObjectData();
 
-		VertexBuffer& vertexBuffer() 
+		VertexBuffer::Pointer& vertexBuffer()
 			{ return _vb; };
 
-		const VertexBuffer& vertexBuffer() const
+		const VertexBuffer::Pointer& vertexBuffer() const
 			{ return _vb; };
 
 		IndexBuffer& indexBuffer()
@@ -35,16 +35,16 @@ namespace et
 		const IndexBuffer& indexBuffer() const
 			{ return _ib; };
 
-		void setVertexBuffer(VertexBuffer ib);
+		void setVertexBuffer(VertexBuffer::Pointer ib);
 		void setIndexBuffer(IndexBuffer ib);
-		void setBuffers(VertexBuffer vb, IndexBuffer ib);
+		void setBuffers(VertexBuffer::Pointer vb, IndexBuffer ib);
 
 	private:
 		void init();
 
 	private:
 		RenderContext* _rc = nullptr;
-		VertexBuffer _vb;
+		VertexBuffer::Pointer _vb;
 		IndexBuffer _ib;
 	};
 	

@@ -24,12 +24,21 @@ VertexDataChunkData::VertexDataChunkData(VertexAttributeUsage aUsage, VertexAttr
 	_data.fill(0);
 }
 
+void VertexDataChunkData::serialize(std::ostream& stream)
+{
+	serializeUInt32(stream, static_cast<uint32_t>(_usage));
+	serializeUInt32(stream, static_cast<uint32_t>(_type));
+	serializeUInt32(stream, static_cast<uint32_t>(_data.dataSize()));
+	serializeUInt32(stream, static_cast<uint32_t>(_data.lastElementIndex()));
+	stream.write(_data.binary(), static_cast<std::streamsize>(_data.dataSize()));
+}
+
 VertexDataChunkData::VertexDataChunkData(std::istream& stream)
 {
-	_usage = static_cast<VertexAttributeUsage>(deserializeInt(stream));
-	_type = static_cast<VertexAttributeType>(deserializeInt(stream));
-	_data.resize(deserializeUInt(stream));
-	_data.setOffset(deserializeUInt(stream));
+	_usage = static_cast<VertexAttributeUsage>(deserializeUInt32(stream));
+	_type = static_cast<VertexAttributeType>(deserializeUInt32(stream));
+	_data.resize(deserializeUInt32(stream));
+	_data.setOffset(deserializeUInt32(stream));
 	
 	stream.read(_data.binary(), static_cast<std::streamsize>(_data.dataSize()));
 	
@@ -38,15 +47,6 @@ VertexDataChunkData::VertexDataChunkData(std::istream& stream)
 	 */
 	if (_type >= VertexAttributeType::max)
 		_type = openglTypeToVertexAttributeType(static_cast<uint32_t>(_type));
-}
-
-void VertexDataChunkData::serialize(std::ostream& stream)
-{
-	serializeInt(stream, static_cast<uint32_t>(_usage));
-	serializeInt(stream, static_cast<uint32_t>(_type));
-	serializeInt(stream, static_cast<int>(_data.dataSize()));
-	serializeInt(stream, _data.lastElementIndex());
-	stream.write(_data.binary(), static_cast<std::streamsize>(_data.dataSize()));
 }
 
 void VertexDataChunkData::resize(size_t sz)

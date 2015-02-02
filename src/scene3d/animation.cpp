@@ -12,7 +12,8 @@ using namespace et;
 using namespace et::s3d;
 
 const int animationVersion_1 = 0x0001;
-const int animationCurrentVersion = animationVersion_1;
+const int animationVersion_2 = 0x0002;
+const int animationCurrentVersion = animationVersion_2;
 
 Animation::Animation()
 {
@@ -118,13 +119,13 @@ mat4 Animation::transformation(float time) const
 
 void Animation::serialize(std::ostream& stream) const
 {
-	serializeInt(stream, animationCurrentVersion);
-	serializeInt(stream, 3 * sizeof(float) + 2 * sizeof(uint32_t) + _frames.size() * sizeof(Frame));
+	serializeInt32(stream, animationCurrentVersion);
+	serializeUInt64(stream, 3 * sizeof(float) + 2 * sizeof(uint32_t) + _frames.size() * sizeof(Frame));
 	serializeFloat(stream, _startTime);
 	serializeFloat(stream, _stopTime);
 	serializeFloat(stream, _frameRate);
-	serializeInt(stream, _outOfRangeMode);
-	serializeInt(stream, _frames.size());
+	serializeInt32(stream, _outOfRangeMode);
+	serializeUInt64(stream, _frames.size());
 	for (const auto& frame : _frames)
 	{
 		serializeFloat(stream, frame.time);
@@ -138,17 +139,38 @@ void Animation::deserialize(std::istream& stream)
 {
 	_frames.clear();
 	
-	int version = deserializeInt(stream);
-	int dataSize = deserializeInt(stream);
-	
+	int version = deserializeInt32(stream);
 	if (version == animationVersion_1)
 	{
+		deserializeUInt32(stream);
+		
 		_startTime = deserializeFloat(stream);
 		_stopTime = deserializeFloat(stream);
 		_frameRate = deserializeFloat(stream);
-		_outOfRangeMode = static_cast<OutOfRangeMode>(deserializeInt(stream));
+		_outOfRangeMode = static_cast<OutOfRangeMode>(deserializeInt32(stream));
 		
-		int numFrames = deserializeInt(stream);
+		int numFrames = deserializeInt32(stream);
+		
+		_frames.reserve(numFrames);
+		for (int i = 0; i < numFrames; ++i)
+		{
+			float t = deserializeFloat(stream);
+			vec3 tr = deserializeVector<vec3>(stream);
+			quaternion q = deserializeQuaternion(stream);
+			vec3 s = deserializeVector<vec3>(stream);
+			addKeyFrame(t, tr, q, s);
+		}
+	}
+	else if (version == animationVersion_2)
+	{
+		deserializeUInt64(stream);
+		
+		_startTime = deserializeFloat(stream);
+		_stopTime = deserializeFloat(stream);
+		_frameRate = deserializeFloat(stream);
+		_outOfRangeMode = static_cast<OutOfRangeMode>(deserializeInt32(stream));
+		
+		uint64_t numFrames = deserializeUInt64(stream);
 		
 		_frames.reserve(numFrames);
 		for (int i = 0; i < numFrames; ++i)
@@ -162,6 +184,7 @@ void Animation::deserialize(std::istream& stream)
 	}
 	else
 	{
+		uint32_t dataSize = deserializeUInt32(stream);
 		stream.seekg(dataSize, std::ios_base::cur);
 	}
 }

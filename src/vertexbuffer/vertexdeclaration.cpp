@@ -113,31 +113,29 @@ bool VertexDeclaration::operator == (const VertexDeclaration& r) const
 
 void VertexDeclaration::serialize(std::ostream& stream)
 {
-	serializeInt(stream, _interleaved);
-	serializeInt(stream, static_cast<int>(_totalSize));
-	serializeInt(stream, static_cast<int>(_list.size()));
+	serializeUInt32(stream, _interleaved);
+	serializeUInt32(stream, _totalSize);
+	serializeUInt32(stream, _list.size() & 0xffffffff);
 	for (auto& i : _list)
 	{
-		serializeInt(stream, static_cast<uint32_t>(i.usage()));
-		serializeInt(stream, static_cast<uint32_t>(i.type()));
-		serializeInt(stream, i.stride());
-		serializeInt(stream, static_cast<int>(i.offset()));
+		serializeUInt32(stream, static_cast<uint32_t>(i.usage()));
+		serializeUInt32(stream, static_cast<uint32_t>(i.type()));
+		serializeUInt32(stream, i.stride());
+		serializeUInt32(stream, i.offset());
 	}
 }
 
 void VertexDeclaration::deserialize(std::istream& stream)
 {
-	_interleaved = deserializeInt(stream) != 0;
-	uint32_t totalSize = deserializeUInt(stream);
-	uint32_t listSize = deserializeUInt(stream);
+	_interleaved = deserializeUInt32(stream) != 0;
+	uint32_t totalSize = deserializeUInt32(stream);
+	uint32_t listSize = deserializeUInt32(stream);
 	for (size_t i = 0; i < listSize; ++i)
 	{
-		VertexAttributeUsage usage = static_cast<VertexAttributeUsage>(deserializeInt(stream));
-		VertexAttributeType type = static_cast<VertexAttributeType>(deserializeInt(stream));
-		
-		uint32_t stride = deserializeInt(stream);
-		uint32_t offset = deserializeUInt(stream);
-		
+		VertexAttributeUsage usage = static_cast<VertexAttributeUsage>(deserializeUInt32(stream));
+		VertexAttributeType type = static_cast<VertexAttributeType>(deserializeUInt32(stream));
+		uint32_t stride = deserializeUInt32(stream);
+		uint32_t offset = deserializeUInt32(stream);
 		push_back(VertexElement(usage, type, stride, offset));
 	}
 

@@ -95,14 +95,14 @@ void MainController::applicationDidLoad(et::RenderContext* rc)
 	
 	_cameraAngles.updated.connect([this]()
 	{
-		vec3 origin = 263.5f * fromSpherical(_cameraAngles.value().y, _cameraAngles.value().x);
-		_scene.camera.lookAt(origin, 5.0f * unitY);
+		vec3 origin = 65.5f * fromSpherical(_cameraAngles.value().y, _cameraAngles.value().x);
+		_scene.camera.lookAt(origin, 0.0f * unitY);
 		
 		if (!_enableGPURaytracing && (_scene.options.bounces == _previewBounces))
 			startCPUTracing();
 	});
 	
-	_cameraAngles.setTargetValue(vec2(HALF_PI - DEG_30 + PI, DEG_30));
+	_cameraAngles.setTargetValue(vec2(DEG_45 - DEG_1 * 7.5f, DEG_30));
 	_cameraAngles.finishInterpolation();
 	_cameraAngles.run();
 	_cameraAngles.updated.invoke();

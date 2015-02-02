@@ -27,22 +27,18 @@ namespace et
 		RawDataAcessor(char* data, const size_t dataSize, const size_t stride, const size_t offset) :
 			_mutableData(data), _mutable(true)
 		{
-			size_t estimatedDataSize = dataSize - offset;
-
 			_offset = offset;
 			_stride = stride ? stride : TypeSize;
-			_dataSize = (estimatedDataSize / _stride) * _stride;
+			_dataSize = (dataSize / _stride) * _stride;
 			_size = _dataSize / _stride;
 		}
 
 		RawDataAcessor(const char* data, const size_t dataSize, const size_t stride, const size_t offset) :
 			_immutableData(data), _mutable(false)
 		{
-			size_t estimatedDataSize = dataSize - offset;
-			
 			_offset = offset;
 			_stride = stride ? stride : TypeSize;
-			_dataSize = (estimatedDataSize / _stride) * _stride;
+			_dataSize = (dataSize / _stride) * _stride;
 			_size = _dataSize / _stride;
 		}
 		

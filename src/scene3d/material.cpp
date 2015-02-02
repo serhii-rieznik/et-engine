@@ -73,13 +73,13 @@ const std::string materialKeys[MaterialParameter_max] =
 	std::string("transparent_color"),	//	MaterialParameter_TransparentColor,
 };
 
-const int MaterialVersion1_0_2 = ET_COMPOSE_UINT32('M', 'A', 'T', '3');
-const int MaterialVersion1_0_3 = ET_COMPOSE_UINT32('M', 'A', 'T', '4');
-const int MaterialCurrentVersion = MaterialVersion1_0_3;
+const int MaterialVersionFirstSupported = ET_COMPOSE_UINT32('M', 'A', 'T', '3');
+const int MaterialVersion1_0_5 = ET_COMPOSE_UINT32('M', 'A', 'T', '5');
+const int MaterialCurrentVersion = MaterialVersion1_0_5;
 
-inline size_t keyToMaterialParameter(const std::string& k)
+inline uint32_t keyToMaterialParameter(const std::string& k)
 {
-	for (size_t i = 0; i < MaterialParameter_max; ++i)
+	for (uint32_t i = 0; i < MaterialParameter_max; ++i)
 	{
 		if (k == materialKeys[i])
 			return i;
@@ -158,7 +158,7 @@ void Material::serializeReadable(std::ostream& s) const
 		keyValue(s, kCapacity, MaterialParameter_max);
 	)
 
-	for (size_t i = 0; i < MaterialParameter_max; ++i)
+	for (uint32_t i = 0; i < MaterialParameter_max; ++i)
 	{
 		if (_defaultIntParameters[i].set)
 		{
@@ -233,66 +233,66 @@ void Material::serializeReadable(std::ostream& s) const
 
 void Material::serializeBinary(std::ostream& stream) const
 {
-	serializeInt(stream, MaterialCurrentVersion);
+	serializeUInt32(stream, MaterialCurrentVersion);
 	serializeString(stream, name());
-	serializeInt(stream, static_cast<uint32_t>(blendState()));
-	serializeInt(stream, static_cast<uint32_t>(depthWriteEnabled()));
+	serializeUInt32(stream, static_cast<uint32_t>(blendState()));
+	serializeUInt32(stream, static_cast<uint32_t>(depthWriteEnabled()));
 
-	serializeInt(stream, MaterialParameter_max);
-	for (size_t i = 0; i < MaterialParameter_max; ++i)
+	serializeUInt32(stream, MaterialParameter_max);
+	for (uint32_t i = 0; i < MaterialParameter_max; ++i)
 	{
 		const Texture::Pointer& t = _defaultTextureParameters[i].value;
 
-		serializeInt(stream, _defaultIntParameters[i].set);
-		serializeInt(stream, _defaultIntParameters[i].value);
+		serializeUInt32(stream, _defaultIntParameters[i].set);
+		serializeInt32(stream, _defaultIntParameters[i].value);
 
-		serializeInt(stream, _defaultFloatParameters[i].set);
+		serializeUInt32(stream, _defaultFloatParameters[i].set);
 		serializeFloat(stream, _defaultFloatParameters[i].value);
 
-		serializeInt(stream, _defaultVectorParameters[i].set);
+		serializeUInt32(stream, _defaultVectorParameters[i].set);
 		serializeVector(stream, _defaultVectorParameters[i].value);
 
-		serializeInt(stream, _defaultTextureParameters[i].set);
+		serializeUInt32(stream, _defaultTextureParameters[i].set);
 		serializeString(stream, t.valid() ? t->origin() : emptyString);
 
-		serializeInt(stream, _defaultStringParameters[i].set);
+		serializeUInt32(stream, _defaultStringParameters[i].set);
 		serializeString(stream, _defaultStringParameters[i].value);
 	}
 
-	serializeInt(stream, static_cast<int>(_customIntParameters.size()));
+	serializeUInt32(stream, static_cast<uint32_t>(_customIntParameters.size()));
 	for (const auto& i : _customIntParameters)
 	{
-		serializeInt(stream, i.first);
-		serializeInt(stream, i.second);
+		serializeUInt32(stream, i.first);
+		serializeInt32(stream, i.second);
 	}
 
-	serializeInt(stream, static_cast<int>(_customFloatParameters.size()));
+	serializeUInt32(stream, static_cast<uint32_t>(_customFloatParameters.size()));
 	for (const auto& i : _customFloatParameters)
 	{
-		serializeInt(stream, i.first);
+		serializeUInt32(stream, i.first);
 		serializeFloat(stream, i.second);
 	}
 
-	serializeInt(stream, static_cast<int>(_customVectorParameters.size()));
+	serializeUInt32(stream, static_cast<uint32_t>(_customVectorParameters.size()));
 	for (const auto& i : _customVectorParameters)
 	{
-		serializeInt(stream, i.first);
+		serializeUInt32(stream, i.first);
 		serializeVector(stream, i.second);
 	}
 
-	serializeInt(stream, static_cast<int>(_customTextureParameters.size()));
+	serializeUInt32(stream, static_cast<uint32_t>(_customTextureParameters.size()));
 	for (const auto& i : _customTextureParameters)
 	{
-		serializeInt(stream, i.first);
+		serializeUInt32(stream, i.first);
 		std::string path = i.second.valid() ? i.second->origin() : emptyString;
-		serializeInt(stream, i.first);
+		serializeUInt32(stream, i.first);
 		serializeString(stream, path);
 	}
 
-	serializeInt(stream, static_cast<int>(_customStringParameters.size()));
+	serializeUInt32(stream, static_cast<uint32_t>(_customStringParameters.size()));
 	for (const auto& i : _customStringParameters)
 	{
-		serializeInt(stream, i.first);
+		serializeUInt32(stream, i.first);
 		serializeString(stream, i.second);
 	}
 }
@@ -308,14 +308,13 @@ void Material::deserialize(std::istream& stream, RenderContext* rc, ObjectsCache
 	}
 	else if (format == StorageFormat_Binary)
 	{
-		int version = deserializeInt(stream);
-
+		uint32_t version = deserializeUInt32(stream);
 		setName(deserializeString(stream));
 
-		_blendState = static_cast<BlendState>(deserializeInt(stream));
-		_depthWriteEnabled = deserializeInt(stream) != 0;
+		_blendState = static_cast<BlendState>(deserializeUInt32(stream));
+		_depthWriteEnabled = deserializeUInt32(stream) != 0;
 
-		if (version >= MaterialVersion1_0_2)
+		if (version >= MaterialVersionFirstSupported)
 		{
 			deserializeBinary(stream, rc, cache, basePath, async);
 		}
@@ -338,38 +337,38 @@ void Material::deserialize(std::istream& stream, RenderContext* rc, ObjectsCache
 
 void Material::deserializeBinary(std::istream& stream, RenderContext*, ObjectsCache&, const std::string&, bool)
 {
-	size_t numParameters = deserializeUInt(stream);
-	for (size_t i = 0; i < numParameters; ++i)
+	uint32_t numParameters = deserializeUInt32(stream);
+	for (uint32_t i = 0; i < numParameters; ++i)
 	{
-		int has = deserializeInt(stream);
-		int ival = deserializeInt(stream);
+		uint32_t has = deserializeUInt32(stream);
+		int32_t ival = deserializeInt32(stream);
 		if (has)
 		{
 			setInt(i, ival);
 		}
 
-		has = deserializeInt(stream);
+		has = deserializeUInt32(stream);
 		float fval = deserializeFloat(stream);
 		if (has)
 		{
 			setFloat(i, fval);
 		}
 
-		has = deserializeInt(stream);
+		has = deserializeUInt32(stream);
 		vec4 vval = deserializeVector<vec4>(stream);
 		if (has)
 		{
 			setVector(i, vval);
 		}
 
-		has = deserializeInt(stream);
+		has = deserializeUInt32(stream);
 		std::string path = deserializeString(stream);
 		if (has)
 		{
 			_texturesToLoad[i] = path;
 		}
 
-		has = deserializeInt(stream);
+		has = deserializeUInt32(stream);
 		std::string sval = deserializeString(stream);
 		if (has)
 		{
@@ -377,42 +376,42 @@ void Material::deserializeBinary(std::istream& stream, RenderContext*, ObjectsCa
 		}
 	}
 
-	int count = deserializeInt(stream);
+	uint32_t count = deserializeUInt32(stream);
 	for (int i = 0; i < count; ++i)
 	{
-		size_t param = deserializeUInt(stream);
-		int value = deserializeInt(stream);
+		uint32_t param = deserializeUInt32(stream);
+		int32_t value = deserializeInt32(stream);
 		setInt(param, value);
 	}
 	
-	count = deserializeInt(stream);
+	count = deserializeUInt32(stream);
 	for (int i = 0; i < count; ++i)
 	{
-		size_t param = deserializeUInt(stream);
+		uint32_t param = deserializeUInt32(stream);
 		float value = deserializeFloat(stream);
 		setFloat(param, value);
 	}
 	
-	count = deserializeInt(stream);
+	count = deserializeUInt32(stream);
 	for (int i = 0; i < count; ++i)
 	{
-		size_t param = deserializeUInt(stream);
+		uint32_t param = deserializeUInt32(stream);
 		vec4 value = deserializeVector<vec4>(stream);
 		setVector(param, value);
 	}
 	
-	count = deserializeInt(stream);
+	count = deserializeUInt32(stream);
 	for (int i = 0; i < count; ++i)
 	{
-		size_t param = deserializeUInt(stream);
+		uint32_t param = deserializeUInt32(stream);
 		std::string path = deserializeString(stream);
 		_texturesToLoad[param] = path;
 	}
 	
-	count = deserializeInt(stream);
+	count = deserializeUInt32(stream);
 	for (int i = 0; i < count; ++i)
 	{
-		size_t param = deserializeUInt(stream);
+		uint32_t param = deserializeUInt32(stream);
 		std::string value = deserializeString(stream);
 		setString(param, value);
 	}
@@ -446,7 +445,7 @@ void Material::loadDefaultValues(xmlNode* node, RenderContext* rc, ObjectsCache&
 		if (c->type == XML_ELEMENT_NODE)
 		{
 			const char* cName = reinterpret_cast<const char*>(c->name);
-			for (size_t i = 0; i < MaterialParameter_max; ++i)
+			for (uint32_t i = 0; i < MaterialParameter_max; ++i)
 			{
 				if (materialKeys[i] == cName)
 					loadDefaultValue(c, static_cast<MaterialParameters>(i), rc, cache, async);
@@ -521,7 +520,8 @@ void Material::deserializeReadable(std::istream& stream, RenderContext* rc, Obje
 {
 	_texturesToLoad.clear();
 	
-	size_t size = streamSize(stream) - static_cast<size_t>(stream.tellg());
+	uint32_t size = static_cast<uint32_t>(streamSize(stream) - stream.tellg());
+	
 	StringDataStorage data(size + 1, 0);
 	stream.read(data.data(), static_cast<std::streamsize>(size));
 
@@ -585,7 +585,7 @@ Texture::Pointer Material::loadTexture(RenderContext* rc, const std::string& pat
 
 void Material::clear()
 {
-	for (size_t i = 0; i < MaterialParameter_max; ++i)
+	for (uint32_t i = 0; i < MaterialParameter_max; ++i)
 	{
 		_defaultIntParameters[i].set = 0;
 		_defaultIntParameters[i].value = 0;
@@ -611,7 +611,7 @@ void Material::clear()
  * Setters / getters
  *
  */
-const int Material::getInt(size_t param) const
+const int Material::getInt(uint32_t param) const
 {
 	if (param < MaterialParameter_max)
 		return _defaultIntParameters[param].value;
@@ -620,7 +620,7 @@ const int Material::getInt(size_t param) const
 	return i == _customIntParameters.end() ? 0 : i->second; 
 }
 
-const float Material::getFloat(size_t param) const
+const float Material::getFloat(uint32_t param) const
 { 
 	if (param < MaterialParameter_max)
 		return _defaultFloatParameters[param].value;
@@ -629,7 +629,7 @@ const float Material::getFloat(size_t param) const
 	return i == _customFloatParameters.end() ? 0 : i->second; 
 }
 
-const vec4& Material::getVector(size_t param) const
+const vec4& Material::getVector(uint32_t param) const
 { 
 	if (param < MaterialParameter_max)
 		return _defaultVectorParameters[param].value;
@@ -638,7 +638,7 @@ const vec4& Material::getVector(size_t param) const
 	return i == _customVectorParameters.end() ? _emptyVector : i->second; 
 }
 
-const std::string& Material::getString(size_t param) const
+const std::string& Material::getString(uint32_t param) const
 { 
 	if (param < MaterialParameter_max)
 		return _defaultStringParameters[param].value;
@@ -647,7 +647,7 @@ const std::string& Material::getString(size_t param) const
 	return i == _customStringParameters.end() ? _emptyString : i->second; 
 }
 
-const Texture::Pointer& Material::getTexture(size_t param) const 
+const Texture::Pointer& Material::getTexture(uint32_t param) const 
 { 
 	if (param < MaterialParameter_max)
 		return _defaultTextureParameters[param].value;
@@ -656,7 +656,7 @@ const Texture::Pointer& Material::getTexture(size_t param) const
 	return i == _customTextureParameters.end() ? _emptyTexture : i->second; 
 }
 
-void Material::setInt(size_t param, int value)
+void Material::setInt(uint32_t param, int value)
 {
 	if (param < MaterialParameter_max)
 		_defaultIntParameters[param] = value;
@@ -664,7 +664,7 @@ void Material::setInt(size_t param, int value)
 		_customIntParameters[param] = value; 
 }
 
-void Material::setFloat(size_t param, float value)
+void Material::setFloat(uint32_t param, float value)
 {
 	if (param < MaterialParameter_max)
 		_defaultFloatParameters[param] = value;
@@ -672,7 +672,7 @@ void Material::setFloat(size_t param, float value)
 		_customFloatParameters[param] = value; 
 }
 
-void Material::setVector(size_t param, const vec4& value)
+void Material::setVector(uint32_t param, const vec4& value)
 {
 	if (param < MaterialParameter_max)
 		_defaultVectorParameters[param] = value;
@@ -680,7 +680,7 @@ void Material::setVector(size_t param, const vec4& value)
 		_customVectorParameters[param] = value; 
 }
 
-void Material::setTexture(size_t param, const Texture::Pointer& value)
+void Material::setTexture(uint32_t param, const Texture::Pointer& value)
 {
 	if (param < MaterialParameter_max)
 		_defaultTextureParameters[param] = value;
@@ -688,7 +688,7 @@ void Material::setTexture(size_t param, const Texture::Pointer& value)
 		_customTextureParameters[param] = value; 
 }
 
-void Material::setString(size_t param, const std::string& value)
+void Material::setString(uint32_t param, const std::string& value)
 {
 	if (param < MaterialParameter_max)
 		_defaultStringParameters[param] = value;
@@ -696,31 +696,31 @@ void Material::setString(size_t param, const std::string& value)
 		_customStringParameters[param] = value; 
 }
 
-bool Material::hasVector(size_t param) const
+bool Material::hasVector(uint32_t param) const
 { 
 	return (param < MaterialParameter_max) ? (_defaultVectorParameters[param].set > 0) : 
 		(_customVectorParameters.find(param) != _customVectorParameters.end());
 }
 
-bool Material::hasFloat(size_t param) const
+bool Material::hasFloat(uint32_t param) const
 {
 	return (param < MaterialParameter_max) ? (_defaultFloatParameters[param].set > 0) : 
 		(_customFloatParameters.find(param) != _customFloatParameters.end());
 }
 
-bool Material::hasTexture(size_t param) const
+bool Material::hasTexture(uint32_t param) const
 { 
 	return (param < MaterialParameter_max) ? (_defaultTextureParameters[param].set > 0) : 
 		(_customTextureParameters.find(param) != _customTextureParameters.end()); 
 }
 
-bool Material::hasInt(size_t param) const
+bool Material::hasInt(uint32_t param) const
 { 
 	return (param < MaterialParameter_max) ? (_defaultIntParameters[param].set > 0) : 
 		(_customIntParameters.find(param) != _customIntParameters.end()); 
 }
 
-bool Material::hasString(size_t param) const
+bool Material::hasString(uint32_t param) const
 { 
 	return (param < MaterialParameter_max) ? (_defaultStringParameters[param].set > 0) : 
 		(_customStringParameters.find(param) != _customStringParameters.end()); 
@@ -746,7 +746,7 @@ void Material::textureDidStartLoading(Texture::Pointer t)
 #if (ET_DEBUG)
 	bool pendingTextureFound = false;
 	
-	for (size_t i = 0; i < MaterialParameter_max; ++i)
+	for (uint32_t i = 0; i < MaterialParameter_max; ++i)
 	{
 		if ((_defaultTextureParameters[i].value == t) && (_texturesToLoad.count(i) > 0))
 		{
@@ -773,10 +773,10 @@ void Material::textureDidLoad(Texture::Pointer t)
 {
 	ET_ASSERT(t.valid())
 	
-	size_t invalidParameter = static_cast<size_t>(-1);
-	size_t param = invalidParameter;
+	uint32_t invalidParameter = static_cast<uint32_t>(-1);
+	uint32_t param = invalidParameter;
 	
-	for (size_t i = 0; i < MaterialParameter_max; ++i)
+	for (uint32_t i = 0; i < MaterialParameter_max; ++i)
 	{
 		if ((_defaultTextureParameters[i].value == t) && (_texturesToLoad.count(i) > 0))
 		{

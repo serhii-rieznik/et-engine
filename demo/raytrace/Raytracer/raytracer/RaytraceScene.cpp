@@ -19,14 +19,14 @@ void RaytraceScene::load(et::RenderContext* rc)
 {
 	apertureSize = 0.0f;
 	
-	ambientColor = vec4(3.0f);
+	ambientColor = vec4(2.0f);
 	
-	environmentMap = loadTexture(application().resolveFileName("background.hdr"));
+	environmentMap = loadTexture(application().resolveFileName("sun-fixed.hdr"));
 	
 	camera.perspectiveProjection(QUARTER_PI, 1.0f, 1.0f, 1024.0f);
 		
 	ObjectsCache cache;
-	OBJLoader loader(rc, "shaderart.obj");
+	OBJLoader loader(rc, "sphere.obj");
 	auto loadedModel = loader.load(cache, OBJLoader::Option_SupportMeshes);
 	auto meshes = loadedModel->childrenOfType(s3d::ElementType_SupportMesh);
 	

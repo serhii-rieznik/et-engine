@@ -10,9 +10,9 @@
 
 using namespace et;
 
-VertexBufferData::VertexBufferData(RenderContext* rc, const VertexArray::Description& desc,
-	BufferDrawType vertexDrawType, const std::string& aName) : APIObject(aName), _rc(rc),
-	_decl(desc.declaration), _drawType(vertexDrawType)
+VertexBuffer::VertexBuffer(RenderContext* rc, const VertexDeclaration& decl,
+	const BinaryDataStorage& data, BufferDrawType vertexDrawType, const std::string& aName) : APIObject(aName),
+	_rc(rc), _decl(decl), _drawType(vertexDrawType)
 {
 #if defined(ET_CONSOLE_APPLICATION)
 	ET_FAIL("Attempt to create VertexBuffer in console application.")
@@ -20,26 +20,14 @@ VertexBufferData::VertexBufferData(RenderContext* rc, const VertexArray::Descrip
 	GLuint buffer = 0;
 	glGenBuffers(1, &buffer);
 	setAPIHandle(buffer);
-	setData(desc.data.data(), desc.data.dataSize());
+	setData(data.data(), data.dataSize());
 #endif
 }
 
-VertexBufferData::VertexBufferData(RenderContext* rc, const VertexDeclaration& decl, const void* vertexData,
-	size_t vertexDataSize, BufferDrawType vertexDrawType, const std::string& aName) : APIObject(aName), _rc(rc),
-	_decl(decl), _drawType(vertexDrawType)
-{
-#if defined(ET_CONSOLE_APPLICATION)
-	ET_FAIL("Attempt to create VertexBuffer in console application.")
-#else
-	GLuint buffer = 0;
-	glGenBuffers(1, &buffer);
-	setAPIHandle(buffer);
+VertexBuffer::VertexBuffer(RenderContext* rc, const VertexArray::Description& desc, BufferDrawType drawType,
+	const std::string& aName) : VertexBuffer(rc, desc.declaration, desc.data, drawType, aName) { }
 
-	setData(vertexData, vertexDataSize);
-#endif
-}
-
-VertexBufferData::~VertexBufferData()
+VertexBuffer::~VertexBuffer()
 {
 #if !defined(ET_CONSOLE_APPLICATION)
 	uint32_t buffer = static_cast<uint32_t>(apiHandle());
@@ -51,7 +39,7 @@ VertexBufferData::~VertexBufferData()
 #endif
 }
 
-void VertexBufferData::setData(const void* data, size_t dataSize)
+void VertexBuffer::setData(const void* data, size_t dataSize)
 {
 #if !defined(ET_CONSOLE_APPLICATION)
 	_rc->renderState().bindBuffer(GL_ARRAY_BUFFER, static_cast<uint32_t>(apiHandle()));
@@ -66,7 +54,7 @@ void VertexBufferData::setData(const void* data, size_t dataSize)
 #endif
 }
 
-void* VertexBufferData::map(size_t offset, size_t dataSize, MapBufferMode mode)
+void* VertexBuffer::map(size_t offset, size_t dataSize, MapBufferMode mode)
 {
 	ET_ASSERT(!_mapped)
 	ET_ASSERT(dataSize > 0)
@@ -119,7 +107,7 @@ void* VertexBufferData::map(size_t offset, size_t dataSize, MapBufferMode mode)
 	return result;
 }
 
-void VertexBufferData::unmap()
+void VertexBuffer::unmap()
 {
 #if !defined(ET_CONSOLE_APPLICATION)
 	glUnmapBuffer(GL_ARRAY_BUFFER);
@@ -129,12 +117,12 @@ void VertexBufferData::unmap()
 #endif
 }
 
-void VertexBufferData::serialize(std::ostream&)
+void VertexBuffer::serialize(std::ostream&)
 {
 	ET_FAIL("Unsupported");
 }
 
-void VertexBufferData::deserialize(std::istream&)
+void VertexBuffer::deserialize(std::istream&)
 {
 	ET_FAIL("Unsupported");
 }

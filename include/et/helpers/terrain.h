@@ -72,7 +72,7 @@ namespace et
 		TerrainLODLevels* _lods;
 		TerrainChunkList _chunks;
 
-		VertexBuffer _vertexBuffer;
+		VertexBuffer::Pointer _vertexBuffer;
 		IndexBuffer _indexBuffer;
 		VertexArrayObject _vao;
 

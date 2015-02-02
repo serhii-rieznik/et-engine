@@ -36,23 +36,23 @@ namespace et
 		public:
 			Material();
 			
-			const int getInt(size_t param) const;
-			const float getFloat(size_t param) const;
-			const vec4& getVector(size_t param) const;
-			const std::string& getString(size_t param) const;
-			const Texture::Pointer& getTexture(size_t param) const;
+			const int getInt(uint32_t param) const;
+			const float getFloat(uint32_t param) const;
+			const vec4& getVector(uint32_t param) const;
+			const std::string& getString(uint32_t param) const;
+			const Texture::Pointer& getTexture(uint32_t param) const;
 
-			void setInt(size_t param, int value);
-			void setFloat(size_t param, float value);
-			void setVector(size_t param, const vec4& value);
-			void setTexture(size_t param, const Texture::Pointer& value);
-			void setString(size_t param, const std::string& value);
+			void setInt(uint32_t param, int value);
+			void setFloat(uint32_t param, float value);
+			void setVector(uint32_t param, const vec4& value);
+			void setTexture(uint32_t param, const Texture::Pointer& value);
+			void setString(uint32_t param, const std::string& value);
 
-			bool hasInt(size_t param) const;
-			bool hasFloat(size_t param) const;
-			bool hasVector(size_t param) const;
-			bool hasTexture(size_t param) const;
-			bool hasString(size_t param) const;
+			bool hasInt(uint32_t param) const;
+			bool hasFloat(uint32_t param) const;
+			bool hasVector(uint32_t param) const;
+			bool hasTexture(uint32_t param) const;
+			bool hasString(uint32_t param) const;
 
 			void serialize(std::ostream& stream, StorageFormat format) const;
 
@@ -116,7 +116,7 @@ namespace et
 			CustomTextureParameters _customTextureParameters;
 			CustomStringParameters _customStringParameters;
 			
-			std::map<size_t, std::string> _texturesToLoad;
+			std::map<uint32_t, std::string> _texturesToLoad;
 		};
 		
 		typedef ObjectsCache MaterialCache;

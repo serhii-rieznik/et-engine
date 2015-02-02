@@ -16,14 +16,14 @@
 namespace et
 {
 	class RenderContext;
-	class VertexBufferData;
+	class VertexBuffer;
 	class VertexArrayObjectData;
 	class IndexBufferData;
 	class VertexDeclaration;
 	class VertexElement;
 	
+	typedef IntrusivePtr<VertexBuffer> VertexBufferPointer;
 	typedef IntrusivePtr<IndexBufferData> IndexBuffer;
-	typedef IntrusivePtr<VertexBufferData> VertexBuffer;
 	typedef IntrusivePtr<VertexArrayObjectData> VertexArrayObject;
 
 	class RenderState
@@ -149,9 +149,9 @@ namespace et
 		void bindBuffer(uint32_t target, uint32_t buffer, bool force = false);
 		void bindVertexArray(uint32_t buffer, bool force = false);
 
-		void bindBuffer(const VertexBuffer& buf, bool force = false);
+		void bindBuffer(const VertexBufferPointer& buf, bool force = false);
 		void bindBuffer(const IndexBuffer& buf, bool force = false);
-		void bindBuffers(const VertexBuffer& vb, const IndexBuffer& ib, bool force = false);
+		void bindBuffers(const VertexBufferPointer& vb, const IndexBuffer& ib, bool force = false);
 		void bindVertexArray(const VertexArrayObject& vao, bool force = false);
 
 		void setVertexAttributes(const VertexDeclaration& decl, bool force = false);

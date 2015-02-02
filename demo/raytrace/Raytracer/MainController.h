@@ -81,7 +81,7 @@ namespace rt
 		size_t _previewSamples = 4;
 		size_t _previewBounces = 1;
 
-		size_t _productionSamples = 512;
+		size_t _productionSamples = 64;
 		size_t _productionBounces = 64;
 		
 		bool _shouldRender = true;

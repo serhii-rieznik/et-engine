@@ -276,6 +276,8 @@ namespace et
 	
 	std::string vertexAttributeToString(VertexAttributeUsage va);
 	
+	uint32_t sizeOfDataType(DataType);
+	
 	uint32_t vertexAttributeUsageMask(VertexAttributeUsage u);
 	uint32_t vertexAttributeTypeSize(VertexAttributeType t);
 	uint32_t vertexAttributeTypeComponents(VertexAttributeType t);

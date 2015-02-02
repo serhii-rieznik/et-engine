@@ -25,24 +25,23 @@ void Scene::serialize(std::ostream& stream, StorageFormat fmt, const std::string
 	Element::List storages = childrenOfType(ElementType_Storage);
 
 	serializeChunk(stream, HeaderScene);
-	serializeInt(stream, SceneVersionLatest);
+	serializeUInt32(stream, SceneVersionLatest);
 
 	serializeChunk(stream, HeaderData);
-	serializeInt(stream, StorageVersionLatest);
+	serializeUInt32(stream, StorageVersionLatest);
 
-	serializeInt(stream, fmt);
+	serializeUInt32(stream, fmt);
 
-	serializeInt(stream, storages.size());
+	serializeUInt64(stream, storages.size());
 	for (Scene3dStorage::Pointer s : storages)
 	{
 		serializeChunk(stream, HeaderMaterials);
-		serializeInt(stream, s->materials().size());
+		serializeUInt64(stream, s->materials().size());
 		if (fmt == StorageFormat_Binary)
 		{
 			for (auto& mi : s->materials())
 			{
-                size_t miPtr = reinterpret_cast<size_t>(mi.ptr());
-				serializeInt(stream, static_cast<int>(miPtr & 0xffffffff));
+				serializeUInt64(stream, reinterpret_cast<size_t>(mi.ptr()));
 				mi->serialize(stream, fmt);
 			}
 		}
@@ -65,8 +64,7 @@ void Scene::serialize(std::ostream& stream, StorageFormat fmt, const std::string
 					materialsMap[matName] = materialsMap[matName] + 1;
 				}
 
-                size_t miPtr = reinterpret_cast<size_t>(mi.ptr()) & 0xffffffff;
-				serializeInt(stream, static_cast<int>(miPtr));
+				serializeUInt64(stream, reinterpret_cast<size_t>(mi.ptr()));
 				serializeString(stream, mFile);
 
 				std::ofstream mStream(mFile.c_str());
@@ -80,17 +78,17 @@ void Scene::serialize(std::ostream& stream, StorageFormat fmt, const std::string
 		}
 
 		serializeChunk(stream, HeaderVertexArrays);
-		serializeInt(stream, s->vertexArrays().size());
+		serializeUInt64(stream, s->vertexArrays().size());
 		for (auto& vi : s->vertexArrays())
 		{
-            serializeInt(stream, reinterpret_cast<size_t>(vi.ptr()) & 0xffffffff);
+            serializeUInt64(stream, reinterpret_cast<uintptr_t>(vi.ptr()));
 			vi->serialize(stream);
 		}
 
 		IndexArray::Pointer ia = s->indexArray();
 		serializeChunk(stream, HeaderIndexArrays);
-		serializeInt(stream, 1);
-        serializeInt(stream, reinterpret_cast<size_t>(ia.ptr()) & 0xffffffff);
+		serializeUInt32(stream, 1);
+        serializeUInt64(stream, reinterpret_cast<uintptr_t>(ia.ptr()));
 		ia->serialize(stream);
 	}
 
@@ -118,7 +116,7 @@ bool Scene::deserialize(std::istream& stream, RenderContext* rc, ObjectsCache& t
 }
 
 Scene3dStorage::Pointer Scene::deserializeStorage(std::istream& stream, RenderContext* rc,
-	ObjectsCache& tc, const std::string& basePath, StorageFormat fmt, bool async)
+	ObjectsCache& tc, const std::string& basePath, StorageFormat fmt, StorageVersion ver, bool async)
 {
 	Scene3dStorage::Pointer result = Scene3dStorage::Pointer::create("storage", nullptr);
 
@@ -133,7 +131,7 @@ Scene3dStorage::Pointer Scene::deserializeStorage(std::istream& stream, RenderCo
 
 		if (chunkEqualTo(readChunk, HeaderMaterials))
 		{
-			size_t numMaterials = deserializeUInt(stream);
+			size_t numMaterials = deserializeUInt32(stream);
 			_materialsToLoad.setValue(static_cast<AtomicCounterType>(numMaterials));
 			
 			if (fmt == StorageFormat_Binary)
@@ -142,7 +140,7 @@ Scene3dStorage::Pointer Scene::deserializeStorage(std::istream& stream, RenderCo
 				{
 					Material::Pointer m;
 					ET_CONNECT_EVENT(m->loaded, Scene::onMaterialLoaded);
-					m->tag = deserializeInt(stream);
+					m->tag = deserializeInt32(stream);
 					m->deserialize(stream, rc, tc, basePath, StorageFormat_Binary, async);
 					result->addMaterial(m);
 				}
@@ -154,7 +152,7 @@ Scene3dStorage::Pointer Scene::deserializeStorage(std::istream& stream, RenderCo
 					Material::Pointer m;
 					ET_CONNECT_EVENT(m->loaded, Scene::onMaterialLoaded);
 					
-					m->tag = deserializeInt(stream);
+					m->tag = deserializeInt32(stream);
 					m->setOrigin(application().resolveFileName(basePath + getFileName(deserializeString(stream))));
 
 					InputStream mStream(m->origin(), StreamMode_Text);
@@ -176,11 +174,11 @@ Scene3dStorage::Pointer Scene::deserializeStorage(std::istream& stream, RenderCo
 		}
 		else if (chunkEqualTo(readChunk, HeaderVertexArrays))
 		{
-			size_t numVertexArrays = deserializeUInt(stream);
+			uint64_t numVertexArrays = (ver < StorageVersion_1_1_0) ? deserializeUInt32(stream) : deserializeUInt64(stream);
 			for (size_t i = 0; i < numVertexArrays; ++i)
 			{
 				VertexArray::Pointer va = VertexArray::Pointer::create();
-				va->tag = deserializeInt(stream);
+				va->tag = deserializeInt32(stream);
 				va->deserialize(stream);
 				result->addVertexArray(va);
 			}
@@ -188,10 +186,10 @@ Scene3dStorage::Pointer Scene::deserializeStorage(std::istream& stream, RenderCo
 		}
 		else if (chunkEqualTo(readChunk, HeaderIndexArrays))
 		{
-			int num = deserializeInt(stream);
+			int num = deserializeInt32(stream);
 			ET_ASSERT(num == 1);
 			(void)(num);
-			result->indexArray()->tag = deserializeInt(stream);
+			result->indexArray()->tag = deserializeInt32(stream);
 			result->indexArray()->deserialize(stream);
 			indexArrayRead = true;
 		}
@@ -216,7 +214,7 @@ void Scene::buildAPIObjects(Scene3dStorage::Pointer p, RenderContext* rc)
 			"-" + intToStr(static_cast<size_t>(p->indexArray()->tag));
 		
 		VertexArrayObject vao = rc->vertexBufferFactory().createVertexArrayObject(vaoName);
-		VertexBuffer vb = rc->vertexBufferFactory().createVertexBuffer(vbName, i, BufferDrawType::Static);
+		VertexBuffer::Pointer vb = rc->vertexBufferFactory().createVertexBuffer(vbName, i, BufferDrawType::Static);
 		if (!ib.valid())
 		{
 			ib = rc->vertexBufferFactory().createIndexBuffer(ibName, p->indexArray(), BufferDrawType::Static);
@@ -282,12 +280,12 @@ Element::Pointer Scene::createElementOfType(size_t type, Element* parent)
 	}
 }
 
-Material::Pointer Scene::materialWithId(int id)
+Material::Pointer Scene::materialWithId(uint64_t id)
 {
 	Element::List storages = childrenOfType(ElementType_Storage);
-	for (auto si = storages.begin(), se = storages.end(); si != se; ++si)
+	for (auto si : storages)
 	{
-		Scene3dStorage* storage = static_cast<Scene3dStorage*>(si->ptr());
+		Scene3dStorage* storage = static_cast<Scene3dStorage*>(si.ptr());
 		for (auto& data : storage->materials())
 		{
 			if (data->tag == id)
@@ -352,7 +350,7 @@ bool Scene::performDeserialization(std::istream& stream, RenderContext* rc, Obje
 
 	_externalFactory = factory;
 
-	size_t version = deserializeUInt(stream);
+	uint32_t version = deserializeUInt32(stream);
 	if (version > static_cast<size_t>(SceneVersionLatest))
 	{
 		log::error("Unsupported version of the ETM file.");
@@ -366,19 +364,26 @@ bool Scene::performDeserialization(std::istream& stream, RenderContext* rc, Obje
 		deserializeChunk(stream, readChunk);
 		if (chunkEqualTo(readChunk, HeaderData))
 		{
-			size_t storageVersion = deserializeUInt(stream);
+			uint32_t storageVersion = deserializeUInt32(stream);
 			
 			size_t numStorages = 0;
 			StorageFormat format = StorageFormat_Binary;
 			
 			if (storageVersion == StorageVersion_1_0_0)
 			{
-				numStorages = deserializeUInt(stream);
+				numStorages = deserializeUInt32(stream);
 			}
 			else if (storageVersion >= StorageVersion_1_0_1)
 			{
-				format = static_cast<StorageFormat>(deserializeInt(stream));
-				numStorages = deserializeUInt(stream);
+				format = static_cast<StorageFormat>(deserializeInt32(stream));
+				if (storageVersion >= StorageVersion_1_1_0)
+				{
+					numStorages = deserializeUInt64(stream);
+				}
+				else
+				{
+					numStorages = deserializeUInt32(stream);
+				}
 			}
 			else
 			{
@@ -388,7 +393,8 @@ bool Scene::performDeserialization(std::istream& stream, RenderContext* rc, Obje
 
 			for (size_t i = 0; i < numStorages; ++i)
 			{
-				Scene3dStorage::Pointer ptr = deserializeStorage(stream, rc, tc, basePath, format, async);
+				Scene3dStorage::Pointer ptr = deserializeStorage(stream, rc, tc, basePath, format,
+					static_cast<StorageVersion>(storageVersion), async);
 				ptr->setParent(this);
 			}
 

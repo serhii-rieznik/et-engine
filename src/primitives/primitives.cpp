@@ -464,6 +464,53 @@ uint32_t primitives::buildTriangleStripIndexes(IndexArray::Pointer buffer, const
 	return buildTriangleStripIndexes(buffer.reference(), dim, vertexOffset, indexOffset);
 }
 
+void primitives::calculateNormals(VertexStorage::Pointer data, const IndexArray::Pointer& buffer, size_t first, size_t last)
+{
+	ET_ASSERT(first < last);
+	
+	if (!data->hasAttributeWithType(VertexAttributeUsage::Position, VertexAttributeType::Vec3))
+	{
+		log::error("primitives::calculateNormals - vertex storage does not contain positions of type vec3.");
+		return;
+	}
+	if (!data->hasAttributeWithType(VertexAttributeUsage::Normal, VertexAttributeType::Vec3))
+	{
+		log::error("primitives::calculateNormals - vertex storage does not contain normals of type vec3.");
+		return;
+	}
+	
+	RawDataAcessor<vec3> pos = data->accessData<VertexAttributeType::Vec3>(VertexAttributeUsage::Position, 0);
+	RawDataAcessor<vec3> nrm = data->accessData<VertexAttributeType::Vec3>(VertexAttributeUsage::Normal, 0);
+	
+	const auto& e = buffer->primitive(last);
+	
+	for (auto i = buffer->primitive(first); i != e; ++i)
+	{
+		const auto& p = (*i);
+		nrm[p[0]] = vec3(0.0f);
+		nrm[p[1]] = vec3(0.0f);
+		nrm[p[2]] = vec3(0.0f);
+	}
+	
+	for (auto i = buffer->primitive(first); i != e; ++i)
+	{
+		const auto& p = (*i);
+		triangle t(pos[p[0]], pos[p[1]], pos[p[2]]);
+		vec3 n = t.normalizedNormal() * t.square();
+		nrm[p[0]] += n;
+		nrm[p[1]] += n;
+		nrm[p[2]] += n;
+	}
+	
+	for (auto i = buffer->primitive(first); i != e; ++i)
+	{
+		const auto& p = (*i);
+		nrm[p[0]].normalize();
+		nrm[p[1]].normalize();
+		nrm[p[2]].normalize();
+	}
+}
+
 void primitives::calculateNormals(VertexArray::Pointer data, const IndexArray::Pointer& buffer, size_t first, size_t last)
 {
 	ET_ASSERT(first < last);

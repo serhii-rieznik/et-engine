@@ -25,7 +25,7 @@ namespace et
 
 	private:
 		friend class OBJLoader;
-		OBJLoader* _owner;
+		OBJLoader* _owner = nullptr;
 		ObjectsCache& _cache;
 	};
 }
@@ -95,13 +95,9 @@ OBJLoaderThread::OBJLoaderThread(OBJLoader* owner, ObjectsCache& cache) :
 ThreadResult OBJLoaderThread::main()
 {
 	_owner->loadData(true, _cache);
-
 	_owner->processLoadedData();
-
-	Invocation i;
-	i.setTarget(_owner, &OBJLoader::threadFinished);
-	i.invokeInMainRunLoop();
-
+	Invocation([this]() { _owner->threadFinished(); }).invokeInMainRunLoop();
+	
 	return 0;
 }
 
@@ -685,14 +681,13 @@ void OBJLoader::processLoadedData()
 		
 	IndexArrayFormat fmt = (totalVertices > 65535) ? IndexArrayFormat::Format_32bit : IndexArrayFormat::Format_16bit;
 	
-	_vertexData = VertexArray::Pointer::create(decl, totalVertices);
 	_indices = IndexArray::Pointer::create(fmt, totalVertices, PrimitiveType::Triangles);
-	
 	_indices->linearize(totalVertices);
-
-	RawDataAcessor<vec3> pos = _vertexData->chunk(VertexAttributeUsage::Position).accessData<vec3>(0);
-	RawDataAcessor<vec3> norm = _vertexData->chunk(VertexAttributeUsage::Normal).accessData<vec3>(0);
-	RawDataAcessor<vec2> tex = _vertexData->chunk(VertexAttributeUsage::TexCoord0).accessData<vec2>(0);
+	
+	_vertexData = VertexStorage::Pointer::create(decl, totalVertices);
+	auto pos = _vertexData->accessData<VertexAttributeType::Vec3>(VertexAttributeUsage::Position, 0);
+	auto norm = _vertexData->accessData<VertexAttributeType::Vec3>(VertexAttributeUsage::Normal, 0);
+	auto tex = _vertexData->accessData<VertexAttributeType::Vec2>(VertexAttributeUsage::TexCoord0, 0);
 	
 	size_t index = 0;
 	
@@ -778,17 +773,14 @@ s3d::ElementContainer::Pointer OBJLoader::generateVertexBuffers()
 	s3d::ElementContainer::Pointer result = s3d::ElementContainer::Pointer::create(inputFileName, nullptr);
 
 	_storage = s3d::Scene3dStorage::Pointer::create(getFileName(inputFileName) + "-storage", result.ptr());
-	_storage->addVertexArray(_vertexData);
+	_storage->addVertexStorage(_vertexData);
 	_storage->setIndexArray(_indices);
 	
 	for (auto m : _materials)
 		_storage->addMaterial(m);
 	
-	
-	VertexArrayObject vao = _rc->vertexBufferFactory().createVertexArrayObject("model-vao");
-
-	vao->setBuffers(_rc->vertexBufferFactory().createVertexBuffer("model-vb", _vertexData, BufferDrawType::Static),
-		_rc->vertexBufferFactory().createIndexBuffer("model-ib", _indices, BufferDrawType::Static));
+	VertexArrayObject vao = _rc->vertexBufferFactory().createVertexArrayObject("model-vao", _vertexData,
+		BufferDrawType::Static, _indices, BufferDrawType::Static);
 
 	for (const auto& i : _meshes)
 	{

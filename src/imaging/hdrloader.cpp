@@ -106,7 +106,8 @@ void et::hdr::loadFromStream(std::istream& source, TextureDescription& desc)
 	auto sourcePos = source.tellg();
 
 	size_t rowSize = desc.size.x * 4;
-	size_t maxDataSize = desc.size.square() * desc.bitsPerPixel / 8;
+	size_t square = desc.size.square();
+	size_t maxDataSize = square * desc.bitsPerPixel / 8;
 	BinaryDataStorage inData(maxDataSize, 0);
 	source.read(inData.binary(), maxDataSize);
 	auto ptr = inData.begin();

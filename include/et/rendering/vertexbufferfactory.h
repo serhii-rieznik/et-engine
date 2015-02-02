@@ -22,17 +22,17 @@ namespace et
 	public:
 		VertexBufferFactory(RenderContext* rc);
 
-		VertexBuffer createVertexBuffer(const std::string& name,
-			VertexArray::Pointer data, BufferDrawType drawType);
+		VertexBuffer::Pointer createVertexBuffer(const std::string&, VertexArray::Pointer, BufferDrawType);
+		VertexBuffer::Pointer createVertexBuffer(const std::string&, VertexStorage::Pointer, BufferDrawType);
 		
-		IndexBuffer createIndexBuffer(const std::string& name,
-			IndexArray::Pointer data, BufferDrawType drawType);
+		IndexBuffer createIndexBuffer(const std::string&, IndexArray::Pointer, BufferDrawType);
 		
-		VertexArrayObject createVertexArrayObject(const std::string& name);
+		VertexArrayObject createVertexArrayObject(const std::string&);
 
-		VertexArrayObject createVertexArrayObject(const std::string& name, 
-			VertexArray::Pointer vertexData, BufferDrawType vertexDrawType,
-			IndexArray::Pointer indexData, BufferDrawType indexDrawType);
+		VertexArrayObject createVertexArrayObject(const std::string&, VertexArray::Pointer, BufferDrawType,
+			IndexArray::Pointer, BufferDrawType);
+		VertexArrayObject createVertexArrayObject(const std::string&, VertexStorage::Pointer, BufferDrawType,
+			IndexArray::Pointer, BufferDrawType);
 
 	private:
 		ET_DENY_COPY(VertexBufferFactory)

@@ -800,7 +800,7 @@ void FBXLoaderPrivate::buildVertexBuffers(RenderContext* rc, s3d::Element::Point
 	for (const auto& i : vertexArrays)
 	{
 		VertexArrayObject vao = rc->vertexBufferFactory().createVertexArrayObject("fbx-vao");
-		VertexBuffer vb = rc->vertexBufferFactory().createVertexBuffer("fbx-v", i, BufferDrawType::Static);
+		VertexBuffer::Pointer vb = rc->vertexBufferFactory().createVertexBuffer("fbx-v", i, BufferDrawType::Static);
 		vao->setBuffers(vb, primaryIndexBuffer);
 		vertexArrayObjects.push_back(vao);
 	}

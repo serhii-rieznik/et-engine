@@ -193,17 +193,22 @@ vec4 gatherBouncesRecursive(const RaytraceScene& scene, const ray3d& ray, size_t
 		
 		if (k < 0.0f) // reflect to the current medium
 		{
-			return computeReflection(scene, mat, ray.direction, i.hitPoint, i.hitNormal, depth + 1, maxDepth,
-				mediumIORs, terminatingColor);
+			vec3 ideal;
+			vec3 reflectedRay = randomReflectedVector(ray.direction, i.hitNormal, mat.roughness, ideal);
+			auto deepBounce = gatherBouncesRecursive(scene, ray3d(i.hitPoint, reflectedRay), depth + 1, maxDepth, mediumIORs, terminatingColor);
+			mul(deepBounce, dot(reflectedRay, ideal));
+			return add(mat.emissiveColor, mul(mat.reflectiveColor, deepBounce));
 		}
 		else
 		{
 			float fresnel = computeFresnelTerm(ray.direction, i.hitNormal, eta);
-			
 			if (randomFloat() < fresnel) // reflect to the current medium
 			{
-				return computeReflection(scene, mat, ray.direction, i.hitPoint, i.hitNormal, depth + 1, maxDepth,
-					mediumIORs, terminatingColor);
+				vec3 ideal;
+				vec3 reflectedRay = randomReflectedVector(ray.direction, i.hitNormal, mat.roughness, ideal);
+				auto deepBounce = gatherBouncesRecursive(scene, ray3d(i.hitPoint, reflectedRay), depth + 1, maxDepth, mediumIORs, terminatingColor);
+				mul(deepBounce, dot(reflectedRay, ideal));
+				return add(mat.emissiveColor, mul(mat.reflectiveColor, deepBounce));
 			}
 			else // perform refraction
 			{
@@ -215,9 +220,8 @@ vec4 gatherBouncesRecursive(const RaytraceScene& scene, const ray3d& ray, size_t
 				vec3 ideal;
 				vec3 refractedRay = randomRefractedVector(ray.direction, i.hitNormal, eta, k, mat.roughness, ideal);
 				
-				auto deepBounce = gatherBouncesRecursive(scene, ray3d(i.hitPoint, refractedRay), depth + 1, maxDepth,
-					mediumIORs, terminatingColor);
-				
+				auto deepBounce = gatherBouncesRecursive(scene, ray3d(i.hitPoint, refractedRay), depth + 1,
+					maxDepth, mediumIORs, terminatingColor);
 				mul(deepBounce, dot(refractedRay, ideal));
 				return add(mat.emissiveColor, mul(mat.diffuseColor, deepBounce));
 			}
@@ -228,19 +232,14 @@ vec4 gatherBouncesRecursive(const RaytraceScene& scene, const ray3d& ray, size_t
 		return computeReflection(scene, mat, ray.direction, i.hitPoint, i.hitNormal, depth + 1, maxDepth,
 			mediumIORs, terminatingColor);
 	}
-	else
-	{
-		vec3 direction = randomDiffuseVector(i.hitNormal);
-		
-		auto deepBounce = gatherBouncesRecursive(scene, ray3d(i.hitPoint, direction), depth + 1, maxDepth,
-			mediumIORs, terminatingColor);
-		
-		mul(deepBounce, dot(direction, i.hitNormal));
-		
-		return add(mat.emissiveColor, mul(mat.diffuseColor, deepBounce));
-	}
 	
-	return vec4(1000.0f, 0.0f, 1000.0f, 0.0f);
+	vec3 direction = randomDiffuseVector(i.hitNormal);
+	
+	auto deepBounce = gatherBouncesRecursive(scene, ray3d(i.hitPoint, direction), depth + 1, maxDepth,
+		mediumIORs, terminatingColor);
+	
+	mul(deepBounce, dot(direction, i.hitNormal));
+	return add(mat.emissiveColor, mul(mat.diffuseColor, deepBounce));
 }
 
 void rt::raytrace(const RaytraceScene& scene, const et::vec2i& imageSize, const et::vec2i& origin,

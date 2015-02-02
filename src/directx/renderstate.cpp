@@ -99,7 +99,7 @@ void RenderState::setVertexAttributesBaseIndex(const VertexDeclaration& decl, si
 #endif
 }
 
-void RenderState::bindBuffer(const VertexBuffer& buffer, bool force)
+void RenderState::bindBuffer(const VertexBuffer::Pointer& buffer, bool force)
 {
 #if !defined(ET_CONSOLE_APPLICATION)
 #endif
@@ -111,7 +111,7 @@ void RenderState::bindBuffer(const IndexBuffer& buf, bool force)
 #endif
 }
 
-void RenderState::bindBuffers(const VertexBuffer& vb, const IndexBuffer& ib, bool force)
+void RenderState::bindBuffers(const VertexBuffer::Pointer& vb, const IndexBuffer& ib, bool force)
 {
 #if !defined(ET_CONSOLE_APPLICATION)
 #endif

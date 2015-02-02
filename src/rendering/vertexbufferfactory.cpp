@@ -14,10 +14,22 @@ VertexBufferFactory::VertexBufferFactory(et::RenderContext* rc) :
 {
 }
 
-VertexBuffer VertexBufferFactory::createVertexBuffer(const std::string& name, VertexArray::Pointer data,
-	BufferDrawType vertexDrawType)
+VertexBuffer::Pointer VertexBufferFactory::createVertexBuffer(const std::string& name,
+	VertexArray::Pointer data, BufferDrawType drawType)
 {
-	VertexBuffer vb = VertexBuffer::create(renderContext(), data->generateDescription(), vertexDrawType, name);
+	VertexBuffer::Pointer vb = VertexBuffer::Pointer::create(renderContext(), data->generateDescription(),
+		drawType, name);
+	
+	vb->setSourceTag(reinterpret_cast<size_t>(data.ptr()));
+	return vb;
+}
+
+VertexBuffer::Pointer VertexBufferFactory::createVertexBuffer(const std::string& name,
+	VertexStorage::Pointer data, BufferDrawType drawType)
+{
+	VertexBuffer::Pointer vb = VertexBuffer::Pointer::create(renderContext(), data->declaration(),
+		data->data(), drawType, name);
+	
 	vb->setSourceTag(reinterpret_cast<size_t>(data.ptr()));
 	return vb;
 }
@@ -44,5 +56,17 @@ VertexArrayObject VertexBufferFactory::createVertexArrayObject(const std::string
 	result->setBuffers(createVertexBuffer(name + "-vb", vertexData, vertexDrawType),
 		createIndexBuffer(name + "-ib", indexData, indexDrawType));
 
+	return result;
+}
+
+VertexArrayObject VertexBufferFactory::createVertexArrayObject(const std::string& name,
+	VertexStorage::Pointer vertexData, BufferDrawType vertexDrawType, IndexArray::Pointer indexData,
+	BufferDrawType indexDrawType)
+{
+	VertexArrayObject result = VertexArrayObject::create(renderContext(), name);
+	
+	result->setBuffers(createVertexBuffer(name + "-vb", vertexData, vertexDrawType),
+		createIndexBuffer(name + "-ib", indexData, indexDrawType));
+	
 	return result;
 }

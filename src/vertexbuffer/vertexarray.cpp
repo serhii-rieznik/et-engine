@@ -10,8 +10,9 @@
 
 using namespace et;
 
-const int VertexArrayId_1 = ET_COMPOSE_UINT32('V', 'A', 'V', '1');
-const int VertexArrayCurrentId = VertexArrayId_1;
+const uint32_t VertexArrayId_1 = ET_COMPOSE_UINT32('V', 'A', 'V', '1');
+const uint32_t VertexArrayId_2 = ET_COMPOSE_UINT32('V', 'A', 'V', '2');
+const uint32_t VertexArrayCurrentId = VertexArrayId_2;
 
 VertexArray::VertexArray() : tag(0), _decl(true), _size(0),
 	_smoothing(VertexAttributeUsage::Smoothing, VertexAttributeType::Int, 0) { }
@@ -132,11 +133,11 @@ void VertexArray::fitToSize(size_t count)
 
 void VertexArray::serialize(std::ostream& stream)
 {
-	serializeInt(stream, VertexArrayCurrentId);
+	serializeUInt32(stream, VertexArrayCurrentId);
 	_decl.serialize(stream);
 
-	serializeInt(stream, static_cast<int>(_size));
-	serializeInt(stream, static_cast<int>(_chunks.size()));
+	serializeUInt64(stream, _size);
+	serializeUInt64(stream, _chunks.size());
 	
 	for (auto& i :_chunks)
 		i->serialize(stream);
@@ -146,20 +147,27 @@ void VertexArray::serialize(std::ostream& stream)
 
 void VertexArray::deserialize(std::istream& stream)
 {
-	int id = deserializeInt(stream);
+	uint32_t id = deserializeUInt32(stream);
 	
 	if (id == VertexArrayId_1)
 	{
 		_decl.deserialize(stream);
+		_size = deserializeUInt32(stream);
 		
-		_size = deserializeSizeT(stream);
-		
-		size_t numChunks = deserializeSizeT(stream);
-		
+		size_t numChunks = deserializeUInt32(stream);
 		for (size_t i = 0; i < numChunks; ++i)
 			_chunks.push_back(VertexDataChunk(stream));
 		
-		_smoothing = VertexDataChunk(stream);
+	}
+	else if (id == VertexArrayId_2)
+	{
+		_decl.deserialize(stream);
+		_size = deserializeUInt64(stream);
+		
+		uint64_t numChunks = deserializeUInt64(stream);
+		for (uint64_t i = 0; i < numChunks; ++i)
+			_chunks.push_back(VertexDataChunk(stream));
+		
 	}
 	else
 	{

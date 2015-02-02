@@ -172,47 +172,46 @@ void Element::clearRecursively()
 void Element::serializeGeneralParameters(std::ostream& stream, SceneVersion version)
 {
 	serializeString(stream, name());
-	serializeInt(stream, _active);
-	serializeInt(stream, flags());
+	serializeInt32(stream, _active);
+	serializeInt64(stream, flags());
 	serializeVector(stream, translation());
 	serializeVector(stream, scale());
 	serializeQuaternion(stream, orientation());
 	
-	if (version >= SceneVersion_1_0_1)
-	{
-		serializeInt(stream, _properites.size());
-		for (const auto& i : _properites)
-			serializeString(stream, i);
-	}
+	serializeInt64(stream, _properites.size());
+	for (const auto& i : _properites)
+		serializeString(stream, i);
 	
-	if (version >= SceneVersion_1_0_4)
-	{
-		serializeInt(stream, _animations.size());
-		for (const auto& a : _animations)
-			a.serialize(stream);
-	}
+	serializeInt64(stream, _animations.size());
+	for (const auto& a : _animations)
+		a.serialize(stream);
 }
 
 void Element::deserializeGeneralParameters(std::istream& stream, SceneVersion version)
 {
 	setName(deserializeString(stream));
 	
-	_active = deserializeInt(stream) != 0;
-	setFlags(deserializeUInt(stream));
+	_active = deserializeUInt32(stream) != 0;
+	
+	bool is64BitVersion = version >= SceneVersion_1_1_0;
+	
+	uint64_t aFlags = is64BitVersion ? deserializeUInt64(stream) : deserializeUInt32(stream);
+	setFlags(aFlags);
+	
 	setTranslation(deserializeVector<vec3>(stream));
 	setScale(deserializeVector<vec3>(stream));
 	setOrientation(deserializeQuaternion(stream));
 
 	if (version >= SceneVersion_1_0_1)
 	{
-		size_t numProperties = deserializeUInt(stream);
-		for (size_t i = 0; i < numProperties; ++i)
+		uint64_t numProperties = is64BitVersion ? deserializeUInt64(stream) : deserializeUInt32(stream);
+		for (uint64_t i = 0; i < numProperties; ++i)
 			_properites.insert(deserializeString(stream));
 	}
 	
 	if (version >= SceneVersion_1_0_4)
 	{
-		size_t numAnimations = deserializeUInt(stream);
+		size_t numAnimations = is64BitVersion ? deserializeUInt64(stream) : deserializeUInt32(stream);
 		_animations.reserve(numAnimations);
 		
 		for (size_t i = 0; i < numAnimations; ++i)
@@ -222,20 +221,20 @@ void Element::deserializeGeneralParameters(std::istream& stream, SceneVersion ve
 
 void Element::serializeChildren(std::ostream& stream, SceneVersion version)
 {
-	serializeInt(stream, children().size());
+	serializeUInt64(stream, children().size());
 	for (auto& i :children())
 	{
-		serializeInt(stream, i->type());
+		serializeUInt32(stream, i->type());
 		i->serialize(stream, version);
 	}
 }
 
 void Element::deserializeChildren(std::istream& stream, ElementFactory* factory, SceneVersion version)
 {
-	size_t numChildren = deserializeUInt(stream);
+	uint64_t numChildren = (version >= SceneVersion_1_1_0) ? deserializeUInt64(stream) : deserializeUInt32(stream);
 	for (size_t i = 0; i < numChildren; ++i)
 	{
-		size_t type = deserializeUInt(stream);
+		size_t type = deserializeUInt32(stream);
 		Element::Pointer child = factory->createElementOfType(type, (type == ElementType_Storage) ? 0 : this);
 		child->deserialize(stream, factory, version);
 	}

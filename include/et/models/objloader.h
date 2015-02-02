@@ -12,6 +12,7 @@
 #include <et/scene3d/material.h>
 #include <et/scene3d/storage.h>
 #include <et/rendering/rendercontext.h>
+#include <et/vertexbuffer/vertexstorage.h>
 
 namespace et
 {
@@ -55,12 +56,12 @@ namespace et
 		struct OBJMeshIndexBounds
 		{
 			std::string name;
-			uint32_t start;
-			size_t count;
+			uint32_t start = 0;
+			uint32_t count = 0;
 			et::vec3 center;
 			s3d::Material::Pointer material;
 
-			OBJMeshIndexBounds(const std::string& n, uint32_t s, size_t c, s3d::Material::Pointer m, const vec3& aCenter) :
+			OBJMeshIndexBounds(const std::string& n, uint32_t s, uint32_t c, s3d::Material::Pointer m, const vec3& aCenter) :
 				name(n), start(s), count(c), material(m), center(aCenter) { }
 		};
 		typedef std::vector<OBJMeshIndexBounds> OBJMeshIndexBoundsList;
@@ -96,6 +97,7 @@ namespace et
 	private:
 		void loadData(bool async, ObjectsCache& cache);
 		void processLoadedData();
+		
 		s3d::ElementContainer::Pointer generateVertexBuffers();
 
 		void loadMaterials(const std::string& fileName, bool async, ObjectsCache& cache);
@@ -117,7 +119,10 @@ namespace et
 		s3d::Material::List _materials;
 		OBJMeshIndexBoundsList _meshes;
         IndexArray::Pointer _indices;
-		VertexArray::Pointer _vertexData;
+		
+//		VertexArray::Pointer _vertexData;
+		
+		VertexStorage::Pointer _vertexData;
 
 		std::vector<et::vec3, et::SharedBlockAllocatorSTDProxy<et::vec3>> _vertices;
 		std::vector<et::vec3, et::SharedBlockAllocatorSTDProxy<et::vec3>> _normals;

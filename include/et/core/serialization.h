@@ -13,62 +13,64 @@
 
 namespace et
 {
-	inline void serializeInt(std::ostream& stream, int32_t value)
+	inline void serializeInt32(std::ostream& stream, int32_t value)
 	{
 		ET_ASSERT(stream.good());
-		stream.write(reinterpret_cast<const char*>(&value), sizeof(value));
+		stream.write(reinterpret_cast<const char*>(&value), 4);
 	}
-
-	inline void serializeInt(std::ostream& stream, uint32_t value)
+	inline int32_t deserializeInt32(std::istream& stream)
 	{
 		ET_ASSERT(stream.good());
-		stream.write(reinterpret_cast<const char*>(&value), sizeof(value));
-	}
-
-	inline void serializeInt(std::ostream& stream, long value)
-		{ serializeInt(stream, static_cast<int32_t>(value & 0xffffffff)); }
-	
-	inline void serializeInt(std::ostream& stream, unsigned long value)
-		{ serializeInt(stream, static_cast<uint32_t>(value & 0xfffffff)); }
-	
-	inline void serializeInt(std::ostream& stream, int64_t value)
-		{ serializeInt(stream, static_cast<int32_t>(value & 0xffffffff)); }
-
-	inline void serializeInt(std::ostream& stream, uint64_t value)
-		{ serializeInt(stream, static_cast<uint32_t>(value & 0xffffffff)); }
-
-	inline int32_t deserializeInt(std::istream& stream)
-	{
-		ET_ASSERT(stream.good());
-
-		int value = 0;
-		stream.read(reinterpret_cast<char*>(&value), sizeof(value)); 
+		int32_t value = 0;
+		stream.read(reinterpret_cast<char*>(&value), 4);
 		return value;
 	}
-	
-	inline uint32_t deserializeUInt(std::istream& stream)
+	inline void serializeInt64(std::ostream& stream, int64_t value)
+	{
+		ET_ASSERT(stream.good());
+		stream.write(reinterpret_cast<const char*>(&value), 8);
+	}
+	inline int64_t deserializeInt64(std::istream& stream)
+	{
+		ET_ASSERT(stream.good());
+		
+		int64_t value = 0;
+		stream.read(reinterpret_cast<char*>(&value), 8);
+		return value;
+	}
+
+	inline void serializeUInt32(std::ostream& stream, uint32_t value)
+	{
+		ET_ASSERT(stream.good());
+		stream.write(reinterpret_cast<const char*>(&value), 4);
+	}
+	inline uint32_t deserializeUInt32(std::istream& stream)
 	{
 		ET_ASSERT(stream.good());
 		
 		uint32_t value = 0;
-		stream.read(reinterpret_cast<char*>(&value), sizeof(value));
+		stream.read(reinterpret_cast<char*>(&value), 4);
 		return value;
 	}
-	
-	inline size_t deserializeSizeT(std::istream& stream)
+	inline void serializeUInt64(std::ostream& stream, uint64_t value)
+	{
+		ET_ASSERT(stream.good());
+		stream.write(reinterpret_cast<const char*>(&value), 8);
+	}
+	inline uint64_t deserializeUInt64(std::istream& stream)
 	{
 		ET_ASSERT(stream.good());
 		
-		size_t value = 0;
-		stream.read(reinterpret_cast<char*>(&value), sizeof(uint32_t));
+		uint64_t value = 0;
+		stream.read(reinterpret_cast<char*>(&value), 8);
 		return value;
 	}
-
+	
 	inline void serializeString(std::ostream& stream, const std::string& s)
 	{
 		ET_ASSERT(stream.good());
 
-		serializeInt(stream, s.size());
+		serializeUInt64(stream, s.size());
         
 		if (s.size() > 0)
 			stream.write(s.c_str(), static_cast<std::streamsize>(s.size()));
@@ -78,7 +80,7 @@ namespace et
 	{
 		ET_ASSERT(stream.good());
 
-		int size = deserializeInt(stream);
+		uint64_t size = deserializeUInt64(stream);
 		if (size > 0)
 		{
 			StringDataStorage value(size + 1, 0);

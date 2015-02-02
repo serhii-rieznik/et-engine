@@ -35,7 +35,7 @@ void LightElement::serialize(std::ostream& stream, SceneVersion version)
 {
 	serializeMatrix(stream, modelViewMatrix());
 	serializeMatrix(stream, projectionMatrix());
-	serializeInt(stream, upVectorLocked());
+	serializeUInt32(stream, upVectorLocked());
 	serializeVector(stream, lockedUpVector());
 
 	serializeGeneralParameters(stream, version);
@@ -44,14 +44,16 @@ void LightElement::serialize(std::ostream& stream, SceneVersion version)
 
 void LightElement::deserialize(std::istream& stream, ElementFactory* factory, SceneVersion version)
 {
-//	mat4 mv =
-	deserializeMatrix(stream);
-//	mat4 proj =
-	deserializeMatrix(stream);
-//	bool upLocked =
-    deserializeInt(stream);
-//	vec3 locked =
-	deserializeVector<vec3>(stream);
+	mat4 mv = deserializeMatrix(stream);
+	mat4 proj = deserializeMatrix(stream);
+	bool upLocked = deserializeUInt32(stream) != 0;
+	vec3 locked = deserializeVector<vec3>(stream);
+	
+	setModelViewMatrix(mv);
+	setProjectionMatrix(proj);
+	
+	if (upLocked)
+		lockUpVector(locked);
 
 	deserializeGeneralParameters(stream, version);
 	deserializeChildren(stream, factory, version);

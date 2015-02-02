@@ -54,7 +54,7 @@ namespace et
 			/*
 			 * Access to content
 			 */
-			VertexBuffer vertexBufferWithId(const std::string& id);
+			VertexBuffer::Pointer vertexBufferWithId(const std::string& id);
 			
 			IndexBuffer indexBufferWithId(const std::string& id);
 			
@@ -70,17 +70,17 @@ namespace et
 			void buildAPIObjects(Scene3dStorage::Pointer p, RenderContext* rc);
 
 			Scene3dStorage::Pointer deserializeStorage(std::istream& stream, RenderContext* rc,
-				ObjectsCache& tc, const std::string& basePath, StorageFormat fmt, bool async);
+				ObjectsCache& tc, const std::string& basePath, StorageFormat, StorageVersion, bool async);
 			
 			Element::Pointer createElementOfType(size_t type, Element* parent);
-			Material::Pointer materialWithId(int id);
+			Material::Pointer materialWithId(uint64_t);
 
 			void onMaterialLoaded(Material*);
 			void allMaterialsLoaded();
 
 		private:
 			ElementFactory* _externalFactory;
-			std::vector<VertexBuffer> _vertexBuffers;
+			std::vector<VertexBuffer::Pointer> _vertexBuffers;
 			std::vector<IndexBuffer> _indexBuffers;
 			std::vector<VertexArrayObject> _vaos;
 			AtomicCounter _materialsToLoad;

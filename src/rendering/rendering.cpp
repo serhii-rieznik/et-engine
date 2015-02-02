@@ -82,6 +82,35 @@ namespace et
 		return vertexAttributeUsageMasks[static_cast<uint32_t>(u)];
 	}
 	
+	uint32_t sizeOfDataType(DataType type)
+	{
+		switch (type)
+		{
+			case DataType::Char:
+			case DataType::UnsignedChar:
+				return 1;
+
+			case DataType::Half:
+			case DataType::Short:
+			case DataType::UnsignedShort:
+			case DataType::UnsignedShort_4444:
+			case DataType::UnsignedShort_5551:
+			case DataType::UnsignedShort_565:
+				return 2;
+
+			case DataType::Int:
+			case DataType::UnsignedInt:
+			case DataType::Float:
+				return 4;
+				
+			case DataType::Double:
+				return 8;
+				
+			default:
+				ET_FAIL_FMT("Invalid data type: %d", type);
+		}
+	}
+	
 	uint32_t bitsPerPixelForTextureFormat(TextureFormat format, DataType type)
 	{
 		switch (format)

@@ -9,18 +9,25 @@
 
 #include <et/rendering/apiobject.h>
 #include <et/vertexbuffer/vertexarray.h>
+#include <et/vertexbuffer/vertexstorage.h>
 
 namespace et
 {
 	class RenderState;
 	
-	class VertexBufferData : public APIObject
+	class VertexBuffer : public APIObject
 	{
 	public:
-		VertexBufferData(RenderContext* rc, const VertexArray::Description& desc,
-			BufferDrawType vertexDrawType, const std::string& name = emptyString);
+		ET_DECLARE_POINTER(VertexBuffer)
+		
+	public:
+		VertexBuffer(RenderContext*, const VertexDeclaration&, const BinaryDataStorage&, BufferDrawType,
+			const std::string& = emptyString);
+		
+		VertexBuffer(RenderContext*, const VertexArray::Description&, BufferDrawType,
+			const std::string& = emptyString);
 
-		~VertexBufferData();
+		~VertexBuffer();
 		
 		size_t vertexCount() const
 			{ return _dataSize / _decl.dataSize(); }
@@ -47,10 +54,6 @@ namespace et
 			{ return _sourceTag; }
 
 	private:
-		VertexBufferData(RenderContext* rc, const VertexDeclaration& decl, const void* vertexData,
-			size_t vertexDataSize, BufferDrawType vertexDrawType, const std::string& name = emptyString);
-
-	private:
 		RenderContext* _rc = nullptr;
 		VertexDeclaration _decl;
 		AtomicBool _mapped;
@@ -58,6 +61,4 @@ namespace et
 		size_t _sourceTag = 0;
 		BufferDrawType _drawType = BufferDrawType::Static;
 	};
-
-	typedef IntrusivePtr<VertexBufferData> VertexBuffer;
 }
