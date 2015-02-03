@@ -421,7 +421,7 @@ void dds::loadFromStream(std::istream& source, TextureDescription& desc)
 	if (dataSize)
 	{
 		desc.data = BinaryDataStorage(dataSize);
-		source.read(desc.data.binary(), static_cast<std::streamsize>(dataSize));
+		source.read(desc.data.binary(), dataSize);
 	}
 }
 

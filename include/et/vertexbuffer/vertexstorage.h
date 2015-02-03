@@ -8,6 +8,7 @@
 #pragma once
 
 #include <et/core/rawdataaccessor.h>
+#include <et/vertexbuffer/vertexarray.h>
 #include <et/vertexbuffer/vertexdeclaration.h>
 
 namespace et
@@ -21,8 +22,11 @@ namespace et
 	public:
 		ET_DECLARE_POINTER(VertexStorage)
 		
+		int tag = 0;
+		
 	public:
 		VertexStorage(const VertexDeclaration&, size_t);
+		VertexStorage(const VertexArray::Pointer&);
 		~VertexStorage();
 		
 		template <VertexAttributeType T>

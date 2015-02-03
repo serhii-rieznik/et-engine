@@ -16,7 +16,7 @@ using namespace rt;
 using namespace et;
 
 #if (ET_ENABLE_VEC4_ALIGN == 0)
-#	error Compile with ET_ENABLE_VEC4_ALIGN enabled
+#	warning Compile with ET_ENABLE_VEC4_ALIGN enabled
 #endif
 
 typedef std::deque<float, et::SharedBlockAllocatorSTDProxy<float>> IndexOfRefractionDeque;

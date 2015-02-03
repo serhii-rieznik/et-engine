@@ -16,11 +16,13 @@ namespace et
 	inline void serializeInt32(std::ostream& stream, int32_t value)
 	{
 		ET_ASSERT(stream.good());
+		
 		stream.write(reinterpret_cast<const char*>(&value), 4);
 	}
 	inline int32_t deserializeInt32(std::istream& stream)
 	{
 		ET_ASSERT(stream.good());
+		
 		int32_t value = 0;
 		stream.read(reinterpret_cast<char*>(&value), 4);
 		return value;
@@ -28,6 +30,7 @@ namespace et
 	inline void serializeInt64(std::ostream& stream, int64_t value)
 	{
 		ET_ASSERT(stream.good());
+		
 		stream.write(reinterpret_cast<const char*>(&value), 8);
 	}
 	inline int64_t deserializeInt64(std::istream& stream)
@@ -42,6 +45,7 @@ namespace et
 	inline void serializeUInt32(std::ostream& stream, uint32_t value)
 	{
 		ET_ASSERT(stream.good());
+		
 		stream.write(reinterpret_cast<const char*>(&value), 4);
 	}
 	inline uint32_t deserializeUInt32(std::istream& stream)
@@ -73,7 +77,7 @@ namespace et
 		serializeUInt32(stream, static_cast<uint32_t>(s.size()));
         
 		if (s.size() > 0)
-			stream.write(s.c_str(), static_cast<std::streamsize>(s.size()));
+			stream.write(s.c_str(), s.size());
 	}
 
 	inline std::string deserializeString(std::istream& stream)

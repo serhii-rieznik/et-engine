@@ -30,18 +30,22 @@ void VertexDataChunkData::serialize(std::ostream& stream)
 	serializeUInt32(stream, static_cast<uint32_t>(_type));
 	serializeUInt32(stream, static_cast<uint32_t>(_data.dataSize()));
 	serializeUInt32(stream, static_cast<uint32_t>(_data.lastElementIndex()));
-	stream.write(_data.binary(), static_cast<std::streamsize>(_data.dataSize()));
+	stream.write(_data.binary(), _data.dataSize());
 }
 
 VertexDataChunkData::VertexDataChunkData(std::istream& stream)
 {
 	_usage = static_cast<VertexAttributeUsage>(deserializeUInt32(stream));
 	_type = static_cast<VertexAttributeType>(deserializeUInt32(stream));
-	_data.resize(deserializeUInt32(stream));
-	_data.setOffset(deserializeUInt32(stream));
 	
-	stream.read(_data.binary(), static_cast<std::streamsize>(_data.dataSize()));
+	uint32_t capacity = deserializeUInt32(stream);
+	uint32_t offset = deserializeUInt32(stream);
 	
+	_data.resize(capacity);
+	_data.setOffset(offset);
+	
+	stream.read(_data.binary(), capacity);
+		
 	/*
 	 * Support legacy values
 	 */

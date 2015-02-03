@@ -230,8 +230,7 @@ void parseFormat(TextureDescription& desc, png_structp pngPtr, png_infop infoPtr
 
 void streamReadData(png_structp pngPtr, png_bytep data, png_size_t length)
 {
-	reinterpret_cast<std::istream*>(png_get_io_ptr(pngPtr))->read((char*)data,
-		static_cast<std::streamsize>(length));
+	reinterpret_cast<std::istream*>(png_get_io_ptr(pngPtr))->read((char*)data, length);
 }
 
 void handlePngError(png_structp, png_const_charp e)

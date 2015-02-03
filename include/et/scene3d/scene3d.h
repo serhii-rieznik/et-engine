@@ -38,18 +38,14 @@ namespace et
 			/*
 			 * Synchronous deserializing
 			 */
-			bool deserialize(std::istream& stream, RenderContext* rc, ObjectsCache& tc,
-				ElementFactory* factory, const std::string& basePath);
-			bool deserialize(const std::string& filename, RenderContext* rc, ObjectsCache& tc,
-				ElementFactory* factory);
+			bool deserialize(std::istream&, RenderContext*, ObjectsCache&, const std::string&);
+			bool deserialize(const std::string&, RenderContext*, ObjectsCache&);
 
 			/*
 			 * Asynchronous deserializing
 			 */
-			void deserializeAsync(std::istream& stream, RenderContext* rc, ObjectsCache& tc,
-				ElementFactory* factory, const std::string& basePath);
-			void deserializeAsync(const std::string& filename, RenderContext* rc, ObjectsCache& tc,
-				ElementFactory* factory);
+			void deserializeAsync(std::istream&, RenderContext*, ObjectsCache&, const std::string&);
+			void deserializeAsync(const std::string&, RenderContext*, ObjectsCache&);
 
 			/*
 			 * Access to content
@@ -65,7 +61,7 @@ namespace et
 
 		private:
 			bool performDeserialization(std::istream& stream, RenderContext* rc, ObjectsCache& tc,
-				ElementFactory* factory, const std::string& basePath, bool async);
+				const std::string& basePath, bool async);
 
 			void buildAPIObjects(Scene3dStorage::Pointer p, RenderContext* rc);
 
@@ -74,12 +70,13 @@ namespace et
 			
 			Element::Pointer createElementOfType(size_t type, Element* parent);
 			Material::Pointer materialWithId(uint64_t);
+			IndexArray::Pointer primaryIndexArray();
+			VertexStorage::Pointer vertexStorageForVertexBuffer(const std::string&);
 
 			void onMaterialLoaded(Material*);
 			void allMaterialsLoaded();
 
 		private:
-			ElementFactory* _externalFactory;
 			std::vector<VertexBuffer::Pointer> _vertexBuffers;
 			std::vector<IndexBuffer> _indexBuffers;
 			std::vector<VertexArrayObject> _vaos;

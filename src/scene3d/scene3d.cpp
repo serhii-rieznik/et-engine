@@ -14,7 +14,7 @@ using namespace et;
 using namespace s3d;
 
 Scene::Scene(const std::string& name) :
-	ElementContainer(name, nullptr), _externalFactory(nullptr)
+	ElementContainer(name, nullptr)
 {
 }
 
@@ -96,23 +96,20 @@ void Scene::serialize(std::ostream& stream, StorageFormat fmt, const std::string
 	ElementContainer::serialize(stream, SceneVersionLatest);
 }
 
-void Scene::deserializeAsync(std::istream& stream, RenderContext* rc, ObjectsCache& tc,
-				ElementFactory* factory, const std::string& basePath)
+void Scene::deserializeAsync(std::istream& stream, RenderContext* rc, ObjectsCache& tc, const std::string& basePath)
 {
-	performDeserialization(stream, rc, tc, factory, basePath, true);
+	performDeserialization(stream, rc, tc, basePath, true);
 }
 
-void Scene::deserializeAsync(const std::string& filename, RenderContext* rc, ObjectsCache& tc, 
-	ElementFactory* factory)
+void Scene::deserializeAsync(const std::string& filename, RenderContext* rc, ObjectsCache& tc)
 {
 	InputStream file(filename, StreamMode_Binary);
-	deserializeAsync(file.stream(), rc, tc, factory, getFilePath(filename));
+	deserializeAsync(file.stream(), rc, tc, getFilePath(filename));
 }
 
-bool Scene::deserialize(std::istream& stream, RenderContext* rc, ObjectsCache& tc,
-	ElementFactory* factory, const std::string& basePath)
+bool Scene::deserialize(std::istream& stream, RenderContext* rc, ObjectsCache& tc, const std::string& basePath)
 {
-	return performDeserialization(stream, rc, tc, factory, basePath, false);
+	return performDeserialization(stream, rc, tc, basePath, false);
 }
 
 Scene3dStorage::Pointer Scene::deserializeStorage(std::istream& stream, RenderContext* rc,
@@ -120,11 +117,9 @@ Scene3dStorage::Pointer Scene::deserializeStorage(std::istream& stream, RenderCo
 {
 	Scene3dStorage::Pointer result = Scene3dStorage::Pointer::create("storage", nullptr);
 
-	volatile bool materialsRead = false;
-	volatile bool vertexArraysRead = false;
-	volatile bool indexArrayRead = false;
-
-	while (!(materialsRead && vertexArraysRead && indexArrayRead))
+	size_t readComponents = 0;
+	volatile bool reading = true;
+	while (reading)
 	{
 		ChunkId readChunk = { };
 		deserializeChunk(stream, readChunk);
@@ -153,7 +148,8 @@ Scene3dStorage::Pointer Scene::deserializeStorage(std::istream& stream, RenderCo
 					ET_CONNECT_EVENT(m->loaded, Scene::onMaterialLoaded);
 					
 					m->tag = deserializeInt32(stream);
-					m->setOrigin(application().resolveFileName(basePath + getFileName(deserializeString(stream))));
+					auto materialName = deserializeString(stream);
+					m->setOrigin(application().resolveFileName(basePath + getFileName(materialName)));
 
 					InputStream mStream(m->origin(), StreamMode_Text);
 					
@@ -170,11 +166,18 @@ Scene3dStorage::Pointer Scene::deserializeStorage(std::istream& stream, RenderCo
 			{
 				ET_FAIL("Invalid storage format specified");
 			}
-			materialsRead = true;
+			
+			++readComponents;
 		}
 		else if (chunkEqualTo(readChunk, HeaderVertexArrays))
 		{
-			uint64_t numVertexArrays = (ver < StorageVersion_1_1_0) ? deserializeUInt32(stream) : deserializeUInt64(stream);
+			uint64_t numVertexArrays = 0;
+			
+			if (ver < StorageVersion_1_1_0)
+				numVertexArrays = deserializeUInt32(stream);
+			else
+				numVertexArrays = deserializeUInt64(stream);
+			
 			for (size_t i = 0; i < numVertexArrays; ++i)
 			{
 				VertexArray::Pointer va = VertexArray::Pointer::create();
@@ -182,19 +185,40 @@ Scene3dStorage::Pointer Scene::deserializeStorage(std::istream& stream, RenderCo
 				va->deserialize(stream);
 				result->addVertexArray(va);
 			}
-			vertexArraysRead = true;
+			
+			++readComponents;
 		}
 		else if (chunkEqualTo(readChunk, HeaderIndexArrays))
 		{
 			int num = deserializeInt32(stream);
 			ET_ASSERT(num == 1);
 			(void)(num);
-			result->indexArray()->tag = deserializeInt32(stream);
-			result->indexArray()->deserialize(stream);
-			indexArrayRead = true;
+			
+			auto indexArray = result->indexArray();
+			indexArray->tag = deserializeInt32(stream);
+			indexArray->deserialize(stream);
+			
+			++readComponents;
 		}
-
-		if (stream.eof()) break;
+		else
+		{
+			log::error("Invalid chunk in scene storage");
+			result.reset(nullptr);
+			return result;
+		}
+		
+		reading = (readComponents < 3) && stream.good();
+	}
+	
+	if (result->vertexStorages().empty())
+	{
+		for (const auto& va : result->vertexArrays())
+		{
+			auto vs = VertexStorage::Pointer::create(va);
+			vs->tag = va->tag;
+			
+			result->addVertexStorage(vs);
+		}
 	}
 
 	buildAPIObjects(result, rc);
@@ -204,17 +228,16 @@ Scene3dStorage::Pointer Scene::deserializeStorage(std::istream& stream, RenderCo
 void Scene::buildAPIObjects(Scene3dStorage::Pointer p, RenderContext* rc)
 {
 	IndexBuffer ib;
-	VertexArrayList& vertexArrays = p->vertexArrays();
-	for (auto& i : vertexArrays)
+	
+	for (const auto& vs : p->vertexStorages())
 	{
-		std::string vbName = "vb-" + intToStr(static_cast<size_t>(i->tag));
-		std::string ibName = "ib-" + intToStr(static_cast<size_t>(p->indexArray()->tag));
-		
-		std::string vaoName = "vao-" + intToStr(static_cast<size_t>(i->tag)) +
-			"-" + intToStr(static_cast<size_t>(p->indexArray()->tag));
+		std::string vbName = "vb-" + intToStr(static_cast<uint32_t>(vs->tag));
+		std::string ibName = "ib-" + intToStr(static_cast<uint32_t>(p->indexArray()->tag));
+		std::string vaoName = "vao-" + intToStr(static_cast<uint32_t>(vs->tag)) + "-" +
+			intToStr(static_cast<uint32_t>(p->indexArray()->tag));
 		
 		VertexArrayObject vao = rc->vertexBufferFactory().createVertexArrayObject(vaoName);
-		VertexBuffer::Pointer vb = rc->vertexBufferFactory().createVertexBuffer(vbName, i, BufferDrawType::Static);
+		VertexBuffer::Pointer vb = rc->vertexBufferFactory().createVertexBuffer(vbName, vs, BufferDrawType::Static);
 		if (!ib.valid())
 		{
 			ib = rc->vertexBufferFactory().createIndexBuffer(ibName, p->indexArray(), BufferDrawType::Static);
@@ -235,15 +258,14 @@ void Scene::serialize(const std::string& filename, s3d::StorageFormat fmt)
 	serialize(file, fmt, getFilePath(filename));
 }
 
-bool Scene::deserialize(const std::string& filename, RenderContext* rc, ObjectsCache& tc,
-	ElementFactory* factory)
+bool Scene::deserialize(const std::string& filename, RenderContext* rc, ObjectsCache& tc)
 {
 	InputStream file(application().resolveFileName(filename), StreamMode_Binary);
 	
 	if (file.invalid())
 		return false;
 	
-	bool success = deserialize(file.stream(), rc, tc, factory, getFilePath(filename));
+	bool success = deserialize(file.stream(), rc, tc, getFilePath(filename));
 
 	if (!success)
 		log::error("Unable to load scene from file: %s", filename.c_str());
@@ -257,35 +279,52 @@ Element::Pointer Scene::createElementOfType(size_t type, Element* parent)
 	{
 	case ElementType_Container:
 		return ElementContainer::Pointer::create(emptyString, parent);
-
 	case ElementType_Mesh:
 		return Mesh::Pointer::create(emptyString, parent);
-
 	case ElementType_SupportMesh:
 		return SupportMesh::Pointer::create(emptyString, parent);
-
 	case ElementType_Storage:
 		return Scene3dStorage::Pointer::create(emptyString, parent);
-
 	case ElementType_Camera:
 		return CameraElement::Pointer::create(emptyString, parent);
-
 	default:
+		return ElementContainer::Pointer::create(emptyString, parent);
+	}
+}
+
+IndexArray::Pointer Scene::primaryIndexArray()
+{
+	Element::List storages = childrenOfType(ElementType_Storage);
+	ET_ASSERT(!storages.empty())
+	return Scene3dStorage::Pointer(storages.front())->indexArray();
+}
+
+VertexStorage::Pointer Scene::vertexStorageForVertexBuffer(const std::string& vbName)
+{
+	Element::List storages = childrenOfType(ElementType_Storage);
+	for (Scene3dStorage::Pointer storage : storages)
+	{
+		for (const auto& va : storage->vertexArrays())
 		{
-			if (_externalFactory)
-				return _externalFactory->createElementOfType(type, parent);
-			else
-				return ElementContainer::Pointer::create(emptyString, parent);
+			auto suggestedName = "vb-" + intToStr(va->tag);
+			if (suggestedName == vbName)
+			{
+				for (const auto& vs : storage->vertexStorages())
+				{
+					if (vs->tag == va->tag)
+						return vs;
+				}
+			}
 		}
 	}
+	return VertexStorage::Pointer();
 }
 
 Material::Pointer Scene::materialWithId(uint64_t id)
 {
 	Element::List storages = childrenOfType(ElementType_Storage);
-	for (auto si : storages)
+	for (Scene3dStorage::Pointer storage : storages)
 	{
-		Scene3dStorage* storage = static_cast<Scene3dStorage*>(si.ptr());
 		for (auto& data : storage->materials())
 		{
 			if (data->tag == id)
@@ -330,7 +369,7 @@ VertexArrayObject Scene::vaoWithIdentifiers(const std::string& vbid, const std::
 #define INVOKE_FAIL		{ if (async) { deserializationFinished.invoke(false); } return false; }
 
 bool Scene::performDeserialization(std::istream& stream, RenderContext* rc, ObjectsCache& tc,
-		ElementFactory* factory, const std::string& basePath, bool async)
+	const std::string& basePath, bool async)
 {
 	clearRecursively();
 	
@@ -340,15 +379,13 @@ bool Scene::performDeserialization(std::istream& stream, RenderContext* rc, Obje
 		INVOKE_FAIL
     }
 
-	ChunkId readChunk = { };
-	deserializeChunk(stream, readChunk);
-	if (!chunkEqualTo(readChunk, HeaderScene)) 
+	ChunkId headerChunk = { };
+	deserializeChunk(stream, headerChunk);
+	if (!chunkEqualTo(headerChunk, HeaderScene))
 	{
 		log::error("Data not looks like proper ETM file.");
 		INVOKE_FAIL
 	}
-
-	_externalFactory = factory;
 
 	uint32_t version = deserializeUInt32(stream);
 	if (version > static_cast<size_t>(SceneVersionLatest))
@@ -361,6 +398,7 @@ bool Scene::performDeserialization(std::istream& stream, RenderContext* rc, Obje
 	volatile bool readCompleted = false;
 	while (!readCompleted)
 	{
+		ChunkId readChunk = { };
 		deserializeChunk(stream, readChunk);
 		if (chunkEqualTo(readChunk, HeaderData))
 		{
@@ -377,13 +415,9 @@ bool Scene::performDeserialization(std::istream& stream, RenderContext* rc, Obje
 			{
 				format = static_cast<StorageFormat>(deserializeInt32(stream));
 				if (storageVersion >= StorageVersion_1_1_0)
-				{
 					numStorages = deserializeUInt64(stream);
-				}
 				else
-				{
 					numStorages = deserializeUInt32(stream);
-				}
 			}
 			else
 			{
@@ -404,12 +438,16 @@ bool Scene::performDeserialization(std::istream& stream, RenderContext* rc, Obje
 			ElementContainer::deserialize(stream, this, static_cast<SceneVersion>(version));
 			readCompleted = true;
 		}
+		else
+		{
+			log::error("Unknown chunk in ETM file.");
+			INVOKE_FAIL
+		}
 	}
 	_componentsToLoad.release();
 	
 	if (_componentsToLoad.atomicCounterValue() == 0)
 		deserializationFinished.invoke(true);
 
-	_externalFactory = nullptr;
 	return true;
 }

@@ -57,13 +57,16 @@ namespace et
 			uint32_t numIndexes() const;
 			virtual void setNumIndexes(uint32_t num);
 
-			void setVertexBuffer(VertexBuffer::Pointer vb);
-			void setIndexBuffer(IndexBuffer ib);
-			void setVertexArrayObject(VertexArrayObject vao);
+			void setVertexBuffer(VertexBuffer::Pointer);
+			void setIndexBuffer(IndexBuffer);
+			void setVertexArrayObject(VertexArrayObject);
 
-			void serialize(std::ostream& stream, SceneVersion version);
-			void deserialize(std::istream& stream, ElementFactory* factory, SceneVersion version);
+			void serialize(std::ostream&, SceneVersion);
+			void deserialize(std::istream&, ElementFactory*, SceneVersion);
 
+			void setVertexStorage(VertexStorage::Pointer);
+			void setIndexArray(IndexArray::Pointer);
+			
 			void cleanupLodChildren();
 			void attachLod(uint32_t level, Mesh::Pointer mesh);
 
@@ -95,8 +98,8 @@ namespace et
 
 		private:
 			VertexArrayObject _vao;
-			const VertexStorage::Pointer _vertexStorage;
-			const IndexArray::Pointer _indexArray;
+			VertexStorage::Pointer _vertexStorage;
+			IndexArray::Pointer _indexArray;
 			
 			SupportData _supportData;
 			std::map<uint32_t, Mesh::Pointer> _lods;

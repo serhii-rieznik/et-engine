@@ -60,7 +60,7 @@ void pvr::loadFromStream(std::istream& stream, TextureDescription& desc)
 {
 	loadInfoFromStream(stream, desc);
 	desc.data.resize(desc.layersCount * desc.dataSizeForAllMipLevels());
-	stream.read(desc.data.binary(), static_cast<std::streamsize>(desc.data.dataSize()));
+	stream.read(desc.data.binary(), desc.data.dataSize());
 	
 #if (ET_PLATFORM_IOS)
 	

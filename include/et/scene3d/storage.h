@@ -28,19 +28,32 @@ namespace et
 			void serialize(std::ostream& stream, SceneVersion version);
 			void deserialize(std::istream& stream, ElementFactory* factory, SceneVersion version);
 
-			virtual ElementType type() const 
+			ElementType type() const
 				{ return ElementType_Storage; }
 
-			VertexArrayList& vertexArrays()
+			std::vector<VertexArray::Pointer>& vertexArrays()
 				{ return _vertexArrays; }
+			const std::vector<VertexArray::Pointer>& vertexArrays() const
+				{ return _vertexArrays; }
+
+			std::vector<VertexStorage::Pointer>& vertexStorages()
+				{ return _vertexStorages; }
+			const std::vector<VertexStorage::Pointer>& vertexStorages() const
+				{ return _vertexStorages; }
 			
 			IndexArray::Pointer indexArray()
+				{ return _indexArray; }
+			const IndexArray::Pointer indexArray() const
 				{ return _indexArray; }
 
 			Material::List& materials()
 				{ return _materials; }
+			const Material::List& materials() const
+				{ return _materials; }
 
 			std::vector<Texture::Pointer>& textures()
+				{ return _textures; }
+			const std::vector<Texture::Pointer>& textures() const
 				{ return _textures; }
 
 			void addTexture(Texture::Pointer t)

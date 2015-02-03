@@ -22,11 +22,11 @@ const vec2i frameSize = vec2i(1280, 800);
 	const size_t numThreads = 4;
 #endif
 
-const float cameraDistance = 3.5f;
+const float cameraDistance = 173.5f;
 
 const vec3 cameraOffset = vec3(0.0f, 1.0f, 0.0f);
 
-const vec2 cameraInitialAngles = vec2(HALF_PI, 0.0f);
+const vec2 cameraInitialAngles = vec2(HALF_PI, DEG_30);
 
 et::IApplicationDelegate* Application::initApplicationDelegate()
 	{ return sharedObjectFactory().createObject<MainController>(); }

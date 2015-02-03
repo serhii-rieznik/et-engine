@@ -106,6 +106,16 @@ void Mesh::setVertexArrayObject(VertexArrayObject vao)
 	_vao = vao;
 }
 
+void Mesh::setVertexStorage(VertexStorage::Pointer vs)
+{
+	_vertexStorage = vs;
+}
+
+void Mesh::setIndexArray(IndexArray::Pointer ia)
+{
+	_indexArray = ia;
+}
+
 void Mesh::serialize(std::ostream& stream, SceneVersion version)
 {
 	std::string vbId = (_vao.valid() && _vao->vertexBuffer().valid()) ?
@@ -148,6 +158,9 @@ void Mesh::deserialize(std::istream& stream, ElementFactory* factory, SceneVersi
 	setMaterial(factory->materialWithId(materialId));
 	
 	setVertexArrayObject(factory->vaoWithIdentifiers(_vbName, _ibName));
+	
+	setIndexArray(factory->primaryIndexArray());
+	setVertexStorage(factory->vertexStorageForVertexBuffer(_vbName));
 
 	_startIndex = deserializeUInt32(stream);
 	_numIndexes = deserializeUInt32(stream);

@@ -796,7 +796,7 @@ void FBXLoaderPrivate::buildVertexBuffers(RenderContext* rc, s3d::Element::Point
 		rc->vertexBufferFactory().createIndexBuffer("fbx-i", storage->indexArray(), BufferDrawType::Static);
 
 	std::vector<VertexArrayObject> vertexArrayObjects;
-	VertexArrayList& vertexArrays = storage->vertexArrays();
+	const auto& vertexArrays = storage->vertexArrays();
 	for (const auto& i : vertexArrays)
 	{
 		VertexArrayObject vao = rc->vertexBufferFactory().createVertexArrayObject("fbx-vao");

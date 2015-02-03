@@ -147,32 +147,32 @@ void VertexArray::serialize(std::ostream& stream)
 
 void VertexArray::deserialize(std::istream& stream)
 {
+	uint64_t numChunks = 0;
 	uint32_t id = deserializeUInt32(stream);
+	
+	_decl.deserialize(stream);
 	
 	if (id == VertexArrayId_1)
 	{
-		_decl.deserialize(stream);
 		_size = deserializeUInt32(stream);
-		
-		size_t numChunks = deserializeUInt32(stream);
-		for (size_t i = 0; i < numChunks; ++i)
-			_chunks.push_back(VertexDataChunk(stream));
-		
+		numChunks = deserializeUInt32(stream);
 	}
 	else if (id == VertexArrayId_2)
 	{
-		_decl.deserialize(stream);
 		_size = static_cast<size_t>(deserializeUInt64(stream));
-		
-		uint64_t numChunks = deserializeUInt64(stream);
-		for (uint64_t i = 0; i < numChunks; ++i)
-			_chunks.push_back(VertexDataChunk(stream));
-		
+		numChunks = deserializeUInt64(stream);
 	}
 	else
 	{
-		ET_FAIL("Unrecognized vertex array version");
+		ET_FAIL("Stream contains invalid vertex array id.");
 	}
+		
+	_chunks.reserve(numChunks);
+	
+	for (uint64_t i = 0; i < numChunks; ++i)
+		_chunks.emplace_back(stream);
+	
+	_smoothing = VertexDataChunk(stream);
 }
 
 VertexArray* VertexArray::duplicate()

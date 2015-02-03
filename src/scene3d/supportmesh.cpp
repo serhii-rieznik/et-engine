@@ -170,7 +170,7 @@ void SupportMesh::serialize(std::ostream& stream, SceneVersion version)
 	serializeVector(stream, vec3(0.0f));
 	serializeVector(stream, vec3(0.0f));
 	serializeUInt64(stream, _data.size());
-	stream.write(_data.binary(), static_cast<std::streamsize>(_data.dataSize()));
+	stream.write(_data.binary(), _data.dataSize());
 	Mesh::serialize(stream, version);
 }
 
@@ -195,7 +195,7 @@ void SupportMesh::deserialize(std::istream& stream, ElementFactory* factory, Sce
 	}
 	else 
 	{
-		stream.read(_data.binary(), static_cast<std::streamsize>(_data.dataSize()));
+		stream.read(_data.binary(), _data.dataSize());
 	}
 
 	Mesh::deserialize(stream, factory, version);

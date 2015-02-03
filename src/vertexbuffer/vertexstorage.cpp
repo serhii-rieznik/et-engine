@@ -26,6 +26,14 @@ VertexStorage::VertexStorage(const VertexDeclaration& aDecl, size_t capacity)
 	ET_PIMPL_INIT(VertexStorage, aDecl, capacity);
 }
 
+VertexStorage::VertexStorage(const VertexArray::Pointer& va)
+{
+	auto desc = va->generateDescription();
+	ET_ASSERT(desc.declaration.interleaved());
+	ET_PIMPL_INIT(VertexStorage, desc.declaration, va->size());
+	memcpy(_private->data.binary(), desc.data.binary(), desc.data.dataSize());
+}
+
 VertexStorage::~VertexStorage()
 {
 	ET_PIMPL_FINALIZE(VertexStorage)

@@ -70,7 +70,7 @@ namespace et
 			ET_DECLARE_PROPERTY_GET_COPY_SET_COPY(bool, depthWriteEnabled, setDepthWriteEnabled)
 
 		public:
-			int tag;
+			int tag = 0;
 
 		private:
 			void reloadObject(LoadableObject::Pointer obj, ObjectsCache&);

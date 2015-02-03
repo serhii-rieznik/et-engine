@@ -28,7 +28,7 @@ std::string et::loadTextFile(const std::string& fileName)
 	if (file.invalid()) return emptyString;
 
 	StringDataStorage data(streamSize(file.stream()) + 1, 0);
-	file.stream().read(data.data(), static_cast<std::streamsize>(data.size()));
+	file.stream().read(data.data(), data.size());
 	
 	return std::string(data.data());
 }

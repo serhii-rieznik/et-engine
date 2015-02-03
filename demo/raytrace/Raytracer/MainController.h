@@ -66,7 +66,7 @@ namespace rt
 		size_t _previewSamples = 4;
 		size_t _previewBounces = 1;
 		
-		size_t _productionSamples = 2048;
+		size_t _productionSamples = 128;
 		size_t _productionBounces = 64;
 		
 		size_t _renderRectIndex = 0;

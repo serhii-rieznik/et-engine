@@ -523,7 +523,7 @@ void Material::deserializeReadable(std::istream& stream, RenderContext* rc, Obje
 	uint32_t size = static_cast<uint32_t>(streamSize(stream) - stream.tellg());
 	
 	StringDataStorage data(size + 1, 0);
-	stream.read(data.data(), static_cast<std::streamsize>(size));
+	stream.read(data.data(), size);
 
 	xmlInitParser();
 	xmlDoc* xml = xmlParseMemory(data.data(), static_cast<int>(size));

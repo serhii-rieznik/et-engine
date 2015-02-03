@@ -66,6 +66,4 @@ namespace et
 		VertexDataChunkList _chunks;
 		VertexDataChunk _smoothing;
 	};
-	
-	typedef std::vector<VertexArray::Pointer> VertexArrayList;
 }

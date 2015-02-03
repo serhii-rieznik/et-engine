@@ -280,7 +280,7 @@ void IndexArray::serialize(std::ostream& stream)
 	serializeUInt32(stream, static_cast<uint32_t>(_primitiveType));
 	serializeUInt64(stream, _actualSize);
 	serializeUInt64(stream, _data.dataSize());
-	stream.write(_data.binary(), static_cast<std::streamsize>(_data.dataSize()));
+	stream.write(_data.binary(), _data.dataSize());
 }
 
 void IndexArray::deserialize(std::istream& stream)
@@ -291,8 +291,10 @@ void IndexArray::deserialize(std::istream& stream)
 		_format = static_cast<IndexArrayFormat>(deserializeUInt32(stream));
 		_primitiveType = static_cast<PrimitiveType>(deserializeUInt32(stream));
 		_actualSize = deserializeUInt32(stream);
-		_data.resize(deserializeUInt32(stream));
-		stream.read(_data.binary(), static_cast<std::streamsize>(_data.dataSize()));
+		
+		uint32_t capacity = deserializeUInt32(stream);
+		_data.resize(capacity);
+		stream.read(_data.binary(), capacity);
 	}
 	else if (versionId == IndexArrayId_2)
 	{
@@ -300,8 +302,9 @@ void IndexArray::deserialize(std::istream& stream)
 		_primitiveType = static_cast<PrimitiveType>(deserializeUInt32(stream));
 		_actualSize = static_cast<size_t>(deserializeUInt64(stream));
 		_data.resize(static_cast<size_t>(deserializeUInt64(stream)));
-		stream.read(_data.binary(), static_cast<std::streamsize>(_data.dataSize()));
+		stream.read(_data.binary(), _data.dataSize());
 	}
+	else 
 	{
 		ET_FAIL("Unrecognized index array version");
 	}
