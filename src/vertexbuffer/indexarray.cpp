@@ -298,8 +298,8 @@ void IndexArray::deserialize(std::istream& stream)
 	{
 		_format = static_cast<IndexArrayFormat>(deserializeUInt32(stream));
 		_primitiveType = static_cast<PrimitiveType>(deserializeUInt32(stream));
-		_actualSize = deserializeUInt64(stream);
-		_data.resize(deserializeUInt64(stream));
+		_actualSize = static_cast<size_t>(deserializeUInt64(stream));
+		_data.resize(static_cast<size_t>(deserializeUInt64(stream)));
 		stream.read(_data.binary(), static_cast<std::streamsize>(_data.dataSize()));
 	}
 	{

@@ -70,7 +70,7 @@ namespace et
 	{
 		ET_ASSERT(stream.good());
 
-		serializeUInt64(stream, s.size());
+		serializeUInt32(stream, static_cast<uint32_t>(s.size()));
         
 		if (s.size() > 0)
 			stream.write(s.c_str(), static_cast<std::streamsize>(s.size()));
@@ -80,7 +80,7 @@ namespace et
 	{
 		ET_ASSERT(stream.good());
 
-		uint64_t size = deserializeUInt64(stream);
+		uint32_t size = deserializeUInt32(stream);
 		if (size > 0)
 		{
 			StringDataStorage value(size + 1, 0);
