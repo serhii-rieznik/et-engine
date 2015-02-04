@@ -609,14 +609,13 @@ s3d::Mesh::Pointer FBXLoaderPrivate::loadMesh(FbxMesh* mesh, s3d::Element::Point
 	if (hasSmoothingGroups)
 		decl.push_back(VertexAttributeUsage::Smoothing, VertexAttributeType::Int);
 	
+	uint32_t texCoord0 = static_cast<uint32_t>(VertexAttributeUsage::TexCoord0);
+	
 	auto uv = mesh->GetElementUV();
 	if ((uv != nullptr) && (uv->GetMappingMode() != FbxGeometryElement::eNone))
 	{
 		for (uint32_t i = 0; i < uvChannels; ++i)
-		{
-			uint32_t usage = static_cast<uint32_t>(VertexAttributeUsage::TexCoord0) + i;
-			decl.push_back(static_cast<VertexAttributeUsage>(usage), VertexAttributeType::Vec2);
-		}
+			decl.push_back(static_cast<VertexAttributeUsage>(texCoord0 + i), VertexAttributeType::Vec2);
 	}
 
 	VertexStorage::Pointer vs = storage->vertexStorageWithDeclarationForAppendingSize(decl, lPolygonVertexCount);
@@ -648,12 +647,9 @@ s3d::Mesh::Pointer FBXLoaderPrivate::loadMesh(FbxMesh* mesh, s3d::Element::Point
 		smg = vs->accessData<VertexAttributeType::Int>(VertexAttributeUsage::Smoothing, vertexBaseOffset);
 
 	std::vector<VertexDataAccessor<VertexAttributeType::Vec2>> uvs;
-	uint32_t texCoord0 = static_cast<uint32_t>(VertexAttributeUsage::TexCoord0);
 	for (uint32_t i = 0; i < uvChannels; ++i)
-	{
-		VertexAttributeUsage usage = static_cast<VertexAttributeUsage>(texCoord0 + i);
-		uvs.push_back(vs->accessData<VertexAttributeType::Vec2>(usage, vertexBaseOffset));
-	}
+		uvs.push_back(vs->accessData<VertexAttributeType::Vec2>(static_cast<VertexAttributeUsage>(texCoord0 + i), vertexBaseOffset));
+
 	FbxStringList lUVNames;
 	mesh->GetUVSetNames(lUVNames);
 

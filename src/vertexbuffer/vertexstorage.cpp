@@ -89,7 +89,8 @@ size_t VertexStorage::capacity() const
 
 void VertexStorage::increaseSize(size_t sz)
 {
-	_private->data.resize((capacity() + sz) * _private->decl.dataSize());
+	_private->capacity += sz;
+	_private->data.resize(_private->capacity * _private->decl.dataSize());
 }
 
 /*

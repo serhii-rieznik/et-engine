@@ -30,17 +30,21 @@ namespace et
 		~VertexStorage();
 		
 		template <VertexAttributeType T>
-		VertexDataAccessor<T> accessData(VertexAttributeUsage usage, size_t)
+		VertexDataAccessor<T> accessData(VertexAttributeUsage usage, size_t offset)
 		{
 			ET_ASSERT(hasAttributeWithType(usage, T));
-			return VertexDataAccessor<T>(data().binary(), data().dataSize(), stride(), offsetOfAttribute(usage));
+			
+			return VertexDataAccessor<T>(data().binary(), data().dataSize(), stride(),
+				offset * stride() + offsetOfAttribute(usage));
 		}
 		
 		template <VertexAttributeType T>
-		VertexDataAccessor<T> accessData(VertexAttributeUsage usage, size_t) const
+		VertexDataAccessor<T> accessData(VertexAttributeUsage usage, size_t offset) const
 		{
 			ET_ASSERT(hasAttributeWithType(usage, T));
-			return VertexDataAccessor<T>(data().binary(), data().dataSize(), stride(), offsetOfAttribute(usage));
+			
+			return VertexDataAccessor<T>(data().binary(), data().dataSize(), stride(),
+				offset * stride() + offsetOfAttribute(usage));
 		}
 		
 		BinaryDataStorage& data();
