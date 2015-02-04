@@ -36,12 +36,6 @@ namespace et
 			StorageVersion_1_1_0 = 110,
 		};
 
-		enum StorageFormat
-		{
-			StorageFormat_Binary,
-			StorageFormat_HumanReadableMaterials,
-		};
-
 		extern const SceneVersion SceneVersionLatest;
 		extern const StorageVersion StorageVersionLatest;
 

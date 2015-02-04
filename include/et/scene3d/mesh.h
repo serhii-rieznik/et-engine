@@ -7,6 +7,8 @@
 
 #pragma once
 
+#include <et/collision/aabb.h>
+#include <et/collision/sphere.h>
 #include <et/rendering/vertexarrayobject.h>
 #include <et/scene3d/baseelement.h>
 
@@ -26,6 +28,7 @@ namespace et
 				vec3 minMaxCenter;
 				vec3 averageCenter;
 				vec3 dimensions;
+				float boundingSphereRadius = 0.0f;
 			};
 
 		public:
@@ -92,14 +95,23 @@ namespace et
 			const IndexArray::Pointer& indexArray() const
 				{ return _indexArray; }
 			
+			const AABB& boundingBox();
+			const Sphere& boundingSphere();
+			
+			float finalTransformScale();
+			
 		private:
 			Mesh* currentLod();
 			const Mesh* currentLod() const;
+			void transformInvalidated() override;
 
 		private:
 			VertexArrayObject _vao;
 			VertexStorage::Pointer _vertexStorage;
 			IndexArray::Pointer _indexArray;
+			
+			AABB _cachedBoundingBox;
+			Sphere _cachedBoundingSphere;
 			
 			SupportData _supportData;
 			std::map<uint32_t, Mesh::Pointer> _lods;
@@ -109,6 +121,9 @@ namespace et
 			std::string _vaoName;
 			std::string _vbName;
 			std::string _ibName;
+			
+			bool _shouldUpdateBoundingBox = true;
+			bool _shouldUpdateBoundingSphere = true;
 		};
 	}
 }

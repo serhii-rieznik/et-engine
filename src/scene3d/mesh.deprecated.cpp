@@ -62,12 +62,9 @@ void Mesh::calculateSupportData()
 		_supportData.averageCenter += v;
 	}
 	
-	vec3 maxExtent = maxv(absv(maxVertex), absv(minVertex));
-	
 	_supportData.dimensions = maxVertex - minVertex;
 	_supportData.minMaxCenter = 0.5f * (minVertex + maxVertex);
 	_supportData.averageCenter /= static_cast<float>(_numIndexes);
-	_supportData.boundingSphereRadius = etMax(etMax(maxExtent.x, maxExtent.y), maxExtent.z);
 	
 	ET_ASSERT(!isnan(_supportData.averageCenter.x));
 }
@@ -155,7 +152,7 @@ void Mesh::deserialize(std::istream& stream, ElementFactory* factory, SceneVersi
 	setVertexArrayObject(factory->vaoWithIdentifiers(_vbName, _ibName));
 	
 	setIndexArray(factory->primaryIndexArray());
-	setVertexStorage(factory->vertexStorageWithName(_vbName));
+	setVertexStorage(factory->vertexStorageForVertexBuffer(_vbName));
 
 	_startIndex = deserializeUInt32(stream);
 	_numIndexes = deserializeUInt32(stream);
@@ -268,31 +265,12 @@ void Mesh::setLod(uint32_t level)
 
 void Mesh::transformInvalidated()
 {
-	_shouldUpdateBoundingBox = true;
-	_shouldUpdateBoundingSphere = true;
-}
-
-float Mesh::finalTransformScale()
-{
-	return 1.0f / std::pow(std::abs(finalInverseTransform().mat3().determinant()), 1.0f / 3.0f);
-}
-
-const Sphere& Mesh::boundingSphere()
-{
-	if (_shouldUpdateBoundingSphere)
-	{
-		_shouldUpdateBoundingSphere = false;
-		
-		_cachedBoundingSphere = Sphere(finalTransform() * _supportData.averageCenter,
-			finalTransformScale() * _supportData.boundingSphereRadius);
-	}
-	
-	return _cachedBoundingSphere;
+	_shouldUpdateBoundignBox = true;
 }
 
 const AABB& Mesh::boundingBox()
 {
-	if (_shouldUpdateBoundingBox)
+	if (_shouldUpdateBoundignBox)
 	{
 		AABB originalAABB = AABB(_supportData.averageCenter, 0.5f * _supportData.dimensions);
 		
@@ -308,7 +286,7 @@ const AABB& Mesh::boundingBox()
 		}
 		
 		_cachedBoundingBox = AABB(0.5f * (maxVertex + minVertex), 0.5f * (maxVertex - minVertex));
-		_shouldUpdateBoundingBox = false;
+		_shouldUpdateBoundignBox = false;
 	}
 	
 	return _cachedBoundingBox;

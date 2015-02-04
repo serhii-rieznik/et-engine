@@ -118,10 +118,8 @@ namespace et
 		s3d::Material::Pointer _lastMaterial;
 		s3d::Material::List _materials;
 		OBJMeshIndexBoundsList _meshes;
+		
         IndexArray::Pointer _indices;
-		
-//		VertexArray::Pointer _vertexData;
-		
 		VertexStorage::Pointer _vertexData;
 
 		std::vector<et::vec3, et::SharedBlockAllocatorSTDProxy<et::vec3>> _vertices;

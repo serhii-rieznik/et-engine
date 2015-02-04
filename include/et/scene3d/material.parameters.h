@@ -9,7 +9,7 @@
 
 namespace et
 {
-	enum MaterialParameters
+	enum MaterialParameters : uint32_t
 	{
 		MaterialParameter_Undefined,
 		
@@ -39,15 +39,14 @@ namespace et
 
 		MaterialParameter_TransparentColor,
 
-		MaterialParameter_max,
-		MaterialParameter_User = 0xffff
+		MaterialParameter_max
 	};
 	
 	template <typename T>
 	struct DefaultMaterialEntryBase
 	{
 		T value;
-		uint32_t set;
+		uint32_t set = 0;
 		
 	public:
 		DefaultMaterialEntryBase& operator = (const DefaultMaterialEntryBase& r)

@@ -17,7 +17,7 @@ namespace et
 	class VertexDataAccessor { };
 	
 	class VertexStoragePrivate;
-	class VertexStorage : public Shared
+	class VertexStorage : public Object
 	{
 	public:
 		ET_DECLARE_POINTER(VertexStorage)
@@ -46,15 +46,18 @@ namespace et
 		BinaryDataStorage& data();
 		const BinaryDataStorage& data() const;
 		
+		void increaseSize(size_t);
+		
 		bool hasAttribute(VertexAttributeUsage) const;
 		bool hasAttributeWithType(VertexAttributeUsage, VertexAttributeType) const;
 		
 		const VertexDeclaration& declaration() const;
 		
 		size_t stride() const;
+		size_t capacity() const;
+		
 		size_t offsetOfAttribute(VertexAttributeUsage usage) const;
 		size_t sizeOfAttribute(VertexAttributeUsage usage) const;
-		
 	private:
 		ET_DECLARE_PIMPL(VertexStorage, 128)
 	};

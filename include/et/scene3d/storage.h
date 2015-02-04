@@ -7,7 +7,6 @@
 
 #pragma once
 
-#include <et/vertexbuffer/vertexarray.h>
 #include <et/vertexbuffer/indexarray.h>
 #include <et/vertexbuffer/vertexstorage.h>
 #include <et/scene3d/material.h>
@@ -30,11 +29,6 @@ namespace et
 
 			ElementType type() const
 				{ return ElementType_Storage; }
-
-			std::vector<VertexArray::Pointer>& vertexArrays()
-				{ return _vertexArrays; }
-			const std::vector<VertexArray::Pointer>& vertexArrays() const
-				{ return _vertexArrays; }
 
 			std::vector<VertexStorage::Pointer>& vertexStorages()
 				{ return _vertexStorages; }
@@ -63,14 +57,12 @@ namespace et
 				{ _materials.push_back(m); }
 
 			void addVertexStorage(const VertexStorage::Pointer&);
-			void addVertexArray(const VertexArray::Pointer&);
 			void setIndexArray(const IndexArray::Pointer&);
 			
-			VertexArray::Pointer addVertexArrayWithDeclaration(const VertexDeclaration& decl, size_t size);
-			VertexArray::Pointer vertexArrayWithDeclaration(const VertexDeclaration& decl);
-			VertexArray::Pointer vertexArrayWithDeclarationForAppendingSize(const VertexDeclaration& decl, size_t size);
+			VertexStorage::Pointer addVertexStorageWithDeclaration(const VertexDeclaration& decl, size_t size);
+			VertexStorage::Pointer vertexStorageWithDeclarationForAppendingSize(const VertexDeclaration& decl, size_t size);
 			
-			int indexOfVertexArray(const VertexArray::Pointer& va);
+			int indexOfVertexStorage(const VertexStorage::Pointer& va);
 			
 			void flush();
 
@@ -79,7 +71,6 @@ namespace et
 				{ return 0; }
 
 		private:
-			std::vector<VertexArray::Pointer> _vertexArrays;
 			std::vector<VertexStorage::Pointer> _vertexStorages;
 			IndexArray::Pointer _indexArray;
 			Material::List _materials;

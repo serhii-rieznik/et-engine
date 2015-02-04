@@ -13,6 +13,8 @@
 #include <et/scene3d/serialization.h>
 #include <et/scene3d/material.parameters.h>
 
+typedef struct _xmlNode xmlNode;
+
 namespace et
 {
 	namespace s3d
@@ -51,32 +53,44 @@ namespace et
 			bool hasVector(uint32_t param) const;
 			bool hasTexture(uint32_t param) const;
 			bool hasString(uint32_t param) const;
-			
-			void setBlendState(BlendState bs)
-				{ _blendState = bs; }
-			
-			void setDepthMask(bool dm)
-				{ _depthMask = dm; }
 
-			void serialize(std::ostream& stream) const;
+			void serialize(std::ostream& stream, StorageFormat format) const;
 
 			void deserialize(std::istream& stream, RenderContext* rc, ObjectsCache& cache,
-				const std::string& basePath, bool async);
+				const std::string& basePath, StorageFormat format, bool async);
 
 			void clear();
 			
 			Material* duplicate() const;
 			
-			Dictionary toDictionary();
-			void loadFromDictionary(const Dictionary&);
-			
 			ET_DECLARE_EVENT1(loaded, Material*)
 			
+		public:
+			ET_DECLARE_PROPERTY_GET_COPY_SET_COPY(BlendState, blendState, setBlendState)
+			ET_DECLARE_PROPERTY_GET_COPY_SET_COPY(bool, depthWriteEnabled, setDepthWriteEnabled)
+
 		public:
 			int tag = 0;
 
 		private:
 			void reloadObject(LoadableObject::Pointer obj, ObjectsCache&);
+			
+			void serializeBinary(std::ostream& stream) const;
+			void serializeReadable(std::ostream& stream) const;
+
+			void deserializeBinary(std::istream& stream, RenderContext* rc, ObjectsCache& cache,
+				const std::string& basePath, bool async);
+			
+			void deserializeReadable(std::istream& stream, RenderContext* rc, ObjectsCache& cache,
+				const std::string& basePath, bool async);
+
+			/*
+			 * Loading from XML
+			 */
+			void loadProperties(xmlNode*);
+
+			void loadDefaultValues(xmlNode*, RenderContext* rc, ObjectsCache& cache, bool async);
+			void loadDefaultValue(xmlNode*, MaterialParameters, RenderContext* rc, ObjectsCache& cache, bool async);
 
 			/*
 			 * Textures loading stuff
@@ -103,9 +117,6 @@ namespace et
 			CustomStringParameters _customStringParameters;
 			
 			std::map<uint32_t, std::string> _texturesToLoad;
-			
-			BlendState _blendState = BlendState::Disabled;
-			bool _depthMask = true;
 		};
 		
 		typedef ObjectsCache MaterialCache;

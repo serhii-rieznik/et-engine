@@ -82,6 +82,16 @@ const VertexDeclaration& VertexStorage::declaration() const
 	return _private->decl;
 }
 
+size_t VertexStorage::capacity() const
+{
+	return _private->capacity;
+}
+
+void VertexStorage::increaseSize(size_t sz)
+{
+	_private->data.resize((capacity() + sz) * _private->decl.dataSize());
+}
+
 /*
  * Private
  */

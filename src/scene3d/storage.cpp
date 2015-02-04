@@ -22,51 +22,36 @@ void Scene3dStorage::addVertexStorage(const VertexStorage::Pointer& vs)
 	_vertexStorages.push_back(vs);
 }
 
-void Scene3dStorage::addVertexArray(const VertexArray::Pointer& va)
-{
-	_vertexArrays.push_back(va);
-}
-
 void Scene3dStorage::setIndexArray(const IndexArray::Pointer& ia)
 {
 	_indexArray = ia;
 }
 
-VertexArray::Pointer Scene3dStorage::addVertexArrayWithDeclaration(const VertexDeclaration& decl, size_t size)
+VertexStorage::Pointer Scene3dStorage::addVertexStorageWithDeclaration(const VertexDeclaration& decl, size_t size)
 {
-	_vertexArrays.push_back(VertexArray::Pointer::create(decl, size));
-	return _vertexArrays.back();
+	_vertexStorages.push_back(VertexStorage::Pointer::create(decl, size));
+	return _vertexStorages.back();
 }
 
-VertexArray::Pointer Scene3dStorage::vertexArrayWithDeclaration(const VertexDeclaration& decl)
+VertexStorage::Pointer Scene3dStorage::vertexStorageWithDeclarationForAppendingSize(const VertexDeclaration& decl, size_t size)
 {
-	for (const auto&  i : _vertexArrays)
+	for (const auto&  i : _vertexStorages)
 	{
-		if (i->decl() == decl)
+		if ((i->declaration() == decl) && (i->capacity() + size < IndexArray::MaxShortIndex))
 			return i;
 	}
-
-	return addVertexArrayWithDeclaration(decl, 0);
+	
+	return addVertexStorageWithDeclaration(decl, 0);
+	
 }
 
-VertexArray::Pointer Scene3dStorage::vertexArrayWithDeclarationForAppendingSize(const VertexDeclaration& decl, size_t size)
-{
-	for (const auto&  i : _vertexArrays)
-	{
-		if ((i->decl() == decl) && (i->size() + size < IndexArray::MaxShortIndex))
-			return i;
-	}
-
-	return addVertexArrayWithDeclaration(decl, 0);
-}
-
-int Scene3dStorage::indexOfVertexArray(const VertexArray::Pointer& va)
+int Scene3dStorage::indexOfVertexStorage(const VertexStorage::Pointer& vs)
 {
 	int index = 0;
 
-	for (const auto&  i : _vertexArrays)
+	for (const auto&  i : _vertexStorages)
 	{
-		if (i == va)
+		if (i == vs)
 			return index;
 		
 		++index;
@@ -89,45 +74,30 @@ void Scene3dStorage::deserialize(std::istream& stream, ElementFactory*, SceneVer
 
 void Scene3dStorage::flush()
 {
-	auto vi = _vertexArrays.begin();
-	while (vi != _vertexArrays.end())
+	auto vi = _vertexStorages.begin();
+	while (vi != _vertexStorages.end())
 	{
-		VertexArray* ptr = vi->ptr();
-		if (ptr->atomicCounterValue() == 1)
-		{
-			vi = _vertexArrays.erase(vi);
-		}
+		if (vi->ptr()->atomicCounterValue() == 1)
+			vi = _vertexStorages.erase(vi);
 		else
-		{
 			++vi;
-		}
 	}
 	
 	Material::List::iterator mi = _materials.begin();
 	while (mi != _materials.end())
 	{
-		Material* ptr = mi->ptr();
-		if (ptr->atomicCounterValue() == 1)
-		{
+		if (mi->ptr()->atomicCounterValue() == 1)
 			mi = _materials.erase(mi);
-		}
 		else
-		{
 			++mi;
-		}
 	}
 	
 	auto ti = _textures.begin();
 	while (ti != _textures.end())
 	{
-		Texture* ptr = ti->ptr();
-		if (ptr->atomicCounterValue() == 1)
-		{
+		if (ti->ptr()->atomicCounterValue() == 1)
 			ti = _textures.erase(ti);
-		}
 		else
-		{
 			++ti;
-		}
 	}
 }

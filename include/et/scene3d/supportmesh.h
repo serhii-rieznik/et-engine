@@ -29,26 +29,19 @@ namespace et
 			ElementType type() const 
 				{ return ElementType_SupportMesh; }
 
-			float radius() const
-				{ return _radius; }
-
 			const CollisionData& triangles() const
 				{ return _data; }
 
 			void setNumIndexes(uint32_t num);
-			void fillCollisionData(const VertexArray::Pointer& v, const IndexArray::Pointer& i);
 			void fillCollisionData(const VertexStorage::Pointer& v, const IndexArray::Pointer& i);
 
 			SupportMesh* duplicate();
 
-			Sphere sphere();
-			const AABB& aabb();
 			OBB obb();
 			
 			void serialize(std::ostream& stream, SceneVersion version);
 			void deserialize(std::istream& stream, ElementFactory* factory, SceneVersion version);
 			
-			float finalTransformScale();
 
 		private:
 			void transformInvalidated() override;
@@ -56,9 +49,6 @@ namespace et
 
 		private:
 			CollisionData _data;
-			AABB _cachedAABB;
-			float _radius = 0.0f;
-			bool _shouldBuildAABB = true;
 		};
 	}
 }

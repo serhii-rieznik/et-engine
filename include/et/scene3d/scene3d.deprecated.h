@@ -32,8 +32,8 @@ namespace et
 			/*
 			 * Synchronous serializing
 			 */
-			void serialize(std::ostream& stream, const std::string& basePath);
-			void serialize(const std::string& filename);
+			void serialize(std::ostream& stream, StorageFormat fmt, const std::string& basePath);
+			void serialize(const std::string& filename, StorageFormat fmt);
 
 			/*
 			 * Synchronous deserializing
@@ -66,18 +66,20 @@ namespace et
 			void buildAPIObjects(Scene3dStorage::Pointer p, RenderContext* rc);
 
 			Scene3dStorage::Pointer deserializeStorage(std::istream& stream, RenderContext* rc,
-				ObjectsCache& tc, const std::string& basePath, StorageVersion, bool async);
+				ObjectsCache& tc, const std::string& basePath, StorageFormat, StorageVersion, bool async);
 			
 			Element::Pointer createElementOfType(size_t type, Element* parent);
 			Material::Pointer materialWithId(uint64_t);
 			IndexArray::Pointer primaryIndexArray();
-			VertexStorage::Pointer vertexStorageWithName(const std::string&);
+			VertexStorage::Pointer vertexStorageForVertexBuffer(const std::string&);
 
 			void onMaterialLoaded(Material*);
 			void allMaterialsLoaded();
 
 		private:
-			std::vector<VertexArrayObject> _vertexArrayObjects;
+			std::vector<VertexBuffer::Pointer> _vertexBuffers;
+			std::vector<IndexBuffer> _indexBuffers;
+			std::vector<VertexArrayObject> _vaos;
 			AtomicCounter _materialsToLoad;
 			AtomicCounter _componentsToLoad;
 		};

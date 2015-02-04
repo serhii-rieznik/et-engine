@@ -208,7 +208,7 @@ namespace et
 			virtual VertexArrayObject vaoWithIdentifiers(const std::string&, const std::string&) = 0;
 			virtual Element::Pointer createElementOfType(size_t, Element*) = 0;
 			
-			virtual VertexStorage::Pointer vertexStorageForVertexBuffer(const std::string&) = 0;
+			virtual VertexStorage::Pointer vertexStorageWithName(const std::string&) = 0;
 			virtual IndexArray::Pointer primaryIndexArray() = 0;
 			
 			virtual ~ElementFactory() { }
