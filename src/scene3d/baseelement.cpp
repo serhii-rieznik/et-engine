@@ -173,16 +173,16 @@ void Element::serializeGeneralParameters(std::ostream& stream, SceneVersion vers
 {
 	serializeString(stream, name());
 	serializeInt32(stream, _active);
-	serializeInt64(stream, flags());
+	serializeInt32(stream, flags());
 	serializeVector(stream, translation());
 	serializeVector(stream, scale());
 	serializeQuaternion(stream, orientation());
 	
-	serializeInt64(stream, _properites.size());
+	serializeInt32(stream, _properites.size());
 	for (const auto& i : _properites)
 		serializeString(stream, i);
 	
-	serializeInt64(stream, _animations.size());
+	serializeInt32(stream, _animations.size());
 	for (const auto& a : _animations)
 		a.serialize(stream);
 }
@@ -193,10 +193,7 @@ void Element::deserializeGeneralParameters(std::istream& stream, SceneVersion ve
 	
 	_active = deserializeUInt32(stream) != 0;
 	
-	bool is64BitVersion = version >= SceneVersion_1_1_0;
-	
-	uint64_t aFlags = is64BitVersion ? deserializeUInt64(stream) : deserializeUInt32(stream);
-	setFlags(aFlags);
+	setFlags(deserializeUInt32(stream));
 	
 	setTranslation(deserializeVector<vec3>(stream));
 	setScale(deserializeVector<vec3>(stream));
@@ -204,14 +201,14 @@ void Element::deserializeGeneralParameters(std::istream& stream, SceneVersion ve
 
 	if (version >= SceneVersion_1_0_1)
 	{
-		uint64_t numProperties = is64BitVersion ? deserializeUInt64(stream) : deserializeUInt32(stream);
-		for (uint64_t i = 0; i < numProperties; ++i)
+		uint32_t numProperties = deserializeUInt32(stream);
+		for (uint32_t i = 0; i < numProperties; ++i)
 			_properites.insert(deserializeString(stream));
 	}
 	
 	if (version >= SceneVersion_1_0_4)
 	{
-		size_t numAnimations = is64BitVersion ? deserializeUInt64(stream) : deserializeUInt32(stream);
+		size_t numAnimations = deserializeUInt32(stream);
 		_animations.reserve(numAnimations);
 		
 		for (size_t i = 0; i < numAnimations; ++i)

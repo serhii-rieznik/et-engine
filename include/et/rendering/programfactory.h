@@ -31,6 +31,9 @@ namespace et
 		Program ::Pointer genProgram(const std::string& name, const std::string&, const std::string&,
 			const StringList& defines = StringList(), const std::string& workFolder = ".");
 		
+		Program::Pointer genProgramAsIs(const std::string& name, const std::string&, const std::string&,
+			const StringList& defines = StringList(), const std::string& workFolder = ".");
+
 		Program ::Pointer genProgram(const std::string& name, const std::string& vs, const std::string& gs,
 			const std::string& fs, const StringList& defines = StringList(), const std::string& workFolder = ".");
 

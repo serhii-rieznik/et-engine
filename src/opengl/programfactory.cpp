@@ -273,6 +273,12 @@ Program ::Pointer ProgramFactory::genProgram(const std::string& name, const std:
 	return Program::Pointer::create(renderContext(), vs, emptyString, fs, name, name, defines);
 }
 
+Program::Pointer ProgramFactory::genProgramAsIs(const std::string& name, const std::string& vs, const std::string& fs,
+	const StringList& defines, const std::string& workFolder)
+{
+	return Program::Pointer::create(renderContext(), vs, emptyString, fs, name, name, defines);
+}
+
 void ProgramFactory::parseSourceCode(ShaderType type, std::string& source, const StringList& defines,
 	const std::string& workFolder)
 {

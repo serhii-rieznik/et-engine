@@ -31,9 +31,10 @@ namespace et
 		{
 			std::string name;
 			VertexAttributeUsage usage = VertexAttributeUsage::Position;
+			bool compatibilityAttribute = false;
 			
-			Attribute(const std::string& aName, VertexAttributeUsage aUsage) :
-				name(aName), usage(aUsage) { }
+			Attribute(const std::string& aName, VertexAttributeUsage aUsage, bool compatibility) :
+				name(aName), usage(aUsage), compatibilityAttribute(compatibility) { }
 		};
 		
 		typedef std::unordered_map<std::string, Uniform> UniformMap;
@@ -98,6 +99,7 @@ namespace et
 		void setUniform(int, uint32_t, const mat3&, bool force = false);
 		void setUniform(int, uint32_t, const mat4&, bool force = false);
 
+		void setUniform(int, uint32_t, const float* value, size_t amount);
 		void setUniform(int, uint32_t, const vec2* value, size_t amount);
 		void setUniform(int, uint32_t, const vec3* value, size_t amount);
 		void setUniform(int, uint32_t, const vec4* value, size_t amount);

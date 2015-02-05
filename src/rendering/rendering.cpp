@@ -17,19 +17,46 @@ namespace et
 		"SmoothingGroup", "gl_InstanceID", "gl_InstanceIDEXT"
 	};
 
-	const uint32_t vertexAttributeUsageMasks[VertexAttributeUsage_max] =
-		{ 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x100, 0x200, 0x0 };
-
-	VertexAttributeUsage stringToVertexAttribute(const std::string& s)
+	const std::string compatibilityVertexAttributeUsageNames[VertexAttributeUsage_max] =
 	{
+		"gl_Vertex", "gl_Normal", "gl_Color", "gl_Tangent", "gl_Binormal",
+		"gl_MultiTexCoord0", "gl_MultiTexCoord1", "gl_MultiTexCoord2", "gl_MultiTexCoord3",
+		"gl_SmoothingGroup", "gl_InstanceID", "gl_InstanceIDEXT"
+	};
+
+	const uint32_t vertexAttributeUsageMasks[VertexAttributeUsage_max] =
+		{ 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x100, 0x200, 0x0, 0x0 };
+
+	VertexAttributeUsage stringToVertexAttribute(const std::string& s, bool& compatibility)
+	{
+		VertexAttributeUsage result = VertexAttributeUsage::Unknown;
+
 		for (uint32_t i = 0, e = VertexAttributeUsage_max; i < e; ++i)
 		{
 			if (s == vertexAttributeUsageNames[i])
-				return static_cast<VertexAttributeUsage>(i);
+			{
+				result = static_cast<VertexAttributeUsage>(i);
+				break;
+			}
 		}
-		
-		ET_FAIL_FMT("Unknown vertex attribute usage: %s", s.c_str());
-		return VertexAttributeUsage::Position;
+
+		for (uint32_t i = 0, e = VertexAttributeUsage_max; i < e; ++i)
+		{
+			if (s == compatibilityVertexAttributeUsageNames[i])
+			{
+				compatibility = true;
+				result = static_cast<VertexAttributeUsage>(i);
+				break;
+			}
+		}
+
+		compatibility |= (result == VertexAttributeUsage::InstanceId) ||
+			(result == VertexAttributeUsage::InstanceIdExt);
+
+		if (result == VertexAttributeUsage::Unknown)
+			log::warning("Unknown vertex attribute usage: %s", s.c_str());
+
+		return result;
 	}
 
 	std::string vertexAttributeToString(VertexAttributeUsage va)

@@ -41,6 +41,7 @@ namespace et
 		bool multipleTouch = true;
 		bool bindDefaultFramebufferEachFrame = true;
 		bool lockScreenScaleToInitial = true;
+		bool compatibilityProfile = false;
 
 		size_t swapInterval = 1;
         size_t supportedInterfaceOrientations = InterfaceOrientation_Any;

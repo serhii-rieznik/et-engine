@@ -362,11 +362,10 @@ bool RenderContextPrivate::initOpenGL(const RenderContextParameters& params)
 			WGL_CONTEXT_MINOR_VERSION_ARB, 5,
 			WGL_CONTEXT_FLAGS_ARB, 
 			WGL_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB,
-			0, 0, 0, 0
+			WGL_CONTEXT_PROFILE_MASK_ARB, 
+			params.compatibilityProfile ? WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB : WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
+			0, 0
 		};
-
-		attrib_list[6] = WGL_CONTEXT_PROFILE_MASK_ARB;
-		attrib_list[7] = WGL_CONTEXT_CORE_PROFILE_BIT_ARB;
 
 		primaryContext.hGLRC = wglCreateContextAttribsARB(primaryContext.hDC, 0, attrib_list);
 		if (primaryContext.hGLRC == 0)

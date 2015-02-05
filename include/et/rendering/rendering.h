@@ -27,6 +27,7 @@ namespace et
 		InstanceId,
 		InstanceIdExt,
 		
+		Unknown,
 		max
 	};
 	
@@ -272,7 +273,7 @@ namespace et
 	};
 	
 	DataType vertexAttributeTypeDataType(VertexAttributeType t);
-	VertexAttributeUsage stringToVertexAttribute(const std::string& s);
+	VertexAttributeUsage stringToVertexAttribute(const std::string& s, bool& compatibility);
 	
 	std::string vertexAttributeToString(VertexAttributeUsage va);
 	

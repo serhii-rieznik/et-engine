@@ -68,7 +68,8 @@ void SupportMesh::deserialize(std::istream& stream, ElementFactory* factory, Sce
 	deserializeVector<vec3>(stream);
 	deserializeVector<vec3>(stream);
 	
-	uint64_t dataSize = (version < SceneVersion_1_1_0) ? deserializeUInt32(stream) : deserializeUInt64(stream);
+	uint32_t dataSize = deserializeUInt32(stream);
+
 	_data.resize(dataSize);
 
 	if (version <= SceneVersion_1_0_1)

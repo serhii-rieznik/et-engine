@@ -268,18 +268,17 @@ void Program::buildProgram(const std::string& vertex_source, const std::string& 
 			StringDataStorage name(maxNameLength, 0);
 			glGetActiveAttrib(program, i, maxNameLength, &nameLength, &attribSize, &attribType, name.data());
 
-			_attributes.emplace_back(name.data(), stringToVertexAttribute(name.data()));
-		}
+			bool compatibility = false;
+			auto attrib = stringToVertexAttribute(name.data(), compatibility);
+			_attributes.emplace_back(name.data(), attrib, compatibility);
 
-		for (auto& i : _attributes)
-		{
-			if ((i.usage != VertexAttributeUsage::InstanceId) && (i.usage != VertexAttributeUsage::InstanceIdExt))
+			if (!compatibility)
 			{
-				glBindAttribLocation(static_cast<uint32_t>(apiHandle()), static_cast<GLuint>(i.usage), i.name.c_str());
-				checkOpenGLError("glBindAttribLocation - %s", i.name.c_str());
+				glBindAttribLocation(static_cast<uint32_t>(apiHandle()), static_cast<GLuint>(attrib), name.data());
+				checkOpenGLError("glBindAttribLocation - %s", name.data());
 			}
 		}
-		
+	
 		linkStatus = link();
 
 		_rc->renderState().bindProgram(static_cast<uint32_t>(apiHandle()), true);
@@ -611,6 +610,20 @@ void Program::setUniformDirectly(int nLoc, uint32_t type, const mat4& value)
 	
 	glUniformMatrix4fv(nLoc, 1, 0, value.data());
 	checkOpenGLError("glUniformMatrix4fv");
+#endif
+}
+
+void Program::setUniform(int nLoc, uint32_t type, const float* value, size_t amount)
+{
+#if !defined(ET_CONSOLE_APPLICATION)
+	if (nLoc == -1) return;
+
+	(void)type;
+	ET_ASSERT(type == GL_FLOAT);
+	ET_ASSERT(apiHandleValid());
+
+	glUniform1fv(nLoc, static_cast<GLsizei>(amount), value);
+	checkOpenGLError("glUniform1fv");
 #endif
 }
 

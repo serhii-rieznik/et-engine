@@ -147,7 +147,7 @@ void VertexArray::serialize(std::ostream& stream)
 
 void VertexArray::deserialize(std::istream& stream)
 {
-	uint64_t numChunks = 0;
+	uint32_t numChunks = 0;
 	uint32_t id = deserializeUInt32(stream);
 	
 	_decl.deserialize(stream);
@@ -160,7 +160,7 @@ void VertexArray::deserialize(std::istream& stream)
 	else if (id == VertexArrayId_2)
 	{
 		_size = static_cast<size_t>(deserializeUInt64(stream));
-		numChunks = deserializeUInt64(stream);
+		numChunks = static_cast<uint32_t>(deserializeUInt64(stream));
 	}
 	else
 	{
