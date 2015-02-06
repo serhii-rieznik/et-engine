@@ -16,6 +16,7 @@ using namespace et;
 extern const std::string fullscreen_vertex_shader; 
 extern const std::string fullscreen_scaled_vertex_shader;
 extern const std::string scaled_copy_vertex_shader;
+extern const std::string scaled_rotated_copy_vertex_shader;
 extern const std::string copy_fragment_shader;
 extern const std::string depth_fragment_shader;
 
@@ -62,7 +63,13 @@ Renderer::Renderer(RenderContext* rc) :
 	_scaledProgram->setUniform("color_texture", _defaultTextureBindingUnit);
 	_scaledProgram_PSUniform = _scaledProgram->getUniform("PositionScale");
 	_scaledProgram_TintUniform = _scaledProgram->getUniform("tint");
-	
+
+	_scaledRotatedProgram = rc->programFactory().genProgram("__et__scaled_rotated_program__",
+		scaled_rotated_copy_vertex_shader, copy_fragment_shader);
+	_scaledRotatedProgram->setUniform("color_texture", _defaultTextureBindingUnit);
+	_scaledRotatedProgram_PSUniform = _scaledRotatedProgram->getUniform("PositionScale");
+	_scaledRotatedProgram_TintUniform = _scaledRotatedProgram->getUniform("tint");
+	_scaledRotatedProgram_AngleUniform = _scaledRotatedProgram->getUniform("angle");
 #endif
 }
 
@@ -129,6 +136,17 @@ void Renderer::renderTexture(const Texture::Pointer& texture, const vec2& positi
 #endif
 }
 
+void Renderer::renderTextureRotated(const Texture::Pointer& texture, float angle, const vec2& position,
+	const vec2& size, const vec4& tint)
+{
+	_rc->renderState().bindTexture(_defaultTextureBindingUnit, texture);
+	_rc->renderState().bindProgram(_scaledRotatedProgram);
+	_scaledRotatedProgram->setUniform(_scaledRotatedProgram_PSUniform, vec4(position, size));
+	_scaledRotatedProgram->setUniform(_scaledRotatedProgram_TintUniform, tint);
+	_scaledRotatedProgram->setUniform(_scaledRotatedProgram_AngleUniform, angle);
+	fullscreenPass();
+}
+
 vec2 Renderer::currentViewportCoordinatesToScene(const vec2i& coord)
 {
 	auto vpSize = _rc->renderState().viewportSizeFloat();
@@ -151,6 +169,21 @@ void Renderer::renderTexture(const Texture::Pointer& texture, const vec2i& posit
 	sz.x = (size.x == -1) ? texture->width() : size.x;
 	sz.y = (size.y == -1) ? texture->height() : size.y;
 	renderTexture(texture, currentViewportCoordinatesToScene(position + vec2i(0, sz.y)), currentViewportSizeToScene(sz), tint);
+#endif
+}
+
+void Renderer::renderTextureRotated(const Texture::Pointer& texture, float angle, const vec2i& position,
+	const vec2i& size, const vec4& tint)
+{
+#if !defined(ET_CONSOLE_APPLICATION)
+	if (texture.invalid()) return;
+	
+	vec2i sz;
+	sz.x = (size.x == -1) ? texture->width() : size.x;
+	sz.y = (size.y == -1) ? texture->height() : size.y;
+	
+	renderTextureRotated(texture, angle, currentViewportCoordinatesToScene(position + vec2i(0, sz.y)),
+		currentViewportSizeToScene(sz), tint);
 #endif
 }
 
@@ -269,6 +302,21 @@ void main()
 {
 	TexCoord = 0.5 * Vertex + vec2(0.5);
 	gl_Position = vec4(PositionScale.xy + TexCoord * PositionScale.zw, 0.0, 1.0);
+})";
+
+const std::string scaled_rotated_copy_vertex_shader = R"(
+uniform vec4 PositionScale;
+uniform float angle;
+etVertexIn vec2 Vertex;
+etVertexOut vec2 TexCoord;
+void main()
+{
+	float ca = cos(angle);
+	float sa = sin(angle);
+	float rotatedX = ca * Vertex.x - sa * Vertex.y;
+	float rotatedY = sa * Vertex.x + ca * Vertex.y;
+	TexCoord = 0.5 * vec2(rotatedX, rotatedY) + vec2(0.5);
+	gl_Position = vec4(PositionScale.xy + (0.5 + 0.5 * Vertex) * PositionScale.zw, 0.0, 1.0);
 })";
 
 const std::string copy_fragment_shader = R"(

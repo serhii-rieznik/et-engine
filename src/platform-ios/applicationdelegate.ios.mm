@@ -32,6 +32,7 @@ using namespace et;
 	CADisplayLink* _displayLink;
 	
 	BOOL _shouldUnlockRenderLock;
+	AtomicBool _renderThreadStarted;
 }
 
 @end
@@ -64,6 +65,9 @@ extern etOpenGLViewController* sharedOpenGLViewController;
 		}
 	}
 #endif
+	
+	while (!_renderThreadStarted)
+		[NSThread sleepForTimeInterval:0.01];
 	
     return YES;
 }
@@ -135,6 +139,8 @@ extern etOpenGLViewController* sharedOpenGLViewController;
 			[sharedOpenGLViewController beginRender];
 			_notifier.notifyIdle();
 			[sharedOpenGLViewController endRender];
+			
+			_renderThreadStarted = true;
 		}
 	}
 #endif
