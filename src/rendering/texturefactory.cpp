@@ -186,7 +186,7 @@ Texture::Pointer TextureFactory::genTexture(TextureTarget target, TextureFormat 
 }
 
 Texture::Pointer TextureFactory::genCubeTexture(TextureFormat internalformat, uint32_t size, TextureFormat format,
-	DataType type, const std::string& id)
+	DataType type, const std::string& aName)
 {
 	TextureDescription::Pointer desc = TextureDescription::Pointer::create();
 	
@@ -204,7 +204,30 @@ Texture::Pointer TextureFactory::genCubeTexture(TextureFormat internalformat, ui
 	
 	desc->data = BinaryDataStorage(desc->layersCount * desc->dataSizeForAllMipLevels(), 0);
 	
-	return Texture::Pointer::create(renderContext(), desc, id, false);
+	return Texture::Pointer::create(renderContext(), desc, aName, false);
+}
+
+Texture::Pointer TextureFactory::genTexture2DArray(const vec2i& size, uint32_t layers, TextureFormat internalformat,
+	TextureFormat format, DataType type, const BinaryDataStorage& data, const std::string& aName)
+{
+	TextureDescription::Pointer desc = TextureDescription::Pointer::create();
+
+	desc->target = TextureTarget::Texture_2D_Array;
+
+	desc->format = format;
+	desc->internalformat = internalformat;
+	desc->type = type;
+
+	desc->size = size;
+
+	desc->mipMapCount = 1;
+	desc->layersCount = layers;
+	desc->bitsPerPixel = bitsPerPixelForTextureFormat(internalformat, type);
+	desc->channels = channelsForTextureFormat(internalformat);
+
+	desc->data = data;
+
+	return Texture::Pointer::create(renderContext(), desc, aName, false);
 }
 
 Texture::Pointer TextureFactory::genTexture(TextureDescription::Pointer desc)

@@ -30,13 +30,21 @@ namespace et
 			TextureFormat depthInternalformat = TextureFormat::Depth,
 			TextureFormat depthFormat = TextureFormat::Depth,
 			DataType depthType = DataType::UnsignedInt,
-			bool useRenderbuffers = false, int32_t samples = 0);
+			bool useRenderbuffers = false, uint32_t samples = 0);
 
 		Framebuffer::Pointer createMultisampledFramebuffer(const vec2i& size, int32_t samples,
 			const std::string& name = emptyString, TextureFormat colorInternalformat = TextureFormat::RGBA8,
 			TextureFormat depthInternalformat = TextureFormat::Depth16);
 		
 		Framebuffer::Pointer createCubemapFramebuffer(size_t size, const std::string& objectId = emptyString,
+			TextureFormat colorInternalformat = TextureFormat::RGBA,
+			TextureFormat colorFormat = TextureFormat::RGBA,
+			DataType colorType = DataType::UnsignedChar,
+			TextureFormat depthInternalformat = TextureFormat::Depth,
+			TextureFormat depthFormat = TextureFormat::Depth,
+			DataType depthType = DataType::UnsignedInt);
+
+		Framebuffer::Pointer createArrayFramebuffer(const vec2i& size, uint32_t layers, const std::string& name = emptyString,
 			TextureFormat colorInternalformat = TextureFormat::RGBA,
 			TextureFormat colorFormat = TextureFormat::RGBA,
 			DataType colorType = DataType::UnsignedChar,

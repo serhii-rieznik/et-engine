@@ -233,9 +233,17 @@ void Texture::buildData(const char* aDataPtr, size_t aDataSize)
 			}
 		}
 	}
+	else if (_desc->target == TextureTarget::Texture_2D_Array)
+	{
+		ET_ASSERT(!_desc->compressed);
+		ET_ASSERT(_desc->mipMapCount == 1);
+
+		etTexImage3D(targetValue, 0, internalFormatValue, _desc->size.x, _desc->size.y, _desc->layersCount, 
+			0, formatValue, typeValue, aDataPtr);
+	}
 	else
 	{
-		log::error("Unsupported texture target specified: glTexTargetToString(_target)");
+		log::error("Unsupported texture target specified: %s", glTexTargetToString(targetValue).c_str());
 	}
 #endif
 }

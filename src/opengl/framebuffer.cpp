@@ -30,8 +30,7 @@ Framebuffer::Framebuffer(RenderContext* rc, const FramebufferDescription& desc,
 
 	_rc->renderState().bindFramebuffer(framebuffer);
 
-	bool hasColor = (_description.numColorRenderTargets > 0) &&
-		(_description.colorInternalformat != TextureFormat::Invalid) &&
+	bool hasColor = (_description.colorInternalformat != TextureFormat::Invalid) &&
 		(_description.colorIsRenderbuffer || (_description.colorFormat != TextureFormat::Invalid));
 	
 	bool hasDepth = (_description.depthInternalformat != TextureFormat::Invalid) &&
@@ -40,72 +39,29 @@ Framebuffer::Framebuffer(RenderContext* rc, const FramebufferDescription& desc,
 	if (hasColor)
 	{
 		if (_description.colorIsRenderbuffer)
-		{
 			createOrUpdateColorRenderbuffer();
-		}
 		else 
-		{
-			for (size_t i = 0; i < _description.numColorRenderTargets; ++i)
-			{ 
-				Texture::Pointer target;
-				if (_description.isCubemap)
-				{
-					target = _rc->textureFactory().genCubeTexture(_description.colorInternalformat, _description.size.x,
-						_description.colorFormat, _description.colorType, name() + "_color_" + intToStr(i));
-				}
-				else 
-				{
-					size_t dataSize = _description.size.square() *
-						bitsPerPixelForTextureFormat(_description.colorInternalformat, _description.colorType) / 8;
-					
-					target = _rc->textureFactory().genTexture(TextureTarget::Texture_2D, _description.colorInternalformat,
-						_description.size, _description.colorFormat, _description.colorType,
-						BinaryDataStorage(dataSize, 0), name() + "_color_" + intToStr(i));
-				}
-				target->setWrap(rc, TextureWrap::ClampToEdge, TextureWrap::ClampToEdge);
-				addRenderTarget(target);
-			}
-		}
-		checkStatus();
+			buildColorAttachment();
 	}
 
 	if (hasDepth)
 	{
 		if (_description.depthIsRenderbuffer)
-		{
 			createOrUpdateDepthRenderbuffer();
-		}
 		else 
-		{
-			Texture::Pointer depthTarget;
-			if (_description.isCubemap && (OpenGLCapabilities::instance().version() == OpenGLVersion::Version_3x))
-			{
-				depthTarget = _rc->textureFactory().genCubeTexture(_description.depthInternalformat, _description.size.x,
-					_description.depthFormat, _description.depthType, name() + "_depth");
-			}
-			else 
-			{
-				size_t dataSize = _description.size.square() *
-					bitsPerPixelForTextureFormat(_description.depthInternalformat, _description.depthType) / 8;
-				
-				depthTarget = _rc->textureFactory().genTexture(TextureTarget::Texture_2D, _description.depthInternalformat,
-					_description.size, _description.depthFormat, _description.depthType,
-					BinaryDataStorage(dataSize, 0), name() + "_depth");
-			}
-			depthTarget->setWrap(rc, TextureWrap::ClampToEdge, TextureWrap::ClampToEdge);
-			setDepthTarget(depthTarget);
-		}
-		checkStatus();
+			buildDepthAttachment();
 	}
 
-#	if (!ET_OPENGLES)
+#if (!ET_OPENGLES)
 	if (!hasColor)
 	{
 		glReadBuffer(GL_NONE);
 		glDrawBuffer(GL_NONE);
 	}
-#	endif
-	
+#endif
+
+	checkStatus();
+
 #endif
 }
 
@@ -179,21 +135,64 @@ bool Framebuffer::checkStatus()
 	
 	return status == GL_FRAMEBUFFER_COMPLETE;
 #else
-	
 	return true;
-	
 #endif
 }
 
-void Framebuffer::addRenderTarget(const Texture::Pointer& rt)
+Texture::Pointer Framebuffer::buildTexture(const vec2i& aSize, TextureTarget aTarget, TextureFormat aInternalFormat, 
+	TextureFormat aFormat, DataType aType, uint32_t param)
 {
-#if !defined(ET_CONSOLE_APPLICATION)
+	switch (aTarget)
+	{
+		case TextureTarget::Texture_2D:
+		{
+			size_t dataSize = aSize.square() * bitsPerPixelForTextureFormat(aInternalFormat, aType) / 8;
+			return _rc->textureFactory().genTexture(TextureTarget::Texture_2D, aInternalFormat, aSize,
+				aFormat, aType, BinaryDataStorage(dataSize, 0), name() + "_texture");
+		}
+
+		case TextureTarget::Texture_2D_Array:
+		{
+			size_t dataSize = param * aSize.square() * bitsPerPixelForTextureFormat(aInternalFormat, aType) / 8;
+			return _rc->textureFactory().genTexture2DArray(aSize, param, aInternalFormat, aFormat, aType,
+				BinaryDataStorage(dataSize, 0), name() + "_texture");
+		}
+
+		case TextureTarget::Texture_Cube:
+		{
+			return _rc->textureFactory().genCubeTexture(aInternalFormat, etMax(aSize.x, aSize.y),
+				aFormat, aType, name() + "_color");
+		}
+
+		default:
+			ET_FAIL_FMT("Invalid or unsupported texture target: %u", static_cast<uint32_t>(aTarget));
+	}
+
+	return Texture::Pointer();
+}
+
+void Framebuffer::buildColorAttachment()
+{
+	Texture::Pointer target = buildTexture(_description.size, _description.target, 
+		_description.colorInternalformat, _description.colorFormat, _description.colorType, _description.numLayers);
+	target->setWrap(_rc, TextureWrap::ClampToEdge, TextureWrap::ClampToEdge);
+	addRenderTarget(target);
+}
+
+void Framebuffer::buildDepthAttachment()
+{
+	Texture::Pointer target = buildTexture(_description.size, _description.target,
+		_description.depthInternalformat, _description.depthFormat, _description.depthType, _description.numLayers);
+	target->setWrap(_rc, TextureWrap::ClampToEdge, TextureWrap::ClampToEdge);
+	setDepthTarget(target);
+}
+
+void Framebuffer::attachTexture(Texture::Pointer rt, uint32_t target)
+{
 	if (rt.invalid() || (rt->size() != _description.size)) return;
 	ET_ASSERT(glIsTexture(static_cast<uint32_t>(rt->apiHandle())));
 
 	_rc->renderState().bindFramebuffer(static_cast<uint32_t>(apiHandle()));
-	
-	auto target = drawBufferTarget(_renderTargets.size());
 
 	if (rt->target() == TextureTarget::Texture_2D)
 	{
@@ -208,7 +207,18 @@ void Framebuffer::addRenderTarget(const Texture::Pointer& rt)
 			checkOpenGLError("glFramebufferTexture2D(...) - %s", name().c_str());
 		}
 	}
-	
+	else if (rt->target() == TextureTarget::Texture_2D_Array)
+	{
+		glFramebufferTexture(GL_FRAMEBUFFER, target, rt->apiHandle(), 0);
+		checkOpenGLError("glFramebufferTexture(...) - %s", name().c_str());
+	}
+}
+
+void Framebuffer::addRenderTarget(const Texture::Pointer& rt)
+{
+#if !defined(ET_CONSOLE_APPLICATION)
+	auto target = drawBufferTarget(_renderTargets.size());
+	attachTexture(rt, target);
 	_renderTargets.push_back(rt);
 	checkStatus();
 	
@@ -216,39 +226,11 @@ void Framebuffer::addRenderTarget(const Texture::Pointer& rt)
 #endif
 }
 
-void Framebuffer::setDepthTarget(const Texture::Pointer& rt)
+void Framebuffer::setDepthTarget(const Texture::Pointer& texture)
 {
 #if !defined(ET_CONSOLE_APPLICATION)
-	if (rt.invalid() || (rt->size() != _description.size)) return;
-
-	_depthBuffer = rt;
-	
-	_rc->renderState().bindFramebuffer(static_cast<uint32_t>(apiHandle()));
-	if (_depthBuffer->target() == TextureTarget::Texture_2D)
-	{
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, static_cast<uint32_t>(_depthBuffer->apiHandle()), 0);
-		checkOpenGLError("glFramebufferTexture2D");
-	}
-	else if (_depthBuffer->target() == TextureTarget::Texture_Cube)
-	{
-		for (GLenum i = 0; i < 6; ++i)
-		{
-			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
-				GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, static_cast<uint32_t>(_depthBuffer->apiHandle()), 0);
-			checkOpenGLError("glFramebufferTexture2D(...) - %s", name().c_str());
-		}
-	}
-#endif
-}
-
-void Framebuffer::setDepthTarget(const Texture::Pointer& texture, uint32_t target)
-{
-#if !defined(ET_CONSOLE_APPLICATION)
-	if (texture.invalid() || (texture->size() != _description.size)) return;
-	
-	_rc->renderState().bindFramebuffer(static_cast<uint32_t>(apiHandle()));
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, target, static_cast<uint32_t>(texture->apiHandle()), 0);
-	checkOpenGLError("glFramebufferTexture2D(...) - %s", name().c_str());
+	_depthBuffer = texture;
+	attachTexture(_depthBuffer, GL_DEPTH_ATTACHMENT);
 #endif
 }
 
@@ -257,26 +239,13 @@ void Framebuffer::addSameRendertarget()
 #if !defined(ET_CONSOLE_APPLICATION)
 	if (_renderTargets.empty()) return;
 		
-	Texture::Pointer basic = _renderTargets.front();
-	
-	std::string texName = name() + "_color_" + intToStr(_renderTargets.size() + 1);
-	
-	Texture::Pointer target;
-	if (_description.isCubemap)
-	{
-		target = _rc->textureFactory().genCubeTexture(basic->internalFormat(), basic->width(),
-			basic->format(), basic->dataType(), texName);
-	}
-	else
-	{
-		BinaryDataStorage emptyData(basic->size().square() *
-			bitsPerPixelForTextureFormat(basic->internalFormat(), basic->dataType()) / 8, 0);
-		
-		target = _rc->textureFactory().genTexture(basic->target(), basic->internalFormat(),
-			basic->size(), basic->format(), basic->dataType(), emptyData, texName);
-	}
-	
+	const Texture::Pointer& basic = _renderTargets.front();
+
+	Texture::Pointer target = buildTexture(basic->size(), basic->target(), basic->internalFormat(),
+		basic->format(), basic->dataType(), basic->description()->layersCount);
+	target->setName(name() + "_color_" + intToStr(_renderTargets.size() + 1));
 	target->setWrap(_rc, TextureWrap::ClampToEdge, TextureWrap::ClampToEdge);
+
 	addRenderTarget(target);
 #endif 
 }
@@ -285,34 +254,7 @@ void Framebuffer::setCurrentRenderTarget(const Texture::Pointer& texture)
 {
 #if !defined(ET_CONSOLE_APPLICATION)
 	ET_ASSERT(texture.valid());
-	setCurrentRenderTarget(texture, texture->target());
-#endif
-}
-
-void Framebuffer::setCurrentRenderTarget(const Texture::Pointer& texture, TextureTarget target)
-{
-#if !defined(ET_CONSOLE_APPLICATION)
-	ET_ASSERT(texture.valid());
-	_rc->renderState().bindFramebuffer(static_cast<uint32_t>(apiHandle()));
-
-	if (target == TextureTarget::Texture_Cube)
-	{
-		for (GLenum i = 0; i < 6; ++i)
-		{
-			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
-				GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, static_cast<uint32_t>(texture->apiHandle()), 0);
-			checkOpenGLError("glFramebufferTexture2D");
-		}
-	}
-	else if (target == TextureTarget::Texture_2D)
-	{
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, static_cast<uint32_t>(texture->apiHandle()), 0);
-		checkOpenGLError("glFramebufferTexture2D");
-	}
-	else
-	{
-		ET_FAIL_FMT("Invalid framebuffer attachment target: %u", static_cast<uint32_t>(target));
-	}
+	attachTexture(texture, GL_COLOR_ATTACHMENT0);
 #endif
 }
 
@@ -329,7 +271,7 @@ void Framebuffer::setCurrentRenderTarget(size_t index)
 void Framebuffer::setCurrentCubemapFace(uint32_t faceIndex)
 {
 #if !defined(ET_CONSOLE_APPLICATION)
-	ET_ASSERT(_description.isCubemap && (faceIndex < 6));
+	ET_ASSERT((_description.target == TextureTarget::Texture_Cube) && (faceIndex < 6));
 	
 	_rc->renderState().bindFramebuffer(static_cast<uint32_t>(apiHandle()));
 	
@@ -350,6 +292,22 @@ void Framebuffer::setCurrentCubemapFace(uint32_t faceIndex)
 		checkOpenGLError("setCurrentCubemapFace -> depth");
 	}
 #endif
+}
+
+void Framebuffer::setCurrentLayer(uint32_t layerIndex)
+{
+	ET_ASSERT(layerIndex < _description.numLayers);
+	_rc->renderState().bindFramebuffer(static_cast<uint32_t>(apiHandle()));
+
+	uint32_t targetIndex = 0;
+	for (const auto& t : _renderTargets)
+	{
+		glFramebufferTextureLayer(GL_FRAMEBUFFER, drawBufferTarget(targetIndex), t->apiHandle(), 0, layerIndex);
+		++targetIndex;
+	}
+
+	if (_depthBuffer.valid())
+		glFramebufferTextureLayer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, _depthBuffer->apiHandle(), 0, layerIndex);
 }
 
 void Framebuffer::createOrUpdateColorRenderbuffer()
@@ -417,8 +375,7 @@ void Framebuffer::resize(const vec2i& sz)
 	
 	_description.size = sz;
 	
-	bool hasColor = (_description.numColorRenderTargets > 0) &&
-		(_description.colorInternalformat != TextureFormat::Invalid) &&
+	bool hasColor = (_description.colorInternalformat != TextureFormat::Invalid) &&
 		(_description.colorIsRenderbuffer || (_description.colorFormat != TextureFormat::Invalid));
 	
 	bool hasDepth = (_description.depthInternalformat != TextureFormat::Invalid) &&
@@ -439,8 +396,7 @@ void Framebuffer::resize(const vec2i& sz)
 				desc->data.resize(desc->layersCount * desc->dataSizeForAllMipLevels());
 				desc->data.fill(0);
 				rt->updateData(_rc, desc);
-				setCurrentRenderTarget(rt, rt->target());
-				
+				setCurrentRenderTarget(rt);
 			}
 		}
 	}

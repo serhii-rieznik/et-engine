@@ -318,6 +318,8 @@ uint32_t et::textureTargetValue(TextureTarget value)
 		GL_TEXTURE_2D,
 		
 		GL_TEXTURE_CUBE_MAP,
+
+		GL_TEXTURE_2D_ARRAY
 	};
 	
 	ET_SAMPLE_VALUE_FROM_MAP
@@ -823,7 +825,7 @@ void et::etTexImage1D(uint32_t target, int level, int internalformat, GLsizei wi
 #if !defined(ET_CONSOLE_APPLICATION)
 	glTexImage1D(target, level, internalformat, width, border, format, type, pixels);
 	
-	checkOpenGLError("glTexImage2D(%s, %d, %s, %d, %d, %s, %s, %, 0x%8X)",
+	checkOpenGLError("glTexImage1D(%s, %d, %s, %d, %d, %s, %s, %, 0x%8X)",
 		glTexTargetToString(target).c_str(), level, glInternalFormatToString(internalformat).c_str(),
 		width, border, glInternalFormatToString(static_cast<int32_t>(format)).c_str(), glTypeToString(type).c_str(), pixels);
 #endif
@@ -867,6 +869,22 @@ void et::etTexImage2D(uint32_t target, int level, int internalformat, GLsizei wi
 	checkOpenGLError("glTexImage2D(%s, %d, %s, %d, %d, %d, %s, %s, %, 0x%08X)",
 		glTexTargetToString(target).c_str(), level, glInternalFormatToString(internalformat).c_str(),
 		width, height, border, glInternalFormatToString(format).c_str(), glTypeToString(type).c_str(),
+		pixels);
+#	endif
+#endif
+}
+
+void et::etTexImage3D(uint32_t target, int level, int internalformat, GLsizei width, GLsizei height,
+	GLsizei depth, int border, uint32_t format, uint32_t type, const GLvoid* pixels)
+{
+#if !defined(ET_CONSOLE_APPLICATION)
+	ET_ASSERT(pixels);
+	glTexImage3D(target, level, internalformat, width, height, depth, border, format, type, pixels);
+
+#	if (ET_DEBUG)
+	checkOpenGLError("glTexImage3D(%s, %d, %s, %d, %d, %d, %d, %s, %s, %, 0x%08X)",
+		glTexTargetToString(target).c_str(), level, glInternalFormatToString(internalformat).c_str(),
+		width, height, depth, border, glInternalFormatToString(format).c_str(), glTypeToString(type).c_str(),
 		pixels);
 #	endif
 #endif

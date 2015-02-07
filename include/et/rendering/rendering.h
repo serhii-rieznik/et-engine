@@ -108,7 +108,8 @@ namespace et
 		Texture_1D,
 		Texture_2D,
 		Texture_Cube,
-		
+		Texture_2D_Array,
+
 		max,
 	};
 	

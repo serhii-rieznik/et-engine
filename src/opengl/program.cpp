@@ -402,13 +402,15 @@ void Program::validate() const
  * Uniform setters
  */
 
+bool isSamplerUniform(uint32_t);
+
 void Program::setUniform(int nLoc, uint32_t type, int32_t value, bool)
 {
 #if !defined(ET_CONSOLE_APPLICATION)
 	if (nLoc == -1) return;
 	
 	(void)type;
-	ET_ASSERT((type == GL_INT) || (type == GL_SAMPLER_2D) || (type == GL_SAMPLER_CUBE));
+	ET_ASSERT((type == GL_INT) || isSamplerUniform(type));
 	ET_ASSERT(apiHandleValid());
 	
 	glUniform1i(nLoc, value);
@@ -613,6 +615,20 @@ void Program::setUniformDirectly(int nLoc, uint32_t type, const mat4& value)
 #endif
 }
 
+void Program::setUniform(int nLoc, uint32_t type, const int* value, size_t amount)
+{
+#if !defined(ET_CONSOLE_APPLICATION)
+	if (nLoc == -1) return;
+
+	(void)type;
+	ET_ASSERT(type == GL_INT);
+	ET_ASSERT(apiHandleValid());
+
+	glUniform1iv(nLoc, static_cast<GLsizei>(amount), value);
+	checkOpenGLError("glUniform1iv");
+#endif
+}
+
 void Program::setUniform(int nLoc, uint32_t type, const float* value, size_t amount)
 {
 #if !defined(ET_CONSOLE_APPLICATION)
@@ -681,4 +697,20 @@ void Program::setUniform(int nLoc, uint32_t type, const mat4* value, size_t amou
 	glUniformMatrix4fv(nLoc, static_cast<GLsizei>(amount), 0, value->data());
 	checkOpenGLError("glUniformMatrix4fv");
 #endif
+}
+
+/*
+ * Service stuff
+ */
+bool isSamplerUniform(uint32_t value)
+{
+	return 
+		(value == GL_SAMPLER_1D) || 
+		(value == GL_SAMPLER_2D) || 
+		(value == GL_SAMPLER_3D) || 
+		(value == GL_SAMPLER_CUBE) || 
+		(value == GL_SAMPLER_2D_SHADOW) ||
+		(value == GL_SAMPLER_2D_ARRAY) ||
+		(value == GL_SAMPLER_2D_ARRAY_SHADOW)
+		;
 }

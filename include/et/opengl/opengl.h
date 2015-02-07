@@ -173,6 +173,9 @@ namespace et
 	void etTexImage2D(uint32_t target, int level, int internalformat, GLsizei width, GLsizei height,
 		int border, uint32_t format, uint32_t type, const GLvoid * pixels);
 	
+	void etTexImage3D(uint32_t target, int level, int internalformat, GLsizei width, GLsizei height,
+		GLsizei depth, int border, uint32_t format, uint32_t type, const GLvoid * pixels);
+
 	void etCompressedTexImage1D(uint32_t target, int level, uint32_t internalformat, GLsizei width,
 		int border, GLsizei imageSize, const GLvoid * data);
 	
