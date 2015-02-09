@@ -375,13 +375,18 @@ bool RenderContextPrivate::initOpenGL(const RenderContextParameters& params)
 			0, 0
 		};
 
+		GetLastError(); // clear last error
+
 		primaryContext.hGLRC = wglCreateContextAttribsARB(primaryContext.hDC, 0, attrib_list);
 		if (primaryContext.hGLRC == 0)
 		{
-			DWORD lastError = GetLastError();
+			DWORD lastError = GetLastError() & 0xffff;
 
 			if (lastError == ERROR_INVALID_VERSION_ARB)
-				log::warning("Attempt to create OpenGL context with version %d.%d failed.", attrib_list[1], attrib_list[3]);
+			{
+				log::warning("Attempt to create OpenGL context with version %d.%d failed, trying previous versions...",
+					attrib_list[1], attrib_list[3]);
+			}
 			else if (lastError == ERROR_INVALID_PROFILE_ARB)
 				log::error("Error creating context: ERROR_INVALID_PROFILE_ARB");
 			else if (lastError == ERROR_INVALID_PIXEL_FORMAT)
@@ -411,7 +416,10 @@ bool RenderContextPrivate::initOpenGL(const RenderContextParameters& params)
 			{
 				DWORD lastError = GetLastError();
 				if (lastError == ERROR_INVALID_VERSION_ARB)
-					log::warning("Attempt to create OpenGL context with version %d.%d failed.", attrib_list[1], attrib_list[3]);
+				{
+					log::warning("Attempt to create OpenGL context with version %d.%d failed, trying previous versions...",
+						attrib_list[1], attrib_list[3]);
+				}
 				else if (lastError == ERROR_INVALID_PROFILE_ARB)
 					log::error("Error creating context: ERROR_INVALID_PROFILE_ARB");
 			}
