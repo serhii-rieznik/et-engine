@@ -44,21 +44,18 @@ namespace et
 		
 		void unmap();
 
-		void serialize(std::ostream& stream);
-		void deserialize(std::istream& stream);
+		void setSourceObjectName(const std::string& tag)
+			{ _sourceObjectName = tag; }
 
-		void setSourceTag(size_t tag)
-			{_sourceTag = tag; }
-
-		size_t sourceTag() const
-			{ return _sourceTag; }
+		const std::string& sourceObjectName() const
+			{ return _sourceObjectName; }
 
 	private:
 		RenderContext* _rc = nullptr;
 		VertexDeclaration _decl;
 		AtomicBool _mapped;
 		size_t _dataSize = 0;
-		size_t _sourceTag = 0;
+		std::string _sourceObjectName;
 		BufferDrawType _drawType = BufferDrawType::Static;
 	};
 }

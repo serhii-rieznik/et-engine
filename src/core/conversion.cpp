@@ -210,6 +210,16 @@ ArrayValue et::rectToArray(const rect& v)
 	return result;
 }
 
+ArrayValue et::quaternionToArray(const quaternion& q)
+{
+	ArrayValue result;
+	result->content.push_back(FloatValue(q.scalar));
+	result->content.push_back(FloatValue(q.vector.x));
+	result->content.push_back(FloatValue(q.vector.y));
+	result->content.push_back(FloatValue(q.vector.z));
+	return result;
+}
+
 vec2 et::arrayToVec2(ArrayValue a)
 {
 	vec2 result;
@@ -274,6 +284,21 @@ vec4 et::arrayToVec4(ArrayValue a)
 	return result;
 }
 
+quaternion et::arrayToQuaternion(ArrayValue a)
+{
+	quaternion result;
+	size_t index = 0;
+	for (auto v : a->content)
+	{
+		if (v->valueClass() == ValueClass_Float)
+			result[index++] = FloatValue(v)->content;
+		else if (v->valueClass() == ValueClass_Integer)
+			result[index++] = static_cast<float>(IntegerValue(v)->content);
+
+		if (index >= 4) break;
+	}
+	return result;
+}
 
 rect et::arrayToRect(ArrayValue a)
 {

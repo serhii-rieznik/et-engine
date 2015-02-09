@@ -19,7 +19,7 @@ Animation::Animation()
 	
 }
 
-Animation::Animation(std::istream& stream)
+Animation::Animation(Dictionary stream)
 {
 	deserialize(stream);
 }
@@ -116,8 +116,9 @@ mat4 Animation::transformation(float time) const
 	return result.transform();
 }
 
-void Animation::serialize(std::ostream& stream) const
+void Animation::serialize(Dictionary stream) const
 {
+	/*
 	serializeInt32(stream, animationCurrentVersion);
 	serializeUInt32(stream, static_cast<uint32_t>(3 * sizeof(float) + 2 * sizeof(uint32_t) + _frames.size() * sizeof(Frame)));
 	serializeFloat(stream, _startTime);
@@ -132,10 +133,12 @@ void Animation::serialize(std::ostream& stream) const
 		serializeQuaternion(stream, frame.orientation);
 		serializeVector(stream, frame.scale);
 	}
+	*/
 }
 
-void Animation::deserialize(std::istream& stream)
+void Animation::deserialize(Dictionary stream)
 {
+	/*
 	_frames.clear();
 	
 	int version = deserializeInt32(stream);
@@ -165,6 +168,7 @@ void Animation::deserialize(std::istream& stream)
 		uint32_t dataSize = deserializeUInt32(stream);
 		stream.seekg(dataSize, std::ios_base::cur);
 	}
+	*/
 }
 
 void Animation::setOutOfRangeMode(OutOfRangeMode mode)

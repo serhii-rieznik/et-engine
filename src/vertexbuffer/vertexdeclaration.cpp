@@ -111,34 +111,16 @@ bool VertexDeclaration::operator == (const VertexDeclaration& r) const
 	return true;
 }
 
-void VertexDeclaration::serialize(std::ostream& stream)
+bool VertexDeclaration::hasSameElementsAs(const VertexDeclaration& r) const
 {
-	serializeUInt32(stream, _interleaved);
-	serializeUInt32(stream, _totalSize);
-	serializeUInt32(stream, _list.size() & 0xffffffff);
-	for (auto& i : _list)
-	{
-		serializeUInt32(stream, static_cast<uint32_t>(i.usage()));
-		serializeUInt32(stream, static_cast<uint32_t>(i.type()));
-		serializeUInt32(stream, i.stride());
-		serializeUInt32(stream, i.offset());
-	}
-}
+	if (r.elements().size() != _list.size()) return false;
 
-void VertexDeclaration::deserialize(std::istream& stream)
-{
-	_interleaved = deserializeUInt32(stream) != 0;
-	uint32_t totalSize = deserializeUInt32(stream);
-	uint32_t listSize = deserializeUInt32(stream);
-	for (size_t i = 0; i < listSize; ++i)
+	for (const auto& ownElement : _list)
 	{
-		VertexAttributeUsage usage = static_cast<VertexAttributeUsage>(deserializeUInt32(stream));
-		VertexAttributeType type = static_cast<VertexAttributeType>(deserializeUInt32(stream));
-		uint32_t stride = deserializeUInt32(stream);
-		uint32_t offset = deserializeUInt32(stream);
-		push_back(VertexElement(usage, type, stride, offset));
+		auto usage = ownElement.usage();
+		if (!r.has(usage) || (ownElement != r.elementForUsage(usage)))
+			return false;
 	}
 
-	ET_ASSERT(_totalSize == totalSize);
-	(void)(totalSize);
+	return true;
 }

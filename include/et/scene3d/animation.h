@@ -40,7 +40,7 @@ namespace et
 			
 		public:
 			Animation();
-			Animation(std::istream&);
+			Animation(Dictionary);
 			
 			void addKeyFrame(float, const vec3&, const quaternion&, const vec3&);
 			
@@ -66,8 +66,8 @@ namespace et
 			float duration() const
 				{ return _stopTime - _startTime; }
 			
-			void serialize(std::ostream&) const;
-			void deserialize(std::istream&);
+			void serialize(Dictionary) const;
+			void deserialize(Dictionary);
 			
 		private:
 			std::vector<Frame> _frames;

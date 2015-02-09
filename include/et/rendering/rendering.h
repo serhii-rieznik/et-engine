@@ -197,7 +197,7 @@ namespace et
 		Lines,
 		Triangles,
 		TriangleStrips,
-		LineStrip,
+		LineStrips,
 		
 		max
 	};
@@ -258,7 +258,10 @@ namespace et
 	{
 		VertexAttributeUsage_max = static_cast<uint32_t>(VertexAttributeUsage::max),
 		VertexAttributeType_max = static_cast<uint32_t>(VertexAttributeType::max),
-		
+
+		IndexArrayFormat_max = static_cast<uint32_t>(IndexArrayFormat::max),
+		PrimitiveType_max = static_cast<uint32_t>(PrimitiveType::max),
+
 		DataType_max = static_cast<uint32_t>(DataType::max),
 		BlendState_max = static_cast<uint32_t>(BlendState::max),
 
@@ -274,10 +277,17 @@ namespace et
 	};
 	
 	DataType vertexAttributeTypeDataType(VertexAttributeType t);
-	VertexAttributeUsage stringToVertexAttribute(const std::string& s, bool& compatibility);
-	
-	std::string vertexAttributeToString(VertexAttributeUsage va);
-	
+
+	VertexAttributeUsage stringToVertexAttributeUsage(const std::string& s, bool& compatibility);
+	VertexAttributeType stringToVertexAttributeType(const std::string& s);
+	DataType stringToDataType(const std::string&);
+
+	std::string vertexAttributeUsageToString(VertexAttributeUsage);
+	std::string vertexAttributeTypeToString(VertexAttributeType);
+	std::string dataTypeToString(DataType);
+	std::string indexArrayFormatToString(IndexArrayFormat);
+	std::string primitiveTypeToString(PrimitiveType);
+
 	uint32_t sizeOfDataType(DataType);
 	
 	uint32_t vertexAttributeUsageMask(VertexAttributeUsage u);

@@ -5,12 +5,14 @@
  *
  */
 
+#include <et/core/conversion.h>
 #include <et/scene3d/cameraelement.h>
 
 using namespace et;
 using namespace et::s3d;
 
-CameraElement::CameraElement(const std::string& name, Element* parent) : Element(name, parent)
+CameraElement::CameraElement(const std::string& name, BaseElement* parent) : 
+	BaseElement(name, parent)
 {
 
 }
@@ -31,31 +33,33 @@ CameraElement* CameraElement::duplicate()
 	return result;
 }
 
-void CameraElement::serialize(std::ostream& stream, SceneVersion version)
+void CameraElement::serialize(Dictionary stream, const std::string& basePath)
 {
-	serializeMatrix(stream, modelViewMatrix());
-	serializeMatrix(stream, projectionMatrix());
-	serializeUInt32(stream, upVectorLocked());
-	serializeVector(stream, lockedUpVector());
+	const auto& mv = modelViewMatrix();
+	const auto& pr = projectionMatrix();
+	
+	ArrayValue modelView;
+	modelView->content.push_back(vec4ToArray(mv[0]));
+	modelView->content.push_back(vec4ToArray(mv[1]));
+	modelView->content.push_back(vec4ToArray(mv[2]));
+	modelView->content.push_back(vec4ToArray(mv[3]));
+	stream.setArrayForKey(kModelView, modelView);
 
-	serializeGeneralParameters(stream, version);
-	serializeChildren(stream, version);
+	ArrayValue projection;
+	projection->content.push_back(vec4ToArray(pr[0]));
+	projection->content.push_back(vec4ToArray(pr[1]));
+	projection->content.push_back(vec4ToArray(pr[2]));
+	projection->content.push_back(vec4ToArray(pr[3]));
+	stream.setArrayForKey(kProjection, modelView);
+
+	stream.setArrayForKey(kUpVector, vec3ToArray(lockedUpVector()));
+	stream.setIntegerForKey(kUpVectorLocked, upVectorLocked());
+
+	BaseElement::serialize(stream, basePath);
 }
 
-void CameraElement::deserialize(std::istream& stream, ElementFactory* factory, SceneVersion version)
+void CameraElement::deserialize(Dictionary stream, ElementFactory* factory)
 {
-	mat4 mv = deserializeMatrix(stream);
-	mat4 proj = deserializeMatrix(stream);
-	bool upLocked = deserializeUInt32(stream) != 0;
-	vec3 locked = deserializeVector<vec3>(stream);
-	
-	setModelViewMatrix(mv);
-	setProjectionMatrix(proj);
-	
-	if (upLocked)
-		lockUpVector(locked);
-
-	deserializeGeneralParameters(stream, version);
-	deserializeChildren(stream, factory, version);
+	BaseElement::deserialize(stream, factory);
 }
 

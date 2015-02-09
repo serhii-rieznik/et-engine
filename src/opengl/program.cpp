@@ -269,7 +269,7 @@ void Program::buildProgram(const std::string& vertex_source, const std::string& 
 			glGetActiveAttrib(program, i, maxNameLength, &nameLength, &attribSize, &attribType, name.data());
 
 			bool compatibility = false;
-			auto attrib = stringToVertexAttribute(name.data(), compatibility);
+			auto attrib = stringToVertexAttributeUsage(name.data(), compatibility);
 			_attributes.emplace_back(name.data(), attrib, compatibility);
 
 			if (!compatibility)

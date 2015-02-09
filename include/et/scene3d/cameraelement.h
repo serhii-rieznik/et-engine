@@ -14,13 +14,13 @@ namespace et
 {
 	namespace s3d
 	{
-		class CameraElement : public Element, public Camera
+		class CameraElement : public BaseElement, public Camera
 		{
 		public:
 			ET_DECLARE_POINTER(CameraElement)
 			
 		public:
-			CameraElement(const std::string& name, Element* parent);
+			CameraElement(const std::string& name, BaseElement* parent);
 
 			ElementType type() const 
 				{ return ElementType_Camera; }
@@ -33,8 +33,8 @@ namespace et
 			const Camera& camera() const
 				{ return *this; }
 
-			void serialize(std::ostream& stream, SceneVersion version);
-			void deserialize(std::istream& stream, ElementFactory* factory, SceneVersion version);
+			void serialize(Dictionary, const std::string&);
+			void deserialize(Dictionary, ElementFactory*);
 		};
 	}
 }

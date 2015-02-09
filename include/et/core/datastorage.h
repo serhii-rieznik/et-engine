@@ -181,7 +181,13 @@ namespace et
 		
 		const size_t dataSize() const
 			{ return _dataSize; }
-		
+
+		/*
+		 * unsafe access 
+		 */
+		DataTypePointer mutableDataUnsafe()
+			{ return _mutableData; }
+
 		/*
 		 * wrappers
 		 */

@@ -5,14 +5,15 @@
  *
  */
 
+#include <et/core/conversion.h>
 #include <et/app/application.h>
 #include <et/scene3d/baseelement.h>
 
 using namespace et;
 using namespace et::s3d;
 
-Element::Element(const std::string& name, Element* parent) :
-	ElementHierarchy(parent),  tag(0), _animationTransform(identityMatrix), _active(true)
+BaseElement::BaseElement(const std::string& name, BaseElement* parent) :
+	ElementHierarchy(parent),  tag(0), _animationTransform(identityMatrix)
 {
 	setName(name);
 	
@@ -36,13 +37,13 @@ Element::Element(const std::string& name, Element* parent) :
 	});
 }
 
-void Element::setParent(Element* p)
+void BaseElement::setParent(BaseElement* p)
 {
 	invalidateTransform();
 	ElementHierarchy::setParent(p);
 }
 
-void Element::invalidateTransform()
+void BaseElement::invalidateTransform()
 {
 	ComponentTransformable::invalidateTransform();
 	
@@ -52,7 +53,7 @@ void Element::invalidateTransform()
 	transformInvalidated();
 }
 
-void Element::buildTransform()
+void BaseElement::buildTransform()
 {
 	_cachedFinalTransform = localTransform();
 	
@@ -62,13 +63,13 @@ void Element::buildTransform()
 	_cachedFinalInverseTransform = _cachedFinalTransform.inverse();
 }
 
-const mat4& Element::localTransform()
+const mat4& BaseElement::localTransform()
 {
 	_cachedLocalTransform = _animations.empty() ? transform() : _animationTransform;
 	return _cachedLocalTransform;
 }
 
-const mat4& Element::finalTransform()
+const mat4& BaseElement::finalTransform()
 {
 	if (!transformValid())
 		buildTransform();
@@ -76,7 +77,7 @@ const mat4& Element::finalTransform()
 	return _cachedFinalTransform;
 }
 
-const mat4& Element::finalInverseTransform()
+const mat4& BaseElement::finalInverseTransform()
 {
 	if (!transformValid())
 		buildTransform();
@@ -84,16 +85,16 @@ const mat4& Element::finalInverseTransform()
 	return _cachedFinalInverseTransform;
 }
 
-bool Element::isKindOf(ElementType t) const
+bool BaseElement::isKindOf(ElementType t) const
 {
 	return (t == ElementType_Any) || (type() == t);
 }
 
-Element::Pointer Element::childWithName(const std::string& name, ElementType ofType, bool assertFail)
+BaseElement::Pointer BaseElement::childWithName(const std::string& name, ElementType ofType, bool assertFail)
 {
-	for (const Element::Pointer& i : children())
+	for (const BaseElement::Pointer& i : children())
 	{
-		Element::Pointer element = childWithNameCallback(name, i, ofType);
+		BaseElement::Pointer element = childWithNameCallback(name, i, ofType);
 		if (element.valid())
 			return element;
 	}
@@ -101,44 +102,44 @@ Element::Pointer Element::childWithName(const std::string& name, ElementType ofT
 	if (assertFail)
 		ET_FAIL_FMT("Unable to find child: %s", name.c_str());
 
-	return Element::Pointer();
+	return BaseElement::Pointer();
 }
 
-Element::List Element::childrenOfType(ElementType ofType) const
+BaseElement::List BaseElement::childrenOfType(ElementType ofType) const
 {
-	Element::List list;
+	BaseElement::List list;
 	
-	for (const Element::Pointer& i : children())
+	for (const BaseElement::Pointer& i : children())
 		childrenOfTypeCallback(ofType, list, i);
 	
 	return list;
 }
 
-Element::List Element::childrenHavingFlag(size_t flag)
+BaseElement::List BaseElement::childrenHavingFlag(size_t flag)
 {
-	Element::List list;
+	BaseElement::List list;
 	
-	for (const Element::Pointer& i : children())
+	for (const BaseElement::Pointer& i : children())
 		childrenHavingFlagCallback(flag, list, i);
 	
 	return list;
 }
 
-Element::Pointer Element::childWithNameCallback(const std::string& name, Element::Pointer root, ElementType ofType)
+BaseElement::Pointer BaseElement::childWithNameCallback(const std::string& name, BaseElement::Pointer root, ElementType ofType)
 {
 	if (root->isKindOf(ofType) && (root->name() == name)) return root;
 
 	for (const auto& i : root->children())
 	{
-		Element::Pointer element = childWithNameCallback(name, i, ofType);
+		BaseElement::Pointer element = childWithNameCallback(name, i, ofType);
 		if (element.valid() && element->isKindOf(ofType))
 			return element;
 	}
 
-	return Element::Pointer();
+	return BaseElement::Pointer();
 }
 
-void Element::childrenOfTypeCallback(ElementType t, Element::List& list, Element::Pointer root) const
+void BaseElement::childrenOfTypeCallback(ElementType t, BaseElement::List& list, BaseElement::Pointer root) const
 {
 	if (root->isKindOf(t))
 		list.push_back(root);
@@ -147,7 +148,7 @@ void Element::childrenOfTypeCallback(ElementType t, Element::List& list, Element
 		childrenOfTypeCallback(t, list, i);
 }
 
-void Element::childrenHavingFlagCallback(size_t flag, Element::List& list, Element::Pointer root)
+void BaseElement::childrenHavingFlagCallback(size_t flag, BaseElement::List& list, BaseElement::Pointer root)
 {
 	if (root->hasFlag(flag))
 		list.push_back(root);
@@ -156,12 +157,12 @@ void Element::childrenHavingFlagCallback(size_t flag, Element::List& list, Eleme
 		childrenHavingFlagCallback(flag, list, i);
 }
 
-void Element::clear()
+void BaseElement::clear()
 {
 	removeChildren();
 }
 
-void Element::clearRecursively()
+void BaseElement::clearRecursively()
 {
 	for (auto& c : children())
 		c->clearRecursively();
@@ -169,81 +170,94 @@ void Element::clearRecursively()
 	clear();
 }
 
-void Element::serializeGeneralParameters(std::ostream& stream, SceneVersion version)
+void BaseElement::serialize(Dictionary stream, const std::string& basePath)
 {
-	serializeString(stream, name());
-	serializeInt32(stream, _active);
-	serializeInt32(stream, flags());
-	serializeVector(stream, translation());
-	serializeVector(stream, scale());
-	serializeQuaternion(stream, orientation());
-	
-	serializeInt32(stream, _properites.size());
-	for (const auto& i : _properites)
-		serializeString(stream, i);
-	
-	serializeInt32(stream, _animations.size());
-	for (const auto& a : _animations)
-		a.serialize(stream);
+	serializeGeneralParameters(stream);
+	serializeChildren(stream, basePath);
 }
 
-void Element::deserializeGeneralParameters(std::istream& stream, SceneVersion version)
+void BaseElement::deserialize(Dictionary stream, ElementFactory* factory)
 {
-	setName(deserializeString(stream));
-	
-	_active = deserializeUInt32(stream) != 0;
-	
-	setFlags(deserializeUInt32(stream));
-	
-	setTranslation(deserializeVector<vec3>(stream));
-	setScale(deserializeVector<vec3>(stream));
-	setOrientation(deserializeQuaternion(stream));
+	deserializeGeneralParameters(stream);
+	deserializeChildren(stream, factory);
+}
 
-	if (version >= SceneVersion_1_0_1)
+void BaseElement::serializeGeneralParameters(Dictionary stream)
+{
+	stream.setStringForKey(kName, name());
+	stream.setIntegerForKey(kElementTypeCode, type());
+	stream.setIntegerForKey(kFlagsValue, flags());
+	stream.setArrayForKey(kTranslation, vec3ToArray(translation()));
+	stream.setArrayForKey(kScale, vec3ToArray(scale()));
+	stream.setArrayForKey(kOrientation, quaternionToArray(orientation()));
+
+	if (!_properites.empty())
 	{
-		uint32_t numProperties = deserializeUInt32(stream);
-		for (uint32_t i = 0; i < numProperties; ++i)
-			_properites.insert(deserializeString(stream));
+		ArrayValue propertiesArray;
+		propertiesArray->content.reserve(_properites.size());
+		for (const auto& i : _properites)
+			propertiesArray->content.push_back(StringValue(i));
+		stream.setArrayForKey(kProperties, propertiesArray);
 	}
-	
-	if (version >= SceneVersion_1_0_4)
+
+	if (!_animations.empty())
 	{
-		size_t numAnimations = deserializeUInt32(stream);
-		_animations.reserve(numAnimations);
-		
-		for (size_t i = 0; i < numAnimations; ++i)
-			addAnimation(Animation(stream));
+		ArrayValue animationsArray;
+		animationsArray->content.reserve(_animations.size());
+		for (const auto& a : _animations)
+		{
+			Dictionary animationDictionary;
+			a.serialize(animationDictionary);
+			animationsArray->content.push_back(animationDictionary);
+		}
+		stream.setArrayForKey(kAnimations, animationsArray);
 	}
 }
 
-void Element::serializeChildren(std::ostream& stream, SceneVersion version)
+void BaseElement::deserializeGeneralParameters(Dictionary stream)
 {
-	serializeUInt64(stream, children().size());
-	for (auto& i :children())
+	setName(stream.stringForKey(kName)->content);
+
+	auto typeCode = stream.integerForKey(kElementTypeCode)->content;
+	if (typeCode != type())
+		log::warning("Deserialiaing element %s with invalid type code %llu, supposed to be: %llu", typeCode, uint64_t(type()));
+}
+
+void BaseElement::serializeChildren(Dictionary stream, const std::string& basePath)
+{
+	if (children().empty()) return;
+
+	ArrayValue childrenArray;
+	childrenArray->content.reserve(children().size());
+
+	for (auto i :children())
 	{
-		serializeUInt32(stream, i->type());
-		i->serialize(stream, version);
+		Dictionary object;
+		i->serialize(object, basePath);
+		childrenArray->content.push_back(object);
+	}
+
+	stream.setArrayForKey(kChildren, childrenArray);
+}
+
+void BaseElement::deserializeChildren(Dictionary stream, ElementFactory* factory)
+{
+	ArrayValue childrenArray = stream.arrayForKey(kChildren);
+	for (Dictionary object : childrenArray->content)
+	{
+		auto elementTypeCode = object.integerForKey(kElementTypeCode)->content;
+		auto child = factory->createElementOfType(elementTypeCode, this);
+		child->deserialize(object, factory);
 	}
 }
 
-void Element::deserializeChildren(std::istream& stream, ElementFactory* factory, SceneVersion version)
-{
-	uint64_t numChildren = (version >= SceneVersion_1_1_0) ? deserializeUInt64(stream) : deserializeUInt32(stream);
-	for (size_t i = 0; i < numChildren; ++i)
-	{
-		size_t type = deserializeUInt32(stream);
-		Element::Pointer child = factory->createElementOfType(type, (type == ElementType_Storage) ? 0 : this);
-		child->deserialize(stream, factory, version);
-	}
-}
-
-void Element::duplicateChildrenToObject(Element* object)
+void BaseElement::duplicateChildrenToObject(BaseElement* object)
 {
 	for (auto& c : children())
 		c->duplicate()->setParent(object);
 }
 
-void Element::duplicateBasePropertiesToObject(Element* object)
+void BaseElement::duplicateBasePropertiesToObject(BaseElement* object)
 {
 	object->setScale(scale());
 	object->setTranslation(translation());
@@ -255,33 +269,12 @@ void Element::duplicateBasePropertiesToObject(Element* object)
 	object->tag = tag;
 }
 
-void Element::serialize(std::ostream&, SceneVersion)
-{
-	log::error("Serialization method was not overloaded");
-#if (ET_DEBUG)
-	abort();
-#endif
-}
-
-void Element::deserialize(std::istream&, ElementFactory*, SceneVersion)
-{
-	log::error("Deserialization method was not overloaded");
-#if (ET_DEBUG)
-	abort();
-#endif
-}
-
-void Element::setActive(bool active)
-{
-	_active = active;
-}
-
-bool Element::hasPropertyString(const std::string& s) const
+bool BaseElement::hasPropertyString(const std::string& s) const
 {
 	return _properites.find(s) != _properites.end();
 }
 
-void Element::addAnimation(const Animation& a)
+void BaseElement::addAnimation(const Animation& a)
 {
 	_animations.push_back(a);
 	_animationTransform = a.transformation(a.startTime());
@@ -289,26 +282,42 @@ void Element::addAnimation(const Animation& a)
 	setFlag(Flag_HasAnimations);
 }
 
-void Element::removeAnimations()
+void BaseElement::removeAnimations()
 {
 	_animations.clear();
 	removeFlag(Flag_HasAnimations);
 	invalidateTransform();
 }
 
-void Element::animate()
+void BaseElement::animate()
 {
 	if (_animations.empty()) return;
 	
 	_animationTimer.start(mainTimerPool(), 0.0f, NotifyTimer::RepeatForever);
 }
 
-Animation& Element::defaultAnimation()
+Animation& BaseElement::defaultAnimation()
 {
 	return _animations.empty() ? _emptyAnimation : _animations.front();
 }
 
-const Animation& Element::defaultAnimation() const
+const Animation& BaseElement::defaultAnimation() const
 {
 	return _animations.empty() ? _emptyAnimation : _animations.front();
+}
+
+/*
+ * Renderable element
+ */
+void RenderableElement::serialize(Dictionary stream, const std::string& basePath)
+{
+	stream.setStringForKey(kMaterialName, material()->name());
+	ElementContainer::serialize(stream, basePath);
+}
+
+void RenderableElement::deserialize(Dictionary stream, ElementFactory* factory)
+{
+	auto materialName = stream.stringForKey(kMaterialName)->content;
+	setMaterial(factory->materialWithName(materialName));
+	ElementContainer::deserialize(stream, factory);
 }

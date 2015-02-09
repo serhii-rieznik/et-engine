@@ -99,8 +99,7 @@ namespace et
 		bool operator != (const VertexDeclaration& r) const
 			{ return !(operator == (r)); }
 
-		void serialize(std::ostream& stream);
-		void deserialize(std::istream& stream);
+		bool hasSameElementsAs(const VertexDeclaration&) const;
 
 	private:  
 		VertexElementList _list;

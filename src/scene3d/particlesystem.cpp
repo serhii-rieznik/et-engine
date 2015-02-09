@@ -12,8 +12,8 @@
 using namespace et;
 using namespace et::s3d;
 
-ParticleSystem::ParticleSystem(RenderContext* rc, size_t maxSize, const std::string& name, Element* parent) :
-	Element(name, parent), _rc(rc), _decl(true, VertexAttributeUsage::Position, VertexAttributeType::Vec3),
+ParticleSystem::ParticleSystem(RenderContext* rc, size_t maxSize, const std::string& name, BaseElement* parent) :
+	BaseElement(name, parent), _rc(rc), _decl(true, VertexAttributeUsage::Position, VertexAttributeType::Vec3),
 	_emitter(maxSize)
 {
 	_decl.push_back(VertexAttributeUsage::Color, VertexAttributeType::Vec4);

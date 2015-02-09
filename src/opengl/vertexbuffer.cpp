@@ -11,8 +11,8 @@
 using namespace et;
 
 VertexBuffer::VertexBuffer(RenderContext* rc, const VertexDeclaration& decl,
-	const BinaryDataStorage& data, BufferDrawType vertexDrawType, const std::string& aName) : APIObject(aName),
-	_rc(rc), _decl(decl), _drawType(vertexDrawType)
+	const BinaryDataStorage& data, BufferDrawType vertexDrawType, const std::string& aName) : 
+	APIObject(aName), _rc(rc), _decl(decl),  _drawType(vertexDrawType)
 {
 #if defined(ET_CONSOLE_APPLICATION)
 	ET_FAIL("Attempt to create VertexBuffer in console application.")
@@ -115,14 +115,4 @@ void VertexBuffer::unmap()
 
 	_mapped = false;
 #endif
-}
-
-void VertexBuffer::serialize(std::ostream&)
-{
-	ET_FAIL("Unsupported");
-}
-
-void VertexBuffer::deserialize(std::istream&)
-{
-	ET_FAIL("Unsupported");
 }

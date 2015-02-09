@@ -10,8 +10,8 @@
 using namespace et;
 using namespace et::s3d;
 
-LightElement::LightElement(const std::string& name, Element* parent) :
-	Element(name, parent)
+LightElement::LightElement(const std::string& name, BaseElement* parent) :
+	CameraElement(name, parent)
 {
 }
 
@@ -31,31 +31,13 @@ LightElement* LightElement::duplicate()
 	return result;
 }
 
-void LightElement::serialize(std::ostream& stream, SceneVersion version)
+void LightElement::serialize(Dictionary stream, const std::string& basePath)
 {
-	serializeMatrix(stream, modelViewMatrix());
-	serializeMatrix(stream, projectionMatrix());
-	serializeUInt32(stream, upVectorLocked());
-	serializeVector(stream, lockedUpVector());
-
-	serializeGeneralParameters(stream, version);
-	serializeChildren(stream, version);
+	CameraElement::serialize(stream, basePath);
 }
 
-void LightElement::deserialize(std::istream& stream, ElementFactory* factory, SceneVersion version)
+void LightElement::deserialize(Dictionary stream, ElementFactory* factory)
 {
-	mat4 mv = deserializeMatrix(stream);
-	mat4 proj = deserializeMatrix(stream);
-	bool upLocked = deserializeUInt32(stream) != 0;
-	vec3 locked = deserializeVector<vec3>(stream);
-	
-	setModelViewMatrix(mv);
-	setProjectionMatrix(proj);
-	
-	if (upLocked)
-		lockUpVector(locked);
-
-	deserializeGeneralParameters(stream, version);
-	deserializeChildren(stream, factory, version);
+	CameraElement::deserialize(stream, factory);
 }
 

@@ -19,8 +19,7 @@ VertexBuffer::Pointer VertexBufferFactory::createVertexBuffer(const std::string&
 {
 	VertexBuffer::Pointer vb = VertexBuffer::Pointer::create(renderContext(), data->generateDescription(),
 		drawType, name);
-	
-	vb->setSourceTag(reinterpret_cast<size_t>(data.ptr()));
+	vb->setSourceObjectName(data->name());
 	return vb;
 }
 
@@ -29,8 +28,7 @@ VertexBuffer::Pointer VertexBufferFactory::createVertexBuffer(const std::string&
 {
 	VertexBuffer::Pointer vb = VertexBuffer::Pointer::create(renderContext(), data->declaration(),
 		data->data(), drawType, name);
-	
-	vb->setSourceTag(reinterpret_cast<size_t>(data.ptr()));
+	vb->setSourceObjectName(data->name());
 	return vb;
 }
 
@@ -38,7 +36,7 @@ IndexBuffer VertexBufferFactory::createIndexBuffer(const std::string& name, Inde
 	BufferDrawType drawType)
 {
 	IndexBuffer ib = IndexBuffer::create(renderContext(), data, drawType, name);
-	ib->setSourceTag(reinterpret_cast<size_t>(data.ptr()));
+	ib->setSourceObjectName(data->name());
 	return ib;
 }
 

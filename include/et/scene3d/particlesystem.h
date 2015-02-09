@@ -14,13 +14,13 @@ namespace et
 {
 	namespace s3d
 	{
-		class ParticleSystem : public Element, public EventReceiver
+		class ParticleSystem : public BaseElement, public EventReceiver
 		{
 		public:
 			ET_DECLARE_POINTER(ParticleSystem)
 						
 		public:
-			ParticleSystem(RenderContext*, size_t, const std::string&, Element*);
+			ParticleSystem(RenderContext*, size_t, const std::string&, BaseElement*);
 			
 			ElementType type() const
 				{ return ElementType_ParticleSystem; }

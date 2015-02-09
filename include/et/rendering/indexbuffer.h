@@ -32,11 +32,11 @@ namespace et
 		size_t size() const
 			{ return _size; }
 
-		void setSourceTag(size_t tag)
-			{_sourceTag = tag; }
+		void setSourceObjectName(const std::string& tag)
+			{ _sourceObjectName = tag; }
 
-		size_t sourceTag() const
-			{ return _sourceTag; }
+		const std::string& sourceObjectName() const
+			{ return _sourceObjectName; }
 
 		void setData(const IndexArray::Pointer& i);
 		
@@ -51,7 +51,7 @@ namespace et
 	private:
 		RenderContext* _rc = nullptr;
 		size_t _size = 0;
-		size_t _sourceTag = 0;
+		std::string _sourceObjectName = 0;
 		DataType _dataType = DataType::UnsignedChar;
 		PrimitiveType _primitiveType = PrimitiveType::Points;
 		IndexArrayFormat _format = IndexArrayFormat::Format_16bit;

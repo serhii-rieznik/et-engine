@@ -11,7 +11,8 @@
 using namespace et;
 
 IndexBufferData::IndexBufferData(RenderContext* rc, IndexArray::Pointer i, BufferDrawType drawType,
-	const std::string& aName) : APIObject(aName), _rc(rc), _size(i->actualSize()), _sourceTag(0), _drawType(drawType)
+	const std::string& aName) : APIObject(aName), _rc(rc), _size(i->actualSize()), _sourceObjectName(i->name()),
+	_drawType(drawType)
 {
 #if defined(ET_CONSOLE_APPLICATION)
 	ET_FAIL("Attempt to create IndexBuffer in console application.")

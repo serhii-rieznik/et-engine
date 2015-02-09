@@ -22,52 +22,50 @@ namespace et
 {
 	namespace s3d
 	{
-		class Element;
-		class Scene3dStorage;
+		class BaseElement;
+		class ElementFactory;
+		class Storage;
 
-		enum Flags
+		enum Flags : uint32_t
 		{
 			Flag_Renderable = 0x0001,
 			Flag_HasAnimations = 0x0002
 		};
 
-		enum ElementType
+		enum ElementType : uint32_t
 		{
+			ElementType_Storage,
 			ElementType_Container,
 			ElementType_Mesh,
 			ElementType_SupportMesh,
 			ElementType_Camera,
 			ElementType_Light,
 			ElementType_ParticleSystem,
-			// ... to be addded ...
-			ElementType_Storage = 0xfe,
-			ElementType_Any = 0xff,
-			ElementType_Custom
+			ElementType_Any = 0xffffffff
 		};
 
-		class ElementFactory;
-		typedef Hierarchy<Element, LoadableObject> ElementHierarchy;
-		class Element : public ElementHierarchy, public FlagsHolder, public ComponentTransformable
+		typedef Hierarchy<BaseElement, LoadableObject> ElementHierarchy;
+		class BaseElement : public ElementHierarchy, public FlagsHolder, public ComponentTransformable
 		{
 		public:
-			ET_DECLARE_POINTER(Element)
-			
-			size_t tag;
-			virtual ElementType type() const = 0;
-			virtual Element* duplicate() = 0;
+			ET_DECLARE_POINTER(BaseElement)
+
+			typedef std::vector<BaseElement::Pointer> List;
 
 		public:
-			Element(const std::string& name, Element* parent);
+			size_t tag = 0;
+
+		public:
+			virtual ElementType type() const = 0;
+			virtual BaseElement* duplicate() = 0;
+
+		public:
+			BaseElement(const std::string& name, BaseElement* parent);
 			
 			void animate();
 			
 			Animation& defaultAnimation();
 			const Animation& defaultAnimation() const;
-
-			bool active() const
-				{ return _active; }
-
-			void setActive(bool active);
 
 			bool isKindOf(ElementType t) const;
 
@@ -79,16 +77,16 @@ namespace et
 			void invalidateTransform();
 			virtual void transformInvalidated() { }
 
-			void setParent(Element* p);
+			void setParent(BaseElement* p);
 
 			Pointer childWithName(const std::string& name, ElementType ofType = ElementType_Any,
 				bool assertFail = false);
 			
-			Element::List childrenOfType(ElementType ofType) const;
-			Element::List childrenHavingFlag(size_t flag);
+			BaseElement::List childrenOfType(ElementType ofType) const;
+			BaseElement::List childrenHavingFlag(size_t flag);
 
-			virtual void serialize(std::ostream& stream, SceneVersion version);
-			virtual void deserialize(std::istream& stream, ElementFactory* factory, SceneVersion version);
+			virtual void serialize(Dictionary, const std::string&);
+			virtual void deserialize(Dictionary, ElementFactory* factory);
 			
 			void clear();
 			void clearRecursively();
@@ -109,18 +107,19 @@ namespace et
 			void removeAnimations();
 			
 		protected:
-			void serializeGeneralParameters(std::ostream& stream, SceneVersion version);
-			void serializeChildren(std::ostream& stream, SceneVersion version);
-			void deserializeGeneralParameters(std::istream& stream, SceneVersion version);
-			void deserializeChildren(std::istream& stream, ElementFactory* factory, SceneVersion version);
+			void serializeGeneralParameters(Dictionary);
+			void serializeChildren(Dictionary, const std::string&);
 
-			void duplicateChildrenToObject(Element* object);
-			void duplicateBasePropertiesToObject(Element* object);
+			void deserializeGeneralParameters(Dictionary);
+			void deserializeChildren(Dictionary, ElementFactory* factory);
+
+			void duplicateChildrenToObject(BaseElement* object);
+			void duplicateBasePropertiesToObject(BaseElement* object);
 			
 		private:
 			Pointer childWithNameCallback(const std::string& name, Pointer root, ElementType ofType);
-			void childrenOfTypeCallback(ElementType t, Element::List& list, Pointer root) const;
-			void childrenHavingFlagCallback(size_t flag, Element::List& list, Pointer root);
+			void childrenOfTypeCallback(ElementType t, BaseElement::List& list, Pointer root) const;
+			void childrenHavingFlagCallback(size_t flag, BaseElement::List& list, Pointer root);
 			
 			void buildTransform();
 
@@ -135,18 +134,16 @@ namespace et
 			mat4 _cachedLocalTransform;
 			mat4 _cachedFinalTransform;
 			mat4 _cachedFinalInverseTransform;
-			
-			bool _active;
 		};
 
-		class ElementContainer : public Element
+		class ElementContainer : public BaseElement
 		{
 		public:
 			ET_DECLARE_POINTER(ElementContainer)
 			
 		public:
-			ElementContainer(const std::string& name, Element* parent) :
-				Element(name, parent) { }
+			ElementContainer(const std::string& name, BaseElement* parent) :
+				BaseElement(name, parent) { }
 
 			ElementType type() const 
 				{ return ElementType_Container; }
@@ -158,28 +155,18 @@ namespace et
 				result->tag = tag;
 				return result; 
 			}
-
-			void serialize(std::ostream& stream, SceneVersion version)
-			{
-				serializeGeneralParameters(stream, version);
-				serializeChildren(stream, version);
-			}
-
-			void deserialize(std::istream& stream, ElementFactory* factory, SceneVersion version)
-			{
-				deserializeGeneralParameters(stream, version);
-				deserializeChildren(stream, factory, version);
-			}
 		};
 
-		class RenderableElement : public Element
+		class RenderableElement : public ElementContainer
 		{
 		public:
 			ET_DECLARE_POINTER(RenderableElement)
 			
 		public:
-			RenderableElement(const std::string& name, Element* parent) :
-				Element(name, parent) { setFlag(Flag_Renderable); }
+			RenderableElement(const std::string& name, BaseElement* parent) :
+				ElementContainer(name, parent) {
+				setFlag(Flag_Renderable);
+			}
 
 			Material::Pointer& material()
 				{ return _material; }
@@ -195,6 +182,9 @@ namespace et
 			
 			void setVisible(bool visible)
 				{ _visible = visible; }
+
+			void serialize(Dictionary, const std::string&);
+			void deserialize(Dictionary, ElementFactory*);
 			
 		private:
 			Material::Pointer _material;
@@ -204,11 +194,12 @@ namespace et
 		class ElementFactory
 		{
 		public:
-			virtual Material::Pointer materialWithId(uint64_t) = 0;
-			virtual VertexArrayObject vaoWithIdentifiers(const std::string&, const std::string&) = 0;
-			virtual Element::Pointer createElementOfType(size_t, Element*) = 0;
+			virtual Material::Pointer materialWithName(const std::string&) = 0;
+
+			virtual BaseElement::Pointer createElementOfType(uint64_t, BaseElement*) = 0;
 			
 			virtual VertexStorage::Pointer vertexStorageWithName(const std::string&) = 0;
+
 			virtual IndexArray::Pointer primaryIndexArray() = 0;
 			
 			virtual ~ElementFactory() { }

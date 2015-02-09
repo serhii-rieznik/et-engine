@@ -64,9 +64,6 @@ namespace et
 
 		void compact();
 
-		void serialize(std::ostream& stream);
-		void deserialize(std::istream& stream);
-
 		class Primitive
 		{
 		public:
@@ -143,7 +140,6 @@ namespace et
 		size_t _actualSize = 0;
 		IndexArrayFormat _format = IndexArrayFormat::Format_16bit;
 		PrimitiveType _primitiveType = PrimitiveType::Points;
-		uint32_t* _rawData = nullptr;
 	};
 
 	typedef std::vector<IndexArray::Pointer> IndexArrayList;

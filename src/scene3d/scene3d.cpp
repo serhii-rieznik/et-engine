@@ -16,91 +16,10 @@ using namespace s3d;
 Scene::Scene(const std::string& name) :
 	ElementContainer(name, nullptr)
 {
+
 }
 
-void Scene::serialize(std::ostream& stream, const std::string& basePath)
-{
-	Element::List storages = childrenOfType(ElementType_Storage);
-	for (Scene3dStorage::Pointer storage : storages)
-	{
-		for (auto m : storage->materials())
-		{
-			m->toDictionary().printContent();
-		}
-	}
-}
-
-void Scene::deserializeAsync(std::istream& stream, RenderContext* rc, ObjectsCache& tc, const std::string& basePath)
-{
-	performDeserialization(stream, rc, tc, basePath, true);
-}
-
-void Scene::deserializeAsync(const std::string& filename, RenderContext* rc, ObjectsCache& tc)
-{
-	InputStream file(filename, StreamMode_Binary);
-	deserializeAsync(file.stream(), rc, tc, getFilePath(filename));
-}
-
-bool Scene::deserialize(std::istream& stream, RenderContext* rc, ObjectsCache& tc, const std::string& basePath)
-{
-	return performDeserialization(stream, rc, tc, basePath, false);
-}
-
-Scene3dStorage::Pointer Scene::deserializeStorage(std::istream& stream, RenderContext* rc,
-	ObjectsCache& tc, const std::string& basePath, StorageVersion ver, bool async)
-{
-	Scene3dStorage::Pointer result = Scene3dStorage::Pointer::create("storage", nullptr);
-	buildAPIObjects(result, rc);
-	return result;
-}
-
-void Scene::buildAPIObjects(Scene3dStorage::Pointer p, RenderContext* rc)
-{
-	IndexBuffer ib;
-	
-	for (const auto& vs : p->vertexStorages())
-	{
-		std::string vbName = "vb-" + intToStr(static_cast<uint32_t>(vs->tag));
-		std::string ibName = "ib-" + intToStr(static_cast<uint32_t>(p->indexArray()->tag));
-		std::string vaoName = "vao-" + intToStr(static_cast<uint32_t>(vs->tag)) + "-" +
-			intToStr(static_cast<uint32_t>(p->indexArray()->tag));
-		
-		VertexArrayObject vao = rc->vertexBufferFactory().createVertexArrayObject(vaoName);
-		
-		VertexBuffer::Pointer vb = rc->vertexBufferFactory().createVertexBuffer(vbName, vs, BufferDrawType::Static);
-		
-		if (!ib.valid())
-			ib = rc->vertexBufferFactory().createIndexBuffer(ibName, p->indexArray(), BufferDrawType::Static);
-		
-		vao->setBuffers(vb, ib);
-		_vertexArrayObjects.push_back(vao);
-	}
-
-	rc->renderState().resetBufferBindings();
-}
-
-void Scene::serialize(const std::string& filename)
-{
-	std::ofstream file(filename.c_str(), std::ios::binary | std::ios::out);
-	serialize(file, getFilePath(filename));
-}
-
-bool Scene::deserialize(const std::string& filename, RenderContext* rc, ObjectsCache& tc)
-{
-	InputStream file(application().resolveFileName(filename), StreamMode_Binary);
-	
-	if (file.invalid())
-		return false;
-	
-	bool success = deserialize(file.stream(), rc, tc, getFilePath(filename));
-
-	if (!success)
-		log::error("Unable to load scene from file: %s", filename.c_str());
-
-	return success;
-}
-
-Element::Pointer Scene::createElementOfType(size_t type, Element* parent)
+BaseElement::Pointer Scene::createElementOfType(uint64_t type, BaseElement* parent)
 {
 	switch (type)
 	{
@@ -111,7 +30,7 @@ Element::Pointer Scene::createElementOfType(size_t type, Element* parent)
 	case ElementType_SupportMesh:
 		return SupportMesh::Pointer::create(emptyString, parent);
 	case ElementType_Storage:
-		return Scene3dStorage::Pointer::create(emptyString, parent);
+		return Storage::Pointer::create(emptyString, parent);
 	case ElementType_Camera:
 		return CameraElement::Pointer::create(emptyString, parent);
 	default:
@@ -121,15 +40,15 @@ Element::Pointer Scene::createElementOfType(size_t type, Element* parent)
 
 IndexArray::Pointer Scene::primaryIndexArray()
 {
-	Element::List storages = childrenOfType(ElementType_Storage);
+	BaseElement::List storages = childrenOfType(ElementType_Storage);
 	ET_ASSERT(!storages.empty())
-	return Scene3dStorage::Pointer(storages.front())->indexArray();
+	return Storage::Pointer(storages.front())->indexArray();
 }
 
 VertexStorage::Pointer Scene::vertexStorageWithName(const std::string& vsName)
 {
-	Element::List storages = childrenOfType(ElementType_Storage);
-	for (Scene3dStorage::Pointer storage : storages)
+	BaseElement::List storages = childrenOfType(ElementType_Storage);
+	for (Storage::Pointer storage : storages)
 	{
 		for (const auto& vs : storage->vertexStorages())
 		{
@@ -140,58 +59,32 @@ VertexStorage::Pointer Scene::vertexStorageWithName(const std::string& vsName)
 	return VertexStorage::Pointer();
 }
 
-Material::Pointer Scene::materialWithId(uint64_t id)
+Material::Pointer Scene::materialWithName(const std::string& mName)
 {
-	Element::List storages = childrenOfType(ElementType_Storage);
-	for (Scene3dStorage::Pointer storage : storages)
+	BaseElement::List storages = childrenOfType(ElementType_Storage);
+	for (Storage::Pointer storage : storages)
 	{
-		for (auto& data : storage->materials())
+		const auto& materials = storage->materials();
+
+		if (materials.count(mName) > 0)
+			return materials.at(mName);
+
+		for (const auto& kv : materials)
 		{
-			if (data->tag == id)
-				return data;
+			if (kv.second->name() == mName)
+				return kv.second;
 		}
 	}
 	
 	return Material::Pointer();
 }
 
-void Scene::onMaterialLoaded(Material*)
+/*
+ * Serialization stuff
+ */
+Dictionary Scene::serialize(const std::string& basePath)
 {
-	ET_ASSERT(_materialsToLoad.atomicCounterValue() > 0)
-	
-	_materialsToLoad.release();
-	
-	if (_materialsToLoad.atomicCounterValue()== 0)
-		allMaterialsLoaded();
-}
-
-void Scene::allMaterialsLoaded()
-{
-	ET_ASSERT(_componentsToLoad.atomicCounterValue() > 0)
-	
-	_componentsToLoad.release();
-	
-	if (_componentsToLoad.atomicCounterValue() == 0)
-		deserializationFinished.invoke(true);
-}
-
-VertexArrayObject Scene::vaoWithIdentifiers(const std::string& vbid, const std::string& ibid)
-{
-	for (auto& i : _vertexArrayObjects)
-	{
-		if ((i->vertexBuffer()->name() == vbid) && (i->indexBuffer()->name() == ibid))
-			return i;
-	}
-
-	return VertexArrayObject();
-}
-
-#define INVOKE_FAIL		{ if (async) { deserializationFinished.invoke(false); } return false; }
-
-bool Scene::performDeserialization(std::istream& stream, RenderContext* rc, ObjectsCache& tc,
-	const std::string& basePath, bool async)
-{
-	clearRecursively();
-	deserializationFinished.invoke(true);
-	return true;
+	Dictionary result;
+	ElementContainer::serialize(result, basePath);
+	return result;
 }

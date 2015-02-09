@@ -29,16 +29,18 @@ namespace et
 				vec3 averageCenter;
 				vec3 dimensions;
 				float boundingSphereRadius = 0.0f;
+				bool valid = false;
 			};
 
 		public:
-			Mesh(const std::string& = defaultMeshName, Element* = nullptr);
+			Mesh(const std::string& = defaultMeshName, BaseElement* = nullptr);
 			
 			Mesh(const std::string&, const VertexArrayObject&, const Material::Pointer&,
-				uint32_t, uint32_t, Element* = nullptr);
+				uint32_t, uint32_t, BaseElement* = nullptr);
 			
 			Mesh(const std::string&, const VertexArrayObject&, const Material::Pointer&,
-				 uint32_t, uint32_t, const VertexStorage::Pointer&, const IndexArray::Pointer&, Element* = nullptr);
+				uint32_t, uint32_t, const VertexStorage::Pointer&, const IndexArray::Pointer&, 
+				BaseElement* = nullptr);
 
 			ElementType type() const 
 				{ return ElementType_Mesh; }
@@ -64,8 +66,8 @@ namespace et
 			void setIndexBuffer(IndexBuffer);
 			void setVertexArrayObject(VertexArrayObject);
 
-			void serialize(std::ostream&, SceneVersion);
-			void deserialize(std::istream&, ElementFactory*, SceneVersion);
+			void serialize(Dictionary, const std::string&);
+			void deserialize(Dictionary, ElementFactory*);
 
 			void setVertexStorage(VertexStorage::Pointer);
 			void setIndexArray(IndexArray::Pointer);

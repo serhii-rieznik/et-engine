@@ -28,6 +28,11 @@ Material::Material() :
 	setVector(MaterialParameter_DiffuseColor, vec4(1.0f));
 }
 
+Material::~Material()
+{
+
+}
+
 Material* Material::duplicate() const
 {
 	Material* m = sharedObjectFactory().createObject<Material>();
@@ -51,15 +56,65 @@ Material* Material::duplicate() const
 	return m;
 }
 
-void Material::serialize(std::ostream& stream) const
+void Material::serialize(Dictionary stream, const std::string& basePath)
 {
-	
+	Dictionary intValues;
+	Dictionary floatValues;
+	Dictionary vectorValues;
+	Dictionary textureValues;
+	for (size_t i = 0; i < MaterialParameter_max; ++i)
+	{
+		if (_defaultIntParameters[i].set)
+			intValues.setIntegerForKey(materialKeys[i], _defaultIntParameters[i].value);
+
+		if (_defaultFloatParameters[i].set)
+			floatValues.setFloatForKey(materialKeys[i], _defaultFloatParameters[i].value);
+
+		if (_defaultVectorParameters[i].set)
+			vectorValues.setArrayForKey(materialKeys[i], vec4ToArray(_defaultVectorParameters[i].value));
+
+		if (_defaultTextureParameters[i].set)
+		{
+			const auto& tex = _defaultTextureParameters[i];
+			if (tex.value.valid() && !tex.value->origin().empty())
+				textureValues.setStringForKey(materialKeys[i], tex.value->origin());
+		}
+	}
+
+	for (const auto& kv : _customIntParameters)
+		intValues.setIntegerForKey("id" + intToStr(kv.first), kv.second);
+
+	for (const auto& kv : _customFloatParameters)
+		floatValues.setFloatForKey("id" + intToStr(kv.first), kv.second);
+
+	for (const auto& kv : _customVectorParameters)
+		vectorValues.setArrayForKey("id" + intToStr(kv.first), vec4ToArray(kv.second));
+
+	for (const auto& kv : _customTextureParameters)
+	{
+		if (kv.second.valid() && !kv.second->origin().empty())
+			textureValues.setStringForKey("id" + intToStr(kv.first), kv.second->origin());
+	}
+
+	stream.setStringForKey(kName, name());
+	stream.setIntegerForKey(kBlendState, static_cast<uint32_t>(_blendState));
+	stream.setIntegerForKey(kDepthMask, _depthMask);
+
+	if (!intValues.empty())
+		stream.setDictionaryForKey(kIntegerValues, intValues);
+
+	if (!floatValues.empty())
+		stream.setDictionaryForKey(kFloatValues, floatValues);
+
+	if (!vectorValues.empty())
+		stream.setDictionaryForKey(kVectorValues, vectorValues);
+
+	if (!textureValues.empty())
+		stream.setDictionaryForKey(kTextures, textureValues);
 }
 
-void Material::deserialize(std::istream& stream, RenderContext* rc, ObjectsCache& cache,
-	const std::string& basePath, bool async)
+void Material::deserialize(Dictionary, RenderContext*, ObjectsCache&, const std::string&)
 {
-	
 }
 
 Texture::Pointer Material::loadTexture(RenderContext* rc, const std::string& path, const std::string& basePath,
@@ -99,53 +154,8 @@ void Material::clear()
 	_customStringParameters.clear();
 }
 
-Dictionary Material::toDictionary()
-{
-	Dictionary result;
-	Dictionary intValues;
-	Dictionary floatValues;
-	Dictionary vectorValues;
-	Dictionary textureValues;
-	for (size_t i = 0; i < MaterialParameter_max; ++i)
-	{
-		if (_defaultIntParameters[i].set)
-			intValues.setIntegerForKey(materialKeys[i], _defaultIntParameters[i].value);
-		if (_defaultFloatParameters[i].set)
-			floatValues.setFloatForKey(materialKeys[i], _defaultFloatParameters[i].value);
-		if (_defaultVectorParameters[i].set)
-			vectorValues.setArrayForKey(materialKeys[i], vec4ToArray(_defaultVectorParameters[i].value));
-		if (_defaultTextureParameters[i].set)
-		{
-			const auto& tex = _defaultTextureParameters[i];
-			
-			if (tex.value.valid() && !tex.value->origin().empty())
-				textureValues.setStringForKey(materialKeys[i], tex.value->origin());
-		}
-	}
-	
-	result.setIntegerForKey("blend", static_cast<uint32_t>(_blendState));
-	result.setIntegerForKey("depth_mask", _depthMask);
-	if (!intValues.empty())
-		result.setDictionaryForKey("int_values", intValues);
-	if (!floatValues.empty())
-		result.setDictionaryForKey("float_values", floatValues);
-	if (!vectorValues.empty())
-		result.setDictionaryForKey("vector_values", vectorValues);
-	if (!textureValues.empty())
-		result.setDictionaryForKey("texture_values", textureValues);
-	
-	return result;
-}
-
-void Material::loadFromDictionary(const Dictionary&)
-{
-	
-}
-
 /*
- *
  * Setters / getters
- *
  */
 const int Material::getInt(uint32_t param) const
 {

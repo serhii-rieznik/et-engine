@@ -7,34 +7,27 @@
 
 #pragma once
 
-#include <et/camera/light.h>
-#include <et/scene3d/baseelement.h>
+#include <et/scene3d/cameraelement.h>
 
 namespace et
 {
 	namespace s3d
 	{
-		class LightElement : public Element, public Light
+		class LightElement : public CameraElement
 		{
 		public:
 			ET_DECLARE_POINTER(LightElement)
 
 		public:
-			LightElement(const std::string& name, Element* parent);
+			LightElement(const std::string& name, BaseElement* parent);
 
 			ElementType type() const 
 				{ return ElementType_Light; }
 
 			LightElement* duplicate();
 
-			Light& light()
-				{ return *this; }
-
-			const Light& light() const
-				{ return *this; }
-
-			void serialize(std::ostream& stream, SceneVersion version);
-			void deserialize(std::istream& stream, ElementFactory* factory, SceneVersion version);
+			void serialize(Dictionary, const std::string&);
+			void deserialize(Dictionary, ElementFactory* factory);
 		};
 	}
 }

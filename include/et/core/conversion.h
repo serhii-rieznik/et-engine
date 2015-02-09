@@ -21,11 +21,13 @@ namespace et
 	ArrayValue vec3ToArray(const vec3&);
 	ArrayValue vec4ToArray(const vec4&);
 	ArrayValue rectToArray(const rect&);
-	
+	ArrayValue quaternionToArray(const quaternion&);
+
 	vec2 arrayToVec2(ArrayValue);
 	vec2i arrayToVec2i(ArrayValue);
 	
 	vec3 arrayToVec3(ArrayValue);
 	vec4 arrayToVec4(ArrayValue);
 	rect arrayToRect(ArrayValue);
+	quaternion arrayToQuaternion(ArrayValue);
 }

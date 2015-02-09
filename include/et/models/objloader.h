@@ -114,7 +114,7 @@ namespace et
 		std::ifstream inputFile;
 		std::ifstream materialFile;
 
-		s3d::Scene3dStorage::Pointer _storage;
+		s3d::Storage::Pointer _storage;
 		s3d::Material::Pointer _lastMaterial;
 		s3d::Material::List _materials;
 		OBJMeshIndexBoundsList _meshes;

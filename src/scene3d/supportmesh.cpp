@@ -12,11 +12,11 @@
 using namespace et;
 using namespace et::s3d;
 
-SupportMesh::SupportMesh(const std::string& name, Element* parent) :
+SupportMesh::SupportMesh(const std::string& name, BaseElement* parent) :
 	Mesh(name, parent)  {}
 
 SupportMesh::SupportMesh(const std::string& name, const VertexArrayObject& ib, const Material::Pointer& material,
-	uint32_t start, uint32_t num, const VertexStorage::Pointer& storage, const IndexArray::Pointer& ia, Element* parent) :
+	uint32_t start, uint32_t num, const VertexStorage::Pointer& storage, const IndexArray::Pointer& ia, BaseElement* parent) :
 	Mesh(name, ib, material, start, num, storage, ia, parent), _data(num / 3, 0)
 {
 }
@@ -52,18 +52,21 @@ OBB SupportMesh::obb()
 	return OBB(ft * supportData().averageCenter, 0.5f * s * supportData().dimensions, r);
 }
 
-void SupportMesh::serialize(std::ostream& stream, SceneVersion version)
+void SupportMesh::serialize(Dictionary stream, const std::string& basePath)
 {
+	/*
 	serializeFloat(stream, 0.0f);
 	serializeVector(stream, vec3(0.0f));
 	serializeVector(stream, vec3(0.0f));
 	serializeUInt64(stream, _data.size());
 	stream.write(_data.binary(), _data.dataSize());
-	Mesh::serialize(stream, version);
+	*/
+	Mesh::serialize(stream, basePath);
 }
 
-void SupportMesh::deserialize(std::istream& stream, ElementFactory* factory, SceneVersion version)
+void SupportMesh::deserialize(Dictionary stream, ElementFactory* factory)
 {
+	/*
 	deserializeFloat(stream);
 	deserializeVector<vec3>(stream);
 	deserializeVector<vec3>(stream);
@@ -85,8 +88,9 @@ void SupportMesh::deserialize(std::istream& stream, ElementFactory* factory, Sce
 	{
 		stream.read(_data.binary(), _data.dataSize());
 	}
+	*/
 
-	Mesh::deserialize(stream, factory, version);
+	Mesh::deserialize(stream, factory);
 }
 
 void SupportMesh::transformInvalidated()

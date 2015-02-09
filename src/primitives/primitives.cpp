@@ -27,7 +27,7 @@ size_t primitives::primitiveCountForIndexCount(size_t numIndexes, PrimitiveType 
 		case PrimitiveType::Triangles:
 			return numIndexes / 3;
 
-		case PrimitiveType::LineStrip:
+		case PrimitiveType::LineStrips:
 			return numIndexes - 1;
 
 		case PrimitiveType::TriangleStrips:

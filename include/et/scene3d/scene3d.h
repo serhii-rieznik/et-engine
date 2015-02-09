@@ -21,7 +21,7 @@ namespace et
 {
 	namespace s3d
 	{
-		class Scene : public EventReceiver, public ElementContainer, public ElementFactory
+		class Scene : public ElementContainer, public ElementFactory
 		{
 		public:
 			ET_DECLARE_POINTER(Scene)
@@ -29,57 +29,16 @@ namespace et
 		public:
 			Scene(const std::string& name = "scene");
 
-			/*
-			 * Synchronous serializing
-			 */
-			void serialize(std::ostream& stream, const std::string& basePath);
-			void serialize(const std::string& filename);
+			Dictionary serialize(const std::string&);
 
-			/*
-			 * Synchronous deserializing
-			 */
-			bool deserialize(std::istream&, RenderContext*, ObjectsCache&, const std::string&);
-			bool deserialize(const std::string&, RenderContext*, ObjectsCache&);
-
-			/*
-			 * Asynchronous deserializing
-			 */
-			void deserializeAsync(std::istream&, RenderContext*, ObjectsCache&, const std::string&);
-			void deserializeAsync(const std::string&, RenderContext*, ObjectsCache&);
-
-			/*
-			 * Access to content
-			 */
-			VertexBuffer::Pointer vertexBufferWithId(const std::string& id);
-			
-			IndexBuffer indexBufferWithId(const std::string& id);
-			
-			VertexArrayObject vaoWithIdentifiers(const std::string& vbid, const std::string& ibid);
-			
 		public:
 			ET_DECLARE_EVENT1(deserializationFinished, bool)
 
 		private:
-			bool performDeserialization(std::istream& stream, RenderContext* rc, ObjectsCache& tc,
-				const std::string& basePath, bool async);
-
-			void buildAPIObjects(Scene3dStorage::Pointer p, RenderContext* rc);
-
-			Scene3dStorage::Pointer deserializeStorage(std::istream& stream, RenderContext* rc,
-				ObjectsCache& tc, const std::string& basePath, StorageVersion, bool async);
-			
-			Element::Pointer createElementOfType(size_t type, Element* parent);
-			Material::Pointer materialWithId(uint64_t);
+			BaseElement::Pointer createElementOfType(uint64_t type, BaseElement* parent);
+			Material::Pointer materialWithName(const std::string&);
 			IndexArray::Pointer primaryIndexArray();
 			VertexStorage::Pointer vertexStorageWithName(const std::string&);
-
-			void onMaterialLoaded(Material*);
-			void allMaterialsLoaded();
-
-		private:
-			std::vector<VertexArrayObject> _vertexArrayObjects;
-			AtomicCounter _materialsToLoad;
-			AtomicCounter _componentsToLoad;
 		};
 	}
 }

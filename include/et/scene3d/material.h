@@ -30,9 +30,11 @@ namespace et
 			};
 			
 			typedef std::vector<Material::Pointer> List;
+			typedef std::map<std::string, Material::Pointer> Map;
 
 		public:
 			Material();
+			~Material();
 			
 			const int getInt(uint32_t param) const;
 			const float getFloat(uint32_t param) const;
@@ -51,6 +53,9 @@ namespace et
 			bool hasVector(uint32_t param) const;
 			bool hasTexture(uint32_t param) const;
 			bool hasString(uint32_t param) const;
+
+			BlendState blendState() const 
+				{ return _blendState; }
 			
 			void setBlendState(BlendState bs)
 				{ _blendState = bs; }
@@ -58,17 +63,12 @@ namespace et
 			void setDepthMask(bool dm)
 				{ _depthMask = dm; }
 
-			void serialize(std::ostream& stream) const;
-
-			void deserialize(std::istream& stream, RenderContext* rc, ObjectsCache& cache,
-				const std::string& basePath, bool async);
+			void serialize(Dictionary, const std::string&);
+			void deserialize(Dictionary, RenderContext*, ObjectsCache&, const std::string&);
 
 			void clear();
 			
 			Material* duplicate() const;
-			
-			Dictionary toDictionary();
-			void loadFromDictionary(const Dictionary&);
 			
 			ET_DECLARE_EVENT1(loaded, Material*)
 			

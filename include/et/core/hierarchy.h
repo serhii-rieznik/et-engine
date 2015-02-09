@@ -9,6 +9,13 @@
 
 namespace et
 {
+	template <typename T>
+	class Derived
+	{
+	public:
+		typedef T AncestorClass;
+	};
+
 	template <typename T, typename BASE>
 	class Hierarchy : public BASE
 	{
@@ -57,8 +64,7 @@ namespace et
 	template <typename T, typename BASE>
 	Hierarchy<T, BASE>::~Hierarchy()
 	{
-		for (auto& i : _children)
-			i->removeParent();
+		removeChildren();
 	}
 
 	template <typename T, typename BASE>

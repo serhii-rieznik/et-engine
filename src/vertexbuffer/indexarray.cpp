@@ -15,10 +15,6 @@ const uint32_t IndexArray::MaxIndex = 0xffffffff;
 const uint16_t IndexArray::MaxShortIndex = 0xffff;
 const uint8_t IndexArray::MaxSmallIndex = 0xff;
 
-const uint32_t IndexArrayId_1 = ET_COMPOSE_UINT32('I', 'A', 'V', '1');
-const uint32_t IndexArrayId_2 = ET_COMPOSE_UINT32('I', 'A', 'V', '2');
-const uint32_t IndexArrayCurrentId = IndexArrayId_2;
-
 static const uint32_t indexTypesMask[static_cast<uint32_t>(IndexArrayFormat::max)] =
 {
 	0x00000000, // IndexArrayFormat::Undefined = 0
@@ -168,12 +164,9 @@ IndexArray::PrimitiveIterator IndexArray::primitive(size_t index) const
 	return IndexArray::PrimitiveIterator(this, primitiveIndex > capacity() ? capacity() : primitiveIndex);
 }
 
-/**
- *
+/*
  * Supporting types
- *
  */
-
 IndexArray::Primitive::Primitive()
 {
 	for (size_t i = 0; i < IndexArray::Primitive::VertexCount_max; ++i)
@@ -211,7 +204,7 @@ void IndexArray::PrimitiveIterator::configure(size_t p)
 		}
 			
 		case PrimitiveType::Lines:
-		case PrimitiveType::LineStrip:
+		case PrimitiveType::LineStrips:
 		{
 			_primitive[0] = (p < cap) ? _ib->getIndex(p) : InvalidIndex; ++p;
 			_primitive[1] = (p < cap) ? _ib->getIndex(p) : InvalidIndex;
@@ -249,7 +242,7 @@ IndexArray::PrimitiveIterator& IndexArray::PrimitiveIterator::operator ++()
 		{ PrimitiveType::Lines, 2 },
 		{ PrimitiveType::Triangles, 3 },
 		{ PrimitiveType::TriangleStrips, 1 },
-		{ PrimitiveType::LineStrip, 1 },
+		{ PrimitiveType::LineStrips, 1 },
 	};
 	
 	configure(_pos += primitiveOffset.at(_ib->primitiveType()));
@@ -271,43 +264,6 @@ bool IndexArray::PrimitiveIterator::operator == (const IndexArray::PrimitiveIter
 bool IndexArray::PrimitiveIterator::operator != (const IndexArray::PrimitiveIterator& p) const
 {
 	return _primitive != p._primitive;
-}
-
-void IndexArray::serialize(std::ostream& stream)
-{
-	serializeUInt32(stream, IndexArrayCurrentId);
-	serializeUInt32(stream, static_cast<uint32_t>(_format));
-	serializeUInt32(stream, static_cast<uint32_t>(_primitiveType));
-	serializeUInt64(stream, _actualSize);
-	serializeUInt64(stream, _data.dataSize());
-	stream.write(_data.binary(), _data.dataSize());
-}
-
-void IndexArray::deserialize(std::istream& stream)
-{
-	uint32_t versionId = deserializeUInt32(stream);
-	if (versionId == IndexArrayId_1)
-	{
-		_format = static_cast<IndexArrayFormat>(deserializeUInt32(stream));
-		_primitiveType = static_cast<PrimitiveType>(deserializeUInt32(stream));
-		_actualSize = deserializeUInt32(stream);
-		
-		uint32_t capacity = deserializeUInt32(stream);
-		_data.resize(capacity);
-		stream.read(_data.binary(), capacity);
-	}
-	else if (versionId == IndexArrayId_2)
-	{
-		_format = static_cast<IndexArrayFormat>(deserializeUInt32(stream));
-		_primitiveType = static_cast<PrimitiveType>(deserializeUInt32(stream));
-		_actualSize = static_cast<size_t>(deserializeUInt64(stream));
-		_data.resize(static_cast<size_t>(deserializeUInt64(stream)));
-		stream.read(_data.binary(), _data.dataSize());
-	}
-	else 
-	{
-		ET_FAIL("Unrecognized index array version");
-	}
 }
 
 /*

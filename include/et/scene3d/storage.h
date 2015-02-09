@@ -16,37 +16,41 @@ namespace et
 {
 	namespace s3d
 	{
-		class Scene3dStorage : public ElementContainer
+		class Storage : public ElementContainer
 		{
 		public:
-			ET_DECLARE_POINTER(Scene3dStorage)
+			ET_DECLARE_POINTER(Storage)
 
 		public:
-			Scene3dStorage(const std::string& name, Element* parent);
+			Storage(const std::string& name, BaseElement* parent);
 
-			void serialize(std::ostream& stream, SceneVersion version);
-			void deserialize(std::istream& stream, ElementFactory* factory, SceneVersion version);
+			void serialize(Dictionary, const std::string&);
+			void deserialize(Dictionary, ElementFactory* factory);
 
 			ElementType type() const
 				{ return ElementType_Storage; }
 
 			std::vector<VertexStorage::Pointer>& vertexStorages()
 				{ return _vertexStorages; }
+
 			const std::vector<VertexStorage::Pointer>& vertexStorages() const
 				{ return _vertexStorages; }
 			
 			IndexArray::Pointer indexArray()
 				{ return _indexArray; }
+
 			const IndexArray::Pointer indexArray() const
 				{ return _indexArray; }
 
-			Material::List& materials()
+			Material::Map& materials()
 				{ return _materials; }
-			const Material::List& materials() const
+
+			const Material::Map& materials() const
 				{ return _materials; }
 
 			std::vector<Texture::Pointer>& textures()
 				{ return _textures; }
+
 			const std::vector<Texture::Pointer>& textures() const
 				{ return _textures; }
 
@@ -54,9 +58,10 @@ namespace et
 				{ _textures.push_back(t); }
 
 			void addMaterial(Material::Pointer m)
-				{ _materials.push_back(m); }
+				{ _materials.insert({m->name(), m}); }
 
 			void addVertexStorage(const VertexStorage::Pointer&);
+
 			void setIndexArray(const IndexArray::Pointer&);
 			
 			VertexStorage::Pointer addVertexStorageWithDeclaration(const VertexDeclaration& decl, size_t size);
@@ -67,13 +72,13 @@ namespace et
 			void flush();
 
 		private:
-			Scene3dStorage* duplicate()
-				{ return 0; }
+			Storage* duplicate()
+				{ return nullptr; }
 
 		private:
 			std::vector<VertexStorage::Pointer> _vertexStorages;
 			IndexArray::Pointer _indexArray;
-			Material::List _materials;
+			Material::Map _materials;
 			std::vector<Texture::Pointer> _textures;
 		};
 	}

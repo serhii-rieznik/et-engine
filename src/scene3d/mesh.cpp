@@ -6,6 +6,7 @@
  */
 
 #include <et/core/tools.h>
+#include <et/core/conversion.h>
 #include <et/scene3d/mesh.h>
 #include <et/scene3d/storage.h>
 
@@ -17,19 +18,19 @@ const std::string Mesh::defaultMeshName = "mesh";
 static IndexBuffer _emptyIndexBuffer;
 static VertexBuffer::Pointer _emptyVertexBuffer;
 
-Mesh::Mesh(const std::string& name, Element* parent) :
+Mesh::Mesh(const std::string& name, BaseElement* parent) :
 	RenderableElement(name, parent) { }
 
 Mesh::Mesh(const std::string& aName, const VertexArrayObject& vao, const Material::Pointer& mat,
-	uint32_t startIndex, uint32_t numIndexes, Element* parent) : RenderableElement(aName, parent), _vao(vao),
-	_startIndex(startIndex), _numIndexes(numIndexes)
+	uint32_t startIndex, uint32_t numIndexes, BaseElement* parent) : RenderableElement(aName, parent), 
+	_vao(vao), _startIndex(startIndex), _numIndexes(numIndexes)
 {
 	setMaterial(mat);
 }
 
 Mesh::Mesh(const std::string& aName, const VertexArrayObject& vao, const Material::Pointer& mat,
 	uint32_t start, uint32_t num, const VertexStorage::Pointer& storage, const IndexArray::Pointer& ia,
-	Element* parent) : RenderableElement(aName, parent), _vao(vao), _startIndex(start), _numIndexes(num),
+	BaseElement* parent) : RenderableElement(aName, parent), _vao(vao), _startIndex(start), _numIndexes(num),
 	_vertexStorage(storage), _indexArray(ia)
 {
 	setMaterial(mat);
@@ -68,7 +69,8 @@ void Mesh::calculateSupportData()
 	_supportData.minMaxCenter = 0.5f * (minVertex + maxVertex);
 	_supportData.averageCenter /= static_cast<float>(_numIndexes);
 	_supportData.boundingSphereRadius = etMax(etMax(maxExtent.x, maxExtent.y), maxExtent.z);
-	
+	_supportData.valid = true;
+
 	ET_ASSERT(!isnan(_supportData.averageCenter.x));
 }
 
@@ -111,74 +113,51 @@ void Mesh::setIndexArray(IndexArray::Pointer ia)
 	_indexArray = ia;
 }
 
-void Mesh::serialize(std::ostream& stream, SceneVersion version)
+void Mesh::serialize(Dictionary stream, const std::string& basePath)
 {
-	std::string vbId = (_vao.valid() && _vao->vertexBuffer().valid()) ?
-		intToStr(_vao->vertexBuffer()->sourceTag() & 0xffffffff) : "0";
-	
-	std::string ibId = (_vao.valid() && _vao->indexBuffer().valid()) ?
-		intToStr(_vao->indexBuffer()->sourceTag() & 0xffffffff) : "0";
-	
-	std::string ibName = "ib-" + ibId;
-	std::string vbName = "vb-" + vbId;
-	std::string vaoName = "vao-" + vbId + "-" + ibId;
+	stream.setIntegerForKey(kStartIndex, _startIndex);
+	stream.setIntegerForKey(kIndexesCount, _numIndexes);
+	stream.setStringForKey(kVertexArrayName, _vao->name());
 
-	serializeString(stream, vaoName);
-	serializeString(stream, vbName);
-	serializeString(stream, ibName);
-	
-	serializeUInt64(stream, reinterpret_cast<uintptr_t>(material().ptr()));
-	
-	serializeUInt32(stream, _startIndex);
-	serializeUInt32(stream, _numIndexes);
+	if (_vertexStorage.valid())
+		stream.setStringForKey(kVertexStorageName, _vertexStorage->name());
 
-	serializeUInt64(stream, _lods.size());
-	for (auto i : _lods)
+	if (_indexArray.valid())
+		stream.setStringForKey(kIndexArrayName, _indexArray->name());
+
+	if (!_lods.empty())
 	{
-		serializeUInt32(stream, i.first);
-		i.second->serialize(stream, version);
+		Dictionary lodsDictionary;
+		for (auto& kv : _lods)
+		{
+			Dictionary lodDictionary;
+			kv.second->serialize(lodDictionary, basePath);
+			lodsDictionary.setDictionaryForKey(intToStr(kv.first), lodDictionary);
+		}
+		stream.setDictionaryForKey(kLods, lodsDictionary);
 	}
 
-	serializeGeneralParameters(stream, version);
-	serializeChildren(stream, version);
+	if (_supportData.valid)
+	{
+		Dictionary supportDataDictionary;
+		supportDataDictionary.setArrayForKey(kMinMaxCenter, vec3ToArray(_supportData.minMaxCenter));
+		supportDataDictionary.setArrayForKey(kAverageCenter, vec3ToArray(_supportData.averageCenter));
+		supportDataDictionary.setArrayForKey(kDimensions, vec3ToArray(_supportData.dimensions));
+		supportDataDictionary.setFloatForKey(kBoundingSphereRadius, _supportData.boundingSphereRadius);
+		stream.setDictionaryForKey(kSupportData, supportDataDictionary);
+	}
+
+	RenderableElement::serialize(stream, basePath);
 }
 
-void Mesh::deserialize(std::istream& stream, ElementFactory* factory, SceneVersion version)
+void Mesh::deserialize(Dictionary stream, ElementFactory* factory)
 {
-	_vaoName = deserializeString(stream);
-	_vbName = deserializeString(stream);
-	_ibName = deserializeString(stream);
-	
-	uint64_t materialId = (version < SceneVersion_1_1_0) ? deserializeUInt32(stream) : deserializeUInt64(stream);
-	setMaterial(factory->materialWithId(materialId));
-	
-	setVertexArrayObject(factory->vaoWithIdentifiers(_vbName, _ibName));
-	
-	setIndexArray(factory->primaryIndexArray());
-	setVertexStorage(factory->vertexStorageWithName(_vbName));
-
-	_startIndex = deserializeUInt32(stream);
-	_numIndexes = deserializeUInt32(stream);
-
-	uint64_t numLods = (version < SceneVersion_1_1_0) ? deserializeUInt32(stream) : deserializeUInt64(stream);
-	for (uint64_t i = 0; i < numLods; ++i)
-	{
-		uint32_t level = deserializeUInt32(stream);
-		Mesh::Pointer p = factory->createElementOfType(ElementType_Mesh, 0);
-		p->deserialize(stream, factory, version);
-		attachLod(level, p);
-	}
-
-	deserializeGeneralParameters(stream, version);
-	deserializeChildren(stream, factory, version);
-	
-	calculateSupportData();
+	RenderableElement::deserialize(stream, factory);
 }
 
 void Mesh::attachLod(uint32_t level, Mesh::Pointer mesh)
 {
 	_lods[level] = mesh;
-	mesh->setActive(false);
 }
 
 void Mesh::cleanupLodChildren()
@@ -279,7 +258,7 @@ float Mesh::finalTransformScale()
 
 const Sphere& Mesh::boundingSphere()
 {
-	if (_shouldUpdateBoundingSphere)
+	if (_shouldUpdateBoundingSphere && _supportData.valid)
 	{
 		_shouldUpdateBoundingSphere = false;
 		
@@ -292,7 +271,7 @@ const Sphere& Mesh::boundingSphere()
 
 const AABB& Mesh::boundingBox()
 {
-	if (_shouldUpdateBoundingBox)
+	if (_shouldUpdateBoundingBox && _supportData.valid)
 	{
 		AABB originalAABB = AABB(_supportData.averageCenter, 0.5f * _supportData.dimensions);
 		

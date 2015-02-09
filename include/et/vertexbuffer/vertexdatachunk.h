@@ -42,8 +42,6 @@ namespace et
 		VertexAttributeType type() const
 			{ return _type; }
 
-		void serialize(std::ostream& stream);
-		
 		void copyTo(VertexDataChunkData&) const;
 
 	private:

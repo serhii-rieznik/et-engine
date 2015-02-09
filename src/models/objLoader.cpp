@@ -779,7 +779,7 @@ s3d::ElementContainer::Pointer OBJLoader::generateVertexBuffers()
 {
 	s3d::ElementContainer::Pointer result = s3d::ElementContainer::Pointer::create(inputFileName, nullptr);
 
-	_storage = s3d::Scene3dStorage::Pointer::create(getFileName(inputFileName) + "-storage", result.ptr());
+	_storage = s3d::Storage::Pointer::create(getFileName(inputFileName) + "-storage", result.ptr());
 	_storage->addVertexStorage(_vertexData);
 	_storage->setIndexArray(_indices);
 	
@@ -791,7 +791,7 @@ s3d::ElementContainer::Pointer OBJLoader::generateVertexBuffers()
 
 	for (const auto& i : _meshes)
 	{
-		s3d::Element::Pointer object;
+		s3d::BaseElement::Pointer object;
 		
 		if (_loadOptions & Option_SupportMeshes)
 		{

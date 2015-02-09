@@ -17,6 +17,27 @@ namespace et
 		"SmoothingGroup", "gl_InstanceID", "gl_InstanceIDEXT"
 	};
 
+	const std::string vertexAttributeTypeNames[VertexAttributeType_max] =
+	{
+		"float", "vec2", "vec3", "vec4", "mat3", "mat4", "int",
+	};
+
+	const std::string dataTypeNames[DataType_max] =
+	{
+		"char",
+		"unsigned char",
+		"short",
+		"unsigned short",
+		"int",
+		"insigned int",
+		"half",
+		"float",
+		"double",
+		"unsigned short <4444>",
+		"unsigned short <5551>",
+		"unsigned short <565>",
+	};
+
 	const std::string compatibilityVertexAttributeUsageNames[VertexAttributeUsage_max] =
 	{
 		"gl_Vertex", "gl_Normal", "gl_Color", "gl_Tangent", "gl_Binormal",
@@ -24,10 +45,20 @@ namespace et
 		"gl_SmoothingGroup", "gl_InstanceID", "gl_InstanceIDEXT"
 	};
 
+	const std::string indexArrayFormatNames[IndexArrayFormat_max] = 
+	{
+		"8 bit", "16 bit", "32 bit",
+	};
+
+	const std::string primitiveTypeNames[PrimitiveType_max] =
+	{
+		"points", "lines", "triangles", "triangle strips", "line strips",
+	};
+
 	const uint32_t vertexAttributeUsageMasks[VertexAttributeUsage_max] =
 		{ 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x100, 0x200, 0x0, 0x0 };
 
-	VertexAttributeUsage stringToVertexAttribute(const std::string& s, bool& compatibility)
+	VertexAttributeUsage stringToVertexAttributeUsage(const std::string& s, bool& compatibility)
 	{
 		VertexAttributeUsage result = VertexAttributeUsage::Unknown;
 
@@ -59,9 +90,79 @@ namespace et
 		return result;
 	}
 
-	std::string vertexAttributeToString(VertexAttributeUsage va)
+	VertexAttributeType stringToVertexAttributeType(const std::string& s)
 	{
-		return (va < VertexAttributeUsage::max) ? vertexAttributeUsageNames[static_cast<uint32_t>(va)] : emptyString;
+		for (uint32_t i = 0, e = VertexAttributeType_max; i < e; ++i)
+		{
+			if (s == vertexAttributeTypeNames[i])
+				return static_cast<VertexAttributeType>(i);
+		}
+
+		return VertexAttributeType::Float;
+	}
+
+	DataType stringToDataType(const std::string& s)
+	{
+		for (uint32_t i = 0, e = DataType_max; i < e; ++i)
+		{
+			if (s == dataTypeNames[i])
+				return static_cast<DataType>(i);
+		}
+
+		return DataType::Char;
+	}
+
+	IndexArrayFormat stringToIndexArrayFormat(const std::string& s)
+	{
+		for (uint32_t i = 0, e = IndexArrayFormat_max; i < e; ++i)
+		{
+			if (s == indexArrayFormatNames[i])
+				return static_cast<IndexArrayFormat>(i);
+		}
+
+		return IndexArrayFormat::Format_8bit;
+	}
+
+	PrimitiveType stringToPrimitiveType(const std::string& s)
+	{
+		for (uint32_t i = 0, e = PrimitiveType_max; i < e; ++i)
+		{
+			if (s == primitiveTypeNames[i])
+				return static_cast<PrimitiveType>(i);
+		}
+
+		return PrimitiveType::Points;
+	}
+
+
+	std::string vertexAttributeUsageToString(VertexAttributeUsage va)
+	{
+		return (va < VertexAttributeUsage::max) ? vertexAttributeUsageNames[static_cast<uint32_t>(va)] : 
+			intToStr(static_cast<uint32_t>(va));
+	}
+
+	std::string vertexAttributeTypeToString(VertexAttributeType vat)
+	{
+		return (vat < VertexAttributeType::max) ? vertexAttributeTypeNames[static_cast<uint32_t>(vat)] : 
+			intToStr(static_cast<uint32_t>(vat));
+	}
+
+	std::string dataTypeToString(DataType dt)
+	{
+		return (dt < DataType::max) ? dataTypeNames[static_cast<uint32_t>(dt)] :
+			intToStr(static_cast<uint32_t>(dt));
+	}
+
+	std::string indexArrayFormatToString(IndexArrayFormat iaf)
+	{
+		return (iaf < IndexArrayFormat::max) ? indexArrayFormatNames[static_cast<uint32_t>(iaf) / 2] :
+			intToStr(static_cast<uint32_t>(iaf));
+	}
+
+	std::string primitiveTypeToString(PrimitiveType pt)
+	{
+		return (pt < PrimitiveType::max) ? primitiveTypeNames[static_cast<uint32_t>(pt)] :
+			intToStr(static_cast<uint32_t>(pt));
 	}
 
 	uint32_t vertexAttributeTypeComponents(VertexAttributeType t)

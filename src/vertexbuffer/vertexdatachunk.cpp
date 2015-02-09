@@ -24,15 +24,6 @@ VertexDataChunkData::VertexDataChunkData(VertexAttributeUsage aUsage, VertexAttr
 	_data.fill(0);
 }
 
-void VertexDataChunkData::serialize(std::ostream& stream)
-{
-	serializeUInt32(stream, static_cast<uint32_t>(_usage));
-	serializeUInt32(stream, static_cast<uint32_t>(_type));
-	serializeUInt32(stream, static_cast<uint32_t>(_data.dataSize()));
-	serializeUInt32(stream, static_cast<uint32_t>(_data.lastElementIndex()));
-	stream.write(_data.binary(), _data.dataSize());
-}
-
 VertexDataChunkData::VertexDataChunkData(std::istream& stream)
 {
 	_usage = static_cast<VertexAttributeUsage>(deserializeUInt32(stream));

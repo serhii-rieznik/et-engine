@@ -21,10 +21,10 @@ namespace et
 			typedef DataStorage<triangle> CollisionData;
 
 		public:
-			SupportMesh(const std::string& = defaultMeshName, Element* = nullptr);
+			SupportMesh(const std::string& = defaultMeshName, BaseElement* = nullptr);
 			
 			SupportMesh(const std::string&, const VertexArrayObject&, const Material::Pointer&,
-				uint32_t, uint32_t, const VertexStorage::Pointer&, const IndexArray::Pointer&, Element* = nullptr);
+				uint32_t, uint32_t, const VertexStorage::Pointer&, const IndexArray::Pointer&, BaseElement* = nullptr);
 
 			ElementType type() const 
 				{ return ElementType_SupportMesh; }
@@ -39,8 +39,8 @@ namespace et
 
 			OBB obb();
 			
-			void serialize(std::ostream& stream, SceneVersion version);
-			void deserialize(std::istream& stream, ElementFactory* factory, SceneVersion version);
+			void serialize(Dictionary, const std::string&);
+			void deserialize(Dictionary, ElementFactory* factory);
 			
 
 		private:

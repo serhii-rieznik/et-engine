@@ -131,50 +131,6 @@ void VertexArray::fitToSize(size_t count)
 		resize(count);
 }
 
-void VertexArray::serialize(std::ostream& stream)
-{
-	serializeUInt32(stream, VertexArrayCurrentId);
-	_decl.serialize(stream);
-
-	serializeUInt64(stream, _size);
-	serializeUInt64(stream, _chunks.size());
-	
-	for (auto& i :_chunks)
-		i->serialize(stream);
-	
-	_smoothing->serialize(stream);
-}
-
-void VertexArray::deserialize(std::istream& stream)
-{
-	uint32_t numChunks = 0;
-	uint32_t id = deserializeUInt32(stream);
-	
-	_decl.deserialize(stream);
-	
-	if (id == VertexArrayId_1)
-	{
-		_size = deserializeUInt32(stream);
-		numChunks = deserializeUInt32(stream);
-	}
-	else if (id == VertexArrayId_2)
-	{
-		_size = static_cast<size_t>(deserializeUInt64(stream));
-		numChunks = static_cast<uint32_t>(deserializeUInt64(stream));
-	}
-	else
-	{
-		ET_FAIL("Stream contains invalid vertex array id.");
-	}
-		
-	_chunks.reserve(numChunks);
-	
-	for (uint64_t i = 0; i < numChunks; ++i)
-		_chunks.emplace_back(stream);
-	
-	_smoothing = VertexDataChunk(stream);
-}
-
 VertexArray* VertexArray::duplicate()
 {
 	VertexArray* result = sharedObjectFactory().createObject<VertexArray>(_decl, _size);
