@@ -42,6 +42,7 @@ namespace et
 		bool bindDefaultFramebufferEachFrame = true;
 		bool lockScreenScaleToInitial = true;
 		bool compatibilityProfile = false;
+		bool debugContext = false;
 
 		size_t swapInterval = 1;
         size_t supportedInterfaceOrientations = InterfaceOrientation_Any;
@@ -49,6 +50,7 @@ namespace et
 		vec2i contextSize;
 		vec2i contextBaseSize;
 		vec2i contextMinimumSize;
+		vec2i contextTargetVersion;
 
 		RenderContextParameters()
 		{
@@ -56,6 +58,7 @@ namespace et
 			contextSize = nativeScreenSize();
 			contextBaseSize = nativeScreenSize();
 #		else
+			contextTargetVersion = vec2i(4, 5);
 			contextSize = vec2i(800, 600);
 			contextBaseSize = vec2i(800, 600);
 #		endif

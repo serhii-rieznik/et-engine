@@ -339,7 +339,7 @@ bool RenderContextPrivate::initOpenGL(const RenderContextParameters& params)
 		}
 	}
 
-	if (!wglCreateContextAttribsARB)
+	if ((params.contextTargetVersion.x < 3) || (wglCreateContextAttribsARB == nullptr))
 	{
 		primaryContext.hGLRC = wglCreateContext(primaryContext.hDC);
 		if (primaryContext.hGLRC == 0)
@@ -356,22 +356,20 @@ bool RenderContextPrivate::initOpenGL(const RenderContextParameters& params)
 	} 
 	else
 	{
-#	if (ET_DEBUG)
-		int debugFlag = WGL_CONTEXT_DEBUG_BIT_ARB;
-#	else
-		int debugFlag = 0;
-#	endif
-
 		int attrib_list[] = 
 		{
-			WGL_CONTEXT_MAJOR_VERSION_ARB, 4,
-			WGL_CONTEXT_MINOR_VERSION_ARB, 5,
+			WGL_CONTEXT_MAJOR_VERSION_ARB, params.contextTargetVersion.x,
+
+			WGL_CONTEXT_MINOR_VERSION_ARB, params.contextTargetVersion.y,
 
 			WGL_CONTEXT_FLAGS_ARB, 
-			debugFlag | (params.compatibilityProfile ? 0 : WGL_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB),
+				(params.debugContext ? WGL_CONTEXT_DEBUG_BIT_ARB : 0) | 
+				(params.compatibilityProfile ? 0 : WGL_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB),
 
 			WGL_CONTEXT_PROFILE_MASK_ARB, 
-			params.compatibilityProfile ? WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB : WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
+				params.compatibilityProfile ? WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB : 
+					WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
+
 			0, 0
 		};
 
@@ -405,10 +403,10 @@ bool RenderContextPrivate::initOpenGL(const RenderContextParameters& params)
 				attrib_list[3] -= 1;
 			}
 
-			if (attrib_list[1] <= 0)
+			if (attrib_list[1] < 2)
 			{
 				primaryContext.release();
-				return 0;
+				return false;
 			}
 
 			primaryContext.hGLRC = wglCreateContextAttribsARB(primaryContext.hDC, 0, attrib_list);
