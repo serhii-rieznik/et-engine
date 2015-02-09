@@ -173,7 +173,7 @@ void Program::buildProgram(const std::string& vertex_source, const std::string& 
 	checkOpenGLError("glGetShaderiv<VERT> %s compile staus - %s", name().c_str());
 
 	glGetShaderiv(VertexShader, GL_INFO_LOG_LENGTH, &nLogLen);
-	if ((vertStatus == GL_FALSE) && (nLogLen > 1))
+	if (nLogLen > 1)
 	{
 		DataStorage<GLchar> infoLog(nLogLen, 0);
 		glGetShaderInfoLog(VertexShader, nLogLen, &nLogLen, infoLog.data());
@@ -206,7 +206,7 @@ void Program::buildProgram(const std::string& vertex_source, const std::string& 
 		checkOpenGLError("glGetShaderiv<GEOM> %s compile staus", name().c_str());
 		
 		glGetShaderiv(GeometryShader, GL_INFO_LOG_LENGTH, &nLogLen);
-		if ((geomStatus == GL_FALSE) && (nLogLen > 1))
+		if (nLogLen > 1)
 		{
 			DataStorage<GLchar> infoLog(nLogLen, 0);
 			glGetShaderInfoLog(GeometryShader, nLogLen, &nLogLen, infoLog.data());
@@ -239,7 +239,7 @@ void Program::buildProgram(const std::string& vertex_source, const std::string& 
 	checkOpenGLError("glGetShaderiv<FRAG> %s compile staus ", name().c_str());
 
 	glGetShaderiv(FragmentShader, GL_INFO_LOG_LENGTH, &nLogLen);
-	if ((fragStatus == GL_FALSE) && (nLogLen > 1))
+	if (nLogLen > 1)
 	{
 		DataStorage<GLchar> infoLog(nLogLen, 0);
 		glGetShaderInfoLog(FragmentShader, nLogLen, &nLogLen, infoLog.data());
