@@ -185,8 +185,9 @@ void Application::alert(const std::string& title, const std::string& message, Al
 
 void Application::setTitle(const std::string& s)
 {
+	auto stringValue = ET_STRING_TO_PARAM_TYPE(s);
 	HWND window = reinterpret_cast<HWND>(_renderingContextHandle);
-	SendMessage(window, WM_SETTEXT, 0, reinterpret_cast<LPARAM>(s.c_str()));
+	SendMessage(window, WM_SETTEXT, 0, reinterpret_cast<LPARAM>(stringValue.c_str()));
 }
 
 void Application::requestUserAttention()
