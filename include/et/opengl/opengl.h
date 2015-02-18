@@ -74,8 +74,18 @@
 
 #if (ET_DEBUG)
 #
-#	define checkOpenGLError(...)				et::checkOpenGLErrorEx(ET_CALL_FUNCTION, __FILE__, \
-													ET_TO_CONST_CHAR(__LINE__), __VA_ARGS__);
+#	define ET_CHECK_OPENGL_PRODUCES_LOG			0
+#
+#	if (ET_CHECK_OPENGL_PRODUCES_LOG)
+#		define checkOpenGLError(...)			do {\
+													et::log::info(__VA_ARGS__); \
+													et::checkOpenGLErrorEx(ET_CALL_FUNCTION, __FILE__, \ 
+														ET_TO_CONST_CHAR(__LINE__), __VA_ARGS__); \
+												} while (0);
+#	else
+#		define checkOpenGLError(...)			do { et::checkOpenGLErrorEx(ET_CALL_FUNCTION, __FILE__, \
+													ET_TO_CONST_CHAR(__LINE__), __VA_ARGS__); } while (0);
+#	endif
 #
 #	define ET_OPENGL_DEBUG_SCOPE_IN_DEBUG		OpenGLDebugScope etOpenGLDebugScope(ET_CALL_FUNCTION);
 #

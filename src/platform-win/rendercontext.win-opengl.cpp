@@ -296,9 +296,8 @@ bool RenderContextPrivate::initOpenGL(const RenderContextParameters& params)
 	RenderContextData dummy = createDummyContext(dummyWindow);
 	if (!dummy.initialized)	return false;
 
-	wglChoosePixelFormatARB = (GLEEPFNWGLCHOOSEPIXELFORMATARBPROC)(wglGetProcAddress("wglChoosePixelFormatARB"));
-	wglCreateContextAttribsARB = (GLEEPFNWGLCREATECONTEXTATTRIBSARBPROC)wglGetProcAddress("wglCreateContextAttribsARB");
-	wglMakeContextCurrentARB = (GLEEPFNWGLMAKECONTEXTCURRENTARBPROC)wglGetProcAddress("wglMakeContextCurrentARB");
+	auto local_wglCreateContextAttribsARB = (GLEEPFNWGLCREATECONTEXTATTRIBSARBPROC)wglGetProcAddress("wglCreateContextAttribsARB");
+	auto local_wglMakeContextCurrentARB = (GLEEPFNWGLMAKECONTEXTCURRENTARBPROC)wglGetProcAddress("wglMakeContextCurrentARB");
 
 	PIXELFORMATDESCRIPTOR pfd = { };
 	pfd.nSize = sizeof(pfd);
@@ -339,8 +338,10 @@ bool RenderContextPrivate::initOpenGL(const RenderContextParameters& params)
 		}
 	}
 
-	if (!wglCreateContextAttribsARB)
+	if ((params.contextTargetVersion.x < 3) || (local_wglCreateContextAttribsARB == nullptr))
 	{
+		log::warning("Using legacy methods to create OpenGL context.");
+
 		primaryContext.hGLRC = wglCreateContext(primaryContext.hDC);
 		if (primaryContext.hGLRC == 0)
 		{
@@ -358,26 +359,34 @@ bool RenderContextPrivate::initOpenGL(const RenderContextParameters& params)
 	{
 		int attrib_list[] = 
 		{
-			WGL_CONTEXT_MAJOR_VERSION_ARB, 4,
-			WGL_CONTEXT_MINOR_VERSION_ARB, 5,
+			WGL_CONTEXT_MAJOR_VERSION_ARB, params.contextTargetVersion.x,
+
+			WGL_CONTEXT_MINOR_VERSION_ARB, params.contextTargetVersion.y,
+
 			WGL_CONTEXT_FLAGS_ARB, 
-			WGL_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB,
+				params.debugContext ? WGL_CONTEXT_DEBUG_BIT_ARB : 0,
+
 			WGL_CONTEXT_PROFILE_MASK_ARB, 
-			params.compatibilityProfile ? WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB : WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
+				params.compatibilityProfile ? WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB : 
+					WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
+
 			0, 0
 		};
 
-		primaryContext.hGLRC = wglCreateContextAttribsARB(primaryContext.hDC, 0, attrib_list);
+		primaryContext.hGLRC = local_wglCreateContextAttribsARB(primaryContext.hDC, 0, attrib_list);
 		if (primaryContext.hGLRC == 0)
 		{
-			DWORD lastError = GetLastError();
+			DWORD lastError = GetLastError() & 0xffff;
 
 			if (lastError == ERROR_INVALID_VERSION_ARB)
-				log::error("Error creating context: ERROR_INVALID_VERSION_ARB. Requested: %d.%d", attrib_list[1], attrib_list[3]);
+			{
+				log::warning("Attempt to create OpenGL context with version %d.%d failed, trying previous versions...",
+					attrib_list[1], attrib_list[3]);
+			}
 			else if (lastError == ERROR_INVALID_PROFILE_ARB)
 				log::error("Error creating context: ERROR_INVALID_PROFILE_ARB");
-			else if (lastError == ERROR_INVALID_PROFILE_ARB)
-				log::error("Error creating context: ERROR_INVALID_PROFILE_ARB");
+			else if (lastError == ERROR_INVALID_PIXEL_FORMAT)
+				log::error("Error creating context: ERROR_INVALID_PIXEL_FORMAT");
 		}
 
 		while (primaryContext.hGLRC == 0)
@@ -392,24 +401,27 @@ bool RenderContextPrivate::initOpenGL(const RenderContextParameters& params)
 				attrib_list[3] -= 1;
 			}
 
-			if (attrib_list[1] <= 0)
+			if (attrib_list[1] < 2)
 			{
 				primaryContext.release();
-				return 0;
+				return false;
 			}
 
-			primaryContext.hGLRC = wglCreateContextAttribsARB(primaryContext.hDC, 0, attrib_list);
+			primaryContext.hGLRC = local_wglCreateContextAttribsARB(primaryContext.hDC, 0, attrib_list);
 			if (primaryContext.hGLRC == 0)
 			{
 				DWORD lastError = GetLastError();
 				if (lastError == ERROR_INVALID_VERSION_ARB)
-					log::error("Creating context: ERROR_INVALID_VERSION_ARB. Requested: %d.",  attrib_list[1],  attrib_list[3]);
+				{
+					log::warning("Attempt to create OpenGL context with version %d.%d failed, trying previous versions...",
+						attrib_list[1], attrib_list[3]);
+				}
 				else if (lastError == ERROR_INVALID_PROFILE_ARB)
 					log::error("Error creating context: ERROR_INVALID_PROFILE_ARB");
 			}
 		}
 
-		if (!wglMakeContextCurrentARB(primaryContext.hDC, primaryContext.hDC, primaryContext.hGLRC))
+		if (!local_wglMakeContextCurrentARB(primaryContext.hDC, primaryContext.hDC, primaryContext.hGLRC))
 		{
 			primaryContext.release();
 			return 0;
@@ -431,6 +443,8 @@ bool RenderContextPrivate::initOpenGL(const RenderContextParameters& params)
 
 int RenderContextPrivate::chooseMSAAPixelFormat(HDC aDC, PIXELFORMATDESCRIPTOR*)
 {
+	auto local_wglChoosePixelFormatARB = (GLEEPFNWGLCHOOSEPIXELFORMATARBPROC)(wglGetProcAddress("wglChoosePixelFormatARB"));
+
 	int attributes[] =
 	{
 		WGL_DRAW_TO_WINDOW_ARB, GL_TRUE,
@@ -455,7 +469,7 @@ int RenderContextPrivate::chooseMSAAPixelFormat(HDC aDC, PIXELFORMATDESCRIPTOR*)
 	for (; maxSamples > 0; maxSamples /= 2)
 	{
 		attributes[17] = maxSamples;
-		bStatus = wglChoosePixelFormatARB(aDC, attributes, 0, 1, &returnedPixelFormat, &numFormats);
+		bStatus = local_wglChoosePixelFormatARB(aDC, attributes, 0, 1, &returnedPixelFormat, &numFormats);
 		if (bStatus && numFormats) break;
 	}
 

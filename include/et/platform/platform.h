@@ -23,6 +23,22 @@
 #	define NOMINMAX						1
 #	include <Windows.h>
 #
+#	if defined(_UNICODE)
+#		define ET_WIN_UNICODE					1
+#		define ET_CHAR_TYPE						wchar_t
+#		define ET_STRING_TYPE					std::wstring
+#		define ET_STRING_TO_PARAM_TYPE(str)		utf8ToUnicode(str)
+#		define ET_STRING_TO_OUTPUT_TYPE(str)	unicodeToUtf8(str)
+#		define ET_STRING_FROM_CONST_CHAR(str)	L##str
+#	else
+#		define ET_WIN_UNICODE					0
+#		define ET_CHAR_TYPE						char
+#		define ET_STRING_TYPE					std::string
+#		define ET_STRING_TO_PARAM_TYPE(str)		str
+#		define ET_STRING_TO_OUTPUT_TYPE(str)	str
+#		define ET_STRING_FROM_CONST_CHAR(str)	str
+#	endif
+#
 #elif (TARGET_OS_IPHONE)
 #
 #	define ET_PLATFORM_IOS				1

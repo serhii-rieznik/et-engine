@@ -62,6 +62,9 @@ namespace et
 	{
 		VertexAttributeUsage result = VertexAttributeUsage::Unknown;
 
+		if (s.empty())
+			return result;
+
 		for (uint32_t i = 0, e = VertexAttributeUsage_max; i < e; ++i)
 		{
 			if (s == vertexAttributeUsageNames[i])

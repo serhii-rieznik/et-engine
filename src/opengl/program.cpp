@@ -170,10 +170,11 @@ void Program::buildProgram(const std::string& vertex_source, const std::string& 
 	
 	GLsizei nLogLen = 0;
 	glGetShaderiv(VertexShader, GL_COMPILE_STATUS, &vertStatus);
-	checkOpenGLError("glGetShaderiv<VERT> %s compile staus - %s", name().c_str());
+	checkOpenGLError("glGetShaderiv<VERTEX, GL_COMPILE_STATUS> - %s", name().c_str());
 
 	glGetShaderiv(VertexShader, GL_INFO_LOG_LENGTH, &nLogLen);
-	if ((vertStatus == GL_FALSE) && (nLogLen > 1))
+	checkOpenGLError("glGetShaderiv<VERTEX, GL_INFO_LOG_LENGTH> - %s", name().c_str());
+	if (nLogLen > 1)
 	{
 		DataStorage<GLchar> infoLog(nLogLen, 0);
 		glGetShaderInfoLog(VertexShader, nLogLen, &nLogLen, infoLog.data());
@@ -203,10 +204,10 @@ void Program::buildProgram(const std::string& vertex_source, const std::string& 
 		checkOpenGLError("glCompileShader<GEOM> - %s", name().c_str());
 
 		glGetShaderiv(GeometryShader, GL_COMPILE_STATUS, &geomStatus);
-		checkOpenGLError("glGetShaderiv<GEOM> %s compile staus", name().c_str());
+		checkOpenGLError("glGetShaderiv<GEOM> %s compile status", name().c_str());
 		
 		glGetShaderiv(GeometryShader, GL_INFO_LOG_LENGTH, &nLogLen);
-		if ((geomStatus == GL_FALSE) && (nLogLen > 1))
+		if (nLogLen > 1)
 		{
 			DataStorage<GLchar> infoLog(nLogLen, 0);
 			glGetShaderInfoLog(GeometryShader, nLogLen, &nLogLen, infoLog.data());
@@ -236,10 +237,10 @@ void Program::buildProgram(const std::string& vertex_source, const std::string& 
 
 	nLogLen = 0;
 	glGetShaderiv(FragmentShader, GL_COMPILE_STATUS, &fragStatus);
-	checkOpenGLError("glGetShaderiv<FRAG> %s compile staus ", name().c_str());
+	checkOpenGLError("glGetShaderiv<FRAG> %s compile status", name().c_str());
 
 	glGetShaderiv(FragmentShader, GL_INFO_LOG_LENGTH, &nLogLen);
-	if ((fragStatus == GL_FALSE) && (nLogLen > 1))
+	if (nLogLen > 1)
 	{
 		DataStorage<GLchar> infoLog(nLogLen, 0);
 		glGetShaderInfoLog(FragmentShader, nLogLen, &nLogLen, infoLog.data());
@@ -259,23 +260,31 @@ void Program::buildProgram(const std::string& vertex_source, const std::string& 
 		int activeAttribs = 0;
 		int maxNameLength = 0;
 		glGetProgramiv(program, GL_ACTIVE_ATTRIBUTES, &activeAttribs);
+		checkOpenGLError("glGetProgramiv<GL_ACTIVE_ATTRIBUTES> - %s", name().c_str());
+
 		glGetProgramiv(program, GL_ACTIVE_ATTRIBUTE_MAX_LENGTH, &maxNameLength);
+		checkOpenGLError("glGetProgramiv<GL_ACTIVE_ATTRIBUTE_MAX_LENGTH> - %s", name().c_str());
+
 		for (uint32_t i = 0, e = static_cast<uint32_t>(activeAttribs); i < e; ++i)
 		{ 
 			int nameLength = 0;
 			int attribSize = 0; 
 			uint32_t attribType = 0;
-			StringDataStorage name(maxNameLength, 0);
-			glGetActiveAttrib(program, i, maxNameLength, &nameLength, &attribSize, &attribType, name.data());
+			StringDataStorage attribName(maxNameLength + 1, 0);
+
+			glGetActiveAttrib(program, i, maxNameLength, &nameLength, &attribSize, &attribType, attribName.binary());
+			checkOpenGLError("glGetActiveAttrib(..., %d, %d, ..., %s) - %s", maxNameLength, nameLength, 
+				attribName.binary(), name().c_str());
 
 			bool compatibility = false;
-			auto attrib = stringToVertexAttributeUsage(name.data(), compatibility);
-			_attributes.emplace_back(name.data(), attrib, compatibility);
+			auto attrib = stringToVertexAttributeUsage(attribName.binary(), compatibility);
+
+			_attributes.emplace_back(std::string(attribName.binary()), attrib, compatibility);
 
 			if (!compatibility)
 			{
-				glBindAttribLocation(static_cast<uint32_t>(apiHandle()), static_cast<GLuint>(attrib), name.data());
-				checkOpenGLError("glBindAttribLocation - %s", name.data());
+				glBindAttribLocation(static_cast<uint32_t>(apiHandle()), static_cast<GLuint>(attrib), attribName.binary());
+				checkOpenGLError("glBindAttribLocation - %s", attribName.data());
 			}
 		}
 	
@@ -293,28 +302,28 @@ void Program::buildProgram(const std::string& vertex_source, const std::string& 
 			{
 				int uSize = 0;
 				GLsizei uLenght = 0;
-				StringDataStorage name(maxNameLength, 0);
+				StringDataStorage uniformName(maxNameLength + 1, 0);
 				Program::Uniform P;
-				glGetActiveUniform(program, i, maxNameLength, &uLenght, &uSize, &P.type, name.binary());
-				P.location = glGetUniformLocation(program, name.binary());
-				_uniforms[name.binary()] = P;
+				glGetActiveUniform(program, i, maxNameLength, &uLenght, &uSize, &P.type, uniformName.binary());
+				P.location = glGetUniformLocation(program, uniformName.binary());
+				_uniforms[uniformName.binary()] = P;
 
-				if (strcmp(name.binary(), "mModelView") == 0)
+				if (strcmp(uniformName.binary(), "mModelView") == 0)
 					_mModelViewLocation = P.location;
 
-				if (strcmp(name.binary(), "mModelViewProjection") == 0) 
+				if (strcmp(uniformName.binary(), "mModelViewProjection") == 0)
 					_mModelViewProjectionLocation = P.location;
 
-				if (strcmp(name.binary(), "vCamera") == 0) 
+				if (strcmp(uniformName.binary(), "vCamera") == 0)
 					_vCameraLocation = P.location;
 
-				if (strcmp(name.binary(), "vPrimaryLight") == 0) 
+				if (strcmp(uniformName.binary(), "vPrimaryLight") == 0)
 					_vPrimaryLightLocation = P.location;
 
-				if (strcmp(name.binary(), "mLightProjectionMatrix") == 0) 
+				if (strcmp(uniformName.binary(), "mLightProjectionMatrix") == 0)
 					_mLightProjectionMatrixLocation = P.location;
 
-				if (strcmp(name.binary(), "mTransform") == 0)
+				if (strcmp(uniformName.binary(), "mTransform") == 0)
 					_mTransformLocation = P.location;
 			}
 		}
@@ -365,32 +374,34 @@ int Program::link()
 	int result = 0;
 	
 #if !defined(ET_CONSOLE_APPLICATION)
-	int nLogLen = 0;
-	
 	uint32_t program = static_cast<uint32_t>(apiHandle());
 
+	const char* nameCStr = name().c_str();
+
 	glLinkProgram(program);
-	checkOpenGLError("glLinkProgram - %s", name().c_str());
+	checkOpenGLError("glLinkProgram - %s", nameCStr);
 
 	glGetProgramiv(program, GL_LINK_STATUS, &result);
-	checkOpenGLError("glGetProgramiv<GL_LINK_STATUS> - %s", name().c_str());
+	checkOpenGLError("glGetProgramiv<GL_LINK_STATUS> - %s", nameCStr);
 
+	int nLogLen = 0;
 	glGetProgramiv(program, GL_INFO_LOG_LENGTH, &nLogLen);
-	checkOpenGLError("glGetProgramiv<GL_INFO_LOG_LENGTH> - %s", name().c_str());
+	checkOpenGLError("glGetProgramiv<GL_INFO_LOG_LENGTH> - %s", nameCStr);
 
 	if (nLogLen > 1)
 	{
 		StringDataStorage infoLog(nLogLen + 1, 0);
-		glGetProgramInfoLog(program, nLogLen, &nLogLen, infoLog.data());
-		checkOpenGLError("glGetProgramInfoLog<LINK> - %s", name().c_str());
+
+		glGetProgramInfoLog(program, nLogLen,  &nLogLen, infoLog.data());
+		checkOpenGLError("glGetProgramInfoLog - %s, log length = %d", nameCStr, nLogLen);
 		
 		if (result == GL_FALSE)
-			log::error("Program %s link log:\n%s", name().c_str(), infoLog.data());
+			log::error("Program %s link log:\n%s", nameCStr, infoLog.data());
 		else
-			log::warning("Program %s link log:\n%s", name().c_str(), infoLog.data());
+			log::warning("Program %s link log:\n%s", nameCStr, infoLog.data());
 	}
 #endif
-	
+
 	return result;
 }
 
