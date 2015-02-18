@@ -631,6 +631,88 @@ void primitives::calculateTangents(VertexArray::Pointer data, const IndexArray::
 	}
 }
 
+void primitives::calculateTangents(VertexStorage::Pointer data, const IndexArray::Pointer& buffer,
+	uint32_t first, uint32_t last)
+{
+	ET_ASSERT(first < last);
+
+	if (!data->hasAttributeWithType(VertexAttributeUsage::Position, VertexAttributeType::Vec3))
+	{
+		log::error("primitives::calculateNormals - vertex storage does not contain positions of type vec3.");
+		return;
+	}
+	if (!data->hasAttributeWithType(VertexAttributeUsage::Normal, VertexAttributeType::Vec3))
+	{
+		log::error("primitives::calculateNormals - vertex storage does not contain normals of type vec3.");
+		return;
+	}
+	if (!data->hasAttributeWithType(VertexAttributeUsage::TexCoord0, VertexAttributeType::Vec2))
+	{
+		log::error("primitives::calculateNormals - vertex storage does not contain TexCoord0 of type vec2.");
+		return;
+	}
+	if (!data->hasAttributeWithType(VertexAttributeUsage::Tangent, VertexAttributeType::Vec3))
+	{
+		log::error("primitives::calculateNormals - vertex storage does not contain tangents of type vec3.");
+		return;
+	}
+
+	RawDataAcessor<vec3> pos = data->accessData<VertexAttributeType::Vec3>(VertexAttributeUsage::Position, 0);
+	RawDataAcessor<vec3> nrm = data->accessData<VertexAttributeType::Vec3>(VertexAttributeUsage::Normal, 0);
+	RawDataAcessor<vec3> tan = data->accessData<VertexAttributeType::Vec3>(VertexAttributeUsage::Tangent, 0);
+	RawDataAcessor<vec2> uv = data->accessData<VertexAttributeType::Vec2>(VertexAttributeUsage::TexCoord0, 0);
+
+	DataStorage<vec3> tan1(data->capacity(), 0);
+	DataStorage<vec3> tan2(data->capacity(), 0);
+
+	for (IndexArray::PrimitiveIterator i = buffer->primitive(first), e = buffer->primitive(last); i != e; ++i)
+	{
+		IndexArray::Primitive& p = (*i);
+
+		vec3& v1 = pos[p[0]];
+		vec3& v2 = pos[p[1]];
+		vec3& v3 = pos[p[2]];
+		vec2& w1 = uv[p[0]];
+		vec2& w2 = uv[p[1]];
+		vec2& w3 = uv[p[2]];
+
+		float x1 = v2.x - v1.x;
+		float x2 = v3.x - v1.x;
+		float y1 = v2.y - v1.y;
+		float y2 = v3.y - v1.y;
+		float z1 = v2.z - v1.z;
+		float z2 = v3.z - v1.z;
+		float s1 = w2.x - w1.x;
+		float s2 = w3.x - w1.x;
+		float t1 = w2.y - w1.y;
+		float t2 = w3.y - w1.y;
+		float r = 1.0f / (s1 * t2 - s2 * t1);
+
+		vec3 sdir((t2 * x1 - t1 * x2) * r, (t2 * y1 - t1 * y2) * r, (t2 * z1 - t1 * z2) * r);
+		vec3 tdir((s1 * x2 - s2 * x1) * r, (s1 * y2 - s2 * y1) * r, (s1 * z2 - s2 * z1) * r);
+
+		tan1[p[0]] += sdir;
+		tan1[p[1]] += sdir;
+		tan1[p[2]] += sdir;
+
+		tan2[p[0]] += tdir;
+		tan2[p[1]] += tdir;
+		tan2[p[2]] += tdir;
+	}
+
+	for (IndexArray::PrimitiveIterator i = buffer->primitive(first), e = buffer->primitive(last); i != e; ++i)
+	{
+		const IndexArray::Primitive& p = (*i);
+		for (size_t k = 0; k < 3; ++k)
+		{
+			vec3& n = nrm[p[k]];
+			vec3& t = tan1[p[k]];
+			float value = dot(cross(n, t), tan2[p[k]]);
+			tan[p[k]] = normalize(t - n * dot(n, t)) * signOrZero(value);
+		}
+	}
+}
+
 void primitives::smoothTangents(VertexArray::Pointer data, const IndexArray::Pointer&,
 	uint32_t first, uint32_t last)
 {

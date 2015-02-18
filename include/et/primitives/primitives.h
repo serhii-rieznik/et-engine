@@ -58,7 +58,9 @@ namespace et
 		
 		void calculateTangents(VertexArray::Pointer data, const IndexArray::Pointer& buffer,
 			uint32_t first, uint32_t last);
-		
+		void calculateTangents(VertexStorage::Pointer data, const IndexArray::Pointer& buffer,
+			uint32_t first, uint32_t last);
+
 		void smoothTangents(VertexArray::Pointer data, const IndexArray::Pointer& buffer,
 			uint32_t first, uint32_t last);
 		

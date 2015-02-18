@@ -409,7 +409,7 @@ bool et::intersect::sphereBox(const vec3& sphereCenter, float sphereRadius, cons
 
 bool et::intersect::sphereAABB(const Sphere& s, const AABB& b)
 {
-	return sphereBox(s.center(), s.radius(), b.center, b.dimension);
+	return sphereBox(s.center(), s.radius(), b.center, b.halfDimension);
 }
 
 bool et::intersect::sphereOBB(const Sphere& s, const OBB& b)
@@ -421,7 +421,7 @@ bool et::intersect::sphereOBB(const Sphere& s, const OBB& b)
 bool et::intersect::aabbAABB(const AABB& a1, const AABB& a2)
 {
 	vec3 dc = a1.center - a2.center;
-	vec3 sd = a1.dimension + a2.dimension;
+	vec3 sd = a1.halfDimension + a2.halfDimension;
 
 	if (std::abs(dc.x) > (sd.x)) return false;
 	if (std::abs(dc.y) > (sd.y)) return false;

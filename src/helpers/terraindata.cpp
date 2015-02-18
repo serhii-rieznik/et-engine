@@ -210,8 +210,8 @@ const vec3& TerrainData::positionAtXZ(const vec2i& xy) const
 
 vec2 TerrainData::normalizePoint(const vec3& pt) const
 {
-	float nx = _dimensionf.x * clamp((pt.x - _minVertex.x) / _bounds.dimension.x, 0.0f, 1.0f);
-	float nz = _dimensionf.y * clamp((pt.z - _minVertex.z) / _bounds.dimension.z, 0.0f, 1.0f);
+	float nx = _dimensionf.x * clamp((pt.x - _minVertex.x) / _bounds.halfDimension.x, 0.0f, 1.0f);
+	float nz = _dimensionf.y * clamp((pt.z - _minVertex.z) / _bounds.halfDimension.z, 0.0f, 1.0f);
 	return vec2(nx, nz);
 }
 

@@ -285,7 +285,7 @@ const AABB& Mesh::boundingBox()
 			maxVertex = maxv(maxVertex, transformedCorner);
 		}
 		
-		_cachedBoundingBox = AABB(0.5f * (maxVertex + minVertex), 0.5f * (maxVertex - minVertex));
+		_cachedBoundingBox = AABB(0.5f * (maxVertex + minVertex), 0.5f * maxv(vec3(0.0002f), maxVertex - minVertex));
 		_shouldUpdateBoundingBox = false;
 	}
 	

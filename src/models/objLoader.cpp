@@ -673,12 +673,16 @@ void OBJLoader::processLoadedData()
 	bool hasTexCoords = _texCoords.size() > 0;
 		
 	VertexDeclaration decl(true, VertexAttributeUsage::Position, VertexAttributeType::Vec3);
-	
 	decl.push_back(VertexAttributeUsage::Normal, VertexAttributeType::Vec3);
 
 	if (hasTexCoords)
+	{
 		decl.push_back(VertexAttributeUsage::TexCoord0, VertexAttributeType::Vec2);
-		
+
+		if ((_loadOptions & Option_CalculateTangents) == Option_CalculateTangents)
+			decl.push_back(VertexAttributeUsage::Tangent, VertexAttributeType::Vec3);
+	}
+
 	IndexArrayFormat fmt = (totalVertices > 65535) ? IndexArrayFormat::Format_32bit : IndexArrayFormat::Format_16bit;
 	
 	_indices = IndexArray::Pointer::create(fmt, totalVertices, PrimitiveType::Triangles);
@@ -773,6 +777,9 @@ void OBJLoader::processLoadedData()
 	
 	if (!hasNormals)
 		primitives::calculateNormals(_vertexData, _indices, 0, _indices->primitivesCount());
+
+	if (hasTexCoords && ((_loadOptions & Option_CalculateTangents) == Option_CalculateTangents))
+		primitives::calculateTangents(_vertexData, _indices, 0, _indices->primitivesCount());
 }
 
 s3d::ElementContainer::Pointer OBJLoader::generateVertexBuffers()

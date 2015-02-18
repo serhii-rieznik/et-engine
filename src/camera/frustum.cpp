@@ -49,7 +49,7 @@ bool Frustum::containsAABB(const AABB& aabb) const
 {
 	for (const auto& frustumPlane : _planes)
 	{
-		if (dot(aabb.center, frustumPlane.xyz()) + dot(aabb.dimension, absv(frustumPlane.xyz())) < -frustumPlane.w)
+		if (dot(aabb.center, frustumPlane.xyz()) + 2.0 * dot(aabb.halfDimension, absv(frustumPlane.xyz())) < -frustumPlane.w)
 			return false;
 	}
 	

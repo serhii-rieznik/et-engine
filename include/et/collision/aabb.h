@@ -31,23 +31,23 @@ namespace et
 		typedef vec3 AABBCorners[AABBCorner_max];
 
 		vec3 center;
-		vec3 dimension;
+		vec3 halfDimension;
 		
 		AABBCorners corners; 
 
 		AABB() { }
 		
-		AABB(const vec3& aCenter, const vec3& aDimension) :
-			center(aCenter), dimension(aDimension)
+		AABB(const vec3& aCenter, const vec3& aHalfDimension) :
+			center(aCenter), halfDimension(aHalfDimension)
 		{
-			corners[AABBCorner_LeftDownFar] = center + vec3(-dimension.x, -dimension.y, -dimension.z);
-			corners[AABBCorner_RightDownFar] = center + vec3( dimension.x, -dimension.y, -dimension.z);
-			corners[AABBCorner_LeftUpFar] = center + vec3(-dimension.x, dimension.y, -dimension.z);
-			corners[AABBCorner_RightUpFar] = center + vec3( dimension.x, dimension.y, -dimension.z);
-			corners[AABBCorner_LeftDownNear] = center + vec3(-dimension.x, -dimension.y, dimension.z);
-			corners[AABBCorner_RightDownNear] = center + vec3( dimension.x, -dimension.y, dimension.z);
-			corners[AABBCorner_LeftUpNear] = center + vec3(-dimension.x, dimension.y, dimension.z);
-			corners[AABBCorner_RightUpNear] = center + vec3( dimension.x, dimension.y, dimension.z);
+			corners[AABBCorner_LeftDownFar] = center + vec3(-halfDimension.x, -halfDimension.y, -halfDimension.z);
+			corners[AABBCorner_RightDownFar] = center + vec3( halfDimension.x, -halfDimension.y, -halfDimension.z);
+			corners[AABBCorner_LeftUpFar] = center + vec3(-halfDimension.x, halfDimension.y, -halfDimension.z);
+			corners[AABBCorner_RightUpFar] = center + vec3( halfDimension.x, halfDimension.y, -halfDimension.z);
+			corners[AABBCorner_LeftDownNear] = center + vec3(-halfDimension.x, -halfDimension.y, halfDimension.z);
+			corners[AABBCorner_RightDownNear] = center + vec3( halfDimension.x, -halfDimension.y, halfDimension.z);
+			corners[AABBCorner_LeftUpNear] = center + vec3(-halfDimension.x, halfDimension.y, halfDimension.z);
+			corners[AABBCorner_RightUpNear] = center + vec3( halfDimension.x, halfDimension.y, halfDimension.z);
 		}
 
 		const vec3& minVertex() const

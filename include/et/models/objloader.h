@@ -26,6 +26,7 @@ namespace et
 			Option_SwapYwithZ = 0x02,
 			Option_ReverseTriangles = 0x04,
 			Option_CalculateTransforms = 0x80,
+			Option_CalculateTangents = 0x10,
 		};
 
 	public:
