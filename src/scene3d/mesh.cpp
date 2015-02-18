@@ -117,7 +117,6 @@ void Mesh::serialize(Dictionary stream, const std::string& basePath)
 {
 	stream.setIntegerForKey(kStartIndex, _startIndex);
 	stream.setIntegerForKey(kIndexesCount, _numIndexes);
-	stream.setStringForKey(kVertexArrayName, _vao->name());
 
 	if (_vertexStorage.valid())
 		stream.setStringForKey(kVertexStorageName, _vertexStorage->name());
