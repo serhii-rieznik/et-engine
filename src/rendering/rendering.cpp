@@ -263,6 +263,7 @@ namespace et
 			case TextureFormat::RG16F:
 			case TextureFormat::RGBA8:
 			case TextureFormat::Depth32:
+			case TextureFormat::Depth32F:
 				return 32;
 				
 			case TextureFormat::RGB16:
