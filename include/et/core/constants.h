@@ -85,6 +85,7 @@
 #	define ET_KEY_ESCAPE				VK_ESCAPE
 #	define ET_KEY_BACKSPACE				VK_BACK
 #	define ET_KEY_SHIFT					VK_SHIFT
+#	define ET_KEY_CONTROL				VK_CONTROL
 #
 #	define ET_KEY_LEFT					VK_LEFT
 #	define ET_KEY_RIGHT					VK_RIGHT

@@ -41,6 +41,9 @@ namespace et
 		float zFar() const
 			{ return _zFar; }
 
+		float perspectiveProjectionAspect() const
+			{ return _perspecitveAspect; }
+
 		vec3 direction() const;
 		void setDirection(const vec3& d);
 		void setSide(const vec3& s);
@@ -123,6 +126,7 @@ namespace et
 		vec3 _upLocked;
 		float _zNear = 0.0f;
 		float _zFar = 0.0f;
+		float _perspecitveAspect = 0.0f;
 		bool _lockUpVector = false;
 	};
 

@@ -34,7 +34,8 @@ const mat4& Camera::perspectiveProjection(float fov, float aspect, float zNear, 
 {
 	_zFar = zFar;
 	_zNear = zNear;
-	
+	_perspecitveAspect = aspect;
+
 	_projectionMatrix = identityMatrix;
 
 	float fHalfFOV = 0.5f * fov;
@@ -54,6 +55,9 @@ const mat4& Camera::perspectiveProjection(float fov, float aspect, float zNear, 
 
 const mat4& Camera::customPerspectiveProjection(const vec2& fullFov, float zNear, float zFar)
 {
+	_zFar = zFar;
+	_zNear = zNear;
+	_perspecitveAspect = 0.0f;
 	_projectionMatrix = identityMatrix;
 	
 	vec2 fov = 0.5f * fullFov;
