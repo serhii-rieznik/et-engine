@@ -174,20 +174,7 @@ void Texture::buildData(const char* aDataPtr, size_t aDataSize)
 	auto formatValue = textureFormatValue(_desc->format);
 	auto typeValue = dataTypeValue(_desc->type);
 
-	if (_desc->target == TextureTarget::Texture_1D)
-	{
-		if (_desc->compressed && (aDataSize > 0))
-		{
-			etCompressedTexImage1D(targetValue, 0, static_cast<uint32_t>(_desc->internalformat),
-				_desc->size.x, 0, static_cast<GLsizei>(aDataSize), aDataPtr);
-		}
-		else
-		{
-			etTexImage1D(targetValue, 0, internalFormatValue, _desc->size.x, 0,
-				formatValue, typeValue, aDataPtr);
-		}
-	}
-	else if (_desc->target == TextureTarget::Texture_2D)
+	if ((_desc->target == TextureTarget::Texture_2D) || (_desc->target == TextureTarget::Texture_Rectangle))
 	{
 		for (size_t level = 0; level < _desc->mipMapCount; ++level)
 		{
@@ -243,7 +230,8 @@ void Texture::buildData(const char* aDataPtr, size_t aDataSize)
 	}
 	else
 	{
-		log::error("Unsupported texture target specified: %s", glTexTargetToString(targetValue).c_str());
+		ET_FAIL_FMT("Unsupported texture target specified: %s", glTexTargetToString(targetValue).c_str());
+
 	}
 #endif
 }
@@ -272,14 +260,22 @@ void Texture::build(RenderContext* rc)
 
 	rc->renderState().bindTexture(defaultBindingUnit, static_cast<uint32_t>(apiHandle()), _desc->target, true);
 
+	if (_desc->target == TextureTarget::Texture_Rectangle)
+	{
+		_wrap = vector3<TextureWrap>(TextureWrap::ClampToEdge);
+
+		if (_filtration.x > TextureFiltration::Linear)
+			_filtration.x = TextureFiltration::Linear;
+	}
+
 	setFiltration(rc, _filtration.x, _filtration.y);
 	setWrap(rc, _wrap.x, _wrap.y, _wrap.z);
 
+	buildData(_desc->data.constBinaryData(), _desc->data.dataSize());
+	checkOpenGLError("buildData");
+
 	if (_desc->mipMapCount > 1)
 		setMaxLod(rc, _desc->mipMapCount - 1);
-
-    buildData(_desc->data.constBinaryData(), _desc->data.dataSize());
-	checkOpenGLError("buildData");
 	
 	_desc->data.resize(0);
 #endif

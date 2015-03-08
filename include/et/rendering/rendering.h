@@ -105,11 +105,10 @@ namespace et
 	
 	enum class TextureTarget : uint32_t
 	{
-		Texture_1D,
 		Texture_2D,
-		Texture_Cube,
 		Texture_2D_Array,
-
+		Texture_Rectangle,
+		Texture_Cube,
 		max,
 	};
 	

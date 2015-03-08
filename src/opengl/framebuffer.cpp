@@ -92,7 +92,7 @@ Framebuffer::Framebuffer(RenderContext* rc, uint32_t fboId, const std::string& a
 	}
 	else if (fboId == 0)
 	{
-		_description.size = rc->sizei();
+		_description.size.xy() = rc->sizei();
 	}
 #endif
 }
@@ -139,22 +139,23 @@ bool Framebuffer::checkStatus()
 #endif
 }
 
-Texture::Pointer Framebuffer::buildTexture(const vec2i& aSize, TextureTarget aTarget, TextureFormat aInternalFormat, 
-	TextureFormat aFormat, DataType aType, uint32_t param)
+Texture::Pointer Framebuffer::buildTexture(const vec3i& aSize, TextureTarget aTarget, TextureFormat aInternalFormat, 
+	TextureFormat aFormat, DataType aType)
 {
 	switch (aTarget)
 	{
 		case TextureTarget::Texture_2D:
+		case TextureTarget::Texture_Rectangle:
 		{
-			size_t dataSize = aSize.square() * bitsPerPixelForTextureFormat(aInternalFormat, aType) / 8;
-			return _rc->textureFactory().genTexture(TextureTarget::Texture_2D, aInternalFormat, aSize,
+			size_t dataSize = aSize.xy().square() * bitsPerPixelForTextureFormat(aInternalFormat, aType) / 8;
+			return _rc->textureFactory().genTexture(aTarget, aInternalFormat, aSize.xy(),
 				aFormat, aType, BinaryDataStorage(dataSize, 0), name() + "_texture");
 		}
 
 		case TextureTarget::Texture_2D_Array:
 		{
-			size_t dataSize = param * aSize.square() * bitsPerPixelForTextureFormat(aInternalFormat, aType) / 8;
-			return _rc->textureFactory().genTexture2DArray(aSize, param, aInternalFormat, aFormat, aType,
+			size_t dataSize = aSize.z * aSize.xy().square() * bitsPerPixelForTextureFormat(aInternalFormat, aType) / 8;
+			return _rc->textureFactory().genTexture2DArray(aSize, aTarget, aInternalFormat, aFormat, aType,
 				BinaryDataStorage(dataSize, 0), name() + "_texture");
 		}
 
@@ -174,7 +175,7 @@ Texture::Pointer Framebuffer::buildTexture(const vec2i& aSize, TextureTarget aTa
 void Framebuffer::buildColorAttachment()
 {
 	Texture::Pointer target = buildTexture(_description.size, _description.target, 
-		_description.colorInternalformat, _description.colorFormat, _description.colorType, _description.numLayers);
+		_description.colorInternalformat, _description.colorFormat, _description.colorType);
 	target->setWrap(_rc, TextureWrap::ClampToEdge, TextureWrap::ClampToEdge);
 	addRenderTarget(target);
 }
@@ -182,34 +183,41 @@ void Framebuffer::buildColorAttachment()
 void Framebuffer::buildDepthAttachment()
 {
 	Texture::Pointer target = buildTexture(_description.size, _description.target,
-		_description.depthInternalformat, _description.depthFormat, _description.depthType, _description.numLayers);
+		_description.depthInternalformat, _description.depthFormat, _description.depthType);
+
 	target->setWrap(_rc, TextureWrap::ClampToEdge, TextureWrap::ClampToEdge);
+
 	setDepthTarget(target);
 }
 
 void Framebuffer::attachTexture(Texture::Pointer rt, uint32_t target)
 {
-	if (rt.invalid() || (rt->size() != _description.size)) return;
+	if (rt.invalid() || (rt->size() != _description.size.xy())) return;
 	ET_ASSERT(glIsTexture(static_cast<uint32_t>(rt->apiHandle())));
 
 	_rc->renderState().bindFramebuffer(static_cast<uint32_t>(apiHandle()));
 
-	if (rt->target() == TextureTarget::Texture_2D)
+	if ((rt->target() == TextureTarget::Texture_2D) || (rt->target() == TextureTarget::Texture_Rectangle))
 	{
-		glFramebufferTexture2D(GL_FRAMEBUFFER, target, GL_TEXTURE_2D, static_cast<uint32_t>(rt->apiHandle()), 0);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, target, textureTargetValue(rt->target()), 
+			static_cast<uint32_t>(rt->apiHandle()), 0);
+
 		checkOpenGLError("glFramebufferTexture2D(...) - %s", name().c_str());
 	}
 	else if (rt->target() == TextureTarget::Texture_Cube)
 	{
 		for (GLenum i = 0; i < 6; ++i)
 		{
-			glFramebufferTexture2D(GL_FRAMEBUFFER, target, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, static_cast<uint32_t>(rt->apiHandle()), 0);
+			glFramebufferTexture2D(GL_FRAMEBUFFER, target, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 
+				static_cast<uint32_t>(rt->apiHandle()), 0);
+
 			checkOpenGLError("glFramebufferTexture2D(...) - %s", name().c_str());
 		}
 	}
 	else if (rt->target() == TextureTarget::Texture_2D_Array)
 	{
 		glFramebufferTexture(GL_FRAMEBUFFER, target, rt->apiHandle(), 0);
+
 		checkOpenGLError("glFramebufferTexture(...) - %s", name().c_str());
 	}
 }
@@ -241,8 +249,9 @@ void Framebuffer::addSameRendertarget()
 		
 	const Texture::Pointer& basic = _renderTargets.front();
 
-	Texture::Pointer target = buildTexture(basic->size(), basic->target(), basic->internalFormat(),
-		basic->format(), basic->dataType(), basic->description()->layersCount);
+	Texture::Pointer target = buildTexture(vec3i(basic->size(), basic->description()->layersCount), 
+		basic->target(), basic->internalFormat(), basic->format(), basic->dataType());
+
 	target->setName(name() + "_color_" + intToStr(_renderTargets.size() + 1));
 	target->setWrap(_rc, TextureWrap::ClampToEdge, TextureWrap::ClampToEdge);
 
@@ -296,7 +305,7 @@ void Framebuffer::setCurrentCubemapFace(uint32_t faceIndex)
 
 void Framebuffer::setCurrentLayer(uint32_t layerIndex)
 {
-	ET_ASSERT(layerIndex < _description.numLayers);
+	ET_ASSERT(layerIndex < static_cast<uint32_t>(_description.size.z));
 	_rc->renderState().bindFramebuffer(static_cast<uint32_t>(apiHandle()));
 
 	uint32_t targetIndex = 0;
@@ -371,9 +380,9 @@ void Framebuffer::createOrUpdateDepthRenderbuffer()
 void Framebuffer::resize(const vec2i& sz)
 {
 #if !defined(ET_CONSOLE_APPLICATION)
-	if (_description.size == sz) return;
+	if (_description.size.xy() == sz) return;
 	
-	_description.size = sz;
+	forceSize(sz);
 	
 	bool hasColor = (_description.colorInternalformat != TextureFormat::Invalid) &&
 		(_description.colorIsRenderbuffer || (_description.colorFormat != TextureFormat::Invalid));
@@ -425,7 +434,7 @@ void Framebuffer::resize(const vec2i& sz)
 
 void Framebuffer::forceSize(const vec2i& sz)
 {
-	_description.size = sz;
+	_description.size = vec3i(sz, _description.size.z);
 }
 
 void Framebuffer::resolveMultisampledTo(Framebuffer::Pointer framebuffer)
@@ -436,22 +445,27 @@ void Framebuffer::resolveMultisampledTo(Framebuffer::Pointer framebuffer)
 	
 #	if (ET_PLATFORM_IOS)
 
-#	if defined(GL_ES_VERSION_3_0)
-		glBlitFramebuffer(0, 0, _description.size.x, _description.size.y, 0, 0, framebuffer->size().x,
-			framebuffer->size().y, GL_COLOR_BUFFER_BIT, GL_NEAREST);
-		checkOpenGLError("glBlitFramebuffer");
-#	else
-		glResolveMultisampleFramebufferAPPLE();
-		checkOpenGLError("glResolveMultisampleFramebuffer");
-#	endif
+#		if defined(GL_ES_VERSION_3_0)
+			glBlitFramebuffer(0, 0, _description.size.x, _description.size.y, 0, 0, framebuffer->size().x,
+				framebuffer->size().y, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+			checkOpenGLError("glBlitFramebuffer");
+#		else
+			glResolveMultisampleFramebufferAPPLE();
+			checkOpenGLError("glResolveMultisampleFramebuffer");
+#		endif
+
 #	elif (ET_PLATFORM_ANDROID)
+
 		glBlitFramebuffer(0, 0, _description.size.x, _description.size.y, 0, 0, framebuffer->size().x,
-			framebuffer->size().y, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+			framebuffer->size().y, GL_COLOR_BUFFER_BIT, GL_LINEAR);
 		checkOpenGLError("glBlitFramebuffer");
+
 #	else
+
 		glBlitFramebuffer(0, 0, _description.size.x, _description.size.y, 0, 0, framebuffer->size().x,
-			framebuffer->size().y, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+			framebuffer->size().y, GL_COLOR_BUFFER_BIT, GL_LINEAR);
 		checkOpenGLError("glBlitFramebuffer");
+
 #	endif
 	
 #endif

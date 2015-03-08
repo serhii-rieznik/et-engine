@@ -16,9 +16,9 @@ namespace et
 	
 	struct FramebufferDescription
 	{
-		vec2i size;
+		vec3i size;
 		uint32_t numSamples = 0;
-		uint32_t numLayers = 0;
+		uint32_t numLayers_deprecated = 0;
 
 		TextureFormat colorInternalformat = TextureFormat::Invalid;
 		TextureFormat colorFormat = TextureFormat::Invalid;
@@ -66,8 +66,8 @@ namespace et
 		int32_t drawBuffersCount() const
 			{ return _drawBuffers; }
 
-		vec2i size() const
-			{ return _description.size; }
+		const vec2i& size() const
+			{ return _description.size.xy(); }
 	
 		uint32_t colorRenderbuffer() const
 			{ return _colorRenderbuffer; }
@@ -107,8 +107,8 @@ namespace et
 
 		void attachTexture(Texture::Pointer, uint32_t);
 
-		Texture::Pointer buildTexture(const vec2i&, TextureTarget, TextureFormat, 
-			TextureFormat, DataType, uint32_t);
+		Texture::Pointer buildTexture(const vec3i&, TextureTarget, TextureFormat, 
+			TextureFormat, DataType);
 
 	private:
 		RenderContext* _rc;

@@ -309,17 +309,10 @@ uint32_t et::textureTargetValue(TextureTarget value)
 {
 	static const uint32_t valuesMap[TextureTarget_max] =
 	{
-#	if defined(GL_TEXTURE_1D)
-		GL_TEXTURE_1D,
-#	else
-		GL_TEXTURE_2D,
-#	endif
-		
-		GL_TEXTURE_2D,
-		
-		GL_TEXTURE_CUBE_MAP,
-
-		GL_TEXTURE_2D_ARRAY
+		GL_TEXTURE_2D, // Texture_2D,
+		GL_TEXTURE_2D_ARRAY, // Texture_2D_Array,
+		GL_TEXTURE_RECTANGLE, // Texture_2D_Rect,
+		GL_TEXTURE_CUBE_MAP, // Texture_Cube,
 	};
 	
 	ET_SAMPLE_VALUE_FROM_MAP

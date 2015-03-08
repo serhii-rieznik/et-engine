@@ -447,6 +447,10 @@ const std::string openGl2FragmentHeader = R"(
 #define etFragmentOut1		gl_FragData[1]
 #define etFragmentOut2		gl_FragData[2]
 #define etFragmentOut3		gl_FragData[3]
+#define etFragmentOut4		gl_FragData[4]
+#define etFragmentOut5		gl_FragData[5]
+#define etFragmentOut6		gl_FragData[6]
+#define etFragmentOut7		gl_FragData[7]
 )";
 
 const std::string openGl3FragmentHeader = R"(
@@ -463,4 +467,8 @@ layout (location = 0) out vec4 etFragmentOut0;
 layout (location = 1) out vec4 etFragmentOut1;
 layout (location = 2) out vec4 etFragmentOut2;
 layout (location = 3) out vec4 etFragmentOut3;
+layout (location = 4) out vec4 etFragmentOut4;
+layout (location = 5) out vec4 etFragmentOut5;
+layout (location = 6) out vec4 etFragmentOut6;
+layout (location = 7) out vec4 etFragmentOut7;
 )";

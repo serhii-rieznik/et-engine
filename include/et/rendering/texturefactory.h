@@ -37,8 +37,9 @@ namespace et
 		Texture::Pointer genCubeTexture(TextureFormat internalformat, uint32_t size, TextureFormat format,
 			DataType type, const std::string& aName);
 
-		Texture::Pointer genTexture2DArray(const vec2i& size, uint32_t layers, TextureFormat internalformat,
-			TextureFormat format, DataType type, const BinaryDataStorage& data, const std::string& aName);
+		Texture::Pointer genTexture2DArray(const vec3i& size, TextureTarget textureTarget, 
+			TextureFormat internalformat, TextureFormat format, DataType type, const BinaryDataStorage& data, 
+			const std::string& aName);
 		
 		Texture::Pointer genTexture(TextureDescription::Pointer desc);
 		

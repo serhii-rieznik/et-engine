@@ -16,7 +16,7 @@ Framebuffer::Pointer FramebufferFactory::createFramebuffer(const vec2i& size, co
 	FramebufferDescription desc;
 	
 	desc.target = TextureTarget::Texture_2D;
-	desc.size = size;
+	desc.size = vec3i(size, 0);
 	desc.numSamples = samples;
 
 	desc.colorFormat = colorFormat;
@@ -39,7 +39,7 @@ Framebuffer::Pointer FramebufferFactory::createMultisampledFramebuffer(const vec
 	FramebufferDescription desc;
 	
 	desc.target = TextureTarget::Texture_2D;
-	desc.size = size;
+	desc.size = vec3i(size, 0);
 	desc.numSamples = samples;
 	desc.colorInternalformat = colorInternalformat;
 	desc.depthInternalformat = depthInternalformat;
@@ -56,7 +56,7 @@ Framebuffer::Pointer FramebufferFactory::createCubemapFramebuffer(size_t size, c
 	FramebufferDescription desc;
 	
 	desc.target = TextureTarget::Texture_Cube;
-	desc.size = vec2i(static_cast<int>(size & 0xffffffff));
+	desc.size = vec3i(static_cast<int>(size & 0xffffffff), static_cast<int>(size & 0xffffffff), 0);
 	desc.numSamples = 1;
 
 	desc.colorFormat = colorFormat;
@@ -75,15 +75,14 @@ Framebuffer::Pointer FramebufferFactory::createFramebufferWrapper(uint32_t fbo, 
 	return Framebuffer::Pointer::create(renderContext(), fbo, id);
 }
 
-Framebuffer::Pointer FramebufferFactory::createArrayFramebuffer(const vec2i& size, const uint32_t layers, 
-	const std::string& id, TextureFormat colorInternalformat, TextureFormat colorFormat, DataType colorType, 
-	TextureFormat depthInternalformat, TextureFormat depthFormat, DataType depthType)
+Framebuffer::Pointer FramebufferFactory::createFramebuffer(const vec2i& size, TextureTarget textureTarget,
+	const std::string& name, TextureFormat colorInternalformat, TextureFormat colorFormat, DataType colorType, 
+	TextureFormat depthInternalformat, TextureFormat depthFormat, DataType depthType, const uint32_t layers)
 {
 	FramebufferDescription desc;
 
-	desc.target = TextureTarget::Texture_2D_Array;
-	desc.size = size;
-	desc.numLayers = layers;
+	desc.target = textureTarget;
+	desc.size = vec3i(size, layers);
 
 	desc.colorFormat = colorFormat;
 	desc.colorInternalformat = colorInternalformat;
@@ -93,5 +92,13 @@ Framebuffer::Pointer FramebufferFactory::createArrayFramebuffer(const vec2i& siz
 	desc.depthInternalformat = depthInternalformat;
 	desc.depthType = depthType;
 
-	return Framebuffer::Pointer::create(renderContext(), desc, id);
+	return Framebuffer::Pointer::create(renderContext(), desc, name);
+}
+
+Framebuffer::Pointer FramebufferFactory::createArrayFramebuffer(const vec2i& size, const uint32_t layers, 
+	const std::string& name, TextureFormat colorInternalformat, TextureFormat colorFormat, DataType colorType, 
+	TextureFormat depthInternalformat, TextureFormat depthFormat, DataType depthType)
+{
+	return createFramebuffer(size, TextureTarget::Texture_2D_Array, name, colorInternalformat, colorFormat, colorType,
+		depthInternalformat, depthFormat, depthType, layers);
 }

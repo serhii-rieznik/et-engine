@@ -717,9 +717,11 @@ bool isSamplerUniform(uint32_t value)
 {
 	return 
 		(value == GL_SAMPLER_1D) || 
-		(value == GL_SAMPLER_2D) || 
-		(value == GL_SAMPLER_3D) || 
+		(value == GL_SAMPLER_2D) ||
+		(value == GL_SAMPLER_3D) ||
 		(value == GL_SAMPLER_CUBE) || 
+		(value == GL_SAMPLER_2D_RECT) ||
+		(value == GL_SAMPLER_2D_RECT_SHADOW) ||
 		(value == GL_SAMPLER_2D_SHADOW) ||
 		(value == GL_SAMPLER_2D_ARRAY) ||
 		(value == GL_SAMPLER_2D_ARRAY_SHADOW)
