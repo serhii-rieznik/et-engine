@@ -63,7 +63,7 @@ namespace et
 		ObjectsCache _sharedCache;
 		VertexArrayObject _fullscreenQuadVao;
 
-		Program::Pointer _fullscreenProgram;
+		Program::Pointer _fullscreenProgram[TextureTarget_max];
 		Program::Pointer _fullscreenDepthProgram;
 		Program::Pointer _fullscreenScaledProgram;
 		Program::Pointer _scaledProgram;
@@ -74,7 +74,6 @@ namespace et
 		Program::Uniform _scaledRotatedProgram_PSUniform;
 		Program::Uniform _scaledRotatedProgram_TintUniform;
 		Program::Uniform _scaledRotatedProgram_AngleUniform;
-		Program::Uniform _fullScreenProgram_TintUniform;
 		Program::Uniform _fullScreenScaledProgram_PSUniform;
 		Program::Uniform _fullScreenScaledProgram_TintUniform;
 		Program::Uniform _fullScreenDepthProgram_FactorUniform;

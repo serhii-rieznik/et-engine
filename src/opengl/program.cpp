@@ -435,7 +435,7 @@ void Program::setUniform(int nLoc, uint32_t type, uint32_t value, bool)
 	if (nLoc == -1) return;
 	
 	(void)type;
-	ET_ASSERT((type == GL_INT) || (type == GL_SAMPLER_2D) || (type == GL_SAMPLER_CUBE));
+	ET_ASSERT((type == GL_INT) || isSamplerUniform(type));
 	ET_ASSERT(apiHandleValid());
 	
 	glUniform1i(nLoc, static_cast<GLint>(value));
@@ -449,7 +449,7 @@ void Program::setUniform(int nLoc, uint32_t type, int64_t value, bool)
 	if (nLoc == -1) return;
 	
 	(void)type;
-	ET_ASSERT((type == GL_INT) || (type == GL_SAMPLER_2D) || (type == GL_SAMPLER_CUBE));
+	ET_ASSERT((type == GL_INT) || isSamplerUniform(type));
 	ET_ASSERT(apiHandleValid());
 	
 	glUniform1i(nLoc, static_cast<GLint>(value));
@@ -463,7 +463,7 @@ void Program::setUniform(int nLoc, uint32_t type, uint64_t value, bool)
 	if (nLoc == -1) return;
 
 	(void)type;
-	ET_ASSERT((type == GL_INT) || (type == GL_SAMPLER_2D) || (type == GL_SAMPLER_CUBE));
+	ET_ASSERT((type == GL_INT) || isSamplerUniform(type));
 	ET_ASSERT(apiHandleValid());
 
 	glUniform1i(nLoc, static_cast<GLint>(value));
@@ -477,7 +477,7 @@ void Program::setUniform(int nLoc, uint32_t type, const unsigned long value, boo
 	if (nLoc == -1) return;
 	
 	(void)type;
-	ET_ASSERT((type == GL_INT) || (type == GL_SAMPLER_2D) || (type == GL_SAMPLER_CUBE));
+	ET_ASSERT((type == GL_INT) || isSamplerUniform(type));
 	ET_ASSERT(apiHandleValid());
 	
 	glUniform1i(nLoc, static_cast<GLint>(value));
@@ -557,6 +557,63 @@ void Program::setUniform(int nLoc, uint32_t type, const vec4& value, bool forced
 		checkOpenGLError("glUniform4fv");
 	}
 	
+#endif
+}
+
+void Program::setUniform(int nLoc, uint32_t type, const vec2i& value, bool forced)
+{
+#if !defined(ET_CONSOLE_APPLICATION)
+	if (nLoc == -1) return;
+
+	(void)type;
+	ET_ASSERT(type == GL_INT_VEC2);
+	ET_ASSERT(apiHandleValid());
+
+	if (forced || ((_vec2iCache.count(nLoc) == 0) || (_vec2iCache[nLoc] != value)))
+	{
+		_vec2iCache[nLoc] = value;
+		glUniform2iv(nLoc, 1, value.data());
+		checkOpenGLError("glUniform2iv");
+	}
+
+#endif
+}
+
+void Program::setUniform(int nLoc, uint32_t type, const vec3i& value, bool forced)
+{
+#if !defined(ET_CONSOLE_APPLICATION)
+	if (nLoc == -1) return;
+
+	(void)type;
+	ET_ASSERT(type == GL_INT_VEC3);
+	ET_ASSERT(apiHandleValid());
+
+	if (forced || ((_vec3iCache.count(nLoc) == 0) || (_vec3iCache[nLoc] != value)))
+	{
+		_vec3iCache[nLoc] = value;
+		glUniform3iv(nLoc, 1, value.data());
+		checkOpenGLError("glUniform3iv");
+	}
+
+#endif
+}
+
+void Program::setUniform(int nLoc, uint32_t type, const vec4i& value, bool forced)
+{
+#if !defined(ET_CONSOLE_APPLICATION)
+	if (nLoc == -1) return;
+
+	(void)type;
+	ET_ASSERT(type == GL_INT_VEC4);
+	ET_ASSERT(apiHandleValid());
+
+	if (forced || ((_vec4iCache.count(nLoc) == 0) || (_vec4iCache[nLoc] != value)))
+	{
+		_vec4iCache[nLoc] = value;
+		glUniform4iv(nLoc, 1, value.data());
+		checkOpenGLError("glUniform4iv");
+	}
+
 #endif
 }
 

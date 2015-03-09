@@ -95,7 +95,10 @@ namespace et
 		void setUniform(int, uint32_t, const vec2&, bool force = false);
 		void setUniform(int, uint32_t, const vec3&, bool force = false);
 		void setUniform(int, uint32_t, const vec4&, bool force = false);
-		
+		void setUniform(int, uint32_t, const vec2i&, bool force = false);
+		void setUniform(int, uint32_t, const vec3i&, bool force = false);
+		void setUniform(int, uint32_t, const vec4i&, bool force = false);
+
 		void setUniform(int, uint32_t, const mat3&, bool force = false);
 		void setUniform(int, uint32_t, const mat4&, bool force = false);
 
@@ -165,9 +168,12 @@ namespace et
 		std::map<int, vec2> _vec2Cache;
 		std::map<int, vec3> _vec3Cache;
 		std::map<int, vec4> _vec4Cache;
+		std::map<int, vec2i> _vec2iCache;
+		std::map<int, vec3i> _vec3iCache;
+		std::map<int, vec4i> _vec4iCache;
 		std::map<int, mat3> _mat3Cache;
 		std::map<int, mat4> _mat4Cache;
-		
+
 		StringList _defines;
 	};
 }

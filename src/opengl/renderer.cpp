@@ -42,10 +42,23 @@ Renderer::Renderer(RenderContext* rc) :
 	_fullscreenQuadVao = rc->vertexBufferFactory().createVertexArrayObject("__et__internal__fullscreen_vao__",
 		vb, BufferDrawType::Static, ib, BufferDrawType::Static);
 
-	_fullscreenProgram = rc->programFactory().genProgram("__et__fullscreeen__program__",
-		fullscreen_vertex_shader, copy_fragment_shader);
-	_fullscreenProgram->setUniform("color_texture", _defaultTextureBindingUnit);
-	_fullScreenProgram_TintUniform = _fullscreenProgram->getUniform("tint");
+	const std::string textureTypeDefines[TextureTarget_max] =  
+	{
+		"#define TEXTURE_2D", // Texture_2D,
+		"#define TEXTURE_2D_ARRAY", // Texture_2D_Array,
+		"#define TEXTURE_RECTANGLE", // Texture_Rectangle,
+		"#define TEXTURE_CUBE", // Texture_Cube,
+	};
+
+	StringList currentDefines(1);
+	for (int i = 0; i < TextureTarget_max; ++i)
+	{
+		currentDefines[0] = textureTypeDefines[i];
+
+		_fullscreenProgram[i] = rc->programFactory().genProgram("__et__fullscreeen__program__", 
+			fullscreen_vertex_shader, copy_fragment_shader, currentDefines);
+		_fullscreenProgram[i]->setUniform("color_texture", _defaultTextureBindingUnit);
+	}
 
 	_fullscreenDepthProgram = rc->programFactory().genProgram("__et__fullscreeen__depth__program__",
 		fullscreen_vertex_shader, depth_fragment_shader);
@@ -97,9 +110,11 @@ void Renderer::fullscreenPass()
 void Renderer::renderFullscreenTexture(const Texture::Pointer& texture, const vec4& tint)
 {
 #if !defined(ET_CONSOLE_APPLICATION)
+	auto prog = _fullscreenProgram[static_cast<int>(texture->target())];
+
 	_rc->renderState().bindTexture(_defaultTextureBindingUnit, texture);
-	_rc->renderState().bindProgram(_fullscreenProgram);
-	_fullscreenProgram->setUniform(_fullScreenProgram_TintUniform, tint);
+	_rc->renderState().bindProgram(prog);
+	prog->setUniform("tint", tint);
 	fullscreenPass();
 #endif
 }
@@ -320,12 +335,38 @@ void main()
 })";
 
 const std::string copy_fragment_shader = R"(
-uniform etLowp sampler2D color_texture;
+#if defined(TEXTURE_CUBE)
+	uniform etLowp samplerCube color_texture;
+#elif defined(TEXTURE_RECTANGLE)
+	uniform etLowp sampler2DRect color_texture;
+#elif defined(TEXTURE_2D_ARRAY)
+	uniform etLowp sampler2DArray color_texture;
+#else
+	uniform etLowp sampler2D color_texture;
+#endif
+
 uniform etLowp vec4 tint;
 etFragmentIn etHighp vec2 TexCoord;
+
 void main()
 {
+#if defined(TEXTURE_CUBE)
+
+	etFragmentOut = tint * etTextureCube(color_texture, vec3(TexCoord, 0.0));
+
+#elif defined(TEXTURE_RECTANGLE)
+
+	etFragmentOut = tint * etTextureRect(color_texture, TexCoord * vec2(textureSize(color_texture)));
+
+#elif defined(TEXTURE_2D_ARRAY)
+
+	etFragmentOut = tint * etTexture2D(color_texture, vec3(TexCoord, 0.0));
+
+#else
+
 	etFragmentOut = tint * etTexture2D(color_texture, TexCoord);
+
+#endif
 })";
 
 const std::string depth_fragment_shader = R"(
