@@ -309,3 +309,9 @@ void GesturesRecognizer::setRecognizedGestures(size_t values)
 	if ((values & _gesture) == 0)
 		_gesture = RecognizedGesture_NoGesture;
 }
+
+void GesturesRecognizer::cancelRecognition()
+{
+	_gesture = RecognizedGesture_NoGesture;
+	cancelWaitingForClicks();
+}

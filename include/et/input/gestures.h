@@ -38,6 +38,8 @@ namespace et
 		
 		void setRecognizedGestures(size_t);
 
+		void cancelRecognition();
+
 	public:
 		ET_DECLARE_PROPERTY_GET_COPY_SET_COPY(float, clickTemporalThreshold, setClickTemporalThreshold)
 		ET_DECLARE_PROPERTY_GET_COPY_SET_COPY(float, clickSpatialThreshold, setClickSpatialThreshold)
