@@ -76,6 +76,29 @@ ObjectLoader::Pointer TextureFactory::objectLoader()
 	return _private->loader;
 }
 
+std::string TextureFactory::resolveTextureName(const std::string& fileName) const
+{
+	auto result = application().resolveFileName(fileName);
+
+	if (fileExists(result))
+		return result;
+
+	auto fileExt = lowercase(getFileExt(fileName));
+
+	for (const auto& ext : _private->supportedExtensions)
+	{
+		if (ext == fileExt) continue;
+
+		result = replaceFileExt(fileName, "." + ext);
+		result = application().resolveFileName(result);
+
+		if (fileExists(result))
+			return result;
+	}
+
+	return result;
+}
+
 Texture::Pointer TextureFactory::loadTexture(const std::string& fileName, ObjectsCache& cache,
 	bool async, TextureLoaderDelegate* delegate)
 {
@@ -84,25 +107,9 @@ Texture::Pointer TextureFactory::loadTexture(const std::string& fileName, Object
 	
 	CriticalSectionScope lock(_csTextureLoading);
 	
-	auto file = application().resolveFileName(fileName);
-	
+	auto file = resolveTextureName(fileName);
 	if (!fileExists(file))
-	{
-		auto fileExt = lowercase(getFileExt(fileName));
-		for (const auto& ext : _private->supportedExtensions)
-		{
-			if (ext == fileExt) continue;
-			
-			file = replaceFileExt(fileName, "." + ext);
-			file = application().resolveFileName(file);
-			
-			if (fileExists(file))
-				break;
-		}
-		
-		if (!fileExists(file))
-			return Texture::Pointer();
-	}
+		return Texture::Pointer();
 	
 	uint64_t cachedFileProperty = 0;
     Texture::Pointer texture = cache.findAnyObject(file, &cachedFileProperty);

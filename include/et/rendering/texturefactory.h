@@ -51,6 +51,8 @@ namespace et
 		ObjectLoader::Pointer objectLoader();
 		
 		const StringList& supportedTextureExtensions() const;
+
+		std::string resolveTextureName(const std::string&) const;
 		
 		ET_DECLARE_EVENT1(textureDidStartLoading, Texture::Pointer)
 		ET_DECLARE_EVENT1(textureDidLoad, Texture::Pointer)

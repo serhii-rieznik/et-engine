@@ -22,6 +22,7 @@ namespace et
 	public:
 		enum Options
 		{
+			Option_JustLoad = 0x00,
 			Option_SupportMeshes = 0x01,
 			Option_SwapYwithZ = 0x02,
 			Option_ReverseTriangles = 0x04,
