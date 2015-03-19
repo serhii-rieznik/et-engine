@@ -216,8 +216,7 @@ void Framebuffer::attachTexture(Texture::Pointer rt, uint32_t target)
 	}
 	else if (rt->target() == TextureTarget::Texture_2D_Array)
 	{
-		glFramebufferTexture(GL_FRAMEBUFFER, target, rt->apiHandle(), 0);
-
+		glFramebufferTexture(GL_FRAMEBUFFER, target, static_cast<GLuint>(rt->apiHandle()), 0);
 		checkOpenGLError("glFramebufferTexture(...) - %s", name().c_str());
 	}
 }
@@ -311,12 +310,16 @@ void Framebuffer::setCurrentLayer(uint32_t layerIndex)
 	uint32_t targetIndex = 0;
 	for (const auto& t : _renderTargets)
 	{
-		glFramebufferTextureLayer(GL_FRAMEBUFFER, drawBufferTarget(targetIndex), t->apiHandle(), 0, layerIndex);
+		glFramebufferTextureLayer(GL_FRAMEBUFFER, drawBufferTarget(targetIndex),
+			static_cast<GLuint>(t->apiHandle()), 0, layerIndex);
 		++targetIndex;
 	}
 
 	if (_depthBuffer.valid())
-		glFramebufferTextureLayer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, _depthBuffer->apiHandle(), 0, layerIndex);
+	{
+		glFramebufferTextureLayer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, 
+			static_cast<GLuint>(_depthBuffer->apiHandle()), 0, layerIndex);
+	}
 }
 
 void Framebuffer::createOrUpdateColorRenderbuffer()

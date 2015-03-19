@@ -101,7 +101,7 @@ namespace et
 		friend class RenderContextNotifier;
 		friend class ApplicationNotifier;
 
-		ET_DECLARE_PIMPL(RenderContext, 128)
+		ET_DECLARE_PIMPL(RenderContext, 256)
 
 		RenderContextParameters _params;
 

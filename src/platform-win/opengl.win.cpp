@@ -21332,12 +21332,12 @@ void __GLeeExtList_add(ExtensionList *extList, const char * extName)
 	int n = i + 1;
 	if (i == 0)
 	{
-		extList->lengths = (size_t*)malloc(sizeof(int));
+		extList->lengths = (size_t*)malloc(sizeof(size_t));
 		extList->names = (char **)malloc(sizeof(char *));
 	}
 	else
 	{
-		extList->lengths = (size_t*)realloc((void *)extList->lengths, n*sizeof(int));
+		extList->lengths = (size_t*)realloc((void *)extList->lengths, n*sizeof(size_t));
 		extList->names = (char **)realloc((void *)extList->names, n*sizeof(char *));
 	}
 	extList->names[i] = strdup(extName);

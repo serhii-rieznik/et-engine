@@ -106,7 +106,7 @@ void Thread::resume()
 
 void Thread::stop()
 {
-	if (_private->running.atomicCounterValue() != 0)
+	if (running())
 	{
 		_private->running.release();
 		resume();
@@ -144,7 +144,8 @@ ThreadId Thread::id() const
 
 void Thread::waitForTermination()
 {
-	WaitForSingleObject(_private->thread, INFINITE);
+	if (_private->thread && running())
+		WaitForSingleObject(_private->thread, INFINITE);
 }
 
 #endif // ET_PLATFORM_WIN

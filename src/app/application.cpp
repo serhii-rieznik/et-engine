@@ -50,7 +50,10 @@ IApplicationDelegate* Application::delegate()
 	{
 		_delegate = initApplicationDelegate();
 		ET_ASSERT(_delegate);
+
+#	if !defined(ET_EMBEDDED_APPLICATION)
 		_identifier = _delegate->applicationIdentifier();
+#	endif
 	}
     
 	return _delegate;
@@ -306,6 +309,17 @@ void Application::setShouldSilentPathResolverErrors(bool e)
 {
 	_standardPathResolver.setSilentErrors(e);
 }
+
+const ApplicationIdentifier& Application::identifier() const
+{
+#if defined(ET_EMBEDDED_APPLICATION)
+	static const ApplicationIdentifier dummy;
+	return dummy;
+#else
+	return _identifier;
+#endif
+}
+
 
 /*
  * Service

@@ -36,12 +36,14 @@ public:
 	~RenderContextPrivate();
 
 public:
-	bool failed;
-	HINSTANCE hInstance;
-	WNDCLASSEXW wndClass;
+	bool failed = true;
 
+#if !defined(ET_EMBEDDED_APPLICATION)
+	HINSTANCE hInstance = nullptr;
+	WNDCLASSEXW wndClass;
 	RenderContextData primaryContext;
 	RenderContextData dummyContext;
+#endif
 
 	RenderContext* renderContext() 
 		{ return _renderContext; }
@@ -60,13 +62,13 @@ private:
 	int choosePixelFormat(HDC, PIXELFORMATDESCRIPTOR*);
 
 private:
-	RenderContext* _renderContext;
-	int _mouseX;
-	int _mouseY;
+	RenderContext* _renderContext = nullptr;
+	int _mouseX = -1;
+	int _mouseY = -1;
 };
 
-RenderContext::RenderContext(const RenderContextParameters& inParams, Application* app) : _params(inParams), _app(app),
-	_programFactory(0), _textureFactory(0), _framebufferFactory(0), _vertexBufferFactory(0), _renderer(0)
+RenderContext::RenderContext(const RenderContextParameters& inParams, Application* app) : 
+	_params(inParams), _app(app)
 {
 	ET_PIMPL_INIT(RenderContext, this, _params, app->parameters())
 
@@ -104,9 +106,11 @@ RenderContext::~RenderContext()
 
 void RenderContext::init()
 {
-	RECT r = { };
+#if !defined(ET_EMBEDDED_APPLICATION)
+	RECT r = {};
 	GetClientRect(_private->primaryContext.hWnd, &r);
 	_renderState.setMainViewportSize(vec2i(r.right - r.left, r.bottom - r.top));
+#endif
 
 	_fpsTimer.expired.connect(this, &RenderContext::onFPSTimerExpired);
 	_fpsTimer.start(mainTimerPool().ptr(), 1.0f, -1);
@@ -119,20 +123,29 @@ bool RenderContext::valid()
 
 size_t RenderContext::renderingContextHandle()
 {
+#if defined(ET_EMBEDDED_APPLICATION)
+	return 0;
+#else
 	return reinterpret_cast<size_t>(_private->primaryContext.hWnd);
+#endif
 }
 
 void RenderContext::beginRender()
 {
 	OpenGLCounters::reset();
+
+#if !defined(ET_EMBEDDED_APPLICATION)
 	_renderState.bindDefaultFramebuffer();
 	checkOpenGLError("RenderContext::beginRender");
+#endif
 }
 
 void RenderContext::endRender()
 {
+#if !defined(ET_EMBEDDED_APPLICATION)
 	checkOpenGLError("RenderContext::endRender");
 	SwapBuffers(_private->primaryContext.hDC);
+#endif
 
 	++_info.averageFramePerSecond;
 	_info.averageDIPPerSecond += OpenGLCounters::DIPCounter;
@@ -146,18 +159,22 @@ void RenderContext::endRender()
  */
 
 RenderContextPrivate::RenderContextPrivate(RenderContext* rc, RenderContextParameters& params, 
-	const ApplicationParameters& appParams) : failed(true), hInstance(nullptr), _renderContext(rc), 
-	_mouseX(-1), _mouseY(-1)
+	const ApplicationParameters& appParams) : _renderContext(rc)
 {
+#if !defined(ET_EMBEDDED_APPLICATION)
 	if (initWindow(params, appParams))
 	{
 		if (initOpenGL(params))
 			failed = false;
 	}
+#else
+	failed = false;
+#endif
 }
 
 HWND RenderContextPrivate::createWindow(size_t style, WindowSize windowSize, vec2i& size)
 { 
+#if !defined(ET_EMBEDDED_APPLICATION)
 	UINT windowStyle = WS_POPUP | WS_VISIBLE | WS_SYSMENU | WS_MINIMIZEBOX;
 
 	if (windowSize != WindowSize::Fullscreen)
@@ -215,10 +232,16 @@ HWND RenderContextPrivate::createWindow(size_t style, WindowSize windowSize, vec
 	size = vec2i(windowRect.right, windowRect.bottom);
 
 	return window;
+#else
+
+	return nullptr;
+
+#endif
 }
 
 bool RenderContextPrivate::initWindow(RenderContextParameters& params, const ApplicationParameters& appParams)
 {
+#if !defined(ET_EMBEDDED_APPLICATION)
 	hInstance = GetModuleHandle(0);
 
 	memset(&wndClass, 0, sizeof(wndClass));
@@ -248,6 +271,7 @@ bool RenderContextPrivate::initWindow(RenderContextParameters& params, const App
 		EnumDisplaySettings(0, ENUM_CURRENT_SETTINGS, &dm);
 		ChangeDisplaySettings(&dm, CDS_FULLSCREEN);
 	}
+#endif
 
 	return true;
 }
@@ -256,6 +280,7 @@ RenderContextData RenderContextPrivate::createDummyContext(HWND hWnd)
 {
 	RenderContextData result;
 
+#if !defined(ET_EMBEDDED_APPLICATION)
 	result.hWnd = hWnd;
 	result.hDC = GetDC(result.hWnd);
 	if (result.hDC == 0) return result;
@@ -284,11 +309,14 @@ RenderContextData RenderContextPrivate::createDummyContext(HWND hWnd)
 		return result.release();
 
 	result.initialized = true;
+#endif
+
 	return result;
 }
 
 bool RenderContextPrivate::initOpenGL(const RenderContextParameters& params)
 {
+#if !defined(ET_EMBEDDED_APPLICATION)
 	vec2i dummySize;
 	HWND dummyWindow = createWindow(WindowStyle_Borderless, WindowSize::Predefined, dummySize);
 	if (dummyWindow == nullptr) return false;
@@ -427,22 +455,27 @@ bool RenderContextPrivate::initOpenGL(const RenderContextParameters& params)
 			return 0;
 		}
 	}
+#endif
 
 	GLeeInit();
-
 	checkOpenGLError("RenderContextPrivate::initOpenGL");
 
-	if (wglSwapIntervalEXT) 
+#if !defined(ET_EMBEDDED_APPLICATION)
+	if (wglSwapIntervalEXT)
 	{
 		wglSwapIntervalEXT(static_cast<int>(params.swapInterval));
 		checkOpenGLError("RenderContextPrivate::initOpenGL -> wglSwapIntervalEXT");
 	}
+#endif
 
 	return true;
 }
 
 int RenderContextPrivate::chooseMSAAPixelFormat(HDC aDC, PIXELFORMATDESCRIPTOR*)
 {
+	int returnedPixelFormat = 0;
+
+#if !defined(ET_EMBEDDED_APPLICATION)
 	auto local_wglChoosePixelFormatARB = (GLEEPFNWGLCHOOSEPIXELFORMATARBPROC)(wglGetProcAddress("wglChoosePixelFormatARB"));
 
 	int attributes[] =
@@ -462,7 +495,6 @@ int RenderContextPrivate::chooseMSAAPixelFormat(HDC aDC, PIXELFORMATDESCRIPTOR*)
 	int maxSamples = 0;
 	glGetIntegerv(GL_MAX_SAMPLES, &maxSamples);
 
-	int returnedPixelFormat = 0;
 	UINT numFormats = 0;
 	BOOL bStatus = FALSE;
 
@@ -472,6 +504,7 @@ int RenderContextPrivate::chooseMSAAPixelFormat(HDC aDC, PIXELFORMATDESCRIPTOR*)
 		bStatus = local_wglChoosePixelFormatARB(aDC, attributes, 0, 1, &returnedPixelFormat, &numFormats);
 		if (bStatus && numFormats) break;
 	}
+#endif
 
 	return returnedPixelFormat;
 }
@@ -488,8 +521,10 @@ int RenderContextPrivate::choosePixelFormat(HDC aDC, PIXELFORMATDESCRIPTOR* pfd)
 
 RenderContextPrivate::~RenderContextPrivate()
 {
+#if !defined(ET_EMBEDDED_APPLICATION)
 	primaryContext.release();
 	UnregisterClassW(wndClass.lpszClassName, hInstance);
+#endif
 }
 
 bool RenderContextPrivate::shouldPostMovementMessage(int x, int y)

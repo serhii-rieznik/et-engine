@@ -84,12 +84,17 @@ void Application::platformInit()
 	
 	SetUnhandledExceptionFilter(unhandledExceptionFilter);
 	
+#if !defined(ET_EMBEDDED_APPLICATION)
 	_env.updateDocumentsFolder(_identifier);
+#endif
 }
 
 void Application::platformFinalize()
 {
+	sharedObjectFactory().deleteObject(_delegate);
 	sharedObjectFactory().deleteObject(_renderContext);
+
+	_delegate = nullptr;
 	_renderContext = nullptr;
 }
 
@@ -126,6 +131,7 @@ int Application::platformRun(int, char*[])
 		enterRunLoop();
 		_delegate->applicationWillResizeContext(_renderContext->sizei());
 
+#	if !defined(ET_EMBEDDED_APPLICATION)
 		MSG msg = { };
 		while (_running)
 		{
@@ -139,23 +145,31 @@ int Application::platformRun(int, char*[])
 				performUpdateAndRender();
 			}
 		}
+#	endif
 	}
 
+#if defined(ET_EMBEDDED_APPLICATION)
+
+	return 0;
+
+#else
+
 	terminated();
-
-	sharedObjectFactory().deleteObject(_delegate);
-	sharedObjectFactory().deleteObject(_renderContext);
-
-	_delegate = nullptr;
-	_renderContext = nullptr;
-
+	platformFinalize();
 	return _exitCode;
+
+#endif
 }
 
 void Application::quit(int exitCode)
 {
 	_running = false;
 	_exitCode = exitCode;
+
+#if (ET_EMBEDDED_APPLICATION)
+	terminated();
+	platformFinalize();
+#endif
 }
 
 void Application::alert(const std::string& title, const std::string& message, AlertType type)

@@ -66,8 +66,10 @@ namespace et
 	public:
 		virtual ~IApplicationDelegate() { }
 
+#	if !defined(ET_EMBEDDED_APPLICATION)
 		virtual et::ApplicationIdentifier applicationIdentifier() const = 0;
-		
+#	endif
+
 		virtual void setApplicationParameters(et::ApplicationParameters&) { }
 		virtual void setRenderContextParameters(et::RenderContextParameters&) { }
 		

@@ -63,8 +63,13 @@ ProgramFactory::ProgramFactory(RenderContext* rc) : APIObjectFactory(rc)
 	}
 	
 #else
-	_commonHeader =
-		"#version " + OpenGLCapabilities::instance().glslVersionShortString() + "\n"
+	_commonHeader = 
+		"#version " + OpenGLCapabilities::instance().glslVersionShortString() + "\n";
+
+	if (OpenGLCapabilities::instance().glslVersionShortString() < "130")
+		_commonHeader += "#extension GL_EXT_gpu_shader4 : enable\n";
+
+	_commonHeader +=
 		"#define etLowp\n"
 		"#define etMediump\n"
 		"#define etHighp\n";
@@ -416,8 +421,9 @@ const std::string openGl2VertexHeader = R"(
 #define etShadow2DProj		shadow2DProj
 #define etTexture2DProj		texture2DProj
 #define etTexture2DLod		texture2DLod
+#define etTexture2DArray	texture2DArray
 #define etTextureCubeLod	textureCubeLod
-#define etTextureRect		textureRect
+#define etTextureRect		texture2DRect
 #define etVertexIn			attribute
 #define etVertexOut			varying
 )";
@@ -427,6 +433,7 @@ const std::string openGl3VertexHeader = R"(
 #define etTexture2D			texture
 #define etTextureCube		texture
 #define etTextureRect		texture
+#define etTexture2DArray	texture
 #define etShadow2DProj		textureProj
 #define etTexture2DProj		textureProj
 #define etTexture2DLod		textureLod
@@ -442,8 +449,9 @@ const std::string openGl2FragmentHeader = R"(
 #define etShadow2DProj		shadow2DProj
 #define etTexture2DProj		texture2DProj
 #define etTexture2DLod		textureLod
+#define etTexture2DArray	texture2DArray
 #define etTextureCubeLod	textureCubeLod
-#define etTextureRect		textureRect
+#define etTextureRect		texture2DRect
 #define etFragmentIn		varying
 #define etFragmentOut		gl_FragColor
 #define etFragmentOut0		gl_FragData[0]
@@ -461,6 +469,7 @@ const std::string openGl3FragmentHeader = R"(
 #define etTexture2D			texture
 #define etTextureCube		texture
 #define etTextureRect		texture
+#define etTexture2DArray	texture
 #define etShadow2DProj		textureProj
 #define etTexture2DProj		textureProj
 #define etTexture2DLod		textureLod

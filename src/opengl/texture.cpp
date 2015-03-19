@@ -150,16 +150,16 @@ void Texture::compareRefToTexture(RenderContext*, bool, int32_t)
 void Texture::generateTexture(RenderContext*)
 {
 #if !defined(ET_CONSOLE_APPLICATION)
+	uint32_t texture = static_cast<uint32_t>(apiHandle());
+	bool validTexture = glIsTexture(texture) != 0;
+	checkOpenGLError("glIsTexture - %s", name().c_str());
+
+	if (!validTexture)
 	{
-		uint32_t texture = static_cast<uint32_t>(apiHandle());
-		if (!glIsTexture(texture))
-		{
-			glGenTextures(1, &texture);
-			setAPIHandle(texture);
-		}
+		glGenTextures(1, &texture);
+		checkOpenGLError("glGenTextures - %s", name().c_str());
+		setAPIHandle(texture);
 	}
-	
-	checkOpenGLError("Texture::generateTexture - %s", name().c_str());
 #endif
 }
 
