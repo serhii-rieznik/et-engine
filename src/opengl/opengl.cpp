@@ -310,8 +310,19 @@ uint32_t et::textureTargetValue(TextureTarget value)
 	static const uint32_t valuesMap[TextureTarget_max] =
 	{
 		GL_TEXTURE_2D, // Texture_2D,
+		
+#	if defined(GL_TEXTURE_2D_ARRAY)
 		GL_TEXTURE_2D_ARRAY, // Texture_2D_Array,
+#	else
+		GL_TEXTURE_2D, // Texture_2D_Array,
+#	endif
+		
+#	if defined(GL_TEXTURE_RECTANGLE)
 		GL_TEXTURE_RECTANGLE, // Texture_2D_Rect,
+#	else
+		GL_TEXTURE_2D, // Texture_2D_Rect,
+#	endif
+		
 		GL_TEXTURE_CUBE_MAP, // Texture_Cube,
 	};
 	
@@ -867,6 +878,13 @@ void et::etTexImage2D(uint32_t target, int level, int internalformat, GLsizei wi
 #endif
 }
 
+#if (ET_OPENGLES)
+
+void et::etTexImage3D(uint32_t, int, int, GLsizei, GLsizei, GLsizei, int, uint32_t, uint32_t, const GLvoid*)
+	{ ET_FAIL("Call to texImage3D in ES environment"); }
+
+#else
+
 void et::etTexImage3D(uint32_t target, int level, int internalformat, GLsizei width, GLsizei height,
 	GLsizei depth, int border, uint32_t format, uint32_t type, const GLvoid* pixels)
 {
@@ -882,6 +900,8 @@ void et::etTexImage3D(uint32_t target, int level, int internalformat, GLsizei wi
 #	endif
 #endif
 }
+
+#endif
 
 #if (ET_PLATFORM_WIN)
 #	define ET_VALIDATE_GLFUNC_EXT(F) if (F == nullptr) F = F##EXT;

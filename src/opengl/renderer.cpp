@@ -42,6 +42,15 @@ Renderer::Renderer(RenderContext* rc) :
 	_fullscreenQuadVao = rc->vertexBufferFactory().createVertexArrayObject("__et__internal__fullscreen_vao__",
 		vb, BufferDrawType::Static, ib, BufferDrawType::Static);
 
+#if (ET_OPENGLES)
+	const std::string textureTypeDefines[TextureTarget_max] =
+	{
+		"#define TEXTURE_2D", // Texture_2D,
+		"#define TEXTURE_2D", // Texture_2D_Array,
+		"#define TEXTURE_2D", // Texture_Rectangle,
+		"#define TEXTURE_CUBE", // Texture_Cube,
+	};
+#else
 	const std::string textureTypeDefines[TextureTarget_max] =  
 	{
 		"#define TEXTURE_2D", // Texture_2D,
@@ -49,7 +58,7 @@ Renderer::Renderer(RenderContext* rc) :
 		"#define TEXTURE_RECTANGLE", // Texture_Rectangle,
 		"#define TEXTURE_CUBE", // Texture_Cube,
 	};
-
+#endif
 	StringList currentDefines(1);
 	for (int i = 0; i < TextureTarget_max; ++i)
 	{

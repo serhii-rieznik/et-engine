@@ -10,10 +10,6 @@
 
 using namespace et;
 
-const uint32_t VertexArrayId_1 = ET_COMPOSE_UINT32('V', 'A', 'V', '1');
-const uint32_t VertexArrayId_2 = ET_COMPOSE_UINT32('V', 'A', 'V', '2');
-const uint32_t VertexArrayCurrentId = VertexArrayId_2;
-
 VertexArray::VertexArray() : tag(0), _decl(true), _size(0),
 	_smoothing(VertexAttributeUsage::Smoothing, VertexAttributeType::Int, 0) { }
 

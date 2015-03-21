@@ -17,9 +17,9 @@ namespace et
 	class OrientationManagerPrivate : public EventReceiver
 	{
 	private:
-		static mat4 transformFromCMRotationMatrix(const CMRotationMatrix& m)
+		static mat3 transformFromCMRotationMatrix(const CMRotationMatrix& m)
 		{
-			mat4 mout = identityMatrix;
+			mat3 mout = identityMatrix3;
 			mout[0][0] = static_cast<float>(m.m11);
 			mout[0][1] = static_cast<float>(m.m21);
 			mout[0][2] = static_cast<float>(m.m31);
