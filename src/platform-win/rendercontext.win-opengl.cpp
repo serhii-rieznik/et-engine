@@ -225,6 +225,7 @@ HWND RenderContextPrivate::createWindow(size_t style, WindowSize windowSize, vec
 	}
 
 	auto title = utf8ToUnicode(application().identifier().applicationName);
+
 	HWND window = CreateWindowExW(WS_EX_APPWINDOW, wndClass.lpszClassName, title.c_str(), windowStyle, 
 		windowRect.left, windowRect.top, actualSize.x, actualSize.y, 0, 0, hInstance, 0);
 
@@ -259,7 +260,11 @@ bool RenderContextPrivate::initWindow(RenderContextParameters& params, const App
 	primaryContext.hWnd = createWindow(appParams.windowStyle, appParams.windowSize, params.contextSize);
 	ET_ASSERT(primaryContext.hWnd != nullptr);
 
+#if (ET_PLATFORM_WIN64)
 	SetWindowLongPtr(primaryContext.hWnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
+#else
+	SetWindowLong(primaryContext.hWnd, GWL_USERDATA, reinterpret_cast<LONG>(this));
+#endif
 
 	ShowWindow(primaryContext.hWnd, SW_SHOW);
 	SetForegroundWindow(primaryContext.hWnd);
@@ -319,7 +324,9 @@ bool RenderContextPrivate::initOpenGL(const RenderContextParameters& params)
 #if !defined(ET_EMBEDDED_APPLICATION)
 	vec2i dummySize;
 	HWND dummyWindow = createWindow(WindowStyle_Borderless, WindowSize::Predefined, dummySize);
-	if (dummyWindow == nullptr) return false;
+
+	if (dummyWindow == nullptr)
+		return false;
 
 	RenderContextData dummy = createDummyContext(dummyWindow);
 	if (!dummy.initialized)	return false;
@@ -622,12 +629,12 @@ void releaseMouse()
 LRESULT CALLBACK mainWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 #if ET_PLATFORM_WIN64
-	RenderContextPrivate* handler = (RenderContextPrivate*)GetWindowLong(hWnd, GWLP_USERDATA);
+	RenderContextPrivate* handler = (RenderContextPrivate*)GetWindowLongPtr(hWnd, GWLP_USERDATA);
 #else
 	RenderContextPrivate* handler = (RenderContextPrivate*)GetWindowLong(hWnd, GWL_USERDATA);
 #endif
 
-	if (handler == 0)
+	if (handler == nullptr)
 		return DefWindowProcW(hWnd, uMsg, wParam, lParam);
 
 	vec2 viewportSize = handler->renderContext()->size();
