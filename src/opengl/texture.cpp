@@ -166,9 +166,13 @@ void Texture::generateTexture(RenderContext*)
 void Texture::buildData(const char* aDataPtr, size_t aDataSize)
 {
 #if !defined(ET_CONSOLE_APPLICATION)
-	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+	glPixelStorei(GL_UNPACK_ALIGNMENT, _desc->alignment);
 	checkOpenGLError("glPixelStorei");
-	
+
+	glPixelStorei(GL_UNPACK_ROW_LENGTH, _desc->rowSize);
+	checkOpenGLError("glPixelStorei");
+
 	auto targetValue = textureTargetValue(_desc->target);
 	auto internalFormatValue = textureFormatValue(_desc->internalformat);
 	auto formatValue = textureFormatValue(_desc->format);
@@ -323,9 +327,12 @@ void Texture::updatePartialDataDirectly(RenderContext* rc, const vec2i& offset,
 	
     rc->renderState().bindTexture(defaultBindingUnit, static_cast<uint32_t>(apiHandle()), _desc->target);
 	
-	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+	glPixelStorei(GL_UNPACK_ALIGNMENT, _desc->alignment);
 	checkOpenGLError("glPixelStorei");
-	
+
+	glPixelStorei(GL_UNPACK_ROW_LENGTH, _desc->rowSize);
+	checkOpenGLError("glPixelStorei");
+
 	auto targetValue = textureTargetValue(_desc->target);
 	auto typeValue = dataTypeValue(_desc->type);
 	auto formatValue = textureFormatValue(_desc->format);

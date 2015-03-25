@@ -94,7 +94,9 @@ namespace et
 		uint32_t channels = 0;
 		uint32_t mipMapCount = 0;
 		uint32_t layersCount = 0;
-		
+		uint32_t alignment = 1;
+		uint32_t rowSize = 0;
+
 		size_t minimalDataSize = 0;
 		
 		TextureTarget target = TextureTarget::Texture_2D;

@@ -224,6 +224,8 @@ namespace et
 		UnsignedShort_4444,
 		UnsignedShort_5551,
 		UnsignedShort_565,
+
+		UnsignedInt_8888_Rev,
 		
 		max,
 	};
