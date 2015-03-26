@@ -36,9 +36,6 @@ Application::Application()
 Application::~Application()
 {
 	_running = false;
-
-	_backgroundThread.stop();
-	_backgroundThread.waitForTermination();
 	
 	platformDeactivate();
 	platformFinalize();

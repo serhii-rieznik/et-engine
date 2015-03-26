@@ -332,7 +332,6 @@ bool RenderContextPrivate::initOpenGL(const RenderContextParameters& params)
 	if (!dummy.initialized)	return false;
 
 	auto local_wglCreateContextAttribsARB = (GLEEPFNWGLCREATECONTEXTATTRIBSARBPROC)wglGetProcAddress("wglCreateContextAttribsARB");
-	auto local_wglMakeContextCurrentARB = (GLEEPFNWGLMAKECONTEXTCURRENTARBPROC)wglGetProcAddress("wglMakeContextCurrentARB");
 
 	PIXELFORMATDESCRIPTOR pfd = { };
 	pfd.nSize = sizeof(pfd);
@@ -456,7 +455,7 @@ bool RenderContextPrivate::initOpenGL(const RenderContextParameters& params)
 			}
 		}
 
-		if (!local_wglMakeContextCurrentARB(primaryContext.hDC, primaryContext.hDC, primaryContext.hGLRC))
+		if (!wglMakeCurrent(primaryContext.hDC, primaryContext.hGLRC))
 		{
 			primaryContext.release();
 			return 0;

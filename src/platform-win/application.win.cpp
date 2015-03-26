@@ -91,6 +91,9 @@ void Application::platformInit()
 
 void Application::platformFinalize()
 {
+	_backgroundThread.stop();
+	_backgroundThread.waitForTermination();
+
 	sharedObjectFactory().deleteObject(_delegate);
 	sharedObjectFactory().deleteObject(_renderContext);
 
