@@ -152,6 +152,13 @@ namespace et
 			}
 		}
 
+		void addMultiplied(const vector3<T>& m, T a)
+		{
+			x = a * m.x + x;
+			y = a * m.y + y;
+			z = a * m.z + z;
+		}
+
 		bool operator == (const vector3<T>& r) const
 			{ return (x == r.x) && (y == r.y) && (z == r.z); }
 		

@@ -171,6 +171,14 @@ namespace et
 
 		bool operator != (const vector4& r) const
 			{ return (x != r.x) || (y != r.y) || (z != r.z) || (w != r.w); }
+
+		void addMultiplied(const vector4<T>& m, T a)
+		{
+			x = a * m.x + x;
+			y = a * m.y + y;
+			z = a * m.z + z;
+			w = a * m.w + w;
+		}
 	};
 
 	template <typename T>
