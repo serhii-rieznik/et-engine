@@ -159,6 +159,13 @@ namespace et
 			z = a * m.z + z;
 		}
 
+		void clear()
+		{
+			x = 0;
+			y = 0;
+			z = 0;
+		}
+
 		bool operator == (const vector3<T>& r) const
 			{ return (x == r.x) && (y == r.y) && (z == r.z); }
 		
