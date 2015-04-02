@@ -20,8 +20,11 @@ namespace et
 			T c[3];
 		};
 
-		vector3() :
-			x(static_cast<T>(0)), y(static_cast<T>(0)), z(static_cast<T>(0)) { }
+		vector3()
+#if (!ET_DISABLE_VECTOR_INITIALIZATION)
+		: x(0), y(0), z(0)
+#endif	
+		{ }
 		
 		vector3(const vector3& m) :
 			x(m.x), y(m.y), z(m.z) { }

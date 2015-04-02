@@ -43,8 +43,11 @@ namespace et
 		};
 		
 	public:
-		vector4() :
-			x(0), y(0), z(0), w(0) { }
+		vector4() 
+#if (!ET_DISABLE_VECTOR_INITIALIZATION)
+		: x(0), y(0), z(0), w(0)
+#endif
+		{ }
 
 		vector4(const vector4& c) :
 			x(c.x), y(c.y), z(c.z), w(c.w) { }

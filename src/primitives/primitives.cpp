@@ -167,13 +167,7 @@ void primitives::createTorus(VertexArray::Pointer data, float centralRadius, flo
 			}
 
 			if (hasNorm)
-			{
-				vec3 n;
-				n.x = std::cos(phi) * std::cos(theta);
-				n.y = std::sin(theta);
-				n.z = std::sin(phi) * std::cos(theta);
-				norm[counter] = normalize(n);
-			}
+				norm[counter] = fromSpherical(theta, phi);
 
 			if (hasTex)
 			{
