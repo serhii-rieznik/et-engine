@@ -21,10 +21,10 @@ namespace et
 		};
 
 		vector3()
-#if (!ET_DISABLE_VECTOR_INITIALIZATION)
-		: x(T(0)), y(T(0)), z(T(0))
-#endif	
-		{ }
+#	if !defined(ET_DISABLE_VECTOR_INITIALIZATION)
+			: x(T(0)), y(T(0)), z(T(0))
+#	endif
+			{ }
 		
 		vector3(const vector3& m) :
 			x(m.x), y(m.y), z(m.z) { }

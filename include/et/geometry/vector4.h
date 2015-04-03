@@ -44,10 +44,10 @@ namespace et
 		
 	public:
 		vector4() 
-#if (!ET_DISABLE_VECTOR_INITIALIZATION)
-		: x(0), y(0), z(0), w(0)
-#endif
-		{ }
+#	if !defined(ET_DISABLE_VECTOR_INITIALIZATION)
+			: x(T(0)), y(T(0)), z(T(0)), w(T(0))
+#	endif
+			{ }
 
 		vector4(const vector4& c) :
 			x(c.x), y(c.y), z(c.z), w(c.w) { }
