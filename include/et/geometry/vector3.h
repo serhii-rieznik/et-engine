@@ -22,7 +22,7 @@ namespace et
 
 		vector3()
 #if (!ET_DISABLE_VECTOR_INITIALIZATION)
-		: x(0), y(0), z(0)
+		: x(T(0)), y(T(0)), z(T(0))
 #endif	
 		{ }
 		
