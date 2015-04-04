@@ -48,11 +48,16 @@ namespace et
 			return result;
 		}
 		
+		vector3<T> interpolatedPosition(const vector3<T>& bc) const
+		{
+			return v1() * bc.x + v2() * bc.y + v3() * bc.z;
+		}
+		
 		vector3<T> interpolatedNormal(const vector3<T>& bc) const
 		{
 			return _n1 * bc.x + _n2 * bc.y + _n3 * bc.z;
 		}
-		
+
 	private:
 		
 		void fillAdditionalSupportData()

@@ -772,14 +772,15 @@ void OBJLoader::processLoadedData()
 			}
 		}
 		
-		_meshes.emplace_back(group->name, startIndex, index - startIndex, m, center);
+		_meshes.emplace_back(group->name, startIndex & 0xffffffff,
+			(index - startIndex) & 0xffffffff, m, center);
 	}
 	
 	if (!hasNormals)
 		primitives::calculateNormals(_vertexData, _indices, 0, _indices->primitivesCount());
 
 	if (hasTexCoords && ((_loadOptions & Option_CalculateTangents) == Option_CalculateTangents))
-		primitives::calculateTangents(_vertexData, _indices, 0, _indices->primitivesCount());
+		primitives::calculateTangents(_vertexData, _indices, 0, _indices->primitivesCount() & 0xffffffff);
 }
 
 s3d::ElementContainer::Pointer OBJLoader::generateVertexBuffers()
