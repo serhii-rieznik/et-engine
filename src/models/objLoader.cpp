@@ -728,7 +728,7 @@ void OBJLoader::processLoadedData()
 	{
 		size_t startIndex = index;
 		
-		vec3 center;
+		vec3 center(0.0f);
 		
 		if (_loadOptions & Option_CalculateTransforms)
 		{

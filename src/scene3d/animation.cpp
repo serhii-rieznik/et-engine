@@ -103,8 +103,8 @@ void Animation::transformation(float time, vec3& t, quaternion& o, vec3& s) cons
 
 mat4 Animation::transformation(float time) const
 {
-	vec3 t = { };
-	vec3 s = { };
+	vec3 t(0.0f);
+	vec3 s(0.0f);
 	quaternion o;
 
 	transformation(time, t, o, s);
