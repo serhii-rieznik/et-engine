@@ -138,7 +138,13 @@ namespace et
 		
 		bool operator != (const matrix3<T>& m) const
 			{ return (mat[0] != m.mat[0]) || (mat[1] != m.mat[1]) || (mat[2] != m.mat[2]); }
-		
+
+		void clear()
+		{
+			mat[0].clear();
+			mat[1].clear();
+			mat[2].clear();
+		}
 	};
 
 }

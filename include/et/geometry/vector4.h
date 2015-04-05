@@ -182,6 +182,14 @@ namespace et
 			z = a * m.z + z;
 			w = a * m.w + w;
 		}
+
+		void clear()
+		{
+			x = 0;
+			y = 0;
+			z = 0;
+			w = 0;
+		}
 	};
 
 	template <typename T>
