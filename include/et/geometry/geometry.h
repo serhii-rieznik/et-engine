@@ -266,7 +266,7 @@ namespace et
 	template <typename T>
 	inline matrix4<T> translationMatrix(T x, T y, T z)
 	{
-		matrix4<T> M;
+		matrix4<T> M(T(1));
 		M[0][0] = M[1][1] = M[2][2] = static_cast<T>(1);
 		M[3] = vector4<T>(x, y, z, static_cast<T>(1));
 		return M;
@@ -275,7 +275,7 @@ namespace et
 	template <typename T>
 	inline matrix4<T> translationScaleMatrix(T tx, T ty, T tz, T sx, T sy, T sz)
 	{
-		matrix4<T> M;
+		matrix4<T> M(T(1));
 		M[0][0] = sx;
 		M[1][1] = sy;
 		M[2][2] = sz;
@@ -286,7 +286,7 @@ namespace et
 	template <typename T>
 	inline matrix4<T> scaleMatrix(T x, T y, T z)
 	{
-		matrix4<T> M;
+		matrix4<T> M(T(1));
 		M[0][0] = x;
 		M[1][1] = y;
 		M[2][2] = z;
@@ -297,7 +297,7 @@ namespace et
 	template <typename T>
 	inline matrix4<T> rotationYXZMatrix(T x, T y, T z)
 	{
-		matrix4<T> m(static_cast<T>(1));
+		matrix4<T> m(T(1));
 
 		float sx = std::sin(x);
 		float cx = std::cos(x);
@@ -316,7 +316,7 @@ namespace et
 	template <typename T>
 	inline matrix4<T> translationRotationYXZMatrix(T tx, T ty, T tz, T rx, T ry, T rz)
 	{
-		matrix4<T> m;
+		matrix4<T> m(T(1));
 
 		float sx = std::sin(rx);
 		float cx = std::cos(rx);
@@ -337,7 +337,7 @@ namespace et
 	template <typename T>
 	inline matrix4<T> rotationScaleMatrix(T rx, T ry, T rz, T scx, T scy, T scz)
 	{
-		matrix4<T> m;
+		matrix4<T> m(T(1));
 
 		float sx = std::sin(rx);
 		float cx = std::cos(rx);
@@ -365,7 +365,7 @@ namespace et
 	template <typename T>
 	inline matrix4<T> transformYXZMatrix(T tx, T ty, T tz, T rx, T ry, T rz)
 	{
-		matrix4<T> m;
+		matrix4<T> m(T(1));
 
 		float sx = std::sin(rx);
 		float cx = std::cos(rx);
@@ -394,7 +394,7 @@ namespace et
 		vector3<T> side2(csTheta * cos(phi), sin(theta), csTheta * sin(phi));
 		vector3<T> side1 = up.cross(side2);
 		
-		matrix4<T> result;
+		matrix4<T> result(T(1));
 		result[0].xyz() = vector3<T>(side1.x, up.x, side2.x);
 		result[1].xyz() = vector3<T>(side1.y, up.y, side2.y);
 		result[2].xyz() = vector3<T>(side1.z, up.z, side2.z);

@@ -340,6 +340,14 @@ namespace et
 			RowType r3 = RowType(mat[2].xyz() * p, mat[2].w);
 			return matrix4(r1, r2, r3, mat[3]);
 		}
+
+		void clear()
+		{
+			mat[0].clear();
+			mat[1].clear();
+			mat[2].clear();
+			mat[3].clear();
+		}
 	};
 }
 

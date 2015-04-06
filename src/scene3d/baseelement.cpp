@@ -13,7 +13,8 @@ using namespace et;
 using namespace et::s3d;
 
 BaseElement::BaseElement(const std::string& name, BaseElement* parent) :
-	ElementHierarchy(parent),  tag(0), _animationTransform(identityMatrix)
+	ElementHierarchy(parent),  tag(0), _animationTransform(1.0f), 
+	_cachedLocalTransform(1.0f), _cachedFinalTransform(1.0f), _cachedFinalInverseTransform(1.0f)
 {
 	setName(name);
 	
