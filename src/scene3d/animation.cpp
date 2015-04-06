@@ -11,9 +11,6 @@
 using namespace et;
 using namespace et::s3d;
 
-const int animationVersion_1 = 0x0001;
-const int animationCurrentVersion = animationVersion_1;
-
 Animation::Animation()
 {
 	

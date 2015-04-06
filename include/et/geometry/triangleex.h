@@ -50,7 +50,7 @@ namespace et
 		
 		vector3<T> interpolatedPosition(const vector3<T>& bc) const
 		{
-			return v1() * bc.x + v2() * bc.y + v3() * bc.z;
+			return Triangle<T>::v1() * bc.x + Triangle<T>::v2() * bc.y + Triangle<T>::v3() * bc.z;
 		}
 		
 		vector3<T> interpolatedNormal(const vector3<T>& bc) const

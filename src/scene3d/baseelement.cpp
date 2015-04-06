@@ -221,7 +221,10 @@ void BaseElement::deserializeGeneralParameters(Dictionary stream)
 
 	auto typeCode = stream.integerForKey(kElementTypeCode)->content;
 	if (typeCode != type())
-		log::warning("Deserialiaing element %s with invalid type code %llu, supposed to be: %llu", typeCode, uint64_t(type()));
+	{
+		log::warning("Deserializing element %s with invalid type code %llu, supposed to be: %llu",
+			name().c_str(), typeCode, uint64_t(type()));
+	}
 }
 
 void BaseElement::serializeChildren(Dictionary stream, const std::string& basePath)
