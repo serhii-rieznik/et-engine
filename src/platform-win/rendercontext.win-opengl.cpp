@@ -5,6 +5,7 @@
  *
  */
 
+#include <stack>
 #include <et/opengl/opengl.h>
 #include <et/opengl/openglcaps.h>
 #include <et/app/application.h>
@@ -35,20 +36,25 @@ public:
 	RenderContextPrivate(RenderContext* rc, RenderContextParameters& params, const ApplicationParameters& appParams);
 	~RenderContextPrivate();
 
+	void push();
+	bool activate();
+	bool pushAndActivate();
+	void pop();
+
 public:
 	bool failed = true;
 
-#if !defined(ET_EMBEDDED_APPLICATION)
 	HINSTANCE hInstance = nullptr;
 	WNDCLASSEXW wndClass;
 	RenderContextData primaryContext;
 	RenderContextData dummyContext;
-#endif
 
 	RenderContext* renderContext() 
 		{ return _renderContext; }
 
 	bool shouldPostMovementMessage(int x, int y);
+
+	std::stack<std::pair<HDC, HGLRC>> contextStack;
 
 private:
 	HWND createWindow(size_t, WindowSize, vec2i&);
@@ -72,6 +78,9 @@ RenderContext::RenderContext(const RenderContextParameters& inParams, Applicatio
 {
 	ET_PIMPL_INIT(RenderContext, this, _params, app->parameters())
 
+	if (app->parameters().shouldPreserveRenderContext)
+		pushAndActivateRenderingContext();
+
 	if (_private->failed)
 	{
 		ET_PIMPL_FINALIZE(RenderContext)
@@ -91,26 +100,36 @@ RenderContext::RenderContext(const RenderContextParameters& inParams, Applicatio
 		
 		updateScreenScale(_params.contextSize);
 	}
+
+	if (app->parameters().shouldPreserveRenderContext)
+		popRenderingContext();
 }
 
 RenderContext::~RenderContext()
 {
+	if (application().parameters().shouldPreserveRenderContext)
+		pushAndActivateRenderingContext();
+
 	_renderer.reset(nullptr);
 	_vertexBufferFactory.reset(nullptr);
 	_framebufferFactory.reset(nullptr);
 	_textureFactory.reset(nullptr);
 	_programFactory.reset(nullptr);
 
+	if (application().parameters().shouldPreserveRenderContext)
+		popRenderingContext();
+
 	ET_PIMPL_FINALIZE(RenderContext)
 }
 
 void RenderContext::init()
 {
-#if !defined(ET_EMBEDDED_APPLICATION)
-	RECT r = {};
-	GetClientRect(_private->primaryContext.hWnd, &r);
-	_renderState.setMainViewportSize(vec2i(r.right - r.left, r.bottom - r.top));
-#endif
+	if (application().parameters().shouldCreateContext)
+	{
+		RECT r = {};
+		GetClientRect(_private->primaryContext.hWnd, &r);
+		_renderState.setMainViewportSize(vec2i(r.right - r.left, r.bottom - r.top));
+	}
 
 	_fpsTimer.expired.connect(this, &RenderContext::onFPSTimerExpired);
 	_fpsTimer.start(mainTimerPool().ptr(), 1.0f, -1);
@@ -123,33 +142,57 @@ bool RenderContext::valid()
 
 size_t RenderContext::renderingContextHandle()
 {
-#if defined(ET_EMBEDDED_APPLICATION)
-	return 0;
-#else
 	return reinterpret_cast<size_t>(_private->primaryContext.hWnd);
-#endif
 }
 
 void RenderContext::beginRender()
 {
 	OpenGLCounters::reset();
 
-#if !defined(ET_EMBEDDED_APPLICATION)
-	_renderState.bindDefaultFramebuffer();
-	checkOpenGLError("RenderContext::beginRender");
-#endif
+	if (application().parameters().shouldPreserveRenderContext)
+		pushAndActivateRenderingContext();
+
+	if (application().parameters().shouldCreateContext)
+	{
+		_renderState.bindDefaultFramebuffer();
+		checkOpenGLError("RenderContext::beginRender");
+	}
 }
 
 void RenderContext::endRender()
 {
-#if !defined(ET_EMBEDDED_APPLICATION)
-	checkOpenGLError("RenderContext::endRender");
-	SwapBuffers(_private->primaryContext.hDC);
-#endif
+	if (application().parameters().shouldCreateContext)
+	{
+		checkOpenGLError("RenderContext::endRender");
+		SwapBuffers(_private->primaryContext.hDC);
+	}
 
 	++_info.averageFramePerSecond;
 	_info.averageDIPPerSecond += OpenGLCounters::DIPCounter;
 	_info.averagePolygonsPerSecond += OpenGLCounters::primitiveCounter;
+
+	if (application().parameters().shouldPreserveRenderContext)
+		popRenderingContext();
+}
+
+void RenderContext::pushRenderingContext()
+{
+	_private->push();
+}
+
+bool RenderContext::activateRenderingContext()
+{
+	return _private->activate();
+}
+
+bool RenderContext::pushAndActivateRenderingContext()
+{
+	return _private->pushAndActivate();
+}
+
+void RenderContext::popRenderingContext()
+{
+	_private->pop();
 }
 
 /*
@@ -161,21 +204,41 @@ void RenderContext::endRender()
 RenderContextPrivate::RenderContextPrivate(RenderContext* rc, RenderContextParameters& params, 
 	const ApplicationParameters& appParams) : _renderContext(rc)
 {
-#if !defined(ET_EMBEDDED_APPLICATION)
-	if (initWindow(params, appParams))
+	if (application().parameters().shouldPreserveRenderContext)
+		push();
+
+	if (application().parameters().shouldCreateContext)
 	{
-		if (initOpenGL(params))
-			failed = false;
+		if (initWindow(params, appParams))
+		{
+			if (initOpenGL(params))
+				failed = false;
+		}
 	}
-#else
-	failed = false;
-#endif
+	else 
+	{
+		failed = false;
+	}
+
+	if (!failed)
+	{
+		GLeeInit();
+		checkOpenGLError("GLeeInit");
+
+		if (application().parameters().shouldCreateContext && wglSwapIntervalEXT)
+		{
+			wglSwapIntervalEXT(static_cast<int>(params.swapInterval));
+			checkOpenGLError("RenderContextPrivate::initOpenGL -> wglSwapIntervalEXT");
+		}
+	}
+
+	if (application().parameters().shouldPreserveRenderContext)
+		pop();
 }
 
 HWND RenderContextPrivate::createWindow(size_t style, WindowSize windowSize, vec2i& size)
 { 
-#if !defined(ET_EMBEDDED_APPLICATION)
-	UINT windowStyle = WS_POPUP | WS_VISIBLE | WS_SYSMENU | WS_MINIMIZEBOX;
+	UINT windowStyle = WS_POPUP | WS_SYSMENU | WS_MINIMIZEBOX;
 
 	if (windowSize != WindowSize::Fullscreen)
 	{
@@ -233,16 +296,10 @@ HWND RenderContextPrivate::createWindow(size_t style, WindowSize windowSize, vec
 	size = vec2i(windowRect.right, windowRect.bottom);
 
 	return window;
-#else
-
-	return nullptr;
-
-#endif
 }
 
 bool RenderContextPrivate::initWindow(RenderContextParameters& params, const ApplicationParameters& appParams)
 {
-#if !defined(ET_EMBEDDED_APPLICATION)
 	hInstance = GetModuleHandle(0);
 
 	memset(&wndClass, 0, sizeof(wndClass));
@@ -266,9 +323,16 @@ bool RenderContextPrivate::initWindow(RenderContextParameters& params, const App
 	SetWindowLong(primaryContext.hWnd, GWL_USERDATA, reinterpret_cast<LONG>(this));
 #endif
 
-	ShowWindow(primaryContext.hWnd, SW_SHOW);
-	SetForegroundWindow(primaryContext.hWnd);
-	SetFocus(primaryContext.hWnd);
+	if ((appParams.windowStyle & WindowStyle_Hidden) == WindowStyle_Hidden)
+	{
+		ShowWindow(primaryContext.hWnd, SW_HIDE);
+	}
+	else 
+	{
+		ShowWindow(primaryContext.hWnd, SW_SHOW);
+		SetForegroundWindow(primaryContext.hWnd);
+		SetFocus(primaryContext.hWnd);
+	}
 
 	if (appParams.windowSize == WindowSize::Fullscreen)
 	{
@@ -276,7 +340,6 @@ bool RenderContextPrivate::initWindow(RenderContextParameters& params, const App
 		EnumDisplaySettings(0, ENUM_CURRENT_SETTINGS, &dm);
 		ChangeDisplaySettings(&dm, CDS_FULLSCREEN);
 	}
-#endif
 
 	return true;
 }
@@ -285,7 +348,6 @@ RenderContextData RenderContextPrivate::createDummyContext(HWND hWnd)
 {
 	RenderContextData result;
 
-#if !defined(ET_EMBEDDED_APPLICATION)
 	result.hWnd = hWnd;
 	result.hDC = GetDC(result.hWnd);
 	if (result.hDC == 0) return result;
@@ -314,14 +376,12 @@ RenderContextData RenderContextPrivate::createDummyContext(HWND hWnd)
 		return result.release();
 
 	result.initialized = true;
-#endif
 
 	return result;
 }
 
 bool RenderContextPrivate::initOpenGL(const RenderContextParameters& params)
 {
-#if !defined(ET_EMBEDDED_APPLICATION)
 	vec2i dummySize;
 	HWND dummyWindow = createWindow(WindowStyle_Borderless, WindowSize::Predefined, dummySize);
 
@@ -383,7 +443,7 @@ bool RenderContextPrivate::initOpenGL(const RenderContextParameters& params)
 			return 0;
 		}
 
-		if (!wglMakeCurrent(primaryContext.hDC, primaryContext.hGLRC))
+		if (!renderContext()->activateRenderingContext())
 		{
 			primaryContext.release();
 			return false;
@@ -455,24 +515,12 @@ bool RenderContextPrivate::initOpenGL(const RenderContextParameters& params)
 			}
 		}
 
-		if (!wglMakeCurrent(primaryContext.hDC, primaryContext.hGLRC))
+		if (!activate())
 		{
 			primaryContext.release();
 			return 0;
 		}
 	}
-#endif
-
-	GLeeInit();
-	checkOpenGLError("RenderContextPrivate::initOpenGL");
-
-#if !defined(ET_EMBEDDED_APPLICATION)
-	if (wglSwapIntervalEXT)
-	{
-		wglSwapIntervalEXT(static_cast<int>(params.swapInterval));
-		checkOpenGLError("RenderContextPrivate::initOpenGL -> wglSwapIntervalEXT");
-	}
-#endif
 
 	return true;
 }
@@ -481,7 +529,6 @@ int RenderContextPrivate::chooseMSAAPixelFormat(HDC aDC, PIXELFORMATDESCRIPTOR*)
 {
 	int returnedPixelFormat = 0;
 
-#if !defined(ET_EMBEDDED_APPLICATION)
 	auto local_wglChoosePixelFormatARB = (GLEEPFNWGLCHOOSEPIXELFORMATARBPROC)(wglGetProcAddress("wglChoosePixelFormatARB"));
 
 	int attributes[] =
@@ -510,7 +557,6 @@ int RenderContextPrivate::chooseMSAAPixelFormat(HDC aDC, PIXELFORMATDESCRIPTOR*)
 		bStatus = local_wglChoosePixelFormatARB(aDC, attributes, 0, 1, &returnedPixelFormat, &numFormats);
 		if (bStatus && numFormats) break;
 	}
-#endif
 
 	return returnedPixelFormat;
 }
@@ -527,10 +573,17 @@ int RenderContextPrivate::choosePixelFormat(HDC aDC, PIXELFORMATDESCRIPTOR* pfd)
 
 RenderContextPrivate::~RenderContextPrivate()
 {
-#if !defined(ET_EMBEDDED_APPLICATION)
-	primaryContext.release();
-	UnregisterClassW(wndClass.lpszClassName, hInstance);
-#endif
+	if (application().parameters().shouldCreateContext)
+	{
+		if (application().parameters().shouldPreserveRenderContext)
+			renderContext()->pushAndActivateRenderingContext();
+
+		primaryContext.release();
+		UnregisterClassW(wndClass.lpszClassName, hInstance);
+
+		if (application().parameters().shouldPreserveRenderContext)
+			renderContext()->popRenderingContext();
+	}
 }
 
 bool RenderContextPrivate::shouldPostMovementMessage(int x, int y)
@@ -540,6 +593,35 @@ bool RenderContextPrivate::shouldPostMovementMessage(int x, int y)
 	_mouseX = x;
 	_mouseY = y;
 	return true;
+}
+
+void RenderContextPrivate::push()
+{
+	auto currentDC = wglGetCurrentDC();
+	auto currentRC = wglGetCurrentContext();
+	contextStack.push(std::make_pair(currentDC, currentRC));
+	log::info("PUSH(%p, %p)", currentDC, currentRC);
+}
+
+bool RenderContextPrivate::activate()
+{
+	log::info("ACTIVTE(%p, %p)", primaryContext.hDC, primaryContext.hGLRC);
+	return wglMakeCurrent(primaryContext.hDC, primaryContext.hGLRC) == TRUE;
+}
+
+bool RenderContextPrivate::pushAndActivate()
+{
+	push();
+	return activate();
+}
+
+void RenderContextPrivate::pop()
+{
+	ET_ASSERT(!contextStack.empty());
+
+	auto top = contextStack.top();
+	wglMakeCurrent(top.first, top.second);
+	log::info("POP(%p, %p)", top.first, top.second);
 }
 
 /*

@@ -73,7 +73,7 @@ LONG WINAPI unhandledExceptionFilter(struct _EXCEPTION_POINTERS* info)
 			log::info(" - 0x%08X", reinterpret_cast<uintptr_t>(backtrace[i]));
 	}
 	
-	return EXCEPTION_EXECUTE_HANDLER;
+	return continuable ? EXCEPTION_CONTINUE_EXECUTION : EXCEPTION_EXECUTE_HANDLER;
 }
 
 void Application::platformInit()
@@ -83,18 +83,21 @@ void Application::platformInit()
 #endif
 	
 	SetUnhandledExceptionFilter(unhandledExceptionFilter);
-	
-#if !defined(ET_EMBEDDED_APPLICATION)
 	_env.updateDocumentsFolder(_identifier);
-#endif
 }
 
 void Application::platformFinalize()
 {
+	if (_parameters.shouldPreserveRenderContext)
+		_renderContext->pushAndActivateRenderingContext();
+
 	_backgroundThread.stop();
 	_backgroundThread.waitForTermination();
-
 	sharedObjectFactory().deleteObject(_delegate);
+
+	if (_parameters.shouldPreserveRenderContext)
+		_renderContext->popRenderingContext();
+
 	sharedObjectFactory().deleteObject(_renderContext);
 
 	_delegate = nullptr;
@@ -134,45 +137,50 @@ int Application::platformRun(int, char*[])
 		enterRunLoop();
 		_delegate->applicationWillResizeContext(_renderContext->sizei());
 
-#	if !defined(ET_EMBEDDED_APPLICATION)
-		MSG msg = { };
-		while (_running)
+		if (_parameters.shouldCreateRunLoop)
 		{
-			if (PeekMessageW(&msg, 0, 0, 0, PM_REMOVE))
+			MSG msg = { };
+			while (_running)
 			{
-				TranslateMessage(&msg);
-				DispatchMessageW(&msg);
+				if (PeekMessageW(&msg, 0, 0, 0, PM_REMOVE))
+				{
+					TranslateMessage(&msg);
+					DispatchMessageW(&msg);
+				}
+				else if (shouldPerformRendering())
+				{
+					performUpdateAndRender();
+				}
 			}
-			else if (shouldPerformRendering())
-			{
-				performUpdateAndRender();
-			}
+
+			terminated();
+			platformFinalize();
+			return _exitCode;
 		}
-#	endif
 	}
 
-#if defined(ET_EMBEDDED_APPLICATION)
-
 	return 0;
-
-#else
-
-	terminated();
-	platformFinalize();
-	return _exitCode;
-
-#endif
 }
 
 void Application::quit(int exitCode)
 {
+	ET_ASSERT(_running)
+
 	_running = false;
 	_exitCode = exitCode;
 
-#if (ET_EMBEDDED_APPLICATION)
-	terminated();
-	platformFinalize();
-#endif
+	if (!_parameters.shouldCreateRunLoop)
+	{
+		if (_parameters.shouldPreserveRenderContext)
+			_renderContext->pushAndActivateRenderingContext();
+
+		terminated();
+
+		if (_parameters.shouldPreserveRenderContext)
+			_renderContext->popRenderingContext();
+
+		platformFinalize();
+	}
 }
 
 void Application::alert(const std::string& title, const std::string& message, AlertType type)

@@ -23,7 +23,7 @@ namespace et
 	extern const std::string kSystemEventOpenURL;
 	
 	class ApplicationNotifier;
-	class Application : public Singleton<Application>,  public EventReceiver
+	class Application : public Singleton<Application>
 	{
 	public:
 		enum AlertType

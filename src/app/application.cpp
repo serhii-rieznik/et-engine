@@ -35,10 +35,7 @@ Application::Application()
 
 Application::~Application()
 {
-	_running = false;
-	
-	platformDeactivate();
-	platformFinalize();
+
 }
 
 IApplicationDelegate* Application::delegate()
@@ -47,10 +44,7 @@ IApplicationDelegate* Application::delegate()
 	{
 		_delegate = initApplicationDelegate();
 		ET_ASSERT(_delegate);
-
-#	if !defined(ET_EMBEDDED_APPLICATION)
 		_identifier = _delegate->applicationIdentifier();
-#	endif
 	}
     
 	return _delegate;
@@ -77,6 +71,9 @@ int Application::run(int argc, char* argv[])
 void Application::enterRunLoop()
 {
 	_running = true;
+
+	if (_parameters.shouldPreserveRenderContext)
+		_renderContext->pushAndActivateRenderingContext();
 	
 	_standardPathResolver.setRenderContext(_renderContext);
 	delegate()->applicationDidLoad(_renderContext);
@@ -95,13 +92,14 @@ void Application::enterRunLoop()
 	setActive(true);
 	
 #endif
+
+	if (_parameters.shouldPreserveRenderContext)
+		_renderContext->popRenderingContext();
 }
 
 void Application::performRendering()
 {
-#if defined(ET_CONSOLE_APPLICATION)
-	
-#else
+#if !defined(ET_CONSOLE_APPLICATION)
 	_renderContext->beginRender();
 	_delegate->render(_renderContext);
 	_renderContext->endRender();
@@ -111,15 +109,8 @@ void Application::performRendering()
 bool Application::shouldPerformRendering()
 {
 	uint64_t currentTime = queryContiniousTimeInMilliSeconds();
-	
-#if defined(ET_EMBEDDED_APPLICATION)
-	
-	_lastQueuedTimeMSec = currentTime;
-	return true;
-	
-#else
-	
 	uint64_t elapsedTime = currentTime - _lastQueuedTimeMSec;
+
 	if (elapsedTime < _fpsLimitMSec)
 	{
 		uint64_t sleepInterval = (_fpsLimitMSec - elapsedTime) +
@@ -132,8 +123,6 @@ bool Application::shouldPerformRendering()
 	_lastQueuedTimeMSec = queryContiniousTimeInMilliSeconds();
 	
 	return !_suspended;
-	
-#endif
 }
 
 void Application::performUpdateAndRender()
@@ -141,8 +130,7 @@ void Application::performUpdateAndRender()
 	ET_ASSERT(_running && !_suspended);
 	
 	_runLoop.update(_lastQueuedTimeMSec);
-	_delegate->idle(_runLoop.firstTimerPool()->actualTime());
-	
+
 #if !defined(ET_CONSOLE_APPLICATION)
 	performRendering();
 #endif
@@ -309,12 +297,7 @@ void Application::setShouldSilentPathResolverErrors(bool e)
 
 const ApplicationIdentifier& Application::identifier() const
 {
-#if defined(ET_EMBEDDED_APPLICATION)
-	static const ApplicationIdentifier dummy;
-	return dummy;
-#else
 	return _identifier;
-#endif
 }
 
 

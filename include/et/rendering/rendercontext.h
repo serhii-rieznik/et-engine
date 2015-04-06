@@ -78,6 +78,11 @@ namespace et
 		size_t lastFPSValue() const
 			{ return _info.averageFramePerSecond; }
 
+		void pushRenderingContext();
+		bool activateRenderingContext();
+		bool pushAndActivateRenderingContext();
+		void popRenderingContext();
+
 		void beginRender();
 		void endRender();
 

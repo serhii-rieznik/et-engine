@@ -213,7 +213,7 @@ namespace et
 			{ Input::instance().pushGestureInputAction(info); }
 	};
 
-	class InputHandler : virtual public EventReceiver
+	class InputHandler : public EventReceiver
 	{
 	protected:
 		InputHandler(bool connect = true);

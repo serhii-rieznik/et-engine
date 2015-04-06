@@ -18,7 +18,7 @@ namespace et
 		void notifyLoaded()
 			{ application().loaded(); }
 		
-		void notifyIdle()
+		void notifyUpdate()
 			{ application().performUpdateAndRender(); }
 		
 		void notifyActivated()
