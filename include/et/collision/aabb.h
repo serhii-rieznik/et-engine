@@ -30,8 +30,8 @@ namespace et
 	{
 		typedef vec3 AABBCorners[AABBCorner_max];
 
-		vec3 center;
-		vec3 halfDimension;
+		vec3 center = vec3(0.0f);
+		vec3 halfDimension = vec3(0.0f);
 		
 		AABBCorners corners; 
 

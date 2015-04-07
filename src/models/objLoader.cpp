@@ -772,8 +772,9 @@ void OBJLoader::processLoadedData()
 			}
 		}
 		
-		_meshes.emplace_back(group->name, startIndex & 0xffffffff,
-			(index - startIndex) & 0xffffffff, m, center);
+		uint32_t startIndex_u32 = static_cast<uint32_t>(startIndex);
+		uint32_t numIndexes_u32 = static_cast<uint32_t>(index - startIndex);
+		_meshes.emplace_back(group->name, startIndex_u32, numIndexes_u32, m, center);
 	}
 	
 	if (!hasNormals)
