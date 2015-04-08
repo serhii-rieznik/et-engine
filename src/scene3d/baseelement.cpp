@@ -300,6 +300,14 @@ void BaseElement::animate()
 	_animationTimer.start(mainTimerPool(), 0.0f, NotifyTimer::RepeatForever);
 }
 
+void BaseElement::animateRecursive()
+{
+	animate();
+
+	for (auto c : children())
+		c->animateRecursive();
+}
+
 Animation& BaseElement::defaultAnimation()
 {
 	return _animations.empty() ? _emptyAnimation : _animations.front();

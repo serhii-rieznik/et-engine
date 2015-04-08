@@ -63,6 +63,7 @@ namespace et
 			BaseElement(const std::string& name, BaseElement* parent);
 			
 			void animate();
+			void animateRecursive();
 			
 			Animation& defaultAnimation();
 			const Animation& defaultAnimation() const;

@@ -91,7 +91,7 @@ void Animation::transformation(float time, vec3& t, quaternion& o, vec3& s) cons
 	{
 		const auto& lowerFrame = _frames.at(nearestLowerFrame);
 		const auto& upperFrame = _frames.at(nearestLowerFrame + 1);
-		float interolationFactor = (time - lowerFrame.time) / (lowerFrame.time - upperFrame.time);
+		float interolationFactor = (time - lowerFrame.time) / (upperFrame.time - lowerFrame.time);
 		t = mix(lowerFrame.translation, upperFrame.translation, interolationFactor);
 		o = slerp(lowerFrame.orientation, upperFrame.orientation, interolationFactor);
 		s = mix(lowerFrame.scale, upperFrame.scale, interolationFactor);
