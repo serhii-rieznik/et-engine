@@ -1182,7 +1182,8 @@ VertexArray::Pointer primitives::buildLinearIndexArray(VertexArray::Pointer vert
 				newClr[indexMap.size()] = oldClr[i];
 			
 			indexArray->setIndex(static_cast<uint32_t>(indexMap.size()), i);
-			indexMap[hash] = indexMap.size();
+			size_t mapSize = indexMap.size();
+			indexMap[hash] = mapSize;
 		}
 		else
 		{
