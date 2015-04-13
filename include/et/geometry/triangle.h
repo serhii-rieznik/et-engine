@@ -45,7 +45,7 @@ namespace et
 			{ return _normal; }
 
 		T square() const
-			{ return cross(_edge2to1, _edge3to1).length() / static_cast<T>(2); }
+			{ return _edge2to1.cross(_edge3to1).length() / static_cast<T>(2); }
 
 	private:
 		
