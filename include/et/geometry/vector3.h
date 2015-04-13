@@ -122,6 +122,9 @@ namespace et
 		vector3 cross(const vector3 &vec) const
 			{ return vector3(y * vec.z - z * vec.y, z * vec.x - x * vec.z, 	x * vec.y - y * vec.x ); 	}
 
+		float dot(const vector3& vec) const 
+			{ return x * vec.x + y * vec.y + z * vec.z; }
+
 		vector2<T>& xy()
 			{ return *((vector2<T>*)(c)); }
 

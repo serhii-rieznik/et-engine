@@ -54,7 +54,7 @@ namespace et
 			_edge2to1 = _v2 - _v1;
 			_edge3to1 = _v3 - _v1;
 			_edge3to2 = _v3 - _v2;
-			_normal = cross(_edge2to1, _edge3to1);
+			_normal = _edge2to1.cross(_edge3to1);
 			_normal.normalize();
 		}
 

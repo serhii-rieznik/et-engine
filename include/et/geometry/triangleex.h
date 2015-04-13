@@ -64,7 +64,7 @@ namespace et
 		{
 			_dot00 = Triangle<T>::edge2to1().dotSelf();
 			_dot11 = Triangle<T>::edge3to1().dotSelf();
-			_dot01 = dot(Triangle<T>::edge2to1(), Triangle<T>::edge3to1());
+			_dot01 = Triangle<T>::edge2to1().dot(Triangle<T>::edge3to1());
 			_invDenom = T(1) / (_dot00 * _dot11 - _dot01 * _dot01);
 		}
 
