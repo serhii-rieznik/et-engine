@@ -29,9 +29,6 @@ namespace et
 		vector3(const vector3& m) :
 			x(m.x), y(m.y), z(m.z) { }
 		
-		vector3(vector3&& m) :
-			x(m.x), y(m.y), z(m.z) { }
-		
 		explicit vector3(T val) :
 			x(val), y(val), z(val) { }
 		
@@ -108,9 +105,6 @@ namespace et
 			{ x/=value; y /= value; z /= value; return *this; }
 
 		vector3& operator = (const vector3& value)
-			{ x = value.x; y = value.y; z = value.z; return *this; }
-		
-		vector3& operator = (vector3&& value)
 			{ x = value.x; y = value.y; z = value.z; return *this; }
 		
 		T dotSelf() const 

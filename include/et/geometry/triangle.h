@@ -20,9 +20,6 @@ namespace et
 		Triangle(const vector3<T>& av1, const vector3<T>& av2, const vector3<T>& av3) : 
 			_v1(av1), _v2(av2), _v3(av3) { fillSupportData(); }
 
-		Triangle(vector3<T>&& av1, vector3<T>&& av2, vector3<T>&& av3) : 
-			_v1(av1), _v2(av2), _v3(av3) { fillSupportData(); }
-
 		const vector3<T>& v1() const 
 			{ return _v1; }
 

@@ -21,10 +21,6 @@ namespace et
 				   const vector3<T>& an1, const vector3<T>& an2, const vector3<T>& an3) :
 			Triangle<T>(av1, av2, av3), _n1(an1), _n2(an2), _n3(an3) { fillAdditionalSupportData(); }
 
-		TriangleEx(vector3<T>&& av1, vector3<T>&& av2, vector3<T>&& av3,
-				   vector3<T>&& an1, vector3<T>&& an2, vector3<T>&& an3) :
-			Triangle<T>(av1, av2, av3), _n1(an1), _n2(an2), _n3(an3) { fillAdditionalSupportData(); }
-		
 		const vector3<T>& n1() const
 			{ return _n1; }
 		

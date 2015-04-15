@@ -266,13 +266,13 @@ void OBJLoader::loadData(bool async, ObjectsCache& cache)
 			
 			if (subKey == 't')
 			{
-				vec2 vertex;
+				vec2 vertex(0.0f);
 				inputFile >> subKey >> vertex;
 				_texCoords.push_back(vertex);
 			}
 			else if (subKey == 'n')
 			{
-				vec3 vertex;
+				vec3 vertex(0.0f);
 				inputFile >> subKey >> vertex;
 
 				if ((_loadOptions & Option_SwapYwithZ) == Option_SwapYwithZ)
@@ -282,7 +282,7 @@ void OBJLoader::loadData(bool async, ObjectsCache& cache)
 			}
 			else if (isWhitespaceChar(subKey))
 			{
-				vec3 vertex;
+				vec3 vertex(0.0f);
 				inputFile >> vertex;
 
 				if ((_loadOptions & Option_SwapYwithZ) == Option_SwapYwithZ)
