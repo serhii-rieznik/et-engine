@@ -10,7 +10,7 @@
       <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
     </Filter>
     <Filter Include="et-ext">
-      <UniqueIdentifier>{c75a4525-f5c5-42f7-95f5-6e87213d90a2}</UniqueIdentifier>
+      <UniqueIdentifier>{2cf90c85-13c7-4b22-90c3-e145793cc74b}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -32,9 +32,6 @@
     <ClCompile Include="..\..\src\core\memoryallocator.cpp">
       <Filter>et</Filter>
     </ClCompile>
-    <ClCompile Include="atlas.cpp">
-      <Filter>et</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\core\et.cpp">
       <Filter>et</Filter>
     </ClCompile>
@@ -43,9 +40,6 @@
     </ClCompile>
     <ClCompile Include="..\..\src\platform-win\atomiccounter.win.cpp">
       <Filter>et</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\et-ext\src\scene2d\textureatlaswriter.cpp">
-      <Filter>et-ext</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\platform-win\criticalsection.win.cpp">
       <Filter>et</Filter>
@@ -58,6 +52,15 @@
     </ClCompile>
     <ClCompile Include="..\..\src\core\stream.cpp">
       <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="atlas.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\et-ext\src\scene2d\textureatlaswriter.cpp">
+      <Filter>et-ext</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\json\json.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -1,6 +1,5 @@
 #include <et/core/tools.h>
 #include <et/imaging/pngloader.h>
-
 #include "..\..\..\et-ext\include\et-ext\scene2d\textureatlaswriter.h"
 
 using namespace et;
@@ -115,8 +114,8 @@ int main(int argc, char* argv[])
 			}
 		}
 		
-		texture.texture->size.x = static_cast<int>(roundToHighestPowerOfTwo(texture.dimensions.x));
-		texture.texture->size.y = static_cast<int>(roundToHighestPowerOfTwo(texture.dimensions.y));
+		texture.texture->size.x = static_cast<int>(roundToHighestPowerOfTwo(texture.maxWidth));
+		texture.texture->size.y = static_cast<int>(roundToHighestPowerOfTwo(texture.maxHeight));
 	}
 	
 	for (const auto i : placer.items())

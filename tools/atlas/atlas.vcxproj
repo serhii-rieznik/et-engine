@@ -101,6 +101,7 @@
     <ClCompile Include="..\..\src\imaging\imageoperations.cpp" />
     <ClCompile Include="..\..\src\imaging\imagewriter.cpp" />
     <ClCompile Include="..\..\src\imaging\pngloader.cpp" />
+    <ClCompile Include="..\..\src\json\json.cpp" />
     <ClCompile Include="..\..\src\platform-win\atomiccounter.win.cpp" />
     <ClCompile Include="..\..\src\platform-win\criticalsection.win.cpp" />
     <ClCompile Include="..\..\src\platform-win\log.win.cpp" />
