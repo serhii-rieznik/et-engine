@@ -600,12 +600,10 @@ void RenderContextPrivate::push()
 	auto currentDC = wglGetCurrentDC();
 	auto currentRC = wglGetCurrentContext();
 	contextStack.push(std::make_pair(currentDC, currentRC));
-	log::info("PUSH(%p, %p)", currentDC, currentRC);
 }
 
 bool RenderContextPrivate::activate()
 {
-	log::info("ACTIVTE(%p, %p)", primaryContext.hDC, primaryContext.hGLRC);
 	return wglMakeCurrent(primaryContext.hDC, primaryContext.hGLRC) == TRUE;
 }
 
@@ -621,7 +619,6 @@ void RenderContextPrivate::pop()
 
 	auto top = contextStack.top();
 	wglMakeCurrent(top.first, top.second);
-	log::info("POP(%p, %p)", top.first, top.second);
 }
 
 /*
