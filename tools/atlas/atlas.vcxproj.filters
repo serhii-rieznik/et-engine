@@ -9,104 +9,11 @@
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
     </Filter>
-    <Filter Include="png">
-      <UniqueIdentifier>{ecf84522-9f7d-4460-9bdc-f828cd8aaa1b}</UniqueIdentifier>
+    <Filter Include="et-ext">
+      <UniqueIdentifier>{c75a4525-f5c5-42f7-95f5-6e87213d90a2}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="atlas.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\libpng\png.c">
-      <Filter>png</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\libpng\pngerror.c">
-      <Filter>png</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\libpng\pngget.c">
-      <Filter>png</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\libpng\pngmem.c">
-      <Filter>png</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\libpng\pngpread.c">
-      <Filter>png</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\libpng\pngread.c">
-      <Filter>png</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\libpng\pngrio.c">
-      <Filter>png</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\libpng\pngrtran.c">
-      <Filter>png</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\libpng\pngrutil.c">
-      <Filter>png</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\libpng\pngset.c">
-      <Filter>png</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\libpng\pngtrans.c">
-      <Filter>png</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\libpng\pngwio.c">
-      <Filter>png</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\libpng\pngwrite.c">
-      <Filter>png</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\libpng\pngwtran.c">
-      <Filter>png</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\libpng\pngwutil.c">
-      <Filter>png</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\zlib\compress.c">
-      <Filter>png</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\zlib\crc32.c">
-      <Filter>png</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\zlib\deflate.c">
-      <Filter>png</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\zlib\gzclose.c">
-      <Filter>png</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\zlib\gzlib.c">
-      <Filter>png</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\zlib\gzread.c">
-      <Filter>png</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\zlib\gzwrite.c">
-      <Filter>png</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\zlib\infback.c">
-      <Filter>png</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\zlib\inffast.c">
-      <Filter>png</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\zlib\inflate.c">
-      <Filter>png</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\zlib\inftrees.c">
-      <Filter>png</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\zlib\trees.c">
-      <Filter>png</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\zlib\uncompr.c">
-      <Filter>png</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\zlib\zutil.c">
-      <Filter>png</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\zlib\adler32.c">
-      <Filter>png</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\core\tools.cpp">
       <Filter>et</Filter>
     </ClCompile>
@@ -119,10 +26,37 @@
     <ClCompile Include="..\..\src\imaging\imageoperations.cpp">
       <Filter>et</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\imaging\textureatlaswriter.cpp">
+    <ClCompile Include="..\..\src\imaging\imagewriter.cpp">
       <Filter>et</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\imaging\imagewriter.cpp">
+    <ClCompile Include="..\..\src\core\memoryallocator.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="atlas.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\core\et.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\platform-win\log.win.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\platform-win\atomiccounter.win.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\et-ext\src\scene2d\textureatlaswriter.cpp">
+      <Filter>et-ext</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\platform-win\criticalsection.win.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\core\conversion.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\core\dictionary.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\core\stream.cpp">
       <Filter>et</Filter>
     </ClCompile>
   </ItemGroup>
