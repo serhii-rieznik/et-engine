@@ -148,4 +148,13 @@ void Thread::waitForTermination()
 		WaitForSingleObject(_private->thread, INFINITE);
 }
 
+void Thread::stopAndWaitForTermination()
+{
+	if (_private->thread && running())
+	{
+		stop();
+		WaitForSingleObject(_private->thread, INFINITE);
+	}
+}
+
 #endif // ET_PLATFORM_WIN

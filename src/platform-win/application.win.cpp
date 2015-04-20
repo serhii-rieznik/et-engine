@@ -91,8 +91,7 @@ void Application::platformFinalize()
 	if (_parameters.shouldPreserveRenderContext)
 		_renderContext->pushAndActivateRenderingContext();
 
-	_backgroundThread.stop();
-	_backgroundThread.waitForTermination();
+	_backgroundThread.stopAndWaitForTermination();
 	sharedObjectFactory().deleteObject(_delegate);
 
 	if (_parameters.shouldPreserveRenderContext)

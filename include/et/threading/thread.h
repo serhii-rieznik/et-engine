@@ -37,7 +37,7 @@ namespace et
 		void resume();
 		void stop();
 
-		void waitForTermination();
+		void stopAndWaitForTermination();
 		void terminate(int result = 0);
 
 		bool running() const;
@@ -48,6 +48,8 @@ namespace et
 
 	private:
 		ET_DENY_COPY(Thread)
+
+		void waitForTermination(); // deprecated
 
 	private:
 		friend class ThreadPrivate;

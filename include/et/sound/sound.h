@@ -24,10 +24,12 @@ namespace et
 			Player::Pointer genPlayer(Track::Pointer track);
 			Player::Pointer genPlayer();
 
+			void stopStreamingThread();
+
         private:
             Manager();
 			~Manager();
-			
+		
 			void nativePreInit();
 			void nativeInit();
 			void nativeRelease();
