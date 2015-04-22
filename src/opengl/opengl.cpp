@@ -354,7 +354,11 @@ uint32_t et::dataTypeValue(DataType value)
 		GL_UNSIGNED_SHORT_5_5_5_1, // UnsignedShort_5551
 		GL_UNSIGNED_SHORT_5_6_5, // UnsignedShort_565
 
+#	if defined(GL_UNSIGNED_INT_8_8_8_8_REV)
 		GL_UNSIGNED_INT_8_8_8_8_REV, // UnsignedInt_8888_Rev
+#	else
+		GL_UNSIGNED_BYTE
+#	endif
 	};
 	
 	ET_SAMPLE_VALUE_FROM_MAP

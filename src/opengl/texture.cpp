@@ -170,9 +170,11 @@ void Texture::buildData(const char* aDataPtr, size_t aDataSize)
 	glPixelStorei(GL_UNPACK_ALIGNMENT, _desc->alignment);
 	checkOpenGLError("glPixelStorei");
 
+#if defined(GL_UNPACK_ROW_LENGTH)
 	glPixelStorei(GL_UNPACK_ROW_LENGTH, _desc->rowSize);
 	checkOpenGLError("glPixelStorei");
-
+#endif
+	
 	auto targetValue = textureTargetValue(_desc->target);
 	auto internalFormatValue = textureFormatValue(_desc->internalformat);
 	auto formatValue = textureFormatValue(_desc->format);
@@ -330,9 +332,11 @@ void Texture::updatePartialDataDirectly(RenderContext* rc, const vec2i& offset,
 	glPixelStorei(GL_UNPACK_ALIGNMENT, _desc->alignment);
 	checkOpenGLError("glPixelStorei");
 
+#if defined(GL_UNPACK_ROW_LENGTH)
 	glPixelStorei(GL_UNPACK_ROW_LENGTH, _desc->rowSize);
 	checkOpenGLError("glPixelStorei");
-
+#endif
+	
 	auto targetValue = textureTargetValue(_desc->target);
 	auto typeValue = dataTypeValue(_desc->type);
 	auto formatValue = textureFormatValue(_desc->format);
