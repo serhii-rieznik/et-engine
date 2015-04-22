@@ -182,6 +182,11 @@ void Application::quit(int exitCode)
 	}
 }
 
+Application::~Application()
+{
+
+}
+
 void Application::alert(const std::string& title, const std::string& message, AlertType type)
 {
 	UINT alType = MB_ICONINFORMATION;
