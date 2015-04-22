@@ -279,7 +279,7 @@ Program ::Pointer ProgramFactory::genProgram(const std::string& name, const std:
 }
 
 Program::Pointer ProgramFactory::genProgramAsIs(const std::string& name, const std::string& vs, const std::string& fs,
-	const StringList& defines, const std::string& workFolder)
+	const StringList& defines, const std::string&)
 {
 	return Program::Pointer::create(renderContext(), vs, emptyString, fs, name, name, defines);
 }

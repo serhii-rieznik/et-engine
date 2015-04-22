@@ -121,7 +121,7 @@ std::pair<uint32_t, uint32_t> et::blendStateValue(BlendState value)
 	return blendStatesMap[static_cast<uint32_t>(value)];
 }
 
-BlendState et::blendValuesToBlendState(int32_t source, int32_t dest)
+BlendState et::blendValuesToBlendState(uint32_t source, uint32_t dest)
 {
 	size_t availableBlendModes = sizeof(blendStatesMap) / sizeof(blendStatesMap[0]);
 	
