@@ -120,6 +120,16 @@ void Thread::stop()
 	}
 }
 
+void Thread::stopAndWaitForTermination()
+{
+	if (_private->running)
+	{
+		_private->running = false;
+		resume();
+		waitForTermination();
+	}
+}
+
 void Thread::waitForTermination()
 {
 	pthread_join(_private->thread, nullptr);

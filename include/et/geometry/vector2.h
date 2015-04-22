@@ -99,7 +99,7 @@ namespace et
 		T dotSelf() const 
 			{ return x*x + y*y; }
 
-		T dot(vector2<T>& v) const
+		T dot(const vector2<T>& v) const
 			{ return x * v.x + y * v.y; }
 
 		T length() const
