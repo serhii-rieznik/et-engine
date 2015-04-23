@@ -887,9 +887,12 @@ LRESULT CALLBACK mainWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			vec2i newSize(size.width, size.height);
 
 			ApplicationNotifier notifier;
-			notifier.accessRenderContext()->renderState().defaultFramebuffer()->resize(newSize);
-			notifier.notifyResize(newSize);
-
+			auto rc = notifier.accessRenderContext();
+			if (rc && rc->renderState().defaultFramebuffer().valid())
+			{
+				rc->renderState().defaultFramebuffer()->resize(newSize);
+				notifier.notifyResize(newSize);
+			}
 			return 0;
 		}
 
