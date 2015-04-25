@@ -118,10 +118,7 @@ OBJLoader::OBJLoader(RenderContext* rc, const std::string& inFile) : _rc(rc),
 OBJLoader::~OBJLoader()
 {
 	if (_thread.valid())
-	{
-		_thread->stop();
-		_thread->waitForTermination();
-	}
+		_thread->stopAndWaitForTermination();
 	
 	for (auto group : _groups)
 		sharedObjectFactory().deleteObject(group);
