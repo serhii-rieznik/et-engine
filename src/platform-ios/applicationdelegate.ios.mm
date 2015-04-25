@@ -137,7 +137,7 @@ extern etOpenGLViewController* sharedOpenGLViewController;
 		if (_notifier.shouldPerformRendering())
 		{
 			[sharedOpenGLViewController beginRender];
-			_notifier.notifyIdle();
+			_notifier.notifyUpdate();
 			[sharedOpenGLViewController endRender];
 			
 			_renderThreadStarted = true;

@@ -5,6 +5,7 @@
  *
  */
 
+#include <DbgHelp.h>
 #include <et/rendering/rendercontext.h>
 #include <et/app/application.h>
 
@@ -57,23 +58,34 @@ LONG WINAPI unhandledExceptionFilter(struct _EXCEPTION_POINTERS* info)
 {
 	bool continuable = (info->ExceptionRecord->ExceptionFlags & EXCEPTION_NONCONTINUABLE) == 0;
 	
+	auto process = GetCurrentProcess();
+	SymInitialize(process, nullptr, TRUE);
+
 	void* backtrace[32] = { };
+	char symbolInfoData[sizeof(SYMBOL_INFO) + MAX_SYM_NAME] = {};
+	SYMBOL_INFO* symbol = reinterpret_cast<SYMBOL_INFO*>(symbolInfoData);
+	symbol->MaxNameLen = 255;
+	symbol->SizeOfStruct = sizeof(SYMBOL_INFO);
+
 	DWORD backtraceHash = 0;
 	WORD framesCaptured = RtlCaptureStackBackTrace(0, 32, backtrace, &backtraceHash);
 	
 	std::string excCode = exceptionCodeToString(info->ExceptionRecord->ExceptionCode);
 	std::string type = continuable ? "continuable" : "non-continuable";
-	log::info("Unhandled exception:\n code: %s\n type: %s\n address: 0x%08X", excCode.c_str(),
+	log::info("Unhandled exception:\n code: %s\n type: %s\n address: 0x%016llX", excCode.c_str(),
 		type.c_str(), reinterpret_cast<uintptr_t>(info->ExceptionRecord->ExceptionAddress));
 	
 	if (framesCaptured > 0)
 	{
-		log::info("Backtrace hash: 0x%08X", backtraceHash);
-		for (int i = framesCaptured - 1; i >= 0; --i)
-			log::info(" - 0x%08X", reinterpret_cast<uintptr_t>(backtrace[i]));
+		log::info("Backtrace (hash = 0x%08X):", backtraceHash);
+		for (unsigned int i = 0; i < framesCaptured; ++i)
+		{
+			SymFromAddr(process, reinterpret_cast<DWORD64>(backtrace[i]), 0, symbol);
+			log::info("%u : %s (0x%016llX)", i, symbol->Name, symbol->Address);
+		}
 	}
 	
-	return continuable ? EXCEPTION_CONTINUE_EXECUTION : EXCEPTION_EXECUTE_HANDLER;
+	return EXCEPTION_EXECUTE_HANDLER;
 }
 
 void Application::platformInit()
@@ -180,6 +192,11 @@ void Application::quit(int exitCode)
 
 		platformFinalize();
 	}
+}
+
+Application::~Application()
+{
+
 }
 
 void Application::alert(const std::string& title, const std::string& message, AlertType type)

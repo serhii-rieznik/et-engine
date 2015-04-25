@@ -121,7 +121,7 @@ std::pair<uint32_t, uint32_t> et::blendStateValue(BlendState value)
 	return blendStatesMap[static_cast<uint32_t>(value)];
 }
 
-BlendState et::blendValuesToBlendState(int32_t source, int32_t dest)
+BlendState et::blendValuesToBlendState(uint32_t source, uint32_t dest)
 {
 	size_t availableBlendModes = sizeof(blendStatesMap) / sizeof(blendStatesMap[0]);
 	
@@ -354,7 +354,11 @@ uint32_t et::dataTypeValue(DataType value)
 		GL_UNSIGNED_SHORT_5_5_5_1, // UnsignedShort_5551
 		GL_UNSIGNED_SHORT_5_6_5, // UnsignedShort_565
 
+#	if defined(GL_UNSIGNED_INT_8_8_8_8_REV)
 		GL_UNSIGNED_INT_8_8_8_8_REV, // UnsignedInt_8888_Rev
+#	else
+		GL_UNSIGNED_BYTE
+#	endif
 	};
 	
 	ET_SAMPLE_VALUE_FROM_MAP

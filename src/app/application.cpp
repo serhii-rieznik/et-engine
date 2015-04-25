@@ -33,11 +33,6 @@ Application::Application()
 	_backgroundThread.run();
 }
 
-Application::~Application()
-{
-
-}
-
 IApplicationDelegate* Application::delegate()
 {
 	if (_delegate == nullptr)

@@ -113,6 +113,11 @@ void Application::loaded()
     enterRunLoop();
 }
 
+Application::~Application()
+{
+	platformFinalize();
+}
+
 void Application::quit(int exitCode)
 {
 	_running = false;

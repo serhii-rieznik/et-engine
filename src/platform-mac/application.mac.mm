@@ -80,6 +80,11 @@ void Application::loaded()
 	enterRunLoop();
 }
 
+Application::~Application()
+{
+	platformFinalize();
+}
+
 void Application::quit(int code)
 {
 #if defined(ET_CONSOLE_APPLICATION)
