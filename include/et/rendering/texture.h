@@ -82,9 +82,9 @@ namespace et
 
 	private:
 		TextureDescription::Pointer _desc;
-		vector3<TextureWrap> _wrap;
-		vector2<TextureFiltration> _filtration;
-		vec2 _texel;
+		vector3<TextureWrap> _wrap = vector3<TextureWrap>(TextureWrap::Repeat);
+		vector2<TextureFiltration> _filtration = vector2<TextureFiltration>(TextureFiltration::Linear);
+		vec2 _texel = vec2(0.0f);
 		bool _own = false;
 	};
 }
