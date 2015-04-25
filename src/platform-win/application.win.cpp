@@ -5,13 +5,13 @@
  *
  */
 
-#include <DbgHelp.h>
 #include <et/rendering/rendercontext.h>
 #include <et/app/application.h>
 
 #if (ET_PLATFORM_WIN)
 
 #include <MMSystem.h>
+#include <DbgHelp.h>
 
 using namespace et;
 
