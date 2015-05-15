@@ -177,11 +177,20 @@ namespace et
 
 		void addMultiplied(const vector4<T>& m, T a)
 		{
-			x = a * m.x + x;
-			y = a * m.y + y;
-			z = a * m.z + z;
-			w = a * m.w + w;
+			x += a * m.x;
+			y += a * m.y;
+			z += a * m.z;
+			w += a * m.w;
 		}
+
+		void setMultiplied(const vector4<T>& m, T a)
+		{
+			x = a * m.x;
+			y = a * m.y;
+			z = a * m.z;
+			w = a * m.w;
+		}
+
 
 		void clear()
 		{
@@ -189,6 +198,21 @@ namespace et
 			y = 0;
 			z = 0;
 			w = 0;
+		}
+
+		void set(float value)
+		{
+			x = value;
+			y = value;
+			z = value;
+			w = value;
+		}
+
+		void divideXYZByW()
+		{
+			x /= w;
+			y /= w;
+			z /= w;
 		}
 	};
 

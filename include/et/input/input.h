@@ -46,14 +46,14 @@ namespace et
 
 	struct PointerInputInfo
 	{
-		size_t id;
-		float timestamp;
-		vec2 pos;
-		vec2 normalizedPos;
-		vec2 scroll;
-		PointerType type;
-		PointerOrigin origin;
-		char tag;
+		size_t id = 0;
+		float timestamp = 0.0f;
+		vec2 pos = vec2(0.0f);
+		vec2 normalizedPos = vec2(0.0f);
+		vec2 scroll = vec2(0.0f);
+		PointerType type = PointerType_None;
+		PointerOrigin origin = PointerOrigin_Any;
+		char tag = 0;
 
 		PointerInputInfo() :
 			id(0), timestamp(0), scroll(0), type(PointerType_None), origin(PointerOrigin_Any), tag(0) { }
@@ -93,7 +93,7 @@ namespace et
 
 	struct GestureInputInfo
 	{
-		vec2 swipe;
+		vec2 swipe = vec2(0.0f);
 		float zoom = 0.0f;
 		float rotation = 0.0f;
 		size_t mask = 0;

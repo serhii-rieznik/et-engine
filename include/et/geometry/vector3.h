@@ -152,11 +152,25 @@ namespace et
 			}
 		}
 
+		void setMultiplied(const vector3<T>& m, T a)
+		{
+			x = a * m.x;
+			y = a * m.y;
+			z = a * m.z;
+		}
+
 		void addMultiplied(const vector3<T>& m, T a)
 		{
-			x = a * m.x + x;
-			y = a * m.y + y;
-			z = a * m.z + z;
+			x += a * m.x;
+			y += a * m.y;
+			z += a * m.z;
+		}
+
+		void addMultiplied(const vector3<T>& m, const vector3<T>& a)
+		{
+			x = a.x * m.x + x;
+			y = a.y * m.y + y;
+			z = a.z * m.z + z;
 		}
 
 		void clear()

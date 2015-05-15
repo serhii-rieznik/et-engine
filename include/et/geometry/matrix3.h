@@ -21,6 +21,13 @@ namespace et
 		matrix3(const vector3<T>& c0, const vector3<T>& c1, const vector3<T>& c2) 
 			{ mat[0] = c0; mat[1] = c1; mat[2] = c2; }
 
+		matrix3(T s)
+		{
+			mat[0] = vector3<T>(s, 0, 0);
+			mat[1] = vector3<T>(0, s, 0);
+			mat[2] = vector3<T>(0, 0, s);
+		}
+
 		matrix3(T a00, T a01, T a02, T a10, T a11, T a12, T a20, T a21, T a22)
 		{
 			mat[0] = vector3<T>(a00, a01, a02);
