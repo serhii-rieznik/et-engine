@@ -64,6 +64,12 @@ namespace et
 		const T* data() const
 			{ return c; }
 
+		char* binary() 
+			{ return reinterpret_cast<char*>(c); }
+
+		const char* binary() const
+			{ return reinterpret_cast<char*>(c); }
+
 		T right() const 
 			{ return left + width; }
 

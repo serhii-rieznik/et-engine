@@ -13,17 +13,16 @@
 namespace et
 {
 	template <int> struct Vector4AlignHelper { };
+
+#if (ET_ENABLE_VEC4_ALIGN)
 	template <> struct ET_ALIGNED( 4) Vector4AlignHelper<1> { };
 	template <> struct ET_ALIGNED( 8) Vector4AlignHelper<2> { };
 	template <> struct ET_ALIGNED(16) Vector4AlignHelper<4> { };
 	template <> struct ET_ALIGNED(32) Vector4AlignHelper<8> { };
+#endif
 
 	template <typename T>
-#if (ET_ENABLE_VEC4_ALIGN)
 	struct vector4 : Vector4AlignHelper<sizeof(T)>
-#else
-	struct vector4
-#endif
 	{
 	public:
 		typedef T ComponentsType;
@@ -213,6 +212,19 @@ namespace et
 			x /= w;
 			y /= w;
 			z /= w;
+		}
+
+		void normalize()
+		{
+			T l = dotSelf();
+			if (l > std::numeric_limits<float>::epsilon())
+			{
+				l = std::sqrt(l);
+				x /= l;
+				y /= l;
+				z /= l;
+				w /= l;
+			}
 		}
 	};
 
