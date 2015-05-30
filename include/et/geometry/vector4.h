@@ -226,6 +226,9 @@ namespace et
 				w /= l;
 			}
 		}
+
+		float length() const 
+			{ return std::sqrt(dotSelf()); }
 	};
 
 	template <typename T>
