@@ -190,7 +190,6 @@ namespace et
 			w = a * m.w;
 		}
 
-
 		void clear()
 		{
 			x = 0;
@@ -214,6 +213,16 @@ namespace et
 			z /= w;
 		}
 
+		float divideByW()
+		{
+			float r = w;
+			x /= w;
+			y /= w;
+			z /= w;
+			w = 1.0f;
+			return r;
+		}
+
 		void normalize()
 		{
 			T l = dotSelf();
@@ -229,6 +238,13 @@ namespace et
 
 		float length() const 
 			{ return std::sqrt(dotSelf()); }
+
+		template <int x, int y, int z, int w>
+		vector4<T> shuffle() const
+			{ return vector4<T>(c[x], c[y], c[z], c[w]); }
+
+		vector4<T> reciprocal() const
+			{ return vector4<T>(1.0f / x, 1.0f / y, 1.0f / z, 1.0f / w); }
 	};
 
 	template <typename T>
