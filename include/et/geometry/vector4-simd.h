@@ -36,14 +36,11 @@ namespace et
 		template <int c>
 		float component() const 
 		{
-			auto shuffled = _mm_shuffle_ps(_data, _data, _MM_SHUFFLE(c, c, c, c));
-			float result;
-			_mm_store_ss(&result, shuffled);
-			return result;
+			return _mm_cvtss_f32(_mm_shuffle_ps(_data, _data, _MM_SHUFFLE(c, c, c, c)));
 		}
 
 		float x() const
-			{ return component<0>(); }
+			{ return _mm_cvtss_f32(_data); }
 
 		float y() const
 			{ return component<1>(); }
@@ -85,55 +82,74 @@ namespace et
 		const vector3<float> xyz() const
 			{ return vector3<float>(x(), y(), z()); };
 
+		float dot(const vec4simd& r) const
+		{
+			return _mm_cvtss_f32(_mm_dp_ps(_data, r._data, 0x71));
+		}
+
+		vec4simd dotVector(const vec4simd& r) const
+		{
+			return vec4simd(_mm_dp_ps(_data, r._data, 0x71));
+		}
+
 		float dotSelf() const
 		{
-			__m128 s0 = _mm_mul_ps(_data, _data);
-			__m128 s1 = _mm_hadd_ps(s0, s0);
-			__m128 s2 = _mm_hadd_ps(s1, s1);
-			float result;
-			_mm_store_ss(&result, s2);
-			return result;
+			return _mm_cvtss_f32(_mm_dp_ps(_data, _data, 0x71));
+		}
+
+		vec4simd dotSelfVector() const
+		{
+			return vec4simd(_mm_dp_ps(_data, _data, 0x71));
 		}
 
 		float length() const
 		{
-			__m128 s0 = _mm_mul_ps(_data, _data);
-			__m128 s1 = _mm_hadd_ps(s0, s0);
-			__m128 s2 = _mm_hadd_ps(s1, s1);
-			__m128 s3 = _mm_sqrt_ss(s2);
-			float result;
-			_mm_store_ss(&result, s3);
-			return result;
+			__m128 s0 = _mm_dp_ps(_data, _data, 0x71);
+			return _mm_cvtss_f32(_mm_sqrt_ss(s0));
 		}
 
 		void normalize()
 		{
-			__m128 s0 = _mm_mul_ps(_data, _data);
-			__m128 s1 = _mm_hadd_ps(s0, s0);
-			__m128 s2 = _mm_hadd_ps(s1, s1);
-			__m128 s3 = _mm_rsqrt_ps(s2);
-			_data = _mm_mul_ps(_data, s3);
+			__m128 norm = _mm_sqrt_ps(_mm_dp_ps(_data, _data, 0x7F));
+			_data = _mm_div_ps(_data, norm);		
 		}
 
-		vec4simd inverseSqrtVector() const
+		vec4simd inverseLengthVector() const
 		{
-			__m128 s0 = _mm_mul_ps(_data, _data);
-			__m128 s1 = _mm_hadd_ps(s0, s0);
-			__m128 s2 = _mm_hadd_ps(s1, s1);
-			return vec4simd(_mm_rsqrt_ps(s2));
+			__m128 s0 = _mm_dp_ps(_data, _data, 0x7F);
+			return vec4simd(_mm_rsqrt_ps(s0));
 		}
 
 		vec4simd lengthVector() const
 		{
-			__m128 s0 = _mm_mul_ps(_data, _data);
-			__m128 s1 = _mm_hadd_ps(s0, s0);
-			__m128 s2 = _mm_hadd_ps(s1, s1);
-			return vec4simd(_mm_sqrt_ss(s2));
+			__m128 s0 = _mm_dp_ps(_data, _data, 0x71);
+			return vec4simd(_mm_sqrt_ss(s0));
 		}
 
 		vec4simd reciprocal() const 
 		{
 			return vec4simd(_mm_rcp_ps(_data));
+		}
+
+		vec4simd crossXYZ(const vec4simd& r) const
+		{
+			__m128 result = _mm_sub_ps
+			( 
+				_mm_mul_ps(_data, _mm_shuffle_ps(r._data, r._data, _MM_SHUFFLE(3, 0, 2, 1))), 
+				_mm_mul_ps(r._data, _mm_shuffle_ps(_data, _data, _MM_SHUFFLE(3, 0, 2, 1))) 
+			);
+			return vec4simd(_mm_shuffle_ps(result, result, _MM_SHUFFLE(3, 0, 2, 1 )));
+		}
+
+		vec4simd maxWith(const vec4simd& r) const
+		{
+			return vec4simd(_mm_max_ps(_data, r._data));
+		}
+
+		template <int x, int y, int z, int w>
+		vec4simd shuffle()
+		{
+			return vec4simd(_mm_shuffle_ps(_data, _data, _MM_SHUFFLE(w, z, y, x)));
 		}
 
 	public:
@@ -190,10 +206,35 @@ namespace et
 			return vec4simd(_mm_mul_ps(_data, r._data));
 		}
 
+		vec4simd operator / (const vec4simd& r) const
+		{
+			return vec4simd(_mm_div_ps(_data, r._data));
+		}
+
+		vec4simd operator * (float r) const
+		{
+			return vec4simd(_mm_mul_ps(_data, _mm_set_ps1(r)));
+		}
+
+		vec4simd operator / (float r) const
+		{
+			return vec4simd(_mm_div_ps(_data, _mm_set_ps1(r)));
+		}
+
 	public:
 		void loadToVec4(vector4<float>& dst) const
 		{
 			_mm_storeu_ps(dst.data(), _data);
+		}
+
+		void loadToFloats(float dst[4]) const
+		{
+			_mm_store_ps(dst, _data);
+		}
+
+		void loadToFloatsUnaligned(float dst[4]) const
+		{
+			_mm_storeu_ps(dst, _data);
 		}
 
 		vector4<float> toVec4() const
@@ -202,6 +243,9 @@ namespace et
 			loadToVec4(result);
 			return result;
 		}
+
+		const __m128& data() const 
+			{ return _data; }
 
 	private:
 		__m128 _data;
