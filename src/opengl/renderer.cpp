@@ -296,6 +296,11 @@ BinaryDataStorage Renderer::readFramebufferData(const vec2i& size, TextureFormat
 	return result;
 }
 
+void Renderer::finishRendering()
+{
+	glFinish();
+}
+
 /*
  * Default shaders
  */

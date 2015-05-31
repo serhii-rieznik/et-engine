@@ -51,6 +51,8 @@ namespace et
 
 		vec2 currentViewportCoordinatesToScene(const vec2i& coord);
 		vec2 currentViewportSizeToScene(const vec2i& size);
+		
+		void finishRendering();
 
 		ET_DECLARE_PROPERTY_GET_COPY_SET_COPY(uint32_t, defaultTextureBindingUnit, setDefaultTextureBindingUnit)
 		

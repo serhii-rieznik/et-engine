@@ -7,7 +7,12 @@
 
 #pragma once
 
-#include <xmmintrin.h>
+#if defined(__SSE4_1__)
+#	include <smmintrin.h>
+#else
+#	include <pmmintrin.h>
+#endif
+
 #include <et/geometry/vector3.h>
 
 namespace et
@@ -52,7 +57,7 @@ namespace et
 			{ return component<3>(); }
 
 	public:
-		void clear() 
+		void clear()
 		{
 			_data = _mm_setzero_ps();
 		}
@@ -84,45 +89,45 @@ namespace et
 
 		float dot(const vec4simd& r) const
 		{
-			return _mm_cvtss_f32(_mm_dp_ps(_data, r._data, 0x71));
+			return _mm_cvtss_f32(dotImpl(_data, r._data, 0x71));
 		}
 
 		vec4simd dotVector(const vec4simd& r) const
 		{
-			return vec4simd(_mm_dp_ps(_data, r._data, 0x71));
+			return vec4simd(dotImpl(_data, r._data, 0x71));
 		}
 
 		float dotSelf() const
 		{
-			return _mm_cvtss_f32(_mm_dp_ps(_data, _data, 0x71));
+			return _mm_cvtss_f32(dotImpl(_data, _data, 0x71));
 		}
 
 		vec4simd dotSelfVector() const
 		{
-			return vec4simd(_mm_dp_ps(_data, _data, 0x71));
+			return vec4simd(dotImpl(_data, _data, 0x71));
 		}
 
 		float length() const
 		{
-			__m128 s0 = _mm_dp_ps(_data, _data, 0x71);
+			__m128 s0 = dotImpl(_data, _data, 0x71);
 			return _mm_cvtss_f32(_mm_sqrt_ss(s0));
 		}
 
 		void normalize()
 		{
-			__m128 norm = _mm_sqrt_ps(_mm_dp_ps(_data, _data, 0x7F));
+			__m128 norm = _mm_sqrt_ps(dotImpl(_data, _data, 0x7F));
 			_data = _mm_div_ps(_data, norm);		
 		}
 
 		vec4simd inverseLengthVector() const
 		{
-			__m128 s0 = _mm_dp_ps(_data, _data, 0x7F);
+			__m128 s0 = dotImpl(_data, _data, 0x7F);
 			return vec4simd(_mm_rsqrt_ps(s0));
 		}
 
 		vec4simd lengthVector() const
 		{
-			__m128 s0 = _mm_dp_ps(_data, _data, 0x71);
+			__m128 s0 = dotImpl(_data, _data, 0x71);
 			return vec4simd(_mm_sqrt_ss(s0));
 		}
 
@@ -247,6 +252,18 @@ namespace et
 		const __m128& data() const 
 			{ return _data; }
 
+	private:
+		__m128 dotImpl(const __m128& a, const __m128& b, int mask) const
+		{
+#		if defined(__SSE4_1__)
+			return _mm_dp_ps(a, b, 0x71);
+#		else
+			__m128 dp = _mm_mul_ps(_data, _data);
+			__m128 s1 = _mm_hadd_ps(dp, dp);
+			return _mm_hadd_ps(s1, s1);
+#		endif
+		}
+		
 	private:
 		__m128 _data;
 	};

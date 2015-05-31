@@ -199,14 +199,12 @@ void et::tga::loadFromStream(std::istream& source, TextureDescription& desc)
 	TGAHeader header = { };
 	source.read(reinterpret_cast<char*>(header), sizeof(TGAHeader));
 	
-	bool compressed = false;
 	if (memcmp(uTGAcompare, header, sizeof(TGAHeader)) == 0)
 	{
 
 	}
 	else if (memcmp(cTGAcompare, header, sizeof(TGAHeader)) == 0)
 	{
-		compressed = true;
 		ET_FAIL("Not implemented");
 	}
 	else
