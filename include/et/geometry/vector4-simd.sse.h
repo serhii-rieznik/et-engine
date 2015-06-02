@@ -146,11 +146,6 @@ namespace et
 			return vec4simd(_mm_shuffle_ps(result, result, _MM_SHUFFLE(3, 0, 2, 1 )));
 		}
 
-		vec4simd maxWith(const vec4simd& r) const
-		{
-			return vec4simd(_mm_max_ps(_data, r._data));
-		}
-
 		template <int x, int y, int z, int w>
 		vec4simd shuffle() const
 		{
