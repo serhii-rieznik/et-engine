@@ -56,6 +56,9 @@ namespace et
 		float w() const 
 			{ return component<3>(); }
 
+		const vector3<float> xyz() const
+			{ return vector3<float>(x(), y(), z()); };
+		
 	public:
 		void clear()
 		{
@@ -64,28 +67,30 @@ namespace et
 
 		void addMultiplied(const vec4simd& r, float x)
 		{
-			__m128 scalar = _mm_set_ps1(x);
-			scalar = _mm_mul_ps(scalar, r._data);
-			_data = _mm_add_ps(_data, scalar);
+			_data = _mm_add_ps(_data, _mm_mul_ps(r._data, _mm_set_ps1(x)));
 		}
 
+		void addMultiplied(const vec4simd& r, const vec4simd& q)
+		{
+			_data = _mm_add_ps(_data, _mm_mul_ps(r._data, q._data));
+		}
+		
 		void setMultiplied(const vec4simd& r, float x)
 		{
-			__m128 scalar = _mm_set_ps1(x);
-			_data = _mm_mul_ps(scalar, r._data);
+			_data = _mm_mul_ps(_mm_set_ps1(x), r._data);
 		}
 
+		void set_A_add_B_times_C(const vec4simd& a, const vec4simd& b, const vec4simd& c)
+		{
+			_data = _mm_add_ps(a._data, _mm_mul_ps(b._data, c._data));
+		}
+		
 		float divideByW()
 		{
-			float result;
 			__m128 w = _mm_shuffle_ps(_data, _data, _MM_SHUFFLE(3, 3, 3, 3));
-			_mm_store_ss(&result, w);
 			_data = _mm_div_ps(_data, w);
-			return result;
+			return _mm_cvtss_f32(w);
 		}
-
-		const vector3<float> xyz() const
-			{ return vector3<float>(x(), y(), z()); };
 
 		float dot(const vec4simd& r) const
 		{
