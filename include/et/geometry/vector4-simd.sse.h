@@ -7,12 +7,7 @@
 
 #pragma once
 
-#if defined(__SSE4_1__)
-#	include <smmintrin.h>
-#else
-#	include <pmmintrin.h>
-#endif
-
+#include <pmmintrin.h>
 #include <et/geometry/vector3.h>
 
 namespace et
@@ -170,7 +165,7 @@ namespace et
 		
 		bool firstComponentIsLessThan(const vec4simd& r) const
 		{
-			return _mm_comilt_ss(_data, r._data);
+			return (_mm_comilt_ss(_data, r._data) != 0);
 		}
 		
 		vec4simd sqrtFirstComponent() const
@@ -281,13 +276,9 @@ namespace et
 	private:
 		__m128 dotImpl(const __m128& a, const __m128& b, int mask) const
 		{
-#		if defined(__SSE4_1__)
-			return _mm_dp_ps(a, b, 0x71);
-#		else
-			__m128 dp = _mm_mul_ps(_data, _data);
+			__m128 dp = _mm_mul_ps(a, b);
 			__m128 s1 = _mm_hadd_ps(dp, dp);
 			return _mm_hadd_ps(s1, s1);
-#		endif
 		}
 		
 		__m128 floorImpl(__m128 x) const
