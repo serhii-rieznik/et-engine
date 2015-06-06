@@ -387,10 +387,7 @@ void RenderContextPrivate::stop()
 void RenderContextPrivate::performUpdateAndRender()
 {
 #if !defined(ET_CONSOLE_APPLICATION)
-	bool shouldUpdate = application().running() &&
-		windowController->applicationNotifier.shouldPerformRendering();
-
-	if (shouldUpdate)
+	if (windowController->applicationNotifier.shouldPerformRendering())
 	{
 		CGLLockContext(cOpenGLContext);
 		CGLSetCurrentContext(cOpenGLContext);
