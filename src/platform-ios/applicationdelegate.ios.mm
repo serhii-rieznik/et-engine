@@ -32,7 +32,7 @@ using namespace et;
 	CADisplayLink* _displayLink;
 	
 	BOOL _shouldUnlockRenderLock;
-	AtomicBool _renderThreadStarted;
+	std::atomic<bool> _renderThreadStarted;
 }
 
 @end

@@ -27,8 +27,8 @@ namespace et
 		pthread_t thread;
 		pthread_mutex_t suspendMutex;
 		pthread_cond_t suspend;
-		AtomicBool running;
-		AtomicBool suspended;
+		std::atomic<bool> running;
+		std::atomic<bool> suspended;
 		ThreadId threadId = 0;
 	};
 }

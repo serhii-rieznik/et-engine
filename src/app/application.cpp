@@ -219,6 +219,7 @@ void Application::stop()
 void Application::terminated()
 {
 	_delegate->applicationWillTerminate();
+	stop();
 }
 
 std::string Application::resolveFileName(const std::string& path)

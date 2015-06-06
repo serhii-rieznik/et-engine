@@ -165,9 +165,9 @@ namespace et
 		std::string _emptyParamter;
 		StringList _launchParameters;
 
-		AtomicBool _running;
-		AtomicBool _active;
-		AtomicBool _suspended;
+		std::atomic<bool> _running;
+		std::atomic<bool> _active;
+		std::atomic<bool> _suspended;
 		
 		size_t _renderingContextHandle = 0;
 		uint64_t _lastQueuedTimeMSec = 0;
