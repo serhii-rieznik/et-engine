@@ -156,12 +156,7 @@ namespace et
 		{
 			return false;
 		}
-		
-		vec4simd sqrtFirstComponent() const
-		{
-			return vec4simd();
-		}
-		
+				
 		vec4simd sqrt() const
 		{
 			return vec4simd(vsqrtf(_data));

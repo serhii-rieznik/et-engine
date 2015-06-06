@@ -168,12 +168,7 @@ namespace et
 			return (_mm_comilt_ss(_data, r._data) != 0);
 		}
 		
-		vec4simd sqrtFirstComponent() const
-		{
-			return vec4simd(_mm_sqrt_ss(_data));
-		}
-
-		vec4simd sqrt() const
+		vec4simd sqrt() const	
 		{
 			return vec4simd(_mm_sqrt_ps(_data));
 		}

@@ -142,11 +142,8 @@ namespace et
 			{ x /= value; y /= value; z /= value; w /= value; return *this; }
 		
 		vector4& operator = (const vector4& value)
-			{ x = value.x; y = value.y; z = value.z; w = value.w; return *this; }
+			{ memcpy(c, value.c, sizeof(c)); return *this; }
 		
-		vector4& operator = (vector4&& value)
-			{ x = value.x; y = value.y; z = value.z; w = value.w; return *this; }
-
 		vector2<T>& xy()
 			{ return *(reinterpret_cast<vector2<T>*>(c)); }
 

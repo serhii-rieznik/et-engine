@@ -74,7 +74,8 @@ namespace et
 		
 		void setMultiplied(const vec4simd& r, float x)
 		{
-			_data = r._data * (float32x4_t{x, x, x, x});
+			float32x4_t s = {x, x, x, x};
+			_data = r._data * s;
 		}
 
 		void setMultiplied(const vec4simd& r, const vec4simd& q)
@@ -153,10 +154,9 @@ namespace et
 
 		vec4simd crossXYZ(const vec4simd& r) const
 		{
-			return vec4simd(_data[1] * r._data[2] - _data[2] * r._data[1],
-							_data[2] * r._data[0] - _data[0] * r._data[2],
-							_data[0] * r._data[1] - _data[1] * r._data[0],
-							0.0f);
+			vec4simd s0 = shuffle<1, 2, 0, 3>() * r.shuffle<2, 0, 1, 3>();
+			vec4simd s1 = shuffle<2, 0, 1, 3>() * r.shuffle<1, 2, 0, 3>();
+			return s0 - s1;
 		}
 
 		template <int x, int y, int z, int w>
@@ -180,14 +180,9 @@ namespace et
 		
 		bool firstComponentIsLessThan(const vec4simd& r) const
 		{
-			return (vcltq_f32(_data, r._data))[0] != 0;
+			return (_data[0] < r._data[0]);
 		}
-		
-		vec4simd sqrtFirstComponent() const
-		{
-			return vec4simd(vsqrtq_f32(_data));
-		}
-		
+				
 		vec4simd sqrt() const
 		{
 			return vec4simd(vsqrtq_f32(_data));
