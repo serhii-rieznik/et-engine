@@ -105,7 +105,7 @@ namespace et
 			{ x/=value; y /= value; z /= value; return *this; }
 
 		vector3& operator = (const vector3& value)
-			{ x = value.x; y = value.y; z = value.z; return *this; }
+			{ memcpy(c, value.c, sizeof(c)); return *this; }
 		
 		T dotSelf() const 
 			{ return x*x + y*y + z*z; }

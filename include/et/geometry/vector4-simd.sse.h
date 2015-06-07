@@ -89,45 +89,48 @@ namespace et
 
 		float dot(const vec4simd& r) const
 		{
-			return _mm_cvtss_f32(dotImpl(_data, r._data, 0x71));
+			return _mm_cvtss_f32(dotImpl(_data, r._data));
 		}
 
 		vec4simd dotVector(const vec4simd& r) const
 		{
-			return vec4simd(dotImpl(_data, r._data, 0x71));
+			return vec4simd(dotImpl(_data, r._data));
 		}
 
 		float dotSelf() const
 		{
-			return _mm_cvtss_f32(dotImpl(_data, _data, 0x71));
+			return _mm_cvtss_f32(dotImpl(_data, _data));
 		}
 
 		vec4simd dotSelfVector() const
 		{
-			return vec4simd(dotImpl(_data, _data, 0x71));
+			__m128 dp = _mm_mul_ps(_data, _data);
+			__m128 s1 = _mm_hadd_ps(dp, dp);
+			return vec4simd(_mm_hadd_ps(s1, s1));
 		}
 
 		float length() const
 		{
-			__m128 s0 = dotImpl(_data, _data, 0x71);
-			return _mm_cvtss_f32(_mm_sqrt_ss(s0));
+			__m128 dp = _mm_mul_ps(_data, _data);
+			__m128 s1 = _mm_hadd_ps(dp, dp);
+			return ::sqrtf(_mm_cvtss_f32(_mm_hadd_ps(s1, s1)));
 		}
 
 		void normalize()
 		{
-			__m128 norm = _mm_sqrt_ps(dotImpl(_data, _data, 0x7F));
+			__m128 norm = _mm_sqrt_ps(dotImpl(_data, _data));
 			_data = _mm_div_ps(_data, norm);		
 		}
 
 		vec4simd inverseLengthVector() const
 		{
-			__m128 s0 = dotImpl(_data, _data, 0x7F);
+			__m128 s0 = dotImpl(_data, _data);
 			return vec4simd(_mm_rsqrt_ps(s0));
 		}
 
 		vec4simd lengthVector() const
 		{
-			__m128 s0 = dotImpl(_data, _data, 0x71);
+			__m128 s0 = dotImpl(_data, _data);
 			return vec4simd(_mm_sqrt_ss(s0));
 		}
 
@@ -269,7 +272,7 @@ namespace et
 			{ return _data; }
 
 	private:
-		__m128 dotImpl(const __m128& a, const __m128& b, int mask) const
+		__m128 dotImpl(const __m128& a, const __m128& b) const
 		{
 			__m128 dp = _mm_mul_ps(a, b);
 			__m128 s1 = _mm_hadd_ps(dp, dp);
