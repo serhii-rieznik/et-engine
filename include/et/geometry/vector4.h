@@ -50,9 +50,6 @@ namespace et
 
 		vector4(const vector4& c) :
 			x(c.x), y(c.y), z(c.z), w(c.w) { }
-
-		vector4(vector4&& c) :
-			x(c.x), y(c.y), z(c.z), w(c.w) { }
 		
 		explicit vector4(T s) :
 			x(s), y(s), z(s), w(s) { }
@@ -140,10 +137,10 @@ namespace et
 
 		vector4& operator /= (T value)
 			{ x /= value; y /= value; z /= value; w /= value; return *this; }
-		
+/*
 		vector4& operator = (const vector4& value)
 			{ memcpy(c, value.c, sizeof(c)); return *this; }
-		
+*/		
 		vector2<T>& xy()
 			{ return *(reinterpret_cast<vector2<T>*>(c)); }
 

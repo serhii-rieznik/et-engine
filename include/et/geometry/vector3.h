@@ -103,10 +103,10 @@ namespace et
 
 		vector3& operator /= (T value)
 			{ x/=value; y /= value; z /= value; return *this; }
-
+/*
 		vector3& operator = (const vector3& value)
 			{ memcpy(c, value.c, sizeof(c)); return *this; }
-		
+*/		
 		T dotSelf() const 
 			{ return x*x + y*y + z*z; }
 
