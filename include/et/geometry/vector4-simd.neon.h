@@ -242,7 +242,7 @@ namespace et
 
 		vec4simd operator / (const vec4simd& r) const
 		{
-			return vec4simd(_data * r._data);
+			return vec4simd(_data / r._data);
 		}
 
 		vec4simd operator * (float r) const
