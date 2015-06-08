@@ -146,7 +146,7 @@ namespace et
 				_mm_mul_ps(_data, _mm_shuffle_ps(r._data, r._data, _MM_SHUFFLE(3, 0, 2, 1))), 
 				_mm_mul_ps(r._data, _mm_shuffle_ps(_data, _data, _MM_SHUFFLE(3, 0, 2, 1))) 
 			);
-			return vec4simd(_mm_shuffle_ps(result, result, _MM_SHUFFLE(3, 0, 2, 1 )));
+			return vec4simd(_mm_shuffle_ps(result, result, _MM_SHUFFLE(3, 0, 2, 1)));
 		}
 
 		template <int x, int y, int z, int w>
