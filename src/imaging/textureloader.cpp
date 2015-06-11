@@ -12,6 +12,7 @@
 #include <et/imaging/hdrloader.h>
 #include <et/imaging/jpegloader.h>
 #include <et/imaging/tgaloader.h>
+#include <et/imaging/bmploader.h>
 
 using namespace et;
 
@@ -60,6 +61,12 @@ TextureDescription::Pointer et::loadTextureDescription(const std::string& fileNa
 		desc->target = TextureTarget::Texture_2D;
 		desc->setOrigin(fileName);
 		jpeg::loadInfoFromFile(fileName, desc.reference());
+	}
+	else if ((ext == "bmp"))
+	{
+		desc->target = TextureTarget::Texture_2D;
+		desc->setOrigin(fileName);
+		bmp::loadInfoFromFile(fileName, desc.reference());
 	}
 	else
 	{
@@ -120,6 +127,12 @@ TextureDescription::Pointer et::loadTexture(const std::string& fileName)
 		desc->target = TextureTarget::Texture_2D;
 		desc->setOrigin(fileName);
 		jpeg::loadFromFile(fileName, desc.reference());
+	}
+	else if ((ext == "bmp"))
+	{
+		desc->target = TextureTarget::Texture_2D;
+		desc->setOrigin(fileName);
+		bmp::loadFromFile(fileName, desc.reference());
 	}
 	else
 	{
