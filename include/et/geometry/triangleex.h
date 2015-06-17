@@ -34,8 +34,8 @@ namespace et
 		{
 			p -= Triangle<T>::v1();
 			
-			float dot20 = dot(p, Triangle<T>::edge2to1());
-			float dot21 = dot(p, Triangle<T>::edge3to1());
+			float dot20 = p.dot(Triangle<T>::edge2to1());
+			float dot21 = p.dot(Triangle<T>::edge3to1());
 			
 			vector3<T> result;
 			result.y = (_dot11 * dot20 - _dot01 * dot21) * _invDenom;
