@@ -163,6 +163,28 @@ void RenderContext::endRender()
 	_info.averageFrameTimeInMicroseconds += queryCurrentTimeInMicroSeconds() - _private->frameDuration;
 }
 
+void RenderContext::pushRenderingContext()
+{
+	ET_FAIL("Not implemented")
+}
+
+bool RenderContext::pushAndActivateRenderingContext()
+{
+	ET_FAIL("Not implemented")
+	return true;
+}
+
+bool RenderContext::activateRenderingContext()
+{
+	ET_FAIL("Not implemented")
+	return true;
+}
+
+void RenderContext::popRenderingContext()
+{
+	ET_FAIL("Not implemented")
+}
+
 /*
  *
  * RenderContextPrivate
@@ -371,7 +393,7 @@ void RenderContextPrivate::performUpdateAndRender()
 		CGLSetCurrentContext(cOpenGLContext);
 		
 		Threading::setRenderingThread(Threading::currentThread());
-		windowController->applicationNotifier.notifyIdle();
+		windowController->applicationNotifier.notifyUpdate();
 		
 		CGLFlushDrawable(cOpenGLContext);
 		CGLUnlockContext(cOpenGLContext);

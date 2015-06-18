@@ -24,13 +24,11 @@ size_t et::memoryUsage()
 size_t et::availableMemory()
 {
 	ET_FAIL("Not implemented.");
-	return 0;
 }
 
 void* et::allocateVirtualMemory(size_t)
 {
 	ET_FAIL("Not implemented.");
-	return nullptr;
 }
 
 void et::deallocateVirtualMemory(void*, size_t)

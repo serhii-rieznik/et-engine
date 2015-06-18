@@ -92,6 +92,28 @@ void RenderContext::endRender()
 	_info.averageFrameTimeInMicroseconds += queryCurrentTimeInMicroSeconds() - _private->frameDuration;
 }
 
+void RenderContext::pushRenderingContext()
+{
+	// TODO
+}
+
+bool RenderContext::activateRenderingContext()
+{
+	// TODO
+	return true;
+}
+
+bool RenderContext::pushAndActivateRenderingContext()
+{
+	pushRenderingContext();
+	return activateRenderingContext();
+}
+
+void RenderContext::popRenderingContext()
+{
+	// TODO
+}
+
 /*
  * RenderContextPrivate
  */

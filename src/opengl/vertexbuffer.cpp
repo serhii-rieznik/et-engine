@@ -90,12 +90,6 @@ void* VertexBuffer::map(size_t offset, size_t dataSize, MapBufferMode mode)
 
 	if (shouldUseMapBuffer)
 	{
-		if (accessFlags2x == 0)
-		{
-			log::error("glMapBuffer access flag %d is not supported.", mode);
-			return nullptr;
-		}
-		
 		result = reinterpret_cast<uint8_t*>(glMapBuffer(GL_ARRAY_BUFFER, accessFlags2x[static_cast<uint32_t>(mode)])) + offset;
 		checkOpenGLError("glMapBuffer(GL_ARRAY_BUFFER, %d)", mode);
 	}

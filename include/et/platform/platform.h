@@ -100,12 +100,22 @@ namespace et
 	enum Architecture
 	{
 		Architecture_Unknown,
-		
-		Architecture_32bit = 1,
-		Architecture_64bit = 2,
-		
-		currentArchitecture = (sizeof(void*) == 4) ? Architecture_32bit :
-			((sizeof(void*) == 8) ? Architecture_64bit : Architecture_Unknown)
+		Architecture_32bit,
+		Architecture_64bit,
 	};
-	
+
+	enum
+	{
+		currentArchitecture = (sizeof(void*) == 4) ? Architecture_32bit : 
+			((sizeof(void*) == 8) ? Architecture_64bit : Architecture_Unknown),
+
+#	if (ET_PLATFORM_IOS | ET_PLATFORM_ANDROID)
+		currentPlatformIsDesktop = 0,
+		currentPlatformIsMobile = 1,
+#	else
+		currentPlatformIsDesktop = 1,
+		currentPlatformIsMobile = 0,
+#	endif
+
+	};
 }

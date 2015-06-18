@@ -5,8 +5,11 @@
  *
  */
 
-#include <external/ogg/ogg.h>
-#include <external/vorbis/vorbisfile.h>
+#if !defined(ET_DISABLE_OGG)
+#	include <external/ogg/ogg.h>
+#	include <external/vorbis/vorbisfile.h>
+#endif
+
 
 #include <et/core/containers.h>
 #include <et/sound/sound.h>
@@ -25,21 +28,26 @@ namespace et
 			~TrackPrivate();
 			
 			void loadWAVE();
-			void loadOGG();
+			bool fillNextBuffer();
 
 			void rewind();
 			void rewindPCM();
-			void rewindOGG();
-			
-			bool fillNextBuffer();
 			bool fillNextPCMBuffer();
+
+#		if !defined(ET_DISABLE_OGG)
+			void loadOGG();
+			void rewindOGG();
 			bool fillNextOGGBuffer();
-			
+#		endif
+
 			enum SourceFormat
 			{
 				SourceFormat_Undefined,
 				SourceFormat_PCM,
+
+#			if !defined(ET_DISABLE_OGG)
 				SourceFormat_OGG,
+#			endif
 			};
 			
 		public:
@@ -68,10 +76,12 @@ namespace et
 			int buffersCount = 0;
 			int totalBuffers = 0;
 			
+#		if !defined(ET_DISABLE_OGG)
 			OggVorbis_File oggFile;
 			ov_callbacks oggCallbacks;
 			size_t oggStartPosition = 0;
-			
+#		endif			
+
 			SourceFormat sourceFormat = SourceFormat_Undefined;
         };
     }
@@ -110,10 +120,12 @@ Track::Track(const std::string& fileName)
 		{
 			_private->loadWAVE();
 		}
+#	if !defined(ET_DISABLE_OGG)
 		else if (ext == ".ogg")
 		{
 			_private->loadOGG();
 		}
+#	endif
 		else
 		{
 			log::error("Unsupported sound file extension %s", ext.c_str());
@@ -241,6 +253,8 @@ TrackPrivate::TrackPrivate(const std::string& filename) :
 	_filename(filename)
 {
 	etFillMemory(&buffers, 0, sizeof(buffers));
+
+#if !defined(ET_DISABLE_OGG)
 	etFillMemory(&oggFile, 0, sizeof(oggFile));
 	etFillMemory(&oggCallbacks, 0, sizeof(oggCallbacks));
 
@@ -258,7 +272,6 @@ TrackPrivate::TrackPrivate(const std::string& filename) :
 		return static_cast<size_t>(dataRead);
 	};
 	
-	
 	oggCallbacks.seek_func = [](void* datasource, ogg_int64_t p1, int p2) -> int
 	{
 		InputStream* astream = reinterpret_cast<InputStream*>(datasource);
@@ -274,13 +287,16 @@ TrackPrivate::TrackPrivate(const std::string& filename) :
 		InputStream* astream = reinterpret_cast<InputStream*>(datasource);
 		return (astream->valid() && astream->stream().good()) ? static_cast<long>(astream->stream().tellg()) : 0;
 	};
+#endif
 }
 
 TrackPrivate::~TrackPrivate()
 {
+#if !defined(ET_DISABLE_OGG)
 	if (sourceFormat == SourceFormat_OGG)
 		ov_clear(&oggFile);
-	
+#endif
+
 	alDeleteBuffers(buffersCount, buffers);
 	checkOpenALError("alDeleteBuffers(%d, ...", buffersCount);
 }
@@ -291,8 +307,12 @@ bool TrackPrivate::fillNextBuffer()
 	{
 		case SourceFormat_PCM:
 			return fillNextPCMBuffer();
+
+#if !defined(ET_DISABLE_OGG)
 		case SourceFormat_OGG:
 			return fillNextOGGBuffer();
+#	endif
+
 		default:
 			return false;
 	}
@@ -306,10 +326,12 @@ void TrackPrivate::rewind()
 			rewindPCM();
 			break;
 			
+#	if !defined(ET_DISABLE_OGG)
 		case SourceFormat_OGG:
 			rewindOGG();
 			break;
-			
+#	endif
+
 		default:
 			break;
 	}
@@ -421,6 +443,8 @@ bool TrackPrivate::fillNextPCMBuffer()
 /*
  * OGG stuff
  */
+#if !defined(ET_DISABLE_OGG)
+
 void TrackPrivate::loadOGG()
 {
 	int result = ov_open_callbacks(stream.ptr(), &oggFile, nullptr, -1, oggCallbacks);
@@ -544,7 +568,6 @@ void TrackPrivate::rewindOGG()
 	pcmReadOffset = 0;
 }
 
-
 /*
  * Service functions
  */
@@ -576,3 +599,4 @@ void checkOGGError(long code, const char* tag, const char* filename)
 			break;
 	}
 }
+#endif

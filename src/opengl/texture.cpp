@@ -150,24 +150,30 @@ void Texture::compareRefToTexture(RenderContext*, bool, int32_t)
 void Texture::generateTexture(RenderContext*)
 {
 #if !defined(ET_CONSOLE_APPLICATION)
+	uint32_t texture = static_cast<uint32_t>(apiHandle());
+	bool validTexture = glIsTexture(texture) != 0;
+	checkOpenGLError("glIsTexture - %s", name().c_str());
+
+	if (!validTexture)
 	{
-		uint32_t texture = static_cast<uint32_t>(apiHandle());
-		if (!glIsTexture(texture))
-		{
-			glGenTextures(1, &texture);
-			setAPIHandle(texture);
-		}
+		glGenTextures(1, &texture);
+		checkOpenGLError("glGenTextures - %s", name().c_str());
+		setAPIHandle(texture);
 	}
-	
-	checkOpenGLError("Texture::generateTexture - %s", name().c_str());
 #endif
 }
 
 void Texture::buildData(const char* aDataPtr, size_t aDataSize)
 {
 #if !defined(ET_CONSOLE_APPLICATION)
-	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+	glPixelStorei(GL_UNPACK_ALIGNMENT, _desc->alignment);
 	checkOpenGLError("glPixelStorei");
+
+#if defined(GL_UNPACK_ROW_LENGTH)
+	glPixelStorei(GL_UNPACK_ROW_LENGTH, _desc->rowSize);
+	checkOpenGLError("glPixelStorei");
+#endif
 	
 	auto targetValue = textureTargetValue(_desc->target);
 	auto internalFormatValue = textureFormatValue(_desc->internalformat);
@@ -323,8 +329,13 @@ void Texture::updatePartialDataDirectly(RenderContext* rc, const vec2i& offset,
 	
     rc->renderState().bindTexture(defaultBindingUnit, static_cast<uint32_t>(apiHandle()), _desc->target);
 	
-	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+	glPixelStorei(GL_UNPACK_ALIGNMENT, _desc->alignment);
 	checkOpenGLError("glPixelStorei");
+
+#if defined(GL_UNPACK_ROW_LENGTH)
+	glPixelStorei(GL_UNPACK_ROW_LENGTH, _desc->rowSize);
+	checkOpenGLError("glPixelStorei");
+#endif
 	
 	auto targetValue = textureTargetValue(_desc->target);
 	auto typeValue = dataTypeValue(_desc->type);

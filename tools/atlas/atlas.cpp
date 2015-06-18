@@ -1,6 +1,6 @@
 #include <et/core/tools.h>
 #include <et/imaging/pngloader.h>
-#include <et/gui/textureatlaswriter.h>
+#include "..\..\..\et-ext\include\et-ext\scene2d\textureatlaswriter.h"
 
 using namespace et;
 
@@ -78,7 +78,7 @@ int main(int argc, char* argv[])
 
 	for (auto i : fileList)
 	{
-		TextureDescription::Pointer desc(new TextureDescription);
+		TextureDescription::Pointer desc = TextureDescription::Pointer::create();
 		png::loadInfoFromFile(i, desc.reference());
 		
 		if ((desc->size.x > outputSize) || (desc->size.y > outputSize))

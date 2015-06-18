@@ -81,13 +81,13 @@
 													et::log::info(__VA_ARGS__); \
 													et::checkOpenGLErrorEx(ET_CALL_FUNCTION, __FILE__, \ 
 														ET_TO_CONST_CHAR(__LINE__), __VA_ARGS__); \
-												} while (0);
+												} while (0)
 #	else
 #		define checkOpenGLError(...)			do { et::checkOpenGLErrorEx(ET_CALL_FUNCTION, __FILE__, \
-													ET_TO_CONST_CHAR(__LINE__), __VA_ARGS__); } while (0);
+													ET_TO_CONST_CHAR(__LINE__), __VA_ARGS__); } while (0)
 #	endif
 #
-#	define ET_OPENGL_DEBUG_SCOPE_IN_DEBUG		OpenGLDebugScope etOpenGLDebugScope(ET_CALL_FUNCTION);
+#	define ET_OPENGL_DEBUG_SCOPE_IN_DEBUG		OpenGLDebugScope etOpenGLDebugScope(ET_CALL_FUNCTION)
 #
 #else
 #
@@ -102,8 +102,7 @@
 #	error Vertex Array Objects are not supported on selected platform
 #endif
 
-#define ET_OPENGL_DEBUG_SCOPE					OpenGLDebugScope etOpenGLDebugScope(ET_CALL_FUNCTION);
-
+#define ET_OPENGL_DEBUG_SCOPE					OpenGLDebugScope etOpenGLDebugScope(ET_CALL_FUNCTION)
 
 namespace et
 {
@@ -163,7 +162,7 @@ namespace et
 	uint32_t primitiveTypeValue(PrimitiveType);
 	
 	std::pair<uint32_t, uint32_t> blendStateValue(BlendState);
-	BlendState blendValuesToBlendState(int32_t source, int32_t dest);
+	BlendState blendValuesToBlendState(uint32_t source, uint32_t dest);
 	
 	size_t primitiveCount(uint32_t mode, size_t count);
 

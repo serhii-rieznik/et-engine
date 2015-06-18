@@ -20,13 +20,13 @@ namespace et
 			T c[3];
 		};
 
-		vector3() :
-			x(static_cast<T>(0)), y(static_cast<T>(0)), z(static_cast<T>(0)) { }
+		vector3()
+#	if !defined(ET_DISABLE_VECTOR_INITIALIZATION)
+			: x(T(0)), y(T(0)), z(T(0))
+#	endif
+			{ }
 		
 		vector3(const vector3& m) :
-			x(m.x), y(m.y), z(m.z) { }
-		
-		vector3(vector3&& m) :
 			x(m.x), y(m.y), z(m.z) { }
 		
 		explicit vector3(T val) :
@@ -103,13 +103,10 @@ namespace et
 
 		vector3& operator /= (T value)
 			{ x/=value; y /= value; z /= value; return *this; }
-
+/*
 		vector3& operator = (const vector3& value)
-			{ x = value.x; y = value.y; z = value.z; return *this; }
-		
-		vector3& operator = (vector3&& value)
-			{ x = value.x; y = value.y; z = value.z; return *this; }
-		
+			{ memcpy(c, value.c, sizeof(c)); return *this; }
+*/		
 		T dotSelf() const 
 			{ return x*x + y*y + z*z; }
 
@@ -118,6 +115,9 @@ namespace et
 
 		vector3 cross(const vector3 &vec) const
 			{ return vector3(y * vec.z - z * vec.y, z * vec.x - x * vec.z, 	x * vec.y - y * vec.x ); 	}
+
+		float dot(const vector3& vec) const 
+			{ return x * vec.x + y * vec.y + z * vec.z; }
 
 		vector2<T>& xy()
 			{ return *((vector2<T>*)(c)); }
@@ -150,6 +150,34 @@ namespace et
 			{
 				return *this;
 			}
+		}
+
+		void setMultiplied(const vector3<T>& m, T a)
+		{
+			x = a * m.x;
+			y = a * m.y;
+			z = a * m.z;
+		}
+
+		void addMultiplied(const vector3<T>& m, T a)
+		{
+			x += a * m.x;
+			y += a * m.y;
+			z += a * m.z;
+		}
+
+		void addMultiplied(const vector3<T>& m, const vector3<T>& a)
+		{
+			x = a.x * m.x + x;
+			y = a.y * m.y + y;
+			z = a.z * m.z + z;
+		}
+
+		void clear()
+		{
+			x = 0;
+			y = 0;
+			z = 0;
 		}
 
 		bool operator == (const vector3<T>& r) const

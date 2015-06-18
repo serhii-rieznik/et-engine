@@ -772,15 +772,25 @@ void Program::setUniform(int nLoc, uint32_t type, const mat4* value, size_t amou
  */
 bool isSamplerUniform(uint32_t value)
 {
-	return 
-		(value == GL_SAMPLER_1D) || 
-		(value == GL_SAMPLER_2D) ||
+	return (value == GL_SAMPLER_2D) || (value == GL_SAMPLER_CUBE) || (value == GL_SAMPLER_2D_SHADOW) ||
+
+#	if defined(GL_SAMPLER_1D)
+		(value == GL_SAMPLER_1D) ||
+#	endif
+
+#	if defined(GL_SAMPLER_3D)
 		(value == GL_SAMPLER_3D) ||
-		(value == GL_SAMPLER_CUBE) || 
+#	endif
+	
+#	if defined(GL_SAMPLER_2D_RECT)
 		(value == GL_SAMPLER_2D_RECT) ||
 		(value == GL_SAMPLER_2D_RECT_SHADOW) ||
-		(value == GL_SAMPLER_2D_SHADOW) ||
+#	endif
+	
+#	if defined(GL_SAMPLER_2D_ARRAY)
 		(value == GL_SAMPLER_2D_ARRAY) ||
-		(value == GL_SAMPLER_2D_ARRAY_SHADOW)
-		;
+		(value == GL_SAMPLER_2D_ARRAY_SHADOW) ||
+#	endif
+
+		false;
 }

@@ -77,6 +77,11 @@
 #	define ET_KEY_DOWN					8
 #	define ET_KEY_UP					9
 #
+#	define ET_KEY_A						10
+#	define ET_KEY_D						11
+#	define ET_KEY_S						12
+#	define ET_KEY_W						13
+#
 #elif (ET_PLATFORM_WIN)
 #
 #	define ET_KEY_RETURN				VK_RETURN

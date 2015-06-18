@@ -121,7 +121,7 @@ std::pair<uint32_t, uint32_t> et::blendStateValue(BlendState value)
 	return blendStatesMap[static_cast<uint32_t>(value)];
 }
 
-BlendState et::blendValuesToBlendState(int32_t source, int32_t dest)
+BlendState et::blendValuesToBlendState(uint32_t source, uint32_t dest)
 {
 	size_t availableBlendModes = sizeof(blendStatesMap) / sizeof(blendStatesMap[0]);
 	
@@ -316,8 +316,19 @@ uint32_t et::textureTargetValue(TextureTarget value)
 	static const uint32_t valuesMap[TextureTarget_max] =
 	{
 		GL_TEXTURE_2D, // Texture_2D,
+		
+#	if defined(GL_TEXTURE_2D_ARRAY)
 		GL_TEXTURE_2D_ARRAY, // Texture_2D_Array,
+#	else
+		GL_TEXTURE_2D, // Texture_2D_Array,
+#	endif
+		
+#	if defined(GL_TEXTURE_RECTANGLE)
 		GL_TEXTURE_RECTANGLE, // Texture_2D_Rect,
+#	else
+		GL_TEXTURE_2D, // Texture_2D_Rect,
+#	endif
+		
 		GL_TEXTURE_CUBE_MAP, // Texture_Cube,
 	};
 	
@@ -348,6 +359,12 @@ uint32_t et::dataTypeValue(DataType value)
 		GL_UNSIGNED_SHORT_4_4_4_4, // UnsignedShort_4444
 		GL_UNSIGNED_SHORT_5_5_5_1, // UnsignedShort_5551
 		GL_UNSIGNED_SHORT_5_6_5, // UnsignedShort_565
+
+#	if defined(GL_UNSIGNED_INT_8_8_8_8_REV)
+		GL_UNSIGNED_INT_8_8_8_8_REV, // UnsignedInt_8888_Rev
+#	else
+		GL_UNSIGNED_BYTE
+#	endif
 	};
 	
 	ET_SAMPLE_VALUE_FROM_MAP
@@ -873,6 +890,13 @@ void et::etTexImage2D(uint32_t target, int level, int internalformat, GLsizei wi
 #endif
 }
 
+#if (ET_OPENGLES)
+
+void et::etTexImage3D(uint32_t, int, int, GLsizei, GLsizei, GLsizei, int, uint32_t, uint32_t, const GLvoid*)
+	{ ET_FAIL("Call to texImage3D in ES environment"); }
+
+#else
+
 void et::etTexImage3D(uint32_t target, int level, int internalformat, GLsizei width, GLsizei height,
 	GLsizei depth, int border, uint32_t format, uint32_t type, const GLvoid* pixels)
 {
@@ -888,6 +912,8 @@ void et::etTexImage3D(uint32_t target, int level, int internalformat, GLsizei wi
 #	endif
 #endif
 }
+
+#endif
 
 #if (ET_PLATFORM_WIN)
 #	define ET_VALIDATE_GLFUNC_EXT(F) if (F == nullptr) F = F##EXT;

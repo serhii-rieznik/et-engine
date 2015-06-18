@@ -20,9 +20,6 @@ namespace et
 		Triangle(const vector3<T>& av1, const vector3<T>& av2, const vector3<T>& av3) : 
 			_v1(av1), _v2(av2), _v3(av3) { fillSupportData(); }
 
-		Triangle(vector3<T>&& av1, vector3<T>&& av2, vector3<T>&& av3) : 
-			_v1(av1), _v2(av2), _v3(av3) { fillSupportData(); }
-
 		const vector3<T>& v1() const 
 			{ return _v1; }
 
@@ -45,7 +42,7 @@ namespace et
 			{ return _normal; }
 
 		T square() const
-			{ return cross(_edge2to1, _edge3to1).length() / static_cast<T>(2); }
+			{ return _edge2to1.cross(_edge3to1).length() / static_cast<T>(2); }
 
 	private:
 		
@@ -54,7 +51,7 @@ namespace et
 			_edge2to1 = _v2 - _v1;
 			_edge3to1 = _v3 - _v1;
 			_edge3to2 = _v3 - _v2;
-			_normal = cross(_edge2to1, _edge3to1);
+			_normal = _edge2to1.cross(_edge3to1);
 			_normal.normalize();
 		}
 

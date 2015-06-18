@@ -21,10 +21,6 @@ namespace et
 				   const vector3<T>& an1, const vector3<T>& an2, const vector3<T>& an3) :
 			Triangle<T>(av1, av2, av3), _n1(an1), _n2(an2), _n3(an3) { fillAdditionalSupportData(); }
 
-		TriangleEx(vector3<T>&& av1, vector3<T>&& av2, vector3<T>&& av3,
-				   vector3<T>&& an1, vector3<T>&& an2, vector3<T>&& an3) :
-			Triangle<T>(av1, av2, av3), _n1(an1), _n2(an2), _n3(an3) { fillAdditionalSupportData(); }
-		
 		const vector3<T>& n1() const
 			{ return _n1; }
 		
@@ -38,8 +34,8 @@ namespace et
 		{
 			p -= Triangle<T>::v1();
 			
-			float dot20 = dot(p, Triangle<T>::edge2to1());
-			float dot21 = dot(p, Triangle<T>::edge3to1());
+			float dot20 = p.dot(Triangle<T>::edge2to1());
+			float dot21 = p.dot(Triangle<T>::edge3to1());
 			
 			vector3<T> result;
 			result.y = (_dot11 * dot20 - _dot01 * dot21) * _invDenom;
@@ -48,18 +44,23 @@ namespace et
 			return result;
 		}
 		
+		vector3<T> interpolatedPosition(const vector3<T>& bc) const
+		{
+			return Triangle<T>::v1() * bc.x + Triangle<T>::v2() * bc.y + Triangle<T>::v3() * bc.z;
+		}
+		
 		vector3<T> interpolatedNormal(const vector3<T>& bc) const
 		{
 			return _n1 * bc.x + _n2 * bc.y + _n3 * bc.z;
 		}
-		
+
 	private:
 		
 		void fillAdditionalSupportData()
 		{
 			_dot00 = Triangle<T>::edge2to1().dotSelf();
 			_dot11 = Triangle<T>::edge3to1().dotSelf();
-			_dot01 = dot(Triangle<T>::edge2to1(), Triangle<T>::edge3to1());
+			_dot01 = Triangle<T>::edge2to1().dot(Triangle<T>::edge3to1());
 			_invDenom = T(1) / (_dot00 * _dot11 - _dot01 * _dot01);
 		}
 

@@ -13,17 +13,16 @@
 namespace et
 {
 	template <int> struct Vector4AlignHelper { };
+
+#if (ET_ENABLE_VEC4_ALIGN)
 	template <> struct ET_ALIGNED( 4) Vector4AlignHelper<1> { };
 	template <> struct ET_ALIGNED( 8) Vector4AlignHelper<2> { };
 	template <> struct ET_ALIGNED(16) Vector4AlignHelper<4> { };
 	template <> struct ET_ALIGNED(32) Vector4AlignHelper<8> { };
+#endif
 
 	template <typename T>
-#if (ET_ENABLE_VEC4_ALIGN)
 	struct vector4 : Vector4AlignHelper<sizeof(T)>
-#else
-	struct vector4
-#endif
 	{
 	public:
 		typedef T ComponentsType;
@@ -43,13 +42,13 @@ namespace et
 		};
 		
 	public:
-		vector4() :
-			x(0), y(0), z(0), w(0) { }
+		vector4() 
+#	if !defined(ET_DISABLE_VECTOR_INITIALIZATION)
+			: x(T(0)), y(T(0)), z(T(0)), w(T(0))
+#	endif
+			{ }
 
 		vector4(const vector4& c) :
-			x(c.x), y(c.y), z(c.z), w(c.w) { }
-
-		vector4(vector4&& c) :
 			x(c.x), y(c.y), z(c.z), w(c.w) { }
 		
 		explicit vector4(T s) :
@@ -138,13 +137,10 @@ namespace et
 
 		vector4& operator /= (T value)
 			{ x /= value; y /= value; z /= value; w /= value; return *this; }
-		
+/*
 		vector4& operator = (const vector4& value)
-			{ x = value.x; y = value.y; z = value.z; w = value.w; return *this; }
-		
-		vector4& operator = (vector4&& value)
-			{ x = value.x; y = value.y; z = value.z; w = value.w; return *this; }
-
+			{ memcpy(c, value.c, sizeof(c)); return *this; }
+*/		
 		vector2<T>& xy()
 			{ return *(reinterpret_cast<vector2<T>*>(c)); }
 
@@ -171,6 +167,78 @@ namespace et
 
 		bool operator != (const vector4& r) const
 			{ return (x != r.x) || (y != r.y) || (z != r.z) || (w != r.w); }
+
+		void addMultiplied(const vector4<T>& m, T a)
+		{
+			x += a * m.x;
+			y += a * m.y;
+			z += a * m.z;
+			w += a * m.w;
+		}
+
+		void setMultiplied(const vector4<T>& m, T a)
+		{
+			x = a * m.x;
+			y = a * m.y;
+			z = a * m.z;
+			w = a * m.w;
+		}
+
+		void clear()
+		{
+			x = 0;
+			y = 0;
+			z = 0;
+			w = 0;
+		}
+
+		void set(float value)
+		{
+			x = value;
+			y = value;
+			z = value;
+			w = value;
+		}
+
+		void divideXYZByW()
+		{
+			x /= w;
+			y /= w;
+			z /= w;
+		}
+
+		float divideByW()
+		{
+			float r = w;
+			x /= w;
+			y /= w;
+			z /= w;
+			w = 1.0f;
+			return r;
+		}
+
+		void normalize()
+		{
+			T l = dotSelf();
+			if (l > std::numeric_limits<float>::epsilon())
+			{
+				l = std::sqrt(l);
+				x /= l;
+				y /= l;
+				z /= l;
+				w /= l;
+			}
+		}
+
+		float length() const 
+			{ return std::sqrt(dotSelf()); }
+
+		template <int x, int y, int z, int w>
+		vector4<T> shuffle() const
+			{ return vector4<T>(c[x], c[y], c[z], c[w]); }
+
+		vector4<T> reciprocal() const
+			{ return vector4<T>(1.0f / x, 1.0f / y, 1.0f / z, 1.0f / w); }
 	};
 
 	template <typename T>

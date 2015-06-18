@@ -110,7 +110,7 @@ void FileOutput::debug(const char* format, va_list args)
 
 void FileOutput::info(const char* format, va_list args)
 {
-	fprintf(_file, format, args);
+	vfprintf(_file, format, args);
 	fprintf(_file, "\n");
 	fflush(_file);
 }

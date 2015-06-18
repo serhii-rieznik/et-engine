@@ -287,7 +287,8 @@ vec4 et::arrayToVec4(ArrayValue a)
 quaternion et::arrayToQuaternion(ArrayValue a)
 {
 	quaternion result;
-	size_t index = 0;
+
+	int index = 0;
 	for (auto v : a->content)
 	{
 		if (v->valueClass() == ValueClass_Float)

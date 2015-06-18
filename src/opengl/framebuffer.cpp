@@ -214,12 +214,13 @@ void Framebuffer::attachTexture(Texture::Pointer rt, uint32_t target)
 			checkOpenGLError("glFramebufferTexture2D(...) - %s", name().c_str());
 		}
 	}
+#if (!ET_OPENGLES)
 	else if (rt->target() == TextureTarget::Texture_2D_Array)
 	{
-		glFramebufferTexture(GL_FRAMEBUFFER, target, rt->apiHandle(), 0);
-
+		glFramebufferTexture(GL_FRAMEBUFFER, target, static_cast<GLuint>(rt->apiHandle()), 0);
 		checkOpenGLError("glFramebufferTexture(...) - %s", name().c_str());
 	}
+#endif
 }
 
 void Framebuffer::addRenderTarget(const Texture::Pointer& rt)
@@ -305,18 +306,24 @@ void Framebuffer::setCurrentCubemapFace(uint32_t faceIndex)
 
 void Framebuffer::setCurrentLayer(uint32_t layerIndex)
 {
+#if (!ET_OPENGLES)
 	ET_ASSERT(layerIndex < static_cast<uint32_t>(_description.size.z));
 	_rc->renderState().bindFramebuffer(static_cast<uint32_t>(apiHandle()));
 
 	uint32_t targetIndex = 0;
 	for (const auto& t : _renderTargets)
 	{
-		glFramebufferTextureLayer(GL_FRAMEBUFFER, drawBufferTarget(targetIndex), t->apiHandle(), 0, layerIndex);
+		glFramebufferTextureLayer(GL_FRAMEBUFFER, drawBufferTarget(targetIndex),
+			static_cast<GLuint>(t->apiHandle()), 0, layerIndex);
 		++targetIndex;
 	}
 
 	if (_depthBuffer.valid())
-		glFramebufferTextureLayer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, _depthBuffer->apiHandle(), 0, layerIndex);
+	{
+		glFramebufferTextureLayer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, 
+			static_cast<GLuint>(_depthBuffer->apiHandle()), 0, layerIndex);
+	}
+#endif
 }
 
 void Framebuffer::createOrUpdateColorRenderbuffer()

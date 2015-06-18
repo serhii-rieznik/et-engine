@@ -185,14 +185,14 @@ namespace et
 		std::function<float(float)> _timeInterpolationFunction;
 		std::function<T(const T&, const T&, float)> _valueInterpolationFunction;
 		
-		T _from;
-		T _to;
-		T _value;
+		T _from = T(0);
+		T _to = T(0);
+		T _value = T(0);
 		
-		T* _valuePointer;
+		T* _valuePointer = nullptr;
 		
-		float _startTime;
-		float _duration;
+		float _startTime = 0.0f;
+		float _duration = 0.0f;
 	};
 
 	typedef Animator<float> FloatAnimator;

@@ -74,10 +74,7 @@ Manager::Manager()
 
 Manager::~Manager()
 {
-	_streamingThread.stop();
-	_streamingThread.waitForTermination();
-	_streamingThread.release();
-	
+	stopStreamingThread();
 	if (sharedDevice == nullptr) return;
 	
 	nativeRelease();
@@ -89,6 +86,12 @@ Manager::~Manager()
 	
     sharedDevice = nullptr;
 	nativePostRelease();
+}
+
+void Manager::stopStreamingThread()
+{
+	_streamingThread.stopAndWaitForTermination();
+	_streamingThread.release();
 }
 
 Track::Pointer Manager::loadTrack(const std::string& fileName)

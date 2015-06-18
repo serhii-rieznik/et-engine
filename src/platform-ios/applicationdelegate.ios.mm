@@ -32,7 +32,7 @@ using namespace et;
 	CADisplayLink* _displayLink;
 	
 	BOOL _shouldUnlockRenderLock;
-	AtomicBool _renderThreadStarted;
+	std::atomic<bool> _renderThreadStarted;
 }
 
 @end
@@ -137,7 +137,7 @@ extern etOpenGLViewController* sharedOpenGLViewController;
 		if (_notifier.shouldPerformRendering())
 		{
 			[sharedOpenGLViewController beginRender];
-			_notifier.notifyIdle();
+			_notifier.notifyUpdate();
 			[sharedOpenGLViewController endRender];
 			
 			_renderThreadStarted = true;

@@ -34,6 +34,7 @@ namespace et
 		WindowStyle_Borderless = 0x00,
 		WindowStyle_Caption = 0x01,
 		WindowStyle_Sizable = 0x02,
+		WindowStyle_Hidden = 0x04
 	};
 	
 	enum class WindowSize
@@ -45,29 +46,22 @@ namespace et
 
 	struct ApplicationParameters
 	{
-		size_t windowStyle;
-		WindowSize windowSize;
-		bool shouldSuspendOnDeactivate;
-		bool keepWindowAspectOnResize;
-
-#if (ET_PLATFORM_IOS || ET_PLATFORM_ANDROID)
-		ApplicationParameters() :
-			windowStyle(WindowStyle_Borderless), windowSize(WindowSize::Predefined),
-			shouldSuspendOnDeactivate(true), keepWindowAspectOnResize(false) { }
-#else
-		ApplicationParameters() :
-			windowStyle(WindowStyle_Caption), windowSize(WindowSize::Predefined),
-			shouldSuspendOnDeactivate(false), keepWindowAspectOnResize(false) { }
-#endif
+		size_t windowStyle = WindowStyle_Caption;
+		WindowSize windowSize = WindowSize::Predefined;
+		bool keepWindowAspectOnResize = false;
+		bool shouldCreateContext = true;
+		bool shouldCreateRunLoop = true;
+		bool shouldSuspendOnDeactivate = currentPlatformIsMobile;
+		bool shouldPreserveRenderContext = false;
 	};
 	
-	class IApplicationDelegate : virtual public EventReceiver
+	class IApplicationDelegate
 	{
 	public:
 		virtual ~IApplicationDelegate() { }
 
 		virtual et::ApplicationIdentifier applicationIdentifier() const = 0;
-		
+
 		virtual void setApplicationParameters(et::ApplicationParameters&) { }
 		virtual void setRenderContextParameters(et::RenderContextParameters&) { }
 		
@@ -81,7 +75,5 @@ namespace et
 		virtual void applicationWillResizeContext(const et::vec2i&) { }
 
 		virtual void render(et::RenderContext*) { }
-		virtual void idle(float) { }
 	};
-
 }

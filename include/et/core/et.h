@@ -13,6 +13,7 @@
 #include <cstring>
 #include <cstddef>
 #include <cstdint>
+#include <atomic>
 
 #include <string>
 #include <vector>

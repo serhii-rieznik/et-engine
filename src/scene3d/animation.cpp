@@ -11,9 +11,6 @@
 using namespace et;
 using namespace et::s3d;
 
-const int animationVersion_1 = 0x0001;
-const int animationCurrentVersion = animationVersion_1;
-
 Animation::Animation()
 {
 	
@@ -94,7 +91,7 @@ void Animation::transformation(float time, vec3& t, quaternion& o, vec3& s) cons
 	{
 		const auto& lowerFrame = _frames.at(nearestLowerFrame);
 		const auto& upperFrame = _frames.at(nearestLowerFrame + 1);
-		float interolationFactor = (time - lowerFrame.time) / (lowerFrame.time - upperFrame.time);
+		float interolationFactor = (time - lowerFrame.time) / (upperFrame.time - lowerFrame.time);
 		t = mix(lowerFrame.translation, upperFrame.translation, interolationFactor);
 		o = slerp(lowerFrame.orientation, upperFrame.orientation, interolationFactor);
 		s = mix(lowerFrame.scale, upperFrame.scale, interolationFactor);
@@ -103,10 +100,10 @@ void Animation::transformation(float time, vec3& t, quaternion& o, vec3& s) cons
 
 mat4 Animation::transformation(float time) const
 {
-	vec3 t;
+	vec3 t(0.0f);
+	vec3 s(0.0f);
 	quaternion o;
-	vec3 s;
-	
+
 	transformation(time, t, o, s);
 	
 	ComponentTransformable result;

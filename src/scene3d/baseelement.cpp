@@ -13,7 +13,8 @@ using namespace et;
 using namespace et::s3d;
 
 BaseElement::BaseElement(const std::string& name, BaseElement* parent) :
-	ElementHierarchy(parent),  tag(0), _animationTransform(identityMatrix)
+	ElementHierarchy(parent),  tag(0), _animationTransform(1.0f), 
+	_cachedLocalTransform(1.0f), _cachedFinalTransform(1.0f), _cachedFinalInverseTransform(1.0f)
 {
 	setName(name);
 	
@@ -220,7 +221,10 @@ void BaseElement::deserializeGeneralParameters(Dictionary stream)
 
 	auto typeCode = stream.integerForKey(kElementTypeCode)->content;
 	if (typeCode != type())
-		log::warning("Deserialiaing element %s with invalid type code %llu, supposed to be: %llu", typeCode, uint64_t(type()));
+	{
+		log::warning("Deserializing element %s with invalid type code %llu, supposed to be: %llu",
+			name().c_str(), typeCode, uint64_t(type()));
+	}
 }
 
 void BaseElement::serializeChildren(Dictionary stream, const std::string& basePath)
@@ -294,6 +298,14 @@ void BaseElement::animate()
 	if (_animations.empty()) return;
 	
 	_animationTimer.start(mainTimerPool(), 0.0f, NotifyTimer::RepeatForever);
+}
+
+void BaseElement::animateRecursive()
+{
+	animate();
+
+	for (auto c : children())
+		c->animateRecursive();
 }
 
 Animation& BaseElement::defaultAnimation()

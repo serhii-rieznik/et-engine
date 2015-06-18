@@ -11,6 +11,7 @@
 #if (ET_PLATFORM_WIN)
 
 #include <MMSystem.h>
+#include <DbgHelp.h>
 
 using namespace et;
 
@@ -57,20 +58,31 @@ LONG WINAPI unhandledExceptionFilter(struct _EXCEPTION_POINTERS* info)
 {
 	bool continuable = (info->ExceptionRecord->ExceptionFlags & EXCEPTION_NONCONTINUABLE) == 0;
 	
+	auto process = GetCurrentProcess();
+	SymInitialize(process, nullptr, TRUE);
+
 	void* backtrace[32] = { };
+	char symbolInfoData[sizeof(SYMBOL_INFO) + MAX_SYM_NAME] = {};
+	SYMBOL_INFO* symbol = reinterpret_cast<SYMBOL_INFO*>(symbolInfoData);
+	symbol->MaxNameLen = 255;
+	symbol->SizeOfStruct = sizeof(SYMBOL_INFO);
+
 	DWORD backtraceHash = 0;
 	WORD framesCaptured = RtlCaptureStackBackTrace(0, 32, backtrace, &backtraceHash);
 	
 	std::string excCode = exceptionCodeToString(info->ExceptionRecord->ExceptionCode);
 	std::string type = continuable ? "continuable" : "non-continuable";
-	log::info("Unhandled exception:\n code: %s\n type: %s\n address: 0x%08X", excCode.c_str(),
+	log::info("Unhandled exception:\n code: %s\n type: %s\n address: 0x%016llX", excCode.c_str(),
 		type.c_str(), reinterpret_cast<uintptr_t>(info->ExceptionRecord->ExceptionAddress));
 	
 	if (framesCaptured > 0)
 	{
-		log::info("Backtrace hash: 0x%08X", backtraceHash);
-		for (int i = framesCaptured - 1; i >= 0; --i)
-			log::info(" - 0x%08X", reinterpret_cast<uintptr_t>(backtrace[i]));
+		log::info("Backtrace (hash = 0x%08X):", backtraceHash);
+		for (unsigned int i = 0; i < framesCaptured; ++i)
+		{
+			SymFromAddr(process, reinterpret_cast<DWORD64>(backtrace[i]), 0, symbol);
+			log::info("%u : %s (0x%016llX)", i, symbol->Name, symbol->Address);
+		}
 	}
 	
 	return EXCEPTION_EXECUTE_HANDLER;
@@ -83,13 +95,23 @@ void Application::platformInit()
 #endif
 	
 	SetUnhandledExceptionFilter(unhandledExceptionFilter);
-	
 	_env.updateDocumentsFolder(_identifier);
 }
 
 void Application::platformFinalize()
 {
+	if (_parameters.shouldPreserveRenderContext)
+		_renderContext->pushAndActivateRenderingContext();
+
+	_backgroundThread.stopAndWaitForTermination();
+	sharedObjectFactory().deleteObject(_delegate);
+
+	if (_parameters.shouldPreserveRenderContext)
+		_renderContext->popRenderingContext();
+
 	sharedObjectFactory().deleteObject(_renderContext);
+
+	_delegate = nullptr;
 	_renderContext = nullptr;
 }
 
@@ -126,36 +148,55 @@ int Application::platformRun(int, char*[])
 		enterRunLoop();
 		_delegate->applicationWillResizeContext(_renderContext->sizei());
 
-		MSG msg = { };
-		while (_running)
+		if (_parameters.shouldCreateRunLoop)
 		{
-			if (PeekMessageW(&msg, 0, 0, 0, PM_REMOVE))
+			MSG msg = { };
+			while (_running)
 			{
-				TranslateMessage(&msg);
-				DispatchMessageW(&msg);
+				if (PeekMessageW(&msg, 0, 0, 0, PM_REMOVE))
+				{
+					TranslateMessage(&msg);
+					DispatchMessageW(&msg);
+				}
+				else if (shouldPerformRendering())
+				{
+					performUpdateAndRender();
+				}
 			}
-			else if (shouldPerformRendering())
-			{
-				performUpdateAndRender();
-			}
+
+			terminated();
+			platformFinalize();
+			return _exitCode;
 		}
 	}
 
-	terminated();
-
-	sharedObjectFactory().deleteObject(_delegate);
-	sharedObjectFactory().deleteObject(_renderContext);
-
-	_delegate = nullptr;
-	_renderContext = nullptr;
-
-	return _exitCode;
+	return 0;
 }
 
 void Application::quit(int exitCode)
 {
+	ET_ASSERT(_running)
+
 	_running = false;
 	_exitCode = exitCode;
+
+	if (!_parameters.shouldCreateRunLoop)
+	{
+		if (_parameters.shouldPreserveRenderContext)
+			_renderContext->pushAndActivateRenderingContext();
+
+		terminated();
+
+		if (_parameters.shouldPreserveRenderContext)
+			_renderContext->popRenderingContext();
+
+		platformFinalize();
+	}
+}
+
+Application::~Application()
+{
+
 }
 
 void Application::alert(const std::string& title, const std::string& message, AlertType type)

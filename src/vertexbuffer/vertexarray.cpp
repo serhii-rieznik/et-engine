@@ -10,10 +10,6 @@
 
 using namespace et;
 
-const uint32_t VertexArrayId_1 = ET_COMPOSE_UINT32('V', 'A', 'V', '1');
-const uint32_t VertexArrayId_2 = ET_COMPOSE_UINT32('V', 'A', 'V', '2');
-const uint32_t VertexArrayCurrentId = VertexArrayId_2;
-
 VertexArray::VertexArray() : tag(0), _decl(true), _size(0),
 	_smoothing(VertexAttributeUsage::Smoothing, VertexAttributeType::Int, 0) { }
 
@@ -41,16 +37,16 @@ VertexArray::VertexArray(const VertexDeclaration& decl, int size) : tag(0), _dec
 
 VertexArray::Description VertexArray::generateDescription() const
 {
-	uint32_t dataSize = 0;
-	uint32_t offset = 0;
+	size_t dataSize = 0;
+	size_t offset = 0;
 
 	Description desc;
 	desc.declaration = VertexDeclaration(_decl.interleaved());
 
 	for (auto& chunk : _chunks)
 	{
-		int t_stride = _decl.interleaved() ? static_cast<int>(_decl.dataSize()) : 0;
-		uint32_t t_offset = _decl.interleaved() ? offset : dataSize;
+		uint32_t t_stride = static_cast<uint32_t>(_decl.interleaved() ? _decl.dataSize() : 0);
+		uint32_t t_offset = static_cast<uint32_t>(_decl.interleaved() ? offset : dataSize);
 		desc.declaration.push_back(VertexElement(chunk->usage(), chunk->type(), t_stride, t_offset));
 		dataSize += chunk->dataSize();
 		offset += chunk->typeSize();

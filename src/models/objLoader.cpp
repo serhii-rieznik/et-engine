@@ -118,10 +118,7 @@ OBJLoader::OBJLoader(RenderContext* rc, const std::string& inFile) : _rc(rc),
 OBJLoader::~OBJLoader()
 {
 	if (_thread.valid())
-	{
-		_thread->stop();
-		_thread->waitForTermination();
-	}
+		_thread->stopAndWaitForTermination();
 	
 	for (auto group : _groups)
 		sharedObjectFactory().deleteObject(group);
@@ -266,13 +263,13 @@ void OBJLoader::loadData(bool async, ObjectsCache& cache)
 			
 			if (subKey == 't')
 			{
-				vec2 vertex;
+				vec2 vertex(0.0f);
 				inputFile >> subKey >> vertex;
 				_texCoords.push_back(vertex);
 			}
 			else if (subKey == 'n')
 			{
-				vec3 vertex;
+				vec3 vertex(0.0f);
 				inputFile >> subKey >> vertex;
 
 				if ((_loadOptions & Option_SwapYwithZ) == Option_SwapYwithZ)
@@ -282,7 +279,7 @@ void OBJLoader::loadData(bool async, ObjectsCache& cache)
 			}
 			else if (isWhitespaceChar(subKey))
 			{
-				vec3 vertex;
+				vec3 vertex(0.0f);
 				inputFile >> vertex;
 
 				if ((_loadOptions & Option_SwapYwithZ) == Option_SwapYwithZ)
@@ -728,7 +725,7 @@ void OBJLoader::processLoadedData()
 	{
 		size_t startIndex = index;
 		
-		vec3 center;
+		vec3 center(0.0f);
 		
 		if (_loadOptions & Option_CalculateTransforms)
 		{
@@ -772,14 +769,16 @@ void OBJLoader::processLoadedData()
 			}
 		}
 		
-		_meshes.emplace_back(group->name, startIndex, index - startIndex, m, center);
+		uint32_t startIndex_u32 = static_cast<uint32_t>(startIndex);
+		uint32_t numIndexes_u32 = static_cast<uint32_t>(index - startIndex);
+		_meshes.emplace_back(group->name, startIndex_u32, numIndexes_u32, m, center);
 	}
 	
 	if (!hasNormals)
 		primitives::calculateNormals(_vertexData, _indices, 0, _indices->primitivesCount());
 
 	if (hasTexCoords && ((_loadOptions & Option_CalculateTangents) == Option_CalculateTangents))
-		primitives::calculateTangents(_vertexData, _indices, 0, _indices->primitivesCount());
+		primitives::calculateTangents(_vertexData, _indices, 0, _indices->primitivesCount() & 0xffffffff);
 }
 
 s3d::ElementContainer::Pointer OBJLoader::generateVertexBuffers()

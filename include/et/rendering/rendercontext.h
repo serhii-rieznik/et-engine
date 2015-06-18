@@ -78,6 +78,11 @@ namespace et
 		size_t lastFPSValue() const
 			{ return _info.averageFramePerSecond; }
 
+		void pushRenderingContext();
+		bool activateRenderingContext();
+		bool pushAndActivateRenderingContext();
+		void popRenderingContext();
+
 		void beginRender();
 		void endRender();
 
@@ -101,7 +106,7 @@ namespace et
 		friend class RenderContextNotifier;
 		friend class ApplicationNotifier;
 
-		ET_DECLARE_PIMPL(RenderContext, 128)
+		ET_DECLARE_PIMPL(RenderContext, 256)
 
 		RenderContextParameters _params;
 

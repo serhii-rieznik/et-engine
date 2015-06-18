@@ -315,7 +315,7 @@ void FBXLoaderPrivate::loadNodeAnimations(FbxNode* node, s3d::BaseElement::Point
 	
 	if (keyFramesToTime.size() == 0) return;
 	
-	log::info("Node %s has %zu frames in animation.", node->GetName(), keyFramesToTime.size());
+	log::info("Node %s has %llu frames in animation.", node->GetName(), uint64_t(keyFramesToTime.size()));
 	
 	FbxTimeSpan pInterval;
 	node->GetAnimationInterval(pInterval);

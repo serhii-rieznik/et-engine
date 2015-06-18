@@ -23,7 +23,7 @@ namespace et
 	extern const std::string kSystemEventOpenURL;
 	
 	class ApplicationNotifier;
-	class Application : public Singleton<Application>,  public EventReceiver
+	class Application : public Singleton<Application>
 	{
 	public:
 		enum AlertType
@@ -65,8 +65,7 @@ namespace et
 		const std::string& launchParameter(size_t i) const
 			{ return (i >= _launchParameters.size()) ? _emptyParamter : _launchParameters.at(i); }
 
-		const ApplicationIdentifier& identifier() const
-			{ return _identifier; }
+		const ApplicationIdentifier& identifier() const;
 
 		bool running() const 
 			{ return _running; }
@@ -166,9 +165,9 @@ namespace et
 		std::string _emptyParamter;
 		StringList _launchParameters;
 
-		AtomicBool _running;
-		AtomicBool _active;
-		AtomicBool _suspended;
+		std::atomic<bool> _running;
+		std::atomic<bool> _active;
+		std::atomic<bool> _suspended;
 		
 		size_t _renderingContextHandle = 0;
 		uint64_t _lastQueuedTimeMSec = 0;

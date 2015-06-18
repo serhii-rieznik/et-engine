@@ -27,8 +27,8 @@ namespace et
 		pthread_t thread;
 		pthread_mutex_t suspendMutex;
 		pthread_cond_t suspend;
-		AtomicBool running;
-		AtomicBool suspended;
+		std::atomic<bool> running;
+		std::atomic<bool> suspended;
 		ThreadId threadId = 0;
 	};
 }
@@ -117,6 +117,16 @@ void Thread::stop()
 	{
 		_private->running = false;
 		resume();
+	}
+}
+
+void Thread::stopAndWaitForTermination()
+{
+	if (_private->running)
+	{
+		_private->running = false;
+		resume();
+		waitForTermination();
 	}
 }
 

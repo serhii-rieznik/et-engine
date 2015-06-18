@@ -23,7 +23,7 @@ namespace et
 		virtual void* allocate(size_t) = 0;
 		virtual void release(void* ptr) = 0;
 		
-		virtual bool validatePointer(void*, bool abortOnFail = true) { return false; }
+		virtual bool validatePointer(void*, bool = true) { return false; }
 		
 		virtual void printInfo() const { }
 		

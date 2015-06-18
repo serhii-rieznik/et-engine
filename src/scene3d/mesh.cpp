@@ -63,12 +63,13 @@ void Mesh::calculateSupportData()
 		_supportData.averageCenter += v;
 	}
 	
-	vec3 maxExtent = maxv(absv(maxVertex), absv(minVertex));
-	
 	_supportData.dimensions = maxVertex - minVertex;
 	_supportData.minMaxCenter = 0.5f * (minVertex + maxVertex);
 	_supportData.averageCenter /= static_cast<float>(_numIndexes);
-	_supportData.boundingSphereRadius = etMax(etMax(maxExtent.x, maxExtent.y), maxExtent.z);
+
+	_supportData.boundingSphereRadius = 
+		0.5f * etMax(etMax(_supportData.dimensions.x, _supportData.dimensions.y), _supportData.dimensions.z);
+
 	_supportData.valid = true;
 
 	ET_ASSERT(!isnan(_supportData.averageCenter.x));
@@ -260,8 +261,10 @@ const Sphere& Mesh::boundingSphere()
 	if (_shouldUpdateBoundingSphere && _supportData.valid)
 	{
 		_shouldUpdateBoundingSphere = false;
+
+		const auto& ft = finalTransform();
 		
-		_cachedBoundingSphere = Sphere(finalTransform() * _supportData.averageCenter,
+		_cachedBoundingSphere = Sphere(ft * _supportData.averageCenter, 
 			finalTransformScale() * _supportData.boundingSphereRadius);
 	}
 	

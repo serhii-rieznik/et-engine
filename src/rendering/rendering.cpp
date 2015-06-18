@@ -232,6 +232,7 @@ namespace et
 			case DataType::Int:
 			case DataType::UnsignedInt:
 			case DataType::Float:
+			case DataType::UnsignedInt_8888_Rev:
 				return 4;
 				
 			case DataType::Double:
@@ -340,6 +341,7 @@ namespace et
 				
 			case DataType::Int:
 			case DataType::UnsignedInt:
+			case DataType::UnsignedInt_8888_Rev:
 				return 32;
 				
 			case DataType::Half:

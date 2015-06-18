@@ -42,6 +42,15 @@ Renderer::Renderer(RenderContext* rc) :
 	_fullscreenQuadVao = rc->vertexBufferFactory().createVertexArrayObject("__et__internal__fullscreen_vao__",
 		vb, BufferDrawType::Static, ib, BufferDrawType::Static);
 
+#if (ET_OPENGLES)
+	const std::string textureTypeDefines[TextureTarget_max] =
+	{
+		"#define TEXTURE_2D", // Texture_2D,
+		"#define TEXTURE_2D", // Texture_2D_Array,
+		"#define TEXTURE_2D", // Texture_Rectangle,
+		"#define TEXTURE_CUBE", // Texture_Cube,
+	};
+#else
 	const std::string textureTypeDefines[TextureTarget_max] =  
 	{
 		"#define TEXTURE_2D", // Texture_2D,
@@ -49,7 +58,7 @@ Renderer::Renderer(RenderContext* rc) :
 		"#define TEXTURE_RECTANGLE", // Texture_Rectangle,
 		"#define TEXTURE_CUBE", // Texture_Cube,
 	};
-
+#endif
 	StringList currentDefines(1);
 	for (int i = 0; i < TextureTarget_max; ++i)
 	{
@@ -114,6 +123,7 @@ void Renderer::renderFullscreenTexture(const Texture::Pointer& texture, const ve
 
 	_rc->renderState().bindTexture(_defaultTextureBindingUnit, texture);
 	_rc->renderState().bindProgram(prog);
+	prog->setUniform("color_texture_size", texture->sizeFloat());
 	prog->setUniform("tint", tint);
 	fullscreenPass();
 #endif
@@ -286,6 +296,11 @@ BinaryDataStorage Renderer::readFramebufferData(const vec2i& size, TextureFormat
 	return result;
 }
 
+void Renderer::finishRendering()
+{
+	glFinish();
+}
+
 /*
  * Default shaders
  */
@@ -345,6 +360,7 @@ const std::string copy_fragment_shader = R"(
 	uniform etLowp sampler2D color_texture;
 #endif
 
+uniform etHighp vec2 color_texture_size;
 uniform etLowp vec4 tint;
 etFragmentIn etHighp vec2 TexCoord;
 
@@ -356,11 +372,11 @@ void main()
 
 #elif defined(TEXTURE_RECTANGLE)
 
-	etFragmentOut = tint * etTextureRect(color_texture, TexCoord * vec2(textureSize(color_texture)));
+	etFragmentOut = tint * etTextureRect(color_texture, TexCoord * color_texture_size);
 
 #elif defined(TEXTURE_2D_ARRAY)
 
-	etFragmentOut = tint * etTexture2D(color_texture, vec3(TexCoord, 0.0));
+	etFragmentOut = tint * etTexture2DArray(color_texture, vec3(TexCoord, 0.0));
 
 #else
 
