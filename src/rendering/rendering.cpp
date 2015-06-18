@@ -264,6 +264,7 @@ namespace et
 			case TextureFormat::RGBA8:
 			case TextureFormat::Depth32:
 			case TextureFormat::Depth32F:
+			case TextureFormat::R11G11B10F:
 				return 32;
 				
 			case TextureFormat::RGB16:
@@ -285,7 +286,7 @@ namespace et
 			case TextureFormat::R:
 			case TextureFormat::Depth:
 				return bitsPerPixelForType(type);
-				
+
 			case TextureFormat::RGB:
 			case TextureFormat::BGR:
 			{
@@ -372,6 +373,7 @@ namespace et
 			case TextureFormat::R16:
 			case TextureFormat::R16F:
 			case TextureFormat::R32F:
+			case TextureFormat::R11G11B10F:
 				return 1;
 				
 			case TextureFormat::RG:

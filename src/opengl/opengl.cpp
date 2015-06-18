@@ -300,6 +300,12 @@ uint32_t et::textureFormatValue(TextureFormat value)
 #	else
 		0,
 #	endif
+
+#if defined(GL_R11F_G11F_B10F)
+		GL_R11F_G11F_B10F
+#	else
+		0
+#	endif
 	};
 
 	ET_SAMPLE_VALUE_FROM_MAP

@@ -174,6 +174,8 @@ namespace et
 		PVR_4bpp_sRGB,
 		PVR_4bpp_RGBA,
 		PVR_4bpp_sRGBA,
+
+		R11G11B10F,
 		
 		max
 	};
