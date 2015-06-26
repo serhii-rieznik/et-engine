@@ -50,6 +50,8 @@ namespace et
 		const std::string& sourceObjectName() const
 			{ return _sourceObjectName; }
 
+		void clear();
+
 	private:
 		RenderContext* _rc = nullptr;
 		VertexDeclaration _decl;

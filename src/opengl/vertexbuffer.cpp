@@ -110,3 +110,9 @@ void VertexBuffer::unmap()
 	_mapped = false;
 #endif
 }
+
+void VertexBuffer::clear()
+{
+	_dataSize = 0;
+	setData(nullptr, 0);
+}

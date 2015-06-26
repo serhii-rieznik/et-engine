@@ -39,6 +39,8 @@ namespace et
 			{ return _sourceObjectName; }
 
 		void setData(const IndexArray::Pointer& i);
+
+		void clear();
 		
 		void overridePrimitiveType(PrimitiveType);
 

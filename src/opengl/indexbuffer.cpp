@@ -71,6 +71,8 @@ void IndexBufferData::setProperties(const IndexArray::Pointer& i)
 void IndexBufferData::build(const IndexArray::Pointer& i)
 {
 #if !defined(ET_CONSOLE_APPLICATION)
+	ET_ASSERT(i.valid());
+
 	if (apiHandleInvalid())
 	{
 		uint32_t buffer = 0;
@@ -107,6 +109,12 @@ void IndexBufferData::setData(const IndexArray::Pointer& i)
 #if !defined(ET_CONSOLE_APPLICATION)
 	build(i);
 #endif
+}
+
+void IndexBufferData::clear()
+{
+	_size = 0;
+	internal_setData(nullptr, 0);
 }
 
 void IndexBufferData::overridePrimitiveType(PrimitiveType pt)

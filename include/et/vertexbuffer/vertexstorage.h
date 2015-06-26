@@ -51,6 +51,7 @@ namespace et
 		const BinaryDataStorage& data() const;
 		
 		void increaseSize(size_t);
+		void resize(size_t);
 		
 		bool hasAttribute(VertexAttributeUsage) const;
 		bool hasAttributeWithType(VertexAttributeUsage, VertexAttributeType) const;
