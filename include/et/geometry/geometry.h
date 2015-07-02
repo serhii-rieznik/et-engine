@@ -503,6 +503,9 @@ namespace et
 	vec3 circleFromPoints(const vec2& p1, const vec2& p2, const vec2& p3);
 	vec3 perpendicularVector(const vec3&);
 	vec3 randomVectorOnHemisphere(const vec3& normal, float distributionAngle);
-	
-	quaternion quaternionFromAngels(float x, float y, float z);
+	vec3 randomVectorOnDisk(const vec3& normal);
+
+	vec3 rotateAroundVector(const vec3& axis, const vec3& v, float);
+
+	quaternion quaternionFromAngles(float x, float y, float z);
 }

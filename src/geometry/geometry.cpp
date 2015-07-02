@@ -221,7 +221,7 @@ vec3 et::circleFromPoints(const vec2& p1, const vec2& p2, const vec2& p3)
 	return vec3(pos.x, pos.y, (pos - p2).length());
 }
 
-quaternion et::quaternionFromAngels(float yaw, float pitch, float roll)
+quaternion et::quaternionFromAngles(float yaw, float pitch, float roll)
 {
     float yawOver2 = 0.5f * yaw;
     float pitchOver2 = 0.5f * pitch;
@@ -270,4 +270,34 @@ vec3 et::randomVectorOnHemisphere(const vec3& normal, float distributionAngle)
 	vec3 u = perpendicularVector(normal);
 	return ((u * std::cos(phi) + cross(u, normal) * std::sin(phi)) * std::sqrt(theta) +
 		normal * std::sqrt(1.0f - theta)).normalized();
+}
+
+vec3 et::randomVectorOnDisk(const vec3& normal)
+{
+	vec3 u = perpendicularVector(normal);
+	vec3 v = cross(u, normal);
+	float phi = randomFloat() * DOUBLE_PI;
+	return (u * std::cos(phi) + v * std::sin(phi)).normalized();
+}
+
+vec3 et::rotateAroundVector(const vec3& v, const vec3& p, float a)
+{
+	float cosa = std::cos(a);
+	float sina = std::sin(a);
+	float invCosa = 1.0f - cosa;
+
+	mat3 transform;
+	transform[0][0] = cosa + invCosa * v.x * v.x;
+	transform[0][1] = invCosa * v.y * v.x - sina * v.z;
+	transform[0][2] = invCosa * v.x * v.z + sina * v.y;
+
+	transform[1][0] = invCosa * v.y * v.x + sina * v.z;
+	transform[1][1] = cosa + invCosa * v.y * v.y;
+	transform[1][2] = invCosa * v.y * v.z - sina * v.x;
+
+	transform[2][0] = invCosa * v.x * v.z - sina * v.y;
+	transform[2][1] = invCosa * v.z * v.y + sina * v.x;
+	transform[2][2] = cosa + invCosa * v.z * v.z;
+
+	return transform * p;
 }
