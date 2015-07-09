@@ -361,7 +361,7 @@ void FBXLoaderPrivate::loadNodeAnimations(FbxNode* node, s3d::BaseElement::Point
 		
 		a.addKeyFrame(static_cast<float>(kf.second.GetSecondDouble()),
 			vec3(static_cast<float>(t[0]), static_cast<float>(t[1]), static_cast<float>(t[2])),
-			quaternionFromAngels(static_cast<float>(r[0]) * animationAnglesScale,
+			quaternionFromAngles(static_cast<float>(r[0]) * animationAnglesScale,
 				static_cast<float>(r[1]) * animationAnglesScale, static_cast<float>(r[2]) * animationAnglesScale),
 			vec3(static_cast<float>(s[0]), static_cast<float>(s[1]), static_cast<float>(s[2])));
 	}

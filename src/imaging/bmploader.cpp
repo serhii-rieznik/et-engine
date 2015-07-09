@@ -67,7 +67,7 @@ void et::bmp::loadFromStream(std::istream& source, TextureDescription& desc)
 	}
 	else 
 	{
-		ET_FAIL_FMT("Unsupporte bitmap format");
+		ET_FAIL_FMT("Unsupported bitmap format: %u", desc.channels);
 	}
 
 	desc.data.resize(desc.size.square() * desc.channels);
