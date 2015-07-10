@@ -59,6 +59,7 @@ namespace et
 		 */
 		void loadNode(FbxNode* node, s3d::BaseElement::Pointer parent);
 		void loadNodeAnimations(FbxNode* node, s3d::BaseElement::Pointer object, const StringList& props);
+
 		s3d::Material::List loadNodeMaterials(FbxNode* node);
 		StringList loadNodeProperties(FbxNode* node);
 		
@@ -361,7 +362,7 @@ void FBXLoaderPrivate::loadNodeAnimations(FbxNode* node, s3d::BaseElement::Point
 		
 		a.addKeyFrame(static_cast<float>(kf.second.GetSecondDouble()),
 			vec3(static_cast<float>(t[0]), static_cast<float>(t[1]), static_cast<float>(t[2])),
-			quaternionFromAngels(static_cast<float>(r[0]) * animationAnglesScale,
+			quaternionFromAngles(static_cast<float>(r[0]) * animationAnglesScale,
 				static_cast<float>(r[1]) * animationAnglesScale, static_cast<float>(r[2]) * animationAnglesScale),
 			vec3(static_cast<float>(s[0]), static_cast<float>(s[1]), static_cast<float>(s[2])));
 	}
@@ -531,6 +532,28 @@ s3d::Material::Pointer FBXLoaderPrivate::loadMaterial(FbxSurfaceMaterial* mat)
 	return m;
 }
 
+void loadMeshDeformers(FbxMesh* mesh)
+{
+	int numDeformers =mesh->GetDeformerCount(FbxDeformer::eSkin);
+	if (numDeformers == 0) return;
+
+	int numClusters = 0;
+	for (int i = 0; i < numDeformers; ++i)
+	{
+		FbxSkin* skin = static_cast<FbxSkin*>(mesh->GetDeformer(i, FbxDeformer::eSkin));
+		int skinClusters = skin->GetClusterCount();
+		numClusters += skinClusters;
+		for (int c = 0; c < skinClusters; ++c)
+		{
+			FbxCluster* cluster = skin->GetCluster(c);
+			FbxCluster::ELinkMode linkMode = cluster->GetLinkMode();
+			log::info("%d", linkMode);
+		}
+	}
+
+	log::info(">>> Mesh '%s' has %d deformers and %d clusters", mesh->GetName(), numDeformers, numClusters);
+}
+
 s3d::Mesh::Pointer FBXLoaderPrivate::loadMesh(FbxMesh* mesh, s3d::BaseElement::Pointer parent, 
 	const s3d::Material::List& materials, const StringList& params)
 {
@@ -559,23 +582,18 @@ s3d::Mesh::Pointer FBXLoaderPrivate::loadMesh(FbxMesh* mesh, s3d::BaseElement::P
 	int lPolygonVertexCount = lPolygonCount * 3;
 
 	bool isContainer = false;
-	int numMaterials = 0;
 
 	FbxGeometryElementMaterial* material = mesh->GetElementMaterial();
 	FbxLayerElementArrayTemplate<int>* materialIndices = 0;
 	if (material)
 	{
-		numMaterials = 1;
 		FbxGeometryElement::EMappingMode mapping = material->GetMappingMode();
 		ET_ASSERT((mapping == FbxGeometryElement::eAllSame) || (mapping == FbxGeometryElement::eByPolygon));
-
-		isContainer = mapping == FbxGeometryElement::eByPolygon;
-		if (isContainer)
+		if (mapping == FbxGeometryElement::eByPolygon)
 		{
+			isContainer = true;
 			materialIndices = &mesh->GetElementMaterial()->GetIndexArray();
 			ET_ASSERT(materialIndices->GetCount() == lPolygonCount);
-			for (int i = 0; i < materialIndices->GetCount(); ++i)
-				numMaterials = etMax(numMaterials, materialIndices->GetAt(i) + 1);
 		}
 	}
 
@@ -598,29 +616,25 @@ s3d::Mesh::Pointer FBXLoaderPrivate::loadMesh(FbxMesh* mesh, s3d::BaseElement::P
 	FbxGeometryElementSmoothing* smoothing = hasSmoothingGroups ? mesh->GetElementSmoothing() : nullptr;
 	FbxGeometryElementVertexColor* vertexColor = hasColor ? mesh->GetElementVertexColor() : nullptr;
 
-	if (hasNormal)
-		hasNormal = mesh->GetElementNormal()->GetMappingMode() != FbxGeometryElement::eNone;
+	hasNormal &= (mesh->GetElementNormal()->GetMappingMode() != FbxGeometryElement::eNone);
 
-	if (hasTangents)
-		hasTangents = tangents->GetMappingMode() == FbxGeometryElement::eByPolygonVertex;
+	if (tangents)
+		hasTangents &= (tangents->GetMappingMode() == FbxGeometryElement::eByPolygonVertex);
+	
+	if (smoothing)
+		hasSmoothingGroups &= (smoothing->GetMappingMode() == FbxGeometryElement::eByPolygon);
 
-	if (hasSmoothingGroups)
-		hasSmoothingGroups = smoothing->GetMappingMode() == FbxGeometryElement::eByPolygon;
-
-	if (hasColor)
-		hasColor = vertexColor->GetMappingMode() == FbxGeometryElement::eByPolygonVertex;
+	if (vertexColor)
+		hasColor &= (vertexColor->GetMappingMode() == FbxGeometryElement::eByPolygonVertex);
 
 	VertexDeclaration decl(true, VertexAttributeUsage::Position, VertexAttributeType::Vec3);
 
 	if (hasNormal)
 		decl.push_back(VertexAttributeUsage::Normal, VertexAttributeType::Vec3);
-
 	if (hasTangents)
 		decl.push_back(VertexAttributeUsage::Tangent, VertexAttributeType::Vec3);
-
 	if (hasColor)
 		decl.push_back(VertexAttributeUsage::Color, VertexAttributeType::Vec4);
-	
 	if (hasSmoothingGroups)
 		decl.push_back(VertexAttributeUsage::Smoothing, VertexAttributeType::Int);
 	
@@ -702,6 +716,12 @@ s3d::Mesh::Pointer FBXLoaderPrivate::loadMesh(FbxMesh* mesh, s3d::BaseElement::P
 		clr[vertexCount] = vec4(static_cast<float>(c.mRed), static_cast<float>(c.mGreen), \
 			static_cast<float>(c.mBlue), static_cast<float>(c.mAlpha)); }
 
+#define ET_FBX_LOADER_PUSH_SG if (hasSmoothingGroups) { \
+		int sgIndex = 0; if (smoothing->GetReferenceMode() == FbxGeometryElement::eDirect) \
+			sgIndex = lPolygonIndex; else if (smoothing->GetReferenceMode() == FbxGeometryElement::eIndexToDirect) \
+			sgIndex = smoothing->GetIndexArray().GetAt(static_cast<int>(vertexCount)); \
+			sgIndex = smoothing->GetDirectArray().GetAt(sgIndex); smg[vertexCount] = sgIndex; }
+
 	if (isContainer)
 	{
 		for (size_t m = 0; m < materials.size(); ++m)
@@ -738,7 +758,7 @@ s3d::Mesh::Pointer FBXLoaderPrivate::loadMesh(FbxMesh* mesh, s3d::BaseElement::P
 				{
 					for (int lVerticeIndex = 0; lVerticeIndex < 3; ++lVerticeIndex)
 					{
-						const int lControlPointIndex = mesh->GetPolygonVertex(lPolygonIndex, lVerticeIndex);
+						int lControlPointIndex = mesh->GetPolygonVertex(lPolygonIndex, lVerticeIndex);
 						ia->setIndex(static_cast<uint32_t>(vertexBaseOffset + vertexCount), indexOffset);
 
 						ET_FBX_LOADER_PUSH_VERTEX
@@ -746,6 +766,7 @@ s3d::Mesh::Pointer FBXLoaderPrivate::loadMesh(FbxMesh* mesh, s3d::BaseElement::P
 						ET_FBX_LOADER_PUSH_UV
 						ET_FBX_LOADER_PUSH_TANGENT
 						ET_FBX_LOADER_PUSH_COLOR
+						ET_FBX_LOADER_PUSH_SG
 
 						++vertexCount;
 						++indexOffset;
@@ -771,7 +792,7 @@ s3d::Mesh::Pointer FBXLoaderPrivate::loadMesh(FbxMesh* mesh, s3d::BaseElement::P
 		me->setVertexStorage(vs);
 		me->setIndexArray(ia);
 
-		if (materials.size())
+		if (!materials.empty())
 			me->setMaterial(materials.front());
 
 		for (int lPolygonIndex = 0; lPolygonIndex < lPolygonCount; ++lPolygonIndex)
@@ -780,24 +801,12 @@ s3d::Mesh::Pointer FBXLoaderPrivate::loadMesh(FbxMesh* mesh, s3d::BaseElement::P
 			{
 				const int lControlPointIndex = mesh->GetPolygonVertex(lPolygonIndex, lVerticeIndex);
 				ia->setIndex(static_cast<uint32_t>(vertexBaseOffset + vertexCount), indexOffset);
-				
 				ET_FBX_LOADER_PUSH_VERTEX
 				ET_FBX_LOADER_PUSH_NORMAL
 				ET_FBX_LOADER_PUSH_UV
 				ET_FBX_LOADER_PUSH_TANGENT
 				ET_FBX_LOADER_PUSH_COLOR
-
-				if (hasSmoothingGroups)
-				{
-					int sgIndex = 0;
-					if (smoothing->GetReferenceMode() == FbxGeometryElement::eDirect)
-						sgIndex = lPolygonIndex;
-					else if (smoothing->GetReferenceMode() == FbxGeometryElement::eIndexToDirect)
-						sgIndex = smoothing->GetIndexArray().GetAt(static_cast<int>(vertexCount));
-					sgIndex = smoothing->GetDirectArray().GetAt(sgIndex);
-					smg[vertexCount] = sgIndex;
-				}
-
+				ET_FBX_LOADER_PUSH_SG
 				++vertexCount;
 				++indexOffset;
 			}
@@ -810,11 +819,7 @@ s3d::Mesh::Pointer FBXLoaderPrivate::loadMesh(FbxMesh* mesh, s3d::BaseElement::P
 		}
 	}
 
-#undef ET_FBX_LOADER_PUSH_VERTEX
-#undef ET_FBX_LOADER_PUSH_NORMAL
-#undef ET_FBX_LOADER_PUSH_UV
-#undef ET_FBX_LOADER_PUSH_TANGENT
-#undef ET_FBX_LOADER_PUSH_COLOR
+	loadMeshDeformers(mesh);
 
 	return element;
 }
