@@ -93,7 +93,7 @@ namespace et
 		void resize(const vec2i&);
 		void forceSize(const vec2i&);
 		
-		void resolveMultisampledTo(Framebuffer::Pointer);
+		void resolveMultisampledTo(Framebuffer::Pointer, bool resolveColor, bool resolveDepth);
 		void invalidate(bool color, bool depth);
 
 	private:

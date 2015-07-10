@@ -444,7 +444,7 @@ void Framebuffer::forceSize(const vec2i& sz)
 	_description.size = vec3i(sz, _description.size.z);
 }
 
-void Framebuffer::resolveMultisampledTo(Framebuffer::Pointer framebuffer)
+void Framebuffer::resolveMultisampledTo(Framebuffer::Pointer framebuffer, bool resolveColor, bool resolveDepth)
 {
 #if !defined(ET_CONSOLE_APPLICATION)
 	_rc->renderState().bindReadFramebuffer(static_cast<uint32_t>(apiHandle()));
@@ -469,9 +469,20 @@ void Framebuffer::resolveMultisampledTo(Framebuffer::Pointer framebuffer)
 
 #	else
 
-		glBlitFramebuffer(0, 0, _description.size.x, _description.size.y, 0, 0, framebuffer->size().x,
-			framebuffer->size().y, GL_COLOR_BUFFER_BIT, GL_LINEAR);
-		checkOpenGLError("glBlitFramebuffer");
+		if (resolveColor)
+		{
+			glBlitFramebuffer(0, 0, _description.size.x, _description.size.y, 0, 0, framebuffer->size().x,
+				framebuffer->size().y, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+			checkOpenGLError("glBlitFramebuffer");
+		}
+
+		if (resolveDepth)
+		{
+			glBlitFramebuffer(0, 0, _description.size.x, _description.size.y, 0, 0, framebuffer->size().x,
+				framebuffer->size().y, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+			checkOpenGLError("glBlitFramebuffer");
+		}
+
 
 #	endif
 	
