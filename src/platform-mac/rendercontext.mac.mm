@@ -404,18 +404,21 @@ void RenderContextPrivate::performUpdateAndRender()
 int RenderContextPrivate::displayLinkSynchronized()
 {
 #if !defined(ET_CONSOLE_APPLICATION)
-	if (firstSync)
+	@synchronized(windowController)
 	{
-		Threading::setMainThread(Threading::currentThread());
-		firstSync = false;
-	}
+		if (firstSync)
+		{
+			Threading::setMainThread(Threading::currentThread());
+			firstSync = false;
+		}
 
-	if (application().running() && !application().suspended())
-	{
-		if (resizeScheduled)
-			resize(scheduledSize);
-		
-		performUpdateAndRender();
+		if (application().running() && !application().suspended())
+		{
+			if (resizeScheduled)
+				resize(scheduledSize);
+			
+			performUpdateAndRender();
+		}
 	}
 #endif
 	return kCVReturnSuccess;
@@ -657,9 +660,13 @@ CVReturn cvDisplayLinkOutputCallback(CVDisplayLinkRef, const CVTimeStamp*, const
 
 - (void)windowWillClose:(NSNotification*)notification
 {
-	(void)notification;
-	applicationNotifier.notifyStopped();
-	rcPrivate->stop();
+	@synchronized(self)
+	{
+		(void)notification;
+		applicationNotifier.notifyStopped();
+		rcPrivate->stop();
+		applicationNotifier.notifyTerminated();
+	}
 }
 
 @end

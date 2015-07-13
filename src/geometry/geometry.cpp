@@ -276,8 +276,9 @@ vec3 et::randomVectorOnDisk(const vec3& normal)
 {
 	vec3 u = perpendicularVector(normal);
 	vec3 v = cross(u, normal);
-	float phi = randomFloat() * DOUBLE_PI;
-	return (u * std::cos(phi) + v * std::sin(phi)).normalized();
+	vec3 w = cross(v, normal);
+	float phi = std::sin(randomFloat() * DOUBLE_PI);
+	return (v * phi + w * (1.0f - phi)).normalized();
 }
 
 vec3 et::rotateAroundVector(const vec3& v, const vec3& p, float a)

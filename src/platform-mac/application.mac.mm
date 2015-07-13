@@ -111,11 +111,18 @@ void Application::setTitle(const std::string &s)
 
 void Application::alert(const std::string& title, const std::string& message, AlertType)
 {
+#if (__MAC_OS_X_VERSION_MIN_REQUIRED >= __MAC_10_10)
+	NSAlert* alert = [[NSAlert alloc] init];
+	alert.messageText = [NSString stringWithUTF8String:title.c_str()];
+	alert.informativeText = [NSString stringWithUTF8String:message.c_str()];
+	[alert addButtonWithTitle:@"OK"];
+	[alert runModal];
+#else
 	NSString* nsTitle = [NSString stringWithUTF8String:title.c_str()];
 	NSString* nsMessage = [NSString stringWithUTF8String:message.c_str()];
-	
 	[[NSAlert alertWithMessageText:nsTitle defaultButton:@"OK" alternateButton:nil otherButton:nil
-		informativeTextWithFormat:@"%@", nsMessage, nil] runModal];
+		 informativeTextWithFormat:@"%@", nsMessage, nil] runModal];
+#endif
 }
 
 void Application::platformInit()
@@ -264,8 +271,6 @@ void Application::enableRemoteNotifications()
 
 - (void)applicationWillTerminate:(NSNotification*)notification
 {
-    (void)notification;
-	_notifier.notifyTerminated();
 }
 
 - (BOOL)applicationShouldTerminateAfterLastWindowClosed:(NSApplication*)sender

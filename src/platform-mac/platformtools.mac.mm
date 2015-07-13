@@ -108,7 +108,7 @@ std::string et::selectFile(const StringList& allowedTypes, SelectFileMode mode, 
 	[openDlg setAllowsMultipleSelection:NO];
 	[openDlg setResolvesAliases:YES];
 	
-	_callback([openDlg runModal] == NSOKButton ? [[[openDlg URLs] objectAtIndex:0] path] : [NSString string]);
+	_callback([openDlg runModal] ? [[[openDlg URLs] objectAtIndex:0] path] : [NSString string]);
 	
 #endif
 }
@@ -123,7 +123,7 @@ std::string et::selectFile(const StringList& allowedTypes, SelectFileMode mode, 
 	
 	NSSavePanel* saveDlg = [NSSavePanel savePanel];
 	[saveDlg setNameFieldStringValue:_defaultName];
-	_callback([saveDlg runModal] == NSOKButton ? [[saveDlg URL] path] : [NSString string]);
+	_callback([saveDlg runModal] ? [[saveDlg URL] path] : [NSString string]);
 	
 #endif
 }

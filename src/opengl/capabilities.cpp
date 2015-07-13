@@ -130,6 +130,10 @@ void OpenGLCapabilities::checkCaps()
 	setFlag(OpenGLFeature_DrawElementsBaseVertex);
 #endif
 	
+#if (ET_PLATFORM_MAC)
+	setFlag(OpenGLFeature_MipMapGeneration);
+	setFlag(OpenGLFeature_VertexArrayObjects);
+#else
 	if (glGenerateMipmap != nullptr)
 		setFlag(OpenGLFeature_MipMapGeneration);
 	
@@ -146,6 +150,7 @@ void OpenGLCapabilities::checkCaps()
 			setFlag(OpenGLFeature_VertexArrayObjects);
 		}
 	}
+#endif
 	
 	log::info("[OpenGLCapabilities] Version: %s (%s), GLSL version: %s (%s)", _versionString.c_str(),
 		_versionShortString.c_str(), _glslVersionString.c_str(), _glslVersionShortString.c_str());
