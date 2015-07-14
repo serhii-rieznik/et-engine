@@ -52,7 +52,7 @@ namespace et
 
 	const std::string primitiveTypeNames[PrimitiveType_max] =
 	{
-		"points", "lines", "triangles", "triangle strips", "line strips",
+		"points", "lines", "triangles", "triangle strips", "line strips", "line strips adjancency",
 	};
 
 	const uint32_t vertexAttributeUsageMasks[VertexAttributeUsage_max] =

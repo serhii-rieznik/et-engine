@@ -199,7 +199,8 @@ namespace et
 		Triangles,
 		TriangleStrips,
 		LineStrips,
-		
+		LineStripAdjacency,
+		LinesAdjacency,
 		max
 	};
 	
