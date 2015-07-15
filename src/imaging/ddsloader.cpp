@@ -452,6 +452,16 @@ void fillDescriptionWithFormat(TextureDescription& desc, DXGI_FORMAT format)
 {
 	switch (format)
 	{
+		case DXGI_FORMAT_R8_UNORM:
+		case DXGI_FORMAT_R8_UINT:
+		{
+			desc.channels = 1;
+			desc.bitsPerPixel = 8 * desc.channels;
+			desc.internalformat = TextureFormat::R8;
+			desc.format = TextureFormat::R;
+			desc.type = DataType::UnsignedChar;
+			break;
+		}
 		case DXGI_FORMAT_R8G8B8A8_UNORM:
 		{
 			desc.channels = 4;
