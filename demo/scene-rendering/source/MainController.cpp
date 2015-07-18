@@ -1,11 +1,3 @@
-//
-//  MainController.cpp
-//  SceneRendering
-//
-//  Created by Sergey Reznik on 13/12/2014.
-//  Copyright (c) 2014 Cheetek. All rights reserved.
-//
-
 #include <et/input/input.h>
 #include <et/rendering/rendercontext.h>
 #include "MainController.h"
@@ -55,7 +47,7 @@ void MainController::applicationDidLoad(et::RenderContext* rc)
 	_renderer.init(rc);
 	_cameraController.init(rc);
 	
-	auto loadedScene = _loader.loadFromFile(application().resolveFileName("crytek/sponza.etm"));
+	auto loadedScene = _loader.loadFromFile(application().resolveFileName("bunny.obj"));
 	_renderer.setScene(loadedScene);
 
 	connectInputEvents();

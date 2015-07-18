@@ -227,6 +227,7 @@ float et::extractFloat(std::string& s)
 StringList et::split(const std::string& s, const std::string& delim)
 {
 	StringList result;
+	result.reserve(1 + s.size() / 2);
 	
 	size_t startIndex = 0;
 	size_t separatorIndex = s.find_first_of(delim, startIndex);

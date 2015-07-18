@@ -1,11 +1,3 @@
-//
-//  DemoCameraController.h
-//  SceneRendering
-//
-//  Created by Sergey Reznik on 15/12/2014.
-//  Copyright (c) 2014 Cheetek. All rights reserved.
-//
-
 #pragma once
 
 #include <et/timers/notifytimer.h>

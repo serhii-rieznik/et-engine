@@ -1,11 +1,3 @@
-//
-//  DemoCameraController.cpp
-//  SceneRendering
-//
-//  Created by Sergey Reznik on 15/12/2014.
-//  Copyright (c) 2014 Cheetek. All rights reserved.
-//
-
 #include <et/app/application.h>
 #include <et/rendering/rendercontext.h>
 #include "DemoCameraController.h"

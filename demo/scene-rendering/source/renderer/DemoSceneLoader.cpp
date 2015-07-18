@@ -1,11 +1,3 @@
-//
-//  DemoSceneLoader.cpp
-//  SceneRendering
-//
-//  Created by Sergey Reznik on 14/12/2014.
-//  Copyright (c) 2014 Cheetek. All rights reserved.
-//
-
 #include <et/models/objloader.h>
 #include <et/primitives/primitives.h>
 #include <et/app/application.h>
@@ -34,14 +26,14 @@ et::s3d::Scene::Pointer SceneLoader::loadFromFile(const std::string& fileName)
 	}
 	else if (ext == "etm")
 	{
-		ObjectsCache localCache;
-		result->deserialize(fileName, _rc, localCache, nullptr);
+		ET_FAIL("Not implemented")
 	}
 	else
 	{
 		ET_FAIL("Not implemented")
 	}
-	
+
+/*	
 	auto storages = result->childrenOfType(s3d::ElementType_Storage);
 	auto meshes = result->childrenOfType(s3d::ElementType_SupportMesh);
 	
@@ -76,12 +68,10 @@ et::s3d::Scene::Pointer SceneLoader::loadFromFile(const std::string& fileName)
 				
 				va.reset(updated.ptr());
 				updated.reset(nullptr);
-				
-				
 			}
 		}
 	}
-	
+*/	
 	return result;
 }
 
@@ -89,14 +79,9 @@ void SceneLoader::loadObjFile(const std::string& fileName, et::s3d::Scene::Point
 {
 	ObjectsCache localCache;
 	OBJLoader loader(_rc, fileName);
-	
 	auto container = loader.load(localCache, OBJLoader::Option_SupportMeshes);
 	auto allObjects = container->children();
-	
 	for (auto c : allObjects)
 		c->setParent(scene.ptr());
-	
-	scene->serialize(application().environment().applicationDocumentsFolder() +
-		 replaceFileExt(getFileName(fileName), ".etm"), s3d::StorageFormat_HumanReadableMaterials);
 }
 

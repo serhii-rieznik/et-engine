@@ -1,11 +1,3 @@
-//
-//  DemoSceneRenderer.cpp
-//  SceneRendering
-//
-//  Created by Sergey Reznik on 14/12/2014.
-//  Copyright (c) 2014 Cheetek. All rights reserved.
-//
-
 #include <et/app/application.h>
 #include <et/rendering/rendercontext.h>
 #include <et/primitives/primitives.h>
@@ -148,7 +140,7 @@ void SceneRenderer::setScene(et::s3d::Scene::Pointer aScene)
 	for (s3d::SupportMesh::Pointer& e : _allObjects)
 	{
 		auto mat = e->material();
-		for (size_t i = MaterialParameter_AmbientMap; i < MaterialParameter_AmbientFactor; ++i)
+		for (uint32_t i = MaterialParameter_AmbientMap; i < MaterialParameter_AmbientFactor; ++i)
 		{
 			Texture::Pointer tex = mat->getTexture(i);
 			if (tex.valid())
@@ -191,7 +183,7 @@ void SceneRenderer::renderToGeometryBuffer(const et::Camera& cam)
 
 	for (s3d::SupportMesh::Pointer& e : _allObjects)
 	{
-		if (cam.frustum().containsAABB(e->aabb()))
+		if (cam.frustum().containsAABB(e->boundingBox()))
 		{
 			const auto& mat = e->material();
 			

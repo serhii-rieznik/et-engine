@@ -1,11 +1,3 @@
-//
-//  DemoSceneRenderer.h
-//  SceneRendering
-//
-//  Created by Sergey Reznik on 14/12/2014.
-//  Copyright (c) 2014 Cheetek. All rights reserved.
-//
-
 #pragma once
 
 #include <et/scene3d/scene3d.h>

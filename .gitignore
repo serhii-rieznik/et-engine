@@ -6,3 +6,4 @@ demo/get-started/windows/Debug/
 *.suo
 *.sdf
 *.opensdf
+demo/scene-rendering/windows/x64/

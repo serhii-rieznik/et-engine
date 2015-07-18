@@ -5,9 +5,17 @@
       <Configuration>Debug</Configuration>
       <Platform>Win32</Platform>
     </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
     <ProjectConfiguration Include="Release|Win32">
       <Configuration>Release</Configuration>
       <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
@@ -30,10 +38,21 @@
     <ClCompile Include="..\..\..\src\core\stream.cpp" />
     <ClCompile Include="..\..\..\src\core\tools.cpp" />
     <ClCompile Include="..\..\..\src\core\transformable.cpp" />
+    <ClCompile Include="..\..\..\src\directx\capabilities_dx.cpp" />
+    <ClCompile Include="..\..\..\src\directx\framebuffer_dx.cpp" />
+    <ClCompile Include="..\..\..\src\directx\indexbuffer_dx.cpp" />
+    <ClCompile Include="..\..\..\src\directx\programfactory_dx.cpp" />
+    <ClCompile Include="..\..\..\src\directx\program_dx.cpp" />
+    <ClCompile Include="..\..\..\src\directx\renderer_dx.cpp" />
+    <ClCompile Include="..\..\..\src\directx\renderstate_dx.cpp" />
+    <ClCompile Include="..\..\..\src\directx\texture_dx.cpp" />
+    <ClCompile Include="..\..\..\src\directx\vertexarrayobject_dx.cpp" />
+    <ClCompile Include="..\..\..\src\directx\vertexbuffer_dx.cpp" />
     <ClCompile Include="..\..\..\src\geometry\geometry.cpp" />
     <ClCompile Include="..\..\..\src\geometry\rectplacer.cpp" />
     <ClCompile Include="..\..\..\src\helpers\terrain.cpp" />
     <ClCompile Include="..\..\..\src\helpers\terraindata.cpp" />
+    <ClCompile Include="..\..\..\src\imaging\bmploader.cpp" />
     <ClCompile Include="..\..\..\src\imaging\ddsloader.cpp" />
     <ClCompile Include="..\..\..\src\imaging\hdrloader.cpp" />
     <ClCompile Include="..\..\..\src\imaging\imageoperations.cpp" />
@@ -61,10 +80,26 @@
     <ClCompile Include="..\..\..\src\opengl\texture.cpp" />
     <ClCompile Include="..\..\..\src\opengl\vertexarrayobject.cpp" />
     <ClCompile Include="..\..\..\src\opengl\vertexbuffer.cpp" />
+    <ClCompile Include="..\..\..\src\platform-android\application.android.cpp" />
+    <ClCompile Include="..\..\..\src\platform-android\input.android.cpp" />
+    <ClCompile Include="..\..\..\src\platform-android\locale.android.cpp" />
+    <ClCompile Include="..\..\..\src\platform-android\log.android.cpp" />
+    <ClCompile Include="..\..\..\src\platform-android\memory.android.cpp" />
+    <ClCompile Include="..\..\..\src\platform-android\nativeactivity.android.cpp" />
+    <ClCompile Include="..\..\..\src\platform-android\rendercontext.android.cpp" />
+    <ClCompile Include="..\..\..\src\platform-android\sound.openal.android.cpp" />
+    <ClCompile Include="..\..\..\src\platform-android\stream.android.cpp" />
+    <ClCompile Include="..\..\..\src\platform-android\tools.android.cpp" />
+    <ClCompile Include="..\..\..\src\platform-unix\atomiccounter.unix.cpp" />
+    <ClCompile Include="..\..\..\src\platform-unix\criticalsection.unix.cpp" />
+    <ClCompile Include="..\..\..\src\platform-unix\mutex.unix.cpp" />
+    <ClCompile Include="..\..\..\src\platform-unix\thread.unix.cpp" />
+    <ClCompile Include="..\..\..\src\platform-unix\threading.unix.cpp" />
     <ClCompile Include="..\..\..\src\platform-win\application.win.cpp" />
     <ClCompile Include="..\..\..\src\platform-win\atomiccounter.win.cpp" />
     <ClCompile Include="..\..\..\src\platform-win\criticalsection.win.cpp" />
     <ClCompile Include="..\..\..\src\platform-win\input.win.cpp" />
+    <ClCompile Include="..\..\..\src\platform-win\kinect.cpp" />
     <ClCompile Include="..\..\..\src\platform-win\locale.win.cpp" />
     <ClCompile Include="..\..\..\src\platform-win\location.win.cpp" />
     <ClCompile Include="..\..\..\src\platform-win\log.win.cpp" />
@@ -73,10 +108,13 @@
     <ClCompile Include="..\..\..\src\platform-win\opengl.win.cpp" />
     <ClCompile Include="..\..\..\src\platform-win\orientation.win.cpp" />
     <ClCompile Include="..\..\..\src\platform-win\platformtools.win.cpp" />
+    <ClCompile Include="..\..\..\src\platform-win\rendercontext.win-directx.cpp" />
     <ClCompile Include="..\..\..\src\platform-win\rendercontext.win-opengl.cpp" />
+    <ClCompile Include="..\..\..\src\platform-win\sound.openal.win.cpp" />
     <ClCompile Include="..\..\..\src\platform-win\thread.win.cpp" />
     <ClCompile Include="..\..\..\src\platform-win\threading.win.cpp" />
     <ClCompile Include="..\..\..\src\platform-win\tools.win.cpp" />
+    <ClCompile Include="..\..\..\src\platform-win\videocapture.win.cpp" />
     <ClCompile Include="..\..\..\src\primitives\primitives.cpp" />
     <ClCompile Include="..\..\..\src\rendering\framebufferfactory.cpp" />
     <ClCompile Include="..\..\..\src\rendering\rendercontext.cpp" />
@@ -95,6 +133,10 @@
     <ClCompile Include="..\..\..\src\scene3d\serialization.cpp" />
     <ClCompile Include="..\..\..\src\scene3d\storage.cpp" />
     <ClCompile Include="..\..\..\src\scene3d\supportmesh.cpp" />
+    <ClCompile Include="..\..\..\src\sound\player.cpp" />
+    <ClCompile Include="..\..\..\src\sound\sound.cpp" />
+    <ClCompile Include="..\..\..\src\sound\streamingthread.cpp" />
+    <ClCompile Include="..\..\..\src\sound\track.cpp" />
     <ClCompile Include="..\..\..\src\tasks\taskpool.cpp" />
     <ClCompile Include="..\..\..\src\timers\notifytimer.cpp" />
     <ClCompile Include="..\..\..\src\timers\sequence.cpp" />
@@ -104,6 +146,7 @@
     <ClCompile Include="..\..\..\src\vertexbuffer\vertexarray.cpp" />
     <ClCompile Include="..\..\..\src\vertexbuffer\vertexdatachunk.cpp" />
     <ClCompile Include="..\..\..\src\vertexbuffer\vertexdeclaration.cpp" />
+    <ClCompile Include="..\..\..\src\vertexbuffer\vertexstorage.cpp" />
     <ClCompile Include="..\source\main.cpp" />
     <ClCompile Include="..\source\MainController.cpp" />
     <ClCompile Include="..\source\renderer\DemoCameraController.cpp" />
@@ -123,7 +166,6 @@
     <ClInclude Include="..\..\..\include\et\app\runloop.h" />
     <ClInclude Include="..\..\..\include\et\camera\camera.h" />
     <ClInclude Include="..\..\..\include\et\camera\frustum.h" />
-    <ClInclude Include="..\..\..\include\et\camera\light.h" />
     <ClInclude Include="..\..\..\include\et\collision\aabb.h" />
     <ClInclude Include="..\..\..\include\et\collision\collision.h" />
     <ClInclude Include="..\..\..\include\et\collision\obb.h" />
@@ -180,12 +222,18 @@
     <ClInclude Include="..\..\..\include\et\geometry\splines.h" />
     <ClInclude Include="..\..\..\include\et\geometry\splines.inl.h" />
     <ClInclude Include="..\..\..\include\et\geometry\triangle.h" />
+    <ClInclude Include="..\..\..\include\et\geometry\triangleex.h" />
     <ClInclude Include="..\..\..\include\et\geometry\vector2.h" />
     <ClInclude Include="..\..\..\include\et\geometry\vector3.h" />
+    <ClInclude Include="..\..\..\include\et\geometry\vector4-simd.accelerate.h" />
+    <ClInclude Include="..\..\..\include\et\geometry\vector4-simd.h" />
+    <ClInclude Include="..\..\..\include\et\geometry\vector4-simd.neon.h" />
+    <ClInclude Include="..\..\..\include\et\geometry\vector4-simd.sse.h" />
     <ClInclude Include="..\..\..\include\et\geometry\vector4.h" />
     <ClInclude Include="..\..\..\include\et\helpers\particles.h" />
     <ClInclude Include="..\..\..\include\et\helpers\terrain.h" />
     <ClInclude Include="..\..\..\include\et\helpers\terraindata.h" />
+    <ClInclude Include="..\..\..\include\et\imaging\bmploader.h" />
     <ClInclude Include="..\..\..\include\et\imaging\ddsloader.h" />
     <ClInclude Include="..\..\..\include\et\imaging\hdrloader.h" />
     <ClInclude Include="..\..\..\include\et\imaging\imageoperations.h" />
@@ -212,7 +260,6 @@
     <ClInclude Include="..\..\..\include\et\platform-apple\objc.h" />
     <ClInclude Include="..\..\..\include\et\platform-cocos\etnode.h" />
     <ClInclude Include="..\..\..\include\et\platform-ios\applicationdelegate.h" />
-    <ClInclude Include="..\..\..\include\et\platform-ios\chartboost.h" />
     <ClInclude Include="..\..\..\include\et\platform-ios\embeddedapplication.h" />
     <ClInclude Include="..\..\..\include\et\platform-ios\imagepicker.h" />
     <ClInclude Include="..\..\..\include\et\platform-ios\ios.h" />
@@ -251,10 +298,12 @@
     <ClInclude Include="..\..\..\include\et\scene3d\baseelement.h" />
     <ClInclude Include="..\..\..\include\et\scene3d\cameraelement.h" />
     <ClInclude Include="..\..\..\include\et\scene3d\lightelement.h" />
+    <ClInclude Include="..\..\..\include\et\scene3d\material.deprecated.h" />
     <ClInclude Include="..\..\..\include\et\scene3d\material.h" />
     <ClInclude Include="..\..\..\include\et\scene3d\material.parameters.h" />
     <ClInclude Include="..\..\..\include\et\scene3d\mesh.h" />
     <ClInclude Include="..\..\..\include\et\scene3d\particlesystem.h" />
+    <ClInclude Include="..\..\..\include\et\scene3d\scene3d.deprecated.h" />
     <ClInclude Include="..\..\..\include\et\scene3d\scene3d.h" />
     <ClInclude Include="..\..\..\include\et\scene3d\serialization.h" />
     <ClInclude Include="..\..\..\include\et\scene3d\storage.h" />
@@ -285,6 +334,7 @@
     <ClInclude Include="..\..\..\include\et\vertexbuffer\vertexarray.h" />
     <ClInclude Include="..\..\..\include\et\vertexbuffer\vertexdatachunk.h" />
     <ClInclude Include="..\..\..\include\et\vertexbuffer\vertexdeclaration.h" />
+    <ClInclude Include="..\..\..\include\et\vertexbuffer\vertexstorage.h" />
     <ClInclude Include="..\source\MainController.h" />
     <ClInclude Include="..\source\renderer\DemoCameraController.h" />
     <ClInclude Include="..\source\renderer\DemoSceneLoader.h" />
@@ -302,7 +352,20 @@
     <PlatformToolset>v120</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v120</PlatformToolset>
@@ -315,7 +378,13 @@
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
@@ -324,10 +393,20 @@
     <IncludePath>$(SolutionDir)..\..\..\include\;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)..\..\..\lib\win;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LinkIncremental>true</LinkIncremental>
+    <IncludePath>$(SolutionDir)..\..\..\include\;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)..\..\..\lib\win\x64;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <IncludePath>$(SolutionDir)..\..\..\include\;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)..\..\..\lib\win;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LinkIncremental>false</LinkIncremental>
+    <IncludePath>$(SolutionDir)..\..\..\include\;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)..\..\..\lib\win\x64;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -341,7 +420,22 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>libxml2.lib;jpeg.lib;opengl32.lib;libpng16.lib;zlib.lib;openal32.lib;jansson.lib;ogg.lib;vorbis.lib;vorbisfile.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>dbghelp.lib;jpeg.lib;opengl32.lib;png.lib;z.lib;openal32.lib;jansson.lib;ogg.lib;vorbis.lib;vorbisfile.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;ET_DISABLE_JSON;_DEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>dbghelp.lib;jpeg.lib;opengl32.lib;png.lib;z.lib;openal32.lib;jansson.lib;ogg.lib;vorbis.lib;vorbisfile.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -360,7 +454,26 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>libxml2.lib;jpeg.lib;opengl32.lib;libpng16.lib;zlib.lib;openal32.lib;jansson.lib;ogg.lib;vorbis.lib;vorbisfile.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>dbghelp.lib;jpeg.lib;opengl32.lib;png.lib;z.lib;openal32.lib;jansson.lib;ogg.lib;vorbis.lib;vorbisfile.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;ET_DISABLE_JSON;NDEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>dbghelp.lib;jpeg.lib;opengl32.lib;png.lib;z.lib;openal32.lib;jansson.lib;ogg.lib;vorbis.lib;vorbisfile.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
