@@ -1,3 +1,8 @@
 *.xcworkspacedata
 *.xcuserstate
 *.xcscheme
+demo/get-started/windows/x64/
+demo/get-started/windows/Debug/
+*.suo
+*.sdf
+*.opensdf

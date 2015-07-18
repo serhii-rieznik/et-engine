@@ -1,11 +1,3 @@
-//
-//  MainController.h
-//  SceneRendering
-//
-//  Created by Sergey Reznik on 13/12/2014.
-//  Copyright (c) 2014 Cheetek. All rights reserved.
-//
-
 #pragma once
 
 #include <et/app/application.h>

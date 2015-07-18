@@ -1,11 +1,3 @@
-//
-//  MainController.cpp
-//  SceneRendering
-//
-//  Created by Sergey Reznik on 13/12/2014.
-//  Copyright (c) 2014 Cheetek. All rights reserved.
-//
-
 #include <et/primitives/primitives.h>
 #include "MainController.h"
 
@@ -71,7 +63,7 @@ void MainController::createTextures(et::RenderContext* rc)
 	for (const auto& screen : allScreens)
 		maxSize = maxv(screen.frame.size(), maxSize);
 
-	_noiseTexture = rc->textureFactory().genNoiseTexture(maxSize, false, "noise-texture");
+	_noiseTexture = rc->textureFactory().genNoiseTexture(maxSize, true, "noise-texture");
 }
 
 void MainController::createPrograms(et::RenderContext* rc)
@@ -119,9 +111,12 @@ void MainController::render(et::RenderContext* rc)
 	auto ren = rc->renderer();
 	auto& rs = rc->renderState();
 
-	ren->renderTexture(_noiseTexture, (rc->sizei() - _noiseTexture->size()) / 2);
 	ren->clear(false, true);
-	
+
+	rs.setDepthMask(false);
+	ren->renderTexture(_noiseTexture, (rc->sizei() - _noiseTexture->size()) / 2);
+	rs.setDepthMask(true);
+
 	rs.bindVertexArray(_testModel);
 	rs.bindTexture(0, _noiseTexture);
 	rs.bindProgram(_defaultProgram);
