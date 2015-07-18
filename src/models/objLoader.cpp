@@ -30,57 +30,72 @@ namespace et
 	};
 }
 
+template <typename F>
+inline void splitAndWrite(const std::string& s, char token, F func)
+{
+	if (s.empty()) return;
+
+	const char* begin = s.data();
+	const char* pos = begin;
+	const char* end = begin + s.size();
+	while (begin < end)
+	{
+		if (*begin == token)
+		{
+			func(std::string(pos, begin - pos));
+			pos = begin + 1;
+		}
+		++begin;
+	}
+	if (begin - pos > 0)
+		func(std::string(pos, begin - pos));
+}
+
 inline std::istream& operator >> (std::istream& stream, vec2& value)
 {
 	std::string ln;
+	ln.reserve(128);
 	std::getline(stream, ln);
 	trim(ln);
-	
-	auto values = split(ln, " ");
-	
+
 	size_t comp = 0;
-	for (const auto& val : values)
+	splitAndWrite(ln, ' ', [&value, &comp](const std::string& s)
 	{
 		if (comp < 2)
-			value[comp++] = strToFloat(val);
-	}
-	
+			value[comp++] = strToFloat(s);
+	});
 	return stream;
 }
 
 inline std::istream& operator >> (std::istream& stream, vec3& value)
 {
 	std::string ln;
+	ln.reserve(128);
 	std::getline(stream, ln);
 	trim(ln);
-	
-	auto values = split(ln, " ");
-	
+
 	size_t comp = 0;
-	for (const auto& val : values)
+	splitAndWrite(ln, ' ', [&value, &comp](const std::string& s)
 	{
-		if ((comp < 3) && !val.empty())
-			value[comp++] = strToFloat(val);
-	}
-	
+		if (comp < 3)
+			value[comp++] = strToFloat(s);
+	});
 	return stream;
 }
 
 inline std::istream& operator >> (std::istream& stream, vec4& value)
 {
 	std::string ln;
+	ln.reserve(128);
 	std::getline(stream, ln);
 	trim(ln);
-	
-	auto values = split(ln, " ");
-	
+
 	size_t comp = 0;
-	for (const auto& val : values)
+	splitAndWrite(ln, ' ', [&value, &comp](const std::string& s)
 	{
 		if (comp < 4)
-			value[comp++] = strToFloat(val);
-	}
-	
+			value[comp++] = strToFloat(s);
+	});
 	return stream;
 }
 
@@ -107,7 +122,7 @@ ThreadResult OBJLoaderThread::main()
 
 OBJLoader::OBJLoader(RenderContext* rc, const std::string& inFile) : _rc(rc),
 	inputFileName(application().resolveFileName(inFile).c_str()),
-	inputFile(inputFileName.c_str()), lastGroup(0), _loadOptions(0)
+	inputFile(inputFileName.c_str()), lastGroup(nullptr), _loadOptions(0)
 {
 	inputFilePath = getFilePath(inputFileName);
 	
@@ -174,6 +189,7 @@ void OBJLoader::loadData(bool async, ObjectsCache& cache)
 			trim(line);
 			
 			lastGroup = sharedObjectFactory().createObject<OBJGroup>(line);
+			lastGroup->faces.reserve(1024);
 			_groups.push_back(lastGroup);
 		}
 		else if (key == 'u') // group's material
@@ -216,6 +232,7 @@ void OBJLoader::loadData(bool async, ObjectsCache& cache)
 		else if (key == 'f') // faces
 		{
 			OBJFace face;
+			face.vertices.reserve(1024);
 			std::getline(inputFile, line);
 			trim(line);
 
@@ -225,15 +242,17 @@ void OBJLoader::loadData(bool async, ObjectsCache& cache)
 			for (auto inFace : faces)
 			{
 				OBJVertex vertex;
-				auto indexes = split(inFace, "/");
+
+				std::vector<int> indexes;
+				indexes.reserve(3);
+				splitAndWrite(inFace, '/', [&indexes](const std::string& s)
+					{ indexes.push_back(strToInt(s)); });
 								
 				vertex.numVertices = indexes.size();
 
 				size_t i = 0;
-				for (auto index : indexes)
+				for (auto iValue : indexes)
 				{
-					auto iValue = strToInt(index);
-					
 					if (iValue < 0)
 					{
 						size_t szValue = static_cast<size_t>(-iValue);
@@ -304,6 +323,11 @@ void OBJLoader::loadData(bool async, ObjectsCache& cache)
 
 s3d::ElementContainer::Pointer OBJLoader::load(ObjectsCache& cache, size_t options)
 {
+	_groups.reserve(4);
+	_vertices.reserve(1024);
+	_normals.reserve(1024);
+	_texCoords.reserve(1024);
+
 	_loadOptions = options;
 
 	loadData(false, cache);

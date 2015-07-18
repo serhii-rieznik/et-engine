@@ -1,21 +1,14 @@
-//
-// sample.cpp
-// osx
-//
-// Created by Sergey Reznik on 30.05.13.
-// Copyright (c) 2013 Sergey Reznik. All rights reserved.
-//
-
 #include <et/core/tools.h>
 #include <et/primitives/primitives.h>
 #include <et/camera/camera.h>
 #include <et/app/application.h>
+#include <et/opengl/opengl.h>
 #include "sample.h"
 
 using namespace demo;
 using namespace et;
 
-IndexType frustumLines[] = { 0,1, 0,4, 1,2, 1,5, 2,3, 2,6, 3,0, 3,7, 4,5, 5,6, 6,7, 7,4 };
+uint32_t frustumLines[] = { 0,1, 0,4, 1,2, 1,5, 2,3, 2,6, 3,0, 3,7, 4,5, 5,6, 6,7, 7,4 };
 
 size_t numFrustumPoints = sizeof(frustumLines) / sizeof(frustumLines[0]);
 size_t numFrustumLines = numFrustumPoints / 2;
@@ -28,7 +21,7 @@ void Sample::prepare(et::RenderContext* rc)
 	_belowSurface = false;
 
 	_texture = rc->textureFactory().loadTexture("data/textures/clouds.png", _cache);
-	_texture->setWrap(rc, TextureWrap_Repeat, TextureWrap_Repeat);
+	_texture->setWrap(rc, TextureWrap::Repeat, TextureWrap::Repeat);
 
 	_cameraAngles.setValue(vec2(0.0f, 0.0f));
 	_cameraPosition.setValue(vec3(50.0f));
@@ -52,15 +45,16 @@ void Sample::loadPrograms(et::RenderContext* rc)
 	_program = rc->programFactory().loadProgram("data/shaders/pgrid.program", _cache);
 	_program->setUniform("cloudsTexture", 0);
 	
+	GLuint glID = static_cast<GLuint>(_program->apiHandle());
 	GLint numUniforms = 0;
-	glGetProgramiv(_program->glID(), GL_ACTIVE_UNIFORMS, &numUniforms);
+	glGetProgramiv(glID, GL_ACTIVE_UNIFORMS, &numUniforms);
 	
 	for (GLuint uniformIndex = 0; uniformIndex < (GLuint)numUniforms; ++uniformIndex)
 	{
 		GLsizei uniformNameLength = 0;
 		GLchar uniformName[1024] = { };
-		glGetActiveUniformName(_program->glID(), uniformIndex, 1024, &uniformNameLength, uniformName);
-		GLint testIndex = glGetUniformLocation(_program->glID(), uniformName);
+		glGetActiveUniformName(glID, uniformIndex, 1024, &uniformNameLength, uniformName);
+		GLint testIndex = glGetUniformLocation(glID, uniformName);
 		
 		log::info("Uniform #%u, name: %s, location: %d", uniformIndex, uniformName, testIndex);
 	}
@@ -82,14 +76,14 @@ void Sample::initCamera(et::RenderContext* rc)
 void Sample::createGeometry(et::RenderContext* rc)
 {
 	vec2i gridSize = rc->sizei() / 2;
-	VertexArray va(VertexDeclaration(false, Usage_Position, Type_Vec2), gridSize.square());
+	VertexArray va(VertexDeclaration(false, VertexAttributeUsage::Position, VertexAttributeType::Vec2), gridSize.square());
 	va.retain();
 
-	IndexArray ia(IndexArrayFormat_32bit, primitives::indexCountForRegularMesh(gridSize,
-		PrimitiveType_TriangleStrips), PrimitiveType_TriangleStrips);
+	IndexArray ia(IndexArrayFormat::Format_32bit, primitives::indexCountForRegularMesh(gridSize,
+		PrimitiveType::TriangleStrips), PrimitiveType::TriangleStrips);
 	ia.retain();
 
-	RawDataAcessor<vec2> pos = va.chunk(Usage_Position).accessData<vec2>(0);
+	RawDataAcessor<vec2> pos = va.chunk(VertexAttributeUsage::Position).accessData<vec2>(0);
 	size_t k = 0;
 	float dx = 1.0f / static_cast<float>(gridSize.x - 1);
 	float dy = 1.0f / static_cast<float>(gridSize.y - 1);
@@ -106,7 +100,7 @@ void Sample::createGeometry(et::RenderContext* rc)
 	primitives::buildTriangleStripIndexes(ia, gridSize, 0, 0);
 
 	_vao = rc->vertexBufferFactory().createVertexArrayObject("grid", VertexArray::Pointer(&va),
-		BufferDrawType_Static, IndexArray::Pointer(&ia), BufferDrawType_Static);
+		BufferDrawType::Static, IndexArray::Pointer(&ia), BufferDrawType::Static);
 }
 
 void Sample::render(et::RenderContext* rc)
@@ -115,11 +109,11 @@ void Sample::render(et::RenderContext* rc)
 
 	rc->renderState().setDepthTest(true);
 	rc->renderState().setDepthMask(true);
-	rc->renderState().setDepthFunc(DepthFunc_Less);
+	rc->renderState().setDepthFunc(DepthFunc::Less);
 
 	if (_shouldRenderGrid)
 	{
-		rc->renderState().setCulling((_belowSurface & !_observing) ? CullState_Front : CullState_Back);
+		rc->renderState().setCulling(true, (_belowSurface & !_observing) ? CullState::Back : CullState::Front);
 		rc->renderState().setWireframeRendering(_wireframe);
 		rc->renderState().bindProgram(_program);
 
@@ -138,7 +132,7 @@ void Sample::render(et::RenderContext* rc)
 	if (_model.valid())
 	{
 		rc->renderState().setWireframeRendering(_wireframe);
-		rc->renderState().setCulling(CullState_Back);
+		rc->renderState().setCulling(true, CullState::Back);
 		rc->renderState().bindVertexArray(_model);
 		rc->renderState().bindProgram(_modelProgram);
 		_modelProgram->setCameraProperties(cam);
@@ -270,11 +264,11 @@ void Sample::updateProjectorMatrix()
 
 void Sample::createFrustumGeometry(et::RenderContext* rc)
 {
-	VertexDeclaration decl(false, Usage_Position, Type_Vec3);
-	decl.push_back(Usage_Color, Type_Vec4);
+	VertexDeclaration decl(false, VertexAttributeUsage::Position, VertexAttributeType::Vec3);
+	decl.push_back(VertexAttributeUsage::Color, VertexAttributeType::Vec4);
 	_frustumLinesData = VertexArray::Pointer::create(decl, 2 * _frustumLines.size());
 	
-	IndexArray ai(IndexArrayFormat_8bit, 4 * numFrustumLines, PrimitiveType_Lines);
+	IndexArray ai(IndexArrayFormat::Format_8bit, 4 * numFrustumLines, PrimitiveType::Lines);
 	size_t k = 0;
 	for (size_t i = 0; i < numFrustumLines; ++i)
 	{
@@ -282,7 +276,7 @@ void Sample::createFrustumGeometry(et::RenderContext* rc)
 		ai.setIndex(frustumLines[2*i+1], k++);
 	}
 
-	IndexType i0 = static_cast<IndexType>(_frustumLines.size());
+	uint32_t i0 = static_cast<uint32_t>(_frustumLines.size());
 	for (size_t i = 0; i < numFrustumLines; ++i)
 	{
 		ai.setIndex(i0 + frustumLines[2*i+0], k++);
@@ -292,7 +286,7 @@ void Sample::createFrustumGeometry(et::RenderContext* rc)
 	ai.retain();
 	
 	_frustumGeometry = rc->vertexBufferFactory().createVertexArrayObject("frustum", _frustumLinesData,
-		BufferDrawType_Stream, IndexArray::Pointer(&ai), BufferDrawType_Static);
+		BufferDrawType::Stream, IndexArray::Pointer(&ai), BufferDrawType::Static);
 }
 
 void Sample::updateFrustumGeometry(bool projector)
@@ -309,8 +303,8 @@ void Sample::updateFrustumGeometry(bool projector)
 	size_t off = projector ? _frustumLines.size() : 0;
 	vec4 aColor = projector ? vec4(1.0f, 1.0f, 0.0f, 1.0f) : vec4(1.0f);
 	
-	RawDataAcessor<vec3> pos = _frustumLinesData->chunk(Usage_Position).accessData<vec3>(0);
-	RawDataAcessor<vec4> clr = _frustumLinesData->chunk(Usage_Color).accessData<vec4>(0);
+	RawDataAcessor<vec3> pos = _frustumLinesData->chunk(VertexAttributeUsage::Position).accessData<vec3>(0);
+	RawDataAcessor<vec4> clr = _frustumLinesData->chunk(VertexAttributeUsage::Color).accessData<vec4>(0);
 	for (size_t i = 0; i < _frustumLines.size(); ++i)
 	{
 		clr[off + i] = aColor;

@@ -1,5 +1,6 @@
 #include <et/models/objloader.h>
 #include <et/primitives/primitives.h>
+#include <et/app/application.h>
 #include "maincontroller.h"
 
 using namespace et;
@@ -18,6 +19,11 @@ void MainController::setRenderContextParameters(et::RenderContextParameters& p)
 
 void MainController::applicationDidLoad(et::RenderContext* rc)
 {
+#if (ET_PLATFORM_WIN)
+	application().pushRelativeSearchPath("..");
+	application().pushRelativeSearchPath("..\\..");
+	application().pushRelativeSearchPath("..\\..\\..");
+#endif
 	rc->renderState().setClearColor(vec4(0.25f));
 	
 	_sample.prepare(rc);
@@ -38,25 +44,25 @@ void MainController::applicationDidLoad(et::RenderContext* rc)
 	{
 		const auto& tris = mesh->triangles();
 		
-		VertexDeclaration decl(true, Usage_Position, Type_Vec3);
-		decl.push_back(Usage_Normal, Type_Vec3);
+		VertexDeclaration decl(true, VertexAttributeUsage::Position, VertexAttributeType::Vec3);
+		decl.push_back(VertexAttributeUsage::Normal, VertexAttributeType::Vec3);
 		
 		VertexArray::Pointer vdata = VertexArray::Pointer::create(decl, 3 * tris.size());
 		
 		size_t i = 0;
-		auto verts = vdata->chunk(Usage_Position).accessData<vec3>(0);
+		auto verts = vdata->chunk(VertexAttributeUsage::Position).accessData<vec3>(0);
 		for (const auto& t : tris)
 		{
 			verts[i++] = t.v3();
 			verts[i++] = t.v2();
 			verts[i++] = t.v1();
 		}
-		IndexArray::Pointer idata = IndexArray::Pointer::create(IndexArrayFormat_32bit, 0, PrimitiveType_Triangles);
+		IndexArray::Pointer idata = IndexArray::Pointer::create(IndexArrayFormat::Format_32bit, 0, PrimitiveType::Triangles);
 		vdata = primitives::buildLinearIndexArray(vdata, idata);
 		primitives::calculateNormals(vdata, idata, 0, idata->primitivesCount());
 		
-		_sample.setModelToDraw(rc->vertexBufferFactory().createVertexArrayObject("model", vdata, BufferDrawType_Static,
-			idata, BufferDrawType_Static));
+		_sample.setModelToDraw(rc->vertexBufferFactory().createVertexArrayObject("model", vdata, 
+			BufferDrawType::Static, idata, BufferDrawType::Static));
 	}
 }
 

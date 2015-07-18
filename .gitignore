@@ -7,3 +7,5 @@ demo/get-started/windows/Debug/
 *.sdf
 *.opensdf
 demo/scene-rendering/windows/x64/
+demo/vertex-texture-fetch/windows/x64/
+demo/vertex-texture-fetch/windows/Release/

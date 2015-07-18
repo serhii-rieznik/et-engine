@@ -1,11 +1,3 @@
-//
-//  sample.h
-//  osx
-//
-//  Created by Sergey Reznik on 30.05.13.
-//  Copyright (c) 2013 Sergey Reznik. All rights reserved.
-//
-
 #pragma once
 
 #include <et/camera/camera.h>
@@ -58,7 +50,7 @@ namespace demo
 		et::Program::Pointer _program;
 		et::Program::Pointer _frustumProgram;
 		et::Program::Pointer _modelProgram;
-		et::Texture _texture;
+		et::Texture::Pointer _texture;
 
 		et::InertialValue<et::vec2> _cameraAngles;
 		et::InertialValue<et::vec3> _cameraPosition;
