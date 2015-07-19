@@ -113,8 +113,40 @@ void Material::serialize(Dictionary stream, const std::string& basePath)
 		stream.setDictionaryForKey(kTextures, textureValues);
 }
 
-void Material::deserialize(Dictionary, RenderContext*, ObjectsCache&, const std::string&)
+void Material::deserialize(Dictionary stream, RenderContext* rc, ObjectsCache& cache, const std::string& basePath)
 {
+	setName(stream.stringForKey(kName)->content);
+	auto blendValue = stream.integerForKey(kBlendState)->content;
+	_blendState = ((blendValue >= 0) && (blendValue < BlendState_max)) ? 
+		static_cast<BlendState>(blendValue) : BlendState::Default;
+	_depthMask = stream.integerForKey(kDepthMask)->content != 0;
+
+	Dictionary intValues = stream.dictionaryForKey(kIntegerValues);
+	Dictionary floatValues = stream.dictionaryForKey(kFloatValues);
+	Dictionary vectorValues = stream.dictionaryForKey(kVectorValues);
+	Dictionary textureValues = stream.dictionaryForKey(kTextures);
+	for (uint32_t i = 0; i < MaterialParameter_max; ++i)
+	{
+		const auto& key = materialKeys[i];
+
+		if (intValues.hasKey(key))
+			setInt(i, static_cast<int>(intValues.integerForKey(key)->content));
+
+		if (floatValues.hasKey(key))
+			setFloat(i, intValues.floatForKey(key)->content);
+
+		if (vectorValues.hasKey(key))
+			setVector(i, arrayToVec4(vectorValues.arrayForKey(key)));
+
+		if (textureValues.hasKey(key))
+		{
+			auto textureFileName = textureValues.stringForKey(key)->content;
+			if (!fileExists(textureFileName))
+				textureFileName = basePath + textureFileName;
+			setTexture(i, rc->textureFactory().loadTexture(textureFileName, cache));
+		}
+	}
+	log::warning("Custom material parameters are not deserialized");
 }
 
 Texture::Pointer Material::loadTexture(RenderContext* rc, const std::string& path, const std::string& basePath,

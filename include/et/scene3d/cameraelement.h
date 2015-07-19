@@ -23,7 +23,7 @@ namespace et
 			CameraElement(const std::string& name, BaseElement* parent);
 
 			ElementType type() const 
-				{ return ElementType_Camera; }
+				{ return ElementType::Camera; }
 
 			CameraElement* duplicate();
 
@@ -34,7 +34,7 @@ namespace et
 				{ return *this; }
 
 			void serialize(Dictionary, const std::string&);
-			void deserialize(Dictionary, ElementFactory*);
+			void deserialize(Dictionary, SerializationHelper*);
 		};
 	}
 }

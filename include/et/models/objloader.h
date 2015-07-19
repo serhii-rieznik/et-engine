@@ -13,11 +13,12 @@
 #include <et/scene3d/storage.h>
 #include <et/rendering/rendercontext.h>
 #include <et/vertexbuffer/vertexstorage.h>
+#include <et/models/modelloader.h>
 
 namespace et
 {
 	class OBJLoaderThread;
-	class OBJLoader
+	class OBJLoader : public ModelLoader
 	{
 	public:
 		enum Options
@@ -31,11 +32,11 @@ namespace et
 		};
 
 	public:
-		OBJLoader(RenderContext* rc, const std::string& inFile);
+		OBJLoader(const std::string& inFile, size_t options);
 		~OBJLoader();
 
-		s3d::ElementContainer::Pointer load(ObjectsCache& cahce, size_t options);
-		void loadAsync(ObjectsCache& cahce);
+		s3d::ElementContainer::Pointer load(et::RenderContext*, s3d::Storage&, ObjectsCache&);
+		void loadAsync(et::RenderContext*, s3d::Storage&, ObjectsCache& cahce);
 
 		ET_DECLARE_EVENT1(loaded, s3d::ElementContainer::Pointer)
 
@@ -97,13 +98,13 @@ namespace et
 		};
 
 	private:
-		void loadData(bool async, ObjectsCache& cache);
+		void loadData(bool async, s3d::Storage&, ObjectsCache& cache);
 		void processLoadedData();
 		
-		s3d::ElementContainer::Pointer generateVertexBuffers();
+		s3d::ElementContainer::Pointer generateVertexBuffers(s3d::Storage&);
 
 		void loadMaterials(const std::string& fileName, bool async, ObjectsCache& cache);
-		void threadFinished();
+		void threadFinished(s3d::Storage&);
 
 	private:
 		friend class OBJLoaderThread;
@@ -116,7 +117,6 @@ namespace et
 		std::ifstream inputFile;
 		std::ifstream materialFile;
 
-		s3d::Storage::Pointer _storage;
 		s3d::Material::Pointer _lastMaterial;
 		s3d::Material::List _materials;
 		OBJMeshIndexBoundsList _meshes;
@@ -130,7 +130,7 @@ namespace et
 		std::vector<OBJGroup*,et::SharedBlockAllocatorSTDProxy<OBJGroup*>> _groups;
 
 		OBJGroup* lastGroup = nullptr;
-		size_t _loadOptions = 0;
+		size_t _loadOptions = Option_JustLoad;
 		int _lastSmoothGroup = 0;
 		int _lastGroupId = 0;
 	};

@@ -8,16 +8,17 @@
 #pragma once
 
 #include <et/scene3d/scene3d.h>
+#include <et/models/modelloader.h>
 
 namespace et
 {
 	class RenderContext;
-	class FBXLoader
+	class FBXLoader : public ModelLoader
 	{
 	public:
 		FBXLoader(const std::string& filename);
 
-		s3d::ElementContainer::Pointer load(RenderContext* rc, ObjectsCache& textureCache);
+		s3d::ElementContainer::Pointer load(RenderContext*, s3d::Storage&, ObjectsCache&);
 
 	private:
 		std::string _filename;

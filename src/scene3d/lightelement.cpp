@@ -36,8 +36,8 @@ void LightElement::serialize(Dictionary stream, const std::string& basePath)
 	CameraElement::serialize(stream, basePath);
 }
 
-void LightElement::deserialize(Dictionary stream, ElementFactory* factory)
+void LightElement::deserialize(Dictionary stream, SerializationHelper* helper)
 {
-	CameraElement::deserialize(stream, factory);
+	CameraElement::deserialize(stream, helper);
 }
 

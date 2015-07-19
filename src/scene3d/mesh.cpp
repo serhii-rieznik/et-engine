@@ -150,9 +150,9 @@ void Mesh::serialize(Dictionary stream, const std::string& basePath)
 	RenderableElement::serialize(stream, basePath);
 }
 
-void Mesh::deserialize(Dictionary stream, ElementFactory* factory)
+void Mesh::deserialize(Dictionary stream, SerializationHelper* helper)
 {
-	RenderableElement::deserialize(stream, factory);
+	RenderableElement::deserialize(stream, helper);
 }
 
 void Mesh::attachLod(uint32_t level, Mesh::Pointer mesh)

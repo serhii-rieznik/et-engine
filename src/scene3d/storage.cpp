@@ -12,11 +12,8 @@
 using namespace et;
 using namespace et::s3d;
 
-Storage::Storage(const std::string& name, BaseElement* parent) :
-	ElementContainer(name, parent)
+Storage::Storage()
 {
-	_indexArray = IndexArray::Pointer::create(IndexArrayFormat::Format_16bit, 0, PrimitiveType::Triangles);
-	_indexArray->setName("mainIndexBuffer");
 }
 
 void Storage::addVertexStorage(const VertexStorage::Pointer& vs)
@@ -64,8 +61,10 @@ int Storage::indexOfVertexStorage(const VertexStorage::Pointer& vs)
 	return -1;
 }
 
-void Storage::serialize(Dictionary stream, const std::string& basePath)
+Dictionary Storage::serialize(const std::string& basePath)
 {
+	Dictionary stream;
+
 	if (!_materials.empty())
 	{
 		Dictionary materialsDictionary;
@@ -146,12 +145,79 @@ void Storage::serialize(Dictionary stream, const std::string& basePath)
 	fOut.flush();
 	fOut.close();
 
-	ElementContainer::serialize(stream, basePath);
+	return stream;
 }
 
-void Storage::deserialize(Dictionary stream, ElementFactory* factory)
+void Storage::deserialize(RenderContext* rc, Dictionary stream, SerializationHelper* helper, ObjectsCache& cache)
 {
-	ElementContainer::deserialize(stream, factory);
+	auto materialsLibrary = stream.stringForKey(kMaterials)->content;
+	if (!fileExists(materialsLibrary))
+		materialsLibrary = helper->serializationBasePath() + materialsLibrary;
+
+	if (fileExists(materialsLibrary))
+	{
+		ValueClass vc = ValueClass_Invalid;
+		Dictionary materials = json::deserialize(loadTextFile(materialsLibrary), vc);
+		if (vc == ValueClass_Dictionary)
+		{
+			for (const auto kv : materials->content)
+			{
+				Dictionary materialInfo(kv.second);
+				Material::Pointer material;
+				material->deserialize(materialInfo, rc, cache, helper->serializationBasePath());
+				addMaterial(material);
+			}
+		}
+	}
+
+	Dictionary vertexStorages = stream.dictionaryForKey(kVertexStorages);
+	for (const auto& kv : vertexStorages->content)
+	{
+		Dictionary storage(kv.second);
+		ArrayValue declInfo = storage.arrayForKey(kVertexDeclaration);
+
+		VertexDeclaration decl(true);
+		for (Dictionary e : declInfo->content)
+		{
+			bool comp = false;
+			decl.push_back(stringToVertexAttributeUsage(e.stringForKey(kUsage)->content, comp),
+				stringToVertexAttributeType(e.stringForKey(kType)->content));
+		}
+		size_t capacity = static_cast<size_t>(storage.integerForKey(kDataSize)->content) / decl.dataSize();
+
+		VertexStorage::Pointer vs = VertexStorage::Pointer::create(decl, capacity);
+		vs->setName(storage.stringForKey(kName)->content);
+
+		auto binaryFileName = storage.stringForKey(kBinary)->content;
+		if (!fileExists(binaryFileName))
+			binaryFileName = helper->serializationBasePath() + binaryFileName;
+
+		std::ifstream fIn(binaryFileName, std::ios::in | std::ios::binary);
+		if (fIn.good())
+		{
+			fIn.read(vs->data().binary(), vs->data().dataSize());
+			fIn.close();
+		}
+		addVertexStorage(vs);
+	}
+
+	Dictionary iaInfo = stream.dictionaryForKey(kIndexArray);
+	IndexArrayFormat fmt = stringToIndexArrayFormat(iaInfo.stringForKey(kFormat)->content);
+	PrimitiveType pt = stringToPrimitiveType(iaInfo.stringForKey(kPrimitiveType)->content);
+	size_t indexesCount = static_cast<size_t>(iaInfo.integerForKey(kIndexesCount)->content);
+	IndexArray::Pointer ia = IndexArray::Pointer::create(fmt, indexesCount, pt);
+
+	auto binaryFileName = iaInfo.stringForKey(kBinary)->content;
+	if (!fileExists(binaryFileName))
+		binaryFileName = helper->serializationBasePath() + binaryFileName;
+
+	std::ifstream fIn(binaryFileName, std::ios::in | std::ios::binary);
+	if (fIn.good())
+	{
+		fIn.read(ia->binary(), ia->dataSize());
+		fIn.close();
+	}
+	setIndexArray(ia);
 }
 
 void Storage::flush()

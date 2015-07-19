@@ -26,7 +26,7 @@ namespace et
 					IntrusivePtr<Material>(sharedObjectFactory().createObject<Material>()) { }
 				
 				explicit Pointer(Material* data) :
-					IntrusivePtr<Material>(data) { }
+					IntrusivePtr<Material>(data = nullptr ? sharedObjectFactory().createObject<Material>() : data) { }
 			};
 			
 			typedef std::vector<Material::Pointer> List;

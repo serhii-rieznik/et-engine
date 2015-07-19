@@ -22,12 +22,12 @@ namespace et
 			LightElement(const std::string& name, BaseElement* parent);
 
 			ElementType type() const 
-				{ return ElementType_Light; }
+				{ return ElementType::Light; }
 
 			LightElement* duplicate();
 
 			void serialize(Dictionary, const std::string&);
-			void deserialize(Dictionary, ElementFactory* factory);
+			void deserialize(Dictionary, SerializationHelper*);
 		};
 	}
 }

@@ -9,9 +9,8 @@
 
 #include <et/app/events.h>
 #include <et/core/objectscache.h>
-#include <et/scene3d/baseelement.h>
+#include <et/scene3d/elementcontainer.h>
 #include <et/scene3d/storage.h>
-#include <et/scene3d/mesh.h>
 #include <et/scene3d/supportmesh.h>
 #include <et/scene3d/cameraelement.h>
 #include <et/scene3d/lightelement.h>
@@ -21,7 +20,7 @@ namespace et
 {
 	namespace s3d
 	{
-		class Scene : public ElementContainer, public ElementFactory
+		class Scene : public ElementContainer, public SerializationHelper
 		{
 		public:
 			ET_DECLARE_POINTER(Scene)
@@ -29,16 +28,29 @@ namespace et
 		public:
 			Scene(const std::string& name = "scene");
 
-			Dictionary serialize(const std::string&);
+			Dictionary serialize(const std::string& basePath);
+			void deserialize(et::RenderContext*, Dictionary, const std::string& basePath, ObjectsCache&);
+
+			Storage& storage()
+				{ return _storage; }
+
+			const Storage& storage() const
+				{ return _storage; }
 
 		public:
 			ET_DECLARE_EVENT1(deserializationFinished, bool)
 
 		private:
-			BaseElement::Pointer createElementOfType(uint64_t type, BaseElement* parent);
-			Material::Pointer materialWithName(const std::string&);
-			IndexArray::Pointer primaryIndexArray();
-			VertexStorage::Pointer vertexStorageWithName(const std::string&);
+			Material* materialWithName(const std::string&);
+
+			BaseElement::Pointer createElementOfType(ElementType, BaseElement*);
+
+			const std::string& serializationBasePath() const 
+				{ return _serializationBasePath; }
+
+		private:
+			Storage _storage;
+			std::string _serializationBasePath;
 		};
 	}
 }

@@ -11,6 +11,7 @@ namespace et
 {
 	namespace s3d
 	{
+		const std::string kStorage = "storage";
 		const std::string kName = "name";
 		const std::string kChildren = "children";
 		const std::string kElementTypeCode = "elementTypeCode";

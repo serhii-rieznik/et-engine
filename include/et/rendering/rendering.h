@@ -289,8 +289,12 @@ namespace et
 	std::string vertexAttributeUsageToString(VertexAttributeUsage);
 	std::string vertexAttributeTypeToString(VertexAttributeType);
 	std::string dataTypeToString(DataType);
-	std::string indexArrayFormatToString(IndexArrayFormat);
+
 	std::string primitiveTypeToString(PrimitiveType);
+	PrimitiveType stringToPrimitiveType(const std::string&);
+
+	std::string indexArrayFormatToString(IndexArrayFormat);
+	IndexArrayFormat stringToIndexArrayFormat(const std::string&);
 
 	uint32_t sizeOfDataType(DataType);
 	

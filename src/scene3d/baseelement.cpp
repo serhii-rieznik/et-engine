@@ -88,7 +88,7 @@ const mat4& BaseElement::finalInverseTransform()
 
 bool BaseElement::isKindOf(ElementType t) const
 {
-	return (t == ElementType_Any) || (type() == t);
+	return (t == ElementType::DontCare) || (type() == t);
 }
 
 BaseElement::Pointer BaseElement::childWithName(const std::string& name, ElementType ofType, bool assertFail)
@@ -177,16 +177,16 @@ void BaseElement::serialize(Dictionary stream, const std::string& basePath)
 	serializeChildren(stream, basePath);
 }
 
-void BaseElement::deserialize(Dictionary stream, ElementFactory* factory)
+void BaseElement::deserialize(Dictionary stream, SerializationHelper* helper)
 {
 	deserializeGeneralParameters(stream);
-	deserializeChildren(stream, factory);
+	deserializeChildren(stream, helper);
 }
 
 void BaseElement::serializeGeneralParameters(Dictionary stream)
 {
 	stream.setStringForKey(kName, name());
-	stream.setIntegerForKey(kElementTypeCode, type());
+	stream.setIntegerForKey(kElementTypeCode, static_cast<int64_t>(type()));
 	stream.setIntegerForKey(kFlagsValue, flags());
 	stream.setArrayForKey(kTranslation, vec3ToArray(translation()));
 	stream.setArrayForKey(kScale, vec3ToArray(scale()));
@@ -220,10 +220,16 @@ void BaseElement::deserializeGeneralParameters(Dictionary stream)
 	setName(stream.stringForKey(kName)->content);
 
 	auto typeCode = stream.integerForKey(kElementTypeCode)->content;
-	if (typeCode != type())
+	bool isValidType = (typeCode >= 0) && (typeCode < ElementType_Max) && (typeCode == static_cast<int64_t>(type()));
+
+	if (isValidType)
+	{
+	}
+	else
 	{
 		log::warning("Deserializing element %s with invalid type code %llu, supposed to be: %llu",
 			name().c_str(), typeCode, uint64_t(type()));
+
 	}
 }
 
@@ -244,14 +250,17 @@ void BaseElement::serializeChildren(Dictionary stream, const std::string& basePa
 	stream.setArrayForKey(kChildren, childrenArray);
 }
 
-void BaseElement::deserializeChildren(Dictionary stream, ElementFactory* factory)
+void BaseElement::deserializeChildren(Dictionary stream, SerializationHelper* helper)
 {
 	ArrayValue childrenArray = stream.arrayForKey(kChildren);
 	for (Dictionary object : childrenArray->content)
 	{
 		auto elementTypeCode = object.integerForKey(kElementTypeCode)->content;
-		auto child = factory->createElementOfType(elementTypeCode, this);
-		child->deserialize(object, factory);
+		if ((elementTypeCode >= ElementType_First) && (elementTypeCode < ElementType_Max))
+		{
+			auto child = helper->createElementOfType(static_cast<ElementType>(elementTypeCode), this);
+			child->deserialize(object, helper);
+		}
 	}
 }
 
@@ -316,20 +325,4 @@ Animation& BaseElement::defaultAnimation()
 const Animation& BaseElement::defaultAnimation() const
 {
 	return _animations.empty() ? _emptyAnimation : _animations.front();
-}
-
-/*
- * Renderable element
- */
-void RenderableElement::serialize(Dictionary stream, const std::string& basePath)
-{
-	stream.setStringForKey(kMaterialName, material()->name());
-	ElementContainer::serialize(stream, basePath);
-}
-
-void RenderableElement::deserialize(Dictionary stream, ElementFactory* factory)
-{
-	auto materialName = stream.stringForKey(kMaterialName)->content;
-	setMaterial(factory->materialWithName(materialName));
-	ElementContainer::deserialize(stream, factory);
 }

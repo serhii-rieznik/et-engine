@@ -10,25 +10,18 @@
 #include <et/vertexbuffer/indexarray.h>
 #include <et/vertexbuffer/vertexstorage.h>
 #include <et/scene3d/material.h>
-#include <et/scene3d/baseelement.h>
 
 namespace et
 {
 	namespace s3d
 	{
-		class Storage : public ElementContainer
+		class Storage
 		{
 		public:
-			ET_DECLARE_POINTER(Storage)
+			Storage();
 
-		public:
-			Storage(const std::string& name, BaseElement* parent);
-
-			void serialize(Dictionary, const std::string&);
-			void deserialize(Dictionary, ElementFactory* factory);
-
-			ElementType type() const
-				{ return ElementType_Storage; }
+			Dictionary serialize(const std::string&);
+			void deserialize(RenderContext*, Dictionary, SerializationHelper*, ObjectsCache&);
 
 			std::vector<VertexStorage::Pointer>& vertexStorages()
 				{ return _vertexStorages; }

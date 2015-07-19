@@ -19,13 +19,14 @@ namespace et
 	class OBJLoaderThread : public Thread
 	{
 	public:
-		OBJLoaderThread(OBJLoader*, ObjectsCache&);
+		OBJLoaderThread(OBJLoader*, s3d::Storage&, ObjectsCache&);
 		
 		ThreadResult main();
 
 	private:
 		friend class OBJLoader;
 		OBJLoader* _owner = nullptr;
+		s3d::Storage& _storage;
 		ObjectsCache& _cache;
 	};
 }
@@ -101,18 +102,17 @@ inline std::istream& operator >> (std::istream& stream, vec4& value)
 
 void getLine(std::ifstream& stream, std::string& line);
 
-OBJLoaderThread::OBJLoaderThread(OBJLoader* owner, ObjectsCache& cache) : 
-	Thread(false), _owner(owner), _cache(cache)
+OBJLoaderThread::OBJLoaderThread(OBJLoader* owner, s3d::Storage& storage, ObjectsCache& cache) : 
+	Thread(false), _owner(owner), _storage(storage), _cache(cache)
 {
 	run();
 }
 
 ThreadResult OBJLoaderThread::main()
 {
-	_owner->loadData(true, _cache);
+	_owner->loadData(true, _storage, _cache);
 	_owner->processLoadedData();
-	Invocation([this]() { _owner->threadFinished(); }).invokeInMainRunLoop();
-	
+	Invocation([this]() { _owner->threadFinished(_storage); }).invokeInMainRunLoop();
 	return 0;
 }
 
@@ -120,9 +120,9 @@ ThreadResult OBJLoaderThread::main()
  * OBJLoader
  */
 
-OBJLoader::OBJLoader(RenderContext* rc, const std::string& inFile) : _rc(rc),
+OBJLoader::OBJLoader(const std::string& inFile, size_t options) :
 	inputFileName(application().resolveFileName(inFile).c_str()),
-	inputFile(inputFileName.c_str()), lastGroup(nullptr), _loadOptions(0)
+	inputFile(inputFileName.c_str()), lastGroup(nullptr), _loadOptions(options)
 {
 	inputFilePath = getFilePath(inputFileName);
 	
@@ -147,7 +147,7 @@ OBJLoader::~OBJLoader()
 		materialFile.close();
 }
 
-void OBJLoader::loadData(bool async, ObjectsCache& cache)
+void OBJLoader::loadData(bool async,  s3d::Storage& storage, ObjectsCache& cache)
 {
 	std::string line;
 	int lineNumber = 0;
@@ -317,31 +317,31 @@ void OBJLoader::loadData(bool async, ObjectsCache& cache)
 			getLine(inputFile, line);
 			std::cout << "Unknown line " << lineNumber << " in file: " << key << line << std::endl;
 		}
-		
 	}
 }
 
-s3d::ElementContainer::Pointer OBJLoader::load(ObjectsCache& cache, size_t options)
+s3d::ElementContainer::Pointer OBJLoader::load(et::RenderContext* rc, s3d::Storage& storage, ObjectsCache& cache)
 {
+	storage.flush();
+
 	_groups.reserve(4);
 	_vertices.reserve(1024);
 	_normals.reserve(1024);
 	_texCoords.reserve(1024);
 
-	_loadOptions = options;
-
-	loadData(false, cache);
+	loadData(false, storage, cache);
 	
 	processLoadedData();
 
-	s3d::ElementContainer::Pointer result = generateVertexBuffers();
+	s3d::ElementContainer::Pointer result = generateVertexBuffers(storage);
 	loaded.invoke(result);
 	return result;
 }
 
-void OBJLoader::loadAsync(ObjectsCache& cache)
+void OBJLoader::loadAsync(et::RenderContext* rc, s3d::Storage& storage, ObjectsCache& cache)
 {
-	_thread = sharedObjectFactory().createObject<OBJLoaderThread>(this, cache);
+	_rc = rc;
+	_thread = sharedObjectFactory().createObject<OBJLoaderThread>(this, storage, cache);
 }
 
 void OBJLoader::loadMaterials(const std::string& fileName, bool async, ObjectsCache& cache)
@@ -805,16 +805,16 @@ void OBJLoader::processLoadedData()
 		primitives::calculateTangents(_vertexData, _indices, 0, _indices->primitivesCount() & 0xffffffff);
 }
 
-s3d::ElementContainer::Pointer OBJLoader::generateVertexBuffers()
+s3d::ElementContainer::Pointer OBJLoader::generateVertexBuffers(s3d::Storage& storage)
 {
 	s3d::ElementContainer::Pointer result = s3d::ElementContainer::Pointer::create(inputFileName, nullptr);
 
-	_storage = s3d::Storage::Pointer::create(getFileName(inputFileName) + "-storage", result.ptr());
-	_storage->addVertexStorage(_vertexData);
-	_storage->setIndexArray(_indices);
+	storage.flush();
+	storage.addVertexStorage(_vertexData);
+	storage.setIndexArray(_indices);
 	
 	for (auto m : _materials)
-		_storage->addMaterial(m);
+		storage.addMaterial(m);
 	
 	VertexArrayObject vao = _rc->vertexBufferFactory().createVertexArrayObject("model-vao", _vertexData,
 		BufferDrawType::Static, _indices, BufferDrawType::Static);
@@ -842,9 +842,9 @@ s3d::ElementContainer::Pointer OBJLoader::generateVertexBuffers()
 	return result;
 }
 
-void OBJLoader::threadFinished()
+void OBJLoader::threadFinished(s3d::Storage& storage)
 {
-	loaded.invoke(generateVertexBuffers());
+	loaded.invoke(generateVertexBuffers(storage));
 }
 
 /*

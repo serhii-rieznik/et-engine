@@ -9,11 +9,29 @@
 
 #include <ostream>
 #include <istream>
+#include <et/core/et.h>
+#include <et/scene3d/base.h>
 
 namespace et
 {
 	namespace s3d
 	{
+		class Material;
+		class BaseElement;
+		typedef IntrusivePtr<BaseElement> BaseElementPointer;
+
+		class SerializationHelper
+		{
+		public:
+			virtual const std::string& serializationBasePath() const = 0;
+			virtual BaseElementPointer createElementOfType(ElementType, BaseElement*) = 0;
+			virtual Material* materialWithName(const std::string&) = 0;
+
+		public:
+			virtual ~SerializationHelper() { }
+		};
+
+		extern const std::string kStorage;
 		extern const std::string kName;
 		extern const std::string kChildren;
 		extern const std::string kElementTypeCode;

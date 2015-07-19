@@ -64,7 +64,7 @@ void SupportMesh::serialize(Dictionary stream, const std::string& basePath)
 	Mesh::serialize(stream, basePath);
 }
 
-void SupportMesh::deserialize(Dictionary stream, ElementFactory* factory)
+void SupportMesh::deserialize(Dictionary stream, SerializationHelper* helper)
 {
 	/*
 	deserializeFloat(stream);
@@ -90,7 +90,7 @@ void SupportMesh::deserialize(Dictionary stream, ElementFactory* factory)
 	}
 	*/
 
-	Mesh::deserialize(stream, factory);
+	Mesh::deserialize(stream, helper);
 }
 
 void SupportMesh::transformInvalidated()

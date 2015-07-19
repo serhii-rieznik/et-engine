@@ -23,7 +23,7 @@ namespace et
 			ParticleSystem(RenderContext*, size_t, const std::string&, BaseElement*);
 			
 			ElementType type() const
-				{ return ElementType_ParticleSystem; }
+				{ return ElementType::ParticleSystem; }
 			
 			ParticleSystem* duplicate();
 			

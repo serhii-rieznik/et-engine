@@ -117,10 +117,12 @@ namespace et
 
 	IndexArrayFormat stringToIndexArrayFormat(const std::string& s)
 	{
+		uint32_t result = 1;
 		for (uint32_t i = 0, e = IndexArrayFormat_max; i < e; ++i)
 		{
 			if (s == indexArrayFormatNames[i])
-				return static_cast<IndexArrayFormat>(i);
+				return static_cast<IndexArrayFormat>(result);
+			result *= 2;
 		}
 
 		return IndexArrayFormat::Format_8bit;

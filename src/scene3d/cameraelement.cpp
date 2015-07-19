@@ -58,8 +58,8 @@ void CameraElement::serialize(Dictionary stream, const std::string& basePath)
 	BaseElement::serialize(stream, basePath);
 }
 
-void CameraElement::deserialize(Dictionary stream, ElementFactory* factory)
+void CameraElement::deserialize(Dictionary stream, SerializationHelper* helper)
 {
-	BaseElement::deserialize(stream, factory);
+	BaseElement::deserialize(stream, helper);
 }
 

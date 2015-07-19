@@ -27,7 +27,7 @@ namespace et
 				uint32_t, uint32_t, const VertexStorage::Pointer&, const IndexArray::Pointer&, BaseElement* = nullptr);
 
 			ElementType type() const 
-				{ return ElementType_SupportMesh; }
+				{ return ElementType::SupportMesh; }
 
 			const CollisionData& triangles() const
 				{ return _data; }
@@ -40,7 +40,7 @@ namespace et
 			OBB obb();
 			
 			void serialize(Dictionary, const std::string&);
-			void deserialize(Dictionary, ElementFactory* factory);
+			void deserialize(Dictionary, SerializationHelper*);
 			
 
 		private:

@@ -19,35 +19,58 @@ Scene::Scene(const std::string& name) :
 
 }
 
-BaseElement::Pointer Scene::createElementOfType(uint64_t type, BaseElement* parent)
+BaseElement::Pointer Scene::createElementOfType(ElementType type, BaseElement* parent)
 {
 	switch (type)
 	{
-	case ElementType_Container:
+	case ElementType::Container:
 		return ElementContainer::Pointer::create(emptyString, parent);
-	case ElementType_Mesh:
+
+	case ElementType::Mesh:
 		return Mesh::Pointer::create(emptyString, parent);
-	case ElementType_SupportMesh:
+
+	case ElementType::SupportMesh:
 		return SupportMesh::Pointer::create(emptyString, parent);
-	case ElementType_Storage:
-		return Storage::Pointer::create(emptyString, parent);
-	case ElementType_Camera:
+
+	case ElementType::Camera:
 		return CameraElement::Pointer::create(emptyString, parent);
+
 	default:
+	{
+		log::warning("[s3d::Scene] Attempt to create element with invalid type: %u", static_cast<uint32_t>(type));
 		return ElementContainer::Pointer::create(emptyString, parent);
+	}
 	}
 }
 
+
+Material* Scene::materialWithName(const std::string& mName)
+{
+	auto& materials = _storage.materials();
+
+	if (materials.count(mName) > 0)
+		return materials.at(mName).ptr();
+
+	for (auto& kv : materials)
+	{
+		if (kv.second->name() == mName)
+			return kv.second.ptr();
+	}
+	
+	return nullptr;
+}
+
+/*
 IndexArray::Pointer Scene::primaryIndexArray()
 {
-	BaseElement::List storages = childrenOfType(ElementType_Storage);
+	BaseElement::List storages = childrenOfType(ElementType::Storage);
 	ET_ASSERT(!storages.empty())
 	return Storage::Pointer(storages.front())->indexArray();
 }
 
 VertexStorage::Pointer Scene::vertexStorageWithName(const std::string& vsName)
 {
-	BaseElement::List storages = childrenOfType(ElementType_Storage);
+	BaseElement::List storages = childrenOfType(ElementType::Storage);
 	for (Storage::Pointer storage : storages)
 	{
 		for (const auto& vs : storage->vertexStorages())
@@ -59,32 +82,28 @@ VertexStorage::Pointer Scene::vertexStorageWithName(const std::string& vsName)
 	return VertexStorage::Pointer();
 }
 
-Material::Pointer Scene::materialWithName(const std::string& mName)
-{
-	BaseElement::List storages = childrenOfType(ElementType_Storage);
-	for (Storage::Pointer storage : storages)
-	{
-		const auto& materials = storage->materials();
-
-		if (materials.count(mName) > 0)
-			return materials.at(mName);
-
-		for (const auto& kv : materials)
-		{
-			if (kv.second->name() == mName)
-				return kv.second;
-		}
-	}
-	
-	return Material::Pointer();
-}
-
+*/
 /*
  * Serialization stuff
  */
 Dictionary Scene::serialize(const std::string& basePath)
 {
 	Dictionary result;
+	result.setDictionaryForKey(kStorage, _storage.serialize(basePath));
 	ElementContainer::serialize(result, basePath);
 	return result;
+}
+
+void Scene::deserialize(et::RenderContext* rc, Dictionary info, const std::string& basePath, ObjectsCache& cache)
+{
+	_serializationBasePath = basePath;
+
+	{
+		Dictionary storageDictionary = info.dictionaryForKey(kStorage);
+		if (storageDictionary.empty())
+			log::warning("Serialized scene contains no storage");
+		_storage.deserialize(rc, storageDictionary, this, cache);
+	}
+
+	ElementContainer::deserialize(info, this);
 }

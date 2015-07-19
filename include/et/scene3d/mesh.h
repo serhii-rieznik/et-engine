@@ -10,7 +10,7 @@
 #include <et/collision/aabb.h>
 #include <et/collision/sphere.h>
 #include <et/rendering/vertexarrayobject.h>
-#include <et/scene3d/baseelement.h>
+#include <et/scene3d/renderableelement.h>
 
 namespace et
 {
@@ -43,7 +43,7 @@ namespace et
 				BaseElement* = nullptr);
 
 			ElementType type() const 
-				{ return ElementType_Mesh; }
+				{ return ElementType::Mesh; }
 
 			Mesh* duplicate();
 
@@ -67,7 +67,7 @@ namespace et
 			void setVertexArrayObject(VertexArrayObject);
 
 			void serialize(Dictionary, const std::string&);
-			void deserialize(Dictionary, ElementFactory*);
+			void deserialize(Dictionary, SerializationHelper*);
 
 			void setVertexStorage(VertexStorage::Pointer);
 			void setIndexArray(IndexArray::Pointer);
