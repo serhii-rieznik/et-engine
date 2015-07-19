@@ -825,10 +825,8 @@ s3d::ElementContainer::Pointer OBJLoader::generateVertexBuffers(s3d::Storage& st
 		
 		if (_loadOptions & Option_SupportMeshes)
 		{
-			auto mesh = SupportMesh::Pointer::create(i.name, vao, i.material, i.start, i.count,
+			object = SupportMesh::Pointer::create(i.name, vao, i.material, i.start, i.count,
 				_vertexData, _indices, result.ptr());
-			mesh->fillCollisionData(_vertexData, _indices);
-			object = mesh;
 		}
 		else 
 		{

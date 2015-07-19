@@ -8,7 +8,6 @@
 #pragma once
 
 #include <et/scene3d/mesh.h>
-#include <et/collision/collision.h>
 
 namespace et
 {
@@ -18,7 +17,6 @@ namespace et
 		{
 		public:
 			ET_DECLARE_POINTER(SupportMesh)
-			typedef DataStorage<triangle> CollisionData;
 
 		public:
 			SupportMesh(const std::string& = defaultMeshName, BaseElement* = nullptr);
@@ -29,26 +27,7 @@ namespace et
 			ElementType type() const 
 				{ return ElementType::SupportMesh; }
 
-			const CollisionData& triangles() const
-				{ return _data; }
-
-			void setNumIndexes(uint32_t num);
-			void fillCollisionData(const VertexStorage::Pointer& v, const IndexArray::Pointer& i);
-
 			SupportMesh* duplicate();
-
-			OBB obb();
-			
-			void serialize(Dictionary, const std::string&);
-			void deserialize(Dictionary, SerializationHelper*);
-			
-
-		private:
-			void transformInvalidated() override;
-			void buildInverseTransform();
-
-		private:
-			CollisionData _data;
 		};
 	}
 }

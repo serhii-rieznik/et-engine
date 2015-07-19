@@ -9,6 +9,7 @@
 
 #include <et/collision/aabb.h>
 #include <et/collision/sphere.h>
+#include <et/collision/obb.h>
 #include <et/rendering/vertexarrayobject.h>
 #include <et/scene3d/renderableelement.h>
 
@@ -97,8 +98,9 @@ namespace et
 			const IndexArray::Pointer& indexArray() const
 				{ return _indexArray; }
 			
-			const AABB& boundingBox();
 			const Sphere& boundingSphere();
+			const AABB& boundingBox();
+			const OBB& orientedBoundingBox();
 			
 			float finalTransformScale();
 			
@@ -113,6 +115,7 @@ namespace et
 			IndexArray::Pointer _indexArray;
 			
 			AABB _cachedBoundingBox;
+			OBB _cachedOrientedBoundingBox;
 			Sphere _cachedBoundingSphere;
 			
 			SupportData _supportData;
@@ -125,6 +128,7 @@ namespace et
 			std::string _ibName;
 			
 			bool _shouldUpdateBoundingBox = true;
+			bool _shouldUpdateOrientedBoundingBox = true;
 			bool _shouldUpdateBoundingSphere = true;
 		};
 	}

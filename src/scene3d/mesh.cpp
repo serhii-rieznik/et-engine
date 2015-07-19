@@ -249,6 +249,7 @@ void Mesh::transformInvalidated()
 {
 	_shouldUpdateBoundingBox = true;
 	_shouldUpdateBoundingSphere = true;
+	_shouldUpdateOrientedBoundingBox = true;
 }
 
 float Mesh::finalTransformScale()
@@ -293,4 +294,18 @@ const AABB& Mesh::boundingBox()
 	}
 	
 	return _cachedBoundingBox;
+}
+
+const OBB& Mesh::orientedBoundingBox()
+{
+	if (_shouldUpdateOrientedBoundingBox)
+	{
+		mat4 ft = finalTransform();
+		mat3 r = ft.mat3();
+		vec3 s = removeMatrixScale(r);
+		_cachedOrientedBoundingBox = OBB(ft * _supportData.averageCenter, 0.5f * s * _supportData.dimensions, r);
+		_shouldUpdateOrientedBoundingBox = false;
+	}
+
+	return _cachedOrientedBoundingBox;
 }
