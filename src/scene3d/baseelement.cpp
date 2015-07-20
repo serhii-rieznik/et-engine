@@ -306,8 +306,12 @@ void BaseElement::removeAnimations()
 void BaseElement::animate()
 {
 	if (_animations.empty()) return;
-	
 	_animationTimer.start(mainTimerPool(), 0.0f, NotifyTimer::RepeatForever);
+}
+
+void BaseElement::stopAnimation()
+{
+	_animationTimer.cancelUpdates();
 }
 
 void BaseElement::animateRecursive()
@@ -316,6 +320,33 @@ void BaseElement::animateRecursive()
 
 	for (auto c : children())
 		c->animateRecursive();
+}
+
+void BaseElement::stopAnimationRecursive()
+{
+	stopAnimation();
+
+	for (auto c : children())
+		c->stopAnimationRecursive();
+}
+
+bool BaseElement::animating() const 
+{
+	return _animationTimer.running();
+}
+
+bool BaseElement::anyChildAnimating() const
+{
+	if (animating()) 
+		return true;
+
+	for (auto c : children())
+	{
+		if (c->anyChildAnimating())
+			return true;
+	}
+
+	return false;
 }
 
 Animation& BaseElement::defaultAnimation()

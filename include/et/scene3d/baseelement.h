@@ -39,7 +39,12 @@ namespace et
 			BaseElement(const std::string& name, BaseElement* parent);
 			
 			void animate();
+			void stopAnimation();
 			void animateRecursive();
+			void stopAnimationRecursive();
+
+			bool animating() const;
+			bool anyChildAnimating() const;
 			
 			Animation& defaultAnimation();
 			const Animation& defaultAnimation() const;
