@@ -61,29 +61,6 @@ Material* Scene::materialWithName(const std::string& mName)
 }
 
 /*
-IndexArray::Pointer Scene::primaryIndexArray()
-{
-	BaseElement::List storages = childrenOfType(ElementType::Storage);
-	ET_ASSERT(!storages.empty())
-	return Storage::Pointer(storages.front())->indexArray();
-}
-
-VertexStorage::Pointer Scene::vertexStorageWithName(const std::string& vsName)
-{
-	BaseElement::List storages = childrenOfType(ElementType::Storage);
-	for (Storage::Pointer storage : storages)
-	{
-		for (const auto& vs : storage->vertexStorages())
-		{
-			if (vs->name() == vsName)
-				return vs;
-		}
-	}
-	return VertexStorage::Pointer();
-}
-
-*/
-/*
  * Serialization stuff
  */
 Dictionary Scene::serialize(const std::string& basePath)
@@ -103,6 +80,27 @@ void Scene::deserialize(et::RenderContext* rc, Dictionary info, const std::strin
 		if (storageDictionary.empty())
 			log::warning("Serialized scene contains no storage");
 		_storage.deserialize(rc, storageDictionary, this, cache);
+
+		for (auto vs : _storage.vertexStorages())
+		{
+			VertexArrayObject vao;
+			std::string vaoName = "vao-" + intToStr(_vertexArrays.size() + 1);
+
+			if (_mainIndexBuffer.invalid())
+			{
+				vao = rc->vertexBufferFactory().createVertexArrayObject(vaoName, vs, BufferDrawType::Static,
+					_storage.indexArray(), BufferDrawType::Static);
+				_mainIndexBuffer = vao->indexBuffer();
+				_mainIndexBuffer->setName("mainIndexBuffer");
+			}
+			else
+			{
+				vao = rc->vertexBufferFactory().createVertexArrayObject(vaoName, vs, BufferDrawType::Static, 
+					_mainIndexBuffer);
+			}
+			vao->vertexBuffer()->setName(vs->name());
+			_vertexArrays.push_back(vao);
+		}
 	}
 
 	ElementContainer::deserialize(info, this);

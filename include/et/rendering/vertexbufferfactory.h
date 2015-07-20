@@ -31,8 +31,12 @@ namespace et
 
 		VertexArrayObject createVertexArrayObject(const std::string&, VertexArray::Pointer, BufferDrawType,
 			IndexArray::Pointer, BufferDrawType);
+
 		VertexArrayObject createVertexArrayObject(const std::string&, VertexStorage::Pointer, BufferDrawType,
 			IndexArray::Pointer, BufferDrawType);
+
+		VertexArrayObject createVertexArrayObject(const std::string&, VertexStorage::Pointer, BufferDrawType,
+			IndexBuffer::Pointer);
 
 	private:
 		ET_DENY_COPY(VertexBufferFactory)

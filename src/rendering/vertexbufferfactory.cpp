@@ -68,3 +68,12 @@ VertexArrayObject VertexBufferFactory::createVertexArrayObject(const std::string
 	
 	return result;
 }
+
+VertexArrayObject VertexBufferFactory::createVertexArrayObject(const std::string& name, VertexStorage::Pointer vertexData,
+	BufferDrawType vertexDrawType, IndexBuffer::Pointer ib)
+{
+	VertexArrayObject result = VertexArrayObject::create(renderContext(), name);
+	result->setBuffers(createVertexBuffer(name + "-vb", vertexData, vertexDrawType), ib);
+	return result;
+}
+

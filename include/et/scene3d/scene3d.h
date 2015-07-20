@@ -51,7 +51,7 @@ namespace et
 		private:
 			Storage _storage;
 			std::string _serializationBasePath;
-			std::map<std::string, VertexArrayObject> _vertexArray;
+			std::vector<VertexArrayObject> _vertexArrays;
 			IndexBuffer::Pointer _mainIndexBuffer;
 		};
 	}
