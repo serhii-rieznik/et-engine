@@ -649,7 +649,15 @@ s3d::Mesh::Pointer FBXLoaderPrivate::loadMesh(s3d::Storage& storage, FbxMesh* me
 	vs->increaseSize(lPolygonVertexCount);
 
 	IndexArray::Pointer ia = storage.indexArray();
-	ia->resizeToFit(ia->actualSize() + lPolygonCount * 3);
+	if (ia.invalid())
+	{
+		ia = IndexArray::Pointer::create(IndexArrayFormat::Format_16bit, 3 * lPolygonCount, PrimitiveType::Triangles);
+		storage.setIndexArray(ia);
+	}
+	else 
+	{
+		ia->resizeToFit(ia->actualSize() + 3 * lPolygonCount);
+	}
 	
 	VertexDataAccessor<VertexAttributeType::Vec3> pos;
 	VertexDataAccessor<VertexAttributeType::Vec3> nrm;
