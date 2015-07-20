@@ -247,10 +247,11 @@ void dds::loadInfoFromStream(std::istream& source, TextureDescription& desc)
 	{
 		case 0:
 		{
-			bool isRGB = (desc.channels == 3);
-			bool isBGR = (header.ddspf.dwBBitMask == 255);
 			desc.channels = header.ddspf.dwRGBBitCount / 8;
 			desc.bitsPerPixel = header.ddspf.dwRGBBitCount;
+
+			bool isRGB = (desc.channels == 3);
+			bool isBGR = (header.ddspf.dwBBitMask == 255);
 			desc.internalformat = isRGB ? TextureFormat::RGB : TextureFormat::RGBA;
 			desc.format = isBGR ? (isRGB  ? TextureFormat::BGR : TextureFormat::BGRA) :
 				(isRGB  ? TextureFormat::RGB : TextureFormat::RGBA);
