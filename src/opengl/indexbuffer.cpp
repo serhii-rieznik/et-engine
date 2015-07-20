@@ -10,7 +10,7 @@
 
 using namespace et;
 
-IndexBufferData::IndexBufferData(RenderContext* rc, IndexArray::Pointer i, BufferDrawType drawType,
+IndexBuffer::IndexBuffer(RenderContext* rc, IndexArray::Pointer i, BufferDrawType drawType,
 	const std::string& aName) : APIObject(aName), _rc(rc), _size(i->actualSize()), _sourceObjectName(i->name()),
 	_drawType(drawType)
 {
@@ -21,7 +21,7 @@ IndexBufferData::IndexBufferData(RenderContext* rc, IndexArray::Pointer i, Buffe
 #endif
 }
 
-IndexBufferData::~IndexBufferData()
+IndexBuffer::~IndexBuffer()
 {
 #if !defined(ET_CONSOLE_APPLICATION)
 	uint32_t buffer = static_cast<uint32_t>(apiHandle());
@@ -33,7 +33,7 @@ IndexBufferData::~IndexBufferData()
 #endif
 }
 
-void IndexBufferData::setProperties(const IndexArray::Pointer& i)
+void IndexBuffer::setProperties(const IndexArray::Pointer& i)
 {
 #if !defined(ET_CONSOLE_APPLICATION)
 	
@@ -68,7 +68,7 @@ void IndexBufferData::setProperties(const IndexArray::Pointer& i)
 #endif
 }
 
-void IndexBufferData::build(const IndexArray::Pointer& i)
+void IndexBuffer::build(const IndexArray::Pointer& i)
 {
 #if !defined(ET_CONSOLE_APPLICATION)
 	ET_ASSERT(i.valid());
@@ -88,7 +88,7 @@ void IndexBufferData::build(const IndexArray::Pointer& i)
 #endif
 }
 
-void IndexBufferData::internal_setData(const unsigned char* data, size_t size)
+void IndexBuffer::internal_setData(const unsigned char* data, size_t size)
 {
 #if !defined(ET_CONSOLE_APPLICATION)
 	if (size == 0) return;
@@ -99,25 +99,25 @@ void IndexBufferData::internal_setData(const unsigned char* data, size_t size)
 #endif
 }
 
-void* IndexBufferData::indexOffset(size_t offset) const
+void* IndexBuffer::indexOffset(size_t offset) const
 {
 	return reinterpret_cast<void*>(static_cast<size_t>(_format) * offset);
 }
 
-void IndexBufferData::setData(const IndexArray::Pointer& i)
+void IndexBuffer::setData(const IndexArray::Pointer& i)
 {
 #if !defined(ET_CONSOLE_APPLICATION)
 	build(i);
 #endif
 }
 
-void IndexBufferData::clear()
+void IndexBuffer::clear()
 {
 	_size = 0;
 	internal_setData(nullptr, 0);
 }
 
-void IndexBufferData::overridePrimitiveType(PrimitiveType pt)
+void IndexBuffer::overridePrimitiveType(PrimitiveType pt)
 {
 	_primitiveType = pt;
 }

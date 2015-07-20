@@ -21,9 +21,10 @@ namespace et
 	class IndexBufferData;
 	class VertexDeclaration;
 	class VertexElement;
+	class IndexBuffer;
 	
 	typedef IntrusivePtr<VertexBuffer> VertexBufferPointer;
-	typedef IntrusivePtr<IndexBufferData> IndexBuffer;
+	typedef IntrusivePtr<IndexBuffer> IndexBufferPointer;
 	typedef IntrusivePtr<VertexArrayObjectData> VertexArrayObject;
 
 	class RenderState
@@ -150,8 +151,8 @@ namespace et
 		void bindVertexArray(uint32_t buffer, bool force = false);
 
 		void bindBuffer(const VertexBufferPointer& buf, bool force = false);
-		void bindBuffer(const IndexBuffer& buf, bool force = false);
-		void bindBuffers(const VertexBufferPointer& vb, const IndexBuffer& ib, bool force = false);
+		void bindBuffer(const IndexBufferPointer& buf, bool force = false);
+		void bindBuffers(const VertexBufferPointer& vb, const IndexBufferPointer& ib, bool force = false);
 		void bindVertexArray(const VertexArrayObject& vao, bool force = false);
 
 		void setVertexAttributes(const VertexDeclaration& decl, bool force = false);

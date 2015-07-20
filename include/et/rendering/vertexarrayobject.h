@@ -16,7 +16,7 @@ namespace et
 	class VertexArrayObjectData : public APIObject
 	{
 	public:
-		VertexArrayObjectData(RenderContext*, VertexBuffer::Pointer, IndexBuffer,
+		VertexArrayObjectData(RenderContext*, VertexBuffer::Pointer, IndexBuffer::Pointer,
 			const std::string& name = emptyString);
 		
 		VertexArrayObjectData(RenderContext*, const std::string& name = emptyString);
@@ -29,15 +29,15 @@ namespace et
 		const VertexBuffer::Pointer& vertexBuffer() const
 			{ return _vb; };
 
-		IndexBuffer& indexBuffer()
+		IndexBuffer::Pointer& indexBuffer()
 			{ return _ib; };
 
-		const IndexBuffer& indexBuffer() const
+		const IndexBuffer::Pointer& indexBuffer() const
 			{ return _ib; };
 
 		void setVertexBuffer(VertexBuffer::Pointer ib);
-		void setIndexBuffer(IndexBuffer ib);
-		void setBuffers(VertexBuffer::Pointer vb, IndexBuffer ib);
+		void setIndexBuffer(IndexBuffer::Pointer ib);
+		void setBuffers(VertexBuffer::Pointer vb, IndexBuffer::Pointer ib);
 
 	private:
 		void init();
@@ -45,7 +45,7 @@ namespace et
 	private:
 		RenderContext* _rc = nullptr;
 		VertexBuffer::Pointer _vb;
-		IndexBuffer _ib;
+		IndexBuffer::Pointer _ib;
 	};
 	
 	typedef IntrusivePtr<VertexArrayObjectData> VertexArrayObject;

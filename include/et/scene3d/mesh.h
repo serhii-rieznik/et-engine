@@ -54,8 +54,8 @@ namespace et
 			VertexBuffer::Pointer& vertexBuffer();
 			const VertexBuffer::Pointer& vertexBuffer() const;
 
-			IndexBuffer& indexBuffer();
-			const IndexBuffer& indexBuffer() const;
+			IndexBuffer::Pointer& indexBuffer();
+			const IndexBuffer::Pointer& indexBuffer() const;
 
 			uint32_t startIndex() const;
 			void setStartIndex(uint32_t index);
@@ -64,7 +64,7 @@ namespace et
 			virtual void setNumIndexes(uint32_t num);
 
 			void setVertexBuffer(VertexBuffer::Pointer);
-			void setIndexBuffer(IndexBuffer);
+			void setIndexBuffer(IndexBuffer::Pointer);
 			void setVertexArrayObject(VertexArrayObject);
 
 			void serialize(Dictionary, const std::string&);

@@ -11,8 +11,8 @@
 
 using namespace et;
 
-VertexArrayObjectData::VertexArrayObjectData(RenderContext* rc, VertexBuffer::Pointer vb, IndexBuffer ib,
-	const std::string& aName) : APIObject(aName), _rc(rc), _vb(vb), _ib(ib)
+VertexArrayObjectData::VertexArrayObjectData(RenderContext* rc, VertexBuffer::Pointer vb, 
+	IndexBuffer::Pointer ib, const std::string& aName) : APIObject(aName), _rc(rc), _vb(vb), _ib(ib)
 {
 #if defined(ET_CONSOLE_APPLICATION)
 	ET_FAIL("Attempt to create VertexArrayObject in console application.")
@@ -62,7 +62,7 @@ void VertexArrayObjectData::init()
 #endif
 }
 
-void VertexArrayObjectData::setBuffers(VertexBuffer::Pointer vb, IndexBuffer ib)
+void VertexArrayObjectData::setBuffers(VertexBuffer::Pointer vb, IndexBuffer::Pointer ib)
 {
 #if !defined(ET_CONSOLE_APPLICATION)
 	_vb = vb;
@@ -87,7 +87,7 @@ void VertexArrayObjectData::setVertexBuffer(VertexBuffer::Pointer vb)
 #endif
 }
 
-void VertexArrayObjectData::setIndexBuffer(IndexBuffer ib)
+void VertexArrayObjectData::setIndexBuffer(IndexBuffer::Pointer ib)
 {
 #if !defined(ET_CONSOLE_APPLICATION)
 	_ib = ib;

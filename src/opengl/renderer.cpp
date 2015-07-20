@@ -212,7 +212,7 @@ void Renderer::renderTextureRotated(const Texture::Pointer& texture, float angle
 #endif
 }
 
-void Renderer::drawElements(const IndexBuffer& ib, size_t first, size_t count)
+void Renderer::drawElements(const IndexBuffer::Pointer& ib, size_t first, size_t count)
 {
 #if !defined(ET_CONSOLE_APPLICATION)
 	ET_ASSERT(ib.valid());
@@ -222,7 +222,7 @@ void Renderer::drawElements(const IndexBuffer& ib, size_t first, size_t count)
 #endif
 }
 
-void Renderer::drawElementsInstanced(const IndexBuffer& ib, size_t first, size_t count, size_t instances)
+void Renderer::drawElementsInstanced(const IndexBuffer::Pointer& ib, size_t first, size_t count, size_t instances)
 {
 #if !defined(ET_CONSOLE_APPLICATION)
 	ET_ASSERT(ib.valid());
@@ -232,7 +232,7 @@ void Renderer::drawElementsInstanced(const IndexBuffer& ib, size_t first, size_t
 #endif
 }
 
-void Renderer::drawElements(PrimitiveType pt, const IndexBuffer& ib, size_t first, size_t count)
+void Renderer::drawElements(PrimitiveType pt, const IndexBuffer::Pointer& ib, size_t first, size_t count)
 {
 #if !defined(ET_CONSOLE_APPLICATION)
 	ET_ASSERT(ib.valid());
@@ -242,7 +242,7 @@ void Renderer::drawElements(PrimitiveType pt, const IndexBuffer& ib, size_t firs
 #endif
 }
 
-void Renderer::drawAllElements(const IndexBuffer& ib)
+void Renderer::drawAllElements(const IndexBuffer::Pointer& ib)
 {
 #if !defined(ET_CONSOLE_APPLICATION)
 	ET_ASSERT(ib.valid());
@@ -257,7 +257,7 @@ void Renderer::drawElementsBaseIndex(const VertexArrayObject& vao, int base, siz
 #if !defined(ET_CONSOLE_APPLICATION)
 	ET_ASSERT(vao->indexBuffer().valid());
 	
-	const IndexBuffer& ib = vao->indexBuffer();
+	const IndexBuffer::Pointer& ib = vao->indexBuffer();
 
 #	if (ET_OPENGLES)
 	

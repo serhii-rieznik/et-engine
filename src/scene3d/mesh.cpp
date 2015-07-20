@@ -15,7 +15,7 @@ using namespace et::s3d;
 
 const std::string Mesh::defaultMeshName = "mesh";
 
-static IndexBuffer _emptyIndexBuffer;
+static IndexBuffer::Pointer _emptyIndexBuffer;
 static VertexBuffer::Pointer _emptyVertexBuffer;
 
 Mesh::Mesh(const std::string& name, BaseElement* parent) :
@@ -92,7 +92,7 @@ void Mesh::setVertexBuffer(VertexBuffer::Pointer vb)
 		_vao->setVertexBuffer(vb);
 }
 
-void Mesh::setIndexBuffer(IndexBuffer ib)
+void Mesh::setIndexBuffer(IndexBuffer::Pointer ib)
 {
 	if (_vao.valid())
 		_vao->setIndexBuffer(ib);
@@ -191,13 +191,13 @@ const VertexBuffer::Pointer& Mesh::vertexBuffer() const
 	return vao.valid() ? vao->vertexBuffer() : _emptyVertexBuffer; 
 }
 
-IndexBuffer& Mesh::indexBuffer() 
+IndexBuffer::Pointer& Mesh::indexBuffer() 
 {
 	VertexArrayObject& vao = vertexArrayObject();
 	return vao.valid() ? vao->indexBuffer() : _emptyIndexBuffer; 
 }
 
-const IndexBuffer& Mesh::indexBuffer() const
+const IndexBuffer::Pointer& Mesh::indexBuffer() const
 {
 	VertexArrayObject vao = vertexArrayObject();
 	return vao.valid() ? vao->indexBuffer() : _emptyIndexBuffer; 

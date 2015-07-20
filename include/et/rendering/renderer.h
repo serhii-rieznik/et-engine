@@ -39,11 +39,11 @@ namespace et
 		void renderTextureRotated(const Texture::Pointer&, float angle, const vec2i& position,
 			const vec2i& size = vec2i(-1), const vec4& = vec4(1.0f));
 
-		void drawElements(const IndexBuffer& ib, size_t first, size_t count);
-		void drawElements(PrimitiveType primitiveType, const IndexBuffer& ib, size_t first, size_t count);
-		void drawAllElements(const IndexBuffer& ib);
+		void drawElements(const IndexBuffer::Pointer& ib, size_t first, size_t count);
+		void drawElements(PrimitiveType primitiveType, const IndexBuffer::Pointer& ib, size_t first, size_t count);
+		void drawAllElements(const IndexBuffer::Pointer& ib);
 
-		void drawElementsInstanced(const IndexBuffer& ib, size_t first, size_t count, size_t instances);
+		void drawElementsInstanced(const IndexBuffer::Pointer& ib, size_t first, size_t count, size_t instances);
 		void drawElementsBaseIndex(const VertexArrayObject& vao, int base, size_t first, size_t count);
 		
 		BinaryDataStorage readFramebufferData(const vec2i&, TextureFormat, DataType);

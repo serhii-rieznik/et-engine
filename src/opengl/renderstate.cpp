@@ -182,12 +182,12 @@ void RenderState::bindBuffer(const VertexBuffer::Pointer& buffer, bool force)
 #endif
 }
 
-void RenderState::bindBuffer(const IndexBuffer& buf, bool force)
+void RenderState::bindBuffer(const IndexBuffer::Pointer& buf, bool force)
 {
 	bindBuffer(GL_ELEMENT_ARRAY_BUFFER, buf.valid() ? static_cast<uint32_t>(buf->apiHandle()) : 0, force);
 }
 
-void RenderState::bindBuffers(const VertexBuffer::Pointer& vb, const IndexBuffer& ib, bool force)
+void RenderState::bindBuffers(const VertexBuffer::Pointer& vb, const IndexBuffer::Pointer& ib, bool force)
 {
 	bindBuffer(vb, force);
 	bindBuffer(ib, force);
@@ -218,7 +218,7 @@ void RenderState::bindVertexArray(const VertexArrayObject& vao, bool force)
 		if (vao.valid())
 			bindBuffers(vao->vertexBuffer(), vao->indexBuffer(), force);
 		else
-			bindBuffers(VertexBuffer::Pointer(), IndexBuffer(), force);
+			bindBuffers(VertexBuffer::Pointer(), IndexBuffer::Pointer(), force);
 	}
 #endif
 }

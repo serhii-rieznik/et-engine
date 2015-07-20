@@ -13,13 +13,16 @@
 namespace et
 {
 	class RenderState;
-	class IndexBufferData : public APIObject
+	class IndexBuffer : public APIObject
 	{
 	public:
-		IndexBufferData(RenderContext* rc, IndexArray::Pointer i, BufferDrawType drawType,
+		ET_DECLARE_POINTER(IndexBuffer)
+
+	public:
+		IndexBuffer(RenderContext* rc, IndexArray::Pointer i, BufferDrawType drawType,
 			const std::string& name = emptyString);
 		
-		~IndexBufferData();
+		~IndexBuffer();
 
 		PrimitiveType primitiveType() const
 			{ return _primitiveType; }
@@ -59,6 +62,4 @@ namespace et
 		IndexArrayFormat _format = IndexArrayFormat::Format_16bit;
 		BufferDrawType _drawType = BufferDrawType::Static;
 	};
-	
-	typedef IntrusivePtr<IndexBufferData> IndexBuffer;
 }

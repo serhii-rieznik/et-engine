@@ -30,7 +30,7 @@ namespace et
 			const VertexArrayObject& vao() const
 				{ return _vao; }
 
-			const IndexBuffer& indexBuffer() const
+			const IndexBuffer::Pointer& indexBuffer() const
 				{ return _vao->indexBuffer(); }
 			
 			size_t activeParticlesCount() const

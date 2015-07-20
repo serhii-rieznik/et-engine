@@ -32,10 +32,10 @@ VertexBuffer::Pointer VertexBufferFactory::createVertexBuffer(const std::string&
 	return vb;
 }
 
-IndexBuffer VertexBufferFactory::createIndexBuffer(const std::string& name, IndexArray::Pointer data,
+IndexBuffer::Pointer VertexBufferFactory::createIndexBuffer(const std::string& name, IndexArray::Pointer data,
 	BufferDrawType drawType)
 {
-	IndexBuffer ib = IndexBuffer::create(renderContext(), data, drawType, name);
+	IndexBuffer::Pointer ib = IndexBuffer::Pointer::create(renderContext(), data, drawType, name);
 	ib->setSourceObjectName(data->name());
 	return ib;
 }

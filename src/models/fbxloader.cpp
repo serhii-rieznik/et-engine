@@ -822,7 +822,7 @@ s3d::Mesh::Pointer FBXLoaderPrivate::loadMesh(s3d::Storage& storage, FbxMesh* me
 
 void FBXLoaderPrivate::buildVertexBuffers(RenderContext* rc, s3d::BaseElement::Pointer root, s3d::Storage& storage)
 {
-	IndexBuffer primaryIndexBuffer =
+	IndexBuffer::Pointer primaryIndexBuffer =
 		rc->vertexBufferFactory().createIndexBuffer("fbx-i", storage.indexArray(), BufferDrawType::Static);
 
 	std::vector<VertexArrayObject> vertexArrayObjects;
