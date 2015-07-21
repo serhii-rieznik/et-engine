@@ -67,6 +67,9 @@ namespace et
 		s3d::Mesh::Pointer loadMesh(s3d::Storage&, FbxMesh*, s3d::BaseElement::Pointer parent,
 			const s3d::Material::List& materials, const StringList& params);
 
+		s3d::LineElement::Pointer loadLine(s3d::Storage&, FbxLine*, s3d::BaseElement::Pointer parent, 
+			const StringList& params);
+
 		s3d::Material::Pointer loadMaterial(FbxSurfaceMaterial* material);
 
 		void loadMaterialValue(s3d::Material::Pointer m, uint32_t propName,
@@ -377,7 +380,8 @@ void FBXLoaderPrivate::loadNode(s3d::Storage& storage, FbxNode* node, s3d::BaseE
 	FbxNodeAttribute* lNodeAttribute = node->GetNodeAttribute();
 	if (lNodeAttribute)
 	{
-		if (lNodeAttribute->GetAttributeType() == FbxNodeAttribute::eMesh)
+		auto nodeType = lNodeAttribute->GetAttributeType();
+		if (nodeType == FbxNodeAttribute::eMesh)
 		{
 			FbxMesh* mesh = node->GetMesh();
 			if (mesh->IsTriangleMesh())
@@ -396,8 +400,17 @@ void FBXLoaderPrivate::loadNode(s3d::Storage& storage, FbxNode* node, s3d::BaseE
 			}
 			else
 			{
-				log::warning("Non-triangle meshes are not supported and should not be present in scene.");
+				log::warning("Non-triangle meshes are not supported.");
 			}
+		}
+		else if (nodeType == FbxNodeAttribute::eLine)
+		{
+			FbxLine* line = node->GetLine();
+			createdElement = loadLine(storage, line, parent, props);
+		}
+		else 
+		{
+			log::warning("Non-mesh nodes are not supported, found: %u", static_cast<uint32_t>(nodeType));
 		}
 	}
 	else if (parent.invalid() && rootNode.invalid())
@@ -898,6 +911,26 @@ StringList FBXLoaderPrivate::loadNodeProperties(FbxNode* node)
 		prop.erase(std::remove_if(prop.begin(), prop.end(), [](char c) { return isWhitespaceChar(c); }), prop.end());
 	}
 	
+	return result;
+}
+
+s3d::LineElement::Pointer FBXLoaderPrivate::loadLine(s3d::Storage&, FbxLine* line, s3d::BaseElement::Pointer parent, 
+	const StringList& params)
+{
+	const char* lineName = line->GetName();
+	if ((lineName == nullptr) || (strlen(lineName) == 0))
+		lineName = line->GetNode()->GetName();
+
+	auto result = s3d::LineElement::Pointer::create(lineName, parent.ptr());
+
+	auto points = line->GetControlPoints();
+	int numIndexes = line->GetIndexArraySize();
+	for (int i = 0; i < numIndexes; ++i)
+	{
+		auto point = points[line->GetPointIndexAt(i)];
+		result->addPoint(vec3(float(point[0]), float(point[1]), float(point[2])));
+	}
+
 	return result;
 }
 

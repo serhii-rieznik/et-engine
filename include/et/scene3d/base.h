@@ -25,6 +25,7 @@ namespace et
 			Camera,
 			Light,
 			ParticleSystem,
+			Line,
 
 			max,
 			DontCare
