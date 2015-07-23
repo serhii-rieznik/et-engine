@@ -627,11 +627,18 @@ std::string et::glPrimitiveTypeToString(uint32_t value)
 		CASE_VALUE(GL_LINES)
 		CASE_VALUE(GL_LINE_LOOP)
 		CASE_VALUE(GL_LINE_STRIP)
-		CASE_VALUE(GL_LINE_STRIP_ADJACENCY)
-		CASE_VALUE(GL_LINES_ADJACENCY)
 		CASE_VALUE(GL_TRIANGLES)
 		CASE_VALUE(GL_TRIANGLE_STRIP)
 		CASE_VALUE(GL_TRIANGLE_FAN)
+		
+#	if defined(GL_LINE_STRIP_ADJACENCY)
+		CASE_VALUE(GL_LINE_STRIP_ADJACENCY)
+#	endif
+		
+#	if defined(GL_LINES_ADJACENCY)
+		CASE_VALUE(GL_LINES_ADJACENCY)
+#	endif
+		
 		default:
 			return "Unknown primitive type " + intToStr(value);
 	}
@@ -822,8 +829,18 @@ uint32_t et::primitiveTypeValue(PrimitiveType t)
 		GL_TRIANGLES,
 		GL_TRIANGLE_STRIP,
 		GL_LINE_STRIP,
+		
+#	if defined(GL_LINE_STRIP_ADJACENCY)
 		GL_LINE_STRIP_ADJACENCY,
+#	else
+		GL_LINE_STRIP,
+#	endif
+		
+#	if defined(GL_LINES_ADJACENCY)
 		GL_LINES_ADJACENCY,
+#	else
+		GL_LINES
+#	endif
 	};
 	
 	return conversion[static_cast<uint32_t>(t)];

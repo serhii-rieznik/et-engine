@@ -70,6 +70,7 @@ void et::png::loadFromStream(std::istream& source, TextureDescription& desc, boo
 
 	png_structp pngPtr = png_create_read_struct(PNG_LIBPNG_VER_STRING, nullptr,
 		handlePngError, handlePngWarning);
+	png_infop infoPtr = nullptr;
 	
 	if (pngPtr == nullptr)
 	{
@@ -77,11 +78,17 @@ void et::png::loadFromStream(std::istream& source, TextureDescription& desc, boo
 		return;
 	}
 
-	png_infop infoPtr = png_create_info_struct(pngPtr);
-	if (!infoPtr) 
+	if (setjmp(png_jmpbuf(pngPtr)))
+	{
+		png_destroy_read_struct(&pngPtr, &infoPtr, nullptr);
+		return;
+	}
+	
+	infoPtr = png_create_info_struct(pngPtr);
+	if (infoPtr == nullptr)
 	{
 		log::error("Couldn't initialize png info struct");
-		png_destroy_read_struct(&pngPtr, (png_infopp)0, (png_infopp)0);
+		png_destroy_read_struct(&pngPtr, nullptr, nullptr);
 		return;
 	}
 

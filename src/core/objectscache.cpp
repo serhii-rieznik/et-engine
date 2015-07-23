@@ -75,7 +75,7 @@ LoadableObject::Pointer ObjectsCache::findAnyObject(const std::string& key, uint
 		if (property)
 			*property = 0;
 		
-		return  LoadableObject::Pointer();
+		return LoadableObject::Pointer();
 	}
 	else
 	{

@@ -27,7 +27,7 @@ namespace et
 
 		const mat4& windowProjection(const vec2& windowSize);
 
-		const vec3 position() const
+		const vec3& position() const
 			{ return _inverseModelViewMatrix[3].xyz(); }
 
 		void setPosition(const vec3& pos);

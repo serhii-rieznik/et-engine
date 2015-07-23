@@ -134,8 +134,11 @@ void OpenGLCapabilities::checkCaps()
 	setFlag(OpenGLFeature_MipMapGeneration);
 	setFlag(OpenGLFeature_VertexArrayObjects);
 #else
+	
+#if (ET_PLATFROM_WIN)
 	if (glGenerateMipmap != nullptr)
 		setFlag(OpenGLFeature_MipMapGeneration);
+#endif
 	
 	bool supportVertexArrays = (glGenVertexArrays != nullptr) && (glDeleteVertexArrays != nullptr)
 		&& (glBindVertexArray != nullptr) && (glIsVertexArray != nullptr);

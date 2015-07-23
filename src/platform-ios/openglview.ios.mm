@@ -166,7 +166,7 @@ using namespace et;
 	if (_multisampled)
 	{
 		_multisampledFramebuffer->invalidate(false, true);
-		_multisampledFramebuffer->resolveMultisampledTo(_mainFramebuffer);
+		_multisampledFramebuffer->resolveMultisampledTo(_mainFramebuffer, true, false);
 		_multisampledFramebuffer->invalidate(true, false);
 	}
 		
