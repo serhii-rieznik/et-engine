@@ -471,8 +471,11 @@ void Framebuffer::resolveMultisampledTo(Framebuffer::Pointer framebuffer, bool r
 
 		if (resolveColor)
 		{
-			glBlitFramebuffer(0, 0, _description.size.x, _description.size.y, 0, 0, framebuffer->size().x,
-				framebuffer->size().y, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+			vec2i sourceSize = _description.size.xy();
+			vec2i destSize = framebuffer->size();
+			
+			glBlitFramebuffer(0, 0, sourceSize.x, sourceSize.y, 0, 0, destSize.x, destSize.y,
+				GL_COLOR_BUFFER_BIT, (sourceSize == destSize) ? GL_NEAREST : GL_LINEAR);
 			checkOpenGLError("glBlitFramebuffer");
 		}
 

@@ -204,7 +204,7 @@ RenderContextPrivate::RenderContextPrivate(RenderContext*, RenderContextParamete
 		NSOpenGLPFADepthSize, 32,
 		NSOpenGLPFAAccelerated,
 		NSOpenGLPFADoubleBuffer,
-		NSOpenGLPFASampleBuffers, 4,
+		NSOpenGLPFASampleBuffers, 1,
 		0, 0, 0, 0, 0, 0, // space for multisampling and context profile
 		0,
 	};
