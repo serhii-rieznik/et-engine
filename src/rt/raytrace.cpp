@@ -38,6 +38,9 @@ namespace et
 
 		vec4 raytracePixel(const vec2i&);
 
+		vec4simd gatherBouncesRecursive(const rt::Ray&, size_t depth);
+		vec4simd sampleEnvironment(const vec4simd& direction);
+
 		rt::Region getNextRegion();
 
 	public:
@@ -134,6 +137,8 @@ void RaytracePrivate::buildMaterialAndTriangles(s3d::Scene::Pointer scene)
 			auto& mat = materials.back();
 			mat.diffuse = vec4simd(meshMaterial->getVector(MaterialParameter_DiffuseColor));
 			mat.specular = vec4simd(meshMaterial->getVector(MaterialParameter_SpecularColor));
+			mat.emissive = vec4simd(meshMaterial->getVector(MaterialParameter_EmissiveColor));
+			mat.roughness = 0.06125f;
 			mat.name = meshMaterial->name();
 		}
 
@@ -180,7 +185,7 @@ size_t RaytracePrivate::findIntersection(const rt::Ray& ray, vec4simd& intersect
 	for (const auto& tri : triangles)
 	{
 		vec4simd ip;
-		if (rt::rayTriangle(ray, tri, &ip))
+		if (rt::rayTriangle(ray, tri, ip))
 		{
 			float distance = (ip - ray.origin).dotSelf();
 			if (distance < minDistance)
@@ -246,6 +251,8 @@ void RaytracePrivate::buildRegions(vec2i size)
 			regions.back().size = vec2i(w, h);
 		}
 	}
+
+	std::random_shuffle(regions.begin(), regions.end());
 }
 
 rt::Region RaytracePrivate::getNextRegion()
@@ -305,27 +312,73 @@ void RaytracePrivate::threadFunction()
 
 vec4 RaytracePrivate::raytracePixel(const vec2i& pixel)
 {
-	const int multisample = 12;
+	const int multisample = 256;
 	vec2 pixelSize = vec2(1.0f) / vector2ToFloat(viewportSize);
 	vec2 pixelBase = 2.0f * (vector2ToFloat(pixel) * pixelSize) - vec2(1.0f);
 
-	vec4 result = vec4(0.0f);
+	vec4simd result(0.0f);
 
 	for (int m = 0; m < multisample; ++m)
 	{
 		vec2 jitter(randomFloat(-pixelSize.x, pixelSize.x), randomFloat(-pixelSize.y, pixelSize.y));
-		rt::Ray rtRay = camera.castRay(pixelBase + jitter);
-		vec4simd p;
-		size_t i = findIntersection(rtRay, p);
-
-		if (i != InvalidIndex)
-		{
-			const auto& tri = triangles[i];
-			const auto& mat = materials[tri.materialIndex];
-			vec4simd b = tri.barycentric(p);
-			result += mat.diffuse.toVec4();// tri.interpolatedNormal(b).toVec4();
-		}
+		result += gatherBouncesRecursive(camera.castRay(pixelBase + jitter), 0);
 	}
 
-	return result / static_cast<float>(multisample);
+	return (result / static_cast<float>(multisample)).toVec4();
+}
+
+vec4simd RaytracePrivate::gatherBouncesRecursive(const rt::Ray& r, size_t depth)
+{
+	const size_t maxDepth = 16;
+	const vec4simd epsilon(0.0001f);
+
+	vec4simd intersectionPoint;
+	size_t i = findIntersection(r, intersectionPoint);
+
+	if (i == InvalidIndex)
+		return sampleEnvironment(r.direction);
+
+	const auto& tri = triangles[i];
+	const auto& mat = materials[tri.materialIndex];
+
+	vec4simd barycentric = tri.barycentric(intersectionPoint);
+	vec4simd n = tri.interpolatedNormal(barycentric);
+
+	vec4simd newDirection;
+	vec4simd materialColor;
+	if (randomFloat(0.0f, 1.0f) > mat.roughness) 
+	{
+		// compute specular reflection
+		newDirection = rt::randomVectorOnHemisphere(rt::reflect(r.direction, n), HALF_PI * mat.roughness);
+		if (newDirection.dot(n) < 0.0f)
+		{
+			vec4simd p = newDirection.crossXYZ(n);
+			newDirection = rt::reflect(newDirection, p);
+			newDirection.normalize();
+		}
+		materialColor = mat.specular;
+	}
+	else 
+	{
+		// compute diffuse reflection
+		newDirection = rt::randomVectorOnHemisphere(n, HALF_PI);
+		materialColor = mat.diffuse;
+	}
+
+	vec4simd nextColor(0.0f);
+
+	if (depth < maxDepth)
+		nextColor = gatherBouncesRecursive(rt::Ray(intersectionPoint + n * epsilon, newDirection), depth + 1);
+
+	return mat.emissive + materialColor * nextColor * newDirection.dotVector(n);
+}
+
+vec4simd RaytracePrivate::sampleEnvironment(const vec4simd& direction)
+{
+	const vec4simd color(0.85f, 0.92f, 1.0f, 0.5f);
+	const vec4simd ambient(0.215f, 0.18f, 0.1f, 0.5f);
+
+	float t = std::max(0.0f, direction.y());
+	float a = std::sqrt(t) + t * t;
+	return ambient + color * vec4simd(a, a, a, 1.0f);
 }

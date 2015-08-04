@@ -38,7 +38,7 @@ void MainController::applicationDidLoad(et::RenderContext* rc)
 	model->setParent(scene.ptr());
 
 	Camera cam;
-	cam.lookAt(vec3(-70.0f, 70.0f, 70.0f));
+	cam.lookAt(vec3(-70.0f, 25.0f, 70.0f));
 	cam.perspectiveProjection(vector2ToFloat(textureSize).aspect(), DEG_60, 1.0f, 1024.0f);
 
 	_rt.setOutputMethod([this](const vec2i& pixel, const vec4& color)
