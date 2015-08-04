@@ -324,6 +324,7 @@ s3d::ElementContainer::Pointer OBJLoader::load(et::RenderContext* rc, s3d::Stora
 {
 	storage.flush();
 
+	_rc = rc;
 	_groups.reserve(4);
 	_vertices.reserve(1024);
 	_normals.reserve(1024);

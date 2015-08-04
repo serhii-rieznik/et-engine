@@ -1,0 +1,337 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="et">
+      <UniqueIdentifier>{e4ce576b-7bfb-4b82-812f-32d49da82da9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="et\include">
+      <UniqueIdentifier>{7870ac63-663a-419d-8051-72895c93fb3c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="et\source">
+      <UniqueIdentifier>{d67f8aec-86f3-4fc0-ad4a-62d2a7d0b298}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="et\source\rt">
+      <UniqueIdentifier>{06597218-ac6c-44c3-9ff8-b00d3d2a66cb}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="source\main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\maincontroller.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\app\appevironment.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\app\application.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\app\backgroundthread.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\app\events.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\app\invocation.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\app\pathresolver.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\app\runloop.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\camera\camera.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\camera\frustum.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\collision\collision.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\core\base64.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\core\conversion.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\core\dictionary.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\core\et.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\core\memoryallocator.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\core\objectscache.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\core\stream.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\core\tools.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\core\transformable.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\geometry\geometry.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\geometry\rectplacer.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\imaging\bmploader.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\imaging\ddsloader.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\imaging\hdrloader.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\imaging\imageoperations.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\imaging\imagewriter.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\imaging\jpegloader.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\imaging\pngloader.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\imaging\pvrdecompressor.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\imaging\pvrloader.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\imaging\textureloader.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\imaging\tgaloader.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\input\gestures.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\input\input.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\json\json.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\locale\locale.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\models\fbxloader.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\models\objLoader.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\opengl\capabilities.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\opengl\framebuffer.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\opengl\indexbuffer.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\opengl\opengl.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\opengl\program.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\opengl\programfactory.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\opengl\renderer.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\opengl\renderstate.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\opengl\texture.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\opengl\vertexarrayobject.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\opengl\vertexbuffer.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\platform-win\application.win.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\platform-win\atomiccounter.win.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\platform-win\criticalsection.win.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\platform-win\input.win.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\platform-win\kinect.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\platform-win\locale.win.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\platform-win\location.win.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\platform-win\log.win.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\platform-win\memory.win.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\platform-win\mutex.win.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\platform-win\opengl.win.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\platform-win\orientation.win.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\platform-win\rendercontext.win-directx.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\platform-win\rendercontext.win-opengl.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\platform-win\sound.openal.win.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\platform-win\thread.win.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\platform-win\threading.win.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\platform-win\tools.win.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\platform-win\videocapture.win.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\rendering\framebufferfactory.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\rendering\rendercontext.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\rendering\rendering.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\rendering\texturefactory.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\rendering\textureloadingthread.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\rendering\vertexbufferfactory.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scene3d\animation.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scene3d\baseelement.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scene3d\cameraelement.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scene3d\lightelement.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scene3d\lineelement.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scene3d\material.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scene3d\mesh.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scene3d\particlesystem.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scene3d\renderableelement.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scene3d\scene3d.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scene3d\serialization.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scene3d\storage.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scene3d\supportmesh.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\tasks\taskpool.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\timers\notifytimer.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\timers\sequence.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\timers\timedobject.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\timers\timerpool.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\vertexbuffer\indexarray.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\vertexbuffer\vertexarray.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\vertexbuffer\vertexdatachunk.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\vertexbuffer\vertexdeclaration.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\vertexbuffer\vertexstorage.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\primitives\primitives.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\rt\raytrace.cpp">
+      <Filter>et\source\rt</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="source\maincontroller.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\rt\raytrace.h">
+      <Filter>et\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\rt\raytraceobjects.h">
+      <Filter>et\include</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
