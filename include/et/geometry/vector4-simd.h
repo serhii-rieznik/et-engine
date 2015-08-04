@@ -11,7 +11,7 @@
 
 #if (ET_PLATFORM_IOS)
 #	include "vector4-simd.neon.h"
-#elif (ET_PLATFORM_MAC | ET_PLATFORM_WIN)
+#elif (ET_PLATFORM_MAC || ET_PLATFORM_WIN)
 #	include "vector4-simd.sse.h"
 #else
 #	error Unsupported platform selected
