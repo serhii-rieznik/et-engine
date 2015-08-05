@@ -285,10 +285,12 @@ namespace et
 			case TextureFormat::RGBA32F:
 				return 128;
 				
-			case TextureFormat::RG:
 			case TextureFormat::R:
 			case TextureFormat::Depth:
 				return bitsPerPixelForType(type);
+
+			case TextureFormat::RG:
+				return 2 * bitsPerPixelForType(type);
 
 			case TextureFormat::RGB:
 			case TextureFormat::BGR:

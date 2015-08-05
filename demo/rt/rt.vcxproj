@@ -258,6 +258,8 @@
     <ClCompile Include="source\maincontroller.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\include\et\geometry\vector4-simd.h" />
+    <ClInclude Include="..\..\include\et\geometry\vector4-simd.sse.h" />
     <ClInclude Include="..\..\include\et\rt\raytrace.h" />
     <ClInclude Include="..\..\include\et\rt\raytraceobjects.h" />
     <ClInclude Include="source\maincontroller.hpp" />

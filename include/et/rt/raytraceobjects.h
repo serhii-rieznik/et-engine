@@ -26,8 +26,8 @@ namespace et
 		{
 			vec4simd v[3];
 			vec4simd n[3];
-			vec4simd edge2to1;
-			vec4simd edge3to1;
+			vec4simd edge1to0;
+			vec4simd edge2to0;
 			size_t materialIndex = 0;
 
 			float _dot00 = 0.0f;
@@ -38,19 +38,19 @@ namespace et
 
 			void computeSupportData()
 			{
-				edge2to1 = v[1] - v[0];
-				edge3to1 = v[2] - v[0];
-				_dot00 = edge2to1.dotSelf();
-				_dot11 = edge3to1.dotSelf();
-				_dot01 = edge2to1.dot(edge3to1);
+				edge1to0 = v[1] - v[0];
+				edge2to0 = v[2] - v[0];
+				_dot00 = edge1to0.dotSelf();
+				_dot11 = edge2to0.dotSelf();
+				_dot01 = edge1to0.dot(edge2to0);
 				_invDenom = 1.0f / (_dot00 * _dot11 - _dot01 * _dot01);
 			}
 
 			vec4simd barycentric(vec4simd p) const
 			{
 				p -= v[0];
-				float dot20 = p.dot(edge2to1);
-				float dot21 = p.dot(edge3to1);
+				float dot20 = p.dot(edge1to0);
+				float dot21 = p.dot(edge2to0);
 				float y = (_dot11 * dot20 - _dot01 * dot21) * _invDenom;
 				float z = (_dot00 * dot21 - _dot01 * dot20) * _invDenom;
 				float x = 1.0f - y - z;
@@ -85,27 +85,31 @@ namespace et
 			bool sampled = false;
 		};
 
-		inline bool rayTriangle(const Ray& ray, const Triangle& tri, vec4simd& intersection_pt)
+		inline bool rayTriangle(const Ray& ray, const Triangle& tri, vec4simd& intersection_pt, vec4simd& barycentric)
 		{
-			static const float epsilon = 0.000001f;
+			const float epsilon = 0.0005f;
+			const float minusEpsilon = -0.5f * epsilon;
+			const float onePlusEpsilon = 1.0f + 0.5f * epsilon;
+			const float epsilonSquared = epsilon * epsilon;
 
-			vec4simd h = ray.direction.crossXYZ(tri.edge3to1);
-			float a = tri.edge2to1.dot(h);
-			if (a * a < epsilon)
+			vec4simd pvec = ray.direction.crossXYZ(tri.edge2to0);
+			float det = tri.edge1to0.dot(pvec);
+			if (det * det < epsilonSquared)
 				return false;
 
-			vec4simd s = ray.origin - tri.v[0];
-			float u = s.dot(h) / a;
-			if (u * u > u)
+			vec4simd tvec = ray.origin - tri.v[0];
+			float u = tvec.dot(pvec) / det;
+			if ((u < minusEpsilon) || (u > onePlusEpsilon))
 				return false;
 
-			vec4simd q = s.crossXYZ(tri.edge2to1);
-			float v = ray.direction.dot(q) / a;
-			if ((v < 0.0) || (u + v > 1.0))
+			vec4simd qvec = tvec.crossXYZ(tri.edge1to0);
+			float v = ray.direction.dot(qvec) / det;
+			if ((v < minusEpsilon) || (u + v > onePlusEpsilon))
 				return false;
 
-			float t = tri.edge3to1.dot(q) / a;
+			float t = tri.edge2to0.dot(qvec) / det;
 			intersection_pt = ray.origin + ray.direction * t;
+			barycentric = vec4simd(1.0f - u - v, u, v, 0.0f);
 			return (t > epsilon);
 		}
 
@@ -139,6 +143,9 @@ namespace et
 		}
 
 		inline vec4simd reflect(const vec4simd& v, const vec4simd& n)
-			{ return v - n * (2.0f * v.dot(n)); }
+		{
+			const vec4simd two(2.0f);
+			return v - two * n * v.dotVector(n);
+		}
 	}
 }

@@ -26,6 +26,8 @@ namespace et
 			{ _outputMethod = func; }
 
 		void perform(s3d::Scene::Pointer, const Camera&, const vec2i&);
+		vec4 performAtPoint(s3d::Scene::Pointer, const Camera&, const vec2i&, const vec2i&);
+
 		void stop();
 
 	private:

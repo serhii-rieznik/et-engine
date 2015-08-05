@@ -333,5 +333,11 @@
     <ClInclude Include="..\..\include\et\rt\raytraceobjects.h">
       <Filter>et\include</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\et\geometry\vector4-simd.h">
+      <Filter>et\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\geometry\vector4-simd.sse.h">
+      <Filter>et\include</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

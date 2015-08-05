@@ -30,16 +30,15 @@ void MainController::applicationDidLoad(et::RenderContext* rc)
 		TextureFormat::RGBA, DataType::Float, _textureData, "output-texture");
 
 	application().pushSearchPath("Q:\\SDK\\Models\\");
-	auto modelName = application().resolveFileName("test.obj");
+	auto modelName = application().resolveFileName("buddha.obj");
 
-	s3d::Scene::Pointer scene = s3d::Scene::Pointer::create();
+	_scene = s3d::Scene::Pointer::create();
 	OBJLoader loader(modelName, OBJLoader::Option_CalculateTangents);
-	auto model = loader.load(rc, scene->storage(), localCache);
-	model->setParent(scene.ptr());
+	auto model = loader.load(rc, _scene->storage(), localCache);
+	model->setParent(_scene.ptr());
 
-	Camera cam;
-	cam.lookAt(vec3(-70.0f, 25.0f, 70.0f));
-	cam.perspectiveProjection(vector2ToFloat(textureSize).aspect(), DEG_60, 1.0f, 1024.0f);
+	_camera.lookAt(vec3(-70.0f, 25.0f, 70.0f));
+	_camera.perspectiveProjection(vector2ToFloat(textureSize).aspect(), DEG_60, 1.0f, 1024.0f);
 
 	_rt.setOutputMethod([this](const vec2i& pixel, const vec4& color)
 	{
@@ -47,7 +46,12 @@ void MainController::applicationDidLoad(et::RenderContext* rc)
 		vec4data[pixel.x + pixel.y * _texture->size().x] = color;
 	});
 
-	_rt.perform(scene, cam, _texture->size());
+	_rt.perform(_scene, _camera, _texture->size());
+
+	_gestures.click.connect([this](const PointerInputInfo& p)
+	{
+		_rt.performAtPoint(_scene, _camera, _texture->size(), vec2i(int(p.pos.x), int(p.pos.y)));
+	});
 }
 
 void MainController::applicationWillTerminate()
@@ -58,7 +62,6 @@ void MainController::applicationWillTerminate()
 void MainController::render(et::RenderContext* rc)
 {
 	_texture->updateDataDirectly(rc, _texture->size(), _textureData.binary(), _textureData.dataSize());
-
 	rc->renderer()->clear(true, true);
 	rc->renderer()->renderFullscreenTexture(_texture);
 }

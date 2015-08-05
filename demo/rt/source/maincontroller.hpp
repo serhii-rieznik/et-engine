@@ -2,6 +2,7 @@
 
 #include <et/app/application.h>
 #include <et/rt/raytrace.h>
+#include <et/input/gestures.h>
 
 namespace demo
 {
@@ -18,5 +19,8 @@ namespace demo
 		et::Raytrace _rt;
 		et::Texture::Pointer _texture;
 		et::BinaryDataStorage _textureData;
+		et::GesturesRecognizer _gestures;
+		et::Camera _camera;
+		et::s3d::Scene::Pointer _scene;
 	};
 }
