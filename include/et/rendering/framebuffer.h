@@ -68,15 +68,12 @@ namespace et
 
 		const vec2i& size() const
 			{ return _description.size.xy(); }
-	
-		uint32_t colorRenderbuffer() const
-			{ return _colorRenderbuffer; }
 		
 		uint32_t depthRenderbuffer() const
 			{ return _depthRenderbuffer; }
 		
 		bool hasRenderTargets() const
-			{ return !_renderTargets.empty(); }
+			{ return !_renderTargets.empty() && !_colorRenderBuffers.empty(); }
 
 		Texture::Pointer renderTarget(size_t index = 0) const
 			{ ET_ASSERT(index < _renderTargets.size()); return _renderTargets.at(index); }
@@ -87,7 +84,7 @@ namespace et
 		bool isCubemap() const
 			{ return _description.target == TextureTarget::Texture_Cube; }
 				
-		void setColorRenderbuffer(uint32_t);
+		void setColorRenderbuffer(uint32_t, uint32_t);
 		void setDepthRenderbuffer(uint32_t);
 		
 		void resize(const vec2i&);
@@ -99,7 +96,7 @@ namespace et
 	private:
 		friend class FramebufferFactory;
 
-		void createOrUpdateColorRenderbuffer();
+		uint32_t buildColorRenderbuffer(uint32_t);
 		void createOrUpdateDepthRenderbuffer();
 
 		void buildColorAttachment();
@@ -115,10 +112,11 @@ namespace et
 		FramebufferDescription _description;
 		
 		std::vector<Texture::Pointer> _renderTargets;
-		Texture::Pointer _depthBuffer;
+		std::vector<uint32_t> _colorRenderBuffers;
 		
-		uint32_t _colorRenderbuffer = 0;
+		Texture::Pointer _depthBuffer;
 		uint32_t _depthRenderbuffer = 0;
+		
 		int32_t _drawBuffers = 1;
 	};
 

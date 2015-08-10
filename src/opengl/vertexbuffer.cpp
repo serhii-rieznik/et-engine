@@ -39,16 +39,18 @@ VertexBuffer::~VertexBuffer()
 #endif
 }
 
-void VertexBuffer::setData(const void* data, size_t dataSize)
+void VertexBuffer::setData(const void* data, size_t dataSize, bool invalidateExistingData)
 {
 #if !defined(ET_CONSOLE_APPLICATION)
 	_rc->renderState().bindBuffer(GL_ARRAY_BUFFER, static_cast<uint32_t>(apiHandle()));
 	
-	glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>(_dataSize), nullptr, drawTypeValue(_drawType));
-	checkOpenGLError("glBufferData(GL_ARRAY_BUFFER, %u, 0x%08X, %d)", _dataSize, data, _drawType);
+	if (invalidateExistingData)
+	{
+		glBufferData(GL_ARRAY_BUFFER, 0, nullptr, drawTypeValue(_drawType));
+		checkOpenGLError("glBufferData(GL_ARRAY_BUFFER, %u, 0x%08X, %d)", _dataSize, data, _drawType);
+	}
 	
 	_dataSize = dataSize;
-	
 	glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>(_dataSize), data, drawTypeValue(_drawType));
 	checkOpenGLError("glBufferData(GL_ARRAY_BUFFER, %u, 0x%08X, %d)", _dataSize, data, _drawType);
 #endif
