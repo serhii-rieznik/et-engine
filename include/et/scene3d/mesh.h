@@ -7,11 +7,11 @@
 
 #pragma once
 
+#include <et/rendering/vertexarrayobject.h>
+#include <et/scene3d/renderableelement.h>
 #include <et/collision/aabb.h>
 #include <et/collision/sphere.h>
 #include <et/collision/obb.h>
-#include <et/rendering/vertexarrayobject.h>
-#include <et/scene3d/renderableelement.h>
 
 namespace et
 {

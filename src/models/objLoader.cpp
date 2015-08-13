@@ -32,10 +32,39 @@ namespace et
 }
 
 template <typename F>
+inline void splitAndWrite(const std::string& s, F func)
+{
+	if (s.empty()) return;
+	
+	const char t_space = ' ';
+	const char t_tab = '\t';
+
+	const char* begin = s.data();
+	const char* pos = begin;
+	const char* end = begin + s.size();
+	while (begin < end)
+	{
+		if ((*begin == t_space) || (*begin == t_tab))
+		{
+			func(std::string(pos, begin - pos));
+			while ((*begin == t_space) || (*begin == t_tab))
+				++begin;
+			pos = begin;
+		}
+		else
+		{
+			++begin;
+		}
+	}
+	if (begin - pos > 0)
+		func(std::string(pos, begin - pos));
+}
+
+template <typename F>
 inline void splitAndWrite(const std::string& s, char token, F func)
 {
 	if (s.empty()) return;
-
+	
 	const char* begin = s.data();
 	const char* pos = begin;
 	const char* end = begin + s.size();
@@ -44,7 +73,7 @@ inline void splitAndWrite(const std::string& s, char token, F func)
 		if (*begin == token)
 		{
 			func(std::string(pos, begin - pos));
-			pos = begin + 1;
+			while (*begin++ == token);
 		}
 		++begin;
 	}
@@ -60,7 +89,7 @@ inline std::istream& operator >> (std::istream& stream, vec2& value)
 	trim(ln);
 
 	size_t comp = 0;
-	splitAndWrite(ln, ' ', [&value, &comp](const std::string& s)
+	splitAndWrite(ln, [&value, &comp](const std::string& s)
 	{
 		if (comp < 2)
 			value[comp++] = strToFloat(s);
@@ -76,7 +105,7 @@ inline std::istream& operator >> (std::istream& stream, vec3& value)
 	trim(ln);
 
 	size_t comp = 0;
-	splitAndWrite(ln, ' ', [&value, &comp](const std::string& s)
+	splitAndWrite(ln, [&value, &comp](const std::string& s)
 	{
 		if (comp < 3)
 			value[comp++] = strToFloat(s);
@@ -92,7 +121,7 @@ inline std::istream& operator >> (std::istream& stream, vec4& value)
 	trim(ln);
 
 	size_t comp = 0;
-	splitAndWrite(ln, ' ', [&value, &comp](const std::string& s)
+	splitAndWrite(ln, [&value, &comp](const std::string& s)
 	{
 		if (comp < 4)
 			value[comp++] = strToFloat(s);

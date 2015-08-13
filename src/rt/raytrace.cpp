@@ -17,7 +17,7 @@ namespace et
 	public:
 		enum : size_t 
 		{
-			InvalidIndex = -1,
+			InvalidIndex = size_t(-1),
 		};
 
 	public:
@@ -55,6 +55,10 @@ namespace et
 
 		std::vector<rt::Region> regions;
 		std::mutex regionsLock;
+		
+		size_t maxRecursionDepth = 16;
+		size_t extraRaysPerPixel = 1024;
+		
 	};
 }
 
@@ -324,23 +328,21 @@ void RaytracePrivate::threadFunction()
 
 vec4 RaytracePrivate::raytracePixel(const vec2i& pixel)
 {
-	const int multisample = 16;
 	vec2 pixelSize = vec2(1.0f) / vector2ToFloat(viewportSize);
 	vec2 pixelBase = 2.0f * (vector2ToFloat(pixel) * pixelSize) - vec2(1.0f);
 
 	vec4simd result = gatherBouncesRecursive(camera.castRay(pixelBase), 0);
-	for (int m = 0; m < multisample; ++m)
+	for (int m = 0; m < extraRaysPerPixel; ++m)
 	{
 		vec2 jitter(randomFloat(-pixelSize.x, pixelSize.x), randomFloat(-pixelSize.y, pixelSize.y));
 		result += gatherBouncesRecursive(camera.castRay(pixelBase + jitter), 0);
 	}
 
-	return (result / static_cast<float>(multisample + 1)).toVec4();
+	return (result / static_cast<float>(extraRaysPerPixel + 1)).toVec4();
 }
 
 vec4simd RaytracePrivate::gatherBouncesRecursive(const rt::Ray& r, size_t depth)
 {
-	const size_t maxDepth = 8;
 	const vec4simd epsilon(0.0001f);
 
 	vec4simd barycentric;
@@ -383,7 +385,7 @@ vec4simd RaytracePrivate::gatherBouncesRecursive(const rt::Ray& r, size_t depth)
 		colorScale = newDirection.dotVector(n);
 	}
 
-	if (depth < maxDepth)
+	if (depth < maxRecursionDepth)
 	{
 		vec4simd nextColor = gatherBouncesRecursive(rt::Ray(intersectionPoint + n * epsilon, newDirection), depth + 1);
 		return mat.emissive + materialColor * nextColor * colorScale;

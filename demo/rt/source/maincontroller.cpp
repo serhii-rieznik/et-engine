@@ -13,7 +13,7 @@ void MainController::setApplicationParameters(et::ApplicationParameters& p)
 void MainController::setRenderContextParameters(et::RenderContextParameters& p)
 {
 	p.multisamplingQuality = MultisamplingQuality_None;
-	p.contextBaseSize = vec2i(1024, 768);
+	p.contextBaseSize = vec2i(1024, 640);
 	p.contextSize = p.contextBaseSize;
 }
 
@@ -29,15 +29,25 @@ void MainController::applicationDidLoad(et::RenderContext* rc)
 	_texture = rc->textureFactory().genTexture(TextureTarget::Texture_2D, TextureFormat::RGBA32F, textureSize,
 		TextureFormat::RGBA, DataType::Float, _textureData, "output-texture");
 
+#if (ET_PLATFORM_MAC)
+	application().pushSearchPath("/Volumes/Development/SDK/Models");
+#elif (ET_PLATFORM_WIN
 	application().pushSearchPath("Q:\\SDK\\Models\\");
-	auto modelName = application().resolveFileName("buddha.obj");
+#endif
+	
+	auto modelName = application().resolveFileName("cornellbox.obj");
 
 	_scene = s3d::Scene::Pointer::create();
 	OBJLoader loader(modelName, OBJLoader::Option_CalculateTangents);
 	auto model = loader.load(rc, _scene->storage(), localCache);
 	model->setParent(_scene.ptr());
 
-	_camera.lookAt(vec3(-70.0f, 25.0f, 70.0f));
+	float cameraDistance = 3.0f;
+	float cameraPhi = HALF_PI;
+	float cameraTheta = 0.0f;
+	const vec3 lookPoint = vec3(0.0f, 1.0f, 0.0f);
+	const vec3 offset = vec3(0.0f, 1.0f, 0.0f);
+	_camera.lookAt(cameraDistance * fromSpherical(cameraTheta, cameraPhi) + offset, lookPoint);
 	_camera.perspectiveProjection(vector2ToFloat(textureSize).aspect(), DEG_60, 1.0f, 1024.0f);
 
 	_rt.setOutputMethod([this](const vec2i& pixel, const vec4& color)

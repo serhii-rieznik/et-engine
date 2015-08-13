@@ -27,17 +27,11 @@ namespace et
 		vector2(T _x, T _y) :
 			x(_x), y(_y) { }
 
-		T& operator [](int i)
-			{ return c[i]; }
+		T& operator [](unsigned long i)
+			{ ET_ASSERT(i < 2); return c[i]; }
 
-		const T& operator [](int i) const
-			{ return c[i]; }
-
-		T& operator [](size_t i)
-			{ return c[i]; }
-
-		const T& operator [](size_t i) const
-			{ return c[i]; }
+		const T& operator [](unsigned long i) const
+			{ ET_ASSERT(i < 2); return c[i]; }
 
 		T* data() 
 			{ return c; }
