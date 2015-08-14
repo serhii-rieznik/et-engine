@@ -82,6 +82,7 @@ namespace et
 		{
 			vec2i origin = vec2i(0);
 			vec2i size = vec2i(0);
+			size_t estimatedBounces = 0;
 			bool sampled = false;
 		};
 

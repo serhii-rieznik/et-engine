@@ -47,8 +47,8 @@ void MainController::applicationDidLoad(et::RenderContext* rc)
 	float cameraTheta = 0.0f;
 	const vec3 lookPoint = vec3(0.0f, 1.0f, 0.0f);
 	const vec3 offset = vec3(0.0f, 1.0f, 0.0f);
+	_camera.perspectiveProjection(DEG_60, vector2ToFloat(textureSize).aspect(), 1.0f, 1024.0f);
 	_camera.lookAt(cameraDistance * fromSpherical(cameraTheta, cameraPhi) + offset, lookPoint);
-	_camera.perspectiveProjection(vector2ToFloat(textureSize).aspect(), DEG_60, 1.0f, 1024.0f);
 
 	_rt.setOutputMethod([this](const vec2i& pixel, const vec4& color)
 	{

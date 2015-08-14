@@ -35,10 +35,11 @@ namespace et
 		size_t findIntersection(const rt::Ray&, vec4simd&, vec4simd&);
 
 		void buildRegions(vec2i size);
+		void estimateRegionsOrder();
 
-		vec4 raytracePixel(const vec2i&);
+		vec4 raytracePixel(const vec2i&, size_t samples, size_t& bounces);
 
-		vec4simd gatherBouncesRecursive(const rt::Ray&, size_t depth);
+		vec4simd gatherBouncesRecursive(const rt::Ray&, size_t depth, size_t& maxDepth);
 		vec4simd sampleEnvironment(const vec4simd& direction);
 
 		rt::Region getNextRegion();
@@ -56,8 +57,8 @@ namespace et
 		std::vector<rt::Region> regions;
 		std::mutex regionsLock;
 		
-		size_t maxRecursionDepth = 16;
-		size_t extraRaysPerPixel = 1024;
+		size_t maxRecursionDepth = 12;
+		size_t extraRaysPerPixel = 8 ;
 		
 	};
 }
@@ -81,6 +82,7 @@ void Raytrace::perform(s3d::Scene::Pointer scene, const Camera& cam, const vec2i
 	_private->viewportSize = dimension;
 	_private->buildMaterialAndTriangles(scene);
 	_private->buildRegions(vec2i(32));
+	_private->estimateRegionsOrder();
 	_private->emitWorkerThreads();
 }
 
@@ -91,7 +93,9 @@ vec4 Raytrace::performAtPoint(s3d::Scene::Pointer scene, const Camera& cam, cons
 	_private->camera = cam;
 	_private->viewportSize = dimension;
 	_private->buildMaterialAndTriangles(scene);
-	return _private->raytracePixel(vec2i(pixel.x, dimension.y - pixel.y));
+	
+	size_t bounces = 0;
+	return _private->raytracePixel(vec2i(pixel.x, dimension.y - pixel.y), _private->extraRaysPerPixel, bounces);
 }
 
 void Raytrace::stop()
@@ -196,11 +200,12 @@ size_t RaytracePrivate::findIntersection(const rt::Ray& ray, vec4simd& intersect
 	size_t index = 0;
 	float minDistance = std::numeric_limits<float>::max();
 
-	for (const auto& tri : triangles)
+	const auto* tri = triangles.data();
+	for (size_t i = 0, e = triangles.size(); i < e; ++i, ++tri)
 	{
 		vec4simd ip;
 		vec4simd bc;
-		if (rt::rayTriangle(ray, tri, ip, bc))
+		if (rt::rayTriangle(ray, *tri, ip, bc))
 		{
 			float distance = (ip - ray.origin).dotSelf();
 			if (distance < minDistance)
@@ -267,8 +272,6 @@ void RaytracePrivate::buildRegions(vec2i size)
 			regions.back().size = vec2i(w, h);
 		}
 	}
-
-	std::random_shuffle(regions.begin(), regions.end());
 }
 
 rt::Region RaytracePrivate::getNextRegion()
@@ -317,7 +320,8 @@ void RaytracePrivate::threadFunction()
 		{
 			for (pixel.x = region.origin.x; pixel.x < region.origin.x + region.size.x; ++pixel.x)
 			{
-				owner->_outputMethod(pixel, raytracePixel(pixel));
+				size_t bounces = 0;
+				owner->_outputMethod(pixel, raytracePixel(pixel, extraRaysPerPixel, bounces));
 				if (!running)
 					return;
 			}
@@ -326,23 +330,26 @@ void RaytracePrivate::threadFunction()
 	log::info("RT thread completed");
 }
 
-vec4 RaytracePrivate::raytracePixel(const vec2i& pixel)
+vec4 RaytracePrivate::raytracePixel(const vec2i& pixel, size_t samples, size_t& bounces)
 {
-	vec2 pixelSize = vec2(1.0f) / vector2ToFloat(viewportSize);
+	vec2 pixelSize = vec2(1.0f, 1.0f) / vector2ToFloat(viewportSize);
 	vec2 pixelBase = 2.0f * (vector2ToFloat(pixel) * pixelSize) - vec2(1.0f);
 
-	vec4simd result = gatherBouncesRecursive(camera.castRay(pixelBase), 0);
-	for (int m = 0; m < extraRaysPerPixel; ++m)
+	vec4simd result = gatherBouncesRecursive(camera.castRay(pixelBase), 0, bounces);
+	for (int m = 0; m < samples; ++m)
 	{
-		vec2 jitter(randomFloat(-pixelSize.x, pixelSize.x), randomFloat(-pixelSize.y, pixelSize.y));
-		result += gatherBouncesRecursive(camera.castRay(pixelBase + jitter), 0);
+		vec2 jitter = 2.0f * vec2(randomFloat(-pixelSize.x, pixelSize.x),
+			randomFloat(-pixelSize.y, pixelSize.y));
+		
+		result += gatherBouncesRecursive(camera.castRay(pixelBase + jitter), 0, bounces);
 	}
 
-	return (result / static_cast<float>(extraRaysPerPixel + 1)).toVec4();
+	return (result / static_cast<float>(samples + 1)).toVec4();
 }
 
-vec4simd RaytracePrivate::gatherBouncesRecursive(const rt::Ray& r, size_t depth)
+vec4simd RaytracePrivate::gatherBouncesRecursive(const rt::Ray& r, size_t depth, size_t& maxDepth)
 {
+	maxDepth = std::max(maxDepth, depth);
 	const vec4simd epsilon(0.0001f);
 
 	vec4simd barycentric;
@@ -387,7 +394,8 @@ vec4simd RaytracePrivate::gatherBouncesRecursive(const rt::Ray& r, size_t depth)
 
 	if (depth < maxRecursionDepth)
 	{
-		vec4simd nextColor = gatherBouncesRecursive(rt::Ray(intersectionPoint + n * epsilon, newDirection), depth + 1);
+		vec4simd nextColor = gatherBouncesRecursive(rt::Ray(intersectionPoint + n * epsilon, newDirection),
+			depth + 1, maxDepth);
 		return mat.emissive + materialColor * nextColor * colorScale;
 	}
 
@@ -396,6 +404,8 @@ vec4simd RaytracePrivate::gatherBouncesRecursive(const rt::Ray& r, size_t depth)
 
 vec4simd RaytracePrivate::sampleEnvironment(const vec4simd& direction)
 {
+	return vec4simd(0.0f);
+	/*
 	const vec4simd ambient(40.0f / 255.0f, 58.0f / 255.0f, 72.0f / 255.0f, 1.0f);
 	const vec4simd sun(249.0f / 255.0f, 243.0f / 255.0f, 179.0f / 255.0f, 1.0f);
 	const vec4simd atmosphere(173.0f / 255.0f, 181.0f / 255.0f, 185.0f / 255.0f, 1.0f);
@@ -403,4 +413,24 @@ vec4simd RaytracePrivate::sampleEnvironment(const vec4simd& direction)
 	float t = std::max(0.0f, direction.y());
 	float s = pow(t, 32.0f) + 10.0f * pow(t, 256.0f);
 	return ambient + atmosphere * std::sqrt(t) + sun * s;
+	// */
+}
+
+void RaytracePrivate::estimateRegionsOrder()
+{
+	for (auto& r : regions)
+	{
+		r.estimatedBounces = 0;
+		for (size_t i = 0; i < 5; ++i)
+		{
+			size_t bounces = 0;
+			raytracePixel(r.origin + vec2i(rand() % r.size.x, rand() % r.size.y), 1, bounces);
+			r.estimatedBounces += bounces;
+		}
+	}
+	
+	std::sort(regions.begin(), regions.end(), [](const rt::Region& l, const rt::Region& r)
+	{
+		return l.estimatedBounces > r.estimatedBounces;
+	});
 }
