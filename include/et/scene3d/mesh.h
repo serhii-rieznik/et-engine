@@ -102,6 +102,10 @@ namespace et
 			void setDeformer(MeshDeformer::Pointer d)
 				{ _deformer = d; }
 			
+			const std::vector<mat4>& deformationMatrices();
+			
+			VertexStorage::Pointer bakeDeformations();
+			
 		private:
 			Mesh* currentLod();
 			const Mesh* currentLod() const;
@@ -118,6 +122,7 @@ namespace et
 			
 			SupportData _supportData;
 			std::map<uint32_t, Mesh::Pointer> _lods;
+			std::vector<mat4> _undeformedTransformationMatrices;
 			MeshDeformer::Pointer _deformer;
 			
 			uint32_t _startIndex = 0;

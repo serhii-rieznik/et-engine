@@ -19,13 +19,17 @@ static IndexBuffer::Pointer _emptyIndexBuffer;
 static VertexBuffer::Pointer _emptyVertexBuffer;
 
 Mesh::Mesh(const std::string& name, BaseElement* parent) :
-	RenderableElement(name, parent) { }
+	RenderableElement(name, parent)
+{
+	_undeformedTransformationMatrices.resize(4);
+}
 
 Mesh::Mesh(const std::string& aName, const VertexArrayObject& vao, const Material::Pointer& mat,
 	uint32_t startIndex, uint32_t numIndexes, BaseElement* parent) : RenderableElement(aName, parent), 
 	_vao(vao), _startIndex(startIndex), _numIndexes(numIndexes)
 {
 	setMaterial(mat);
+	_undeformedTransformationMatrices.resize(4);
 }
 
 Mesh::Mesh(const std::string& aName, const VertexArrayObject& vao, const Material::Pointer& mat,
@@ -35,6 +39,7 @@ Mesh::Mesh(const std::string& aName, const VertexArrayObject& vao, const Materia
 {
 	setMaterial(mat);
 	calculateSupportData();
+	_undeformedTransformationMatrices.resize(4);
 }
 
 void Mesh::calculateSupportData()
@@ -308,4 +313,158 @@ const OBB& Mesh::orientedBoundingBox()
 	}
 
 	return _cachedOrientedBoundingBox;
+}
+
+const std::vector<mat4>& Mesh::deformationMatrices()
+{
+	if (_deformer.valid())
+		return _deformer->calculateTransformsForMesh(this);
+	
+	for (size_t i = 0; i < 4; ++i)
+		_undeformedTransformationMatrices[i] = finalTransform();
+	
+	return _undeformedTransformationMatrices;
+}
+
+/*
+ * Bake deformations + stuff for it
+ */
+
+template <VertexAttributeType attribType>
+void copyAttributeWithType(VertexStorage::Pointer from, VertexStorage::Pointer to, VertexAttributeUsage attrib)
+{
+	auto c0 = from->accessData<attribType>(attrib, 0);
+	auto c1 = to->accessData<attribType>(attrib, 0);
+	for (size_t i = 0; i < from->capacity(); ++i)
+		c1[i] = c0[i];
+}
+
+void copyAttribute(VertexStorage::Pointer from, VertexStorage::Pointer to, VertexAttributeUsage attrib)
+{
+	if (!from->hasAttribute(attrib)) return;
+	
+	switch (from->attributeType(attrib))
+	{
+		case VertexAttributeType::Float:
+			copyAttributeWithType<VertexAttributeType::Float>(from, to, attrib);
+			break;
+		case VertexAttributeType::Int:
+			copyAttributeWithType<VertexAttributeType::Int>(from, to, attrib);
+			break;
+		case VertexAttributeType::Vec2:
+			copyAttributeWithType<VertexAttributeType::Vec2>(from, to, attrib);
+			break;
+		case VertexAttributeType::Vec3:
+			copyAttributeWithType<VertexAttributeType::Vec3>(from, to, attrib);
+			break;
+		case VertexAttributeType::Vec4:
+			copyAttributeWithType<VertexAttributeType::Vec4>(from, to, attrib);
+			break;
+		case VertexAttributeType::IntVec2:
+			copyAttributeWithType<VertexAttributeType::IntVec2>(from, to, attrib);
+			break;
+		case VertexAttributeType::IntVec3:
+			copyAttributeWithType<VertexAttributeType::IntVec3>(from, to, attrib);
+			break;
+		case VertexAttributeType::IntVec4:
+			copyAttributeWithType<VertexAttributeType::IntVec4>(from, to, attrib);
+			break;
+		default:
+			ET_FAIL("Unhandled attribute type");
+	}
+}
+
+void copyVector3Rotated(VertexStorage::Pointer from, VertexStorage::Pointer to, VertexAttributeUsage attrib,
+	const mat4& transform)
+{
+	if (!from->hasAttribute(attrib)) return;
+	
+	auto c0 = from->accessData<VertexAttributeType::Vec3>(attrib, 0);
+	auto c1 = to->accessData<VertexAttributeType::Vec3>(attrib, 0);
+	for (size_t i = 0; i < from->capacity(); ++i)
+		c1[i] = transform.rotationMultiply(c0[i]);
+}
+
+void copyVector3Transformed(VertexStorage::Pointer from, VertexStorage::Pointer to, VertexAttributeUsage attrib,
+	const mat4& transform)
+{
+	if (!from->hasAttribute(attrib)) return;
+	
+	auto c0 = from->accessData<VertexAttributeType::Vec3>(attrib, 0);
+	auto c1 = to->accessData<VertexAttributeType::Vec3>(attrib, 0);
+	for (size_t i = 0; i < from->capacity(); ++i)
+		c1[i] = transform * c0[i];
+}
+
+void skinVector3Rotated(VertexStorage::Pointer from, VertexStorage::Pointer to, VertexAttributeUsage attrib,
+	const std::vector<mat4>& transforms)
+{
+	if (!from->hasAttribute(attrib)) return;
+	
+	auto c0 = from->accessData<VertexAttributeType::Vec3>(attrib, 0);
+	auto c1 = to->accessData<VertexAttributeType::Vec3>(attrib, 0);
+	auto bi = to->accessData<VertexAttributeType::IntVec4>(VertexAttributeUsage::BlendIndices, 0);
+	auto bw = to->accessData<VertexAttributeType::Vec4>(VertexAttributeUsage::BlendWeights, 0);
+	for (size_t i = 0; i < from->capacity(); ++i)
+	{
+		c1[i] =
+			transforms[bi[i][0]].rotationMultiply(c0[i]) * bw[i][0] +
+			transforms[bi[i][1]].rotationMultiply(c0[i]) * bw[i][1] +
+			transforms[bi[i][2]].rotationMultiply(c0[i]) * bw[i][2] +
+			transforms[bi[i][3]].rotationMultiply(c0[i]) * bw[i][3];
+	}
+}
+
+void skinVector3Transformed(VertexStorage::Pointer from, VertexStorage::Pointer to, VertexAttributeUsage attrib,
+	const std::vector<mat4>& transforms)
+{
+	if (!from->hasAttribute(attrib)) return;
+	
+	auto c0 = from->accessData<VertexAttributeType::Vec3>(attrib, 0);
+	auto c1 = to->accessData<VertexAttributeType::Vec3>(attrib, 0);
+	auto bi = to->accessData<VertexAttributeType::IntVec4>(VertexAttributeUsage::BlendIndices, 0);
+	auto bw = to->accessData<VertexAttributeType::Vec4>(VertexAttributeUsage::BlendWeights, 0);
+	for (size_t i = 0; i < from->capacity(); ++i)
+	{
+		c1[i] = (transforms[bi[i][0]] * c0[i]) * bw[i][0] + (transforms[bi[i][1]] * c0[i]) * bw[i][1] +
+			(transforms[bi[i][2]] * c0[i]) * bw[i][2] +  (transforms[bi[i][3]] * c0[i]) * bw[i][3];
+	}
+}
+
+VertexStorage::Pointer Mesh::bakeDeformations()
+{
+	const auto& transforms = deformationMatrices();
+	
+	bool isSkinned = _vertexStorage->hasAttribute(VertexAttributeUsage::BlendIndices) &&
+		_vertexStorage->hasAttribute(VertexAttributeUsage::BlendWeights);
+	
+	VertexStorage::Pointer result =
+		VertexStorage::Pointer::create(_vertexStorage->declaration(), _vertexStorage->capacity());
+	
+	copyAttribute(_vertexStorage, result, VertexAttributeUsage::Color);
+	copyAttribute(_vertexStorage, result, VertexAttributeUsage::TexCoord0);
+	copyAttribute(_vertexStorage, result, VertexAttributeUsage::TexCoord1);
+	copyAttribute(_vertexStorage, result, VertexAttributeUsage::TexCoord2);
+	copyAttribute(_vertexStorage, result, VertexAttributeUsage::TexCoord3);
+	copyAttribute(_vertexStorage, result, VertexAttributeUsage::Smoothing);
+	copyAttribute(_vertexStorage, result, VertexAttributeUsage::BlendIndices);
+	copyAttribute(_vertexStorage, result, VertexAttributeUsage::BlendWeights);
+	
+	if (isSkinned)
+	{
+		skinVector3Transformed(_vertexStorage, result, VertexAttributeUsage::Position, transforms);
+		skinVector3Rotated(_vertexStorage, result, VertexAttributeUsage::Normal, transforms);
+		skinVector3Rotated(_vertexStorage, result, VertexAttributeUsage::Tangent, transforms);
+		skinVector3Rotated(_vertexStorage, result, VertexAttributeUsage::Binormal, transforms);
+	}
+	else
+	{
+		const mat4& ft = finalTransform();
+		copyVector3Transformed(_vertexStorage, result, VertexAttributeUsage::Position, ft);
+		copyVector3Rotated(_vertexStorage, result, VertexAttributeUsage::Normal, ft);
+		copyVector3Rotated(_vertexStorage, result, VertexAttributeUsage::Tangent, ft);
+		copyVector3Rotated(_vertexStorage, result, VertexAttributeUsage::Binormal, ft);
+	}
+	
+	return result;
 }

@@ -23,18 +23,13 @@ BaseElement::BaseElement(const std::string& name, BaseElement* parent) :
 		ET_ASSERT(!_animations.empty());
 		
 		const auto& a = _animations.front();
-		
 		float dt = a.startTime() + (timer->actualTime() - timer->startTime());
-		
 		if ((a.outOfRangeMode() == Animation::OutOfRangeMode_Once) && (dt > a.stopTime()))
 		{
 			dt = a.startTime();
 			timer->cancelUpdates();
 		}
-		
-		_animationTransform = a.transformation(dt);
-		
-		invalidateTransform();
+		setAnimationTime(dt);
 	});
 }
 
@@ -357,4 +352,17 @@ Animation& BaseElement::defaultAnimation()
 const Animation& BaseElement::defaultAnimation() const
 {
 	return _animations.empty() ? _emptyAnimation : _animations.front();
+}
+
+void BaseElement::setAnimationTime(float t)
+{
+	_animationTransform = _animations.empty() ? identityMatrix : _animations.front().transformation(t);
+	invalidateTransform();
+}
+
+void BaseElement::setAnimationTimeRecursive(float a)
+{
+	setAnimationTime(a);
+	for (auto c : children())
+		c->setAnimationTimeRecursive(a);
 }

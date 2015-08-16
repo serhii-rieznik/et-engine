@@ -55,6 +55,7 @@ namespace et
 		
 		bool hasAttribute(VertexAttributeUsage) const;
 		bool hasAttributeWithType(VertexAttributeUsage, VertexAttributeType) const;
+		VertexAttributeType attributeType(VertexAttributeUsage) const;
 		
 		const VertexDeclaration& declaration() const;
 		

@@ -42,6 +42,8 @@ namespace et
 			void stopAnimation();
 			void animateRecursive();
 			void stopAnimationRecursive();
+			void setAnimationTime(float);
+			void setAnimationTimeRecursive(float);
 
 			bool animating() const;
 			bool anyChildAnimating() const;

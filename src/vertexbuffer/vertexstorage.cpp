@@ -49,6 +49,12 @@ bool VertexStorage::hasAttributeWithType(VertexAttributeUsage usage, VertexAttri
 	return hasAttribute(usage) && (_private->decl.elementForUsage(usage).type() == type);
 }
 
+VertexAttributeType VertexStorage::attributeType(VertexAttributeUsage usage) const
+{
+	ET_ASSERT(hasAttribute(usage));
+	return _private->decl.elementForUsage(usage).type();
+}
+
 BinaryDataStorage& VertexStorage::data()
 {
 	return _private->data;
