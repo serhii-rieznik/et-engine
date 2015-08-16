@@ -14,12 +14,15 @@ namespace et
 	{ 
 		"Vertex", "Normal", "Color", "Tangent", "Binormal",
 		"TexCoord0", "TexCoord1", "TexCoord2", "TexCoord3",
-		"SmoothingGroup", "gl_InstanceID", "gl_InstanceIDEXT"
+		"SmoothingGroup", "gl_InstanceID", "gl_InstanceIDEXT",
+		"BlendWeights", "BlendIndices",
 	};
 
 	const std::string vertexAttributeTypeNames[VertexAttributeType_max] =
 	{
-		"float", "vec2", "vec3", "vec4", "mat3", "mat4", "int",
+		"float", "vec2", "vec3", "vec4",
+		"mat3", "mat4",
+		"int", "ivec2", "ivec3", "ivec4"
 	};
 
 	const std::string dataTypeNames[DataType_max] =
@@ -42,7 +45,7 @@ namespace et
 	{
 		"gl_Vertex", "gl_Normal", "gl_Color", "gl_Tangent", "gl_Binormal",
 		"gl_MultiTexCoord0", "gl_MultiTexCoord1", "gl_MultiTexCoord2", "gl_MultiTexCoord3",
-		"gl_SmoothingGroup", "gl_InstanceID", "gl_InstanceIDEXT"
+		"gl_SmoothingGroup", "gl_InstanceID", "gl_InstanceIDEXT", "gl_MultiTexCoord4", "gl_MultiTexCoord5",
 	};
 
 	const std::string indexArrayFormatNames[IndexArrayFormat_max] = 
@@ -56,7 +59,12 @@ namespace et
 	};
 
 	const uint32_t vertexAttributeUsageMasks[VertexAttributeUsage_max] =
-		{ 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x100, 0x200, 0x0, 0x0 };
+	{
+		0x0001, 0x0002, 0x0004, 0x0008, 0x0010,
+		0x0020, 0x0040, 0x0080, 0x0100,
+		0x0200, 0x0400, 0x0800, 0x1000, 0x2000,
+		0x0000
+	};
 
 	VertexAttributeUsage stringToVertexAttributeUsage(const std::string& s, bool& compatibility)
 	{
@@ -183,6 +191,9 @@ namespace et
 			9,  // Mat3,
 			16, // Mat4,
 			1,  // Int,
+			2,  // IntVec2,
+			3,  // IntVec3,
+			4,  // IntVec4,
 		};
 		return values[static_cast<uint32_t>(t)];
 	}
@@ -190,7 +201,6 @@ namespace et
 	DataType vertexAttributeTypeDataType(VertexAttributeType t)
 	{
 		ET_ASSERT(t < VertexAttributeType::max)
-		
 		static const DataType values[VertexAttributeType_max] =
 		{
 			DataType::Float, // Float,
@@ -200,13 +210,17 @@ namespace et
 			DataType::Float, // Mat3,
 			DataType::Float, // Mat4,
 			DataType::Int, // Int,
+			DataType::Int, // IntVec2,
+			DataType::Int, // IntVec3,
+			DataType::Int, // IntVec4,
 		};
 		return values[int32_t(t)];
 	}
 
 	uint32_t vertexAttributeTypeSize(VertexAttributeType t)
 	{
-		return vertexAttributeTypeComponents(t) * ((t == VertexAttributeType::Int) ? sizeof(int) : sizeof(float));
+		return vertexAttributeTypeComponents(t) *
+			((t == VertexAttributeType::Int) ? sizeof(int) : sizeof(float));
 	}
 
 	uint32_t vertexAttributeUsageMask(VertexAttributeUsage u)

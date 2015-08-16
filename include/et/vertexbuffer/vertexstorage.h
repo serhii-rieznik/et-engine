@@ -67,59 +67,24 @@ namespace et
 		ET_DECLARE_PIMPL(VertexStorage, 128)
 	};
 	
-	template <> class VertexDataAccessor<VertexAttributeType::Int> : public RawDataAcessor<uint32_t>
-	{
-	public:
-		VertexDataAccessor() { }
-		
-		VertexDataAccessor(const char* data, size_t dataSize, size_t stride, size_t offset) :
-			RawDataAcessor<uint32_t>(data, dataSize, stride, offset) { }
-		
-		VertexDataAccessor(char* data, size_t dataSize, size_t stride, size_t offset) :
-			RawDataAcessor<uint32_t>(data, dataSize, stride, offset) { }
+#define ET_DECLARE_ACCESSOR(vat, base) \
+	template <> class VertexDataAccessor<VertexAttributeType::vat> : public RawDataAcessor<base> \
+	{ \
+	public: \
+		VertexDataAccessor() { } \
+		VertexDataAccessor(const char* data, size_t dataSize, size_t stride, size_t offset) : \
+			RawDataAcessor<base>(data, dataSize, stride, offset) { } \
+		VertexDataAccessor(char* data, size_t dataSize, size_t stride, size_t offset) : \
+			RawDataAcessor<base>(data, dataSize, stride, offset) { } \
 	};
-	template <> class VertexDataAccessor<VertexAttributeType::Vec2> : public RawDataAcessor<vec2>
-	{
-	public:
-		VertexDataAccessor() { }
-		
-		VertexDataAccessor(const char* data, size_t dataSize, size_t stride, size_t offset) :
-			RawDataAcessor<vec2>(data, dataSize, stride, offset) { }
-		
-		VertexDataAccessor(char* data, size_t dataSize, size_t stride, size_t offset) :
-			RawDataAcessor<vec2>(data, dataSize, stride, offset) { }
-	};
-	template <> class VertexDataAccessor<VertexAttributeType::Vec3> : public RawDataAcessor<vec3>
-	{
-	public:
-		VertexDataAccessor() { }
-		
-		VertexDataAccessor(const char* data, size_t dataSize, size_t stride, size_t offset) :
-			RawDataAcessor<vec3>(data, dataSize, stride, offset) { }
-
-		VertexDataAccessor(char* data, size_t dataSize, size_t stride, size_t offset) :
-			RawDataAcessor<vec3>(data, dataSize, stride, offset) { }
-	};
-	template <> class VertexDataAccessor<VertexAttributeType::Vec4> : public RawDataAcessor<vec4>
-	{
-	public:
-		VertexDataAccessor() { }
-		
-		VertexDataAccessor(const char* data, size_t dataSize, size_t stride, size_t offset) :
-			RawDataAcessor<vec4>(data, dataSize, stride, offset) { }
-
-		VertexDataAccessor(char* data, size_t dataSize, size_t stride, size_t offset) :
-			RawDataAcessor<vec4>(data, dataSize, stride, offset) { }
-	};
-	template <> class VertexDataAccessor<VertexAttributeType::Float> : public RawDataAcessor<float>
-	{
-	public:
-		VertexDataAccessor() { }
-		
-		VertexDataAccessor(const char* data, size_t dataSize, size_t stride, size_t offset) :
-			RawDataAcessor<float>(data, dataSize, stride, offset) { }
-
-		VertexDataAccessor(char* data, size_t dataSize, size_t stride, size_t offset) :
-			RawDataAcessor<float>(data, dataSize, stride, offset) { }
-	};
+	
+	ET_DECLARE_ACCESSOR(Int, int32_t)
+	ET_DECLARE_ACCESSOR(Float, float)
+	ET_DECLARE_ACCESSOR(Vec2, vec2)
+	ET_DECLARE_ACCESSOR(IntVec2, vec2i)
+	ET_DECLARE_ACCESSOR(Vec3, vec3)
+	ET_DECLARE_ACCESSOR(IntVec3, vec3i)
+	ET_DECLARE_ACCESSOR(Vec4, vec4)
+	ET_DECLARE_ACCESSOR(IntVec4, vec4i)
+#undef ET_DECLARE_ACCESSOR
 }

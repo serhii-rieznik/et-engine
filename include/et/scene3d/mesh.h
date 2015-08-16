@@ -9,6 +9,7 @@
 
 #include <et/rendering/vertexarrayobject.h>
 #include <et/scene3d/renderableelement.h>
+#include <et/scene3d/meshdeformer.h>
 #include <et/collision/aabb.h>
 #include <et/collision/sphere.h>
 #include <et/collision/obb.h>
@@ -43,10 +44,10 @@ namespace et
 				uint32_t, uint32_t, const VertexStorage::Pointer&, const IndexArray::Pointer&, 
 				BaseElement* = nullptr);
 
-			ElementType type() const 
+			ElementType type() const override
 				{ return ElementType::Mesh; }
 
-			Mesh* duplicate();
+			Mesh* duplicate() override;
 
 			VertexArrayObject& vertexArrayObject();
 			const VertexArrayObject& vertexArrayObject() const;
@@ -67,8 +68,8 @@ namespace et
 			void setIndexBuffer(IndexBuffer::Pointer);
 			void setVertexArrayObject(VertexArrayObject);
 
-			void serialize(Dictionary, const std::string&);
-			void deserialize(Dictionary, SerializationHelper*);
+			void serialize(Dictionary, const std::string&) override;
+			void deserialize(Dictionary, SerializationHelper*) override;
 
 			void setVertexStorage(VertexStorage::Pointer);
 			void setIndexArray(IndexArray::Pointer);
@@ -77,16 +78,7 @@ namespace et
 			void attachLod(uint32_t level, Mesh::Pointer mesh);
 
 			void setLod(uint32_t level);
-			
-			const std::string& vaoName() const
-				{ return _vaoName; }
-			
-			const std::string& vbName() const
-				{ return _vbName; }
-			
-			const std::string& ibName() const
-				{ return _ibName; }
-			
+						
 			void calculateSupportData();
 			
 			const SupportData& supportData() const
@@ -104,6 +96,12 @@ namespace et
 			
 			float finalTransformScale();
 			
+			MeshDeformer::Pointer deformer()
+				{ return _deformer; }
+			
+			void setDeformer(MeshDeformer::Pointer d)
+				{ _deformer = d; }
+			
 		private:
 			Mesh* currentLod();
 			const Mesh* currentLod() const;
@@ -120,12 +118,11 @@ namespace et
 			
 			SupportData _supportData;
 			std::map<uint32_t, Mesh::Pointer> _lods;
+			MeshDeformer::Pointer _deformer;
+			
 			uint32_t _startIndex = 0;
 			uint32_t _numIndexes = 0;
 			uint32_t _selectedLod = 0;
-			std::string _vaoName;
-			std::string _vbName;
-			std::string _ibName;
 			
 			bool _shouldUpdateBoundingBox = true;
 			bool _shouldUpdateOrientedBoundingBox = true;

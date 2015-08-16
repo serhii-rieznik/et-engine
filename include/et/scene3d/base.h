@@ -26,6 +26,7 @@ namespace et
 			Light,
 			ParticleSystem,
 			Line,
+			Skeleton,
 
 			max,
 			DontCare

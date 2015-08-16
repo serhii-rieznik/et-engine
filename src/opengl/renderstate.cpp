@@ -543,8 +543,20 @@ void RenderState::setVertexAttribPointer(const VertexElement& e, size_t baseInde
 #if !defined(ET_CONSOLE_APPLICATION)
 	(void)force;
 	
-	glVertexAttribPointer(GLuint(e.usage()), static_cast<GLint>(e.components()), dataTypeValue(e.dataType()), false,
-		e.stride(), reinterpret_cast<GLvoid*>(e.offset() + baseIndex));
+	if (e.dataType() == DataType::Int)
+	{
+		glVertexAttribIPointer(GLuint(e.usage()), static_cast<GLint>(e.components()), dataTypeValue(e.dataType()),
+			e.stride(), reinterpret_cast<GLvoid*>(e.offset() + baseIndex));
+	}
+	else if (e.dataType() == DataType::Float)
+	{
+		glVertexAttribPointer(GLuint(e.usage()), static_cast<GLint>(e.components()), dataTypeValue(e.dataType()),
+			false, e.stride(), reinterpret_cast<GLvoid*>(e.offset() + baseIndex));
+	}
+	else
+	{
+		ET_FAIL("Unhandled vertex attribute data type.");
+	}
 
 	checkOpenGLError("glVertexAttribPointer");
 #endif

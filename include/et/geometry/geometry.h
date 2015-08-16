@@ -149,32 +149,30 @@ namespace et
 	template<typename T>
 	inline Quaternion<T> slerp(const Quaternion<T>& from, const Quaternion<T>& to, T t)
 	{
-		T cosom = dot(from.vector, to.vector) + from.scalar * to.scalar;
+		const T one(1);
+		const T epsilon(0.0001);
 		
-		Quaternion<T> temp = to;
+		Quaternion<T> target = to;
+		
+		T cosom = dot(from.vector, to.vector) + from.scalar * to.scalar;
 		if (cosom < 0.0f)
 		{
-			temp = -to;
+			target = -to;
 			cosom = -cosom;
 		}
 		
-		T scale0 = static_cast<T>(1) - t;
+		T scale0 = one - t;
 		T scale1 = t;
-		
-		if ((static_cast<T>(1) - cosom) > static_cast<T>(1.0e-5))
+		if (one - cosom > epsilon)
 		{
 			T omega = std::acos(cosom);
-			T sinom = static_cast<T>(1) / std::sin(omega);
-			scale0 = std::sin((static_cast<T>(1) - t) * omega) * sinom;
-			scale1 = std::sin(t * omega) * sinom;
+			T sinom = one / std::sin(omega);
+			scale0 = std::sin(scale0 * omega) * sinom;
+			scale1 = std::sin(scale1 * omega) * sinom;
 		}
-		
-		Quaternion<T> result;
-		result.scalar = scale0 * from.scalar + scale1 * temp.scalar;
-		result.vector = scale0 * from.vector + scale1 * temp.vector;
-		return result;
+		return from * scale0 + target * scale1;
 	}
-
+	
 	template<typename T>
 	inline vector3<T>fromSpherical(T theta, T phi)
 	{

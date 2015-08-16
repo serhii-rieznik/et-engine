@@ -16,6 +16,7 @@
 #include <et/scene3d/lightelement.h>
 #include <et/scene3d/particlesystem.h>
 #include <et/scene3d/lineelement.h>
+#include <et/scene3d/skeletonelement.h>
 
 namespace et
 {

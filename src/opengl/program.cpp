@@ -283,7 +283,8 @@ void Program::buildProgram(const std::string& vertex_source, const std::string& 
 
 			if (!compatibility)
 			{
-				glBindAttribLocation(static_cast<uint32_t>(apiHandle()), static_cast<GLuint>(attrib), attribName.binary());
+				glBindAttribLocation(static_cast<uint32_t>(apiHandle()), static_cast<GLuint>(attrib),
+					attribName.binary());
 				checkOpenGLError("glBindAttribLocation - %s", attribName.data());
 			}
 		}

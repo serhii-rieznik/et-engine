@@ -18,14 +18,17 @@ namespace et
 		Color,
 		Tangent,
 		Binormal,
+		
 		TexCoord0,
 		TexCoord1,
 		TexCoord2,
 		TexCoord3,
-		Smoothing,
 		
+		Smoothing,
 		InstanceId,
 		InstanceIdExt,
+		BlendWeights,
+		BlendIndices,
 		
 		Unknown,
 		max
@@ -42,6 +45,9 @@ namespace et
 		Mat4,
 		
 		Int,
+		IntVec2,
+		IntVec3,
+		IntVec4,
 		
 		max
 	};

@@ -51,13 +51,14 @@ namespace et
 			return result;
 		};
 
-		Quaternion operator * (T v) const
+		Quaternion operator + (Quaternion v) const
 		{
-			Quaternion result;
-			result.scalar = scalar * v;
-			result.vector = vector * v;
-			return result;
+			return Quaternion<T>(scalar + v.scalar,
+				vector.x + v.vector.x, vector.y + v.vector.y, vector.z + v.vector.z);
 		};
+		
+		Quaternion operator * (T v) const
+			{ return Quaternion<T>(scalar * v, vector.x * v, vector.y * v, vector.z * v); };
 
 		Quaternion operator / (T v) const
 		{
