@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include <et/scene3d/scene3d.h>
+#include <et/rt/raytraceobjects.h>
 
 namespace et
 {
@@ -16,14 +16,17 @@ namespace et
 	public:
 		struct Node
 		{
+			rt::BoundingBox boundingBox;
+			std::vector<size_t> triangles;
 			Node* left = nullptr;
 			Node* right = nullptr;
-			std::vector<size_t> triangles;
 		};
 		
 	public:
 		void build(const std::vector<triangleEx>&);
 		void cleanUp();
+		
+		Node* traverse(const rt::Ray&);
 		
 	private:
 		void cleanUpRecursively(Node*);

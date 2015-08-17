@@ -8,6 +8,7 @@
 #pragma once
 
 #include <et/geometry/vector4-simd.h>
+#include <et/scene3d/scene3d.h>
 
 namespace et
 {
@@ -77,6 +78,24 @@ namespace et
 			Ray(const ray3d& r) : 
 				origin(r.origin, 1.0f), direction(r.direction, 0.0f) { } 
 		};
+		
+		struct BoundingBox
+		{
+			vec4simd center = vec4simd(0.0f);
+			vec4simd halfSize = vec4simd(0.0f);
+			
+			BoundingBox()
+				{ }
+			
+			BoundingBox(const vec4simd& c, const vec4simd& hs) :
+				center(c), halfSize(hs) { }
+			
+			vec4simd minVertex() const
+				{ return center - halfSize; }
+			
+			vec4simd maxVertex() const
+				{ return center + halfSize; }
+		};
 
 		struct Region
 		{
@@ -114,7 +133,7 @@ namespace et
 			return (t > epsilon);
 		}
 
-		vec4simd perpendicularVector(const vec4simd& normal)
+		inline vec4simd perpendicularVector(const vec4simd& normal)
 		{
 			vec3 componentsLength = (normal * normal).xyz();
 
@@ -147,6 +166,42 @@ namespace et
 		{
 			const vec4simd two(2.0f);
 			return v - two * n * v.dotVector(n);
+		}
+		
+		inline bool rayHitsBoundingBox(const Ray& r, const BoundingBox& box)
+		{
+			vec4 origin;
+			vec4 invDirection;
+			r.origin.loadToVec4(origin);
+			r.direction.reciprocal().loadToVec4(invDirection);
+			
+			int r_sign_x = (invDirection.x < 0.0f ? 1 : 0);
+			int r_sign_y = (invDirection.y < 0.0f ? 1 : 0);
+			
+			vec4simd parameters[2] = { box.minVertex(), box.maxVertex() };
+			
+			float txmin = (parameters[r_sign_x].x() - origin.x) * invDirection.x;
+			float tymin = (parameters[r_sign_y].y() - origin.y) * invDirection.y;
+			float txmax = (parameters[1 - r_sign_x].x() - origin.x) * invDirection.x;
+			float tymax = (parameters[1 - r_sign_y].y() - origin.y) * invDirection.y;
+			
+			if ((txmin < tymax) && (tymin < txmax))
+			{
+				if (tymin > txmin)
+					txmin = tymin;
+				
+				if (tymax < txmax)
+					txmax = tymax;
+				
+				int r_sign_z = (invDirection.z < 0.0f ? 1 : 0);
+				float tzmin = (parameters[r_sign_z].z() - origin.z) * invDirection.z;
+				float tzmax = (parameters[1 - r_sign_z].z() - origin.z) * invDirection.z;
+				
+				if ((txmin < tzmax) && (tzmin < txmax))
+					return true;
+			}
+			
+			return false;
 		}
 	}
 }

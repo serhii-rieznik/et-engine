@@ -7,7 +7,6 @@
 
 #pragma once
 
-#include <et/scene3d/scene3d.h>
 #include <et/rt/kdtree.h>
 
 namespace et

@@ -17,6 +17,7 @@ void KDTree::build(const std::vector<triangleEx>&)
 void KDTree::cleanUp()
 {
 	cleanUpRecursively(_root);
+	_root = nullptr;
 }
 
 void KDTree::cleanUpRecursively(Node* node)
