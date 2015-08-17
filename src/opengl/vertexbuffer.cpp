@@ -58,8 +58,8 @@ void VertexBuffer::setData(const void* data, size_t dataSize, bool invalidateExi
 
 void* VertexBuffer::map(size_t offset, size_t dataSize, MapBufferMode mode)
 {
-	ET_ASSERT(!_mapped)
-	ET_ASSERT(dataSize > 0)
+	ET_ASSERT(!_mapped);
+	ET_ASSERT(dataSize > 0);
 
 	void* result = nullptr;
 	

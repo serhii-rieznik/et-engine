@@ -98,8 +98,8 @@ Renderer::Renderer(RenderContext* rc) :
 void Renderer::clear(bool color, bool depth)
 {
 #if !defined(ET_CONSOLE_APPLICATION)
-	ET_ASSERT(!depth || (depth && _rc->renderState().depthMask()))
-	ET_ASSERT(!color || (color && (_rc->renderState().colorMask() != static_cast<size_t>(ColorMask::None))))
+	ET_ASSERT(!depth || (depth && _rc->renderState().depthMask()));
+	ET_ASSERT(!color || (color && (_rc->renderState().colorMask() != static_cast<size_t>(ColorMask::None))));
 	
 	GLbitfield clearMask = (color * GL_COLOR_BUFFER_BIT) + (depth * GL_DEPTH_BUFFER_BIT);
 

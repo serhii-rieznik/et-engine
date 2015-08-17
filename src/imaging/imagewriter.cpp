@@ -56,7 +56,7 @@ bool et::writeImageToBuffer(BinaryDataStorage& buffer, const BinaryDataStorage& 
 
 std::string et::extensionForImageFormat(ImageFormat fmt)
 {
-	ET_ASSERT(fmt < ImageFormat_max)
+	ET_ASSERT(fmt < ImageFormat_max);
 	
 	switch (fmt)
 	{

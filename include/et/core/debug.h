@@ -95,13 +95,13 @@ namespace et
 #if (ET_DEBUG)
 #
 #	define ET_ASSERT(C)	\
-	{ \
+	do { \
 		if (!(C)) \
 		{ \
 			et::log::warning("Condition: %s\nfailed at: %s [%d]", (#C), __FILE__, __LINE__); \
 			abort(); \
 		} \
-	}
+	} while (0)
 #
 #else
 #

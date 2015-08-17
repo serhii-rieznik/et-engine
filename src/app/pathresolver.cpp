@@ -23,7 +23,7 @@ void StandardPathResolver::setRenderContext(RenderContext* rc)
 
 void StandardPathResolver::validateCaches()
 {
-	ET_ASSERT(_rc != nullptr)
+	ET_ASSERT(_rc != nullptr);
 	
 	if (Locale::instance().currentLocale() != _cachedLocale)
 	{

@@ -50,6 +50,7 @@ namespace et
 		vec2i viewportSize = vec2i(0);
 		Raytrace* owner = nullptr;
 		Camera camera;
+		KDTree kdTree;
 
 		std::vector<rt::Material> materials;
 		std::vector<rt::Triangle> triangles;
@@ -57,9 +58,7 @@ namespace et
 		std::vector<rt::Region> regions;
 		std::mutex regionsLock;
 		
-		size_t maxRecursionDepth = 12;
-		size_t extraRaysPerPixel = 8 ;
-		
+		Raytrace::Options options;
 	};
 }
 
@@ -95,12 +94,18 @@ vec4 Raytrace::performAtPoint(s3d::Scene::Pointer scene, const Camera& cam, cons
 	_private->buildMaterialAndTriangles(scene);
 	
 	size_t bounces = 0;
-	return _private->raytracePixel(vec2i(pixel.x, dimension.y - pixel.y), _private->extraRaysPerPixel, bounces);
+	return _private->raytracePixel(vec2i(pixel.x, dimension.y - pixel.y),
+		_private->options.raysPerPixel, bounces);
 }
 
 void Raytrace::stop()
 {
 	_private->stopWorkerThreads();
+}
+
+void Raytrace::setOptions(const et::Raytrace::Options& options)
+{
+	_private->options = options;
 }
 
 /*
@@ -321,7 +326,7 @@ void RaytracePrivate::threadFunction()
 			for (pixel.x = region.origin.x; pixel.x < region.origin.x + region.size.x; ++pixel.x)
 			{
 				size_t bounces = 0;
-				owner->_outputMethod(pixel, raytracePixel(pixel, extraRaysPerPixel, bounces));
+				owner->_outputMethod(pixel, raytracePixel(pixel, options.raysPerPixel, bounces));
 				if (!running)
 					return;
 			}
@@ -332,19 +337,21 @@ void RaytracePrivate::threadFunction()
 
 vec4 RaytracePrivate::raytracePixel(const vec2i& pixel, size_t samples, size_t& bounces)
 {
-	vec2 pixelSize = vec2(1.0f, 1.0f) / vector2ToFloat(viewportSize);
+	ET_ASSERT(samples > 0);
+	
+	vec2 pixelSize = vec2(1.0f) / vector2ToFloat(viewportSize);
 	vec2 pixelBase = 2.0f * (vector2ToFloat(pixel) * pixelSize) - vec2(1.0f);
 
 	vec4simd result = gatherBouncesRecursive(camera.castRay(pixelBase), 0, bounces);
-	for (int m = 0; m < samples; ++m)
+	for (int m = 1; m < samples; ++m)
 	{
-		vec2 jitter = 2.0f * vec2(randomFloat(-pixelSize.x, pixelSize.x),
+		vec2 jitter = vec2(randomFloat(-pixelSize.x, pixelSize.x),
 			randomFloat(-pixelSize.y, pixelSize.y));
 		
 		result += gatherBouncesRecursive(camera.castRay(pixelBase + jitter), 0, bounces);
 	}
 
-	return (result / static_cast<float>(samples + 1)).toVec4();
+	return (result / static_cast<float>(samples)).toVec4();
 }
 
 vec4simd RaytracePrivate::gatherBouncesRecursive(const rt::Ray& r, size_t depth, size_t& maxDepth)
@@ -392,10 +399,10 @@ vec4simd RaytracePrivate::gatherBouncesRecursive(const rt::Ray& r, size_t depth,
 		colorScale = newDirection.dotVector(n);
 	}
 
-	if (depth < maxRecursionDepth)
+	if (depth <= options.maxRecursionDepth)
 	{
-		vec4simd nextColor = gatherBouncesRecursive(rt::Ray(intersectionPoint + n * epsilon, newDirection),
-			depth + 1, maxDepth);
+		rt::Ray nextRay(intersectionPoint + n * epsilon, newDirection);
+		vec4simd nextColor = gatherBouncesRecursive(nextRay, depth + 1, maxDepth);
 		return mat.emissive + materialColor * nextColor * colorScale;
 	}
 

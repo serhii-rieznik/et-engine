@@ -461,7 +461,7 @@ namespace et
 	template <typename T>
 	T bezierCurve(T* points, size_t size, float time)
 	{
-		ET_ASSERT((size > 0) && (points != nullptr))
+		ET_ASSERT((size > 0) && (points != nullptr));
 
 		if (size == 1)
 			return *points;

@@ -1,0 +1,5 @@
+{
+	"rays-per-pixel" : 156,
+	"max-recursion-depth" : 16,
+	"initial-camera-distance" : 3.0
+}

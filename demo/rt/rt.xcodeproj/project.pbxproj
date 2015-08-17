@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		A52329021B82780900D00DD6 /* meshdeformer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A52329011B82780900D00DD6 /* meshdeformer.cpp */; };
+		A52329041B8278C400D00DD6 /* config in Resources */ = {isa = PBXBuildFile; fileRef = A52329031B8278C400D00DD6 /* config */; };
+		A52329071B827D1900D00DD6 /* media in Resources */ = {isa = PBXBuildFile; fileRef = A52329061B827D1900D00DD6 /* media */; };
+		A52329091B82817E00D00DD6 /* kdtree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A52329081B82817E00D00DD6 /* kdtree.cpp */; };
 		A5E2AEBD1B7D4A7700DE53DD /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5E2AEBA1B7D4A7700DE53DD /* main.cpp */; };
 		A5E2AEBE1B7D4A7700DE53DD /* maincontroller.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5E2AEBB1B7D4A7700DE53DD /* maincontroller.cpp */; };
 		A5E2AFF01B7D4ACB00DE53DD /* appevironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5E2AF7C1B7D4ACB00DE53DD /* appevironment.cpp */; };
@@ -111,6 +115,12 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		A52329001B8277F800D00DD6 /* meshdeformer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = meshdeformer.h; sourceTree = "<group>"; };
+		A52329011B82780900D00DD6 /* meshdeformer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = meshdeformer.cpp; sourceTree = "<group>"; };
+		A52329031B8278C400D00DD6 /* config */ = {isa = PBXFileReference; lastKnownFileType = folder; path = config; sourceTree = "<group>"; };
+		A52329061B827D1900D00DD6 /* media */ = {isa = PBXFileReference; lastKnownFileType = folder; name = media; path = ../media; sourceTree = "<group>"; };
+		A52329081B82817E00D00DD6 /* kdtree.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = kdtree.cpp; sourceTree = "<group>"; };
+		A523290A1B8281A000D00DD6 /* kdtree.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = kdtree.h; sourceTree = "<group>"; };
 		A5E2AE941B7D4A1800DE53DD /* rt.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = rt.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A5E2AEB81B7D4A5800DE53DD /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = SOURCE_ROOT; };
 		A5E2AEBA1B7D4A7700DE53DD /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = main.cpp; path = source/main.cpp; sourceTree = SOURCE_ROOT; };
@@ -397,6 +407,8 @@
 		A5E2AE8B1B7D4A1800DE53DD = {
 			isa = PBXGroup;
 			children = (
+				A52329061B827D1900D00DD6 /* media */,
+				A52329031B8278C400D00DD6 /* config */,
 				A5E2AEBF1B7D4A7A00DE53DD /* et */,
 				A5E2AE961B7D4A1800DE53DD /* rt */,
 				A5E2AE971B7D4A1800DE53DD /* Supporting Files */,
@@ -706,6 +718,7 @@
 		A5E2AF4C1B7D4A9900DE53DD /* rt */ = {
 			isa = PBXGroup;
 			children = (
+				A523290A1B8281A000D00DD6 /* kdtree.h */,
 				A5E2AF4D1B7D4A9900DE53DD /* raytrace.h */,
 				A5E2AF4E1B7D4A9900DE53DD /* raytraceobjects.h */,
 			);
@@ -727,6 +740,7 @@
 				A5E2AF581B7D4A9900DE53DD /* material.h */,
 				A5E2AF591B7D4A9900DE53DD /* material.parameters.h */,
 				A5E2AF5A1B7D4A9900DE53DD /* mesh.h */,
+				A52329001B8277F800D00DD6 /* meshdeformer.h */,
 				A5E2AF5B1B7D4A9900DE53DD /* particlesystem.h */,
 				A5E2AF5C1B7D4A9900DE53DD /* renderableelement.h */,
 				A5E2AF5D1B7D4A9900DE53DD /* scene3d.deprecated.h */,
@@ -1049,6 +1063,7 @@
 		A5E2AFD31B7D4ACB00DE53DD /* rt */ = {
 			isa = PBXGroup;
 			children = (
+				A52329081B82817E00D00DD6 /* kdtree.cpp */,
 				A5E2AFD41B7D4ACB00DE53DD /* raytrace.cpp */,
 			);
 			name = rt;
@@ -1065,6 +1080,7 @@
 				A5E2AFDA1B7D4ACB00DE53DD /* lineelement.cpp */,
 				A5E2AFDB1B7D4ACB00DE53DD /* material.cpp */,
 				A5E2AFDC1B7D4ACB00DE53DD /* mesh.cpp */,
+				A52329011B82780900D00DD6 /* meshdeformer.cpp */,
 				A5E2AFDD1B7D4ACB00DE53DD /* particlesystem.cpp */,
 				A5E2AFDE1B7D4ACB00DE53DD /* renderableelement.cpp */,
 				A5E2AFDF1B7D4ACB00DE53DD /* scene3d.cpp */,
@@ -1136,7 +1152,7 @@
 		A5E2AE8C1B7D4A1800DE53DD /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0640;
+				LastUpgradeCheck = 0700;
 				ORGANIZATIONNAME = "Serhii Rieznik";
 				TargetAttributes = {
 					A5E2AE931B7D4A1800DE53DD = {
@@ -1167,6 +1183,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A52329041B8278C400D00DD6 /* config in Resources */,
+				A52329071B827D1900D00DD6 /* media in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1201,6 +1219,7 @@
 				A5E2AFFF1B7D4ACB00DE53DD /* objectscache.cpp in Sources */,
 				A5E2B0271B7D4ACB00DE53DD /* input.mac.mm in Sources */,
 				A5E2B03E1B7D4ACB00DE53DD /* material.cpp in Sources */,
+				A52329091B82817E00D00DD6 /* kdtree.cpp in Sources */,
 				A5E2B0321B7D4ACB00DE53DD /* framebufferfactory.cpp in Sources */,
 				A5E2B0411B7D4ACB00DE53DD /* renderableelement.cpp in Sources */,
 				A5E2B00A1B7D4ACB00DE53DD /* jpegloader.cpp in Sources */,
@@ -1271,6 +1290,7 @@
 				A5E2B02E1B7D4ACB00DE53DD /* mutex.unix.cpp in Sources */,
 				A5E2B0461B7D4ACB00DE53DD /* taskpool.cpp in Sources */,
 				A5E2B0331B7D4ACB00DE53DD /* rendercontext.cpp in Sources */,
+				A52329021B82780900D00DD6 /* meshdeformer.cpp in Sources */,
 				A5E2B0261B7D4ACB00DE53DD /* application.mac.mm in Sources */,
 				A5E2B0341B7D4ACB00DE53DD /* rendering.cpp in Sources */,
 				A5E2B0071B7D4ACB00DE53DD /* hdrloader.cpp in Sources */,
@@ -1301,6 +1321,7 @@
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
@@ -1394,6 +1415,7 @@
 				INFOPLIST_FILE = "$(SRCROOT)/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				LIBRARY_SEARCH_PATHS = $PROJECT_DIR/../../lib/osx;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.serhiirieznik.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -1406,6 +1428,7 @@
 				INFOPLIST_FILE = "$(SRCROOT)/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				LIBRARY_SEARCH_PATHS = $PROJECT_DIR/../../lib/osx;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.serhiirieznik.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;

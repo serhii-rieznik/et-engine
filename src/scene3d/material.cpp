@@ -311,7 +311,7 @@ void Material::reloadObject(LoadableObject::Pointer, ObjectsCache&)
 
 void Material::textureDidStartLoading(Texture::Pointer t)
 {
-	ET_ASSERT(t.valid())
+	ET_ASSERT(t.valid());
 	
 #if (ET_DEBUG)
 	bool pendingTextureFound = false;
@@ -335,13 +335,13 @@ void Material::textureDidStartLoading(Texture::Pointer t)
 		}
 	}
 	
-	ET_ASSERT(pendingTextureFound)
+	ET_ASSERT(pendingTextureFound);
 #endif
 }
 
 void Material::textureDidLoad(Texture::Pointer t)
 {
-	ET_ASSERT(t.valid())
+	ET_ASSERT(t.valid());
 	
 	uint32_t invalidParameter = static_cast<uint32_t>(-1);
 	uint32_t param = invalidParameter;
@@ -367,7 +367,7 @@ void Material::textureDidLoad(Texture::Pointer t)
 		}
 	}
 	
-	ET_ASSERT(param != invalidParameter)
+	ET_ASSERT(param != invalidParameter);
 	
 	_texturesToLoad.erase(param);
 	

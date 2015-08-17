@@ -468,7 +468,7 @@ void RenderState::vertexArrayDeleted(uint32_t buffer)
 {
 	if (OpenGLCapabilities::instance().hasFeature(OpenGLFeature_VertexArrayObjects))
 	{
-		ET_ASSERT(_currentState.boundVertexArrayObject == buffer)
+		ET_ASSERT(_currentState.boundVertexArrayObject == buffer);
 		(void)buffer;
 		
 		bindBuffer(GL_ARRAY_BUFFER, 0, true);

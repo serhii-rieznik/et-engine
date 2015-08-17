@@ -180,7 +180,7 @@ namespace et
 
 	uint32_t vertexAttributeTypeComponents(VertexAttributeType t)
 	{
-		ET_ASSERT(t < VertexAttributeType::max)
+		ET_ASSERT(t < VertexAttributeType::max);
 		
 		static const uint32_t values[VertexAttributeType_max] =
 		{
@@ -200,7 +200,7 @@ namespace et
 
 	DataType vertexAttributeTypeDataType(VertexAttributeType t)
 	{
-		ET_ASSERT(t < VertexAttributeType::max)
+		ET_ASSERT(t < VertexAttributeType::max);
 		static const DataType values[VertexAttributeType_max] =
 		{
 			DataType::Float, // Float,
@@ -225,7 +225,7 @@ namespace et
 
 	uint32_t vertexAttributeUsageMask(VertexAttributeUsage u)
 	{
-		ET_ASSERT(u < VertexAttributeUsage::max)
+		ET_ASSERT(u < VertexAttributeUsage::max);
 		return vertexAttributeUsageMasks[static_cast<uint32_t>(u)];
 	}
 	

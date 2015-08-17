@@ -87,7 +87,7 @@ VertexAttributeType et::openglTypeToVertexAttributeType(uint32_t value)
 
 uint32_t et::vertexAttributeTypeValue(VertexAttributeType value)
 {
-	ET_ASSERT(value < VertexAttributeType::max)
+	ET_ASSERT(value < VertexAttributeType::max);
 	
 	static const uint32_t valuesMap[VertexAttributeType_max] =
 	{
@@ -117,7 +117,7 @@ static const std::pair<uint32_t, uint32_t> blendStatesMap[BlendState_max] =
 
 std::pair<uint32_t, uint32_t> et::blendStateValue(BlendState value)
 {
-	ET_ASSERT(value < BlendState::max)
+	ET_ASSERT(value < BlendState::max);
 	return blendStatesMap[static_cast<uint32_t>(value)];
 }
 
@@ -137,7 +137,7 @@ BlendState et::blendValuesToBlendState(uint32_t source, uint32_t dest)
 
 uint32_t et::textureFormatValue(TextureFormat value)
 {
-	ET_ASSERT(value < TextureFormat::max)
+	ET_ASSERT(value < TextureFormat::max);
 	
 	static const uint32_t valuesMap[TextureFormat_max] =
 	{
@@ -820,7 +820,7 @@ uint32_t et::drawTypeValue(BufferDrawType t)
 
 uint32_t et::primitiveTypeValue(PrimitiveType t)
 {
-	ET_ASSERT((t >= PrimitiveType::Points) && (t <= PrimitiveType::max))
+	ET_ASSERT((t >= PrimitiveType::Points) && (t <= PrimitiveType::max));
 	
 	static const uint32_t conversion[static_cast<uint32_t>(PrimitiveType::max)] =
 	{
@@ -1019,6 +1019,6 @@ const uint32_t* et::drawBufferTargets()
 
 uint32_t et::drawBufferTarget(size_t i)
 {
-	ET_ASSERT(i < MaxDrawBuffers)
+	ET_ASSERT(i < MaxDrawBuffers);
 	return *(drawBufferTargets() + i);
 }

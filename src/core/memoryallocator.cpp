@@ -247,14 +247,14 @@ using namespace et;
 
 inline uint32_t alignUpTo(uint32_t sz, uint32_t al)
 {
-	ET_ASSERT(sz > 0)
+	ET_ASSERT(sz > 0);
 	auto m = al-1;
 	return sz + m & (~m);
 }
 
 inline uint32_t alignDownTo(uint32_t sz, uint32_t al)
 {
-	ET_ASSERT(sz > 0)
+	ET_ASSERT(sz > 0);
 	return sz & (~(al-1));
 }
 

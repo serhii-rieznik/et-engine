@@ -216,7 +216,7 @@ Texture::Pointer TextureFactory::genTexture2DArray(const vec3i& size, TextureTar
 	TextureFormat internalformat, TextureFormat format, DataType type, const BinaryDataStorage& data,
 	const std::string& aName)
 {
-	ET_ASSERT(textureTarget == TextureTarget::Texture_2D_Array)
+	ET_ASSERT(textureTarget == TextureTarget::Texture_2D_Array);
 
 	TextureDescription::Pointer desc = TextureDescription::Pointer::create();
 

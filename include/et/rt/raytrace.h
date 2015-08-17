@@ -8,6 +8,7 @@
 #pragma once
 
 #include <et/scene3d/scene3d.h>
+#include <et/rt/kdtree.h>
 
 namespace et
 {
@@ -16,6 +17,12 @@ namespace et
 	{
 	public:
 		typedef std::function<void(const vec2i&, const vec4&)> OutputMethod;
+		
+		struct Options
+		{
+			size_t raysPerPixel = 32;
+			size_t maxRecursionDepth = 8;
+		};
 
 	public:
 		Raytrace();
@@ -29,10 +36,11 @@ namespace et
 		vec4 performAtPoint(s3d::Scene::Pointer, const Camera&, const vec2i&, const vec2i&);
 
 		void stop();
+		void setOptions(const Options&);
 
 	private:
 		friend class RaytracePrivate;
-		ET_DECLARE_PIMPL(Raytrace, 1024);
+		ET_DECLARE_PIMPL(Raytrace, 2048);
 		OutputMethod _outputMethod;
 	};
 }
