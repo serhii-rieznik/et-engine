@@ -33,6 +33,7 @@ namespace et
 		size_t materialIndexWithName(const std::string&);
 
 		size_t findIntersection(const rt::Ray&, vec4simd&, vec4simd&);
+		size_t findIntersection(const rt::Ray&, vec4simd&, vec4simd&, KDTree::Node*);
 
 		void buildRegions(vec2i size);
 		void estimateRegionsOrder();
@@ -187,6 +188,8 @@ void RaytracePrivate::buildMaterialAndTriangles(s3d::Scene::Pointer scene)
 			tri.computeSupportData();
 		}
 	}
+	
+	kdTree.build(triangles);
 }
 
 size_t RaytracePrivate::materialIndexWithName(const std::string& n)
@@ -197,6 +200,35 @@ size_t RaytracePrivate::materialIndexWithName(const std::string& n)
 			return i;
 	}
 	return InvalidIndex;
+}
+
+size_t RaytracePrivate::findIntersection(const rt::Ray& ray, vec4simd& intersectionPoint,
+	vec4simd& barycentric, KDTree::Node* node)
+{
+	size_t returnIndex = InvalidIndex;
+	size_t index = 0;
+	float minDistance = std::numeric_limits<float>::max();
+	
+	size_t* triangleIndex = node->triangles.data();
+	for (size_t i = 0, e = node->triangles.size(); i < e; ++i, ++triangleIndex)
+	{
+		vec4simd ip;
+		vec4simd bc;
+		if (rt::rayTriangle(ray, triangles.at(*triangleIndex), ip, bc))
+		{
+			float distance = (ip - ray.origin).dotSelf();
+			if (distance < minDistance)
+			{
+				barycentric = bc;
+				intersectionPoint = ip;
+				returnIndex = index;
+				minDistance = distance;
+			}
+		}
+		++index;
+	}
+	
+	return returnIndex;
 }
 
 size_t RaytracePrivate::findIntersection(const rt::Ray& ray, vec4simd& intersectionPoint, vec4simd& barycentric)
@@ -358,10 +390,14 @@ vec4simd RaytracePrivate::gatherBouncesRecursive(const rt::Ray& r, size_t depth,
 {
 	maxDepth = std::max(maxDepth, depth);
 	const vec4simd epsilon(0.0001f);
+	
+	auto treeNode = kdTree.traverse(r);
+	if (treeNode == nullptr)
+		return sampleEnvironment(r.direction);
 
 	vec4simd barycentric;
 	vec4simd intersectionPoint;
-	size_t i = findIntersection(r, intersectionPoint, barycentric);
+	size_t i = findIntersection(r, intersectionPoint, barycentric, treeNode);
 	
 	if (i == InvalidIndex)
 		return sampleEnvironment(r.direction);

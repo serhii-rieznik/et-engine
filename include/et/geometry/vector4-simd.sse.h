@@ -171,6 +171,16 @@ namespace et
 			return vec4simd(_mm_sqrt_ps(_data));
 		}
 		
+		vec4simd maxWith(const vec4simd& v)
+		{
+			return vec4simd(_mm_max_ps(_data, v._data));
+		}
+		
+		vec4simd minWith(const vec4simd& v)
+		{
+			return vec4simd(_mm_min_ps(_data, v._data));
+		}
+		
 	public:
 		vec4simd& operator += (const vec4simd& r) 
 		{

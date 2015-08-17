@@ -23,7 +23,7 @@ namespace et
 		};
 		
 	public:
-		void build(const std::vector<triangleEx>&);
+		void build(const std::vector<rt::Triangle>&);
 		void cleanUp();
 		
 		Node* traverse(const rt::Ray&);
