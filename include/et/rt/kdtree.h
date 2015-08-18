@@ -28,6 +28,9 @@ namespace et
 		void build(const std::vector<rt::Triangle>&);
 		void cleanUp();
 		
+		Node* root() const
+			{ return _root; }
+		
 		Node* traverse(const rt::Ray&);
 		
 	private:

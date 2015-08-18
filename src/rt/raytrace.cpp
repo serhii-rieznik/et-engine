@@ -46,6 +46,10 @@ namespace et
 		rt::Region getNextRegion();
 		
 		void renderSpacePartitioning();
+		void renderBoundingBox(const rt::BoundingBox&);
+		void renderLine(const vec2& from, const vec2& to);
+		void renderPixel(const vec2&);
+		vec2 projectPoint(const vec4simd&);
 
 	public:
 		std::vector<std::thread> workerThreads;
@@ -495,5 +499,67 @@ void RaytracePrivate::estimateRegionsOrder()
 
 void RaytracePrivate::renderSpacePartitioning()
 {
+	if (kdTree.root())
+		renderBoundingBox(kdTree.root()->boundingBox);
+}
 
+void RaytracePrivate::renderBoundingBox(const rt::BoundingBox& box)
+{
+	vec2 c0 = projectPoint(box.center + box.halfSize * vec4simd(-1.0f, -1.0f, -1.0f, 0.0f));
+	vec2 c1 = projectPoint(box.center + box.halfSize * vec4simd( 1.0f, -1.0f, -1.0f, 0.0f));
+	vec2 c2 = projectPoint(box.center + box.halfSize * vec4simd(-1.0f,  1.0f, -1.0f, 0.0f));
+	vec2 c3 = projectPoint(box.center + box.halfSize * vec4simd( 1.0f,  1.0f, -1.0f, 0.0f));
+	vec2 c4 = projectPoint(box.center + box.halfSize * vec4simd(-1.0f, -1.0f,  1.0f, 0.0f));
+	vec2 c5 = projectPoint(box.center + box.halfSize * vec4simd( 1.0f, -1.0f,  1.0f, 0.0f));
+	vec2 c6 = projectPoint(box.center + box.halfSize * vec4simd(-1.0f,  1.0f,  1.0f, 0.0f));
+	vec2 c7 = projectPoint(box.center + box.halfSize * vec4simd( 1.0f,  1.0f,  1.0f, 0.0f));
+	
+	renderLine(c0, c1);
+	renderLine(c0, c2);
+	renderLine(c0, c4);
+	
+	renderLine(c1, c5);
+	renderLine(c2, c6);
+	
+	renderLine(c3, c1);
+	renderLine(c3, c2);
+	renderLine(c3, c7);
+	
+	renderLine(c4, c5);
+	renderLine(c4, c6);
+	renderLine(c7, c5);
+	renderLine(c7, c6);
+}
+
+void RaytracePrivate::renderLine(const vec2& from, const vec2& to)
+{
+	float dt = 2.0f / length(to - from);
+	
+	float t = 0.0f;
+	while (t <= 1.0f)
+	{
+		renderPixel(mix(from, to, t));
+		t += dt;
+	}
+}
+
+void RaytracePrivate::renderPixel(const vec2& pixel)
+{
+	vec2 nearPixels[4];
+	nearPixels[0] = floorv(pixel);
+	nearPixels[1] = nearPixels[0] + vec2(1.0f, 0.0f);
+	nearPixels[2] = nearPixels[0] + vec2(0.0f, 1.0f);
+	nearPixels[3] = nearPixels[0] + vec2(1.0f, 1.0f);
+	for (size_t i = 0; i < 4; ++i)
+	{
+		float d = length(nearPixels[i] - pixel);
+		vec2i px(static_cast<int>(nearPixels[i].x), static_cast<int>(nearPixels[i].y));
+		owner->_outputMethod(px, vec4(0.0f, 1.0f - d, 0.0f, 1.0f));
+	}
+}
+
+vec2 RaytracePrivate::projectPoint(const vec4simd& p)
+{
+	return vector2ToFloat(viewportSize) *
+		(vec2(0.5f, 0.5f) + vec2(0.5f, 0.5f) * camera.project(p.xyz()).xy());
 }

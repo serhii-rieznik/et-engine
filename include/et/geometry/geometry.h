@@ -92,7 +92,19 @@ namespace et
 
 	template <typename T>
 	inline vector4<T> floorv(const vector4<T>& v)
-		{ return vector4<T>(std::floor(v.x), ::floor(v.y), std::floor(v.z), std::floor(v.w)); }
+		{ return vector4<T>(std::floor(v.x), std::floor(v.y), std::floor(v.z), std::floor(v.w)); }
+
+	template <typename T>
+	inline vector2<T> ceilv(const vector2<T>& v)
+		{ return vector2<T>(std::ceil(v.x), std::ceil(v.y)); }
+	
+	template <typename T>
+	inline vector3<T> ceiv(const vector3<T>& v)
+		{ return vector3<T>(std::ceil(v.x), std::ceil(v.y), std::ceil(v.z)); }
+	
+	template <typename T>
+	inline vector4<T> ceilv(const vector4<T>& v)
+		{ return vector4<T>(std::ceil(v.x), std::ceil(v.y), std::ceil(v.z), std::ceil(v.w)); }
 
 	template <typename T>
 	inline vector4<T> sqrtv(const vector4<T>& v)
