@@ -23,6 +23,8 @@ namespace et
 		};
 		
 	public:
+		~KDTree();
+		
 		void build(const std::vector<rt::Triangle>&);
 		void cleanUp();
 		

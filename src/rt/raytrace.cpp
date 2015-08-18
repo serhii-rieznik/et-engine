@@ -44,6 +44,8 @@ namespace et
 		vec4simd sampleEnvironment(const vec4simd& direction);
 
 		rt::Region getNextRegion();
+		
+		void renderSpacePartitioning();
 
 	public:
 		std::vector<std::thread> workerThreads;
@@ -60,6 +62,7 @@ namespace et
 		std::mutex regionsLock;
 		
 		Raytrace::Options options;
+		std::atomic<size_t> threadCounter;
 	};
 }
 
@@ -81,7 +84,7 @@ void Raytrace::perform(s3d::Scene::Pointer scene, const Camera& cam, const vec2i
 	_private->camera = cam;
 	_private->viewportSize = dimension;
 	_private->buildMaterialAndTriangles(scene);
-	_private->buildRegions(vec2i(32));
+	_private->buildRegions(vec2i(16));
 	_private->estimateRegionsOrder();
 	_private->emitWorkerThreads();
 }
@@ -109,6 +112,11 @@ void Raytrace::setOptions(const et::Raytrace::Options& options)
 	_private->options = options;
 }
 
+void Raytrace::renderSpacePartitioning()
+{
+	
+}
+
 /*
  * Private implementation
  */
@@ -126,6 +134,7 @@ RaytracePrivate::~RaytracePrivate()
 void RaytracePrivate::emitWorkerThreads()
 {
 	running = true;
+	threadCounter.store(std::thread::hardware_concurrency());
 	for (unsigned i = 0, e = std::thread::hardware_concurrency(); i < e; ++i)
 		workerThreads.emplace_back(&RaytracePrivate::threadFunction, this);
 }
@@ -364,7 +373,13 @@ void RaytracePrivate::threadFunction()
 			}
 		}
 	}
-	log::info("RT thread completed");
+	
+	--threadCounter;
+	if (threadCounter.load() == 0)
+	{
+		renderSpacePartitioning();
+		log::info("Rendering completed");
+	}
 }
 
 vec4 RaytracePrivate::raytracePixel(const vec2i& pixel, size_t samples, size_t& bounces)
@@ -476,4 +491,9 @@ void RaytracePrivate::estimateRegionsOrder()
 	{
 		return l.estimatedBounces > r.estimatedBounces;
 	});
+}
+
+void RaytracePrivate::renderSpacePartitioning()
+{
+
 }

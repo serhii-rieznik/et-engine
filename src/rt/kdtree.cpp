@@ -9,6 +9,11 @@
 
 using namespace et;
 
+KDTree::~KDTree()
+{
+	cleanUp();
+}
+
 void KDTree::build(const std::vector<rt::Triangle>& triangles)
 {
 	cleanUp();

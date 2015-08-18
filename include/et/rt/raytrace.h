@@ -36,6 +36,8 @@ namespace et
 
 		void stop();
 		void setOptions(const Options&);
+		
+		void renderSpacePartitioning();
 
 	private:
 		friend class RaytracePrivate;

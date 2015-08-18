@@ -24,6 +24,8 @@ namespace et
 		notAllocatedValue = 0xffffffff,
 		defaultChunkSize = 16 * megabytes,
 		minimumAllocationSize = 32,
+		smallBlockSize = 60,
+		mediumBlockSize = 124,
 	};
 
 	struct MemoryChunkInfo
@@ -127,6 +129,11 @@ namespace et
 	class SmallMemoryBlockAllocator
 	{
 	public:
+		enum
+		{
+			BlockSize = blockSize
+		};
+		
 		SmallMemoryBlockAllocator()
 		{
 			auto sizeToAllocate = blocksCount * sizeof(SmallMemoryBlock);
@@ -141,7 +148,7 @@ namespace et
 			log::ConsoleOutput lOut;
 			for (auto i = firstBlock; i != lastBlock; ++i)
 			{
-				if (i->allocated)
+				if (i->blockAllocated)
 					lOut.info("Memory leak detected: %d bytes, offset %lld", blockSize, (int64_t)(i - firstBlock));
 			}
 			::free(blocks);
@@ -151,7 +158,7 @@ namespace et
 		{
 			auto startBlock = currentBlock;
 			
-			while (currentBlock->allocated)
+			while (currentBlock->blockAllocated)
 			{
 				currentBlock = advance(currentBlock);
 				if (currentBlock == startBlock)
@@ -162,8 +169,7 @@ namespace et
 				}
 			}
 			
-			currentBlock->allocated = 1;
-			
+			currentBlock->blockAllocated = 1;
 			result = currentBlock->data;
 			currentBlock = advance(currentBlock);
 			
@@ -172,14 +178,14 @@ namespace et
 		
 		void free(void* ptr)
 		{
-			SmallMemoryBlock* block = reinterpret_cast<SmallMemoryBlock*>(reinterpret_cast<char*>(ptr) - 4);
+			SmallMemoryBlock* block = reinterpret_cast<SmallMemoryBlock*>(ptr);
 			
 			if ((ptr < firstBlock) || (ptr > lastBlock))
 				ET_FAIL_FMT("Pointer being freed (0x%016llx) was not allocated via this allocator.", (int64_t)ptr);
 			
-			block->allocated = 0;
+			block->blockAllocated = 0;
 			
-			if (_haveFreeBlocks == false)
+			if (!_haveFreeBlocks)
 				currentBlock = block;
 
 			_haveFreeBlocks = true;
@@ -187,7 +193,7 @@ namespace et
 		
 		bool containsPointer(void* ptr)
 		{
-			SmallMemoryBlock* block = reinterpret_cast<SmallMemoryBlock*>(reinterpret_cast<char*>(ptr) - 4);
+			SmallMemoryBlock* block = reinterpret_cast<SmallMemoryBlock*>(ptr);
 			return (block >= firstBlock) && (block < lastBlock);
 		}
 		
@@ -202,8 +208,11 @@ namespace et
 		
 		struct SmallMemoryBlock
 		{
-			uint32_t allocated = 0;
+			static_assert((blockSize + sizeof(uint32_t)) % 32 == 0,
+				"Invalid block size will cause troubles allocating aligned objects");
+			
 			char data[blockSize];
+			uint32_t blockAllocated = 0;
 		};
 		
 		SmallMemoryBlock* advance(SmallMemoryBlock* b)
@@ -238,8 +247,8 @@ namespace et
 		CriticalSection _csLock;
 		std::list<MemoryChunk> _chunks;
 		
-		SmallMemoryBlockAllocator<48> _allocator48;
-		SmallMemoryBlockAllocator<96> _allocator96;
+		SmallMemoryBlockAllocator<smallBlockSize> _allocatorSmall;
+		SmallMemoryBlockAllocator<mediumBlockSize> _allocatorMedium;
 	};
 }
 
@@ -298,34 +307,20 @@ void* BlockMemoryAllocatorPrivate::alloc(uint32_t allocSize)
 	
 	void* result = nullptr;
 	
-	auto allocScale = (allocSize - 1) / 48;
-	switch (allocScale)
+	if ((allocSize <= smallBlockSize) && _allocatorSmall.haveFreeBlocks() && _allocatorSmall.allocate(result))
+		return result;
+	
+	if ((allocSize <= mediumBlockSize) && _allocatorMedium.haveFreeBlocks() && _allocatorMedium.allocate(result))
+		return result;
+	
+	for (MemoryChunk& chunk : _chunks)
 	{
-		case 0 :
-		{
-			if (_allocator48.haveFreeBlocks() && _allocator48.allocate(result))
-				return result;
-		}
-			
-		case 1 :
-		{
-			if (_allocator96.haveFreeBlocks() && _allocator96.allocate(result))
-				return result;
-		}
-			
-		default:
-		{
-			for (MemoryChunk& chunk : _chunks)
-			{
-				if (chunk.allocate(allocSize, result))
-					return result;
-			}
-			
-			_chunks.emplace_back(alignUpTo(allocSize, defaultChunkSize));
-			_chunks.back().allocate(allocSize, result);
-		}
+		if (chunk.allocate(allocSize, result))
+			return result;
 	}
 	
+	_chunks.emplace_back(alignUpTo(allocSize, defaultChunkSize));
+	_chunks.back().allocate(allocSize, result);
 	return result;
 }
 
@@ -336,10 +331,10 @@ bool BlockMemoryAllocatorPrivate::validate(void* ptr, bool abortOnFail)
 	
 	CriticalSectionScope lock(_csLock);
 	
-	if (_allocator48.containsPointer(ptr))
+	if (_allocatorSmall.containsPointer(ptr))
 		return true;
 	
-	if (_allocator96.containsPointer(ptr))
+	if (_allocatorMedium.containsPointer(ptr))
 		return true;
 
 	auto charPtr = static_cast<char*>(ptr);
@@ -404,13 +399,13 @@ void BlockMemoryAllocatorPrivate::free(void* ptr)
 	
 	CriticalSectionScope lock(_csLock);
 	
-	if (_allocator48.containsPointer(ptr))
+	if (_allocatorSmall.containsPointer(ptr))
 	{
-		_allocator48.free(ptr);
+		_allocatorSmall.free(ptr);
 	}
-	else if (_allocator96.containsPointer(ptr))
+	else if (_allocatorMedium.containsPointer(ptr))
 	{
-		_allocator96.free(ptr);
+		_allocatorMedium.free(ptr);
 	}
 	else
 	{
@@ -470,17 +465,19 @@ void BlockMemoryAllocatorPrivate::printInfo()
 	log::info("\t0...48 bytes");
 	log::info("\t{");
 	allocatedBlocks = 0;
-	for (auto i = _allocator48.firstBlock; i != _allocator48.lastBlock; ++i) allocatedBlocks += i->allocated;
-	log::info("\t\tallocated blocks : %u of %lld", allocatedBlocks, (int64_t)(_allocator48.lastBlock - _allocator48.firstBlock));
-	log::info("\t\tcurrent offset : %lld", (int64_t)(_allocator48.currentBlock - _allocator48.firstBlock));
+	for (auto i = _allocatorSmall.firstBlock; i != _allocatorSmall.lastBlock; ++i)
+		allocatedBlocks += i->blockAllocated;
+	log::info("\t\tallocated blocks : %u of %lld", allocatedBlocks, (int64_t)(_allocatorSmall.lastBlock - _allocatorSmall.firstBlock));
+	log::info("\t\tcurrent offset : %lld", (int64_t)(_allocatorSmall.currentBlock - _allocatorSmall.firstBlock));
 	log::info("\t},");
 	
 	log::info("\t48...96");
 	log::info("\t{");
 	allocatedBlocks = 0;
-	for (auto i = _allocator96.firstBlock; i != _allocator96.lastBlock; ++i) allocatedBlocks += i->allocated;
-	log::info("\t\tallocated blocks : %u of %lld", allocatedBlocks,  (int64_t)(_allocator96.lastBlock - _allocator96.firstBlock));
-	log::info("\t\tcurrent offset : %lld", (int64_t)(_allocator96.currentBlock - _allocator96.firstBlock));
+	for (auto i = _allocatorMedium.firstBlock; i != _allocatorMedium.lastBlock; ++i)
+		allocatedBlocks += i->blockAllocated;
+	log::info("\t\tallocated blocks : %u of %lld", allocatedBlocks,  (int64_t)(_allocatorMedium.lastBlock - _allocatorMedium.firstBlock));
+	log::info("\t\tcurrent offset : %lld", (int64_t)(_allocatorMedium.currentBlock - _allocatorMedium.firstBlock));
 	log::info("\t}");
 	
 	log::info("}");
