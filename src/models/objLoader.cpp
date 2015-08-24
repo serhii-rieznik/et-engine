@@ -73,7 +73,9 @@ inline void splitAndWrite(const std::string& s, char token, F func)
 		if (*begin == token)
 		{
 			func(std::string(pos, begin - pos));
-			while (*begin++ == token);
+			while (*(begin + 1) == token)
+				++begin;
+			pos = begin + 1;
 		}
 		++begin;
 	}
@@ -276,8 +278,6 @@ void OBJLoader::loadData(bool async,  s3d::Storage& storage, ObjectsCache& cache
 				indexes.reserve(3);
 				splitAndWrite(inFace, '/', [&indexes](const std::string& s)
 					{ indexes.push_back(strToInt(s)); });
-								
-				vertex.numVertices = indexes.size();
 
 				size_t i = 0;
 				for (auto iValue : indexes)

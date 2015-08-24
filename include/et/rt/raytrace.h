@@ -21,6 +21,9 @@ namespace et
 		{
 			size_t raysPerPixel = 32;
 			size_t maxRecursionDepth = 8;
+			size_t maxKDTreeDepth = 0;
+			int kdTreeSplits = 4;
+			bool debugRendering = false;
 		};
 
 	public:

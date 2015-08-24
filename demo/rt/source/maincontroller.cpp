@@ -2,6 +2,7 @@
 #include <et/camera/camera.h>
 #include <et/rendering/rendercontext.h>
 #include <et/json/json.h>
+#include <et/core/conversion.h>
 #include "maincontroller.hpp"
 
 using namespace et;
@@ -36,35 +37,44 @@ void MainController::applicationDidLoad(et::RenderContext* rc)
 	application().pushSearchPath("Q:\\SDK\\Models\\");
 #endif
 	
-	auto modelName = application().resolveFileName("media/cornellbox.obj");
 	auto configName = application().resolveFileName("config/config.json");
+	
+	ValueClass vc = ValueClass_Invalid;
+	Dictionary options = json::deserialize(loadTextFile(configName), vc);
+	ET_ASSERT(vc == ValueClass_Dictionary);
+	
+	auto modelName = application().resolveFileName("media/" + options.stringForKey("model-name")->content);
 
 	_scene = s3d::Scene::Pointer::create();
 	OBJLoader loader(modelName, OBJLoader::Option_CalculateTangents);
 	auto model = loader.load(rc, _scene->storage(), localCache);
 	model->setParent(_scene.ptr());
-	
-	ValueClass vc = ValueClass_Invalid;
-	Dictionary options = json::deserialize(loadTextFile(configName), vc);
-	ET_ASSERT(vc == ValueClass_Dictionary);
 
-	const vec3 lookPoint = vec3(0.0f, 1.0f, 0.0f);
-	const vec3 offset = vec3(0.0f, 1.0f, 0.0f);
-	float cameraPhi = HALF_PI;
-	float cameraTheta = 0.0f;
-	float cameraDistance = options.floatForKey("initial-camera-distance", 3.0f)->content;
-	_camera.perspectiveProjection(DEG_60, vector2ToFloat(textureSize).aspect(), 1.0f, 1024.0f);
+	const vec3 lookPoint = arrayToVec3(options.arrayForKey("camera-view-point"));
+	const vec3 offset = arrayToVec3(options.arrayForKey("camera-offset"));
+	float cameraFOV = options.floatForKey("camera-fov", 60.0f)->content * TO_RADIANS;
+	float cameraPhi = options.floatForKey("camera-phi", 0.0f)->content * TO_RADIANS;
+	float cameraTheta = options.floatForKey("camera-theta", 0.0f)->content * TO_RADIANS;
+	float cameraDistance = options.floatForKey("camera-distance", 3.0f)->content;
+	_camera.perspectiveProjection(cameraFOV, vector2ToFloat(textureSize).aspect(), 0.1f, 2048.0f);
 	_camera.lookAt(cameraDistance * fromSpherical(cameraTheta, cameraPhi) + offset, lookPoint);
 	
 	Raytrace::Options rtOptions;
 	rtOptions.maxRecursionDepth = options.integerForKey("max-recursion-depth", 8)->content;
 	rtOptions.raysPerPixel = options.integerForKey("rays-per-pixel", 32)->content;
+	rtOptions.debugRendering = options.integerForKey("debug-rendering", 0ll)->content != 0;
+	rtOptions.maxKDTreeDepth = options.integerForKey("kd-tree-max-depth", 4)->content;
+	rtOptions.kdTreeSplits = static_cast<int>(options.integerForKey("kd-tree-splits", 4)->content);
 	_rt.setOptions(rtOptions);
 
 	_rt.setOutputMethod([this](const vec2i& pixel, const vec4& color)
 	{
-		DataStorage<vec4> vec4data(reinterpret_cast<vec4*>(_textureData.binary()), _textureData.dataSize());
-		vec4data[pixel.x + pixel.y * _texture->size().x] = color;
+		if ((pixel.x >= 0) && (pixel.y >= 0) && (pixel.x < _texture->size().x) &&  (pixel.y < _texture->size().y))
+		{
+			DataStorage<vec4> vec4data(reinterpret_cast<vec4*>(_textureData.binary()), _textureData.dataSize());
+			int pos = pixel.x + pixel.y * _texture->size().x;
+			vec4data[pos] = mix(vec4data[pos], color, color.w);
+		}
 	});
 
 	_rt.perform(_scene, _camera, _texture->size());

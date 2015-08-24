@@ -41,20 +41,7 @@ namespace et
 		ET_DECLARE_EVENT1(loaded, s3d::ElementContainer::Pointer)
 
 	private:
-		struct OBJVertex
-		{
-			size_t numVertices = 0;
-			StaticDataStorage<size_t, 3> vertices;
-
-			size_t& operator [] (size_t i)
-				{ ET_ASSERT(i < numVertices); return vertices[i]; }
-
-			const size_t& operator [] (size_t i) const
-				{ ET_ASSERT(i < numVertices); return vertices[i]; }
-			
-			OBJVertex() : numVertices(0)
-				{ vertices.fill(0); }
-		};
+		typedef StaticDataStorage<size_t, 3> OBJVertex;
 
 		struct OBJMeshIndexBounds
 		{

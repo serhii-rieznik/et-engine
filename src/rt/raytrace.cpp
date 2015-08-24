@@ -46,10 +46,12 @@ namespace et
 		rt::Region getNextRegion();
 		
 		void renderSpacePartitioning();
-		void renderBoundingBox(const rt::BoundingBox&);
-		void renderLine(const vec2& from, const vec2& to);
-		void renderPixel(const vec2&);
+		void renderKDTreeRecursive(KDTree::Node*, size_t index);
+		void renderBoundingBox(const rt::BoundingBox&, const vec4& color);
+		void renderLine(const vec2& from, const vec2& to, const vec4& color);
+		void renderPixel(const vec2&, const vec4& color);
 		vec2 projectPoint(const vec4simd&);
+		
 
 	public:
 		std::vector<std::thread> workerThreads;
@@ -202,7 +204,7 @@ void RaytracePrivate::buildMaterialAndTriangles(s3d::Scene::Pointer scene)
 		}
 	}
 	
-	kdTree.build(triangles);
+	kdTree.build(triangles, options.maxKDTreeDepth, options.kdTreeSplits);
 }
 
 size_t RaytracePrivate::materialIndexWithName(const std::string& n)
@@ -402,7 +404,10 @@ vec4 RaytracePrivate::raytracePixel(const vec2i& pixel, size_t samples, size_t& 
 		result += gatherBouncesRecursive(camera.castRay(pixelBase + jitter), 0, bounces);
 	}
 
-	return (result / static_cast<float>(samples)).toVec4();
+	vec4 output = (result / static_cast<float>(samples)).toVec4();
+	output.w = 1.0f;
+	
+	return output;
 }
 
 vec4simd RaytracePrivate::gatherBouncesRecursive(const rt::Ray& r, size_t depth, size_t& maxDepth)
@@ -410,23 +415,36 @@ vec4simd RaytracePrivate::gatherBouncesRecursive(const rt::Ray& r, size_t depth,
 	maxDepth = std::max(maxDepth, depth);
 	const vec4simd epsilon(0.0001f);
 	
-	auto treeNode = kdTree.traverse(r);
-	if (treeNode == nullptr)
+	auto traverseResult = kdTree.traverse(r);
+	if (traverseResult.empty())
 		return sampleEnvironment(r.direction);
 
 	vec4simd barycentric;
 	vec4simd intersectionPoint;
-	size_t i = findIntersection(r, intersectionPoint, barycentric, treeNode);
+	size_t i = findIntersection(r, intersectionPoint, barycentric, traverseResult.top());
 	
 	if (i == InvalidIndex)
 		return sampleEnvironment(r.direction);
-
+	
 	const auto& tri = triangles[i];
 	const auto& mat = materials[tri.materialIndex];
-
+	
 	vec4simd n = tri.interpolatedNormal(barycentric);
 	n.normalize();
-
+	
+	//*
+	if ((depth == 0) && (n.dot(r.direction) > 0.0f))
+		return gatherBouncesRecursive(rt::Ray(intersectionPoint + n * epsilon, r.direction), 1, maxDepth);
+	// */
+	
+	if (options.debugRendering)
+	{
+//		const float epsilon = 0.0125f;
+//		if ((barycentric.y() <= epsilon) || (barycentric.z() <= epsilon))
+//			return vec4simd(10.0f, 10.0f, 10.0f, 1.0f);
+		return ((n * 0.5f + vec4simd(0.5)) + mat.emissive + mat.diffuse) * 0.333333f;
+	}
+	
 	vec4simd newDirection;
 	vec4simd materialColor;
 	vec4simd colorScale;
@@ -466,8 +484,8 @@ vec4simd RaytracePrivate::gatherBouncesRecursive(const rt::Ray& r, size_t depth,
 
 vec4simd RaytracePrivate::sampleEnvironment(const vec4simd& direction)
 {
-	return vec4simd(0.0f);
-	/*
+//	return vec4simd(0.0f);
+	//*
 	const vec4simd ambient(40.0f / 255.0f, 58.0f / 255.0f, 72.0f / 255.0f, 1.0f);
 	const vec4simd sun(249.0f / 255.0f, 243.0f / 255.0f, 179.0f / 255.0f, 1.0f);
 	const vec4simd atmosphere(173.0f / 255.0f, 181.0f / 255.0f, 185.0f / 255.0f, 1.0f);
@@ -492,18 +510,31 @@ void RaytracePrivate::estimateRegionsOrder()
 	}
 	
 	std::sort(regions.begin(), regions.end(), [](const rt::Region& l, const rt::Region& r)
-	{
-		return l.estimatedBounces > r.estimatedBounces;
-	});
+		{ return l.estimatedBounces > r.estimatedBounces; });
 }
 
 void RaytracePrivate::renderSpacePartitioning()
 {
-	if (kdTree.root())
-		renderBoundingBox(kdTree.root()->boundingBox);
+	renderBoundingBox(kdTree.root()->boundingBox, vec4(1.0f, 0.0f, 1.0f, 1.0f));
+	renderKDTreeRecursive(kdTree.root(), 0);
 }
 
-void RaytracePrivate::renderBoundingBox(const rt::BoundingBox& box)
+void RaytracePrivate::renderKDTreeRecursive(KDTree::Node* node, size_t index)
+{
+	if (node)
+	{
+		const vec4 colorOdd(1.0f, 1.0f, 0.0f, 1.0f);
+		const vec4 colorEven(0.0f, 1.0f, 1.0f, 1.0f);
+		
+		if ((node->left == nullptr) && (node->right == nullptr))
+			renderBoundingBox(node->boundingBox, (index % 2) ? colorOdd : colorEven);
+		
+		renderKDTreeRecursive(node->left, index + 1);
+		renderKDTreeRecursive(node->right, index + 1);
+	}
+}
+
+void RaytracePrivate::renderBoundingBox(const rt::BoundingBox& box, const vec4& color)
 {
 	vec2 c0 = projectPoint(box.center + box.halfSize * vec4simd(-1.0f, -1.0f, -1.0f, 0.0f));
 	vec2 c1 = projectPoint(box.center + box.halfSize * vec4simd( 1.0f, -1.0f, -1.0f, 0.0f));
@@ -514,36 +545,33 @@ void RaytracePrivate::renderBoundingBox(const rt::BoundingBox& box)
 	vec2 c6 = projectPoint(box.center + box.halfSize * vec4simd(-1.0f,  1.0f,  1.0f, 0.0f));
 	vec2 c7 = projectPoint(box.center + box.halfSize * vec4simd( 1.0f,  1.0f,  1.0f, 0.0f));
 	
-	renderLine(c0, c1);
-	renderLine(c0, c2);
-	renderLine(c0, c4);
-	
-	renderLine(c1, c5);
-	renderLine(c2, c6);
-	
-	renderLine(c3, c1);
-	renderLine(c3, c2);
-	renderLine(c3, c7);
-	
-	renderLine(c4, c5);
-	renderLine(c4, c6);
-	renderLine(c7, c5);
-	renderLine(c7, c6);
+	renderLine(c0, c1, color);
+	renderLine(c0, c2, color);
+	renderLine(c0, c4, color);
+	renderLine(c1, c5, color);
+	renderLine(c2, c6, color);
+	renderLine(c3, c1, color);
+	renderLine(c3, c2, color);
+	renderLine(c3, c7, color);
+	renderLine(c4, c5, color);
+	renderLine(c4, c6, color);
+	renderLine(c7, c5, color);
+	renderLine(c7, c6, color);
 }
 
-void RaytracePrivate::renderLine(const vec2& from, const vec2& to)
+void RaytracePrivate::renderLine(const vec2& from, const vec2& to, const vec4& color)
 {
-	float dt = 2.0f / length(to - from);
+	float dt = 1.0f / length(to - from);
 	
 	float t = 0.0f;
 	while (t <= 1.0f)
 	{
-		renderPixel(mix(from, to, t));
+		renderPixel(mix(from, to, t), color);
 		t += dt;
 	}
 }
 
-void RaytracePrivate::renderPixel(const vec2& pixel)
+void RaytracePrivate::renderPixel(const vec2& pixel, const vec4& color)
 {
 	vec2 nearPixels[4];
 	nearPixels[0] = floorv(pixel);
@@ -554,7 +582,7 @@ void RaytracePrivate::renderPixel(const vec2& pixel)
 	{
 		float d = length(nearPixels[i] - pixel);
 		vec2i px(static_cast<int>(nearPixels[i].x), static_cast<int>(nearPixels[i].y));
-		owner->_outputMethod(px, vec4(0.0f, 1.0f - d, 0.0f, 1.0f));
+		owner->_outputMethod(px, color * vec4(1.0f, 1.0f, 1.0f, 1.0f - d));
 	}
 }
 

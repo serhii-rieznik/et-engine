@@ -30,6 +30,7 @@ namespace et
 			vec4simd edge1to0;
 			vec4simd edge2to0;
 			size_t materialIndex = 0;
+			float square = 0.0f;
 
 			float _dot00 = 0.0f;
 			float _dot10 = 0.0f;
@@ -41,6 +42,8 @@ namespace et
 			{
 				edge1to0 = v[1] - v[0];
 				edge2to0 = v[2] - v[0];
+				square = edge1to0.crossXYZ(edge2to0).length() * 0.5f;
+				
 				_dot00 = edge1to0.dotSelf();
 				_dot11 = edge2to0.dotSelf();
 				_dot01 = edge1to0.dot(edge2to0);
@@ -62,6 +65,13 @@ namespace et
 			{
 				return n[0] * b.shuffle<0, 0, 0, 0>() + 
 					n[1] * b.shuffle<1, 1, 1, 1>() + n[2] * b.shuffle<2, 2, 2, 2>();
+			}
+			
+			vec4simd averageNormal() const
+			{
+				vec4simd c = edge2to0.crossXYZ(edge1to0);
+				c.normalize();
+				return c;
 			}
 		};
 
@@ -90,11 +100,32 @@ namespace et
 			BoundingBox(const vec4simd& c, const vec4simd& hs) :
 				center(c), halfSize(hs) { }
 			
+			BoundingBox(const vec4simd& minVertex, const vec4simd& maxVertex, int)
+			{
+				center = (minVertex + maxVertex) * 0.5f;
+				halfSize = (maxVertex - minVertex) * 0.5f;
+			}
+			
 			vec4simd minVertex() const
 				{ return center - halfSize; }
 			
 			vec4simd maxVertex() const
 				{ return center + halfSize; }
+			
+			float square() const
+			{
+				return 4.0f *
+				(
+					halfSize.x() * halfSize.y() +
+					halfSize.y() * halfSize.z() +
+					halfSize.x() * halfSize.z()
+				);
+			}
+			
+			float volume() const
+			{
+				return 8.0f * halfSize.x() * halfSize.y() * halfSize.z();
+			};
 		};
 
 		struct Region
@@ -168,6 +199,17 @@ namespace et
 			return v - two * n * v.dotVector(n);
 		}
 		
+		inline bool pointInsideBoundingBox(const vec4simd& p, const BoundingBox& box)
+		{
+			vec4simd lower = box.center - box.halfSize;
+			if ((p.x() < lower.x()) || (p.y() < lower.y()) || (p.z() < lower.z())) return false;
+			
+			vec4simd upper = box.center + box.halfSize;
+			if ((p.x() > upper.x()) || (p.y() > upper.y()) || (p.z() > upper.z())) return false;
+			
+			return true;
+		}
+		
 		inline bool rayHitsBoundingBox(const Ray& r, const BoundingBox& box)
 		{
 			vec4 origin;
@@ -202,6 +244,94 @@ namespace et
 			}
 			
 			return false;
+		}
+		
+		inline bool triangleIntersectsBoundingBox(const Triangle& t, const BoundingBox& b)
+		{
+			auto projectToTriangle = [&t](const vec4simd& axis, float& minValue, float& maxValue)
+			{
+				minValue = std::numeric_limits<float>::max();
+				maxValue = -std::numeric_limits<float>::max();
+				for (int i = 0; i < 3; ++i)
+				{
+					double val = axis.dot(t.v[i]);
+					if (val < minValue) minValue = val;
+					if (val > maxValue) maxValue = val;
+				}
+			};
+			auto projectToBox = [&b](const vec4simd& axis, float& minValue, float& maxValue)
+			{
+				const vec4simd scales[8] =
+				{
+					vec4simd(-1.0f, -1.0f, -1.0f, 1.0f),
+					vec4simd( 1.0f, -1.0f, -1.0f, 1.0f),
+					vec4simd(-1.0f,  1.0f, -1.0f, 1.0f),
+					vec4simd( 1.0f,  1.0f, -1.0f, 1.0f),
+					vec4simd(-1.0f, -1.0f,  1.0f, 1.0f),
+					vec4simd( 1.0f, -1.0f,  1.0f, 1.0f),
+					vec4simd(-1.0f,  1.0f,  1.0f, 1.0f),
+					vec4simd( 1.0f,  1.0f,  1.0f, 1.0f),
+				};
+				minValue = std::numeric_limits<float>::max();
+				maxValue = -std::numeric_limits<float>::max();
+				for (int i = 0; i < 8; ++i)
+				{
+					double val = axis.dot(b.center + b.halfSize * scales[i]);
+					if (val < minValue) minValue = val;
+					if (val > maxValue) maxValue = val;
+				}
+			};
+			
+			vec4simd boxNormals[3] =
+			{
+				vec4simd(1.0f, 0.0f, 0.0f, 0.0f),
+				vec4simd(0.0f, 1.0f, 0.0f, 0.0f),
+				vec4simd(0.0f, 0.0f, 1.0f, 0.0f)
+			};
+			
+			vec3 boxMin = (b.center - b.halfSize).xyz();
+			vec3 boxMax = (b.center + b.halfSize).xyz();
+			
+			for (int i = 0; i < 3; i++)
+			{
+				float minValue = 0.0f;
+				float maxValue = 0.0f;
+				projectToTriangle(boxNormals[i], minValue, maxValue);
+				if ((minValue < boxMin[i]) || (maxValue > boxMax[i]))
+					return false;
+			}
+			
+			// Test the triangle normal
+			float triangleOffset = t.averageNormal().dot(t.v[0]);
+			float minValue = 0.0f;
+			float maxValue = 0.0f;
+			projectToBox(t.averageNormal(), minValue, maxValue);
+			if ((maxValue < triangleOffset) || (minValue > triangleOffset))
+				return false; // No intersection possible.
+			
+			vec4simd triangleEdges[] =
+			{
+				t.v[0] - t.v[1],
+				t.v[1] - t.v[2],
+				t.v[2] - t.v[0]
+			};
+			
+			for (int i = 0; i < 3; i++)
+			{
+				for (int j = 0; j < 3; j++)
+				{
+					// The box normals are the same as it's edge tangents
+					float boxMinProj;
+					float boxMaxProj;
+					vec4simd axis = triangleEdges[i].crossXYZ(boxNormals[j]);
+					projectToBox(axis, boxMinProj, boxMaxProj);
+					projectToTriangle(axis, minValue, maxValue);
+					if ((boxMaxProj < minValue)|| (boxMinProj > maxValue))
+						return false; // No intersection possible
+				}
+			}
+		
+			return true;
 		}
 	}
 }
