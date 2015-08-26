@@ -48,7 +48,7 @@ void KDTree::build(const std::vector<rt::Triangle>& triangles, size_t maxDepth, 
 	_root = buildRootNode(triangles);
 	_maxDepth = maxDepth;
 	_spaceSplitSize = splits;
-	splitNodeUsingSortedArray(_root, triangles);
+	splitNodeUsingBins(_root, triangles);
 	printStructure(_root, std::string());
 }
 
@@ -73,9 +73,9 @@ struct Split
 	int axis = 0;
 };
 
-void KDTree::splitNodeUsingBins(Node* node, const std::vector<rt::Triangle>& triangles, size_t depth)
+void KDTree::splitNodeUsingBins(Node* node, const std::vector<rt::Triangle>& triangles)
 {
-	if ((depth > _maxDepth) || (node->triangles.size() < _minTrianglesToSubdivide))
+	if ((node->depth > _maxDepth) || (node->triangles.size() < _minTrianglesToSubdivide))
 		return;
 		
 	const auto& bbox = node->boundingBox;
@@ -127,32 +127,19 @@ void KDTree::splitNodeUsingBins(Node* node, const std::vector<rt::Triangle>& tri
 	};
 	
 	for (auto triIndex : node->triangles)
-	{
-		const auto& tri = triangles.at(triIndex);
-		/*
-		{
-			log::info("\nTriangle V0: (%.3f, %.3f, %.3f)\n"
-					  "Triangle V1: (%.3f, %.3f, %.3f)\n"
-					  "Triangle V2: (%.3f, %.3f, %.3f)\n\n",
-				tri.v[0].x(), tri.v[0].y(), tri.v[0].z(),
-				tri.v[1].x(), tri.v[1].y(), tri.v[1].z(),
-				tri.v[2].x(), tri.v[2].y(), tri.v[2].z());
-		}
-		// */
-		placePointToBins(triangleCentroid(tri));
-	}
+		placePointToBins(triangleCentroid(triangles.at(triIndex)));
 	
 	vec3 splitSquare;
-	splitSquare.x = 4.0f * (binHalfSize.x * (bbox.halfSize.y() + bbox.halfSize.z()) +
-		bbox.halfSize.y() * bbox.halfSize.z());
-	splitSquare.y = 4.0f * (binHalfSize.y * (bbox.halfSize.x() + bbox.halfSize.z()) +
-		bbox.halfSize.x() * bbox.halfSize.z());
-	splitSquare.z = 4.0f * (binHalfSize.z * (bbox.halfSize.x() + bbox.halfSize.y()) +
-		bbox.halfSize.y() * bbox.halfSize.x());
+	splitSquare.x = binHalfSize.x * (bbox.halfSize.y() + bbox.halfSize.z()) + bbox.halfSize.y() * bbox.halfSize.z();
+	splitSquare.y = binHalfSize.y * (bbox.halfSize.x() + bbox.halfSize.z()) + bbox.halfSize.x() * bbox.halfSize.z();
+	splitSquare.z = binHalfSize.z * (bbox.halfSize.x() + bbox.halfSize.y()) + bbox.halfSize.y() * bbox.halfSize.x();
 	
 	std::vector<Split> splitCosts(_spaceSplitSize);
+	splitCosts.back().cost = vec3(std::numeric_limits<float>::max());
 	
-	for (int i = 0; i < _spaceSplitSize; ++i)
+	vec3 fTotalTriangles(static_cast<float>(node->triangles.size()));
+	
+	for (int i = 0; i + 1 < _spaceSplitSize; ++i)
 	{
 		vec3 numTrianglesFromLeft(0.0f);
 		float numSplitsFromLeft = float(i + 1);
@@ -162,8 +149,8 @@ void KDTree::splitNodeUsingBins(Node* node, const std::vector<rt::Triangle>& tri
 		
 		for (int j = 0; j < _spaceSplitSize; ++j)
 		{
-			((j <= i) ? numTrianglesFromLeft : numTrianglesFromRight) +=
-				vec3(float(binsX[j].numTriangles), float(binsY[j].numTriangles), float(binsZ[j].numTriangles));
+			vec3 fCurrentTriangles(float(binsX[j].numTriangles), float(binsY[j].numTriangles), float(binsZ[j].numTriangles));
+			((j <= i) ? numTrianglesFromLeft : numTrianglesFromRight) += fCurrentTriangles / fTotalTriangles;
 		}
 		
 		splitCosts[i].cost = splitSquare *
@@ -188,7 +175,7 @@ void KDTree::splitNodeUsingBins(Node* node, const std::vector<rt::Triangle>& tri
 	std::sort(splitCosts.begin(), splitCosts.end(), [](const Split& l, const Split& r)
 		{ return l.cost.z < r.cost.z; });
 	minSplits[2] = splitCosts.front();
-	minSplits[2].cost = vec3(minSplits[2].cost.x);
+	minSplits[2].cost = vec3(minSplits[2].cost.z);
 	minSplits[2].axis = 2;
 	
 	std::sort(minSplits.begin(), minSplits.end(), [](const Split& l, const Split& r)
@@ -208,8 +195,8 @@ void KDTree::splitNodeUsingBins(Node* node, const std::vector<rt::Triangle>& tri
 	log::info("Left, containing %llu triangles", static_cast<uint64_t>(node->left->triangles.size()));
 	log::info("Right, containing %llu triangles", static_cast<uint64_t>(node->right->triangles.size()));
 	
-	splitNodeUsingBins(node->left, triangles, depth + 1);
-	splitNodeUsingBins(node->right, triangles, depth + 1);
+	splitNodeUsingBins(node->left, triangles);
+	splitNodeUsingBins(node->right, triangles);
 	
 }
 

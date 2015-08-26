@@ -42,7 +42,7 @@ namespace et
 		void cleanUpRecursively(Node*);
 		
 		Node* buildRootNode(const std::vector<rt::Triangle>&);
-		void splitNodeUsingBins(Node*, const std::vector<rt::Triangle>&, size_t depth);
+		void splitNodeUsingBins(Node*, const std::vector<rt::Triangle>&);
 		void splitNodeUsingSortedArray(Node*, const std::vector<rt::Triangle>&);
 		void buildSplitBoxesUsingAxisAndPosition(Node*, int axis, float position);
 		void distributeTrianglesToChildren(Node*, const std::vector<rt::Triangle>&);
