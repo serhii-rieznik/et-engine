@@ -317,7 +317,7 @@ RenderContextPrivate::RenderContextPrivate(RenderContext*, RenderContextParamete
 		static_cast<int>(contentRect.size.height));
 	
 	etOpenGLView* openGlView = [[etOpenGLView alloc] init];
-	[openGlView setWantsBestResolutionOpenGLSurface:YES];
+    [openGlView setWantsBestResolutionOpenGLSurface:params.enableHighResolutionContext ? YES : NO];
 	openGlView->rcPrivate = this;
 
 	if (appParams.windowStyle & WindowStyle_Sizable)

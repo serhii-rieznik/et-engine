@@ -90,7 +90,7 @@ void Raytrace::perform(s3d::Scene::Pointer scene, const Camera& cam, const vec2i
 	_private->camera = cam;
 	_private->viewportSize = dimension;
 	_private->buildMaterialAndTriangles(scene);
-	_private->buildRegions(vec2i(16));
+	_private->buildRegions(vec2i(static_cast<int>(_private->options.renderRegionSize)));
 	_private->estimateRegionsOrder();
 	_private->emitWorkerThreads();
 }

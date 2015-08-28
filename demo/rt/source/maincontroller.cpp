@@ -17,6 +17,7 @@ void MainController::setRenderContextParameters(et::RenderContextParameters& p)
 	p.multisamplingQuality = MultisamplingQuality_None;
 	p.contextBaseSize = vec2i(1024, 640);
 	p.contextSize = p.contextBaseSize;
+    p.enableHighResolutionContext = true;
 }
 
 void MainController::applicationDidLoad(et::RenderContext* rc)
@@ -63,7 +64,8 @@ void MainController::applicationDidLoad(et::RenderContext* rc)
 	rtOptions.maxRecursionDepth = options.integerForKey("max-recursion-depth", 8)->content;
 	rtOptions.raysPerPixel = options.integerForKey("rays-per-pixel", 32)->content;
 	rtOptions.debugRendering = options.integerForKey("debug-rendering", 0ll)->content != 0;
-	rtOptions.maxKDTreeDepth = options.integerForKey("kd-tree-max-depth", 4)->content;
+    rtOptions.maxKDTreeDepth = options.integerForKey("kd-tree-max-depth", 4)->content;
+    rtOptions.renderRegionSize = options.integerForKey("render-region-size", 32)->content;
 	rtOptions.kdTreeSplits = static_cast<int>(options.integerForKey("kd-tree-splits", 4)->content);
 	_rt.setOptions(rtOptions);
 

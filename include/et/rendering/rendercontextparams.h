@@ -43,6 +43,7 @@ namespace et
 		bool lockScreenScaleToInitial = true;
 		bool compatibilityProfile = false;
 		bool debugContext = false;
+        bool enableHighResolutionContext = true;
 
 		size_t swapInterval = 1;
         size_t supportedInterfaceOrientations = InterfaceOrientation_Any;

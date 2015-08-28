@@ -1,14 +1,15 @@
 {
-	"model-name" : "gnome.obj",
-	"rays-per-pixel" : 1024,
+	"model-name" : "cornellbox.obj",
+	"rays-per-pixel" : 256,
 	"max-recursion-depth" : 16,
 	"camera-fov" : 60.0,
-	"camera-distance" : 5.5,
+	"camera-distance" : 2.75,
 	"camera-phi" : 90.0,
 	"camera-theta" : 0.0,
-	"camera-offset" : [0.0, 3.9, 0.0],
-	"camera-view-point" : [0.0, 2.7, 0.0],
+	"camera-offset" : [0.0, 1.0, 0.0],
+	"camera-view-point" : [0.0, 1.0, 0.0],
 	"debug-rendering" : 0,
 	"kd-tree-max-depth" : 0,
-	"kd-tree-splits" : 32
+	"kd-tree-splits" : 32,
+    "render-region-size" : 32
 }
