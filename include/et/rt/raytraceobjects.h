@@ -14,6 +14,16 @@ namespace et
 {
 	namespace rt
 	{
+		enum : size_t
+		{
+			InvalidIndex = size_t(-1),
+		};
+		
+		struct Constants
+		{
+			static constexpr float epsilon = 0.000001f;
+		};
+		
 		struct Material
 		{
 			std::string name;
@@ -72,6 +82,16 @@ namespace et
 				vec4simd c = edge2to0.crossXYZ(edge1to0);
 				c.normalize();
 				return c;
+			}
+			
+			vec4simd minVertex() const
+			{
+				return v[0].minWith(v[1].minWith(v[2]));
+			}
+			
+			vec4simd maxVertex() const
+			{
+				return v[0].maxWith(v[1].maxWith(v[2]));
 			}
 		};
 
@@ -136,12 +156,12 @@ namespace et
 			bool sampled = false;
 		};
 
-		inline bool rayTriangle(const Ray& ray, const Triangle& tri, vec4simd& intersection_pt, vec4simd& barycentric)
+		inline bool rayTriangle(const Ray& ray, const Triangle& tri, vec4simd& intersection_pt,
+			vec4simd& barycentric, float& distance)
 		{
-			const float epsilon = 0.0005f;
-			const float minusEpsilon = -0.5f * epsilon;
-			const float onePlusEpsilon = 1.0f + 0.5f * epsilon;
-			const float epsilonSquared = epsilon * epsilon;
+			const float minusEpsilon = -Constants::epsilon;
+			const float onePlusEpsilon = 1.0f + Constants::epsilon;
+			const float epsilonSquared = Constants::epsilon * Constants::epsilon;
 
 			vec4simd pvec = ray.direction.crossXYZ(tri.edge2to0);
 			float det = tri.edge1to0.dot(pvec);
@@ -158,10 +178,11 @@ namespace et
 			if ((v < minusEpsilon) || (u + v > onePlusEpsilon))
 				return false;
 
-			float t = tri.edge2to0.dot(qvec) / det;
-			intersection_pt = ray.origin + ray.direction * t;
+			distance = tri.edge2to0.dot(qvec) / det;
+			intersection_pt = ray.origin + ray.direction * distance;
 			barycentric = vec4simd(1.0f - u - v, u, v, 0.0f);
-			return (t > epsilon);
+			
+			return (distance >= Constants::epsilon);
 		}
 
 		inline vec4simd perpendicularVector(const vec4simd& normal)
@@ -201,13 +222,82 @@ namespace et
 		
 		inline bool pointInsideBoundingBox(const vec4simd& p, const BoundingBox& box)
 		{
-			vec4simd lower = box.center - box.halfSize;
-			if ((p.x() < lower.x()) || (p.y() < lower.y()) || (p.z() < lower.z())) return false;
+			vec4simd lower = box.minVertex();
 			
-			vec4simd upper = box.center + box.halfSize;
-			if ((p.x() > upper.x()) || (p.y() > upper.y()) || (p.z() > upper.z())) return false;
+			if ((p.x() < lower.x() - Constants::epsilon) ||
+				(p.y() < lower.y() - Constants::epsilon) ||
+				(p.z() < lower.z() - Constants::epsilon)) return false;
+			
+			vec4simd upper = box.maxVertex();
+			
+			if ((p.x() > upper.x() + Constants::epsilon) ||
+				(p.y() > upper.y() + Constants::epsilon) ||
+				(p.z() > upper.z() + Constants::epsilon)) return false;
 			
 			return true;
+		}
+		
+		inline bool rayToBoundingBox(const Ray& r, const BoundingBox& box, float& tNear, float& tFar)
+		{
+			vec4simd bounds[2] = { box.minVertex(), box.maxVertex() };
+			
+			float tmin, tmax, tymin, tymax, tzmin, tzmax;
+			
+			if (r.direction.x() >= 0)
+			{
+				tmin = (bounds[0].x() - r.origin.x()) / r.direction.x() - Constants::epsilon;
+				tmax = (bounds[1].x() - r.origin.x()) / r.direction.x() + Constants::epsilon;
+			}
+			else
+			{
+				tmin = (bounds[1].x() - r.origin.x()) / r.direction.x() - Constants::epsilon;
+				tmax = (bounds[0].x() - r.origin.x()) / r.direction.x() + Constants::epsilon;
+			}
+			
+			if (r.direction.y() >= 0)
+			{
+				tymin = (bounds[0].y() - r.origin.y()) / r.direction.y() - Constants::epsilon;
+				tymax = (bounds[1].y() - r.origin.y()) / r.direction.y() + Constants::epsilon;
+			}
+			else
+			{
+				tymin = (bounds[1].y() - r.origin.y()) / r.direction.y() - Constants::epsilon;
+				tymax = (bounds[0].y() - r.origin.y()) / r.direction.y() + Constants::epsilon;
+			}
+			
+			if ((tmin > tymax) || (tymin > tmax))
+				return false;
+			
+			if (tymin > tmin)
+				tmin = tymin;
+			
+			if (tymax < tmax)
+				tmax = tymax;
+			
+			if (r.direction.z() >= 0)
+			{
+				tzmin = (bounds[0].z() - r.origin.z()) / r.direction.z() - Constants::epsilon;
+				tzmax = (bounds[1].z() - r.origin.z()) / r.direction.z() + Constants::epsilon;
+			}
+			else
+			{
+				tzmin = (bounds[1].z() - r.origin.z()) / r.direction.z() - Constants::epsilon;
+				tzmax = (bounds[0].z() - r.origin.z()) / r.direction.z() + Constants::epsilon;
+			}
+			
+			if ( (tmin > tzmax) || (tzmin > tmax) )
+				return false;
+			
+			if (tzmin > tmin)
+				tmin = tzmin;
+			
+			if (tzmax < tmax)
+				tmax = tzmax;
+			
+			tNear = tmin;
+			tFar = tmax;
+			
+			return tmin <= tmax;
 		}
 		
 		inline bool rayHitsBoundingBox(const Ray& r, const BoundingBox& box)
@@ -227,111 +317,19 @@ namespace et
 			float txmax = (parameters[1 - r_sign_x].x() - origin.x) * invDirection.x;
 			float tymax = (parameters[1 - r_sign_y].y() - origin.y) * invDirection.y;
 			
-			if ((txmin < tymax) && (tymin < txmax))
-			{
-				if (tymin > txmin)
-					txmin = tymin;
-				
-				if (tymax < txmax)
-					txmax = tymax;
-				
-				int r_sign_z = (invDirection.z < 0.0f ? 1 : 0);
-				float tzmin = (parameters[r_sign_z].z() - origin.z) * invDirection.z;
-				float tzmax = (parameters[1 - r_sign_z].z() - origin.z) * invDirection.z;
-				
-				if ((txmin < tzmax) && (tzmin < txmax))
-					return true;
-			}
+			if ((txmin >= tymax) || (tymin >= txmax))
+				return false;
 			
-			return false;
-		}
-		
-		inline bool triangleIntersectsBoundingBox(const Triangle& t, const BoundingBox& b)
-		{
-			auto projectToTriangle = [&t](const vec4simd& axis, float& minValue, float& maxValue)
-			{
-				minValue = std::numeric_limits<float>::max();
-				maxValue = -std::numeric_limits<float>::max();
-				for (int i = 0; i < 3; ++i)
-				{
-					double val = axis.dot(t.v[i]);
-					if (val < minValue) minValue = val;
-					if (val > maxValue) maxValue = val;
-				}
-			};
-			auto projectToBox = [&b](const vec4simd& axis, float& minValue, float& maxValue)
-			{
-				const vec4simd scales[8] =
-				{
-					vec4simd(-1.0f, -1.0f, -1.0f, 1.0f),
-					vec4simd( 1.0f, -1.0f, -1.0f, 1.0f),
-					vec4simd(-1.0f,  1.0f, -1.0f, 1.0f),
-					vec4simd( 1.0f,  1.0f, -1.0f, 1.0f),
-					vec4simd(-1.0f, -1.0f,  1.0f, 1.0f),
-					vec4simd( 1.0f, -1.0f,  1.0f, 1.0f),
-					vec4simd(-1.0f,  1.0f,  1.0f, 1.0f),
-					vec4simd( 1.0f,  1.0f,  1.0f, 1.0f),
-				};
-				minValue = std::numeric_limits<float>::max();
-				maxValue = -std::numeric_limits<float>::max();
-				for (int i = 0; i < 8; ++i)
-				{
-					double val = axis.dot(b.center + b.halfSize * scales[i]);
-					if (val < minValue) minValue = val;
-					if (val > maxValue) maxValue = val;
-				}
-			};
+			if (tymin > txmin)
+				txmin = tymin;
+			if (tymax < txmax)
+				txmax = tymax;
 			
-			vec4simd boxNormals[3] =
-			{
-				vec4simd(1.0f, 0.0f, 0.0f, 0.0f),
-				vec4simd(0.0f, 1.0f, 0.0f, 0.0f),
-				vec4simd(0.0f, 0.0f, 1.0f, 0.0f)
-			};
+			int r_sign_z = (invDirection.z < 0.0f ? 1 : 0);
+			float tzmin = (parameters[r_sign_z].z() - origin.z) * invDirection.z;
+			float tzmax = (parameters[1 - r_sign_z].z() - origin.z) * invDirection.z;
 			
-			vec3 boxMin = (b.center - b.halfSize).xyz();
-			vec3 boxMax = (b.center + b.halfSize).xyz();
-			
-			for (int i = 0; i < 3; i++)
-			{
-				float minValue = 0.0f;
-				float maxValue = 0.0f;
-				projectToTriangle(boxNormals[i], minValue, maxValue);
-				if ((minValue < boxMin[i]) || (maxValue > boxMax[i]))
-					return false;
-			}
-			
-			// Test the triangle normal
-			float triangleOffset = t.averageNormal().dot(t.v[0]);
-			float minValue = 0.0f;
-			float maxValue = 0.0f;
-			projectToBox(t.averageNormal(), minValue, maxValue);
-			if ((maxValue < triangleOffset) || (minValue > triangleOffset))
-				return false; // No intersection possible.
-			
-			vec4simd triangleEdges[] =
-			{
-				t.v[0] - t.v[1],
-				t.v[1] - t.v[2],
-				t.v[2] - t.v[0]
-			};
-			
-			for (int i = 0; i < 3; i++)
-			{
-				for (int j = 0; j < 3; j++)
-				{
-					// The box normals are the same as it's edge tangents
-					float boxMinProj;
-					float boxMaxProj;
-					vec4simd axis = triangleEdges[i].crossXYZ(boxNormals[j]);
-					projectToBox(axis, boxMinProj, boxMaxProj);
-					projectToTriangle(axis, minValue, maxValue);
-					if ((boxMaxProj < minValue)|| (boxMinProj > maxValue))
-						return false; // No intersection possible
-				}
-			}
-		
-			return true;
+			return ((txmin < tzmax) && (tzmin < txmax));
 		}
 	}
 }

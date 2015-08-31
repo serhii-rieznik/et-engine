@@ -19,6 +19,7 @@
 #include <AppKit/NSTrackingArea.h>
 #include <CoreVideo/CVDisplayLink.h>
 
+#include <et/platform/platformtools.h>
 #include <et/platform-apple/apple.h>
 #include <et/opengl/opengl.h>
 #include <et/opengl/openglcaps.h>
@@ -245,9 +246,9 @@ RenderContextPrivate::RenderContextPrivate(RenderContext*, RenderContextParamete
 		
 		if (pixelFormat == nil)
 		{
-			[[NSAlert alertWithMessageText:@"Unable to create and initialize rendering context"
-				defaultButton:@"Terminate" alternateButton:nil otherButton:nil informativeTextWithFormat:
-				@"Unable to create NSOpenGLPixelFormat object, application will now terminate."] runModal];
+			alert("Unable to create and initialize rendering context",
+				  "Unable to create NSOpenGLPixelFormat object, application will now terminate.",
+				  "Terminate", AlertType::Error);
 			exit(1);
 		}
 	}
@@ -360,11 +361,9 @@ void RenderContextPrivate::run()
 		
 		if ((result != kCVReturnSuccess) || (displayLink == nullptr))
 		{
-			[[NSAlert alertWithMessageText:@"Something went wrong, could not create display link."
-				defaultButton:@"Ok" alternateButton:nil otherButton:nil
-				informativeTextWithFormat:@"Return code: %d, Application will now shut down.", result] runModal];
+			alert("Could not create display link.", "Application will now shut down.",
+				"Terminate", AlertType::Error);
 			exit(1);
-			return;
 		}
 
 		CVDisplayLinkSetOutputCallback(displayLink, cvDisplayLinkOutputCallback, this);

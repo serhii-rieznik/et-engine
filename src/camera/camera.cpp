@@ -194,8 +194,11 @@ void Camera::rotate(const quaternion& q)
 
 ray3d Camera::castRay(const vec2& pt) const
 {
-	vec3 pos = position();
-	return ray3d(pos, normalize(unproject(vec3(pt, 1.0f)) - pos));
+	const vec3& pos = position();
+	vec3 dir = unproject(vec3(pt, 1.0f));
+	dir -= pos;
+	dir.normalize();
+	return ray3d(pos, dir);
 }
 
 void Camera::modelViewUpdated()

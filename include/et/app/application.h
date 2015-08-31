@@ -25,14 +25,6 @@ namespace et
 	class ApplicationNotifier;
 	class Application : public Singleton<Application>
 	{
-	public:
-		enum AlertType
-		{
-			AlertType_Information,
-			AlertType_Warning,
-			AlertType_Error
-		};
-
 	public: 
 		int run(int argc, char* argv[]);
 		
@@ -93,7 +85,6 @@ namespace et
 		void setTitle(const std::string& s);
 		void setFrameRateLimit(size_t value);
 
-		void alert(const std::string& title, const std::string& message, AlertType type = AlertType_Information);
 		void requestUserAttention();
 		
 		void enableRemoteNotifications();

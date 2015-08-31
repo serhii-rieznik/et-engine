@@ -49,7 +49,6 @@
 		A5E2B0111B7D4ACB00DE53DD /* input.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5E2AFA31B7D4ACB00DE53DD /* input.cpp */; };
 		A5E2B0121B7D4ACB00DE53DD /* json.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5E2AFA51B7D4ACB00DE53DD /* json.cpp */; };
 		A5E2B0131B7D4ACB00DE53DD /* locale.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5E2AFA71B7D4ACB00DE53DD /* locale.cpp */; };
-		A5E2B0141B7D4ACB00DE53DD /* fbxloader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5E2AFA91B7D4ACB00DE53DD /* fbxloader.cpp */; };
 		A5E2B0151B7D4ACB00DE53DD /* objLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5E2AFAA1B7D4ACB00DE53DD /* objLoader.cpp */; };
 		A5E2B0161B7D4ACB00DE53DD /* capabilities.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5E2AFAC1B7D4ACB00DE53DD /* capabilities.cpp */; };
 		A5E2B0171B7D4ACB00DE53DD /* framebuffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5E2AFAD1B7D4ACB00DE53DD /* framebuffer.cpp */; };
@@ -219,7 +218,6 @@
 		A5E2AF221B7D4A9800DE53DD /* json.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = json.h; sourceTree = "<group>"; };
 		A5E2AF241B7D4A9800DE53DD /* locale.ext.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = locale.ext.h; sourceTree = "<group>"; };
 		A5E2AF251B7D4A9800DE53DD /* locale.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = locale.h; sourceTree = "<group>"; };
-		A5E2AF271B7D4A9800DE53DD /* fbxloader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = fbxloader.h; sourceTree = "<group>"; };
 		A5E2AF281B7D4A9800DE53DD /* modelloader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = modelloader.h; sourceTree = "<group>"; };
 		A5E2AF291B7D4A9800DE53DD /* objloader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = objloader.h; sourceTree = "<group>"; };
 		A5E2AF2B1B7D4A9800DE53DD /* opengl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = opengl.h; sourceTree = "<group>"; };
@@ -324,7 +322,6 @@
 		A5E2AFA31B7D4ACB00DE53DD /* input.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = input.cpp; sourceTree = "<group>"; };
 		A5E2AFA51B7D4ACB00DE53DD /* json.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = json.cpp; sourceTree = "<group>"; };
 		A5E2AFA71B7D4ACB00DE53DD /* locale.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = locale.cpp; sourceTree = "<group>"; };
-		A5E2AFA91B7D4ACB00DE53DD /* fbxloader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = fbxloader.cpp; sourceTree = "<group>"; };
 		A5E2AFAA1B7D4ACB00DE53DD /* objLoader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = objLoader.cpp; sourceTree = "<group>"; };
 		A5E2AFAC1B7D4ACB00DE53DD /* capabilities.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = capabilities.cpp; sourceTree = "<group>"; };
 		A5E2AFAD1B7D4ACB00DE53DD /* framebuffer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = framebuffer.cpp; sourceTree = "<group>"; };
@@ -632,7 +629,6 @@
 		A5E2AF261B7D4A9800DE53DD /* models */ = {
 			isa = PBXGroup;
 			children = (
-				A5E2AF271B7D4A9800DE53DD /* fbxloader.h */,
 				A5E2AF281B7D4A9800DE53DD /* modelloader.h */,
 				A5E2AF291B7D4A9800DE53DD /* objloader.h */,
 			);
@@ -972,7 +968,6 @@
 		A5E2AFA81B7D4ACB00DE53DD /* models */ = {
 			isa = PBXGroup;
 			children = (
-				A5E2AFA91B7D4ACB00DE53DD /* fbxloader.cpp */,
 				A5E2AFAA1B7D4ACB00DE53DD /* objLoader.cpp */,
 			);
 			name = models;
@@ -1233,7 +1228,6 @@
 				A5E2B0161B7D4ACB00DE53DD /* capabilities.cpp in Sources */,
 				A5E2AFF91B7D4ACB00DE53DD /* collision.cpp in Sources */,
 				A5E2B00D1B7D4ACB00DE53DD /* pvrloader.cpp in Sources */,
-				A5E2B0141B7D4ACB00DE53DD /* fbxloader.cpp in Sources */,
 				A5E2B0431B7D4ACB00DE53DD /* serialization.cpp in Sources */,
 				A5E2B0251B7D4ACB00DE53DD /* tools.apple.mm in Sources */,
 				A5E2AEBE1B7D4A7700DE53DD /* maincontroller.cpp in Sources */,

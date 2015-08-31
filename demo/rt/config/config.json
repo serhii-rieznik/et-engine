@@ -1,15 +1,15 @@
 {
 	"model-name" : "cornellbox.obj",
-	"rays-per-pixel" : 256,
-	"max-recursion-depth" : 16,
+	"rays-per-pixel" : 1,
+	"max-recursion-depth" : 15,
 	"camera-fov" : 60.0,
-	"camera-distance" : 2.75,
-	"camera-phi" : 90.0,
-	"camera-theta" : 0.0,
+	"camera-distance" : 1.5,
+	"camera-phi" : 75.0,
+	"camera-theta" : 15.0,
 	"camera-offset" : [0.0, 1.0, 0.0],
-	"camera-view-point" : [0.0, 1.0, 0.0],
-	"debug-rendering" : 0,
+	"camera-view-point" : [0.0, 0.0, 0.0],
+	"debug-rendering" : 1,
 	"kd-tree-max-depth" : 0,
 	"kd-tree-splits" : 32,
-    "render-region-size" : 32
+    "render-region-size" : 16
 }

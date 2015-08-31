@@ -9,17 +9,12 @@
 #include <mutex>
 #include <et/rt/raytrace.h>
 #include <et/rt/raytraceobjects.h>
+#include <et/app/application.h>
 
 namespace et
 {
 	class RaytracePrivate
 	{
-	public:
-		enum : size_t 
-		{
-			InvalidIndex = size_t(-1),
-		};
-
 	public:
 		RaytracePrivate(Raytrace* owner);
 		~RaytracePrivate();
@@ -31,9 +26,6 @@ namespace et
 		void buildMaterialAndTriangles(s3d::Scene::Pointer);
 
 		size_t materialIndexWithName(const std::string&);
-
-		size_t findIntersection(const rt::Ray&, vec4simd&, vec4simd&);
-		size_t findIntersection(const rt::Ray&, vec4simd&, vec4simd&, KDTree::Node*);
 
 		void buildRegions(vec2i size);
 		void estimateRegionsOrder();
@@ -52,27 +44,40 @@ namespace et
 		void renderPixel(const vec2&, const vec4& color);
 		vec2 projectPoint(const vec4simd&);
 		
-
 	public:
+		Raytrace* owner = nullptr;
+		Raytrace::Options options;
+		KDTree kdTree;
+		Camera camera;
+		vec2i viewportSize = vec2i(0);
+
 		std::vector<std::thread> workerThreads;
 		std::atomic<bool> running;
-		vec2i viewportSize = vec2i(0);
-		Raytrace* owner = nullptr;
-		Camera camera;
-		KDTree kdTree;
-
 		std::vector<rt::Material> materials;
-		std::vector<rt::Triangle> triangles;
-
 		std::vector<rt::Region> regions;
 		std::mutex regionsLock;
-		
-		Raytrace::Options options;
 		std::atomic<size_t> threadCounter;
+		uint64_t startTime = 0;
 	};
 }
 
 using namespace et;
+
+float fastRandomFloat()
+{
+	static const int maxValues = 1000;
+	static float values[maxValues];
+	static bool shouldInit = false;
+	
+	if (shouldInit)
+	{
+		for (size_t i = 0; i < maxValues; ++i)
+			values[i] = randomFloat(0.0f, 1.0f);
+		shouldInit = false;
+	}
+	
+	return values[rand() % maxValues];
+}
 
 Raytrace::Raytrace()
 {
@@ -129,7 +134,6 @@ void Raytrace::renderSpacePartitioning()
 RaytracePrivate::RaytracePrivate(Raytrace* o) : 
 	owner(o), running(false)
 {
-
 }
 
 RaytracePrivate::~RaytracePrivate()
@@ -139,6 +143,10 @@ RaytracePrivate::~RaytracePrivate()
 
 void RaytracePrivate::emitWorkerThreads()
 {
+	startTime = queryContiniousTimeInMilliSeconds();
+	
+	log::info("Rendering started: %llu", startTime);
+	
 	running = true;
 	threadCounter.store(std::thread::hardware_concurrency());
 	for (unsigned i = 0, e = std::thread::hardware_concurrency(); i < e; ++i)
@@ -155,11 +163,9 @@ void RaytracePrivate::stopWorkerThreads()
 
 void RaytracePrivate::buildMaterialAndTriangles(s3d::Scene::Pointer scene)
 {
-	triangleEx te;
-
 	materials.clear();
-	triangles.clear();
-
+	std::vector<rt::Triangle> triangles;
+	
 	auto meshes = scene->childrenOfType(s3d::ElementType::Mesh);
 	for (s3d::Mesh::Pointer mesh : meshes)
 	{
@@ -215,63 +221,6 @@ size_t RaytracePrivate::materialIndexWithName(const std::string& n)
 			return i;
 	}
 	return InvalidIndex;
-}
-
-size_t RaytracePrivate::findIntersection(const rt::Ray& ray, vec4simd& intersectionPoint,
-	vec4simd& barycentric, KDTree::Node* node)
-{
-	size_t returnIndex = InvalidIndex;
-	size_t index = 0;
-	float minDistance = std::numeric_limits<float>::max();
-	
-	size_t* triangleIndex = node->triangles.data();
-	for (size_t i = 0, e = node->triangles.size(); i < e; ++i, ++triangleIndex)
-	{
-		vec4simd ip;
-		vec4simd bc;
-		if (rt::rayTriangle(ray, triangles.at(*triangleIndex), ip, bc))
-		{
-			float distance = (ip - ray.origin).dotSelf();
-			if (distance < minDistance)
-			{
-				barycentric = bc;
-				intersectionPoint = ip;
-				returnIndex = index;
-				minDistance = distance;
-			}
-		}
-		++index;
-	}
-	
-	return returnIndex;
-}
-
-size_t RaytracePrivate::findIntersection(const rt::Ray& ray, vec4simd& intersectionPoint, vec4simd& barycentric)
-{
-	size_t returnIndex = InvalidIndex;
-	size_t index = 0;
-	float minDistance = std::numeric_limits<float>::max();
-
-	const auto* tri = triangles.data();
-	for (size_t i = 0, e = triangles.size(); i < e; ++i, ++tri)
-	{
-		vec4simd ip;
-		vec4simd bc;
-		if (rt::rayTriangle(ray, *tri, ip, bc))
-		{
-			float distance = (ip - ray.origin).dotSelf();
-			if (distance < minDistance)
-			{
-				barycentric = bc;
-				intersectionPoint = ip;
-				returnIndex = index;
-				minDistance = distance;
-			}
-		}
-		++index;
-	}
-
-	return returnIndex;
 }
 
 void RaytracePrivate::buildRegions(vec2i size)
@@ -381,10 +330,14 @@ void RaytracePrivate::threadFunction()
 	}
 	
 	--threadCounter;
+	
 	if (threadCounter.load() == 0)
 	{
-		renderSpacePartitioning();
-		log::info("Rendering completed");
+		auto endTime = queryContiniousTimeInMilliSeconds();
+		uint64_t diff = endTime - startTime;
+		
+		log::info("Rendering completed: %llu, (in %llu ms, %.3g s)", endTime,
+			diff, static_cast<double>(diff) / 1000.0f);
 	}
 }
 
@@ -414,41 +367,34 @@ vec4simd RaytracePrivate::gatherBouncesRecursive(const rt::Ray& r, size_t depth,
 {
 	maxDepth = std::max(maxDepth, depth);
 	const vec4simd epsilon(0.0001f);
-	
-	auto traverseResult = kdTree.traverse(r);
-	if (traverseResult.empty())
-		return sampleEnvironment(r.direction);
 
-	vec4simd barycentric;
-	vec4simd intersectionPoint;
-	size_t i = findIntersection(r, intersectionPoint, barycentric, traverseResult.top());
-	
-	if (i == InvalidIndex)
+	KDTree::TraverseResult traverse = kdTree.traverse(r);
+	if (traverse.triangleIndex == InvalidIndex)
 		return sampleEnvironment(r.direction);
-	
-	const auto& tri = triangles[i];
+		
+	const auto& tri = kdTree.triangleAtIndex(traverse.triangleIndex);
 	const auto& mat = materials[tri.materialIndex];
 	
-	vec4simd n = tri.interpolatedNormal(barycentric);
+	vec4simd n = tri.interpolatedNormal(traverse.intersectionPointBarycentric);
 	n.normalize();
 	
-	//*
+	/* backface culling for camera
 	if ((depth == 0) && (n.dot(r.direction) > 0.0f))
-		return gatherBouncesRecursive(rt::Ray(intersectionPoint + n * epsilon, r.direction), 1, maxDepth);
+		return gatherBouncesRecursive(rt::Ray(traverse.intersectionPoint + n * epsilon, r.direction), 1, maxDepth);
 	// */
 	
+	//*
 	if (options.debugRendering)
 	{
-//		const float epsilon = 0.0125f;
-//		if ((barycentric.y() <= epsilon) || (barycentric.z() <= epsilon))
-//			return vec4simd(10.0f, 10.0f, 10.0f, 1.0f);
-		return ((n * 0.5f + vec4simd(0.5)) + mat.emissive + mat.diffuse) * 0.333333f;
+		// return traverse.intersectionPointBarycentric;// (());// + mat.emissive + mat.diffuse) * 0.333333f;
+		return n * 0.5f + vec4simd(0.5);
 	}
+	// */
 	
 	vec4simd newDirection;
 	vec4simd materialColor;
 	vec4simd colorScale;
-	if (randomFloat(0.0f, 1.0f) >= mat.roughness) 
+	if (fastRandomFloat() >= mat.roughness)
 	{
 		// compute specular reflection
 		vec4simd reflected = rt::reflect(r.direction, n);
@@ -474,7 +420,7 @@ vec4simd RaytracePrivate::gatherBouncesRecursive(const rt::Ray& r, size_t depth,
 
 	if (depth <= options.maxRecursionDepth)
 	{
-		rt::Ray nextRay(intersectionPoint + n * epsilon, newDirection);
+		rt::Ray nextRay(traverse.intersectionPoint + n * epsilon, newDirection);
 		vec4simd nextColor = gatherBouncesRecursive(nextRay, depth + 1, maxDepth);
 		return mat.emissive + materialColor * nextColor * colorScale;
 	}
@@ -484,14 +430,17 @@ vec4simd RaytracePrivate::gatherBouncesRecursive(const rt::Ray& r, size_t depth,
 
 vec4simd RaytracePrivate::sampleEnvironment(const vec4simd& direction)
 {
-//	return vec4simd(0.0f);
-	//*
+	return vec4simd(0.0f);
+	/*
 	const vec4simd ambient(40.0f / 255.0f, 58.0f / 255.0f, 72.0f / 255.0f, 1.0f);
 	const vec4simd sun(249.0f / 255.0f, 243.0f / 255.0f, 179.0f / 255.0f, 1.0f);
 	const vec4simd atmosphere(173.0f / 255.0f, 181.0f / 255.0f, 185.0f / 255.0f, 1.0f);
-
-	float t = std::max(0.0f, direction.y());
-	float s = pow(t, 32.0f) + 10.0f * pow(t, 256.0f);
+	
+	vec4simd sunDirection = vec4simd(-2.0f, 1.0f, 2.0f, 0.0f);
+	sunDirection.normalize();
+	
+	float t = etMax(0.0f, direction.dot(sunDirection));
+	float s = 5.0f * pow(t, 32.0f) + 8.0f * pow(t, 256.0f);
 	return ambient + atmosphere * std::sqrt(t) + sun * s;
 	// */
 }

@@ -9,6 +9,7 @@
 
 #if (ET_PLATFORM_MAC)
 
+#include <AppKit/NSAlert.h>
 #include <AppKit/NSOpenPanel.h>
 #include <et/platform-apple/apple.h>
 
@@ -22,13 +23,36 @@ typedef void (^filePickerCallback)(__strong NSString* path);
 	NSArray* _allowedExtensions;
 	filePickerCallback _callback;
 }
-
-- (instancetype)initWithDefaultName:(NSString*)name fileTypes:(NSArray*)fileTypes callback:(filePickerCallback)cb;
-
+- (instancetype)initWithDefaultName:(NSString*)name fileTypes:(NSArray*)fileTypes
+	callback:(filePickerCallback)cb;
 - (void)openFile;
 - (void)saveFile;
-
 @end
+
+void et::alert(const std::string& title, const std::string& message, const std::string& button, AlertType type)
+{
+#if (__MAC_OS_X_VERSION_MIN_REQUIRED >= __MAC_10_10)
+	NSAlert* alert = [[NSAlert alloc] init];
+	
+	if (type == AlertType::Error)
+		alert.alertStyle = NSCriticalAlertStyle;
+	else if (type == AlertType::Warning)
+		alert.alertStyle = NSWarningAlertStyle;
+	else
+		alert.alertStyle = NSInformationalAlertStyle;
+	
+	alert.messageText = [NSString stringWithUTF8String:title.c_str()];
+	alert.informativeText = [NSString stringWithUTF8String:message.c_str()];
+	[alert addButtonWithTitle:[NSString stringWithUTF8String:button.c_str()]];
+	[alert runModal];
+#else
+	NSString* nsTitle = [NSString stringWithUTF8String:title.c_str()];
+	NSString* nsMessage = [NSString stringWithUTF8String:message.c_str()];
+	NSString* nsButton = [NSString stringWithUTF8String:button.c_str()];
+	[[NSAlert alertWithMessageText:nsTitle defaultButton:nsButton alternateButton:nil otherButton:nil
+		 informativeTextWithFormat:@"%@", nsMessage, nil] runModal];
+#endif
+}
 
 std::string et::selectFile(const StringList& allowedTypes, SelectFileMode mode, const std::string& defName)
 {

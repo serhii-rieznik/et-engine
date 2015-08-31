@@ -10,3 +10,4 @@ demo/scene-rendering/windows/x64/
 demo/vertex-texture-fetch/windows/x64/
 demo/vertex-texture-fetch/windows/Release/
 demo/rt/x64/
+xcschememanagement.plist
