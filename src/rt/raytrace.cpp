@@ -13,6 +13,12 @@
 
 namespace et
 {
+	enum class DebugRenderMode
+	{
+		TraceSinglePoint,
+		RenderTriangle
+	};
+	
 	class RaytracePrivate
 	{
 	public:
@@ -44,12 +50,16 @@ namespace et
 		void renderPixel(const vec2&, const vec4& color);
 		vec2 projectPoint(const vec4simd&);
 		
+		void fillRegionWithColor(const rt::Region&, const vec4& color);
+		void renderTriangle(const rt::Triangle&);
+		
 	public:
 		Raytrace* owner = nullptr;
 		Raytrace::Options options;
 		KDTree kdTree;
 		Camera camera;
 		vec2i viewportSize = vec2i(0);
+		DebugRenderMode debugMode = DebugRenderMode::TraceSinglePoint;
 
 		std::vector<std::thread> workerThreads;
 		std::atomic<bool> running;
@@ -96,17 +106,22 @@ void Raytrace::perform(s3d::Scene::Pointer scene, const Camera& cam, const vec2i
 	_private->viewportSize = dimension;
 	_private->buildMaterialAndTriangles(scene);
 	_private->buildRegions(vec2i(static_cast<int>(_private->options.renderRegionSize)));
-	_private->estimateRegionsOrder();
-	_private->emitWorkerThreads();
+	Invocation([this]()
+	{
+		_private->estimateRegionsOrder();
+	}).invokeInBackground();
 }
 
-vec4 Raytrace::performAtPoint(s3d::Scene::Pointer scene, const Camera& cam, const vec2i& dimension, const vec2i& pixel)
+vec4 Raytrace::performAtPoint(s3d::Scene::Pointer scene, const Camera& cam,
+	const vec2i& dimension, const vec2i& pixel)
 {
 	_private->stopWorkerThreads();
 
 	_private->camera = cam;
 	_private->viewportSize = dimension;
 	_private->buildMaterialAndTriangles(scene);
+	
+	_private->debugMode = DebugRenderMode::RenderTriangle;
 	
 	size_t bounces = 0;
 	return _private->raytracePixel(vec2i(pixel.x, dimension.y - pixel.y),
@@ -125,7 +140,12 @@ void Raytrace::setOptions(const et::Raytrace::Options& options)
 
 void Raytrace::renderSpacePartitioning()
 {
-	
+	_private->renderSpacePartitioning();
+}
+
+void Raytrace::output(const vec2i& pos, const vec4& color)
+{
+	_outputMethod(pos, color);
 }
 
 /*
@@ -333,6 +353,8 @@ void RaytracePrivate::threadFunction()
 	
 	if (threadCounter.load() == 0)
 	{
+		// renderSpacePartitioning();
+		
 		auto endTime = queryContiniousTimeInMilliSeconds();
 		uint64_t diff = endTime - startTime;
 		
@@ -353,7 +375,6 @@ vec4 RaytracePrivate::raytracePixel(const vec2i& pixel, size_t samples, size_t& 
 	{
 		vec2 jitter = vec2(randomFloat(-pixelSize.x, pixelSize.x),
 			randomFloat(-pixelSize.y, pixelSize.y));
-		
 		result += gatherBouncesRecursive(camera.castRay(pixelBase + jitter), 0, bounces);
 	}
 
@@ -383,13 +404,17 @@ vec4simd RaytracePrivate::gatherBouncesRecursive(const rt::Ray& r, size_t depth,
 		return gatherBouncesRecursive(rt::Ray(traverse.intersectionPoint + n * epsilon, r.direction), 1, maxDepth);
 	// */
 	
-	//*
 	if (options.debugRendering)
 	{
-		// return traverse.intersectionPointBarycentric;// (());// + mat.emissive + mat.diffuse) * 0.333333f;
-		return n * 0.5f + vec4simd(0.5);
+		if (debugMode == DebugRenderMode::TraceSinglePoint)
+			return mat.emissive + mat.diffuse;
+
+		if (debugMode == DebugRenderMode::RenderTriangle)
+		{
+			renderTriangle(tri);
+			return vec4simd(0.0f);
+		}
 	}
-	// */
 	
 	vec4simd newDirection;
 	vec4simd materialColor;
@@ -430,36 +455,45 @@ vec4simd RaytracePrivate::gatherBouncesRecursive(const rt::Ray& r, size_t depth,
 
 vec4simd RaytracePrivate::sampleEnvironment(const vec4simd& direction)
 {
-	return vec4simd(0.0f);
-	/*
 	const vec4simd ambient(40.0f / 255.0f, 58.0f / 255.0f, 72.0f / 255.0f, 1.0f);
 	const vec4simd sun(249.0f / 255.0f, 243.0f / 255.0f, 179.0f / 255.0f, 1.0f);
 	const vec4simd atmosphere(173.0f / 255.0f, 181.0f / 255.0f, 185.0f / 255.0f, 1.0f);
 	
-	vec4simd sunDirection = vec4simd(-2.0f, 1.0f, 2.0f, 0.0f);
+	vec4simd sunDirection = vec4simd(0.0f, 1.0f, 0.0f, 0.0f);
 	sunDirection.normalize();
 	
 	float t = etMax(0.0f, direction.dot(sunDirection));
 	float s = 5.0f * pow(t, 32.0f) + 8.0f * pow(t, 256.0f);
-	return ambient + atmosphere * std::sqrt(t) + sun * s;
+	return (ambient + atmosphere * std::sqrt(t) + sun * s) * 2.0f;
 	// */
 }
 
 void RaytracePrivate::estimateRegionsOrder()
 {
+	const size_t maxSamples = 5;
+	const size_t maxEstimatedBounces = maxSamples * options.maxRecursionDepth;
+	
+	std::random_shuffle(regions.begin(), regions.end());
+	
 	for (auto& r : regions)
 	{
 		r.estimatedBounces = 0;
-		for (size_t i = 0; i < 5; ++i)
+		vec4 estimatedColor(0.0);
+		for (size_t i = 0; i < maxSamples; ++i)
 		{
 			size_t bounces = 0;
-			raytracePixel(r.origin + vec2i(rand() % r.size.x, rand() % r.size.y), 1, bounces);
+			estimatedColor += raytracePixel(r.origin + vec2i(rand() % r.size.x, rand() % r.size.y), 1, bounces);
 			r.estimatedBounces += bounces;
 		}
+		float aspect = float(maxEstimatedBounces - r.estimatedBounces) / float(maxEstimatedBounces);
+		vec4 estimatedDensity = vec4(1.0f - 0.5f * aspect * aspect, 1.0f);
+		fillRegionWithColor(r, estimatedDensity * estimatedDensity);
 	}
 	
 	std::sort(regions.begin(), regions.end(), [](const rt::Region& l, const rt::Region& r)
 		{ return l.estimatedBounces > r.estimatedBounces; });
+	
+	emitWorkerThreads();
 }
 
 void RaytracePrivate::renderSpacePartitioning()
@@ -539,4 +573,26 @@ vec2 RaytracePrivate::projectPoint(const vec4simd& p)
 {
 	return vector2ToFloat(viewportSize) *
 		(vec2(0.5f, 0.5f) + vec2(0.5f, 0.5f) * camera.project(p.xyz()).xy());
+}
+
+void RaytracePrivate::fillRegionWithColor(const rt::Region& region, const vec4& color)
+{
+	vec2i pixel;
+	for (pixel.y = region.origin.y; pixel.y < region.origin.y + region.size.y; ++pixel.y)
+	{
+		for (pixel.x = region.origin.x; pixel.x < region.origin.x + region.size.x; ++pixel.x)
+			owner->_outputMethod(pixel, color);
+	}
+}
+
+void RaytracePrivate::renderTriangle(const rt::Triangle& tri)
+{
+	const vec4 lineColor(5.0f, 0.9f, 0.8f, 1.0f);
+	
+	vec2 c0 = projectPoint(tri.v[0]);
+	vec2 c1 = projectPoint(tri.v[1]);
+	vec2 c2 = projectPoint(tri.v[2]);
+	renderLine(c0, c1, lineColor);
+	renderLine(c1, c2, lineColor);
+	renderLine(c2, c0, lineColor);
 }

@@ -18,10 +18,11 @@ namespace et
 		struct Node
 		{
 			size_t depth = 0;
-			size_t splitAxis = 0;
-			plane splitPlane;
+			int splitAxis = -1;
+			plane splitPlane = plane(-1.0f, -1.0f, -1.0f, -1.0f);
 			rt::BoundingBox boundingBox;
 			
+			Node* parent = nullptr;
 			Node* left = nullptr;
 			Node* right = nullptr;
 

@@ -83,7 +83,8 @@ void MainController::applicationDidLoad(et::RenderContext* rc)
 
 	_gestures.click.connect([this](const PointerInputInfo& p)
 	{
-		_rt.performAtPoint(_scene, _camera, _texture->size(), vec2i(int(p.pos.x), int(p.pos.y)));
+		vec2i pixel(int(p.pos.x), int(p.pos.y));
+		_rt.output(pixel, _rt.performAtPoint(_scene, _camera, _texture->size(), pixel));
 	});
 }
 

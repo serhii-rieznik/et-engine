@@ -21,7 +21,11 @@ namespace et
 		
 		struct Constants
 		{
-			static constexpr float epsilon = 0.000001f;
+			static constexpr float epsilon = 0.0001f;
+			static constexpr float minusEpsilon = -epsilon;
+			static constexpr float onePlusEpsilon = 1.0f + epsilon;
+			static constexpr float epsilonSquared = epsilon * epsilon;
+			static constexpr float initialSplitValue = std::numeric_limits<float>::max();
 		};
 		
 		struct Material
@@ -159,26 +163,23 @@ namespace et
 		inline bool rayTriangle(const Ray& ray, const Triangle& tri, vec4simd& intersection_pt,
 			vec4simd& barycentric, float& distance)
 		{
-			const float minusEpsilon = -Constants::epsilon;
-			const float onePlusEpsilon = 1.0f + Constants::epsilon;
-			const float epsilonSquared = Constants::epsilon * Constants::epsilon;
-
 			vec4simd pvec = ray.direction.crossXYZ(tri.edge2to0);
 			float det = tri.edge1to0.dot(pvec);
-			if (det * det < epsilonSquared)
+			if (det * det < Constants::epsilonSquared)
 				return false;
+			det = 1.0f / det;
 
 			vec4simd tvec = ray.origin - tri.v[0];
-			float u = tvec.dot(pvec) / det;
-			if ((u < minusEpsilon) || (u > onePlusEpsilon))
+			float u = tvec.dot(pvec) * det;
+			if ((u < Constants::minusEpsilon) || (u > Constants::onePlusEpsilon))
 				return false;
 
 			vec4simd qvec = tvec.crossXYZ(tri.edge1to0);
-			float v = ray.direction.dot(qvec) / det;
-			if ((v < minusEpsilon) || (u + v > onePlusEpsilon))
+			float v = ray.direction.dot(qvec) * det;
+			if ((v < Constants::minusEpsilon) || (u + v > Constants::onePlusEpsilon))
 				return false;
 
-			distance = tri.edge2to0.dot(qvec) / det;
+			distance = tri.edge2to0.dot(qvec) * det;
 			intersection_pt = ray.origin + ray.direction * distance;
 			barycentric = vec4simd(1.0f - u - v, u, v, 0.0f);
 			
