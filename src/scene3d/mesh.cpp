@@ -255,6 +255,7 @@ void Mesh::transformInvalidated()
 	_shouldUpdateBoundingBox = true;
 	_shouldUpdateBoundingSphere = true;
 	_shouldUpdateOrientedBoundingBox = true;
+	_shouldUpdateBoundingSphereUntransformed = true;
 }
 
 float Mesh::finalTransformScale()
@@ -262,18 +263,26 @@ float Mesh::finalTransformScale()
 	return 1.0f / std::pow(std::abs(finalInverseTransform().mat3().determinant()), 1.0f / 3.0f);
 }
 
+const Sphere& Mesh::boundingSphereUntransformed()
+{
+	if (_shouldUpdateBoundingSphereUntransformed && _supportData.valid)
+	{
+		_cachedBoundingSphereUntransformed = Sphere(_supportData.averageCenter,
+			_supportData.boundingSphereRadius);
+		_shouldUpdateBoundingSphereUntransformed = false;
+	}
+	return _cachedBoundingSphereUntransformed;
+}
+
 const Sphere& Mesh::boundingSphere()
 {
 	if (_shouldUpdateBoundingSphere && _supportData.valid)
 	{
-		_shouldUpdateBoundingSphere = false;
-
 		const auto& ft = finalTransform();
-		
-		_cachedBoundingSphere = Sphere(ft * _supportData.averageCenter, 
+		_cachedBoundingSphere = Sphere(ft * _supportData.averageCenter,
 			finalTransformScale() * _supportData.boundingSphereRadius);
+		_shouldUpdateBoundingSphere = false;
 	}
-	
 	return _cachedBoundingSphere;
 }
 
@@ -431,12 +440,15 @@ void skinVector3Transformed(VertexStorage::Pointer from, VertexStorage::Pointer 
 	}
 }
 
+bool Mesh::skinned() const
+{
+	return _vertexStorage->hasAttribute(VertexAttributeUsage::BlendIndices) &&
+		_vertexStorage->hasAttribute(VertexAttributeUsage::BlendWeights);
+}
+
 VertexStorage::Pointer Mesh::bakeDeformations()
 {
 	const auto& transforms = deformationMatrices();
-	
-	bool isSkinned = _vertexStorage->hasAttribute(VertexAttributeUsage::BlendIndices) &&
-		_vertexStorage->hasAttribute(VertexAttributeUsage::BlendWeights);
 	
 	VertexStorage::Pointer result =
 		VertexStorage::Pointer::create(_vertexStorage->declaration(), _vertexStorage->capacity());
@@ -450,7 +462,7 @@ VertexStorage::Pointer Mesh::bakeDeformations()
 	copyAttribute(_vertexStorage, result, VertexAttributeUsage::BlendIndices);
 	copyAttribute(_vertexStorage, result, VertexAttributeUsage::BlendWeights);
 	
-	if (isSkinned)
+	if (skinned())
 	{
 		skinVector3Transformed(_vertexStorage, result, VertexAttributeUsage::Position, transforms);
 		skinVector3Rotated(_vertexStorage, result, VertexAttributeUsage::Normal, transforms);

@@ -91,6 +91,7 @@ namespace et
 				{ return _indexArray; }
 			
 			const Sphere& boundingSphere();
+			const Sphere& boundingSphereUntransformed();
 			const AABB& boundingBox();
 			const OBB& orientedBoundingBox();
 			
@@ -103,7 +104,8 @@ namespace et
 				{ _deformer = d; }
 			
 			const std::vector<mat4>& deformationMatrices();
-			
+
+			bool skinned() const;
 			VertexStorage::Pointer bakeDeformations();
 			
 		private:
@@ -119,6 +121,7 @@ namespace et
 			AABB _cachedBoundingBox;
 			OBB _cachedOrientedBoundingBox;
 			Sphere _cachedBoundingSphere;
+			Sphere _cachedBoundingSphereUntransformed;
 			
 			SupportData _supportData;
 			std::map<uint32_t, Mesh::Pointer> _lods;
@@ -132,6 +135,7 @@ namespace et
 			bool _shouldUpdateBoundingBox = true;
 			bool _shouldUpdateOrientedBoundingBox = true;
 			bool _shouldUpdateBoundingSphere = true;
+			bool _shouldUpdateBoundingSphereUntransformed = true;
 		};
 	}
 }

@@ -924,24 +924,6 @@ s3d::Mesh::Pointer FBXLoaderPrivate::loadMesh(s3d::Storage& storage, FbxMesh* me
 
 void FBXLoaderPrivate::buildVertexBuffers(RenderContext* rc, s3d::BaseElement::Pointer root, s3d::Storage& storage)
 {
-	for (auto vs : storage.vertexStorages())
-	{
-		if (vs->hasAttribute(VertexAttributeUsage::BlendIndices))
-		{
-			auto pos = vs->accessData<VertexAttributeType::Vec3>(et::VertexAttributeUsage::Position, 0);
-			auto blw = vs->accessData<VertexAttributeType::Vec4>(et::VertexAttributeUsage::BlendWeights, 0);
-			auto bli = vs->accessData<VertexAttributeType::IntVec4>(et::VertexAttributeUsage::BlendIndices, 0);
-			for (size_t i = 0; i < vs->capacity(); ++i)
-			{
-				log::info("%llu) (%.3f, %.3f, %.3f) -> [%d, %d, %d, %d], [%.3f, %.3f, %.3f, %.3f]",
-					uint64_t(i),
-					pos[i].x, pos[i].y, pos[i].z,
-					bli[i].x, bli[i].y, bli[i].z, bli[i].w,
-					blw[i].x, blw[i].y, blw[i].z, blw[i].w);
-			}
-		}
-	}
-
 	IndexBuffer::Pointer primaryIndexBuffer;
 	
 	std::vector<VertexArrayObject> vertexArrayObjects;
