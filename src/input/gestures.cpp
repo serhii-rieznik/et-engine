@@ -208,10 +208,11 @@ void GesturesRecognizer::onPointerMoved(et::PointerInputInfo pi)
 			
 			moved.invoke(pi.normalizedPos, pi.type);
 			
-			if (pCurr.type == PointerType_General)
-				dragWithGeneralPointer.invokeInMainRunLoop(speed, offset);
-			
-			drag.invoke(speed, pi.type);
+			DragGesture info;
+			info.offset = offset;
+			info.velocity = speed;
+			info.pointerType = pCurr.type;
+			drag.invoke(info);
 		}
 	}
 	else
@@ -296,7 +297,11 @@ void GesturesRecognizer::onGesturePerformed(GestureInputInfo i)
 		zoom.invoke(1.0f - i.zoom);
 
 	if (i.mask & GestureTypeMask_Swipe)
-		drag.invoke(i.swipe, PointerType_None);
+	{
+		DragGesture info;
+		info.offset = i.swipe;
+		drag.invoke(info);
+	}
 	
 	if (i.mask & GestureTypeMask_Rotate)
 		rotate.invokeInMainRunLoop(i.rotation);

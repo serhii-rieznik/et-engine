@@ -27,6 +27,13 @@ namespace et
 		static const float defaultClickSpatialTreshold;
 		static const float defaultHoldTemporalThreshold;
 		
+		struct DragGesture
+		{
+			vec2 offset = vec2(0.0f);
+			vec2 velocity = vec2(0.0f);
+			PointerType pointerType = PointerType_None;
+		};
+		
 	public:
 		GesturesRecognizer(bool automaticMode = true);
 		
@@ -63,17 +70,9 @@ namespace et
 		
 		/*
 		 * Drag gesture
-		 * first parameter - velocity
 		 */
-		ET_DECLARE_EVENT2(drag, vec2, PointerType)
-		
-		/*
-		 * Drag gesture
-		 * first parameter - velocity
-		 * second parameter - offset
-		 */
-		ET_DECLARE_EVENT2(dragWithGeneralPointer, vec2, vec2)
-		
+		ET_DECLARE_EVENT1(drag, const DragGesture&)
+				
 		ET_DECLARE_EVENT2(pressed, vec2, PointerType)
 		ET_DECLARE_EVENT2(moved, vec2, PointerType)
 		ET_DECLARE_EVENT2(released, vec2, PointerType)
