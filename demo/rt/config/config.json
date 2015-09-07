@@ -1,15 +1,16 @@
 {
-	"model-name" : "shaderart.obj",
-	"rays-per-pixel" : 1024,
-	"max-recursion-depth" : 8,
-	"camera-fov" : 60.0,
-	"camera-distance" : 250.85,
-	"camera-phi" : 35.0,
-	"camera-theta" : 65.0,
-	"camera-offset" : [40.0, 0.0, 40.0],
-	"camera-view-point" : [40.0, 0.0, 40.0],
+	"model-name" : "CornellBox-Sphere.obj",
+	"rays-per-pixel" : 1536,
+	"max-recursion-depth" : 24,
+	"camera-fov" : 50.0,
+	"camera-distance" : 2.85,
+	"camera-phi" : 90.0,
+	"camera-theta" : 0.0,
+	"camera-offset" : [0.0, 0.8, 0.0],
+	"camera-view-point" : [0.0, 0.8, 0.0],
 	"debug-rendering" : 0,
-	"kd-tree-max-depth" : 12,
-	"kd-tree-splits" : 32,
-    "render-region-size" : 16
+	"kd-tree-max-depth" : 16,
+	"kd-tree-splits" : 64,
+    "render-region-size" : 32,
+	"render-kd-tree" : 0
 }

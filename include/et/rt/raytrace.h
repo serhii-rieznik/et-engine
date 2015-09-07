@@ -25,6 +25,7 @@ namespace et
             size_t renderRegionSize = 32;
 			int kdTreeSplits = 4;
 			bool debugRendering = false;
+			bool renderKDTree = false;
 		};
 
 	public:

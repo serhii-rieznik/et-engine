@@ -13,10 +13,19 @@
 
 namespace et
 {
-	enum class DebugRenderMode
+	enum class DebugRenderMode : size_t
 	{
-		TraceSinglePoint,
+		RenderNormals,
+		RenderDiffuse,
 		RenderTriangle
+	};
+	
+	enum class RayClass : size_t
+	{
+		Debug,
+		Diffuse,
+		Reflected,
+		Refracted,
 	};
 	
 	class RaytracePrivate
@@ -53,13 +62,17 @@ namespace et
 		void fillRegionWithColor(const rt::Region&, const vec4& color);
 		void renderTriangle(const rt::Triangle&);
 		
+		RayClass classifyRay(vec4simd& hitNormal, const rt::Material& hitMaterial,
+			const vec4simd& inDirection, vec4simd& defaultDirection, vec4simd& actualDirection,
+			vec4simd& output);
+		
 	public:
 		Raytrace* owner = nullptr;
 		Raytrace::Options options;
 		KDTree kdTree;
 		Camera camera;
 		vec2i viewportSize = vec2i(0);
-		DebugRenderMode debugMode = DebugRenderMode::TraceSinglePoint;
+		DebugRenderMode debugMode = DebugRenderMode::RenderNormals;
 
 		std::vector<std::thread> workerThreads;
 		std::atomic<bool> running;
@@ -77,7 +90,7 @@ float fastRandomFloat()
 {
 	static const int maxValues = 1000;
 	static float values[maxValues];
-	static bool shouldInit = false;
+	static bool shouldInit = true;
 	
 	if (shouldInit)
 	{
@@ -163,6 +176,7 @@ RaytracePrivate::~RaytracePrivate()
 
 void RaytracePrivate::emitWorkerThreads()
 {
+	srand(static_cast<unsigned int>(time(nullptr)));
 	startTime = queryContiniousTimeInMilliSeconds();
 	
 	log::info("Rendering started: %llu", startTime);
@@ -194,17 +208,23 @@ void RaytracePrivate::buildMaterialAndTriangles(s3d::Scene::Pointer scene)
 		if (vs.invalid() || ia.invalid()) continue;
 
 		auto meshMaterial = mesh->material();
-		size_t matIndex = materialIndexWithName(meshMaterial->name());
-		if (matIndex == InvalidIndex)
+		auto materialIndex = materialIndexWithName(meshMaterial->name());
+		if (materialIndex == InvalidIndex)
 		{
-			matIndex = materials.size();
+			materialIndex = materials.size();
 			materials.emplace_back();
 			auto& mat = materials.back();
-			mat.diffuse = vec4simd(meshMaterial->getVector(MaterialParameter_DiffuseColor));
+			
+			float r = clamp(meshMaterial->getFloat(MaterialParameter_Roughness), 0.0f, 1.0f);
+			auto kA = meshMaterial->getVector(MaterialParameter_AmbientColor);
+			auto kD = meshMaterial->getVector(MaterialParameter_DiffuseColor);
+			
+			mat.name = meshMaterial->name();
+			mat.diffuse = vec4simd(kA + kD);
 			mat.specular = vec4simd(meshMaterial->getVector(MaterialParameter_SpecularColor));
 			mat.emissive = vec4simd(meshMaterial->getVector(MaterialParameter_EmissiveColor));
-			mat.roughness = meshMaterial->getFloat(MaterialParameter_Roughness);
-			mat.name = meshMaterial->name();
+			mat.roughness = HALF_PI * (1.0f - std::cos(HALF_PI * r));
+			mat.ior = meshMaterial->getFloat(MaterialParameter_Transparency);
 		}
 
 		const mat4& t = mesh->finalTransform();
@@ -225,12 +245,15 @@ void RaytracePrivate::buildMaterialAndTriangles(s3d::Scene::Pointer scene)
 			tri.n[0] = vec4simd(t.rotationMultiply(nrm[i0]).normalized(), 0.0f);
 			tri.n[1] = vec4simd(t.rotationMultiply(nrm[i1]).normalized(), 0.0f);
 			tri.n[2] = vec4simd(t.rotationMultiply(nrm[i2]).normalized(), 0.0f);
-			tri.materialIndex = matIndex;
+			tri.materialIndex = materialIndex;
 			tri.computeSupportData();
 		}
 	}
 	
 	kdTree.build(triangles, options.maxKDTreeDepth, options.kdTreeSplits);
+	
+	if (options.renderKDTree)
+		kdTree.printStructure();
 }
 
 size_t RaytracePrivate::materialIndexWithName(const std::string& n)
@@ -353,7 +376,8 @@ void RaytracePrivate::threadFunction()
 	
 	if (threadCounter.load() == 0)
 	{
-		// renderSpacePartitioning();
+		if (options.renderKDTree)
+			renderSpacePartitioning();
 		
 		auto endTime = queryContiniousTimeInMilliSeconds();
 		uint64_t diff = endTime - startTime;
@@ -373,8 +397,7 @@ vec4 RaytracePrivate::raytracePixel(const vec2i& pixel, size_t samples, size_t& 
 	vec4simd result = gatherBouncesRecursive(camera.castRay(pixelBase), 0, bounces);
 	for (int m = 1; m < samples; ++m)
 	{
-		vec2 jitter = vec2(randomFloat(-pixelSize.x, pixelSize.x),
-			randomFloat(-pixelSize.y, pixelSize.y));
+		vec2 jitter = pixelSize * vec2(2.0f * fastRandomFloat() - 1.0f, 2.0f * fastRandomFloat() - 1.0f);
 		result += gatherBouncesRecursive(camera.castRay(pixelBase + jitter), 0, bounces);
 	}
 
@@ -384,70 +407,147 @@ vec4 RaytracePrivate::raytracePixel(const vec2i& pixel, size_t samples, size_t& 
 	return output;
 }
 
+inline void computeReflectionWithRoughness(const vec4simd& indidence, const vec4simd& normal, float roughness,
+	vec4simd& defaultDirection, vec4simd& actualDirection)
+{
+	defaultDirection = rt::reflect(indidence, normal);
+	actualDirection = rt::randomVectorOnHemisphere(defaultDirection, roughness);
+	if (actualDirection.dot(normal) < rt::Constants::minusEpsilon)
+	{
+		actualDirection = rt::reflect(actualDirection, actualDirection.crossXYZ(normal));
+		actualDirection.normalize();
+	}
+}
+
+inline void computeDiffuseWithRoughness(const vec4simd& indidence, const vec4simd& normal, float roughness,
+	vec4simd& defaultDirection, vec4simd& actualDirection)
+{
+	defaultDirection = normal;
+	actualDirection = rt::randomVectorOnHemisphere(defaultDirection, HALF_PI);
+}
+
+inline void computeRefractionWithParameters(const vec4simd& incidence, const vec4simd& normal, float roughness,
+	float k, float eta, vec4simd& defaultDirection, vec4simd& actualDirection)
+{
+	ET_ASSERT(k >= 0.0f);
+	defaultDirection = incidence * eta - normal * (eta * normal.dot(incidence) + std::sqrt(k));
+	actualDirection = rt::randomVectorOnHemisphere(defaultDirection, roughness);
+	if (actualDirection.dot(normal) > rt::Constants::epsilon)
+	{
+		actualDirection = rt::reflect(actualDirection, actualDirection.crossXYZ(normal));
+		actualDirection.normalize();
+	}
+}
+
+RayClass RaytracePrivate::classifyRay(vec4simd& normal, const rt::Material& mat,
+	const vec4simd& inDirection, vec4simd& defaultDirection, vec4simd& actualDirection,
+	vec4simd& output)
+{
+	output = vec4simd(100.0f, 0.0f, 100.0f, 1.0f);
+	
+	if (mat.ior >= 1.0f)
+	{
+		float currentMediumIOR = 1.001f;
+		float targetMediumIOR = mat.ior;
+		bool enteringMaterial = normal.dot(inDirection) < rt::Constants::epsilon;
+		
+		if (!enteringMaterial)
+		{
+			normal *= -1.0f;
+			std::swap(currentMediumIOR, targetMediumIOR);
+		}
+		
+		float eta = currentMediumIOR / targetMediumIOR;
+		float k = rt::computeRefractiveCoefficient(inDirection, normal, eta);
+		if (k >= 0.0f) // refract
+		{
+			float fresnel = rt::computeFresnelTerm(inDirection, normal, eta);
+			ET_ASSERT(fresnel >= 0.0f);
+			ET_ASSERT(fresnel <= 1.0f);
+			if (fastRandomFloat() >= fresnel)
+			{
+				// refract
+				output = mat.diffuse;
+				computeRefractionWithParameters(inDirection, normal, mat.roughness, k, eta, defaultDirection, actualDirection);
+				return RayClass::Refracted;
+			}
+			else
+			{
+				output = mat.specular;
+				computeReflectionWithRoughness(inDirection, normal, mat.roughness, defaultDirection, actualDirection);
+				return RayClass::Reflected;
+			}
+		}
+		else // reflect due to total internal reflection
+		{
+			output = mat.specular;
+			computeReflectionWithRoughness(inDirection, normal, mat.roughness, defaultDirection, actualDirection);
+			return RayClass::Reflected;
+		}
+	}
+
+	if (fastRandomFloat() >= mat.roughness)
+	{
+		output = mat.specular;
+		computeReflectionWithRoughness(inDirection, normal, mat.roughness, defaultDirection, actualDirection);
+		return RayClass::Reflected;
+	}
+	
+	// compute diffuse reflection
+	output = mat.diffuse;
+	computeDiffuseWithRoughness(inDirection, normal, mat.roughness, defaultDirection, actualDirection);
+	
+	return RayClass::Diffuse;
+}
+
 vec4simd RaytracePrivate::gatherBouncesRecursive(const rt::Ray& r, size_t depth, size_t& maxDepth)
 {
 	maxDepth = std::max(maxDepth, depth);
-	const vec4simd epsilon(0.0001f);
 
 	KDTree::TraverseResult traverse = kdTree.traverse(r);
 	if (traverse.triangleIndex == InvalidIndex)
 		return sampleEnvironment(r.direction);
-		
+	
 	const auto& tri = kdTree.triangleAtIndex(traverse.triangleIndex);
 	const auto& mat = materials[tri.materialIndex];
 	
 	vec4simd n = tri.interpolatedNormal(traverse.intersectionPointBarycentric);
 	n.normalize();
 	
-	/* backface culling for camera
-	if ((depth == 0) && (n.dot(r.direction) > 0.0f))
-		return gatherBouncesRecursive(rt::Ray(traverse.intersectionPoint + n * epsilon, r.direction), 1, maxDepth);
-	// */
-	
+	//*
 	if (options.debugRendering)
 	{
-		if (debugMode == DebugRenderMode::TraceSinglePoint)
-			return mat.emissive + mat.diffuse;
-
-		if (debugMode == DebugRenderMode::RenderTriangle)
+		switch (debugMode)
 		{
-			renderTriangle(tri);
-			return vec4simd(0.0f);
+			case DebugRenderMode::RenderDiffuse:
+				return mat.emissive + mat.diffuse;
+				
+			case DebugRenderMode::RenderNormals:
+				return n * 0.5f + vec4simd(0.5f);
+				
+			case DebugRenderMode::RenderTriangle:
+			{
+				renderTriangle(tri);
+				return vec4simd(0.0f);
+			}
+			default:
+				break;
 		}
 	}
+	// */
 	
-	vec4simd newDirection;
 	vec4simd materialColor;
-	vec4simd colorScale;
-	if (fastRandomFloat() >= mat.roughness)
-	{
-		// compute specular reflection
-		vec4simd reflected = rt::reflect(r.direction, n);
-		reflected.normalize();
-
-		newDirection = rt::randomVectorOnHemisphere(reflected, HALF_PI * mat.roughness);
-
-		if (newDirection.dot(n) < 0.0f)
-			newDirection = rt::reflect(newDirection, newDirection.crossXYZ(n));
-
-		newDirection.normalize();
-
-		materialColor = mat.specular;
-		colorScale = newDirection.dotVector(reflected);
-	}
-	else 
-	{
-		// compute diffuse reflection
-		newDirection = rt::randomVectorOnHemisphere(n, HALF_PI);
-		materialColor = mat.diffuse;
-		colorScale = newDirection.dotVector(n);
-	}
+	vec4simd defaultDirection;
+	vec4simd actualDirection;
+	
+	if (classifyRay(n, mat, r.direction, defaultDirection, actualDirection, materialColor) == RayClass::Debug)
+		return materialColor;
 
 	if (depth <= options.maxRecursionDepth)
 	{
-		rt::Ray nextRay(traverse.intersectionPoint + n * epsilon, newDirection);
+		rt::Ray nextRay(traverse.intersectionPoint + defaultDirection * rt::Constants::epsilon, actualDirection);
 		vec4simd nextColor = gatherBouncesRecursive(nextRay, depth + 1, maxDepth);
-		return mat.emissive + materialColor * nextColor * colorScale;
+		return mat.emissive + materialColor * nextColor * actualDirection.dotVector(defaultDirection);
 	}
 
 	return mat.emissive;
@@ -455,16 +555,16 @@ vec4simd RaytracePrivate::gatherBouncesRecursive(const rt::Ray& r, size_t depth,
 
 vec4simd RaytracePrivate::sampleEnvironment(const vec4simd& direction)
 {
+	//	return vec4simd(1.0f, 1.0f, 0.75f, 1.0f);
+	//*
 	const vec4simd ambient(40.0f / 255.0f, 58.0f / 255.0f, 72.0f / 255.0f, 1.0f);
 	const vec4simd sun(249.0f / 255.0f, 243.0f / 255.0f, 179.0f / 255.0f, 1.0f);
 	const vec4simd atmosphere(173.0f / 255.0f, 181.0f / 255.0f, 185.0f / 255.0f, 1.0f);
-	
 	vec4simd sunDirection = vec4simd(0.0f, 1.0f, 0.0f, 0.0f);
 	sunDirection.normalize();
-	
 	float t = etMax(0.0f, direction.dot(sunDirection));
 	float s = 5.0f * pow(t, 32.0f) + 8.0f * pow(t, 256.0f);
-	return (ambient + atmosphere * std::sqrt(t) + sun * s) * 2.0f;
+	return ambient + atmosphere * std::sqrt(t) + sun * s;
 	// */
 }
 
@@ -475,6 +575,24 @@ void RaytracePrivate::estimateRegionsOrder()
 	
 	std::random_shuffle(regions.begin(), regions.end());
 	
+	vec2i sx[maxSamples] =
+	{
+		vec2i(1, 3),
+		vec2i(2, 3),
+		vec2i(1, 2),
+		vec2i(1, 3),
+		vec2i(2, 3),
+	};
+
+	vec2i sy[maxSamples] =
+	{
+		vec2i(1, 3),
+		vec2i(1, 3),
+		vec2i(1, 2),
+		vec2i(2, 3),
+		vec2i(2, 3),
+	};
+	
 	for (auto& r : regions)
 	{
 		r.estimatedBounces = 0;
@@ -482,7 +600,8 @@ void RaytracePrivate::estimateRegionsOrder()
 		for (size_t i = 0; i < maxSamples; ++i)
 		{
 			size_t bounces = 0;
-			estimatedColor += raytracePixel(r.origin + vec2i(rand() % r.size.x, rand() % r.size.y), 1, bounces);
+			estimatedColor += raytracePixel(r.origin + vec2i(sx[i].x * r.size.x / sx[i].y,
+				sy[i].x * r.size.y / sy[i].y), 1, bounces);
 			r.estimatedBounces += bounces;
 		}
 		float aspect = float(maxEstimatedBounces - r.estimatedBounces) / float(maxEstimatedBounces);

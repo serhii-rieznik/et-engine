@@ -35,6 +35,7 @@ namespace et
 			vec4simd specular;
 			vec4simd emissive;
 			float roughness = 0.0f;
+			float ior = 0.0f;
 		};
 
 		struct Triangle
@@ -81,11 +82,18 @@ namespace et
 					n[1] * b.shuffle<1, 1, 1, 1>() + n[2] * b.shuffle<2, 2, 2, 2>();
 			}
 			
-			vec4simd averageNormal() const
+			vec4simd geometricNormal() const
 			{
-				vec4simd c = edge2to0.crossXYZ(edge1to0);
+				vec4simd c = edge1to0.crossXYZ(edge2to0);
 				c.normalize();
 				return c;
+			}
+
+			vec4simd averageNormal() const
+			{
+				vec4simd result = n[0] + n[1] + n[2];
+				result.normalize();
+				return result;
 			}
 			
 			vec4simd minVertex() const
@@ -332,5 +340,39 @@ namespace et
 			
 			return ((txmin < tzmax) && (tzmin < txmax));
 		}
+		
+		inline float computeRefractiveCoefficient(const vec4simd& incidence, const vec4simd& normal, float eta)
+		{
+			return 1.0f - sqr(eta) * (1.0f - sqr(normal.dot(incidence)));
+		}
+		
+		inline float computeFresnelTerm(const vec4simd& incidence, const vec4simd& normal, float eta)
+		{
+			float cosTheta = std::abs(incidence.dot(normal));
+			float sinTheta = std::sqrt(1.0f - cosTheta * cosTheta);
+			float etaCosTheta = eta * cosTheta;
+			float v = std::sqrt(1.0f - sqr(eta * sinTheta));
+			return sqr((etaCosTheta - v) / (etaCosTheta + v));
+			/*
+			return sqr
+			(
+				(
+					2.0f * sqr(eta) * sqr(cosTheta) + 1.0f - sqr(eta) - 2.0f * std::sqrt
+					(
+						1.0f - sqr(eta) + sqr(eta) * sqr(cosTheta)
+					)
+				)
+			    /
+				(sqr(eta) - 1.0f)
+			);
+			/*
+			float etaIdotN = eta * incidence.dot(normal);
+			float etaIdotN2 = etaIdotN * etaIdotN;
+			float beta = 1.0f - eta * eta;
+			float result = 1.0f + 2.0f * (etaIdotN2 + etaIdotN * std::sqrt(beta + etaIdotN2)) / beta;
+			return clamp(result * result, 0.0f, 1.0f);
+			*/
+		}
+
 	}
 }

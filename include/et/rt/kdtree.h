@@ -12,24 +12,29 @@
 
 namespace et
 {
-	class KDTree
+	class ET_ALIGNED(16) KDTree
 	{
 	public:
 		struct Node
 		{
-			size_t depth = 0;
-			int splitAxis = -1;
-			plane splitPlane = plane(-1.0f, -1.0f, -1.0f, -1.0f);
 			rt::BoundingBox boundingBox;
-			
-			Node* parent = nullptr;
-			Node* left = nullptr;
-			Node* right = nullptr;
-
 			std::vector<size_t> triangles;
+			int splitAxis;
+			float splitDistance;
+			bool containsSubNodes;
+
+			union
+			{
+				struct
+				{
+					Node* left;
+					Node* right;
+				};
+				Node* subNodes[2];
+			};
 			
-			bool isLeafNode() const
-				{ return (left == nullptr) && (right == nullptr); }
+			Node() :
+				left(nullptr), right(nullptr) { };
 		};
 		
 		struct ET_ALIGNED(16) TraverseResult
@@ -50,6 +55,7 @@ namespace et
 			{ return _root; }
 		
 		TraverseResult traverse(const rt::Ray& r);
+		void printStructure();
 		
 		const rt::Triangle& triangleAtIndex(size_t) const;
 		
@@ -58,8 +64,8 @@ namespace et
 		void cleanUpRecursively(Node*);
 		
 		Node* buildRootNode();
-		void splitNodeUsingBins(Node*);
-		void splitNodeUsingSortedArray(Node*);
+		void splitNodeUsingBins(Node*, size_t);
+		void splitNodeUsingSortedArray(Node*, size_t);
 		void buildSplitBoxesUsingAxisAndPosition(Node*, int axis, float position);
 		void distributeTrianglesToChildren(Node*);
 		
@@ -69,7 +75,7 @@ namespace et
 	private:
 		Node* _root = nullptr;
 		size_t _maxDepth = 0;
-		size_t _minTrianglesToSubdivide = 5;
+		size_t _minTrianglesToSubdivide = 16;
 		int _spaceSplitSize = 32;
 		std::vector<rt::Triangle> _triangles;
 	};

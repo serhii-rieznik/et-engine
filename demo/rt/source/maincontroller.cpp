@@ -63,9 +63,10 @@ void MainController::applicationDidLoad(et::RenderContext* rc)
 	Raytrace::Options rtOptions;
 	rtOptions.maxRecursionDepth = options.integerForKey("max-recursion-depth", 8)->content;
 	rtOptions.raysPerPixel = options.integerForKey("rays-per-pixel", 32)->content;
-	rtOptions.debugRendering = options.integerForKey("debug-rendering", 0ll)->content != 0;
     rtOptions.maxKDTreeDepth = options.integerForKey("kd-tree-max-depth", 4)->content;
     rtOptions.renderRegionSize = options.integerForKey("render-region-size", 32)->content;
+	rtOptions.debugRendering = options.integerForKey("debug-rendering", 0ll)->content != 0;
+	rtOptions.renderKDTree = options.integerForKey("render-kd-tree", 0ll)->content != 0;
 	rtOptions.kdTreeSplits = static_cast<int>(options.integerForKey("kd-tree-splits", 4)->content);
 	_rt.setOptions(rtOptions);
 

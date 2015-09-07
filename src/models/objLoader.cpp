@@ -74,7 +74,10 @@ inline void splitAndWrite(const std::string& s, char token, F func)
 		{
 			func(std::string(pos, begin - pos));
 			while (*(begin + 1) == token)
+			{
+				func(intToStr(std::numeric_limits<int>::max()));
 				++begin;
+			}
 			pos = begin + 1;
 		}
 		++begin;
@@ -273,6 +276,7 @@ void OBJLoader::loadData(bool async,  s3d::Storage& storage, ObjectsCache& cache
 			for (auto inFace : faces)
 			{
 				OBJVertex vertex;
+				vertex.fill(0);
 
 				std::vector<int> indexes;
 				indexes.reserve(3);
@@ -282,16 +286,33 @@ void OBJLoader::loadData(bool async,  s3d::Storage& storage, ObjectsCache& cache
 				size_t i = 0;
 				for (auto iValue : indexes)
 				{
-					if (iValue < 0)
+					if (iValue == std::numeric_limits<int>::max())
+					{
+					}
+					else if (iValue < 0)
 					{
 						size_t szValue = static_cast<size_t>(-iValue);
-						ET_ASSERT(szValue <= _vertices.size());
-						vertex[i++] = _vertices.size() - szValue;
+						if (i == 0)
+						{
+							ET_ASSERT(szValue <= _vertices.size());
+							vertex[i] = _vertices.size() - szValue;
+						}
+						else if (i == 1)
+						{
+							ET_ASSERT(szValue <= _texCoords.size());
+							vertex[i] = _texCoords.size() - szValue;
+						}
+						else if (i == 2)
+						{
+							ET_ASSERT(szValue <= _normals.size());
+							vertex[i] = _normals.size() - szValue;
+						}
 					}
 					else
 					{
-						vertex[i++] = iValue - 1;
+						vertex[i] = iValue - 1;
 					}
+					++i;
 				}
 				
 				face.vertices.push_back(vertex);
