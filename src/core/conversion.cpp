@@ -223,7 +223,7 @@ ArrayValue et::quaternionToArray(const quaternion& q)
 vec2 et::arrayToVec2(ArrayValue a)
 {
 	vec2 result;
-	size_t index = 0;
+	int index = 0;
 	for (auto v : a->content)
 	{
 		if (v->valueClass() == ValueClass_Float)

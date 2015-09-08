@@ -66,14 +66,6 @@ namespace et
 	template <typename T>
 	struct SharedBlockAllocatorSTDProxy : public std::allocator<T>
 	{
-		typedef T value_type;
-		
-		typedef T* pointer;
-		typedef T& reference;
-		
-		typedef const T* const_pointer;
-		typedef const T& const_reference;
-		
 		pointer allocate(size_t n)
 			{ return reinterpret_cast<pointer>(sharedBlockAllocator().allocate(n * sizeof(T))); }
 		

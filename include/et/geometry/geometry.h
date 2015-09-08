@@ -162,7 +162,7 @@ namespace et
 	inline Quaternion<T> slerp(const Quaternion<T>& from, const Quaternion<T>& to, T t)
 	{
 		const T one(1);
-		const T epsilon(0.0001);
+		const T epsilon(0.0001f);
 		
 		Quaternion<T> target = to;
 		

@@ -310,7 +310,8 @@ std::wstring et::utf8ToUnicode(const std::string& mbcs)
 		switch (GetLastError())
 		{
 		case ERROR_INSUFFICIENT_BUFFER:
-			std::cout << "A supplied buffer size was not large enough, or it was incorrectly set to NULL." << std::endl;
+			std::cout << "A supplied buffer size was not large enough, "
+				"or it was incorrectly set to NULL." << std::endl;
 			break;
 
 		case ERROR_INVALID_FLAGS:
@@ -399,6 +400,31 @@ std::string et::selectFile(const StringList&, SelectFileMode mode, const std::st
 	auto func = (mode == SelectFileMode::Save) ? GetSaveFileName : GetOpenFileName;
 
 	return func(&of) ? ET_STRING_TO_OUTPUT_TYPE(of.lpstrFile) : emptyString;
+}
+
+void et::alert(const std::string& title, const std::string& message, const std::string&, AlertType type)
+{
+	UINT alType = MB_ICONINFORMATION;
+
+	switch (type)
+	{
+	case AlertType::Warning: 
+		{
+			alType = MB_ICONWARNING;
+			break;
+		}
+
+	case AlertType::Error: 
+		{
+			alType = MB_ICONERROR;
+			break;
+		}
+
+	default:
+		break;
+	}
+
+	MessageBoxA(nullptr, message.c_str(), title.c_str(), alType);
 }
 
 #endif // ET_PLATFORM_WIN

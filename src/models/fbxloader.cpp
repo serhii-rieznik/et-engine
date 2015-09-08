@@ -885,12 +885,12 @@ s3d::Mesh::Pointer FBXLoaderPrivate::loadMesh(s3d::Storage& storage, FbxMesh* me
 			mat4 meshInitialTransform(0.0f);
 			for (int r = 0; r < 4; ++r)
 				for (int c = 0; c < 4; ++c)
-					meshInitialTransform[r][c] = fbxMeshTransformMatrix.Get(r, c);
+					meshInitialTransform[r][c] = static_cast<float>(fbxMeshTransformMatrix.Get(r, c));
 
 			mat4 linkInitialTransform(0.0f);
 			for (int r = 0; r < 4; ++r)
 				for (int c = 0; c < 4; ++c)
-					linkInitialTransform[r][c] = fbxLinkTransformMatrix.Get(r, c);
+					linkInitialTransform[r][c] = static_cast<float>(fbxLinkTransformMatrix.Get(r, c));
 					
 			cluster->setMeshInitialTransform(meshInitialTransform);
 			cluster->setLinkInitialTransform(linkInitialTransform);

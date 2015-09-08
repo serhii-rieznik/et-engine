@@ -199,31 +199,6 @@ Application::~Application()
 
 }
 
-void Application::alert(const std::string& title, const std::string& message, AlertType type)
-{
-	UINT alType = MB_ICONINFORMATION;
-
-	switch (type)
-	{
-	case AlertType_Warning: 
-		{
-			alType = MB_ICONWARNING;
-			break;
-		}
-
-	case AlertType_Error: 
-		{
-			alType = MB_ICONERROR;
-			break;
-		}
-
-	default:
-		break;
-	}
-
-	MessageBoxA(0, message.c_str(), title.c_str(), alType);
-}
-
 void Application::setTitle(const std::string& s)
 {
 	auto stringValue = ET_STRING_TO_PARAM_TYPE(s);

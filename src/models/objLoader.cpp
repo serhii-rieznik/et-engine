@@ -93,7 +93,7 @@ inline std::istream& operator >> (std::istream& stream, vec2& value)
 	std::getline(stream, ln);
 	trim(ln);
 
-	size_t comp = 0;
+	int comp = 0;
 	splitAndWrite(ln, [&value, &comp](const std::string& s)
 	{
 		if (comp < 2)
