@@ -88,18 +88,14 @@ using namespace et;
 
 float fastRandomFloat()
 {
-	static const int maxValues = 1000;
-	static float values[maxValues];
-	static bool shouldInit = true;
-	
-	if (shouldInit)
+	union
 	{
-		for (size_t i = 0; i < maxValues; ++i)
-			values[i] = randomFloat(0.0f, 1.0f);
-		shouldInit = false;
-	}
-	
-	return values[rand() % maxValues];
+		float fres;
+		unsigned int ires;
+	};
+	static unsigned int seed = 1;
+	ires = (((seed *= 16807) >> 9) | 0x3f800000);
+	return fres - 1.0f;
 }
 
 Raytrace::Raytrace()
@@ -462,8 +458,6 @@ RayClass RaytracePrivate::classifyRay(vec4simd& normal, const rt::Material& mat,
 		if (k >= 0.0f) // refract
 		{
 			float fresnel = rt::computeFresnelTerm(inDirection, normal, eta);
-			ET_ASSERT(fresnel >= 0.0f);
-			ET_ASSERT(fresnel <= 1.0f);
 			if (fastRandomFloat() >= fresnel)
 			{
 				// refract
@@ -512,9 +506,9 @@ vec4simd RaytracePrivate::gatherBouncesRecursive(const rt::Ray& r, size_t depth,
 	const auto& mat = materials[tri.materialIndex];
 	
 	vec4simd n = tri.interpolatedNormal(traverse.intersectionPointBarycentric);
-	n.normalize();
+	// n.normalize();
 	
-	//*
+	/*
 	if (options.debugRendering)
 	{
 		switch (debugMode)
@@ -555,8 +549,8 @@ vec4simd RaytracePrivate::gatherBouncesRecursive(const rt::Ray& r, size_t depth,
 
 vec4simd RaytracePrivate::sampleEnvironment(const vec4simd& direction)
 {
-    return vec4simd(0.0f, 0.0f, 0.0f, 1.0f);
-	/*
+	// return vec4simd(1.0f, 1.0f, 1.0f, 1.0f);
+	//*
 	const vec4simd ambient(40.0f / 255.0f, 58.0f / 255.0f, 72.0f / 255.0f, 1.0f);
 	const vec4simd sun(249.0f / 255.0f, 243.0f / 255.0f, 179.0f / 255.0f, 1.0f);
 	const vec4simd atmosphere(173.0f / 255.0f, 181.0f / 255.0f, 185.0f / 255.0f, 1.0f);

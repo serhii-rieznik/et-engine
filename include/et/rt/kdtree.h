@@ -75,7 +75,7 @@ namespace et
 	private:
 		Node* _root = nullptr;
 		size_t _maxDepth = 0;
-		size_t _minTrianglesToSubdivide = 16;
+		size_t _minTrianglesToSubdivide = 32;
 		int _spaceSplitSize = 32;
 		std::vector<rt::Triangle> _triangles;
 	};

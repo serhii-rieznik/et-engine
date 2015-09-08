@@ -365,7 +365,7 @@ namespace et
 			    /
 				(sqr(eta) - 1.0f)
 			);
-			/*
+
 			float etaIdotN = eta * incidence.dot(normal);
 			float etaIdotN2 = etaIdotN * etaIdotN;
 			float beta = 1.0f - eta * eta;

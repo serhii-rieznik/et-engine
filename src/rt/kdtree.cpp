@@ -50,7 +50,7 @@ void KDTree::build(const std::vector<rt::Triangle>& triangles, size_t maxDepth, 
 	_spaceSplitSize = splits;
 	
 	_root = buildRootNode();
-	// splitNodeUsingSortedArray(_root, 0);
+	//splitNodeUsingSortedArray(_root, 0);
 	splitNodeUsingBins(_root, 0);
 }
 
@@ -190,30 +190,8 @@ void KDTree::splitNodeUsingBins(Node* node, size_t depth)
 	
 	buildSplitBoxesUsingAxisAndPosition(node, axis, splitPlane);
 	distributeTrianglesToChildren(node);
-	
-	if ((node->left->triangles.size() >= node->triangles.size()) ||
-		(node->right->triangles.size() >= node->triangles.size()))
-	{
-		sharedObjectFactory().deleteObject(node->left);
-		sharedObjectFactory().deleteObject(node->right);
-		node->left = nullptr;
-		node->right = nullptr;
-		node->containsSubNodes = false;
-	}
-	else
-	{
-		splitNodeUsingBins(node->left, depth + 1);
-		splitNodeUsingBins(node->right, depth + 1);
-	}
-	
-	/*
-	const char* axisNames[3] = { "X", "Y", "Z" };
-	log::info("Node with depth (%llu), containing %llu triangles, split along %s axis at position %.4f:",
-		static_cast<uint64_t>(node->depth), static_cast<uint64_t>(node->triangles.size()), axisNames[axis], splitPlane);
-	log::info("Left, containing %llu triangles", static_cast<uint64_t>(node->left->triangles.size()));
-	log::info("Right, containing %llu triangles", static_cast<uint64_t>(node->right->triangles.size()));
-	// */
-	
+	splitNodeUsingBins(node->left, depth + 1);
+	splitNodeUsingBins(node->right, depth + 1);
 }
 
 void KDTree::buildSplitBoxesUsingAxisAndPosition(Node* node, int axis, float position)
@@ -238,13 +216,11 @@ void KDTree::buildSplitBoxesUsingAxisAndPosition(Node* node, int axis, float pos
 	node->splitDistance = position;
 	
 	node->left = sharedObjectFactory().createObject<Node>();
-	node->left->boundingBox.center = node->boundingBox.center * axisScale +
-		posScale * (middlePoint - leftSize);
+	node->left->boundingBox.center = node->boundingBox.center * axisScale + posScale * (middlePoint - leftSize);
 	node->left->boundingBox.halfSize = node->boundingBox.halfSize * axisScale + posScale * leftSize;
 	
 	node->right = sharedObjectFactory().createObject<Node>();
-	node->right->boundingBox.center = node->boundingBox.center * axisScale +
-		posScale * (middlePoint + rightSize);
+	node->right->boundingBox.center = node->boundingBox.center * axisScale + posScale * (middlePoint + rightSize);
 	node->right->boundingBox.halfSize = node->boundingBox.halfSize * axisScale + posScale * rightSize;
 	
 	node->containsSubNodes = 1;
@@ -274,11 +250,6 @@ void KDTree::distributeTrianglesToChildren(Node* node)
 			node->right->triangles.push_back(triIndex);
 		}
 	}
-	
-	/*
-	std::vector<size_t> empty;
-	node->triangles.swap(empty);
-	// */
 }
 
 void KDTree::cleanUp()
@@ -364,6 +335,7 @@ void KDTree::splitNodeUsingSortedArray(Node* node, size_t depth)
 	{
 		std::sort(minPoints.begin(), minPoints.end(), [&currentAxis](const vec3& l, const vec3& r)
 			{ return l[currentAxis] < r[currentAxis]; });
+		
 		std::sort(maxPoints.begin(), maxPoints.end(), [&currentAxis](const vec3& l, const vec3& r)
 			{ return l[currentAxis] < r[currentAxis]; });
 		
@@ -403,21 +375,8 @@ void KDTree::splitNodeUsingSortedArray(Node* node, size_t depth)
 	
 	buildSplitBoxesUsingAxisAndPosition(node, currentAxis, splitPosition[currentAxis]);
 	distributeTrianglesToChildren(node);
-	
-	if ((node->left->triangles.size() >= node->triangles.size()) ||
-		(node->right->triangles.size() >= node->triangles.size()))
-	{
-		sharedObjectFactory().deleteObject(node->left);
-		sharedObjectFactory().deleteObject(node->right);
-		node->left = nullptr;
-		node->right = nullptr;
-		node->containsSubNodes = false;
-	}
-	else
-	{
-		splitNodeUsingSortedArray(node->left, depth + 1);
-		splitNodeUsingSortedArray(node->right, depth + 1);
-	}
+	splitNodeUsingSortedArray(node->left, depth + 1);
+	splitNodeUsingSortedArray(node->right, depth + 1);
 }
 
 void KDTree::printStructure()

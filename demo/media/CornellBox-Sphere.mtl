@@ -15,11 +15,11 @@ newmtl leftSphere
 	Kd 0.95 0.95 0.95
 	Ks 0.95 0.95 0.95
     Ns 0.025
-	Tr 2.41
+	Tr 0.41
 
 newmtl rightSphere
 	Ns 0.15
-	Tr 1.3333
+	Tr 0.3333
     Ka 0.01 0.01 0.01
 	Kd 1.00 1.00 1.00
 	Ks 1.00 1.00 1.00

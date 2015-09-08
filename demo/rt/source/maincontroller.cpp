@@ -74,9 +74,11 @@ void MainController::applicationDidLoad(et::RenderContext* rc)
 	
 	_gestures.click.connect([this](const PointerInputInfo& p)
 	{
-		vec2i pixel(int(p.pos.x), int(p.pos.y));
+		vec2i pixel(int(p.pos.x), int(_texture->size().y - p.pos.y));
 		_rt.output(pixel, _rt.performAtPoint(_scene, _camera, _texture->size(), pixel));
 	});
+	
+	Input::instance().keyPressed.invokeInMainRunLoop(ET_KEY_SPACE);
 }
 
 void MainController::start()

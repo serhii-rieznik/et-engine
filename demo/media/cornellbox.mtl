@@ -35,15 +35,15 @@ Ks 1.0 1.0 1.0
 Ke 0.0 0.0 0.0
 
 newmtl shortBox
-Ns 1.0
-Tr 0.0
+Ns 0.3
+Tr 1.3333
 Kd 1.0 1.0 1.0
 Ks 1.0 1.0 1.0
-Ke 0.0 0.0 0.0
+Ke 0.01 0.02 0.05
 
 newmtl tallBox
-Ns 1.0
-Tr 0.0
+Ns 0.025
+Tr 2.41
 Kd 1.0 1.0 1.0
 Ks 1.0 1.0 1.0
 Ke 0.0 0.0 0.0

@@ -11,7 +11,7 @@
 # http://www.cs.cmu.edu/~djames/15-864/pics/cornellBox.jpg
 #
 
-mtllib CornellBox-Sphere.mtl
+mtllib cornellbox-sphere.mtl
 
 ## Object leftSphere 
 

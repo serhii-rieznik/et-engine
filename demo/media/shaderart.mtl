@@ -1,9 +1,10 @@
 newmtl wire_194194194
 #	plane
-	Ns 0.0120
+	Ns 0.3120
 	Tr 0.0
 	Kd 0.76080 0.76080 0.76080
 	Ks 1.0 1.0 1.0
+	Ke 0.3 0.35 0.5
 newmtl wire_154215229
 #	big cube
 	Ns 0.01
@@ -35,7 +36,7 @@ newmtl wire_028089177
 newmtl wire_214229166
 #	stick
 	Ns 0.0
-	Tr 2.41
+	Tr 1.41
 	Kd 0.83920 0.8980 0.6510
 	Ks 1.0 1.0 1.0
 newmtl wire_176026026
