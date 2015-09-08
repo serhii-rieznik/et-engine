@@ -14,8 +14,12 @@ namespace demo
 		void applicationDidLoad(et::RenderContext*);
 		void render(et::RenderContext*);
 		void applicationWillTerminate();
+        
+        void start();
 
 	private:
+        et::Dictionary _options;
+        et::RenderContext* _rc = nullptr;
 		et::Raytrace _rt;
 		et::Texture::Pointer _texture;
 		et::BinaryDataStorage _textureData;

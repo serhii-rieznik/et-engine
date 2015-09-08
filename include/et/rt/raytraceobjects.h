@@ -352,7 +352,7 @@ namespace et
 			float sinTheta = std::sqrt(1.0f - cosTheta * cosTheta);
 			float etaCosTheta = eta * cosTheta;
 			float v = std::sqrt(1.0f - sqr(eta * sinTheta));
-			return sqr((etaCosTheta - v) / (etaCosTheta + v));
+			return sqr((etaCosTheta - v) / (etaCosTheta + v + 0.000001f));
 			/*
 			return sqr
 			(

@@ -383,7 +383,7 @@ void RaytracePrivate::threadFunction()
 		uint64_t diff = endTime - startTime;
 		
 		log::info("Rendering completed: %llu, (in %llu ms, %.3g s)", endTime,
-			diff, static_cast<double>(diff) / 1000.0f);
+			diff, static_cast<float>(diff) / 1000.0f);
 	}
 }
 
@@ -555,8 +555,8 @@ vec4simd RaytracePrivate::gatherBouncesRecursive(const rt::Ray& r, size_t depth,
 
 vec4simd RaytracePrivate::sampleEnvironment(const vec4simd& direction)
 {
-	//	return vec4simd(1.0f, 1.0f, 0.75f, 1.0f);
-	//*
+    return vec4simd(0.0f, 0.0f, 0.0f, 1.0f);
+	/*
 	const vec4simd ambient(40.0f / 255.0f, 58.0f / 255.0f, 72.0f / 255.0f, 1.0f);
 	const vec4simd sun(249.0f / 255.0f, 243.0f / 255.0f, 179.0f / 255.0f, 1.0f);
 	const vec4simd atmosphere(173.0f / 255.0f, 181.0f / 255.0f, 185.0f / 255.0f, 1.0f);
