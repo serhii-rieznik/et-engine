@@ -1,6 +1,6 @@
 {
-	"model-name" : "shaderart.obj",
-	"rays-per-pixel" : 1536,
+	"model-name" : "material-test.obj",
+	"rays-per-pixel" : 32,
 	"camera-fov" : 45.0,
 	"camera-distance" : 150.9,
 	"camera-phi" : 200.0,

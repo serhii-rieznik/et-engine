@@ -103,7 +103,7 @@ namespace
 		rt::Region getNextRegion();
 		
 		void renderSpacePartitioning();
-		void renderKDTreeRecursive(KDTree::Node*, size_t index);
+		void renderKDTreeRecursive(size_t nodeIndex, size_t index);
 		void renderBoundingBox(const rt::BoundingBox&, const vec4& color);
 		void renderLine(const vec2& from, const vec2& to, const vec4& color);
 		void renderPixel(const vec2&, const vec4& color);
@@ -135,18 +135,6 @@ namespace
 }
 
 using namespace et;
-
-float fastRandomFloat()
-{
-	union
-	{
-		float fres;
-		unsigned int ires;
-	};
-	static unsigned int seed = 1;
-	ires = (((seed *= 16807) >> 9) | 0x3f800000);
-	return fres - 1.0f;
-}
 
 Raytrace::Raytrace()
 {
@@ -444,7 +432,7 @@ vec4 RaytracePrivate::raytracePixel(const vec2i& pixel, size_t samples, size_t& 
 	rt::float4 result = gatherBouncesIterative(camera.castRay(pixelBase), 0, bounces);
 	for (int m = 1; m < samples; ++m)
 	{
-		vec2 jitter = pixelSize * vec2(2.0f * fastRandomFloat() - 1.0f, 2.0f * fastRandomFloat() - 1.0f);
+		vec2 jitter = pixelSize * vec2(2.0f * rt::fastRandomFloat() - 1.0f, 2.0f * rt::fastRandomFloat() - 1.0f);
 		result += gatherBouncesIterative(camera.castRay(pixelBase + jitter), 0, bounces);
 	}
 #else
@@ -502,7 +490,7 @@ RayClass RaytracePrivate::classifyRay(rt::float4& normal, rt::float4& originalNo
 		if (k >= rt::Constants::epsilon) // refract
 		{
 			float fresnel = rt::computeFresnelTerm(inDirection, normal, eta);
-			if (fastRandomFloat() >= fresnel)
+			if (rt::fastRandomFloat() >= fresnel)
 			{
 				// refract
 				output = mat.diffuse;
@@ -525,7 +513,7 @@ RayClass RaytracePrivate::classifyRay(rt::float4& normal, rt::float4& originalNo
 		}
 	}
 	
-	if (fastRandomFloat() >= mat.roughness)
+	if (rt::fastRandomFloat() >= mat.roughness)
 	{
 		// compute specular reflection
 		output = mat.specular;
@@ -685,22 +673,25 @@ void RaytracePrivate::estimateRegionsOrder()
 
 void RaytracePrivate::renderSpacePartitioning()
 {
-	renderBoundingBox(kdTree.root()->boundingBox, vec4(1.0f, 0.0f, 1.0f, 1.0f));
-	renderKDTreeRecursive(kdTree.root(), 0);
+	renderBoundingBox(kdTree.bboxAt(0), vec4(1.0f, 0.0f, 1.0f, 1.0f));
+	renderKDTreeRecursive(0, 0);
 }
 
-void RaytracePrivate::renderKDTreeRecursive(KDTree::Node* node, size_t index)
+void RaytracePrivate::renderKDTreeRecursive(size_t nodeIndex, size_t index)
 {
-	if (node)
+	const vec4 colorOdd(1.0f, 1.0f, 0.0f, 1.0f);
+	const vec4 colorEven(0.0f, 1.0f, 1.0f, 1.0f);
+	
+	const auto& node = kdTree.nodeAt(nodeIndex);
+	
+	if (node.containsSubNodes)
 	{
-		const vec4 colorOdd(1.0f, 1.0f, 0.0f, 1.0f);
-		const vec4 colorEven(0.0f, 1.0f, 1.0f, 1.0f);
-		
-		if ((node->left == nullptr) && (node->right == nullptr))
-			renderBoundingBox(node->boundingBox, (index % 2) ? colorOdd : colorEven);
-		
-		renderKDTreeRecursive(node->left, index + 1);
-		renderKDTreeRecursive(node->right, index + 1);
+		renderKDTreeRecursive(node.children[0], index + 1);
+		renderKDTreeRecursive(node.children[1], index + 1);
+	}
+	else
+	{
+		renderBoundingBox(kdTree.bboxAt(nodeIndex), (index % 2) ? colorOdd : colorEven);
 	}
 }
 

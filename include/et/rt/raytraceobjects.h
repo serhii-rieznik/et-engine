@@ -171,6 +171,18 @@ namespace et
 			size_t estimatedBounces = 0;
 			bool sampled = false;
 		};
+		
+		inline float fastRandomFloat()
+		{
+			union
+			{
+				float fres;
+				unsigned int ires;
+			};
+			static unsigned int seed = 1;
+			ires = (((seed *= 16807) >> 9) | 0x3f800000);
+			return fres - 1.0f;
+		}
 
 		inline bool rayTriangle(const Ray& ray, const Triangle* tri, float& distance, float4& barycentric)
 		{
@@ -218,8 +230,8 @@ namespace et
 
 		inline float4 randomVectorOnHemisphere(const float4& normal, float distributionAngle)
 		{
-			float phi = randomFloat() * DOUBLE_PI;
-			float theta = std::sin(randomFloat() * clamp(distributionAngle, 0.0f, HALF_PI));
+			float phi = fastRandomFloat() * DOUBLE_PI;
+			float theta = std::sin(fastRandomFloat() * clamp(distributionAngle, 0.0f, HALF_PI));
 			float4 u = perpendicularVector(normal);
 			float4 result = (u * std::cos(phi) + u.crossXYZ(normal) * std::sin(phi)) * std::sqrt(theta) +
 				normal * std::sqrt(1.0f - theta);

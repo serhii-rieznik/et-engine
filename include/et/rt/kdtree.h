@@ -17,24 +17,11 @@ namespace et
 	public:
 		struct Node
 		{
-			union
-			{
-				struct
-				{
-					Node* left;
-					Node* right;
-				};
-				Node* subNodes[2];
-			};
-			
-			rt::BoundingBox boundingBox;
 			std::vector<size_t> triangles;
-			float splitDistance;
-			int splitAxis : 3;
-			int containsSubNodes : 1;
-			
-			Node() :
-				left(nullptr), right(nullptr) { };
+			size_t children[2];
+			float splitDistance = 0.0f;
+			int splitAxis = 0;
+			int containsSubNodes = 0;
 		};
 		
 		struct ET_ALIGNED(16) TraverseResult
@@ -57,8 +44,14 @@ namespace et
 		void build(const std::vector<rt::Triangle>&, size_t maxDepth, int splits);
 		void cleanUp();
 		
-		Node* root() const
-			{ return _root; }
+		const Node& root() const
+			{ return _nodes.front(); }
+		
+		const Node& nodeAt(size_t i) const
+			{ return _nodes.at(i); }
+
+		const rt::BoundingBox& bboxAt(size_t i) const
+			{ return _boundingBoxes.at(i); }
 		
 		TraverseResult traverse(const rt::Ray& r);
 		void printStructure();
@@ -66,19 +59,19 @@ namespace et
 		const rt::Triangle& triangleAtIndex(size_t) const;
 		
 	private:
-		void printStructure(Node*, const std::string&);
-		void cleanUpRecursively(Node*);
+		void printStructure(const Node&, const std::string&);
 		
-		Node* buildRootNode();
-		void splitNodeUsingBins(Node*, size_t);
-		void splitNodeUsingSortedArray(Node*, size_t);
-		void buildSplitBoxesUsingAxisAndPosition(Node*, int axis, float position);
-		void distributeTrianglesToChildren(Node*);
+		Node buildRootNode();
+		void splitNodeUsingBins(Node&, size_t);
+		void splitNodeUsingSortedArray(size_t, size_t);
+		void buildSplitBoxesUsingAxisAndPosition(size_t nodeIndex, int axis, float position);
+		void distributeTrianglesToChildren(Node&);
 		
-		float findIntersectionInNode(const rt::Ray&, KDTree::Node*, TraverseResult&);
+		float findIntersectionInNode(const rt::Ray&, const KDTree::Node&, TraverseResult&);
 		
 	private:
-		Node* _root = nullptr;
+		std::vector<Node> _nodes;
+		std::vector<rt::BoundingBox> _boundingBoxes;
 		std::vector<rt::Triangle> _triangles;
 		size_t _maxDepth = 0;
 		size_t _minTrianglesToSubdivide = 16;
