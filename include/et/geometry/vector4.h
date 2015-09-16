@@ -137,10 +137,7 @@ namespace et
 
 		vector4& operator /= (T value)
 			{ x /= value; y /= value; z /= value; w /= value; return *this; }
-/*
-		vector4& operator = (const vector4& value)
-			{ memcpy(c, value.c, sizeof(c)); return *this; }
-*/		
+
 		vector2<T>& xy()
 			{ return *(reinterpret_cast<vector2<T>*>(c)); }
 
@@ -239,6 +236,68 @@ namespace et
 
 		vector4<T> reciprocal() const
 			{ return vector4<T>(1.0f / x, 1.0f / y, 1.0f / z, 1.0f / w); }
+		
+		vector4<T> crossXYZ(const vector4<T>& vec) const
+		{
+			return vector4
+			(
+				y * vec.z - z * vec.y,
+				z * vec.x - x * vec.z,
+				x * vec.y - y * vec.x,
+				0.0f
+			);
+		}
+		
+		vector4<T> minWith(const vector4<T>& vec) const
+		{
+			return vector4
+			(
+				(x < vec.x) ? x : vec.x,
+				(y < vec.y) ? y : vec.y,
+				(z < vec.z) ? z : vec.z,
+				(w < vec.w) ? w : vec.w
+			);
+		}
+		
+		vector4<T> maxWith(const vector4<T>& vec) const
+		{
+			return vector4
+			(
+				(x > vec.x) ? x : vec.x,
+				(y > vec.y) ? y : vec.y,
+				(z > vec.z) ? z : vec.z,
+				(w > vec.w) ? w : vec.w
+			 );
+		}
+		
+		vector4<T> dotVector(const vector4<T>& vec) const
+		{
+			float dotProduct = x * vec.x + y * vec.y + z * vec.z + w * vec.w;
+			return vector4(dotProduct, dotProduct, dotProduct, dotProduct);
+		}
+		
+		vector4<float> toVec4() const
+		{
+			return vector4<float>(static_cast<float>(x), static_cast<float>(y),
+				static_cast<float>(z), static_cast<float>(w));
+		}
+		
+		void loadToFloats(float* data) const
+		{
+			static_assert(std::is_same<T, float>::value, "Only works for float vector");
+			memcpy(data, c, sizeof(float) * 4);
+		}
+
+		void loadToVec4(vector4<float>& target) const
+		{
+			static_assert(std::is_same<T, float>::value, "Only works for float vector");
+			target = *this;
+		}
+		
+		float cX() const { return x; }
+		float cY() const { return y; }
+		float cZ() const { return z; }
+		float cW() const { return w; }
 	};
 
 	template <typename T>

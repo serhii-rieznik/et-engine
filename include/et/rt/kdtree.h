@@ -17,12 +17,6 @@ namespace et
 	public:
 		struct Node
 		{
-			rt::BoundingBox boundingBox;
-			std::vector<size_t> triangles;
-			int splitAxis;
-			float splitDistance;
-			bool containsSubNodes;
-
 			union
 			{
 				struct
@@ -33,16 +27,28 @@ namespace et
 				Node* subNodes[2];
 			};
 			
+			rt::BoundingBox boundingBox;
+			std::vector<size_t> triangles;
+			float splitDistance;
+			int splitAxis : 3;
+			int containsSubNodes : 1;
+			
 			Node() :
 				left(nullptr), right(nullptr) { };
 		};
 		
 		struct ET_ALIGNED(16) TraverseResult
 		{
-			vec4simd intersectionPoint = vec4simd(0.0f);
-			vec4simd intersectionPointBarycentric = vec4simd(0.0f);
-			Node* node = nullptr;
+			rt::float4 intersectionPoint;
+			rt::float4 intersectionPointBarycentric;
 			size_t triangleIndex = InvalidIndex;
+		};
+		
+		enum class BuildMode
+		{
+			Bins,
+			SortedArrays,
+			BruteForce
 		};
 		
 	public:
@@ -69,14 +75,14 @@ namespace et
 		void buildSplitBoxesUsingAxisAndPosition(Node*, int axis, float position);
 		void distributeTrianglesToChildren(Node*);
 		
-		bool findIntersection(const rt::Ray&, TraverseResult&, KDTree::Node*);
 		float findIntersectionInNode(const rt::Ray&, KDTree::Node*, TraverseResult&);
 		
 	private:
 		Node* _root = nullptr;
-		size_t _maxDepth = 0;
-		size_t _minTrianglesToSubdivide = 32;
-		int _spaceSplitSize = 32;
 		std::vector<rt::Triangle> _triangles;
+		size_t _maxDepth = 0;
+		size_t _minTrianglesToSubdivide = 16;
+		int _spaceSplitSize = 32;
+		BuildMode _buildMode = BuildMode::SortedArrays;
 	};
 }

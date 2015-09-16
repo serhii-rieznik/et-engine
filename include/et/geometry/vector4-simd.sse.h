@@ -39,20 +39,24 @@ namespace et
 			return _mm_cvtss_f32(_mm_shuffle_ps(_data, _data, _MM_SHUFFLE(c, c, c, c)));
 		}
 
-		float x() const
+		float cX() const
 			{ return _mm_cvtss_f32(_data); }
-
-		float y() const
+		
+		float cY() const
 			{ return component<1>(); }
-
-		float z() const 
+		
+		float cZ() const
 			{ return component<2>(); }
-
-		float w() const 
+		
+		float cW() const
 			{ return component<3>(); }
-
+		
 		const vector3<float> xyz() const
-			{ return vector3<float>(x(), y(), z()); };
+		{
+			ET_ALIGNED(16) float data[4];
+			loadToFloats(data);
+			return vector3<float>(data[0], data[1], data[2]);
+		};
 		
 	public:
 		void clear()

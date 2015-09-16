@@ -60,9 +60,14 @@ void MainController::applicationDidLoad(et::RenderContext* rc)
 	{
 		if ((pixel.x >= 0) && (pixel.y >= 0) && (pixel.x < _texture->size().x) &&  (pixel.y < _texture->size().y))
 		{
-			DataStorage<vec4> vec4data(reinterpret_cast<vec4*>(_textureData.binary()), _textureData.dataSize());
 			int pos = pixel.x + pixel.y * _texture->size().x;
-			vec4data[pos] = mix(vec4data[pos], color, color.w);
+			_textureData[pos] = mix(_textureData[pos], color, color.w);
+			
+			ET_ASSERT(!isnan(_textureData[pos].x));
+			ET_ASSERT(!isnan(_textureData[pos].y));
+			ET_ASSERT(!isnan(_textureData[pos].z));
+			ET_ASSERT(!isnan(_textureData[pos].w));
+			
 		}
 	});
 	
@@ -74,8 +79,9 @@ void MainController::applicationDidLoad(et::RenderContext* rc)
 	
 	_gestures.click.connect([this](const PointerInputInfo& p)
 	{
-		vec2i pixel(int(p.pos.x), int(_texture->size().y - p.pos.y));
-		_rt.output(pixel, _rt.performAtPoint(_scene, _camera, _texture->size(), pixel));
+		vec2i pixel(int(p.pos.x), int(p.pos.y));
+		vec4 color = _rt.performAtPoint(_scene, _camera, _texture->size(), pixel);
+		_rt.output(vec2i(pixel.x, _texture->size().y - pixel.y), color);
 	});
 	
 	Input::instance().keyPressed.invokeInMainRunLoop(ET_KEY_SPACE);
@@ -90,8 +96,9 @@ void MainController::start()
 	_textureData.resize(textureSize.square() * sizeof(vec4));
 	_textureData.fill(0);
 	
-	_texture = _rc->textureFactory().genTexture(TextureTarget::Texture_2D, TextureFormat::RGBA32F, textureSize,
-		TextureFormat::RGBA, DataType::Float, _textureData, "output-texture");
+	BinaryDataStorage proxy(reinterpret_cast<unsigned char*>(_textureData.data()), _textureData.dataSize());
+	_texture = _rc->textureFactory().genTexture(TextureTarget::Texture_2D, TextureFormat::RGBA32F,
+		textureSize, TextureFormat::RGBA, DataType::Float, proxy, "output-texture");
 	
 	const vec3 lookPoint = arrayToVec3(_options.arrayForKey("camera-view-point"));
 	const vec3 offset = arrayToVec3(_options.arrayForKey("camera-offset"));

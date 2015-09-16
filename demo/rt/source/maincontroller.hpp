@@ -22,7 +22,7 @@ namespace demo
         et::RenderContext* _rc = nullptr;
 		et::Raytrace _rt;
 		et::Texture::Pointer _texture;
-		et::BinaryDataStorage _textureData;
+		et::DataStorage<et::vec4> _textureData;
 		et::GesturesRecognizer _gestures;
 		et::Camera _camera;
 		et::s3d::Scene::Pointer _scene;
