@@ -520,13 +520,15 @@ const rt::Triangle& KDTree::triangleAtIndex(size_t i) const
 	return _triangles.at(i);
 }
 
-inline int floatSign(float& a)
+inline int floatIsNegative(float& a)
 {
-	return ((reinterpret_cast<uint32_t&>(a)) & 0x80000000) >> 31;
+	return reinterpret_cast<uint32_t&>(a) >> 31;
 }
 
 KDTree::TraverseResult KDTree::traverse(const rt::Ray& r)
 {
+	const float localEpsilon = rt::Constants::epsilon;
+	
 	KDTree::TraverseResult result;
 	
 	float tNear = 0.0f;
@@ -553,7 +555,7 @@ KDTree::TraverseResult KDTree::traverse(const rt::Ray& r)
 			const auto& node = _nodes[currentNode];
 			
 			int axis = node.splitAxis;
-			int side = floatSign(direction[axis]);
+			int side = floatIsNegative(direction[axis]);
 			
 			float tSplit = (node.splitDistance - origin[axis]) / direction[axis];
 			
