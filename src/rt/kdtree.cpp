@@ -95,7 +95,7 @@ KDTree::Node KDTree::buildRootNode()
 	
 	KDTree::Node result;
 	result.triangles.reserve(_triangles.size());
-	for (size_t i = 0, e = _triangles.size(); i < e; ++i)
+	for (uint32_t i = 0, e = static_cast<uint32_t>(_triangles.size()); i < e; ++i)
 		result.triangles.push_back(i);
 	return result;
 }
@@ -281,12 +281,12 @@ void KDTree::buildSplitBoxesUsingAxisAndPosition(size_t nodeIndex, int axis, flo
 	node.splitAxis = axis;
 	node.splitDistance = position;
 	
-	node.children[0] = _nodes.size();
+	node.children[0] = static_cast<uint32_t>(_nodes.size());
 	_nodes.emplace_back();
 	_boundingBoxes.emplace_back(bbox.center * axisScale + posScale * (middlePoint - leftSize),
 		bbox.halfSize * axisScale + posScale * leftSize);
 
-	node.children[1] = _nodes.size();
+	node.children[1] = static_cast<uint32_t>(_nodes.size());
 	_nodes.emplace_back();
 	_boundingBoxes.emplace_back(bbox.center * axisScale + posScale * (middlePoint + rightSize),
 		bbox.halfSize * axisScale + posScale * rightSize);
@@ -448,7 +448,7 @@ void KDTree::splitNodeUsingSortedArray(size_t nodeIndex, size_t depth)
 			}
 			else
 			{
-				std::vector<size_t> empty;
+				std::vector<uint32_t> empty;
 				node.triangles.swap(empty);
 				
 				splitNodeUsingSortedArray(left, depth + 1);
@@ -483,24 +483,38 @@ void KDTree::printStructure(const Node& node, const std::string& tag)
 
 float KDTree::findIntersectionInNode(const rt::Ray& ray, const KDTree::Node& node, TraverseResult& result)
 {
-	float minDistance = std::numeric_limits<float>::max();
+	const uint32_t localBufferSize = 128;
 	
 	auto trianglesData = _triangles.data();
-	auto trianglesIndex = node.triangles.data();
+	auto trianglesIndices = node.triangles.data();
 	
-	size_t minIndex = InvalidIndex;
-	for (size_t i = 0, e = node.triangles.size(); i < e; ++i)
+	uint32_t minIndex = InvalidIndex;
+	float minDistance = std::numeric_limits<float>::max();
+	
+	uint32_t remainingIndices = uint32_t(node.triangles.size());
+	while (remainingIndices > 0)
 	{
-		rt::float4 bc;
-		size_t triIndex = *trianglesIndex++;
-		float intersectionDistance;
-		if (rt::rayTriangle(ray, trianglesData + triIndex, intersectionDistance, bc))
+		uint32_t localIndices[localBufferSize];
+		uint32_t indicesToCopy = etMin(localBufferSize, remainingIndices);
+		
+		memcpy(localIndices, trianglesIndices, sizeof(uint32_t) * indicesToCopy);
+		remainingIndices -= indicesToCopy;
+		trianglesIndices += indicesToCopy;
+		
+		auto indices = localIndices;
+		for (uint32_t i = 0; i < indicesToCopy; ++i)
 		{
-			if (intersectionDistance < minDistance)
+			rt::float4 bc;
+			float intersectionDistance;
+			auto currentIndex = *indices++;
+			if (rt::rayTriangle(ray, trianglesData + currentIndex, intersectionDistance, bc))
 			{
-				minIndex = triIndex;
-				minDistance = intersectionDistance;
-				result.intersectionPointBarycentric = bc;
+				if (intersectionDistance < minDistance)
+				{
+					minIndex = currentIndex;
+					minDistance = intersectionDistance;
+					result.intersectionPointBarycentric = bc;
+				}
 			}
 		}
 	}

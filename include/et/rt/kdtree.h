@@ -17,8 +17,8 @@ namespace et
 	public:
 		struct Node
 		{
-			std::vector<size_t> triangles;
-			size_t children[2];
+			std::vector<uint32_t> triangles;
+			uint32_t children[2];
 			float splitDistance = 0.0f;
 			int splitAxis = 0;
 			int containsSubNodes = 0;
