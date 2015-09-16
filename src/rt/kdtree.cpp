@@ -527,8 +527,6 @@ inline int floatIsNegative(float& a)
 
 KDTree::TraverseResult KDTree::traverse(const rt::Ray& r)
 {
-	const float localEpsilon = rt::Constants::epsilon;
-	
 	KDTree::TraverseResult result;
 	
 	float tNear = 0.0f;
