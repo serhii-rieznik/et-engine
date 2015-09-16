@@ -325,9 +325,6 @@ void KDTree::distributeTrianglesToChildren(Node& node)
 	
 	std::sort(left.triangles.begin(), left.triangles.end());
 	std::sort(right.triangles.begin(), right.triangles.end());
-	
-//	std::vector<size_t> empty;
-//	node.triangles.swap(empty);
 }
 
 void KDTree::cleanUp()
@@ -451,6 +448,9 @@ void KDTree::splitNodeUsingSortedArray(size_t nodeIndex, size_t depth)
 			}
 			else
 			{
+				std::vector<size_t> empty;
+				node.triangles.swap(empty);
+				
 				splitNodeUsingSortedArray(left, depth + 1);
 				splitNodeUsingSortedArray(right, depth + 1);
 			}
@@ -484,7 +484,6 @@ void KDTree::printStructure(const Node& node, const std::string& tag)
 float KDTree::findIntersectionInNode(const rt::Ray& ray, const KDTree::Node& node, TraverseResult& result)
 {
 	float minDistance = std::numeric_limits<float>::max();
-	float intersectionDistance = std::numeric_limits<float>::max();
 	
 	auto trianglesData = _triangles.data();
 	auto trianglesIndex = node.triangles.data();
@@ -493,7 +492,8 @@ float KDTree::findIntersectionInNode(const rt::Ray& ray, const KDTree::Node& nod
 	for (size_t i = 0, e = node.triangles.size(); i < e; ++i)
 	{
 		rt::float4 bc;
-		size_t triIndex = *trianglesIndex;
+		size_t triIndex = *trianglesIndex++;
+		float intersectionDistance;
 		if (rt::rayTriangle(ray, trianglesData + triIndex, intersectionDistance, bc))
 		{
 			if (intersectionDistance < minDistance)
@@ -503,7 +503,6 @@ float KDTree::findIntersectionInNode(const rt::Ray& ray, const KDTree::Node& nod
 				result.intersectionPointBarycentric = bc;
 			}
 		}
-		++trianglesIndex;
 	}
 	
 	if (minIndex < InvalidIndex)
