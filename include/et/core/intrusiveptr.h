@@ -9,7 +9,7 @@
 
 namespace et
 {
-#	define ET_DECLARE_POINTER(T)					typedef et::IntrusivePtr<T> Pointer;
+#	define ET_DECLARE_POINTER(T)					using Pointer = et::IntrusivePtr<T>;
 	
 	ObjectFactory& sharedObjectFactory();
 	

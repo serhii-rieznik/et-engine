@@ -23,6 +23,7 @@ namespace et
 			int splitAxis = 0;
 			int containsSubNodes = 0;
 		};
+		using NodeList = std::vector<Node, SharedBlockAllocatorSTDProxy<rt::Triangle>>;
 		
 		struct ET_ALIGNED(16) TraverseResult
 		{
@@ -38,12 +39,10 @@ namespace et
 			BruteForce
 		};
 
-		using TriangleList = std::vector<rt::Triangle, SharedBlockAllocatorSTDProxy<rt::Triangle>>;
-		
 	public:
 		~KDTree();
 		
-		void build(const TriangleList&, size_t maxDepth, int splits);
+		void build(const rt::TriangleList&, size_t maxDepth, int splits);
 		void cleanUp();
 		
 		const Node& root() const
@@ -72,9 +71,9 @@ namespace et
 		float findIntersectionInNode(const rt::Ray&, const KDTree::Node&, TraverseResult&);
 		
 	private:
-		std::vector<Node> _nodes;
-		std::vector<rt::BoundingBox> _boundingBoxes;
-		TriangleList _triangles;
+		NodeList _nodes;
+		rt::BoundingBoxList _boundingBoxes;
+		rt::TriangleList _triangles;
 		size_t _maxDepth = 0;
 		size_t _minTrianglesToSubdivide = 16;
 		int _spaceSplitSize = 32;

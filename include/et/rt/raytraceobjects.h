@@ -29,7 +29,8 @@ namespace et
 			static const float epsilonSquared;
 			static const float initialSplitValue;
 		};
-		
+
+#		pragma pack(push, 16)
 		ET_ALIGNED(16) struct Material
 		{
 			std::string name;
@@ -46,14 +47,14 @@ namespace et
 			float4 n[3];
 			float4 edge1to0;
 			float4 edge2to0;
-			size_t materialIndex = 0;
+			uint32_t materialIndex = 0;
 			float square = 0.0f;
-
 			float _dot00 = 0.0f;
 			float _dot10 = 0.0f;
 			float _dot01 = 0.0f;
 			float _dot11 = 0.0f;
 			float _invDenom = 0.0f;
+			float _padding = 0.0f;
 
 			void computeSupportData()
 			{
@@ -112,22 +113,9 @@ namespace et
 				return v[0].maxWith(v[1].maxWith(v[2]));
 			}
 		};
+		using TriangleList = std::vector<Triangle, SharedBlockAllocatorSTDProxy<rt::Triangle>>;
 
-		struct Ray
-		{
-			float4 origin;
-			float4 direction;
-
-			Ray() { }
-
-			Ray(const float4& o, const float4& d) : 
-				origin(o), direction(d) { }
-
-			Ray(const ray3d& r) : 
-				origin(r.origin, 1.0f), direction(r.direction, 0.0f) { } 
-		};
-		
-		struct BoundingBox
+		ET_ALIGNED(16) struct BoundingBox
 		{
 			float4 center = float4(0.0f);
 			float4 halfSize = float4(0.0f);
@@ -162,6 +150,22 @@ namespace et
 			{
 				return 8.0f * halfSize.cX() * halfSize.cY() * halfSize.cZ();
 			};
+		};
+		using BoundingBoxList = std::vector<BoundingBox, SharedBlockAllocatorSTDProxy<rt::Triangle>>;
+#		pragma pack(pop)
+
+		struct Ray
+		{
+			float4 origin;
+			float4 direction;
+
+			Ray() { }
+
+			Ray(const float4& o, const float4& d) : 
+				origin(o), direction(d) { }
+
+			Ray(const ray3d& r) : 
+				origin(r.origin, 1.0f), direction(r.direction, 0.0f) { } 
 		};
 
 		struct Region

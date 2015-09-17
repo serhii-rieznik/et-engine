@@ -238,7 +238,7 @@ void RaytracePrivate::stopWorkerThreads()
 void RaytracePrivate::buildMaterialAndTriangles(s3d::Scene::Pointer scene)
 {
 	materials.clear();
-	KDTree::TriangleList triangles;
+	rt::TriangleList triangles;
 	
 	auto meshes = scene->childrenOfType(s3d::ElementType::Mesh);
 	for (s3d::Mesh::Pointer mesh : meshes)
@@ -268,6 +268,8 @@ void RaytracePrivate::buildMaterialAndTriangles(s3d::Scene::Pointer scene)
 		}
 
 		const mat4& t = mesh->finalTransform();
+
+		triangles.reserve(triangles.size() + mesh->numIndexes());
 
 		const auto pos = vs->accessData<VertexAttributeType::Vec3>(VertexAttributeUsage::Position, 0);
 		const auto nrm = vs->accessData<VertexAttributeType::Vec3>(VertexAttributeUsage::Normal, 0);

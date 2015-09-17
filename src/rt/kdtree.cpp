@@ -100,7 +100,7 @@ KDTree::Node KDTree::buildRootNode()
 	return result;
 }
 
-void KDTree::build(const TriangleList& triangles, size_t maxDepth, int splits)
+void KDTree::build(const rt::TriangleList& triangles, size_t maxDepth, int splits)
 {
 	cleanUp();
 	
@@ -337,16 +337,16 @@ void KDTree::cleanUp()
 
 void KDTree::splitNodeUsingSortedArray(size_t nodeIndex, size_t depth)
 {
-	auto& node = _nodes.at(nodeIndex);
 	const auto& bbox = _boundingBoxes.at(nodeIndex);
-	
-	if ((depth > _maxDepth) || (node.triangles.size() <= _minTrianglesToSubdivide))
+
+	if ((depth > _maxDepth) || (_nodes.at(nodeIndex).triangles.size() <= _minTrianglesToSubdivide))
 		return;
 	
-	auto estimateCostAtSplit = [&node, &bbox](float splitPlane, size_t leftTriangles,
+	auto estimateCostAtSplit = [&bbox, nodeIndex, this](float splitPlane, size_t leftTriangles,
 		size_t rightTriangles, int axis) -> float
 	{
-		ET_ASSERT((leftTriangles + rightTriangles) == node.triangles.size());
+		const auto& localNode = _nodes.at(nodeIndex);
+		ET_ASSERT((leftTriangles + rightTriangles) == localNode.triangles.size());
 		
 		const vec4& minVertex = bbox.minVertex().toVec4();
 		if (splitPlane <= minVertex[axis] + std::numeric_limits<float>::epsilon())
@@ -381,7 +381,8 @@ void KDTree::splitNodeUsingSortedArray(size_t nodeIndex, size_t depth)
 	
 	std::vector<vec3> minPoints;
 	std::vector<vec3> maxPoints;
-	for (size_t triIndex : node.triangles)
+	const auto& localNode = _nodes.at(nodeIndex);
+	for (size_t triIndex : localNode.triangles)
 	{
 		const auto& tri = _triangles.at(triIndex);
 		minPoints.push_back(tri.minVertex().xyz());
@@ -429,14 +430,11 @@ void KDTree::splitNodeUsingSortedArray(size_t nodeIndex, size_t depth)
 		if (splitCost[currentAxis] == targetValue)
 		{
 			buildSplitBoxesUsingAxisAndPosition(nodeIndex, currentAxis, splitPosition[currentAxis]);
-			distributeTrianglesToChildren(node);
-			
-			auto left = node.children[0];
-			auto right = node.children[1];
+			distributeTrianglesToChildren(_nodes.at(nodeIndex));
 			
 			bool shouldDeleteSplit =
-				(nodeAt(left).triangles.size() >= node.triangles.size()) ||
-				(nodeAt(left).triangles.size() >= node.triangles.size());
+				(_nodes.at(nodeIndex + 1).triangles.size() >= _nodes.at(nodeIndex).triangles.size()) ||
+				(_nodes.at(nodeIndex + 2).triangles.size() >= _nodes.at(nodeIndex).triangles.size());
 			
 			if (shouldDeleteSplit)
 			{
@@ -444,15 +442,12 @@ void KDTree::splitNodeUsingSortedArray(size_t nodeIndex, size_t depth)
 				_nodes.pop_back();
 				_boundingBoxes.pop_back();
 				_boundingBoxes.pop_back();
-				node.containsSubNodes = 0;
+				_nodes.at(nodeIndex).containsSubNodes = 0;
 			}
 			else
 			{
-				std::vector<uint32_t> empty;
-				node.triangles.swap(empty);
-				
-				splitNodeUsingSortedArray(left, depth + 1);
-				splitNodeUsingSortedArray(right, depth + 1);
+				splitNodeUsingSortedArray(nodeIndex + 1, depth + 1);
+				splitNodeUsingSortedArray(nodeIndex + 2, depth + 1);
 			}
 			
 			break;

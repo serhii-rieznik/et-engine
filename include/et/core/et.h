@@ -64,21 +64,51 @@ namespace et
 	std::vector<log::Output::Pointer>& sharedLogOutputs();
 	
 	template <typename T>
-	struct SharedBlockAllocatorSTDProxy : public std::allocator<T>
+	struct SharedBlockAllocatorSTDProxy
 	{
-		typedef size_t size_type;
-		typedef ptrdiff_t difference_type;
-		typedef T* pointer;
-		typedef const T* const_pointer;
-		typedef T& reference;
-		typedef const T& const_reference;
-		typedef T value_type;
+		using size_type = size_t;
+		using value_type = T;
+		using pointer = T*;
+
+		SharedBlockAllocatorSTDProxy()
+		{
+		}
+
+		SharedBlockAllocatorSTDProxy(const SharedBlockAllocatorSTDProxy&)
+		{
+		}
+
+		template<class U> 
+		SharedBlockAllocatorSTDProxy(const SharedBlockAllocatorSTDProxy<U>& other) 
+		{
+		}
+
+		pointer allocate(size_type n)
+		{
+			return reinterpret_cast<pointer>(sharedBlockAllocator().allocate(n * sizeof(T))); 
+		}
 		
-		pointer allocate(size_t n)
-			{ return reinterpret_cast<pointer>(sharedBlockAllocator().allocate(n * sizeof(T))); }
-		
-		void deallocate(void* ptr, size_t)
-			{ sharedBlockAllocator().release(ptr); }
+		void deallocate(pointer ptr, size_type)
+		{
+			sharedBlockAllocator().release(ptr); 
+		}
+
+		bool operator == (const SharedBlockAllocatorSTDProxy<T>& other) const
+		{
+			return true;
+		}
+
+		bool operator != (const SharedBlockAllocatorSTDProxy<T>& other) const
+		{
+			return false;
+		}
+
+		template<class O>
+		struct rebind
+		{
+			typedef SharedBlockAllocatorSTDProxy<O> other;
+		};
+
 	};
 }
 
