@@ -175,7 +175,7 @@ int Application::platformRun(int, char*[])
 
 void Application::quit(int exitCode)
 {
-	ET_ASSERT(_running)
+	ET_ASSERT(_running);
 
 	_running = false;
 	_exitCode = exitCode;

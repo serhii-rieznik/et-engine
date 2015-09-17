@@ -230,6 +230,7 @@
     <ClCompile Include="..\..\src\rendering\texturefactory.cpp" />
     <ClCompile Include="..\..\src\rendering\textureloadingthread.cpp" />
     <ClCompile Include="..\..\src\rendering\vertexbufferfactory.cpp" />
+    <ClCompile Include="..\..\src\rt\kdtree.cpp" />
     <ClCompile Include="..\..\src\rt\raytrace.cpp" />
     <ClCompile Include="..\..\src\scene3d\animation.cpp" />
     <ClCompile Include="..\..\src\scene3d\baseelement.cpp" />
@@ -238,10 +239,12 @@
     <ClCompile Include="..\..\src\scene3d\lineelement.cpp" />
     <ClCompile Include="..\..\src\scene3d\material.cpp" />
     <ClCompile Include="..\..\src\scene3d\mesh.cpp" />
+    <ClCompile Include="..\..\src\scene3d\meshdeformer.cpp" />
     <ClCompile Include="..\..\src\scene3d\particlesystem.cpp" />
     <ClCompile Include="..\..\src\scene3d\renderableelement.cpp" />
     <ClCompile Include="..\..\src\scene3d\scene3d.cpp" />
     <ClCompile Include="..\..\src\scene3d\serialization.cpp" />
+    <ClCompile Include="..\..\src\scene3d\skeletonelement.cpp" />
     <ClCompile Include="..\..\src\scene3d\storage.cpp" />
     <ClCompile Include="..\..\src\scene3d\supportmesh.cpp" />
     <ClCompile Include="..\..\src\tasks\taskpool.cpp" />

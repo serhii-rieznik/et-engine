@@ -16,6 +16,12 @@
 namespace et
 {
 	
+const float rt::Constants::epsilon = 0.0001f;
+const float rt::Constants::minusEpsilon = -epsilon;
+const float rt::Constants::onePlusEpsilon = 1.0f + epsilon;
+const float rt::Constants::epsilonSquared = epsilon * epsilon;
+const float rt::Constants::initialSplitValue = std::numeric_limits<float>::max();
+
 namespace
 {
 	enum class DebugRenderMode : size_t
@@ -43,7 +49,7 @@ namespace
 		};
 		
 	public:
-		void emplace(const rt::float4& a, const rt::float4 m)
+		void emplace(const rt::float4& a, const rt::float4& m)
 		{
 			ET_ASSERT(_size < MaxElements);
 			add[_size] = a;
@@ -96,7 +102,7 @@ namespace
 		vec4 raytracePixel(const vec2i&, size_t samples, size_t& bounces);
 
 		rt::float4 gatherBouncesRecursive(const rt::Ray&, size_t depth, size_t& maxDepth);
-		rt::float4 gatherBouncesIterative(rt::Ray, size_t depth, size_t& maxDepth);
+		rt::float4 gatherBouncesIterative(const rt::Ray&, size_t depth, size_t& maxDepth);
 		
 		rt::float4 sampleEnvironment(const rt::float4& direction);
 
@@ -232,7 +238,7 @@ void RaytracePrivate::stopWorkerThreads()
 void RaytracePrivate::buildMaterialAndTriangles(s3d::Scene::Pointer scene)
 {
 	materials.clear();
-	std::vector<rt::Triangle> triangles;
+	KDTree::TriangleList triangles;
 	
 	auto meshes = scene->childrenOfType(s3d::ElementType::Mesh);
 	for (s3d::Mesh::Pointer mesh : meshes)
@@ -430,7 +436,7 @@ vec4 RaytracePrivate::raytracePixel(const vec2i& pixel, size_t samples, size_t& 
 
 #if (USE_ITERATIVE_GATHER)
 	rt::float4 result = gatherBouncesIterative(camera.castRay(pixelBase), 0, bounces);
-	for (int m = 1; m < samples; ++m)
+	for (size_t m = 1; m < samples; ++m)
 	{
 		vec2 jitter = pixelSize * vec2(2.0f * rt::fastRandomFloat() - 1.0f, 2.0f * rt::fastRandomFloat() - 1.0f);
 		result += gatherBouncesIterative(camera.castRay(pixelBase + jitter), 0, bounces);
@@ -527,8 +533,9 @@ RayClass RaytracePrivate::classifyRay(rt::float4& normal, rt::float4& originalNo
 	return RayClass::Diffuse;
 }
 
-rt::float4 RaytracePrivate::gatherBouncesIterative(rt::Ray currentRay, size_t depth, size_t& maxDepth)
+rt::float4 RaytracePrivate::gatherBouncesIterative(const rt::Ray& inRay, size_t depth, size_t& maxDepth)
 {
+	auto currentRay = inRay;
 	rt::float4 materialColor;
 	
 	FastTraverseStack bounces;

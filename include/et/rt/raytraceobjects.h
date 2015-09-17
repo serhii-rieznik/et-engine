@@ -23,14 +23,14 @@ namespace et
 		
 		struct Constants
 		{
-			static constexpr float epsilon = 0.0001f;
-			static constexpr float minusEpsilon = -epsilon;
-			static constexpr float onePlusEpsilon = 1.0f + epsilon;
-			static constexpr float epsilonSquared = epsilon * epsilon;
-			static constexpr float initialSplitValue = std::numeric_limits<float>::max();
+			static const float epsilon;
+			static const float minusEpsilon;
+			static const float onePlusEpsilon;
+			static const float epsilonSquared;
+			static const float initialSplitValue;
 		};
 		
-		struct Material
+		ET_ALIGNED(16) struct Material
 		{
 			std::string name;
 			float4 diffuse;
@@ -40,7 +40,7 @@ namespace et
 			float ior = 0.0f;
 		};
 
-		struct Triangle
+		ET_ALIGNED(16) struct Triangle
 		{
 			float4 v[3];
 			float4 n[3];
@@ -67,9 +67,9 @@ namespace et
 				_invDenom = 1.0f / (_dot00 * _dot11 - _dot01 * _dot01);
 			}
 
-			float4 barycentric(float4 p) const
+			float4 barycentric(const float4& inP) const
 			{
-				p -= v[0];
+				float4 p = inP - v[0];
 				float dot20 = p.dot(edge1to0);
 				float dot21 = p.dot(edge2to0);
 				float y = (_dot11 * dot20 - _dot01 * dot21) * _invDenom;
