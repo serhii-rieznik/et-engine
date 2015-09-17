@@ -287,7 +287,7 @@ void RaytracePrivate::buildMaterialAndTriangles(s3d::Scene::Pointer scene)
 			tri.n[0] = rt::float4(t.rotationMultiply(nrm[i0]).normalized(), 0.0f);
 			tri.n[1] = rt::float4(t.rotationMultiply(nrm[i1]).normalized(), 0.0f);
 			tri.n[2] = rt::float4(t.rotationMultiply(nrm[i2]).normalized(), 0.0f);
-			tri.materialIndex = materialIndex;
+			tri.materialIndex = static_cast<uint32_t>(materialIndex);
 			tri.computeSupportData();
 		}
 	}

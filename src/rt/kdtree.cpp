@@ -345,8 +345,7 @@ void KDTree::splitNodeUsingSortedArray(size_t nodeIndex, size_t depth)
 	auto estimateCostAtSplit = [&bbox, nodeIndex, this](float splitPlane, size_t leftTriangles,
 		size_t rightTriangles, int axis) -> float
 	{
-		const auto& localNode = _nodes.at(nodeIndex);
-		ET_ASSERT((leftTriangles + rightTriangles) == localNode.triangles.size());
+		ET_ASSERT((leftTriangles + rightTriangles) == _nodes.at(nodeIndex).triangles.size());
 		
 		const vec4& minVertex = bbox.minVertex().toVec4();
 		if (splitPlane <= minVertex[axis] + std::numeric_limits<float>::epsilon())

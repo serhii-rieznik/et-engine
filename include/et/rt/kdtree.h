@@ -23,7 +23,7 @@ namespace et
 			int splitAxis = 0;
 			int containsSubNodes = 0;
 		};
-		using NodeList = std::vector<Node, SharedBlockAllocatorSTDProxy<rt::Triangle>>;
+		using NodeList = std::vector<Node, SharedBlockAllocatorSTDProxy<Node>>;
 		
 		struct ET_ALIGNED(16) TraverseResult
 		{

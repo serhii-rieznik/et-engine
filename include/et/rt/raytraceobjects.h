@@ -31,7 +31,7 @@ namespace et
 		};
 
 #		pragma pack(push, 16)
-		ET_ALIGNED(16) struct Material
+		struct ET_ALIGNED(16) Material
 		{
 			std::string name;
 			float4 diffuse;
@@ -41,14 +41,13 @@ namespace et
 			float ior = 0.0f;
 		};
 
-		ET_ALIGNED(16) struct Triangle
+		struct ET_ALIGNED(16) Triangle
 		{
 			float4 v[3];
 			float4 n[3];
 			float4 edge1to0;
 			float4 edge2to0;
 			uint32_t materialIndex = 0;
-			float square = 0.0f;
 			float _dot00 = 0.0f;
 			float _dot10 = 0.0f;
 			float _dot01 = 0.0f;
@@ -60,8 +59,6 @@ namespace et
 			{
 				edge1to0 = v[1] - v[0];
 				edge2to0 = v[2] - v[0];
-				square = edge1to0.crossXYZ(edge2to0).length() * 0.5f;
-				
 				_dot00 = edge1to0.dotSelf();
 				_dot11 = edge2to0.dotSelf();
 				_dot01 = edge1to0.dot(edge2to0);
@@ -115,7 +112,7 @@ namespace et
 		};
 		using TriangleList = std::vector<Triangle, SharedBlockAllocatorSTDProxy<rt::Triangle>>;
 
-		ET_ALIGNED(16) struct BoundingBox
+		struct ET_ALIGNED(16) BoundingBox
 		{
 			float4 center = float4(0.0f);
 			float4 halfSize = float4(0.0f);
@@ -151,7 +148,7 @@ namespace et
 				return 8.0f * halfSize.cX() * halfSize.cY() * halfSize.cZ();
 			};
 		};
-		using BoundingBoxList = std::vector<BoundingBox, SharedBlockAllocatorSTDProxy<rt::Triangle>>;
+		using BoundingBoxList = std::vector<BoundingBox, SharedBlockAllocatorSTDProxy<BoundingBox>>;
 #		pragma pack(pop)
 
 		struct Ray
