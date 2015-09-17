@@ -49,11 +49,9 @@ namespace et
 			float4 edge2to0;
 			uint32_t materialIndex = 0;
 			float _dot00 = 0.0f;
-			float _dot10 = 0.0f;
 			float _dot01 = 0.0f;
 			float _dot11 = 0.0f;
 			float _invDenom = 0.0f;
-			float _padding = 0.0f;
 
 			void computeSupportData()
 			{
@@ -185,6 +183,16 @@ namespace et
 			return fres - 1.0f;
 		}
 
+		inline int floatIsNegative(float& a)
+		{
+			return reinterpret_cast<uint32_t&>(a) >> 31;
+		}
+		
+		inline bool floatIsPositive(float& a)
+		{
+			return (reinterpret_cast<uint32_t&>(a) >> 31) == 0;
+		}
+		
 		inline bool rayTriangle(const Ray& ray, const Triangle* tri, float& distance, float4& barycentric)
 		{
 			float4 pvec = ray.direction.crossXYZ(tri->edge2to0);

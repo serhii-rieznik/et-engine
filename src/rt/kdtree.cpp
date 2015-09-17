@@ -477,47 +477,55 @@ void KDTree::printStructure(const Node& node, const std::string& tag)
 
 float KDTree::findIntersectionInNode(const rt::Ray& ray, const KDTree::Node& node, TraverseResult& result)
 {
-	const uint32_t localBufferSize = 128;
+	result.triangleIndex = InvalidIndex;
 	
-	auto trianglesData = _triangles.data();
+	const uint32_t localBufferSize = 32;
 	auto trianglesIndices = node.triangles.data();
 	
-	uint32_t minIndex = InvalidIndex;
+	uint32_t remainingIndices = uint32_t(node.triangles.size());
 	float minDistance = std::numeric_limits<float>::max();
 	
-	uint32_t remainingIndices = uint32_t(node.triangles.size());
 	while (remainingIndices > 0)
 	{
 		uint32_t localIndices[localBufferSize];
 		uint32_t indicesToCopy = etMin(localBufferSize, remainingIndices);
-		
-		memcpy(localIndices, trianglesIndices, sizeof(uint32_t) * indicesToCopy);
+		std::copy(trianglesIndices, trianglesIndices + indicesToCopy, localIndices);
 		remainingIndices -= indicesToCopy;
 		trianglesIndices += indicesToCopy;
 		
-		auto indices = localIndices;
 		for (uint32_t i = 0; i < indicesToCopy; ++i)
 		{
-			rt::float4 bc;
-			float intersectionDistance;
-			auto currentIndex = *indices++;
-			if (rt::rayTriangle(ray, trianglesData + currentIndex, intersectionDistance, bc))
+			auto triangleIndex = localIndices[i];
+			const auto& tri = _triangles[triangleIndex];
+			
+			rt::float4 pvec = ray.direction.crossXYZ(tri.edge2to0);
+			float det = tri.edge1to0.dot(pvec);
+			if (det*det > rt::Constants::epsilon)
 			{
-				if (intersectionDistance < minDistance)
+				rt::float4 tvec = ray.origin - tri.v[0];
+				float u = tvec.dot(pvec) / det;
+				if ((u >= rt::Constants::minusEpsilon) && (u < rt::Constants::onePlusEpsilon))
 				{
-					minIndex = currentIndex;
-					minDistance = intersectionDistance;
-					result.intersectionPointBarycentric = bc;
+					rt::float4 qvec = tvec.crossXYZ(tri.edge1to0);
+					float v = ray.direction.dot(qvec) / det;
+					float uv = u + v;
+					if ((v >= rt::Constants::minusEpsilon) && (uv < rt::Constants::onePlusEpsilon))
+					{
+						float intersectionDistance = tri.edge2to0.dot(qvec) / det;
+						if ((intersectionDistance > rt::Constants::epsilon) && (intersectionDistance < minDistance))
+						{
+							result.triangleIndex = triangleIndex;
+							minDistance = intersectionDistance;
+							result.intersectionPointBarycentric = rt::float4(1.0f - uv, u, v, 0.0f);
+						}
+					}
 				}
 			}
 		}
 	}
 	
-	if (minIndex < InvalidIndex)
-	{
-		result.triangleIndex = minIndex;
+	if (result.triangleIndex < InvalidIndex)
 		result.intersectionPoint = ray.origin + ray.direction * minDistance;
-	}
 	
 	return minDistance;
 }
@@ -525,11 +533,6 @@ float KDTree::findIntersectionInNode(const rt::Ray& ray, const KDTree::Node& nod
 const rt::Triangle& KDTree::triangleAtIndex(size_t i) const
 {
 	return _triangles.at(i);
-}
-
-inline int floatIsNegative(float& a)
-{
-	return reinterpret_cast<uint32_t&>(a) >> 31;
 }
 
 KDTree::TraverseResult KDTree::traverse(const rt::Ray& r)
@@ -560,7 +563,7 @@ KDTree::TraverseResult KDTree::traverse(const rt::Ray& r)
 			const auto& node = _nodes[currentNode];
 			
 			int axis = node.splitAxis;
-			int side = floatIsNegative(direction[axis]);
+			int side = rt::floatIsNegative(direction[axis]);
 			
 			float tSplit = (node.splitDistance - origin[axis]) / direction[axis];
 			
