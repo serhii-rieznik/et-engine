@@ -50,11 +50,13 @@ namespace et
 			SortedArrays,
 			BruteForce
 		};
+
+		using TriangleList = std::vector<rt::Triangle, SharedBlockAllocatorSTDProxy<rt::Triangle>>;
 		
 	public:
 		~KDTree();
 		
-		void build(const std::vector<rt::Triangle>&, size_t maxDepth, int splits);
+		void build(const TriangleList&, size_t maxDepth, int splits);
 		void cleanUp();
 		
 		Node* root() const

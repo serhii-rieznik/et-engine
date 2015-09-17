@@ -30,7 +30,10 @@ void MainController::applicationDidLoad(et::RenderContext* rc)
 	ObjectsCache localCache;
 	
 #if (ET_PLATFORM_WIN)
-	application().pushSearchPath("Q:\\SDK\\Models\\");
+	application().pushSearchPath("..");
+	application().pushSearchPath("..\\..");
+	application().pushSearchPath("..\\..\\..");
+	application().pushSearchPath("..\\..\\..\\..");
 #endif
 	
 	auto configName = application().resolveFileName("config/config.json");
@@ -47,10 +50,10 @@ void MainController::applicationDidLoad(et::RenderContext* rc)
 	model->setParent(_scene.ptr());
 	
 	Raytrace::Options rtOptions;
-	rtOptions.maxRecursionDepth = _options.integerForKey("max-recursion-depth", 8)->content;
-	rtOptions.raysPerPixel = _options.integerForKey("rays-per-pixel", 32)->content;
-	rtOptions.maxKDTreeDepth = _options.integerForKey("kd-tree-max-depth", 4)->content;
-	rtOptions.renderRegionSize = _options.integerForKey("render-region-size", 32)->content;
+	rtOptions.maxRecursionDepth = static_cast<size_t>(_options.integerForKey("max-recursion-depth", 8)->content);
+	rtOptions.raysPerPixel = static_cast<size_t>(_options.integerForKey("rays-per-pixel", 32)->content);
+	rtOptions.maxKDTreeDepth = static_cast<size_t>(_options.integerForKey("kd-tree-max-depth", 4)->content);
+	rtOptions.renderRegionSize = static_cast<size_t>(_options.integerForKey("render-region-size", 32)->content);
 	rtOptions.debugRendering = _options.integerForKey("debug-rendering", 0ll)->content != 0;
 	rtOptions.renderKDTree = _options.integerForKey("render-kd-tree", 0ll)->content != 0;
 	rtOptions.kdTreeSplits = static_cast<int>(_options.integerForKey("kd-tree-splits", 4)->content);

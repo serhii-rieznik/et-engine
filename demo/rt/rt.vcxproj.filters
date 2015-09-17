@@ -322,6 +322,15 @@
     <ClCompile Include="..\..\src\rt\raytrace.cpp">
       <Filter>et\source\rt</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\rt\kdtree.cpp">
+      <Filter>et\source\rt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scene3d\meshdeformer.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scene3d\skeletonelement.cpp">
+      <Filter>et</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\maincontroller.hpp">
