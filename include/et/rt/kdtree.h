@@ -74,7 +74,7 @@ namespace et
 	private:
 		std::vector<Node> _nodes;
 		std::vector<rt::BoundingBox> _boundingBoxes;
-		std::vector<rt::Triangle> _triangles;
+		TriangleList _triangles;
 		size_t _maxDepth = 0;
 		size_t _minTrianglesToSubdivide = 16;
 		int _spaceSplitSize = 32;

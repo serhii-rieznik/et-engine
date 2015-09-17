@@ -100,7 +100,7 @@ KDTree::Node KDTree::buildRootNode()
 	return result;
 }
 
-void KDTree::build(const std::vector<rt::Triangle>& triangles, size_t maxDepth, int splits)
+void KDTree::build(const TriangleList& triangles, size_t maxDepth, int splits)
 {
 	cleanUp();
 	
@@ -115,7 +115,7 @@ void KDTree::build(const std::vector<rt::Triangle>& triangles, size_t maxDepth, 
 	{
 		case BuildMode::Bins:
 		{
-			splitNodeUsingBins(_nodes.front(), 0);
+			// splitNodeUsingBins(_nodes.front(), 0);
 			break;
 		}
 			
