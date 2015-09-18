@@ -12,6 +12,8 @@
 
 namespace et
 {
+#	define ET_ALLOW_MM_DP_PS	1
+
 	struct ET_ALIGNED(16) vec4simd
 	{
 	public:
@@ -283,9 +285,13 @@ namespace et
 	private:
 		__m128 dotImpl(const __m128& a, const __m128& b) const
 		{
+#		if (ET_ALLOW_MM_DP_PS)
+			return _mm_dp_ps(a, b, 0xff);
+#		else
 			__m128 dp = _mm_mul_ps(a, b);
 			__m128 s1 = _mm_hadd_ps(dp, dp);
 			return _mm_hadd_ps(s1, s1);
+#		endif
 		}
 		
 		__m128 floorImpl(__m128 x) const

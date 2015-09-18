@@ -17,6 +17,9 @@
     <Filter Include="et\source\rt">
       <UniqueIdentifier>{06597218-ac6c-44c3-9ff8-b00d3d2a66cb}</UniqueIdentifier>
     </Filter>
+    <Filter Include="config">
+      <UniqueIdentifier>{34b68e15-c575-4ef1-892d-0dad6d0890d3}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\main.cpp">
@@ -348,5 +351,10 @@
     <ClInclude Include="..\..\include\et\geometry\vector4-simd.sse.h">
       <Filter>et\include</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="config\config.json">
+      <Filter>config</Filter>
+    </None>
   </ItemGroup>
 </Project>

@@ -497,26 +497,31 @@ float KDTree::findIntersectionInNode(const rt::Ray& ray, const KDTree::Node& nod
 		{
 			auto triangleIndex = localIndices[i];
 			const auto& tri = _triangles[triangleIndex];
+			rt::float4 v0 = tri.v[0];
+			rt::float4 edge1to0 = tri.edge1to0;
+			rt::float4 edge2to0 = tri.edge2to0;
 			
-			rt::float4 pvec = ray.direction.crossXYZ(tri.edge2to0);
-			float det = tri.edge1to0.dot(pvec);
-			if (det*det > rt::Constants::epsilon)
+			rt::float4 pvec = ray.direction.crossXYZ(edge2to0);
+			float det = edge1to0.dot(pvec);
+			if (det > rt::Constants::epsilon)
 			{
-				rt::float4 tvec = ray.origin - tri.v[0];
-				float u = tvec.dot(pvec) / det;
-				if ((u >= rt::Constants::minusEpsilon) && (u < rt::Constants::onePlusEpsilon))
+				const float minusEdet = rt::Constants::minusEpsilon * det;
+				const float onePlusEdet = rt::Constants::onePlusEpsilon * det;
+				rt::float4 tvec = ray.origin - v0;
+				float u = tvec.dot(pvec);
+				if ((u > minusEdet) && (u < onePlusEdet))
 				{
-					rt::float4 qvec = tvec.crossXYZ(tri.edge1to0);
-					float v = ray.direction.dot(qvec) / det;
+					rt::float4 qvec = tvec.crossXYZ(edge1to0);
+					float v = ray.direction.dot(qvec);
 					float uv = u + v;
-					if ((v >= rt::Constants::minusEpsilon) && (uv < rt::Constants::onePlusEpsilon))
+					if ((v > minusEdet) && (uv < onePlusEdet))
 					{
-						float intersectionDistance = tri.edge2to0.dot(qvec) / det;
-						if ((intersectionDistance > rt::Constants::epsilon) && (intersectionDistance < minDistance))
+						float intersectionDistance = edge2to0.dot(qvec);
+						if ((intersectionDistance > rt::Constants::epsilon * det) && (intersectionDistance < minDistance * det))
 						{
 							result.triangleIndex = triangleIndex;
-							minDistance = intersectionDistance;
-							result.intersectionPointBarycentric = rt::float4(1.0f - uv, u, v, 0.0f);
+							minDistance = intersectionDistance / det;
+							result.intersectionPointBarycentric = rt::float4(det - uv, u, v, 0.0f) / rt::float4(det);
 						}
 					}
 				}
