@@ -10,6 +10,7 @@
 
 #if (ET_PLATFORM_WIN)
 
+#include <ShellScalingAPI.h>
 #include <MMSystem.h>
 #include <DbgHelp.h>
 
@@ -94,6 +95,8 @@ void Application::platformInit()
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 #endif
 	
+	SetProcessDPIAware();
+	SetProcessDpiAwareness(PROCESS_SYSTEM_DPI_AWARE);
 	SetUnhandledExceptionFilter(unhandledExceptionFilter);
 	_env.updateDocumentsFolder(_identifier);
 }

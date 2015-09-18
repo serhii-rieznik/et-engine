@@ -20,6 +20,9 @@
     <Filter Include="config">
       <UniqueIdentifier>{34b68e15-c575-4ef1-892d-0dad6d0890d3}</UniqueIdentifier>
     </Filter>
+    <Filter Include="media">
+      <UniqueIdentifier>{cf4a634a-e1c2-49bf-8d56-134eae09b770}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\main.cpp">
@@ -356,5 +359,49 @@
     <None Include="config\config.json">
       <Filter>config</Filter>
     </None>
+    <None Include="..\media\bunny.mtl">
+      <Filter>media</Filter>
+    </None>
+    <None Include="..\media\cornellbox.mtl">
+      <Filter>media</Filter>
+    </None>
+    <None Include="..\media\CornellBox-Sphere.mtl">
+      <Filter>media</Filter>
+    </None>
+    <None Include="..\media\material-test.mtl">
+      <Filter>media</Filter>
+    </None>
+    <None Include="..\media\shaderart.mtl">
+      <Filter>media</Filter>
+    </None>
+    <None Include="..\media\cube.mtl">
+      <Filter>media</Filter>
+    </None>
+    <None Include="..\media\test.mtl">
+      <Filter>media</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Object Include="..\media\bunny.obj">
+      <Filter>media</Filter>
+    </Object>
+    <Object Include="..\media\cornellbox.obj">
+      <Filter>media</Filter>
+    </Object>
+    <Object Include="..\media\CornellBox-Sphere.obj">
+      <Filter>media</Filter>
+    </Object>
+    <Object Include="..\media\material-test.obj">
+      <Filter>media</Filter>
+    </Object>
+    <Object Include="..\media\shaderart.obj">
+      <Filter>media</Filter>
+    </Object>
+    <Object Include="..\media\cube.obj">
+      <Filter>media</Filter>
+    </Object>
+    <Object Include="..\media\test.obj">
+      <Filter>media</Filter>
+    </Object>
   </ItemGroup>
 </Project>

@@ -13,7 +13,7 @@ namespace et
 	R strToVector(const std::string& s, const std::string& delimiter)
 	{
 		R result;
-		size_t index = 0;
+		int index = 0;
 		StringList values = split(s, delimiter);
 		for (auto& i : values)
 		{
@@ -239,7 +239,7 @@ vec2 et::arrayToVec2(ArrayValue a)
 vec2i et::arrayToVec2i(ArrayValue a)
 {
 	vec2i result;
-	size_t index = 0;
+	int index = 0;
 	for (auto v : a->content)
 	{
 		if (v->valueClass() == ValueClass_Float)
@@ -255,7 +255,7 @@ vec2i et::arrayToVec2i(ArrayValue a)
 vec3 et::arrayToVec3(ArrayValue a)
 {
 	vec3 result;
-	size_t index = 0;
+	int index = 0;
 	for (auto v : a->content)
 	{
 		if (v->valueClass() == ValueClass_Float)
@@ -271,7 +271,7 @@ vec3 et::arrayToVec3(ArrayValue a)
 vec4 et::arrayToVec4(ArrayValue a)
 {
 	vec4 result;
-	size_t index = 0;
+	int index = 0;
 	for (auto v : a->content)
 	{
 		if (v->valueClass() == ValueClass_Float)

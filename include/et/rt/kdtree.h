@@ -18,9 +18,9 @@ namespace et
 		struct Node
 		{
 			std::vector<rt::index> triangles;
-			rt::index children[2] = { InvalidIndex, InvalidIndex };
-			float distance = 0.0f;
-			int axis = -1;
+			rt::index children[2];
+			float distance;
+			int axis;
 		};
 		using NodeList = std::vector<Node, SharedBlockAllocatorSTDProxy<Node>>;
 		
@@ -31,8 +31,8 @@ namespace et
 			size_t totalNodes = 0;
 			size_t leafNodes = 0;
 			size_t maxDepth = 0;
-			size_t maxTrianglesPerNode = -std::numeric_limits<size_t>::max();
-			size_t minTrianglesPerNode = +std::numeric_limits<size_t>::max();
+			size_t maxTrianglesPerNode = 0;
+			size_t minTrianglesPerNode = std::numeric_limits<size_t>::max();
 		};
 		
 		struct ET_ALIGNED(16) TraverseResult
