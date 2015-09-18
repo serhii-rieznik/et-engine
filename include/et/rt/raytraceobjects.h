@@ -15,10 +15,11 @@ namespace et
 	namespace rt
 	{
 		using float4 = vec4simd;
+		using index = uint32_t;
 		
-		enum : size_t
+		enum : index
 		{
-			InvalidIndex = size_t(-1),
+			InvalidIndex = index(-1),
 		};
 		
 		struct Constants
@@ -47,11 +48,12 @@ namespace et
 			float4 n[3];
 			float4 edge1to0;
 			float4 edge2to0;
-			uint32_t materialIndex = 0;
+			float4 _invDenom;
+			index materialIndex = 0;
+			float _invDenomValue = 0.0f;
 			float _dot00 = 0.0f;
 			float _dot01 = 0.0f;
 			float _dot11 = 0.0f;
-			float _invDenom = 0.0f;
 
 			void computeSupportData()
 			{
@@ -60,7 +62,8 @@ namespace et
 				_dot00 = edge1to0.dotSelf();
 				_dot11 = edge2to0.dotSelf();
 				_dot01 = edge1to0.dot(edge2to0);
-				_invDenom = 1.0f / (_dot00 * _dot11 - _dot01 * _dot01);
+				_invDenomValue = 1.0f / (_dot00 * _dot11 - _dot01 * _dot01);
+				_invDenom = rt::float4(_invDenomValue);
 			}
 
 			float4 barycentric(const float4& inP) const
@@ -68,10 +71,9 @@ namespace et
 				float4 p = inP - v[0];
 				float dot20 = p.dot(edge1to0);
 				float dot21 = p.dot(edge2to0);
-				float y = (_dot11 * dot20 - _dot01 * dot21) * _invDenom;
-				float z = (_dot00 * dot21 - _dot01 * dot20) * _invDenom;
-				float x = 1.0f - y - z;
-				return float4(x, y, z, 0.0f);
+				float y = _dot11 * dot20 - _dot01 * dot21;
+				float z = _dot00 * dot21 - _dot01 * dot20;
+				return float4(_invDenomValue - y - z, y, z, 0.0f) * _invDenom;
 			}
 
 			float4 interpolatedNormal(const float4& b) const
@@ -109,6 +111,18 @@ namespace et
 			}
 		};
 		using TriangleList = std::vector<Triangle, SharedBlockAllocatorSTDProxy<rt::Triangle>>;
+		
+		struct ET_ALIGNED(16) IntersectionData
+		{
+			float4 v0;
+			float4 edge1to0;
+			float4 edge2to0;
+			
+			IntersectionData(const float4& v, const float4& e1, const float4& e2) :
+				v0(v), edge1to0(e1), edge2to0(e2) { }
+		};
+		using IntersectionDataList =
+			std::vector<IntersectionData, SharedBlockAllocatorSTDProxy<rt::IntersectionData>>;
 
 		struct ET_ALIGNED(16) BoundingBox
 		{

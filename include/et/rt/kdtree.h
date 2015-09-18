@@ -17,13 +17,23 @@ namespace et
 	public:
 		struct Node
 		{
-			std::vector<uint32_t> triangles;
-			uint32_t children[2];
-			float splitDistance = 0.0f;
-			int splitAxis = 0;
-			int containsSubNodes = 0;
+			std::vector<rt::index> triangles;
+			rt::index children[2] = { InvalidIndex, InvalidIndex };
+			float distance = 0.0f;
+			int axis = -1;
 		};
 		using NodeList = std::vector<Node, SharedBlockAllocatorSTDProxy<Node>>;
+		
+		struct Stats
+		{
+			size_t totalTriangles = 0;
+			size_t distributedTriangles = 0;
+			size_t totalNodes = 0;
+			size_t leafNodes = 0;
+			size_t maxDepth = 0;
+			size_t maxTrianglesPerNode = -std::numeric_limits<size_t>::max();
+			size_t minTrianglesPerNode = +std::numeric_limits<size_t>::max();
+		};
 		
 		struct ET_ALIGNED(16) TraverseResult
 		{
@@ -43,6 +53,7 @@ namespace et
 		~KDTree();
 		
 		void build(const rt::TriangleList&, size_t maxDepth, int splits);
+		Stats nodesStatistics() const;
 		void cleanUp();
 		
 		const Node& root() const
@@ -66,16 +77,18 @@ namespace et
 		void splitNodeUsingBins(Node&, size_t);
 		void splitNodeUsingSortedArray(size_t, size_t);
 		void buildSplitBoxesUsingAxisAndPosition(size_t nodeIndex, int axis, float position);
-		void distributeTrianglesToChildren(Node&);
+		void distributeTrianglesToChildren(size_t nodeIndex);
 		
 		float findIntersectionInNode(const rt::Ray&, const KDTree::Node&, TraverseResult&);
 		
 	private:
 		NodeList _nodes;
 		rt::BoundingBoxList _boundingBoxes;
+		
 		rt::TriangleList _triangles;
-		size_t _maxDepth = 0;
-		size_t _minTrianglesToSubdivide = 16;
+		rt::IntersectionDataList _intersectionData;
+		
+		size_t _maxBuildDepth = 0;
 		int _spaceSplitSize = 32;
 		BuildMode _buildMode = BuildMode::SortedArrays;
 	};

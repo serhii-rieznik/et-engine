@@ -287,12 +287,19 @@ void RaytracePrivate::buildMaterialAndTriangles(s3d::Scene::Pointer scene)
 			tri.n[0] = rt::float4(t.rotationMultiply(nrm[i0]).normalized(), 0.0f);
 			tri.n[1] = rt::float4(t.rotationMultiply(nrm[i1]).normalized(), 0.0f);
 			tri.n[2] = rt::float4(t.rotationMultiply(nrm[i2]).normalized(), 0.0f);
-			tri.materialIndex = static_cast<uint32_t>(materialIndex);
+			tri.materialIndex = static_cast<rt::index>(materialIndex);
 			tri.computeSupportData();
 		}
 	}
 	
 	kdTree.build(triangles, options.maxKDTreeDepth, options.kdTreeSplits);
+	
+	auto stats = kdTree.nodesStatistics();
+	log::info("KD-Tree statistics:\n\t%llu nodes\n\t%llu leaf nodes\n\t%llu max depth"
+		"\n\t%llu min triangles per node\n\t%llu max triangles per node"
+		"\n\t%llu total triangles\n\t%llu distributed triangles", uint64_t(stats.totalNodes),
+		uint64_t(stats.leafNodes), uint64_t(stats.maxDepth), uint64_t(stats.minTrianglesPerNode),
+		uint64_t(stats.maxTrianglesPerNode), uint64_t(stats.totalTriangles), uint64_t(stats.distributedTriangles));
 	
 	if (options.renderKDTree)
 		kdTree.printStructure();
@@ -554,7 +561,6 @@ rt::float4 RaytracePrivate::gatherBouncesIterative(const rt::Ray& inRay, size_t 
 		
 		rt::float4 clearN = tri.interpolatedNormal(traverse.intersectionPointBarycentric);
 		rt::float4 roughN = rt::randomVectorOnHemisphere(clearN, mat.roughness);
-		
 		classifyRay(roughN, clearN, mat, currentRay.direction, currentRay.direction, materialColor);
 		bounces.emplace(mat.emissive, materialColor * roughN.dotVector(clearN));
 		currentRay.origin = traverse.intersectionPoint + currentRay.direction * rt::Constants::epsilon;
@@ -693,7 +699,7 @@ void RaytracePrivate::renderKDTreeRecursive(size_t nodeIndex, size_t index)
 	
 	const auto& node = kdTree.nodeAt(nodeIndex);
 	
-	if (node.containsSubNodes)
+	if (node.axis >= 0)
 	{
 		renderKDTreeRecursive(node.children[0], index + 1);
 		renderKDTreeRecursive(node.children[1], index + 1);

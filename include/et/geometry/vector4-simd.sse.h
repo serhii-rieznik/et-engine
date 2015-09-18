@@ -8,6 +8,7 @@
 #pragma once
 
 #include <pmmintrin.h>
+#include <immintrin.h>
 #include <et/geometry/vector3.h>
 
 namespace et

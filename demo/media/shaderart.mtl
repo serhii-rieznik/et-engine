@@ -4,7 +4,6 @@ newmtl wire_194194194
 	Tr 0.0
 	Kd 0.76080 0.76080 0.76080
 	Ks 1.0 1.0 1.0
-	Ke 0.3 0.35 0.5
 newmtl wire_154215229
 #	big cube
 	Ns 0.01
