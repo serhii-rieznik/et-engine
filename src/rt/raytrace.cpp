@@ -433,6 +433,8 @@ void RaytracePrivate::threadFunction()
 		
 		log::info("Rendering completed: %llu, (in %llu ms, %.3g s)", endTime,
 			diff, static_cast<float>(diff) / 1000.0f);
+		
+		owner->renderFinished.invokeInMainRunLoop();
 	}
 }
 

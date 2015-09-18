@@ -74,6 +74,11 @@ void MainController::applicationDidLoad(et::RenderContext* rc)
 		}
 	});
 	
+	_rt.renderFinished.connect([this]()
+	{
+
+	});
+	
 	Input::instance().keyPressed.connect([this](size_t key)
 	{
 		if (key == ET_KEY_SPACE)
