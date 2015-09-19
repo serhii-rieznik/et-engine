@@ -380,28 +380,26 @@
     <None Include="..\media\test.mtl">
       <Filter>media</Filter>
     </None>
-  </ItemGroup>
-  <ItemGroup>
-    <Object Include="..\media\bunny.obj">
+    <None Include="..\media\bunny.obj">
       <Filter>media</Filter>
-    </Object>
-    <Object Include="..\media\cornellbox.obj">
+    </None>
+    <None Include="..\media\cornellbox.obj">
       <Filter>media</Filter>
-    </Object>
-    <Object Include="..\media\CornellBox-Sphere.obj">
+    </None>
+    <None Include="..\media\CornellBox-Sphere.obj">
       <Filter>media</Filter>
-    </Object>
-    <Object Include="..\media\material-test.obj">
+    </None>
+    <None Include="..\media\cube.obj">
       <Filter>media</Filter>
-    </Object>
-    <Object Include="..\media\shaderart.obj">
+    </None>
+    <None Include="..\media\material-test.obj">
       <Filter>media</Filter>
-    </Object>
-    <Object Include="..\media\cube.obj">
+    </None>
+    <None Include="..\media\shaderart.obj">
       <Filter>media</Filter>
-    </Object>
-    <Object Include="..\media\test.obj">
+    </None>
+    <None Include="..\media\test.obj">
       <Filter>media</Filter>
-    </Object>
+    </None>
   </ItemGroup>
 </Project>

@@ -30,6 +30,7 @@ namespace et
 			size_t distributedTriangles = 0;
 			size_t totalNodes = 0;
 			size_t leafNodes = 0;
+			size_t emptyLeafNodes = 0;
 			size_t maxDepth = 0;
 			size_t maxTrianglesPerNode = 0;
 			size_t minTrianglesPerNode = std::numeric_limits<size_t>::max();

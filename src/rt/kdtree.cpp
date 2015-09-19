@@ -624,10 +624,15 @@ KDTree::Stats KDTree::nodesStatistics() const
 	uint32_t index = 0;
 	for (const auto& node : _nodes)
 	{
-		if (node.axis == -1)
-			++result.leafNodes;
-		
 		size_t nodeTriangles = node.triangles.size();
+		if (node.axis == -1)
+		{
+			++result.leafNodes;
+
+			if (nodeTriangles == 0)
+				++result.emptyLeafNodes;
+		}
+		
 		if (nodeTriangles > 0)
 		{
 			result.maxTrianglesPerNode = etMax(result.maxTrianglesPerNode, nodeTriangles);

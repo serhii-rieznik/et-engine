@@ -44,7 +44,7 @@ namespace
 	public:
 		enum : size_t
 		{
-			MaxElements = 48,
+			MaxElements = 64,
 			MaxElementsPlusOne = MaxElements + 1,
 		};
 		
@@ -295,11 +295,12 @@ void RaytracePrivate::buildMaterialAndTriangles(s3d::Scene::Pointer scene)
 	kdTree.build(triangles, options.maxKDTreeDepth, options.kdTreeSplits);
 	
 	auto stats = kdTree.nodesStatistics();
-	log::info("KD-Tree statistics:\n\t%llu nodes\n\t%llu leaf nodes\n\t%llu max depth"
-		"\n\t%llu min triangles per node\n\t%llu max triangles per node"
+	log::info("KD-Tree statistics:\n\t%llu nodes\n\t%llu leaf nodes\n\t%llu empty leaf nodes"
+		"\n\t%llu max depth\n\t%llu min triangles per node\n\t%llu max triangles per node"
 		"\n\t%llu total triangles\n\t%llu distributed triangles", uint64_t(stats.totalNodes),
-		uint64_t(stats.leafNodes), uint64_t(stats.maxDepth), uint64_t(stats.minTrianglesPerNode),
-		uint64_t(stats.maxTrianglesPerNode), uint64_t(stats.totalTriangles), uint64_t(stats.distributedTriangles));
+		uint64_t(stats.leafNodes), uint64_t(stats.emptyLeafNodes), uint64_t(stats.maxDepth),
+		uint64_t(stats.minTrianglesPerNode), uint64_t(stats.maxTrianglesPerNode), 
+		uint64_t(stats.totalTriangles), uint64_t(stats.distributedTriangles));
 	
 	if (options.renderKDTree)
 		kdTree.printStructure();

@@ -28,12 +28,13 @@ void MainController::applicationDidLoad(et::RenderContext* rc)
 	srand(static_cast<unsigned int>(time(nullptr)));
 	
 	ObjectsCache localCache;
-	
+
 #if (ET_PLATFORM_WIN)
 	application().pushSearchPath("..");
 	application().pushSearchPath("..\\..");
 	application().pushSearchPath("..\\..\\..");
 	application().pushSearchPath("..\\..\\..\\..");
+	application().pushSearchPath("Q:\\SDK\\Models");
 #endif
 	
 	auto configName = application().resolveFileName("config/config.json");
@@ -42,7 +43,7 @@ void MainController::applicationDidLoad(et::RenderContext* rc)
 	_options = json::deserialize(loadTextFile(configName), vc);
 	ET_ASSERT(vc == ValueClass_Dictionary);
 	
-	auto modelName = application().resolveFileName("media/" + _options.stringForKey("model-name")->content);
+	auto modelName = application().resolveFileName(_options.stringForKey("model-name")->content);
 	
 	_scene = s3d::Scene::Pointer::create();
 	OBJLoader loader(modelName, OBJLoader::Option_CalculateTangents);
