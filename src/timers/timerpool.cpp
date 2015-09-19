@@ -85,16 +85,16 @@ void TimerPool::update(float t)
 
 	_updating = true;
 
-	for (auto i = _timedObjects.begin(); i != _timedObjects.end(); )
+	for (auto& object : _timedObjects)
 	{
-		if ((i->action == QueueAction_Update) && i->object->running())
-			i->object->update(t);
-		
-		if ((i->action == QueueAction_Remove) || !i->object->running())
-			i = _timedObjects.erase(i);
-		else 
-			++i;
+		auto updatableObject = object.object;
+		if ((object.action == QueueAction_Update) && updatableObject->running())
+			updatableObject->update(t);
 	}
+
+	auto e = std::remove_if(_timedObjects.begin(), _timedObjects.end(), [](const QueueEntry& entry)
+		{ return (entry.action == QueueAction_Remove) || (!entry.object->running()); });
+	_timedObjects.erase(e, _timedObjects.end());
 
 	_updating = false;
 }

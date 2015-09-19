@@ -59,7 +59,7 @@ namespace et
 				{ return (e.object == object) && (e.action == action); }
 		};
 
-		typedef std::list<QueueEntry> TimerPoolQueue;
+		typedef std::vector<QueueEntry> TimerPoolQueue;
 
 	private:
 		TimerPoolQueue _timedObjects;

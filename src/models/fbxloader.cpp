@@ -41,7 +41,7 @@ namespace et
 		
 		std::map<size_t, s3d::BaseElement::Pointer> nodeToElementMap;
 
-		s3d::BaseElement::Pointer rootNode;
+		s3d::BaseElement::Pointer root;
 
 	public:
 		FBXLoaderPrivate(RenderContext* rc, ObjectsCache& ObjectsCache);
@@ -57,7 +57,7 @@ namespace et
 		/* 
 		 * Node loading
 		 */
-		void loadNode(s3d::Storage&, FbxNode* node, s3d::BaseElement::Pointer parent);
+		void loadNode(s3d::Storage&, FbxNode* node, s3d::BaseElement::Pointer parent, bool isRootNode);
 		void loadNodeAnimations(FbxNode* node, s3d::BaseElement::Pointer object, const StringList& props);
 
 		s3d::Material::List loadNodeMaterials(s3d::Storage&, FbxNode* node);
@@ -85,6 +85,17 @@ namespace et
 		
 		void loadMaterialTextureValue(s3d::Material::Pointer m, uint32_t propName,
 			FbxSurfaceMaterial* fbxm, const char* fbxprop);
+
+		mat4 fbxMatrixToMat4(const FbxAMatrix& m)
+		{
+			mat4 transform;
+			for (int r = 0; r < 4; ++r)
+			{
+				for (int c = 0; c < 4; ++c)
+					transform[r][c] = static_cast<float>(m.Get(r, c));
+			}
+			return transform;
+		}
 	};
 }
 
@@ -161,39 +172,38 @@ bool FBXLoaderPrivate::import(const std::string& filename)
 
 s3d::ElementContainer::Pointer FBXLoaderPrivate::parse(s3d::Storage& storage)
 {
-	rootNode.reset(nullptr);
 	storage.flush();
 	
-	FbxAxisSystem sceneAxisSystem = scene->GetGlobalSettings().GetAxisSystem();
-	FbxAxisSystem openglAxisSystem(FbxAxisSystem::eOpenGL);
-	
-	if (sceneAxisSystem != openglAxisSystem)
-		openglAxisSystem.ConvertScene(scene);
-
-	FbxSystemUnit sceneSystemUnit = scene->GetGlobalSettings().GetOriginalSystemUnit();
-	if (sceneSystemUnit.GetScaleFactor() != 1.0f)
-		FbxSystemUnit::cm.ConvertScene(scene);
-	
+	FbxSystemUnit sceneSystemUnit = scene->GetGlobalSettings().GetSystemUnit();
+	FbxAxisSystem openGLAxisSystem(FbxAxisSystem::eOpenGL);
 	FbxGeometryConverter geometryConverter(manager);
+
+	sceneSystemUnit.ConvertScene(scene);
+	openGLAxisSystem.ConvertScene(scene);
 	geometryConverter.Triangulate(scene, true);
-	
-	scene->GetRootNode()->ResetPivotSetAndConvertAnimation();
-	
+		
 	loadAnimations();
 	loadTextures();
-	loadNode(storage, scene->GetRootNode(), rootNode);
-	linkSkeleton(storage, rootNode);
-	buildVertexBuffers(_rc, rootNode, storage);
+
+	auto fbxRootNode = scene->GetRootNode();
+	root = s3d::ElementContainer::Pointer::create(fbxRootNode->GetName(), nullptr);
+
+	int lChildCount = fbxRootNode->GetChildCount();
+	for (int lChildIndex = 0; lChildIndex < lChildCount; ++lChildIndex)
+		loadNode(storage, fbxRootNode->GetChild(lChildIndex), root, true);
+
+	linkSkeleton(storage, root);
+	buildVertexBuffers(_rc, root, storage);
 	
-	auto meshes = rootNode->childrenOfType(s3d::ElementType::Mesh);
+	auto meshes = root->childrenOfType(s3d::ElementType::Mesh);
 	for (s3d::Mesh::Pointer mesh : meshes)
 		mesh->calculateSupportData();
 
-	meshes = rootNode->childrenOfType(s3d::ElementType::SupportMesh);
+	meshes = root->childrenOfType(s3d::ElementType::SupportMesh);
 	for (s3d::SupportMesh::Pointer mesh : meshes)
 		mesh->calculateSupportData();
 
-	return rootNode;
+	return root;
 }
 
 void FBXLoaderPrivate::loadAnimations()
@@ -350,7 +360,7 @@ void FBXLoaderPrivate::loadNodeAnimations(FbxNode* node, s3d::BaseElement::Point
 	object->addAnimation(a);
 }
 
-void FBXLoaderPrivate::loadNode(s3d::Storage& storage, FbxNode* node, s3d::BaseElement::Pointer parent)
+void et::FBXLoaderPrivate::loadNode(s3d::Storage& storage, FbxNode* node, s3d::BaseElement::Pointer parent, bool isRootNode)
 {
 	auto props = loadNodeProperties(node);
 	auto materials = loadNodeMaterials(storage, node);
@@ -403,26 +413,15 @@ void FBXLoaderPrivate::loadNode(s3d::Storage& storage, FbxNode* node, s3d::BaseE
 			log::warning("Unsupported node found in FBX, with type: %u", static_cast<uint32_t>(nodeType));
 		}
 	}
-	else if (parent.invalid() && rootNode.invalid())
-	{
-		rootNode = s3d::ElementContainer::Pointer::create(nodeName, nullptr);
-		createdElement = rootNode;
-	}
 	
 	if (createdElement.invalid())
 		createdElement = s3d::ElementContainer::Pointer::create(nodeName, parent.ptr());
 	
 	nodeToElementMap[reinterpret_cast<size_t>(node)] = createdElement;
 
-	mat4 transform;
-	FbxAMatrix& fbxTransform = node->EvaluateLocalTransform();
-	for (int v = 0; v < 4; ++v)
-	{
-		for (int u = 0; u < 4; ++u)
-			transform[v][u] = static_cast<float>(fbxTransform.Get(v, u));
-	}
-	createdElement->setTransform(transform);
-	
+	auto transform = isRootNode ? node->EvaluateGlobalTransform() : node->EvaluateLocalTransform();
+	createdElement->setTransform(fbxMatrixToMat4(transform));
+
 	for (const auto& p : props)
 	{
 		if (!createdElement->hasPropertyString(p))
@@ -433,7 +432,7 @@ void FBXLoaderPrivate::loadNode(s3d::Storage& storage, FbxNode* node, s3d::BaseE
 
 	int lChildCount = node->GetChildCount();
 	for (int lChildIndex = 0; lChildIndex < lChildCount; ++lChildIndex)
-		loadNode(storage, node->GetChild(lChildIndex), createdElement);
+		loadNode(storage, node->GetChild(lChildIndex), createdElement, false);
 }
 
 void FBXLoaderPrivate::loadMaterialTextureValue(s3d::Material::Pointer m, uint32_t propName,
@@ -720,28 +719,21 @@ s3d::Mesh::Pointer FBXLoaderPrivate::loadMesh(s3d::Storage& storage, FbxMesh* me
 
 #define PUSH_VERTEX FbxVector4 v = lControlPoints[lControlPointIndex]; \
 		controlPointToMeshIndex[lControlPointIndex].push_back(vertexCount); \
-		pos[vertexCount] = vec3(static_cast<float>(v[0]), static_cast<float>(v[1]), static_cast<float>(v[2]));
-
+		pos[vertexCount] = vec3(static_cast<float>(v[0]), static_cast<float>(v[1]), static_cast<float>(v[2])); 
 #define PUSH_NORMAL if (hasNormal) { \
 		FbxVector4 n; mesh->GetPolygonVertexNormal(lPolygonIndex, lVerticeIndex, n); \
 		nrm[vertexCount] = vec3(static_cast<float>(n[0]), static_cast<float>(n[1]), static_cast<float>(n[2])); }
-
-#define PUSH_UV \
-	for (size_t i = 0; i < uvChannels; ++i) \
-	{ \
+#define PUSH_UV for (size_t i = 0; i < uvChannels; ++i) { \
 		FbxVector2 t; \
 		bool unmap = false; \
 		mesh->GetPolygonVertexUV(lPolygonIndex, lVerticeIndex, lUVNames[static_cast<int>(i)].Buffer(), t, unmap); \
-		uvs[i][vertexCount] = vec2(static_cast<float>(t[0]), static_cast<float>(t[1])); \
-	}
-
+		uvs[i][vertexCount] = vec2(static_cast<float>(t[0]), static_cast<float>(t[1])); }
 #define PUSH_TANGENT if (hasTangents) { FbxVector4 t; \
 		if (tangents->GetReferenceMode() == FbxGeometryElement::eDirect) \
 			t = tangents->GetDirectArray().GetAt(static_cast<int>(vertexCount)); \
 		else if (tangents->GetReferenceMode() == FbxGeometryElement::eIndexToDirect) \
 			t = tangents->GetDirectArray().GetAt(tangents->GetIndexArray().GetAt(static_cast<int>(vertexCount))); \
 		tan[vertexCount] = vec3(static_cast<float>(t[0]), static_cast<float>(t[1]), static_cast<float>(t[2])); }
-
 #define PUSH_COLOR if (hasColor) { FbxColor c; \
 		if (vertexColor->GetReferenceMode() == FbxGeometryElement::eDirect) \
 			c = vertexColor->GetDirectArray().GetAt(static_cast<int>(vertexCount)); \
@@ -749,7 +741,6 @@ s3d::Mesh::Pointer FBXLoaderPrivate::loadMesh(s3d::Storage& storage, FbxMesh* me
 			c = vertexColor->GetDirectArray().GetAt(vertexColor->GetIndexArray().GetAt(static_cast<int>(vertexCount))); \
 		clr[vertexCount] = vec4(static_cast<float>(c.mRed), static_cast<float>(c.mGreen), \
 			static_cast<float>(c.mBlue), static_cast<float>(c.mAlpha)); }
-
 #define PUSH_SG if (hasSmoothingGroups) { \
 		int sgIndex = 0; if (smoothing->GetReferenceMode() == FbxGeometryElement::eDirect) \
 			sgIndex = lPolygonIndex; else if (smoothing->GetReferenceMode() == FbxGeometryElement::eIndexToDirect) \
@@ -876,21 +867,12 @@ s3d::Mesh::Pointer FBXLoaderPrivate::loadMesh(s3d::Storage& storage, FbxMesh* me
 			FbxCluster* fbxCluster = skin->GetCluster(cl);
 			s3d::MeshDeformerCluster::Pointer cluster = s3d::MeshDeformerCluster::Pointer::create();
 			
-			FbxAMatrix fbxMeshTransformMatrix = { };
+			FbxAMatrix fbxMeshTransformMatrix;
+			FbxAMatrix fbxLinkTransformMatrix;
 			fbxCluster->GetTransformMatrix(fbxMeshTransformMatrix);
-
-			FbxAMatrix fbxLinkTransformMatrix = { };
 			fbxCluster->GetTransformLinkMatrix(fbxLinkTransformMatrix);
-			
-			mat4 meshInitialTransform(0.0f);
-			for (int r = 0; r < 4; ++r)
-				for (int c = 0; c < 4; ++c)
-					meshInitialTransform[r][c] = static_cast<float>(fbxMeshTransformMatrix.Get(r, c));
-
-			mat4 linkInitialTransform(0.0f);
-			for (int r = 0; r < 4; ++r)
-				for (int c = 0; c < 4; ++c)
-					linkInitialTransform[r][c] = static_cast<float>(fbxLinkTransformMatrix.Get(r, c));
+			mat4 meshInitialTransform = fbxMatrixToMat4(fbxMeshTransformMatrix);
+			mat4 linkInitialTransform = fbxMatrixToMat4(fbxLinkTransformMatrix);
 					
 			cluster->setMeshInitialTransform(meshInitialTransform);
 			cluster->setLinkInitialTransform(linkInitialTransform);

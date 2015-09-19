@@ -91,6 +91,15 @@ namespace et
 		Rect& operator *= (T v)
 			{ left *= v; top *= v; width *= v; height *= v; return *this; }
 		
+		Rect& operator += (const Rect& r)
+		{
+			left += r.left;
+			top += r.top;
+			width += r.width;
+			height += r.height;
+			return *this;
+		}
+
 		Rect operator / (T v) const
 			{ return Rect(left / v, top / v, width / v, height / v); }
 
