@@ -79,7 +79,7 @@ namespace et
 		}
 
 		template<class U> 
-		SharedBlockAllocatorSTDProxy(const SharedBlockAllocatorSTDProxy<U>& other) 
+		SharedBlockAllocatorSTDProxy(const SharedBlockAllocatorSTDProxy<U>&) 
 		{
 		}
 
@@ -93,12 +93,12 @@ namespace et
 			sharedBlockAllocator().release(ptr); 
 		}
 
-		bool operator == (const SharedBlockAllocatorSTDProxy<T>& other) const
+		bool operator == (const SharedBlockAllocatorSTDProxy<T>&) const
 		{
 			return true;
 		}
 
-		bool operator != (const SharedBlockAllocatorSTDProxy<T>& other) const
+		bool operator != (const SharedBlockAllocatorSTDProxy<T>&) const
 		{
 			return false;
 		}

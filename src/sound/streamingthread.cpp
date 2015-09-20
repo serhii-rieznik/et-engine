@@ -78,7 +78,7 @@ ThreadResult StreamingThread::main()
 
 void StreamingThread::addPlayer(Player::Pointer player)
 {
-	ET_ASSERT(_private != nullptr)
+	ET_ASSERT(_private != nullptr);
 	
 	CriticalSectionScope scope(_private->csLock);
 	

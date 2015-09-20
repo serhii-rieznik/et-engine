@@ -53,7 +53,8 @@ void ConsoleOutput::debug(const char* format, va_list args)
 void ConsoleOutput::info(const char* format, va_list args)
 {
 	static char storage[2048] = { };
-	int pos = vsnprintf(storage, 2048, format, args);
+	int pos = vsnprintf(storage, sizeof(storage), format, args);
+	pos = etMin(pos, static_cast<int>(sizeof(storage) - 3));
 	storage[pos++] = '\n';
 	storage[pos++] = 0;
 	OutputDebugStringA(storage);
