@@ -157,6 +157,40 @@ void Mesh::serialize(Dictionary stream, const std::string& basePath)
 
 void Mesh::deserialize(Dictionary stream, SerializationHelper* helper)
 {
+	_startIndex = static_cast<uint32_t>(stream.integerForKey(kStartIndex)->content);
+	_numIndexes = static_cast<uint32_t>(stream.integerForKey(kIndexesCount)->content);
+	
+	if (stream.hasKey(kVertexStorageName))
+	{
+		auto vertexStorageName = stream.stringForKey(kVertexStorageName)->content;
+		_vertexStorage = helper->vertexStorageWithName(vertexStorageName);
+		_vao = helper->vertexArrayWithStorageName(vertexStorageName);
+	}
+	
+	if (stream.hasKey(kIndexArrayName))
+	{
+		_indexArray = helper->indexArrayWithName(stream.stringForKey(kIndexArrayName)->content);
+	}
+	
+	if (stream.hasKey(kSupportData))
+	{
+		auto supportData = stream.dictionaryForKey(kSupportData);
+		_supportData.minMaxCenter = arrayToVec3(supportData.arrayForKey(kMinMaxCenter));
+		_supportData.averageCenter = arrayToVec3(supportData.arrayForKey(kAverageCenter));
+		_supportData.dimensions = arrayToVec3(supportData.arrayForKey(kDimensions));
+		_supportData.boundingSphereRadius = supportData.floatForKey(kBoundingSphereRadius)->content;
+	}
+	
+	if (stream.hasKey(kLods))
+	{
+		auto lods = stream.dictionaryForKey(kLods)->content;
+		for (const auto& lod : lods)
+		{
+			auto mesh = s3d::Mesh::Pointer::create(lod.first);
+			mesh->deserialize(lod.second, helper);
+		}
+	}
+	
 	RenderableElement::deserialize(stream, helper);
 }
 

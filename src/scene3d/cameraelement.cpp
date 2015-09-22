@@ -61,5 +61,6 @@ void CameraElement::serialize(Dictionary stream, const std::string& basePath)
 void CameraElement::deserialize(Dictionary stream, SerializationHelper* helper)
 {
 	BaseElement::deserialize(stream, helper);
+	ET_FAIL("Not implemented");
 }
 

@@ -43,13 +43,18 @@ namespace et
 			ET_DECLARE_EVENT1(deserializationFinished, bool)
 
 		private:
-			Material* materialWithName(const std::string&);
+			Material* materialWithName(const std::string&) override;
 
-			BaseElement::Pointer createElementOfType(ElementType, BaseElement*);
+			BaseElement::Pointer createElementOfType(ElementType, BaseElement*) override;
 
-			const std::string& serializationBasePath() const 
+			const std::string& serializationBasePath() const override
 				{ return _serializationBasePath; }
 
+			IndexArray::Pointer indexArrayWithName(const std::string&) override;
+			VertexStorage::Pointer vertexStorageWithName(const std::string&) override;
+			
+			VertexArrayObject vertexArrayWithStorageName(const std::string&) override;
+			
 		private:
 			Storage _storage;
 			std::string _serializationBasePath;

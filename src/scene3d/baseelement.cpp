@@ -217,16 +217,25 @@ void BaseElement::deserializeGeneralParameters(Dictionary stream)
 	auto typeCode = stream.integerForKey(kElementTypeCode)->content;
 	bool isValidType = (typeCode >= 0) && (typeCode < ElementType_Max) && (typeCode == static_cast<int64_t>(type()));
 
-	if (isValidType)
-	{
-		// TODO
-	}
-	else
+	if (!isValidType)
 	{
 		log::warning("Deserializing element %s with invalid type code %llu, supposed to be: %llu",
 			name().c_str(), typeCode, uint64_t(type()));
-
+		return;
 	}
+	
+	setFlags(stream.integerForKey(kFlagsValue)->content);
+	setTranslation(arrayToVec3(stream.arrayForKey(kTranslation)));
+	setScale(arrayToVec3(stream.arrayForKey(kScale)));
+	setOrientation(arrayToQuaternion(stream.arrayForKey(kOrientation)));
+	
+	auto propsArray = stream.arrayForKey(kProperties);
+	for (StringValue prop : propsArray->content)
+		_properites.insert(prop->content);
+	
+	auto animsArray = stream.arrayForKey(kAnimations);
+	for (Dictionary anim : animsArray->content)
+		_animations.emplace_back(anim);
 }
 
 void BaseElement::serializeChildren(Dictionary stream, const std::string& basePath)

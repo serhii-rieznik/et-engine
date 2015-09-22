@@ -181,11 +181,13 @@ s3d::ElementContainer::Pointer FBXLoaderPrivate::parse(s3d::Storage& storage)
 	sceneSystemUnit.ConvertScene(scene);
 	openGLAxisSystem.ConvertScene(scene);
 	geometryConverter.Triangulate(scene, true);
-		
+	
+	auto fbxRootNode = scene->GetRootNode();
+	fbxRootNode->ResetPivotSetAndConvertAnimation();
+	
 	loadAnimations();
 	loadTextures();
 
-	auto fbxRootNode = scene->GetRootNode();
 	root = s3d::ElementContainer::Pointer::create(fbxRootNode->GetName(), nullptr);
 
 	int lChildCount = fbxRootNode->GetChildCount();
@@ -306,7 +308,11 @@ void FBXLoaderPrivate::loadNodeAnimations(FbxNode* node, s3d::BaseElement::Point
 	
 	if (keyFramesToTime.size() == 0) return;
 	
-	log::info("Node %s has %llu frames in animation.", node->GetName(), uint64_t(keyFramesToTime.size()));
+	if (keyFramesToTime.size() > 1)
+	{
+		log::info("Node %s has %llu frames in animation.",
+			node->GetName(), uint64_t(keyFramesToTime.size()));
+	}
 	
 	FbxTimeSpan pInterval;
 	node->GetAnimationInterval(pInterval);
@@ -551,8 +557,11 @@ bool FBXLoaderPrivate::meshHasSkin(FbxMesh* mesh)
 		numClusters += skin ? skin->GetClusterCount() : 0;
 	}
 	
-	log::info(">>> Mesh '%s' has %d deformers and %d clusters", mesh->GetNode()->GetName(),
-		numDeformers, numClusters);
+	if (numDeformers + numClusters > 0)
+	{
+		log::info(">>> Mesh '%s' has %d deformers and %d clusters", mesh->GetNode()->GetName(),
+			numDeformers, numClusters);
+	}
 	
 	return numClusters > 0;
 }

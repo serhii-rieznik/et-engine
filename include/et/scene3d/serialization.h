@@ -11,6 +11,9 @@
 #include <istream>
 #include <et/core/et.h>
 #include <et/scene3d/base.h>
+#include <et/vertexbuffer/vertexstorage.h>
+#include <et/vertexbuffer/indexarray.h>
+#include <et/rendering/vertexarrayobject.h>
 
 namespace et
 {
@@ -26,6 +29,11 @@ namespace et
 			virtual const std::string& serializationBasePath() const = 0;
 			virtual BaseElementPointer createElementOfType(ElementType, BaseElement*) = 0;
 			virtual Material* materialWithName(const std::string&) = 0;
+			
+			virtual IndexArray::Pointer indexArrayWithName(const std::string&) = 0;
+			virtual VertexStorage::Pointer vertexStorageWithName(const std::string&) = 0;
+			
+			virtual VertexArrayObject vertexArrayWithStorageName(const std::string&) = 0;
 
 		public:
 			virtual ~SerializationHelper() { }

@@ -19,6 +19,34 @@ Scene::Scene(const std::string& name) :
 
 }
 
+VertexStorage::Pointer Scene::vertexStorageWithName(const std::string& name)
+{
+	const auto& all = _storage.vertexStorages();
+	for (const auto& vs : all)
+	{
+		if (vs->name() == name)
+			return vs;
+	}
+	
+	return VertexStorage::Pointer();
+}
+
+IndexArray::Pointer Scene::indexArrayWithName(const std::string& name)
+{
+	return _storage.indexArray();
+}
+
+VertexArrayObject Scene::vertexArrayWithStorageName(const std::string& name)
+{
+	for (const auto& vao : _vertexArrays)
+	{
+		if (vao->vertexBuffer()->name() == name)
+			return vao;
+	}
+	
+	return VertexArrayObject();
+}
+
 BaseElement::Pointer Scene::createElementOfType(ElementType type, BaseElement* parent)
 {
 	switch (type)
@@ -42,7 +70,6 @@ BaseElement::Pointer Scene::createElementOfType(ElementType type, BaseElement* p
 	}
 	}
 }
-
 
 Material* Scene::materialWithName(const std::string& mName)
 {
