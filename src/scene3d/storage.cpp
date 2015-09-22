@@ -170,8 +170,8 @@ void Storage::deserialize(RenderContext* rc, Dictionary stream, SerializationHel
 		}
 	}
 
-	Dictionary vertexStorages = stream.dictionaryForKey(kVertexStorages);
-	for (const auto& kv : vertexStorages->content)
+	Dictionary vsmap = stream.dictionaryForKey(kVertexStorages);
+	for (const auto& kv : vsmap->content)
 	{
 		Dictionary storage(kv.second);
 		ArrayValue declInfo = storage.arrayForKey(kVertexDeclaration);
@@ -205,7 +205,9 @@ void Storage::deserialize(RenderContext* rc, Dictionary stream, SerializationHel
 	IndexArrayFormat fmt = stringToIndexArrayFormat(iaInfo.stringForKey(kFormat)->content);
 	PrimitiveType pt = stringToPrimitiveType(iaInfo.stringForKey(kPrimitiveType)->content);
 	size_t indexesCount = static_cast<size_t>(iaInfo.integerForKey(kIndexesCount)->content);
+	
 	IndexArray::Pointer ia = IndexArray::Pointer::create(fmt, indexesCount, pt);
+	ia->setActualSize(indexesCount);
 
 	auto binaryFileName = iaInfo.stringForKey(kBinary)->content;
 	if (!fileExists(binaryFileName))
