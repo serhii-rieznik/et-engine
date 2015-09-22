@@ -230,8 +230,8 @@ namespace et
 	template <typename T>
 	inline Quaternion<T> normalize(const Quaternion<T>& q)
 	{ 
-		T l = q.length();
-		return (l > 0) ? q / std::sqrt(l) : Quaternion<T>();
+		T l = q.lengthSquared();
+		return (l > 0) ? (q / std::sqrt(l)) : Quaternion<T>();
 	}
 
 	template <typename T>

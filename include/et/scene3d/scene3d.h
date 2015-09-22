@@ -43,6 +43,8 @@ namespace et
 			ET_DECLARE_EVENT1(deserializationFinished, bool)
 
 		private:
+			void buildVertexBuffers(et::RenderContext*);
+			
 			Material* materialWithName(const std::string&) override;
 
 			BaseElement::Pointer createElementOfType(ElementType, BaseElement*) override;

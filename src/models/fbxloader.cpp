@@ -380,7 +380,6 @@ void et::FBXLoaderPrivate::loadNode(s3d::Storage& storage, FbxNode* node, s3d::B
 		auto nodeType = lNodeAttribute->GetAttributeType();
 		if (nodeType == FbxNodeAttribute::eMesh)
 		{
-			log::info("Loading mesh");
 			FbxMesh* mesh = node->GetMesh();
 			if (mesh->IsTriangleMesh())
 			{

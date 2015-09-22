@@ -67,16 +67,19 @@ namespace et
 			result.vector = vector / v;
 			return result;
 		};
+		
+		T lengthSquared() const
+			{ return scalar*scalar + vector.dotSelf(); }
 
 		T length() const
 			{ return std::sqrt(scalar*scalar + vector.dotSelf()); }
 
 		void normalize() 
 		{ 
-			T len = this->length();
+			T len = lengthSquared();
 			if (len > 0)
 			{
-				len = sqrt(len);
+				len = std::sqrt(len);
 				scalar /= len;
 				vector /= len;
 			}
@@ -105,10 +108,10 @@ namespace et
 
 		matrix4<T> toMatrix() const
 		{
-			static const T one = static_cast<T>(1);
-			static const T two = static_cast<T>(2);
+			const T one = static_cast<T>(1);
+			const T two = static_cast<T>(2);
 			
-			T len = std::sqrt(vector.dotSelf() + scalar * scalar);
+			T len = length();
 			T qx = vector.x / len;
 			T qy = vector.y / len;
 			T qz = vector.z / len;

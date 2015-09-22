@@ -101,34 +101,29 @@ Dictionary Scene::serialize(const std::string& basePath)
 void Scene::deserialize(et::RenderContext* rc, Dictionary info, const std::string& basePath, ObjectsCache& cache)
 {
 	_serializationBasePath = basePath;
-
-	{
-		Dictionary storageDictionary = info.dictionaryForKey(kStorage);
-		if (storageDictionary.empty())
-			log::warning("Serialized scene contains no storage");
-		_storage.deserialize(rc, storageDictionary, this, cache);
-
-		for (auto vs : _storage.vertexStorages())
-		{
-			VertexArrayObject vao;
-			std::string vaoName = "vao-" + intToStr(_vertexArrays.size() + 1);
-
-			if (_mainIndexBuffer.invalid())
-			{
-				vao = rc->vertexBufferFactory().createVertexArrayObject(vaoName, vs, BufferDrawType::Static,
-					_storage.indexArray(), BufferDrawType::Static);
-				_mainIndexBuffer = vao->indexBuffer();
-				_mainIndexBuffer->setName("mainIndexBuffer");
-			}
-			else
-			{
-				vao = rc->vertexBufferFactory().createVertexArrayObject(vaoName, vs, BufferDrawType::Static, 
-					_mainIndexBuffer);
-			}
-			vao->vertexBuffer()->setName(vs->name());
-			_vertexArrays.push_back(vao);
-		}
-	}
-
+	_storage.deserialize(rc,  info.dictionaryForKey(kStorage), this, cache);
+	
+	buildVertexBuffers(rc);
+	
 	ElementContainer::deserialize(info, this);
+}
+
+void Scene::buildVertexBuffers(et::RenderContext* rc)
+{
+	for (auto vs : _storage.vertexStorages())
+	{
+		std::string vaoName = "vao-" + intToStr(_vertexArrays.size() + 1);
+		auto vao = rc->vertexBufferFactory().createVertexArrayObject(vaoName);
+		
+		if (_mainIndexBuffer.invalid())
+		{
+			_mainIndexBuffer = rc->vertexBufferFactory().createIndexBuffer("mainIndexBuffer",
+				_storage.indexArray(), BufferDrawType::Static);
+		}
+		
+		auto vb = rc->vertexBufferFactory().createVertexBuffer(vs->name(), vs, BufferDrawType::Static);
+		vao->setBuffers(vb, _mainIndexBuffer);
+		
+		_vertexArrays.push_back(vao);
+	}
 }
