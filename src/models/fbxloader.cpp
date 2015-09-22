@@ -644,31 +644,31 @@ s3d::Mesh::Pointer FBXLoaderPrivate::loadMesh(s3d::Storage& storage, FbxMesh* me
 
 	if (hasNormal)
 		decl.push_back(VertexAttributeUsage::Normal, VertexAttributeType::Vec3);
+
+	if (hasColor)
+		decl.push_back(VertexAttributeUsage::Color, VertexAttributeType::Vec4);
 	
 	if (hasTangents)
 		decl.push_back(VertexAttributeUsage::Tangent, VertexAttributeType::Vec3);
 	
-	if (hasColor)
-		decl.push_back(VertexAttributeUsage::Color, VertexAttributeType::Vec4);
-	
-	if (hasSmoothingGroups)
-		decl.push_back(VertexAttributeUsage::Smoothing, VertexAttributeType::Int);
-	
-	if (hasSkin)
-	{
-		decl.push_back(VertexAttributeUsage::BlendWeights, VertexAttributeType::Vec4);
-		decl.push_back(VertexAttributeUsage::BlendIndices, VertexAttributeType::IntVec4);
-	}
-
-	uint32_t texCoord0 = static_cast<uint32_t>(VertexAttributeUsage::TexCoord0);
-	
 	auto uv = mesh->GetElementUV();
+	uint32_t texCoord0 = static_cast<uint32_t>(VertexAttributeUsage::TexCoord0);
 	if ((uv != nullptr) && (uv->GetMappingMode() != FbxGeometryElement::eNone))
 	{
 		for (uint32_t i = 0; i < uvChannels; ++i)
 			decl.push_back(static_cast<VertexAttributeUsage>(texCoord0 + i), VertexAttributeType::Vec2);
 	}
 
+	if (hasSkin)
+	{
+		decl.push_back(VertexAttributeUsage::BlendWeights, VertexAttributeType::Vec4);
+		decl.push_back(VertexAttributeUsage::BlendIndices, VertexAttributeType::IntVec4);
+	}
+	
+	if (hasSmoothingGroups)
+		decl.push_back(VertexAttributeUsage::Smoothing, VertexAttributeType::Int);
+	
+	
 	VertexStorage::Pointer vs = storage.vertexStorageWithDeclarationForAppendingSize(decl, lPolygonVertexCount);
 	int vbIndex = storage.indexOfVertexStorage(vs);
 	size_t vertexBaseOffset = vs->capacity();
@@ -697,12 +697,12 @@ s3d::Mesh::Pointer FBXLoaderPrivate::loadMesh(s3d::Storage& storage, FbxMesh* me
 	
 	if (hasNormal)
 		nrm = vs->accessData<VertexAttributeType::Vec3>(VertexAttributeUsage::Normal, vertexBaseOffset);
+
+	if (hasColor)
+		clr = vs->accessData<VertexAttributeType::Vec4>(VertexAttributeUsage::Color, vertexBaseOffset);
 	
 	if (hasTangents)
 		tan = vs->accessData<VertexAttributeType::Vec3>(VertexAttributeUsage::Tangent, vertexBaseOffset);
-	
-	if (hasColor)
-		clr = vs->accessData<VertexAttributeType::Vec4>(VertexAttributeUsage::Color, vertexBaseOffset);
 	
 	if (hasSmoothingGroups)
 		smg = vs->accessData<VertexAttributeType::Int>(VertexAttributeUsage::Smoothing, vertexBaseOffset);
