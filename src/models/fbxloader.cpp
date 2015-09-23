@@ -28,21 +28,6 @@ namespace et
 {
 	class FBXLoaderPrivate
 	{
-	private:
-		RenderContext* _rc = nullptr;
-		ObjectsCache& _texCache;
-		std::string _folder;
-
-	public:
-		FbxManager* manager = nullptr;
-		FbxImporter* importer = nullptr;
-		FbxScene* scene = nullptr;
-		FbxAnimLayer* sharedAnimationLayer = nullptr;
-		
-		std::map<size_t, s3d::BaseElement::Pointer> nodeToElementMap;
-
-		s3d::BaseElement::Pointer root;
-
 	public:
 		FBXLoaderPrivate(RenderContext* rc, ObjectsCache& ObjectsCache);
 		~FBXLoaderPrivate();
@@ -96,6 +81,19 @@ namespace et
 			}
 			return transform;
 		}
+		
+	public:
+		RenderContext* _rc = nullptr;
+		ObjectsCache& _texCache;
+		std::string _folder;
+		FbxManager* manager = nullptr;
+		FbxImporter* importer = nullptr;
+		FbxScene* scene = nullptr;
+		FbxAnimLayer* sharedAnimationLayer = nullptr;
+		std::map<size_t, s3d::BaseElement::Pointer> nodeToElementMap;
+		s3d::BaseElement::Pointer root;
+		bool shouldCreateRenderObjects = true;
+		
 	};
 }
 
@@ -186,7 +184,9 @@ s3d::ElementContainer::Pointer FBXLoaderPrivate::parse(s3d::Storage& storage)
 	fbxRootNode->ResetPivotSetAndConvertAnimation();
 	
 	loadAnimations();
-	loadTextures();
+	
+	if (shouldCreateRenderObjects)
+		loadTextures();
 
 	root = s3d::ElementContainer::Pointer::create(fbxRootNode->GetName(), nullptr);
 
@@ -195,7 +195,9 @@ s3d::ElementContainer::Pointer FBXLoaderPrivate::parse(s3d::Storage& storage)
 		loadNode(storage, fbxRootNode->GetChild(lChildIndex), root, true);
 
 	linkSkeleton(storage, root);
-	buildVertexBuffers(_rc, root, storage);
+	
+	if (shouldCreateRenderObjects)
+		buildVertexBuffers(_rc, root, storage);
 	
 	auto meshes = root->childrenOfType(s3d::ElementType::Mesh);
 	for (s3d::Mesh::Pointer mesh : meshes)
@@ -410,12 +412,11 @@ void et::FBXLoaderPrivate::loadNode(s3d::Storage& storage, FbxNode* node, s3d::B
 		}
 		else if (nodeType == FbxNodeAttribute::eNull)
 		{
-			log::info("Loading dummy");
 			createdElement = s3d::ElementContainer::Pointer::create(nodeName, parent.ptr());
 		}
 		else
 		{
-			log::warning("Unsupported node found in FBX, with type: %u", static_cast<uint32_t>(nodeType));
+			log::warning("Unsupported node found in FBX, with type: %s", node->GetTypeName());
 		}
 	}
 	
@@ -450,7 +451,7 @@ void FBXLoaderPrivate::loadMaterialTextureValue(s3d::Material::Pointer m, uint32
 		if (lTextureCount)
 		{
 			FbxFileTexture* lTexture = value.GetSrcObject<FbxFileTexture>(0);
-			if (lTexture && lTexture->GetUserDataPtr())
+			if ((lTexture != nullptr) && lTexture->GetUserDataPtr())
 			{
 				Texture* ptr = reinterpret_cast<Texture*>(lTexture->GetUserDataPtr());
 				m->setTexture(propName, Texture::Pointer(ptr));
@@ -505,35 +506,33 @@ void FBXLoaderPrivate::loadMaterialValue(s3d::Material::Pointer m, uint32_t prop
 s3d::Material::Pointer FBXLoaderPrivate::loadMaterial(FbxSurfaceMaterial* mat)
 {
 	s3d::Material::Pointer m;
-
 	m->setName(mat->GetName());
 
-	loadMaterialTextureValue(m, MaterialParameter_DiffuseMap, mat, FbxSurfaceMaterial::sDiffuse);
-	loadMaterialTextureValue(m, MaterialParameter_AmbientMap, mat, FbxSurfaceMaterial::sAmbient);
-	loadMaterialTextureValue(m, MaterialParameter_EmissiveMap, mat, FbxSurfaceMaterial::sEmissive);
-	loadMaterialTextureValue(m, MaterialParameter_SpecularMap, mat, FbxSurfaceMaterial::sSpecular);
-	loadMaterialTextureValue(m, MaterialParameter_NormalMap, mat, FbxSurfaceMaterial::sNormalMap);
-	loadMaterialTextureValue(m, MaterialParameter_BumpMap, mat, FbxSurfaceMaterial::sBump);
-	loadMaterialTextureValue(m, MaterialParameter_ReflectionMap, mat, FbxSurfaceMaterial::sReflection);
-
+	if (shouldCreateRenderObjects)
+	{
+		loadMaterialTextureValue(m, MaterialParameter_DiffuseMap, mat, FbxSurfaceMaterial::sDiffuse);
+		loadMaterialTextureValue(m, MaterialParameter_AmbientMap, mat, FbxSurfaceMaterial::sAmbient);
+		loadMaterialTextureValue(m, MaterialParameter_EmissiveMap, mat, FbxSurfaceMaterial::sEmissive);
+		loadMaterialTextureValue(m, MaterialParameter_SpecularMap, mat, FbxSurfaceMaterial::sSpecular);
+		loadMaterialTextureValue(m, MaterialParameter_NormalMap, mat, FbxSurfaceMaterial::sNormalMap);
+		loadMaterialTextureValue(m, MaterialParameter_BumpMap, mat, FbxSurfaceMaterial::sBump);
+		loadMaterialTextureValue(m, MaterialParameter_ReflectionMap, mat, FbxSurfaceMaterial::sReflection);
+	}
+	
 	loadMaterialValue(m, MaterialParameter_AmbientColor, mat, FbxSurfaceMaterial::sAmbient);
 	loadMaterialValue(m, MaterialParameter_DiffuseColor, mat, FbxSurfaceMaterial::sDiffuse);
 	loadMaterialValue(m, MaterialParameter_SpecularColor, mat, FbxSurfaceMaterial::sSpecular);
 	loadMaterialValue(m, MaterialParameter_EmissiveColor, mat, FbxSurfaceMaterial::sEmissive);
-	
 	loadMaterialValue(m, MaterialParameter_TransparentColor, mat, FbxSurfaceMaterial::sTransparentColor);
-
 	loadMaterialValue(m, MaterialParameter_AmbientFactor, mat, FbxSurfaceMaterial::sAmbientFactor);
 	loadMaterialValue(m, MaterialParameter_DiffuseFactor, mat, FbxSurfaceMaterial::sDiffuseFactor);
 	loadMaterialValue(m, MaterialParameter_SpecularFactor, mat, FbxSurfaceMaterial::sSpecularFactor);
 	loadMaterialValue(m, MaterialParameter_BumpFactor, mat, FbxSurfaceMaterial::sBumpFactor);
 	loadMaterialValue(m, MaterialParameter_ReflectionFactor, mat, FbxSurfaceMaterial::sReflectionFactor);
-
 	loadMaterialValue(m, MaterialParameter_Roughness, mat, FbxSurfaceMaterial::sShininess);
 	loadMaterialValue(m, MaterialParameter_Transparency, mat, FbxSurfaceMaterial::sTransparencyFactor);
-
 	loadMaterialValue(m, MaterialParameter_ShadingModel, mat, FbxSurfaceMaterial::sShadingModel);
-
+	
 	return m;
 }
 
@@ -857,17 +856,6 @@ s3d::Mesh::Pointer FBXLoaderPrivate::loadMesh(s3d::Storage& storage, FbxMesh* me
 		createdMeshes.push_back(element);
 	}
 
-	float* vals = (float*)vs->data().mutableDataUnsafe();
-	for (size_t i = 0, e = vs->capacity(); i < e; ++i)
-	{
-		auto n = vs->declaration().dataSize() / sizeof(float);
-		for (size_t j = 0; j < n; ++j)
-		{
-			printf("%.2f / ", *vals++);
-		}
-		printf("\n");
-	}
-
 	if (hasSkin)
 	{
 		int numDeformers = mesh->GetDeformerCount(FbxDeformer::eSkin);
@@ -955,7 +943,10 @@ void FBXLoaderPrivate::buildVertexBuffers(RenderContext* rc, s3d::BaseElement::P
 	
 	meshes = root->childrenOfType(s3d::ElementType::SupportMesh);
 	for (s3d::SupportMesh::Pointer mesh : meshes)
+	{
 		mesh->setVertexArrayObject(vertexArrayObjects[mesh->tag]);
+		mesh->cleanupLodChildren();
+	}
 }
 
 StringList FBXLoaderPrivate::loadNodeProperties(FbxNode* node)
@@ -1103,10 +1094,16 @@ FBXLoader::FBXLoader(const std::string& filename) :
 {
 }
 
+void FBXLoader::setShouldCreateRenderObjects(bool value)
+{
+	_shouldCreateRenderObjects = value;
+}
+
 s3d::ElementContainer::Pointer FBXLoader::load(RenderContext* rc, s3d::Storage& storage, ObjectsCache& ObjectsCache)
 {
 	s3d::ElementContainer::Pointer result;
 	FBXLoaderPrivate* loader = sharedObjectFactory().createObject<FBXLoaderPrivate>(rc, ObjectsCache);
+	loader->shouldCreateRenderObjects = _shouldCreateRenderObjects;
 
 	if (loader->import(_filename))
 		result = loader->parse(storage);

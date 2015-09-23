@@ -18,9 +18,12 @@ namespace et
 	public:
 		FBXLoader(const std::string& filename);
 
-		s3d::ElementContainer::Pointer load(RenderContext*, s3d::Storage&, ObjectsCache&);
+		void setShouldCreateRenderObjects(bool);
+
+		s3d::ElementContainer::Pointer load(RenderContext*, s3d::Storage&, ObjectsCache&) override;
 
 	private:
 		std::string _filename;
+		bool _shouldCreateRenderObjects = true;
 	};
 }
