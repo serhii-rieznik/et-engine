@@ -615,21 +615,24 @@ s3d::Mesh::Pointer FBXLoaderPrivate::loadMesh(s3d::Storage& storage, FbxMesh* me
 	else
 		element = s3d::Mesh::Pointer::create(meshName, parent.ptr());
 	
-	
 	size_t uvChannels = mesh->GetElementUVCount();
 
 	bool hasNormal = mesh->GetElementNormalCount() > 0;
-	bool hasTangents = mesh->GetElementTangentCount() > 0;
-	bool hasSmoothingGroups = mesh->GetElementSmoothingCount() > 0;
-	bool hasColor = mesh->GetElementVertexColorCount() > 0;
 	bool hasSkin = meshHasSkin(mesh);
 
 	const FbxVector4* lControlPoints = mesh->GetControlPoints();
+	
+	bool hasTangents = mesh->GetElementTangentCount() > 0;
 	FbxGeometryElementTangent* tangents = hasTangents ? mesh->GetElementTangent() : nullptr;
-	FbxGeometryElementSmoothing* smoothing = hasSmoothingGroups ? mesh->GetElementSmoothing() : nullptr;
+	
+	bool hasSmoothingGroups = false; // mesh->GetElementSmoothingCount() > 0;
+	FbxGeometryElementSmoothing* smoothing = nullptr; // hasSmoothingGroups ? mesh->GetElementSmoothing() : nullptr;
+	
+	bool hasColor = mesh->GetElementVertexColorCount() > 0;
 	FbxGeometryElementVertexColor* vertexColor = hasColor ? mesh->GetElementVertexColor() : nullptr;
 
-	hasNormal &= (mesh->GetElementNormal()->GetMappingMode() != FbxGeometryElement::eNone);
+	if (hasNormal)
+		hasNormal &= (mesh->GetElementNormal()->GetMappingMode() != FbxGeometryElement::eNone);
 
 	if (tangents)
 		hasTangents &= (tangents->GetMappingMode() == FbxGeometryElement::eByPolygonVertex);
@@ -852,6 +855,17 @@ s3d::Mesh::Pointer FBXLoaderPrivate::loadMesh(s3d::Storage& storage, FbxMesh* me
 			p->attachLod(lodIndex, element);
 		}
 		createdMeshes.push_back(element);
+	}
+
+	float* vals = (float*)vs->data().mutableDataUnsafe();
+	for (size_t i = 0, e = vs->capacity(); i < e; ++i)
+	{
+		auto n = vs->declaration().dataSize() / sizeof(float);
+		for (size_t j = 0; j < n; ++j)
+		{
+			printf("%.2f / ", *vals++);
+		}
+		printf("\n");
 	}
 
 	if (hasSkin)

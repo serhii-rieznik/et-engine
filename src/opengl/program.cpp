@@ -288,7 +288,7 @@ void Program::buildProgram(const std::string& vertex_source, const std::string& 
 				checkOpenGLError("glBindAttribLocation - %s", attribName.data());
 			}
 		}
-	
+
 		linkStatus = link();
 
 		_rc->renderState().bindProgram(static_cast<uint32_t>(apiHandle()), true);
@@ -406,8 +406,27 @@ int Program::link()
 	return result;
 }
 
-void Program::validate() const
+bool Program::validate() const
 {
+	auto glId = static_cast<GLuint>(apiHandle());
+	glValidateProgram(glId);
+	checkOpenGLError("glValidateProgram");
+	
+	GLint result = 0;
+	glGetProgramiv(glId, GL_VALIDATE_STATUS, &result);
+	
+	GLint nLogLen = 0;
+	glGetProgramiv(glId, GL_INFO_LOG_LENGTH, &nLogLen);
+	checkOpenGLError("glGetProgramiv<GL_INFO_LOG_LENGTH> - %s", name().c_str());
+	
+	if (nLogLen > 1)
+	{
+		StringDataStorage infoLog(nLogLen + 1, 0);
+		glGetProgramInfoLog(glId, nLogLen, &nLogLen, infoLog.data());
+		log::info("Program %s validation report:\n%s", name().c_str(), infoLog.data());
+	}
+	
+	return (result == GL_TRUE);
 }
 
 /*

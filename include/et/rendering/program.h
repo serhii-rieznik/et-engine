@@ -52,7 +52,7 @@ namespace et
 		uint32_t getUniformType(const std::string& uniform) const;
 		Program::Uniform getUniform(const std::string& uniform) const;
 
-		void validate() const;
+		bool validate() const;
 		
 		int modelViewMatrixUniformLocation() const 
 			{ return _mModelViewLocation; }

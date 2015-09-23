@@ -27,7 +27,7 @@ void OpenGLCapabilities::checkCaps()
 	
 	const char* glv = reinterpret_cast<const char*>(glGetString(GL_VERSION));
 	_versionShortString = emptyString;
-	_versionString = std::string(glv ? glv : "<Unknown OpenGL version>");
+	_versionString = ((glv == nullptr) || strlen(glv) == 0) ? "<Unknown OpenGL version>" : glv;
 	if (glv != nullptr)
 	{
 		do
@@ -45,7 +45,7 @@ void OpenGLCapabilities::checkCaps()
 	
 	const char* glslv = reinterpret_cast<const char*>(glGetString(GL_SHADING_LANGUAGE_VERSION));
 	_glslVersionShortString = emptyString;
-	_glslVersionString = std::string(glslv ? glslv : "<Unknown GLSL version>");
+	_glslVersionString = ((glslv == nullptr) || (strlen(glslv) == 0)) ? "<Unknown GLSL version>" : glslv;
 	if (glslv != nullptr)
 	{
 		do
