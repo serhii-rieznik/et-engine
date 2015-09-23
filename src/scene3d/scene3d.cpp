@@ -38,10 +38,13 @@ IndexArray::Pointer Scene::indexArrayWithName(const std::string& name)
 
 VertexArrayObject Scene::vertexArrayWithStorageName(const std::string& name)
 {
-	for (const auto& vao : _vertexArrays)
+	if (_shouldCreateRenderObjects)
 	{
-		if (vao->vertexBuffer()->name() == name)
-			return vao;
+		for (const auto& vao : _vertexArrays)
+		{
+			if (vao->vertexBuffer()->name() == name)
+				return vao;
+		}
 	}
 	
 	return VertexArrayObject();
@@ -98,12 +101,17 @@ Dictionary Scene::serialize(const std::string& basePath)
 	return result;
 }
 
-void Scene::deserialize(et::RenderContext* rc, Dictionary info, const std::string& basePath, ObjectsCache& cache)
+void Scene::deserialize(et::RenderContext* rc, Dictionary info, const std::string& basePath,
+	ObjectsCache& cache, bool shouldCreateRenderObjects)
 {
 	_serializationBasePath = basePath;
-	_storage.deserialize(rc,  info.dictionaryForKey(kStorage), this, cache);
+	_shouldCreateRenderObjects = shouldCreateRenderObjects;
 	
-	buildVertexBuffers(rc);
+	_storage.deserialize(rc,  info.dictionaryForKey(kStorage), this,
+		cache, shouldCreateRenderObjects);
+	
+	if (shouldCreateRenderObjects)
+		buildVertexBuffers(rc);
 	
 	ElementContainer::deserialize(info, this);
 }

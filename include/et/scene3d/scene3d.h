@@ -31,7 +31,9 @@ namespace et
 			Scene(const std::string& name = "scene");
 
 			Dictionary serialize(const std::string& basePath);
-			void deserialize(et::RenderContext*, Dictionary, const std::string& basePath, ObjectsCache&);
+			
+			void deserialize(et::RenderContext*, Dictionary, const std::string& basePath, ObjectsCache&,
+				bool shouldCreateRenderObjects = true);
 
 			Storage& storage()
 				{ return _storage; }
@@ -56,12 +58,13 @@ namespace et
 			VertexStorage::Pointer vertexStorageWithName(const std::string&) override;
 			
 			VertexArrayObject vertexArrayWithStorageName(const std::string&) override;
-			
+						
 		private:
 			Storage _storage;
 			std::string _serializationBasePath;
 			std::vector<VertexArrayObject> _vertexArrays;
 			IndexBuffer::Pointer _mainIndexBuffer;
+			bool _shouldCreateRenderObjects = true;
 		};
 	}
 }

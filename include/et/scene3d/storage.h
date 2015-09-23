@@ -21,7 +21,8 @@ namespace et
 			Storage();
 
 			Dictionary serialize(const std::string&);
-			void deserialize(RenderContext*, Dictionary, SerializationHelper*, ObjectsCache&);
+			void deserialize(RenderContext*, Dictionary, SerializationHelper*, ObjectsCache&,
+				bool createRenderObjects);
 
 			std::vector<VertexStorage::Pointer>& vertexStorages()
 				{ return _vertexStorages; }

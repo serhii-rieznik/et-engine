@@ -148,7 +148,8 @@ Dictionary Storage::serialize(const std::string& basePath)
 	return stream;
 }
 
-void Storage::deserialize(RenderContext* rc, Dictionary stream, SerializationHelper* helper, ObjectsCache& cache)
+void Storage::deserialize(RenderContext* rc, Dictionary stream, SerializationHelper* helper,
+	ObjectsCache& cache, bool createRenderObjects)
 {
 	auto materialsLibrary = stream.stringForKey(kMaterials)->content;
 	if (!fileExists(materialsLibrary))
@@ -164,7 +165,8 @@ void Storage::deserialize(RenderContext* rc, Dictionary stream, SerializationHel
 			{
 				Dictionary materialInfo(kv.second);
 				Material::Pointer material;
-				material->deserialize(materialInfo, rc, cache, helper->serializationBasePath());
+				material->deserialize(materialInfo, rc, cache, helper->serializationBasePath(),
+					createRenderObjects);
 				addMaterial(material);
 			}
 		}

@@ -113,7 +113,8 @@ void Material::serialize(Dictionary stream, const std::string& basePath)
 		stream.setDictionaryForKey(kTextures, textureValues);
 }
 
-void Material::deserialize(Dictionary stream, RenderContext* rc, ObjectsCache& cache, const std::string& basePath)
+void Material::deserialize(Dictionary stream, RenderContext* rc, ObjectsCache& cache,
+	const std::string& basePath, bool createRenderObjects)
 {
 	setName(stream.stringForKey(kName)->content);
 	auto blendValue = stream.integerForKey(kBlendState)->content;
@@ -138,7 +139,7 @@ void Material::deserialize(Dictionary stream, RenderContext* rc, ObjectsCache& c
 		if (vectorValues.hasKey(key))
 			setVector(i, arrayToVec4(vectorValues.arrayForKey(key)));
 
-		if (textureValues.hasKey(key))
+		if (createRenderObjects && textureValues.hasKey(key))
 		{
 			auto textureFileName = textureValues.stringForKey(key)->content;
 			if (!fileExists(textureFileName))

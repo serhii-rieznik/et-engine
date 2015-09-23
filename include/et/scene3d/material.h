@@ -64,7 +64,9 @@ namespace et
 				{ _depthMask = dm; }
 
 			void serialize(Dictionary, const std::string&);
-			void deserialize(Dictionary, RenderContext*, ObjectsCache&, const std::string&);
+			
+			void deserialize(Dictionary, RenderContext*, ObjectsCache&, const std::string&,
+				bool createRenderObjects);
 
 			void clear();
 			
