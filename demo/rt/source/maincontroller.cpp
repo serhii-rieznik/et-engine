@@ -51,7 +51,6 @@ void MainController::applicationDidLoad(et::RenderContext* rc)
 	model->setParent(_scene.ptr());
 	
 	Raytrace::Options rtOptions;
-	rtOptions.maxRecursionDepth = static_cast<size_t>(_options.integerForKey("max-recursion-depth", 8)->content);
 	rtOptions.raysPerPixel = static_cast<size_t>(_options.integerForKey("rays-per-pixel", 32)->content);
 	rtOptions.maxKDTreeDepth = static_cast<size_t>(_options.integerForKey("kd-tree-max-depth", 4)->content);
 	rtOptions.renderRegionSize = static_cast<size_t>(_options.integerForKey("render-region-size", 32)->content);

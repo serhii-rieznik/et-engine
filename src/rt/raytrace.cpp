@@ -101,7 +101,6 @@ namespace
 
 		vec4 raytracePixel(const vec2i&, size_t samples, size_t& bounces);
 
-		rt::float4 gatherBouncesRecursive(const rt::Ray&, size_t depth, size_t& maxDepth);
 		rt::float4 gatherBouncesIterative(const rt::Ray&, size_t depth, size_t& maxDepth);
 		
 		rt::float4 sampleEnvironment(const rt::float4& direction);
@@ -585,55 +584,6 @@ rt::float4 RaytracePrivate::gatherBouncesIterative(const rt::Ray& inRay, size_t 
 	return result;
 }
 
-rt::float4 RaytracePrivate::gatherBouncesRecursive(const rt::Ray& r, size_t depth, size_t& maxDepth)
-{
-	maxDepth = std::max(maxDepth, depth);
-
-	KDTree::TraverseResult traverse = kdTree.traverse(r);
-	if (traverse.triangleIndex == InvalidIndex)
-		return sampleEnvironment(r.direction);
-	
-	const auto& tri = kdTree.triangleAtIndex(traverse.triangleIndex);
-	const auto& mat = materials[tri.materialIndex];
-	
-	rt::float4 n = tri.interpolatedNormal(traverse.intersectionPointBarycentric);
-
-	if (options.debugRendering)
-	{
-		switch (debugMode)
-		{
-			case DebugRenderMode::RenderDiffuse:
-				return mat.emissive + mat.diffuse;
-				
-			case DebugRenderMode::RenderNormals:
-				return n * 0.5f + rt::float4(0.5f);
-				
-			case DebugRenderMode::RenderTriangle:
-			{
-				renderTriangle(tri);
-				return rt::float4(0.0f);
-			}
-			default:
-				break;
-		}
-	}
-	
-	rt::float4 materialColor;
-	rt::float4 defaultDirection;
-	rt::float4 actualDirection;
-	
-	if (classifyRay(n, n, mat, r.direction, defaultDirection, materialColor) == RayClass::Debug)
-		return materialColor;
-
-	if (depth <= options.maxRecursionDepth)
-	{
-		rt::Ray nextRay(traverse.intersectionPoint, actualDirection);
-		rt::float4 nextColor = gatherBouncesRecursive(nextRay, depth + 1, maxDepth);
-		return mat.emissive + materialColor * nextColor * actualDirection.dotVector(defaultDirection);
-	}
-
-	return mat.emissive;
-}
 
 rt::float4 RaytracePrivate::sampleEnvironment(const rt::float4& direction)
 {

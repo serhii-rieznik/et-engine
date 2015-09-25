@@ -15,11 +15,10 @@ newmtl leftSphere
 	Kd 0.95 0.95 0.95
 	Ks 0.95 0.95 0.95
     Ns 0.025
-	Tr 0.41
 
 newmtl rightSphere
-	Ns 0.15
-	Tr 0.3333
+	Ns 0.1
+	Tr 1.42
     Ka 0.01 0.01 0.01
 	Kd 1.00 1.00 1.00
 	Ks 1.00 1.00 1.00
@@ -57,7 +56,6 @@ newmtl leftWall
 
 newmtl light
 	Ns 10.0000
-	Tr 0.0000
 	Ka 0.7800 0.7800 0.7800
 	Kd 0.7800 0.7800 0.7800
     Ke 50 30 20

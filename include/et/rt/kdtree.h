@@ -45,9 +45,7 @@ namespace et
 		
 		enum class BuildMode
 		{
-			Bins,
 			SortedArrays,
-			BruteForce
 		};
 
 	public:
@@ -75,7 +73,6 @@ namespace et
 		void printStructure(const Node&, const std::string&);
 		
 		Node buildRootNode();
-		void splitNodeUsingBins(Node&, size_t);
 		void splitNodeUsingSortedArray(size_t, size_t);
 		void buildSplitBoxesUsingAxisAndPosition(size_t nodeIndex, int axis, float position);
 		void distributeTrianglesToChildren(size_t nodeIndex);
@@ -89,6 +86,7 @@ namespace et
 		rt::TriangleList _triangles;
 		rt::IntersectionDataList _intersectionData;
 		
+		size_t _maxDepth = 0;
 		size_t _maxBuildDepth = 0;
 		int _spaceSplitSize = 32;
 		BuildMode _buildMode = BuildMode::SortedArrays;

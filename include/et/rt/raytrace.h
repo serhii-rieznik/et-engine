@@ -20,7 +20,6 @@ namespace et
 		struct Options
 		{
 			size_t raysPerPixel = 32;
-			size_t maxRecursionDepth = 8;
 			size_t maxKDTreeDepth = 0;
             size_t renderRegionSize = 32;
 			int kdTreeSplits = 4;

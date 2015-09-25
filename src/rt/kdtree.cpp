@@ -11,19 +11,9 @@ using namespace et;
 
 namespace
 {
-	enum
-	{
-		MaxDepth = 31,
-		MinTrianglesToSubdivide = 16,
-		MaxTraverseStack = MaxDepth + 1
-	};
-	
-	struct BinContainer
-	{
-		int numTriangles = 0;
-		vec3 center = vec3(0.0f);
-	};
-	using BinContainerVector = std::vector<BinContainer>;
+	const size_t DepthLimit = 31;
+	const size_t MinTrianglesToSubdivide = 16;
+	const size_t MaxTraverseStack = DepthLimit + 1;
 	
 	struct Split
 	{
@@ -108,7 +98,7 @@ KDTree::Node KDTree::buildRootNode()
 	return result;
 }
 
-void KDTree::build(const rt::TriangleList& triangles, size_t, int splits)
+void KDTree::build(const rt::TriangleList& triangles, size_t maxDepth, int splits)
 {
 	cleanUp();
 	
@@ -116,17 +106,12 @@ void KDTree::build(const rt::TriangleList& triangles, size_t, int splits)
 	_triangles = triangles;
 	_spaceSplitSize = splits;
 	
-	_nodes.reserve(MaxDepth * MaxDepth);
+	_maxDepth = etMin(DepthLimit, maxDepth);
+	_nodes.reserve(maxDepth * maxDepth);
 	_nodes.push_back(buildRootNode());
 	
 	switch (_buildMode)
 	{
-		case BuildMode::Bins:
-		{
-			// splitNodeUsingBins(_nodes.front(), 0);
-			break;
-		}
-			
 		case BuildMode::SortedArrays:
 		{
 			splitNodeUsingSortedArray(0, 0);
@@ -142,126 +127,6 @@ vec3 triangleCentroid(const rt::Triangle& t)
 	rt::float4 maxV = t.v[0].maxWith(t.v[1].maxWith(t.v[2]));
 	rt::float4 minV = t.v[0].minWith(t.v[1].minWith(t.v[2]));
 	return ((maxV + minV) * 0.5f).xyz();
-}
-
-void KDTree::splitNodeUsingBins(Node& node, size_t depth)
-{
-	if ((depth > MaxDepth) || (node.triangles.size() < MinTrianglesToSubdivide))
-		return;
-	
-	// TODO: use indices
-	const auto& bbox = _boundingBoxes.front(); // node.boundingBox;
-	
-	BinContainerVector binsX(_spaceSplitSize);
-	BinContainerVector binsY(_spaceSplitSize);
-	BinContainerVector binsZ(_spaceSplitSize);
-	// const BinContainerVector* bins[3] = { &binsX, &binsY, &binsZ };
-	
-	vec3 lowerCorner = (bbox.center - bbox.halfSize).xyz();
-	vec3 binHalfSize = bbox.halfSize.xyz() / vec3(static_cast<float>(_spaceSplitSize));
-	vec3 center = lowerCorner + binHalfSize;
-	
-	for (int i = 0; i < _spaceSplitSize; ++i)
-	{
-		auto& binX = binsX[i];
-		auto& binY = binsY[i];
-		auto& binZ = binsZ[i];
-		binX.center = bbox.center.xyz();
-		binY.center = bbox.center.xyz();
-		binZ.center = bbox.center.xyz();
-		binX.center.x = center.x;
-		binY.center.y = center.y;
-		binZ.center.z = center.z;
-		center += 2.0f * binHalfSize;
-	}
-	
-	auto placePointToBins = [this, &binsX, &binsY, &binsZ, &bbox](const vec3& point)
-	{
-		if (rt::pointInsideBoundingBox(rt::float4(point, 1.0f), bbox))
-		{
-			vec3 bboxStartPosition = (bbox.center - bbox.halfSize).xyz();
-			vec3 centerInBbox = point - bboxStartPosition;
-			vec3 centerInBboxRelativeSize = centerInBbox / (2.0f * bbox.halfSize.xyz());
-			vec3 centerInSplitSize = vec3(float(_spaceSplitSize - 1)) * centerInBboxRelativeSize;
-			vec3i centerInSplitCoordinates(static_cast<int>(centerInSplitSize.x),
-				static_cast<int>(centerInSplitSize.y), static_cast<int>(centerInSplitSize.z));
-			
-			ET_ASSERT(centerInSplitCoordinates.x >= 0);
-			ET_ASSERT(centerInSplitCoordinates.y >= 0);
-			ET_ASSERT(centerInSplitCoordinates.z >= 0);
-			ET_ASSERT(centerInSplitCoordinates.x < _spaceSplitSize);
-			ET_ASSERT(centerInSplitCoordinates.y < _spaceSplitSize);
-			ET_ASSERT(centerInSplitCoordinates.z < _spaceSplitSize);
-			
-			binsX[centerInSplitCoordinates.x].numTriangles += 1;
-			binsY[centerInSplitCoordinates.y].numTriangles += 1;
-			binsZ[centerInSplitCoordinates.z].numTriangles += 1;
-		}
-	};
-	
-	for (auto triIndex : node.triangles)
-		placePointToBins(triangleCentroid(_triangles.at(triIndex)));
-	
-	vec3 splitSquare;
-	splitSquare.x = binHalfSize.x * (bbox.halfSize.cY() + bbox.halfSize.cZ()) + bbox.halfSize.cY() * bbox.halfSize.cZ();
-	splitSquare.y = binHalfSize.y * (bbox.halfSize.cX() + bbox.halfSize.cZ()) + bbox.halfSize.cX() * bbox.halfSize.cZ();
-	splitSquare.z = binHalfSize.z * (bbox.halfSize.cX() + bbox.halfSize.cY()) + bbox.halfSize.cY() * bbox.halfSize.cX();
-	
-	std::vector<Split> splitCosts(_spaceSplitSize);
-	splitCosts.back().cost = vec3(std::numeric_limits<float>::max());
-	
-	vec3 fTotalTriangles(static_cast<float>(node.triangles.size()));
-	
-	for (int i = 0; i + 1 < _spaceSplitSize; ++i)
-	{
-		vec3 numTrianglesFromLeft(0.0f);
-		float numSplitsFromLeft = float(i + 1);
-		
-		vec3 numTrianglesFromRight(0.0f);
-		float numSplitsFromRight = float(_spaceSplitSize - i - 1);
-		
-		for (int j = 0; j < _spaceSplitSize; ++j)
-		{
-			vec3 fCurrentTriangles(float(binsX[j].numTriangles), float(binsY[j].numTriangles), float(binsZ[j].numTriangles));
-			((j <= i) ? numTrianglesFromLeft : numTrianglesFromRight) += fCurrentTriangles / fTotalTriangles;
-		}
-		
-		splitCosts[i].cost = splitSquare *
-			(numTrianglesFromLeft * numSplitsFromLeft + numTrianglesFromRight * numSplitsFromRight);
-		
-		splitCosts[i].index = i;
-	}
-	
-	std::vector<Split> minSplits(3);
-	std::sort(splitCosts.begin(), splitCosts.end(), [](const Split& l, const Split& r)
-		{ return l.cost.x < r.cost.x; });
-	minSplits[0] = splitCosts.front();
-	minSplits[0].cost = vec3(minSplits[0].cost.x);
-	minSplits[0].axis = 0;
-
-	std::sort(splitCosts.begin(), splitCosts.end(), [](const Split& l, const Split& r)
-		{ return l.cost.y < r.cost.y; });
-	minSplits[1] = splitCosts.front();
-	minSplits[1].cost = vec3(minSplits[1].cost.y);
-	minSplits[1].axis = 1;
-
-	std::sort(splitCosts.begin(), splitCosts.end(), [](const Split& l, const Split& r)
-		{ return l.cost.z < r.cost.z; });
-	minSplits[2] = splitCosts.front();
-	minSplits[2].cost = vec3(minSplits[2].cost.z);
-	minSplits[2].axis = 2;
-	
-	std::sort(minSplits.begin(), minSplits.end(), [](const Split& l, const Split& r)
-		{ return l.cost.x < r.cost.x; });
-	
-	// TODO: proper use of indices
-	// int axis = minSplits.front().axis;
-	// int index = minSplits.front().index;
-	// float splitPlane = bins[axis]->at(index).center[axis] + binHalfSize[axis];
-	// buildSplitBoxesUsingAxisAndPosition(node, axis, splitPlane);
-	// distributeTrianglesToChildren(node);
-	// splitNodeUsingBins(_nodes.at(node.children[0]), depth + 1);
-	// splitNodeUsingBins(_nodes.at(node.children[1]), depth + 1);
 }
 
 void KDTree::buildSplitBoxesUsingAxisAndPosition(size_t nodeIndex, int axis, float position)
@@ -350,20 +215,12 @@ void KDTree::cleanUp()
 
 void KDTree::splitNodeUsingSortedArray(size_t nodeIndex, size_t depth)
 {
-	if (depth > MaxDepth)
-	{
-		// log::info("Stop by depth: %llu", uint64_t(depth));
-		return;
-	}
-	
 	auto numTriangles = _nodes.at(nodeIndex).triangles.size();
-	ET_ASSERT(numTriangles > 0);
-	if (numTriangles < MinTrianglesToSubdivide)
+	if ((depth > _maxDepth) || (numTriangles < MinTrianglesToSubdivide))
 	{
-		// log::info("Stop by triangles: %llu", uint64_t(numTriangles));
 		return;
 	}
-	
+		
 	_maxBuildDepth = etMax(_maxBuildDepth, depth);
 	const auto& bbox = _boundingBoxes.at(nodeIndex);
 	

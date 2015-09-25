@@ -1,19 +1,18 @@
 {
-	"model-name" : "media/bunny.obj",
-	"rays-per-pixel" : 64,
+	"model-name" : "media/CornellBox-Sphere.obj",
+	"rays-per-pixel" : 128,
 	"camera-fov" : 45.0,
-	"camera-distance" : 400.0,
-	"camera-phi" : 75.0,
-	"camera-theta" : 15.0,
-	"camera-offset" : [0.0, 125.0, 0.0],
-	"camera-view-point" : [0.0, 125.0, 0.0],
-    "render-region-size" : 64,
+	"camera-distance" : 3.25,
+	"camera-phi" : 90.0,
+	"camera-theta" : 0.0,
+	"camera-offset" : [0.0, 0.8, 0.0],
+	"camera-view-point" : [0.0, 0.8, 0.0],
+    "render-region-size" : 32,
+	"kd-tree-max-depth" : 31,
 	"render-kd-tree" : 0,
 	"debug-rendering" : 0,
 	
 	"------- deprecated-values -------" : "------- below -------",
 	
-	"kd-tree-splits" : 50,
-	"max-recursion-depth" : 9,
-	"kd-tree-max-depth" : 1024
+	"kd-tree-splits" : 50
 }
