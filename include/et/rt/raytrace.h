@@ -8,6 +8,7 @@
 #pragma once
 
 #include <et/rt/kdtree.h>
+#include <et/rt/environment.h>
 
 namespace et
 {
@@ -34,6 +35,8 @@ namespace et
 		template <typename F>
 		void setOutputMethod(F func)
 			{ _outputMethod = func; }
+		
+		void setEnvironmentSampler(rt::EnvironmentSampler::Pointer);
 		
 		void output(const vec2i&, const vec4&);
 

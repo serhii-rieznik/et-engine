@@ -11,6 +11,7 @@
 		A52329041B8278C400D00DD6 /* config in Resources */ = {isa = PBXBuildFile; fileRef = A52329031B8278C400D00DD6 /* config */; };
 		A52329071B827D1900D00DD6 /* media in Resources */ = {isa = PBXBuildFile; fileRef = A52329061B827D1900D00DD6 /* media */; };
 		A52329091B82817E00D00DD6 /* kdtree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A52329081B82817E00D00DD6 /* kdtree.cpp */; };
+		A5686FC11BB6944C00D8CF14 /* environment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5686FC01BB6944C00D8CF14 /* environment.cpp */; settings = {ASSET_TAGS = (); }; };
 		A5E2AEBD1B7D4A7700DE53DD /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5E2AEBA1B7D4A7700DE53DD /* main.cpp */; };
 		A5E2AEBE1B7D4A7700DE53DD /* maincontroller.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5E2AEBB1B7D4A7700DE53DD /* maincontroller.cpp */; };
 		A5E2AFF01B7D4ACB00DE53DD /* appevironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5E2AF7C1B7D4ACB00DE53DD /* appevironment.cpp */; };
@@ -120,6 +121,8 @@
 		A52329061B827D1900D00DD6 /* media */ = {isa = PBXFileReference; lastKnownFileType = folder; name = media; path = ../media; sourceTree = "<group>"; };
 		A52329081B82817E00D00DD6 /* kdtree.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = kdtree.cpp; sourceTree = "<group>"; };
 		A523290A1B8281A000D00DD6 /* kdtree.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = kdtree.h; sourceTree = "<group>"; };
+		A5686FC01BB6944C00D8CF14 /* environment.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = environment.cpp; sourceTree = "<group>"; };
+		A5686FC21BB6946A00D8CF14 /* environment.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = environment.h; sourceTree = "<group>"; };
 		A5E2AE941B7D4A1800DE53DD /* rt.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = rt.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A5E2AEB81B7D4A5800DE53DD /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = SOURCE_ROOT; };
 		A5E2AEBA1B7D4A7700DE53DD /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = main.cpp; path = source/main.cpp; sourceTree = SOURCE_ROOT; };
@@ -714,6 +717,7 @@
 		A5E2AF4C1B7D4A9900DE53DD /* rt */ = {
 			isa = PBXGroup;
 			children = (
+				A5686FC21BB6946A00D8CF14 /* environment.h */,
 				A523290A1B8281A000D00DD6 /* kdtree.h */,
 				A5E2AF4D1B7D4A9900DE53DD /* raytrace.h */,
 				A5E2AF4E1B7D4A9900DE53DD /* raytraceobjects.h */,
@@ -1058,6 +1062,7 @@
 		A5E2AFD31B7D4ACB00DE53DD /* rt */ = {
 			isa = PBXGroup;
 			children = (
+				A5686FC01BB6944C00D8CF14 /* environment.cpp */,
 				A52329081B82817E00D00DD6 /* kdtree.cpp */,
 				A5E2AFD41B7D4ACB00DE53DD /* raytrace.cpp */,
 			);
@@ -1266,6 +1271,7 @@
 				A5E2B0241B7D4ACB00DE53DD /* memory.apple.mm in Sources */,
 				A5E2B0221B7D4ACB00DE53DD /* locale.apple.mm in Sources */,
 				A5E2B0191B7D4ACB00DE53DD /* opengl.cpp in Sources */,
+				A5686FC11BB6944C00D8CF14 /* environment.cpp in Sources */,
 				A5E2AEBD1B7D4A7700DE53DD /* main.cpp in Sources */,
 				A5E2B0011B7D4ACB00DE53DD /* tools.cpp in Sources */,
 				A5E2B03D1B7D4ACB00DE53DD /* lineelement.cpp in Sources */,

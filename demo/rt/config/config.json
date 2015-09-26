@@ -1,16 +1,16 @@
 {
-	"model-name" : "media/CornellBox-Sphere.obj",
-	"rays-per-pixel" : 128,
+	"model-name" : "media/glass_for_wine.obj",
+	"rays-per-pixel" : 64,
 	"camera-fov" : 45.0,
-	"camera-distance" : 3.25,
+	"camera-distance" : 15.25,
 	"camera-phi" : 90.0,
-	"camera-theta" : 0.0,
-	"camera-offset" : [0.0, 0.8, 0.0],
-	"camera-view-point" : [0.0, 0.8, 0.0],
+	"camera-theta" : 25.0,
+	"camera-offset" : [0.0, 6.8, 0.0],
+	"camera-view-point" : [0.0, 6.8, 0.0],
     "render-region-size" : 32,
 	"kd-tree-max-depth" : 31,
 	"render-kd-tree" : 0,
-	"debug-rendering" : 0,
+	"debug-rendering" : 1,
 	
 	"------- deprecated-values -------" : "------- below -------",
 	

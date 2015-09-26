@@ -117,14 +117,14 @@ namespace
 		void fillRegionWithColor(const rt::Region&, const vec4& color);
 		void renderTriangle(const rt::Triangle&);
 		
-		RayClass classifyRay(rt::float4& hitNormal, rt::float4& originalNormal,
-			const rt::Material& hitMaterial, const rt::float4& inDirection, rt::float4& direction,
-			rt::float4& output);
+		RayClass classifyRay(rt::float4& hitNormal, const rt::Material& hitMaterial,
+			const rt::float4& inDirection, rt::float4& direction, rt::float4& output);
 		
 	public:
 		Raytrace* owner = nullptr;
 		Raytrace::Options options;
 		KDTree kdTree;
+		rt::EnvironmentSampler::Pointer sampler;
 		Camera camera;
 		vec2i viewportSize = vec2i(0);
 		DebugRenderMode debugMode = DebugRenderMode::RenderNormals;
@@ -198,6 +198,11 @@ void Raytrace::renderSpacePartitioning()
 void Raytrace::output(const vec2i& pos, const vec4& color)
 {
 	_outputMethod(pos, color);
+}
+
+void Raytrace::setEnvironmentSampler(rt::EnvironmentSampler::Pointer sampler)
+{
+	_private->sampler = sampler;
 }
 
 /*
@@ -467,13 +472,13 @@ vec4 RaytracePrivate::raytracePixel(const vec2i& pixel, size_t samples, size_t& 
 	return output;
 }
 
-inline void computeDiffuseWithRoughness(const rt::float4& indidence, const rt::float4& normal,
+inline void computeDiffuseVector(const rt::float4& indidence, const rt::float4& normal,
 	rt::float4& direction)
 {
 	direction = normal;
 }
 
-inline void computeReflectionWithRoughness(const rt::float4& indidence, const rt::float4& normal,
+inline void computeReflectionVector(const rt::float4& indidence, const rt::float4& normal,
 	rt::float4& direction)
 {
 	direction = rt::reflect(indidence, normal);
@@ -481,7 +486,7 @@ inline void computeReflectionWithRoughness(const rt::float4& indidence, const rt
 		direction = rt::reflect(direction, normal);
 }
 
-inline void computeRefractionWithParameters(const rt::float4& incidence, const rt::float4& normal,
+inline void computeRefractionVector(const rt::float4& incidence, const rt::float4& normal,
 	float k, float eta, rt::float4& direction)
 {
 	direction = incidence * eta - normal * (eta * normal.dot(incidence) + std::sqrt(k));
@@ -489,20 +494,19 @@ inline void computeRefractionWithParameters(const rt::float4& incidence, const r
 		direction = rt::reflect(direction, normal);
 }
 
-RayClass RaytracePrivate::classifyRay(rt::float4& normal, rt::float4& originalNormal,
-	const rt::Material& mat, const rt::float4& inDirection, rt::float4& direction, rt::float4& output)
+RayClass RaytracePrivate::classifyRay(rt::float4& normal, const rt::Material& mat,
+	const rt::float4& inDirection, rt::float4& direction, rt::float4& output)
 {
 	if (mat.ior >= rt::Constants::onePlusEpsilon)
 	{
 		float eta = 1.001f / mat.ior;
-		//*
+
 		if (normal.dot(inDirection) >= 0.0)
 		{
 			normal *= -1.0f;
-			originalNormal *= -1.0f;
 			eta = 1.0f / eta;
 		}
-		// */
+
 		float k = rt::computeRefractiveCoefficient(inDirection, normal, eta);
 		if (k >= rt::Constants::epsilon) // refract
 		{
@@ -511,21 +515,20 @@ RayClass RaytracePrivate::classifyRay(rt::float4& normal, rt::float4& originalNo
 			{
 				// refract
 				output = mat.diffuse;
-				// computeDiffuseWithRoughness(inDirection, normal, mat.roughness, defaultDirection, actualDirection);
-				computeRefractionWithParameters(inDirection, normal, k, eta, direction);
+				computeRefractionVector(inDirection, normal, k, eta, direction);
 				return RayClass::Refracted;
 			}
 			else
 			{
 				output = mat.specular;
-				computeReflectionWithRoughness(inDirection, normal, direction);
+				computeReflectionVector(inDirection, normal, direction);
 				return RayClass::Reflected;
 			}
 		}
 		else // reflect due to total internal reflection
 		{
 			output = mat.specular;
-			computeReflectionWithRoughness(inDirection, normal, direction);
+			computeReflectionVector(inDirection, normal, direction);
 			return RayClass::Reflected;
 		}
 	}
@@ -534,13 +537,13 @@ RayClass RaytracePrivate::classifyRay(rt::float4& normal, rt::float4& originalNo
 	{
 		// compute specular reflection
 		output = mat.specular;
-		computeReflectionWithRoughness(inDirection, normal, direction);
+		computeReflectionVector(inDirection, normal, direction);
 		return RayClass::Reflected;
 	}
 	
 	// compute diffuse reflection
 	output = mat.diffuse;
-	computeDiffuseWithRoughness(inDirection, normal, direction);
+	computeDiffuseVector(inDirection, normal, direction);
 	return RayClass::Diffuse;
 }
 
@@ -563,15 +566,13 @@ rt::float4 RaytracePrivate::gatherBouncesIterative(const rt::Ray& inRay, size_t 
 		
 		rt::float4 clearN = tri.interpolatedNormal(traverse.intersectionPointBarycentric);
 		rt::float4 roughN = rt::randomVectorOnHemisphere(clearN, mat.roughness);
-		classifyRay(roughN, clearN, mat, currentRay.direction, currentRay.direction, materialColor);
-		bounces.emplace(mat.emissive, materialColor * roughN.dotVector(clearN));
+		rt::float4 directionScale = clearN.dotVector(roughN);
+		classifyRay(roughN, mat, currentRay.direction, currentRay.direction, materialColor);
+		bounces.emplace(mat.emissive, materialColor * directionScale);
 		currentRay.origin = traverse.intersectionPoint + currentRay.direction * rt::Constants::epsilon;
 	}
 	maxDepth = bounces.size();
-	/*
-	if (bounces.size() == FastTraverseStack::MaxElements)
-		return rt::float4(100.0f, 0.0f, 100.0f, 1.0f);
-	// */
+
 	rt::float4 result(0.0f);
 	do
 	{
@@ -587,8 +588,8 @@ rt::float4 RaytracePrivate::gatherBouncesIterative(const rt::Ray& inRay, size_t 
 
 rt::float4 RaytracePrivate::sampleEnvironment(const rt::float4& direction)
 {
-	// return rt::float4(1.0f, 1.0f, 1.0f, 1.0f);
-	//*
+	return sampler.valid() ? sampler->sampleInDirection(direction) : vec4simd(0.0f);
+	/*
 	const rt::float4 ambient(40.0f / 255.0f, 58.0f / 255.0f, 72.0f / 255.0f, 1.0f);
 	const rt::float4 sun(249.0f / 255.0f, 243.0f / 255.0f, 179.0f / 255.0f, 1.0f);
 	const rt::float4 atmosphere(173.0f / 255.0f, 181.0f / 255.0f, 185.0f / 255.0f, 1.0f);

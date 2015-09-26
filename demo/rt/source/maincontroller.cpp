@@ -3,6 +3,7 @@
 #include <et/rendering/rendercontext.h>
 #include <et/json/json.h>
 #include <et/core/conversion.h>
+#include <et/imaging/textureloader.h>
 #include "maincontroller.hpp"
 
 using namespace et;
@@ -35,6 +36,9 @@ void MainController::applicationDidLoad(et::RenderContext* rc)
 	application().pushSearchPath("..\\..\\..");
 	application().pushSearchPath("..\\..\\..\\..");
 	application().pushSearchPath("Q:\\SDK\\Models");
+#elif (ET_PLATFORM_MAC)
+	application().pushSearchPath("/Volumes/Development/SDK/Models");
+	application().pushSearchPath("/Volumes/Development/SDK/Textures");
 #endif
 	
 	auto configName = application().resolveFileName("config/config.json");
@@ -73,6 +77,10 @@ void MainController::applicationDidLoad(et::RenderContext* rc)
 			
 		}
 	});
+	
+	auto textureName = application().resolveFileName("hdrmaps_com_free_016_half.hdr");
+	auto tex = loadTexture(textureName);
+	_rt.setEnvironmentSampler(rt::EnvironmentEquirectangularMapSampler::Pointer::create(tex, rt::float4(1.0f)));
 	
 	_rt.renderFinished.connect([this]()
 	{
