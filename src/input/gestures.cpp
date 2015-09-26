@@ -209,7 +209,7 @@ void GesturesRecognizer::onPointerMoved(et::PointerInputInfo pi)
 			moved.invoke(pi.normalizedPos, pi.type);
 			
 			DragGesture info;
-			info.offset = offset;
+			info.delta = offset;
 			info.velocity = speed;
 			info.pointerType = pCurr.type;
 			drag.invoke(info);
@@ -299,7 +299,7 @@ void GesturesRecognizer::onGesturePerformed(GestureInputInfo i)
 	if (i.mask & GestureTypeMask_Swipe)
 	{
 		DragGesture info;
-		info.offset = i.swipe;
+		info.delta = i.swipe;
 		drag.invoke(info);
 	}
 	

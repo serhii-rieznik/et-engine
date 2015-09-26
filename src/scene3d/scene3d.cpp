@@ -38,13 +38,10 @@ IndexArray::Pointer Scene::indexArrayWithName(const std::string& name)
 
 VertexArrayObject Scene::vertexArrayWithStorageName(const std::string& name)
 {
-	if (_shouldCreateRenderObjects)
+	for (const auto& vao : _vertexArrays)
 	{
-		for (const auto& vao : _vertexArrays)
-		{
-			if (vao->vertexBuffer()->name() == name)
-				return vao;
-		}
+		if (vao->vertexBuffer()->name() == name)
+			return vao;
 	}
 	
 	return VertexArrayObject();
@@ -101,19 +98,28 @@ Dictionary Scene::serialize(const std::string& basePath)
 	return result;
 }
 
-void Scene::deserialize(et::RenderContext* rc, Dictionary info, const std::string& basePath,
-	ObjectsCache& cache, bool shouldCreateRenderObjects)
+void Scene::deserializeWithOptions(et::RenderContext* rc, Dictionary info, const std::string& basePath,
+	ObjectsCache& cache, uint32_t options)
 {
 	_serializationBasePath = basePath;
-	_shouldCreateRenderObjects = shouldCreateRenderObjects;
+	_storage.deserializeWithOptions(rc,  info.dictionaryForKey(kStorage), this, cache, options);
 	
-	_storage.deserialize(rc,  info.dictionaryForKey(kStorage), this,
-		cache, shouldCreateRenderObjects);
-	
-	if (shouldCreateRenderObjects)
+	if (options & DeserializeOption_CreateVertexBuffers)
+	{
 		buildVertexBuffers(rc);
+	}
 	
 	ElementContainer::deserialize(info, this);
+	
+	if ((options & DeserializeOption_KeepGeometry) == 0)
+	{
+		cleanupGeometry();
+	}
+	
+	if ((options & DeserializeOption_KeepSupportMeshes) == 0)
+	{
+		cleanUpSupportMehses();
+	}
 }
 
 void Scene::buildVertexBuffers(et::RenderContext* rc)
@@ -133,5 +139,31 @@ void Scene::buildVertexBuffers(et::RenderContext* rc)
 		vao->setBuffers(vb, _mainIndexBuffer);
 		
 		_vertexArrays.push_back(vao);
+	}
+}
+
+void Scene::cleanupGeometry()
+{
+	auto meshes = childrenOfType(ElementType::Mesh);
+	for (s3d::Mesh::Pointer mesh : meshes)
+	{
+		mesh->setVertexStorage(VertexStorage::Pointer());
+		mesh->setIndexArray(IndexArray::Pointer());
+	}
+	meshes = childrenOfType(ElementType::SupportMesh);
+	for (s3d::SupportMesh::Pointer mesh : meshes)
+	{
+		mesh->setVertexStorage(VertexStorage::Pointer());
+		mesh->setIndexArray(IndexArray::Pointer());
+	}
+	_storage.flush();
+}
+
+void Scene::cleanUpSupportMehses()
+{
+	auto meshes = childrenOfType(ElementType::SupportMesh);
+	for (s3d::SupportMesh::Pointer mesh : meshes)
+	{
+		mesh->setParent(nullptr);
 	}
 }

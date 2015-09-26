@@ -13,22 +13,23 @@
 
 namespace et
 {
-	class CameraMovingController : public CameraController
+	class CameraOrbitController : public CameraController
 	{
 	public:
-		ET_DECLARE_POINTER(CameraMovingController);
+		ET_DECLARE_POINTER(CameraOrbitController);
 		
 	public:
-		CameraMovingController(Camera&, bool autoConnectToEvents);
+		CameraOrbitController(Camera&, bool autoConnectToEvents);
 		
+		void setTargetPoint(const vec3&);
 		void setMovementSpeed(const vec3&);
 		void setIntepolationRate(float);
 		
-	private:
-		void synchronize(const Camera&) override;
-		
 		void startUpdates() override;
 		void cancelUpdates() override;
+		
+	private:
+		void synchronize(const Camera&) override;
 		void update(float) override;
 		
 		void onKeyPressed(size_t) override;
@@ -37,14 +38,15 @@ namespace et
 		void onPointerMoved(PointerInputInfo) override;
 		void onPointerReleased(PointerInputInfo) override;
 		void onPointerCancelled(PointerInputInfo) override;
+		void onPointerScrolled(PointerInputInfo) override;
 		
 		void validateCameraAngles(vec2&);
 		
 	private:
 		GesturesRecognizer _gestures;
 		std::map<size_t, int> _pressedKeys;
-		InterpolationValue<vec3> _positionAnimator;
-		InterpolationValue<vec2> _directionAnimator;
+		InterpolationValue<vec3> _anglesDistanceAnimator;
 		vec3 _movementSpeed = vec3(1.0f);
+		vec3 _targetPoint = vec3(0.0f);
 	};
 }

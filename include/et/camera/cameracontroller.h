@@ -13,11 +13,14 @@
 
 namespace et
 {
-	class CameraController : public EventReceiver
+	class CameraController : public et::Shared, public EventReceiver
 	{
 	public:
+		ET_DECLARE_POINTER(CameraController);
+		
+	public:
 		CameraController(Camera& cam, bool autoConnectToInput);
-
+		
 		Camera& camera()
 			{ return _camera; }
 		
@@ -27,17 +30,23 @@ namespace et
 		void setPointerEventsEnabled(bool);
 		void setKeyboardEventsEnabled(bool);
 		
+
+	public:
 		virtual void startUpdates();
 		virtual void cancelUpdates();
 		
-	protected:
-		virtual void update(float dt) { }
+		virtual void synchronize(const Camera&) { }
+		
 		virtual void onKeyPressed(size_t) { }
 		virtual void onKeyReleased(size_t) { }
 		virtual void onPointerPressed(PointerInputInfo) { }
 		virtual void onPointerMoved(PointerInputInfo) { }
 		virtual void onPointerReleased(PointerInputInfo) { }
 		virtual void onPointerCancelled(PointerInputInfo) { }
+		virtual void onPointerScrolled(PointerInputInfo) { }
+		
+	protected:
+		virtual void update(float dt) { }
 		
 	private:
 		Camera& _camera;

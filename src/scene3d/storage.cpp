@@ -148,8 +148,8 @@ Dictionary Storage::serialize(const std::string& basePath)
 	return stream;
 }
 
-void Storage::deserialize(RenderContext* rc, Dictionary stream, SerializationHelper* helper,
-	ObjectsCache& cache, bool createRenderObjects)
+void Storage::deserializeWithOptions(RenderContext* rc, Dictionary stream, SerializationHelper* helper,
+	ObjectsCache& cache, uint32_t options)
 {
 	auto materialsLibrary = stream.stringForKey(kMaterials)->content;
 	if (!fileExists(materialsLibrary))
@@ -165,8 +165,8 @@ void Storage::deserialize(RenderContext* rc, Dictionary stream, SerializationHel
 			{
 				Dictionary materialInfo(kv.second);
 				Material::Pointer material;
-				material->deserialize(materialInfo, rc, cache, helper->serializationBasePath(),
-					createRenderObjects);
+				material->deserializeWithOptions(materialInfo, rc, cache,
+					helper->serializationBasePath(), options);
 				addMaterial(material);
 			}
 		}
@@ -234,6 +234,9 @@ void Storage::flush()
 		else
 			++vi;
 	}
+	
+	if (_indexArray.valid() && (_indexArray->atomicCounterValue() == 1))
+		_indexArray = IndexArray::Pointer();
 	
 	Material::Map::iterator mi = _materials.begin();
 	while (mi != _materials.end())

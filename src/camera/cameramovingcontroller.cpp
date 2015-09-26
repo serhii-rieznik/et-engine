@@ -12,17 +12,34 @@ using namespace et;
 CameraMovingController::CameraMovingController(Camera& cam, bool connectInput) :
 	CameraController(cam, connectInput)
 {
-	_positionAnimator.setValue(cam.position());
+	camera().lockUpVector(unitY);
+	
 	_positionAnimator.valueUpdated.connect([this](const vec3& p)
 	{
 		camera().setPosition(p);
+	});
+	
+	_directionAnimator.valueUpdated.connect([this](const vec2& p)
+	{
+		camera().setDirection(fromSpherical(p.y, p.x));
+	});
+	
+	_gestures.drag.connect([this](const GesturesRecognizer::DragGesture& drag)
+	{
+		if (drag.pointerType == PointerType_General)
+		{
+			vec2 delta = _directionAnimator.targetValue() + vec2(drag.delta.x, -drag.delta.y);
+			validateCameraAngles(delta);
+			_directionAnimator.setTargetValue(delta);
+		}
 	});
 }
 
 void CameraMovingController::startUpdates()
 {
 	CameraController::startUpdates();
-	_positionAnimator.setValue(camera().position());
+	synchronize(camera());
+	_directionAnimator.run();
 	_positionAnimator.run();
 }
 
@@ -30,6 +47,7 @@ void CameraMovingController::cancelUpdates()
 {
 	CameraController::cancelUpdates();
 	_positionAnimator.cancelUpdates();
+	_directionAnimator.cancelUpdates();
 }
 
 void CameraMovingController::onKeyPressed(size_t key)
@@ -42,24 +60,24 @@ void CameraMovingController::onKeyReleased(size_t key)
 	_pressedKeys[key] = 0;
 }
 
-void CameraMovingController::onPointerPressed(PointerInputInfo)
+void CameraMovingController::onPointerPressed(PointerInputInfo info)
 {
-	
+	_gestures.onPointerPressed(info);
 }
 
-void CameraMovingController::onPointerMoved(PointerInputInfo)
+void CameraMovingController::onPointerMoved(PointerInputInfo info)
 {
-	
+	_gestures.onPointerMoved(info);
 }
 
-void CameraMovingController::onPointerReleased(PointerInputInfo)
+void CameraMovingController::onPointerReleased(PointerInputInfo info)
 {
-	
+	_gestures.onPointerReleased(info);
 }
 
-void CameraMovingController::onPointerCancelled(PointerInputInfo)
+void CameraMovingController::onPointerCancelled(PointerInputInfo info)
 {
-	
+	_gestures.onPointerCancelled(info);
 }
 
 void CameraMovingController::update(float dt)
@@ -80,6 +98,32 @@ void CameraMovingController::update(float dt)
 	if (movement.dotSelf() > 0.0f)
 	{
 		movement.normalize();
-		_positionAnimator.addTargetValue(camera().side() * movement.x - camera().direction() * movement.z);
+		vec3 direction = camera().side() * movement.x - camera().direction() * movement.z;
+		_positionAnimator.addTargetValue(_movementSpeed * direction);
 	}
+}
+
+void CameraMovingController::setMovementSpeed(const vec3& speed)
+{
+	_movementSpeed = speed;
+}
+
+void CameraMovingController::setIntepolationRate(float rate)
+{
+	_positionAnimator.setRate(rate);
+	_directionAnimator.setRate(rate);
+}
+
+void CameraMovingController::validateCameraAngles(vec2& angles)
+{
+	angles.y = clamp(angles.y, -HALF_PI + DEG_15, HALF_PI - DEG_15);
+}
+
+void CameraMovingController::synchronize(const Camera&)
+{
+	vec2 angles = toSpherical(camera().direction()).xy();
+	_directionAnimator.setValue(angles);
+	_directionAnimator.setTargetValue(angles);
+	_positionAnimator.setValue(camera().position());
+	_positionAnimator.setTargetValue(camera().position());
 }

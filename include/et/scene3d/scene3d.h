@@ -26,14 +26,14 @@ namespace et
 		{
 		public:
 			ET_DECLARE_POINTER(Scene)
-			
+						
 		public:
 			Scene(const std::string& name = "scene");
 
 			Dictionary serialize(const std::string& basePath);
 			
-			void deserialize(et::RenderContext*, Dictionary, const std::string& basePath, ObjectsCache&,
-				bool shouldCreateRenderObjects = true);
+			void deserializeWithOptions(et::RenderContext*, Dictionary, const std::string& basePath,
+				ObjectsCache&, uint32_t options);
 
 			Storage& storage()
 				{ return _storage; }
@@ -46,6 +46,8 @@ namespace et
 
 		private:
 			void buildVertexBuffers(et::RenderContext*);
+			void cleanupGeometry();
+			void cleanUpSupportMehses();
 			
 			Material* materialWithName(const std::string&) override;
 
@@ -64,7 +66,6 @@ namespace et
 			std::string _serializationBasePath;
 			std::vector<VertexArrayObject> _vertexArrays;
 			IndexBuffer::Pointer _mainIndexBuffer;
-			bool _shouldCreateRenderObjects = true;
 		};
 	}
 }

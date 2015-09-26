@@ -29,7 +29,7 @@ namespace et
 		
 		struct DragGesture
 		{
-			vec2 offset = vec2(0.0f);
+			vec2 delta = vec2(0.0f);
 			vec2 velocity = vec2(0.0f);
 			PointerType pointerType = PointerType_None;
 		};

@@ -65,8 +65,8 @@ namespace et
 
 			void serialize(Dictionary, const std::string&);
 			
-			void deserialize(Dictionary, RenderContext*, ObjectsCache&, const std::string&,
-				bool createRenderObjects);
+			void deserializeWithOptions(Dictionary, RenderContext*, ObjectsCache&, const std::string&,
+				uint32_t);
 
 			void clear();
 			
