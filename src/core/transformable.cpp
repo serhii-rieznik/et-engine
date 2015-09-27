@@ -116,7 +116,7 @@ void ComponentTransformable::setTransform(const mat4& originalMatrix)
 			deviation += sqr(originalMatrix[v][u] - _cachedTransform[v][u]);
 	}
 	
-	if (deviation > 0.01f)
+	if (deviation > 0.001f)
 	{
 		log::warning("Failed to decompose matrix\n{\n"
 			"\tscale: (%f %f %f)\n"
