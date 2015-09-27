@@ -21,7 +21,7 @@ InvocationTask::InvocationTask(PureInvocationTarget* invocation) :
 
 InvocationTask::~InvocationTask()
 {
-	sharedObjectFactory().deleteObject(_invocation);
+	etDestroyObject(_invocation);
 }
 
 void InvocationTask::execute() 
@@ -50,7 +50,7 @@ void Invocation::invokeInBackground(float delay)
 
 void Invocation::invokeInRunLoop(RunLoop& rl, float delay)
 {
-	rl.addTask(sharedObjectFactory().createObject<InvocationTask>(_target->copy()), delay);
+	rl.addTask(etCreateObject<InvocationTask>(_target->copy()), delay);
 }
 
 /*
@@ -74,7 +74,7 @@ void Invocation1::invokeInBackground(float delay)
 
 void Invocation1::invokeInRunLoop(RunLoop& rl, float delay)
 {
-	rl.addTask(sharedObjectFactory().createObject<InvocationTask>(_target->copy()), delay);
+	rl.addTask(etCreateObject<InvocationTask>(_target->copy()), delay);
 }
 
 /*
@@ -98,5 +98,5 @@ void Invocation2::invokeInBackground(float delay)
 
 void Invocation2::invokeInRunLoop(RunLoop& rl, float delay)
 {
-	rl.addTask(sharedObjectFactory().createObject<InvocationTask>(_target->copy()), delay);
+	rl.addTask(etCreateObject<InvocationTask>(_target->copy()), delay);
 }

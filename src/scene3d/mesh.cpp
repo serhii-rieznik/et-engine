@@ -82,13 +82,20 @@ void Mesh::calculateSupportData()
 
 Mesh* Mesh::duplicate()
 {
-	Mesh* result = sharedObjectFactory().createObject<Mesh>(name(), _vao, material(),
+	Mesh* result = etCreateObject<Mesh>(name(), _vao, material(),
 		_startIndex, _numIndexes, parent());
 	
+	duplicateMeshPropertiesToMesh(result);
 	duplicateBasePropertiesToObject(result);
 	duplicateChildrenToObject(result);
 
 	return result;
+}
+
+void Mesh::duplicateMeshPropertiesToMesh(s3d::Mesh* result)
+{
+	result->_supportData = _supportData;
+	result->_deformer = _deformer; // TODO: clone deformer
 }
 
 void Mesh::setVertexBuffer(VertexBuffer::Pointer vb)
@@ -179,6 +186,10 @@ void Mesh::deserialize(Dictionary stream, SerializationHelper* helper)
 		_supportData.averageCenter = arrayToVec3(supportData.arrayForKey(kAverageCenter));
 		_supportData.dimensions = arrayToVec3(supportData.arrayForKey(kDimensions));
 		_supportData.boundingSphereRadius = supportData.floatForKey(kBoundingSphereRadius)->content;
+	}
+	else
+	{
+		calculateSupportData();
 	}
 	
 	if (stream.hasKey(kLods))

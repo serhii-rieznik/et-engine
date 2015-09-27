@@ -20,7 +20,7 @@ namespace et
 	public:
 		~InputStreamPrivate()
 		{
-			sharedObjectFactory().deleteObject(stream);
+			etDestroyObject(stream);
 		}
 
 	public:
@@ -44,12 +44,12 @@ InputStream::InputStream(const std::string& file, StreamMode mode)
 	if (mode == StreamMode_Binary)
 		openMode |= std::ios::binary;
 	
-	_private->stream = sharedObjectFactory().createObject<std::ifstream>(file.c_str(), openMode);
+	_private->stream = etCreateObject<std::ifstream>(file.c_str(), openMode);
 
 	if (_private->stream->fail())
 	{
 		log::error("Unable to open file: %s", file.c_str());
-		sharedObjectFactory().deleteObject(_private->stream);
+		etDestroyObject(_private->stream);
 		_private->stream = nullptr;
 	}
 }

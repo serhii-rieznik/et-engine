@@ -104,7 +104,6 @@ void ComponentTransformable::setTransform(const mat4& originalMatrix)
 	_flags &= ~Flag_ShouldDecompose;
 	
 	decomposeMatrix(originalMatrix, _translation, _orientation, _scale);
-	invalidateTransform();
 
 #if (ET_DEBUG)
 	buildTransform();
@@ -142,6 +141,8 @@ void ComponentTransformable::setTransform(const mat4& originalMatrix)
 			 _cachedTransform[3][0], _cachedTransform[3][1], _cachedTransform[3][2], _cachedTransform[3][3]);
 	}
 #endif
+	
+	invalidateTransform();
 }
 
 void ComponentTransformable::setTransformDirectly(const mat4& m)

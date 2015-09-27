@@ -1102,7 +1102,7 @@ void FBXLoader::setShouldCreateRenderObjects(bool value)
 s3d::ElementContainer::Pointer FBXLoader::load(RenderContext* rc, s3d::Storage& storage, ObjectsCache& ObjectsCache)
 {
 	s3d::ElementContainer::Pointer result;
-	FBXLoaderPrivate* loader = sharedObjectFactory().createObject<FBXLoaderPrivate>(rc, ObjectsCache);
+	FBXLoaderPrivate* loader = etCreateObject<FBXLoaderPrivate>(rc, ObjectsCache);
 	loader->shouldCreateRenderObjects = _shouldCreateRenderObjects;
 
 	if (loader->import(_filename))
@@ -1111,7 +1111,7 @@ s3d::ElementContainer::Pointer FBXLoader::load(RenderContext* rc, s3d::Storage& 
 	Invocation i;
 	i.setTarget([loader]()
 	{
-		sharedObjectFactory().deleteObject(loader);
+		etDestroyObject(loader);
 	});
 	i.invokeInMainRunLoop();
 	

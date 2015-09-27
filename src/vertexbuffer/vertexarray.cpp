@@ -129,7 +129,7 @@ void VertexArray::fitToSize(size_t count)
 
 VertexArray* VertexArray::duplicate()
 {
-	VertexArray* result = sharedObjectFactory().createObject<VertexArray>(_decl, _size);
+	VertexArray* result = etCreateObject<VertexArray>(_decl, _size);
 	
 	for (auto& c : _chunks)
 		c->copyTo(result->chunk(c->usage()).reference());

@@ -18,7 +18,7 @@ TextureLoaderDelegate::~TextureLoaderDelegate()
 }
 
 TextureLoadingRequest::TextureLoadingRequest(const std::string& name, const Texture::Pointer& tex, TextureLoaderDelegate* d) :
-	fileName(name), textureDescription(sharedObjectFactory().createObject<TextureDescription>()), texture(tex), delegate(d)
+	fileName(name), textureDescription(etCreateObject<TextureDescription>()), texture(tex), delegate(d)
 {
 	if (delegate)
 		delegate->addTextureLoadingRequest(this);
@@ -45,7 +45,7 @@ TextureLoadingThread::~TextureLoadingThread()
 	CriticalSectionScope lock(_requestsCriticalSection);
 	while (_requests.size())
 	{
-		sharedObjectFactory().deleteObject(_requests.front());
+		etDestroyObject(_requests.front());
 		_requests.pop();
 	}
 }
@@ -98,7 +98,7 @@ void TextureLoadingThread::addRequest(const std::string& fileName, Texture::Poin
 	}
 	
 	CriticalSectionScope lock(_requestsCriticalSection);
-	_requests.push(sharedObjectFactory().createObject<TextureLoadingRequest>(fileName, texture, delegate));
+	_requests.push(etCreateObject<TextureLoadingRequest>(fileName, texture, delegate));
 
 	if (running())
 		resume();

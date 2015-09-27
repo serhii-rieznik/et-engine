@@ -30,7 +30,7 @@ public:
 	IntrusivePtr<Loader> loader;
 
 	ProgramFactoryPrivate(ProgramFactory* owner) : 
-		loader(sharedObjectFactory().createObject<Loader>(owner)) { }
+		loader(etCreateObject<Loader>(owner)) { }
 };
 
 StringList parseDefinesString(std::string defines, std::string separators = ",; \t");

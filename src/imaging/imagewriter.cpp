@@ -117,7 +117,7 @@ bool internal_writePNGtoBuffer(BinaryDataStorage& buffer, const BinaryDataStorag
 	
 	png_set_compression_level(png_ptr, static_cast<int>(9.0f * clamp(compressionLevels[ImageFormat_PNG], 0.0f, 1.0f) + 0.5f));
 	
-	png_bytep* row_pointers = reinterpret_cast<png_bytep*>(sharedObjectFactory().allocator()->allocate(sizeof(png_bytep) * size.y));
+	png_bytep* row_pointers = reinterpret_cast<png_bytep*>(sharedBlockAllocator().allocate(sizeof(png_bytep) * size.y));
 	
 	int rowSize = size.x * components * bitsPerComponent / 8;
 	
@@ -140,7 +140,7 @@ bool internal_writePNGtoBuffer(BinaryDataStorage& buffer, const BinaryDataStorag
 	
 	png_destroy_write_struct(&png_ptr, &info_ptr);
 	
-	sharedObjectFactory().allocator()->release(row_pointers);
+	sharedBlockAllocator().release(row_pointers);
 	return true;
 }
 

@@ -35,7 +35,7 @@ Material::~Material()
 
 Material* Material::duplicate() const
 {
-	Material* m = sharedObjectFactory().createObject<Material>();
+	Material* m = etCreateObject<Material>();
 	
 	m->tag = tag;
 	m->setName(name());
