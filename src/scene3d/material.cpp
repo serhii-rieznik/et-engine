@@ -122,7 +122,7 @@ void Material::deserializeWithOptions(Dictionary stream, RenderContext* rc, Obje
 		static_cast<BlendState>(blendValue) : BlendState::Default;
 	_depthMask = stream.integerForKey(kDepthMask)->content != 0;
 
-	bool shouldCreateTextures = options & DeserializeOption_CreateTextures;
+	bool shouldCreateTextures = (options & DeserializeOption_CreateTextures) == DeserializeOption_CreateTextures;
 	Dictionary intValues = stream.dictionaryForKey(kIntegerValues);
 	Dictionary floatValues = stream.dictionaryForKey(kFloatValues);
 	Dictionary vectorValues = stream.dictionaryForKey(kVectorValues);
