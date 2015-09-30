@@ -150,6 +150,8 @@ namespace et
 		Program::UniformMap::const_iterator findUniform(const std::string& name) const;
 		
 		int link();
+		void printShaderLog(uint32_t, size_t, const char*);
+		void printShaderSource(uint32_t, size_t, const char*);
 
 	private:
 		RenderContext* _rc;

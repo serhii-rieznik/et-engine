@@ -122,6 +122,41 @@ void Program::setCameraProperties(const Camera& cam)
 	setCameraPosition(cam.position());
 }
 
+void Program::printShaderSource(uint32_t shader, size_t initialSize, const char* tag)
+{
+	GLsizei sourceLength = 0;
+	DataStorage<GLchar> buffer(initialSize + 1, 0);
+	glGetShaderSource(shader, static_cast<GLsizei>(buffer.size()), &sourceLength, buffer.data());
+	
+	DataStorage<char> stringBuffer(10 * sourceLength, 0);
+	auto ptr = buffer.begin();
+	auto end = ptr + sourceLength;
+	
+	int pos = 0;
+	int lineNumber = 1;
+	while (ptr < end)
+	{
+		pos += sprintf(stringBuffer.element_ptr(pos), "%04d > ", lineNumber);
+		while ((ptr < end) && (*ptr != '\n'))
+		{
+			stringBuffer[pos++] = *ptr++;
+		}
+		stringBuffer[pos++] = '\n';
+		++lineNumber;
+		++ptr;
+	}
+	
+	log::info("Program: %s, %s shader source:\n%s", name().c_str(), tag, stringBuffer.data());
+}
+
+void Program::printShaderLog(uint32_t shader, size_t initialSize, const char* tag)
+{
+	GLsizei nLogLen = 0;
+	DataStorage<GLchar> infoLog(initialSize + 1, 0);
+	glGetShaderInfoLog(shader, static_cast<GLsizei>(infoLog.size()), &nLogLen, infoLog.data());
+	log::info("Program %s, %s shader info log:\n%s", name().c_str(), tag, infoLog.data());
+}
+
 void Program::buildProgram(const std::string& vertex_source, const std::string& geom_source,
 	const std::string& frag_source)
 {
@@ -176,9 +211,8 @@ void Program::buildProgram(const std::string& vertex_source, const std::string& 
 	checkOpenGLError("glGetShaderiv<VERTEX, GL_INFO_LOG_LENGTH> - %s", name().c_str());
 	if (nLogLen > 1)
 	{
-		DataStorage<GLchar> infoLog(nLogLen, 0);
-		glGetShaderInfoLog(VertexShader, nLogLen, &nLogLen, infoLog.data());
-		log::error("Vertex shader %s compile report:\n%s", name().c_str(), infoLog.data());
+		printShaderLog(VertexShader, nLogLen, "vertex");
+		printShaderSource(VertexShader, vertex_source.size(), "vertex");
 	}
 
 	if (vertStatus == GL_TRUE)
@@ -209,9 +243,8 @@ void Program::buildProgram(const std::string& vertex_source, const std::string& 
 		glGetShaderiv(GeometryShader, GL_INFO_LOG_LENGTH, &nLogLen);
 		if (nLogLen > 1)
 		{
-			DataStorage<GLchar> infoLog(nLogLen, 0);
-			glGetShaderInfoLog(GeometryShader, nLogLen, &nLogLen, infoLog.data());
-			log::error("Geometry shader %s compile report:\n%s", name().c_str(), infoLog.data());
+			printShaderLog(GeometryShader, geom_source.size(), "geometry");
+			printShaderSource(GeometryShader, geom_source.size(), "geometry");
 		}
 		
 		if (geomStatus == GL_TRUE)
@@ -242,9 +275,8 @@ void Program::buildProgram(const std::string& vertex_source, const std::string& 
 	glGetShaderiv(FragmentShader, GL_INFO_LOG_LENGTH, &nLogLen);
 	if (nLogLen > 1)
 	{
-		DataStorage<GLchar> infoLog(nLogLen, 0);
-		glGetShaderInfoLog(FragmentShader, nLogLen, &nLogLen, infoLog.data());
-		log::error("Fragment shader %s compile report:\n%s", name().c_str(), infoLog.data());
+		printShaderLog(GeometryShader, frag_source.size(), "fragment");
+		printShaderSource(GeometryShader, frag_source.size(), "fragment");
 	}
 
 	if (fragStatus == GL_TRUE)
