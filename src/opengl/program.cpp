@@ -275,8 +275,8 @@ void Program::buildProgram(const std::string& vertex_source, const std::string& 
 	glGetShaderiv(FragmentShader, GL_INFO_LOG_LENGTH, &nLogLen);
 	if (nLogLen > 1)
 	{
-		printShaderLog(GeometryShader, frag_source.size(), "fragment");
-		printShaderSource(GeometryShader, frag_source.size(), "fragment");
+		printShaderLog(FragmentShader, frag_source.size(), "fragment");
+		printShaderSource(FragmentShader, frag_source.size(), "fragment");
 	}
 
 	if (fragStatus == GL_TRUE)
