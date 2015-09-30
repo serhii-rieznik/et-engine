@@ -308,12 +308,12 @@ void Program::buildProgram(const std::string& vertex_source, const std::string& 
 			checkOpenGLError("glGetActiveAttrib(..., %d, %d, ..., %s) - %s", maxNameLength, nameLength, 
 				attribName.binary(), name().c_str());
 
-			bool compatibility = false;
-			auto attrib = stringToVertexAttributeUsage(attribName.binary(), compatibility);
+			bool builtIn = false;
+			auto attrib = stringToVertexAttributeUsage(attribName.binary(), builtIn);
 
-			_attributes.emplace_back(std::string(attribName.binary()), attrib, compatibility);
+			_attributes.emplace_back(std::string(attribName.binary()), attrib, builtIn);
 
-			if (!compatibility)
+			if (!builtIn)
 			{
 				glBindAttribLocation(static_cast<uint32_t>(apiHandle()), static_cast<GLuint>(attrib),
 					attribName.binary());

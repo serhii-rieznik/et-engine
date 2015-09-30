@@ -31,10 +31,10 @@ namespace et
 		{
 			std::string name;
 			VertexAttributeUsage usage = VertexAttributeUsage::Position;
-			bool compatibilityAttribute = false;
+			uint32_t builtIn = 0;
 			
-			Attribute(const std::string& aName, VertexAttributeUsage aUsage, bool compatibility) :
-				name(aName), usage(aUsage), compatibilityAttribute(compatibility) { }
+			Attribute(const std::string& aName, VertexAttributeUsage aUsage, bool isBuiltIn) :
+				name(aName), usage(aUsage), builtIn(isBuiltIn ? 1 : 0) { }
 		};
 		
 		typedef std::unordered_map<std::string, Uniform> UniformMap;

@@ -15,7 +15,7 @@ namespace et
 		"Vertex", "Normal", "Color", "Tangent", "Binormal",
 		"TexCoord0", "TexCoord1", "TexCoord2", "TexCoord3",
 		"SmoothingGroup", "gl_InstanceID", "gl_InstanceIDEXT",
-		"BlendWeights", "BlendIndices",
+		"BlendWeights", "BlendIndices", "gl_VertexID"
 	};
 
 	const std::string vertexAttributeTypeNames[VertexAttributeType_max] =
@@ -41,13 +41,6 @@ namespace et
 		"unsigned short <565>",
 	};
 
-	const std::string compatibilityVertexAttributeUsageNames[VertexAttributeUsage_max] =
-	{
-		"gl_Vertex", "gl_Normal", "gl_Color", "gl_Tangent", "gl_Binormal",
-		"gl_MultiTexCoord0", "gl_MultiTexCoord1", "gl_MultiTexCoord2", "gl_MultiTexCoord3",
-		"gl_SmoothingGroup", "gl_InstanceID", "gl_InstanceIDEXT", "gl_MultiTexCoord4", "gl_MultiTexCoord5",
-	};
-
 	const std::string indexArrayFormatNames[IndexArrayFormat_max] = 
 	{
 		"8 bit", "16 bit", "32 bit",
@@ -66,7 +59,7 @@ namespace et
 		0x0000
 	};
 
-	VertexAttributeUsage stringToVertexAttributeUsage(const std::string& s, bool& compatibility)
+	VertexAttributeUsage stringToVertexAttributeUsage(const std::string& s, bool& builtIn)
 	{
 		VertexAttributeUsage result = VertexAttributeUsage::Unknown;
 
@@ -82,21 +75,14 @@ namespace et
 			}
 		}
 
-		for (uint32_t i = 0, e = VertexAttributeUsage_max; i < e; ++i)
-		{
-			if (s == compatibilityVertexAttributeUsageNames[i])
-			{
-				compatibility = true;
-				result = static_cast<VertexAttributeUsage>(i);
-				break;
-			}
-		}
-
-		compatibility |= (result == VertexAttributeUsage::InstanceId) ||
-			(result == VertexAttributeUsage::InstanceIdExt);
-
 		if (result == VertexAttributeUsage::Unknown)
+		{
 			log::warning("Unknown vertex attribute usage: %s", s.c_str());
+		}
+		else
+		{
+			builtIn = (s.find("gl_") == 0);
+		}
 
 		return result;
 	}

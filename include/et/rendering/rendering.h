@@ -25,10 +25,12 @@ namespace et
 		TexCoord3,
 		
 		Smoothing,
-		InstanceId,
-		InstanceIdExt,
+		BuiltIn_InstanceId,
+		BuiltIn_InstanceIdExt,
 		BlendWeights,
 		BlendIndices,
+		
+		BuiltIn_VertexId,
 		
 		Unknown,
 		max
@@ -288,7 +290,7 @@ namespace et
 	
 	DataType vertexAttributeTypeDataType(VertexAttributeType t);
 
-	VertexAttributeUsage stringToVertexAttributeUsage(const std::string& s, bool& compatibility);
+	VertexAttributeUsage stringToVertexAttributeUsage(const std::string& s, bool& builtIn);
 	VertexAttributeType stringToVertexAttributeType(const std::string& s);
 	DataType stringToDataType(const std::string&);
 
