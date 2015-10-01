@@ -47,10 +47,10 @@ ProgramFactory::ProgramFactory(RenderContext* rc) : APIObjectFactory(rc)
 
 #if (ET_OPENGLES)	
 	_commonHeader =
-		"#define etLowp			lowp\n"
+		"#define etLowp		lowp\n"
 		"#define etMediump		mediump\n"
 		"#define etHighp		highp\n"
-		"#define ET_OPENGL_ES	1";
+		"#define ET_OPENGL_ES	1\n";
 	
 	if (OpenGLCapabilities::instance().versionShortString() >= "300")
 	{
@@ -476,12 +476,12 @@ const std::string openGl3FragmentHeader = R"(
 #define etTextureCubeLod	textureLod
 #define etFragmentIn		in
 #define etFragmentOut		etFragmentOut0
-layout (location = 0) out vec4 etFragmentOut0;
-layout (location = 1) out vec4 etFragmentOut1;
-layout (location = 2) out vec4 etFragmentOut2;
-layout (location = 3) out vec4 etFragmentOut3;
-layout (location = 4) out vec4 etFragmentOut4;
-layout (location = 5) out vec4 etFragmentOut5;
-layout (location = 6) out vec4 etFragmentOut6;
-layout (location = 7) out vec4 etFragmentOut7;
+layout (location = 0) out etHighp vec4 etFragmentOut0;
+layout (location = 1) out etHighp vec4 etFragmentOut1;
+layout (location = 2) out etHighp vec4 etFragmentOut2;
+layout (location = 3) out etHighp vec4 etFragmentOut3;
+layout (location = 4) out etHighp vec4 etFragmentOut4;
+layout (location = 5) out etHighp vec4 etFragmentOut5;
+layout (location = 6) out etHighp vec4 etFragmentOut6;
+layout (location = 7) out etHighp vec4 etFragmentOut7;
 )";

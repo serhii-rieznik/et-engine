@@ -152,6 +152,23 @@ bool et::ios::runningOnIPad()
 	return UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad;
 }
 
+void et::alert(const std::string& title, const std::string& message, const std::string& button, AlertType)
+{
+	NSString* nsTitle = [NSString stringWithCString:title.c_str() encoding:NSUTF8StringEncoding];
+	NSString* nsMessage = [NSString stringWithCString:message.c_str() encoding:NSUTF8StringEncoding];
+	NSString* nsButton = [NSString stringWithCString:button.c_str() encoding:NSUTF8StringEncoding];
+	
+	UIAlertView* alert = [[UIAlertView alloc] initWithTitle:nsTitle message:nsMessage delegate:nil
+		cancelButtonTitle:nsButton otherButtonTitles:nil];
+	
+	[alert show];
+	
+#if (!ET_OBJC_ARC_ENABLED)
+	[alert release];
+#endif
+}
+
+
 /*
  * Obj-C stuff
  */

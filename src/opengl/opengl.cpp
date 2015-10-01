@@ -7,6 +7,7 @@
 
 #include <et/core/tools.h>
 #include <et/opengl/opengl.h>
+#include <et/opengl/openglcaps.h>
 #include <et/threading/threading.h>
 
 using namespace et;
@@ -506,19 +507,28 @@ std::string et::glInternalFormatToString(int format)
 		CASE_VALUE(GL_DEPTH_COMPONENT)
 		CASE_VALUE(GL_DEPTH_COMPONENT16)
 		
+		CASE_VALUE(GL_RED)
 		CASE_VALUE(GL_RGB)
 		CASE_VALUE(GL_RGBA)
 		CASE_VALUE(GL_RGBA4)
 		CASE_VALUE(GL_RGB5_A1)
-			
+
 #if defined(GL_R8)
 		CASE_VALUE(GL_R8)
 #endif
 
+#if defined(GL_RG)
+		CASE_VALUE(GL_RG)
+#endif
+		
 #if defined(GL_RG8)
 		CASE_VALUE(GL_RG8)
 #endif
-			
+		
+#if defined(GL_RG16F)
+		CASE_VALUE(GL_RG16F)
+#endif
+		
 #if defined(GL_RG32F)
 		CASE_VALUE(GL_RG32F)
 #endif
@@ -1020,5 +1030,14 @@ const uint32_t* et::drawBufferTargets()
 uint32_t et::drawBufferTarget(size_t i)
 {
 	ET_ASSERT(i < MaxDrawBuffers);
+	
+#if (ET_OPENGLES)
+	if ((i > 0) && (OpenGLCapabilities::instance().versionShortString() <= "200"))
+	{
+		log::warning("MRT is not supported on ES 2.0, GL_COLOR_ATTACHMENT0 will be used all the time.");
+		i = 0;
+	}
+#endif
+	
 	return *(drawBufferTargets() + i);
 }
