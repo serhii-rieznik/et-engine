@@ -1032,7 +1032,7 @@ uint32_t et::drawBufferTarget(size_t i)
 	ET_ASSERT(i < MaxDrawBuffers);
 	
 #if (ET_OPENGLES)
-	if ((i > 0) && (OpenGLCapabilities::instance().versionShortString() <= "200"))
+	if ((i > 0) && (OpenGLCapabilities::instance().version() < OpenGLVersion::Version_3x))
 	{
 		log::warning("MRT is not supported on ES 2.0, GL_COLOR_ATTACHMENT0 will be used all the time.");
 		i = 0;

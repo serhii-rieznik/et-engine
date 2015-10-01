@@ -502,7 +502,7 @@ void Framebuffer::resolveMultisampledTo(Framebuffer::Pointer framebuffer, bool r
 	_rc->renderState().bindDrawFramebuffer(static_cast<uint32_t>(framebuffer->apiHandle()));
 	
 #	if (ET_OPENGLES)
-	if (OpenGLCapabilities::instance().versionShortString() < "300")
+	if (OpenGLCapabilities::instance().version() < OpenGLVersion::Version_3x)
 	{
 		glResolveMultisampleFramebufferAPPLE();
 		checkOpenGLError("glResolveMultisampleFramebuffer");

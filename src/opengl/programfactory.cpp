@@ -52,7 +52,7 @@ ProgramFactory::ProgramFactory(RenderContext* rc) : APIObjectFactory(rc)
 		"#define etHighp		highp\n"
 		"#define ET_OPENGL_ES	1\n";
 	
-	if (OpenGLCapabilities::instance().versionShortString() >= "300")
+	if (OpenGLCapabilities::instance().version() >= OpenGLVersion::Version_3x)
 	{
 		_commonHeader = "#version " + OpenGLCapabilities::instance().glslVersionShortString() + " es\n" +
 			_commonHeader + "#define ET_OPENGL_ES_3\n";

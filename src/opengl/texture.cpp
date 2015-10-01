@@ -30,7 +30,8 @@ Texture::Texture(RenderContext* rc, const TextureDescription::Pointer& desc, con
 		_wrap = vector3<TextureWrap>(TextureWrap::ClampToEdge);
 	
 	const auto& caps = OpenGLCapabilities::instance();
-	if ((_desc->internalformat == TextureFormat::R) && (caps.versionShortString() > "200"))
+
+	if ((_desc->internalformat == TextureFormat::R) && (caps.version() > OpenGLVersion::Version_2x))
 		_desc->internalformat = TextureFormat::R8;
 	
 #	endif
@@ -91,7 +92,7 @@ void Texture::setWrap(RenderContext* rc, TextureWrap s, TextureWrap t, TextureWr
 	
 #	if defined(GL_TEXTURE_WRAP_R)
 #		if (ET_OPENGLES)
-			if (OpenGLCapabilities::instance().versionShortString() > "200")
+			if (OpenGLCapabilities::instance().version() > OpenGLVersion::Version_2x)
 #		endif
 	{
 		glTexParameteri(targetValue, GL_TEXTURE_WRAP_R, textureWrapValue(_wrap.z));
@@ -177,7 +178,7 @@ void Texture::buildData(const char* aDataPtr, size_t aDataSize)
 
 #if defined(GL_UNPACK_ROW_LENGTH)
 	const auto& caps = OpenGLCapabilities::instance();
-	if (!caps.isOpenGLES() || (caps.isOpenGLES() && caps.versionShortString() > "200"))
+	if (!caps.isOpenGLES() || (caps.isOpenGLES() && caps.version() > OpenGLVersion::Version_2x))
 	{
 		glPixelStorei(GL_UNPACK_ROW_LENGTH, _desc->rowSize);
 		checkOpenGLError("glPixelStorei");
