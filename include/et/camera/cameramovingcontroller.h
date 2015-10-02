@@ -23,12 +23,13 @@ namespace et
 		
 		void setMovementSpeed(const vec3&);
 		void setIntepolationRate(float);
+
+		void startUpdates() override;
+		void cancelUpdates() override;
 		
 	private:
 		void synchronize(const Camera&) override;
 		
-		void startUpdates() override;
-		void cancelUpdates() override;
 		void update(float) override;
 		
 		void onKeyPressed(size_t) override;

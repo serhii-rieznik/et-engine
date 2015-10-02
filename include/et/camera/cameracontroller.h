@@ -30,7 +30,6 @@ namespace et
 		void setPointerEventsEnabled(bool);
 		void setKeyboardEventsEnabled(bool);
 		
-
 	public:
 		virtual void startUpdates();
 		virtual void cancelUpdates();
