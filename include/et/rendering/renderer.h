@@ -45,6 +45,7 @@ namespace et
 
 		void drawElementsInstanced(const IndexBuffer::Pointer& ib, size_t first, size_t count, size_t instances);
 		void drawElementsBaseIndex(const VertexArrayObject& vao, int base, size_t first, size_t count);
+		void drawElementsSequentially(PrimitiveType, size_t first, size_t count);
 		
 		BinaryDataStorage readFramebufferData(const vec2i&, TextureFormat, DataType);
 		void readFramebufferData(const vec2i&, TextureFormat, DataType, BinaryDataStorage&);

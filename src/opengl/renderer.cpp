@@ -281,6 +281,14 @@ void Renderer::drawElementsBaseIndex(const VertexArrayObject& vao, int base, siz
 #endif
 }
 
+void Renderer::drawElementsSequentially(PrimitiveType primitiveType, size_t first, size_t count)
+{
+	auto pvalue = primitiveTypeValue(primitiveType);
+	glDrawArrays(pvalue, GLint(first), GLsizei(count));
+	checkOpenGLError("glDrawArrays(%u, %u, %u)", static_cast<uint32_t>(pvalue),
+		static_cast<uint32_t>(first), static_cast<uint32_t>(count));
+}
+
 void Renderer::readFramebufferData(const vec2i& size, TextureFormat format, DataType dataType, BinaryDataStorage& data)
 {
 	ET_ASSERT((8 * data.size()) >= (size.square() * bitsPerPixelForTextureFormat(format, dataType)));

@@ -105,6 +105,8 @@ void* VertexBuffer::map(size_t offset, size_t dataSize, MapBufferMode mode)
 
 void VertexBuffer::unmap()
 {
+	ET_ASSERT(_mapped);
+	
 #if !defined(ET_CONSOLE_APPLICATION)
 	glUnmapBuffer(GL_ARRAY_BUFFER);
 	checkOpenGLError("glUnmapBuffer(GL_ARRAY_BUFFER)");
