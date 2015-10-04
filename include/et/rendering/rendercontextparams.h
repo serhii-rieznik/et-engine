@@ -11,10 +11,11 @@ namespace et
 {
 	vec2i nativeScreenSize();
 	
-	enum MultisamplingQuality
+	enum class MultisamplingQuality
 	{
-		MultisamplingQuality_None,
-		MultisamplingQuality_Best
+		None,
+		Minimal,
+		Best
 	};
 	
     enum InterfaceOrientation
@@ -36,7 +37,7 @@ namespace et
 	
 	struct RenderContextParameters
 	{
-		MultisamplingQuality multisamplingQuality = MultisamplingQuality_Best;
+		MultisamplingQuality multisamplingQuality = MultisamplingQuality::Best;
 		
 		bool multipleTouch = true;
 		bool bindDefaultFramebufferEachFrame = true;

@@ -198,32 +198,42 @@ RenderContextPrivate::RenderContextPrivate(RenderContext*, RenderContextParamete
 	const ApplicationParameters& appParams)
 {
 #if !defined(ET_CONSOLE_APPLICATION)
+	bool msaaEnabled = params.multisamplingQuality != MultisamplingQuality::None;
+	
 	NSOpenGLPixelFormatAttribute pixelFormatAttributes[] =
 	{
 		NSOpenGLPFAColorSize, 24,
 		NSOpenGLPFAAlphaSize, 8,
+		
 		NSOpenGLPFADepthSize, 32,
+		
 		NSOpenGLPFAAccelerated,
+		
 		NSOpenGLPFADoubleBuffer,
-		NSOpenGLPFASampleBuffers, 1,
-		0, 0, 0, 0, 0, 0, // space for multisampling and context profile
-		0,
+		
+		(msaaEnabled ? NSOpenGLPFASampleBuffers : 0u), (msaaEnabled ? 1u : 0u),
+		
+		0, 0, 0, 0, 0, 0, 0 // space for multisampling and context profile
 	};
 	
 	size_t lastEntry = 0;
 	while (pixelFormatAttributes[++lastEntry] != 0);
 	
 	pixelFormatAttributes[lastEntry++] = NSOpenGLPFAOpenGLProfile;
-	pixelFormatAttributes[lastEntry++] = NSOpenGLProfileVersion3_2Core;
+	pixelFormatAttributes[lastEntry++] = NSOpenGLProfileVersion4_1Core;
 	
 	size_t antialiasFirstEntry = 0;
 	size_t antialiasSamplesEntry = 0;
-	if (params.multisamplingQuality == MultisamplingQuality_Best)
+	
+	if (msaaEnabled)
 	{
 		antialiasFirstEntry = lastEntry;
 		pixelFormatAttributes[lastEntry++] = NSOpenGLPFAMultisample;
 		pixelFormatAttributes[lastEntry++] = NSOpenGLPFASamples;
-		pixelFormatAttributes[lastEntry++] = 16;
+		
+		pixelFormatAttributes[lastEntry++] =
+			(params.multisamplingQuality == MultisamplingQuality::Best) ? 32 : 1;
+		
 		antialiasSamplesEntry = lastEntry - 1;
 	}
 	

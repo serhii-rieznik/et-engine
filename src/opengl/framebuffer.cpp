@@ -498,8 +498,47 @@ void Framebuffer::forceSize(const vec2i& sz)
 void Framebuffer::resolveMultisampledTo(Framebuffer::Pointer framebuffer, bool resolveColor, bool resolveDepth)
 {
 #if !defined(ET_CONSOLE_APPLICATION)
+	
+	vec2i sourceSize = _description.size.xy();
+	vec2i targetSize = framebuffer->size();
+	
 	_rc->renderState().bindReadFramebuffer(static_cast<uint32_t>(apiHandle()));
+	
+#if (ET_DEBUG)
+	GLint sourceSamples = 0;
+	glGetIntegerv(GL_SAMPLES, &sourceSamples);
+	checkOpenGLError("glGetIntegerv(GL_SAMPLES, ...)");
+	
+	GLint sourceSampleBuffers = 0;
+	glGetIntegerv(GL_SAMPLE_BUFFERS, &sourceSampleBuffers);
+	checkOpenGLError("glGetIntegerv(GL_SAMPLE_BUFFERS, ...)");
+#endif
+	
 	_rc->renderState().bindDrawFramebuffer(static_cast<uint32_t>(framebuffer->apiHandle()));
+	
+#if (ET_DEBUG)
+	GLint targetSamples = 0;
+	glGetIntegerv(GL_SAMPLES, &targetSamples);
+	checkOpenGLError("glGetIntegerv(GL_SAMPLES, ...)");
+	
+	GLint targetSampleBuffers = 0;
+	glGetIntegerv(GL_SAMPLE_BUFFERS, &targetSampleBuffers);
+	checkOpenGLError("glGetIntegerv(GL_SAMPLE_BUFFERS, ...)");
+	
+	if ((targetSamples != 0) && (targetSamples != sourceSamples))
+	{
+		log::info("glBlitFramebuffer will likely fail:\n"
+			"GL_SAMPLES of target (%d) and source (%d) framebuffers are different", targetSamples, sourceSamples);
+	}
+	
+	if (((sourceSampleBuffers > 0) || (targetSampleBuffers > 0)) && (sourceSize != targetSize))
+	{
+		log::info("glBlitFramebuffer will likely fail:\n"
+			"GL_SAMPLE_BUFFERS of target (%d) and source (%d) framebuffers are greater than zero\n"
+			"and dimensions are not identical (%dx%d and %dx%d", targetSampleBuffers, sourceSampleBuffers,
+			targetSize.x, targetSize.y, sourceSize.x, sourceSize.y);
+	}
+#endif
 	
 #	if (ET_OPENGLES)
 	if (OpenGLCapabilities::instance().version() < OpenGLVersion::Version_3x)
@@ -511,18 +550,15 @@ void Framebuffer::resolveMultisampledTo(Framebuffer::Pointer framebuffer, bool r
 	
 	if (resolveColor)
 	{
-		vec2i sourceSize = _description.size.xy();
-		vec2i destSize = framebuffer->size();
-		
-		glBlitFramebuffer(0, 0, sourceSize.x, sourceSize.y, 0, 0, destSize.x, destSize.y,
-			GL_COLOR_BUFFER_BIT, (sourceSize == destSize) ? GL_NEAREST : GL_LINEAR);
+		glBlitFramebuffer(0, 0, sourceSize.x, sourceSize.y, 0, 0, targetSize.x, targetSize.y,
+			GL_COLOR_BUFFER_BIT, (sourceSize == targetSize) ? GL_NEAREST : GL_LINEAR);
 		checkOpenGLError("glBlitFramebuffer");
 	}
 
 	if (resolveDepth)
 	{
-		glBlitFramebuffer(0, 0, _description.size.x, _description.size.y, 0, 0, framebuffer->size().x,
-			framebuffer->size().y, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+		glBlitFramebuffer(0, 0, sourceSize.x, sourceSize.y, 0, 0, targetSize.x, targetSize.y,
+			GL_DEPTH_BUFFER_BIT, GL_NEAREST);
 		checkOpenGLError("glBlitFramebuffer");
 	}
 #endif
