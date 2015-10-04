@@ -36,6 +36,7 @@ namespace et
 			{ return _decl; }
 
 		void setData(const void* data, size_t dataSize, bool invalidateExistingData = false);
+		void setDataWithOffset(const void* data, size_t offset, size_t dataSize);
 		
 		void* map(size_t offset, size_t dataSize, MapBufferMode mode);
 		

@@ -37,11 +37,10 @@ using namespace et;
 	
 	RenderContext* _rc;
 	RenderContextNotifier _rcNotifier;
+	MultisamplingQuality _multisampling;
 	
 	float _scaleFactor;
-	
 	BOOL _keyboardAllowed;
-	BOOL _multisampled;
 	BOOL _shouldCreateFramebuffer;
 }
 
@@ -103,7 +102,7 @@ using namespace et;
 - (void)performInitializationWithParameters:(const RenderContextParameters&)params
 {
 	_shouldCreateFramebuffer = YES;
-	_multisampled = params.multisamplingQuality == MultisamplingQuality_Best;
+	_multisampling = params.multisamplingQuality;
 	
 	CAEAGLLayer* eaglLayer = (CAEAGLLayer*)self.layer;
 	
@@ -163,7 +162,7 @@ using namespace et;
 	if (_mainFramebuffer.invalid())
 		return;
 	
-	if (_multisampled)
+	if (_multisampling != MultisamplingQuality::None)
 	{
 		_multisampledFramebuffer->invalidate(false, true);
 		_multisampledFramebuffer->resolveMultisampledTo(_mainFramebuffer, true, false);
@@ -197,11 +196,14 @@ using namespace et;
 			TextureFormat::Depth16, TextureFormat::Depth, DataType::UnsignedInt, true, false);
 	}
 	
-	if (_multisampled && (_multisampledFramebuffer.invalid()))
+	if ((_multisampling != MultisamplingQuality::None) && (_multisampledFramebuffer.invalid()))
 	{
+		auto samples = (_multisampling == MultisamplingQuality::Best) ?
+			RenderingCapabilities::instance().maxSamples() : 1;
+		
 		_multisampledFramebuffer = _rc->framebufferFactory().createFramebuffer(size, "__et_ios_multisampled_framebuffer__",
 			TextureFormat::RGBA8, TextureFormat::RGBA, DataType::UnsignedChar, TextureFormat::Depth16,
-			TextureFormat::Depth, DataType::UnsignedInt, true, RenderingCapabilities::instance().maxSamples());
+			TextureFormat::Depth, DataType::UnsignedInt, true, samples);
 	}
 	
 	_rc->renderState().bindFramebuffer(_mainFramebuffer, true);
@@ -218,7 +220,7 @@ using namespace et;
 	
 	_mainFramebuffer->resize(size);
 	
-	if (_multisampled)
+	if (_multisampling != MultisamplingQuality::None)
 		_multisampledFramebuffer->resize(size);
 	
 	_rc->renderState().setDefaultFramebuffer([self defaultFramebuffer]);
@@ -238,7 +240,8 @@ using namespace et;
 
 - (const Framebuffer::Pointer&)defaultFramebuffer
 {
-	return _multisampled ? _multisampledFramebuffer : _mainFramebuffer;
+	return (_multisampling != MultisamplingQuality::None) ?
+		_multisampledFramebuffer : _mainFramebuffer;
 }
 
 - (PointerInputInfo)touchToPointerInputInfo:(UITouch*)touch

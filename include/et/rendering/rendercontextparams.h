@@ -11,7 +11,7 @@ namespace et
 {
 	vec2i nativeScreenSize();
 	
-	enum class MultisamplingQuality
+	enum class MultisamplingQuality : uint32_t
 	{
 		None,
 		Minimal,

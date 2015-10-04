@@ -56,6 +56,15 @@ void VertexBuffer::setData(const void* data, size_t dataSize, bool invalidateExi
 #endif
 }
 
+void VertexBuffer::setDataWithOffset(const void* data, size_t offset, size_t dataSize)
+{
+	_rc->renderState().bindBuffer(GL_ARRAY_BUFFER, static_cast<uint32_t>(apiHandle()));
+	
+	glBufferSubData(GL_ARRAY_BUFFER, offset, dataSize, data);
+	checkOpenGLError("glBufferSubData(GL_ARRAY_BUFFER, %llu, %llu, 0x%08X)", uint64_t(offset),
+		uint64_t(_dataSize), data);
+}
+
 void* VertexBuffer::map(size_t offset, size_t dataSize, MapBufferMode mode)
 {
 	ET_ASSERT(!_mapped);
