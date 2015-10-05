@@ -403,7 +403,7 @@ bool RenderContextPrivate::initOpenGL(const RenderContextParameters& params)
 
 	int pixelFormat = 0;
 
-	if (params.multisamplingQuality != MultisamplingQuality_None)
+	if (params.multisamplingQuality != MultisamplingQuality::None)
 	{
 		pixelFormat = chooseAAPixelFormat(dummy.hDC, &pfd);
 
