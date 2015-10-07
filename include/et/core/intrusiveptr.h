@@ -19,21 +19,20 @@ namespace et
 	class IntrusivePtr
 	{
 	public:
-		IntrusivePtr() :
-			_data(nullptr) { }
+		IntrusivePtr() = default;
 
-		IntrusivePtr(const IntrusivePtr& r) :
-			_data(nullptr) { reset(r._data);  }
+		IntrusivePtr(const IntrusivePtr& r)
+			{ reset(r._data);  }
 
-		IntrusivePtr(IntrusivePtr&& r) :
-			_data(nullptr) { std::swap(_data, r._data); }
+		IntrusivePtr(IntrusivePtr&& r)
+			{ std::swap(_data, r._data); }
 		
 		template <typename R>
-		IntrusivePtr(IntrusivePtr<R> r) :
-			_data(nullptr) { reset(static_cast<T*>(r.ptr()));  }
+		IntrusivePtr(IntrusivePtr<R> r)
+			{ reset(static_cast<T*>(r.ptr()));  }
 
-		explicit IntrusivePtr(T* data) :
-			_data(nullptr) { reset(data); }
+		explicit IntrusivePtr(T* data)
+			{ reset(data); }
 			
 		virtual ~IntrusivePtr() 
 			{ reset(nullptr); }
@@ -109,9 +108,9 @@ namespace et
 		{
 			if (data == _data) return;
 
-			if (_data && (_data->release() == 0))
+			if ((_data != nullptr) && (_data->release() == 0))
 				sharedObjectFactory().deleteObject<T>(_data);
-			
+
 			_data = data;
 
 			if (_data)
@@ -119,7 +118,7 @@ namespace et
 		}
 
 	private:
-		T* _data;
+		T* _data = nullptr;
 	};
 
 }

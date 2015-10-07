@@ -45,7 +45,9 @@ Framebuffer::Framebuffer(RenderContext* rc, const FramebufferDescription& desc,
 			setColorRenderbuffer(buffer, 0);
 		}
 		else
+		{
 			buildColorAttachment();
+		}
 	}
 
 	if (hasDepth)

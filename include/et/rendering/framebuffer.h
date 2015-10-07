@@ -73,7 +73,7 @@ namespace et
 			{ return _depthRenderbuffer; }
 		
 		bool hasRenderTargets() const
-			{ return !_renderTargets.empty() && !_colorRenderBuffers.empty(); }
+			{ return !_renderTargets.empty() || !_colorRenderBuffers.empty(); }
 
 		Texture::Pointer renderTarget(size_t index = 0) const
 			{ ET_ASSERT(index < _renderTargets.size()); return _renderTargets.at(index); }
