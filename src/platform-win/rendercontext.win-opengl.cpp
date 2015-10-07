@@ -309,6 +309,7 @@ bool RenderContextPrivate::initWindow(RenderContextParameters& params, const App
 	wndClass.hInstance = hInstance;
 	wndClass.hCursor = LoadCursor(nullptr, IDC_ARROW);
 	wndClass.lpszClassName = L"etWindowClass";
+	wndClass.hIcon = LoadIcon(hInstance, MAKEINTRESOURCE(101));
 
 	ATOM result = RegisterClassExW(&wndClass);
 	ET_ASSERT(result);
