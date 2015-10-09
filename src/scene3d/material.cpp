@@ -17,7 +17,7 @@ using namespace et;
 using namespace et::s3d;
 
 static const vec4 nullVector;
-static const Texture::Pointer nullTexture;
+static const Texture::Pointer nullTexture = Texture::Pointer();
 
 extern const std::string materialKeys[MaterialParameter_max];
 size_t stringToMaterialParameter(const std::string&);
