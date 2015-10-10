@@ -19,12 +19,8 @@ using namespace et;
 
 bool et::mac::canOpenURL(const std::string& s)
 {
-#if defined(ET_CONSOLE_APPLICATION)
-	return false;
-#else
 	return [[NSWorkspace sharedWorkspace] URLForApplicationToOpenURL:
 		[NSURL URLWithString:[NSString stringWithUTF8String:s.c_str()]]] != nil;
-#endif
 }
 
 #endif // ET_PLATFORM_MAC

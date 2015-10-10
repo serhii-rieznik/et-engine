@@ -14,29 +14,21 @@ IndexBuffer::IndexBuffer(RenderContext* rc, IndexArray::Pointer i, BufferDrawTyp
 	const std::string& aName) : APIObject(aName), _rc(rc), _size(i->actualSize()), _sourceObjectName(i->name()),
 	_drawType(drawType)
 {
-#if defined(ET_CONSOLE_APPLICATION)
-	ET_FAIL("Attempt to create IndexBuffer in console application.")
-#else
 	build(i);
-#endif
 }
 
 IndexBuffer::~IndexBuffer()
 {
-#if !defined(ET_CONSOLE_APPLICATION)
 	uint32_t buffer = static_cast<uint32_t>(apiHandle());
 	if (buffer != 0)
 	{
 		_rc->renderState().indexBufferDeleted(buffer);
 		glDeleteBuffers(1, &buffer);
 	}
-#endif
 }
 
 void IndexBuffer::setProperties(const IndexArray::Pointer& i)
 {
-#if !defined(ET_CONSOLE_APPLICATION)
-	
 	_size = i->actualSize();
 	_primitiveType = i->primitiveType();
 	_format = i->format();
@@ -64,13 +56,10 @@ void IndexBuffer::setProperties(const IndexArray::Pointer& i)
 		default:
 			ET_FAIL_FMT("Invalid IndexArrayFormat value: %u", static_cast<uint32_t>(_format));
 	}
-	
-#endif
 }
 
 void IndexBuffer::build(const IndexArray::Pointer& i)
 {
-#if !defined(ET_CONSOLE_APPLICATION)
 	ET_ASSERT(i.valid());
 
 	if (apiHandleInvalid())
@@ -85,18 +74,16 @@ void IndexBuffer::build(const IndexArray::Pointer& i)
 
 	setProperties(i);
 	internal_setData(i->data(), static_cast<size_t>(i->format()) * _size);
-#endif
 }
 
 void IndexBuffer::internal_setData(const unsigned char* data, size_t size)
 {
-#if !defined(ET_CONSOLE_APPLICATION)
-	if (size == 0) return;
-	
-	_rc->renderState().bindBuffer(GL_ELEMENT_ARRAY_BUFFER, static_cast<uint32_t>(apiHandle()));
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, static_cast<GLsizeiptr>(size), data, drawTypeValue(_drawType));
-	checkOpenGLError("glBufferData(GL_ELEMENT_ARRAY_BUFFER, %u, 0x%08X, ..,)", size, data);
-#endif
+	if (size > 0)
+	{
+		_rc->renderState().bindBuffer(GL_ELEMENT_ARRAY_BUFFER, static_cast<uint32_t>(apiHandle()));
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, static_cast<GLsizeiptr>(size), data, drawTypeValue(_drawType));
+		checkOpenGLError("glBufferData(GL_ELEMENT_ARRAY_BUFFER, %u, 0x%08X, ..,)", size, data);
+	}
 }
 
 void* IndexBuffer::indexOffset(size_t offset) const
@@ -106,9 +93,7 @@ void* IndexBuffer::indexOffset(size_t offset) const
 
 void IndexBuffer::setData(const IndexArray::Pointer& i)
 {
-#if !defined(ET_CONSOLE_APPLICATION)
 	build(i);
-#endif
 }
 
 void IndexBuffer::clear()

@@ -17,9 +17,6 @@ extern std::string FramebufferStatusToString(uint32_t status);
 Framebuffer::Framebuffer(RenderContext* rc, const FramebufferDescription& desc,
 	const std::string& aName) : APIObject(aName), _rc(rc), _description(desc)
 {
-#if defined(ET_CONSOLE_APPLICATION)
-	ET_FAIL("Attempt to create Framebuffer in console application.");
-#else
 	checkOpenGLError("Framebuffer::Framebuffer %s", name().c_str());
 
 	uint32_t framebuffer = 0;
@@ -67,14 +64,11 @@ Framebuffer::Framebuffer(RenderContext* rc, const FramebufferDescription& desc,
 #endif
 
 	checkStatus();
-
-#endif
 }
 
 Framebuffer::Framebuffer(RenderContext* rc, uint32_t fboId, const std::string& aName) :
 	APIObject(aName), _rc(rc)
 {
-#if !defined(ET_CONSOLE_APPLICATION)
 	if (glIsFramebuffer(fboId))
 	{
 		setAPIHandle(fboId);
@@ -100,12 +94,10 @@ Framebuffer::Framebuffer(RenderContext* rc, uint32_t fboId, const std::string& a
 	{
 		_description.size.xy() = rc->sizei();
 	}
-#endif
 }
 
 Framebuffer::~Framebuffer()
 {
-#if !defined(ET_CONSOLE_APPLICATION)
 	uint32_t framebuffer = static_cast<uint32_t>(apiHandle());
 	_rc->renderState().frameBufferDeleted(framebuffer);
 	
@@ -130,12 +122,10 @@ Framebuffer::~Framebuffer()
 		glDeleteFramebuffers(1, &framebuffer);
 		checkOpenGLError("glDeleteFramebuffers");
 	}
-#endif
 }
 
 bool Framebuffer::checkStatus()
 {
-#if (!defined(ET_CONSOLE_APPLICATION) && ET_DEBUG)
 	_rc->renderState().bindFramebuffer(static_cast<uint32_t>(apiHandle()));
 	
 	uint32_t status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
@@ -144,9 +134,6 @@ bool Framebuffer::checkStatus()
 		log::error("%s for %s", FramebufferStatusToString(status).c_str(), name().c_str());
 	
 	return status == GL_FRAMEBUFFER_COMPLETE;
-#else
-	return true;
-#endif
 }
 
 Texture::Pointer Framebuffer::buildTexture(const vec3i& aSize, TextureTarget aTarget,
@@ -235,26 +222,21 @@ void Framebuffer::attachTexture(Texture::Pointer rt, uint32_t target)
 
 void Framebuffer::addRenderTarget(const Texture::Pointer& rt)
 {
-#if !defined(ET_CONSOLE_APPLICATION)
 	attachTexture(rt, drawBufferTarget(_renderTargets.size()));
 	_renderTargets.push_back(rt);
 	checkStatus();
 	
 	setDrawBuffersCount(_renderTargets.size() & 0xff);
-#endif
 }
 
 void Framebuffer::setDepthTarget(const Texture::Pointer& texture)
 {
-#if !defined(ET_CONSOLE_APPLICATION)
 	_depthBuffer = texture;
 	attachTexture(_depthBuffer, GL_DEPTH_ATTACHMENT);
-#endif
 }
 
 void Framebuffer::addSameRendertarget()
 {
-#if !defined(ET_CONSOLE_APPLICATION)
 	if (_description.colorIsRenderbuffer)
 	{
 		ET_ASSERT(!_colorRenderBuffers.empty());
@@ -274,61 +256,24 @@ void Framebuffer::addSameRendertarget()
 		target->setWrap(_rc, TextureWrap::ClampToEdge, TextureWrap::ClampToEdge);
 		addRenderTarget(target);
 	}
-#endif
-	/*
-	if (_renderTargets.empty())
-	{
-		if (_colorRenderbuffer == 0)
-		{
-			log::warning("Unable to add same render target, FBO has no valid attachments.");
-			return;
-		}
-		
-		GLuint newRenderBuffer = 0;
-		glGenRenderbuffers(1, &newRenderBuffer);
-		_rc->renderState().bindRenderbuffer(newRenderBuffer);
-		if (_description.numSamples > 1)
-		{
-			glRenderbufferStorageMultisample(GL_RENDERBUFFER, _description.numSamples,
-				textureFormatValue(_description.colorInternalformat), _description.size.x, _description.size.y);
-			checkOpenGLError("glRenderbufferStorageMultisample");
-		}
-		else
-		{
-			glRenderbufferStorage(GL_RENDERBUFFER, textureFormatValue(_description.colorInternalformat),
-				_description.size.x, _description.size.y);
-			checkOpenGLError("glRenderbufferStorage");
-		}
-		setColorRenderbuffer(newRenderBuffer, 1);
-	}
-	else
-	{
-	}
-#endif 
-*/
 }
 
 void Framebuffer::setCurrentRenderTarget(const Texture::Pointer& texture)
 {
-#if !defined(ET_CONSOLE_APPLICATION)
 	ET_ASSERT(texture.valid());
 	attachTexture(texture, GL_COLOR_ATTACHMENT0);
-#endif
 }
 
 void Framebuffer::setCurrentRenderTarget(size_t index)
 {
-#if !defined(ET_CONSOLE_APPLICATION)
 	ET_ASSERT(index < _renderTargets.size());
 	ET_ASSERT(_renderTargets[index].valid());
 	
 	setCurrentRenderTarget(_renderTargets.at(index));
-#endif
 }
 
 void Framebuffer::setCurrentCubemapFace(uint32_t faceIndex)
 {
-#if !defined(ET_CONSOLE_APPLICATION)
 	ET_ASSERT((_description.target == TextureTarget::Texture_Cube) && (faceIndex < 6));
 	
 	_rc->renderState().bindFramebuffer(static_cast<uint32_t>(apiHandle()));
@@ -351,7 +296,6 @@ void Framebuffer::setCurrentCubemapFace(uint32_t faceIndex)
 			static_cast<uint32_t>(_depthBuffer->apiHandle()), 0);
 		checkOpenGLError("setCurrentCubemapFace -> depth");
 	}
-#endif
 }
 
 void Framebuffer::setCurrentLayer(uint32_t layerIndex)
@@ -380,7 +324,6 @@ uint32_t Framebuffer::buildColorRenderbuffer(uint32_t input)
 {
 	uint32_t result = input;
 	
-#if !defined(ET_CONSOLE_APPLICATION)
 	if ((result == 0) || !glIsRenderbuffer(result))
 	{
 		glGenRenderbuffers(1, &result);
@@ -402,14 +345,12 @@ uint32_t Framebuffer::buildColorRenderbuffer(uint32_t input)
 			_description.size.x, _description.size.y);
 		checkOpenGLError("glRenderbufferStorage");
 	}
-#endif
 	
 	return result;
 }
 
 void Framebuffer::createOrUpdateDepthRenderbuffer()
 {
-#if !defined(ET_CONSOLE_APPLICATION)
 	if (!glIsRenderbuffer(_depthRenderbuffer))
 	{
 		glGenRenderbuffers(1, &_depthRenderbuffer);
@@ -433,12 +374,10 @@ void Framebuffer::createOrUpdateDepthRenderbuffer()
 	}
 	
 	setDepthRenderbuffer(_depthRenderbuffer);
-#endif
 }
 
 void Framebuffer::resize(const vec2i& sz)
 {
-#if !defined(ET_CONSOLE_APPLICATION)
 	if (_description.size.xy() == sz) return;
 	
 	forceSize(sz);
@@ -489,7 +428,6 @@ void Framebuffer::resize(const vec2i& sz)
 	
 	if (hasColor || hasDepth)
 		checkStatus();
-#endif
 }
 
 void Framebuffer::forceSize(const vec2i& sz)
@@ -499,8 +437,6 @@ void Framebuffer::forceSize(const vec2i& sz)
 
 void Framebuffer::resolveMultisampledTo(Framebuffer::Pointer framebuffer, bool resolveColor, bool resolveDepth)
 {
-#if !defined(ET_CONSOLE_APPLICATION)
-	
 	vec2i sourceSize = _description.size.xy();
 	vec2i targetSize = framebuffer->size();
 	
@@ -563,13 +499,12 @@ void Framebuffer::resolveMultisampledTo(Framebuffer::Pointer framebuffer, bool r
 			GL_DEPTH_BUFFER_BIT, GL_NEAREST);
 		checkOpenGLError("glBlitFramebuffer");
 	}
-#endif
 }
 
 void Framebuffer::invalidate(bool color, bool depth)
 {
-#if (ET_PLATFORM_IOS) && !defined(ET_CONSOLE_APPLICATION)
-	
+#if (ET_OPENGLES)
+	ET_FAIL("TODO")
 	_rc->renderState().bindReadFramebuffer(static_cast<uint32_t>(apiHandle()));
 	
 	GLsizei numDiscards = 0;
@@ -581,37 +516,28 @@ void Framebuffer::invalidate(bool color, bool depth)
 	if (depth)
 		discards[numDiscards++] = GL_DEPTH_ATTACHMENT;
 	
-#	if defined(GL_ES_VERSION_3_0)
-		glInvalidateFramebuffer(GL_FRAMEBUFFER, numDiscards, discards);
-		checkOpenGLError("glInvalidateFramebuffer");
-#	else
-		glDiscardFramebufferEXT(GL_READ_FRAMEBUFFER, numDiscards, discards);
-		checkOpenGLError("glDiscardFramebufferEXT");
-#	endif
+	// select either one or another
+	glDiscardFramebufferEXT(GL_READ_FRAMEBUFFER, numDiscards, discards);
+	checkOpenGLError("glDiscardFramebufferEXT");
 	
-#else
-	(void)color;
-	(void)depth;
+	glInvalidateFramebuffer(GL_FRAMEBUFFER, numDiscards, discards);
+	checkOpenGLError("glInvalidateFramebuffer");
 #endif
 }
 
 void Framebuffer::setColorRenderbuffer(uint32_t r, uint32_t index)
 {
-#if !defined(ET_CONSOLE_APPLICATION)
 	ET_ASSERT(index < _colorRenderBuffers.size());
 	_colorRenderBuffers[index] = r;
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, drawBufferTarget(index), GL_RENDERBUFFER, r);
 	checkOpenGLError("glFramebufferRenderbuffer");
-#endif
 }
 
 void Framebuffer::setDepthRenderbuffer(uint32_t r)
 {
-#if !defined(ET_CONSOLE_APPLICATION)
 	_depthRenderbuffer = r;
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, _depthRenderbuffer);
 	checkOpenGLError("glFramebufferRenderbuffer");
-#endif
 }
 
 void Framebuffer::setDrawBuffersCount(int32_t value)

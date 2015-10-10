@@ -35,7 +35,7 @@ void OpenGLCounters::reset()
 
 OpenGLDebugScope::OpenGLDebugScope(const std::string& info)
 {
-#if defined(GL_EXT_debug_marker) && !defined(ET_CONSOLE_APPLICATION)
+#if defined(GL_EXT_debug_marker)
 	glPushGroupMarkerEXT(static_cast<GLsizei>(info.size()), info.c_str());
 #else
 	(void)info;
@@ -44,7 +44,7 @@ OpenGLDebugScope::OpenGLDebugScope(const std::string& info)
 
 OpenGLDebugScope::~OpenGLDebugScope()
 {
-#if defined(GL_EXT_debug_marker) && !defined(ET_CONSOLE_APPLICATION)
+#if defined(GL_EXT_debug_marker)
 	glPopGroupMarkerEXT();
 #endif
 }
@@ -388,11 +388,6 @@ std::string et::glErrorToString(uint32_t error)
 
 void et::checkOpenGLErrorEx(const char* caller, const char* fileName, const char* line, const char* tag, ...)
 {
-#if defined(ET_CONSOLE_APPLICATION)
-	
-	log::error("Call to OpenGL in console application.\n%s [%s]\n%s - %s", fileName, line, caller, tag);
-	
-#else
 	GLenum error = glGetError();
 	if (error != GL_NO_ERROR)
 	{
@@ -410,7 +405,6 @@ void et::checkOpenGLErrorEx(const char* caller, const char* fileName, const char
 		abort();
 #	endif
 	}
-#endif
 }
 
 size_t et::primitiveCount(uint32_t mode, size_t count)
@@ -656,117 +650,103 @@ std::string et::glPrimitiveTypeToString(uint32_t value)
 void et::etDrawElementsInstanced(uint32_t mode, GLsizei count, uint32_t type, const GLvoid* indices,
 	GLsizei instanceCount)
 {
-#if !defined(ET_CONSOLE_APPLICATION)
 	glDrawElementsInstanced(mode, count, type, indices, instanceCount);
 	checkOpenGLError("glDrawElementsInstanced(%d, %d, %u, %08x, %d)", mode, count, type, indices, instanceCount);
 	
-#	if ET_ENABLE_OPENGL_COUNTERS
+#if ET_ENABLE_OPENGL_COUNTERS
 	OpenGLCounters::primitiveCounter += instanceCount * primitiveCount(mode, static_cast<size_t>(count));
 	++OpenGLCounters::DIPCounter;
-#	endif
 #endif
 }
 
 #if defined(GL_ARB_draw_elements_base_vertex)
+
 void et::etDrawElementsBaseVertex(uint32_t mode, GLsizei count, uint32_t type, const GLvoid* indices, int base)
 {
-#if !defined(ET_CONSOLE_APPLICATION)
 	glDrawElementsBaseVertex(mode, count, type, indices, base);
 	checkOpenGLError("glDrawElementsBaseVertex(mode, count, type, indices, base)");
 
-#	if ET_ENABLE_OPENGL_COUNTERS
+#if ET_ENABLE_OPENGL_COUNTERS
 	OpenGLCounters::primitiveCounter += primitiveCount(mode, static_cast<size_t>(count));
 	++OpenGLCounters::DIPCounter;
-#	endif
 #endif
 }
+
 #else
+
 void et::etDrawElementsBaseVertex(uint32_t, GLsizei, uint32_t, const GLvoid*, int)
 {
 	log::warning("Call to glDrawElementsBaseVertex without defined GL_ARB_draw_elements_base_vertex");
 }
+
 #endif
 
 void et::etDrawElements(uint32_t mode, GLsizei count, uint32_t type, const GLvoid* indices)
 {
-#if !defined(ET_CONSOLE_APPLICATION)
 	glDrawElements(mode, count, type, indices);
 	
 	checkOpenGLError("glDrawElements(%s, %u, %s, 0x%08X)", glPrimitiveTypeToString(mode).c_str(),
 		count, glTypeToString(type).c_str(), indices);
 
-#	if ET_ENABLE_OPENGL_COUNTERS
+#if ET_ENABLE_OPENGL_COUNTERS
 	OpenGLCounters::primitiveCounter += primitiveCount(mode, static_cast<size_t>(count));
 	++OpenGLCounters::DIPCounter;
-#	endif
 #endif
 }
 
 void et::etBindTexture(uint32_t target, uint32_t texture)
 {
-#if !defined(ET_CONSOLE_APPLICATION)
 	glBindTexture(target, texture);
 	checkOpenGLError("glBindTexture(%s, %d)", glTexTargetToString(target).c_str(), texture);
 
-#	if ET_ENABLE_OPENGL_COUNTERS
+#if ET_ENABLE_OPENGL_COUNTERS
 	++OpenGLCounters::bindTextureCounter;
-#	endif
 #endif
 }
 
 void et::etBindBuffer(uint32_t target, uint32_t buffer)
 {
-#if !defined(ET_CONSOLE_APPLICATION)
 	glBindBuffer(target, buffer);
 	checkOpenGLError("glBindBuffer(%u, %u)", target, buffer);
 
-#	if ET_ENABLE_OPENGL_COUNTERS
+#if ET_ENABLE_OPENGL_COUNTERS
 	++OpenGLCounters::bindBufferCounter;
-#	endif
 #endif
 }
 
 void et::etBindFramebuffer(uint32_t target, uint32_t framebuffer)
 {
-#if !defined(ET_CONSOLE_APPLICATION)
 	glBindFramebuffer(target, framebuffer);
 	checkOpenGLError("glBindFramebuffer(%u, %u)", target, framebuffer);
 
-#	if ET_ENABLE_OPENGL_COUNTERS
+#if ET_ENABLE_OPENGL_COUNTERS
 	++OpenGLCounters::bindFramebufferCounter;
-#	endif
 #endif
 }
 
 void et::etViewport(int x, int y, GLsizei width, GLsizei height)
 {
-#if !defined(ET_CONSOLE_APPLICATION)
 	glViewport(x, y, width, height);
 	checkOpenGLError("glViewport(%d, %d, %u, %u)", x, y, width, height);
-#endif
 }
 
 void et::etUseProgram(uint32_t program)
 {
-#if !defined(ET_CONSOLE_APPLICATION)
 	glUseProgram(program);
 	checkOpenGLError("glUseProgram(%u)", program);
 
-#	if ET_ENABLE_OPENGL_COUNTERS
+#if ET_ENABLE_OPENGL_COUNTERS
 	++OpenGLCounters::useProgramCounter;
-#	endif
 #endif
 }
 
 void et::etBindVertexArray(uint32_t arr)
 {
-#if !defined(ET_CONSOLE_APPLICATION)
 	glBindVertexArray(arr);
 	checkOpenGLError("glBindVertexArray(%u)", arr);
 
-#	if ET_ENABLE_OPENGL_COUNTERS
+#if ET_ENABLE_OPENGL_COUNTERS
 	++OpenGLCounters::bindVertexArrayObjectCounter;
-#	endif
 #endif
 }
 
@@ -868,23 +848,19 @@ void et::etCompressedTexImage1D(uint32_t, int, uint32_t, GLsizei, int, GLsizei, 
 void et::etTexImage1D(uint32_t target, int level, int internalformat, GLsizei width, int border,
 	uint32_t format, uint32_t type, const GLvoid * pixels)
 {
-#if !defined(ET_CONSOLE_APPLICATION)
 	glTexImage1D(target, level, internalformat, width, border, format, type, pixels);
 	
 	checkOpenGLError("glTexImage1D(%s, %d, %s, %d, %d, %s, %s, %, 0x%8X)",
 		glTexTargetToString(target).c_str(), level, glInternalFormatToString(internalformat).c_str(),
 		width, border, glInternalFormatToString(static_cast<int32_t>(format)).c_str(), glTypeToString(type).c_str(), pixels);
-#endif
 }
 
 void et::etCompressedTexImage1D(uint32_t target, int level, uint32_t internalformat,
 	GLsizei width, int border, GLsizei imageSize, const GLvoid * data)
 {
-#if !defined(ET_CONSOLE_APPLICATION)
 	glCompressedTexImage1D(target, level, internalformat, width, border, imageSize, data);
 	checkOpenGLError("glCompressedTexImage1D(%s, %d, %s, %d, %d, %d, 0x%8X)", glTexTargetToString(target).c_str(),
 		level, glInternalFormatToString(static_cast<int32_t>(internalformat)).c_str(),width, border, imageSize, data);
-#endif
 }
 
 #endif
@@ -892,31 +868,27 @@ void et::etCompressedTexImage1D(uint32_t target, int level, uint32_t internalfor
 void et::etCompressedTexImage2D(uint32_t target, int level, uint32_t internalformat,
 	GLsizei width, GLsizei height, int border, GLsizei imageSize, const GLvoid * data)
 {
-#if !defined(ET_CONSOLE_APPLICATION)
 	ET_ASSERT(data);
 	glCompressedTexImage2D(target, level, internalformat, width, height, border, imageSize, data);
 
-#	if (ET_DEBUG)
+#if (ET_DEBUG)
 	checkOpenGLError("glCompressedTexImage2D(%s, %d, %s, %d, %d, %d, %d, 0x%016X)",
 		glTexTargetToString(target).c_str(), level, glInternalFormatToString(static_cast<int32_t>(internalformat)).c_str(),
 		width, height, border, imageSize, data);
-#	endif
 #endif
 }
 
 void et::etTexImage2D(uint32_t target, int level, int internalformat, GLsizei width, GLsizei height,
 	int border, uint32_t format, uint32_t type, const GLvoid* pixels)
 {
-#if !defined(ET_CONSOLE_APPLICATION)
 	ET_ASSERT(pixels);
 	glTexImage2D(target, level, internalformat, width, height, border, format, type, pixels);
 
-#	if (ET_DEBUG)
+#if (ET_DEBUG)
 	checkOpenGLError("glTexImage2D(%s, %d, %s, %d, %d, %d, %s, %s, %, 0x%08X)",
 		glTexTargetToString(target).c_str(), level, glInternalFormatToString(internalformat).c_str(),
 		width, height, border, glInternalFormatToString(format).c_str(), glTypeToString(type).c_str(),
 		pixels);
-#	endif
 #endif
 }
 
@@ -930,16 +902,14 @@ void et::etTexImage3D(uint32_t, int, int, GLsizei, GLsizei, GLsizei, int, uint32
 void et::etTexImage3D(uint32_t target, int level, int internalformat, GLsizei width, GLsizei height,
 	GLsizei depth, int border, uint32_t format, uint32_t type, const GLvoid* pixels)
 {
-#if !defined(ET_CONSOLE_APPLICATION)
 	ET_ASSERT(pixels);
 	glTexImage3D(target, level, internalformat, width, height, depth, border, format, type, pixels);
 
-#	if (ET_DEBUG)
+#if (ET_DEBUG)
 	checkOpenGLError("glTexImage3D(%s, %d, %s, %d, %d, %d, %d, %s, %s, %, 0x%08X)",
 		glTexTargetToString(target).c_str(), level, glInternalFormatToString(internalformat).c_str(),
 		width, height, depth, border, glInternalFormatToString(format).c_str(), glTypeToString(type).c_str(),
 		pixels);
-#	endif
 #endif
 }
 

@@ -81,6 +81,7 @@ void Application::enterRunLoop()
 		performUpdateAndRender();
 	
 	terminated();
+	
 #else
 	
 	_renderContext->init();

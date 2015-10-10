@@ -19,12 +19,6 @@ bool OpenGLCapabilities::hasExtension(const std::string& e)
 
 void OpenGLCapabilities::checkCaps()
 {
-#if defined(ET_CONSOLE_APPLICATION)
-	
-	log::info("[OpenGLCapabilities] Rendering disabled in console application.");
-	
-#else
-	
 	const char* glv = reinterpret_cast<const char*>(glGetString(GL_VERSION));
 	_versionShortString = emptyString;
 	_versionString = ((glv == nullptr) || strlen(glv) == 0) ? "<Unknown OpenGL version>" : glv;
@@ -157,7 +151,6 @@ void OpenGLCapabilities::checkCaps()
 	
 	log::info("[OpenGLCapabilities] Version: %s (%s), GLSL version: %s (%s)", _versionString.c_str(),
 		_versionShortString.c_str(), _glslVersionString.c_str(), _glslVersionShortString.c_str());
-#endif
 	
 	RenderingCapabilities::instance().checkCaps();
 };

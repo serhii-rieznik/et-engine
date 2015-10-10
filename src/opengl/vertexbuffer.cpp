@@ -14,14 +14,10 @@ VertexBuffer::VertexBuffer(RenderContext* rc, const VertexDeclaration& decl,
 	const BinaryDataStorage& data, BufferDrawType vertexDrawType, const std::string& aName) : 
 	APIObject(aName), _rc(rc), _decl(decl),  _drawType(vertexDrawType)
 {
-#if defined(ET_CONSOLE_APPLICATION)
-	ET_FAIL("Attempt to create VertexBuffer in console application.")
-#else
 	GLuint buffer = 0;
 	glGenBuffers(1, &buffer);
 	setAPIHandle(buffer);
 	setData(data.data(), data.dataSize());
-#endif
 }
 
 VertexBuffer::VertexBuffer(RenderContext* rc, const VertexArray::Description& desc, BufferDrawType drawType,
@@ -29,19 +25,16 @@ VertexBuffer::VertexBuffer(RenderContext* rc, const VertexArray::Description& de
 
 VertexBuffer::~VertexBuffer()
 {
-#if !defined(ET_CONSOLE_APPLICATION)
 	uint32_t buffer = static_cast<uint32_t>(apiHandle());
 	if (buffer != 0)
 	{
 		_rc->renderState().vertexBufferDeleted(buffer);
 		glDeleteBuffers(1, &buffer);
 	}
-#endif
 }
 
 void VertexBuffer::setData(const void* data, size_t dataSize, bool invalidateExistingData)
 {
-#if !defined(ET_CONSOLE_APPLICATION)
 	_rc->renderState().bindBuffer(GL_ARRAY_BUFFER, static_cast<uint32_t>(apiHandle()));
 	
 	if (invalidateExistingData)
@@ -53,7 +46,6 @@ void VertexBuffer::setData(const void* data, size_t dataSize, bool invalidateExi
 	_dataSize = dataSize;
 	glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>(_dataSize), data, drawTypeValue(_drawType));
 	checkOpenGLError("glBufferData(GL_ARRAY_BUFFER, %u, 0x%08X, %d)", _dataSize, data, _drawType);
-#endif
 }
 
 void VertexBuffer::setDataWithOffset(const void* data, size_t offset, size_t dataSize)
@@ -72,8 +64,6 @@ void* VertexBuffer::map(size_t offset, size_t dataSize, MapBufferMode mode)
 
 	void* result = nullptr;
 	
-#if !defined(ET_CONSOLE_APPLICATION)
-		
 	_rc->renderState().bindBuffer(GL_ARRAY_BUFFER, static_cast<uint32_t>(apiHandle()));
 	
 	static const GLenum accessFlags2x[MapBufferMode_max] =
@@ -107,21 +97,15 @@ void* VertexBuffer::map(size_t offset, size_t dataSize, MapBufferMode mode)
 
 	_mapped = true;
 
-#endif
-
 	return result;
 }
 
 void VertexBuffer::unmap()
 {
 	ET_ASSERT(_mapped);
-	
-#if !defined(ET_CONSOLE_APPLICATION)
 	glUnmapBuffer(GL_ARRAY_BUFFER);
 	checkOpenGLError("glUnmapBuffer(GL_ARRAY_BUFFER)");
-
 	_mapped = false;
-#endif
 }
 
 void VertexBuffer::clear()
