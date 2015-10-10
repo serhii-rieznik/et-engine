@@ -71,7 +71,7 @@ namespace et
 		void addRequest(const std::string& fileName, Texture::Pointer texture, TextureLoaderDelegate* delegate);
 
 	private:
-		ThreadResult main();
+		uint64_t main();
 		TextureLoadingRequest* dequeRequest();
 
 	private:

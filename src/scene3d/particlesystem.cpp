@@ -37,7 +37,7 @@ ParticleSystem::ParticleSystem(RenderContext* rc, size_t maxSize, const std::str
 	_vertexData = va->generateDescription();
 	
 	_timer.expired.connect(this, &ParticleSystem::onTimerUpdated);
-	_timer.start(mainTimerPool(), 0.0f, NotifyTimer::RepeatForever);
+	_timer.start(currentTimerPool(), 0.0f, NotifyTimer::RepeatForever);
 }
 
 ParticleSystem* ParticleSystem::duplicate()

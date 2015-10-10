@@ -36,7 +36,7 @@ namespace et
 			{ return _runLoop; }
 		
 	private:
-		ThreadResult main();
+		uint64_t main();
 		
 	private:
 		BackgroundRunLoop _runLoop;

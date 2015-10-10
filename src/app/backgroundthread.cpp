@@ -6,6 +6,7 @@
  */
 
 #include <et/core/tools.h>
+#include <et/app/application.h>
 #include <et/app/backgroundthread.h>
 
 using namespace et;
@@ -28,20 +29,21 @@ BackgroundThread::BackgroundThread()
 	_runLoop.setOwner(this);
 }
 
-ThreadResult BackgroundThread::main()
+uint64_t BackgroundThread::main()
 {
+	registerRunLoop(_runLoop);	
 	while (running())
 	{
 		if (_runLoop.hasTasks() || _runLoop.firstTimerPool()->hasObjects())
 		{
 			_runLoop.update(queryContiniousTimeInMilliSeconds());
-			Thread::sleepMSec(1);
+			threading::sleepMSec(1);
 		}
 		else
 		{
 			suspend();
 		}
 	}
-	
+	unregisterRunLoop(_runLoop);
 	return 0;
 }

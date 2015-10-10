@@ -8,7 +8,6 @@
 #include <et/core/tools.h>
 #include <et/opengl/opengl.h>
 #include <et/opengl/openglcaps.h>
-#include <et/threading/threading.h>
 
 using namespace et;
 

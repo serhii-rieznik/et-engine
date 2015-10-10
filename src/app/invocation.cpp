@@ -40,12 +40,17 @@ void Invocation::invoke()
 
 void Invocation::invokeInMainRunLoop(float delay)
 {
-	invokeInRunLoop(mainRunLoop(), delay);
+	invokeInRunLoop(mainRunLoop());
+}
+
+void Invocation::invokeInCurrentRunLoop(float delay)
+{
+	invokeInRunLoop(currentRunLoop());
 }
 
 void Invocation::invokeInBackground(float delay)
 {
-	invokeInRunLoop(backgroundRunLoop(), delay);
+	invokeInRunLoop(backgroundRunLoop());
 }
 
 void Invocation::invokeInRunLoop(RunLoop& rl, float delay)
@@ -65,6 +70,11 @@ void Invocation1::invoke()
 void Invocation1::invokeInMainRunLoop(float delay)
 {
 	invokeInRunLoop(mainRunLoop(), delay);
+}
+
+void Invocation1::invokeInCurrentRunLoop(float delay)
+{
+	invokeInRunLoop(currentRunLoop(), delay);
 }
 
 void Invocation1::invokeInBackground(float delay)
@@ -89,6 +99,11 @@ void Invocation2::invoke()
 void Invocation2::invokeInMainRunLoop(float delay)
 {
 	invokeInRunLoop(mainRunLoop(), delay);
+}
+
+void Invocation2::invokeInCurrentRunLoop(float delay)
+{
+	invokeInRunLoop(currentRunLoop(), delay);
 }
 
 void Invocation2::invokeInBackground(float delay)

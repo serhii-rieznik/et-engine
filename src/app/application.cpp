@@ -5,7 +5,6 @@
  *
  */
 
-#include <et/threading/threading.h>
 #include <et/rendering/rendercontext.h>
 #include <et/app/application.h>
 
@@ -23,7 +22,7 @@ Application::Application()
 
 	_lastQueuedTimeMSec = queryContiniousTimeInMilliSeconds();
 	
-	threading();
+	threading::setMainThreadIdentifier(threading::currentThread());
 
 	delegate()->setApplicationParameters(_parameters);
 
@@ -65,6 +64,7 @@ int Application::run(int argc, char* argv[])
 
 void Application::enterRunLoop()
 {
+	registerRunLoop(_runLoop);
 	_running = true;
 
 	if (_parameters.shouldPreserveRenderContext)
@@ -92,6 +92,11 @@ void Application::enterRunLoop()
 		_renderContext->popRenderingContext();
 }
 
+void Application::exitRunLoop()
+{
+	unregisterRunLoop(_runLoop);
+}
+
 void Application::performRendering()
 {
 #if !defined(ET_CONSOLE_APPLICATION)
@@ -111,7 +116,7 @@ bool Application::shouldPerformRendering()
 		uint64_t sleepInterval = (_fpsLimitMSec - elapsedTime) +
 			(randomInteger(1000) > _fpsLimitMSecFractPart ? 0 : static_cast<uint64_t>(-1));
 		
-		Thread::sleepMSec(sleepInterval);
+		threading::sleepMSec(sleepInterval);
 		
 		return false;
 	}
@@ -177,11 +182,6 @@ void Application::contextResized(const vec2i& size)
 		else
 			_postResizeOnActivate = true;
 	}
-}
-
-float Application::cpuLoad() const
-{
-	return Threading::cpuUsage();
 }
 
 void Application::suspend()
@@ -300,17 +300,73 @@ const ApplicationIdentifier& Application::identifier() const
 /*
  * Service
  */
+
+namespace
+{
+	static std::map<threading::ThreadIdentifier, RunLoop*> allRunLoops;
+	bool removeRunLoopFromMap(RunLoop* ptr)
+	{
+		bool found = false;
+		auto i = allRunLoops.begin();
+		while (i != allRunLoops.end())
+		{
+			if (i->second == ptr)
+			{
+				found = true;
+				i = allRunLoops.erase(i);
+			}
+			else
+			{
+				++i;
+			}
+		}
+		return found;
+	}
+}
+
+RunLoop& et::mainRunLoop()
+{
+	return application().mainRunLoop();
+}
+
+RunLoop& et::backgroundRunLoop()
+{
+	return application().backgroundRunLoop();
+}
+
 RunLoop& et::currentRunLoop()
 {
-	if (Threading::currentThread() == application().backgroundThread().id())
-		return application().backgroundRunLoop();
-	
-	return mainRunLoop();
+	auto threadId = threading::currentThread();
+	ET_ASSERT(allRunLoops.count(threadId) > 0);
+	return *(allRunLoops.at(threadId));
+}
+
+TimerPool::Pointer& et::mainTimerPool()
+{
+	return application().mainRunLoop().firstTimerPool();
 }
 
 TimerPool::Pointer et::currentTimerPool()
 {
 	return currentRunLoop().firstTimerPool();
+}
+
+void et::registerRunLoop(RunLoop& runLoop)
+{
+	auto currentThread = threading::currentThread();
+	ET_ASSERT(allRunLoops.count(currentThread) == 0);
+
+	removeRunLoopFromMap(&runLoop);
+	allRunLoops.insert({currentThread, &runLoop});
+}
+
+void et::unregisterRunLoop(RunLoop& runLoop)
+{
+	auto success = removeRunLoopFromMap(&runLoop);
+	if (!success)
+	{
+		log::error("Attempt to unregister non-registered RunLoop");
+	}
 }
 
 const std::string et::kSystemEventType = "kSystemEventType";

@@ -163,6 +163,17 @@ inline void Event1<ArgType>::invokeInMainRunLoop(ArgType arg, float delay)
 	_invoking = false;
 }
 
+template <typename ArgType>
+inline void Event1<ArgType>::invokeInCurrentRunLoop(ArgType arg, float delay)
+{
+	cleanup();
+	
+	_invoking = true;
+	for (auto& conn : _connections)
+		conn->invokeInCurrentRunLoop(arg, delay);
+	_invoking = false;
+}
+
 /*
 * Event2Connection
 */
@@ -274,4 +285,18 @@ inline void Event2<Arg1Type, Arg2Type>::invokeInMainRunLoop(Arg1Type a1, Arg2Typ
 		conn->invokeInMainRunLoop(a1, a2, delay);
 	_invoking = false;
 
+}
+
+template <typename Arg1Type, typename Arg2Type>
+inline void Event2<Arg1Type, Arg2Type>::invokeInCurrentRunLoop(Arg1Type a1, Arg2Type a2, float delay)
+{
+	auto i = remove_if(_connections.begin(), _connections.end(), shouldRemoveConnection);
+	if (i != _connections.end())
+		_connections.erase(i, _connections.end());
+	
+	_invoking = true;
+	for (auto& conn : _connections)
+		conn->invokeInCurrentRunLoop(a1, a2, delay);
+	_invoking = false;
+	
 }

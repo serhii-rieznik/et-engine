@@ -22,6 +22,7 @@
 #include <limits>
 #include <functional>
 #include <algorithm>
+#include <thread>
 
 #include <iosfwd>
 #include <iostream>
@@ -122,7 +123,7 @@ namespace et
 
 #include <et/core/properties.h>
 #include <et/core/strings.h>
-
+#include <et/core/threading.h>
 #include <et/core/filesystem.h>
 #include <et/core/conversionbase.h>
 #include <et/core/object.h>

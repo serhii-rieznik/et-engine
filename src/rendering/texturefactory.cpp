@@ -6,8 +6,8 @@
  */
 
 #include <et/core/objectscache.h>
+#include <et/core/threading.h>
 #include <et/app/application.h>
-#include <et/threading/threading.h>
 #include <et/imaging/textureloader.h>
 #include <et/rendering/rendercontext.h>
 #include <et/rendering/texturefactory.h>
@@ -125,15 +125,19 @@ Texture::Pointer TextureFactory::loadTexture(const std::string& fileName, Object
 		
 		if (desc.valid())
 		{
-			bool calledFromAnotherThread = Threading::currentThread() != threading().renderingThread();
+			bool calledFromAnotherThread = !threading::inMainThread();
 			
 			texture = Texture::Pointer::create(renderContext(), desc, desc->origin(), async || calledFromAnotherThread);
 			cache.manage(texture, _private->loader);
 			
 			if (async)
+			{
 				_loadingThread->addRequest(desc->origin(), texture, delegate);
+			}
 			else if (calledFromAnotherThread)
+			{
 				ET_FAIL("ERROR: Unable to load texture synchronously from non-rendering thread.");
+			}
 		}
 		
 	}

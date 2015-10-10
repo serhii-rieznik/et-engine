@@ -29,7 +29,7 @@ namespace et
 			void removePlayer(PlayerPointer);
 			
 		private:
-			ThreadResult main();
+			uint64_t main();
 			
 		private:
 			ET_DECLARE_PIMPL(StreamingThread, 256)

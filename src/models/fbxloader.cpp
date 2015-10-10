@@ -1110,7 +1110,7 @@ s3d::ElementContainer::Pointer FBXLoader::load(RenderContext* rc, s3d::Storage& 
 	{
 		etDestroyObject(loader);
 	});
-	i.invokeInMainRunLoop();
+	i.invokeInCurrentRunLoop();
 	
 	return result;
 }

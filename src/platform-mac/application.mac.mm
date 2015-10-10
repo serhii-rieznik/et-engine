@@ -83,6 +83,7 @@ void Application::loaded()
 Application::~Application()
 {
 	platformFinalize();
+	exitRunLoop();
 }
 
 void Application::quit(int code)

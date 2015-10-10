@@ -48,12 +48,10 @@ namespace et
 	private:
 		std::vector<TimerPool::Pointer> _timerPools;
 		TaskPool _taskPool;
-		
-		uint64_t _actualTimeMSec;
-		uint64_t _activityTimeMSec;
-		
-		float _time;
-		bool _started;
-		bool _active;
+		uint64_t _actualTimeMSec = 0;
+		uint64_t _activityTimeMSec = 0;
+		float _time = 0.0f;
+		bool _started = false;
+		bool _active = true;
 	};
 }

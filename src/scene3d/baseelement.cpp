@@ -310,7 +310,8 @@ void BaseElement::removeAnimations()
 void BaseElement::animate()
 {
 	if (_animations.empty()) return;
-	_animationTimer.start(mainTimerPool(), 0.0f, NotifyTimer::RepeatForever);
+	
+	_animationTimer.start(currentTimerPool(), 0.0f, NotifyTimer::RepeatForever);
 }
 
 void BaseElement::stopAnimation()

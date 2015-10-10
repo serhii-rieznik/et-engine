@@ -34,7 +34,7 @@ CameraController::CameraController(Camera& cam, bool connectInput) :
 
 void CameraController::startUpdates()
 {
-	_updateTimer.start(mainTimerPool(), 0.0f, NotifyTimer::RepeatForever);
+	_updateTimer.start(currentTimerPool(), 0.0f, NotifyTimer::RepeatForever);
 }
 
 void CameraController::cancelUpdates()

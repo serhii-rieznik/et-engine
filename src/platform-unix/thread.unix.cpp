@@ -29,7 +29,7 @@ namespace et
 		pthread_cond_t suspend;
 		std::atomic<bool> running;
 		std::atomic<bool> suspended;
-		ThreadId threadId = 0;
+		Thread::Identifier threadId = 0;
 	};
 }
 
@@ -59,7 +59,7 @@ ThreadPrivate::~ThreadPrivate()
 void* ThreadPrivate::threadProc(void* context)
 {
 	Thread* thread = static_cast<Thread*>(context);
-	thread->_private->threadId = reinterpret_cast<ThreadId>(pthread_self());
+	thread->_private->threadId = reinterpret_cast<Thread::Identifier>(pthread_self());
 	return reinterpret_cast<void*>(thread->main());
 }
 
@@ -126,11 +126,11 @@ void Thread::stopAndWaitForTermination()
 	{
 		_private->running = false;
 		resume();
-		waitForTermination();
+		join();
 	}
 }
 
-void Thread::waitForTermination()
+void Thread::join()
 {
 	pthread_join(_private->thread, nullptr);
 }
@@ -144,7 +144,7 @@ void Thread::terminate(int result)
 	}
 }
 
-ThreadResult Thread::main()
+uint64_t Thread::main()
 {
 	return 0;
 }
@@ -159,19 +159,9 @@ bool Thread::suspended() const
 	return _private->suspended;
 }
 
-ThreadId Thread::id() const
+Thread::Identifier Thread::identifier() const
 {
 	return _private->threadId;
 }
 
-void Thread::sleep(float seconds)
-{
-	usleep(static_cast<useconds_t>(seconds * 1000000.0f));
-}
-
-void Thread::sleepMSec(uint64_t msec)
-{
-	usleep(static_cast<useconds_t>(msec * 1000));
-}
-
-#endif // !ET_PLATFORM_WIN
+#endif // ET_PLATFORM_IOS | ET_PLATFORM_MAC | ET_PLATFORM_ANDROID

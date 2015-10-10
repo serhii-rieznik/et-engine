@@ -11,20 +11,11 @@
 
 namespace et
 {
-	typedef unsigned long ThreadResult;
-	
-#if (ET_PLATFORM_ANDROID)
-	typedef long ThreadId;
-#else
-	typedef size_t ThreadId;
-#endif
-	
 	class ThreadPrivate;
 	class Thread
 	{
 	public:
-		static void sleep(float seconds);
-		static void sleepMSec(uint64_t msec);
+		using Identifier = std::thread::native_handle_type;
 		
 	public:
 		Thread();
@@ -36,6 +27,7 @@ namespace et
 		void suspend();
 		void resume();
 		void stop();
+		void join();
 
 		void stopAndWaitForTermination();
 		void terminate(int result = 0);
@@ -43,13 +35,11 @@ namespace et
 		bool running() const;
 		bool suspended() const;
 
-		ThreadId id() const;
-		virtual ThreadResult main();
+		Identifier identifier() const;
+		virtual uint64_t main();
 
 	private:
 		ET_DENY_COPY(Thread)
-
-		void waitForTermination(); // deprecated
 
 	private:
 		friend class ThreadPrivate;

@@ -10,8 +10,7 @@
 
 using namespace et;
 
-RunLoop::RunLoop() :
-	_actualTimeMSec(0), _time(0.0f), _activityTimeMSec(0), _started(false), _active(true)
+RunLoop::RunLoop() 
 {
 	attachTimerPool(TimerPool::Pointer::create(this));
 }

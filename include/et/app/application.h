@@ -68,8 +68,6 @@ namespace et
 		bool suspended() const
 			{ return _suspended; }
 
-		float cpuLoad() const;
-		
 		std::string resolveFileName(const std::string&);
 		std::string resolveFolderName(const std::string&);
 		std::set<std::string> resolveFolderNames(const std::string&);
@@ -121,6 +119,7 @@ namespace et
 		void terminated();
 		
 		void enterRunLoop();
+		void exitRunLoop();
 		
 		bool shouldPerformRendering();
 		void performUpdateAndRender();
@@ -172,18 +171,16 @@ namespace et
 	/*
 	 * currentRunLoop - returns background run loop if called in background and mainRunLoop otherwise
 	 */
-	RunLoop& currentRunLoop();
-	TimerPool::Pointer currentTimerPool();
-	
 	inline Application& application()
 		{ return Application::instance(); }
-
-	inline RunLoop& mainRunLoop()
-		{ return Application::instance().mainRunLoop(); }
-
-	inline RunLoop& backgroundRunLoop()
-		{ return Application::instance().backgroundRunLoop(); }
 	
-	inline TimerPool::Pointer& mainTimerPool()
-		{ return Application::instance().mainRunLoop().firstTimerPool(); }
+	RunLoop& mainRunLoop();
+	RunLoop& backgroundRunLoop();
+	RunLoop& currentRunLoop();
+	
+	TimerPool::Pointer& mainTimerPool();
+	TimerPool::Pointer currentTimerPool();
+	
+	void registerRunLoop(RunLoop&);
+	void unregisterRunLoop(RunLoop&);
 }

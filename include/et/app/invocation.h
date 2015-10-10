@@ -208,6 +208,7 @@ namespace et
 		
 		void invoke();
 		void invokeInMainRunLoop(float delay = 0.0f);
+		void invokeInCurrentRunLoop(float delay = 0.0f);
 		void invokeInBackground(float delay = 0.0f);
 		void invokeInRunLoop(RunLoop& rl, float delay = 0.0f);
 
@@ -225,6 +226,7 @@ namespace et
 	public:
 		void invoke();
 		void invokeInMainRunLoop(float delay = 0.0f);
+		void invokeInCurrentRunLoop(float delay = 0.0f);
 		void invokeInBackground(float delay = 0.0f);
 		void invokeInRunLoop(RunLoop& rl, float delay = 0.0f);
 
@@ -249,6 +251,7 @@ namespace et
 	public:
 		void invoke();
 		void invokeInMainRunLoop(float delay = 0.0f);
+		void invokeInCurrentRunLoop(float delay = 0.0f);
 		void invokeInBackground(float delay = 0.0f);
 		void invokeInRunLoop(RunLoop& rl, float delay = 0.0f);
 
@@ -264,66 +267,4 @@ namespace et
 		void setParameters(A1 p1, A2 p2)
 			{ (static_cast<Invocation2Target<T, A1, A2>*>(_target.ptr()))->setParameters(p1, p2); }
 	};
-
-/*
- * 0
- */
-	
-#define ET_INVOKE_THIS_CLASS_METHOD(CLASS, METHOD)	\
-		{ Invocation _aInvocation;\
-		_aInvocation.setTarget(this, &CLASS::METHOD);\
-		_aInvocation.invokeInMainRunLoop(); }
-
-#define ET_INVOKE_THIS_CLASS_METHOD_DELAYED(CLASS, METHOD, DELAY)	\
-		{ Invocation _aInvocation;\
-		_aInvocation.setTarget(this, &CLASS::METHOD);\
-		_aInvocation.invokeInMainRunLoop(DELAY); }
-
-#define ET_INVOKE_THIS_CLASS_METHOD_IN_BACKGROUND(CLASS, METHOD)	\
-		{ Invocation _aInvocation;\
-		_aInvocation.setTarget(this, &CLASS::METHOD);\
-		_aInvocation.invokeInBackground(); }
-	
-#define ET_INVOKE_THIS_CLASS_METHOD_IN_BACKGROUND_DELAYED(CLASS, METHOD, DELAY)	\
-		{ Invocation _aInvocation;\
-		_aInvocation.setTarget(this, &CLASS::METHOD);\
-		_aInvocation.invokeInBackground(DELAY); }
-	
-/*
- * 1
- */
-	
-#define ET_INVOKE_THIS_CLASS_METHOD1(CLASS, METHOD, P1) \
-		{ Invocation1 _aInvocation1; \
-		_aInvocation1.setTarget(this, &CLASS::METHOD, P1); \
-		_aInvocation1.invokeInMainRunLoop(); }
-
-#define ET_INVOKE_THIS_CLASS_METHOD1_DELAYED(CLASS, METHOD, P1, DELAY) \
-		{ Invocation1 _aInvocation1; \
-		_aInvocation1.setTarget(this, &CLASS::METHOD, P1); \
-		_aInvocation1.invokeInMainRunLoop(DELAY); }
-	
-#define ET_INVOKE_THIS_CLASS_METHOD1_IN_BACKGROUND(CLASS, METHOD, P1) \
-		{ Invocation1 _aInvocation;\
-		_aInvocation.setTarget(this, &CLASS::METHOD, P1);\
-		_aInvocation.invokeInBackground(); }
-
-#define ET_INVOKE_THIS_CLASS_METHOD1_IN_BACKGROUND_DELAYED(CLASS, METHOD, P1, DELAY) \
-		{ Invocation1 _aInvocation;\
-		_aInvocation.setTarget(this, &CLASS::METHOD, P1);\
-		_aInvocation.invokeInBackground(DELAY); }
-
-/*
- * 2
- */
-
-#define ET_INVOKE_THIS_CLASS_METHOD2(CLASS, METHOD, P1, P2)	\
-		{ Invocation2 _aInvocation2; \
-		_aInvocation2.setTarget(this, &CLASS::METHOD, P1, P2); \
-		_aInvocation2.invokeInMainRunLoop(); }
-
-#define ET_INVOKE_THIS_CLASS_METHOD2_DELAYED(CLASS, METHOD, P1, P2, DELAY) \
-		{ Invocation2 _aInvocation2; \
-		_aInvocation2.setTarget(this, &CLASS::METHOD, P1, P2); \
-		_aInvocation2.invokeInMainRunLoop(DELAY); }
 }

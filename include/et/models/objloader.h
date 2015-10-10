@@ -91,7 +91,7 @@ namespace et
 		s3d::ElementContainer::Pointer generateVertexBuffers(s3d::Storage&);
 
 		void loadMaterials(const std::string& fileName, bool async, ObjectsCache& cache);
-		void threadFinished(s3d::Storage&);
+		void threadFinished();
 
 	private:
 		friend class OBJLoaderThread;

@@ -64,7 +64,7 @@ TextureLoadingRequest* TextureLoadingThread::dequeRequest()
 	return result;
 }
 
-ThreadResult TextureLoadingThread::main()
+uint64_t TextureLoadingThread::main()
 {
 	while (running())
 	{

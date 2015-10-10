@@ -21,11 +21,11 @@
 
 #include <et/platform/platformtools.h>
 #include <et/platform-apple/apple.h>
+#include <et/core/threading.h>
 #include <et/opengl/opengl.h>
 #include <et/opengl/openglcaps.h>
 #include <et/input/input.h>
 #include <et/app/applicationnotifier.h>
-#include <et/threading/threading.h>
 
 using namespace et;
 
@@ -134,7 +134,7 @@ RenderContext::~RenderContext()
 
 void RenderContext::init()
 {
-	_fpsTimer.start(mainTimerPool(), 1.0f, NotifyTimer::RepeatForever);
+	_fpsTimer.start(currentTimerPool(), 1.0f, NotifyTimer::RepeatForever);
 	_private->run();
 }
 
@@ -402,7 +402,6 @@ void RenderContextPrivate::performUpdateAndRender()
 		CGLLockContext(cOpenGLContext);
 		CGLSetCurrentContext(cOpenGLContext);
 		
-		Threading::setRenderingThread(Threading::currentThread());
 		windowController->applicationNotifier.notifyUpdate();
 		
 		CGLFlushDrawable(cOpenGLContext);
@@ -418,7 +417,8 @@ int RenderContextPrivate::displayLinkSynchronized()
 	{
 		if (firstSync)
 		{
-			Threading::setMainThread(Threading::currentThread());
+			threading::setMainThreadIdentifier(threading::currentThread());
+			registerRunLoop(mainRunLoop());
 			firstSync = false;
 		}
 
@@ -441,9 +441,7 @@ void RenderContextPrivate::resize(const NSSize& sz)
 	{
 		CGLLockContext(cOpenGLContext);
 		CGLSetCurrentContext(cOpenGLContext);
-		
-		Threading::setRenderingThread(Threading::currentThread());
-		
+				
 		vec2i newSize(static_cast<int>(sz.width), static_cast<int>(sz.height));
 		
 		auto& notifier = windowController->applicationNotifier;

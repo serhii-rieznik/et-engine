@@ -21,7 +21,7 @@ namespace et
 	public:
 		OBJLoaderThread(OBJLoader*, s3d::Storage&, ObjectsCache&);
 		
-		ThreadResult main();
+		uint64_t main();
 
 	private:
 		friend class OBJLoader;
@@ -142,11 +142,8 @@ OBJLoaderThread::OBJLoaderThread(OBJLoader* owner, s3d::Storage& storage, Object
 	run();
 }
 
-ThreadResult OBJLoaderThread::main()
+uint64_t OBJLoaderThread::main()
 {
-	_owner->loadData(true, _storage, _cache);
-	_owner->processLoadedData();
-	Invocation([this]() { _owner->threadFinished(_storage); }).invokeInMainRunLoop();
 	return 0;
 }
 
@@ -183,6 +180,8 @@ OBJLoader::~OBJLoader()
 
 void OBJLoader::loadData(bool async,  s3d::Storage& storage, ObjectsCache& cache)
 {
+	ET_ASSERT(!async && "Async loading is currently disabled");
+	
 	std::string line;
 	int lineNumber = 0;
 	char key = 0;
@@ -891,9 +890,13 @@ s3d::ElementContainer::Pointer OBJLoader::generateVertexBuffers(s3d::Storage& st
 	return result;
 }
 
-void OBJLoader::threadFinished(s3d::Storage& storage)
+void OBJLoader::threadFinished() // s3d::Storage& storage)
 {
-	loaded.invoke(generateVertexBuffers(storage));
+	ET_FAIL("TODO");
+	/*
+	auto buffers = generateVertexBuffers(storage);
+	loaded.invoke(buffers);
+	*/
 }
 
 /*

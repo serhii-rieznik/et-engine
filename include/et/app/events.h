@@ -99,6 +99,13 @@ namespace et
 			i.invokeInMainRunLoop(delay);
 		}
 
+		void invokeInCurrentRunLoop(float delay = 0.0f)
+		{
+			Invocation i;
+			i.setTarget(_receiver, _receiverMethod);
+			i.invokeInCurrentRunLoop(delay);
+		}
+		
 		void invokeInBackground(float delay = 0.0f)
 		{
 			Invocation i;
@@ -129,6 +136,13 @@ namespace et
 			Invocation i;
 			i.setTarget(_func);
 			i.invokeInMainRunLoop(delay);
+		}
+
+		void invokeInCurrentRunLoop(float delay = 0.0f)
+		{
+			Invocation i;
+			i.setTarget(_func);
+			i.invokeInCurrentRunLoop(delay);
 		}
 		
 		void invokeInBackground(float delay = 0.0f)
@@ -204,6 +218,13 @@ namespace et
 			i.setTarget<ReceiverType, ArgType>(_receiver, _receiverMethod, arg);
 			i.invokeInMainRunLoop(delay);
 		}
+
+		void invokeInCurrentRunLoop(ArgType arg, float delay)
+		{
+			Invocation1 i;
+			i.setTarget<ReceiverType, ArgType>(_receiver, _receiverMethod, arg);
+			i.invokeInCurrentRunLoop(delay);
+		}
 		
 		void invokeInBackground(ArgType arg, float delay)
 		{
@@ -236,6 +257,13 @@ namespace et
 			i.setTarget<F, ArgType>(_func, arg);
 			i.invokeInMainRunLoop(delay);
 		}
+
+		void invokeInCurrentRunLoop(ArgType arg, float delay)
+		{
+			Invocation1 i;
+			i.setTarget<F, ArgType>(_func, arg);
+			i.invokeInCurrentRunLoop(delay);
+		}
 		
 		void invokeInBackground(ArgType arg, float delay)
 		{
@@ -266,6 +294,7 @@ namespace et
 		void receiverDisconnected(EventReceiver* r);
 		void invoke(ArgType arg);
 		void invokeInMainRunLoop(ArgType arg, float delay = 0.0f);
+		void invokeInCurrentRunLoop(ArgType arg, float delay = 0.0f);
 		
 		bool hasConnections()
 			{ return !_connections.empty(); }
@@ -311,6 +340,13 @@ namespace et
 			i.setTarget<ReceiverType, Arg1Type, Arg2Type>(_receiver, _receiverMethod, a1, a2);
 			i.invokeInMainRunLoop(delay);
 		}
+
+		void invokeInCurrentRunLoop(Arg1Type a1, Arg2Type a2, float delay)
+		{
+			Invocation2 i;
+			i.setTarget<ReceiverType, Arg1Type, Arg2Type>(_receiver, _receiverMethod, a1, a2);
+			i.invokeInCurrentRunLoop(delay);
+		}
 		
 		void invokeInBackground(Arg1Type a1, Arg2Type a2, float delay)
 		{
@@ -343,6 +379,13 @@ namespace et
 			i.setTarget<F, ArgType1, ArgType2>(_func, arg1, arg2);
 			i.invokeInMainRunLoop(delay);
 		}
+
+		void invokeInCurrentRunLoop(ArgType1 arg1, ArgType2 arg2, float delay)
+		{
+			Invocation2 i;
+			i.setTarget<F, ArgType1, ArgType2>(_func, arg1, arg2);
+			i.invokeInCurrentRunLoop(delay);
+		}
 		
 		void invokeInBackground(ArgType1 arg1, ArgType2 arg2, float delay)
 		{
@@ -373,6 +416,7 @@ namespace et
 		void receiverDisconnected(EventReceiver* r);
 		void invoke(Arg1Type a1, Arg2Type a2);
 		void invokeInMainRunLoop(Arg1Type a1, Arg2Type a2, float delay = 0.0f);
+		void invokeInCurrentRunLoop(Arg1Type a1, Arg2Type a2, float delay = 0.0f);
 
 		bool hasConnections()
 			{ return !_connections.empty(); }
