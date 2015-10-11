@@ -140,21 +140,6 @@ void Application::quit(int exitCode)
 #endif
 }
 
-void Application::alert(const std::string& title, const std::string& message, AlertType)
-{
-	NSString* nsTitle = [NSString stringWithCString:title.c_str() encoding:NSASCIIStringEncoding];
-	NSString* nsMessage = [NSString stringWithCString:message.c_str() encoding:NSASCIIStringEncoding];
-	
-	UIAlertView* alert = [[UIAlertView alloc] initWithTitle:nsTitle message:nsMessage delegate:nil
-		cancelButtonTitle:@"Close" otherButtonTitles:nil];
-	
-	[alert show];
-
-#if (!ET_OBJC_ARC_ENABLED)
-	[alert release];
-#endif
-}
-
 void Application::setTitle(const std::string&)
 {
 	
@@ -166,15 +151,14 @@ void Application::requestUserAttention()
 
 void Application::enableRemoteNotifications()
 {
-	NSUInteger notificationTypes = UIRemoteNotificationTypeBadge | UIRemoteNotificationTypeSound |
-		UIRemoteNotificationTypeAlert;
-	
 #if (__IPHONE_OS_VERSION_MIN_REQUIRED >= __IPHONE_8_0)
 	
-	UIUserNotificationSettings* settings = [UIUserNotificationSettings settingsForTypes:notificationTypes categories:nil];
 	[[UIApplication sharedApplication] registerForRemoteNotifications];
 	
 #else
+	
+	NSUInteger notificationTypes = UIRemoteNotificationTypeBadge | UIRemoteNotificationTypeSound |
+	UIRemoteNotificationTypeAlert;
 	
 	bool isIOS8OrLater = [[[UIDevice currentDevice] systemVersion] compare:@"8.0"
 		options:NSNumericSearch] == NSOrderedDescending;

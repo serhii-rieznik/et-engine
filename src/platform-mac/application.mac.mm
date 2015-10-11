@@ -45,7 +45,7 @@ void Application::loaded()
 	delegate()->setRenderContextParameters(parameters);
 	
 #if !defined(ET_CONSOLE_APPLICATION)
-	_renderContext = sharedObjectFactory().createObject<RenderContext>(parameters, this);
+	_renderContext = etCreateObject<RenderContext>(parameters, this);
 	
 	NSMenu* mainMenu = [[NSMenu allocWithZone:[NSMenu menuZone]] init];
 	NSMenuItem* applicationMenuItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] init];
@@ -136,8 +136,8 @@ int Application::platformRun(int, char*[])
 
 void Application::platformFinalize()
 {
-	sharedObjectFactory().deleteObject(_delegate);
-	sharedObjectFactory().deleteObject(_renderContext);
+	etDestroyObject(_delegate);
+	etDestroyObject(_renderContext);
 	
 	_renderContext = nullptr;
 	_delegate = nullptr;

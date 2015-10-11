@@ -9,8 +9,6 @@
 
 namespace et
 {
-	ObjectFactory& sharedObjectFactory();
-	
 	template <typename T>
 	class AutoPtr
 	{
@@ -61,7 +59,7 @@ namespace et
 
 		void release()
 		{
-			sharedObjectFactory().deleteObject(_data);
+			etDestroyObject(_data);
 			_data = nullptr;
 		}
 

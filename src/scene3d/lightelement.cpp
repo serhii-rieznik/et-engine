@@ -17,7 +17,7 @@ LightElement::LightElement(const std::string& name, BaseElement* parent) :
 
 LightElement* LightElement::duplicate()
 {
-	LightElement* result = sharedObjectFactory().createObject<LightElement>(name(), parent());
+	LightElement* result = etCreateObject<LightElement>(name(), parent());
 
 	duplicateBasePropertiesToObject(result);
 	duplicateChildrenToObject(result);

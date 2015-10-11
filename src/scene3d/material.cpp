@@ -17,7 +17,7 @@ using namespace et;
 using namespace et::s3d;
 
 static const vec4 nullVector;
-static const Texture::Pointer nullTexture;
+static const Texture::Pointer nullTexture = Texture::Pointer();
 
 extern const std::string materialKeys[MaterialParameter_max];
 size_t stringToMaterialParameter(const std::string&);
@@ -35,7 +35,7 @@ Material::~Material()
 
 Material* Material::duplicate() const
 {
-	Material* m = sharedObjectFactory().createObject<Material>();
+	Material* m = etCreateObject<Material>();
 	
 	m->tag = tag;
 	m->setName(name());
@@ -122,7 +122,7 @@ void Material::deserializeWithOptions(Dictionary stream, RenderContext* rc, Obje
 		static_cast<BlendState>(blendValue) : BlendState::Default;
 	_depthMask = stream.integerForKey(kDepthMask)->content != 0;
 
-	bool shouldCreateTextures = options & DeserializeOption_CreateTextures;
+	bool shouldCreateTextures = (options & DeserializeOption_CreateTextures) == DeserializeOption_CreateTextures;
 	Dictionary intValues = stream.dictionaryForKey(kIntegerValues);
 	Dictionary floatValues = stream.dictionaryForKey(kFloatValues);
 	Dictionary vectorValues = stream.dictionaryForKey(kVectorValues);

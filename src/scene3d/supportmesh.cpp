@@ -23,9 +23,10 @@ SupportMesh::SupportMesh(const std::string& name, const VertexArrayObject& ib, c
 
 SupportMesh* SupportMesh::duplicate()
 {
-	SupportMesh* result = sharedObjectFactory().createObject<SupportMesh>(name(), vertexArrayObject(),
+	SupportMesh* result = etCreateObject<SupportMesh>(name(), vertexArrayObject(),
 		material(), startIndex(), numIndexes(), vertexStorage(), indexArray(), parent());
 
+	duplicateMeshPropertiesToMesh(result);
 	duplicateBasePropertiesToObject(result);
 	duplicateChildrenToObject(result);
 

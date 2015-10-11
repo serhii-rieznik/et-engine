@@ -18,7 +18,7 @@ TaskPool::~TaskPool()
 	CriticalSectionScope lock(_csModifying);
 	
 	for (auto i : _tasks)
-		sharedObjectFactory().deleteObject(i);
+		etDestroyObject(i);
 }
 
 void TaskPool::addTask(Task* t, float delay)
@@ -46,7 +46,7 @@ void TaskPool::update(float currentTime)
 		if (_lastTime >= task->executionTime())
 		{
 			task->execute();
-			sharedObjectFactory().deleteObject(task);
+			etDestroyObject(task);
 			i = _tasks.erase(i);
 		}
 		else

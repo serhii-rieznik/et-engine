@@ -214,7 +214,7 @@ namespace et
 			
 			if (newSize > 0)
 			{
-				new_data = reinterpret_cast<DataTypePointer>(sharedObjectFactory().allocator()->allocate(DataTypeSize * newSize));
+				new_data = reinterpret_cast<DataTypePointer>(sharedBlockAllocator().allocate(DataTypeSize * newSize));
 				if (min_size > 0)
 					etCopyMemory(new_data, _immutableData, min_size * DataTypeSize);
 			}
@@ -224,7 +224,7 @@ namespace et
 			}
 			
 			if (ownsData())
-				sharedObjectFactory().allocator()->release(_mutableData);
+				sharedBlockAllocator().release(_mutableData);
 			
 			_flags |= DataStorageFlag_Mutable;
 			_mutableData = new_data;

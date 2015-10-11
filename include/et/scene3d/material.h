@@ -23,10 +23,10 @@ namespace et
 			struct Pointer : public IntrusivePtr<Material>
 			{
 				Pointer() :
-					IntrusivePtr<Material>(sharedObjectFactory().createObject<Material>()) { }
+					IntrusivePtr<Material>(etCreateObject<Material>()) { }
 				
 				explicit Pointer(Material* data) :
-					IntrusivePtr<Material>(data = nullptr ? sharedObjectFactory().createObject<Material>() : data) { }
+					IntrusivePtr<Material>(data = nullptr ? etCreateObject<Material>() : data) { }
 			};
 			
 			typedef std::vector<Material::Pointer> List;

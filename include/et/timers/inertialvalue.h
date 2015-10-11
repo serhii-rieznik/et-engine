@@ -56,7 +56,7 @@ namespace et
 		void startUpdates(TimerPool* timerPool = nullptr) override
 			{ TimedObject::startUpdates(timerPool); }
 
-		void update(float t)
+		void update(float t) override
 		{
 			float dt = _deccelerationRate * (t - _time);
 			_velocity *= etMax(0.0f, 1.0f - dt);

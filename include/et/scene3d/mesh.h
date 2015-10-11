@@ -108,6 +108,9 @@ namespace et
 			bool skinned() const;
 			VertexStorage::Pointer bakeDeformations();
 			
+		protected:
+			void duplicateMeshPropertiesToMesh(s3d::Mesh*);
+			
 		private:
 			Mesh* currentLod();
 			const Mesh* currentLod() const;

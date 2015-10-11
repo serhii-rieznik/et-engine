@@ -37,11 +37,10 @@ using namespace et;
 	
 	RenderContext* _rc;
 	RenderContextNotifier _rcNotifier;
+	MultisamplingQuality _multisampling;
 	
 	float _scaleFactor;
-	
 	BOOL _keyboardAllowed;
-	BOOL _multisampled;
 	BOOL _shouldCreateFramebuffer;
 }
 
@@ -103,7 +102,7 @@ using namespace et;
 - (void)performInitializationWithParameters:(const RenderContextParameters&)params
 {
 	_shouldCreateFramebuffer = YES;
-	_multisampled = params.multisamplingQuality == MultisamplingQuality_Best;
+	_multisampling = params.multisamplingQuality;
 	
 	CAEAGLLayer* eaglLayer = (CAEAGLLayer*)self.layer;
 	
@@ -163,7 +162,7 @@ using namespace et;
 	if (_mainFramebuffer.invalid())
 		return;
 	
-	if (_multisampled)
+	if (_multisampling != MultisamplingQuality::None)
 	{
 		_multisampledFramebuffer->invalidate(false, true);
 		_multisampledFramebuffer->resolveMultisampledTo(_mainFramebuffer, true, false);
@@ -171,7 +170,7 @@ using namespace et;
 	}
 		
 	_rc->renderState().bindFramebuffer(_mainFramebuffer);
-	_rc->renderState().bindRenderbuffer(_mainFramebuffer->colorRenderbuffer());
+	_rc->renderState().bindRenderbuffer(_mainFramebuffer->renderBufferTarget());
 	_mainFramebuffer->invalidate(false, true);
 	
 	[_context presentRenderbuffer:GL_RENDERBUFFER];
@@ -190,30 +189,25 @@ using namespace et;
 	vec2i size(static_cast<int>(glLayer.bounds.size.width * glLayer.contentsScale),
 		static_cast<int>(glLayer.bounds.size.height * glLayer.contentsScale));
 	
-	uint32_t colorRenderBuffer = 0;
-	
 	if (_mainFramebuffer.invalid())
 	{
 		_mainFramebuffer = _rc->framebufferFactory().createFramebuffer(size, "et-main-fbo",
-			TextureFormat::Invalid, TextureFormat::Invalid, DataType::UnsignedChar,
+			TextureFormat::RGBA8, TextureFormat::RGBA, DataType::UnsignedChar,
 			TextureFormat::Depth16, TextureFormat::Depth, DataType::UnsignedInt, true, false);
-		
-		glGenRenderbuffers(1, &colorRenderBuffer);
-	}
-	else
-	{
-		colorRenderBuffer = _mainFramebuffer->colorRenderbuffer();
 	}
 	
-	if (_multisampled && (_multisampledFramebuffer.invalid()))
+	if ((_multisampling != MultisamplingQuality::None) && (_multisampledFramebuffer.invalid()))
 	{
+		auto samples = (_multisampling == MultisamplingQuality::Best) ?
+			RenderingCapabilities::instance().maxSamples() : 1;
+		
 		_multisampledFramebuffer = _rc->framebufferFactory().createFramebuffer(size, "__et_ios_multisampled_framebuffer__",
 			TextureFormat::RGBA8, TextureFormat::RGBA, DataType::UnsignedChar, TextureFormat::Depth16,
-			TextureFormat::Depth, DataType::UnsignedInt, true, RenderingCapabilities::instance().maxSamples());
+			TextureFormat::Depth, DataType::UnsignedInt, true, samples);
 	}
 	
 	_rc->renderState().bindFramebuffer(_mainFramebuffer, true);
-	_rc->renderState().bindRenderbuffer(colorRenderBuffer, true);
+	_rc->renderState().bindRenderbuffer(_mainFramebuffer->renderBufferTarget(), true);
 	
 	if (![_context renderbufferStorage:GL_RENDERBUFFER fromDrawable:glLayer])
 		ET_FAIL("Unable to create render buffer.");
@@ -224,10 +218,9 @@ using namespace et;
 	glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_HEIGHT, &size.y);
 	checkOpenGLError("glGetRenderbufferParameteriv");
 	
-	_mainFramebuffer->setColorRenderbuffer(colorRenderBuffer);
 	_mainFramebuffer->resize(size);
 	
-	if (_multisampled)
+	if (_multisampling != MultisamplingQuality::None)
 		_multisampledFramebuffer->resize(size);
 	
 	_rc->renderState().setDefaultFramebuffer([self defaultFramebuffer]);
@@ -247,7 +240,8 @@ using namespace et;
 
 - (const Framebuffer::Pointer&)defaultFramebuffer
 {
-	return _multisampled ? _multisampledFramebuffer : _mainFramebuffer;
+	return (_multisampling != MultisamplingQuality::None) ?
+		_multisampledFramebuffer : _mainFramebuffer;
 }
 
 - (PointerInputInfo)touchToPointerInputInfo:(UITouch*)touch

@@ -33,7 +33,7 @@ namespace et
 
 		float duration()
 			{ return static_cast<float>(queryContiniousTimeInMilliSeconds() - _runTimeMSec) / 1000.0f; }
-
+		
 	private:
 		uint64_t _runTimeMSec = 0;
 		uint64_t _startTimeMSec = 0;

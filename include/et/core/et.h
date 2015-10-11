@@ -108,8 +108,16 @@ namespace et
 		{
 			typedef SharedBlockAllocatorSTDProxy<O> other;
 		};
-
 	};
+	
+	template <class C, typename ... args>
+	C* etCreateObject(args&&... a)
+		{ return sharedObjectFactory().createObject<C>(a...); }
+	
+	template <class C>
+	void etDestroyObject(C* c)
+		{ sharedObjectFactory().deleteObject(c); }
+	
 }
 
 #include <et/core/properties.h>

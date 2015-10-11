@@ -31,7 +31,7 @@ namespace et
 		};
 		
 		TextureFactoryPrivate(TextureFactory* owner) :
-		loader(sharedObjectFactory().createObject<Loader>(owner))
+		loader(etCreateObject<Loader>(owner))
 		{
 			supportedExtensions.push_back("png");
 			supportedExtensions.push_back("dds");
@@ -55,7 +55,7 @@ TextureFactory::TextureFactory(RenderContext* rc) :
 {
 	ET_PIMPL_INIT(TextureFactory, this)
 	
-	_loadingThread = sharedObjectFactory().createObject<TextureLoadingThread>(this);
+	_loadingThread = etCreateObject<TextureLoadingThread>(this);
 }
 
 TextureFactory::~TextureFactory()
@@ -286,7 +286,7 @@ void TextureFactory::textureLoadingThreadDidLoadTextureData(TextureLoadingReques
 	if (request->delegate)
 		request->delegate->textureDidLoad(request->texture);
 
-	sharedObjectFactory().deleteObject(request);
+	etDestroyObject(request);
 }
 
 Texture::Pointer TextureFactory::loadTexturesToCubemap(const std::string& posx, const std::string& negx,

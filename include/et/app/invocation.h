@@ -59,7 +59,7 @@ namespace et
 			{ (_object->*_method)(); }
 
 		PureInvocationTarget* copy()
-			{ return sharedObjectFactory().createObject<InvocationTarget>(_object, _method); }
+			{ return etCreateObject<InvocationTarget>(_object, _method); }
 
 	private:
 		ET_DENY_COPY(InvocationTarget)
@@ -80,7 +80,7 @@ namespace et
 			{ _func(); }
 		
 		PureInvocationTarget* copy()
-			{ return sharedObjectFactory().createObject<DirectInvocationTarget<F>>(_func); }
+			{ return etCreateObject<DirectInvocationTarget<F>>(_func); }
 		
 	private:
 		ET_DENY_COPY(DirectInvocationTarget)
@@ -103,7 +103,7 @@ namespace et
 			{ _param = p1; }
 
 		PureInvocationTarget* copy() 
-			{ return sharedObjectFactory().createObject<Invocation1Target>(_object, _method, _param); }
+			{ return etCreateObject<Invocation1Target>(_object, _method, _param); }
 
 	private:
 		ET_DENY_COPY(Invocation1Target)
@@ -128,7 +128,7 @@ namespace et
 			{ _param = p1; }
 		
 		PureInvocationTarget* copy()
-			{ return sharedObjectFactory().createObject<DirectInvocation1Target>(_func, _param); }
+			{ return etCreateObject<DirectInvocation1Target>(_func, _param); }
 		
 	private:
 		ET_DENY_COPY(DirectInvocation1Target)
@@ -155,7 +155,7 @@ namespace et
 		}
 
 		PureInvocationTarget* copy() 
-			{ return sharedObjectFactory().createObject<Invocation2Target>(_object, _method, _p1, _p2); }
+			{ return etCreateObject<Invocation2Target>(_object, _method, _p1, _p2); }
 
 	private:
 		Invocation2Target operator = (const Invocation2Target&) 
@@ -182,7 +182,7 @@ namespace et
 			{ _param1 = p1; _param2 = p2; }
 		
 		PureInvocationTarget* copy()
-			{ return sharedObjectFactory().createObject<DirectInvocation2Target>(_func, _param1, _param2); }
+			{ return etCreateObject<DirectInvocation2Target>(_func, _param1, _param2); }
 		
 	private:
 		ET_DENY_COPY(DirectInvocation2Target)
@@ -213,11 +213,11 @@ namespace et
 
 		template <typename T>
 		void setTarget(T* o, void(T::*m)())
-			{ ET_ASSERT(o != nullptr); _target = sharedObjectFactory().createObject<InvocationTarget<T>>(o, m); }
+			{ ET_ASSERT(o != nullptr); _target = etCreateObject<InvocationTarget<T>>(o, m); }
 		
 		template <typename F>
 		void setTarget(F func)
-			{ _target = sharedObjectFactory().createObject<DirectInvocationTarget<F>>(func); }
+			{ _target = etCreateObject<DirectInvocationTarget<F>>(func); }
 	};
 
 	class Invocation1 : public PureInvocation
@@ -230,11 +230,11 @@ namespace et
 
 		template <typename T, typename A1>
 		void setTarget(T* o, void(T::*m)(A1), A1 param)
-			{ ET_ASSERT(o != nullptr); _target = sharedObjectFactory().createObject<Invocation1Target<T, A1>>(o, m, param); }
+			{ ET_ASSERT(o != nullptr); _target = etCreateObject<Invocation1Target<T, A1>>(o, m, param); }
 
 		template <typename F, typename A1>
 		void setTarget(F func, A1 param)
-			{ _target = sharedObjectFactory().createObject<DirectInvocation1Target<F, A1>>(func, param); }
+			{ _target = etCreateObject<DirectInvocation1Target<F, A1>>(func, param); }
 		
 		template <typename T, typename A1>
 		void setParameter(A1 p)
@@ -254,11 +254,11 @@ namespace et
 
 		template <typename T, typename A1, typename A2>
 		void setTarget(T* o, void(T::*m)(A1, A2), A1 p1, A2 p2)
-			{ ET_ASSERT(o != nullptr); _target = sharedObjectFactory().createObject<Invocation2Target<T, A1, A2>>(o, m, p1, p2); }
+			{ ET_ASSERT(o != nullptr); _target = etCreateObject<Invocation2Target<T, A1, A2>>(o, m, p1, p2); }
 
 		template <typename F, typename A1, typename A2>
 		void setTarget(F func, A1 param1, A2 param2)
-			{ _target = sharedObjectFactory().createObject<DirectInvocation2Target<F, A1, A2>>(func, param1, param2); }
+			{ _target = etCreateObject<DirectInvocation2Target<F, A1, A2>>(func, param1, param2); }
 		
 		template <typename T, typename A1, typename A2>
 		void setParameters(A1 p1, A2 p2)

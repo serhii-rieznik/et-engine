@@ -657,7 +657,7 @@ static int pvrtcDecompress(	PVRTuint8 *pCompressedData,
 	// Structs used for decompression
 	PVRTCWordIndices indices;
 	Pixel32 *pPixels;
-	pPixels = (Pixel32*)(et::sharedObjectFactory().allocator()->allocate(ui32WordWidth*ui32WordHeight*sizeof(Pixel32)));
+	pPixels = (Pixel32*)(et::sharedBlockAllocator().allocate(ui32WordWidth*ui32WordHeight*sizeof(Pixel32)));
 	
 	// For each row of words
 	for(int wordY=-1; wordY < i32NumYWords-1; wordY++)
@@ -701,7 +701,7 @@ static int pvrtcDecompress(	PVRTuint8 *pCompressedData,
 		} // for each word
 	} // for each row of words
 
-	et::sharedObjectFactory().allocator()->release(pPixels);
+	et::sharedBlockAllocator().release(pPixels);
 	//Return the data size
 	return ui32Width * ui32Height / (PVRTuint32)(ui32WordWidth/2);
 }
@@ -732,7 +732,7 @@ int PVRTDecompressPVRTC(const void *pCompressedData,
 	//If the dimensions aren't correct, we need to create a new buffer instead of just using the provided one, as the buffer will overrun otherwise.
 	if (XTrueDim!=XDim || YTrueDim!=YDim)
 	{
-		pDecompressedData = (Pixel32*)(et::sharedObjectFactory().allocator()->allocate(XTrueDim*YTrueDim*sizeof(Pixel32)));
+		pDecompressedData = (Pixel32*)(et::sharedBlockAllocator().allocate(XTrueDim*YTrueDim*sizeof(Pixel32)));
 	}
 		
 	//Decompress the surface.
@@ -749,7 +749,7 @@ int PVRTDecompressPVRTC(const void *pCompressedData,
 		}
 
 		//Free the temporary buffer.
-		et::sharedObjectFactory().allocator()->release(pDecompressedData);
+		et::sharedBlockAllocator().release(pDecompressedData);
 	}
 	return retval;
 }
@@ -929,13 +929,13 @@ int PVRTDecompressETC(const void * const pSrcData, const unsigned int &x, const 
 
 	if (x < ETC_MIN_TEXWIDTH || y < ETC_MIN_TEXHEIGHT)
 	{	// decompress into a buffer big enough to take the minimum size
-		char* pTempBuffer =	(char*)(et::sharedObjectFactory().allocator()->allocate(PVRT_MAX(x,ETC_MIN_TEXWIDTH)*PVRT_MAX(y,ETC_MIN_TEXHEIGHT)*4));
+		char* pTempBuffer =	(char*)(et::sharedBlockAllocator().allocate(PVRT_MAX(x,ETC_MIN_TEXWIDTH)*PVRT_MAX(y,ETC_MIN_TEXHEIGHT)*4));
 		i32read = ETCTextureDecompress(pSrcData,PVRT_MAX(x,ETC_MIN_TEXWIDTH),PVRT_MAX(y,ETC_MIN_TEXHEIGHT),pTempBuffer,nMode);
 
 		for(unsigned int i=0;i<y;i++)
 			memcpy((char*)(pDestData)+i*x*4,pTempBuffer+PVRT_MAX(x,ETC_MIN_TEXWIDTH)*4*i,x*4);
 		
-		et::sharedObjectFactory().allocator()->release(pTempBuffer);
+		et::sharedBlockAllocator().release(pTempBuffer);
 	}
 	else	// decompress larger MIP levels straight into the output data
 		i32read = ETCTextureDecompress(pSrcData,x,y,pDestData,nMode);

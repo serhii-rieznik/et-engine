@@ -6,10 +6,10 @@
  */
 
 #include <et/opengl/opengl.h>
-#include <et/rendering/rendercontext.h>
-#include <et/app/application.h>
-#include <et/rendering/renderer.h>
 #include <et/opengl/openglcaps.h>
+#include <et/app/application.h>
+#include <et/rendering/rendercontext.h>
+#include <et/rendering/renderer.h>
 
 #if (ET_PLATFORM_IOS)
 

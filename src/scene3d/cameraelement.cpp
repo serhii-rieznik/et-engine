@@ -19,7 +19,7 @@ CameraElement::CameraElement(const std::string& name, BaseElement* parent) :
 
 CameraElement* CameraElement::duplicate()
 {
-	CameraElement* result = sharedObjectFactory().createObject<CameraElement>(name(), parent());
+	CameraElement* result = etCreateObject<CameraElement>(name(), parent());
 
 	duplicateBasePropertiesToObject(result);
 	duplicateChildrenToObject(result);

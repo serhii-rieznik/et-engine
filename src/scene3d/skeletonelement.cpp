@@ -12,7 +12,7 @@ using namespace et::s3d;
 
 SkeletonElement* SkeletonElement::duplicate()
 {
-	SkeletonElement* result = sharedObjectFactory().createObject<SkeletonElement>(name(), parent());
+	SkeletonElement* result = etCreateObject<SkeletonElement>(name(), parent());
 	duplicateChildrenToObject(result);
 	result->tag = tag;
 	return result;

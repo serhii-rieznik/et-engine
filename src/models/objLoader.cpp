@@ -170,7 +170,7 @@ OBJLoader::~OBJLoader()
 		_thread->stopAndWaitForTermination();
 	
 	for (auto group : _groups)
-		sharedObjectFactory().deleteObject(group);
+		etDestroyObject(group);
 	
 	_groups.clear();
 	
@@ -222,7 +222,7 @@ void OBJLoader::loadData(bool async,  s3d::Storage& storage, ObjectsCache& cache
 			getLine(inputFile, line);
 			trim(line);
 			
-			lastGroup = sharedObjectFactory().createObject<OBJGroup>(line);
+			lastGroup = etCreateObject<OBJGroup>(line);
 			lastGroup->faces.reserve(1024);
 			_groups.push_back(lastGroup);
 		}
@@ -244,7 +244,7 @@ void OBJLoader::loadData(bool async,  s3d::Storage& storage, ObjectsCache& cache
 				else
 				{
 					auto groupName = "group-" + intToStr(_lastGroupId++) + "-" + materialId;
-					lastGroup = sharedObjectFactory().createObject<OBJGroup>(groupName, materialId);
+					lastGroup = etCreateObject<OBJGroup>(groupName, materialId);
 					_groups.push_back(lastGroup);
 				}
 			}
@@ -257,7 +257,7 @@ void OBJLoader::loadData(bool async,  s3d::Storage& storage, ObjectsCache& cache
 		{
 			if (lastGroup == nullptr)
 			{
-				lastGroup = sharedObjectFactory().createObject<OBJGroup>("group-" + intToStr(_lastGroupId++));
+				lastGroup = etCreateObject<OBJGroup>("group-" + intToStr(_lastGroupId++));
 				_groups.push_back(lastGroup);
 			}
 			getLine(inputFile, line);
@@ -320,7 +320,7 @@ void OBJLoader::loadData(bool async,  s3d::Storage& storage, ObjectsCache& cache
 			
 			if (lastGroup == nullptr)
 			{
-				lastGroup = sharedObjectFactory().createObject<OBJGroup>("group-" + intToStr(_lastGroupId++));
+				lastGroup = etCreateObject<OBJGroup>("group-" + intToStr(_lastGroupId++));
 				_groups.push_back(lastGroup);
 			}
 			
@@ -392,7 +392,7 @@ s3d::ElementContainer::Pointer OBJLoader::load(et::RenderContext* rc, s3d::Stora
 void OBJLoader::loadAsync(et::RenderContext* rc, s3d::Storage& storage, ObjectsCache& cache)
 {
 	_rc = rc;
-	_thread = sharedObjectFactory().createObject<OBJLoaderThread>(this, storage, cache);
+	_thread = etCreateObject<OBJLoaderThread>(this, storage, cache);
 }
 
 void OBJLoader::loadMaterials(const std::string& fileName, bool async, ObjectsCache& cache)

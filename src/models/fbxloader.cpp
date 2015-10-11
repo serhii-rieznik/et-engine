@@ -172,25 +172,22 @@ s3d::ElementContainer::Pointer FBXLoaderPrivate::parse(s3d::Storage& storage)
 {
 	storage.flush();
 	
-	FbxSystemUnit sceneSystemUnit = scene->GetGlobalSettings().GetSystemUnit();
-	FbxAxisSystem openGLAxisSystem(FbxAxisSystem::eOpenGL);
 	FbxGeometryConverter geometryConverter(manager);
-
-	sceneSystemUnit.ConvertScene(scene);
-	openGLAxisSystem.ConvertScene(scene);
 	geometryConverter.Triangulate(scene, true);
-	
-	auto fbxRootNode = scene->GetRootNode();
-	fbxRootNode->ResetPivotSetAndConvertAnimation();
 	
 	loadAnimations();
 	
 	if (shouldCreateRenderObjects)
 		loadTextures();
 
+	auto fbxRootNode = scene->GetRootNode();
 	root = s3d::ElementContainer::Pointer::create(fbxRootNode->GetName(), nullptr);
 
 	int lChildCount = fbxRootNode->GetChildCount();
+
+	auto gt = fbxRootNode->EvaluateGlobalTransform();
+	auto lt = fbxRootNode->EvaluateLocalTransform();
+
 	for (int lChildIndex = 0; lChildIndex < lChildCount; ++lChildIndex)
 		loadNode(storage, fbxRootNode->GetChild(lChildIndex), root, true);
 
@@ -425,7 +422,7 @@ void et::FBXLoaderPrivate::loadNode(s3d::Storage& storage, FbxNode* node, s3d::B
 	
 	nodeToElementMap[reinterpret_cast<size_t>(node)] = createdElement;
 
-	auto transform = isRootNode ? node->EvaluateGlobalTransform() : node->EvaluateLocalTransform();
+	const auto& transform = node->EvaluateLocalTransform();
 	createdElement->setTransform(fbxMatrixToMat4(transform));
 
 	for (const auto& p : props)
@@ -1102,7 +1099,7 @@ void FBXLoader::setShouldCreateRenderObjects(bool value)
 s3d::ElementContainer::Pointer FBXLoader::load(RenderContext* rc, s3d::Storage& storage, ObjectsCache& ObjectsCache)
 {
 	s3d::ElementContainer::Pointer result;
-	FBXLoaderPrivate* loader = sharedObjectFactory().createObject<FBXLoaderPrivate>(rc, ObjectsCache);
+	FBXLoaderPrivate* loader = etCreateObject<FBXLoaderPrivate>(rc, ObjectsCache);
 	loader->shouldCreateRenderObjects = _shouldCreateRenderObjects;
 
 	if (loader->import(_filename))
@@ -1111,7 +1108,7 @@ s3d::ElementContainer::Pointer FBXLoader::load(RenderContext* rc, s3d::Storage& 
 	Invocation i;
 	i.setTarget([loader]()
 	{
-		sharedObjectFactory().deleteObject(loader);
+		etDestroyObject(loader);
 	});
 	i.invokeInMainRunLoop();
 	

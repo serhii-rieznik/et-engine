@@ -5,12 +5,13 @@
  *
  */
 
-#import <et/app/applicationnotifier.h>
+#include <et/app/applicationnotifier.h>
 
 #if (ET_PLATFORM_IOS)
 
-#import <QuartzCore/QuartzCore.h>
-#import <et/platform-ios/openglviewcontroller.h>
+#include <QuartzCore/QuartzCore.h>
+#include <et/opengl/opengl.h>
+#include <et/platform-ios/openglviewcontroller.h>
 
 using namespace et;
 
@@ -55,17 +56,17 @@ extern NSString* etKeyboardNotRequiredNotification;
 - (BOOL)performInitialization
 {
 #if defined(ET_EMBEDDED_APPLICATION)
-	
 	_context = [EAGLContext currentContext];
-	
 #else
+
+	_glView = [[etOpenGLView alloc] initWithFrame:[[UIScreen mainScreen] bounds] parameters:_params];
 	
 #	if defined(GL_ES_VERSION_3_0)
 		_context = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES3];
-		if (_context == nil)
 #	endif
+	
+	if (_context == nil)
 		_context = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2];
-		_glView = [[etOpenGLView alloc] initWithFrame:[[UIScreen mainScreen] bounds] parameters:_params];
 	
 #endif
 	

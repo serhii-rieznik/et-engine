@@ -267,7 +267,8 @@ void RenderState::bindFramebuffer(uint32_t framebuffer, uint32_t target, bool fo
 void RenderState::bindReadFramebuffer(uint32_t framebuffer, bool force)
 {
 #if !defined(ET_CONSOLE_APPLICATION)
-	bool alreadyBound = (_currentState.boundReadFramebuffer == framebuffer) ||
+	bool alreadyBound =
+		(_currentState.boundReadFramebuffer == framebuffer) ||
 		(_currentState.boundFramebuffer == framebuffer);
 	
 	if (force || !alreadyBound)
@@ -281,7 +282,8 @@ void RenderState::bindReadFramebuffer(uint32_t framebuffer, bool force)
 void RenderState::bindDrawFramebuffer(uint32_t framebuffer, bool force)
 {
 #if !defined(ET_CONSOLE_APPLICATION)
-	bool alreadyBound = (_currentState.boundDrawFramebuffer == framebuffer) ||
+	bool alreadyBound =
+		(_currentState.boundDrawFramebuffer == framebuffer) ||
 		(_currentState.boundFramebuffer == framebuffer);
 	
 	if (force || !alreadyBound)
@@ -343,10 +345,8 @@ void RenderState::setDrawBuffersCount(int32_t count)
 {
 #if !defined(ET_CONSOLE_APPLICATION)
 	
-#	if (GL_VERSION_2_0)
-		glDrawBuffers(count, drawBufferTargets());
-		checkOpenGLError("glDrawBuffers(%d, ...)", count);
-#	endif
+	glDrawBuffers(count, drawBufferTargets());
+	checkOpenGLError("glDrawBuffers(%d, ...)", count);
 	
 #endif
 }
@@ -749,18 +749,16 @@ RenderState::State RenderState::currentState()
 	
 	int value = 0;
 	
-#	if defined(GL3_PROTOTYPES)
-		int maxDrawBuffers = 0;
-		glGetIntegerv(GL_MAX_DRAW_BUFFERS, &maxDrawBuffers);
-		checkOpenGLError("");
+	int maxDrawBuffers = 0;
+	glGetIntegerv(GL_MAX_DRAW_BUFFERS, &maxDrawBuffers);
+	checkOpenGLError("");
 		
-		for (int i = 0; i < maxDrawBuffers; ++i)
-		{
-			glGetIntegerv(GL_DRAW_BUFFER0 + i, &value);
-			s.drawBuffers[i] = value;
-			checkOpenGLError("");
-		}
-#	endif
+	for (int i = 0; i < maxDrawBuffers; ++i)
+	{
+		glGetIntegerv(GL_DRAW_BUFFER0 + i, &value);
+		s.drawBuffers[i] = value;
+		checkOpenGLError("");
+	}
 	
 	value = 0;
 	glGetIntegerv(GL_ACTIVE_TEXTURE, &value);

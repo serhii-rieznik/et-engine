@@ -104,7 +104,6 @@ void ComponentTransformable::setTransform(const mat4& originalMatrix)
 	_flags &= ~Flag_ShouldDecompose;
 	
 	decomposeMatrix(originalMatrix, _translation, _orientation, _scale);
-	invalidateTransform();
 
 #if (ET_DEBUG)
 	buildTransform();
@@ -117,7 +116,7 @@ void ComponentTransformable::setTransform(const mat4& originalMatrix)
 			deviation += sqr(originalMatrix[v][u] - _cachedTransform[v][u]);
 	}
 	
-	if (deviation > 0.01f)
+	if (deviation > 0.001f)
 	{
 		log::warning("Failed to decompose matrix\n{\n"
 			"\tscale: (%f %f %f)\n"
@@ -142,6 +141,8 @@ void ComponentTransformable::setTransform(const mat4& originalMatrix)
 			 _cachedTransform[3][0], _cachedTransform[3][1], _cachedTransform[3][2], _cachedTransform[3][3]);
 	}
 #endif
+	
+	invalidateTransform();
 }
 
 void ComponentTransformable::setTransformDirectly(const mat4& m)

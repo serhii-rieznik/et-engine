@@ -10,6 +10,8 @@
 
 #include <OpenGLES/ES2/gl.h>
 #include <OpenGLES/ES2/glext.h>
+#include <OpenGLES/ES3/gl.h>
+#include <OpenGLES/ES3/glext.h>
 
 #define ET_OPENGLES									1
 
@@ -28,6 +30,10 @@
 #define glFlushMappedBufferRange					glFlushMappedBufferRangeEXT
 #define glMapBuffer									glMapBufferOES
 #define glUnmapBuffer								glUnmapBufferOES
+
+#if !defined(GL_PRIMITIVE_RESTART) && defined(GL_PRIMITIVE_RESTART_FIXED_INDEX)
+#	define GL_PRIMITIVE_RESTART						GL_PRIMITIVE_RESTART_FIXED_INDEX
+#endif
 
 #if !defined(GL_DEPTH_COMPONENT24) && defined(GL_DEPTH_COMPONENT24_OES)
 #	define GL_DEPTH_COMPONENT24						GL_DEPTH_COMPONENT24_OES
@@ -93,7 +99,7 @@
 #	define GL_R32F									GL_R32F_EXT
 #endif
 
-#if !defined(GL_RGBA162F) && defined(GL_RGBA16F_EXT)
+#if !defined(GL_RGBA16F) && defined(GL_RGBA16F_EXT)
 #	define GL_RGBA16F								GL_RGBA16F_EXT
 #endif
 
