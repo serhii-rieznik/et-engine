@@ -232,6 +232,7 @@
     <ClCompile Include="..\..\src\rendering\texturefactory.cpp" />
     <ClCompile Include="..\..\src\rendering\textureloadingthread.cpp" />
     <ClCompile Include="..\..\src\rendering\vertexbufferfactory.cpp" />
+    <ClCompile Include="..\..\src\rt\environment.cpp" />
     <ClCompile Include="..\..\src\rt\kdtree.cpp" />
     <ClCompile Include="..\..\src\rt\raytrace.cpp" />
     <ClCompile Include="..\..\src\scene3d\animation.cpp" />
