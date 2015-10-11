@@ -60,7 +60,7 @@ Renderer::Renderer(RenderContext* rc) :
 	};
 #endif
 	StringList currentDefines(1);
-	for (int i = 0; i < TextureTarget_max; ++i)
+	for (uint32_t i = 0; i < TextureTarget_max; ++i)
 	{
 		currentDefines[0] = textureTypeDefines[i];
 

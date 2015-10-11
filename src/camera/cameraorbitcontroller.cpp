@@ -96,7 +96,7 @@ void CameraOrbitController::onPointerScrolled(PointerInputInfo info)
 	_gestures.onPointerScrolled(info);
 }
 
-void CameraOrbitController::update(float dt)
+void CameraOrbitController::update(float)
 {
 	float directional = 0.0f;
 	if (_pressedKeys.count(ET_KEY_W) && (_pressedKeys[ET_KEY_W] != 0))
