@@ -99,7 +99,7 @@ void CameraMovingController::update(float dt)
 	{
 		movement.normalize();
 		vec3 direction = camera().side() * movement.x - camera().direction() * movement.z;
-		_positionAnimator.addTargetValue(_movementSpeed * direction);
+		_positionAnimator.addTargetValue(_movementSpeed * dt * direction);
 	}
 }
 

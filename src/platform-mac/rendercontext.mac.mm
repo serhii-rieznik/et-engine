@@ -663,6 +663,7 @@ CVReturn cvDisplayLinkOutputCallback(CVDisplayLinkRef, const CVTimeStamp*, const
 
 - (NSString*)windowTitleForDocumentDisplayName:(NSString*)displayName
 {
+	(void)displayName;
 	return nil;
 }
 

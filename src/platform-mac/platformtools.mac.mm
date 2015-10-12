@@ -29,7 +29,7 @@ typedef void (^filePickerCallback)(__strong NSString* path);
 - (void)saveFile;
 @end
 
-void et::alert(const std::string& title, const std::string& message, const std::string& button, AlertType type)
+void et::alert(const std::string& title, const std::string& message, const std::string& button, AlertType)
 {
 #if (__MAC_OS_X_VERSION_MIN_REQUIRED >= __MAC_10_10)
 	NSAlert* alert = [[NSAlert alloc] init];
@@ -99,6 +99,8 @@ std::string et::selectFile(const StringList& allowedTypes, SelectFileMode mode, 
 
 - (BOOL)panel:(id)sender shouldEnableURL:(NSURL*)url
 {
+	(void)sender;
+	
 	NSError* error = nil;
 	NSDictionary* resourceValues = [url resourceValuesForKeys:@[NSURLIsRegularFileKey, NSURLIsDirectoryKey] error:&error];
 	

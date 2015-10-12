@@ -337,6 +337,9 @@
     <ClCompile Include="..\..\src\scene3d\skeletonelement.cpp">
       <Filter>et</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\rt\environment.cpp">
+      <Filter>et\source\rt</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\maincontroller.hpp">

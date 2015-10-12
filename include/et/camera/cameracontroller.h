@@ -45,7 +45,7 @@ namespace et
 		virtual void onPointerScrolled(PointerInputInfo) { }
 		
 	protected:
-		virtual void update(float dt) { }
+		virtual void update(float) { }
 		
 	private:
 		Camera& _camera;
