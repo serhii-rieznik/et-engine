@@ -338,7 +338,10 @@ RunLoop& et::backgroundRunLoop()
 RunLoop& et::currentRunLoop()
 {
 	auto threadId = threading::currentThread();
-	ET_ASSERT(allRunLoops.count(threadId) > 0);
+	
+	if (allRunLoops.count(threadId) > 0)
+		return mainRunLoop();
+	
 	return *(allRunLoops.at(threadId));
 }
 

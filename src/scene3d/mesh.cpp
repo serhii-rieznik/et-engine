@@ -186,6 +186,7 @@ void Mesh::deserialize(Dictionary stream, SerializationHelper* helper)
 		_supportData.averageCenter = arrayToVec3(supportData.arrayForKey(kAverageCenter));
 		_supportData.dimensions = arrayToVec3(supportData.arrayForKey(kDimensions));
 		_supportData.boundingSphereRadius = supportData.floatForKey(kBoundingSphereRadius)->content;
+		_supportData.valid = true;
 	}
 	else
 	{

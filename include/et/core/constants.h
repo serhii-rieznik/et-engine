@@ -63,6 +63,7 @@
 #	define ET_KEY_A						0
 #	define ET_KEY_S						1
 #	define ET_KEY_D						2
+#	define ET_KEY_H						4
 #
 #elif (ET_PLATFORM_IOS)
 #
