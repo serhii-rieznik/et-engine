@@ -73,17 +73,7 @@ void Thread::run()
 		_private->thread = CreateThread(0, 0, ThreadPrivate::threadProc, this, 0, &_private->threadId);
 }
 
-void Thread::sleep(float sec)
-{
-	SleepEx(static_cast<DWORD>(1000.0f * sec), TRUE);
-}
-
-void Thread::sleepMSec(uint64_t msec)
-{
-	SleepEx(static_cast<DWORD>(msec), TRUE);
-}
-
-ThreadResult Thread::main()
+uint64_t Thread::main()
 {
 	return 0;
 }
@@ -113,6 +103,11 @@ void Thread::stop()
 	}
 }
 
+void et::Thread::join()
+{
+	WaitForSingleObject(_private->thread, INFINITE);
+}
+
 void Thread::terminate(int exitCode)
 {
 	if (_private->running.atomicCounterValue() == 0) return;
@@ -137,23 +132,19 @@ bool Thread::running() const
 	return (_private->running.atomicCounterValue() != 0);
 }
 
-ThreadId Thread::id() const
+Thread::Identifier Thread::identifier() const
 {
-	return _private->threadId;
+	uintptr_t ptr = _private->threadId;
+	return reinterpret_cast<Identifier>(ptr);
 }
 
-void Thread::waitForTermination()
-{
-	if (_private->thread && running())
-		WaitForSingleObject(_private->thread, INFINITE);
-}
 
 void Thread::stopAndWaitForTermination()
 {
 	if (_private->thread && running())
 	{
 		stop();
-		WaitForSingleObject(_private->thread, INFINITE);
+		join();
 	}
 }
 

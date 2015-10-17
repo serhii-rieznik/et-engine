@@ -19,6 +19,7 @@ using namespace et;
 #if defined(_MSC_VER)
 #	pragma comment(lib, "winmm.lib")
 #	pragma comment(lib, "psapi.lib")
+#	pragma comment(lib, "Dbghelp.lib")
 #endif
 
 #define IF_CASE(A) case A: return #A;
