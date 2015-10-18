@@ -40,7 +40,7 @@ void StreamingThread::release()
 	ET_PIMPL_FINALIZE(StreamingThread)
 }
 
-ThreadResult StreamingThread::main()
+uint64_t StreamingThread::main()
 {
 	while (running())
 	{
@@ -65,7 +65,7 @@ ThreadResult StreamingThread::main()
 			player->handleProcessedSamples();
 		}
 		
-		sleepMSec(50);
+		threading::sleepMSec(50);
 	}
 
 	CriticalSectionScope scope(_private->csLock);
