@@ -102,6 +102,7 @@
 #	define ET_KEY_S						'S'	
 #	define ET_KEY_D						'D'	
 #	define ET_KEY_W						'W'	
+#	define ET_KEY_H						'H'	
 #	define ET_KEY_1						49
 #	define ET_KEY_2						50
 #	define ET_KEY_3						51
