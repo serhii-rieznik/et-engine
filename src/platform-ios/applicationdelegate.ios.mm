@@ -14,7 +14,6 @@
 #include <et/core/base64.h>
 #include <et/json/json.h>
 #include <et/app/applicationnotifier.h>
-#include <et/threading/threading.h>
 #include <et/threading/mutex.h>
 
 #include <et/platform-apple/apple.h>
@@ -150,8 +149,7 @@ extern etOpenGLViewController* sharedOpenGLViewController;
 {
 	@synchronized(self)
 	{
-		Threading::setMainThread(Threading::currentThread());
-		Threading::setRenderingThread(Threading::currentThread());
+		threading::setMainThreadIdentifier(threading::currentThread());
 		
 		_displayLink = [[UIScreen mainScreen] displayLinkWithTarget:self selector:@selector(tick)];
 		

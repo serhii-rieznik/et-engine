@@ -504,7 +504,6 @@ void Framebuffer::resolveMultisampledTo(Framebuffer::Pointer framebuffer, bool r
 void Framebuffer::invalidate(bool color, bool depth)
 {
 #if (ET_OPENGLES)
-	ET_FAIL("TODO")
 	_rc->renderState().bindReadFramebuffer(static_cast<uint32_t>(apiHandle()));
 	
 	GLsizei numDiscards = 0;
@@ -516,12 +515,16 @@ void Framebuffer::invalidate(bool color, bool depth)
 	if (depth)
 		discards[numDiscards++] = GL_DEPTH_ATTACHMENT;
 	
-	// select either one or another
-	glDiscardFramebufferEXT(GL_READ_FRAMEBUFFER, numDiscards, discards);
-	checkOpenGLError("glDiscardFramebufferEXT");
-	
-	glInvalidateFramebuffer(GL_FRAMEBUFFER, numDiscards, discards);
-	checkOpenGLError("glInvalidateFramebuffer");
+	if (OpenGLCapabilities::instance().version() > OpenGLVersion::Version_2x)
+	{
+		glInvalidateFramebuffer(GL_FRAMEBUFFER, numDiscards, discards);
+		checkOpenGLError("glInvalidateFramebuffer");
+	}
+	else
+	{
+		glDiscardFramebufferEXT(GL_READ_FRAMEBUFFER, numDiscards, discards);
+		checkOpenGLError("glDiscardFramebufferEXT");
+	}
 #endif
 }
 
