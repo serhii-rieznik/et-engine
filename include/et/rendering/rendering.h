@@ -257,13 +257,13 @@ namespace et
 		max
 	};
 	
-	enum class MapBufferMode
+	enum MapBufferOptions : uint32_t
 	{
-		ReadOnly,
-		WriteOnly,
-		ReadWrite,
-		
-		max
+		Read = 0x01,
+		Write = 0x02,
+		Unsynchronized = 0x04,
+		InvalidateRange = 0x08,
+		InvalidateBuffer = 0x10,
 	};
 	
 	enum : uint32_t
@@ -279,7 +279,6 @@ namespace et
 
 		TextureTarget_max = static_cast<uint32_t>(TextureTarget::max),
 		TextureFormat_max = static_cast<uint32_t>(TextureFormat::max),
-		MapBufferMode_max = static_cast<uint32_t>(MapBufferMode::max),
 		
 		InvalidIndex = static_cast<uint32_t>(-1),
 		InvalidShortIndex = static_cast<uint16_t>(-1),

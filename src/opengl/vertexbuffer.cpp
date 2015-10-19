@@ -57,7 +57,7 @@ void VertexBuffer::setDataWithOffset(const void* data, size_t offset, size_t dat
 		uint64_t(_dataSize), data);
 }
 
-void* VertexBuffer::map(size_t offset, size_t dataSize, MapBufferMode mode)
+void* VertexBuffer::map(size_t offset, size_t dataSize, uint32_t options)
 {
 	ET_ASSERT(!_mapped);
 	ET_ASSERT(dataSize > 0);
@@ -66,33 +66,47 @@ void* VertexBuffer::map(size_t offset, size_t dataSize, MapBufferMode mode)
 	
 	_rc->renderState().bindBuffer(GL_ARRAY_BUFFER, static_cast<uint32_t>(apiHandle()));
 	
-	static const GLenum accessFlags2x[MapBufferMode_max] =
-		{ GL_READ_ONLY, GL_WRITE_ONLY, GL_READ_WRITE };
-
 	bool shouldUseMapBuffer = true;
 
-#	if defined(GL_ARB_map_buffer_range) || defined(GL_EXT_map_buffer_range)
+#if defined(GL_ARB_map_buffer_range) || defined(GL_EXT_map_buffer_range)
 
-		static const GLenum accessFlags3x[MapBufferMode_max] =
-			{ GL_MAP_READ_BIT, GL_MAP_WRITE_BIT, GL_MAP_READ_BIT | GL_MAP_WRITE_BIT };
+	uint32_t mbrOptions = 0;
+	
+	if (options & MapBufferOptions::Read)
+		mbrOptions |= GL_MAP_READ_BIT;
+	if (options & MapBufferOptions::Write)
+		mbrOptions |= GL_MAP_WRITE_BIT;
+	if (options & MapBufferOptions::Unsynchronized)
+		mbrOptions |= GL_MAP_UNSYNCHRONIZED_BIT;
+	if (options & MapBufferOptions::InvalidateBuffer)
+		mbrOptions |= GL_MAP_INVALIDATE_BUFFER_BIT;
+	if (options & MapBufferOptions::InvalidateRange)
+		mbrOptions |= GL_MAP_INVALIDATE_RANGE_BIT;
 	
 #	if (ET_DEBUG)
 		GLint bufferSize = 0;
 		glGetBufferParameteriv(GL_ARRAY_BUFFER, GL_BUFFER_SIZE, &bufferSize);
 		ET_ASSERT(offset + dataSize <= static_cast<size_t>(bufferSize));
 #	endif
-	
-		result = glMapBufferRange(GL_ARRAY_BUFFER, offset, dataSize, accessFlags3x[static_cast<uint32_t>(mode)]);
-		checkOpenGLError("glMapBufferRange(GL_ARRAY_BUFFER, %lu, %lu, %d)", offset, dataSize, (int)mode);
 
-		shouldUseMapBuffer = (result == nullptr);
+	result = glMapBufferRange(GL_ARRAY_BUFFER, offset, dataSize, mbrOptions);
+	checkOpenGLError("glMapBufferRange(GL_ARRAY_BUFFER, %lu, %lu, %X)", offset, dataSize, mbrOptions);
 
-#	endif
+	shouldUseMapBuffer = (result == nullptr);
+
+#endif
 
 	if (shouldUseMapBuffer)
 	{
-		result = reinterpret_cast<uint8_t*>(glMapBuffer(GL_ARRAY_BUFFER, accessFlags2x[static_cast<uint32_t>(mode)])) + offset;
-		checkOpenGLError("glMapBuffer(GL_ARRAY_BUFFER, %d)", mode);
+		uint32_t mbOptions = 0;
+		if ((options & MapBufferOptions::Read) && (options & MapBufferOptions::Write))
+			mbOptions = GL_READ_WRITE;
+		else if (options & MapBufferOptions::Read)
+			mbOptions = GL_READ_ONLY;
+		else if (options & MapBufferOptions::Write)
+			mbOptions = GL_WRITE_ONLY;
+		result = reinterpret_cast<uint8_t*>(glMapBuffer(GL_ARRAY_BUFFER, mbOptions)) + offset;
+		checkOpenGLError("glMapBuffer(GL_ARRAY_BUFFER, %X)", mbOptions);
 	}
 
 	_mapped = true;

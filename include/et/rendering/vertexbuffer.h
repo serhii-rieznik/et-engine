@@ -38,7 +38,7 @@ namespace et
 		void setData(const void* data, size_t dataSize, bool invalidateExistingData = false);
 		void setDataWithOffset(const void* data, size_t offset, size_t dataSize);
 		
-		void* map(size_t offset, size_t dataSize, MapBufferMode mode);
+		void* map(size_t offset, size_t dataSize, uint32_t options /* see MapBufferOptions */);
 		
 		bool mapped() const
 			{ return _mapped; }

@@ -51,7 +51,8 @@ void ParticleSystem::onTimerUpdated(NotifyTimer* timer)
 	_emitter.update(timer->actualTime());
 	
 	_rc->renderState().bindVertexArray(_vao);
-	void* bufferData = bufferData = _vao->vertexBuffer()->map(0, _vertexData.data.dataSize(), MapBufferMode::WriteOnly);
+	void* bufferData = bufferData = _vao->vertexBuffer()->map(0, _vertexData.data.dataSize(),
+		MapBufferOptions::Write | MapBufferOptions::InvalidateBuffer);
 
 	auto posOffset = _decl.elementForUsage(VertexAttributeUsage::Position).offset();
 	auto clrOffset = _decl.elementForUsage(VertexAttributeUsage::Color).offset();
