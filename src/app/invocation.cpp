@@ -40,17 +40,17 @@ void Invocation::invoke()
 
 void Invocation::invokeInMainRunLoop(float delay)
 {
-	invokeInRunLoop(mainRunLoop());
+	invokeInRunLoop(mainRunLoop(), delay);
 }
 
 void Invocation::invokeInCurrentRunLoop(float delay)
 {
-	invokeInRunLoop(currentRunLoop());
+	invokeInRunLoop(currentRunLoop(), delay);
 }
 
 void Invocation::invokeInBackground(float delay)
 {
-	invokeInRunLoop(backgroundRunLoop());
+	invokeInRunLoop(backgroundRunLoop(), delay);
 }
 
 void Invocation::invokeInRunLoop(RunLoop& rl, float delay)

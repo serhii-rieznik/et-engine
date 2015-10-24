@@ -525,6 +525,9 @@ void Framebuffer::invalidate(bool color, bool depth)
 		glDiscardFramebufferEXT(GL_READ_FRAMEBUFFER, numDiscards, discards);
 		checkOpenGLError("glDiscardFramebufferEXT");
 	}
+#else
+	(void)color;
+	(void)depth;
 #endif
 }
 

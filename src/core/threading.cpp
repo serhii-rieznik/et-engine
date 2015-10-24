@@ -20,7 +20,7 @@ void et::threading::setMainThreadIdentifier(et::threading::ThreadIdentifier t)
 	mainThreadId = t;
 }
 
-et::threading::ThreadIdentifier mainThreadIdentifier()
+et::threading::ThreadIdentifier et::threading::mainThreadIdentifier()
 {
 	ET_ASSERT(mainThreadId != 0);
 	return mainThreadId;
