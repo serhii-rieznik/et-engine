@@ -7,6 +7,7 @@
 
 #include <et/core/et.h>
 #include <et/core/dictionary.h>
+#include <et/json/json.h>
 
 using namespace et;
 
@@ -100,6 +101,27 @@ bool Dictionary::hasKey(const std::string& key) const
 ValueClass Dictionary::valueClassForKey(const std::string& key) const
 {
 	return hasKey(key) ? objectForKeyPath(StringList(1, key))->valueClass() : ValueClass_Invalid;
+}
+
+Dictionary::Dictionary(const std::string& jsonString)
+{
+	loadFromJson(jsonString);
+}
+
+bool Dictionary::loadFromJson(const std::string& jsonString)
+{
+	ValueClass vc = ValueClass_Invalid;
+	Dictionary object = json::deserialize(jsonString, vc);
+	if (vc != ValueClass_Dictionary)
+		return false;
+	
+	reference().content = object->content;
+	return true;
+}
+
+std::string Dictionary::storeToJson() const
+{
+	return json::serialize(*this);
 }
 
 StringList Dictionary::allKeyPaths()

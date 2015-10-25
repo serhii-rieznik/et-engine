@@ -60,8 +60,8 @@ namespace et
 	class ValuePointer : public Value<T, C>::Pointer
 	{
 	public:
-		typedef T ValueType;
-		typedef typename Value<T, C>::Pointer PointerType;
+		using ValueType = T;
+		using PointerType = typename Value<T, C>::Pointer;
 		
 	public:
 		ValuePointer() :
@@ -118,7 +118,8 @@ namespace et
 			{ return reference().content.empty(); }
 	};
 	
-	class ArrayValue : public ValuePointer<std::vector<ValueBase::Pointer, SharedBlockAllocatorSTDProxy<ValueBase::Pointer>>, ValueClass_Array>
+	class ArrayValue : public
+		ValuePointer<std::vector<ValueBase::Pointer, SharedBlockAllocatorSTDProxy<ValueBase::Pointer>>, ValueClass_Array>
 	{
 	public:
 		ArrayValue() :
@@ -146,7 +147,7 @@ namespace et
 		}
 		
 		inline void performRecursive(ValueCallbackFunction func);
-		
+					
 	public:
 		void printContent() const;
 	};
@@ -173,6 +174,8 @@ namespace et
 		
 		Dictionary(const ValuePointer::ValueType& c) :
 			ValuePointer<Dictionary::ValueType, ValueClass_Dictionary>( ) { reference().content = c; }
+		
+		Dictionary(const std::string& json);
 		
 		Dictionary& operator = (const Dictionary& r)
 		{
@@ -234,6 +237,10 @@ namespace et
 			{ return Dictionary(valueForKeyPath<Dictionary::ValueType, ValueClass_Dictionary>(key, def)); }
 		
 	public:
+		bool loadFromJson(const std::string&);
+		
+		std::string storeToJson() const;
+		
 		void removeObjectForKey(const std::string& key)
 			{ reference().content.erase(key); }
 		
