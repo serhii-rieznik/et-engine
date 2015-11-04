@@ -233,7 +233,7 @@ std::string Application::resolveFileName(const std::string& path)
 	if (!fileExists(result))
 		result = _standardPathResolver.resolveFilePath(path);
 	
-	return result;
+	return fileExists(result) ? result : path;
 }
 
 std::string Application::resolveFolderName(const std::string& path)
@@ -246,7 +246,7 @@ std::string Application::resolveFolderName(const std::string& path)
 	if (!folderExists(result))
 		result = _standardPathResolver.resolveFolderPath(path);
 	
-	return result;
+	return folderExists(result) ? result : path;
 }
 
 std::set<std::string> Application::resolveFolderNames(const std::string& path)

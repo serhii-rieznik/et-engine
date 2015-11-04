@@ -96,43 +96,64 @@ StringList ProgramFactory::loadProgramSources(const std::string& file, std::stri
 	std::string& geom_shader, std::string& frag_shader, const StringList& defines)
 {
 	StringList sources;
-	
-	std::string filename = application().resolveFileName(file);
-	if (!fileExists(filename))
-	{
-		log::error("Unable to find file: %s", file.c_str());
-		return sources;
-	}
-	
 	StringList resultDefines = defines;
 	std::string vertex_source;
 	std::string geometry_source;
 	std::string fragment_source;
-	std::string s;
 	
-	InputStream progFile(filename, StreamMode_Binary);
-	while (!(progFile.stream().eof() || progFile.stream().fail()))
+	bool shouldParseProgramFile = true;
+	
+	std::string filename = file;
+	if (!fileExists(filename))
 	{
-		getline(progFile.stream(), s);
-		trim(s);
+		bool shouldFailAndReturn = true;
 		
-		std::string id = s.substr(0, s.find(':'));
-		trim(id);
-		lowercase(id);
-		
-		if (id == "vs")
-			vertex_source = s.substr(s.find_first_of(':') + 1);
-		
-		if (id == "gs")
-			geometry_source = s.substr(s.find_first_of(':') + 1);
-		
-		if (id == "fs")
-			fragment_source = s.substr(s.find_first_of(':') + 1);
-		
-		if (id == "defines")
+		filename = application().resolveFolderName(file);
+		if (!fileExists(filename))
 		{
-			StringList aDefines = parseDefinesString(s.substr(s.find_first_of(':') + 1));
-			resultDefines.insert(resultDefines.end(), aDefines.begin(), aDefines.end());
+			vertex_source = replaceFileExt(filename, ".vsh");
+			if (fileExists(vertex_source))
+			{
+				fragment_source = replaceFileExt(filename, ".fsh");
+				shouldFailAndReturn = !fileExists(fragment_source);
+				shouldParseProgramFile = false;
+			}
+		}
+		
+		if (shouldFailAndReturn)
+		{
+			log::error("Unable to find file: %s", file.c_str());
+			return sources;
+		}
+	}
+	
+	if (shouldParseProgramFile)
+	{
+		std::string s;
+		InputStream progFile(filename, StreamMode_Binary);
+		while (!(progFile.stream().eof() || progFile.stream().fail()))
+		{
+			getline(progFile.stream(), s);
+			trim(s);
+			
+			std::string id = s.substr(0, s.find(':'));
+			trim(id);
+			lowercase(id);
+			
+			if (id == "vs")
+				vertex_source = s.substr(s.find_first_of(':') + 1);
+			
+			if (id == "gs")
+				geometry_source = s.substr(s.find_first_of(':') + 1);
+			
+			if (id == "fs")
+				fragment_source = s.substr(s.find_first_of(':') + 1);
+			
+			if (id == "defines")
+			{
+				StringList aDefines = parseDefinesString(s.substr(s.find_first_of(':') + 1));
+				resultDefines.insert(resultDefines.end(), aDefines.begin(), aDefines.end());
+			}
 		}
 	}
 	
@@ -141,49 +162,54 @@ StringList ProgramFactory::loadProgramSources(const std::string& file, std::stri
 	normalizeFilePath(trim(fragment_source));
 	
 	std::string programFolder = getFilePath(filename);
-	std::string fName = programFolder + vertex_source;
+
+	if (!fileExists(vertex_source))
+		vertex_source = programFolder + vertex_source;
 	
-	if (!fileExists(fName))
-		fName = application().resolveFileName(fName);
+	if (!fileExists(vertex_source))
+		vertex_source = application().resolveFileName(vertex_source);
 	
-	if (!fileExists(fName))
-		fName = application().resolveFileName(vertex_source);
+	if (!fileExists(vertex_source))
+		vertex_source = application().resolveFileName(vertex_source);
 	
-	if (fileExists(fName))
+	if (fileExists(vertex_source))
 	{
-		sources.push_back(fName);
-		vertex_shader = loadTextFile(fName);
+		sources.push_back(vertex_source);
+		vertex_shader = loadTextFile(vertex_source);
 		ET_ASSERT((vertex_shader.size() > 1) && "Vertex shader source should not be empty");
 	}
 	
 	if (!geometry_source.empty())
 	{
-		fName = programFolder + geometry_source;
-		if (!fileExists(fName))
-			fName = application().resolveFileName(fName);
+		if (!fileExists(geometry_source))
+			geometry_source = programFolder + geometry_source;
 		
-		if (!fileExists(fName))
-			fName = application().resolveFileName(geometry_source);
+		if (!fileExists(geometry_source))
+			geometry_source = application().resolveFileName(geometry_source);
 		
-		if (fileExists(fName))
+		if (!fileExists(geometry_source))
+			geometry_source = application().resolveFileName(geometry_source);
+		
+		if (fileExists(geometry_source))
 		{
-			geom_shader = loadTextFile(fName);
-			sources.push_back(fName);
+			geom_shader = loadTextFile(geometry_source);
+			sources.push_back(geometry_source);
 		}
 	}
 	
-	fName = programFolder + fragment_source;
+	if (!fileExists(fragment_source))
+		fragment_source = programFolder + fragment_source;
 	
-	if (!fileExists(fName))
-		fName = application().resolveFileName(fName);
+	if (!fileExists(fragment_source))
+		fragment_source = application().resolveFileName(fragment_source);
 	
-	if (!fileExists(fName))
-		fName = application().resolveFileName(fragment_source);
+	if (!fileExists(fragment_source))
+		fragment_source = application().resolveFileName(fragment_source);
 	
-	if (fileExists(fName))
+	if (fileExists(fragment_source))
 	{
-		sources.push_back(fName);
-		frag_shader = loadTextFile(fName);
+		sources.push_back(fragment_source);
+		frag_shader = loadTextFile(fragment_source);
 		ET_ASSERT((frag_shader.size() > 1) && "Fragment shader source should not be empty");
 	}
 	
@@ -248,7 +274,7 @@ Program::Pointer ProgramFactory::loadProgram(const std::string& file, ObjectsCac
 
 Program::Pointer ProgramFactory::loadProgram(const std::string& file, ObjectsCache& cache, const std::string& defines)
 {
-	return loadProgram(application().resolveFileName(file), cache, parseDefinesString(defines));
+	return loadProgram(file, cache, parseDefinesString(defines));
 }
 
 Program::Pointer ProgramFactory::genProgram(const std::string& name, const std::string& vertexshader,
