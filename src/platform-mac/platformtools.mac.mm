@@ -29,7 +29,7 @@ typedef void (^filePickerCallback)(__strong NSString* path);
 - (void)saveFile;
 @end
 
-void et::alert(const std::string& title, const std::string& message, const std::string& button, AlertType)
+void et::alert(const std::string& title, const std::string& message, const std::string& button, AlertType type)
 {
 #if (__MAC_OS_X_VERSION_MIN_REQUIRED >= __MAC_10_10)
 	NSAlert* alert = [[NSAlert alloc] init];

@@ -11,7 +11,8 @@
 		A52329041B8278C400D00DD6 /* config in Resources */ = {isa = PBXBuildFile; fileRef = A52329031B8278C400D00DD6 /* config */; };
 		A52329071B827D1900D00DD6 /* media in Resources */ = {isa = PBXBuildFile; fileRef = A52329061B827D1900D00DD6 /* media */; };
 		A52329091B82817E00D00DD6 /* kdtree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A52329081B82817E00D00DD6 /* kdtree.cpp */; };
-		A5686FC11BB6944C00D8CF14 /* environment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5686FC01BB6944C00D8CF14 /* environment.cpp */; settings = {ASSET_TAGS = (); }; };
+		A5405AA41BEE8AEC00CBD8C3 /* threading.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5405AA31BEE8AEC00CBD8C3 /* threading.cpp */; };
+		A5686FC11BB6944C00D8CF14 /* environment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5686FC01BB6944C00D8CF14 /* environment.cpp */; };
 		A5E2AEBD1B7D4A7700DE53DD /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5E2AEBA1B7D4A7700DE53DD /* main.cpp */; };
 		A5E2AEBE1B7D4A7700DE53DD /* maincontroller.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5E2AEBB1B7D4A7700DE53DD /* maincontroller.cpp */; };
 		A5E2AFF01B7D4ACB00DE53DD /* appevironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5E2AF7C1B7D4ACB00DE53DD /* appevironment.cpp */; };
@@ -76,7 +77,6 @@
 		A5E2B02D1B7D4ACB00DE53DD /* criticalsection.unix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5E2AFC61B7D4ACB00DE53DD /* criticalsection.unix.cpp */; };
 		A5E2B02E1B7D4ACB00DE53DD /* mutex.unix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5E2AFC71B7D4ACB00DE53DD /* mutex.unix.cpp */; };
 		A5E2B02F1B7D4ACB00DE53DD /* thread.unix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5E2AFC81B7D4ACB00DE53DD /* thread.unix.cpp */; };
-		A5E2B0301B7D4ACB00DE53DD /* threading.unix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5E2AFC91B7D4ACB00DE53DD /* threading.unix.cpp */; };
 		A5E2B0311B7D4ACB00DE53DD /* primitives.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5E2AFCB1B7D4ACB00DE53DD /* primitives.cpp */; };
 		A5E2B0321B7D4ACB00DE53DD /* framebufferfactory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5E2AFCD1B7D4ACB00DE53DD /* framebufferfactory.cpp */; };
 		A5E2B0331B7D4ACB00DE53DD /* rendercontext.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5E2AFCE1B7D4ACB00DE53DD /* rendercontext.cpp */; };
@@ -121,6 +121,7 @@
 		A52329061B827D1900D00DD6 /* media */ = {isa = PBXFileReference; lastKnownFileType = folder; name = media; path = ../media; sourceTree = "<group>"; };
 		A52329081B82817E00D00DD6 /* kdtree.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = kdtree.cpp; sourceTree = "<group>"; };
 		A523290A1B8281A000D00DD6 /* kdtree.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = kdtree.h; sourceTree = "<group>"; };
+		A5405AA31BEE8AEC00CBD8C3 /* threading.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = threading.cpp; sourceTree = "<group>"; };
 		A5686FC01BB6944C00D8CF14 /* environment.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = environment.cpp; sourceTree = "<group>"; };
 		A5686FC21BB6946A00D8CF14 /* environment.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = environment.h; sourceTree = "<group>"; };
 		A5E2AE941B7D4A1800DE53DD /* rt.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = rt.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -351,7 +352,6 @@
 		A5E2AFC61B7D4ACB00DE53DD /* criticalsection.unix.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = criticalsection.unix.cpp; sourceTree = "<group>"; };
 		A5E2AFC71B7D4ACB00DE53DD /* mutex.unix.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = mutex.unix.cpp; sourceTree = "<group>"; };
 		A5E2AFC81B7D4ACB00DE53DD /* thread.unix.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = thread.unix.cpp; sourceTree = "<group>"; };
-		A5E2AFC91B7D4ACB00DE53DD /* threading.unix.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = threading.unix.cpp; sourceTree = "<group>"; };
 		A5E2AFCB1B7D4ACB00DE53DD /* primitives.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = primitives.cpp; sourceTree = "<group>"; };
 		A5E2AFCD1B7D4ACB00DE53DD /* framebufferfactory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = framebufferfactory.cpp; sourceTree = "<group>"; };
 		A5E2AFCE1B7D4ACB00DE53DD /* rendercontext.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = rendercontext.cpp; sourceTree = "<group>"; };
@@ -905,6 +905,7 @@
 				A5E2AF8D1B7D4ACB00DE53DD /* memoryallocator.cpp */,
 				A5E2AF8E1B7D4ACB00DE53DD /* objectscache.cpp */,
 				A5E2AF8F1B7D4ACB00DE53DD /* stream.cpp */,
+				A5405AA31BEE8AEC00CBD8C3 /* threading.cpp */,
 				A5E2AF901B7D4ACB00DE53DD /* tools.cpp */,
 				A5E2AF911B7D4ACB00DE53DD /* transformable.cpp */,
 			);
@@ -1030,7 +1031,6 @@
 				A5E2AFC61B7D4ACB00DE53DD /* criticalsection.unix.cpp */,
 				A5E2AFC71B7D4ACB00DE53DD /* mutex.unix.cpp */,
 				A5E2AFC81B7D4ACB00DE53DD /* thread.unix.cpp */,
-				A5E2AFC91B7D4ACB00DE53DD /* threading.unix.cpp */,
 			);
 			name = "platform-unix";
 			path = "../../src/platform-unix";
@@ -1228,6 +1228,7 @@
 				A5E2B0361B7D4ACB00DE53DD /* textureloadingthread.cpp in Sources */,
 				A5E2B04E1B7D4ACB00DE53DD /* vertexdeclaration.cpp in Sources */,
 				A5E2B0401B7D4ACB00DE53DD /* particlesystem.cpp in Sources */,
+				A5405AA41BEE8AEC00CBD8C3 /* threading.cpp in Sources */,
 				A5E2AFF71B7D4ACB00DE53DD /* camera.cpp in Sources */,
 				A5E2B01C1B7D4ACB00DE53DD /* renderer.cpp in Sources */,
 				A5E2B0161B7D4ACB00DE53DD /* capabilities.cpp in Sources */,
@@ -1281,7 +1282,6 @@
 				A5E2B04F1B7D4ACB00DE53DD /* vertexstorage.cpp in Sources */,
 				A5E2B0291B7D4ACB00DE53DD /* platformtools.mac.mm in Sources */,
 				A5E2B0171B7D4ACB00DE53DD /* framebuffer.cpp in Sources */,
-				A5E2B0301B7D4ACB00DE53DD /* threading.unix.cpp in Sources */,
 				A5E2B00F1B7D4ACB00DE53DD /* tgaloader.cpp in Sources */,
 				A5E2B02D1B7D4ACB00DE53DD /* criticalsection.unix.cpp in Sources */,
 				A5E2B0101B7D4ACB00DE53DD /* gestures.cpp in Sources */,

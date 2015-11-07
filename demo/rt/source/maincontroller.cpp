@@ -17,7 +17,7 @@ void MainController::setApplicationParameters(et::ApplicationParameters& p)
 
 void MainController::setRenderContextParameters(et::RenderContextParameters& p)
 {
-	p.multisamplingQuality = MultisamplingQuality_None;
+	p.multisamplingQuality = MultisamplingQuality::None;
 	p.contextBaseSize = vec2i(1024, 640);
 	p.contextSize = p.contextBaseSize;
     p.enableHighResolutionContext = true;
