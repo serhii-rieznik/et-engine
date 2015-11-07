@@ -40,7 +40,7 @@ Program::Program(RenderContext* rc, const std::string& vertexShader, const std::
 Program::~Program()
 {
 #if !defined(ET_CONSOLE_APPLICATION)
-	uint32_t program = static_cast<uint32_t>(apiHandle());
+	uint32_t program = apiHandle();
 	if (program != 0)
 	{
 		_rc->renderState().programDeleted(program);
@@ -177,7 +177,7 @@ void Program::buildProgram(const std::string& vertex_source, const std::string& 
 	
 	checkOpenGLError("[Program] buildProgram - %s", name().c_str());
 
-	uint32_t program = static_cast<uint32_t>(apiHandle());
+	uint32_t program = apiHandle();
 	
 	if ((program == 0) || !glIsProgram(program))
 	{
@@ -315,7 +315,7 @@ void Program::buildProgram(const std::string& vertex_source, const std::string& 
 
 			if (!builtIn)
 			{
-				glBindAttribLocation(static_cast<uint32_t>(apiHandle()), static_cast<GLuint>(attrib),
+				glBindAttribLocation(apiHandle(), static_cast<GLuint>(attrib),
 					attribName.binary());
 				checkOpenGLError("glBindAttribLocation - %s", attribName.data());
 			}
@@ -323,7 +323,7 @@ void Program::buildProgram(const std::string& vertex_source, const std::string& 
 
 		linkStatus = link();
 
-		_rc->renderState().bindProgram(static_cast<uint32_t>(apiHandle()), true);
+		_rc->renderState().bindProgram(apiHandle(), true);
 
 		if (linkStatus == GL_TRUE)
 		{
@@ -407,7 +407,7 @@ int Program::link()
 	int result = 0;
 	
 #if !defined(ET_CONSOLE_APPLICATION)
-	uint32_t program = static_cast<uint32_t>(apiHandle());
+	uint32_t program = apiHandle();
 
 	const char* nameCStr = name().c_str();
 

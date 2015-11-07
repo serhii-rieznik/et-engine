@@ -23,10 +23,10 @@ namespace et
 		APIObject(const std::string& aName, const std::string& aOrigin) :
 			LoadableObject(aName, aOrigin)  { }
 		
-		size_t apiHandle() const
+		uint32_t apiHandle() const
 			{ return _apiHandle; }
 		
-		void setAPIHandle(size_t value)
+		void setAPIHandle(uint32_t value)
 			{ _apiHandle = value; }
 		
 		bool apiHandleValid() const
@@ -36,6 +36,6 @@ namespace et
 			{ return _apiHandle == 0; }
 		
 	private:
-		size_t _apiHandle = 0;
+		uint32_t _apiHandle = 0;
 	};
 }

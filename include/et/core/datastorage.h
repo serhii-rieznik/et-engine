@@ -214,7 +214,7 @@ namespace et
 			
 			if (newSize > 0)
 			{
-				new_data = reinterpret_cast<DataTypePointer>(sharedBlockAllocator().allocate(DataTypeSize * newSize));
+				new_data = reinterpret_cast<DataTypePointer>(sharedBlockAllocator().allocate(_dataSize));
 				if (min_size > 0)
 					etCopyMemory(new_data, _immutableData, min_size * DataTypeSize);
 			}

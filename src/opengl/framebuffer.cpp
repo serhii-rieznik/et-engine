@@ -98,7 +98,7 @@ Framebuffer::Framebuffer(RenderContext* rc, uint32_t fboId, const std::string& a
 
 Framebuffer::~Framebuffer()
 {
-	uint32_t framebuffer = static_cast<uint32_t>(apiHandle());
+	uint32_t framebuffer = apiHandle();
 	_rc->renderState().frameBufferDeleted(framebuffer);
 	
 	for (uint32_t colorBuffer : _colorRenderBuffers)
@@ -126,7 +126,7 @@ Framebuffer::~Framebuffer()
 
 bool Framebuffer::checkStatus()
 {
-	_rc->renderState().bindFramebuffer(static_cast<uint32_t>(apiHandle()));
+	_rc->renderState().bindFramebuffer(apiHandle());
 	
 	uint32_t status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 	
@@ -187,12 +187,12 @@ void Framebuffer::buildDepthAttachment()
 	setDepthTarget(target);
 }
 
-void Framebuffer::attachTexture(Texture::Pointer rt, uint32_t target)
+void Framebuffer::attachTexture(const Texture::Pointer& rt, uint32_t target)
 {
 	if (rt.invalid() || (rt->size() != _description.size.xy())) return;
 	ET_ASSERT(glIsTexture(static_cast<uint32_t>(rt->apiHandle())));
 
-	_rc->renderState().bindFramebuffer(static_cast<uint32_t>(apiHandle()));
+	_rc->renderState().bindFramebuffer(apiHandle());
 
 	if ((rt->target() == TextureTarget::Texture_2D) || (rt->target() == TextureTarget::Texture_Rectangle))
 	{
@@ -258,25 +258,28 @@ void Framebuffer::addSameRendertarget()
 	}
 }
 
-void Framebuffer::setCurrentRenderTarget(const Texture::Pointer& texture)
+void Framebuffer::setRenderTargetAtIndex(const Texture::Pointer& texture, uint32_t index)
 {
 	ET_ASSERT(texture.valid());
-	attachTexture(texture, GL_COLOR_ATTACHMENT0);
+	attachTexture(texture, GL_COLOR_ATTACHMENT0 + index);
 }
 
-void Framebuffer::setCurrentRenderTarget(size_t index)
+void Framebuffer::setCurrentRenderTarget(const Texture::Pointer& texture)
+{
+	setRenderTargetAtIndex(texture, 0);
+}
+
+void Framebuffer::setCurrentRenderTarget(uint32_t index)
 {
 	ET_ASSERT(index < _renderTargets.size());
-	ET_ASSERT(_renderTargets[index].valid());
-	
-	setCurrentRenderTarget(_renderTargets.at(index));
+	setRenderTargetAtIndex(_renderTargets.at(index), 0);
 }
 
 void Framebuffer::setCurrentCubemapFace(uint32_t faceIndex)
 {
 	ET_ASSERT((_description.target == TextureTarget::Texture_Cube) && (faceIndex < 6));
 	
-	_rc->renderState().bindFramebuffer(static_cast<uint32_t>(apiHandle()));
+	_rc->renderState().bindFramebuffer(apiHandle());
 	
 	uint32_t target = GL_TEXTURE_CUBE_MAP_POSITIVE_X + faceIndex;
 	
@@ -302,7 +305,7 @@ void Framebuffer::setCurrentLayer(uint32_t layerIndex)
 {
 #if (!ET_OPENGLES)
 	ET_ASSERT(layerIndex < static_cast<uint32_t>(_description.size.z));
-	_rc->renderState().bindFramebuffer(static_cast<uint32_t>(apiHandle()));
+	_rc->renderState().bindFramebuffer(apiHandle());
 
 	uint32_t targetIndex = 0;
 	for (const auto& t : _renderTargets)
@@ -330,7 +333,7 @@ uint32_t Framebuffer::buildColorRenderbuffer(uint32_t input)
 		checkOpenGLError("glGenRenderbuffers");
 	}
 	
-	_rc->renderState().bindFramebuffer(static_cast<uint32_t>(apiHandle()));
+	_rc->renderState().bindFramebuffer(apiHandle());
 	_rc->renderState().bindRenderbuffer(result);
 
 	if (_description.numSamples > 1)
@@ -357,7 +360,7 @@ void Framebuffer::createOrUpdateDepthRenderbuffer()
 		checkOpenGLError("glGenRenderbuffers");
 	}
 	
-	_rc->renderState().bindFramebuffer(static_cast<uint32_t>(apiHandle()));
+	_rc->renderState().bindFramebuffer(apiHandle());
 	_rc->renderState().bindRenderbuffer(_depthRenderbuffer);
 	
 	if (_description.numSamples > 1)
@@ -440,7 +443,7 @@ void Framebuffer::resolveMultisampledTo(Framebuffer::Pointer framebuffer, bool r
 	vec2i sourceSize = _description.size.xy();
 	vec2i targetSize = framebuffer->size();
 	
-	_rc->renderState().bindReadFramebuffer(static_cast<uint32_t>(apiHandle()));
+	_rc->renderState().bindReadFramebuffer(apiHandle());
 	
 #if (ET_DEBUG)
 	GLint sourceSamples = 0;
@@ -504,7 +507,7 @@ void Framebuffer::resolveMultisampledTo(Framebuffer::Pointer framebuffer, bool r
 void Framebuffer::invalidate(bool color, bool depth)
 {
 #if (ET_OPENGLES)
-	_rc->renderState().bindReadFramebuffer(static_cast<uint32_t>(apiHandle()));
+	_rc->renderState().bindReadFramebuffer(apiHandle());
 	
 	GLsizei numDiscards = 0;
 	GLenum discards[2] = { };

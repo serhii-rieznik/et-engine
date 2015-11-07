@@ -25,7 +25,7 @@ VertexArrayObjectData::VertexArrayObjectData(RenderContext* rc, const std::strin
 
 VertexArrayObjectData::~VertexArrayObjectData()
 {
-	uint32_t buffer = static_cast<uint32_t>(apiHandle());
+	uint32_t buffer = apiHandle();
 	if ((buffer != 0) && OpenGLCapabilities::instance().hasFeature(OpenGLFeature_VertexArrayObjects))
 	{
 		_rc->renderState().bindVertexArray(buffer);
@@ -56,7 +56,7 @@ void VertexArrayObjectData::setBuffers(VertexBuffer::Pointer vb, IndexBuffer::Po
 	_ib = ib;
 	
 	if (OpenGLCapabilities::instance().hasFeature(OpenGLFeature_VertexArrayObjects))
-		_rc->renderState().bindVertexArray(static_cast<uint32_t>(apiHandle()));
+		_rc->renderState().bindVertexArray(apiHandle());
 	
 	_rc->renderState().bindBuffers(_vb, _ib, true);
 }
@@ -66,7 +66,7 @@ void VertexArrayObjectData::setVertexBuffer(VertexBuffer::Pointer vb)
 	_vb = vb;
 	
 	if (OpenGLCapabilities::instance().hasFeature(OpenGLFeature_VertexArrayObjects))
-		_rc->renderState().bindVertexArray(static_cast<uint32_t>(apiHandle()));
+		_rc->renderState().bindVertexArray(apiHandle());
 	
 	_rc->renderState().bindBuffers(_vb, _ib, true);
 }
@@ -76,7 +76,7 @@ void VertexArrayObjectData::setIndexBuffer(IndexBuffer::Pointer ib)
 	_ib = ib;
 	
 	if (OpenGLCapabilities::instance().hasFeature(OpenGLFeature_VertexArrayObjects))
-		_rc->renderState().bindVertexArray(static_cast<uint32_t>(apiHandle()));
+		_rc->renderState().bindVertexArray(apiHandle());
 	
 	_rc->renderState().bindBuffers(_vb, _ib, true);
 }

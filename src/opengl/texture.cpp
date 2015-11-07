@@ -56,7 +56,7 @@ Texture::Texture(RenderContext*, uint32_t texture, const vec2i& size, const std:
 
 Texture::~Texture()
 {
-	uint32_t texture = static_cast<uint32_t>(apiHandle());
+	uint32_t texture = apiHandle();
 	if (_own && (texture != 0) && glIsTexture(texture))
 		glDeleteTextures(1, &texture);
 }
@@ -65,7 +65,7 @@ void Texture::setWrap(RenderContext* rc, TextureWrap s, TextureWrap t, TextureWr
 {
 	_wrap = vector3<TextureWrap>(s, t, r);
 
-	rc->renderState().bindTexture(defaultBindingUnit, static_cast<uint32_t>(apiHandle()), _desc->target);
+	rc->renderState().bindTexture(defaultBindingUnit, apiHandle(), _desc->target);
 	
 	auto targetValue = textureTargetValue(_desc->target);
 	
@@ -89,7 +89,7 @@ void Texture::setWrap(RenderContext* rc, TextureWrap s, TextureWrap t, TextureWr
 void Texture::setFiltration(RenderContext* rc, TextureFiltration minFiltration,
 	TextureFiltration magFiltration)
 {
-	rc->renderState().bindTexture(defaultBindingUnit, static_cast<uint32_t>(apiHandle()), _desc->target);
+	rc->renderState().bindTexture(defaultBindingUnit, apiHandle(), _desc->target);
 
 	_filtration = vector2<TextureFiltration>(minFiltration, magFiltration);
 
@@ -114,7 +114,7 @@ void Texture::compareRefToTexture(RenderContext* rc, bool enable, int32_t compar
 {
 	auto targetValue = textureTargetValue(_desc->target);
 	
-	rc->renderState().bindTexture(defaultBindingUnit, static_cast<uint32_t>(apiHandle()), _desc->target);
+	rc->renderState().bindTexture(defaultBindingUnit, apiHandle(), _desc->target);
 	if (enable)
 	{
 		glTexParameteri(targetValue, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
@@ -139,7 +139,7 @@ void Texture::compareRefToTexture(RenderContext*, bool, int32_t)
 
 void Texture::generateTexture(RenderContext*)
 {
-	uint32_t texture = static_cast<uint32_t>(apiHandle());
+	uint32_t texture = apiHandle();
 	bool validTexture = glIsTexture(texture) != 0;
 	checkOpenGLError("glIsTexture - %s", name().c_str());
 
@@ -252,7 +252,7 @@ void Texture::build(RenderContext* rc)
 	
 	buildProperies();
 
-	rc->renderState().bindTexture(defaultBindingUnit, static_cast<uint32_t>(apiHandle()), _desc->target, true);
+	rc->renderState().bindTexture(defaultBindingUnit, apiHandle(), _desc->target, true);
 
 	if (_desc->target == TextureTarget::Texture_Rectangle)
 	{
@@ -294,7 +294,7 @@ void Texture::updateDataDirectly(RenderContext* rc, const vec2i& size, const cha
 		generateTexture(rc);
 
     _desc->size = size;
-    rc->renderState().bindTexture(defaultBindingUnit, static_cast<uint32_t>(apiHandle()), _desc->target);
+    rc->renderState().bindTexture(defaultBindingUnit, apiHandle(), _desc->target);
 	buildData(data, dataSize);
 }
 
@@ -309,7 +309,7 @@ void Texture::updatePartialDataDirectly(RenderContext* rc, const vec2i& offset,
 	if (apiHandleInvalid())
 		generateTexture(rc);
 	
-    rc->renderState().bindTexture(defaultBindingUnit, static_cast<uint32_t>(apiHandle()), _desc->target);
+    rc->renderState().bindTexture(defaultBindingUnit, apiHandle(), _desc->target);
 	
 	glPixelStorei(GL_UNPACK_ALIGNMENT, _desc->alignment);
 	checkOpenGLError("glPixelStorei");
@@ -332,7 +332,7 @@ void Texture::updatePartialDataDirectly(RenderContext* rc, const vec2i& offset,
 
 void Texture::generateMipMaps(RenderContext* rc)
 {
-    rc->renderState().bindTexture(defaultBindingUnit, static_cast<uint32_t>(apiHandle()), _desc->target);
+    rc->renderState().bindTexture(defaultBindingUnit, apiHandle(), _desc->target);
 	glGenerateMipmap(textureTargetValue(_desc->target));
 	checkOpenGLError("glGenerateMipmap");
 }
@@ -340,7 +340,7 @@ void Texture::generateMipMaps(RenderContext* rc)
 void Texture::setMaxLod(RenderContext* rc, size_t value)
 {
 #if defined(GL_TEXTURE_MAX_LEVEL)
-	rc->renderState().bindTexture(defaultBindingUnit, static_cast<uint32_t>(apiHandle()), _desc->target);
+	rc->renderState().bindTexture(defaultBindingUnit, apiHandle(), _desc->target);
 	glTexParameteri(textureTargetValue(_desc->target), GL_TEXTURE_MAX_LEVEL, static_cast<GLint>(value));
 	checkOpenGLError("Texture::setMaxLod(%lu) - %s", static_cast<unsigned long>(value), name().c_str());
 #endif
@@ -349,7 +349,7 @@ void Texture::setMaxLod(RenderContext* rc, size_t value)
 void Texture::setAnisotropyLevel(RenderContext* rc, float value)
 {
 #if defined(GL_TEXTURE_MAX_ANISOTROPY_EXT)
-	rc->renderState().bindTexture(defaultBindingUnit, static_cast<uint32_t>(apiHandle()), _desc->target);
+	rc->renderState().bindTexture(defaultBindingUnit, apiHandle(), _desc->target);
 	glTexParameterf(textureTargetValue(_desc->target), GL_TEXTURE_MAX_ANISOTROPY_EXT, value);
 	checkOpenGLError("Texture::setAnisotropyLevel(%f) - %s", value, name().c_str());
 #endif

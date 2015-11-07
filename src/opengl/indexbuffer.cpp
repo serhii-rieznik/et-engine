@@ -19,7 +19,7 @@ IndexBuffer::IndexBuffer(RenderContext* rc, IndexArray::Pointer i, BufferDrawTyp
 
 IndexBuffer::~IndexBuffer()
 {
-	uint32_t buffer = static_cast<uint32_t>(apiHandle());
+	uint32_t buffer = apiHandle();
 	if (buffer != 0)
 	{
 		_rc->renderState().indexBufferDeleted(buffer);
@@ -80,7 +80,7 @@ void IndexBuffer::internal_setData(const unsigned char* data, size_t size)
 {
 	if (size > 0)
 	{
-		_rc->renderState().bindBuffer(GL_ELEMENT_ARRAY_BUFFER, static_cast<uint32_t>(apiHandle()));
+		_rc->renderState().bindBuffer(GL_ELEMENT_ARRAY_BUFFER, apiHandle());
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, static_cast<GLsizeiptr>(size), data, drawTypeValue(_drawType));
 		checkOpenGLError("glBufferData(GL_ELEMENT_ARRAY_BUFFER, %u, 0x%08X, ..,)", size, data);
 	}

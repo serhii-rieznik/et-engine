@@ -25,7 +25,7 @@ VertexBuffer::VertexBuffer(RenderContext* rc, const VertexArray::Description& de
 
 VertexBuffer::~VertexBuffer()
 {
-	uint32_t buffer = static_cast<uint32_t>(apiHandle());
+	uint32_t buffer = apiHandle();
 	if (buffer != 0)
 	{
 		_rc->renderState().vertexBufferDeleted(buffer);
@@ -35,7 +35,7 @@ VertexBuffer::~VertexBuffer()
 
 void VertexBuffer::setData(const void* data, size_t dataSize, bool invalidateExistingData)
 {
-	_rc->renderState().bindBuffer(GL_ARRAY_BUFFER, static_cast<uint32_t>(apiHandle()));
+	_rc->renderState().bindBuffer(GL_ARRAY_BUFFER, apiHandle());
 	
 	if (invalidateExistingData)
 	{
@@ -50,7 +50,7 @@ void VertexBuffer::setData(const void* data, size_t dataSize, bool invalidateExi
 
 void VertexBuffer::setDataWithOffset(const void* data, size_t offset, size_t dataSize)
 {
-	_rc->renderState().bindBuffer(GL_ARRAY_BUFFER, static_cast<uint32_t>(apiHandle()));
+	_rc->renderState().bindBuffer(GL_ARRAY_BUFFER, apiHandle());
 	
 	glBufferSubData(GL_ARRAY_BUFFER, offset, dataSize, data);
 	checkOpenGLError("glBufferSubData(GL_ARRAY_BUFFER, %llu, %llu, 0x%08X)", uint64_t(offset),
@@ -64,7 +64,7 @@ void* VertexBuffer::map(size_t offset, size_t dataSize, uint32_t options)
 
 	void* result = nullptr;
 	
-	_rc->renderState().bindBuffer(GL_ARRAY_BUFFER, static_cast<uint32_t>(apiHandle()));
+	_rc->renderState().bindBuffer(GL_ARRAY_BUFFER, apiHandle());
 	
 	bool shouldUseMapBuffer = true;
 

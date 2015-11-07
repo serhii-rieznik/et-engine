@@ -70,23 +70,6 @@ namespace et
 		
 		~MemoryChunk();
 		
-		MemoryChunk(MemoryChunk&& m)
-		{
-			size = m.size;
-			actualDataOffset = m.actualDataOffset;
-			firstInfo = m.firstInfo;
-			lastInfo = m.lastInfo;
-			allocatedMemoryBegin = m.allocatedMemoryBegin;
-			allocatedMemoryEnd = m.allocatedMemoryEnd;
-			
-			m.size = 0;
-			m.actualDataOffset = 0;
-			m.firstInfo = nullptr;
-			m.lastInfo = nullptr;
-			m.allocatedMemoryBegin = nullptr;
-			m.allocatedMemoryEnd = nullptr;
-		}
-		
 		bool allocate(uint32_t size, void*& result);
 		bool free(char*);
 		
@@ -100,7 +83,7 @@ namespace et
 #	endif
 		
 	private:
-		void init(uint32_t);
+		inline void validateInfo(MemoryChunkInfo*);
 		
 	private:
 		MemoryChunk(const MemoryChunk&) = delete;
@@ -110,6 +93,7 @@ namespace et
 		uint32_t compressCounter = 0;
 		uint32_t size = 0;
 		uint32_t actualDataOffset = 0;
+		uint32_t index = 0;
 		
 		MemoryChunkInfo* firstInfo = nullptr;
 		MemoryChunkInfo* lastInfo = nullptr;
@@ -320,7 +304,10 @@ void* BlockMemoryAllocatorPrivate::alloc(uint32_t allocSize)
 	}
 	
 	_chunks.emplace_back(alignUpTo(allocSize, defaultChunkSize));
-	_chunks.back().allocate(allocSize, result);
+	
+	auto& lastChunk = _chunks.back();
+	lastChunk.allocate(allocSize, result);
+	
 	return result;
 }
 
@@ -486,16 +473,19 @@ void BlockMemoryAllocatorPrivate::printInfo()
 /*
  * Chunk
  */
-MemoryChunk::MemoryChunk(uint32_t capacity)
+MemoryChunk::MemoryChunk(uint32_t capacity) :
+	size(capacity)
 {
+	static std::atomic<uint32_t> counter(0);
+	index = counter++;
+	
 #if (ET_DEBUG)
 	allocationStatistics.fill(0);
 	deallocationStatistics.fill(0);
 #endif
 	
-	size = capacity;
-	
-	actualDataOffset = alignUpTo((capacity / minimumAllocationSize + 1) * sizeof(MemoryChunkInfo), minimumAllocationSize);
+	uint32_t maxInfoChunks = capacity / minimumAllocationSize + 1;
+	actualDataOffset = alignUpTo(maxInfoChunks * sizeof(MemoryChunkInfo), minimumAllocationSize);
 	size_t sizeToAllocate = alignUpTo(actualDataOffset + capacity, minimumAllocationSize);
 	
 #if (ET_PLATFORM_APPLE)
@@ -558,6 +548,7 @@ bool MemoryChunk::allocate(uint32_t sizeToAllocate, void*& result)
 	MemoryChunkInfo* info = firstInfo;
 	while (info < lastInfo)
 	{
+		validateInfo(info);
 		if ((info->allocated & info->length) >= sizeToAllocate)
 		{
 			auto remaining = info->length - sizeToAllocate;
@@ -604,6 +595,14 @@ bool MemoryChunk::allocate(uint32_t sizeToAllocate, void*& result)
 	return false;
 }
 
+inline void MemoryChunk::validateInfo(et::MemoryChunkInfo* info)
+{
+	ET_ASSERT((info->allocated == allocatedValue) || (info->allocated == notAllocatedValue));
+	ET_ASSERT(info->begin < size);
+	ET_ASSERT(info->length <= size);
+	ET_ASSERT(info->begin + info->length <= size);
+}
+
 bool MemoryChunk::containsPointer(char* ptr)
 {
 	if ((ptr < allocatedMemoryBegin + actualDataOffset) || (ptr >= allocatedMemoryEnd)) return false;
@@ -628,6 +627,7 @@ bool MemoryChunk::free(char* ptr)
 	auto i = firstInfo;
 	while (i < lastInfo)
 	{
+		validateInfo(i);
 		if (i->begin == offset)
 		{
 			if (i->allocated == notAllocatedValue)
@@ -661,6 +661,7 @@ void MemoryChunk::compress()
 	
 	while (i < lastInfo)
 	{
+		validateInfo(i);
 		if (i->allocated == notAllocatedValue)
 		{
 			auto nextInfo = i + 1;

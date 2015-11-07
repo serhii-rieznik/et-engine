@@ -50,8 +50,10 @@ namespace et
 
 		void setDepthTarget(const Texture::Pointer& texture);
 
+		void setRenderTargetAtIndex(const Texture::Pointer& texture, uint32_t index);
+		
 		void setCurrentRenderTarget(const Texture::Pointer& texture);
-		void setCurrentRenderTarget(size_t index);
+		void setCurrentRenderTarget(uint32_t index);
 
 		void setCurrentCubemapFace(uint32_t faceIndex);
 		void setCurrentLayer(uint32_t);
@@ -98,15 +100,15 @@ namespace et
 
 	private:
 		friend class FramebufferFactory;
-
+		
 		uint32_t buildColorRenderbuffer(uint32_t);
 		void createOrUpdateDepthRenderbuffer();
 
 		void buildColorAttachment();
 		void buildDepthAttachment();
 
-		void attachTexture(Texture::Pointer, uint32_t);
-
+		void attachTexture(const Texture::Pointer&, uint32_t);
+		
 		Texture::Pointer buildTexture(const vec3i&, TextureTarget, TextureFormat, 
 			TextureFormat, DataType);
 

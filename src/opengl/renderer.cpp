@@ -21,18 +21,16 @@ extern const std::string copy_fragment_shader;
 extern const std::string depth_fragment_shader;
 
 Renderer::Renderer(RenderContext* rc) :
-	_rc(rc), _defaultTextureBindingUnit(6)
+	_rc(rc), _defaultTextureBindingUnit(7)
 {
 #if !defined(ET_CONSOLE_APPLICATION)
 	checkOpenGLError("Renderer::Renderer", 0);
 
-	IndexArray::Pointer ib = IndexArray::Pointer::create(IndexArrayFormat::Format_16bit, 4, PrimitiveType::TriangleStrips);
-	
+	IndexArray::Pointer ib = IndexArray::Pointer::create(IndexArrayFormat::Format_8bit, 4, PrimitiveType::TriangleStrips);
 	ib->linearize(4);
 	
-	VertexStorage::Pointer vb = VertexStorage::Pointer::create(VertexDeclaration(false,
-		VertexAttributeUsage::Position, VertexAttributeType::Vec2), 4);
-	
+	auto vd = VertexDeclaration(false, VertexAttributeUsage::Position, VertexAttributeType::Vec2);
+	VertexStorage::Pointer vb = VertexStorage::Pointer::create(vd, 4);
 	auto pos = vb->accessData<VertexAttributeType::Vec2>(VertexAttributeUsage::Position, 0);
 	pos[0] = vec2(-1.0f, -1.0f);
 	pos[1] = vec2( 1.0f, -1.0f);
