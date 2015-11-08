@@ -285,7 +285,7 @@ void Program::buildProgram(const std::string& vertex_source, const std::string& 
 		checkOpenGLError("glAttachShader<FRAG> - %s", name().c_str());
 	}
 
-	int linkStatus = link();
+	int linkStatus = link(false);
 
 	if (linkStatus == GL_TRUE)
 	{
@@ -321,7 +321,7 @@ void Program::buildProgram(const std::string& vertex_source, const std::string& 
 			}
 		}
 
-		linkStatus = link();
+		linkStatus = link(true);
 
 		_rc->renderState().bindProgram(apiHandle(), true);
 
@@ -402,7 +402,7 @@ void Program::buildProgram(const std::string& vertex_source, const std::string& 
 #endif
 }
 
-int Program::link()
+int Program::link(bool enableOutput)
 {
 	int result = 0;
 	
@@ -421,7 +421,7 @@ int Program::link()
 	glGetProgramiv(program, GL_INFO_LOG_LENGTH, &nLogLen);
 	checkOpenGLError("glGetProgramiv<GL_INFO_LOG_LENGTH> - %s", nameCStr);
 
-	if (nLogLen > 1)
+	if ((nLogLen > 1) && (enableOutput || (result == GL_FALSE)))
 	{
 		StringDataStorage infoLog(nLogLen + 1, 0);
 
