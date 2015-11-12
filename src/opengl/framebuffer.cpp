@@ -189,7 +189,8 @@ void Framebuffer::buildDepthAttachment()
 
 void Framebuffer::attachTexture(const Texture::Pointer& rt, uint32_t target)
 {
-	if (rt.invalid() || (rt->size() != _description.size.xy())) return;
+	ET_ASSERT(rt.valid());
+	ET_ASSERT(rt->size() == _description.size.xy());
 	ET_ASSERT(glIsTexture(static_cast<uint32_t>(rt->apiHandle())));
 
 	_rc->renderState().bindFramebuffer(apiHandle());
