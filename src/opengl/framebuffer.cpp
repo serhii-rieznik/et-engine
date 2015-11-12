@@ -549,7 +549,7 @@ void Framebuffer::setDepthRenderbuffer(uint32_t r)
 	checkOpenGLError("glFramebufferRenderbuffer");
 }
 
-void Framebuffer::setDrawBuffersCount(int32_t value)
+void Framebuffer::setDrawBuffersCount(uint32_t value)
 {
 	_drawBuffers = value;
 	

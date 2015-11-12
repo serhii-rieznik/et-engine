@@ -341,7 +341,7 @@ void RenderState::bindDefaultFramebuffer(bool force)
 	bindFramebuffer(_defaultFramebuffer, force);
 }
 
-void RenderState::setDrawBuffersCount(int32_t count)
+void RenderState::setDrawBuffersCount(uint32_t count)
 {
 #if !defined(ET_CONSOLE_APPLICATION)
 	

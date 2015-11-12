@@ -116,6 +116,9 @@ namespace et
 			if (_data)
 				_data->retain();
 		}
+		
+		void swap(IntrusivePtr<T>& t)
+			{ std::swap(_data, t._data); }
 
 	private:
 		T* _data = nullptr;

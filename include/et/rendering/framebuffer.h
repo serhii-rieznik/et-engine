@@ -58,7 +58,7 @@ namespace et
 		void setCurrentCubemapFace(uint32_t faceIndex);
 		void setCurrentLayer(uint32_t);
 
-		void setDrawBuffersCount(int32_t value);
+		void setDrawBuffersCount(uint32_t value);
 
 		bool checkStatus();
 				

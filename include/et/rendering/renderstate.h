@@ -128,7 +128,7 @@ namespace et
 		
 		void bindRenderbuffer(uint32_t, bool force = false);
 		
-		void setDrawBuffersCount(int32_t);
+		void setDrawBuffersCount(uint32_t);
 
 		/*
 		 * Textures
