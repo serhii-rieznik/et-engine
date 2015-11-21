@@ -47,13 +47,8 @@ IApplicationDelegate* Application::delegate()
 int Application::run(int argc, char* argv[])
 {
 #if (ET_DEBUG)
-#	if defined(ET_CONSOLE_APPLICATION)
-		log::info("[et-engine] Version: %d.%d, running console application in debug mode.",
-			ET_MAJOR_VERSION, ET_MINOR_VERSION);
-#	else
-		log::info("[et-engine] Version: %d.%d, running in debug mode.",
-			ET_MAJOR_VERSION, ET_MINOR_VERSION);
-#	endif
+	log::info("[et-engine] Version: %d.%d, running in debug mode.",
+		ET_MAJOR_VERSION, ET_MINOR_VERSION);
 #endif
 	
 	for (int i = 0; i < argc; ++i)
@@ -73,22 +68,9 @@ void Application::enterRunLoop()
 	_standardPathResolver.setRenderContext(_renderContext);
 	delegate()->applicationDidLoad(_renderContext);
 	
-#if defined(ET_CONSOLE_APPLICATION)
-	
-	setActive(true);
-	
-	while (_running)
-		performUpdateAndRender();
-	
-	terminated();
-	
-#else
-	
 	_renderContext->init();
 	setActive(true);
 	
-#endif
-
 	if (_parameters.shouldPreserveRenderContext)
 		_renderContext->popRenderingContext();
 }
@@ -100,11 +82,9 @@ void Application::exitRunLoop()
 
 void Application::performRendering()
 {
-#if !defined(ET_CONSOLE_APPLICATION)
 	_renderContext->beginRender();
 	_delegate->render(_renderContext);
 	_renderContext->endRender();
-#endif
 }
 
 bool Application::shouldPerformRendering()
@@ -131,10 +111,7 @@ void Application::performUpdateAndRender()
 	ET_ASSERT(_running && !_suspended);
 	
 	_runLoop.update(_lastQueuedTimeMSec);
-
-#if !defined(ET_CONSOLE_APPLICATION)
 	performRendering();
-#endif
 }
 
 void Application::setFrameRateLimit(size_t value)

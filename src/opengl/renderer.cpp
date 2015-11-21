@@ -23,7 +23,6 @@ extern const std::string depth_fragment_shader;
 Renderer::Renderer(RenderContext* rc) :
 	_rc(rc), _defaultTextureBindingUnit(7)
 {
-#if !defined(ET_CONSOLE_APPLICATION)
 	checkOpenGLError("Renderer::Renderer", 0);
 
 	IndexArray::Pointer ib = IndexArray::Pointer::create(IndexArrayFormat::Format_8bit, 4, PrimitiveType::TriangleStrips);
@@ -90,12 +89,10 @@ Renderer::Renderer(RenderContext* rc) :
 	_scaledRotatedProgram_PSUniform = _scaledRotatedProgram->getUniform("PositionScale");
 	_scaledRotatedProgram_TintUniform = _scaledRotatedProgram->getUniform("tint");
 	_scaledRotatedProgram_AngleUniform = _scaledRotatedProgram->getUniform("angle");
-#endif
 }
 
 void Renderer::clear(bool color, bool depth)
 {
-#if !defined(ET_CONSOLE_APPLICATION)
 	ET_ASSERT(!depth || (depth && _rc->renderState().depthMask()));
 	ET_ASSERT(!color || (color && (_rc->renderState().colorMask() != static_cast<size_t>(ColorMask::None))));
 	
@@ -103,20 +100,16 @@ void Renderer::clear(bool color, bool depth)
 
 	if (clearMask)
 		glClear(clearMask);
-#endif
 }
 
 void Renderer::fullscreenPass()
 {
-#if !defined(ET_CONSOLE_APPLICATION)
 	_rc->renderState().bindVertexArray(_fullscreenQuadVao);
 	drawAllElements(_fullscreenQuadVao->indexBuffer());
-#endif
 }
 
 void Renderer::renderFullscreenTexture(const Texture::Pointer& texture, const vec4& tint)
 {
-#if !defined(ET_CONSOLE_APPLICATION)
 	auto prog = _fullscreenProgram[static_cast<int>(texture->target())];
 
 	_rc->renderState().bindTexture(_defaultTextureBindingUnit, texture);
@@ -124,39 +117,32 @@ void Renderer::renderFullscreenTexture(const Texture::Pointer& texture, const ve
 	prog->setUniform("color_texture_size", texture->sizeFloat());
 	prog->setUniform("tint", tint);
 	fullscreenPass();
-#endif
 }
 
 void Renderer::renderFullscreenDepthTexture(const Texture::Pointer& texture, float factor)
 {
-#if !defined(ET_CONSOLE_APPLICATION)
 	_rc->renderState().bindTexture(_defaultTextureBindingUnit, texture);
 	_rc->renderState().bindProgram(_fullscreenDepthProgram);
 	_fullscreenDepthProgram->setUniform(_fullScreenDepthProgram_FactorUniform, factor);
 	fullscreenPass();
-#endif
 }
 
 void Renderer::renderFullscreenTexture(const Texture::Pointer& texture, const vec2& scale, const vec4& tint)
 {
-#if !defined(ET_CONSOLE_APPLICATION)
 	_rc->renderState().bindTexture(_defaultTextureBindingUnit, texture);
 	_rc->renderState().bindProgram(_fullscreenScaledProgram);
 	_scaledProgram->setUniform(_fullScreenScaledProgram_PSUniform, scale);
 	_scaledProgram->setUniform(_fullScreenScaledProgram_TintUniform, tint);
 	fullscreenPass();
-#endif
 }
 
 void Renderer::renderTexture(const Texture::Pointer& texture, const vec2& position, const vec2& size, const vec4& tint)
 {
-#if !defined(ET_CONSOLE_APPLICATION)
 	_rc->renderState().bindTexture(_defaultTextureBindingUnit, texture);
 	_rc->renderState().bindProgram(_scaledProgram);
 	_scaledProgram->setUniform(_scaledProgram_PSUniform, vec4(position, size));
 	_scaledProgram->setUniform(_scaledProgram_TintUniform, tint);
 	fullscreenPass();
-#endif
 }
 
 void Renderer::renderTextureRotated(const Texture::Pointer& texture, float angle, const vec2& position,
@@ -185,20 +171,17 @@ vec2 Renderer::currentViewportSizeToScene(const vec2i& size)
 
 void Renderer::renderTexture(const Texture::Pointer& texture, const vec2i& position, const vec2i& size, const vec4& tint)
 {
-#if !defined(ET_CONSOLE_APPLICATION)
 	if (texture.invalid()) return;
 	
 	vec2i sz;
 	sz.x = (size.x == -1) ? texture->width() : size.x;
 	sz.y = (size.y == -1) ? texture->height() : size.y;
 	renderTexture(texture, currentViewportCoordinatesToScene(position + vec2i(0, sz.y)), currentViewportSizeToScene(sz), tint);
-#endif
 }
 
 void Renderer::renderTextureRotated(const Texture::Pointer& texture, float angle, const vec2i& position,
 	const vec2i& size, const vec4& tint)
 {
-#if !defined(ET_CONSOLE_APPLICATION)
 	if (texture.invalid()) return;
 	
 	vec2i sz;
@@ -207,57 +190,47 @@ void Renderer::renderTextureRotated(const Texture::Pointer& texture, float angle
 	
 	renderTextureRotated(texture, angle, currentViewportCoordinatesToScene(position + vec2i(0, sz.y)),
 		currentViewportSizeToScene(sz), tint);
-#endif
 }
 
 void Renderer::drawElements(const IndexBuffer::Pointer& ib, size_t first, size_t count)
 {
-#if !defined(ET_CONSOLE_APPLICATION)
 	ET_ASSERT(ib.valid());
 	
 	etDrawElements(primitiveTypeValue(ib->primitiveType()), static_cast<GLsizei>(count),
 		dataTypeValue(ib->dataType()), ib->indexOffset(first));
-#endif
 }
 
 void Renderer::drawElementsInstanced(const IndexBuffer::Pointer& ib, size_t first, size_t count, size_t instances)
 {
-#if !defined(ET_CONSOLE_APPLICATION)
 	ET_ASSERT(ib.valid());
 	
 	etDrawElementsInstanced(primitiveTypeValue(ib->primitiveType()), static_cast<GLsizei>(count),
 		dataTypeValue(ib->dataType()), ib->indexOffset(first), static_cast<GLsizei>(instances));
-#endif
 }
 
 void Renderer::drawElements(PrimitiveType pt, const IndexBuffer::Pointer& ib, size_t first, size_t count)
 {
-#if !defined(ET_CONSOLE_APPLICATION)
 	ET_ASSERT(ib.valid());
 	
 	etDrawElements(primitiveTypeValue(pt), static_cast<GLsizei>(count), dataTypeValue(ib->dataType()),
 		ib->indexOffset(first));
-#endif
 }
 
 void Renderer::drawAllElements(const IndexBuffer::Pointer& ib)
 {
-#if !defined(ET_CONSOLE_APPLICATION)
 	ET_ASSERT(ib.valid());
 	
 	etDrawElements(primitiveTypeValue(ib->primitiveType()), static_cast<GLsizei>(ib->size()),
 		dataTypeValue(ib->dataType()), nullptr);
-#endif
 }
 
 void Renderer::drawElementsBaseIndex(const VertexArrayObject& vao, int base, size_t first, size_t count)
 {
-#if !defined(ET_CONSOLE_APPLICATION)
 	ET_ASSERT(vao->indexBuffer().valid());
 	
 	const IndexBuffer::Pointer& ib = vao->indexBuffer();
 
-#	if (ET_OPENGLES)
+#if (ET_OPENGLES)
 	
 	ET_ASSERT(vao->vertexBuffer().valid());
 	
@@ -270,12 +243,11 @@ void Renderer::drawElementsBaseIndex(const VertexArrayObject& vao, int base, siz
 	etDrawElements(primitiveTypeValue(ib->primitiveType()), static_cast<GLsizei>(count),
 		dataTypeValue(ib->dataType()), ib->indexOffset(first));
 	
-#	else
+#else
 	
 	etDrawElementsBaseVertex(primitiveTypeValue(ib->primitiveType()), static_cast<GLsizei>(count),
 		dataTypeValue(ib->dataType()), ib->indexOffset(first), base);
 	
-#	endif	
 #endif
 }
 

@@ -44,7 +44,6 @@ void Application::loaded()
 	RenderContextParameters parameters;
 	delegate()->setRenderContextParameters(parameters);
 	
-#if !defined(ET_CONSOLE_APPLICATION)
 	_renderContext = etCreateObject<RenderContext>(parameters, this);
 	
 	NSMenu* mainMenu = [[NSMenu allocWithZone:[NSMenu menuZone]] init];
@@ -74,7 +73,6 @@ void Application::loaded()
 	(void)ET_OBJC_AUTORELEASE(applicationMenuItem);
 	(void)ET_OBJC_AUTORELEASE(quitItem);
 	(void)ET_OBJC_AUTORELEASE(applicationMenu);
-#endif
 	
 	_runLoop.updateTime(_lastQueuedTimeMSec);
 	enterRunLoop();
@@ -88,18 +86,12 @@ Application::~Application()
 
 void Application::quit(int code)
 {
-#if defined(ET_CONSOLE_APPLICATION)
-	_running = false;
-	_exitCode = code;
-#else
 	[[NSApplication sharedApplication] performSelectorOnMainThread:@selector(terminate:) withObject:nil waitUntilDone:NO];
 	(void)code;
-#endif
 }
 
 void Application::setTitle(const std::string &s)
 {
-#if !defined(ET_CONSOLE_APPLICATION)
 	NSString* titleToSet = [NSString stringWithUTF8String:s.c_str()];
 	dispatch_async(dispatch_get_main_queue(),
 	^{
@@ -107,7 +99,6 @@ void Application::setTitle(const std::string &s)
 		for (NSWindow* window in allWindows)
 			[window setTitle:titleToSet];
 	});
-#endif
 }
 
 void Application::platformInit()
@@ -117,21 +108,12 @@ void Application::platformInit()
 
 int Application::platformRun(int, char*[])
 {
-#if defined(ET_CONSOLE_APPLICATION)
-	
-	loaded();
-	
-#else
-	
 	@autoreleasepool
 	{
 		etApplicationDelegate* delegate = ET_OBJC_AUTORELEASE([[etApplicationDelegate alloc] init]);
 		[[NSApplication sharedApplication] setDelegate:delegate];
 		[[NSApplication sharedApplication] run];
 	}
-	
-#endif
-	
 	return _exitCode;
 }
 
@@ -162,9 +144,7 @@ void Application::platformResume()
 
 void Application::requestUserAttention()
 {
-#if !defined(ET_CONSOLE_APPLICATION)
 	[[NSApplication sharedApplication] requestUserAttention:NSCriticalRequest];
-#endif
 }
 
 void Application::enableRemoteNotifications()

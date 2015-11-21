@@ -29,8 +29,6 @@
 
 using namespace et;
 
-#if !defined(ET_CONSOLE_APPLICATION)
-
 @interface etWindowController : NSWindowController<NSWindowDelegate>
 {
 @public
@@ -59,7 +57,6 @@ using namespace et;
 }
 
 @end
-#endif
 
 class et::RenderContextPrivate
 {
@@ -74,19 +71,13 @@ public:
 	void performUpdateAndRender();
 	void stop();
 		
-#if defined(ET_CONSOLE_APPLICATION)
-	bool canPerformOperations()
-		{ return false; }
-#else
 	bool canPerformOperations()
 		{ return !firstSync && (displayLink != nil); }
-#endif
 	
 public:
 	uint64_t frameDuration = 0;
 	
 private:
-#if !defined(ET_CONSOLE_APPLICATION)
 	etWindowController* windowController = nil;
 	etOpenGLWindow* mainWindow = nil;
 	NSOpenGLPixelFormat* pixelFormat = nil;
@@ -95,7 +86,6 @@ private:
 	NSSize scheduledSize = { };
 	bool firstSync = true;
 	bool resizeScheduled = false;
-#endif
 };
 
 RenderContext::RenderContext(const RenderContextParameters& inParams, Application* app) : _params(inParams),
@@ -104,9 +94,7 @@ RenderContext::RenderContext(const RenderContextParameters& inParams, Applicatio
 {
 	ET_PIMPL_INIT(RenderContext, this, _params, app->parameters())
 	
-#if !defined(ET_CONSOLE_APPLICATION)
 	OpenGLCapabilities::instance().checkCaps();
-#endif
 	
 	_renderState.setRenderContext(this);
 	_renderState.setMainViewportSize(_renderState.viewportSize());
@@ -118,10 +106,7 @@ RenderContext::RenderContext(const RenderContextParameters& inParams, Applicatio
 	_programFactory = ProgramFactory::Pointer::create(this);
 	_vertexBufferFactory = VertexBufferFactory::Pointer::create(this);
 
-#if !defined(ET_CONSOLE_APPLICATION)
 	_renderState.setDefaultFramebuffer(_framebufferFactory->createFramebufferWrapper(0));
-#endif
-	
 	_renderer = Renderer::Pointer::create(this);
 	
 	ET_CONNECT_EVENT(_fpsTimer.expired, RenderContext::onFPSTimerExpired)
@@ -197,7 +182,6 @@ CVReturn cvDisplayLinkOutputCallback(CVDisplayLinkRef, const CVTimeStamp*, const
 RenderContextPrivate::RenderContextPrivate(RenderContext*, RenderContextParameters& params,
 	const ApplicationParameters& appParams)
 {
-#if !defined(ET_CONSOLE_APPLICATION)
 	bool msaaEnabled = params.multisamplingQuality != MultisamplingQuality::None;
 	
 	NSOpenGLPixelFormatAttribute pixelFormatAttributes[] =
@@ -320,9 +304,9 @@ RenderContextPrivate::RenderContextPrivate(RenderContext*, RenderContextParamete
 	[mainWindow setMinSize:NSMakeSize(static_cast<float>(params.contextMinimumSize.x),
 		static_cast<float>(params.contextMinimumSize.y))];
 
-#	if (ET_OBJC_ARC_ENABLED)
+#if (ET_OBJC_ARC_ENABLED)
 	CFRetain((__bridge CFTypeRef)mainWindow);
-#	endif
+#endif
 		
 	params.contextSize = vec2i(static_cast<int>(contentRect.size.width),
 		static_cast<int>(contentRect.size.height));
@@ -351,21 +335,16 @@ RenderContextPrivate::RenderContextPrivate(RenderContext*, RenderContextParamete
 	[mainWindow orderFrontRegardless];
 	
 	[[NSApplication sharedApplication] activateIgnoringOtherApps:YES];
-#endif
 }
 
 RenderContextPrivate::~RenderContextPrivate()
 {
-#if !defined(ET_CONSOLE_APPLICATION)
 	ET_OBJC_RELEASE(windowController);
-#endif
-	
 	mainWindow = nil;
 }
 
 void RenderContextPrivate::run()
 {
-#if !defined(ET_CONSOLE_APPLICATION)
 	if (displayLink == nil)
 	{
 		CVReturn result = CVDisplayLinkCreateWithActiveCGDisplays(&displayLink);
@@ -382,21 +361,17 @@ void RenderContextPrivate::run()
 	}
 	
 	CVDisplayLinkStart(displayLink);
-#endif
 }
 
 void RenderContextPrivate::stop()
 {
-#if !defined(ET_CONSOLE_APPLICATION)
 	CVDisplayLinkStop(displayLink);
 	CVDisplayLinkRelease(displayLink);
 	displayLink = nil;
-#endif
 }
 
 void RenderContextPrivate::performUpdateAndRender()
 {
-#if !defined(ET_CONSOLE_APPLICATION)
 	if (windowController->applicationNotifier.shouldPerformRendering())
 	{
 		CGLLockContext(cOpenGLContext);
@@ -407,12 +382,10 @@ void RenderContextPrivate::performUpdateAndRender()
 		CGLFlushDrawable(cOpenGLContext);
 		CGLUnlockContext(cOpenGLContext);
 	}
-#endif
 }
 
 int RenderContextPrivate::displayLinkSynchronized()
 {
-#if !defined(ET_CONSOLE_APPLICATION)
 	@synchronized(windowController)
 	{
 		if (firstSync)
@@ -430,13 +403,11 @@ int RenderContextPrivate::displayLinkSynchronized()
 			performUpdateAndRender();
 		}
 	}
-#endif
 	return kCVReturnSuccess;
 }
 
 void RenderContextPrivate::resize(const NSSize& sz)
 {
-#if !defined(ET_CONSOLE_APPLICATION)
 	if (canPerformOperations())
 	{
 		CGLLockContext(cOpenGLContext);
@@ -457,7 +428,6 @@ void RenderContextPrivate::resize(const NSSize& sz)
 		scheduledSize = sz;
 		resizeScheduled = true;
 	}
-#endif
 }
 
 /*
@@ -472,7 +442,6 @@ CVReturn cvDisplayLinkOutputCallback(CVDisplayLinkRef, const CVTimeStamp*, const
 	}
 }
 
-#if !defined(ET_CONSOLE_APPLICATION)
 /*
  * OpenGL View implementation
  */
@@ -679,7 +648,5 @@ CVReturn cvDisplayLinkOutputCallback(CVDisplayLinkRef, const CVTimeStamp*, const
 }
 
 @end
-
-#endif // !ET_CONSOLE_APPLICATION
 
 #endif // ET_PLATFORM_MAC

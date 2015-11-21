@@ -35,7 +35,6 @@ void RenderState::setRenderContext(RenderContext* rc)
 {
 	_rc = rc;
 	
-#if !defined(ET_CONSOLE_APPLICATION)
 	_currentState = RenderState::currentState();
 		
 	unsigned char blackColor[] = { 0, 0, 0, 255 };
@@ -50,12 +49,10 @@ void RenderState::setRenderContext(RenderContext* rc)
 	
 	auto currentUnit = _currentState.boundTextures[TextureTarget::Texture_2D][_currentState.activeTextureUnit];
 	bindTexture(_currentState.activeTextureUnit, currentUnit, TextureTarget::Texture_2D);
-#endif
 }
 
 void RenderState::setMainViewportSize(const vec2i& sz, bool force)
 {
-#if !defined(ET_CONSOLE_APPLICATION)
 	if (!force && (sz.x == _currentState.mainViewportSize.x) && (sz.y == _currentState.mainViewportSize.y)) return;
 
 	_currentState.mainViewportSize = sz;
@@ -66,23 +63,19 @@ void RenderState::setMainViewportSize(const vec2i& sz, bool force)
 	
 	if (shouldSetViewport)
 		etViewport(0, 0, _currentState.mainViewportSize.x, _currentState.mainViewportSize.y);
-#endif
 }
 
 void RenderState::setViewportSize(const vec2i& sz, bool force)
 {
-#if !defined(ET_CONSOLE_APPLICATION)
 	if (!force && (sz.x == _currentState.viewportSize.x) && (sz.y == _currentState.viewportSize.y)) return;
 
 	_currentState.viewportSize = sz;
 	_currentState.viewportSizeFloat = vec2(static_cast<float>(sz.x), static_cast<float>(sz.y));
 	etViewport(0, 0, _currentState.viewportSize.x, _currentState.viewportSize.y);
-#endif
 }
 
 void RenderState::setActiveTextureUnit(uint32_t unit, bool force)
 {
-#if !defined(ET_CONSOLE_APPLICATION)
 	if ((unit != _currentState.activeTextureUnit) || force)
 	{
 		_currentState.activeTextureUnit = unit;
@@ -90,12 +83,10 @@ void RenderState::setActiveTextureUnit(uint32_t unit, bool force)
 		glActiveTexture(GL_TEXTURE0 + _currentState.activeTextureUnit);
 		checkOpenGLError("glActiveTexture(GL_TEXTURE0 + %u)", _currentState.activeTextureUnit);
 	}
-#endif
 }
 
 void RenderState::bindTexture(uint32_t unit, uint32_t texture, TextureTarget target, bool force)
 {
-#if !defined(ET_CONSOLE_APPLICATION)
 	setActiveTextureUnit(unit, force);
 	
 	if (force || (_currentState.boundTextures[target][unit] != texture))
@@ -103,31 +94,25 @@ void RenderState::bindTexture(uint32_t unit, uint32_t texture, TextureTarget tar
 		_currentState.boundTextures[target][unit] = texture;
 		etBindTexture(textureTargetValue(target), texture);
 	}
-#endif
 }
 
 void RenderState::bindProgram(uint32_t program, bool force)
 {
-#if !defined(ET_CONSOLE_APPLICATION)
 	if (force || (program != _currentState.boundProgram))
 	{ 
 		_currentState.boundProgram = program;
 		etUseProgram(program);
 	}
-#endif
 }
 
 void RenderState::bindProgram(const Program::Pointer& prog, bool force)
 {
-#if !defined(ET_CONSOLE_APPLICATION)
 	ET_ASSERT(prog.valid());
 	bindProgram(static_cast<uint32_t>(prog->apiHandle()), force);
-#endif
 }
 
 void RenderState::bindBuffer(uint32_t target, uint32_t buffer, bool force)
 { 
-#if !defined(ET_CONSOLE_APPLICATION)
 	if ((target == GL_ARRAY_BUFFER) && (force || (_currentState.boundArrayBuffer != buffer)))
 	{
 		_currentState.boundArrayBuffer = buffer;
@@ -142,34 +127,28 @@ void RenderState::bindBuffer(uint32_t target, uint32_t buffer, bool force)
 	{
 		log::warning("Trying to bind buffer %u to unknown target %u", buffer, target);
 	}
-#endif
 }
 
 void RenderState::setVertexAttributes(const VertexDeclaration& decl, bool force)
 {
-#if !defined(ET_CONSOLE_APPLICATION)
 	for (uint32_t i = 0; i < VertexAttributeUsage_max; ++i)
 		setVertexAttribEnabled(i, decl.has(static_cast<VertexAttributeUsage>(i)), force);
 	
 	setVertexAttributesBaseIndex(decl, 0);
-#endif
 }
 
 void RenderState::setVertexAttributesBaseIndex(const VertexDeclaration& decl, size_t index, bool force)
 {
-#if !defined(ET_CONSOLE_APPLICATION)
 	for (size_t i = 0; i < decl.numElements(); ++i)
 	{
 		const VertexElement& e = decl.element(i);
 		size_t dataOffset = index * (decl.interleaved() ? decl.dataSize() : vertexAttributeTypeSize(e.type()));
 		setVertexAttribPointer(e, dataOffset, force);
 	}
-#endif
 }
 
 void RenderState::bindBuffer(const VertexBuffer::Pointer& buffer, bool force)
 {
-#if !defined(ET_CONSOLE_APPLICATION)
 	if (buffer.valid())
 	{
 		bindBuffer(GL_ARRAY_BUFFER, static_cast<uint32_t>(buffer->apiHandle()), force);
@@ -179,7 +158,6 @@ void RenderState::bindBuffer(const VertexBuffer::Pointer& buffer, bool force)
 	{
 		bindBuffer(GL_ARRAY_BUFFER, 0, force);
 	}
-#endif
 }
 
 void RenderState::bindBuffer(const IndexBuffer::Pointer& buf, bool force)
@@ -195,7 +173,6 @@ void RenderState::bindBuffers(const VertexBuffer::Pointer& vb, const IndexBuffer
 
 void RenderState::bindVertexArray(uint32_t buffer, bool force)
 {
-#if !defined(ET_CONSOLE_APPLICATION)
 	ET_ASSERT(OpenGLCapabilities::instance().hasFeature(OpenGLFeature_VertexArrayObjects));
 	
 	if (force || (_currentState.boundVertexArrayObject != buffer))
@@ -203,12 +180,10 @@ void RenderState::bindVertexArray(uint32_t buffer, bool force)
 		_currentState.boundVertexArrayObject = buffer;
 		etBindVertexArray(buffer);
 	}
-#endif
 }
 
 void RenderState::bindVertexArray(const VertexArrayObject& vao, bool force)
 {
-#if !defined(ET_CONSOLE_APPLICATION)
 	if (OpenGLCapabilities::instance().hasFeature(OpenGLFeature_VertexArrayObjects))
 	{
 		bindVertexArray(vao.valid() ? static_cast<uint32_t>(vao->apiHandle()) : 0, force);
@@ -220,28 +195,23 @@ void RenderState::bindVertexArray(const VertexArrayObject& vao, bool force)
 		else
 			bindBuffers(VertexBuffer::Pointer(), IndexBuffer::Pointer(), force);
 	}
-#endif
 }
 
 void RenderState::resetBufferBindings()
 {
-#if !defined(ET_CONSOLE_APPLICATION)
 	if (OpenGLCapabilities::instance().hasFeature(OpenGLFeature_VertexArrayObjects))
 		bindVertexArray(0);
 	
 	bindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	bindBuffer(GL_ARRAY_BUFFER, 0);
-#endif
 }
 
 void RenderState::bindTexture(uint32_t unit, const Texture::Pointer& texture, bool force)
 {
-#if !defined(ET_CONSOLE_APPLICATION)
 	if (texture.valid())
 		bindTexture(unit, static_cast<uint32_t>(texture->apiHandle()), texture->target(), force);
 	else
 		bindTexture(unit, 0, TextureTarget::Texture_2D, force);
-#endif
 }
 
 void RenderState::bindFramebuffer(uint32_t framebuffer, bool force)
@@ -251,7 +221,6 @@ void RenderState::bindFramebuffer(uint32_t framebuffer, bool force)
 
 void RenderState::bindFramebuffer(uint32_t framebuffer, uint32_t target, bool force)
 {
-#if !defined(ET_CONSOLE_APPLICATION)
 	if (force || (_currentState.boundFramebuffer != framebuffer) ||
 		(_currentState.boundDrawFramebuffer != framebuffer) ||
 		(_currentState.boundReadFramebuffer != framebuffer))
@@ -261,12 +230,10 @@ void RenderState::bindFramebuffer(uint32_t framebuffer, uint32_t target, bool fo
 		_currentState.boundFramebuffer = framebuffer;
 		etBindFramebuffer(target, framebuffer);
 	}
-#endif
 }
 
 void RenderState::bindReadFramebuffer(uint32_t framebuffer, bool force)
 {
-#if !defined(ET_CONSOLE_APPLICATION)
 	bool alreadyBound =
 		(_currentState.boundReadFramebuffer == framebuffer) ||
 		(_currentState.boundFramebuffer == framebuffer);
@@ -276,12 +243,10 @@ void RenderState::bindReadFramebuffer(uint32_t framebuffer, bool force)
 		_currentState.boundReadFramebuffer = framebuffer;
 		etBindFramebuffer(GL_READ_FRAMEBUFFER, framebuffer);
 	}
-#endif
 }
 
 void RenderState::bindDrawFramebuffer(uint32_t framebuffer, bool force)
 {
-#if !defined(ET_CONSOLE_APPLICATION)
 	bool alreadyBound =
 		(_currentState.boundDrawFramebuffer == framebuffer) ||
 		(_currentState.boundFramebuffer == framebuffer);
@@ -291,12 +256,10 @@ void RenderState::bindDrawFramebuffer(uint32_t framebuffer, bool force)
 		_currentState.boundDrawFramebuffer = framebuffer;
 		etBindFramebuffer(GL_DRAW_FRAMEBUFFER, framebuffer);
 	}
-#endif
 }
 
 void RenderState::bindFramebuffer(const Framebuffer::Pointer& fbo, bool force)
 {
-#if !defined(ET_CONSOLE_APPLICATION)
 	if (fbo.valid())
 	{
 		bindFramebuffer(static_cast<uint32_t>(fbo->apiHandle()), GL_FRAMEBUFFER, force);
@@ -311,29 +274,24 @@ void RenderState::bindFramebuffer(const Framebuffer::Pointer& fbo, bool force)
 		bindFramebuffer(0, GL_FRAMEBUFFER, force);
 		setViewportSize(_currentState.mainViewportSize, force);
 	}
-#endif
 }
 
 void RenderState::bindRenderbuffer(uint32_t renderbuffer, bool force)
 {
-#if !defined(ET_CONSOLE_APPLICATION)
 	if (force || (_currentState.boundRenderbuffer != renderbuffer))
 	{
 		_currentState.boundRenderbuffer = renderbuffer;
 		glBindRenderbuffer(GL_RENDERBUFFER, renderbuffer);
 		checkOpenGLError("glBindRenderbuffer");
 	}
-#endif
 }
 
 void RenderState::setDefaultFramebuffer(const Framebuffer::Pointer& framebuffer)
 {
-#if !defined(ET_CONSOLE_APPLICATION)
 	_defaultFramebuffer = framebuffer;
 
 	if (_defaultFramebuffer.valid())
 		setMainViewportSize(_defaultFramebuffer->size());
-#endif
 }
 
 void RenderState::bindDefaultFramebuffer(bool force)
@@ -343,39 +301,30 @@ void RenderState::bindDefaultFramebuffer(bool force)
 
 void RenderState::setDrawBuffersCount(uint32_t count)
 {
-#if !defined(ET_CONSOLE_APPLICATION)
-	
 	glDrawBuffers(count, drawBufferTargets());
 	checkOpenGLError("glDrawBuffers(%d, ...)", count);
-	
-#endif
 }
 
 void RenderState::setDepthMask(bool enable, bool force)
 {
-#if !defined(ET_CONSOLE_APPLICATION)
 	if (force || (_currentState.depthMask != enable))
 	{
 		_currentState.depthMask = enable;
 		glDepthMask(enable);
 	}
-#endif
 }
 
 void RenderState::setDepthTest(bool enable, bool force)
 {
-#if !defined(ET_CONSOLE_APPLICATION)
 	if (force || (enable != _currentState.depthTestEnabled))
 	{
 		_currentState.depthTestEnabled = enable;
 		(enable ? glEnable : glDisable)(GL_DEPTH_TEST);
 	}
-#endif
 }
 
 void RenderState::setDepthFunc(DepthFunc func, bool force)
 {
-#if !defined(ET_CONSOLE_APPLICATION)
 	if (force || (func != _currentState.lastDepthFunc))
 	{
 		_currentState.lastDepthFunc = func;
@@ -422,12 +371,10 @@ void RenderState::setDepthFunc(DepthFunc func, bool force)
 				ET_FAIL("Invalid DepthFunc value");
 		}
 	}
-#endif
 }
 
 void RenderState::setSeparateBlend(bool enable, BlendState color, BlendState alpha, bool force)
 {
-#if !defined(ET_CONSOLE_APPLICATION)
 	if (force || (_currentState.blendEnabled != enable))
 	{
 		_currentState.blendEnabled = enable;
@@ -456,7 +403,6 @@ void RenderState::setSeparateBlend(bool enable, BlendState color, BlendState alp
 		checkOpenGLError("glBlendFuncSeparate(%u, %u, %u, %u)", colorBlend.first, colorBlend.second,
 			alphaBlend.first, alphaBlend.second);
 	}
-#endif
 }
 
 void RenderState::setBlend(bool enable, BlendState blend, bool force)
@@ -509,18 +455,15 @@ void RenderState::textureDeleted(uint32_t texture)
 
 void RenderState::frameBufferDeleted(uint32_t buffer)
 {
-#if !defined(ET_CONSOLE_APPLICATION)
 	if (_defaultFramebuffer.valid() && (_defaultFramebuffer->apiHandle() == buffer))
 		_defaultFramebuffer = Framebuffer::Pointer();
 	
 	if (_currentState.boundFramebuffer == buffer)
 		bindDefaultFramebuffer();
-#endif
 }
 
 void RenderState::setVertexAttribEnabled(uint32_t attrib, bool enabled, bool force)
 {
-#if !defined(ET_CONSOLE_APPLICATION)
 	bool wasEnabled = _currentState.enabledVertexAttributes[attrib] > 0;
 
 	if (enabled && (!wasEnabled || force))
@@ -535,12 +478,10 @@ void RenderState::setVertexAttribEnabled(uint32_t attrib, bool enabled, bool for
 	}
 	
 	_currentState.enabledVertexAttributes[attrib] = enabled;
-#endif
 }
 
 void RenderState::setVertexAttribPointer(const VertexElement& e, size_t baseIndex, bool force)
 {
-#if !defined(ET_CONSOLE_APPLICATION)
 	(void)force;
 	
 	if (e.dataType() == DataType::Int)
@@ -559,12 +500,10 @@ void RenderState::setVertexAttribPointer(const VertexElement& e, size_t baseInde
 	}
 
 	checkOpenGLError("glVertexAttribPointer");
-#endif
 }
 
 void RenderState::setCulling(bool enabled, CullState cull, bool force)
 {
-#if !defined(ET_CONSOLE_APPLICATION)
 	if (force || (_currentState.cullEnabled != enabled))
 	{
 		_currentState.cullEnabled = enabled;
@@ -586,12 +525,10 @@ void RenderState::setCulling(bool enabled, CullState cull, bool force)
 		glCullFace(cull == CullState::Back ? GL_BACK : GL_FRONT);
 		checkOpenGLError(cull == CullState::Back ? "glCullFace(GL_BACK)" : "glCullFace(GL_FRONT)");
 	}
-#endif
 }
 
 void RenderState::setPolygonOffsetFill(bool enabled, float factor, float units, bool force)
 {
-#if !defined(ET_CONSOLE_APPLICATION)
 	if (force || (_currentState.polygonOffsetFillEnabled != enabled))
 	{
 		_currentState.polygonOffsetFillEnabled = enabled;
@@ -601,12 +538,10 @@ void RenderState::setPolygonOffsetFill(bool enabled, float factor, float units, 
 	_currentState.polygonOffsetFactor = factor;
 	_currentState.polygonOffsetUnits = units;
 	glPolygonOffset(factor, units);
-#endif
 }
 
 void RenderState::setWireframeRendering(bool wire, bool force)
 {
-#if !defined(ET_CONSOLE_APPLICATION)
 	if (force || (_currentState.wireframe != wire))
 	{
 #		if (!ET_OPENGLES)
@@ -614,24 +549,20 @@ void RenderState::setWireframeRendering(bool wire, bool force)
 		glPolygonMode(GL_FRONT_AND_BACK, wire ? GL_LINE : GL_FILL);
 #		endif
 	}
-#endif
 }
 
 void RenderState::setClearColor(const vec4& color, bool force)
 {
-#if !defined(ET_CONSOLE_APPLICATION)
 	if (force || ((_currentState.clearColor - color).dotSelf() > std::numeric_limits<float>::epsilon()))
 	{
 		_currentState.clearColor = color;
 		glClearColor(color.x, color.y, color.z, color.w);
 		checkOpenGLError("RenderState::glClearColor");
 	}
-#endif
 }
 
 void RenderState::setColorMask(size_t mask, bool force)
 {
-#if !defined(ET_CONSOLE_APPLICATION)
 	if (force || (_currentState.colorMask != mask))
 	{
 		_currentState.colorMask = mask;
@@ -643,25 +574,20 @@ void RenderState::setColorMask(size_t mask, bool force)
 		glColorMask(redEnabled, greenEnabled, blueEnabled, alphaEnabled);
 		checkOpenGLError("RenderState::setColorMask");
 	}
-#endif
 }
 
 void RenderState::setClearDepth(float depth, bool force)
 {
-#if !defined(ET_CONSOLE_APPLICATION)
 	if (force || (_currentState.clearDepth != depth))
 	{
 		_currentState.clearDepth = depth;
 		glClearDepth(depth);
 		checkOpenGLError("RenderState::setClearDepth");
 	}
-#endif
 }
 
 void RenderState::setClip(bool enable, const recti& clip, bool force)
 {
-#if !defined(ET_CONSOLE_APPLICATION)
-	
 	if (force || (enable != _currentState.clipEnabled))
 	{
 		_currentState.clipEnabled = enable;
@@ -675,25 +601,21 @@ void RenderState::setClip(bool enable, const recti& clip, bool force)
 		glScissor(clip.left, clip.top, etMax(0, clip.width), etMax(0, clip.height));
 		checkOpenGLError("RenderState::setClip - glScissor");
 	}
-	
-#endif
 }
 
 void RenderState::setSampleAlphaToCoverage(bool enable, bool force)
 {
-#if !defined(ET_CONSOLE_APPLICATION)
 	if (force || (_currentState.alphaToCoverage != enable))
 	{
 		_currentState.alphaToCoverage = enable;
 		(enable ? glEnable : glDisable)(GL_SAMPLE_ALPHA_TO_COVERAGE);
 		checkOpenGLError("setSampleAlphaToCoverage(%s)", enable ? "true" : "false");
 	}
-#endif
 }
 
 void RenderState::setPointSizeControlInVertexShader(bool enable, bool force)
 {
-#if !defined(ET_CONSOLE_APPLICATION) && defined(GL_VERTEX_PROGRAM_POINT_SIZE)
+#if defined(GL_VERTEX_PROGRAM_POINT_SIZE)
 	if (force || (_currentState.pointSizeControlInVertexShaderEnabled != enable))
 	{
 		_currentState.pointSizeControlInVertexShaderEnabled = enable;
@@ -710,7 +632,6 @@ void RenderState::reset()
 
 void RenderState::applyState(const RenderState::State& s)
 {
-#if !defined(ET_CONSOLE_APPLICATION)
 	setClearColor(s.clearColor, true);
 	setColorMask(s.colorMask, true);
 	setSeparateBlend(s.blendEnabled, s.lastColorBlend, s.lastAlphaBlend, true);
@@ -737,14 +658,12 @@ void RenderState::applyState(const RenderState::State& s)
 		setVertexAttribEnabled(i, (s.enabledVertexAttributes[i] != 0), true);
 	
 	setActiveTextureUnit(s.activeTextureUnit, true);
-#endif
 }
 
 RenderState::State RenderState::currentState()
 {
 	State s;
-	
-#if !defined(ET_CONSOLE_APPLICATION)
+
 	checkOpenGLError("currentState()");
 	
 	int value = 0;
@@ -937,7 +856,6 @@ RenderState::State RenderState::currentState()
 	checkOpenGLError("");
 	
 	s.lastAlphaBlend = blendValuesToBlendState(blendSource, blendDest);
-#endif
-	
+
 	return s;
 }

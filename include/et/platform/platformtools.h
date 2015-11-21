@@ -12,7 +12,7 @@
 namespace et
 {
 	inline bool platformHasHardwareKeyboard()
-		{ return CurrentPlatform != Platform_iOS; }
+		{ return PlatformOptions::IsDesktop; }
 
 	enum class SelectFileMode : uint32_t
 	{
