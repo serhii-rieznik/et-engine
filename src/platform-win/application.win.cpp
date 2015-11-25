@@ -152,26 +152,23 @@ int Application::platformRun(int, char*[])
 		enterRunLoop();
 		_delegate->applicationWillResizeContext(_renderContext->sizei());
 
-		if (_parameters.shouldCreateRunLoop)
+		MSG msg = { };
+		while (_running)
 		{
-			MSG msg = { };
-			while (_running)
+			if (PeekMessageW(&msg, 0, 0, 0, PM_REMOVE))
 			{
-				if (PeekMessageW(&msg, 0, 0, 0, PM_REMOVE))
-				{
-					TranslateMessage(&msg);
-					DispatchMessageW(&msg);
-				}
-				else if (shouldPerformRendering())
-				{
-					performUpdateAndRender();
-				}
+				TranslateMessage(&msg);
+				DispatchMessageW(&msg);
 			}
-
-			terminated();
-			platformFinalize();
-			return _exitCode;
+			else if (shouldPerformRendering())
+			{
+				performUpdateAndRender();
+			}
 		}
+
+		terminated();
+		platformFinalize();
+		return _exitCode;
 	}
 
 	return 0;
@@ -183,19 +180,6 @@ void Application::quit(int exitCode)
 
 	_running = false;
 	_exitCode = exitCode;
-
-	if (!_parameters.shouldCreateRunLoop)
-	{
-		if (_parameters.shouldPreserveRenderContext)
-			_renderContext->pushAndActivateRenderingContext();
-
-		terminated();
-
-		if (_parameters.shouldPreserveRenderContext)
-			_renderContext->popRenderingContext();
-
-		platformFinalize();
-	}
 }
 
 Application::~Application()

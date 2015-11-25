@@ -124,12 +124,9 @@ RenderContext::~RenderContext()
 
 void RenderContext::init()
 {
-	if (application().parameters().shouldCreateContext)
-	{
-		RECT r = {};
-		GetClientRect(_private->primaryContext.hWnd, &r);
-		_renderState.setMainViewportSize(vec2i(r.right - r.left, r.bottom - r.top));
-	}
+	RECT r = {};
+	GetClientRect(_private->primaryContext.hWnd, &r);
+	_renderState.setMainViewportSize(vec2i(r.right - r.left, r.bottom - r.top));
 
 	_fpsTimer.expired.connect(this, &RenderContext::onFPSTimerExpired);
 	_fpsTimer.start(mainTimerPool().ptr(), 1.0f, -1);
@@ -152,20 +149,14 @@ void RenderContext::beginRender()
 	if (application().parameters().shouldPreserveRenderContext)
 		pushAndActivateRenderingContext();
 
-	if (application().parameters().shouldCreateContext)
-	{
-		_renderState.bindDefaultFramebuffer();
-		checkOpenGLError("RenderContext::beginRender");
-	}
+	_renderState.bindDefaultFramebuffer();
+	checkOpenGLError("RenderContext::beginRender");
 }
 
 void RenderContext::endRender()
 {
-	if (application().parameters().shouldCreateContext)
-	{
-		checkOpenGLError("RenderContext::endRender");
-		SwapBuffers(_private->primaryContext.hDC);
-	}
+	checkOpenGLError("RenderContext::endRender");
+	SwapBuffers(_private->primaryContext.hDC);
 
 	++_info.averageFramePerSecond;
 	_info.averageDIPPerSecond += OpenGLCounters::DIPCounter;
@@ -207,17 +198,10 @@ RenderContextPrivate::RenderContextPrivate(RenderContext* rc, RenderContextParam
 	if (application().parameters().shouldPreserveRenderContext)
 		push();
 
-	if (application().parameters().shouldCreateContext)
+	if (initWindow(params, appParams))
 	{
-		if (initWindow(params, appParams))
-		{
-			if (initOpenGL(params))
-				failed = false;
-		}
-	}
-	else 
-	{
-		failed = false;
+		if (initOpenGL(params))
+			failed = false;
 	}
 
 	if (!failed)
@@ -225,7 +209,7 @@ RenderContextPrivate::RenderContextPrivate(RenderContext* rc, RenderContextParam
 		GLeeInit();
 		checkOpenGLError("GLeeInit");
 
-		if (application().parameters().shouldCreateContext && wglSwapIntervalEXT)
+		if (wglSwapIntervalEXT != nullptr)
 		{
 			wglSwapIntervalEXT(static_cast<int>(params.swapInterval));
 			checkOpenGLError("RenderContextPrivate::initOpenGL -> wglSwapIntervalEXT");
@@ -574,17 +558,14 @@ int RenderContextPrivate::choosePixelFormat(HDC aDC, PIXELFORMATDESCRIPTOR* pfd)
 
 RenderContextPrivate::~RenderContextPrivate()
 {
-	if (application().parameters().shouldCreateContext)
-	{
-		if (application().parameters().shouldPreserveRenderContext)
-			renderContext()->pushAndActivateRenderingContext();
+	if (application().parameters().shouldPreserveRenderContext)
+		renderContext()->pushAndActivateRenderingContext();
 
-		primaryContext.release();
-		UnregisterClassW(wndClass.lpszClassName, hInstance);
+	primaryContext.release();
+	UnregisterClassW(wndClass.lpszClassName, hInstance);
 
-		if (application().parameters().shouldPreserveRenderContext)
-			renderContext()->popRenderingContext();
-	}
+	if (application().parameters().shouldPreserveRenderContext)
+		renderContext()->popRenderingContext();
 }
 
 bool RenderContextPrivate::shouldPostMovementMessage(int x, int y)
