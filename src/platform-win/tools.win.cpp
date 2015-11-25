@@ -377,6 +377,11 @@ std::vector<et::Screen> et::availableScreens()
 	return result;
 }
 
+et::Screen et::currentScreen()
+{
+	return availableScreens().front();
+}
+
 std::string et::selectFile(const StringList&, SelectFileMode mode, const std::string& defaultName)
 {
 	ET_STRING_TYPE defaultFileName = ET_STRING_TO_PARAM_TYPE(defaultName);
