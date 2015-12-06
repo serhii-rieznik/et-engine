@@ -314,12 +314,8 @@ RunLoop& et::backgroundRunLoop()
 
 RunLoop& et::currentRunLoop()
 {
-	auto threadId = threading::currentThread();
-	
-	if (allRunLoops.count(threadId) > 0)
-		return mainRunLoop();
-	
-	return *(allRunLoops.at(threadId));
+	auto i = allRunLoops.find(threading::currentThread());
+	return (i == allRunLoops.end()) ? mainRunLoop() : *(i->second);
 }
 
 TimerPool::Pointer& et::mainTimerPool()
