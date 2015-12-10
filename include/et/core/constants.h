@@ -85,11 +85,11 @@
 #
 #elif (ET_PLATFORM_WIN)
 #
-#	define ET_KEY_RETURN				VK_RETURN
+#	define ET_KEY_RETURN				0x0D
 #	define ET_KEY_TAB					VK_TAB
 #	define ET_KEY_SPACE					VK_SPACE
-#	define ET_KEY_ESCAPE				VK_ESCAPE
-#	define ET_KEY_BACKSPACE				VK_BACK
+#	define ET_KEY_ESCAPE				0x1B
+#	define ET_KEY_BACKSPACE				0x08
 #	define ET_KEY_SHIFT					VK_SHIFT
 #	define ET_KEY_CONTROL				VK_CONTROL
 #
