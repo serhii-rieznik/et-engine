@@ -10,6 +10,7 @@
 #if (ET_PLATFORM_WIN)
 
 #include <et/input/input.h>
+#include <Windows.h>
 
 using namespace et;
 

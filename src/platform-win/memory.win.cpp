@@ -10,6 +10,7 @@
 
 #if (ET_PLATFORM_WIN)
 
+#include <Windows.h>
 #include <Psapi.h>
 
 using namespace et;

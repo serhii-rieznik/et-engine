@@ -9,6 +9,8 @@
 
 #if (ET_PLATFORM_WIN)
 
+#include <Windows.h>
+
 #define PASS_TO_OUTPUTS(FUNC)		for (Output::Pointer output : logOutputs) \
 									{ \
 										va_list args; \

@@ -11,6 +11,8 @@
 
 #if (ET_PLATFORM_WIN)
 
+#include <Windows.h>
+
 using namespace et;
 
 std::string locale::time()

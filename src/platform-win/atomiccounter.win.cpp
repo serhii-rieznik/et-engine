@@ -9,10 +9,12 @@
 
 #if (ET_PLATFORM_WIN)
 
+#include <Windows.h>
+
 using namespace et;
 
 AtomicCounter::AtomicCounter() :
-_counter(0)
+	_counter(0)
 {
 #if (ET_DEBUG)
 	notifyOnRetain = false;

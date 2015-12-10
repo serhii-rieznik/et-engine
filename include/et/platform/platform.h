@@ -21,7 +21,6 @@
 #	endif
 #
 #	define NOMINMAX						1
-#	include <Windows.h>
 #
 #	if defined(_UNICODE)
 #		define ET_WIN_UNICODE					1
