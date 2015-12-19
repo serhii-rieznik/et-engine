@@ -105,7 +105,7 @@ namespace et
 #
 #else
 #
-#	define ET_ASSERT(C)				{ }
+#	define ET_ASSERT(C)				do { } while (0)
 #
 #endif
 

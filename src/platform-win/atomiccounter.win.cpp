@@ -42,7 +42,7 @@ AtomicCounterType AtomicCounter::release()
 	return InterlockedDecrement(&_counter);
 }
 
-void AtomicCounter::setValue(AtomicCounterType v)
+void AtomicCounter::setAtomicCounterValue(AtomicCounterType v)
 {
 	InterlockedExchange(&_counter, v);
 }
