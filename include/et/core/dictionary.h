@@ -38,7 +38,7 @@ namespace et
 	class Value : public ValueBase
 	{
 	public:
-		typedef et::IntrusivePtr< Value<T, C> > Pointer;
+		using Pointer =  et::IntrusivePtr<Value<T, C>>;
 		
 	public:
 		T content;
@@ -78,12 +78,12 @@ namespace et
 
 		ValuePointer(ValueBase::Pointer p) :
 			Value<T, C>::Pointer(p) { }
-		
-		const T& value() const
-			{ return this->reference().content; }
-		
+			
 		virtual void performRecursive(ValueCallbackFunction func)
 			{ func(*this); }
+
+		virtual ValuePointer<T, C> duplicate() const
+			{ return ValuePointer<T, C>(this->reference().content); }
 	};
 	
 	typedef ValuePointer<float, ValueClass_Float> FloatValue;
@@ -150,6 +150,7 @@ namespace et
 					
 	public:
 		void printContent() const;
+		ValuePointer<ValueType, ValueClass_Array> duplicate() const override;
 	};
 	
 	class Dictionary : public ValuePointer<std::unordered_map<std::string, ValueBase::Pointer,
@@ -255,6 +256,8 @@ namespace et
 			{ return reference().content.empty(); }
 		
 		StringList allKeyPaths();
+
+		ValuePointer<ValueType, ValueClass_Dictionary> duplicate() const override;
 				
 	public:
 		void printContent() const;

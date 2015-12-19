@@ -14,6 +14,30 @@ using namespace et;
 void printDictionary(const Dictionary& dict, const std::string& tabs);
 void printArray(ArrayValue arr, const std::string& tabs);
 
+ValueBase::Pointer duplicateValue(ValueBase::Pointer obj)
+{
+	if (obj->valueClass() == ValueClass_String)
+		return StringValue(obj).duplicate();
+
+	if (obj->valueClass() == ValueClass_Dictionary)
+		return Dictionary(obj).duplicate();
+
+	if (obj->valueClass() == ValueClass_Array)
+		return ArrayValue(obj).duplicate();
+
+	if (obj->valueClass() == ValueClass_Integer)
+		return IntegerValue(obj).duplicate();
+
+	if (obj->valueClass() == ValueClass_Boolean)
+		return BooleanValue(obj).duplicate();
+
+	if (obj->valueClass() == ValueClass_Float)
+		return FloatValue(obj).duplicate();
+
+	abort();
+	return ValueBase::Pointer();
+}
+
 void Dictionary::printContent() const
 {
 	log::info("<");
@@ -26,6 +50,17 @@ void ArrayValue::printContent() const
 	log::info("{");
 	printArray(*this, "\t");
 	log::info("}");
+}
+
+ArrayValue::ValuePointer ArrayValue::duplicate() const
+{
+	ArrayValue result;
+	result->content.reserve(reference().content.size());
+	for (const auto& val : reference().content)
+	{
+		result->content.push_back(duplicateValue(val));
+	}
+	return result;
 }
 
 ValueBase::Pointer Dictionary::baseValueForKeyPathInHolder(const std::vector<std::string>& path,
@@ -128,6 +163,16 @@ StringList Dictionary::allKeyPaths()
 {
 	StringList result;
 	addKeyPathsFromHolder(*this, emptyString, result);
+	return result;
+}
+
+Dictionary::ValuePointer Dictionary::duplicate() const
+{
+	Dictionary result;
+	for (const auto& kv : reference().content)
+	{
+		result.setValueForKey(kv.first, duplicateValue(kv.second));
+	}
 	return result;
 }
 
