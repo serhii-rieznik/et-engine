@@ -13,11 +13,12 @@
 
 #if defined(_MSC_VER)
 #
-#	pragma warning(disable:4201)
-#	pragma warning(disable:4996)
-#	pragma warning(disable:4131)
-#	pragma warning(disable:4204)
+#	pragma warning(disable:4091)
 #	pragma warning(disable:4099)
+#	pragma warning(disable:4131)
+#	pragma warning(disable:4201)
+#	pragma warning(disable:4204)
+#	pragma warning(disable:4996)
 #
 #elif defined(__MACH__)
 #
