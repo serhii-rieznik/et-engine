@@ -102,12 +102,14 @@ void etInterruptListener(void*, UInt32 inInterruptionState)
 
 bool et::ios::musicIsPlaying()
 {
-	MPMediaItem* item = [[MPMusicPlayerController iPodMusicPlayer] nowPlayingItem];
+#if (__IPHONE_OS_VERSION_MIN_REQUIRED >= __IPHONE_8_0)
+	auto player = [MPMusicPlayerController systemMusicPlayer];
+#else
+	auto player = [MPMusicPlayerController iPodMusicPlayer];
+#endif
 	
-	if (item == nil)
-		return false;
-	
-	return ([[MPMusicPlayerController iPodMusicPlayer] playbackState] == MPMusicPlaybackStatePlaying);
+	return ([player nowPlayingItem] == nil) ? false :
+		([player playbackState] == MPMusicPlaybackStatePlaying);
 }
 
 #endif // ET_PLATFORM_IOS

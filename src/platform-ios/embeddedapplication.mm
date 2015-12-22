@@ -62,7 +62,7 @@ static etApplication* _sharedInstance = nil;
 - (void)loadedInViewController:(UIViewController*)viewController withView:(UIView*)view
 {
 	ET_ASSERT(_loaded == NO);
-	ET_ASSERT([EAGLContext currentContext] != nil)
+	ET_ASSERT([EAGLContext currentContext] != nil);
 	(void)viewController;
 	
 	RenderState::State state = RenderState::currentState();
@@ -85,7 +85,7 @@ static etApplication* _sharedInstance = nil;
 
 - (void)unloadedInViewController:(UIViewController*)viewController
 {
-	ET_ASSERT(_loaded)
+	ET_ASSERT(_loaded);
 	(void)viewController;
 	
 	application().quit();
