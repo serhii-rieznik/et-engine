@@ -146,7 +146,7 @@ namespace et
 			return *this;
 		}
 		
-		inline void performRecursive(ValueCallbackFunction func);
+		inline void performRecursive(ValueCallbackFunction func) override;
 					
 	public:
 		void printContent() const;
@@ -209,7 +209,7 @@ namespace et
 		void setFloatForKeyPath(const StringList& keyPath, FloatValue value)
 			{ setValueForKeyPath<FloatValue, ValueClass_Float>(keyPath, value); }
 		
-		inline void performRecursive(ValueCallbackFunction func);
+		inline void performRecursive(ValueCallbackFunction func) override;
 		
 	public:
 		IntegerValue integerForKey(const std::string& key, IntegerValue def = IntegerValue()) const

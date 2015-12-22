@@ -74,7 +74,7 @@ AtomicCounterType AtomicCounter::release()
 #endif
 }
 
-void AtomicCounter::setValue(AtomicCounterType value)
+void AtomicCounter::setAtomicCounterValue(AtomicCounterType value)
 {
 #if (ET_PLATFORM_APPLE)
 	OSAtomicCompareAndSwap32(_counter, value, &_counter);
