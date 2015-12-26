@@ -12,25 +12,25 @@ namespace et
 	class FlagsHolder
 	{
 	public:
-		FlagsHolder(size_t flags = 0) :
+		FlagsHolder(uint64_t flags = 0) :
 			_flags(flags) { }
 
-		size_t flags() const
+		uint64_t flags() const
 			{ return _flags; }
 
-		void setFlag(size_t flag)
+		void setFlag(uint64_t flag)
 			{ _flags = _flags | flag; }
 
-		void removeFlag(size_t flag)
+		void removeFlag(uint64_t flag)
 			{ _flags = _flags & (~flag); }
 
-		bool hasFlag(size_t flag) const
+		bool hasFlag(uint64_t flag) const
 			{ return (_flags & flag) == flag; }
 
-		void setFlags(size_t value)
+		void setFlags(uint64_t value)
 			{ _flags = value; }
 
-		void toggleFlag(size_t value) 
+		void toggleFlag(uint64_t value)
 		{ 
 			if (hasFlag(value)) 
 				removeFlag(value);
@@ -39,6 +39,6 @@ namespace et
 		}
 
 	private:
-		size_t _flags;
+		uint64_t _flags = 0;
 	};
 }
