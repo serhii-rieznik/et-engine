@@ -18,33 +18,21 @@
 using namespace et;
 
 #if ET_DEBUG
-	enum : AtomicCounterType
-	{
-		validMask = static_cast<AtomicCounterType>(0xfffffffc)
-	};
+enum : AtomicCounterType
+{
+	validMask = static_cast<AtomicCounterType>(0xfffffffc)
+};
 #endif
 
-AtomicCounter::AtomicCounter() :
-#if (ET_DEBUG)
-	notifyOnRetain(false),
-	notifyOnRelease(false),
-#endif
-	_counter(0)
+AtomicCounter::AtomicCounter()
 {
 }
 
 AtomicCounterType AtomicCounter::retain()
 {
 #if (ET_DEBUG)
-	
 	if (notifyOnRetain)
-	{
-#	if (ET_PLATFORM_MAC)
-		__asm__("int $3");
-#	elif (ET_PLATFORM_IOS)
-		printf("retain %d\n", _counter);
-#	endif
-	}
+		et::debug::debugBreak();
 #endif
 	
 #if (ET_PLATFORM_ANDROID)
@@ -58,13 +46,7 @@ AtomicCounterType AtomicCounter::release()
 {
 #if (ET_DEBUG)
 	if (notifyOnRelease)
-	{
-#	if (ET_PLATFORM_MAC)
-		__asm__("int $3");
-#	elif (ET_PLATFORM_IOS)
-		printf("release %d\n", _counter);
-#	endif
-	}
+		et::debug::debugBreak();
 #endif
 
 #if (ET_PLATFORM_ANDROID)

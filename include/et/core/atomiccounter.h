@@ -31,15 +31,15 @@ namespace et
 			{ return _counter; }
 
 #if (ET_DEBUG)
-		volatile bool notifyOnRetain;
-		volatile bool notifyOnRelease;
+		volatile bool notifyOnRetain = false;
+		volatile bool notifyOnRelease = false;
 #endif
 
 	private:
 		ET_DENY_COPY(AtomicCounter)
 		
 	private:
-		volatile AtomicCounterType _counter;
+		volatile AtomicCounterType _counter = 0;
 	};
 	
 	class AtomicBool

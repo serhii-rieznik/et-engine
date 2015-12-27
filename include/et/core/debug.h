@@ -90,6 +90,11 @@ namespace et
 		void warning(const char*, ...) ET_FORMAT_FUNCTION;
 		void error(const char*, ...) ET_FORMAT_FUNCTION;
 	}
+	
+	namespace debug
+	{
+		void debugBreak();
+	}
 }
 
 #if (ET_DEBUG)
@@ -99,7 +104,7 @@ namespace et
 		if (!(C)) \
 		{ \
 			et::log::warning("Condition: %s\nfailed at: %s [%d]", (#C), __FILE__, __LINE__); \
-			abort(); \
+			et::debug::debugBreak(); \
 		} \
 	} while (0)
 #
