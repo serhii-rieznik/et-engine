@@ -62,6 +62,9 @@ namespace et
 			
 			void setDepthMask(bool dm)
 				{ _depthMask = dm; }
+			
+			bool depthMaskEnabled() const
+				{ return _depthMask; }
 
 			void serialize(Dictionary, const std::string&);
 			
