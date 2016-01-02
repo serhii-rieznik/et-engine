@@ -5,6 +5,7 @@
  *
  */
 
+#include <et/geometry/geometry.h>
 #include <et/opengl/opengl.h>
 #include <et/rendering/rendercontext.h>
 #include <et/rendering/renderer.h>
@@ -93,13 +94,14 @@ Renderer::Renderer(RenderContext* rc) :
 
 void Renderer::clear(bool color, bool depth)
 {
-	ET_ASSERT(!depth || (depth && _rc->renderState().depthMask()));
+	ET_ASSERT(!depth || (depth && _rc->renderState().depthState().depthWriteEnabled));
 	ET_ASSERT(!color || (color && (_rc->renderState().colorMask() != static_cast<size_t>(ColorMask::None))));
 	
 	GLbitfield clearMask = (color * GL_COLOR_BUFFER_BIT) + (depth * GL_DEPTH_BUFFER_BIT);
-
-	if (clearMask)
+	if (clearMask != 0)
+	{
 		glClear(clearMask);
+	}
 }
 
 void Renderer::fullscreenPass()
@@ -158,14 +160,14 @@ void Renderer::renderTextureRotated(const Texture::Pointer& texture, float angle
 
 vec2 Renderer::currentViewportCoordinatesToScene(const vec2i& coord)
 {
-	auto vpSize = _rc->renderState().viewportSizeFloat();
+	auto vpSize = vector2ToFloat(_rc->renderState().viewportSize());
 	return vec2(2.0f * static_cast<float>(coord.x) / vpSize.x - 1.0f,
 		1.0f - 2.0f * static_cast<float>(coord.y) / vpSize.y );
 }
 
 vec2 Renderer::currentViewportSizeToScene(const vec2i& size)
 {
-	auto vpSize = _rc->renderState().viewportSizeFloat();
+	auto vpSize = vector2ToFloat(_rc->renderState().viewportSize());
 	return vec2(2.0f * static_cast<float>(size.x) / vpSize.x, 2.0f * static_cast<float>(size.y) / vpSize.y);
 }
 
@@ -261,8 +263,7 @@ void Renderer::drawElementsSequentially(PrimitiveType primitiveType, size_t firs
 
 void Renderer::readFramebufferData(const vec2i& size, TextureFormat format, DataType dataType, BinaryDataStorage& data)
 {
-	ET_ASSERT((8 * data.size()) >= (size.square() * bitsPerPixelForTextureFormat(format, dataType)));
-	
+	data.fitToSize(size.square() * bitsPerPixelForTextureFormat(format, dataType));
 	glReadPixels(0, 0, size.x, size.y, textureFormatValue(format), dataTypeValue(dataType), data.data());
 	checkOpenGLError("glReadPixels");
 }

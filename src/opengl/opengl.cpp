@@ -102,10 +102,9 @@ uint32_t et::vertexAttributeTypeValue(VertexAttributeType value)
 	ET_SAMPLE_VALUE_FROM_MAP
 }
 
-static const std::pair<uint32_t, uint32_t> blendStatesMap[BlendState_max] =
+static const std::pair<uint32_t, uint32_t> blendStatesMap[BlendConfiguration_max] =
 {
 	{ GL_ONE, GL_ZERO }, // Disabled,
-	{ GL_ONE, GL_ZERO }, // Current,
 	{ GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA }, // Default,
 	{ GL_ONE, GL_ONE_MINUS_SRC_ALPHA}, // AlphaPremultiplied,
 	{ GL_ONE, GL_ONE }, // Additive,
@@ -115,24 +114,24 @@ static const std::pair<uint32_t, uint32_t> blendStatesMap[BlendState_max] =
 	{ GL_ZERO, GL_ONE_MINUS_SRC_ALPHA } // AlphaInverseMultiplicative
 };
 
-std::pair<uint32_t, uint32_t> et::blendStateValue(BlendState value)
+std::pair<uint32_t, uint32_t> et::blendConfigurationValue(BlendConfiguration value)
 {
-	ET_ASSERT(value < BlendState::max);
+	ET_ASSERT(value < BlendConfiguration::max);
 	return blendStatesMap[static_cast<uint32_t>(value)];
 }
 
-BlendState et::blendValuesToBlendState(uint32_t source, uint32_t dest)
+BlendConfiguration et::blendValuesToBlendState(uint32_t source, uint32_t dest)
 {
 	size_t availableBlendModes = sizeof(blendStatesMap) / sizeof(blendStatesMap[0]);
 	
 	for (size_t i = 0; i < availableBlendModes; ++i)
 	{
 		if ((blendStatesMap[i].first == source) && (blendStatesMap[i].second == dest))
-			return static_cast<BlendState>(i);
+			return static_cast<BlendConfiguration>(i);
 	}
 	
 	log::warning("Unsupported blend combination: %d, %d", source, dest);
-	return BlendState::Disabled;
+	return BlendConfiguration::Disabled;
 }
 
 uint32_t et::textureFormatValue(TextureFormat value)
@@ -946,7 +945,7 @@ void et::validateExtensions()
 
 const uint32_t* et::drawBufferTargets()
 {
-	static const uint32_t colorAttachmentValues[et::MaxDrawBuffers] =
+	static const uint32_t colorAttachmentValues[et::MaxRenderTargets] =
 	{
 		GL_COLOR_ATTACHMENT0,
 		
@@ -998,7 +997,7 @@ const uint32_t* et::drawBufferTargets()
 
 uint32_t et::drawBufferTarget(size_t i)
 {
-	ET_ASSERT(i < MaxDrawBuffers);
+	ET_ASSERT(i < MaxRenderTargets);
 	
 #if (ET_OPENGLES)
 	if ((i > 0) && (OpenGLCapabilities::instance().version() < OpenGLVersion::Version_3x))
@@ -1009,4 +1008,123 @@ uint32_t et::drawBufferTarget(size_t i)
 #endif
 	
 	return *(drawBufferTargets() + i);
+}
+
+using ValueNamePair = const std::pair<uint32_t, std::string>;
+
+static ValueNamePair compareFunctionsMap[CompareFunction_max] =
+{
+	{GL_NEVER, "never"},
+	{GL_LESS, "less"},
+	{GL_LEQUAL, "less-or-equal"},
+	{GL_EQUAL, "equal"},
+	{GL_GEQUAL, "greater-or-equal"},
+	{GL_GREATER, "greater"},
+	{GL_ALWAYS, "always"},
+};
+
+static ValueNamePair blendFunctionsMap[BlendFunction_max] =
+{
+	{GL_ZERO, "zero"}, // Zero,
+	{GL_ONE, "one"}, // One,
+	{GL_SRC_COLOR, "src-color"}, // SourceColor,
+	{GL_ONE_MINUS_SRC_COLOR, "inv-src-color"}, // InvSourceColor,
+	{GL_SRC_ALPHA, "src-alpha"}, // SourceAlpha,
+	{GL_ONE_MINUS_SRC_ALPHA, "inv-src-alpha"}, // InvSourceAlpha,
+	{GL_DST_COLOR, "dst-color"}, // DestColor,
+	{GL_ONE_MINUS_DST_COLOR, "inv-dst-color"}, // InvDestColor,
+	{GL_DST_ALPHA, "dst-alpha"}, // DestAlpha,
+	{GL_ONE_MINUS_DST_ALPHA, "inv-dst-alpha"}, // InvDestAlpha,
+};
+
+static ValueNamePair blendOperationsMap[BlendOperation_max] =
+{
+	{GL_FUNC_ADD, "add"}, // Add,
+	{GL_FUNC_SUBTRACT, "subtract"}, // Subtract,
+	{GL_FUNC_REVERSE_SUBTRACT, "reverse-subtract"}, // ReverseSubtract,
+};
+
+template <class ENUM>
+const ValueNamePair& sampleValueFromMap(ENUM value, const ValueNamePair* fromMap)
+{
+	ET_ASSERT(value < ENUM::max);
+	return fromMap[static_cast<uint32_t>(value)];
+}
+
+template <class ENUM>
+ENUM findValueInMap(uint32_t value, const ValueNamePair* inMap, size_t mapSize)
+{
+	for (size_t i = 0; i < mapSize; ++i)
+	{
+		if (value == inMap[i].first)
+			return static_cast<ENUM>(i);
+	}
+	log::error("Unable to find enum value in map: %x (%s - %s)",
+		value, inMap[0].second.c_str(), inMap[mapSize-1].second.c_str());
+	return static_cast<ENUM>(0);
+}
+
+template <class ENUM>
+ENUM findStringInMap(const std::string& value, const ValueNamePair* inMap, size_t mapSize)
+{
+	for (size_t i = 0; i < mapSize; ++i)
+	{
+		if (value == inMap[i].second)
+			return static_cast<ENUM>(i);
+	}
+	log::error("Unable to find enum value in map: %s (%s - %s)",
+		value.c_str(), inMap[0].second.c_str(), inMap[mapSize-1].second.c_str());
+	return static_cast<ENUM>(0);
+}
+
+uint32_t et::compareFunctionValue(CompareFunction value)
+{
+	return sampleValueFromMap(value, compareFunctionsMap).first;
+}
+uint32_t et::blendFunctionValue(BlendFunction value)
+{
+	return sampleValueFromMap(value, blendFunctionsMap).first;
+}
+uint32_t et::blendOperationValue(BlendOperation value)
+{
+	return sampleValueFromMap(value, blendOperationsMap).first;
+}
+
+CompareFunction et::valueToCompareFunction(uint32_t value)
+{
+	return findValueInMap<CompareFunction>(value, compareFunctionsMap, sizeof(compareFunctionsMap) / sizeof(compareFunctionsMap[0]));
+}
+BlendFunction et::valueToBlendFunction(uint32_t value)
+{
+	return findValueInMap<BlendFunction>(value, blendFunctionsMap, sizeof(blendFunctionsMap) / sizeof(blendFunctionsMap[0]));
+}
+BlendOperation et::valueToBlendOperation(uint32_t value)
+{
+	return findValueInMap<BlendOperation>(value, blendOperationsMap, sizeof(blendOperationsMap) / sizeof(blendOperationsMap[0]));
+}
+
+const std::string& et::compareFunctionToString(CompareFunction value)
+{
+	return sampleValueFromMap(value, compareFunctionsMap).second;
+}
+const std::string& et::blendFunctionToString(BlendFunction value)
+{
+	return sampleValueFromMap(value, blendFunctionsMap).second;
+}
+const std::string& et::blendOperationToString(BlendOperation value)
+{
+	return sampleValueFromMap(value, blendOperationsMap).second;
+}
+
+CompareFunction et::stringToCompareFunction(const std::string& value)
+{
+	return findStringInMap<CompareFunction>(value, compareFunctionsMap, sizeof(compareFunctionsMap) / sizeof(compareFunctionsMap[0]));
+}
+BlendFunction et::stringToBlendFunction(const std::string& value)
+{
+	return findStringInMap<BlendFunction>(value, blendFunctionsMap, sizeof(blendFunctionsMap) / sizeof(blendFunctionsMap[0]));
+}
+BlendOperation et::stringToBlendOperation(const std::string& value)
+{
+	return findStringInMap<BlendOperation>(value, blendOperationsMap, sizeof(blendOperationsMap) / sizeof(blendOperationsMap[0]));
 }

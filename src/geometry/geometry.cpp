@@ -129,6 +129,13 @@ vec3 et::removeMatrixScale(mat3& mat)
 	ET_ASSERT(lengths[1] > 0.0f);
 	ET_ASSERT(lengths[2] > 0.0f);
 
+	for (size_t i = 0; i < 3; ++i)
+	{
+		mat[0][i] /= lengths[i];
+		mat[1][i] /= lengths[i];
+		mat[2][i] /= lengths[i];
+	}
+	
 	if (mat.determinant() < 0.0f)
 	{
 		float minValues[3] =
@@ -139,13 +146,6 @@ vec3 et::removeMatrixScale(mat3& mat)
 		};
 		auto offset = std::min_element(minValues, minValues + 3) - minValues;
 		lengths[offset] = -lengths[offset];
-	}
-
-	for (size_t i = 0; i < 3; ++i)
-	{
-		mat[0][i] /= lengths[i];
-		mat[1][i] /= lengths[i];
-		mat[2][i] /= lengths[i];
 	}
 	
 	return vec3(lengths[0], lengths[1], lengths[2]);

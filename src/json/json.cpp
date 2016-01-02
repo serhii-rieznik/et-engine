@@ -186,9 +186,9 @@ Dictionary deserializeDictionary(json_t* root)
 		else if (json_is_null(value))
 			result.setDictionaryForKey(key, Dictionary());
 		else if (json_is_true(value))
-			result.setIntegerForKey(key, IntegerValue(1ll));
+			result.setBooleanForKey(key, 1);
 		else if (json_is_false(value))
-			result.setIntegerForKey(key, IntegerValue(0ll));
+			result.setBooleanForKey(key, 0);
 		else if (value != nullptr)
 		{
 			ET_FAIL_FMT("Unsupported JSON type: %d", value->type);

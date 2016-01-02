@@ -14,19 +14,18 @@
 #include <cstddef>
 #include <cstdint>
 #include <atomic>
-
-#include <string>
-#include <vector>
-#include <list>
-#include <map>
-#include <limits>
-#include <functional>
 #include <algorithm>
-#include <thread>
-
+#include <array>
+#include <fstream>
+#include <functional>
 #include <iosfwd>
 #include <iostream>
-#include <fstream>
+#include <limits>
+#include <list>
+#include <map>
+#include <string>
+#include <thread>
+#include <vector>
 
 #define ET_MAJOR_VERSION		0
 #define ET_MINOR_VERSION		7
@@ -165,8 +164,10 @@ namespace et
 	
 	typedef Quaternion<float> quaternion;
 	
-	typedef Rect<float> rect;
-	typedef Rect<int> recti;
+	using rect = Rect<float> ET_DEPRECATED;
+	
+	using recti = Rect<int>;
+	using rectf = Rect<float>;
 	
 	template <typename T>
 	inline T etMin(const T& v1, const T& v2)

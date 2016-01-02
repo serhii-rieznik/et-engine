@@ -67,7 +67,7 @@ namespace et
 		extern const std::string kAnimations;
 		extern const std::string kMaterials;
 		extern const std::string kBlendState;
-		extern const std::string kDepthMask;
+		extern const std::string kDepthState;
 		extern const std::string kIntegerValues;
 		extern const std::string kFloatValues;
 		extern const std::string kVectorValues;
@@ -105,5 +105,15 @@ namespace et
 		extern const std::string kVertexBufferSourceName;
 		extern const std::string kIndexBufferSourceName;
 		extern const std::string kVertexArrayObjects;
+		extern const std::string kBlendEnabled;
+		extern const std::string kSourceColor;
+		extern const std::string kDestColor;
+		extern const std::string kSourceAlpha;
+		extern const std::string kDestAlpha;
+		extern const std::string kColorOperation;
+		extern const std::string kAlphaOperation;
+		extern const std::string kDepthFunction;
+		extern const std::string kDepthWriteEnabled;
+		extern const std::string kDepthTestEnabled;
 	}
 }

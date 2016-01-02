@@ -25,7 +25,7 @@ namespace et
 		MaterialParameter_NormalMap,
 		MaterialParameter_BumpMap,
 		MaterialParameter_ReflectionMap,
-		MaterialParameter_TransparencyMap,
+		MaterialParameter_OpacityMap,
 		
 		MaterialParameter_AmbientFactor,
 		MaterialParameter_DiffuseFactor,
@@ -38,6 +38,7 @@ namespace et
 		MaterialParameter_ShadingModel,
 
 		MaterialParameter_TransparentColor,
+		MaterialParameter_Opacity,
 
 		MaterialParameter_max
 	};

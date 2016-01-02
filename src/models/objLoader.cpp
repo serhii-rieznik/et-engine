@@ -629,7 +629,7 @@ void OBJLoader::loadMaterials(const std::string& fileName, bool async, ObjectsCa
 				else if (mapId == 'd')
 				{
 					getLine(materialFile, line);
-					_lastMaterial->setTexture(MaterialParameter_TransparencyMap, _rc->textureFactory().loadTexture(line, cache, async) );
+					_lastMaterial->setTexture(MaterialParameter_OpacityMap, _rc->textureFactory().loadTexture(line, cache, async) );
 				}
 				else
 				{

@@ -214,7 +214,12 @@ void printArray(ArrayValue arr, const std::string& tabs)
 			IntegerValue val = i;
 			log::info("%s%lld", tabs.c_str(), val->content);
 		}
-		if (i->valueClass() == ValueClass_Float)
+		else if (i->valueClass() == ValueClass_Boolean)
+		{
+			BooleanValue val = i;
+			log::info("%s%s", tabs.c_str(), val->content == 0 ? "false" : "true");
+		}
+		else if (i->valueClass() == ValueClass_Float)
 		{
 			FloatValue val = i;
 			log::info("%s%f", tabs.c_str(), val->content);
@@ -248,6 +253,11 @@ void printDictionary(const Dictionary& dict, const std::string& tabs)
 		{
 			IntegerValue val = i.second;
 			log::info("%s%s = %lld", tabs.c_str(), i.first.c_str(), val->content);
+		}
+		else if (i.second->valueClass() == ValueClass_Boolean)
+		{
+			BooleanValue val = i.second;
+			log::info("%s%s = %s", tabs.c_str(), i.first.c_str(), val->content == 0 ? "false" : "true");
 		}
 		else if (i.second->valueClass() == ValueClass_Float)
 		{

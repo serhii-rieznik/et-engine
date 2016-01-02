@@ -81,7 +81,7 @@ Dictionary Storage::serialize(const std::string& basePath)
 			materialsDictionary.setDictionaryForKey(kv.first, materialDictionary);
 		}
 
-		std::string libraryName = replaceFileExt(basePath, ".etxmtls");
+		std::string libraryName = replaceFileExt(basePath, "-materials.json");
 
 		auto serializedData = json::serialize(materialsDictionary, json::SerializationFlag_ReadableFormat);
 		BinaryDataStorage binaryData(serializedData.size() + 1, 0);

@@ -92,7 +92,7 @@ Framebuffer::Framebuffer(RenderContext* rc, uint32_t fboId, const std::string& a
 	}
 	else if (fboId == 0)
 	{
-		_description.size.xy() = rc->sizei();
+		_description.size.xy() = rc->size();
 	}
 }
 
@@ -554,7 +554,7 @@ void Framebuffer::setDrawBuffersCount(uint32_t value)
 {
 	_drawBuffers = value;
 	
-	if (_rc->renderState().actualState().boundFramebuffer == apiHandle())
+	if (_rc->renderState().boundFramebuffer() == apiHandle())
 		_rc->renderState().setDrawBuffersCount(value);
 }
 

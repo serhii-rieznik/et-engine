@@ -53,27 +53,24 @@ namespace et
 			bool hasVector(uint32_t param) const;
 			bool hasTexture(uint32_t param) const;
 			bool hasString(uint32_t param) const;
+			
+			const DepthState& depthState() const
+				{ return _depth; }
+			void setDepthState(const DepthState&);
 
-			BlendState blendState() const 
-				{ return _blendState; }
+			const BlendState& blendState() const
+				{ return _blend; }
+			void setBlendState(const BlendState&);
 			
-			void setBlendState(BlendState bs)
-				{ _blendState = bs; }
-			
-			void setDepthMask(bool dm)
-				{ _depthMask = dm; }
-			
-			bool depthMaskEnabled() const
-				{ return _depthMask; }
-
 			void serialize(Dictionary, const std::string&);
 			
-			void deserializeWithOptions(Dictionary, RenderContext*, ObjectsCache&, const std::string&,
-				uint32_t);
+			void deserializeWithOptions(Dictionary, RenderContext*, ObjectsCache&, const std::string&, uint32_t);
 
 			void clear();
 			
 			Material* duplicate() const;
+			
+			uint32_t sortingKey() const;
 			
 			ET_DECLARE_EVENT1(loaded, Material*)
 			
@@ -93,24 +90,20 @@ namespace et
 			void textureDidLoad(Texture::Pointer);
 
 		private:
-			RenderContext* _rc;
-			
+			RenderContext* _rc = nullptr;
 			DefaultIntParameters _defaultIntParameters;
 			DefaultFloatParameters _defaultFloatParameters;
 			DefaultVectorParameters _defaultVectorParameters;
 			DefaultTextureParameters _defaultTextureParameters;
 			DefaultStringParameters _defaultStringParameters;
-
 			CustomIntParameters _customIntParameters;
 			CustomFloatParameters _customFloatParameters;
 			CustomVectorParameters _customVectorParameters;
 			CustomTextureParameters _customTextureParameters;
 			CustomStringParameters _customStringParameters;
-			
+			BlendState _blend;
+			DepthState _depth;
 			std::map<uint32_t, std::string> _texturesToLoad;
-			
-			BlendState _blendState = BlendState::Disabled;
-			bool _depthMask = true;
 		};
 		
 		typedef ObjectsCache MaterialCache;

@@ -50,8 +50,8 @@ Material* Material::duplicate() const
 	m->_customVectorParameters = _customVectorParameters;
 	m->_customTextureParameters = _customTextureParameters;
 	m->_customStringParameters = _customStringParameters;
-	m->_blendState = _blendState;
-	m->_depthMask = _depthMask;
+	m->_blend = _blend;
+	m->_depth = _depth;
 
 	return m;
 }
@@ -76,8 +76,10 @@ void Material::serialize(Dictionary stream, const std::string& basePath)
 		if (_defaultTextureParameters[i].set)
 		{
 			const auto& tex = _defaultTextureParameters[i];
-			if (tex.value.valid() && !tex.value->origin().empty())
+			if (tex.value.valid())
+			{
 				textureValues.setStringForKey(materialKeys[i], tex.value->origin());
+			}
 		}
 	}
 
@@ -95,10 +97,24 @@ void Material::serialize(Dictionary stream, const std::string& basePath)
 		if (kv.second.valid() && !kv.second->origin().empty())
 			textureValues.setStringForKey("id" + intToStr(kv.first), kv.second->origin());
 	}
+	
+	Dictionary blend;
+	blend.setBooleanForKey(kBlendEnabled, _blend.blendEnabled);
+	blend.setStringForKey(kSourceColor, blendFunctionToString(_blend.color.source));
+	blend.setStringForKey(kDestColor, blendFunctionToString(_blend.color.dest));
+	blend.setStringForKey(kSourceAlpha, blendFunctionToString(_blend.alpha.source));
+	blend.setStringForKey(kDestAlpha, blendFunctionToString(_blend.alpha.dest));
+	blend.setStringForKey(kColorOperation, blendOperationToString(_blend.colorOperation));
+	blend.setStringForKey(kAlphaOperation, blendOperationToString(_blend.alphaOperation));
+	
+	Dictionary depth;
+	depth.setBooleanForKey(kDepthWriteEnabled, _depth.depthWriteEnabled);
+	depth.setBooleanForKey(kDepthTestEnabled, _depth.depthTestEnabled);
+	depth.setStringForKey(kDepthFunction, compareFunctionToString(_depth.compareFunction));
 
 	stream.setStringForKey(kName, name());
-	stream.setIntegerForKey(kBlendState, static_cast<uint32_t>(_blendState));
-	stream.setIntegerForKey(kDepthMask, _depthMask);
+	stream.setDictionaryForKey(kBlendState, blend);
+	stream.setDictionaryForKey(kDepthState, depth);
 
 	if (!intValues.empty())
 		stream.setDictionaryForKey(kIntegerValues, intValues);
@@ -117,10 +133,20 @@ void Material::deserializeWithOptions(Dictionary stream, RenderContext* rc, Obje
 	const std::string& basePath, uint32_t options)
 {
 	setName(stream.stringForKey(kName)->content);
-	auto blendValue = stream.integerForKey(kBlendState)->content;
-	_blendState = ((blendValue >= 0) && (blendValue < BlendState_max)) ? 
-		static_cast<BlendState>(blendValue) : BlendState::Default;
-	_depthMask = stream.integerForKey(kDepthMask)->content != 0;
+	
+	Dictionary blend = stream.dictionaryForKey(kBlendState);
+	_blend.blendEnabled = blend.boolForKey(kBlendEnabled, false)->content != 0;
+	_blend.color.source = stringToBlendFunction(blend.stringForKey(kSourceColor, blendFunctionToString(BlendFunction::One))->content);
+	_blend.color.dest = stringToBlendFunction(blend.stringForKey(kDestColor, blendFunctionToString(BlendFunction::Zero))->content);
+	_blend.colorOperation = stringToBlendOperation(blend.stringForKey(kColorOperation, blendOperationToString(BlendOperation::Add))->content);
+	_blend.alpha.source = stringToBlendFunction(blend.stringForKey(kSourceAlpha, blendFunctionToString(BlendFunction::One))->content);
+	_blend.alpha.dest = stringToBlendFunction(blend.stringForKey(kDestAlpha, blendFunctionToString(BlendFunction::Zero))->content);
+	_blend.alphaOperation = stringToBlendOperation(blend.stringForKey(kAlphaOperation, blendOperationToString(BlendOperation::Add))->content);
+	
+	Dictionary depth = stream.dictionaryForKey(kDepthState);
+	_depth.compareFunction = stringToCompareFunction(depth.stringForKey(kDepthFunction, compareFunctionToString(CompareFunction::Less))->content);
+	_depth.depthWriteEnabled = depth.boolForKey(kDepthWriteEnabled, true)->content != 0;
+	_depth.depthTestEnabled = depth.boolForKey(kDepthTestEnabled, true)->content != 0;
 
 	bool shouldCreateTextures = (options & DeserializeOption_CreateTextures) == DeserializeOption_CreateTextures;
 	Dictionary intValues = stream.dictionaryForKey(kIntegerValues);
@@ -378,33 +404,49 @@ void Material::textureDidLoad(Texture::Pointer t)
 		loaded.invokeInMainRunLoop(this);
 }
 
+void Material::setBlendState(const BlendState& bs)
+{
+	_blend = bs;
+}
+
+void Material::setDepthState(const DepthState& ds)
+{
+	_depth = ds;
+}
+
+uint32_t Material::sortingKey() const
+{
+	return _blend.sortingKey() << 16 | _depth.sortingKey();
+}
+
 /*
  * Support stuff
  */
 extern const std::string materialKeys[MaterialParameter_max] =
 {
 	std::string("unknown"),				//	MaterialParameter_Undefined,
-	std::string("ambient_color"),		//	MaterialParameter_AmbientColor,
-	std::string("diffuse_color"),		//	MaterialParameter_DiffuseColor,
-	std::string("specular_color"),		//	MaterialParameter_SpecularColor,
-	std::string("emissive_color"),		//	MaterialParameter_EmissiveColor,
-	std::string("ambient_map"),			//	MaterialParameter_AmbientMap,
-	std::string("diffuse_map"),			//	MaterialParameter_DiffuseMap,
-	std::string("specular_map"),		//	MaterialParameter_SpecularMap,
-	std::string("emissive_map"),		//	MaterialParameter_EmissiveMap,
-	std::string("normalmap_map"),		//	MaterialParameter_NormalMap,
-	std::string("bump_map"),			//	MaterialParameter_BumpMap,
-	std::string("reflection_map"),		//	MaterialParameter_ReflectionMap,
-	std::string("transparency_map"),	//	MaterialParameter_TransparencyMap,
-	std::string("ambient_factor"),		//	MaterialParameter_AmbientFactor,
-	std::string("diffuse_factor"),		//	MaterialParameter_DiffuseFactor,
-	std::string("specular_factor"),		//	MaterialParameter_SpecularFactor,
-	std::string("bump_factor"),			//	MaterialParameter_BumpFactor,
-	std::string("reflection_factor"),	//	MaterialParameter_ReflectionFactor,
+	std::string("ambient-color"),		//	MaterialParameter_AmbientColor,
+	std::string("diffuse-color"),		//	MaterialParameter_DiffuseColor,
+	std::string("specular-color"),		//	MaterialParameter_SpecularColor,
+	std::string("emissive-color"),		//	MaterialParameter_EmissiveColor,
+	std::string("ambient-map"),			//	MaterialParameter_AmbientMap,
+	std::string("diffuse-map"),			//	MaterialParameter_DiffuseMap,
+	std::string("specular-map"),		//	MaterialParameter_SpecularMap,
+	std::string("emissive-map"),		//	MaterialParameter_EmissiveMap,
+	std::string("normalmap-map"),		//	MaterialParameter_NormalMap,
+	std::string("bump-map"),			//	MaterialParameter_BumpMap,
+	std::string("reflection-map"),		//	MaterialParameter_ReflectionMap,
+	std::string("transparency-map"),	//	MaterialParameter_TransparencyMap,
+	std::string("ambient-factor"),		//	MaterialParameter_AmbientFactor,
+	std::string("diffuse-factor"),		//	MaterialParameter_DiffuseFactor,
+	std::string("specular-factor"),		//	MaterialParameter_SpecularFactor,
+	std::string("bump-factor"),			//	MaterialParameter_BumpFactor,
+	std::string("reflection-factor"),	//	MaterialParameter_ReflectionFactor,
 	std::string("roughness"),			//	MaterialParameter_Roughness,
 	std::string("transparency"),		//	MaterialParameter_Transparency,
-	std::string("shading_model"),		//	MaterialParameter_ShadingModel,
-	std::string("transparent_color"),	//	MaterialParameter_TransparentColor,
+	std::string("shading-model"),		//	MaterialParameter_ShadingModel,
+	std::string("transparent-color"),	//	MaterialParameter_TransparentColor,
+	std::string("opacity"),				//	MaterialParameter_Opacity,
 };
 
 size_t stringToMaterialParameter(const std::string& s)

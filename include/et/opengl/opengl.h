@@ -161,8 +161,8 @@ namespace et
 	uint32_t dataTypeValue(DataType);
 	uint32_t primitiveTypeValue(PrimitiveType);
 	
-	std::pair<uint32_t, uint32_t> blendStateValue(BlendState);
-	BlendState blendValuesToBlendState(uint32_t source, uint32_t dest);
+	std::pair<uint32_t, uint32_t> blendConfigurationValue(BlendConfiguration);
+	BlendConfiguration blendValuesToBlendState(uint32_t source, uint32_t dest);
 	
 	size_t primitiveCount(uint32_t mode, size_t count);
 
@@ -196,6 +196,15 @@ namespace et
 	
 	uint32_t drawTypeValue(BufferDrawType);
 	uint32_t primitiveTypeValue(PrimitiveType);
+	
+	uint32_t compareFunctionValue(CompareFunction);
+	CompareFunction valueToCompareFunction(uint32_t);
+
+	uint32_t blendFunctionValue(BlendFunction);
+	BlendFunction valueToBlendFunction(uint32_t);
+
+	uint32_t blendOperationValue(BlendOperation);
+	BlendOperation valueToBlendOperation(uint32_t);
 		
 	const uint32_t* drawBufferTargets();
 	uint32_t drawBufferTarget(size_t);

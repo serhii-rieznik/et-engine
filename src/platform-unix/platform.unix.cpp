@@ -5,6 +5,8 @@
  *
  */
 
+#include <signal.h>
+
 namespace et
 {
 	namespace debug

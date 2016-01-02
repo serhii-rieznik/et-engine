@@ -7,7 +7,6 @@
 
 #pragma once
 
-#include <et/core/containers.h>
 #include <et/rendering/texture.h>
 #include <et/rendering/program.h>
 #include <et/rendering/framebuffer.h>
@@ -26,83 +25,35 @@ namespace et
 	typedef IntrusivePtr<VertexBuffer> VertexBufferPointer;
 	typedef IntrusivePtr<IndexBuffer> IndexBufferPointer;
 	typedef IntrusivePtr<VertexArrayObjectData> VertexArrayObject;
-
+	
 	class RenderState
 	{
 	public:
-		struct State
+		struct Descriptor
 		{
-		public:
-			typedef std::map<uint32_t, uint32_t> UnitToTextureMap;
-			typedef std::map<TextureTarget, UnitToTextureMap> TargetToUnitTextureMap;
-			
-		public:
-			TargetToUnitTextureMap boundTextures;
-			
-			StaticDataStorage<size_t, static_cast<size_t>(VertexAttributeUsage::max)> enabledVertexAttributes;
-			StaticDataStorage<size_t, MaxDrawBuffers> drawBuffers;
-			
-			uint32_t activeTextureUnit = 0;
-			
-			uint32_t boundFramebuffer = 0;
-			uint32_t boundReadFramebuffer = 0;
-			uint32_t boundDrawFramebuffer = 0;
-			uint32_t boundRenderbuffer = 0;
-			
-			uint32_t boundArrayBuffer = 0;
-			uint32_t boundElementArrayBuffer = 0;
-			uint32_t boundVertexArrayObject = 0;
-			
-			uint32_t boundProgram = 0;
-			
-			recti clipRect;
-			vec2i mainViewportSize;
-			vec2i viewportSize;
-			vec2 mainViewportSizeFloat;
-			vec2 viewportSizeFloat;
-
-			vec4 clearColor;
-			
-			size_t colorMask = 0;
-			float clearDepth = false;
-			
-			float polygonOffsetFactor = 0.0f;
-			float polygonOffsetUnits = 0.0f;
-			
-			bool blendEnabled = false;
-			bool depthTestEnabled = false;
-			bool depthMask = false;
-			bool polygonOffsetFillEnabled = false;
-			bool wireframe = false;
-			bool clipEnabled = false;
-			bool cullEnabled = false;
-			bool alphaToCoverage = false;
-			bool pointSizeControlInVertexShaderEnabled = false;
-			
-			BlendState lastColorBlend = BlendState::Current;
-			BlendState lastAlphaBlend = BlendState::Current;
-			CullState lastCull = CullState::Current;
-			DepthFunc lastDepthFunc = DepthFunc::Less;
-			
-			State();
+			DepthState depth;
+			BlendState blend;
+			RasterizerState rasterizer;
+			RenderStateCache cache;
+			Descriptor();
 		};
-
-	public: 
+		
+	public:
 		void setRenderContext(RenderContext* rc);
-		void reset();
-		void applyState(const State& s);
+		void applyState(const Descriptor& s);
 
 		/*
 		 * Viewport
 		 */
-		const vec2i& mainViewportSize() const
-			{ return _currentState.mainViewportSize; }
+		const recti& viewport() const
+			{ return _desc.cache.viewport; }
 		const vec2i& viewportSize() const
-			{ return _currentState.viewportSize; }
-		const vec2& mainViewportSizeFloat() const
-			{ return _currentState.mainViewportSizeFloat; }
-		const vec2& viewportSizeFloat() const
-			{ return _currentState.viewportSizeFloat; }
+			{ return _desc.cache.viewport.size(); }
+		
+		const recti& mainViewport() const
+			{ return _mainViewport; }
+		const vec2i& mainViewportSize() const
+			{ return _mainViewport.size(); }
 
 		void setMainViewportSize(const vec2i& sz, bool force = false);
 		void setViewportSize(const vec2i& sz, bool force = false);
@@ -156,76 +107,63 @@ namespace et
 		void bindVertexArray(const VertexArrayObject& vao, bool force = false);
 
 		void setVertexAttributes(const VertexDeclaration& decl, bool force = false);
-		void setVertexAttributesBaseIndex(const VertexDeclaration& decl, size_t index, bool force = false);
+		void setVertexAttributesBaseIndex(const VertexDeclaration& decl, uint32_t index, bool force = false);
 		void setVertexAttribEnabled(uint32_t attrib, bool enabled, bool force = false);
-		void setVertexAttribPointer(const VertexElement& e, size_t baseIndex, bool force = false);
+		void setVertexAttribPointer(const VertexElement& e, uint32_t baseIndex, bool force = false);
 
 		/*
 		 * State
 		 */
+		void setDepthState(const DepthState&, bool force = false);
+		void setDepthFunc(CompareFunction func, bool force = false);
+		void setDepthTestEnabled(bool enable, bool force = false);
+		void setDepthWriteEnabled(bool enable, bool force = false);
+		void setDepthClearValue(float depth, bool force = false);
+		
+		void setBlendState(const BlendState&, bool force = false);
+		void setBlendConfiguration(BlendConfiguration blend, bool force = false);
+		
 		uint32_t boundFramebuffer() const
-			{ return _currentState.boundFramebuffer; }
+			{ return _desc.cache.boundFramebuffer; }
 
 		uint32_t boundRenderbuffer() const
-			{ return _currentState.boundRenderbuffer; }
+			{ return _desc.cache.boundRenderbuffer; }
 		
-		bool blendEnabled() const
-			{ return _currentState.blendEnabled; }
-
-		BlendState blendStateForColor() const
-			{ return _currentState.lastColorBlend; }
-
-		BlendState blendStateForAlpha() const
-		{ return _currentState.lastAlphaBlend; }
+		const BlendState& blendState() const
+			{ return _desc.blend; }
 		
-		bool depthTestEnabled() const 
-			{ return _currentState.depthTestEnabled; }
-
-		bool depthMask() const 
-			{ return _currentState.depthMask; }
+		const DepthState& depthState() const
+			{ return _desc.depth; }
 		
-		DepthFunc depthFunc() const
-			{ return _currentState.lastDepthFunc; }
+		CompareFunction depthFunction() const
+			{ return _desc.depth.compareFunction; }
 
 		bool wireframeRendering() const 
-			{ return _currentState.wireframe; }
+			{ return _desc.rasterizer.fillMode == FillMode::Wireframe; }
 
-		bool clipEnabled() const 
-			{ return _currentState.clipEnabled; }
+		bool scissorEnabled() const
+			{ return _desc.rasterizer.scissorEnabled; }
 
 		const recti& clipRect() const 
-			{ return _currentState.clipRect; }
+			{ return _desc.rasterizer.scissorRectangle; }
 
-		size_t colorMask() const
-			{ return _currentState.colorMask; }
+		uint32_t colorMask() const
+			{ return _desc.rasterizer.colorMask; }
 		
-		bool cullEnabled() const
-			{ return _currentState.cullEnabled; }
-
-		CullState cullState() const
-			{ return _currentState.lastCull; }
+		CullMode cullMode() const
+			{ return _desc.rasterizer.cullMode; }
 		
 		vec4 clearColor() const
-			{ return _currentState.clearColor; }
+			{ return _desc.rasterizer.clearColor; }
 		
-		void setBlend(bool enable, BlendState blend = BlendState::Current, bool force = false);
-		
-		void setSeparateBlend(bool enable, BlendState color = BlendState::Current,
-			BlendState alpha = BlendState::Current, bool force = false);
-		
-		void setCulling(bool enabled, CullState cull = CullState::Current, bool force = false);
-		void setDepthTest(bool enable, bool force = false);
-		void setDepthFunc(DepthFunc func, bool force = false);
-		void setDepthMask(bool enable, bool force = false);
-		void setPolygonOffsetFill(bool enabled, float factor = 0.0f, float units = 0.0f, bool force = false);
-		void setWireframeRendering(bool wire, bool force = false);
+		void setCulling(CullMode cull, bool force = false);
+		void setDepthBias(bool enabled, float bias = 0.0f, float slopeScale = 0.0f, bool force = false);
+		void setFillMode(FillMode mode, bool force = false);
 		void setClearColor(const vec4& color, bool force = false);
-		void setColorMask(size_t mask, bool force = false);
-		void setClearDepth(float depth, bool force = false);
-		void setClip(bool enable, const recti& clip, bool force = false);
+		void setColorMask(uint32_t mask, bool force = false);
+		void setScissor(bool enable, const recti& clip, bool force = false);
 		void setSampleAlphaToCoverage(bool enable, bool force = false);
-		void setPointSizeControlInVertexShader(bool enable, bool force = false);
-
+		
 		/*
 		 * Deletion handlers
 		 */
@@ -239,14 +177,18 @@ namespace et
 		/*
 		 * Service
 		 */
-		const State& actualState() const
-			{ return _currentState; }
+		const Descriptor& actualState() const
+			{ return _desc; }
 		
-		static State currentState();
+		static Descriptor currentState();
+		static BlendState currentBlendState();
+		static DepthState currentDepthState();
+		static RasterizerState currentRasterizedState();
+		static RenderStateCache currentCacheValues();
 		
 	protected:
 		void bindFramebuffer(uint32_t framebuffer, uint32_t target, bool force);
-
+		
 	private:
 		friend class RenderContext;
 		
@@ -262,8 +204,8 @@ namespace et
 	private:
 		RenderContext* _rc;
 		Framebuffer::Pointer _defaultFramebuffer;
-	
-		State _currentState;
+		Descriptor _desc;
+		recti _mainViewport = recti(0, 0, 0, 0);
 	};
 	
 	class PreservedRenderStateScope
@@ -276,8 +218,8 @@ namespace et
 		ET_DENY_COPY(PreservedRenderStateScope)
 		
 	private:
-		RenderContext* _rc;
-		RenderState::State _state;
+		RenderContext* _rc = nullptr;
+		RenderState::Descriptor _desc;
 	};
 
 }

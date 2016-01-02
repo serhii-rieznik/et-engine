@@ -11,6 +11,67 @@
 
 namespace et
 {
+	/*
+	 * Common declarations
+	 */
+	enum class CompareFunction : uint32_t
+	{
+		Never,
+		Less,
+		LessOrEqual,
+		Equal,
+		GreaterOrEqual,
+		Greater,
+		Always,
+		
+		max
+	};
+	
+	enum class BlendFunction : uint32_t
+	{
+		Zero,
+		One,
+		SourceColor,
+		InvSourceColor,
+		SourceAlpha,
+		InvSourceAlpha,
+		DestColor,
+		InvDestColor,
+		DestAlpha,
+		InvDestAlpha,
+		
+		max
+	};
+	
+	enum class BlendOperation : uint32_t
+	{
+		Add,
+		Subtract,
+		ReverseSubtract,
+		
+		max
+	};
+	
+	enum class CullMode : uint32_t
+	{
+		Disabled,
+		Back,
+		Front,
+		
+		max
+	};
+	
+	enum class FillMode : uint32_t
+	{
+		Solid,
+		Wireframe,
+		
+		max
+	};
+
+	/*
+	 * Engine-specific declarations
+	 */
 	enum class VertexAttributeUsage : uint32_t
 	{
 		Position,
@@ -54,10 +115,9 @@ namespace et
 		max
 	};
 	
-	enum class BlendState : uint32_t
+	enum class BlendConfiguration : uint32_t
 	{
 		Disabled,
-		Current,
 		Default,
 		AlphaPremultiplied,
 		Additive,
@@ -69,28 +129,6 @@ namespace et
 		max
 	};
 	
-	enum class CullState : uint32_t
-	{
-		Current,
-		Front,
-		Back,
-		
-		max
-	};
-	
-	enum class DepthFunc : uint32_t
-	{
-		Never,
-		Less,
-		LessOrEqual,
-		Equal,
-		GreaterOrEqual,
-		Greater,
-		Always,
-		
-		max
-	};
-	
 	enum ColorMask : uint32_t
 	{
 		None = 0x00,
@@ -98,8 +136,8 @@ namespace et
 		Green = 0x02,
 		Blue = 0x04,
 		Alpha = 0x08,
-		RGB = Red | Green | Blue,
-		RGBA = RGB | Alpha
+		ColorOnly = Red | Green | Blue,
+		ColorAndAlpha = ColorOnly | Alpha
 	};
 	
 	enum class BufferDrawType : uint32_t
@@ -117,6 +155,7 @@ namespace et
 		Texture_2D_Array,
 		Texture_Rectangle,
 		Texture_Cube,
+		
 		max,
 	};
 	
@@ -268,23 +307,123 @@ namespace et
 	
 	enum : uint32_t
 	{
+		/*
+		 * Common values maxes
+		 */
+		BlendFunction_max = static_cast<uint32_t>(BlendFunction::max),
+		BlendOperation_max = static_cast<uint32_t>(BlendOperation::max),
+		CompareFunction_max = static_cast<uint32_t>(CompareFunction::max),
+		CullMode_max = static_cast<uint32_t>(CullMode::max),
+		FillMode_max = static_cast<uint32_t>(FillMode::max),
+		
 		VertexAttributeUsage_max = static_cast<uint32_t>(VertexAttributeUsage::max),
 		VertexAttributeType_max = static_cast<uint32_t>(VertexAttributeType::max),
-
 		IndexArrayFormat_max = static_cast<uint32_t>(IndexArrayFormat::max),
 		PrimitiveType_max = static_cast<uint32_t>(PrimitiveType::max),
-
+		BlendConfiguration_max = static_cast<uint32_t>(BlendConfiguration::max),
 		DataType_max = static_cast<uint32_t>(DataType::max),
-		BlendState_max = static_cast<uint32_t>(BlendState::max),
-
 		TextureTarget_max = static_cast<uint32_t>(TextureTarget::max),
 		TextureFormat_max = static_cast<uint32_t>(TextureFormat::max),
-		
 		InvalidIndex = static_cast<uint32_t>(-1),
 		InvalidShortIndex = static_cast<uint16_t>(-1),
 		InvalidSmallIndex = static_cast<uint8_t>(-1),
 		
-		MaxDrawBuffers = 8
+		MaxRenderTargets = 8
+	};
+	
+	struct DepthState
+	{
+		CompareFunction compareFunction = CompareFunction::Less;
+		float clearDepth = 1.0f;
+		bool depthWriteEnabled = true;
+		bool depthTestEnabled = true;
+		
+		DepthState() = default;
+		
+		DepthState(bool write, bool test) :
+			depthWriteEnabled(write), depthTestEnabled(test) { }
+		
+		uint32_t sortingKey() const
+		{
+			return static_cast<uint32_t>(!depthWriteEnabled) << 1 | static_cast<uint32_t>(!depthWriteEnabled);
+		}
+	};
+	
+	class BlendState
+	{
+	public:
+		struct Blend
+		{
+			BlendFunction source = BlendFunction::One;
+			BlendFunction dest = BlendFunction::Zero;
+			
+			Blend() = default;
+			Blend(BlendFunction s, BlendFunction d) :
+				source(s), dest(d) { }
+			
+			bool operator == (const Blend& b) const
+				{ return (source == b.source) && (dest == b.dest); }
+			
+			bool operator != (const Blend& b) const
+				{ return (source != b.source) || (dest != b.dest); }
+		};
+		
+		BlendState() = default;
+		BlendState(uint32_t e) :
+			blendEnabled(e) { }
+		BlendState(uint32_t e, const Blend& b) :
+			blendEnabled(e), color(b), alpha(b) { }
+		BlendState(uint32_t e, const Blend& cb, const Blend& ab) :
+			blendEnabled(e), color(cb), alpha(ab) { }
+		BlendState(uint32_t e, BlendFunction s, BlendFunction d) :
+			blendEnabled(e), color(s, d), alpha(s, d) { }
+		
+		uint32_t sortingKey() const
+		{
+			return blendEnabled ? 1 : 0;
+		}
+		
+	public:
+		Blend color;
+		BlendOperation colorOperation = BlendOperation::Add;
+		
+		Blend alpha;
+		BlendOperation alphaOperation = BlendOperation::Add;
+		
+		bool perRenderTargetBlendEnabled = false;
+		bool alphaToCoverageEnabled = false;
+		bool blendEnabled = false;
+	};
+	
+	struct RasterizerState
+	{
+		FillMode fillMode = FillMode::Solid;
+		CullMode cullMode = CullMode::Back;
+		vec4 clearColor = vec4(0.0f);
+		uint32_t colorMask = ColorMask::ColorAndAlpha;
+		recti scissorRectangle = recti(0.0f, 0.0f, 0.0f, 0.0f);
+		float depthBias = 0.0f;
+		float depthSlopeScale = 0.0f;
+		bool depthBiasEnabled = false;
+		bool scissorEnabled = false;
+	};
+	
+	struct RenderStateCache
+	{
+		uint32_t activeTextureUnit = 0;
+		uint32_t boundFramebuffer = 0;
+		uint32_t boundReadFramebuffer = 0;
+		uint32_t boundDrawFramebuffer = 0;
+		uint32_t boundRenderbuffer = 0;
+		uint32_t boundArrayBuffer = 0;
+		uint32_t boundElementArrayBuffer = 0;
+		uint32_t boundVertexArrayObject = 0;
+		uint32_t boundProgram = 0;
+		recti viewport = recti(0, 0, 0, 0);
+		
+		std::map<TextureTarget, std::map<uint32_t, uint32_t>> boundTextures;
+		std::array<size_t, VertexAttributeUsage_max> enabledVertexAttributes;
+		std::array<size_t, MaxRenderTargets> drawBuffers;
 	};
 	
 	DataType vertexAttributeTypeDataType(VertexAttributeType t);
@@ -312,4 +451,12 @@ namespace et
 	uint32_t bitsPerPixelForType(DataType type);
 	uint32_t bitsPerPixelForTextureFormat(TextureFormat internalFormat, DataType type);
 	uint32_t channelsForTextureFormat(TextureFormat internalFormat);
+	
+	const std::string& compareFunctionToString(CompareFunction);
+	const std::string& blendFunctionToString(BlendFunction);
+	const std::string& blendOperationToString(BlendOperation);
+	
+	CompareFunction stringToCompareFunction(const std::string&);
+	BlendFunction stringToBlendFunction(const std::string& );
+	BlendOperation stringToBlendOperation(const std::string&);
 }

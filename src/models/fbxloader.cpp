@@ -42,7 +42,7 @@ namespace et
 		/* 
 		 * Node loading
 		 */
-		void loadNode(s3d::Storage&, FbxNode* node, s3d::BaseElement::Pointer parent, bool isRootNode);
+		void loadNode(s3d::Storage&, FbxNode* node, s3d::BaseElement::Pointer parent);
 		void loadNodeAnimations(FbxNode* node, s3d::BaseElement::Pointer object, const StringList& props);
 
 		s3d::Material::List loadNodeMaterials(s3d::Storage&, FbxNode* node);
@@ -117,26 +117,25 @@ FBXLoaderPrivate::~FBXLoaderPrivate()
 bool FBXLoaderPrivate::import(const std::string& filename)
 {
 	_folder = getFilePath(filename);
-
-	int lFileMajor = 0;
-	int lFileMinor = 0;
-	int lFileRevision = 0;
-	int lSDKMajor = 0;
-	int lSDKMinor = 0;
-	int lSDKRevision = 0;
-
-	FbxManager::GetFileFormatVersion(lSDKMajor, lSDKMinor, lSDKRevision);
-	importer = FbxImporter::Create(manager, 0);
-	bool status = importer->Initialize(filename.c_str(), -1, manager->GetIOSettings());
-	importer->GetFileVersion(lFileMajor, lFileMinor, lFileRevision);
-
-	if (!status)
+	importer = FbxImporter::Create(manager, nullptr);
+	
+	if (importer->Initialize(filename.c_str(), -1, manager->GetIOSettings()) == false)
 	{
 		printf("Call to FbxImporter::Initialize() failed.\n");
 		printf("Error returned: %s\n", importer->GetStatus().GetErrorString());
 
 		if (importer->GetStatus().GetCode() == FbxStatus::eInvalidFileVersion)
 		{
+			int lSDKMajor = 0;
+			int lSDKMinor = 0;
+			int lSDKRevision = 0;
+			FbxManager::GetFileFormatVersion(lSDKMajor, lSDKMinor, lSDKRevision);
+			
+			int lFileMajor = 0;
+			int lFileMinor = 0;
+			int lFileRevision = 0;
+			importer->GetFileVersion(lFileMajor, lFileMinor, lFileRevision);
+			
 			printf("FBX version number for this FBX SDK is %d.%d.%d\n", lSDKMajor,
 				lSDKMinor, lSDKRevision);
 			
@@ -148,16 +147,14 @@ bool FBXLoaderPrivate::import(const std::string& filename)
 		return false;
 	}
 
-	status = importer->IsFBX();
-	if (!status)
+	if (importer->IsFBX() == false)
 	{
 		log::error("FBXLoader error: %s is not an FBX file", filename.c_str());
 		importer->Destroy();
 		return false;
 	}
 
-	status = importer->Import(scene);
-	if (!status)
+	if (importer->Import(scene) == false)
 	{
 		log::error("FBXLoader error: unable to import scene from from %s", filename.c_str());
 		importer->Destroy();
@@ -174,35 +171,42 @@ s3d::ElementContainer::Pointer FBXLoaderPrivate::parse(s3d::Storage& storage)
 	
 	FbxGeometryConverter geometryConverter(manager);
 	geometryConverter.Triangulate(scene, true);
+	geometryConverter.RemoveBadPolygonsFromMeshes(scene);
 	
 	loadAnimations();
 	
 	if (shouldCreateRenderObjects)
+	{
 		loadTextures();
+	}
 
 	auto fbxRootNode = scene->GetRootNode();
 	root = s3d::ElementContainer::Pointer::create(fbxRootNode->GetName(), nullptr);
 
 	int lChildCount = fbxRootNode->GetChildCount();
-
-	auto gt = fbxRootNode->EvaluateGlobalTransform();
-	auto lt = fbxRootNode->EvaluateLocalTransform();
-
 	for (int lChildIndex = 0; lChildIndex < lChildCount; ++lChildIndex)
-		loadNode(storage, fbxRootNode->GetChild(lChildIndex), root, true);
+	{
+		loadNode(storage, fbxRootNode->GetChild(lChildIndex), root);
+	}
 
 	linkSkeleton(storage, root);
 	
 	if (shouldCreateRenderObjects)
+	{
 		buildVertexBuffers(_rc, root, storage);
+	}
 	
 	auto meshes = root->childrenOfType(s3d::ElementType::Mesh);
 	for (s3d::Mesh::Pointer mesh : meshes)
+	{
 		mesh->calculateSupportData();
+	}
 
 	meshes = root->childrenOfType(s3d::ElementType::SupportMesh);
 	for (s3d::SupportMesh::Pointer mesh : meshes)
+	{
 		mesh->calculateSupportData();
+	}
 
 	return root;
 }
@@ -225,33 +229,43 @@ void FBXLoaderPrivate::loadAnimations()
 void FBXLoaderPrivate::loadTextures()
 {
 	application().pushSearchPath(_folder);
+	application().setShouldSilentPathResolverErrors(true);
 
 	int textures = scene->GetTextureCount();
 	for (int i = 0; i < textures; ++i)
 	{
 		FbxFileTexture* fileTexture = FbxCast<FbxFileTexture>(scene->GetTexture(i));
-		if (fileTexture && !fileTexture->GetUserDataPtr())
+		if (fileTexture && (fileTexture->GetUserDataPtr() == nullptr))
 		{
-			std::string fileName = normalizeFilePath(std::string(fileTexture->GetFileName()));
-
-			if (!fileExists(fileName))
-				fileName = application().resolveFileName(getFileName(fileName));
-
-			if (!fileExists(fileName))
-				fileName = _folder + getFileName(fileName);
-
-			Texture::Pointer texture = _rc->textureFactory().loadTexture(fileName, _texCache);
-			if (texture.invalid())
+			const char* fileTextureFileName = fileTexture->GetFileName();
+			if ((fileTextureFileName != nullptr) && (strlen(fileTextureFileName) > 0))
 			{
-				log::info("Unable to load texture: %s", fileName.c_str());
-				texture = _rc->textureFactory().genNoiseTexture(vec2i(128), false, fileName);
-				texture->setOrigin(fileName);
-				_texCache.manage(texture, _rc->textureFactory().objectLoader());
+				std::string fileName = normalizeFilePath(std::string(fileTextureFileName));
+				
+				if (!fileExists(fileName))
+				{
+					fileName = application().resolveFileName(getFileName(fileName));
+				}
+
+				if (!fileExists(fileName))
+				{
+					fileName = _folder + getFileName(fileName);
+				}
+
+				Texture::Pointer texture = _rc->textureFactory().loadTexture(fileName, _texCache);
+				if (texture.invalid())
+				{
+					log::info("Unable to load texture: %s", fileName.c_str());
+					texture = _rc->textureFactory().genNoiseTexture(vec2i(128), false, fileName);
+					texture->setOrigin(fileName);
+					_texCache.manage(texture, _rc->textureFactory().objectLoader());
+				}
+				fileTexture->SetUserDataPtr(texture.ptr());
 			}
-			fileTexture->SetUserDataPtr(texture.ptr());
 		}
 	}
 	application().popSearchPaths();
+	application().setShouldSilentPathResolverErrors(false);
 }
 
 s3d::Material::List FBXLoaderPrivate::loadNodeMaterials(s3d::Storage& storage, FbxNode* node)
@@ -309,8 +323,7 @@ void FBXLoaderPrivate::loadNodeAnimations(FbxNode* node, s3d::BaseElement::Point
 	
 	if (keyFramesToTime.size() > 1)
 	{
-		log::info("Node %s has %llu frames in animation.",
-			node->GetName(), uint64_t(keyFramesToTime.size()));
+		log::info("Node %s has %llu frames in animation.", node->GetName(), uint64_t(keyFramesToTime.size()));
 	}
 	
 	FbxTimeSpan pInterval;
@@ -365,7 +378,7 @@ void FBXLoaderPrivate::loadNodeAnimations(FbxNode* node, s3d::BaseElement::Point
 	object->addAnimation(a);
 }
 
-void et::FBXLoaderPrivate::loadNode(s3d::Storage& storage, FbxNode* node, s3d::BaseElement::Pointer parent, bool isRootNode)
+void et::FBXLoaderPrivate::loadNode(s3d::Storage& storage, FbxNode* node, s3d::BaseElement::Pointer parent)
 {
 	auto props = loadNodeProperties(node);
 	auto materials = loadNodeMaterials(storage, node);
@@ -435,24 +448,27 @@ void et::FBXLoaderPrivate::loadNode(s3d::Storage& storage, FbxNode* node, s3d::B
 
 	int lChildCount = node->GetChildCount();
 	for (int lChildIndex = 0; lChildIndex < lChildCount; ++lChildIndex)
-		loadNode(storage, node->GetChild(lChildIndex), createdElement, false);
+	{
+		loadNode(storage, node->GetChild(lChildIndex), createdElement);
+	}
 }
 
 void FBXLoaderPrivate::loadMaterialTextureValue(s3d::Material::Pointer m, uint32_t propName,
 	FbxSurfaceMaterial* fbxm, const char* fbxprop)
 {
 	FbxProperty value = fbxm->FindProperty(fbxprop);
-	if (value.IsValid())
+	if (!value.IsValid())
 	{
-		int lTextureCount = value.GetSrcObjectCount<FbxFileTexture>();
-		if (lTextureCount)
+		return;
+	}
+	
+	int lTextureCount = value.GetSrcObjectCount<FbxFileTexture>();
+	for (int i = 0; i < lTextureCount; ++i)
+	{
+		FbxFileTexture* lTexture = value.GetSrcObject<FbxFileTexture>(i);
+		if ((lTexture != nullptr) && lTexture->GetUserDataPtr())
 		{
-			FbxFileTexture* lTexture = value.GetSrcObject<FbxFileTexture>(0);
-			if ((lTexture != nullptr) && lTexture->GetUserDataPtr())
-			{
-				Texture* ptr = reinterpret_cast<Texture*>(lTexture->GetUserDataPtr());
-				m->setTexture(propName, Texture::Pointer(ptr));
-			} 
+			m->setTexture(propName, Texture::Pointer(reinterpret_cast<Texture*>(lTexture->GetUserDataPtr())));
 		}
 	}
 }
@@ -502,8 +518,22 @@ void FBXLoaderPrivate::loadMaterialValue(s3d::Material::Pointer m, uint32_t prop
 
 s3d::Material::Pointer FBXLoaderPrivate::loadMaterial(FbxSurfaceMaterial* mat)
 {
+	const char* kOpacity = "Opacity";
 	s3d::Material::Pointer m;
 	m->setName(mat->GetName());
+	
+	/*
+	 * enumerate material properties to find something interesting
+	 *
+	log::info("Material %s contains properties:", mat->GetName());
+	auto prop = mat->GetFirstProperty();
+	while (prop.IsValid())
+	{
+		log::info("prop: %s", prop.GetNameAsCStr());
+		prop = mat->GetNextProperty(prop);
+	}
+	// */
+	
 
 	if (shouldCreateRenderObjects)
 	{
@@ -514,6 +544,7 @@ s3d::Material::Pointer FBXLoaderPrivate::loadMaterial(FbxSurfaceMaterial* mat)
 		loadMaterialTextureValue(m, MaterialParameter_NormalMap, mat, FbxSurfaceMaterial::sNormalMap);
 		loadMaterialTextureValue(m, MaterialParameter_BumpMap, mat, FbxSurfaceMaterial::sBump);
 		loadMaterialTextureValue(m, MaterialParameter_ReflectionMap, mat, FbxSurfaceMaterial::sReflection);
+		loadMaterialTextureValue(m, MaterialParameter_OpacityMap, mat, FbxSurfaceMaterial::sTransparentColor);
 	}
 	
 	loadMaterialValue(m, MaterialParameter_AmbientColor, mat, FbxSurfaceMaterial::sAmbient);
@@ -529,6 +560,21 @@ s3d::Material::Pointer FBXLoaderPrivate::loadMaterial(FbxSurfaceMaterial* mat)
 	loadMaterialValue(m, MaterialParameter_Roughness, mat, FbxSurfaceMaterial::sShininess);
 	loadMaterialValue(m, MaterialParameter_Transparency, mat, FbxSurfaceMaterial::sTransparencyFactor);
 	loadMaterialValue(m, MaterialParameter_ShadingModel, mat, FbxSurfaceMaterial::sShadingModel);
+	loadMaterialValue(m, MaterialParameter_Opacity, mat, kOpacity);
+	
+	bool shouldEnableBlend = false;
+	if (m->hasFloat(MaterialParameter_Opacity))
+	{
+		shouldEnableBlend |= m->getFloat(MaterialParameter_Opacity) < 1.0f;
+	}
+	if (m->hasFloat(MaterialParameter_Transparency))
+	{
+		shouldEnableBlend |= m->getFloat(MaterialParameter_Transparency) >= 0.0f;
+	}
+	if (shouldEnableBlend)
+	{
+		m->setBlendState(BlendState(1, BlendFunction::SourceAlpha, BlendFunction::InvSourceAlpha));
+	}
 	
 	return m;
 }
@@ -1103,14 +1149,14 @@ s3d::ElementContainer::Pointer FBXLoader::load(RenderContext* rc, s3d::Storage& 
 	loader->shouldCreateRenderObjects = _shouldCreateRenderObjects;
 
 	if (loader->import(_filename))
+	{
 		result = loader->parse(storage);
+	}
 
-	Invocation i;
-	i.setTarget([loader]()
+	Invocation([loader]()
 	{
 		etDestroyObject(loader);
-	});
-	i.invokeInCurrentRunLoop();
+	}).invokeInCurrentRunLoop();
 	
 	return result;
 }

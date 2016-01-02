@@ -48,10 +48,7 @@ namespace et
 		const RenderContextParameters& parameters() const
 			{ return _params; }
 
-		const vec2& size() const
-			{ return _renderState.mainViewportSizeFloat(); }
-
-		const vec2i& sizei() const
+		const vec2i& size() const
 			{ return _renderState.mainViewportSize(); }
 
 		size_t screenScaleFactor() const

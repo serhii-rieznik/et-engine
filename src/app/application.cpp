@@ -135,7 +135,7 @@ void Application::setActive(bool active)
 		
 		if (_postResizeOnActivate)
 		{
-			_delegate->applicationWillResizeContext(_renderContext->sizei());
+			_delegate->applicationWillResizeContext(_renderContext->size());
 			_postResizeOnActivate = false;
 		}
 		
