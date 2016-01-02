@@ -212,6 +212,11 @@ namespace et
 		inline void performRecursive(ValueCallbackFunction func) override;
 		
 	public:
+		BooleanValue boolForKey(const std::string& key, BooleanValue def = BooleanValue()) const
+			{ return valueForKey<BooleanValue::ValueType, ValueClass_Boolean>(key, def); }
+		BooleanValue boolForKeyPath(const std::vector<std::string>& key, BooleanValue def = BooleanValue()) const
+			{ return valueForKeyPath<BooleanValue::ValueType, ValueClass_Boolean>(key, def); }
+		
 		IntegerValue integerForKey(const std::string& key, IntegerValue def = IntegerValue()) const
 			{ return valueForKey<IntegerValue::ValueType, ValueClass_Integer>(key, def); }
 		IntegerValue integerForKeyPath(const std::vector<std::string>& key, IntegerValue def = IntegerValue()) const

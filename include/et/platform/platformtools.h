@@ -29,4 +29,5 @@ namespace et
 
 	std::string selectFile(const StringList& types, SelectFileMode mode, const std::string& defaultName);
 	void alert(const std::string& title, const std::string& message, const std::string& button, AlertType type);
+	bool canOpenURL(const std::string&);
 }

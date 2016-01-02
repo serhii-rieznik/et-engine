@@ -5,16 +5,16 @@
 *
 */
 
-#include <Foundation/NSArray.h>
-#include <Foundation/NSDate.h>
-#include <Foundation/NSDateFormatter.h>
-#include <Foundation/NSLocale.h>
-#include <Foundation/NSString.h>
-#include <Foundation/NSBundle.h>
 #include <et/core/tools.h>
 #include <et/core/containers.h>
 #include <et/locale/locale.h>
 #include <et/platform-apple/apple.h>
+
+#include <Foundation/NSDateFormatter.h>
+#include <Foundation/NSLocale.h>
+#include <Foundation/NSString.h>
+#include <Foundation/NSDate.h>
+#include <Foundation/NSBundle.h>
 
 using namespace et;
 

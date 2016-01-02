@@ -21,6 +21,8 @@ namespace et
 	public:
 		CameraMovingController(Camera&, bool autoConnectToEvents);
 		
+		void synchronize(const Camera&) override;
+		
 		void setMovementSpeed(const vec3&);
 		void setIntepolationRate(float);
 
@@ -28,8 +30,6 @@ namespace et
 		void cancelUpdates() override;
 		
 	private:
-		void synchronize(const Camera&) override;
-		
 		void update(float) override;
 		
 		void onKeyPressed(size_t) override;

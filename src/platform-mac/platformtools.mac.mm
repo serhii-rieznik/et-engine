@@ -54,6 +54,12 @@ void et::alert(const std::string& title, const std::string& message, const std::
 #endif
 }
 
+bool et::canOpenURL(const std::string& s)
+{
+	return [[NSWorkspace sharedWorkspace] URLForApplicationToOpenURL:
+			[NSURL URLWithString:[NSString stringWithUTF8String:s.c_str()]]] != nil;
+}
+
 std::string et::selectFile(const StringList& allowedTypes, SelectFileMode mode, const std::string& defName)
 {
 	SEL selector = nil;

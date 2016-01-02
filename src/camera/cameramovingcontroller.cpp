@@ -98,8 +98,9 @@ void CameraMovingController::update(float dt)
 	if (movement.dotSelf() > 0.0f)
 	{
 		movement.normalize();
+		float multiplier = dt * static_cast<float>(1.0f + _pressedKeys.count(ET_KEY_SHIFT));
 		vec3 direction = camera().side() * movement.x - camera().direction() * movement.z;
-		_positionAnimator.addTargetValue(_movementSpeed * dt * direction);
+		_positionAnimator.addTargetValue(_movementSpeed * multiplier * direction);
 	}
 }
 
