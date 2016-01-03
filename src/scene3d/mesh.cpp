@@ -1,6 +1,6 @@
 /*
  * This file is part of `et engine`
- * Copyright 2009-2015 by Sergey Reznik
+ * Copyright 2009-2016 by Sergey Reznik
  * Please, modify content only if you know what are you doing.
  *
  */
@@ -61,7 +61,7 @@ void Mesh::calculateSupportData()
 	const auto pos = _vertexStorage->accessData<VertexAttributeType::Vec3>(VertexAttributeUsage::Position, 0);
 	for (uint32_t i = 0; i < _numIndexes; ++i)
 	{
-		size_t index = _indexArray->getIndex(_startIndex + i);
+		uint32_t index = _indexArray->getIndex(_startIndex + i);
 		const auto& v = pos[index];
 		minVertex = minv(minVertex, v);
 		maxVertex = maxv(maxVertex, v);
@@ -342,7 +342,7 @@ const AABB& Mesh::boundingBox()
 		vec3 maxVertex(-std::numeric_limits<float>::max());
 		
 		const auto& ft = finalTransform();
-		for (size_t i = 0; i < AABBCorner_max; ++i)
+		for (uint32_t i = 0; i < AABBCorner_max; ++i)
 		{
 			vec3 transformedCorner = ft * originalAABB.corners[i];
 			minVertex = minv(minVertex, transformedCorner);
@@ -375,7 +375,7 @@ const std::vector<mat4>& Mesh::deformationMatrices()
 	if (_deformer.valid())
 		return _deformer->calculateTransformsForMesh(this);
 	
-	for (size_t i = 0; i < 4; ++i)
+	for (uint32_t i = 0; i < 4; ++i)
 		_undeformedTransformationMatrices[i] = finalTransform();
 	
 	return _undeformedTransformationMatrices;
@@ -390,7 +390,7 @@ void copyAttributeWithType(VertexStorage::Pointer from, VertexStorage::Pointer t
 {
 	auto c0 = from->accessData<attribType>(attrib, 0);
 	auto c1 = to->accessData<attribType>(attrib, 0);
-	for (size_t i = 0; i < from->capacity(); ++i)
+	for (uint32_t i = 0; i < from->capacity(); ++i)
 		c1[i] = c0[i];
 }
 
@@ -436,7 +436,7 @@ void copyVector3Rotated(VertexStorage::Pointer from, VertexStorage::Pointer to, 
 	
 	auto c0 = from->accessData<VertexAttributeType::Vec3>(attrib, 0);
 	auto c1 = to->accessData<VertexAttributeType::Vec3>(attrib, 0);
-	for (size_t i = 0; i < from->capacity(); ++i)
+	for (uint32_t i = 0; i < from->capacity(); ++i)
 		c1[i] = transform.rotationMultiply(c0[i]);
 }
 
@@ -447,7 +447,7 @@ void copyVector3Transformed(VertexStorage::Pointer from, VertexStorage::Pointer 
 	
 	auto c0 = from->accessData<VertexAttributeType::Vec3>(attrib, 0);
 	auto c1 = to->accessData<VertexAttributeType::Vec3>(attrib, 0);
-	for (size_t i = 0; i < from->capacity(); ++i)
+	for (uint32_t i = 0; i < from->capacity(); ++i)
 		c1[i] = transform * c0[i];
 }
 
@@ -460,7 +460,7 @@ void skinVector3Rotated(VertexStorage::Pointer from, VertexStorage::Pointer to, 
 	auto c1 = to->accessData<VertexAttributeType::Vec3>(attrib, 0);
 	auto bi = to->accessData<VertexAttributeType::IntVec4>(VertexAttributeUsage::BlendIndices, 0);
 	auto bw = to->accessData<VertexAttributeType::Vec4>(VertexAttributeUsage::BlendWeights, 0);
-	for (size_t i = 0; i < from->capacity(); ++i)
+	for (uint32_t i = 0; i < from->capacity(); ++i)
 	{
 		c1[i] =
 			transforms[bi[i][0]].rotationMultiply(c0[i]) * bw[i][0] +
@@ -479,7 +479,7 @@ void skinVector3Transformed(VertexStorage::Pointer from, VertexStorage::Pointer 
 	auto c1 = to->accessData<VertexAttributeType::Vec3>(attrib, 0);
 	auto bi = to->accessData<VertexAttributeType::IntVec4>(VertexAttributeUsage::BlendIndices, 0);
 	auto bw = to->accessData<VertexAttributeType::Vec4>(VertexAttributeUsage::BlendWeights, 0);
-	for (size_t i = 0; i < from->capacity(); ++i)
+	for (uint32_t i = 0; i < from->capacity(); ++i)
 	{
 		c1[i] = (transforms[bi[i][0]] * c0[i]) * bw[i][0] + (transforms[bi[i][1]] * c0[i]) * bw[i][1] +
 			(transforms[bi[i][2]] * c0[i]) * bw[i][2] +  (transforms[bi[i][3]] * c0[i]) * bw[i][3];

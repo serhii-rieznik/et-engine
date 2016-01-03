@@ -1,6 +1,6 @@
 /*
  * This file is part of `et engine`
- * Copyright 2009-2015 by Sergey Reznik
+ * Copyright 2009-2016 by Sergey Reznik
  * Please, modify content only if you know what are you doing.
  *
  */
@@ -36,7 +36,7 @@ Frustum::Frustum(const mat4& mvp)
 
 bool Frustum::containsSphere(const Sphere& sphere) const
 {
-	for (size_t p = FrustumPlane_Right; p < FrustumPlane_max; ++p)
+	for (uint32_t p = FrustumPlane_Right; p < FrustumPlane_max; ++p)
 	{
 		if (_planes[p].dot(vec4(sphere.center(), 1.0f)) + sphere.radius() <= 0.0f)
 			return false;

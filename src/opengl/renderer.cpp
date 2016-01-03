@@ -1,6 +1,6 @@
 /*
  * This file is part of `et engine`
- * Copyright 2009-2015 by Sergey Reznik
+ * Copyright 2009-2016 by Sergey Reznik
  * Please, modify content only if you know what are you doing.
  *
  */
@@ -95,7 +95,7 @@ Renderer::Renderer(RenderContext* rc) :
 void Renderer::clear(bool color, bool depth)
 {
 	ET_ASSERT(!depth || (depth && _rc->renderState().depthState().depthWriteEnabled));
-	ET_ASSERT(!color || (color && (_rc->renderState().colorMask() != static_cast<size_t>(ColorMask::None))));
+	ET_ASSERT(!color || (color && (_rc->renderState().colorMask() != static_cast<uint32_t>(ColorMask::None))));
 	
 	GLbitfield clearMask = (color * GL_COLOR_BUFFER_BIT) + (depth * GL_DEPTH_BUFFER_BIT);
 	if (clearMask != 0)
@@ -194,7 +194,7 @@ void Renderer::renderTextureRotated(const Texture::Pointer& texture, float angle
 		currentViewportSizeToScene(sz), tint);
 }
 
-void Renderer::drawElements(const IndexBuffer::Pointer& ib, size_t first, size_t count)
+void Renderer::drawElements(const IndexBuffer::Pointer& ib, uint32_t first, uint32_t count)
 {
 	ET_ASSERT(ib.valid());
 	
@@ -202,7 +202,7 @@ void Renderer::drawElements(const IndexBuffer::Pointer& ib, size_t first, size_t
 		dataTypeValue(ib->dataType()), ib->indexOffset(first));
 }
 
-void Renderer::drawElementsInstanced(const IndexBuffer::Pointer& ib, size_t first, size_t count, size_t instances)
+void Renderer::drawElementsInstanced(const IndexBuffer::Pointer& ib, uint32_t first, uint32_t count, uint32_t instances)
 {
 	ET_ASSERT(ib.valid());
 	
@@ -210,7 +210,7 @@ void Renderer::drawElementsInstanced(const IndexBuffer::Pointer& ib, size_t firs
 		dataTypeValue(ib->dataType()), ib->indexOffset(first), static_cast<GLsizei>(instances));
 }
 
-void Renderer::drawElements(PrimitiveType pt, const IndexBuffer::Pointer& ib, size_t first, size_t count)
+void Renderer::drawElements(PrimitiveType pt, const IndexBuffer::Pointer& ib, uint32_t first, uint32_t count)
 {
 	ET_ASSERT(ib.valid());
 	
@@ -226,7 +226,7 @@ void Renderer::drawAllElements(const IndexBuffer::Pointer& ib)
 		dataTypeValue(ib->dataType()), nullptr);
 }
 
-void Renderer::drawElementsBaseIndex(const VertexArrayObject& vao, int base, size_t first, size_t count)
+void Renderer::drawElementsBaseIndex(const VertexArrayObject& vao, int base, uint32_t first, uint32_t count)
 {
 	ET_ASSERT(vao->indexBuffer().valid());
 	
@@ -253,7 +253,7 @@ void Renderer::drawElementsBaseIndex(const VertexArrayObject& vao, int base, siz
 #endif
 }
 
-void Renderer::drawElementsSequentially(PrimitiveType primitiveType, size_t first, size_t count)
+void Renderer::drawElementsSequentially(PrimitiveType primitiveType, uint32_t first, uint32_t count)
 {
 	auto pvalue = primitiveTypeValue(primitiveType);
 	glDrawArrays(pvalue, GLint(first), GLsizei(count));

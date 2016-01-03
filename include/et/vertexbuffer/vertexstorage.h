@@ -1,6 +1,6 @@
 /*
  * This file is part of `et engine`
- * Copyright 2009-2015 by Sergey Reznik
+ * Copyright 2009-2016 by Sergey Reznik
  * Please, modify content only if you know what are you doing.
  *
  */
@@ -64,6 +64,7 @@ namespace et
 		
 		size_t offsetOfAttribute(VertexAttributeUsage usage) const;
 		size_t sizeOfAttribute(VertexAttributeUsage usage) const;
+		
 	private:
 		ET_DECLARE_PIMPL(VertexStorage, 128)
 	};

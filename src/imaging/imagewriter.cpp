@@ -1,6 +1,6 @@
 /*
  * This file is part of `et engine`
- * Copyright 2009-2015 by Sergey Reznik
+ * Copyright 2009-2016 by Sergey Reznik
  * Please, modify content only if you know what are you doing.
  *
  */
@@ -74,7 +74,7 @@ void internal_func_writePNGtoBuffer(png_structp png_ptr, png_bytep data, png_siz
 
 	buffer->fitToSize(length);
 	etCopyMemory(buffer->current_ptr(), data, length);
-	buffer->applyOffset(length);
+	buffer->applyOffset(static_cast<uint32_t>(length));
 }
 
 bool internal_writePNGtoBuffer(BinaryDataStorage& buffer, const BinaryDataStorage& data,

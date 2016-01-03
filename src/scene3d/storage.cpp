@@ -1,6 +1,6 @@
 /*
  * This file is part of `et engine`
- * Copyright 2009-2015 by Sergey Reznik
+ * Copyright 2009-2016 by Sergey Reznik
  * Please, modify content only if you know what are you doing.
  *
  */
@@ -206,7 +206,7 @@ void Storage::deserializeWithOptions(RenderContext* rc, Dictionary stream, Seria
 	Dictionary iaInfo = stream.dictionaryForKey(kIndexArray);
 	IndexArrayFormat fmt = stringToIndexArrayFormat(iaInfo.stringForKey(kFormat)->content);
 	PrimitiveType pt = stringToPrimitiveType(iaInfo.stringForKey(kPrimitiveType)->content);
-	size_t indexesCount = static_cast<size_t>(iaInfo.integerForKey(kIndexesCount)->content);
+	uint32_t indexesCount = static_cast<uint32_t>(iaInfo.integerForKey(kIndexesCount)->content);
 	
 	IndexArray::Pointer ia = IndexArray::Pointer::create(fmt, indexesCount, pt);
 	ia->setActualSize(indexesCount);

@@ -1,6 +1,6 @@
 /*
  * This file is part of `et engine`
- * Copyright 2009-2015 by Sergey Reznik
+ * Copyright 2009-2016 by Sergey Reznik
  * Please, modify content only if you know what are you doing.
  *
  */
@@ -22,8 +22,8 @@ public:
 	struct LOD
 	{
 		static const size_t VARIATIONS = 16;
-		size_t first[VARIATIONS];
-		size_t size[VARIATIONS];
+		uint32_t first[VARIATIONS];
+		uint32_t size[VARIATIONS];
 	};
 
 	LOD lods[Terrain::LodLevel_max];

@@ -1,6 +1,6 @@
 /*
  * This file is part of `et engine`
- * Copyright 2009-2015 by Sergey Reznik
+ * Copyright 2009-2016 by Sergey Reznik
  * Please, modify content only if you know what are you doing.
  *
  */
@@ -84,31 +84,31 @@ namespace et
 		const char* binary() const
 			{ return mat[0].binary(); }  
 
-		T& operator () (int i)
+		T& operator () (int32_t i)
 			{ return *(mat[0].data() + i); }
 		
-		const T& operator () (int i) const
+		const T& operator () (int32_t i) const
 			{ return *(mat[0].data() + i); }
 
-		RowType& operator [] (int i)
+		RowType& operator [] (int32_t i)
 			{ return mat[i];}
 
-		const RowType& operator [] (int i) const
+		const RowType& operator [] (int32_t i) const
 			{ return mat[i];}
 
-		T& operator () (size_t i)
+		T& operator () (uint32_t i)
 			{ return *(mat[0].data() + i); }
 		
-		const T& operator () (size_t i) const
+		const T& operator () (uint32_t i) const
 			{ return *(mat[0].data() + i); }
 		
-		RowType& operator [] (size_t i)
+		RowType& operator [] (uint32_t i)
 			{ return mat[i];}
 		
-		const RowType& operator [] (size_t i) const
+		const RowType& operator [] (uint32_t i) const
 			{ return mat[i];}
 		
-		RowType column(int c) const
+		RowType column(int32_t c) const
 			{ return RowType( mat[0][c], mat[1][c], mat[2][c], mat[3][c]); }
 
 		matrix4 operator * (T s) const

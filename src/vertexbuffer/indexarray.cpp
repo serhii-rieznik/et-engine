@@ -1,6 +1,6 @@
 /*
  * This file is part of `et engine`
- * Copyright 2009-2015 by Sergey Reznik
+ * Copyright 2009-2016 by Sergey Reznik
  * Please, modify content only if you know what are you doing.
  *
  */
@@ -24,38 +24,38 @@ static const uint32_t indexTypesMask[static_cast<uint32_t>(IndexArrayFormat::max
 	0xffffffff, // IndexArrayFormat::Format_32bit = 4
 };
 
-size_t verifyDataSize(size_t amount, IndexArrayFormat format);
+uint32_t verifyDataSize(uint32_t amount, IndexArrayFormat format);
 
-IndexArray::IndexArray(IndexArrayFormat format, size_t size, PrimitiveType content) : tag(0),
+IndexArray::IndexArray(IndexArrayFormat format, uint32_t size, PrimitiveType content) : tag(0),
 	_data(verifyDataSize(size, format)), _actualSize(0), _format(format), _primitiveType(content)
 {
 	if (content == PrimitiveType::Points)
 		linearize(size);
 }
 
-void IndexArray::linearize(size_t indexFrom, size_t indexTo, uint32_t startIndex)
+void IndexArray::linearize(uint32_t indexFrom, uint32_t indexTo, uint32_t startIndex)
 {
-	for (size_t i = indexFrom; i < indexTo; ++i)
+	for (uint32_t i = indexFrom; i < indexTo; ++i)
 		setIndex(startIndex++, i);
 }
 
-void IndexArray::linearize(size_t size)
+void IndexArray::linearize(uint32_t size)
 {
 	linearize(0, size, 0);
 }
 
-uint32_t IndexArray::getIndex(size_t pos) const
+uint32_t IndexArray::getIndex(uint32_t pos) const
 {
-	auto maskValue = indexTypesMask[static_cast<size_t>(_format)];
+	auto maskValue = indexTypesMask[static_cast<uint32_t>(_format)];
 	
 	ET_ASSERT(pos <= maskValue);
 	
-	return *reinterpret_cast<const uint32_t*>(_data.element_ptr(pos * static_cast<size_t>(_format))) & maskValue;
+	return *reinterpret_cast<const uint32_t*>(_data.element_ptr(pos * static_cast<uint32_t>(_format))) & maskValue;
 }
 
-void IndexArray::setIndex(uint32_t value, size_t pos)
+void IndexArray::setIndex(uint32_t value, uint32_t pos)
 {
-	unsigned char* elementPtr = _data.element_ptr(pos * static_cast<size_t>(_format));
+	unsigned char* elementPtr = _data.element_ptr(pos * static_cast<uint32_t>(_format));
 
 	if (_format == IndexArrayFormat::Format_32bit)
 	{
@@ -86,7 +86,7 @@ void IndexArray::push_back(uint32_t value)
 	setIndex(value, _actualSize++);
 }
 
-size_t IndexArray::primitivesCount() const
+uint32_t IndexArray::primitivesCount() const
 {
 	switch (_primitiveType)
 	{
@@ -109,13 +109,13 @@ size_t IndexArray::primitivesCount() const
 	return 0;
 }
 
-void IndexArray::resize(size_t count)
+void IndexArray::resize(uint32_t count)
 {
 	_actualSize = etMin(_actualSize, count);
 	_data.resize(verifyDataSize(count, _format));
 }
 
-void IndexArray::resizeToFit(size_t count)
+void IndexArray::resizeToFit(uint32_t count)
 {
 	_actualSize = etMin(_actualSize, count);
 	_data.fitToSize(verifyDataSize(count, _format));
@@ -136,9 +136,9 @@ IndexArray::PrimitiveIterator IndexArray::end() const
 	return IndexArray::PrimitiveIterator(this, capacity());
 }
 
-IndexArray::PrimitiveIterator IndexArray::primitive(size_t index) const
+IndexArray::PrimitiveIterator IndexArray::primitive(uint32_t index) const
 {
-	size_t primitiveIndex = 0;
+	uint32_t primitiveIndex = 0;
 	switch (_primitiveType)
 	{
 		case PrimitiveType::Lines:
@@ -169,8 +169,8 @@ IndexArray::PrimitiveIterator IndexArray::primitive(size_t index) const
  */
 IndexArray::Primitive::Primitive()
 {
-	for (size_t i = 0; i < IndexArray::Primitive::VertexCount_max; ++i)
-		index[i] = static_cast<size_t>(InvalidIndex);
+	for (uint32_t i = 0; i < IndexArray::Primitive::VertexCount_max; ++i)
+		index[i] = static_cast<uint32_t>(InvalidIndex);
 }
 
 bool IndexArray::Primitive::operator == (const Primitive& p) const
@@ -183,15 +183,15 @@ bool IndexArray::Primitive::operator != (const Primitive& p) const
 	return (p.index[0] != index[0]) || (p.index[1] != index[1]) || (p.index[2] != index[2]);
 }
 
-IndexArray::PrimitiveIterator::PrimitiveIterator(const IndexArray* ib, size_t p) :
+IndexArray::PrimitiveIterator::PrimitiveIterator(const IndexArray* ib, uint32_t p) :
 	_ib(ib), _pos(p)
 {
 	configure(_pos);
 }
 
-void IndexArray::PrimitiveIterator::configure(size_t p)
+void IndexArray::PrimitiveIterator::configure(uint32_t p)
 {
-	size_t cap = _ib->_actualSize;
+	uint32_t cap = _ib->_actualSize;
 	
 	switch (_ib->primitiveType())
 	{
@@ -269,7 +269,7 @@ bool IndexArray::PrimitiveIterator::operator != (const IndexArray::PrimitiveIter
 /*
  * Service functions
  */
-size_t verifyDataSize(size_t amount, IndexArrayFormat format)
+uint32_t verifyDataSize(uint32_t amount, IndexArrayFormat format)
 {
-	return static_cast<size_t>(format) * ((format == IndexArrayFormat::Format_32bit) ? amount : (1 + amount / 4) * 4);
+	return static_cast<uint32_t>(format) * ((format == IndexArrayFormat::Format_32bit) ? amount : (1 + amount / 4) * 4);
 }

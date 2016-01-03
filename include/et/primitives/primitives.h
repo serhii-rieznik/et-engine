@@ -1,6 +1,6 @@
 /*
  * This file is part of `et engine`
- * Copyright 2009-2015 by Sergey Reznik
+ * Copyright 2009-2016 by Sergey Reznik
  * Please, modify content only if you know what are you doing.
  *
  */
@@ -16,7 +16,7 @@ namespace et
 {
 	namespace primitives
 	{
-		size_t primitiveCountForIndexCount(size_t numIndexes, PrimitiveType geometryType);
+		uint32_t primitiveCountForIndexCount(uint32_t numIndexes, PrimitiveType geometryType);
 		
 		uint32_t indexCountForRegularMesh(const vec2i& meshSize, PrimitiveType geometryType);
 
@@ -48,19 +48,18 @@ namespace et
 			const vec2& texCoordOffset = vec2(0.0f));
 
 		IndexArray::Pointer createCirclePlane(VertexArray::Pointer data, const vec3& normal, float radius,
-			size_t density, const vec3& center = vec3(0.0f), const vec2& texCoordScale = vec2(1.0f),
+			uint32_t density, const vec3& center = vec3(0.0f), const vec2& texCoordScale = vec2(1.0f),
 			const vec2& texCoordOffset = vec2(0.0f));
 		
 		void calculateNormals(VertexArray::Pointer data, const IndexArray::Pointer& buffer,
-			size_t first, size_t last);
+			uint32_t first, uint32_t last);
 		void calculateNormals(VertexStorage::Pointer data, const IndexArray::Pointer& buffer,
-			size_t first, size_t last);
+			uint32_t first, uint32_t last);
 		
 		void calculateTangents(VertexArray::Pointer data, const IndexArray::Pointer& buffer,
 			uint32_t first, uint32_t last);
 		void calculateTangents(VertexStorage::Pointer data, const IndexArray::Pointer& buffer,
 			uint32_t first, uint32_t last);
-
 		void smoothTangents(VertexArray::Pointer data, const IndexArray::Pointer& buffer,
 			uint32_t first, uint32_t last);
 		

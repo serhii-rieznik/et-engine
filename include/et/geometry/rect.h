@@ -1,6 +1,6 @@
 /*
  * This file is part of `et engine`
- * Copyright 2009-2015 by Sergey Reznik
+ * Copyright 2009-2016 by Sergey Reznik
  * Please, modify content only if you know what are you doing.
  *
  */
@@ -34,16 +34,16 @@ namespace et
 		Rect(const vector2<T>& pos, const vector2<T>& size) : 
 			left(pos.x), top(pos.y), width(size.x), height(size.y) { }
 
-		T& operator [](int i) 
+		T& operator [](int32_t i)
 			{ return c[i]; }
 
-		const T& operator [](int i) const
+		const T& operator [](int32_t i) const
 			{ return c[i]; }
 
-		T& operator [](size_t i)
+		T& operator [](uint32_t i)
 			{ return c[i]; }
 		
-		const T& operator [](size_t i) const
+		const T& operator [](uint32_t i) const
 			{ return c[i]; }
 		
 		const vector2<T>& origin() const

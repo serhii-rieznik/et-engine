@@ -1,6 +1,6 @@
 /*
  * This file is part of `et engine`
- * Copyright 2009-2015 by Sergey Reznik
+ * Copyright 2009-2016 by Sergey Reznik
  * Please, modify content only if you know what are you doing.
  *
  */
@@ -82,7 +82,7 @@ namespace et
 		const VertexElementList& elements() const
 			{ return _list; }   
 
-		VertexElement& operator [](size_t i)
+		VertexElement& operator [](uint32_t i)
 			{ return _list.at(i); }
 
 		size_t numElements() const

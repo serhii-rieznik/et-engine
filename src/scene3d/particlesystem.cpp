@@ -1,6 +1,6 @@
 /*
  * This file is part of `et engine`
- * Copyright 2009-2015 by Sergey Reznik
+ * Copyright 2009-2016 by Sergey Reznik
  * Please, modify content only if you know what are you doing.
  *
  */
@@ -12,7 +12,7 @@
 using namespace et;
 using namespace et::s3d;
 
-ParticleSystem::ParticleSystem(RenderContext* rc, size_t maxSize, const std::string& name, BaseElement* parent) :
+ParticleSystem::ParticleSystem(RenderContext* rc, uint32_t maxSize, const std::string& name, BaseElement* parent) :
 	BaseElement(name, parent), _rc(rc), _decl(true, VertexAttributeUsage::Position, VertexAttributeType::Vec3),
 	_emitter(maxSize)
 {
@@ -25,7 +25,7 @@ ParticleSystem::ParticleSystem(RenderContext* rc, size_t maxSize, const std::str
 	IndexArray::Pointer ia = IndexArray::Pointer::create(IndexArrayFormat::Format_16bit, maxSize, PrimitiveType::Points);
 	auto pos = va->chunk(VertexAttributeUsage::Position).accessData<vec3>(0);
 	auto clr = va->chunk(VertexAttributeUsage::Color).accessData<vec4>(0);
-	for (size_t i = 0; i < pos.size(); ++i)
+	for (uint32_t i = 0; i < pos.size(); ++i)
 	{
 		const auto& p = _emitter.particle(i);
 		pos[i] = p.position;
@@ -60,7 +60,7 @@ void ParticleSystem::onTimerUpdated(NotifyTimer* timer)
 	RawDataAcessor<vec3> pos(reinterpret_cast<char*>(bufferData), _vertexData.data.dataSize(), _decl.dataSize(), posOffset);
 	RawDataAcessor<vec4> clr(reinterpret_cast<char*>(bufferData), _vertexData.data.dataSize() + clrOffset, _decl.dataSize(), clrOffset);
 	
-	for (size_t i = 0; i < _emitter.activeParticlesCount(); ++i)
+	for (uint32_t i = 0; i < _emitter.activeParticlesCount(); ++i)
 	{
 		const auto& p = _emitter.particle(i);
 		pos[i] = p.position;

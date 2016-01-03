@@ -1,6 +1,6 @@
 /*
  * This file is part of `et engine`
- * Copyright 2009-2015 by Sergey Reznik
+ * Copyright 2009-2016 by Sergey Reznik
  * Please, modify content only if you know what are you doing.
  *
  */
@@ -355,19 +355,7 @@ void RenderState::setDepthState(const DepthState& state, bool force)
 void RenderState::setBlendConfiguration(et::BlendConfiguration blend, bool force)
 {
 	ET_ASSERT(static_cast<uint32_t>(blend) < BlendConfiguration_max);
-	
-	static const BlendState blendStates[BlendConfiguration_max] =
-	{
-		BlendState(0, BlendFunction::One, BlendFunction::Zero), // Disabled,
-		BlendState(1, BlendFunction::SourceAlpha, BlendFunction::InvSourceAlpha), // Default,
-		BlendState(1, BlendFunction::One, BlendFunction::InvSourceAlpha), // AlphaPremultiplied,
-		BlendState(1, BlendFunction::One, BlendFunction::One), // Additive,
-		BlendState(1, BlendFunction::SourceAlpha, BlendFunction::One), // AlphaAdditive,
-		BlendState(1, BlendFunction::Zero, BlendFunction::SourceAlpha), // AlphaMultiplicative,
-		BlendState(1, BlendFunction::SourceColor, BlendFunction::One), // ColorAdditive,
-		BlendState(1, BlendFunction::Zero, BlendFunction::InvSourceAlpha), // AlphaInverseMultiplicative,
-	};
-	setBlendState(blendStates[static_cast<uint32_t>(blend)], force);
+	setBlendState(blendConfigurationToBlendState(blend), force);
 }
 
 void RenderState::vertexArrayDeleted(uint32_t buffer)
@@ -834,4 +822,15 @@ RenderState::Descriptor RenderState::currentState()
 	s.rasterizer = currentRasterizedState();
 	s.cache = currentCacheValues();
 	return s;
+}
+
+/*
+ * Materials stuff
+ */
+void RenderState::bindMaterial(const Material::Pointer& mat)
+{
+	setCulling(mat->cullMode());
+	setBlendState(mat->blendState());
+	setDepthState(mat->depthState());
+	bindProgram(mat->program());
 }

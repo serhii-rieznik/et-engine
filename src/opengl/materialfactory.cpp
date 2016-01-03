@@ -1,6 +1,6 @@
 /*
  * This file is part of `et engine`
- * Copyright 2009-2015 by Sergey Reznik
+ * Copyright 2009-2016 by Sergey Reznik
  * Please, modify content only if you know what are you doing.
  *
  */
@@ -258,9 +258,9 @@ Program::Pointer MaterialFactory::loadProgram(const std::string& file, ObjectsCa
 	
 	std::string workFolder = getFilePath(file);
 	
-	parseSourceCode(ShaderType_Vertex, vertex_shader, defines, workFolder);
-	parseSourceCode(ShaderType_Geometry, geom_shader, defines, workFolder);
-	parseSourceCode(ShaderType_Fragment, frag_shader, defines, workFolder);
+	parseSourceCode(ShaderType::Vertex, vertex_shader, defines, workFolder);
+	parseSourceCode(ShaderType::Geometry, geom_shader, defines, workFolder);
+	parseSourceCode(ShaderType::Fragment, frag_shader, defines, workFolder);
 	
 	Program::Pointer program = Program::Pointer::create(renderContext(), vertex_shader, geom_shader,
 		frag_shader, getFileName(file), file, defines);
@@ -285,9 +285,9 @@ Program::Pointer MaterialFactory::genProgram(const std::string& name, const std:
 	std::string gs = geometryshader;
 	std::string fs = fragmentshader;
 	
-	parseSourceCode(ShaderType_Vertex, vs, defines, workFolder);
-	parseSourceCode(ShaderType_Geometry, gs, defines, workFolder);
-	parseSourceCode(ShaderType_Fragment, fs, defines, workFolder);
+	parseSourceCode(ShaderType::Vertex, vs, defines, workFolder);
+	parseSourceCode(ShaderType::Geometry, gs, defines, workFolder);
+	parseSourceCode(ShaderType::Fragment, fs, defines, workFolder);
 	
 	return Program::Pointer::create(renderContext(), vs, gs, fs, name, name, defines);
 }
@@ -298,8 +298,8 @@ Program ::Pointer MaterialFactory::genProgram(const std::string& name, const std
 	std::string vs = vertexshader;
 	std::string fs = fragmentshader;
 	
-	parseSourceCode(ShaderType_Vertex, vs, defines, workFolder);
-	parseSourceCode(ShaderType_Fragment, fs, defines, workFolder);
+	parseSourceCode(ShaderType::Vertex, vs, defines, workFolder);
+	parseSourceCode(ShaderType::Fragment, fs, defines, workFolder);
 	
 	return Program::Pointer::create(renderContext(), vs, emptyString, fs, name, name, defines);
 }
@@ -317,9 +317,9 @@ void MaterialFactory::parseSourceCode(ShaderType type, std::string& source, cons
 	
 	std::string header = _commonHeader;
 	
-	if (type == ShaderType_Vertex)
+	if (type == ShaderType::Vertex)
 		header += _vertShaderHeader;
-	else if (type == ShaderType_Fragment)
+	else if (type == ShaderType::Fragment)
 		header += _fragShaderHeader;
 
 	for (const auto i : defines)
@@ -386,17 +386,17 @@ void MaterialFactory::reloadObject(LoadableObject::Pointer obj, ObjectsCache&)
 	
 	// TODO: handle defines
 	std::string workFolder = getFilePath(obj->origin());
-	parseSourceCode(ShaderType_Vertex, vertex_shader, StringList(), workFolder);
-	parseSourceCode(ShaderType_Geometry, geom_shader, StringList(), workFolder);
-	parseSourceCode(ShaderType_Fragment, frag_shader, StringList(), workFolder);
+	parseSourceCode(ShaderType::Vertex, vertex_shader, StringList(), workFolder);
+	parseSourceCode(ShaderType::Geometry, geom_shader, StringList(), workFolder);
+	parseSourceCode(ShaderType::Fragment, frag_shader, StringList(), workFolder);
 	
 	Program::Pointer(obj)->buildProgram(vertex_shader, geom_shader, frag_shader);
 }
 
 Material::Pointer MaterialFactory::loadMaterial(const std::string& fileName, ObjectsCache& cache)
 {
-	Material::Pointer result = Material::Pointer::create(renderContext());
-	result->loadFromJson(loadTextFile(fileName), cache);
+	Material::Pointer result = Material::Pointer::create(this);
+	result->loadFromJson(loadTextFile(fileName), getFilePath(fileName), cache);
 	return result;
 }
 

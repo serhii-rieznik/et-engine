@@ -1,6 +1,6 @@
 /*
  * This file is part of `et engine`
- * Copyright 2009-2015 by Sergey Reznik
+ * Copyright 2009-2016 by Sergey Reznik
  * Please, modify content only if you know what are you doing.
  *
  */
@@ -304,7 +304,7 @@ quaternion et::arrayToQuaternion(ArrayValue a)
 rect et::arrayToRect(ArrayValue a)
 {
 	rect result;
-	size_t index = 0;
+	uint32_t index = 0;
 	for (auto v : a->content)
 	{
 		if (v->valueClass() == ValueClass_Float)

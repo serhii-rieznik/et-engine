@@ -1,6 +1,6 @@
 /*
  * This file is part of `et engine`
- * Copyright 2009-2015 by Sergey Reznik
+ * Copyright 2009-2016 by Sergey Reznik
  * Please, modify content only if you know what are you doing.
  *
  */
@@ -117,13 +117,13 @@ namespace et
 	{
 		DefaultMaterialEntry<T> values[MaterialParameter_max];
 		
-		DefaultMaterialEntry<T>& operator[] (size_t i)
+		DefaultMaterialEntry<T>& operator[] (uint32_t i)
 		{
 			ET_ASSERT(i < MaterialParameter_max);
 			return values[i];
 		}
 		
-		const DefaultMaterialEntry<T>& operator[] (size_t i) const
+		const DefaultMaterialEntry<T>& operator[] (uint32_t i) const
 		{
 			ET_ASSERT(i < MaterialParameter_max);
 			return values[i];

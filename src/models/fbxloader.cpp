@@ -1,6 +1,6 @@
 /*
  * This file is part of `et engine`
- * Copyright 2009-2015 by Sergey Reznik
+ * Copyright 2009-2016 by Sergey Reznik
  * Please, modify content only if you know what are you doing.
  *
  */
@@ -765,7 +765,7 @@ s3d::Mesh::Pointer FBXLoaderPrivate::loadMesh(s3d::Storage& storage, FbxMesh* me
 	FbxStringList lUVNames;
 	mesh->GetUVSetNames(lUVNames);
 
-	size_t vertexCount = 0;
+	uint32_t vertexCount = 0;
 	uint32_t indexOffset = static_cast<uint32_t>(vertexBaseOffset);
 	
 	std::map<size_t, std::vector<size_t>> controlPointToMeshIndex;
@@ -1091,9 +1091,9 @@ void FBXLoaderPrivate::buildBlendWeightsForMesh(s3d::Storage& storage, s3d::Mesh
 	auto bli = vs->accessData<VertexAttributeType::IntVec4>(VertexAttributeUsage::BlendIndices, mesh->startIndex());
 	auto blw = vs->accessData<VertexAttributeType::Vec4>(VertexAttributeUsage::BlendWeights, mesh->startIndex());
 	
-	std::map<size_t, size_t> placedIndices;
+	std::map<size_t, uint32_t> placedIndices;
 	
-	for (size_t i = 0; i < mesh->numIndexes(); ++i)
+	for (uint32_t i = 0; i < mesh->numIndexes(); ++i)
 	{
 		bli[i] = vec4i(0);
 		blw[i] = vec4(0.0f);
@@ -1104,23 +1104,24 @@ void FBXLoaderPrivate::buildBlendWeightsForMesh(s3d::Storage& storage, s3d::Mesh
 	for (const auto& cluster : clusters)
 	{
 		const auto& weights = cluster->weights();
-		for (const auto& w : weights)
+		for (const auto& weight : weights)
 		{
-			size_t componentIndex = 0;
-			if (placedIndices.count(w.index) > 0)
-				componentIndex = placedIndices[w.index] + 1;
-			
+			uint32_t componentIndex = 0;
+			if (placedIndices.count(weight.index) > 0)
+			{
+				componentIndex = placedIndices[weight.index] + 1;
+			}
 			if (componentIndex > 3)
 			{
-				log::warning("More than four bones affecting vertex %llu", uint64_t(w.index));
+				log::warning("More than four bones affecting vertex %u", weight.index);
 			}
 			else
 			{
-				bli[w.index][componentIndex] = clusterIndex;
-				blw[w.index][componentIndex] = w.weight;
+				bli[weight.index][componentIndex] = clusterIndex;
+				blw[weight.index][componentIndex] = weight.weight;
 			}
 
-			placedIndices[w.index] = componentIndex;
+			placedIndices[weight.index] = componentIndex;
 		}
 		++clusterIndex;
 	}

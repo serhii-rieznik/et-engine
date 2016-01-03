@@ -1,6 +1,6 @@
 /*
  * This file is part of `et engine`
- * Copyright 2009-2015 by Sergey Reznik
+ * Copyright 2009-2016 by Sergey Reznik
  * Please, modify content only if you know what are you doing.
  *
  */
@@ -44,13 +44,13 @@ namespace et
 		 * Material loading
 		 */
 		Material::Pointer loadMaterial(const std::string& fileName, ObjectsCache& cache);
-
+		
 	private:
-		enum ShaderType
+		enum class ShaderType : uint32_t
 		{
-			ShaderType_Vertex,
-			ShaderType_Geometry,
-			ShaderType_Fragment,
+			Vertex,
+			Geometry,
+			Fragment,
 		};
 		
 	private:

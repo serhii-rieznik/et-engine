@@ -1,12 +1,12 @@
 /*
 * This file is part of `et engine`
-* Copyright 2009-2015 by Sergey Reznik
+* Copyright 2009-2016 by Sergey Reznik
 * Please, modify content only if you know what are you doing.
 *
 */
 
 #include <et/core/tools.h>
-#include <et/locale/locale.h>
+#include <et/locale/locale.hpp>
 #include <et/json/json.h>
 
 using namespace et;
@@ -140,11 +140,11 @@ et::Dictionary Locale::parseLanguageFile(const std::string& fileName)
 	 * Parse custom format
 	 */
 	StringDataStorage keyValues(fileContent.size(), 0);
-	size_t i = 0;
+	uint32_t i = 0;
 	bool inQuote = false;
 	while ((i < fileContent.size()) && fileContent[i])
 	{
-		size_t prevChar = i > 0 ? i - 1 : 0;
+		uint32_t prevChar = i > 0 ? i - 1 : 0;
 		if ((fileContent[i] == CommentChar) && (fileContent[prevChar] == NewLineChar))
 		{
 			inQuote = false;
@@ -163,9 +163,9 @@ et::Dictionary Locale::parseLanguageFile(const std::string& fileName)
 	}
 
 	inQuote = false;
-	size_t sourceLength = keyValues.lastElementIndex();
+	uint32_t sourceLength = keyValues.lastElementIndex();
 	StringDataStorage source(sourceLength + 1, 0);
-	for (size_t j = 0; j < sourceLength; ++j)
+	for (uint32_t j = 0; j < sourceLength; ++j)
 	{
 		char c = keyValues[j];
 
@@ -192,11 +192,11 @@ et::Dictionary Locale::parseLanguageFile(const std::string& fileName)
 	return result;
 }
 
-size_t Locale::parseKey(const StringDataStorage& data, size_t index, Dictionary& values)
+uint32_t Locale::parseKey(const StringDataStorage& data, uint32_t index, Dictionary& values)
 {
-	size_t keyEnd = 0;
-	size_t valueStart = 0;
-	size_t i = index;
+	uint32_t keyEnd = 0;
+	uint32_t valueStart = 0;
+	uint32_t i = index;
 	
 	while ((i < data.size()) && data[i] && (data[i] != ';'))
 	{
@@ -211,16 +211,16 @@ size_t Locale::parseKey(const StringDataStorage& data, size_t index, Dictionary&
 		++i;
 	}
 
-	size_t keyLenght = keyEnd - index;
-	size_t valueLenght = i - valueStart - 1;
+	uint32_t keyLenght = keyEnd - index;
+	uint32_t valueLenght = i - valueStart - 1;
 	
 	std::string key(keyLenght, 0);
-	for (size_t j = 0; j < keyLenght; ++j)
+	for (uint32_t j = 0; j < keyLenght; ++j)
 		key[j] = data[index+j];
 	
 	index = 0;
 	std::string value(valueLenght, 0);
-	for (size_t j = 0; j < valueLenght; ++j)
+	for (uint32_t j = 0; j < valueLenght; ++j)
 	{
 		if ((data[valueStart+j] == '\\') && (j + 1 < valueLenght))
 		{
@@ -248,7 +248,7 @@ size_t Locale::parseKey(const StringDataStorage& data, size_t index, Dictionary&
 	return i + 1;
 }
 
-size_t Locale::parseComment(const StringDataStorage& data, size_t index)
+uint32_t Locale::parseComment(const StringDataStorage& data, uint32_t index)
 {
 	if (data[index] == CommentChar) // line comment
 	{

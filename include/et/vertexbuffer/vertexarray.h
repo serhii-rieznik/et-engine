@@ -1,6 +1,6 @@
 /*
  * This file is part of `et engine`
- * Copyright 2009-2015 by Sergey Reznik
+ * Copyright 2009-2016 by Sergey Reznik
  * Please, modify content only if you know what are you doing.
  *
  */
@@ -27,8 +27,7 @@ namespace et
 
 	public:
 		VertexArray();
-		VertexArray(const VertexDeclaration& decl, size_t size);
-		VertexArray(const VertexDeclaration& decl, int size);
+		VertexArray(const VertexDeclaration& decl, uint32_t size);
 		
 		VertexDataChunk& smoothing()
 			{ return _smoothing; }
@@ -45,11 +44,11 @@ namespace et
 		
 		Description generateDescription() const;
 		
-		void resize(size_t size);
-		void increase(size_t size);
-		void fitToSize(size_t size);
+		void resize(uint32_t size);
+		void increase(uint32_t size);
+		void fitToSize(uint32_t size);
 		
-		size_t size() const
+		uint32_t size() const
 			{ return _size; }
 
 		const VertexDeclaration& decl() const
@@ -58,7 +57,7 @@ namespace et
 		VertexArray* duplicate();
 		
 	private:
-		size_t _size = 0;
+		uint32_t _size = 0;
 		VertexDeclaration _decl;
 		VertexDataChunkList _chunks;
 		VertexDataChunk _smoothing;

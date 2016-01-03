@@ -1,6 +1,6 @@
 /*
 * This file is part of `et engine`
-* Copyright 2009-2015 by Sergey Reznik
+* Copyright 2009-2016 by Sergey Reznik
 * Please, modify content only if you know what are you doing.
 *
 */
@@ -109,11 +109,12 @@ void ComponentTransformable::setTransform(const mat4& originalMatrix)
 	buildTransform();
 
 	float deviation = 0.0f;
-	
-	for (size_t v = 0; v < 4; ++v)
+	for (uint32_t v = 0; v < 4; ++v)
 	{
-		for (size_t u = 0; u < 4; ++u)
+		for (uint32_t u = 0; u < 4; ++u)
+		{
 			deviation += sqr(originalMatrix[v][u] - _cachedTransform[v][u]);
+		}
 	}
 	
 	if (deviation > 0.001f)

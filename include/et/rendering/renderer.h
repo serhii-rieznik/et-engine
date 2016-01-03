@@ -1,6 +1,6 @@
 /*
  * This file is part of `et engine`
- * Copyright 2009-2015 by Sergey Reznik
+ * Copyright 2009-2016 by Sergey Reznik
  * Please, modify content only if you know what are you doing.
  *
  */
@@ -39,13 +39,13 @@ namespace et
 		void renderTextureRotated(const Texture::Pointer&, float angle, const vec2i& position,
 			const vec2i& size = vec2i(-1), const vec4& = vec4(1.0f));
 
-		void drawElements(const IndexBuffer::Pointer& ib, size_t first, size_t count);
-		void drawElements(PrimitiveType primitiveType, const IndexBuffer::Pointer& ib, size_t first, size_t count);
+		void drawElements(const IndexBuffer::Pointer& ib, uint32_t first, uint32_t count);
+		void drawElements(PrimitiveType primitiveType, const IndexBuffer::Pointer& ib, uint32_t first, uint32_t count);
 		void drawAllElements(const IndexBuffer::Pointer& ib);
 
-		void drawElementsInstanced(const IndexBuffer::Pointer& ib, size_t first, size_t count, size_t instances);
-		void drawElementsBaseIndex(const VertexArrayObject& vao, int base, size_t first, size_t count);
-		void drawElementsSequentially(PrimitiveType, size_t first, size_t count);
+		void drawElementsInstanced(const IndexBuffer::Pointer& ib, uint32_t first, uint32_t count, uint32_t instances);
+		void drawElementsBaseIndex(const VertexArrayObject& vao, int base, uint32_t first, uint32_t count);
+		void drawElementsSequentially(PrimitiveType, uint32_t first, uint32_t count);
 		
 		BinaryDataStorage readFramebufferData(const vec2i&, TextureFormat, DataType);
 		void readFramebufferData(const vec2i&, TextureFormat, DataType, BinaryDataStorage&);

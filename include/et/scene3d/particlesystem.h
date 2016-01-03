@@ -1,6 +1,6 @@
 /*
  * This file is part of `et engine`
- * Copyright 2009-2015 by Sergey Reznik
+ * Copyright 2009-2016 by Sergey Reznik
  * Please, modify content only if you know what are you doing.
  *
  */
@@ -20,7 +20,7 @@ namespace et
 			ET_DECLARE_POINTER(ParticleSystem)
 						
 		public:
-			ParticleSystem(RenderContext*, size_t, const std::string&, BaseElement*);
+			ParticleSystem(RenderContext*, uint32_t capacity, const std::string&, BaseElement*);
 			
 			ElementType type() const
 				{ return ElementType::ParticleSystem; }

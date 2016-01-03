@@ -1,6 +1,6 @@
  /*
  * This file is part of `et engine`
- * Copyright 2009-2015 by Sergey Reznik
+ * Copyright 2009-2016 by Sergey Reznik
  * Please, modify content only if you know what are you doing.
  *
  */
@@ -45,11 +45,11 @@ namespace et
 		/* 
 		 * mutable accessors
 		 */
-		T& operator [] (size_t i)
+		T& operator [] (uint32_t i)
 			{ ET_ASSERT(_mutable); ET_ASSERT(i < _size); return *(reinterpret_cast<T*>(_mutableData + i * _stride + _offset)); }
 		
-		T& operator [] (int i)
-			{ ET_ASSERT(_mutable); ET_ASSERT(i >= 0); return operator [] (static_cast<size_t>(i)); }
+		T& operator [] (int32_t i)
+			{ ET_ASSERT(_mutable); ET_ASSERT(i >= 0); return operator [] (static_cast<uint32_t>(i)); }
 		
 		void fill(int v)
 			{ ET_ASSERT(_mutable); etFillMemory(_mutableData, v, _dataSize); }
@@ -60,11 +60,11 @@ namespace et
 		/*
 		 * immutable accessors
 		 */
-		const T& operator [] (size_t i) const
+		const T& operator [] (uint32_t i) const
 			{ ET_ASSERT(i < _size); return *(reinterpret_cast<const T*>(_immutableData + i * _stride + _offset)); }
 		
-		const T& operator [] (int i) const
-			{ ET_ASSERT(i >= 0); return operator [] (static_cast<size_t>(i)); }
+		const T& operator [] (int32_t i) const
+			{ ET_ASSERT(i >= 0); return operator [] (static_cast<uint32_t>(i)); }
 
 		const char* binary() const
 			{ return (char*)_immutableData; };

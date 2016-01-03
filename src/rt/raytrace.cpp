@@ -1,6 +1,6 @@
 /*
  * This file is part of `et engine`
- * Copyright 2009-2015 by Sergey Reznik
+ * Copyright 2009-2016 by Sergey Reznik
  * Please, modify content only if you know what are you doing.
  *
  */
@@ -279,9 +279,9 @@ void RaytracePrivate::buildMaterialAndTriangles(s3d::Scene::Pointer scene)
 		const auto nrm = vs->accessData<VertexAttributeType::Vec3>(VertexAttributeUsage::Normal, 0);
 		for (uint32_t i = 0; i < mesh->numIndexes(); i += 3)
 		{
-			size_t i0 = ia->getIndex(mesh->startIndex() + i + 0);
-			size_t i1 = ia->getIndex(mesh->startIndex() + i + 1);
-			size_t i2 = ia->getIndex(mesh->startIndex() + i + 2);
+			uint32_t i0 = ia->getIndex(mesh->startIndex() + i + 0);
+			uint32_t i1 = ia->getIndex(mesh->startIndex() + i + 1);
+			uint32_t i2 = ia->getIndex(mesh->startIndex() + i + 2);
 
 			triangles.emplace_back();
 			auto& tri = triangles.back();

@@ -1,6 +1,6 @@
 /*
  * This file is part of `et engine`
- * Copyright 2009-2015 by Sergey Reznik
+ * Copyright 2009-2016 by Sergey Reznik
  * Please, modify content only if you know what are you doing.
  *
  */
@@ -22,10 +22,10 @@ namespace et
 
 			struct VertexWeight
 			{
-				size_t index = 0;
+				uint32_t index = 0;
 				float weight = 0.0f;
-				VertexWeight() { }
-				VertexWeight(size_t i, float w) :
+				VertexWeight() = default;
+				VertexWeight(uint32_t i, float w) :
 					index(i), weight(w) { }
 			};
 			typedef std::vector<VertexWeight> VertexWeightVector;

@@ -1,6 +1,6 @@
 /*
 * This file is part of `et engine`
-* Copyright 2009-2015 by Sergey Reznik
+* Copyright 2009-2016 by Sergey Reznik
 * Please, modify content only if you know what are you doing.
 *
 */
@@ -57,7 +57,7 @@ void SceneMaterial::serialize(Dictionary stream, const std::string& basePath)
 	Dictionary floatValues;
 	Dictionary vectorValues;
 	Dictionary textureValues;
-	for (size_t i = 0; i < MaterialParameter_max; ++i)
+	for (uint32_t i = 0; i < MaterialParameter_max; ++i)
 	{
 		if (_defaultIntParameters[i].set)
 			intValues.setIntegerForKey(materialKeys[i], _defaultIntParameters[i].value);
@@ -93,23 +93,9 @@ void SceneMaterial::serialize(Dictionary stream, const std::string& basePath)
 			textureValues.setStringForKey("id" + intToStr(kv.first), kv.second->origin());
 	}
 	
-	Dictionary blend;
-	blend.setBooleanForKey(kBlendEnabled, _blend.blendEnabled);
-	blend.setStringForKey(kSourceColor, blendFunctionToString(_blend.color.source));
-	blend.setStringForKey(kDestColor, blendFunctionToString(_blend.color.dest));
-	blend.setStringForKey(kSourceAlpha, blendFunctionToString(_blend.alpha.source));
-	blend.setStringForKey(kDestAlpha, blendFunctionToString(_blend.alpha.dest));
-	blend.setStringForKey(kColorOperation, blendOperationToString(_blend.colorOperation));
-	blend.setStringForKey(kAlphaOperation, blendOperationToString(_blend.alphaOperation));
-	
-	Dictionary depth;
-	depth.setBooleanForKey(kDepthWriteEnabled, _depth.depthWriteEnabled);
-	depth.setBooleanForKey(kDepthTestEnabled, _depth.depthTestEnabled);
-	depth.setStringForKey(kDepthFunction, compareFunctionToString(_depth.compareFunction));
-
 	stream.setStringForKey(kName, name());
-	stream.setDictionaryForKey(kBlendState, blend);
-	stream.setDictionaryForKey(kDepthState, depth);
+	stream.setDictionaryForKey(kBlendState, serializeBlendState(_blend));
+	stream.setDictionaryForKey(kDepthState, serializeDepthState(_depth));
 
 	if (!intValues.empty())
 		stream.setDictionaryForKey(kIntegerValues, intValues);
@@ -129,19 +115,8 @@ void SceneMaterial::deserializeWithOptions(Dictionary stream, RenderContext* rc,
 {
 	setName(stream.stringForKey(kName)->content);
 	
-	Dictionary blend = stream.dictionaryForKey(kBlendState);
-	_blend.blendEnabled = blend.boolForKey(kBlendEnabled, false)->content != 0;
-	_blend.color.source = stringToBlendFunction(blend.stringForKey(kSourceColor, blendFunctionToString(BlendFunction::One))->content);
-	_blend.color.dest = stringToBlendFunction(blend.stringForKey(kDestColor, blendFunctionToString(BlendFunction::Zero))->content);
-	_blend.colorOperation = stringToBlendOperation(blend.stringForKey(kColorOperation, blendOperationToString(BlendOperation::Add))->content);
-	_blend.alpha.source = stringToBlendFunction(blend.stringForKey(kSourceAlpha, blendFunctionToString(BlendFunction::One))->content);
-	_blend.alpha.dest = stringToBlendFunction(blend.stringForKey(kDestAlpha, blendFunctionToString(BlendFunction::Zero))->content);
-	_blend.alphaOperation = stringToBlendOperation(blend.stringForKey(kAlphaOperation, blendOperationToString(BlendOperation::Add))->content);
-	
-	Dictionary depth = stream.dictionaryForKey(kDepthState);
-	_depth.compareFunction = stringToCompareFunction(depth.stringForKey(kDepthFunction, compareFunctionToString(CompareFunction::Less))->content);
-	_depth.depthWriteEnabled = depth.boolForKey(kDepthWriteEnabled, true)->content != 0;
-	_depth.depthTestEnabled = depth.boolForKey(kDepthTestEnabled, true)->content != 0;
+	_blend = deserializeBlendState(stream.dictionaryForKey(kBlendState));
+	_depth = deserializeDepthState(stream.dictionaryForKey(kDepthState));
 
 	bool shouldCreateTextures = (options & DeserializeOption_CreateTextures) == DeserializeOption_CreateTextures;
 	Dictionary intValues = stream.dictionaryForKey(kIntegerValues);

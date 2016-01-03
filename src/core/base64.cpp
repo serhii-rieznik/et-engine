@@ -1,6 +1,6 @@
 /*
  * This file is part of `et engine`
- * Copyright 2009-2015 by Sergey Reznik
+ * Copyright 2009-2016 by Sergey Reznik
  * Please, modify content only if you know what are you doing.
  *
  */
@@ -126,9 +126,8 @@ std::string base64::encode(const BinaryDataStorage& bytes_to_encode)
 	unsigned char char_array_3[3];
 	unsigned char char_array_4[4];
 	
-	size_t n = 0;
+	uint32_t n = 0;
 	size_t in_len = bytes_to_encode.size();
-	
 	while (in_len--)
 	{
 		char_array_3[i++] = bytes_to_encode[n++];

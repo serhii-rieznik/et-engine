@@ -1,6 +1,6 @@
 /*
  * This file is part of `et engine`
- * Copyright 2009-2015 by Sergey Reznik
+ * Copyright 2009-2016 by Sergey Reznik
  * Please, modify content only if you know what are you doing.
  *
  */
@@ -109,11 +109,13 @@ inline std::istream& operator >> (std::istream& stream, vec3& value)
 	std::getline(stream, ln);
 	trim(ln);
 
-	size_t comp = 0;
+	uint32_t comp = 0;
 	splitAndWrite(ln, [&value, &comp](const std::string& s)
 	{
 		if (comp < 3)
+		{
 			value[comp++] = strToFloat(s);
+		}
 	});
 	return stream;
 }
@@ -125,7 +127,7 @@ inline std::istream& operator >> (std::istream& stream, vec4& value)
 	std::getline(stream, ln);
 	trim(ln);
 
-	size_t comp = 0;
+	uint32_t comp = 0;
 	splitAndWrite(ln, [&value, &comp](const std::string& s)
 	{
 		if (comp < 4)
@@ -282,7 +284,7 @@ void OBJLoader::loadData(bool async,  s3d::Storage& storage, ObjectsCache& cache
 				splitAndWrite(inFace, '/', [&indexes](const std::string& s)
 					{ indexes.push_back(strToInt(s)); });
 
-				size_t i = 0;
+				uint32_t i = 0;
 				for (auto iValue : indexes)
 				{
 					if (iValue == std::numeric_limits<int>::max())
@@ -730,7 +732,7 @@ void OBJLoader::loadMaterials(const std::string& fileName, bool async, ObjectsCa
 
 void OBJLoader::processLoadedData()
 {
-	size_t totalTriangles = 0;
+	uint32_t totalTriangles = 0;
 
 	for (const auto& group : _groups)
 	{
@@ -738,7 +740,7 @@ void OBJLoader::processLoadedData()
 			totalTriangles += face.vertices.size() - 2;
 	}
 	
-	size_t totalVertices = 3 * totalTriangles;
+	uint32_t totalVertices = 3 * totalTriangles;
 	
 	bool hasNormals = _normals.size() > 0;
 	bool hasTexCoords = _texCoords.size() > 0;
@@ -771,7 +773,7 @@ void OBJLoader::processLoadedData()
 	if (_vertexData->hasAttributeWithType(VertexAttributeUsage::TexCoord0, VertexAttributeType::Vec2))
 		tex = _vertexData->accessData<VertexAttributeType::Vec2>(VertexAttributeUsage::TexCoord0, 0);
 	
-	size_t index = 0;
+	uint32_t index = 0;
 	
 	auto PUSH_VERTEX = [this, &pos, &nrm, &tex, &index, hasTexCoords, hasNormals](const OBJVertex& vertex, const vec3& offset)
 	{

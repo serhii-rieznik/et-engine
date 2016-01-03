@@ -1,6 +1,6 @@
 /*
  * This file is part of `et engine`
- * Copyright 2009-2015 by Sergey Reznik
+ * Copyright 2009-2016 by Sergey Reznik
  * Please, modify content only if you know what are you doing.
  *
  */
@@ -121,7 +121,7 @@ namespace et
 }
 
 #include <et/core/properties.h>
-#include <et/core/strings.h>
+#include <et/core/strings.hpp>
 #include <et/core/threading.h>
 #include <et/core/filesystem.h>
 #include <et/core/conversionbase.h>

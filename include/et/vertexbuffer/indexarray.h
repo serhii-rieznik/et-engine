@@ -1,6 +1,6 @@
 /*
  * This file is part of `et engine`
- * Copyright 2009-2015 by Sergey Reznik
+ * Copyright 2009-2016 by Sergey Reznik
  * Please, modify content only if you know what are you doing.
  *
  */
@@ -24,10 +24,10 @@ namespace et
 		int tag = 0;
 
 	public:
-		IndexArray(IndexArrayFormat format, size_t size, PrimitiveType primitiveType);
+		IndexArray(IndexArrayFormat format, uint32_t size, PrimitiveType primitiveType);
 		
-		void linearize(size_t size);
-		void linearize(size_t indexFrom, size_t indexTo, uint32_t startIndex);
+		void linearize(uint32_t size);
+		void linearize(uint32_t indexFrom, uint32_t indexTo, uint32_t startIndex);
 
 		char* binary()
 			{ return _data.binary(); }
@@ -47,20 +47,20 @@ namespace et
 		PrimitiveType primitiveType() const
 			{ return _primitiveType; }
 
-		size_t actualSize() const
+		uint32_t actualSize() const
 			{ return _actualSize; }
 
-		void setActualSize(size_t value)
+		void setActualSize(uint32_t value)
 			{ _actualSize = value; }
 
-		size_t primitivesCount() const;
+		uint32_t primitivesCount() const;
 
-		uint32_t getIndex(size_t pos) const;
-		void setIndex(uint32_t value, size_t pos);
+		uint32_t getIndex(uint32_t pos) const;
+		void setIndex(uint32_t value, uint32_t pos);
 		void push_back(uint32_t value);
 
-		void resize(size_t count);
-		void resizeToFit(size_t count);
+		void resize(uint32_t count);
+		void resizeToFit(uint32_t count);
 
 		void compact();
 
@@ -72,15 +72,15 @@ namespace et
 				VertexCount_max = 3
 			};
 
-			size_t index[VertexCount_max];
+			uint32_t index[VertexCount_max];
 			
 		public:
 			Primitive();
 			
-			size_t& operator [] (size_t i)
+			uint32_t& operator [] (uint32_t i)
 				{ ET_ASSERT(i < VertexCount_max); return index[i]; }
 
-			const size_t& operator [] (size_t i) const
+			const uint32_t& operator [] (uint32_t i) const
 				{ ET_ASSERT(i < VertexCount_max); return index[i]; }
 
 			bool operator == (const Primitive& p) const;
@@ -108,36 +108,36 @@ namespace et
 			Primitive& operator ->()
 				{ return _primitive; }
 
-			size_t pos() const
+			uint32_t pos() const
 				{ return _pos; }
 			
-			size_t& operator [] (size_t i)
+			uint32_t& operator [] (uint32_t i)
 				{ return _primitive[i]; }
 			
-			const size_t& operator [] (size_t i) const
+			const uint32_t& operator [] (uint32_t i) const
 				{ return _primitive[i]; }
 
 		private:
 			friend class IndexArray;
 
-			PrimitiveIterator(const IndexArray* ib, size_t p);
-			void configure(size_t p);
+			PrimitiveIterator(const IndexArray* ib, uint32_t p);
+			void configure(uint32_t p);
 
 			PrimitiveIterator& operator = (const PrimitiveIterator& p);
 
 		private:
 			const IndexArray* _ib = nullptr;
 			Primitive _primitive;
-			size_t _pos = 0;
+			uint32_t _pos = 0;
 		};
 
 		PrimitiveIterator begin() const;
 		PrimitiveIterator end() const;
-		PrimitiveIterator primitive(size_t index) const;
+		PrimitiveIterator primitive(uint32_t index) const;
 		
 	private:
 		BinaryDataStorage _data;
-		size_t _actualSize = 0;
+		uint32_t _actualSize = 0;
 		IndexArrayFormat _format = IndexArrayFormat::Format_16bit;
 		PrimitiveType _primitiveType = PrimitiveType::Points;
 	};

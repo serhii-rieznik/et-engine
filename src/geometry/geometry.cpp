@@ -1,6 +1,6 @@
 /*
  * This file is part of `et engine`
- * Copyright 2009-2015 by Sergey Reznik
+ * Copyright 2009-2016 by Sergey Reznik
  * Please, modify content only if you know what are you doing.
  *
  */
@@ -129,7 +129,7 @@ vec3 et::removeMatrixScale(mat3& mat)
 	ET_ASSERT(lengths[1] > 0.0f);
 	ET_ASSERT(lengths[2] > 0.0f);
 
-	for (size_t i = 0; i < 3; ++i)
+	for (uint32_t i = 0; i < 3; ++i)
 	{
 		mat[0][i] /= lengths[i];
 		mat[1][i] /= lengths[i];

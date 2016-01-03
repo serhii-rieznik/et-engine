@@ -1,6 +1,6 @@
 /*
  * This file is part of `et engine`
- * Copyright 2009-2015 by Sergey Reznik
+ * Copyright 2009-2016 by Sergey Reznik
  * Please, modify content only if you know what are you doing.
  *
  */
@@ -31,12 +31,18 @@ namespace et
 			vector = static_cast<T>(std::sin(half)) * axis;
 		}
 
-		T& operator[](int i) 
+		T& operator[](int32_t i)
 			{ return *(&scalar + i); }
 
-		const T& operator[](int i) const
+		const T& operator[](int32_t i) const
 			{ return *(&scalar + i); }
 
+		T& operator[](uint32_t i)
+			{ return *(&scalar + i); }
+		
+		const T& operator[](uint32_t i) const
+			{ return *(&scalar + i); }
+		
 		Quaternion operator !() const
 			{ return Quaternion(scalar, -vector.x, -vector.y, -vector.z); }
 

@@ -1,15 +1,15 @@
 /*
  * This file is part of `et engine`
- * Copyright 2009-2015 by Sergey Reznik
+ * Copyright 2009-2016 by Sergey Reznik
  * Please, modify content only if you know what are you doing.
  *
  */
 
 #pragma once
 
-#include <et/rendering/texture.h>
-#include <et/rendering/program.h>
 #include <et/rendering/framebuffer.h>
+#include <et/rendering/material.h>
+#include <et/rendering/texture.h>
 #include <et/rendering/vertexarrayobject.h>
 
 namespace et
@@ -173,6 +173,11 @@ namespace et
 		void vertexBufferDeleted(uint32_t);
 		void indexBufferDeleted(uint32_t);
 		void frameBufferDeleted(uint32_t);
+		
+		/*
+		 * Materials
+		 */
+		void bindMaterial(const Material::Pointer&);
 
 		/*
 		 * Service

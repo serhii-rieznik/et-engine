@@ -1,6 +1,6 @@
 /*
  * This file is part of `et engine`
- * Copyright 2009-2015 by Sergey Reznik
+ * Copyright 2009-2016 by Sergey Reznik
  * Please, modify content only if you know what are you doing.
  *
  */
@@ -118,7 +118,7 @@ namespace et
 	enum class BlendConfiguration : uint32_t
 	{
 		Disabled,
-		Default,
+		AlphaBlend,
 		AlphaPremultiplied,
 		Additive,
 		AlphaAdditive,
@@ -379,8 +379,14 @@ namespace et
 			blendEnabled(e), color(s, d), alpha(s, d) { }
 		
 		uint32_t sortingKey() const
+			{ return blendEnabled ? 1 : 0; }
+		
+		bool operator == (const BlendState& bs) const
 		{
-			return blendEnabled ? 1 : 0;
+			return (color == bs.color) && (blendEnabled == bs.blendEnabled) && (alpha == bs.alpha) &&
+				(alphaToCoverageEnabled == bs.alphaToCoverageEnabled) &&
+				(perRenderTargetBlendEnabled == bs.perRenderTargetBlendEnabled) &&
+				(colorOperation == bs.colorOperation) && (alphaOperation == bs.alphaOperation);
 		}
 		
 	public:
@@ -459,4 +465,17 @@ namespace et
 	CompareFunction stringToCompareFunction(const std::string&);
 	BlendFunction stringToBlendFunction(const std::string& );
 	BlendOperation stringToBlendOperation(const std::string&);
+	
+	BlendState blendConfigurationToBlendState(BlendConfiguration);
+	std::string blendConfigurationToString(BlendConfiguration);
+	bool blendStateToConfiguration(const BlendState&, BlendConfiguration&);
+	bool stringToBlendConfiguration(const std::string& name, BlendConfiguration& config);
+	
+	Dictionary serializeDepthState(const DepthState&);
+	Dictionary serializeBlendState(const BlendState&);
+	DepthState deserializeDepthState(const Dictionary&);
+	BlendState deserializeBlendState(const Dictionary&);
+	
+	std::string cullModeToString(CullMode);
+	bool stringToCullMode(const std::string&, CullMode&);
 }

@@ -1,6 +1,6 @@
 /*
  * This file is part of `et engine`
- * Copyright 2009-2015 by Sergey Reznik
+ * Copyright 2009-2016 by Sergey Reznik
  * Please, modify content only if you know what are you doing.
  *
  */
@@ -74,7 +74,7 @@ void TerrainData::generateVertexData(const FloatDataStorage& hm)
 
 	bool firstMinVertex = true;
 	bool firstMaxVertex = true;
-	for (size_t i = 0; i < hm.size(); ++i)
+	for (uint32_t i = 0; i < hm.size(); ++i)
 	{
 		float dx = x / static_cast<float>(_dimension.x - 1);
 		float dz = z / static_cast<float>(_dimension.y - 1);
@@ -120,7 +120,7 @@ void TerrainData::generateVertexData(const FloatDataStorage& hm)
 	_normals.resize(hm.size());
 	_normals.setOffset(0);
 	
-	for (size_t i = 0; i < hm.size(); ++i)
+	for (uint32_t i = 0; i < hm.size(); ++i)
 		_normals.push_back(nrm[i]);
 }
 

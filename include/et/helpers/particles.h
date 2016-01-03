@@ -88,7 +88,7 @@ namespace et
 				return _particles.at(i);
 			}
 			
-			size_t activeParticlesCount() const
+			uint32_t activeParticlesCount() const
 				{ return _activeParticles; }
 			
 			void setShouldAutoRenewParticles(bool a)
@@ -195,7 +195,7 @@ namespace et
 			P _base;
 			P _variation;
 			
-			size_t _activeParticles = 0;
+			uint32_t _activeParticles = 0;
 			float _updateTime = 0.0f;
 			bool _autoRenewParticles = true;
 		};

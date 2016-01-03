@@ -1,6 +1,6 @@
 /*
  * This file is part of `et engine`
- * Copyright 2009-2015 by Sergey Reznik
+ * Copyright 2009-2016 by Sergey Reznik
  * Please, modify content only if you know what are you doing.
  *
  */
@@ -35,10 +35,10 @@ namespace et
 		void fill(int value)
 			{ etFillMemory(data, value, dataSize()); }
 
-		T& operator [](size_t i)
+		T& operator [](uint32_t i)
 			{ ET_ASSERT(i < count); return data[i]; }
 		
-		const T& operator [](size_t i) const
+		const T& operator [](uint32_t i) const
 			{ ET_ASSERT(i < count); return data[i]; }
 
 		char* binary()

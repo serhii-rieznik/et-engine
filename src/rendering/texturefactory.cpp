@@ -1,6 +1,6 @@
 /*
  * This file is part of `et engine`
- * Copyright 2009-2015 by Sergey Reznik
+ * Copyright 2009-2016 by Sergey Reznik
  * Please, modify content only if you know what are you doing.
  *
  */
@@ -250,7 +250,7 @@ Texture::Pointer TextureFactory::genTexture(TextureDescription::Pointer desc)
 Texture::Pointer TextureFactory::genNoiseTexture(const vec2i& size, bool norm, const std::string& id)
 {
 	DataStorage<vec4ub> randata(size.square());
-	for (size_t i = 0; i < randata.size(); ++i)
+	for (uint32_t i = 0; i < randata.size(); ++i)
 	{
 		vec4 rand_f = vec4(randomFloat(-1.0f, 1.0f), randomFloat(-1.0f, 1.0f),
 			randomFloat(-1.0f, 1.0f), randomFloat(-1.0f, 1.0f));

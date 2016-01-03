@@ -1,6 +1,6 @@
 /*
  * This file is part of `et engine`
- * Copyright 2009-2015 by Sergey Reznik
+ * Copyright 2009-2016 by Sergey Reznik
  * Please, modify content only if you know what are you doing.
  *
  */
@@ -73,10 +73,10 @@ void IndexBuffer::build(const IndexArray::Pointer& i)
 	}
 
 	setProperties(i);
-	internal_setData(i->data(), static_cast<size_t>(i->format()) * _size);
+	internal_setData(i->data(), static_cast<uint32_t>(i->format()) * _size);
 }
 
-void IndexBuffer::internal_setData(const unsigned char* data, size_t size)
+void IndexBuffer::internal_setData(const unsigned char* data, uint32_t size)
 {
 	if (size > 0)
 	{
@@ -86,9 +86,9 @@ void IndexBuffer::internal_setData(const unsigned char* data, size_t size)
 	}
 }
 
-void* IndexBuffer::indexOffset(size_t offset) const
+void* IndexBuffer::indexOffset(uint32_t offset) const
 {
-	return reinterpret_cast<void*>(static_cast<size_t>(_format) * offset);
+	return reinterpret_cast<void*>(static_cast<uintptr_t>(_format) * offset);
 }
 
 void IndexBuffer::setData(const IndexArray::Pointer& i)

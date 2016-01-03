@@ -1,6 +1,6 @@
 /*
  * This file is part of `et engine`
- * Copyright 2009-2015 by Sergey Reznik
+ * Copyright 2009-2016 by Sergey Reznik
  * Please, modify content only if you know what are you doing.
  *
  */
@@ -30,9 +30,9 @@ namespace et
 		DataType dataType() const
 			{ return _dataType; }
 
-		void* indexOffset(size_t offset) const;
+		void* indexOffset(uint32_t offset) const;
 
-		size_t size() const
+		uint32_t size() const
 			{ return _size; }
 
 		void setSourceObjectName(const std::string& tag)
@@ -51,11 +51,11 @@ namespace et
 		void setProperties(const IndexArray::Pointer& i);
 		void build(const IndexArray::Pointer& i);
 		
-		void internal_setData(const unsigned char* data, size_t size);
+		void internal_setData(const unsigned char* data, uint32_t size);
 
 	private:
 		RenderContext* _rc = nullptr;
-		size_t _size = 0;
+		uint32_t _size = 0;
 		std::string _sourceObjectName = 0;
 		DataType _dataType = DataType::UnsignedChar;
 		PrimitiveType _primitiveType = PrimitiveType::Points;
