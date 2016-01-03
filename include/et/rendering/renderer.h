@@ -8,6 +8,7 @@
 #pragma once
 
 #include <et/rendering/renderstate.h>
+#include <et/rendering/renderbatch.h>
 
 namespace et
 {
@@ -54,6 +55,8 @@ namespace et
 		vec2 currentViewportSizeToScene(const vec2i& size);
 		
 		void finishRendering();
+		
+		void pushRenderBatch(RenderBatch::Pointer);
 
 		ET_DECLARE_PROPERTY_GET_COPY_SET_COPY(uint32_t, defaultTextureBindingUnit, setDefaultTextureBindingUnit)
 		
@@ -62,7 +65,7 @@ namespace et
 			{ return *this; }
 
 	private:
-		RenderContext* _rc;
+		RenderContext* _rc = nullptr;
 		ObjectsCache _sharedCache;
 		VertexArrayObject _fullscreenQuadVao;
 

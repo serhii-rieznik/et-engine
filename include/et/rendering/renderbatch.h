@@ -21,6 +21,18 @@ namespace et
 		RenderBatch() = default;
 		RenderBatch(const Material::Pointer&, const VertexArrayObject&);
 		RenderBatch(const Material::Pointer&, const VertexArrayObject&, uint32_t, uint32_t);
+
+		const Material::Pointer& material() const
+			{ return _material; }
+		
+		const VertexArrayObject& data() const
+			{ return _data; }
+		
+		const uint32_t firstIndex() const
+			{ return _firstIndex; }
+		
+		const uint32_t numIndexes() const
+			{ return _numIndexes; }
 		
 	private:
 		Material::Pointer _material;

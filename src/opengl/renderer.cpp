@@ -280,6 +280,13 @@ void Renderer::finishRendering()
 	glFinish();
 }
 
+void Renderer::pushRenderBatch(RenderBatch::Pointer rb)
+{
+	_rc->renderState().bindMaterial(rb->material());
+	_rc->renderState().bindVertexArray(rb->data());
+	drawElements(rb->data()->indexBuffer(), rb->firstIndex(), rb->numIndexes());
+}
+
 /*
  * Default shaders
  */
