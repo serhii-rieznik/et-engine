@@ -154,18 +154,10 @@ namespace et
 		void printShaderSource(uint32_t, size_t, const char*);
 
 	private:
-		RenderContext* _rc;
+		RenderContext* _rc = nullptr;
 		
 		Program::UniformMap _uniforms;
 		std::vector<Attribute> _attributes;
-
-		int _mModelViewLocation;
-		int _mModelViewProjectionLocation;
-		int _vCameraLocation;
-		int _vPrimaryLightLocation;
-		int _mLightProjectionMatrixLocation;
-		int _mTransformLocation;
-
 		std::map<int, float> _floatCache;
 		std::map<int, vec2> _vec2Cache;
 		std::map<int, vec3> _vec3Cache;
@@ -175,6 +167,13 @@ namespace et
 		std::map<int, vec4i> _vec4iCache;
 		std::map<int, mat3> _mat3Cache;
 		std::map<int, mat4> _mat4Cache;
+
+		int _mModelViewLocation = -1;
+		int _mModelViewProjectionLocation = -1;
+		int _vCameraLocation = -1;
+		int _vPrimaryLightLocation = -1;
+		int _mLightProjectionMatrixLocation = -1;
+		int _mTransformLocation = -1;
 
 		StringList _defines;
 	};

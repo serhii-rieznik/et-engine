@@ -24,7 +24,7 @@ Mesh::Mesh(const std::string& name, BaseElement* parent) :
 	_undeformedTransformationMatrices.resize(4);
 }
 
-Mesh::Mesh(const std::string& aName, const VertexArrayObject& vao, const Material::Pointer& mat,
+Mesh::Mesh(const std::string& aName, const VertexArrayObject& vao, const SceneMaterial::Pointer& mat,
 	uint32_t startIndex, uint32_t numIndexes, BaseElement* parent) : RenderableElement(aName, parent), 
 	_vao(vao), _startIndex(startIndex), _numIndexes(numIndexes)
 {
@@ -32,7 +32,7 @@ Mesh::Mesh(const std::string& aName, const VertexArrayObject& vao, const Materia
 	_undeformedTransformationMatrices.resize(4);
 }
 
-Mesh::Mesh(const std::string& aName, const VertexArrayObject& vao, const Material::Pointer& mat,
+Mesh::Mesh(const std::string& aName, const VertexArrayObject& vao, const SceneMaterial::Pointer& mat,
 	uint32_t start, uint32_t num, const VertexStorage::Pointer& storage, const IndexArray::Pointer& ia,
 	BaseElement* parent) : RenderableElement(aName, parent), _vao(vao), _startIndex(start), _numIndexes(num),
 	_vertexStorage(storage), _indexArray(ia)

@@ -89,7 +89,7 @@ private:
 };
 
 RenderContext::RenderContext(const RenderContextParameters& inParams, Application* app) : _params(inParams),
-	_app(app), _programFactory(nullptr), _textureFactory(nullptr), _framebufferFactory(nullptr),
+	_app(app), _materialFactory(nullptr), _textureFactory(nullptr), _framebufferFactory(nullptr),
 	_vertexBufferFactory(nullptr), _renderer(nullptr), _screenScaleFactor(1)
 {
 	ET_PIMPL_INIT(RenderContext, this, _params, app->parameters())
@@ -103,7 +103,7 @@ RenderContext::RenderContext(const RenderContextParameters& inParams, Applicatio
 	
 	_textureFactory = TextureFactory::Pointer::create(this);
 	_framebufferFactory = FramebufferFactory::Pointer::create(this);
-	_programFactory = ProgramFactory::Pointer::create(this);
+	_materialFactory = MaterialFactory::Pointer::create(this);
 	_vertexBufferFactory = VertexBufferFactory::Pointer::create(this);
 
 	_renderState.setDefaultFramebuffer(_framebufferFactory->createFramebufferWrapper(0));

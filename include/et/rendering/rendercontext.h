@@ -13,7 +13,7 @@
 #include <et/rendering/renderer.h>
 #include <et/rendering/renderstate.h>
 #include <et/rendering/renderingcaps.h>
-#include <et/rendering/programfactory.h>
+#include <et/rendering/materialfactory.h>
 #include <et/rendering/texturefactory.h>
 #include <et/rendering/framebufferfactory.h>
 #include <et/rendering/vertexbufferfactory.h>
@@ -60,8 +60,8 @@ namespace et
 		Renderer* renderer()
 			{ return _renderer.ptr(); }
 
-		ProgramFactory& programFactory()
-			{ return _programFactory.reference(); }
+		MaterialFactory& materialFactory()
+			{ return _materialFactory.reference(); }
 
 		TextureFactory& textureFactory()
 			{ return _textureFactory.reference(); }
@@ -113,7 +113,7 @@ namespace et
 
 		RenderState _renderState;
 
-		ProgramFactory::Pointer _programFactory;
+		MaterialFactory::Pointer _materialFactory;
 		TextureFactory::Pointer _textureFactory;
 		FramebufferFactory::Pointer _framebufferFactory;
 		VertexBufferFactory::Pointer _vertexBufferFactory;

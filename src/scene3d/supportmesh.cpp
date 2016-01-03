@@ -15,7 +15,7 @@ using namespace et::s3d;
 SupportMesh::SupportMesh(const std::string& name, BaseElement* parent) :
 	Mesh(name, parent) { }
 
-SupportMesh::SupportMesh(const std::string& name, const VertexArrayObject& ib, const Material::Pointer& material,
+SupportMesh::SupportMesh(const std::string& name, const VertexArrayObject& ib, const SceneMaterial::Pointer& material,
 	uint32_t start, uint32_t num, const VertexStorage::Pointer& storage, const IndexArray::Pointer& ia, BaseElement* parent) :
 	Mesh(name, ib, material, start, num, storage, ia, parent)
 {

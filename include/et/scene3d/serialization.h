@@ -19,7 +19,7 @@ namespace et
 {
 	namespace s3d
 	{
-		class Material;
+		class SceneMaterial;
 		class BaseElement;
 		typedef IntrusivePtr<BaseElement> BaseElementPointer;
 
@@ -28,7 +28,7 @@ namespace et
 		public:
 			virtual const std::string& serializationBasePath() const = 0;
 			virtual BaseElementPointer createElementOfType(ElementType, BaseElement*) = 0;
-			virtual Material* materialWithName(const std::string&) = 0;
+			virtual SceneMaterial* materialWithName(const std::string&) = 0;
 			
 			virtual IndexArray::Pointer indexArrayWithName(const std::string&) = 0;
 			virtual VertexStorage::Pointer vertexStorageWithName(const std::string&) = 0;

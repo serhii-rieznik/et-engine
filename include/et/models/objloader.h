@@ -9,7 +9,7 @@
 
 #include <et/scene3d/mesh.h>
 #include <et/scene3d/supportmesh.h>
-#include <et/scene3d/material.h>
+#include <et/scene3d/scenematerial.h>
 #include <et/scene3d/storage.h>
 #include <et/rendering/rendercontext.h>
 #include <et/vertexbuffer/vertexstorage.h>
@@ -49,9 +49,9 @@ namespace et
 			uint32_t start = 0;
 			uint32_t count = 0;
 			et::vec3 center;
-			s3d::Material::Pointer material;
+			s3d::SceneMaterial::Pointer material;
 
-			OBJMeshIndexBounds(const std::string& n, uint32_t s, uint32_t c, s3d::Material::Pointer m, const vec3& aCenter) :
+			OBJMeshIndexBounds(const std::string& n, uint32_t s, uint32_t c, s3d::SceneMaterial::Pointer m, const vec3& aCenter) :
 				name(n), start(s), count(c), material(m), center(aCenter) { }
 		};
 		typedef std::vector<OBJMeshIndexBounds> OBJMeshIndexBoundsList;
@@ -104,8 +104,8 @@ namespace et
 		std::ifstream inputFile;
 		std::ifstream materialFile;
 
-		s3d::Material::Pointer _lastMaterial;
-		s3d::Material::List _materials;
+		s3d::SceneMaterial::Pointer _lastMaterial;
+		s3d::SceneMaterial::List _materials;
 		OBJMeshIndexBoundsList _meshes;
 		
         IndexArray::Pointer _indices;

@@ -49,7 +49,7 @@ namespace et
 			void cleanupGeometry();
 			void cleanUpSupportMehses();
 			
-			Material* materialWithName(const std::string&) override;
+			SceneMaterial* materialWithName(const std::string&) override;
 
 			BaseElement::Pointer createElementOfType(ElementType, BaseElement*) override;
 

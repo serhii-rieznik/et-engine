@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include <et/scene3d/material.h>
+#include <et/scene3d/scenematerial.h>
 #include <et/scene3d/elementcontainer.h>
 
 namespace et
@@ -25,13 +25,13 @@ namespace et
 				setFlag(Flag_Renderable);
 			}
 
-			Material::Pointer& material()
+			SceneMaterial::Pointer& material()
 				{ return _material; }
 
-			const Material::Pointer& material() const
+			const SceneMaterial::Pointer& material() const
 				{ return _material; }
 
-			void setMaterial(const Material::Pointer& material)
+			void setMaterial(const SceneMaterial::Pointer& material)
 				{ _material = material; }
 
 			bool visible() const
@@ -44,7 +44,7 @@ namespace et
 			void deserialize(Dictionary, SerializationHelper*);
 			
 		private:
-			Material::Pointer _material;
+			SceneMaterial::Pointer _material;
 			bool _visible = true;
 		};
 	}

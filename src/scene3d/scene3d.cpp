@@ -71,7 +71,7 @@ BaseElement::Pointer Scene::createElementOfType(ElementType type, BaseElement* p
 	}
 }
 
-Material* Scene::materialWithName(const std::string& mName)
+SceneMaterial* Scene::materialWithName(const std::string& mName)
 {
 	auto& materials = _storage.materials();
 

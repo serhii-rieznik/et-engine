@@ -164,7 +164,7 @@ void Storage::deserializeWithOptions(RenderContext* rc, Dictionary stream, Seria
 			for (const auto kv : materials->content)
 			{
 				Dictionary materialInfo(kv.second);
-				Material::Pointer material;
+				SceneMaterial::Pointer material;
 				material->deserializeWithOptions(materialInfo, rc, cache,
 					helper->serializationBasePath(), options);
 				addMaterial(material);
@@ -238,7 +238,7 @@ void Storage::flush()
 	if (_indexArray.valid() && (_indexArray->atomicCounterValue() == 1))
 		_indexArray = IndexArray::Pointer();
 	
-	Material::Map::iterator mi = _materials.begin();
+	SceneMaterial::Map::iterator mi = _materials.begin();
 	while (mi != _materials.end())
 	{
 		if (mi->second.ptr()->atomicCounterValue() == 1)

@@ -37,10 +37,10 @@ namespace et
 		public:
 			Mesh(const std::string& = defaultMeshName, BaseElement* = nullptr);
 			
-			Mesh(const std::string&, const VertexArrayObject&, const Material::Pointer&,
+			Mesh(const std::string&, const VertexArrayObject&, const SceneMaterial::Pointer&,
 				uint32_t, uint32_t, BaseElement* = nullptr);
 			
-			Mesh(const std::string&, const VertexArrayObject&, const Material::Pointer&,
+			Mesh(const std::string&, const VertexArrayObject&, const SceneMaterial::Pointer&,
 				uint32_t, uint32_t, const VertexStorage::Pointer&, const IndexArray::Pointer&, 
 				BaseElement* = nullptr);
 

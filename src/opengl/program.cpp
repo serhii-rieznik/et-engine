@@ -15,17 +15,15 @@ using namespace et;
 
 static const std::string etNoShader = "none";
 
-Program::Program(RenderContext* rc) : _rc(rc),
-	_mModelViewLocation(-1), _mModelViewProjectionLocation(-1), _vCameraLocation(-1),
-	_vPrimaryLightLocation(-1), _mLightProjectionMatrixLocation(-1), _mTransformLocation(-1)
+Program::Program(RenderContext* rc) :
+	_rc(rc)
 {
+	
 }
 
 Program::Program(RenderContext* rc, const std::string& vertexShader, const std::string& geometryShader,
 	const std::string& fragmentShader, const std::string& objName, const std::string& origin,
-	const StringList& defines) : APIObject(objName, origin), _rc(rc), _mModelViewLocation(-1),
-	_mModelViewProjectionLocation(-1), _vCameraLocation(-1), _vPrimaryLightLocation(-1),
-	_mLightProjectionMatrixLocation(-1), _mTransformLocation(-1), _defines(defines)
+	const StringList& defines) : APIObject(objName, origin), _rc(rc), _defines(defines)
 {
 	buildProgram(vertexShader, geometryShader, fragmentShader);
 }

@@ -21,7 +21,7 @@ namespace et
 		public:
 			SupportMesh(const std::string& = defaultMeshName, BaseElement* = nullptr);
 			
-			SupportMesh(const std::string&, const VertexArrayObject&, const Material::Pointer&,
+			SupportMesh(const std::string&, const VertexArrayObject&, const SceneMaterial::Pointer&,
 				uint32_t, uint32_t, const VertexStorage::Pointer&, const IndexArray::Pointer&, BaseElement* = nullptr);
 
 			ElementType type() const 

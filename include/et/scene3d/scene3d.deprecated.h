@@ -73,7 +73,7 @@ namespace et
 			IndexArray::Pointer primaryIndexArray();
 			VertexStorage::Pointer vertexStorageForVertexBuffer(const std::string&);
 
-			void onMaterialLoaded(Material*);
+			void onMaterialLoaded(SceneMaterial*);
 			void allMaterialsLoaded();
 
 		private:

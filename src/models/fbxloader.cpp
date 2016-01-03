@@ -45,7 +45,7 @@ namespace et
 		void loadNode(s3d::Storage&, FbxNode* node, s3d::BaseElement::Pointer parent);
 		void loadNodeAnimations(FbxNode* node, s3d::BaseElement::Pointer object, const StringList& props);
 
-		s3d::Material::List loadNodeMaterials(s3d::Storage&, FbxNode* node);
+		s3d::SceneMaterial::List loadNodeMaterials(s3d::Storage&, FbxNode* node);
 		StringList loadNodeProperties(FbxNode* node);
 		
 		void buildVertexBuffers(RenderContext* rc, s3d::BaseElement::Pointer root, s3d::Storage&);
@@ -53,22 +53,22 @@ namespace et
 		bool meshHasSkin(FbxMesh*);
 		
 		s3d::Mesh::Pointer loadMesh(s3d::Storage&, FbxMesh*, s3d::BaseElement::Pointer parent,
-			const s3d::Material::List& materials, const StringList& params);
+			const s3d::SceneMaterial::List& materials, const StringList& params);
 
 		s3d::LineElement::Pointer loadLine(s3d::Storage&, FbxLine*, s3d::BaseElement::Pointer parent, 
 			const StringList& params);
 
 		s3d::SkeletonElement::Pointer loadBone(FbxSkeleton* node, s3d::BaseElement::Pointer parent);
 		
-		s3d::Material::Pointer loadMaterial(FbxSurfaceMaterial* material);
+		s3d::SceneMaterial::Pointer loadMaterial(FbxSurfaceMaterial* material);
 		
 		void linkSkeleton(s3d::Storage&, s3d::ElementContainer::Pointer);
 		void buildBlendWeightsForMesh(s3d::Storage&, s3d::Mesh::Pointer);
 
-		void loadMaterialValue(s3d::Material::Pointer m, uint32_t propName,
+		void loadMaterialValue(s3d::SceneMaterial::Pointer m, uint32_t propName,
 			FbxSurfaceMaterial* fbxm, const char* fbxprop);
 		
-		void loadMaterialTextureValue(s3d::Material::Pointer m, uint32_t propName,
+		void loadMaterialTextureValue(s3d::SceneMaterial::Pointer m, uint32_t propName,
 			FbxSurfaceMaterial* fbxm, const char* fbxprop);
 
 		mat4 fbxMatrixToMat4(const FbxAMatrix& m)
@@ -268,24 +268,24 @@ void FBXLoaderPrivate::loadTextures()
 	application().setShouldSilentPathResolverErrors(false);
 }
 
-s3d::Material::List FBXLoaderPrivate::loadNodeMaterials(s3d::Storage& storage, FbxNode* node)
+s3d::SceneMaterial::List FBXLoaderPrivate::loadNodeMaterials(s3d::Storage& storage, FbxNode* node)
 {
-	s3d::Material::List materials;
+	s3d::SceneMaterial::List materials;
 	const int lMaterialCount = node->GetMaterialCount();
 	for (int lMaterialIndex = 0; lMaterialIndex < lMaterialCount; ++lMaterialIndex)
 	{
 		FbxSurfaceMaterial* lMaterial = node->GetMaterial(lMaterialIndex);
-		s3d::Material* storedMaterial = static_cast<s3d::Material*>(lMaterial->GetUserDataPtr());
+		s3d::SceneMaterial* storedMaterial = static_cast<s3d::SceneMaterial*>(lMaterial->GetUserDataPtr());
 		if (storedMaterial == nullptr)
 		{
-			s3d::Material::Pointer m = loadMaterial(lMaterial);
+			s3d::SceneMaterial::Pointer m = loadMaterial(lMaterial);
 			materials.push_back(m);
 			storage.addMaterial(m);
 			lMaterial->SetUserDataPtr(m.ptr());
 		}
 		else
 		{
-			materials.push_back(s3d::Material::Pointer(storedMaterial));
+			materials.push_back(s3d::SceneMaterial::Pointer(storedMaterial));
 		}
 	}
 	return materials;
@@ -453,7 +453,7 @@ void et::FBXLoaderPrivate::loadNode(s3d::Storage& storage, FbxNode* node, s3d::B
 	}
 }
 
-void FBXLoaderPrivate::loadMaterialTextureValue(s3d::Material::Pointer m, uint32_t propName,
+void FBXLoaderPrivate::loadMaterialTextureValue(s3d::SceneMaterial::Pointer m, uint32_t propName,
 	FbxSurfaceMaterial* fbxm, const char* fbxprop)
 {
 	FbxProperty value = fbxm->FindProperty(fbxprop);
@@ -473,7 +473,7 @@ void FBXLoaderPrivate::loadMaterialTextureValue(s3d::Material::Pointer m, uint32
 	}
 }
 
-void FBXLoaderPrivate::loadMaterialValue(s3d::Material::Pointer m, uint32_t propName,
+void FBXLoaderPrivate::loadMaterialValue(s3d::SceneMaterial::Pointer m, uint32_t propName,
 	FbxSurfaceMaterial* fbxm, const char* fbxprop)
 {
 	const FbxProperty value = fbxm->FindProperty(fbxprop);
@@ -516,10 +516,10 @@ void FBXLoaderPrivate::loadMaterialValue(s3d::Material::Pointer m, uint32_t prop
 	}
 }
 
-s3d::Material::Pointer FBXLoaderPrivate::loadMaterial(FbxSurfaceMaterial* mat)
+s3d::SceneMaterial::Pointer FBXLoaderPrivate::loadMaterial(FbxSurfaceMaterial* mat)
 {
 	const char* kOpacity = "Opacity";
-	s3d::Material::Pointer m;
+	s3d::SceneMaterial::Pointer m;
 	m->setName(mat->GetName());
 	
 	/*
@@ -608,7 +608,7 @@ bool FBXLoaderPrivate::meshHasSkin(FbxMesh* mesh)
 }
 
 s3d::Mesh::Pointer FBXLoaderPrivate::loadMesh(s3d::Storage& storage, FbxMesh* mesh, 
-	s3d::BaseElement::Pointer parent, const s3d::Material::List& materials, const StringList& params)
+	s3d::BaseElement::Pointer parent, const s3d::SceneMaterial::List& materials, const StringList& params)
 {
 	const char* mName = mesh->GetName();
 	const char* nName = mesh->GetNode()->GetName();

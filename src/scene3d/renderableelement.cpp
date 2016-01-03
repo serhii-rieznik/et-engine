@@ -20,7 +20,7 @@ void RenderableElement::deserialize(Dictionary stream, SerializationHelper* help
 {
 	auto materialName = stream.stringForKey(kMaterialName)->content;
 
-	Material::Pointer material(helper->materialWithName(materialName));
+	SceneMaterial::Pointer material(helper->materialWithName(materialName));
 	setMaterial(material);
 
 	ElementContainer::deserialize(stream, helper);

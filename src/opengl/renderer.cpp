@@ -62,29 +62,29 @@ Renderer::Renderer(RenderContext* rc) :
 	{
 		currentDefines[0] = textureTypeDefines[i];
 
-		_fullscreenProgram[i] = rc->programFactory().genProgram("__et__fullscreeen__program__", 
+		_fullscreenProgram[i] = rc->materialFactory().genProgram("__et__fullscreeen__program__", 
 			fullscreen_vertex_shader, copy_fragment_shader, currentDefines);
 		_fullscreenProgram[i]->setUniform("color_texture", _defaultTextureBindingUnit);
 	}
 
-	_fullscreenDepthProgram = rc->programFactory().genProgram("__et__fullscreeen__depth__program__",
+	_fullscreenDepthProgram = rc->materialFactory().genProgram("__et__fullscreeen__depth__program__",
 		fullscreen_vertex_shader, depth_fragment_shader);
 	_fullscreenDepthProgram->setUniform("depth_texture", _defaultTextureBindingUnit);
 	_fullScreenDepthProgram_FactorUniform = _fullscreenDepthProgram->getUniform("factor");
 
-	_fullscreenScaledProgram = rc->programFactory().genProgram("__et__fullscreeen_scaled_program__",
+	_fullscreenScaledProgram = rc->materialFactory().genProgram("__et__fullscreeen_scaled_program__",
 		fullscreen_scaled_vertex_shader, copy_fragment_shader);
 	_fullscreenScaledProgram->setUniform("color_texture", _defaultTextureBindingUnit);
 	_fullScreenScaledProgram_PSUniform = _fullscreenScaledProgram->getUniform("vScale");
 	_fullScreenScaledProgram_TintUniform = _fullscreenScaledProgram->getUniform("tint");
 
-	_scaledProgram = rc->programFactory().genProgram("__et__scaled_program__",
+	_scaledProgram = rc->materialFactory().genProgram("__et__scaled_program__",
 		scaled_copy_vertex_shader, copy_fragment_shader);
 	_scaledProgram->setUniform("color_texture", _defaultTextureBindingUnit);
 	_scaledProgram_PSUniform = _scaledProgram->getUniform("PositionScale");
 	_scaledProgram_TintUniform = _scaledProgram->getUniform("tint");
 
-	_scaledRotatedProgram = rc->programFactory().genProgram("__et__scaled_rotated_program__",
+	_scaledRotatedProgram = rc->materialFactory().genProgram("__et__scaled_rotated_program__",
 		scaled_rotated_copy_vertex_shader, copy_fragment_shader);
 	_scaledRotatedProgram->setUniform("color_texture", _defaultTextureBindingUnit);
 	_scaledRotatedProgram_PSUniform = _scaledRotatedProgram->getUniform("PositionScale");
