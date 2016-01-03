@@ -6,6 +6,7 @@
  */
 
 #include <et/app/application.h>
+#include <et/rendering/renderstate.h>
 #include <et/rendering/materialfactory.h>
 
 using namespace et;
@@ -71,4 +72,13 @@ void Material::loadFromJson(const std::string& jsonString, const std::string& ba
 	{
 		log::warning("Invalid or unsupported cull mode in material: %s", cullMode.c_str());
 	}
+}
+
+void Material::enableInRenderState(RenderState& rs)
+{
+	rs.setCulling(_cullMode);
+	rs.setBlendState(_blend);
+	rs.setDepthState(_depth);
+	
+	rs.bindProgram(_program);
 }

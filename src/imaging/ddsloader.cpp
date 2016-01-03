@@ -255,7 +255,7 @@ void dds::loadInfoFromStream(std::istream& source, TextureDescription& desc)
 			desc.internalformat = isRGB ? TextureFormat::RGB : TextureFormat::RGBA;
 			desc.format = isBGR ? (isRGB  ? TextureFormat::BGR : TextureFormat::BGRA) :
 				(isRGB  ? TextureFormat::RGB : TextureFormat::RGBA);
-			desc.type = DataType::UnsignedChar;
+			desc.type = DataFormat::UnsignedChar;
 			break;
 		}
 			
@@ -265,7 +265,7 @@ void dds::loadInfoFromStream(std::istream& source, TextureDescription& desc)
 			desc.bitsPerPixel = header.ddspf.dwRGBBitCount;
 			desc.internalformat = TextureFormat::RGB;
 			desc.format = TextureFormat::BGR;
-			desc.type = DataType::UnsignedChar;
+			desc.type = DataFormat::UnsignedChar;
 			break;
 		}
 			
@@ -275,7 +275,7 @@ void dds::loadInfoFromStream(std::istream& source, TextureDescription& desc)
 			desc.bitsPerPixel = 16 * desc.channels;
 			desc.internalformat = TextureFormat::RG16;
 			desc.format = TextureFormat::RG;
-			desc.type = DataType::UnsignedShort;
+			desc.type = DataFormat::UnsignedShort;
 			break;
 		}
 
@@ -285,7 +285,7 @@ void dds::loadInfoFromStream(std::istream& source, TextureDescription& desc)
 			desc.bitsPerPixel = 16 * desc.channels;
 			desc.internalformat = TextureFormat::RGBA16;
 			desc.format = TextureFormat::RGBA;
-			desc.type = DataType::UnsignedShort;
+			desc.type = DataFormat::UnsignedShort;
 			break;
 		}
 
@@ -295,7 +295,7 @@ void dds::loadInfoFromStream(std::istream& source, TextureDescription& desc)
 			desc.bitsPerPixel = 16 * desc.channels;
 			desc.internalformat = TextureFormat::R16F;
 			desc.format = TextureFormat::R;
-			desc.type = DataType::Half;
+			desc.type = DataFormat::Half;
 			break;
 		}
 
@@ -305,7 +305,7 @@ void dds::loadInfoFromStream(std::istream& source, TextureDescription& desc)
 			desc.bitsPerPixel = 16 * desc.channels;
 			desc.internalformat = TextureFormat::RG16F;
 			desc.format = TextureFormat::RG;
-			desc.type = DataType::Half;
+			desc.type = DataFormat::Half;
 			break;
 		}
 
@@ -315,7 +315,7 @@ void dds::loadInfoFromStream(std::istream& source, TextureDescription& desc)
 			desc.bitsPerPixel = 32 * desc.channels;
 			desc.internalformat = TextureFormat::R32F;
 			desc.format = TextureFormat::R;
-			desc.type = DataType::Float;
+			desc.type = DataFormat::Float;
 			break;
 		}
 
@@ -325,7 +325,7 @@ void dds::loadInfoFromStream(std::istream& source, TextureDescription& desc)
 			desc.bitsPerPixel = 32 * desc.channels;
 			desc.internalformat = TextureFormat::R32F;
 			desc.format = TextureFormat::R;
-			desc.type = DataType::Float;
+			desc.type = DataFormat::Float;
 			break;
 		}
 
@@ -335,7 +335,7 @@ void dds::loadInfoFromStream(std::istream& source, TextureDescription& desc)
 			desc.bitsPerPixel = 16 * desc.channels;
 			desc.internalformat = TextureFormat::RGBA16F;
 			desc.format = TextureFormat::RGBA;
-			desc.type = DataType::Half;
+			desc.type = DataFormat::Half;
 			break;
 		}
 
@@ -353,7 +353,7 @@ void dds::loadInfoFromStream(std::istream& source, TextureDescription& desc)
 			desc.bitsPerPixel = 1 * desc.channels;
 			desc.internalformat = hasAlpha ? TextureFormat::DXT1_RGB : TextureFormat::DXT1_RGBA;
 			desc.format = hasAlpha ? TextureFormat::RGB : TextureFormat::RGBA;
-			desc.type = DataType::UnsignedChar;
+			desc.type = DataFormat::UnsignedChar;
 			break;
 		}
 
@@ -364,7 +364,7 @@ void dds::loadInfoFromStream(std::istream& source, TextureDescription& desc)
 			desc.bitsPerPixel = 2 * desc.channels;
 			desc.internalformat = TextureFormat::DXT3;
 			desc.format = TextureFormat::RGBA;
-			desc.type = DataType::UnsignedChar;
+			desc.type = DataFormat::UnsignedChar;
 			break;
 		}
 
@@ -375,7 +375,7 @@ void dds::loadInfoFromStream(std::istream& source, TextureDescription& desc)
 			desc.bitsPerPixel = 2 * desc.channels;
 			desc.internalformat = TextureFormat::DXT5;
 			desc.format = TextureFormat::RGBA;
-			desc.type = DataType::UnsignedChar;
+			desc.type = DataFormat::UnsignedChar;
 			break;
 		}
 			
@@ -386,7 +386,7 @@ void dds::loadInfoFromStream(std::istream& source, TextureDescription& desc)
 			desc.bitsPerPixel = 4 * desc.channels;
 			desc.internalformat = TextureFormat::RGTC2;
 			desc.format = TextureFormat::RG;
-			desc.type = DataType::UnsignedChar;
+			desc.type = DataFormat::UnsignedChar;
 			break;
 		}
 			
@@ -460,7 +460,7 @@ void fillDescriptionWithFormat(TextureDescription& desc, DXGI_FORMAT format)
 			desc.bitsPerPixel = 8 * desc.channels;
 			desc.internalformat = TextureFormat::R8;
 			desc.format = TextureFormat::R;
-			desc.type = DataType::UnsignedChar;
+			desc.type = DataFormat::UnsignedChar;
 			break;
 		}
 		case DXGI_FORMAT_R8G8B8A8_UNORM:
@@ -469,7 +469,7 @@ void fillDescriptionWithFormat(TextureDescription& desc, DXGI_FORMAT format)
 			desc.bitsPerPixel = 8 * desc.channels;
 			desc.internalformat = TextureFormat::RGBA8;
 			desc.format = TextureFormat::RGBA;
-			desc.type = DataType::UnsignedChar;
+			desc.type = DataFormat::UnsignedChar;
 			break;
 		}
 		case DXGI_FORMAT_R32G32B32A32_FLOAT:
@@ -478,7 +478,7 @@ void fillDescriptionWithFormat(TextureDescription& desc, DXGI_FORMAT format)
 			desc.bitsPerPixel = 32 * desc.channels;
 			desc.internalformat = TextureFormat::RGBA32F;
 			desc.format = TextureFormat::RGBA;
-			desc.type = DataType::Float;
+			desc.type = DataFormat::Float;
 			break;
 		}
 			

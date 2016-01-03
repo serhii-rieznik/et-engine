@@ -37,19 +37,19 @@ void IndexBuffer::setProperties(const IndexArray::Pointer& i)
 	{
 		case IndexArrayFormat::Format_8bit:
 		{
-			_dataType = DataType::UnsignedChar;
+			_dataType = DataFormat::UnsignedChar;
 			break;
 		}
 			
 		case IndexArrayFormat::Format_16bit:
 		{
-			_dataType = DataType::UnsignedShort;
+			_dataType = DataFormat::UnsignedShort;
 			break;
 		}
 			
 		case IndexArrayFormat::Format_32bit:
 		{
-			_dataType = DataType::UnsignedInt;
+			_dataType = DataFormat::UnsignedInt;
 			break;
 		}
 			

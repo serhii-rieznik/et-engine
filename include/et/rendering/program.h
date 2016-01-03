@@ -55,10 +55,10 @@ namespace et
 		bool validate() const;
 		
 		int modelViewMatrixUniformLocation() const 
-			{ return _mModelViewLocation; }
+			{ return _matViewLocation; }
 
 		int mvpMatrixUniformLocation() const
-			{ return _mModelViewProjectionLocation; }
+			{ return _matViewProjectionLocation; }
 
 		int cameraUniformLocation() const
 			{ return _vCameraLocation; }
@@ -67,10 +67,10 @@ namespace et
 			{ return _vPrimaryLightLocation; }
 
 		int lightProjectionMatrixLocation() const
-			{ return _mLightProjectionMatrixLocation; }
+			{ return _matLightViewProjectionLocation; }
 
 		int transformMatrixLocation() const
-			{ return _mTransformLocation; }
+			{ return _matWorldLocation; }
 
 		void setModelViewMatrix(const mat4 &m, bool force = false);
 		void setMVPMatrix(const mat4 &m, bool force = false);
@@ -168,12 +168,12 @@ namespace et
 		std::map<int, mat3> _mat3Cache;
 		std::map<int, mat4> _mat4Cache;
 
-		int _mModelViewLocation = -1;
-		int _mModelViewProjectionLocation = -1;
+		int _matViewLocation = -1;
+		int _matViewProjectionLocation = -1;
 		int _vCameraLocation = -1;
 		int _vPrimaryLightLocation = -1;
-		int _mLightProjectionMatrixLocation = -1;
-		int _mTransformLocation = -1;
+		int _matLightViewProjectionLocation = -1;
+		int _matWorldLocation = -1;
 
 		StringList _defines;
 	};

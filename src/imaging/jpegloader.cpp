@@ -194,7 +194,7 @@ void loadInfoFromHeader(TextureDescription& desc, jpeg_decompress_struct& cinfo)
 	desc.bitsPerPixel = 8 * cinfo.output_components;
 	desc.mipMapCount = 1;
 	desc.layersCount = 1;
-	desc.type = DataType::UnsignedChar;
+	desc.type = DataFormat::UnsignedChar;
 	
 	if (cinfo.out_color_space == JCS_GRAYSCALE)
 	{

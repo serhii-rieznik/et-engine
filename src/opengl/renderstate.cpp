@@ -432,14 +432,14 @@ void RenderState::setVertexAttribPointer(const VertexElement& e, uint32_t baseIn
 {
 	(void)force;
 	
-	if (e.dataType() == DataType::Int)
+	if (e.dataFormat() == DataFormat::Int)
 	{
-		glVertexAttribIPointer(GLuint(e.usage()), static_cast<GLint>(e.components()), dataTypeValue(e.dataType()),
+		glVertexAttribIPointer(GLuint(e.usage()), static_cast<GLint>(e.components()), dataFormatValue(e.dataFormat()),
 			e.stride(), reinterpret_cast<GLvoid*>(e.offset() + baseIndex));
 	}
-	else if (e.dataType() == DataType::Float)
+	else if (e.dataFormat() == DataFormat::Float)
 	{
-		glVertexAttribPointer(GLuint(e.usage()), static_cast<GLint>(e.components()), dataTypeValue(e.dataType()),
+		glVertexAttribPointer(GLuint(e.usage()), static_cast<GLint>(e.components()), dataFormatValue(e.dataFormat()),
 			false, e.stride(), reinterpret_cast<GLvoid*>(e.offset() + baseIndex));
 	}
 	else
@@ -822,15 +822,4 @@ RenderState::Descriptor RenderState::currentState()
 	s.rasterizer = currentRasterizedState();
 	s.cache = currentCacheValues();
 	return s;
-}
-
-/*
- * Materials stuff
- */
-void RenderState::bindMaterial(const Material::Pointer& mat)
-{
-	setCulling(mat->cullMode());
-	setBlendState(mat->blendState());
-	setDepthState(mat->depthState());
-	bindProgram(mat->program());
 }

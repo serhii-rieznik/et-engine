@@ -80,13 +80,13 @@ void et::hdr::loadInfoFromStream(std::istream& source, TextureDescription& desc)
 	if (shouldConvertRGBEToFloat)
 	{
 		desc.internalformat = TextureFormat::RGBA32F;
-		desc.type = DataType::Float;
+		desc.type = DataFormat::Float;
 		desc.bitsPerPixel = 128;
 	}
 	else
 	{
 		desc.internalformat = TextureFormat::RGBA;
-		desc.type = DataType::UnsignedChar;
+		desc.type = DataFormat::UnsignedChar;
 		desc.bitsPerPixel = 32;
 	}
 	

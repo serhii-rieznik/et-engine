@@ -102,7 +102,7 @@ namespace et
 		TextureTarget target = TextureTarget::Texture_2D;
 		TextureFormat internalformat = TextureFormat::Invalid;
 		TextureFormat format = TextureFormat::Invalid;
-		DataType type = DataType::UnsignedChar;
+		DataFormat type = DataFormat::UnsignedChar;
 		
 		TextureDataLayout dataLayout = TextureDataLayout::FacesFirst;
 	};

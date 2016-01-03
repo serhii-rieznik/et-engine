@@ -24,7 +24,7 @@ const std::string vertexAttributeTypeNames[VertexAttributeType_max] =
 	"int", "ivec2", "ivec3", "ivec4"
 };
 
-const std::string dataTypeNames[DataType_max] =
+const std::string dataTypeNames[DataFormat_max] =
 {
 	"char",
 	"unsigned char",
@@ -97,15 +97,15 @@ VertexAttributeType et::stringToVertexAttributeType(const std::string& s)
 	return VertexAttributeType::Float;
 }
 
-DataType et::stringToDataType(const std::string& s)
+DataFormat et::stringToDataType(const std::string& s)
 {
-	for (uint32_t i = 0, e = DataType_max; i < e; ++i)
+	for (uint32_t i = 0, e = DataFormat_max; i < e; ++i)
 	{
 		if (s == dataTypeNames[i])
-			return static_cast<DataType>(i);
+			return static_cast<DataFormat>(i);
 	}
 	
-	return DataType::Char;
+	return DataFormat::Char;
 }
 
 IndexArrayFormat et::stringToIndexArrayFormat(const std::string& s)
@@ -145,9 +145,9 @@ std::string et::vertexAttributeTypeToString(VertexAttributeType vat)
 	intToStr(static_cast<uint32_t>(vat));
 }
 
-std::string et::dataTypeToString(DataType dt)
+std::string et::dataFormatToString(DataFormat dt)
 {
-	return (dt < DataType::max) ? dataTypeNames[static_cast<uint32_t>(dt)] :
+	return (dt < DataFormat::max) ? dataTypeNames[static_cast<uint32_t>(dt)] :
 	intToStr(static_cast<uint32_t>(dt));
 }
 
@@ -183,21 +183,21 @@ uint32_t et::vertexAttributeTypeComponents(VertexAttributeType t)
 	return values[static_cast<uint32_t>(t)];
 }
 
-DataType et::vertexAttributeTypeDataType(VertexAttributeType t)
+DataFormat et::vertexAttributeTypeDataFormat(VertexAttributeType t)
 {
 	ET_ASSERT(t < VertexAttributeType::max);
-	static const DataType values[VertexAttributeType_max] =
+	static const DataFormat values[VertexAttributeType_max] =
 	{
-		DataType::Float, // Float,
-		DataType::Float, // Vec2,
-		DataType::Float, // Vec3,
-		DataType::Float, // Vec4,
-		DataType::Float, // Mat3,
-		DataType::Float, // Mat4,
-		DataType::Int, // Int,
-		DataType::Int, // IntVec2,
-		DataType::Int, // IntVec3,
-		DataType::Int, // IntVec4,
+		DataFormat::Float, // Float,
+		DataFormat::Float, // Vec2,
+		DataFormat::Float, // Vec3,
+		DataFormat::Float, // Vec4,
+		DataFormat::Float, // Mat3,
+		DataFormat::Float, // Mat4,
+		DataFormat::Int, // Int,
+		DataFormat::Int, // IntVec2,
+		DataFormat::Int, // IntVec3,
+		DataFormat::Int, // IntVec4,
 	};
 	return values[int32_t(t)];
 }
@@ -214,29 +214,29 @@ uint32_t et::vertexAttributeUsageMask(VertexAttributeUsage u)
 	return vertexAttributeUsageMasks[static_cast<uint32_t>(u)];
 }
 
-uint32_t et::sizeOfDataType(DataType type)
+uint32_t et::sizeOfDataFormat(DataFormat type)
 {
 	switch (type)
 	{
-		case DataType::Char:
-		case DataType::UnsignedChar:
+		case DataFormat::Char:
+		case DataFormat::UnsignedChar:
 			return 1;
 			
-		case DataType::Half:
-		case DataType::Short:
-		case DataType::UnsignedShort:
-		case DataType::UnsignedShort_4444:
-		case DataType::UnsignedShort_5551:
-		case DataType::UnsignedShort_565:
+		case DataFormat::Half:
+		case DataFormat::Short:
+		case DataFormat::UnsignedShort:
+		case DataFormat::UnsignedShort_4444:
+		case DataFormat::UnsignedShort_5551:
+		case DataFormat::UnsignedShort_565:
 			return 2;
 			
-		case DataType::Int:
-		case DataType::UnsignedInt:
-		case DataType::Float:
-		case DataType::UnsignedInt_8888_Rev:
+		case DataFormat::Int:
+		case DataFormat::UnsignedInt:
+		case DataFormat::Float:
+		case DataFormat::UnsignedInt_8888_Rev:
 			return 4;
 			
-		case DataType::Double:
+		case DataFormat::Double:
 			return 8;
 			
 		default:
@@ -244,7 +244,7 @@ uint32_t et::sizeOfDataType(DataType type)
 	}
 }
 
-uint32_t et::bitsPerPixelForTextureFormat(TextureFormat format, DataType type)
+uint32_t et::bitsPerPixelForTextureFormat(TextureFormat format, DataFormat type)
 {
 	switch (format)
 	{
@@ -286,21 +286,21 @@ uint32_t et::bitsPerPixelForTextureFormat(TextureFormat format, DataType type)
 			
 		case TextureFormat::R:
 		case TextureFormat::Depth:
-			return bitsPerPixelForType(type);
+			return bitsPerPixelForDataFormat(type);
 			
 		case TextureFormat::RG:
-			return 2 * bitsPerPixelForType(type);
+			return 2 * bitsPerPixelForDataFormat(type);
 			
 		case TextureFormat::RGB:
 		case TextureFormat::BGR:
 		{
 			switch (type)
 			{
-				case DataType::UnsignedShort_565:
+				case DataFormat::UnsignedShort_565:
 					return 16;
 					
 				default:
-					return 3 * bitsPerPixelForType(type);
+					return 3 * bitsPerPixelForDataFormat(type);
 			}
 		}
 			
@@ -309,12 +309,12 @@ uint32_t et::bitsPerPixelForTextureFormat(TextureFormat format, DataType type)
 		{
 			switch (type)
 			{
-				case DataType::UnsignedShort_4444:
-				case DataType::UnsignedShort_5551:
+				case DataFormat::UnsignedShort_4444:
+				case DataFormat::UnsignedShort_5551:
 					return 16;
 					
 				default:
-					return 4 * bitsPerPixelForType(type);
+					return 4 * bitsPerPixelForDataFormat(type);
 			}
 		}
 			
@@ -327,33 +327,33 @@ uint32_t et::bitsPerPixelForTextureFormat(TextureFormat format, DataType type)
 	}
 }
 
-uint32_t et::bitsPerPixelForType(DataType type)
+uint32_t et::bitsPerPixelForDataFormat(DataFormat type)
 {
 	switch (type)
 	{
-		case DataType::Char:
-		case DataType::UnsignedChar:
+		case DataFormat::Char:
+		case DataFormat::UnsignedChar:
 			return 8;
 			
-		case DataType::Short:
-		case DataType::UnsignedShort:
-		case DataType::UnsignedShort_4444:
-		case DataType::UnsignedShort_5551:
-		case DataType::UnsignedShort_565:
+		case DataFormat::Short:
+		case DataFormat::UnsignedShort:
+		case DataFormat::UnsignedShort_4444:
+		case DataFormat::UnsignedShort_5551:
+		case DataFormat::UnsignedShort_565:
 			return 16;
 			
-		case DataType::Int:
-		case DataType::UnsignedInt:
-		case DataType::UnsignedInt_8888_Rev:
+		case DataFormat::Int:
+		case DataFormat::UnsignedInt:
+		case DataFormat::UnsignedInt_8888_Rev:
 			return 32;
 			
-		case DataType::Half:
+		case DataFormat::Half:
 			return 16;
 			
-		case DataType::Float:
+		case DataFormat::Float:
 			return 32;
 			
-		case DataType::Double:
+		case DataFormat::Double:
 			return 64;
 			
 		default:

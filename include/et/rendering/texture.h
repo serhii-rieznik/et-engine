@@ -50,7 +50,7 @@ namespace et
 		TextureFormat format() const
 			{ return _desc->format; }
 
-		DataType dataType() const
+		DataFormat dataType() const
 			{ return _desc->type; }
 
 		TextureTarget target() const

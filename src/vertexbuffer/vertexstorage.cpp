@@ -75,7 +75,7 @@ size_t VertexStorage::sizeOfAttribute(VertexAttributeUsage usage) const
 {
 	ET_ASSERT(hasAttribute(usage));
 	const auto& element = declaration().elementForUsage(usage);
-	return sizeOfDataType(element.dataType()) * vertexAttributeTypeComponents(element.type());
+	return sizeOfDataFormat(element.dataFormat()) * vertexAttributeTypeComponents(element.type());
 }
 
 size_t VertexStorage::stride() const

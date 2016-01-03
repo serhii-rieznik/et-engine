@@ -82,7 +82,7 @@ void pvr::loadFromStream(std::istream& stream, TextureDescription& desc)
 		desc.mipMapCount = 1;
 		desc.internalformat = TextureFormat::RGBA;
 		desc.format = TextureFormat::RGBA;
-		desc.type = DataType::UnsignedChar;
+		desc.type = DataFormat::UnsignedChar;
 		desc.compressed = 0;
 		desc.data = rgbaData;
 	}
@@ -136,7 +136,7 @@ void parseTextureFormat(const PVRTextureHeaderV3& sTextureHeader, TextureDescrip
 		
 	if ((PixelFormat & PVRTEX_PFHIGHMASK) == 0)
 	{
-		desc.type = DataType::UnsignedChar;
+		desc.type = DataFormat::UnsignedChar;
 		
 		switch (PixelFormat)
 		{
@@ -196,7 +196,7 @@ void parseTextureFormat(const PVRTextureHeaderV3& sTextureHeader, TextureDescrip
 				{
 					case PVRTGENPIXELID4('r','g','b','a',16,16,16,16):
 					{
-						desc.type = DataType::Half;
+						desc.type = DataFormat::Half;
 						desc.internalformat = TextureFormat::RGBA16F;
 						desc.format = TextureFormat::RGBA;
 						desc.channels = 4;
@@ -205,7 +205,7 @@ void parseTextureFormat(const PVRTextureHeaderV3& sTextureHeader, TextureDescrip
 						
 					case PVRTGENPIXELID3('r','g','b',16,16,16):
 					{
-						desc.type = DataType::Half;
+						desc.type = DataFormat::Half;
 						desc.internalformat = TextureFormat::RGB16F;
 						desc.format = TextureFormat::RGB;
 						desc.channels = 3;
@@ -214,7 +214,7 @@ void parseTextureFormat(const PVRTextureHeaderV3& sTextureHeader, TextureDescrip
 						
 					case PVRTGENPIXELID2('l','a',16,16):
 					{
-						desc.type = DataType::Half;
+						desc.type = DataFormat::Half;
 						desc.internalformat = TextureFormat::RG16F;
 						desc.format = TextureFormat::RG;
 						desc.channels = 2;
@@ -223,7 +223,7 @@ void parseTextureFormat(const PVRTextureHeaderV3& sTextureHeader, TextureDescrip
 						
 					case PVRTGENPIXELID1('l',16):
 					{
-						desc.type = DataType::Half;
+						desc.type = DataFormat::Half;
 						desc.internalformat = TextureFormat::R16F;
 						desc.format = TextureFormat::R;
 						desc.channels = 1;
@@ -232,7 +232,7 @@ void parseTextureFormat(const PVRTextureHeaderV3& sTextureHeader, TextureDescrip
 						
 					case PVRTGENPIXELID1('a',16):
 					{
-						desc.type = DataType::Half;
+						desc.type = DataFormat::Half;
 						desc.format = TextureFormat::R16F;
 						desc.internalformat = TextureFormat::R;
 						desc.channels = 1;
@@ -241,7 +241,7 @@ void parseTextureFormat(const PVRTextureHeaderV3& sTextureHeader, TextureDescrip
 						
 					case PVRTGENPIXELID4('r','g','b','a',32,32,32,32):
 					{
-						desc.type = DataType::Float;
+						desc.type = DataFormat::Float;
 						desc.internalformat = TextureFormat::RGBA32F;
 						desc.format = TextureFormat::RGBA;
 						desc.channels = 4;
@@ -250,7 +250,7 @@ void parseTextureFormat(const PVRTextureHeaderV3& sTextureHeader, TextureDescrip
 						
 					case PVRTGENPIXELID3('r','g','b',32,32,32):
 					{
-						desc.type = DataType::Float;
+						desc.type = DataFormat::Float;
 						desc.internalformat = TextureFormat::RGB32F;
 						desc.format = TextureFormat::RGB;
 						desc.channels = 3;
@@ -259,7 +259,7 @@ void parseTextureFormat(const PVRTextureHeaderV3& sTextureHeader, TextureDescrip
 						
 					case PVRTGENPIXELID2('l','a',32,32):
 					{
-						desc.type = DataType::Float;
+						desc.type = DataFormat::Float;
 						desc.internalformat = TextureFormat::RG32F;
 						desc.format = TextureFormat::RG;
 						desc.channels = 2;
@@ -268,7 +268,7 @@ void parseTextureFormat(const PVRTextureHeaderV3& sTextureHeader, TextureDescrip
 						
 					case PVRTGENPIXELID1('l',32):
 					{
-						desc.type = DataType::Float;
+						desc.type = DataFormat::Float;
 						desc.internalformat = TextureFormat::R32F;
 						desc.format = TextureFormat::R;
 						desc.channels = 1;
@@ -277,7 +277,7 @@ void parseTextureFormat(const PVRTextureHeaderV3& sTextureHeader, TextureDescrip
 						
 					case PVRTGENPIXELID1('a',32):
 					{
-						desc.type = DataType::Float;
+						desc.type = DataFormat::Float;
 						desc.internalformat = TextureFormat::R32F;
 						desc.format = TextureFormat::R;
 						desc.channels = 1;
@@ -289,7 +289,7 @@ void parseTextureFormat(const PVRTextureHeaderV3& sTextureHeader, TextureDescrip
 				
 			case ePVRTVarTypeUnsignedByteNorm:
 			{
-				desc.type = DataType::UnsignedChar;
+				desc.type = DataFormat::UnsignedChar;
 				switch (PixelFormat)
 				{
 					case PVRTGENPIXELID4('r','g','b','a',8,8,8,8):
@@ -348,7 +348,7 @@ void parseTextureFormat(const PVRTextureHeaderV3& sTextureHeader, TextureDescrip
 				{
 					case PVRTGENPIXELID4('r','g','b','a',4,4,4,4):
 					{
-						desc.type = DataType::UnsignedShort_4444;
+						desc.type = DataFormat::UnsignedShort_4444;
 						desc.internalformat = TextureFormat::RGBA;
 						desc.format = TextureFormat::RGBA;
 						desc.channels = 4;
@@ -357,7 +357,7 @@ void parseTextureFormat(const PVRTextureHeaderV3& sTextureHeader, TextureDescrip
 						
 					case PVRTGENPIXELID4('r','g','b','a',5,5,5,1):
 					{
-						desc.type = DataType::UnsignedShort_5551;
+						desc.type = DataFormat::UnsignedShort_5551;
 						desc.internalformat = TextureFormat::RGBA;
 						desc.format = TextureFormat::RGBA;
 						desc.channels = 4;
@@ -366,7 +366,7 @@ void parseTextureFormat(const PVRTextureHeaderV3& sTextureHeader, TextureDescrip
 						
 					case PVRTGENPIXELID3('r','g','b',5,6,5):
 					{
-						desc.type = DataType::UnsignedShort_565;
+						desc.type = DataFormat::UnsignedShort_565;
 						desc.internalformat = TextureFormat::RGB;
 						desc.format = TextureFormat::RGB;
 						desc.channels = 3;

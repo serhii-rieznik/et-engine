@@ -27,7 +27,7 @@ namespace et
 		PrimitiveType primitiveType() const
 			{ return _primitiveType; }
 		
-		DataType dataType() const
+		DataFormat dataFormat() const
 			{ return _dataType; }
 
 		void* indexOffset(uint32_t offset) const;
@@ -57,7 +57,7 @@ namespace et
 		RenderContext* _rc = nullptr;
 		uint32_t _size = 0;
 		std::string _sourceObjectName = 0;
-		DataType _dataType = DataType::UnsignedChar;
+		DataFormat _dataType = DataFormat::UnsignedChar;
 		PrimitiveType _primitiveType = PrimitiveType::Points;
 		IndexArrayFormat _format = IndexArrayFormat::Format_16bit;
 		BufferDrawType _drawType = BufferDrawType::Static;

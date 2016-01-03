@@ -10,8 +10,8 @@
 using namespace et;
 
 Framebuffer::Pointer FramebufferFactory::createFramebuffer(const vec2i& size, const std::string& id,
-	TextureFormat colorInternalformat, TextureFormat colorFormat, DataType colorType, TextureFormat depthInternalformat,
-	TextureFormat depthFormat, DataType depthType, bool useRenderbuffers, uint32_t samples)
+	TextureFormat colorInternalformat, TextureFormat colorFormat, DataFormat colorType, TextureFormat depthInternalformat,
+	TextureFormat depthFormat, DataFormat depthType, bool useRenderbuffers, uint32_t samples)
 {
 	FramebufferDescription desc;
 	
@@ -50,8 +50,8 @@ Framebuffer::Pointer FramebufferFactory::createMultisampledFramebuffer(const vec
 }
 
 Framebuffer::Pointer FramebufferFactory::createCubemapFramebuffer(size_t size, const std::string& id,
-	TextureFormat colorInternalformat, TextureFormat colorFormat, DataType colorType,
-	TextureFormat depthInternalformat, TextureFormat depthFormat, DataType depthType)
+	TextureFormat colorInternalformat, TextureFormat colorFormat, DataFormat colorType,
+	TextureFormat depthInternalformat, TextureFormat depthFormat, DataFormat depthType)
 {
 	FramebufferDescription desc;
 	
@@ -76,8 +76,8 @@ Framebuffer::Pointer FramebufferFactory::createFramebufferWrapper(uint32_t fbo, 
 }
 
 Framebuffer::Pointer FramebufferFactory::createFramebuffer(const vec2i& size, TextureTarget textureTarget,
-	const std::string& name, TextureFormat colorInternalformat, TextureFormat colorFormat, DataType colorType, 
-	TextureFormat depthInternalformat, TextureFormat depthFormat, DataType depthType, const uint32_t layers)
+	const std::string& name, TextureFormat colorInternalformat, TextureFormat colorFormat, DataFormat colorType, 
+	TextureFormat depthInternalformat, TextureFormat depthFormat, DataFormat depthType, const uint32_t layers)
 {
 	FramebufferDescription desc;
 
@@ -96,8 +96,8 @@ Framebuffer::Pointer FramebufferFactory::createFramebuffer(const vec2i& size, Te
 }
 
 Framebuffer::Pointer FramebufferFactory::createArrayFramebuffer(const vec2i& size, const uint32_t layers, 
-	const std::string& name, TextureFormat colorInternalformat, TextureFormat colorFormat, DataType colorType, 
-	TextureFormat depthInternalformat, TextureFormat depthFormat, DataType depthType)
+	const std::string& name, TextureFormat colorInternalformat, TextureFormat colorFormat, DataFormat colorType, 
+	TextureFormat depthInternalformat, TextureFormat depthFormat, DataFormat depthType)
 {
 	return createFramebuffer(size, TextureTarget::Texture_2D_Array, name, colorInternalformat, colorFormat, colorType,
 		depthInternalformat, depthFormat, depthType, layers);

@@ -48,8 +48,8 @@ namespace et
 		void drawElementsBaseIndex(const VertexArrayObject& vao, int base, uint32_t first, uint32_t count);
 		void drawElementsSequentially(PrimitiveType, uint32_t first, uint32_t count);
 		
-		BinaryDataStorage readFramebufferData(const vec2i&, TextureFormat, DataType);
-		void readFramebufferData(const vec2i&, TextureFormat, DataType, BinaryDataStorage&);
+		BinaryDataStorage readFramebufferData(const vec2i&, TextureFormat, DataFormat);
+		void readFramebufferData(const vec2i&, TextureFormat, DataFormat, BinaryDataStorage&);
 
 		vec2 currentViewportCoordinatesToScene(const vec2i& coord);
 		vec2 currentViewportSizeToScene(const vec2i& size);

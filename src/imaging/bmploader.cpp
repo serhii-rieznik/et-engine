@@ -48,7 +48,7 @@ void et::bmp::loadFromStream(std::istream& source, TextureDescription& desc)
 	source.read(reinterpret_cast<char*>(&ih), sizeof(InfoHeader));
 
 	desc.target = TextureTarget::Texture_2D;
-	desc.type = DataType::UnsignedChar;
+	desc.type = DataFormat::UnsignedChar;
 	desc.size = vec2i(ih.biWidth, ih.biHeight);
 	desc.bitsPerPixel = ih.biBitCount;
 	desc.mipMapCount = 1;

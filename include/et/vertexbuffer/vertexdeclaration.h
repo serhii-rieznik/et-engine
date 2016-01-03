@@ -44,8 +44,8 @@ namespace et
 		uint32_t components() const
 			{ return _components; }
 
-		DataType dataType() const
-			{ return _dataType; }
+		DataFormat dataFormat() const
+			{ return _dataFormat; }
 
 		void setStride(int s)
 			{ _stride = s; }
@@ -53,7 +53,7 @@ namespace et
 	private:
 		VertexAttributeUsage _usage = VertexAttributeUsage::Position;
 		VertexAttributeType _type = VertexAttributeType::Float;
-		DataType _dataType = DataType::Float;
+		DataFormat _dataFormat = DataFormat::Float;
 		uint32_t _stride = 0;
 		uint32_t _offset = 0;
 		uint32_t _components = 0;

@@ -172,7 +172,7 @@ Texture::Pointer TextureFactory::loadTexture(const std::string& fileName, Object
 }
 
 Texture::Pointer TextureFactory::genTexture(TextureTarget target, TextureFormat internalformat, const vec2i& size,
-	TextureFormat format, DataType type, const BinaryDataStorage& data, const std::string& id)
+	TextureFormat format, DataFormat type, const BinaryDataStorage& data, const std::string& id)
 {
 	TextureDescription::Pointer desc = TextureDescription::Pointer::create();
 	
@@ -195,7 +195,7 @@ Texture::Pointer TextureFactory::genTexture(TextureTarget target, TextureFormat 
 }
 
 Texture::Pointer TextureFactory::genCubeTexture(TextureFormat internalformat, uint32_t size, TextureFormat format,
-	DataType type, const std::string& aName)
+	DataFormat type, const std::string& aName)
 {
 	TextureDescription::Pointer desc = TextureDescription::Pointer::create();
 	
@@ -217,7 +217,7 @@ Texture::Pointer TextureFactory::genCubeTexture(TextureFormat internalformat, ui
 }
 
 Texture::Pointer TextureFactory::genTexture2DArray(const vec3i& size, TextureTarget textureTarget, 
-	TextureFormat internalformat, TextureFormat format, DataType type, const BinaryDataStorage& data,
+	TextureFormat internalformat, TextureFormat format, DataFormat type, const BinaryDataStorage& data,
 	const std::string& aName)
 {
 	ET_ASSERT(textureTarget == TextureTarget::Texture_2D_Array);
@@ -269,7 +269,7 @@ Texture::Pointer TextureFactory::genNoiseTexture(const vec2i& size, bool norm, c
 	desc->target = TextureTarget::Texture_2D;
 	desc->internalformat = TextureFormat::RGBA;
 	desc->format = TextureFormat::RGBA;
-	desc->type = DataType::UnsignedChar;
+	desc->type = DataFormat::UnsignedChar;
 	desc->size = size;
 	desc->mipMapCount = 1;
 	desc->layersCount = 1;

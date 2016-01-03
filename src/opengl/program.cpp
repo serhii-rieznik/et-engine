@@ -74,12 +74,12 @@ Program::Uniform Program::getUniform(const std::string& uniform) const
 
 void Program::setModelViewMatrix(const mat4& m, bool forced)
 {
-	setUniform(_mModelViewLocation, GL_FLOAT_MAT4, m, forced);
+	setUniform(_matViewLocation, GL_FLOAT_MAT4, m, forced);
 }
 
 void Program::setMVPMatrix(const mat4& m, bool forced)
 {
-	setUniform(_mModelViewProjectionLocation, GL_FLOAT_MAT4, m, forced);
+	setUniform(_matViewProjectionLocation, GL_FLOAT_MAT4, m, forced);
 }
 
 void Program::setCameraPosition(const vec3& p, bool forced)
@@ -94,12 +94,12 @@ void Program::setPrimaryLightPosition(const vec3& p, bool forced)
 
 void Program::setLightProjectionMatrix(const mat4& m, bool forced)
 {
-	setUniform(_mLightProjectionMatrixLocation, GL_FLOAT_MAT4, m, forced);
+	setUniform(_matLightViewProjectionLocation, GL_FLOAT_MAT4, m, forced);
 }
 
 void Program::setTransformMatrix(const mat4 &m, bool forced)
 {
-	setUniform(_mTransformLocation, GL_FLOAT_MAT4, m, forced);
+	setUniform(_matWorldLocation, GL_FLOAT_MAT4, m, forced);
 }
 
 void Program::setCameraProperties(const Camera& cam)
@@ -328,23 +328,23 @@ void Program::buildProgram(const std::string& vertex_source, const std::string& 
 				P.location = glGetUniformLocation(program, uniformName.binary());
 				_uniforms[uniformName.binary()] = P;
 
-				if (strcmp(uniformName.binary(), "mModelView") == 0)
-					_mModelViewLocation = P.location;
+				if (strcmp(uniformName.binary(), "matWorld") == 0)
+					_matWorldLocation = P.location;
+				
+				if (strcmp(uniformName.binary(), "matView") == 0)
+					_matViewLocation = P.location;
 
-				if (strcmp(uniformName.binary(), "mModelViewProjection") == 0)
-					_mModelViewProjectionLocation = P.location;
-
+				if (strcmp(uniformName.binary(), "matViewProjection") == 0)
+					_matViewProjectionLocation = P.location;
+				
+				if (strcmp(uniformName.binary(), "matLightViewProjection") == 0)
+					_matLightViewProjectionLocation = P.location;
+				
 				if (strcmp(uniformName.binary(), "vCamera") == 0)
 					_vCameraLocation = P.location;
 
 				if (strcmp(uniformName.binary(), "vPrimaryLight") == 0)
 					_vPrimaryLightLocation = P.location;
-
-				if (strcmp(uniformName.binary(), "mLightProjectionMatrix") == 0)
-					_mLightProjectionMatrixLocation = P.location;
-
-				if (strcmp(uniformName.binary(), "mTransform") == 0)
-					_mTransformLocation = P.location;
 			}
 		}
 	}

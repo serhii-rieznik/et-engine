@@ -195,7 +195,7 @@ void parseFormat(TextureDescription& desc, png_structp pngPtr, png_infop infoPtr
 				 &bpp, &color_type, &interlace_method, &compression, &filter);
 	
 	desc.bitsPerPixel = desc.channels * static_cast<uint32_t>(bpp);
-	desc.type = (bpp == 16) ? DataType::UnsignedShort : DataType::UnsignedChar;
+	desc.type = (bpp == 16) ? DataFormat::UnsignedShort : DataFormat::UnsignedChar;
 	
 	if (rowBytes)
 		*rowBytes = png_get_rowbytes(pngPtr, infoPtr);

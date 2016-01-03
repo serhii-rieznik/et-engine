@@ -27,7 +27,7 @@ VertexElement::VertexElement(VertexAttributeUsage aUsage, VertexAttributeType aT
 		_type = openglTypeToVertexAttributeType(static_cast<uint32_t>(_type));
 
 	_components = vertexAttributeTypeComponents(_type);
-	_dataType = vertexAttributeTypeDataType(_type);
+	_dataFormat = vertexAttributeTypeDataFormat(_type);
 }
 
 VertexDeclaration::VertexDeclaration() :

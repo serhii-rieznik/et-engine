@@ -11,6 +11,7 @@
 
 namespace et
 {
+	class RenderState;
 	class MaterialFactory;
 	class Material : public et::Shared
 	{
@@ -21,6 +22,8 @@ namespace et
 		Material(MaterialFactory*);
 		
 		void loadFromJson(const std::string&, const std::string& baseFolder, ObjectsCache& cache);
+		
+		void enableInRenderState(RenderState&);
 		
 		et::Program::Pointer program() const
 			{ return _program; }
@@ -33,6 +36,16 @@ namespace et
 		
 		CullMode cullMode() const
 			{ return _cullMode; }
+
+	private:
+		struct Property
+		{
+			std::string name;
+			uint32_t offset = 0;
+			uint32_t length = 0;
+		};
+		
+		void addProperty(const std::string& name, uint32_t off, uint32_t len);
 		
 	public:
 		MaterialFactory* _factory = nullptr;

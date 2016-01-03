@@ -9,6 +9,7 @@
 #include <et/opengl/opengl.h>
 #include <et/rendering/rendercontext.h>
 #include <et/rendering/renderer.h>
+#include <et/rendering/material.h>
 #include <et/vertexbuffer/indexarray.h>
 #include <et/vertexbuffer/vertexstorage.h>
 
@@ -199,7 +200,7 @@ void Renderer::drawElements(const IndexBuffer::Pointer& ib, uint32_t first, uint
 	ET_ASSERT(ib.valid());
 	
 	etDrawElements(primitiveTypeValue(ib->primitiveType()), static_cast<GLsizei>(count),
-		dataTypeValue(ib->dataType()), ib->indexOffset(first));
+		dataFormatValue(ib->dataFormat()), ib->indexOffset(first));
 }
 
 void Renderer::drawElementsInstanced(const IndexBuffer::Pointer& ib, uint32_t first, uint32_t count, uint32_t instances)
@@ -207,14 +208,14 @@ void Renderer::drawElementsInstanced(const IndexBuffer::Pointer& ib, uint32_t fi
 	ET_ASSERT(ib.valid());
 	
 	etDrawElementsInstanced(primitiveTypeValue(ib->primitiveType()), static_cast<GLsizei>(count),
-		dataTypeValue(ib->dataType()), ib->indexOffset(first), static_cast<GLsizei>(instances));
+		dataFormatValue(ib->dataFormat()), ib->indexOffset(first), static_cast<GLsizei>(instances));
 }
 
 void Renderer::drawElements(PrimitiveType pt, const IndexBuffer::Pointer& ib, uint32_t first, uint32_t count)
 {
 	ET_ASSERT(ib.valid());
 	
-	etDrawElements(primitiveTypeValue(pt), static_cast<GLsizei>(count), dataTypeValue(ib->dataType()),
+	etDrawElements(primitiveTypeValue(pt), static_cast<GLsizei>(count), dataFormatValue(ib->dataFormat()),
 		ib->indexOffset(first));
 }
 
@@ -223,7 +224,7 @@ void Renderer::drawAllElements(const IndexBuffer::Pointer& ib)
 	ET_ASSERT(ib.valid());
 	
 	etDrawElements(primitiveTypeValue(ib->primitiveType()), static_cast<GLsizei>(ib->size()),
-		dataTypeValue(ib->dataType()), nullptr);
+		dataFormatValue(ib->dataFormat()), nullptr);
 }
 
 void Renderer::drawElementsBaseIndex(const VertexArrayObject& vao, int base, uint32_t first, uint32_t count)
@@ -243,12 +244,12 @@ void Renderer::drawElementsBaseIndex(const VertexArrayObject& vao, int base, uin
 	rs.setVertexAttributesBaseIndex(vb->declaration(), base);
 	
 	etDrawElements(primitiveTypeValue(ib->primitiveType()), static_cast<GLsizei>(count),
-		dataTypeValue(ib->dataType()), ib->indexOffset(first));
+		dataFormatValue(ib->dataFormat()), ib->indexOffset(first));
 	
 #else
 	
 	etDrawElementsBaseVertex(primitiveTypeValue(ib->primitiveType()), static_cast<GLsizei>(count),
-		dataTypeValue(ib->dataType()), ib->indexOffset(first), base);
+		dataFormatValue(ib->dataFormat()), ib->indexOffset(first), base);
 	
 #endif
 }
@@ -261,14 +262,14 @@ void Renderer::drawElementsSequentially(PrimitiveType primitiveType, uint32_t fi
 		static_cast<uint32_t>(first), static_cast<uint32_t>(count));
 }
 
-void Renderer::readFramebufferData(const vec2i& size, TextureFormat format, DataType dataType, BinaryDataStorage& data)
+void Renderer::readFramebufferData(const vec2i& size, TextureFormat format, DataFormat dataType, BinaryDataStorage& data)
 {
 	data.fitToSize(size.square() * bitsPerPixelForTextureFormat(format, dataType));
-	glReadPixels(0, 0, size.x, size.y, textureFormatValue(format), dataTypeValue(dataType), data.data());
+	glReadPixels(0, 0, size.x, size.y, textureFormatValue(format), dataFormatValue(dataType), data.data());
 	checkOpenGLError("glReadPixels");
 }
 
-BinaryDataStorage Renderer::readFramebufferData(const vec2i& size, TextureFormat format, DataType dataType)
+BinaryDataStorage Renderer::readFramebufferData(const vec2i& size, TextureFormat format, DataFormat dataType)
 {
 	BinaryDataStorage result(size.square() * bitsPerPixelForTextureFormat(format, dataType));
 	readFramebufferData(size, format, dataType, result);
@@ -282,7 +283,7 @@ void Renderer::finishRendering()
 
 void Renderer::pushRenderBatch(RenderBatch::Pointer rb)
 {
-	_rc->renderState().bindMaterial(rb->material());
+	rb->material()->enableInRenderState(_rc->renderState());
 	_rc->renderState().bindVertexArray(rb->data());
 	drawElements(rb->data()->indexBuffer(), rb->firstIndex(), rb->numIndexes());
 }

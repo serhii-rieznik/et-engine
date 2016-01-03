@@ -259,7 +259,7 @@ namespace et
 		max
 	};
 	
-	enum class DataType : uint32_t
+	enum class DataFormat : uint32_t
 	{
 		Char,
 		UnsignedChar,
@@ -321,7 +321,7 @@ namespace et
 		IndexArrayFormat_max = static_cast<uint32_t>(IndexArrayFormat::max),
 		PrimitiveType_max = static_cast<uint32_t>(PrimitiveType::max),
 		BlendConfiguration_max = static_cast<uint32_t>(BlendConfiguration::max),
-		DataType_max = static_cast<uint32_t>(DataType::max),
+		DataFormat_max = static_cast<uint32_t>(DataFormat::max),
 		TextureTarget_max = static_cast<uint32_t>(TextureTarget::max),
 		TextureFormat_max = static_cast<uint32_t>(TextureFormat::max),
 		InvalidIndex = static_cast<uint32_t>(-1),
@@ -432,15 +432,15 @@ namespace et
 		std::array<size_t, MaxRenderTargets> drawBuffers;
 	};
 	
-	DataType vertexAttributeTypeDataType(VertexAttributeType t);
+	DataFormat vertexAttributeTypeDataFormat(VertexAttributeType t);
 
 	VertexAttributeUsage stringToVertexAttributeUsage(const std::string& s, bool& builtIn);
 	VertexAttributeType stringToVertexAttributeType(const std::string& s);
-	DataType stringToDataType(const std::string&);
+	DataFormat stringToDataType(const std::string&);
 
 	std::string vertexAttributeUsageToString(VertexAttributeUsage);
 	std::string vertexAttributeTypeToString(VertexAttributeType);
-	std::string dataTypeToString(DataType);
+	std::string dataFormatToString(DataFormat);
 
 	std::string primitiveTypeToString(PrimitiveType);
 	PrimitiveType stringToPrimitiveType(const std::string&);
@@ -448,14 +448,14 @@ namespace et
 	std::string indexArrayFormatToString(IndexArrayFormat);
 	IndexArrayFormat stringToIndexArrayFormat(const std::string&);
 
-	uint32_t sizeOfDataType(DataType);
+	uint32_t sizeOfDataFormat(DataFormat);
 	
 	uint32_t vertexAttributeUsageMask(VertexAttributeUsage u);
 	uint32_t vertexAttributeTypeSize(VertexAttributeType t);
 	uint32_t vertexAttributeTypeComponents(VertexAttributeType t);
 
-	uint32_t bitsPerPixelForType(DataType type);
-	uint32_t bitsPerPixelForTextureFormat(TextureFormat internalFormat, DataType type);
+	uint32_t bitsPerPixelForDataFormat(DataFormat type);
+	uint32_t bitsPerPixelForTextureFormat(TextureFormat internalFormat, DataFormat type);
 	uint32_t channelsForTextureFormat(TextureFormat internalFormat);
 	
 	const std::string& compareFunctionToString(CompareFunction);

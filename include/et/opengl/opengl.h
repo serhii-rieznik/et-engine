@@ -158,7 +158,7 @@ namespace et
 	
 	uint32_t textureTargetValue(TextureTarget);
 	uint32_t textureFormatValue(TextureFormat);
-	uint32_t dataTypeValue(DataType);
+	uint32_t dataFormatValue(DataFormat);
 	uint32_t primitiveTypeValue(PrimitiveType);
 	
 	std::pair<uint32_t, uint32_t> blendConfigurationValue(BlendConfiguration);

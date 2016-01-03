@@ -137,7 +137,7 @@ bool Framebuffer::checkStatus()
 }
 
 Texture::Pointer Framebuffer::buildTexture(const vec3i& aSize, TextureTarget aTarget,
-	TextureFormat aInternalFormat, TextureFormat aFormat, DataType aType)
+	TextureFormat aInternalFormat, TextureFormat aFormat, DataFormat aType)
 {
 	switch (aTarget)
 	{

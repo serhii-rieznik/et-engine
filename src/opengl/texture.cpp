@@ -168,7 +168,7 @@ void Texture::buildData(const char* aDataPtr, size_t aDataSize)
 	auto targetValue = textureTargetValue(_desc->target);
 	auto internalFormatValue = textureFormatValue(_desc->internalformat);
 	auto formatValue = textureFormatValue(_desc->format);
-	auto typeValue = dataTypeValue(_desc->type);
+	auto typeValue = dataFormatValue(_desc->type);
 
 	if ((_desc->target == TextureTarget::Texture_2D) || (_desc->target == TextureTarget::Texture_Rectangle))
 	{
@@ -320,7 +320,7 @@ void Texture::updatePartialDataDirectly(RenderContext* rc, const vec2i& offset,
 #endif
 	
 	auto targetValue = textureTargetValue(_desc->target);
-	auto typeValue = dataTypeValue(_desc->type);
+	auto typeValue = dataFormatValue(_desc->type);
 	auto formatValue = textureFormatValue(_desc->format);
 	
 	glTexSubImage2D(targetValue, 0, offset.x, offset.y, aSize.x, aSize.y, formatValue, typeValue, data);

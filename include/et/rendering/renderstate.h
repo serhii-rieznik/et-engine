@@ -8,7 +8,7 @@
 #pragma once
 
 #include <et/rendering/framebuffer.h>
-#include <et/rendering/material.h>
+#include <et/rendering/program.h>
 #include <et/rendering/texture.h>
 #include <et/rendering/vertexarrayobject.h>
 
@@ -174,11 +174,6 @@ namespace et
 		void indexBufferDeleted(uint32_t);
 		void frameBufferDeleted(uint32_t);
 		
-		/*
-		 * Materials
-		 */
-		void bindMaterial(const Material::Pointer&);
-
 		/*
 		 * Service
 		 */

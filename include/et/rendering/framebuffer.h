@@ -22,11 +22,11 @@ namespace et
 
 		TextureFormat colorInternalformat = TextureFormat::Invalid;
 		TextureFormat colorFormat = TextureFormat::Invalid;
-		DataType colorType = DataType::UnsignedChar;
+		DataFormat colorType = DataFormat::UnsignedChar;
 		
 		TextureFormat depthInternalformat = TextureFormat::Invalid;
 		TextureFormat depthFormat = TextureFormat::Invalid;
-		DataType depthType = DataType::UnsignedChar;
+		DataFormat depthType = DataFormat::UnsignedChar;
 
 		TextureTarget target = TextureTarget::Texture_2D;
 		
@@ -110,7 +110,7 @@ namespace et
 		void attachTexture(const Texture::Pointer&, uint32_t);
 		
 		Texture::Pointer buildTexture(const vec3i&, TextureTarget, TextureFormat, 
-			TextureFormat, DataType);
+			TextureFormat, DataFormat);
 
 	private:
 		RenderContext* _rc;

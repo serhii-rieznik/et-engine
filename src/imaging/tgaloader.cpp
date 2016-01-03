@@ -217,7 +217,7 @@ void et::tga::loadFromStream(std::istream& source, TextureDescription& desc)
 	source.read(reinterpret_cast<char*>(&info), sizeof(TGADescription));
 	
 	desc.target = TextureTarget::Texture_2D;
-	desc.type = DataType::UnsignedChar;
+	desc.type = DataFormat::UnsignedChar;
 	desc.size.x = info.width;
 	desc.size.y = info.height;
 	desc.bitsPerPixel = info.bitsPerPixel;

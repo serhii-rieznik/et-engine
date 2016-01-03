@@ -22,8 +22,14 @@ namespace et
 		RenderBatch(const Material::Pointer&, const VertexArrayObject&);
 		RenderBatch(const Material::Pointer&, const VertexArrayObject&, uint32_t, uint32_t);
 
+		Material::Pointer& material()
+			{ return _material; }
+		
 		const Material::Pointer& material() const
 			{ return _material; }
+		
+		VertexArrayObject& data()
+			{ return _data; }
 		
 		const VertexArrayObject& data() const
 			{ return _data; }

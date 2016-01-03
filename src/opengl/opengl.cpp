@@ -334,11 +334,11 @@ uint32_t et::textureTargetValue(TextureTarget value)
 	ET_SAMPLE_VALUE_FROM_MAP
 }
 
-uint32_t et::dataTypeValue(DataType value)
+uint32_t et::dataFormatValue(DataFormat value)
 {
-	ET_ASSERT(value < DataType::max);
+	ET_ASSERT(value < DataFormat::max);
 
-	static const uint32_t valuesMap[DataType_max] =
+	static const uint32_t valuesMap[DataFormat_max] =
 	{
 		GL_BYTE, // Char
 		GL_UNSIGNED_BYTE, // UnsignedChar
