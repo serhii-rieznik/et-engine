@@ -25,7 +25,7 @@ namespace et
 		
 		enum
 		{
-			DataTypeSize = sizeof(DataType)
+			dataTypeSize = sizeof(DataType)
 		};
 		
 	public:
@@ -72,11 +72,11 @@ namespace et
 		}
 		
 		DataStorage(DataTypePointer data, size_t dataSize) :
-			_mutableData(data), _size(dataSize / DataTypeSize), _dataSize(dataSize),
+			_mutableData(data), _size(dataSize / dataTypeSize), _dataSize(dataSize),
 			_flags(DataStorageFlag_Mutable) { }
 
 		DataStorage(DataTypeConstPointer data, size_t dataSize) :
-			_immutableData(data), _size(dataSize / DataTypeSize), _dataSize(dataSize) { }
+			_immutableData(data), _size(dataSize / dataTypeSize), _dataSize(dataSize) { }
 
 		~DataStorage()
 			{ resize(0); }
@@ -206,13 +206,13 @@ namespace et
 			DataTypePointer new_data = nullptr;
 			size_t min_size = (newSize < _size) ? newSize : _size;
 			_size = newSize;
-			_dataSize = _size * DataTypeSize;
+			_dataSize = _size * dataTypeSize;
 			
 			if (newSize > 0)
 			{
 				new_data = reinterpret_cast<DataTypePointer>(sharedBlockAllocator().allocate(_dataSize));
 				if (min_size > 0)
-					etCopyMemory(new_data, _immutableData, min_size * DataTypeSize);
+					etCopyMemory(new_data, _immutableData, min_size * dataTypeSize);
 			}
 			else
 			{
@@ -239,7 +239,7 @@ namespace et
 			
 			size_t currentSize = _size;
 			resize(_size + count);
-			etCopyMemory(&_mutableData[currentSize], values, count * DataTypeSize);
+			etCopyMemory(&_mutableData[currentSize], values, count * dataTypeSize);
 		}
 		
 		void appendData(const void* ptr, size_t dataSize)
@@ -248,7 +248,7 @@ namespace et
 			ET_ASSERT(ptr);
 			
 			size_t currentSize = _size;
-			size_t numElements = dataSize / DataTypeSize + ((dataSize % DataTypeSize > 0) ? 1 : 0);
+			size_t numElements = dataSize / dataTypeSize + ((dataSize % dataTypeSize > 0) ? 1 : 0);
 			resize(_size + numElements);
 			etCopyMemory(&_mutableData[currentSize], ptr, dataSize);
 		}

@@ -19,8 +19,8 @@ namespace et
 		
 	public:
 		RenderBatch() = default;
-		RenderBatch(const Material::Pointer&, const VertexArrayObject&);
-		RenderBatch(const Material::Pointer&, const VertexArrayObject&, uint32_t, uint32_t);
+		RenderBatch(const Material::Pointer&, const VertexArrayObject&, const mat4& transform = identityMatrix);
+		RenderBatch(const Material::Pointer&, const VertexArrayObject&, const mat4& transform, uint32_t, uint32_t);
 
 		Material::Pointer& material()
 			{ return _material; }
@@ -40,9 +40,13 @@ namespace et
 		const uint32_t numIndexes() const
 			{ return _numIndexes; }
 		
+		const mat4& transformation() const
+			{ return _transformation; }
+		
 	private:
 		Material::Pointer _material;
 		VertexArrayObject _data;
+		mat4 _transformation = identityMatrix;
 		uint32_t _firstIndex = 0;
 		uint32_t _numIndexes = 0;
 	};

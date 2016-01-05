@@ -27,8 +27,10 @@ namespace et
 	{
 	public:
 		Frustum();
-		Frustum(const mat4& mvpMatrix);
+		Frustum(const mat4& vpMatrix);
 
+		void build(const mat4& vpMatrix);
+		
 		bool containsSphere(const Sphere& sphere) const;
 		bool containsAABB(const AABB& aabb) const;
 		bool containsOBB(const OBB& obb) const;

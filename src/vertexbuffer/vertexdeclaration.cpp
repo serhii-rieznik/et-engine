@@ -10,24 +10,24 @@
 
 namespace et
 {
-	VertexAttributeType openglTypeToVertexAttributeType(uint32_t);
+	DataType openglTypeToDataType(uint32_t);
 }
 
 using namespace et;
 
 static VertexElement _emptyVertexElement;
 
-VertexElement::VertexElement(VertexAttributeUsage aUsage, VertexAttributeType aType, uint32_t aStride,
+VertexElement::VertexElement(VertexAttributeUsage aUsage, DataType aType, uint32_t aStride,
 	uint32_t aOffset) : _usage(aUsage), _type(aType), _stride(aStride), _offset(aOffset)
 {
 	/*
 	 * Support legacy values
 	 */
-	if (_type >= VertexAttributeType::max)
-		_type = openglTypeToVertexAttributeType(static_cast<uint32_t>(_type));
+	if (_type >= DataType::max)
+		_type = openglTypeToDataType(static_cast<uint32_t>(_type));
 
-	_components = vertexAttributeTypeComponents(_type);
-	_dataFormat = vertexAttributeTypeDataFormat(_type);
+	_components = dataTypeComponents(_type);
+	_dataFormat = dataTypeDataFormat(_type);
 }
 
 VertexDeclaration::VertexDeclaration() :
@@ -36,13 +36,13 @@ VertexDeclaration::VertexDeclaration() :
 VertexDeclaration::VertexDeclaration(bool interleaved) :
 	_interleaved(interleaved), _totalSize(0), _usageMask(0) { }
 
-VertexDeclaration::VertexDeclaration(bool interleaved, VertexAttributeUsage usage, VertexAttributeType type) : 
+VertexDeclaration::VertexDeclaration(bool interleaved, VertexAttributeUsage usage, DataType type) : 
 	_interleaved(interleaved), _totalSize(0), _usageMask(0) { push_back(usage, type); }
 
 bool VertexDeclaration::has(VertexAttributeUsage usage) const
 	{ return (_usageMask & vertexAttributeUsageMask(usage)) != 0; }
 
-bool VertexDeclaration::push_back(VertexAttributeUsage usage, VertexAttributeType type)
+bool VertexDeclaration::push_back(VertexAttributeUsage usage, DataType type)
 	{ return push_back(VertexElement(usage, type, 0, _totalSize)); }
 
 bool VertexDeclaration::push_back(const VertexElement& element)
@@ -51,7 +51,7 @@ bool VertexDeclaration::push_back(const VertexElement& element)
 
 	_usageMask = _usageMask | vertexAttributeUsageMask(element.usage());
 	
-	_totalSize += vertexAttributeTypeSize(element.type());
+	_totalSize += dataTypeSize(element.type());
 	_list.push_back(element);
 
 	if (_interleaved)

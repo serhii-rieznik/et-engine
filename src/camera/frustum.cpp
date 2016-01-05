@@ -15,6 +15,11 @@ Frustum::Frustum()
 
 Frustum::Frustum(const mat4& mvp)
 {
+	build(mvp);
+}
+
+void Frustum::build(const mat4& mvp)
+{
 	_planes[FrustumPlane_Right] = normalizePlane(vec4(mvp(3) - mvp(0), mvp(7) - mvp(4), mvp(11) - mvp(8), mvp(15) - mvp(12)));
 	_planes[FrustumPlane_Left] = normalizePlane(vec4(mvp(3) + mvp(0), mvp(7) + mvp(4), mvp(11) + mvp(8), mvp(15) + mvp(12)));
 	_planes[FrustumPlane_Bottom] = normalizePlane(vec4(mvp(3) + mvp(1), mvp(7) + mvp(5), mvp(11) + mvp(9), mvp(15) + mvp(13)));

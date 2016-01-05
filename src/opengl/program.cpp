@@ -72,12 +72,12 @@ Program::Uniform Program::getUniform(const std::string& uniform) const
 	return (i == _uniforms.end()) ? Program::Uniform() : i->second;
 }
 
-void Program::setModelViewMatrix(const mat4& m, bool forced)
+void Program::setViewMatrix(const mat4& m, bool forced)
 {
 	setUniform(_matViewLocation, GL_FLOAT_MAT4, m, forced);
 }
 
-void Program::setMVPMatrix(const mat4& m, bool forced)
+void Program::setViewProjectionMatrix(const mat4& m, bool forced)
 {
 	setUniform(_matViewProjectionLocation, GL_FLOAT_MAT4, m, forced);
 }
@@ -97,7 +97,7 @@ void Program::setLightProjectionMatrix(const mat4& m, bool forced)
 	setUniform(_matLightViewProjectionLocation, GL_FLOAT_MAT4, m, forced);
 }
 
-void Program::setTransformMatrix(const mat4 &m, bool forced)
+void Program::setTransformMatrix(const mat4& m, bool forced)
 {
 	setUniform(_matWorldLocation, GL_FLOAT_MAT4, m, forced);
 }
@@ -106,8 +106,8 @@ void Program::setCameraProperties(const Camera& cam)
 {
 	ET_ASSERT(apiHandleValid());
 
-	setModelViewMatrix(cam.modelViewMatrix());
-	setMVPMatrix(cam.modelViewProjectionMatrix());
+	setViewMatrix(cam.viewMatrix());
+	setViewProjectionMatrix(cam.viewProjectionMatrix());
 	setCameraPosition(cam.position());
 }
 

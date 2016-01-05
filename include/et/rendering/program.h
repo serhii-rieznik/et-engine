@@ -24,7 +24,7 @@ namespace et
 		struct Uniform
 		{
 			uint32_t type = 0;
-			int location = -1;
+			int32_t location = -1;
 		};
 		
 		struct Attribute
@@ -54,7 +54,7 @@ namespace et
 
 		bool validate() const;
 		
-		int modelViewMatrixUniformLocation() const 
+		int viewMatrixUniformLocation() const 
 			{ return _matViewLocation; }
 
 		int mvpMatrixUniformLocation() const
@@ -72,8 +72,8 @@ namespace et
 		int transformMatrixLocation() const
 			{ return _matWorldLocation; }
 
-		void setModelViewMatrix(const mat4 &m, bool force = false);
-		void setMVPMatrix(const mat4 &m, bool force = false);
+		void setViewMatrix(const mat4 &m, bool force = false);
+		void setViewProjectionMatrix(const mat4 &m, bool force = false);
 		void setCameraPosition(const vec3& p, bool force = false);
 		void setPrimaryLightPosition(const vec3& p, bool force = false);
 		void setLightProjectionMatrix(const mat4 &m, bool force = false);

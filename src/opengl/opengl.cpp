@@ -49,30 +49,30 @@ OpenGLDebugScope::~OpenGLDebugScope()
 #endif
 }
 
-VertexAttributeType et::openglTypeToVertexAttributeType(uint32_t value)
+DataType et::openglTypeToDataType(uint32_t value)
 {
 	switch (value)
 	{
 		case GL_FLOAT:
-			return VertexAttributeType::Float;
+			return DataType::Float;
 			
 		case GL_FLOAT_VEC2:
-			return VertexAttributeType::Vec2;
+			return DataType::Vec2;
 			
 		case GL_FLOAT_VEC3:
-			return VertexAttributeType::Vec3;
+			return DataType::Vec3;
 			
 		case GL_FLOAT_VEC4:
-			return VertexAttributeType::Vec4;
+			return DataType::Vec4;
 			
 		case GL_FLOAT_MAT3:
-			return VertexAttributeType::Mat3;
+			return DataType::Mat3;
 			
 		case GL_FLOAT_MAT4:
-			return VertexAttributeType::Mat4;
+			return DataType::Mat4;
 			
 		case GL_INT:
-			return VertexAttributeType::Int;
+			return DataType::Int;
 			
 		default:
 			ET_FAIL_FMT("Unsupported OpenGL type %u (0x%X)", value, value);
@@ -85,11 +85,11 @@ VertexAttributeType et::openglTypeToVertexAttributeType(uint32_t value)
 										return valuesMap[intValue]; \
 									}
 
-uint32_t et::vertexAttributeTypeValue(VertexAttributeType value)
+uint32_t et::DataTypeValue(DataType value)
 {
-	ET_ASSERT(value < VertexAttributeType::max);
+	ET_ASSERT(value < DataType::max);
 	
-	static const uint32_t valuesMap[VertexAttributeType_max] =
+	static const uint32_t valuesMap[DataType_max] =
 	{
 		GL_FLOAT,
 		GL_FLOAT_VEC2,

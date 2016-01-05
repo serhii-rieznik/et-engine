@@ -316,7 +316,7 @@ namespace et
 			return (det * det > 0) ? adjugateMatrix() / det : matrix4(0);
 		}
 
-		bool isModelViewMatrix()
+		bool isOrthonormal()
 		{
 			vector3<T>c1 = vector3<T>(mat[0][0], mat[1][0], mat[2][0]);
 			vector3<T>c2 = vector3<T>(mat[0][1], mat[1][1], mat[2][1]);

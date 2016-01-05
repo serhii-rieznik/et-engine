@@ -17,7 +17,7 @@ namespace et
 		VertexElement()
 			{ }
 		
-		VertexElement(VertexAttributeUsage aUsage, VertexAttributeType aType, uint32_t aStride = 0,
+		VertexElement(VertexAttributeUsage aUsage, DataType aType, uint32_t aStride = 0,
 			uint32_t aOffset = 0);
 
 		bool operator == (const VertexElement& r) const
@@ -32,7 +32,7 @@ namespace et
 		VertexAttributeUsage usage() const
 			{ return _usage; }
 
-		VertexAttributeType type() const
+		DataType type() const
 			{ return _type; } 
 
 		uint32_t stride() const
@@ -52,7 +52,7 @@ namespace et
 
 	private:
 		VertexAttributeUsage _usage = VertexAttributeUsage::Position;
-		VertexAttributeType _type = VertexAttributeType::Float;
+		DataType _type = DataType::Float;
 		DataFormat _dataFormat = DataFormat::Float;
 		uint32_t _stride = 0;
 		uint32_t _offset = 0;
@@ -66,11 +66,11 @@ namespace et
 	public:
 		VertexDeclaration();
 		VertexDeclaration(bool interleaved);
-		VertexDeclaration(bool interleaved, VertexAttributeUsage usage, VertexAttributeType type);
+		VertexDeclaration(bool interleaved, VertexAttributeUsage usage, DataType type);
 
 		bool has(VertexAttributeUsage usage) const;
 
-		bool push_back(VertexAttributeUsage usage, VertexAttributeType type);
+		bool push_back(VertexAttributeUsage usage, DataType type);
 		bool push_back(const VertexElement& element);
 
 		bool remove(VertexAttributeUsage usage);

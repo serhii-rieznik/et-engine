@@ -63,7 +63,7 @@ namespace et
 		void smoothTangents(VertexArray::Pointer data, const IndexArray::Pointer& buffer,
 			uint32_t first, uint32_t last);
 		
-		void createCube(VertexArray::Pointer data, float radius, const vec3& center = vec3(0.0f));
+		void createBox(VertexArray::Pointer data, const vec3& size, const vec3& center = vec3(0.0f));
 		void createOctahedron(VertexArray::Pointer data, float radius);
 		void createDodecahedron(VertexArray::Pointer data, float radius);
 		void createIcosahedron(VertexArray::Pointer data, float radius, bool top = true, bool middle = true, bool bottom = true);

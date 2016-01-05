@@ -13,7 +13,7 @@
 
 namespace et
 {
-	template <VertexAttributeType T>
+	template <DataType T>
 	class VertexDataAccessor { };
 	
 	class VertexStoragePrivate;
@@ -29,7 +29,7 @@ namespace et
 		VertexStorage(const VertexArray::Pointer&);
 		~VertexStorage();
 		
-		template <VertexAttributeType T>
+		template <DataType T>
 		VertexDataAccessor<T> accessData(VertexAttributeUsage usage, size_t offset)
 		{
 			ET_ASSERT(hasAttributeWithType(usage, T));
@@ -38,7 +38,7 @@ namespace et
 				offset * stride() + offsetOfAttribute(usage));
 		}
 		
-		template <VertexAttributeType T>
+		template <DataType T>
 		VertexDataAccessor<T> accessData(VertexAttributeUsage usage, size_t offset) const
 		{
 			ET_ASSERT(hasAttributeWithType(usage, T));
@@ -54,8 +54,8 @@ namespace et
 		void resize(size_t);
 		
 		bool hasAttribute(VertexAttributeUsage) const;
-		bool hasAttributeWithType(VertexAttributeUsage, VertexAttributeType) const;
-		VertexAttributeType attributeType(VertexAttributeUsage) const;
+		bool hasAttributeWithType(VertexAttributeUsage, DataType) const;
+		DataType attributeType(VertexAttributeUsage) const;
 		
 		const VertexDeclaration& declaration() const;
 		
@@ -70,7 +70,7 @@ namespace et
 	};
 	
 #define ET_DECLARE_ACCESSOR(vat, base) \
-	template <> class VertexDataAccessor<VertexAttributeType::vat> : public RawDataAcessor<base> \
+	template <> class VertexDataAccessor<DataType::vat> : public RawDataAcessor<base> \
 	{ \
 	public: \
 		VertexDataAccessor() { } \

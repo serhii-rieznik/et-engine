@@ -72,6 +72,8 @@ void Material::loadFromJson(const std::string& jsonString, const std::string& ba
 	{
 		log::warning("Invalid or unsupported cull mode in material: %s", cullMode.c_str());
 	}
+	
+	loadProperties();
 }
 
 void Material::enableInRenderState(RenderState& rs)
@@ -81,4 +83,12 @@ void Material::enableInRenderState(RenderState& rs)
 	rs.setDepthState(_depth);
 	
 	rs.bindProgram(_program);
+}
+
+void Material::loadProperties()
+{
+	for (const auto& u : _program->uniforms())
+	{
+		log::info("%s -> %d", u.first.c_str(), u.second.location);
+	}
 }

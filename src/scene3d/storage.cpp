@@ -103,7 +103,7 @@ Dictionary Storage::serialize(const std::string& basePath)
 		{
 			Dictionary declDictionary;
 			declDictionary.setStringForKey(kUsage, vertexAttributeUsageToString(e.usage()));
-			declDictionary.setStringForKey(kType, vertexAttributeTypeToString(e.type()));
+			declDictionary.setStringForKey(kType, DataTypeToString(e.type()));
 			declDictionary.setStringForKey(kDataType, dataFormatToString(e.dataFormat()));
 			declDictionary.setIntegerForKey(kStride, e.stride());
 			declDictionary.setIntegerForKey(kOffset, e.offset());
@@ -183,7 +183,7 @@ void Storage::deserializeWithOptions(RenderContext* rc, Dictionary stream, Seria
 		{
 			bool comp = false;
 			decl.push_back(stringToVertexAttributeUsage(e.stringForKey(kUsage)->content, comp),
-				stringToVertexAttributeType(e.stringForKey(kType)->content));
+				stringToDataType(e.stringForKey(kType)->content));
 		}
 		size_t capacity = static_cast<size_t>(storage.integerForKey(kDataSize)->content) / decl.dataSize();
 

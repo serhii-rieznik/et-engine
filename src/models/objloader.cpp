@@ -745,15 +745,15 @@ void OBJLoader::processLoadedData()
 	bool hasNormals = _normals.size() > 0;
 	bool hasTexCoords = _texCoords.size() > 0;
 		
-	VertexDeclaration decl(true, VertexAttributeUsage::Position, VertexAttributeType::Vec3);
-	decl.push_back(VertexAttributeUsage::Normal, VertexAttributeType::Vec3);
+	VertexDeclaration decl(true, VertexAttributeUsage::Position, DataType::Vec3);
+	decl.push_back(VertexAttributeUsage::Normal, DataType::Vec3);
 
 	if (hasTexCoords)
 	{
-		decl.push_back(VertexAttributeUsage::TexCoord0, VertexAttributeType::Vec2);
+		decl.push_back(VertexAttributeUsage::TexCoord0, DataType::Vec2);
 
 		if ((_loadOptions & Option_CalculateTangents) == Option_CalculateTangents)
-			decl.push_back(VertexAttributeUsage::Tangent, VertexAttributeType::Vec3);
+			decl.push_back(VertexAttributeUsage::Tangent, DataType::Vec3);
 	}
 
 	IndexArrayFormat fmt = (totalVertices > 65535) ? IndexArrayFormat::Format_32bit : IndexArrayFormat::Format_16bit;
@@ -763,15 +763,15 @@ void OBJLoader::processLoadedData()
 	
 	_vertexData = VertexStorage::Pointer::create(decl, totalVertices);
 
-	auto pos = _vertexData->accessData<VertexAttributeType::Vec3>(VertexAttributeUsage::Position, 0);
+	auto pos = _vertexData->accessData<DataType::Vec3>(VertexAttributeUsage::Position, 0);
 	
-	VertexDataAccessor<VertexAttributeType::Vec3> nrm;
-	if (_vertexData->hasAttributeWithType(VertexAttributeUsage::Normal, VertexAttributeType::Vec3))
-		nrm = _vertexData->accessData<VertexAttributeType::Vec3>(VertexAttributeUsage::Normal, 0);
+	VertexDataAccessor<DataType::Vec3> nrm;
+	if (_vertexData->hasAttributeWithType(VertexAttributeUsage::Normal, DataType::Vec3))
+		nrm = _vertexData->accessData<DataType::Vec3>(VertexAttributeUsage::Normal, 0);
 	
-	VertexDataAccessor<VertexAttributeType::Vec2> tex;
-	if (_vertexData->hasAttributeWithType(VertexAttributeUsage::TexCoord0, VertexAttributeType::Vec2))
-		tex = _vertexData->accessData<VertexAttributeType::Vec2>(VertexAttributeUsage::TexCoord0, 0);
+	VertexDataAccessor<DataType::Vec2> tex;
+	if (_vertexData->hasAttributeWithType(VertexAttributeUsage::TexCoord0, DataType::Vec2))
+		tex = _vertexData->accessData<DataType::Vec2>(VertexAttributeUsage::TexCoord0, 0);
 	
 	uint32_t index = 0;
 	

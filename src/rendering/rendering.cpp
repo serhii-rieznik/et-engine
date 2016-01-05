@@ -17,14 +17,14 @@ const std::string vertexAttributeUsageNames[VertexAttributeUsage_max] =
 	"BlendWeights", "BlendIndices", "gl_VertexID"
 };
 
-const std::string vertexAttributeTypeNames[VertexAttributeType_max] =
+const std::string dataTypeNames[DataType_max] =
 {
 	"float", "vec2", "vec3", "vec4",
 	"mat3", "mat4",
 	"int", "ivec2", "ivec3", "ivec4"
 };
 
-const std::string dataTypeNames[DataFormat_max] =
+const std::string dataFormatNames[DataFormat_max] =
 {
 	"char",
 	"unsigned char",
@@ -86,22 +86,22 @@ VertexAttributeUsage et::stringToVertexAttributeUsage(const std::string& s, bool
 	return result;
 }
 
-VertexAttributeType et::stringToVertexAttributeType(const std::string& s)
+DataType et::stringToDataType(const std::string& s)
 {
-	for (uint32_t i = 0, e = VertexAttributeType_max; i < e; ++i)
+	for (uint32_t i = 0, e = DataType_max; i < e; ++i)
 	{
-		if (s == vertexAttributeTypeNames[i])
-			return static_cast<VertexAttributeType>(i);
+		if (s == dataTypeNames[i])
+			return static_cast<DataType>(i);
 	}
 	
-	return VertexAttributeType::Float;
+	return DataType::Float;
 }
 
-DataFormat et::stringToDataType(const std::string& s)
+DataFormat et::stringToDataFormat(const std::string& s)
 {
 	for (uint32_t i = 0, e = DataFormat_max; i < e; ++i)
 	{
-		if (s == dataTypeNames[i])
+		if (s == dataFormatNames[i])
 			return static_cast<DataFormat>(i);
 	}
 	
@@ -139,15 +139,15 @@ std::string et::vertexAttributeUsageToString(VertexAttributeUsage va)
 	intToStr(static_cast<uint32_t>(va));
 }
 
-std::string et::vertexAttributeTypeToString(VertexAttributeType vat)
+std::string et::DataTypeToString(DataType vat)
 {
-	return (vat < VertexAttributeType::max) ? vertexAttributeTypeNames[static_cast<uint32_t>(vat)] :
+	return (vat < DataType::max) ? dataTypeNames[static_cast<uint32_t>(vat)] :
 	intToStr(static_cast<uint32_t>(vat));
 }
 
 std::string et::dataFormatToString(DataFormat dt)
 {
-	return (dt < DataFormat::max) ? dataTypeNames[static_cast<uint32_t>(dt)] :
+	return (dt < DataFormat::max) ? dataFormatNames[static_cast<uint32_t>(dt)] :
 	intToStr(static_cast<uint32_t>(dt));
 }
 
@@ -163,11 +163,11 @@ std::string et::primitiveTypeToString(PrimitiveType pt)
 	intToStr(static_cast<uint32_t>(pt));
 }
 
-uint32_t et::vertexAttributeTypeComponents(VertexAttributeType t)
+uint32_t et::dataTypeComponents(DataType t)
 {
-	ET_ASSERT(t < VertexAttributeType::max);
+	ET_ASSERT(t < DataType::max);
 	
-	static const uint32_t values[VertexAttributeType_max] =
+	static const uint32_t values[DataType_max] =
 	{
 		1,  // Float,
 		2,  // Vec2,
@@ -183,10 +183,10 @@ uint32_t et::vertexAttributeTypeComponents(VertexAttributeType t)
 	return values[static_cast<uint32_t>(t)];
 }
 
-DataFormat et::vertexAttributeTypeDataFormat(VertexAttributeType t)
+DataFormat et::dataTypeDataFormat(DataType t)
 {
-	ET_ASSERT(t < VertexAttributeType::max);
-	static const DataFormat values[VertexAttributeType_max] =
+	ET_ASSERT(t < DataType::max);
+	static const DataFormat values[DataType_max] =
 	{
 		DataFormat::Float, // Float,
 		DataFormat::Float, // Vec2,
@@ -202,10 +202,9 @@ DataFormat et::vertexAttributeTypeDataFormat(VertexAttributeType t)
 	return values[int32_t(t)];
 }
 
-uint32_t et::vertexAttributeTypeSize(VertexAttributeType t)
+uint32_t et::dataTypeSize(DataType t)
 {
-	return vertexAttributeTypeComponents(t) *
-	((t == VertexAttributeType::Int) ? sizeof(int) : sizeof(float));
+	return dataTypeComponents(t) * ((t == DataType::Int) ? sizeof(int) : sizeof(float));
 }
 
 uint32_t et::vertexAttributeUsageMask(VertexAttributeUsage u)

@@ -153,8 +153,8 @@ namespace et
 	
 	void validateExtensions();
 
-	VertexAttributeType openglTypeToVertexAttributeType(uint32_t);
-	uint32_t vertexAttributeTypeValue(VertexAttributeType);
+	DataType openglTypeToDataType(uint32_t);
+	uint32_t DataTypeValue(DataType);
 	
 	uint32_t textureTargetValue(TextureTarget);
 	uint32_t textureFormatValue(TextureFormat);

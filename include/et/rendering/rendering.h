@@ -97,7 +97,7 @@ namespace et
 		max
 	};
 	
-	enum class VertexAttributeType : uint32_t
+	enum class DataType : uint32_t
 	{
 		Float,
 		Vec2,
@@ -317,7 +317,7 @@ namespace et
 		FillMode_max = static_cast<uint32_t>(FillMode::max),
 		
 		VertexAttributeUsage_max = static_cast<uint32_t>(VertexAttributeUsage::max),
-		VertexAttributeType_max = static_cast<uint32_t>(VertexAttributeType::max),
+		DataType_max = static_cast<uint32_t>(DataType::max),
 		IndexArrayFormat_max = static_cast<uint32_t>(IndexArrayFormat::max),
 		PrimitiveType_max = static_cast<uint32_t>(PrimitiveType::max),
 		BlendConfiguration_max = static_cast<uint32_t>(BlendConfiguration::max),
@@ -432,14 +432,14 @@ namespace et
 		std::array<size_t, MaxRenderTargets> drawBuffers;
 	};
 	
-	DataFormat vertexAttributeTypeDataFormat(VertexAttributeType t);
+	DataFormat dataTypeDataFormat(DataType t);
 
 	VertexAttributeUsage stringToVertexAttributeUsage(const std::string& s, bool& builtIn);
-	VertexAttributeType stringToVertexAttributeType(const std::string& s);
-	DataFormat stringToDataType(const std::string&);
+	DataType stringToDataType(const std::string& s);
+	DataFormat stringToDataFormat(const std::string&);
 
 	std::string vertexAttributeUsageToString(VertexAttributeUsage);
-	std::string vertexAttributeTypeToString(VertexAttributeType);
+	std::string DataTypeToString(DataType);
 	std::string dataFormatToString(DataFormat);
 
 	std::string primitiveTypeToString(PrimitiveType);
@@ -451,8 +451,8 @@ namespace et
 	uint32_t sizeOfDataFormat(DataFormat);
 	
 	uint32_t vertexAttributeUsageMask(VertexAttributeUsage u);
-	uint32_t vertexAttributeTypeSize(VertexAttributeType t);
-	uint32_t vertexAttributeTypeComponents(VertexAttributeType t);
+	uint32_t dataTypeSize(DataType t);
+	uint32_t dataTypeComponents(DataType t);
 
 	uint32_t bitsPerPixelForDataFormat(DataFormat type);
 	uint32_t bitsPerPixelForTextureFormat(TextureFormat internalFormat, DataFormat type);

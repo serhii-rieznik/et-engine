@@ -44,12 +44,12 @@ bool VertexStorage::hasAttribute(VertexAttributeUsage usage) const
 	return declaration().has(usage);
 }
 
-bool VertexStorage::hasAttributeWithType(VertexAttributeUsage usage, VertexAttributeType type) const
+bool VertexStorage::hasAttributeWithType(VertexAttributeUsage usage, DataType type) const
 {
 	return hasAttribute(usage) && (_private->decl.elementForUsage(usage).type() == type);
 }
 
-VertexAttributeType VertexStorage::attributeType(VertexAttributeUsage usage) const
+DataType VertexStorage::attributeType(VertexAttributeUsage usage) const
 {
 	ET_ASSERT(hasAttribute(usage));
 	return _private->decl.elementForUsage(usage).type();
@@ -75,7 +75,7 @@ size_t VertexStorage::sizeOfAttribute(VertexAttributeUsage usage) const
 {
 	ET_ASSERT(hasAttribute(usage));
 	const auto& element = declaration().elementForUsage(usage);
-	return sizeOfDataFormat(element.dataFormat()) * vertexAttributeTypeComponents(element.type());
+	return sizeOfDataFormat(element.dataFormat()) * dataTypeComponents(element.type());
 }
 
 size_t VertexStorage::stride() const

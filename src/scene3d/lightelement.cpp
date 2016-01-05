@@ -22,7 +22,7 @@ LightElement* LightElement::duplicate()
 	duplicateBasePropertiesToObject(result);
 	duplicateChildrenToObject(result);
 
-	result->setModelViewMatrix(modelViewMatrix());
+	result->setViewMatrix(viewMatrix());
 	result->setProjectionMatrix(projectionMatrix());
 	
 	if (upVectorLocked())

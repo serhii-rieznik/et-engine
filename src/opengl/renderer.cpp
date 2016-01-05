@@ -30,9 +30,9 @@ Renderer::Renderer(RenderContext* rc) :
 	IndexArray::Pointer ib = IndexArray::Pointer::create(IndexArrayFormat::Format_8bit, 4, PrimitiveType::TriangleStrips);
 	ib->linearize(4);
 	
-	auto vd = VertexDeclaration(false, VertexAttributeUsage::Position, VertexAttributeType::Vec2);
+	auto vd = VertexDeclaration(false, VertexAttributeUsage::Position, DataType::Vec2);
 	VertexStorage::Pointer vb = VertexStorage::Pointer::create(vd, 4);
-	auto pos = vb->accessData<VertexAttributeType::Vec2>(VertexAttributeUsage::Position, 0);
+	auto pos = vb->accessData<DataType::Vec2>(VertexAttributeUsage::Position, 0);
 	pos[0] = vec2(-1.0f, -1.0f);
 	pos[1] = vec2( 1.0f, -1.0f);
 	pos[2] = vec2(-1.0f,  1.0f);
@@ -281,11 +281,25 @@ void Renderer::finishRendering()
 	glFinish();
 }
 
+void Renderer::setCurrentCamera(Camera* cam)
+{
+	_currentCamera = cam;
+}
+
 void Renderer::pushRenderBatch(RenderBatch::Pointer rb)
 {
-	rb->material()->enableInRenderState(_rc->renderState());
-	_rc->renderState().bindVertexArray(rb->data());
-	drawElements(rb->data()->indexBuffer(), rb->firstIndex(), rb->numIndexes());
+	auto& rs = _rc->renderState();
+	auto& batch = rb.reference();
+	auto& mat = batch.material().reference();
+	auto& prog = mat.program().reference();
+	
+	mat.enableInRenderState(rs);
+	
+	prog.setCameraProperties((_currentCamera == nullptr) ? _defaultCamera : (*_currentCamera));
+	prog.setTransformMatrix(batch.transformation());
+	
+	rs.bindVertexArray(batch.data());
+	drawElements(batch.data()->indexBuffer(), batch.firstIndex(), batch.numIndexes());
 }
 
 /*

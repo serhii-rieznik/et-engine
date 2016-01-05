@@ -685,33 +685,33 @@ s3d::Mesh::Pointer FBXLoaderPrivate::loadMesh(s3d::Storage& storage, FbxMesh* me
 	if (vertexColor)
 		hasColor &= (vertexColor->GetMappingMode() == FbxGeometryElement::eByPolygonVertex);
 
-	VertexDeclaration decl(true, VertexAttributeUsage::Position, VertexAttributeType::Vec3);
+	VertexDeclaration decl(true, VertexAttributeUsage::Position, DataType::Vec3);
 
 	if (hasNormal)
-		decl.push_back(VertexAttributeUsage::Normal, VertexAttributeType::Vec3);
+		decl.push_back(VertexAttributeUsage::Normal, DataType::Vec3);
 
 	if (hasColor)
-		decl.push_back(VertexAttributeUsage::Color, VertexAttributeType::Vec4);
+		decl.push_back(VertexAttributeUsage::Color, DataType::Vec4);
 	
 	if (hasTangents)
-		decl.push_back(VertexAttributeUsage::Tangent, VertexAttributeType::Vec3);
+		decl.push_back(VertexAttributeUsage::Tangent, DataType::Vec3);
 	
 	auto uv = mesh->GetElementUV();
 	uint32_t texCoord0 = static_cast<uint32_t>(VertexAttributeUsage::TexCoord0);
 	if ((uv != nullptr) && (uv->GetMappingMode() != FbxGeometryElement::eNone))
 	{
 		for (uint32_t i = 0; i < uvChannels; ++i)
-			decl.push_back(static_cast<VertexAttributeUsage>(texCoord0 + i), VertexAttributeType::Vec2);
+			decl.push_back(static_cast<VertexAttributeUsage>(texCoord0 + i), DataType::Vec2);
 	}
 
 	if (hasSkin)
 	{
-		decl.push_back(VertexAttributeUsage::BlendWeights, VertexAttributeType::Vec4);
-		decl.push_back(VertexAttributeUsage::BlendIndices, VertexAttributeType::IntVec4);
+		decl.push_back(VertexAttributeUsage::BlendWeights, DataType::Vec4);
+		decl.push_back(VertexAttributeUsage::BlendIndices, DataType::IntVec4);
 	}
 	
 	if (hasSmoothingGroups)
-		decl.push_back(VertexAttributeUsage::Smoothing, VertexAttributeType::Int);
+		decl.push_back(VertexAttributeUsage::Smoothing, DataType::Int);
 	
 	
 	VertexStorage::Pointer vs = storage.vertexStorageWithDeclarationForAppendingSize(decl, lPolygonVertexCount);
@@ -730,37 +730,37 @@ s3d::Mesh::Pointer FBXLoaderPrivate::loadMesh(s3d::Storage& storage, FbxMesh* me
 		ia->resizeToFit(ia->actualSize() + 3 * lPolygonCount);
 	}
 	
-	VertexDataAccessor<VertexAttributeType::Vec3> pos;
-	VertexDataAccessor<VertexAttributeType::Vec3> nrm;
-	VertexDataAccessor<VertexAttributeType::Vec3> tan;
-	VertexDataAccessor<VertexAttributeType::Vec4> clr;
-	VertexDataAccessor<VertexAttributeType::Int> smg;
-	VertexDataAccessor<VertexAttributeType::Vec4> blw;
-	VertexDataAccessor<VertexAttributeType::IntVec4> bli;
+	VertexDataAccessor<DataType::Vec3> pos;
+	VertexDataAccessor<DataType::Vec3> nrm;
+	VertexDataAccessor<DataType::Vec3> tan;
+	VertexDataAccessor<DataType::Vec4> clr;
+	VertexDataAccessor<DataType::Int> smg;
+	VertexDataAccessor<DataType::Vec4> blw;
+	VertexDataAccessor<DataType::IntVec4> bli;
 	
-	pos = vs->accessData<VertexAttributeType::Vec3>(VertexAttributeUsage::Position, vertexBaseOffset);
+	pos = vs->accessData<DataType::Vec3>(VertexAttributeUsage::Position, vertexBaseOffset);
 	
 	if (hasNormal)
-		nrm = vs->accessData<VertexAttributeType::Vec3>(VertexAttributeUsage::Normal, vertexBaseOffset);
+		nrm = vs->accessData<DataType::Vec3>(VertexAttributeUsage::Normal, vertexBaseOffset);
 
 	if (hasColor)
-		clr = vs->accessData<VertexAttributeType::Vec4>(VertexAttributeUsage::Color, vertexBaseOffset);
+		clr = vs->accessData<DataType::Vec4>(VertexAttributeUsage::Color, vertexBaseOffset);
 	
 	if (hasTangents)
-		tan = vs->accessData<VertexAttributeType::Vec3>(VertexAttributeUsage::Tangent, vertexBaseOffset);
+		tan = vs->accessData<DataType::Vec3>(VertexAttributeUsage::Tangent, vertexBaseOffset);
 	
 	if (hasSmoothingGroups)
-		smg = vs->accessData<VertexAttributeType::Int>(VertexAttributeUsage::Smoothing, vertexBaseOffset);
+		smg = vs->accessData<DataType::Int>(VertexAttributeUsage::Smoothing, vertexBaseOffset);
 	
 	if (hasSkin)
 	{
-		blw = vs->accessData<VertexAttributeType::Vec4>(VertexAttributeUsage::BlendWeights, vertexBaseOffset);
-		bli = vs->accessData<VertexAttributeType::IntVec4>(VertexAttributeUsage::BlendIndices, vertexBaseOffset);
+		blw = vs->accessData<DataType::Vec4>(VertexAttributeUsage::BlendWeights, vertexBaseOffset);
+		bli = vs->accessData<DataType::IntVec4>(VertexAttributeUsage::BlendIndices, vertexBaseOffset);
 	}
 	
-	std::vector<VertexDataAccessor<VertexAttributeType::Vec2>> uvs;
+	std::vector<VertexDataAccessor<DataType::Vec2>> uvs;
 	for (uint32_t i = 0; i < uvChannels; ++i)
-		uvs.push_back(vs->accessData<VertexAttributeType::Vec2>(static_cast<VertexAttributeUsage>(texCoord0 + i), vertexBaseOffset));
+		uvs.push_back(vs->accessData<DataType::Vec2>(static_cast<VertexAttributeUsage>(texCoord0 + i), vertexBaseOffset));
 
 	FbxStringList lUVNames;
 	mesh->GetUVSetNames(lUVNames);
@@ -1088,8 +1088,8 @@ void FBXLoaderPrivate::buildBlendWeightsForMesh(s3d::Storage& storage, s3d::Mesh
 	if (!vs->hasAttribute(VertexAttributeUsage::BlendIndices) ||
 		!vs->hasAttribute(VertexAttributeUsage::BlendWeights)) return;
 	
-	auto bli = vs->accessData<VertexAttributeType::IntVec4>(VertexAttributeUsage::BlendIndices, mesh->startIndex());
-	auto blw = vs->accessData<VertexAttributeType::Vec4>(VertexAttributeUsage::BlendWeights, mesh->startIndex());
+	auto bli = vs->accessData<DataType::IntVec4>(VertexAttributeUsage::BlendIndices, mesh->startIndex());
+	auto blw = vs->accessData<DataType::Vec4>(VertexAttributeUsage::BlendWeights, mesh->startIndex());
 	
 	std::map<size_t, uint32_t> placedIndices;
 	

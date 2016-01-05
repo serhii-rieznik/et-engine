@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <et/core/datastorage.h>
 #include <et/rendering/program.h>
 
 namespace et
@@ -25,7 +26,10 @@ namespace et
 		
 		void enableInRenderState(RenderState&);
 		
-		et::Program::Pointer program() const
+		et::Program::Pointer& program()
+			{ return _program; }
+		
+		const et::Program::Pointer& program() const
 			{ return _program; }
 		
 		const DepthState& depthState() const
@@ -40,15 +44,20 @@ namespace et
 	private:
 		struct Property
 		{
-			std::string name;
+			DataFormat type = DataFormat::max;
+			Program::Uniform uniform;
 			uint32_t offset = 0;
 			uint32_t length = 0;
 		};
 		
-		void addProperty(const std::string& name, uint32_t off, uint32_t len);
+		void loadProperties();
 		
 	public:
 		MaterialFactory* _factory = nullptr;
+		
+		BinaryDataStorage _propertiesData;
+		std::unordered_map<std::string, Property> _properties;
+		
 		Program::Pointer _program;
 		DepthState _depth;
 		BlendState _blend;

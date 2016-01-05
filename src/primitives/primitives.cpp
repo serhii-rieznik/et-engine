@@ -65,7 +65,7 @@ void primitives::createPhotonMap(VertexArray::Pointer buffer, const vec2i& densi
 	buffer->increase(static_cast<uint32_t>(density.square()));
 	
 	VertexDataChunk chunk = buffer->chunk(VertexAttributeUsage::Position);
-	ET_ASSERT(chunk->type() == VertexAttributeType::Vec2);
+	ET_ASSERT(chunk->type() == DataType::Vec2);
 	
 	RawDataAcessor<vec2> data = chunk.accessData<vec2>(0);
 	
@@ -462,19 +462,19 @@ void primitives::calculateNormals(VertexStorage::Pointer data, const IndexArray:
 {
 	ET_ASSERT(first < last);
 	
-	if (!data->hasAttributeWithType(VertexAttributeUsage::Position, VertexAttributeType::Vec3))
+	if (!data->hasAttributeWithType(VertexAttributeUsage::Position, DataType::Vec3))
 	{
 		log::error("primitives::calculateNormals - vertex storage does not contain positions of type vec3.");
 		return;
 	}
-	if (!data->hasAttributeWithType(VertexAttributeUsage::Normal, VertexAttributeType::Vec3))
+	if (!data->hasAttributeWithType(VertexAttributeUsage::Normal, DataType::Vec3))
 	{
 		log::error("primitives::calculateNormals - vertex storage does not contain normals of type vec3.");
 		return;
 	}
 	
-	RawDataAcessor<vec3> pos = data->accessData<VertexAttributeType::Vec3>(VertexAttributeUsage::Position, 0);
-	RawDataAcessor<vec3> nrm = data->accessData<VertexAttributeType::Vec3>(VertexAttributeUsage::Normal, 0);
+	RawDataAcessor<vec3> pos = data->accessData<DataType::Vec3>(VertexAttributeUsage::Position, 0);
+	RawDataAcessor<vec3> nrm = data->accessData<DataType::Vec3>(VertexAttributeUsage::Normal, 0);
 	
 	const auto& e = buffer->primitive(last);
 	
@@ -512,8 +512,8 @@ void primitives::calculateNormals(VertexArray::Pointer data, const IndexArray::P
 	VertexDataChunk posChunk = data->chunk(VertexAttributeUsage::Position);
 	VertexDataChunk nrmChunk = data->chunk(VertexAttributeUsage::Normal);
 
-	if (posChunk.invalid() || (posChunk->type() != VertexAttributeType::Vec3) || !nrmChunk.valid() ||
-		(nrmChunk->type() != VertexAttributeType::Vec3))
+	if (posChunk.invalid() || (posChunk->type() != DataType::Vec3) || !nrmChunk.valid() ||
+		(nrmChunk->type() != DataType::Vec3))
 	{
 		log::error("primitives::calculateNormals - data is invalid.");
 		return;
@@ -561,10 +561,10 @@ void primitives::calculateTangents(VertexArray::Pointer data, const IndexArray::
 	VertexDataChunk uvChunk = data->chunk(VertexAttributeUsage::TexCoord0);
 	VertexDataChunk tanChunk = data->chunk(VertexAttributeUsage::Tangent);
 	
-	if (posChunk.invalid() || (posChunk->type() != VertexAttributeType::Vec3) ||
-		nrmChunk.invalid() || (nrmChunk->type() != VertexAttributeType::Vec3) ||
-		tanChunk.invalid() || (tanChunk->type() != VertexAttributeType::Vec3) ||
-		uvChunk.invalid() || (uvChunk->type() != VertexAttributeType::Vec2))
+	if (posChunk.invalid() || (posChunk->type() != DataType::Vec3) ||
+		nrmChunk.invalid() || (nrmChunk->type() != DataType::Vec3) ||
+		tanChunk.invalid() || (tanChunk->type() != DataType::Vec3) ||
+		uvChunk.invalid() || (uvChunk->type() != DataType::Vec2))
 	{
 		log::error("primitives::calculateTangents - data is invalid.");
 		return;
@@ -630,31 +630,31 @@ void primitives::calculateTangents(VertexStorage::Pointer data, const IndexArray
 {
 	ET_ASSERT(first < last);
 
-	if (!data->hasAttributeWithType(VertexAttributeUsage::Position, VertexAttributeType::Vec3))
+	if (!data->hasAttributeWithType(VertexAttributeUsage::Position, DataType::Vec3))
 	{
 		log::error("primitives::calculateNormals - vertex storage does not contain positions of type vec3.");
 		return;
 	}
-	if (!data->hasAttributeWithType(VertexAttributeUsage::Normal, VertexAttributeType::Vec3))
+	if (!data->hasAttributeWithType(VertexAttributeUsage::Normal, DataType::Vec3))
 	{
 		log::error("primitives::calculateNormals - vertex storage does not contain normals of type vec3.");
 		return;
 	}
-	if (!data->hasAttributeWithType(VertexAttributeUsage::TexCoord0, VertexAttributeType::Vec2))
+	if (!data->hasAttributeWithType(VertexAttributeUsage::TexCoord0, DataType::Vec2))
 	{
 		log::error("primitives::calculateNormals - vertex storage does not contain TexCoord0 of type vec2.");
 		return;
 	}
-	if (!data->hasAttributeWithType(VertexAttributeUsage::Tangent, VertexAttributeType::Vec3))
+	if (!data->hasAttributeWithType(VertexAttributeUsage::Tangent, DataType::Vec3))
 	{
 		log::error("primitives::calculateNormals - vertex storage does not contain tangents of type vec3.");
 		return;
 	}
 
-	RawDataAcessor<vec3> pos = data->accessData<VertexAttributeType::Vec3>(VertexAttributeUsage::Position, 0);
-	RawDataAcessor<vec3> nrm = data->accessData<VertexAttributeType::Vec3>(VertexAttributeUsage::Normal, 0);
-	RawDataAcessor<vec3> tan = data->accessData<VertexAttributeType::Vec3>(VertexAttributeUsage::Tangent, 0);
-	RawDataAcessor<vec2> uv = data->accessData<VertexAttributeType::Vec2>(VertexAttributeUsage::TexCoord0, 0);
+	RawDataAcessor<vec3> pos = data->accessData<DataType::Vec3>(VertexAttributeUsage::Position, 0);
+	RawDataAcessor<vec3> nrm = data->accessData<DataType::Vec3>(VertexAttributeUsage::Normal, 0);
+	RawDataAcessor<vec3> tan = data->accessData<DataType::Vec3>(VertexAttributeUsage::Tangent, 0);
+	RawDataAcessor<vec2> uv = data->accessData<DataType::Vec2>(VertexAttributeUsage::TexCoord0, 0);
 
 	DataStorage<vec3> tan1(data->capacity(), 0);
 	DataStorage<vec3> tan2(data->capacity(), 0);
@@ -715,8 +715,8 @@ void primitives::smoothTangents(VertexArray::Pointer data, const IndexArray::Poi
 	VertexDataChunk posChunk = data->chunk(VertexAttributeUsage::Position);
 	VertexDataChunk tanChunk = data->chunk(VertexAttributeUsage::Tangent);
 	
-	if (posChunk.invalid() || (posChunk->type() != VertexAttributeType::Vec3) || !tanChunk.valid() ||
-		(tanChunk->type() != VertexAttributeType::Vec3))
+	if (posChunk.invalid() || (posChunk->type() != DataType::Vec3) || !tanChunk.valid() ||
+		(tanChunk->type() != DataType::Vec3))
 	{
 		log::error("primitives::smoothTangents - data is invalid.");
 		return;
@@ -754,12 +754,12 @@ void primitives::smoothTangents(VertexArray::Pointer data, const IndexArray::Poi
 	}
 
 
-void primitives::createCube(VertexArray::Pointer data, float radius, const vec3& center)
+void primitives::createBox(VertexArray::Pointer data, const vec3& size, const vec3& center)
 {
 	VertexDataChunk posChunk = data->chunk(VertexAttributeUsage::Position);
 	VertexDataChunk nrmChunk = data->chunk(VertexAttributeUsage::Normal);
-	bool hasPosition = posChunk.valid() && (posChunk->type() == VertexAttributeType::Vec3);
-	bool hasNormals = nrmChunk.valid() && (nrmChunk->type() == VertexAttributeType::Vec3);
+	bool hasPosition = posChunk.valid() && (posChunk->type() == DataType::Vec3);
+	bool hasNormals = nrmChunk.valid() && (nrmChunk->type() == DataType::Vec3);
 	
 	ET_ASSERT(hasPosition);
 	(void)hasPosition;
@@ -770,18 +770,16 @@ void primitives::createCube(VertexArray::Pointer data, float radius, const vec3&
 	RawDataAcessor<vec3> pos = posChunk.accessData<vec3>(offset);
 	RawDataAcessor<vec3> nrm = nrmChunk.accessData<vec3>(offset);
 	
-	float d = radius * INV_SQRT_3;
-	
 	vec3 corners[8] =
 	{
-		center + vec3(-d,  d, -d),
-		center + vec3( d,  d, -d),
-		center + vec3(-d,  d,  d),
-		center + vec3( d,  d,  d),
-		center + vec3(-d, -d, -d),
-		center + vec3( d, -d, -d),
-		center + vec3(-d, -d,  d),
-		center + vec3( d, -d,  d),
+		center + vec3(-size.x,  size.y, -size.z),
+		center + vec3( size.x,  size.y, -size.z),
+		center + vec3(-size.x,  size.y,  size.z),
+		center + vec3( size.x,  size.y,  size.z),
+		center + vec3(-size.x, -size.y, -size.z),
+		center + vec3( size.x, -size.y, -size.z),
+		center + vec3(-size.x, -size.y,  size.z),
+		center + vec3( size.x, -size.y,  size.z),
 	};
 	
 	uint32_t k = 0;
@@ -804,8 +802,8 @@ void primitives::createOctahedron(VertexArray::Pointer data, float radius)
 {
 	VertexDataChunk posChunk = data->chunk(VertexAttributeUsage::Position);
 	VertexDataChunk nrmChunk = data->chunk(VertexAttributeUsage::Normal);
-	bool hasPosition = posChunk.valid() && (posChunk->type() == VertexAttributeType::Vec3);
-	bool hasNormals = nrmChunk.valid() && (nrmChunk->type() == VertexAttributeType::Vec3);
+	bool hasPosition = posChunk.valid() && (posChunk->type() == DataType::Vec3);
+	bool hasNormals = nrmChunk.valid() && (nrmChunk->type() == DataType::Vec3);
 	
 	ET_ASSERT(hasPosition);
 	(void)hasPosition;
@@ -843,8 +841,8 @@ void primitives::createDodecahedron(VertexArray::Pointer data, float radius)
 {
 	VertexDataChunk posChunk = data->chunk(VertexAttributeUsage::Position);
 	VertexDataChunk nrmChunk = data->chunk(VertexAttributeUsage::Normal);
-	bool hasPosition = posChunk.valid() && (posChunk->type() == VertexAttributeType::Vec3);
-	bool hasNormals = nrmChunk.valid() && (nrmChunk->type() == VertexAttributeType::Vec3);
+	bool hasPosition = posChunk.valid() && (posChunk->type() == DataType::Vec3);
+	bool hasNormals = nrmChunk.valid() && (nrmChunk->type() == DataType::Vec3);
 	
 	ET_ASSERT(hasPosition);
 	(void)hasPosition;
@@ -950,8 +948,8 @@ void primitives::createIcosahedron(VertexArray::Pointer data, float radius, bool
 {
 	VertexDataChunk posChunk = data->chunk(VertexAttributeUsage::Position);
 	VertexDataChunk nrmChunk = data->chunk(VertexAttributeUsage::Normal);
-	bool hasPosition = posChunk.valid() && (posChunk->type() == VertexAttributeType::Vec3);
-	bool hasNormals = nrmChunk.valid() && (nrmChunk->type() == VertexAttributeType::Vec3);
+	bool hasPosition = posChunk.valid() && (posChunk->type() == DataType::Vec3);
+	bool hasNormals = nrmChunk.valid() && (nrmChunk->type() == DataType::Vec3);
 
 	ET_ASSERT(hasPosition);
 	(void)hasPosition;
@@ -1024,13 +1022,13 @@ void primitives::tesselateTriangles(VertexArray::Pointer data, IndexArray::Point
 	ET_ASSERT(indexArray->primitiveType() == PrimitiveType::Triangles);
 		   
 	bool hasPosition = data->chunk(VertexAttributeUsage::Position).valid() &&
-		(data->chunk(VertexAttributeUsage::Position)->type() == VertexAttributeType::Vec3);
+		(data->chunk(VertexAttributeUsage::Position)->type() == DataType::Vec3);
 	
 	bool hasNormals = data->chunk(VertexAttributeUsage::Normal).valid() &&
-		(data->chunk(VertexAttributeUsage::Normal)->type() == VertexAttributeType::Vec3);
+		(data->chunk(VertexAttributeUsage::Normal)->type() == DataType::Vec3);
 
 	bool hasColor = data->chunk(VertexAttributeUsage::Color).valid() &&
-		(data->chunk(VertexAttributeUsage::Color)->type() == VertexAttributeType::Vec4);
+		(data->chunk(VertexAttributeUsage::Color)->type() == DataType::Vec4);
 	
 	ET_ASSERT(hasPosition);
 	(void)hasPosition;
@@ -1213,7 +1211,7 @@ VertexArray::Pointer primitives::linearizeTrianglesIndexArray(VertexArray::Point
 	VertexArray::Pointer result = VertexArray::Pointer::create(data->decl(), 3 * indexArray->primitivesCount());
 	for (auto& e : decl.elements())
 	{
-		if (e.type() == VertexAttributeType::Vec4)
+		if (e.type() == DataType::Vec4)
 		{
 			auto oldValues = data->chunk(e.usage()).accessData<vec4>(0);
 			auto newValues = result->chunk(e.usage()).accessData<vec4>(0);
@@ -1225,7 +1223,7 @@ VertexArray::Pointer primitives::linearizeTrianglesIndexArray(VertexArray::Point
 				newValues[i++] = oldValues[p[2]];
 			}
 		}
-		else if (e.type() == VertexAttributeType::Vec3)
+		else if (e.type() == DataType::Vec3)
 		{
 			auto oldValues = data->chunk(e.usage()).accessData<vec3>(0);
 			auto newValues = result->chunk(e.usage()).accessData<vec3>(0);
@@ -1237,7 +1235,7 @@ VertexArray::Pointer primitives::linearizeTrianglesIndexArray(VertexArray::Point
 				newValues[i++] = oldValues[p[2]];
 			}
 		}
-		else if (e.type() == VertexAttributeType::Vec2)
+		else if (e.type() == DataType::Vec2)
 		{
 			auto oldValues = data->chunk(e.usage()).accessData<vec2>(0);
 			auto newValues = result->chunk(e.usage()).accessData<vec2>(0);

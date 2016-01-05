@@ -51,7 +51,7 @@ namespace et
 	const std::string kDataSize = "data-size";
 	const std::string kFormat = "format";
 	const std::string kPrimitiveType = "primitive-type";
-	const std::string kModelView = "model-view";
+	const std::string kView = "view";
 	const std::string kProjection = "projection";
 	const std::string kUpVector = "up";
 	const std::string kUpVectorLocked = "up-locked";

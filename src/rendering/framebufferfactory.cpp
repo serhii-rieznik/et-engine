@@ -14,7 +14,6 @@ Framebuffer::Pointer FramebufferFactory::createFramebuffer(const vec2i& size, co
 	TextureFormat depthFormat, DataFormat depthType, bool useRenderbuffers, uint32_t samples)
 {
 	FramebufferDescription desc;
-	
 	desc.target = TextureTarget::Texture_2D;
 	desc.size = vec3i(size, 0);
 	desc.numSamples = samples;

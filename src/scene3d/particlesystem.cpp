@@ -13,10 +13,10 @@ using namespace et;
 using namespace et::s3d;
 
 ParticleSystem::ParticleSystem(RenderContext* rc, uint32_t maxSize, const std::string& name, BaseElement* parent) :
-	BaseElement(name, parent), _rc(rc), _decl(true, VertexAttributeUsage::Position, VertexAttributeType::Vec3),
+	BaseElement(name, parent), _rc(rc), _decl(true, VertexAttributeUsage::Position, DataType::Vec3),
 	_emitter(maxSize)
 {
-	_decl.push_back(VertexAttributeUsage::Color, VertexAttributeType::Vec4);
+	_decl.push_back(VertexAttributeUsage::Color, DataType::Vec4);
 
 	/*
 	 * Init geometry

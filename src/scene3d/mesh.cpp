@@ -50,7 +50,7 @@ void Mesh::calculateSupportData()
 	
 	if ((_numIndexes == 0) || _vertexStorage.invalid() || _indexArray.invalid()) return;
 	
-	if (!_vertexStorage->hasAttributeWithType(VertexAttributeUsage::Position, VertexAttributeType::Vec3))
+	if (!_vertexStorage->hasAttributeWithType(VertexAttributeUsage::Position, DataType::Vec3))
 	{
 		log::warning("Unable to calculate support data for mesh, storage not containing position of type vec3");
 		return;
@@ -58,7 +58,7 @@ void Mesh::calculateSupportData()
 	
 	vec3 minVertex( std::numeric_limits<float>::max());
 	vec3 maxVertex(-std::numeric_limits<float>::max());
-	const auto pos = _vertexStorage->accessData<VertexAttributeType::Vec3>(VertexAttributeUsage::Position, 0);
+	const auto pos = _vertexStorage->accessData<DataType::Vec3>(VertexAttributeUsage::Position, 0);
 	for (uint32_t i = 0; i < _numIndexes; ++i)
 	{
 		uint32_t index = _indexArray->getIndex(_startIndex + i);
@@ -385,7 +385,7 @@ const std::vector<mat4>& Mesh::deformationMatrices()
  * Bake deformations + stuff for it
  */
 
-template <VertexAttributeType attribType>
+template <DataType attribType>
 void copyAttributeWithType(VertexStorage::Pointer from, VertexStorage::Pointer to, VertexAttributeUsage attrib)
 {
 	auto c0 = from->accessData<attribType>(attrib, 0);
@@ -400,29 +400,29 @@ void copyAttribute(VertexStorage::Pointer from, VertexStorage::Pointer to, Verte
 	
 	switch (from->attributeType(attrib))
 	{
-		case VertexAttributeType::Float:
-			copyAttributeWithType<VertexAttributeType::Float>(from, to, attrib);
+		case DataType::Float:
+			copyAttributeWithType<DataType::Float>(from, to, attrib);
 			break;
-		case VertexAttributeType::Int:
-			copyAttributeWithType<VertexAttributeType::Int>(from, to, attrib);
+		case DataType::Int:
+			copyAttributeWithType<DataType::Int>(from, to, attrib);
 			break;
-		case VertexAttributeType::Vec2:
-			copyAttributeWithType<VertexAttributeType::Vec2>(from, to, attrib);
+		case DataType::Vec2:
+			copyAttributeWithType<DataType::Vec2>(from, to, attrib);
 			break;
-		case VertexAttributeType::Vec3:
-			copyAttributeWithType<VertexAttributeType::Vec3>(from, to, attrib);
+		case DataType::Vec3:
+			copyAttributeWithType<DataType::Vec3>(from, to, attrib);
 			break;
-		case VertexAttributeType::Vec4:
-			copyAttributeWithType<VertexAttributeType::Vec4>(from, to, attrib);
+		case DataType::Vec4:
+			copyAttributeWithType<DataType::Vec4>(from, to, attrib);
 			break;
-		case VertexAttributeType::IntVec2:
-			copyAttributeWithType<VertexAttributeType::IntVec2>(from, to, attrib);
+		case DataType::IntVec2:
+			copyAttributeWithType<DataType::IntVec2>(from, to, attrib);
 			break;
-		case VertexAttributeType::IntVec3:
-			copyAttributeWithType<VertexAttributeType::IntVec3>(from, to, attrib);
+		case DataType::IntVec3:
+			copyAttributeWithType<DataType::IntVec3>(from, to, attrib);
 			break;
-		case VertexAttributeType::IntVec4:
-			copyAttributeWithType<VertexAttributeType::IntVec4>(from, to, attrib);
+		case DataType::IntVec4:
+			copyAttributeWithType<DataType::IntVec4>(from, to, attrib);
 			break;
 		default:
 			ET_FAIL("Unhandled attribute type");
@@ -434,8 +434,8 @@ void copyVector3Rotated(VertexStorage::Pointer from, VertexStorage::Pointer to, 
 {
 	if (!from->hasAttribute(attrib)) return;
 	
-	auto c0 = from->accessData<VertexAttributeType::Vec3>(attrib, 0);
-	auto c1 = to->accessData<VertexAttributeType::Vec3>(attrib, 0);
+	auto c0 = from->accessData<DataType::Vec3>(attrib, 0);
+	auto c1 = to->accessData<DataType::Vec3>(attrib, 0);
 	for (uint32_t i = 0; i < from->capacity(); ++i)
 		c1[i] = transform.rotationMultiply(c0[i]);
 }
@@ -445,8 +445,8 @@ void copyVector3Transformed(VertexStorage::Pointer from, VertexStorage::Pointer 
 {
 	if (!from->hasAttribute(attrib)) return;
 	
-	auto c0 = from->accessData<VertexAttributeType::Vec3>(attrib, 0);
-	auto c1 = to->accessData<VertexAttributeType::Vec3>(attrib, 0);
+	auto c0 = from->accessData<DataType::Vec3>(attrib, 0);
+	auto c1 = to->accessData<DataType::Vec3>(attrib, 0);
 	for (uint32_t i = 0; i < from->capacity(); ++i)
 		c1[i] = transform * c0[i];
 }
@@ -456,10 +456,10 @@ void skinVector3Rotated(VertexStorage::Pointer from, VertexStorage::Pointer to, 
 {
 	if (!from->hasAttribute(attrib)) return;
 	
-	auto c0 = from->accessData<VertexAttributeType::Vec3>(attrib, 0);
-	auto c1 = to->accessData<VertexAttributeType::Vec3>(attrib, 0);
-	auto bi = to->accessData<VertexAttributeType::IntVec4>(VertexAttributeUsage::BlendIndices, 0);
-	auto bw = to->accessData<VertexAttributeType::Vec4>(VertexAttributeUsage::BlendWeights, 0);
+	auto c0 = from->accessData<DataType::Vec3>(attrib, 0);
+	auto c1 = to->accessData<DataType::Vec3>(attrib, 0);
+	auto bi = to->accessData<DataType::IntVec4>(VertexAttributeUsage::BlendIndices, 0);
+	auto bw = to->accessData<DataType::Vec4>(VertexAttributeUsage::BlendWeights, 0);
 	for (uint32_t i = 0; i < from->capacity(); ++i)
 	{
 		c1[i] =
@@ -475,10 +475,10 @@ void skinVector3Transformed(VertexStorage::Pointer from, VertexStorage::Pointer 
 {
 	if (!from->hasAttribute(attrib)) return;
 	
-	auto c0 = from->accessData<VertexAttributeType::Vec3>(attrib, 0);
-	auto c1 = to->accessData<VertexAttributeType::Vec3>(attrib, 0);
-	auto bi = to->accessData<VertexAttributeType::IntVec4>(VertexAttributeUsage::BlendIndices, 0);
-	auto bw = to->accessData<VertexAttributeType::Vec4>(VertexAttributeUsage::BlendWeights, 0);
+	auto c0 = from->accessData<DataType::Vec3>(attrib, 0);
+	auto c1 = to->accessData<DataType::Vec3>(attrib, 0);
+	auto bi = to->accessData<DataType::IntVec4>(VertexAttributeUsage::BlendIndices, 0);
+	auto bw = to->accessData<DataType::Vec4>(VertexAttributeUsage::BlendWeights, 0);
 	for (uint32_t i = 0; i < from->capacity(); ++i)
 	{
 		c1[i] = (transforms[bi[i][0]] * c0[i]) * bw[i][0] + (transforms[bi[i][1]] * c0[i]) * bw[i][1] +

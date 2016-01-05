@@ -9,14 +9,14 @@
 
 using namespace et;
 
-RenderBatch::RenderBatch(const Material::Pointer& m, const VertexArrayObject& v) :
-	_material(m), _data(v), _firstIndex(0), _numIndexes(v->indexBuffer()->size())
+RenderBatch::RenderBatch(const Material::Pointer& m, const VertexArrayObject& v, const mat4& transform) :
+	_material(m), _data(v), _firstIndex(0), _numIndexes(v->indexBuffer()->size()), _transformation(transform)
 {
 	
 }
 
-RenderBatch::RenderBatch(const Material::Pointer& m, const VertexArrayObject& v, uint32_t i, uint32_t ni) :
-	_material(m), _data(v), _firstIndex(i), _numIndexes(ni)
+RenderBatch::RenderBatch(const Material::Pointer& m, const VertexArrayObject& v, const mat4& transform, uint32_t i, uint32_t ni) :
+	_material(m), _data(v), _firstIndex(i), _numIndexes(ni), _transformation(transform)
 {
 	
 }

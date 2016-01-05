@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <et/camera/camera.h>
 #include <et/rendering/renderstate.h>
 #include <et/rendering/renderbatch.h>
 
@@ -56,6 +57,10 @@ namespace et
 		
 		void finishRendering();
 		
+		/*
+		 * Render batches stuff
+		 */
+		void setCurrentCamera(Camera*);
 		void pushRenderBatch(RenderBatch::Pointer);
 
 		ET_DECLARE_PROPERTY_GET_COPY_SET_COPY(uint32_t, defaultTextureBindingUnit, setDefaultTextureBindingUnit)
@@ -66,15 +71,19 @@ namespace et
 
 	private:
 		RenderContext* _rc = nullptr;
+		
+		Camera _defaultCamera;
+		Camera* _currentCamera = nullptr;
+		
 		ObjectsCache _sharedCache;
 		VertexArrayObject _fullscreenQuadVao;
-
+		
 		Program::Pointer _fullscreenProgram[TextureTarget_max];
 		Program::Pointer _fullscreenDepthProgram;
 		Program::Pointer _fullscreenScaledProgram;
 		Program::Pointer _scaledProgram;
 		Program::Pointer _scaledRotatedProgram;
-
+		
 		Program::Uniform _scaledProgram_PSUniform;
 		Program::Uniform _scaledProgram_TintUniform;
 		Program::Uniform _scaledRotatedProgram_PSUniform;

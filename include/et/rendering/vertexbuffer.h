@@ -52,6 +52,9 @@ namespace et
 			{ return _sourceObjectName; }
 
 		void clear();
+		
+		size_t dataSize() const
+			{ return _dataSize; }
 
 	private:
 		RenderContext* _rc = nullptr;

@@ -130,7 +130,7 @@ void RenderState::setVertexAttributesBaseIndex(const VertexDeclaration& decl, ui
 	for (size_t i = 0; i < decl.numElements(); ++i)
 	{
 		const VertexElement& e = decl.element(i);
-		uint32_t dataOffset = index * (decl.interleaved() ? decl.dataSize() : vertexAttributeTypeSize(e.type()));
+		uint32_t dataOffset = index * (decl.interleaved() ? decl.dataSize() : dataTypeSize(e.type()));
 		setVertexAttribPointer(e, dataOffset, force);
 	}
 }

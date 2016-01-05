@@ -11,10 +11,10 @@
 using namespace et;
 
 VertexArray::VertexArray() : tag(0), _decl(true), _size(0),
-	_smoothing(VertexAttributeUsage::Smoothing, VertexAttributeType::Int, 0) { }
+	_smoothing(VertexAttributeUsage::Smoothing, DataType::Int, 0) { }
 
 VertexArray::VertexArray(const VertexDeclaration& decl, uint32_t size) : tag(0), _decl(decl.interleaved()),
-	_size(size), _smoothing(VertexAttributeUsage::Smoothing, VertexAttributeType::Int, size)
+	_size(size), _smoothing(VertexAttributeUsage::Smoothing, DataType::Int, size)
 {
 	for (uint32_t i = 0; i < decl.numElements(); ++i)
 	{

@@ -169,7 +169,7 @@ namespace et
 	extern const std::string kDataSize;
 	extern const std::string kFormat;
 	extern const std::string kPrimitiveType;
-	extern const std::string kModelView;
+	extern const std::string kView;
 	extern const std::string kProjection;
 	extern const std::string kUpVector;
 	extern const std::string kUpVectorLocked;
