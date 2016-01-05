@@ -16,10 +16,10 @@ namespace et
 	{
 	public:
 		VertexDataChunkData(std::istream& stream);
-		VertexDataChunkData(VertexAttributeUsage usage, DataType type, size_t size);
+		VertexDataChunkData(VertexAttributeUsage usage, DataType type, uint32_t size);
 
-		void resize(size_t);
-		void fitToSize(size_t);
+		void resize(uint32_t);
+		void fitToSize(uint32_t);
 
 		char* data()
 			{ return _data.binary(); }
@@ -27,13 +27,13 @@ namespace et
 		const char* data() const
 			{ return _data.binary(); }
 
-		const size_t size() const
-			{ return _data.size(); }
+		const uint32_t size() const
+			{ return static_cast<uint32_t>(_data.size()); }
 
-		const size_t dataSize() const
-			{ return _data.dataSize(); }
+		const uint32_t dataSize() const
+			{ return static_cast<uint32_t>(_data.dataSize()); }
 
-		const size_t typeSize() const
+		const uint32_t typeSize() const
 			{ return dataTypeSize(_type); }
 
 		VertexAttributeUsage usage() const
@@ -59,7 +59,7 @@ namespace et
 		VertexDataChunk(std::istream& stream) : 
 			IntrusivePtr<VertexDataChunkData>(etCreateObject<VertexDataChunkData>(stream)) { }
 
-		VertexDataChunk(VertexAttributeUsage usage, DataType type, size_t size) : 
+		VertexDataChunk(VertexAttributeUsage usage, DataType type, uint32_t size) : 
 			IntrusivePtr<VertexDataChunkData>(etCreateObject<VertexDataChunkData>(usage, type, size)) { }
 
 		template <typename T>

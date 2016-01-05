@@ -737,7 +737,10 @@ void OBJLoader::processLoadedData()
 	for (const auto& group : _groups)
 	{
 		for (const auto& face : group->faces)
-			totalTriangles += face.vertices.size() - 2;
+		{
+			ET_ASSERT(face.vertices.size() > 1);
+			totalTriangles += static_cast<uint32_t>(face.vertices.size() - 2);
+		}
 	}
 	
 	uint32_t totalVertices = 3 * totalTriangles;

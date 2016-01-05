@@ -15,7 +15,7 @@ namespace et
 
 using namespace et;
 
-VertexDataChunkData::VertexDataChunkData(VertexAttributeUsage aUsage, DataType aType, size_t aSize) :
+VertexDataChunkData::VertexDataChunkData(VertexAttributeUsage aUsage, DataType aType, uint32_t aSize) :
 	_usage(aUsage), _type(aType)
 {
 	ET_ASSERT(_type < DataType::max);
@@ -44,12 +44,12 @@ VertexDataChunkData::VertexDataChunkData(std::istream& stream)
 		_type = openglTypeToDataType(static_cast<uint32_t>(_type));
 }
 
-void VertexDataChunkData::resize(size_t sz)
+void VertexDataChunkData::resize(uint32_t sz)
 {
 	_data.resize(typeSize() * sz);
 }
 
-void VertexDataChunkData::fitToSize(size_t count)
+void VertexDataChunkData::fitToSize(uint32_t count)
 {
 	if (_data.dataSize() < typeSize() * count)
 		resize(count);
