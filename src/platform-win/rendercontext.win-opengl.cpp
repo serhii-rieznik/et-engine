@@ -90,7 +90,7 @@ RenderContext::RenderContext(const RenderContextParameters& inParams, Applicatio
 		OpenGLCapabilities::instance().checkCaps();
 
 		_renderState.setRenderContext(this);
-		_programFactory = ProgramFactory::Pointer::create(this);
+		_materialFactory = MaterialFactory::Pointer::create(this);
 		_textureFactory = TextureFactory::Pointer::create(this);
 		_framebufferFactory = FramebufferFactory::Pointer::create(this);
 		_vertexBufferFactory = VertexBufferFactory::Pointer::create(this);
@@ -114,7 +114,8 @@ RenderContext::~RenderContext()
 	_vertexBufferFactory.reset(nullptr);
 	_framebufferFactory.reset(nullptr);
 	_textureFactory.reset(nullptr);
-	_programFactory.reset(nullptr);
+	_materialFactory.reset(nullptr);
+	_renderState.setDefaultFramebuffer(Framebuffer::Pointer());
 
 	if (application().parameters().shouldPreserveRenderContext)
 		popRenderingContext();
@@ -697,7 +698,7 @@ LRESULT CALLBACK mainWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	if (handler == nullptr)
 		return DefWindowProcW(hWnd, uMsg, wParam, lParam);
 
-	vec2 viewportSize = handler->renderContext()->size();
+	vec2 viewportSize = vector2ToFloat(handler->renderContext()->size());
 
 	switch (uMsg)
 	{ 

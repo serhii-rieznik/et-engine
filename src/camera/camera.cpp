@@ -141,6 +141,7 @@ void Camera::setSide(const vec3& s)
 	_viewMatrix[1] = vec4(s.y, u.y, -d.y, 0.0f);
 	_viewMatrix[2] = vec4(s.z, u.z, -d.z, 0.0f);
 	_viewMatrix[3] = vec4(e.x, e.y,  e.z, 1.0f);
+
 	viewUpdated();
 }
 
@@ -208,6 +209,8 @@ ray3d Camera::castRay(const vec2& pt) const
 
 void Camera::viewUpdated()
 {
+	_inverseViewMatrix = _viewMatrix.inverse();
+
 	if (_lockUpVector)
 	{
 		vec3 p = position();
@@ -219,9 +222,9 @@ void Camera::viewUpdated()
 		_viewMatrix[1] = vec4(s.y, u.y, -d.y, 0.0f);
 		_viewMatrix[2] = vec4(s.z, u.z, -d.z, 0.0f);
 		_viewMatrix[3] = vec4(e.x, e.y,  e.z, 1.0f);
+		_inverseViewMatrix = _viewMatrix.inverse();
 	}
 	
-	_inverseViewMatrix = _viewMatrix.inverse();
 	updateViewProjectionMatrix();
 }
 

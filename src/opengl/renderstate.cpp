@@ -44,6 +44,7 @@ void RenderState::setMainViewportSize(const vec2i& sz, bool force)
 	if (!force && (sz.x == _mainViewport.width) && (sz.y == _mainViewport.height)) return;
 
 	_mainViewport.setSize(sz);
+	_defaultFramebuffer->forceSize(sz);
 
 	bool shouldSetViewport = (_desc.cache.boundFramebuffer == 0) ||
 		(_defaultFramebuffer.valid() && (_desc.cache.boundFramebuffer == _defaultFramebuffer->apiHandle()));
@@ -354,7 +355,7 @@ void RenderState::setDepthState(const DepthState& state, bool force)
 
 void RenderState::setBlendConfiguration(et::BlendConfiguration blend, bool force)
 {
-	ET_ASSERT(static_cast<uint32_t>(blend) < BlendConfiguration_max);
+	ET_ASSERT(blend < BlendConfiguration::max);
 	setBlendState(blendConfigurationToBlendState(blend), force);
 }
 
@@ -435,12 +436,12 @@ void RenderState::setVertexAttribPointer(const VertexElement& e, uint32_t baseIn
 	if (e.dataFormat() == DataFormat::Int)
 	{
 		glVertexAttribIPointer(GLuint(e.usage()), static_cast<GLint>(e.components()), dataFormatValue(e.dataFormat()),
-			e.stride(), reinterpret_cast<GLvoid*>(e.offset() + baseIndex));
+			e.stride(), reinterpret_cast<GLvoid*>(uintptr_t(e.offset() + baseIndex)));
 	}
 	else if (e.dataFormat() == DataFormat::Float)
 	{
 		glVertexAttribPointer(GLuint(e.usage()), static_cast<GLint>(e.components()), dataFormatValue(e.dataFormat()),
-			false, e.stride(), reinterpret_cast<GLvoid*>(e.offset() + baseIndex));
+			false, e.stride(), reinterpret_cast<GLvoid*>(uintptr_t(e.offset() + baseIndex)));
 	}
 	else
 	{

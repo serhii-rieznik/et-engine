@@ -369,13 +369,13 @@ namespace et
 		};
 		
 		BlendState() = default;
-		BlendState(uint32_t e) :
+		BlendState(bool e) :
 			blendEnabled(e) { }
-		BlendState(uint32_t e, const Blend& b) :
+		BlendState(bool e, const Blend& b) :
 			blendEnabled(e), color(b), alpha(b) { }
-		BlendState(uint32_t e, const Blend& cb, const Blend& ab) :
+		BlendState(bool e, const Blend& cb, const Blend& ab) :
 			blendEnabled(e), color(cb), alpha(ab) { }
-		BlendState(uint32_t e, BlendFunction s, BlendFunction d) :
+		BlendState(bool e, BlendFunction s, BlendFunction d) :
 			blendEnabled(e), color(s, d), alpha(s, d) { }
 		
 		uint32_t sortingKey() const
@@ -407,7 +407,7 @@ namespace et
 		CullMode cullMode = CullMode::Back;
 		vec4 clearColor = vec4(0.0f);
 		uint32_t colorMask = ColorMask::ColorAndAlpha;
-		recti scissorRectangle = recti(0.0f, 0.0f, 0.0f, 0.0f);
+		recti scissorRectangle = recti(0, 0, 0, 0);
 		float depthBias = 0.0f;
 		float depthSlopeScale = 0.0f;
 		bool depthBiasEnabled = false;

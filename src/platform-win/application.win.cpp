@@ -87,7 +87,7 @@ int Application::platformRun(int, char*[])
 	{
 		_renderingContextHandle = _renderContext->renderingContextHandle();
 		enterRunLoop();
-		_delegate->applicationWillResizeContext(_renderContext->sizei());
+		_delegate->applicationWillResizeContext(_renderContext->size());
 
 		MSG msg = { };
 		while (_running)

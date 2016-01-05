@@ -768,7 +768,7 @@ s3d::Mesh::Pointer FBXLoaderPrivate::loadMesh(s3d::Storage& storage, FbxMesh* me
 	uint32_t vertexCount = 0;
 	uint32_t indexOffset = static_cast<uint32_t>(vertexBaseOffset);
 	
-	std::map<size_t, std::vector<size_t>> controlPointToMeshIndex;
+	std::map<size_t, std::vector<uint32_t>> controlPointToMeshIndex;
 
 #define PUSH_VERTEX FbxVector4 v = lControlPoints[lControlPointIndex]; \
 		controlPointToMeshIndex[lControlPointIndex].push_back(vertexCount); \
@@ -942,7 +942,7 @@ s3d::Mesh::Pointer FBXLoaderPrivate::loadMesh(s3d::Storage& storage, FbxMesh* me
 				if (controlPointToMeshIndex.count(index) > 0)
 				{
 					const auto& convertedIndices = controlPointToMeshIndex.at(index);
-					for (size_t ci : convertedIndices)
+					for (uint32_t ci : convertedIndices)
 						cluster->weights().emplace_back(ci, weight);
 				}
 			}
