@@ -439,7 +439,7 @@ namespace et
 	DataFormat stringToDataFormat(const std::string&);
 
 	std::string vertexAttributeUsageToString(VertexAttributeUsage);
-	std::string DataTypeToString(DataType);
+	std::string dataTypeToString(DataType);
 	std::string dataFormatToString(DataFormat);
 
 	std::string primitiveTypeToString(PrimitiveType);

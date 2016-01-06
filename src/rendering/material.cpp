@@ -19,9 +19,19 @@ namespace
 }
 
 Material::Material(MaterialFactory* mf) :
-	_factory(mf)
+	_factory(mf), _propertiesData(2 * sizeof(mat4), 0)
 {
+	_setFloatFunctions[uint32_t(DataType::Float)] = &Program::setFloatUniform;
+	_setFloatFunctions[uint32_t(DataType::Vec2)] = &Program::setFloat2Uniform;
+	_setFloatFunctions[uint32_t(DataType::Vec3)] = &Program::setFloat3Uniform;
+	_setFloatFunctions[uint32_t(DataType::Vec4)] = &Program::setFloat4Uniform;
+	_setFloatFunctions[uint32_t(DataType::Mat3)] = &Program::setMatrix3Uniform;
+	_setFloatFunctions[uint32_t(DataType::Mat4)] = &Program::setMatrix4Uniform;
 	
+	_setIntFunctions[uint32_t(DataType::Int)] = &Program::setIntUniform;
+	_setIntFunctions[uint32_t(DataType::IntVec2)] = &Program::setInt2Uniform;
+	_setIntFunctions[uint32_t(DataType::IntVec3)] = &Program::setInt3Uniform;
+	_setIntFunctions[uint32_t(DataType::IntVec4)] = &Program::setInt4Uniform;
 }
 
 void Material::loadFromJson(const std::string& jsonString, const std::string& baseFolder, ObjectsCache& cache)
@@ -81,14 +91,75 @@ void Material::enableInRenderState(RenderState& rs)
 	rs.setCulling(_cullMode);
 	rs.setBlendState(_blend);
 	rs.setDepthState(_depth);
-	
 	rs.bindProgram(_program);
+	
+	for (auto& i : _properties)
+	{
+		if (i.second.requireUpdate)
+		{
+			auto& prop = i.second;
+			auto format = dataTypeDataFormat(prop.type);
+			auto ptr = _propertiesData.element_ptr(prop.offset);
+			
+			auto programPtr = _program.ptr();
+			if (format == DataFormat::Int)
+			{
+				auto& fn = _setIntFunctions[uint32_t(prop.type)];
+				(programPtr->*fn)(prop.locationInProgram, reinterpret_cast<const int*>(ptr), 1);
+			}
+			else
+			{
+				auto& fn = _setFloatFunctions[uint32_t(prop.type)];
+				(programPtr->*fn)(prop.locationInProgram, reinterpret_cast<const float*>(ptr), 1);
+			}
+			
+			prop.requireUpdate = false;
+		}
+	}
 }
 
 void Material::loadProperties()
 {
 	for (const auto& u : _program->uniforms())
 	{
-		log::info("%s -> %d", u.first.c_str(), u.second.location);
+		if (!_program->isBuiltInUniformName(u.first))
+		{
+			addProperty(u.first, _program->uniformTypeToDataType(u.second.type), u.second.location);
+		}
 	}
 }
+
+void Material::addProperty(const std::string& name, DataType type, int32_t location)
+{
+	uint32_t requiredSpace = dataTypeSize(type);
+	uint32_t currentSize = _propertiesData.lastElementIndex();
+	if (currentSize + requiredSpace > _propertiesData.size())
+	{
+		_propertiesData.resize(std::max(2 * _propertiesData.size(), size_t(currentSize + requiredSpace)));
+	}
+	_properties.emplace(name, Property(type, location, currentSize, requiredSpace));
+	_propertiesData.applyOffset(requiredSpace);
+}
+
+void Material::updateProperty(Property& prop, const void* src)
+{
+	auto dst = _propertiesData.element_ptr(prop.offset);
+	memcpy(dst, src, prop.length);
+	prop.requireUpdate = true;
+}
+
+#define ET_SET_PROPERTY_IMPL(TYPE) 	{ auto i = _properties.find(name); \
+									if ((i != _properties.end()) && (i->second.type == DataType::TYPE)) { \
+										updateProperty(i->second, &value); \
+									}}
+
+void Material::setProperty(const std::string& name, const float value) ET_SET_PROPERTY_IMPL(Float)
+void Material::setProperty(const std::string& name, const vec2& value) ET_SET_PROPERTY_IMPL(Vec2)
+void Material::setProperty(const std::string& name, const vec3& value) ET_SET_PROPERTY_IMPL(Vec3)
+void Material::setProperty(const std::string& name, const vec4& value) ET_SET_PROPERTY_IMPL(Vec4)
+void Material::setProperty(const std::string& name, const int value) ET_SET_PROPERTY_IMPL(Int)
+void Material::setProperty(const std::string& name, const vec2i& value) ET_SET_PROPERTY_IMPL(IntVec2)
+void Material::setProperty(const std::string& name, const vec3i& value) ET_SET_PROPERTY_IMPL(IntVec3)
+void Material::setProperty(const std::string& name, const vec4i& value) ET_SET_PROPERTY_IMPL(IntVec4)
+void Material::setProperty(const std::string& name, const mat3& value) ET_SET_PROPERTY_IMPL(Mat3)
+void Material::setProperty(const std::string& name, const mat4& value) ET_SET_PROPERTY_IMPL(Mat4)

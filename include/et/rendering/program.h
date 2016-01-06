@@ -80,6 +80,9 @@ namespace et
 		void setTransformMatrix(const mat4 &m, bool force = false);
 
 		void setCameraProperties(const Camera& cam);
+		
+		bool isBuiltInUniformName(const std::string&);
+		DataType uniformTypeToDataType(uint32_t);
 
 		const Program::UniformMap& uniforms() const 
 			{ return _uniforms; }
@@ -111,6 +114,17 @@ namespace et
 
 		void setUniformDirectly(int, uint32_t, const vec4&);
 		void setUniformDirectly(int, uint32_t, const mat4& value);
+		
+		void setIntUniform(int location, const int* data, uint32_t amount);
+		void setInt2Uniform(int location, const int* data, uint32_t amount);
+		void setInt3Uniform(int location, const int* data, uint32_t amount);
+		void setInt4Uniform(int location, const int* data, uint32_t amount);
+		void setFloatUniform(int location, const float* data, uint32_t amount);
+		void setFloat2Uniform(int location, const float* data, uint32_t amount);
+		void setFloat3Uniform(int location, const float* data, uint32_t amount);
+		void setFloat4Uniform(int location, const float* data, uint32_t amount);
+		void setMatrix3Uniform(int location, const float* data, uint32_t amount);
+		void setMatrix4Uniform(int location, const float* data, uint32_t amount);
 		
 		template <typename T>
 		void setUniform(const std::string& name, const T& value, bool force = false)
@@ -145,13 +159,14 @@ namespace et
 		
 		const StringList& defines() const
 			{ return _defines; }
-
+		
 	private:
 		Program::UniformMap::const_iterator findUniform(const std::string& name) const;
 		
 		int link(bool);
 		void printShaderLog(uint32_t, size_t, const char*);
 		void printShaderSource(uint32_t, size_t, const char*);
+		void initBuiltInUniforms();
 
 	private:
 		RenderContext* _rc = nullptr;
@@ -175,6 +190,7 @@ namespace et
 		int _matLightViewProjectionLocation = -1;
 		int _matWorldLocation = -1;
 
+		std::unordered_map<std::string, int*> _builtInUniforms;
 		StringList _defines;
 	};
 }

@@ -55,24 +55,26 @@ DataType et::openglTypeToDataType(uint32_t value)
 	{
 		case GL_FLOAT:
 			return DataType::Float;
-			
 		case GL_FLOAT_VEC2:
 			return DataType::Vec2;
-			
 		case GL_FLOAT_VEC3:
 			return DataType::Vec3;
-			
 		case GL_FLOAT_VEC4:
 			return DataType::Vec4;
 			
 		case GL_FLOAT_MAT3:
 			return DataType::Mat3;
-			
 		case GL_FLOAT_MAT4:
 			return DataType::Mat4;
 			
 		case GL_INT:
 			return DataType::Int;
+		case GL_INT_VEC2:
+			return DataType::IntVec2;
+		case GL_INT_VEC3:
+			return DataType::IntVec3;
+		case GL_INT_VEC4:
+			return DataType::IntVec4;
 			
 		default:
 			ET_FAIL_FMT("Unsupported OpenGL type %u (0x%X)", value, value);
@@ -85,7 +87,7 @@ DataType et::openglTypeToDataType(uint32_t value)
 										return valuesMap[intValue]; \
 									}
 
-uint32_t et::DataTypeValue(DataType value)
+uint32_t et::dataTypeValue(DataType value)
 {
 	ET_ASSERT(value < DataType::max);
 	

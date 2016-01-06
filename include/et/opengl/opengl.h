@@ -154,7 +154,7 @@ namespace et
 	void validateExtensions();
 
 	DataType openglTypeToDataType(uint32_t);
-	uint32_t DataTypeValue(DataType);
+	uint32_t dataTypeValue(DataType);
 	
 	uint32_t textureTargetValue(TextureTarget);
 	uint32_t textureFormatValue(TextureFormat);

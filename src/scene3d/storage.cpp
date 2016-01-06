@@ -103,7 +103,7 @@ Dictionary Storage::serialize(const std::string& basePath)
 		{
 			Dictionary declDictionary;
 			declDictionary.setStringForKey(kUsage, vertexAttributeUsageToString(e.usage()));
-			declDictionary.setStringForKey(kType, DataTypeToString(e.type()));
+			declDictionary.setStringForKey(kType, dataTypeToString(e.type()));
 			declDictionary.setStringForKey(kDataType, dataFormatToString(e.dataFormat()));
 			declDictionary.setIntegerForKey(kStride, e.stride());
 			declDictionary.setIntegerForKey(kOffset, e.offset());

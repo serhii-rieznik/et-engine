@@ -96,18 +96,17 @@ RenderContext::RenderContext(const RenderContextParameters& inParams, Applicatio
 	
 	OpenGLCapabilities::instance().checkCaps();
 	
-	_renderState.setRenderContext(this);
-	_renderState.setMainViewportSize(_renderState.viewportSize());
-	
 	updateScreenScale(_renderState.viewportSize());
 	
 	_textureFactory = TextureFactory::Pointer::create(this);
 	_framebufferFactory = FramebufferFactory::Pointer::create(this);
 	_materialFactory = MaterialFactory::Pointer::create(this);
 	_vertexBufferFactory = VertexBufferFactory::Pointer::create(this);
-
-	_renderState.setDefaultFramebuffer(_framebufferFactory->createFramebufferWrapper(0));
 	_renderer = Renderer::Pointer::create(this);
+
+	_renderState.setRenderContext(this);
+	_renderState.setDefaultFramebuffer(_framebufferFactory->createFramebufferWrapper(0));
+	_renderState.setMainViewportSize(_renderState.viewportSize());
 	
 	ET_CONNECT_EVENT(_fpsTimer.expired, RenderContext::onFPSTimerExpired)
 }

@@ -18,13 +18,14 @@ static const std::string etNoShader = "none";
 Program::Program(RenderContext* rc) :
 	_rc(rc)
 {
-	
+	initBuiltInUniforms();
 }
 
 Program::Program(RenderContext* rc, const std::string& vertexShader, const std::string& geometryShader,
 	const std::string& fragmentShader, const std::string& objName, const std::string& origin,
 	const StringList& defines) : APIObject(objName, origin), _rc(rc), _defines(defines)
 {
+	initBuiltInUniforms();
 	buildProgram(vertexShader, geometryShader, fragmentShader);
 }
 
@@ -40,6 +41,16 @@ Program::~Program()
 			checkOpenGLError("glDeleteProgram: %s", name().c_str());
 		}
 	}
+}
+
+void Program::initBuiltInUniforms()
+{
+	_builtInUniforms["matWorld"] = &_matWorldLocation;
+	_builtInUniforms["matView"] = &_matViewLocation;
+	_builtInUniforms["matViewProjection"] = &_matViewProjectionLocation;
+	_builtInUniforms["matLightViewProjection"] = &_matLightViewProjectionLocation;
+	_builtInUniforms["vCamera"] = &_vCameraLocation;
+	_builtInUniforms["vPrimaryLight"] = &_vPrimaryLightLocation;
 }
 
 Program::UniformMap::const_iterator Program::findUniform(const std::string& name) const
@@ -326,25 +337,15 @@ void Program::buildProgram(const std::string& vertex_source, const std::string& 
 				Program::Uniform P;
 				glGetActiveUniform(program, i, maxNameLength, &uLenght, &uSize, &P.type, uniformName.binary());
 				P.location = glGetUniformLocation(program, uniformName.binary());
-				_uniforms[uniformName.binary()] = P;
-
-				if (strcmp(uniformName.binary(), "matWorld") == 0)
-					_matWorldLocation = P.location;
 				
-				if (strcmp(uniformName.binary(), "matView") == 0)
-					_matViewLocation = P.location;
+				std::string uniformNameString(uniformName.binary());
+				_uniforms.emplace(uniformNameString, P);
 
-				if (strcmp(uniformName.binary(), "matViewProjection") == 0)
-					_matViewProjectionLocation = P.location;
-				
-				if (strcmp(uniformName.binary(), "matLightViewProjection") == 0)
-					_matLightViewProjectionLocation = P.location;
-				
-				if (strcmp(uniformName.binary(), "vCamera") == 0)
-					_vCameraLocation = P.location;
-
-				if (strcmp(uniformName.binary(), "vPrimaryLight") == 0)
-					_vPrimaryLightLocation = P.location;
+				auto builtIn = _builtInUniforms.find(uniformNameString);
+				if (builtIn != _builtInUniforms.end())
+				{
+					*(builtIn->second) = P.location;
+				}
 			}
 		}
 	}
@@ -453,8 +454,6 @@ bool isSamplerUniform(uint32_t);
 
 void Program::setUniform(int nLoc, uint32_t type, int32_t value, bool)
 {
-	if (nLoc == -1) return;
-	
 	(void)type;
 	ET_ASSERT((type == GL_INT) || isSamplerUniform(type));
 	ET_ASSERT(apiHandleValid());
@@ -465,8 +464,6 @@ void Program::setUniform(int nLoc, uint32_t type, int32_t value, bool)
 
 void Program::setUniform(int nLoc, uint32_t type, uint32_t value, bool)
 {
-	if (nLoc == -1) return;
-	
 	(void)type;
 	ET_ASSERT((type == GL_INT) || isSamplerUniform(type));
 	ET_ASSERT(apiHandleValid());
@@ -477,8 +474,6 @@ void Program::setUniform(int nLoc, uint32_t type, uint32_t value, bool)
 
 void Program::setUniform(int nLoc, uint32_t type, int64_t value, bool)
 {
-	if (nLoc == -1) return;
-	
 	(void)type;
 	ET_ASSERT((type == GL_INT) || isSamplerUniform(type));
 	ET_ASSERT(apiHandleValid());
@@ -489,8 +484,6 @@ void Program::setUniform(int nLoc, uint32_t type, int64_t value, bool)
 
 void Program::setUniform(int nLoc, uint32_t type, uint64_t value, bool)
 {
-	if (nLoc == -1) return;
-
 	(void)type;
 	ET_ASSERT((type == GL_INT) || isSamplerUniform(type));
 	ET_ASSERT(apiHandleValid());
@@ -501,8 +494,6 @@ void Program::setUniform(int nLoc, uint32_t type, uint64_t value, bool)
 
 void Program::setUniform(int nLoc, uint32_t type, const unsigned long value, bool)
 {
-	if (nLoc == -1) return;
-	
 	(void)type;
 	ET_ASSERT((type == GL_INT) || isSamplerUniform(type));
 	ET_ASSERT(apiHandleValid());
@@ -513,8 +504,6 @@ void Program::setUniform(int nLoc, uint32_t type, const unsigned long value, boo
 
 void Program::setUniform(int nLoc, uint32_t type, const float value, bool forced)
 {
-	if (nLoc == -1) return;
-	
 	(void)type;
 	ET_ASSERT(type == GL_FLOAT);
 	ET_ASSERT(apiHandleValid());
@@ -529,8 +518,6 @@ void Program::setUniform(int nLoc, uint32_t type, const float value, bool forced
 
 void Program::setUniform(int nLoc, uint32_t type, const vec2& value, bool forced)
 {
-	if (nLoc == -1) return;
-	
 	(void)type;
 	ET_ASSERT(type == GL_FLOAT_VEC2);
 	ET_ASSERT(apiHandleValid());
@@ -545,8 +532,6 @@ void Program::setUniform(int nLoc, uint32_t type, const vec2& value, bool forced
 
 void Program::setUniform(int nLoc, uint32_t type, const vec3& value, bool forced)
 {
-	if (nLoc == -1) return;
-	
 	(void)type;
 	ET_ASSERT(type == GL_FLOAT_VEC3);
 	ET_ASSERT(apiHandleValid());
@@ -561,8 +546,6 @@ void Program::setUniform(int nLoc, uint32_t type, const vec3& value, bool forced
 
 void Program::setUniform(int nLoc, uint32_t type, const vec4& value, bool forced)
 {
-	if (nLoc == -1) return;
-	
 	(void)type;
 	ET_ASSERT(type == GL_FLOAT_VEC4);
 	ET_ASSERT(apiHandleValid());
@@ -577,8 +560,6 @@ void Program::setUniform(int nLoc, uint32_t type, const vec4& value, bool forced
 
 void Program::setUniform(int nLoc, uint32_t type, const vec2i& value, bool forced)
 {
-	if (nLoc == -1) return;
-
 	(void)type;
 	ET_ASSERT(type == GL_INT_VEC2);
 	ET_ASSERT(apiHandleValid());
@@ -593,8 +574,6 @@ void Program::setUniform(int nLoc, uint32_t type, const vec2i& value, bool force
 
 void Program::setUniform(int nLoc, uint32_t type, const vec3i& value, bool forced)
 {
-	if (nLoc == -1) return;
-
 	(void)type;
 	ET_ASSERT(type == GL_INT_VEC3);
 	ET_ASSERT(apiHandleValid());
@@ -609,8 +588,6 @@ void Program::setUniform(int nLoc, uint32_t type, const vec3i& value, bool force
 
 void Program::setUniform(int nLoc, uint32_t type, const vec4i& value, bool forced)
 {
-	if (nLoc == -1) return;
-
 	(void)type;
 	ET_ASSERT(type == GL_INT_VEC4);
 	ET_ASSERT(apiHandleValid());
@@ -625,8 +602,6 @@ void Program::setUniform(int nLoc, uint32_t type, const vec4i& value, bool force
 
 void Program::setUniformDirectly(int nLoc, uint32_t type, const vec4& value)
 {
-	if (nLoc == -1) return;
-	
 	(void)type;
 	ET_ASSERT(type == GL_FLOAT_VEC4);
 	ET_ASSERT(apiHandleValid());
@@ -637,8 +612,6 @@ void Program::setUniformDirectly(int nLoc, uint32_t type, const vec4& value)
 
 void Program::setUniform(int nLoc, uint32_t type, const mat3& value, bool forced)
 {
-	if (nLoc == -1) return;
-	
 	(void)type;
 	ET_ASSERT(type == GL_FLOAT_MAT3);
 	ET_ASSERT(apiHandleValid());
@@ -653,8 +626,6 @@ void Program::setUniform(int nLoc, uint32_t type, const mat3& value, bool forced
 
 void Program::setUniform(int nLoc, uint32_t type, const mat4& value, bool forced)
 {
-	if (nLoc == -1) return;
-	
 	(void)type;
 	ET_ASSERT(type == GL_FLOAT_MAT4);
 	ET_ASSERT(apiHandleValid());
@@ -669,8 +640,6 @@ void Program::setUniform(int nLoc, uint32_t type, const mat4& value, bool forced
 
 void Program::setUniformDirectly(int nLoc, uint32_t type, const mat4& value)
 {
-	if (nLoc == -1) return;
-	
 	(void)type;
 	ET_ASSERT(type == GL_FLOAT_MAT4);
 	ET_ASSERT(apiHandleValid());
@@ -681,10 +650,7 @@ void Program::setUniformDirectly(int nLoc, uint32_t type, const mat4& value)
 
 void Program::setUniform(int nLoc, uint32_t type, const int* value, size_t amount)
 {
-	if (nLoc == -1) return;
-
 	(void)type;
-	ET_ASSERT(type == GL_INT);
 	ET_ASSERT(apiHandleValid());
 
 	glUniform1iv(nLoc, static_cast<GLsizei>(amount), value);
@@ -693,10 +659,6 @@ void Program::setUniform(int nLoc, uint32_t type, const int* value, size_t amoun
 
 void Program::setUniform(int nLoc, uint32_t type, const float* value, size_t amount)
 {
-	if (nLoc == -1) return;
-
-	(void)type;
-	ET_ASSERT(type == GL_FLOAT);
 	ET_ASSERT(apiHandleValid());
 
 	glUniform1fv(nLoc, static_cast<GLsizei>(amount), value);
@@ -705,8 +667,6 @@ void Program::setUniform(int nLoc, uint32_t type, const float* value, size_t amo
 
 void Program::setUniform(int nLoc, uint32_t type, const vec2* value, size_t amount)
 {
-	if (nLoc == -1) return;
-	
 	(void)type;
 	ET_ASSERT(type == GL_FLOAT_VEC2);
 	ET_ASSERT(apiHandleValid());
@@ -717,8 +677,6 @@ void Program::setUniform(int nLoc, uint32_t type, const vec2* value, size_t amou
 
 void Program::setUniform(int nLoc, uint32_t type, const vec3* value, size_t amount)
 {
-	if (nLoc == -1) return;
-	
 	(void)type;
 	ET_ASSERT(type == GL_FLOAT_VEC3);
 	ET_ASSERT(apiHandleValid());
@@ -729,8 +687,6 @@ void Program::setUniform(int nLoc, uint32_t type, const vec3* value, size_t amou
 
 void Program::setUniform(int nLoc, uint32_t type, const vec4* value, size_t amount)
 {
-	if (nLoc == -1) return;
-	
 	(void)type;
 	ET_ASSERT(type == GL_FLOAT_VEC4);
 	ET_ASSERT(apiHandleValid());
@@ -741,14 +697,95 @@ void Program::setUniform(int nLoc, uint32_t type, const vec4* value, size_t amou
 
 void Program::setUniform(int nLoc, uint32_t type, const mat4* value, size_t amount)
 {
-	if (nLoc == -1) return;
-	
 	(void)type;
 	ET_ASSERT(type == GL_FLOAT_MAT4);
 	ET_ASSERT(apiHandleValid());
 	
 	glUniformMatrix4fv(nLoc, static_cast<GLsizei>(amount), 0, value->data());
 	checkOpenGLError("glUniformMatrix4fv");
+}
+
+void Program::setIntUniform(int location, const int* data, uint32_t amount)
+{
+	ET_ASSERT(apiHandleValid());
+	glUniform1iv(location, amount, data);
+	checkOpenGLError("glUniform1iv");
+}
+
+void Program::setInt2Uniform(int location, const int* data, uint32_t amount)
+{
+	ET_ASSERT(apiHandleValid());
+	glUniform2iv(location, amount, data);
+	checkOpenGLError("glUniform1iv");
+}
+
+void Program::setInt3Uniform(int location, const int* data, uint32_t amount)
+{
+	ET_ASSERT(apiHandleValid());
+	glUniform3iv(location, amount, data);
+	checkOpenGLError("glUniform1iv");
+}
+
+void Program::setInt4Uniform(int location, const int* data, uint32_t amount)
+{
+	ET_ASSERT(apiHandleValid());
+	glUniform4iv(location, amount, data);
+	checkOpenGLError("glUniform1iv");
+}
+
+void Program::setFloatUniform(int location, const float* data, uint32_t amount)
+{
+	ET_ASSERT(apiHandleValid());
+	glUniform1fv(location, amount, data);
+	checkOpenGLError("glUniform1fv");
+}
+
+void Program::setFloat2Uniform(int location, const float* data, uint32_t amount)
+{
+	ET_ASSERT(apiHandleValid());
+	glUniform2fv(location, amount, data);
+	checkOpenGLError("glUniform1fv");
+}
+
+void Program::setFloat3Uniform(int location, const float* data, uint32_t amount)
+{
+	ET_ASSERT(apiHandleValid());
+	glUniform3fv(location, amount, data);
+	checkOpenGLError("glUniform1fv");
+}
+
+void Program::setFloat4Uniform(int location, const float* data, uint32_t amount)
+{
+	ET_ASSERT(apiHandleValid());
+	glUniform4fv(location, amount, data);
+	checkOpenGLError("glUniform1fv");
+}
+
+void Program::setMatrix3Uniform(int location, const float* data, uint32_t amount)
+{
+	ET_ASSERT(apiHandleValid());
+	glUniformMatrix3fv(location, amount, false, data);
+	checkOpenGLError("glUniformMatrix3fv");
+}
+
+void Program::setMatrix4Uniform(int location, const float* data, uint32_t amount)
+{
+	ET_ASSERT(apiHandleValid());
+	glUniformMatrix4fv(location, amount, false, data);
+	checkOpenGLError("glUniformMatrix4fv");
+}
+
+bool Program::isBuiltInUniformName(const std::string& name)
+{
+	return _builtInUniforms.count(name) > 0;
+}
+
+DataType Program::uniformTypeToDataType(uint32_t t)
+{
+	if (isSamplerUniform(t))
+		return DataType::Int;
+	
+	return openglTypeToDataType(t);
 }
 
 /*

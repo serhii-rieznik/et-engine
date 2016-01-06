@@ -139,7 +139,7 @@ std::string et::vertexAttributeUsageToString(VertexAttributeUsage va)
 	intToStr(static_cast<uint32_t>(va));
 }
 
-std::string et::DataTypeToString(DataType vat)
+std::string et::dataTypeToString(DataType vat)
 {
 	return (vat < DataType::max) ? dataTypeNames[static_cast<uint32_t>(vat)] :
 	intToStr(static_cast<uint32_t>(vat));
