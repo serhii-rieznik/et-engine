@@ -9,6 +9,7 @@
 
 #include <et/core/datastorage.h>
 #include <et/rendering/program.h>
+#include <et/rendering/texture.h>
 
 namespace et
 {
@@ -51,9 +52,11 @@ namespace et
 		void setProperty(const std::string& name, const vec4i& value);
 		void setProperty(const std::string& name, const mat3& value);
 		void setProperty(const std::string& name, const mat4& value);
+		
+		void setTexutre(const std::string& name, const Texture::Pointer&);
 
 	private:
-		struct Property
+		struct DataProperty
 		{
 			DataType type = DataType::max;
 			int32_t locationInProgram = -1;
@@ -61,21 +64,33 @@ namespace et
 			uint32_t length = 0;
 			bool requireUpdate = true;
 			
-			Property(DataType dt, int32_t loc, uint32_t o, uint32_t len) :
+			DataProperty(DataType dt, int32_t loc, uint32_t o, uint32_t len) :
 				type(dt), locationInProgram(loc), offset(o), length(len) { }
 		};
+		
+		struct TextureProperty
+		{
+			int32_t locationInProgram = -1;
+			uint32_t unit = 0;
+			Texture::Pointer texture;
+			TextureProperty(int32_t loc, uint32_t u) :
+				locationInProgram(loc), unit(u) { }
+		};
+		
 		using ProgramSetIntFunction = void (Program::*)(int, const int*, uint32_t);
 		using ProgramSetFloatFunction = void (Program::*)(int, const float*, uint32_t);
 		
 		void loadProperties();
-		void addProperty(const std::string&, DataType, int32_t);
-		void updateProperty(Property&, const void*);
+		void addDataProperty(const std::string&, DataType, int32_t location);
+		void addTexture(const std::string&, int32_t location, uint32_t unit);
+		void updateDataProperty(DataProperty&, const void*);
 		
 	public:
 		MaterialFactory* _factory = nullptr;
 		
 		BinaryDataStorage _propertiesData;
-		std::unordered_map<std::string, Property> _properties;
+		std::unordered_map<std::string, DataProperty> _properties;
+		std::unordered_map<std::string, TextureProperty> _textures;
 		
 		Program::Pointer _program;
 		DepthState _depth;

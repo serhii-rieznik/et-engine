@@ -74,7 +74,6 @@ void Material::loadFromJson(const std::string& jsonString, const std::string& ba
 		}
 	}
 	
-	_program = _factory->genProgram(name, loadTextFile(vertexSource), loadTextFile(fragmentSource), defines, baseFolder);
 	_blend = deserializeBlendState(obj.dictionaryForKey(kBlendState));
 	_depth = deserializeDepthState(obj.dictionaryForKey(kDepthState));
 	
@@ -83,6 +82,9 @@ void Material::loadFromJson(const std::string& jsonString, const std::string& ba
 		log::warning("Invalid or unsupported cull mode in material: %s", cullMode.c_str());
 	}
 	
+	_program = _factory->genProgram(name, loadTextFile(vertexSource), loadTextFile(fragmentSource), defines, baseFolder);
+	_program->addOrigin(vertexSource);
+	_program->addOrigin(fragmentSource);
 	loadProperties();
 }
 
@@ -91,8 +93,13 @@ void Material::enableInRenderState(RenderState& rs)
 	rs.setCulling(_cullMode);
 	rs.setBlendState(_blend);
 	rs.setDepthState(_depth);
-	rs.bindProgram(_program);
+
+	for (auto& i : _textures)
+	{
+		rs.bindTexture(i.second.unit, i.second.texture);
+	}
 	
+	rs.bindProgram(_program);
 	for (auto& i : _properties)
 	{
 		if (i.second.requireUpdate)
@@ -100,7 +107,6 @@ void Material::enableInRenderState(RenderState& rs)
 			auto& prop = i.second;
 			auto format = dataTypeDataFormat(prop.type);
 			auto ptr = _propertiesData.element_ptr(prop.offset);
-			
 			auto programPtr = _program.ptr();
 			if (format == DataFormat::Int)
 			{
@@ -120,16 +126,28 @@ void Material::enableInRenderState(RenderState& rs)
 
 void Material::loadProperties()
 {
+	uint32_t textureUnitCounter = 0;
 	for (const auto& u : _program->uniforms())
 	{
-		if (!_program->isBuiltInUniformName(u.first))
+		if (_program->isSamplerUniformType(u.second.type))
 		{
-			addProperty(u.first, _program->uniformTypeToDataType(u.second.type), u.second.location);
+			addTexture(u.first, u.second.location, textureUnitCounter);
+			_program->setUniform(u.second.location, u.second.type, textureUnitCounter);
+			++textureUnitCounter;
+		}
+		else if (!_program->isBuiltInUniformName(u.first))
+		{
+			addDataProperty(u.first, _program->uniformTypeToDataType(u.second.type), u.second.location);
 		}
 	}
 }
 
-void Material::addProperty(const std::string& name, DataType type, int32_t location)
+void Material::addTexture(const std::string& name, int32_t location, uint32_t unit)
+{
+	_textures.emplace(name, TextureProperty(location, unit));
+}
+
+void Material::addDataProperty(const std::string& name, DataType type, int32_t location)
 {
 	uint32_t requiredSpace = dataTypeSize(type);
 	uint32_t currentSize = _propertiesData.lastElementIndex();
@@ -137,11 +155,11 @@ void Material::addProperty(const std::string& name, DataType type, int32_t locat
 	{
 		_propertiesData.resize(std::max(2 * _propertiesData.size(), size_t(currentSize + requiredSpace)));
 	}
-	_properties.emplace(name, Property(type, location, currentSize, requiredSpace));
+	_properties.emplace(name, DataProperty(type, location, currentSize, requiredSpace));
 	_propertiesData.applyOffset(requiredSpace);
 }
 
-void Material::updateProperty(Property& prop, const void* src)
+void Material::updateDataProperty(DataProperty& prop, const void* src)
 {
 	auto dst = _propertiesData.element_ptr(prop.offset);
 	memcpy(dst, src, prop.length);
@@ -150,7 +168,7 @@ void Material::updateProperty(Property& prop, const void* src)
 
 #define ET_SET_PROPERTY_IMPL(TYPE) 	{ auto i = _properties.find(name); \
 									if ((i != _properties.end()) && (i->second.type == DataType::TYPE)) { \
-										updateProperty(i->second, &value); \
+										updateDataProperty(i->second, &value); \
 									}}
 
 void Material::setProperty(const std::string& name, const float value) ET_SET_PROPERTY_IMPL(Float)
@@ -163,3 +181,12 @@ void Material::setProperty(const std::string& name, const vec3i& value) ET_SET_P
 void Material::setProperty(const std::string& name, const vec4i& value) ET_SET_PROPERTY_IMPL(IntVec4)
 void Material::setProperty(const std::string& name, const mat3& value) ET_SET_PROPERTY_IMPL(Mat3)
 void Material::setProperty(const std::string& name, const mat4& value) ET_SET_PROPERTY_IMPL(Mat4)
+
+void Material::setTexutre(const std::string& name, const Texture::Pointer& tex)
+{
+	auto i = _textures.find(name);
+	if (i != _textures.end())
+	{
+		i->second.texture = tex;
+	}
+}

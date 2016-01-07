@@ -450,12 +450,10 @@ bool Program::validate() const
  * Uniform setters
  */
 
-bool isSamplerUniform(uint32_t);
-
 void Program::setUniform(int nLoc, uint32_t type, int32_t value, bool)
 {
 	(void)type;
-	ET_ASSERT((type == GL_INT) || isSamplerUniform(type));
+	ET_ASSERT((type == GL_INT) || isSamplerUniformType(type));
 	ET_ASSERT(apiHandleValid());
 	
 	glUniform1i(nLoc, value);
@@ -465,7 +463,7 @@ void Program::setUniform(int nLoc, uint32_t type, int32_t value, bool)
 void Program::setUniform(int nLoc, uint32_t type, uint32_t value, bool)
 {
 	(void)type;
-	ET_ASSERT((type == GL_INT) || isSamplerUniform(type));
+	ET_ASSERT((type == GL_INT) || isSamplerUniformType(type));
 	ET_ASSERT(apiHandleValid());
 	
 	glUniform1i(nLoc, static_cast<GLint>(value));
@@ -475,7 +473,7 @@ void Program::setUniform(int nLoc, uint32_t type, uint32_t value, bool)
 void Program::setUniform(int nLoc, uint32_t type, int64_t value, bool)
 {
 	(void)type;
-	ET_ASSERT((type == GL_INT) || isSamplerUniform(type));
+	ET_ASSERT((type == GL_INT) || isSamplerUniformType(type));
 	ET_ASSERT(apiHandleValid());
 	
 	glUniform1i(nLoc, static_cast<GLint>(value));
@@ -485,19 +483,9 @@ void Program::setUniform(int nLoc, uint32_t type, int64_t value, bool)
 void Program::setUniform(int nLoc, uint32_t type, uint64_t value, bool)
 {
 	(void)type;
-	ET_ASSERT((type == GL_INT) || isSamplerUniform(type));
+	ET_ASSERT((type == GL_INT) || isSamplerUniformType(type));
 	ET_ASSERT(apiHandleValid());
 
-	glUniform1i(nLoc, static_cast<GLint>(value));
-	checkOpenGLError("glUniform1i");
-}
-
-void Program::setUniform(int nLoc, uint32_t type, const unsigned long value, bool)
-{
-	(void)type;
-	ET_ASSERT((type == GL_INT) || isSamplerUniform(type));
-	ET_ASSERT(apiHandleValid());
-	
 	glUniform1i(nLoc, static_cast<GLint>(value));
 	checkOpenGLError("glUniform1i");
 }
@@ -780,38 +768,33 @@ bool Program::isBuiltInUniformName(const std::string& name)
 	return _builtInUniforms.count(name) > 0;
 }
 
+bool Program::isSamplerUniformType(uint32_t value)
+{
+	return
+#if defined(GL_SAMPLER_1D)
+	(value == GL_SAMPLER_1D) ||
+#endif
+	#if defined(GL_SAMPLER_3D)
+	(value == GL_SAMPLER_3D) ||
+#endif
+#if defined(GL_SAMPLER_2D_RECT)
+	(value == GL_SAMPLER_2D_RECT) ||
+	(value == GL_SAMPLER_2D_RECT_SHADOW) ||
+#endif
+#if defined(GL_SAMPLER_2D_ARRAY)
+	(value == GL_SAMPLER_2D_ARRAY) ||
+	(value == GL_SAMPLER_2D_ARRAY_SHADOW) ||
+#endif
+#if defined(GL_SAMPLER_2D_SHADOW)
+	(value == GL_SAMPLER_2D_SHADOW) ||
+#endif
+	(value == GL_SAMPLER_2D) || (value == GL_SAMPLER_CUBE);
+}
+
 DataType Program::uniformTypeToDataType(uint32_t t)
 {
-	if (isSamplerUniform(t))
+	if (isSamplerUniformType(t))
 		return DataType::Int;
 	
 	return openglTypeToDataType(t);
-}
-
-/*
- * Service stuff
- */
-bool isSamplerUniform(uint32_t value)
-{
-	return (value == GL_SAMPLER_2D) || (value == GL_SAMPLER_CUBE) || (value == GL_SAMPLER_2D_SHADOW) ||
-
-#	if defined(GL_SAMPLER_1D)
-		(value == GL_SAMPLER_1D) ||
-#	endif
-
-#	if defined(GL_SAMPLER_3D)
-		(value == GL_SAMPLER_3D) ||
-#	endif
-	
-#	if defined(GL_SAMPLER_2D_RECT)
-		(value == GL_SAMPLER_2D_RECT) ||
-		(value == GL_SAMPLER_2D_RECT_SHADOW) ||
-#	endif
-	
-#	if defined(GL_SAMPLER_2D_ARRAY)
-		(value == GL_SAMPLER_2D_ARRAY) ||
-		(value == GL_SAMPLER_2D_ARRAY_SHADOW) ||
-#	endif
-
-		false;
 }

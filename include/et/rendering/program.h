@@ -82,19 +82,18 @@ namespace et
 		void setCameraProperties(const Camera& cam);
 		
 		bool isBuiltInUniformName(const std::string&);
+		bool isSamplerUniformType(uint32_t);
 		DataType uniformTypeToDataType(uint32_t);
 
 		const Program::UniformMap& uniforms() const 
 			{ return _uniforms; }
 
-		void setUniform(int, uint32_t, const int32_t, bool);
-		void setUniform(int, uint32_t, const uint32_t, bool);
-		void setUniform(int, uint32_t, const int64_t, bool);
-		void setUniform(int, uint32_t, const uint64_t, bool);
-		void setUniform(int, uint32_t, const unsigned long, bool);
+		void setUniform(int, uint32_t, const int32_t, bool force = false);
+		void setUniform(int, uint32_t, const uint32_t, bool force = false);
+		void setUniform(int, uint32_t, const int64_t, bool force = false);
+		void setUniform(int, uint32_t, const uint64_t, bool force = false);
 		
 		void setUniform(int, uint32_t, const float, bool force = false);
-		
 		void setUniform(int, uint32_t, const vec2&, bool force = false);
 		void setUniform(int, uint32_t, const vec3&, bool force = false);
 		void setUniform(int, uint32_t, const vec4&, bool force = false);
