@@ -795,7 +795,11 @@ s3d::Mesh::Pointer FBXLoaderPrivate::loadMesh(s3d::Storage& storage, FbxMesh* me
 				meshElement->addPropertyString(prop);
 			}
 			
-			uint32_t numIndexesInCurrentMesh = 0;
+			MeshConstructionInfo ce;
+			ce.mesh = meshElement;
+			ce.startIndex = indexOffset;
+			ce.numIndices = 0;
+			
 			for (int lPolygonIndex = 0; lPolygonIndex < lPolygonCount; ++lPolygonIndex)
 			{
 				if (materialIndices->GetAt(lPolygonIndex) == m)
@@ -812,17 +816,12 @@ s3d::Mesh::Pointer FBXLoaderPrivate::loadMesh(s3d::Storage& storage, FbxMesh* me
 						PUSH_SG
 						++vertexCount;
 						++indexOffset;
-						++numIndexesInCurrentMesh;
+						++ce.numIndices;
 					}
 				}
 			}
 
-			MeshConstructionInfo ce;
-			ce.mesh = meshElement;
-			ce.startIndex = indexOffset;
-			ce.numIndices = numIndexesInCurrentMesh;
 			constructionInfo[vs.ptr()].push_back(ce);
-			
 			createdMeshes.push_back(meshElement);
 		}
 	}
