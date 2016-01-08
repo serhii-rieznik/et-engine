@@ -25,11 +25,40 @@ RenderableElement::RenderableElement(const std::string& name, const SceneMateria
 void RenderableElement::serialize(Dictionary stream, const std::string& basePath)
 {
 	stream.setStringForKey(kMaterialName, material()->name());
+	
+	ArrayValue batches;
+	batches->content.reserve(renderBatches().size());
+	for (const auto& rb : renderBatches())
+	{
+		batches->content.push_back(rb->serialize());
+	}
+	stream.setArrayForKey(kRenderBatches, batches);
+	
 	ElementContainer::serialize(stream, basePath);
 }
 
 void RenderableElement::deserialize(Dictionary stream, SerializationHelper* helper)
 {
+	auto batches = stream.arrayForKey(kRenderBatches);
+	for (Dictionary rb : batches->content)
+	{
+		uint32_t startIndex = static_cast<uint32_t>(rb.integerForKey(kStartIndex)->content);
+		uint32_t numIndexes = static_cast<uint32_t>(rb.integerForKey(kIndexesCount)->content);
+		auto storageName = rb.stringForKey(kVertexStorageName)->content;
+		auto indexName = rb.stringForKey(kIndexArrayName)->content;
+		auto materialName = rb.stringForKey(kMaterialName)->content;
+		
+		auto mat = helper->materialWithName(materialName);
+		auto vao = helper->vertexArrayWithStorageName(storageName);
+		auto vs = helper->vertexStorageWithName(storageName);
+		auto ia = helper->indexArrayWithName(indexName);
+
+		auto batch = RenderBatch::Pointer::create(mat, vao, identityMatrix, startIndex, numIndexes);
+		batch->setVertexStorage(vs);
+		batch->setIndexArray(ia);
+		addRenderBatch(batch);
+	}
+
 	auto materialName = stream.stringForKey(kMaterialName)->content;
 	setMaterial(helper->sceneMaterialWithName(materialName));
 	ElementContainer::deserialize(stream, helper);

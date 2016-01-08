@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <et/geometry/geometry.h>
 #include <et/rendering/material.h>
 #include <et/rendering/vertexarrayobject.h>
 #include <et/vertexbuffer/vertexstorage.h>
@@ -59,12 +60,26 @@ namespace et
 		void setIndexArray(IndexArray::Pointer ia)
 			{ _indexArray = ia; }
 		
+		void calculateBoundingBox();
+		
+		const BoundingBox& boundingBox() const
+			{ return _boundingBox; }
+		const vec3& maxExtent() const
+			{ return _maxExtent; }
+		const vec3& minExtent() const
+			{ return _minExtent; }
+		
+		Dictionary serialize() const;
+		
 	private:
 		Material::Pointer _material;
 		VertexArrayObject::Pointer _vao;
 		VertexStorage::Pointer _vertexStorage;
 		IndexArray::Pointer _indexArray;
 		mat4 _transformation = identityMatrix;
+		vec3 _minExtent;
+		vec3 _maxExtent;
+		BoundingBox _boundingBox;
 		uint32_t _firstIndex = 0;
 		uint32_t _numIndexes = 0;
 	};

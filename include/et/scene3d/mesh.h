@@ -10,10 +10,6 @@
 #include <et/scene3d/renderableelement.h>
 #include <et/scene3d/meshdeformer.h>
 
-#include <et/collision/aabb.h>
-#include <et/collision/sphere.h>
-#include <et/collision/obb.h>
-
 namespace et
 {
 	namespace s3d
@@ -24,26 +20,6 @@ namespace et
 			ET_DECLARE_POINTER(Mesh)
 			
 			static const std::string defaultMeshName;
-			
-			struct SupportData
-			{
-				vec3 minMaxCenter;
-				vec3 averageCenter;
-				vec3 dimensions;
-				
-				AABB cachedBoundingBox;
-				OBB cachedOrientedBoundingBox;
-				Sphere cachedBoundingSphere;
-				Sphere cachedBoundingSphereUntransformed;
-				
-				float boundingSphereRadius = 0.0f;
-				
-				bool shouldUpdateBoundingBox = true;
-				bool shouldUpdateOrientedBoundingBox = true;
-				bool shouldUpdateBoundingSphere = true;
-				bool shouldUpdateBoundingSphereUntransformed = true;
-				bool valid = false;
-			};
 
 		public:
 			Mesh(const std::string& = defaultMeshName, BaseElement* = nullptr);
@@ -59,13 +35,10 @@ namespace et
 
 			void calculateSupportData();
 			
-			const SupportData& supportData() const
-				{ return _supportData; }
-			
 			const Sphere& boundingSphere();
 			const Sphere& boundingSphereUntransformed();
-			const AABB& boundingBox();
-			const OBB& orientedBoundingBox();
+			
+			const BoundingBox& tranformedBoundingBox();
 			
 			float finalTransformScale();
 			
@@ -83,12 +56,23 @@ namespace et
 		protected:
 			void duplicateMeshPropertiesToMesh(s3d::Mesh*);
 			void transformInvalidated() override;
+			
+			struct SupportData
+			{
+				Sphere untranfromedBoundingSphere;
+				Sphere tranfromedBoundingSphere;
+				BoundingBox transformedBoundingBox;
+				bool shouldUpdateBoundingBox = true;
+				bool shouldUpdateBoundingSphere = true;
+				bool shouldUpdateBoundingSphereUntransformed = true;
+			};
 
 		private:
 			MeshDeformer::Pointer _deformer;
 			SupportData _supportData;
+			BoundingBox _boundingBox;
+			float _boundingSphereRadius = 0.0f;
 			std::vector<mat4> _undeformedTransformationMatrices;
-			uint32_t _selectedLod = 0;
 		};
 	}
 }

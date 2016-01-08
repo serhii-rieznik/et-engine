@@ -164,7 +164,7 @@ void Storage::deserializeWithOptions(RenderContext* rc, Dictionary stream, Seria
 			for (const auto kv : materials->content)
 			{
 				Dictionary materialInfo(kv.second);
-				SceneMaterial::Pointer material;
+				SceneMaterial::Pointer material = SceneMaterial::Pointer::create();
 				material->deserializeWithOptions(materialInfo, rc, cache,
 					helper->serializationBasePath(), options);
 				addMaterial(material);

@@ -13,9 +13,11 @@ namespace et
 	const std::string kName = "name";
 	const std::string kChildren = "children";
 	const std::string kElementTypeCode = "element-type-code";
+	const std::string kRenderBatches = "render-batches";
 	const std::string kMaterialName = "material-name";
 	const std::string kFlagsValue = "flags-value";
 	const std::string kTranslation = "translation";
+	const std::string kTransform = "transform";
 	const std::string kScale = "scale";
 	const std::string kOrientation = "orientation";
 	const std::string kProperties = "properties";
@@ -60,6 +62,7 @@ namespace et
 	const std::string kVertexBufferSourceName = "vertex-buffer-source-name";
 	const std::string kIndexBufferSourceName = "index-buffer-source-name";
 	const std::string kVertexArrayObjects = "vertex-array-objects";
+	const std::string kVertexArrayObjectName = "vertex-array-object-name";
 	const std::string kBlendEnabled = "blend-enabled";
 	const std::string kBlendConfiguration = "blend-configuration";
 	const std::string kSourceColor = "source-color";

@@ -687,6 +687,7 @@ s3d::Mesh::Pointer FBXLoaderPrivate::loadMesh(s3d::Storage& storage, FbxMesh* me
 	if (ia.invalid())
 	{
 		ia = IndexArray::Pointer::create(IndexArrayFormat::Format_32bit, 3 * lPolygonCount, PrimitiveType::Triangles);
+		ia->setName("fbx-indexes");
 		storage.setIndexArray(ia);
 	}
 	else 

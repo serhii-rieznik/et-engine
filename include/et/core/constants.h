@@ -131,8 +131,10 @@ namespace et
 	extern const std::string kName;
 	extern const std::string kChildren;
 	extern const std::string kElementTypeCode;
+	extern const std::string kRenderBatches;
 	extern const std::string kMaterialName;
 	extern const std::string kFlagsValue;
+	extern const std::string kTransform;
 	extern const std::string kTranslation;
 	extern const std::string kScale;
 	extern const std::string kOrientation;
@@ -178,6 +180,7 @@ namespace et
 	extern const std::string kVertexBufferSourceName;
 	extern const std::string kIndexBufferSourceName;
 	extern const std::string kVertexArrayObjects;
+	extern const std::string kVertexArrayObjectName;
 	extern const std::string kBlendEnabled;
 	extern const std::string kBlendConfiguration;
 	extern const std::string kSourceColor;

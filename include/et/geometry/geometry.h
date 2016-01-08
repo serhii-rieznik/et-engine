@@ -13,8 +13,10 @@
 #include <et/geometry/segment2d.h>
 #include <et/geometry/segment3d.h>
 #include <et/geometry/plane.h>
+#include <et/geometry/sphere.h>
 #include <et/geometry/parallelepiped.h>
 #include <et/geometry/equations.h>
+#include <et/geometry/boundingbox.h>
 
 namespace et
 {

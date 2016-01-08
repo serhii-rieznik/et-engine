@@ -50,8 +50,10 @@ bool Frustum::containsSphere(const Sphere& sphere) const
 	return true;
 }
 
-bool Frustum::containsAABB(const AABB& aabb) const
+bool Frustum::containsBoundingBox(const BoundingBox& aabb) const
 {
+	// TODO : use box's transform
+	
 	for (const auto& frustumPlane : _planes)
 	{
 		if (dot(aabb.center, frustumPlane.xyz()) + 2.0 * dot(aabb.halfDimension, absv(frustumPlane.xyz())) < -frustumPlane.w)
@@ -59,10 +61,4 @@ bool Frustum::containsAABB(const AABB& aabb) const
 	}
 	
 	return true;
-}
-
-bool Frustum::containsOBB(const OBB&) const
-{
-	ET_FAIL("Not implemented")
-	return false;
 }
