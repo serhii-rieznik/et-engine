@@ -9,6 +9,7 @@
 #include <et/core/conversion.h>
 #include <et/core/filesystem.h>
 #include <et/primitives/primitives.h>
+#include <et/rendering/material.h>
 #include <et/models/objloader.h>
 
 using namespace et;
@@ -371,11 +372,13 @@ void OBJLoader::loadData(bool async,  s3d::Storage& storage, ObjectsCache& cache
 	}
 }
 
-s3d::ElementContainer::Pointer OBJLoader::load(et::RenderContext* rc, s3d::Storage& storage, ObjectsCache& cache)
+s3d::ElementContainer::Pointer OBJLoader::load(et::RenderContext* rc, MaterialProvider* mp,
+	s3d::Storage& storage, ObjectsCache& cache)
 {
 	storage.flush();
 
 	_rc = rc;
+	_materialProvider = mp;
 	_groups.reserve(4);
 	_vertices.reserve(1024);
 	_normals.reserve(1024);
@@ -449,10 +452,10 @@ void OBJLoader::loadMaterials(const std::string& fileName, bool async, ObjectsCa
 					{
 						float value = 0.0f;
 						materialFile >> value;
-						_lastMaterial->setFloat(MaterialParameter_BumpFactor, value);
+						_lastMaterial->setFloat(MaterialParameter::BumpFactor, value);
 						
 						getLine(materialFile, line);
-						_lastMaterial->setTexture(MaterialParameter_NormalMap, _rc->textureFactory().loadTexture(line, cache, async));
+						_lastMaterial->setTexture(MaterialParameter::NormalMap, _rc->textureFactory().loadTexture(line, cache, async));
 					}
 					else
 					{
@@ -463,7 +466,7 @@ void OBJLoader::loadMaterials(const std::string& fileName, bool async, ObjectsCa
 				else
 				{
 					getLine(materialFile, line);
-					_lastMaterial->setTexture(MaterialParameter_NormalMap, _rc->textureFactory().loadTexture(line, cache, async) );
+					_lastMaterial->setTexture(MaterialParameter::NormalMap, _rc->textureFactory().loadTexture(line, cache, async) );
 				}
 			}
 			else
@@ -488,25 +491,25 @@ void OBJLoader::loadMaterials(const std::string& fileName, bool async, ObjectsCa
 				{
 					vec4 value;
 					materialFile >> value;
-					_lastMaterial->setVector(MaterialParameter_AmbientColor, value);
+					_lastMaterial->setVector(MaterialParameter::AmbientColor, value);
 				} 
 				else if (next == 'd')
 				{
 					vec4 value;
 					materialFile >> value;
-					_lastMaterial->setVector(MaterialParameter_DiffuseColor, value);
+					_lastMaterial->setVector(MaterialParameter::DiffuseColor, value);
 				} 
 				else if (next == 's')
 				{
 					vec4 value;
 					materialFile >> value;
-					_lastMaterial->setVector(MaterialParameter_SpecularColor, value);
+					_lastMaterial->setVector(MaterialParameter::SpecularColor, value);
 				} 
 				else if (next == 'e')
 				{
 					vec4 value;
 					materialFile >> value;
-					_lastMaterial->setVector(MaterialParameter_EmissiveColor, value);
+					_lastMaterial->setVector(MaterialParameter::EmissiveColor, value);
 				} 
 				else
 				{
@@ -525,7 +528,7 @@ void OBJLoader::loadMaterials(const std::string& fileName, bool async, ObjectsCa
 			{
 				float value = 0.0f;
 				materialFile >> value;
-				_lastMaterial->setFloat(MaterialParameter_Transparency, value);
+				_lastMaterial->setFloat(MaterialParameter::Transparency, value);
 			}
 			else if (next == 'f') // skip
 			{
@@ -557,22 +560,22 @@ void OBJLoader::loadMaterials(const std::string& fileName, bool async, ObjectsCa
 					if (subId == 'd')
 					{
 						getLine(materialFile, line);
-						_lastMaterial->setTexture(MaterialParameter_DiffuseMap, _rc->textureFactory().loadTexture(line, cache, async) );
+						_lastMaterial->setTexture(MaterialParameter::DiffuseMap, _rc->textureFactory().loadTexture(line, cache, async) );
 					}
 					else if (subId == 'a')
 					{
 						getLine(materialFile, line);
-						_lastMaterial->setTexture(MaterialParameter_AmbientMap, _rc->textureFactory().loadTexture(line, cache, async) );
+						_lastMaterial->setTexture(MaterialParameter::AmbientMap, _rc->textureFactory().loadTexture(line, cache, async) );
 					}
 					else if (subId == 's')
 					{
 						getLine(materialFile, line);
-						_lastMaterial->setTexture(MaterialParameter_SpecularMap, _rc->textureFactory().loadTexture(line, cache, async) );
+						_lastMaterial->setTexture(MaterialParameter::SpecularMap, _rc->textureFactory().loadTexture(line, cache, async) );
 					}
 					else if (subId == 'e')
 					{
 						getLine(materialFile, line);
-						_lastMaterial->setTexture(MaterialParameter_EmissiveMap, _rc->textureFactory().loadTexture(line, cache, async) );
+						_lastMaterial->setTexture(MaterialParameter::EmissiveMap, _rc->textureFactory().loadTexture(line, cache, async) );
 					}
 					else
 					{
@@ -606,10 +609,10 @@ void OBJLoader::loadMaterials(const std::string& fileName, bool async, ObjectsCa
 							{
 								float value;
 								materialFile >> value;
-								_lastMaterial->setFloat(MaterialParameter_BumpFactor, value);
+								_lastMaterial->setFloat(MaterialParameter::BumpFactor, value);
 								
 								getLine(materialFile, line);
-								_lastMaterial->setTexture(MaterialParameter_NormalMap, _rc->textureFactory().loadTexture(line, cache, async));
+								_lastMaterial->setTexture(MaterialParameter::NormalMap, _rc->textureFactory().loadTexture(line, cache, async));
 							}
 							else
 							{
@@ -620,7 +623,7 @@ void OBJLoader::loadMaterials(const std::string& fileName, bool async, ObjectsCa
 						else
 						{
 							getLine(materialFile, line);
-							_lastMaterial->setTexture(MaterialParameter_NormalMap, _rc->textureFactory().loadTexture(line, cache, async) );
+							_lastMaterial->setTexture(MaterialParameter::NormalMap, _rc->textureFactory().loadTexture(line, cache, async) );
 						}
 					}
 					else
@@ -631,7 +634,7 @@ void OBJLoader::loadMaterials(const std::string& fileName, bool async, ObjectsCa
 				else if (mapId == 'd')
 				{
 					getLine(materialFile, line);
-					_lastMaterial->setTexture(MaterialParameter_OpacityMap, _rc->textureFactory().loadTexture(line, cache, async) );
+					_lastMaterial->setTexture(MaterialParameter::OpacityMap, _rc->textureFactory().loadTexture(line, cache, async) );
 				}
 				else
 				{
@@ -665,7 +668,7 @@ void OBJLoader::loadMaterials(const std::string& fileName, bool async, ObjectsCa
 				{              
 					int value = 0;
 					materialFile >> value;
-					_lastMaterial->setInt(MaterialParameter_ShadingModel, value);
+					log::warning("[OBJLoader] Illumination parameter ignored: %d", value);
 				}
 				else
 				{
@@ -683,7 +686,7 @@ void OBJLoader::loadMaterials(const std::string& fileName, bool async, ObjectsCa
 			{
 				float value = 0.0f;
 				materialFile >> value;
-				_lastMaterial->setFloat(MaterialParameter_Roughness, value);
+				_lastMaterial->setFloat(MaterialParameter::Roughness, value);
 			}
 			else if (next == 'i')
 			{
@@ -869,39 +872,39 @@ s3d::ElementContainer::Pointer OBJLoader::generateVertexBuffers(s3d::Storage& st
 	storage.setIndexArray(_indices);
 	
 	for (auto m : _materials)
+	{
 		storage.addMaterial(m);
+	}
 	
-	VertexArrayObject vao = _rc->vertexBufferFactory().createVertexArrayObject("model-vao", _vertexData,
+	VertexArrayObject::Pointer vao = _rc->vertexBufferFactory().createVertexArrayObject("model-vao", _vertexData,
 		BufferDrawType::Static, _indices, BufferDrawType::Static);
 
+	uint32_t helperFlag = s3d::Flag_Helper * static_cast<uint32_t>((_loadOptions & Option_SupportMeshes) != 0);
 	for (const auto& i : _meshes)
 	{
-		s3d::BaseElement::Pointer object;
+		auto material = _materialProvider->materialWithName(i.material->name());
 		
-		if (_loadOptions & Option_SupportMeshes)
-		{
-			object = SupportMesh::Pointer::create(i.name, vao, i.material, i.start, i.count,
-				_vertexData, _indices, result.ptr());
-		}
-		else 
-		{
-			object = Mesh::Pointer::create(i.name, vao, i.material, i.start, i.count,
-				_vertexData, _indices, result.ptr());
-		}
+		auto rb = RenderBatch::Pointer::create(material, vao, translationMatrix(i.center), i.start, i.count);
+		rb->setVertexStorage(_vertexData);
+		rb->setIndexArray(_indices);
 		
-		object->setTranslation(i.center);
+		s3d::Mesh::Pointer object = Mesh::Pointer::create(i.name, i.material, result.ptr());
+		
+		object->addRenderBatch(rb);
+		object->setFlag(helperFlag);
 	}
 
 	return result;
 }
 
-void OBJLoader::threadFinished() // s3d::Storage& storage)
+void OBJLoader::threadFinished()
 {
 	ET_FAIL("TODO");
 	/*
-	auto buffers = generateVertexBuffers(storage);
-	loaded.invoke(buffers);
-	*/
+	 * TODO
+	 *
+	loaded.invoke(generateVertexBuffers(storage));
+	// */
 }
 
 /*

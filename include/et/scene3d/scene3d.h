@@ -11,17 +11,17 @@
 #include <et/core/objectscache.h>
 #include <et/scene3d/elementcontainer.h>
 #include <et/scene3d/storage.h>
-#include <et/scene3d/supportmesh.h>
 #include <et/scene3d/cameraelement.h>
 #include <et/scene3d/lightelement.h>
 #include <et/scene3d/particlesystem.h>
 #include <et/scene3d/lineelement.h>
 #include <et/scene3d/skeletonelement.h>
+#include <et/scene3d/mesh.h>
 
 namespace et
 {
 	namespace s3d
-	{
+	{		
 		class Scene : public ElementContainer, public SerializationHelper
 		{
 		public:
@@ -32,8 +32,8 @@ namespace et
 
 			Dictionary serialize(const std::string& basePath);
 			
-			void deserializeWithOptions(et::RenderContext*, Dictionary, const std::string& basePath,
-				ObjectsCache&, uint32_t options);
+			void deserializeWithOptions(et::RenderContext*, MaterialProvider*, Dictionary,
+				const std::string& basePath, ObjectsCache&, uint32_t options);
 
 			Storage& storage()
 				{ return _storage; }
@@ -49,7 +49,8 @@ namespace et
 			void cleanupGeometry();
 			void cleanUpSupportMehses();
 			
-			SceneMaterial* materialWithName(const std::string&) override;
+			SceneMaterial::Pointer sceneMaterialWithName(const std::string&) override;
+			Material::Pointer materialWithName(const std::string&) override;
 
 			BaseElement::Pointer createElementOfType(ElementType, BaseElement*) override;
 
@@ -59,12 +60,13 @@ namespace et
 			IndexArray::Pointer indexArrayWithName(const std::string&) override;
 			VertexStorage::Pointer vertexStorageWithName(const std::string&) override;
 			
-			VertexArrayObject vertexArrayWithStorageName(const std::string&) override;
+			VertexArrayObject::Pointer vertexArrayWithStorageName(const std::string&) override;
 						
 		private:
 			Storage _storage;
+			MaterialProvider* _currentMaterialProvider = nullptr;
 			std::string _serializationBasePath;
-			std::vector<VertexArrayObject> _vertexArrays;
+			std::vector<VertexArrayObject::Pointer> _vertexArrayObjects;
 			IndexBuffer::Pointer _mainIndexBuffer;
 		};
 	}

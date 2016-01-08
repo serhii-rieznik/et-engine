@@ -8,7 +8,6 @@
 #pragma once
 
 #include <et/scene3d/mesh.h>
-#include <et/scene3d/supportmesh.h>
 #include <et/scene3d/scenematerial.h>
 #include <et/scene3d/storage.h>
 #include <et/rendering/rendercontext.h>
@@ -17,6 +16,7 @@
 
 namespace et
 {
+	class MaterialProvider;
 	class OBJLoaderThread;
 	class OBJLoader : public ModelLoader
 	{
@@ -35,7 +35,7 @@ namespace et
 		OBJLoader(const std::string& inFile, size_t options);
 		~OBJLoader();
 
-		s3d::ElementContainer::Pointer load(et::RenderContext*, s3d::Storage&, ObjectsCache&);
+		s3d::ElementContainer::Pointer load(RenderContext*, MaterialProvider*, s3d::Storage&, ObjectsCache&);
 		void loadAsync(et::RenderContext*, s3d::Storage&, ObjectsCache& cahce);
 
 		ET_DECLARE_EVENT1(loaded, s3d::ElementContainer::Pointer)
@@ -97,6 +97,7 @@ namespace et
 		friend class OBJLoaderThread;
 
 		RenderContext* _rc = nullptr;
+		MaterialProvider* _materialProvider = nullptr;
 		AutoPtr<OBJLoaderThread> _thread;
 
 		std::string inputFileName;

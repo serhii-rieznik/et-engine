@@ -7,33 +7,33 @@
 
 #pragma once
 
-#include <ostream>
-#include <istream>
 #include <et/core/et.h>
 #include <et/scene3d/base.h>
-#include <et/vertexbuffer/vertexstorage.h>
-#include <et/vertexbuffer/indexarray.h>
-#include <et/rendering/vertexarrayobject.h>
 
 namespace et
 {
+	class VertexStorage;
+	class IndexArray;
+	class VertexArrayObject;
+	class Material;
+	
 	namespace s3d
 	{
-		class SceneMaterial;
 		class BaseElement;
-		typedef IntrusivePtr<BaseElement> BaseElementPointer;
-
+		class SceneMaterial;
 		class SerializationHelper
 		{
 		public:
 			virtual const std::string& serializationBasePath() const = 0;
-			virtual BaseElementPointer createElementOfType(ElementType, BaseElement*) = 0;
-			virtual SceneMaterial* materialWithName(const std::string&) = 0;
+			virtual IntrusivePtr<BaseElement> createElementOfType(ElementType, BaseElement*) = 0;
 			
-			virtual IndexArray::Pointer indexArrayWithName(const std::string&) = 0;
-			virtual VertexStorage::Pointer vertexStorageWithName(const std::string&) = 0;
+			virtual IntrusivePtr<VertexStorage> vertexStorageWithName(const std::string&) = 0;
+			virtual IntrusivePtr<IndexArray> indexArrayWithName(const std::string&) = 0;
 			
-			virtual VertexArrayObject vertexArrayWithStorageName(const std::string&) = 0;
+			virtual IntrusivePtr<SceneMaterial> sceneMaterialWithName(const std::string&) = 0;
+			
+			virtual IntrusivePtr<VertexArrayObject> vertexArrayWithStorageName(const std::string&) = 0;
+			virtual IntrusivePtr<Material> materialWithName(const std::string&) = 0;
 
 		public:
 			virtual ~SerializationHelper() { }
@@ -43,14 +43,14 @@ namespace et
 		{
 			DeserializeOption_LoadHierarchy = 0x0000,
 			
-			DeserializeOption_KeepGeometry = 0x0001,
-			DeserializeOption_KeepSupportMeshes = 0x0002,
+			DeserializeOption_KeepMeshes = 0x0001,
+			DeserializeOption_KeepHelperMeshes = 0x0002,
 			
 			DeserializeOption_CreateTextures = 0x0010,
 			DeserializeOption_CreateVertexBuffers = 0x0020,
 			
 			DeserializeOption_KeepAndCreateEverything = DeserializeOption_LoadHierarchy |
-				DeserializeOption_KeepGeometry | DeserializeOption_KeepSupportMeshes | 
+				DeserializeOption_KeepMeshes | DeserializeOption_KeepHelperMeshes |
 				DeserializeOption_CreateTextures | DeserializeOption_CreateVertexBuffers
 		};
 	}

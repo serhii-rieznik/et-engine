@@ -29,9 +29,6 @@ namespace et
 			typedef std::vector<BaseElement::Pointer> List;
 
 		public:
-			size_t tag = 0;
-
-		public:
 			virtual ElementType type() const = 0;
 			virtual BaseElement* duplicate() = 0;
 

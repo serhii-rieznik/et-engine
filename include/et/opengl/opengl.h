@@ -174,7 +174,7 @@ namespace et
 	void etBindBuffer(uint32_t target, uint32_t buffer);
 	void etBindFramebuffer(uint32_t target, uint32_t framebuffer);
 	void etUseProgram(uint32_t program);
-	void etBindVertexArray(uint32_t arr);
+	void etbindVertexArrayObject(uint32_t arr);
 
 	void etTexImage1D(uint32_t target, int level, int internalformat, GLsizei width, int border,
 		uint32_t format, uint32_t type, const GLvoid * pixels);

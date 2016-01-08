@@ -16,6 +16,7 @@ namespace
 	const std::string kVertexSource = "vertex-source";
 	const std::string kFragmentSource = "fragment-source";
 	const std::string kDefines = "defines";
+	const std::string kRenderPriority = "render-priority";
 }
 
 Material::Material(MaterialFactory* mf) :
@@ -74,6 +75,10 @@ void Material::loadFromJson(const std::string& jsonString, const std::string& ba
 		}
 	}
 	
+	setName(name);
+	setOrigin(baseFolder);
+	
+	_additionalPriority = static_cast<uint32_t>(obj.integerForKey(kRenderPriority, 0ll)->content);
 	_blend = deserializeBlendState(obj.dictionaryForKey(kBlendState));
 	_depth = deserializeDepthState(obj.dictionaryForKey(kDepthState));
 	
@@ -189,4 +194,9 @@ void Material::setTexutre(const std::string& name, const Texture::Pointer& tex)
 	{
 		i->second.texture = tex;
 	}
+}
+
+uint32_t Material::sortingKey() const
+{
+	return _depth.sortingKey() | _blend.sortingKey() << 8 | _additionalPriority << 16;
 }

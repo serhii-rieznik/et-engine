@@ -11,31 +11,31 @@
 
 using namespace et;
 
-VertexArrayObjectData::VertexArrayObjectData(RenderContext* rc, VertexBuffer::Pointer vb, 
+VertexArrayObject::VertexArrayObject(RenderContext* rc, VertexBuffer::Pointer vb, 
 	IndexBuffer::Pointer ib, const std::string& aName) : APIObject(aName), _rc(rc), _vb(vb), _ib(ib)
 {
 	init();
 }
 
-VertexArrayObjectData::VertexArrayObjectData(RenderContext* rc, const std::string& aName) :
+VertexArrayObject::VertexArrayObject(RenderContext* rc, const std::string& aName) :
 	APIObject(aName), _rc(rc)
 {
 	init();
 }
 
-VertexArrayObjectData::~VertexArrayObjectData()
+VertexArrayObject::~VertexArrayObject()
 {
 	uint32_t buffer = apiHandle();
 	if ((buffer != 0) && OpenGLCapabilities::instance().hasFeature(OpenGLFeature_VertexArrayObjects))
 	{
-		_rc->renderState().bindVertexArray(buffer);
+		_rc->renderState().bindVertexArrayObject(buffer);
 		_rc->renderState().vertexArrayDeleted(buffer);
 		glDeleteVertexArrays(1, &buffer);
 		checkOpenGLError("glDeleteVertexArrays");
 	}
 }
 
-void VertexArrayObjectData::init()
+void VertexArrayObject::init()
 {
 	if (OpenGLCapabilities::instance().hasFeature(OpenGLFeature_VertexArrayObjects))
 	{
@@ -44,39 +44,39 @@ void VertexArrayObjectData::init()
 		checkOpenGLError("glGenVertexArrays in %s", name().c_str());
 		
 		setAPIHandle(buffer);
-		_rc->renderState().bindVertexArray(buffer);
+		_rc->renderState().bindVertexArrayObject(buffer);
 	}
 	
 	_rc->renderState().bindBuffers(_vb, _ib, true);
 }
 
-void VertexArrayObjectData::setBuffers(VertexBuffer::Pointer vb, IndexBuffer::Pointer ib)
+void VertexArrayObject::setBuffers(VertexBuffer::Pointer vb, IndexBuffer::Pointer ib)
 {
 	_vb = vb;
 	_ib = ib;
 	
 	if (OpenGLCapabilities::instance().hasFeature(OpenGLFeature_VertexArrayObjects))
-		_rc->renderState().bindVertexArray(apiHandle());
+		_rc->renderState().bindVertexArrayObject(apiHandle());
 	
 	_rc->renderState().bindBuffers(_vb, _ib, true);
 }
 
-void VertexArrayObjectData::setVertexBuffer(VertexBuffer::Pointer vb)
+void VertexArrayObject::setVertexBuffer(VertexBuffer::Pointer vb)
 {
 	_vb = vb;
 	
 	if (OpenGLCapabilities::instance().hasFeature(OpenGLFeature_VertexArrayObjects))
-		_rc->renderState().bindVertexArray(apiHandle());
+		_rc->renderState().bindVertexArrayObject(apiHandle());
 	
 	_rc->renderState().bindBuffers(_vb, _ib, true);
 }
 
-void VertexArrayObjectData::setIndexBuffer(IndexBuffer::Pointer ib)
+void VertexArrayObject::setIndexBuffer(IndexBuffer::Pointer ib)
 {
 	_ib = ib;
 	
 	if (OpenGLCapabilities::instance().hasFeature(OpenGLFeature_VertexArrayObjects))
-		_rc->renderState().bindVertexArray(apiHandle());
+		_rc->renderState().bindVertexArrayObject(apiHandle());
 	
 	_rc->renderState().bindBuffers(_vb, _ib, true);
 }

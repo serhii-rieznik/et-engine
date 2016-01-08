@@ -13,8 +13,7 @@ using namespace et;
 using namespace et::s3d;
 
 BaseElement::BaseElement(const std::string& name, BaseElement* parent) :
-	ElementHierarchy(parent),  tag(0), _animationTransform(1.0f), 
-	_cachedLocalTransform(1.0f), _cachedFinalTransform(1.0f), _cachedFinalInverseTransform(1.0f)
+	ElementHierarchy(parent)
 {
 	setName(name);
 	
@@ -283,8 +282,6 @@ void BaseElement::duplicateBasePropertiesToObject(BaseElement* object)
 	
 	for (const auto& p : properties())
 		object->addPropertyString(p);
-	
-	object->tag = tag;
 }
 
 bool BaseElement::hasPropertyString(const std::string& s) const

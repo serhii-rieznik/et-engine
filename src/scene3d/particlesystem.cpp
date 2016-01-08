@@ -50,7 +50,7 @@ void ParticleSystem::onTimerUpdated(NotifyTimer* timer)
 {
 	_emitter.update(timer->actualTime());
 	
-	_rc->renderState().bindVertexArray(_vao);
+	_rc->renderState().bindVertexArrayObject(_vao);
 	void* bufferData = bufferData = _vao->vertexBuffer()->map(0, _vertexData.data.dataSize(),
 		MapBufferOptions::Write | MapBufferOptions::InvalidateBuffer);
 

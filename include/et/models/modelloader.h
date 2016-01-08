@@ -15,7 +15,7 @@ namespace et
 	class ModelLoader
 	{
 	public:
-		virtual s3d::ElementContainer::Pointer load(RenderContext*, s3d::Storage&, ObjectsCache&) = 0;
+		virtual s3d::ElementContainer::Pointer load(RenderContext*, MaterialProvider*, s3d::Storage&, ObjectsCache&) = 0;
 
 	public:
 		virtual ~ModelLoader() { }

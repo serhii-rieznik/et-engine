@@ -15,67 +15,44 @@
 
 namespace et
 {
+	class Material;
 	namespace s3d
 	{
 		class SceneMaterial : public LoadableObject, public TextureLoaderDelegate
 		{
 		public:
-			struct Pointer : public IntrusivePtr<SceneMaterial>
-			{
-				Pointer() :
-					IntrusivePtr<SceneMaterial>(etCreateObject<SceneMaterial>()) { }
-				
-				explicit Pointer(SceneMaterial* data) :
-					IntrusivePtr<SceneMaterial>(data = nullptr ? etCreateObject<SceneMaterial>() : data) { }
-			};
-			
-			typedef std::vector<SceneMaterial::Pointer> List;
-			typedef std::map<std::string, SceneMaterial::Pointer> Map;
+			ET_DECLARE_POINTER(SceneMaterial)
+			using List = std::vector<SceneMaterial::Pointer>;
+			using Map = std::map<std::string, SceneMaterial::Pointer>;
 
 		public:
 			SceneMaterial();
 			~SceneMaterial() = default;
 			
-			const int getInt(uint32_t param) const;
-			const float getFloat(uint32_t param) const;
-			const vec4& getVector(uint32_t param) const;
-			const std::string& getString(uint32_t param) const;
-			const Texture::Pointer& getTexture(uint32_t param) const;
+			const int64_t getInt(MaterialParameter param) const;
+			const float getFloat(MaterialParameter param) const;
+			const vec4& getVector(MaterialParameter param) const;
+			const Texture::Pointer& getTexture(MaterialParameter param) const;
 
-			void setInt(uint32_t param, int value);
-			void setFloat(uint32_t param, float value);
-			void setVector(uint32_t param, const vec4& value);
-			void setTexture(uint32_t param, const Texture::Pointer& value);
-			void setString(uint32_t param, const std::string& value);
+			void setInt(MaterialParameter param, int64_t value);
+			void setFloat(MaterialParameter param, float value);
+			void setVector(MaterialParameter param, const vec4& value);
+			void setTexture(MaterialParameter param, const Texture::Pointer& value);
 
-			bool hasInt(uint32_t param) const;
-			bool hasFloat(uint32_t param) const;
-			bool hasVector(uint32_t param) const;
-			bool hasTexture(uint32_t param) const;
-			bool hasString(uint32_t param) const;
-			
-			const DepthState& depthState() const
-				{ return _depth; }
-			void setDepthState(const DepthState&);
-
-			const BlendState& blendState() const
-				{ return _blend; }
-			void setBlendState(const BlendState&);
+			bool hasInt(MaterialParameter param) const;
+			bool hasFloat(MaterialParameter param) const;
+			bool hasVector(MaterialParameter param) const;
+			bool hasTexture(MaterialParameter param) const;
 			
 			void serialize(Dictionary, const std::string&);
-			
 			void deserializeWithOptions(Dictionary, RenderContext*, ObjectsCache&, const std::string&, uint32_t);
-
 			void clear();
 			
 			SceneMaterial* duplicate() const;
 			
-			uint32_t sortingKey() const;
-			
 			ET_DECLARE_EVENT1(loaded, SceneMaterial*)
 			
-		public:
-			int tag = 0;
+			void bindToMaterial(et::IntrusivePtr<Material>&);
 
 		private:
 			void reloadObject(LoadableObject::Pointer obj, ObjectsCache&);
@@ -91,19 +68,11 @@ namespace et
 
 		private:
 			RenderContext* _rc = nullptr;
-			DefaultIntParameters _defaultIntParameters;
-			DefaultFloatParameters _defaultFloatParameters;
-			DefaultVectorParameters _defaultVectorParameters;
-			DefaultTextureParameters _defaultTextureParameters;
-			DefaultStringParameters _defaultStringParameters;
-			CustomIntParameters _customIntParameters;
-			CustomFloatParameters _customFloatParameters;
-			CustomVectorParameters _customVectorParameters;
-			CustomTextureParameters _customTextureParameters;
-			CustomStringParameters _customStringParameters;
-			BlendState _blend;
-			DepthState _depth;
-			std::map<uint32_t, std::string> _texturesToLoad;
+			ParameterSet<int64_t> _intParams;
+			ParameterSet<float> _floatParams;
+			ParameterSet<vec4> _vectorParams;
+			ParameterSet<Texture::Pointer> _textureParams;
+			std::map<MaterialParameter, std::string> _texturesToLoad;
 		};
 		
 		typedef ObjectsCache MaterialCache;

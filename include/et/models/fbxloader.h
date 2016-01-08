@@ -20,7 +20,7 @@ namespace et
 
 		void setShouldCreateRenderObjects(bool);
 
-		s3d::ElementContainer::Pointer load(RenderContext*, s3d::Storage&, ObjectsCache&) override;
+		s3d::ElementContainer::Pointer load(RenderContext*, MaterialProvider*, s3d::Storage&, ObjectsCache&) override;
 
 	private:
 		std::string _filename;

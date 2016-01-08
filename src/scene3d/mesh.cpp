@@ -24,21 +24,8 @@ Mesh::Mesh(const std::string& name, BaseElement* parent) :
 	_undeformedTransformationMatrices.resize(4);
 }
 
-Mesh::Mesh(const std::string& aName, const VertexArrayObject& vao, const SceneMaterial::Pointer& mat,
-	uint32_t startIndex, uint32_t numIndexes, BaseElement* parent) : RenderableElement(aName, parent), 
-	_vao(vao), _startIndex(startIndex), _numIndexes(numIndexes)
+Mesh::Mesh(const std::string& aName, const SceneMaterial::Pointer& mat, BaseElement* parent) : RenderableElement(aName, mat, parent)
 {
-	setMaterial(mat);
-	_undeformedTransformationMatrices.resize(4);
-}
-
-Mesh::Mesh(const std::string& aName, const VertexArrayObject& vao, const SceneMaterial::Pointer& mat,
-	uint32_t start, uint32_t num, const VertexStorage::Pointer& storage, const IndexArray::Pointer& ia,
-	BaseElement* parent) : RenderableElement(aName, parent), _vao(vao), _startIndex(start), _numIndexes(num),
-	_vertexStorage(storage), _indexArray(ia)
-{
-	setMaterial(mat);
-	calculateSupportData();
 	_undeformedTransformationMatrices.resize(4);
 }
 
@@ -48,48 +35,43 @@ void Mesh::calculateSupportData()
 	_supportData.minMaxCenter = vec3(0.0f);
 	_supportData.averageCenter = vec3(0.0f);
 	
-	if ((_numIndexes == 0) || _vertexStorage.invalid() || _indexArray.invalid()) return;
-	
-	if (!_vertexStorage->hasAttributeWithType(VertexAttributeUsage::Position, DataType::Vec3))
-	{
-		log::warning("Unable to calculate support data for mesh, storage not containing position of type vec3");
-		return;
-	}
-	
+	float processedVertices = 0.0f;
 	vec3 minVertex( std::numeric_limits<float>::max());
 	vec3 maxVertex(-std::numeric_limits<float>::max());
-	const auto pos = _vertexStorage->accessData<DataType::Vec3>(VertexAttributeUsage::Position, 0);
-	for (uint32_t i = 0; i < _numIndexes; ++i)
+	
+	for (const auto& rb : renderBatches())
 	{
-		uint32_t index = _indexArray->getIndex(_startIndex + i);
-		const auto& v = pos[index];
-		minVertex = minv(minVertex, v);
-		maxVertex = maxv(maxVertex, v);
-		_supportData.averageCenter += v;
+		const auto& vs = rb->vertexStorage();
+		const auto& ia = rb->indexArray();
+		if (vs.valid() && ia.valid() && vs->hasAttributeWithType(VertexAttributeUsage::Position, DataType::Vec3))
+		{
+			const auto pos = vs->accessData<DataType::Vec3>(VertexAttributeUsage::Position, 0);
+			for (uint32_t i = 0; i < rb->numIndexes(); ++i)
+			{
+				uint32_t index = ia->getIndex(rb->firstIndex() + i);
+				const auto& v = pos[index];
+				minVertex = minv(minVertex, v);
+				maxVertex = maxv(maxVertex, v);
+				_supportData.averageCenter += v;
+				processedVertices += 1.0f;
+			}
+		}
 	}
 	
-	_supportData.dimensions = maxVertex - minVertex;
-	_supportData.minMaxCenter = 0.5f * (minVertex + maxVertex);
-	_supportData.averageCenter /= static_cast<float>(_numIndexes);
-
-	_supportData.boundingSphereRadius = 
-		0.5f * etMax(etMax(_supportData.dimensions.x, _supportData.dimensions.y), _supportData.dimensions.z);
-
-	_supportData.valid = true;
-
-	ET_ASSERT(!isnan(_supportData.averageCenter.x));
+	if (processedVertices > 0.0f)
+	{
+		_supportData.dimensions = maxVertex - minVertex;
+		_supportData.minMaxCenter = 0.5f * (minVertex + maxVertex);
+		_supportData.averageCenter /= processedVertices;
+		_supportData.boundingSphereRadius =  0.5f * etMax(etMax(_supportData.dimensions.x, _supportData.dimensions.y), _supportData.dimensions.z);
+		_supportData.valid = true;
+	}
 }
 
 Mesh* Mesh::duplicate()
 {
-	Mesh* result = etCreateObject<Mesh>(name(), _vao, material(),
-		_startIndex, _numIndexes, parent());
-	
-	duplicateMeshPropertiesToMesh(result);
-	duplicateBasePropertiesToObject(result);
-	duplicateChildrenToObject(result);
-
-	return result;
+	ET_FAIL("Not implemented");
+	return nullptr;
 }
 
 void Mesh::duplicateMeshPropertiesToMesh(s3d::Mesh* result)
@@ -98,36 +80,10 @@ void Mesh::duplicateMeshPropertiesToMesh(s3d::Mesh* result)
 	result->_deformer = _deformer; // TODO: clone deformer
 }
 
-void Mesh::setVertexBuffer(VertexBuffer::Pointer vb)
-{
-	if (_vao.valid())
-		_vao->setVertexBuffer(vb);
-}
-
-void Mesh::setIndexBuffer(IndexBuffer::Pointer ib)
-{
-	if (_vao.valid())
-		_vao->setIndexBuffer(ib);
-}
-
-void Mesh::setVertexArrayObject(VertexArrayObject vao)
-{
-	ET_ASSERT(vao.valid());
-	_vao = vao;
-}
-
-void Mesh::setVertexStorage(VertexStorage::Pointer vs)
-{
-	_vertexStorage = vs;
-}
-
-void Mesh::setIndexArray(IndexArray::Pointer ia)
-{
-	_indexArray = ia;
-}
-
 void Mesh::serialize(Dictionary stream, const std::string& basePath)
 {
+	ET_FAIL("Not implemented")
+	/*
 	stream.setIntegerForKey(kStartIndex, _startIndex);
 	stream.setIntegerForKey(kIndexesCount, _numIndexes);
 
@@ -158,12 +114,14 @@ void Mesh::serialize(Dictionary stream, const std::string& basePath)
 		supportDataDictionary.setFloatForKey(kBoundingSphereRadius, _supportData.boundingSphereRadius);
 		stream.setDictionaryForKey(kSupportData, supportDataDictionary);
 	}
-
+	*/
 	RenderableElement::serialize(stream, basePath);
 }
 
 void Mesh::deserialize(Dictionary stream, SerializationHelper* helper)
 {
+	ET_FAIL("Not implemented");
+	/*
 	_startIndex = static_cast<uint32_t>(stream.integerForKey(kStartIndex)->content);
 	_numIndexes = static_cast<uint32_t>(stream.integerForKey(kIndexesCount)->content);
 	
@@ -202,106 +160,16 @@ void Mesh::deserialize(Dictionary stream, SerializationHelper* helper)
 			mesh->deserialize(lod.second, helper);
 		}
 	}
-	
+	*/
 	RenderableElement::deserialize(stream, helper);
-}
-
-void Mesh::attachLod(uint32_t level, Mesh::Pointer mesh)
-{
-	_lods[level] = mesh;
-}
-
-void Mesh::cleanupLodChildren()
-{
-	for (auto i : _lods)
-	{
-		if (i.second->parent() == this)
-			i.second->setParent(nullptr);
-	}
-}
-
-VertexArrayObject& Mesh::vertexArrayObject()
-{
-	return currentLod()->_vao; 
-}
-
-const VertexArrayObject& Mesh::vertexArrayObject() const
-{
-	return currentLod()->_vao; 
-}
-
-VertexBuffer::Pointer& Mesh::vertexBuffer() 
-{
-	VertexArrayObject& vao = vertexArrayObject();
-	return vao.valid() ? vao->vertexBuffer() : _emptyVertexBuffer; 
-}
-
-const VertexBuffer::Pointer& Mesh::vertexBuffer() const
-{
-	const VertexArrayObject& vao = vertexArrayObject();
-	return vao.valid() ? vao->vertexBuffer() : _emptyVertexBuffer; 
-}
-
-IndexBuffer::Pointer& Mesh::indexBuffer() 
-{
-	VertexArrayObject& vao = vertexArrayObject();
-	return vao.valid() ? vao->indexBuffer() : _emptyIndexBuffer; 
-}
-
-const IndexBuffer::Pointer& Mesh::indexBuffer() const
-{
-	VertexArrayObject vao = vertexArrayObject();
-	return vao.valid() ? vao->indexBuffer() : _emptyIndexBuffer; 
-}
-
-uint32_t Mesh::startIndex() const 
-{
-	return currentLod()->_startIndex; 
-}
-
-uint32_t Mesh::numIndexes() const
-{
-	return currentLod()->_numIndexes; 
-}
-
-void Mesh::setStartIndex(uint32_t index)
-{
-	currentLod()->_startIndex = index; 
-}
-
-void Mesh::setNumIndexes(uint32_t num)
-{
-	currentLod()->_numIndexes = num; 
-}
-
-const Mesh* Mesh::currentLod() const
-{
-	if (_selectedLod == 0) return this;
-	
-	auto i = _lods.find(_selectedLod);
-	return (i == _lods.end()) ? this : i->second.ptr();
-}
-
-Mesh* Mesh::currentLod()
-{
-	if (_selectedLod == 0) return this;
-
-	auto i = _lods.find(_selectedLod);
-	return (i == _lods.end()) ? this : i->second.ptr();
-}
-
-void Mesh::setLod(uint32_t level)
-{
-	auto i = _lods.find(level);
-	_selectedLod = (i == _lods.end()) ? 0 : level;
 }
 
 void Mesh::transformInvalidated()
 {
-	_shouldUpdateBoundingBox = true;
-	_shouldUpdateBoundingSphere = true;
-	_shouldUpdateOrientedBoundingBox = true;
-	_shouldUpdateBoundingSphereUntransformed = true;
+	_supportData.shouldUpdateBoundingBox = true;
+	_supportData.shouldUpdateBoundingSphere = true;
+	_supportData.shouldUpdateOrientedBoundingBox = true;
+	_supportData.shouldUpdateBoundingSphereUntransformed = true;
 }
 
 float Mesh::finalTransformScale()
@@ -311,30 +179,30 @@ float Mesh::finalTransformScale()
 
 const Sphere& Mesh::boundingSphereUntransformed()
 {
-	if (_shouldUpdateBoundingSphereUntransformed && _supportData.valid)
+	if (_supportData.shouldUpdateBoundingSphereUntransformed && _supportData.valid)
 	{
-		_cachedBoundingSphereUntransformed = Sphere(_supportData.averageCenter,
+		_supportData.cachedBoundingSphereUntransformed = Sphere(_supportData.averageCenter,
 			_supportData.boundingSphereRadius);
-		_shouldUpdateBoundingSphereUntransformed = false;
+		_supportData.shouldUpdateBoundingSphereUntransformed = false;
 	}
-	return _cachedBoundingSphereUntransformed;
+	return _supportData.cachedBoundingSphereUntransformed;
 }
 
 const Sphere& Mesh::boundingSphere()
 {
-	if (_shouldUpdateBoundingSphere && _supportData.valid)
+	if (_supportData.shouldUpdateBoundingSphere && _supportData.valid)
 	{
 		const auto& ft = finalTransform();
-		_cachedBoundingSphere = Sphere(ft * _supportData.averageCenter,
+		_supportData.cachedBoundingSphere = Sphere(ft * _supportData.averageCenter,
 			finalTransformScale() * _supportData.boundingSphereRadius);
-		_shouldUpdateBoundingSphere = false;
+		_supportData.shouldUpdateBoundingSphere = false;
 	}
-	return _cachedBoundingSphere;
+	return _supportData.cachedBoundingSphere;
 }
 
 const AABB& Mesh::boundingBox()
 {
-	if (_shouldUpdateBoundingBox && _supportData.valid)
+	if (_supportData.shouldUpdateBoundingBox && _supportData.valid)
 	{
 		AABB originalAABB = AABB(_supportData.averageCenter, 0.5f * _supportData.dimensions);
 		
@@ -349,25 +217,25 @@ const AABB& Mesh::boundingBox()
 			maxVertex = maxv(maxVertex, transformedCorner);
 		}
 		
-		_cachedBoundingBox = AABB(0.5f * (maxVertex + minVertex), 0.5f * maxv(vec3(0.0002f), maxVertex - minVertex));
-		_shouldUpdateBoundingBox = false;
+		_supportData.cachedBoundingBox = AABB(0.5f * (maxVertex + minVertex), 0.5f * maxv(vec3(0.0002f), maxVertex - minVertex));
+		_supportData.shouldUpdateBoundingBox = false;
 	}
 	
-	return _cachedBoundingBox;
+	return _supportData.cachedBoundingBox;
 }
 
 const OBB& Mesh::orientedBoundingBox()
 {
-	if (_shouldUpdateOrientedBoundingBox)
+	if (_supportData.shouldUpdateOrientedBoundingBox)
 	{
 		mat4 ft = finalTransform();
 		mat3 r = ft.mat3();
 		vec3 s = removeMatrixScale(r);
-		_cachedOrientedBoundingBox = OBB(ft * _supportData.averageCenter, 0.5f * s * _supportData.dimensions, r);
-		_shouldUpdateOrientedBoundingBox = false;
+		_supportData.cachedOrientedBoundingBox = OBB(ft * _supportData.averageCenter, 0.5f * s * _supportData.dimensions, r);
+		_supportData.shouldUpdateOrientedBoundingBox = false;
 	}
 
-	return _cachedOrientedBoundingBox;
+	return _supportData.cachedOrientedBoundingBox;
 }
 
 const std::vector<mat4>& Mesh::deformationMatrices()
@@ -488,12 +356,23 @@ void skinVector3Transformed(VertexStorage::Pointer from, VertexStorage::Pointer 
 
 bool Mesh::skinned() const
 {
+	ET_FAIL("TODO");
+	/*
+	 * TODO
+	 *
 	return _vertexStorage->hasAttribute(VertexAttributeUsage::BlendIndices) &&
 		_vertexStorage->hasAttribute(VertexAttributeUsage::BlendWeights);
+	// */
+	return false;
 }
 
 VertexStorage::Pointer Mesh::bakeDeformations()
 {
+	ET_FAIL("TODO");
+	
+	/*
+	 * TODO
+	 *
 	const auto& transforms = deformationMatrices();
 	
 	VertexStorage::Pointer result =
@@ -523,6 +402,7 @@ VertexStorage::Pointer Mesh::bakeDeformations()
 		copyVector3Rotated(_vertexStorage, result, VertexAttributeUsage::Tangent, ft);
 		copyVector3Rotated(_vertexStorage, result, VertexAttributeUsage::Binormal, ft);
 	}
-	
 	return result;
+	// */
+	return VertexStorage::Pointer();
 }

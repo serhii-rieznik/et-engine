@@ -345,7 +345,7 @@ namespace et
 		
 		uint32_t sortingKey() const
 		{
-			return static_cast<uint32_t>(!depthWriteEnabled) << 1 | static_cast<uint32_t>(!depthWriteEnabled);
+			return static_cast<uint32_t>(depthWriteEnabled) << 1 | static_cast<uint32_t>(depthWriteEnabled);
 		}
 	};
 	
@@ -379,7 +379,7 @@ namespace et
 			blendEnabled(e), color(s, d), alpha(s, d) { }
 		
 		uint32_t sortingKey() const
-			{ return blendEnabled ? 1 : 0; }
+			{ return blendEnabled ? 0 : 1; }
 		
 		bool operator == (const BlendState& bs) const
 		{

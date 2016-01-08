@@ -14,7 +14,6 @@ SkeletonElement* SkeletonElement::duplicate()
 {
 	SkeletonElement* result = etCreateObject<SkeletonElement>(name(), parent());
 	duplicateChildrenToObject(result);
-	result->tag = tag;
 	return result;
 }
 

@@ -27,7 +27,7 @@ namespace et
 			
 			ParticleSystem* duplicate();
 			
-			const VertexArrayObject& vao() const
+			const VertexArrayObject::Pointer& vao() const
 				{ return _vao; }
 
 			const IndexBuffer::Pointer& indexBuffer() const
@@ -52,7 +52,7 @@ namespace et
 		private:
 			RenderContext* _rc = nullptr;
 			
-			VertexArrayObject _vao;
+			VertexArrayObject::Pointer _vao;
 			VertexDeclaration _decl;
 			VertexArray::Description _vertexData;
 			

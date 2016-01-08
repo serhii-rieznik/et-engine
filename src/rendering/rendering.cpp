@@ -561,6 +561,6 @@ bool et::stringToCullMode(const std::string& mode, CullMode& outMode)
 			return true;
 		}
 	}
-	
+	log::error("Unable to convert cull mode string `%s` to CullMode value", mode.c_str());
 	return false;
 }

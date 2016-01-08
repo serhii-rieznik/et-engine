@@ -741,10 +741,10 @@ void et::etUseProgram(uint32_t program)
 #endif
 }
 
-void et::etBindVertexArray(uint32_t arr)
+void et::etbindVertexArrayObject(uint32_t arr)
 {
 	glBindVertexArray(arr);
-	checkOpenGLError("glBindVertexArray(%u)", arr);
+	checkOpenGLError("glBindVertexArrayObject(%u)", arr);
 
 #if ET_ENABLE_OPENGL_COUNTERS
 	++OpenGLCounters::bindVertexArrayObjectCounter;

@@ -9,6 +9,8 @@
 
 #include <et/rendering/material.h>
 #include <et/rendering/vertexarrayobject.h>
+#include <et/vertexbuffer/vertexstorage.h>
+#include <et/vertexbuffer/indexarray.h>
 
 namespace et
 {
@@ -19,8 +21,8 @@ namespace et
 		
 	public:
 		RenderBatch() = default;
-		RenderBatch(const Material::Pointer&, const VertexArrayObject&, const mat4& transform = identityMatrix);
-		RenderBatch(const Material::Pointer&, const VertexArrayObject&, const mat4& transform, uint32_t, uint32_t);
+		RenderBatch(const Material::Pointer&, const VertexArrayObject::Pointer&, const mat4& transform = identityMatrix);
+		RenderBatch(const Material::Pointer&, const VertexArrayObject::Pointer&, const mat4& transform, uint32_t, uint32_t);
 
 		Material::Pointer& material()
 			{ return _material; }
@@ -28,24 +30,40 @@ namespace et
 		const Material::Pointer& material() const
 			{ return _material; }
 		
-		VertexArrayObject& data()
-			{ return _data; }
-		
-		const VertexArrayObject& data() const
-			{ return _data; }
+		VertexArrayObject::Pointer& vao()
+			{ return _vao; }
+		const VertexArrayObject::Pointer& vao() const
+			{ return _vao; }
 		
 		const uint32_t firstIndex() const
 			{ return _firstIndex; }
-		
 		const uint32_t numIndexes() const
 			{ return _numIndexes; }
 		
 		const mat4& transformation() const
 			{ return _transformation; }
+		void setTransformation(const mat4& m)
+			{ _transformation = m ; }
+		
+		VertexStorage::Pointer& vertexStorage()
+			{ return _vertexStorage; }
+		const VertexStorage::Pointer& vertexStorage() const
+			{ return _vertexStorage; }
+		void setVertexStorage(VertexStorage::Pointer vs)
+			{ _vertexStorage = vs; }
+
+		IndexArray::Pointer& indexArray()
+			{ return _indexArray; }
+		const IndexArray::Pointer& indexArray() const
+			{ return _indexArray; }
+		void setIndexArray(IndexArray::Pointer ia)
+			{ _indexArray = ia; }
 		
 	private:
 		Material::Pointer _material;
-		VertexArrayObject _data;
+		VertexArrayObject::Pointer _vao;
+		VertexStorage::Pointer _vertexStorage;
+		IndexArray::Pointer _indexArray;
 		mat4 _transformation = identityMatrix;
 		uint32_t _firstIndex = 0;
 		uint32_t _numIndexes = 0;

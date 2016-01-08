@@ -46,7 +46,7 @@ namespace et
 		void drawAllElements(const IndexBuffer::Pointer& ib);
 
 		void drawElementsInstanced(const IndexBuffer::Pointer& ib, uint32_t first, uint32_t count, uint32_t instances);
-		void drawElementsBaseIndex(const VertexArrayObject& vao, int base, uint32_t first, uint32_t count);
+		void drawElementsBaseIndex(const VertexArrayObject::Pointer& vao, int base, uint32_t first, uint32_t count);
 		void drawElementsSequentially(PrimitiveType, uint32_t first, uint32_t count);
 		
 		BinaryDataStorage readFramebufferData(const vec2i&, TextureFormat, DataFormat);
@@ -76,7 +76,7 @@ namespace et
 		Camera* _currentCamera = nullptr;
 		
 		ObjectsCache _sharedCache;
-		VertexArrayObject _fullscreenQuadVao;
+		VertexArrayObject::Pointer _fullscreenQuadVao;
 		
 		Program::Pointer _fullscreenProgram[TextureTarget_max];
 		Program::Pointer _fullscreenDepthProgram;

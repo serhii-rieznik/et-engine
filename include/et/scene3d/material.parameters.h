@@ -9,144 +9,93 @@
 
 namespace et
 {
-	enum MaterialParameters : uint32_t
+	enum class MaterialParameter : uint32_t
 	{
-		MaterialParameter_Undefined,
+		AmbientMap,
+		DiffuseMap,
+		SpecularMap,
+		EmissiveMap,
+		NormalMap,
+		BumpMap,
+		ReflectionMap,
+		OpacityMap,
 		
-		MaterialParameter_AmbientColor,
-		MaterialParameter_DiffuseColor,
-		MaterialParameter_SpecularColor,
-		MaterialParameter_EmissiveColor,
+		AmbientColor,
+		DiffuseColor,
+		SpecularColor,
+		EmissiveColor,
 		
-		MaterialParameter_AmbientMap,
-		MaterialParameter_DiffuseMap,
-		MaterialParameter_SpecularMap,
-		MaterialParameter_EmissiveMap,
-		MaterialParameter_NormalMap,
-		MaterialParameter_BumpMap,
-		MaterialParameter_ReflectionMap,
-		MaterialParameter_OpacityMap,
+		AmbientFactor,
+		DiffuseFactor,
+		SpecularFactor,
+		EmissiveFactor,
+		BumpFactor,
 		
-		MaterialParameter_AmbientFactor,
-		MaterialParameter_DiffuseFactor,
-		MaterialParameter_SpecularFactor,
-		MaterialParameter_BumpFactor,
-		MaterialParameter_ReflectionFactor,
+		Transparency,
+		Roughness,
 		
-		MaterialParameter_Roughness,
-		MaterialParameter_Transparency,
-		MaterialParameter_ShadingModel,
-
-		MaterialParameter_TransparentColor,
-		MaterialParameter_Opacity,
-
-		MaterialParameter_max
+		max
+	};
+	
+	enum : uint32_t
+	{
+		MaterialParameter_max = static_cast<uint32_t>(MaterialParameter::max)
 	};
 	
 	template <typename T>
-	struct DefaultMaterialEntryBase
+	struct DefaultMaterialEntry
 	{
-		T value;
-		uint32_t set = 0;
+		DefaultMaterialEntry() = default;
 		
-	public:
-		DefaultMaterialEntryBase& operator = (const DefaultMaterialEntryBase& r)
+		DefaultMaterialEntry(const T& v) :
+			value(v), set(1) { }
+		
+		DefaultMaterialEntry& operator = (const DefaultMaterialEntry& r)
 		{
 			this->value = r.value;
 			this->set = r.set;
 			return *this;
 		}
 		
-	protected:
-		DefaultMaterialEntryBase() :
-			value(0), set(0) { }
+		void clear()
+		{
+			value = T();
+			set = 0;
+		}
 		
-		DefaultMaterialEntryBase(const T& v) :
-			value(v), set(1) { }
+	public:
+		T value = T();
+		uint32_t set = 0;
 	};
 	
 	template <typename T>
-	struct DefaultMaterialEntry : public DefaultMaterialEntryBase<T>
-	{
-		DefaultMaterialEntry& operator = (T r)
-		{
-			this->value = r;
-			this->set = r != 0;
-			return *this;
-		}
-	};
-		
-	template <>
-	struct DefaultMaterialEntry<std::string> : public DefaultMaterialEntryBase<std::string>
-	{
-		DefaultMaterialEntry() :
-			DefaultMaterialEntryBase(emptyString) { }
-		
-		DefaultMaterialEntry& operator = (const std::string& r)
-		{
-			this->value = r;
-			this->set = !r.empty();
-			return *this;
-		}
-	};
-
-	template <>
-	struct DefaultMaterialEntry<vec4> : public DefaultMaterialEntryBase<vec4>
-	{
-		DefaultMaterialEntry& operator = (const vec4& r)
-		{
-			this->value = r;
-			this->set = r.dotSelf() > 0.0f;
-			return *this;
-		}
-	};
-	
-	template <>
-	struct DefaultMaterialEntry<Texture::Pointer> : public DefaultMaterialEntryBase<Texture::Pointer>
-	{
-		DefaultMaterialEntry& operator = (const Texture::Pointer& r)
-		{
-			this->value = r;
-			this->set = r.valid();
-			return *this;
-		}
-	};
-			
-	template <typename T>
-	struct DefaultParameters
+	struct ParameterSet
 	{
 		DefaultMaterialEntry<T> values[MaterialParameter_max];
 		
-		DefaultMaterialEntry<T>& operator[] (uint32_t i)
+		DefaultMaterialEntry<T>& operator [] (MaterialParameter i)
 		{
-			ET_ASSERT(i < MaterialParameter_max);
-			return values[i];
+			ET_ASSERT(i < MaterialParameter::max);
+			return values[static_cast<uint32_t>(i)];
 		}
 		
-		const DefaultMaterialEntry<T>& operator[] (uint32_t i) const
+		const DefaultMaterialEntry<T>& operator [] (MaterialParameter i) const
 		{
-			ET_ASSERT(i < MaterialParameter_max);
-			return values[i];
+			ET_ASSERT(i < MaterialParameter::max);
+			return values[static_cast<uint32_t>(i)];
 		}
 		
-		DefaultParameters& operator = (const DefaultParameters& r)
-		{
-			for (uint32_t i = 0; i < MaterialParameter_max; ++i)
-				values[i] = r.values[i];
-			return *this;
-		}
+		DefaultMaterialEntry<T>* begin()
+			{ return values; }
+		
+		DefaultMaterialEntry<T>* end()
+			{ return begin() + MaterialParameter_max; }
+		
+		const DefaultMaterialEntry<T>* begin() const
+			{ return values; }
+		
+		const DefaultMaterialEntry<T>* end() const
+			{ return begin() + MaterialParameter_max; }
 	};
-		
-	typedef std::map<uint32_t, int32_t> CustomIntParameters;
-	typedef std::map<uint32_t, float> CustomFloatParameters;
-	typedef std::map<uint32_t, vec4> CustomVectorParameters;
-	typedef std::map<uint32_t, Texture::Pointer> CustomTextureParameters;
-	typedef std::map<uint32_t, std::string> CustomStringParameters;
-	
-	typedef DefaultParameters<int32_t> DefaultIntParameters;
-	typedef DefaultParameters<float> DefaultFloatParameters;
-	typedef DefaultParameters<vec4> DefaultVectorParameters;
-	typedef DefaultParameters<Texture::Pointer> DefaultTextureParameters;
-	typedef DefaultParameters<std::string> DefaultStringParameters;
 }
 

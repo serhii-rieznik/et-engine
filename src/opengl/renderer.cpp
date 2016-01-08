@@ -107,7 +107,7 @@ void Renderer::clear(bool color, bool depth)
 
 void Renderer::fullscreenPass()
 {
-	_rc->renderState().bindVertexArray(_fullscreenQuadVao);
+	_rc->renderState().bindVertexArrayObject(_fullscreenQuadVao);
 	drawAllElements(_fullscreenQuadVao->indexBuffer());
 }
 
@@ -227,7 +227,7 @@ void Renderer::drawAllElements(const IndexBuffer::Pointer& ib)
 		dataFormatValue(ib->dataFormat()), nullptr);
 }
 
-void Renderer::drawElementsBaseIndex(const VertexArrayObject& vao, int base, uint32_t first, uint32_t count)
+void Renderer::drawElementsBaseIndex(const VertexArrayObject::Pointer& vao, int base, uint32_t first, uint32_t count)
 {
 	ET_ASSERT(vao->indexBuffer().valid());
 	
@@ -239,7 +239,7 @@ void Renderer::drawElementsBaseIndex(const VertexArrayObject& vao, int base, uin
 	
 	const VertexBuffer::Pointer& vb = vao->vertexBuffer();
 	RenderState& rs = _rc->renderState();
-	rs.bindVertexArray(vao);
+	rs.bindVertexArrayObject(vao);
 	rs.bindBuffer(vb);
 	rs.setVertexAttributesBaseIndex(vb->declaration(), base);
 	
@@ -290,16 +290,16 @@ void Renderer::pushRenderBatch(RenderBatch::Pointer rb)
 {
 	auto& rs = _rc->renderState();
 	auto& batch = rb.reference();
-	auto& mat = batch.material().reference();
-	auto& prog = mat.program().reference();
 	
+	auto& mat = batch.material().reference();
 	mat.enableInRenderState(rs);
 	
+	auto& prog = mat.program().reference();
 	prog.setCameraProperties((_currentCamera == nullptr) ? _defaultCamera : (*_currentCamera));
 	prog.setTransformMatrix(batch.transformation());
 	
-	rs.bindVertexArray(batch.data());
-	drawElements(batch.data()->indexBuffer(), batch.firstIndex(), batch.numIndexes());
+	rs.bindVertexArrayObject(batch.vao());
+	drawElements(batch.vao()->indexBuffer(), batch.firstIndex(), batch.numIndexes());
 }
 
 /*

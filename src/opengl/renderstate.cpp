@@ -160,22 +160,22 @@ void RenderState::bindBuffers(const VertexBuffer::Pointer& vb, const IndexBuffer
 	bindBuffer(ib, force);
 }
 
-void RenderState::bindVertexArray(uint32_t buffer, bool force)
+void RenderState::bindVertexArrayObject(uint32_t buffer, bool force)
 {
 	ET_ASSERT(OpenGLCapabilities::instance().hasFeature(OpenGLFeature_VertexArrayObjects));
 	
 	if (force || (_desc.cache.boundVertexArrayObject != buffer))
 	{
 		_desc.cache.boundVertexArrayObject = buffer;
-		etBindVertexArray(buffer);
+		etbindVertexArrayObject(buffer);
 	}
 }
 
-void RenderState::bindVertexArray(const VertexArrayObject& vao, bool force)
+void RenderState::bindVertexArrayObject(const VertexArrayObject::Pointer& vao, bool force)
 {
 	if (OpenGLCapabilities::instance().hasFeature(OpenGLFeature_VertexArrayObjects))
 	{
-		bindVertexArray(vao.valid() ? static_cast<uint32_t>(vao->apiHandle()) : 0, force);
+		bindVertexArrayObject(vao.valid() ? static_cast<uint32_t>(vao->apiHandle()) : 0, force);
 	}
 	else
 	{
@@ -189,7 +189,7 @@ void RenderState::bindVertexArray(const VertexArrayObject& vao, bool force)
 void RenderState::resetBufferBindings()
 {
 	if (OpenGLCapabilities::instance().hasFeature(OpenGLFeature_VertexArrayObjects))
-		bindVertexArray(0);
+		bindVertexArrayObject(0);
 	
 	bindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	bindBuffer(GL_ARRAY_BUFFER, 0);
@@ -368,7 +368,7 @@ void RenderState::vertexArrayDeleted(uint32_t buffer)
 		
 		bindBuffer(GL_ARRAY_BUFFER, 0, true);
 		bindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0, true);
-		bindVertexArray(0);
+		bindVertexArrayObject(0);
 	}
 }
 
@@ -578,7 +578,7 @@ void RenderState::applyState(const RenderState::Descriptor& s)
 	
 	bindFramebuffer(s.cache.boundFramebuffer, true);
 	bindProgram(s.cache.boundProgram, true);
-	bindVertexArray(s.cache.boundVertexArrayObject, true);
+	bindVertexArrayObject(s.cache.boundVertexArrayObject, true);
 	bindBuffer(GL_ELEMENT_ARRAY_BUFFER, s.cache.boundElementArrayBuffer, true);
 	bindBuffer(GL_ARRAY_BUFFER, s.cache.boundArrayBuffer, true);
 	

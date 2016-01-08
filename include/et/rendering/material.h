@@ -15,7 +15,7 @@ namespace et
 {
 	class RenderState;
 	class MaterialFactory;
-	class Material : public et::Shared
+	class Material : public LoadableObject
 	{
 	public:
 		ET_DECLARE_POINTER(Material)
@@ -54,6 +54,8 @@ namespace et
 		void setProperty(const std::string& name, const mat4& value);
 		
 		void setTexutre(const std::string& name, const Texture::Pointer&);
+		
+		uint32_t sortingKey() const;
 
 	private:
 		struct DataProperty
@@ -95,8 +97,15 @@ namespace et
 		Program::Pointer _program;
 		DepthState _depth;
 		BlendState _blend;
-		CullMode _cullMode;
+		CullMode _cullMode = CullMode::Disabled;
 		ProgramSetIntFunction _setIntFunctions[DataType_max];
 		ProgramSetFloatFunction _setFloatFunctions[DataType_max];
+		uint32_t _additionalPriority = 0;
+	};
+	
+	class MaterialProvider
+	{
+	public:
+		virtual Material::Pointer materialWithName(const std::string&) = 0;
 	};
 }

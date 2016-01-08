@@ -27,15 +27,15 @@ namespace et
 		
 		IndexBuffer::Pointer createIndexBuffer(const std::string&, IndexArray::Pointer, BufferDrawType);
 		
-		VertexArrayObject createVertexArrayObject(const std::string&);
+		VertexArrayObject::Pointer createVertexArrayObject(const std::string&);
 
-		VertexArrayObject createVertexArrayObject(const std::string&, VertexArray::Pointer, BufferDrawType,
+		VertexArrayObject::Pointer createVertexArrayObject(const std::string&, VertexArray::Pointer, BufferDrawType,
 			IndexArray::Pointer, BufferDrawType);
 
-		VertexArrayObject createVertexArrayObject(const std::string&, VertexStorage::Pointer, BufferDrawType,
+		VertexArrayObject::Pointer createVertexArrayObject(const std::string&, VertexStorage::Pointer, BufferDrawType,
 			IndexArray::Pointer, BufferDrawType);
 
-		VertexArrayObject createVertexArrayObject(const std::string&, VertexStorage::Pointer, BufferDrawType,
+		VertexArrayObject::Pointer createVertexArrayObject(const std::string&, VertexStorage::Pointer, BufferDrawType,
 			IndexBuffer::Pointer);
 
 	private:
