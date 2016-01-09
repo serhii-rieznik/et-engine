@@ -435,7 +435,11 @@ void et::FBXLoaderPrivate::loadNode(s3d::Storage& storage, FbxNode* node, s3d::B
 	
 	nodeToElementMap[reinterpret_cast<size_t>(node)] = createdElement;
 
-	const auto& transform = node->EvaluateLocalTransform();
+	auto t = node->GetGeometricTranslation(FbxNode::eSourcePivot);
+	auto r = node->GetGeometricRotation(FbxNode::eSourcePivot);
+	auto s = node->GetGeometricScaling(FbxNode::eSourcePivot);
+
+	const auto& transform = node->EvaluateLocalTransform() * FbxAMatrix(t, r, s);
 	createdElement->setTransform(fbxMatrixToMat4(transform));
 
 	for (const auto& p : props)
