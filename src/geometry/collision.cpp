@@ -575,7 +575,7 @@ bool et::pointInsidePolygon(const vec2& p, const std::vector<vec2>& polygon)
 	return (intersectionCount % 2) == 1;
 }
 
-bool et::intersect::rayBoundingBox(et::ray3d r, const et::BoundingBox& box)
+bool et::intersect::rayBoundingBox(et::ray3d r, const et::BoundingBox& box, vec3* intersection_pt)
 {
 	r.direction.x = 1.0f / r.direction.x;
 	r.direction.y = 1.0f / r.direction.y;
@@ -586,24 +586,32 @@ bool et::intersect::rayBoundingBox(et::ray3d r, const et::BoundingBox& box)
 	
 	vec3 parameters[2] = { box.minVertex(), box.maxVertex() };
 	
-	float txmin = (parameters[r_sign_x].x - r.origin.x) * r.direction.x;
+	float t_min = (parameters[r_sign_x].x - r.origin.x) * r.direction.x;
 	float tymin = (parameters[r_sign_y].y - r.origin.y) * r.direction.y;
 	
-	float txmax = (parameters[1 - r_sign_x].x - r.origin.x) * r.direction.x;
+	float t_max = (parameters[1 - r_sign_x].x - r.origin.x) * r.direction.x;
 	float tymax = (parameters[1 - r_sign_y].y - r.origin.y) * r.direction.y;
 	
-	if ((txmin < tymax) && (tymin < txmax))
+	if ((t_min < tymax) && (tymin < t_max))
 	{
-		if (tymin > txmin) txmin = tymin;
-		if (tymax < txmax) txmax = tymax;
+		if (tymin > t_min)
+			t_min = tymin;
+		if (tymax < t_max)
+			t_max = tymax;
 		
 		int r_sign_z = (r.direction.z < 0.0f ? 1 : 0);
 		
 		float tzmin = (parameters[r_sign_z].z - r.origin.z) * r.direction.z;
 		float tzmax = (parameters[1 - r_sign_z].z - r.origin.z) * r.direction.z;
-		
-		if ((txmin < tzmax) && (tzmin < txmax))
+
+		if ((t_min < tzmax) && (tzmin < t_max))
+		{
+			if (intersection_pt != nullptr)
+			{
+				*intersection_pt = r.origin + r.direction * std::max(t_min, tzmin);
+			}
 			return true;
+		}
 	}
 	
 	return false;

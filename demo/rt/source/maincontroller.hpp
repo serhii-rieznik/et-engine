@@ -6,17 +6,18 @@
 
 namespace demo
 {
-	class MainController : public et::IApplicationDelegate
+	class MainController : public et::IApplicationDelegate, public et::MaterialProvider
 	{
-		et::ApplicationIdentifier applicationIdentifier() const;
-		void setApplicationParameters(et::ApplicationParameters&);
-		void setRenderContextParameters(et::RenderContextParameters&);
-		void applicationDidLoad(et::RenderContext*);
-		void render(et::RenderContext*);
-		void applicationWillTerminate();
+		et::ApplicationIdentifier applicationIdentifier() const override;
+		void setApplicationParameters(et::ApplicationParameters&) override;
+		void setRenderContextParameters(et::RenderContextParameters&) override;
+		void applicationDidLoad(et::RenderContext*) override;
+		void render(et::RenderContext*) override;
+		void applicationWillTerminate() override;
         
         void start();
-
+		et::Material::Pointer materialWithName(const std::string&) override;
+		
 	private:
         et::Dictionary _options;
         et::RenderContext* _rc = nullptr;

@@ -44,7 +44,7 @@ namespace et
 		 */
 		bool raySphere(const ray3d&, const Sphere& s, vec3* ip1, vec3* ip2 = nullptr);
 		bool rayPlane(const ray3d&, const plane& p, vec3* intersection_pt);
-		bool rayBoundingBox(et::ray3d r, const et::BoundingBox&);
+		bool rayBoundingBox(et::ray3d r, const et::BoundingBox&, vec3* intersection_pt);
 		bool raySegment(const ray2d&, const segment2d&, vec2* intersectionPoint);
 		
 		/*

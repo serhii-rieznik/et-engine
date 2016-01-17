@@ -462,7 +462,6 @@ DepthState et::deserializeDepthState(const et::Dictionary& depth)
 BlendState et::deserializeBlendState(const et::Dictionary& blend)
 {
 	BlendState _blend;
-	_blend.blendEnabled = blend.boolForKey(kBlendEnabled, false)->content != 0;
 	
 	BlendConfiguration config = BlendConfiguration::Disabled;
 	if (stringToBlendConfiguration(blend.stringForKey(kBlendConfiguration)->content, config))
@@ -477,6 +476,11 @@ BlendState et::deserializeBlendState(const et::Dictionary& blend)
 		_blend.alpha.source = stringToBlendFunction(blend.stringForKey(kSourceAlpha, blendFunctionToString(BlendFunction::One))->content);
 		_blend.alpha.dest = stringToBlendFunction(blend.stringForKey(kDestAlpha, blendFunctionToString(BlendFunction::Zero))->content);
 		_blend.alphaOperation = stringToBlendOperation(blend.stringForKey(kAlphaOperation, blendOperationToString(BlendOperation::Add))->content);
+	}
+	
+	if (blend.hasKey(kBlendEnabled))
+	{
+		_blend.blendEnabled = blend.boolForKey(kBlendEnabled)->content != 0;
 	}
 	return _blend;
 }

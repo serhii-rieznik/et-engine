@@ -106,7 +106,7 @@ void KDTree::build(const rt::TriangleList& triangles, size_t maxDepth, int split
 	_triangles = triangles;
 	_spaceSplitSize = splits;
 	
-	_maxDepth = etMin(DepthLimit, maxDepth);
+	_maxDepth = std::min(DepthLimit, maxDepth);
 	_nodes.reserve(maxDepth * maxDepth);
 	_nodes.push_back(buildRootNode());
 	
@@ -221,7 +221,7 @@ void KDTree::splitNodeUsingSortedArray(size_t nodeIndex, size_t depth)
 		return;
 	}
 		
-	_maxBuildDepth = etMax(_maxBuildDepth, depth);
+	_maxBuildDepth = std::max(_maxBuildDepth, depth);
 	const auto& bbox = _boundingBoxes.at(nodeIndex);
 	
 	auto estimateCostAtSplit = [&bbox, nodeIndex, this](float splitPlane, size_t leftTriangles,
@@ -305,7 +305,7 @@ void KDTree::splitNodeUsingSortedArray(size_t nodeIndex, size_t depth)
 		}
 	}
 	
-	float targetValue = etMin(splitCost.x, etMin(splitCost.y, splitCost.z));
+	float targetValue = std::min(splitCost.x, std::min(splitCost.y, splitCost.z));
 	for (int currentAxis = 0; splitFound && (currentAxis < 3); ++currentAxis)
 	{
 		if (splitCost[currentAxis] == targetValue)
@@ -352,7 +352,7 @@ float KDTree::findIntersectionInNode(const rt::Ray& ray, const KDTree::Node& nod
 	while (remainingIndices > 0)
 	{
 		rt::index localIndices[localBufferSize];
-		rt::index indicesToCopy = etMin(localBufferSize, remainingIndices);
+		rt::index indicesToCopy = std::min(localBufferSize, remainingIndices);
 		std::copy(trianglesIndices, trianglesIndices + indicesToCopy, localIndices);
 		remainingIndices -= indicesToCopy;
 		trianglesIndices += indicesToCopy;
@@ -492,8 +492,8 @@ KDTree::Stats KDTree::nodesStatistics() const
 		
 		if (nodeTriangles > 0)
 		{
-			result.maxTrianglesPerNode = etMax(result.maxTrianglesPerNode, nodeTriangles);
-			result.minTrianglesPerNode = etMin(result.minTrianglesPerNode, nodeTriangles);
+			result.maxTrianglesPerNode = std::max(result.maxTrianglesPerNode, nodeTriangles);
+			result.minTrianglesPerNode = std::min(result.minTrianglesPerNode, nodeTriangles);
 		}
 		
 		result.distributedTriangles += nodeTriangles;

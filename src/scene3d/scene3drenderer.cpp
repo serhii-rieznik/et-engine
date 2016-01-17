@@ -54,49 +54,35 @@ void s3d::Renderer::renderMeshList(RenderContext* rc, const s3d::BaseElement::Li
 		}
 	}
 
-/*
-	auto cam = rc->renderer()->currentCamera();
+	auto cameraPosition = rc->renderer()->currentCamera()->position();
 	for (auto& rbv : _latestBatches)
 	{
-		auto& v = rbv.second;
-		std::sort(v.begin(), v.end(), [cam](BatchFromMesh& l, BatchFromMesh& r)
+		std::sort(rbv.second.begin(), rbv.second.end(), [cameraPosition](BatchFromMesh& l, BatchFromMesh& r)
 		{
-			// TODO
+			auto lip = l.first->transformation() * l.first->boundingBox().center;
+			auto rip = r.first->transformation() * r.first->boundingBox().center;
+			if (l.first->material()->blendState().blendEnabled)
+				return (lip - cameraPosition).dotSelf() > (rip - cameraPosition).dotSelf();
+			else
+				return (lip - cameraPosition).dotSelf() < (rip - cameraPosition).dotSelf();
 		});
-	}
-*/
-	
-	static uint32_t frameIndex = 0;
-	const uint32_t frameStep = 1;
-	const uint32_t renderGroup = 1;
-	
-	uint32_t i = 0;
-	for (auto& rbv : _latestBatches)
-	{
-		if (i == renderGroup)
+
+		for (auto& rb : rbv.second)
 		{
-			uint32_t j = 0;
-			
+			rb.second->material()->bindToMaterial(rb.first->material());
+			rc->renderer()->pushRenderBatch(rb.first);
+		}
+	}
+	
+	if (hasFlag(RenderDebugObjects))
+	{
+		for (auto& rbv : _latestBatches)
+		{
 			for (auto& rb : rbv.second)
 			{
-				if (j < frameIndex)
-				{
-					rb.second->material()->bindToMaterial(rb.first->material());
-					rc->renderer()->pushRenderBatch(rb.first);
-					
-					renderTransformedBoundingBox(rc, rb.first->boundingBox(), rb.second->finalTransform());
-				}
-				++j;
+				renderTransformedBoundingBox(rc, rb.first->boundingBox(), rb.first->transformation());
 			}
-			
-			frameIndex += frameStep;
-			if (frameIndex >= rbv.second.size())
-			{
-				frameIndex = 0;
-			}
-			break;
 		}
-		++i;
 	}
 }
 
@@ -115,6 +101,14 @@ void s3d::Renderer::initDebugObjects(RenderContext* rc, Material::Pointer bboxMa
 
 void s3d::Renderer::renderTransformedBoundingBox(RenderContext* rc, const BoundingBox& b, const mat4& t)
 {
+	_bboxBatch->material()->setProperty("bboxScale", b.halfDimension);
+	_bboxBatch->material()->setProperty("bboxCenter", b.center);
 	_bboxBatch->setTransformation(t);
+
+	auto& rs = rc->renderState();
+	rs.setFillMode(FillMode::Solid);
 	rc->renderer()->pushRenderBatch(_bboxBatch);
+	rs.setFillMode(FillMode::Wireframe);
+	rc->renderer()->pushRenderBatch(_bboxBatch);
+	rs.setFillMode(hasFlag(Wireframe) ? FillMode::Wireframe : FillMode::Solid);
 }

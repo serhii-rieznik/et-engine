@@ -697,7 +697,7 @@ void OBJLoader::loadMaterials(const std::string& fileName, bool async, ObjectsCa
 					std::string name;
 					materialFile >> name;
 					
-					_lastMaterial = SceneMaterial::Pointer();
+					_lastMaterial = SceneMaterial::Pointer::create();
 					_lastMaterial->setName(name);
 					
 					_materials.push_back(_lastMaterial);
@@ -834,7 +834,7 @@ void OBJLoader::processLoadedData()
 			}
 		}
 		
-		SceneMaterial::Pointer m;
+		SceneMaterial::Pointer m = SceneMaterial::Pointer::create();
 		
 		for (auto mat : _materials)
 		{

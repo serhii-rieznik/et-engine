@@ -6,6 +6,7 @@
  */
 
 #include <et/geometry/geometry.h>
+#include <et/geometry/collision.h>
 #include <et/core/conversion.h>
 #include <et/rendering/renderbatch.h>
 
@@ -80,4 +81,39 @@ Dictionary RenderBatch::serialize() const
 	result.setIntegerForKey(kStartIndex, _firstIndex);
 	result.setIntegerForKey(kIndexesCount, _numIndexes);
 	return result;
+}
+
+bool RenderBatch::intersectsLocalSpaceRay(const ray3d& ray, vec3& intersection)
+{
+	if (_vertexStorage->hasAttributeWithType(VertexAttributeUsage::Position, DataType::Vec3) == false)
+	{
+		log::error("Unable to calculate intersection - missing position attribute.");
+	}
+	
+	bool found = false;
+	float minDistance = std::numeric_limits<float>::max();
+	const auto pos = _vertexStorage->accessData<DataType::Vec3>(VertexAttributeUsage::Position, 0);
+	uint32_t numTriangles = _numIndexes / 3;
+	for (uint32_t t = 0; t < numTriangles; ++t)
+	{
+		auto i0 = _indexArray->getIndex(_firstIndex + 3 * t + 0);
+		auto i1 = _indexArray->getIndex(_firstIndex + 3 * t + 1);
+		auto i2 = _indexArray->getIndex(_firstIndex + 3 * t + 2);
+		const vec3& p0 = pos[i0];
+		const vec3& p1 = pos[i1];
+		const vec3& p2 = pos[i2];
+		vec3 ip;
+		if (intersect::rayTriangle(ray, triangle(p0, p1, p2), &ip))
+		{
+			float d = (ip - ray.origin).dotSelf();
+			if (d < minDistance)
+			{
+				minDistance = d;
+				intersection = ip;
+				found = true;
+			}
+		}
+	}
+	
+	return found;
 }

@@ -71,6 +71,8 @@ namespace et
 
 		const BoundingBox& transformedBoundingBox();
 		
+		bool intersectsLocalSpaceRay(const ray3d&, vec3& intersection);
+		
 		Dictionary serialize() const;
 		
 	private:

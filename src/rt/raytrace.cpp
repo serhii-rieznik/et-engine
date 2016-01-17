@@ -247,10 +247,6 @@ void RaytracePrivate::buildMaterialAndTriangles(s3d::Scene::Pointer scene)
 	auto meshes = scene->childrenOfType(s3d::ElementType::Mesh);
 	for (s3d::Mesh::Pointer mesh : meshes)
 	{
-		auto& vs = mesh->vertexStorage();
-		auto& ia = mesh->indexArray();
-		if (vs.invalid() || ia.invalid()) continue;
-
 		auto meshMaterial = mesh->material();
 		auto materialIndex = materialIndexWithName(meshMaterial->name());
 		if (materialIndex == InvalidIndex)
@@ -258,41 +254,46 @@ void RaytracePrivate::buildMaterialAndTriangles(s3d::Scene::Pointer scene)
 			materialIndex = materials.size();
 			materials.emplace_back();
 			auto& mat = materials.back();
-			
-			float r = clamp(meshMaterial->getFloat(MaterialParameter_Roughness), 0.0f, 1.0f);
-			auto kA = meshMaterial->getVector(MaterialParameter_AmbientColor);
-			auto kD = meshMaterial->getVector(MaterialParameter_DiffuseColor);
-			
+			float r = clamp(meshMaterial->getFloat(MaterialParameter::Roughness), 0.0f, 1.0f);
+			auto kA = meshMaterial->getVector(MaterialParameter::AmbientColor);
+			auto kD = meshMaterial->getVector(MaterialParameter::DiffuseColor);
 			mat.name = meshMaterial->name();
 			mat.diffuse = rt::float4(kA + kD);
-			mat.specular = rt::float4(meshMaterial->getVector(MaterialParameter_SpecularColor));
-			mat.emissive = rt::float4(meshMaterial->getVector(MaterialParameter_EmissiveColor));
+			mat.specular = rt::float4(meshMaterial->getVector(MaterialParameter::SpecularColor));
+			mat.emissive = rt::float4(meshMaterial->getVector(MaterialParameter::EmissiveColor));
 			mat.roughness = HALF_PI * (1.0f - std::cos(HALF_PI * r));
-			mat.ior = meshMaterial->getFloat(MaterialParameter_Transparency);
+			mat.ior = meshMaterial->getFloat(MaterialParameter::Transparency);
 		}
-
-		const mat4& t = mesh->finalTransform();
-
-		triangles.reserve(triangles.size() + mesh->numIndexes());
-
-		const auto pos = vs->accessData<VertexAttributeType::Vec3>(VertexAttributeUsage::Position, 0);
-		const auto nrm = vs->accessData<VertexAttributeType::Vec3>(VertexAttributeUsage::Normal, 0);
-		for (uint32_t i = 0; i < mesh->numIndexes(); i += 3)
+		
+		for (const auto& rb : mesh->renderBatches())
 		{
-			uint32_t i0 = ia->getIndex(mesh->startIndex() + i + 0);
-			uint32_t i1 = ia->getIndex(mesh->startIndex() + i + 1);
-			uint32_t i2 = ia->getIndex(mesh->startIndex() + i + 2);
-
-			triangles.emplace_back();
-			auto& tri = triangles.back();
-			tri.v[0] = rt::float4(t * pos[i0], 1.0f);
-			tri.v[1] = rt::float4(t * pos[i1], 1.0f);
-			tri.v[2] = rt::float4(t * pos[i2], 1.0f);
-			tri.n[0] = rt::float4(t.rotationMultiply(nrm[i0]).normalized(), 0.0f);
-			tri.n[1] = rt::float4(t.rotationMultiply(nrm[i1]).normalized(), 0.0f);
-			tri.n[2] = rt::float4(t.rotationMultiply(nrm[i2]).normalized(), 0.0f);
-			tri.materialIndex = static_cast<rt::index>(materialIndex);
-			tri.computeSupportData();
+			auto& vs = rb->vertexStorage();
+			auto& ia = rb->indexArray();
+			if (vs.invalid() || ia.invalid()) continue;
+			
+			const mat4& t = mesh->finalTransform();
+			
+			triangles.reserve(triangles.size() + rb->numIndexes());
+			
+			const auto pos = vs->accessData<DataType::Vec3>(VertexAttributeUsage::Position, 0);
+			const auto nrm = vs->accessData<DataType::Vec3>(VertexAttributeUsage::Normal, 0);
+			for (uint32_t i = 0; i < rb->numIndexes(); i += 3)
+			{
+				uint32_t i0 = ia->getIndex(rb->firstIndex() + i + 0);
+				uint32_t i1 = ia->getIndex(rb->firstIndex() + i + 1);
+				uint32_t i2 = ia->getIndex(rb->firstIndex() + i + 2);
+				
+				triangles.emplace_back();
+				auto& tri = triangles.back();
+				tri.v[0] = rt::float4(t * pos[i0], 1.0f);
+				tri.v[1] = rt::float4(t * pos[i1], 1.0f);
+				tri.v[2] = rt::float4(t * pos[i2], 1.0f);
+				tri.n[0] = rt::float4(t.rotationMultiply(nrm[i0]).normalized(), 0.0f);
+				tri.n[1] = rt::float4(t.rotationMultiply(nrm[i1]).normalized(), 0.0f);
+				tri.n[2] = rt::float4(t.rotationMultiply(nrm[i2]).normalized(), 0.0f);
+				tri.materialIndex = static_cast<rt::index>(materialIndex);
+				tri.computeSupportData();
+			}
 		}
 	}
 	
@@ -595,7 +596,7 @@ rt::float4 RaytracePrivate::sampleEnvironment(const rt::float4& direction)
 	const rt::float4 atmosphere(173.0f / 255.0f, 181.0f / 255.0f, 185.0f / 255.0f, 1.0f);
 	rt::float4 sunDirection = rt::float4(0.0f, 1.0f, 0.0f, 0.0f);
 	sunDirection.normalize();
-	float t = etMax(0.0f, direction.dot(sunDirection));
+	float t = std::max(0.0f, direction.dot(sunDirection));
 	float s = 5.0f * pow(t, 32.0f) + 8.0f * pow(t, 256.0f);
 	return ambient + atmosphere * std::sqrt(t) + sun * s;
 	// */

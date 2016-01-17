@@ -80,36 +80,7 @@ void Mesh::serialize(Dictionary stream, const std::string& basePath)
 void Mesh::deserialize(Dictionary stream, SerializationHelper* helper)
 {
 	RenderableElement::deserialize(stream, helper);
-	/*
-	if (stream.hasKey(kIndexArrayName))
-	{
-		_indexArray = helper->indexArrayWithName(stream.stringForKey(kIndexArrayName)->content);
-	}
-	
-	if (stream.hasKey(kSupportData))
-	{
-		auto supportData = stream.dictionaryForKey(kSupportData);
-		_supportData.minMaxCenter = arrayToVec3(supportData.arrayForKey(kMinMaxCenter));
-		_supportData.averageCenter = arrayToVec3(supportData.arrayForKey(kAverageCenter));
-		_supportData.dimensions = arrayToVec3(supportData.arrayForKey(kDimensions));
-		_boundingSphereRadius = supportData.floatForKey(kBoundingSphereRadius)->content;
-		_supportData.valid = true;
-	}
-	else
-	{
-		calculateSupportData();
-	}
-	
-	if (stream.hasKey(kLods))
-	{
-		auto lods = stream.dictionaryForKey(kLods)->content;
-		for (const auto& lod : lods)
-		{
-			auto mesh = s3d::Mesh::Pointer::create(lod.first);
-			mesh->deserialize(lod.second, helper);
-		}
-	}
-	*/
+	calculateSupportData();
 }
 
 void Mesh::transformInvalidated()

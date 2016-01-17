@@ -110,7 +110,7 @@ namespace et
 				return v[0].maxWith(v[1].maxWith(v[2]));
 			}
 		};
-		using TriangleList = std::vector<Triangle, SharedBlockAllocatorSTDProxy<rt::Triangle>>;
+		using TriangleList = std::vector<rt::Triangle, SharedBlockAllocatorSTDProxy<rt::Triangle>>;
 		
 		struct ET_ALIGNED(16) IntersectionData
 		{

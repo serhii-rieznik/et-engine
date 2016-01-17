@@ -22,7 +22,8 @@ namespace et
 			{
 				RenderMeshes = 0x01,
 				RenderHelperMeshes = 0x02,
-				Wireframe = 0x04,
+				RenderDebugObjects = 0x04,
+				Wireframe = 0x08,
 				
 				RenderAll = RenderMeshes | RenderHelperMeshes
 			};
@@ -30,12 +31,12 @@ namespace et
 		public:
 			Renderer();
 			void render(RenderContext*, const Scene&);
+			void renderTransformedBoundingBox(RenderContext*, const BoundingBox&, const mat4&);
 			
 			void initDebugObjects(RenderContext*, Material::Pointer bboxMaterial);
 			
 		private:
 			void renderMeshList(RenderContext*, const s3d::BaseElement::List&);
-			void renderTransformedBoundingBox(RenderContext*, const BoundingBox&, const mat4&);
 			
 		private:
 			using BatchFromMesh = std::pair<et::RenderBatch::Pointer, et::s3d::Mesh::Pointer>;

@@ -1,6 +1,6 @@
 {
 	"model-name" : "media/glass_for_wine.obj",
-	"rays-per-pixel" : 64,
+	"rays-per-pixel" : 256,
 	"camera-fov" : 45.0,
 	"camera-distance" : 15.25,
 	"camera-phi" : 90.0,

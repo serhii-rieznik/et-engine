@@ -52,7 +52,7 @@ void MainController::applicationDidLoad(et::RenderContext* rc)
 	
 	_scene = s3d::Scene::Pointer::create();
 	OBJLoader loader(modelName, OBJLoader::Option_CalculateTangents);
-	auto model = loader.load(rc, _scene->storage(), localCache);
+	auto model = loader.load(rc, this, _scene->storage(), localCache);
 	model->setParent(_scene.ptr());
 	
 	Raytrace::Options rtOptions;
@@ -108,14 +108,14 @@ void MainController::start()
 {
 	_rt.stop();
 	
-	vec2i textureSize = _rc->sizei();
+	vec2i textureSize = _rc->size();
 	
 	_textureData.resize(textureSize.square() * sizeof(vec4));
 	_textureData.fill(0);
 	
 	BinaryDataStorage proxy(reinterpret_cast<unsigned char*>(_textureData.data()), _textureData.dataSize());
 	_texture = _rc->textureFactory().genTexture(TextureTarget::Texture_2D, TextureFormat::RGBA32F,
-		textureSize, TextureFormat::RGBA, DataType::Float, proxy, "output-texture");
+		textureSize, TextureFormat::RGBA, DataFormat::Float, proxy, "output-texture");
 	
 	const vec3 lookPoint = arrayToVec3(_options.arrayForKey("camera-view-point"));
 	const vec3 offset = arrayToVec3(_options.arrayForKey("camera-offset"));
@@ -144,6 +144,11 @@ void MainController::render(et::RenderContext* rc)
 			_textureData.binary(), _textureData.dataSize());
 		rc->renderer()->renderFullscreenTexture(_texture);
 	}
+}
+
+Material::Pointer MainController::materialWithName(const std::string&)
+{
+	return Material::Pointer();
 }
 
 et::IApplicationDelegate* et::Application::initApplicationDelegate()

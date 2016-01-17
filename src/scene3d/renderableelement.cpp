@@ -56,6 +56,8 @@ void RenderableElement::deserialize(Dictionary stream, SerializationHelper* help
 		auto batch = RenderBatch::Pointer::create(mat, vao, identityMatrix, startIndex, numIndexes);
 		batch->setVertexStorage(vs);
 		batch->setIndexArray(ia);
+		batch->calculateBoundingBox();
+		
 		addRenderBatch(batch);
 	}
 
