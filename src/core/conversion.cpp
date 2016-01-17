@@ -123,7 +123,7 @@ vec4 et::strHexToVec4(const std::string& s)
 {
 	vec4 result;
 	uint32_t value = 0;
-	int l = etMin(8, static_cast<int>(s.size()));
+	int l = std::min(8, static_cast<int>(s.size()));
 
 	uint32_t scale = 1;
 	const char* cstr = s.c_str();
@@ -150,7 +150,7 @@ vec4 et::strHexToVec4(const std::wstring& s)
 {
 	vec4 result;
 	uint32_t value = 0;
-	int l = etMin(8, static_cast<int>(s.size()));
+	int l = std::min(8, static_cast<int>(s.size()));
 
 	uint32_t scale = 1;
 	const wchar_t* cstr = s.c_str();

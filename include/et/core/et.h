@@ -168,14 +168,6 @@ namespace et
 	
 	using recti = Rect<int>;
 	using rectf = Rect<float>;
-	
-	template <typename T>
-	inline T etMin(const T& v1, const T& v2)
-		{ return (v1 < v2) ? v1 : v2; }
-	
-	template <typename T>
-	inline T etMax(const T& v1, const T& v2)
-		{ return (v1 > v2) ? v1 : v2; }
 
 	template<typename T>
 	inline T clamp(T value, T min, T max)

@@ -549,7 +549,7 @@ void RenderState::setScissor(bool enable, const recti& clip, bool force)
 	if (force || (clip != _desc.rasterizer.scissorRectangle))
 	{
 		_desc.rasterizer.scissorRectangle = clip;
-		glScissor(clip.left, clip.top, etMax(0, clip.width), etMax(0, clip.height));
+		glScissor(clip.left, clip.top, std::max(0, clip.width), std::max(0, clip.height));
 		checkOpenGLError("RenderState::setClip - glScissor");
 	}
 }

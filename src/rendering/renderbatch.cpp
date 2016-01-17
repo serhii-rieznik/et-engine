@@ -48,6 +48,16 @@ void RenderBatch::calculateBoundingBox()
 	}
 }
 
+const BoundingBox& RenderBatch::transformedBoundingBox()
+{
+	if (!_transformedBoxValid)
+	{
+		_transformedBoudingBox = _boundingBox.transform(_transformation);
+	}
+	
+	return _transformedBoudingBox;
+}
+
 Dictionary RenderBatch::serialize() const
 {
 	Dictionary result;
@@ -69,16 +79,5 @@ Dictionary RenderBatch::serialize() const
 	}
 	result.setIntegerForKey(kStartIndex, _firstIndex);
 	result.setIntegerForKey(kIndexesCount, _numIndexes);
-	
-	/*
-	ArrayValue transform;
-	transform->content.resize(4);
-	transform->content[0] = vec4ToArray(_transformation[0]);
-	transform->content[1] = vec4ToArray(_transformation[1]);
-	transform->content[2] = vec4ToArray(_transformation[2]);
-	transform->content[3] = vec4ToArray(_transformation[3]);
-	result.setArrayForKey(kTransform, transform);
-	*/
-	
 	return result;
 }

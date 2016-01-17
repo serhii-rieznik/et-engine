@@ -91,6 +91,13 @@ namespace et
 			}
 		}
 
+		Quaternion<T> normalized() const
+		{
+			Quaternion<T> result(*this);
+			result.normalize();
+			return result;
+		}
+
 		vector3<T> transform(const vector3<T> &v) const
 		{
 			const Quaternion& thisOne = *this;
@@ -135,4 +142,39 @@ namespace et
 	template <typename T>
 	inline Quaternion<T> operator * (T value, const Quaternion<T>& q)
 		{ return q * value; }
+	
+	template<typename T>
+	inline Quaternion<T> slerp(const Quaternion<T>& from, const Quaternion<T>& to, T t)
+	{
+		const T one(1);
+		const T epsilon(0.0001f);
+		
+		Quaternion<T> target = to;
+		
+		T cosom = dot(from.vector, to.vector) + from.scalar * to.scalar;
+		if (cosom < 0.0f)
+		{
+			target = -to;
+			cosom = -cosom;
+		}
+		
+		T scale0 = one - t;
+		T scale1 = t;
+		if (one - cosom > epsilon)
+		{
+			T omega = std::acos(cosom);
+			T sinom = one / std::sin(omega);
+			scale0 = std::sin(scale0 * omega) * sinom;
+			scale1 = std::sin(scale1 * omega) * sinom;
+		}
+		return from * scale0 + target * scale1;
+	}
+	
+	template <typename T>
+	inline Quaternion<T> normalize(const Quaternion<T>& q)
+	{
+		return q.normalized();
+		T l = q.lengthSquared();
+		return (l > 0) ? (q / std::sqrt(l)) : Quaternion<T>();
+	}
 }

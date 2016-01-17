@@ -204,7 +204,7 @@ void GesturesRecognizer::onPointerMoved(et::PointerInputInfo pi)
 			const PointerInputInfo& pCurr = _pointers[pi.id].current; 
 
 			vec2 offset = pCurr.normalizedPos - pPrev.normalizedPos;
-			vec2 speed = offset / etMax(0.01f, pCurr.timestamp - pPrev.timestamp);
+			vec2 speed = offset / std::max(0.01f, pCurr.timestamp - pPrev.timestamp);
 			
 			moved.invoke(pi.normalizedPos, pi.type);
 			

@@ -41,13 +41,13 @@ void RenderContext::updateScreenScale(const vec2i& screenSize)
 {
 	if (_screenScaleFactorSet && _params.lockScreenScaleToInitial) return;
 	
-	int maxDimension = etMax(screenSize.x, screenSize.y);
-	int maxBaseSize = etMax(_params.contextBaseSize.x, _params.contextBaseSize.y);
+	int maxDimension = std::max(screenSize.x, screenSize.y);
+	int maxBaseSize = std::max(_params.contextBaseSize.x, _params.contextBaseSize.y);
 	
 	size_t newScale = static_cast<size_t>((maxDimension - 1) / (3 * maxBaseSize / 2) + 1);
 	if (newScale == _screenScaleFactor) return;
 	
-	_screenScaleFactor = etMin(_maxScreenScaleFactor, newScale);
+	_screenScaleFactor = std::min(_maxScreenScaleFactor, newScale);
 	_screenScaleFactorSet = true;
 	
 	screenScaleFactorChanged.invoke(_screenScaleFactor);

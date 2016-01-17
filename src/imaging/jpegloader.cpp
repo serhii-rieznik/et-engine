@@ -168,8 +168,8 @@ void skip(j_decompress_ptr cinfo, long count)
 {
     auto src = (jpegStreamWrapper*)(cinfo->src);
 	
-	long bytesToAdjust = etMin(static_cast<long>(src->pub.bytes_in_buffer), count);
-	long bytesToSkip = etMax(0l, count - bytesToAdjust);
+	long bytesToAdjust = std::min(static_cast<long>(src->pub.bytes_in_buffer), count);
+	long bytesToSkip = std::max(0l, count - bytesToAdjust);
 	
 	if (bytesToAdjust > 0)
 	{

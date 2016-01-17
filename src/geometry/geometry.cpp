@@ -140,9 +140,9 @@ vec3 et::removeMatrixScale(mat3& mat)
 	{
 		float minValues[3] =
 		{
-			etMin(c0.x, etMin(c0.y, c0.z)),
-			etMin(c1.x, etMin(c1.y, c1.z)),
-			etMin(c2.x, etMin(c2.y, c2.z))
+			std::min(c0.x, std::min(c0.y, c0.z)),
+			std::min(c1.x, std::min(c1.y, c1.z)),
+			std::min(c2.x, std::min(c2.y, c2.z))
 		};
 		auto offset = std::min_element(minValues, minValues + 3) - minValues;
 		lengths[offset] = -lengths[offset];

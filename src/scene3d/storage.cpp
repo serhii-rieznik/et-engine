@@ -129,7 +129,7 @@ Dictionary Storage::serialize(const std::string& basePath)
 
 	std::string binaryName = replaceFileExt(basePath, ".indexes.etvs");
 
-	size_t indexesDataSize = etMin(_indexArray->dataSize(),
+	size_t indexesDataSize = std::min(_indexArray->dataSize(),
 		_indexArray->actualSize() * static_cast<size_t>(_indexArray->format()));
 
 	Dictionary indexArrayDictionary;

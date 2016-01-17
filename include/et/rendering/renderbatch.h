@@ -68,6 +68,8 @@ namespace et
 			{ return _maxExtent; }
 		const vec3& minExtent() const
 			{ return _minExtent; }
+
+		const BoundingBox& transformedBoundingBox();
 		
 		Dictionary serialize() const;
 		
@@ -80,7 +82,9 @@ namespace et
 		vec3 _minExtent;
 		vec3 _maxExtent;
 		BoundingBox _boundingBox;
+		BoundingBox _transformedBoudingBox;
 		uint32_t _firstIndex = 0;
 		uint32_t _numIndexes = 0;
+		bool _transformedBoxValid = false;
 	};
 }

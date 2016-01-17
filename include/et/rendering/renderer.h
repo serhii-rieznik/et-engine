@@ -62,6 +62,9 @@ namespace et
 		 */
 		void setCurrentCamera(Camera*);
 		void pushRenderBatch(RenderBatch::Pointer);
+		
+		Camera* currentCamera() const
+			{ return _currentCamera; }
 
 		ET_DECLARE_PROPERTY_GET_COPY_SET_COPY(uint32_t, defaultTextureBindingUnit, setDefaultTextureBindingUnit)
 		

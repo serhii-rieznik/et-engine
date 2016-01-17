@@ -580,7 +580,7 @@ bool MemoryChunk::allocate(uint32_t sizeToAllocate, void*& result)
 			result = allocatedMemoryBegin + actualDataOffset + info->begin;
 			
 #		if (ET_DEBUG)
-			uint32_t allocIndex = etMin(maximumAllocationStatisticsSize - 1, sizeToAllocate / minimumAllocationStatisticsSize);
+			uint32_t allocIndex = std::min(maximumAllocationStatisticsSize - 1, sizeToAllocate / minimumAllocationStatisticsSize);
 			++allocationStatistics[allocIndex];
 			if (breakOnAllocation)
 				log::info("Allocated %u bytes (%uKb, %uMb)", sizeToAllocate, sizeToAllocate / 1024, sizeToAllocate / megabytes);
@@ -638,7 +638,7 @@ bool MemoryChunk::free(char* ptr)
 			else
 			{
 #			if ET_DEBUG
-				uint32_t deallocIndex = etMin(maximumAllocationStatisticsSize - 1, i->length / minimumAllocationStatisticsSize);
+				uint32_t deallocIndex = std::min(maximumAllocationStatisticsSize - 1, i->length / minimumAllocationStatisticsSize);
 				++deallocationStatistics[deallocIndex];
 				if (breakOnAllocation)
 					log::info("Deallocated %u bytes (%uKb, %uMb)", i->length, i->length / 1024, i->length / megabytes);

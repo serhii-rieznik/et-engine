@@ -342,7 +342,7 @@ void Texture::setMaxLod(RenderContext* rc, size_t value)
 #if defined(GL_TEXTURE_MAX_LEVEL)
 	rc->renderState().bindTexture(defaultBindingUnit, apiHandle(), _desc->target);
 	glTexParameteri(textureTargetValue(_desc->target), GL_TEXTURE_MAX_LEVEL, static_cast<GLint>(value));
-	checkOpenGLError("Texture::setMaxLod(%lu) - %s", static_cast<unsigned long>(value), name().c_str());
+	checkOpenGLError("Texture::sstd::maxLod(%lu) - %s", static_cast<unsigned long>(value), name().c_str());
 #endif
 }
 

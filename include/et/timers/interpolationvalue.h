@@ -52,7 +52,7 @@ namespace et
 	private:
 		void update(float t)
 		{
-			step(etMin(1.0f, _rate * (t - _updateTime)));
+			step(std::min(1.0f, _rate * (t - _updateTime)));
 			_updateTime = t;
 		}
 		

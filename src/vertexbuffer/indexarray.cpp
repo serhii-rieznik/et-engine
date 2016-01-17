@@ -7,7 +7,7 @@
 
 #include <et/core/serialization.h>
 #include <et/vertexbuffer/indexarray.h>
-#include <et/primitives/primitives.h>
+#include <et/rendering/primitives.h>
 
 using namespace et;
 
@@ -111,13 +111,13 @@ uint32_t IndexArray::primitivesCount() const
 
 void IndexArray::resize(uint32_t count)
 {
-	_actualSize = etMin(_actualSize, count);
+	_actualSize = std::min(_actualSize, count);
 	_data.resize(verifyDataSize(count, _format));
 }
 
 void IndexArray::resizeToFit(uint32_t count)
 {
-	_actualSize = etMin(_actualSize, count);
+	_actualSize = std::min(_actualSize, count);
 	_data.fitToSize(verifyDataSize(count, _format));
 }
 

@@ -31,7 +31,7 @@ namespace et
 		{
 			size_t actualSize = static_cast<size_t>(sizeForMipLevel(level).square()) * bitsPerPixel / 8;
 			size_t minimumSize = static_cast<size_t>(minimalSizeForCompressedFormat.square()) * bitsPerPixel / 8;
-			return compressed ? etMax(minimalDataSize, etMax(minimumSize, actualSize)) : actualSize;
+			return compressed ? std::max(minimalDataSize, std::max(minimumSize, actualSize)) : actualSize;
 		}
 
 		size_t dataSizeForAllMipLevels()

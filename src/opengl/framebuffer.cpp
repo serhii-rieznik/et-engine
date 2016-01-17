@@ -154,7 +154,7 @@ Texture::Pointer Framebuffer::buildTexture(const vec3i& aSize, TextureTarget aTa
 
 		case TextureTarget::Texture_Cube:
 		{
-			return _rc->textureFactory().genCubeTexture(aInternalFormat, etMax(aSize.x, aSize.y),
+			return _rc->textureFactory().genCubeTexture(aInternalFormat, std::max(aSize.x, aSize.y),
 				aFormat, aType, name() + "_color");
 		}
 

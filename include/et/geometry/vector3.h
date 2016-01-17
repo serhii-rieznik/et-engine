@@ -103,11 +103,8 @@ namespace et
 
 		vector3& operator /= (T value)
 			{ x/=value; y /= value; z /= value; return *this; }
-/*
-		vector3& operator = (const vector3& value)
-			{ memcpy(c, value.c, sizeof(c)); return *this; }
-*/		
-		T dotSelf() const 
+
+		T dotSelf() const
 			{ return x*x + y*y + z*z; }
 
 		T length() const 
@@ -191,4 +188,76 @@ namespace et
 	vector3<T> operator * (T value, const vector3<T>& vec) 
 		{ return vector3<T>(vec.x * value, vec.y * value, vec.z * value); }
 
+	template<typename T>
+	inline vector3<T> absv(const vector3<T>& value)
+		{ return vector3<T>(std::abs(value.x), std::abs(value.y), std::abs(value.z)); }
+	
+	template<typename T>
+	inline vector3<T> maxv(const vector3<T>& v1, const vector3<T>& v2)
+		{ return vector3<T>(std::max(v1.x, v2.x), std::max(v1.y, v2.y), std::max(v1.z, v2.z)); }
+	
+	template<typename T>
+	inline vector3<T> minv(const vector3<T>& v1, const vector3<T>& v2)
+		{ return vector3<T>(std::min(v1.x, v2.x), std::min(v1.y, v2.y), std::min(v1.z, v2.z)); }
+		
+	template <typename T>
+	inline vector3<T> floorv(const vector3<T>& v)
+		{ return vector3<T>(std::floor(v.x), std::floor(v.y), std::floor(v.z)); }
+
+	template <typename T>
+	inline vector3<T> ceiv(const vector3<T>& v)
+		{ return vector3<T>(std::ceil(v.x), std::ceil(v.y), std::ceil(v.z)); }
+	
+	template <typename T>
+	inline vector3<T> sqrtv(const vector3<T>& v)
+		{ return vector3<T>(std::sqrt(v.x), std::sqrt(v.y), std::sqrt(v.z)); }
+	
+	template<typename T>
+	inline vector3<T> mix(const vector3<T>& v1, const vector3<T>& v2, const T& t)
+		{ return v1 * (static_cast<T>(1) - t) + v2 * t; }
+	
+	template<typename T>
+	inline vector3<T>fromSpherical(T theta, T phi)
+	{
+		T fCosTheta = std::cos(theta);
+		return vector3<float>(fCosTheta * std::cos(phi), std::sin(theta), fCosTheta * std::sin(phi));
+	}
+	
+	template<typename T>
+	inline vector3<T>fromSphericalRotated(T theta, T phi)
+	{
+		T fSinTheta = std::sin(theta);
+		return vector3<float>(fSinTheta * std::cos(phi), std::cos(theta), fSinTheta * std::sin(phi));
+	}
+	
+	template <typename T>
+	inline vector3<T> toSpherical(const vector3<T>& vec)
+	{
+		vector3<T> n = vec.normalized();
+		return vector3<T>(std::atan2(n.z, n.x), std::asin(n.y), vec.length());
+	}
+	
+	template <typename T>
+	inline vector3<T> normalize(const vector3<T>& v)
+		{ return v.normalized(); }
+	
+	template <typename T>
+	inline vector3<T> cross(const vector3<T>& v1, const vector3<T>& v2)
+		{ return v1.cross(v2); }
+	
+	template <typename T>
+	inline T dot(const vector3<T>& v1, const vector3<T>& v2)
+		{ return v1.dot(v2); }
+	
+	template <typename T>
+	inline vector3<T> reflect(const vector3<T>& v, const vector3<T>& n)
+		{ return v - static_cast<T>(2) * dot(v, n) * n; }
+	
+	template <typename T>
+	inline T length(const vector3<T>& v)
+		{ return v.length(); }
+	
+	template <typename T>
+	inline vector3<float> vector3ToFloat(const vector3<T>& v)
+		{ return vector3<float>(static_cast<float>(v.x), static_cast<float>(v.y), static_cast<float>(v.z)); }
 }

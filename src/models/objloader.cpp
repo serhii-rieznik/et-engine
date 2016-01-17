@@ -8,7 +8,7 @@
 #include <et/app/application.h>
 #include <et/core/conversion.h>
 #include <et/core/filesystem.h>
-#include <et/primitives/primitives.h>
+#include <et/rendering/primitives.h>
 #include <et/rendering/material.h>
 #include <et/models/objloader.h>
 

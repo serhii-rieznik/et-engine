@@ -59,7 +59,7 @@ namespace et
 		void update(float t) override
 		{
 			float dt = _deccelerationRate * (t - _time);
-			_velocity *= etMax(0.0f, 1.0f - dt);
+			_velocity *= std::max(0.0f, 1.0f - dt);
 			
 			_latestDelta = dt * _velocity;
 			

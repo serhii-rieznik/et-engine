@@ -55,7 +55,7 @@ void Mesh::calculateSupportData()
 	{
 		vec3 dimensions = maxVertex - minVertex;
 		_boundingBox = BoundingBox(0.5f * (minVertex + maxVertex), 0.5f * dimensions);
-		_boundingSphereRadius =  0.5f * etMax(etMax(dimensions.x, dimensions.y), dimensions.z);
+		_boundingSphereRadius =  0.5f * std::max(std::max(dimensions.x, dimensions.y), dimensions.z);
 	}
 }
 
