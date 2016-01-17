@@ -23,8 +23,6 @@ namespace et
 			BinaryDataStorage data;
 		};
 
-		int tag = 0;
-
 	public:
 		VertexArray();
 		VertexArray(const VertexDeclaration& decl, uint32_t size);
@@ -58,8 +56,8 @@ namespace et
 		
 	private:
 		uint32_t _size = 0;
-		VertexDeclaration _decl;
+		VertexDeclaration _decl = VertexDeclaration(true);
 		VertexDataChunkList _chunks;
-		VertexDataChunk _smoothing;
+		VertexDataChunk _smoothing = VertexDataChunk(VertexAttributeUsage::Smoothing, DataType::Int, 0);
 	};
 }

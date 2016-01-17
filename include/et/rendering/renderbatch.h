@@ -36,9 +36,9 @@ namespace et
 		const VertexArrayObject::Pointer& vao() const
 			{ return _vao; }
 		
-		const uint32_t firstIndex() const
+		uint32_t firstIndex() const
 			{ return _firstIndex; }
-		const uint32_t numIndexes() const
+		uint32_t numIndexes() const
 			{ return _numIndexes; }
 		
 		const mat4& transformation() const

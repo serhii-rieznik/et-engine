@@ -14,7 +14,7 @@ namespace et
 	template <typename T>
 	struct ContainerBase
 	{
-		static const size_t typeSize()
+		static size_t typeSize()
 			{ return sizeof(T); }
 	};
 }

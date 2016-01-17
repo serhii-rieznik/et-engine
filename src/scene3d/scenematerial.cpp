@@ -42,7 +42,7 @@ SceneMaterial* SceneMaterial::duplicate() const
 	return m;
 }
 
-void SceneMaterial::serialize(Dictionary stream, const std::string& basePath)
+void SceneMaterial::serialize(Dictionary stream, const std::string& /* basePath */)
 {
 	Dictionary intValues;
 	Dictionary floatValues;
@@ -146,12 +146,12 @@ void SceneMaterial::clear()
 /*
  * Setters / getters
  */
-const int64_t SceneMaterial::getInt(MaterialParameter param) const
+int64_t SceneMaterial::getInt(MaterialParameter param) const
 {
 	return _intParams[param].value;
 }
 
-const float SceneMaterial::getFloat(MaterialParameter param) const
+float SceneMaterial::getFloat(MaterialParameter param) const
 {
 	return _floatParams[param].value;
 }

@@ -65,9 +65,7 @@ namespace et
 		TimerPoolQueue _timedObjects;
 		TimerPoolQueue _queue;
 		CriticalSection _lock;
-		RunLoop* _owner;
-
-		bool _initialized;
-		bool _updating;
+		RunLoop* _owner = nullptr;
+		bool _updating = false;
 	};
 }

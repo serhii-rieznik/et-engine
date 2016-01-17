@@ -43,7 +43,7 @@ namespace et
 		/*
 		 * Material loading
 		 */
-		Material::Pointer loadMaterial(const std::string& fileName, ObjectsCache& cache);
+		Material::Pointer loadMaterial(const std::string& fileName);
 		
 	private:
 		enum class ShaderType : uint32_t

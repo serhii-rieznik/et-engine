@@ -456,7 +456,7 @@ CVReturn cvDisplayLinkOutputCallback(CVDisplayLinkRef, const CVTimeStamp*, const
 	return YES;
 }
 
-- (PointerInputInfo)mousePointerInfo:(NSEvent*)theEvent withType:(PointerType)type;
+- (PointerInputInfo)mousePointerInfo:(NSEvent*)theEvent withType:(PointerType)type
 {
 	NSRect ownFrame = [self convertRectToBacking:self.frame];
 	NSPoint nativePoint = [self convertPointToBacking:[theEvent locationInWindow]];

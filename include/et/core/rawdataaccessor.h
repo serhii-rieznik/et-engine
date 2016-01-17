@@ -72,10 +72,10 @@ namespace et
 		/*
 		 * other accessors
 		 */
-		const size_t size() const
+		size_t size() const
 			{ return _size; };
 		
-		const size_t dataSize() const
+		size_t dataSize() const
 			{ return _dataSize; }
 
 		bool valid() const

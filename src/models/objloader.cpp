@@ -21,14 +21,7 @@ namespace et
 	{
 	public:
 		OBJLoaderThread(OBJLoader*, s3d::Storage&, ObjectsCache&);
-		
 		uint64_t main();
-
-	private:
-		friend class OBJLoader;
-		OBJLoader* _owner = nullptr;
-		s3d::Storage& _storage;
-		ObjectsCache& _cache;
 	};
 }
 
@@ -139,14 +132,15 @@ inline std::istream& operator >> (std::istream& stream, vec4& value)
 
 void getLine(std::ifstream& stream, std::string& line);
 
-OBJLoaderThread::OBJLoaderThread(OBJLoader* owner, s3d::Storage& storage, ObjectsCache& cache) : 
-	Thread(false), _owner(owner), _storage(storage), _cache(cache)
+OBJLoaderThread::OBJLoaderThread(OBJLoader*, s3d::Storage&, ObjectsCache&) : 
+	Thread(false)
 {
 	run();
 }
 
 uint64_t OBJLoaderThread::main()
 {
+	ET_FAIL("Not implemented");
 	return 0;
 }
 
@@ -181,7 +175,7 @@ OBJLoader::~OBJLoader()
 		materialFile.close();
 }
 
-void OBJLoader::loadData(bool async,  s3d::Storage& storage, ObjectsCache& cache)
+void OBJLoader::loadData(bool async, ObjectsCache& cache)
 {
 	ET_ASSERT(!async && "Async loading is currently disabled");
 	
@@ -384,7 +378,7 @@ s3d::ElementContainer::Pointer OBJLoader::load(et::RenderContext* rc, MaterialPr
 	_normals.reserve(1024);
 	_texCoords.reserve(1024);
 
-	loadData(false, storage, cache);
+	loadData(false, cache);
 	
 	processLoadedData();
 

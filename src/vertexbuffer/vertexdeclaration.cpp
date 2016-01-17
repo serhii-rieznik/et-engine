@@ -30,14 +30,13 @@ VertexElement::VertexElement(VertexAttributeUsage aUsage, DataType aType, uint32
 	_dataFormat = dataTypeDataFormat(_type);
 }
 
-VertexDeclaration::VertexDeclaration() :
-	_interleaved(true), _totalSize(0), _usageMask(0) { }
+VertexDeclaration::VertexDeclaration() = default;
 
 VertexDeclaration::VertexDeclaration(bool interleaved) :
-	_interleaved(interleaved), _totalSize(0), _usageMask(0) { }
+	_interleaved(interleaved) { }
 
 VertexDeclaration::VertexDeclaration(bool interleaved, VertexAttributeUsage usage, DataType type) : 
-	_interleaved(interleaved), _totalSize(0), _usageMask(0) { push_back(usage, type); }
+	_interleaved(interleaved) { push_back(usage, type); }
 
 bool VertexDeclaration::has(VertexAttributeUsage usage) const
 	{ return (_usageMask & vertexAttributeUsageMask(usage)) != 0; }

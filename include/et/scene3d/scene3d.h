@@ -31,6 +31,7 @@ namespace et
 			Scene(const std::string& name = "scene");
 
 			Dictionary serialize(const std::string& basePath);
+			void serialize(Dictionary, const std::string&) override;
 			
 			void deserializeWithOptions(et::RenderContext*, MaterialProvider*, Dictionary,
 				const std::string& basePath, ObjectsCache&, uint32_t options);

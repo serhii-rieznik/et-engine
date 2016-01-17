@@ -54,7 +54,7 @@ namespace et
 		s3d::SceneMaterial::List loadNodeMaterials(s3d::Storage&, FbxNode* node);
 		StringList loadNodeProperties(FbxNode* node);
 		
-		void buildVertexBuffers(RenderContext* rc, s3d::BaseElement::Pointer root, s3d::Storage&);
+		void buildVertexBuffers(RenderContext* rc, s3d::Storage&);
 
 		bool meshHasSkin(FbxMesh*);
 		
@@ -68,8 +68,8 @@ namespace et
 		
 		s3d::SceneMaterial::Pointer loadMaterial(FbxSurfaceMaterial* material);
 		
-		void linkSkeleton(s3d::Storage&, s3d::ElementContainer::Pointer);
-		void buildBlendWeightsForMesh(s3d::Storage&, s3d::Mesh::Pointer);
+		void linkSkeleton(s3d::ElementContainer::Pointer);
+		void buildBlendWeightsForMesh(s3d::Mesh::Pointer);
 
 		void loadMaterialValue(s3d::SceneMaterial::Pointer m, MaterialParameter propName,
 			FbxSurfaceMaterial* fbxm, const char* fbxprop);
@@ -110,7 +110,7 @@ using namespace et;
  * Private implementation
  */
 FBXLoaderPrivate::FBXLoaderPrivate(RenderContext* rc, MaterialProvider* mp, ObjectsCache& ObjectsCache) :
-	manager(FbxManager::Create()), _rc(rc), _mp(mp), _texCache(ObjectsCache), scene(FbxScene::Create(manager, 0))
+	_rc(rc), _mp(mp), _texCache(ObjectsCache), manager(FbxManager::Create()), scene(FbxScene::Create(manager, 0))
 {
 }
 
@@ -195,11 +195,11 @@ s3d::ElementContainer::Pointer FBXLoaderPrivate::parse(s3d::Storage& storage)
 		loadNode(storage, fbxRootNode->GetChild(lChildIndex), root);
 	}
 
-	linkSkeleton(storage, root);
+	linkSkeleton(root);
 	
 	if (shouldCreateRenderObjects)
 	{
-		buildVertexBuffers(_rc, root, storage);
+		buildVertexBuffers(_rc, storage);
 	}
 	
 	auto meshes = root->childrenOfType(s3d::ElementType::Mesh);
@@ -776,7 +776,7 @@ s3d::Mesh::Pointer FBXLoaderPrivate::loadMesh(s3d::Storage& storage, FbxMesh* me
 
 	if (isContainer)
 	{
-		for (size_t m = 0; m < materials.size(); ++m)
+		for (int m = 0, me = static_cast<int>(materials.size()); m < me; ++m)
 		{
 			s3d::BaseElement* aParent = (m == 0) ? parent.ptr() : element.ptr();
 			std::string aName = (m == 0) ? meshName : (meshName + "~" + materials.at(m)->name());
@@ -923,10 +923,8 @@ s3d::Mesh::Pointer FBXLoaderPrivate::loadMesh(s3d::Storage& storage, FbxMesh* me
 	return element;
 }
 
-void FBXLoaderPrivate::buildVertexBuffers(RenderContext* rc, s3d::BaseElement::Pointer root, s3d::Storage& storage)
+void FBXLoaderPrivate::buildVertexBuffers(RenderContext* rc, s3d::Storage& storage)
 {
-	// s3d::BaseElement::List meshes = root->childrenOfType(s3d::ElementType::Mesh);
-	
 	IndexBuffer::Pointer primaryIndexBuffer;
 	for (const VertexStorage::Pointer& i : storage.vertexStorages())
 	{
@@ -1002,7 +1000,7 @@ StringList FBXLoaderPrivate::loadNodeProperties(FbxNode* node)
 }
 
 s3d::LineElement::Pointer FBXLoaderPrivate::loadLine(s3d::Storage&, FbxLine* line, s3d::BaseElement::Pointer parent, 
-	const StringList& params)
+	const StringList& /* params */)
 {
 	const char* lineName = line->GetName();
 	if ((lineName == nullptr) || (strlen(lineName) == 0))
@@ -1021,7 +1019,7 @@ s3d::LineElement::Pointer FBXLoaderPrivate::loadLine(s3d::Storage&, FbxLine* lin
 	return result;
 }
 
-void FBXLoaderPrivate::linkSkeleton(s3d::Storage& storage, s3d::ElementContainer::Pointer root)
+void FBXLoaderPrivate::linkSkeleton(s3d::ElementContainer::Pointer root)
 {
 	auto meshes = root->childrenOfType(s3d::ElementType::Mesh);
 	for (s3d::Mesh::Pointer mesh : meshes)
@@ -1038,11 +1036,11 @@ void FBXLoaderPrivate::linkSkeleton(s3d::Storage& storage, s3d::ElementContainer
 					log::warning("Unable to link deformer cluster in mesh %s - link is missing", mesh->name().c_str());
 			}
 		}
-		buildBlendWeightsForMesh(storage, mesh);
+		buildBlendWeightsForMesh(mesh);
 	}
 }
 
-void FBXLoaderPrivate::buildBlendWeightsForMesh(s3d::Storage& storage, s3d::Mesh::Pointer mesh)
+void FBXLoaderPrivate::buildBlendWeightsForMesh(s3d::Mesh::Pointer mesh)
 {
 	if (mesh->deformer().invalid()) return;
 	

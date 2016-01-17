@@ -27,13 +27,13 @@ namespace et
 		const char* data() const
 			{ return _data.binary(); }
 
-		const uint32_t size() const
+		uint32_t size() const
 			{ return static_cast<uint32_t>(_data.size()); }
 
-		const uint32_t dataSize() const
+		uint32_t dataSize() const
 			{ return static_cast<uint32_t>(_data.dataSize()); }
 
-		const uint32_t typeSize() const
+		uint32_t typeSize() const
 			{ return dataTypeSize(_type); }
 
 		VertexAttributeUsage usage() const

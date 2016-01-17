@@ -46,6 +46,7 @@ void et::alert(const std::string& title, const std::string& message, const std::
 	[alert addButtonWithTitle:[NSString stringWithUTF8String:button.c_str()]];
 	[alert runModal];
 #else
+	(void)type;
 	NSString* nsTitle = [NSString stringWithUTF8String:title.c_str()];
 	NSString* nsMessage = [NSString stringWithUTF8String:message.c_str()];
 	NSString* nsButton = [NSString stringWithUTF8String:button.c_str()];

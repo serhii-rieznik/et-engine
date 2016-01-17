@@ -113,7 +113,7 @@ mat4 Animation::transformation(float time) const
 	return result.transform();
 }
 
-void Animation::serialize(Dictionary stream) const
+void Animation::serialize(Dictionary /* stream */) const
 {
 	/*
 	serializeInt32(stream, animationCurrentVersion);
@@ -133,7 +133,7 @@ void Animation::serialize(Dictionary stream) const
 	*/
 }
 
-void Animation::deserialize(Dictionary stream)
+void Animation::deserialize(Dictionary /* stream */)
 {
 	/*
 	_frames.clear();

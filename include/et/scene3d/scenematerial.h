@@ -29,8 +29,8 @@ namespace et
 			SceneMaterial();
 			~SceneMaterial() = default;
 			
-			const int64_t getInt(MaterialParameter param) const;
-			const float getFloat(MaterialParameter param) const;
+			int64_t getInt(MaterialParameter param) const;
+			float getFloat(MaterialParameter param) const;
 			const vec4& getVector(MaterialParameter param) const;
 			const Texture::Pointer& getTexture(MaterialParameter param) const;
 
@@ -67,7 +67,6 @@ namespace et
 			void textureDidLoad(Texture::Pointer);
 
 		private:
-			RenderContext* _rc = nullptr;
 			ParameterSet<int64_t> _intParams;
 			ParameterSet<float> _floatParams;
 			ParameterSet<vec4> _vectorParams;

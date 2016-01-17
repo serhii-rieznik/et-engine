@@ -23,7 +23,7 @@ namespace et
 	public:
 		Material(MaterialFactory*);
 		
-		void loadFromJson(const std::string&, const std::string& baseFolder, ObjectsCache& cache);
+		void loadFromJson(const std::string&, const std::string& baseFolder);
 		
 		void enableInRenderState(RenderState&);
 		

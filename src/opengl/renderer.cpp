@@ -23,7 +23,7 @@ extern const std::string copy_fragment_shader;
 extern const std::string depth_fragment_shader;
 
 Renderer::Renderer(RenderContext* rc) :
-	_rc(rc), _defaultTextureBindingUnit(7)
+	_defaultTextureBindingUnit(7), _rc(rc)
 {
 	checkOpenGLError("Renderer::Renderer", 0);
 

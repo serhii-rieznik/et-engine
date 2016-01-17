@@ -47,10 +47,10 @@ namespace et
 		const char* binary() const
 			{ return reinterpret_cast<const char*>(data); }
 
-		const size_t size() const
+		size_t size() const
 			{ return count; }
 		
-		const size_t dataSize() const 
+		size_t dataSize() const 
 			{ return count * sizeof(T); }
 		
 		void copyFrom(const StaticDataStorage& r)

@@ -11,10 +11,10 @@ using namespace et;
 
 Camera::Camera() :
 	_viewMatrix(1.0f),
-	_projectionMatrix(1.0f),
-	_viewProjectionMatrix(1.0f),
 	_inverseViewMatrix(1.0f),
+	_projectionMatrix(1.0f),
 	_inverseProjectionMatrix(1.0f),
+	_viewProjectionMatrix(1.0f),
 	_inverseViewProjectionMatrix(1.0f)
 {
 

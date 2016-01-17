@@ -108,7 +108,7 @@ void VertexStorage::resize(size_t sz)
  * Private
  */
 VertexStoragePrivate::VertexStoragePrivate(const VertexDeclaration& d, size_t cap) :
-	decl(d), capacity(cap), data(d.dataSize() * cap, 0)
+	decl(d), data(d.dataSize() * cap, 0), capacity(cap)
 {
 
 }

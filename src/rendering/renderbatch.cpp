@@ -12,14 +12,14 @@
 using namespace et;
 
 RenderBatch::RenderBatch(const Material::Pointer& m, const VertexArrayObject::Pointer& v, const mat4& transform) :
-	_material(m), _vao(v), _firstIndex(0), _numIndexes(v->indexBuffer()->size()), _transformation(transform)
+	_material(m), _vao(v), _transformation(transform), _firstIndex(0), _numIndexes(v->indexBuffer()->size())
 {
 	
 }
 
 RenderBatch::RenderBatch(const Material::Pointer& m, const VertexArrayObject::Pointer& v,
-	const mat4& transform, uint32_t i, uint32_t ni) : _material(m), _vao(v), _firstIndex(i), _numIndexes(ni),
-	_transformation(transform)
+	const mat4& transform, uint32_t i, uint32_t ni) : _material(m), _vao(v), _transformation(transform),
+	_firstIndex(i), _numIndexes(ni)
 {
 	
 }

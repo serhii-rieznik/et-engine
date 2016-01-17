@@ -35,7 +35,7 @@ Material::Material(MaterialFactory* mf) :
 	_setIntFunctions[uint32_t(DataType::IntVec4)] = &Program::setInt4Uniform;
 }
 
-void Material::loadFromJson(const std::string& jsonString, const std::string& baseFolder, ObjectsCache& cache)
+void Material::loadFromJson(const std::string& jsonString, const std::string& baseFolder)
 {
 	Dictionary obj;
 	if (obj.loadFromJson(jsonString) == false)

@@ -90,7 +90,7 @@ namespace et
 			const std::vector<MeshDeformerCluster::Pointer>& clusters() const
 				{ return _clusters; }
 			
-			const std::vector<mat4>& calculateTransformsForMesh(Mesh*);
+			const std::vector<mat4>& calculateTransforms();
 			
 		private:
 			std::vector<MeshDeformerCluster::Pointer> _clusters;

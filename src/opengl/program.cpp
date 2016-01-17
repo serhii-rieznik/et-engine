@@ -645,7 +645,7 @@ void Program::setUniform(int nLoc, uint32_t type, const int* value, size_t amoun
 	checkOpenGLError("glUniform1iv");
 }
 
-void Program::setUniform(int nLoc, uint32_t type, const float* value, size_t amount)
+void Program::setUniform(int nLoc, uint32_t /* type */, const float* value, size_t amount)
 {
 	ET_ASSERT(apiHandleValid());
 

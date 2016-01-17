@@ -171,7 +171,7 @@ const BoundingBox& Mesh::tranformedBoundingBox()
 const std::vector<mat4>& Mesh::deformationMatrices()
 {
 	if (_deformer.valid())
-		return _deformer->calculateTransformsForMesh(this);
+		return _deformer->calculateTransforms();
 	
 	for (uint32_t i = 0; i < 4; ++i)
 		_undeformedTransformationMatrices[i] = finalTransform();

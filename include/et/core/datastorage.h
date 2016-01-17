@@ -172,10 +172,10 @@ namespace et
 		const char* binary() const
 			{ return reinterpret_cast<const char*>(_immutableData); }
 		
-		const size_t size() const
+		size_t size() const
 			{ return _size; }
 		
-		const size_t dataSize() const
+		size_t dataSize() const
 			{ return _dataSize; }
 
 		/*
@@ -270,7 +270,7 @@ namespace et
 				resize(need_size);
 		}
 
-		const uint32_t lastElementIndex() const
+		uint32_t lastElementIndex() const
 			{ return _lastElementIndex; }
 		
 		void applyOffset(uint32_t o)

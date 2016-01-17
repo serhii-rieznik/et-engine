@@ -31,7 +31,7 @@ VertexStorage::Pointer Scene::vertexStorageWithName(const std::string& name)
 	return VertexStorage::Pointer();
 }
 
-IndexArray::Pointer Scene::indexArrayWithName(const std::string& name)
+IndexArray::Pointer Scene::indexArrayWithName(const std::string&)
 {
 	return _storage.indexArray();
 }
@@ -98,11 +98,16 @@ SceneMaterial::Pointer Scene::sceneMaterialWithName(const std::string& mName)
 /*
  * Serialization stuff
  */
+void Scene::serialize(Dictionary stream, const std::string& basePath)
+{
+	stream.setDictionaryForKey(kStorage, _storage.serialize(basePath));
+	ElementContainer::serialize(stream, basePath);
+}
+
 Dictionary Scene::serialize(const std::string& basePath)
 {
 	Dictionary result;
-	result.setDictionaryForKey(kStorage, _storage.serialize(basePath));
-	ElementContainer::serialize(result, basePath);
+	serialize(result, basePath);
 	return result;
 }
 

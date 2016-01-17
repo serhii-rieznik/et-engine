@@ -347,10 +347,10 @@ void RenderState::setBlendState(const BlendState& bs, bool force)
 
 void RenderState::setDepthState(const DepthState& state, bool force)
 {
-	setDepthWriteEnabled(state.depthWriteEnabled);
-	setDepthTestEnabled(state.depthTestEnabled);
-	setDepthClearValue(state.clearDepth);
-	setDepthFunc(state.compareFunction);
+	setDepthWriteEnabled(state.depthWriteEnabled, force);
+	setDepthTestEnabled(state.depthTestEnabled, force);
+	setDepthClearValue(state.clearDepth, force);
+	setDepthFunc(state.compareFunction, force);
 }
 
 void RenderState::setBlendConfiguration(et::BlendConfiguration blend, bool force)

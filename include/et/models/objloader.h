@@ -52,7 +52,7 @@ namespace et
 			s3d::SceneMaterial::Pointer material;
 
 			OBJMeshIndexBounds(const std::string& n, uint32_t s, uint32_t c, s3d::SceneMaterial::Pointer m, const vec3& aCenter) :
-				name(n), start(s), count(c), material(m), center(aCenter) { }
+				name(n), start(s), count(c), center(aCenter), material(m) { }
 		};
 		typedef std::vector<OBJMeshIndexBounds> OBJMeshIndexBoundsList;
 		typedef std::vector<OBJVertex> VertexList;
@@ -85,7 +85,7 @@ namespace et
 		};
 
 	private:
-		void loadData(bool async, s3d::Storage&, ObjectsCache& cache);
+		void loadData(bool async, ObjectsCache& cache);
 		void processLoadedData();
 		
 		s3d::ElementContainer::Pointer generateVertexBuffers(s3d::Storage&);

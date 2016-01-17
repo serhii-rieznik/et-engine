@@ -372,11 +372,11 @@ namespace et
 		BlendState(bool e) :
 			blendEnabled(e) { }
 		BlendState(bool e, const Blend& b) :
-			blendEnabled(e), color(b), alpha(b) { }
+			color(b), alpha(b), blendEnabled(e) { }
 		BlendState(bool e, const Blend& cb, const Blend& ab) :
-			blendEnabled(e), color(cb), alpha(ab) { }
+			color(cb), alpha(ab), blendEnabled(e) { }
 		BlendState(bool e, BlendFunction s, BlendFunction d) :
-			blendEnabled(e), color(s, d), alpha(s, d) { }
+			color(s, d), alpha(s, d), blendEnabled(e) { }
 		
 		uint32_t sortingKey() const
 			{ return blendEnabled ? 0 : 1; }

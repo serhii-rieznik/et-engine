@@ -40,7 +40,7 @@ Texture::Texture(RenderContext* rc, const TextureDescription::Pointer& desc, con
 }
 
 Texture::Texture(RenderContext*, uint32_t texture, const vec2i& size, const std::string& name) :
-	APIObject(name), _own(false), _desc(etCreateObject<TextureDescription>())
+	APIObject(name), _desc(etCreateObject<TextureDescription>())
 {
 	if (glIsTexture(texture))
 	{
