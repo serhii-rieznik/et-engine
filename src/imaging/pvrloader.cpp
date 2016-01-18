@@ -5,12 +5,12 @@
  *
  */
 
-#include <external/pvr/PVRTTexture.h>
-#include <external/pvr/PVRTDecompress.h>
-
 #include <et/core/tools.h>
 #include <et/geometry/geometry.h>
 #include <et/imaging/pvrloader.h>
+
+#include <external/pvr/PVRTTexture.h>
+#include <external/pvr/PVRTDecompress.h>
 
 using namespace et;
 
