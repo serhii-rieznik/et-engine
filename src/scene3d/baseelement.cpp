@@ -53,7 +53,9 @@ void BaseElement::buildTransform()
 	_cachedFinalTransform = localTransform();
 	
 	if (parent() != nullptr)
+	{
 		_cachedFinalTransform *= parent()->finalTransform();
+	}
 	
 	_cachedFinalInverseTransform = _cachedFinalTransform.inverse();
 }
@@ -67,8 +69,9 @@ const mat4& BaseElement::localTransform()
 const mat4& BaseElement::finalTransform()
 {
 	if (!transformValid())
+	{
 		buildTransform();
-	
+	}
 	return _cachedFinalTransform;
 }
 
@@ -185,6 +188,7 @@ void BaseElement::serializeGeneralParameters(Dictionary stream)
 	stream.setArrayForKey(kTranslation, vec3ToArray(translation()));
 	stream.setArrayForKey(kScale, vec3ToArray(scale()));
 	stream.setArrayForKey(kOrientation, quaternionToArray(orientation()));
+	stream.setArrayForKey(kAdditionalTransform, matrixToArray(additionalTransform()));
 
 	if (!_properites.empty())
 	{
@@ -227,6 +231,7 @@ void BaseElement::deserializeGeneralParameters(Dictionary stream)
 	setTranslation(arrayToVec3(stream.arrayForKey(kTranslation)));
 	setScale(arrayToVec3(stream.arrayForKey(kScale)));
 	setOrientation(arrayToQuaternion(stream.arrayForKey(kOrientation)));
+	setAdditionalTransform(arrayToMatrix(stream.arrayForKey(kAdditionalTransform)));
 	
 	auto propsArray = stream.arrayForKey(kProperties);
 	for (StringValue prop : propsArray->content)

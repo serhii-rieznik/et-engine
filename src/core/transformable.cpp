@@ -10,16 +10,13 @@
 
 using namespace et;
 
-ComponentTransformable::ComponentTransformable() :
-	_cachedTransform(identityMatrix), _translation(0.0f), _scale(1.0f), _orientation(), _flags(0)
-{
-}
-
 const mat4& ComponentTransformable::transform()
 {
 	if (!transformValid())
+	{
 		buildTransform();
-
+	}
+	
 	return _cachedTransform;
 }
 
@@ -42,7 +39,9 @@ void ComponentTransformable::invalidateTransform()
 void ComponentTransformable::setTranslation(const vec3& t)
 {
 	if (shouldDecompose())
+	{
 		setTransform(_cachedTransform);
+	}
 
 	_translation = t;
 	invalidateTransform();
@@ -51,8 +50,10 @@ void ComponentTransformable::setTranslation(const vec3& t)
 void ComponentTransformable::applyTranslation(const vec3& t)
 {
 	if (shouldDecompose())
+	{
 		setTransform(_cachedTransform);
-
+	}
+	
 	_translation += t;
 	invalidateTransform();
 }
@@ -60,7 +61,9 @@ void ComponentTransformable::applyTranslation(const vec3& t)
 void ComponentTransformable::setScale(const vec3& s)
 {
 	if (shouldDecompose())
+	{
 		setTransform(_cachedTransform);
+	}
 
 	_scale = s;
 	invalidateTransform();
@@ -69,8 +72,10 @@ void ComponentTransformable::setScale(const vec3& s)
 void ComponentTransformable::applyScale(const vec3& s)
 {
 	if (shouldDecompose())
+	{
 		setTransform(_cachedTransform);
-
+	}
+	
 	_scale *= s;
 	invalidateTransform();
 }
@@ -87,8 +92,10 @@ void ComponentTransformable::setOrientation(const quaternion& q)
 void ComponentTransformable::applyOrientation(const quaternion& q)
 {
 	if (shouldDecompose())
+	{
 		setTransform(_cachedTransform);
-
+	}
+	
 	_orientation *= q;
 	invalidateTransform();
 }
@@ -97,6 +104,17 @@ const mat4& ComponentTransformable::cachedTransform() const
 {
 	ET_ASSERT(transformValid());
 	return _cachedTransform; 
+}
+
+const mat4& ComponentTransformable::additionalTransform() const
+{
+	return _additionalTransform;
+}
+
+void ComponentTransformable::setAdditionalTransform(const mat4& m)
+{
+	_additionalTransform = m;
+	invalidateTransform();
 }
 
 void ComponentTransformable::setTransform(const mat4& originalMatrix)

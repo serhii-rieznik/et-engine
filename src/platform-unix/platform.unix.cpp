@@ -13,7 +13,7 @@ namespace et
 	{
 		void debugBreak()
 		{
-			__builtin_trap();
+			__asm int 3; // __builtin_trap();
 		}
 	}
 }

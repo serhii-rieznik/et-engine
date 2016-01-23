@@ -18,6 +18,7 @@ namespace et
 	const std::string kFlagsValue = "flags-value";
 	const std::string kTranslation = "translation";
 	const std::string kTransform = "transform";
+	const std::string kAdditionalTransform = "additional-transform";
 	const std::string kScale = "scale";
 	const std::string kOrientation = "orientation";
 	const std::string kProperties = "properties";

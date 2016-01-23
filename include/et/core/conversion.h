@@ -22,6 +22,7 @@ namespace et
 	ArrayValue vec4ToArray(const vec4&);
 	ArrayValue rectToArray(const rect&);
 	ArrayValue quaternionToArray(const quaternion&);
+	ArrayValue matrixToArray(const mat4&);
 
 	vec2 arrayToVec2(ArrayValue);
 	vec2i arrayToVec2i(ArrayValue);
@@ -30,4 +31,5 @@ namespace et
 	vec4 arrayToVec4(ArrayValue);
 	rect arrayToRect(ArrayValue);
 	quaternion arrayToQuaternion(ArrayValue);
+	mat4 arrayToMatrix(ArrayValue);
 }

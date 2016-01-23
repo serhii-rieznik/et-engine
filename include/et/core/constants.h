@@ -135,6 +135,7 @@ namespace et
 	extern const std::string kMaterialName;
 	extern const std::string kFlagsValue;
 	extern const std::string kTransform;
+	extern const std::string kAdditionalTransform;
 	extern const std::string kTranslation;
 	extern const std::string kScale;
 	extern const std::string kOrientation;

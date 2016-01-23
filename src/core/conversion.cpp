@@ -176,6 +176,7 @@ vec4 et::strHexToVec4(const std::wstring& s)
 ArrayValue et::vec2ToArray(const vec2& v)
 {
 	ArrayValue result;
+	result->content.reserve(2);
 	result->content.push_back(FloatValue(v.x));
 	result->content.push_back(FloatValue(v.y));
 	return result;
@@ -184,6 +185,7 @@ ArrayValue et::vec2ToArray(const vec2& v)
 ArrayValue et::vec3ToArray(const vec3& v)
 {
 	ArrayValue result;
+	result->content.reserve(3);
 	result->content.push_back(FloatValue(v.x));
 	result->content.push_back(FloatValue(v.y));
 	result->content.push_back(FloatValue(v.z));
@@ -193,6 +195,7 @@ ArrayValue et::vec3ToArray(const vec3& v)
 ArrayValue et::vec4ToArray(const vec4& v)
 {
 	ArrayValue result;
+	result->content.reserve(5);
 	result->content.push_back(FloatValue(v.x));
 	result->content.push_back(FloatValue(v.y));
 	result->content.push_back(FloatValue(v.z));
@@ -203,6 +206,7 @@ ArrayValue et::vec4ToArray(const vec4& v)
 ArrayValue et::rectToArray(const rect& v)
 {
 	ArrayValue result;
+	result->content.reserve(4);
 	result->content.push_back(FloatValue(v.left));
 	result->content.push_back(FloatValue(v.top));
 	result->content.push_back(FloatValue(v.width));
@@ -213,10 +217,22 @@ ArrayValue et::rectToArray(const rect& v)
 ArrayValue et::quaternionToArray(const quaternion& q)
 {
 	ArrayValue result;
+	result->content.reserve(4);
 	result->content.push_back(FloatValue(q.scalar));
 	result->content.push_back(FloatValue(q.vector.x));
 	result->content.push_back(FloatValue(q.vector.y));
 	result->content.push_back(FloatValue(q.vector.z));
+	return result;
+}
+
+ArrayValue et::matrixToArray(const mat4& m)
+{
+	ArrayValue result;
+	result->content.reserve(16);
+	for (size_t r = 0; r < 4; ++r)
+	{
+		result->content.push_back(vec4ToArray(m.mat[r]));
+	}
 	return result;
 }
 
@@ -313,6 +329,19 @@ rect et::arrayToRect(ArrayValue a)
 			result[index++] = static_cast<float>(IntegerValue(v)->content);
 		
 		if (index >= 4) break;
+	}
+	return result;
+}
+
+mat4 et::arrayToMatrix(ArrayValue arr)
+{
+	mat4 result = identityMatrix;
+	for (size_t i = 0; i < std::min(size_t(4), arr->content.size()); ++i)
+	{
+		if (arr->content[i]->valueClass() == ValueClass_Array)
+		{
+			result.mat[i] = arrayToVec4(arr->content[i]);
+		}
 	}
 	return result;
 }

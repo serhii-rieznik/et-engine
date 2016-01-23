@@ -41,6 +41,11 @@ namespace et
 			void serialize(Dictionary, const std::string&);
 			void deserialize(Dictionary, SerializationHelper*);
 			
+		protected:
+			// should use RenderBatches' transformation
+			const mat4& finalInverseTransform();
+			const mat4& finalTransform();
+			
 		private:
 			SceneMaterial::Pointer _material;
 			std::vector<RenderBatch::Pointer> _renderBatches;

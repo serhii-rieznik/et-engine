@@ -75,7 +75,7 @@ void RenderableElement::prepareRenderBatches()
 {
 	for (auto& rb : _renderBatches)
 	{
-		rb->setTransformation(finalTransform());
+		rb->setTransformation(additionalTransform() * finalTransform());
 	}
 }
 
@@ -87,4 +87,14 @@ std::vector<RenderBatch::Pointer>& RenderableElement::renderBatches()
 const std::vector<RenderBatch::Pointer>& RenderableElement::renderBatches() const
 {
 	return _renderBatches;
+}
+
+const mat4& RenderableElement::finalInverseTransform()
+{
+	return ElementContainer::finalInverseTransform();
+}
+
+const mat4& RenderableElement::finalTransform()
+{
+	return ElementContainer::finalTransform();
 }
