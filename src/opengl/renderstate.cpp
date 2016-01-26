@@ -35,7 +35,7 @@ void RenderState::setRenderContext(RenderContext* rc)
 {
 	_rc = rc;
 	_desc = RenderState::currentState();
-	auto currentUnit = _desc.cache.boundTextures[TextureTarget::Texture_2D][_desc.cache.activeTextureUnit];
+	auto currentUnit = _desc.cache.boundTextures[uint32_t(TextureTarget::Texture_2D)][_desc.cache.activeTextureUnit];
 	bindTexture(_desc.cache.activeTextureUnit, currentUnit, TextureTarget::Texture_2D);
 }
 
@@ -78,9 +78,10 @@ void RenderState::bindTexture(uint32_t unit, uint32_t texture, TextureTarget tar
 {
 	setActiveTextureUnit(unit, force);
 	
-	if (force || (_desc.cache.boundTextures[target][unit] != texture))
+	uint32_t targetIndex = static_cast<uint32_t>(target);
+	if (force || (_desc.cache.boundTextures[targetIndex][unit] != texture))
 	{
-		_desc.cache.boundTextures[target][unit] = texture;
+		_desc.cache.boundTextures[targetIndex][unit] = texture;
 		etBindTexture(textureTargetValue(target), texture);
 	}
 }
@@ -390,15 +391,21 @@ void RenderState::programDeleted(uint32_t program)
 		bindProgram(0, true);
 }
 
-void RenderState::textureDeleted(uint32_t texture)
+void RenderState::textureDeleted(uint32_t deletedTexture)
 {
-	for (auto& target : _desc.cache.boundTextures)
+	uint32_t target = 0;
+	for (const auto& targetUnits : _desc.cache.boundTextures)
 	{
-		for (auto& unit : target.second)
+		uint32_t unit = 0;
+		for (auto& texture : targetUnits)
 		{
-			if (unit.second == texture)
-				bindTexture(unit.first, unit.second, target.first);
+			if (deletedTexture == texture)
+			{
+				bindTexture(unit, texture, static_cast<TextureTarget>(target));
+			}
+			++unit;
 		}
+		++target;
 	}
 }
 
@@ -582,10 +589,16 @@ void RenderState::applyState(const RenderState::Descriptor& s)
 	bindBuffer(GL_ELEMENT_ARRAY_BUFFER, s.cache.boundElementArrayBuffer, true);
 	bindBuffer(GL_ARRAY_BUFFER, s.cache.boundArrayBuffer, true);
 	
-	for (auto& target : s.cache.boundTextures)
+	uint32_t target = 0;
+	for (const auto& targetUnits : s.cache.boundTextures)
 	{
-		for (auto& unit : target.second)
-			bindTexture(unit.first, unit.second, target.first, true);
+		uint32_t unit = 0;
+		for (const auto& texture : targetUnits)
+		{
+			bindTexture(unit, texture, static_cast<TextureTarget>(target), true);
+			++unit;
+		}
+		++target;
 	}
 	
 	for (uint32_t i = 0, e = static_cast<uint32_t>(VertexAttributeUsage::max); i < e; ++i)
@@ -748,11 +761,11 @@ RenderStateCache RenderState::currentCacheValues()
 		
 		value = 0;
 		glGetIntegerv(GL_TEXTURE_BINDING_2D, &value);
-		cache.boundTextures[TextureTarget::Texture_2D][i] = value;
+		cache.boundTextures[uint32_t(TextureTarget::Texture_2D)][i] = value;
 		
 		value = 0;
 		glGetIntegerv(GL_TEXTURE_BINDING_CUBE_MAP, &value);
-		cache.boundTextures[TextureTarget::Texture_Cube][i] = value;
+		cache.boundTextures[uint32_t(TextureTarget::Texture_Cube)][i] = value;
 	}
 	
 	glActiveTexture(GL_TEXTURE0 + cache.activeTextureUnit);

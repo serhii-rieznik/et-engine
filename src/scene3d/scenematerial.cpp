@@ -213,9 +213,8 @@ void SceneMaterial::reloadObject(LoadableObject::Pointer, ObjectsCache&)
 
 void SceneMaterial::textureDidStartLoading(Texture::Pointer t)
 {
-	ET_ASSERT(t.valid());
-	
 #if (ET_DEBUG)
+	ET_ASSERT(t.valid());
 	bool pendingTextureFound = false;
 	
 	for (uint32_t i = 0; i < MaterialParameter_max; ++i)
@@ -229,6 +228,8 @@ void SceneMaterial::textureDidStartLoading(Texture::Pointer t)
 	}
 	
 	ET_ASSERT(pendingTextureFound);
+#else
+	(void)t;
 #endif
 }
 

@@ -141,10 +141,10 @@ namespace et
 			{ return vector3<T>(mat[0][i], mat[1][i], mat[2][i]); }
 		
 		bool operator == (const matrix3<T>& m) const
-			{ return (mat[0] == m.mat[0]) && (mat[1] == m.mat[1]) && (mat[2] == m.mat[2]); }
+			{ return memcmp(mat, m.mat, sizeof(mat)) == 0; }
 		
 		bool operator != (const matrix3<T>& m) const
-			{ return (mat[0] != m.mat[0]) || (mat[1] != m.mat[1]) || (mat[2] != m.mat[2]); }
+			{ return memcmp(mat, m.mat, sizeof(mat)) != 0; }
 
 		void clear()
 		{

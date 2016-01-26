@@ -11,8 +11,6 @@
 #include <et/core/objectscache.h>
 #include <et/scene3d/elementcontainer.h>
 #include <et/scene3d/storage.h>
-#include <et/scene3d/cameraelement.h>
-#include <et/scene3d/lightelement.h>
 #include <et/scene3d/particlesystem.h>
 #include <et/scene3d/lineelement.h>
 #include <et/scene3d/skeletonelement.h>

@@ -11,8 +11,11 @@
 
 namespace et
 {
-	class Camera
+	class Camera : public Shared
 	{
+	public:
+		ET_DECLARE_POINTER(Camera)
+		
 	public:
 		Camera();
 
@@ -97,7 +100,7 @@ namespace et
 		void setProjectionMatrix(const mat4& m)
 			{ _projectionMatrix = m; projectionUpdated(); }
 
-		Camera reflected(const plane&) const;
+		void reflected(const plane&, Camera&) const;
 
 		vec3 project(const vec3&) const;
 		vec3 unproject(const vec3&) const;

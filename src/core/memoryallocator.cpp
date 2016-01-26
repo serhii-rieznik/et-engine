@@ -601,6 +601,7 @@ inline void MemoryChunk::validateInfo(et::MemoryChunkInfo* info)
 	ET_ASSERT(info->begin < size);
 	ET_ASSERT(info->length <= size);
 	ET_ASSERT(info->begin + info->length <= size);
+	(void)info;
 }
 
 bool MemoryChunk::containsPointer(char* ptr)

@@ -75,6 +75,11 @@ namespace et
 		
 		Dictionary serialize() const;
 		
+		void makeMaterialSnapshot();
+		
+		uint64_t materialSnapshot() const
+			{ return _materialSnapshot; }
+		
 	private:
 		Material::Pointer _material;
 		VertexArrayObject::Pointer _vao;
@@ -87,6 +92,7 @@ namespace et
 		BoundingBox _transformedBoudingBox;
 		uint32_t _firstIndex = 0;
 		uint32_t _numIndexes = 0;
+		uint64_t _materialSnapshot = uint64_t(-1);
 		bool _transformedBoxValid = false;
 	};
 }

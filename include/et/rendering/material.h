@@ -26,6 +26,7 @@ namespace et
 		void loadFromJson(const std::string&, const std::string& baseFolder);
 		
 		void enableInRenderState(RenderState&);
+		void enableSnapshotInRenderState(RenderState&, uint64_t);
 		
 		et::Program::Pointer& program()
 			{ return _program; }
@@ -41,6 +42,9 @@ namespace et
 		
 		CullMode cullMode() const
 			{ return _cullMode; }
+		
+		uint64_t makeSnapshot();
+		void clearSnapshots();
 		
 		void setProperty(const std::string& name, const float value);
 		void setProperty(const std::string& name, const vec2& value);
@@ -66,6 +70,7 @@ namespace et
 			uint32_t length = 0;
 			bool requireUpdate = true;
 			
+			DataProperty(const DataProperty&) = default;
 			DataProperty(DataType dt, int32_t loc, uint32_t o, uint32_t len) :
 				type(dt), locationInProgram(loc), offset(o), length(len) { }
 		};
@@ -75,8 +80,19 @@ namespace et
 			int32_t locationInProgram = -1;
 			uint32_t unit = 0;
 			Texture::Pointer texture;
+			
+			TextureProperty(const TextureProperty&) = default;
 			TextureProperty(int32_t loc, uint32_t u) :
 				locationInProgram(loc), unit(u) { }
+		};
+		
+		struct Snapshot
+		{
+			std::vector<DataProperty, SharedBlockAllocatorSTDProxy<DataProperty>> properties;
+			std::vector<TextureProperty, SharedBlockAllocatorSTDProxy<TextureProperty>> textures;
+			DepthState depth;
+			BlendState blend;
+			CullMode cullMode;
 		};
 		
 		using ProgramSetIntFunction = void (Program::*)(int, const int*, uint32_t);
@@ -87,20 +103,26 @@ namespace et
 		void addTexture(const std::string&, int32_t location, uint32_t unit);
 		void updateDataProperty(DataProperty&, const void*);
 		
+		void applySnapshot(const Snapshot&);
+		void applyProperty(const DataProperty&);
+		
 	public:
 		MaterialFactory* _factory = nullptr;
+		Program::Pointer _program;
 		
-		BinaryDataStorage _propertiesData;
+		std::vector<Snapshot, SharedBlockAllocatorSTDProxy<Snapshot>> _snapshots;
 		std::unordered_map<std::string, DataProperty> _properties;
 		std::unordered_map<std::string, TextureProperty> _textures;
-		
-		Program::Pointer _program;
 		DepthState _depth;
 		BlendState _blend;
 		CullMode _cullMode = CullMode::Disabled;
+		
+		BinaryDataStorage _propertiesData;
 		ProgramSetIntFunction _setIntFunctions[DataType_max];
 		ProgramSetFloatFunction _setFloatFunctions[DataType_max];
 		uint32_t _additionalPriority = 0;
+		uint64_t _lastShapshotIndex = uint64_t(-1);
+		bool _shouldUpdateSnapshot = true;
 	};
 	
 	class MaterialProvider

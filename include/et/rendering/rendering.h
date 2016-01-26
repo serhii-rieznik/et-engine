@@ -328,7 +328,8 @@ namespace et
 		InvalidShortIndex = static_cast<uint16_t>(-1),
 		InvalidSmallIndex = static_cast<uint8_t>(-1),
 		
-		MaxRenderTargets = 8
+		MaxRenderTargets = 8,
+		MaxTextureUnits = 8
 	};
 	
 	struct DepthState
@@ -427,7 +428,7 @@ namespace et
 		uint32_t boundProgram = 0;
 		recti viewport = recti(0, 0, 0, 0);
 		
-		std::map<TextureTarget, std::map<uint32_t, uint32_t>> boundTextures;
+		std::array<std::array<uint32_t, MaxTextureUnits>, TextureTarget_max> boundTextures;
 		std::array<size_t, VertexAttributeUsage_max> enabledVertexAttributes;
 		std::array<size_t, MaxRenderTargets> drawBuffers;
 	};

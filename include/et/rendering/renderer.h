@@ -56,27 +56,16 @@ namespace et
 		vec2 currentViewportSizeToScene(const vec2i& size);
 		
 		void finishRendering();
-		
-		/*
-		 * Render batches stuff
-		 */
-		void setCurrentCamera(Camera*);
-		void pushRenderBatch(RenderBatch::Pointer);
-		
-		Camera* currentCamera() const
-			{ return _currentCamera; }
 
 		ET_DECLARE_PROPERTY_GET_COPY_SET_COPY(uint32_t, defaultTextureBindingUnit, setDefaultTextureBindingUnit)
 		
 	private:
-		Renderer& operator = (const Renderer&)
-			{ return *this; }
+		Renderer(Renderer&&) = delete;
+		Renderer(const Renderer&) = delete;
+		Renderer& operator = (const Renderer&) = delete;
 
 	private:
 		RenderContext* _rc = nullptr;
-		
-		Camera _defaultCamera;
-		Camera* _currentCamera = nullptr;
 		
 		ObjectsCache _sharedCache;
 		VertexArrayObject::Pointer _fullscreenQuadVao;

@@ -8,6 +8,7 @@
 #include <et/scene3d/scene3drenderer.h>
 #include <et/rendering/primitives.h>
 #include <et/rendering/rendercontext.h>
+#include <et/rendering/rendersystem.h>
 
 using namespace et;
 using namespace et::s3d;
@@ -18,7 +19,7 @@ s3d::Renderer::Renderer() :
 	
 }
 
-void s3d::Renderer::render(RenderContext* rc, const Scene& scene)
+void s3d::Renderer::render(RenderContext* rc, const Scene& scene, Camera::Pointer camera)
 {
 	auto& rs = rc->renderState();
 	
@@ -34,11 +35,16 @@ void s3d::Renderer::render(RenderContext* rc, const Scene& scene)
 	}), allMeshes.end());
 	
 	rs.setFillMode(hasFlag(Wireframe) ? FillMode::Wireframe : FillMode::Solid);
-	renderMeshList(rc, allMeshes);
+	
+	RenderSystem renderSystem(rc);
+	auto pass = renderSystem.allocateRenderPass({camera});
+	renderMeshList(pass, allMeshes);
+	renderSystem.submitRenderPass(pass);
+	
 	rs.setFillMode(FillMode::Solid);
 }
 
-void s3d::Renderer::renderMeshList(RenderContext* rc, const s3d::BaseElement::List& meshes)
+void s3d::Renderer::renderMeshList(RenderPass::Pointer pass, const s3d::BaseElement::List& meshes)
 {
 	for (auto& lb : _latestBatches)
 	{
@@ -54,7 +60,7 @@ void s3d::Renderer::renderMeshList(RenderContext* rc, const s3d::BaseElement::Li
 		}
 	}
 
-	auto cameraPosition = rc->renderer()->currentCamera()->position();
+	auto cameraPosition = pass->camera()->position();
 	for (auto& rbv : _latestBatches)
 	{
 		std::sort(rbv.second.begin(), rbv.second.end(), [cameraPosition](BatchFromMesh& l, BatchFromMesh& r)
@@ -70,7 +76,7 @@ void s3d::Renderer::renderMeshList(RenderContext* rc, const s3d::BaseElement::Li
 		for (auto& rb : rbv.second)
 		{
 			rb.second->material()->bindToMaterial(rb.first->material());
-			rc->renderer()->pushRenderBatch(rb.first);
+			pass->pushRenderBatch(rb.first);
 		}
 	}
 	
@@ -80,7 +86,7 @@ void s3d::Renderer::renderMeshList(RenderContext* rc, const s3d::BaseElement::Li
 		{
 			for (auto& rb : rbv.second)
 			{
-				renderTransformedBoundingBox(rc, rb.first->boundingBox(), rb.first->transformation());
+				renderTransformedBoundingBox(pass, rb.first->boundingBox(), rb.first->transformation());
 			}
 		}
 	}
@@ -99,16 +105,10 @@ void s3d::Renderer::initDebugObjects(RenderContext* rc, Material::Pointer bboxMa
 	_bboxBatch = RenderBatch::Pointer::create(bboxMaterial, cube);
 }
 
-void s3d::Renderer::renderTransformedBoundingBox(RenderContext* rc, const BoundingBox& b, const mat4& t)
+void s3d::Renderer::renderTransformedBoundingBox(RenderPass::Pointer pass, const BoundingBox& b, const mat4& t)
 {
 	_bboxBatch->material()->setProperty("bboxScale", b.halfDimension);
 	_bboxBatch->material()->setProperty("bboxCenter", b.center);
 	_bboxBatch->setTransformation(t);
-
-	auto& rs = rc->renderState();
-	rs.setFillMode(FillMode::Solid);
-	rc->renderer()->pushRenderBatch(_bboxBatch);
-	rs.setFillMode(FillMode::Wireframe);
-	rc->renderer()->pushRenderBatch(_bboxBatch);
-	rs.setFillMode(hasFlag(Wireframe) ? FillMode::Wireframe : FillMode::Solid);
+	pass->pushRenderBatch(_bboxBatch);
 }

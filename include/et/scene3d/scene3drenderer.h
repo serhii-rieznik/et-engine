@@ -7,10 +7,13 @@
 
 #pragma once
 
+#include <et/rendering/renderpass.h>
 #include <et/scene3d/scene3d.h>
 
 namespace et
 {
+	class Camera;
+	class RenderSystem;
 	namespace s3d
 	{		
 		class Renderer : public FlagsHolder
@@ -30,13 +33,13 @@ namespace et
 			
 		public:
 			Renderer();
-			void render(RenderContext*, const Scene&);
-			void renderTransformedBoundingBox(RenderContext*, const BoundingBox&, const mat4&);
+			void render(RenderContext*, const Scene&, Camera::Pointer);
 			
 			void initDebugObjects(RenderContext*, Material::Pointer bboxMaterial);
+			void renderTransformedBoundingBox(RenderPass::Pointer, const BoundingBox&, const mat4&);
 			
 		private:
-			void renderMeshList(RenderContext*, const s3d::BaseElement::List&);
+			void renderMeshList(RenderPass::Pointer, const s3d::BaseElement::List&);
 			
 		private:
 			using BatchFromMesh = std::pair<et::RenderBatch::Pointer, et::s3d::Mesh::Pointer>;

@@ -109,22 +109,8 @@ void Material::enableInRenderState(RenderState& rs)
 	{
 		if (i.second.requireUpdate)
 		{
-			auto& prop = i.second;
-			auto format = dataTypeDataFormat(prop.type);
-			auto ptr = _propertiesData.element_ptr(prop.offset);
-			auto programPtr = _program.ptr();
-			if (format == DataFormat::Int)
-			{
-				auto& fn = _setIntFunctions[uint32_t(prop.type)];
-				(programPtr->*fn)(prop.locationInProgram, reinterpret_cast<const int*>(ptr), 1);
-			}
-			else
-			{
-				auto& fn = _setFloatFunctions[uint32_t(prop.type)];
-				(programPtr->*fn)(prop.locationInProgram, reinterpret_cast<const float*>(ptr), 1);
-			}
-			
-			prop.requireUpdate = false;
+			applyProperty(i.second);
+			i.second.requireUpdate = false;
 		}
 	}
 }
@@ -150,6 +136,7 @@ void Material::loadProperties()
 void Material::addTexture(const std::string& name, int32_t location, uint32_t unit)
 {
 	_textures.emplace(name, TextureProperty(location, unit));
+	_shouldUpdateSnapshot = true;
 }
 
 void Material::addDataProperty(const std::string& name, DataType type, int32_t location)
@@ -162,13 +149,18 @@ void Material::addDataProperty(const std::string& name, DataType type, int32_t l
 	}
 	_properties.emplace(name, DataProperty(type, location, currentSize, requiredSpace));
 	_propertiesData.applyOffset(requiredSpace);
+	_shouldUpdateSnapshot = true;
 }
 
 void Material::updateDataProperty(DataProperty& prop, const void* src)
 {
 	auto dst = _propertiesData.element_ptr(prop.offset);
-	memcpy(dst, src, prop.length);
-	prop.requireUpdate = true;
+	if (memcmp(src, dst, prop.length) != 0)
+	{
+		_shouldUpdateSnapshot = true;
+		memcpy(dst, src, prop.length);
+		prop.requireUpdate = true;
+	}
 }
 
 #define ET_SET_PROPERTY_IMPL(TYPE) 	{ auto i = _properties.find(name); \
@@ -190,13 +182,91 @@ void Material::setProperty(const std::string& name, const mat4& value) ET_SET_PR
 void Material::setTexutre(const std::string& name, const Texture::Pointer& tex)
 {
 	auto i = _textures.find(name);
-	if (i != _textures.end())
+	if ((i != _textures.end()) && (i->second.texture != tex))
 	{
 		i->second.texture = tex;
+		_shouldUpdateSnapshot = true;
 	}
 }
 
 uint32_t Material::sortingKey() const
 {
 	return _depth.sortingKey() | _blend.sortingKey() << 8 | _additionalPriority << 16;
+}
+
+uint64_t Material::makeSnapshot()
+{
+	if (_shouldUpdateSnapshot == false)
+	{
+		return _lastShapshotIndex;
+	}
+	
+	_snapshots.emplace_back();
+	
+	auto& snapshot = _snapshots.back();
+	
+	snapshot.blend = _blend;
+	snapshot.depth = _depth;
+	snapshot.cullMode = _cullMode;
+	
+	snapshot.textures.reserve(_textures.size());
+	for (const auto& t : _textures)
+	{
+		snapshot.textures.emplace_back(t.second);
+	}
+	
+	snapshot.properties.reserve(_properties.size());
+	for (const auto& p : _properties)
+	{
+		snapshot.properties.emplace_back(p.second);
+	}
+	
+	_shouldUpdateSnapshot = false;
+	_lastShapshotIndex = _snapshots.size() - 1;
+	return _lastShapshotIndex;
+}
+
+void Material::enableSnapshotInRenderState(RenderState& rs, uint64_t index)
+{
+	ET_ASSERT(index < _snapshots.size());
+	
+	const auto& snapshot = _snapshots.at(index);
+	rs.setCulling(snapshot.cullMode);
+	rs.setBlendState(snapshot.blend);
+	rs.setDepthState(snapshot.depth);
+	
+	for (auto& i : snapshot.textures)
+	{
+		rs.bindTexture(i.unit, i.texture);
+	}
+	
+	rs.bindProgram(_program);
+	for (const auto& i : snapshot.properties)
+	{
+		applyProperty(i);
+	}
+}
+
+void Material::applyProperty(const DataProperty& prop)
+{
+	auto format = dataTypeDataFormat(prop.type);
+	auto ptr = _propertiesData.element_ptr(prop.offset);
+	auto programPtr = _program.ptr();
+	if (format == DataFormat::Int)
+	{
+		auto& fn = _setIntFunctions[uint32_t(prop.type)];
+		(programPtr->*fn)(prop.locationInProgram, reinterpret_cast<const int*>(ptr), 1);
+	}
+	else
+	{
+		auto& fn = _setFloatFunctions[uint32_t(prop.type)];
+		(programPtr->*fn)(prop.locationInProgram, reinterpret_cast<const float*>(ptr), 1);
+	}
+}
+
+void Material::clearSnapshots()
+{
+	_snapshots.clear();
+	_lastShapshotIndex = uint64_t(-1);
+	_shouldUpdateSnapshot = true;
 }

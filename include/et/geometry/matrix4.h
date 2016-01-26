@@ -227,14 +227,12 @@ namespace et
 
 		bool operator == (const matrix4& m) const
 		{
-			return (mat[0] == m.mat[0]) && (mat[1] == m.mat[1]) &&
-				(mat[2] == m.mat[2]) && (mat[3] == m.mat[3]);
+			return memcmp(mat, m.mat, sizeof(mat)) == 0;
 		}
 
 		bool operator != (const matrix4& m) const
 		{
-			return (mat[0] != m.mat[0]) || (mat[1] != m.mat[1]) ||
-				(mat[2] != m.mat[2]) || (mat[3] != m.mat[3]);
+			return memcmp(mat, m.mat, sizeof(mat)) != 0;
 		}
 
 		T determinant() const

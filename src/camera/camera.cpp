@@ -253,10 +253,8 @@ void Camera::unlockUpVector()
 	_lockUpVector = false;
 }
 
-Camera Camera::reflected(const plane& pl) const
+void Camera::reflected(const plane& pl, Camera& result) const
 {
-	Camera result(*this);
-	
 	vec3 s = normalize(reflect(side(), pl.normal()));
 	vec3 u = normalize(reflect(up(), pl.normal()));
 	vec3 d = normalize(reflect(direction(), pl.normal()));
@@ -270,8 +268,7 @@ Camera Camera::reflected(const plane& pl) const
 	
 	result.unlockUpVector();
  	result.setViewMatrix(mv);
-	
-	return result;
+	result.setProjectionMatrix(_projectionMatrix);
 }
 
 vec3 Camera::project(const vec3& v) const

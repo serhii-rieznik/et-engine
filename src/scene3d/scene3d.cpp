@@ -56,10 +56,7 @@ BaseElement::Pointer Scene::createElementOfType(ElementType type, BaseElement* p
 			
 		case ElementType::Mesh:
 			return Mesh::Pointer::create(emptyString, parent);
-			
-		case ElementType::Camera:
-			return CameraElement::Pointer::create(emptyString, parent);
-			
+						
 		default:
 		{
 			log::warning("[s3d::Scene] Attempt to create element with invalid type: %u", static_cast<uint32_t>(type));

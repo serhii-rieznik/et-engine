@@ -281,27 +281,6 @@ void Renderer::finishRendering()
 	glFinish();
 }
 
-void Renderer::setCurrentCamera(Camera* cam)
-{
-	_currentCamera = cam;
-}
-
-void Renderer::pushRenderBatch(RenderBatch::Pointer rb)
-{
-	auto& rs = _rc->renderState();
-	auto& batch = rb.reference();
-	
-	auto& mat = batch.material().reference();
-	mat.enableInRenderState(rs);
-	
-	auto& prog = mat.program().reference();
-	prog.setCameraProperties((_currentCamera == nullptr) ? _defaultCamera : (*_currentCamera));
-	prog.setTransformMatrix(batch.transformation());
-	
-	rs.bindVertexArrayObject(batch.vao());
-	drawElements(batch.vao()->indexBuffer(), batch.firstIndex(), batch.numIndexes());
-}
-
 /*
  * Default shaders
  */

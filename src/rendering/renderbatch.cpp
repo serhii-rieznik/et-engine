@@ -117,3 +117,8 @@ bool RenderBatch::intersectsLocalSpaceRay(const ray3d& ray, vec3& intersection)
 	
 	return found;
 }
+
+void RenderBatch::makeMaterialSnapshot()
+{
+	_materialSnapshot = _material->makeSnapshot();
+}
