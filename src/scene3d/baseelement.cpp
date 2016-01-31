@@ -281,6 +281,7 @@ void BaseElement::duplicateChildrenToObject(BaseElement* object)
 
 void BaseElement::duplicateBasePropertiesToObject(BaseElement* object)
 {
+	object->setFlags(flags());
 	object->setScale(scale());
 	object->setTranslation(translation());
 	object->setOrientation(orientation());

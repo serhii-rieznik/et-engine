@@ -46,7 +46,7 @@ void Mesh::calculateSupportData()
 		{
 			rb->calculateBoundingBox();
 			minVertex = minv(minVertex, rb->minExtent());
-			maxVertex = maxv(maxVertex, rb->minExtent());
+			maxVertex = maxv(maxVertex, rb->maxExtent());
 			processedBatches += 1.0f;
 		}
 	}
