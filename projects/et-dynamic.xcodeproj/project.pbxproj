@@ -970,7 +970,7 @@
 				A5D1AC081C5E0D1B000E7D97 /* external */,
 			);
 			name = include;
-			path = ../../include;
+			path = ../include;
 			sourceTree = "<group>";
 		};
 		A5D1AB2C1C5E0D1B000E7D97 /* et */ = {
@@ -1582,7 +1582,7 @@
 				A5D1AD251C5E0D1B000E7D97 /* vertexbuffer */,
 			);
 			name = src;
-			path = ../../src;
+			path = ../src;
 			sourceTree = "<group>";
 		};
 		A5D1AC671C5E0D1B000E7D97 /* app */ = {
@@ -2490,7 +2490,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				HEADER_SEARCH_PATHS = "\"$PROJECT_DIR/../../include\"";
+				HEADER_SEARCH_PATHS = "\"$PROJECT_DIR/../include\"";
 				MACOSX_DEPLOYMENT_TARGET = 10.8;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -2534,7 +2534,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				HEADER_SEARCH_PATHS = "\"$PROJECT_DIR/../../include\"";
+				HEADER_SEARCH_PATHS = "\"$PROJECT_DIR/../include\"";
 				MACOSX_DEPLOYMENT_TARGET = 10.8;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				OTHER_LDFLAGS = (
@@ -2558,7 +2558,7 @@
 				GCC_ENABLE_CPP_EXCEPTIONS = YES;
 				GCC_ENABLE_CPP_RTTI = YES;
 				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
-				LIBRARY_SEARCH_PATHS = "\"$PROJECT_DIR/../../lib/osx\"";
+				LIBRARY_SEARCH_PATHS = "\"$PROJECT_DIR/../lib/osx\"";
 				PRODUCT_NAME = "et-dynamic";
 			};
 			name = Debug;
@@ -2573,7 +2573,7 @@
 				GCC_ENABLE_CPP_EXCEPTIONS = YES;
 				GCC_ENABLE_CPP_RTTI = YES;
 				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
-				LIBRARY_SEARCH_PATHS = "\"$PROJECT_DIR/../../lib/osx\"";
+				LIBRARY_SEARCH_PATHS = "\"$PROJECT_DIR/../lib/osx\"";
 				PRODUCT_NAME = "et-dynamic";
 			};
 			name = Release;
