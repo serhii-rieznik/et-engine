@@ -80,6 +80,8 @@ namespace et
 		uint64_t materialSnapshot() const
 			{ return _materialSnapshot; }
 		
+		RenderBatch* duplicate() const;
+		
 	private:
 		Material::Pointer _material;
 		VertexArrayObject::Pointer _vao;

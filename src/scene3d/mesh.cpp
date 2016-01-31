@@ -61,14 +61,24 @@ void Mesh::calculateSupportData()
 
 Mesh* Mesh::duplicate()
 {
-	ET_FAIL("Not implemented");
-	return nullptr;
-}
-
-void Mesh::duplicateMeshPropertiesToMesh(s3d::Mesh* result)
-{
+	Mesh* result = etCreateObject<Mesh>(name(), parent());
 	result->_supportData = _supportData;
-	result->_deformer = _deformer; // TODO: clone deformer
+	result->_boundingBox = _boundingBox;
+	result->_boundingSphereRadius = _boundingSphereRadius;
+	result->_undeformedTransformationMatrices = _undeformedTransformationMatrices;
+	
+	// renderable element
+	result->setMaterial(SceneMaterial::Pointer(material()->duplicate()));
+	for (auto batch : renderBatches())
+	{
+		result->addRenderBatch(RenderBatch::Pointer(batch->duplicate()));
+	}
+	
+	// base object
+	duplicateBasePropertiesToObject(result);
+	duplicateChildrenToObject(result);
+	
+	return result;
 }
 
 void Mesh::serialize(Dictionary stream, const std::string& basePath)
@@ -99,8 +109,7 @@ const Sphere& Mesh::boundingSphereUntransformed()
 {
 	if (_supportData.shouldUpdateBoundingSphereUntransformed)
 	{
-		_supportData.untranfromedBoundingSphere = Sphere(_boundingBox.center,
-			_boundingSphereRadius);
+		_supportData.untranfromedBoundingSphere = Sphere(_boundingBox.center, _boundingSphereRadius);
 		_supportData.shouldUpdateBoundingSphereUntransformed = false;
 	}
 	return _supportData.untranfromedBoundingSphere;

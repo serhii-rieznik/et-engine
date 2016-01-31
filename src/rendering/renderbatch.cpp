@@ -122,3 +122,17 @@ void RenderBatch::makeMaterialSnapshot()
 {
 	_materialSnapshot = _material->makeSnapshot();
 }
+
+RenderBatch* RenderBatch::duplicate() const
+{
+	RenderBatch* result = etCreateObject<RenderBatch>(_material, _vao, _transformation, _firstIndex, _numIndexes);
+	result->setVertexStorage(_vertexStorage);
+	result->setIndexArray(_indexArray);
+	result->_minExtent = _minExtent;
+	result->_maxExtent = _maxExtent;
+	result->_boundingBox = _boundingBox;
+	result->_transformedBoudingBox = _transformedBoudingBox;
+	result->_materialSnapshot = uint64_t(-1);
+	result->_transformedBoxValid = false;
+	return result;
+}

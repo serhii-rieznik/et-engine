@@ -54,7 +54,6 @@ namespace et
 			VertexStorage::Pointer bakeDeformations();
 			
 		protected:
-			void duplicateMeshPropertiesToMesh(s3d::Mesh*);
 			void transformInvalidated() override;
 			
 			struct SupportData

@@ -284,9 +284,12 @@ void BaseElement::duplicateBasePropertiesToObject(BaseElement* object)
 	object->setScale(scale());
 	object->setTranslation(translation());
 	object->setOrientation(orientation());
+	object->setAdditionalTransform(additionalTransform());
 	
 	for (const auto& p : properties())
+	{
 		object->addPropertyString(p);
+	}
 }
 
 bool BaseElement::hasPropertyString(const std::string& s) const
