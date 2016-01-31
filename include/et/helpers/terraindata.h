@@ -8,7 +8,7 @@
 #pragma once
 
 #include <et/core/containers.h>
-#include <et/collision/collision.h>
+#include <et/geometry/collision.h>
 #include <et/vertexbuffer/vertexarray.h>
 
 namespace et
@@ -56,7 +56,7 @@ namespace et
 		inline const vec2i& dimension() const 
 			{ return _dimension; }
 
-		const AABB& bounds() const
+		const BoundingBox& bounds() const
 			{ return _bounds; }
 
 		const VertexArray::Pointer& vertexData() const
@@ -97,7 +97,7 @@ namespace et
 
 		vec3 _minVertex;
 		vec3 _maxVertex;
-		AABB _bounds;
+		BoundingBox _bounds;
 
 		DataStorage<vec3> _positions;
 		DataStorage<vec3> _normals;

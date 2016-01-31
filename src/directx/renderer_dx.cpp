@@ -29,7 +29,7 @@ Renderer::Renderer(RenderContext* rc) :
 	ib->linearize(4);
 	
 	VertexArray::Pointer vb = VertexArray::Pointer::create(VertexDeclaration(false,
-		VertexAttributeUsage::Position, VertexAttributeType::Vec2), 4);
+		VertexAttributeUsage::Position, DataType::Vec2), 4);
 	
 	RawDataAcessor<vec2> pos = vb->chunk(VertexAttributeUsage::Position).accessData<vec2>(0);
 	pos[0] = vec2(-1.0f, -1.0f);

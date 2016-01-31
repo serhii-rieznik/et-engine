@@ -398,7 +398,7 @@ void TrackPrivate::loadWAVE()
 	pcmStartPosition = static_cast<size_t>(inStream.tellg());
 	pcmReadOffset = 0;
 	totalBuffers = static_cast<int>(1 + pcmDataSize / pcmBufferSize);
-	buffersCount = etMin(BuffersCount, totalBuffers);
+	buffersCount = std::min(BuffersCount, totalBuffers);
 	alGenBuffers(buffersCount, buffers);
 	checkOpenALError("alGenBuffers(%d, ...)", buffersCount);
 	
@@ -419,7 +419,7 @@ bool TrackPrivate::fillNextPCMBuffer()
 	
 	BinaryDataStorage data(pcmBufferSize, 0);
 	auto& inStream = stream->stream();
-	inStream.read(data.binary(), etMin(pcmBufferSize, pcmDataSize - pcmReadOffset));
+	inStream.read(data.binary(), std::min(pcmBufferSize, pcmDataSize - pcmReadOffset));
 	pcmReadOffset += static_cast<size_t>(inStream.gcount());
 	
 	ALsizei bytesRead = static_cast<ALsizei>(inStream.gcount());
@@ -483,7 +483,7 @@ void TrackPrivate::loadOGG()
 	pcmReadOffset = 0;
 	duration = static_cast<float>(pcmDataSize) / static_cast<float>(oneSecondSize);
 	totalBuffers = static_cast<int>(1 + pcmDataSize / pcmBufferSize);
-	buffersCount = etMin(BuffersCount, totalBuffers);
+	buffersCount = std::min(BuffersCount, totalBuffers);
 	alGenBuffers(buffersCount, buffers);
 	checkOpenALError("alGenBuffers(%d, ...)", buffersCount);
 	
@@ -503,7 +503,7 @@ bool TrackPrivate::fillNextOGGBuffer()
 	while (bytesRead < pcmBufferSize)
 	{
 		int section = -1;
-		int bytesToRead = etMin(4096, static_cast<int>(pcmBufferSize - bytesRead));
+		int bytesToRead = std::min(4096, static_cast<int>(pcmBufferSize - bytesRead));
 		
 		long lastRead = ov_read(&oggFile, data.binary() + bytesRead, bytesToRead, 0, 2, 1, &section);
 		
@@ -523,7 +523,7 @@ bool TrackPrivate::fillNextOGGBuffer()
 		}
 	}
 		
-	pcmReadOffset = etMin(pcmReadOffset + bytesRead, pcmDataSize);
+	pcmReadOffset = std::min(pcmReadOffset + bytesRead, pcmDataSize);
 	
 	if (bytesRead > 0)
 	{

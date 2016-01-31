@@ -63,7 +63,7 @@ namespace et
 				bool assertFail = false);
 			
 			BaseElement::List childrenOfType(ElementType ofType) const;
-			BaseElement::List childrenHavingFlag(size_t flag);
+			BaseElement::List childrenHavingFlag(size_t flag) const;
 
 			void clear();
 			void clearRecursively();
@@ -100,7 +100,7 @@ namespace et
 		private:
 			Pointer childWithNameCallback(const std::string& name, Pointer root, ElementType ofType);
 			void childrenOfTypeCallback(ElementType t, BaseElement::List& list, Pointer root) const;
-			void childrenHavingFlagCallback(size_t flag, BaseElement::List& list, Pointer root);
+			void childrenHavingFlagCallback(size_t flag, BaseElement::List& list, Pointer root) const;
 			
 			void buildTransform();
 

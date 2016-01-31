@@ -39,7 +39,7 @@ std::vector<RenderBatch::Pointer>& RenderPass::renderBatches()
 	return _renderBatches;
 }
 
-et::Camera::Pointer RenderPass::camera() const
+const et::Camera& RenderPass::camera() const
 {
 	return _camera;
 }

@@ -33,7 +33,7 @@ namespace et
 			
 		public:
 			Renderer();
-			void render(RenderContext*, const Scene&, Camera::Pointer);
+			void render(RenderContext*, const Scene&, const Camera&);
 			
 			void initDebugObjects(RenderContext*, Material::Pointer bboxMaterial);
 			void renderTransformedBoundingBox(RenderPass::Pointer, const BoundingBox&, const mat4&);

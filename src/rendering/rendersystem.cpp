@@ -34,7 +34,7 @@ void RenderSystem::submitRenderPass(RenderPass::Pointer pass)
 		mat.enableSnapshotInRenderState(rs, batch->materialSnapshot());
 		
 		auto& prog = mat.program().reference();
-		prog.setCameraProperties(pass->camera().reference());
+		prog.setCameraProperties(pass->camera());
 		prog.setTransformMatrix(batch->transformation());
 		
 		rs.bindVertexArrayObject(batch->vao());

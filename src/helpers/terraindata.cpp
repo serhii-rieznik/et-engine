@@ -5,9 +5,9 @@
  *
  */
 
-#include <et/collision/collision.h>
+#include <et/geometry/collision.h>
 #include <et/timers/intervaltimer.h>
-#include <et/primitives/primitives.h>
+#include <et/rendering/primitives.h>
 #include <et/helpers/terraindata.h>
 
 using namespace et;
@@ -57,10 +57,10 @@ void TerrainData::generateVertexData(const FloatDataStorage& hm)
 	float z = 0.0f;
 
 	VertexDeclaration decl(true);
-	decl.push_back(VertexAttributeUsage::Position, VertexAttributeType::Vec3);
-	decl.push_back(VertexAttributeUsage::Normal, VertexAttributeType::Vec3);
-	decl.push_back(VertexAttributeUsage::TexCoord0, VertexAttributeType::Vec2);
-	decl.push_back(VertexAttributeUsage::Tangent, VertexAttributeType::Vec3);
+	decl.push_back(VertexAttributeUsage::Position, DataType::Vec3);
+	decl.push_back(VertexAttributeUsage::Normal, DataType::Vec3);
+	decl.push_back(VertexAttributeUsage::TexCoord0, DataType::Vec2);
+	decl.push_back(VertexAttributeUsage::Tangent, DataType::Vec3);
 
 	_vertexData = VertexArray::Pointer::create(decl, _dimension.square());
 
@@ -108,7 +108,7 @@ void TerrainData::generateVertexData(const FloatDataStorage& hm)
 		tan[i] = vec3(0.0f);
 	}
 
-	_bounds = AABB(0.5f * (_minVertex + _maxVertex), _maxVertex - _minVertex);
+	_bounds = BoundingBox(0.5f * (_minVertex + _maxVertex), _maxVertex - _minVertex);
 
 	uint32_t numTriangles = primitives::indexCountForRegularMesh(_dimension, PrimitiveType::Triangles);
 	IndexArray::Pointer tempIB = IndexArray::Pointer::create(IndexArrayFormat::Format_32bit, numTriangles, PrimitiveType::Triangles);
@@ -127,7 +127,7 @@ void TerrainData::generateVertexData(const FloatDataStorage& hm)
 vec3 TerrainData::normalAtNormalizedPoint(const vec2& normalized) const
 {
 	vec2i p00(static_cast<int>(normalized.x), static_cast<int>(normalized.y));
-	vec2i p11(etMin(p00.x + 1, _dimension.x - 1), etMin(p00.y + 1, _dimension.y - 1));
+	vec2i p11(std::min(p00.x + 1, _dimension.x - 1), std::min(p00.y + 1, _dimension.y - 1));
 
 	vec2 dp(normalized.x - static_cast<float>(p00.x), normalized.y - static_cast<float>(p00.y));
 
@@ -154,7 +154,7 @@ vec3 TerrainData::normalAtPoint(const vec3& pt) const
 float TerrainData::heightAtNormalizedPoint(const vec2& normalized) const
 {
 	vec2i p00(static_cast<int>(normalized.x), static_cast<int>(normalized.y));
-	vec2i p11(etMin(p00.x + 1, _dimension.x - 1), etMin(p00.y + 1, _dimension.y - 1));
+	vec2i p11(std::min(p00.x + 1, _dimension.x - 1), std::min(p00.y + 1, _dimension.y - 1));
 
 	vec2 dp(normalized.x - static_cast<float>(p00.x), normalized.y - static_cast<float>(p00.y));
 

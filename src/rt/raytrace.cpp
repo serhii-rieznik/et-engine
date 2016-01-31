@@ -10,6 +10,7 @@
 #include <et/rt/raytrace.h>
 #include <et/rt/raytraceobjects.h>
 #include <et/app/application.h>
+#include <et/camera/camera.h>
 
 #define USE_ITERATIVE_GATHER 1
 
@@ -265,13 +266,14 @@ void RaytracePrivate::buildMaterialAndTriangles(s3d::Scene::Pointer scene)
 			mat.ior = meshMaterial->getFloat(MaterialParameter::Transparency);
 		}
 		
+		mesh->prepareRenderBatches();
 		for (const auto& rb : mesh->renderBatches())
 		{
 			auto& vs = rb->vertexStorage();
 			auto& ia = rb->indexArray();
 			if (vs.invalid() || ia.invalid()) continue;
 			
-			const mat4& t = mesh->finalTransform();
+			const mat4& t = rb->transformation();
 			
 			triangles.reserve(triangles.size() + rb->numIndexes());
 			

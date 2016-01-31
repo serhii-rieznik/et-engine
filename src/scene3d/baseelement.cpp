@@ -113,7 +113,7 @@ BaseElement::List BaseElement::childrenOfType(ElementType ofType) const
 	return list;
 }
 
-BaseElement::List BaseElement::childrenHavingFlag(size_t flag)
+BaseElement::List BaseElement::childrenHavingFlag(size_t flag) const
 {
 	BaseElement::List list;
 	
@@ -146,7 +146,7 @@ void BaseElement::childrenOfTypeCallback(ElementType t, BaseElement::List& list,
 		childrenOfTypeCallback(t, list, i);
 }
 
-void BaseElement::childrenHavingFlagCallback(size_t flag, BaseElement::List& list, BaseElement::Pointer root)
+void BaseElement::childrenHavingFlagCallback(size_t flag, BaseElement::List& list, BaseElement::Pointer root) const
 {
 	if (root->hasFlag(flag))
 		list.push_back(root);

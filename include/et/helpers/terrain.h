@@ -8,9 +8,9 @@
 #pragma once
 
 #include <et/core/containers.h>
-#include <et/collision/collision.h>
-#include <et/primitives/primitives.h>
+#include <et/geometry/collision.h>
 #include <et/rendering/rendercontext.h>
+#include <et/rendering/primitives.h>
 #include <et/helpers/terraindata.h>
 
 namespace et
@@ -22,7 +22,7 @@ namespace et
 	class TerrainDelegate : public TerrainDataDelegate
 	{
 	public: 
-		virtual int computeTerrainLod(Terrain const*, const AABB&/* chunkAABB */, int/* lastLod */, bool& /* visible */) 
+		virtual int computeTerrainLod(Terrain const*, const BoundingBox&/* chunkAABB */, int/* lastLod */, bool& /* visible */)
 			{ return 0; };
 	};
 
@@ -74,7 +74,7 @@ namespace et
 
 		VertexBuffer::Pointer _vertexBuffer;
 		IndexBuffer::Pointer _indexBuffer;
-		VertexArrayObject _vao;
+		VertexArrayObject::Pointer _vao;
 
 		vec2i _chunkSizes;
 	};

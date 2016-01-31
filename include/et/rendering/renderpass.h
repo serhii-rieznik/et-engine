@@ -19,7 +19,7 @@ namespace et
 		
 		struct ConstructionInfo
 		{
-			et::Camera::Pointer camera;
+			et::Camera camera;
 		};
 		
 	public:
@@ -31,10 +31,10 @@ namespace et
 		std::vector<RenderBatch::Pointer>& renderBatches();
 		const std::vector<RenderBatch::Pointer>& renderBatches() const;
 		
-		et::Camera::Pointer camera() const;
+		const et::Camera& camera() const;
 		
 	private:
-		et::Camera::Pointer _camera;
+		et::Camera _camera;
 		std::vector<RenderBatch::Pointer> _renderBatches;
 	};
 }

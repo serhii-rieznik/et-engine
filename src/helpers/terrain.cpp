@@ -10,7 +10,7 @@
 #include <et/helpers/terrain.h>
 #include <et/timers/intervaltimer.h>
 #include <et/rendering/rendering.h>
-#include <et/primitives/primitives.h>
+#include <et/rendering/primitives.h>
 
 using namespace et;
 
@@ -127,13 +127,13 @@ public:
 
 		for (uint32_t v = 0; v < dim.y; ++v)
 		{
-			uint32_t c_v = etMin(terrainDim.y, static_cast<uint32_t>(_z0 + v * scale)) * (terrainDim.x + 1);
-			uint32_t n_v = etMin(terrainDim.y, static_cast<uint32_t>(_z0 + (v + 1) * scale)) * (terrainDim.x + 1);
+			uint32_t c_v = std::min(terrainDim.y, static_cast<uint32_t>(_z0 + v * scale)) * (terrainDim.x + 1);
+			uint32_t n_v = std::min(terrainDim.y, static_cast<uint32_t>(_z0 + (v + 1) * scale)) * (terrainDim.x + 1);
 
 			for (uint32_t u = 0; u < dim.x; ++u)
 			{
-				uint32_t c_u = etMin(terrainDim.x, static_cast<uint32_t>(_x0 + u * scale));
-				uint32_t n_u = etMin(terrainDim.x, static_cast<uint32_t>(_x0 + (u + 1) * scale));
+				uint32_t c_u = std::min(terrainDim.x, static_cast<uint32_t>(_x0 + u * scale));
+				uint32_t n_u = std::min(terrainDim.x, static_cast<uint32_t>(_x0 + (u + 1) * scale));
 
 				pushIndex(c_u + c_v);
 				pushIndex(c_u + n_v);
@@ -152,12 +152,12 @@ public:
 
 		for (uint32_t v = 0; v < static_cast<uint32_t>(lod_dim.y - 1); ++v)
 		{
-			uint32_t c_v = etMin(terrainDim.y, static_cast<uint32_t>(_z0 + lod_scale_hi + v * lod_scale)) * (terrainDim.x + 1);
-			uint32_t n_v = etMin(terrainDim.y, static_cast<uint32_t>(_z0 + lod_scale_hi + (v + 1) * lod_scale)) * (terrainDim.x + 1);
+			uint32_t c_v = std::min(terrainDim.y, static_cast<uint32_t>(_z0 + lod_scale_hi + v * lod_scale)) * (terrainDim.x + 1);
+			uint32_t n_v = std::min(terrainDim.y, static_cast<uint32_t>(_z0 + lod_scale_hi + (v + 1) * lod_scale)) * (terrainDim.x + 1);
 			for (uint32_t u = 0; u < static_cast<uint32_t>(lod_dim.x - 1); ++u)
 			{
-				uint32_t c_u = etMin(terrainDim.x, static_cast<uint32_t>(_x0 + lod_scale_hi + u * lod_scale));
-				uint32_t n_u = etMin(terrainDim.x, static_cast<uint32_t>(_x0 + lod_scale_hi + (u + 1) * lod_scale ));
+				uint32_t c_u = std::min(terrainDim.x, static_cast<uint32_t>(_x0 + lod_scale_hi + u * lod_scale));
+				uint32_t n_u = std::min(terrainDim.x, static_cast<uint32_t>(_x0 + lod_scale_hi + (u + 1) * lod_scale ));
 				pushIndex(c_u + c_v);
 				pushIndex(c_u + n_v);
 				pushIndex(n_u + c_v);
@@ -179,11 +179,11 @@ public:
 			for (uint32_t u = 0; u < static_cast<uint32_t>(lod_dim.x - 1); ++u)
 			{
 				uint32_t v = (side == Side_Top) ? 0 : static_cast<uint32_t>(lod_dim_hi.y - 1);
-				uint32_t c_v = etMin(terrainDim.y, static_cast<uint32_t>(_z0 + v * lod_scale_hi)) * (terrainDim.x + 1);
-				uint32_t n_v = etMin(terrainDim.y, static_cast<uint32_t>(_z0 + (v + 1) * lod_scale_hi)) * (terrainDim.x + 1);
-				uint32_t c_u = etMin(terrainDim.x, static_cast<uint32_t>(_x0 + lod_scale_hi + u * lod_scale));
-				uint32_t m_u = etMin(terrainDim.x, static_cast<uint32_t>(_x0 + lod_scale_hi + u * lod_scale + lod_scale_hi));
-				uint32_t n_u = etMin(terrainDim.x, static_cast<uint32_t>(_x0 + lod_scale_hi + (u + 1) * lod_scale));
+				uint32_t c_v = std::min(terrainDim.y, static_cast<uint32_t>(_z0 + v * lod_scale_hi)) * (terrainDim.x + 1);
+				uint32_t n_v = std::min(terrainDim.y, static_cast<uint32_t>(_z0 + (v + 1) * lod_scale_hi)) * (terrainDim.x + 1);
+				uint32_t c_u = std::min(terrainDim.x, static_cast<uint32_t>(_x0 + lod_scale_hi + u * lod_scale));
+				uint32_t m_u = std::min(terrainDim.x, static_cast<uint32_t>(_x0 + lod_scale_hi + u * lod_scale + lod_scale_hi));
+				uint32_t n_u = std::min(terrainDim.x, static_cast<uint32_t>(_x0 + lod_scale_hi + (u + 1) * lod_scale));
 				if (side == Side_Top)
 				{
 					pushIndex( m_u + c_v );
@@ -204,11 +204,11 @@ public:
 			for (int v = 0; v < lod_dim.y - 1; ++v)
 			{
 				uint32_t u = (side == Side_Left) ? 0 : static_cast<uint32_t>((lod_dim.x - 1) * lod_scale + lod_scale_hi);
-				uint32_t c_v = etMin(terrainDim.y, static_cast<uint32_t>(_z0 + lod_scale_hi + v * lod_scale)) * (terrainDim.x + 1);
-				uint32_t m_v = etMin(terrainDim.y, static_cast<uint32_t>(_z0 + lod_scale_hi + v * lod_scale + lod_scale_hi)) * (terrainDim.x + 1);
-				uint32_t n_v = etMin(terrainDim.y, static_cast<uint32_t>(_z0 + lod_scale_hi + (v + 1) * lod_scale)) * (terrainDim.x + 1);
-				uint32_t c_u = etMin(terrainDim.x, static_cast<uint32_t>(_x0 + u));
-				uint32_t n_u = etMin(terrainDim.x, static_cast<uint32_t>(_x0 + u + lod_scale_hi));
+				uint32_t c_v = std::min(terrainDim.y, static_cast<uint32_t>(_z0 + lod_scale_hi + v * lod_scale)) * (terrainDim.x + 1);
+				uint32_t m_v = std::min(terrainDim.y, static_cast<uint32_t>(_z0 + lod_scale_hi + v * lod_scale + lod_scale_hi)) * (terrainDim.x + 1);
+				uint32_t n_v = std::min(terrainDim.y, static_cast<uint32_t>(_z0 + lod_scale_hi + (v + 1) * lod_scale)) * (terrainDim.x + 1);
+				uint32_t c_u = std::min(terrainDim.x, static_cast<uint32_t>(_x0 + u));
+				uint32_t n_u = std::min(terrainDim.x, static_cast<uint32_t>(_x0 + u + lod_scale_hi));
 				if (side == Side_Left)
 				{
 					pushIndex( n_u + c_v );
@@ -236,20 +236,20 @@ public:
 		if ((side == Side_Top) || (side == Side_Bottom))
 		{
 			int v = (side == Side_Top) ? 0 : lod_dim_hi.y - 1;
-			uint32_t c_v = etMin(terrainDim.y, static_cast<uint32_t>(_z0 + v * lod_scale_hi)) * (terrainDim.x + 1);
-			uint32_t n_v = etMin(terrainDim.y, static_cast<uint32_t>(_z0 + (v + 1) * lod_scale_hi)) * (terrainDim.x + 1);
+			uint32_t c_v = std::min(terrainDim.y, static_cast<uint32_t>(_z0 + v * lod_scale_hi)) * (terrainDim.x + 1);
+			uint32_t n_v = std::min(terrainDim.y, static_cast<uint32_t>(_z0 + (v + 1) * lod_scale_hi)) * (terrainDim.x + 1);
 
 			for (uint32_t u = 0; u < static_cast<uint32_t>(currentDim.x); ++u)
 			{
 				bool odd = u % 2 == 1;
-				uint32_t c_u = etMin(terrainDim.x, static_cast<uint32_t>(_x0 + u * currentScale));
-				uint32_t n_u = etMin(terrainDim.x, static_cast<uint32_t>(_x0 + (u + 1) * currentScale));
+				uint32_t c_u = std::min(terrainDim.x, static_cast<uint32_t>(_x0 + u * currentScale));
+				uint32_t n_u = std::min(terrainDim.x, static_cast<uint32_t>(_x0 + (u + 1) * currentScale));
 
 				if (side == Side_Top)
 				{
 					if (large)
 					{
-						uint32_t m_u = etMin(terrainDim.x, static_cast<uint32_t>(_x0 + u * currentScale + lod_scale_hi));
+						uint32_t m_u = std::min(terrainDim.x, static_cast<uint32_t>(_x0 + u * currentScale + lod_scale_hi));
 						pushIndex( c_u + c_v );
 						pushIndex( m_u + n_v );
 						pushIndex( n_u + c_v );
@@ -261,7 +261,7 @@ public:
 				{
 					if (large)
 					{
-						uint32_t m_u = etMin(terrainDim.x, static_cast<uint32_t>(_x0 + u * currentScale + lod_scale_hi));
+						uint32_t m_u = std::min(terrainDim.x, static_cast<uint32_t>(_x0 + u * currentScale + lod_scale_hi));
 						pushIndex( m_u + c_v );
 						pushIndex( c_u + n_v );
 						pushIndex( n_u + n_v );
@@ -275,20 +275,20 @@ public:
 		else
 		{
 			uint32_t u = (side == Side_Left) ? 0 : static_cast<uint32_t>(lod_dim_hi.x - 1);
-			uint32_t c_u = etMin(terrainDim.x, static_cast<uint32_t>(_x0 + u * lod_scale_hi));
-			uint32_t n_u = etMin(terrainDim.x, static_cast<uint32_t>(_x0 + (u + 1) * lod_scale_hi));
+			uint32_t c_u = std::min(terrainDim.x, static_cast<uint32_t>(_x0 + u * lod_scale_hi));
+			uint32_t n_u = std::min(terrainDim.x, static_cast<uint32_t>(_x0 + (u + 1) * lod_scale_hi));
 
 			for (int h = 0; h < currentDim.y; ++h)
 			{
 				bool odd = h % 2 == 1;
-				uint32_t c_v = etMin(terrainDim.y, static_cast<uint32_t>(_z0 + h * currentScale)) * (terrainDim.x + 1);
-				uint32_t n_v = etMin(terrainDim.y, static_cast<uint32_t>(_z0 + (h + 1) * currentScale)) * (terrainDim.x + 1);
+				uint32_t c_v = std::min(terrainDim.y, static_cast<uint32_t>(_z0 + h * currentScale)) * (terrainDim.x + 1);
+				uint32_t n_v = std::min(terrainDim.y, static_cast<uint32_t>(_z0 + (h + 1) * currentScale)) * (terrainDim.x + 1);
 
 				if (side == Side_Left)
 				{
 					if (large)
 					{
-						uint32_t m_v = etMin(terrainDim.y, static_cast<uint32_t>(_z0 + h * currentScale + lod_scale_hi)) * (terrainDim.x + 1);
+						uint32_t m_v = std::min(terrainDim.y, static_cast<uint32_t>(_z0 + h * currentScale + lod_scale_hi)) * (terrainDim.x + 1);
 						pushIndex(c_u + c_v);
 						pushIndex(c_u + n_v);
 						pushIndex(n_u + m_v);
@@ -300,7 +300,7 @@ public:
 				{
 					if (large)
 					{
-						uint32_t m_v = etMin(terrainDim.y, static_cast<uint32_t>(_z0 + h * currentScale + lod_scale_hi)) * (terrainDim.x + 1);
+						uint32_t m_v = std::min(terrainDim.y, static_cast<uint32_t>(_z0 + h * currentScale + lod_scale_hi)) * (terrainDim.x + 1);
 						pushIndex(n_u + c_v);
 						pushIndex(c_u + m_v);
 						pushIndex(n_u + n_v);
@@ -411,7 +411,7 @@ public:
 
 		vec3 center = (_minVect + _maxVect) / 2.0f;
 		vec3 dimension = _maxVect - _minVect;
-		_aabb = AABB(center, dimension);
+		_boundingBox = BoundingBox(center, dimension);
 	}
 
 public:
@@ -423,15 +423,15 @@ public:
 	const int index() const
 		{ return _index; }
 
-	const AABB& aabb() const
-		{ return _aabb; }
+	const BoundingBox& boundingBox() const
+		{ return _boundingBox; }
 
 private:
 	int _x0;
 	int _z0;
 	int _index;
 	Terrain* _t;
-	AABB _aabb;
+	BoundingBox _boundingBox;
 };
 
 Terrain::Terrain(RenderContext* rc, TerrainDelegate* tDelegate) : 
@@ -457,7 +457,7 @@ void Terrain::releaseData()
 
 void Terrain::render(RenderContext* rc)
 {
-	rc->renderState().bindVertexArray(_vao);
+	rc->renderState().bindVertexArrayObject(_vao);
 	for (ChunkIterator i = _chunks.begin(), e = _chunks.end(); i != e; ++i)
 	{
 		TerrainChunk* chunk = *i;
@@ -523,13 +523,14 @@ void Terrain::generateChunks()
 
 void Terrain::recomputeLodLevels()
 {
-	if (!_delegate) return;
+	if (_delegate == nullptr)
+		return;
 
-	for (ChunkIterator i = _chunks.begin(), e = _chunks.end(); i != e; ++i)
+	for (auto& i : _chunks)
 	{
 		bool visible = true;
-		(*i)->selectedLod = clamp<int>(_delegate->computeTerrainLod(this, (*i)->aabb(), (*i)->selectedLod, visible), 0, LodLevel4);
-		(*i)->visible = visible;
+		i->selectedLod = clamp<int>(_delegate->computeTerrainLod(this, i->boundingBox(), i->selectedLod, visible), 0, LodLevel4);
+		i->visible = visible;
 	}
 	validateLODLevels();
 }
@@ -549,10 +550,10 @@ void Terrain::validateLODLevels()
 			int chunkRow = chunk->index() / _chunkSizes.x;
 			int chunkCol = chunk->index() % _chunkSizes.x;
 
-			int leftCol = etMax(0, chunkCol - 1);
-			int rightCol = etMin(_chunkSizes.x - 1, chunkCol + 1);
-			int topRow = etMax(0, chunkRow - 1);
-			int bottomRow = etMin(_chunkSizes.y - 1, chunkRow + 1);
+			int leftCol = std::max(0, chunkCol - 1);
+			int rightCol = std::min(_chunkSizes.x - 1, chunkCol + 1);
+			int topRow = std::max(0, chunkRow - 1);
+			int bottomRow = std::min(_chunkSizes.y - 1, chunkRow + 1);
 
 			int leftChunk = leftCol + chunkRow * _chunkSizes.x;
 			int rightChunk = rightCol + chunkRow * _chunkSizes.x;

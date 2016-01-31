@@ -19,7 +19,7 @@ s3d::Renderer::Renderer() :
 	
 }
 
-void s3d::Renderer::render(RenderContext* rc, const Scene& scene, Camera::Pointer camera)
+void s3d::Renderer::render(RenderContext* rc, const Scene& scene, const Camera& camera)
 {
 	auto& rs = rc->renderState();
 	
@@ -60,7 +60,7 @@ void s3d::Renderer::renderMeshList(RenderPass::Pointer pass, const s3d::BaseElem
 		}
 	}
 
-	auto cameraPosition = pass->camera()->position();
+	auto cameraPosition = pass->camera().position();
 	for (auto& rbv : _latestBatches)
 	{
 		std::sort(rbv.second.begin(), rbv.second.end(), [cameraPosition](BatchFromMesh& l, BatchFromMesh& r)
