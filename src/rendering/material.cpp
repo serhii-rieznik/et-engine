@@ -120,26 +120,27 @@ void Material::loadProperties()
 	uint32_t textureUnitCounter = 0;
 	for (const auto& u : _program->uniforms())
 	{
+		String name(u.first.c_str());
 		if (_program->isSamplerUniformType(u.second.type))
 		{
-			addTexture(u.first, u.second.location, textureUnitCounter);
+			addTexture(name, u.second.location, textureUnitCounter);
 			_program->setUniform(u.second.location, u.second.type, textureUnitCounter);
 			++textureUnitCounter;
 		}
 		else if (!_program->isBuiltInUniformName(u.first))
 		{
-			addDataProperty(u.first, _program->uniformTypeToDataType(u.second.type), u.second.location);
+			addDataProperty(name, _program->uniformTypeToDataType(u.second.type), u.second.location);
 		}
 	}
 }
 
-void Material::addTexture(const std::string& name, int32_t location, uint32_t unit)
+void Material::addTexture(const String& name, int32_t location, uint32_t unit)
 {
 	_textures.emplace(name, TextureProperty(location, unit));
 	_shouldUpdateSnapshot = true;
 }
 
-void Material::addDataProperty(const std::string& name, DataType type, int32_t location)
+void Material::addDataProperty(const String& name, DataType type, int32_t location)
 {
 	uint32_t requiredSpace = dataTypeSize(type);
 	uint32_t currentSize = _propertiesData.lastElementIndex();
@@ -168,18 +169,18 @@ void Material::updateDataProperty(DataProperty& prop, const void* src)
 										updateDataProperty(i->second, &value); \
 									}}
 
-void Material::setProperty(const std::string& name, const float value) ET_SET_PROPERTY_IMPL(Float)
-void Material::setProperty(const std::string& name, const vec2& value) ET_SET_PROPERTY_IMPL(Vec2)
-void Material::setProperty(const std::string& name, const vec3& value) ET_SET_PROPERTY_IMPL(Vec3)
-void Material::setProperty(const std::string& name, const vec4& value) ET_SET_PROPERTY_IMPL(Vec4)
-void Material::setProperty(const std::string& name, const int value) ET_SET_PROPERTY_IMPL(Int)
-void Material::setProperty(const std::string& name, const vec2i& value) ET_SET_PROPERTY_IMPL(IntVec2)
-void Material::setProperty(const std::string& name, const vec3i& value) ET_SET_PROPERTY_IMPL(IntVec3)
-void Material::setProperty(const std::string& name, const vec4i& value) ET_SET_PROPERTY_IMPL(IntVec4)
-void Material::setProperty(const std::string& name, const mat3& value) ET_SET_PROPERTY_IMPL(Mat3)
-void Material::setProperty(const std::string& name, const mat4& value) ET_SET_PROPERTY_IMPL(Mat4)
+void Material::setProperty(const String& name, const float value) ET_SET_PROPERTY_IMPL(Float)
+void Material::setProperty(const String& name, const vec2& value) ET_SET_PROPERTY_IMPL(Vec2)
+void Material::setProperty(const String& name, const vec3& value) ET_SET_PROPERTY_IMPL(Vec3)
+void Material::setProperty(const String& name, const vec4& value) ET_SET_PROPERTY_IMPL(Vec4)
+void Material::setProperty(const String& name, const int value) ET_SET_PROPERTY_IMPL(Int)
+void Material::setProperty(const String& name, const vec2i& value) ET_SET_PROPERTY_IMPL(IntVec2)
+void Material::setProperty(const String& name, const vec3i& value) ET_SET_PROPERTY_IMPL(IntVec3)
+void Material::setProperty(const String& name, const vec4i& value) ET_SET_PROPERTY_IMPL(IntVec4)
+void Material::setProperty(const String& name, const mat3& value) ET_SET_PROPERTY_IMPL(Mat3)
+void Material::setProperty(const String& name, const mat4& value) ET_SET_PROPERTY_IMPL(Mat4)
 
-void Material::setTexutre(const std::string& name, const Texture::Pointer& tex)
+void Material::setTexutre(const String& name, const Texture::Pointer& tex)
 {
 	auto i = _textures.find(name);
 	if ((i != _textures.end()) && (i->second.texture != tex))

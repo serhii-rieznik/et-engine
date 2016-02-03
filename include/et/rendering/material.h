@@ -46,18 +46,18 @@ namespace et
 		uint64_t makeSnapshot();
 		void clearSnapshots();
 		
-		void setProperty(const std::string& name, const float value);
-		void setProperty(const std::string& name, const vec2& value);
-		void setProperty(const std::string& name, const vec3& value);
-		void setProperty(const std::string& name, const vec4& value);
-		void setProperty(const std::string& name, const int value);
-		void setProperty(const std::string& name, const vec2i& value);
-		void setProperty(const std::string& name, const vec3i& value);
-		void setProperty(const std::string& name, const vec4i& value);
-		void setProperty(const std::string& name, const mat3& value);
-		void setProperty(const std::string& name, const mat4& value);
+		void setProperty(const String& name, const float value);
+		void setProperty(const String& name, const vec2& value);
+		void setProperty(const String& name, const vec3& value);
+		void setProperty(const String& name, const vec4& value);
+		void setProperty(const String& name, const int value);
+		void setProperty(const String& name, const vec2i& value);
+		void setProperty(const String& name, const vec3i& value);
+		void setProperty(const String& name, const vec4i& value);
+		void setProperty(const String& name, const mat3& value);
+		void setProperty(const String& name, const mat4& value);
 		
-		void setTexutre(const std::string& name, const Texture::Pointer&);
+		void setTexutre(const String& name, const Texture::Pointer&);
 		
 		uint32_t sortingKey() const;
 
@@ -99,8 +99,8 @@ namespace et
 		using ProgramSetFloatFunction = void (Program::*)(int, const float*, uint32_t);
 		
 		void loadProperties();
-		void addDataProperty(const std::string&, DataType, int32_t location);
-		void addTexture(const std::string&, int32_t location, uint32_t unit);
+		void addDataProperty(const String&, DataType, int32_t location);
+		void addTexture(const String&, int32_t location, uint32_t unit);
 		void updateDataProperty(DataProperty&, const void*);
 		
 		void applyProperty(const DataProperty&);
@@ -110,8 +110,8 @@ namespace et
 		Program::Pointer _program;
 		
 		Vector<Snapshot> _snapshots;
-		UnorderedMap<std::string, DataProperty> _properties;
-		UnorderedMap<std::string, TextureProperty> _textures;
+		UnorderedMap<String, DataProperty> _properties;
+		UnorderedMap<String, TextureProperty> _textures;
 		DepthState _depth;
 		BlendState _blend;
 		CullMode _cullMode = CullMode::Disabled;

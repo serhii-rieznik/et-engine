@@ -19,8 +19,7 @@ using namespace et::s3d;
 static const vec4 nullVector;
 static const Texture::Pointer nullTexture = Texture::Pointer();
 
-extern const std::string materialKeys[MaterialParameter_max];
-size_t stringToMaterialParameter(const std::string&);
+extern const String materialKeys[MaterialParameter_max];
 
 SceneMaterial::SceneMaterial() :
 	LoadableObject("default-material")
@@ -53,16 +52,16 @@ void SceneMaterial::serialize(Dictionary stream, const std::string& /* basePath 
 		MaterialParameter i = static_cast<MaterialParameter>(ii);
 		
 		if (_intParams[i].set)
-			intValues.setIntegerForKey(materialKeys[ii], _intParams[i].value);
+			intValues.setIntegerForKey(materialKeys[ii].c_str(), _intParams[i].value);
 
 		if (_floatParams[i].set)
-			floatValues.setFloatForKey(materialKeys[ii], _floatParams[i].value);
+			floatValues.setFloatForKey(materialKeys[ii].c_str(), _floatParams[i].value);
 
 		if (_vectorParams[i].set)
-			vectorValues.setArrayForKey(materialKeys[ii], vec4ToArray(_vectorParams[i].value));
+			vectorValues.setArrayForKey(materialKeys[ii].c_str(), vec4ToArray(_vectorParams[i].value));
 
 		if (_textureParams[i].set && _textureParams[i].value.valid())
-			textureValues.setStringForKey(materialKeys[ii], _textureParams[i].value->origin());
+			textureValues.setStringForKey(materialKeys[ii].c_str(), _textureParams[i].value->origin());
 	}
 	
 	stream.setStringForKey(kName, name());
@@ -92,7 +91,7 @@ void SceneMaterial::deserializeWithOptions(Dictionary stream, RenderContext* rc,
 	Dictionary textureValues = stream.dictionaryForKey(kTextures);
 	for (uint32_t ii = 0; ii < MaterialParameter_max; ++ii)
 	{
-		const auto& key = materialKeys[ii];
+		std::string key(materialKeys[ii].c_str());
 		
 		MaterialParameter i = static_cast<MaterialParameter>(ii);
 
@@ -279,39 +278,28 @@ void SceneMaterial::bindToMaterial(et::Material::Pointer& m)
 /*
  * Support stuff
  */
-const std::string materialKeys[MaterialParameter_max] =
+const String materialKeys[MaterialParameter_max] =
 {
-	std::string("ambient_map"), // AmbientMap,
-	std::string("diffuse_map"), // DiffuseMap,
-	std::string("specular_map"), // SpecularMap,
-	std::string("emissive_map"), // EmissiveMap,
-	std::string("normal_map"), // NormalMap,
-	std::string("bump_map"), // BumpMap,
-	std::string("reflection_map"), // ReflectionMap,
-	std::string("opacity_map"), // OpacityMap,
+	String("ambient_map"), // AmbientMap,
+	String("diffuse_map"), // DiffuseMap,
+	String("specular_map"), // SpecularMap,
+	String("emissive_map"), // EmissiveMap,
+	String("normal_map"), // NormalMap,
+	String("bump_map"), // BumpMap,
+	String("reflection_map"), // ReflectionMap,
+	String("opacity_map"), // OpacityMap,
 	
-	std::string("ambient_color"), // AmbientColor,
-	std::string("diffuse_color"), // DiffuseColor,
-	std::string("specular_color"), // SpecularColor,
-	std::string("emissive_color"), // EmissiveColor,
+	String("ambient_color"), // AmbientColor,
+	String("diffuse_color"), // DiffuseColor,
+	String("specular_color"), // SpecularColor,
+	String("emissive_color"), // EmissiveColor,
 	
-	std::string("ambient_factor"), // AmbientFactor,
-	std::string("diffuse_factor"), // DiffuseFactor,
-	std::string("specular_factor"), // SpecularFactor,
-	std::string("emissive_factor"), // EmissiveFactor,
-	std::string("bump_factor"), // BumpFactor,
+	String("ambient_factor"), // AmbientFactor,
+	String("diffuse_factor"), // DiffuseFactor,
+	String("specular_factor"), // SpecularFactor,
+	String("emissive_factor"), // EmissiveFactor,
+	String("bump_factor"), // BumpFactor,
 	
-	std::string("transparency"), // Transparency,
-	std::string("roughness"), // Roughness,
+	String("transparency"), // Transparency,
+	String("roughness"), // Roughness,
 };
-
-size_t stringToMaterialParameter(const std::string& s)
-{
-	for (size_t i = 0; i < MaterialParameter_max; ++i)
-	{
-		if (s == materialKeys[i])
-			return i;
-	}
-	
-	return MaterialParameter_max + 1;
-}
