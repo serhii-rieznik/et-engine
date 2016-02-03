@@ -6,6 +6,9 @@
  */
 
 #include <signal.h>
+#include <et/core/et.h>
+
+#if (ET_PLATFORM_APPLE)
 
 namespace et
 {
@@ -17,3 +20,5 @@ namespace et
 		}
 	}
 }
+
+#endif

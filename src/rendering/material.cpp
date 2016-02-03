@@ -230,7 +230,7 @@ void Material::enableSnapshotInRenderState(RenderState& rs, uint64_t index)
 {
 	ET_ASSERT(index < _snapshots.size());
 	
-	const auto& snapshot = _snapshots.at(index);
+	const auto& snapshot = _snapshots.at(static_cast<size_t>(index));
 	rs.setCulling(snapshot.cullMode);
 	rs.setBlendState(snapshot.blend);
 	rs.setDepthState(snapshot.depth);

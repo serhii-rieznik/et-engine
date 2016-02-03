@@ -11,7 +11,7 @@
 
 #include <Windows.h>
 
-#define PASS_TO_OUTPUTS(FUNC)		for (Output::Pointer output : logOutputs) \
+#define PASS_TO_OUTPUTS(FUNC)		for (Output::Pointer output : sharedLogOutputs()) \
 									{ \
 										va_list args; \
 										va_start(args, format); \
@@ -22,17 +22,15 @@
 using namespace et;
 using namespace log;
 
-static std::vector<Output::Pointer> logOutputs;
-
 void et::log::addOutput(Output::Pointer ptr)
 {
-	logOutputs.push_back(ptr);
+	sharedLogOutputs().push_back(ptr);
 }
 
 void et::log::removeOutput(Output::Pointer ptr)
 {
-	logOutputs.erase(std::remove_if(logOutputs.begin(), logOutputs.end(),
-		[ptr](Output::Pointer out) { return out == ptr; }), logOutputs.end());
+	sharedLogOutputs().erase(std::remove_if(sharedLogOutputs().begin(), sharedLogOutputs().end(),
+		[ptr](Output::Pointer out) { return out == ptr; }), sharedLogOutputs().end());
 }
 
 void et::log::debug(const char* format, ...) { PASS_TO_OUTPUTS(debug) }

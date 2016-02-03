@@ -752,10 +752,7 @@ RenderStateCache RenderState::currentCacheValues()
 	cache.activeTextureUnit = static_cast<uint32_t>(value - GL_TEXTURE0);
 	checkOpenGLError("");
 	
-	int maxTextureUnits = 0;
-	glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &maxTextureUnits);
-	
-	for (int i = 0; i < maxTextureUnits; ++i)
+	for (int i = 0; i < MaxTextureUnits; ++i)
 	{
 		glActiveTexture(GL_TEXTURE0 + i);
 		
