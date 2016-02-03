@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include <set>
+#include <et/core/et.h>
 #include <et/core/flags.h>
 #include <et/core/transformable.h>
 #include <et/core/serialization.h>
@@ -25,8 +25,7 @@ namespace et
 		{
 		public:
 			ET_DECLARE_POINTER(BaseElement)
-
-			typedef std::vector<BaseElement::Pointer> List;
+			using List = Vector<Pointer>;
 
 		public:
 			virtual ElementType type() const = 0;
@@ -68,10 +67,10 @@ namespace et
 			void clear();
 			void clearRecursively();
 
-			const std::set<std::string>& properties() const
+			const Set<std::string>& properties() const
 				{ return _properites; }
 
-			std::set<std::string>& properties()
+			Set<std::string>& properties()
 				{ return _properites; }
 
 			void addPropertyString(const std::string& s)
@@ -108,8 +107,8 @@ namespace et
 			Animation _emptyAnimation;
 			NotifyTimer _animationTimer;
 			
-			std::set<std::string> _properites;
-			std::vector<Animation> _animations;
+			Set<std::string> _properites;
+			Vector<Animation> _animations;
 			
 			mat4 _animationTransform = mat4(1.0f);
 			mat4 _cachedLocalTransform = mat4(1.0f);

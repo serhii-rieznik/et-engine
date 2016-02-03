@@ -20,8 +20,8 @@ namespace et
 	class Hierarchy : public BASE
 	{
 	public:
-		typedef IntrusivePtr<T> BasePointer;
-		typedef std::list<BasePointer> List;
+		using BasePointer = IntrusivePtr<T>;
+		using List = Vector<BasePointer>;
 		
 	public:
 		Hierarchy(T* parent);
@@ -155,7 +155,7 @@ namespace et
 				auto pointer = *i;
 
 				_children.erase(i);
-				_children.push_front(pointer);
+				_children.insert(_children.begin(), pointer);
 
 				break;
 			}

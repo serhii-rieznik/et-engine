@@ -23,6 +23,7 @@
 #include <limits>
 #include <list>
 #include <map>
+#include <set>
 #include <unordered_map>
 #include <string>
 #include <thread>
@@ -139,6 +140,10 @@ namespace et
 	
 	template <typename T>
 	using Vector = std::vector<T, 
+		SharedBlockAllocatorSTDProxy<T>>;
+
+	template <typename T>
+	using Set = std::set<T, std::less<T>, 
 		SharedBlockAllocatorSTDProxy<T>>;
 
 	template <typename Key, typename Value>

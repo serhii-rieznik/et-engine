@@ -7,7 +7,6 @@
 
 #pragma once
 
-#include <set>
 #include <deque>
 #include <et/core/et.h>
 
