@@ -201,6 +201,9 @@ uint64_t Material::makeSnapshot()
 		return _lastShapshotIndex;
 	}
 	
+	if (_snapshots.empty())
+		_snapshots.reserve(8);
+
 	_snapshots.emplace_back();
 	
 	auto& snapshot = _snapshots.back();

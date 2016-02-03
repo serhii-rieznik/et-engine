@@ -88,8 +88,8 @@ namespace et
 		
 		struct Snapshot
 		{
-			std::vector<DataProperty, SharedBlockAllocatorSTDProxy<DataProperty>> properties;
-			std::vector<TextureProperty, SharedBlockAllocatorSTDProxy<TextureProperty>> textures;
+			Vector<DataProperty> properties;
+			Vector<TextureProperty> textures;
 			DepthState depth;
 			BlendState blend;
 			CullMode cullMode;
@@ -103,16 +103,15 @@ namespace et
 		void addTexture(const std::string&, int32_t location, uint32_t unit);
 		void updateDataProperty(DataProperty&, const void*);
 		
-		void applySnapshot(const Snapshot&);
 		void applyProperty(const DataProperty&);
 		
 	public:
 		MaterialFactory* _factory = nullptr;
 		Program::Pointer _program;
 		
-		std::vector<Snapshot, SharedBlockAllocatorSTDProxy<Snapshot>> _snapshots;
-		std::unordered_map<std::string, DataProperty> _properties;
-		std::unordered_map<std::string, TextureProperty> _textures;
+		Vector<Snapshot> _snapshots;
+		UnorderedMap<std::string, DataProperty> _properties;
+		UnorderedMap<std::string, TextureProperty> _textures;
 		DepthState _depth;
 		BlendState _blend;
 		CullMode _cullMode = CullMode::Disabled;

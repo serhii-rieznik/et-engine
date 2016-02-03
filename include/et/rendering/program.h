@@ -7,7 +7,6 @@
 
 #pragma once
 
-#include <unordered_map>
 #include <et/rendering/apiobject.h>
 #include <et/rendering/rendering.h>
 

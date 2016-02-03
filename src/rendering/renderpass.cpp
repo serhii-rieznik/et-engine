@@ -12,7 +12,7 @@ using namespace et;
 RenderPass::RenderPass(const ConstructionInfo& info) :
 	_camera(info.camera)
 {
-	_renderBatches.reserve(4);
+	_renderBatches.reserve(256);
 }
 
 RenderPass::~RenderPass()

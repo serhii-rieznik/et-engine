@@ -95,9 +95,6 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <Text Include="ReadMe.txt" />
-  </ItemGroup>
-  <ItemGroup>
     <ClInclude Include="..\..\include\et\app\appevironment.h" />
     <ClInclude Include="..\..\include\et\app\application.h" />
     <ClInclude Include="..\..\include\et\app\applicationdelegate.h" />

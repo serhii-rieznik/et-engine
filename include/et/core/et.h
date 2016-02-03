@@ -23,6 +23,7 @@
 #include <limits>
 #include <list>
 #include <map>
+#include <unordered_map>
 #include <string>
 #include <thread>
 #include <vector>
@@ -93,6 +94,18 @@ namespace et
 			sharedBlockAllocator().release(ptr); 
 		}
 
+		template<class U, class... Args>
+		void construct(U* p, Args&&... args)
+		{
+			new ((void*)p) U(std::forward<Args>(args)...);
+		}
+
+		template<class U>
+		void destroy(U* p) 
+		{
+			p->~U();
+		}
+
 		bool operator == (const SharedBlockAllocatorSTDProxy<T>&) const
 		{
 			return true;
@@ -117,7 +130,24 @@ namespace et
 	template <class C>
 	void etDestroyObject(C* c)
 		{ sharedObjectFactory().deleteObject(c); }
+
+	using String = std::basic_string<char, std::char_traits<char>, 
+		SharedBlockAllocatorSTDProxy<char>>;
+
+	using WideString = std::basic_string<wchar_t, std::char_traits<wchar_t>, 
+		SharedBlockAllocatorSTDProxy<wchar_t>>;
 	
+	template <typename T>
+	using Vector = std::vector<T, 
+		SharedBlockAllocatorSTDProxy<T>>;
+
+	template <typename Key, typename Value>
+	using Map = std::map<Key, Value, std::less<Key>, 
+		SharedBlockAllocatorSTDProxy<std::pair<const Key, Value>>>;
+
+	template <typename Key, typename Value>
+	using UnorderedMap = std::unordered_map<Key, Value, std::hash<Key>, std::equal_to<Key>, 
+		SharedBlockAllocatorSTDProxy<std::pair<const Key, Value>>>;
 }
 
 #include <et/core/properties.h>
