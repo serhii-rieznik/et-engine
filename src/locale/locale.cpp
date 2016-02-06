@@ -82,19 +82,19 @@ bool Locale::appendCurrentLanguageFile(const std::string& rootFolder, const std:
 	return false;
 }
 
-std::string Locale::localizedStringFromObject(const ValueBase::Pointer& obj, const std::string& def)
+std::string Locale::localizedStringFromObject(const VariantBase::Pointer& obj, const std::string& def)
 {
-	if (obj->valueClass() == ValueClass_String)
+	if (obj->variantClass() == VariantClass::String)
 	{
 		return StringValue(obj)->content;
 	}
-	else if (obj->valueClass() == ValueClass_Array)
+	else if (obj->variantClass() == VariantClass::Array)
 	{
 		ArrayValue arr(obj);
 		return arr->content.empty() ? def : localizedStringFromObject(arr->content.front(), def);
 	}
 	
-	log::error("Invalid locale key %s, of type: %d", def.c_str(), obj->valueClass());
+	log::error("Invalid locale key %s, of type: %d", def.c_str(), obj->variantClass());
 	
 	return def;
 }
@@ -131,9 +131,9 @@ et::Dictionary Locale::parseLanguageFile(const std::string& fileName)
 	/*
 	 * Try to parse JSON
 	 */
-	ValueClass vc = ValueClass_Invalid;
+	VariantClass vc = VariantClass::Invalid;
 	auto object = json::deserialize(fileContent.binary(), vc, false);
-	if (vc == ValueClass_Dictionary)
+	if (vc == VariantClass::Dictionary)
 		return object;
 	
 	/*

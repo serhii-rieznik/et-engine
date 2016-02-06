@@ -13,9 +13,11 @@ namespace et
 {
 	class Task
 	{
+    public:
+        using List = Vector<Task*>;
+        
 	public:
 		virtual ~Task()	{ }
-		
 		virtual void execute() = 0;
 
 	private:
@@ -30,6 +32,4 @@ namespace et
 	private:
 		float _executionTime = 0.0f;
 	};
-	
-	typedef std::vector<Task*> TaskList;
 }

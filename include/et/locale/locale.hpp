@@ -45,7 +45,7 @@ namespace et
 		uint32_t parseComment(const StringDataStorage& data, uint32_t index);
 		uint32_t parseKey(const StringDataStorage& data, uint32_t index, Dictionary&);
 		
-		std::string localizedStringFromObject(const ValueBase::Pointer&, const std::string&);
+		std::string localizedStringFromObject(const VariantBase::Pointer&, const std::string&);
 
 		ET_SINGLETON_COPY_DENY(Locale)
 		

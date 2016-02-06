@@ -238,7 +238,7 @@ void et::getFolderContent(const std::string& folder, StringList& list)
 		list.push_back(folder + std::string([file cStringUsingEncoding:NSUTF8StringEncoding]));
 }
 
-void et::findFiles(const std::string& folder, const std::string& mask, bool /* recursive */, std::vector<std::string>& list)
+void et::findFiles(const std::string& folder, const std::string& mask, bool /* recursive */, StringList& list)
 {
 	size_t maskLength = mask.length();
 	size_t nameSearchCriteria = mask.find_last_of(".*");
@@ -270,7 +270,7 @@ void et::findFiles(const std::string& folder, const std::string& mask, bool /* r
 		list.push_back(folder + std::string([file cStringUsingEncoding:NSUTF8StringEncoding]));
 }
 
-void et::findSubfolders(const std::string& folder, bool recursive, std::vector<std::string>& list)
+void et::findSubfolders(const std::string& folder, bool recursive, StringList& list)
 {
 	NSString* path = [NSString stringWithCString:folder.c_str() encoding:NSASCIIStringEncoding];
 	if (![path hasSuffix:@"/"])

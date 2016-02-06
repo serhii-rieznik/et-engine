@@ -14,7 +14,7 @@ namespace et
 	class RectPlacer
 	{
 	public:
-		typedef std::vector<recti> RectList;
+        using RectList = Vector<recti>;
 
 	public:
 		RectPlacer(const vec2i& contextSize, bool addSpace);

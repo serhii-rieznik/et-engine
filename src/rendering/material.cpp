@@ -69,7 +69,7 @@ void Material::loadFromJson(const std::string& jsonString, const std::string& ba
 	
 	for (auto def : definesArray->content)
 	{
-		if (def->valueClass() == ValueClass_String)
+		if (def->variantClass() == VariantClass::String)
 		{
 			addDefine(StringValue(def)->content);
 		}

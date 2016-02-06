@@ -11,6 +11,8 @@ using namespace et;
 
 TaskPool::TaskPool()
 {
+    _tasks.reserve(128);
+    _tasksToAdd.reserve(128);
 }
 
 TaskPool::~TaskPool() 

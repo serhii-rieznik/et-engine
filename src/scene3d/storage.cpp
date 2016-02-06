@@ -157,9 +157,9 @@ void Storage::deserializeWithOptions(RenderContext* rc, Dictionary stream, Seria
 
 	if (fileExists(materialsLibrary))
 	{
-		ValueClass vc = ValueClass_Invalid;
+		VariantClass vc = VariantClass::Invalid;
 		Dictionary materials = json::deserialize(loadTextFile(materialsLibrary), vc);
-		if (vc == ValueClass_Dictionary)
+		if (vc == VariantClass::Dictionary)
 		{
 			for (const auto kv : materials->content)
 			{

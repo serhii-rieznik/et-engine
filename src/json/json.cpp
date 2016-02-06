@@ -11,7 +11,7 @@
 using namespace et;
 using namespace et::json;
 
-et::ValueBase::Pointer deserializeJson(const char*, size_t, ValueClass&, bool);
+et::VariantBase::Pointer deserializeJson(const char*, size_t, VariantClass&, bool);
 
 ArrayValue deserializeArray(json_t* json);
 Dictionary deserializeDictionary(json_t* json);
@@ -26,7 +26,7 @@ json_t* serializeInteger(const IntegerValue&);
 json_t* serializeBoolean(const BooleanValue&);
 json_t* serializeDictionary(const Dictionary&);
 
-json_t* serializeValue(const ValueBase::Pointer&);
+json_t* serializeValue(const VariantBase::Pointer&);
 
 std::string et::json::serialize(const Dictionary& msg, size_t inFlags)
 {
@@ -64,18 +64,18 @@ std::string et::json::serialize(const et::ArrayValue& arr, size_t inFlags)
 	return serialized;
 }
 
-et::ValueBase::Pointer et::json::deserialize(const char* input, size_t len, ValueClass& c, bool printErrors)
+et::VariantBase::Pointer et::json::deserialize(const char* input, size_t len, VariantClass& c, bool printErrors)
 	{ return deserializeJson(input, len, c, printErrors); }
 
-et::ValueBase::Pointer et::json::deserialize(const char* input, ValueClass& c, bool printErrors)
+et::VariantBase::Pointer et::json::deserialize(const char* input, VariantClass& c, bool printErrors)
 	{ return deserializeJson(input, strlen(input), c, printErrors); }
 
-et::ValueBase::Pointer  et::json::deserialize(const std::string& s, ValueClass& c, bool printErrors)
+et::VariantBase::Pointer  et::json::deserialize(const std::string& s, VariantClass& c, bool printErrors)
 	{ return deserializeJson(s.c_str(), s.length(), c, printErrors); }
 
-et::ValueBase::Pointer deserializeJson(const char* buffer, size_t len, ValueClass& c, bool printErrors)
+et::VariantBase::Pointer deserializeJson(const char* buffer, size_t len, VariantClass& c, bool printErrors)
 {
-	c = ValueClass_Invalid;
+	c = VariantClass::Invalid;
 	
 	if ((buffer == nullptr) || (len == 0))
 		return Dictionary();
@@ -94,16 +94,16 @@ et::ValueBase::Pointer deserializeJson(const char* buffer, size_t len, ValueClas
 		return Dictionary();
 	}
 	
-	et::ValueBase::Pointer result;
+	et::VariantBase::Pointer result;
 	
 	if (json_is_object(root))
 	{
-		c = ValueClass_Dictionary;
+		c = VariantClass::Dictionary;
 		result = deserializeDictionary(root);
 	}
 	else if (json_is_array(root))
 	{
-		c = ValueClass_Array;
+		c = VariantClass::Array;
 		result = deserializeArray(root);
 	}
 	else
@@ -247,25 +247,25 @@ json_t* serializeDictionary(const Dictionary& msg)
 	return root;
 }
 
-json_t* serializeValue(const ValueBase::Pointer& v)
+json_t* serializeValue(const VariantBase::Pointer& v)
 {
 	json_t* value = nullptr;
 	
-	if (v->valueClass() == ValueClass_String)
+	if (v->variantClass() == VariantClass::String)
 		value = serializeString(v);
-	else if (v->valueClass() == ValueClass_Integer)
+	else if (v->variantClass() == VariantClass::Integer)
 		value = serializeInteger(v);
-	else if (v->valueClass() == ValueClass_Boolean)
+	else if (v->variantClass() == VariantClass::Boolean)
 		value = serializeBoolean(v);
-	else if (v->valueClass() == ValueClass_Float)
+	else if (v->variantClass() == VariantClass::Float)
 		value = serializeFloat(v);
-	else if (v->valueClass() == ValueClass_Array)
+	else if (v->variantClass() == VariantClass::Array)
 		value = serializeArray(v);
-	else if (v->valueClass() == ValueClass_Dictionary)
+	else if (v->variantClass() == VariantClass::Dictionary)
 		value = serializeDictionary(v);
 	else
 	{
-		ET_FAIL_FMT("Unknown dictionary class %d", v->valueClass());
+		ET_FAIL_FMT("Unknown dictionary class %d", v->variantClass());
 	}
 	
 	return value;

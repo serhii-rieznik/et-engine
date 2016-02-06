@@ -76,6 +76,5 @@ namespace et
 				elementOffset * ptr()->typeSize()) : RawDataAcessor<T>();
 		}
 	};
-
-	typedef std::vector<VertexDataChunk> VertexDataChunkList;
+    using VertexDataChunkList = Vector<VertexDataChunk>;
 }

@@ -167,8 +167,8 @@ namespace et
 		void removePointerInfo(const PointerInputInfo& info);
 
 	private:
-		typedef std::vector<PointerInputInfo> PointerInputInfoList;
-		typedef std::map<size_t, size_t> KeysMap;
+        using KeysMap = std::map<size_t, size_t>;
+        using PointerInputInfoList = Vector<PointerInputInfo>;
 		
 		KeysMap _pressedKeys;
 		PointerInputInfoList _pointers;

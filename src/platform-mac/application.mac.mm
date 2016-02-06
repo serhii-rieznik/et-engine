@@ -280,9 +280,9 @@ void Application::enableRemoteNotifications()
 		Dictionary systemEvent;
 		systemEvent.setStringForKey(kSystemEventType, kSystemEventRemoteNotification);
 		
-		ValueClass vc = ValueClass_Invalid;
+		VariantClass vc = VariantClass::Invalid;
 		auto object = json::deserialize(reinterpret_cast<const char*>([jsonData bytes]), [jsonData length], vc);
-		if (vc == ValueClass_Invalid)
+		if (vc == VariantClass::Invalid)
 		{
 			log::error("Unable to get remote notification info.");
 			systemEvent.setObjectForKey("info", Dictionary());

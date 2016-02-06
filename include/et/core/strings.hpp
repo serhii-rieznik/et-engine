@@ -25,7 +25,7 @@
 
 namespace et
 {
-	typedef std::vector<std::string> StringList;
+    using StringList = Vector<std::string>;
 	
 	inline void lowercase(std::string& s)
 		{ for (auto& c : s) c = static_cast<char>(::tolower(c) & 0xff); }

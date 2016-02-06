@@ -30,10 +30,8 @@ namespace et
 		
 	private:
 		CriticalSection _csModifying;
-		TaskList _tasks;
-		TaskList _tasksToAdd;
-		float _lastTime;
+        Task::List _tasks;
+		Task::List _tasksToAdd;
+		float _lastTime = 0.0f;
 	};
-
-
 }

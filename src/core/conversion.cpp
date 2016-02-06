@@ -242,9 +242,9 @@ vec2 et::arrayToVec2(ArrayValue a)
 	int index = 0;
 	for (auto v : a->content)
 	{
-		if (v->valueClass() == ValueClass_Float)
+		if (v->variantClass() == VariantClass::Float)
 			result[index++] = FloatValue(v)->content;
-		else if (v->valueClass() == ValueClass_Integer)
+		else if (v->variantClass() == VariantClass::Integer)
 			result[index++] = static_cast<float>(IntegerValue(v)->content);
 		
 		if (index >= 2) break;
@@ -258,9 +258,9 @@ vec2i et::arrayToVec2i(ArrayValue a)
 	int index = 0;
 	for (auto v : a->content)
 	{
-		if (v->valueClass() == ValueClass_Float)
+		if (v->variantClass() == VariantClass::Float)
 			result[index++] = static_cast<int>(FloatValue(v)->content);
-		else if (v->valueClass() == ValueClass_Integer)
+		else if (v->variantClass() == VariantClass::Integer)
 			result[index++] = static_cast<int>(IntegerValue(v)->content);
 		
 		if (index >= 2) break;
@@ -274,9 +274,9 @@ vec3 et::arrayToVec3(ArrayValue a)
 	int index = 0;
 	for (auto v : a->content)
 	{
-		if (v->valueClass() == ValueClass_Float)
+		if (v->variantClass() == VariantClass::Float)
 			result[index++] = FloatValue(v)->content;
-		else if (v->valueClass() == ValueClass_Integer)
+		else if (v->variantClass() == VariantClass::Integer)
 			result[index++] = static_cast<float>(IntegerValue(v)->content);
 		
 		if (index >= 3) break;
@@ -290,9 +290,9 @@ vec4 et::arrayToVec4(ArrayValue a)
 	int index = 0;
 	for (auto v : a->content)
 	{
-		if (v->valueClass() == ValueClass_Float)
+		if (v->variantClass() == VariantClass::Float)
 			result[index++] = FloatValue(v)->content;
-		else if (v->valueClass() == ValueClass_Integer)
+		else if (v->variantClass() == VariantClass::Integer)
 			result[index++] = static_cast<float>(IntegerValue(v)->content);
 		
 		if (index >= 4) break;
@@ -307,9 +307,9 @@ quaternion et::arrayToQuaternion(ArrayValue a)
 	int index = 0;
 	for (auto v : a->content)
 	{
-		if (v->valueClass() == ValueClass_Float)
+		if (v->variantClass() == VariantClass::Float)
 			result[index++] = FloatValue(v)->content;
-		else if (v->valueClass() == ValueClass_Integer)
+		else if (v->variantClass() == VariantClass::Integer)
 			result[index++] = static_cast<float>(IntegerValue(v)->content);
 
 		if (index >= 4) break;
@@ -323,9 +323,9 @@ rect et::arrayToRect(ArrayValue a)
 	uint32_t index = 0;
 	for (auto v : a->content)
 	{
-		if (v->valueClass() == ValueClass_Float)
+		if (v->variantClass() == VariantClass::Float)
 			result[index++] = FloatValue(v)->content;
-		else if (v->valueClass() == ValueClass_Integer)
+		else if (v->variantClass() == VariantClass::Integer)
 			result[index++] = static_cast<float>(IntegerValue(v)->content);
 		
 		if (index >= 4) break;
@@ -338,7 +338,7 @@ mat4 et::arrayToMatrix(ArrayValue arr)
 	mat4 result = identityMatrix;
 	for (size_t i = 0; i < std::min(size_t(4), arr->content.size()); ++i)
 	{
-		if (arr->content[i]->valueClass() == ValueClass_Array)
+		if (arr->content[i]->variantClass() == VariantClass::Array)
 		{
 			result.mat[i] = arrayToVec4(arr->content[i]);
 		}

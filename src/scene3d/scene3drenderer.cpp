@@ -79,17 +79,6 @@ void s3d::Renderer::renderMeshList(RenderPass::Pointer pass, const s3d::BaseElem
 			pass->pushRenderBatch(rb.first);
 		}
 	}
-	
-	if (hasFlag(RenderDebugObjects))
-	{
-		for (auto& rbv : _latestBatches)
-		{
-			for (auto& rb : rbv.second)
-			{
-				renderTransformedBoundingBox(pass, rb.first->boundingBox(), rb.first->transformation());
-			}
-		}
-	}
 }
 
 void s3d::Renderer::initDebugObjects(RenderContext* rc, Material::Pointer bboxMaterial)
@@ -107,8 +96,11 @@ void s3d::Renderer::initDebugObjects(RenderContext* rc, Material::Pointer bboxMa
 
 void s3d::Renderer::renderTransformedBoundingBox(RenderPass::Pointer pass, const BoundingBox& b, const mat4& t)
 {
-	_bboxBatch->material()->setProperty("bboxScale", b.halfDimension);
-	_bboxBatch->material()->setProperty("bboxCenter", b.center);
-	_bboxBatch->setTransformation(t);
-	pass->pushRenderBatch(_bboxBatch);
+    if (hasFlag(RenderDebugObjects))
+    {
+        _bboxBatch->material()->setProperty("bboxScale", b.halfDimension);
+        _bboxBatch->material()->setProperty("bboxCenter", b.center);
+        _bboxBatch->setTransformation(t);
+        pass->pushRenderBatch(_bboxBatch);
+    }
 }

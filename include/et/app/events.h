@@ -185,7 +185,7 @@ namespace et
 		void cleanup();
 
 	private:
-		typedef std::vector<Event0ConnectionBase*> ConnectionList;
+        using ConnectionList = Vector<Event0ConnectionBase*>;
 		ConnectionList _connections; 
 	};
 
@@ -306,8 +306,8 @@ namespace et
 			{ return nullptr; }
 
 	private:
-		typedef std::vector< Event1ConnectionBase<ArgType>* > ConnectionList;
-		ConnectionList _connections;
+        using ConnectionList = Vector<Event1ConnectionBase<ArgType>*>;
+        ConnectionList _connections;
 	};
 
 	/*
@@ -426,8 +426,8 @@ namespace et
 			{ return nullptr; }
 
 	private:
-		typedef std::vector<Event2ConnectionBase<Arg1Type, Arg2Type>*> ConnectionList;
-		ConnectionList _connections; 
+        using ConnectionList = Vector<Event2ConnectionBase<Arg1Type, Arg2Type>*>;
+        ConnectionList _connections;
 	};
 
 #	include <et/app/events.inl.h>

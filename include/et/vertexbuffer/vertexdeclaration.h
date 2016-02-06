@@ -59,7 +59,7 @@ namespace et
 		uint32_t _components = 0;
 	};
 
-	typedef std::vector<VertexElement> VertexElementList;
+    using VertexElementList = Vector<VertexElement>;
 
 	class VertexDeclaration
 	{
