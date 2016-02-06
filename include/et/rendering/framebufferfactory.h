@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include <et/rendering/apiobjectfactory.h>
+#include <et/rendering/apiobject.h>
 #include <et/rendering/framebuffer.h>
 
 namespace et

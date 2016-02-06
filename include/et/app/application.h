@@ -171,8 +171,7 @@ namespace et
 	/*
 	 * currentRunLoop - returns background run loop if called in background and mainRunLoop otherwise
 	 */
-	inline Application& application()
-		{ return Application::instance(); }
+    Application& application();
 	
 	RunLoop& mainRunLoop();
 	RunLoop& backgroundRunLoop();

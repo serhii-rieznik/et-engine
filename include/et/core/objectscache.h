@@ -8,8 +8,8 @@
 #pragma once
 
 #include <et/core/et.h>
-#include <et/threading/criticalsection.h>
-#include <et/timers/timedobject.h>
+#include <et/core/criticalsection.h>
+#include <et/core/timedobject.h>
 
 namespace et
 {

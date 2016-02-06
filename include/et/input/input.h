@@ -235,6 +235,5 @@ namespace et
 		virtual void onGesturePerformed(et::GestureInputInfo) { }
 	};
 
-	inline Input& input()
-		{ return Input::instance(); }
+    Input& input();
 }

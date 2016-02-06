@@ -7,8 +7,8 @@
 
 #pragma once
 
-#include <et/timers/timerpool.h>
-#include <et/tasks/taskpool.h>
+#include <et/core/timerpool.h>
+#include <et/core/taskpool.h>
 
 namespace et
 {

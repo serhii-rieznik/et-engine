@@ -8,7 +8,7 @@
 #pragma once
 
 #include <et/rendering/material.h>
-#include <et/rendering/apiobjectfactory.h>
+#include <et/rendering/apiobject.h>
 
 namespace et
 {

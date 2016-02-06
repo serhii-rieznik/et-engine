@@ -8,8 +8,8 @@
 #pragma once
 
 #include <queue>
-#include <et/threading/thread.h>
-#include <et/threading/criticalsection.h>
+#include <et/core/thread.h>
+#include <et/core/criticalsection.h>
 #include <et/rendering/texture.h>
 
 namespace et

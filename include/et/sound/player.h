@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include <et/timers/animator.h>
+#include <et/core/animator.h>
 #include <et/sound/track.h>
 
 namespace et

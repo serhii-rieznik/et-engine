@@ -9,7 +9,7 @@
 
 #include <et/input/input.h>
 #include <et/camera/camera.h>
-#include <et/timers/notifytimer.h>
+#include <et/core/notifytimer.h>
 
 namespace et
 {

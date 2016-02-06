@@ -8,9 +8,9 @@
 #pragma once
 
 #include <et/core/containers.h>
-#include <et/vertexbuffer/indexarray.h>
-#include <et/vertexbuffer/vertexarray.h>
-#include <et/vertexbuffer/vertexstorage.h>
+#include <et/rendering/indexarray.h>
+#include <et/rendering/vertexarray.h>
+#include <et/rendering/vertexstorage.h>
 
 namespace et
 {

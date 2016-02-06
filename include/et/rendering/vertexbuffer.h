@@ -8,8 +8,8 @@
 #pragma once
 
 #include <et/rendering/apiobject.h>
-#include <et/vertexbuffer/vertexarray.h>
-#include <et/vertexbuffer/vertexstorage.h>
+#include <et/rendering/vertexarray.h>
+#include <et/rendering/vertexstorage.h>
 
 namespace et
 {

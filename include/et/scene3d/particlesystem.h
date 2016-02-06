@@ -7,8 +7,8 @@
 
 #pragma once
 
-#include <et/helpers/particles.h>
 #include <et/scene3d/baseelement.h>
+#include <et-ext/helpers/particles.h>
 
 namespace et
 {

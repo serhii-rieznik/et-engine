@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include <et/threading/thread.h>
+#include <et/core/thread.h>
 #include <et/app/runloop.h>
 
 namespace et

@@ -17,7 +17,7 @@
 #include <et/rendering/texturefactory.h>
 #include <et/rendering/framebufferfactory.h>
 #include <et/rendering/vertexbufferfactory.h>
-#include <et/timers/notifytimer.h>
+#include <et/core/notifytimer.h>
 #include <et/app/events.h>
 
 namespace et

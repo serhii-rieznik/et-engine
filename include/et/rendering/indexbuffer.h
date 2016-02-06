@@ -8,7 +8,7 @@
 #pragma once
 
 #include <et/rendering/apiobject.h>
-#include <et/vertexbuffer/indexarray.h>
+#include <et/rendering/indexarray.h>
 
 namespace et
 {

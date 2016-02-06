@@ -9,7 +9,7 @@
 
 #include <et/app/events.h>
 #include <et/rendering/texture.h>
-#include <et/rendering/apiobjectfactory.h>
+#include <et/rendering/apiobject.h>
 #include <et/imaging/textureloaderthread.h>
 
 namespace et

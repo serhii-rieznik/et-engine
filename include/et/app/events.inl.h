@@ -5,9 +5,6 @@
  *
  */
 
-inline bool shouldRemoveConnection(EventConnectionBase* b)
-	{ return (b == nullptr) || b->removed(); }
-
 /*
  * Event0Connection
  */
@@ -136,9 +133,8 @@ inline void Event1<ArgType>::receiverDisconnected(EventReceiver* r)
 template <typename ArgType>
 inline void Event1<ArgType>::cleanup()
 {
-	auto i = remove_if(_connections.begin(), _connections.end(), shouldRemoveConnection);
-	if (i != _connections.end())
-		_connections.erase(i, _connections.end());
+    auto i = std::remove_if(_connections.begin(), _connections.end(), [](EventConnectionBase* b) { return (b == nullptr) || b->removed(); });
+    _connections.erase(i, _connections.end());
 }
 
 template <typename ArgType>
@@ -263,9 +259,8 @@ inline void Event2<Arg1Type, Arg2Type>::receiverDisconnected(EventReceiver* r)
 template <typename Arg1Type, typename Arg2Type>
 inline void Event2<Arg1Type, Arg2Type>::invoke(Arg1Type a1, Arg2Type a2)
 {
-	auto i = remove_if(_connections.begin(), _connections.end(), shouldRemoveConnection);
-	if (i != _connections.end())
-		_connections.erase(i, _connections.end());
+    auto i = remove_if(_connections.begin(), _connections.end(), [](EventConnectionBase* b) { return (b == nullptr) || b->removed(); });
+    _connections.erase(i, _connections.end());
 
 	_invoking = true;
 	for (auto& conn : _connections)
@@ -276,9 +271,8 @@ inline void Event2<Arg1Type, Arg2Type>::invoke(Arg1Type a1, Arg2Type a2)
 template <typename Arg1Type, typename Arg2Type>
 inline void Event2<Arg1Type, Arg2Type>::invokeInMainRunLoop(Arg1Type a1, Arg2Type a2, float delay)
 {
-	auto i = remove_if(_connections.begin(), _connections.end(), shouldRemoveConnection);
-	if (i != _connections.end())
-		_connections.erase(i, _connections.end());
+    auto i = remove_if(_connections.begin(), _connections.end(), [](EventConnectionBase* b) { return (b == nullptr) || b->removed(); });
+    _connections.erase(i, _connections.end());
 	
 	_invoking = true;
 	for (auto& conn : _connections)
@@ -290,9 +284,8 @@ inline void Event2<Arg1Type, Arg2Type>::invokeInMainRunLoop(Arg1Type a1, Arg2Typ
 template <typename Arg1Type, typename Arg2Type>
 inline void Event2<Arg1Type, Arg2Type>::invokeInCurrentRunLoop(Arg1Type a1, Arg2Type a2, float delay)
 {
-	auto i = remove_if(_connections.begin(), _connections.end(), shouldRemoveConnection);
-	if (i != _connections.end())
-		_connections.erase(i, _connections.end());
+    auto i = remove_if(_connections.begin(), _connections.end(), [](EventConnectionBase* b) { return (b == nullptr) || b->removed(); });
+    _connections.erase(i, _connections.end());
 	
 	_invoking = true;
 	for (auto& conn : _connections)

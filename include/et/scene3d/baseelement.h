@@ -11,7 +11,7 @@
 #include <et/core/flags.h>
 #include <et/core/transformable.h>
 #include <et/core/serialization.h>
-#include <et/timers/notifytimer.h>
+#include <et/core/notifytimer.h>
 #include <et/scene3d/base.h>
 #include <et/scene3d/serialization.h>
 #include <et/scene3d/animation.h>

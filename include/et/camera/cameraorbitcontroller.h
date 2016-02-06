@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include <et/timers/interpolationvalue.h>
+#include <et/core/interpolationvalue.h>
 #include <et/camera/cameracontroller.h>
 #include <et/input/gestures.h>
 

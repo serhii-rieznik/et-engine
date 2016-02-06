@@ -8,8 +8,8 @@
 #pragma once
 
 #include <et/scene3d/scenematerial.h>
-#include <et/vertexbuffer/indexarray.h>
-#include <et/vertexbuffer/vertexstorage.h>
+#include <et/rendering/indexarray.h>
+#include <et/rendering/vertexstorage.h>
 
 namespace et
 {

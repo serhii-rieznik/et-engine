@@ -10,8 +10,8 @@
 #include <et/geometry/geometry.h>
 #include <et/rendering/material.h>
 #include <et/rendering/vertexarrayobject.h>
-#include <et/vertexbuffer/vertexstorage.h>
-#include <et/vertexbuffer/indexarray.h>
+#include <et/rendering/vertexstorage.h>
+#include <et/rendering/indexarray.h>
 
 namespace et
 {

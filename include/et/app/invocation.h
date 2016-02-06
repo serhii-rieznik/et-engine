@@ -8,7 +8,7 @@
 #pragma once
 
 #include <et/app/runloop.h>
-#include <et/tasks/tasks.h>
+#include <et/core/tasks.h>
 
 namespace et
 {

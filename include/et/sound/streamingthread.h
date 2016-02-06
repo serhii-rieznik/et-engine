@@ -8,7 +8,7 @@
 #pragma once
 
 #include <et/sound/openal.h>
-#include <et/threading/thread.h>
+#include <et/core/thread.h>
 
 namespace et
 {
