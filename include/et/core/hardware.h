@@ -16,15 +16,15 @@ namespace et
 		std::string deviceId;
 		recti frame;
 		recti availableFrame;
-		int scaleFactor = 1;
+		float scaleFactor = 1.0f;
 		
 		Screen()
 			{ }
 		
-		Screen(const recti& f, const recti& a, int sf) :
+		Screen(const recti& f, const recti& a, float sf) :
 			frame(f), availableFrame(a), scaleFactor(sf) { }
 	};
 	
 	Screen currentScreen();
-	std::vector<Screen> availableScreens();
+	Vector<Screen> availableScreens();
 }

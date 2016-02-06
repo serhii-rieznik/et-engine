@@ -29,26 +29,8 @@ void RenderContext::onFPSTimerExpired(NotifyTimer*)
 
 void RenderContext::resized(const vec2i& sz)
 {
-	updateScreenScale(sz);
-	
 	_renderState.setMainViewportSize(sz);
 	
 	if (_app->running())
 		_app->contextResized(sz);
-}
-
-void RenderContext::updateScreenScale(const vec2i& screenSize)
-{
-	if (_screenScaleFactorSet && _params.lockScreenScaleToInitial) return;
-	
-	int maxDimension = std::max(screenSize.x, screenSize.y);
-	int maxBaseSize = std::max(_params.contextBaseSize.x, _params.contextBaseSize.y);
-	
-	size_t newScale = static_cast<size_t>((maxDimension - 1) / (3 * maxBaseSize / 2) + 1);
-	if (newScale == _screenScaleFactor) return;
-	
-	_screenScaleFactor = std::min(_maxScreenScaleFactor, newScale);
-	_screenScaleFactorSet = true;
-	
-	screenScaleFactorChanged.invoke(_screenScaleFactor);
 }

@@ -62,7 +62,7 @@ namespace et
 		std::string _baseFolder;
 		std::string _cachedLocale;
 		
-		size_t _cachedScreenScaleFactor = 0;
+		float _cachedScreenScaleFactor = 0.0f;
 		bool _silentErrors = false;
 	};
 }

@@ -162,6 +162,14 @@ std::string et::documentsBaseFolder()
     }
 }
 
+std::string et::workingFolder()
+{
+    const size_t bufferSize = 1024;
+    char buffer[bufferSize] = { };
+    getcwd(buffer, bufferSize);
+    return addTrailingSlash(normalizeFilePath(std::string(buffer)));
+}
+
 bool et::createDirectory(const std::string& name, bool intermediates)
 {
 	NSError* error = nil;
@@ -435,9 +443,9 @@ et::Screen et::currentScreen()
 #endif
 }
 
-std::vector<et::Screen> et::availableScreens()
+et::Vector<et::Screen> et::availableScreens()
 {
-	std::vector<et::Screen> result;
+	Vector<et::Screen> result;
 	
 #if (ET_PLATFORM_IOS)
 	for (UIScreen* screen in [UIScreen screens])
@@ -455,13 +463,13 @@ et::Screen uiScreenToScreen(UIScreen* screen)
 {
 	CGRect frame = [screen bounds];
 	CGRect available = frame;
-	int scaleFactor = static_cast<int>([screen scale]);
+    float scaleFactor = [screen scale];
 #else
 et::Screen nsScreenToScreen(NSScreen* screen)
 {
 	NSRect frame = [screen frame];
 	NSRect available = [screen visibleFrame];
-	int scaleFactor = static_cast<int>([screen backingScaleFactor]);
+    float scaleFactor = [screen backingScaleFactor];
 #endif
 		
 	auto aFrame = et::recti(static_cast<int>(frame.origin.x), static_cast<int>(frame.origin.y),

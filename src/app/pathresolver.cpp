@@ -38,9 +38,9 @@ void StandardPathResolver::validateCaches()
 			_cachedLanguage += "-" + _cachedSubLang;
 	}
 	
-	_cachedScreenScaleFactor = _rc->screenScaleFactor();
+    _cachedScreenScaleFactor = currentScreen().scaleFactor;
 	_cachedScreenScale = (_cachedScreenScaleFactor > 1) ?
-		"@" + intToStr(_cachedScreenScaleFactor) + "x" : emptyString;
+		"@" + floatToStr(_cachedScreenScaleFactor, 2) + "x" : emptyString;
 }
 
 std::string StandardPathResolver::resolveFilePath(const std::string& input)

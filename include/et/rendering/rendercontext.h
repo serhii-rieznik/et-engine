@@ -51,9 +51,6 @@ namespace et
 		const vec2i& size() const
 			{ return _renderState.mainViewportSize(); }
 
-		size_t screenScaleFactor() const
-			{ return _screenScaleFactor; }
-
 		RenderState& renderState()
 			{ return _renderState; }
 
@@ -87,7 +84,6 @@ namespace et
 
 	public:
 		ET_DECLARE_EVENT1(renderingInfoUpdated, const RenderingInfo&)
-		ET_DECLARE_EVENT1(screenScaleFactorChanged, size_t)
 
 	private:
 		RenderContext(RenderContext&&) = delete;
@@ -96,7 +92,6 @@ namespace et
 
 		void onFPSTimerExpired(NotifyTimer* t);
 		void resized(const vec2i&);
-		void updateScreenScale(const vec2i& screenSize);
 
 	private:
 		friend class RenderContextPrivate;
@@ -118,10 +113,6 @@ namespace et
 		FramebufferFactory::Pointer _framebufferFactory;
 		VertexBufferFactory::Pointer _vertexBufferFactory;
 		Renderer::Pointer _renderer;
-		
-		size_t _screenScaleFactor = 1;
-		size_t _maxScreenScaleFactor = 2;
-		bool _screenScaleFactorSet = false;
 	};
 
 }

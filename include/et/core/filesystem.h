@@ -22,6 +22,7 @@ namespace et
 	std::string libraryBaseFolder();
 	std::string documentsBaseFolder();
 	std::string temporaryBaseFolder();
+    std::string workingFolder();
 	
 	std::string normalizeFilePath(std::string s);
 	

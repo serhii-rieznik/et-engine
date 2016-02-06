@@ -90,14 +90,12 @@ private:
 
 RenderContext::RenderContext(const RenderContextParameters& inParams, Application* app) : _params(inParams),
 	_app(app), _materialFactory(nullptr), _textureFactory(nullptr), _framebufferFactory(nullptr),
-	_vertexBufferFactory(nullptr), _renderer(nullptr), _screenScaleFactor(1)
+	_vertexBufferFactory(nullptr), _renderer(nullptr)
 {
 	ET_PIMPL_INIT(RenderContext, this, _params, app->parameters())
 	
 	OpenGLCapabilities::instance().checkCaps();
-	
-	updateScreenScale(_renderState.viewportSize());
-	
+		
 	_textureFactory = TextureFactory::Pointer::create(this);
 	_framebufferFactory = FramebufferFactory::Pointer::create(this);
 	_materialFactory = MaterialFactory::Pointer::create(this);
