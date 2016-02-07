@@ -6,6 +6,7 @@
  */
 
 #include <et/core/json.h>
+#include <et/rendering/rendercontext.h>
 #include <et/scene3d/storage.h>
 #include <et/scene3d/serialization.h>
 
@@ -18,7 +19,7 @@ Storage::Storage()
 
 void Storage::addVertexStorage(const VertexStorage::Pointer& vs)
 {
-	_vertexStorages.push_back(vs);
+	_vertexStorages.insert(vs);
 }
 
 void Storage::setIndexArray(const IndexArray::Pointer& ia)
@@ -30,9 +31,8 @@ VertexStorage::Pointer Storage::addVertexStorageWithDeclaration(const VertexDecl
 {
 	auto storage = VertexStorage::Pointer::create(decl, size);
 	storage->setName("vertexStorage" + intToStr(_vertexStorages.size()));
-	_vertexStorages.push_back(storage);
-
-	return _vertexStorages.back();
+	_vertexStorages.insert(storage);
+    return storage;
 }
 
 VertexStorage::Pointer Storage::vertexStorageWithDeclarationForAppendingSize(const VertexDeclaration& decl, size_t size)
@@ -95,6 +95,9 @@ Dictionary Storage::serialize(const std::string& basePath)
 	Dictionary storagesDictionary;
 	for (const auto& vs : _vertexStorages)
 	{
+        if (vs->data().dataSize() == 0)
+            continue;
+        
 		std::string binaryName = replaceFileExt(basePath, ".storage-" + intToStr(index) + ".etvs");
 
 		ArrayValue declaration;
@@ -268,4 +271,21 @@ void Storage::flush()
 		else
 			++ti;
 	}
+}
+
+void Storage::buildVertexArrayObjects(RenderContext* rc)
+{
+    IndexBuffer::Pointer ib;
+    for (auto vs : _vertexStorages)
+    {
+        std::string vaoName = "vao-" + intToStr(_vertexArrayObjects.size() + 1);
+        auto vao = rc->vertexBufferFactory().createVertexArrayObject(vaoName);
+        if (ib.invalid())
+        {
+            ib = rc->vertexBufferFactory().createIndexBuffer("mainIndexBuffer", _indexArray, BufferDrawType::Static);
+        }
+        auto vb = rc->vertexBufferFactory().createVertexBuffer(vs->name(), vs, BufferDrawType::Static);
+        vao->setBuffers(vb, ib);
+        _vertexArrayObjects.insert(vao);
+    }
 }

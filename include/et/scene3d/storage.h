@@ -25,10 +25,10 @@ namespace et
 			void deserializeWithOptions(RenderContext*, Dictionary, SerializationHelper*, ObjectsCache&,
 				uint32_t);
 
-			std::vector<VertexStorage::Pointer>& vertexStorages()
+			Set<VertexStorage::Pointer>& vertexStorages()
 				{ return _vertexStorages; }
 
-			const std::vector<VertexStorage::Pointer>& vertexStorages() const
+			const Set<VertexStorage::Pointer>& vertexStorages() const
 				{ return _vertexStorages; }
 			
 			IndexArray::Pointer indexArray()
@@ -43,14 +43,17 @@ namespace et
 			const SceneMaterial::Map& materials() const
 				{ return _materials; }
 
-			std::vector<Texture::Pointer>& textures()
+			Set<Texture::Pointer>& textures()
 				{ return _textures; }
 
-			const std::vector<Texture::Pointer>& textures() const
+			const Set<Texture::Pointer>& textures() const
 				{ return _textures; }
-
+            
+            const Set<VertexArrayObject::Pointer>& vertexArrayObjects() const
+                { return _vertexArrayObjects; }
+            
 			void addTexture(Texture::Pointer t)
-				{ _textures.push_back(t); }
+				{ _textures.insert(t); }
 
 			void addMaterial(SceneMaterial::Pointer m)
 				{ _materials.insert({m->name(), m}); }
@@ -65,16 +68,19 @@ namespace et
 			int indexOfVertexStorage(const VertexStorage::Pointer& va);
 			
 			void flush();
+            
+            void buildVertexArrayObjects(RenderContext* rc);
 
 		private:
 			Storage* duplicate()
 				{ return nullptr; }
 
 		private:
-			std::vector<VertexStorage::Pointer> _vertexStorages;
+			Set<VertexStorage::Pointer> _vertexStorages;
+            Set<Texture::Pointer> _textures;
+            Set<VertexArrayObject::Pointer> _vertexArrayObjects;
 			IndexArray::Pointer _indexArray;
 			SceneMaterial::Map _materials;
-			std::vector<Texture::Pointer> _textures;
 		};
 	}
 }

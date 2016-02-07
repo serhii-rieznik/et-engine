@@ -44,7 +44,6 @@ namespace et
 			ET_DECLARE_EVENT1(deserializationFinished, bool)
 
 		private:
-			void buildVertexBuffers(et::RenderContext*);
 			void cleanupGeometry();
 			
 			SceneMaterial::Pointer sceneMaterialWithName(const std::string&) override;
@@ -64,7 +63,6 @@ namespace et
 			Storage _storage;
 			MaterialProvider* _currentMaterialProvider = nullptr;
 			std::string _serializationBasePath;
-			std::vector<VertexArrayObject::Pointer> _vertexArrayObjects;
 			IndexBuffer::Pointer _mainIndexBuffer;
 		};
 	}

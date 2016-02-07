@@ -38,7 +38,7 @@ IndexArray::Pointer Scene::indexArrayWithName(const std::string&)
 
 VertexArrayObject::Pointer Scene::vertexArrayWithStorageName(const std::string& name)
 {
-	for (const auto& vao : _vertexArrayObjects)
+	for (const auto& vao : _storage.vertexArrayObjects())
 	{
 		if (vao->vertexBuffer()->name() == name)
 			return vao;
@@ -117,7 +117,7 @@ void Scene::deserializeWithOptions(et::RenderContext* rc, MaterialProvider* mp,
 	
 	if (options & DeserializeOption_CreateVertexBuffers)
 	{
-		buildVertexBuffers(rc);
+        _storage.buildVertexArrayObjects(rc);
 	}
 	
 	ElementContainer::deserialize(info, this);
@@ -125,26 +125,6 @@ void Scene::deserializeWithOptions(et::RenderContext* rc, MaterialProvider* mp,
 	if ((options & DeserializeOption_KeepMeshes) == 0)
 	{
 		cleanupGeometry();
-	}
-}
-
-void Scene::buildVertexBuffers(et::RenderContext* rc)
-{
-	for (auto vs : _storage.vertexStorages())
-	{
-		std::string vaoName = "vao-" + intToStr(_vertexArrayObjects.size() + 1);
-		auto vao = rc->vertexBufferFactory().createVertexArrayObject(vaoName);
-		
-		if (_mainIndexBuffer.invalid())
-		{
-			_mainIndexBuffer = rc->vertexBufferFactory().createIndexBuffer("mainIndexBuffer",
-				_storage.indexArray(), BufferDrawType::Static);
-		}
-		
-		auto vb = rc->vertexBufferFactory().createVertexBuffer(vs->name(), vs, BufferDrawType::Static);
-		vao->setBuffers(vb, _mainIndexBuffer);
-		
-		_vertexArrayObjects.push_back(vao);
 	}
 }
 
