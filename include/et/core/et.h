@@ -126,7 +126,7 @@ namespace et
 	
 	template <class C, typename ... args>
 	C* etCreateObject(args&&... a)
-		{ return sharedObjectFactory().createObject<C>(a...); }
+        { return sharedObjectFactory().createObject<C>(std::forward<args>(a)...); }
 	
 	template <class C>
 	void etDestroyObject(C* c)
