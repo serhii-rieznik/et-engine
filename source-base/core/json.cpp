@@ -50,8 +50,7 @@ std::string et::json::serialize(const et::ArrayValue& arr, size_t inFlags)
 {
 	json_t* dictionary = serializeArray(arr);
 	
-	size_t flags = JSON_PRESERVE_ORDER;
-	flags |= (inFlags & SerializationFlag_ReadableFormat) ? JSON_INDENT(2) : JSON_COMPACT;
+	size_t flags = (inFlags & SerializationFlag_ReadableFormat) ? JSON_INDENT(2) : JSON_COMPACT;
 	flags |= (inFlags & SerializationFlag_ConvertUnicode) ? JSON_ENSURE_ASCII : 0;
 	
 	char* dump = json_dumps(dictionary, flags);
