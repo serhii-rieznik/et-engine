@@ -15,7 +15,7 @@
 #include <AppKit/NSAlert.h>
 
 #include <et/core/base64.h>
-#include <et/json/json.h>
+#include <et/core/json.h>
 #include <et/app/applicationnotifier.h>
 
 using namespace et;

@@ -5,7 +5,7 @@
  *
  */
 
-#include <et/json/json.h>
+#include <et/core/json.h>
 #include <et/scene3d/storage.h>
 #include <et/scene3d/serialization.h>
 
@@ -129,20 +129,33 @@ Dictionary Storage::serialize(const std::string& basePath)
 
 	std::string binaryName = replaceFileExt(basePath, ".indexes.etvs");
 
-	size_t indexesDataSize = std::min(_indexArray->dataSize(),
-		_indexArray->actualSize() * static_cast<size_t>(_indexArray->format()));
-
-	Dictionary indexArrayDictionary;
-	indexArrayDictionary.setStringForKey(kBinary, getFileName(binaryName));
-	indexArrayDictionary.setIntegerForKey(kDataSize, indexesDataSize);
-	indexArrayDictionary.setIntegerForKey(kIndexesCount, _indexArray->actualSize());
-	indexArrayDictionary.setStringForKey(kPrimitiveType, primitiveTypeToString(_indexArray->primitiveType()));
-	indexArrayDictionary.setStringForKey(kFormat, indexArrayFormatToString(_indexArray->format()));
+    size_t indexesDataSize = 0;
+    Dictionary indexArrayDictionary;
+    if (_indexArray.valid())
+    {
+        indexesDataSize = std::min(_indexArray->dataSize(), _indexArray->actualSize() * static_cast<size_t>(_indexArray->format()));
+        indexArrayDictionary.setStringForKey(kBinary, getFileName(binaryName));
+        indexArrayDictionary.setIntegerForKey(kDataSize, indexesDataSize);
+        indexArrayDictionary.setIntegerForKey(kIndexesCount, _indexArray->actualSize());
+        indexArrayDictionary.setStringForKey(kPrimitiveType, primitiveTypeToString(_indexArray->primitiveType()));
+        indexArrayDictionary.setStringForKey(kFormat, indexArrayFormatToString(_indexArray->format()));
+    }
+    else
+    {
+        indexArrayDictionary.setStringForKey(kBinary, getFileName(binaryName));
+        indexArrayDictionary.setIntegerForKey(kDataSize, 0ll);
+        indexArrayDictionary.setIntegerForKey(kIndexesCount, 0ll);
+        indexArrayDictionary.setStringForKey(kPrimitiveType, primitiveTypeToString(PrimitiveType::Triangles));
+        indexArrayDictionary.setStringForKey(kFormat, indexArrayFormatToString(IndexArrayFormat::Format_8bit));
+    }
 	stream.setDictionaryForKey(kIndexArray, indexArrayDictionary);
 
 	std::ofstream fOut(binaryName, std::ios::out | std::ios::binary);
-	fOut.write(_indexArray->binary(), indexesDataSize);
-	fOut.flush();
+    if (indexesDataSize > 0)
+    {
+        fOut.write(_indexArray->binary(), indexesDataSize);
+        fOut.flush();
+    }
 	fOut.close();
 
 	return stream;

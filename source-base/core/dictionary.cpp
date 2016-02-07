@@ -7,7 +7,7 @@
 
 #include <et/core/et.h>
 #include <et/core/dictionary.h>
-#include <et/json/json.h>
+#include <et/core/json.h>
 
 using namespace et;
 
@@ -147,11 +147,13 @@ bool Dictionary::loadFromJson(const std::string& jsonString)
 {
 	VariantClass vc = VariantClass::Invalid;
 	Dictionary object = json::deserialize(jsonString, vc);
-	if (vc != VariantClass::Dictionary)
-		return false;
-	
-	reference().content = object->content;
-	return true;
+	if (vc == VariantClass::Dictionary)
+    {
+        reference().content = object->content;
+        return true;
+    }
+    
+    return false;
 }
 
 std::string Dictionary::storeToJson() const

@@ -112,7 +112,6 @@
 		6EBE21821C66B8BE00AF7206 /* tgaloader.h in Headers */ = {isa = PBXBuildFile; fileRef = 6EBE1FC71C66B8BE00AF7206 /* tgaloader.h */; };
 		6EBE21831C66B8BE00AF7206 /* gestures.h in Headers */ = {isa = PBXBuildFile; fileRef = 6EBE1FC91C66B8BE00AF7206 /* gestures.h */; };
 		6EBE21841C66B8BE00AF7206 /* input.h in Headers */ = {isa = PBXBuildFile; fileRef = 6EBE1FCA1C66B8BE00AF7206 /* input.h */; };
-		6EBE21851C66B8BE00AF7206 /* json.h in Headers */ = {isa = PBXBuildFile; fileRef = 6EBE1FCC1C66B8BE00AF7206 /* json.h */; };
 		6EBE21861C66B8BE00AF7206 /* locale.ext.h in Headers */ = {isa = PBXBuildFile; fileRef = 6EBE1FCE1C66B8BE00AF7206 /* locale.ext.h */; };
 		6EBE21871C66B8BE00AF7206 /* locale.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 6EBE1FCF1C66B8BE00AF7206 /* locale.hpp */; };
 		6EBE21881C66B8BE00AF7206 /* opengl.h in Headers */ = {isa = PBXBuildFile; fileRef = 6EBE1FD11C66B8BE00AF7206 /* opengl.h */; };
@@ -289,6 +288,7 @@
 		6EBE22AA1C66B8BE00AF7206 /* sound.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6EBE21191C66B8BE00AF7206 /* sound.cpp */; };
 		6EBE22AB1C66B8BE00AF7206 /* streamingthread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6EBE211A1C66B8BE00AF7206 /* streamingthread.cpp */; };
 		6EBE22AC1C66B8BE00AF7206 /* track.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6EBE211B1C66B8BE00AF7206 /* track.cpp */; };
+		6EBE23151C66C1C100AF7206 /* json.h in Headers */ = {isa = PBXBuildFile; fileRef = 6EBE23141C66C1C100AF7206 /* json.h */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -398,7 +398,6 @@
 		6EBE1FC71C66B8BE00AF7206 /* tgaloader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tgaloader.h; sourceTree = "<group>"; };
 		6EBE1FC91C66B8BE00AF7206 /* gestures.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = gestures.h; sourceTree = "<group>"; };
 		6EBE1FCA1C66B8BE00AF7206 /* input.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = input.h; sourceTree = "<group>"; };
-		6EBE1FCC1C66B8BE00AF7206 /* json.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = json.h; sourceTree = "<group>"; };
 		6EBE1FCE1C66B8BE00AF7206 /* locale.ext.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = locale.ext.h; sourceTree = "<group>"; };
 		6EBE1FCF1C66B8BE00AF7206 /* locale.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = locale.hpp; sourceTree = "<group>"; };
 		6EBE1FD11C66B8BE00AF7206 /* opengl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = opengl.h; sourceTree = "<group>"; };
@@ -575,6 +574,7 @@
 		6EBE21191C66B8BE00AF7206 /* sound.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = sound.cpp; sourceTree = "<group>"; };
 		6EBE211A1C66B8BE00AF7206 /* streamingthread.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = streamingthread.cpp; sourceTree = "<group>"; };
 		6EBE211B1C66B8BE00AF7206 /* track.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = track.cpp; sourceTree = "<group>"; };
+		6EBE23141C66C1C100AF7206 /* json.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = json.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -614,7 +614,6 @@
 				6EBE1F9F1C66B8BE00AF7206 /* geometry */,
 				6EBE1FBB1C66B8BE00AF7206 /* imaging */,
 				6EBE1FC81C66B8BE00AF7206 /* input */,
-				6EBE1FCB1C66B8BE00AF7206 /* json */,
 				6EBE1FCD1C66B8BE00AF7206 /* locale */,
 				6EBE1FD01C66B8BE00AF7206 /* opengl */,
 				6EBE1FD31C66B8BE00AF7206 /* platform */,
@@ -686,6 +685,7 @@
 				6EBE1F831C66B8BE00AF7206 /* interpolationvalue.h */,
 				6EBE1F841C66B8BE00AF7206 /* intervaltimer.h */,
 				6EBE1F851C66B8BE00AF7206 /* intrusiveptr.h */,
+				6EBE23141C66C1C100AF7206 /* json.h */,
 				6EBE1F861C66B8BE00AF7206 /* log.h */,
 				6EBE1F871C66B8BE00AF7206 /* memory.h */,
 				6EBE1F881C66B8BE00AF7206 /* memoryallocator.h */,
@@ -779,15 +779,6 @@
 			);
 			name = input;
 			path = et/input;
-			sourceTree = "<group>";
-		};
-		6EBE1FCB1C66B8BE00AF7206 /* json */ = {
-			isa = PBXGroup;
-			children = (
-				6EBE1FCC1C66B8BE00AF7206 /* json.h */,
-			);
-			name = json;
-			path = et/json;
 			sourceTree = "<group>";
 		};
 		6EBE1FCD1C66B8BE00AF7206 /* locale */ = {
@@ -1259,6 +1250,7 @@
 				6EBE212B1C66B8BE00AF7206 /* animator.h in Headers */,
 				6EBE21C11C66B8BE00AF7206 /* renderableelement.h in Headers */,
 				6EBE212C1C66B8BE00AF7206 /* atomiccounter.h in Headers */,
+				6EBE23151C66C1C100AF7206 /* json.h in Headers */,
 				6EBE21841C66B8BE00AF7206 /* input.h in Headers */,
 				6EBE21891C66B8BE00AF7206 /* openglcaps.h in Headers */,
 				6EBE21531C66B8BE00AF7206 /* taskpool.h in Headers */,
@@ -1283,7 +1275,6 @@
 				6EBE21361C66B8BE00AF7206 /* criticalsection.h in Headers */,
 				6EBE21481C66B8BE00AF7206 /* object.h in Headers */,
 				6EBE213D1C66B8BE00AF7206 /* hardware.h in Headers */,
-				6EBE21851C66B8BE00AF7206 /* json.h in Headers */,
 				6EBE21A41C66B8BE00AF7206 /* renderbatch.h in Headers */,
 				6EBE212E1C66B8BE00AF7206 /* autovalue.h in Headers */,
 				6EBE219C1C66B8BE00AF7206 /* framebuffer.h in Headers */,
