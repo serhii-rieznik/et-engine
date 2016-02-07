@@ -257,11 +257,12 @@ std::ostream& et::operator << (std::ostream& stream, const StringList& list)
 
 std::string et::removeWhitespace(const std::string& s)
 {
-	StringDataStorage result(s.size() + 1, 0);
-	for (char c : s)
-	{
-		if (!isWhitespaceChar(c))
-			result.push_back(c);
-	}
-	return std::string(result.data());
+    std::string result(s.size(), 0);
+    size_t i = 0;
+    for (char c : s)
+    {
+        if (!isWhitespaceChar(c))
+            result[i++] = c;
+    }
+    return result;
 }

@@ -27,9 +27,9 @@ namespace et
 
 		Material::Pointer& material()
 			{ return _material; }
-		
 		const Material::Pointer& material() const
 			{ return _material; }
+        void setMaterial(Material::Pointer);
 		
 		VertexArrayObject::Pointer& vao()
 			{ return _vao; }

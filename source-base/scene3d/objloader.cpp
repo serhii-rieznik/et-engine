@@ -873,7 +873,6 @@ s3d::ElementContainer::Pointer OBJLoader::generateVertexBuffers(s3d::Storage& st
 	VertexArrayObject::Pointer vao = _rc->vertexBufferFactory().createVertexArrayObject("model-vao", _vertexData,
 		BufferDrawType::Static, _indices, BufferDrawType::Static);
 
-	uint32_t helperFlag = s3d::Flag_Helper * static_cast<uint32_t>((_loadOptions & Option_SupportMeshes) != 0);
 	for (const auto& i : _meshes)
 	{
 		auto material = _materialProvider->materialWithName(i.material->name());
@@ -885,7 +884,6 @@ s3d::ElementContainer::Pointer OBJLoader::generateVertexBuffers(s3d::Storage& st
 		s3d::Mesh::Pointer object = Mesh::Pointer::create(i.name, i.material, result.ptr());
 		
 		object->addRenderBatch(rb);
-		object->setFlag(helperFlag);
 	}
 
 	return result;

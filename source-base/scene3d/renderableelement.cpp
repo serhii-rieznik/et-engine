@@ -13,13 +13,11 @@ using namespace et::s3d;
 RenderableElement::RenderableElement(const std::string& name, BaseElement* parent) :
 	ElementContainer(name, parent)
 {
-	setFlag(Flag_Renderable);
 }
 
 RenderableElement::RenderableElement(const std::string& name, const SceneMaterial::Pointer& mat,
 	BaseElement* parent) : ElementContainer(name, parent), _material(mat)
 {
-	setFlag(Flag_Renderable);
 }
 
 void RenderableElement::serialize(Dictionary stream, const std::string& basePath)
@@ -79,22 +77,12 @@ void RenderableElement::prepareRenderBatches()
 	}
 }
 
-std::vector<RenderBatch::Pointer>& RenderableElement::renderBatches()
+Vector<RenderBatch::Pointer>& RenderableElement::renderBatches()
 {
 	return _renderBatches;
 }
 
-const std::vector<RenderBatch::Pointer>& RenderableElement::renderBatches() const
+const Vector<RenderBatch::Pointer>& RenderableElement::renderBatches() const
 {
 	return _renderBatches;
-}
-
-const mat4& RenderableElement::finalInverseTransform()
-{
-	return ElementContainer::finalInverseTransform();
-}
-
-const mat4& RenderableElement::finalTransform()
-{
-	return ElementContainer::finalTransform();
 }

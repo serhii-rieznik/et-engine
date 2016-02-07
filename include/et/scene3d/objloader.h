@@ -24,11 +24,10 @@ namespace et
 		enum Options
 		{
 			Option_JustLoad = 0x00,
-			Option_SupportMeshes = 0x01,
-			Option_SwapYwithZ = 0x02,
-			Option_ReverseTriangles = 0x04,
-			Option_CalculateTransforms = 0x80,
-			Option_CalculateTangents = 0x10,
+			Option_SwapYwithZ = 0x01,
+			Option_ReverseTriangles = 0x02,
+			Option_CalculateTransforms = 0x04,
+			Option_CalculateTangents = 0x08,
 		};
 
 	public:

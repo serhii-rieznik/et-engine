@@ -126,11 +126,6 @@ void Scene::deserializeWithOptions(et::RenderContext* rc, MaterialProvider* mp,
 	{
 		cleanupGeometry();
 	}
-	
-	if ((options & DeserializeOption_KeepHelperMeshes) == 0)
-	{
-		cleanUpSupportMehses();
-	}
 }
 
 void Scene::buildVertexBuffers(et::RenderContext* rc)
@@ -158,23 +153,7 @@ void Scene::cleanupGeometry()
 	auto meshes = childrenOfType(ElementType::Mesh);
 	for (s3d::Mesh::Pointer mesh : meshes)
 	{
-		if (!mesh->hasFlag(s3d::Flag_Helper))
-		{
-			mesh->setParent(nullptr);
-		}
-	}
-	_storage.flush();
-}
-
-void Scene::cleanUpSupportMehses()
-{
-	auto meshes = childrenOfType(ElementType::Mesh);
-	for (s3d::Mesh::Pointer mesh : meshes)
-	{
-		if (mesh->hasFlag(s3d::Flag_Helper))
-		{
-			mesh->setParent(nullptr);
-		}
+        mesh->setParent(nullptr);
 	}
 	_storage.flush();
 }

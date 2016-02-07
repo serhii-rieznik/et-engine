@@ -136,3 +136,8 @@ RenderBatch* RenderBatch::duplicate() const
 	result->_transformedBoxValid = false;
 	return result;
 }
+
+void RenderBatch::setMaterial(Material::Pointer mat)
+{
+    _material = mat;
+}

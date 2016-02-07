@@ -24,11 +24,10 @@ namespace et
 			enum : uint64_t
 			{
 				RenderMeshes = 0x01,
-				RenderHelperMeshes = 0x02,
-				RenderDebugObjects = 0x04,
-				Wireframe = 0x08,
+				RenderDebugObjects = 0x02,
+				Wireframe = 0x04,
 				
-				RenderAll = RenderMeshes | RenderHelperMeshes
+				RenderAll = RenderMeshes | RenderDebugObjects
 			};
 			
 		public:

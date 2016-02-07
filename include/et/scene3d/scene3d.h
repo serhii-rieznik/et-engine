@@ -46,7 +46,6 @@ namespace et
 		private:
 			void buildVertexBuffers(et::RenderContext*);
 			void cleanupGeometry();
-			void cleanUpSupportMehses();
 			
 			SceneMaterial::Pointer sceneMaterialWithName(const std::string&) override;
 			Material::Pointer materialWithName(const std::string&) override;

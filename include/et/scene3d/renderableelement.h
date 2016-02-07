@@ -35,20 +35,15 @@ namespace et
 			void addRenderBatch(RenderBatch::Pointer);
 			void prepareRenderBatches();
 			
-			std::vector<RenderBatch::Pointer>& renderBatches();
-			const std::vector<RenderBatch::Pointer>& renderBatches() const;
+			Vector<RenderBatch::Pointer>& renderBatches();
+			const Vector<RenderBatch::Pointer>& renderBatches() const;
 
 			void serialize(Dictionary, const std::string&);
 			void deserialize(Dictionary, SerializationHelper*);
-			
-		protected:
-			// should use RenderBatches' transformation
-			const mat4& finalInverseTransform();
-			const mat4& finalTransform();
-			
+						
 		private:
 			SceneMaterial::Pointer _material;
-			std::vector<RenderBatch::Pointer> _renderBatches;
+			Vector<RenderBatch::Pointer> _renderBatches;
 		};
 	}
 }

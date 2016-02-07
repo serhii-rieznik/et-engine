@@ -17,8 +17,6 @@
 
 using namespace FBXSDK_NAMESPACE;
 
-static const std::string s_supportMeshProperty = "support=true";
-static const std::string s_collisionMeshProperty = "collision=true";
 static const std::string s_AnimationProperty = "animation=";
 static const float animationAnglesScale = -TO_RADIANS;
 
@@ -67,7 +65,7 @@ namespace et
 		bool meshHasSkin(FbxMesh*);
 		
 		s3d::Mesh::Pointer loadMesh(s3d::Storage&, FbxMesh*, s3d::BaseElement::Pointer parent,
-			const s3d::SceneMaterial::List& materials, const StringList& params);
+            const s3d::SceneMaterial::List& materials);
 
 		s3d::LineElement::Pointer loadLine(s3d::Storage&, FbxLine*, s3d::BaseElement::Pointer parent, 
 			const StringList& params);
@@ -407,7 +405,7 @@ void et::FBXLoaderPrivate::loadNode(s3d::Storage& storage, FbxNode* node, s3d::B
 				
 				if (storedElement == nullptr)
 				{
-					createdElement = loadMesh(storage, mesh, parent, materials, props);
+					createdElement = loadMesh(storage, mesh, parent, materials);
 					mesh->SetUserDataPtr(createdElement.ptr());
 				}
 				else
@@ -596,22 +594,12 @@ bool FBXLoaderPrivate::meshHasSkin(FbxMesh* mesh)
 }
 
 s3d::Mesh::Pointer FBXLoaderPrivate::loadMesh(s3d::Storage& storage, FbxMesh* mesh, 
-	s3d::BaseElement::Pointer parent, const s3d::SceneMaterial::List& materials, const StringList& params)
+	s3d::BaseElement::Pointer parent, const s3d::SceneMaterial::List& materials)
 {
 	const char* mName = mesh->GetName();
 	const char* nName = mesh->GetNode()->GetName();
 	std::string meshName(strlen(mName) == 0 ? nName : mName);
-
-	bool support = false;
-	for (auto p : params)
-	{
-		if ((p.find(s_collisionMeshProperty) == 0) || (p.find(s_supportMeshProperty) == 0))
-		{
-			support = true;
-			break;
-		}
-	}
-
+    
 	bool oneMaterialForPolygons = false;
 
 	FbxGeometryElementMaterial* material = mesh->GetElementMaterial();
@@ -622,7 +610,6 @@ s3d::Mesh::Pointer FBXLoaderPrivate::loadMesh(s3d::Storage& storage, FbxMesh* me
 	oneMaterialForPolygons = (mapping == FbxGeometryElement::eAllSame);
 	
 	s3d::Mesh::Pointer result = s3d::Mesh::Pointer::create(meshName, parent.ptr());
-	result->setFlag(static_cast<uint32_t>(support) * s3d::Flag_Helper);
 	
 	size_t uvChannels = mesh->GetElementUVCount();
 

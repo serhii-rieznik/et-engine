@@ -21,26 +21,17 @@ s3d::Renderer::Renderer() :
 
 void s3d::Renderer::render(RenderContext* rc, const Scene& scene, const Camera& camera)
 {
-	auto& rs = rc->renderState();
-	
-	bool renderNormal = hasFlag(RenderMeshes);
-	bool renderHelper = hasFlag(RenderHelperMeshes);
-	
-	s3d::BaseElement::List allMeshes = scene.childrenOfType(s3d::ElementType::Mesh);
-	allMeshes.erase(std::remove_if(allMeshes.begin(), allMeshes.end(),
-		[renderNormal, renderHelper](s3d::Mesh::Pointer m)
-	{
-		bool isHelper = m->hasFlag(s3d::Flag_Helper);
-		return (isHelper && !renderHelper) || (!isHelper && !renderNormal);
-	}), allMeshes.end());
-	
+    if (hasFlag(RenderMeshes) == false)
+        return;
+
+    auto& rs = rc->renderState();
 	rs.setFillMode(hasFlag(Wireframe) ? FillMode::Wireframe : FillMode::Solid);
-	
+    
 	RenderSystem renderSystem(rc);
 	auto pass = renderSystem.allocateRenderPass({camera});
-	renderMeshList(pass, allMeshes);
+	renderMeshList(pass, scene.childrenOfType(s3d::ElementType::Mesh));
 	renderSystem.submitRenderPass(pass);
-	
+    
 	rs.setFillMode(FillMode::Solid);
 }
 

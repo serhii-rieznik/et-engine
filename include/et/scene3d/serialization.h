@@ -44,13 +44,12 @@ namespace et
 			DeserializeOption_LoadHierarchy = 0x0000,
 			
 			DeserializeOption_KeepMeshes = 0x0001,
-			DeserializeOption_KeepHelperMeshes = 0x0002,
 			
 			DeserializeOption_CreateTextures = 0x0010,
 			DeserializeOption_CreateVertexBuffers = 0x0020,
 			
 			DeserializeOption_KeepAndCreateEverything = DeserializeOption_LoadHierarchy |
-				DeserializeOption_KeepMeshes | DeserializeOption_KeepHelperMeshes |
+				DeserializeOption_KeepMeshes |
 				DeserializeOption_CreateTextures | DeserializeOption_CreateVertexBuffers
 		};
 	}

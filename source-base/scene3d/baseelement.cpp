@@ -302,14 +302,11 @@ void BaseElement::addAnimation(const Animation& a)
 {
 	_animations.push_back(a);
 	_animationTransform = a.transformation(a.startTime());
-	
-	setFlag(Flag_HasAnimations);
 }
 
 void BaseElement::removeAnimations()
 {
 	_animations.clear();
-	removeFlag(Flag_HasAnimations);
 	invalidateTransform();
 }
 
