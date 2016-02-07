@@ -98,7 +98,7 @@ Dictionary Storage::serialize(const std::string& basePath)
         if (vs->data().dataSize() == 0)
             continue;
         
-		std::string binaryName = replaceFileExt(basePath, ".storage-" + intToStr(index) + ".etvs");
+		std::string binaryName = replaceFileExt(basePath, ".storage-" + intToStr(index++) + ".etvs");
 
 		ArrayValue declaration;
 		declaration->content.reserve(vs->declaration().elements().size());
@@ -125,8 +125,6 @@ Dictionary Storage::serialize(const std::string& basePath)
 		fOut.write(vs->data().binary(), vs->data().dataSize());
 		fOut.flush();
 		fOut.close();
-
-		++index;
 	}
 	stream.setDictionaryForKey(kVertexStorages, storagesDictionary);
 
