@@ -289,3 +289,45 @@ void printDictionary(const Dictionary& dict, const std::string& tabs)
 		}
 	}
 }
+
+void ArrayValue::performRecursive(VariantCallbackFunction func)
+{
+	func(*this);
+
+	for (auto& cp : reference().content)
+	{
+		if (cp->variantClass() == VariantClass::Dictionary)
+		{
+			Dictionary(cp).performRecursive(func);
+		}
+		else if (cp->variantClass() == VariantClass::Array)
+		{
+			ArrayValue(cp).performRecursive(func);
+		}
+		else
+		{
+			VariantPointer(cp).performRecursive(func);
+		}
+	}
+}
+
+void Dictionary::performRecursive(VariantCallbackFunction func)
+{
+	func(*this);
+
+	for (Dictionary::ValueType::value_type& kv : reference().content)
+	{
+		if (kv.second->variantClass() == VariantClass::Dictionary)
+		{
+			Dictionary(kv.second).performRecursive(func);
+		}
+		else if (kv.second->variantClass() == VariantClass::Array)
+		{
+			ArrayValue(kv.second).performRecursive(func);
+		}
+		else
+		{
+			VariantPointer(kv.second).performRecursive(func);
+		}
+	}
+}

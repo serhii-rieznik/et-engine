@@ -44,7 +44,7 @@ namespace et
 			bool hasVector(MaterialParameter param) const;
 			bool hasTexture(MaterialParameter param) const;
 			
-			void serialize(Dictionary, const std::string&);
+			void serialize(Dictionary, const std::string& basePath);
 			void deserializeWithOptions(Dictionary, RenderContext*, ObjectsCache&, const std::string&, uint32_t);
 			void clear();
 			

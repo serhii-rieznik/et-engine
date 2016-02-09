@@ -297,47 +297,5 @@ namespace et
 			return (i.invalid() || (i->variantClass() != C)) ? def : VariantPointer<T, C>(i);
 		}
 	};
-	
-	inline void ArrayValue::performRecursive(VariantCallbackFunction func)
-	{
-		func(*this);
-		
-		for (auto& cp : reference().content)
-		{
-			if (cp->variantClass() == VariantClass::Dictionary)
-			{
-				Dictionary(cp).performRecursive(func);
-			}
-			else if (cp->variantClass() == VariantClass::Array)
-			{
-				ArrayValue(cp).performRecursive(func);
-			}
-			else
-			{
-				VariantPointer(cp).performRecursive(func);
-			}
-		}
-	}
-	
-	inline void Dictionary::performRecursive(VariantCallbackFunction func)
-	{
-		func(*this);
-		
-		for (auto& cp : reference().content)
-		{
-			if (cp.second->variantClass() == VariantClass::Dictionary)
-			{
-				Dictionary(cp.second).performRecursive(func);
-			}
-			else if (cp.second->variantClass() == VariantClass::Array)
-			{
-				ArrayValue(cp.second).performRecursive(func);
-			}
-			else
-			{
-				VariantPointer(cp.second).performRecursive(func);
-			}
-		}
-	}
 }
 

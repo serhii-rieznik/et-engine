@@ -241,7 +241,9 @@ StringList et::split(const std::string& s, const std::string& delim)
 
 	while (separatorIndex != std::string::npos)
 	{
-		result.push_back(s.substr(startIndex, separatorIndex - startIndex));
+		if (separatorIndex > startIndex)
+			result.push_back(s.substr(startIndex, separatorIndex - startIndex));
+
 		startIndex = separatorIndex + 1;
 		separatorIndex = s.find_first_of(delim, startIndex);
 	}
