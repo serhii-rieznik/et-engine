@@ -210,7 +210,8 @@ std::string StandardPathResolver::resolveFolderPath(const std::string& input)
 
 void StandardPathResolver::pushSearchPath(const std::string& path)
 {
-	_searchPath.push_front(addTrailingSlash(normalizeFilePath(path)));
+	_searchPath.push_front(addTrailingSlash(path));
+	normalizeFilePath(_searchPath.front());
 }
 
 void StandardPathResolver::pushSearchPaths(const std::set<std::string>& paths)
@@ -220,8 +221,13 @@ void StandardPathResolver::pushSearchPaths(const std::set<std::string>& paths)
 
 void StandardPathResolver::pushRelativeSearchPath(const std::string& path)
 {
-	_searchPath.emplace_front(addTrailingSlash(normalizeFilePath(application().environment().applicationPath() + path)));
-	_searchPath.emplace_front(addTrailingSlash(normalizeFilePath(application().environment().applicationInputDataFolder() + path)));
+	const auto& env = application().environment();
+	pushSearchPath(env.applicationPath() + path);
+
+	if (env.applicationPath() != env.applicationInputDataFolder())
+	{
+		pushSearchPath(env.applicationInputDataFolder() + path);
+	}
 }
 
 void StandardPathResolver::popSearchPaths(size_t amount)

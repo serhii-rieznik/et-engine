@@ -79,7 +79,9 @@ RenderContext::RenderContext(const RenderContextParameters& inParams, Applicatio
 	ET_PIMPL_INIT(RenderContext, this, _params, app->parameters())
 
 	if (app->parameters().shouldPreserveRenderContext)
+	{
 		pushAndActivateRenderingContext();
+	}
 
 	if (_private->failed)
 	{
@@ -96,9 +98,9 @@ RenderContext::RenderContext(const RenderContextParameters& inParams, Applicatio
 		_vertexBufferFactory = VertexBufferFactory::Pointer::create(this);
 		_renderer = Renderer::Pointer::create(this);
 
-		_renderState.setDefaultFramebuffer(_framebufferFactory->createFramebufferWrapper(0, "default-fbo"));
-		
-		updateScreenScale(_params.contextSize);
+		auto mainFramebuffer = _framebufferFactory->createFramebufferWrapper(0, "default-fbo");
+		mainFramebuffer->forceSize(_params.contextSize);
+		_renderState.setDefaultFramebuffer(mainFramebuffer);
 	}
 
 	if (app->parameters().shouldPreserveRenderContext)

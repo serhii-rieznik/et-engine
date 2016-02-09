@@ -275,8 +275,11 @@ void BaseElement::deserializeChildren(Dictionary stream, SerializationHelper* he
 
 void BaseElement::duplicateChildrenToObject(BaseElement* object)
 {
-	for (auto& c : children())
+	auto allChildren = children();
+	for (auto& c : allChildren)
+	{
 		c->duplicate()->setParent(object);
+	}
 }
 
 void BaseElement::duplicateBasePropertiesToObject(BaseElement* object)

@@ -24,7 +24,8 @@ namespace et
 	std::string temporaryBaseFolder();
     std::string workingFolder();
 	
-	std::string normalizeFilePath(std::string s);
+	std::string normalizeFilePath(const std::string& s);
+	std::string& normalizeFilePath(std::string& s);
 	
 	bool fileExists(const std::string& name);
 	bool folderExists(const std::string& name);

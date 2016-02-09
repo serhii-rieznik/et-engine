@@ -151,7 +151,14 @@ std::string et::removeUpDir(std::string name)
 	return name;
 }
 
-std::string et::normalizeFilePath(std::string s)
+std::string et::normalizeFilePath(const std::string& s)
+{
+	auto result = s;
+	normalizeFilePath(result);
+	return result;
+}
+
+std::string& et::normalizeFilePath(std::string& s)
 {
 	for (char& i : s)
 	{

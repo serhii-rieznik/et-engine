@@ -30,7 +30,7 @@
 #include <vector>
 
 #define ET_MAJOR_VERSION		0
-#define ET_MINOR_VERSION		7
+#define ET_MINOR_VERSION		9
 
 #define ET_CORE_INCLUDES
 

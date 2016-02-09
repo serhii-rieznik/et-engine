@@ -1,14 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
-    <ProjectConfiguration Include="Debug|Win32">
-      <Configuration>Debug</Configuration>
-      <Platform>Win32</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="Release|Win32">
-      <Configuration>Release</Configuration>
-      <Platform>Win32</Platform>
-    </ProjectConfiguration>
     <ProjectConfiguration Include="Debug|x64">
       <Configuration>Debug</Configuration>
       <Platform>x64</Platform>
@@ -18,166 +10,7 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
-  <PropertyGroup Label="Globals">
-    <ProjectGuid>{BEA7046F-015A-4890-A4C3-DD82D4BFD14B}</ProjectGuid>
-    <Keyword>Win32Proj</Keyword>
-    <RootNamespace>etdynamic</RootNamespace>
-    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
-  </PropertyGroup>
-  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
-    <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
-    <CharacterSet>Unicode</CharacterSet>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
-    <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
-    <WholeProgramOptimization>true</WholeProgramOptimization>
-    <CharacterSet>Unicode</CharacterSet>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
-    <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
-    <CharacterSet>Unicode</CharacterSet>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
-    <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
-    <WholeProgramOptimization>true</WholeProgramOptimization>
-    <CharacterSet>Unicode</CharacterSet>
-  </PropertyGroup>
-  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
-  <ImportGroup Label="ExtensionSettings">
-  </ImportGroup>
-  <ImportGroup Label="Shared">
-  </ImportGroup>
-  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-  </ImportGroup>
-  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-  </ImportGroup>
-  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-  </ImportGroup>
-  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-  </ImportGroup>
-  <PropertyGroup Label="UserMacros" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(ProjectDir)..\..\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(ProjectDir)..\..\lib\win;$(LibraryPath)</LibraryPath>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(ProjectDir)..\..\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(ProjectDir)..\..\lib\win64;$(LibraryPath)</LibraryPath>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(ProjectDir)..\..\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(ProjectDir)..\..\lib\win32;$(LibraryPath)</LibraryPath>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(ProjectDir)..\..\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(ProjectDir)..\..\lib\win64;$(LibraryPath)</LibraryPath>
-  </PropertyGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <ClCompile>
-      <PrecompiledHeader>
-      </PrecompiledHeader>
-      <WarningLevel>Level3</WarningLevel>
-      <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;ETDYNAMIC_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-      <MinimalRebuild>false</MinimalRebuild>
-    </ClCompile>
-    <Link>
-      <SubSystem>Windows</SubSystem>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>opengl32.lib;jansson.lib;jpeg.lib;ogg.lib;openal32.lib;png.lib;vorbis.lib;vorbisfile.lib;z.lib;%(AdditionalDependencies)</AdditionalDependencies>
-    </Link>
-  </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <ClCompile>
-      <PrecompiledHeader>
-      </PrecompiledHeader>
-      <WarningLevel>Level3</WarningLevel>
-      <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>_DEBUG;_WINDOWS;_USRDLL;ETDYNAMIC_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-      <MinimalRebuild>false</MinimalRebuild>
-    </ClCompile>
-    <Link>
-      <SubSystem>Windows</SubSystem>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>opengl32.lib;jansson.lib;jpeg.lib;ogg.lib;openal32.lib;png.lib;vorbis.lib;vorbisfile.lib;z.lib;%(AdditionalDependencies)</AdditionalDependencies>
-    </Link>
-  </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
-      <PrecompiledHeader>
-      </PrecompiledHeader>
-      <Optimization>MaxSpeed</Optimization>
-      <FunctionLevelLinking>true</FunctionLevelLinking>
-      <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;ETDYNAMIC_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-    </ClCompile>
-    <Link>
-      <SubSystem>Windows</SubSystem>
-      <EnableCOMDATFolding>true</EnableCOMDATFolding>
-      <OptimizeReferences>true</OptimizeReferences>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>jansson.lib;jpeg.lib;ogg.lib;openal32.lib;png.lib;vorbis.lib;vorbisfile.lib;z.lib;%(AdditionalDependencies)</AdditionalDependencies>
-    </Link>
-  </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
-      <PrecompiledHeader>
-      </PrecompiledHeader>
-      <Optimization>MaxSpeed</Optimization>
-      <FunctionLevelLinking>true</FunctionLevelLinking>
-      <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>NDEBUG;_WINDOWS;_USRDLL;ETDYNAMIC_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-    </ClCompile>
-    <Link>
-      <SubSystem>Windows</SubSystem>
-      <EnableCOMDATFolding>true</EnableCOMDATFolding>
-      <OptimizeReferences>true</OptimizeReferences>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>jansson.lib;jpeg.lib;ogg.lib;openal32.lib;png.lib;vorbis.lib;vorbisfile.lib;z.lib;%(AdditionalDependencies)</AdditionalDependencies>
-    </Link>
-  </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\include\et-ext\formats\fbxloader.h" />
-    <ClInclude Include="..\..\include\et-ext\helpers\particles.h" />
-    <ClInclude Include="..\..\include\et-ext\helpers\terrain.h" />
-    <ClInclude Include="..\..\include\et-ext\helpers\terraindata.h" />
-    <ClInclude Include="..\..\include\et-ext\platform-android\nativeactivity.h" />
-    <ClInclude Include="..\..\include\et-ext\platform-cocos\etnode.h" />
-    <ClInclude Include="..\..\include\et-ext\rt\environment.h" />
-    <ClInclude Include="..\..\include\et-ext\rt\kdtree.h" />
-    <ClInclude Include="..\..\include\et-ext\rt\raytrace.h" />
-    <ClInclude Include="..\..\include\et-ext\rt\raytraceobjects.h" />
-    <ClInclude Include="..\..\include\et-ext\sensor\kinect.h" />
-    <ClInclude Include="..\..\include\et-ext\sensor\location.h" />
-    <ClInclude Include="..\..\include\et-ext\sensor\orientation.h" />
-    <ClInclude Include="..\..\include\et-ext\sensor\videocapture.h" />
     <ClInclude Include="..\..\include\et\app\appevironment.h" />
     <ClInclude Include="..\..\include\et\app\application.h" />
     <ClInclude Include="..\..\include\et\app\applicationdelegate.h" />
@@ -288,23 +121,7 @@
     <ClInclude Include="..\..\include\et\locale\locale.hpp" />
     <ClInclude Include="..\..\include\et\opengl\opengl.h" />
     <ClInclude Include="..\..\include\et\opengl\openglcaps.h" />
-    <ClInclude Include="..\..\include\et\platform-apple\apple.h" />
-    <ClInclude Include="..\..\include\et\platform-apple\applicationdelegate.h" />
-    <ClInclude Include="..\..\include\et\platform-apple\embeddedapplication.h" />
-    <ClInclude Include="..\..\include\et\platform-apple\iap.h" />
-    <ClInclude Include="..\..\include\et\platform-apple\imagepicker.h" />
-    <ClInclude Include="..\..\include\et\platform-apple\ios.h" />
-    <ClInclude Include="..\..\include\et\platform-apple\mailcomposer.h" />
-    <ClInclude Include="..\..\include\et\platform-apple\objc.h" />
-    <ClInclude Include="..\..\include\et\platform-apple\opengl.ios.h" />
-    <ClInclude Include="..\..\include\et\platform-apple\openglview.h" />
-    <ClInclude Include="..\..\include\et\platform-apple\openglviewcontroller.h" />
-    <ClInclude Include="..\..\include\et\platform-apple\printer.h" />
-    <ClInclude Include="..\..\include\et\platform-apple\social.h" />
     <ClInclude Include="..\..\include\et\platform-win\glee.h" />
-    <ClInclude Include="..\..\include\et\platform\compileoptions.h" />
-    <ClInclude Include="..\..\include\et\platform\platform.h" />
-    <ClInclude Include="..\..\include\et\platform\platformtools.h" />
     <ClInclude Include="..\..\include\et\rendering\apiobject.h" />
     <ClInclude Include="..\..\include\et\rendering\framebuffer.h" />
     <ClInclude Include="..\..\include\et\rendering\framebufferfactory.h" />
@@ -416,8 +233,6 @@
     <ClCompile Include="..\..\source-base\opengl\texture.cpp" />
     <ClCompile Include="..\..\source-base\opengl\vertexarrayobject.cpp" />
     <ClCompile Include="..\..\source-base\opengl\vertexbuffer.cpp" />
-    <ClCompile Include="..\..\source-base\platform-unix\atomiccounter.unix.cpp" />
-    <ClCompile Include="..\..\source-base\platform-unix\thread.unix.cpp" />
     <ClCompile Include="..\..\source-base\platform-win\application.win.cpp" />
     <ClCompile Include="..\..\source-base\platform-win\atomiccounter.win.cpp" />
     <ClCompile Include="..\..\source-base\platform-win\input.win.cpp" />
@@ -462,27 +277,93 @@
     <ClCompile Include="..\..\source-base\sound\sound.cpp" />
     <ClCompile Include="..\..\source-base\sound\streamingthread.cpp" />
     <ClCompile Include="..\..\source-base\sound\track.cpp" />
-    <ClCompile Include="..\..\source-ext\formats\fbxloader.cpp" />
-    <ClCompile Include="..\..\source-ext\helpers\terrain.cpp" />
-    <ClCompile Include="..\..\source-ext\helpers\terraindata.cpp" />
-    <ClCompile Include="..\..\source-ext\platform-android\application.android.cpp" />
-    <ClCompile Include="..\..\source-ext\platform-android\input.android.cpp" />
-    <ClCompile Include="..\..\source-ext\platform-android\locale.android.cpp" />
-    <ClCompile Include="..\..\source-ext\platform-android\log.android.cpp" />
-    <ClCompile Include="..\..\source-ext\platform-android\memory.android.cpp" />
-    <ClCompile Include="..\..\source-ext\platform-android\nativeactivity.android.cpp" />
-    <ClCompile Include="..\..\source-ext\platform-android\rendercontext.android.cpp" />
-    <ClCompile Include="..\..\source-ext\platform-android\sound.openal.android.cpp" />
-    <ClCompile Include="..\..\source-ext\platform-android\stream.android.cpp" />
-    <ClCompile Include="..\..\source-ext\platform-android\tools.android.cpp" />
-    <ClCompile Include="..\..\source-ext\rt\environment.cpp" />
-    <ClCompile Include="..\..\source-ext\rt\kdtree.cpp" />
-    <ClCompile Include="..\..\source-ext\rt\raytrace.cpp" />
-    <ClCompile Include="..\..\source-ext\sensor\kinect.cpp" />
-    <ClCompile Include="..\..\source-ext\sensor\location.win.cpp" />
-    <ClCompile Include="..\..\source-ext\sensor\orientation.win.cpp" />
-    <ClCompile Include="..\..\source-ext\sensor\videocapture.win.cpp" />
   </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{C16E6F9D-51E8-4DC3-BEA8-3822B46E3EDF}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>etstaticwin</RootNamespace>
+    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LibraryPath>$(ProjectDir)..\..\lib\win64;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(ProjectDir)..\..\include;$(IncludePath)</IncludePath>
+    <TargetName>et-debug</TargetName>
+    <OutDir>$(ProjectDir)..\..\lib\win64\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LibraryPath>$(ProjectDir)..\..\lib\win64;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(ProjectDir)..\..\include;$(IncludePath)</IncludePath>
+    <TargetName>et-release</TargetName>
+    <OutDir>$(ProjectDir)..\..\lib\win64\</OutDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <OmitDefaultLibName>true</OmitDefaultLibName>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <PreprocessorDefinitions>_DEBUG;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+    </Link>
+    <Lib>
+      <AdditionalDependencies>jansson.lib;jpeg.lib;ogg.lib;openal32.lib;png.lib;vorbis.lib;vorbisfile.lib;z.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <IgnoreAllDefaultLibraries>true</IgnoreAllDefaultLibraries>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <OmitDefaultLibName>true</OmitDefaultLibName>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+    <Lib>
+      <AdditionalDependencies>jansson.lib;jpeg.lib;ogg.lib;openal32.lib;png.lib;vorbis.lib;vorbisfile.lib;z.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Lib>
+    <Lib>
+      <IgnoreAllDefaultLibraries>true</IgnoreAllDefaultLibraries>
+    </Lib>
+  </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

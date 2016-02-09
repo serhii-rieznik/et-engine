@@ -179,6 +179,18 @@ std::string et::libraryBaseFolder()
 	return result;
 }
 
+std::string et::workingFolder()
+{
+	char buffer[1024] = { };
+	GetCurrentDirectoryA(sizeof(buffer) - 2, buffer);
+	
+	auto* ptr = buffer;
+	while (*++ptr) { }
+	*ptr = pathDelimiter;
+
+	return std::string(buffer);
+}
+
 bool et::createDirectory(const std::string& name, bool recursive)
 {
 	if (recursive)
@@ -352,9 +364,9 @@ uint64_t et::getFileDate(const std::string& path)
 		(static_cast<uint64_t>(findData.ftLastWriteTime.dwHighDateTime) << 32);
 }
 
-std::vector<et::Screen> et::availableScreens()
+et::Vector<et::Screen> et::availableScreens()
 {
-	std::vector<et::Screen> result;
+	et::Vector<et::Screen> result;
 	
 	EnumDisplayMonitors(nullptr, nullptr, [](HMONITOR hMonitor, HDC, LPRECT, LPARAM dwData) -> BOOL
 	{
@@ -368,8 +380,8 @@ std::vector<et::Screen> et::availableScreens()
 		recti workarea(info.rcWork.left, info.rcWork.top, info.rcWork.right - info.rcWork.left,
 			info.rcWork.bottom - info.rcWork.top);
 
-		std::vector<et::Screen>* r = reinterpret_cast<std::vector<et::Screen>*>(dwData);
-		r->emplace_back(screenRect, workarea, 1);
+		Vector<et::Screen>* r = reinterpret_cast<Vector<et::Screen>*>(dwData);
+		r->emplace_back(screenRect, workarea, 1.0f);
 		return 1;
 	}, 
 	reinterpret_cast<LPARAM>(&result));
