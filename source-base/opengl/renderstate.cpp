@@ -324,10 +324,10 @@ void RenderState::setDepthFunc(CompareFunction func, bool force)
 
 void RenderState::setBlendState(const BlendState& bs, bool force)
 {
-	if ((_desc.blend.blendEnabled != bs.blendEnabled) || force)
+	if ((_desc.blend.enabled != bs.enabled) || force)
 	{
-		(bs.blendEnabled ? glEnable : glDisable)(GL_BLEND);
-		_desc.blend.blendEnabled = bs.blendEnabled;
+		_desc.blend.enabled = bs.enabled;
+		(_desc.blend.enabled ? glEnable : glDisable)(GL_BLEND);
 	}
 	
 	if ((bs.color != _desc.blend.color) || (bs.alpha != _desc.blend.alpha) || force)
@@ -612,7 +612,7 @@ BlendState RenderState::currentBlendState()
 	BlendState blend;
 	
 	blend.alphaToCoverageEnabled = glIsEnabled(GL_SAMPLE_ALPHA_TO_COVERAGE) != 0;
-	blend.blendEnabled = glIsEnabled(GL_BLEND) != 0;
+	blend.enabled = glIsEnabled(GL_BLEND) != 0;
 	
 	int blendSource = 0;
 	glGetIntegerv(GL_BLEND_SRC_RGB, &blendSource);

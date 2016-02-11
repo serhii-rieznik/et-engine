@@ -430,7 +430,7 @@ et::Dictionary et::serializeDepthState(const DepthState& _depth)
 et::Dictionary et::serializeBlendState(const BlendState& _blend)
 {
 	Dictionary blend;
-	blend.setBooleanForKey(kBlendEnabled, _blend.blendEnabled);
+	blend.setBooleanForKey(kBlendEnabled, _blend.enabled);
 	
 	BlendConfiguration config = BlendConfiguration::Disabled;
 	if (blendStateToConfiguration(_blend, config))
@@ -480,7 +480,7 @@ BlendState et::deserializeBlendState(const et::Dictionary& blend)
 	
 	if (blend.hasKey(kBlendEnabled))
 	{
-		_blend.blendEnabled = blend.boolForKey(kBlendEnabled)->content != 0;
+		_blend.enabled = blend.boolForKey(kBlendEnabled)->content != 0;
 	}
 	return _blend;
 }

@@ -58,7 +58,7 @@ void s3d::Renderer::renderMeshList(RenderPass::Pointer pass, const s3d::BaseElem
 		{
 			auto lip = l.first->transformation() * l.first->boundingBox().center;
 			auto rip = r.first->transformation() * r.first->boundingBox().center;
-			if (l.first->material()->blendState().blendEnabled)
+			if (l.first->material()->blendState().enabled)
 				return (lip - cameraPosition).dotSelf() > (rip - cameraPosition).dotSelf();
 			else
 				return (lip - cameraPosition).dotSelf() < (rip - cameraPosition).dotSelf();

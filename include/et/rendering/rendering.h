@@ -371,20 +371,20 @@ namespace et
 		
 		BlendState() = default;
 		BlendState(bool e) :
-			blendEnabled(e) { }
+			enabled(e) { }
 		BlendState(bool e, const Blend& b) :
-			color(b), alpha(b), blendEnabled(e) { }
+			color(b), alpha(b), enabled(e) { }
 		BlendState(bool e, const Blend& cb, const Blend& ab) :
-			color(cb), alpha(ab), blendEnabled(e) { }
+			color(cb), alpha(ab), enabled(e) { }
 		BlendState(bool e, BlendFunction s, BlendFunction d) :
-			color(s, d), alpha(s, d), blendEnabled(e) { }
+			color(s, d), alpha(s, d), enabled(e) { }
 		
 		uint32_t sortingKey() const
-			{ return blendEnabled ? 0 : 1; }
+			{ return enabled ? 0 : 1; }
 		
 		bool operator == (const BlendState& bs) const
 		{
-			return (color == bs.color) && (blendEnabled == bs.blendEnabled) && (alpha == bs.alpha) &&
+			return (color == bs.color) && (enabled == bs.enabled) && (alpha == bs.alpha) &&
 				(alphaToCoverageEnabled == bs.alphaToCoverageEnabled) &&
 				(perRenderTargetBlendEnabled == bs.perRenderTargetBlendEnabled) &&
 				(colorOperation == bs.colorOperation) && (alphaOperation == bs.alphaOperation);
@@ -399,7 +399,7 @@ namespace et
 		
 		bool perRenderTargetBlendEnabled = false;
 		bool alphaToCoverageEnabled = false;
-		bool blendEnabled = false;
+		bool enabled = false;
 	};
 	
 	struct RasterizerState
