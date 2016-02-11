@@ -140,4 +140,5 @@ RenderBatch* RenderBatch::duplicate() const
 void RenderBatch::setMaterial(Material::Pointer mat)
 {
     _material = mat;
+    _materialSnapshot = uint64_t(-1);
 }
