@@ -47,6 +47,12 @@ namespace et
 	protected:
 		virtual void update(float) { }
 		
+		bool pointerEventsEnabled() const
+			{ return _pointerEventsEnabled; }
+		
+		bool keyboardEventsEnabled() const
+			{ return _keyboardEventsEnabled; }
+		
 	private:
 		Camera& _camera;
 		NotifyTimer _updateTimer;

@@ -26,7 +26,7 @@ CameraMovingController::CameraMovingController(Camera& cam, bool connectInput) :
 	
 	_gestures.drag.connect([this](const GesturesRecognizer::DragGesture& drag)
 	{
-		if (drag.pointerType == PointerType_General)
+		if (pointerEventsEnabled() && (drag.pointerType == PointerType_General))
 		{
 			vec2 delta = _directionAnimator.targetValue() + vec2(drag.delta.x, -drag.delta.y);
 			validateCameraAngles(delta);
