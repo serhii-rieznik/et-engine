@@ -203,7 +203,7 @@ ArrayValue et::vec4ToArray(const vec4& v)
 	return result;
 }
 
-ArrayValue et::rectToArray(const rect& v)
+ArrayValue et::rectToArray(const rectf& v)
 {
 	ArrayValue result;
 	result->content.reserve(4);
@@ -317,9 +317,9 @@ quaternion et::arrayToQuaternion(ArrayValue a)
 	return result;
 }
 
-rect et::arrayToRect(ArrayValue a)
+rectf et::arrayToRect(ArrayValue a)
 {
-	rect result;
+	rectf result;
 	uint32_t index = 0;
 	for (auto v : a->content)
 	{

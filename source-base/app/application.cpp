@@ -222,8 +222,11 @@ std::string Application::resolveFolderName(const std::string& path)
 	
 	if (!folderExists(result))
 		result = _standardPathResolver.resolveFolderPath(path);
+
+	result = addTrailingSlash(folderExists(result) ? result : path);
+	normalizeFilePath(result);
 	
-	return folderExists(result) ? result : path;
+	return result;
 }
 
 std::set<std::string> Application::resolveFolderNames(const std::string& path)

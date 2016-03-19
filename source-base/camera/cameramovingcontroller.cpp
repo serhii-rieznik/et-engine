@@ -82,6 +82,9 @@ void CameraMovingController::onPointerCancelled(PointerInputInfo info)
 
 void CameraMovingController::update(float dt)
 {
+	if (keyboardEventsEnabled() == false)
+		return;
+
 	float directional = 0.0f;
 	if (_pressedKeys.count(ET_KEY_W) && (_pressedKeys[ET_KEY_W] != 0))
 		directional += 1.0f;

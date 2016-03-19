@@ -198,9 +198,7 @@ namespace et
 	typedef matrix4<int> mat4i;
 	
 	typedef Quaternion<float> quaternion;
-	
-	using rect = Rect<float> ET_DEPRECATED;
-	
+
 	using recti = Rect<int>;
 	using rectf = Rect<float>;
 

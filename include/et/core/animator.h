@@ -200,5 +200,5 @@ namespace et
 	typedef Animator<vec3> Vector3Animator;
 	typedef Animator<vec4> Vector4Animator;
 	typedef Animator<mat4> MatrixAnimator;
-	typedef Animator<rect> RectAnimator;
+	typedef Animator<rectf> RectAnimator;
 }
