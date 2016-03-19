@@ -1,7 +1,7 @@
-#include <et/models/objloader.h>
+#include <et/scene3d/objloader.h>
 #include <et/camera/camera.h>
 #include <et/rendering/rendercontext.h>
-#include <et/json/json.h>
+#include <et/core/json.h>
 #include <et/core/conversion.h>
 #include <et/imaging/textureloader.h>
 #include "maincontroller.hpp"
@@ -18,8 +18,7 @@ void MainController::setApplicationParameters(et::ApplicationParameters& p)
 void MainController::setRenderContextParameters(et::RenderContextParameters& p)
 {
 	p.multisamplingQuality = MultisamplingQuality::None;
-	p.contextBaseSize = vec2i(1024, 640);
-	p.contextSize = p.contextBaseSize;
+	p.contextSize = 4 * et::currentScreen().frame.size() / 5;
     p.enableHighResolutionContext = true;
 }
 
@@ -44,9 +43,9 @@ void MainController::applicationDidLoad(et::RenderContext* rc)
 	
 	auto configName = application().resolveFileName("config/config.json");
 	
-	ValueClass vc = ValueClass_Invalid;
+	VariantClass vc = VariantClass::Invalid;
 	_options = json::deserialize(loadTextFile(configName), vc);
-	ET_ASSERT(vc == ValueClass_Dictionary);
+	ET_ASSERT(vc == VariantClass::Dictionary);
 	
 	auto modelName = application().resolveFileName(_options.stringForKey("model-name")->content);
 	

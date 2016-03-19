@@ -1,8 +1,9 @@
 #pragma once
 
 #include <et/app/application.h>
-#include <et/rt/raytrace.h>
+#include <et/camera/camera.h>
 #include <et/input/gestures.h>
+#include <et-ext/rt/raytrace.h>
 
 namespace demo
 {
