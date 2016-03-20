@@ -1,9 +1,9 @@
 #pragma once
 
 #include <et/app/application.h>
+#include <et/core/intervaltimer.h>
 #include <et/rendering/rendercontext.h>
 #include <et/camera/camera.h>
-#include <et/timers/intervaltimer.h>
 
 namespace demo
 {
@@ -27,7 +27,7 @@ namespace demo
 	private:
 		et::Camera _camera;
 		et::Texture::Pointer _noiseTexture;
-		et::VertexArrayObject _testModel;
+		et::VertexArrayObject::Pointer _testModel;
 		et::Program::Pointer _defaultProgram;
 		et::IntervalTimer _frameTimeTimer;
 		et::mat4 _transformMatrix;

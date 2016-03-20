@@ -1,4 +1,4 @@
-#include <et/primitives/primitives.h>
+#include <et/rendering/primitives.h>
 #include "MainController.h"
 
 using namespace et;
@@ -11,17 +11,16 @@ void MainController::setApplicationParameters(et::ApplicationParameters& p)
 
 void MainController::setRenderContextParameters(et::RenderContextParameters& params)
 {
-	params.contextSize = vec2i(1024, 768);
-	params.contextBaseSize = params.contextSize;
-	params.multisamplingQuality = MultisamplingQuality_Best;
+	params.contextSize = 4 * et::currentScreen().frame.size();
+	params.multisamplingQuality = MultisamplingQuality::Best;
 }
 
 void MainController::applicationDidLoad(et::RenderContext* rc)
 {
 	_camera.lookAt(vec3(20.0f));
 
-	rc->renderState().setDepthTest(true);
-	rc->renderState().setDepthMask(true);
+	rc->renderState().setDepthTestEnabled(true);
+	rc->renderState().setDepthWriteEnabled(true);
 
 	createModels(rc);
 	createTextures(rc);
@@ -39,8 +38,8 @@ void MainController::applicationDidLoad(et::RenderContext* rc)
 void MainController::createModels(et::RenderContext* rc)
 {
 	VertexDeclaration decl(true);
-	decl.push_back(VertexAttributeUsage::Position, VertexAttributeType::Vec3);
-	decl.push_back(VertexAttributeUsage::Normal, VertexAttributeType::Vec3);
+	decl.push_back(VertexAttributeUsage::Position, DataType::Vec3);
+	decl.push_back(VertexAttributeUsage::Normal, DataType::Vec3);
 
 	VertexArray::Pointer vertices = VertexArray::Pointer::create(decl, 0);
 	primitives::createIcosahedron(vertices, 5.0f);
@@ -57,7 +56,7 @@ void MainController::createModels(et::RenderContext* rc)
 
 void MainController::createTextures(et::RenderContext* rc)
 {
-	vec2i maxSize = rc->sizei();
+	vec2i maxSize = rc->size();
 
 	auto allScreens = availableScreens();
 	for (const auto& screen : allScreens)
@@ -70,16 +69,16 @@ void MainController::createPrograms(et::RenderContext* rc)
 {
 	const std::string vertexShader =
 	R"(
-		uniform mat4 mModelViewProjection;
-		uniform mat4 mTransform;
+		uniform mat4 matViewProjection;
+		uniform mat4 matWorld;
 		etVertexIn vec3 Vertex;
 		etVertexIn vec3 Normal;
 		etVertexOut vec3 vNormalWS;
 		void main()
 		{
-			vNormalWS = normalize(mat3(mTransform) * Normal);
-			vec4 vVertexWS = mTransform * vec4(Vertex, 1.0);
-			gl_Position = mModelViewProjection * vVertexWS;
+			vNormalWS = normalize(mat3(matWorld) * Normal);
+			vec4 vVertexWS = matWorld * vec4(Vertex, 1.0);
+			gl_Position = matViewProjection * vVertexWS;
 		}
 	)";
 
@@ -89,12 +88,12 @@ void MainController::createPrograms(et::RenderContext* rc)
 		const vec3 lightDirection = vec3(0.0, 1.0, 0.0);
 		void main()
 		{
-			float LdotN = max(0.0, dot(vNormalWS, lightDirection));
+			float LdotN = 0.25 + 0.75 * max(0.0, dot(vNormalWS, lightDirection));
 			etFragmentOut = vec4((0.5 + 0.5 * vNormalWS) * LdotN, 1.0);
 		}
 	)";
 
-	_defaultProgram = rc->programFactory().genProgram("default-progam", vertexShader, fragmentShader);
+	_defaultProgram = rc->materialFactory().genProgram("default-progam", vertexShader, fragmentShader);
 }
 
  void MainController::applicationWillResizeContext(const et::vec2i& sz)
@@ -111,14 +110,14 @@ void MainController::render(et::RenderContext* rc)
 	auto ren = rc->renderer();
 	auto& rs = rc->renderState();
 
-	ren->clear(false, true);
+	ren->clear(true, true);
 
-	rs.setDepthMask(false);
-	ren->renderTexture(_noiseTexture, (rc->sizei() - _noiseTexture->size()) / 2);
-	rs.setDepthMask(true);
+	rs.setDepthWriteEnabled(false);
+	ren->renderTexture(_noiseTexture, (rc->size() - _noiseTexture->size()) / 2);
+	rs.setDepthWriteEnabled(true);
 
-	rs.bindVertexArray(_testModel);
-	rs.bindTexture(0, _noiseTexture);
+	rs.bindVertexArrayObject(_testModel);
+
 	rs.bindProgram(_defaultProgram);
 	_defaultProgram->setCameraProperties(_camera);
 	_defaultProgram->setTransformMatrix(_transformMatrix);
