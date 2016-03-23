@@ -224,7 +224,9 @@ void RaytracePrivate::emitWorkerThreads()
 	srand(static_cast<unsigned int>(time(nullptr)));
 	startTime = queryContiniousTimeInMilliSeconds();
 	
-	log::info("Rendering started: %llu", startTime);
+    uint64_t totalRays = static_cast<uint64_t>(viewportSize.square()) * options.raysPerPixel;
+	log::info("Rendering started: %d x %d, %llu rpp, %llu total rays",
+        viewportSize.x, viewportSize.y, static_cast<uint64_t>(options.raysPerPixel), totalRays);
 	
 	running = true;
 	threadCounter.store(std::thread::hardware_concurrency());

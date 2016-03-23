@@ -341,6 +341,11 @@ void KDTree::printStructure(const Node& node, const std::string& tag)
 
 float KDTree::findIntersectionInNode(const rt::Ray& ray, const KDTree::Node& node, TraverseResult& result)
 {
+    float localEpsilon = rt::Constants::epsilon;
+    float localMinusEpsilon = rt::Constants::minusEpsilon;
+    float localOnePlusEpsilon = rt::Constants::onePlusEpsilon;
+    float localEpsilonSquared = rt::Constants::epsilonSquared;
+    
 	result.triangleIndex = InvalidIndex;
 	
 	const rt::index localBufferSize = 32;
@@ -364,19 +369,26 @@ float KDTree::findIntersectionInNode(const rt::Ray& ray, const KDTree::Node& nod
 			
 			rt::float4 pvec = ray.direction.crossXYZ(data.edge2to0);
 			float det = data.edge1to0.dot(pvec);
-			if (det * det > rt::Constants::epsilonSquared)// rt::floatIsPositive(det))
+            float d2e = det * det - localEpsilonSquared;
+            if (rt::floatIsPositive(d2e))
 			{
 				rt::float4 tvec = ray.origin - data.v0;
 				float u = tvec.dot(pvec) / det;
-				if ((u > rt::Constants::minusEpsilon) && (u < rt::Constants::onePlusEpsilon))
+                float um = u - localMinusEpsilon;
+                float up = u - localOnePlusEpsilon;
+                if (rt::floatIsPositive(um) & rt::floatIsNegative(up))
 				{
 					rt::float4 qvec = tvec.crossXYZ(data.edge1to0);
 					float v = ray.direction.dot(qvec) / det;
 					float uv = u + v;
-					if ((v > rt::Constants::minusEpsilon) && (uv < rt::Constants::onePlusEpsilon))
+                    float vm = v - localMinusEpsilon;
+                    float uvp = uv - localOnePlusEpsilon;
+                    if (rt::floatIsPositive(vm) & rt::floatIsNegative(uvp))
 					{
 						float intersectionDistance = data.edge2to0.dot(qvec) / det;
-						if ((intersectionDistance > rt::Constants::epsilon) && (intersectionDistance < minDistance))
+                        float ide = intersectionDistance - localEpsilon;
+                        float idm = intersectionDistance - minDistance;
+                        if (rt::floatIsPositive(ide) & rt::floatIsNegative(idm))
 						{
 							result.triangleIndex = triangleIndex;
 							minDistance = intersectionDistance;
@@ -409,8 +421,11 @@ KDTree::TraverseResult KDTree::traverse(const rt::Ray& r)
 	if (!rt::rayToBoundingBox(r, _boundingBoxes.front(), tNear, tFar))
 		return result;
 	
-	if (tNear < 0.0f)
-		tNear = 0.0f;
+	if (tNear < rt::Constants::epsilon)
+		tNear = rt::Constants::epsilon;
+    
+    tNear -= rt::Constants::epsilon;
+    tFar += rt::Constants::epsilon;
 	
 	size_t currentNode = 0;
 	
@@ -430,12 +445,14 @@ KDTree::TraverseResult KDTree::traverse(const rt::Ray& r)
 			int side = rt::floatIsNegative(direction[axis]);
 			
 			float tSplit = (node.distance - origin[axis]) / direction[axis];
-			
-			if (tSplit <= tNear - rt::Constants::epsilon)
+            float tFarSplit = tSplit - tNear;
+            float tNearSplit = tSplit - tFar;
+            
+            if (rt::floatIsNegative(tFarSplit))
 			{
 				currentNode = node.children[1 - side];
 			}
-			else if (tSplit >= tFar + rt::Constants::epsilon)
+            else if (rt::floatIsPositive(tNearSplit))
 			{
 				currentNode = node.children[side];
 			}
@@ -462,8 +479,8 @@ KDTree::TraverseResult KDTree::traverse(const rt::Ray& r)
 		}
 		
 		currentNode = traverseStack.topNodeIndex();
-		tNear = tFar;
-		tFar = traverseStack.topTime();
+        tNear = tFar - rt::Constants::epsilon;
+		tFar = traverseStack.topTime() + rt::Constants::epsilon;
 		
 		traverseStack.pop();
 	}

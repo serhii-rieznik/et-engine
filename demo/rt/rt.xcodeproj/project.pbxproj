@@ -7,10 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		5C3C4FF41C9E135E00C5B47A /* environment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5C3C4FF11C9E135E00C5B47A /* environment.cpp */; };
-		5C3C4FF51C9E135E00C5B47A /* kdtree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5C3C4FF21C9E135E00C5B47A /* kdtree.cpp */; };
-		5C3C4FF61C9E135E00C5B47A /* raytrace.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5C3C4FF31C9E135E00C5B47A /* raytrace.cpp */; };
 		5C3C4FF71C9E13A700C5B47A /* libet-static-mac.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5C3C4FEF1C9E135700C5B47A /* libet-static-mac.a */; };
+		6EC562B41CA1E0C900321FA8 /* environment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6EC562B11CA1E0C900321FA8 /* environment.cpp */; };
+		6EC562B51CA1E0C900321FA8 /* kdtree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6EC562B21CA1E0C900321FA8 /* kdtree.cpp */; };
+		6EC562B61CA1E0C900321FA8 /* raytrace.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6EC562B31CA1E0C900321FA8 /* raytrace.cpp */; };
 		A52329041B8278C400D00DD6 /* config in Resources */ = {isa = PBXBuildFile; fileRef = A52329031B8278C400D00DD6 /* config */; };
 		A52329071B827D1900D00DD6 /* media in Resources */ = {isa = PBXBuildFile; fileRef = A52329061B827D1900D00DD6 /* media */; };
 		A5E2AEBD1B7D4A7700DE53DD /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5E2AEBA1B7D4A7700DE53DD /* main.cpp */; };
@@ -33,9 +33,9 @@
 
 /* Begin PBXFileReference section */
 		5C3C4FEA1C9E135700C5B47A /* et-static-mac.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "et-static-mac.xcodeproj"; path = "../../projects/et-static-mac.xcodeproj"; sourceTree = "<group>"; };
-		5C3C4FF11C9E135E00C5B47A /* environment.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = environment.cpp; sourceTree = "<group>"; };
-		5C3C4FF21C9E135E00C5B47A /* kdtree.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = kdtree.cpp; sourceTree = "<group>"; };
-		5C3C4FF31C9E135E00C5B47A /* raytrace.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = raytrace.cpp; sourceTree = "<group>"; };
+		6EC562B11CA1E0C900321FA8 /* environment.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = environment.cpp; sourceTree = "<group>"; };
+		6EC562B21CA1E0C900321FA8 /* kdtree.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = kdtree.cpp; sourceTree = "<group>"; };
+		6EC562B31CA1E0C900321FA8 /* raytrace.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = raytrace.cpp; sourceTree = "<group>"; };
 		A52329031B8278C400D00DD6 /* config */ = {isa = PBXFileReference; lastKnownFileType = folder; path = config; sourceTree = "<group>"; };
 		A52329061B827D1900D00DD6 /* media */ = {isa = PBXFileReference; lastKnownFileType = folder; name = media; path = ../media; sourceTree = "<group>"; };
 		A5E2AE941B7D4A1800DE53DD /* rt.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = rt.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -73,20 +73,21 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		5C3C4FF01C9E135E00C5B47A /* rt */ = {
+		6EC562B01CA1E0C900321FA8 /* rt */ = {
 			isa = PBXGroup;
 			children = (
-				5C3C4FF11C9E135E00C5B47A /* environment.cpp */,
-				5C3C4FF21C9E135E00C5B47A /* kdtree.cpp */,
-				5C3C4FF31C9E135E00C5B47A /* raytrace.cpp */,
+				6EC562B11CA1E0C900321FA8 /* environment.cpp */,
+				6EC562B21CA1E0C900321FA8 /* kdtree.cpp */,
+				6EC562B31CA1E0C900321FA8 /* raytrace.cpp */,
 			);
 			name = rt;
-			path = "../../../source-ext/rt";
+			path = "../../source-ext/rt";
 			sourceTree = "<group>";
 		};
 		A5E2AE8B1B7D4A1800DE53DD = {
 			isa = PBXGroup;
 			children = (
+				6EC562B01CA1E0C900321FA8 /* rt */,
 				5C3C4FEA1C9E135700C5B47A /* et-static-mac.xcodeproj */,
 				A52329061B827D1900D00DD6 /* media */,
 				A52329031B8278C400D00DD6 /* config */,
@@ -107,7 +108,6 @@
 		A5E2AE961B7D4A1800DE53DD /* rt */ = {
 			isa = PBXGroup;
 			children = (
-				5C3C4FF01C9E135E00C5B47A /* rt */,
 				A5E2AEBA1B7D4A7700DE53DD /* main.cpp */,
 				A5E2AEBB1B7D4A7700DE53DD /* maincontroller.cpp */,
 				A5E2AEBC1B7D4A7700DE53DD /* maincontroller.hpp */,
@@ -222,9 +222,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				A5E2AEBE1B7D4A7700DE53DD /* maincontroller.cpp in Sources */,
-				5C3C4FF61C9E135E00C5B47A /* raytrace.cpp in Sources */,
-				5C3C4FF41C9E135E00C5B47A /* environment.cpp in Sources */,
-				5C3C4FF51C9E135E00C5B47A /* kdtree.cpp in Sources */,
+				6EC562B61CA1E0C900321FA8 /* raytrace.cpp in Sources */,
+				6EC562B41CA1E0C900321FA8 /* environment.cpp in Sources */,
+				6EC562B51CA1E0C900321FA8 /* kdtree.cpp in Sources */,
 				A5E2AEBD1B7D4A7700DE53DD /* main.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

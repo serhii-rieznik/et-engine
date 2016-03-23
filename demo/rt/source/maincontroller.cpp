@@ -17,6 +17,7 @@ void MainController::setApplicationParameters(et::ApplicationParameters& p)
 
 void MainController::setRenderContextParameters(et::RenderContextParameters& p)
 {
+    p.enableHighResolutionContext = true;
 	p.multisamplingQuality = MultisamplingQuality::None;
 	p.contextSize = 4 * et::currentScreen().frame.size() / 5;
     p.enableHighResolutionContext = true;
@@ -74,18 +75,10 @@ void MainController::applicationDidLoad(et::RenderContext* rc)
 			ET_ASSERT(!isnan(_textureData[pos].y));
 			ET_ASSERT(!isnan(_textureData[pos].z));
 			ET_ASSERT(!isnan(_textureData[pos].w));
-			
 		}
 	});
 	
-	auto textureName = application().resolveFileName("background.hdr");
-	auto tex = loadTexture(textureName);
-	_rt.setEnvironmentSampler(rt::EnvironmentEquirectangularMapSampler::Pointer::create(tex, rt::float4(1.0f)));
-	
-	_rt.renderFinished.connect([this]()
-	{
-
-	});
+	_rt.setEnvironmentSampler(rt::EnvironmentColorSampler::Pointer::create(rt::float4(0.0f)));
 	
 	Input::instance().keyPressed.connect([this](size_t key)
 	{
