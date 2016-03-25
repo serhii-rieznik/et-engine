@@ -76,6 +76,9 @@ template <typename ArgType>
 template <typename ReceiverType>
 inline void Event1<ArgType>::connect(ReceiverType* receiver, void (ReceiverType::*receiverMethod)(ArgType))
 {
+	static_assert(std::is_base_of<EventReceiver, ReceiverType>::value, 
+		"Receiver object should be derived from et::EventReceiver");
+
 	for (auto& connection : _connections)
 	{
 		if (connection->receiver() == receiver)

@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <type_traits>
 #include <et/app/invocation.h>
 
 namespace et
