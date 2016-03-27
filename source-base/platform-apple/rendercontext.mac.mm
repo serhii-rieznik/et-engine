@@ -635,13 +635,10 @@ CVReturn cvDisplayLinkOutputCallback(CVDisplayLinkRef, const CVTimeStamp*, const
 
 - (void)windowWillClose:(NSNotification*)notification
 {
-	@synchronized(self)
-	{
-		(void)notification;
-		applicationNotifier.notifyStopped();
-		rcPrivate->stop();
-		applicationNotifier.notifyTerminated();
-	}
+	(void)notification;
+	applicationNotifier.notifyStopped();
+	rcPrivate->stop();
+	applicationNotifier.notifyTerminated();
 }
 
 @end

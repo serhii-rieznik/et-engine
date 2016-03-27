@@ -71,6 +71,8 @@ namespace et
 		using size_type = size_t;
 		using value_type = T;
 		using pointer = T*;
+		using reference = T&;
+		using const_reference = const T&;
 
 		SharedBlockAllocatorSTDProxy()
 		{

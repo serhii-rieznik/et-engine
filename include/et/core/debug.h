@@ -75,7 +75,6 @@
 
 #define ET_DENY_COPY(t)										private:\
 																t(const t&) = delete;\
-																t(t&&) = delete;\
 																t& operator = (const t&) = delete;
 																	
 #define ET_COMPOSE_UINT32(A, B, C, D)					(D | (C << 8) | (B << 16) | (A << 24))
