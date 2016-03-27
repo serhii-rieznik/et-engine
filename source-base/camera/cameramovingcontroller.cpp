@@ -15,15 +15,11 @@ CameraMovingController::CameraMovingController(Camera& cam, bool connectInput) :
 	camera().lockUpVector(unitY);
 	
 	_positionAnimator.valueUpdated.connect([this](const vec3& p)
-	{
-		camera().setPosition(p);
-	});
-	
+		{ camera().setPosition(p); });
+
 	_directionAnimator.valueUpdated.connect([this](const vec2& p)
-	{
-		camera().setDirection(fromSpherical(p.y, p.x));
-	});
-	
+		{ camera().setDirection(fromSpherical(p.y, p.x)); });
+
 	_gestures.drag.connect([this](const GesturesRecognizer::DragGesture& drag)
 	{
 		if (pointerEventsEnabled() && (drag.pointerType == PointerType_General))
@@ -38,7 +34,6 @@ CameraMovingController::CameraMovingController(Camera& cam, bool connectInput) :
 void CameraMovingController::startUpdates()
 {
 	CameraController::startUpdates();
-	synchronize(camera());
 	_directionAnimator.run();
 	_positionAnimator.run();
 }

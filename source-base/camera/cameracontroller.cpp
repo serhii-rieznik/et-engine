@@ -15,8 +15,8 @@ CameraController::CameraController(Camera& cam, bool connectInput) :
 {
 	if (connectInput)
 	{
-		setKeyboardEventsEnabled(true);
-		setPointerEventsEnabled(true);
+		connectPointerEvents();
+		connectKeyboardEvents();
 	}
 	
 	_updateTimer.expired.connect([this](NotifyTimer* timer)
@@ -44,38 +44,38 @@ void CameraController::cancelUpdates()
 
 void CameraController::setPointerEventsEnabled(bool enable)
 {
-	if (_pointerEventsEnabled == enable) return;
-	
 	_pointerEventsEnabled = enable;
-	if (_pointerEventsEnabled)
-	{
-		input().pointerPressed.connect(this, &CameraController::onPointerPressed);
-		input().pointerMoved.connect(this, &CameraController::onPointerMoved);
-		input().pointerReleased.connect(this, &CameraController::onPointerCancelled);
-		input().pointerCancelled.connect(this, &CameraController::onPointerCancelled);
-	}
-	else
-	{
-		input().pointerPressed.disconnect(this);
-		input().pointerMoved.disconnect(this);
-		input().pointerReleased.disconnect(this);
-		input().pointerCancelled.disconnect(this);
-	}
 }
 
 void CameraController::setKeyboardEventsEnabled(bool enable)
 {
-	if (_keyboardEventsEnabled == enable) return;
-	
 	_keyboardEventsEnabled = enable;
-	if (_keyboardEventsEnabled)
-	{
-		input().keyPressed.connect(this, &CameraController::onKeyPressed);
-		input().keyReleased.connect(this, &CameraController::onKeyReleased);
-	}
-	else
-	{
-		input().keyPressed.disconnect(this);
-		input().keyReleased.disconnect(this);
-	}
+}
+
+void CameraController::connectPointerEvents()
+{
+	input().pointerPressed.connect(this, &CameraController::onPointerPressed);
+	input().pointerMoved.connect(this, &CameraController::onPointerMoved);
+	input().pointerReleased.connect(this, &CameraController::onPointerCancelled);
+	input().pointerCancelled.connect(this, &CameraController::onPointerCancelled);
+}
+
+void CameraController::disconnectPointerEvents()
+{
+	input().pointerPressed.disconnect(this);
+	input().pointerMoved.disconnect(this);
+	input().pointerReleased.disconnect(this);
+	input().pointerCancelled.disconnect(this);
+}
+
+void CameraController::connectKeyboardEvents()
+{
+	input().keyPressed.connect(this, &CameraController::onKeyPressed);
+	input().keyReleased.connect(this, &CameraController::onKeyReleased);
+}
+
+void CameraController::disconnectKeyboardEvents()
+{
+	input().keyPressed.disconnect(this);
+	input().keyReleased.disconnect(this);
 }

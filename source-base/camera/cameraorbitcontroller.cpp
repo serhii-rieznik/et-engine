@@ -15,11 +15,10 @@ CameraOrbitController::CameraOrbitController(Camera& cam, bool connectInput) :
 	camera().lockUpVector(unitY);
 	
 	_anglesDistanceAnimator.valueUpdated.connect([this](const vec3& p)
-	{
-		vec3 pos = fromSpherical(p.y, p.x) * p.z;
-		camera().lookAt(pos, _targetPoint);
-	});
-	
+		{ _shouldRebuildMatrix = true; });
+	_anglesDistanceAnimator.valueUpdated.connect([this](const vec3& p)
+		{ _shouldRebuildMatrix = true; });
+
 	_gestures.drag.connect([this](const GesturesRecognizer::DragGesture& drag)
 	{
 		if (drag.pointerType == PointerType_General)
@@ -51,14 +50,15 @@ CameraOrbitController::CameraOrbitController(Camera& cam, bool connectInput) :
 void CameraOrbitController::startUpdates()
 {
 	CameraController::startUpdates();
-	synchronize(camera());
 	_anglesDistanceAnimator.run();
+	_targetPoint.run();
 }
 
 void CameraOrbitController::cancelUpdates()
 {
 	CameraController::cancelUpdates();
 	_anglesDistanceAnimator.cancelUpdates();
+	_targetPoint.cancelInterpolation();
 }
 
 void CameraOrbitController::onKeyPressed(size_t key)
@@ -98,6 +98,14 @@ void CameraOrbitController::onPointerScrolled(PointerInputInfo info)
 
 void CameraOrbitController::update(float)
 {
+	if (_shouldRebuildMatrix)
+	{
+		const auto& a = _anglesDistanceAnimator.value();
+		const auto& t = _targetPoint.value();
+		camera().lookAt(t + fromSpherical(a.y, a.x) * a.z, t);
+		_shouldRebuildMatrix = false;
+	}
+
 	float directional = 0.0f;
 	if (_pressedKeys.count(ET_KEY_W) && (_pressedKeys[ET_KEY_W] != 0))
 		directional += 1.0f;
@@ -128,6 +136,7 @@ void CameraOrbitController::setMovementSpeed(const vec3& speed)
 void CameraOrbitController::setIntepolationRate(float rate)
 {
 	_anglesDistanceAnimator.setRate(rate);
+	_targetPoint.setRate(rate);
 }
 
 void CameraOrbitController::validateCameraAngles(vec2& angles)
@@ -137,12 +146,11 @@ void CameraOrbitController::validateCameraAngles(vec2& angles)
 
 void CameraOrbitController::setTargetPoint(const vec3& tp)
 {
-	_targetPoint = tp;
+	_targetPoint.setTargetValue(tp);
 }
 
 void CameraOrbitController::synchronize(const Camera& cam)
 {
-	vec3 sc = toSpherical(cam.position() - _targetPoint);
-	_anglesDistanceAnimator.setValue(sc);
-	_anglesDistanceAnimator.setTargetValue(sc);
+	_anglesDistanceAnimator.setTargetValue(toSpherical(cam.position() - _targetPoint.targetValue()));
+	_anglesDistanceAnimator.finishInterpolation();
 }

@@ -29,7 +29,12 @@ namespace et
 		
 		void setPointerEventsEnabled(bool);
 		void setKeyboardEventsEnabled(bool);
-		
+
+		void connectPointerEvents();
+		void disconnectPointerEvents();
+		void connectKeyboardEvents();
+		void disconnectKeyboardEvents();
+
 	public:
 		virtual void startUpdates();
 		virtual void cancelUpdates();
@@ -57,7 +62,7 @@ namespace et
 		Camera& _camera;
 		NotifyTimer _updateTimer;
 		float _lastUpdateTime = 0.0f;
-		bool _pointerEventsEnabled = false;
-		bool _keyboardEventsEnabled = false;
+		bool _pointerEventsEnabled = true;
+		bool _keyboardEventsEnabled = true;
 	};
 }
