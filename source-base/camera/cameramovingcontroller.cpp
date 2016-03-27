@@ -10,7 +10,7 @@
 using namespace et;
 
 CameraMovingController::CameraMovingController(Camera& cam, bool connectInput) :
-	CameraController(cam, connectInput)
+	CameraController(cam, connectInput), _gestures(false)
 {
 	camera().lockUpVector(unitY);
 	
