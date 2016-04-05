@@ -12,8 +12,6 @@
 #include <et/app/application.h>
 #include <et/camera/camera.h>
 
-#define USE_ITERATIVE_GATHER 1
-
 namespace et
 {
 	
@@ -30,56 +28,6 @@ namespace
 		RenderNormals,
 		RenderDiffuse,
 		RenderTriangle
-	};
-	
-	enum class RayClass : size_t
-	{
-		Debug,
-		Diffuse,
-		Reflected,
-		Refracted,
-	};
-
-	struct ET_ALIGNED(16) FastTraverseStack
-	{
-	public:
-		enum : size_t
-		{
-			MaxElements = 64,
-			MaxElementsPlusOne = MaxElements + 1,
-		};
-		
-	public:
-		void emplace(const rt::float4& a, const rt::float4& m)
-		{
-			ET_ASSERT(_size < MaxElements);
-			add[_size] = a;
-			mul[_size] = m;
-			++_size;
-		}
-		
-		bool empty() const
-			{ return _size == 0; }
-		
-		bool hasSomething() const
-			{ return _size > 0; }
-		
-		const rt::float4& topMul() const
-			{ ET_ASSERT(_size < MaxElementsPlusOne); return mul[_size - 1]; }
-		
-		const rt::float4& topAdd() const
-			{ ET_ASSERT(_size < MaxElementsPlusOne); return add[_size - 1]; }
-		
-		void pop()
-			{ ET_ASSERT(_size > 0); --_size; }
-		
-		size_t size() const
-			{ return _size; }
-		
-	private:
-		rt::float4 add[MaxElements];
-		rt::float4 mul[MaxElements];
-		size_t _size = 0;
 	};
 }
 	
@@ -101,11 +49,7 @@ namespace
 		void estimateRegionsOrder();
 
 		vec4 raytracePixel(const vec2i&, size_t samples, size_t& bounces);
-
-		rt::float4 gatherBouncesIterative(const rt::Ray&, size_t depth, size_t& maxDepth);
 		
-		rt::float4 sampleEnvironment(const rt::float4& direction);
-
 		rt::Region getNextRegion();
 		
 		void renderSpacePartitioning();
@@ -117,22 +61,20 @@ namespace
 		
 		void fillRegionWithColor(const rt::Region&, const vec4& color);
 		void renderTriangle(const rt::Triangle&);
-		
-		RayClass classifyRay(rt::float4& hitNormal, const rt::Material& hitMaterial,
-			const rt::float4& inDirection, rt::float4& direction, rt::float4& output);
-		
+				
 	public:
 		Raytrace* owner = nullptr;
 		Raytrace::Options options;
 		KDTree kdTree;
 		rt::EnvironmentSampler::Pointer sampler;
+        rt::Integrator::Pointer integrator;
 		Camera camera;
 		vec2i viewportSize = vec2i(0);
 		DebugRenderMode debugMode = DebugRenderMode::RenderNormals;
+        rt::Material::Collection materials;
 
 		std::vector<std::thread> workerThreads;
 		std::atomic<bool> running;
-		std::vector<rt::Material> materials;
 		std::vector<rt::Region> regions;
 		std::mutex regionsLock;
 		std::atomic<size_t> threadCounter;
@@ -204,6 +146,11 @@ void Raytrace::output(const vec2i& pos, const vec4& color)
 void Raytrace::setEnvironmentSampler(rt::EnvironmentSampler::Pointer sampler)
 {
 	_private->sampler = sampler;
+}
+
+void Raytrace::setIntegrator(rt::Integrator::Pointer integrator)
+{
+    _private->integrator = integrator;
 }
 
 /*
@@ -301,7 +248,7 @@ void RaytracePrivate::buildMaterialAndTriangles(s3d::Scene::Pointer scene)
 		}
 	}
 	
-	kdTree.build(triangles, options.maxKDTreeDepth, options.kdTreeSplits);
+    kdTree.build(triangles, options.maxKDTreeDepth);
 	
 	auto stats = kdTree.nodesStatistics();
 	log::info("KD-Tree statistics:\n\t%llu nodes\n\t%llu leaf nodes\n\t%llu empty leaf nodes"
@@ -451,164 +398,31 @@ void RaytracePrivate::threadFunction()
 vec4 RaytracePrivate::raytracePixel(const vec2i& pixel, size_t samples, size_t& bounces)
 {
 	ET_ASSERT(samples > 0);
+    
+    if (integrator.invalid())
+    {
+        ET_FAIL("Integrator is not set");
+        return vec4(0.0f);
+    }
 	
 	vec2 pixelSize = vec2(1.0f) / vector2ToFloat(viewportSize);
 	vec2 pixelBase = 2.0f * (vector2ToFloat(pixel) * pixelSize) - vec2(1.0f);
 
-#if (USE_ITERATIVE_GATHER)
-	rt::float4 result = gatherBouncesIterative(camera.castRay(pixelBase), 0, bounces);
+    rt::float4 result = integrator->gather(camera.castRay(pixelBase), 0, bounces, kdTree, sampler, materials);
 	for (size_t m = 1; m < samples; ++m)
 	{
 		vec2 jitter = pixelSize * vec2(2.0f * rt::fastRandomFloat() - 1.0f, 2.0f * rt::fastRandomFloat() - 1.0f);
-		result += gatherBouncesIterative(camera.castRay(pixelBase + jitter), 0, bounces);
+		result += integrator->gather(camera.castRay(pixelBase + jitter), 0, bounces, kdTree, sampler, materials);
 	}
-#else
-	rt::float4 result = gatherBouncesRecursive(camera.castRay(pixelBase), 0, bounces);
-	for (int m = 1; m < samples; ++m)
-	{
-		vec2 jitter = pixelSize * vec2(2.0f * fastRandomFloat() - 1.0f, 2.0f * fastRandomFloat() - 1.0f);
-		result += gatherBouncesRecursive(camera.castRay(pixelBase + jitter), 0, bounces);
-	}
-#endif
-
 	vec4 output = (result / static_cast<float>(samples)).toVec4();
 	output.w = 1.0f;
 	
 	return output;
 }
 
-inline void computeDiffuseVector(const rt::float4& indidence, const rt::float4& normal,
-	rt::float4& direction)
-{
-	direction = normal;
-}
-
-inline void computeReflectionVector(const rt::float4& indidence, const rt::float4& normal,
-	rt::float4& direction)
-{
-	direction = rt::reflect(indidence, normal);
-	if (direction.dot(normal) <= rt::Constants::epsilon)
-		direction = rt::reflect(direction, normal);
-}
-
-inline void computeRefractionVector(const rt::float4& incidence, const rt::float4& normal,
-	float k, float eta, rt::float4& direction)
-{
-	direction = incidence * eta - normal * (eta * normal.dot(incidence) + std::sqrt(k));
-	if (direction.dot(normal) >= rt::Constants::minusEpsilon)
-		direction = rt::reflect(direction, normal);
-}
-
-RayClass RaytracePrivate::classifyRay(rt::float4& normal, const rt::Material& mat,
-	const rt::float4& inDirection, rt::float4& direction, rt::float4& output)
-{
-	if (mat.ior >= rt::Constants::onePlusEpsilon)
-	{
-		float eta = 1.001f / mat.ior;
-
-		if (normal.dot(inDirection) >= 0.0)
-		{
-			normal *= -1.0f;
-			eta = 1.0f / eta;
-		}
-
-		float k = rt::computeRefractiveCoefficient(inDirection, normal, eta);
-		if (k >= rt::Constants::epsilon) // refract
-		{
-			float fresnel = rt::computeFresnelTerm(inDirection, normal, eta);
-			if (rt::fastRandomFloat() >= fresnel)
-			{
-				// refract
-				output = mat.diffuse;
-				computeRefractionVector(inDirection, normal, k, eta, direction);
-				return RayClass::Refracted;
-			}
-			else
-			{
-				output = mat.specular;
-				computeReflectionVector(inDirection, normal, direction);
-				return RayClass::Reflected;
-			}
-		}
-		else // reflect due to total internal reflection
-		{
-			output = mat.specular;
-			computeReflectionVector(inDirection, normal, direction);
-			return RayClass::Reflected;
-		}
-	}
-	
-	if (rt::fastRandomFloat() >= mat.roughness)
-	{
-		// compute specular reflection
-		output = mat.specular;
-		computeReflectionVector(inDirection, normal, direction);
-		return RayClass::Reflected;
-	}
-	
-	// compute diffuse reflection
-	output = mat.diffuse;
-	computeDiffuseVector(inDirection, normal, direction);
-	return RayClass::Diffuse;
-}
-
-rt::float4 RaytracePrivate::gatherBouncesIterative(const rt::Ray& inRay, size_t depth, size_t& maxDepth)
-{
-	auto currentRay = inRay;
-	rt::float4 materialColor;
-	
-	FastTraverseStack bounces;
-	while (bounces.size() < FastTraverseStack::MaxElements)
-	{
-		KDTree::TraverseResult traverse = kdTree.traverse(currentRay);
-		if (traverse.triangleIndex == InvalidIndex)
-		{
-			bounces.emplace(sampleEnvironment(currentRay.direction), rt::float4(0.0f));
-			break;
-		}
-		const auto& tri = kdTree.triangleAtIndex(traverse.triangleIndex);
-		const auto& mat = materials[tri.materialIndex];
-		
-		rt::float4 clearN = tri.interpolatedNormal(traverse.intersectionPointBarycentric);
-		rt::float4 roughN = rt::randomVectorOnHemisphere(clearN, mat.roughness);
-		rt::float4 directionScale = clearN.dotVector(roughN);
-		classifyRay(roughN, mat, currentRay.direction, currentRay.direction, materialColor);
-		bounces.emplace(mat.emissive, materialColor * directionScale);
-		currentRay.origin = traverse.intersectionPoint + currentRay.direction * rt::Constants::epsilon;
-	}
-	maxDepth = bounces.size();
-
-	rt::float4 result(0.0f);
-	do
-	{
-		result *= bounces.topMul();
-		result += bounces.topAdd();
-		bounces.pop();
-	}
-	while (bounces.hasSomething());
-
-	return result;
-}
-
-
-rt::float4 RaytracePrivate::sampleEnvironment(const rt::float4& direction)
-{
-	return sampler.valid() ? sampler->sampleInDirection(direction) : vec4simd(0.0f);
-	/*
-	const rt::float4 ambient(40.0f / 255.0f, 58.0f / 255.0f, 72.0f / 255.0f, 1.0f);
-	const rt::float4 sun(249.0f / 255.0f, 243.0f / 255.0f, 179.0f / 255.0f, 1.0f);
-	const rt::float4 atmosphere(173.0f / 255.0f, 181.0f / 255.0f, 185.0f / 255.0f, 1.0f);
-	rt::float4 sunDirection = rt::float4(0.0f, 1.0f, 0.0f, 0.0f);
-	sunDirection.normalize();
-	float t = std::max(0.0f, direction.dot(sunDirection));
-	float s = 5.0f * pow(t, 32.0f) + 8.0f * pow(t, 256.0f);
-	return ambient + atmosphere * std::sqrt(t) + sun * s;
-	// */
-}
-
 void RaytracePrivate::estimateRegionsOrder()
 {
-	const float maxPossibleBounces = float(FastTraverseStack::MaxElements);
+    const float maxPossibleBounces = float(rt::PathTraceIntegrator::MaxTraverseDepth);
 	const size_t maxSamples = 5;
 	
 	const vec2i sx[maxSamples] =

@@ -51,7 +51,7 @@ namespace et
 	public:
 		~KDTree();
 		
-		void build(const rt::TriangleList&, size_t maxDepth, int splits);
+        void build(const rt::TriangleList&, size_t maxDepth);
 		Stats nodesStatistics() const;
 		void cleanUp();
 		
@@ -88,7 +88,51 @@ namespace et
 		
 		size_t _maxDepth = 0;
 		size_t _maxBuildDepth = 0;
-		int _spaceSplitSize = 32;
 		BuildMode _buildMode = BuildMode::SortedArrays;
 	};
+    
+    template <size_t MaxElements, class T>
+    struct ET_ALIGNED(16) FastStack
+    {
+    public:
+        enum : size_t
+        {
+            MaxElementsPlusOne = MaxElements + 1,
+        };
+        
+    public:
+        template <typename ... Args>
+        void emplace(Args&&... a)
+        {
+            ET_ASSERT(_size < MaxElements);
+            _elements[_size] = T(std::forward<Args>(a)...);
+            ++_size;
+        }
+        
+        void push(const T& value)
+        {
+            ET_ASSERT(_size < MaxElements);
+            _elements[_size] = value;
+            ++_size;
+        }
+        
+        bool empty() const
+            { return _size == 0; }
+        
+        bool hasSomething() const
+            { return _size > 0; }
+        
+        const T& top() const
+            { ET_ASSERT(_size < MaxElementsPlusOne); return _elements[_size - 1]; }
+        
+        void pop()
+            { ET_ASSERT(_size > 0); --_size; }
+        
+        size_t size() const
+            { return _size; }
+        
+    private:
+        T _elements[MaxElements];
+        size_t _size = 0;
+    };
 }

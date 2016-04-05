@@ -13,49 +13,12 @@ namespace
 {
 	const size_t DepthLimit = 31;
 	const size_t MinTrianglesToSubdivide = 16;
-	const size_t MaxTraverseStack = DepthLimit + 1;
 	
 	struct Split
 	{
 		vec3 cost = vec3(0.0f);
 		int index = 0;
 		int axis = 0;
-	};
-	
-	struct FastTraverseStack
-	{
-	public:
-		FastTraverseStack()
-		{
-			memset(nodes, 0, sizeof(nodes));
-			memset(times, 0, sizeof(times));
-		}
-		
-		void emplace(rt::index nodeIndex, float farTime)
-		{
-			ET_ASSERT(size < MaxTraverseStack);
-			nodes[size] = nodeIndex;
-			times[size] = farTime;
-			++size;
-		}
-		
-		bool empty() const
-			{ return size == 0; }
-		
-		rt::index topNodeIndex() const
-			{ ET_ASSERT(size < MaxTraverseStack + 1); return nodes[size - 1]; }
-		
-		const float topTime() const
-			{ ET_ASSERT(size < MaxTraverseStack + 1); return times[size - 1]; }
-		
-		void pop()
-			{ ET_ASSERT(size > 0); --size; }
-		
-	private:
-		rt::index nodes[MaxTraverseStack];
-		float times[MaxTraverseStack];
-		
-		size_t size = 0;
 	};
 }
 
@@ -98,13 +61,12 @@ KDTree::Node KDTree::buildRootNode()
 	return result;
 }
 
-void KDTree::build(const rt::TriangleList& triangles, size_t maxDepth, int splits)
+void KDTree::build(const rt::TriangleList& triangles, size_t maxDepth)
 {
 	cleanUp();
 	
 	_maxBuildDepth = 0;
 	_triangles = triangles;
-	_spaceSplitSize = splits;
 	
 	_maxDepth = std::min(DepthLimit, maxDepth);
 	_nodes.reserve(maxDepth * maxDepth);
@@ -210,7 +172,6 @@ void KDTree::cleanUp()
 {
 	_nodes.clear();
 	_triangles.clear();
-	_spaceSplitSize = 0;
 }
 
 void KDTree::splitNodeUsingSortedArray(size_t nodeIndex, size_t depth)
@@ -411,6 +372,16 @@ const rt::Triangle& KDTree::triangleAtIndex(size_t i) const
 	return _triangles.at(i);
 }
 
+struct KDTreeSearchNode
+{
+    rt::index index;
+    float time;
+    
+    KDTreeSearchNode() = default;
+    KDTreeSearchNode(rt::index i, float t) :
+        index(i), time(t) { }
+};
+
 KDTree::TraverseResult KDTree::traverse(const rt::Ray& r)
 {
 	KDTree::TraverseResult result;
@@ -434,7 +405,7 @@ KDTree::TraverseResult KDTree::traverse(const rt::Ray& r)
 	r.origin.loadToFloats(origin);
 	r.direction.loadToFloats(direction);
 	
-	FastTraverseStack traverseStack;
+	FastStack<DepthLimit + 1, KDTreeSearchNode> traverseStack;
 	for (;;)
 	{
 		while (_nodes[currentNode].axis >= 0)
@@ -445,9 +416,8 @@ KDTree::TraverseResult KDTree::traverse(const rt::Ray& r)
 			int side = rt::floatIsNegative(direction[axis]);
 			
 			float tSplit = (node.distance - origin[axis]) / direction[axis];
-            float tFarSplit = tSplit - tNear;
             float tNearSplit = tSplit - tFar;
-            
+            float tFarSplit = tSplit - tNear;
             if (rt::floatIsNegative(tFarSplit))
 			{
 				currentNode = node.children[1 - side];
@@ -478,9 +448,9 @@ KDTree::TraverseResult KDTree::traverse(const rt::Ray& r)
 			return result;
 		}
 		
-		currentNode = traverseStack.topNodeIndex();
+		currentNode = traverseStack.top().index;
         tNear = tFar - rt::Constants::epsilon;
-		tFar = traverseStack.topTime() + rt::Constants::epsilon;
+		tFar = traverseStack.top().time + rt::Constants::epsilon;
 		
 		traverseStack.pop();
 	}

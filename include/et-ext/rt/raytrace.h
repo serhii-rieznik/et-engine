@@ -8,6 +8,7 @@
 #pragma once
 
 #include <et-ext/rt/kdtree.h>
+#include <et-ext/rt/integrator.h>
 #include <et-ext/rt/environment.h>
 
 namespace et
@@ -23,7 +24,6 @@ namespace et
 			size_t raysPerPixel = 32;
 			size_t maxKDTreeDepth = 0;
             size_t renderRegionSize = 32;
-			int kdTreeSplits = 4;
 			bool debugRendering = false;
 			bool renderKDTree = false;
 		};
@@ -36,6 +36,7 @@ namespace et
 		void setOutputMethod(F func)
 			{ _outputMethod = func; }
 		
+        void setIntegrator(rt::Integrator::Pointer);
 		void setEnvironmentSampler(rt::EnvironmentSampler::Pointer);
 		
 		void output(const vec2i&, const vec4&);

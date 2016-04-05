@@ -17,6 +17,9 @@ EnvironmentEquirectangularMapSampler::EnvironmentEquirectangularMapSampler(
 	{
 		ET_FAIL("Only RGBA32F textures are supported at this time")
 	}
+    
+    _rawData = reinterpret_cast<vec4*>(_data->data.binary());
+    _textureSize = _data->size;
 }
 
 float4 EnvironmentEquirectangularMapSampler::sampleTexture(vec2i texCoord)
@@ -28,8 +31,7 @@ float4 EnvironmentEquirectangularMapSampler::sampleTexture(vec2i texCoord)
 		while (texCoord.y < 0) texCoord.y += _data->size.y;
 	}
 	
-	const vec4* rawData = reinterpret_cast<const vec4*>(_data->data.binary());
-	return float4(rawData[texCoord.x + texCoord.y * _data->size.x]);
+	return float4(_rawData[texCoord.x + texCoord.y * _textureSize.x]);
 }
 
 float4 EnvironmentEquirectangularMapSampler::sampleInDirection(const float4& r)
@@ -40,14 +42,15 @@ float4 EnvironmentEquirectangularMapSampler::sampleInDirection(const float4& r)
 	vec2 tc(phi * _data->size.x, theta * _data->size.y);
 	vec2i baseTexCoord(static_cast<int>(tc.x), static_cast<int>(tc.y));
 	
-	float4 c00 = sampleTexture(baseTexCoord); ++baseTexCoord.x;
-	float4 c10 = sampleTexture(baseTexCoord); ++baseTexCoord.y;
-	float4 c11 = sampleTexture(baseTexCoord); --baseTexCoord.x;
-	float4 c01 = sampleTexture(baseTexCoord);
+    float4 c00 = sampleTexture(baseTexCoord); ++baseTexCoord.x;
+    float4 c01 = sampleTexture(baseTexCoord); ++baseTexCoord.y;
+    float4 c11 = sampleTexture(baseTexCoord); --baseTexCoord.x;
+    float4 c10 = sampleTexture(baseTexCoord);
 	
-	vec2 dudv(tc.x - std::floor(tc.x), tc.y - std::floor(tc.y));
-	float4 cx1 = c00 * (1.0f - dudv.x) + c01 * dudv.x;
-	float4 cx2 = c10 * (1.0f - dudv.x) + c11 * dudv.x;
+    float dx = tc.x - std::floor(tc.x);
+    float dy = tc.y - std::floor(tc.y);
+    float4 cx1 = c00 * (1.0f - dx) + c01 * dx;
+	float4 cx2 = c10 * (1.0f - dx) + c11 * dx;
 	
-	return _scale * (cx1 * (1.0f - dudv.y) + cx2 * dudv.y);
+    return _scale * (cx1 * (1.0f - dy) + cx2 * dy);
 }

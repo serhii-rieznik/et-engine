@@ -8,9 +8,10 @@
 
 /* Begin PBXBuildFile section */
 		5C3C4FF71C9E13A700C5B47A /* libet-static-mac.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5C3C4FEF1C9E135700C5B47A /* libet-static-mac.a */; };
-		6EC562B41CA1E0C900321FA8 /* environment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6EC562B11CA1E0C900321FA8 /* environment.cpp */; };
-		6EC562B51CA1E0C900321FA8 /* kdtree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6EC562B21CA1E0C900321FA8 /* kdtree.cpp */; };
-		6EC562B61CA1E0C900321FA8 /* raytrace.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6EC562B31CA1E0C900321FA8 /* raytrace.cpp */; };
+		6E225A771CB408D900AE27BD /* environment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6E225A731CB408D900AE27BD /* environment.cpp */; };
+		6E225A781CB408D900AE27BD /* integrator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6E225A741CB408D900AE27BD /* integrator.cpp */; };
+		6E225A791CB408D900AE27BD /* kdtree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6E225A751CB408D900AE27BD /* kdtree.cpp */; };
+		6E225A7A1CB408D900AE27BD /* raytrace.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6E225A761CB408D900AE27BD /* raytrace.cpp */; };
 		A52329041B8278C400D00DD6 /* config in Resources */ = {isa = PBXBuildFile; fileRef = A52329031B8278C400D00DD6 /* config */; };
 		A52329071B827D1900D00DD6 /* media in Resources */ = {isa = PBXBuildFile; fileRef = A52329061B827D1900D00DD6 /* media */; };
 		A5E2AEBD1B7D4A7700DE53DD /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5E2AEBA1B7D4A7700DE53DD /* main.cpp */; };
@@ -33,9 +34,15 @@
 
 /* Begin PBXFileReference section */
 		5C3C4FEA1C9E135700C5B47A /* et-static-mac.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "et-static-mac.xcodeproj"; path = "../../projects/et-static-mac.xcodeproj"; sourceTree = "<group>"; };
-		6EC562B11CA1E0C900321FA8 /* environment.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = environment.cpp; sourceTree = "<group>"; };
-		6EC562B21CA1E0C900321FA8 /* kdtree.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = kdtree.cpp; sourceTree = "<group>"; };
-		6EC562B31CA1E0C900321FA8 /* raytrace.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = raytrace.cpp; sourceTree = "<group>"; };
+		6E225A6D1CB408CD00AE27BD /* environment.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = environment.h; sourceTree = "<group>"; };
+		6E225A6E1CB408CD00AE27BD /* integrator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = integrator.h; sourceTree = "<group>"; };
+		6E225A6F1CB408CD00AE27BD /* kdtree.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = kdtree.h; sourceTree = "<group>"; };
+		6E225A701CB408CD00AE27BD /* raytrace.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = raytrace.h; sourceTree = "<group>"; };
+		6E225A711CB408CD00AE27BD /* raytraceobjects.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = raytraceobjects.h; sourceTree = "<group>"; };
+		6E225A731CB408D900AE27BD /* environment.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = environment.cpp; sourceTree = "<group>"; };
+		6E225A741CB408D900AE27BD /* integrator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = integrator.cpp; sourceTree = "<group>"; };
+		6E225A751CB408D900AE27BD /* kdtree.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = kdtree.cpp; sourceTree = "<group>"; };
+		6E225A761CB408D900AE27BD /* raytrace.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = raytrace.cpp; sourceTree = "<group>"; };
 		A52329031B8278C400D00DD6 /* config */ = {isa = PBXFileReference; lastKnownFileType = folder; path = config; sourceTree = "<group>"; };
 		A52329061B827D1900D00DD6 /* media */ = {isa = PBXFileReference; lastKnownFileType = folder; name = media; path = ../media; sourceTree = "<group>"; };
 		A5E2AE941B7D4A1800DE53DD /* rt.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = rt.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -73,12 +80,35 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		6EC562B01CA1E0C900321FA8 /* rt */ = {
+		6E225A6B1CB408C800AE27BD /* et-ext */ = {
 			isa = PBXGroup;
 			children = (
-				6EC562B11CA1E0C900321FA8 /* environment.cpp */,
-				6EC562B21CA1E0C900321FA8 /* kdtree.cpp */,
-				6EC562B31CA1E0C900321FA8 /* raytrace.cpp */,
+				6E225A721CB408D900AE27BD /* rt */,
+				6E225A6C1CB408CD00AE27BD /* rt */,
+			);
+			name = "et-ext";
+			sourceTree = "<group>";
+		};
+		6E225A6C1CB408CD00AE27BD /* rt */ = {
+			isa = PBXGroup;
+			children = (
+				6E225A6D1CB408CD00AE27BD /* environment.h */,
+				6E225A6E1CB408CD00AE27BD /* integrator.h */,
+				6E225A6F1CB408CD00AE27BD /* kdtree.h */,
+				6E225A701CB408CD00AE27BD /* raytrace.h */,
+				6E225A711CB408CD00AE27BD /* raytraceobjects.h */,
+			);
+			name = rt;
+			path = "../../include/et-ext/rt";
+			sourceTree = "<group>";
+		};
+		6E225A721CB408D900AE27BD /* rt */ = {
+			isa = PBXGroup;
+			children = (
+				6E225A731CB408D900AE27BD /* environment.cpp */,
+				6E225A741CB408D900AE27BD /* integrator.cpp */,
+				6E225A751CB408D900AE27BD /* kdtree.cpp */,
+				6E225A761CB408D900AE27BD /* raytrace.cpp */,
 			);
 			name = rt;
 			path = "../../source-ext/rt";
@@ -87,11 +117,11 @@
 		A5E2AE8B1B7D4A1800DE53DD = {
 			isa = PBXGroup;
 			children = (
-				6EC562B01CA1E0C900321FA8 /* rt */,
+				6E225A6B1CB408C800AE27BD /* et-ext */,
 				5C3C4FEA1C9E135700C5B47A /* et-static-mac.xcodeproj */,
 				A52329061B827D1900D00DD6 /* media */,
 				A52329031B8278C400D00DD6 /* config */,
-				A5E2AE961B7D4A1800DE53DD /* rt */,
+				A5E2AE961B7D4A1800DE53DD /* main */,
 				A5E2AE971B7D4A1800DE53DD /* Supporting Files */,
 				A5E2AE951B7D4A1800DE53DD /* Products */,
 			);
@@ -105,13 +135,14 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		A5E2AE961B7D4A1800DE53DD /* rt */ = {
+		A5E2AE961B7D4A1800DE53DD /* main */ = {
 			isa = PBXGroup;
 			children = (
 				A5E2AEBA1B7D4A7700DE53DD /* main.cpp */,
 				A5E2AEBB1B7D4A7700DE53DD /* maincontroller.cpp */,
 				A5E2AEBC1B7D4A7700DE53DD /* maincontroller.hpp */,
 			);
+			name = main;
 			path = rt;
 			sourceTree = "<group>";
 		};
@@ -221,10 +252,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6E225A7A1CB408D900AE27BD /* raytrace.cpp in Sources */,
 				A5E2AEBE1B7D4A7700DE53DD /* maincontroller.cpp in Sources */,
-				6EC562B61CA1E0C900321FA8 /* raytrace.cpp in Sources */,
-				6EC562B41CA1E0C900321FA8 /* environment.cpp in Sources */,
-				6EC562B51CA1E0C900321FA8 /* kdtree.cpp in Sources */,
+				6E225A771CB408D900AE27BD /* environment.cpp in Sources */,
+				6E225A791CB408D900AE27BD /* kdtree.cpp in Sources */,
+				6E225A781CB408D900AE27BD /* integrator.cpp in Sources */,
 				A5E2AEBD1B7D4A7700DE53DD /* main.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

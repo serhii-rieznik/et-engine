@@ -40,6 +40,8 @@ namespace et
 			float4 emissive;
 			float roughness = 0.0f;
 			float ior = 0.0f;
+            
+            using Collection = Vector<Material>;
 		};
 
 		struct ET_ALIGNED(16) Triangle
@@ -197,14 +199,14 @@ namespace et
 			return fres - 1.0f;
 		}
 
-		inline int floatIsNegative(float& a)
+		inline uint32_t floatIsNegative(float& a)
 		{
 			return reinterpret_cast<uint32_t&>(a) >> 31;
 		}
 		
-		inline bool floatIsPositive(float& a)
+		inline uint32_t floatIsPositive(float& a)
 		{
-			return (reinterpret_cast<uint32_t&>(a) >> 31) == 0;
+            return (~reinterpret_cast<uint32_t&>(a)) >> 31;
 		}
 		
 		inline bool rayTriangle(const Ray& ray, const Triangle* tri, float& distance, float4& barycentric)

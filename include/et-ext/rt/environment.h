@@ -56,6 +56,8 @@ namespace rt
 	private:
 		TextureDescription::Pointer _data;
 		float4 _scale = float4(1.0f);
+        vec2i _textureSize;
+        vec4* _rawData = nullptr;
 	};
 }
 }

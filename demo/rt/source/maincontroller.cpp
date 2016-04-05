@@ -61,7 +61,6 @@ void MainController::applicationDidLoad(et::RenderContext* rc)
 	rtOptions.renderRegionSize = static_cast<size_t>(_options.integerForKey("render-region-size", 32)->content);
 	rtOptions.debugRendering = _options.integerForKey("debug-rendering", 0ll)->content != 0;
 	rtOptions.renderKDTree = _options.integerForKey("render-kd-tree", 0ll)->content != 0;
-	rtOptions.kdTreeSplits = static_cast<int>(_options.integerForKey("kd-tree-splits", 4)->content);
 	_rt.setOptions(rtOptions);
 	
 	_rt.setOutputMethod([this](const vec2i& pixel, const vec4& color)
@@ -78,7 +77,22 @@ void MainController::applicationDidLoad(et::RenderContext* rc)
 		}
 	});
 	
-	_rt.setEnvironmentSampler(rt::EnvironmentColorSampler::Pointer::create(rt::float4(0.0f)));
+    // _rt.setIntegrator(rt::AmbientOcclusionIntegrator::Pointer::create());
+    _rt.setIntegrator(rt::PathTraceIntegrator::Pointer::create());
+    
+    auto envMap = _options.stringForKey("env-map")->content;
+    if (envMap.empty() == false)
+        envMap = application().resolveFileName(envMap);
+    
+    if (/* DISABLES CODE */ (false)) // && fileExists(envMap))
+    {
+        auto texture = loadTexture(envMap);
+        _rt.setEnvironmentSampler(rt::EnvironmentEquirectangularMapSampler::Pointer::create(texture, rt::float4(1.0f)));
+    }
+    else
+    {
+        _rt.setEnvironmentSampler(rt::EnvironmentColorSampler::Pointer::create(rt::float4(0.0f)));
+    }
 	
 	Input::instance().keyPressed.connect([this](size_t key)
 	{
