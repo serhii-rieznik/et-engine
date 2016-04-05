@@ -25,7 +25,7 @@ float4 AmbientOcclusionIntegrator::gather(const Ray& inRay, size_t depth, size_t
     float4 nextOrigin = hit0.intersectionPoint + nextDirection * Constants::epsilon;
     
     if (tree.traverse(Ray(nextOrigin, nextDirection)).triangleIndex == InvalidIndex)
-        return env->sampleInDirection(nextDirection);
+        return env->sampleInDirection(nextDirection) * nextDirection.dot(surfaceNormal);
     
     return float4(0.0f);
 }
@@ -58,9 +58,9 @@ float4 PathTraceIntegrator::gather(const Ray& inRay, size_t depth, size_t& maxDe
             break;
         }
         const auto& tri = tree.triangleAtIndex(traverse.triangleIndex);
-        const auto& mat = materials[tri.materialIndex];
-        
         float4 clearN = tri.interpolatedNormal(traverse.intersectionPointBarycentric);
+
+		const auto& mat = materials[tri.materialIndex];
         float4 roughN = randomVectorOnHemisphere(clearN, mat.roughness);
         float4 directionScale = clearN.dotVector(roughN);
         choseNewRayDirectionAndMaterial(roughN, mat, currentRay.direction, currentRay.direction, materialColor);

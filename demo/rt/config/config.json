@@ -1,18 +1,15 @@
 {
-	"model-name" : "media/cornellbox.obj",
-	"rays-per-pixel" : 8,
-	"camera-fov" : 32.5,
+	"model-name" : "media/CornellBox-Sphere.obj",
+	"env-map" : "none",
+	"rays-per-pixel" : 2048,
+	"camera-fov" : 42.0,
 	"camera-distance" : 3.0,
 	"camera-phi" : 90.0,
 	"camera-theta" : 0.0,
-	"camera-offset" : [0.0, 1.2, 0.0],
+	"camera-offset" : [0.0, 0.8, 0.0],
 	"camera-view-point" : [0.0, 0.8, 0.0],
     "render-region-size" : 64,
-	"kd-tree-max-depth" : 0,
+	"kd-tree-max-depth" : 64,
 	"render-kd-tree" : 0,
-	"debug-rendering" : 1,
-	
-	"------- deprecated-values -------" : "------- below -------",
-	
-	"kd-tree-splits" : 50
+	"debug-rendering" : 0
 }

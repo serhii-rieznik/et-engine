@@ -48,6 +48,7 @@ namespace et
 		{
 			float4 v[3];
 			float4 n[3];
+			float4 t[3];
 			float4 edge1to0;
 			float4 edge2to0;
 			float4 _invDenom;
@@ -110,6 +111,11 @@ namespace et
 			float4 maxVertex() const
 			{
 				return v[0].maxWith(v[1].maxWith(v[2]));
+			}
+
+			float4 interpolatedTexCoord(const float4& b) const
+			{
+				return t[0] * b.shuffle<0, 0, 0, 3>() + t[1] * b.shuffle<1, 1, 1, 3>() + t[2] * b.shuffle<2, 2, 2, 3>();
 			}
 		};
 		using TriangleList = std::vector<rt::Triangle, SharedBlockAllocatorSTDProxy<rt::Triangle>>;

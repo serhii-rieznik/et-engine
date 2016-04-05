@@ -77,14 +77,14 @@ void MainController::applicationDidLoad(et::RenderContext* rc)
 		}
 	});
 	
-    // _rt.setIntegrator(rt::AmbientOcclusionIntegrator::Pointer::create());
+    _rt.setIntegrator(rt::AmbientOcclusionIntegrator::Pointer::create());
     _rt.setIntegrator(rt::PathTraceIntegrator::Pointer::create());
     
     auto envMap = _options.stringForKey("env-map")->content;
     if (envMap.empty() == false)
         envMap = application().resolveFileName(envMap);
     
-    if (/* DISABLES CODE */ (false)) // && fileExists(envMap))
+    if (fileExists(envMap))
     {
         auto texture = loadTexture(envMap);
         _rt.setEnvironmentSampler(rt::EnvironmentEquirectangularMapSampler::Pointer::create(texture, rt::float4(1.0f)));
