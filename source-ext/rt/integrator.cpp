@@ -25,8 +25,11 @@ float4 AmbientOcclusionIntegrator::gather(const Ray& inRay, size_t depth, size_t
     float4 nextOrigin = hit0.intersectionPoint + nextDirection * Constants::epsilon;
     
     if (tree.traverse(Ray(nextOrigin, nextDirection)).triangleIndex == InvalidIndex)
+	{
+		++maxDepth;
         return env->sampleInDirection(nextDirection) * nextDirection.dot(surfaceNormal);
-    
+	}
+
     return float4(0.0f);
 }
     
@@ -35,8 +38,8 @@ float4 AmbientOcclusionIntegrator::gather(const Ray& inRay, size_t depth, size_t
  */
 struct ET_ALIGNED(16) Bounce
 {
-    rt::float4 add;
-    rt::float4 mul;
+    float4 add;
+    float4 mul;
     Bounce() = default;
     Bounce(const float4& a, const float4& m) :
         add(a), mul(m) { }
@@ -146,6 +149,48 @@ void PathTraceIntegrator::choseNewRayDirectionAndMaterial(float4& normal, const 
         direction = normal;
     }
 }
+
+/*
+ * Normals
+ */
+float4 NormalsIntegrator::gather(const Ray& inRay, size_t depth, size_t& maxDepth, KDTree& tree,
+	EnvironmentSampler::Pointer& env, const Material::Collection&)
+{
+	KDTree::TraverseResult hit0 = tree.traverse(inRay);
+	if (hit0.triangleIndex == InvalidIndex)
+		return env->sampleInDirection(inRay.direction);
+
+	const auto& tri = tree.triangleAtIndex(hit0.triangleIndex);
+	return tri.interpolatedNormal(hit0.intersectionPointBarycentric) * 0.5f + float4(0.5f);
+}
+
+/*
+ * Fresnel
+ */
+float4 FresnelIntegrator::gather(const Ray& inRay, size_t depth, size_t& maxDepth, KDTree& tree,
+	EnvironmentSampler::Pointer& env, const Material::Collection& materials)
+{
+	KDTree::TraverseResult hit0 = tree.traverse(inRay);
+	if (hit0.triangleIndex == InvalidIndex)
+		return env->sampleInDirection(inRay.direction);
+
+	++maxDepth;
+	const auto& tri = tree.triangleAtIndex(hit0.triangleIndex);
+	const auto& mat = materials[tri.materialIndex];
+	
+	float4 normal = tri.interpolatedNormal(hit0.intersectionPointBarycentric);
+	normal = randomVectorOnHemisphere(normal, mat.roughness);
+	
+	float eta = 1.0f / mat.ior;
+	float k = computeRefractiveCoefficient(inRay.direction, normal, eta);
+	if (k >= Constants::epsilon)
+	{
+		return float4(computeFresnelTerm(inRay.direction, normal, eta));
+	}
+
+	return float4(1.0f, 0.0f, 0.0f, 1.0f);
+}
+
 
 }
 }

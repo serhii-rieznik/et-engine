@@ -12,46 +12,46 @@
 
 namespace et
 {
+namespace rt
+{
 	class ET_ALIGNED(16) KDTree
 	{
 	public:
-		struct Node
+		struct ET_ALIGNED(16) Node
 		{
-			std::vector<rt::index> triangles;
-			rt::index children[2];
 			float distance;
-			int axis;
+			int_fast32_t axis;
+			index startIndex;
+			index endIndex;
+			index children[2];
+
+			inline index numIndexes() const
+				{ return endIndex - startIndex; }
 		};
-		using NodeList = std::vector<Node, SharedBlockAllocatorSTDProxy<Node>>;
-		
+
 		struct Stats
 		{
 			size_t totalTriangles = 0;
-			size_t distributedTriangles = 0;
 			size_t totalNodes = 0;
-			size_t leafNodes = 0;
-			size_t emptyLeafNodes = 0;
 			size_t maxDepth = 0;
-			size_t maxTrianglesPerNode = 0;
-			size_t minTrianglesPerNode = std::numeric_limits<size_t>::max();
+			index distributedTriangles = 0;
+			index leafNodes = 0;
+			index emptyLeafNodes = 0;
+			index maxTrianglesPerNode = 0;
+			index minTrianglesPerNode = std::numeric_limits<index>::max();
 		};
 		
 		struct ET_ALIGNED(16) TraverseResult
 		{
-			rt::float4 intersectionPoint;
-			rt::float4 intersectionPointBarycentric;
+			float4 intersectionPoint;
+			float4 intersectionPointBarycentric;
 			size_t triangleIndex = InvalidIndex;
-		};
-		
-		enum class BuildMode
-		{
-			SortedArrays,
 		};
 
 	public:
 		~KDTree();
 		
-        void build(const rt::TriangleList&, size_t maxDepth);
+        void build(const TriangleList&, size_t maxDepth);
 		Stats nodesStatistics() const;
 		void cleanUp();
 		
@@ -61,13 +61,13 @@ namespace et
 		const Node& nodeAt(size_t i) const
 			{ return _nodes.at(i); }
 
-		const rt::BoundingBox& bboxAt(size_t i) const
+		const BoundingBox& bboxAt(size_t i) const
 			{ return _boundingBoxes.at(i); }
 		
-		TraverseResult traverse(const rt::Ray& r);
+		TraverseResult traverse(const Ray& r);
 		void printStructure();
 		
-		const rt::Triangle& triangleAtIndex(size_t) const;
+		const Triangle& triangleAtIndex(size_t) const;
 		
 	private:
 		void printStructure(const Node&, const std::string&);
@@ -77,18 +77,14 @@ namespace et
 		void buildSplitBoxesUsingAxisAndPosition(size_t nodeIndex, int axis, float position);
 		void distributeTrianglesToChildren(size_t nodeIndex);
 		
-		float findIntersectionInNode(const rt::Ray&, const KDTree::Node&, TraverseResult&);
-		
 	private:
-		NodeList _nodes;
-		rt::BoundingBoxList _boundingBoxes;
-		
-		rt::TriangleList _triangles;
-		rt::IntersectionDataList _intersectionData;
-		
+		Vector<Node> _nodes;
+		BoundingBoxList _boundingBoxes;
+		TriangleList _triangles;
+		IntersectionDataList _intersectionData;
+		Vector<index> _indexes;
 		size_t _maxDepth = 0;
 		size_t _maxBuildDepth = 0;
-		BuildMode _buildMode = BuildMode::SortedArrays;
 	};
     
     template <size_t MaxElements, class T>
@@ -135,4 +131,5 @@ namespace et
         T _elements[MaxElements];
         size_t _size = 0;
     };
+}
 }

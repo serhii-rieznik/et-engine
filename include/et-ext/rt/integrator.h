@@ -21,18 +21,38 @@ namespace rt
         
     public:
         virtual ~Integrator() { }
-        virtual rt::float4 gather(const rt::Ray& inRay, size_t depth, size_t& maxDepth,
-            KDTree& tree, EnvironmentSampler::Pointer&, const rt::Material::Collection&) = 0;
+        virtual float4 gather(const Ray& inRay, size_t depth, size_t& maxDepth,
+            KDTree& tree, EnvironmentSampler::Pointer&, const Material::Collection&) = 0;
     };
-    
+
+	class NormalsIntegrator : public Integrator
+	{
+	public:
+		ET_DECLARE_POINTER(NormalsIntegrator)
+
+	public:
+		float4 gather(const Ray& inRay, size_t depth, size_t& maxDepth,
+			KDTree& tree, EnvironmentSampler::Pointer&, const Material::Collection&) override;
+	};
+
+	class FresnelIntegrator : public Integrator
+	{
+	public:
+		ET_DECLARE_POINTER(FresnelIntegrator)
+
+	public:
+		float4 gather(const Ray& inRay, size_t depth, size_t& maxDepth,
+			KDTree& tree, EnvironmentSampler::Pointer&, const Material::Collection&) override;
+	};
+
     class AmbientOcclusionIntegrator : public Integrator
     {
     public:
         ET_DECLARE_POINTER(AmbientOcclusionIntegrator)
         
     public:
-        rt::float4 gather(const rt::Ray& inRay, size_t depth, size_t& maxDepth,
-            KDTree& tree, EnvironmentSampler::Pointer&, const rt::Material::Collection&) override;
+        float4 gather(const Ray& inRay, size_t depth, size_t& maxDepth,
+            KDTree& tree, EnvironmentSampler::Pointer&, const Material::Collection&) override;
     };
     
     class PathTraceIntegrator : public Integrator
@@ -46,12 +66,12 @@ namespace rt
         };
         
     public:
-        rt::float4 gather(const rt::Ray& inRay, size_t depth, size_t& maxDepth,
-            KDTree& tree, EnvironmentSampler::Pointer&, const rt::Material::Collection&) override;
+        float4 gather(const Ray& inRay, size_t depth, size_t& maxDepth,
+            KDTree& tree, EnvironmentSampler::Pointer&, const Material::Collection&) override;
 
     private:
-        void choseNewRayDirectionAndMaterial(rt::float4& normal, const rt::Material& mat, const rt::float4& inDirection,
-            rt::float4& direction, rt::float4& output);
+        void choseNewRayDirectionAndMaterial(float4& normal, const Material& mat, const float4& inDirection,
+            float4& direction, float4& output);
     };
 }
 }

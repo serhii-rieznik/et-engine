@@ -77,9 +77,11 @@ void MainController::applicationDidLoad(et::RenderContext* rc)
 		}
 	});
 	
-    _rt.setIntegrator(rt::AmbientOcclusionIntegrator::Pointer::create());
+	// _rt.setIntegrator(rt::NormalsIntegrator::Pointer::create());
+	// _rt.setIntegrator(rt::AmbientOcclusionIntegrator::Pointer::create());
+	// _rt.setIntegrator(rt::FresnelIntegrator::Pointer::create());
     _rt.setIntegrator(rt::PathTraceIntegrator::Pointer::create());
-    
+
     auto envMap = _options.stringForKey("env-map")->content;
     if (envMap.empty() == false)
         envMap = application().resolveFileName(envMap);
@@ -87,11 +89,11 @@ void MainController::applicationDidLoad(et::RenderContext* rc)
     if (fileExists(envMap))
     {
         auto texture = loadTexture(envMap);
-        _rt.setEnvironmentSampler(rt::EnvironmentEquirectangularMapSampler::Pointer::create(texture, rt::float4(1.0f)));
+        _rt.setEnvironmentSampler(rt::EnvironmentEquirectangularMapSampler::Pointer::create(texture, rt::float4(2.0f)));
     }
     else
     {
-        _rt.setEnvironmentSampler(rt::EnvironmentColorSampler::Pointer::create(rt::float4(0.0f)));
+        _rt.setEnvironmentSampler(rt::EnvironmentColorSampler::Pointer::create(rt::float4(1.0f)));
     }
 	
 	Input::instance().keyPressed.connect([this](size_t key)

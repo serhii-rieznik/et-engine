@@ -7,32 +7,32 @@
 
 #include <et-ext/rt/kdtree.h>
 
-using namespace et;
-
-namespace
+namespace et
 {
-	const size_t DepthLimit = 31;
-	const size_t MinTrianglesToSubdivide = 16;
-	
-	struct Split
-	{
-		vec3 cost = vec3(0.0f);
-		int index = 0;
-		int axis = 0;
-	};
-}
+namespace rt
+{
+
+const size_t DepthLimit = 31;
+const size_t MinTrianglesToSubdivide = 12;
+
+struct Split
+{
+	vec3 cost = vec3(0.0f);
+	int index = 0;
+	int axis = 0;
+};
 
 KDTree::~KDTree()
 {
 	cleanUp();
 }
 
-KDTree::Node KDTree::buildRootNode()
+rt::KDTree::Node KDTree::buildRootNode()
 {
 	_intersectionData.reserve(_triangles.size());
 	
-	rt::float4 minVertex = _triangles.front().v[0];
-	rt::float4 maxVertex = minVertex;
+	float4 minVertex = _triangles.front().v[0];
+	float4 maxVertex = minVertex;
 	
 	for (const auto& t : _triangles)
 	{
@@ -46,22 +46,26 @@ KDTree::Node KDTree::buildRootNode()
 		_intersectionData.emplace_back(t.v[0], t.edge1to0, t.edge2to0);
 	}
 	
-	rt::float4 center = (minVertex + maxVertex) * rt::float4(0.5f);
-	rt::float4 halfSize = (maxVertex - minVertex) * rt::float4(0.5f);
+	float4 center = (minVertex + maxVertex) * float4(0.5f);
+	float4 halfSize = (maxVertex - minVertex) * float4(0.5f);
 	_boundingBoxes.emplace_back(center, halfSize);
+	_indexes.reserve(sqr(_triangles.size() + 1));
 	
 	KDTree::Node result;
-	result.children[0] = rt::InvalidIndex;
-	result.children[1] = rt::InvalidIndex;
+	result.children[0] = InvalidIndex;
+	result.children[1] = InvalidIndex;
 	result.axis = -1;
 	result.distance = 0.0f;
-	result.triangles.reserve(_triangles.size());
-	for (rt::index i = 0, e = static_cast<rt::index>(_triangles.size()); i < e; ++i)
-		result.triangles.push_back(i);
+	result.startIndex = 0;
+	result.endIndex = static_cast<index>(_triangles.size());
+	for (index i = 0; i < result.endIndex; ++i)
+	{
+		_indexes.push_back(i);
+	}
 	return result;
 }
 
-void KDTree::build(const rt::TriangleList& triangles, size_t maxDepth)
+void KDTree::build(const TriangleList& triangles, size_t maxDepth)
 {
 	cleanUp();
 	
@@ -72,22 +76,13 @@ void KDTree::build(const rt::TriangleList& triangles, size_t maxDepth)
 	_nodes.reserve(maxDepth * maxDepth);
 	_nodes.push_back(buildRootNode());
 	
-	switch (_buildMode)
-	{
-		case BuildMode::SortedArrays:
-		{
-			splitNodeUsingSortedArray(0, 0);
-			break;
-		}
-		default:
-			ET_FAIL("Invalid kd-tree build mode");
-	}
+	splitNodeUsingSortedArray(0, 0);
 }
 
 vec3 triangleCentroid(const rt::Triangle& t)
 {
-	rt::float4 maxV = t.v[0].maxWith(t.v[1].maxWith(t.v[2]));
-	rt::float4 minV = t.v[0].minWith(t.v[1].minWith(t.v[2]));
+	float4 maxV = t.v[0].maxWith(t.v[1].maxWith(t.v[2]));
+	float4 minV = t.v[0].minWith(t.v[1].minWith(t.v[2]));
 	return ((maxV + minV) * 0.5f).xyz();
 }
 
@@ -95,8 +90,8 @@ void KDTree::buildSplitBoxesUsingAxisAndPosition(size_t nodeIndex, int axis, flo
 {
 	auto bbox = _boundingBoxes.at(nodeIndex);
 	
-	rt::float4 lowerCorner = bbox.minVertex();
-	rt::float4 upperCorner = bbox.maxVertex();
+	float4 lowerCorner = bbox.minVertex();
+	float4 upperCorner = bbox.maxVertex();
 	
 	vec4 axisScale4(1.0f);
 	axisScale4[axis] = 0.0f;
@@ -104,29 +99,29 @@ void KDTree::buildSplitBoxesUsingAxisAndPosition(size_t nodeIndex, int axis, flo
 	vec4 posScale4(0.0f);
 	posScale4[axis] = 1.0f;
 	
-	rt::float4 axisScale(axisScale4);
-	rt::float4 posScale(posScale4);
+	float4 axisScale(axisScale4);
+	float4 posScale(posScale4);
 	
-	rt::float4 middlePoint = lowerCorner * axisScale + posScale * position;
-	rt::float4 leftSize = (middlePoint - lowerCorner) * posScale * 0.5f;
-	rt::float4 rightSize = (upperCorner - middlePoint) * posScale * 0.5f;
+	float4 middlePoint = lowerCorner * axisScale + posScale * position;
+	float4 leftSize = (middlePoint - lowerCorner) * posScale * 0.5f;
+	float4 rightSize = (upperCorner - middlePoint) * posScale * 0.5f;
 	
 	_nodes.at(nodeIndex).axis = axis;
 	_nodes.at(nodeIndex).distance = position;
-	_nodes.at(nodeIndex).children[0] = static_cast<rt::index>(_nodes.size());
+	_nodes.at(nodeIndex).children[0] = static_cast<index>(_nodes.size());
 	_nodes.emplace_back();
-	_nodes.back().children[0] = rt::InvalidIndex;
-	_nodes.back().children[1] = rt::InvalidIndex;
+	_nodes.back().children[0] = InvalidIndex;
+	_nodes.back().children[1] = InvalidIndex;
 	_nodes.back().axis = -1;
 	_nodes.back().distance = 0.0f;
 
 	_boundingBoxes.emplace_back(bbox.center * axisScale + posScale * (middlePoint - leftSize),
 		bbox.halfSize * axisScale + posScale * leftSize);
 
-	_nodes.at(nodeIndex).children[1] = static_cast<rt::index>(_nodes.size());
+	_nodes.at(nodeIndex).children[1] = static_cast<index>(_nodes.size());
 	_nodes.emplace_back();
-	_nodes.back().children[0] = rt::InvalidIndex;
-	_nodes.back().children[1] = rt::InvalidIndex;
+	_nodes.back().children[0] = InvalidIndex;
+	_nodes.back().children[1] = InvalidIndex;
 	_nodes.back().axis = -1;
 	_nodes.back().distance = 0.0f;
 
@@ -140,32 +135,44 @@ void KDTree::distributeTrianglesToChildren(size_t nodeIndex)
 	ET_ALIGNED(16) vec4 maxVertex;
 	
 	auto& node = _nodes.at(nodeIndex);
-	auto& left = _nodes.at(node.children[0]);
-	auto& right = _nodes.at(node.children[1]);
-	
-	for (auto triIndex : node.triangles)
+
+	Vector<index> rightIndexes;
+	rightIndexes.reserve(node.numIndexes());
+	Vector<index> leftIndexes;
+	leftIndexes.reserve(node.numIndexes());
+
+	for (index i = node.startIndex, e = node.startIndex + node.numIndexes(); i < e; ++i)
 	{
+		index triIndex = _indexes[i];
 		const auto& tri = _triangles.at(triIndex);
 		tri.minVertex().loadToFloats(minVertex.data());
 		tri.maxVertex().loadToFloats(maxVertex.data());
 		
 		if (minVertex[node.axis] > node.distance)
 		{
-			right.triangles.push_back(triIndex);
+			rightIndexes.push_back(triIndex);
 		}
 		else if (maxVertex[node.axis] < node.distance)
 		{
-			left.triangles.push_back(triIndex);
+			leftIndexes.push_back(triIndex);
 		}
 		else
 		{
-			left.triangles.push_back(triIndex);
-			right.triangles.push_back(triIndex);
+			rightIndexes.push_back(triIndex);
+			leftIndexes.push_back(triIndex);
 		}
 	}
-	
-	std::vector<rt::index> emptyVector;
-	_nodes.at(nodeIndex).triangles.swap(emptyVector);
+
+
+	auto& left = _nodes.at(node.children[0]);
+	left.startIndex = static_cast<index>(_indexes.size());
+	left.endIndex = left.startIndex + static_cast<index>(leftIndexes.size());
+	_indexes.insert(_indexes.end(), leftIndexes.begin(), leftIndexes.end());
+
+	auto& right = _nodes.at(node.children[1]);
+	right.startIndex = static_cast<index>(_indexes.size());
+	right.endIndex = right.startIndex + static_cast<index>(rightIndexes.size());
+	_indexes.insert(_indexes.end(), rightIndexes.begin(), rightIndexes.end());
 }
 
 void KDTree::cleanUp()
@@ -176,7 +183,7 @@ void KDTree::cleanUp()
 
 void KDTree::splitNodeUsingSortedArray(size_t nodeIndex, size_t depth)
 {
-	auto numTriangles = _nodes.at(nodeIndex).triangles.size();
+	auto numTriangles = _nodes[nodeIndex].numIndexes();
 	if ((depth > _maxDepth) || (numTriangles < MinTrianglesToSubdivide))
 	{
 		return;
@@ -188,22 +195,22 @@ void KDTree::splitNodeUsingSortedArray(size_t nodeIndex, size_t depth)
 	auto estimateCostAtSplit = [&bbox, nodeIndex, this](float splitPlane, size_t leftTriangles,
 		size_t rightTriangles, int axis) -> float
 	{
-		ET_ASSERT((leftTriangles + rightTriangles) == _nodes.at(nodeIndex).triangles.size());
+		ET_ASSERT((leftTriangles + rightTriangles) == _nodes.at(nodeIndex).numIndexes());
 		
 		const vec4& minVertex = bbox.minVertex().toVec4();
-		if (splitPlane <= minVertex[axis] + rt::Constants::epsilon)
+		if (splitPlane <= minVertex[axis] + Constants::epsilon)
 			return std::numeric_limits<float>::max();
 
 		const vec4& maxVertex = bbox.maxVertex().toVec4();
-		if (splitPlane >= maxVertex[axis] - rt::Constants::epsilon)
+		if (splitPlane >= maxVertex[axis] - Constants::epsilon)
 			return std::numeric_limits<float>::max();
 
 		vec4 axisScale(1.0f);
 		vec4 axisOffset(0.0f);
 		axisScale[axis] = 0.0f;
 		axisOffset[axis] = splitPlane;
-		rt::BoundingBox leftBox(bbox.minVertex(), bbox.maxVertex() * rt::float4(axisScale) + rt::float4(axisOffset), 0);
-		rt::BoundingBox rightBox(bbox.minVertex() * rt::float4(axisScale) + rt::float4(axisOffset), bbox.maxVertex(), 0);
+		BoundingBox leftBox(bbox.minVertex(), bbox.maxVertex() * float4(axisScale) + float4(axisOffset), 0);
+		BoundingBox rightBox(bbox.minVertex() * float4(axisScale) + float4(axisOffset), bbox.maxVertex(), 0);
 		
 		float totalSquare = bbox.square();
 		float leftSquare = leftBox.square() / totalSquare;
@@ -224,15 +231,15 @@ void KDTree::splitNodeUsingSortedArray(size_t nodeIndex, size_t depth)
 	std::vector<vec3> minPoints;
 	std::vector<vec3> maxPoints;
 	const auto& localNode = _nodes.at(nodeIndex);
-	for (size_t triIndex : localNode.triangles)
+	for (index i = localNode.startIndex, e = localNode.startIndex + localNode.numIndexes(); i < e; ++i)
 	{
-		const auto& tri = _triangles.at(triIndex);
-		minPoints.push_back(tri.minVertex().xyz() - vec3(rt::Constants::epsilon));
-		maxPoints.push_back(tri.maxVertex().xyz() + vec3(rt::Constants::epsilon));
+		const auto& tri = _triangles.at(_indexes[i]);
+		minPoints.push_back(tri.minVertex().xyz() - vec3(Constants::epsilon));
+		maxPoints.push_back(tri.maxVertex().xyz() + vec3(Constants::epsilon));
 	}
 	
 	vec3 splitPosition = minPoints.at(minPoints.size() / 2);
-	vec3 splitCost(rt::Constants::initialSplitValue);
+	vec3 splitCost(Constants::initialSplitValue);
 	
 	bool splitFound = false;
 	int numElements = static_cast<int>(minPoints.size());
@@ -296,150 +303,128 @@ void KDTree::printStructure(const Node& node, const std::string& tag)
 	}
 	else
 	{
-		log::info("%s %llu tris", tag.c_str(), uint64_t(node.triangles.size()));
+		log::info("%s %u tris", tag.c_str(), node.numIndexes());
 	}
 }
 
-float KDTree::findIntersectionInNode(const rt::Ray& ray, const KDTree::Node& node, TraverseResult& result)
-{
-    float localEpsilon = rt::Constants::epsilon;
-    float localMinusEpsilon = rt::Constants::minusEpsilon;
-    float localOnePlusEpsilon = rt::Constants::onePlusEpsilon;
-    float localEpsilonSquared = rt::Constants::epsilonSquared;
-    
-	result.triangleIndex = InvalidIndex;
-	
-	const rt::index localBufferSize = 32;
-	auto trianglesIndices = node.triangles.data();
-	
-	rt::index remainingIndices = rt::index(node.triangles.size());
-	float minDistance = std::numeric_limits<float>::max();
-	
-	while (remainingIndices > 0)
-	{
-		rt::index localIndices[localBufferSize];
-		rt::index indicesToCopy = std::min(localBufferSize, remainingIndices);
-		std::copy(trianglesIndices, trianglesIndices + indicesToCopy, localIndices);
-		remainingIndices -= indicesToCopy;
-		trianglesIndices += indicesToCopy;
-		
-		for (rt::index i = 0; i < indicesToCopy; ++i)
-		{
-			auto triangleIndex = localIndices[i];
-			const auto& data = _intersectionData[triangleIndex];
-			
-			rt::float4 pvec = ray.direction.crossXYZ(data.edge2to0);
-			float det = data.edge1to0.dot(pvec);
-            float d2e = det * det - localEpsilonSquared;
-            if (rt::floatIsPositive(d2e))
-			{
-				rt::float4 tvec = ray.origin - data.v0;
-				float u = tvec.dot(pvec) / det;
-                float um = u - localMinusEpsilon;
-                float up = u - localOnePlusEpsilon;
-                if (rt::floatIsPositive(um) & rt::floatIsNegative(up))
-				{
-					rt::float4 qvec = tvec.crossXYZ(data.edge1to0);
-					float v = ray.direction.dot(qvec) / det;
-					float uv = u + v;
-                    float vm = v - localMinusEpsilon;
-                    float uvp = uv - localOnePlusEpsilon;
-                    if (rt::floatIsPositive(vm) & rt::floatIsNegative(uvp))
-					{
-						float intersectionDistance = data.edge2to0.dot(qvec) / det;
-                        float ide = intersectionDistance - localEpsilon;
-                        float idm = intersectionDistance - minDistance;
-                        if (rt::floatIsPositive(ide) & rt::floatIsNegative(idm))
-						{
-							result.triangleIndex = triangleIndex;
-							minDistance = intersectionDistance;
-							result.intersectionPointBarycentric = rt::float4(1.0f - uv, u, v, 0.0f);
-						}
-					}
-				}
-			}
-		}
-	}
-	
-	if (result.triangleIndex < InvalidIndex)
-		result.intersectionPoint = ray.origin + ray.direction * minDistance;
-	
-	return minDistance;
-}
-
-const rt::Triangle& KDTree::triangleAtIndex(size_t i) const
+const Triangle& KDTree::triangleAtIndex(size_t i) const
 {
 	return _triangles.at(i);
 }
 
 struct KDTreeSearchNode
 {
-    rt::index index;
+	index ind;
     float time;
     
     KDTreeSearchNode() = default;
-    KDTreeSearchNode(rt::index i, float t) :
-        index(i), time(t) { }
+	KDTreeSearchNode(index n, float t) :
+        ind(n), time(t) { }
 };
 
-KDTree::TraverseResult KDTree::traverse(const rt::Ray& r)
+KDTree::TraverseResult KDTree::traverse(const Ray& ray)
 {
+	auto localEpsilon = Constants::epsilon;
+	auto localEpsilonSquared = Constants::epsilonSquared;
+
 	KDTree::TraverseResult result;
 	
 	float tNear = 0.0f;
 	float tFar = 0.0f;
 	
-	if (!rt::rayToBoundingBox(r, _boundingBoxes.front(), tNear, tFar))
+	if (!rayToBoundingBox(ray, _boundingBoxes.front(), tNear, tFar))
 		return result;
 	
-	if (tNear < rt::Constants::epsilon)
-		tNear = rt::Constants::epsilon;
+	if (tNear < localEpsilon)
+		tNear = localEpsilon;
     
-    tNear -= rt::Constants::epsilon;
-    tFar += rt::Constants::epsilon;
+    tNear -= localEpsilon;
+    tFar += localEpsilon;
 	
-	size_t currentNode = 0;
-	
-	ET_ALIGNED(16) float origin[4];
 	ET_ALIGNED(16) float direction[4];
-	r.origin.loadToFloats(origin);
-	r.direction.loadToFloats(direction);
-	
+	ray.direction.loadToFloats(direction);
+
+	ET_ALIGNED(16) float originDivDirection[4];
+	(ray.origin / ray.direction).loadToFloats(originDivDirection);
+
+	Node localNode = _nodes.front();
 	FastStack<DepthLimit + 1, KDTreeSearchNode> traverseStack;
 	for (;;)
 	{
-		while (_nodes[currentNode].axis >= 0)
+		while (localNode.axis >= 0)
 		{
-			const auto& node = _nodes[currentNode];
-			
-			int axis = node.axis;
-			int side = rt::floatIsNegative(direction[axis]);
-			
-			float tSplit = (node.distance - origin[axis]) / direction[axis];
-            float tNearSplit = tSplit - tFar;
-            float tFarSplit = tSplit - tNear;
-            if (rt::floatIsNegative(tFarSplit))
+			int side = floatIsNegative(direction[localNode.axis]);
+			float tSplit = localNode.distance / direction[localNode.axis] - originDivDirection[localNode.axis];
+			float tNearSplit = tSplit - tFar;
+			float tFarSplit = tSplit - tNear;
+
+			if (floatIsNegative(tFarSplit))
 			{
-				currentNode = node.children[1 - side];
+				localNode = _nodes[localNode.children[1 - side]];
 			}
-            else if (rt::floatIsPositive(tNearSplit))
+			else if (floatIsPositive(tNearSplit))
 			{
-				currentNode = node.children[side];
+				localNode = _nodes[localNode.children[side]];
 			}
 			else
 			{
-				traverseStack.emplace(node.children[1 - side], tFar);
-				currentNode = node.children[side];
+				traverseStack.emplace(localNode.children[1 - side], tFar);
+				localNode = _nodes[localNode.children[side]];
 				tFar = tSplit;
 			}
 		}
-		
-		const auto& node = _nodes[currentNode];
-		if (!node.triangles.empty())
+
+		if (localNode.numIndexes() > 0)
 		{
-			float tHit = findIntersectionInNode(r, node, result);
-			if (tHit <= tFar + rt::Constants::epsilon)
+			result.triangleIndex = InvalidIndex;
+
+			float minDistance = std::numeric_limits<float>::max();
+			for (index i = localNode.startIndex, e = localNode.endIndex; i < e; ++i)
+			{
+				auto triangleIndex = _indexes[i];
+				const auto& data = _intersectionData[triangleIndex];
+
+				float4 pvec = ray.direction.crossXYZ(data.edge2to0);
+				float det = data.edge1to0.dot(pvec);
+				float d2e = det * det - localEpsilonSquared;
+				if (floatIsPositive(d2e))
+				{
+					float4 tvec = ray.origin - data.v0;
+					float u = tvec.dot(pvec) / det;
+					float um = u - localEpsilon;
+					float up = u - Constants::onePlusEpsilon;
+					if (floatIsPositive(um) & floatIsNegative(up))
+					{
+						float4 qvec = tvec.crossXYZ(data.edge1to0);
+						float v = ray.direction.dot(qvec) / det;
+						float uv = u + v;
+						float vm = v - localEpsilon;
+						float uvp = uv - Constants::onePlusEpsilon;
+						if (floatIsPositive(vm) & floatIsNegative(uvp))
+						{
+							float intersectionDistance = data.edge2to0.dot(qvec) / det;
+							float iFar = intersectionDistance - tFar;
+							if (floatIsNegative(iFar))
+							{
+								float ide = intersectionDistance - localEpsilon;
+								float idm = intersectionDistance - minDistance;
+								if (floatIsPositive(ide) & floatIsNegative(idm))
+								{
+									result.triangleIndex = triangleIndex;
+									result.intersectionPointBarycentric = float4(1.0f - uv, u, v, 0.0f);
+									minDistance = intersectionDistance;
+								}
+							}
+						}
+					}
+				}
+			}
+
+			if (result.triangleIndex < InvalidIndex)
+			{
+				result.intersectionPoint = ray.origin + ray.direction * minDistance;
 				return result;
+			}
 		}
 		
 		if (traverseStack.empty())
@@ -448,9 +433,9 @@ KDTree::TraverseResult KDTree::traverse(const rt::Ray& r)
 			return result;
 		}
 		
-		currentNode = traverseStack.top().index;
-        tNear = tFar - rt::Constants::epsilon;
-		tFar = traverseStack.top().time + rt::Constants::epsilon;
+		localNode = _nodes[traverseStack.top().ind];
+        tNear = tFar - Constants::epsilon;
+		tFar = traverseStack.top().time + Constants::epsilon;
 		
 		traverseStack.pop();
 	}
@@ -468,25 +453,25 @@ KDTree::Stats KDTree::nodesStatistics() const
 	uint32_t index = 0;
 	for (const auto& node : _nodes)
 	{
-		size_t nodeTriangles = node.triangles.size();
 		if (node.axis == -1)
 		{
 			++result.leafNodes;
 
-			if (nodeTriangles == 0)
+			if (node.numIndexes() == 0)
 				++result.emptyLeafNodes;
 		}
 		
-		if (nodeTriangles > 0)
+		if (node.numIndexes() > 0)
 		{
-			result.maxTrianglesPerNode = std::max(result.maxTrianglesPerNode, nodeTriangles);
-			result.minTrianglesPerNode = std::min(result.minTrianglesPerNode, nodeTriangles);
+			result.maxTrianglesPerNode = std::max(result.maxTrianglesPerNode, node.numIndexes());
+			result.minTrianglesPerNode = std::min(result.minTrianglesPerNode, node.numIndexes());
 		}
 		
-		result.distributedTriangles += nodeTriangles;
+		result.distributedTriangles += node.numIndexes();
 		
 		++index;
 	}
 	return result;
 }
-
+}
+}

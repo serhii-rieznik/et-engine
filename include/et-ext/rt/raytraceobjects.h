@@ -15,7 +15,7 @@ namespace et
 	namespace rt
 	{
 		using float4 = vec4simd;
-		using index = uint32_t;
+		using index = uint_fast32_t;
 		
 		enum : index
 		{
@@ -205,14 +205,14 @@ namespace et
 			return fres - 1.0f;
 		}
 
-		inline uint32_t floatIsNegative(float& a)
+		inline uint_fast32_t floatIsNegative(float& a)
 		{
-			return reinterpret_cast<uint32_t&>(a) >> 31;
+			return reinterpret_cast<uint_fast32_t&>(a) >> 31;
 		}
 		
-		inline uint32_t floatIsPositive(float& a)
+		inline uint_fast32_t floatIsPositive(float& a)
 		{
-            return (~reinterpret_cast<uint32_t&>(a)) >> 31;
+            return (~reinterpret_cast<uint_fast32_t&>(a)) >> 31;
 		}
 		
 		inline bool rayTriangle(const Ray& ray, const Triangle* tri, float& distance, float4& barycentric)

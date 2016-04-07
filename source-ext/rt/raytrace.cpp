@@ -12,75 +12,62 @@
 #include <et/app/application.h>
 #include <et/camera/camera.h>
 
-namespace et
+const float et::rt::Constants::epsilon = 0.0001f;
+const float et::rt::Constants::minusEpsilon = -epsilon;
+const float et::rt::Constants::onePlusEpsilon = 1.0f + epsilon;
+const float et::rt::Constants::epsilonSquared = epsilon * epsilon;
+const float et::rt::Constants::initialSplitValue = std::numeric_limits<float>::max();
+
+class et::RaytracePrivate
 {
-	
-const float rt::Constants::epsilon = 0.0001f;
-const float rt::Constants::minusEpsilon = -epsilon;
-const float rt::Constants::onePlusEpsilon = 1.0f + epsilon;
-const float rt::Constants::epsilonSquared = epsilon * epsilon;
-const float rt::Constants::initialSplitValue = std::numeric_limits<float>::max();
+public:
+	RaytracePrivate(Raytrace* owner);
+	~RaytracePrivate();
 
-namespace
-{
-	enum class DebugRenderMode : size_t
-	{
-		RenderNormals,
-		RenderDiffuse,
-		RenderTriangle
-	};
-}
-	
-	class RaytracePrivate
-	{
-	public:
-		RaytracePrivate(Raytrace* owner);
-		~RaytracePrivate();
+	void threadFunction();
+	void emitWorkerThreads();
+	void stopWorkerThreads();
 
-		void threadFunction();
-		void emitWorkerThreads();
-		void stopWorkerThreads();
+	void buildMaterialAndTriangles(s3d::Scene::Pointer);
 
-		void buildMaterialAndTriangles(s3d::Scene::Pointer);
+	size_t materialIndexWithName(const std::string&);
 
-		size_t materialIndexWithName(const std::string&);
+	void buildRegions(vec2i size);
+	void estimateRegionsOrder();
 
-		void buildRegions(vec2i size);
-		void estimateRegionsOrder();
+	vec4 raytracePixel(const vec2i&, size_t samples, size_t& bounces);
 
-		vec4 raytracePixel(const vec2i&, size_t samples, size_t& bounces);
-		
-		rt::Region getNextRegion();
-		
-		void renderSpacePartitioning();
-		void renderKDTreeRecursive(size_t nodeIndex, size_t index);
-		void renderBoundingBox(const rt::BoundingBox&, const vec4& color);
-		void renderLine(const vec2& from, const vec2& to, const vec4& color);
-		void renderPixel(const vec2&, const vec4& color);
-		vec2 projectPoint(const rt::float4&);
-		
-		void fillRegionWithColor(const rt::Region&, const vec4& color);
-		void renderTriangle(const rt::Triangle&);
-				
-	public:
-		Raytrace* owner = nullptr;
-		Raytrace::Options options;
-		KDTree kdTree;
-		rt::EnvironmentSampler::Pointer sampler;
-        rt::Integrator::Pointer integrator;
-		Camera camera;
-		vec2i viewportSize = vec2i(0);
-		DebugRenderMode debugMode = DebugRenderMode::RenderNormals;
-        rt::Material::Collection materials;
+	rt::Region getNextRegion();
 
-		std::vector<std::thread> workerThreads;
-		std::atomic<bool> running;
-		std::vector<rt::Region> regions;
-		std::mutex regionsLock;
-		std::atomic<size_t> threadCounter;
-		uint64_t startTime = 0;
-	};
-}
+	void renderSpacePartitioning();
+	void renderKDTreeRecursive(size_t nodeIndex, size_t index);
+	void renderBoundingBox(const rt::BoundingBox&, const vec4& color);
+	void renderLine(const vec2& from, const vec2& to, const vec4& color);
+	void renderPixel(const vec2&, const vec4& color);
+	vec2 projectPoint(const rt::float4&);
+
+	void fillRegionWithColor(const rt::Region&, const vec4& color);
+	void renderTriangle(const rt::Triangle&);
+
+public:
+	Raytrace* owner = nullptr;
+	Raytrace::Options options;
+	rt::KDTree kdTree;
+	rt::EnvironmentSampler::Pointer sampler;
+	rt::Integrator::Pointer integrator;
+	rt::Material::Collection materials;
+	Camera camera;
+	vec2i viewportSize = vec2i(0);
+
+	Vector<std::thread> workerThreads;
+	std::atomic<size_t> threadCounter;
+
+	Vector<rt::Region> regions;
+	std::mutex regionsLock;
+
+	std::atomic<bool> running;
+	uint64_t startTime = 0;
+};
 
 using namespace et;
 
@@ -101,26 +88,21 @@ void Raytrace::perform(s3d::Scene::Pointer scene, const Camera& cam, const vec2i
 	_private->viewportSize = dimension;
 	_private->buildMaterialAndTriangles(scene);
 	_private->buildRegions(vec2i(static_cast<int>(_private->options.renderRegionSize)));
-	Invocation([this]()
-	{
+	Invocation([this]() {
 		_private->estimateRegionsOrder();
 	}).invokeInBackground();
 }
 
-vec4 Raytrace::performAtPoint(s3d::Scene::Pointer scene, const Camera& cam,
-	const vec2i& dimension, const vec2i& pixel)
+vec4 Raytrace::performAtPoint(s3d::Scene::Pointer scene, const Camera& cam, const vec2i& dimension, const vec2i& pixel)
 {
 	_private->stopWorkerThreads();
 
 	_private->camera = cam;
 	_private->viewportSize = dimension;
 	_private->buildMaterialAndTriangles(scene);
-	
-	_private->debugMode = DebugRenderMode::RenderTriangle;
-	
+
 	size_t bounces = 0;
-	return _private->raytracePixel(vec2i(pixel.x, dimension.y - pixel.y),
-		_private->options.raysPerPixel, bounces);
+	return _private->raytracePixel(vec2i(pixel.x, dimension.y - pixel.y), _private->options.raysPerPixel, bounces);
 }
 
 void Raytrace::stop()
@@ -150,14 +132,14 @@ void Raytrace::setEnvironmentSampler(rt::EnvironmentSampler::Pointer sampler)
 
 void Raytrace::setIntegrator(rt::Integrator::Pointer integrator)
 {
-    _private->integrator = integrator;
+	_private->integrator = integrator;
 }
 
 /*
  * Private implementation
  */
-RaytracePrivate::RaytracePrivate(Raytrace* o) : 
-	owner(o), running(false)
+RaytracePrivate::RaytracePrivate(Raytrace* o) :
+owner(o), running(false)
 {
 }
 
@@ -170,11 +152,11 @@ void RaytracePrivate::emitWorkerThreads()
 {
 	srand(static_cast<unsigned int>(time(nullptr)));
 	startTime = queryContiniousTimeInMilliSeconds();
-	
-    uint64_t totalRays = static_cast<uint64_t>(viewportSize.square()) * options.raysPerPixel;
+
+	uint64_t totalRays = static_cast<uint64_t>(viewportSize.square()) * options.raysPerPixel;
 	log::info("Rendering started: %d x %d, %llu rpp, %llu total rays",
-        viewportSize.x, viewportSize.y, static_cast<uint64_t>(options.raysPerPixel), totalRays);
-	
+			  viewportSize.x, viewportSize.y, static_cast<uint64_t>(options.raysPerPixel), totalRays);
+
 	running = true;
 	threadCounter.store(std::thread::hardware_concurrency());
 	for (unsigned i = 0, e = std::thread::hardware_concurrency(); i < e; ++i)
@@ -193,7 +175,7 @@ void RaytracePrivate::buildMaterialAndTriangles(s3d::Scene::Pointer scene)
 {
 	materials.clear();
 	rt::TriangleList triangles;
-	
+
 	auto meshes = scene->childrenOfType(s3d::ElementType::Mesh);
 	for (s3d::Mesh::Pointer mesh : meshes)
 	{
@@ -214,27 +196,27 @@ void RaytracePrivate::buildMaterialAndTriangles(s3d::Scene::Pointer scene)
 			mat.roughness = HALF_PI * (1.0f - std::cos(HALF_PI * r));
 			mat.ior = meshMaterial->getFloat(MaterialParameter::Transparency);
 		}
-		
+
 		mesh->prepareRenderBatches();
 		for (const auto& rb : mesh->renderBatches())
 		{
 			auto& vs = rb->vertexStorage();
 			auto& ia = rb->indexArray();
 			if (vs.invalid() || ia.invalid()) continue;
-			
+
 			const mat4& t = rb->transformation();
-			
+
 			triangles.reserve(triangles.size() + rb->numIndexes());
-			
+
 			const auto pos = vs->accessData<DataType::Vec3>(VertexAttributeUsage::Position, 0);
 			const auto nrm = vs->accessData<DataType::Vec3>(VertexAttributeUsage::Normal, 0);
-			const auto uv0 = vs->accessData<DataType::Vec2>(VertexAttributeUsage::TexCoord0, 0);
+			// const auto uv0 = vs->accessData<DataType::Vec2>(VertexAttributeUsage::TexCoord0, 0);
 			for (uint32_t i = 0; i < rb->numIndexes(); i += 3)
 			{
 				uint32_t i0 = ia->getIndex(rb->firstIndex() + i + 0);
 				uint32_t i1 = ia->getIndex(rb->firstIndex() + i + 1);
 				uint32_t i2 = ia->getIndex(rb->firstIndex() + i + 2);
-				
+
 				triangles.emplace_back();
 				auto& tri = triangles.back();
 				tri.v[0] = rt::float4(t * pos[i0], 1.0f);
@@ -243,25 +225,27 @@ void RaytracePrivate::buildMaterialAndTriangles(s3d::Scene::Pointer scene)
 				tri.n[0] = rt::float4(t.rotationMultiply(nrm[i0]).normalized(), 0.0f);
 				tri.n[1] = rt::float4(t.rotationMultiply(nrm[i1]).normalized(), 0.0f);
 				tri.n[2] = rt::float4(t.rotationMultiply(nrm[i2]).normalized(), 0.0f);
+				/*
 				tri.t[0] = rt::float4(uv0[i0].x, uv0[i0].y, 0.0f, 0.0f);
 				tri.t[1] = rt::float4(uv0[i1].x, uv0[i1].y, 0.0f, 0.0f);
 				tri.t[2] = rt::float4(uv0[i2].x, uv0[i2].y, 0.0f, 0.0f);
+				*/
 				tri.materialIndex = static_cast<rt::index>(materialIndex);
 				tri.computeSupportData();
 			}
 		}
 	}
-	
-    kdTree.build(triangles, options.maxKDTreeDepth);
-	
+
+	kdTree.build(triangles, options.maxKDTreeDepth);
+
 	auto stats = kdTree.nodesStatistics();
 	log::info("KD-Tree statistics:\n\t%llu nodes\n\t%llu leaf nodes\n\t%llu empty leaf nodes"
-		"\n\t%llu max depth\n\t%llu min triangles per node\n\t%llu max triangles per node"
-		"\n\t%llu total triangles\n\t%llu distributed triangles", uint64_t(stats.totalNodes),
-		uint64_t(stats.leafNodes), uint64_t(stats.emptyLeafNodes), uint64_t(stats.maxDepth),
-		uint64_t(stats.minTrianglesPerNode), uint64_t(stats.maxTrianglesPerNode), 
-		uint64_t(stats.totalTriangles), uint64_t(stats.distributedTriangles));
-	
+			  "\n\t%llu max depth\n\t%llu min triangles per node\n\t%llu max triangles per node"
+			  "\n\t%llu total triangles\n\t%llu distributed triangles", uint64_t(stats.totalNodes),
+			  uint64_t(stats.leafNodes), uint64_t(stats.emptyLeafNodes), uint64_t(stats.maxDepth),
+			  uint64_t(stats.minTrianglesPerNode), uint64_t(stats.maxTrianglesPerNode),
+			  uint64_t(stats.totalTriangles), uint64_t(stats.distributedTriangles));
+
 	if (options.renderKDTree)
 		kdTree.printStructure();
 }
@@ -381,20 +365,20 @@ void RaytracePrivate::threadFunction()
 			}
 		}
 	}
-	
+
 	--threadCounter;
-	
+
 	if (threadCounter.load() == 0)
 	{
 		if (options.renderKDTree)
 			renderSpacePartitioning();
-		
+
 		auto endTime = queryContiniousTimeInMilliSeconds();
 		uint64_t diff = endTime - startTime;
-		
+
 		log::info("Rendering completed: %llu, (in %llu ms, %.3g s)", endTime,
-			diff, static_cast<float>(diff) / 1000.0f);
-		
+				  diff, static_cast<float>(diff) / 1000.0f);
+
 		owner->renderFinished.invokeInMainRunLoop();
 	}
 }
@@ -402,17 +386,17 @@ void RaytracePrivate::threadFunction()
 vec4 RaytracePrivate::raytracePixel(const vec2i& pixel, size_t samples, size_t& bounces)
 {
 	ET_ASSERT(samples > 0);
-    
-    if (integrator.invalid())
-    {
-        ET_FAIL("Integrator is not set");
-        return vec4(0.0f);
-    }
-	
+
+	if (integrator.invalid())
+	{
+		ET_FAIL("Integrator is not set");
+		return vec4(0.0f);
+	}
+
 	vec2 pixelSize = vec2(1.0f) / vector2ToFloat(viewportSize);
 	vec2 pixelBase = 2.0f * (vector2ToFloat(pixel) * pixelSize) - vec2(1.0f);
 
-    rt::float4 result = integrator->gather(camera.castRay(pixelBase), 0, bounces, kdTree, sampler, materials);
+	rt::float4 result = integrator->gather(camera.castRay(pixelBase), 0, bounces, kdTree, sampler, materials);
 	for (size_t m = 1; m < samples; ++m)
 	{
 		vec2 jitter = pixelSize * vec2(2.0f * rt::fastRandomFloat() - 1.0f, 2.0f * rt::fastRandomFloat() - 1.0f);
@@ -420,15 +404,15 @@ vec4 RaytracePrivate::raytracePixel(const vec2i& pixel, size_t samples, size_t& 
 	}
 	vec4 output = (result / static_cast<float>(samples)).toVec4();
 	output.w = 1.0f;
-	
+
 	return output;
 }
 
 void RaytracePrivate::estimateRegionsOrder()
 {
-    const float maxPossibleBounces = float(rt::PathTraceIntegrator::MaxTraverseDepth);
+	const float maxPossibleBounces = float(rt::PathTraceIntegrator::MaxTraverseDepth);
 	const size_t maxSamples = 5;
-	
+
 	const vec2i sx[maxSamples] =
 	{
 		vec2i(1, 3), vec2i(2, 3), vec2i(1, 2), vec2i(1, 3), vec2i(2, 3),
@@ -438,7 +422,7 @@ void RaytracePrivate::estimateRegionsOrder()
 	{
 		vec2i(1, 3), vec2i(1, 3), vec2i(1, 2), vec2i(2, 3), vec2i(2, 3),
 	};
-	
+
 	std::random_shuffle(regions.begin(), regions.end());
 	for (auto& r : regions)
 	{
@@ -448,18 +432,18 @@ void RaytracePrivate::estimateRegionsOrder()
 		{
 			size_t bounces = 0;
 			estimatedColor += raytracePixel(r.origin + vec2i(sx[i].x * r.size.x / sx[i].y,
-				sy[i].x * r.size.y / sy[i].y), 1, bounces);
+															 sy[i].x * r.size.y / sy[i].y), 1, bounces);
 			r.estimatedBounces += bounces;
 		}
 		float aspect = (maxPossibleBounces - float(r.estimatedBounces)) / maxPossibleBounces;
 		vec4 estimatedDensity = vec4(1.0f - 0.5f * aspect * aspect, 1.0f);
-		
+
 		fillRegionWithColor(r, estimatedDensity * estimatedDensity);
 	}
-	
+
 	std::sort(regions.begin(), regions.end(), [](const rt::Region& l, const rt::Region& r)
-		{ return l.estimatedBounces > r.estimatedBounces; });
-	
+			  { return l.estimatedBounces > r.estimatedBounces; });
+
 	emitWorkerThreads();
 }
 
@@ -473,9 +457,9 @@ void RaytracePrivate::renderKDTreeRecursive(size_t nodeIndex, size_t index)
 {
 	const vec4 colorOdd(1.0f, 1.0f, 0.0f, 1.0f);
 	const vec4 colorEven(0.0f, 1.0f, 1.0f, 1.0f);
-	
+
 	const auto& node = kdTree.nodeAt(nodeIndex);
-	
+
 	if (node.axis >= 0)
 	{
 		renderKDTreeRecursive(node.children[0], index + 1);
@@ -497,7 +481,7 @@ void RaytracePrivate::renderBoundingBox(const rt::BoundingBox& box, const vec4& 
 	vec2 c5 = projectPoint(box.center + box.halfSize * rt::float4( 1.0f, -1.0f,  1.0f, 0.0f));
 	vec2 c6 = projectPoint(box.center + box.halfSize * rt::float4(-1.0f,  1.0f,  1.0f, 0.0f));
 	vec2 c7 = projectPoint(box.center + box.halfSize * rt::float4( 1.0f,  1.0f,  1.0f, 0.0f));
-	
+
 	renderLine(c0, c1, color);
 	renderLine(c0, c2, color);
 	renderLine(c0, c4, color);
@@ -515,7 +499,7 @@ void RaytracePrivate::renderBoundingBox(const rt::BoundingBox& box, const vec4& 
 void RaytracePrivate::renderLine(const vec2& from, const vec2& to, const vec4& color)
 {
 	float dt = 1.0f / length(to - from);
-	
+
 	float t = 0.0f;
 	while (t <= 1.0f)
 	{
@@ -542,7 +526,7 @@ void RaytracePrivate::renderPixel(const vec2& pixel, const vec4& color)
 vec2 RaytracePrivate::projectPoint(const rt::float4& p)
 {
 	return vector2ToFloat(viewportSize) *
-		(vec2(0.5f, 0.5f) + vec2(0.5f, 0.5f) * camera.project(p.xyz()).xy());
+	(vec2(0.5f, 0.5f) + vec2(0.5f, 0.5f) * camera.project(p.xyz()).xy());
 }
 
 void RaytracePrivate::fillRegionWithColor(const rt::Region& region, const vec4& color)
@@ -551,7 +535,7 @@ void RaytracePrivate::fillRegionWithColor(const rt::Region& region, const vec4& 
 	ET_ASSERT(!isinf(color.y));
 	ET_ASSERT(!isinf(color.z));
 	ET_ASSERT(!isinf(color.w));
-	
+
 	vec2i pixel;
 	for (pixel.y = region.origin.y; pixel.y < region.origin.y + region.size.y; ++pixel.y)
 	{
@@ -563,7 +547,7 @@ void RaytracePrivate::fillRegionWithColor(const rt::Region& region, const vec4& 
 void RaytracePrivate::renderTriangle(const rt::Triangle& tri)
 {
 	const vec4 lineColor(5.0f, 0.9f, 0.8f, 1.0f);
-	
+
 	vec2 c0 = projectPoint(tri.v[0]);
 	vec2 c1 = projectPoint(tri.v[1]);
 	vec2 c2 = projectPoint(tri.v[2]);
