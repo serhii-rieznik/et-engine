@@ -326,6 +326,7 @@ KDTree::TraverseResult KDTree::traverse(const Ray& ray)
 {
 	auto localEpsilon = Constants::epsilon;
 	auto localEpsilonSquared = Constants::epsilonSquared;
+	auto localOnePlusEpsilon = Constants::onePlusEpsilon;
 
 	KDTree::TraverseResult result;
 	
@@ -382,38 +383,27 @@ KDTree::TraverseResult KDTree::traverse(const Ray& ray)
 			for (index i = localNode.startIndex, e = localNode.endIndex; i < e; ++i)
 			{
 				auto triangleIndex = _indexes[i];
-				const auto& data = _intersectionData[triangleIndex];
+				auto data = _intersectionData[triangleIndex];
 
 				float4 pvec = ray.direction.crossXYZ(data.edge2to0);
 				float det = data.edge1to0.dot(pvec);
-				float d2e = det * det - localEpsilonSquared;
-				if (floatIsPositive(d2e))
+				if (det * det >= localEpsilonSquared)
 				{
 					float4 tvec = ray.origin - data.v0;
 					float u = tvec.dot(pvec) / det;
-					float um = u - localEpsilon;
-					float up = u - Constants::onePlusEpsilon;
-					if (floatIsPositive(um) & floatIsNegative(up))
+					if ((u >= localEpsilon) && (u <= localOnePlusEpsilon))
 					{
 						float4 qvec = tvec.crossXYZ(data.edge1to0);
 						float v = ray.direction.dot(qvec) / det;
 						float uv = u + v;
-						float vm = v - localEpsilon;
-						float uvp = uv - Constants::onePlusEpsilon;
-						if (floatIsPositive(vm) & floatIsNegative(uvp))
+						if ((v >= localEpsilon) && (uv <= localOnePlusEpsilon))
 						{
 							float intersectionDistance = data.edge2to0.dot(qvec) / det;
-							float iFar = intersectionDistance - tFar;
-							if (floatIsNegative(iFar))
+							if ((intersectionDistance <= minDistance) && (intersectionDistance <= tFar) && (intersectionDistance >= localEpsilon))
 							{
-								float ide = intersectionDistance - localEpsilon;
-								float idm = intersectionDistance - minDistance;
-								if (floatIsPositive(ide) & floatIsNegative(idm))
-								{
-									result.triangleIndex = triangleIndex;
-									result.intersectionPointBarycentric = float4(1.0f - uv, u, v, 0.0f);
-									minDistance = intersectionDistance;
-								}
+								result.triangleIndex = triangleIndex;
+								result.intersectionPointBarycentric = float4(1.0f - uv, u, v, 0.0f);
+								minDistance = intersectionDistance;
 							}
 						}
 					}
