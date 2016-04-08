@@ -1,9 +1,9 @@
 {
 	"model-name" : "media/material-test.obj",
 	"env-map" : "none",
-	"rays-per-pixel" : 32,
+	"rays-per-pixel" : 1024,
 	"camera-fov" : 32.0,
-	"camera-distance" : 190.0,
+	"camera-distance" : 220.0,
 	"camera-phi" : 0.0,
 	"camera-theta" : 30.0,
 	"camera-offset" : [0.0, 3.8, 0.0],

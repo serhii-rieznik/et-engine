@@ -94,7 +94,8 @@ void MainController::applicationDidLoad(et::RenderContext* rc)
     else
     {
 		// _rt.setEnvironmentSampler(rt::EnvironmentColorSampler::Pointer::create(rt::float4(1.0f)));
-		_rt.setEnvironmentSampler(rt::DirectionalLightSampler::Pointer::create(rt::float4(1.0f, 1.0f, -1.0f, 0.0f), rt::float4(1.0f)));
+		_rt.setEnvironmentSampler(rt::DirectionalLightSampler::Pointer::create(
+			rt::float4(1.0f, 1.0f, -1.0f, 0.0f), rt::float4(50.0f)));
     }
 	
 	Input::instance().keyPressed.connect([this](size_t key)
