@@ -39,6 +39,20 @@ namespace rt
 	private:
 		float4 _color;
 	};
+
+	class DirectionalLightSampler : public EnvironmentSampler
+	{
+	public:
+		ET_DECLARE_POINTER(DirectionalLightSampler);
+
+	public:
+		DirectionalLightSampler(const float4& color, const float4& direction);
+		float4 sampleInDirection(const float4&);
+
+	private:
+		float4 _color;
+		float4 _direction;
+	};
 	
 	class EnvironmentEquirectangularMapSampler : public EnvironmentSampler
 	{

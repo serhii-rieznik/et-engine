@@ -54,3 +54,14 @@ float4 EnvironmentEquirectangularMapSampler::sampleInDirection(const float4& r)
 	
     return _scale * (cx1 * (1.0f - dy) + cx2 * dy);
 }
+
+DirectionalLightSampler::DirectionalLightSampler(const float4& direction, const float4& color) :
+	_color(color), _direction(direction * float4(1.0f, 1.0f, 1.0f, 0.0f))
+{
+	_direction.normalize();
+}
+
+float4 DirectionalLightSampler::sampleInDirection(const float4& inDirection)
+{
+	return _color * inDirection.dotVector(_direction);
+}
