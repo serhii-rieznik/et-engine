@@ -12,11 +12,11 @@
 #include <et/app/application.h>
 #include <et/camera/camera.h>
 
-const float et::rt::Constants::epsilon = 0.0001f;
-const float et::rt::Constants::minusEpsilon = -epsilon;
-const float et::rt::Constants::onePlusEpsilon = 1.0f + epsilon;
-const float et::rt::Constants::epsilonSquared = epsilon * epsilon;
-const float et::rt::Constants::initialSplitValue = std::numeric_limits<float>::max();
+const et::rt::float_type et::rt::Constants::epsilon = 0.00025f;
+const et::rt::float_type et::rt::Constants::minusEpsilon = -epsilon;
+const et::rt::float_type et::rt::Constants::onePlusEpsilon = 1.0f + epsilon;
+const et::rt::float_type et::rt::Constants::epsilonSquared = epsilon * epsilon;
+const et::rt::float_type et::rt::Constants::initialSplitValue = std::numeric_limits<float>::max();
 
 class et::RaytracePrivate
 {
@@ -186,7 +186,7 @@ void RaytracePrivate::buildMaterialAndTriangles(s3d::Scene::Pointer scene)
 			materialIndex = materials.size();
 			materials.emplace_back();
 			auto& mat = materials.back();
-			float r = clamp(meshMaterial->getFloat(MaterialParameter::Roughness), 0.0f, 1.0f);
+			rt::float_type r = clamp(meshMaterial->getFloat(MaterialParameter::Roughness), 0.0f, 1.0f);
 			auto kA = meshMaterial->getVector(MaterialParameter::AmbientColor);
 			auto kD = meshMaterial->getVector(MaterialParameter::DiffuseColor);
 			mat.name = meshMaterial->name();
@@ -195,6 +195,17 @@ void RaytracePrivate::buildMaterialAndTriangles(s3d::Scene::Pointer scene)
 			mat.emissive = rt::float4(meshMaterial->getVector(MaterialParameter::EmissiveColor));
 			mat.roughness = HALF_PI * (1.0f - std::cos(HALF_PI * r));
 			mat.ior = meshMaterial->getFloat(MaterialParameter::Transparency);
+			if (mat.roughness < 1.0f)
+			{
+				if (mat.ior == 0.0f)
+				{
+					mat.type = rt::MaterialType::Conductor;
+				}
+				else
+				{
+					mat.type = rt::MaterialType::Dielectric;
+				}
+			}
 		}
 
 		mesh->prepareRenderBatches();
@@ -410,7 +421,7 @@ vec4 RaytracePrivate::raytracePixel(const vec2i& pixel, size_t samples, size_t& 
 
 void RaytracePrivate::estimateRegionsOrder()
 {
-	const float maxPossibleBounces = float(rt::PathTraceIntegrator::MaxTraverseDepth);
+	const rt::float_type maxPossibleBounces = float(rt::PathTraceIntegrator::MaxTraverseDepth);
 	const size_t maxSamples = 5;
 
 	const vec2i sx[maxSamples] =
@@ -435,7 +446,7 @@ void RaytracePrivate::estimateRegionsOrder()
 															 sy[i].x * r.size.y / sy[i].y), 1, bounces);
 			r.estimatedBounces += bounces;
 		}
-		float aspect = (maxPossibleBounces - float(r.estimatedBounces)) / maxPossibleBounces;
+		rt::float_type aspect = (maxPossibleBounces - float(r.estimatedBounces)) / maxPossibleBounces;
 		vec4 estimatedDensity = vec4(1.0f - 0.5f * aspect * aspect, 1.0f);
 
 		fillRegionWithColor(r, estimatedDensity * estimatedDensity);
@@ -498,9 +509,9 @@ void RaytracePrivate::renderBoundingBox(const rt::BoundingBox& box, const vec4& 
 
 void RaytracePrivate::renderLine(const vec2& from, const vec2& to, const vec4& color)
 {
-	float dt = 1.0f / length(to - from);
+	rt::float_type dt = 1.0f / length(to - from);
 
-	float t = 0.0f;
+	rt::float_type t = 0.0f;
 	while (t <= 1.0f)
 	{
 		renderPixel(mix(from, to, t), color);
@@ -517,7 +528,7 @@ void RaytracePrivate::renderPixel(const vec2& pixel, const vec4& color)
 	nearPixels[3] = nearPixels[0] + vec2(1.0f, 1.0f);
 	for (size_t i = 0; i < 4; ++i)
 	{
-		float d = length(nearPixels[i] - pixel);
+		rt::float_type d = length(nearPixels[i] - pixel);
 		vec2i px(static_cast<int>(nearPixels[i].x), static_cast<int>(nearPixels[i].y));
 		owner->_outputMethod(px, color * vec4(1.0f, 1.0f, 1.0f, 1.0f - d));
 	}

@@ -70,8 +70,7 @@ namespace rt
             KDTree& tree, EnvironmentSampler::Pointer&, const Material::Collection&) override;
 
     private:
-        void choseNewRayDirectionAndMaterial(float4& normal, const Material& mat, const float4& inDirection,
-            float4& direction, float4& output);
+        float4 compute(float4& normal, const Material& mat, const float4& inDirection, float4& direction);
     };
 }
 }

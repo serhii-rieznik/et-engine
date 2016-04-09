@@ -28,7 +28,7 @@ namespace et
 				VertexWeight(uint32_t i, float w) :
 					index(i), weight(w) { }
 			};
-			typedef std::vector<VertexWeight> VertexWeightVector;
+			using VertexWeightVector = Vector<VertexWeight>;
 			
 		public:
 			VertexWeightVector& weights()
@@ -84,17 +84,17 @@ namespace et
 			void addCluster(MeshDeformerCluster::Pointer cl)
 				{ _clusters.push_back(cl); }
 			
-			std::vector<MeshDeformerCluster::Pointer>& clusters()
+			Vector<MeshDeformerCluster::Pointer>& clusters()
 				{ return _clusters; }
 			
-			const std::vector<MeshDeformerCluster::Pointer>& clusters() const
+			const Vector<MeshDeformerCluster::Pointer>& clusters() const
 				{ return _clusters; }
 			
-			const std::vector<mat4>& calculateTransforms();
+			const Vector<mat4>& calculateTransforms();
 			
 		private:
-			std::vector<MeshDeformerCluster::Pointer> _clusters;
-			std::vector<mat4> _transformMatrices;
+			Vector<MeshDeformerCluster::Pointer> _clusters;
+			Vector<mat4> _transformMatrices;
 		};
 	}
 }

@@ -119,8 +119,8 @@
 			children = (
 				6E225A6B1CB408C800AE27BD /* et-ext */,
 				5C3C4FEA1C9E135700C5B47A /* et-static-mac.xcodeproj */,
-				A52329061B827D1900D00DD6 /* media */,
 				A52329031B8278C400D00DD6 /* config */,
+				A52329061B827D1900D00DD6 /* media */,
 				A5E2AE961B7D4A1800DE53DD /* main */,
 				A5E2AE971B7D4A1800DE53DD /* Supporting Files */,
 				A5E2AE951B7D4A1800DE53DD /* Products */,

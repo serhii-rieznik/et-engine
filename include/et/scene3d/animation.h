@@ -70,7 +70,7 @@ namespace et
 			void deserialize(Dictionary);
 			
 		private:
-			std::vector<Frame> _frames;
+			Vector<Frame> _frames;
 			
 			float _startTime = 0.0f;
 			float _stopTime = 0.0f;

@@ -16,7 +16,6 @@ namespace et
 	{  
 	public:
 		ET_DECLARE_POINTER(TextureDescription)
-		typedef std::vector<TextureDescription::Pointer> List;
 
 	public:
 		vec2i sizeForMipLevel(size_t level)

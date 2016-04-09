@@ -141,6 +141,4 @@ namespace et
 		IndexArrayFormat _format = IndexArrayFormat::Format_16bit;
 		PrimitiveType _primitiveType = PrimitiveType::Points;
 	};
-
-	typedef std::vector<IndexArray::Pointer> IndexArrayList;
 }

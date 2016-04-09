@@ -42,7 +42,7 @@ namespace et
 			
 		private:
 			using BatchFromMesh = std::pair<et::RenderBatch::Pointer, et::s3d::Mesh::Pointer>;
-			std::map<uint32_t, std::vector<BatchFromMesh>, std::greater<uint32_t>> _latestBatches;
+			std::map<uint32_t, Vector<BatchFromMesh>, std::greater<uint32_t>> _latestBatches;
 			RenderBatch::Pointer _bboxBatch;
 		};
 	}

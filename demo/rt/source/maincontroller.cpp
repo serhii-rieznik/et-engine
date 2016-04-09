@@ -76,11 +76,24 @@ void MainController::applicationDidLoad(et::RenderContext* rc)
 			ET_ASSERT(!isnan(_textureData[pos].w));
 		}
 	});
-	
-	// _rt.setIntegrator(rt::NormalsIntegrator::Pointer::create());
-	// _rt.setIntegrator(rt::AmbientOcclusionIntegrator::Pointer::create());
-	// _rt.setIntegrator(rt::FresnelIntegrator::Pointer::create());
-    _rt.setIntegrator(rt::PathTraceIntegrator::Pointer::create());
+
+	auto integrator = _options.stringForKey("integrator", "path-trace")->content;
+	if (integrator == "ao")
+	{
+		_rt.setIntegrator(rt::AmbientOcclusionIntegrator::Pointer::create());
+	}
+	else if (integrator == "normals")
+	{
+		_rt.setIntegrator(rt::NormalsIntegrator::Pointer::create());
+	}
+	else if (integrator == "fresnel")
+	{
+		_rt.setIntegrator(rt::FresnelIntegrator::Pointer::create());
+	}
+	else
+	{
+		_rt.setIntegrator(rt::PathTraceIntegrator::Pointer::create());
+	}
 
     auto envMap = _options.stringForKey("env-map")->content;
     if (envMap.empty() == false)
@@ -89,7 +102,7 @@ void MainController::applicationDidLoad(et::RenderContext* rc)
     if (fileExists(envMap))
     {
         auto texture = loadTexture(envMap);
-        _rt.setEnvironmentSampler(rt::EnvironmentEquirectangularMapSampler::Pointer::create(texture, rt::float4(2.0f)));
+        _rt.setEnvironmentSampler(rt::EnvironmentEquirectangularMapSampler::Pointer::create(texture, rt::float4(3.0f)));
     }
     else
     {

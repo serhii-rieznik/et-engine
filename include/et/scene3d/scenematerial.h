@@ -22,8 +22,8 @@ namespace et
 		{
 		public:
 			ET_DECLARE_POINTER(SceneMaterial)
-			using List = std::vector<SceneMaterial::Pointer>;
-			using Map = std::map<std::string, SceneMaterial::Pointer>;
+			using Collection = Vector<SceneMaterial::Pointer>;
+			using Map = et::Map<std::string, SceneMaterial::Pointer>;
 
 		public:
 			SceneMaterial();

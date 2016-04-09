@@ -40,8 +40,6 @@ namespace et
 		ET_DECLARE_EVENT1(loaded, s3d::ElementContainer::Pointer)
 
 	private:
-		typedef StaticDataStorage<size_t, 3> OBJVertex;
-
 		struct OBJMeshIndexBounds
 		{
 			std::string name;
@@ -53,34 +51,35 @@ namespace et
 			OBJMeshIndexBounds(const std::string& n, uint32_t s, uint32_t c, s3d::SceneMaterial::Pointer m, const vec3& aCenter) :
 				name(n), start(s), count(c), center(aCenter), material(m) { }
 		};
-		typedef std::vector<OBJMeshIndexBounds> OBJMeshIndexBoundsList;
-		typedef std::vector<OBJVertex> VertexList;
 
 		struct OBJFace
 		{
-			int smoothingGroupIndex;
+			enum
+			{
+				MaxVertexLinks = 16,
+				MaxVertexSize = 3
+			};
+			using VertexLink = StaticDataStorage<size_t, MaxVertexSize>;
 
-			VertexList vertices;
-
-			OBJFace() : 
-				smoothingGroupIndex(0) { }
+			StaticDataStorage<VertexLink, MaxVertexLinks> vertexLinks;
+			uint32_t vertexLinksCount = 0;
+			uint32_t smoothingGroupIndex = 0;
 		};
-		typedef std::vector<OBJFace> FaceList;
 
 		struct OBJGroup
 		{
 			std::string name;
 			std::string material;
-			FaceList faces;
+			Vector<OBJFace> faces;
 			
 			OBJGroup()
-				{ }
+				{ faces.reserve(0xffff); }
 			
 			OBJGroup(const std::string& aName) :
-				name(aName) { }
+				name(aName) { faces.reserve(0xffff); }
 			
 			OBJGroup(const std::string& aName, const std::string& aMat) :
-				name(aName), material(aMat) { }
+				name(aName), material(aMat) { faces.reserve(0xffff); }
 		};
 
 	private:
@@ -105,16 +104,16 @@ namespace et
 		std::ifstream materialFile;
 
 		s3d::SceneMaterial::Pointer _lastMaterial;
-		s3d::SceneMaterial::List _materials;
-		OBJMeshIndexBoundsList _meshes;
+		s3d::SceneMaterial::Collection _materials;
+		Vector<OBJMeshIndexBounds> _meshes;
 		
         IndexArray::Pointer _indices;
 		VertexStorage::Pointer _vertexData;
 
-		std::vector<et::vec3, et::SharedBlockAllocatorSTDProxy<et::vec3>> _vertices;
-		std::vector<et::vec3, et::SharedBlockAllocatorSTDProxy<et::vec3>> _normals;
-		std::vector<et::vec2, et::SharedBlockAllocatorSTDProxy<et::vec2>> _texCoords;
-		std::vector<OBJGroup*,et::SharedBlockAllocatorSTDProxy<OBJGroup*>> _groups;
+		Vector<et::vec3> _vertices;
+		Vector<et::vec3> _normals;
+		Vector<et::vec2> _texCoords;
+		Vector<OBJGroup*> _groups;
 
 		OBJGroup* lastGroup = nullptr;
 		size_t _loadOptions = Option_JustLoad;

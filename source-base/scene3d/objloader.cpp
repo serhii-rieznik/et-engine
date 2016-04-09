@@ -262,7 +262,6 @@ void OBJLoader::loadData(bool async, ObjectsCache& cache)
 		else if (key == 'f') // faces
 		{
 			OBJFace face;
-			face.vertices.reserve(1024);
 			std::getline(inputFile, line);
 			trim(line);
 
@@ -271,10 +270,10 @@ void OBJLoader::loadData(bool async, ObjectsCache& cache)
 
 			for (auto inFace : faces)
 			{
-				OBJVertex vertex;
+				OBJFace::VertexLink vertex;
 				vertex.fill(0);
 
-				std::vector<int> indexes;
+				Vector<int> indexes;
 				indexes.reserve(3);
 				splitAndWrite(inFace, '/', [&indexes](const std::string& s)
 					{ indexes.push_back(strToInt(s)); });
@@ -311,7 +310,7 @@ void OBJLoader::loadData(bool async, ObjectsCache& cache)
 					++i;
 				}
 				
-				face.vertices.push_back(vertex);
+				face.vertexLinks[face.vertexLinksCount++] = vertex;
 			}
 			
 			if (lastGroup == nullptr)
@@ -662,7 +661,6 @@ void OBJLoader::loadMaterials(const std::string& fileName, bool async, ObjectsCa
 				{              
 					int value = 0;
 					materialFile >> value;
-					log::warning("[OBJLoader] Illumination parameter ignored: %d", value);
 				}
 				else
 				{
@@ -735,8 +733,8 @@ void OBJLoader::processLoadedData()
 	{
 		for (const auto& face : group->faces)
 		{
-			ET_ASSERT(face.vertices.size() > 1);
-			totalTriangles += static_cast<uint32_t>(face.vertices.size() - 2);
+			ET_ASSERT(face.vertexLinksCount > 1);
+			totalTriangles += static_cast<uint32_t>(face.vertexLinksCount - 2);
 		}
 	}
 	
@@ -775,7 +773,7 @@ void OBJLoader::processLoadedData()
 	
 	uint32_t index = 0;
 	
-	auto PUSH_VERTEX = [this, &pos, &nrm, &tex, &index, hasTexCoords, hasNormals](const OBJVertex& vertex, const vec3& offset)
+	auto PUSH_VERTEX = [this, &pos, &nrm, &tex, &index, hasTexCoords, hasNormals](const OBJFace::VertexLink& vertex, const vec3& offset)
 	{
 		{
 			ET_ASSERT(vertex[0] < _vertices.size());
@@ -809,12 +807,12 @@ void OBJLoader::processLoadedData()
 			
 			for (auto face : group->faces)
 			{
-				size_t numTriangles = face.vertices.size() - 2;
+				size_t numTriangles = face.vertexLinksCount - 2;
 				for (size_t i = 1; i <= numTriangles; ++i)
 				{
-					center += _vertices[face.vertices[0][0]];
-					center += _vertices[face.vertices[i][0]];
-					center += _vertices[face.vertices[i+1][0]];
+					center += _vertices[face.vertexLinks[0][0]];
+					center += _vertices[face.vertexLinks[i][0]];
+					center += _vertices[face.vertexLinks[i+1][0]];
 					totalVertices += 3;
 				}
 			}
@@ -825,12 +823,12 @@ void OBJLoader::processLoadedData()
 		
 		for (auto face : group->faces)
 		{
-			size_t numTriangles = face.vertices.size() - 2;
+			size_t numTriangles = face.vertexLinksCount - 2;
 			for (size_t i = 1; i <= numTriangles; ++i)
 			{
-				PUSH_VERTEX(face.vertices[0], center);
-				PUSH_VERTEX(face.vertices[i], center);
-				PUSH_VERTEX(face.vertices[i+1], center);
+				PUSH_VERTEX(face.vertexLinks[0], center);
+				PUSH_VERTEX(face.vertexLinks[i], center);
+				PUSH_VERTEX(face.vertexLinks[i+1], center);
 			}
 		}
 		

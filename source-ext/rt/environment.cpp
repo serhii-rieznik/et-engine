@@ -36,8 +36,8 @@ float4 EnvironmentEquirectangularMapSampler::sampleTexture(vec2i texCoord)
 
 float4 EnvironmentEquirectangularMapSampler::sampleInDirection(const float4& r)
 {
-	float phi = 0.5f + std::atan2(r.cZ(), r.cX()) / DOUBLE_PI;
-	float theta = 0.5f + std::asin(r.cY()) / PI;
+	float_type phi = 0.5f + std::atan2(r.cZ(), r.cX()) / DOUBLE_PI;
+	float_type theta = 0.5f + std::asin(r.cY()) / PI;
 	
 	vec2 tc(phi * _data->size.x, theta * _data->size.y);
 	vec2i baseTexCoord(static_cast<int>(tc.x), static_cast<int>(tc.y));
@@ -47,8 +47,8 @@ float4 EnvironmentEquirectangularMapSampler::sampleInDirection(const float4& r)
     float4 c11 = sampleTexture(baseTexCoord); --baseTexCoord.x;
     float4 c10 = sampleTexture(baseTexCoord);
 	
-    float dx = tc.x - std::floor(tc.x);
-    float dy = tc.y - std::floor(tc.y);
+    float_type dx = tc.x - std::floor(tc.x);
+    float_type dy = tc.y - std::floor(tc.y);
     float4 cx1 = c00 * (1.0f - dx) + c01 * dx;
 	float4 cx2 = c10 * (1.0f - dx) + c11 * dx;
 	
@@ -63,6 +63,6 @@ DirectionalLightSampler::DirectionalLightSampler(const float4& direction, const 
 
 float4 DirectionalLightSampler::sampleInDirection(const float4& inDirection)
 {
-	float dp = std::max(0.0f, inDirection.dot(_direction));
+	float_type dp = std::max(0.0f, inDirection.dot(_direction));
 	return _color * std::pow(dp, 64.0f);
 }

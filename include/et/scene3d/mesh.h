@@ -48,7 +48,7 @@ namespace et
 			void setDeformer(MeshDeformer::Pointer d)
 				{ _deformer = d; }
 			
-			const std::vector<mat4>& deformationMatrices();
+			const Vector<mat4>& deformationMatrices();
 
 			bool skinned() const;
 			VertexStorage::Pointer bakeDeformations();
@@ -71,7 +71,7 @@ namespace et
 			SupportData _supportData;
 			BoundingBox _boundingBox;
 			float _boundingSphereRadius = 0.0f;
-			std::vector<mat4> _undeformedTransformationMatrices;
+			Vector<mat4> _undeformedTransformationMatrices;
 		};
 	}
 }

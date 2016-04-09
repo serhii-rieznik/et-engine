@@ -28,13 +28,13 @@ namespace et
 		
 		void pushRenderBatch(RenderBatch::Pointer);
 		
-		std::vector<RenderBatch::Pointer>& renderBatches();
-		const std::vector<RenderBatch::Pointer>& renderBatches() const;
+		Vector<RenderBatch::Pointer>& renderBatches();
+		const Vector<RenderBatch::Pointer>& renderBatches() const;
 		
 		const et::Camera& camera() const;
 		
 	private:
 		et::Camera _camera;
-		std::vector<RenderBatch::Pointer> _renderBatches;
+		Vector<RenderBatch::Pointer> _renderBatches;
 	};
 }

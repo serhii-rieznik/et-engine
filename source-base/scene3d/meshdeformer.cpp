@@ -18,7 +18,7 @@ void MeshDeformerCluster::sortWeights()
 	});
 }
 
-const std::vector<mat4>& MeshDeformer::calculateTransforms()
+const Vector<mat4>& MeshDeformer::calculateTransforms()
 {
 	_transformMatrices.clear();
 	_transformMatrices.reserve(std::min(size_t(4), _clusters.size()));

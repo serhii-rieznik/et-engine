@@ -148,7 +148,7 @@ const BoundingBox& Mesh::tranformedBoundingBox()
 	return _supportData.transformedBoundingBox;
 }
 
-const std::vector<mat4>& Mesh::deformationMatrices()
+const Vector<mat4>& Mesh::deformationMatrices()
 {
 	if (_deformer.valid())
 		return _deformer->calculateTransforms();
@@ -230,7 +230,7 @@ void copyVector3Transformed(VertexStorage::Pointer from, VertexStorage::Pointer 
 }
 
 void skinVector3Rotated(VertexStorage::Pointer from, VertexStorage::Pointer to, VertexAttributeUsage attrib,
-	const std::vector<mat4>& transforms)
+	const Vector<mat4>& transforms)
 {
 	if (!from->hasAttribute(attrib)) return;
 	
@@ -249,7 +249,7 @@ void skinVector3Rotated(VertexStorage::Pointer from, VertexStorage::Pointer to, 
 }
 
 void skinVector3Transformed(VertexStorage::Pointer from, VertexStorage::Pointer to, VertexAttributeUsage attrib,
-	const std::vector<mat4>& transforms)
+	const Vector<mat4>& transforms)
 {
 	if (!from->hasAttribute(attrib)) return;
 	

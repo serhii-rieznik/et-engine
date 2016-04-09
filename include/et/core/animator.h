@@ -27,8 +27,6 @@ namespace et
 		BaseAnimator(int aTag, TimerPool* tp) :
 			TimedObject(tp), _tag(aTag) { }
 	};
-
-	typedef std::vector<BaseAnimator*> AnimatorList;
 	
 	template <typename T>
 	inline T linearInterpolationFunction(const T& from, const T& to, float t)

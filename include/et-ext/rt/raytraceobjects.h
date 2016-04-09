@@ -14,6 +14,8 @@ namespace et
 {
 	namespace rt
 	{
+		using float_type = float;
+		using float3 = vector3<float_type>;
 		using float4 = vec4simd;
 		using index = uint_fast32_t;
 		
@@ -24,22 +26,30 @@ namespace et
 		
 		struct Constants
 		{
-			static const float epsilon;
-			static const float minusEpsilon;
-			static const float onePlusEpsilon;
-			static const float epsilonSquared;
-			static const float initialSplitValue;
+			static const float_type epsilon;
+			static const float_type minusEpsilon;
+			static const float_type onePlusEpsilon;
+			static const float_type epsilonSquared;
+			static const float_type initialSplitValue;
 		};
 
 #		pragma pack(push, 16)
+		enum MaterialType : uint32_t
+		{
+			Diffuse,
+			Conductor,
+			Dielectric,
+		};
+
 		struct ET_ALIGNED(16) Material
 		{
 			std::string name;
 			float4 diffuse;
 			float4 specular;
 			float4 emissive;
-			float roughness = 0.0f;
-			float ior = 0.0f;
+			float_type roughness = 0.0f;
+			float_type ior = 0.0f;
+			MaterialType type = MaterialType::Diffuse;
             
             using Collection = Vector<Material>;
 		};
@@ -53,10 +63,10 @@ namespace et
 			float4 edge2to0;
 			float4 _invDenom;
 			index materialIndex = 0;
-			float _invDenomValue = 0.0f;
-			float _dot00 = 0.0f;
-			float _dot01 = 0.0f;
-			float _dot11 = 0.0f;
+			float_type _invDenomValue = 0.0f;
+			float_type _dot00 = 0.0f;
+			float_type _dot01 = 0.0f;
+			float_type _dot11 = 0.0f;
 
 			void computeSupportData()
 			{
@@ -72,10 +82,10 @@ namespace et
 			float4 barycentric(const float4& inP) const
 			{
 				float4 p = inP - v[0];
-				float dot20 = p.dot(edge1to0);
-				float dot21 = p.dot(edge2to0);
-				float y = _dot11 * dot20 - _dot01 * dot21;
-				float z = _dot00 * dot21 - _dot01 * dot20;
+				float_type dot20 = p.dot(edge1to0);
+				float_type dot21 = p.dot(edge2to0);
+				float_type y = _dot11 * dot20 - _dot01 * dot21;
+				float_type z = _dot00 * dot21 - _dot01 * dot20;
 				return float4(_invDenomValue - y - z, y, z, 0.0f) * _invDenom;
 			}
 
@@ -118,7 +128,7 @@ namespace et
 				return t[0] * b.shuffle<0, 0, 0, 3>() + t[1] * b.shuffle<1, 1, 1, 3>() + t[2] * b.shuffle<2, 2, 2, 3>();
 			}
 		};
-		using TriangleList = std::vector<rt::Triangle, SharedBlockAllocatorSTDProxy<rt::Triangle>>;
+		using TriangleList = Vector<rt::Triangle>;
 		
 		struct ET_ALIGNED(16) IntersectionData
 		{
@@ -129,8 +139,7 @@ namespace et
 			IntersectionData(const float4& v, const float4& e1, const float4& e2) :
 				v0(v), edge1to0(e1), edge2to0(e2) { }
 		};
-		using IntersectionDataList =
-			std::vector<IntersectionData, SharedBlockAllocatorSTDProxy<rt::IntersectionData>>;
+		using IntersectionDataList = Vector<IntersectionData>;
 
 		struct ET_ALIGNED(16) BoundingBox
 		{
@@ -155,20 +164,20 @@ namespace et
 			float4 maxVertex() const
 				{ return center + halfSize; }
 			
-			float square() const
+			float_type square() const
 			{
-				float xy = halfSize.cX() * halfSize.cY();
-				float yz = halfSize.cY() * halfSize.cZ();
-				float xz = halfSize.cX() * halfSize.cZ();
+				float_type xy = halfSize.cX() * halfSize.cY();
+				float_type yz = halfSize.cY() * halfSize.cZ();
+				float_type xz = halfSize.cX() * halfSize.cZ();
 				return 4.0f * (xy + yz + xz);
 			}
 			
-			float volume() const
+			float_type volume() const
 			{
 				return 8.0f * halfSize.cX() * halfSize.cY() * halfSize.cZ();
 			};
 		};
-		using BoundingBoxList = std::vector<BoundingBox, SharedBlockAllocatorSTDProxy<BoundingBox>>;
+		using BoundingBoxList = Vector<BoundingBox>;
 #		pragma pack(pop)
 
 		struct Ray
@@ -193,11 +202,11 @@ namespace et
 			bool sampled = false;
 		};
 		
-		inline float fastRandomFloat()
+		inline float_type fastRandomFloat()
 		{
 			union
 			{
-				float fres;
+				float_type fres;
 				unsigned int ires;
 			};
 			static unsigned int seed = 1;
@@ -214,55 +223,29 @@ namespace et
 		{
             return (~reinterpret_cast<uint_fast32_t&>(a)) >> 31;
 		}
-		
-		inline bool rayTriangle(const Ray& ray, const Triangle* tri, float& distance, float4& barycentric)
-		{
-			float4 pvec = ray.direction.crossXYZ(tri->edge2to0);
-			float det = tri->edge1to0.dot(pvec);
-			
-			if (det * det < Constants::epsilonSquared)
-				return false;
-			
-			float4 tvec = ray.origin - tri->v[0];
-			float u = tvec.dot(pvec) / det;
-			
-			if ((u < Constants::minusEpsilon) || (u > Constants::onePlusEpsilon))
-				return false;
-
-			float4 qvec = tvec.crossXYZ(tri->edge1to0);
-			float v = ray.direction.dot(qvec) / det;
-			
-			if ((v < Constants::minusEpsilon) || (u + v > Constants::onePlusEpsilon))
-				return false;
-
-			distance = tri->edge2to0.dot(qvec) / det;
-			barycentric = float4(1.0f - u - v, u, v, 0.0f);
-			
-			return distance > Constants::epsilon;
-		}
 
 		inline float4 perpendicularVector(const float4& normal)
 		{
-			vec3 componentsLength = (normal * normal).xyz();
+			auto componentsLength = (normal * normal).xyz();
 
 			if (componentsLength.x > 0.5f)
 			{
-				float scaleFactor = std::sqrt(componentsLength.z + componentsLength.x);
+				float_type scaleFactor = std::sqrt(componentsLength.z + componentsLength.x);
 				return normal.shuffle<2, 3, 0, 1>() * float4(1.0f / scaleFactor, 0.0f, -1.0f / scaleFactor, 0.0f);
 			}
 			else if (componentsLength.y > 0.5f)
 			{
-				float scaleFactor = std::sqrt(componentsLength.y + componentsLength.x);
+				float_type scaleFactor = std::sqrt(componentsLength.y + componentsLength.x);
 				return normal.shuffle<1, 0, 3, 3>() * float4(-1.0f / scaleFactor, 1.0f / scaleFactor, 0.0f, 0.0f);
 			}
-			float scaleFactor = std::sqrt(componentsLength.z + componentsLength.y);
+			float_type scaleFactor = std::sqrt(componentsLength.z + componentsLength.y);
 			return normal.shuffle<3, 2, 1, 3>() * float4(0.0f, -1.0f / scaleFactor, 1.0f / scaleFactor, 0.0f);
 		}
 
-		inline float4 randomVectorOnHemisphere(const float4& normal, float distributionAngle)
+		inline float4 randomVectorOnHemisphere(const float4& normal, float_type distributionAngle)
 		{
-			float phi = fastRandomFloat() * DOUBLE_PI;
-			float theta = std::sin(fastRandomFloat() * clamp(distributionAngle, 0.0f, HALF_PI));
+			float_type phi = fastRandomFloat() * DOUBLE_PI;
+			float_type theta = std::sin(fastRandomFloat() * clamp(distributionAngle, 0.0f, 0.999f * HALF_PI));
 			float4 u = perpendicularVector(normal);
 			float4 result = (u * std::cos(phi) + u.crossXYZ(normal) * std::sin(phi)) * std::sqrt(theta) +
 				normal * std::sqrt(1.0f - theta);
@@ -297,7 +280,7 @@ namespace et
 		{
 			float4 bounds[2] = { box.minVertex(), box.maxVertex() };
 			
-			float tmin, tmax, tymin, tymax, tzmin, tzmax;
+			float_type tmin, tmax, tymin, tymax, tzmin, tzmax;
 			
 			if (r.direction.cX() >= 0)
 			{
@@ -368,10 +351,10 @@ namespace et
 			
 			float4 parameters[2] = { box.minVertex(), box.maxVertex() };
 			
-			float txmin = (parameters[r_sign_x].cX() - origin.x) * invDirection.x;
-			float tymin = (parameters[r_sign_y].cY() - origin.y) * invDirection.y;
-			float txmax = (parameters[1 - r_sign_x].cX() - origin.x) * invDirection.x;
-			float tymax = (parameters[1 - r_sign_y].cY() - origin.y) * invDirection.y;
+			float_type txmin = (parameters[r_sign_x].cX() - origin.x) * invDirection.x;
+			float_type tymin = (parameters[r_sign_y].cY() - origin.y) * invDirection.y;
+			float_type txmax = (parameters[1 - r_sign_x].cX() - origin.x) * invDirection.x;
+			float_type tymax = (parameters[1 - r_sign_y].cY() - origin.y) * invDirection.y;
 			
 			if ((txmin >= tymax) || (tymin >= txmax))
 				return false;
@@ -382,24 +365,24 @@ namespace et
 				txmax = tymax;
 			
 			int r_sign_z = (invDirection.z < 0.0f ? 1 : 0);
-			float tzmin = (parameters[r_sign_z].cZ() - origin.z) * invDirection.z;
-			float tzmax = (parameters[1 - r_sign_z].cZ() - origin.z) * invDirection.z;
+			float_type tzmin = (parameters[r_sign_z].cZ() - origin.z) * invDirection.z;
+			float_type tzmax = (parameters[1 - r_sign_z].cZ() - origin.z) * invDirection.z;
 			
 			return ((txmin < tzmax) && (tzmin < txmax));
 		}
 		
-		inline float computeRefractiveCoefficient(const float4& incidence, const float4& normal, float eta)
+		inline float_type computeRefractiveCoefficient(const float4& incidence, const float4& normal, float_type eta)
 		{
-			float NdotI = normal.dot(incidence);
+			float_type NdotI = normal.dot(incidence);
 			return 1.0f - (eta * eta) * (1.0f - NdotI * NdotI);
 		}
 		
-		inline float computeFresnelTerm(const float4& incidence, const float4& normal, float eta)
+		inline float_type computeFresnelTerm(const float4& incidence, const float4& normal, float_type eta)
 		{
-			float cosTheta = std::abs(incidence.dot(normal));
-			float sinTheta = std::sqrt(1.0f - cosTheta * cosTheta);
-			float etaCosTheta = eta * cosTheta;
-			float v = std::sqrt(1.0f - sqr(eta * sinTheta));
+			float_type cosTheta = std::abs(incidence.dot(normal));
+			float_type sinTheta = std::sqrt(1.0f - cosTheta * cosTheta);
+			float_type etaCosTheta = eta * cosTheta;
+			float_type v = std::sqrt(1.0f - sqr(eta * sinTheta));
 			return sqr((etaCosTheta - v) / (etaCosTheta + v + 0.000001f));
 		}
 

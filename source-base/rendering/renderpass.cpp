@@ -29,12 +29,12 @@ void RenderPass::pushRenderBatch(RenderBatch::Pointer batch)
 	_renderBatches.push_back(batch);
 }
 
-const std::vector<RenderBatch::Pointer>& RenderPass::renderBatches() const
+const Vector<RenderBatch::Pointer>& RenderPass::renderBatches() const
 {
 	return _renderBatches;
 }
 
-std::vector<RenderBatch::Pointer>& RenderPass::renderBatches()
+Vector<RenderBatch::Pointer>& RenderPass::renderBatches()
 {
 	return _renderBatches;
 }

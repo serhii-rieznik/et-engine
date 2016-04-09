@@ -1139,8 +1139,8 @@ VertexArray::Pointer primitives::buildLinearIndexArray(VertexArray::Pointer vert
 	 * Count unique vertices
 	 */
 	uint32_t dataSize = vertexArray->size();
-	std::map<uint64_t, uint32_t> countMap;
-	std::vector<uint64_t> hashes;
+	Map<uint64_t, uint32_t> countMap;
+	Vector<uint64_t> hashes;
 	hashes.reserve(vertexArray->size());
 	
 	auto oldPos = vertexArray->chunk(VertexAttributeUsage::Position).accessData<vec3>(0);
