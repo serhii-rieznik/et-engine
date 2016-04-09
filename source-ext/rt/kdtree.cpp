@@ -138,6 +138,7 @@ void KDTree::distributeTrianglesToChildren(size_t nodeIndex)
 
 	Vector<index> rightIndexes;
 	rightIndexes.reserve(node.numIndexes());
+	
 	Vector<index> leftIndexes;
 	leftIndexes.reserve(node.numIndexes());
 
@@ -325,11 +326,11 @@ struct KDTreeSearchNode
         ind(n), time(t) { }
 };
 
+#define DECL_INT_FLOAT_UNION(name, exp) union { float_type f; int_fast32_t i; } name = { (exp) }
+
 KDTree::TraverseResult KDTree::traverse(const Ray& ray)
 {
-	auto localEpsilon = Constants::epsilon;
-	auto localEpsilonSquared = Constants::epsilonSquared;
-	auto localOnePlusEpsilon = Constants::onePlusEpsilon;
+	DECL_INT_FLOAT_UNION(one, 1.0f);
 
 	KDTree::TraverseResult result;
 	
@@ -339,12 +340,9 @@ KDTree::TraverseResult KDTree::traverse(const Ray& ray)
 	if (!rayToBoundingBox(ray, _boundingBoxes.front(), tNear, tFar))
 		return result;
 	
-	if (tNear < localEpsilon)
-		tNear = localEpsilon;
-    
-    tNear -= localEpsilon;
-    tFar += localEpsilon;
-	
+	if (tNear < 0.0f)
+		tNear = 0.0f;
+
 	ET_ALIGNED(16) float_type direction[4];
 	ray.direction.loadToFloats(direction);
 
@@ -359,14 +357,14 @@ KDTree::TraverseResult KDTree::traverse(const Ray& ray)
 		{
 			int side = floatIsNegative(direction[localNode.axis]);
 			float_type tSplit = localNode.distance / direction[localNode.axis] - originDivDirection[localNode.axis];
-			float_type tNearSplit = tSplit - tFar;
-			float_type tFarSplit = tSplit - tNear;
+			DECL_INT_FLOAT_UNION(tNearSplit, tSplit - tFar);
+			DECL_INT_FLOAT_UNION(tFarSplit, tSplit - tNear);
 
-			if (floatIsNegative(tFarSplit))
+			if (tFarSplit.i < 0)
 			{
 				localNode = _nodes[localNode.children[1 - side]];
 			}
-			else if (floatIsPositive(tNearSplit))
+			else if (tNearSplit.i > 0)
 			{
 				localNode = _nodes[localNode.children[side]];
 			}
@@ -389,23 +387,23 @@ KDTree::TraverseResult KDTree::traverse(const Ray& ray)
 				auto data = _intersectionData[triangleIndex];
 
 				float4 pvec = ray.direction.crossXYZ(data.edge2to0);
-				float_type det = data.edge1to0.dot(pvec);
-				if (det * det >= localEpsilonSquared)
+				DECL_INT_FLOAT_UNION(det, data.edge1to0.dot(pvec));
+				if (det.i > 0)
 				{
 					float4 tvec = ray.origin - data.v0;
-					float_type u = tvec.dot(pvec) / det;
-					if ((u >= localEpsilon) && (u <= localOnePlusEpsilon))
+					DECL_INT_FLOAT_UNION(u, tvec.dot(pvec) / det.f);
+					if ((u.i > 0) && (u.i <= one.i))
 					{
 						float4 qvec = tvec.crossXYZ(data.edge1to0);
-						float_type v = ray.direction.dot(qvec) / det;
-						float_type uv = u + v;
-						if ((v >= localEpsilon) && (uv <= localOnePlusEpsilon))
+						DECL_INT_FLOAT_UNION(v, ray.direction.dot(qvec) / det.f);
+						DECL_INT_FLOAT_UNION(uv, u.f + v.f);
+						if ((v.i > 0) && (uv.i <= one.i))
 						{
-							float_type intersectionDistance = data.edge2to0.dot(qvec) / det;
-							if ((intersectionDistance <= minDistance) && (intersectionDistance <= tFar) && (intersectionDistance >= localEpsilon))
+							float_type intersectionDistance = data.edge2to0.dot(qvec) / det.f;
+							if ((intersectionDistance <= minDistance) && (intersectionDistance <= tFar) && (intersectionDistance > 0.0f))
 							{
 								result.triangleIndex = triangleIndex;
-								result.intersectionPointBarycentric = float4(1.0f - uv, u, v, 0.0f);
+								result.intersectionPointBarycentric = float4(1.0f - uv.f, u.f, v.f, 0.0f);
 								minDistance = intersectionDistance;
 							}
 						}
@@ -454,7 +452,7 @@ KDTree::Stats KDTree::nodesStatistics() const
 				++result.emptyLeafNodes;
 		}
 		
-		if (node.numIndexes() > 0)
+		if ((node.children[0] == InvalidIndex) && (node.children[1] == InvalidIndex) && (node.numIndexes() > 0))
 		{
 			result.maxTrianglesPerNode = std::max(result.maxTrianglesPerNode, node.numIndexes());
 			result.minTrianglesPerNode = std::min(result.minTrianglesPerNode, node.numIndexes());

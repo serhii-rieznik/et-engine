@@ -12,7 +12,7 @@ namespace et
 namespace rt
 {
    
-float4 AmbientOcclusionIntegrator::gather(const Ray& inRay, size_t depth, size_t& maxDepth,
+float4 AmbientOcclusionIntegrator::shoot(const Ray& inRay, size_t depth, size_t& maxDepth,
     KDTree& tree, EnvironmentSampler::Pointer& env, const Material::Collection&)
 {
     KDTree::TraverseResult hit0 = tree.traverse(inRay);
@@ -21,13 +21,12 @@ float4 AmbientOcclusionIntegrator::gather(const Ray& inRay, size_t depth, size_t
     
     const auto& tri = tree.triangleAtIndex(hit0.triangleIndex);
     float4 surfaceNormal = tri.interpolatedNormal(hit0.intersectionPointBarycentric);
-    float4 nextDirection = randomVectorOnHemisphere(surfaceNormal, HALF_PI);
-    float4 nextOrigin = hit0.intersectionPoint + nextDirection * Constants::epsilon;
-    
-    if (tree.traverse(Ray(nextOrigin, nextDirection)).triangleIndex == InvalidIndex)
+	float4 nextDirection = randomVectorOnHemisphere(surfaceNormal, HALF_PI);
+	float4 nextOrigin = hit0.intersectionPoint + nextDirection * Constants::epsilon;
+	if (tree.traverse(Ray(nextOrigin, nextDirection)).triangleIndex == InvalidIndex)
 	{
 		++maxDepth;
-        return env->sampleInDirection(nextDirection) * nextDirection.dot(surfaceNormal);
+		return env->sampleInDirection(nextDirection) * nextDirection.dot(surfaceNormal);
 	}
 
     return float4(0.0f);
@@ -45,7 +44,7 @@ struct ET_ALIGNED(16) Bounce
         add(a), mul(m) { }
 };
     
-float4 PathTraceIntegrator::gather(const Ray& inRay, size_t depth, size_t& maxDepth,
+float4 PathTraceIntegrator::shoot(const Ray& inRay, size_t depth, size_t& maxDepth,
     KDTree& tree, EnvironmentSampler::Pointer& env, const Material::Collection& materials)
 {
     auto currentRay = inRay;
@@ -68,8 +67,8 @@ float4 PathTraceIntegrator::gather(const Ray& inRay, size_t depth, size_t& maxDe
         currentRay.origin = traverse.intersectionPoint + currentRay.direction * Constants::epsilon;
 		bounces.emplace(mat.emissive, outputColor);
     }
-    maxDepth = bounces.size();
-    
+	maxDepth = bounces.size();
+
     float4 result(0.0f);
     do
     {
@@ -78,7 +77,8 @@ float4 PathTraceIntegrator::gather(const Ray& inRay, size_t depth, size_t& maxDe
         bounces.pop();
     }
     while (bounces.hasSomething());
-    
+
+
     return result;
 }
 
@@ -180,7 +180,7 @@ float4 PathTraceIntegrator::compute(float4& normal, const Material& mat, const f
 /*
  * Normals
  */
-float4 NormalsIntegrator::gather(const Ray& inRay, size_t depth, size_t& maxDepth, KDTree& tree,
+float4 NormalsIntegrator::shoot(const Ray& inRay, size_t depth, size_t& maxDepth, KDTree& tree,
 	EnvironmentSampler::Pointer& env, const Material::Collection&)
 {
 	KDTree::TraverseResult hit0 = tree.traverse(inRay);
@@ -194,7 +194,7 @@ float4 NormalsIntegrator::gather(const Ray& inRay, size_t depth, size_t& maxDept
 /*
  * Fresnel
  */
-float4 FresnelIntegrator::gather(const Ray& inRay, size_t depth, size_t& maxDepth, KDTree& tree,
+float4 FresnelIntegrator::shoot(const Ray& inRay, size_t depth, size_t& maxDepth, KDTree& tree,
 	EnvironmentSampler::Pointer& env, const Material::Collection& materials)
 {
 	KDTree::TraverseResult hit0 = tree.traverse(inRay);
@@ -204,11 +204,14 @@ float4 FresnelIntegrator::gather(const Ray& inRay, size_t depth, size_t& maxDept
 	++maxDepth;
 	const auto& tri = tree.triangleAtIndex(hit0.triangleIndex);
 	const auto& mat = materials[tri.materialIndex];
-	
+
+	if (mat.ior == 0.0f)
+		return float4(1.0f, 0.0f, 1.0f, 0.0f);
+
 	float4 normal = tri.interpolatedNormal(hit0.intersectionPointBarycentric);
 	normal = randomVectorOnHemisphere(normal, mat.roughness);
 	
-	float_type eta = 1.0f / mat.ior;
+	float_type eta = mat.ior > 1.0f ? 1.0f / mat.ior : mat.ior;
 	float_type k = computeRefractiveCoefficient(inRay.direction, normal, eta);
 	if (k >= Constants::epsilon)
 	{
@@ -217,7 +220,6 @@ float4 FresnelIntegrator::gather(const Ray& inRay, size_t depth, size_t& maxDept
 
 	return float4(1.0f, 0.0f, 0.0f, 1.0f);
 }
-
 
 }
 }

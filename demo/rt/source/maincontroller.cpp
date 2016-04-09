@@ -95,6 +95,8 @@ void MainController::applicationDidLoad(et::RenderContext* rc)
 		_rt.setIntegrator(rt::PathTraceIntegrator::Pointer::create());
 	}
 
+	rt::float4 envColor(et::arrayToVec4(_options.arrayForKey("env-color")));
+
     auto envMap = _options.stringForKey("env-map")->content;
     if (envMap.empty() == false)
         envMap = application().resolveFileName(envMap);
@@ -102,11 +104,11 @@ void MainController::applicationDidLoad(et::RenderContext* rc)
     if (fileExists(envMap))
     {
         auto texture = loadTexture(envMap);
-        _rt.setEnvironmentSampler(rt::EnvironmentEquirectangularMapSampler::Pointer::create(texture, rt::float4(3.0f)));
+        _rt.setEnvironmentSampler(rt::EnvironmentEquirectangularMapSampler::Pointer::create(texture, envColor));
     }
     else
     {
-		_rt.setEnvironmentSampler(rt::EnvironmentColorSampler::Pointer::create(rt::float4(1.0f)));
+		_rt.setEnvironmentSampler(rt::EnvironmentColorSampler::Pointer::create(envColor));
 		// _rt.setEnvironmentSampler(rt::DirectionalLightSampler::Pointer::create(
 		//	rt::float4(1.0f, 1.0f, -1.0f, 0.0f), rt::float4(50.0f)));
     }

@@ -24,7 +24,7 @@ public:
 	RaytracePrivate(Raytrace* owner);
 	~RaytracePrivate();
 
-	void threadFunction();
+	void threadFunction(unsigned index);
 	void emitWorkerThreads();
 	void stopWorkerThreads();
 
@@ -32,10 +32,11 @@ public:
 
 	size_t materialIndexWithName(const std::string&);
 
-	void buildRegions(vec2i size);
+	void buildRegions(const vec2i& size);
 	void estimateRegionsOrder();
 
 	vec4 raytracePixel(const vec2i&, size_t samples, size_t& bounces);
+	rt::float4 gatherAtPixel(const vec2&, size_t&);
 
 	rt::Region getNextRegion();
 
@@ -56,17 +57,21 @@ public:
 	rt::EnvironmentSampler::Pointer sampler;
 	rt::Integrator::Pointer integrator;
 	rt::Material::Collection materials;
+	rt::TriangleList lightTriangles;
 	Camera camera;
-	vec2i viewportSize = vec2i(0);
+	vec2i viewportSize;
+	vec2i regionSize;
 
 	Vector<std::thread> workerThreads;
 	std::atomic<size_t> threadCounter;
+	std::atomic<size_t> sampledRegions;
 
 	Vector<rt::Region> regions;
 	std::mutex regionsLock;
 
 	std::atomic<bool> running;
-	uint64_t startTime = 0;
+	std::atomic<uint64_t> startTime;
+	std::atomic<uint64_t> elapsedTime;
 };
 
 using namespace et;
@@ -87,7 +92,9 @@ void Raytrace::perform(s3d::Scene::Pointer scene, const Camera& cam, const vec2i
 	_private->camera = cam;
 	_private->viewportSize = dimension;
 	_private->buildMaterialAndTriangles(scene);
+
 	_private->buildRegions(vec2i(static_cast<int>(_private->options.renderRegionSize)));
+
 	Invocation([this]() {
 		_private->estimateRegionsOrder();
 	}).invokeInBackground();
@@ -152,15 +159,18 @@ void RaytracePrivate::emitWorkerThreads()
 {
 	srand(static_cast<unsigned int>(time(nullptr)));
 	startTime = queryContiniousTimeInMilliSeconds();
+	elapsedTime = 0;
 
 	uint64_t totalRays = static_cast<uint64_t>(viewportSize.square()) * options.raysPerPixel;
 	log::info("Rendering started: %d x %d, %llu rpp, %llu total rays",
-			  viewportSize.x, viewportSize.y, static_cast<uint64_t>(options.raysPerPixel), totalRays);
+		viewportSize.x, viewportSize.y, static_cast<uint64_t>(options.raysPerPixel), totalRays);
 
 	running = true;
 	threadCounter.store(std::thread::hardware_concurrency());
 	for (unsigned i = 0, e = std::thread::hardware_concurrency(); i < e; ++i)
-		workerThreads.emplace_back(&RaytracePrivate::threadFunction, this);
+	{
+		workerThreads.emplace_back(&RaytracePrivate::threadFunction, this, i);
+	}
 }
 
 void RaytracePrivate::stopWorkerThreads()
@@ -174,11 +184,17 @@ void RaytracePrivate::stopWorkerThreads()
 void RaytracePrivate::buildMaterialAndTriangles(s3d::Scene::Pointer scene)
 {
 	materials.clear();
+	lightTriangles.clear();
+
 	rt::TriangleList triangles;
+	triangles.reserve(0xffff);
+
+	lightTriangles.reserve(0xffff);
 
 	auto meshes = scene->childrenOfType(s3d::ElementType::Mesh);
 	for (s3d::Mesh::Pointer mesh : meshes)
 	{
+		bool isEmitter = false;
 		auto meshMaterial = mesh->material();
 		auto materialIndex = materialIndexWithName(meshMaterial->name());
 		if (materialIndex == InvalidIndex)
@@ -206,6 +222,8 @@ void RaytracePrivate::buildMaterialAndTriangles(s3d::Scene::Pointer scene)
 					mat.type = rt::MaterialType::Dielectric;
 				}
 			}
+
+			isEmitter = mat.emissive.length() > 0.0f;
 		}
 
 		mesh->prepareRenderBatches();
@@ -243,6 +261,11 @@ void RaytracePrivate::buildMaterialAndTriangles(s3d::Scene::Pointer scene)
 				*/
 				tri.materialIndex = static_cast<rt::index>(materialIndex);
 				tri.computeSupportData();
+
+				if (isEmitter)
+				{
+					lightTriangles.push_back(tri);
+				}
 			}
 		}
 	}
@@ -252,13 +275,15 @@ void RaytracePrivate::buildMaterialAndTriangles(s3d::Scene::Pointer scene)
 	auto stats = kdTree.nodesStatistics();
 	log::info("KD-Tree statistics:\n\t%llu nodes\n\t%llu leaf nodes\n\t%llu empty leaf nodes"
 			  "\n\t%llu max depth\n\t%llu min triangles per node\n\t%llu max triangles per node"
-			  "\n\t%llu total triangles\n\t%llu distributed triangles", uint64_t(stats.totalNodes),
-			  uint64_t(stats.leafNodes), uint64_t(stats.emptyLeafNodes), uint64_t(stats.maxDepth),
-			  uint64_t(stats.minTrianglesPerNode), uint64_t(stats.maxTrianglesPerNode),
-			  uint64_t(stats.totalTriangles), uint64_t(stats.distributedTriangles));
+			  "\n\t%llu total triangles\n\t%llu distributed triangles\\n\t%llu light triangles",
+			  uint64_t(stats.totalNodes), uint64_t(stats.leafNodes), uint64_t(stats.emptyLeafNodes),
+			  uint64_t(stats.maxDepth), uint64_t(stats.minTrianglesPerNode), uint64_t(stats.maxTrianglesPerNode),
+			  uint64_t(stats.totalTriangles), uint64_t(stats.distributedTriangles), uint64_t(lightTriangles.size()));
 
 	if (options.renderKDTree)
+	{
 		kdTree.printStructure();
+	}
 }
 
 size_t RaytracePrivate::materialIndexWithName(const std::string& n)
@@ -271,53 +296,55 @@ size_t RaytracePrivate::materialIndexWithName(const std::string& n)
 	return InvalidIndex;
 }
 
-void RaytracePrivate::buildRegions(vec2i size)
+void RaytracePrivate::buildRegions(const vec2i& aSize)
 {
 	std::unique_lock<std::mutex> lock(regionsLock);
 	regions.clear();
+	sampledRegions.store(0);
 
-	if (size.x > viewportSize.x)
-		size.x = viewportSize.x;
+	regionSize = aSize;
 
-	if (size.y > viewportSize.y)
-		size.y = viewportSize.y;
+	if (regionSize.x > viewportSize.x)
+		regionSize.x = viewportSize.x;
+	if (regionSize.y > viewportSize.y)
+		regionSize.y = viewportSize.y;
 
-	int xr = viewportSize.x / size.x;
-	int yr = viewportSize.y / size.y;
+	int xr = viewportSize.x / regionSize.x;
+	int yr = viewportSize.y / regionSize.y;
 
 	for (int y = 0; y < yr; ++y)
 	{
 		for (int x = 0; x < xr; ++x)
 		{
 			regions.emplace_back();
-			regions.back().origin = vec2i(x, y) * size;
-			regions.back().size = size;
+			regions.back().origin = vec2i(x, y) * regionSize;
+			regions.back().size = regionSize;
 		}
 
-		if (xr * size.x < viewportSize.x)
+		if (xr * regionSize.x < viewportSize.x)
 		{
-			int w = viewportSize.x - xr * size.x;
+			int w = viewportSize.x - xr * regionSize.x;
 			regions.emplace_back();
-			regions.back().origin = vec2i(xr, y) * size;
-			regions.back().size = vec2i(w, size.y);
+			regions.back().origin = vec2i(xr, y) * regionSize;
+			regions.back().size = vec2i(w, regionSize.y);
 		}
 	}
 
-	if (yr * size.y < viewportSize.y)
+	if (yr * regionSize.y < viewportSize.y)
 	{
-		int h = viewportSize.y - yr * size.y;
+		int h = viewportSize.y - yr * regionSize.y;
 		for (int x = 0; x < xr; ++x)
 		{
 			regions.emplace_back();
-			regions.back().origin = vec2i(x, yr) * size;
-			regions.back().size = vec2i(size.x, h);
+			regions.back().origin = vec2i(x, yr) * regionSize;
+			regions.back().size = vec2i(regionSize.x, h);
 		}
 
-		if (xr * size.x < viewportSize.x)
+		if (xr * regionSize.x < viewportSize.x)
 		{
-			int w = viewportSize.x - xr * size.x;
+			int w = viewportSize.x - xr * regionSize.x;
 			regions.emplace_back();
-			regions.back().origin = vec2i(xr, yr) * size;
+			regions.back().origin = vec2i(xr, yr) * regionSize;
 			regions.back().size = vec2i(w, h);
 		}
 	}
@@ -326,31 +353,30 @@ void RaytracePrivate::buildRegions(vec2i size)
 rt::Region RaytracePrivate::getNextRegion()
 {
 	std::unique_lock<std::mutex> lock(regionsLock);
-
-	size_t index = 0;
 	for (auto& rgn : regions)
 	{
-		if (!rgn.sampled)
+		if (rgn.sampled == false)
 		{
+			++sampledRegions;
 			rgn.sampled = true;
 			return rgn;
 		}
-		++index;
 	}
-
 	return rt::Region();
 }
 
 /*
  * Raytrace function
  */
-void RaytracePrivate::threadFunction()
+void RaytracePrivate::threadFunction(unsigned index)
 {
 	while (running)
 	{
 		auto region = getNextRegion();
-		if (!region.sampled)
+		if (region.sampled == false)
 			break;
+
+		auto runTime = et::queryContiniousTimeInMilliSeconds();
 
 		vec2i pixel;
 
@@ -365,16 +391,23 @@ void RaytracePrivate::threadFunction()
 			owner->_outputMethod(vec2i(pixel.x, region.origin.y + region.size.y - 1), vec4(1.0f, 0.0f, 0.0f, 1.0f));
 		}
 
-		for (pixel.y = region.origin.y; pixel.y < region.origin.y + region.size.y; ++pixel.y)
+		for (pixel.y = region.origin.y; running && (pixel.y < region.origin.y + region.size.y); ++pixel.y)
 		{
-			for (pixel.x = region.origin.x; pixel.x < region.origin.x + region.size.x; ++pixel.x)
+			for (pixel.x = region.origin.x; running && (pixel.x < region.origin.x + region.size.x); ++pixel.x)
 			{
 				size_t bounces = 0;
 				owner->_outputMethod(pixel, raytracePixel(pixel, options.raysPerPixel, bounces));
-				if (!running)
-					return;
 			}
 		}
+
+		elapsedTime += et::queryContiniousTimeInMilliSeconds() - runTime;
+		rt::float_type averageTime = static_cast<rt::float_type>(elapsedTime) / static_cast<rt::float_type>(1000 * sampledRegions);
+
+		auto actualElapsed = et::queryContiniousTimeInMilliSeconds() - startTime;
+
+		log::info("Elapsed: %s, estimated: %s",
+			floatToTimeStr(static_cast<rt::float_type>(actualElapsed) / 1000.f, false).c_str(),
+			floatToTimeStr(averageTime * static_cast<rt::float_type>(regions.size() - sampledRegions), false).c_str());
 	}
 
 	--threadCounter;
@@ -407,11 +440,11 @@ vec4 RaytracePrivate::raytracePixel(const vec2i& pixel, size_t samples, size_t& 
 	vec2 pixelSize = vec2(1.0f) / vector2ToFloat(viewportSize);
 	vec2 pixelBase = 2.0f * (vector2ToFloat(pixel) * pixelSize) - vec2(1.0f);
 
-	rt::float4 result = integrator->gather(camera.castRay(pixelBase), 0, bounces, kdTree, sampler, materials);
+	rt::float4 result = integrator->shoot(camera.castRay(pixelBase), 0, bounces, kdTree, sampler, materials);
 	for (size_t m = 1; m < samples; ++m)
 	{
 		vec2 jitter = pixelSize * vec2(2.0f * rt::fastRandomFloat() - 1.0f, 2.0f * rt::fastRandomFloat() - 1.0f);
-		result += integrator->gather(camera.castRay(pixelBase + jitter), 0, bounces, kdTree, sampler, materials);
+		result += integrator->shoot(camera.castRay(pixelBase + jitter), 0, bounces, kdTree, sampler, materials);
 	}
 	vec4 output = (result / static_cast<float>(samples)).toVec4();
 	output.w = 1.0f;
@@ -442,18 +475,16 @@ void RaytracePrivate::estimateRegionsOrder()
 		for (size_t i = 0; i < maxSamples; ++i)
 		{
 			size_t bounces = 0;
-			estimatedColor += raytracePixel(r.origin + vec2i(sx[i].x * r.size.x / sx[i].y,
-															 sy[i].x * r.size.y / sy[i].y), 1, bounces);
+			estimatedColor += raytracePixel(r.origin + vec2i(sx[i].x * r.size.x / sx[i].y, sy[i].x * r.size.y / sy[i].y), 1, bounces);
 			r.estimatedBounces += bounces;
 		}
 		rt::float_type aspect = (maxPossibleBounces - float(r.estimatedBounces)) / maxPossibleBounces;
 		vec4 estimatedDensity = vec4(1.0f - 0.5f * aspect * aspect, 1.0f);
-
 		fillRegionWithColor(r, estimatedDensity * estimatedDensity);
 	}
 
 	std::sort(regions.begin(), regions.end(), [](const rt::Region& l, const rt::Region& r)
-			  { return l.estimatedBounces > r.estimatedBounces; });
+		{ return l.estimatedBounces > r.estimatedBounces; });
 
 	emitWorkerThreads();
 }
