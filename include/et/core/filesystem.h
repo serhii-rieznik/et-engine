@@ -1,6 +1,6 @@
 /*
  * This file is part of `et engine`
- * Copyright 2009-2015 by Sergey Reznik
+ * Copyright 2009-2016 by Sergey Reznik
  * Please, modify content only if you know what are you doing.
  *
  */
@@ -22,8 +22,10 @@ namespace et
 	std::string libraryBaseFolder();
 	std::string documentsBaseFolder();
 	std::string temporaryBaseFolder();
+    std::string workingFolder();
 	
-	std::string normalizeFilePath(std::string s);
+	std::string normalizeFilePath(const std::string& s);
+	std::string& normalizeFilePath(std::string& s);
 	
 	bool fileExists(const std::string& name);
 	bool folderExists(const std::string& name);

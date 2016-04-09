@@ -1,13 +1,12 @@
 /*
  * This file is part of `et engine`
- * Copyright 2009-2015 by Sergey Reznik
+ * Copyright 2009-2016 by Sergey Reznik
  * Please, modify content only if you know what are you doing.
  *
  */
 
 #pragma once
 
-#include <set>
 #include <deque>
 #include <et/core/et.h>
 
@@ -63,7 +62,7 @@ namespace et
 		std::string _baseFolder;
 		std::string _cachedLocale;
 		
-		size_t _cachedScreenScaleFactor = 0;
+		float _cachedScreenScaleFactor = 0.0f;
 		bool _silentErrors = false;
 	};
 }

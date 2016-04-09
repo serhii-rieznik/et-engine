@@ -1,13 +1,13 @@
 /*
  * This file is part of `et engine`
- * Copyright 2009-2015 by Sergey Reznik
+ * Copyright 2009-2016 by Sergey Reznik
  * Please, modify content only if you know what are you doing.
  *
  */
 
 #pragma once
 
-#include <et/timers/interpolationvalue.h>
+#include <et/core/interpolationvalue.h>
 #include <et/camera/cameracontroller.h>
 #include <et/input/gestures.h>
 
@@ -21,6 +21,8 @@ namespace et
 	public:
 		CameraMovingController(Camera&, bool autoConnectToEvents);
 		
+		void synchronize(const Camera&) override;
+		
 		void setMovementSpeed(const vec3&);
 		void setIntepolationRate(float);
 
@@ -28,8 +30,6 @@ namespace et
 		void cancelUpdates() override;
 		
 	private:
-		void synchronize(const Camera&) override;
-		
 		void update(float) override;
 		
 		void onKeyPressed(size_t) override;

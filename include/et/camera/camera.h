@@ -1,6 +1,6 @@
 /*
  * This file is part of `et engine`
- * Copyright 2009-2015 by Sergey Reznik
+ * Copyright 2009-2016 by Sergey Reznik
  * Please, modify content only if you know what are you doing.
  *
  */
@@ -28,12 +28,12 @@ namespace et
 		const mat4& windowProjection(const vec2& windowSize);
 
 		const vec3& position() const
-			{ return _inverseModelViewMatrix[3].xyz(); }
+			{ return _inverseViewMatrix[3].xyz(); }
 
 		void setPosition(const vec3& pos);
 
 		const quaternion orientation() const
-			{ return matrixToQuaternion(_modelViewMatrix.mat3()); }
+			{ return matrixToQuaternion(_viewMatrix.mat3()); }
 		
 		float zNear() const
 			{ return _zNear; }
@@ -48,23 +48,20 @@ namespace et
 		void setDirection(const vec3& d);
 		void setSide(const vec3& s);
 
-		const mat4& modelViewMatrix() const 
-			{ return _modelViewMatrix; }
+		const mat4& viewMatrix() const
+			{ return _viewMatrix; }
+		const mat4& inverseViewMatrix() const
+			{ return _inverseViewMatrix; }
 
 		const mat4& projectionMatrix() const 
 			{ return _projectionMatrix; }
-
-		const mat4& modelViewProjectionMatrix() const
-			{ return _mvpMatrix; }
-
-		const mat4& inverseModelViewMatrix() const 
-			{ return _inverseModelViewMatrix; }
-
 		const mat4& inverseProjectionMatrix() const
 			{ return _inverseProjectionMatrix; }
 
-		const mat4& inverseModelViewProjectionMatrix() const
-			{ return _inverseMVPMatrix; }
+		const mat4& viewProjectionMatrix() const
+			{ return _viewProjectionMatrix; }
+		const mat4& inverseViewProjectionMatrix() const
+			{ return _inverseViewProjectionMatrix; }
 
 		vec3 up() const;
 		vec3 side() const;
@@ -94,13 +91,13 @@ namespace et
 
 		ray3d castRay(const vec2& pt) const;
 
-		void setModelViewMatrix(const mat4& m)
-			{ _modelViewMatrix = m; modelViewUpdated(); }
+		void setViewMatrix(const mat4& m)
+			{ _viewMatrix = m; viewUpdated(); }
 		
 		void setProjectionMatrix(const mat4& m)
 			{ _projectionMatrix = m; projectionUpdated(); }
 
-		Camera reflected(const plane&) const;
+		void reflected(const plane&, Camera&) const;
 
 		vec3 project(const vec3&) const;
 		vec3 unproject(const vec3&) const;
@@ -109,18 +106,20 @@ namespace et
 		vec4 unproject(const vec4&) const;
 
 	private:
-		void modelViewUpdated();
+		void viewUpdated();
 		void projectionUpdated();
-		void updateMVP();
+		void updateViewProjectionMatrix();
 
 	private:
-		mat4 _modelViewMatrix;
+		mat4 _viewMatrix;
+		mat4 _inverseViewMatrix;
+		
 		mat4 _projectionMatrix;
-
-		mat4 _mvpMatrix;
-		mat4 _inverseModelViewMatrix;
 		mat4 _inverseProjectionMatrix;
-		mat4 _inverseMVPMatrix;
+		
+		mat4 _viewProjectionMatrix;
+		mat4 _inverseViewProjectionMatrix;
+		
 		Frustum _frustum;
 
 		vec3 _upLocked;

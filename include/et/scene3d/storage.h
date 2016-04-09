@@ -1,15 +1,15 @@
 /*
  * This file is part of `et engine`
- * Copyright 2009-2015 by Sergey Reznik
+ * Copyright 2009-2016 by Sergey Reznik
  * Please, modify content only if you know what are you doing.
  *
  */
 
 #pragma once
 
-#include <et/vertexbuffer/indexarray.h>
-#include <et/vertexbuffer/vertexstorage.h>
-#include <et/scene3d/material.h>
+#include <et/scene3d/scenematerial.h>
+#include <et/rendering/indexarray.h>
+#include <et/rendering/vertexstorage.h>
 
 namespace et
 {
@@ -25,10 +25,10 @@ namespace et
 			void deserializeWithOptions(RenderContext*, Dictionary, SerializationHelper*, ObjectsCache&,
 				uint32_t);
 
-			std::vector<VertexStorage::Pointer>& vertexStorages()
+			Set<VertexStorage::Pointer>& vertexStorages()
 				{ return _vertexStorages; }
 
-			const std::vector<VertexStorage::Pointer>& vertexStorages() const
+			const Set<VertexStorage::Pointer>& vertexStorages() const
 				{ return _vertexStorages; }
 			
 			IndexArray::Pointer indexArray()
@@ -37,22 +37,25 @@ namespace et
 			const IndexArray::Pointer indexArray() const
 				{ return _indexArray; }
 
-			Material::Map& materials()
+			SceneMaterial::Map& materials()
 				{ return _materials; }
 
-			const Material::Map& materials() const
+			const SceneMaterial::Map& materials() const
 				{ return _materials; }
 
-			std::vector<Texture::Pointer>& textures()
+			Set<Texture::Pointer>& textures()
 				{ return _textures; }
 
-			const std::vector<Texture::Pointer>& textures() const
+			const Set<Texture::Pointer>& textures() const
 				{ return _textures; }
-
+            
+            const Set<VertexArrayObject::Pointer>& vertexArrayObjects() const
+                { return _vertexArrayObjects; }
+            
 			void addTexture(Texture::Pointer t)
-				{ _textures.push_back(t); }
+				{ _textures.insert(t); }
 
-			void addMaterial(Material::Pointer m)
+			void addMaterial(SceneMaterial::Pointer m)
 				{ _materials.insert({m->name(), m}); }
 
 			void addVertexStorage(const VertexStorage::Pointer&);
@@ -65,16 +68,19 @@ namespace et
 			int indexOfVertexStorage(const VertexStorage::Pointer& va);
 			
 			void flush();
+            
+            void buildVertexArrayObjects(RenderContext* rc);
 
 		private:
 			Storage* duplicate()
 				{ return nullptr; }
 
 		private:
-			std::vector<VertexStorage::Pointer> _vertexStorages;
+			Set<VertexStorage::Pointer> _vertexStorages;
+            Set<Texture::Pointer> _textures;
+            Set<VertexArrayObject::Pointer> _vertexArrayObjects;
 			IndexArray::Pointer _indexArray;
-			Material::Map _materials;
-			std::vector<Texture::Pointer> _textures;
+			SceneMaterial::Map _materials;
 		};
 	}
 }

@@ -1,6 +1,6 @@
 /*
  * This file is part of `et engine`
- * Copyright 2009-2015 by Sergey Reznik
+ * Copyright 2009-2016 by Sergey Reznik
  * Please, modify content only if you know what are you doing.
  *
  */
@@ -13,11 +13,11 @@
 #include <et/rendering/renderer.h>
 #include <et/rendering/renderstate.h>
 #include <et/rendering/renderingcaps.h>
-#include <et/rendering/programfactory.h>
+#include <et/rendering/materialfactory.h>
 #include <et/rendering/texturefactory.h>
 #include <et/rendering/framebufferfactory.h>
 #include <et/rendering/vertexbufferfactory.h>
-#include <et/timers/notifytimer.h>
+#include <et/core/notifytimer.h>
 #include <et/app/events.h>
 
 namespace et
@@ -48,14 +48,8 @@ namespace et
 		const RenderContextParameters& parameters() const
 			{ return _params; }
 
-		const vec2& size() const
-			{ return _renderState.mainViewportSizeFloat(); }
-
-		const vec2i& sizei() const
+		const vec2i& size() const
 			{ return _renderState.mainViewportSize(); }
-
-		size_t screenScaleFactor() const
-			{ return _screenScaleFactor; }
 
 		RenderState& renderState()
 			{ return _renderState; }
@@ -63,8 +57,8 @@ namespace et
 		Renderer* renderer()
 			{ return _renderer.ptr(); }
 
-		ProgramFactory& programFactory()
-			{ return _programFactory.reference(); }
+		MaterialFactory& materialFactory()
+			{ return _materialFactory.reference(); }
 
 		TextureFactory& textureFactory()
 			{ return _textureFactory.reference(); }
@@ -90,7 +84,6 @@ namespace et
 
 	public:
 		ET_DECLARE_EVENT1(renderingInfoUpdated, const RenderingInfo&)
-		ET_DECLARE_EVENT1(screenScaleFactorChanged, size_t)
 
 	private:
 		RenderContext(RenderContext&&) = delete;
@@ -99,7 +92,6 @@ namespace et
 
 		void onFPSTimerExpired(NotifyTimer* t);
 		void resized(const vec2i&);
-		void updateScreenScale(const vec2i& screenSize);
 
 	private:
 		friend class RenderContextPrivate;
@@ -116,15 +108,11 @@ namespace et
 
 		RenderState _renderState;
 
-		ProgramFactory::Pointer _programFactory;
+		MaterialFactory::Pointer _materialFactory;
 		TextureFactory::Pointer _textureFactory;
 		FramebufferFactory::Pointer _framebufferFactory;
 		VertexBufferFactory::Pointer _vertexBufferFactory;
 		Renderer::Pointer _renderer;
-		
-		size_t _screenScaleFactor = 1;
-		size_t _maxScreenScaleFactor = 2;
-		bool _screenScaleFactorSet = false;
 	};
 
 }

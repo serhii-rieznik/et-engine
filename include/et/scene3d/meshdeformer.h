@@ -1,6 +1,6 @@
 /*
  * This file is part of `et engine`
- * Copyright 2009-2015 by Sergey Reznik
+ * Copyright 2009-2016 by Sergey Reznik
  * Please, modify content only if you know what are you doing.
  *
  */
@@ -22,13 +22,13 @@ namespace et
 
 			struct VertexWeight
 			{
-				size_t index = 0;
+				uint32_t index = 0;
 				float weight = 0.0f;
-				VertexWeight() { }
-				VertexWeight(size_t i, float w) :
+				VertexWeight() = default;
+				VertexWeight(uint32_t i, float w) :
 					index(i), weight(w) { }
 			};
-			typedef std::vector<VertexWeight> VertexWeightVector;
+			using VertexWeightVector = Vector<VertexWeight>;
 			
 		public:
 			VertexWeightVector& weights()
@@ -84,17 +84,17 @@ namespace et
 			void addCluster(MeshDeformerCluster::Pointer cl)
 				{ _clusters.push_back(cl); }
 			
-			std::vector<MeshDeformerCluster::Pointer>& clusters()
+			Vector<MeshDeformerCluster::Pointer>& clusters()
 				{ return _clusters; }
 			
-			const std::vector<MeshDeformerCluster::Pointer>& clusters() const
+			const Vector<MeshDeformerCluster::Pointer>& clusters() const
 				{ return _clusters; }
 			
-			const std::vector<mat4>& calculateTransformsForMesh(Mesh*);
+			const Vector<mat4>& calculateTransforms();
 			
 		private:
-			std::vector<MeshDeformerCluster::Pointer> _clusters;
-			std::vector<mat4> _transformMatrices;
+			Vector<MeshDeformerCluster::Pointer> _clusters;
+			Vector<mat4> _transformMatrices;
 		};
 	}
 }

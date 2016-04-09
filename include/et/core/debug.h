@@ -1,6 +1,6 @@
 /*
  * This file is part of `et engine`
- * Copyright 2009-2015 by Sergey Reznik
+ * Copyright 2009-2016 by Sergey Reznik
  * Please, modify content only if you know what are you doing.
  *
  */
@@ -75,7 +75,6 @@
 
 #define ET_DENY_COPY(t)										private:\
 																t(const t&) = delete;\
-																t(t&&) = delete;\
 																t& operator = (const t&) = delete;
 																	
 #define ET_COMPOSE_UINT32(A, B, C, D)					(D | (C << 8) | (B << 16) | (A << 24))
@@ -90,6 +89,11 @@ namespace et
 		void warning(const char*, ...) ET_FORMAT_FUNCTION;
 		void error(const char*, ...) ET_FORMAT_FUNCTION;
 	}
+	
+	namespace debug
+	{
+		void debugBreak();
+	}
 }
 
 #if (ET_DEBUG)
@@ -99,13 +103,13 @@ namespace et
 		if (!(C)) \
 		{ \
 			et::log::warning("Condition: %s\nfailed at: %s [%d]", (#C), __FILE__, __LINE__); \
-			abort(); \
+			et::debug::debugBreak(); \
 		} \
 	} while (0)
 #
 #else
 #
-#	define ET_ASSERT(C)				{ }
+#	define ET_ASSERT(C)				do { } while (0)
 #
 #endif
 

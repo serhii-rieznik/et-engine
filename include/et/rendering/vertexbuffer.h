@@ -1,6 +1,6 @@
 /*
  * This file is part of `et engine`
- * Copyright 2009-2015 by Sergey Reznik
+ * Copyright 2009-2016 by Sergey Reznik
  * Please, modify content only if you know what are you doing.
  *
  */
@@ -8,8 +8,8 @@
 #pragma once
 
 #include <et/rendering/apiobject.h>
-#include <et/vertexbuffer/vertexarray.h>
-#include <et/vertexbuffer/vertexstorage.h>
+#include <et/rendering/vertexarray.h>
+#include <et/rendering/vertexstorage.h>
 
 namespace et
 {
@@ -52,6 +52,9 @@ namespace et
 			{ return _sourceObjectName; }
 
 		void clear();
+		
+		size_t dataSize() const
+			{ return _dataSize; }
 
 	private:
 		RenderContext* _rc = nullptr;

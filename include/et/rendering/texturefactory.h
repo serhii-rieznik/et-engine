@@ -1,6 +1,6 @@
 /*
  * This file is part of `et engine`
- * Copyright 2009-2015 by Sergey Reznik
+ * Copyright 2009-2016 by Sergey Reznik
  * Please, modify content only if you know what are you doing.
  *
  */
@@ -9,7 +9,7 @@
 
 #include <et/app/events.h>
 #include <et/rendering/texture.h>
-#include <et/rendering/apiobjectfactory.h>
+#include <et/rendering/apiobject.h>
 #include <et/imaging/textureloaderthread.h>
 
 namespace et
@@ -35,16 +35,16 @@ namespace et
 		Texture::Pointer genNoiseTexture(const vec2i& size, bool normalize, const std::string& aName);
 		
 		Texture::Pointer genCubeTexture(TextureFormat internalformat, uint32_t size, TextureFormat format,
-			DataType type, const std::string& aName);
+			DataFormat type, const std::string& aName);
 
 		Texture::Pointer genTexture2DArray(const vec3i& size, TextureTarget textureTarget, 
-			TextureFormat internalformat, TextureFormat format, DataType type, const BinaryDataStorage& data, 
+			TextureFormat internalformat, TextureFormat format, DataFormat type, const BinaryDataStorage& data,
 			const std::string& aName);
 		
 		Texture::Pointer genTexture(TextureDescription::Pointer desc);
 		
 		Texture::Pointer genTexture(TextureTarget target, TextureFormat internalformat, const vec2i& size,
-			TextureFormat format, DataType type, const BinaryDataStorage& data, const std::string& aName);
+			TextureFormat format, DataFormat type, const BinaryDataStorage& data, const std::string& aName);
 		
 		Texture::Pointer createTextureWrapper(uint32_t texture, const vec2i& size, const std::string& aName);
 

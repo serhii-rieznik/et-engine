@@ -1,14 +1,14 @@
 /*
  * This file is part of `et engine`
- * Copyright 2009-2015 by Sergey Reznik
+ * Copyright 2009-2016 by Sergey Reznik
  * Please, modify content only if you know what are you doing.
  *
  */
 
 #pragma once
 
-#include <et/helpers/particles.h>
 #include <et/scene3d/baseelement.h>
+#include <et-ext/helpers/particles.h>
 
 namespace et
 {
@@ -20,14 +20,14 @@ namespace et
 			ET_DECLARE_POINTER(ParticleSystem)
 						
 		public:
-			ParticleSystem(RenderContext*, size_t, const std::string&, BaseElement*);
+			ParticleSystem(RenderContext*, uint32_t capacity, const std::string&, BaseElement*);
 			
 			ElementType type() const
 				{ return ElementType::ParticleSystem; }
 			
 			ParticleSystem* duplicate();
 			
-			const VertexArrayObject& vao() const
+			const VertexArrayObject::Pointer& vao() const
 				{ return _vao; }
 
 			const IndexBuffer::Pointer& indexBuffer() const
@@ -52,7 +52,7 @@ namespace et
 		private:
 			RenderContext* _rc = nullptr;
 			
-			VertexArrayObject _vao;
+			VertexArrayObject::Pointer _vao;
 			VertexDeclaration _decl;
 			VertexArray::Description _vertexData;
 			

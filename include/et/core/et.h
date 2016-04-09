@@ -1,6 +1,6 @@
 /*
  * This file is part of `et engine`
- * Copyright 2009-2015 by Sergey Reznik
+ * Copyright 2009-2016 by Sergey Reznik
  * Please, modify content only if you know what are you doing.
  *
  */
@@ -14,22 +14,23 @@
 #include <cstddef>
 #include <cstdint>
 #include <atomic>
-
-#include <string>
-#include <vector>
-#include <list>
-#include <map>
-#include <limits>
-#include <functional>
 #include <algorithm>
-#include <thread>
-
+#include <array>
+#include <fstream>
+#include <functional>
 #include <iosfwd>
 #include <iostream>
-#include <fstream>
+#include <limits>
+#include <list>
+#include <map>
+#include <set>
+#include <unordered_map>
+#include <string>
+#include <thread>
+#include <vector>
 
 #define ET_MAJOR_VERSION		0
-#define ET_MINOR_VERSION		7
+#define ET_MINOR_VERSION		9
 
 #define ET_CORE_INCLUDES
 
@@ -70,6 +71,8 @@ namespace et
 		using size_type = size_t;
 		using value_type = T;
 		using pointer = T*;
+		using reference = T&;
+		using const_reference = const T&;
 
 		SharedBlockAllocatorSTDProxy()
 		{
@@ -94,6 +97,18 @@ namespace et
 			sharedBlockAllocator().release(ptr); 
 		}
 
+		template<class U, class... Args>
+		void construct(U* p, Args&&... args)
+		{
+			new ((void*)p) U(std::forward<Args>(args)...);
+		}
+
+		template<class U>
+		void destroy(U* p) 
+		{
+			p->~U();
+		}
+
 		bool operator == (const SharedBlockAllocatorSTDProxy<T>&) const
 		{
 			return true;
@@ -113,16 +128,37 @@ namespace et
 	
 	template <class C, typename ... args>
 	C* etCreateObject(args&&... a)
-		{ return sharedObjectFactory().createObject<C>(a...); }
+        { return sharedObjectFactory().createObject<C>(std::forward<args>(a)...); }
 	
 	template <class C>
 	void etDestroyObject(C* c)
 		{ sharedObjectFactory().deleteObject(c); }
+
+	using String = std::basic_string<char, std::char_traits<char>, 
+		SharedBlockAllocatorSTDProxy<char>>;
+
+	using WideString = std::basic_string<wchar_t, std::char_traits<wchar_t>, 
+		SharedBlockAllocatorSTDProxy<wchar_t>>;
 	
+	template <typename T>
+	using Vector = std::vector<T, 
+		SharedBlockAllocatorSTDProxy<T>>;
+
+	template <typename T>
+	using Set = std::set<T, std::less<T>, 
+		SharedBlockAllocatorSTDProxy<T>>;
+
+	template <typename Key, typename Value>
+	using Map = std::map<Key, Value, std::less<Key>, 
+		SharedBlockAllocatorSTDProxy<std::pair<const Key, Value>>>;
+
+	template <typename Key, typename Value>
+	using UnorderedMap = std::unordered_map<Key, Value, std::hash<Key>, std::equal_to<Key>, 
+		SharedBlockAllocatorSTDProxy<std::pair<const Key, Value>>>;
 }
 
 #include <et/core/properties.h>
-#include <et/core/strings.h>
+#include <et/core/strings.hpp>
 #include <et/core/threading.h>
 #include <et/core/filesystem.h>
 #include <et/core/conversionbase.h>
@@ -164,17 +200,9 @@ namespace et
 	typedef matrix4<int> mat4i;
 	
 	typedef Quaternion<float> quaternion;
-	
-	typedef Rect<float> rect;
-	typedef Rect<int> recti;
-	
-	template <typename T>
-	inline T etMin(const T& v1, const T& v2)
-		{ return (v1 < v2) ? v1 : v2; }
-	
-	template <typename T>
-	inline T etMax(const T& v1, const T& v2)
-		{ return (v1 > v2) ? v1 : v2; }
+
+	using recti = Rect<int>;
+	using rectf = Rect<float>;
 
 	template<typename T>
 	inline T clamp(T value, T min, T max)

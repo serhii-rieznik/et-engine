@@ -1,7 +1,7 @@
-#include <et/models/objloader.h>
+#include <et/scene3d/objloader.h>
 #include <et/camera/camera.h>
 #include <et/rendering/rendercontext.h>
-#include <et/json/json.h>
+#include <et/core/json.h>
 #include <et/core/conversion.h>
 #include <et/imaging/textureloader.h>
 #include "maincontroller.hpp"
@@ -17,9 +17,9 @@ void MainController::setApplicationParameters(et::ApplicationParameters& p)
 
 void MainController::setRenderContextParameters(et::RenderContextParameters& p)
 {
+    p.enableHighResolutionContext = true;
 	p.multisamplingQuality = MultisamplingQuality::None;
-	p.contextBaseSize = vec2i(1024, 640);
-	p.contextSize = p.contextBaseSize;
+	p.contextSize = 4 * et::currentScreen().frame.size() / 5;
     p.enableHighResolutionContext = true;
 }
 
@@ -44,15 +44,15 @@ void MainController::applicationDidLoad(et::RenderContext* rc)
 	
 	auto configName = application().resolveFileName("config/config.json");
 	
-	ValueClass vc = ValueClass_Invalid;
+	VariantClass vc = VariantClass::Invalid;
 	_options = json::deserialize(loadTextFile(configName), vc);
-	ET_ASSERT(vc == ValueClass_Dictionary);
+	ET_ASSERT(vc == VariantClass::Dictionary);
 	
 	auto modelName = application().resolveFileName(_options.stringForKey("model-name")->content);
 	
 	_scene = s3d::Scene::Pointer::create();
 	OBJLoader loader(modelName, OBJLoader::Option_CalculateTangents);
-	auto model = loader.load(rc, _scene->storage(), localCache);
+	auto model = loader.load(rc, this, _scene->storage(), localCache);
 	model->setParent(_scene.ptr());
 	
 	Raytrace::Options rtOptions;
@@ -61,7 +61,6 @@ void MainController::applicationDidLoad(et::RenderContext* rc)
 	rtOptions.renderRegionSize = static_cast<size_t>(_options.integerForKey("render-region-size", 32)->content);
 	rtOptions.debugRendering = _options.integerForKey("debug-rendering", 0ll)->content != 0;
 	rtOptions.renderKDTree = _options.integerForKey("render-kd-tree", 0ll)->content != 0;
-	rtOptions.kdTreeSplits = static_cast<int>(_options.integerForKey("kd-tree-splits", 4)->content);
 	_rt.setOptions(rtOptions);
 	
 	_rt.setOutputMethod([this](const vec2i& pixel, const vec4& color)
@@ -75,18 +74,44 @@ void MainController::applicationDidLoad(et::RenderContext* rc)
 			ET_ASSERT(!isnan(_textureData[pos].y));
 			ET_ASSERT(!isnan(_textureData[pos].z));
 			ET_ASSERT(!isnan(_textureData[pos].w));
-			
 		}
 	});
-	
-	auto textureName = application().resolveFileName("background.hdr");
-	auto tex = loadTexture(textureName);
-	_rt.setEnvironmentSampler(rt::EnvironmentEquirectangularMapSampler::Pointer::create(tex, rt::float4(1.0f)));
-	
-	_rt.renderFinished.connect([this]()
-	{
 
-	});
+	auto integrator = _options.stringForKey("integrator", "path-trace")->content;
+	if (integrator == "ao")
+	{
+		_rt.setIntegrator(rt::AmbientOcclusionIntegrator::Pointer::create());
+	}
+	else if (integrator == "normals")
+	{
+		_rt.setIntegrator(rt::NormalsIntegrator::Pointer::create());
+	}
+	else if (integrator == "fresnel")
+	{
+		_rt.setIntegrator(rt::FresnelIntegrator::Pointer::create());
+	}
+	else
+	{
+		_rt.setIntegrator(rt::PathTraceIntegrator::Pointer::create());
+	}
+
+	rt::float4 envColor(et::arrayToVec4(_options.arrayForKey("env-color")));
+
+    auto envMap = _options.stringForKey("env-map")->content;
+    if (envMap.empty() == false)
+        envMap = application().resolveFileName(envMap);
+    
+    if (fileExists(envMap))
+    {
+        auto texture = loadTexture(envMap);
+        _rt.setEnvironmentSampler(rt::EnvironmentEquirectangularMapSampler::Pointer::create(texture, envColor));
+    }
+    else
+    {
+		_rt.setEnvironmentSampler(rt::EnvironmentColorSampler::Pointer::create(envColor));
+		// _rt.setEnvironmentSampler(rt::DirectionalLightSampler::Pointer::create(
+		//	rt::float4(1.0f, 1.0f, -1.0f, 0.0f), rt::float4(50.0f)));
+    }
 	
 	Input::instance().keyPressed.connect([this](size_t key)
 	{
@@ -108,14 +133,14 @@ void MainController::start()
 {
 	_rt.stop();
 	
-	vec2i textureSize = _rc->sizei();
+	vec2i textureSize = _rc->size();
 	
 	_textureData.resize(textureSize.square() * sizeof(vec4));
 	_textureData.fill(0);
 	
 	BinaryDataStorage proxy(reinterpret_cast<unsigned char*>(_textureData.data()), _textureData.dataSize());
 	_texture = _rc->textureFactory().genTexture(TextureTarget::Texture_2D, TextureFormat::RGBA32F,
-		textureSize, TextureFormat::RGBA, DataType::Float, proxy, "output-texture");
+		textureSize, TextureFormat::RGBA, DataFormat::Float, proxy, "output-texture");
 	
 	const vec3 lookPoint = arrayToVec3(_options.arrayForKey("camera-view-point"));
 	const vec3 offset = arrayToVec3(_options.arrayForKey("camera-offset"));
@@ -144,6 +169,11 @@ void MainController::render(et::RenderContext* rc)
 			_textureData.binary(), _textureData.dataSize());
 		rc->renderer()->renderFullscreenTexture(_texture);
 	}
+}
+
+Material::Pointer MainController::materialWithName(const std::string&)
+{
+	return Material::Pointer();
 }
 
 et::IApplicationDelegate* et::Application::initApplicationDelegate()

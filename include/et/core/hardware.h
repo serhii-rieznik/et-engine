@@ -1,6 +1,6 @@
 /*
  * This file is part of `et engine`
- * Copyright 2009-2015 by Sergey Reznik
+ * Copyright 2009-2016 by Sergey Reznik
  * Please, modify content only if you know what are you doing.
  *
  */
@@ -16,15 +16,15 @@ namespace et
 		std::string deviceId;
 		recti frame;
 		recti availableFrame;
-		int scaleFactor = 1;
+		float scaleFactor = 1.0f;
 		
 		Screen()
 			{ }
 		
-		Screen(const recti& f, const recti& a, int sf) :
+		Screen(const recti& f, const recti& a, float sf) :
 			frame(f), availableFrame(a), scaleFactor(sf) { }
 	};
 	
 	Screen currentScreen();
-	std::vector<Screen> availableScreens();
+	Vector<Screen> availableScreens();
 }

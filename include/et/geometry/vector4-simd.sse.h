@@ -1,6 +1,6 @@
 /*
  * This file is part of `et engine`
- * Copyright 2009-2015 by Sergey Reznik
+ * Copyright 2009-2016 by Sergey Reznik
  * Please, modify content only if you know what are you doing.
  *
  */
@@ -13,7 +13,7 @@
 
 namespace et
 {
-#	define ET_ALLOW_MM_DP_PS	1
+#	define ET_ALLOW_MM_DP_PS	0
 
 	struct ET_ALIGNED(16) vec4simd
 	{

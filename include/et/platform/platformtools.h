@@ -1,6 +1,6 @@
 /*
  * This file is part of `et engine`
- * Copyright 2009-2015 by Sergey Reznik
+ * Copyright 2009-2016 by Sergey Reznik
  * Please, modify content only if you know what are you doing.
  *
  */
@@ -12,7 +12,7 @@
 namespace et
 {
 	inline bool platformHasHardwareKeyboard()
-		{ return CurrentPlatform != Platform_iOS; }
+		{ return PlatformOptions::IsDesktop; }
 
 	enum class SelectFileMode : uint32_t
 	{
@@ -29,4 +29,5 @@ namespace et
 
 	std::string selectFile(const StringList& types, SelectFileMode mode, const std::string& defaultName);
 	void alert(const std::string& title, const std::string& message, const std::string& button, AlertType type);
+	bool canOpenURL(const std::string&);
 }

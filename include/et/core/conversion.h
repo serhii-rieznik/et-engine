@@ -1,6 +1,6 @@
 /*
  * This file is part of `et engine`
- * Copyright 2009-2015 by Sergey Reznik
+ * Copyright 2009-2016 by Sergey Reznik
  * Please, modify content only if you know what are you doing.
  *
  */
@@ -20,14 +20,16 @@ namespace et
 	ArrayValue vec2ToArray(const vec2&);
 	ArrayValue vec3ToArray(const vec3&);
 	ArrayValue vec4ToArray(const vec4&);
-	ArrayValue rectToArray(const rect&);
+	ArrayValue rectToArray(const rectf&);
 	ArrayValue quaternionToArray(const quaternion&);
+	ArrayValue matrixToArray(const mat4&);
 
 	vec2 arrayToVec2(ArrayValue);
 	vec2i arrayToVec2i(ArrayValue);
 	
 	vec3 arrayToVec3(ArrayValue);
 	vec4 arrayToVec4(ArrayValue);
-	rect arrayToRect(ArrayValue);
+	rectf arrayToRect(ArrayValue);
 	quaternion arrayToQuaternion(ArrayValue);
+	mat4 arrayToMatrix(ArrayValue);
 }

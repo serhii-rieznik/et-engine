@@ -1,6 +1,6 @@
 /*
  * This file is part of `et engine`
- * Copyright 2009-2015 by Sergey Reznik
+ * Copyright 2009-2016 by Sergey Reznik
  * Please, modify content only if you know what are you doing.
  *
  */
@@ -11,6 +11,67 @@
 
 namespace et
 {
+	/*
+	 * Common declarations
+	 */
+	enum class CompareFunction : uint32_t
+	{
+		Never,
+		Less,
+		LessOrEqual,
+		Equal,
+		GreaterOrEqual,
+		Greater,
+		Always,
+		
+		max
+	};
+	
+	enum class BlendFunction : uint32_t
+	{
+		Zero,
+		One,
+		SourceColor,
+		InvSourceColor,
+		SourceAlpha,
+		InvSourceAlpha,
+		DestColor,
+		InvDestColor,
+		DestAlpha,
+		InvDestAlpha,
+		
+		max
+	};
+	
+	enum class BlendOperation : uint32_t
+	{
+		Add,
+		Subtract,
+		ReverseSubtract,
+		
+		max
+	};
+	
+	enum class CullMode : uint32_t
+	{
+		Disabled,
+		Back,
+		Front,
+		
+		max
+	};
+	
+	enum class FillMode : uint32_t
+	{
+		Solid,
+		Wireframe,
+		
+		max
+	};
+
+	/*
+	 * Engine-specific declarations
+	 */
 	enum class VertexAttributeUsage : uint32_t
 	{
 		Position,
@@ -36,7 +97,7 @@ namespace et
 		max
 	};
 	
-	enum class VertexAttributeType : uint32_t
+	enum class DataType : uint32_t
 	{
 		Float,
 		Vec2,
@@ -54,39 +115,16 @@ namespace et
 		max
 	};
 	
-	enum class BlendState : uint32_t
+	enum class BlendConfiguration : uint32_t
 	{
 		Disabled,
-		Current,
-		Default,
+		AlphaBlend,
 		AlphaPremultiplied,
 		Additive,
 		AlphaAdditive,
 		AlphaMultiplicative,
 		ColorAdditive,
 		AlphaInverseMultiplicative,
-		
-		max
-	};
-	
-	enum class CullState : uint32_t
-	{
-		Current,
-		Front,
-		Back,
-		
-		max
-	};
-	
-	enum class DepthFunc : uint32_t
-	{
-		Never,
-		Less,
-		LessOrEqual,
-		Equal,
-		GreaterOrEqual,
-		Greater,
-		Always,
 		
 		max
 	};
@@ -98,8 +136,8 @@ namespace et
 		Green = 0x02,
 		Blue = 0x04,
 		Alpha = 0x08,
-		RGB = Red | Green | Blue,
-		RGBA = RGB | Alpha
+		ColorOnly = Red | Green | Blue,
+		ColorAndAlpha = ColorOnly | Alpha
 	};
 	
 	enum class BufferDrawType : uint32_t
@@ -117,6 +155,7 @@ namespace et
 		Texture_2D_Array,
 		Texture_Rectangle,
 		Texture_Cube,
+		
 		max,
 	};
 	
@@ -220,7 +259,7 @@ namespace et
 		max
 	};
 	
-	enum class DataType : uint32_t
+	enum class DataFormat : uint32_t
 	{
 		Char,
 		UnsignedChar,
@@ -268,34 +307,141 @@ namespace et
 	
 	enum : uint32_t
 	{
+		/*
+		 * Common values maxes
+		 */
+		BlendFunction_max = static_cast<uint32_t>(BlendFunction::max),
+		BlendOperation_max = static_cast<uint32_t>(BlendOperation::max),
+		CompareFunction_max = static_cast<uint32_t>(CompareFunction::max),
+		CullMode_max = static_cast<uint32_t>(CullMode::max),
+		FillMode_max = static_cast<uint32_t>(FillMode::max),
+		
 		VertexAttributeUsage_max = static_cast<uint32_t>(VertexAttributeUsage::max),
-		VertexAttributeType_max = static_cast<uint32_t>(VertexAttributeType::max),
-
+		DataType_max = static_cast<uint32_t>(DataType::max),
 		IndexArrayFormat_max = static_cast<uint32_t>(IndexArrayFormat::max),
 		PrimitiveType_max = static_cast<uint32_t>(PrimitiveType::max),
-
-		DataType_max = static_cast<uint32_t>(DataType::max),
-		BlendState_max = static_cast<uint32_t>(BlendState::max),
-
+		BlendConfiguration_max = static_cast<uint32_t>(BlendConfiguration::max),
+		DataFormat_max = static_cast<uint32_t>(DataFormat::max),
 		TextureTarget_max = static_cast<uint32_t>(TextureTarget::max),
 		TextureFormat_max = static_cast<uint32_t>(TextureFormat::max),
-		
 		InvalidIndex = static_cast<uint32_t>(-1),
 		InvalidShortIndex = static_cast<uint16_t>(-1),
 		InvalidSmallIndex = static_cast<uint8_t>(-1),
 		
-		MaxDrawBuffers = 8
+		MaxRenderTargets = 8,
+		MaxTextureUnits = 8
 	};
 	
-	DataType vertexAttributeTypeDataType(VertexAttributeType t);
+	struct DepthState
+	{
+		CompareFunction compareFunction = CompareFunction::Less;
+		float clearDepth = 1.0f;
+		bool depthWriteEnabled = true;
+		bool depthTestEnabled = true;
+		
+		DepthState() = default;
+		
+		DepthState(bool write, bool test) :
+			depthWriteEnabled(write), depthTestEnabled(test) { }
+		
+		uint32_t sortingKey() const
+		{
+			return static_cast<uint32_t>(depthWriteEnabled) << 1 | static_cast<uint32_t>(depthWriteEnabled);
+		}
+	};
+	
+	class BlendState
+	{
+	public:
+		struct Blend
+		{
+			BlendFunction source = BlendFunction::One;
+			BlendFunction dest = BlendFunction::Zero;
+			
+			Blend() = default;
+			Blend(BlendFunction s, BlendFunction d) :
+				source(s), dest(d) { }
+			
+			bool operator == (const Blend& b) const
+				{ return (source == b.source) && (dest == b.dest); }
+			
+			bool operator != (const Blend& b) const
+				{ return (source != b.source) || (dest != b.dest); }
+		};
+		
+		BlendState() = default;
+		BlendState(bool e) :
+			enabled(e) { }
+		BlendState(bool e, const Blend& b) :
+			color(b), alpha(b), enabled(e) { }
+		BlendState(bool e, const Blend& cb, const Blend& ab) :
+			color(cb), alpha(ab), enabled(e) { }
+		BlendState(bool e, BlendFunction s, BlendFunction d) :
+			color(s, d), alpha(s, d), enabled(e) { }
+		
+		uint32_t sortingKey() const
+			{ return enabled ? 0 : 1; }
+		
+		bool operator == (const BlendState& bs) const
+		{
+			return (color == bs.color) && (enabled == bs.enabled) && (alpha == bs.alpha) &&
+				(alphaToCoverageEnabled == bs.alphaToCoverageEnabled) &&
+				(perRenderTargetBlendEnabled == bs.perRenderTargetBlendEnabled) &&
+				(colorOperation == bs.colorOperation) && (alphaOperation == bs.alphaOperation);
+		}
+		
+	public:
+		Blend color;
+		BlendOperation colorOperation = BlendOperation::Add;
+		
+		Blend alpha;
+		BlendOperation alphaOperation = BlendOperation::Add;
+		
+		bool perRenderTargetBlendEnabled = false;
+		bool alphaToCoverageEnabled = false;
+		bool enabled = false;
+	};
+	
+	struct RasterizerState
+	{
+		FillMode fillMode = FillMode::Solid;
+		CullMode cullMode = CullMode::Back;
+		vec4 clearColor = vec4(0.0f);
+		uint32_t colorMask = ColorMask::ColorAndAlpha;
+		recti scissorRectangle = recti(0, 0, 0, 0);
+		float depthBias = 0.0f;
+		float depthSlopeScale = 0.0f;
+		bool depthBiasEnabled = false;
+		bool scissorEnabled = false;
+	};
+	
+	struct RenderStateCache
+	{
+		uint32_t activeTextureUnit = 0;
+		uint32_t boundFramebuffer = 0;
+		uint32_t boundReadFramebuffer = 0;
+		uint32_t boundDrawFramebuffer = 0;
+		uint32_t boundRenderbuffer = 0;
+		uint32_t boundArrayBuffer = 0;
+		uint32_t boundElementArrayBuffer = 0;
+		uint32_t boundVertexArrayObject = 0;
+		uint32_t boundProgram = 0;
+		recti viewport = recti(0, 0, 0, 0);
+		
+		std::array<std::array<uint32_t, MaxTextureUnits>, TextureTarget_max> boundTextures;
+		std::array<size_t, VertexAttributeUsage_max> enabledVertexAttributes;
+		std::array<size_t, MaxRenderTargets> drawBuffers;
+	};
+	
+	DataFormat dataTypeDataFormat(DataType t);
 
 	VertexAttributeUsage stringToVertexAttributeUsage(const std::string& s, bool& builtIn);
-	VertexAttributeType stringToVertexAttributeType(const std::string& s);
-	DataType stringToDataType(const std::string&);
+	DataType stringToDataType(const std::string& s);
+	DataFormat stringToDataFormat(const std::string&);
 
 	std::string vertexAttributeUsageToString(VertexAttributeUsage);
-	std::string vertexAttributeTypeToString(VertexAttributeType);
 	std::string dataTypeToString(DataType);
+	std::string dataFormatToString(DataFormat);
 
 	std::string primitiveTypeToString(PrimitiveType);
 	PrimitiveType stringToPrimitiveType(const std::string&);
@@ -303,13 +449,34 @@ namespace et
 	std::string indexArrayFormatToString(IndexArrayFormat);
 	IndexArrayFormat stringToIndexArrayFormat(const std::string&);
 
-	uint32_t sizeOfDataType(DataType);
+	uint32_t sizeOfDataFormat(DataFormat);
 	
 	uint32_t vertexAttributeUsageMask(VertexAttributeUsage u);
-	uint32_t vertexAttributeTypeSize(VertexAttributeType t);
-	uint32_t vertexAttributeTypeComponents(VertexAttributeType t);
+	uint32_t dataTypeSize(DataType t);
+	uint32_t dataTypeComponents(DataType t);
 
-	uint32_t bitsPerPixelForType(DataType type);
-	uint32_t bitsPerPixelForTextureFormat(TextureFormat internalFormat, DataType type);
+	uint32_t bitsPerPixelForDataFormat(DataFormat type);
+	uint32_t bitsPerPixelForTextureFormat(TextureFormat internalFormat, DataFormat type);
 	uint32_t channelsForTextureFormat(TextureFormat internalFormat);
+	
+	const std::string& compareFunctionToString(CompareFunction);
+	const std::string& blendFunctionToString(BlendFunction);
+	const std::string& blendOperationToString(BlendOperation);
+	
+	CompareFunction stringToCompareFunction(const std::string&);
+	BlendFunction stringToBlendFunction(const std::string& );
+	BlendOperation stringToBlendOperation(const std::string&);
+	
+	BlendState blendConfigurationToBlendState(BlendConfiguration);
+	std::string blendConfigurationToString(BlendConfiguration);
+	bool blendStateToConfiguration(const BlendState&, BlendConfiguration&);
+	bool stringToBlendConfiguration(const std::string& name, BlendConfiguration& config);
+	
+	Dictionary serializeDepthState(const DepthState&);
+	Dictionary serializeBlendState(const BlendState&);
+	DepthState deserializeDepthState(const Dictionary&);
+	BlendState deserializeBlendState(const Dictionary&);
+	
+	std::string cullModeToString(CullMode);
+	bool stringToCullMode(const std::string&, CullMode&);
 }

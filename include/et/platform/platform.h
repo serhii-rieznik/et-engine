@@ -1,6 +1,6 @@
 /*
  * This file is part of `et engine`
- * Copyright 2009-2015 by Sergey Reznik
+ * Copyright 2009-2016 by Sergey Reznik
  * Please, modify content only if you know what are you doing.
  *
  */
@@ -21,7 +21,6 @@
 #	endif
 #
 #	define NOMINMAX						1
-#	include <Windows.h>
 #
 #	if defined(_UNICODE)
 #		define ET_WIN_UNICODE					1
@@ -42,17 +41,17 @@
 #elif (TARGET_OS_IPHONE)
 #
 #	define ET_PLATFORM_IOS				1
-#	define CurrentPlatform				Platform_iOS
+#	define CurrentPlatform				Platform::iOS
 #
 #elif (TARGET_OS_MAC)
 #
 #	define ET_PLATFORM_MAC				1
-#	define CurrentPlatform				Platform_Mac
+#	define CurrentPlatform				Platform::Mac
 #
 #elif (__ANDROID__)
 #
 #	define ET_PLATFORM_ANDROID			1
-#	define CurrentPlatform				Platform_Android
+#	define CurrentPlatform				Platform::Android
 #
 #else
 #
@@ -61,13 +60,9 @@
 #endif
 
 #if (ET_PLATFORM_IOS || ET_PLATFORM_MAC)
-#
 #	define ET_PLATFORM_APPLE	1
-#
 #else
-#
 #	define ET_PLATFORM_APPLE	0
-#
 #endif
 
 #if defined(DEBUG) || defined(_DEBUG) || defined(NDK_DEBUG)
@@ -89,32 +84,31 @@
 
 namespace et
 {
-	enum Platform
+	enum class Platform : uint32_t
 	{
-		Platform_Windows,
-		Platform_iOS,
-		Platform_Mac,
-		Platform_Android
+		Windows,
+		iOS,
+		Mac,
+		Android
 	};
 	
-	enum Architecture
+	enum Architecture : uint32_t
 	{
-		Architecture_Unknown,
-		Architecture_32bit,
-		Architecture_64bit,
+		arm,
+		x32,
+		x64,
 	};
 
-	enum
+	enum PlatformOptions : uint32_t
 	{
-		currentArchitecture = (sizeof(void*) == 4) ? Architecture_32bit : 
-			((sizeof(void*) == 8) ? Architecture_64bit : Architecture_Unknown),
-
-#	if (ET_PLATFORM_IOS | ET_PLATFORM_ANDROID)
-		currentPlatformIsDesktop = 0,
-		currentPlatformIsMobile = 1,
-#	else
-		currentPlatformIsDesktop = 1,
-		currentPlatformIsMobile = 0,
+		BitDepth = 8 * sizeof(decltype(nullptr)),
+		
+#	if (ET_PLATFORM_IOS || ET_PLATFORM_ANDROID)
+		IsDesktop = 0,
+		IsMobile = 1,
+#	elif (ET_PLATFORM_MAC || ET_PLATFORM_WIN)
+		IsDesktop = 1,
+		IsMobile = 0,
 #	endif
 
 	};

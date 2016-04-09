@@ -1,6 +1,6 @@
 /*
  * This file is part of `et engine`
- * Copyright 2009-2015 by Sergey Reznik
+ * Copyright 2009-2016 by Sergey Reznik
  * Please, modify content only if you know what are you doing.
  *
  */
@@ -25,31 +25,28 @@ namespace et
 		
 		enum
 		{
-			DataTypeSize = sizeof(DataType)
+			dataTypeSize = sizeof(DataType)
 		};
 		
 	public:
 		DataStorage() :
-			_mutableData(nullptr), _size(0), _dataSize(0), _lastElementIndex(0),
-			_flags(DataStorageFlag_OwnsMutableData) { }
+			_mutableData(nullptr), _flags(DataStorageFlag_OwnsMutableData) { }
 		
 		explicit DataStorage(size_t size) :
-			_mutableData(nullptr), _size(0), _dataSize(0), _lastElementIndex(0),
-			_flags(DataStorageFlag_OwnsMutableData)
+			_mutableData(nullptr), _flags(DataStorageFlag_OwnsMutableData)
 		{
 			resize(size);
 		}
 
 		DataStorage(size_t size, int initValue) :
-			_mutableData(nullptr), _size(0), _dataSize(0), _lastElementIndex(0),
-			_flags(DataStorageFlag_OwnsMutableData)
+			_mutableData(nullptr), _flags(DataStorageFlag_OwnsMutableData)
 		{
 			resize(size); 
 			fill(initValue);
 		}
 
 		DataStorage(const DataStorage& copy) :
-			_mutableData(nullptr), _size(0), _dataSize(0), _lastElementIndex(0), _flags(DataStorageFlag_OwnsMutableData)
+			_mutableData(nullptr), _flags(DataStorageFlag_OwnsMutableData)
 		{
 			resize(copy.size());
 			
@@ -75,12 +72,11 @@ namespace et
 		}
 		
 		DataStorage(DataTypePointer data, size_t dataSize) :
-			_mutableData(data), _size(dataSize / DataTypeSize), _dataSize(dataSize), _lastElementIndex(0),
+			_mutableData(data), _size(dataSize / dataTypeSize), _dataSize(dataSize),
 			_flags(DataStorageFlag_Mutable) { }
 
 		DataStorage(DataTypeConstPointer data, size_t dataSize) :
-			_immutableData(data), _size(dataSize / DataTypeSize), _dataSize(dataSize), _lastElementIndex(0),
-			_flags(0) { }
+			_immutableData(data), _size(dataSize / dataTypeSize), _dataSize(dataSize) { }
 
 		~DataStorage()
 			{ resize(0); }
@@ -122,10 +118,10 @@ namespace et
 		char* binary()
 			{ ET_ASSERT(mutableData()); return reinterpret_cast<char*>(_mutableData); }
 		
-		DataTypeReference operator [] (int aIndex)
+		DataTypeReference operator [] (int32_t aIndex)
 			{ ET_ASSERT(mutableData() && (aIndex >= 0) && (aIndex < static_cast<int>(_size))); return _mutableData[aIndex]; }
 		
-		DataTypeReference operator [] (size_t aIndex)
+		DataTypeReference operator [] (uint32_t aIndex)
 			{ ET_ASSERT(mutableData() && (aIndex < _size)); return _mutableData[aIndex]; }
 		
 		DataTypeReference current()
@@ -152,10 +148,10 @@ namespace et
 		DataTypeConstPointer constData() const
 			{ return _immutableData; }
 		
-		DataTypeConstReference operator [] (int i) const
+		DataTypeConstReference operator [] (int32_t i) const
 			{ ET_ASSERT((i >= 0) && (i < static_cast<int>(_size))); return _immutableData[i]; }
 
-		DataTypeConstReference operator [] (size_t i) const
+		DataTypeConstReference operator [] (uint32_t i) const
 			{ ET_ASSERT(i < _size); return _immutableData[i]; }
 		
 		DataTypeConstReference current() const
@@ -176,10 +172,10 @@ namespace et
 		const char* binary() const
 			{ return reinterpret_cast<const char*>(_immutableData); }
 		
-		const size_t size() const
+		size_t size() const
 			{ return _size; }
 		
-		const size_t dataSize() const
+		size_t dataSize() const
 			{ return _dataSize; }
 
 		/*
@@ -210,13 +206,13 @@ namespace et
 			DataTypePointer new_data = nullptr;
 			size_t min_size = (newSize < _size) ? newSize : _size;
 			_size = newSize;
-			_dataSize = _size * DataTypeSize;
+			_dataSize = _size * dataTypeSize;
 			
 			if (newSize > 0)
 			{
 				new_data = reinterpret_cast<DataTypePointer>(sharedBlockAllocator().allocate(_dataSize));
 				if (min_size > 0)
-					etCopyMemory(new_data, _immutableData, min_size * DataTypeSize);
+					etCopyMemory(new_data, _immutableData, min_size * dataTypeSize);
 			}
 			else
 			{
@@ -243,7 +239,7 @@ namespace et
 			
 			size_t currentSize = _size;
 			resize(_size + count);
-			etCopyMemory(&_mutableData[currentSize], values, count * DataTypeSize);
+			etCopyMemory(&_mutableData[currentSize], values, count * dataTypeSize);
 		}
 		
 		void appendData(const void* ptr, size_t dataSize)
@@ -252,7 +248,7 @@ namespace et
 			ET_ASSERT(ptr);
 			
 			size_t currentSize = _size;
-			size_t numElements = dataSize / DataTypeSize + ((dataSize % DataTypeSize > 0) ? 1 : 0);
+			size_t numElements = dataSize / dataTypeSize + ((dataSize % dataTypeSize > 0) ? 1 : 0);
 			resize(_size + numElements);
 			etCopyMemory(&_mutableData[currentSize], ptr, dataSize);
 		}
@@ -274,13 +270,13 @@ namespace et
 				resize(need_size);
 		}
 
-		const size_t lastElementIndex() const
+		uint32_t lastElementIndex() const
 			{ return _lastElementIndex; }
 		
-		void applyOffset(size_t o)
+		void applyOffset(uint32_t o)
 			{ ET_ASSERT(mutableData()); _lastElementIndex += o; }
 
-		void setOffset(size_t o) 
+		void setOffset(uint32_t o)
 			{ ET_ASSERT(mutableData()); _lastElementIndex = o; }
 		
 	public:
@@ -345,8 +341,8 @@ namespace et
 	private:
 		size_t _size = 0;
 		size_t _dataSize = 0;
-		size_t _lastElementIndex = 0;
-		size_t _flags = 0;
+		uint32_t _lastElementIndex = 0;
+		uint32_t _flags = 0;
 	};
 
 	typedef DataStorage<float> FloatDataStorage;

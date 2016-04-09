@@ -1,6 +1,6 @@
 /*
  * This file is part of `et engine`
- * Copyright 2009-2015 by Sergey Reznik
+ * Copyright 2009-2016 by Sergey Reznik
  * Please, modify content only if you know what are you doing.
  *
  */
@@ -16,7 +16,6 @@ namespace et
 	{  
 	public:
 		ET_DECLARE_POINTER(TextureDescription)
-		typedef std::vector<TextureDescription::Pointer> List;
 
 	public:
 		vec2i sizeForMipLevel(size_t level)
@@ -31,7 +30,7 @@ namespace et
 		{
 			size_t actualSize = static_cast<size_t>(sizeForMipLevel(level).square()) * bitsPerPixel / 8;
 			size_t minimumSize = static_cast<size_t>(minimalSizeForCompressedFormat.square()) * bitsPerPixel / 8;
-			return compressed ? etMax(minimalDataSize, etMax(minimumSize, actualSize)) : actualSize;
+			return compressed ? std::max(minimalDataSize, std::max(minimumSize, actualSize)) : actualSize;
 		}
 
 		size_t dataSizeForAllMipLevels()
@@ -102,7 +101,7 @@ namespace et
 		TextureTarget target = TextureTarget::Texture_2D;
 		TextureFormat internalformat = TextureFormat::Invalid;
 		TextureFormat format = TextureFormat::Invalid;
-		DataType type = DataType::UnsignedChar;
+		DataFormat type = DataFormat::UnsignedChar;
 		
 		TextureDataLayout dataLayout = TextureDataLayout::FacesFirst;
 	};

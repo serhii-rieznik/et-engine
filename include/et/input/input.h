@@ -1,6 +1,6 @@
 /*
  * This file is part of `et engine`
- * Copyright 2009-2015 by Sergey Reznik
+ * Copyright 2009-2016 by Sergey Reznik
  * Please, modify content only if you know what are you doing.
  *
  */
@@ -167,8 +167,8 @@ namespace et
 		void removePointerInfo(const PointerInputInfo& info);
 
 	private:
-		typedef std::vector<PointerInputInfo> PointerInputInfoList;
-		typedef std::map<size_t, size_t> KeysMap;
+        using KeysMap = std::map<size_t, size_t>;
+        using PointerInputInfoList = Vector<PointerInputInfo>;
 		
 		KeysMap _pressedKeys;
 		PointerInputInfoList _pointers;
@@ -235,6 +235,5 @@ namespace et
 		virtual void onGesturePerformed(et::GestureInputInfo) { }
 	};
 
-	inline Input& input()
-		{ return Input::instance(); }
+    Input& input();
 }

@@ -1,13 +1,15 @@
 /*
  * This file is part of `et engine`
- * Copyright 2009-2015 by Sergey Reznik
+ * Copyright 2009-2016 by Sergey Reznik
  * Please, modify content only if you know what are you doing.
  *
  */
 
 #pragma once
 
+#include <et/camera/camera.h>
 #include <et/rendering/renderstate.h>
+#include <et/rendering/renderbatch.h>
 
 namespace et
 {
@@ -39,16 +41,16 @@ namespace et
 		void renderTextureRotated(const Texture::Pointer&, float angle, const vec2i& position,
 			const vec2i& size = vec2i(-1), const vec4& = vec4(1.0f));
 
-		void drawElements(const IndexBuffer::Pointer& ib, size_t first, size_t count);
-		void drawElements(PrimitiveType primitiveType, const IndexBuffer::Pointer& ib, size_t first, size_t count);
+		void drawElements(const IndexBuffer::Pointer& ib, uint32_t first, uint32_t count);
+		void drawElements(PrimitiveType primitiveType, const IndexBuffer::Pointer& ib, uint32_t first, uint32_t count);
 		void drawAllElements(const IndexBuffer::Pointer& ib);
 
-		void drawElementsInstanced(const IndexBuffer::Pointer& ib, size_t first, size_t count, size_t instances);
-		void drawElementsBaseIndex(const VertexArrayObject& vao, int base, size_t first, size_t count);
-		void drawElementsSequentially(PrimitiveType, size_t first, size_t count);
+		void drawElementsInstanced(const IndexBuffer::Pointer& ib, uint32_t first, uint32_t count, uint32_t instances);
+		void drawElementsBaseIndex(const VertexArrayObject::Pointer& vao, int base, uint32_t first, uint32_t count);
+		void drawElementsSequentially(PrimitiveType, uint32_t first, uint32_t count);
 		
-		BinaryDataStorage readFramebufferData(const vec2i&, TextureFormat, DataType);
-		void readFramebufferData(const vec2i&, TextureFormat, DataType, BinaryDataStorage&);
+		BinaryDataStorage readFramebufferData(const vec2i&, TextureFormat, DataFormat);
+		void readFramebufferData(const vec2i&, TextureFormat, DataFormat, BinaryDataStorage&);
 
 		vec2 currentViewportCoordinatesToScene(const vec2i& coord);
 		vec2 currentViewportSizeToScene(const vec2i& size);
@@ -58,20 +60,22 @@ namespace et
 		ET_DECLARE_PROPERTY_GET_COPY_SET_COPY(uint32_t, defaultTextureBindingUnit, setDefaultTextureBindingUnit)
 		
 	private:
-		Renderer& operator = (const Renderer&)
-			{ return *this; }
+		Renderer(Renderer&&) = delete;
+		Renderer(const Renderer&) = delete;
+		Renderer& operator = (const Renderer&) = delete;
 
 	private:
-		RenderContext* _rc;
+		RenderContext* _rc = nullptr;
+		
 		ObjectsCache _sharedCache;
-		VertexArrayObject _fullscreenQuadVao;
-
+		VertexArrayObject::Pointer _fullscreenQuadVao;
+		
 		Program::Pointer _fullscreenProgram[TextureTarget_max];
 		Program::Pointer _fullscreenDepthProgram;
 		Program::Pointer _fullscreenScaledProgram;
 		Program::Pointer _scaledProgram;
 		Program::Pointer _scaledRotatedProgram;
-
+		
 		Program::Uniform _scaledProgram_PSUniform;
 		Program::Uniform _scaledProgram_TintUniform;
 		Program::Uniform _scaledRotatedProgram_PSUniform;

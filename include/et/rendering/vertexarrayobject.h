@@ -1,6 +1,6 @@
 /*
  * This file is part of `et engine`
- * Copyright 2009-2015 by Sergey Reznik
+ * Copyright 2009-2016 by Sergey Reznik
  * Please, modify content only if you know what are you doing.
  *
  */
@@ -13,15 +13,18 @@
 namespace et
 {
 	class RenderState;
-	class VertexArrayObjectData : public APIObject
+	class VertexArrayObject : public APIObject
 	{
 	public:
-		VertexArrayObjectData(RenderContext*, VertexBuffer::Pointer, IndexBuffer::Pointer,
+		ET_DECLARE_POINTER(VertexArrayObject)
+		
+	public:
+		VertexArrayObject(RenderContext*, VertexBuffer::Pointer, IndexBuffer::Pointer,
 			const std::string& name = emptyString);
 		
-		VertexArrayObjectData(RenderContext*, const std::string& name = emptyString);
+		VertexArrayObject(RenderContext*, const std::string& name = emptyString);
 		
-		~VertexArrayObjectData();
+		~VertexArrayObject();
 
 		VertexBuffer::Pointer& vertexBuffer()
 			{ return _vb; };
@@ -47,6 +50,4 @@ namespace et
 		VertexBuffer::Pointer _vb;
 		IndexBuffer::Pointer _ib;
 	};
-	
-	typedef IntrusivePtr<VertexArrayObjectData> VertexArrayObject;
 }

@@ -1,6 +1,6 @@
 /*
  * This file is part of `et engine`
- * Copyright 2009-2015 by Sergey Reznik
+ * Copyright 2009-2016 by Sergey Reznik
  * Please, modify content only if you know what are you doing.
  *
  */
@@ -29,7 +29,7 @@ namespace et
 			applicationName(aApplicationName) { }
 	};
 
-	enum WindowStyle
+	enum WindowStyle : uint32_t
 	{
 		WindowStyle_Borderless = 0x00,
 		WindowStyle_Caption = 0x01,
@@ -37,21 +37,19 @@ namespace et
 		WindowStyle_Hidden = 0x04
 	};
 	
-	enum class WindowSize
+	enum class WindowSize : uint32_t
 	{
 		Predefined,
 		FillWorkarea,
 		Fullscreen
 	};
-
+	
 	struct ApplicationParameters
 	{
 		size_t windowStyle = WindowStyle_Caption;
 		WindowSize windowSize = WindowSize::Predefined;
 		bool keepWindowAspectOnResize = false;
-		bool shouldCreateContext = true;
-		bool shouldCreateRunLoop = true;
-		bool shouldSuspendOnDeactivate = currentPlatformIsMobile;
+		bool shouldSuspendOnDeactivate = PlatformOptions::IsMobile;
 		bool shouldPreserveRenderContext = false;
 	};
 	

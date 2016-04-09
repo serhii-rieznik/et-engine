@@ -1,6 +1,6 @@
 /*
  * This file is part of `et engine`
- * Copyright 2009-2015 by Sergey Reznik
+ * Copyright 2009-2016 by Sergey Reznik
  * Please, modify content only if you know what are you doing.
  *
  */
@@ -119,7 +119,7 @@ namespace et
 			PointersInputDelta(const PointerInputInfo& c, const PointerInputInfo& p) : 
 				current(c), previous(p) { }
 		};
-        typedef std::map<size_t, PointersInputDelta> PointersInputDeltaMap;
+        using PointersInputDeltaMap = Map<size_t, PointersInputDelta>;
 
 	private:
 		PointersInputDeltaMap _pointers;

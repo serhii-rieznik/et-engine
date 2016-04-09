@@ -1,17 +1,17 @@
 /*
  * This file is part of `et engine`
- * Copyright 2009-2015 by Sergey Reznik
+ * Copyright 2009-2016 by Sergey Reznik
  * Please, modify content only if you know what are you doing.
  *
  */
 
 #pragma once
 
-#include <set>
+#include <et/core/et.h>
 #include <et/core/flags.h>
 #include <et/core/transformable.h>
 #include <et/core/serialization.h>
-#include <et/timers/notifytimer.h>
+#include <et/core/notifytimer.h>
 #include <et/scene3d/base.h>
 #include <et/scene3d/serialization.h>
 #include <et/scene3d/animation.h>
@@ -25,11 +25,7 @@ namespace et
 		{
 		public:
 			ET_DECLARE_POINTER(BaseElement)
-
-			typedef std::vector<BaseElement::Pointer> List;
-
-		public:
-			size_t tag = 0;
+			using List = Vector<Pointer>;
 
 		public:
 			virtual ElementType type() const = 0;
@@ -66,15 +62,15 @@ namespace et
 				bool assertFail = false);
 			
 			BaseElement::List childrenOfType(ElementType ofType) const;
-			BaseElement::List childrenHavingFlag(size_t flag);
+			BaseElement::List childrenHavingFlag(size_t flag) const;
 
 			void clear();
 			void clearRecursively();
 
-			const std::set<std::string>& properties() const
+			const Set<std::string>& properties() const
 				{ return _properites; }
 
-			std::set<std::string>& properties()
+			Set<std::string>& properties()
 				{ return _properites; }
 
 			void addPropertyString(const std::string& s)
@@ -103,7 +99,7 @@ namespace et
 		private:
 			Pointer childWithNameCallback(const std::string& name, Pointer root, ElementType ofType);
 			void childrenOfTypeCallback(ElementType t, BaseElement::List& list, Pointer root) const;
-			void childrenHavingFlagCallback(size_t flag, BaseElement::List& list, Pointer root);
+			void childrenHavingFlagCallback(size_t flag, BaseElement::List& list, Pointer root) const;
 			
 			void buildTransform();
 
@@ -111,8 +107,8 @@ namespace et
 			Animation _emptyAnimation;
 			NotifyTimer _animationTimer;
 			
-			std::set<std::string> _properites;
-			std::vector<Animation> _animations;
+			Set<std::string> _properites;
+			Vector<Animation> _animations;
 			
 			mat4 _animationTransform = mat4(1.0f);
 			mat4 _cachedLocalTransform = mat4(1.0f);

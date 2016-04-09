@@ -1,6 +1,6 @@
 /*
  * This file is part of `et engine`
- * Copyright 2009-2015 by Sergey Reznik
+ * Copyright 2009-2016 by Sergey Reznik
  * Please, modify content only if you know what are you doing.
  *
  */
@@ -153,16 +153,16 @@ namespace et
 	
 	void validateExtensions();
 
-	VertexAttributeType openglTypeToVertexAttributeType(uint32_t);
-	uint32_t vertexAttributeTypeValue(VertexAttributeType);
+	DataType openglTypeToDataType(uint32_t);
+	uint32_t dataTypeValue(DataType);
 	
 	uint32_t textureTargetValue(TextureTarget);
 	uint32_t textureFormatValue(TextureFormat);
-	uint32_t dataTypeValue(DataType);
+	uint32_t dataFormatValue(DataFormat);
 	uint32_t primitiveTypeValue(PrimitiveType);
 	
-	std::pair<uint32_t, uint32_t> blendStateValue(BlendState);
-	BlendState blendValuesToBlendState(uint32_t source, uint32_t dest);
+	std::pair<uint32_t, uint32_t> blendConfigurationValue(BlendConfiguration);
+	BlendConfiguration blendValuesToBlendState(uint32_t source, uint32_t dest);
 	
 	size_t primitiveCount(uint32_t mode, size_t count);
 
@@ -174,7 +174,7 @@ namespace et
 	void etBindBuffer(uint32_t target, uint32_t buffer);
 	void etBindFramebuffer(uint32_t target, uint32_t framebuffer);
 	void etUseProgram(uint32_t program);
-	void etBindVertexArray(uint32_t arr);
+	void etbindVertexArrayObject(uint32_t arr);
 
 	void etTexImage1D(uint32_t target, int level, int internalformat, GLsizei width, int border,
 		uint32_t format, uint32_t type, const GLvoid * pixels);
@@ -196,6 +196,15 @@ namespace et
 	
 	uint32_t drawTypeValue(BufferDrawType);
 	uint32_t primitiveTypeValue(PrimitiveType);
+	
+	uint32_t compareFunctionValue(CompareFunction);
+	CompareFunction valueToCompareFunction(uint32_t);
+
+	uint32_t blendFunctionValue(BlendFunction);
+	BlendFunction valueToBlendFunction(uint32_t);
+
+	uint32_t blendOperationValue(BlendOperation);
+	BlendOperation valueToBlendOperation(uint32_t);
 		
 	const uint32_t* drawBufferTargets();
 	uint32_t drawBufferTarget(size_t);

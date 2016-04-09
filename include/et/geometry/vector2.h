@@ -1,6 +1,6 @@
 /*
  * This file is part of `et engine`
- * Copyright 2009-2015 by Sergey Reznik
+ * Copyright 2009-2016 by Sergey Reznik
  * Please, modify content only if you know what are you doing.
  *
  */
@@ -116,7 +116,7 @@ namespace et
 			}
 		}
 		
-		vector2 normalized()
+		vector2 normalized() const
 		{
 			T lenSquare = dotSelf();
 			if (lenSquare > 0)
@@ -141,4 +141,51 @@ namespace et
 	vector2<T> operator * (T value, const vector2<T>& vec) 
 		{ return vector2<T>(vec.x * value, vec.y * value); }
 
+	template<typename T>
+	inline vector2<T> minv(const vector2<T>& v1, const vector2<T>& v2)
+		{ return vector2<T>(std::min(v1.x, v2.x), std::min(v1.y, v2.y)); }
+
+	template<typename T>
+	inline vector2<T> maxv(const vector2<T>& v1, const vector2<T>& v2)
+		{ return vector2<T>(std::max(v1.x, v2.x), std::max(v1.y, v2.y)); }
+	
+	template<typename T>
+	inline vector2<T> absv(const vector2<T>& value)
+		{ return vector2<T>(std::abs(value.x), std::abs(value.y)); }
+	
+	template <typename T>
+	inline vector2<T> floorv(const vector2<T>& v)
+		{ return vector2<T>(std::floor(v.x), std::floor(v.y)); }
+
+	template <typename T>
+	inline vector2<T> ceilv(const vector2<T>& v)
+		{ return vector2<T>(std::ceil(v.x), std::ceil(v.y)); }
+
+	template <typename T>
+	inline vector2<T> sqrtv(const vector2<T>& v)
+		{ return vector2<T>(std::sqrt(v.x), std::sqrt(v.y)); }
+	
+	template <typename T>
+	inline T length(const vector2<T>& v)
+		{ return v.length(); }
+	
+	template<typename T>
+	inline vector2<T> mix(const vector2<T>& v1, const vector2<T>& v2, const T& t)
+		{ return v1 * (static_cast<T>(1) - t) + v2 * t; }
+	
+	template <typename T>
+	inline vector2<T> normalize(const vector2<T>& v)
+		{ return v.normalized(); }
+	
+	template <typename T>
+	inline T dot(const vector2<T>& v1, const vector2<T>& v2)
+		{ return v1.dot(v2); }
+	
+	template <typename T>
+	inline T outerProduct(const vector2<T>& v1, const vector2<T>& v2)
+		{ return v1.x * v2.y - v1.y * v2.x; }
+	
+	template <typename T>
+	inline vector2<float> vector2ToFloat(const vector2<T>& v)
+		{ return vector2<float>(static_cast<float>(v.x), static_cast<float>(v.y)); }
 }

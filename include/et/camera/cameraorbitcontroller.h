@@ -1,13 +1,13 @@
 /*
  * This file is part of `et engine`
- * Copyright 2009-2015 by Sergey Reznik
+ * Copyright 2009-2016 by Sergey Reznik
  * Please, modify content only if you know what are you doing.
  *
  */
 
 #pragma once
 
-#include <et/timers/interpolationvalue.h>
+#include <et/core/interpolationvalue.h>
 #include <et/camera/cameracontroller.h>
 #include <et/input/gestures.h>
 
@@ -28,8 +28,9 @@ namespace et
 		void startUpdates() override;
 		void cancelUpdates() override;
 		
-	private:
 		void synchronize(const Camera&) override;
+		
+	private:
 		void update(float) override;
 		
 		void onKeyPressed(size_t) override;
@@ -46,7 +47,8 @@ namespace et
 		GesturesRecognizer _gestures;
 		std::map<size_t, int> _pressedKeys;
 		InterpolationValue<vec3> _anglesDistanceAnimator;
+		InterpolationValue<vec3> _targetPoint;
 		vec3 _movementSpeed = vec3(1.0f);
-		vec3 _targetPoint = vec3(0.0f);
+		bool _shouldRebuildMatrix = false;
 	};
 }

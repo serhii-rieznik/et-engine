@@ -1,115 +1,113 @@
 /*
  * This file is part of `et engine`
- * Copyright 2009-2015 by Sergey Reznik
+ * Copyright 2009-2016 by Sergey Reznik
  * Please, modify content only if you know what are you doing.
  *
  */
 
 #pragma once
 
-#include <unordered_map>
 #include <et/core/intrusiveptr.h>
 
 namespace et
 {
-	enum ValueClass
+    enum class VariantClass : int32_t
 	{
-		ValueClass_Invalid = -1,
-		
-		ValueClass_Float,
-		ValueClass_Integer,
-		ValueClass_Boolean,
-		ValueClass_String,
-		ValueClass_Array,
-		ValueClass_Dictionary,
+		Invalid = -1,
+		Float,
+		Integer,
+		Boolean,
+		String,
+		Array,
+		Dictionary,
 	};
 	
-	class ValueBase : public Shared
+	class VariantBase : public Shared
 	{
 	public:
-		ET_DECLARE_POINTER(ValueBase)
+		ET_DECLARE_POINTER(VariantBase)
 						   
  	public:
-		virtual ~ValueBase() { }
-		virtual ValueClass valueClass() const = 0;
+		virtual ~VariantBase() { }
+		virtual VariantClass variantClass() const = 0;
 	};
 	
-	template <typename T, ValueClass C>
-	class Value : public ValueBase
+	template <typename T, VariantClass C>
+	class Variant : public VariantBase
 	{
 	public:
-		typedef et::IntrusivePtr< Value<T, C> > Pointer;
+		using Pointer =  et::IntrusivePtr<Variant<T, C>>;
 		
 	public:
 		T content;
 		
 	public:
-		Value() :
+		Variant() :
 			content(T()) { }
 		
-		Value(const T& r) :
+		Variant(const T& r) :
 			content(r) { }
 
-		ValueClass valueClass() const
+        VariantClass variantClass() const override
 			{ return C; }
 	};
 	
-	typedef std::function<void(ValueBase::Pointer)> ValueCallbackFunction;
+	typedef std::function<void(VariantBase::Pointer)> VariantCallbackFunction;
 		
-	template <typename T, ValueClass C>
-	class ValuePointer : public Value<T, C>::Pointer
+	template <typename T, VariantClass C>
+	class VariantPointer : public Variant<T, C>::Pointer
 	{
 	public:
 		using ValueType = T;
-		using PointerType = typename Value<T, C>::Pointer;
+		using PointerType = typename Variant<T, C>::Pointer;
 		
 	public:
-		ValuePointer() :
-			Value<T, C>::Pointer(etCreateObject<Value<T, C>>()) { }
+		VariantPointer() :
+			Variant<T, C>::Pointer(etCreateObject<Variant<T, C>>()) { }
 		
-		ValuePointer(const T& r) :
-			Value<T, C>::Pointer(etCreateObject<Value<T, C>>(r)) { }
+		VariantPointer(const T& r) :
+			Variant<T, C>::Pointer(etCreateObject<Variant<T, C>>(r)) { }
 
-		ValuePointer(const typename Value<T, C>::Pointer& p) :
-			Value<T, C>::Pointer(p) { }
+		VariantPointer(const typename Variant<T, C>::Pointer& p) :
+			Variant<T, C>::Pointer(p) { }
 
-		ValuePointer(Value<T, C>* p) :
-			Value<T, C>::Pointer(p) { }
+		VariantPointer(Variant<T, C>* p) :
+			Variant<T, C>::Pointer(p) { }
 
-		ValuePointer(ValueBase::Pointer p) :
-			Value<T, C>::Pointer(p) { }
-		
-		const T& value() const
-			{ return this->reference().content; }
-		
-		virtual void performRecursive(ValueCallbackFunction func)
+		VariantPointer(VariantBase::Pointer p) :
+			Variant<T, C>::Pointer(p) { }
+			
+		virtual void performRecursive(VariantCallbackFunction func)
 			{ func(*this); }
+
+		virtual VariantPointer<T, C> duplicate() const
+			{ return VariantPointer<T, C>(this->reference().content); }
 	};
 	
-	typedef ValuePointer<float, ValueClass_Float> FloatValue;
-	typedef ValuePointer<int64_t, ValueClass_Integer> IntegerValue;
-	typedef ValuePointer<int, ValueClass_Boolean> BooleanValue;
+	typedef VariantPointer<float, VariantClass::Float> FloatValue;
+	typedef VariantPointer<int64_t, VariantClass::Integer> IntegerValue;
+	typedef VariantPointer<int, VariantClass::Boolean> BooleanValue;
 	
-	class StringValue : public ValuePointer<std::string, ValueClass_String>
+	class StringValue : public VariantPointer<std::string, VariantClass::String>
 	{
 	public:
 		StringValue() :
-			ValuePointer<std::string, ValueClass_String>() { }
+			VariantPointer<std::string, VariantClass::String>() { }
 		
 		StringValue(const std::string& r) :
-			ValuePointer<std::string, ValueClass_String>(r) { }
+			VariantPointer<std::string, VariantClass::String>(r) { }
 
 		StringValue(const char* r) :
-			ValuePointer<std::string, ValueClass_String>(std::string(r)) { }
+			VariantPointer<std::string, VariantClass::String>(std::string(r)) { }
 		
-		StringValue(const Value<std::string, ValueClass_String>::Pointer& p) :
-			ValuePointer<std::string, ValueClass_String>(p) { }
+		StringValue(const Variant<std::string, VariantClass::String>::Pointer& p) :
+			VariantPointer<std::string, VariantClass::String>(p) { }
 		
-		StringValue(Value<std::string, ValueClass_String>* p) :
-			ValuePointer<std::string, ValueClass_String>(p) { }
+		StringValue(Variant<std::string, VariantClass::String>* p) :
+			VariantPointer<std::string, VariantClass::String>(p) { }
 		
-		StringValue(ValueBase::Pointer p) :
-			ValuePointer<std::string, ValueClass_String>(p) { }
+		StringValue(VariantBase::Pointer p) :
+			VariantPointer<std::string, VariantClass::String>(p) { }
 		
 		size_t size() const
 			{ return reference().content.size(); }
@@ -118,27 +116,26 @@ namespace et
 			{ return reference().content.empty(); }
 	};
 	
-	class ArrayValue : public
-		ValuePointer<std::vector<ValueBase::Pointer, SharedBlockAllocatorSTDProxy<ValueBase::Pointer>>, ValueClass_Array>
+	class ArrayValue : public VariantPointer<Vector<VariantBase::Pointer>, VariantClass::Array>
 	{
 	public:
 		ArrayValue() :
-			ValuePointer<ArrayValue::ValueType, ValueClass_Array>( ) { }
+			VariantPointer<ArrayValue::ValueType, VariantClass::Array>( ) { }
 		
-		ArrayValue(const ValuePointer<ArrayValue::ValueType, ValueClass_Array>& r) :
-			ValuePointer<ArrayValue::ValueType, ValueClass_Array>(r) { }
+		ArrayValue(const VariantPointer<ArrayValue::ValueType, VariantClass::Array>& r) :
+			VariantPointer<ArrayValue::ValueType, VariantClass::Array>(r) { }
 		
 		ArrayValue(const ArrayValue& r) :
-			ValuePointer<ArrayValue::ValueType, ValueClass_Array>(r) { }
+			VariantPointer<ArrayValue::ValueType, VariantClass::Array>(r) { }
 		
 		ArrayValue(ArrayValue&& r) :
-			ValuePointer<ArrayValue::ValueType, ValueClass_Array>(r) {	}
+			VariantPointer<ArrayValue::ValueType, VariantClass::Array>(r) {	}
 		
-		ArrayValue(ValueBase::Pointer p) :
-			ValuePointer<ArrayValue::ValueType, ValueClass_Array>(p) { }
+		ArrayValue(VariantBase::Pointer p) :
+			VariantPointer<ArrayValue::ValueType, VariantClass::Array>(p) { }
 		
-		ArrayValue(const ValuePointer::ValueType& c) :
-			ValuePointer<ArrayValue::ValueType, ValueClass_Array>( ) { reference().content = c; }
+		ArrayValue(const VariantPointer::ValueType& c) :
+			VariantPointer<ArrayValue::ValueType, VariantClass::Array>( ) { reference().content = c; }
 		
 		ArrayValue& operator = (const ArrayValue& r)
 		{
@@ -146,34 +143,33 @@ namespace et
 			return *this;
 		}
 		
-		inline void performRecursive(ValueCallbackFunction func);
+		inline void performRecursive(VariantCallbackFunction func) override;
 					
 	public:
 		void printContent() const;
+		VariantPointer<ValueType, VariantClass::Array> duplicate() const override;
 	};
 	
-	class Dictionary : public ValuePointer<std::unordered_map<std::string, ValueBase::Pointer,
-		std::hash<std::string>, std::equal_to<std::string>,
-		SharedBlockAllocatorSTDProxy<std::pair<const std::string, ValueBase::Pointer>>>, ValueClass_Dictionary>
+	class Dictionary : public VariantPointer<UnorderedMap<std::string, VariantBase::Pointer>, VariantClass::Dictionary>
 	{
 	public:
 		Dictionary() :
-			ValuePointer<Dictionary::ValueType, ValueClass_Dictionary>( ) { }
+			VariantPointer<Dictionary::ValueType, VariantClass::Dictionary>( ) { }
 		
-		Dictionary(const ValuePointer<Dictionary::ValueType, ValueClass_Dictionary>& r) :
-			ValuePointer<Dictionary::ValueType, ValueClass_Dictionary>(r) { }
+		Dictionary(const VariantPointer<Dictionary::ValueType, VariantClass::Dictionary>& r) :
+			VariantPointer<Dictionary::ValueType, VariantClass::Dictionary>(r) { }
 
 		Dictionary(const Dictionary& r) :
-			ValuePointer<Dictionary::ValueType, ValueClass_Dictionary>(r) { }
+			VariantPointer<Dictionary::ValueType, VariantClass::Dictionary>(r) { }
 
 		Dictionary(Dictionary&& r) :
-			ValuePointer<Dictionary::ValueType, ValueClass_Dictionary>(r) {	}
+			VariantPointer<Dictionary::ValueType, VariantClass::Dictionary>(r) {	}
 		
-		Dictionary(ValueBase::Pointer p) :
-			ValuePointer<Dictionary::ValueType, ValueClass_Dictionary>(p) { }
+		Dictionary(VariantBase::Pointer p) :
+			VariantPointer<Dictionary::ValueType, VariantClass::Dictionary>(p) { }
 		
-		Dictionary(const ValuePointer::ValueType& c) :
-			ValuePointer<Dictionary::ValueType, ValueClass_Dictionary>( ) { reference().content = c; }
+		Dictionary(const VariantPointer::ValueType& c) :
+			VariantPointer<Dictionary::ValueType, VariantClass::Dictionary>( ) { reference().content = c; }
 		
 		Dictionary(const std::string& json);
 		
@@ -184,8 +180,8 @@ namespace et
 		}
 		
 	public:
-		void setObjectForKey(const std::string& key, ValueBase::Pointer value)
-			{ setValueForKey<ValueBase::Pointer>(key, value); }
+		void setObjectForKey(const std::string& key, VariantBase::Pointer value)
+			{ setValueForKey<VariantBase::Pointer>(key, value); }
 
 		void setStringForKey(const std::string& key, StringValue value)
 			{ setValueForKey<StringValue>(key, value); }
@@ -206,35 +202,40 @@ namespace et
 			{ setValueForKey<Dictionary>(key, value); }
 
 		void setFloatForKeyPath(const StringList& keyPath, FloatValue value)
-			{ setValueForKeyPath<FloatValue, ValueClass_Float>(keyPath, value); }
+			{ setValueForKeyPath<FloatValue, VariantClass::Float>(keyPath, value); }
 		
-		inline void performRecursive(ValueCallbackFunction func);
+		inline void performRecursive(VariantCallbackFunction func) override;
 		
 	public:
+		BooleanValue boolForKey(const std::string& key, BooleanValue def = BooleanValue()) const
+			{ return valueForKey<BooleanValue::ValueType, VariantClass::Boolean>(key, def); }
+		BooleanValue boolForKeyPath(const StringList& key, BooleanValue def = BooleanValue()) const
+			{ return valueForKeyPath<BooleanValue::ValueType, VariantClass::Boolean>(key, def); }
+		
 		IntegerValue integerForKey(const std::string& key, IntegerValue def = IntegerValue()) const
-			{ return valueForKey<IntegerValue::ValueType, ValueClass_Integer>(key, def); }
-		IntegerValue integerForKeyPath(const std::vector<std::string>& key, IntegerValue def = IntegerValue()) const
-			{ return valueForKeyPath<IntegerValue::ValueType, ValueClass_Integer>(key, def); }
+			{ return valueForKey<IntegerValue::ValueType, VariantClass::Integer>(key, def); }
+		IntegerValue integerForKeyPath(const StringList& key, IntegerValue def = IntegerValue()) const
+			{ return valueForKeyPath<IntegerValue::ValueType, VariantClass::Integer>(key, def); }
 
 		FloatValue floatForKey(const std::string& key, FloatValue def = FloatValue()) const
-			{ return valueForKey<FloatValue::ValueType, ValueClass_Float>(key, def); }
-		FloatValue floatForKeyPath(const std::vector<std::string>& key, FloatValue def = FloatValue()) const
-			{ return valueForKeyPath<FloatValue::ValueType, ValueClass_Float>(key, def); }
+			{ return valueForKey<FloatValue::ValueType, VariantClass::Float>(key, def); }
+		FloatValue floatForKeyPath(const StringList& key, FloatValue def = FloatValue()) const
+			{ return valueForKeyPath<FloatValue::ValueType, VariantClass::Float>(key, def); }
 		
 		StringValue stringForKey(const std::string& key, StringValue def = StringValue()) const
-			{ return valueForKey<StringValue::ValueType, ValueClass_String>(key, def); }
-		StringValue stringForKeyPath(const std::vector<std::string>& key, StringValue def = StringValue()) const
-			{ return valueForKeyPath<StringValue::ValueType, ValueClass_String>(key, def); }
+			{ return valueForKey<StringValue::ValueType, VariantClass::String>(key, def); }
+		StringValue stringForKeyPath(const StringList& key, StringValue def = StringValue()) const
+			{ return valueForKeyPath<StringValue::ValueType, VariantClass::String>(key, def); }
 		
 		ArrayValue arrayForKey(const std::string& key, ArrayValue def = ArrayValue()) const
-			{ return valueForKey<ArrayValue::ValueType, ValueClass_Array>(key, def); }
-		ArrayValue arrayForKeyPath(const std::vector<std::string>& key, ArrayValue def = ArrayValue()) const
-			{ return valueForKeyPath<ArrayValue::ValueType, ValueClass_Array>(key, def); }
+			{ return valueForKey<ArrayValue::ValueType, VariantClass::Array>(key, def); }
+		ArrayValue arrayForKeyPath(const StringList& key, ArrayValue def = ArrayValue()) const
+			{ return valueForKeyPath<ArrayValue::ValueType, VariantClass::Array>(key, def); }
 		
 		Dictionary dictionaryForKey(const std::string& key, Dictionary def = Dictionary()) const
-			{ return Dictionary(valueForKey<Dictionary::ValueType, ValueClass_Dictionary>(key, def)); }
-		Dictionary dictionaryForKeyPath(const std::vector<std::string>& key, Dictionary def = Dictionary()) const
-			{ return Dictionary(valueForKeyPath<Dictionary::ValueType, ValueClass_Dictionary>(key, def)); }
+			{ return Dictionary(valueForKey<Dictionary::ValueType, VariantClass::Dictionary>(key, def)); }
+		Dictionary dictionaryForKeyPath(const StringList& key, Dictionary def = Dictionary()) const
+			{ return Dictionary(valueForKeyPath<Dictionary::ValueType, VariantClass::Dictionary>(key, def)); }
 		
 	public:
 		bool loadFromJson(const std::string&);
@@ -246,95 +247,55 @@ namespace et
 		
 		bool hasKey(const std::string&) const;
 		
-		ValueClass valueClassForKey(const std::string&) const;
+		VariantClass VariantClassForKey(const std::string&) const;
 		
-		ValueBase::Pointer objectForKey(const std::string& key) const;
-		ValueBase::Pointer objectForKeyPath(const std::vector<std::string>& key) const;
+		VariantBase::Pointer objectForKey(const std::string& key) const;
+		VariantBase::Pointer objectForKeyPath(const StringList& key) const;
 		
 		bool empty() const
 			{ return reference().content.empty(); }
 		
 		StringList allKeyPaths();
+
+		VariantPointer<ValueType, VariantClass::Dictionary> duplicate() const override;
 				
 	public:
 		void printContent() const;
 
 	private:
-		bool valueForKeyPathIsClassOf(const std::vector<std::string>& key, ValueClass) const;
+		bool valueForKeyPathIsClassOf(const StringList& key, VariantClass) const;
 				
-		ValueBase::Pointer baseValueForKeyPathInHolder(const std::vector<std::string>& key,
-			ValueBase::Pointer holder) const;
+		VariantBase::Pointer baseValueForKeyPathInHolder(const StringList& key,
+			VariantBase::Pointer holder) const;
 
-		void addKeyPathsFromHolder(ValueBase::Pointer holder, const std::string& baseKeyPath,
+		void addKeyPathsFromHolder(VariantBase::Pointer holder, const std::string& baseKeyPath,
 			StringList& keyPaths) const;
 		
 		template <typename T>
 		void setValueForKey(const std::string& key, const T& value)
 			{ this->reference().content[key] = value; }
 
-		template <typename T, ValueClass C>
+		template <typename T, VariantClass C>
 		void setValueForKeyPath(const StringList& keyPath, const T& value)
 		{
 			auto v = objectForKeyPath(keyPath);
-			if (v.invalid() || (v->valueClass() != C)) return;
+			if (v.invalid() || (v->variantClass() != C)) return;
 			T(v)->content = value->content;
 		}
 
-		template <typename T, ValueClass C>
-		ValuePointer<T, C> valueForKey(const std::string& key, ValuePointer<T, C> def) const
+		template <typename T, VariantClass C>
+		VariantPointer<T, C> valueForKey(const std::string& key, VariantPointer<T, C> def) const
 		{
 			auto i = objectForKey(key);
-			return (i.invalid() || (i->valueClass() != C)) ? def : ValuePointer<T, C>(i);
+			return (i.invalid() || (i->variantClass() != C)) ? def : VariantPointer<T, C>(i);
 		}
 		
-		template <typename T, ValueClass C>
-		ValuePointer<T, C> valueForKeyPath(const std::vector<std::string>& key, ValuePointer<T, C> def) const
+		template <typename T, VariantClass C>
+		VariantPointer<T, C> valueForKeyPath(const StringList& key, VariantPointer<T, C> def) const
 		{
 			auto i = objectForKeyPath(key);
-			return (i.invalid() || (i->valueClass() != C)) ? def : ValuePointer<T, C>(i);
+			return (i.invalid() || (i->variantClass() != C)) ? def : VariantPointer<T, C>(i);
 		}
 	};
-	
-	inline void ArrayValue::performRecursive(ValueCallbackFunction func)
-	{
-		func(*this);
-		
-		for (auto& cp : reference().content)
-		{
-			if (cp->valueClass() == ValueClass_Dictionary)
-			{
-				Dictionary(cp).performRecursive(func);
-			}
-			else if (cp->valueClass() == ValueClass_Array)
-			{
-				ArrayValue(cp).performRecursive(func);
-			}
-			else
-			{
-				ValuePointer(cp).performRecursive(func);
-			}
-		}
-	}
-	
-	inline void Dictionary::performRecursive(ValueCallbackFunction func)
-	{
-		func(*this);
-		
-		for (auto& cp : reference().content)
-		{
-			if (cp.second->valueClass() == ValueClass_Dictionary)
-			{
-				Dictionary(cp.second).performRecursive(func);
-			}
-			else if (cp.second->valueClass() == ValueClass_Array)
-			{
-				ArrayValue(cp.second).performRecursive(func);
-			}
-			else
-			{
-				ValuePointer(cp.second).performRecursive(func);
-			}
-		}
-	}
 }
 

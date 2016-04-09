@@ -1,6 +1,6 @@
 /*
  * This file is part of `et engine`
- * Copyright 2009-2015 by Sergey Reznik
+ * Copyright 2009-2016 by Sergey Reznik
  * Please, modify content only if you know what are you doing.
  *
  */
@@ -50,7 +50,6 @@ namespace et
         size_t supportedInterfaceOrientations = InterfaceOrientation_Any;
 
 		vec2i contextSize;
-		vec2i contextBaseSize;
 		vec2i contextMinimumSize;
 		vec2i contextTargetVersion;
 
@@ -58,11 +57,9 @@ namespace et
 		{
 #		if defined(ET_PLATFORM_IOS)
 			contextSize = nativeScreenSize();
-			contextBaseSize = nativeScreenSize();
 #		else
 			contextTargetVersion = vec2i(4, 5);
 			contextSize = vec2i(800, 600);
-			contextBaseSize = vec2i(800, 600);
 #		endif
 		}
 	};

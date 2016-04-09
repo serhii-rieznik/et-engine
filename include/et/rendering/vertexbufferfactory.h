@@ -1,13 +1,13 @@
 /*
  * This file is part of `et engine`
- * Copyright 2009-2015 by Sergey Reznik
+ * Copyright 2009-2016 by Sergey Reznik
  * Please, modify content only if you know what are you doing.
  *
  */
 
 #pragma once
 
-#include <et/rendering/apiobjectfactory.h>
+#include <et/rendering/apiobject.h>
 #include <et/rendering/vertexarrayobject.h>
 
 namespace et
@@ -27,15 +27,15 @@ namespace et
 		
 		IndexBuffer::Pointer createIndexBuffer(const std::string&, IndexArray::Pointer, BufferDrawType);
 		
-		VertexArrayObject createVertexArrayObject(const std::string&);
+		VertexArrayObject::Pointer createVertexArrayObject(const std::string&);
 
-		VertexArrayObject createVertexArrayObject(const std::string&, VertexArray::Pointer, BufferDrawType,
+		VertexArrayObject::Pointer createVertexArrayObject(const std::string&, VertexArray::Pointer, BufferDrawType,
 			IndexArray::Pointer, BufferDrawType);
 
-		VertexArrayObject createVertexArrayObject(const std::string&, VertexStorage::Pointer, BufferDrawType,
+		VertexArrayObject::Pointer createVertexArrayObject(const std::string&, VertexStorage::Pointer, BufferDrawType,
 			IndexArray::Pointer, BufferDrawType);
 
-		VertexArrayObject createVertexArrayObject(const std::string&, VertexStorage::Pointer, BufferDrawType,
+		VertexArrayObject::Pointer createVertexArrayObject(const std::string&, VertexStorage::Pointer, BufferDrawType,
 			IndexBuffer::Pointer);
 
 	private:

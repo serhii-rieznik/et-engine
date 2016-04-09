@@ -1,13 +1,13 @@
 /*
  * This file is part of `et engine`
- * Copyright 2009-2015 by Sergey Reznik
+ * Copyright 2009-2016 by Sergey Reznik
  * Please, modify content only if you know what are you doing.
  *
  */
 
 #pragma once
 
-#include <et/timers/animator.h>
+#include <et/core/animator.h>
 #include <et/sound/track.h>
 
 namespace et

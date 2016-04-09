@@ -1,6 +1,6 @@
 /*
  * This file is part of `et engine`
- * Copyright 2009-2015 by Sergey Reznik
+ * Copyright 2009-2016 by Sergey Reznik
  * Please, modify content only if you know what are you doing.
  *
  */
@@ -84,31 +84,31 @@ namespace et
 		const char* binary() const
 			{ return mat[0].binary(); }  
 
-		T& operator () (int i)
+		T& operator () (int32_t i)
 			{ return *(mat[0].data() + i); }
 		
-		const T& operator () (int i) const
+		const T& operator () (int32_t i) const
 			{ return *(mat[0].data() + i); }
 
-		RowType& operator [] (int i)
+		RowType& operator [] (int32_t i)
 			{ return mat[i];}
 
-		const RowType& operator [] (int i) const
+		const RowType& operator [] (int32_t i) const
 			{ return mat[i];}
 
-		T& operator () (size_t i)
+		T& operator () (uint32_t i)
 			{ return *(mat[0].data() + i); }
 		
-		const T& operator () (size_t i) const
+		const T& operator () (uint32_t i) const
 			{ return *(mat[0].data() + i); }
 		
-		RowType& operator [] (size_t i)
+		RowType& operator [] (uint32_t i)
 			{ return mat[i];}
 		
-		const RowType& operator [] (size_t i) const
+		const RowType& operator [] (uint32_t i) const
 			{ return mat[i];}
 		
-		RowType column(int c) const
+		RowType column(int32_t c) const
 			{ return RowType( mat[0][c], mat[1][c], mat[2][c], mat[3][c]); }
 
 		matrix4 operator * (T s) const
@@ -227,14 +227,12 @@ namespace et
 
 		bool operator == (const matrix4& m) const
 		{
-			return (mat[0] == m.mat[0]) && (mat[1] == m.mat[1]) &&
-				(mat[2] == m.mat[2]) && (mat[3] == m.mat[3]);
+			return memcmp(mat, m.mat, sizeof(mat)) == 0;
 		}
 
 		bool operator != (const matrix4& m) const
 		{
-			return (mat[0] != m.mat[0]) || (mat[1] != m.mat[1]) ||
-				(mat[2] != m.mat[2]) || (mat[3] != m.mat[3]);
+			return memcmp(mat, m.mat, sizeof(mat)) != 0;
 		}
 
 		T determinant() const
@@ -316,7 +314,7 @@ namespace et
 			return (det * det > 0) ? adjugateMatrix() / det : matrix4(0);
 		}
 
-		bool isModelViewMatrix()
+		bool isOrthonormal()
 		{
 			vector3<T>c1 = vector3<T>(mat[0][0], mat[1][0], mat[2][0]);
 			vector3<T>c2 = vector3<T>(mat[0][1], mat[1][1], mat[2][1]);
@@ -349,5 +347,146 @@ namespace et
 			mat[3].clear();
 		}
 	};
-}
+	
+	template <typename T>
+	inline matrix4<T> translationMatrix(T x, T y, T z)
+	{
+		matrix4<T> M(T(1));
+		M[0][0] = M[1][1] = M[2][2] = static_cast<T>(1);
+		M[3] = vector4<T>(x, y, z, static_cast<T>(1));
+		return M;
+	}
+	
+	template <typename T>
+	inline matrix4<T> translationScaleMatrix(T tx, T ty, T tz, T sx, T sy, T sz)
+	{
+		matrix4<T> M(T(1));
+		M[0][0] = sx;
+		M[1][1] = sy;
+		M[2][2] = sz;
+		M[3] = vector4<T>(tx, ty, tz, static_cast<T>(1));
+		return M;
+	}
+	
+	template <typename T>
+	inline matrix4<T> scaleMatrix(T x, T y, T z)
+	{
+		matrix4<T> M(T(1));
+		M[0][0] = x;
+		M[1][1] = y;
+		M[2][2] = z;
+		M[3][3] = static_cast<T>(1);
+		return M;
+	}
+	
+	template <typename T>
+	inline matrix4<T> rotationYXZMatrix(T x, T y, T z)
+	{
+		matrix4<T> m(T(1));
+		
+		float sx = std::sin(x);
+		float cx = std::cos(x);
+		float sy = std::sin(y);
+		float cy = std::cos(y);
+		float sz = std::sin(z);
+		float cz = std::cos(z);
+		
+		m[0][0] =  cz*cy - sz*sx*sy; m[0][1] = -cx*sz; m[0][2] = cz*sy + sz*sx*cy;
+		m[1][0] =  sz*cy + cz*sx*sy; m[1][1] =  cx*cz; m[1][2] = sz*sy - cz*sx*cy;
+		m[2][0] = -cx*sy;            m[2][1] =  sx;    m[2][2] = cx*cy;
+		
+		return m;
+	}
+	
+	template <typename T>
+	inline matrix4<T> translationRotationYXZMatrix(T tx, T ty, T tz, T rx, T ry, T rz)
+	{
+		matrix4<T> m(T(1));
+		
+		float sx = std::sin(rx);
+		float cx = std::cos(rx);
+		float sy = std::sin(ry);
+		float cy = std::cos(ry);
+		float sz = std::sin(rz);
+		float cz = std::cos(rz);
+		
+		m[0][0] =  cz*cy - sz*sx*sy; m[0][1] = -cx*sz; m[0][2] = cz*sy + sz*sx*cy;
+		m[1][0] =  sz*cy + cz*sx*sy; m[1][1] =  cx*cz; m[1][2] = sz*sy - cz*sx*cy;
+		m[2][0] = -cx*sy;            m[2][1] =  sx;    m[2][2] = cx*cy;
+		m[3][0] =  tx;				 m[3][1] =  ty;    m[3][2] = tz;
+		m[3][3] = 1;
+		
+		return m;
+	}
+	
+	template <typename T>
+	inline matrix4<T> rotationScaleMatrix(T rx, T ry, T rz, T scx, T scy, T scz)
+	{
+		matrix4<T> m(T(1));
+		
+		float sx = std::sin(rx);
+		float cx = std::cos(rx);
+		float sy = std::sin(ry);
+		float cy = std::cos(ry);
+		float sz = std::sin(rz);
+		float cz = std::cos(rz);
+		
+		m[0][0] = scx * (cz*cy - sz*sx*sy);
+		m[0][1] = scy * (-cx*sz);
+		m[0][2] = scz * (cz*sy + sz*sx*cy);
+		
+		m[1][0] = scx * (sz*cy + cz*sx*sy);
+		m[1][1] = scy * (cx*cz);
+		m[1][2] = scz * (sz*sy - cz*sx*cy);
+		
+		m[2][0] = scx * (-cx*sy);
+		m[2][1] = scy * (sx);
+		m[2][2] = scz * (cx*cy);
+		m[3][3] = 1;
+		
+		return m;
+	}
+	
+	template <typename T>
+	inline matrix4<T> transformYXZMatrix(T tx, T ty, T tz, T rx, T ry, T rz)
+	{
+		matrix4<T> m(T(1));
+		
+		float sx = std::sin(rx);
+		float cx = std::cos(rx);
+		float sy = std::sin(ry);
+		float cy = std::cos(ry);
+		float sz = std::sin(rz);
+		float cz = std::cos(rz);
+		
+		m[0][0] =  cz*cy - sz*sx*sy; m[0][1] = -cx*sz; m[0][2] = cz*sy + sz*sx*cy;
+		m[1][0] =  sz*cy + cz*sx*sy; m[1][1] =  cx*cz; m[1][2] = sz*sy - cz*sx*cy;
+		m[2][0] = -cx*sy;            m[2][1] =  sx;    m[2][2] = cx*cy;
+		m[3][0] =  tx;               m[3][1] =  ty;    m[3][2] = tz;
+		
+		m[3][3] = 1;
+		
+		return m;
+	}
 
+	inline matrix4<float> translationMatrix(const vector3<float>& v)
+		{ return translationMatrix<float>(v.x, v.y, v.z); }
+	
+	inline matrix4<float> translationScaleMatrix(const vector3<float>& t, const vector3<float>& s)
+		{ return translationScaleMatrix<float>(t.x, t.y, t.z, s.x, s.y, s.z); }
+	
+	inline matrix4<float> scaleMatrix(const vector3<float>& v)
+		{ return scaleMatrix<float>(v.x, v.y, v.z); }
+	
+	inline matrix4<float> rotationYXZMatrix(const vector3<float>& v)
+		{ return rotationYXZMatrix<float>(v.x, v.y, v.z); }
+	
+	inline matrix4<float> rotationScaleMatrix(const vector3<float>& r, const vector3<float>& s)
+		{ return rotationScaleMatrix<float>(r.x, r.y, r.z, s.x, s.y, s.z); }
+	
+	inline matrix4<float> translationRotationYXZMatrix(const vector3<float>& t, const vector3<float>& r)
+		{ return translationRotationYXZMatrix<float>(t.x, t.y, t.z, r.x, r.y, r.z); }
+	
+	inline matrix4<float> transformYXZMatrix(vector3<float> translate, vector3<float> rotate)
+		{ return transformYXZMatrix<float>(translate.x, translate.y, translate.z, rotate.x, rotate.y, rotate.z); }
+}
