@@ -12,7 +12,7 @@ namespace et
 namespace rt
 {
    
-float4 AmbientOcclusionIntegrator::shoot(const Ray& inRay, size_t depth, size_t& maxDepth,
+float4 AmbientOcclusionIntegrator::gather(const Ray& inRay, size_t depth, size_t& maxDepth,
     KDTree& tree, EnvironmentSampler::Pointer& env, const Material::Collection&)
 {
     KDTree::TraverseResult hit0 = tree.traverse(inRay);
@@ -44,7 +44,7 @@ struct ET_ALIGNED(16) Bounce
         add(a), mul(m) { }
 };
     
-float4 PathTraceIntegrator::shoot(const Ray& inRay, size_t depth, size_t& maxDepth,
+float4 PathTraceIntegrator::gather(const Ray& inRay, size_t depth, size_t& maxDepth,
     KDTree& tree, EnvironmentSampler::Pointer& env, const Material::Collection& materials)
 {
     auto currentRay = inRay;
@@ -180,7 +180,7 @@ float4 PathTraceIntegrator::compute(float4& normal, const Material& mat, const f
 /*
  * Normals
  */
-float4 NormalsIntegrator::shoot(const Ray& inRay, size_t depth, size_t& maxDepth, KDTree& tree,
+float4 NormalsIntegrator::gather(const Ray& inRay, size_t depth, size_t& maxDepth, KDTree& tree,
 	EnvironmentSampler::Pointer& env, const Material::Collection&)
 {
 	KDTree::TraverseResult hit0 = tree.traverse(inRay);
@@ -194,7 +194,7 @@ float4 NormalsIntegrator::shoot(const Ray& inRay, size_t depth, size_t& maxDepth
 /*
  * Fresnel
  */
-float4 FresnelIntegrator::shoot(const Ray& inRay, size_t depth, size_t& maxDepth, KDTree& tree,
+float4 FresnelIntegrator::gather(const Ray& inRay, size_t depth, size_t& maxDepth, KDTree& tree,
 	EnvironmentSampler::Pointer& env, const Material::Collection& materials)
 {
 	KDTree::TraverseResult hit0 = tree.traverse(inRay);

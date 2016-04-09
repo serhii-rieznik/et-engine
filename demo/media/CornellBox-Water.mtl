@@ -60,5 +60,5 @@ newmtl light
 newmtl water
 	Ns 0.0
 	Tr 1.7333
-	Kd 0.82 0.939 1.0
-    Ks 0.93 0.97 1.0
+	Kd 0.72 0.839 1.0
+    Ks 0.73 0.87 1.0

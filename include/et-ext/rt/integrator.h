@@ -21,7 +21,7 @@ namespace rt
         
     public:
         virtual ~Integrator() { }
-        virtual float4 shoot(const Ray& inRay, size_t depth, size_t& maxDepth,
+        virtual float4 gather(const Ray& inRay, size_t depth, size_t& maxDepth,
             KDTree& tree, EnvironmentSampler::Pointer&, const Material::Collection&) = 0;
     };
 
@@ -31,7 +31,7 @@ namespace rt
 		ET_DECLARE_POINTER(NormalsIntegrator)
 
 	public:
-		float4 shoot(const Ray& inRay, size_t depth, size_t& maxDepth,
+		float4 gather(const Ray& inRay, size_t depth, size_t& maxDepth,
 			KDTree& tree, EnvironmentSampler::Pointer&, const Material::Collection&) override;
 	};
 
@@ -41,7 +41,7 @@ namespace rt
 		ET_DECLARE_POINTER(FresnelIntegrator)
 
 	public:
-		float4 shoot(const Ray& inRay, size_t depth, size_t& maxDepth,
+		float4 gather(const Ray& inRay, size_t depth, size_t& maxDepth,
 			KDTree& tree, EnvironmentSampler::Pointer&, const Material::Collection&) override;
 	};
 
@@ -51,7 +51,7 @@ namespace rt
         ET_DECLARE_POINTER(AmbientOcclusionIntegrator)
         
     public:
-        float4 shoot(const Ray& inRay, size_t depth, size_t& maxDepth,
+        float4 gather(const Ray& inRay, size_t depth, size_t& maxDepth,
             KDTree& tree, EnvironmentSampler::Pointer&, const Material::Collection&) override;
     };
     
@@ -66,7 +66,7 @@ namespace rt
         };
         
     public:
-        float4 shoot(const Ray& inRay, size_t depth, size_t& maxDepth,
+        float4 gather(const Ray& inRay, size_t depth, size_t& maxDepth,
             KDTree& tree, EnvironmentSampler::Pointer&, const Material::Collection&) override;
 
     private:

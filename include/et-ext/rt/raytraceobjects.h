@@ -89,6 +89,11 @@ namespace et
 				return float4(_invDenomValue - y - z, y, z, 0.0f) * _invDenom;
 			}
 
+			float4 interpolatedPosition(const float4& b) const
+			{
+				return v[0] * b.shuffle<0, 0, 0, 3>() + v[1] * b.shuffle<1, 1, 1, 3>() + v[2] * b.shuffle<2, 2, 2, 3>();
+			}
+
 			float4 interpolatedNormal(const float4& b) const
 			{
 				auto result =
@@ -388,5 +393,11 @@ namespace et
 			return sqr((etaCosTheta - v) / (etaCosTheta + v + 0.000001f));
 		}
 
+		inline float4 randomBarycentric()
+		{
+			float r1 = std::sqrt(fastRandomFloat());
+			float r2 = fastRandomFloat();
+			return float4(1.0f - r1, r1 * (1.0f - r2), r1 * r2, 0.0f);
+		}
 	}
 }

@@ -17,17 +17,17 @@ void MainController::setApplicationParameters(et::ApplicationParameters& p)
 
 void MainController::setRenderContextParameters(et::RenderContextParameters& p)
 {
-    p.enableHighResolutionContext = true;
+	p.enableHighResolutionContext = true;
 	p.multisamplingQuality = MultisamplingQuality::None;
 	p.contextSize = 4 * et::currentScreen().frame.size() / 5;
-    p.enableHighResolutionContext = true;
+	p.enableHighResolutionContext = true;
 }
 
 void MainController::applicationDidLoad(et::RenderContext* rc)
 {
 	_rc = rc;
 	srand(static_cast<unsigned int>(time(nullptr)));
-	
+
 	ObjectsCache localCache;
 
 #if (ET_PLATFORM_WIN)
@@ -41,20 +41,20 @@ void MainController::applicationDidLoad(et::RenderContext* rc)
 	application().pushSearchPath("/Volumes/Development/SDK/Models");
 	application().pushSearchPath("/Volumes/Development/SDK/Textures");
 #endif
-	
+
 	auto configName = application().resolveFileName("config/config.json");
-	
+
 	VariantClass vc = VariantClass::Invalid;
 	_options = json::deserialize(loadTextFile(configName), vc);
 	ET_ASSERT(vc == VariantClass::Dictionary);
-	
+
 	auto modelName = application().resolveFileName(_options.stringForKey("model-name")->content);
-	
+
 	_scene = s3d::Scene::Pointer::create();
 	OBJLoader loader(modelName, OBJLoader::Option_CalculateTangents);
 	auto model = loader.load(rc, this, _scene->storage(), localCache);
 	model->setParent(_scene.ptr());
-	
+
 	Raytrace::Options rtOptions;
 	rtOptions.raysPerPixel = static_cast<size_t>(_options.integerForKey("rays-per-pixel", 32)->content);
 	rtOptions.maxKDTreeDepth = static_cast<size_t>(_options.integerForKey("kd-tree-max-depth", 4)->content);
@@ -62,14 +62,13 @@ void MainController::applicationDidLoad(et::RenderContext* rc)
 	rtOptions.debugRendering = _options.integerForKey("debug-rendering", 0ll)->content != 0;
 	rtOptions.renderKDTree = _options.integerForKey("render-kd-tree", 0ll)->content != 0;
 	_rt.setOptions(rtOptions);
-	
-	_rt.setOutputMethod([this](const vec2i& pixel, const vec4& color)
-	{
+
+	_rt.setOutputMethod([this](const vec2i& pixel, const vec4& color) {
 		if ((pixel.x >= 0) && (pixel.y >= 0) && (pixel.x < _texture->size().x) &&  (pixel.y < _texture->size().y))
 		{
 			int pos = pixel.x + pixel.y * _texture->size().x;
 			_textureData[pos] = mix(_textureData[pos], color, color.w);
-			
+
 			ET_ASSERT(!isnan(_textureData[pos].x));
 			ET_ASSERT(!isnan(_textureData[pos].y));
 			ET_ASSERT(!isnan(_textureData[pos].z));
@@ -97,51 +96,49 @@ void MainController::applicationDidLoad(et::RenderContext* rc)
 
 	rt::float4 envColor(et::arrayToVec4(_options.arrayForKey("env-color")));
 
-    auto envMap = _options.stringForKey("env-map")->content;
-    if (envMap.empty() == false)
-        envMap = application().resolveFileName(envMap);
-    
-    if (fileExists(envMap))
-    {
-        auto texture = loadTexture(envMap);
-        _rt.setEnvironmentSampler(rt::EnvironmentEquirectangularMapSampler::Pointer::create(texture, envColor));
-    }
-    else
-    {
+	auto envMap = _options.stringForKey("env-map")->content;
+	if (envMap.empty() == false)
+		envMap = application().resolveFileName(envMap);
+
+	if (fileExists(envMap))
+	{
+		auto texture = loadTexture(envMap);
+		_rt.setEnvironmentSampler(rt::EnvironmentEquirectangularMapSampler::Pointer::create(texture, envColor));
+	}
+	else
+	{
 		_rt.setEnvironmentSampler(rt::EnvironmentColorSampler::Pointer::create(envColor));
 		// _rt.setEnvironmentSampler(rt::DirectionalLightSampler::Pointer::create(
 		//	rt::float4(1.0f, 1.0f, -1.0f, 0.0f), rt::float4(50.0f)));
-    }
-	
-	Input::instance().keyPressed.connect([this](size_t key)
-	{
+	}
+
+	Input::instance().keyPressed.connect([this](size_t key) {
 		if (key == ET_KEY_SPACE)
 			start();
 	});
-	
-	_gestures.click.connect([this](const PointerInputInfo& p)
-	{
+
+	_gestures.click.connect([this](const PointerInputInfo& p) {
 		vec2i pixel(int(p.pos.x), int(p.pos.y));
 		vec4 color = _rt.performAtPoint(_scene, _camera, _texture->size(), pixel);
 		_rt.output(vec2i(pixel.x, _texture->size().y - pixel.y), color);
 	});
-	
+
 	Input::instance().keyPressed.invokeInMainRunLoop(ET_KEY_SPACE);
 }
 
 void MainController::start()
 {
 	_rt.stop();
-	
+
 	vec2i textureSize = _rc->size();
-	
+
 	_textureData.resize(textureSize.square() * sizeof(vec4));
 	_textureData.fill(0);
-	
+
 	BinaryDataStorage proxy(reinterpret_cast<unsigned char*>(_textureData.data()), _textureData.dataSize());
 	_texture = _rc->textureFactory().genTexture(TextureTarget::Texture_2D, TextureFormat::RGBA32F,
 		textureSize, TextureFormat::RGBA, DataFormat::Float, proxy, "output-texture");
-	
+
 	const vec3 lookPoint = arrayToVec3(_options.arrayForKey("camera-view-point"));
 	const vec3 offset = arrayToVec3(_options.arrayForKey("camera-offset"));
 	float cameraFOV = _options.floatForKey("camera-fov", 60.0f)->content * TO_RADIANS;
@@ -150,7 +147,7 @@ void MainController::start()
 	float cameraDistance = _options.floatForKey("camera-distance", 3.0f)->content;
 	_camera.perspectiveProjection(cameraFOV, vector2ToFloat(textureSize).aspect(), 0.1f, 2048.0f);
 	_camera.lookAt(cameraDistance * fromSpherical(cameraTheta, cameraPhi) + offset, lookPoint);
-	
+
 	_rt.perform(_scene, _camera, _texture->size());
 }
 
@@ -162,11 +159,10 @@ void MainController::applicationWillTerminate()
 void MainController::render(et::RenderContext* rc)
 {
 	rc->renderer()->clear(true, true);
-	
+
 	if (_texture.valid())
 	{
-		_texture->updateDataDirectly(rc, _texture->size(),
-			_textureData.binary(), _textureData.dataSize());
+		_texture->updateDataDirectly(rc, _texture->size(), _textureData.binary(), _textureData.dataSize());
 		rc->renderer()->renderFullscreenTexture(_texture);
 	}
 }
@@ -177,7 +173,7 @@ Material::Pointer MainController::materialWithName(const std::string&)
 }
 
 et::IApplicationDelegate* et::Application::initApplicationDelegate()
-	{ return sharedObjectFactory().createObject<MainController>(); }
+{ return sharedObjectFactory().createObject<MainController>(); }
 
 et::ApplicationIdentifier MainController::applicationIdentifier() const
-	{ return et::ApplicationIdentifier(applicationIdentifierForCurrentProject(), "Cheetek", "RT demo"); }
+{ return et::ApplicationIdentifier(applicationIdentifierForCurrentProject(), "Cheetek", "RT demo"); }

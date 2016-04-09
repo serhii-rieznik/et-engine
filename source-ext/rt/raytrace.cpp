@@ -24,7 +24,8 @@ public:
 	RaytracePrivate(Raytrace* owner);
 	~RaytracePrivate();
 
-	void threadFunction(unsigned index);
+	void gatherThreadFunction(unsigned index);
+	void shootingThreadFunction(unsigned index);
 	void emitWorkerThreads();
 	void stopWorkerThreads();
 
@@ -169,7 +170,7 @@ void RaytracePrivate::emitWorkerThreads()
 	threadCounter.store(std::thread::hardware_concurrency());
 	for (unsigned i = 0, e = std::thread::hardware_concurrency(); i < e; ++i)
 	{
-		workerThreads.emplace_back(&RaytracePrivate::threadFunction, this, i);
+		workerThreads.emplace_back(&RaytracePrivate::shootingThreadFunction, this, i);
 	}
 }
 
@@ -368,7 +369,32 @@ rt::Region RaytracePrivate::getNextRegion()
 /*
  * Raytrace function
  */
-void RaytracePrivate::threadFunction(unsigned index)
+void RaytracePrivate::shootingThreadFunction(unsigned index)
+{
+	while (running)
+	{
+		const auto& emitterTriangle = lightTriangles[rand() % lightTriangles.size()];
+		auto bc = rt::randomBarycentric();
+		auto originalNormal = emitterTriangle.interpolatedNormal(bc);
+		auto initialDirection = rt::randomVectorOnHemisphere(originalNormal, HALF_PI);
+		auto initialPoint = emitterTriangle.interpolatedPosition(bc);
+		rt::Ray initialRay(initialPoint + initialDirection * rt::Constants::epsilon, initialDirection);
+
+		auto trav = kdTree.traverse(initialRay);
+		if (trav.triangleIndex != InvalidIndex)
+		{
+			rt::float_type NdotD = originalNormal.dot(initialDirection);
+
+			vec3 hp = trav.intersectionPoint.toVec4().xyz();
+			auto projected = (0.5f * camera.project(hp).xy() + vec2(0.5f)) * vector2ToFloat(viewportSize);
+			
+			vec2i pixel(static_cast<int>(projected.x), static_cast<int>(projected.y));
+			owner->output(pixel, vec4(NdotD, NdotD, NdotD, 1.0f));
+		}
+	}
+}
+
+void RaytracePrivate::gatherThreadFunction(unsigned index)
 {
 	while (running)
 	{
@@ -440,11 +466,11 @@ vec4 RaytracePrivate::raytracePixel(const vec2i& pixel, size_t samples, size_t& 
 	vec2 pixelSize = vec2(1.0f) / vector2ToFloat(viewportSize);
 	vec2 pixelBase = 2.0f * (vector2ToFloat(pixel) * pixelSize) - vec2(1.0f);
 
-	rt::float4 result = integrator->shoot(camera.castRay(pixelBase), 0, bounces, kdTree, sampler, materials);
+	rt::float4 result = integrator->gather(camera.castRay(pixelBase), 0, bounces, kdTree, sampler, materials);
 	for (size_t m = 1; m < samples; ++m)
 	{
 		vec2 jitter = pixelSize * vec2(2.0f * rt::fastRandomFloat() - 1.0f, 2.0f * rt::fastRandomFloat() - 1.0f);
-		result += integrator->shoot(camera.castRay(pixelBase + jitter), 0, bounces, kdTree, sampler, materials);
+		result += integrator->gather(camera.castRay(pixelBase + jitter), 0, bounces, kdTree, sampler, materials);
 	}
 	vec4 output = (result / static_cast<float>(samples)).toVec4();
 	output.w = 1.0f;
@@ -454,7 +480,7 @@ vec4 RaytracePrivate::raytracePixel(const vec2i& pixel, size_t samples, size_t& 
 
 void RaytracePrivate::estimateRegionsOrder()
 {
-	const rt::float_type maxPossibleBounces = float(rt::PathTraceIntegrator::MaxTraverseDepth);
+	// const rt::float_type maxPossibleBounces = float(rt::PathTraceIntegrator::MaxTraverseDepth);
 	const size_t maxSamples = 5;
 
 	const vec2i sx[maxSamples] =
@@ -478,9 +504,11 @@ void RaytracePrivate::estimateRegionsOrder()
 			estimatedColor += raytracePixel(r.origin + vec2i(sx[i].x * r.size.x / sx[i].y, sy[i].x * r.size.y / sy[i].y), 1, bounces);
 			r.estimatedBounces += bounces;
 		}
+		/*
 		rt::float_type aspect = (maxPossibleBounces - float(r.estimatedBounces)) / maxPossibleBounces;
 		vec4 estimatedDensity = vec4(1.0f - 0.5f * aspect * aspect, 1.0f);
 		fillRegionWithColor(r, estimatedDensity * estimatedDensity);
+		// */
 	}
 
 	std::sort(regions.begin(), regions.end(), [](const rt::Region& l, const rt::Region& r)
