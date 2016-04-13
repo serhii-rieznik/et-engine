@@ -16,7 +16,7 @@ namespace rt
    
 inline float lambert(const float4& n, const float4& Wo, float r)
 {
-    return n.dot(Wo) / PI;
+    return 1.0f / PI;
 }
 
 inline float phong(const float4& n, const float4& Wi, const float4& Wo, const float4& r, float roughness)
@@ -87,7 +87,7 @@ float4 PathTraceIntegrator::gather(const Ray& inRay, size_t depth, size_t& maxDe
         currentRay.direction = reflectance(currentRay.direction, nrm, mat, color, brdf);
 		currentRay.origin = traverse.intersectionPoint + currentRay.direction * Constants::epsilon;
         bounce.add = mat.emissive;
-        bounce.scale = color * brdf;
+        bounce.scale = color * (brdf * std::max(0.0f, nrm.dot(currentRay.direction)));
 #   endif
         
     }
