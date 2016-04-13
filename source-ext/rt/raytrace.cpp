@@ -29,6 +29,9 @@ public:
 	void emitWorkerThreads();
 	void stopWorkerThreads();
 
+	bool finalizeShooting(const rt::float4& cameraPosition, const rt::float4 hitPoint,
+			const rt::float4& color, vec4& outColor, vec2i& pixel);
+
 	void buildMaterialAndTriangles(s3d::Scene::Pointer);
 
 	size_t materialIndexWithName(const std::string&);
@@ -73,6 +76,10 @@ public:
 	std::atomic<bool> running;
 	std::atomic<uint64_t> startTime;
 	std::atomic<uint64_t> elapsedTime;
+
+	Vector<rt::float4> imagePlane;
+	std::mutex imagePlaneLock;
+	std::atomic<uint64_t> raysShot;
 };
 
 using namespace et;
@@ -147,7 +154,7 @@ void Raytrace::setIntegrator(rt::Integrator::Pointer integrator)
  * Private implementation
  */
 RaytracePrivate::RaytracePrivate(Raytrace* o) :
-owner(o), running(false)
+	owner(o), running(false)
 {
 }
 
@@ -162,6 +169,11 @@ void RaytracePrivate::emitWorkerThreads()
 	startTime = queryContiniousTimeInMilliSeconds();
 	elapsedTime = 0;
 
+	raysShot = 0;
+	imagePlane.clear();
+	imagePlane.resize(viewportSize.square());
+	std::fill(imagePlane.begin(), imagePlane.end(), rt::float4(0.0f, 0.0f, 0.0f, 0.0f));
+
 	uint64_t totalRays = static_cast<uint64_t>(viewportSize.square()) * options.raysPerPixel;
 	log::info("Rendering started: %d x %d, %llu rpp, %llu total rays",
 		viewportSize.x, viewportSize.y, static_cast<uint64_t>(options.raysPerPixel), totalRays);
@@ -170,7 +182,7 @@ void RaytracePrivate::emitWorkerThreads()
 	threadCounter.store(std::thread::hardware_concurrency());
 	for (unsigned i = 0, e = std::thread::hardware_concurrency(); i < e; ++i)
 	{
-		workerThreads.emplace_back(&RaytracePrivate::shootingThreadFunction, this, i);
+		workerThreads.emplace_back(&RaytracePrivate::gatherThreadFunction, this, i);
 	}
 }
 
@@ -197,22 +209,26 @@ void RaytracePrivate::buildMaterialAndTriangles(s3d::Scene::Pointer scene)
 	{
 		bool isEmitter = false;
 		auto meshMaterial = mesh->material();
+
+//		if (meshMaterial->name().find("07___Default") == std::string::npos)
+//			continue;
+
 		auto materialIndex = materialIndexWithName(meshMaterial->name());
 		if (materialIndex == InvalidIndex)
 		{
 			materialIndex = materials.size();
 			materials.emplace_back();
 			auto& mat = materials.back();
-			rt::float_type r = clamp(meshMaterial->getFloat(MaterialParameter::Roughness), 0.0f, 1.0f);
 			auto kA = meshMaterial->getVector(MaterialParameter::AmbientColor);
 			auto kD = meshMaterial->getVector(MaterialParameter::DiffuseColor);
 			mat.name = meshMaterial->name();
 			mat.diffuse = rt::float4(kA + kD);
 			mat.specular = rt::float4(meshMaterial->getVector(MaterialParameter::SpecularColor));
 			mat.emissive = rt::float4(meshMaterial->getVector(MaterialParameter::EmissiveColor));
-			mat.roughness = HALF_PI * (1.0f - std::cos(HALF_PI * r));
+			mat.roughnessValue = clamp(meshMaterial->getFloat(MaterialParameter::Roughness), 0.0f, 1.0f);
+			mat.distributionAngle = HALF_PI * (1.0f - std::cos(HALF_PI * mat.roughnessValue));
 			mat.ior = meshMaterial->getFloat(MaterialParameter::Transparency);
-			if (mat.roughness < 1.0f)
+			if (mat.roughnessValue < 1.0f)
 			{
 				if (mat.ior == 0.0f)
 				{
@@ -276,7 +292,7 @@ void RaytracePrivate::buildMaterialAndTriangles(s3d::Scene::Pointer scene)
 	auto stats = kdTree.nodesStatistics();
 	log::info("KD-Tree statistics:\n\t%llu nodes\n\t%llu leaf nodes\n\t%llu empty leaf nodes"
 			  "\n\t%llu max depth\n\t%llu min triangles per node\n\t%llu max triangles per node"
-			  "\n\t%llu total triangles\n\t%llu distributed triangles\\n\t%llu light triangles",
+			  "\n\t%llu total triangles\n\t%llu distributed triangles\n\t%llu light triangles",
 			  uint64_t(stats.totalNodes), uint64_t(stats.leafNodes), uint64_t(stats.emptyLeafNodes),
 			  uint64_t(stats.maxDepth), uint64_t(stats.minTrianglesPerNode), uint64_t(stats.maxTrianglesPerNode),
 			  uint64_t(stats.totalTriangles), uint64_t(stats.distributedTriangles), uint64_t(lightTriangles.size()));
@@ -369,29 +385,92 @@ rt::Region RaytracePrivate::getNextRegion()
 /*
  * Raytrace function
  */
+bool RaytracePrivate::finalizeShooting(const rt::float4& cameraPosition, const rt::float4 hitPoint,
+	const rt::float4& color, vec4& outColor, vec2i& pixel)
+{
+	rt::float4 viewDirection = hitPoint - cameraPosition;
+
+	if (viewDirection.dot(rt::float4(camera.direction(), 0.0f)) >= 0.0f)
+		return false;
+
+	viewDirection.normalize();
+	rt::Ray viewRay(cameraPosition, viewDirection);
+	auto ct = kdTree.traverse(viewRay);
+	if ((ct.intersectionPoint - hitPoint).dotSelf() > rt::Constants::epsilon)
+		return false;
+
+	vec3 hp = hitPoint.toVec4().xyz();
+	auto projected = (0.5f * camera.project(hp).xy() + vec2(0.5f)) * vector2ToFloat(viewportSize);
+
+	pixel = vec2i(static_cast<int>(projected.x), static_cast<int>(projected.y));
+	if ((pixel.x < 0) || (pixel.y < 0) || (pixel.x >= viewportSize.x) || (pixel.y >= viewportSize.y))
+		return false;
+
+	rt::float4 putColor = color;
+	putColor = putColor * rt::float4(1.0f, 1.0f, 1.0f, 0.0f) + rt::float4(0.0f, 0.0f, 0.0f, 1.0f);
+
+	{
+		std::unique_lock<std::mutex> lock(imagePlaneLock);
+		auto& sampled = imagePlane[pixel.x + pixel.y * viewportSize.x];
+		sampled = sampled.maxWith(color);
+		outColor = sampled.toVec4();// / sampled
+		outColor.w = 1.0f;
+	}
+	return true;
+}
+
 void RaytracePrivate::shootingThreadFunction(unsigned index)
 {
+/*
+	const int_fast32_t maxBounces = 31;
+	rt::float4 cameraPosition(camera.position(), 0.0f);
+
 	while (running)
 	{
-		const auto& emitterTriangle = lightTriangles[rand() % lightTriangles.size()];
 		auto bc = rt::randomBarycentric();
+		const auto& emitterTriangle = lightTriangles[rand() % lightTriangles.size()];
+		auto currentPoint = emitterTriangle.interpolatedPosition(bc);
 		auto originalNormal = emitterTriangle.interpolatedNormal(bc);
-		auto initialDirection = rt::randomVectorOnHemisphere(originalNormal, HALF_PI);
-		auto initialPoint = emitterTriangle.interpolatedPosition(bc);
-		rt::Ray initialRay(initialPoint + initialDirection * rt::Constants::epsilon, initialDirection);
+		const auto& lightMaterial = materials[emitterTriangle.materialIndex];
 
-		auto trav = kdTree.traverse(initialRay);
-		if (trav.triangleIndex != InvalidIndex)
+		rt::float4 radiance = lightMaterial.emissive * 0.05f;
+
+		vec2i pixel;
+		vec4 outColor;
+		if (finalizeShooting(cameraPosition, currentPoint, radiance, outColor, pixel))
 		{
-			rt::float_type NdotD = originalNormal.dot(initialDirection);
+			owner->output(pixel, outColor);
+		}
 
-			vec3 hp = trav.intersectionPoint.toVec4().xyz();
-			auto projected = (0.5f * camera.project(hp).xy() + vec2(0.5f)) * vector2ToFloat(viewportSize);
-			
-			vec2i pixel(static_cast<int>(projected.x), static_cast<int>(projected.y));
-			owner->output(pixel, vec4(NdotD, NdotD, NdotD, 1.0f));
+		auto currentDirection = rt::randomVectorOnHemisphere(originalNormal, HALF_PI);
+		rt::Ray currentRay(currentPoint + currentDirection * rt::Constants::epsilon, currentDirection);
+
+		radiance *= currentDirection.dot(originalNormal);
+
+		bool shouldFinalize = true;
+		for (int_fast32_t bounce = 0; bounce < maxBounces; ++bounce)
+		{
+			auto trav = kdTree.traverse(currentRay);
+			if (trav.triangleIndex == InvalidIndex)
+			{
+				shouldFinalize = bounce > 0;
+				break;
+			}
+
+			const auto& tri = kdTree.triangleAtIndex(trav.triangleIndex);
+			const auto& mat = materials[tri.materialIndex];
+			auto hitNormal = tri.interpolatedNormal(trav.intersectionPointBarycentric);
+			auto incidence = currentRay.direction;
+			radiance *= 1.0f; // rt::PathTraceIntegrator::computeBackward(hitNormal, mat, incidence, currentRay.direction);
+			currentRay.origin = trav.intersectionPoint + currentRay.direction * rt::Constants::epsilon;
+		}
+		++raysShot;
+		if (shouldFinalize && finalizeShooting(cameraPosition, currentRay.origin, radiance, outColor, pixel))
+		{
+			owner->output(pixel, outColor);
 		}
 	}
+*/
 }
 
 void RaytracePrivate::gatherThreadFunction(unsigned index)
@@ -404,8 +483,16 @@ void RaytracePrivate::gatherThreadFunction(unsigned index)
 
 		auto runTime = et::queryContiniousTimeInMilliSeconds();
 
-		vec2i pixel;
+		for (size_t i = 0; i < 255; ++i)
+		{
+			auto n = rt::randomVectorOnHemisphere(rt::float4(0.0f, 1.0f, 0.0f, 0.0f), HALF_PI);
+			vec2 c0 = projectPoint(n * 4.99f);
+			vec2 c1 = projectPoint(n * 5.0f);
+			renderLine(c0, c1, vec4(1.0f));
+		}
 
+		/*
+		vec2i pixel;
 		for (pixel.y = region.origin.y; pixel.y < region.origin.y + region.size.y; ++pixel.y)
 		{
 			owner->_outputMethod(vec2i(region.origin.x, pixel.y), vec4(1.0f, 0.0f, 0.0f, 1.0f));
@@ -425,7 +512,7 @@ void RaytracePrivate::gatherThreadFunction(unsigned index)
 				owner->_outputMethod(pixel, raytracePixel(pixel, options.raysPerPixel, bounces));
 			}
 		}
-
+*/
 		elapsedTime += et::queryContiniousTimeInMilliSeconds() - runTime;
 		rt::float_type averageTime = static_cast<rt::float_type>(elapsedTime) / static_cast<rt::float_type>(1000 * sampledRegions);
 
@@ -472,7 +559,8 @@ vec4 RaytracePrivate::raytracePixel(const vec2i& pixel, size_t samples, size_t& 
 		vec2 jitter = pixelSize * vec2(2.0f * rt::fastRandomFloat() - 1.0f, 2.0f * rt::fastRandomFloat() - 1.0f);
 		result += integrator->gather(camera.castRay(pixelBase + jitter), 0, bounces, kdTree, sampler, materials);
 	}
-	vec4 output = (result / static_cast<float>(samples)).toVec4();
+	vec4 output = result.toVec4() / static_cast<float>(samples);
+	output = maxv(minv(output, vec4(1.0f)), vec4(0.0f));
 	output.w = 1.0f;
 
 	return output;
@@ -480,7 +568,6 @@ vec4 RaytracePrivate::raytracePixel(const vec2i& pixel, size_t samples, size_t& 
 
 void RaytracePrivate::estimateRegionsOrder()
 {
-	// const rt::float_type maxPossibleBounces = float(rt::PathTraceIntegrator::MaxTraverseDepth);
 	const size_t maxSamples = 5;
 
 	const vec2i sx[maxSamples] =
@@ -505,6 +592,7 @@ void RaytracePrivate::estimateRegionsOrder()
 			r.estimatedBounces += bounces;
 		}
 		/*
+		const rt::float_type maxPossibleBounces = float(rt::PathTraceIntegrator::MaxTraverseDepth);
 		rt::float_type aspect = (maxPossibleBounces - float(r.estimatedBounces)) / maxPossibleBounces;
 		vec4 estimatedDensity = vec4(1.0f - 0.5f * aspect * aspect, 1.0f);
 		fillRegionWithColor(r, estimatedDensity * estimatedDensity);

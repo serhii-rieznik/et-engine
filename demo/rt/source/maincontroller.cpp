@@ -1,6 +1,7 @@
 #include <et/scene3d/objloader.h>
 #include <et/camera/camera.h>
 #include <et/rendering/rendercontext.h>
+#include <et/rendering/primitives.h>
 #include <et/core/json.h>
 #include <et/core/conversion.h>
 #include <et/imaging/textureloader.h>
@@ -50,11 +51,36 @@ void MainController::applicationDidLoad(et::RenderContext* rc)
 
 	auto modelName = application().resolveFileName(_options.stringForKey("model-name")->content);
 
-	_scene = s3d::Scene::Pointer::create();
-	OBJLoader loader(modelName, OBJLoader::Option_CalculateTangents);
-	auto model = loader.load(rc, this, _scene->storage(), localCache);
-	model->setParent(_scene.ptr());
+	VertexDeclaration decl(true, et::VertexAttributeUsage::Position, et::DataType::Vec3);
+	decl.push_back(et::VertexAttributeUsage::Normal, et::DataType::Vec3);
+	decl.push_back(et::VertexAttributeUsage::TexCoord0, et::DataType::Vec2);
 
+	_scene = s3d::Scene::Pointer::create();
+	if (fileExists(modelName))
+	{
+		OBJLoader loader(modelName, OBJLoader::Option_CalculateTangents);
+		auto model = loader.load(rc, this, _scene->storage(), localCache);
+		model->setParent(_scene.ptr());
+	}
+	else
+	{
+		vec2i density(30);
+		VertexStorage::Pointer va = VertexStorage::Pointer::create(decl, 0);
+		IndexArray::Pointer ia = IndexArray::Pointer::create(IndexArrayFormat::Format_32bit,
+			primitives::indexCountForRegularMesh(density, et::PrimitiveType::Triangles), et::PrimitiveType::Triangles);
+		primitives::createSphere(va, 10.0f, density);
+		primitives::buildTrianglesIndexes(ia, density, 0, 0);
+
+		s3d::SceneMaterial::Pointer mat = s3d::SceneMaterial::Pointer::create();
+		mat->setVector(et::MaterialParameter::DiffuseColor, vec4(1.0f, 0.5f, 0.25f, 1.0f));
+		
+		auto obj = _rc->vertexBufferFactory().createVertexArrayObject("sphere", va, et::BufferDrawType::Static, ia, et::BufferDrawType::Static);
+		auto mesh = s3d::Mesh::Pointer::create("sphere", mat, _scene.ptr());
+		RenderBatch::Pointer rb = RenderBatch::Pointer::create(Material::Pointer(), obj);
+		rb->setVertexStorage(va);
+		rb->setIndexArray(ia);
+		mesh->addRenderBatch(rb);
+	}
 	Raytrace::Options rtOptions;
 	rtOptions.raysPerPixel = static_cast<size_t>(_options.integerForKey("rays-per-pixel", 32)->content);
 	rtOptions.maxKDTreeDepth = static_cast<size_t>(_options.integerForKey("kd-tree-max-depth", 4)->content);
@@ -63,17 +89,17 @@ void MainController::applicationDidLoad(et::RenderContext* rc)
 	rtOptions.renderKDTree = _options.integerForKey("render-kd-tree", 0ll)->content != 0;
 	_rt.setOptions(rtOptions);
 
-	_rt.setOutputMethod([this](const vec2i& pixel, const vec4& color) {
-		if ((pixel.x >= 0) && (pixel.y >= 0) && (pixel.x < _texture->size().x) &&  (pixel.y < _texture->size().y))
-		{
-			int pos = pixel.x + pixel.y * _texture->size().x;
-			_textureData[pos] = mix(_textureData[pos], color, color.w);
+	_rt.setOutputMethod([this](const vec2i& pixel, const vec4& color)
+	{
+		ET_ASSERT((pixel.x >= 0) && (pixel.y >= 0) && (pixel.x < _texture->size().x) &&  (pixel.y < _texture->size().y));
 
-			ET_ASSERT(!isnan(_textureData[pos].x));
-			ET_ASSERT(!isnan(_textureData[pos].y));
-			ET_ASSERT(!isnan(_textureData[pos].z));
-			ET_ASSERT(!isnan(_textureData[pos].w));
-		}
+		int pos = pixel.x + pixel.y * _texture->size().x;
+		_textureData[pos] = mix(_textureData[pos], color, color.w);
+
+		ET_ASSERT(!isnan(_textureData[pos].x));
+		ET_ASSERT(!isnan(_textureData[pos].y));
+		ET_ASSERT(!isnan(_textureData[pos].z));
+		ET_ASSERT(!isnan(_textureData[pos].w));
 	});
 
 	auto integrator = _options.stringForKey("integrator", "path-trace")->content;
@@ -108,8 +134,7 @@ void MainController::applicationDidLoad(et::RenderContext* rc)
 	else
 	{
 		_rt.setEnvironmentSampler(rt::EnvironmentColorSampler::Pointer::create(envColor));
-		// _rt.setEnvironmentSampler(rt::DirectionalLightSampler::Pointer::create(
-		//	rt::float4(1.0f, 1.0f, -1.0f, 0.0f), rt::float4(50.0f)));
+		// _rt.setEnvironmentSampler(rt::DirectionalLightSampler::Pointer::create(rt::float4(1.0f, 1.0f, -1.0f, 0.0f), envColor));
 	}
 
 	Input::instance().keyPressed.connect([this](size_t key) {

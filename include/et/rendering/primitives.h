@@ -34,7 +34,7 @@ namespace et
 
 		void createPhotonMap(VertexArray::Pointer data, const vec2i& density);
 
-		void createSphere(VertexArray::Pointer data, float radius, const vec2i& density,
+		void createSphere(VertexStorage::Pointer data, float radius, const vec2i& density,
 			const vec3& center = vec3(0.0f), const vec2& hemiSphere = vec2(1.0f));
 		
 		void createCylinder(VertexArray::Pointer data, float radius, float height, const vec2i& density,

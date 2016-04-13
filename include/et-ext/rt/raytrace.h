@@ -17,7 +17,7 @@ namespace et
 	class Raytrace
 	{
 	public:
-		typedef std::function<void(const vec2i&, const vec4&)> OutputMethod;
+		using OutputMethod = std::function<void(const vec2i&, const vec4&)>;
 		
 		struct Options
 		{

@@ -83,21 +83,18 @@ void primitives::createPhotonMap(VertexArray::Pointer buffer, const vec2i& densi
 	}
 }
 
-void primitives::createSphere(VertexArray::Pointer data, float radius, const vec2i& density,
+void primitives::createSphere(VertexStorage::Pointer data, float radius, const vec2i& density,
 	const vec3& center, const vec2& hemiSphere)
 {
-	uint32_t lastIndex = data->size();
-	data->increase(static_cast<uint32_t>(density.square()));
+	size_t lastIndex = data->capacity();
+	data->increaseSize(static_cast<uint32_t>(density.square()));
 
-	VertexDataChunk pos_c = data->chunk(VertexAttributeUsage::Position);
-	VertexDataChunk norm_c = data->chunk(VertexAttributeUsage::Normal);
-	VertexDataChunk tex_c = data->chunk(VertexAttributeUsage::TexCoord0);
-	RawDataAcessor<vec3> pos = pos_c.valid() ? pos_c.accessData<vec3>(lastIndex) : RawDataAcessor<vec3>();
-	RawDataAcessor<vec3> norm = norm_c.valid() ? norm_c.accessData<vec3>(lastIndex) : RawDataAcessor<vec3>();
-	RawDataAcessor<vec2> tex = tex_c.valid() ? tex_c.accessData<vec2>(lastIndex) : RawDataAcessor<vec2>();
+	auto pos = data->accessData<et::DataType::Vec3>(et::VertexAttributeUsage::Position, lastIndex);
+	auto nrm = data->accessData<et::DataType::Vec3>(et::VertexAttributeUsage::Normal, lastIndex);
+	auto tex = data->accessData<et::DataType::Vec2>(et::VertexAttributeUsage::TexCoord0, lastIndex);
 
 	bool hasPos = pos.valid();
-	bool hasNorm = norm.valid();
+	bool hasNorm = nrm.valid();
 	bool hasTex = tex.valid();
 
 	float dPhi = hemiSphere.x * DOUBLE_PI / (density.x - 1.0f);
@@ -116,7 +113,7 @@ void primitives::createSphere(VertexArray::Pointer data, float radius, const vec
 				pos[counter] = center + p * radius;
 
 			if (hasNorm)
-				norm[counter] = p;
+				nrm[counter] = p;
 
 			if (hasTex)
 			{

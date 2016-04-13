@@ -69,9 +69,8 @@ namespace rt
         float4 gather(const Ray& inRay, size_t depth, size_t& maxDepth,
             KDTree& tree, EnvironmentSampler::Pointer&, const Material::Collection&) override;
 
-    private:
-        float4 compute(float4& normal, const Material& mat, const float4& inDirection, float4& direction);
-		size_t internalDepthCounter = 0;
+		static float4 selectNextDirection(const float4& Wi, float4 N, const Material& mat, float4& color);
+		static float_type brdf(const float4& Wi, const float4& Wo, const float4& N, const Material& mat);
     };
 }
 }

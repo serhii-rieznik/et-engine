@@ -45,7 +45,7 @@ namespace rt
 		{
 			float4 intersectionPoint;
 			float4 intersectionPointBarycentric;
-			size_t triangleIndex = InvalidIndex;
+			index triangleIndex = InvalidIndex;
 		};
 
 	public:
@@ -101,15 +101,13 @@ namespace rt
         void emplace(Args&&... a)
         {
             ET_ASSERT(_size < MaxElements);
-            _elements[_size] = T(std::forward<Args>(a)...);
-            ++_size;
+            _elements[_size++] = T(std::forward<Args>(a)...);
         }
         
         void push(const T& value)
         {
             ET_ASSERT(_size < MaxElements);
-            _elements[_size] = value;
-            ++_size;
+            _elements[_size++] = value;
         }
         
         bool empty() const
@@ -126,6 +124,12 @@ namespace rt
         
         size_t size() const
             { return _size; }
+
+		T& emplace_back()
+		{
+			ET_ASSERT(_size < MaxElements);
+			return _elements[_size++];
+		}
         
     private:
         T _elements[MaxElements];

@@ -26,7 +26,7 @@ float4 AmbientOcclusionIntegrator::gather(const Ray& inRay, size_t depth, size_t
 	if (tree.traverse(Ray(nextOrigin, nextDirection)).triangleIndex == InvalidIndex)
 	{
 		++maxDepth;
-		return env->sampleInDirection(nextDirection) * nextDirection.dot(surfaceNormal);
+		return env->sampleInDirection(nextDirection);// * nextDirection.dot(surfaceNormal);
 	}
 
     return float4(0.0f);
@@ -37,11 +37,11 @@ float4 AmbientOcclusionIntegrator::gather(const Ray& inRay, size_t depth, size_t
  */
 struct ET_ALIGNED(16) Bounce
 {
-    float4 add;
-    float4 mul;
-    Bounce() = default;
-    Bounce(const float4& a, const float4& m) :
-        add(a), mul(m) { }
+	float4 color;
+	float4 emissive;
+
+	Bounce() = default;
+	Bounce(const float4& c, const float4& e) : color(c), emissive(e) { }
 };
     
 float4 PathTraceIntegrator::gather(const Ray& inRay, size_t depth, size_t& maxDepth,
@@ -55,29 +55,30 @@ float4 PathTraceIntegrator::gather(const Ray& inRay, size_t depth, size_t& maxDe
         KDTree::TraverseResult traverse = tree.traverse(currentRay);
         if (traverse.triangleIndex == InvalidIndex)
         {
-            bounces.emplace(env->sampleInDirection(currentRay.direction), float4(0.0f));
+			bounces.emplace(float4(0.0f), env->sampleInDirection(currentRay.direction));
             break;
         }
 
-        const auto& tri = tree.triangleAtIndex(traverse.triangleIndex);
+		const auto& tri = tree.triangleAtIndex(traverse.triangleIndex);
 		const auto& mat = materials[tri.materialIndex];
-		auto incidence = currentRay.direction;
-        float4 normal = tri.interpolatedNormal(traverse.intersectionPointBarycentric);
-		float4 outputColor = compute(normal, mat, incidence, currentRay.direction);
-        currentRay.origin = traverse.intersectionPoint + currentRay.direction * Constants::epsilon;
-		bounces.emplace(mat.emissive, outputColor);
+		const auto& normal = tri.interpolatedNormal(traverse.intersectionPointBarycentric);
+
+		float4 color;
+		currentRay.direction = selectNextDirection(currentRay.direction, normal, mat, color);
+		currentRay.origin = traverse.intersectionPoint + currentRay.direction * Constants::epsilon;
+
+		bounces.emplace(color, mat.emissive);
     }
 	maxDepth = bounces.size();
 
     float4 result(0.0f);
     do
     {
-        result *= bounces.top().mul;
-        result += bounces.top().add;
+		result = result * bounces.top().color;
+		result += bounces.top().emissive;
         bounces.pop();
     }
     while (bounces.hasSomething());
-
 
     return result;
 }
@@ -100,24 +101,24 @@ inline float4 computeRefractionVector(const float4& incidence, const float4& nor
         direction = reflect(direction, normal);
 	return direction;
 }
-    
-float4 PathTraceIntegrator::compute(float4& normal, const Material& mat, const float4& incidence,
-	float4& newDirection)
+
+float4 PathTraceIntegrator::selectNextDirection(const float4& Wi, float4 N, const Material& mat, float4& color)
 {
 	switch (mat.type)
 	{
 		case MaterialType::Diffuse:
 		{
-			newDirection = randomVectorOnHemisphere(normal, HALF_PI);
-			auto scale = newDirection.dot(normal);
-			return mat.diffuse * scale;
+			auto Wo = randomVectorOnHemisphere(N, HALF_PI);
+			color = mat.diffuse;
+			return Wo;
 		}
 
 		case MaterialType::Conductor:
 		{
 			float4 idealReflection;
-			newDirection = computeReflectionVector(incidence, normal, idealReflection, mat.roughness);
-			return mat.specular * idealReflection.dot(newDirection);
+			auto Wo = computeReflectionVector(Wi, N, idealReflection, mat.distributionAngle);
+			color = mat.specular;
+			return Wo;
 		}
 
 		case MaterialType::Dielectric:
@@ -125,9 +126,9 @@ float4 PathTraceIntegrator::compute(float4& normal, const Material& mat, const f
 			if (mat.ior > 1.0f) // refractive
 			{
 				float_type eta;
-				if (normal.dot(incidence) >= 0.0)
+				if (N.dot(Wi) >= 0.0)
 				{
-					normal *= -1.0f;
+					N *= -1.0f;
 					eta = mat.ior;
 				}
 				else
@@ -135,37 +136,34 @@ float4 PathTraceIntegrator::compute(float4& normal, const Material& mat, const f
 					eta = 1.00001f / mat.ior;
 				}
 
-				float_type k = computeRefractiveCoefficient(incidence, normal, eta);
-				auto fresnel = computeFresnelTerm(incidence, normal, eta);
+				float_type k = computeRefractiveCoefficient(Wi, N, eta);
+				auto fresnel = computeFresnelTerm(Wi, N, eta);
 				if ((k >= Constants::epsilon) && (fastRandomFloat() >= fresnel))
 				{
+					color = mat.diffuse;
 					float4 idealRefraction;
-					newDirection = computeRefractionVector(incidence, normal, k, eta, idealRefraction, mat.roughness);
-					return mat.diffuse * idealRefraction.dot(newDirection);
+					return computeRefractionVector(Wi, N, k, eta, idealRefraction, mat.distributionAngle);
 				}
 				else
 				{
+					color = mat.specular;
 					float4 idealReflection;
-					newDirection = computeReflectionVector(incidence, normal, idealReflection, mat.roughness);
-					return mat.specular * idealReflection.dot(newDirection);
+					return computeReflectionVector(Wi, N, idealReflection, mat.distributionAngle);
 				}
 			}
 			else // non-refractive material
 			{
-				auto fresnel = computeFresnelTerm(incidence, normal, mat.ior);
+				auto fresnel = computeFresnelTerm(Wi, N, mat.ior);
 				if (fastRandomFloat() > fresnel)
 				{
-					newDirection = randomVectorOnHemisphere(normal, HALF_PI);
-					return mat.diffuse * newDirection.dot(normal);
+					color = mat.diffuse;
+					return randomVectorOnHemisphere(N, HALF_PI);
 				}
 				else
 				{
-					auto reflected = reflect(incidence, normal);
-					newDirection = randomVectorOnHemisphere(reflected, mat.roughness);
-					if (newDirection.dot(normal) < 0.0f)
-						newDirection = reflect(newDirection, normal);
-					auto scale = newDirection.dot(reflected);
-					return mat.specular * scale;
+					color = mat.specular;
+					float4 idealReflection;
+					return computeReflectionVector(Wi, N, idealReflection, mat.distributionAngle);
 				}
 			}
 			break;
@@ -175,6 +173,28 @@ float4 PathTraceIntegrator::compute(float4& normal, const Material& mat, const f
 	}
 
 	return float4(1000.0f, 0.0f, 1000.0f, 1.0f);
+}
+
+float_type PathTraceIntegrator::brdf(const float4& Wi, const float4& Wo, const float4& N, const Material& mat)
+{
+	return 0.0f;
+/*
+	auto OdotN = Wo.dot(N);
+	ET_ASSERT(OdotN >= 0.0f);
+
+	if (mat.type == MaterialType::Diffuse)
+	{
+		return OdotN / PI;
+	}
+
+	auto R = rt::reflect(Wi, N);
+	auto OdotR = std::max(0.0f, Wo.dot(R));
+	auto sh = 2.0f / (mat.roughness * mat.roughness + Constants::epsilon) - 2.0f;
+	auto val = std::pow(OdotR, sh);// * OdotN * (sh + 1.0f) / DOUBLE_PI;
+	ET_ASSERT(!isnan(val));
+	ET_ASSERT(!isinf(val));
+	return val;
+*/
 }
 
 /*
@@ -209,7 +229,7 @@ float4 FresnelIntegrator::gather(const Ray& inRay, size_t depth, size_t& maxDept
 		return float4(1.0f, 0.0f, 1.0f, 0.0f);
 
 	float4 normal = tri.interpolatedNormal(hit0.intersectionPointBarycentric);
-	normal = randomVectorOnHemisphere(normal, mat.roughness);
+	normal = randomVectorOnHemisphere(normal, mat.distributionAngle);
 	
 	float_type eta = mat.ior > 1.0f ? 1.0f / mat.ior : mat.ior;
 	float_type k = computeRefractiveCoefficient(inRay.direction, normal, eta);

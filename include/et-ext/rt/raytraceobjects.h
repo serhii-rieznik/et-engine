@@ -47,7 +47,8 @@ namespace et
 			float4 diffuse;
 			float4 specular;
 			float4 emissive;
-			float_type roughness = 0.0f;
+			float_type roughnessValue = 0.0f;
+			float_type distributionAngle = 0.0f;
 			float_type ior = 0.0f;
 			MaterialType type = MaterialType::Diffuse;
             
@@ -251,12 +252,17 @@ namespace et
 
 		inline float4 randomVectorOnHemisphere(const float4& normal, float_type distributionAngle)
 		{
-			float_type phi = fastRandomFloat() * DOUBLE_PI;
+			float phi = fastRandomFloat() * DOUBLE_PI;
 			float_type theta = std::sin(fastRandomFloat() * clamp(distributionAngle, 0.0f, 0.999f * HALF_PI));
 			float4 u = perpendicularVector(normal);
-			float4 result = (u * std::cos(phi) + u.crossXYZ(normal) * std::sin(phi)) * std::sqrt(theta) +
-				normal * std::sqrt(1.0f - theta);
+			u.normalize();
+
+			float4 v = u.crossXYZ(normal);
+			v.normalize();
+
+			float4 result = (u * std::cos(phi) + v * std::sin(phi)) * std::sqrt(theta) + normal * std::sqrt(1.0f - theta);
 			result.normalize();
+			
 			return result;
 		}
 
