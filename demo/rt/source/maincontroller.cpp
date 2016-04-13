@@ -20,7 +20,7 @@ void MainController::setRenderContextParameters(et::RenderContextParameters& p)
 {
 	p.enableHighResolutionContext = true;
 	p.multisamplingQuality = MultisamplingQuality::None;
-	p.contextSize = 4 * et::currentScreen().frame.size() / 5;
+	p.contextSize = et::currentScreen().frame.size() / 2;
 	p.enableHighResolutionContext = true;
 }
 
@@ -91,15 +91,15 @@ void MainController::applicationDidLoad(et::RenderContext* rc)
 
 	_rt.setOutputMethod([this](const vec2i& pixel, const vec4& color)
 	{
-		ET_ASSERT((pixel.x >= 0) && (pixel.y >= 0) && (pixel.x < _texture->size().x) &&  (pixel.y < _texture->size().y));
-
-		int pos = pixel.x + pixel.y * _texture->size().x;
-		_textureData[pos] = mix(_textureData[pos], color, color.w);
-
-		ET_ASSERT(!isnan(_textureData[pos].x));
-		ET_ASSERT(!isnan(_textureData[pos].y));
-		ET_ASSERT(!isnan(_textureData[pos].z));
-		ET_ASSERT(!isnan(_textureData[pos].w));
+		if ((pixel.x >= 0) && (pixel.y >= 0) && (pixel.x < _texture->size().x) &&  (pixel.y < _texture->size().y))
+        {
+            int pos = pixel.x + pixel.y * _texture->size().x;
+            _textureData[pos] = mix(_textureData[pos], color, color.w);
+            ET_ASSERT(!isnan(_textureData[pos].x));
+            ET_ASSERT(!isnan(_textureData[pos].y));
+            ET_ASSERT(!isnan(_textureData[pos].z));
+            ET_ASSERT(!isnan(_textureData[pos].w));
+        }
 	});
 
 	auto integrator = _options.stringForKey("integrator", "path-trace")->content;
@@ -133,8 +133,16 @@ void MainController::applicationDidLoad(et::RenderContext* rc)
 	}
 	else
 	{
-		_rt.setEnvironmentSampler(rt::EnvironmentColorSampler::Pointer::create(envColor));
-		// _rt.setEnvironmentSampler(rt::DirectionalLightSampler::Pointer::create(rt::float4(1.0f, 1.0f, -1.0f, 0.0f), envColor));
+        auto envType = _options.stringForKey("env-type", "uniform")->content;
+        if (envType == "directional")
+        {
+            rt::float4 light(et::arrayToVec4(_options.arrayForKey("light-direction")));
+            _rt.setEnvironmentSampler(rt::DirectionalLightSampler::Pointer::create(light, envColor));
+        }
+        else
+        {
+            _rt.setEnvironmentSampler(rt::EnvironmentColorSampler::Pointer::create(envColor));
+        }
 	}
 
 	Input::instance().keyPressed.connect([this](size_t key) {
@@ -172,6 +180,7 @@ void MainController::start()
 	float cameraDistance = _options.floatForKey("camera-distance", 3.0f)->content;
 	_camera.perspectiveProjection(cameraFOV, vector2ToFloat(textureSize).aspect(), 0.1f, 2048.0f);
 	_camera.lookAt(cameraDistance * fromSpherical(cameraTheta, cameraPhi) + offset, lookPoint);
+    log::info("Camera position: %f, %f, %f", _camera.position().x, _camera.position().y, _camera.position().z);
 
 	_rt.perform(_scene, _camera, _texture->size());
 }

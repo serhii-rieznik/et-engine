@@ -252,18 +252,15 @@ namespace et
 
 		inline float4 randomVectorOnHemisphere(const float4& normal, float_type distributionAngle)
 		{
-			float phi = fastRandomFloat() * DOUBLE_PI;
+            float phi = fastRandomFloat() * DOUBLE_PI;
 			float_type theta = std::sin(fastRandomFloat() * clamp(distributionAngle, 0.0f, 0.999f * HALF_PI));
 			float4 u = perpendicularVector(normal);
-			u.normalize();
-
+            u.normalize();
 			float4 v = u.crossXYZ(normal);
-			v.normalize();
-
-			float4 result = (u * std::cos(phi) + v * std::sin(phi)) * std::sqrt(theta) + normal * std::sqrt(1.0f - theta);
-			result.normalize();
-			
-			return result;
+            v.normalize();
+            auto w = (u * std::cos(phi) + v * std::sin(phi)) * std::sqrt(theta) + normal * std::sqrt(1.0f - theta);
+            w.normalize();
+			return w;
 		}
 
 		inline float4 reflect(const float4& v, const float4& n)
@@ -390,7 +387,11 @@ namespace et
 			return 1.0f - (eta * eta) * (1.0f - NdotI * NdotI);
 		}
 		
-		inline float_type computeFresnelTerm(const float4& incidence, const float4& normal, float_type eta)
+        template <MaterialType M>
+        inline float_type computeFresnelTerm(const float4& incidence, const float4& normal, float_type eta);
+        
+        template <>
+        inline float_type computeFresnelTerm<MaterialType::Dielectric>(const float4& incidence, const float4& normal, float_type eta)
 		{
 			float_type cosTheta = std::abs(incidence.dot(normal));
 			float_type sinTheta = std::sqrt(1.0f - cosTheta * cosTheta);
@@ -399,6 +400,18 @@ namespace et
 			return sqr((etaCosTheta - v) / (etaCosTheta + v + 0.000001f));
 		}
 
+        template <>
+        inline float_type computeFresnelTerm<MaterialType::Conductor>(const float4& incidence, const float4& normal, float_type eta)
+        {
+            return 1.0f;
+        }
+        
+        inline float_type computeFresnelTerm(const float4& incidence, const float4& normal)
+        {
+            const float r0 = 0.15f;
+            return r0 + (1.0f - r0) * std::pow(1.0f - incidence.dot(normal), 5.0f);
+        }
+        
 		inline float4 randomBarycentric()
 		{
 			float r1 = std::sqrt(fastRandomFloat());

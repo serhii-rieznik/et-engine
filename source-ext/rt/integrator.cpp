@@ -7,11 +7,25 @@
 
 #include <et-ext/rt/integrator.h>
 
+#define VISUALIZE_BRDF 0
+
 namespace et
 {
 namespace rt
 {
    
+inline float lambert(const float4& n, const float4& Wo, float r)
+{
+    return n.dot(Wo) / PI;
+}
+
+inline float phong(const float4& n, const float4& Wi, const float4& Wo, const float4& r, float roughness)
+{
+    float Ns = std::max(0.0f, 2.0f / (sqr(roughness) + Constants::epsilon) - 2.0f);
+    auto RdotW = clamp(r.dot(Wo), 0.0f, 1.0f);
+    return clamp(std::pow(RdotW, Ns) * (Ns + 2.0f) / DOUBLE_PI, 0.0f, 1.0f);
+}
+    
 float4 AmbientOcclusionIntegrator::gather(const Ray& inRay, size_t depth, size_t& maxDepth,
     KDTree& tree, EnvironmentSampler::Pointer& env, const Material::Collection&)
 {
@@ -37,88 +51,104 @@ float4 AmbientOcclusionIntegrator::gather(const Ray& inRay, size_t depth, size_t
  */
 struct ET_ALIGNED(16) Bounce
 {
-	float4 color;
-	float4 emissive;
-
-	Bounce() = default;
-	Bounce(const float4& c, const float4& e) : color(c), emissive(e) { }
+    float4 scale;
+    float4 add;
 };
     
 float4 PathTraceIntegrator::gather(const Ray& inRay, size_t depth, size_t& maxDepth,
     KDTree& tree, EnvironmentSampler::Pointer& env, const Material::Collection& materials)
 {
+    ++maxDepth;
+    float4 l(0.0f, 1.0f, 0.0f, 0.0f);
+    
     auto currentRay = inRay;
-
+    
     FastStack<PathTraceIntegrator::MaxTraverseDepth, Bounce> bounces;
     while (bounces.size() < MaxTraverseDepth)
     {
+        auto& bounce = bounces.emplace_back();
         KDTree::TraverseResult traverse = tree.traverse(currentRay);
         if (traverse.triangleIndex == InvalidIndex)
         {
-			bounces.emplace(float4(0.0f), env->sampleInDirection(currentRay.direction));
+            bounce.add = env->sampleInDirection(currentRay.direction);
             break;
         }
-
+        
 		const auto& tri = tree.triangleAtIndex(traverse.triangleIndex);
-		const auto& mat = materials[tri.materialIndex];
-		const auto& normal = tri.interpolatedNormal(traverse.intersectionPointBarycentric);
+        const auto& mat = materials[tri.materialIndex];
+        auto nrm = tri.interpolatedNormal(traverse.intersectionPointBarycentric);
 
-		float4 color;
-		currentRay.direction = selectNextDirection(currentRay.direction, normal, mat, color);
+#   if (VISUALIZE_BRDF)
+        auto r = reflect(currentRay.direction, nrm);
+        return float4(phong(nrm, currentRay.direction, l, r, mat.roughnessValue));
+#   else
+        float4 color;
+        float brdf = 0.0f;
+        currentRay.direction = reflectance(currentRay.direction, nrm, mat, color, brdf);
 		currentRay.origin = traverse.intersectionPoint + currentRay.direction * Constants::epsilon;
-
-		bounces.emplace(color, mat.emissive);
+        bounce.add = mat.emissive;
+        bounce.scale = color * brdf;
+#   endif
+        
     }
 	maxDepth = bounces.size();
-
+    
     float4 result(0.0f);
     do
     {
-		result = result * bounces.top().color;
-		result += bounces.top().emissive;
+        result *= bounces.top().scale;
+        result += bounces.top().add;
         bounces.pop();
     }
     while (bounces.hasSomething());
-
+    
     return result;
 }
 
-inline float4 computeReflectionVector(const float4& incidence, const float4& normal, float4& idealReflection, float roughness)
+inline float4 computeReflectionVector(const float4& incidence, const float4& normal, float4& idealReflection, float distribution)
 {
 	idealReflection = reflect(incidence, normal);
-	auto direction = randomVectorOnHemisphere(idealReflection, roughness);
+    
+	auto direction = randomVectorOnHemisphere(idealReflection, distribution);
 	if (direction.dot(normal) < 0.0f)
 		direction = reflect(direction, normal);
 	return direction;
 }
 
 inline float4 computeRefractionVector(const float4& incidence, const float4& normal,
-	float_type k, float_type eta, float4& idealRefraction, float roughness)
+	float_type k, float_type eta, float4& idealRefraction, float distribution)
 {
     idealRefraction = incidence * eta - normal * (eta * normal.dot(incidence) + std::sqrt(k));
-	auto direction = randomVectorOnHemisphere(idealRefraction, roughness);
-    if (direction.dot(normal) >= Constants::minusEpsilon)
+    
+	auto direction = randomVectorOnHemisphere(idealRefraction, distribution);
+    if (direction.dot(normal) > 0.0f)
         direction = reflect(direction, normal);
 	return direction;
 }
 
-float4 PathTraceIntegrator::selectNextDirection(const float4& Wi, float4 N, const Material& mat, float4& color)
+float4 PathTraceIntegrator::reflectance(const float4& incidence, float4& normal, const Material& mat,
+    float4& color, float_type& brdf)
 {
+    brdf = 1.0f;
+    
 	switch (mat.type)
 	{
 		case MaterialType::Diffuse:
 		{
-			auto Wo = randomVectorOnHemisphere(N, HALF_PI);
-			color = mat.diffuse;
-			return Wo;
+            color = mat.diffuse;
+            
+            auto out = randomVectorOnHemisphere(normal, HALF_PI);
+            brdf = lambert(normal, out, mat.roughnessValue);
+			return out;
 		}
 
 		case MaterialType::Conductor:
 		{
-			float4 idealReflection;
-			auto Wo = computeReflectionVector(Wi, N, idealReflection, mat.distributionAngle);
-			color = mat.specular;
-			return Wo;
+            color = mat.specular;
+            float4 idealReflection;
+            auto out = computeReflectionVector(incidence, normal, idealReflection, mat.distributionAngle);
+            brdf = phong(normal, incidence, out, idealReflection, mat.roughnessValue);
+			return out;
 		}
 
 		case MaterialType::Dielectric:
@@ -126,9 +156,9 @@ float4 PathTraceIntegrator::selectNextDirection(const float4& Wi, float4 N, cons
 			if (mat.ior > 1.0f) // refractive
 			{
 				float_type eta;
-				if (N.dot(Wi) >= 0.0)
+				if (normal.dot(incidence) >= 0.0)
 				{
-					N *= -1.0f;
+					normal *= -1.0f;
 					eta = mat.ior;
 				}
 				else
@@ -136,34 +166,46 @@ float4 PathTraceIntegrator::selectNextDirection(const float4& Wi, float4 N, cons
 					eta = 1.00001f / mat.ior;
 				}
 
-				float_type k = computeRefractiveCoefficient(Wi, N, eta);
-				auto fresnel = computeFresnelTerm(Wi, N, eta);
+				float_type k = computeRefractiveCoefficient(incidence, normal, eta);
+                auto fresnel = computeFresnelTerm<MaterialType::Dielectric>(incidence, normal, eta);
 				if ((k >= Constants::epsilon) && (fastRandomFloat() >= fresnel))
 				{
 					color = mat.diffuse;
-					float4 idealRefraction;
-					return computeRefractionVector(Wi, N, k, eta, idealRefraction, mat.distributionAngle);
+                    
+                    float4 idealRefraction;
+                    auto out = computeRefractionVector(incidence, normal, k, eta, idealRefraction, mat.distributionAngle);
+                    brdf = phong(normal, incidence, out, idealRefraction, mat.roughnessValue);
+					return out;
 				}
 				else
 				{
 					color = mat.specular;
-					float4 idealReflection;
-					return computeReflectionVector(Wi, N, idealReflection, mat.distributionAngle);
+                    
+                    float4 idealReflection;
+                    auto out = computeReflectionVector(incidence, normal, idealReflection, mat.distributionAngle);
+                    brdf = phong(normal, incidence, out, idealReflection, mat.roughnessValue);
+					return out;
 				}
 			}
 			else // non-refractive material
 			{
-				auto fresnel = computeFresnelTerm(Wi, N, mat.ior);
+				auto fresnel = computeFresnelTerm<MaterialType::Dielectric>(incidence, normal, mat.ior);
 				if (fastRandomFloat() > fresnel)
 				{
-					color = mat.diffuse;
-					return randomVectorOnHemisphere(N, HALF_PI);
+                    color = mat.diffuse;
+                    
+                    auto out = randomVectorOnHemisphere(normal, HALF_PI);
+                    brdf = lambert(normal, out, mat.roughnessValue);
+					return out;
 				}
 				else
 				{
 					color = mat.specular;
-					float4 idealReflection;
-					return computeReflectionVector(Wi, N, idealReflection, mat.distributionAngle);
+                    
+                    float4 idealReflection;
+                    auto out = computeReflectionVector(incidence, normal, idealReflection, mat.distributionAngle);
+                    brdf = phong(normal, incidence, out, idealReflection, mat.roughnessValue);
+					return out;
 				}
 			}
 			break;
@@ -173,28 +215,6 @@ float4 PathTraceIntegrator::selectNextDirection(const float4& Wi, float4 N, cons
 	}
 
 	return float4(1000.0f, 0.0f, 1000.0f, 1.0f);
-}
-
-float_type PathTraceIntegrator::brdf(const float4& Wi, const float4& Wo, const float4& N, const Material& mat)
-{
-	return 0.0f;
-/*
-	auto OdotN = Wo.dot(N);
-	ET_ASSERT(OdotN >= 0.0f);
-
-	if (mat.type == MaterialType::Diffuse)
-	{
-		return OdotN / PI;
-	}
-
-	auto R = rt::reflect(Wi, N);
-	auto OdotR = std::max(0.0f, Wo.dot(R));
-	auto sh = 2.0f / (mat.roughness * mat.roughness + Constants::epsilon) - 2.0f;
-	auto val = std::pow(OdotR, sh);// * OdotN * (sh + 1.0f) / DOUBLE_PI;
-	ET_ASSERT(!isnan(val));
-	ET_ASSERT(!isinf(val));
-	return val;
-*/
 }
 
 /*
@@ -224,21 +244,29 @@ float4 FresnelIntegrator::gather(const Ray& inRay, size_t depth, size_t& maxDept
 	++maxDepth;
 	const auto& tri = tree.triangleAtIndex(hit0.triangleIndex);
 	const auto& mat = materials[tri.materialIndex];
+    float4 normal = tri.interpolatedNormal(hit0.intersectionPointBarycentric);
 
-	if (mat.ior == 0.0f)
-		return float4(1.0f, 0.0f, 1.0f, 0.0f);
-
-	float4 normal = tri.interpolatedNormal(hit0.intersectionPointBarycentric);
-	normal = randomVectorOnHemisphere(normal, mat.distributionAngle);
-	
-	float_type eta = mat.ior > 1.0f ? 1.0f / mat.ior : mat.ior;
-	float_type k = computeRefractiveCoefficient(inRay.direction, normal, eta);
-	if (k >= Constants::epsilon)
-	{
-		return float4(computeFresnelTerm(inRay.direction, normal, eta));
-	}
-
-	return float4(1.0f, 0.0f, 0.0f, 1.0f);
+    float value = 0.0f;
+    switch (mat.type)
+    {
+        case MaterialType::Conductor:
+        {
+            value = computeFresnelTerm<MaterialType::Conductor>(inRay.direction, normal, 0.0f);
+            break;
+        }
+            
+        case MaterialType::Dielectric:
+        {
+            float_type eta = mat.ior > 1.0f ? 1.0f / mat.ior : mat.ior;
+            value = computeFresnelTerm<MaterialType::Dielectric>(inRay.direction, normal, eta);
+            break;
+        }
+            
+        default:
+            ET_FAIL("Invalid material type");
+    }
+    
+    return float4(value);
 }
 
 }

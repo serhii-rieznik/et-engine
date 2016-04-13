@@ -210,7 +210,7 @@ void RaytracePrivate::buildMaterialAndTriangles(s3d::Scene::Pointer scene)
 		bool isEmitter = false;
 		auto meshMaterial = mesh->material();
 
-//		if (meshMaterial->name().find("07___Default") == std::string::npos)
+//		if (meshMaterial->name().find("wire_057008136") == std::string::npos)
 //			continue;
 
 		auto materialIndex = materialIndexWithName(meshMaterial->name());
@@ -483,15 +483,16 @@ void RaytracePrivate::gatherThreadFunction(unsigned index)
 
 		auto runTime = et::queryContiniousTimeInMilliSeconds();
 
+        /*
 		for (size_t i = 0; i < 255; ++i)
 		{
 			auto n = rt::randomVectorOnHemisphere(rt::float4(0.0f, 1.0f, 0.0f, 0.0f), HALF_PI);
-			vec2 c0 = projectPoint(n * 4.99f);
-			vec2 c1 = projectPoint(n * 5.0f);
-			renderLine(c0, c1, vec4(1.0f));
+			vec2 e = projectPoint(n * 50.0f);
+			renderPixel(e, vec4(1.0f));
 		}
-
-		/*
+        // */
+        
+		//*
 		vec2i pixel;
 		for (pixel.y = region.origin.y; pixel.y < region.origin.y + region.size.y; ++pixel.y)
 		{
@@ -512,7 +513,8 @@ void RaytracePrivate::gatherThreadFunction(unsigned index)
 				owner->_outputMethod(pixel, raytracePixel(pixel, options.raysPerPixel, bounces));
 			}
 		}
-*/
+        // */
+        
 		elapsedTime += et::queryContiniousTimeInMilliSeconds() - runTime;
 		rt::float_type averageTime = static_cast<rt::float_type>(elapsedTime) / static_cast<rt::float_type>(1000 * sampledRegions);
 
@@ -560,9 +562,17 @@ vec4 RaytracePrivate::raytracePixel(const vec2i& pixel, size_t samples, size_t& 
 		result += integrator->gather(camera.castRay(pixelBase + jitter), 0, bounces, kdTree, sampler, materials);
 	}
 	vec4 output = result.toVec4() / static_cast<float>(samples);
+    output.x = std::pow(output.x, 1.0f / 2.2f);
+    output.y = std::pow(output.y, 1.0f / 2.2f);
+    output.z = std::pow(output.z, 1.0f / 2.2f);
 	output = maxv(minv(output, vec4(1.0f)), vec4(0.0f));
 	output.w = 1.0f;
 
+    ET_ASSERT(!isnan(output.x));
+    ET_ASSERT(!isnan(output.y));
+    ET_ASSERT(!isnan(output.z));
+    ET_ASSERT(!isnan(output.w));
+    
 	return output;
 }
 
