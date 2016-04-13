@@ -87,7 +87,7 @@ float4 PathTraceIntegrator::gather(const Ray& inRay, size_t depth, size_t& maxDe
         currentRay.direction = reflectance(currentRay.direction, nrm, mat, color, brdf);
 		currentRay.origin = traverse.intersectionPoint + currentRay.direction * Constants::epsilon;
         bounce.add = mat.emissive;
-        bounce.scale = color * (brdf * std::max(0.0f, nrm.dot(currentRay.direction)));
+        bounce.scale = color * brdf;
 #   endif
         
     }
@@ -175,6 +175,8 @@ float4 PathTraceIntegrator::reflectance(const float4& incidence, float4& normal,
                     float4 idealRefraction;
                     auto out = computeRefractionVector(incidence, normal, k, eta, idealRefraction, mat.distributionAngle);
                     brdf = phong(normal, incidence, out, idealRefraction, mat.roughnessValue);
+                    
+                    normal *= -1.0f;
 					return out;
 				}
 				else

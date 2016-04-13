@@ -560,19 +560,23 @@ vec4 RaytracePrivate::raytracePixel(const vec2i& pixel, size_t samples, size_t& 
 	{
 		vec2 jitter = pixelSize * vec2(2.0f * rt::fastRandomFloat() - 1.0f, 2.0f * rt::fastRandomFloat() - 1.0f);
 		result += integrator->gather(camera.castRay(pixelBase + jitter), 0, bounces, kdTree, sampler, materials);
+        ET_ASSERT(!isnan(result.cX()));
+        ET_ASSERT(!isnan(result.cY()));
+        ET_ASSERT(!isnan(result.cZ()));
+        ET_ASSERT(!isnan(result.cW()));
 	}
 	vec4 output = result.toVec4() / static_cast<float>(samples);
+    output = maxv(minv(output, vec4(1.0f)), vec4(0.0f));
+    
     output.x = std::pow(output.x, 1.0f / 2.2f);
     output.y = std::pow(output.y, 1.0f / 2.2f);
     output.z = std::pow(output.z, 1.0f / 2.2f);
-	output = maxv(minv(output, vec4(1.0f)), vec4(0.0f));
-	output.w = 1.0f;
-
+    
     ET_ASSERT(!isnan(output.x));
     ET_ASSERT(!isnan(output.y));
     ET_ASSERT(!isnan(output.z));
-    ET_ASSERT(!isnan(output.w));
     
+	output.w = 1.0f;
 	return output;
 }
 
