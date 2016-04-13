@@ -129,8 +129,6 @@ inline float4 computeRefractionVector(const float4& incidence, const float4& nor
 float4 PathTraceIntegrator::reflectance(const float4& incidence, float4& normal, const Material& mat,
     float4& color, float_type& brdf)
 {
-    brdf = 1.0f;
-    
 	switch (mat.type)
 	{
 		case MaterialType::Diffuse:
@@ -172,6 +170,7 @@ float4 PathTraceIntegrator::reflectance(const float4& incidence, float4& normal,
 				if ((k >= Constants::epsilon) && (fastRandomFloat() >= fresnel))
 				{
 					color = mat.diffuse;
+                    
                     float4 idealRefraction;
                     auto out = computeRefractionVector(incidence, normal, k, eta, IdotN, idealRefraction, mat.distributionAngle);
                     brdf = phong(normal, incidence, out, idealRefraction, mat.roughnessValue);
