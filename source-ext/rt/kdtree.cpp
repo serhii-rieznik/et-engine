@@ -330,8 +330,6 @@ struct KDTreeSearchNode
 
 KDTree::TraverseResult KDTree::traverse(const Ray& ray)
 {
-	DECL_INT_FLOAT_UNION(one, 1.0f);
-
 	KDTree::TraverseResult result;
 	
 	float_type tNear = 0.0f;
@@ -387,23 +385,23 @@ KDTree::TraverseResult KDTree::traverse(const Ray& ray)
 				auto data = _intersectionData[triangleIndex];
 
 				float4 pvec = ray.direction.crossXYZ(data.edge2to0);
-				DECL_INT_FLOAT_UNION(det, data.edge1to0.dot(pvec));
-				if (det.i > 0)
+                float det = data.edge1to0.dot(pvec);
+                if (det * det >= Constants::epsilonSquared)
 				{
 					float4 tvec = ray.origin - data.v0;
-					DECL_INT_FLOAT_UNION(u, tvec.dot(pvec) / det.f);
-					if ((u.i > 0) && (u.i <= one.i))
+                    float u = tvec.dot(pvec) / det;
+					if ((u >= 0.0f) && (u <= 1.0f))
 					{
 						float4 qvec = tvec.crossXYZ(data.edge1to0);
-						DECL_INT_FLOAT_UNION(v, ray.direction.dot(qvec) / det.f);
-						DECL_INT_FLOAT_UNION(uv, u.f + v.f);
-						if ((v.i > 0) && (uv.i <= one.i))
+                        float v = ray.direction.dot(qvec) / det;
+                        float uv = u + v;
+						if ((v >= 0.0f) && (uv <= 1.0f))
 						{
-							float_type intersectionDistance = data.edge2to0.dot(qvec) / det.f;
+							float_type intersectionDistance = data.edge2to0.dot(qvec) / det;
 							if ((intersectionDistance <= minDistance) && (intersectionDistance <= tFar) && (intersectionDistance > 0.0f))
 							{
 								result.triangleIndex = triangleIndex;
-								result.intersectionPointBarycentric = float4(1.0f - uv.f, u.f, v.f, 0.0f);
+								result.intersectionPointBarycentric = float4(1.0f - uv, u, v, 0.0f);
 								minDistance = intersectionDistance;
 							}
 						}

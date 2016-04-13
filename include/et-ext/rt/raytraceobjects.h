@@ -381,19 +381,18 @@ namespace et
 			return ((txmin < tzmax) && (tzmin < txmax));
 		}
 		
-		inline float_type computeRefractiveCoefficient(const float4& incidence, const float4& normal, float_type eta)
+		inline float_type computeRefractiveCoefficient(float_type eta, float_type IdotN)
 		{
-			float_type NdotI = normal.dot(incidence);
-			return 1.0f - (eta * eta) * (1.0f - NdotI * NdotI);
+			return 1.0f - (eta * eta) * (1.0f - IdotN * IdotN);
 		}
 		
         template <MaterialType M>
-        inline float_type computeFresnelTerm(const float4& incidence, const float4& normal, float_type eta);
+        inline float_type computeFresnelTerm(float_type eta, float_type IdotN);
         
         template <>
-        inline float_type computeFresnelTerm<MaterialType::Dielectric>(const float4& incidence, const float4& normal, float_type eta)
+        inline float_type computeFresnelTerm<MaterialType::Dielectric>(float_type eta, float_type IdotN)
 		{
-			float_type cosTheta = std::abs(incidence.dot(normal));
+			float_type cosTheta = std::abs(IdotN);
 			float_type sinTheta = std::sqrt(1.0f - cosTheta * cosTheta);
 			float_type etaCosTheta = eta * cosTheta;
 			float_type v = std::sqrt(1.0f - sqr(eta * sinTheta));
@@ -401,17 +400,11 @@ namespace et
 		}
 
         template <>
-        inline float_type computeFresnelTerm<MaterialType::Conductor>(const float4& incidence, const float4& normal, float_type eta)
+        inline float_type computeFresnelTerm<MaterialType::Conductor>(float_type eta, float_type IdotN)
         {
             return 1.0f;
         }
-        
-        inline float_type computeFresnelTerm(const float4& incidence, const float4& normal)
-        {
-            const float r0 = 0.15f;
-            return r0 + (1.0f - r0) * std::pow(1.0f - incidence.dot(normal), 5.0f);
-        }
-        
+                
 		inline float4 randomBarycentric()
 		{
 			float r1 = std::sqrt(fastRandomFloat());
