@@ -25,7 +25,9 @@ public:
 	~RaytracePrivate();
 
 	void gatherThreadFunction(unsigned index);
-	void shootingThreadFunction(unsigned index);
+    void shootingThreadFunction(unsigned index);
+    void testThreadFunction(unsigned index);
+    
 	void emitWorkerThreads();
 	void stopWorkerThreads();
 
@@ -471,6 +473,61 @@ void RaytracePrivate::shootingThreadFunction(unsigned index)
 		}
 	}
 */
+}
+
+void RaytracePrivate::testThreadFunction(unsigned index)
+{
+    if (index > 0)
+        return;
+    
+    rt::float4 nrm(2.0f * rt::fastRandomFloat() - 1.0f, 2.0f * rt::fastRandomFloat() - 1.0f, 2.0f * rt::fastRandomFloat() - 1.0f, 0.0f);
+    nrm.normalize();
+    
+    const size_t sampleCount = 1000;
+    const size_t testCount = 100000000;
+    Vector<size_t> prob(sampleCount, 0);
+    for (size_t i = 0; i < testCount; ++i)
+    {
+        auto v = rt::randomVectorOnHemisphere(nrm, DEG_30).dot(nrm);
+        size_t VdotN = static_cast<size_t>(clamp(v, 0.0f, 1.0f) * static_cast<float>(sampleCount));
+        prob[VdotN] += 1;
+    }
+    
+    size_t maxValue = prob.front();
+    for (auto i : prob)
+    {
+        maxValue = std::max(maxValue, i);
+    }
+    float vScale = static_cast<float>(testCount) / static_cast<float>(maxValue);
+    
+    const float off = 10.0f;
+    vec2 p00(off);
+    vec2 p01(viewportSize.x - off, off);
+    vec2 p10(off, viewportSize.y - off);
+    renderLine(p00, p01, vec4(1.0f));
+    renderLine(p00, p10, vec4(1.0f));
+    
+    float ds = 1.0f / static_cast<float>(sampleCount - 1);
+    float lastHeight = vScale * static_cast<float>(prob.front()) / static_cast<float>(testCount);
+    for (size_t i = 0; i < sampleCount; ++i)
+    {
+        float delta = static_cast<float>(i) * ds;
+        
+        float x0 = off + delta * (viewportSize.x - 2.0f * off);
+        float x1 = off + (delta + ds) * (viewportSize.x - 2.0f * off);
+        float y0 = lastHeight;
+        float y1 = vScale * static_cast<float>(prob[i]) / static_cast<float>(testCount);
+        
+        vec2 p0i(x0, off);
+        vec2 p1i(x0, viewportSize.y - off);
+        renderLine(p0i, p1i, vec4(1.0f, 0.25f));
+        
+        vec2 ph1(x0, off + (viewportSize.y - 2.0f * off) * y0);
+        vec2 ph2(x1, off + (viewportSize.y - 2.0f * off) * y1);
+        renderLine(ph1, ph2, vec4(1.0f, 1.0f, 0.0f, 1.0f));
+        
+        lastHeight = y1;
+    }
 }
 
 void RaytracePrivate::gatherThreadFunction(unsigned index)

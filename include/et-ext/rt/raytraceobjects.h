@@ -252,15 +252,18 @@ namespace et
 
 		inline float4 randomVectorOnHemisphere(const float4& normal, float_type distributionAngle)
 		{
+            float scaledD = clamp(distributionAngle * fastRandomFloat(), 0.0f, HALF_PI) / HALF_PI;
             float phi = fastRandomFloat() * DOUBLE_PI;
-			float_type theta = std::sin(fastRandomFloat() * clamp(distributionAngle, 0.0f, 0.999f * HALF_PI));
-			float4 u = perpendicularVector(normal);
-            u.normalize();
-			float4 v = u.crossXYZ(normal);
-            v.normalize();
-            auto w = (u * std::cos(phi) + v * std::sin(phi)) * std::sqrt(theta) + normal * std::sqrt(1.0f - theta);
-            w.normalize();
-			return w;
+            float Xi1 = acos(scaledD) / HALF_PI; // cos
+            
+            // float Xi1 = 1.0f - scaledD; // uniform
+            // float Xi1 = std::sqrt(1.0f - scaledD); // linear
+            
+            float4 u = perpendicularVector(normal);
+            float4 v = u.crossXYZ(normal);
+            float4 direction = (u * std::cos(phi) + v * std::sin(phi)) * std::sqrt(1.0f - Xi1 * Xi1) + normal * Xi1;
+            direction.normalize();
+            return direction;
 		}
 
 		inline float4 reflect(const float4& v, const float4& n)
