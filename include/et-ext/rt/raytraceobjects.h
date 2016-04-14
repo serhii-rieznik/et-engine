@@ -18,12 +18,12 @@ namespace et
 		using float3 = vector3<float_type>;
 		using float4 = vec4simd;
 		using index = uint_fast32_t;
-		
+
 		enum : index
 		{
 			InvalidIndex = index(-1),
 		};
-		
+
 		struct Constants
 		{
 			static const float_type epsilon;
@@ -51,8 +51,8 @@ namespace et
 			float_type distributionAngle = 0.0f;
 			float_type ior = 0.0f;
 			MaterialType type = MaterialType::Diffuse;
-            
-            using Collection = Vector<Material>;
+
+			using Collection = Vector<Material>;
 		};
 
 		struct ET_ALIGNED(16) Triangle
@@ -104,7 +104,7 @@ namespace et
 				result.normalize();
 				return result;
 			}
-			
+
 			float4 geometricNormal() const
 			{
 				float4 c = edge1to0.crossXYZ(edge2to0);
@@ -118,12 +118,12 @@ namespace et
 				result.normalize();
 				return result;
 			}
-			
+
 			float4 minVertex() const
 			{
 				return v[0].minWith(v[1].minWith(v[2]));
 			}
-			
+
 			float4 maxVertex() const
 			{
 				return v[0].maxWith(v[1].maxWith(v[2]));
@@ -137,15 +137,17 @@ namespace et
 			*/
 		};
 		using TriangleList = Vector<rt::Triangle>;
-		
+
 		struct ET_ALIGNED(16) IntersectionData
 		{
 			float4 v0;
 			float4 edge1to0;
 			float4 edge2to0;
-			
+
 			IntersectionData(const float4& v, const float4& e1, const float4& e2) :
-				v0(v), edge1to0(e1), edge2to0(e2) { }
+				v0(v), edge1to0(e1), edge2to0(e2)
+			{
+			}
 		};
 		using IntersectionDataList = Vector<IntersectionData>;
 
@@ -153,25 +155,32 @@ namespace et
 		{
 			float4 center = float4(0.0f);
 			float4 halfSize = float4(0.0f);
-			
+
 			BoundingBox()
-				{ }
-			
+			{
+			}
+
 			BoundingBox(const float4& c, const float4& hs) :
-				center(c), halfSize(hs) { }
-			
+				center(c), halfSize(hs)
+			{
+			}
+
 			BoundingBox(const float4& minVertex, const float4& maxVertex, int)
 			{
 				center = (minVertex + maxVertex) * 0.5f;
 				halfSize = (maxVertex - minVertex) * 0.5f;
 			}
-			
+
 			float4 minVertex() const
-				{ return center - halfSize; }
-			
+			{
+				return center - halfSize;
+			}
+
 			float4 maxVertex() const
-				{ return center + halfSize; }
-			
+			{
+				return center + halfSize;
+			}
+
 			float_type square() const
 			{
 				float_type xy = halfSize.cX() * halfSize.cY();
@@ -179,7 +188,7 @@ namespace et
 				float_type xz = halfSize.cX() * halfSize.cZ();
 				return 4.0f * (xy + yz + xz);
 			}
-			
+
 			float_type volume() const
 			{
 				return 8.0f * halfSize.cX() * halfSize.cY() * halfSize.cZ();
@@ -193,13 +202,17 @@ namespace et
 			float4 origin;
 			float4 direction;
 
-			Ray() { }
+			Ray() {}
 
-			Ray(const float4& o, const float4& d) : 
-				origin(o), direction(d) { }
+			Ray(const float4& o, const float4& d) :
+				origin(o), direction(d)
+			{
+			}
 
-			Ray(const ray3d& r) : 
-				origin(r.origin, 1.0f), direction(r.direction, 0.0f) { } 
+			Ray(const ray3d& r) :
+				origin(r.origin, 1.0f), direction(r.direction, 0.0f)
+			{
+			}
 		};
 
 		struct Region
@@ -209,7 +222,7 @@ namespace et
 			size_t estimatedBounces = 0;
 			bool sampled = false;
 		};
-		
+
 		inline float_type fastRandomFloat()
 		{
 			union
@@ -226,10 +239,10 @@ namespace et
 		{
 			return reinterpret_cast<uint_fast32_t&>(a) >> 31;
 		}
-		
+
 		inline uint_fast32_t floatIsPositive(float& a)
 		{
-            return (~reinterpret_cast<uint_fast32_t&>(a)) >> 31;
+			return (~reinterpret_cast<uint_fast32_t&>(a)) >> 31;
 		}
 
 		inline float4 perpendicularVector(const float4& normal)
@@ -252,18 +265,15 @@ namespace et
 
 		inline float4 randomVectorOnHemisphere(const float4& normal, float_type distributionAngle)
 		{
-            float scaledD = clamp(distributionAngle * fastRandomFloat(), 0.0f, HALF_PI) / HALF_PI;
-            float phi = fastRandomFloat() * DOUBLE_PI;
-            float Xi1 = acos(scaledD) / HALF_PI; // cos
-            
-            // float Xi1 = 1.0f - scaledD; // uniform
-            // float Xi1 = std::sqrt(1.0f - scaledD); // linear
-            
-            float4 u = perpendicularVector(normal);
-            float4 v = u.crossXYZ(normal);
-            float4 direction = (u * std::cos(phi) + v * std::sin(phi)) * std::sqrt(1.0f - Xi1 * Xi1) + normal * Xi1;
-            direction.normalize();
-            return direction;
+			float scaledD = clamp(distributionAngle * fastRandomFloat(), 0.0f, HALF_PI) / HALF_PI;
+			float phi = fastRandomFloat() * DOUBLE_PI;
+			// float Xi1 = 1.0f - scaledD; // uniform
+			float Xi1 = std::acos(scaledD) / HALF_PI; // cos
+			// float Xi1 = std::sqrt(1.0f - scaledD); // linear
+
+			float4 u = perpendicularVector(normal);
+			float4 v = u.crossXYZ(normal);
+			return (u * std::cos(phi) + v * std::sin(phi)) * std::sqrt(1.0f - Xi1 * Xi1) + normal * Xi1;
 		}
 
 		inline float4 reflect(const float4& v, const float4& n)
@@ -271,30 +281,30 @@ namespace et
 			const float4 two(2.0f);
 			return v - two * n * v.dotVector(n);
 		}
-		
+
 		inline bool pointInsideBoundingBox(const float4& p, const BoundingBox& box)
 		{
 			float4 lower = box.minVertex();
-			
+
 			if ((p.cX() < lower.cX() - Constants::epsilon) ||
 				(p.cY() < lower.cY() - Constants::epsilon) ||
 				(p.cZ() < lower.cZ() - Constants::epsilon)) return false;
-			
+
 			float4 upper = box.maxVertex();
-			
+
 			if ((p.cX() > upper.cX() + Constants::epsilon) ||
 				(p.cY() > upper.cY() + Constants::epsilon) ||
 				(p.cZ() > upper.cZ() + Constants::epsilon)) return false;
-			
+
 			return true;
 		}
-		
+
 		inline bool rayToBoundingBox(const Ray& r, const BoundingBox& box, float& tNear, float& tFar)
 		{
 			float4 bounds[2] = { box.minVertex(), box.maxVertex() };
-			
+
 			float_type tmin, tmax, tymin, tymax, tzmin, tzmax;
-			
+
 			if (r.direction.cX() >= 0)
 			{
 				tmin = (bounds[0].cX() - r.origin.cX()) / r.direction.cX() - Constants::epsilon;
@@ -305,7 +315,7 @@ namespace et
 				tmin = (bounds[1].cX() - r.origin.cX()) / r.direction.cX() - Constants::epsilon;
 				tmax = (bounds[0].cX() - r.origin.cX()) / r.direction.cX() + Constants::epsilon;
 			}
-			
+
 			if (r.direction.cY() >= 0)
 			{
 				tymin = (bounds[0].cY() - r.origin.cY()) / r.direction.cY() - Constants::epsilon;
@@ -316,16 +326,16 @@ namespace et
 				tymin = (bounds[1].cY() - r.origin.cY()) / r.direction.cY() - Constants::epsilon;
 				tymax = (bounds[0].cY() - r.origin.cY()) / r.direction.cY() + Constants::epsilon;
 			}
-			
+
 			if ((tmin > tymax) || (tymin > tmax))
 				return false;
-			
+
 			if (tymin > tmin)
 				tmin = tymin;
-			
+
 			if (tymax < tmax)
 				tmax = tymax;
-			
+
 			if (r.direction.cZ() >= 0)
 			{
 				tzmin = (bounds[0].cZ() - r.origin.cZ()) / r.direction.cZ() - Constants::epsilon;
@@ -336,64 +346,64 @@ namespace et
 				tzmin = (bounds[1].cZ() - r.origin.cZ()) / r.direction.cZ() - Constants::epsilon;
 				tzmax = (bounds[0].cZ() - r.origin.cZ()) / r.direction.cZ() + Constants::epsilon;
 			}
-			
-			if ( (tmin > tzmax) || (tzmin > tmax) )
+
+			if ((tmin > tzmax) || (tzmin > tmax))
 				return false;
-			
+
 			if (tzmin > tmin)
 				tmin = tzmin;
-			
+
 			if (tzmax < tmax)
 				tmax = tzmax;
-			
+
 			tNear = tmin;
 			tFar = tmax;
-			
+
 			return tmin <= tmax;
 		}
-		
+
 		inline bool rayHitsBoundingBox(const Ray& r, const BoundingBox& box)
 		{
 			vec4 origin;
 			vec4 invDirection;
 			r.origin.loadToVec4(origin);
 			r.direction.reciprocal().loadToVec4(invDirection);
-			
+
 			int r_sign_x = (invDirection.x < 0.0f ? 1 : 0);
 			int r_sign_y = (invDirection.y < 0.0f ? 1 : 0);
-			
+
 			float4 parameters[2] = { box.minVertex(), box.maxVertex() };
-			
+
 			float_type txmin = (parameters[r_sign_x].cX() - origin.x) * invDirection.x;
 			float_type tymin = (parameters[r_sign_y].cY() - origin.y) * invDirection.y;
 			float_type txmax = (parameters[1 - r_sign_x].cX() - origin.x) * invDirection.x;
 			float_type tymax = (parameters[1 - r_sign_y].cY() - origin.y) * invDirection.y;
-			
+
 			if ((txmin >= tymax) || (tymin >= txmax))
 				return false;
-			
+
 			if (tymin > txmin)
 				txmin = tymin;
 			if (tymax < txmax)
 				txmax = tymax;
-			
+
 			int r_sign_z = (invDirection.z < 0.0f ? 1 : 0);
 			float_type tzmin = (parameters[r_sign_z].cZ() - origin.z) * invDirection.z;
 			float_type tzmax = (parameters[1 - r_sign_z].cZ() - origin.z) * invDirection.z;
-			
+
 			return ((txmin < tzmax) && (tzmin < txmax));
 		}
-		
+
 		inline float_type computeRefractiveCoefficient(float_type eta, float_type IdotN)
 		{
 			return 1.0f - (eta * eta) * (1.0f - IdotN * IdotN);
 		}
-		
-        template <MaterialType M>
-        inline float_type computeFresnelTerm(float_type eta, float_type IdotN);
-        
-        template <>
-        inline float_type computeFresnelTerm<MaterialType::Dielectric>(float_type eta, float_type IdotN)
+
+		template <MaterialType M>
+		inline float_type computeFresnelTerm(float_type eta, float_type IdotN);
+
+		template <>
+		inline float_type computeFresnelTerm<MaterialType::Dielectric>(float_type eta, float_type IdotN)
 		{
 			float_type cosTheta = std::abs(IdotN);
 			float_type sinTheta = std::sqrt(1.0f - cosTheta * cosTheta);
@@ -402,12 +412,12 @@ namespace et
 			return sqr((etaCosTheta - v) / (etaCosTheta + v + 0.000001f));
 		}
 
-        template <>
-        inline float_type computeFresnelTerm<MaterialType::Conductor>(float_type eta, float_type IdotN)
-        {
-            return 1.0f;
-        }
-                
+		template <>
+		inline float_type computeFresnelTerm<MaterialType::Conductor>(float_type eta, float_type IdotN)
+		{
+			return 1.0f;
+		}
+
 		inline float4 randomBarycentric()
 		{
 			float r1 = std::sqrt(fastRandomFloat());

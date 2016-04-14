@@ -64,9 +64,10 @@ float4 PathTraceIntegrator::gather(const Ray& inRay, size_t depth, size_t& maxDe
     auto currentRay = inRay;
     
     FastStack<PathTraceIntegrator::MaxTraverseDepth, Bounce> bounces;
-    while (bounces.size() < MaxTraverseDepth)
+    while (bounces.size() < PathTraceIntegrator::MaxTraverseDepth)
     {
         auto& bounce = bounces.emplace_back();
+
         KDTree::TraverseResult traverse = tree.traverse(currentRay);
         if (traverse.triangleIndex == InvalidIndex)
         {
@@ -87,7 +88,7 @@ float4 PathTraceIntegrator::gather(const Ray& inRay, size_t depth, size_t& maxDe
         currentRay.direction = reflectance(currentRay.direction, nrm, mat, color, brdf);
 		currentRay.origin = traverse.intersectionPoint + currentRay.direction * Constants::epsilon;
         bounce.add = mat.emissive;
-        bounce.scale = color * brdf;
+        bounce.scale = color;
 #   endif
         
     }

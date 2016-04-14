@@ -311,16 +311,16 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <LibraryPath>$(ProjectDir)..\..\lib\win64;$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(ProjectDir)..\..\lib\vs2015;$(LibraryPath)</LibraryPath>
     <IncludePath>$(ProjectDir)..\..\include;$(IncludePath)</IncludePath>
     <TargetName>et-debug</TargetName>
-    <OutDir>$(ProjectDir)..\..\lib\win64\</OutDir>
+    <OutDir>$(ProjectDir)..\..\lib\vs2015\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <LibraryPath>$(ProjectDir)..\..\lib\win64;$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(ProjectDir)..\..\lib\vs2015;$(LibraryPath)</LibraryPath>
     <IncludePath>$(ProjectDir)..\..\include;$(IncludePath)</IncludePath>
     <TargetName>et-release</TargetName>
-    <OutDir>$(ProjectDir)..\..\lib\win64\</OutDir>
+    <OutDir>$(ProjectDir)..\..\lib\vs2015\</OutDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>

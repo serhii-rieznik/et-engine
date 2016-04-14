@@ -31,7 +31,7 @@ public:
 	void emitWorkerThreads();
 	void stopWorkerThreads();
 
-	bool finalizeShooting(const rt::float4& cameraPosition, const rt::float4 hitPoint,
+	bool finalizeShooting(const rt::float4& cameraPosition, const rt::float4& hitPoint,
 			const rt::float4& color, vec4& outColor, vec2i& pixel);
 
 	void buildMaterialAndTriangles(s3d::Scene::Pointer);
@@ -387,7 +387,7 @@ rt::Region RaytracePrivate::getNextRegion()
 /*
  * Raytrace function
  */
-bool RaytracePrivate::finalizeShooting(const rt::float4& cameraPosition, const rt::float4 hitPoint,
+bool RaytracePrivate::finalizeShooting(const rt::float4& cameraPosition, const rt::float4& hitPoint,
 	const rt::float4& color, vec4& outColor, vec2i& pixel)
 {
 	rt::float4 viewDirection = hitPoint - cameraPosition;
@@ -488,7 +488,7 @@ void RaytracePrivate::testThreadFunction(unsigned index)
     Vector<size_t> prob(sampleCount, 0);
     for (size_t i = 0; i < testCount; ++i)
     {
-        auto v = rt::randomVectorOnHemisphere(nrm, DEG_30).dot(nrm);
+        auto v = rt::randomVectorOnHemisphere(nrm, HALF_PI).dot(nrm);
         size_t VdotN = static_cast<size_t>(clamp(v, 0.0f, 1.0f) * static_cast<float>(sampleCount));
         prob[VdotN] += 1;
     }
@@ -518,10 +518,12 @@ void RaytracePrivate::testThreadFunction(unsigned index)
         float y0 = lastHeight;
         float y1 = vScale * static_cast<float>(prob[i]) / static_cast<float>(testCount);
         
-        vec2 p0i(x0, off);
+		/*
+		vec2 p0i(x0, off);
         vec2 p1i(x0, viewportSize.y - off);
         renderLine(p0i, p1i, vec4(1.0f, 0.25f));
-        
+        // */
+
         vec2 ph1(x0, off + (viewportSize.y - 2.0f * off) * y0);
         vec2 ph2(x1, off + (viewportSize.y - 2.0f * off) * y1);
         renderLine(ph1, ph2, vec4(1.0f, 1.0f, 0.0f, 1.0f));
@@ -624,14 +626,15 @@ vec4 RaytracePrivate::raytracePixel(const vec2i& pixel, size_t samples, size_t& 
 	}
 	vec4 output = result.toVec4() / static_cast<float>(samples);
     output = maxv(minv(output, vec4(1.0f)), vec4(0.0f));
-    
+
+    /*
     output.x = std::pow(output.x, 1.0f / 2.2f);
     output.y = std::pow(output.y, 1.0f / 2.2f);
     output.z = std::pow(output.z, 1.0f / 2.2f);
-    
     ET_ASSERT(!isnan(output.x));
     ET_ASSERT(!isnan(output.y));
     ET_ASSERT(!isnan(output.z));
+	*/
     
 	output.w = 1.0f;
 	return output;

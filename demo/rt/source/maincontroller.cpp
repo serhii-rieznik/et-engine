@@ -20,7 +20,7 @@ void MainController::setRenderContextParameters(et::RenderContextParameters& p)
 {
 	p.enableHighResolutionContext = true;
 	p.multisamplingQuality = MultisamplingQuality::None;
-	p.contextSize = 4 * et::currentScreen().frame.size() / 8;
+	p.contextSize = vec2i(1024, 768); // 4 * et::currentScreen().frame.size() / 8;
 	p.enableHighResolutionContext = true;
 }
 

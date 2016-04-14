@@ -62,7 +62,7 @@ namespace rt
         
         enum
         {
-            MaxTraverseDepth = 32
+            MaxTraverseDepth = 1024
         };
         
     public:
