@@ -7,13 +7,20 @@
 
 #include <et-ext/rt/integrator.h>
 
-#define VISUALIZE_BRDF 0
+#define VISUALIZE_BRDF                      0
+#define USE_COSINE_WEIGHTED_DISTRIBUTION    1
 
 namespace et
 {
 namespace rt
 {
-   
+
+#if (USE_COSINE_WEIGHTED_DISTRIBUTION)
+const SamplingMethod samplignMethod = SamplingMethod::CosineWeighted;
+#else
+const SamplingMethod samplignMethod = SamplingMethod::Uniform;
+#endif
+
 inline float lambert(const float4& n, const float4& Wo, float r)
 {
     return 1.0f / PI;
@@ -35,7 +42,7 @@ float4 AmbientOcclusionIntegrator::gather(const Ray& inRay, size_t depth, size_t
     
     const auto& tri = tree.triangleAtIndex(hit0.triangleIndex);
     float4 surfaceNormal = tri.interpolatedNormal(hit0.intersectionPointBarycentric);
-	float4 nextDirection = randomVectorOnHemisphere(surfaceNormal, HALF_PI);
+	float4 nextDirection = randomVectorOnHemisphere<samplignMethod>(surfaceNormal, HALF_PI);
 	float4 nextOrigin = hit0.intersectionPoint + nextDirection * Constants::epsilon;
 	if (tree.traverse(Ray(nextOrigin, nextDirection)).triangleIndex == InvalidIndex)
 	{
@@ -72,6 +79,10 @@ float4 PathTraceIntegrator::gather(const Ray& inRay, size_t depth, size_t& maxDe
         if (traverse.triangleIndex == InvalidIndex)
         {
             bounce.add = env->sampleInDirection(currentRay.direction);
+            ET_ASSERT(!isnan(bounce.add.cX()));
+            ET_ASSERT(!isnan(bounce.add.cY()));
+            ET_ASSERT(!isnan(bounce.add.cZ()));
+            ET_ASSERT(!isnan(bounce.add.cW()));
             break;
         }
         
@@ -87,8 +98,25 @@ float4 PathTraceIntegrator::gather(const Ray& inRay, size_t depth, size_t& maxDe
         float brdf = 0.0f;
         currentRay.direction = reflectance(currentRay.direction, nrm, mat, color, brdf);
 		currentRay.origin = traverse.intersectionPoint + currentRay.direction * Constants::epsilon;
+        
+#       if (USE_COSINE_WEIGHTED_DISTRIBUTION == 0)
+        {
+            brdf *= currentRay.direction.dot(nrm);
+        }
+#       endif
+        
         bounce.add = mat.emissive;
-        bounce.scale = color;
+        bounce.scale = color * brdf;
+        
+        ET_ASSERT(!isnan(bounce.add.cX()));
+        ET_ASSERT(!isnan(bounce.add.cY()));
+        ET_ASSERT(!isnan(bounce.add.cZ()));
+        ET_ASSERT(!isnan(bounce.add.cW()));
+        ET_ASSERT(!isnan(bounce.scale.cX()));
+        ET_ASSERT(!isnan(bounce.scale.cY()));
+        ET_ASSERT(!isnan(bounce.scale.cZ()));
+        ET_ASSERT(!isnan(bounce.scale.cW()));
+        
 #   endif
         
     }
@@ -110,7 +138,7 @@ inline float4 computeReflectionVector(const float4& incidence, const float4& nor
 {
 	idealReflection = reflect(incidence, normal);
     
-	auto direction = randomVectorOnHemisphere(idealReflection, distribution);
+	auto direction = randomVectorOnHemisphere<samplignMethod>(idealReflection, distribution);
 	if (direction.dot(normal) < 0.0f)
 		direction = reflect(direction, normal);
 	return direction;
@@ -120,8 +148,9 @@ inline float4 computeRefractionVector(const float4& incidence, const float4& nor
 	float_type k, float_type eta, float IdotN, float4& idealRefraction, float distribution)
 {
     idealRefraction = incidence * eta - normal * (eta * IdotN + std::sqrt(k));
+    idealRefraction.normalize();
     
-	auto direction = randomVectorOnHemisphere(idealRefraction, distribution);
+	auto direction = randomVectorOnHemisphere<samplignMethod>(idealRefraction, distribution);
     if (direction.dot(normal) > 0.0f)
         direction = reflect(direction, normal);
 	return direction;
@@ -136,7 +165,7 @@ float4 PathTraceIntegrator::reflectance(const float4& incidence, float4& normal,
 		{
             color = mat.diffuse;
             
-            auto out = randomVectorOnHemisphere(normal, HALF_PI);
+            auto out = randomVectorOnHemisphere<samplignMethod>(normal, HALF_PI);
             brdf = lambert(normal, out, mat.roughnessValue);
 			return out;
 		}
@@ -194,7 +223,7 @@ float4 PathTraceIntegrator::reflectance(const float4& incidence, float4& normal,
 				{
                     color = mat.diffuse;
                     
-                    auto out = randomVectorOnHemisphere(normal, HALF_PI);
+                    auto out = randomVectorOnHemisphere<samplignMethod>(normal, HALF_PI);
                     brdf = lambert(normal, out, mat.roughnessValue);
 					return out;
 				}

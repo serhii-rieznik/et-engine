@@ -12,6 +12,9 @@
 #include <et/app/application.h>
 #include <et/camera/camera.h>
 
+#define EVALUATE_DISTRIBUTION       0
+#define ENABLE_GAMMA_CORRECTION     1
+
 const et::rt::float_type et::rt::Constants::epsilon = 0.00025f;
 const et::rt::float_type et::rt::Constants::minusEpsilon = -epsilon;
 const et::rt::float_type et::rt::Constants::onePlusEpsilon = 1.0f + epsilon;
@@ -184,7 +187,11 @@ void RaytracePrivate::emitWorkerThreads()
 	threadCounter.store(std::thread::hardware_concurrency());
 	for (unsigned i = 0, e = std::thread::hardware_concurrency(); i < e; ++i)
 	{
+#   if (EVALUATE_DISTRIBUTION)
+        workerThreads.emplace_back(&RaytracePrivate::testThreadFunction, this, i);
+#   else
 		workerThreads.emplace_back(&RaytracePrivate::gatherThreadFunction, this, i);
+#   endif
 	}
 }
 
@@ -226,7 +233,7 @@ void RaytracePrivate::buildMaterialAndTriangles(s3d::Scene::Pointer scene)
 			mat.name = meshMaterial->name();
 			mat.diffuse = rt::float4(kA + kD);
 			mat.specular = rt::float4(meshMaterial->getVector(MaterialParameter::SpecularColor));
-			mat.emissive = rt::float4(meshMaterial->getVector(MaterialParameter::EmissiveColor));
+            mat.emissive = rt::float4(meshMaterial->getVector(MaterialParameter::EmissiveColor));
 			mat.roughnessValue = clamp(meshMaterial->getFloat(MaterialParameter::Roughness), 0.0f, 1.0f);
 			mat.distributionAngle = HALF_PI * (1.0f - std::cos(HALF_PI * mat.roughnessValue));
 			mat.ior = meshMaterial->getFloat(MaterialParameter::Transparency);
@@ -488,7 +495,7 @@ void RaytracePrivate::testThreadFunction(unsigned index)
     Vector<size_t> prob(sampleCount, 0);
     for (size_t i = 0; i < testCount; ++i)
     {
-        auto v = rt::randomVectorOnHemisphere(nrm, HALF_PI).dot(nrm);
+        auto v = rt::randomVectorOnHemisphere<rt::SamplingMethod::CosineWeighted>(nrm, HALF_PI).dot(nrm);
         size_t VdotN = static_cast<size_t>(clamp(v, 0.0f, 1.0f) * static_cast<float>(sampleCount));
         prob[VdotN] += 1;
     }
@@ -619,22 +626,19 @@ vec4 RaytracePrivate::raytracePixel(const vec2i& pixel, size_t samples, size_t& 
 	{
 		vec2 jitter = pixelSize * vec2(2.0f * rt::fastRandomFloat() - 1.0f, 2.0f * rt::fastRandomFloat() - 1.0f);
 		result += integrator->gather(camera.castRay(pixelBase + jitter), 0, bounces, kdTree, sampler, materials);
-        ET_ASSERT(!isnan(result.cX()));
-        ET_ASSERT(!isnan(result.cY()));
-        ET_ASSERT(!isnan(result.cZ()));
-        ET_ASSERT(!isnan(result.cW()));
 	}
+    
 	vec4 output = result.toVec4() / static_cast<float>(samples);
     output = maxv(minv(output, vec4(1.0f)), vec4(0.0f));
 
-    /*
+#if (ENABLE_GAMMA_CORRECTION)
     output.x = std::pow(output.x, 1.0f / 2.2f);
     output.y = std::pow(output.y, 1.0f / 2.2f);
     output.z = std::pow(output.z, 1.0f / 2.2f);
     ET_ASSERT(!isnan(output.x));
     ET_ASSERT(!isnan(output.y));
     ET_ASSERT(!isnan(output.z));
-	*/
+#endif
     
 	output.w = 1.0f;
 	return output;

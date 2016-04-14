@@ -68,11 +68,12 @@ void MainController::applicationDidLoad(et::RenderContext* rc)
 		VertexStorage::Pointer va = VertexStorage::Pointer::create(decl, 0);
 		IndexArray::Pointer ia = IndexArray::Pointer::create(IndexArrayFormat::Format_32bit,
 			primitives::indexCountForRegularMesh(density, et::PrimitiveType::Triangles), et::PrimitiveType::Triangles);
-		primitives::createSphere(va, 10.0f, density);
+		primitives::createSphere(va, 1.0f, density);
 		primitives::buildTrianglesIndexes(ia, density, 0, 0);
 
 		s3d::SceneMaterial::Pointer mat = s3d::SceneMaterial::Pointer::create();
 		mat->setVector(et::MaterialParameter::DiffuseColor, vec4(1.0f, 0.5f, 0.25f, 1.0f));
+        mat->setFloat(et::MaterialParameter::Roughness, 1.0f);
 		
 		auto obj = _rc->vertexBufferFactory().createVertexArrayObject("sphere", va, et::BufferDrawType::Static, ia, et::BufferDrawType::Static);
 		auto mesh = s3d::Mesh::Pointer::create("sphere", mat, _scene.ptr());
