@@ -243,6 +243,7 @@ void OBJLoader::loadData(bool async, ObjectsCache& cache)
 					lastGroup = etCreateObject<OBJGroup>(groupName, materialId);
 					_groups.push_back(lastGroup);
 				}
+				getLine(inputFile, line);
 			}
 			else
 			{

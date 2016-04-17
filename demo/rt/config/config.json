@@ -1,19 +1,3 @@
 {
-	"model-name" : "media/cornellbox.obj",
-	"env-map" : "media/background.hdr.no",
-	"env-color" : [0.0, 0.0, 0.0, 1.0],
-    "env-type" : "uniform",
-    "light-direction" : [0.0, 1.0, 0.0, 0.0],
-	"integrator" : "path-trace",
-	"rays-per-pixel" : 256,
-	"camera-fov" : 32.5,
-	"camera-distance" : 4.0,
-	"camera-phi" : 90.0001,
-	"camera-theta" : 0.0,
-	"camera-offset" : [0.0, 0.9, 0.0],
-	"camera-view-point" : [0.0, 0.9, 0.0],
-    "render-region-size" : 32,
-	"kd-tree-max-depth" : 31,
-	"render-kd-tree" : 0,
-	"debug-rendering" : 0
+	"reference" : "cornellbox.json"
 }

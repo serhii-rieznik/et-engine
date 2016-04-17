@@ -12,9 +12,6 @@
 #include <et/app/application.h>
 #include <et/camera/camera.h>
 
-#define EVALUATE_DISTRIBUTION       0
-#define ENABLE_GAMMA_CORRECTION     1
-
 const et::rt::float_type et::rt::Constants::epsilon = 0.00025f;
 const et::rt::float_type et::rt::Constants::minusEpsilon = -epsilon;
 const et::rt::float_type et::rt::Constants::onePlusEpsilon = 1.0f + epsilon;
@@ -187,7 +184,7 @@ void RaytracePrivate::emitWorkerThreads()
 	threadCounter.store(std::thread::hardware_concurrency());
 	for (unsigned i = 0, e = std::thread::hardware_concurrency(); i < e; ++i)
 	{
-#   if (EVALUATE_DISTRIBUTION)
+#   if (ET_RT_EVALUATE_DISTRIBUTION)
         workerThreads.emplace_back(&RaytracePrivate::testThreadFunction, this, i);
 #   else
 		workerThreads.emplace_back(&RaytracePrivate::gatherThreadFunction, this, i);
@@ -219,7 +216,7 @@ void RaytracePrivate::buildMaterialAndTriangles(s3d::Scene::Pointer scene)
 		bool isEmitter = false;
 		auto meshMaterial = mesh->material();
 
-//		if (meshMaterial->name().find("wire_057008136") == std::string::npos)
+//		if (meshMaterial->name().find("03___Default") == std::string::npos)
 //			continue;
 
 		auto materialIndex = materialIndexWithName(meshMaterial->name());
@@ -484,18 +481,35 @@ void RaytracePrivate::shootingThreadFunction(unsigned index)
 
 void RaytracePrivate::testThreadFunction(unsigned index)
 {
+	const size_t sampleTestCount = 100000000;
+	const size_t renderTestCount = 1000000;
+	const rt::SamplingMethod testMethod = rt::SamplingMethod::Cosine;
+
+	static rt::float4 testDirection;
+
+	if (index == 0)
+	{
+		testDirection = rt::float4(2.0f * rt::fastRandomFloat() - 1.0f, 2.0f * rt::fastRandomFloat() - 1.0f, 2.0f * rt::fastRandomFloat() - 1.0f, 0.0f);
+		testDirection.normalize();
+	}
+
     if (index > 0)
+	{
+		float l = camera.position().length() / 10.0f;
+		for (size_t i = 0; running && (i < renderTestCount); ++i)
+		{
+			auto n = rt::randomVectorOnHemisphere<testMethod>(testDirection);
+			vec2 e = projectPoint(n * l);
+			renderPixel(e, vec4(1.0f, 0.01f));
+		}
         return;
-    
-    rt::float4 nrm(2.0f * rt::fastRandomFloat() - 1.0f, 2.0f * rt::fastRandomFloat() - 1.0f, 2.0f * rt::fastRandomFloat() - 1.0f, 0.0f);
-    nrm.normalize();
-    
+	}
+
     const size_t sampleCount = 1000;
-    const size_t testCount = 100000000;
     Vector<size_t> prob(sampleCount, 0);
-    for (size_t i = 0; i < testCount; ++i)
+    for (size_t i = 0; running && (i < sampleTestCount); ++i)
     {
-        auto v = rt::randomVectorOnHemisphere<rt::SamplingMethod::CosineWeighted>(nrm, HALF_PI).dot(nrm);
+		auto v = rt::randomVectorOnHemisphere<testMethod>(testDirection).dot(testDirection);
         size_t VdotN = static_cast<size_t>(clamp(v, 0.0f, 1.0f) * static_cast<float>(sampleCount));
         prob[VdotN] += 1;
     }
@@ -505,7 +519,7 @@ void RaytracePrivate::testThreadFunction(unsigned index)
     {
         maxValue = std::max(maxValue, i);
     }
-    float vScale = static_cast<float>(testCount) / static_cast<float>(maxValue);
+    float vScale = static_cast<float>(sampleTestCount) / static_cast<float>(maxValue);
     
     const float off = 10.0f;
     vec2 p00(off);
@@ -515,27 +529,17 @@ void RaytracePrivate::testThreadFunction(unsigned index)
     renderLine(p00, p10, vec4(1.0f));
     
     float ds = 1.0f / static_cast<float>(sampleCount - 1);
-    float lastHeight = vScale * static_cast<float>(prob.front()) / static_cast<float>(testCount);
-    for (size_t i = 0; i < sampleCount; ++i)
+    float lastHeight = vScale * static_cast<float>(prob.front()) / static_cast<float>(sampleTestCount);
+    for (size_t i = 0; running && (i < sampleCount); ++i)
     {
         float delta = static_cast<float>(i) * ds;
-        
         float x0 = off + delta * (viewportSize.x - 2.0f * off);
         float x1 = off + (delta + ds) * (viewportSize.x - 2.0f * off);
-        float y0 = lastHeight;
-        float y1 = vScale * static_cast<float>(prob[i]) / static_cast<float>(testCount);
-        
-		/*
-		vec2 p0i(x0, off);
-        vec2 p1i(x0, viewportSize.y - off);
-        renderLine(p0i, p1i, vec4(1.0f, 0.25f));
-        // */
-
-        vec2 ph1(x0, off + (viewportSize.y - 2.0f * off) * y0);
-        vec2 ph2(x1, off + (viewportSize.y - 2.0f * off) * y1);
+        float newHeight = vScale * static_cast<float>(prob[i]) / static_cast<float>(sampleTestCount);
+        vec2 ph1(x0, off + (viewportSize.y - 2.0f * off) * lastHeight);
+        vec2 ph2(x1, off + (viewportSize.y - 2.0f * off) * newHeight);
         renderLine(ph1, ph2, vec4(1.0f, 1.0f, 0.0f, 1.0f));
-        
-        lastHeight = y1;
+        lastHeight = newHeight;
     }
 }
 
@@ -549,15 +553,6 @@ void RaytracePrivate::gatherThreadFunction(unsigned index)
 
 		auto runTime = et::queryContiniousTimeInMilliSeconds();
 
-        /*
-		for (size_t i = 0; i < 255; ++i)
-		{
-			auto n = rt::randomVectorOnHemisphere(rt::float4(0.0f, 1.0f, 0.0f, 0.0f), HALF_PI);
-			vec2 e = projectPoint(n * 50.0f);
-			renderPixel(e, vec4(1.0f));
-		}
-        // */
-        
 		//*
 		vec2i pixel;
 		for (pixel.y = region.origin.y; pixel.y < region.origin.y + region.size.y; ++pixel.y)
@@ -631,7 +626,7 @@ vec4 RaytracePrivate::raytracePixel(const vec2i& pixel, size_t samples, size_t& 
 	vec4 output = result.toVec4() / static_cast<float>(samples);
     output = maxv(minv(output, vec4(1.0f)), vec4(0.0f));
 
-#if (ENABLE_GAMMA_CORRECTION)
+#if (ET_RT_ENABLE_GAMMA_CORRECTION)
     output.x = std::pow(output.x, 1.0f / 2.2f);
     output.y = std::pow(output.y, 1.0f / 2.2f);
     output.z = std::pow(output.z, 1.0f / 2.2f);

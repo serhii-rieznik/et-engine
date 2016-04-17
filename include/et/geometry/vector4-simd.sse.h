@@ -13,7 +13,7 @@
 
 namespace et
 {
-#	define ET_ALLOW_MM_DP_PS	0
+#	define ET_ALLOW_MM_DP_PS	1
 
 	struct ET_ALIGNED(16) vec4simd
 	{

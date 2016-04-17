@@ -60,7 +60,7 @@ namespace rt
     public:
         ET_DECLARE_POINTER(PathTraceIntegrator)
         
-        enum
+		enum : uint32_t
         {
             MaxTraverseDepth = 1024
         };

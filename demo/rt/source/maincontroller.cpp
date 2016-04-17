@@ -44,10 +44,17 @@ void MainController::applicationDidLoad(et::RenderContext* rc)
 #endif
 
 	auto configName = application().resolveFileName("config/config.json");
-
 	VariantClass vc = VariantClass::Invalid;
 	_options = json::deserialize(loadTextFile(configName), vc);
 	ET_ASSERT(vc == VariantClass::Dictionary);
+
+	if (_options.hasKey("reference"))
+	{
+		vc = VariantClass::Invalid;
+		configName = application().resolveFileName("config/" + _options.stringForKey("reference")->content);
+		_options = json::deserialize(loadTextFile(configName), vc);
+		ET_ASSERT(vc == VariantClass::Dictionary);
+	}
 
 	auto modelName = application().resolveFileName(_options.stringForKey("model-name")->content);
 

@@ -14,6 +14,11 @@ namespace et
 {
 	namespace rt
 	{
+#		define ET_RT_EVALUATE_DISTRIBUTION				0
+#		define ET_RT_ENABLE_GAMMA_CORRECTION			1
+#		define ET_RT_VISUALIZE_BRDF						0
+#		define ET_RT_USE_COSINE_WEIGHTED_DISTRIBUTION	1
+
 		using float_type = float;
 		using float3 = vector3<float_type>;
 		using float4 = vec4simd;
@@ -33,7 +38,13 @@ namespace et
 			static const float_type initialSplitValue;
 		};
 
-#		pragma pack(push, 16)
+		enum class SamplingMethod : uint32_t
+		{
+			Uniform,
+			Cosine,
+			RaisedCosine
+		};
+
 		enum MaterialType : uint32_t
 		{
 			Diffuse,
@@ -195,7 +206,6 @@ namespace et
 			};
 		};
 		using BoundingBoxList = Vector<BoundingBox>;
-#		pragma pack(pop)
 
 		struct Ray
 		{
@@ -263,38 +273,46 @@ namespace et
 			return normal.shuffle<3, 2, 1, 3>() * float4(0.0f, -1.0f / scaleFactor, 1.0f / scaleFactor, 0.0f);
 		}
 
-        enum class SamplingMethod
-        {
-            Uniform,
-            CosineWeighted
-        };
-        template <SamplingMethod method>
-        float samplingDistribution(float);
-        
-        template <>
-        inline float samplingDistribution<SamplingMethod::Uniform>(float Xi)
-        {
-            return 1.0f - Xi;
-        }
-
-        template <>
-        inline float samplingDistribution<SamplingMethod::CosineWeighted>(float Xi)
-        {
-            return std::acos(Xi) / HALF_PI;
-        }
-        
-        template <SamplingMethod method>
-        inline float4 randomVectorOnHemisphere(const float4& normal, float_type distributionAngle)
+		inline constexpr SamplingMethod diffuseSamplingMethod()
 		{
-			float Xi = clamp(distributionAngle * fastRandomFloat(), 0.0f, HALF_PI) / HALF_PI;
-            Xi = samplingDistribution<method>(Xi);
-            
-            float phi = fastRandomFloat() * DOUBLE_PI;
+#		if (ET_RT_USE_COSINE_WEIGHTED_DISTRIBUTION)
+			return SamplingMethod::Cosine;
+#		else
+			return SamplingMethod::Uniform;
+#		endif
+		}
+
+		template <SamplingMethod method>
+		float samplingDistribution(float);
+		
+		template <>
+		inline float samplingDistribution<SamplingMethod::Uniform>(float Xi)
+		{
+			return Xi;
+		}
+
+		template <>
+		inline float samplingDistribution<SamplingMethod::Cosine>(float Xi)
+		{
+			return std::sqrt(Xi);
+		}
+
+		template <>
+		inline float samplingDistribution<SamplingMethod::RaisedCosine>(float Xi)
+		{
+			const float n = 32.0f;
+			return std::pow(Xi, 1.0f / (1.0f + n));
+		}
+
+		template <SamplingMethod method>
+		inline float4 randomVectorOnHemisphere(const float4& normal)
+		{
+			float phi = fastRandomFloat() * DOUBLE_PI;
+			float cosTheta = samplingDistribution<method>(fastRandomFloat());
+			float sinTheta = std::sqrt(1.0f - cosTheta * cosTheta);
 			float4 u = perpendicularVector(normal);
-			float4 v = u.crossXYZ(normal);
-            auto result = (u * std::cos(phi) + v * std::sin(phi)) * std::sqrt(1.0f - Xi * Xi) + normal * Xi;
-            ET_ASSERT(std::abs(result.dotSelf() - 1.0f) <= Constants::epsilon);
-            return result;
+			float4 v = u.crossXYZ(normal);		
+			return (u * std::cos(phi) + v * std::sin(phi)) * sinTheta + normal * cosTheta;
 		}
 
 		inline float4 reflect(const float4& v, const float4& n)
@@ -444,6 +462,67 @@ namespace et
 			float r1 = std::sqrt(fastRandomFloat());
 			float r2 = fastRandomFloat();
 			return float4(1.0f - r1, r1 * (1.0f - r2), r1 * r2, 0.0f);
+		}
+
+		inline float4 defaultLightDirection()
+		{
+			return float4(0.0f, 1.0f, 0.0f, 0.0f);
+		}
+
+		inline float4 computeDiffuseVector(const float4& normal)
+		{
+		#if (ET_RT_VISUALIZE_BRDF)
+			return defaultLightDirection();
+		#else
+			return randomVectorOnHemisphere<diffuseSamplingMethod()>(normal);
+		#endif
+		}
+
+		inline float4 computeReflectionVector(const float4& incidence, const float4& normal,
+			float4& idealReflection, float distribution)
+		{
+			idealReflection = reflect(incidence, normal);
+
+#		if (ET_RT_VISUALIZE_BRDF)
+			return defaultLightDirection();
+#		else
+			auto direction = randomVectorOnHemisphere<SamplingMethod::Uniform>(idealReflection);
+			if (direction.dot(normal) < 0.0f)
+				direction = reflect(direction, normal);
+			return direction;
+#		endif
+		}
+
+		inline float4 computeRefractionVector(const float4& incidence, const float4& normal,
+			float_type k, float_type eta, float IdotN, float4& idealRefraction, float distribution)
+		{
+			idealRefraction = incidence * eta - normal * (eta * IdotN + std::sqrt(k));
+			idealRefraction.normalize();
+
+#		if (ET_RT_VISUALIZE_BRDF)
+			return defaultLightDirection();
+#		else
+			auto direction = randomVectorOnHemisphere<SamplingMethod::Uniform>(idealRefraction);
+			if (direction.dot(normal) > 0.0f)
+				direction = reflect(direction, normal);
+			return direction;
+#		endif
+		}
+
+		inline float lambert(const float4& n, const float4& Wo, float r)
+		{
+	#	if (ET_RT_USE_COSINE_WEIGHTED_DISTRIBUTION)
+			return 1.0f / PI;
+	#	else
+			return n.dot(Wo) / PI;
+	#	endif
+		}
+
+		inline float phong(const float4& n, const float4& Wi, const float4& Wo, const float4& r, float roughness)
+		{
+			float Ns = std::max(0.0f, 2.0f / (sqr(roughness) + Constants::epsilon) - 2.0f);
+			auto RdotW = clamp(r.dot(Wo), 0.0f, 1.0f);
+			return clamp(std::pow(RdotW, Ns) * (Ns + 2.0f) / DOUBLE_PI, 0.0f, 1.0f);
 		}
 	}
 }

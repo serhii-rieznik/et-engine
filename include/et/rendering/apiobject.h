@@ -11,8 +11,8 @@
 
 namespace et
 {
-    class RenderContext;
-    
+	class RenderContext;
+	
 	class APIObject : public LoadableObject
 	{
 	public:
@@ -40,24 +40,24 @@ namespace et
 	private:
 		uint32_t _apiHandle = 0;
 	};
-    
-    class APIObjectFactory : public Shared
-    {
-    protected:
-        APIObjectFactory(RenderContext* rc) :
-            _rc(rc) { }
-        
-        virtual ~APIObjectFactory() { }
-        
-        RenderContext* renderContext()
-            { return _rc; }
-        
-    protected:
-        APIObjectFactory() = delete;
-        
-        ET_DENY_COPY(APIObjectFactory)
-        
-    private:
-        RenderContext* _rc;
-    };
+	
+	class APIObjectFactory : public Shared
+	{
+	protected:
+		APIObjectFactory(RenderContext* rc) :
+			_rc(rc) { }
+		
+		virtual ~APIObjectFactory() { }
+		
+		RenderContext* renderContext()
+			{ return _rc; }
+		
+	protected:
+		APIObjectFactory() = delete;
+		
+		ET_DENY_COPY(APIObjectFactory)
+		
+	private:
+		RenderContext* _rc;
+	};
 }
