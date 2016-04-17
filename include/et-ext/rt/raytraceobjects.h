@@ -58,8 +58,7 @@ namespace et
 			float4 diffuse;
 			float4 specular;
 			float4 emissive;
-			float_type roughnessValue = 0.0f;
-			float_type distributionAngle = 0.0f;
+			float_type roughness = 0.0f;
 			float_type ior = 0.0f;
 			MaterialType type = MaterialType::Diffuse;
 
@@ -273,45 +272,27 @@ namespace et
 			return normal.shuffle<3, 2, 1, 3>() * float4(0.0f, -1.0f / scaleFactor, 1.0f / scaleFactor, 0.0f);
 		}
 
-		inline constexpr SamplingMethod diffuseSamplingMethod()
-		{
-#		if (ET_RT_USE_COSINE_WEIGHTED_DISTRIBUTION)
-			return SamplingMethod::Cosine;
-#		else
-			return SamplingMethod::Uniform;
-#		endif
-		}
-
-		template <SamplingMethod method>
-		float samplingDistribution(float);
-		
-		template <>
-		inline float samplingDistribution<SamplingMethod::Uniform>(float Xi)
-		{
-			return Xi;
-		}
-
-		template <>
-		inline float samplingDistribution<SamplingMethod::Cosine>(float Xi)
-		{
-			return std::sqrt(Xi);
-		}
-
-		template <>
-		inline float samplingDistribution<SamplingMethod::RaisedCosine>(float Xi)
-		{
-			const float n = 32.0f;
-			return std::pow(Xi, 1.0f / (1.0f + n));
-		}
-
-		template <SamplingMethod method>
 		inline float4 randomVectorOnHemisphere(const float4& normal)
 		{
-			float phi = fastRandomFloat() * DOUBLE_PI;
-			float cosTheta = samplingDistribution<method>(fastRandomFloat());
+		#if ET_RT_USE_COSINE_WEIGHTED_DISTRIBUTION
+			float cosTheta = std::sqrt(fastRandomFloat());
+		#else
+			float cosTheta = fastRandomFloat();
+		#endif
 			float sinTheta = std::sqrt(1.0f - cosTheta * cosTheta);
+			float phi = fastRandomFloat() * DOUBLE_PI;
 			float4 u = perpendicularVector(normal);
 			float4 v = u.crossXYZ(normal);		
+			return (u * std::cos(phi) + v * std::sin(phi)) * sinTheta + normal * cosTheta;
+		}
+
+		inline float4 randomVectorInConeUsingRaisedCosine(const float4& normal, float exponent)
+		{
+			float phi = fastRandomFloat() * DOUBLE_PI;
+			float cosTheta = std::pow(fastRandomFloat(), 1.0f / (1.0f + exponent));
+			float sinTheta = std::sqrt(1.0f - cosTheta * cosTheta);
+			float4 u = perpendicularVector(normal);
+			float4 v = u.crossXYZ(normal);
 			return (u * std::cos(phi) + v * std::sin(phi)) * sinTheta + normal * cosTheta;
 		}
 
@@ -469,24 +450,29 @@ namespace et
 			return float4(0.0f, 1.0f, 0.0f, 0.0f);
 		}
 
+		inline float roughnessToExponent(float r)
+		{
+			return std::max(0.0f, 2.0f / (r * r + Constants::epsilon) - 2.0f);
+		}
+
 		inline float4 computeDiffuseVector(const float4& normal)
 		{
 		#if (ET_RT_VISUALIZE_BRDF)
 			return defaultLightDirection();
 		#else
-			return randomVectorOnHemisphere<diffuseSamplingMethod()>(normal);
+			return randomVectorOnHemisphere(normal);
 		#endif
 		}
 
 		inline float4 computeReflectionVector(const float4& incidence, const float4& normal,
-			float4& idealReflection, float distribution)
+			float4& idealReflection, float r)
 		{
 			idealReflection = reflect(incidence, normal);
 
 #		if (ET_RT_VISUALIZE_BRDF)
 			return defaultLightDirection();
 #		else
-			auto direction = randomVectorOnHemisphere<SamplingMethod::Uniform>(idealReflection);
+			auto direction = randomVectorInConeUsingRaisedCosine(idealReflection, roughnessToExponent(r));
 			if (direction.dot(normal) < 0.0f)
 				direction = reflect(direction, normal);
 			return direction;
@@ -494,7 +480,7 @@ namespace et
 		}
 
 		inline float4 computeRefractionVector(const float4& incidence, const float4& normal,
-			float_type k, float_type eta, float IdotN, float4& idealRefraction, float distribution)
+			float_type k, float_type eta, float IdotN, float4& idealRefraction, float r)
 		{
 			idealRefraction = incidence * eta - normal * (eta * IdotN + std::sqrt(k));
 			idealRefraction.normalize();
@@ -502,14 +488,14 @@ namespace et
 #		if (ET_RT_VISUALIZE_BRDF)
 			return defaultLightDirection();
 #		else
-			auto direction = randomVectorOnHemisphere<SamplingMethod::Uniform>(idealRefraction);
+			auto direction = randomVectorInConeUsingRaisedCosine(idealRefraction, roughnessToExponent(r));
 			if (direction.dot(normal) > 0.0f)
 				direction = reflect(direction, normal);
 			return direction;
 #		endif
 		}
 
-		inline float lambert(const float4& n, const float4& Wo, float r)
+		inline float lambert(const float4& n, const float4& Wo)
 		{
 	#	if (ET_RT_USE_COSINE_WEIGHTED_DISTRIBUTION)
 			return 1.0f / PI;
@@ -520,7 +506,7 @@ namespace et
 
 		inline float phong(const float4& n, const float4& Wi, const float4& Wo, const float4& r, float roughness)
 		{
-			float Ns = std::max(0.0f, 2.0f / (sqr(roughness) + Constants::epsilon) - 2.0f);
+			float Ns = roughnessToExponent(roughness);
 			auto RdotW = clamp(r.dot(Wo), 0.0f, 1.0f);
 			return clamp(std::pow(RdotW, Ns) * (Ns + 2.0f) / DOUBLE_PI, 0.0f, 1.0f);
 		}

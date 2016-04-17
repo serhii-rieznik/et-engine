@@ -81,7 +81,7 @@ float4 PathTraceIntegrator::reflectance(const float4& incidence, float4& normal,
             color = mat.diffuse;
             
             auto out = computeDiffuseVector(normal);
-            brdf = lambert(normal, out, mat.roughnessValue);
+            brdf = lambert(normal, out);
 			return out;
 		}
 
@@ -89,8 +89,8 @@ float4 PathTraceIntegrator::reflectance(const float4& incidence, float4& normal,
 		{
             color = mat.specular;
             float4 idealReflection;
-            auto out = computeReflectionVector(incidence, normal, idealReflection, mat.distributionAngle);
-            brdf = phong(normal, incidence, out, idealReflection, mat.roughnessValue);
+            auto out = computeReflectionVector(incidence, normal, idealReflection, mat.roughness);
+            brdf = phong(normal, incidence, out, idealReflection, mat.roughness);
 			return out;
 		}
 
@@ -117,8 +117,8 @@ float4 PathTraceIntegrator::reflectance(const float4& incidence, float4& normal,
 					color = mat.diffuse;
                     
                     float4 idealRefraction;
-                    auto out = computeRefractionVector(incidence, normal, k, eta, IdotN, idealRefraction, mat.distributionAngle);
-                    brdf = phong(normal, incidence, out, idealRefraction, mat.roughnessValue);
+                    auto out = computeRefractionVector(incidence, normal, k, eta, IdotN, idealRefraction, mat.roughness);
+                    brdf = phong(normal, incidence, out, idealRefraction, mat.roughness);
 					return out;
 				}
 				else
@@ -126,8 +126,8 @@ float4 PathTraceIntegrator::reflectance(const float4& incidence, float4& normal,
                     color = mat.specular;
                     
                     float4 idealReflection;
-                    auto out = computeReflectionVector(incidence, normal, idealReflection, mat.distributionAngle);
-                    brdf = phong(normal, incidence, out, idealReflection, mat.roughnessValue);
+                    auto out = computeReflectionVector(incidence, normal, idealReflection, mat.roughness);
+                    brdf = phong(normal, incidence, out, idealReflection, mat.roughness);
 					return out;
 				}
 			}
@@ -139,7 +139,7 @@ float4 PathTraceIntegrator::reflectance(const float4& incidence, float4& normal,
                     color = mat.diffuse;
                     
                     auto out = computeDiffuseVector(normal);
-                    brdf = lambert(normal, out, mat.roughnessValue);
+                    brdf = lambert(normal, out);
 					return out;
 				}
 				else
@@ -147,8 +147,8 @@ float4 PathTraceIntegrator::reflectance(const float4& incidence, float4& normal,
 					color = mat.specular;
                     
                     float4 idealReflection;
-                    auto out = computeReflectionVector(incidence, normal, idealReflection, mat.distributionAngle);
-                    brdf = phong(normal, incidence, out, idealReflection, mat.roughnessValue);
+                    auto out = computeReflectionVector(incidence, normal, idealReflection, mat.roughness);
+                    brdf = phong(normal, incidence, out, idealReflection, mat.roughness);
 					return out;
 				}
 			}
@@ -226,7 +226,7 @@ float4 AmbientOcclusionIntegrator::gather(const Ray& inRay, size_t depth, size_t
 	float4 surfaceNormal = tri.interpolatedNormal(hit0.intersectionPointBarycentric);
 
 	float4 nextOrigin = hit0.intersectionPoint + surfaceNormal * Constants::epsilon;
-	float4 nextDirection = randomVectorOnHemisphere<rt::SamplingMethod::Uniform>(surfaceNormal);
+	float4 nextDirection = randomVectorOnHemisphere(surfaceNormal);
 
 	if (tree.traverse(Ray(nextOrigin, nextDirection)).triangleIndex == InvalidIndex)
 	{

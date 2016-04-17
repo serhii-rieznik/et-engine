@@ -231,10 +231,9 @@ void RaytracePrivate::buildMaterialAndTriangles(s3d::Scene::Pointer scene)
 			mat.diffuse = rt::float4(kA + kD);
 			mat.specular = rt::float4(meshMaterial->getVector(MaterialParameter::SpecularColor));
             mat.emissive = rt::float4(meshMaterial->getVector(MaterialParameter::EmissiveColor));
-			mat.roughnessValue = clamp(meshMaterial->getFloat(MaterialParameter::Roughness), 0.0f, 1.0f);
-			mat.distributionAngle = HALF_PI * (1.0f - std::cos(HALF_PI * mat.roughnessValue));
+			mat.roughness = clamp(meshMaterial->getFloat(MaterialParameter::Roughness), 0.0f, 1.0f);
 			mat.ior = meshMaterial->getFloat(MaterialParameter::Transparency);
-			if (mat.roughnessValue < 1.0f)
+			if (mat.roughness < 1.0f)
 			{
 				if (mat.ior == 0.0f)
 				{
@@ -483,7 +482,6 @@ void RaytracePrivate::testThreadFunction(unsigned index)
 {
 	const size_t sampleTestCount = 100000000;
 	const size_t renderTestCount = 1000000;
-	const rt::SamplingMethod testMethod = rt::SamplingMethod::Cosine;
 
 	static rt::float4 testDirection;
 
@@ -498,7 +496,7 @@ void RaytracePrivate::testThreadFunction(unsigned index)
 		float l = camera.position().length() / 10.0f;
 		for (size_t i = 0; running && (i < renderTestCount); ++i)
 		{
-			auto n = rt::randomVectorOnHemisphere<testMethod>(testDirection);
+			auto n = rt::randomVectorOnHemisphere(testDirection);
 			vec2 e = projectPoint(n * l);
 			renderPixel(e, vec4(1.0f, 0.01f));
 		}
@@ -509,7 +507,7 @@ void RaytracePrivate::testThreadFunction(unsigned index)
     Vector<size_t> prob(sampleCount, 0);
     for (size_t i = 0; running && (i < sampleTestCount); ++i)
     {
-		auto v = rt::randomVectorOnHemisphere<testMethod>(testDirection).dot(testDirection);
+		auto v = rt::randomVectorOnHemisphere(testDirection).dot(testDirection);
         size_t VdotN = static_cast<size_t>(clamp(v, 0.0f, 1.0f) * static_cast<float>(sampleCount));
         prob[VdotN] += 1;
     }

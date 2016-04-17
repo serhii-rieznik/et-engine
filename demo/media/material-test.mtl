@@ -8,14 +8,14 @@ Kd 1.0 1.0 1.0
 Ks 1.0 1.0 1.0
 
 newmtl 01___Default
-Ns 1.0
+Ns 0.2
 Tr 0.0
 Kd 1.0 1.0 1.0
 Ks 1.0 1.0 1.0
 
 newmtl 02___Default
 Ns 0.15
-Tr 0.4149377593
+Tr 0.0
 Kd 1.0 1.0 1.0
 Ks 1.0 1.0 1.0
 
@@ -27,12 +27,12 @@ Ks 1.0 1.0 1.0
 
 newmtl 07___Default
 Ns 0.05
-Tr 0.4149377593
+Tr 0.0
 Kd 1.0 1.0 1.0
 Ks 1.0 1.0 1.0
 
 newmtl 08___Default
 Ns 0.001
-Tr 2.41
+Tr 0.0
 Kd 1.0 1.0 1.0
 Ks 1.0 1.0 1.0
