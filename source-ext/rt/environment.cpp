@@ -51,7 +51,7 @@ float4 EnvironmentEquirectangularMapSampler::sampleInDirection(const float4& r)
     float_type dy = tc.y - std::floor(tc.y);
     float4 cx1 = c00 * (1.0f - dx) + c01 * dx;
 	float4 cx2 = c10 * (1.0f - dx) + c11 * dx;
-	
+
     return _scale * (cx1 * (1.0f - dy) + cx2 * dy);
 }
 

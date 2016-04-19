@@ -232,6 +232,7 @@ void RaytracePrivate::buildMaterialAndTriangles(s3d::Scene::Pointer scene)
 			mat.specular = rt::float4(meshMaterial->getVector(MaterialParameter::SpecularColor));
             mat.emissive = rt::float4(meshMaterial->getVector(MaterialParameter::EmissiveColor));
 			mat.roughness = clamp(meshMaterial->getFloat(MaterialParameter::Roughness), 0.0f, 1.0f);
+			mat.specularExponent = rt::roughnessToExponent(mat.roughness);
 			mat.ior = meshMaterial->getFloat(MaterialParameter::Transparency);
 			if (mat.roughness < 1.0f)
 			{
@@ -244,8 +245,9 @@ void RaytracePrivate::buildMaterialAndTriangles(s3d::Scene::Pointer scene)
 					mat.type = rt::MaterialType::Dielectric;
 				}
 			}
-
 			isEmitter = mat.emissive.length() > 0.0f;
+
+			log::info("Material added, Ns = %f", mat.specularExponent);
 		}
 
 		mesh->prepareRenderBatches();
@@ -491,12 +493,15 @@ void RaytracePrivate::testThreadFunction(unsigned index)
 		testDirection.normalize();
 	}
 
+	auto distribution = rt::uniformDistribution;
+	float alpha = 0.0f;
+
     if (index > 0)
 	{
 		float l = camera.position().length() / 10.0f;
 		for (size_t i = 0; running && (i < renderTestCount); ++i)
 		{
-			auto n = rt::randomVectorOnHemisphere(testDirection);
+			auto n = rt::randomVectorOnHemisphere(testDirection, distribution, alpha);
 			vec2 e = projectPoint(n * l);
 			renderPixel(e, vec4(1.0f, 0.01f));
 		}
@@ -507,7 +512,7 @@ void RaytracePrivate::testThreadFunction(unsigned index)
     Vector<size_t> prob(sampleCount, 0);
     for (size_t i = 0; running && (i < sampleTestCount); ++i)
     {
-		auto v = rt::randomVectorOnHemisphere(testDirection).dot(testDirection);
+		auto v = rt::randomVectorOnHemisphere(testDirection, distribution, alpha).dot(testDirection);
         size_t VdotN = static_cast<size_t>(clamp(v, 0.0f, 1.0f) * static_cast<float>(sampleCount));
         prob[VdotN] += 1;
     }

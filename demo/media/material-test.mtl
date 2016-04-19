@@ -5,34 +5,34 @@ newmtl wire_057008136
 Ns 1.0
 Tr 0.0
 Kd 1.0 1.0 1.0
-Ks 1.0 1.0 1.0
+Ks 0.98 0.985 0.99
 
 newmtl 01___Default
+Ns 0.4
+Tr 0.0
+Kd 1.0 1.0 1.0
+Ks 0.98 0.985 0.99
+
+newmtl 02___Default
+Ns 0.3
+Tr 0.0
+Kd 1.0 1.0 1.0
+Ks 0.98 0.985 0.99
+
+newmtl 03___Default
 Ns 0.2
 Tr 0.0
 Kd 1.0 1.0 1.0
-Ks 1.0 1.0 1.0
+Ks 0.98 0.985 0.99
 
-newmtl 02___Default
-Ns 0.15
-Tr 0.0
-Kd 1.0 1.0 1.0
-Ks 1.0 1.0 1.0
-
-newmtl 03___Default
+newmtl 07___Default
 Ns 0.1
 Tr 0.0
 Kd 1.0 1.0 1.0
-Ks 1.0 1.0 1.0
-
-newmtl 07___Default
-Ns 0.05
-Tr 0.0
-Kd 1.0 1.0 1.0
-Ks 1.0 1.0 1.0
+Ks 0.98 0.985 0.99
 
 newmtl 08___Default
-Ns 0.001
+Ns 0.0
 Tr 0.0
 Kd 1.0 1.0 1.0
-Ks 1.0 1.0 1.0
+Ks 0.98 0.985 0.99
