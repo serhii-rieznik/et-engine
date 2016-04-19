@@ -447,10 +447,7 @@ namespace et
 			return float4(1.0f - r1, r1 * (1.0f - r2), r1 * r2, 0.0f);
 		}
 
-		inline float4 defaultLightDirection()
-		{
-			return float4(0.0f, 1.0f, 0.0f, 0.0f);
-		}
+		const float4& defaultLightDirection();
 
 		inline float roughnessToExponent(float r)
 		{
@@ -509,28 +506,6 @@ namespace et
 			return std::pow(RdotW, Ns) * (Ns + 2.0f) / (DOUBLE_PI * NdotW);
 		}
 
-		inline float smithGGX(float t, float r)
-		{
-			t *= t;
-			return 1.0f + std::sqrt(1.0f + sqr(r) * (1.0f - t) / t);
-			;//t / (t * (1.0f - r) + r);
-		}
-
-		inline float cooktorrance(const float4& n, const float4& Wi, const float4& Wo, float r)
-		{
-			auto h = Wo - Wi;
-			h.normalize();
-
-			float NdotW = std::max(Constants::epsilon, n.dot(Wo));
-			float NdotI = std::max(Constants::epsilon, -n.dot(Wi));
-			float NdotH = std::max(Constants::epsilon, n.dot(h));
-			float rSq = r * r + Constants::epsilon;
-
-			float d = rSq / (PI * sqr(sqr(NdotH) * (rSq - 1.0f) + 1.0f));
-			float g = smithGGX(NdotW, r) * smithGGX(NdotI, r);
-			float f = 0.95f + 0.05f * std::pow(1.0f - NdotI, 5.0f);
-
-			return (d * g * f) / (NdotI * NdotW);
-		}
+		float cooktorrance(const float4& n, const float4& Wi, const float4& Wo, float r);
 	}
 }

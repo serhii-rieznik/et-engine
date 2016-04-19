@@ -789,3 +789,47 @@ void RaytracePrivate::renderTriangle(const rt::Triangle& tri)
 	renderLine(c1, c2, lineColor);
 	renderLine(c2, c0, lineColor);
 }
+
+/*
+ * From raytraceobjects.h
+ */
+namespace et  {
+namespace rt {
+
+float smithGGX(float t, float r)
+{
+	return 1.0f / (r + t * (1.0f - r) + Constants::epsilon);
+}
+	
+float cooktorrance(const float4& n, const float4& Wi, const float4& Wo, float r)
+{
+	auto h = Wo - Wi;
+	h.normalize();
+
+	float NdotW = std::max(0.0f, n.dot(Wo));
+	float NdotI = std::max(0.0f, -n.dot(Wi));
+	float NdotH = std::max(0.0f, n.dot(h));
+	float HdotI = std::max(0.0f, -h.dot(Wi));
+	float rSq = r * r + Constants::epsilon;
+
+	float d = rSq / (PI * sqr(NdotH * NdotH * (rSq - 1.0f) + 1.0f));
+	float g = smithGGX(NdotW, r) * smithGGX(NdotI, r);
+	float f = 0.95f + 0.05f * std::pow(1.0f - NdotI, 5.0f);
+
+	return (d * g * f) / (4.0f * PI * NdotI * NdotW + Constants::epsilon);
+}
+
+const float4& defaultLightDirection()
+{
+	static float4 d(1.0f, 1.0f, 1.0f, 0.0f);
+	static bool n = true;
+	if (n)
+	{
+		d.normalize();
+		n = false;
+	}
+	return d;
+}
+
+}
+}
