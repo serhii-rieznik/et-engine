@@ -47,7 +47,7 @@ float4 PathTraceIntegrator::gather(const Ray& inRay, size_t depth, size_t& maxDe
         float brdf = 0.0f;
 
         currentRay.direction = reflectance(currentRay.direction, nrm, mat, color, brdf);
-		currentRay.origin = traverse.intersectionPoint + nrm * Constants::epsilon;
+		currentRay.origin = traverse.intersectionPoint + currentRay.direction * Constants::epsilon;
 
 		brdf *= nrm.dot(currentRay.direction);
 
@@ -56,7 +56,7 @@ float4 PathTraceIntegrator::gather(const Ray& inRay, size_t depth, size_t& maxDe
 		return (brdf > 1.0f) ? float4(brdf - 1.0f, 0.0f, 0.0f, 1.0f) : float4(brdf, brdf, brdf, 1.0f);
 #	else
         bounce.add = mat.emissive;
-		bounce.scale = color * std::min(brdf, 1.0f);
+		bounce.scale = color * brdf;
 #	endif
     }
 	maxDepth = bounces.size();
@@ -83,16 +83,16 @@ float4 PathTraceIntegrator::reflectance(const float4& incidence, float4& normal,
             color = mat.diffuse;
             
             auto out = computeDiffuseVector(normal);
-            brdf = lambert(normal, out);
+            brdf = lambert(normal, incidence, out, mat.roughness);
 			return out;
 		}
 
 		case MaterialType::Conductor:
 		{
             color = mat.specular;
-            float4 idealReflection;
-            auto out = computeReflectionVector(incidence, normal, idealReflection, mat.roughness);
-            brdf = cooktorrance(normal, incidence, out, mat.roughness);
+            auto out = computeReflectionVector(incidence, normal, mat.roughness);
+			auto fresnel = computeFresnelTerm<MaterialType::Conductor>(1.0f, -normal.dot(incidence));
+			brdf = reflectionMicrofacet(normal, incidence, out, mat.roughness, fresnel);
 			return out;
 		}
 
@@ -100,57 +100,56 @@ float4 PathTraceIntegrator::reflectance(const float4& incidence, float4& normal,
 		{
             float eta = mat.ior;
             float IdotN = incidence.dot(normal);
-            
+
 			if (eta > 1.0f) // refractive
 			{
-                if (IdotN < 0.0f)
-                {
-                    eta = 1.0f / eta;
-                }
-                else
-                {
-                    normal *= -1.0f;
-                }
-                
+				eta = 1.0f / eta;
+				
+				if (IdotN <= 0.0f) // entering material
+				{
+					IdotN = -IdotN;
+				}
+				else
+				{
+					normal *= -1.0f;
+				}
+
 				float_type k = computeRefractiveCoefficient(eta, IdotN);
-                auto fresnel = computeFresnelTerm<MaterialType::Dielectric>(eta, IdotN);
+				auto fresnel = computeFresnelTerm<MaterialType::Dielectric>(eta, IdotN);
 				if ((k >= Constants::epsilon) && (fastRandomFloat() >= fresnel))
 				{
 					color = mat.diffuse;
-                    
-                    float4 idealRefraction;
-                    auto out = computeRefractionVector(incidence, normal, k, eta, IdotN, idealRefraction, mat.specularExponent);
-                    brdf = phong(normal, incidence, out, idealRefraction, mat.specularExponent);
+
+					auto out = computeRefractionVector(incidence, normal, k, eta, IdotN, mat.roughness);
+					brdf = -refractionMicrofacet(normal, incidence, reflect(out, normal), mat.roughness, fresnel);
 					return out;
 				}
 				else
 				{
-                    color = mat.specular;
-                    
-                    float4 idealReflection;
-                    auto out = computeReflectionVector(incidence, normal, idealReflection, mat.specularExponent);
-                    brdf = phong(normal, incidence, out, idealReflection, mat.specularExponent);
+					color = mat.specular;
+
+					auto out = computeReflectionVector(incidence, normal, mat.roughness);
+					brdf = reflectionMicrofacet(normal, incidence, out, mat.roughness, fresnel);
 					return out;
 				}
 			}
 			else // non-refractive material
 			{
-				auto fresnel = computeFresnelTerm<MaterialType::Dielectric>(eta, IdotN);
+				auto fresnel = computeFresnelTerm<MaterialType::Dielectric>(eta, -IdotN);
 				if (fastRandomFloat() > fresnel)
 				{
                     color = mat.diffuse;
                     
                     auto out = computeDiffuseVector(normal);
-                    brdf = lambert(normal, out);
+                    brdf = lambert(normal, incidence, out, mat.roughness);
 					return out;
 				}
 				else
 				{
 					color = mat.specular;
                     
-                    float4 idealReflection;
-                    auto out = computeReflectionVector(incidence, normal, idealReflection, mat.specularExponent);
-                    brdf = phong(normal, incidence, out, idealReflection, mat.specularExponent);
+                    auto out = computeReflectionVector(incidence, normal, mat.roughness);
+                    brdf = reflectionMicrofacet(normal, incidence, out, mat.roughness, fresnel);
 					return out;
 				}
 			}

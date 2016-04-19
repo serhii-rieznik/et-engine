@@ -232,7 +232,6 @@ void RaytracePrivate::buildMaterialAndTriangles(s3d::Scene::Pointer scene)
 			mat.specular = rt::float4(meshMaterial->getVector(MaterialParameter::SpecularColor));
             mat.emissive = rt::float4(meshMaterial->getVector(MaterialParameter::EmissiveColor));
 			mat.roughness = clamp(meshMaterial->getFloat(MaterialParameter::Roughness), 0.0f, 1.0f);
-			mat.specularExponent = rt::roughnessToExponent(mat.roughness);
 			mat.ior = meshMaterial->getFloat(MaterialParameter::Transparency);
 			if (mat.roughness < 1.0f)
 			{
@@ -246,8 +245,6 @@ void RaytracePrivate::buildMaterialAndTriangles(s3d::Scene::Pointer scene)
 				}
 			}
 			isEmitter = mat.emissive.length() > 0.0f;
-
-			log::info("Material added, Ns = %f", mat.specularExponent);
 		}
 
 		mesh->prepareRenderBatches();
@@ -493,8 +490,8 @@ void RaytracePrivate::testThreadFunction(unsigned index)
 		testDirection.normalize();
 	}
 
-	auto distribution = rt::uniformDistribution;
-	float alpha = 0.0f;
+	auto distribution = rt::ggxDistribution;
+	float alpha = 0.1f;
 
     if (index > 0)
 	{
@@ -533,15 +530,21 @@ void RaytracePrivate::testThreadFunction(unsigned index)
     
     float ds = 1.0f / static_cast<float>(sampleCount - 1);
     float lastHeight = vScale * static_cast<float>(prob.front()) / static_cast<float>(sampleTestCount);
-    for (size_t i = 0; running && (i < sampleCount); ++i)
+    for (size_t i = 1; running && (i < sampleCount); ++i)
     {
         float delta = static_cast<float>(i) * ds;
-        float x0 = off + delta * (viewportSize.x - 2.0f * off);
-        float x1 = off + (delta + ds) * (viewportSize.x - 2.0f * off);
+        float x0 = off + (delta - ds)* (viewportSize.x - 2.0f * off);
+        float x1 = off + delta * (viewportSize.x - 2.0f * off);
         float newHeight = vScale * static_cast<float>(prob[i]) / static_cast<float>(sampleTestCount);
+
         vec2 ph1(x0, off + (viewportSize.y - 2.0f * off) * lastHeight);
         vec2 ph2(x1, off + (viewportSize.y - 2.0f * off) * newHeight);
         renderLine(ph1, ph2, vec4(1.0f, 1.0f, 0.0f, 1.0f));
+
+		ph1.y = off + (viewportSize.y - 2.0f * off) * distribution(delta - ds, alpha);
+		ph2.y = off + (viewportSize.y - 2.0f * off) * distribution(delta, alpha);
+		renderLine(ph1, ph2, vec4(1.0f, 0.0f, 0.0f, 1.0f));
+
         lastHeight = newHeight;
     }
 }
@@ -667,7 +670,7 @@ void RaytracePrivate::estimateRegionsOrder()
 			estimatedColor += raytracePixel(r.origin + vec2i(sx[i].x * r.size.x / sx[i].y, sy[i].x * r.size.y / sy[i].y), 1, bounces);
 			r.estimatedBounces += bounces;
 		}
-		/*
+		//*
 		const rt::float_type maxPossibleBounces = float(rt::PathTraceIntegrator::MaxTraverseDepth);
 		rt::float_type aspect = (maxPossibleBounces - float(r.estimatedBounces)) / maxPossibleBounces;
 		vec4 estimatedDensity = vec4(1.0f - 0.5f * aspect * aspect, 1.0f);
@@ -788,48 +791,4 @@ void RaytracePrivate::renderTriangle(const rt::Triangle& tri)
 	renderLine(c0, c1, lineColor);
 	renderLine(c1, c2, lineColor);
 	renderLine(c2, c0, lineColor);
-}
-
-/*
- * From raytraceobjects.h
- */
-namespace et  {
-namespace rt {
-
-float smithGGX(float t, float r)
-{
-	return 1.0f / (r + t * (1.0f - r) + Constants::epsilon);
-}
-	
-float cooktorrance(const float4& n, const float4& Wi, const float4& Wo, float r)
-{
-	auto h = Wo - Wi;
-	h.normalize();
-
-	float NdotW = std::max(0.0f, n.dot(Wo));
-	float NdotI = std::max(0.0f, -n.dot(Wi));
-	float NdotH = std::max(0.0f, n.dot(h));
-	float HdotI = std::max(0.0f, -h.dot(Wi));
-	float rSq = r * r + Constants::epsilon;
-
-	float d = rSq / (PI * sqr(NdotH * NdotH * (rSq - 1.0f) + 1.0f));
-	float g = smithGGX(NdotW, r) * smithGGX(NdotI, r);
-	float f = 0.95f + 0.05f * std::pow(1.0f - NdotI, 5.0f);
-
-	return (d * g * f) / (4.0f * PI * NdotI * NdotW + Constants::epsilon);
-}
-
-const float4& defaultLightDirection()
-{
-	static float4 d(1.0f, 1.0f, 1.0f, 0.0f);
-	static bool n = true;
-	if (n)
-	{
-		d.normalize();
-		n = false;
-	}
-	return d;
-}
-
-}
 }

@@ -59,7 +59,6 @@ namespace et
 			float4 emissive;
 			float_type roughness = 0.0f;
 			float_type ior = 0.0f;
-			float_type specularExponent = 1.0f;
 			MaterialType type = MaterialType::Diffuse;
 
 			using Collection = Vector<Material>;
@@ -277,12 +276,12 @@ namespace et
 			return Xi;
 		}
 
-		inline float raisedCosineDistribution(float Xi, float exponent)
+		inline float cosineDistribution(float Xi, ...)
 		{
-			return std::pow(fastRandomFloat(), 1.0f / (1.0f + exponent));
+			return std::sqrt(Xi);
 		}
 
-		inline float roughnessDistribution(float Xi, float alpha)
+		inline float ggxDistribution(float Xi, float alpha)
 		{
 			return sqrt((1.0f - Xi) / ((sqr(alpha) - 1.0f) * Xi + 1.0f));
 		}
@@ -427,17 +426,21 @@ namespace et
 		template <>
 		inline float_type computeFresnelTerm<MaterialType::Dielectric>(float_type eta, float_type IdotN)
 		{
-			float_type cosTheta = std::abs(IdotN);
-			float_type sinTheta = std::sqrt(1.0f - cosTheta * cosTheta);
+			float f0 = (1.0f - eta) / (1.0f + eta);
+			return f0 + (1.0f - f0) * std::pow(1.0f - IdotN, 5.0f);
+		/*
+			float_type cosTheta = IdotN;
+			float_type sinThetaSq = 1.0f - cosTheta * cosTheta;
 			float_type etaCosTheta = eta * cosTheta;
-			float_type v = std::sqrt(1.0f - sqr(eta * sinTheta));
+			float_type v = std::sqrt(1.0f - eta * eta * sinThetaSq);
 			return sqr((etaCosTheta - v) / (etaCosTheta + v + 0.000001f));
+		*/
 		}
 
 		template <>
 		inline float_type computeFresnelTerm<MaterialType::Conductor>(float_type eta, float_type IdotN)
 		{
-			return 1.0f;
+			return 0.95f;
 		}
 
 		inline float4 randomBarycentric()
@@ -449,63 +452,15 @@ namespace et
 
 		const float4& defaultLightDirection();
 
-		inline float roughnessToExponent(float r)
-		{
-			return std::max(0.0f, 2.0f / (sqr(r + Constants::epsilon)) - 2.0f);
-		}
+		float4 computeDiffuseVector(const float4& normal);
 
-		inline float4 computeDiffuseVector(const float4& normal)
-		{
-		#if (ET_RT_VISUALIZE_BRDF)
-			return defaultLightDirection();
-		#else
-			return randomVectorOnHemisphere(normal, uniformDistribution);
-		#endif
-		}
+		float4 computeReflectionVector(const float4& incidence, const float4& normal, float roughness);
+			
+		float4 computeRefractionVector(const float4& incidence, const float4& normal,
+			float_type k, float_type eta, float IdotN, float roughness);
 
-		inline float4 computeReflectionVector(const float4& incidence, const float4& normal,
-			float4& idealReflection, float exponent)
-		{
-			idealReflection = reflect(incidence, normal);
-
-#		if (ET_RT_VISUALIZE_BRDF)
-			return defaultLightDirection();
-#		else
-			auto direction = randomVectorOnHemisphere(idealReflection, roughnessDistribution, exponent);
-			if (direction.dot(normal) < 0.0f)
-				direction = reflect(direction, normal);
-			return direction;
-#		endif
-		}
-
-		inline float4 computeRefractionVector(const float4& incidence, const float4& normal,
-			float_type k, float_type eta, float IdotN, float4& idealRefraction, float exponent)
-		{
-			idealRefraction = incidence * eta - normal * (eta * IdotN + std::sqrt(k));
-			idealRefraction.normalize();
-
-#		if (ET_RT_VISUALIZE_BRDF)
-			return defaultLightDirection();
-#		else
-			auto direction = randomVectorOnHemisphere(idealRefraction, roughnessDistribution, exponent);
-			if (direction.dot(normal) > 0.0f)
-				direction = reflect(direction, normal);
-			return direction;
-#		endif
-		}
-
-		inline float lambert(const float4& n, const float4& Wo)
-		{
-			return 1.0f / PI;
-		}
-
-		inline float phong(const float4& n, const float4& Wi, const float4& Wo, const float4& r, float Ns)
-		{
-			auto RdotW = std::max(0.0f, r.dot(Wo));
-			auto NdotW = std::max(Constants::epsilon, n.dot(Wo));
-			return std::pow(RdotW, Ns) * (Ns + 2.0f) / (DOUBLE_PI * NdotW);
-		}
-
-		float cooktorrance(const float4& n, const float4& Wi, const float4& Wo, float r);
+		float lambert(const float4& n, const float4& Wi, const float4& Wo, float r);
+		float reflectionMicrofacet(const float4& n, const float4& Wi, const float4& Wo, float r, float f);
+		float refractionMicrofacet(const float4& n, const float4& Wi, const float4& Wo, float r, float f);
 	}
 }

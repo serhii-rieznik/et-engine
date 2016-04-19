@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		5C3C4FF71C9E13A700C5B47A /* libet-static-mac.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5C3C4FEF1C9E135700C5B47A /* libet-static-mac.a */; };
+		5CE405F91CC6D3E400EA12EC /* raytraceobjects.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5CE405F81CC6D3E400EA12EC /* raytraceobjects.cpp */; };
 		6E225A771CB408D900AE27BD /* environment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6E225A731CB408D900AE27BD /* environment.cpp */; };
 		6E225A781CB408D900AE27BD /* integrator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6E225A741CB408D900AE27BD /* integrator.cpp */; };
 		6E225A791CB408D900AE27BD /* kdtree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6E225A751CB408D900AE27BD /* kdtree.cpp */; };
@@ -34,6 +35,7 @@
 
 /* Begin PBXFileReference section */
 		5C3C4FEA1C9E135700C5B47A /* et-static-mac.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "et-static-mac.xcodeproj"; path = "../../projects/et-static-mac.xcodeproj"; sourceTree = "<group>"; };
+		5CE405F81CC6D3E400EA12EC /* raytraceobjects.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = raytraceobjects.cpp; path = "../../source-ext/rt/raytraceobjects.cpp"; sourceTree = "<group>"; };
 		6E225A6D1CB408CD00AE27BD /* environment.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = environment.h; path = "../../include/et-ext/rt/environment.h"; sourceTree = "<group>"; };
 		6E225A6E1CB408CD00AE27BD /* integrator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = integrator.h; path = "../../include/et-ext/rt/integrator.h"; sourceTree = "<group>"; };
 		6E225A6F1CB408CD00AE27BD /* kdtree.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = kdtree.h; path = "../../include/et-ext/rt/kdtree.h"; sourceTree = "<group>"; };
@@ -84,6 +86,7 @@
 			isa = PBXGroup;
 			children = (
 				6E225A711CB408CD00AE27BD /* raytraceobjects.h */,
+				5CE405F81CC6D3E400EA12EC /* raytraceobjects.cpp */,
 				6E225A6D1CB408CD00AE27BD /* environment.h */,
 				6E225A731CB408D900AE27BD /* environment.cpp */,
 				6E225A6E1CB408CD00AE27BD /* integrator.h */,
@@ -237,6 +240,7 @@
 				6E225A7A1CB408D900AE27BD /* raytrace.cpp in Sources */,
 				A5E2AEBE1B7D4A7700DE53DD /* maincontroller.cpp in Sources */,
 				6E225A771CB408D900AE27BD /* environment.cpp in Sources */,
+				5CE405F91CC6D3E400EA12EC /* raytraceobjects.cpp in Sources */,
 				6E225A791CB408D900AE27BD /* kdtree.cpp in Sources */,
 				6E225A781CB408D900AE27BD /* integrator.cpp in Sources */,
 				A5E2AEBD1B7D4A7700DE53DD /* main.cpp in Sources */,
