@@ -66,28 +66,21 @@ float refractionMicrofacet(const float4& n, const float4& Wi, const float4& Wo, 
 	float NdotI = n.dot(Wi);
 	float HdotO = h.dot(Wo);
 	float HdotI = h.dot(Wi);
-	float NdotH = n.dot(h);
 	float rSq = r * r + Constants::epsilon;
     
-    if (NdotI > 0.0f)
-        eta = 1.0f / eta;
-    
-    float etaSq = eta * eta;
-
 	float g1 = smithGGX(NdotI, rSq) * float(HdotI / NdotI > 0.0f);
 	float g2 = smithGGX(NdotO, rSq) * float(HdotO / NdotO > 0.0f);
 	float g = g1 * g2;
 	ET_ASSERT(!isnan(g));
 
-	float d = D_ggx(rSq, NdotH) * float(NdotH > 0.0f);
-    float denom = sqr(HdotI + eta * HdotO);
-        
-	float brdf = ((1 - f) * d * g * etaSq * HdotI * HdotO) / (NdotI * denom);
-    float pdf = d * etaSq * HdotO / denom;
+    // float NdotH = n.dot(h);
+    // float etaSq = eta * eta;
+	// float d = D_ggx(rSq, NdotH) * float(NdotH > 0.0f);
+    // float denom = sqr(HdotI + eta * HdotO);
+	// float brdf = ((1 - f) * d * g * etaSq * HdotI * HdotO) / (NdotI * denom);
+    // float pdf = d * etaSq * HdotO / denom;
     
-	// float pdf = d * NdotH / (4.0f * HdotI);
-
-    float result = brdf / pdf; // (g * (1.0f - f) * HdotI) / (NdotI * NdotO * NdotH + Constants::epsilon);
+    float result = (1 - f) * g * HdotI / NdotI;
 	ET_ASSERT(!isnan(result));
 	
 	return result;
