@@ -24,15 +24,15 @@ public:
 	RaytracePrivate(Raytrace* owner);
 	~RaytracePrivate();
 
-	void gatherThreadFunction(unsigned index);
-    void shootingThreadFunction(unsigned index);
-    void testThreadFunction(unsigned index);
+	void gatherThreadFunction(uint32_t index);
+    void shootingThreadFunction(uint32_t index);
+    void testThreadFunction(uint32_t index);
     
 	void emitWorkerThreads();
 	void stopWorkerThreads();
 
 	bool finalizeShooting(const rt::float4& cameraPosition, const rt::float4& hitPoint,
-			const rt::float4& color, vec4& outColor, vec2i& pixel);
+        const rt::float4& color, vec4& outColor, vec2i& pixel, uint32_t threadId);
 
 	void buildMaterialAndTriangles(s3d::Scene::Pointer);
 
@@ -182,7 +182,7 @@ void RaytracePrivate::emitWorkerThreads()
 
 	running = true;
 	threadCounter.store(std::thread::hardware_concurrency());
-	for (unsigned i = 0, e = std::thread::hardware_concurrency(); i < e; ++i)
+	for (uint32_t i = 0, e = std::thread::hardware_concurrency(); i < e; ++i)
 	{
 #   if (ET_RT_EVALUATE_DISTRIBUTION)
         workerThreads.emplace_back(&RaytracePrivate::testThreadFunction, this, i);
@@ -390,7 +390,7 @@ rt::Region RaytracePrivate::getNextRegion()
  * Raytrace function
  */
 bool RaytracePrivate::finalizeShooting(const rt::float4& cameraPosition, const rt::float4& hitPoint,
-	const rt::float4& color, vec4& outColor, vec2i& pixel)
+	const rt::float4& color, vec4& outColor, vec2i& pixel, uint32_t threadId)
 {
 	rt::float4 viewDirection = hitPoint - cameraPosition;
 
@@ -549,7 +549,7 @@ void RaytracePrivate::testThreadFunction(unsigned index)
     }
 }
 
-void RaytracePrivate::gatherThreadFunction(unsigned index)
+void RaytracePrivate::gatherThreadFunction(uint32_t threadId)
 {
 	while (running)
 	{
@@ -667,7 +667,8 @@ void RaytracePrivate::estimateRegionsOrder()
 		for (size_t i = 0; i < maxSamples; ++i)
 		{
 			size_t bounces = 0;
-			estimatedColor += raytracePixel(r.origin + vec2i(sx[i].x * r.size.x / sx[i].y, sy[i].x * r.size.y / sy[i].y), 1, bounces);
+            vec2i px = r.origin + vec2i(sx[i].x * r.size.x / sx[i].y, sy[i].x * r.size.y / sy[i].y);
+			estimatedColor += raytracePixel(px, 1, bounces);
 			r.estimatedBounces += bounces;
 		}
 		//*

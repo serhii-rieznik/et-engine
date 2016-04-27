@@ -56,28 +56,38 @@ float reflectionMicrofacet(const float4& n, const float4& Wi, const float4& Wo, 
 	return result;
 }
 
-float refractionMicrofacet(const float4& n, const float4& Wi, const float4& Wo, float r, float f)
+float refractionMicrofacet(const float4& n, const float4& Wi, const float4& Wo, float r, float f, float eta)
 {
-	auto h = Wo - Wi + n * Constants::epsilonSquared;
+    auto h = Wi + Wo * eta;
 	h.normalize();
-
+    h *= 2.0f * float(h.dot(n) > 0.0f) - 1.0f;
+    
 	float NdotO = n.dot(Wo);
-	float NdotI = -n.dot(Wi);
+	float NdotI = n.dot(Wi);
 	float HdotO = h.dot(Wo);
-	float HdotI = -h.dot(Wi);
+	float HdotI = h.dot(Wi);
 	float NdotH = n.dot(h);
 	float rSq = r * r + Constants::epsilon;
+    
+    if (NdotI > 0.0f)
+        eta = 1.0f / eta;
+    
+    float etaSq = eta * eta;
 
 	float g1 = smithGGX(NdotI, rSq) * float(HdotI / NdotI > 0.0f);
 	float g2 = smithGGX(NdotO, rSq) * float(HdotO / NdotO > 0.0f);
 	float g = g1 * g2;
 	ET_ASSERT(!isnan(g));
 
-	// float d = D_ggx(rSq, NdotH) * float(NdotH > 0.0f);
-	// float brdf = (d * g * f) / (4.0f * NdotI * NdotO);
+	float d = D_ggx(rSq, NdotH) * float(NdotH > 0.0f);
+    float denom = sqr(HdotI + eta * HdotO);
+        
+	float brdf = ((1 - f) * d * g * etaSq * HdotI * HdotO) / (NdotI * denom);
+    float pdf = d * etaSq * HdotO / denom;
+    
 	// float pdf = d * NdotH / (4.0f * HdotI);
 
-	float result = (g * (1.0f - f) * HdotI) / (NdotI * NdotO * NdotH + Constants::epsilon);
+    float result = brdf / pdf; // (g * (1.0f - f) * HdotI) / (NdotI * NdotO * NdotH + Constants::epsilon);
 	ET_ASSERT(!isnan(result));
 	
 	return result;
@@ -85,7 +95,7 @@ float refractionMicrofacet(const float4& n, const float4& Wi, const float4& Wo, 
 
 const float4& defaultLightDirection()
 {
-	static float4 d(0.0f, 1.0f, 0.0f, 0.0f);
+	static float4 d(0.0f, 1.0f, 1.0f, 0.0f);
 	static bool n = true;
 	if (n)
 	{
@@ -95,10 +105,10 @@ const float4& defaultLightDirection()
 	return d;
 }
 
-float4 computeDiffuseVector(const float4& normal)
+float4 computeDiffuseVector(const float4& incidence, const float4& normal, float roughness)
 {
 #if (ET_RT_VISUALIZE_BRDF)
-	return defaultLightDirection();
+    return defaultLightDirection();
 #else
 	return randomVectorOnHemisphere(normal, cosineDistribution);
 #endif
@@ -106,11 +116,10 @@ float4 computeDiffuseVector(const float4& normal)
 
 float4 computeReflectionVector(const float4& incidence, const float4& normal, float roughness)
 {
-	auto idealReflection = reflect(incidence, normal);
-
 #if (ET_RT_VISUALIZE_BRDF)
-	return defaultLightDirection();
+    return defaultLightDirection();
 #else
+    auto idealReflection = reflect(incidence, normal);
 	auto direction = randomVectorOnHemisphere(idealReflection, ggxDistribution, roughness);
 	if (direction.dot(normal) < 0.0f)
 		direction = reflect(direction, normal);
@@ -118,20 +127,11 @@ float4 computeReflectionVector(const float4& incidence, const float4& normal, fl
 #endif
 }
 
-float4 computeRefractionVector(const float4& incidence, const float4& normal,
-	float_type k, float_type eta, float IdotN, float roughness)
+float4 computeRefractionVector(const float4& Wi, const float4& n, float_type eta, float roughness,
+    float cosThetaI, float cosThetaT)
 {
-	auto idealRefraction = incidence * eta - normal * (eta * IdotN + std::sqrt(k));
-	idealRefraction.normalize();
-
-#if (ET_RT_VISUALIZE_BRDF)
-	return defaultLightDirection();
-#else
-	auto direction = randomVectorOnHemisphere(idealRefraction, ggxDistribution, roughness);
-	if (direction.dot(normal) > 0.0f)
-		direction = reflect(direction, normal);
-	return direction;
-#endif
+    auto idealRefraction = Wi * eta - n * (cosThetaI * eta - cosThetaT);
+	return randomVectorOnHemisphere(idealRefraction, ggxDistribution, roughness);
 }
 
 }

@@ -158,7 +158,6 @@ namespace et
 			{
 			}
 		};
-		using IntersectionDataList = Vector<IntersectionData>;
 
 		struct ET_ALIGNED(16) BoundingBox
 		{
@@ -203,7 +202,6 @@ namespace et
 				return 8.0f * halfSize.cX() * halfSize.cY() * halfSize.cZ();
 			};
 		};
-		using BoundingBoxList = Vector<BoundingBox>;
 
 		struct Ray
 		{
@@ -421,24 +419,35 @@ namespace et
 		}
 
 		template <MaterialType M>
-		inline float_type computeFresnelTerm(float_type eta, float_type IdotN);
+		inline float_type computeFresnelTerm(const float4& Wi, const float4& n, float_type eta);
+        
+        float fresnelShlickApproximation(float cosTheta, float eta)
+        {
+            float_type f0 = (1.0f - eta) / (1.0f + eta);
+            return f0 + (1.0f - f0) * std::pow(1.0f - std::abs(cosTheta), 5.0f);
+        }
 
 		template <>
-		inline float_type computeFresnelTerm<MaterialType::Dielectric>(float_type eta, float_type IdotN)
+		inline float_type computeFresnelTerm<MaterialType::Dielectric>(const float4& Wi, const float4& n, float_type eta)
 		{
-			float f0 = (1.0f - eta) / (1.0f + eta);
-			return f0 + (1.0f - f0) * std::pow(1.0f - IdotN, 5.0f);
-		/*
-			float_type cosTheta = IdotN;
-			float_type sinThetaSq = 1.0f - cosTheta * cosTheta;
-			float_type etaCosTheta = eta * cosTheta;
-			float_type v = std::sqrt(1.0f - eta * eta * sinThetaSq);
-			return sqr((etaCosTheta - v) / (etaCosTheta + v + 0.000001f));
-		*/
-		}
+            return 0.5f;
+            /*
+            float_type cosThetaI = std::abs(cosTheta);
+            float_type cosThetaT = std::sqrt(cosThetaTSqr);
+            float_type Rs = (cosThetaI - eta * cosThetaT) / (cosThetaI + eta * cosThetaT);
+            float_type Rp = (eta * cosThetaI - cosThetaT) / (eta * cosThetaI + cosThetaT);
+            return 0.5f * (Rs * Rs + Rp * Rp);
+            */
+        }
 
+        template <>
+        inline float_type computeFresnelTerm<MaterialType::Diffuse>(const float4& Wi, const float4& n, float_type eta)
+        {
+            return 0.05f;
+        }
+        
 		template <>
-		inline float_type computeFresnelTerm<MaterialType::Conductor>(float_type eta, float_type IdotN)
+		inline float_type computeFresnelTerm<MaterialType::Conductor>(const float4& Wi, const float4& n, float_type eta)
 		{
 			return 0.95f;
 		}
@@ -452,15 +461,14 @@ namespace et
 
 		const float4& defaultLightDirection();
 
-		float4 computeDiffuseVector(const float4& normal);
+		float4 computeDiffuseVector(const float4& incidence, const float4& normal, float roughness);
 
 		float4 computeReflectionVector(const float4& incidence, const float4& normal, float roughness);
 			
-		float4 computeRefractionVector(const float4& incidence, const float4& normal,
-			float_type k, float_type eta, float IdotN, float roughness);
+		float4 computeRefractionVector(const float4& incidence, const float4& normal, float_type eta, float roughness, float cosTheta, float cosThetaTSqr);
 
 		float lambert(const float4& n, const float4& Wi, const float4& Wo, float r);
 		float reflectionMicrofacet(const float4& n, const float4& Wi, const float4& Wo, float r, float f);
-		float refractionMicrofacet(const float4& n, const float4& Wi, const float4& Wo, float r, float f);
+		float refractionMicrofacet(const float4& n, const float4& Wi, const float4& Wo, float r, float f, float eta);
 	}
 }

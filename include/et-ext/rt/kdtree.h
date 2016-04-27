@@ -55,16 +55,13 @@ namespace rt
 		Stats nodesStatistics() const;
 		void cleanUp();
 		
-		const Node& root() const
-			{ return _nodes.front(); }
-		
-		const Node& nodeAt(size_t i) const
-			{ return _nodes.at(i); }
-
+        const Node& nodeAt(size_t i) const
+            { return _nodes.at(i); }
 		const BoundingBox& bboxAt(size_t i) const
 			{ return _boundingBoxes.at(i); }
-		
+		        
 		TraverseResult traverse(const Ray& r);
+        
 		void printStructure();
 		
 		const Triangle& triangleAtIndex(size_t) const;
@@ -76,13 +73,15 @@ namespace rt
 		void splitNodeUsingSortedArray(size_t, size_t);
 		void buildSplitBoxesUsingAxisAndPosition(size_t nodeIndex, int axis, float position);
 		void distributeTrianglesToChildren(size_t nodeIndex);
-		
+        
 	private:
 		Vector<Node> _nodes;
-		BoundingBoxList _boundingBoxes;
+        Vector<index> _indices;
+        Vector<IntersectionData> _intersectionData;
+		Vector<BoundingBox> _boundingBoxes;
+        
+        BoundingBox _sceneBoundingBox;
 		TriangleList _triangles;
-		IntersectionDataList _intersectionData;
-		Vector<index> _indexes;
 		size_t _maxDepth = 0;
 		size_t _maxBuildDepth = 0;
 	};

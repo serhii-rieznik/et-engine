@@ -53,7 +53,7 @@ float4 PathTraceIntegrator::gather(const Ray& inRay, size_t depth, size_t& maxDe
 
 #   if (ET_RT_VISUALIZE_BRDF)
 		++maxDepth;
-		return (brdf > 1.0f) ? float4(brdf - 1.0f, 0.0f, 0.0f, 1.0f) : float4(brdf, brdf, brdf, 1.0f);
+		return (brdf > 10000.0f) ? float4(brdf - 1.0f, 0.0f, 0.0f, 1.0f) : float4(brdf, brdf, brdf, 1.0f);
 #	else
         bounce.add = mat.emissive;
 		bounce.scale = color * brdf;
@@ -82,7 +82,7 @@ float4 PathTraceIntegrator::reflectance(const float4& incidence, float4& normal,
 		{
             color = mat.diffuse;
             
-            auto out = computeDiffuseVector(normal);
+            auto out = computeDiffuseVector(incidence, normal, mat.roughness);
             brdf = lambert(normal, incidence, out, mat.roughness);
 			return out;
 		}
@@ -91,7 +91,7 @@ float4 PathTraceIntegrator::reflectance(const float4& incidence, float4& normal,
 		{
             color = mat.specular;
             auto out = computeReflectionVector(incidence, normal, mat.roughness);
-			auto fresnel = computeFresnelTerm<MaterialType::Conductor>(1.0f, -normal.dot(incidence));
+			auto fresnel = computeFresnelTerm<MaterialType::Conductor>(incidence, normal, mat.ior);
 			brdf = reflectionMicrofacet(normal, incidence, out, mat.roughness, fresnel);
 			return out;
 		}
@@ -99,35 +99,27 @@ float4 PathTraceIntegrator::reflectance(const float4& incidence, float4& normal,
 		case MaterialType::Dielectric:
 		{
             float eta = mat.ior;
-            float IdotN = incidence.dot(normal);
-
 			if (eta > 1.0f) // refractive
 			{
-				eta = 1.0f / eta;
-				
-				if (IdotN <= 0.0f) // entering material
-				{
-					IdotN = -IdotN;
-				}
-				else
-				{
-					normal *= -1.0f;
-				}
-
-				float_type k = computeRefractiveCoefficient(eta, IdotN);
-				auto fresnel = computeFresnelTerm<MaterialType::Dielectric>(eta, IdotN);
-				if ((k >= Constants::epsilon) && (fastRandomFloat() >= fresnel))
+                float NdotI = incidence.dot(normal);
+                if (NdotI < 0.0f)
+                    eta = 1.0f / eta;
+                
+                float cosTSq = 1.0f - sqr(eta) * (1.0f - sqr(NdotI));
+                auto fresnel = (cosTSq > 0.0f) ? fresnelShlickApproximation(NdotI, eta) : 1.0f;
+				if (fastRandomFloat() > fresnel)
 				{
 					color = mat.diffuse;
-
-					auto out = computeRefractionVector(incidence, normal, k, eta, IdotN, mat.roughness);
-					brdf = -refractionMicrofacet(normal, incidence, reflect(out, normal), mat.roughness, fresnel);
+                    auto r = 0.5f * mat.roughness;
+                    auto cosTSqScale = signNoZero(NdotI);
+                    auto out = computeRefractionVector(incidence, normal, eta, r, NdotI, std::sqrt(cosTSq) * cosTSqScale);
+                    brdf = refractionMicrofacet(normal, incidence, out, r, fresnel, eta) * cosTSqScale;
 					return out;
 				}
 				else
 				{
 					color = mat.specular;
-
+                    normal *= -signNoZero(NdotI);
 					auto out = computeReflectionVector(incidence, normal, mat.roughness);
 					brdf = reflectionMicrofacet(normal, incidence, out, mat.roughness, fresnel);
 					return out;
@@ -135,12 +127,12 @@ float4 PathTraceIntegrator::reflectance(const float4& incidence, float4& normal,
 			}
 			else // non-refractive material
 			{
-				auto fresnel = computeFresnelTerm<MaterialType::Dielectric>(eta, -IdotN);
+                auto fresnel = fresnelShlickApproximation(normal.dot(incidence), eta);
 				if (fastRandomFloat() > fresnel)
 				{
                     color = mat.diffuse;
                     
-                    auto out = computeDiffuseVector(normal);
+                    auto out = computeDiffuseVector(incidence, normal, mat.roughness);
                     brdf = lambert(normal, incidence, out, mat.roughness);
 					return out;
 				}
@@ -190,21 +182,25 @@ float4 FresnelIntegrator::gather(const Ray& inRay, size_t depth, size_t& maxDept
 	const auto& tri = tree.triangleAtIndex(hit0.triangleIndex);
 	const auto& mat = materials[tri.materialIndex];
     float4 normal = tri.interpolatedNormal(hit0.intersectionPointBarycentric);
-    float IdotN = inRay.direction.dot(normal);
 
     float value = 0.0f;
     switch (mat.type)
     {
+        case MaterialType::Diffuse:
+        {
+            value = computeFresnelTerm<MaterialType::Diffuse>(inRay.direction, normal, mat.ior);
+            break;
+        }
+            
         case MaterialType::Conductor:
         {
-            value = computeFresnelTerm<MaterialType::Conductor>(0.0f, IdotN);
+            value = computeFresnelTerm<MaterialType::Conductor>(inRay.direction, normal, mat.ior);
             break;
         }
             
         case MaterialType::Dielectric:
         {
-            float_type eta = mat.ior > 1.0f ? 1.0f / mat.ior : mat.ior;
-            value = computeFresnelTerm<MaterialType::Dielectric>(eta, IdotN);
+            value = computeFresnelTerm<MaterialType::Dielectric>(inRay.direction, normal, mat.ior);
             break;
         }
             
