@@ -96,7 +96,7 @@ namespace et
 
 		RenderContext* _rc = nullptr;
 		MaterialProvider* _materialProvider = nullptr;
-		AutoPtr<OBJLoaderThread> _thread;
+		std::unique_ptr<OBJLoaderThread> _thread;
 
 		std::string inputFileName;
 		std::string inputFilePath;
@@ -113,9 +113,9 @@ namespace et
 		Vector<et::vec3> _vertices;
 		Vector<et::vec3> _normals;
 		Vector<et::vec2> _texCoords;
-		Vector<OBJGroup*> _groups;
+		Vector<OBJGroup> _groups;
 
-		OBJGroup* lastGroup = nullptr;
+        size_t lastGroupIndex = static_cast<size_t>(-1);
 		size_t _loadOptions = Option_JustLoad;
 		int _lastSmoothGroup = 0;
 		int _lastGroupId = 0;

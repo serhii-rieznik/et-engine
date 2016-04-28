@@ -150,7 +150,7 @@ uint64_t OBJLoaderThread::main()
 
 OBJLoader::OBJLoader(const std::string& inFile, size_t options) :
 	inputFileName(application().resolveFileName(inFile).c_str()),
-	inputFile(inputFileName.c_str()), lastGroup(nullptr), _loadOptions(options)
+	inputFile(inputFileName.c_str()), _loadOptions(options)
 {
 	inputFilePath = getFilePath(inputFileName);
 	
@@ -160,14 +160,9 @@ OBJLoader::OBJLoader(const std::string& inFile, size_t options) :
 
 OBJLoader::~OBJLoader()
 {
-	if (_thread.valid())
+	if (_thread.get())
 		_thread->stopAndWaitForTermination();
-	
-	for (auto group : _groups)
-		etDestroyObject(group);
-	
-	_groups.clear();
-	
+			
 	if (inputFile.is_open())
 		inputFile.close();
 	
@@ -217,10 +212,7 @@ void OBJLoader::loadData(bool async, ObjectsCache& cache)
 		{
 			getLine(inputFile, line);
 			trim(line);
-			
-			lastGroup = etCreateObject<OBJGroup>(line);
-			lastGroup->faces.reserve(1024);
-			_groups.push_back(lastGroup);
+            _groups.emplace_back(line);
 		}
 		else if (key == 'u') // group's material
 		{
@@ -233,30 +225,29 @@ void OBJLoader::loadData(bool async, ObjectsCache& cache)
 				std::string materialId;
 				inputFile >> materialId;
 				
-				if ((lastGroup != nullptr) && (lastGroup->material.empty() || lastGroup->material == materialId))
-				{
-					lastGroup->material = materialId;
-				}
-				else
-				{
-					auto groupName = "group-" + intToStr(_lastGroupId++) + "-" + materialId;
-					lastGroup = etCreateObject<OBJGroup>(groupName, materialId);
-					_groups.push_back(lastGroup);
-				}
+                ET_ASSERT(_groups.empty() == false);
+                if (_groups.empty())
+                {
+                    auto groupName = "group-" + intToStr(_lastGroupId++) + "-" + materialId;
+                    _groups.emplace_back(groupName, materialId);
+                }
+                else if (_groups.back().material.empty() || _groups.back().material == materialId)
+                {
+                    _groups.back().material = materialId;
+                }
 				getLine(inputFile, line);
 			}
 			else
 			{
-				std::cout << "Unresolved symbol " << key << usemtl << ". Current group: " << lastGroup->name << std::endl;
+				std::cout << "Unresolved symbol " << key << usemtl << ". Current group: " << _groups.back().name << std::endl;
 			}
 		}
 		else if (key == 's') // smoothing group
 		{
-			if (lastGroup == nullptr)
-			{
-				lastGroup = etCreateObject<OBJGroup>("group-" + intToStr(_lastGroupId++));
-				_groups.push_back(lastGroup);
-			}
+            if (_groups.empty())
+            {
+                _groups.emplace_back("group-" + intToStr(_lastGroupId++));
+            }
 			getLine(inputFile, line);
 			_lastSmoothGroup = (line.compare("off") == 0) ? 0 : strToInt(line);
 		}
@@ -314,13 +305,12 @@ void OBJLoader::loadData(bool async, ObjectsCache& cache)
 				face.vertexLinks[face.vertexLinksCount++] = vertex;
 			}
 			
-			if (lastGroup == nullptr)
+			if (_groups.empty())
 			{
-				lastGroup = etCreateObject<OBJGroup>("group-" + intToStr(_lastGroupId++));
-				_groups.push_back(lastGroup);
+                _groups.emplace_back("group-" + intToStr(_lastGroupId++));
 			}
 			
-			lastGroup->faces.push_back(face);
+			_groups.back().faces.push_back(face);
 		}
 		else if (key == 'v')
 		{
@@ -390,7 +380,7 @@ s3d::ElementContainer::Pointer OBJLoader::load(et::RenderContext* rc, MaterialPr
 void OBJLoader::loadAsync(et::RenderContext* rc, s3d::Storage& storage, ObjectsCache& cache)
 {
 	_rc = rc;
-	_thread = etCreateObject<OBJLoaderThread>(this, storage, cache);
+    _thread = std::unique_ptr<OBJLoaderThread>(etCreateObject<OBJLoaderThread>(this, storage, cache));
 }
 
 void OBJLoader::loadMaterials(const std::string& fileName, bool async, ObjectsCache& cache)
@@ -732,7 +722,7 @@ void OBJLoader::processLoadedData()
 
 	for (const auto& group : _groups)
 	{
-		for (const auto& face : group->faces)
+		for (const auto& face : group.faces)
 		{
 			ET_ASSERT(face.vertexLinksCount > 1);
 			totalTriangles += static_cast<uint32_t>(face.vertexLinksCount - 2);
@@ -806,7 +796,7 @@ void OBJLoader::processLoadedData()
 		{
 			size_t totalVertices = 0;
 			
-			for (auto face : group->faces)
+			for (auto face : group.faces)
 			{
 				size_t numTriangles = face.vertexLinksCount - 2;
 				for (size_t i = 1; i <= numTriangles; ++i)
@@ -822,7 +812,7 @@ void OBJLoader::processLoadedData()
 				center /= static_cast<float>(totalVertices);
 		}
 		
-		for (auto face : group->faces)
+		for (auto face : group.faces)
 		{
 			size_t numTriangles = face.vertexLinksCount - 2;
 			for (size_t i = 1; i <= numTriangles; ++i)
@@ -837,7 +827,7 @@ void OBJLoader::processLoadedData()
 		
 		for (auto mat : _materials)
 		{
-			if (mat->name() == group->material)
+			if (mat->name() == group.material)
 			{
 				m = mat;
 				break;
@@ -846,7 +836,7 @@ void OBJLoader::processLoadedData()
 		
 		uint32_t startIndex_u32 = static_cast<uint32_t>(startIndex);
 		uint32_t numIndexes_u32 = static_cast<uint32_t>(index - startIndex);
-		_meshes.emplace_back(group->name, startIndex_u32, numIndexes_u32, m, center);
+		_meshes.emplace_back(group.name, startIndex_u32, numIndexes_u32, m, center);
 	}
 	
 	if (!hasNormals)

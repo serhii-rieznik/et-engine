@@ -34,7 +34,7 @@ namespace et
 		virtual void invokeInMainRunLoop(float delay) = 0;
 
 	protected:
-		AutoPtr<PureInvocationTarget> _target;
+        std::unique_ptr<PureInvocationTarget> _target;
 	};
 	
 	class InvocationTask : public Task
@@ -214,11 +214,16 @@ namespace et
 
 		template <typename T>
 		void setTarget(T* o, void(T::*m)())
-			{ ET_ASSERT(o != nullptr); _target = etCreateObject<InvocationTarget<T>>(o, m); }
+        {
+            ET_ASSERT(o != nullptr);
+            _target = etCreateObject<InvocationTarget<T>>(o, m);
+        }
 		
 		template <typename F>
 		void setTarget(F func)
-			{ _target = etCreateObject<DirectInvocationTarget<F>>(func); }
+        {
+            _target = std::unique_ptr<PureInvocationTarget>(etCreateObject<DirectInvocationTarget<F>>(func));
+        }
 	};
 
 	class Invocation1 : public PureInvocation
@@ -232,17 +237,22 @@ namespace et
 
 		template <typename T, typename A1>
 		void setTarget(T* o, void(T::*m)(A1), A1 param)
-			{ ET_ASSERT(o != nullptr); _target = etCreateObject<Invocation1Target<T, A1>>(o, m, param); }
+        {
+            ET_ASSERT(o != nullptr);
+            _target = std::unique_ptr<PureInvocationTarget>(etCreateObject<Invocation1Target<T, A1>>(o, m, param));
+        }
 
 		template <typename F, typename A1>
 		void setTarget(F func, A1 param)
-			{ _target = etCreateObject<DirectInvocation1Target<F, A1>>(func, param); }
+        {
+            _target = std::unique_ptr<PureInvocationTarget>(etCreateObject<DirectInvocation1Target<F, A1>>(func, param));
+        }
 		
 		template <typename T, typename A1>
 		void setParameter(A1 p)
 		{
 			ET_ASSERT(_target.valid());
-			(static_cast<Invocation1Target<T, A1>*>(_target.ptr()))->setParameter(p);
+			(static_cast<Invocation1Target<T, A1>*>(_target.get()))->setParameter(p);
 		}
 	};
 
@@ -257,14 +267,19 @@ namespace et
 
 		template <typename T, typename A1, typename A2>
 		void setTarget(T* o, void(T::*m)(A1, A2), A1 p1, A2 p2)
-			{ ET_ASSERT(o != nullptr); _target = etCreateObject<Invocation2Target<T, A1, A2>>(o, m, p1, p2); }
+        {
+            ET_ASSERT(o != nullptr);
+            _target = etCreateObject<Invocation2Target<T, A1, A2>>(o, m, p1, p2);
+        }
 
 		template <typename F, typename A1, typename A2>
 		void setTarget(F func, A1 param1, A2 param2)
-			{ _target = etCreateObject<DirectInvocation2Target<F, A1, A2>>(func, param1, param2); }
+        {
+            _target = std::unique_ptr<PureInvocationTarget>(etCreateObject<DirectInvocation2Target<F, A1, A2>>(func, param1, param2));
+        }
 		
 		template <typename T, typename A1, typename A2>
 		void setParameters(A1 p1, A2 p2)
-			{ (static_cast<Invocation2Target<T, A1, A2>*>(_target.ptr()))->setParameters(p1, p2); }
+			{ (static_cast<Invocation2Target<T, A1, A2>*>(_target.get()))->setParameters(p1, p2); }
 	};
 }
