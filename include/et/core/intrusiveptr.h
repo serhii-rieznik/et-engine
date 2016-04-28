@@ -7,17 +7,37 @@
 
 #pragma once
 
+#include <atomic>
+#include <type_traits>
+
 namespace et
 {
 #	define ET_DECLARE_POINTER(T)					using Pointer = et::IntrusivePtr<T>;
 	
 	ObjectFactory& sharedObjectFactory();
-	
-	typedef AtomicCounter Shared;
+    
+    class Shared
+    {
+    public:
+        size_t retain()
+            { return _retainCount.operator ++(); }
+        
+        size_t release()
+            { return _retainCount.operator --(); }
+        
+        size_t retainCount() const
+            { return _retainCount.load(); }
+        
+    private:
+        std::atomic<size_t> _retainCount;
+    };
 
 	template <typename T>
 	class IntrusivePtr
 	{
+        static_assert(std::is_base_of<Shared, T>::value,
+            "Intrusive pointer content must be derived from Shared class");
+        
 	public:
 		IntrusivePtr() = default;
 
@@ -88,8 +108,8 @@ namespace et
 		bool operator < (const IntrusivePtr& tr) const
 			{ return _data < tr._data; }
 		
-		AtomicCounterType referenceCount() const
-			{ return _data ? _data->atomicCounterValue() : 0; }
+		size_t retainCount() const
+			{ return _data ? _data->retainCount() : 0; }
 
 		IntrusivePtr<T>& operator = (const IntrusivePtr<T>& r)
 		{ 
@@ -107,13 +127,13 @@ namespace et
 		void reset(T* data) 
 		{
 			if (data == _data) return;
-
+            
 			if ((_data != nullptr) && (_data->release() == 0))
 				sharedObjectFactory().deleteObject<T>(_data);
+            
+            std::swap(_data, data);
 
-			_data = data;
-
-			if (_data)
+			if (_data != nullptr)
 				_data->retain();
 		}
 		

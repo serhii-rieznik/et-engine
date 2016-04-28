@@ -59,9 +59,9 @@ namespace et
 	private:
 		RenderContext* _rc = nullptr;
 		VertexDeclaration _decl;
-		AtomicBool _mapped;
 		size_t _dataSize = 0;
 		std::string _sourceObjectName;
-		BufferDrawType _drawType = BufferDrawType::Static;
+        std::atomic<bool> _mapped{false};
+        BufferDrawType _drawType = BufferDrawType::Static;
 	};
 }

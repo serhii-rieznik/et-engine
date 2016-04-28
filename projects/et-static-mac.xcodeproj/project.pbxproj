@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		6E954C811CD2610C00A12C68 /* context_osx.h in Headers */ = {isa = PBXBuildFile; fileRef = 6E954C801CD2610C00A12C68 /* context_osx.h */; };
+		6E954C851CD266C000A12C68 /* context_osx.mm in Sources */ = {isa = PBXBuildFile; fileRef = 6E954C841CD266C000A12C68 /* context_osx.mm */; };
 		6EBE211C1C66B8BE00AF7206 /* appevironment.h in Headers */ = {isa = PBXBuildFile; fileRef = 6EBE1F5D1C66B8BE00AF7206 /* appevironment.h */; };
 		6EBE211D1C66B8BE00AF7206 /* application.h in Headers */ = {isa = PBXBuildFile; fileRef = 6EBE1F5E1C66B8BE00AF7206 /* application.h */; };
 		6EBE211E1C66B8BE00AF7206 /* applicationdelegate.h in Headers */ = {isa = PBXBuildFile; fileRef = 6EBE1F5F1C66B8BE00AF7206 /* applicationdelegate.h */; };
@@ -23,7 +25,6 @@
 		6EBE21291C66B8BE00AF7206 /* cameraorbitcontroller.h in Headers */ = {isa = PBXBuildFile; fileRef = 6EBE1F6B1C66B8BE00AF7206 /* cameraorbitcontroller.h */; };
 		6EBE212A1C66B8BE00AF7206 /* frustum.h in Headers */ = {isa = PBXBuildFile; fileRef = 6EBE1F6C1C66B8BE00AF7206 /* frustum.h */; };
 		6EBE212B1C66B8BE00AF7206 /* animator.h in Headers */ = {isa = PBXBuildFile; fileRef = 6EBE1F6E1C66B8BE00AF7206 /* animator.h */; };
-		6EBE212C1C66B8BE00AF7206 /* atomiccounter.h in Headers */ = {isa = PBXBuildFile; fileRef = 6EBE1F6F1C66B8BE00AF7206 /* atomiccounter.h */; };
 		6EBE212D1C66B8BE00AF7206 /* autoptr.h in Headers */ = {isa = PBXBuildFile; fileRef = 6EBE1F701C66B8BE00AF7206 /* autoptr.h */; };
 		6EBE212E1C66B8BE00AF7206 /* autovalue.h in Headers */ = {isa = PBXBuildFile; fileRef = 6EBE1F711C66B8BE00AF7206 /* autovalue.h */; };
 		6EBE212F1C66B8BE00AF7206 /* base64.h in Headers */ = {isa = PBXBuildFile; fileRef = 6EBE1F721C66B8BE00AF7206 /* base64.h */; };
@@ -131,7 +132,6 @@
 		6EBE21971C66B8BE00AF7206 /* openglviewcontroller.h in Headers */ = {isa = PBXBuildFile; fileRef = 6EBE1FE21C66B8BE00AF7206 /* openglviewcontroller.h */; };
 		6EBE21981C66B8BE00AF7206 /* printer.h in Headers */ = {isa = PBXBuildFile; fileRef = 6EBE1FE31C66B8BE00AF7206 /* printer.h */; };
 		6EBE21991C66B8BE00AF7206 /* social.h in Headers */ = {isa = PBXBuildFile; fileRef = 6EBE1FE41C66B8BE00AF7206 /* social.h */; };
-		6EBE219A1C66B8BE00AF7206 /* glee.h in Headers */ = {isa = PBXBuildFile; fileRef = 6EBE1FE61C66B8BE00AF7206 /* glee.h */; };
 		6EBE219B1C66B8BE00AF7206 /* apiobject.h in Headers */ = {isa = PBXBuildFile; fileRef = 6EBE1FE81C66B8BE00AF7206 /* apiobject.h */; };
 		6EBE219C1C66B8BE00AF7206 /* framebuffer.h in Headers */ = {isa = PBXBuildFile; fileRef = 6EBE1FE91C66B8BE00AF7206 /* framebuffer.h */; };
 		6EBE219D1C66B8BE00AF7206 /* framebufferfactory.h in Headers */ = {isa = PBXBuildFile; fileRef = 6EBE1FEA1C66B8BE00AF7206 /* framebufferfactory.h */; };
@@ -252,7 +252,6 @@
 		6EBE22781C66B8BE00AF7206 /* platformtools.mac.mm in Sources */ = {isa = PBXBuildFile; fileRef = 6EBE20E21C66B8BE00AF7206 /* platformtools.mac.mm */; };
 		6EBE227B1C66B8BE00AF7206 /* rendercontext.mac.mm in Sources */ = {isa = PBXBuildFile; fileRef = 6EBE20E51C66B8BE00AF7206 /* rendercontext.mac.mm */; };
 		6EBE227D1C66B8BE00AF7206 /* tools.apple.mm in Sources */ = {isa = PBXBuildFile; fileRef = 6EBE20E71C66B8BE00AF7206 /* tools.apple.mm */; };
-		6EBE227E1C66B8BE00AF7206 /* atomiccounter.unix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6EBE20E91C66B8BE00AF7206 /* atomiccounter.unix.cpp */; };
 		6EBE227F1C66B8BE00AF7206 /* thread.unix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6EBE20EA1C66B8BE00AF7206 /* thread.unix.cpp */; };
 		6EBE228B1C66B8BE00AF7206 /* framebufferfactory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6EBE20F81C66B8BE00AF7206 /* framebufferfactory.cpp */; };
 		6EBE228C1C66B8BE00AF7206 /* indexarray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6EBE20F91C66B8BE00AF7206 /* indexarray.cpp */; };
@@ -292,6 +291,9 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		6E954C7F1CD25EEC00A12C68 /* context.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = context.h; sourceTree = "<group>"; };
+		6E954C801CD2610C00A12C68 /* context_osx.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = context_osx.h; sourceTree = "<group>"; };
+		6E954C841CD266C000A12C68 /* context_osx.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = context_osx.mm; sourceTree = "<group>"; };
 		6EBE15B11C66B4AD00AF7206 /* libet-static-mac.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libet-static-mac.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		6EBE1F5D1C66B8BE00AF7206 /* appevironment.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = appevironment.h; sourceTree = "<group>"; };
 		6EBE1F5E1C66B8BE00AF7206 /* application.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = application.h; sourceTree = "<group>"; };
@@ -309,7 +311,6 @@
 		6EBE1F6B1C66B8BE00AF7206 /* cameraorbitcontroller.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cameraorbitcontroller.h; sourceTree = "<group>"; };
 		6EBE1F6C1C66B8BE00AF7206 /* frustum.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = frustum.h; sourceTree = "<group>"; };
 		6EBE1F6E1C66B8BE00AF7206 /* animator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = animator.h; sourceTree = "<group>"; };
-		6EBE1F6F1C66B8BE00AF7206 /* atomiccounter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = atomiccounter.h; sourceTree = "<group>"; };
 		6EBE1F701C66B8BE00AF7206 /* autoptr.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = autoptr.h; sourceTree = "<group>"; };
 		6EBE1F711C66B8BE00AF7206 /* autovalue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = autovalue.h; sourceTree = "<group>"; };
 		6EBE1F721C66B8BE00AF7206 /* base64.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = base64.h; sourceTree = "<group>"; };
@@ -417,7 +418,6 @@
 		6EBE1FE21C66B8BE00AF7206 /* openglviewcontroller.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = openglviewcontroller.h; sourceTree = "<group>"; };
 		6EBE1FE31C66B8BE00AF7206 /* printer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = printer.h; sourceTree = "<group>"; };
 		6EBE1FE41C66B8BE00AF7206 /* social.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = social.h; sourceTree = "<group>"; };
-		6EBE1FE61C66B8BE00AF7206 /* glee.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = glee.h; sourceTree = "<group>"; };
 		6EBE1FE81C66B8BE00AF7206 /* apiobject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = apiobject.h; sourceTree = "<group>"; };
 		6EBE1FE91C66B8BE00AF7206 /* framebuffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = framebuffer.h; sourceTree = "<group>"; };
 		6EBE1FEA1C66B8BE00AF7206 /* framebufferfactory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = framebufferfactory.h; sourceTree = "<group>"; };
@@ -538,7 +538,6 @@
 		6EBE20E21C66B8BE00AF7206 /* platformtools.mac.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = platformtools.mac.mm; sourceTree = "<group>"; };
 		6EBE20E51C66B8BE00AF7206 /* rendercontext.mac.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = rendercontext.mac.mm; sourceTree = "<group>"; };
 		6EBE20E71C66B8BE00AF7206 /* tools.apple.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = tools.apple.mm; sourceTree = "<group>"; };
-		6EBE20E91C66B8BE00AF7206 /* atomiccounter.unix.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = atomiccounter.unix.cpp; sourceTree = "<group>"; };
 		6EBE20EA1C66B8BE00AF7206 /* thread.unix.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = thread.unix.cpp; sourceTree = "<group>"; };
 		6EBE20F81C66B8BE00AF7206 /* framebufferfactory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = framebufferfactory.cpp; sourceTree = "<group>"; };
 		6EBE20F91C66B8BE00AF7206 /* indexarray.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = indexarray.cpp; sourceTree = "<group>"; };
@@ -618,7 +617,6 @@
 				6EBE1FD01C66B8BE00AF7206 /* opengl */,
 				6EBE1FD31C66B8BE00AF7206 /* platform */,
 				6EBE1FD71C66B8BE00AF7206 /* platform-apple */,
-				6EBE1FE51C66B8BE00AF7206 /* platform-win */,
 				6EBE1FE71C66B8BE00AF7206 /* rendering */,
 				6EBE20031C66B8BE00AF7206 /* scene3d */,
 				6EBE20161C66B8BE00AF7206 /* sound */,
@@ -635,6 +633,7 @@
 				6EBE1F5F1C66B8BE00AF7206 /* applicationdelegate.h */,
 				6EBE1F601C66B8BE00AF7206 /* applicationnotifier.h */,
 				6EBE1F611C66B8BE00AF7206 /* backgroundthread.h */,
+				6E954C7F1CD25EEC00A12C68 /* context.h */,
 				6EBE1F621C66B8BE00AF7206 /* events.h */,
 				6EBE1F631C66B8BE00AF7206 /* events.inl.h */,
 				6EBE1F641C66B8BE00AF7206 /* invocation.h */,
@@ -662,7 +661,6 @@
 			isa = PBXGroup;
 			children = (
 				6EBE1F6E1C66B8BE00AF7206 /* animator.h */,
-				6EBE1F6F1C66B8BE00AF7206 /* atomiccounter.h */,
 				6EBE1F701C66B8BE00AF7206 /* autoptr.h */,
 				6EBE1F711C66B8BE00AF7206 /* autovalue.h */,
 				6EBE1F721C66B8BE00AF7206 /* base64.h */,
@@ -817,6 +815,7 @@
 			children = (
 				6EBE1FD81C66B8BE00AF7206 /* apple.h */,
 				6EBE1FD91C66B8BE00AF7206 /* applicationdelegate.h */,
+				6E954C801CD2610C00A12C68 /* context_osx.h */,
 				6EBE1FDA1C66B8BE00AF7206 /* embeddedapplication.h */,
 				6EBE1FDB1C66B8BE00AF7206 /* iap.h */,
 				6EBE1FDC1C66B8BE00AF7206 /* imagepicker.h */,
@@ -830,15 +829,6 @@
 			);
 			name = "platform-apple";
 			path = "et/platform-apple";
-			sourceTree = "<group>";
-		};
-		6EBE1FE51C66B8BE00AF7206 /* platform-win */ = {
-			isa = PBXGroup;
-			children = (
-				6EBE1FE61C66B8BE00AF7206 /* glee.h */,
-			);
-			name = "platform-win";
-			path = "et/platform-win";
 			sourceTree = "<group>";
 		};
 		6EBE1FE71C66B8BE00AF7206 /* rendering */ = {
@@ -1048,6 +1038,7 @@
 			children = (
 				6EBE20D41C66B8BE00AF7206 /* application.mac.mm */,
 				6EBE20D61C66B8BE00AF7206 /* embeddedapplication.mm */,
+				6E954C841CD266C000A12C68 /* context_osx.mm */,
 				6EBE20D71C66B8BE00AF7206 /* iap.apple.mm */,
 				6EBE20DA1C66B8BE00AF7206 /* input.mac.mm */,
 				6EBE20DB1C66B8BE00AF7206 /* ios.mm */,
@@ -1064,7 +1055,6 @@
 		6EBE20E81C66B8BE00AF7206 /* platform-unix */ = {
 			isa = PBXGroup;
 			children = (
-				6EBE20E91C66B8BE00AF7206 /* atomiccounter.unix.cpp */,
 				6EBE20EA1C66B8BE00AF7206 /* thread.unix.cpp */,
 			);
 			path = "platform-unix";
@@ -1175,6 +1165,7 @@
 				6EBE21B91C66B8BE00AF7206 /* elementcontainer.h in Headers */,
 				6EBE21B01C66B8BE00AF7206 /* vertexarrayobject.h in Headers */,
 				6EBE21CB1C66B8BE00AF7206 /* streamingthread.h in Headers */,
+				6E954C811CD2610C00A12C68 /* context_osx.h in Headers */,
 				6EBE21711C66B8BE00AF7206 /* vector3.h in Headers */,
 				6EBE215C1C66B8BE00AF7206 /* boundingbox.h in Headers */,
 				6EBE21301C66B8BE00AF7206 /* constants.h in Headers */,
@@ -1249,13 +1240,11 @@
 				6EBE217C1C66B8BE00AF7206 /* jpegloader.h in Headers */,
 				6EBE212B1C66B8BE00AF7206 /* animator.h in Headers */,
 				6EBE21C11C66B8BE00AF7206 /* renderableelement.h in Headers */,
-				6EBE212C1C66B8BE00AF7206 /* atomiccounter.h in Headers */,
 				6EBE23151C66C1C100AF7206 /* json.h in Headers */,
 				6EBE21841C66B8BE00AF7206 /* input.h in Headers */,
 				6EBE21891C66B8BE00AF7206 /* openglcaps.h in Headers */,
 				6EBE21531C66B8BE00AF7206 /* taskpool.h in Headers */,
 				6EBE21C61C66B8BE00AF7206 /* skeletonelement.h in Headers */,
-				6EBE219A1C66B8BE00AF7206 /* glee.h in Headers */,
 				6EBE218D1C66B8BE00AF7206 /* apple.h in Headers */,
 				6EBE21291C66B8BE00AF7206 /* cameraorbitcontroller.h in Headers */,
 				6EBE21991C66B8BE00AF7206 /* social.h in Headers */,
@@ -1377,6 +1366,7 @@
 				6EBE22A51C66B8BE00AF7206 /* scenematerial.cpp in Sources */,
 				6EBE225E1C66B8BE00AF7206 /* capabilities.cpp in Sources */,
 				6EBE22461C66B8BE00AF7206 /* stream.cpp in Sources */,
+				6E954C851CD266C000A12C68 /* context_osx.mm in Sources */,
 				6EBE22781C66B8BE00AF7206 /* platformtools.mac.mm in Sources */,
 				6EBE22AC1C66B8BE00AF7206 /* track.cpp in Sources */,
 				6EBE22501C66B8BE00AF7206 /* rectplacer.cpp in Sources */,
@@ -1432,7 +1422,6 @@
 				6EBE22911C66B8BE00AF7206 /* rendering.cpp in Sources */,
 				6EBE22581C66B8BE00AF7206 /* pvrdecompressor.cpp in Sources */,
 				6EBE223F1C66B8BE00AF7206 /* et.cpp in Sources */,
-				6EBE227E1C66B8BE00AF7206 /* atomiccounter.unix.cpp in Sources */,
 				6EBE223C1C66B8BE00AF7206 /* conversion.cpp in Sources */,
 				6EBE223E1C66B8BE00AF7206 /* dictionary.cpp in Sources */,
 				6EBE225A1C66B8BE00AF7206 /* textureloader.cpp in Sources */,

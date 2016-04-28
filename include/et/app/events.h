@@ -42,7 +42,7 @@ namespace et
 		virtual void receiverDisconnected(EventReceiver* receiver) = 0;
 		
 	protected:
-		AtomicBool _invoking;
+        std::atomic<bool> _invoking{false};
 	};
 	
 	class EventConnectionBase
@@ -66,7 +66,7 @@ namespace et
 			{ return false; }
 
 	protected:
-		AtomicBool _removed;
+        std::atomic<bool> _removed{false};
 	};
 
 	/*

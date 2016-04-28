@@ -119,10 +119,7 @@ float4 computeReflectionVector(const float4& incidence, const float4& normal, fl
     return defaultLightDirection();
 #else
     auto idealReflection = reflect(incidence, normal);
-	auto direction = randomVectorOnHemisphere(idealReflection, ggxDistribution, roughness);
-	if (direction.dot(normal) < 0.0f)
-		direction = reflect(direction, normal);
-	return direction;
+	return randomVectorOnHemisphere(idealReflection, ggxDistribution, roughness);
 #endif
 }
 

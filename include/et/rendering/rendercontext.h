@@ -45,7 +45,10 @@ namespace et
 		void init();
 		bool valid();
 		
-		const RenderContextParameters& parameters() const
+        RenderContextParameters& parameters()
+            { return _params; }
+        
+        const RenderContextParameters& parameters() const
 			{ return _params; }
 
 		const vec2i& size() const

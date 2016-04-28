@@ -25,8 +25,6 @@ namespace et
 		void update(float t);
 		float actualTime() const;
 
-		void retain();
-
 		void attachTimedObject(TimedObject* obj);
 		void detachTimedObject(TimedObject* obj);
 

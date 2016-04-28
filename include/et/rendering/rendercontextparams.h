@@ -44,23 +44,10 @@ namespace et
 		bool lockScreenScaleToInitial = true;
 		bool compatibilityProfile = false;
 		bool debugContext = false;
-        bool enableHighResolutionContext = true;
 
 		size_t swapInterval = 1;
         size_t supportedInterfaceOrientations = InterfaceOrientation_Any;
 
-		vec2i contextSize;
-		vec2i contextMinimumSize;
-		vec2i contextTargetVersion;
-
-		RenderContextParameters()
-		{
-#		if defined(ET_PLATFORM_IOS)
-			contextSize = nativeScreenSize();
-#		else
-			contextTargetVersion = vec2i(4, 5);
-			contextSize = vec2i(800, 600);
-#		endif
-		}
+		vec2i contextTargetVersion = vec2i(4, 5);
 	};
 }

@@ -126,7 +126,7 @@ void ObjectsCache::flush()
 		auto obj = lv.second.begin();
 		while (obj != lv.second.end())
 		{
-			if (obj->object->atomicCounterValue() == 1)
+			if (obj->object->retainCount() == 1)
 			{
 				obj = lv.second.erase(obj);
 				++objectsErased;

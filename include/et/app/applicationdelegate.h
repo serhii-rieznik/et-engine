@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include <et/app/events.h>
+#include <et/app/context.h>
 
 namespace et
 {
@@ -15,43 +15,6 @@ namespace et
 	struct RenderContextParameters;
 	template <typename T> struct vector2;
 	typedef vector2<int> vec2i;
-	
-	struct ApplicationIdentifier
-	{
-		std::string identifier;
-		std::string companyName;
-		std::string applicationName;
-		
-		ApplicationIdentifier() { }
-		
-		ApplicationIdentifier(const std::string& aIdentifier, const std::string& aCompanyName,
-			const std::string& aApplicationName) : identifier(aIdentifier), companyName(aCompanyName),
-			applicationName(aApplicationName) { }
-	};
-
-	enum WindowStyle : uint32_t
-	{
-		WindowStyle_Borderless = 0x00,
-		WindowStyle_Caption = 0x01,
-		WindowStyle_Sizable = 0x02,
-		WindowStyle_Hidden = 0x04
-	};
-	
-	enum class WindowSize : uint32_t
-	{
-		Predefined,
-		FillWorkarea,
-		Fullscreen
-	};
-	
-	struct ApplicationParameters
-	{
-		size_t windowStyle = WindowStyle_Caption;
-		WindowSize windowSize = WindowSize::Predefined;
-		bool keepWindowAspectOnResize = false;
-		bool shouldSuspendOnDeactivate = PlatformOptions::IsMobile;
-		bool shouldPreserveRenderContext = false;
-	};
 	
 	class IApplicationDelegate
 	{

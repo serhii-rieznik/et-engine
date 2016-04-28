@@ -6,12 +6,12 @@ using namespace demo;
 
 void MainController::setApplicationParameters(et::ApplicationParameters& p)
 {
-	p.windowStyle = WindowStyle_Sizable | WindowStyle_Caption;
+    p.context.style = ContextOptions::Style::Sizable | ContextOptions::Style::Caption;
+    p.context.size = 4 * et::currentScreen().frame.size() / 5;
 }
 
 void MainController::setRenderContextParameters(et::RenderContextParameters& params)
 {
-	params.contextSize = 4 * et::currentScreen().frame.size();
 	params.multisamplingQuality = MultisamplingQuality::Best;
 }
 

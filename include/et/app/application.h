@@ -9,6 +9,7 @@
 
 #include <et/core/singleton.h>
 #include <et/core/tools.h>
+#include <et/app/events.h>
 #include <et/app/runloop.h>
 #include <et/app/appevironment.h>
 #include <et/app/applicationdelegate.h>
@@ -42,13 +43,16 @@ namespace et
 		RunLoop& backgroundRunLoop()
 			{ return _backgroundThread.runLoop(); }
 		
-		size_t renderingContextHandle() const
-			{ return _renderingContextHandle; }
+		PlatformDependentContext context() const
+			{ return _context; }
 
 		Environment& environment()
 			{ return _env; }
 
-		const ApplicationParameters& parameters() const
+        ApplicationParameters& parameters()
+            { return _parameters; }
+        
+        const ApplicationParameters& parameters() const
 			{ return _parameters; }
 
 		size_t launchParamtersCount() const
@@ -145,7 +149,9 @@ namespace et
 		RenderContext* _renderContext = nullptr;
 		IApplicationDelegate* _delegate = nullptr;
 		
-		Environment _env;
+        PlatformDependentContext _context;
+        
+        Environment _env;
 		StandardPathResolver _standardPathResolver;
 		PathResolver::Pointer _customPathResolver;
 		
@@ -159,7 +165,6 @@ namespace et
 		std::atomic<bool> _active;
 		std::atomic<bool> _suspended;
 		
-		size_t _renderingContextHandle = 0;
 		uint64_t _lastQueuedTimeMSec = 0;
 		uint64_t _fpsLimitMSec = 15;
 		uint64_t _fpsLimitMSecFractPart = 0;

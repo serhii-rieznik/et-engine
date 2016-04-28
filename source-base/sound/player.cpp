@@ -145,7 +145,7 @@ void Player::pause()
 
 void Player::stop()
 {
-	if (atomicCounterValue() > 0)
+	if (retainCount() > 0)
 		manager().streamingThread().removePlayer(Player::Pointer(this));
 	
 	alSourceStop(_private->source);

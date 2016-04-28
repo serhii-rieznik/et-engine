@@ -53,7 +53,7 @@ void Application::loaded()
 	
 	NSMenu* applicationMenu = [[NSMenu allocWithZone:[NSMenu menuZone]] init];
 	
-	if ((application().parameters().windowStyle & WindowStyle_Sizable) == WindowStyle_Sizable)
+    if (application().parameters().context.style & ContextOptions::Style::Sizable)
 	{
 		NSMenuItem* fullScreen = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:@""
 			action:@selector(toggleFullScreen:) keyEquivalent:@"f"];

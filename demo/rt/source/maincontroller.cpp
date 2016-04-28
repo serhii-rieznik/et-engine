@@ -12,16 +12,14 @@ using namespace demo;
 
 void MainController::setApplicationParameters(et::ApplicationParameters& p)
 {
-	p.windowStyle |= WindowStyle_Sizable;
-	p.windowSize = WindowSize::Predefined;
+    p.context.style |= ContextOptions::Style::Sizable;
+    p.context.supportsHighResolution = true;
+    p.context.size = 4 * et::currentScreen().frame.size() / 5;
 }
 
 void MainController::setRenderContextParameters(et::RenderContextParameters& p)
 {
-	p.enableHighResolutionContext = true;
 	p.multisamplingQuality = MultisamplingQuality::None;
-	p.contextSize = vec2i(1024, 768); // 4 * et::currentScreen().frame.size() / 8;
-	p.enableHighResolutionContext = true;
 }
 
 void MainController::applicationDidLoad(et::RenderContext* rc)

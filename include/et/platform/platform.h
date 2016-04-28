@@ -110,6 +110,5 @@ namespace et
 		IsDesktop = 1,
 		IsMobile = 0,
 #	endif
-
 	};
 }

@@ -15,7 +15,7 @@ namespace et
 	{
 		class Mesh;
 		
-		class MeshDeformerCluster : public AtomicCounter
+		class MeshDeformerCluster : public Shared
 		{
 		public:
 			ET_DECLARE_POINTER(MeshDeformerCluster)
@@ -76,7 +76,7 @@ namespace et
 			size_t _linkTag = 0;
 		};
 		
-		class MeshDeformer : public AtomicCounter
+		class MeshDeformer : public Shared
 		{
 		public:
 			ET_DECLARE_POINTER(MeshDeformer)

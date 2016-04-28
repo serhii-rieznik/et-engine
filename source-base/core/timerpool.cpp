@@ -103,9 +103,3 @@ float TimerPool::actualTime() const
 {
 	return _owner->time();
 }
-
-void TimerPool::retain()
-{
-	Shared::retain();
-}
-

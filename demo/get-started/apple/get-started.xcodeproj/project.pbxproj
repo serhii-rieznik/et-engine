@@ -8,13 +8,13 @@
 
 /* Begin PBXBuildFile section */
 		5C3C50181C9EA09300C5B47A /* libet-static-mac.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5C3C50171C9EA08900C5B47A /* libet-static-mac.a */; };
+		6EBB83BA1CD25D1700552C1E /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 6EBB83B91CD25D1700552C1E /* libz.tbd */; };
 		A5A21CD01A6547C1004AD95C /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5A21CCD1A6547C1004AD95C /* main.cpp */; };
 		A5A21CD11A6547C1004AD95C /* MainController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5A21CCE1A6547C1004AD95C /* MainController.cpp */; };
 		A5A21E251A654892004AD95C /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A5A21E241A654892004AD95C /* OpenGL.framework */; };
 		A5A21E271A654895004AD95C /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A5A21E261A654895004AD95C /* AppKit.framework */; };
 		A5A21E291A654899004AD95C /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A5A21E281A654898004AD95C /* CoreGraphics.framework */; };
 		A5A21E2B1A6548A2004AD95C /* CoreVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A5A21E2A1A6548A2004AD95C /* CoreVideo.framework */; };
-		A5A21E551A65495B004AD95C /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = A5A21E541A65495B004AD95C /* libz.dylib */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -29,8 +29,9 @@
 
 /* Begin PBXFileReference section */
 		5C3C50121C9EA08900C5B47A /* et-static-mac.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "et-static-mac.xcodeproj"; path = "../../../projects/et-static-mac.xcodeproj"; sourceTree = "<group>"; };
+		6EBB83B81CD25CEB00552C1E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		6EBB83B91CD25D1700552C1E /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
 		A5A21CA91A65477B004AD95C /* get-started-osx.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "get-started-osx.app"; sourceTree = BUILT_PRODUCTS_DIR; };
-		A5A21CAD1A65477B004AD95C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		A5A21CCD1A6547C1004AD95C /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = main.cpp; path = ../source/main.cpp; sourceTree = "<group>"; };
 		A5A21CCE1A6547C1004AD95C /* MainController.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MainController.cpp; path = ../source/MainController.cpp; sourceTree = "<group>"; };
 		A5A21CCF1A6547C1004AD95C /* MainController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MainController.h; path = ../source/MainController.h; sourceTree = "<group>"; };
@@ -38,8 +39,6 @@
 		A5A21E261A654895004AD95C /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
 		A5A21E281A654898004AD95C /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
 		A5A21E2A1A6548A2004AD95C /* CoreVideo.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreVideo.framework; path = System/Library/Frameworks/CoreVideo.framework; sourceTree = SDKROOT; };
-		A5A21E521A654902004AD95C /* libxml2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libxml2.dylib; path = usr/lib/libxml2.dylib; sourceTree = SDKROOT; };
-		A5A21E541A65495B004AD95C /* libz.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.dylib; path = usr/lib/libz.dylib; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -47,8 +46,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6EBB83BA1CD25D1700552C1E /* libz.tbd in Frameworks */,
 				5C3C50181C9EA09300C5B47A /* libet-static-mac.a in Frameworks */,
-				A5A21E551A65495B004AD95C /* libz.dylib in Frameworks */,
 				A5A21E2B1A6548A2004AD95C /* CoreVideo.framework in Frameworks */,
 				A5A21E291A654899004AD95C /* CoreGraphics.framework in Frameworks */,
 				A5A21E271A654895004AD95C /* AppKit.framework in Frameworks */,
@@ -88,13 +87,11 @@
 		A5A21CAC1A65477B004AD95C /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
-				A5A21E541A65495B004AD95C /* libz.dylib */,
-				A5A21E521A654902004AD95C /* libxml2.dylib */,
+				6EBB83B91CD25D1700552C1E /* libz.tbd */,
 				A5A21E2A1A6548A2004AD95C /* CoreVideo.framework */,
 				A5A21E281A654898004AD95C /* CoreGraphics.framework */,
 				A5A21E261A654895004AD95C /* AppKit.framework */,
 				A5A21E241A654892004AD95C /* OpenGL.framework */,
-				A5A21CAD1A65477B004AD95C /* Info.plist */,
 			);
 			name = "Supporting Files";
 			path = GetStarted;
@@ -106,6 +103,7 @@
 				A5A21CCD1A6547C1004AD95C /* main.cpp */,
 				A5A21CCE1A6547C1004AD95C /* MainController.cpp */,
 				A5A21CCF1A6547C1004AD95C /* MainController.h */,
+				6EBB83B81CD25CEB00552C1E /* Info.plist */,
 			);
 			name = Source;
 			sourceTree = "<group>";
