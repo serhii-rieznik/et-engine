@@ -380,7 +380,7 @@ s3d::ElementContainer::Pointer OBJLoader::load(et::RenderContext* rc, MaterialPr
 void OBJLoader::loadAsync(et::RenderContext* rc, s3d::Storage& storage, ObjectsCache& cache)
 {
 	_rc = rc;
-    _thread = std::unique_ptr<OBJLoaderThread>(etCreateObject<OBJLoaderThread>(this, storage, cache));
+    _thread = UniquePtr<OBJLoaderThread>(etCreateObject<OBJLoaderThread>(this, storage, cache));
 }
 
 void OBJLoader::loadMaterials(const std::string& fileName, bool async, ObjectsCache& cache)

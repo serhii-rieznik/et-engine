@@ -55,7 +55,7 @@ TextureFactory::TextureFactory(RenderContext* rc) :
 {
 	ET_PIMPL_INIT(TextureFactory, this)
 	
-	_loadingThread = std::unique_ptr<TextureLoadingThread>(etCreateObject<TextureLoadingThread>(this));
+	_loadingThread = UniquePtr<TextureLoadingThread>(etCreateObject<TextureLoadingThread>(this));
 }
 
 TextureFactory::~TextureFactory()

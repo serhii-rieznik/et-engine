@@ -67,7 +67,7 @@ namespace et
 		void textureLoadingThreadDidLoadTextureData(TextureLoadingRequest* request);
 		
 	private:
-		std::unique_ptr<TextureLoadingThread> _loadingThread;
+		UniquePtr<TextureLoadingThread> _loadingThread;
 		
 		ET_DECLARE_PIMPL(TextureFactory, 64)
 

@@ -34,7 +34,7 @@ namespace et
 		virtual void invokeInMainRunLoop(float delay) = 0;
 
 	protected:
-        std::unique_ptr<PureInvocationTarget> _target;
+        UniquePtr<PureInvocationTarget> _target;
 	};
 	
 	class InvocationTask : public Task
@@ -222,7 +222,7 @@ namespace et
 		template <typename F>
 		void setTarget(F func)
         {
-            _target = std::unique_ptr<PureInvocationTarget>(etCreateObject<DirectInvocationTarget<F>>(func));
+            _target = UniquePtr<PureInvocationTarget>(etCreateObject<DirectInvocationTarget<F>>(func));
         }
 	};
 
@@ -239,13 +239,13 @@ namespace et
 		void setTarget(T* o, void(T::*m)(A1), A1 param)
         {
             ET_ASSERT(o != nullptr);
-            _target = std::unique_ptr<PureInvocationTarget>(etCreateObject<Invocation1Target<T, A1>>(o, m, param));
+            _target = UniquePtr<PureInvocationTarget>(etCreateObject<Invocation1Target<T, A1>>(o, m, param));
         }
 
 		template <typename F, typename A1>
 		void setTarget(F func, A1 param)
         {
-            _target = std::unique_ptr<PureInvocationTarget>(etCreateObject<DirectInvocation1Target<F, A1>>(func, param));
+            _target = UniquePtr<PureInvocationTarget>(etCreateObject<DirectInvocation1Target<F, A1>>(func, param));
         }
 		
 		template <typename T, typename A1>
@@ -275,7 +275,7 @@ namespace et
 		template <typename F, typename A1, typename A2>
 		void setTarget(F func, A1 param1, A2 param2)
         {
-            _target = std::unique_ptr<PureInvocationTarget>(etCreateObject<DirectInvocation2Target<F, A1, A2>>(func, param1, param2));
+            _target = UniquePtr<PureInvocationTarget>(etCreateObject<DirectInvocation2Target<F, A1, A2>>(func, param1, param2));
         }
 		
 		template <typename T, typename A1, typename A2>

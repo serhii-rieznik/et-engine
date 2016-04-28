@@ -96,7 +96,7 @@ namespace et
 
 		RenderContext* _rc = nullptr;
 		MaterialProvider* _materialProvider = nullptr;
-		std::unique_ptr<OBJLoaderThread> _thread;
+		UniquePtr<OBJLoaderThread> _thread;
 
 		std::string inputFileName;
 		std::string inputFilePath;

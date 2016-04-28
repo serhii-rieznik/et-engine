@@ -153,6 +153,18 @@ namespace et
 	template <typename Key, typename Value>
 	using UnorderedMap = std::unordered_map<Key, Value, std::hash<Key>, std::equal_to<Key>, 
 		SharedBlockAllocatorSTDProxy<std::pair<const Key, Value>>>;
+    
+    template <typename T>
+    struct DefaultDeleter
+    {
+        void operator () (T* ptr)
+        {
+            etDestroyObject<T>(ptr);
+        }
+    };
+    
+    template <typename T>
+    using UniquePtr = std::unique_ptr<T, DefaultDeleter<T>>;
 }
 
 #include <et/core/properties.h>
