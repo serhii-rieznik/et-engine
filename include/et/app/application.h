@@ -33,6 +33,9 @@ namespace et
 
 		IApplicationDelegate* delegate();
 		IApplicationDelegate* initApplicationDelegate();
+        
+        void initContext();
+        void freeContext();
 
 		RunLoop& mainRunLoop()
 			{ return _runLoop; }

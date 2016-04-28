@@ -412,7 +412,7 @@ void RenderState::textureDeleted(uint32_t deletedTexture)
 void RenderState::frameBufferDeleted(uint32_t buffer)
 {
 	if (_defaultFramebuffer.valid() && (_defaultFramebuffer->apiHandle() == buffer))
-		_defaultFramebuffer = Framebuffer::Pointer();
+        _defaultFramebuffer.reset(nullptr);
 	
 	if (_desc.cache.boundFramebuffer == buffer)
 		bindDefaultFramebuffer();

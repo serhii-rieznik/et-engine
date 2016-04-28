@@ -19,17 +19,20 @@ namespace et
     class Shared
     {
     public:
+        Shared() = default;
+        Shared(Shared&&) = delete;
+        Shared(const Shared&) = delete;
+        Shared& operator = (const Shared&) = delete;
+        
         size_t retain()
-            { return _retainCount.operator ++(); }
-        
+            { return ++_retainCount; }
         size_t release()
-            { return _retainCount.operator --(); }
-        
+            { return --_retainCount; }
         size_t retainCount() const
             { return _retainCount.load(); }
         
     private:
-        std::atomic<size_t> _retainCount;
+        std::atomic<size_t> _retainCount{0};
     };
 
 	template <typename T>
@@ -126,15 +129,27 @@ namespace et
 
 		void reset(T* data) 
 		{
-			if (data == _data) return;
+			if (data == _data)
+                return;
             
-			if ((_data != nullptr) && (_data->release() == 0))
-				sharedObjectFactory().deleteObject<T>(_data);
+            T* oldData = _data;
             
-            std::swap(_data, data);
-
+            _data = data;
 			if (_data != nullptr)
+            {
 				_data->retain();
+            }
+            
+            if (oldData != nullptr)
+            {
+                ET_ASSERT(oldData->retainCount() > 0);
+                
+                oldData->release();
+                if (oldData->retainCount() == 0)
+                {
+                    sharedObjectFactory().deleteObject<T>(oldData);
+                }
+            }
 		}
 		
 		void swap(IntrusivePtr<T>& t)

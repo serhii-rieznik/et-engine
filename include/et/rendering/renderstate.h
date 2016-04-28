@@ -191,17 +191,12 @@ namespace et
 	private:
 		friend class RenderContext;
 		
-		RenderState() :
-			_rc(nullptr) { }
-		
-		RenderState(const RenderState&) :
-			_rc(nullptr) { }
-		
-		RenderState& operator = (const RenderState&)
-			{ return *this; }
+		RenderState() = default;
+		RenderState(const RenderState&) = delete;
+        RenderState& operator = (const RenderState&) = delete;
 		
 	private:
-		RenderContext* _rc;
+        RenderContext* _rc = nullptr;
 		Framebuffer::Pointer _defaultFramebuffer;
 		Descriptor _desc;
 		recti _mainViewport = recti(0, 0, 0, 0);

@@ -17,6 +17,7 @@
 #include <et/core/base64.h>
 #include <et/core/json.h>
 #include <et/app/applicationnotifier.h>
+#include <et/platform-apple/context_osx.h>
 
 using namespace et;
 
@@ -36,6 +37,44 @@ using namespace et;
 /*
  * Application implementation
  */
+void Application::initContext()
+{
+    _context = ApplicationContextFactoryOSX().createContextWithOptions(_parameters.context);
+    
+    NSMenu* mainMenu = [[NSMenu allocWithZone:[NSMenu menuZone]] init];
+    NSMenuItem* applicationMenuItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] init];
+    [mainMenu addItem:applicationMenuItem];
+    [[NSApplication sharedApplication] setMainMenu:mainMenu];
+    
+    NSMenu* applicationMenu = [[NSMenu allocWithZone:[NSMenu menuZone]] init];
+    
+    if (_parameters.context.style & ContextOptions::Style::Sizable)
+    {
+        NSMenuItem* fullScreen = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:@""
+            action:@selector(toggleFullScreen:) keyEquivalent:@"f"];
+        [applicationMenu addItem:fullScreen];
+    }
+    
+    NSString* quitTitle = [NSString stringWithFormat:@"Quit %@", [[NSProcessInfo processInfo] processName]];
+    NSMenuItem* quitItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:quitTitle
+        action:@selector(terminate:) keyEquivalent:@"q"];
+    [applicationMenu addItem:quitItem];
+    
+    [applicationMenuItem setSubmenu:applicationMenu];
+    
+    [[NSApplication sharedApplication] setActivationPolicy:NSApplicationActivationPolicyRegular];
+    
+    (void)ET_OBJC_AUTORELEASE(mainMenu);
+    (void)ET_OBJC_AUTORELEASE(applicationMenuItem);
+    (void)ET_OBJC_AUTORELEASE(quitItem);
+    (void)ET_OBJC_AUTORELEASE(applicationMenu);
+}
+
+void Application::freeContext()
+{
+    ApplicationContextFactoryOSX().destroyContext(_context);
+}
+
 void Application::loaded()
 {
 	_lastQueuedTimeMSec = queryContiniousTimeInMilliSeconds();
@@ -46,34 +85,6 @@ void Application::loaded()
 	
 	_renderContext = etCreateObject<RenderContext>(parameters, this);
 	
-	NSMenu* mainMenu = [[NSMenu allocWithZone:[NSMenu menuZone]] init];
-	NSMenuItem* applicationMenuItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] init];
-	[mainMenu addItem:applicationMenuItem];
-	[[NSApplication sharedApplication] setMainMenu:mainMenu];
-	
-	NSMenu* applicationMenu = [[NSMenu allocWithZone:[NSMenu menuZone]] init];
-	
-    if (application().parameters().context.style & ContextOptions::Style::Sizable)
-	{
-		NSMenuItem* fullScreen = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:@""
-			action:@selector(toggleFullScreen:) keyEquivalent:@"f"];
-		[applicationMenu addItem:fullScreen];
-	}
-	
-	NSString* quitTitle = [NSString stringWithFormat:@"Quit %@", [[NSProcessInfo processInfo] processName]];
-	NSMenuItem* quitItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:quitTitle
-		action:@selector(terminate:) keyEquivalent:@"q"];
-	[applicationMenu addItem:quitItem];
-	
-	[applicationMenuItem setSubmenu:applicationMenu];
-	
-	[[NSApplication sharedApplication] setActivationPolicy:NSApplicationActivationPolicyRegular];
-
-	(void)ET_OBJC_AUTORELEASE(mainMenu);
-	(void)ET_OBJC_AUTORELEASE(applicationMenuItem);
-	(void)ET_OBJC_AUTORELEASE(quitItem);
-	(void)ET_OBJC_AUTORELEASE(applicationMenu);
-	
 	_runLoop.updateTime(_lastQueuedTimeMSec);
 	enterRunLoop();
 }
@@ -82,6 +93,7 @@ Application::~Application()
 {
 	platformFinalize();
 	exitRunLoop();
+    freeContext();
 }
 
 void Application::quit(int code)

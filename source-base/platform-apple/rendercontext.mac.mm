@@ -17,7 +17,6 @@
 
 #include <et/platform/platformtools.h>
 #include <et/platform-apple/apple.h>
-#include <et/platform-apple/context_osx.h>
 #include <et/core/threading.h>
 #include <et/opengl/opengl.h>
 #include <et/opengl/openglcaps.h>
@@ -205,8 +204,8 @@ RenderContextPrivate::RenderContextPrivate(RenderContext*, RenderContextParamete
 	}
 	(void)ET_OBJC_AUTORELEASE(pixelFormat);
     
-    ApplicationContextFactoryOSX f;
-    auto ctx = f.createContextWithOptions(appParams.context);
+    application().initContext();
+    const auto& ctx = application().context();
     
     NSWindow* mainWindow = (NSWindow*)CFBridgingRelease(ctx.pointers[0]);
     NSWindowController* mainWindowController = (NSWindowController*)CFBridgingRelease(ctx.pointers[1]);
