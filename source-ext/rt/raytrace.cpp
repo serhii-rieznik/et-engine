@@ -12,27 +12,18 @@
 #include <et/app/application.h>
 #include <et/camera/camera.h>
 
-const et::rt::float_type et::rt::Constants::epsilon = 0.00025f;
-const et::rt::float_type et::rt::Constants::minusEpsilon = -epsilon;
-const et::rt::float_type et::rt::Constants::onePlusEpsilon = 1.0f + epsilon;
-const et::rt::float_type et::rt::Constants::epsilonSquared = epsilon * epsilon;
-const et::rt::float_type et::rt::Constants::initialSplitValue = std::numeric_limits<float>::max();
-
 class et::RaytracePrivate
 {
 public:
 	RaytracePrivate(Raytrace* owner);
 	~RaytracePrivate();
 
-	void gatherThreadFunction(uint32_t index);
-    void shootingThreadFunction(uint32_t index);
-    void testThreadFunction(uint32_t index);
+	void backwardPathTraceThreadFunction(uint32_t index);
+    void forwardPathTraceThreadFunction(uint32_t index);
+    void visualizeDistributionThreadFunction(uint32_t index);
     
 	void emitWorkerThreads();
 	void stopWorkerThreads();
-
-	bool finalizeShooting(const rt::float4& cameraPosition, const rt::float4& hitPoint,
-        const rt::float4& color, vec4& outColor, vec2i& pixel, uint32_t threadId);
 
 	void buildMaterialAndTriangles(s3d::Scene::Pointer);
 
@@ -55,6 +46,8 @@ public:
 
 	void fillRegionWithColor(const rt::Region&, const vec4& color);
 	void renderTriangle(const rt::Triangle&);
+    
+    void flushToForwardTraceBuffer(const Vector<rt::float4>&, size_t);
 
 public:
 	Raytrace* owner = nullptr;
@@ -79,9 +72,9 @@ public:
 	std::atomic<uint64_t> startTime;
 	std::atomic<uint64_t> elapsedTime;
 
-	Vector<rt::float4> imagePlane;
-	std::mutex imagePlaneLock;
-	std::atomic<uint64_t> raysShot;
+	Vector<rt::float4> forwardTraceBuffer;
+	std::mutex forwardTraceBufferMutex;
+    size_t totalRaysShot = 0;
 };
 
 using namespace et;
@@ -171,10 +164,9 @@ void RaytracePrivate::emitWorkerThreads()
 	startTime = queryContiniousTimeInMilliSeconds();
 	elapsedTime = 0;
 
-	raysShot = 0;
-	imagePlane.clear();
-	imagePlane.resize(viewportSize.square());
-	std::fill(imagePlane.begin(), imagePlane.end(), rt::float4(0.0f, 0.0f, 0.0f, 0.0f));
+	forwardTraceBuffer.clear();
+	forwardTraceBuffer.resize(viewportSize.square());
+	std::fill(forwardTraceBuffer.begin(), forwardTraceBuffer.end(), rt::float4(0.0f, 0.0f, 0.0f, 0.0f));
 
 	uint64_t totalRays = static_cast<uint64_t>(viewportSize.square()) * options.raysPerPixel;
 	log::info("Rendering started: %d x %d, %llu rpp, %llu total rays",
@@ -183,11 +175,14 @@ void RaytracePrivate::emitWorkerThreads()
 	running = true;
 	threadCounter.store(std::thread::hardware_concurrency());
 	for (uint32_t i = 0, e = std::thread::hardware_concurrency(); i < e; ++i)
+    // uint32_t i = 0;
 	{
 #   if (ET_RT_EVALUATE_DISTRIBUTION)
-        workerThreads.emplace_back(&RaytracePrivate::testThreadFunction, this, i);
+        workerThreads.emplace_back(&RaytracePrivate::visualizeDistributionThreadFunction, this, i);
+#   elif (ET_RT_TEST_FORWARD_PATH_TRACING)
+        workerThreads.emplace_back(&RaytracePrivate::forwardPathTraceThreadFunction, this, i);
 #   else
-		workerThreads.emplace_back(&RaytracePrivate::gatherThreadFunction, this, i);
+        workerThreads.emplace_back(&RaytracePrivate::backwardPathTraceThreadFunction, this, i);
 #   endif
 	}
 }
@@ -387,97 +382,9 @@ rt::Region RaytracePrivate::getNextRegion()
 }
 
 /*
- * Raytrace function
+ * Raytrace functions
  */
-bool RaytracePrivate::finalizeShooting(const rt::float4& cameraPosition, const rt::float4& hitPoint,
-	const rt::float4& color, vec4& outColor, vec2i& pixel, uint32_t threadId)
-{
-	rt::float4 viewDirection = hitPoint - cameraPosition;
-
-	if (viewDirection.dot(rt::float4(camera.direction(), 0.0f)) >= 0.0f)
-		return false;
-
-	viewDirection.normalize();
-	rt::Ray viewRay(cameraPosition, viewDirection);
-	auto ct = kdTree.traverse(viewRay);
-	if ((ct.intersectionPoint - hitPoint).dotSelf() > rt::Constants::epsilon)
-		return false;
-
-	vec3 hp = hitPoint.toVec4().xyz();
-	auto projected = (0.5f * camera.project(hp).xy() + vec2(0.5f)) * vector2ToFloat(viewportSize);
-
-	pixel = vec2i(static_cast<int>(projected.x), static_cast<int>(projected.y));
-	if ((pixel.x < 0) || (pixel.y < 0) || (pixel.x >= viewportSize.x) || (pixel.y >= viewportSize.y))
-		return false;
-
-	rt::float4 putColor = color;
-	putColor = putColor * rt::float4(1.0f, 1.0f, 1.0f, 0.0f) + rt::float4(0.0f, 0.0f, 0.0f, 1.0f);
-
-	{
-		std::unique_lock<std::mutex> lock(imagePlaneLock);
-		auto& sampled = imagePlane[pixel.x + pixel.y * viewportSize.x];
-		sampled = sampled.maxWith(color);
-		outColor = sampled.toVec4();// / sampled
-		outColor.w = 1.0f;
-	}
-	return true;
-}
-
-void RaytracePrivate::shootingThreadFunction(unsigned index)
-{
-/*
-	const int_fast32_t maxBounces = 31;
-	rt::float4 cameraPosition(camera.position(), 0.0f);
-
-	while (running)
-	{
-		auto bc = rt::randomBarycentric();
-		const auto& emitterTriangle = lightTriangles[rand() % lightTriangles.size()];
-		auto currentPoint = emitterTriangle.interpolatedPosition(bc);
-		auto originalNormal = emitterTriangle.interpolatedNormal(bc);
-		const auto& lightMaterial = materials[emitterTriangle.materialIndex];
-
-		rt::float4 radiance = lightMaterial.emissive * 0.05f;
-
-		vec2i pixel;
-		vec4 outColor;
-		if (finalizeShooting(cameraPosition, currentPoint, radiance, outColor, pixel))
-		{
-			owner->output(pixel, outColor);
-		}
-
-		auto currentDirection = rt::randomVectorOnHemisphere(originalNormal, HALF_PI);
-		rt::Ray currentRay(currentPoint + currentDirection * rt::Constants::epsilon, currentDirection);
-
-		radiance *= currentDirection.dot(originalNormal);
-
-		bool shouldFinalize = true;
-		for (int_fast32_t bounce = 0; bounce < maxBounces; ++bounce)
-		{
-			auto trav = kdTree.traverse(currentRay);
-			if (trav.triangleIndex == InvalidIndex)
-			{
-				shouldFinalize = bounce > 0;
-				break;
-			}
-
-			const auto& tri = kdTree.triangleAtIndex(trav.triangleIndex);
-			const auto& mat = materials[tri.materialIndex];
-			auto hitNormal = tri.interpolatedNormal(trav.intersectionPointBarycentric);
-			auto incidence = currentRay.direction;
-			radiance *= 1.0f; // rt::PathTraceIntegrator::computeBackward(hitNormal, mat, incidence, currentRay.direction);
-			currentRay.origin = trav.intersectionPoint + currentRay.direction * rt::Constants::epsilon;
-		}
-		++raysShot;
-		if (shouldFinalize && finalizeShooting(cameraPosition, currentRay.origin, radiance, outColor, pixel))
-		{
-			owner->output(pixel, outColor);
-		}
-	}
-*/
-}
-
-void RaytracePrivate::testThreadFunction(unsigned index)
+void RaytracePrivate::visualizeDistributionThreadFunction(uint32_t index)
 {
 	const size_t sampleTestCount = 100000000;
 	const size_t renderTestCount = 1000000;
@@ -549,7 +456,85 @@ void RaytracePrivate::testThreadFunction(unsigned index)
     }
 }
 
-void RaytracePrivate::gatherThreadFunction(uint32_t threadId)
+void RaytracePrivate::forwardPathTraceThreadFunction(uint32_t index)
+{
+    if (lightTriangles.empty())
+    {
+        log::error("No light sources found in scene");
+        return;
+    }
+    
+    Vector<rt::float4> localBuffer(viewportSize.square(), rt::float4(0.0f));
+    
+    auto put = [this, &localBuffer](const rt::float4& pt, const rt::float4& color)
+    {
+        rt::float4 cameraPosition(camera.position(), 0.0f);
+        rt::float4 directionToPoint = pt - cameraPosition;
+        directionToPoint.normalize();
+        
+        rt::Ray testRay(cameraPosition, directionToPoint);
+        auto hit = kdTree.traverse(testRay);
+        if ((hit.intersectionPoint - pt).dotSelf() <= rt::Constants::epsilonSquared)
+        {
+            auto projected = camera.project(pt.toVec4().xyz());
+            if ((std::abs(projected.x) <= 1.0f) && (std::abs(projected.y) <= 1.0f) && (std::abs(projected.z) <= 1.0f))
+            {
+                projected = (projected * 0.5f + vec3(0.5f)) * vec3(vector2ToFloat(viewportSize), 1.0f);
+                vec2i vp(static_cast<int>(projected.x), static_cast<int>(projected.y));
+                auto& sample = localBuffer[vp.x + vp.y * viewportSize.x];
+                sample += color * rt::float4(1.0f, 1.0f, 1.0f, 0.0f) + rt::float4(0.0f, 0.0f, 0.0f, 1.0f);
+            }
+        }
+    };
+    
+    size_t raysShot = 0;
+    size_t raysToFlush = 256;
+    while (running)
+    {
+        const auto& sourceTriangle = lightTriangles.at(rand() % lightTriangles.size());
+        rt::float4 bc = rt::randomBarycentric();
+        rt::float4 sourceNormal = sourceTriangle.interpolatedNormal(bc);
+        rt::float4 sourcePoint = sourceTriangle.interpolatedPosition(bc) + sourceNormal * rt::Constants::epsilonSquared;
+        
+        rt::Ray currentRay(sourcePoint, rt::randomVectorOnHemisphere(sourceNormal, rt::uniformDistribution));
+        rt::float4 color = materials[sourceTriangle.materialIndex].emissive;
+        color *= currentRay.direction.dot(sourceNormal);
+        
+        const size_t maxBonces = 8;
+        for (size_t bounce = 0; bounce < maxBonces; ++bounce)
+        {
+            auto hit = kdTree.traverse(currentRay);
+            if (hit.triangleIndex == InvalidIndex)
+            {
+                put(currentRay.origin, color);
+                break;
+            }
+            
+            const auto& tri = kdTree.triangleAtIndex(hit.triangleIndex);
+            const auto& mat = materials.at(tri.materialIndex);
+            rt::float4 nrm = tri.interpolatedNormal(hit.intersectionPointBarycentric);
+            
+            float cosTheta = std::max(0.0f, -nrm.dot(currentRay.direction));
+            color *= mat.diffuse * cosTheta / PI;
+            
+            put(hit.intersectionPoint, color);
+            
+            currentRay.origin = hit.intersectionPoint;
+            currentRay.direction = rt::randomVectorOnHemisphere(nrm, rt::uniformDistribution);
+            
+            color *= nrm.dot(currentRay.direction) / PI;
+        }
+
+        if (++raysShot == raysToFlush)
+        {
+            flushToForwardTraceBuffer(localBuffer, raysToFlush);
+            std::fill(localBuffer.begin(), localBuffer.end(), rt::float4(0.0f));
+            raysShot = 0;
+        }
+    }
+}
+
+void RaytracePrivate::backwardPathTraceThreadFunction(uint32_t threadId)
 {
 	while (running)
 	{
@@ -671,7 +656,7 @@ void RaytracePrivate::estimateRegionsOrder()
 			estimatedColor += raytracePixel(px, 1, bounces);
 			r.estimatedBounces += bounces;
 		}
-		//*
+		/*
 		const rt::float_type maxPossibleBounces = float(rt::PathTraceIntegrator::MaxTraverseDepth);
 		rt::float_type aspect = (maxPossibleBounces - float(r.estimatedBounces)) / maxPossibleBounces;
 		vec4 estimatedDensity = vec4(1.0f - 0.5f * aspect * aspect, 1.0f);
@@ -792,4 +777,36 @@ void RaytracePrivate::renderTriangle(const rt::Triangle& tri)
 	renderLine(c0, c1, lineColor);
 	renderLine(c1, c2, lineColor);
 	renderLine(c2, c0, lineColor);
+}
+
+void RaytracePrivate::flushToForwardTraceBuffer(const Vector<rt::float4>& localBuffer, size_t raysToFlush)
+{
+    std::lock_guard<std::mutex> lock(forwardTraceBufferMutex);
+    
+    float rsScale = 1.0f / static_cast<float>(++totalRaysShot);
+    
+    auto src = localBuffer.data();
+    auto dst = forwardTraceBuffer.data();
+    for (size_t i = 0; i < forwardTraceBuffer.size(); ++i, ++dst, ++src)
+    {
+        *dst += *src;
+        
+        vec4 output = dst->toVec4();
+        if (output.w > 0.0f)
+        {
+            output *= rsScale;
+            
+#       if (ET_RT_ENABLE_GAMMA_CORRECTION)
+            output.x = std::pow(output.x, 1.0f / 2.2f);
+            output.y = std::pow(output.y, 1.0f / 2.2f);
+            output.z = std::pow(output.z, 1.0f / 2.2f);
+            ET_ASSERT(!isnan(output.x));
+            ET_ASSERT(!isnan(output.y));
+            ET_ASSERT(!isnan(output.z));
+#       endif
+            
+            vec2i px(static_cast<int>(i % viewportSize.x), static_cast<int>(i / viewportSize.x));
+            owner->output(px, output);
+        }
+    }
 }

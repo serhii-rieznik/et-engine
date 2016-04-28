@@ -222,8 +222,8 @@ float4 AmbientOcclusionIntegrator::gather(const Ray& inRay, size_t depth, size_t
 	const auto& tri = tree.triangleAtIndex(hit0.triangleIndex);
 	float4 surfaceNormal = tri.interpolatedNormal(hit0.intersectionPointBarycentric);
 
-	float4 nextOrigin = hit0.intersectionPoint + surfaceNormal * Constants::epsilon;
 	float4 nextDirection = randomVectorOnHemisphere(surfaceNormal, uniformDistribution);
+    float4 nextOrigin = hit0.intersectionPoint + nextDirection * Constants::epsilon;
 
 	if (tree.traverse(Ray(nextOrigin, nextDirection)).triangleIndex == InvalidIndex)
 	{

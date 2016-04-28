@@ -383,12 +383,12 @@ KDTree::TraverseResult KDTree::traverse(const Ray& ray)
 				{
 					float4 tvec = ray.origin - data.v0;
                     float u = tvec.dot(pvec) / det;
-					if ((u >= 0.0f) && (u <= 1.0f))
+                    if ((u >= 0.0f) && (u <= Constants::onePlusEpsilon))
 					{
 						float4 qvec = tvec.crossXYZ(data.edge1to0);
                         float v = ray.direction.dot(qvec) / det;
                         float uv = u + v;
-						if ((v >= 0.0f) && (uv <= 1.0f))
+						if ((v >= 0.0f) && (uv <= Constants::onePlusEpsilon))
 						{
 							float_type intersectionDistance = data.edge2to0.dot(qvec) / det;
 							if ((intersectionDistance <= minDistance) && (intersectionDistance <= tFar) && (intersectionDistance > 0.0f))

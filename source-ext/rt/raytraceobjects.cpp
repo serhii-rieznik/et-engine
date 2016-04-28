@@ -11,22 +11,28 @@
 namespace et {
 namespace rt {
 
-float lambert(const float4& n, const float4& Wi, const float4& Wo, float r)
-{
-	// brdf = 1.0f / PI;
-	// pdf = n.dot(Wo) / PI;
-	return 1.0f / std::max(Constants::epsilon, n.dot(Wo));
-}
+const float_type Constants::epsilon = 0.001f;
+const float_type Constants::minusEpsilon = -epsilon;
+const float_type Constants::onePlusEpsilon = 1.0f + epsilon;
+const float_type Constants::epsilonSquared = epsilon * epsilon;
+const float_type Constants::initialSplitValue = std::numeric_limits<float>::max();
 
-float smithGGX(float t, float rSq)
+inline float G_ggx(float t, float rSq)
 {
 	t *= t;
 	return 2.0f / (1.0f + std::hypot(1.0f, rSq * (1.0f - t) / t));
 }
 
-float D_ggx(float rSq, float cosTheta)
+inline float D_ggx(float rSq, float cosTheta)
 {
 	return rSq / (PI * sqr(cosTheta * cosTheta * (rSq - 1.0f) + 1.0f));
+}
+
+float lambert(const float4& n, const float4& Wi, const float4& Wo, float r)
+{
+    // brdf = 1.0f / PI;
+    // pdf = n.dot(Wo) / PI;
+    return 1.0f / std::max(Constants::epsilon, n.dot(Wo));
 }
 
 float reflectionMicrofacet(const float4& n, const float4& Wi, const float4& Wo, float r, float f)
@@ -41,8 +47,8 @@ float reflectionMicrofacet(const float4& n, const float4& Wi, const float4& Wo, 
 	float NdotH = n.dot(h);
 	float rSq = r * r + Constants::epsilon;
 
-	float g1 = smithGGX(NdotI, rSq) * float(HdotI / NdotI > 0.0f);
-	float g2 = smithGGX(NdotO, rSq) * float(HdotO / NdotO > 0.0f);
+	float g1 = G_ggx(NdotI, rSq) * float(HdotI / NdotI > 0.0f);
+	float g2 = G_ggx(NdotO, rSq) * float(HdotO / NdotO > 0.0f);
 	float g = g1 * g2;
 	ET_ASSERT(!isnan(g));
 
@@ -68,8 +74,8 @@ float refractionMicrofacet(const float4& n, const float4& Wi, const float4& Wo, 
 	float HdotI = h.dot(Wi);
 	float rSq = r * r + Constants::epsilon;
     
-	float g1 = smithGGX(NdotI, rSq) * float(HdotI / NdotI > 0.0f);
-	float g2 = smithGGX(NdotO, rSq) * float(HdotO / NdotO > 0.0f);
+	float g1 = G_ggx(NdotI, rSq) * float(HdotI / NdotI > 0.0f);
+	float g2 = G_ggx(NdotO, rSq) * float(HdotO / NdotO > 0.0f);
 	float g = g1 * g2;
 	ET_ASSERT(!isnan(g));
 
@@ -89,11 +95,11 @@ float refractionMicrofacet(const float4& n, const float4& Wi, const float4& Wo, 
 const float4& defaultLightDirection()
 {
 	static float4 d(0.0f, 1.0f, 1.0f, 0.0f);
-	static bool n = true;
-	if (n)
+	static bool shouldNormalize = true;
+	if (shouldNormalize)
 	{
 		d.normalize();
-		n = false;
+		shouldNormalize = false;
 	}
 	return d;
 }
@@ -125,6 +131,69 @@ float4 computeRefractionVector(const float4& Wi, const float4& n, float_type eta
 {
     auto idealRefraction = Wi * eta - n * (cosThetaI * eta - cosThetaT);
 	return randomVectorOnHemisphere(idealRefraction, ggxDistribution, roughness);
+}
+
+bool rayToBoundingBox(const Ray& r, const BoundingBox& box, float& tNear, float& tFar)
+{
+    float4 bounds[2] = { box.minVertex(), box.maxVertex() };
+    
+    float_type tmin, tmax, tymin, tymax, tzmin, tzmax;
+    
+    if (r.direction.cX() >= 0)
+    {
+        tmin = (bounds[0].cX() - r.origin.cX()) / r.direction.cX() - Constants::epsilon;
+        tmax = (bounds[1].cX() - r.origin.cX()) / r.direction.cX() + Constants::epsilon;
+    }
+    else
+    {
+        tmin = (bounds[1].cX() - r.origin.cX()) / r.direction.cX() - Constants::epsilon;
+        tmax = (bounds[0].cX() - r.origin.cX()) / r.direction.cX() + Constants::epsilon;
+    }
+    
+    if (r.direction.cY() >= 0)
+    {
+        tymin = (bounds[0].cY() - r.origin.cY()) / r.direction.cY() - Constants::epsilon;
+        tymax = (bounds[1].cY() - r.origin.cY()) / r.direction.cY() + Constants::epsilon;
+    }
+    else
+    {
+        tymin = (bounds[1].cY() - r.origin.cY()) / r.direction.cY() - Constants::epsilon;
+        tymax = (bounds[0].cY() - r.origin.cY()) / r.direction.cY() + Constants::epsilon;
+    }
+    
+    if ((tmin > tymax) || (tymin > tmax))
+        return false;
+    
+    if (tymin > tmin)
+        tmin = tymin;
+    
+    if (tymax < tmax)
+        tmax = tymax;
+    
+    if (r.direction.cZ() >= 0)
+    {
+        tzmin = (bounds[0].cZ() - r.origin.cZ()) / r.direction.cZ() - Constants::epsilon;
+        tzmax = (bounds[1].cZ() - r.origin.cZ()) / r.direction.cZ() + Constants::epsilon;
+    }
+    else
+    {
+        tzmin = (bounds[1].cZ() - r.origin.cZ()) / r.direction.cZ() - Constants::epsilon;
+        tzmax = (bounds[0].cZ() - r.origin.cZ()) / r.direction.cZ() + Constants::epsilon;
+    }
+    
+    if ((tmin > tzmax) || (tzmin > tmax))
+        return false;
+    
+    if (tzmin > tmin)
+        tmin = tzmin;
+    
+    if (tzmax < tmax)
+        tmax = tzmax;
+    
+    tNear = tmin;
+    tFar = tmax;
+    
+    return tmin <= tmax;
 }
 
 }

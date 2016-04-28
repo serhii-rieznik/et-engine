@@ -17,6 +17,7 @@ namespace et
 #		define ET_RT_EVALUATE_DISTRIBUTION				0
 #		define ET_RT_ENABLE_GAMMA_CORRECTION			1
 #		define ET_RT_VISUALIZE_BRDF						0
+#       define ET_RT_TEST_FORWARD_PATH_TRACING          0
 
 		using float_type = float;
 		using float3 = vector3<float_type>;
@@ -154,9 +155,7 @@ namespace et
 			float4 edge2to0;
 
 			IntersectionData(const float4& v, const float4& e1, const float4& e2) :
-				v0(v), edge1to0(e1), edge2to0(e2)
-			{
-			}
+				v0(v), edge1to0(e1), edge2to0(e2) { }
 		};
 
 		struct ET_ALIGNED(16) BoundingBox
@@ -164,14 +163,10 @@ namespace et
 			float4 center = float4(0.0f);
 			float4 halfSize = float4(0.0f);
 
-			BoundingBox()
-			{
-			}
+            BoundingBox() = default;
 
 			BoundingBox(const float4& c, const float4& hs) :
-				center(c), halfSize(hs)
-			{
-			}
+				center(c), halfSize(hs) { }
 
 			BoundingBox(const float4& minVertex, const float4& maxVertex, int)
 			{
@@ -180,14 +175,10 @@ namespace et
 			}
 
 			float4 minVertex() const
-			{
-				return center - halfSize;
-			}
+                { return center - halfSize; }
 
 			float4 maxVertex() const
-			{
-				return center + halfSize;
-			}
+                { return center + halfSize; }
 
 			float_type square() const
 			{
@@ -203,22 +194,18 @@ namespace et
 			};
 		};
 
-		struct Ray
+		struct ET_ALIGNED(16) Ray
 		{
 			float4 origin;
 			float4 direction;
 
-			Ray() {}
+            Ray() = default;
 
 			Ray(const float4& o, const float4& d) :
-				origin(o), direction(d)
-			{
-			}
+				origin(o), direction(d) { }
 
 			Ray(const ray3d& r) :
-				origin(r.origin, 1.0f), direction(r.direction, 0.0f)
-			{
-			}
+				origin(r.origin, 1.0f), direction(r.direction, 0.0f) { }
 		};
 
 		struct Region
@@ -301,132 +288,17 @@ namespace et
 			return v - two * n * v.dotVector(n);
 		}
 
-		inline bool pointInsideBoundingBox(const float4& p, const BoundingBox& box)
-		{
-			float4 lower = box.minVertex();
+        bool rayToBoundingBox(const Ray& r, const BoundingBox& box, float& tNear, float& tFar);
 
-			if ((p.cX() < lower.cX() - Constants::epsilon) ||
-				(p.cY() < lower.cY() - Constants::epsilon) ||
-				(p.cZ() < lower.cZ() - Constants::epsilon)) return false;
-
-			float4 upper = box.maxVertex();
-
-			if ((p.cX() > upper.cX() + Constants::epsilon) ||
-				(p.cY() > upper.cY() + Constants::epsilon) ||
-				(p.cZ() > upper.cZ() + Constants::epsilon)) return false;
-
-			return true;
-		}
-
-		inline bool rayToBoundingBox(const Ray& r, const BoundingBox& box, float& tNear, float& tFar)
-		{
-			float4 bounds[2] = { box.minVertex(), box.maxVertex() };
-
-			float_type tmin, tmax, tymin, tymax, tzmin, tzmax;
-
-			if (r.direction.cX() >= 0)
-			{
-				tmin = (bounds[0].cX() - r.origin.cX()) / r.direction.cX() - Constants::epsilon;
-				tmax = (bounds[1].cX() - r.origin.cX()) / r.direction.cX() + Constants::epsilon;
-			}
-			else
-			{
-				tmin = (bounds[1].cX() - r.origin.cX()) / r.direction.cX() - Constants::epsilon;
-				tmax = (bounds[0].cX() - r.origin.cX()) / r.direction.cX() + Constants::epsilon;
-			}
-
-			if (r.direction.cY() >= 0)
-			{
-				tymin = (bounds[0].cY() - r.origin.cY()) / r.direction.cY() - Constants::epsilon;
-				tymax = (bounds[1].cY() - r.origin.cY()) / r.direction.cY() + Constants::epsilon;
-			}
-			else
-			{
-				tymin = (bounds[1].cY() - r.origin.cY()) / r.direction.cY() - Constants::epsilon;
-				tymax = (bounds[0].cY() - r.origin.cY()) / r.direction.cY() + Constants::epsilon;
-			}
-
-			if ((tmin > tymax) || (tymin > tmax))
-				return false;
-
-			if (tymin > tmin)
-				tmin = tymin;
-
-			if (tymax < tmax)
-				tmax = tymax;
-
-			if (r.direction.cZ() >= 0)
-			{
-				tzmin = (bounds[0].cZ() - r.origin.cZ()) / r.direction.cZ() - Constants::epsilon;
-				tzmax = (bounds[1].cZ() - r.origin.cZ()) / r.direction.cZ() + Constants::epsilon;
-			}
-			else
-			{
-				tzmin = (bounds[1].cZ() - r.origin.cZ()) / r.direction.cZ() - Constants::epsilon;
-				tzmax = (bounds[0].cZ() - r.origin.cZ()) / r.direction.cZ() + Constants::epsilon;
-			}
-
-			if ((tmin > tzmax) || (tzmin > tmax))
-				return false;
-
-			if (tzmin > tmin)
-				tmin = tzmin;
-
-			if (tzmax < tmax)
-				tmax = tzmax;
-
-			tNear = tmin;
-			tFar = tmax;
-
-			return tmin <= tmax;
-		}
-
-		inline bool rayHitsBoundingBox(const Ray& r, const BoundingBox& box)
-		{
-			vec4 origin;
-			vec4 invDirection;
-			r.origin.loadToVec4(origin);
-			r.direction.reciprocal().loadToVec4(invDirection);
-
-			int r_sign_x = (invDirection.x < 0.0f ? 1 : 0);
-			int r_sign_y = (invDirection.y < 0.0f ? 1 : 0);
-
-			float4 parameters[2] = { box.minVertex(), box.maxVertex() };
-
-			float_type txmin = (parameters[r_sign_x].cX() - origin.x) * invDirection.x;
-			float_type tymin = (parameters[r_sign_y].cY() - origin.y) * invDirection.y;
-			float_type txmax = (parameters[1 - r_sign_x].cX() - origin.x) * invDirection.x;
-			float_type tymax = (parameters[1 - r_sign_y].cY() - origin.y) * invDirection.y;
-
-			if ((txmin >= tymax) || (tymin >= txmax))
-				return false;
-
-			if (tymin > txmin)
-				txmin = tymin;
-			if (tymax < txmax)
-				txmax = tymax;
-
-			int r_sign_z = (invDirection.z < 0.0f ? 1 : 0);
-			float_type tzmin = (parameters[r_sign_z].cZ() - origin.z) * invDirection.z;
-			float_type tzmax = (parameters[1 - r_sign_z].cZ() - origin.z) * invDirection.z;
-
-			return ((txmin < tzmax) && (tzmin < txmax));
-		}
-
-		inline float_type computeRefractiveCoefficient(float_type eta, float_type IdotN)
-		{
-			return 1.0f - (eta * eta) * (1.0f - IdotN * IdotN);
-		}
-
-		template <MaterialType M>
-		inline float_type computeFresnelTerm(const float4& Wi, const float4& n, float_type eta);
-        
-        float fresnelShlickApproximation(float cosTheta, float eta)
+        inline float fresnelShlickApproximation(float cosTheta, float eta)
         {
             float_type f0 = (1.0f - eta) / (1.0f + eta);
             return f0 + (1.0f - f0) * std::pow(1.0f - std::abs(cosTheta), 5.0f);
         }
-
+        
+		template <MaterialType M>
+		inline float_type computeFresnelTerm(const float4& Wi, const float4& n, float_type eta);
+        
 		template <>
 		inline float_type computeFresnelTerm<MaterialType::Dielectric>(const float4& Wi, const float4& n, float_type eta)
 		{
