@@ -165,8 +165,8 @@ namespace et
 		uint64_t _fpsLimitMSecFractPart = 0;
 		
 		int _exitCode = 0;
-        vec2i _scheduledResize;
-		bool _postResizeOnActivate = false;
+        vec2i _scheduledSize;
+		bool _scheduleResize = false;
 	};
 
 	/*

@@ -29,6 +29,7 @@ class et::RenderContextPrivate
 {
 public:
 	RenderContextPrivate(RenderContext*, RenderContextParameters&, ApplicationParameters&);
+    ~RenderContextPrivate();
 	
 	int displayLinkSynchronized();
 	
@@ -42,8 +43,8 @@ public:
 	
 public:
     RenderContext* owner = nullptr;
-	NSOpenGLPixelFormat* pixelFormat = nil;
-	CGLContextObj cOpenGLContext = nullptr;
+    CGLPixelFormatObj pixelFormat = nullptr;
+	CGLContextObj glContext = nullptr;
 	CVDisplayLinkRef displayLink = nullptr;
     uint64_t frameDuration = 0;
     bool firstSync = true;
@@ -93,8 +94,8 @@ bool RenderContext::beginRender()
 
     OpenGLCounters::reset();
     
-    CGLLockContext(_private->cOpenGLContext);
-    CGLSetCurrentContext(_private->cOpenGLContext);
+    CGLLockContext(_private->glContext);
+    CGLSetCurrentContext(_private->glContext);
  
     _private->frameDuration = queryCurrentTimeInMicroSeconds();
     _renderState.bindDefaultFramebuffer();
@@ -112,8 +113,9 @@ void RenderContext::endRender()
 	_info.averagePolygonsPerSecond += OpenGLCounters::primitiveCounter;
 	_info.averageFrameTimeInMicroseconds += queryCurrentTimeInMicroSeconds() - _private->frameDuration;
     
-    CGLFlushDrawable(_private->cOpenGLContext);
-    CGLUnlockContext(_private->cOpenGLContext);
+    ET_ASSERT(CGLGetCurrentContext() == _private->glContext);
+    CGLFlushDrawable(_private->glContext);
+    CGLUnlockContext(_private->glContext);
 }
 
 void RenderContext::pushRenderingContext()
@@ -154,86 +156,59 @@ CVReturn cvDisplayLinkOutputCallback(CVDisplayLinkRef, const CVTimeStamp*, const
 RenderContextPrivate::RenderContextPrivate(RenderContext* aOwner, RenderContextParameters& params,
     ApplicationParameters& appParams) : owner(aOwner)
 {
-	bool msaaEnabled = params.multisamplingQuality != MultisamplingQuality::None;
-	
-	NSOpenGLPixelFormatAttribute pixelFormatAttributes[] =
-	{
-		NSOpenGLPFAColorSize, 24,
-		NSOpenGLPFAAlphaSize, 8,
-		NSOpenGLPFADepthSize, 32,
-		NSOpenGLPFAAccelerated,
-		NSOpenGLPFADoubleBuffer,
-		(msaaEnabled ? NSOpenGLPFASampleBuffers : 0u), (msaaEnabled ? 1u : 0u),
-		0, 0, 0, 0, 0, 0, 0 // space for multisampling and context profile
-	};
-	
-	size_t lastEntry = 0;
-	while (pixelFormatAttributes[++lastEntry] != 0);
-	
-	pixelFormatAttributes[lastEntry++] = NSOpenGLPFAOpenGLProfile;
-	pixelFormatAttributes[lastEntry++] = NSOpenGLProfileVersion4_1Core;
-	
-	size_t antialiasFirstEntry = 0;
-	size_t antialiasSamplesEntry = 0;
-	
-	if (msaaEnabled)
-	{
-		antialiasFirstEntry = lastEntry;
-		pixelFormatAttributes[lastEntry++] = NSOpenGLPFAMultisample;
-		pixelFormatAttributes[lastEntry++] = NSOpenGLPFASamples;
-		
-		pixelFormatAttributes[lastEntry++] =
-			(params.multisamplingQuality == MultisamplingQuality::Best) ? 32 : 1;
-		
-		antialiasSamplesEntry = lastEntry - 1;
-	}
-	
-	pixelFormat = [[NSOpenGLPixelFormat alloc] initWithAttributes:pixelFormatAttributes];
-	if ((pixelFormat == nil) && (antialiasSamplesEntry != 0))
-	{
-		while ((pixelFormat == nil) && (pixelFormatAttributes[antialiasSamplesEntry] > 1))
-		{
-			pixelFormatAttributes[antialiasSamplesEntry] /= 2;
-			pixelFormat = [[NSOpenGLPixelFormat alloc] initWithAttributes:pixelFormatAttributes];
-		}
-		
-		if (pixelFormat == nil)
-		{
-			pixelFormatAttributes[antialiasFirstEntry++] = 0;
-			pixelFormatAttributes[antialiasFirstEntry++] = 0;
-			pixelFormatAttributes[antialiasFirstEntry++] = 0;
-			pixelFormat = [[NSOpenGLPixelFormat alloc] initWithAttributes:pixelFormatAttributes];
-		}
-		
-		if (pixelFormat == nil)
-		{
-			alert("Unable to create and initialize rendering context",
-				  "Unable to create NSOpenGLPixelFormat object, application will now terminate.",
-				  "Terminate", AlertType::Error);
-			exit(1);
-		}
-	}
-	(void)ET_OBJC_AUTORELEASE(pixelFormat);
-    
     application().initContext();
     const auto& ctx = application().context();
     
+    bool msaaEnabled = params.multisamplingQuality != MultisamplingQuality::None;
+    CGLPixelFormatAttribute attribs[128] =
+    {
+        kCGLPFADoubleBuffer,
+        kCGLPFAColorSize, CGLPixelFormatAttribute(24),
+        kCGLPFAAlphaSize, CGLPixelFormatAttribute(8),
+        kCGLPFADepthSize, CGLPixelFormatAttribute(32),
+        kCGLPFABackingStore, CGLPixelFormatAttribute(1),
+        kCGLPFAAccelerated,
+        kCGLPFAOpenGLProfile, CGLPixelFormatAttribute(kCGLOGLPVersion_GL4_Core),
+    };
+    
+    size_t msaaFirstEntry = 0;
+    while (attribs[++msaaFirstEntry]);
+    
+    if (msaaEnabled)
+    {
+        attribs[msaaFirstEntry+0] = kCGLPFAMultisample;
+        attribs[msaaFirstEntry+1] = kCGLPFASampleBuffers;
+        attribs[msaaFirstEntry+2] = CGLPixelFormatAttribute(1);
+        attribs[msaaFirstEntry+3] = kCGLPFASamples;
+        attribs[msaaFirstEntry+4] = CGLPixelFormatAttribute(32);
+    }
+    
+    GLint numPixelFormats = 0;
+    auto err = CGLChoosePixelFormat(attribs, &pixelFormat, &numPixelFormats);
+    ET_ASSERT(err == kCGLNoError);
+    
+    err = CGLCreateContext(pixelFormat, nullptr, &glContext);
+    ET_ASSERT(err == kCGLNoError);
+    
+    CGLSetCurrentContext(glContext);
+    GLint swap = static_cast<GLint>(params.swapInterval);
+    CGLSetParameter(glContext, kCGLCPSwapInterval, &swap);
+    
     NSWindow* mainWindow = (NSWindow*)CFBridgingRelease(ctx.pointers[0]);
-    // NSWindowController* mainWindowController = (NSWindowController*)CFBridgingRelease(ctx.pointers[1]);
+    
     NSOpenGLView* openGlView = (NSOpenGLView*)CFBridgingRelease(ctx.pointers[2]);
-	
-	[openGlView setOpenGLContext:[[NSOpenGLContext alloc] initWithFormat:pixelFormat shareContext:nil]];
-	cOpenGLContext = [[openGlView openGLContext] CGLContextObj];
-	
-	const int swap = static_cast<int>(params.swapInterval);
-	
-	CGLSetCurrentContext(cOpenGLContext);
-	CGLSetParameter(cOpenGLContext, kCGLCPSwapInterval, &swap);
-	
+    [openGlView setOpenGLContext:[[NSOpenGLContext alloc] initWithCGLContextObj:glContext]];
+    
 	[mainWindow makeKeyAndOrderFront:[NSApplication sharedApplication]];
 	[mainWindow orderFrontRegardless];
 	
 	[[NSApplication sharedApplication] activateIgnoringOtherApps:YES];
+}
+
+RenderContextPrivate::~RenderContextPrivate()
+{
+    CGLDestroyContext(glContext);
+    CGLDestroyPixelFormat(pixelFormat);
 }
 
 void RenderContextPrivate::run()
@@ -250,7 +225,7 @@ void RenderContextPrivate::run()
 		}
 
 		CVDisplayLinkSetOutputCallback(displayLink, cvDisplayLinkOutputCallback, this);
-		CVDisplayLinkSetCurrentCGDisplayFromOpenGLContext(displayLink, cOpenGLContext, [pixelFormat CGLPixelFormatObj]);
+		CVDisplayLinkSetCurrentCGDisplayFromOpenGLContext(displayLink, glContext, pixelFormat);
 	}
 	
 	CVDisplayLinkStart(displayLink);

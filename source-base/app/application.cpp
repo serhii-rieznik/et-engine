@@ -105,6 +105,13 @@ void Application::performUpdateAndRender()
     
     if (_renderContext->beginRender())
     {
+        if (_scheduleResize)
+        {
+            _renderContext->performResizing(_scheduledSize);
+            _delegate->applicationWillResizeContext(_renderContext->size());
+            _scheduleResize = false;
+        }
+        
         _runLoop.update(_lastQueuedTimeMSec);
         _delegate->render(_renderContext);
         _renderContext->endRender();
@@ -130,13 +137,6 @@ void Application::setActive(bool active)
 
 		_delegate->applicationWillActivate();
 		
-		if (_postResizeOnActivate)
-		{
-            _renderContext->performResizing(_scheduledResize);
-			_delegate->applicationWillResizeContext(_renderContext->size());
-			_postResizeOnActivate = false;
-		}
-		
 		platformActivate();
 	}
 	else
@@ -151,16 +151,8 @@ void Application::setActive(bool active)
 
 void Application::resizeContext(const vec2i& size)
 {
-	if (_running && _active)
-	{
-        _delegate->applicationWillResizeContext(size);
-        _renderContext->performResizing(size);
-    }
-    else
-    {
-        _scheduledResize = size;
-        _postResizeOnActivate = true;
-	}
+    _scheduledSize = size;
+    _scheduleResize = true;
 }
 
 void Application::suspend()

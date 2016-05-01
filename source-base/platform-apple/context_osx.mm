@@ -150,12 +150,6 @@
     gestureInputSource.gesturePerformed(et::GestureInputInfo(et::GestureTypeMask_Rotate, event.rotation));
 }
 
-- (void)drawRect:(NSRect)dirtyRect
-{
-    (void)dirtyRect;
-    et::application().performUpdateAndRender();
-}
-
 - (void)reshape
 {
     [super reshape];
