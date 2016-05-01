@@ -57,7 +57,7 @@ namespace et
 		void loadNode(s3d::Storage&, FbxNode* node, s3d::BaseElement::Pointer parent);
 		void loadNodeAnimations(FbxNode* node, s3d::BaseElement::Pointer object, const StringList& props);
 
-		s3d::SceneMaterial::List loadNodeMaterials(s3d::Storage&, FbxNode* node);
+		s3d::SceneMaterial::Collection loadNodeMaterials(s3d::Storage&, FbxNode* node);
 		StringList loadNodeProperties(FbxNode* node);
 		
 		void buildVertexBuffers(RenderContext* rc, s3d::Storage&);
@@ -65,7 +65,7 @@ namespace et
 		bool meshHasSkin(FbxMesh*);
 		
 		s3d::Mesh::Pointer loadMesh(s3d::Storage&, FbxMesh*, s3d::BaseElement::Pointer parent,
-            const s3d::SceneMaterial::List& materials);
+            const s3d::SceneMaterial::Collection& materials);
 
 		s3d::LineElement::Pointer loadLine(s3d::Storage&, FbxLine*, s3d::BaseElement::Pointer parent, 
 			const StringList& params);
@@ -274,9 +274,9 @@ void FBXLoaderPrivate::loadTextures()
 	application().setShouldSilentPathResolverErrors(false);
 }
 
-s3d::SceneMaterial::List FBXLoaderPrivate::loadNodeMaterials(s3d::Storage& storage, FbxNode* node)
+s3d::SceneMaterial::Collection FBXLoaderPrivate::loadNodeMaterials(s3d::Storage& storage, FbxNode* node)
 {
-	s3d::SceneMaterial::List materials;
+	s3d::SceneMaterial::Collection materials;
 	const int lMaterialCount = node->GetMaterialCount();
 	for (int lMaterialIndex = 0; lMaterialIndex < lMaterialCount; ++lMaterialIndex)
 	{
@@ -594,7 +594,7 @@ bool FBXLoaderPrivate::meshHasSkin(FbxMesh* mesh)
 }
 
 s3d::Mesh::Pointer FBXLoaderPrivate::loadMesh(s3d::Storage& storage, FbxMesh* mesh, 
-	s3d::BaseElement::Pointer parent, const s3d::SceneMaterial::List& materials)
+	s3d::BaseElement::Pointer parent, const s3d::SceneMaterial::Collection& materials)
 {
 	const char* mName = mesh->GetName();
 	const char* nName = mesh->GetNode()->GetName();
