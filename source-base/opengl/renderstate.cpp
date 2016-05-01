@@ -41,9 +41,9 @@ void RenderState::setRenderContext(RenderContext* rc)
 
 void RenderState::setMainViewportSize(const vec2i& sz, bool force)
 {
-	if (!force && (sz.x == _mainViewport.width) && (sz.y == _mainViewport.height)) return;
+    auto currentSize = _defaultFramebuffer->size();
+	if (!force && (sz.x == currentSize.x) && (sz.y == currentSize.y)) return;
 
-	_mainViewport.setSize(sz);
 	_defaultFramebuffer->forceSize(sz);
 
 	bool shouldSetViewport = (_desc.cache.boundFramebuffer == 0) ||
@@ -51,7 +51,7 @@ void RenderState::setMainViewportSize(const vec2i& sz, bool force)
 	
 	if (shouldSetViewport)
 	{
-		etViewport(0, 0, _mainViewport.width, _mainViewport.height);
+		etViewport(0, 0, sz.x, sz.y);
 	}
 }
 
@@ -259,10 +259,10 @@ void RenderState::bindFramebuffer(const Framebuffer::Pointer& fbo, bool force)
 		if (fbo->hasRenderTargets())
 			setDrawBuffersCount(fbo->drawBuffersCount());
 	}
-	else 
+	else if (_defaultFramebuffer.valid())
 	{
-		bindFramebuffer(0, GL_FRAMEBUFFER, force);
-		setViewportSize(_mainViewport.size(), force);
+		bindFramebuffer(_defaultFramebuffer->apiHandle(), GL_FRAMEBUFFER, force);
+		setViewportSize(_defaultFramebuffer->size(), force);
 	}
 }
 

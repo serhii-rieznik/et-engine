@@ -60,15 +60,14 @@ void MainController::createTextures(et::RenderContext* rc)
 
 	auto allScreens = availableScreens();
 	for (const auto& screen : allScreens)
-		maxSize = maxv(screen.frame.size(), maxSize);
+		maxSize = maxv(screen.frame.size() * screen.scaleFactor, maxSize);
 
 	_noiseTexture = rc->textureFactory().genNoiseTexture(maxSize, true, "noise-texture");
 }
 
 void MainController::createPrograms(et::RenderContext* rc)
 {
-	const std::string vertexShader =
-	R"(
+	const std::string vertexShader = R"(
 		uniform mat4 matViewProjection;
 		uniform mat4 matWorld;
 		etVertexIn vec3 Vertex;
@@ -79,11 +78,9 @@ void MainController::createPrograms(et::RenderContext* rc)
 			vNormalWS = normalize(mat3(matWorld) * Normal);
 			vec4 vVertexWS = matWorld * vec4(Vertex, 1.0);
 			gl_Position = matViewProjection * vVertexWS;
-		}
-	)";
+		})";
 
-	const std::string fragmentShader =
-		R"(
+	const std::string fragmentShader = R"(
 		etFragmentIn vec3 vNormalWS;
 		const vec3 lightDirection = vec3(0.0, 1.0, 0.0);
 		void main()

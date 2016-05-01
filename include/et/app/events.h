@@ -115,8 +115,8 @@ namespace et
 		}
 		
 	private:
-		void (RecevierType::*_receiverMethod)();
-		RecevierType* _receiver;
+		void (RecevierType::*_receiverMethod)() = nullptr;
+		RecevierType* _receiver = nullptr;
 	};
 	
 	template <typename C>

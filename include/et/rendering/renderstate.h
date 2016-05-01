@@ -49,10 +49,8 @@ namespace et
 		const vec2i& viewportSize() const
 			{ return _desc.cache.viewport.size(); }
 		
-		const recti& mainViewport() const
-			{ return _mainViewport; }
 		const vec2i& mainViewportSize() const
-			{ return _mainViewport.size(); }
+			{ return _defaultFramebuffer->size(); }
 
 		void setMainViewportSize(const vec2i& sz, bool force = false);
 		void setViewportSize(const vec2i& sz, bool force = false);
@@ -199,7 +197,6 @@ namespace et
         RenderContext* _rc = nullptr;
 		Framebuffer::Pointer _defaultFramebuffer;
 		Descriptor _desc;
-		recti _mainViewport = recti(0, 0, 0, 0);
 	};
 	
 	class PreservedRenderStateScope

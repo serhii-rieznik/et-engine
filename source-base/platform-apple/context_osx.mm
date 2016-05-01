@@ -7,8 +7,8 @@
 
 #include <et/core/et.h>
 #include <et/platform-apple/objc.h>
-#include <et/app/applicationnotifier.h>
 #include <et/platform-apple/context_osx.h>
+#include <et/app/application.h>
 #include <et/input/input.h>
 
 #include <AppKit/NSWindow.h>
@@ -19,11 +19,7 @@
 #include <AppKit/NSTrackingArea.h>
 
 @interface etWindowController : NSWindowController<NSWindowDelegate>
-{
-@public
-    et::ApplicationNotifier applicationNotifier;
-    et::RenderContextPrivate* rcPrivate;
-}
+
 @end
     
 @interface etWindow : NSWindow
@@ -42,8 +38,6 @@
     NSTrackingArea* _trackingArea;
     et::Input::PointerInputSource pointerInputSource;
     et::Input::GestureInputSource gestureInputSource;
-    et::ApplicationNotifier applicationNotifier;
-    et::RenderContextPrivate* rcPrivate;
 }
 
 @end
@@ -159,11 +153,7 @@
 - (void)drawRect:(NSRect)dirtyRect
 {
     (void)dirtyRect;
-    
-    /*
-    if (rcPrivate->canPerformOperations())
-        rcPrivate->performUpdateAndRender();
-    */
+    et::application().performUpdateAndRender();
 }
 
 - (void)reshape
@@ -177,8 +167,9 @@
         options:NSTrackingMouseMoved | NSTrackingActiveAlways owner:self userInfo:nil]);
     
     [self addTrackingArea:_trackingArea];
-    
-    // rcPrivate->resize([self convertRectToBacking:self.bounds].size);
+
+    auto nativeSize = [self convertRectToBacking:self.bounds].size;
+    et::application().resizeContext(et::vec2i(static_cast<int>(nativeSize.width), static_cast<int>(nativeSize.height)));
 }
 
 @end
@@ -186,7 +177,7 @@
 @implementation etWindow : NSWindow
 
 - (id)initWithContentRect:(NSRect)contentRect styleMask:(NSUInteger)aStyle
-                  backing:(NSBackingStoreType)bufferingType defer:(BOOL)flag
+    backing:(NSBackingStoreType)bufferingType defer:(BOOL)flag
 {
     self = [super initWithContentRect:contentRect styleMask:aStyle backing:bufferingType defer:flag];
     if (self)
@@ -215,8 +206,7 @@
 {
     et::Input::KeyboardInputSource().keyPressed(theEvent.keyCode);
     
-    NSString* filteredString = [theEvent.characters
-                                stringByTrimmingCharactersInSet:[allowedCharacters invertedSet]];
+    NSString* filteredString = [theEvent.characters stringByTrimmingCharactersInSet:[allowedCharacters invertedSet]];
     
     if ([filteredString length] > 0)
     {
@@ -251,9 +241,7 @@
 - (void)windowWillClose:(NSNotification*)notification
 {
     (void)notification;
-    applicationNotifier.notifyStopped();
-    // rcPrivate->stop();
-    applicationNotifier.notifyTerminated();
+    et::application().stop();
 }
 
 @end
@@ -316,7 +304,6 @@ PlatformDependentContext ApplicationContextFactoryOSX::createContextWithOptions(
     
     etWindowController* windowController = [[etWindowController alloc] initWithWindow:mainWindow];
     CFBridgingRetain(windowController);
-//    windowController->rcPrivate = this;
  
     if (options.keepAspectOnResize)
         [mainWindow setContentAspectRatio:contentRect.size];
@@ -333,7 +320,6 @@ PlatformDependentContext ApplicationContextFactoryOSX::createContextWithOptions(
     
     [openGlView setAcceptsTouchEvents:YES];
     [openGlView setWantsBestResolutionOpenGLSurface:options.supportsHighResolution ? YES : NO];
-    // openGlView->rcPrivate = this;
     
     if (options.style & ContextOptions::Style::Sizable)
         [mainWindow setCollectionBehavior:NSWindowCollectionBehaviorFullScreenPrimary];

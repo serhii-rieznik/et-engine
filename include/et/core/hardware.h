@@ -18,9 +18,7 @@ namespace et
 		recti availableFrame;
 		float scaleFactor = 1.0f;
 		
-		Screen()
-			{ }
-		
+        Screen() = default;
 		Screen(const recti& f, const recti& a, float sf) :
 			frame(f), availableFrame(a), scaleFactor(sf) { }
 	};

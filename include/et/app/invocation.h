@@ -216,7 +216,7 @@ namespace et
 		void setTarget(T* o, void(T::*m)())
         {
             ET_ASSERT(o != nullptr);
-            _target = etCreateObject<InvocationTarget<T>>(o, m);
+            _target = UniquePtr<PureInvocationTarget>(etCreateObject<InvocationTarget<T>>(o, m));
         }
 		
 		template <typename F>
@@ -251,7 +251,7 @@ namespace et
 		template <typename T, typename A1>
 		void setParameter(A1 p)
 		{
-			ET_ASSERT(_target.valid());
+			ET_ASSERT(_target.get() != nullptr);
 			(static_cast<Invocation1Target<T, A1>*>(_target.get()))->setParameter(p);
 		}
 	};
@@ -269,7 +269,7 @@ namespace et
 		void setTarget(T* o, void(T::*m)(A1, A2), A1 p1, A2 p2)
         {
             ET_ASSERT(o != nullptr);
-            _target = etCreateObject<Invocation2Target<T, A1, A2>>(o, m, p1, p2);
+            _target = UniquePtr<PureInvocationTarget>(etCreateObject<Invocation2Target<T, A1, A2>>(o, m, p1, p2));
         }
 
 		template <typename F, typename A1, typename A2>

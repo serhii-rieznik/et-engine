@@ -26,11 +26,3 @@ void RenderContext::onFPSTimerExpired(NotifyTimer*)
 	_info.averagePolygonsPerSecond = 0;
 	_info.averageFrameTimeInMicroseconds = 0;
 }
-
-void RenderContext::resized(const vec2i& sz)
-{
-	_renderState.setMainViewportSize(sz);
-	
-	if (_app->running())
-		_app->contextResized(sz);
-}

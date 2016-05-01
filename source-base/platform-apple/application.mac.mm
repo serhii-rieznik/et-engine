@@ -16,8 +16,9 @@
 
 #include <et/core/base64.h>
 #include <et/core/json.h>
-#include <et/app/applicationnotifier.h>
 #include <et/platform-apple/context_osx.h>
+#include <et/app/application.h>
+#include <et/rendering/rendercontext.h>
 
 using namespace et;
 
@@ -28,7 +29,6 @@ using namespace et;
 @interface etApplicationDelegate : NSObject<NSApplicationDelegate>
 {
 	NSMutableArray* _scheduledURLs;
-	ApplicationNotifier _notifier;
 	BOOL _launchingFinished;
 }
 
@@ -75,7 +75,7 @@ void Application::freeContext()
     ApplicationContextFactoryOSX().destroyContext(_context);
 }
 
-void Application::loaded()
+void Application::load()
 {
 	_lastQueuedTimeMSec = queryContiniousTimeInMilliSeconds();
 	_runLoop.updateTime(_lastQueuedTimeMSec);
@@ -210,7 +210,7 @@ void Application::enableRemoteNotifications()
 - (void)applicationDidFinishLaunching:(NSNotification*)notification
 {
     (void)notification;
-	_notifier.notifyLoaded();
+    application().load();
 	
 	_launchingFinished = YES;
 		
@@ -227,25 +227,13 @@ void Application::enableRemoteNotifications()
 - (void)applicationWillBecomeActive:(NSNotification*)notification
 {
     (void)notification;
-	_notifier.notifyActivated();
+    application().setActive(true);
 }
 
 - (void)applicationWillResignActive:(NSNotification*)notification
 {
     (void)notification;
-	_notifier.notifyDeactivated();
-}
-
-- (void)applicationDidHide:(NSNotification*)notification
-{
-    (void)notification;
-	_notifier.notifyDeactivated();
-}
-
-- (void)applicationDidUnhide:(NSNotification*)notification
-{
-    (void)notification;
-	_notifier.notifyActivated();
+    application().setActive(false);
 }
 
 - (void)applicationWillTerminate:(NSNotification*)notification

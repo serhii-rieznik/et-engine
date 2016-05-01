@@ -54,7 +54,7 @@ namespace et
 
 		struct OBJFace
 		{
-			enum
+            enum : size_t
 			{
 				MaxVertexLinks = 16,
 				MaxVertexSize = 3
@@ -115,7 +115,6 @@ namespace et
 		Vector<et::vec2> _texCoords;
 		Vector<OBJGroup> _groups;
 
-        size_t lastGroupIndex = static_cast<size_t>(-1);
 		size_t _loadOptions = Option_JustLoad;
 		int _lastSmoothGroup = 0;
 		int _lastGroupId = 0;

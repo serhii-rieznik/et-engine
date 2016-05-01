@@ -23,7 +23,6 @@ namespace et
 	extern const std::string kSystemEventRemoteNotificationStatusChanged;
 	extern const std::string kSystemEventOpenURL;
 	
-	class ApplicationNotifier;
 	class Application : public Singleton<Application>
 	{
 	public: 
@@ -95,24 +94,25 @@ namespace et
 		void enableRemoteNotifications();
 		
 		ET_DECLARE_EVENT1(systemEvent, Dictionary)
-		
+        
+    public:
+        void load();
+        void suspend();
+        void resume();
+        void stop();
+        
+        void setActive(bool active);
+        void resizeContext(const vec2i& size);
+        
+        bool shouldPerformRendering();
+        void performUpdateAndRender();
+        
 	private:
 		friend class RenderContext;
 
 		RenderContext* renderContext() 
 			{ return _renderContext; }
 
-		void performRendering();
-
-		void setActive(bool active);
-
-		void contextResized(const vec2i& size);
-
-		void suspend();
-		void resume();
-		
-		void stop();
-		
 		int platformRun(int, char* []);
 		
 		void platformInit();
@@ -121,21 +121,13 @@ namespace et
 		void platformDeactivate();
 		void platformSuspend();
 		void platformResume();
-		
-		void loaded();
-		void terminated();
-		
+				
 		void enterRunLoop();
 		void exitRunLoop();
-		
-		bool shouldPerformRendering();
-		void performUpdateAndRender();
-		
+				
 		void updateTimers(float dt);
-		
-	private:
-		friend class ApplicationNotifier;
-		
+        
+	private:		
 		Application();
 		~Application();
 
@@ -173,6 +165,7 @@ namespace et
 		uint64_t _fpsLimitMSecFractPart = 0;
 		
 		int _exitCode = 0;
+        vec2i _scheduledResize;
 		bool _postResizeOnActivate = false;
 	};
 

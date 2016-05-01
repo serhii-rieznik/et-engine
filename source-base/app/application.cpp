@@ -80,13 +80,6 @@ void Application::exitRunLoop()
 	unregisterRunLoop(_runLoop);
 }
 
-void Application::performRendering()
-{
-	_renderContext->beginRender();
-	_delegate->render(_renderContext);
-	_renderContext->endRender();
-}
-
 bool Application::shouldPerformRendering()
 {
 	uint64_t currentTime = queryContiniousTimeInMilliSeconds();
@@ -109,9 +102,13 @@ bool Application::shouldPerformRendering()
 void Application::performUpdateAndRender()
 {
 	ET_ASSERT(_running && !_suspended);
-	
-	_runLoop.update(_lastQueuedTimeMSec);
-	performRendering();
+    
+    if (_renderContext->beginRender())
+    {
+        _runLoop.update(_lastQueuedTimeMSec);
+        _delegate->render(_renderContext);
+        _renderContext->endRender();
+    }
 }
 
 void Application::setFrameRateLimit(size_t value)
@@ -135,6 +132,7 @@ void Application::setActive(bool active)
 		
 		if (_postResizeOnActivate)
 		{
+            _renderContext->performResizing(_scheduledResize);
 			_delegate->applicationWillResizeContext(_renderContext->size());
 			_postResizeOnActivate = false;
 		}
@@ -151,14 +149,17 @@ void Application::setActive(bool active)
 	}
 }
 
-void Application::contextResized(const vec2i& size)
+void Application::resizeContext(const vec2i& size)
 {
-	if (_running)
+	if (_running && _active)
 	{
-		if (_active)
-			_delegate->applicationWillResizeContext(size);
-		else
-			_postResizeOnActivate = true;
+        _delegate->applicationWillResizeContext(size);
+        _renderContext->performResizing(size);
+    }
+    else
+    {
+        _scheduledResize = size;
+        _postResizeOnActivate = true;
 	}
 }
 
@@ -191,13 +192,10 @@ void Application::resume()
 
 void Application::stop()
 {
-	_running = false;
-}
-
-void Application::terminated()
-{
-	_delegate->applicationWillTerminate();
-	stop();
+    _delegate->applicationWillTerminate();
+    _running = false;
+    
+    _renderContext->shutdown();
 }
 
 std::string Application::resolveFileName(const std::string& path)

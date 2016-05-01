@@ -23,7 +23,6 @@
 namespace et
 {
 	class Application;
-	class ApplicationNotifier;
 	
 	struct RenderingInfo
 	{
@@ -43,6 +42,7 @@ namespace et
 		~RenderContext();
 
 		void init();
+        void shutdown();
 		bool valid();
 		
         RenderContextParameters& parameters()
@@ -80,10 +80,10 @@ namespace et
 		bool pushAndActivateRenderingContext();
 		void popRenderingContext();
 
-		void beginRender();
+		bool beginRender();
 		void endRender();
-
-		size_t renderingContextHandle();
+        
+        void performResizing(const vec2i&);
 
 	public:
 		ET_DECLARE_EVENT1(renderingInfoUpdated, const RenderingInfo&)
@@ -94,12 +94,10 @@ namespace et
 		RenderContext& operator = (const RenderContext&) = delete;
 
 		void onFPSTimerExpired(NotifyTimer* t);
-		void resized(const vec2i&);
 
 	private:
 		friend class RenderContextPrivate;
 		friend class RenderContextNotifier;
-		friend class ApplicationNotifier;
 
 		ET_DECLARE_PIMPL(RenderContext, 256)
 

@@ -10,11 +10,6 @@
 #import <UIKit/UIApplication.h>
 #import <et/app/events.h>
 
-namespace et
-{
-	class ApplicationNotifier;
-}
-
 @interface etApplicationDelegate : UIResponder <UIApplicationDelegate> 
 
 @property (nonatomic, retain) UIWindow* window;

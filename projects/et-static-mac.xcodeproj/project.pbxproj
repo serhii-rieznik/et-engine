@@ -25,8 +25,6 @@
 		6EBE21291C66B8BE00AF7206 /* cameraorbitcontroller.h in Headers */ = {isa = PBXBuildFile; fileRef = 6EBE1F6B1C66B8BE00AF7206 /* cameraorbitcontroller.h */; };
 		6EBE212A1C66B8BE00AF7206 /* frustum.h in Headers */ = {isa = PBXBuildFile; fileRef = 6EBE1F6C1C66B8BE00AF7206 /* frustum.h */; };
 		6EBE212B1C66B8BE00AF7206 /* animator.h in Headers */ = {isa = PBXBuildFile; fileRef = 6EBE1F6E1C66B8BE00AF7206 /* animator.h */; };
-		6EBE212D1C66B8BE00AF7206 /* autoptr.h in Headers */ = {isa = PBXBuildFile; fileRef = 6EBE1F701C66B8BE00AF7206 /* autoptr.h */; };
-		6EBE212E1C66B8BE00AF7206 /* autovalue.h in Headers */ = {isa = PBXBuildFile; fileRef = 6EBE1F711C66B8BE00AF7206 /* autovalue.h */; };
 		6EBE212F1C66B8BE00AF7206 /* base64.h in Headers */ = {isa = PBXBuildFile; fileRef = 6EBE1F721C66B8BE00AF7206 /* base64.h */; };
 		6EBE21301C66B8BE00AF7206 /* constants.h in Headers */ = {isa = PBXBuildFile; fileRef = 6EBE1F731C66B8BE00AF7206 /* constants.h */; };
 		6EBE21311C66B8BE00AF7206 /* containers.h in Headers */ = {isa = PBXBuildFile; fileRef = 6EBE1F741C66B8BE00AF7206 /* containers.h */; };
@@ -122,10 +120,8 @@
 		6EBE218C1C66B8BE00AF7206 /* platformtools.h in Headers */ = {isa = PBXBuildFile; fileRef = 6EBE1FD61C66B8BE00AF7206 /* platformtools.h */; };
 		6EBE218D1C66B8BE00AF7206 /* apple.h in Headers */ = {isa = PBXBuildFile; fileRef = 6EBE1FD81C66B8BE00AF7206 /* apple.h */; };
 		6EBE218E1C66B8BE00AF7206 /* applicationdelegate.h in Headers */ = {isa = PBXBuildFile; fileRef = 6EBE1FD91C66B8BE00AF7206 /* applicationdelegate.h */; };
-		6EBE218F1C66B8BE00AF7206 /* embeddedapplication.h in Headers */ = {isa = PBXBuildFile; fileRef = 6EBE1FDA1C66B8BE00AF7206 /* embeddedapplication.h */; };
 		6EBE21901C66B8BE00AF7206 /* iap.h in Headers */ = {isa = PBXBuildFile; fileRef = 6EBE1FDB1C66B8BE00AF7206 /* iap.h */; };
 		6EBE21911C66B8BE00AF7206 /* imagepicker.h in Headers */ = {isa = PBXBuildFile; fileRef = 6EBE1FDC1C66B8BE00AF7206 /* imagepicker.h */; };
-		6EBE21921C66B8BE00AF7206 /* ios.h in Headers */ = {isa = PBXBuildFile; fileRef = 6EBE1FDD1C66B8BE00AF7206 /* ios.h */; };
 		6EBE21931C66B8BE00AF7206 /* mailcomposer.h in Headers */ = {isa = PBXBuildFile; fileRef = 6EBE1FDE1C66B8BE00AF7206 /* mailcomposer.h */; };
 		6EBE21941C66B8BE00AF7206 /* objc.h in Headers */ = {isa = PBXBuildFile; fileRef = 6EBE1FDF1C66B8BE00AF7206 /* objc.h */; };
 		6EBE21961C66B8BE00AF7206 /* openglview.h in Headers */ = {isa = PBXBuildFile; fileRef = 6EBE1FE11C66B8BE00AF7206 /* openglview.h */; };
@@ -242,10 +238,8 @@
 		6EBE22671C66B8BE00AF7206 /* vertexarrayobject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6EBE20D01C66B8BE00AF7206 /* vertexarrayobject.cpp */; };
 		6EBE22681C66B8BE00AF7206 /* vertexbuffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6EBE20D11C66B8BE00AF7206 /* vertexbuffer.cpp */; };
 		6EBE226A1C66B8BE00AF7206 /* application.mac.mm in Sources */ = {isa = PBXBuildFile; fileRef = 6EBE20D41C66B8BE00AF7206 /* application.mac.mm */; };
-		6EBE226C1C66B8BE00AF7206 /* embeddedapplication.mm in Sources */ = {isa = PBXBuildFile; fileRef = 6EBE20D61C66B8BE00AF7206 /* embeddedapplication.mm */; };
 		6EBE226D1C66B8BE00AF7206 /* iap.apple.mm in Sources */ = {isa = PBXBuildFile; fileRef = 6EBE20D71C66B8BE00AF7206 /* iap.apple.mm */; };
 		6EBE22701C66B8BE00AF7206 /* input.mac.mm in Sources */ = {isa = PBXBuildFile; fileRef = 6EBE20DA1C66B8BE00AF7206 /* input.mac.mm */; };
-		6EBE22711C66B8BE00AF7206 /* ios.mm in Sources */ = {isa = PBXBuildFile; fileRef = 6EBE20DB1C66B8BE00AF7206 /* ios.mm */; };
 		6EBE22721C66B8BE00AF7206 /* locale.apple.mm in Sources */ = {isa = PBXBuildFile; fileRef = 6EBE20DC1C66B8BE00AF7206 /* locale.apple.mm */; };
 		6EBE22731C66B8BE00AF7206 /* log.apple.mm in Sources */ = {isa = PBXBuildFile; fileRef = 6EBE20DD1C66B8BE00AF7206 /* log.apple.mm */; };
 		6EBE22751C66B8BE00AF7206 /* memory.apple.mm in Sources */ = {isa = PBXBuildFile; fileRef = 6EBE20DF1C66B8BE00AF7206 /* memory.apple.mm */; };
@@ -311,8 +305,6 @@
 		6EBE1F6B1C66B8BE00AF7206 /* cameraorbitcontroller.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cameraorbitcontroller.h; sourceTree = "<group>"; };
 		6EBE1F6C1C66B8BE00AF7206 /* frustum.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = frustum.h; sourceTree = "<group>"; };
 		6EBE1F6E1C66B8BE00AF7206 /* animator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = animator.h; sourceTree = "<group>"; };
-		6EBE1F701C66B8BE00AF7206 /* autoptr.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = autoptr.h; sourceTree = "<group>"; };
-		6EBE1F711C66B8BE00AF7206 /* autovalue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = autovalue.h; sourceTree = "<group>"; };
 		6EBE1F721C66B8BE00AF7206 /* base64.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = base64.h; sourceTree = "<group>"; };
 		6EBE1F731C66B8BE00AF7206 /* constants.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = constants.h; sourceTree = "<group>"; };
 		6EBE1F741C66B8BE00AF7206 /* containers.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = containers.h; sourceTree = "<group>"; };
@@ -408,10 +400,8 @@
 		6EBE1FD61C66B8BE00AF7206 /* platformtools.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = platformtools.h; sourceTree = "<group>"; };
 		6EBE1FD81C66B8BE00AF7206 /* apple.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = apple.h; sourceTree = "<group>"; };
 		6EBE1FD91C66B8BE00AF7206 /* applicationdelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = applicationdelegate.h; sourceTree = "<group>"; };
-		6EBE1FDA1C66B8BE00AF7206 /* embeddedapplication.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = embeddedapplication.h; sourceTree = "<group>"; };
 		6EBE1FDB1C66B8BE00AF7206 /* iap.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = iap.h; sourceTree = "<group>"; };
 		6EBE1FDC1C66B8BE00AF7206 /* imagepicker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = imagepicker.h; sourceTree = "<group>"; };
-		6EBE1FDD1C66B8BE00AF7206 /* ios.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ios.h; sourceTree = "<group>"; };
 		6EBE1FDE1C66B8BE00AF7206 /* mailcomposer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = mailcomposer.h; sourceTree = "<group>"; };
 		6EBE1FDF1C66B8BE00AF7206 /* objc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = objc.h; sourceTree = "<group>"; };
 		6EBE1FE11C66B8BE00AF7206 /* openglview.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = openglview.h; sourceTree = "<group>"; };
@@ -528,10 +518,8 @@
 		6EBE20D01C66B8BE00AF7206 /* vertexarrayobject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = vertexarrayobject.cpp; sourceTree = "<group>"; };
 		6EBE20D11C66B8BE00AF7206 /* vertexbuffer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = vertexbuffer.cpp; sourceTree = "<group>"; };
 		6EBE20D41C66B8BE00AF7206 /* application.mac.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = application.mac.mm; sourceTree = "<group>"; };
-		6EBE20D61C66B8BE00AF7206 /* embeddedapplication.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = embeddedapplication.mm; sourceTree = "<group>"; };
 		6EBE20D71C66B8BE00AF7206 /* iap.apple.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = iap.apple.mm; sourceTree = "<group>"; };
 		6EBE20DA1C66B8BE00AF7206 /* input.mac.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = input.mac.mm; sourceTree = "<group>"; };
-		6EBE20DB1C66B8BE00AF7206 /* ios.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ios.mm; sourceTree = "<group>"; };
 		6EBE20DC1C66B8BE00AF7206 /* locale.apple.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = locale.apple.mm; sourceTree = "<group>"; };
 		6EBE20DD1C66B8BE00AF7206 /* log.apple.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = log.apple.mm; sourceTree = "<group>"; };
 		6EBE20DF1C66B8BE00AF7206 /* memory.apple.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = memory.apple.mm; sourceTree = "<group>"; };
@@ -661,8 +649,6 @@
 			isa = PBXGroup;
 			children = (
 				6EBE1F6E1C66B8BE00AF7206 /* animator.h */,
-				6EBE1F701C66B8BE00AF7206 /* autoptr.h */,
-				6EBE1F711C66B8BE00AF7206 /* autovalue.h */,
 				6EBE1F721C66B8BE00AF7206 /* base64.h */,
 				6EBE1F731C66B8BE00AF7206 /* constants.h */,
 				6EBE1F741C66B8BE00AF7206 /* containers.h */,
@@ -816,10 +802,8 @@
 				6EBE1FD81C66B8BE00AF7206 /* apple.h */,
 				6EBE1FD91C66B8BE00AF7206 /* applicationdelegate.h */,
 				6E954C801CD2610C00A12C68 /* context_osx.h */,
-				6EBE1FDA1C66B8BE00AF7206 /* embeddedapplication.h */,
 				6EBE1FDB1C66B8BE00AF7206 /* iap.h */,
 				6EBE1FDC1C66B8BE00AF7206 /* imagepicker.h */,
-				6EBE1FDD1C66B8BE00AF7206 /* ios.h */,
 				6EBE1FDE1C66B8BE00AF7206 /* mailcomposer.h */,
 				6EBE1FDF1C66B8BE00AF7206 /* objc.h */,
 				6EBE1FE11C66B8BE00AF7206 /* openglview.h */,
@@ -1037,11 +1021,9 @@
 			isa = PBXGroup;
 			children = (
 				6EBE20D41C66B8BE00AF7206 /* application.mac.mm */,
-				6EBE20D61C66B8BE00AF7206 /* embeddedapplication.mm */,
 				6E954C841CD266C000A12C68 /* context_osx.mm */,
 				6EBE20D71C66B8BE00AF7206 /* iap.apple.mm */,
 				6EBE20DA1C66B8BE00AF7206 /* input.mac.mm */,
-				6EBE20DB1C66B8BE00AF7206 /* ios.mm */,
 				6EBE20DC1C66B8BE00AF7206 /* locale.apple.mm */,
 				6EBE20DD1C66B8BE00AF7206 /* log.apple.mm */,
 				6EBE20DF1C66B8BE00AF7206 /* memory.apple.mm */,
@@ -1143,7 +1125,6 @@
 				6EBE216E1C66B8BE00AF7206 /* triangle.h in Headers */,
 				6EBE215A1C66B8BE00AF7206 /* transformable.h in Headers */,
 				6EBE21571C66B8BE00AF7206 /* timedobject.h in Headers */,
-				6EBE212D1C66B8BE00AF7206 /* autoptr.h in Headers */,
 				6EBE216D1C66B8BE00AF7206 /* splines.inl.h in Headers */,
 				6EBE21A51C66B8BE00AF7206 /* rendercontext.h in Headers */,
 				6EBE21C21C66B8BE00AF7206 /* scene3d.h in Headers */,
@@ -1183,7 +1164,6 @@
 				6EBE217B1C66B8BE00AF7206 /* imagewriter.h in Headers */,
 				6EBE21511C66B8BE00AF7206 /* stream.h in Headers */,
 				6EBE21681C66B8BE00AF7206 /* rectplacer.h in Headers */,
-				6EBE21921C66B8BE00AF7206 /* ios.h in Headers */,
 				6EBE21961C66B8BE00AF7206 /* openglview.h in Headers */,
 				6EBE21521C66B8BE00AF7206 /* strings.hpp in Headers */,
 				6EBE21A61C66B8BE00AF7206 /* rendercontextparams.h in Headers */,
@@ -1249,7 +1229,6 @@
 				6EBE21291C66B8BE00AF7206 /* cameraorbitcontroller.h in Headers */,
 				6EBE21991C66B8BE00AF7206 /* social.h in Headers */,
 				6EBE21701C66B8BE00AF7206 /* vector2.h in Headers */,
-				6EBE218F1C66B8BE00AF7206 /* embeddedapplication.h in Headers */,
 				6EBE215F1C66B8BE00AF7206 /* geometry.h in Headers */,
 				6EBE214F1C66B8BE00AF7206 /* singleton.h in Headers */,
 				6EBE212F1C66B8BE00AF7206 /* base64.h in Headers */,
@@ -1265,7 +1244,6 @@
 				6EBE21481C66B8BE00AF7206 /* object.h in Headers */,
 				6EBE213D1C66B8BE00AF7206 /* hardware.h in Headers */,
 				6EBE21A41C66B8BE00AF7206 /* renderbatch.h in Headers */,
-				6EBE212E1C66B8BE00AF7206 /* autovalue.h in Headers */,
 				6EBE219C1C66B8BE00AF7206 /* framebuffer.h in Headers */,
 				6EBE214C1C66B8BE00AF7206 /* sequence.h in Headers */,
 				6EBE211E1C66B8BE00AF7206 /* applicationdelegate.h in Headers */,
@@ -1392,7 +1370,6 @@
 				6EBE22391C66B8BE00AF7206 /* frustum.cpp in Sources */,
 				6EBE22451C66B8BE00AF7206 /* sequence.cpp in Sources */,
 				6EBE22311C66B8BE00AF7206 /* events.cpp in Sources */,
-				6EBE226C1C66B8BE00AF7206 /* embeddedapplication.mm in Sources */,
 				6EBE22521C66B8BE00AF7206 /* ddsloader.cpp in Sources */,
 				6EBE22941C66B8BE00AF7206 /* texturefactory.cpp in Sources */,
 				6EBE22441C66B8BE00AF7206 /* objectscache.cpp in Sources */,
@@ -1453,7 +1430,6 @@
 				6EBE22381C66B8BE00AF7206 /* cameraorbitcontroller.cpp in Sources */,
 				6EBE222E1C66B8BE00AF7206 /* appevironment.cpp in Sources */,
 				6EBE22751C66B8BE00AF7206 /* memory.apple.mm in Sources */,
-				6EBE22711C66B8BE00AF7206 /* ios.mm in Sources */,
 				6EBE22531C66B8BE00AF7206 /* hdrloader.cpp in Sources */,
 				6EBE228C1C66B8BE00AF7206 /* indexarray.cpp in Sources */,
 				6EBE22341C66B8BE00AF7206 /* runloop.cpp in Sources */,

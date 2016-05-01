@@ -21,7 +21,7 @@
 #include <et/opengl/opengl.h>
 #include <et/opengl/openglcaps.h>
 #include <et/input/input.h>
-#include <et/app/applicationnotifier.h>
+#include <et/app/application.h>
 
 using namespace et;
 
@@ -33,7 +33,7 @@ public:
 	int displayLinkSynchronized();
 	
 	void run();
-	void resize(const NSSize&);
+	void resize(const vec2i&);
 	void performUpdateAndRender();
 	void stop();
 		
@@ -41,15 +41,12 @@ public:
 		{ return !firstSync && (displayLink != nil); }
 	
 public:
-	uint64_t frameDuration = 0;
-	
-private:
+    RenderContext* owner = nullptr;
 	NSOpenGLPixelFormat* pixelFormat = nil;
 	CGLContextObj cOpenGLContext = nullptr;
 	CVDisplayLinkRef displayLink = nullptr;
-	NSSize scheduledSize = { };
-	bool firstSync = true;
-	bool resizeScheduled = false;
+    uint64_t frameDuration = 0;
+    bool firstSync = true;
 };
 
 RenderContext::RenderContext(const RenderContextParameters& inParams, Application* app) : _params(inParams),
@@ -84,19 +81,25 @@ void RenderContext::init()
 	_private->run();
 }
 
-size_t RenderContext::renderingContextHandle()
+void RenderContext::shutdown()
 {
-	return 0;
+    _private->stop();
 }
 
-void RenderContext::beginRender()
+bool RenderContext::beginRender()
 {
-	checkOpenGLError("RenderContext::beginRender");
-	
-	OpenGLCounters::reset();
-	
-	_private->frameDuration = queryCurrentTimeInMicroSeconds();
-	_renderState.bindDefaultFramebuffer();
+    if (_private->canPerformOperations() == false)
+        return false;
+
+    OpenGLCounters::reset();
+    
+    CGLLockContext(_private->cOpenGLContext);
+    CGLSetCurrentContext(_private->cOpenGLContext);
+ 
+    _private->frameDuration = queryCurrentTimeInMicroSeconds();
+    _renderState.bindDefaultFramebuffer();
+    
+    return true;
 }
 
 void RenderContext::endRender()
@@ -108,6 +111,9 @@ void RenderContext::endRender()
 	_info.averageDIPPerSecond += OpenGLCounters::DIPCounter;
 	_info.averagePolygonsPerSecond += OpenGLCounters::primitiveCounter;
 	_info.averageFrameTimeInMicroseconds += queryCurrentTimeInMicroSeconds() - _private->frameDuration;
+    
+    CGLFlushDrawable(_private->cOpenGLContext);
+    CGLUnlockContext(_private->cOpenGLContext);
 }
 
 void RenderContext::pushRenderingContext()
@@ -132,6 +138,11 @@ void RenderContext::popRenderingContext()
 	ET_FAIL("Not implemented")
 }
 
+void RenderContext::performResizing(const vec2i& newSize)
+{
+    _private->resize(newSize);
+}
+
 /*
  *
  * RenderContextPrivate
@@ -140,8 +151,8 @@ void RenderContext::popRenderingContext()
 CVReturn cvDisplayLinkOutputCallback(CVDisplayLinkRef, const CVTimeStamp*, const CVTimeStamp*,
 	CVOptionFlags, CVOptionFlags*, void* displayLinkContext);
 
-RenderContextPrivate::RenderContextPrivate(RenderContext*, RenderContextParameters& params,
-	ApplicationParameters& appParams)
+RenderContextPrivate::RenderContextPrivate(RenderContext* aOwner, RenderContextParameters& params,
+    ApplicationParameters& appParams) : owner(aOwner)
 {
 	bool msaaEnabled = params.multisamplingQuality != MultisamplingQuality::None;
 	
@@ -208,7 +219,7 @@ RenderContextPrivate::RenderContextPrivate(RenderContext*, RenderContextParamete
     const auto& ctx = application().context();
     
     NSWindow* mainWindow = (NSWindow*)CFBridgingRelease(ctx.pointers[0]);
-    NSWindowController* mainWindowController = (NSWindowController*)CFBridgingRelease(ctx.pointers[1]);
+    // NSWindowController* mainWindowController = (NSWindowController*)CFBridgingRelease(ctx.pointers[1]);
     NSOpenGLView* openGlView = (NSOpenGLView*)CFBridgingRelease(ctx.pointers[2]);
 	
 	[openGlView setOpenGLContext:[[NSOpenGLContext alloc] initWithFormat:pixelFormat shareContext:nil]];
@@ -254,15 +265,9 @@ void RenderContextPrivate::stop()
 
 void RenderContextPrivate::performUpdateAndRender()
 {
-    ApplicationNotifier an;
-    
-    if (an.shouldPerformRendering())
+    if (application().shouldPerformRendering())
 	{
-		CGLLockContext(cOpenGLContext);
-		CGLSetCurrentContext(cOpenGLContext);
-		an.notifyUpdate();
-		CGLFlushDrawable(cOpenGLContext);
-		CGLUnlockContext(cOpenGLContext);
+        application().performUpdateAndRender();
 	}
 }
 
@@ -277,37 +282,18 @@ int RenderContextPrivate::displayLinkSynchronized()
 
     if (application().running() && !application().suspended())
     {
-        if (resizeScheduled)
-            resize(scheduledSize);
-        
         performUpdateAndRender();
     }
     
 	return kCVReturnSuccess;
 }
 
-void RenderContextPrivate::resize(const NSSize& sz)
+void RenderContextPrivate::resize(const vec2i& newSize)
 {
-	if (canPerformOperations())
-	{
-		CGLLockContext(cOpenGLContext);
-		CGLSetCurrentContext(cOpenGLContext);
-				
-		vec2i newSize(static_cast<int>(sz.width), static_cast<int>(sz.height));
-		
-        ApplicationNotifier an;
-		an.accessRenderContext()->renderState().defaultFramebuffer()->resize(newSize);
-		an.notifyResize(newSize);
-		
-		CGLUnlockContext(cOpenGLContext);
-		
-		resizeScheduled = false;
-	}
-	else
-	{
-		scheduledSize = sz;
-		resizeScheduled = true;
-	}
+    if (canPerformOperations())
+    {
+        owner->renderState().defaultFramebuffer()->resize(newSize);
+    }
 }
 
 /*
