@@ -27,5 +27,5 @@ float microfacetSpecular(in float NdotL, in float NdotV, in float NdotH, in floa
     float ggxD = a2 / (denom * denom);
     float ggxF = fresnelShlickApproximation(0.2f, NdotV);
     float ggxV = smithGGX(a2, NdotV) * smithGGX(a2, NdotL);
-    return ggxF * ggxD * ggxV / max(0.00001, NdotL * NdotV);
+    return (ggxF * ggxD * ggxV) / max(0.00001, 4.0 * NdotL * NdotV);
 }
