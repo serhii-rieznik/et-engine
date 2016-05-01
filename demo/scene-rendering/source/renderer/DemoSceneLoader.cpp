@@ -1,6 +1,7 @@
-#include <et/models/objloader.h>
-#include <et/primitives/primitives.h>
+#include <et/rendering/primitives.h>
+#include <et/scene3d/objloader.h>
 #include <et/app/application.h>
+
 #include "DemoSceneLoader.h"
 
 using namespace et;
@@ -9,11 +10,12 @@ using namespace demo;
 void SceneLoader::init(et::RenderContext* rc)
 {
 	_rc = rc;
+    _defaultMaterial = rc->materialFactory().loadMaterial(application().resolveFileName("media/materials/microfacet.material"));
 }
 
 et::s3d::Scene::Pointer SceneLoader::loadFromFile(const std::string& fileName)
 {
-	ET_ASSERT(_rc)
+    ET_ASSERT(_rc);
 	
 	et::s3d::Scene::Pointer result = et::s3d::Scene::Pointer::create();
 	
@@ -24,64 +26,50 @@ et::s3d::Scene::Pointer SceneLoader::loadFromFile(const std::string& fileName)
 	{
 		loadObjFile(fileName, result);
 	}
-	else if (ext == "etm")
-	{
-		ET_FAIL("Not implemented")
-	}
 	else
 	{
 		ET_FAIL("Not implemented")
 	}
-
-/*	
-	auto storages = result->childrenOfType(s3d::ElementType_Storage);
-	auto meshes = result->childrenOfType(s3d::ElementType_SupportMesh);
 	
-	for (s3d::Scene3dStorage::Pointer storage : storages)
-	{
-		for (auto va : storage->vertexArrays())
-		{
-			auto decl = va->decl();
-			
-			if (!decl.has(VertexAttributeUsage::Tangent))
-			{
-				decl.push_back(VertexAttributeUsage::Tangent, VertexAttributeType::Vec3);
-				
-				VertexArray::Pointer updated = VertexArray::Pointer::create(decl, va->size());
-				
-				for (auto& c : va->chunks())
-					c->copyTo(updated->chunk(c->usage()).reference());
-				
-				primitives::calculateTangents(updated, storage->indexArray(), 0,
-					static_cast<uint32_t>(storage->indexArray()->primitivesCount()));
-				
-				for (s3d::Mesh::Pointer mesh : meshes)
-				{
-					auto vao = result->vaoWithIdentifiers(mesh->vbName(), mesh->ibName());
-					
-					if (vao.valid())
-					{
-						_rc->renderState().bindVertexArray(vao);
-						vao->setVertexBuffer(_rc->vertexBufferFactory().createVertexBuffer(va->name(), updated, BufferDrawType::Static));
-					}
-				}
-				
-				va.reset(updated.ptr());
-				updated.reset(nullptr);
-			}
-		}
-	}
-*/	
 	return result;
 }
 
 void SceneLoader::loadObjFile(const std::string& fileName, et::s3d::Scene::Pointer scene)
 {
 	ObjectsCache localCache;
-	OBJLoader loader(_rc, fileName);
-	auto container = loader.load(localCache, OBJLoader::Option_SupportMeshes);
+    OBJLoader loader(fileName, OBJLoader::Option_JustLoad);
+    auto container = loader.load(_rc, this, scene->storage(), localCache);
+
+    // compute bounding box
+    vec3 minVertex(std::numeric_limits<float>::max());
+    vec3 maxVertex(-std::numeric_limits<float>::max());
+    auto meshes = container->childrenOfType(et::s3d::ElementType::Mesh);
+    for (s3d::Mesh::Pointer mesh : meshes)
+    {
+        minVertex = minv(minVertex, mesh->tranformedBoundingBox().minVertex());
+        maxVertex = maxv(maxVertex, mesh->tranformedBoundingBox().maxVertex());
+    }
+    vec3 bboxCenter = 0.5f * (minVertex + maxVertex);
+ 
+    // move objects to scene
 	auto allObjects = container->children();
 	for (auto c : allObjects)
 		c->setParent(scene.ptr());
+    
+    // add light
+    s3d::Light::Pointer lp = s3d::Light::Pointer::create();
+    lp->camera().setPosition(vec3(bboxCenter.x, maxVertex.y + std::abs(maxVertex.y), bboxCenter.z));
+    lp->setParent(scene.ptr());
 }
 
+et::Material::Pointer SceneLoader::materialWithName(const std::string& key)
+{
+    auto i = _materialMap.find(key);
+    if (i == _materialMap.end())
+    {
+        log::error("No material for key: %s", key.c_str());
+        return _defaultMaterial;
+    }
+    
+    return i->second;
+}

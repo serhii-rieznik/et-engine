@@ -49,8 +49,8 @@ void Program::initBuiltInUniforms()
 	_builtInUniforms["matView"] = &_matViewLocation;
 	_builtInUniforms["matViewProjection"] = &_matViewProjectionLocation;
 	_builtInUniforms["matLightViewProjection"] = &_matLightViewProjectionLocation;
-	_builtInUniforms["vCamera"] = &_vCameraLocation;
-	_builtInUniforms["vPrimaryLight"] = &_vPrimaryLightLocation;
+	_builtInUniforms["defaultCamera"] = &_defaultCameraLocation;
+	_builtInUniforms["defaultLight"] = &_defaultLightLocation;
 }
 
 Program::UniformMap::const_iterator Program::findUniform(const std::string& name) const
@@ -95,12 +95,12 @@ void Program::setViewProjectionMatrix(const mat4& m, bool forced)
 
 void Program::setCameraPosition(const vec3& p, bool forced)
 {
-	setUniform(_vCameraLocation, GL_FLOAT_VEC3, p, forced);
+	setUniform(_defaultCameraLocation, GL_FLOAT_VEC3, p, forced);
 }
 
-void Program::setPrimaryLightPosition(const vec3& p, bool forced)
+void Program::setDefaultLightPosition(const vec3& p, bool forced)
 {
-	setUniform(_vPrimaryLightLocation, GL_FLOAT_VEC3, p, forced);
+	setUniform(_defaultLightLocation, GL_FLOAT_VEC3, p, forced);
 }
 
 void Program::setLightProjectionMatrix(const mat4& m, bool forced)

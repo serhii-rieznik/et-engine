@@ -3,6 +3,6 @@
 
 newmtl default_Mesh_default
 	Ns 0.0
-	Tr 0.841
+	Tr 0.0
 	Kd 0.170000 1.00000 0.385000
 	Ks 1.00000 1.00000 1.00000

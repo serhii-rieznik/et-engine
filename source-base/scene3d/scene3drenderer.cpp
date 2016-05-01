@@ -27,8 +27,16 @@ void s3d::Renderer::render(RenderContext* rc, const Scene& scene, const Camera& 
     auto& rs = rc->renderState();
 	rs.setFillMode(hasFlag(Wireframe) ? FillMode::Wireframe : FillMode::Solid);
     
+    auto lights = scene.childrenOfType(et::s3d::ElementType::Light);
+    auto lightPosition = camera.position();
+    if (lights.empty() == false)
+    {
+        auto light = static_cast<s3d::Light::Pointer>(lights.front());
+        lightPosition = light->camera().position();
+    }
+    
 	RenderSystem renderSystem(rc);
-	auto pass = renderSystem.allocateRenderPass({camera});
+	auto pass = renderSystem.allocateRenderPass({camera, lightPosition});
 	renderMeshList(pass, scene.childrenOfType(s3d::ElementType::Mesh));
 	renderSystem.submitRenderPass(pass);
     
@@ -51,7 +59,7 @@ void s3d::Renderer::renderMeshList(RenderPass::Pointer pass, const s3d::BaseElem
 		}
 	}
 
-	auto cameraPosition = pass->camera().position();
+	auto cameraPosition = pass->info().camera.position();
 	for (auto& rbv : _latestBatches)
 	{
 		std::sort(rbv.second.begin(), rbv.second.end(), [cameraPosition](BatchFromMesh& l, BatchFromMesh& r)

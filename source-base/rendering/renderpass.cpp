@@ -10,7 +10,7 @@
 using namespace et;
 
 RenderPass::RenderPass(const ConstructionInfo& info) :
-	_camera(info.camera)
+	_info(info)
 {
 	_renderBatches.reserve(256);
 }
@@ -37,9 +37,4 @@ const Vector<RenderBatch::Pointer>& RenderPass::renderBatches() const
 Vector<RenderBatch::Pointer>& RenderPass::renderBatches()
 {
 	return _renderBatches;
-}
-
-const et::Camera& RenderPass::camera() const
-{
-	return _camera;
 }

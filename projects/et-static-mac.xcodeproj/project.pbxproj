@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		6E954C811CD2610C00A12C68 /* context_osx.h in Headers */ = {isa = PBXBuildFile; fileRef = 6E954C801CD2610C00A12C68 /* context_osx.h */; };
 		6E954C851CD266C000A12C68 /* context_osx.mm in Sources */ = {isa = PBXBuildFile; fileRef = 6E954C841CD266C000A12C68 /* context_osx.mm */; };
+		6E9587B51CD6990F0005A95B /* light.h in Headers */ = {isa = PBXBuildFile; fileRef = 6E9587B41CD6990F0005A95B /* light.h */; };
 		6EBE211C1C66B8BE00AF7206 /* appevironment.h in Headers */ = {isa = PBXBuildFile; fileRef = 6EBE1F5D1C66B8BE00AF7206 /* appevironment.h */; };
 		6EBE211D1C66B8BE00AF7206 /* application.h in Headers */ = {isa = PBXBuildFile; fileRef = 6EBE1F5E1C66B8BE00AF7206 /* application.h */; };
 		6EBE211E1C66B8BE00AF7206 /* applicationdelegate.h in Headers */ = {isa = PBXBuildFile; fileRef = 6EBE1F5F1C66B8BE00AF7206 /* applicationdelegate.h */; };
@@ -288,6 +289,7 @@
 		6E954C7F1CD25EEC00A12C68 /* context.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = context.h; sourceTree = "<group>"; };
 		6E954C801CD2610C00A12C68 /* context_osx.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = context_osx.h; sourceTree = "<group>"; };
 		6E954C841CD266C000A12C68 /* context_osx.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = context_osx.mm; sourceTree = "<group>"; };
+		6E9587B41CD6990F0005A95B /* light.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = light.h; sourceTree = "<group>"; };
 		6EBE15B11C66B4AD00AF7206 /* libet-static-mac.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libet-static-mac.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		6EBE1F5D1C66B8BE00AF7206 /* appevironment.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = appevironment.h; sourceTree = "<group>"; };
 		6EBE1F5E1C66B8BE00AF7206 /* application.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = application.h; sourceTree = "<group>"; };
@@ -857,6 +859,7 @@
 				6EBE20051C66B8BE00AF7206 /* base.h */,
 				6EBE20061C66B8BE00AF7206 /* baseelement.h */,
 				6EBE20071C66B8BE00AF7206 /* elementcontainer.h */,
+				6E9587B41CD6990F0005A95B /* light.h */,
 				6EBE20081C66B8BE00AF7206 /* lineelement.h */,
 				6EBE20091C66B8BE00AF7206 /* material.parameters.h */,
 				6EBE200A1C66B8BE00AF7206 /* mesh.h */,
@@ -1233,6 +1236,7 @@
 				6EBE214F1C66B8BE00AF7206 /* singleton.h in Headers */,
 				6EBE212F1C66B8BE00AF7206 /* base64.h in Headers */,
 				6EBE21761C66B8BE00AF7206 /* vector4.h in Headers */,
+				6E9587B51CD6990F0005A95B /* light.h in Headers */,
 				6EBE21421C66B8BE00AF7206 /* intrusiveptr.h in Headers */,
 				6EBE21671C66B8BE00AF7206 /* rect.h in Headers */,
 				6EBE21BE1C66B8BE00AF7206 /* modelloader.h in Headers */,

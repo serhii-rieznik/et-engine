@@ -13,6 +13,7 @@
 #include <et/scene3d/storage.h>
 #include <et/scene3d/particlesystem.h>
 #include <et/scene3d/lineelement.h>
+#include <et/scene3d/light.h>
 #include <et/scene3d/skeletonelement.h>
 #include <et/scene3d/mesh.h>
 

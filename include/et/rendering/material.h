@@ -89,6 +89,8 @@ namespace et
 		struct Snapshot
 		{
 			Vector<DataProperty> properties;
+            BinaryDataStorage propertiesData;
+            
 			Vector<TextureProperty> textures;
 			DepthState depth;
 			BlendState blend;
@@ -103,7 +105,7 @@ namespace et
 		void addTexture(const String&, int32_t location, uint32_t unit);
 		void updateDataProperty(DataProperty&, const void*);
 		
-		void applyProperty(const DataProperty&);
+		void applyProperty(const DataProperty&, const BinaryDataStorage&);
 		
 	public:
 		MaterialFactory* _factory = nullptr;

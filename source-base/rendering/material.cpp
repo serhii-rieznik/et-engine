@@ -109,7 +109,7 @@ void Material::enableInRenderState(RenderState& rs)
 	{
 		if (i.second.requireUpdate)
 		{
-			applyProperty(i.second);
+			applyProperty(i.second, _propertiesData);
 			i.second.requireUpdate = false;
 		}
 	}
@@ -224,6 +224,8 @@ uint64_t Material::makeSnapshot()
 	{
 		snapshot.properties.emplace_back(p.second);
 	}
+    
+    snapshot.propertiesData = _propertiesData;
 	
 	_shouldUpdateSnapshot = false;
 	_lastShapshotIndex = _snapshots.size() - 1;
@@ -247,14 +249,14 @@ void Material::enableSnapshotInRenderState(RenderState& rs, uint64_t index)
 	rs.bindProgram(_program);
 	for (const auto& i : snapshot.properties)
 	{
-		applyProperty(i);
+		applyProperty(i, snapshot.propertiesData);
 	}
 }
 
-void Material::applyProperty(const DataProperty& prop)
+void Material::applyProperty(const DataProperty& prop, const BinaryDataStorage& data)
 {
 	auto format = dataTypeDataFormat(prop.type);
-	auto ptr = _propertiesData.element_ptr(prop.offset);
+	auto ptr = data.element_ptr(prop.offset);
 	auto programPtr = _program.ptr();
 	if (format == DataFormat::Int)
 	{

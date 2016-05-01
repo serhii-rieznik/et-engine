@@ -60,10 +60,10 @@ namespace et
 			{ return _matViewProjectionLocation; }
 
 		int cameraUniformLocation() const
-			{ return _vCameraLocation; }
+			{ return _defaultCameraLocation; }
 
 		int primaryLightUniformLocation() const
-			{ return _vPrimaryLightLocation; }
+			{ return _defaultLightLocation; }
 
 		int lightProjectionMatrixLocation() const
 			{ return _matLightViewProjectionLocation; }
@@ -74,7 +74,7 @@ namespace et
 		void setViewMatrix(const mat4 &m, bool force = false);
 		void setViewProjectionMatrix(const mat4 &m, bool force = false);
 		void setCameraPosition(const vec3& p, bool force = false);
-		void setPrimaryLightPosition(const vec3& p, bool force = false);
+		void setDefaultLightPosition(const vec3& p, bool force = false);
 		void setLightProjectionMatrix(const mat4 &m, bool force = false);
 		void setTransformMatrix(const mat4 &m, bool force = false);
 
@@ -183,8 +183,8 @@ namespace et
 
 		int _matViewLocation = -1;
 		int _matViewProjectionLocation = -1;
-		int _vCameraLocation = -1;
-		int _vPrimaryLightLocation = -1;
+		int _defaultCameraLocation = -1;
+		int _defaultLightLocation = -1;
 		int _matLightViewProjectionLocation = -1;
 		int _matWorldLocation = -1;
 

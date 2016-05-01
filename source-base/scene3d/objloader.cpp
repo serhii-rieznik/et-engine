@@ -870,8 +870,8 @@ s3d::ElementContainer::Pointer OBJLoader::generateVertexBuffers(s3d::Storage& st
 		rb->setIndexArray(_indices);
 		
 		s3d::Mesh::Pointer object = Mesh::Pointer::create(i.name, i.material, result.ptr());
-		
 		object->addRenderBatch(rb);
+        object->calculateSupportData();
 	}
 
 	return result;

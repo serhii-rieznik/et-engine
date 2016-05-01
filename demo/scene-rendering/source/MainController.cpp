@@ -5,16 +5,14 @@
 using namespace et;
 using namespace demo;
 
-void MainController::setApplicationParameters(et::ApplicationParameters&)
+void MainController::setApplicationParameters(et::ApplicationParameters& params)
 {
-	
+    params.context.size = vec2i(1024, 768);
 }
 
 void MainController::setRenderContextParameters(et::RenderContextParameters& params)
 {
-	params.contextSize = vec2i(1024, 768);
-	params.contextBaseSize = params.contextSize;
-	params.multisamplingQuality = MultisamplingQuality_Best;
+    params.multisamplingQuality = MultisamplingQuality::Best;
 }
 
 void MainController::applicationDidLoad(et::RenderContext* rc)
@@ -34,47 +32,33 @@ void MainController::applicationDidLoad(et::RenderContext* rc)
 	
 	rc->renderingInfoUpdated.connect([this](const et::RenderingInfo& info)
 	{
-		log::info("Rendering stats: %lu fps, %lu polys, %lu draw calls", info.averageFramePerSecond,
-			info.averagePolygonsPerSecond, info.averageDIPPerSecond);
+//		log::info("Rendering stats: %lu fps, %lu polys, %lu draw calls", info.averageFramePerSecond,
+//			info.averagePolygonsPerSecond, info.averageDIPPerSecond);
 	});
-	
-	_gestures.drag.connect([this](et::vec2 d, size_t)
-	{
-		_cameraController.handlePointerDrag(d);
-	});
-	
+    
+    _camera.lookAt(vec3(500.0f));
+    _cameraController = et::CameraMovingController::Pointer::create(_camera, true);
+    _cameraController->setIntepolationRate(10.0f);
+    _cameraController->setMovementSpeed(vec3(100.0f));
+    _cameraController->synchronize(_camera);
+    _cameraController->startUpdates();
+		
 	_loader.init(rc);
 	_renderer.init(rc);
-	_cameraController.init(rc);
 	
-	auto loadedScene = _loader.loadFromFile(application().resolveFileName("bunny.obj"));
+	auto loadedScene = _loader.loadFromFile(application().resolveFileName("media/material-test.obj"));
 	_renderer.setScene(loadedScene);
-
-	connectInputEvents();
-}
-
-void MainController::connectInputEvents()
-{
-	input().keyPressed.connect([this](size_t key)
-	{
-		_cameraController.handlePressedKey(key);
-		_renderer.handlePressedKey(key);
-	});
-	
-	input().keyReleased.connect([this](size_t key)
-	{
-		_cameraController.handleReleasedKey(key);
-	});
 }
 
  void MainController::applicationWillResizeContext(const et::vec2i& sz)
 {
-	_cameraController.adjustCameraToNextContextSize(vector2ToFloat(sz));
+    vec2 fSz = vector2ToFloat(sz);
+    _camera.perspectiveProjection(DEG_45, fSz.aspect(), 1.0f, 1024.0f);
 }
 
 void MainController::render(et::RenderContext* rc)
 {
-	_renderer.render(_cameraController.camera(), _cameraController.observerCamera(), false);
+	_renderer.render(_camera, _camera);
 }
 
 et::IApplicationDelegate* et::Application::initApplicationDelegate()
