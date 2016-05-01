@@ -57,7 +57,7 @@ namespace et
             enum : size_t
 			{
 				MaxVertexLinks = 16,
-				MaxVertexSize = 3
+				MaxVertexSize = 4
 			};
 			using VertexLink = StaticDataStorage<size_t, MaxVertexSize>;
 

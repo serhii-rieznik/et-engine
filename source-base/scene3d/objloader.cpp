@@ -225,7 +225,6 @@ void OBJLoader::loadData(bool async, ObjectsCache& cache)
 				std::string materialId;
 				inputFile >> materialId;
 				
-                ET_ASSERT(_groups.empty() == false);
                 if (_groups.empty())
                 {
                     auto groupName = "group-" + intToStr(_lastGroupId++) + "-" + materialId;
