@@ -173,9 +173,10 @@ void RaytracePrivate::emitWorkerThreads()
 		viewportSize.x, viewportSize.y, static_cast<uint64_t>(options.raysPerPixel), totalRays);
 
 	running = true;
-	threadCounter.store(std::thread::hardware_concurrency());
-	for (uint32_t i = 0, e = std::thread::hardware_concurrency(); i < e; ++i)
-    // uint32_t i = 0;
+
+	uint32_t threadsCount = 1;
+	threadCounter.store(threadsCount);
+	for (uint32_t i = 0; i < threadsCount; ++i)
 	{
 #   if (ET_RT_EVALUATE_DISTRIBUTION)
         workerThreads.emplace_back(&RaytracePrivate::visualizeDistributionThreadFunction, this, i);
@@ -456,81 +457,66 @@ void RaytracePrivate::visualizeDistributionThreadFunction(uint32_t index)
     }
 }
 
-void RaytracePrivate::forwardPathTraceThreadFunction(uint32_t index)
+void RaytracePrivate::forwardPathTraceThreadFunction(uint32_t threadId)
 {
     if (lightTriangles.empty())
     {
         log::error("No light sources found in scene");
         return;
     }
-    
-    Vector<rt::float4> localBuffer(viewportSize.square(), rt::float4(0.0f));
-    
-    auto put = [this, &localBuffer](const rt::float4& pt, const rt::float4& color)
-    {
-        rt::float4 cameraPosition(camera.position(), 0.0f);
-        rt::float4 directionToPoint = pt - cameraPosition;
-        directionToPoint.normalize();
-        
-        rt::Ray testRay(cameraPosition, directionToPoint);
-        auto hit = kdTree.traverse(testRay);
-        if ((hit.intersectionPoint - pt).dotSelf() <= rt::Constants::epsilonSquared)
-        {
-            auto projected = camera.project(pt.toVec4().xyz());
-            if ((std::abs(projected.x) <= 1.0f) && (std::abs(projected.y) <= 1.0f) && (std::abs(projected.z) <= 1.0f))
-            {
-                projected = (projected * 0.5f + vec3(0.5f)) * vec3(vector2ToFloat(viewportSize), 1.0f);
-                vec2i vp(static_cast<int>(projected.x), static_cast<int>(projected.y));
-                auto& sample = localBuffer[vp.x + vp.y * viewportSize.x];
-                sample += color * rt::float4(1.0f, 1.0f, 1.0f, 0.0f) + rt::float4(0.0f, 0.0f, 0.0f, 1.0f);
-            }
-        }
-    };
-    
-    size_t raysShot = 0;
-    size_t raysToFlush = 256;
-    while (running)
-    {
-        const auto& sourceTriangle = lightTriangles.at(rand() % lightTriangles.size());
-        rt::float4 bc = rt::randomBarycentric();
-        rt::float4 sourceNormal = sourceTriangle.interpolatedNormal(bc);
-        rt::float4 sourcePoint = sourceTriangle.interpolatedPosition(bc) + sourceNormal * rt::Constants::epsilonSquared;
-        
-        rt::Ray currentRay(sourcePoint, rt::randomVectorOnHemisphere(sourceNormal, rt::uniformDistribution));
-        rt::float4 color = materials[sourceTriangle.materialIndex].emissive;
-        color *= currentRay.direction.dot(sourceNormal);
-        
-        const size_t maxBonces = 8;
-        for (size_t bounce = 0; bounce < maxBonces; ++bounce)
-        {
-            auto hit = kdTree.traverse(currentRay);
-            if (hit.triangleIndex == InvalidIndex)
-            {
-                put(currentRay.origin, color);
-                break;
-            }
-            
-            const auto& tri = kdTree.triangleAtIndex(hit.triangleIndex);
-            const auto& mat = materials.at(tri.materialIndex);
-            rt::float4 nrm = tri.interpolatedNormal(hit.intersectionPointBarycentric);
-            
-            float cosTheta = std::max(0.0f, -nrm.dot(currentRay.direction));
-            color *= mat.diffuse * cosTheta / PI;
-            
-            put(hit.intersectionPoint, color);
-            
-            currentRay.origin = hit.intersectionPoint;
-            currentRay.direction = rt::randomVectorOnHemisphere(nrm, rt::uniformDistribution);
-            
-            color *= nrm.dot(currentRay.direction) / PI;
-        }
 
-        if (++raysShot == raysToFlush)
-        {
-            flushToForwardTraceBuffer(localBuffer, raysToFlush);
-            std::fill(localBuffer.begin(), localBuffer.end(), rt::float4(0.0f));
-            raysShot = 0;
-        }
+	rt::float4 cameraPos(camera.position(), 0.0f);
+	vec3 viewport = vector3ToFloat(vec3i(viewportSize, 0));
+	auto projectToCamera = [this, &cameraPos, &viewport](const rt::KDTree::TraverseResult& hit, const rt::float4& color)
+	{
+		auto tri = kdTree.triangleAtIndex(hit.triangleIndex);
+		auto pos = hit.intersectionPoint;
+		auto nrm = tri.interpolatedNormal(hit.intersectionPointBarycentric);
+
+		rt::float4 cameraDirection = pos - cameraPos;
+		float distanceToCamera = cameraDirection.length();
+		cameraDirection /= distanceToCamera;
+
+		if (cameraDirection.dot(nrm) >= 0.0f)
+			return;
+
+		rt::Ray backRay(cameraPos, cameraDirection);
+		auto backHit = kdTree.traverse(backRay);
+		if (backHit.triangleIndex != hit.triangleIndex)
+			return;
+
+		auto projected = camera.project(pos.xyz());
+		if ((projected.x * projected.x > 1.0f) || (projected.y * projected.y > 1.0f) || (projected.z * projected.z > 1.0f))
+			return;
+
+		projected = (0.5f * projected + vec3(0.5f)) * viewport;
+		vec2i pixel(static_cast<int>(projected.x), static_cast<int>(projected.y));
+		owner->output(pixel, (color * rt::float4(1.0f, 1.0f, 1.0f, 0.0f) + rt::float4(0.0f, 0.0f, 0.0f, 1.0f)).toVec4());
+	};
+
+	const int raysPerIteration = viewportSize.square();
+
+    // while (running)
+    {
+		for (int i = 0; running && (i < raysPerIteration); ++i)
+		{
+			rt::Triangle emitterTriangle = lightTriangles.at(rand() % lightTriangles.size());
+			rt::float4 uv = rt::randomBarycentric();
+			rt::float4 sourcePos = emitterTriangle.interpolatedPosition(uv);
+			rt::float4 sourceDir = emitterTriangle.interpolatedNormal(uv);
+			rt::float4 color = materials.at(emitterTriangle.materialIndex).emissive;
+
+			sourceDir = rt::randomVectorOnHemisphere(sourceDir, rt::uniformDistribution);
+			rt::Ray currentRay(sourcePos + sourceDir * rt::Constants::epsilon, sourceDir);
+
+			auto hit = kdTree.traverse(currentRay);
+			if (hit.triangleIndex == InvalidIndex)
+			{
+				continue;
+			}
+
+			projectToCamera(hit, color);
+		}
     }
 }
 
