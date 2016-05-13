@@ -40,10 +40,11 @@ const mat4& Camera::perspectiveProjection(float fov, float aspect, float zNear, 
 	_zFar = zFar;
 	_zNear = zNear;
 	_perspecitveAspect = aspect;
+	_fov = fov;
 
 	_projectionMatrix = identityMatrix;
 
-	float fHalfFOV = 0.5f * fov;
+	float fHalfFOV = 0.5f * _fov;
 	float cotan = std::cos(fHalfFOV) / std::sin(fHalfFOV);
 	float dz = _zFar - _zNear;
 

@@ -47,7 +47,7 @@ public:
 	void fillRegionWithColor(const rt::Region&, const vec4& color);
 	void renderTriangle(const rt::Triangle&);
     
-    void flushToForwardTraceBuffer(const Vector<rt::float4>&, size_t);
+    void flushToForwardTraceBuffer(const Vector<rt::float4>&);
 
 public:
 	Raytrace* owner = nullptr;
@@ -74,7 +74,7 @@ public:
 
 	Vector<rt::float4> forwardTraceBuffer;
 	std::mutex forwardTraceBufferMutex;
-    size_t totalRaysShot = 0;
+    size_t flushCounter = 0;
 };
 
 using namespace et;
@@ -174,7 +174,7 @@ void RaytracePrivate::emitWorkerThreads()
 
 	running = true;
 
-	uint32_t threadsCount = 1;
+	uint32_t threadsCount = std::thread::hardware_concurrency();
 	threadCounter.store(threadsCount);
 	for (uint32_t i = 0; i < threadsCount; ++i)
 	{
@@ -465,9 +465,19 @@ void RaytracePrivate::forwardPathTraceThreadFunction(uint32_t threadId)
         return;
     }
 
+	const int iterations = 5;
+	const int raysPerIteration = viewportSize.square();
+
+	float tanFOV = std::tan(0.5f * camera.fieldOfView());
+	float imagePlaneDistance = static_cast<float>(viewportSize.y) / (2.0f * tanFOV);
+
+	Vector<rt::float4> localBuffer(viewportSize.square(), rt::float4(0.0f));
+
 	rt::float4 cameraPos(camera.position(), 0.0f);
+	rt::float4 cameraDir(-camera.direction(), 0.0f);
 	vec3 viewport = vector3ToFloat(vec3i(viewportSize, 0));
-	auto projectToCamera = [this, &cameraPos, &viewport](const rt::KDTree::TraverseResult& hit, const rt::float4& color)
+
+	auto projectToCamera = [&](const rt::KDTree::TraverseResult& hit, const rt::float4& color)
 	{
 		auto tri = kdTree.triangleAtIndex(hit.triangleIndex);
 		auto pos = hit.intersectionPoint;
@@ -477,7 +487,12 @@ void RaytracePrivate::forwardPathTraceThreadFunction(uint32_t threadId)
 		float distanceToCamera = cameraDirection.length();
 		cameraDirection /= distanceToCamera;
 
-		if (cameraDirection.dot(nrm) >= 0.0f)
+		float VdotN = -cameraDirection.dot(nrm);
+		if (VdotN < 0.0f)
+			return;
+
+		auto projected = camera.project(pos.xyz());
+		if ((projected.x * projected.x > 1.0f) || (projected.y * projected.y > 1.0f) || (projected.z * projected.z > 1.0f))
 			return;
 
 		rt::Ray backRay(cameraPos, cameraDirection);
@@ -485,19 +500,21 @@ void RaytracePrivate::forwardPathTraceThreadFunction(uint32_t threadId)
 		if (backHit.triangleIndex != hit.triangleIndex)
 			return;
 
-		auto projected = camera.project(pos.xyz());
-		if ((projected.x * projected.x > 1.0f) || (projected.y * projected.y > 1.0f) || (projected.z * projected.z > 1.0f))
-			return;
+		float bsdfValue = 1.0f / PI;
+		float VdotD = cameraDir.dot(cameraDirection);
+		float imagePointToCameraDist = imagePlaneDistance / VdotD;
+		float imageToSolidAngleFactor = sqr(imagePointToCameraDist) / VdotD;
+		float imageToSurfaceFactor = imageToSolidAngleFactor * VdotN / sqr(distanceToCamera);
+		float scaleFactor = (imageToSurfaceFactor * bsdfValue) / static_cast<float>(raysPerIteration);
 
 		projected = (0.5f * projected + vec3(0.5f)) * viewport;
 		vec2i pixel(static_cast<int>(projected.x), static_cast<int>(projected.y));
-		owner->output(pixel, (color * rt::float4(1.0f, 1.0f, 1.0f, 0.0f) + rt::float4(0.0f, 0.0f, 0.0f, 1.0f)).toVec4());
+		localBuffer[pixel.x + pixel.y * viewportSize.x] += color * scaleFactor;
 	};
 
-	const int raysPerIteration = viewportSize.square();
 
-    // while (running)
-    {
+	for (int i = 0; running && (i < iterations); ++i)
+	{
 		for (int i = 0; running && (i < raysPerIteration); ++i)
 		{
 			rt::Triangle emitterTriangle = lightTriangles.at(rand() % lightTriangles.size());
@@ -506,18 +523,42 @@ void RaytracePrivate::forwardPathTraceThreadFunction(uint32_t threadId)
 			rt::float4 sourceDir = emitterTriangle.interpolatedNormal(uv);
 			rt::float4 color = materials.at(emitterTriangle.materialIndex).emissive;
 
-			sourceDir = rt::randomVectorOnHemisphere(sourceDir, rt::uniformDistribution);
+			sourceDir = rt::randomVectorOnHemisphere(sourceDir, rt::cosineDistribution);
 			rt::Ray currentRay(sourcePos + sourceDir * rt::Constants::epsilon, sourceDir);
 
-			auto hit = kdTree.traverse(currentRay);
-			if (hit.triangleIndex == InvalidIndex)
+			rt::index maxPathLength = rt::PathTraceIntegrator::MaxTraverseDepth;
+			for (rt::index pathLength = 0; pathLength < maxPathLength; ++pathLength)
 			{
-				continue;
-			}
+				auto hit = kdTree.traverse(currentRay);
+				if (hit.triangleIndex == InvalidIndex)
+				{
+					break;
+				}
 
-			projectToCamera(hit, color);
+				const auto& tri = kdTree.triangleAtIndex(hit.triangleIndex);
+				const auto& nrm = tri.interpolatedNormal(hit.intersectionPointBarycentric);
+				const auto& mat = materials.at(tri.materialIndex);
+
+				if (mat.emissive.dotSelf() > 0.0f)
+				{
+					color += mat.emissive;
+					projectToCamera(hit, color);
+					break;
+				}
+
+				color *= mat.diffuse;
+				projectToCamera(hit, color);
+
+				currentRay.direction = rt::randomVectorOnHemisphere(nrm, rt::cosineDistribution);
+				currentRay.origin = hit.intersectionPoint + currentRay.direction * rt::Constants::epsilon;
+			}
 		}
+
+		log::info("Iteration finished");
+		flushToForwardTraceBuffer(localBuffer);
+		std::fill(localBuffer.begin(), localBuffer.end(), rt::float4(0.0f));
     }
+
 }
 
 void RaytracePrivate::backwardPathTraceThreadFunction(uint32_t threadId)
@@ -765,11 +806,13 @@ void RaytracePrivate::renderTriangle(const rt::Triangle& tri)
 	renderLine(c2, c0, lineColor);
 }
 
-void RaytracePrivate::flushToForwardTraceBuffer(const Vector<rt::float4>& localBuffer, size_t raysToFlush)
+void RaytracePrivate::flushToForwardTraceBuffer(const Vector<rt::float4>& localBuffer)
 {
     std::lock_guard<std::mutex> lock(forwardTraceBufferMutex);
+
+	flushCounter++;
     
-    float rsScale = 1.0f / static_cast<float>(++totalRaysShot);
+    float rsScale = 1.0f / static_cast<float>(flushCounter);
     
     auto src = localBuffer.data();
     auto dst = forwardTraceBuffer.data();
@@ -777,22 +820,19 @@ void RaytracePrivate::flushToForwardTraceBuffer(const Vector<rt::float4>& localB
     {
         *dst += *src;
         
-        vec4 output = dst->toVec4();
-        if (output.w > 0.0f)
-        {
-            output *= rsScale;
+        vec4 output = dst->toVec4() * rsScale;
+		output.w = 1.0f;
+
+#   if (ET_RT_ENABLE_GAMMA_CORRECTION)
+		output.x = std::pow(output.x, 1.0f / 2.2f);
+		output.y = std::pow(output.y, 1.0f / 2.2f);
+		output.z = std::pow(output.z, 1.0f / 2.2f);
+		ET_ASSERT(!isnan(output.x));
+		ET_ASSERT(!isnan(output.y));
+		ET_ASSERT(!isnan(output.z));
+#    endif
             
-#       if (ET_RT_ENABLE_GAMMA_CORRECTION)
-            output.x = std::pow(output.x, 1.0f / 2.2f);
-            output.y = std::pow(output.y, 1.0f / 2.2f);
-            output.z = std::pow(output.z, 1.0f / 2.2f);
-            ET_ASSERT(!isnan(output.x));
-            ET_ASSERT(!isnan(output.y));
-            ET_ASSERT(!isnan(output.z));
-#       endif
-            
-            vec2i px(static_cast<int>(i % viewportSize.x), static_cast<int>(i / viewportSize.x));
-            owner->output(px, output);
-        }
+		vec2i px(static_cast<int>(i % viewportSize.x), static_cast<int>(i / viewportSize.x));
+		owner->output(px, output);
     }
 }
