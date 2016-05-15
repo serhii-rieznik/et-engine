@@ -472,25 +472,25 @@ void OBJLoader::loadMaterials(const std::string& fileName, bool async, ObjectsCa
 				
 				if (next == 'a')
 				{
-					vec4 value;
+					vec4 value(0.0f);
 					materialFile >> value;
 					_lastMaterial->setVector(MaterialParameter::AmbientColor, value);
 				} 
 				else if (next == 'd')
 				{
-					vec4 value;
+					vec4 value(0.0f);
 					materialFile >> value;
 					_lastMaterial->setVector(MaterialParameter::DiffuseColor, value);
 				} 
 				else if (next == 's')
 				{
-					vec4 value;
+					vec4 value(0.0f);
 					materialFile >> value;
 					_lastMaterial->setVector(MaterialParameter::SpecularColor, value);
 				} 
 				else if (next == 'e')
 				{
-					vec4 value;
+					vec4 value(0.0f);
 					materialFile >> value;
 					_lastMaterial->setVector(MaterialParameter::EmissiveColor, value);
 				} 

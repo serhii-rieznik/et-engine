@@ -325,8 +325,7 @@ KDTree::TraverseResult KDTree::traverse(const Ray& ray)
 	KDTree::TraverseResult result;
 	
     float_type eps = Constants::epsilon;
-    float_type eps2 = Constants::epsilonSquared;
-    
+
 	float_type tNear = 0.0f;
 	float_type tFar = 0.0f;
 	
@@ -340,7 +339,7 @@ KDTree::TraverseResult KDTree::traverse(const Ray& ray)
 	ray.direction.loadToFloats(direction);
 
 	ET_ALIGNED(16) float_type originDivDirection[4];
-	(ray.origin / ray.direction).loadToFloats(originDivDirection);
+	(ray.origin / (ray.direction + rt::float4(std::numeric_limits<float>::epsilon()))).loadToFloats(originDivDirection);
     
 	Node localNode = _nodes.front();
 	FastStack<DepthLimit + 1, KDTreeSearchNode> traverseStack;
@@ -376,29 +375,31 @@ KDTree::TraverseResult KDTree::traverse(const Ray& ray)
 			{
 				auto triangleIndex = _indices[i];
 				auto data = _intersectionData[triangleIndex];
-
+				
 				float4 pvec = ray.direction.crossXYZ(data.edge2to0);
                 float det = data.edge1to0.dot(pvec);
-                if (det * det >= eps2)
+                if (det == 0.0f)
+					continue;
+
+				float inv_dev = 1.0f / det;
+
+				float4 tvec = ray.origin - data.v0;
+				float u = tvec.dot(pvec) * inv_dev;
+				if ((u < 0.0f) || (u > 1.0f))
+					continue;
+
+				float4 qvec = tvec.crossXYZ(data.edge1to0);
+				float v = ray.direction.dot(qvec) * inv_dev;
+				float uv = u + v;
+				if ((v < 0.0f) || (uv > 1.0f))
+					continue;
+
+				float t = data.edge2to0.dot(qvec) * inv_dev;
+				if ((t < minDistance) && (t <= tFar) && (t > 0.0f))
 				{
-					float4 tvec = ray.origin - data.v0;
-                    float u = tvec.dot(pvec) / det;
-                    if ((u >= 0.0f) && (u <= Constants::onePlusEpsilon))
-					{
-						float4 qvec = tvec.crossXYZ(data.edge1to0);
-                        float v = ray.direction.dot(qvec) / det;
-                        float uv = u + v;
-						if ((v >= 0.0f) && (uv <= Constants::onePlusEpsilon))
-						{
-							float_type intersectionDistance = data.edge2to0.dot(qvec) / det;
-							if ((intersectionDistance <= minDistance) && (intersectionDistance <= tFar) && (intersectionDistance > 0.0f))
-							{
-								result.triangleIndex = triangleIndex;
-								result.intersectionPointBarycentric = float4(1.0f - uv, u, v, 0.0f);
-								minDistance = intersectionDistance;
-							}
-						}
-					}
+					minDistance = t;
+					result.triangleIndex = triangleIndex;
+					result.intersectionPointBarycentric = float4(1.0f - uv, u, v, 0.0f);
 				}
 			}
 
@@ -418,7 +419,7 @@ KDTree::TraverseResult KDTree::traverse(const Ray& ray)
 		localNode = _nodes[traverseStack.top().ind];
         tNear = tFar - eps;
 		tFar = traverseStack.top().time + eps;
-		
+
 		traverseStack.pop();
 	}
 	

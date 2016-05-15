@@ -57,6 +57,7 @@ public:
 	rt::Integrator::Pointer integrator;
 	rt::Material::Collection materials;
 	rt::TriangleList lightTriangles;
+	Map<size_t, rt::index> lightTriangleToIndex;
 	Camera camera;
 	vec2i viewportSize;
 	vec2i regionSize;
@@ -98,9 +99,16 @@ void Raytrace::perform(s3d::Scene::Pointer scene, const Camera& cam, const vec2i
 
 	_private->buildRegions(vec2i(static_cast<int>(_private->options.renderRegionSize)));
 
-	Invocation([this]() {
-		_private->estimateRegionsOrder();
-	}).invokeInBackground();
+	if (_private->options.method == Raytrace::Method::PathTracing)
+	{
+		Invocation([this]() {
+			_private->estimateRegionsOrder();
+		}).invokeInBackground();
+	}
+	else
+	{
+		_private->emitWorkerThreads();
+	}
 }
 
 vec4 Raytrace::performAtPoint(s3d::Scene::Pointer scene, const Camera& cam, const vec2i& dimension, const vec2i& pixel)
@@ -174,16 +182,25 @@ void RaytracePrivate::emitWorkerThreads()
 
 	running = true;
 
-	uint32_t threadsCount = std::thread::hardware_concurrency();
-	threadCounter.store(threadsCount);
-	for (uint32_t i = 0; i < threadsCount; ++i)
+	if (options.threads == 0)
+	{
+		options.threads = std::thread::hardware_concurrency();
+	}
+	
+	threadCounter.store(options.threads);
+	for (uint32_t i = 0; i < options.threads; ++i)
 	{
 #   if (ET_RT_EVALUATE_DISTRIBUTION)
         workerThreads.emplace_back(&RaytracePrivate::visualizeDistributionThreadFunction, this, i);
-#   elif (ET_RT_TEST_FORWARD_PATH_TRACING)
-        workerThreads.emplace_back(&RaytracePrivate::forwardPathTraceThreadFunction, this, i);
-#   else
-        workerThreads.emplace_back(&RaytracePrivate::backwardPathTraceThreadFunction, this, i);
+#	else
+		if (options.method == Raytrace::Method::LightTracing)
+		{
+			workerThreads.emplace_back(&RaytracePrivate::forwardPathTraceThreadFunction, this, i);
+		}
+		else
+		{
+			workerThreads.emplace_back(&RaytracePrivate::backwardPathTraceThreadFunction, this, i);
+		}
 #   endif
 	}
 }
@@ -211,9 +228,6 @@ void RaytracePrivate::buildMaterialAndTriangles(s3d::Scene::Pointer scene)
 	{
 		bool isEmitter = false;
 		auto meshMaterial = mesh->material();
-
-//		if (meshMaterial->name().find("03___Default") == std::string::npos)
-//			continue;
 
 		auto materialIndex = materialIndexWithName(meshMaterial->name());
 		if (materialIndex == InvalidIndex)
@@ -281,6 +295,7 @@ void RaytracePrivate::buildMaterialAndTriangles(s3d::Scene::Pointer scene)
 
 				if (isEmitter)
 				{
+					lightTriangleToIndex[lightTriangles.size()] = static_cast<rt::index>(triangles.size() - 1);
 					lightTriangles.push_back(tri);
 				}
 			}
@@ -465,11 +480,10 @@ void RaytracePrivate::forwardPathTraceThreadFunction(uint32_t threadId)
         return;
     }
 
-	const int iterations = 5;
+	const int iterations = 4;
 	const int raysPerIteration = viewportSize.square();
 
-	float tanFOV = std::tan(0.5f * camera.fieldOfView());
-	float imagePlaneDistance = static_cast<float>(viewportSize.y) / (2.0f * tanFOV);
+	float imagePlaneDistanceSq = sqr(static_cast<float>(viewportSize.y) / std::tan(camera.fieldOfView()));
 
 	Vector<rt::float4> localBuffer(viewportSize.square(), rt::float4(0.0f));
 
@@ -477,57 +491,60 @@ void RaytracePrivate::forwardPathTraceThreadFunction(uint32_t threadId)
 	rt::float4 cameraDir(-camera.direction(), 0.0f);
 	vec3 viewport = vector3ToFloat(vec3i(viewportSize, 0));
 
-	auto projectToCamera = [&](const rt::KDTree::TraverseResult& hit, const rt::float4& color)
+	auto projectToCamera = [&](const rt::KDTree::TraverseResult& hit, const rt::float4& color, rt::float4& nrm)
 	{
 		auto tri = kdTree.triangleAtIndex(hit.triangleIndex);
-		auto pos = hit.intersectionPoint;
-		auto nrm = tri.interpolatedNormal(hit.intersectionPointBarycentric);
+		nrm = tri.interpolatedNormal(hit.intersectionPointBarycentric);
 
-		rt::float4 cameraDirection = pos - cameraPos;
-		float distanceToCamera = cameraDirection.length();
-		cameraDirection /= distanceToCamera;
+		rt::float4 toCamera = hit.intersectionPoint - cameraPos;
+		float distanceToCamera = toCamera.length();
+		toCamera /= distanceToCamera;
 
-		float VdotN = -cameraDirection.dot(nrm);
+		float VdotN = -toCamera.dot(nrm);
 		if (VdotN < 0.0f)
 			return;
 
-		auto projected = camera.project(pos.xyz());
+		auto projected = camera.project(hit.intersectionPoint.xyz());
 		if ((projected.x * projected.x > 1.0f) || (projected.y * projected.y > 1.0f) || (projected.z * projected.z > 1.0f))
 			return;
 
-		rt::Ray backRay(cameraPos, cameraDirection);
-		auto backHit = kdTree.traverse(backRay);
+		auto backHit = kdTree.traverse(rt::Ray(cameraPos, toCamera));
 		if (backHit.triangleIndex != hit.triangleIndex)
 			return;
 
 		float bsdfValue = 1.0f / PI;
-		float VdotD = cameraDir.dot(cameraDirection);
-		float imagePointToCameraDist = imagePlaneDistance / VdotD;
-		float imageToSolidAngleFactor = sqr(imagePointToCameraDist) / VdotD;
-		float imageToSurfaceFactor = imageToSolidAngleFactor * VdotN / sqr(distanceToCamera);
-		float scaleFactor = (imageToSurfaceFactor * bsdfValue) / static_cast<float>(raysPerIteration);
+		float VdotD = cameraDir.dot(toCamera);
+		float pdfW = imagePlaneDistanceSq / (VdotD * sqr(VdotD));
+		float imageToSurfaceFactor = VdotN / sqr(distanceToCamera);
+		float scaleFactor = bsdfValue * pdfW * imageToSurfaceFactor / static_cast<float>(raysPerIteration);
 
 		projected = (0.5f * projected + vec3(0.5f)) * viewport;
 		vec2i pixel(static_cast<int>(projected.x), static_cast<int>(projected.y));
 		localBuffer[pixel.x + pixel.y * viewportSize.x] += color * scaleFactor;
 	};
 
-
-	for (int i = 0; running && (i < iterations); ++i)
+	for (int it = 0; running && (it < iterations); ++it)
 	{
-		for (int i = 0; running && (i < raysPerIteration); ++i)
+		for (int ir = 0; running && (ir < raysPerIteration); ++ir)
 		{
-			rt::Triangle emitterTriangle = lightTriangles.at(rand() % lightTriangles.size());
-			rt::float4 uv = rt::randomBarycentric();
-			rt::float4 sourcePos = emitterTriangle.interpolatedPosition(uv);
-			rt::float4 sourceDir = emitterTriangle.interpolatedNormal(uv);
+			rt::float4 nrm;
+			size_t emitterIndex = rand() % lightTriangles.size();
+			const auto& emitterTriangle = lightTriangles[emitterIndex];
+
+			rt::KDTree::TraverseResult source;
+			source.intersectionPointBarycentric = rt::randomBarycentric();
+			source.intersectionPoint = emitterTriangle.interpolatedPosition(source.intersectionPointBarycentric);
+			source.triangleIndex = lightTriangleToIndex[emitterIndex];
+
 			rt::float4 color = materials.at(emitterTriangle.materialIndex).emissive;
 
-			sourceDir = rt::randomVectorOnHemisphere(sourceDir, rt::cosineDistribution);
-			rt::Ray currentRay(sourcePos + sourceDir * rt::Constants::epsilon, sourceDir);
+			projectToCamera(source, color, nrm);
 
-			rt::index maxPathLength = rt::PathTraceIntegrator::MaxTraverseDepth;
-			for (rt::index pathLength = 0; pathLength < maxPathLength; ++pathLength)
+			rt::float4 sourceDir = emitterTriangle.interpolatedNormal(source.intersectionPointBarycentric);
+			sourceDir = rt::randomVectorOnHemisphere(sourceDir, rt::cosineDistribution);
+			rt::Ray currentRay(source.intersectionPoint + sourceDir * rt::Constants::epsilon, sourceDir);
+
+			for (size_t pathLength = 0; pathLength < options.maxPathLength; ++pathLength)
 			{
 				auto hit = kdTree.traverse(currentRay);
 				if (hit.triangleIndex == InvalidIndex)
@@ -536,18 +553,15 @@ void RaytracePrivate::forwardPathTraceThreadFunction(uint32_t threadId)
 				}
 
 				const auto& tri = kdTree.triangleAtIndex(hit.triangleIndex);
-				const auto& nrm = tri.interpolatedNormal(hit.intersectionPointBarycentric);
 				const auto& mat = materials.at(tri.materialIndex);
 
 				if (mat.emissive.dotSelf() > 0.0f)
 				{
-					color += mat.emissive;
-					projectToCamera(hit, color);
 					break;
 				}
 
 				color *= mat.diffuse;
-				projectToCamera(hit, color);
+				projectToCamera(hit, color, nrm);
 
 				currentRay.direction = rt::randomVectorOnHemisphere(nrm, rt::cosineDistribution);
 				currentRay.origin = hit.intersectionPoint + currentRay.direction * rt::Constants::epsilon;
@@ -558,7 +572,7 @@ void RaytracePrivate::forwardPathTraceThreadFunction(uint32_t threadId)
 		flushToForwardTraceBuffer(localBuffer);
 		std::fill(localBuffer.begin(), localBuffer.end(), rt::float4(0.0f));
     }
-
+	log::info("Thread finished");
 }
 
 void RaytracePrivate::backwardPathTraceThreadFunction(uint32_t threadId)

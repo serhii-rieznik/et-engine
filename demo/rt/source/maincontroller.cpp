@@ -50,8 +50,13 @@ void MainController::applicationDidLoad(et::RenderContext* rc)
 	{
 		vc = VariantClass::Invalid;
 		configName = application().resolveFileName("config/" + _options.stringForKey("reference")->content);
-		_options = json::deserialize(loadTextFile(configName), vc);
+		et::Dictionary reference = json::deserialize(loadTextFile(configName), vc);
 		ET_ASSERT(vc == VariantClass::Dictionary);
+
+		for (auto& kv : reference->content)
+		{
+			_options.setObjectForKey(kv.first, kv.second);
+		}
 	}
 
 	auto modelName = application().resolveFileName(_options.stringForKey("model-name")->content);
@@ -90,9 +95,24 @@ void MainController::applicationDidLoad(et::RenderContext* rc)
 	Raytrace::Options rtOptions;
 	rtOptions.raysPerPixel = static_cast<size_t>(_options.integerForKey("rays-per-pixel", 32)->content);
 	rtOptions.maxKDTreeDepth = static_cast<size_t>(_options.integerForKey("kd-tree-max-depth", 4)->content);
+	rtOptions.maxPathLength = static_cast<size_t>(_options.integerForKey("max-path-length", 1)->content);
 	rtOptions.renderRegionSize = static_cast<size_t>(_options.integerForKey("render-region-size", 32)->content);
-	rtOptions.debugRendering = _options.integerForKey("debug-rendering", 0ll)->content != 0;
+	rtOptions.threads = static_cast<size_t>(_options.integerForKey("threads", 0ll)->content);
 	rtOptions.renderKDTree = _options.integerForKey("render-kd-tree", 0ll)->content != 0;
+
+	if ((rtOptions.maxPathLength == 0) || (rtOptions.maxPathLength > rt::PathTraceIntegrator::MaxTraverseDepth))
+	{
+		rtOptions.maxPathLength = rt::PathTraceIntegrator::MaxTraverseDepth;
+	}
+
+	if (_options.stringForKey("method")->content == "forward")
+	{
+		rtOptions.method = Raytrace::Method::LightTracing;
+	}
+	else
+	{
+		rtOptions.method = Raytrace::Method::PathTracing;
+	}
 	_rt.setOptions(rtOptions);
 
 	_rt.setOutputMethod([this](const vec2i& pixel, const vec4& color)

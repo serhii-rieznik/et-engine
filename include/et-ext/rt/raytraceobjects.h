@@ -17,7 +17,6 @@ namespace et
 #		define ET_RT_EVALUATE_DISTRIBUTION				0
 #		define ET_RT_ENABLE_GAMMA_CORRECTION			1
 #		define ET_RT_VISUALIZE_BRDF						0
-#       define ET_RT_TEST_FORWARD_PATH_TRACING          0
 
 		using float_type = float;
 		using float3 = vector3<float_type>;
