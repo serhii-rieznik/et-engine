@@ -64,8 +64,5 @@ DirectionalLightSampler::DirectionalLightSampler(const float4& direction, const 
 float4 DirectionalLightSampler::sampleInDirection(const float4& inDirection)
 {
 	float_type dp = std::max(0.0f, inDirection.dot(_direction));
-    dp = std::pow(dp, 128.0f);
-    float4 env(0.25f, 0.35f, 0.5f, 0.0f);
-    
-    return _color * dp + env * (1.0f - dp);// * std::pow(dp, 64.0f);
+    return _color * std::pow(dp, 128.0f);
 }

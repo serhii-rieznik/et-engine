@@ -119,7 +119,13 @@ float4 computeReflectionVector(const float4& incidence, const float4& normal, fl
     return defaultLightDirection();
 #else
     auto idealReflection = reflect(incidence, normal);
-	return randomVectorOnHemisphere(idealReflection, ggxDistribution, roughness);
+	
+	auto result = randomVectorOnHemisphere(idealReflection, ggxDistribution, roughness);
+	for (size_t attempt = 0; (attempt < 16) && (result.dot(normal) <= 0.0f); ++attempt)
+	{
+		result = randomVectorOnHemisphere(idealReflection, ggxDistribution, roughness);
+	}
+	return result;
 #endif
 }
 
@@ -127,7 +133,12 @@ float4 computeRefractionVector(const float4& Wi, const float4& n, float_type eta
     float cosThetaI, float cosThetaT)
 {
     auto idealRefraction = Wi * eta - n * (cosThetaI * eta - cosThetaT);
-	return randomVectorOnHemisphere(idealRefraction, ggxDistribution, roughness);
+	auto result = randomVectorOnHemisphere(idealRefraction, ggxDistribution, roughness);
+	for (size_t attempt = 0; (attempt < 16) && (result.dot(n) >= 0.0f); ++attempt)
+	{
+		result = randomVectorOnHemisphere(idealRefraction, ggxDistribution, roughness);
+	}
+	return result;
 }
 
 bool rayToBoundingBox(const Ray& r, const BoundingBox& box, float& tNear, float& tFar)

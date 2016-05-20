@@ -14,6 +14,6 @@ void main()
 	vec4 vVertexWS = matWorld * vec4(Vertex, 1.0);
 	vNormalWS = normalize(mat3(matWorld) * Normal);
     vCameraDirectionWS = defaultCamera - vVertexWS.xyz;
-    vLightDirectionWS = defaultLight - vVertexWS.xyz;
+    vLightDirectionWS = defaultLight;
 	gl_Position = matViewProjection * vVertexWS;
 }

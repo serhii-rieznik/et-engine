@@ -20,7 +20,7 @@ void main()
     
     float NdotV = max(0.00001, dot(vNormal, vView));
     float NdotL = max(0.0, dot(vNormal, vLight));
-    float HdotL = dot(vHalf, vLight);
+	float HdotL = dot(vHalf, vLight);
     float NdotH = dot(vNormal, vHalf);
 
     float kS = microfacetSpecular(NdotL, NdotV, NdotH, roughness) * invPi;

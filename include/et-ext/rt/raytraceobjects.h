@@ -73,10 +73,6 @@ namespace et
 			float4 edge2to0;
 			float4 _invDenom;
 			index materialIndex = 0;
-			float_type _invDenomValue = 0.0f;
-			float_type _dot00 = 0.0f;
-			float_type _dot01 = 0.0f;
-			float_type _dot11 = 0.0f;
 
 			void computeSupportData()
 			{
@@ -87,6 +83,7 @@ namespace et
 				_dot01 = edge1to0.dot(edge2to0);
 				_invDenomValue = 1.0f / (_dot00 * _dot11 - _dot01 * _dot01);
 				_invDenom = rt::float4(_invDenomValue);
+				_area = 0.5f * edge1to0.crossXYZ(edge2to0).length();
 			}
 
 			float4 barycentric(const float4& inP) const
@@ -137,6 +134,18 @@ namespace et
 			{
 				return v[0].maxWith(v[1].maxWith(v[2]));
 			}
+
+			float_type area() const
+			{
+				return _area;
+			}
+
+		private:
+			float_type _invDenomValue = 0.0f;
+			float_type _dot00 = 0.0f;
+			float_type _dot01 = 0.0f;
+			float_type _dot11 = 0.0f;
+			float_type _area = 0.0f;
 
 			/*
 			float4 interpolatedTexCoord(const float4& b) const

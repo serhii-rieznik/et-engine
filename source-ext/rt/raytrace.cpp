@@ -483,7 +483,7 @@ void RaytracePrivate::forwardPathTraceThreadFunction(uint32_t threadId)
 	const int iterations = 4;
 	const int raysPerIteration = viewportSize.square();
 
-	float imagePlaneDistanceSq = sqr(static_cast<float>(viewportSize.y) / std::tan(camera.fieldOfView()));
+	float imagePlaneDistanceSq = 2.0f * sqr(static_cast<float>(viewportSize.x) / std::tan(camera.fieldOfView()));
 
 	Vector<rt::float4> localBuffer(viewportSize.square(), rt::float4(0.0f));
 
@@ -536,12 +536,16 @@ void RaytracePrivate::forwardPathTraceThreadFunction(uint32_t threadId)
 			source.intersectionPoint = emitterTriangle.interpolatedPosition(source.intersectionPointBarycentric);
 			source.triangleIndex = lightTriangleToIndex[emitterIndex];
 
-			rt::float4 color = materials.at(emitterTriangle.materialIndex).emissive;
+			rt::float4 triangleNormal = emitterTriangle.interpolatedNormal(source.intersectionPointBarycentric);
+			rt::float4 sourceDir = rt::randomVectorOnHemisphere(triangleNormal, rt::cosineDistribution);
+			
+			float pickProb = 1.0f / static_cast<float>(lightTriangles.size());
+			float area = emitterTriangle.area();
+
+			rt::float4 color = materials.at(emitterTriangle.materialIndex).emissive * (area / pickProb);
 
 			projectToCamera(source, color, nrm);
 
-			rt::float4 sourceDir = emitterTriangle.interpolatedNormal(source.intersectionPointBarycentric);
-			sourceDir = rt::randomVectorOnHemisphere(sourceDir, rt::cosineDistribution);
 			rt::Ray currentRay(source.intersectionPoint + sourceDir * rt::Constants::epsilon, sourceDir);
 
 			for (size_t pathLength = 0; pathLength < options.maxPathLength; ++pathLength)
