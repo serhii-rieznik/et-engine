@@ -9,6 +9,8 @@
 
 #if (ET_PLATFORM_WIN)
 #   include <Windows.h>
+#elif (ET_PLATFORM_MAC)
+#	include <signal.h>
 #endif
 
 namespace et
@@ -20,7 +22,7 @@ namespace et
 #       if (ET_PLATFORM_WIN)
             ::DebugBreak();
 #       elif (ET_PLATFORM_MAC)
-            __asm int 3;
+            raise(SIGTRAP);
 #       else
 #           error Define breakpoint for current platform
 #       endif

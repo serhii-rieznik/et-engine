@@ -71,11 +71,11 @@ namespace et
 		void addRequest(const std::string& fileName, Texture::Pointer texture, TextureLoaderDelegate* delegate);
 
 	private:
-		uint64_t main();
+		void main();
 		TextureLoadingRequest* dequeRequest();
 
 	private:
-		TextureLoadingThreadDelegate* _delegate;
+		TextureLoadingThreadDelegate* _delegate = nullptr;
 		TextureLoadingRequestQueue _requests;
 		CriticalSection _requestsCriticalSection;
 	};

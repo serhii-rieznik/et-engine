@@ -15,16 +15,6 @@
 using namespace et;
 using namespace et::s3d;
 
-namespace et
-{
-	class OBJLoaderThread : public Thread
-	{
-	public:
-		OBJLoaderThread(OBJLoader*, s3d::Storage&, ObjectsCache&);
-		uint64_t main();
-	};
-}
-
 template <typename F>
 inline void splitAndWrite(const std::string& s, F func)
 {
@@ -132,18 +122,6 @@ inline std::istream& operator >> (std::istream& stream, vec4& value)
 
 void getLine(std::ifstream& stream, std::string& line);
 
-OBJLoaderThread::OBJLoaderThread(OBJLoader*, s3d::Storage&, ObjectsCache&) : 
-	Thread(false)
-{
-	run();
-}
-
-uint64_t OBJLoaderThread::main()
-{
-	ET_FAIL("Not implemented");
-	return 0;
-}
-
 /*
  * OBJLoader
  */
@@ -160,9 +138,6 @@ OBJLoader::OBJLoader(const std::string& inFile, size_t options) :
 
 OBJLoader::~OBJLoader()
 {
-	if (_thread.get())
-		_thread->stopAndWaitForTermination();
-			
 	if (inputFile.is_open())
 		inputFile.close();
 	
@@ -374,12 +349,6 @@ s3d::ElementContainer::Pointer OBJLoader::load(et::RenderContext* rc, MaterialPr
 	s3d::ElementContainer::Pointer result = generateVertexBuffers(storage);
 	loaded.invoke(result);
 	return result;
-}
-
-void OBJLoader::loadAsync(et::RenderContext* rc, s3d::Storage& storage, ObjectsCache& cache)
-{
-	_rc = rc;
-    _thread = UniquePtr<OBJLoaderThread>(etCreateObject<OBJLoaderThread>(this, storage, cache));
 }
 
 void OBJLoader::loadMaterials(const std::string& fileName, bool async, ObjectsCache& cache)

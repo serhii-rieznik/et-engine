@@ -11,19 +11,6 @@
 
 namespace et
 {
-    struct ApplicationIdentifier
-    {
-        std::string identifier;
-        std::string companyName;
-        std::string applicationName;
-        
-        ApplicationIdentifier() = default;
-        
-        ApplicationIdentifier(const std::string& aIdentifier, const std::string& aCompanyName,
-            const std::string& aApplicationName) : identifier(aIdentifier), companyName(aCompanyName),
-            applicationName(aApplicationName) { }
-    };
-    
     struct ContextOptions
     {
         enum Style : uint32_t

@@ -11,9 +11,6 @@
 
 using namespace et;
 
-BackgroundRunLoop::BackgroundRunLoop() :
-	_owner(nullptr) { }
-
 void BackgroundRunLoop::setOwner(BackgroundThread* owner)
 	{ _owner = owner; }
 
@@ -25,11 +22,12 @@ void BackgroundRunLoop::addTask(Task* t, float delay)
 }
 
 BackgroundThread::BackgroundThread()
+	: Thread("et-background-thread")
 {
 	_runLoop.setOwner(this);
 }
 
-uint64_t BackgroundThread::main()
+void BackgroundThread::main()
 {
 	registerRunLoop(_runLoop);	
 	while (running())
@@ -45,5 +43,4 @@ uint64_t BackgroundThread::main()
 		}
 	}
 	unregisterRunLoop(_runLoop);
-	return 0;
 }

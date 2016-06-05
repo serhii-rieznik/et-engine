@@ -17,7 +17,6 @@
 namespace et
 {
 	class MaterialProvider;
-	class OBJLoaderThread;
 	class OBJLoader : public ModelLoader
 	{
 	public:
@@ -35,7 +34,6 @@ namespace et
 		~OBJLoader();
 
 		s3d::ElementContainer::Pointer load(RenderContext*, MaterialProvider*, s3d::Storage&, ObjectsCache&);
-		void loadAsync(et::RenderContext*, s3d::Storage&, ObjectsCache& cahce);
 
 		ET_DECLARE_EVENT1(loaded, s3d::ElementContainer::Pointer)
 
@@ -96,7 +94,6 @@ namespace et
 
 		RenderContext* _rc = nullptr;
 		MaterialProvider* _materialProvider = nullptr;
-		UniquePtr<OBJLoaderThread> _thread;
 
 		std::string inputFileName;
 		std::string inputFilePath;

@@ -36,7 +36,9 @@ void TextureLoadingRequest::discardDelegate()
 }
 
 TextureLoadingThread::TextureLoadingThread(TextureLoadingThreadDelegate* delegate) :
-	Thread(false), _delegate(delegate) { }
+	_delegate(delegate)
+{
+}
 
 TextureLoadingThread::~TextureLoadingThread()
 {
@@ -64,7 +66,7 @@ TextureLoadingRequest* TextureLoadingThread::dequeRequest()
 	return result;
 }
 
-uint64_t TextureLoadingThread::main()
+void TextureLoadingThread::main()
 {
 	while (running())
 	{
@@ -83,8 +85,6 @@ uint64_t TextureLoadingThread::main()
 			suspend();
 		}
 	}
-
-	return 0;
 }
 
 void TextureLoadingThread::addRequest(const std::string& fileName, Texture::Pointer texture,

@@ -90,7 +90,8 @@ Manager::~Manager()
 
 void Manager::stopStreamingThread()
 {
-	_streamingThread.stopAndWaitForTermination();
+	_streamingThread.stop();
+	_streamingThread.join();
 	_streamingThread.release();
 }
 

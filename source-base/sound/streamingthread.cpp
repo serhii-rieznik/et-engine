@@ -28,8 +28,8 @@ namespace et
 using namespace et;
 using namespace et::audio;
 
-StreamingThread::StreamingThread() :
-	Thread(false)
+StreamingThread::StreamingThread()
+	: Thread("et-audio-streaming-thread")
 {
 	ET_PIMPL_INIT(StreamingThread)
 	run();
@@ -40,7 +40,7 @@ void StreamingThread::release()
 	ET_PIMPL_FINALIZE(StreamingThread)
 }
 
-uint64_t StreamingThread::main()
+void StreamingThread::main()
 {
 	while (running())
 	{
@@ -72,8 +72,6 @@ uint64_t StreamingThread::main()
 	_private->playersToAdd.clear();
 	_private->playersToRemove.clear();
 	_private->playersList.clear();
-	
-	return 0;
 }
 
 void StreamingThread::addPlayer(Player::Pointer player)

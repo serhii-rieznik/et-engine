@@ -179,7 +179,6 @@
 		6EBE21CA1C66B8BE00AF7206 /* sound.h in Headers */ = {isa = PBXBuildFile; fileRef = 6EBE20191C66B8BE00AF7206 /* sound.h */; };
 		6EBE21CB1C66B8BE00AF7206 /* streamingthread.h in Headers */ = {isa = PBXBuildFile; fileRef = 6EBE201A1C66B8BE00AF7206 /* streamingthread.h */; };
 		6EBE21CC1C66B8BE00AF7206 /* track.h in Headers */ = {isa = PBXBuildFile; fileRef = 6EBE201B1C66B8BE00AF7206 /* track.h */; };
-		6EBE222E1C66B8BE00AF7206 /* appevironment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6EBE20911C66B8BE00AF7206 /* appevironment.cpp */; };
 		6EBE222F1C66B8BE00AF7206 /* application.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6EBE20921C66B8BE00AF7206 /* application.cpp */; };
 		6EBE22301C66B8BE00AF7206 /* backgroundthread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6EBE20931C66B8BE00AF7206 /* backgroundthread.cpp */; };
 		6EBE22311C66B8BE00AF7206 /* events.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6EBE20941C66B8BE00AF7206 /* events.cpp */; };
@@ -247,7 +246,6 @@
 		6EBE22781C66B8BE00AF7206 /* platformtools.mac.mm in Sources */ = {isa = PBXBuildFile; fileRef = 6EBE20E21C66B8BE00AF7206 /* platformtools.mac.mm */; };
 		6EBE227B1C66B8BE00AF7206 /* rendercontext.mac.mm in Sources */ = {isa = PBXBuildFile; fileRef = 6EBE20E51C66B8BE00AF7206 /* rendercontext.mac.mm */; };
 		6EBE227D1C66B8BE00AF7206 /* tools.apple.mm in Sources */ = {isa = PBXBuildFile; fileRef = 6EBE20E71C66B8BE00AF7206 /* tools.apple.mm */; };
-		6EBE227F1C66B8BE00AF7206 /* thread.unix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6EBE20EA1C66B8BE00AF7206 /* thread.unix.cpp */; };
 		6EBE228B1C66B8BE00AF7206 /* framebufferfactory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6EBE20F81C66B8BE00AF7206 /* framebufferfactory.cpp */; };
 		6EBE228C1C66B8BE00AF7206 /* indexarray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6EBE20F91C66B8BE00AF7206 /* indexarray.cpp */; };
 		6EBE228D1C66B8BE00AF7206 /* material.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6EBE20FA1C66B8BE00AF7206 /* material.cpp */; };
@@ -460,7 +458,6 @@
 		6EBE20191C66B8BE00AF7206 /* sound.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sound.h; sourceTree = "<group>"; };
 		6EBE201A1C66B8BE00AF7206 /* streamingthread.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = streamingthread.h; sourceTree = "<group>"; };
 		6EBE201B1C66B8BE00AF7206 /* track.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = track.h; sourceTree = "<group>"; };
-		6EBE20911C66B8BE00AF7206 /* appevironment.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = appevironment.cpp; sourceTree = "<group>"; };
 		6EBE20921C66B8BE00AF7206 /* application.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = application.cpp; sourceTree = "<group>"; };
 		6EBE20931C66B8BE00AF7206 /* backgroundthread.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = backgroundthread.cpp; sourceTree = "<group>"; };
 		6EBE20941C66B8BE00AF7206 /* events.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = events.cpp; sourceTree = "<group>"; };
@@ -528,7 +525,6 @@
 		6EBE20E21C66B8BE00AF7206 /* platformtools.mac.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = platformtools.mac.mm; sourceTree = "<group>"; };
 		6EBE20E51C66B8BE00AF7206 /* rendercontext.mac.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = rendercontext.mac.mm; sourceTree = "<group>"; };
 		6EBE20E71C66B8BE00AF7206 /* tools.apple.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = tools.apple.mm; sourceTree = "<group>"; };
-		6EBE20EA1C66B8BE00AF7206 /* thread.unix.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = thread.unix.cpp; sourceTree = "<group>"; };
 		6EBE20F81C66B8BE00AF7206 /* framebufferfactory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = framebufferfactory.cpp; sourceTree = "<group>"; };
 		6EBE20F91C66B8BE00AF7206 /* indexarray.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = indexarray.cpp; sourceTree = "<group>"; };
 		6EBE20FA1C66B8BE00AF7206 /* material.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = material.cpp; sourceTree = "<group>"; };
@@ -903,7 +899,6 @@
 				6EBE20C31C66B8BE00AF7206 /* input */,
 				6EBE20C61C66B8BE00AF7206 /* opengl */,
 				6EBE20D21C66B8BE00AF7206 /* platform-apple */,
-				6EBE20E81C66B8BE00AF7206 /* platform-unix */,
 				6EBE20F71C66B8BE00AF7206 /* rendering */,
 				6EBE21081C66B8BE00AF7206 /* scene3d */,
 				6EBE21161C66B8BE00AF7206 /* sound */,
@@ -915,7 +910,6 @@
 		6EBE20901C66B8BE00AF7206 /* app */ = {
 			isa = PBXGroup;
 			children = (
-				6EBE20911C66B8BE00AF7206 /* appevironment.cpp */,
 				6EBE20921C66B8BE00AF7206 /* application.cpp */,
 				6EBE20931C66B8BE00AF7206 /* backgroundthread.cpp */,
 				6EBE20941C66B8BE00AF7206 /* events.cpp */,
@@ -1035,14 +1029,6 @@
 				6EBE20E71C66B8BE00AF7206 /* tools.apple.mm */,
 			);
 			path = "platform-apple";
-			sourceTree = "<group>";
-		};
-		6EBE20E81C66B8BE00AF7206 /* platform-unix */ = {
-			isa = PBXGroup;
-			children = (
-				6EBE20EA1C66B8BE00AF7206 /* thread.unix.cpp */,
-			);
-			path = "platform-unix";
 			sourceTree = "<group>";
 		};
 		6EBE20F71C66B8BE00AF7206 /* rendering */ = {
@@ -1368,7 +1354,6 @@
 				6EBE22A91C66B8BE00AF7206 /* player.cpp in Sources */,
 				6EBE22561C66B8BE00AF7206 /* jpegloader.cpp in Sources */,
 				6EBE224C1C66B8BE00AF7206 /* tools.cpp in Sources */,
-				6EBE227F1C66B8BE00AF7206 /* thread.unix.cpp in Sources */,
 				6EBE229A1C66B8BE00AF7206 /* vertexstorage.cpp in Sources */,
 				6EBE224A1C66B8BE00AF7206 /* timedobject.cpp in Sources */,
 				6EBE22391C66B8BE00AF7206 /* frustum.cpp in Sources */,
@@ -1432,7 +1417,6 @@
 				6EBE22641C66B8BE00AF7206 /* renderer.cpp in Sources */,
 				6EBE22491C66B8BE00AF7206 /* threading.cpp in Sources */,
 				6EBE22381C66B8BE00AF7206 /* cameraorbitcontroller.cpp in Sources */,
-				6EBE222E1C66B8BE00AF7206 /* appevironment.cpp in Sources */,
 				6EBE22751C66B8BE00AF7206 /* memory.apple.mm in Sources */,
 				6EBE22531C66B8BE00AF7206 /* hdrloader.cpp in Sources */,
 				6EBE228C1C66B8BE00AF7206 /* indexarray.cpp in Sources */,

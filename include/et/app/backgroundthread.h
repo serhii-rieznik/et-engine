@@ -17,14 +17,12 @@ namespace et
 	class BackgroundRunLoop : public RunLoop
 	{
 	private:
-		BackgroundRunLoop();
-		
 		void setOwner(BackgroundThread* owner);
 		void addTask(Task* t, float);
 		
 	private:
 		friend class BackgroundThread;
-		BackgroundThread* _owner;
+		BackgroundThread* _owner = nullptr;
 	};
 	
 	class BackgroundThread : public Thread
@@ -36,7 +34,7 @@ namespace et
 			{ return _runLoop; }
 		
 	private:
-		uint64_t main();
+		void main();
 		
 	private:
 		BackgroundRunLoop _runLoop;

@@ -60,7 +60,11 @@ TextureFactory::TextureFactory(RenderContext* rc) :
 
 TextureFactory::~TextureFactory()
 {
-	_loadingThread->stopAndWaitForTermination();
+	if (_loadingThread->running())
+	{
+		_loadingThread->stop();
+		_loadingThread->join();
+	}
 	ET_PIMPL_FINALIZE(TextureFactory)
 }
 

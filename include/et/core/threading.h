@@ -15,7 +15,7 @@ namespace et
 {
 	namespace threading
 	{
-		using ThreadIdentifier = size_t;
+		using ThreadIdentifier = uint64_t;
 		
 		void setMainThreadIdentifier(ThreadIdentifier);
 		

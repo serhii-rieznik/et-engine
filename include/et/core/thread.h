@@ -7,43 +7,103 @@
 
 #pragma once
 
-#include <et/core/et.h>
+#include <et/core/threading.h>
 
 namespace et
 {
-	class ThreadPrivate;
 	class Thread
 	{
 	public:
-		using Identifier = std::thread::native_handle_type;
+		Thread(const std::string& name = std::string())
+			: _name(name)
+		{
+		}
 		
-	public:
-		Thread();
-		Thread(bool start);
-		
-		virtual ~Thread();
+		virtual ~Thread()
+		{
+			ET_ASSERT(!_suspended);
+		}
 
-		void run();
-		void suspend();
-		void resume();
-		void stop();
-		void join();
+		void run()
+		{
+			ET_ASSERT(!_running);
 
-		void stopAndWaitForTermination();
-		void terminate(int result = 0);
+			_thread = std::thread(&Thread::threadFunction, this);
+		}
 
-		bool running() const;
-		bool suspended() const;
+		void suspend()
+		{
+			ET_ASSERT(!_suspended);
+			_suspended = true;
+			{
+				std::unique_lock<std::mutex> lock(_suspendMutex);
+				_suspendLock.wait(lock);
+			}
+			_suspended = false;
+		}
 
-		Identifier identifier() const;
-		virtual uint64_t main();
+		void resume()
+		{
+			ET_ASSERT(_suspended);
+			_suspendLock.notify_all();
+		}
+
+		void stop()
+		{
+			_running = false;
+			if (_suspended)
+			{
+				resume();
+			}
+		}
+
+		void join()
+		{
+			_thread.join();
+		}
+
+		bool running() const
+			{ return _running; }
+
+		bool suspended() const
+			{ return _suspended; }
+
+		threading::ThreadIdentifier identifier() const
+		{
+			return std::hash<std::thread::id>()(_thread.get_id());
+		}
+
+		virtual void main() { }
+
+	private:
+		void setName()
+		{
+			if (_name.empty())
+				return;
+
+#		if (ET_PLATFORM_APPLE)
+			pthread_setname_np(_name.c_str());
+#		else
+			ET_FAIL("Not implemented");
+#		endif
+		}
+
+		void threadFunction()
+		{
+			_running = true;
+			setName();
+			main();
+		}
 
 	private:
 		ET_DENY_COPY(Thread)
+		Thread(Thread&&) = delete;
 
-	private:
-		friend class ThreadPrivate;
-		
-		ET_DECLARE_PIMPL(Thread, 256)
+		std::thread _thread;
+		std::condition_variable _suspendLock;
+		std::mutex _suspendMutex;
+		std::atomic<bool> _running{false};
+		std::atomic<bool> _suspended{false};
+		std::string _name;
 	};
 }

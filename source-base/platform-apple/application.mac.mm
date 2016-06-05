@@ -91,6 +91,9 @@ void Application::load()
 
 Application::~Application()
 {
+	_backgroundThread.stop();
+	_backgroundThread.join();
+	
 	platformFinalize();
 	exitRunLoop();
     freeContext();
