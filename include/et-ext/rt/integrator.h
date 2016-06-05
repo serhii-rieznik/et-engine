@@ -8,6 +8,7 @@
 #pragma once
 
 #include <et-ext/rt/kdtree.h>
+#include <et-ext/rt/bsdf.h>
 #include <et-ext/rt/environment.h>
 
 namespace et
@@ -68,9 +69,10 @@ namespace rt
     public:
         float4 gather(const Ray& inRay, size_t depth, size_t& maxDepth,
             KDTree& tree, EnvironmentSampler::Pointer&, const Material::Collection&) override;
-
+/*
 		static float4 reflectance(const float4& incidence, float4& normal, const Material& mat,
             float4& color, float_type& brdf);
+*/ 
     };
 }
 }

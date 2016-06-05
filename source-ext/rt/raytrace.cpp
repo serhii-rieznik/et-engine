@@ -9,6 +9,7 @@
 #include <mutex>
 #include <et-ext/rt/raytrace.h>
 #include <et-ext/rt/raytraceobjects.h>
+#include <et-ext/rt/bsdf.h>
 #include <et/app/application.h>
 #include <et/camera/camera.h>
 
@@ -232,28 +233,26 @@ void RaytracePrivate::buildMaterialAndTriangles(s3d::Scene::Pointer scene)
 		auto materialIndex = materialIndexWithName(meshMaterial->name());
 		if (materialIndex == InvalidIndex)
 		{
+			float alpha = clamp(meshMaterial->getFloat(MaterialParameter::Roughness), 0.0f, 1.0f);
+			float eta = meshMaterial->getFloat(MaterialParameter::Transparency);
+
+			rt::Material::Class cls = rt::Material::Class::Diffuse;
+			if (alpha < 1.0f)
+			{
+				cls = (eta == 0.0f) ? rt::Material::Class::Conductor : rt::Material::Class::Dielectric;
+			}
+
 			materialIndex = materials.size();
-			materials.emplace_back();
+			materials.emplace_back(cls);
 			auto& mat = materials.back();
-			auto kA = meshMaterial->getVector(MaterialParameter::AmbientColor);
-			auto kD = meshMaterial->getVector(MaterialParameter::DiffuseColor);
+
 			mat.name = meshMaterial->name();
-			mat.diffuse = rt::float4(kA + kD);
+			mat.diffuse = rt::float4(meshMaterial->getVector(MaterialParameter::DiffuseColor));
 			mat.specular = rt::float4(meshMaterial->getVector(MaterialParameter::SpecularColor));
             mat.emissive = rt::float4(meshMaterial->getVector(MaterialParameter::EmissiveColor));
-			mat.roughness = clamp(meshMaterial->getFloat(MaterialParameter::Roughness), 0.0f, 1.0f);
-			mat.ior = meshMaterial->getFloat(MaterialParameter::Transparency);
-			if (mat.roughness < 1.0f)
-			{
-				if (mat.ior == 0.0f)
-				{
-					mat.type = rt::MaterialType::Conductor;
-				}
-				else
-				{
-					mat.type = rt::MaterialType::Dielectric;
-				}
-			}
+			mat.roughness = clamp(sqr(alpha), std::sqrt(rt::Constants::epsilon), 1.0f);
+			mat.ior = eta;
+			
 			isEmitter = mat.emissive.length() > 0.0f;
 		}
 
@@ -480,8 +479,7 @@ void RaytracePrivate::forwardPathTraceThreadFunction(uint32_t threadId)
         return;
     }
 
-	const int iterations = 4;
-	const int raysPerIteration = viewportSize.square();
+	const int raysPerIteration = viewportSize.square() / 4;
 
 	float imagePlaneDistanceSq = 2.0f * sqr(static_cast<float>(viewportSize.x) / std::tan(camera.fieldOfView()));
 
@@ -491,43 +489,51 @@ void RaytracePrivate::forwardPathTraceThreadFunction(uint32_t threadId)
 	rt::float4 cameraDir(-camera.direction(), 0.0f);
 	vec3 viewport = vector3ToFloat(vec3i(viewportSize, 0));
 
-	auto projectToCamera = [&](const rt::KDTree::TraverseResult& hit, const rt::float4& color, rt::float4& nrm)
+	auto projectToCamera = [&](const rt::Ray& inRay, const rt::KDTree::TraverseResult& hit,
+		const rt::float4& color, const rt::float4& nrm)
 	{
-		auto tri = kdTree.triangleAtIndex(hit.triangleIndex);
-		nrm = tri.interpolatedNormal(hit.intersectionPointBarycentric);
+		rt::float4 toCamera = cameraPos - hit.intersectionPoint;
+		toCamera.normalize();
 
-		rt::float4 toCamera = hit.intersectionPoint - cameraPos;
-		float distanceToCamera = toCamera.length();
-		toCamera /= distanceToCamera;
+		const auto& tri = kdTree.triangleAtIndex(hit.triangleIndex);
+		const auto& mat = materials.at(tri.materialIndex);
+		rt::BSDFSample sample(inRay.direction, toCamera, nrm, mat, rt::BSDFSample::Direction::Forward);
 
-		float VdotN = -toCamera.dot(nrm);
-		if (VdotN < 0.0f)
+		if (sample.OdotN <= 0.0f)
 			return;
 
 		auto projected = camera.project(hit.intersectionPoint.xyz());
 		if ((projected.x * projected.x > 1.0f) || (projected.y * projected.y > 1.0f) || (projected.z * projected.z > 1.0f))
 			return;
 
-		auto backHit = kdTree.traverse(rt::Ray(cameraPos, toCamera));
+		auto backHit = kdTree.traverse(rt::Ray(cameraPos, sample.Wo * (-1.0f)));
 		if (backHit.triangleIndex != hit.triangleIndex)
 			return;
 
-		float bsdfValue = 1.0f / PI;
-		float VdotD = cameraDir.dot(toCamera);
+		float pdf = sample.pdf();
+		if (pdf <= 0.0f)
+			return;
+
+		float bsdf = sample.bsdf();
+		if (bsdf == 0.0f)
+			return;
+
+		float VdotD = -cameraDir.dot(sample.Wo);
 		float pdfW = imagePlaneDistanceSq / (VdotD * sqr(VdotD));
-		float imageToSurfaceFactor = VdotN / sqr(distanceToCamera);
-		float scaleFactor = bsdfValue * pdfW * imageToSurfaceFactor / static_cast<float>(raysPerIteration);
+		float imageToSurfaceFactor = sample.OdotN / (hit.intersectionPoint - cameraPos).dotSelf();
+		float scaleFactor = bsdf * pdfW * imageToSurfaceFactor / static_cast<float>(raysPerIteration);
+
+		ET_ASSERT(scaleFactor >= 0.0f);
 
 		projected = (0.5f * projected + vec3(0.5f)) * viewport;
 		vec2i pixel(static_cast<int>(projected.x), static_cast<int>(projected.y));
 		localBuffer[pixel.x + pixel.y * viewportSize.x] += color * scaleFactor;
 	};
 
-	for (int it = 0; running && (it < iterations); ++it)
+	while (running)
 	{
 		for (int ir = 0; running && (ir < raysPerIteration); ++ir)
 		{
-			rt::float4 nrm;
 			size_t emitterIndex = rand() % lightTriangles.size();
 			const auto& emitterTriangle = lightTriangles[emitterIndex];
 
@@ -543,10 +549,9 @@ void RaytracePrivate::forwardPathTraceThreadFunction(uint32_t threadId)
 			float area = emitterTriangle.area();
 
 			rt::float4 color = materials.at(emitterTriangle.materialIndex).emissive * (area / pickProb);
-
-			projectToCamera(source, color, nrm);
-
 			rt::Ray currentRay(source.intersectionPoint + sourceDir * rt::Constants::epsilon, sourceDir);
+
+			projectToCamera(currentRay, source, color, triangleNormal);
 
 			for (size_t pathLength = 0; pathLength < options.maxPathLength; ++pathLength)
 			{
@@ -564,10 +569,18 @@ void RaytracePrivate::forwardPathTraceThreadFunction(uint32_t threadId)
 					break;
 				}
 
-				color *= mat.diffuse;
-				projectToCamera(hit, color, nrm);
+				auto nrm = tri.interpolatedNormal(hit.intersectionPointBarycentric);
+				rt::BSDFSample sample(currentRay.direction, nrm, mat, rt::BSDFSample::Direction::Forward);
 
-				currentRay.direction = rt::randomVectorOnHemisphere(nrm, rt::cosineDistribution);
+#			if (ET_RT_VISUALIZE_BRDF)
+				projectToCamera(currentRay, hit, rt::float4(sample.bsdf()), nrm);
+				break;
+#			else
+				color *= sample.evaluate();
+				projectToCamera(currentRay, hit, color, nrm);
+#			endif
+
+				currentRay.direction = sample.Wo;
 				currentRay.origin = hit.intersectionPoint + currentRay.direction * rt::Constants::epsilon;
 			}
 		}
@@ -701,12 +714,6 @@ void RaytracePrivate::estimateRegionsOrder()
 			estimatedColor += raytracePixel(px, 1, bounces);
 			r.estimatedBounces += bounces;
 		}
-		/*
-		const rt::float_type maxPossibleBounces = float(rt::PathTraceIntegrator::MaxTraverseDepth);
-		rt::float_type aspect = (maxPossibleBounces - float(r.estimatedBounces)) / maxPossibleBounces;
-		vec4 estimatedDensity = vec4(1.0f - 0.5f * aspect * aspect, 1.0f);
-		fillRegionWithColor(r, estimatedDensity * estimatedDensity);
-		// */
 	}
 
 	std::sort(regions.begin(), regions.end(), [](const rt::Region& l, const rt::Region& r)

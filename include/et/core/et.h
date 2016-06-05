@@ -165,6 +165,10 @@ namespace et
     
     template <typename T>
     using UniquePtr = std::unique_ptr<T, DefaultDeleter<T>>;
+
+	template <typename T, typename ... Arg>
+	UniquePtr<T> makeUnique(Arg&&... arg)
+		{ return UniquePtr<T>(etCreateObject<T>(std::forward<Arg>(arg...)...)); }
 }
 
 #include <et/core/properties.h>

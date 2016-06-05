@@ -33,6 +33,7 @@ namespace et
 			static const float_type epsilon;
 			static const float_type minusEpsilon;
 			static const float_type onePlusEpsilon;
+			static const float_type oneMinusEpsilon;
 			static const float_type epsilonSquared;
 			static const float_type initialSplitValue;
 		};
@@ -42,26 +43,6 @@ namespace et
 			Uniform,
 			Cosine,
 			RaisedCosine
-		};
-
-		enum MaterialType : uint32_t
-		{
-			Diffuse,
-			Conductor,
-			Dielectric,
-		};
-
-		struct ET_ALIGNED(16) Material
-		{
-			std::string name;
-			float4 diffuse;
-			float4 specular;
-			float4 emissive;
-			float_type roughness = 0.0f;
-			float_type ior = 0.0f;
-			MaterialType type = MaterialType::Diffuse;
-
-			using Collection = Vector<Material>;
 		};
 
 		struct ET_ALIGNED(16) Triangle
@@ -282,7 +263,8 @@ namespace et
 		template <typename F, typename ... Arg>
 		inline float4 randomVectorOnHemisphere(const float4& normal, F distribution, Arg... args)
 		{
-			float cosTheta = distribution(fastRandomFloat(), std::forward<Arg>(args)...);
+			float Xi = fastRandomFloat();
+			float cosTheta = distribution(Xi, std::forward<Arg>(args)...);
 			float sinTheta = std::sqrt(1.0f - cosTheta * cosTheta);
 			float phi = fastRandomFloat() * DOUBLE_PI;
 			float4 u = perpendicularVector(normal);
@@ -303,34 +285,6 @@ namespace et
             float_type f0 = (1.0f - eta) / (1.0f + eta);
             return f0 + (1.0f - f0) * std::pow(1.0f - std::abs(cosTheta), 5.0f);
         }
-        
-		template <MaterialType M>
-		inline float_type computeFresnelTerm(const float4& Wi, const float4& n, float_type eta);
-        
-		template <>
-		inline float_type computeFresnelTerm<MaterialType::Dielectric>(const float4& Wi, const float4& n, float_type eta)
-		{
-            return 0.5f;
-            /*
-            float_type cosThetaI = std::abs(cosTheta);
-            float_type cosThetaT = std::sqrt(cosThetaTSqr);
-            float_type Rs = (cosThetaI - eta * cosThetaT) / (cosThetaI + eta * cosThetaT);
-            float_type Rp = (eta * cosThetaI - cosThetaT) / (eta * cosThetaI + cosThetaT);
-            return 0.5f * (Rs * Rs + Rp * Rp);
-            */
-        }
-
-        template <>
-        inline float_type computeFresnelTerm<MaterialType::Diffuse>(const float4& Wi, const float4& n, float_type eta)
-        {
-            return 0.05f;
-        }
-        
-		template <>
-		inline float_type computeFresnelTerm<MaterialType::Conductor>(const float4& Wi, const float4& n, float_type eta)
-		{
-			return 0.95f;
-		}
 
 		inline float4 randomBarycentric()
 		{
@@ -346,9 +300,5 @@ namespace et
 		float4 computeReflectionVector(const float4& incidence, const float4& normal, float roughness);
 			
 		float4 computeRefractionVector(const float4& incidence, const float4& normal, float_type eta, float roughness, float cosTheta, float cosThetaTSqr);
-
-		float lambert(const float4& n, const float4& Wi, const float4& Wo, float r);
-		float reflectionMicrofacet(const float4& n, const float4& Wi, const float4& Wo, float r, float f);
-		float refractionMicrofacet(const float4& n, const float4& Wi, const float4& Wo, float r, float f, float eta);
 	}
 }

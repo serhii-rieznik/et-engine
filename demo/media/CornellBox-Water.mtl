@@ -55,7 +55,7 @@ newmtl light
 	Ns 1.0
 	Tr 0.0
 	Kd 1.0 1.0 1.0
-	Ke 40 35 30
+	Ke 8.0 7.0 6.0
 
 newmtl water
 	Ns 0.0

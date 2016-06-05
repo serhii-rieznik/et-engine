@@ -14,27 +14,11 @@ namespace rt {
 const float_type Constants::epsilon = 0.001f;
 const float_type Constants::minusEpsilon = -epsilon;
 const float_type Constants::onePlusEpsilon = 1.0f + epsilon;
+const float_type Constants::oneMinusEpsilon = 1.0f - epsilon;
 const float_type Constants::epsilonSquared = epsilon * epsilon;
 const float_type Constants::initialSplitValue = std::numeric_limits<float>::max();
 
-inline float G_ggx(float t, float rSq)
-{
-	t *= t;
-	return 2.0f / (1.0f + std::hypot(1.0f, rSq * (1.0f - t) / t));
-}
-
-inline float D_ggx(float rSq, float cosTheta)
-{
-	return rSq / (PI * sqr(cosTheta * cosTheta * (rSq - 1.0f) + 1.0f));
-}
-
-float lambert(const float4& n, const float4& Wi, const float4& Wo, float r)
-{
-    // brdf = 1.0f / PI;
-    // pdf = n.dot(Wo) / PI;
-    return 1.0f / std::max(Constants::epsilon, n.dot(Wo));
-}
-
+/*
 float reflectionMicrofacet(const float4& n, const float4& Wi, const float4& Wo, float r, float f)
 {
 	auto h = Wo - Wi + n * Constants::epsilonSquared;
@@ -56,7 +40,7 @@ float reflectionMicrofacet(const float4& n, const float4& Wi, const float4& Wo, 
 	// float brdf = (d * g * f) / (4.0f * NdotI * NdotO);
 	// float pdf = d * NdotH / (4.0f * HdotI);
 
-	float result = (g * f * HdotI) / (NdotI * NdotO * NdotH + Constants::epsilon);
+	float result = (g * f * HdotI) / (NdotI * NdotH + Constants::epsilon); // x NdotO
 	ET_ASSERT(!isnan(result));
 
 	return result;
@@ -64,33 +48,9 @@ float reflectionMicrofacet(const float4& n, const float4& Wi, const float4& Wo, 
 
 float refractionMicrofacet(const float4& n, const float4& Wi, const float4& Wo, float r, float f, float eta)
 {
-    auto h = Wi + Wo * eta;
-	h.normalize();
-    h *= 2.0f * float(h.dot(n) > 0.0f) - 1.0f;
-    
-	float NdotO = n.dot(Wo);
-	float NdotI = n.dot(Wi);
-	float HdotO = h.dot(Wo);
-	float HdotI = h.dot(Wi);
-	float rSq = r * r + Constants::epsilon;
-    
-	float g1 = G_ggx(NdotI, rSq) * float(HdotI / NdotI > 0.0f);
-	float g2 = G_ggx(NdotO, rSq) * float(HdotO / NdotO > 0.0f);
-	float g = g1 * g2;
-	ET_ASSERT(!isnan(g));
 
-    // float NdotH = n.dot(h);
-    // float etaSq = eta * eta;
-	// float d = D_ggx(rSq, NdotH) * float(NdotH > 0.0f);
-    // float denom = sqr(HdotI + eta * HdotO);
-	// float brdf = ((1 - f) * d * g * etaSq * HdotI * HdotO) / (NdotI * denom);
-    // float pdf = d * etaSq * HdotO / denom;
-    
-    float result = (1 - f) * g * HdotI / NdotI;
-	ET_ASSERT(!isnan(result));
-	
-	return result;
 }
+*/
 
 const float4& defaultLightDirection()
 {

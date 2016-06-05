@@ -11,13 +11,14 @@
 # http://www.cs.cmu.edu/~djames/15-864/pics/cornellBox.jpg
 #
 newmtl leftSphere
+	Ns 0.001
+	Tr 0.46
     Ka 0.01 0.01 0.01
 	Kd 0.95 0.95 0.95
 	Ks 0.95 0.95 0.95
-    Ns 0.025
 
 newmtl rightSphere
-	Ns 0.1
+	Ns 0.001
 	Tr 1.42
     Ka 0.01 0.01 0.01
 	Kd 1.00 1.00 1.00
