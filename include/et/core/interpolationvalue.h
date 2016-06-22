@@ -17,6 +17,8 @@ namespace et
 	class InterpolationValue : public TimedObject
 	{
 	public:
+		const float interpolationThreshold = 0.00001f;
+
 		ET_DECLARE_EVENT0(updated)
 		ET_DECLARE_EVENT1(valueUpdated, const T&)
 		ET_DECLARE_EVENT0(finished)
@@ -29,13 +31,21 @@ namespace et
 		}
 		
 		void finishInterpolation()
-			{ step(1.0f); }
+		{
+			step(1.0f);
+		}
 		
 		void cancelInterpolation()
-			{ _targetValue = _value; step(1.0f); }
+		{
+			setTargetValue(_value);
+			step(1.0f);
+		}
 		
 		void addTargetValue(const T& value)
-			{ _targetValue += value; }
+		{
+			_targetValue += value;
+			_shouldInvokeFinish = true;
+		}
 		
 		void resetLatestDelta()
 			{ _latestDelta = T(0); }
@@ -44,13 +54,19 @@ namespace et
 			{ return _value; }
 
 		void setValue(const T& value)
-			{ _value = value; }
+		{
+			_value = value;
+			_shouldInvokeFinish = true;
+		}
 
 		const T& targetValue() const
 			{ return _targetValue; }
 
 		void setTargetValue(const T& targetValue)
-			{ _targetValue = targetValue; }
+		{
+			_targetValue = targetValue;
+			_shouldInvokeFinish = true;
+		}
 
 		void setRate(float rate)
 			{ _rate = rate; }
@@ -66,7 +82,7 @@ namespace et
 		{
 			auto delta = _targetValue - _value;
 			_latestDelta = delta * dt;
-			if (length(delta) > std::numeric_limits<float>::epsilon())
+			if (length(delta) > interpolationThreshold)
 			{
 				_shouldInvokeFinish = true;
 				_value += _latestDelta;
