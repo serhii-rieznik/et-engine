@@ -53,7 +53,6 @@
 		6EBE21471C66B8BE00AF7206 /* notifytimer.h in Headers */ = {isa = PBXBuildFile; fileRef = 6EBE1F8A1C66B8BE00AF7206 /* notifytimer.h */; };
 		6EBE21481C66B8BE00AF7206 /* object.h in Headers */ = {isa = PBXBuildFile; fileRef = 6EBE1F8B1C66B8BE00AF7206 /* object.h */; };
 		6EBE21491C66B8BE00AF7206 /* objectscache.h in Headers */ = {isa = PBXBuildFile; fileRef = 6EBE1F8C1C66B8BE00AF7206 /* objectscache.h */; };
-		6EBE214A1C66B8BE00AF7206 /* properties.h in Headers */ = {isa = PBXBuildFile; fileRef = 6EBE1F8D1C66B8BE00AF7206 /* properties.h */; };
 		6EBE214B1C66B8BE00AF7206 /* rawdataaccessor.h in Headers */ = {isa = PBXBuildFile; fileRef = 6EBE1F8E1C66B8BE00AF7206 /* rawdataaccessor.h */; };
 		6EBE214C1C66B8BE00AF7206 /* sequence.h in Headers */ = {isa = PBXBuildFile; fileRef = 6EBE1F8F1C66B8BE00AF7206 /* sequence.h */; };
 		6EBE214D1C66B8BE00AF7206 /* serialization.h in Headers */ = {isa = PBXBuildFile; fileRef = 6EBE1F901C66B8BE00AF7206 /* serialization.h */; };
@@ -332,7 +331,6 @@
 		6EBE1F8A1C66B8BE00AF7206 /* notifytimer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = notifytimer.h; sourceTree = "<group>"; };
 		6EBE1F8B1C66B8BE00AF7206 /* object.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = object.h; sourceTree = "<group>"; };
 		6EBE1F8C1C66B8BE00AF7206 /* objectscache.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = objectscache.h; sourceTree = "<group>"; };
-		6EBE1F8D1C66B8BE00AF7206 /* properties.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = properties.h; sourceTree = "<group>"; };
 		6EBE1F8E1C66B8BE00AF7206 /* rawdataaccessor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rawdataaccessor.h; sourceTree = "<group>"; };
 		6EBE1F8F1C66B8BE00AF7206 /* sequence.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sequence.h; sourceTree = "<group>"; };
 		6EBE1F901C66B8BE00AF7206 /* serialization.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = serialization.h; sourceTree = "<group>"; };
@@ -675,7 +673,6 @@
 				6EBE1F8A1C66B8BE00AF7206 /* notifytimer.h */,
 				6EBE1F8B1C66B8BE00AF7206 /* object.h */,
 				6EBE1F8C1C66B8BE00AF7206 /* objectscache.h */,
-				6EBE1F8D1C66B8BE00AF7206 /* properties.h */,
 				6EBE1F8E1C66B8BE00AF7206 /* rawdataaccessor.h */,
 				6EBE1F8F1C66B8BE00AF7206 /* sequence.h */,
 				6EBE1F901C66B8BE00AF7206 /* serialization.h */,
@@ -1178,7 +1175,6 @@
 				6EBE21271C66B8BE00AF7206 /* cameracontroller.h in Headers */,
 				6EBE218C1C66B8BE00AF7206 /* platformtools.h in Headers */,
 				6EBE215E1C66B8BE00AF7206 /* equations.h in Headers */,
-				6EBE214A1C66B8BE00AF7206 /* properties.h in Headers */,
 				6EBE21311C66B8BE00AF7206 /* containers.h in Headers */,
 				6EBE21351C66B8BE00AF7206 /* cout.h in Headers */,
 				6EBE21371C66B8BE00AF7206 /* datastorage.h in Headers */,

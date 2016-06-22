@@ -171,7 +171,6 @@ namespace et
 		{ return UniquePtr<T>(etCreateObject<T>(std::forward<Arg>(arg...)...)); }
 }
 
-#include <et/core/properties.h>
 #include <et/core/strings.hpp>
 #include <et/core/threading.h>
 #include <et/core/filesystem.h>

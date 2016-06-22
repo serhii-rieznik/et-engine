@@ -17,19 +17,10 @@ namespace et
 	class InterpolationValue : public TimedObject
 	{
 	public:
-		InterpolationValue() :
-			_value(0), _targetValue(0), _latestDelta(0), _rate(1.0f), _updateTime(0.0f) { }
-		
-		ET_DECLARE_PROPERTY_GET_REF_SET_REF(T, value, setValue)
-		ET_DECLARE_PROPERTY_GET_REF_SET_REF(T, targetValue, setTargetValue)
-		ET_DECLARE_PROPERTY_GET_REF(T, latestDelta)
-		
-		ET_DECLARE_PROPERTY_GET_REF_SET_REF(float, rate, setRate)
-		
-	public:
 		ET_DECLARE_EVENT0(updated)
 		ET_DECLARE_EVENT1(valueUpdated, const T&)
-		
+		ET_DECLARE_EVENT0(finished)
+
 	public:
 		void run()
 		{
@@ -48,7 +39,22 @@ namespace et
 		
 		void resetLatestDelta()
 			{ _latestDelta = T(0); }
-		
+
+		const T& value() const
+			{ return _value; }
+
+		void setValue(const T& value)
+			{ _value = value; }
+
+		const T& targetValue() const
+			{ return _targetValue; }
+
+		void setTargetValue(const T& targetValue)
+			{ _targetValue = targetValue; }
+
+		void setRate(float rate)
+			{ _rate = rate; }
+
 	private:
 		void update(float t)
 		{
@@ -58,16 +64,28 @@ namespace et
 		
 		void step(float dt)
 		{
-			_latestDelta = (_targetValue - _value) * dt;
-			if (length(_latestDelta) > 0.0)
+			auto delta = _targetValue - _value;
+			_latestDelta = delta * dt;
+			if (length(delta) > std::numeric_limits<float>::epsilon())
 			{
+				_shouldInvokeFinish = true;
 				_value += _latestDelta;
 				valueUpdated.invoke(_value);
 				updated.invoke();
 			}
+			else if (_shouldInvokeFinish)
+			{
+				finished.invoke();
+				_shouldInvokeFinish = false;
+			}
 		}
 		
 	private:
-		float _updateTime;
+		T _value = T(0);
+		T _targetValue = T(0);
+		T _latestDelta = T(0);
+		float _updateTime = 0.0f;
+		float _rate = 1.0f;
+		bool _shouldInvokeFinish = false;
 	};
 }

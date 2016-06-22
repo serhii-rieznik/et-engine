@@ -15,17 +15,21 @@ namespace et
 		ET_DECLARE_POINTER(Object)
 		
 	public:
-		Object()
-			{ }
+		Object() = default;
 
 		Object(const std::string& aName) :
 			_name(aName) { }
 
-		virtual ~Object()
-			{ }
+		virtual ~Object() = default;
 
-	public:
-		ET_DECLARE_PROPERTY_GET_REF_SET_REF(std::string, name, setName)
+		const std::string& name() const
+			{ return _name; }
+
+		void setName(const std::string& name)
+			{ _name = name; }
+
+	private:
+		std::string _name;
 	};
 
 	class RenderContext;
@@ -37,8 +41,7 @@ namespace et
 		ET_DECLARE_POINTER(LoadableObject)
 		
 	public:
-		LoadableObject()
-			{ }
+		LoadableObject() = default;
 
 		LoadableObject(const std::string& aName) :
 			Object(aName) { }
@@ -72,7 +75,7 @@ namespace et
 		ET_DECLARE_POINTER(ObjectLoader)
 		
 	public:
-		virtual ~ObjectLoader() { }
+		virtual ~ObjectLoader() = default;
 		virtual void reloadObject(LoadableObject::Pointer, ObjectsCache&) = 0;
 	};
 }

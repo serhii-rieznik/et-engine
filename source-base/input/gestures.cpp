@@ -15,10 +15,8 @@ const float GesturesRecognizer::defaultClickTemporalThreshold = 0.25f;
 const float GesturesRecognizer::defaultClickSpatialTreshold = std::sqrt(50.0f);
 const float GesturesRecognizer::defaultHoldTemporalThreshold = 1.0f;
 
-GesturesRecognizer::GesturesRecognizer(bool automaticMode) : InputHandler(automaticMode),
-	_clickTemporalThreshold(defaultClickTemporalThreshold),
-	_clickSpatialThreshold(defaultClickSpatialTreshold),
-	_holdTemporalThreshold(defaultHoldTemporalThreshold)
+GesturesRecognizer::GesturesRecognizer(bool automaticMode) :
+	InputHandler(automaticMode)
 {
 }
 

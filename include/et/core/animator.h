@@ -18,14 +18,20 @@ namespace et
 	{
 	public:
 		BaseAnimator(TimerPool* tp) :
-			TimedObject(tp), _tag(0) { }
+			TimedObject(tp) { }
 
-	public:
-		ET_DECLARE_PROPERTY_GET_COPY_SET_COPY(int, tag, setTag)
+		int64_t tag() const
+			{ return _tag; }
+
+		void setTag(int64_t tag)
+			{ _tag = tag; }
 
 	protected:
-		BaseAnimator(int aTag, TimerPool* tp) :
+		BaseAnimator(int64_t aTag, TimerPool* tp) :
 			TimedObject(tp), _tag(aTag) { }
+
+	private:
+		int64_t _tag = 0;
 	};
 	
 	template <typename T>
@@ -57,11 +63,11 @@ namespace et
 		/*
 		 * Tag and Timer Pool
 		 */
-		Animator(int tag, TimerPool* tp) :
+		Animator(int64_t tag, TimerPool* tp) :
 			BaseAnimator(tag, tp), _from(), _to(), _value(), _valuePointer(nullptr),
 			_startTime(0.0f), _duration(0.0f) { initDefaultInterpolators(); }
 
-		Animator(int tag, TimerPool::Pointer tp) :
+		Animator(int64_t tag, TimerPool::Pointer tp) :
 			BaseAnimator(tag, tp.ptr()), _from(), _to(), _value(), _valuePointer(nullptr),
 			_startTime(0.0f), _duration(0.0f) { initDefaultInterpolators(); }
 

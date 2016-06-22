@@ -57,8 +57,12 @@ namespace et
 		
 		void finishRendering();
 
-		ET_DECLARE_PROPERTY_GET_COPY_SET_COPY(uint32_t, defaultTextureBindingUnit, setDefaultTextureBindingUnit)
-		
+		uint32_t defaultTextureBindingUnit() const
+			{ return _defaultTextureBindingUnit; }
+
+		void setDefaultTextureBindingUnit(uint32_t defaultTextureBindingUnit)
+			{ _defaultTextureBindingUnit = defaultTextureBindingUnit; }
+
 	private:
 		Renderer(Renderer&&) = delete;
 		Renderer(const Renderer&) = delete;
@@ -66,6 +70,7 @@ namespace et
 
 	private:
 		RenderContext* _rc = nullptr;
+		uint32_t _defaultTextureBindingUnit = 7;
 		
 		ObjectsCache _sharedCache;
 		VertexArrayObject::Pointer _fullscreenQuadVao;

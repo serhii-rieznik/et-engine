@@ -48,10 +48,23 @@ namespace et
 		void cancelRecognition();
 
 	public:
-		ET_DECLARE_PROPERTY_GET_COPY_SET_COPY(float, clickTemporalThreshold, setClickTemporalThreshold)
-		ET_DECLARE_PROPERTY_GET_COPY_SET_COPY(float, clickSpatialThreshold, setClickSpatialThreshold)
-				
-		ET_DECLARE_PROPERTY_GET_COPY_SET_COPY(float, holdTemporalThreshold, setHoldTemporalThreshold)
+		float clickTemporalThreshold() const
+			{ return _clickTemporalThreshold; }
+
+		void setClickTemporalThreshold(float clickTemporalThreshold)
+			{ _clickTemporalThreshold = clickTemporalThreshold; }
+
+		float clickSpatialThreshold() const
+			{ return _clickSpatialThreshold; }
+
+		void setClickSpatialThreshold(float clickSpatialThreshold)
+			{ _clickSpatialThreshold = clickSpatialThreshold; }
+
+		float holdTemporalThreshold() const
+			{ return _holdTemporalThreshold; }
+
+		void setHoldTemporalThreshold(float holdTemporalThreshold)
+			{ _holdTemporalThreshold = holdTemporalThreshold; }
 
 	public:
 		ET_DECLARE_EVENT1(rotate, float)
@@ -126,6 +139,9 @@ namespace et
 		PointerInputInfo _singlePointer;
 		size_t _recognizedGestures = RecognizedGesture_All;
 		RecognizedGesture _gesture = RecognizedGesture_NoGesture;
+		float _clickTemporalThreshold = defaultClickTemporalThreshold;
+		float _clickSpatialThreshold = defaultClickSpatialTreshold;
+		float _holdTemporalThreshold = defaultHoldTemporalThreshold;
 		bool _shouldPerformClick = false;
 		bool _shouldPerformDoubleClick = false;
 		bool _lockGestures = true;
