@@ -304,8 +304,7 @@ PlatformDependentContext ApplicationContextFactoryOSX::createContextWithOptions(
     
     [mainWindow setMinSize:NSMakeSize(static_cast<float>(options.minimumSize.x),
         static_cast<float>(options.minimumSize.y))];
-    
-    
+
     options.size = vec2i(static_cast<int>(contentRect.size.width),
         static_cast<int>(contentRect.size.height));
     
