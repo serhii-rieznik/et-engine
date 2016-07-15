@@ -27,7 +27,6 @@
     <ClInclude Include="..\..\include\et\camera\cameraorbitcontroller.h" />
     <ClInclude Include="..\..\include\et\camera\frustum.h" />
     <ClInclude Include="..\..\include\et\core\animator.h" />
-    <ClInclude Include="..\..\include\et\core\atomiccounter.h" />
     <ClInclude Include="..\..\include\et\core\autoptr.h" />
     <ClInclude Include="..\..\include\et\core\autovalue.h" />
     <ClInclude Include="..\..\include\et\core\base64.h" />
@@ -121,6 +120,7 @@
     <ClInclude Include="..\..\include\et\locale\locale.hpp" />
     <ClInclude Include="..\..\include\et\opengl\opengl.h" />
     <ClInclude Include="..\..\include\et\opengl\openglcaps.h" />
+    <ClInclude Include="..\..\include\et\platform-win\context_win.h" />
     <ClInclude Include="..\..\include\et\platform-win\glee.h" />
     <ClInclude Include="..\..\include\et\rendering\apiobject.h" />
     <ClInclude Include="..\..\include\et\rendering\framebuffer.h" />
@@ -174,7 +174,6 @@
     <ClInclude Include="..\..\include\et\sound\track.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\source-base\app\appevironment.cpp" />
     <ClCompile Include="..\..\source-base\app\application.cpp" />
     <ClCompile Include="..\..\source-base\app\backgroundthread.cpp" />
     <ClCompile Include="..\..\source-base\app\events.cpp" />
@@ -234,14 +233,13 @@
     <ClCompile Include="..\..\source-base\opengl\vertexarrayobject.cpp" />
     <ClCompile Include="..\..\source-base\opengl\vertexbuffer.cpp" />
     <ClCompile Include="..\..\source-base\platform-win\application.win.cpp" />
-    <ClCompile Include="..\..\source-base\platform-win\atomiccounter.win.cpp" />
+    <ClCompile Include="..\..\source-base\platform-win\context_win.cpp" />
     <ClCompile Include="..\..\source-base\platform-win\input.win.cpp" />
     <ClCompile Include="..\..\source-base\platform-win\locale.win.cpp" />
     <ClCompile Include="..\..\source-base\platform-win\log.win.cpp" />
     <ClCompile Include="..\..\source-base\platform-win\memory.win.cpp" />
     <ClCompile Include="..\..\source-base\platform-win\opengl.win.cpp" />
     <ClCompile Include="..\..\source-base\platform-win\rendercontext.win.cpp" />
-    <ClCompile Include="..\..\source-base\platform-win\thread.win.cpp" />
     <ClCompile Include="..\..\source-base\platform-win\tools.win.cpp" />
     <ClCompile Include="..\..\source-base\rendering\framebufferfactory.cpp" />
     <ClCompile Include="..\..\source-base\rendering\indexarray.cpp" />

@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <mutex>
 #include <et/core/threading.h>
 
 namespace et
@@ -27,7 +28,6 @@ namespace et
 		void run()
 		{
 			ET_ASSERT(!_running);
-
 			_thread = std::thread(&Thread::threadFunction, this);
 		}
 
@@ -63,10 +63,14 @@ namespace et
 		}
 
 		bool running() const
-			{ return _running; }
+		{ 
+			return _running; 
+		}
 
 		bool suspended() const
-			{ return _suspended; }
+		{
+			return _suspended; 
+		}
 
 		threading::ThreadIdentifier identifier() const
 		{

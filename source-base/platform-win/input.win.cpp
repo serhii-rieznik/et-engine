@@ -16,12 +16,13 @@ using namespace et;
 
 PointerInputInfo Input::currentPointer()
 {
-	HWND appWindow = HWND(application().renderingContextHandle());
+	HWND mainWindow = reinterpret_cast<HWND>(application().context().pointers[0]);
+
 	POINT pt = { };
 	RECT r = { };
 	GetCursorPos(&pt);
-	ScreenToClient(appWindow, &pt);
-	GetClientRect(appWindow, &r);
+	ScreenToClient(mainWindow, &pt);
+	GetClientRect(mainWindow, &r);
 	vec2 ptf(static_cast<float>(pt.x), static_cast<float>(pt.y));
 
 	vec2 normPt;

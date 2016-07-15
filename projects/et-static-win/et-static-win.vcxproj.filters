@@ -46,37 +46,37 @@
       <UniqueIdentifier>{0a8a0dbb-241a-4c5d-9ed6-76bbc9fbcd79}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\app">
-      <UniqueIdentifier>{aed50f25-7c59-4136-9f25-b30e8f4767da}</UniqueIdentifier>
+      <UniqueIdentifier>{da55a591-5331-473d-b2c0-1312caa9bfb8}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\camera">
-      <UniqueIdentifier>{2548dfa7-bb7b-48b8-b554-6d91a2be454e}</UniqueIdentifier>
+      <UniqueIdentifier>{89be62af-b515-4df6-9e15-1c21bb617267}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\core">
-      <UniqueIdentifier>{68688a03-c984-4d1b-9e1f-7d4e9ad80a3a}</UniqueIdentifier>
+      <UniqueIdentifier>{8e5483d9-fbd6-42c7-8e1b-d61b51f65fe5}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\geometry">
-      <UniqueIdentifier>{3125a681-afc1-4ac8-879d-a2612dd9b8ae}</UniqueIdentifier>
+      <UniqueIdentifier>{f3b58606-e9a7-4030-8332-3b0c03612563}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\imaging">
-      <UniqueIdentifier>{79be869a-c5d8-444a-b193-7ff3eaeae8d6}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\opengl">
-      <UniqueIdentifier>{d63bd01e-1e70-475a-8aaf-3c3e0f058473}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\platform-win">
-      <UniqueIdentifier>{9a1e0064-c87d-4cdb-8949-79a387e8db30}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\rendering">
-      <UniqueIdentifier>{82205af3-c06b-49f3-a644-879c1b962529}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\scene3d">
-      <UniqueIdentifier>{20143549-0bf3-4568-8681-7582aefc8433}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\sound">
-      <UniqueIdentifier>{660b4e19-9aee-4c39-9677-b9244aec8bbc}</UniqueIdentifier>
+      <UniqueIdentifier>{4e4bb8bc-2f46-4b3d-9eba-50c83df5a464}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\input">
-      <UniqueIdentifier>{ea29d8d5-87d3-4524-a4e0-61ed0aac585b}</UniqueIdentifier>
+      <UniqueIdentifier>{6ecafa56-c72d-42a5-948c-00b358439883}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\sound">
+      <UniqueIdentifier>{b37a9a76-405a-4619-a694-536a04526df8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\scene3d">
+      <UniqueIdentifier>{06190f0b-df17-4e1f-94f2-3b67127c470f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\rendering">
+      <UniqueIdentifier>{28d894a4-039b-4759-b40c-6f8510a32276}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\platform-win">
+      <UniqueIdentifier>{a7470628-3770-463a-8f42-50cdb55d0196}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\opengl">
+      <UniqueIdentifier>{d80eda42-a938-41db-8d46-101ee1379305}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -111,9 +111,6 @@
       <Filter>Header Files\app</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\et\core\animator.h">
-      <Filter>Header Files\core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\et\core\atomiccounter.h">
       <Filter>Header Files\core</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\et\core\autoptr.h">
@@ -563,11 +560,11 @@
     <ClInclude Include="..\..\include\et\input\input.h">
       <Filter>Header Files\input</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\et\platform-win\context_win.h">
+      <Filter>Header Files\platform-win</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\source-base\app\appevironment.cpp">
-      <Filter>Source Files\app</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\source-base\app\application.cpp">
       <Filter>Source Files\app</Filter>
     </ClCompile>
@@ -585,6 +582,189 @@
     </ClCompile>
     <ClCompile Include="..\..\source-base\app\runloop.cpp">
       <Filter>Source Files\app</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\camera\camera.cpp">
+      <Filter>Source Files\camera</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\camera\cameracontroller.cpp">
+      <Filter>Source Files\camera</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\camera\cameramovingcontroller.cpp">
+      <Filter>Source Files\camera</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\camera\cameraorbitcontroller.cpp">
+      <Filter>Source Files\camera</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\camera\frustum.cpp">
+      <Filter>Source Files\camera</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\sound\platform-dependent.cpp">
+      <Filter>Source Files\sound</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\sound\player.cpp">
+      <Filter>Source Files\sound</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\sound\sound.cpp">
+      <Filter>Source Files\sound</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\sound\streamingthread.cpp">
+      <Filter>Source Files\sound</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\sound\track.cpp">
+      <Filter>Source Files\sound</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\scene3d\animation.cpp">
+      <Filter>Source Files\scene3d</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\scene3d\baseelement.cpp">
+      <Filter>Source Files\scene3d</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\scene3d\lineelement.cpp">
+      <Filter>Source Files\scene3d</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\scene3d\mesh.cpp">
+      <Filter>Source Files\scene3d</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\scene3d\meshdeformer.cpp">
+      <Filter>Source Files\scene3d</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\scene3d\objloader.cpp">
+      <Filter>Source Files\scene3d</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\scene3d\particlesystem.cpp">
+      <Filter>Source Files\scene3d</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\scene3d\renderableelement.cpp">
+      <Filter>Source Files\scene3d</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\scene3d\scene3d.cpp">
+      <Filter>Source Files\scene3d</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\scene3d\scene3drenderer.cpp">
+      <Filter>Source Files\scene3d</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\scene3d\scenematerial.cpp">
+      <Filter>Source Files\scene3d</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\scene3d\skeletonelement.cpp">
+      <Filter>Source Files\scene3d</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\scene3d\storage.cpp">
+      <Filter>Source Files\scene3d</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\rendering\framebufferfactory.cpp">
+      <Filter>Source Files\rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\rendering\indexarray.cpp">
+      <Filter>Source Files\rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\rendering\material.cpp">
+      <Filter>Source Files\rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\rendering\primitives.cpp">
+      <Filter>Source Files\rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\rendering\renderbatch.cpp">
+      <Filter>Source Files\rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\rendering\rendercontext.cpp">
+      <Filter>Source Files\rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\rendering\rendering.cpp">
+      <Filter>Source Files\rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\rendering\renderpass.cpp">
+      <Filter>Source Files\rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\rendering\rendersystem.cpp">
+      <Filter>Source Files\rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\rendering\texturefactory.cpp">
+      <Filter>Source Files\rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\rendering\textureloadingthread.cpp">
+      <Filter>Source Files\rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\rendering\vertexarray.cpp">
+      <Filter>Source Files\rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\rendering\vertexbufferfactory.cpp">
+      <Filter>Source Files\rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\rendering\vertexdatachunk.cpp">
+      <Filter>Source Files\rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\rendering\vertexdeclaration.cpp">
+      <Filter>Source Files\rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\rendering\vertexstorage.cpp">
+      <Filter>Source Files\rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\platform-win\application.win.cpp">
+      <Filter>Source Files\platform-win</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\platform-win\context_win.cpp">
+      <Filter>Source Files\platform-win</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\platform-win\input.win.cpp">
+      <Filter>Source Files\platform-win</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\platform-win\locale.win.cpp">
+      <Filter>Source Files\platform-win</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\platform-win\log.win.cpp">
+      <Filter>Source Files\platform-win</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\platform-win\memory.win.cpp">
+      <Filter>Source Files\platform-win</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\platform-win\opengl.win.cpp">
+      <Filter>Source Files\platform-win</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\platform-win\rendercontext.win.cpp">
+      <Filter>Source Files\platform-win</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\platform-win\tools.win.cpp">
+      <Filter>Source Files\platform-win</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\opengl\capabilities.cpp">
+      <Filter>Source Files\opengl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\opengl\framebuffer.cpp">
+      <Filter>Source Files\opengl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\opengl\indexbuffer.cpp">
+      <Filter>Source Files\opengl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\opengl\materialfactory.cpp">
+      <Filter>Source Files\opengl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\opengl\opengl.cpp">
+      <Filter>Source Files\opengl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\opengl\program.cpp">
+      <Filter>Source Files\opengl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\opengl\renderer.cpp">
+      <Filter>Source Files\opengl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\opengl\renderstate.cpp">
+      <Filter>Source Files\opengl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\opengl\texture.cpp">
+      <Filter>Source Files\opengl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\opengl\vertexarrayobject.cpp">
+      <Filter>Source Files\opengl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\opengl\vertexbuffer.cpp">
+      <Filter>Source Files\opengl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\input\gestures.cpp">
+      <Filter>Source Files\input</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\input\input.cpp">
+      <Filter>Source Files\input</Filter>
     </ClCompile>
     <ClCompile Include="..\..\source-base\imaging\bmploader.cpp">
       <Filter>Source Files\imaging</Filter>
@@ -687,192 +867,6 @@
     </ClCompile>
     <ClCompile Include="..\..\source-base\core\transformable.cpp">
       <Filter>Source Files\core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\camera\camera.cpp">
-      <Filter>Source Files\camera</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\camera\cameracontroller.cpp">
-      <Filter>Source Files\camera</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\camera\cameramovingcontroller.cpp">
-      <Filter>Source Files\camera</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\camera\cameraorbitcontroller.cpp">
-      <Filter>Source Files\camera</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\camera\frustum.cpp">
-      <Filter>Source Files\camera</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\opengl\capabilities.cpp">
-      <Filter>Source Files\opengl</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\opengl\framebuffer.cpp">
-      <Filter>Source Files\opengl</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\opengl\indexbuffer.cpp">
-      <Filter>Source Files\opengl</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\opengl\materialfactory.cpp">
-      <Filter>Source Files\opengl</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\opengl\opengl.cpp">
-      <Filter>Source Files\opengl</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\opengl\program.cpp">
-      <Filter>Source Files\opengl</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\opengl\renderer.cpp">
-      <Filter>Source Files\opengl</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\opengl\renderstate.cpp">
-      <Filter>Source Files\opengl</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\opengl\texture.cpp">
-      <Filter>Source Files\opengl</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\opengl\vertexarrayobject.cpp">
-      <Filter>Source Files\opengl</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\opengl\vertexbuffer.cpp">
-      <Filter>Source Files\opengl</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\platform-win\application.win.cpp">
-      <Filter>Source Files\platform-win</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\platform-win\atomiccounter.win.cpp">
-      <Filter>Source Files\platform-win</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\platform-win\input.win.cpp">
-      <Filter>Source Files\platform-win</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\platform-win\locale.win.cpp">
-      <Filter>Source Files\platform-win</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\platform-win\log.win.cpp">
-      <Filter>Source Files\platform-win</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\platform-win\memory.win.cpp">
-      <Filter>Source Files\platform-win</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\platform-win\opengl.win.cpp">
-      <Filter>Source Files\platform-win</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\platform-win\rendercontext.win.cpp">
-      <Filter>Source Files\platform-win</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\platform-win\thread.win.cpp">
-      <Filter>Source Files\platform-win</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\platform-win\tools.win.cpp">
-      <Filter>Source Files\platform-win</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\rendering\framebufferfactory.cpp">
-      <Filter>Source Files\rendering</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\rendering\indexarray.cpp">
-      <Filter>Source Files\rendering</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\rendering\material.cpp">
-      <Filter>Source Files\rendering</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\rendering\primitives.cpp">
-      <Filter>Source Files\rendering</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\rendering\renderbatch.cpp">
-      <Filter>Source Files\rendering</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\rendering\rendercontext.cpp">
-      <Filter>Source Files\rendering</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\rendering\rendering.cpp">
-      <Filter>Source Files\rendering</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\rendering\renderpass.cpp">
-      <Filter>Source Files\rendering</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\rendering\rendersystem.cpp">
-      <Filter>Source Files\rendering</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\rendering\texturefactory.cpp">
-      <Filter>Source Files\rendering</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\rendering\textureloadingthread.cpp">
-      <Filter>Source Files\rendering</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\rendering\vertexarray.cpp">
-      <Filter>Source Files\rendering</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\rendering\vertexbufferfactory.cpp">
-      <Filter>Source Files\rendering</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\rendering\vertexdatachunk.cpp">
-      <Filter>Source Files\rendering</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\rendering\vertexdeclaration.cpp">
-      <Filter>Source Files\rendering</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\rendering\vertexstorage.cpp">
-      <Filter>Source Files\rendering</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\scene3d\animation.cpp">
-      <Filter>Source Files\scene3d</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\scene3d\baseelement.cpp">
-      <Filter>Source Files\scene3d</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\scene3d\lineelement.cpp">
-      <Filter>Source Files\scene3d</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\scene3d\mesh.cpp">
-      <Filter>Source Files\scene3d</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\scene3d\meshdeformer.cpp">
-      <Filter>Source Files\scene3d</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\scene3d\objloader.cpp">
-      <Filter>Source Files\scene3d</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\scene3d\particlesystem.cpp">
-      <Filter>Source Files\scene3d</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\scene3d\renderableelement.cpp">
-      <Filter>Source Files\scene3d</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\scene3d\scene3d.cpp">
-      <Filter>Source Files\scene3d</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\scene3d\scene3drenderer.cpp">
-      <Filter>Source Files\scene3d</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\scene3d\scenematerial.cpp">
-      <Filter>Source Files\scene3d</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\scene3d\skeletonelement.cpp">
-      <Filter>Source Files\scene3d</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\scene3d\storage.cpp">
-      <Filter>Source Files\scene3d</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\sound\platform-dependent.cpp">
-      <Filter>Source Files\sound</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\sound\player.cpp">
-      <Filter>Source Files\sound</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\sound\sound.cpp">
-      <Filter>Source Files\sound</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\sound\streamingthread.cpp">
-      <Filter>Source Files\sound</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\sound\track.cpp">
-      <Filter>Source Files\sound</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\input\gestures.cpp">
-      <Filter>Source Files\input</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\input\input.cpp">
-      <Filter>Source Files\input</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

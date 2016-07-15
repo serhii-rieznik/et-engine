@@ -11,12 +11,6 @@
 #	error This file should not be included from anywhere except et.h
 #endif
 
-#if (ET_DEBUG)
-#	define setDebugVariable(var, val) et::et_internal_setDebugVariable(var, val, #var, #val, ET_CALL_FUNCTION);
-#else
-#	define setDebugVariable(var, val) var = val;
-#endif
-
 #if (ET_PLATFORM_WIN)
 #
 #	define ET_CALL_FUNCTION					__FUNCTION__
@@ -118,14 +112,6 @@ namespace et
 
 namespace et
 {
-	template <typename T>
-	inline void et_internal_setDebugVariable(T& variable, const T& newValue,
-		const char* variableName, const char* valueName, const char* function)
-	{
-		variable = newValue;
-		printf("[setDebugVariable] %s:\n%s = %s\n", function, variableName, valueName);
-	}
-	
 #if (ET_DEBUG && ET_LOG_MEMORY_OPERATIONS)
 	inline void etCopyMemory(void* dest, const void* source, uint64_t size)
 	{
