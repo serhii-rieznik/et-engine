@@ -43,6 +43,7 @@ namespace et
 
 		void init();
 		bool valid();
+		void shutdown();
 		
         RenderContextParameters& parameters()
             { return _params; }

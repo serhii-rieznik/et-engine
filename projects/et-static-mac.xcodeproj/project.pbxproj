@@ -13,7 +13,6 @@
 		6EBE211C1C66B8BE00AF7206 /* appevironment.h in Headers */ = {isa = PBXBuildFile; fileRef = 6EBE1F5D1C66B8BE00AF7206 /* appevironment.h */; };
 		6EBE211D1C66B8BE00AF7206 /* application.h in Headers */ = {isa = PBXBuildFile; fileRef = 6EBE1F5E1C66B8BE00AF7206 /* application.h */; };
 		6EBE211E1C66B8BE00AF7206 /* applicationdelegate.h in Headers */ = {isa = PBXBuildFile; fileRef = 6EBE1F5F1C66B8BE00AF7206 /* applicationdelegate.h */; };
-		6EBE211F1C66B8BE00AF7206 /* applicationnotifier.h in Headers */ = {isa = PBXBuildFile; fileRef = 6EBE1F601C66B8BE00AF7206 /* applicationnotifier.h */; };
 		6EBE21201C66B8BE00AF7206 /* backgroundthread.h in Headers */ = {isa = PBXBuildFile; fileRef = 6EBE1F611C66B8BE00AF7206 /* backgroundthread.h */; };
 		6EBE21211C66B8BE00AF7206 /* events.h in Headers */ = {isa = PBXBuildFile; fileRef = 6EBE1F621C66B8BE00AF7206 /* events.h */; };
 		6EBE21221C66B8BE00AF7206 /* events.inl.h in Headers */ = {isa = PBXBuildFile; fileRef = 6EBE1F631C66B8BE00AF7206 /* events.inl.h */; };
@@ -291,7 +290,6 @@
 		6EBE1F5D1C66B8BE00AF7206 /* appevironment.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = appevironment.h; sourceTree = "<group>"; };
 		6EBE1F5E1C66B8BE00AF7206 /* application.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = application.h; sourceTree = "<group>"; };
 		6EBE1F5F1C66B8BE00AF7206 /* applicationdelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = applicationdelegate.h; sourceTree = "<group>"; };
-		6EBE1F601C66B8BE00AF7206 /* applicationnotifier.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = applicationnotifier.h; sourceTree = "<group>"; };
 		6EBE1F611C66B8BE00AF7206 /* backgroundthread.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = backgroundthread.h; sourceTree = "<group>"; };
 		6EBE1F621C66B8BE00AF7206 /* events.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = events.h; sourceTree = "<group>"; };
 		6EBE1F631C66B8BE00AF7206 /* events.inl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = events.inl.h; sourceTree = "<group>"; };
@@ -615,7 +613,6 @@
 				6EBE1F5D1C66B8BE00AF7206 /* appevironment.h */,
 				6EBE1F5E1C66B8BE00AF7206 /* application.h */,
 				6EBE1F5F1C66B8BE00AF7206 /* applicationdelegate.h */,
-				6EBE1F601C66B8BE00AF7206 /* applicationnotifier.h */,
 				6EBE1F611C66B8BE00AF7206 /* backgroundthread.h */,
 				6E954C7F1CD25EEC00A12C68 /* context.h */,
 				6EBE1F621C66B8BE00AF7206 /* events.h */,
@@ -1259,7 +1256,6 @@
 				6EBE21B81C66B8BE00AF7206 /* baseelement.h in Headers */,
 				6EBE21BB1C66B8BE00AF7206 /* material.parameters.h in Headers */,
 				6EBE21601C66B8BE00AF7206 /* line2d.h in Headers */,
-				6EBE211F1C66B8BE00AF7206 /* applicationnotifier.h in Headers */,
 				6EBE21A31C66B8BE00AF7206 /* program.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

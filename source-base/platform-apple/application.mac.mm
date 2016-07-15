@@ -91,11 +91,14 @@ void Application::load()
 
 Application::~Application()
 {
+	exitRunLoop();
+
+	_renderContext->shutdown();
+
 	_backgroundThread.stop();
 	_backgroundThread.join();
-	
+
 	platformFinalize();
-	exitRunLoop();
     freeContext();
 }
 
