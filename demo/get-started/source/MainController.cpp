@@ -60,8 +60,10 @@ void MainController::createTextures(et::RenderContext* rc)
 
 	auto allScreens = availableScreens();
 	for (const auto& screen : allScreens)
-		maxSize = maxv(screen.frame.size() * screen.scaleFactor, maxSize);
-
+	{
+		vec2i scaledSize(static_cast<int>(screen.frame.width * screen.scaleFactor), static_cast<int>(screen.frame.height * screen.scaleFactor));
+		maxSize = maxv(scaledSize, maxSize);
+	}
 	_noiseTexture = rc->textureFactory().genNoiseTexture(maxSize, true, "noise-texture");
 }
 

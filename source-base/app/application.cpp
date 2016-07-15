@@ -186,8 +186,6 @@ void Application::stop()
 {
     _delegate->applicationWillTerminate();
     _running = false;
-    
-    _renderContext->shutdown();
 }
 
 std::string Application::resolveFileName(const std::string& path)

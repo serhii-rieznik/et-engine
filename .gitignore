@@ -19,3 +19,4 @@ projects/x64/
 projects/Debug/
 lib/win64/et-Debug.lib
 lib/win64/et-Release.lib
+*.opendb

@@ -42,8 +42,8 @@
 									memset(_privateData, 0, sizeof(_privateData)); \
 									_private = new (_privateData) T##Private(__VA_ARGS__);
 
-#define ET_PIMPL_FINALIZE(T)		if (_private) \
-										_private->~T##Private(); \
+#define ET_PIMPL_FINALIZE(T)		ET_ASSERT(_private != nullptr); \
+									_private->~T##Private(); \
 									_private = nullptr; \
 									memset(_privateData, 0, sizeof(_privateData));
 

@@ -44,7 +44,8 @@ void Application::platformFinalize()
 	if (_parameters.shouldPreserveRenderContext)
 		_renderContext->pushAndActivateRenderingContext();
 
-	_backgroundThread.stopAndWaitForTermination();
+	_backgroundThread.stop();
+	_backgroundThread.join();
 	sharedObjectFactory().deleteObject(_delegate);
 
 	if (_parameters.shouldPreserveRenderContext)
@@ -85,7 +86,6 @@ int Application::platformRun(int, char*[])
 	_renderContext = sharedObjectFactory().createObject<RenderContext>(params, this);
 	if (_renderContext->valid())
 	{
-		_renderingContextHandle = _renderContext->renderingContextHandle();
 		enterRunLoop();
 		_delegate->applicationWillResizeContext(_renderContext->size());
 
@@ -103,12 +103,11 @@ int Application::platformRun(int, char*[])
 			}
 		}
 
-		terminated();
+		stop();
 		platformFinalize();
-		return _exitCode;
 	}
 
-	return 0;
+	return _exitCode;
 }
 
 void Application::quit(int exitCode)
@@ -127,7 +126,7 @@ Application::~Application()
 void Application::setTitle(const std::string& s)
 {
 	auto stringValue = ET_STRING_TO_PARAM_TYPE(s);
-	HWND window = reinterpret_cast<HWND>(_renderingContextHandle);
+	HWND window = reinterpret_cast<HWND>(_context.pointers[0]);
 	SendMessage(window, WM_SETTEXT, 0, reinterpret_cast<LPARAM>(stringValue.c_str()));
 }
 
@@ -136,7 +135,7 @@ void Application::requestUserAttention()
 	FLASHWINFO fi = { };
 	fi.cbSize = sizeof(fi);
 	fi.dwFlags = FLASHW_ALL | FLASHW_TIMERNOFG;
-	fi.hwnd = reinterpret_cast<HWND>(application().renderingContextHandle());
+	fi.hwnd = reinterpret_cast<HWND>(_context.pointers[0]);
 	fi.uCount = std::numeric_limits<UINT>::max();
 	FlashWindowEx(&fi);
 }
