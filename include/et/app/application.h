@@ -57,11 +57,8 @@ namespace et
         const ApplicationParameters& parameters() const
 			{ return _parameters; }
 
-		size_t launchParamtersCount() const
-			{ return _launchParameters.size(); }
-
-		const std::string& launchParameter(size_t i) const
-			{ return (i >= _launchParameters.size()) ? _emptyParamter : _launchParameters.at(i); }
+		const StringList& launchParamters() const
+			{ return _launchParameters; }
 
 		const ApplicationIdentifier& identifier() const;
 
