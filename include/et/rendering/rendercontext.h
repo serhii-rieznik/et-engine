@@ -10,7 +10,7 @@
 #include <et/core/et.h>
 #include <et/core/objectscache.h>
 #include <et/rendering/rendercontextparams.h>
-#include <et/rendering/renderer.h>
+#include <et/rendering/renderinterface.h>
 #include <et/rendering/renderstate.h>
 #include <et/rendering/renderingcaps.h>
 #include <et/rendering/materialfactory.h>
@@ -57,7 +57,7 @@ namespace et
 		RenderState& renderState()
 			{ return _renderState; }
 
-		Renderer* renderer()
+		RenderInterface* renderer()
 			{ return _renderer.ptr(); }
 
 		MaterialFactory& materialFactory()
@@ -113,7 +113,7 @@ namespace et
 		TextureFactory::Pointer _textureFactory;
 		FramebufferFactory::Pointer _framebufferFactory;
 		VertexBufferFactory::Pointer _vertexBufferFactory;
-		Renderer::Pointer _renderer;
+		RenderInterface::Pointer _renderer;
 	};
 
 }

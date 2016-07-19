@@ -7,14 +7,81 @@
 
 #include <et/geometry/geometry.h>
 #include <et/opengl/opengl.h>
+#include <et/opengl/openglrenderer.h>
+#include <et/rendering/renderstate.h>
 #include <et/rendering/rendercontext.h>
-#include <et/rendering/renderer.h>
 #include <et/rendering/material.h>
 #include <et/rendering/indexarray.h>
 #include <et/rendering/vertexstorage.h>
 
-using namespace et;
+namespace et
+{
 
+OpenGLRenderer::OpenGLRenderer(RenderContext* rc)
+	: RenderInterface(rc)
+{
+}
+
+void OpenGLRenderer::drawIndexedPrimitive(PrimitiveType pt, IndexArrayFormat fmt, uint32_t first, uint32_t count)
+{
+	uintptr_t offset = first * static_cast<uint32_t>(fmt);
+	DataFormat dataFmt = indexArrayFormatToDataFormat(fmt);
+	etDrawElements(primitiveTypeValue(pt), count, dataFormatValue(dataFmt), reinterpret_cast<void*>(offset));
+}
+
+RenderPass::Pointer OpenGLRenderer::allocateRenderPass(const RenderPass::ConstructionInfo& info)
+{
+	RenderPass::Pointer result = RenderPass::Pointer::create(info);
+
+	return result;
+}
+
+void OpenGLRenderer::submitRenderPass(RenderPass::Pointer pass)
+{
+	auto& rs = rc()->renderState();
+
+	GLbitfield clearMask = 0;
+	if (pass->info().colorAttachment.loadOperation == FramebufferOperation::Clear)
+	{
+		clearMask |= GL_COLOR_BUFFER_BIT;
+		ET_ASSERT(rs.colorMask() != static_cast<uint32_t>(ColorMask::None));
+		rs.setClearColor(pass->info().colorAttachment.clearColor);
+	}
+
+	if (pass->info().depthAttachment.loadOperation == FramebufferOperation::Clear)
+	{
+		clearMask |= GL_DEPTH_BUFFER_BIT;
+		ET_ASSERT(rs.depthState().depthWriteEnabled);
+		rs.setClearDepth(pass->info().depthAttachment.clearDepth);
+	}
+
+	if (clearMask != 0)
+	{
+		glClear(clearMask);
+	}
+
+	for (auto& batch : pass->renderBatches())
+	{
+		auto& mat = batch->material().reference();
+		mat.enableSnapshotInRenderState(rs, batch->materialSnapshot());
+
+		auto& prog = mat.program().reference();
+		prog.setTransformMatrix(batch->transformation());
+		prog.setCameraProperties(pass->info().camera);
+		prog.setDefaultLightPosition(pass->info().defaultLightPosition);
+
+		auto& ib = batch->vao()->indexBuffer();
+
+		rs.bindVertexArrayObject(batch->vao());
+		drawIndexedPrimitive(ib->primitiveType(), ib->format(), batch->firstIndex(), batch->numIndexes());
+	}
+}
+
+
+}
+
+
+/*
 extern const std::string fullscreen_vertex_shader; 
 extern const std::string fullscreen_scaled_vertex_shader;
 extern const std::string scaled_copy_vertex_shader;
@@ -95,14 +162,6 @@ Renderer::Renderer(RenderContext* rc) :
 
 void Renderer::clear(bool color, bool depth)
 {
-	ET_ASSERT(!depth || (depth && _rc->renderState().depthState().depthWriteEnabled));
-	ET_ASSERT(!color || (color && (_rc->renderState().colorMask() != static_cast<uint32_t>(ColorMask::None))));
-	
-	GLbitfield clearMask = (color * GL_COLOR_BUFFER_BIT) + (depth * GL_DEPTH_BUFFER_BIT);
-	if (clearMask != 0)
-	{
-		glClear(clearMask);
-	}
 }
 
 void Renderer::fullscreenPass()
@@ -280,11 +339,14 @@ void Renderer::finishRendering()
 {
 	glFinish();
 }
+ 
+*/
 
 /*
  * Default shaders
  */
 
+/*
 const std::string fullscreen_vertex_shader = R"(
 etVertexIn vec2 Vertex;
 etVertexOut vec2 TexCoord;
@@ -373,3 +435,4 @@ void main()
 {
 	etFragmentOut = pow(etTexture2D(depth_texture, TexCoord), vec4(factor));
 })";
+*/

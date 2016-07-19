@@ -6,7 +6,6 @@
  */
 
 #include <et/rendering/rendercontext.h>
-
 #if (ET_PLATFORM_MAC)
 
 #include <AppKit/NSApplication.h>
@@ -18,8 +17,10 @@
 #include <et/platform/platformtools.h>
 #include <et/platform-apple/apple.h>
 #include <et/core/threading.h>
+#include <et/rendering/renderhelper.h>
 #include <et/opengl/opengl.h>
 #include <et/opengl/openglcaps.h>
+#include <et/opengl/openglrenderer.h>
 #include <et/input/input.h>
 #include <et/app/application.h>
 
@@ -62,11 +63,13 @@ RenderContext::RenderContext(const RenderContextParameters& inParams, Applicatio
 	_framebufferFactory = FramebufferFactory::Pointer::create(this);
 	_materialFactory = MaterialFactory::Pointer::create(this);
 	_vertexBufferFactory = VertexBufferFactory::Pointer::create(this);
-	_renderer = Renderer::Pointer::create(this);
+	_renderer = OpenGLRenderer::Pointer::create(this);
 
 	_renderState.setRenderContext(this);
 	_renderState.setDefaultFramebuffer(_framebufferFactory->createFramebufferWrapper(0));
 	_renderState.setMainViewportSize(_renderState.viewportSize());
+
+	renderhelper::init(this);
 	
 	ET_CONNECT_EVENT(_fpsTimer.expired, RenderContext::onFPSTimerExpired)
 }
@@ -85,6 +88,7 @@ void RenderContext::init()
 void RenderContext::shutdown()
 {
     _private->stop();
+	renderhelper::release();
 }
 
 bool RenderContext::beginRender()

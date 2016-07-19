@@ -8,7 +8,6 @@
 #include <et/scene3d/scene3drenderer.h>
 #include <et/rendering/primitives.h>
 #include <et/rendering/rendercontext.h>
-#include <et/rendering/rendersystem.h>
 
 using namespace et;
 using namespace et::s3d;
@@ -35,10 +34,13 @@ void s3d::Renderer::render(RenderContext* rc, const Scene& scene, const Camera& 
         lightPosition = light->camera().position();
     }
     
-	RenderSystem renderSystem(rc);
-	auto pass = renderSystem.allocateRenderPass({camera, lightPosition});
+	RenderPass::ConstructionInfo passInfo;
+	passInfo.camera = camera;
+	passInfo.defaultLightPosition = lightPosition;
+
+	RenderPass::Pointer pass = rc->renderer()->allocateRenderPass(passInfo);
 	renderMeshList(pass, scene.childrenOfType(s3d::ElementType::Mesh));
-	renderSystem.submitRenderPass(pass);
+	rc->renderer()->submitRenderPass(pass);
     
 	rs.setFillMode(FillMode::Solid);
 }

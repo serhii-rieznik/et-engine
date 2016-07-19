@@ -157,6 +157,7 @@ namespace et
 		void setDepthBias(bool enabled, float bias = 0.0f, float slopeScale = 0.0f, bool force = false);
 		void setFillMode(FillMode mode, bool force = false);
 		void setClearColor(const vec4& color, bool force = false);
+		void setClearDepth(float depth, bool force = false);
 		void setColorMask(uint32_t mask, bool force = false);
 		void setScissor(bool enable, const recti& clip, bool force = false);
 		void setSampleAlphaToCoverage(bool enable, bool force = false);
@@ -212,5 +213,4 @@ namespace et
 		RenderContext* _rc = nullptr;
 		RenderState::Descriptor _desc;
 	};
-
 }

@@ -2,9 +2,9 @@
 	"name" : "diffuse",
 
 	"vertex-source" : "default.vsh",
-	"fragment-source" : "microfacet.fsh",
+	"fragment-source" : "normals.fsh",
 
-	"defines" : ["MICROFACET_MATERIAL"],
+	"defines" : [],
 
 	"depth-state":
 	{

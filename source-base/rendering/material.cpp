@@ -54,19 +54,34 @@ void Material::loadFromJson(const std::string& jsonString, const std::string& ba
 	
 	application().popSearchPaths();
 	
+	setName(name);
+	setOrigin(baseFolder);
+	
+	_additionalPriority = static_cast<uint32_t>(obj.integerForKey(kRenderPriority, 0ll)->content);
+
+	setBlendState(deserializeBlendState(obj.dictionaryForKey(kBlendState)));
+	setDepthState(deserializeDepthState(obj.dictionaryForKey(kDepthState)));
+
+	CullMode cm = CullMode::Disabled;
+	if (stringToCullMode(cullMode, cm) == false)
+	{
+		log::warning("Invalid or unsupported cull mode in material: %s", cullMode.c_str());
+	}
+	setCullMode(cm);
+
 	StringList defines;
 	defines.reserve(definesArray->content.size());
-	
+
 	auto addDefine = [&defines](std::string& define)
 	{
 		if (!define.empty())
 		{
 			std::transform(define.begin(), define.end(), define.begin(), [](char c)
-				{ return (c == '=') ? ' ' : c; });
+						   { return (c == '=') ? ' ' : c; });
 			defines.push_back("#define " + define + "\n");
 		}
 	};
-	
+
 	for (auto def : definesArray->content)
 	{
 		if (def->variantClass() == VariantClass::String)
@@ -74,24 +89,33 @@ void Material::loadFromJson(const std::string& jsonString, const std::string& ba
 			addDefine(StringValue(def)->content);
 		}
 	}
-	
-	setName(name);
-	setOrigin(baseFolder);
-	
-	_additionalPriority = static_cast<uint32_t>(obj.integerForKey(kRenderPriority, 0ll)->content);
-	_blend = deserializeBlendState(obj.dictionaryForKey(kBlendState));
-	_depth = deserializeDepthState(obj.dictionaryForKey(kDepthState));
-	
-	if (stringToCullMode(cullMode, _cullMode) == false)
-	{
-		log::warning("Invalid or unsupported cull mode in material: %s", cullMode.c_str());
-	}
-	
-	_program = _factory->genProgram(name, loadTextFile(vertexSource), loadTextFile(fragmentSource), defines, baseFolder);
-	_program->addOrigin(vertexSource);
-	_program->addOrigin(fragmentSource);
+	Program::Pointer program = _factory->genProgram(name, loadTextFile(vertexSource), loadTextFile(fragmentSource), defines, baseFolder);
+	program->addOrigin(vertexSource);
+	program->addOrigin(fragmentSource);
+	setProgram(program);
+}
+
+void Material::setBlendState(const BlendState& state)
+{
+	_blend = state;
+}
+
+void Material::setDepthState(const DepthState& state)
+{
+	_depth = state;
+}
+
+void Material::setCullMode(CullMode cm)
+{
+	_cullMode = cm;
+}
+
+void Material::setProgram(Program::Pointer program)
+{
+	_program = program;
 	loadProperties();
 }
+
 
 void Material::enableInRenderState(RenderState& rs)
 {
@@ -117,6 +141,10 @@ void Material::enableInRenderState(RenderState& rs)
 
 void Material::loadProperties()
 {
+	_textures.clear();
+	_properties.clear();
+	_propertiesData.resize(0);
+
 	uint32_t textureUnitCounter = 0;
 	for (const auto& u : _program->uniforms())
 	{

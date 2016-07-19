@@ -256,7 +256,7 @@ namespace et
 		Format_8bit = 1,
 		Format_16bit = 2,
 		Format_32bit = 4,
-		max
+		Count = 3
 	};
 	
 	enum class DataFormat : uint32_t
@@ -318,7 +318,6 @@ namespace et
 		
 		VertexAttributeUsage_max = static_cast<uint32_t>(VertexAttributeUsage::max),
 		DataType_max = static_cast<uint32_t>(DataType::max),
-		IndexArrayFormat_max = static_cast<uint32_t>(IndexArrayFormat::max),
 		PrimitiveType_max = static_cast<uint32_t>(PrimitiveType::max),
 		BlendConfiguration_max = static_cast<uint32_t>(BlendConfiguration::max),
 		DataFormat_max = static_cast<uint32_t>(DataFormat::max),
@@ -327,7 +326,7 @@ namespace et
 		InvalidIndex = static_cast<uint32_t>(-1),
 		InvalidShortIndex = static_cast<uint16_t>(-1),
 		InvalidSmallIndex = static_cast<uint8_t>(-1),
-		
+
 		MaxRenderTargets = 8,
 		MaxTextureUnits = 8
 	};
@@ -432,6 +431,15 @@ namespace et
 		std::array<size_t, VertexAttributeUsage_max> enabledVertexAttributes;
 		std::array<size_t, MaxRenderTargets> drawBuffers;
 	};
+
+	enum class FramebufferOperation : uint32_t
+	{
+		DontCare,
+		Clear,
+		Load,
+		Store,
+		Discard
+	};
 	
 	DataFormat dataTypeDataFormat(DataType t);
 
@@ -448,6 +456,7 @@ namespace et
 
 	std::string indexArrayFormatToString(IndexArrayFormat);
 	IndexArrayFormat stringToIndexArrayFormat(const std::string&);
+	DataFormat indexArrayFormatToDataFormat(IndexArrayFormat);
 
 	uint32_t sizeOfDataFormat(DataFormat);
 	

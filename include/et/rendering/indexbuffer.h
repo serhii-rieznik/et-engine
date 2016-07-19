@@ -27,6 +27,9 @@ namespace et
 		PrimitiveType primitiveType() const
 			{ return _primitiveType; }
 		
+		IndexArrayFormat format() const
+			{ return _format; }
+
 		DataFormat dataFormat() const
 			{ return _dataType; }
 

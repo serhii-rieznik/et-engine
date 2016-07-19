@@ -520,6 +520,16 @@ void RenderState::setClearColor(const vec4& color, bool force)
 	}
 }
 
+void RenderState::setClearDepth(float depth, bool force)
+{
+	if (force || (_desc.depth.clearDepth != depth))
+	{
+		_desc.depth.clearDepth = depth;
+		glClearDepth(_desc.depth.clearDepth);
+		checkOpenGLError("RenderState::setClearDepth");
+	}
+}
+
 void RenderState::setColorMask(uint32_t mask, bool force)
 {
 	if (force || (_desc.rasterizer.colorMask != mask))

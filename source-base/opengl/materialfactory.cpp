@@ -393,9 +393,14 @@ void MaterialFactory::reloadObject(LoadableObject::Pointer obj, ObjectsCache&)
 	Program::Pointer(obj)->buildProgram(vertex_shader, geom_shader, frag_shader);
 }
 
+Material::Pointer MaterialFactory::createMaterial()
+{
+	return Material::Pointer::create(this);
+}
+
 Material::Pointer MaterialFactory::loadMaterial(const std::string& fileName)
 {
-	Material::Pointer result = Material::Pointer::create(this);
+	Material::Pointer result = createMaterial();
 	result->loadFromJson(loadTextFile(fileName), getFilePath(fileName));
 	return result;
 }

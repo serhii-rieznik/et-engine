@@ -2,6 +2,7 @@
 #include <et/camera/camera.h>
 #include <et/rendering/rendercontext.h>
 #include <et/rendering/primitives.h>
+#include <et/rendering/renderhelper.h>
 #include <et/core/json.h>
 #include <et/core/conversion.h>
 #include <et/imaging/textureloader.h>
@@ -218,13 +219,17 @@ void MainController::applicationWillTerminate()
 
 void MainController::render(et::RenderContext* rc)
 {
-	rc->renderer()->clear(true, true);
+	et::RenderPass::ConstructionInfo passInfo;
+	passInfo.colorAttachment.loadOperation = et::FramebufferOperation::Clear;
+	auto pass = rc->renderer()->allocateRenderPass(passInfo);
 
 	if (_texture.valid())
 	{
 		_texture->updateDataDirectly(rc, _texture->size(), _textureData.binary(), _textureData.dataSize());
-		rc->renderer()->renderFullscreenTexture(_texture);
+		pass->pushRenderBatch(renderhelper::createFullscreenRenderBatch(_texture));
 	}
+
+	rc->renderer()->submitRenderPass(pass);
 }
 
 Material::Pointer MainController::materialWithName(const std::string&)

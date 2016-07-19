@@ -12,15 +12,29 @@
 
 namespace et
 {
-	class RenderPass : public et::Shared
+	class RenderPass : public Shared
 	{
 	public:
 		ET_DECLARE_POINTER(RenderPass)
-		
+
 		struct ConstructionInfo
 		{
-			et::Camera camera;
-            et::vec3 defaultLightPosition;
+			struct ColorAttachment
+			{
+				FramebufferOperation loadOperation = FramebufferOperation::DontCare;
+				FramebufferOperation storeOperation = FramebufferOperation::DontCare;
+				vec4 clearColor = vec4(0.0f);
+			} colorAttachment;
+
+			struct DepthAttachment
+			{
+				FramebufferOperation loadOperation = FramebufferOperation::DontCare;
+				FramebufferOperation storeOperation = FramebufferOperation::DontCare;
+				float clearDepth = 1.0f;
+			} depthAttachment;
+
+            vec3 defaultLightPosition;
+			Camera camera;
 		};
 		
 	public:

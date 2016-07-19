@@ -1,131 +1,89 @@
-#include <et/rendering/primitives.h>
 #include "MainController.h"
+#include <et/rendering/primitives.h>
 
-using namespace et;
-using namespace demo;
-
-void MainController::setApplicationParameters(et::ApplicationParameters& p)
+void demo::MainController::setApplicationParameters(et::ApplicationParameters& p)
 {
-    p.context.style = ContextOptions::Style::Sizable | ContextOptions::Style::Caption;
+	p.context.style = et::ContextOptions::Style::Sizable | et::ContextOptions::Style::Caption;
     p.context.size = 4 * et::currentScreen().frame.size() / 5;
 }
 
-void MainController::setRenderContextParameters(et::RenderContextParameters& params)
+void demo::MainController::setRenderContextParameters(et::RenderContextParameters& params)
 {
-	params.multisamplingQuality = MultisamplingQuality::Best;
+	params.multisamplingQuality = et::MultisamplingQuality::Best;
 }
 
-void MainController::applicationDidLoad(et::RenderContext* rc)
+void demo::MainController::applicationDidLoad(et::RenderContext* rc)
 {
-	_camera.lookAt(vec3(20.0f));
-
-	rc->renderState().setDepthTestEnabled(true);
-	rc->renderState().setDepthWriteEnabled(true);
+	_camera.lookAt(et::vec3(20.0f));
 
 	createModels(rc);
-	createTextures(rc);
-	createPrograms(rc); 
+	loadProgram(rc);
 	
 	rc->renderingInfoUpdated.connect([this](const et::RenderingInfo& info)
 	{
-		log::info("Rendering stats: %lu fps, %lu polys, %lu draw calls", info.averageFramePerSecond,
+		et::log::info("Rendering stats: %lu fps, %lu polys, %lu draw calls", info.averageFramePerSecond,
 			info.averagePolygonsPerSecond, info.averageDIPPerSecond);
 	});
 
 	_frameTimeTimer.run();
 }
 
-void MainController::createModels(et::RenderContext* rc)
+void demo::MainController::createModels(et::RenderContext* rc)
 {
-	VertexDeclaration decl(true);
-	decl.push_back(VertexAttributeUsage::Position, DataType::Vec3);
-	decl.push_back(VertexAttributeUsage::Normal, DataType::Vec3);
+	et::VertexDeclaration decl(true);
+	decl.push_back(et::VertexAttributeUsage::Position, et::DataType::Vec3);
+	decl.push_back(et::VertexAttributeUsage::Normal, et::DataType::Vec3);
 
-	VertexArray::Pointer vertices = VertexArray::Pointer::create(decl, 0);
-	primitives::createIcosahedron(vertices, 5.0f);
+	et::VertexArray::Pointer vertices = et::VertexArray::Pointer::create(decl, 0);
+	et::primitives::createIcosahedron(vertices, 5.0f);
 
-	IndexArray::Pointer indices = IndexArray::Pointer::create(IndexArrayFormat::Format_16bit, 
-		vertices->size(), PrimitiveType::Triangles);
+	et::IndexArray::Pointer indices = et::IndexArray::Pointer::create(et::IndexArrayFormat::Format_16bit,
+		vertices->size(), et::PrimitiveType::Triangles);
 	indices->linearize(vertices->size());
 
 	_testModel = rc->vertexBufferFactory().createVertexArrayObject("test-model",
-		vertices, BufferDrawType::Static, indices, BufferDrawType::Static);
+		vertices, et::BufferDrawType::Static, indices, et::BufferDrawType::Static);
 
-	_transformMatrix = identityMatrix;
+	_transformMatrix = et::identityMatrix;
 }
 
-void MainController::createTextures(et::RenderContext* rc)
+void demo::MainController::loadProgram(et::RenderContext* rc)
 {
-	vec2i maxSize = rc->size();
-
-	auto allScreens = availableScreens();
-	for (const auto& screen : allScreens)
-	{
-		vec2i scaledSize(static_cast<int>(screen.frame.width * screen.scaleFactor), static_cast<int>(screen.frame.height * screen.scaleFactor));
-		maxSize = maxv(scaledSize, maxSize);
-	}
-	_noiseTexture = rc->textureFactory().genNoiseTexture(maxSize, true, "noise-texture");
+	auto materialFile = et::application().resolveFileName("media/materials/normals.material");
+	_defaultMaterial = rc->materialFactory().loadMaterial(materialFile);
 }
 
-void MainController::createPrograms(et::RenderContext* rc)
+ void demo::MainController::applicationWillResizeContext(const et::vec2i& sz)
 {
-	const std::string vertexShader = R"(
-		uniform mat4 matViewProjection;
-		uniform mat4 matWorld;
-		etVertexIn vec3 Vertex;
-		etVertexIn vec3 Normal;
-		etVertexOut vec3 vNormalWS;
-		void main()
-		{
-			vNormalWS = normalize(mat3(matWorld) * Normal);
-			vec4 vVertexWS = matWorld * vec4(Vertex, 1.0);
-			gl_Position = matViewProjection * vVertexWS;
-		})";
-
-	const std::string fragmentShader = R"(
-		etFragmentIn vec3 vNormalWS;
-		const vec3 lightDirection = vec3(0.0, 1.0, 0.0);
-		void main()
-		{
-			float LdotN = 0.25 + 0.75 * max(0.0, dot(vNormalWS, lightDirection));
-			etFragmentOut = vec4((0.5 + 0.5 * vNormalWS) * LdotN, 1.0);
-		}
-	)";
-
-	_defaultProgram = rc->materialFactory().genProgram("default-progam", vertexShader, fragmentShader);
-}
-
- void MainController::applicationWillResizeContext(const et::vec2i& sz)
-{
-	vec2 floatSize = vector2ToFloat(sz);
+	et::vec2 floatSize = vector2ToFloat(sz);
 	_camera.perspectiveProjection(QUARTER_PI, floatSize.aspect(), 1.0f, 100.0f);
 }
 
-void MainController::render(et::RenderContext* rc)
+void demo::MainController::render(et::RenderContext* rc)
 {
-	float deltaTime = _frameTimeTimer.lap();
-	_transformMatrix *= rotationYXZMatrix(vec3(2.0f, 0.5f, -1.0f) * deltaTime);
+	_transformMatrix *= rotationYXZMatrix(et::vec3(2.0f, 0.5f, -1.0f) * _frameTimeTimer.lap());
 
-	auto ren = rc->renderer();
-	auto& rs = rc->renderState();
+	et::RenderPass::ConstructionInfo passInfo;
+	passInfo.camera = _camera;
+	passInfo.colorAttachment.loadOperation = et::FramebufferOperation::Clear;
+	passInfo.colorAttachment.clearColor = et::vec4(0.1f, 0.2f, 0.3f, 1.0f);
+	passInfo.depthAttachment.loadOperation = et::FramebufferOperation::Clear;
+	passInfo.depthAttachment.clearDepth = 1.0f;
 
-	ren->clear(true, true);
+	et::RenderPass::Pointer pass = rc->renderer()->allocateRenderPass(passInfo);
 
-	rs.setDepthWriteEnabled(false);
-	ren->renderTexture(_noiseTexture, (rc->size() - _noiseTexture->size()) / 2);
-	rs.setDepthWriteEnabled(true);
+	et::RenderBatch::Pointer batch = et::RenderBatch::Pointer::create(_defaultMaterial, _testModel, _transformMatrix);
+	pass->pushRenderBatch(batch);
+	
+	rc->renderer()->submitRenderPass(pass);
+}
 
-	rs.bindVertexArrayObject(_testModel);
-
-	rs.bindProgram(_defaultProgram);
-	_defaultProgram->setCameraProperties(_camera);
-	_defaultProgram->setTransformMatrix(_transformMatrix);
-
-	ren->drawAllElements(_testModel->indexBuffer());
+et::ApplicationIdentifier demo::MainController::applicationIdentifier() const
+{
+	return et::ApplicationIdentifier("com.cheetek.et.getstarted", "Cheetek", "Get Started Demo");
 }
 
 et::IApplicationDelegate* et::Application::initApplicationDelegate()
-	{ return sharedObjectFactory().createObject<MainController>(); }
-
-et::ApplicationIdentifier MainController::applicationIdentifier() const
-	{ return ApplicationIdentifier("com.cheetek.et.getstarted", "Cheetek", "Get Started Demo"); }
+{
+	return sharedObjectFactory().createObject<demo::MainController>();
+}

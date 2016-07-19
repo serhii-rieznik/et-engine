@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		5C484BA11D3D7D9500E02180 /* openglrenderer.h in Headers */ = {isa = PBXBuildFile; fileRef = 5C484BA01D3D7D9500E02180 /* openglrenderer.h */; };
+		5C484BA41D3D8E6600E02180 /* renderhelper.h in Headers */ = {isa = PBXBuildFile; fileRef = 5C484BA31D3D8E6600E02180 /* renderhelper.h */; };
+		5C484BA61D3D8E9500E02180 /* renderhelper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5C484BA51D3D8E9500E02180 /* renderhelper.cpp */; };
 		6E954C811CD2610C00A12C68 /* context_osx.h in Headers */ = {isa = PBXBuildFile; fileRef = 6E954C801CD2610C00A12C68 /* context_osx.h */; };
 		6E954C851CD266C000A12C68 /* context_osx.mm in Sources */ = {isa = PBXBuildFile; fileRef = 6E954C841CD266C000A12C68 /* context_osx.mm */; };
 		6E9587B51CD6990F0005A95B /* light.h in Headers */ = {isa = PBXBuildFile; fileRef = 6E9587B41CD6990F0005A95B /* light.h */; };
@@ -139,12 +142,11 @@
 		6EBE21A41C66B8BE00AF7206 /* renderbatch.h in Headers */ = {isa = PBXBuildFile; fileRef = 6EBE1FF11C66B8BE00AF7206 /* renderbatch.h */; };
 		6EBE21A51C66B8BE00AF7206 /* rendercontext.h in Headers */ = {isa = PBXBuildFile; fileRef = 6EBE1FF21C66B8BE00AF7206 /* rendercontext.h */; };
 		6EBE21A61C66B8BE00AF7206 /* rendercontextparams.h in Headers */ = {isa = PBXBuildFile; fileRef = 6EBE1FF31C66B8BE00AF7206 /* rendercontextparams.h */; };
-		6EBE21A71C66B8BE00AF7206 /* renderer.h in Headers */ = {isa = PBXBuildFile; fileRef = 6EBE1FF41C66B8BE00AF7206 /* renderer.h */; };
+		6EBE21A71C66B8BE00AF7206 /* renderinterface.h in Headers */ = {isa = PBXBuildFile; fileRef = 6EBE1FF41C66B8BE00AF7206 /* renderinterface.h */; };
 		6EBE21A81C66B8BE00AF7206 /* rendering.h in Headers */ = {isa = PBXBuildFile; fileRef = 6EBE1FF51C66B8BE00AF7206 /* rendering.h */; };
 		6EBE21A91C66B8BE00AF7206 /* renderingcaps.h in Headers */ = {isa = PBXBuildFile; fileRef = 6EBE1FF61C66B8BE00AF7206 /* renderingcaps.h */; };
 		6EBE21AA1C66B8BE00AF7206 /* renderpass.h in Headers */ = {isa = PBXBuildFile; fileRef = 6EBE1FF71C66B8BE00AF7206 /* renderpass.h */; };
 		6EBE21AB1C66B8BE00AF7206 /* renderstate.h in Headers */ = {isa = PBXBuildFile; fileRef = 6EBE1FF81C66B8BE00AF7206 /* renderstate.h */; };
-		6EBE21AC1C66B8BE00AF7206 /* rendersystem.h in Headers */ = {isa = PBXBuildFile; fileRef = 6EBE1FF91C66B8BE00AF7206 /* rendersystem.h */; };
 		6EBE21AD1C66B8BE00AF7206 /* texture.h in Headers */ = {isa = PBXBuildFile; fileRef = 6EBE1FFA1C66B8BE00AF7206 /* texture.h */; };
 		6EBE21AE1C66B8BE00AF7206 /* texturefactory.h in Headers */ = {isa = PBXBuildFile; fileRef = 6EBE1FFB1C66B8BE00AF7206 /* texturefactory.h */; };
 		6EBE21AF1C66B8BE00AF7206 /* vertexarray.h in Headers */ = {isa = PBXBuildFile; fileRef = 6EBE1FFC1C66B8BE00AF7206 /* vertexarray.h */; };
@@ -230,8 +232,8 @@
 		6EBE22611C66B8BE00AF7206 /* materialfactory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6EBE20CA1C66B8BE00AF7206 /* materialfactory.cpp */; };
 		6EBE22621C66B8BE00AF7206 /* opengl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6EBE20CB1C66B8BE00AF7206 /* opengl.cpp */; };
 		6EBE22631C66B8BE00AF7206 /* program.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6EBE20CC1C66B8BE00AF7206 /* program.cpp */; };
-		6EBE22641C66B8BE00AF7206 /* renderer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6EBE20CD1C66B8BE00AF7206 /* renderer.cpp */; };
-		6EBE22651C66B8BE00AF7206 /* renderstate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6EBE20CE1C66B8BE00AF7206 /* renderstate.cpp */; };
+		6EBE22641C66B8BE00AF7206 /* openglrenderer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6EBE20CD1C66B8BE00AF7206 /* openglrenderer.cpp */; };
+		6EBE22651C66B8BE00AF7206 /* openglrenderstate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6EBE20CE1C66B8BE00AF7206 /* openglrenderstate.cpp */; };
 		6EBE22661C66B8BE00AF7206 /* texture.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6EBE20CF1C66B8BE00AF7206 /* texture.cpp */; };
 		6EBE22671C66B8BE00AF7206 /* vertexarrayobject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6EBE20D01C66B8BE00AF7206 /* vertexarrayobject.cpp */; };
 		6EBE22681C66B8BE00AF7206 /* vertexbuffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6EBE20D11C66B8BE00AF7206 /* vertexbuffer.cpp */; };
@@ -252,7 +254,6 @@
 		6EBE22901C66B8BE00AF7206 /* rendercontext.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6EBE20FD1C66B8BE00AF7206 /* rendercontext.cpp */; };
 		6EBE22911C66B8BE00AF7206 /* rendering.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6EBE20FE1C66B8BE00AF7206 /* rendering.cpp */; };
 		6EBE22921C66B8BE00AF7206 /* renderpass.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6EBE20FF1C66B8BE00AF7206 /* renderpass.cpp */; };
-		6EBE22931C66B8BE00AF7206 /* rendersystem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6EBE21001C66B8BE00AF7206 /* rendersystem.cpp */; };
 		6EBE22941C66B8BE00AF7206 /* texturefactory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6EBE21011C66B8BE00AF7206 /* texturefactory.cpp */; };
 		6EBE22951C66B8BE00AF7206 /* textureloadingthread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6EBE21021C66B8BE00AF7206 /* textureloadingthread.cpp */; };
 		6EBE22961C66B8BE00AF7206 /* vertexarray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6EBE21031C66B8BE00AF7206 /* vertexarray.cpp */; };
@@ -282,6 +283,9 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		5C484BA01D3D7D9500E02180 /* openglrenderer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = openglrenderer.h; sourceTree = "<group>"; };
+		5C484BA31D3D8E6600E02180 /* renderhelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = renderhelper.h; sourceTree = "<group>"; };
+		5C484BA51D3D8E9500E02180 /* renderhelper.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = renderhelper.cpp; sourceTree = "<group>"; };
 		6E954C7F1CD25EEC00A12C68 /* context.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = context.h; sourceTree = "<group>"; };
 		6E954C801CD2610C00A12C68 /* context_osx.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = context_osx.h; sourceTree = "<group>"; };
 		6E954C841CD266C000A12C68 /* context_osx.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = context_osx.mm; sourceTree = "<group>"; };
@@ -416,12 +420,11 @@
 		6EBE1FF11C66B8BE00AF7206 /* renderbatch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = renderbatch.h; sourceTree = "<group>"; };
 		6EBE1FF21C66B8BE00AF7206 /* rendercontext.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rendercontext.h; sourceTree = "<group>"; };
 		6EBE1FF31C66B8BE00AF7206 /* rendercontextparams.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rendercontextparams.h; sourceTree = "<group>"; };
-		6EBE1FF41C66B8BE00AF7206 /* renderer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = renderer.h; sourceTree = "<group>"; };
+		6EBE1FF41C66B8BE00AF7206 /* renderinterface.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = renderinterface.h; sourceTree = "<group>"; };
 		6EBE1FF51C66B8BE00AF7206 /* rendering.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rendering.h; sourceTree = "<group>"; };
 		6EBE1FF61C66B8BE00AF7206 /* renderingcaps.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = renderingcaps.h; sourceTree = "<group>"; };
 		6EBE1FF71C66B8BE00AF7206 /* renderpass.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = renderpass.h; sourceTree = "<group>"; };
 		6EBE1FF81C66B8BE00AF7206 /* renderstate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = renderstate.h; sourceTree = "<group>"; };
-		6EBE1FF91C66B8BE00AF7206 /* rendersystem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rendersystem.h; sourceTree = "<group>"; };
 		6EBE1FFA1C66B8BE00AF7206 /* texture.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = texture.h; sourceTree = "<group>"; };
 		6EBE1FFB1C66B8BE00AF7206 /* texturefactory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = texturefactory.h; sourceTree = "<group>"; };
 		6EBE1FFC1C66B8BE00AF7206 /* vertexarray.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = vertexarray.h; sourceTree = "<group>"; };
@@ -507,8 +510,8 @@
 		6EBE20CA1C66B8BE00AF7206 /* materialfactory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = materialfactory.cpp; sourceTree = "<group>"; };
 		6EBE20CB1C66B8BE00AF7206 /* opengl.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = opengl.cpp; sourceTree = "<group>"; };
 		6EBE20CC1C66B8BE00AF7206 /* program.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = program.cpp; sourceTree = "<group>"; };
-		6EBE20CD1C66B8BE00AF7206 /* renderer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = renderer.cpp; sourceTree = "<group>"; };
-		6EBE20CE1C66B8BE00AF7206 /* renderstate.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = renderstate.cpp; sourceTree = "<group>"; };
+		6EBE20CD1C66B8BE00AF7206 /* openglrenderer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = openglrenderer.cpp; sourceTree = "<group>"; };
+		6EBE20CE1C66B8BE00AF7206 /* openglrenderstate.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = openglrenderstate.cpp; sourceTree = "<group>"; };
 		6EBE20CF1C66B8BE00AF7206 /* texture.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = texture.cpp; sourceTree = "<group>"; };
 		6EBE20D01C66B8BE00AF7206 /* vertexarrayobject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = vertexarrayobject.cpp; sourceTree = "<group>"; };
 		6EBE20D11C66B8BE00AF7206 /* vertexbuffer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = vertexbuffer.cpp; sourceTree = "<group>"; };
@@ -529,7 +532,6 @@
 		6EBE20FD1C66B8BE00AF7206 /* rendercontext.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = rendercontext.cpp; sourceTree = "<group>"; };
 		6EBE20FE1C66B8BE00AF7206 /* rendering.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = rendering.cpp; sourceTree = "<group>"; };
 		6EBE20FF1C66B8BE00AF7206 /* renderpass.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = renderpass.cpp; sourceTree = "<group>"; };
-		6EBE21001C66B8BE00AF7206 /* rendersystem.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = rendersystem.cpp; sourceTree = "<group>"; };
 		6EBE21011C66B8BE00AF7206 /* texturefactory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = texturefactory.cpp; sourceTree = "<group>"; };
 		6EBE21021C66B8BE00AF7206 /* textureloadingthread.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = textureloadingthread.cpp; sourceTree = "<group>"; };
 		6EBE21031C66B8BE00AF7206 /* vertexarray.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = vertexarray.cpp; sourceTree = "<group>"; };
@@ -772,6 +774,7 @@
 			children = (
 				6EBE1FD11C66B8BE00AF7206 /* opengl.h */,
 				6EBE1FD21C66B8BE00AF7206 /* openglcaps.h */,
+				5C484BA01D3D7D9500E02180 /* openglrenderer.h */,
 			);
 			name = opengl;
 			path = et/opengl;
@@ -822,12 +825,12 @@
 				6EBE1FF11C66B8BE00AF7206 /* renderbatch.h */,
 				6EBE1FF21C66B8BE00AF7206 /* rendercontext.h */,
 				6EBE1FF31C66B8BE00AF7206 /* rendercontextparams.h */,
-				6EBE1FF41C66B8BE00AF7206 /* renderer.h */,
+				5C484BA31D3D8E6600E02180 /* renderhelper.h */,
+				6EBE1FF41C66B8BE00AF7206 /* renderinterface.h */,
 				6EBE1FF51C66B8BE00AF7206 /* rendering.h */,
 				6EBE1FF61C66B8BE00AF7206 /* renderingcaps.h */,
 				6EBE1FF71C66B8BE00AF7206 /* renderpass.h */,
 				6EBE1FF81C66B8BE00AF7206 /* renderstate.h */,
-				6EBE1FF91C66B8BE00AF7206 /* rendersystem.h */,
 				6EBE1FFA1C66B8BE00AF7206 /* texture.h */,
 				6EBE1FFB1C66B8BE00AF7206 /* texturefactory.h */,
 				6EBE1FFC1C66B8BE00AF7206 /* vertexarray.h */,
@@ -999,8 +1002,8 @@
 				6EBE20CA1C66B8BE00AF7206 /* materialfactory.cpp */,
 				6EBE20CB1C66B8BE00AF7206 /* opengl.cpp */,
 				6EBE20CC1C66B8BE00AF7206 /* program.cpp */,
-				6EBE20CD1C66B8BE00AF7206 /* renderer.cpp */,
-				6EBE20CE1C66B8BE00AF7206 /* renderstate.cpp */,
+				6EBE20CD1C66B8BE00AF7206 /* openglrenderer.cpp */,
+				6EBE20CE1C66B8BE00AF7206 /* openglrenderstate.cpp */,
 				6EBE20CF1C66B8BE00AF7206 /* texture.cpp */,
 				6EBE20D01C66B8BE00AF7206 /* vertexarrayobject.cpp */,
 				6EBE20D11C66B8BE00AF7206 /* vertexbuffer.cpp */,
@@ -1034,9 +1037,9 @@
 				6EBE20FB1C66B8BE00AF7206 /* primitives.cpp */,
 				6EBE20FC1C66B8BE00AF7206 /* renderbatch.cpp */,
 				6EBE20FD1C66B8BE00AF7206 /* rendercontext.cpp */,
+				5C484BA51D3D8E9500E02180 /* renderhelper.cpp */,
 				6EBE20FE1C66B8BE00AF7206 /* rendering.cpp */,
 				6EBE20FF1C66B8BE00AF7206 /* renderpass.cpp */,
-				6EBE21001C66B8BE00AF7206 /* rendersystem.cpp */,
 				6EBE21011C66B8BE00AF7206 /* texturefactory.cpp */,
 				6EBE21021C66B8BE00AF7206 /* textureloadingthread.cpp */,
 				6EBE21031C66B8BE00AF7206 /* vertexarray.cpp */,
@@ -1126,6 +1129,7 @@
 				6EBE21621C66B8BE00AF7206 /* matrix4.h in Headers */,
 				6EBE21721C66B8BE00AF7206 /* vector4-simd.accelerate.h in Headers */,
 				6EBE21381C66B8BE00AF7206 /* debug.h in Headers */,
+				5C484BA41D3D8E6600E02180 /* renderhelper.h in Headers */,
 				6EBE21B91C66B8BE00AF7206 /* elementcontainer.h in Headers */,
 				6EBE21B01C66B8BE00AF7206 /* vertexarrayobject.h in Headers */,
 				6EBE21CB1C66B8BE00AF7206 /* streamingthread.h in Headers */,
@@ -1136,7 +1140,7 @@
 				6EBE21C31C66B8BE00AF7206 /* scene3drenderer.h in Headers */,
 				6EBE21B31C66B8BE00AF7206 /* vertexdatachunk.h in Headers */,
 				6EBE21471C66B8BE00AF7206 /* notifytimer.h in Headers */,
-				6EBE21A71C66B8BE00AF7206 /* renderer.h in Headers */,
+				6EBE21A71C66B8BE00AF7206 /* renderinterface.h in Headers */,
 				6EBE21771C66B8BE00AF7206 /* bmploader.h in Headers */,
 				6EBE218A1C66B8BE00AF7206 /* compileoptions.h in Headers */,
 				6EBE21691C66B8BE00AF7206 /* segment2d.h in Headers */,
@@ -1187,10 +1191,10 @@
 				6EBE21931C66B8BE00AF7206 /* mailcomposer.h in Headers */,
 				6EBE21901C66B8BE00AF7206 /* iap.h in Headers */,
 				6EBE21981C66B8BE00AF7206 /* printer.h in Headers */,
-				6EBE21AC1C66B8BE00AF7206 /* rendersystem.h in Headers */,
 				6EBE213C1C66B8BE00AF7206 /* flags.h in Headers */,
 				6EBE21661C66B8BE00AF7206 /* ray.h in Headers */,
 				6EBE218B1C66B8BE00AF7206 /* platform.h in Headers */,
+				5C484BA11D3D7D9500E02180 /* openglrenderer.h in Headers */,
 				6EBE21541C66B8BE00AF7206 /* tasks.h in Headers */,
 				6EBE21231C66B8BE00AF7206 /* invocation.h in Headers */,
 				6EBE21441C66B8BE00AF7206 /* memory.h in Headers */,
@@ -1336,7 +1340,7 @@
 				6EBE22921C66B8BE00AF7206 /* renderpass.cpp in Sources */,
 				6EBE22951C66B8BE00AF7206 /* textureloadingthread.cpp in Sources */,
 				6EBE22A81C66B8BE00AF7206 /* platform-dependent.cpp in Sources */,
-				6EBE22651C66B8BE00AF7206 /* renderstate.cpp in Sources */,
+				6EBE22651C66B8BE00AF7206 /* openglrenderstate.cpp in Sources */,
 				6EBE22411C66B8BE00AF7206 /* locale.cpp in Sources */,
 				6EBE22471C66B8BE00AF7206 /* synchronization.cpp in Sources */,
 				6EBE225C1C66B8BE00AF7206 /* gestures.cpp in Sources */,
@@ -1359,6 +1363,7 @@
 				6EBE22371C66B8BE00AF7206 /* cameramovingcontroller.cpp in Sources */,
 				6EBE222F1C66B8BE00AF7206 /* application.cpp in Sources */,
 				6EBE223B1C66B8BE00AF7206 /* constants.cpp in Sources */,
+				5C484BA61D3D8E9500E02180 /* renderhelper.cpp in Sources */,
 				6EBE225F1C66B8BE00AF7206 /* framebuffer.cpp in Sources */,
 				6EBE229C1C66B8BE00AF7206 /* baseelement.cpp in Sources */,
 				6EBE224D1C66B8BE00AF7206 /* transformable.cpp in Sources */,
@@ -1402,11 +1407,10 @@
 				6EBE229F1C66B8BE00AF7206 /* meshdeformer.cpp in Sources */,
 				6EBE22301C66B8BE00AF7206 /* backgroundthread.cpp in Sources */,
 				6EBE22AB1C66B8BE00AF7206 /* streamingthread.cpp in Sources */,
-				6EBE22931C66B8BE00AF7206 /* rendersystem.cpp in Sources */,
 				6EBE22971C66B8BE00AF7206 /* vertexbufferfactory.cpp in Sources */,
 				6EBE22431C66B8BE00AF7206 /* notifytimer.cpp in Sources */,
 				6EBE22721C66B8BE00AF7206 /* locale.apple.mm in Sources */,
-				6EBE22641C66B8BE00AF7206 /* renderer.cpp in Sources */,
+				6EBE22641C66B8BE00AF7206 /* openglrenderer.cpp in Sources */,
 				6EBE22491C66B8BE00AF7206 /* threading.cpp in Sources */,
 				6EBE22381C66B8BE00AF7206 /* cameraorbitcontroller.cpp in Sources */,
 				6EBE22751C66B8BE00AF7206 /* memory.apple.mm in Sources */,

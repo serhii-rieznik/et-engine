@@ -13,7 +13,6 @@
 namespace et
 {
 	class Camera;
-	class RenderSystem;
 	namespace s3d
 	{		
 		class Renderer : public FlagsHolder

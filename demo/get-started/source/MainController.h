@@ -21,14 +21,12 @@ namespace demo
 		void render(et::RenderContext*);
 
 		void createModels(et::RenderContext*);
-		void createTextures(et::RenderContext*);
-		void createPrograms(et::RenderContext*);
+		void loadProgram(et::RenderContext*);
 
 	private:
 		et::Camera _camera;
-		et::Texture::Pointer _noiseTexture;
 		et::VertexArrayObject::Pointer _testModel;
-		et::Program::Pointer _defaultProgram;
+		et::Material::Pointer _defaultMaterial;
 		et::IntervalTimer _frameTimeTimer;
 		et::mat4 _transformMatrix;
 	};

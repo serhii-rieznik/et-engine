@@ -27,6 +27,11 @@ namespace et
 		
 		void enableInRenderState(RenderState&);
 		void enableSnapshotInRenderState(RenderState&, uint64_t);
+
+		void setBlendState(const BlendState&);
+		void setDepthState(const DepthState&);
+		void setCullMode(CullMode);
+		void setProgram(Program::Pointer);
 		
 		et::Program::Pointer& program()
 			{ return _program; }

@@ -40,9 +40,11 @@ const std::string dataFormatNames[DataFormat_max] =
 	"unsigned short <565>",
 };
 
-const std::string indexArrayFormatNames[IndexArrayFormat_max] =
+const std::map<IndexArrayFormat, std::pair<std::string, DataFormat>> indexArrayFormats =
 {
-	"8 bit", "16 bit", "32 bit",
+	{ IndexArrayFormat::Format_8bit, {"8 bit", DataFormat::UnsignedChar} },
+	{ IndexArrayFormat::Format_16bit, {"16 bit", DataFormat::UnsignedShort} },
+	{ IndexArrayFormat::Format_32bit, {"32 bit", DataFormat::UnsignedInt} },
 };
 
 const std::string primitiveTypeNames[PrimitiveType_max] =
@@ -110,15 +112,14 @@ DataFormat et::stringToDataFormat(const std::string& s)
 
 IndexArrayFormat et::stringToIndexArrayFormat(const std::string& s)
 {
-	uint32_t result = 1;
-	for (uint32_t i = 0, e = IndexArrayFormat_max; i < e; ++i)
+	for (auto& kv : indexArrayFormats)
 	{
-		if (s == indexArrayFormatNames[i])
-			return static_cast<IndexArrayFormat>(result);
-		result *= 2;
+		if (kv.second.first == s)
+			return kv.first;
 	}
-	
-	return IndexArrayFormat::Format_8bit;
+
+	ET_FAIL("Invalid index array format string provided");
+	return IndexArrayFormat::Format_32bit;
 }
 
 PrimitiveType et::stringToPrimitiveType(const std::string& s)
@@ -151,10 +152,18 @@ std::string et::dataFormatToString(DataFormat dt)
 	intToStr(static_cast<uint32_t>(dt));
 }
 
-std::string et::indexArrayFormatToString(IndexArrayFormat iaf)
+std::string et::indexArrayFormatToString(IndexArrayFormat fmt)
 {
-	return (iaf < IndexArrayFormat::max) ? indexArrayFormatNames[static_cast<uint32_t>(iaf) / 2] :
-	intToStr(static_cast<uint32_t>(iaf));
+	auto i = indexArrayFormats.find(fmt);
+	ET_ASSERT(i != indexArrayFormats.end());
+	return i->second.first;
+}
+
+et::DataFormat et::indexArrayFormatToDataFormat(IndexArrayFormat fmt)
+{
+	auto i = indexArrayFormats.find(fmt);
+	ET_ASSERT(i != indexArrayFormats.end());
+	return i->second.second;
 }
 
 std::string et::primitiveTypeToString(PrimitiveType pt)

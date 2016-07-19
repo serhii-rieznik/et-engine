@@ -7,21 +7,40 @@
 
 #pragma once
 
-#include <et/camera/camera.h>
-#include <et/rendering/renderstate.h>
-#include <et/rendering/renderbatch.h>
+#include <et/rendering/renderpass.h>
 
 namespace et
 {
 	class RenderContext;
-	class Renderer : public Shared
+	class RenderInterface : public Shared
 	{
 	public:
-		ET_DECLARE_POINTER(Renderer)
-		
-	public: 
+		ET_DECLARE_POINTER(RenderInterface)
+
+	public:
+		RenderInterface(RenderContext* rc)
+			: _rc(rc) { }
+
+		RenderContext* rc() const
+			{ return _rc; }
+
+		virtual RenderPass::Pointer allocateRenderPass(const RenderPass::ConstructionInfo&) = 0;
+		virtual void submitRenderPass(RenderPass::Pointer) = 0;
+
+		virtual void drawIndexedPrimitive(PrimitiveType, IndexArrayFormat, uint32_t first, uint32_t count) = 0;
+
+	private:
+		RenderContext* _rc = nullptr;
+	};
+
+/*
+	class RenderContext;
+	class Renderer : public RendererInterface
+	{
+	public:
 		Renderer(RenderContext*);
 
+	private:
 		void clear(bool color = true, bool depth = true);
 
 		void fullscreenPass();
@@ -90,4 +109,5 @@ namespace et
 		Program::Uniform _fullScreenScaledProgram_TintUniform;
 		Program::Uniform _fullScreenDepthProgram_FactorUniform;
 	};
+*/
 }

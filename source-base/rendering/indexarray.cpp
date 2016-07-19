@@ -15,12 +15,10 @@ const uint32_t IndexArray::MaxIndex = 0xffffffff;
 const uint16_t IndexArray::MaxShortIndex = 0xffff;
 const uint8_t IndexArray::MaxSmallIndex = 0xff;
 
-static const uint32_t indexTypesMask[static_cast<uint32_t>(IndexArrayFormat::max)] =
+static const uint32_t indexTypeMask[static_cast<uint32_t>(IndexArrayFormat::Count)] =
 {
-	0x00000000, // IndexArrayFormat::Undefined = 0
 	0x000000ff, // IndexArrayFormat::Format_8bit = 1
 	0x0000ffff, // IndexArrayFormat::Format_16bit = 2
-	0x00000000, // skip
 	0xffffffff, // IndexArrayFormat::Format_32bit = 4
 };
 
@@ -46,7 +44,7 @@ void IndexArray::linearize(uint32_t size)
 
 uint32_t IndexArray::getIndex(uint32_t pos) const
 {
-	auto maskValue = indexTypesMask[static_cast<uint32_t>(_format)];
+	auto maskValue = indexTypeMask[static_cast<uint32_t>(_format) / 2];
 	
 	ET_ASSERT(pos <= maskValue);
 	
