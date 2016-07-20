@@ -23,18 +23,7 @@
 namespace et
 {
 	class Application;
-	
-	struct RenderingInfo
-	{
-		size_t averageFramePerSecond = 0;
-		size_t averageDIPPerSecond = 0;
-		size_t averagePolygonsPerSecond = 0;
-		uint64_t averageFrameTimeInMicroseconds = 0;
-	};
-
 	class RenderContextPrivate;
-	class RenderContextNotifier;
-	
 	class RenderContext : public EventReceiver
 	{
 	public:
@@ -72,9 +61,6 @@ namespace et
 		VertexBufferFactory& vertexBufferFactory()
 			{ return _vertexBufferFactory.reference(); }
 
-		size_t lastFPSValue() const
-			{ return _info.averageFramePerSecond; }
-
 		void pushRenderingContext();
 		bool activateRenderingContext();
 		bool pushAndActivateRenderingContext();
@@ -85,35 +71,27 @@ namespace et
         
         void performResizing(const vec2i&);
 
-	public:
-		ET_DECLARE_EVENT1(renderingInfoUpdated, const RenderingInfo&)
-
 	private:
 		RenderContext(RenderContext&&) = delete;
 		RenderContext(const RenderContext&) = delete;
 		RenderContext& operator = (const RenderContext&) = delete;
 
-		void onFPSTimerExpired(NotifyTimer* t);
-
 	private:
 		friend class RenderContextPrivate;
-		friend class RenderContextNotifier;
 
 		ET_DECLARE_PIMPL(RenderContext, 256)
 
 		RenderContextParameters _params;
 
 		Application* _app = nullptr;
-		NotifyTimer _fpsTimer;
-		RenderingInfo _info;
 
 		RenderState _renderState;
 
+		RenderInterface::Pointer _renderer;
 		MaterialFactory::Pointer _materialFactory;
 		TextureFactory::Pointer _textureFactory;
 		FramebufferFactory::Pointer _framebufferFactory;
 		VertexBufferFactory::Pointer _vertexBufferFactory;
-		RenderInterface::Pointer _renderer;
 	};
 
 }

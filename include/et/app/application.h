@@ -45,6 +45,9 @@ namespace et
 		RunLoop& backgroundRunLoop()
 			{ return _backgroundThread.runLoop(); }
 		
+		PlatformDependentContext& context()
+			{ return _context; }
+		
 		const PlatformDependentContext& context() const
 			{ return _context; }
 

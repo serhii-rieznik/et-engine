@@ -14,25 +14,6 @@ using namespace et;
 #define ET_STOP_ON_OPENGL_ERROR			1
 #define CASE_VALUE(V)					case V: return #V;
 
-size_t OpenGLCounters::primitiveCounter = 0;
-size_t OpenGLCounters::DIPCounter = 0;
-size_t OpenGLCounters::bindTextureCounter = 0;
-size_t OpenGLCounters::bindBufferCounter = 0;
-size_t OpenGLCounters::bindFramebufferCounter = 0;
-size_t OpenGLCounters::useProgramCounter = 0;
-size_t OpenGLCounters::bindVertexArrayObjectCounter = 0;
-
-void OpenGLCounters::reset()
-{
-	primitiveCounter = 0;
-	DIPCounter = 0;
-	bindTextureCounter = 0;
-	bindBufferCounter = 0;
-	bindFramebufferCounter = 0;
-	useProgramCounter = 0;
-	bindVertexArrayObjectCounter = 0;
-}
-
 OpenGLDebugScope::OpenGLDebugScope(const std::string& info)
 {
 #if defined(GL_EXT_debug_marker)
@@ -653,11 +634,6 @@ void et::etDrawElementsInstanced(uint32_t mode, GLsizei count, uint32_t type, co
 {
 	glDrawElementsInstanced(mode, count, type, indices, instanceCount);
 	checkOpenGLError("glDrawElementsInstanced(%d, %d, %u, %08x, %d)", mode, count, type, indices, instanceCount);
-	
-#if ET_ENABLE_OPENGL_COUNTERS
-	OpenGLCounters::primitiveCounter += instanceCount * primitiveCount(mode, static_cast<size_t>(count));
-	++OpenGLCounters::DIPCounter;
-#endif
 }
 
 #if defined(GL_ARB_draw_elements_base_vertex)
@@ -666,11 +642,6 @@ void et::etDrawElementsBaseVertex(uint32_t mode, GLsizei count, uint32_t type, c
 {
 	glDrawElementsBaseVertex(mode, count, type, indices, base);
 	checkOpenGLError("glDrawElementsBaseVertex(mode, count, type, indices, base)");
-
-#if ET_ENABLE_OPENGL_COUNTERS
-	OpenGLCounters::primitiveCounter += primitiveCount(mode, static_cast<size_t>(count));
-	++OpenGLCounters::DIPCounter;
-#endif
 }
 
 #else
@@ -688,41 +659,24 @@ void et::etDrawElements(uint32_t mode, GLsizei count, uint32_t type, const GLvoi
 	
 	checkOpenGLError("glDrawElements(%s, %u, %s, 0x%08X)", glPrimitiveTypeToString(mode).c_str(),
 		count, glTypeToString(type).c_str(), indices);
-
-#if ET_ENABLE_OPENGL_COUNTERS
-	OpenGLCounters::primitiveCounter += primitiveCount(mode, static_cast<size_t>(count));
-	++OpenGLCounters::DIPCounter;
-#endif
 }
 
 void et::etBindTexture(uint32_t target, uint32_t texture)
 {
 	glBindTexture(target, texture);
 	checkOpenGLError("glBindTexture(%s, %d)", glTexTargetToString(target).c_str(), texture);
-
-#if ET_ENABLE_OPENGL_COUNTERS
-	++OpenGLCounters::bindTextureCounter;
-#endif
 }
 
 void et::etBindBuffer(uint32_t target, uint32_t buffer)
 {
 	glBindBuffer(target, buffer);
 	checkOpenGLError("glBindBuffer(%u, %u)", target, buffer);
-
-#if ET_ENABLE_OPENGL_COUNTERS
-	++OpenGLCounters::bindBufferCounter;
-#endif
 }
 
 void et::etBindFramebuffer(uint32_t target, uint32_t framebuffer)
 {
 	glBindFramebuffer(target, framebuffer);
 	checkOpenGLError("glBindFramebuffer(%u, %u)", target, framebuffer);
-
-#if ET_ENABLE_OPENGL_COUNTERS
-	++OpenGLCounters::bindFramebufferCounter;
-#endif
 }
 
 void et::etViewport(int x, int y, GLsizei width, GLsizei height)
@@ -735,20 +689,12 @@ void et::etUseProgram(uint32_t program)
 {
 	glUseProgram(program);
 	checkOpenGLError("glUseProgram(%u)", program);
-
-#if ET_ENABLE_OPENGL_COUNTERS
-	++OpenGLCounters::useProgramCounter;
-#endif
 }
 
 void et::etbindVertexArrayObject(uint32_t arr)
 {
 	glBindVertexArray(arr);
 	checkOpenGLError("glBindVertexArrayObject(%u)", arr);
-
-#if ET_ENABLE_OPENGL_COUNTERS
-	++OpenGLCounters::bindVertexArrayObjectCounter;
-#endif
 }
 
 int32_t et::textureWrapValue(TextureWrap w)

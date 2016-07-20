@@ -5,8 +5,9 @@
  *
  */
 
-#include <et/geometry/geometry.h>
+#include <et/app/application.h>
 #include <et/opengl/opengl.h>
+#include <et/opengl/openglcaps.h>
 #include <et/opengl/openglrenderer.h>
 #include <et/rendering/renderstate.h>
 #include <et/rendering/rendercontext.h>
@@ -14,12 +15,96 @@
 #include <et/rendering/indexarray.h>
 #include <et/rendering/vertexstorage.h>
 
+#if (ET_PLATFORM_MAC)
+#	include <OpenGL/OpenGL.h>
+#	include <OpenGL/CGLTypes.h>
+#else
+#	error Not implemented for this platform
+#endif
+
 namespace et
 {
+
+class OpenGLRendererPrivate
+{
+public:
+	CGLPixelFormatObj glPixelFormat = nullptr;
+	CGLContextObj glContext = nullptr;
+};
 
 OpenGLRenderer::OpenGLRenderer(RenderContext* rc)
 	: RenderInterface(rc)
 {
+	ET_PIMPL_INIT(OpenGLRenderer);
+}
+
+OpenGLRenderer::~OpenGLRenderer()
+{
+	ET_PIMPL_FINALIZE(OpenGLRenderer)
+}
+
+void OpenGLRenderer::init(const RenderContextParameters& params)
+{
+	bool msaaEnabled = params.multisamplingQuality != MultisamplingQuality::None;
+	CGLPixelFormatAttribute attribs[128] =
+	{
+		kCGLPFADoubleBuffer,
+		kCGLPFAColorSize, CGLPixelFormatAttribute(24),
+		kCGLPFAAlphaSize, CGLPixelFormatAttribute(8),
+		kCGLPFADepthSize, CGLPixelFormatAttribute(32),
+		kCGLPFABackingStore, CGLPixelFormatAttribute(1),
+		kCGLPFAAccelerated,
+		kCGLPFAOpenGLProfile, CGLPixelFormatAttribute(kCGLOGLPVersion_GL4_Core),
+	};
+
+	size_t msaaFirstEntry = 0;
+	while (attribs[++msaaFirstEntry]);
+
+	if (msaaEnabled)
+	{
+		attribs[msaaFirstEntry+0] = kCGLPFAMultisample;
+		attribs[msaaFirstEntry+1] = kCGLPFASampleBuffers;
+		attribs[msaaFirstEntry+2] = CGLPixelFormatAttribute(1);
+		attribs[msaaFirstEntry+3] = kCGLPFASamples;
+		attribs[msaaFirstEntry+4] = CGLPixelFormatAttribute(32);
+	}
+
+	GLint numPixelFormats = 0;
+	auto err = CGLChoosePixelFormat(attribs, &_private->glPixelFormat, &numPixelFormats);
+	ET_ASSERT(err == kCGLNoError);
+
+	err = CGLCreateContext(_private->glPixelFormat, nullptr, &_private->glContext);
+	ET_ASSERT(err == kCGLNoError);
+
+	CGLSetCurrentContext(_private->glContext);
+	GLint swap = static_cast<GLint>(params.swapInterval);
+	CGLSetParameter(_private->glContext, kCGLCPSwapInterval, &swap);
+
+	application().context().pointers[3] = _private->glPixelFormat;
+	application().context().pointers[4] = _private->glContext;
+	
+	OpenGLCapabilities::instance().checkCaps();
+}
+
+void OpenGLRenderer::shutdown()
+{
+	CGLDestroyContext(_private->glContext);
+	CGLDestroyPixelFormat(_private->glPixelFormat);
+}
+
+void OpenGLRenderer::begin()
+{
+	CGLSetCurrentContext(_private->glContext);
+	CGLLockContext(_private->glContext);
+}
+
+void OpenGLRenderer::present()
+{
+	checkOpenGLError("OpenGLRenderer::present()");
+
+	ET_ASSERT(CGLGetCurrentContext() == _private->glContext);
+	CGLFlushDrawable(_private->glContext);
+	CGLUnlockContext(_private->glContext);
 }
 
 void OpenGLRenderer::drawIndexedPrimitive(PrimitiveType pt, IndexArrayFormat fmt, uint32_t first, uint32_t count)

@@ -12,6 +12,7 @@
 namespace et
 {
 	class RenderContext;
+	class OpenGLRendererPrivate;
 	class OpenGLRenderer : public RenderInterface
 	{
 	public:
@@ -19,6 +20,13 @@ namespace et
 
 	public:
 		OpenGLRenderer(RenderContext*);
+		~OpenGLRenderer();
+
+		void init(const RenderContextParameters& params) override;
+		void shutdown() override;
+
+		void begin() override;
+		void present() override;
 
 		RenderPass::Pointer allocateRenderPass(const RenderPass::ConstructionInfo&) override;
 		void submitRenderPass(RenderPass::Pointer) override;
@@ -27,5 +35,7 @@ namespace et
 		 * Low level stuff
 		 */
 		void drawIndexedPrimitive(PrimitiveType, IndexArrayFormat, uint32_t first, uint32_t count) override;
+	private:
+		ET_DECLARE_PIMPL(OpenGLRenderer, 256)
 	};
 }

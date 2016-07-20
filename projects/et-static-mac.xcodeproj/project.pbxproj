@@ -251,7 +251,6 @@
 		6EBE228D1C66B8BE00AF7206 /* material.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6EBE20FA1C66B8BE00AF7206 /* material.cpp */; };
 		6EBE228E1C66B8BE00AF7206 /* primitives.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6EBE20FB1C66B8BE00AF7206 /* primitives.cpp */; };
 		6EBE228F1C66B8BE00AF7206 /* renderbatch.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6EBE20FC1C66B8BE00AF7206 /* renderbatch.cpp */; };
-		6EBE22901C66B8BE00AF7206 /* rendercontext.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6EBE20FD1C66B8BE00AF7206 /* rendercontext.cpp */; };
 		6EBE22911C66B8BE00AF7206 /* rendering.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6EBE20FE1C66B8BE00AF7206 /* rendering.cpp */; };
 		6EBE22921C66B8BE00AF7206 /* renderpass.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6EBE20FF1C66B8BE00AF7206 /* renderpass.cpp */; };
 		6EBE22941C66B8BE00AF7206 /* texturefactory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6EBE21011C66B8BE00AF7206 /* texturefactory.cpp */; };
@@ -529,7 +528,6 @@
 		6EBE20FA1C66B8BE00AF7206 /* material.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = material.cpp; sourceTree = "<group>"; };
 		6EBE20FB1C66B8BE00AF7206 /* primitives.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = primitives.cpp; sourceTree = "<group>"; };
 		6EBE20FC1C66B8BE00AF7206 /* renderbatch.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = renderbatch.cpp; sourceTree = "<group>"; };
-		6EBE20FD1C66B8BE00AF7206 /* rendercontext.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = rendercontext.cpp; sourceTree = "<group>"; };
 		6EBE20FE1C66B8BE00AF7206 /* rendering.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = rendering.cpp; sourceTree = "<group>"; };
 		6EBE20FF1C66B8BE00AF7206 /* renderpass.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = renderpass.cpp; sourceTree = "<group>"; };
 		6EBE21011C66B8BE00AF7206 /* texturefactory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = texturefactory.cpp; sourceTree = "<group>"; };
@@ -1036,7 +1034,6 @@
 				6EBE20FA1C66B8BE00AF7206 /* material.cpp */,
 				6EBE20FB1C66B8BE00AF7206 /* primitives.cpp */,
 				6EBE20FC1C66B8BE00AF7206 /* renderbatch.cpp */,
-				6EBE20FD1C66B8BE00AF7206 /* rendercontext.cpp */,
 				5C484BA51D3D8E9500E02180 /* renderhelper.cpp */,
 				6EBE20FE1C66B8BE00AF7206 /* rendering.cpp */,
 				6EBE20FF1C66B8BE00AF7206 /* renderpass.cpp */,
@@ -1374,7 +1371,6 @@
 				6EBE22731C66B8BE00AF7206 /* log.apple.mm in Sources */,
 				6EBE228B1C66B8BE00AF7206 /* framebufferfactory.cpp in Sources */,
 				6EBE22631C66B8BE00AF7206 /* program.cpp in Sources */,
-				6EBE22901C66B8BE00AF7206 /* rendercontext.cpp in Sources */,
 				6EBE229B1C66B8BE00AF7206 /* animation.cpp in Sources */,
 				6EBE22611C66B8BE00AF7206 /* materialfactory.cpp in Sources */,
 				6EBE22351C66B8BE00AF7206 /* camera.cpp in Sources */,

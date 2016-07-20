@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <et/rendering/rendercontextparams.h>
 #include <et/rendering/renderpass.h>
 
 namespace et
@@ -23,6 +24,12 @@ namespace et
 
 		RenderContext* rc() const
 			{ return _rc; }
+
+		virtual void init(const RenderContextParameters& params) = 0;
+		virtual void shutdown() = 0;
+
+		virtual void begin() = 0;
+		virtual void present() = 0;
 
 		virtual RenderPass::Pointer allocateRenderPass(const RenderPass::ConstructionInfo&) = 0;
 		virtual void submitRenderPass(RenderPass::Pointer) = 0;

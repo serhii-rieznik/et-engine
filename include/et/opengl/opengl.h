@@ -106,18 +106,6 @@
 
 namespace et
 {
-	struct OpenGLCounters
-	{
-		static size_t primitiveCounter;
-		static size_t DIPCounter;
-		static size_t bindTextureCounter;
-		static size_t bindBufferCounter;
-		static size_t bindFramebufferCounter;
-		static size_t useProgramCounter;
-		static size_t bindVertexArrayObjectCounter;
-		static void reset();
-	};
-	
 	enum class OpenGLVersion
 	{
 		Unknown,
