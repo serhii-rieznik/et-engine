@@ -47,11 +47,6 @@
  */
 @implementation etOpenGLView
 
-- (oneway void)dealloc
-{
-    et::log::info("!");
-}
-
 - (BOOL)canBecomeKeyView
 {
     return YES;

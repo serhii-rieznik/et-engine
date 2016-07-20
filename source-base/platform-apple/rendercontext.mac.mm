@@ -16,12 +16,9 @@
 #include <CoreVideo/CVDisplayLink.h>
 
 #include <et/platform/platformtools.h>
-#include <et/platform-apple/apple.h>
 #include <et/core/threading.h>
 #include <et/rendering/renderhelper.h>
-#include <et/opengl/opengl.h>
 #include <et/opengl/openglrenderer.h>
-#include <et/input/input.h>
 #include <et/app/application.h>
 
 using namespace et;
@@ -29,27 +26,15 @@ using namespace et;
 class et::RenderContextPrivate
 {
 public:
-	int displayLinkSynchronized();
-
-	bool canPerformOperations()
-		{ return !firstSync && (displayLink != nil); }
-	
-public:
 	CVDisplayLinkRef displayLink = nullptr;
-    bool firstSync = true;
+	bool initialized = false;
 };
 
 /*
  * Display link callback
  */
-CVReturn cvDisplayLinkOutputCallback(CVDisplayLinkRef, const CVTimeStamp*, const CVTimeStamp*,
-	CVOptionFlags, CVOptionFlags*, void* displayLinkContext)
-{
-	@autoreleasepool
-	{
-		return static_cast<RenderContextPrivate*>(displayLinkContext)->displayLinkSynchronized();
-	}
-}
+CVReturn etDisplayLinkOutputCallback(CVDisplayLinkRef, const CVTimeStamp*, const CVTimeStamp*,
+	CVOptionFlags, CVOptionFlags*, void* displayLinkContext);
 
 RenderContext::RenderContext(const RenderContextParameters& inParams, Application* app)
 	: _params(inParams)
@@ -75,9 +60,11 @@ RenderContext::RenderContext(const RenderContextParameters& inParams, Applicatio
 	renderhelper::init(this);
 
 	NSWindow* mainWindow = (NSWindow*)CFBridgingRelease(ctx.pointers[0]);
+
 	NSOpenGLView* openGlView = (NSOpenGLView*)CFBridgingRelease(ctx.pointers[2]);
 	CGLContextObj glContext = reinterpret_cast<CGLContextObj>(ctx.pointers[4]);
 	[openGlView setOpenGLContext:[[NSOpenGLContext alloc] initWithCGLContextObj:glContext]];
+
 	[mainWindow makeKeyAndOrderFront:[NSApplication sharedApplication]];
 	[mainWindow orderFrontRegardless];
 	[[NSApplication sharedApplication] activateIgnoringOtherApps:YES];
@@ -102,7 +89,7 @@ void RenderContext::init()
 			exit(1);
 		}
 
-		CVDisplayLinkSetOutputCallback(_private->displayLink, cvDisplayLinkOutputCallback, _private);
+		CVDisplayLinkSetOutputCallback(_private->displayLink, etDisplayLinkOutputCallback, _private);
 	}
 
 	CVDisplayLinkStart(_private->displayLink);
@@ -119,15 +106,12 @@ void RenderContext::shutdown()
 
 bool RenderContext::beginRender()
 {
-	bool renderEnabled = _private->canPerformOperations();
+	ET_ASSERT(_private->initialized);
 
-    if (renderEnabled)
-	{
-		_renderer->begin();
-		_renderState.bindDefaultFramebuffer();
-	}
-	
-    return renderEnabled;
+	_renderer->begin();
+	_renderState.bindDefaultFramebuffer();
+
+	return true;
 }
 
 void RenderContext::endRender()
@@ -159,33 +143,34 @@ void RenderContext::popRenderingContext()
 
 void RenderContext::performResizing(const vec2i& newSize)
 {
-	if (_private->canPerformOperations())
+	if (_private->initialized)
 	{
 		_renderState.defaultFramebuffer()->resize(newSize);
 	}
 }
 
-/*
- *
- * RenderContextPrivate
- *
- */
-int RenderContextPrivate::displayLinkSynchronized()
+CVReturn etDisplayLinkOutputCallback(CVDisplayLinkRef, const CVTimeStamp*, const CVTimeStamp*,
+	CVOptionFlags, CVOptionFlags*, void* displayLinkContext)
 {
-    if (firstSync)
-    {
-        threading::setMainThreadIdentifier(threading::currentThread());
-        registerRunLoop(mainRunLoop());
-        firstSync = false;
-    }
+	@autoreleasepool
+	{
+		auto& app = application();
+		auto rcp = static_cast<RenderContextPrivate*>(displayLinkContext);
 
-	auto& app = application();
-    if (app.running() && !app.suspended() && app.shouldPerformRendering())
-    {
-        app.performUpdateAndRender();
-    }
-    
-	return kCVReturnSuccess;
+		if (rcp->initialized == false)
+		{
+			threading::setMainThreadIdentifier(threading::currentThread());
+			registerRunLoop(mainRunLoop());
+			rcp->initialized = true;
+		}
+
+		if (app.running() && !app.suspended() && app.shouldPerformRendering())
+		{
+			app.performUpdateAndRender();
+		}
+
+		return kCVReturnSuccess;
+	}
 }
 
 #endif // ET_PLATFORM_MAC
