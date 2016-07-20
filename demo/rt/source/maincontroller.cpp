@@ -219,9 +219,7 @@ void MainController::applicationWillTerminate()
 
 void MainController::render(et::RenderContext* rc)
 {
-	et::RenderPass::ConstructionInfo passInfo;
-	passInfo.colorAttachment.loadOperation = et::FramebufferOperation::Clear;
-	auto pass = rc->renderer()->allocateRenderPass(passInfo);
+	auto pass = rc->renderer()->allocateRenderPass(et::RenderPass::ConstructionInfo());
 
 	if (_texture.valid())
 	{

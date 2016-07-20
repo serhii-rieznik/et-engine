@@ -17,6 +17,7 @@ namespace rh_local
 {
 	VertexArrayObject::Pointer fullscreenMesh;
 	Material::Pointer plainMaterial;
+	DepthState disabledDepthState;
 	extern const std::string vertexShader;
 	extern const std::string fragmentShader;
 }
@@ -35,10 +36,15 @@ void init(RenderContext* rc)
 	rh_local::fullscreenMesh = rc->vertexBufferFactory().createVertexArrayObject("rh_local::mesh",
 		vb, BufferDrawType::Static, ib, BufferDrawType::Static);
 
+	rh_local::disabledDepthState.compareFunction = CompareFunction::Always;
+	rh_local::disabledDepthState.depthTestEnabled = false;
+	rh_local::disabledDepthState.depthWriteEnabled = false;
+
 	Program::Pointer fullScreenProgram = rc->materialFactory().genProgram("rh_local::program",
 		rh_local::vertexShader, rh_local::fragmentShader);
 	rh_local::plainMaterial = rc->materialFactory().createMaterial();
 	rh_local::plainMaterial->setProgram(fullScreenProgram);
+	rh_local::plainMaterial->setDepthState(rh_local::disabledDepthState);
 }
 
 void release()
