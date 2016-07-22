@@ -11,7 +11,7 @@
 		5C484BA41D3D8E6600E02180 /* renderhelper.h in Headers */ = {isa = PBXBuildFile; fileRef = 5C484BA31D3D8E6600E02180 /* renderhelper.h */; };
 		5C484BA61D3D8E9500E02180 /* renderhelper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5C484BA51D3D8E9500E02180 /* renderhelper.cpp */; };
 		6E954C811CD2610C00A12C68 /* context_osx.h in Headers */ = {isa = PBXBuildFile; fileRef = 6E954C801CD2610C00A12C68 /* context_osx.h */; };
-		6E954C851CD266C000A12C68 /* context_osx.mm in Sources */ = {isa = PBXBuildFile; fileRef = 6E954C841CD266C000A12C68 /* context_osx.mm */; };
+		6E954C851CD266C000A12C68 /* context.mac.mm in Sources */ = {isa = PBXBuildFile; fileRef = 6E954C841CD266C000A12C68 /* context.mac.mm */; };
 		6E9587B51CD6990F0005A95B /* light.h in Headers */ = {isa = PBXBuildFile; fileRef = 6E9587B41CD6990F0005A95B /* light.h */; };
 		6EBE211C1C66B8BE00AF7206 /* appevironment.h in Headers */ = {isa = PBXBuildFile; fileRef = 6EBE1F5D1C66B8BE00AF7206 /* appevironment.h */; };
 		6EBE211D1C66B8BE00AF7206 /* application.h in Headers */ = {isa = PBXBuildFile; fileRef = 6EBE1F5E1C66B8BE00AF7206 /* application.h */; };
@@ -79,7 +79,6 @@
 		6EBE21601C66B8BE00AF7206 /* line2d.h in Headers */ = {isa = PBXBuildFile; fileRef = 6EBE1FA41C66B8BE00AF7206 /* line2d.h */; };
 		6EBE21611C66B8BE00AF7206 /* matrix3.h in Headers */ = {isa = PBXBuildFile; fileRef = 6EBE1FA51C66B8BE00AF7206 /* matrix3.h */; };
 		6EBE21621C66B8BE00AF7206 /* matrix4.h in Headers */ = {isa = PBXBuildFile; fileRef = 6EBE1FA61C66B8BE00AF7206 /* matrix4.h */; };
-		6EBE21631C66B8BE00AF7206 /* parallelepiped.h in Headers */ = {isa = PBXBuildFile; fileRef = 6EBE1FA71C66B8BE00AF7206 /* parallelepiped.h */; };
 		6EBE21641C66B8BE00AF7206 /* plane.h in Headers */ = {isa = PBXBuildFile; fileRef = 6EBE1FA81C66B8BE00AF7206 /* plane.h */; };
 		6EBE21651C66B8BE00AF7206 /* quaternion.h in Headers */ = {isa = PBXBuildFile; fileRef = 6EBE1FA91C66B8BE00AF7206 /* quaternion.h */; };
 		6EBE21661C66B8BE00AF7206 /* ray.h in Headers */ = {isa = PBXBuildFile; fileRef = 6EBE1FAA1C66B8BE00AF7206 /* ray.h */; };
@@ -287,7 +286,7 @@
 		5C484BA51D3D8E9500E02180 /* renderhelper.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = renderhelper.cpp; sourceTree = "<group>"; };
 		6E954C7F1CD25EEC00A12C68 /* context.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = context.h; sourceTree = "<group>"; };
 		6E954C801CD2610C00A12C68 /* context_osx.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = context_osx.h; sourceTree = "<group>"; };
-		6E954C841CD266C000A12C68 /* context_osx.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = context_osx.mm; sourceTree = "<group>"; };
+		6E954C841CD266C000A12C68 /* context.mac.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = context.mac.mm; sourceTree = "<group>"; };
 		6E9587B41CD6990F0005A95B /* light.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = light.h; sourceTree = "<group>"; };
 		6EBE15B11C66B4AD00AF7206 /* libet-static-mac.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libet-static-mac.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		6EBE1F5D1C66B8BE00AF7206 /* appevironment.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = appevironment.h; sourceTree = "<group>"; };
@@ -356,7 +355,6 @@
 		6EBE1FA41C66B8BE00AF7206 /* line2d.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = line2d.h; sourceTree = "<group>"; };
 		6EBE1FA51C66B8BE00AF7206 /* matrix3.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = matrix3.h; sourceTree = "<group>"; };
 		6EBE1FA61C66B8BE00AF7206 /* matrix4.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = matrix4.h; sourceTree = "<group>"; };
-		6EBE1FA71C66B8BE00AF7206 /* parallelepiped.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = parallelepiped.h; sourceTree = "<group>"; };
 		6EBE1FA81C66B8BE00AF7206 /* plane.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = plane.h; sourceTree = "<group>"; };
 		6EBE1FA91C66B8BE00AF7206 /* quaternion.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = quaternion.h; sourceTree = "<group>"; };
 		6EBE1FAA1C66B8BE00AF7206 /* ray.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ray.h; sourceTree = "<group>"; };
@@ -702,7 +700,6 @@
 				6EBE1FA41C66B8BE00AF7206 /* line2d.h */,
 				6EBE1FA51C66B8BE00AF7206 /* matrix3.h */,
 				6EBE1FA61C66B8BE00AF7206 /* matrix4.h */,
-				6EBE1FA71C66B8BE00AF7206 /* parallelepiped.h */,
 				6EBE1FA81C66B8BE00AF7206 /* plane.h */,
 				6EBE1FA91C66B8BE00AF7206 /* quaternion.h */,
 				6EBE1FAA1C66B8BE00AF7206 /* ray.h */,
@@ -1013,7 +1010,7 @@
 			isa = PBXGroup;
 			children = (
 				6EBE20D41C66B8BE00AF7206 /* application.mac.mm */,
-				6E954C841CD266C000A12C68 /* context_osx.mm */,
+				6E954C841CD266C000A12C68 /* context.mac.mm */,
 				6EBE20D71C66B8BE00AF7206 /* iap.apple.mm */,
 				6EBE20DA1C66B8BE00AF7206 /* input.mac.mm */,
 				6EBE20DC1C66B8BE00AF7206 /* locale.apple.mm */,
@@ -1143,7 +1140,6 @@
 				6EBE21691C66B8BE00AF7206 /* segment2d.h in Headers */,
 				6EBE217F1C66B8BE00AF7206 /* texturedescription.h in Headers */,
 				6EBE21AA1C66B8BE00AF7206 /* renderpass.h in Headers */,
-				6EBE21631C66B8BE00AF7206 /* parallelepiped.h in Headers */,
 				6EBE21BF1C66B8BE00AF7206 /* objloader.h in Headers */,
 				6EBE217B1C66B8BE00AF7206 /* imagewriter.h in Headers */,
 				6EBE21511C66B8BE00AF7206 /* stream.h in Headers */,
@@ -1327,7 +1323,7 @@
 				6EBE22A51C66B8BE00AF7206 /* scenematerial.cpp in Sources */,
 				6EBE225E1C66B8BE00AF7206 /* capabilities.cpp in Sources */,
 				6EBE22461C66B8BE00AF7206 /* stream.cpp in Sources */,
-				6E954C851CD266C000A12C68 /* context_osx.mm in Sources */,
+				6E954C851CD266C000A12C68 /* context.mac.mm in Sources */,
 				6EBE22781C66B8BE00AF7206 /* platformtools.mac.mm in Sources */,
 				6EBE22AC1C66B8BE00AF7206 /* track.cpp in Sources */,
 				6EBE22501C66B8BE00AF7206 /* rectplacer.cpp in Sources */,

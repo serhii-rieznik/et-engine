@@ -18,12 +18,6 @@ void demo::MainController::applicationDidLoad(et::RenderContext* rc)
 
 	createModels(rc);
 	loadProgram(rc);
-	
-	rc->renderingInfoUpdated.connect([this](const et::RenderingInfo& info)
-	{
-		et::log::info("Rendering stats: %lu fps, %lu polys, %lu draw calls", info.averageFramePerSecond,
-			info.averagePolygonsPerSecond, info.averageDIPPerSecond);
-	});
 
 	_frameTimeTimer.run();
 }
@@ -36,6 +30,7 @@ void demo::MainController::createModels(et::RenderContext* rc)
 
 	et::VertexArray::Pointer vertices = et::VertexArray::Pointer::create(decl, 0);
 	et::primitives::createIcosahedron(vertices, 5.0f);
+	et::primitives::tesselateTriangles(vertices);
 
 	et::IndexArray::Pointer indices = et::IndexArray::Pointer::create(et::IndexArrayFormat::Format_16bit,
 		vertices->size(), et::PrimitiveType::Triangles);

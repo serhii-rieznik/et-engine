@@ -45,15 +45,16 @@ namespace et
     
     struct PlatformDependentContext
     {
-        enum : size_t { DataSize = 256 };
-        union
-        {
-            char data[DataSize];
-            void* pointers[DataSize / sizeof(void*)];
-        };
-        
+		enum
+		{
+			ObjectsCount = 32
+		};
+		std::array<void*, ObjectsCount> objects;
+
         PlatformDependentContext()
-            { memset(data, DataSize, 0); }
+		{
+			std::fill(objects.begin(), objects.end(), nullptr);
+		}
     };
     
     class ApplicationContextFactory

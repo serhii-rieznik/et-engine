@@ -13,10 +13,11 @@
 
 #include <AppKit/NSWindow.h>
 #include <AppKit/NSWindowController.h>
-#include <AppKit/NSOpenGLView.h>
 #include <AppKit/NSScreen.h>
 #include <AppKit/NSMenu.h>
+#include <AppKit/NSView.h>
 #include <AppKit/NSTrackingArea.h>
+#include <AppKit/NSOpenGLView.h>
 
 @interface etWindowController : NSWindowController<NSWindowDelegate>
 
@@ -39,7 +40,6 @@
     et::Input::PointerInputSource pointerInputSource;
     et::Input::GestureInputSource gestureInputSource;
 }
-
 @end
 
 /*
@@ -147,8 +147,6 @@
 
 - (void)reshape
 {
-    [super reshape];
-    
     if (_trackingArea)
         [self removeTrackingArea:_trackingArea];
     
@@ -158,7 +156,9 @@
     [self addTrackingArea:_trackingArea];
 
     auto nativeSize = [self convertRectToBacking:self.bounds].size;
-    et::application().resizeContext(et::vec2i(static_cast<int>(nativeSize.width), static_cast<int>(nativeSize.height)));
+	
+	et::vec2i newSize(static_cast<int>(nativeSize.width), static_cast<int>(nativeSize.height));
+	et::application().resizeContext(newSize);
 }
 
 @end
@@ -317,17 +317,17 @@ PlatformDependentContext ApplicationContextFactoryOSX::createContextWithOptions(
     [mainWindow setContentView:openGlView];
     
     PlatformDependentContext result;
-    result.pointers[0] = (void*)CFBridgingRetain(mainWindow);
-    result.pointers[1] = (void*)CFBridgingRetain(windowController);
-    result.pointers[2] = (void*)CFBridgingRetain(openGlView);
+    result.objects[0] = (void*)CFBridgingRetain(mainWindow);
+    result.objects[1] = (void*)CFBridgingRetain(windowController);
+    result.objects[2] = (void*)CFBridgingRetain(openGlView);
     return result;
 }
  
 void ApplicationContextFactoryOSX::destroyContext(PlatformDependentContext context)
 {
-    CFBridgingRelease(context.pointers[0]);
-    CFBridgingRelease(context.pointers[1]);
-    CFBridgingRelease(context.pointers[2]);
+    CFBridgingRelease(context.objects[0]);
+    CFBridgingRelease(context.objects[1]);
+    CFBridgingRelease(context.objects[2]);
 }
     
 }

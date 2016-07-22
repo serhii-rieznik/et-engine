@@ -80,8 +80,8 @@ void OpenGLRenderer::init(const RenderContextParameters& params)
 	GLint swap = static_cast<GLint>(params.swapInterval);
 	CGLSetParameter(_private->glContext, kCGLCPSwapInterval, &swap);
 
-	application().context().pointers[3] = _private->glPixelFormat;
-	application().context().pointers[4] = _private->glContext;
+	application().context().objects[3] = _private->glPixelFormat;
+	application().context().objects[4] = _private->glContext;
 	
 	OpenGLCapabilities::instance().checkCaps();
 }

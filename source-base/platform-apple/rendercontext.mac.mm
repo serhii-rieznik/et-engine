@@ -59,10 +59,10 @@ RenderContext::RenderContext(const RenderContextParameters& inParams, Applicatio
 
 	renderhelper::init(this);
 
-	NSWindow* mainWindow = (NSWindow*)CFBridgingRelease(ctx.pointers[0]);
+	NSWindow* mainWindow = (NSWindow*)CFBridgingRelease(ctx.objects[0]);
 
-	NSOpenGLView* openGlView = (NSOpenGLView*)CFBridgingRelease(ctx.pointers[2]);
-	CGLContextObj glContext = reinterpret_cast<CGLContextObj>(ctx.pointers[4]);
+	NSOpenGLView* openGlView = (NSOpenGLView*)CFBridgingRelease(ctx.objects[2]);
+	CGLContextObj glContext = reinterpret_cast<CGLContextObj>(ctx.objects[4]);
 	[openGlView setOpenGLContext:[[NSOpenGLContext alloc] initWithCGLContextObj:glContext]];
 
 	[mainWindow makeKeyAndOrderFront:[NSApplication sharedApplication]];
