@@ -10,6 +10,8 @@
 		5C484BA11D3D7D9500E02180 /* openglrenderer.h in Headers */ = {isa = PBXBuildFile; fileRef = 5C484BA01D3D7D9500E02180 /* openglrenderer.h */; };
 		5C484BA41D3D8E6600E02180 /* renderhelper.h in Headers */ = {isa = PBXBuildFile; fileRef = 5C484BA31D3D8E6600E02180 /* renderhelper.h */; };
 		5C484BA61D3D8E9500E02180 /* renderhelper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5C484BA51D3D8E9500E02180 /* renderhelper.cpp */; };
+		5C4CB7A81D43F6730058E7DA /* metalrenderer.h in Headers */ = {isa = PBXBuildFile; fileRef = 5C4CB7A71D43F6720058E7DA /* metalrenderer.h */; };
+		5C4CB7AA1D43F6A20058E7DA /* metalrenderer.mm in Sources */ = {isa = PBXBuildFile; fileRef = 5C4CB7A91D43F6A20058E7DA /* metalrenderer.mm */; };
 		6E954C811CD2610C00A12C68 /* context_osx.h in Headers */ = {isa = PBXBuildFile; fileRef = 6E954C801CD2610C00A12C68 /* context_osx.h */; };
 		6E954C851CD266C000A12C68 /* context.mac.mm in Sources */ = {isa = PBXBuildFile; fileRef = 6E954C841CD266C000A12C68 /* context.mac.mm */; };
 		6E9587B51CD6990F0005A95B /* light.h in Headers */ = {isa = PBXBuildFile; fileRef = 6E9587B41CD6990F0005A95B /* light.h */; };
@@ -284,6 +286,8 @@
 		5C484BA01D3D7D9500E02180 /* openglrenderer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = openglrenderer.h; sourceTree = "<group>"; };
 		5C484BA31D3D8E6600E02180 /* renderhelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = renderhelper.h; sourceTree = "<group>"; };
 		5C484BA51D3D8E9500E02180 /* renderhelper.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = renderhelper.cpp; sourceTree = "<group>"; };
+		5C4CB7A71D43F6720058E7DA /* metalrenderer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = metalrenderer.h; sourceTree = "<group>"; };
+		5C4CB7A91D43F6A20058E7DA /* metalrenderer.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = metalrenderer.mm; sourceTree = "<group>"; };
 		6E954C7F1CD25EEC00A12C68 /* context.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = context.h; sourceTree = "<group>"; };
 		6E954C801CD2610C00A12C68 /* context_osx.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = context_osx.h; sourceTree = "<group>"; };
 		6E954C841CD266C000A12C68 /* context.mac.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = context.mac.mm; sourceTree = "<group>"; };
@@ -567,6 +571,23 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		5C4CB7A51D43F63A0058E7DA /* metal */ = {
+			isa = PBXGroup;
+			children = (
+				5C4CB7A91D43F6A20058E7DA /* metalrenderer.mm */,
+			);
+			path = metal;
+			sourceTree = "<group>";
+		};
+		5C4CB7A61D43F6560058E7DA /* metal */ = {
+			isa = PBXGroup;
+			children = (
+				5C4CB7A71D43F6720058E7DA /* metalrenderer.h */,
+			);
+			name = metal;
+			path = et/metal;
+			sourceTree = "<group>";
+		};
 		6EBE15A81C66B4AD00AF7206 = {
 			isa = PBXGroup;
 			children = (
@@ -594,6 +615,7 @@
 				6EBE1FBB1C66B8BE00AF7206 /* imaging */,
 				6EBE1FC81C66B8BE00AF7206 /* input */,
 				6EBE1FCD1C66B8BE00AF7206 /* locale */,
+				5C4CB7A61D43F6560058E7DA /* metal */,
 				6EBE1FD01C66B8BE00AF7206 /* opengl */,
 				6EBE1FD31C66B8BE00AF7206 /* platform */,
 				6EBE1FD71C66B8BE00AF7206 /* platform-apple */,
@@ -889,6 +911,7 @@
 				6EBE20B31C66B8BE00AF7206 /* geometry */,
 				6EBE20B71C66B8BE00AF7206 /* imaging */,
 				6EBE20C31C66B8BE00AF7206 /* input */,
+				5C4CB7A51D43F63A0058E7DA /* metal */,
 				6EBE20C61C66B8BE00AF7206 /* opengl */,
 				6EBE20D21C66B8BE00AF7206 /* platform-apple */,
 				6EBE20F71C66B8BE00AF7206 /* rendering */,
@@ -1126,6 +1149,7 @@
 				5C484BA41D3D8E6600E02180 /* renderhelper.h in Headers */,
 				6EBE21B91C66B8BE00AF7206 /* elementcontainer.h in Headers */,
 				6EBE21B01C66B8BE00AF7206 /* vertexarrayobject.h in Headers */,
+				5C4CB7A81D43F6730058E7DA /* metalrenderer.h in Headers */,
 				6EBE21CB1C66B8BE00AF7206 /* streamingthread.h in Headers */,
 				6E954C811CD2610C00A12C68 /* context_osx.h in Headers */,
 				6EBE21711C66B8BE00AF7206 /* vector3.h in Headers */,
@@ -1389,6 +1413,7 @@
 				6EBE22991C66B8BE00AF7206 /* vertexdeclaration.cpp in Sources */,
 				6EBE22481C66B8BE00AF7206 /* taskpool.cpp in Sources */,
 				6EBE223A1C66B8BE00AF7206 /* base64.cpp in Sources */,
+				5C4CB7AA1D43F6A20058E7DA /* metalrenderer.mm in Sources */,
 				6EBE22A31C66B8BE00AF7206 /* scene3d.cpp in Sources */,
 				6EBE22571C66B8BE00AF7206 /* pngloader.cpp in Sources */,
 				6EBE229D1C66B8BE00AF7206 /* lineelement.cpp in Sources */,

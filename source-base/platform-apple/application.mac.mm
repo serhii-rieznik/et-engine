@@ -39,7 +39,7 @@ using namespace et;
  */
 void Application::initContext()
 {
-    _context = ApplicationContextFactoryOSX().createContextWithOptions(_parameters.context);
+    _context = ApplicationContextFactoryOSX().createContextWithOptions(_parameters.renderingAPI, _parameters.context);
     
     NSMenu* mainMenu = [[NSMenu allocWithZone:[NSMenu menuZone]] init];
     NSMenuItem* applicationMenuItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] init];

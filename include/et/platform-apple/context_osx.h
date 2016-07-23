@@ -14,7 +14,7 @@ namespace et
     class ApplicationContextFactoryOSX : public ApplicationContextFactory
     {
     public:
-        PlatformDependentContext createContextWithOptions(ContextOptions&) override;
+        PlatformDependentContext createContextWithOptions(RenderingAPI, ContextOptions&) override;
         void destroyContext(PlatformDependentContext) override;
     };
 }

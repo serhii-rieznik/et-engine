@@ -28,17 +28,24 @@ namespace et
             Fullscreen
         };
         
-        vec2i size;
-        vec2i minimumSize;
+        vec2i size = vec2i(640, 480);
+        vec2i minimumSize = vec2i(640, 480);
         uint32_t style = Style::Caption;
         SizeClass sizeClass = SizeClass::Predefined;
         bool keepAspectOnResize = false;
         bool supportsHighResolution = true;
     };
+
+	enum class RenderingAPI : uint32_t
+	{
+		OpenGL,
+		Metal
+	};
     
     struct ApplicationParameters
     {
         ContextOptions context;
+		RenderingAPI renderingAPI = RenderingAPI::OpenGL;
         bool shouldSuspendOnDeactivate = PlatformOptions::IsMobile;
         bool shouldPreserveRenderContext = false;
     };
@@ -60,7 +67,7 @@ namespace et
     class ApplicationContextFactory
     {
     public:
-        virtual PlatformDependentContext createContextWithOptions(ContextOptions&) = 0;
+        virtual PlatformDependentContext createContextWithOptions(RenderingAPI, ContextOptions&) = 0;
         virtual void destroyContext(PlatformDependentContext) = 0;
         
         virtual ~ApplicationContextFactory() = default;

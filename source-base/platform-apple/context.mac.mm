@@ -32,7 +32,7 @@
     backing:(NSBackingStoreType)bufferingType defer:(BOOL)flag;
 
 @end
-    
+
 @interface etOpenGLView : NSOpenGLView
 {
 @public
@@ -41,6 +41,11 @@
     et::Input::GestureInputSource gestureInputSource;
 }
 @end
+
+@interface etMetalView : NSView
+
+@end
+
 
 /*
  * OpenGL View implementation
@@ -238,7 +243,7 @@
 namespace et
 {
     
-PlatformDependentContext ApplicationContextFactoryOSX::createContextWithOptions(ContextOptions& options)
+PlatformDependentContext ApplicationContextFactoryOSX::createContextWithOptions(RenderingAPI api, ContextOptions& options)
 {
     NSUInteger windowMask = NSBorderlessWindowMask | NSClosableWindowMask;
     
@@ -302,24 +307,36 @@ PlatformDependentContext ApplicationContextFactoryOSX::createContextWithOptions(
 
     options.size = vec2i(static_cast<int>(contentRect.size.width),
         static_cast<int>(contentRect.size.height));
-    
-    etOpenGLView* openGlView = [[etOpenGLView alloc] init];
-    CFBridgingRetain(openGlView);
-    
-    [openGlView setAcceptsTouchEvents:YES];
-    [openGlView setWantsBestResolutionOpenGLSurface:options.supportsHighResolution ? YES : NO];
-    
+
+	NSView* view = nil;
+
+	if (api == RenderingAPI::OpenGL)
+	{
+		etOpenGLView* openGlView = [[etOpenGLView alloc] init];
+		[openGlView setWantsBestResolutionOpenGLSurface:options.supportsHighResolution ? YES : NO];
+		view = openGlView;
+	}
+	else if (api == RenderingAPI::Metal)
+	{
+		view = [[NSView alloc] init];
+	}
+
+	[view setAcceptsTouchEvents:YES];
+	CFBridgingRetain(view);
+
     if (options.style & ContextOptions::Style::Sizable)
+	{
         [mainWindow setCollectionBehavior:NSWindowCollectionBehaviorFullScreenPrimary];
-    
+	}
+
     [mainWindow setDelegate:windowController];
     [mainWindow setOpaque:YES];
-    [mainWindow setContentView:openGlView];
+    [mainWindow setContentView:view];
     
     PlatformDependentContext result;
     result.objects[0] = (void*)CFBridgingRetain(mainWindow);
     result.objects[1] = (void*)CFBridgingRetain(windowController);
-    result.objects[2] = (void*)CFBridgingRetain(openGlView);
+    result.objects[2] = (void*)CFBridgingRetain(view);
     return result;
 }
  

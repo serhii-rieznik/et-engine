@@ -3,6 +3,7 @@
 
 void demo::MainController::setApplicationParameters(et::ApplicationParameters& p)
 {
+	p.renderingAPI = et::RenderingAPI::OpenGL;
 	p.context.style = et::ContextOptions::Style::Sizable | et::ContextOptions::Style::Caption;
     p.context.size = 4 * et::currentScreen().frame.size() / 5;
 }

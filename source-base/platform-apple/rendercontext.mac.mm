@@ -13,12 +13,15 @@
 #include <AppKit/NSOpenGL.h>
 #include <AppKit/NSOpenGLView.h>
 #include <AppKit/NSWindow.h>
+#include <Metal/Metal.h>
+#include <MetalKit/MetalKit.h>
 #include <CoreVideo/CVDisplayLink.h>
 
 #include <et/platform/platformtools.h>
 #include <et/core/threading.h>
 #include <et/rendering/renderhelper.h>
 #include <et/opengl/openglrenderer.h>
+#include <et/metal/metalrenderer.h>
 #include <et/app/application.h>
 
 using namespace et;
@@ -45,9 +48,17 @@ RenderContext::RenderContext(const RenderContextParameters& inParams, Applicatio
 	application().initContext();
 	const auto& ctx = application().context();
 
-	_renderer = OpenGLRenderer::Pointer::create(this);
-	_renderer->init(_params);
+	if (application().parameters().renderingAPI == RenderingAPI::OpenGL)
+	{
+		_renderer = OpenGLRenderer::Pointer::create(this);
+	}
+	else if (application().parameters().renderingAPI == RenderingAPI::Metal)
+	{
+		_renderer = MetalRenderer::Pointer::create(this);
+	}
 
+	_renderer->init(_params);
+	
 	_textureFactory = TextureFactory::Pointer::create(this);
 	_framebufferFactory = FramebufferFactory::Pointer::create(this);
 	_materialFactory = MaterialFactory::Pointer::create(this);
@@ -61,9 +72,16 @@ RenderContext::RenderContext(const RenderContextParameters& inParams, Applicatio
 
 	NSWindow* mainWindow = (NSWindow*)CFBridgingRelease(ctx.objects[0]);
 
-	NSOpenGLView* openGlView = (NSOpenGLView*)CFBridgingRelease(ctx.objects[2]);
-	CGLContextObj glContext = reinterpret_cast<CGLContextObj>(ctx.objects[4]);
-	[openGlView setOpenGLContext:[[NSOpenGLContext alloc] initWithCGLContextObj:glContext]];
+	if (application().parameters().renderingAPI == RenderingAPI::OpenGL)
+	{
+		NSOpenGLView* openGlView = (NSOpenGLView*)CFBridgingRelease(ctx.objects[2]);
+		CGLContextObj glContext = reinterpret_cast<CGLContextObj>(ctx.objects[4]);
+		[openGlView setOpenGLContext:[[NSOpenGLContext alloc] initWithCGLContextObj:glContext]];
+	}
+	else if (application().parameters().renderingAPI == RenderingAPI::Metal)
+	{
+		// TODO
+	}
 
 	[mainWindow makeKeyAndOrderFront:[NSApplication sharedApplication]];
 	[mainWindow orderFrontRegardless];
