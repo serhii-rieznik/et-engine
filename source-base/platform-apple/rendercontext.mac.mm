@@ -10,20 +10,20 @@
 #if (ET_PLATFORM_MAC)
 
 #include <AppKit/NSApplication.h>
-#include <AppKit/NSOpenGL.h>
-#include <AppKit/NSOpenGLView.h>
 #include <AppKit/NSWindow.h>
-#include <Metal/Metal.h>
-#include <MetalKit/MetalKit.h>
 #include <CoreVideo/CVDisplayLink.h>
 
 #include <et/platform/platformtools.h>
 #include <et/core/threading.h>
 #include <et/rendering/renderhelper.h>
 
+#include <AppKit/NSOpenGL.h>
+#include <AppKit/NSOpenGLView.h>
 #include <et/opengl/openglrenderer.h>
 #include <et/opengl/openglrenderstate.h>
 
+#include <Metal/Metal.h>
+#include <QuartzCore/CAMetalLayer.h>
 #include <et/metal/metalrenderer.h>
 #include <et/metal/metalrenderstate.h>
 
@@ -71,26 +71,30 @@ RenderContext::RenderContext(const RenderContextParameters& inParams, Applicatio
 	_materialFactory = MaterialFactory::Pointer::create(this);
 	_vertexBufferFactory = VertexBufferFactory::Pointer::create(this);
 
-	NSWindow* mainWindow = (NSWindow*)CFBridgingRelease(ctx.objects[0]);
+	NSWindow* mainWindow = (__bridge NSWindow*)(ctx.objects[0]);
 	NSView* mainView = nil;
 
 	if (application().parameters().renderingAPI == RenderingAPI::OpenGL)
 	{
-		NSOpenGLView* openGlView = (NSOpenGLView*)CFBridgingRelease(ctx.objects[2]);
+		NSOpenGLView* openGlView = (__bridge NSOpenGLView*)(ctx.objects[2]);
 		CGLContextObj glContext = reinterpret_cast<CGLContextObj>(ctx.objects[4]);
 		[openGlView setOpenGLContext:[[NSOpenGLContext alloc] initWithCGLContextObj:glContext]];
 		mainView = openGlView;
 	}
 	else if (application().parameters().renderingAPI == RenderingAPI::Metal)
 	{
-		mainView = (NSView*)CFBridgingRelease(ctx.objects[2]);;
+		mainView = (__bridge NSView*)(ctx.objects[2]);
+		id<MTLDevice> metalDevice = (__bridge id<MTLDevice>)(ctx.objects[3]);
+		CAMetalLayer* metalLayer = (__bridge CAMetalLayer*)(ctx.objects[4]);
+		metalLayer.drawableSize = mainView.bounds.size;
+		mainView.layer = metalLayer;
+		[mainView setWantsLayer:YES];
 	}
 
-	CGSize viewSize = mainView.bounds.size;
-	_defaultFramebuffer = _framebufferFactory->createFramebufferWrapper(0);
-	_defaultFramebuffer->resize(vec2i(static_cast<int32_t>(viewSize.width),  static_cast<int32_t>(viewSize.height)));
-
-	renderhelper::init(this);
+	// CGSize viewSize = mainView.bounds.size;
+	// _defaultFramebuffer = _framebufferFactory->createFramebufferWrapper(0);
+	// _defaultFramebuffer->resize(vec2i(static_cast<int32_t>(viewSize.width),  static_cast<int32_t>(viewSize.height)));
+	// renderhelper::init(this);
 
 	[mainWindow makeKeyAndOrderFront:[NSApplication sharedApplication]];
 	[mainWindow orderFrontRegardless];

@@ -294,11 +294,11 @@ PlatformDependentContext ApplicationContextFactoryOSX::createContextWithOptions(
     
     etWindow* mainWindow = [[etWindow alloc] initWithContentRect:contentRect
         styleMask:windowMask backing:NSBackingStoreBuffered defer:NO];
-    CFBridgingRetain(mainWindow);
-    
+	CFBridgingRetain(mainWindow);
+
     etWindowController* windowController = [[etWindowController alloc] initWithWindow:mainWindow];
-    CFBridgingRetain(windowController);
- 
+	CFBridgingRetain(windowController);
+
     if (options.keepAspectOnResize)
         [mainWindow setContentAspectRatio:contentRect.size];
     
@@ -329,22 +329,23 @@ PlatformDependentContext ApplicationContextFactoryOSX::createContextWithOptions(
         [mainWindow setCollectionBehavior:NSWindowCollectionBehaviorFullScreenPrimary];
 	}
 
+
+	[mainWindow setContentView:view];
     [mainWindow setDelegate:windowController];
     [mainWindow setOpaque:YES];
-    [mainWindow setContentView:view];
-    
+
     PlatformDependentContext result;
-    result.objects[0] = (void*)CFBridgingRetain(mainWindow);
-    result.objects[1] = (void*)CFBridgingRetain(windowController);
-    result.objects[2] = (void*)CFBridgingRetain(view);
+    result.objects[0] = (__bridge void*)(mainWindow);
+    result.objects[1] = (__bridge void*)(windowController);
+    result.objects[2] = (__bridge void*)(view);
     return result;
 }
  
 void ApplicationContextFactoryOSX::destroyContext(PlatformDependentContext context)
 {
-    CFBridgingRelease(context.objects[0]);
-    CFBridgingRelease(context.objects[1]);
-    CFBridgingRelease(context.objects[2]);
+	CFBridgingRelease(context.objects[0]);
+	CFBridgingRelease(context.objects[1]);
+	CFBridgingRelease(context.objects[2]);
 }
     
 }

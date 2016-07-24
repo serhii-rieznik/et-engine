@@ -3,7 +3,7 @@
 
 void demo::MainController::setApplicationParameters(et::ApplicationParameters& p)
 {
-	p.renderingAPI = et::RenderingAPI::OpenGL;
+	p.renderingAPI = et::RenderingAPI::Metal;
 	p.context.style = et::ContextOptions::Style::Sizable | et::ContextOptions::Style::Caption;
     p.context.size = 4 * et::currentScreen().frame.size() / 5;
 }
@@ -16,10 +16,10 @@ void demo::MainController::setRenderContextParameters(et::RenderContextParameter
 void demo::MainController::applicationDidLoad(et::RenderContext* rc)
 {
 	_camera.lookAt(et::vec3(20.0f));
-
+	/*
 	createModels(rc);
 	loadProgram(rc);
-
+	*/
 	_frameTimeTimer.run();
 }
 
@@ -59,7 +59,7 @@ void demo::MainController::render(et::RenderContext* rc)
 {
 	_transformMatrix *= rotationYXZMatrix(et::vec3(2.0f, 0.5f, -1.0f) * _frameTimeTimer.lap());
 	
-	et::RenderBatch::Pointer batch = et::RenderBatch::Pointer::create(_defaultMaterial, _testModel, _transformMatrix);
+//	et::RenderBatch::Pointer batch = et::RenderBatch::Pointer::create(_defaultMaterial, _testModel, _transformMatrix);
 
 	et::RenderPass::ConstructionInfo passInfo;
 	passInfo.target.destination = rc->defaultFramebuffer();
@@ -70,7 +70,7 @@ void demo::MainController::render(et::RenderContext* rc)
 	passInfo.camera = _camera;
 
 	et::RenderPass::Pointer pass = rc->renderer()->allocateRenderPass(passInfo);
-	pass->pushRenderBatch(batch);
+	// pass->pushRenderBatch(batch);
 	rc->renderer()->submitRenderPass(pass);
 }
 

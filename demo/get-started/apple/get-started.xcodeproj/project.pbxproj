@@ -9,6 +9,8 @@
 /* Begin PBXBuildFile section */
 		5C3C50181C9EA09300C5B47A /* libet-static-mac.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5C3C50171C9EA08900C5B47A /* libet-static-mac.a */; };
 		5C484B9F1D3D700800E02180 /* media in Resources */ = {isa = PBXBuildFile; fileRef = 5C484B9E1D3D700800E02180 /* media */; };
+		5C8E1A0E1D44DC4100E2682B /* Metal.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5C8E1A0D1D44DC4000E2682B /* Metal.framework */; };
+		5C8E1A131D44DC5E00E2682B /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5C8E1A121D44DC5E00E2682B /* QuartzCore.framework */; };
 		6EBB83BA1CD25D1700552C1E /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 6EBB83B91CD25D1700552C1E /* libz.tbd */; };
 		A5A21CD01A6547C1004AD95C /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5A21CCD1A6547C1004AD95C /* main.cpp */; };
 		A5A21CD11A6547C1004AD95C /* MainController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5A21CCE1A6547C1004AD95C /* MainController.cpp */; };
@@ -31,6 +33,8 @@
 /* Begin PBXFileReference section */
 		5C3C50121C9EA08900C5B47A /* et-static-mac.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "et-static-mac.xcodeproj"; path = "../../../projects/et-static-mac.xcodeproj"; sourceTree = "<group>"; };
 		5C484B9E1D3D700800E02180 /* media */ = {isa = PBXFileReference; lastKnownFileType = folder; name = media; path = ../../media; sourceTree = "<group>"; };
+		5C8E1A0D1D44DC4000E2682B /* Metal.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Metal.framework; path = System/Library/Frameworks/Metal.framework; sourceTree = SDKROOT; };
+		5C8E1A121D44DC5E00E2682B /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		6EBB83B81CD25CEB00552C1E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		6EBB83B91CD25D1700552C1E /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
 		A5A21CA91A65477B004AD95C /* get-started-osx.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "get-started-osx.app"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -54,6 +58,8 @@
 				A5A21E291A654899004AD95C /* CoreGraphics.framework in Frameworks */,
 				A5A21E271A654895004AD95C /* AppKit.framework in Frameworks */,
 				A5A21E251A654892004AD95C /* OpenGL.framework in Frameworks */,
+				5C8E1A131D44DC5E00E2682B /* QuartzCore.framework in Frameworks */,
+				5C8E1A0E1D44DC4100E2682B /* Metal.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -91,6 +97,8 @@
 			isa = PBXGroup;
 			children = (
 				6EBB83B91CD25D1700552C1E /* libz.tbd */,
+				5C8E1A121D44DC5E00E2682B /* QuartzCore.framework */,
+				5C8E1A0D1D44DC4000E2682B /* Metal.framework */,
 				A5A21E2A1A6548A2004AD95C /* CoreVideo.framework */,
 				A5A21E281A654898004AD95C /* CoreGraphics.framework */,
 				A5A21E261A654895004AD95C /* AppKit.framework */,
