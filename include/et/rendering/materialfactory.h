@@ -16,7 +16,7 @@ namespace et
 	class MaterialFactory : public APIObjectFactory
 	{
 	public:
-		ET_DECLARE_POINTER(MaterialFactory)
+		ET_DECLARE_POINTER(MaterialFactory);
 		
 	public:
 		MaterialFactory(RenderContext* rc);

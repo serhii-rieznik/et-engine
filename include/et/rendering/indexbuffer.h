@@ -16,7 +16,7 @@ namespace et
 	class IndexBuffer : public APIObject
 	{
 	public:
-		ET_DECLARE_POINTER(IndexBuffer)
+		ET_DECLARE_POINTER(IndexBuffer);
 
 	public:
 		IndexBuffer(RenderContext* rc, IndexArray::Pointer i, BufferDrawType drawType,
@@ -44,6 +44,8 @@ namespace et
 		const std::string& sourceObjectName() const
 			{ return _sourceObjectName; }
 
+		void bind();
+
 		void setData(const IndexArray::Pointer& i);
 
 		void clear();
@@ -57,7 +59,6 @@ namespace et
 		void internal_setData(const unsigned char* data, uint32_t size);
 
 	private:
-		RenderContext* _rc = nullptr;
 		uint32_t _size = 0;
 		std::string _sourceObjectName = 0;
 		DataFormat _dataType = DataFormat::UnsignedChar;

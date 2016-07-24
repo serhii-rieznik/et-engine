@@ -17,12 +17,14 @@ namespace et
 	class Texture : public APIObject
 	{
 	public:
-		ET_DECLARE_POINTER(Texture)
+		ET_DECLARE_POINTER(Texture);
 		
 	public:
 		Texture(RenderContext*, const TextureDescription::Pointer&, const std::string&, bool deferred);
 		Texture(RenderContext*, uint32_t texture, const vec2i& size, const std::string& name);
 		~Texture();
+
+		void bind(uint32_t unit) const;
 
 		void setWrap(RenderContext*, TextureWrap s, TextureWrap t,
 			TextureWrap r = TextureWrap::ClampToEdge);
@@ -30,7 +32,7 @@ namespace et
 		void setFiltration(RenderContext*, TextureFiltration minFiltration,
 			TextureFiltration magFiltration);
 
-		void setMaxLod(RenderContext*, size_t value);
+		void setMaxLod(RenderContext*, uint32_t value);
 		void setAnisotropyLevel(RenderContext*, float);
 
 		void compareRefToTexture(RenderContext*, bool enable, int32_t compareFunc);

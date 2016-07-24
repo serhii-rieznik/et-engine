@@ -17,7 +17,7 @@ namespace et
         class Light : public BaseElement
         {
         public:
-            ET_DECLARE_POINTER(Light)
+            ET_DECLARE_POINTER(Light);
             
         public:
             Light(BaseElement* parent = nullptr) :

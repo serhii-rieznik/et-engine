@@ -15,7 +15,7 @@ namespace et
 	class TextureDescription : public LoadableObject
 	{  
 	public:
-		ET_DECLARE_POINTER(TextureDescription)
+		ET_DECLARE_POINTER(TextureDescription);
 
 	public:
 		vec2i sizeForMipLevel(size_t level)

@@ -18,7 +18,7 @@ namespace et
 	class TextureFactory : public APIObjectFactory, public TextureLoadingThreadDelegate
 	{
 	public:
-		ET_DECLARE_POINTER(TextureFactory)
+		ET_DECLARE_POINTER(TextureFactory);
 		
 	public:
 		TextureFactory(RenderContext*);

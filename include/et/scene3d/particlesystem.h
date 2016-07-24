@@ -17,7 +17,7 @@ namespace et
 		class ParticleSystem : public BaseElement, public EventReceiver
 		{
 		public:
-			ET_DECLARE_POINTER(ParticleSystem)
+			ET_DECLARE_POINTER(ParticleSystem);
 						
 		public:
 			ParticleSystem(RenderContext*, uint32_t capacity, const std::string&, BaseElement*);
@@ -50,8 +50,6 @@ namespace et
 			void onTimerUpdated(NotifyTimer*);
 						
 		private:
-			RenderContext* _rc = nullptr;
-			
 			VertexArrayObject::Pointer _vao;
 			VertexDeclaration _decl;
 			VertexArray::Description _vertexData;

@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include <et/rendering/renderinterface.h>
+#include <et/rendering/interface/renderer.h>
 
 namespace et
 {
@@ -16,7 +16,7 @@ namespace et
 	class MetalRenderer : public RenderInterface
 	{
 	public:
-		ET_DECLARE_POINTER(MetalRenderer)
+		ET_DECLARE_POINTER(MetalRenderer);
 
 	public:
 		MetalRenderer(RenderContext*);

@@ -6,10 +6,49 @@
  */
 
 #include <et/opengl/opengl.h>
+#include <et/opengl/openglrenderstate.h>
+
+namespace et
+{
+
+void OpenGLRenderState::setCullMode(const et::CullMode& mode)
+{
+	ET_ASSERT(static_cast<uint32_t>(mode) < CullMode_max);
+
+	(mode == CullMode::Disabled ? glDisable : glEnable)(GL_CULL_FACE);
+
+	if (mode != CullMode::Disabled)
+	{
+		static const GLenum cullStates[CullMode_max] = { GL_NONE, GL_BACK, GL_FRONT };
+		glCullFace(cullStates[static_cast<uint32_t>(mode)]);
+	}
+}
+
+void OpenGLRenderState::setDepthState(const et::DepthState& state)
+{
+	(state.depthTestEnabled ? glEnable : glDisable)(GL_DEPTH_TEST);
+
+	glDepthMask(state.depthWriteEnabled);
+	glDepthFunc(compareFunctionValue(state.compareFunction));
+}
+
+void OpenGLRenderState::setBlendState(const et::BlendState& state)
+{
+	(state.enabled ? glEnable : glDisable)(GL_BLEND);
+
+	glBlendEquationSeparate(blendOperationValue(state.colorOperation), blendOperationValue(state.alphaOperation));
+	glBlendFuncSeparate(blendFunctionValue(state.color.source), blendFunctionValue(state.color.dest),
+		blendFunctionValue(state.alpha.source), blendFunctionValue(state.alpha.dest));
+}
+
+}
+
+/*
+#if (ET_EXPOSE_OLD_RENDER_STATE)
+
 #include <et/opengl/openglcaps.h>
 #include <et/rendering/vertexdeclaration.h>
 #include <et/rendering/rendercontext.h>
-#include <et/rendering/renderstate.h>
 
 using namespace et;
 
@@ -23,12 +62,12 @@ PreservedRenderStateScope::PreservedRenderStateScope(RenderContext* rc, bool sho
 	_rc(rc), _desc(RenderState::currentState())
 {
 	if (shouldApplyBefore)
-		_rc->renderState().applyState(_desc);
+		_rc->renderState()->applyState(_desc);
 }
 
 PreservedRenderStateScope::~PreservedRenderStateScope()
 {
-	_rc->renderState().applyState(_desc);
+	_rc->renderState()->applyState(_desc);
 }
 
 void RenderState::setRenderContext(RenderContext* rc)
@@ -324,26 +363,7 @@ void RenderState::setDepthFunc(CompareFunction func, bool force)
 
 void RenderState::setBlendState(const BlendState& bs, bool force)
 {
-	if ((_desc.blend.enabled != bs.enabled) || force)
-	{
-		_desc.blend.enabled = bs.enabled;
-		(_desc.blend.enabled ? glEnable : glDisable)(GL_BLEND);
-	}
-	
-	if ((bs.color != _desc.blend.color) || (bs.alpha != _desc.blend.alpha) || force)
-	{
-		glBlendFuncSeparate(blendFunctionValue(bs.color.source), blendFunctionValue(bs.color.dest),
-			blendFunctionValue(bs.alpha.source), blendFunctionValue(bs.alpha.dest));
-		_desc.blend.color = bs.color;
-		_desc.blend.alpha = bs.alpha;
-	}
-	
-	if ((bs.colorOperation != _desc.blend.colorOperation) || (bs.alphaOperation != _desc.blend.alphaOperation) || force)
-	{
-		glBlendEquationSeparate(blendOperationValue(bs.colorOperation), blendOperationValue(bs.alphaOperation));
-		_desc.blend.colorOperation = bs.colorOperation;
-		_desc.blend.alphaOperation = bs.alphaOperation;
-	}
+
 }
 
 void RenderState::setDepthState(const DepthState& state, bool force)
@@ -844,3 +864,6 @@ RenderState::Descriptor RenderState::currentState()
 	s.cache = currentCacheValues();
 	return s;
 }
+
+#endif
+*/

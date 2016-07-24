@@ -14,7 +14,7 @@ namespace et
 	class RenderContext;
 	struct RenderContextParameters;
 	template <typename T> struct vector2;
-	typedef vector2<int> vec2i;
+	typedef vector2<int32_t> vec2i;
 	
 	class IApplicationDelegate
 	{

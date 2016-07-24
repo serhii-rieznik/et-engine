@@ -58,6 +58,9 @@ RenderBatch::Pointer createFullscreenRenderBatch(Texture::Pointer texture)
 	ET_ASSERT(rh_local::plainMaterial.valid());
 	ET_ASSERT(rh_local::fullscreenMesh.valid());
 
+	PipelineState::ConstructInfo psInfo;
+	PipelineState::Pointer ps = PipelineState::Pointer::create(psInfo);
+
 	rh_local::plainMaterial->setTexutre("color_texture", texture);
 	return RenderBatch::Pointer::create(rh_local::plainMaterial, rh_local::fullscreenMesh);
 }

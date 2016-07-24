@@ -12,7 +12,7 @@ using namespace et;
 
 VertexBuffer::VertexBuffer(RenderContext* rc, const VertexDeclaration& decl,
 	const BinaryDataStorage& data, BufferDrawType vertexDrawType, const std::string& aName) : 
-	APIObject(aName), _rc(rc), _decl(decl),  _drawType(vertexDrawType)
+	APIObject(aName), _decl(decl),  _drawType(vertexDrawType)
 {
 	GLuint buffer = 0;
 	glGenBuffers(1, &buffer);
@@ -21,21 +21,64 @@ VertexBuffer::VertexBuffer(RenderContext* rc, const VertexDeclaration& decl,
 }
 
 VertexBuffer::VertexBuffer(RenderContext* rc, const VertexArray::Description& desc, BufferDrawType drawType,
-	const std::string& aName) : VertexBuffer(rc, desc.declaration, desc.data, drawType, aName) { }
+	const std::string& aName) : VertexBuffer(rc, desc.declaration, desc.data, drawType, aName)
+{
+}
 
 VertexBuffer::~VertexBuffer()
 {
 	uint32_t buffer = apiHandle();
-	if (buffer != 0)
+	if ((buffer != 0) && glIsBuffer(buffer))
 	{
-		_rc->renderState().vertexBufferDeleted(buffer);
+#	if (ET_EXPOSE_OLD_RENDER_STATE)
+		_rc->renderState()->vertexBufferDeleted(buffer);
+#	endif
 		glDeleteBuffers(1, &buffer);
+	}
+}
+
+void VertexBuffer::bind()
+{
+	glBindBuffer(GL_ARRAY_BUFFER, apiHandle());
+
+	for (uint32_t i = 0; i < VertexAttributeUsage_max; ++i)
+	{
+		if (_decl.has(static_cast<VertexAttributeUsage>(i)))
+		{
+			glEnableVertexAttribArray(i);
+		}
+		else
+		{
+			glDisableVertexAttribArray(i);
+		}
+		checkOpenGLError("glEnableVertexAttribArray");
+	}
+
+	for (size_t i = 0; i < _decl.numElements(); ++i)
+	{
+		const VertexElement& e = _decl.element(i);
+		uint32_t dataOffset = i * (_decl.interleaved() ? _decl.dataSize() : dataTypeSize(e.type()));
+
+		auto usage = GLuint(e.usage());
+		auto components = static_cast<GLint>(e.components());
+		auto dataFormat = dataFormatValue(e.dataFormat());
+		auto stride = e.stride();
+		auto ptr = reinterpret_cast<GLvoid*>(uintptr_t(e.offset()));
+
+		if (e.dataFormat() == DataFormat::Int)
+		{
+			glVertexAttribIPointer(usage, components, dataFormat, stride, ptr);
+		}
+		else if (e.dataFormat() == DataFormat::Float)
+		{
+			glVertexAttribPointer(usage, components, dataFormat, false, stride, ptr);
+		}
 	}
 }
 
 void VertexBuffer::setData(const void* data, size_t dataSize, bool invalidateExistingData)
 {
-	_rc->renderState().bindBuffer(GL_ARRAY_BUFFER, apiHandle());
+	bind();
 	
 	if (invalidateExistingData)
 	{
@@ -50,8 +93,8 @@ void VertexBuffer::setData(const void* data, size_t dataSize, bool invalidateExi
 
 void VertexBuffer::setDataWithOffset(const void* data, size_t offset, size_t dataSize)
 {
-	_rc->renderState().bindBuffer(GL_ARRAY_BUFFER, apiHandle());
-	
+	bind();
+
 	glBufferSubData(GL_ARRAY_BUFFER, offset, dataSize, data);
 	checkOpenGLError("glBufferSubData(GL_ARRAY_BUFFER, %llu, %llu, 0x%08X)", uint64_t(offset),
 		uint64_t(_dataSize), data);
@@ -64,8 +107,8 @@ void* VertexBuffer::map(size_t offset, size_t dataSize, uint32_t options)
 
 	void* result = nullptr;
 	
-	_rc->renderState().bindBuffer(GL_ARRAY_BUFFER, apiHandle());
-	
+	bind();
+
 	bool shouldUseMapBuffer = true;
 
 #if defined(GL_ARB_map_buffer_range) || defined(GL_EXT_map_buffer_range)

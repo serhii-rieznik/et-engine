@@ -17,7 +17,7 @@ namespace et
 	class PathResolver : public Shared
 	{
 	public:
-		ET_DECLARE_POINTER(PathResolver)
+		ET_DECLARE_POINTER(PathResolver);
 		
 	public:
 		virtual std::string resolveFilePath(const std::string&) = 0;
@@ -30,7 +30,7 @@ namespace et
 	class StandardPathResolver : PathResolver
 	{
 	public:
-		ET_DECLARE_POINTER(StandardPathResolver)
+		ET_DECLARE_POINTER(StandardPathResolver);
 		
 	public:
 		void setRenderContext(RenderContext*);

@@ -56,7 +56,7 @@ bool VertexDeclaration::push_back(const VertexElement& element)
 	if (_interleaved)
 	{
 		for (auto& i : _list)
-			i.setStride(static_cast<int>(_totalSize));
+			i.setStride(static_cast<int32_t>(_totalSize));
 	}
 
 	return true;

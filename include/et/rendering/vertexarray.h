@@ -15,7 +15,7 @@ namespace et
 	class VertexArray : public Object
 	{
 	public:
-		ET_DECLARE_POINTER(VertexArray)
+		ET_DECLARE_POINTER(VertexArray);
 		
 		struct Description
 		{

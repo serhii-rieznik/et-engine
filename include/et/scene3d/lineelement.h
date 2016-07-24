@@ -17,7 +17,7 @@ namespace et
 		class LineElement : public ElementContainer
 		{
 		public:
-			ET_DECLARE_POINTER(LineElement)
+			ET_DECLARE_POINTER(LineElement);
 			
 		public:
 			LineElement(const std::string& name, BaseElement* parent);

@@ -16,7 +16,7 @@ namespace et
 		class Output : public Shared
 		{
 		public:
-			ET_DECLARE_POINTER(Output)
+			ET_DECLARE_POINTER(Output);
 			
 		public:
 			virtual ~Output() { }
@@ -33,7 +33,7 @@ namespace et
 		class FileOutput : public Output
 		{
 		public:
-			ET_DECLARE_POINTER(FileOutput)
+			ET_DECLARE_POINTER(FileOutput);
 			
 		public:
 			FileOutput(const std::string&);
@@ -53,7 +53,7 @@ namespace et
 		class ConsoleOutput : public FileOutput
 		{
 		public:
-			ET_DECLARE_POINTER(ConsoleOutput)
+			ET_DECLARE_POINTER(ConsoleOutput);
 
 			void debug(const char*, va_list);
 			void info(const char*, va_list);

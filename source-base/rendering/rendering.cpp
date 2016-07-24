@@ -428,7 +428,6 @@ uint32_t et::channelsForTextureFormat(TextureFormat internalFormat)
 et::Dictionary et::serializeDepthState(const DepthState& _depth)
 {
 	Dictionary depth;
-	depth.setFloatForKey(kDepthClearValue, _depth.clearDepth);
 	depth.setBooleanForKey(kDepthWriteEnabled, _depth.depthWriteEnabled);
 	depth.setBooleanForKey(kDepthTestEnabled, _depth.depthTestEnabled);
 	depth.setStringForKey(kDepthFunction, compareFunctionToString(_depth.compareFunction));
@@ -464,7 +463,6 @@ DepthState et::deserializeDepthState(const et::Dictionary& depth)
 	_depth.compareFunction = stringToCompareFunction(depth.stringForKey(kDepthFunction, compareFunctionToString(CompareFunction::Less))->content);
 	_depth.depthWriteEnabled = depth.boolForKey(kDepthWriteEnabled, true)->content != 0;
 	_depth.depthTestEnabled = depth.boolForKey(kDepthTestEnabled, true)->content != 0;
-	_depth.clearDepth = depth.floatForKey(kDepthClearValue, 1.0f)->content;
 	return _depth;
 }
 

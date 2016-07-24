@@ -17,7 +17,7 @@ namespace et
 		class Mesh : public RenderableElement
 		{
 		public:
-			ET_DECLARE_POINTER(Mesh)
+			ET_DECLARE_POINTER(Mesh);
 			
 			static const std::string defaultMeshName;
 

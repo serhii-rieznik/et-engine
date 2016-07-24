@@ -21,9 +21,9 @@ namespace et
 		class SceneMaterial : public LoadableObject, public TextureLoaderDelegate
 		{
 		public:
-			ET_DECLARE_POINTER(SceneMaterial)
+			ET_DECLARE_POINTER(SceneMaterial);
 			using Collection = Vector<SceneMaterial::Pointer>;
-			using Map = et::Map<std::string, SceneMaterial::Pointer>;
+			using Map = et::UnorderedMap<std::string, SceneMaterial::Pointer>;
 
 		public:
 			SceneMaterial();

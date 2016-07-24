@@ -281,7 +281,7 @@ void Player::handleProcessedSamples()
 	alGetSourcei(_private->source, AL_SAMPLE_OFFSET, &sampleOffset);
 	checkOpenALError("alGetSourcei(%d, AL_SAMPLE_OFFSET, %d)", _private->source, sampleOffset);
 	
-	if ((sampleOffset == static_cast<int>(_track->samples())) && !_private->playingLooped)
+	if ((sampleOffset == static_cast<int32_t>(_track->samples())) && !_private->playingLooped)
 	{
 		stop();
 		finished.invokeInMainRunLoop(this);

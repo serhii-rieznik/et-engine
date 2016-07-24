@@ -37,13 +37,15 @@ namespace et
 	class Framebuffer : public APIObject
 	{
 	public:
-		ET_DECLARE_POINTER(Framebuffer)
+		ET_DECLARE_POINTER(Framebuffer);
 		
 	public:
 		Framebuffer(RenderContext* rc, const FramebufferDescription& desc, const std::string& name);
 		Framebuffer(RenderContext* rc, uint32_t fboId, const std::string& name);
 		
 		~Framebuffer();
+
+		void bind() const;
 		
 		void addRenderTarget(const Texture::Pointer& texture);
 		void addSameRendertarget();
@@ -104,6 +106,7 @@ namespace et
 		uint32_t buildColorRenderbuffer(uint32_t);
 		void createOrUpdateDepthRenderbuffer();
 
+		void bind(uint32_t target, uint32_t uid) const;
 		void buildColorAttachment();
 		void buildDepthAttachment();
 

@@ -10,21 +10,21 @@
 #include <et/core/et.h>
 #include <et/core/objectscache.h>
 #include <et/rendering/rendercontextparams.h>
-#include <et/rendering/renderinterface.h>
-#include <et/rendering/renderstate.h>
+
+#include <et/rendering/interface/renderer.h>
+#include <et/rendering/interface/renderstate.h>
+
 #include <et/rendering/renderingcaps.h>
 #include <et/rendering/materialfactory.h>
 #include <et/rendering/texturefactory.h>
 #include <et/rendering/framebufferfactory.h>
 #include <et/rendering/vertexbufferfactory.h>
-#include <et/core/notifytimer.h>
-#include <et/app/events.h>
 
 namespace et
 {
 	class Application;
 	class RenderContextPrivate;
-	class RenderContext : public EventReceiver
+	class RenderContext
 	{
 	public:
 		RenderContext(const RenderContextParameters& params, Application* app);
@@ -41,13 +41,16 @@ namespace et
 			{ return _params; }
 
 		const vec2i& size() const
-			{ return _renderState.mainViewportSize(); }
+			{ return _defaultFramebuffer->size(); }
 
-		RenderState& renderState()
+		Framebuffer::Pointer defaultFramebuffer() const
+			{ return _defaultFramebuffer; }
+
+		RenderState::Pointer renderState()
 			{ return _renderState; }
 
-		RenderInterface* renderer()
-			{ return _renderer.ptr(); }
+		RenderInterface::Pointer renderer()
+			{ return _renderer; }
 
 		MaterialFactory& materialFactory()
 			{ return _materialFactory.reference(); }
@@ -85,9 +88,10 @@ namespace et
 
 		Application* _app = nullptr;
 
-		RenderState _renderState;
-
+		RenderState::Pointer _renderState;
 		RenderInterface::Pointer _renderer;
+		Framebuffer::Pointer _defaultFramebuffer;
+		
 		MaterialFactory::Pointer _materialFactory;
 		TextureFactory::Pointer _textureFactory;
 		FramebufferFactory::Pointer _framebufferFactory;

@@ -96,7 +96,7 @@ void SceneMaterial::deserializeWithOptions(Dictionary stream, RenderContext* rc,
 		MaterialParameter i = static_cast<MaterialParameter>(ii);
 
 		if (intValues.hasKey(key))
-			setInt(i, static_cast<int>(intValues.integerForKey(key)->content));
+			setInt(i, static_cast<int32_t>(intValues.integerForKey(key)->content));
 
 		if (floatValues.hasKey(key))
 			setFloat(i, intValues.floatForKey(key)->content);
@@ -270,7 +270,7 @@ void SceneMaterial::bindToMaterial(et::Material::Pointer& m)
 		}
 		if (hasInt(param))
 		{
-			m->setProperty(materialKeys[i], static_cast<int>(getInt(param)));
+			m->setProperty(materialKeys[i], static_cast<int32_t>(getInt(param)));
 		}
 	}
 }

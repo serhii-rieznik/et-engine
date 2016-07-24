@@ -16,7 +16,7 @@ namespace et
 	class RenderInterface : public Shared
 	{
 	public:
-		ET_DECLARE_POINTER(RenderInterface)
+		ET_DECLARE_POINTER(RenderInterface);
 
 	public:
 		RenderInterface(RenderContext* rc)

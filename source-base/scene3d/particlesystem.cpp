@@ -13,7 +13,7 @@ using namespace et;
 using namespace et::s3d;
 
 ParticleSystem::ParticleSystem(RenderContext* rc, uint32_t maxSize, const std::string& name, BaseElement* parent) :
-	BaseElement(name, parent), _rc(rc), _decl(true, VertexAttributeUsage::Position, DataType::Vec3),
+	BaseElement(name, parent), _decl(true, VertexAttributeUsage::Position, DataType::Vec3),
 	_emitter(maxSize)
 {
 	_decl.push_back(VertexAttributeUsage::Color, DataType::Vec4);
@@ -49,8 +49,9 @@ ParticleSystem* ParticleSystem::duplicate()
 void ParticleSystem::onTimerUpdated(NotifyTimer* timer)
 {
 	_emitter.update(timer->actualTime());
+
+	_vao->bind();
 	
-	_rc->renderState().bindVertexArrayObject(_vao);
 	void* bufferData = bufferData = _vao->vertexBuffer()->map(0, _vertexData.data.dataSize(),
 		MapBufferOptions::Write | MapBufferOptions::InvalidateBuffer);
 

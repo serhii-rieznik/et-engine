@@ -15,7 +15,7 @@ namespace et
 	class IndexArray : public Object
 	{
 	public:
-		ET_DECLARE_POINTER(IndexArray)
+		ET_DECLARE_POINTER(IndexArray);
 		
 		static const uint32_t MaxIndex;
 		static const uint16_t MaxShortIndex;

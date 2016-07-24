@@ -55,7 +55,7 @@ namespace et
 		class Emitter
 		{
 		public:
-			ET_DECLARE_POINTER(Emitter)
+			ET_DECLARE_POINTER(Emitter);
 
             using ParticleList = Vector<P>;
 			typedef std::function<void(P&, float, float)> ParticleUpdateFuction;

@@ -223,7 +223,7 @@ void dds::loadInfoFromStream(std::istream& source, TextureDescription& desc)
 	DDS_HEADER header = { };
 	source.read(reinterpret_cast<char*>(&header), sizeof(header));
 	
-	desc.size = vec2i(static_cast<int>(header.dwWidth), static_cast<int>(header.dwHeight));
+	desc.size = vec2i(static_cast<int32_t>(header.dwWidth), static_cast<int32_t>(header.dwHeight));
 	desc.mipMapCount = (header.dwMipMapCount < 1) ? 1 : header.dwMipMapCount;
 	desc.minimalSizeForCompressedFormat = vec2i(4);
 	

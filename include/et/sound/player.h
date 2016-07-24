@@ -18,7 +18,7 @@ namespace et
         class Player : public Object, public EventReceiver
         {
         public:
-			ET_DECLARE_POINTER(Player)
+			ET_DECLARE_POINTER(Player);
 
 		public:
 			Player();

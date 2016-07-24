@@ -10,6 +10,7 @@
 #include <et/scene3d/scenematerial.h>
 #include <et/rendering/indexarray.h>
 #include <et/rendering/vertexstorage.h>
+#include <et/rendering/vertexarrayobject.h>
 
 namespace et
 {

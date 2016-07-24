@@ -18,7 +18,7 @@ namespace et
 		class Renderer : public FlagsHolder
 		{
 		public:
-			ET_DECLARE_POINTER(Renderer)
+			ET_DECLARE_POINTER(Renderer);
 			
 			enum : uint64_t
 			{

@@ -162,7 +162,7 @@
 
     auto nativeSize = [self convertRectToBacking:self.bounds].size;
 	
-	et::vec2i newSize(static_cast<int>(nativeSize.width), static_cast<int>(nativeSize.height));
+	et::vec2i newSize(static_cast<int32_t>(nativeSize.width), static_cast<int32_t>(nativeSize.height));
 	et::application().resizeContext(newSize);
 }
 
@@ -305,8 +305,8 @@ PlatformDependentContext ApplicationContextFactoryOSX::createContextWithOptions(
     [mainWindow setMinSize:NSMakeSize(static_cast<float>(options.minimumSize.x),
         static_cast<float>(options.minimumSize.y))];
 
-    options.size = vec2i(static_cast<int>(contentRect.size.width),
-        static_cast<int>(contentRect.size.height));
+    options.size = vec2i(static_cast<int32_t>(contentRect.size.width),
+        static_cast<int32_t>(contentRect.size.height));
 
 	NSView* view = nil;
 

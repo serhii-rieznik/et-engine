@@ -25,7 +25,7 @@ namespace et
 	class VariantBase : public Shared
 	{
 	public:
-		ET_DECLARE_POINTER(VariantBase)
+		ET_DECLARE_POINTER(VariantBase);
 						   
  	public:
 		virtual ~VariantBase() { }

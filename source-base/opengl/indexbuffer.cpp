@@ -11,7 +11,7 @@
 using namespace et;
 
 IndexBuffer::IndexBuffer(RenderContext* rc, IndexArray::Pointer i, BufferDrawType drawType,
-	const std::string& aName) : APIObject(aName), _rc(rc), _size(i->actualSize()), _sourceObjectName(i->name()),
+	const std::string& aName) : APIObject(aName), _size(i->actualSize()), _sourceObjectName(i->name()),
 	_drawType(drawType)
 {
 	build(i);
@@ -20,11 +20,18 @@ IndexBuffer::IndexBuffer(RenderContext* rc, IndexArray::Pointer i, BufferDrawTyp
 IndexBuffer::~IndexBuffer()
 {
 	uint32_t buffer = apiHandle();
-	if (buffer != 0)
+	if ((buffer != 0) && glIsBuffer(buffer))
 	{
-		_rc->renderState().indexBufferDeleted(buffer);
+#	if (ET_EXPOSE_OLD_RENDER_STATE)
+		_rc->renderState()->indexBufferDeleted(buffer);
+#	endif
 		glDeleteBuffers(1, &buffer);
 	}
+}
+
+void IndexBuffer::bind()
+{
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, apiHandle());
 }
 
 void IndexBuffer::setProperties(const IndexArray::Pointer& i)
@@ -78,12 +85,11 @@ void IndexBuffer::build(const IndexArray::Pointer& i)
 
 void IndexBuffer::internal_setData(const unsigned char* data, uint32_t size)
 {
-	if (size > 0)
-	{
-		_rc->renderState().bindBuffer(GL_ELEMENT_ARRAY_BUFFER, apiHandle());
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, static_cast<GLsizeiptr>(size), data, drawTypeValue(_drawType));
-		checkOpenGLError("glBufferData(GL_ELEMENT_ARRAY_BUFFER, %u, 0x%08X, ..,)", size, data);
-	}
+	ET_ASSERT(size > 0);
+
+	bind();
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, static_cast<GLsizeiptr>(size), data, drawTypeValue(_drawType));
+	checkOpenGLError("glBufferData(GL_ELEMENT_ARRAY_BUFFER, %u, 0x%08X, ..,)", size, data);
 }
 
 void* IndexBuffer::indexOffset(uint32_t offset) const

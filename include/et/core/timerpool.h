@@ -17,7 +17,7 @@ namespace et
 	class TimerPool : public Object
 	{
 	public:
-		ET_DECLARE_POINTER(TimerPool)
+		ET_DECLARE_POINTER(TimerPool);
 		
 	public:
 		TimerPool(RunLoop* owner);

@@ -16,7 +16,7 @@ namespace et
 		class ElementContainer : public BaseElement
 		{
 		public:
-			ET_DECLARE_POINTER(ElementContainer)
+			ET_DECLARE_POINTER(ElementContainer);
 			
 		public:
 			ElementContainer(const std::string& name, BaseElement* parent) :

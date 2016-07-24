@@ -24,7 +24,7 @@ namespace et
 		class Scene : public ElementContainer, public SerializationHelper
 		{
 		public:
-			ET_DECLARE_POINTER(Scene)
+			ET_DECLARE_POINTER(Scene);
 						
 		public:
 			Scene(const std::string& name = "scene");

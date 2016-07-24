@@ -194,27 +194,23 @@ namespace et
 	typedef vector3<float> vec3;
 	typedef vector4<float> vec4;
 	
-	typedef vector2<int> vec2i;
-	typedef vector3<int> vec3i;
-	typedef vector4<int> vec4i;
-	
-	typedef vector2<size_t> vec2sz;
-	typedef vector3<size_t> vec3sz;
-	typedef vector4<size_t> vec4sz;
-	
-	typedef vector2<unsigned char> vec2ub;
-	typedef vector3<unsigned char> vec3ub;
-	typedef vector4<unsigned char> vec4ub;
+	typedef vector2<int32_t> vec2i;
+	typedef vector3<int32_t> vec3i;
+	typedef vector4<int32_t> vec4i;
+
+	typedef vector2<uint8_t> vec2ub;
+	typedef vector3<uint8_t> vec3ub;
+	typedef vector4<uint8_t> vec4ub;
 	
 	typedef matrix3<float> mat3;
 	typedef matrix4<float> mat4;
 	
-	typedef matrix3<int> mat3i;
-	typedef matrix4<int> mat4i;
+	typedef matrix3<int32_t> mat3i;
+	typedef matrix4<int32_t> mat4i;
 	
 	typedef Quaternion<float> quaternion;
 
-	using recti = Rect<int>;
+	using recti = Rect<int32_t>;
 	using rectf = Rect<float>;
 
 	template<typename T>

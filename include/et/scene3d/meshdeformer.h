@@ -18,7 +18,7 @@ namespace et
 		class MeshDeformerCluster : public Shared
 		{
 		public:
-			ET_DECLARE_POINTER(MeshDeformerCluster)
+			ET_DECLARE_POINTER(MeshDeformerCluster);
 
 			struct VertexWeight
 			{
@@ -79,7 +79,7 @@ namespace et
 		class MeshDeformer : public Shared
 		{
 		public:
-			ET_DECLARE_POINTER(MeshDeformer)
+			ET_DECLARE_POINTER(MeshDeformer);
 			
 			void addCluster(MeshDeformerCluster::Pointer cl)
 				{ _clusters.push_back(cl); }

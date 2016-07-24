@@ -75,7 +75,7 @@ Framebuffer::Pointer FramebufferFactory::createCubemapFramebuffer(size_t size, c
 	FramebufferDescription desc;
 	
 	desc.target = TextureTarget::Texture_Cube;
-	desc.size = vec3i(static_cast<int>(size & 0xffffffff), static_cast<int>(size & 0xffffffff), 0);
+	desc.size = vec3i(static_cast<int32_t>(size & 0xffffffff), static_cast<int32_t>(size & 0xffffffff), 0);
 	desc.numSamples = 1;
 
 	desc.colorFormat = colorFormat;

@@ -12,6 +12,10 @@
 		5C484BA61D3D8E9500E02180 /* renderhelper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5C484BA51D3D8E9500E02180 /* renderhelper.cpp */; };
 		5C4CB7A81D43F6730058E7DA /* metalrenderer.h in Headers */ = {isa = PBXBuildFile; fileRef = 5C4CB7A71D43F6720058E7DA /* metalrenderer.h */; };
 		5C4CB7AA1D43F6A20058E7DA /* metalrenderer.mm in Sources */ = {isa = PBXBuildFile; fileRef = 5C4CB7A91D43F6A20058E7DA /* metalrenderer.mm */; };
+		5C4CB7B01D4400120058E7DA /* openglrenderstate.h in Headers */ = {isa = PBXBuildFile; fileRef = 5C4CB7AF1D4400120058E7DA /* openglrenderstate.h */; };
+		5C4CB7B21D4412B60058E7DA /* metalrenderstate.h in Headers */ = {isa = PBXBuildFile; fileRef = 5C4CB7B11D4412B60058E7DA /* metalrenderstate.h */; };
+		5C4CB7B41D4412CE0058E7DA /* metalrenderstate.mm in Sources */ = {isa = PBXBuildFile; fileRef = 5C4CB7B31D4412CE0058E7DA /* metalrenderstate.mm */; };
+		5C8E1A0B1D44344B00E2682B /* pipelinestate.h in Headers */ = {isa = PBXBuildFile; fileRef = 5C8E1A0A1D44344B00E2682B /* pipelinestate.h */; };
 		6E954C811CD2610C00A12C68 /* context_osx.h in Headers */ = {isa = PBXBuildFile; fileRef = 6E954C801CD2610C00A12C68 /* context_osx.h */; };
 		6E954C851CD266C000A12C68 /* context.mac.mm in Sources */ = {isa = PBXBuildFile; fileRef = 6E954C841CD266C000A12C68 /* context.mac.mm */; };
 		6E9587B51CD6990F0005A95B /* light.h in Headers */ = {isa = PBXBuildFile; fileRef = 6E9587B41CD6990F0005A95B /* light.h */; };
@@ -143,7 +147,6 @@
 		6EBE21A41C66B8BE00AF7206 /* renderbatch.h in Headers */ = {isa = PBXBuildFile; fileRef = 6EBE1FF11C66B8BE00AF7206 /* renderbatch.h */; };
 		6EBE21A51C66B8BE00AF7206 /* rendercontext.h in Headers */ = {isa = PBXBuildFile; fileRef = 6EBE1FF21C66B8BE00AF7206 /* rendercontext.h */; };
 		6EBE21A61C66B8BE00AF7206 /* rendercontextparams.h in Headers */ = {isa = PBXBuildFile; fileRef = 6EBE1FF31C66B8BE00AF7206 /* rendercontextparams.h */; };
-		6EBE21A71C66B8BE00AF7206 /* renderinterface.h in Headers */ = {isa = PBXBuildFile; fileRef = 6EBE1FF41C66B8BE00AF7206 /* renderinterface.h */; };
 		6EBE21A81C66B8BE00AF7206 /* rendering.h in Headers */ = {isa = PBXBuildFile; fileRef = 6EBE1FF51C66B8BE00AF7206 /* rendering.h */; };
 		6EBE21A91C66B8BE00AF7206 /* renderingcaps.h in Headers */ = {isa = PBXBuildFile; fileRef = 6EBE1FF61C66B8BE00AF7206 /* renderingcaps.h */; };
 		6EBE21AA1C66B8BE00AF7206 /* renderpass.h in Headers */ = {isa = PBXBuildFile; fileRef = 6EBE1FF71C66B8BE00AF7206 /* renderpass.h */; };
@@ -288,6 +291,12 @@
 		5C484BA51D3D8E9500E02180 /* renderhelper.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = renderhelper.cpp; sourceTree = "<group>"; };
 		5C4CB7A71D43F6720058E7DA /* metalrenderer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = metalrenderer.h; sourceTree = "<group>"; };
 		5C4CB7A91D43F6A20058E7DA /* metalrenderer.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = metalrenderer.mm; sourceTree = "<group>"; };
+		5C4CB7AD1D43FF940058E7DA /* renderer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = renderer.h; sourceTree = "<group>"; };
+		5C4CB7AE1D43FFBB0058E7DA /* renderstate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = renderstate.h; sourceTree = "<group>"; };
+		5C4CB7AF1D4400120058E7DA /* openglrenderstate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = openglrenderstate.h; sourceTree = "<group>"; };
+		5C4CB7B11D4412B60058E7DA /* metalrenderstate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = metalrenderstate.h; sourceTree = "<group>"; };
+		5C4CB7B31D4412CE0058E7DA /* metalrenderstate.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = metalrenderstate.mm; sourceTree = "<group>"; };
+		5C8E1A0A1D44344B00E2682B /* pipelinestate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = pipelinestate.h; sourceTree = "<group>"; };
 		6E954C7F1CD25EEC00A12C68 /* context.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = context.h; sourceTree = "<group>"; };
 		6E954C801CD2610C00A12C68 /* context_osx.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = context_osx.h; sourceTree = "<group>"; };
 		6E954C841CD266C000A12C68 /* context.mac.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = context.mac.mm; sourceTree = "<group>"; };
@@ -421,7 +430,6 @@
 		6EBE1FF11C66B8BE00AF7206 /* renderbatch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = renderbatch.h; sourceTree = "<group>"; };
 		6EBE1FF21C66B8BE00AF7206 /* rendercontext.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rendercontext.h; sourceTree = "<group>"; };
 		6EBE1FF31C66B8BE00AF7206 /* rendercontextparams.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rendercontextparams.h; sourceTree = "<group>"; };
-		6EBE1FF41C66B8BE00AF7206 /* renderinterface.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = renderinterface.h; sourceTree = "<group>"; };
 		6EBE1FF51C66B8BE00AF7206 /* rendering.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rendering.h; sourceTree = "<group>"; };
 		6EBE1FF61C66B8BE00AF7206 /* renderingcaps.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = renderingcaps.h; sourceTree = "<group>"; };
 		6EBE1FF71C66B8BE00AF7206 /* renderpass.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = renderpass.h; sourceTree = "<group>"; };
@@ -574,6 +582,7 @@
 		5C4CB7A51D43F63A0058E7DA /* metal */ = {
 			isa = PBXGroup;
 			children = (
+				5C4CB7B31D4412CE0058E7DA /* metalrenderstate.mm */,
 				5C4CB7A91D43F6A20058E7DA /* metalrenderer.mm */,
 			);
 			path = metal;
@@ -582,10 +591,21 @@
 		5C4CB7A61D43F6560058E7DA /* metal */ = {
 			isa = PBXGroup;
 			children = (
+				5C4CB7B11D4412B60058E7DA /* metalrenderstate.h */,
 				5C4CB7A71D43F6720058E7DA /* metalrenderer.h */,
 			);
 			name = metal;
 			path = et/metal;
+			sourceTree = "<group>";
+		};
+		5C4CB7AC1D43FF940058E7DA /* interface */ = {
+			isa = PBXGroup;
+			children = (
+				5C8E1A0A1D44344B00E2682B /* pipelinestate.h */,
+				5C4CB7AD1D43FF940058E7DA /* renderer.h */,
+				5C4CB7AE1D43FFBB0058E7DA /* renderstate.h */,
+			);
+			path = interface;
 			sourceTree = "<group>";
 		};
 		6EBE15A81C66B4AD00AF7206 = {
@@ -792,6 +812,7 @@
 				6EBE1FD11C66B8BE00AF7206 /* opengl.h */,
 				6EBE1FD21C66B8BE00AF7206 /* openglcaps.h */,
 				5C484BA01D3D7D9500E02180 /* openglrenderer.h */,
+				5C4CB7AF1D4400120058E7DA /* openglrenderstate.h */,
 			);
 			name = opengl;
 			path = et/opengl;
@@ -830,6 +851,7 @@
 		6EBE1FE71C66B8BE00AF7206 /* rendering */ = {
 			isa = PBXGroup;
 			children = (
+				5C4CB7AC1D43FF940058E7DA /* interface */,
 				6EBE1FE81C66B8BE00AF7206 /* apiobject.h */,
 				6EBE1FE91C66B8BE00AF7206 /* framebuffer.h */,
 				6EBE1FEA1C66B8BE00AF7206 /* framebufferfactory.h */,
@@ -843,7 +865,6 @@
 				6EBE1FF21C66B8BE00AF7206 /* rendercontext.h */,
 				6EBE1FF31C66B8BE00AF7206 /* rendercontextparams.h */,
 				5C484BA31D3D8E6600E02180 /* renderhelper.h */,
-				6EBE1FF41C66B8BE00AF7206 /* renderinterface.h */,
 				6EBE1FF51C66B8BE00AF7206 /* rendering.h */,
 				6EBE1FF61C66B8BE00AF7206 /* renderingcaps.h */,
 				6EBE1FF71C66B8BE00AF7206 /* renderpass.h */,
@@ -1158,7 +1179,6 @@
 				6EBE21C31C66B8BE00AF7206 /* scene3drenderer.h in Headers */,
 				6EBE21B31C66B8BE00AF7206 /* vertexdatachunk.h in Headers */,
 				6EBE21471C66B8BE00AF7206 /* notifytimer.h in Headers */,
-				6EBE21A71C66B8BE00AF7206 /* renderinterface.h in Headers */,
 				6EBE21771C66B8BE00AF7206 /* bmploader.h in Headers */,
 				6EBE218A1C66B8BE00AF7206 /* compileoptions.h in Headers */,
 				6EBE21691C66B8BE00AF7206 /* segment2d.h in Headers */,
@@ -1170,6 +1190,7 @@
 				6EBE21681C66B8BE00AF7206 /* rectplacer.h in Headers */,
 				6EBE21961C66B8BE00AF7206 /* openglview.h in Headers */,
 				6EBE21521C66B8BE00AF7206 /* strings.hpp in Headers */,
+				5C8E1A0B1D44344B00E2682B /* pipelinestate.h in Headers */,
 				6EBE21A61C66B8BE00AF7206 /* rendercontextparams.h in Headers */,
 				6EBE21C81C66B8BE00AF7206 /* openal.h in Headers */,
 				6EBE21C41C66B8BE00AF7206 /* scenematerial.h in Headers */,
@@ -1185,6 +1206,7 @@
 				6EBE21251C66B8BE00AF7206 /* runloop.h in Headers */,
 				6EBE21641C66B8BE00AF7206 /* plane.h in Headers */,
 				6EBE21861C66B8BE00AF7206 /* locale.ext.h in Headers */,
+				5C4CB7B01D4400120058E7DA /* openglrenderstate.h in Headers */,
 				6EBE21401C66B8BE00AF7206 /* interpolationvalue.h in Headers */,
 				6EBE21A91C66B8BE00AF7206 /* renderingcaps.h in Headers */,
 				6EBE216B1C66B8BE00AF7206 /* sphere.h in Headers */,
@@ -1215,6 +1237,7 @@
 				6EBE21541C66B8BE00AF7206 /* tasks.h in Headers */,
 				6EBE21231C66B8BE00AF7206 /* invocation.h in Headers */,
 				6EBE21441C66B8BE00AF7206 /* memory.h in Headers */,
+				5C4CB7B21D4412B60058E7DA /* metalrenderstate.h in Headers */,
 				6EBE219E1C66B8BE00AF7206 /* indexarray.h in Headers */,
 				6EBE21A81C66B8BE00AF7206 /* rendering.h in Headers */,
 				6EBE219B1C66B8BE00AF7206 /* apiobject.h in Headers */,
@@ -1391,6 +1414,7 @@
 				6EBE22731C66B8BE00AF7206 /* log.apple.mm in Sources */,
 				6EBE228B1C66B8BE00AF7206 /* framebufferfactory.cpp in Sources */,
 				6EBE22631C66B8BE00AF7206 /* program.cpp in Sources */,
+				5C4CB7B41D4412CE0058E7DA /* metalrenderstate.mm in Sources */,
 				6EBE229B1C66B8BE00AF7206 /* animation.cpp in Sources */,
 				6EBE22611C66B8BE00AF7206 /* materialfactory.cpp in Sources */,
 				6EBE22351C66B8BE00AF7206 /* camera.cpp in Sources */,

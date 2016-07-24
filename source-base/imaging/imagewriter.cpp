@@ -115,7 +115,7 @@ bool internal_writePNGtoBuffer(BinaryDataStorage& buffer, const BinaryDataStorag
 	png_set_IHDR(png_ptr, info_ptr, w, h, bitsPerComponent, colorType,
 		PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_BASE);
 	
-	png_set_compression_level(png_ptr, static_cast<int>(9.0f * clamp(compressionLevels[ImageFormat_PNG], 0.0f, 1.0f) + 0.5f));
+	png_set_compression_level(png_ptr, static_cast<int32_t>(9.0f * clamp(compressionLevels[ImageFormat_PNG], 0.0f, 1.0f) + 0.5f));
 	
 	png_bytep* row_pointers = reinterpret_cast<png_bytep*>(sharedBlockAllocator().allocate(sizeof(png_bytep) * size.y));
 	
@@ -196,7 +196,7 @@ bool internal_writePNGtoFile(const std::string& fileName, const BinaryDataStorag
 	png_set_IHDR(png_ptr, info_ptr, w, h, bitsPerComponent, colorType,
 		PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_BASE);
 	
-	png_set_compression_level(png_ptr, static_cast<int>(9.0f * clamp(compressionLevels[ImageFormat_PNG], 0.0f, 1.0f) + 0.5f));
+	png_set_compression_level(png_ptr, static_cast<int32_t>(9.0f * clamp(compressionLevels[ImageFormat_PNG], 0.0f, 1.0f) + 0.5f));
 	
 	png_write_info(png_ptr, info_ptr);
 	

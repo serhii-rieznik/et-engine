@@ -18,7 +18,7 @@ namespace et
 		class RenderableElement : public ElementContainer
 		{
 		public:
-			ET_DECLARE_POINTER(RenderableElement)
+			ET_DECLARE_POINTER(RenderableElement);
 			
 		public:
 			RenderableElement(const std::string& name, BaseElement* parent);

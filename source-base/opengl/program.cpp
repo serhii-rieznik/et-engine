@@ -15,15 +15,14 @@ using namespace et;
 
 static const std::string etNoShader = "none";
 
-Program::Program(RenderContext* rc) :
-	_rc(rc)
+Program::Program(RenderContext* rc)
 {
 	initBuiltInUniforms();
 }
 
 Program::Program(RenderContext* rc, const std::string& vertexShader, const std::string& geometryShader,
 	const std::string& fragmentShader, const std::string& objName, const std::string& origin,
-	const StringList& defines) : APIObject(objName, origin), _rc(rc), _defines(defines)
+	const StringList& defines) : APIObject(objName, origin), _defines(defines)
 {
 	initBuiltInUniforms();
 	buildProgram(vertexShader, geometryShader, fragmentShader);
@@ -32,15 +31,20 @@ Program::Program(RenderContext* rc, const std::string& vertexShader, const std::
 Program::~Program()
 {
 	uint32_t program = apiHandle();
-	if (program != 0)
+
+	if ((program != 0) && glIsProgram(program))
 	{
-		_rc->renderState().programDeleted(program);
-		if (glIsProgram(program))
-		{
-			glDeleteProgram(program);
-			checkOpenGLError("glDeleteProgram: %s", name().c_str());
-		}
+#	if (ET_EXPOSE_OLD_RENDER_STATE)
+		_rc->renderState()->programDeleted(program);
+#	endif
+		glDeleteProgram(program);
+		checkOpenGLError("glDeleteProgram: %s", name().c_str());
 	}
+}
+
+void Program::bind()
+{
+	etUseProgram(apiHandle());
 }
 
 void Program::initBuiltInUniforms()
@@ -188,7 +192,7 @@ void Program::buildProgram(const std::string& vertex_source, const std::string& 
 	uint32_t VertexShader = glCreateShader(GL_VERTEX_SHADER);
 	checkOpenGLError("glCreateShader<VERT> - %s", name().c_str());
 
-	int nLen = static_cast<int>(vertex_source.size());
+	int nLen = static_cast<int32_t>(vertex_source.size());
 	const GLchar* src = vertex_source.c_str();
 
 	glShaderSource(VertexShader, 1, &src, &nLen);
@@ -226,7 +230,7 @@ void Program::buildProgram(const std::string& vertex_source, const std::string& 
 	{
 		GeometryShader = glCreateShader(GL_GEOMETRY_SHADER);
 		checkOpenGLError("glCreateShader<GEOM> - %s", name().c_str());
-		nLen = static_cast<int>(geom_source.size());
+		nLen = static_cast<int32_t>(geom_source.size());
 		src = geom_source.c_str();
 		glShaderSource(GeometryShader, 1, &src, &nLen);
 		checkOpenGLError("glShaderSource<GEOM> - %s", name().c_str());
@@ -257,7 +261,7 @@ void Program::buildProgram(const std::string& vertex_source, const std::string& 
 	uint32_t FragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
 	checkOpenGLError("glCreateShader<FRAG> - %s", name().c_str());
 
-	nLen = static_cast<int>(frag_source.size());
+	nLen = static_cast<int32_t>(frag_source.size());
 	src  = frag_source.c_str();
 
 	glShaderSource(FragmentShader, 1, &src, &nLen);
@@ -320,8 +324,7 @@ void Program::buildProgram(const std::string& vertex_source, const std::string& 
 		}
 
 		linkStatus = link(true);
-
-		_rc->renderState().bindProgram(apiHandle(), true);
+		bind();
 
 		if (linkStatus == GL_TRUE)
 		{

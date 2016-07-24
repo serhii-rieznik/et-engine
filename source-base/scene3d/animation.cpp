@@ -73,7 +73,7 @@ void Animation::transformation(float time, vec3& t, quaternion& o, vec3& s) cons
 	
 	time = clamp(time, _startTime, _stopTime);
 	
-	int nearestLowerFrame = static_cast<int>(_frames.size()) - 1;
+	int nearestLowerFrame = static_cast<int32_t>(_frames.size()) - 1;
 	for (auto i = _frames.rbegin(), e = _frames.rend(); (i != e) && (nearestLowerFrame >= 0); ++i)
 	{
 		if (i->time <= time) break;

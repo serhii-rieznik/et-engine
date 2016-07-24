@@ -24,7 +24,7 @@ namespace et
 		class BaseElement : public ElementHierarchy, public FlagsHolder, public ComponentTransformable
 		{
 		public:
-			ET_DECLARE_POINTER(BaseElement)
+			ET_DECLARE_POINTER(BaseElement);
 			using List = Vector<Pointer>;
 
 		public:

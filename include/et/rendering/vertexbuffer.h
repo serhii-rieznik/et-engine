@@ -18,7 +18,7 @@ namespace et
 	class VertexBuffer : public APIObject
 	{
 	public:
-		ET_DECLARE_POINTER(VertexBuffer)
+		ET_DECLARE_POINTER(VertexBuffer);
 		
 	public:
 		VertexBuffer(RenderContext*, const VertexDeclaration&, const BinaryDataStorage&, BufferDrawType,
@@ -34,6 +34,8 @@ namespace et
 		
 		const VertexDeclaration& declaration() const
 			{ return _decl; }
+
+		void bind();
 
 		void setData(const void* data, size_t dataSize, bool invalidateExistingData = false);
 		void setDataWithOffset(const void* data, size_t offset, size_t dataSize);
@@ -57,7 +59,6 @@ namespace et
 			{ return _dataSize; }
 
 	private:
-		RenderContext* _rc = nullptr;
 		VertexDeclaration _decl;
 		size_t _dataSize = 0;
 		std::string _sourceObjectName;

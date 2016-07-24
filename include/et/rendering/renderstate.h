@@ -7,6 +7,10 @@
 
 #pragma once
 
+#include <et/rendering/interface/renderstate.h>
+
+#if (ET_EXPOSE_OLD_RENDER_STATE)
+
 #include <et/rendering/framebuffer.h>
 #include <et/rendering/program.h>
 #include <et/rendering/texture.h>
@@ -191,8 +195,8 @@ namespace et
 		friend class RenderContext;
 		
 		RenderState() = default;
-		RenderState(const RenderState&) = delete;
-        RenderState& operator = (const RenderState&) = delete;
+		RenderState(const RenderState::Pointer) = delete;
+        RenderState::Pointer operator = (const RenderState::Pointer) = delete;
 		
 	private:
         RenderContext* _rc = nullptr;
@@ -214,3 +218,5 @@ namespace et
 		RenderState::Descriptor _desc;
 	};
 }
+
+#endif

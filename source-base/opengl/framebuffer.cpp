@@ -10,8 +10,10 @@
 #include <et/rendering/framebuffer.h>
 #include <et/rendering/rendercontext.h>
 
-using namespace et;
+namespace et
+{
 
+extern const uint32_t* drawBufferTargets();
 extern std::string FramebufferStatusToString(uint32_t status);
 
 Framebuffer::Framebuffer(RenderContext* rc, const FramebufferDescription& desc,
@@ -24,8 +26,7 @@ Framebuffer::Framebuffer(RenderContext* rc, const FramebufferDescription& desc,
 	checkOpenGLError("Framebuffer::Framebuffer -> glGenFramebuffers");
 	
 	setAPIHandle(framebuffer);
-
-	_rc->renderState().bindFramebuffer(framebuffer);
+	bind(GL_FRAMEBUFFER, framebuffer);
 
 	bool hasColor = (_description.colorInternalformat != TextureFormat::Invalid) &&
 		(_description.colorIsRenderbuffer || (_description.colorFormat != TextureFormat::Invalid));
@@ -66,6 +67,17 @@ Framebuffer::Framebuffer(RenderContext* rc, const FramebufferDescription& desc,
 	checkStatus();
 }
 
+void Framebuffer::bind() const
+{
+	bind(GL_FRAMEBUFFER, apiHandle());
+}
+
+void Framebuffer::bind(uint32_t target, uint32_t uid) const
+{
+	glBindFramebuffer(target, uid);
+	checkOpenGLError("Framebuffer::bind");
+}
+
 Framebuffer::Framebuffer(RenderContext* rc, uint32_t fboId, const std::string& aName) :
 	APIObject(aName), _rc(rc)
 {
@@ -73,8 +85,8 @@ Framebuffer::Framebuffer(RenderContext* rc, uint32_t fboId, const std::string& a
 		return;
 
 	setAPIHandle(fboId);
-	rc->renderState().bindFramebuffer(fboId);
-		
+	bind(GL_FRAMEBUFFER, fboId);
+
 	GLint attachmentType = 0;
 	glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE, &attachmentType);
 	checkOpenGLError("glGetFramebufferAttachmentParameteriv(GL_RENDERBUFFER, GL_COLOR_ATTACHMENT0, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE, ...)");
@@ -95,11 +107,10 @@ Framebuffer::Framebuffer(RenderContext* rc, uint32_t fboId, const std::string& a
 Framebuffer::~Framebuffer()
 {
 	uint32_t framebuffer = apiHandle();
-	_rc->renderState().frameBufferDeleted(framebuffer);
-	
+
 	for (uint32_t colorBuffer : _colorRenderBuffers)
 	{
-		if (glIsRenderbuffer(colorBuffer))
+		if ((colorBuffer != 0) && glIsRenderbuffer(colorBuffer))
 		{
 			glDeleteRenderbuffers(1, &colorBuffer);
 			checkOpenGLError("glDeleteRenderbuffers");
@@ -107,14 +118,17 @@ Framebuffer::~Framebuffer()
 	}
 	_colorRenderBuffers.clear();
 	
-	if (_depthRenderbuffer && glIsRenderbuffer(_depthRenderbuffer))
+	if ((_depthRenderbuffer != 0) && glIsRenderbuffer(_depthRenderbuffer))
 	{
 		glDeleteRenderbuffers(1, &_depthRenderbuffer);
 		checkOpenGLError("glDeleteRenderbuffers");
 	}
 	
-	if (glIsFramebuffer(framebuffer))
+	if ((framebuffer != 0) && glIsFramebuffer(framebuffer))
 	{
+#	if (ET_EXPOSE_OLD_RENDER_STATE)
+		_rc->renderState()->frameBufferDeleted(framebuffer);
+#	endif
 		glDeleteFramebuffers(1, &framebuffer);
 		checkOpenGLError("glDeleteFramebuffers");
 	}
@@ -122,7 +136,7 @@ Framebuffer::~Framebuffer()
 
 bool Framebuffer::checkStatus()
 {
-	_rc->renderState().bindFramebuffer(apiHandle());
+	bind();
 	
 	uint32_t status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 	
@@ -189,7 +203,7 @@ void Framebuffer::attachTexture(const Texture::Pointer& rt, uint32_t target)
 	ET_ASSERT(rt->size() == _description.size.xy());
 	ET_ASSERT(glIsTexture(static_cast<uint32_t>(rt->apiHandle())));
 
-	_rc->renderState().bindFramebuffer(apiHandle());
+	bind();
 
 	if ((rt->target() == TextureTarget::Texture_2D) || (rt->target() == TextureTarget::Texture_Rectangle))
 	{
@@ -276,7 +290,7 @@ void Framebuffer::setCurrentCubemapFace(uint32_t faceIndex)
 {
 	ET_ASSERT((_description.target == TextureTarget::Texture_Cube) && (faceIndex < 6));
 	
-	_rc->renderState().bindFramebuffer(apiHandle());
+	bind();
 	
 	uint32_t target = GL_TEXTURE_CUBE_MAP_POSITIVE_X + faceIndex;
 	
@@ -302,7 +316,7 @@ void Framebuffer::setCurrentLayer(uint32_t layerIndex)
 {
 #if (!ET_OPENGLES)
 	ET_ASSERT(layerIndex < static_cast<uint32_t>(_description.size.z));
-	_rc->renderState().bindFramebuffer(apiHandle());
+	bind();
 
 	uint32_t targetIndex = 0;
 	for (const auto& t : _renderTargets)
@@ -330,8 +344,8 @@ uint32_t Framebuffer::buildColorRenderbuffer(uint32_t input)
 		checkOpenGLError("glGenRenderbuffers");
 	}
 	
-	_rc->renderState().bindFramebuffer(apiHandle());
-	_rc->renderState().bindRenderbuffer(result);
+	bind();
+	glBindRenderbuffer(GL_RENDERBUFFER, result);
 
 	if (_description.numSamples > 1)
 	{
@@ -357,9 +371,9 @@ void Framebuffer::createOrUpdateDepthRenderbuffer()
 		checkOpenGLError("glGenRenderbuffers");
 	}
 	
-	_rc->renderState().bindFramebuffer(apiHandle());
-	_rc->renderState().bindRenderbuffer(_depthRenderbuffer);
-	
+	bind();
+	glBindRenderbuffer(GL_RENDERBUFFER, _depthRenderbuffer);
+
 	if (_description.numSamples > 1)
 	{
 		glRenderbufferStorageMultisample(GL_RENDERBUFFER, _description.numSamples,
@@ -440,7 +454,7 @@ void Framebuffer::resolveMultisampledTo(Framebuffer::Pointer framebuffer, bool r
 	vec2i sourceSize = _description.size.xy();
 	vec2i targetSize = framebuffer->size();
 	
-	_rc->renderState().bindReadFramebuffer(apiHandle());
+	bind(GL_READ_FRAMEBUFFER, apiHandle());
 	
 #if (ET_DEBUG)
 	GLint sourceSamples = 0;
@@ -452,7 +466,7 @@ void Framebuffer::resolveMultisampledTo(Framebuffer::Pointer framebuffer, bool r
 	checkOpenGLError("glGetIntegerv(GL_SAMPLE_BUFFERS, ...)");
 #endif
 	
-	_rc->renderState().bindDrawFramebuffer(static_cast<uint32_t>(framebuffer->apiHandle()));
+	bind(GL_DRAW_FRAMEBUFFER, framebuffer->apiHandle());
 	
 #if (ET_DEBUG)
 	GLint targetSamples = 0;
@@ -504,7 +518,7 @@ void Framebuffer::resolveMultisampledTo(Framebuffer::Pointer framebuffer, bool r
 void Framebuffer::invalidate(bool color, bool depth)
 {
 #if (ET_OPENGLES)
-	_rc->renderState().bindReadFramebuffer(apiHandle());
+	_rc->renderState()->bindReadFramebuffer(apiHandle());
 	
 	GLsizei numDiscards = 0;
 	GLenum discards[2] = { };
@@ -549,9 +563,9 @@ void Framebuffer::setDepthRenderbuffer(uint32_t r)
 void Framebuffer::setDrawBuffersCount(uint32_t value)
 {
 	_drawBuffers = value;
-	
-	if (_rc->renderState().boundFramebuffer() == apiHandle())
-		_rc->renderState().setDrawBuffersCount(value);
+
+	bind();
+	glDrawBuffers(value, drawBufferTargets());
 }
 
 /*
@@ -601,4 +615,6 @@ std::string FramebufferStatusToString(uint32_t status)
 		default:
 			return "Unknown FBO status " + intToStr(status);
 	}
+}
+
 }

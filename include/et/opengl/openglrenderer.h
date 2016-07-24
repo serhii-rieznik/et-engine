@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include <et/rendering/renderinterface.h>
+#include <et/rendering/interface/renderer.h>
 
 namespace et
 {
@@ -16,7 +16,7 @@ namespace et
 	class OpenGLRenderer : public RenderInterface
 	{
 	public:
-		ET_DECLARE_POINTER(OpenGLRenderer)
+		ET_DECLARE_POINTER(OpenGLRenderer);
 
 	public:
 		OpenGLRenderer(RenderContext*);

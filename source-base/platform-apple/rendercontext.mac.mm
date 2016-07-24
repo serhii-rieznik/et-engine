@@ -20,8 +20,13 @@
 #include <et/platform/platformtools.h>
 #include <et/core/threading.h>
 #include <et/rendering/renderhelper.h>
+
 #include <et/opengl/openglrenderer.h>
+#include <et/opengl/openglrenderstate.h>
+
 #include <et/metal/metalrenderer.h>
+#include <et/metal/metalrenderstate.h>
+
 #include <et/app/application.h>
 
 using namespace et;
@@ -51,37 +56,41 @@ RenderContext::RenderContext(const RenderContextParameters& inParams, Applicatio
 	if (application().parameters().renderingAPI == RenderingAPI::OpenGL)
 	{
 		_renderer = OpenGLRenderer::Pointer::create(this);
+		_renderState = OpenGLRenderState::Pointer::create();
 	}
 	else if (application().parameters().renderingAPI == RenderingAPI::Metal)
 	{
 		_renderer = MetalRenderer::Pointer::create(this);
+		_renderState = MetalRenderState::Pointer::create();
 	}
 
 	_renderer->init(_params);
-	
+
 	_textureFactory = TextureFactory::Pointer::create(this);
 	_framebufferFactory = FramebufferFactory::Pointer::create(this);
 	_materialFactory = MaterialFactory::Pointer::create(this);
 	_vertexBufferFactory = VertexBufferFactory::Pointer::create(this);
 
-	_renderState.setRenderContext(this);
-	_renderState.setDefaultFramebuffer(_framebufferFactory->createFramebufferWrapper(0));
-	_renderState.setMainViewportSize(_renderState.viewportSize());
-
-	renderhelper::init(this);
-
 	NSWindow* mainWindow = (NSWindow*)CFBridgingRelease(ctx.objects[0]);
+	NSView* mainView = nil;
 
 	if (application().parameters().renderingAPI == RenderingAPI::OpenGL)
 	{
 		NSOpenGLView* openGlView = (NSOpenGLView*)CFBridgingRelease(ctx.objects[2]);
 		CGLContextObj glContext = reinterpret_cast<CGLContextObj>(ctx.objects[4]);
 		[openGlView setOpenGLContext:[[NSOpenGLContext alloc] initWithCGLContextObj:glContext]];
+		mainView = openGlView;
 	}
 	else if (application().parameters().renderingAPI == RenderingAPI::Metal)
 	{
-		// TODO
+		mainView = (NSView*)CFBridgingRelease(ctx.objects[2]);;
 	}
+
+	CGSize viewSize = mainView.bounds.size;
+	_defaultFramebuffer = _framebufferFactory->createFramebufferWrapper(0);
+	_defaultFramebuffer->resize(vec2i(static_cast<int32_t>(viewSize.width),  static_cast<int32_t>(viewSize.height)));
+
+	renderhelper::init(this);
 
 	[mainWindow makeKeyAndOrderFront:[NSApplication sharedApplication]];
 	[mainWindow orderFrontRegardless];
@@ -125,10 +134,7 @@ void RenderContext::shutdown()
 bool RenderContext::beginRender()
 {
 	ET_ASSERT(_private->initialized);
-
 	_renderer->begin();
-	_renderState.bindDefaultFramebuffer();
-
 	return true;
 }
 
@@ -161,10 +167,7 @@ void RenderContext::popRenderingContext()
 
 void RenderContext::performResizing(const vec2i& newSize)
 {
-	if (_private->initialized)
-	{
-		_renderState.defaultFramebuffer()->resize(newSize);
-	}
+	_defaultFramebuffer->resize(newSize);
 }
 
 CVReturn etDisplayLinkOutputCallback(CVDisplayLinkRef, const CVTimeStamp*, const CVTimeStamp*,

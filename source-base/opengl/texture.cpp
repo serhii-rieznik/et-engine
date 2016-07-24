@@ -22,10 +22,8 @@ Texture::Texture(RenderContext* rc, const TextureDescription::Pointer& desc, con
 		_wrap = vector3<TextureWrap>(TextureWrap::ClampToEdge);
 	
 	const auto& caps = OpenGLCapabilities::instance();
-
 	if ((_desc->internalformat == TextureFormat::R) && (caps.version() > OpenGLVersion::Version_2x))
 		_desc->internalformat = TextureFormat::R8;
-	
 #endif
 	
 	if (deferred)
@@ -63,10 +61,10 @@ Texture::~Texture()
 
 void Texture::setWrap(RenderContext* rc, TextureWrap s, TextureWrap t, TextureWrap r)
 {
+	bind(defaultBindingUnit);
+
 	_wrap = vector3<TextureWrap>(s, t, r);
 
-	rc->renderState().bindTexture(defaultBindingUnit, apiHandle(), _desc->target);
-	
 	auto targetValue = textureTargetValue(_desc->target);
 	
 	glTexParameteri(targetValue, GL_TEXTURE_WRAP_S, textureWrapValue(_wrap.x));
@@ -89,7 +87,7 @@ void Texture::setWrap(RenderContext* rc, TextureWrap s, TextureWrap t, TextureWr
 void Texture::setFiltration(RenderContext* rc, TextureFiltration minFiltration,
 	TextureFiltration magFiltration)
 {
-	rc->renderState().bindTexture(defaultBindingUnit, apiHandle(), _desc->target);
+	bind(defaultBindingUnit);
 
 	_filtration = vector2<TextureFiltration>(minFiltration, magFiltration);
 
@@ -112,9 +110,10 @@ void Texture::setFiltration(RenderContext* rc, TextureFiltration minFiltration,
 
 void Texture::compareRefToTexture(RenderContext* rc, bool enable, int32_t compareFunc)
 {
+	bind(defaultBindingUnit);
+
 	auto targetValue = textureTargetValue(_desc->target);
 	
-	rc->renderState().bindTexture(defaultBindingUnit, apiHandle(), _desc->target);
 	if (enable)
 	{
 		glTexParameteri(targetValue, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
@@ -181,12 +180,12 @@ void Texture::buildData(const char* aDataPtr, size_t aDataSize)
 			const char* ptr = (aDataPtr && (t_offset < aDataSize)) ? &aDataPtr[t_offset] : 0;
 			if (_desc->compressed && ptr)
 			{
-				etCompressedTexImage2D(targetValue, static_cast<int>(level),
+				etCompressedTexImage2D(targetValue, static_cast<int32_t>(level),
 					internalFormatValue, t_mipSize.x, t_mipSize.y, 0, t_dataSize, ptr);
 			}
 			else
 			{
-				etTexImage2D(targetValue, static_cast<int>(level), internalFormatValue,
+				etTexImage2D(targetValue, static_cast<int32_t>(level), internalFormatValue,
 					t_mipSize.x, t_mipSize.y, 0, formatValue, typeValue, ptr);
 			}
 		}
@@ -205,12 +204,12 @@ void Texture::buildData(const char* aDataPtr, size_t aDataSize)
 				const char* ptr = (aDataPtr && (t_offset < aDataSize)) ? &aDataPtr[t_offset] : nullptr;
 				if (_desc->compressed && (ptr != nullptr))
 				{
-					etCompressedTexImage2D(target, static_cast<int>(level), internalFormatValue,
+					etCompressedTexImage2D(target, static_cast<int32_t>(level), internalFormatValue,
 						t_mipSize.x, t_mipSize.y, 0, static_cast<GLsizei>(_desc->dataSizeForMipLevel(level)), ptr);
 				}
 				else
 				{
-					etTexImage2D(target, static_cast<int>(level), internalFormatValue, t_mipSize.x,
+					etTexImage2D(target, static_cast<int32_t>(level), internalFormatValue, t_mipSize.x,
 						t_mipSize.y, 0, formatValue, typeValue, ptr);
 				}
 			}
@@ -240,6 +239,12 @@ void Texture::buildProperies()
 	_filtration.y = TextureFiltration::Linear;
 }
 
+void Texture::bind(uint32_t unit) const
+{
+	glActiveTexture(GL_TEXTURE0 + unit);
+	glBindTexture(textureTargetValue(_desc->target), apiHandle());
+}
+
 void Texture::build(RenderContext* rc)
 {
 	ET_ASSERT(_desc.valid());
@@ -250,9 +255,8 @@ void Texture::build(RenderContext* rc)
 		return;
 	}
 	
+	bind(defaultBindingUnit);
 	buildProperies();
-
-	rc->renderState().bindTexture(defaultBindingUnit, apiHandle(), _desc->target, true);
 
 	if (_desc->target == TextureTarget::Texture_Rectangle)
 	{
@@ -294,7 +298,8 @@ void Texture::updateDataDirectly(RenderContext* rc, const vec2i& size, const cha
 		generateTexture(rc);
 
     _desc->size = size;
-    rc->renderState().bindTexture(defaultBindingUnit, apiHandle(), _desc->target);
+
+	bind(defaultBindingUnit);
 	buildData(data, dataSize);
 }
 
@@ -309,8 +314,8 @@ void Texture::updatePartialDataDirectly(RenderContext* rc, const vec2i& offset,
 	if (apiHandleInvalid())
 		generateTexture(rc);
 	
-    rc->renderState().bindTexture(defaultBindingUnit, apiHandle(), _desc->target);
-	
+	bind(defaultBindingUnit);
+
 	glPixelStorei(GL_UNPACK_ALIGNMENT, _desc->alignment);
 	checkOpenGLError("glPixelStorei");
 
@@ -332,24 +337,24 @@ void Texture::updatePartialDataDirectly(RenderContext* rc, const vec2i& offset,
 
 void Texture::generateMipMaps(RenderContext* rc)
 {
-    rc->renderState().bindTexture(defaultBindingUnit, apiHandle(), _desc->target);
+	bind(defaultBindingUnit);
 	glGenerateMipmap(textureTargetValue(_desc->target));
 	checkOpenGLError("glGenerateMipmap");
 }
 
-void Texture::setMaxLod(RenderContext* rc, size_t value)
+void Texture::setMaxLod(RenderContext* rc, uint32_t value)
 {
 #if defined(GL_TEXTURE_MAX_LEVEL)
-	rc->renderState().bindTexture(defaultBindingUnit, apiHandle(), _desc->target);
+	bind(defaultBindingUnit);
 	glTexParameteri(textureTargetValue(_desc->target), GL_TEXTURE_MAX_LEVEL, static_cast<GLint>(value));
-	checkOpenGLError("Texture::setMaxLod(%lu) - %s", static_cast<unsigned long>(value), name().c_str());
+	checkOpenGLError("Texture::setMaxLod(%u) - %s", static_cast<uint32_t>(value), name().c_str());
 #endif
 }
 
 void Texture::setAnisotropyLevel(RenderContext* rc, float value)
 {
 #if defined(GL_TEXTURE_MAX_ANISOTROPY_EXT)
-	rc->renderState().bindTexture(defaultBindingUnit, apiHandle(), _desc->target);
+	bind(defaultBindingUnit);
 	glTexParameterf(textureTargetValue(_desc->target), GL_TEXTURE_MAX_ANISOTROPY_EXT, value);
 	checkOpenGLError("Texture::setAnisotropyLevel(%f) - %s", value, name().c_str());
 #endif

@@ -29,7 +29,7 @@ int indexForCoord(const vec2i& coord, const vec2i& size);
 bool grayscaleSortFunction(const vec4ub& v1, const vec4ub& v2);
 
 inline int roundf(float v, int minV, int maxV)
-	{ return clamp(static_cast<int>(v), minV, maxV); }
+	{ return clamp(static_cast<int32_t>(v), minV, maxV); }
 
 void ImageOperations::transfer(const BinaryDataStorage& src, const vec2i& srcSize, int srcComponents,
 	BinaryDataStorage& dst, const vec2i& dstSize, int dstComponents, const vec2i& position)
@@ -84,11 +84,11 @@ void ImageOperations::draw(const BinaryDataStorage& src, const vec2i& srcSize, i
 			vec4ub color(0);
 			for (int c = 0; c < srcComponents; ++c)
 			{
-				unsigned char topInterpolation = static_cast<unsigned char>(
+				unsigned char topInterpolation = static_cast<uint8_t>(
 					static_cast<float>(src[index0 + c]) * (1.0f - du) +  static_cast<float>(src[indexNextU + c]) * du);
-				unsigned char bottomInterpolation = static_cast<unsigned char>(
+				unsigned char bottomInterpolation = static_cast<uint8_t>(
 					static_cast<float>(src[indexNextV + c]) * (1.0f - du) +  static_cast<float>(src[indexNextUV + c]) * du);
-				color[c] =  static_cast<unsigned char>(
+				color[c] =  static_cast<uint8_t>(
 					static_cast<float>(topInterpolation) * (1.0f - dv) +  static_cast<float>(bottomInterpolation) * dv);
 			}
 
@@ -100,11 +100,11 @@ void ImageOperations::draw(const BinaryDataStorage& src, const vec2i& srcSize, i
 			{
 				if (blend == ImageBlendType_Additive)
 				{
-					dst[dstIndex + c] = static_cast<unsigned char>(clamp(dst[dstIndex + c] + color[c] * color.w / 255, 0, 255));
+					dst[dstIndex + c] = static_cast<uint8_t>(clamp(dst[dstIndex + c] + color[c] * color.w / 255, 0, 255));
 				}
 				else if (blend == ImageBlendType_Default)
 				{
-					dst[dstIndex + c] = static_cast<unsigned char>((dst[dstIndex + c] * (255 - color.w) + color[c] * color.w) / 255);
+					dst[dstIndex + c] = static_cast<uint8_t>((dst[dstIndex + c] * (255 - color.w) + color[c] * color.w) / 255);
 				}
 			}
 
@@ -187,7 +187,7 @@ void ImageOperations::blur(BinaryDataStorage& data, const vec2i& size, int compo
 
 			sum /= totalScale;
 			for (int c = 0; c < components; ++c)
-				data[i0 + c] = static_cast<unsigned char>(sum[c]);
+				data[i0 + c] = static_cast<uint8_t>(sum[c]);
 		}
 	}
 }
@@ -230,7 +230,7 @@ void ImageOperations::median(BinaryDataStorage& data, const vec2i& size, int com
 void ImageOperations::applyMatrixFilter(BinaryDataStorage& data, const vec2i& size, int components, const mat3i& m)
 {
 	BinaryDataStorage source(data);
-	matrix3<unsigned char> colorMatrix[4];
+	matrix3<uint8_t> colorMatrix[4];
 
 	for (int y = 0; y < size.y; ++y)
 	{
@@ -266,7 +266,7 @@ void ImageOperations::applyMatrixFilter(BinaryDataStorage& data, const vec2i& si
 
 			int i0 = components * indexForCoord(vec2i(x, y), size);
 			for (int c = 0; c < components; ++c)
-				data[i0 + c] = static_cast<unsigned char>(clamp(result[c], 0, 255));
+				data[i0 + c] = static_cast<uint8_t>(clamp(result[c], 0, 255));
 		}
 	}
 }
@@ -302,9 +302,9 @@ void ImageOperations::normalMapFilter(BinaryDataStorage& data, const vec2i& size
 
 			vec3 produce = normalize(cross(du, dv));
 
-			data[c00+0] = static_cast<unsigned char>(255.0f * (0.5f + 0.5f * produce.x));
-			data[c00+1] = static_cast<unsigned char>(255.0f * (0.5f + 0.5f * produce.y));
-			data[c00+2] = static_cast<unsigned char>(255.0f * (0.5f + 0.5f * produce.z));
+			data[c00+0] = static_cast<uint8_t>(255.0f * (0.5f + 0.5f * produce.x));
+			data[c00+1] = static_cast<uint8_t>(255.0f * (0.5f + 0.5f * produce.y));
+			data[c00+2] = static_cast<uint8_t>(255.0f * (0.5f + 0.5f * produce.z));
 		}
 	}
 }

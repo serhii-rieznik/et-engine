@@ -8,6 +8,7 @@
 #pragma once
 
 #include <et/camera/camera.h>
+#include <et/rendering/framebuffer.h>
 #include <et/rendering/renderbatch.h>
 
 namespace et
@@ -15,28 +16,26 @@ namespace et
 	class RenderPass : public Shared
 	{
 	public:
-		ET_DECLARE_POINTER(RenderPass)
+		ET_DECLARE_POINTER(RenderPass);
+
+		struct Target
+		{
+			Framebuffer::Pointer destination;
+			FramebufferOperation colorLoadOperation = FramebufferOperation::DontCare;
+			FramebufferOperation colorStoreOperation = FramebufferOperation::DontCare;
+			FramebufferOperation depthLoadOperation = FramebufferOperation::DontCare;
+			FramebufferOperation depthStoreOperation = FramebufferOperation::DontCare;
+			vec4 clearColor = vec4(0.0f);
+			float clearDepth = 1.0f;
+		};
 
 		struct ConstructionInfo
 		{
-			struct ColorAttachment
-			{
-				FramebufferOperation loadOperation = FramebufferOperation::DontCare;
-				FramebufferOperation storeOperation = FramebufferOperation::DontCare;
-				vec4 clearColor = vec4(0.0f);
-			} colorAttachment;
-
-			struct DepthAttachment
-			{
-				FramebufferOperation loadOperation = FramebufferOperation::DontCare;
-				FramebufferOperation storeOperation = FramebufferOperation::DontCare;
-				float clearDepth = 1.0f;
-			} depthAttachment;
-
-            vec3 defaultLightPosition;
+			Target target;
 			Camera camera;
+			vec3 defaultLightPosition;
 		};
-		
+
 	public:
 		RenderPass(const ConstructionInfo&);
 		~RenderPass();

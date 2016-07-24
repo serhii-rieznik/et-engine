@@ -15,7 +15,7 @@ namespace et
         class Track : public LoadableObject
         {
         public:
-			ET_DECLARE_POINTER(Track)
+			ET_DECLARE_POINTER(Track);
             
 		public:
 			Track(const std::string& fileName);

@@ -59,7 +59,7 @@ inline void splitAndWrite(const std::string& s, char token, F func)
 			func(std::string(pos, begin - pos));
 			while (*(begin + 1) == token)
 			{
-				func(intToStr(std::numeric_limits<int>::max()));
+				func(intToStr(std::numeric_limits<int32_t>::max()));
 				++begin;
 			}
 			pos = begin + 1;
@@ -239,7 +239,7 @@ void OBJLoader::loadData(bool async, ObjectsCache& cache)
 				OBJFace::VertexLink vertex;
 				vertex.fill(0);
 
-				Vector<int> indexes;
+				Vector<int32_t> indexes;
 				indexes.reserve(3);
 				splitAndWrite(inFace, '/', [&indexes](const std::string& s)
 					{ indexes.push_back(strToInt(s)); });
@@ -247,7 +247,7 @@ void OBJLoader::loadData(bool async, ObjectsCache& cache)
 				uint32_t i = 0;
 				for (auto iValue : indexes)
 				{
-					if (iValue == std::numeric_limits<int>::max())
+					if (iValue == std::numeric_limits<int32_t>::max())
 					{
 					}
 					else if (iValue < 0)

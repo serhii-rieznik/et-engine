@@ -17,7 +17,7 @@ namespace et
 	class VertexBufferFactory : public APIObjectFactory
 	{
 	public:
-		ET_DECLARE_POINTER(VertexBufferFactory)
+		ET_DECLARE_POINTER(VertexBufferFactory);
 		
 	public:
 		VertexBufferFactory(RenderContext* rc);

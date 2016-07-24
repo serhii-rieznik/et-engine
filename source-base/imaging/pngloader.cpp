@@ -121,11 +121,11 @@ void et::png::loadFromStream(std::istream& source, TextureDescription& desc, boo
 
 	if (desc.bitsPerPixel / desc.channels == 16)
 	{
-		unsigned short* data_ptr = reinterpret_cast<unsigned short*>(desc.data.binary());
+		uint16_t* data_ptr = reinterpret_cast<uint16_t*>(desc.data.binary());
 		for (size_t i = 0; i < desc.data.dataSize() / 2; ++i)
 		{
-			unsigned short value = data_ptr[i];
-			data_ptr[i] = static_cast<unsigned short>(((value >> 8) & 0xff) + ((value << 8) & 0xff));
+			uint16_t value = data_ptr[i];
+			data_ptr[i] = static_cast<uint16_t>(((value >> 8) & 0xff) + ((value << 8) & 0xff));
 		}
 	}
 
@@ -160,8 +160,8 @@ void parseFormat(TextureDescription& desc, png_structp pngPtr, png_infop infoPtr
 {
 	desc.mipMapCount = 1;
 	desc.layersCount = 1;
-	desc.size.x = static_cast<int>(png_get_image_width(pngPtr, infoPtr));
-	desc.size.y = static_cast<int>(png_get_image_height(pngPtr, infoPtr));
+	desc.size.x = static_cast<int32_t>(png_get_image_width(pngPtr, infoPtr));
+	desc.size.y = static_cast<int32_t>(png_get_image_height(pngPtr, infoPtr));
 	desc.channels = png_get_channels(pngPtr, infoPtr);
 	
 	int color_type = png_get_color_type(pngPtr, infoPtr); 

@@ -18,7 +18,7 @@ namespace et
 	class RenderBatch : public et::Shared
 	{
 	public:
-		ET_DECLARE_POINTER(RenderBatch)
+		ET_DECLARE_POINTER(RenderBatch);
 		
 	public:
 		RenderBatch() = default;

@@ -12,7 +12,7 @@
 using namespace et;
 
 inline int getIndex(int u, int v, int u_sz, int v_sz)
-	{ return clamp<int>(u, 0, u_sz - 1) + clamp<int>(v, 0, v_sz - 1) * u_sz; }
+	{ return clamp<int32_t>(u, 0, u_sz - 1) + clamp<int32_t>(v, 0, v_sz - 1) * u_sz; }
 
 uint32_t primitives::primitiveCountForIndexCount(uint32_t numIndexes, PrimitiveType geometryType)
 {

@@ -12,7 +12,7 @@
 
 namespace et
 {
-	template <int> struct Vector4AlignHelper { };
+	template <int32_t> struct Vector4AlignHelper { };
 
 #if (ET_ENABLE_VEC4_ALIGN)
 	template <> struct ET_ALIGNED( 4) Vector4AlignHelper<1> { };

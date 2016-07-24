@@ -20,7 +20,7 @@ namespace et
 	class VertexStorage : public Object
 	{
 	public:
-		ET_DECLARE_POINTER(VertexStorage)
+		ET_DECLARE_POINTER(VertexStorage);
 		
 		int tag = 0;
 		

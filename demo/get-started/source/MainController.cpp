@@ -58,19 +58,19 @@ void demo::MainController::loadProgram(et::RenderContext* rc)
 void demo::MainController::render(et::RenderContext* rc)
 {
 	_transformMatrix *= rotationYXZMatrix(et::vec3(2.0f, 0.5f, -1.0f) * _frameTimeTimer.lap());
+	
+	et::RenderBatch::Pointer batch = et::RenderBatch::Pointer::create(_defaultMaterial, _testModel, _transformMatrix);
 
 	et::RenderPass::ConstructionInfo passInfo;
+	passInfo.target.destination = rc->defaultFramebuffer();
+	passInfo.target.colorLoadOperation = et::FramebufferOperation::Clear;
+	passInfo.target.depthLoadOperation = et::FramebufferOperation::Clear;
+	passInfo.target.clearColor = et::vec4(0.1f, 0.2f, 0.3f, 1.0f);
+	passInfo.target.clearDepth = 1.0f;
 	passInfo.camera = _camera;
-	passInfo.colorAttachment.loadOperation = et::FramebufferOperation::Clear;
-	passInfo.colorAttachment.clearColor = et::vec4(0.1f, 0.2f, 0.3f, 1.0f);
-	passInfo.depthAttachment.loadOperation = et::FramebufferOperation::Clear;
-	passInfo.depthAttachment.clearDepth = 1.0f;
 
 	et::RenderPass::Pointer pass = rc->renderer()->allocateRenderPass(passInfo);
-
-	et::RenderBatch::Pointer batch = et::RenderBatch::Pointer::create(_defaultMaterial, _testModel, _transformMatrix);
 	pass->pushRenderBatch(batch);
-	
 	rc->renderer()->submitRenderPass(pass);
 }
 

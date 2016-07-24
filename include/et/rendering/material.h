@@ -10,6 +10,8 @@
 #include <et/core/datastorage.h>
 #include <et/rendering/program.h>
 #include <et/rendering/texture.h>
+#include <et/rendering/interface/renderstate.h>
+#include <et/rendering/interface/pipelinestate.h>
 
 namespace et
 {
@@ -18,15 +20,17 @@ namespace et
 	class Material : public LoadableObject
 	{
 	public:
-		ET_DECLARE_POINTER(Material)
+		ET_DECLARE_POINTER(Material);
 		
 	public:
 		Material(MaterialFactory*);
 		
 		void loadFromJson(const std::string&, const std::string& baseFolder);
 		
-		void enableInRenderState(RenderState&);
-		void enableSnapshotInRenderState(RenderState&, uint64_t);
+		PipelineState::Pointer createPipelineStateForVertexStream(VertexArrayObject::Pointer vertexStream);
+
+		void enableInRenderState(RenderState::Pointer);
+		void enableSnapshotInRenderState(RenderState::Pointer, uint64_t);
 
 		void setBlendState(const BlendState&);
 		void setDepthState(const DepthState&);
@@ -34,19 +38,19 @@ namespace et
 		void setProgram(Program::Pointer);
 		
 		et::Program::Pointer& program()
-			{ return _program; }
+			{ return _pipelineState.program; }
 		
 		const et::Program::Pointer& program() const
-			{ return _program; }
+			{ return _pipelineState.program; }
 		
 		const DepthState& depthState() const
-			{ return _depth; }
+			{ return _pipelineState.depth; }
 		
 		const BlendState& blendState() const
-			{ return _blend; }
+			{ return _pipelineState.blend; }
 		
 		CullMode cullMode() const
-			{ return _cullMode; }
+			{ return _pipelineState.cull; }
 		
 		uint64_t makeSnapshot();
 		void clearSnapshots();
@@ -94,12 +98,9 @@ namespace et
 		struct Snapshot
 		{
 			Vector<DataProperty> properties;
-            BinaryDataStorage propertiesData;
-            
 			Vector<TextureProperty> textures;
-			DepthState depth;
-			BlendState blend;
-			CullMode cullMode;
+			BinaryDataStorage propertiesData;
+			PipelineState::ConstructInfo pipelineState;
 		};
 		
 		using ProgramSetIntFunction = void (Program::*)(int, const int*, uint32_t);
@@ -114,15 +115,11 @@ namespace et
 		
 	public:
 		MaterialFactory* _factory = nullptr;
-		Program::Pointer _program;
-		
 		Vector<Snapshot> _snapshots;
 		UnorderedMap<String, DataProperty> _properties;
 		UnorderedMap<String, TextureProperty> _textures;
-		DepthState _depth;
-		BlendState _blend;
-		CullMode _cullMode = CullMode::Disabled;
-		
+
+		PipelineState::ConstructInfo _pipelineState;
 		BinaryDataStorage _propertiesData;
 		ProgramSetIntFunction _setIntFunctions[DataType_max];
 		ProgramSetFloatFunction _setFloatFunctions[DataType_max];

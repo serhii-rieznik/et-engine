@@ -12,7 +12,7 @@ namespace et
 	class Object : public Shared
 	{
 	public:
-		ET_DECLARE_POINTER(Object)
+		ET_DECLARE_POINTER(Object);
 		
 	public:
 		Object() = default;
@@ -38,7 +38,7 @@ namespace et
 	class LoadableObject : public Object
 	{
 	public:
-		ET_DECLARE_POINTER(LoadableObject)
+		ET_DECLARE_POINTER(LoadableObject);
 		
 	public:
 		LoadableObject() = default;
@@ -72,7 +72,7 @@ namespace et
 	class ObjectLoader : public Shared
 	{
 	public:
-		ET_DECLARE_POINTER(ObjectLoader)
+		ET_DECLARE_POINTER(ObjectLoader);
 		
 	public:
 		virtual ~ObjectLoader() = default;

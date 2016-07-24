@@ -15,7 +15,7 @@ namespace et
 	class RunLoop : public Shared
 	{
 	public:
-		ET_DECLARE_POINTER(RunLoop)
+		ET_DECLARE_POINTER(RunLoop);
 		
 	public:
 		RunLoop();

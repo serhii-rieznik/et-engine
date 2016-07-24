@@ -334,7 +334,6 @@ namespace et
 	struct DepthState
 	{
 		CompareFunction compareFunction = CompareFunction::Less;
-		float clearDepth = 1.0f;
 		bool depthWriteEnabled = true;
 		bool depthTestEnabled = true;
 		

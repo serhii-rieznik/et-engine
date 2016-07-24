@@ -80,6 +80,8 @@ void OpenGLRenderer::init(const RenderContextParameters& params)
 	GLint swap = static_cast<GLint>(params.swapInterval);
 	CGLSetParameter(_private->glContext, kCGLCPSwapInterval, &swap);
 
+	glViewport(0, 0, 640, 480);
+
 	application().context().objects[3] = _private->glPixelFormat;
 	application().context().objects[4] = _private->glContext;
 	
@@ -123,42 +125,45 @@ RenderPass::Pointer OpenGLRenderer::allocateRenderPass(const RenderPass::Constru
 
 void OpenGLRenderer::submitRenderPass(RenderPass::Pointer pass)
 {
-	auto& rs = rc()->renderState();
-
 	GLbitfield clearMask = 0;
-	if (pass->info().colorAttachment.loadOperation == FramebufferOperation::Clear)
+	const RenderPass::Target& rt = pass->info().target;
+
+	if (rt.colorLoadOperation == FramebufferOperation::Clear)
 	{
 		clearMask |= GL_COLOR_BUFFER_BIT;
-		ET_ASSERT(rs.colorMask() != static_cast<uint32_t>(ColorMask::None));
-		rs.setClearColor(pass->info().colorAttachment.clearColor);
+		const auto& clr = rt.clearColor;
+		glClearColor(clr.x, clr.y, clr.z, clr.w);
 	}
 
-	if (pass->info().depthAttachment.loadOperation == FramebufferOperation::Clear)
+	if (rt.depthLoadOperation == FramebufferOperation::Clear)
 	{
 		clearMask |= GL_DEPTH_BUFFER_BIT;
-		ET_ASSERT(rs.depthState().depthWriteEnabled);
-		rs.setClearDepth(pass->info().depthAttachment.clearDepth);
+		glClearDepth(rt.clearDepth);
 	}
+
+	rt.destination->bind();
+	etViewport(0, 0, rt.destination->size().x, rt.destination->size().y);
 
 	if (clearMask != 0)
 	{
 		glClear(clearMask);
 	}
 
-	for (auto& batch : pass->renderBatches())
+	for (auto& batch_ptr : pass->renderBatches())
 	{
-		auto& mat = batch->material().reference();
-		mat.enableSnapshotInRenderState(rs, batch->materialSnapshot());
-
+		auto& batch = batch_ptr.reference();
+		auto& mat = batch.material().reference();
 		auto& prog = mat.program().reference();
-		prog.setTransformMatrix(batch->transformation());
+		auto& vao = batch.vao().reference();
+		auto& ib = vao.indexBuffer().reference();
+
+		mat.enableSnapshotInRenderState(rc()->renderState(), batch.materialSnapshot());
+		prog.setTransformMatrix(batch.transformation());
 		prog.setCameraProperties(pass->info().camera);
 		prog.setDefaultLightPosition(pass->info().defaultLightPosition);
-
-		auto& ib = batch->vao()->indexBuffer();
-
-		rs.bindVertexArrayObject(batch->vao());
-		drawIndexedPrimitive(ib->primitiveType(), ib->format(), batch->firstIndex(), batch->numIndexes());
+		
+		vao.bind();
+		drawIndexedPrimitive(ib.primitiveType(), ib.format(), batch.firstIndex(), batch.numIndexes());
 	}
 }
 
@@ -251,16 +256,16 @@ void Renderer::clear(bool color, bool depth)
 
 void Renderer::fullscreenPass()
 {
-	_rc->renderState().bindVertexArrayObject(_fullscreenQuadVao);
+	_rc->renderState()->bindVertexArrayObject(_fullscreenQuadVao);
 	drawAllElements(_fullscreenQuadVao->indexBuffer());
 }
 
 void Renderer::renderFullscreenTexture(const Texture::Pointer& texture, const vec4& tint)
 {
-	auto prog = _fullscreenProgram[static_cast<int>(texture->target())];
+	auto prog = _fullscreenProgram[static_cast<int32_t>(texture->target())];
 
-	_rc->renderState().bindTexture(_defaultTextureBindingUnit, texture);
-	_rc->renderState().bindProgram(prog);
+	_rc->renderState()->bindTexture(_defaultTextureBindingUnit, texture);
+	_rc->renderState()->bindProgram(prog);
 	prog->setUniform("color_texture_size", texture->sizeFloat());
 	prog->setUniform("tint", tint);
 	fullscreenPass();
@@ -268,16 +273,16 @@ void Renderer::renderFullscreenTexture(const Texture::Pointer& texture, const ve
 
 void Renderer::renderFullscreenDepthTexture(const Texture::Pointer& texture, float factor)
 {
-	_rc->renderState().bindTexture(_defaultTextureBindingUnit, texture);
-	_rc->renderState().bindProgram(_fullscreenDepthProgram);
+	_rc->renderState()->bindTexture(_defaultTextureBindingUnit, texture);
+	_rc->renderState()->bindProgram(_fullscreenDepthProgram);
 	_fullscreenDepthProgram->setUniform(_fullScreenDepthProgram_FactorUniform, factor);
 	fullscreenPass();
 }
 
 void Renderer::renderFullscreenTexture(const Texture::Pointer& texture, const vec2& scale, const vec4& tint)
 {
-	_rc->renderState().bindTexture(_defaultTextureBindingUnit, texture);
-	_rc->renderState().bindProgram(_fullscreenScaledProgram);
+	_rc->renderState()->bindTexture(_defaultTextureBindingUnit, texture);
+	_rc->renderState()->bindProgram(_fullscreenScaledProgram);
 	_scaledProgram->setUniform(_fullScreenScaledProgram_PSUniform, scale);
 	_scaledProgram->setUniform(_fullScreenScaledProgram_TintUniform, tint);
 	fullscreenPass();
@@ -285,8 +290,8 @@ void Renderer::renderFullscreenTexture(const Texture::Pointer& texture, const ve
 
 void Renderer::renderTexture(const Texture::Pointer& texture, const vec2& position, const vec2& size, const vec4& tint)
 {
-	_rc->renderState().bindTexture(_defaultTextureBindingUnit, texture);
-	_rc->renderState().bindProgram(_scaledProgram);
+	_rc->renderState()->bindTexture(_defaultTextureBindingUnit, texture);
+	_rc->renderState()->bindProgram(_scaledProgram);
 	_scaledProgram->setUniform(_scaledProgram_PSUniform, vec4(position, size));
 	_scaledProgram->setUniform(_scaledProgram_TintUniform, tint);
 	fullscreenPass();
@@ -295,8 +300,8 @@ void Renderer::renderTexture(const Texture::Pointer& texture, const vec2& positi
 void Renderer::renderTextureRotated(const Texture::Pointer& texture, float angle, const vec2& position,
 	const vec2& size, const vec4& tint)
 {
-	_rc->renderState().bindTexture(_defaultTextureBindingUnit, texture);
-	_rc->renderState().bindProgram(_scaledRotatedProgram);
+	_rc->renderState()->bindTexture(_defaultTextureBindingUnit, texture);
+	_rc->renderState()->bindProgram(_scaledRotatedProgram);
 	_scaledRotatedProgram->setUniform(_scaledRotatedProgram_PSUniform, vec4(position, size));
 	_scaledRotatedProgram->setUniform(_scaledRotatedProgram_TintUniform, tint);
 	_scaledRotatedProgram->setUniform(_scaledRotatedProgram_AngleUniform, angle);
@@ -305,14 +310,14 @@ void Renderer::renderTextureRotated(const Texture::Pointer& texture, float angle
 
 vec2 Renderer::currentViewportCoordinatesToScene(const vec2i& coord)
 {
-	auto vpSize = vector2ToFloat(_rc->renderState().viewportSize());
+	auto vpSize = vector2ToFloat(_rc->renderState()->viewportSize());
 	return vec2(2.0f * static_cast<float>(coord.x) / vpSize.x - 1.0f,
 		1.0f - 2.0f * static_cast<float>(coord.y) / vpSize.y );
 }
 
 vec2 Renderer::currentViewportSizeToScene(const vec2i& size)
 {
-	auto vpSize = vector2ToFloat(_rc->renderState().viewportSize());
+	auto vpSize = vector2ToFloat(_rc->renderState()->viewportSize());
 	return vec2(2.0f * static_cast<float>(size.x) / vpSize.x, 2.0f * static_cast<float>(size.y) / vpSize.y);
 }
 
@@ -382,7 +387,7 @@ void Renderer::drawElementsBaseIndex(const VertexArrayObject::Pointer& vao, int 
 	ET_ASSERT(vao->vertexBuffer().valid());
 	
 	const VertexBuffer::Pointer& vb = vao->vertexBuffer();
-	RenderState& rs = _rc->renderState();
+	RenderState::Pointer rs = _rc->renderState();
 	rs.bindVertexArrayObject(vao);
 	rs.bindBuffer(vb);
 	rs.setVertexAttributesBaseIndex(vb->declaration(), base);

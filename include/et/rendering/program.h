@@ -18,7 +18,7 @@ namespace et
 	class Program : public APIObject
 	{
 	public:
-		ET_DECLARE_POINTER(Program)
+		ET_DECLARE_POINTER(Program);
 
 		struct Uniform
 		{
@@ -51,6 +51,7 @@ namespace et
 		uint32_t getUniformType(const std::string& uniform) const;
 		Program::Uniform getUniform(const std::string& uniform) const;
 
+		void bind();
 		bool validate() const;
 		
 		int viewMatrixUniformLocation() const 
@@ -167,8 +168,6 @@ namespace et
 		void initBuiltInUniforms();
 
 	private:
-		RenderContext* _rc = nullptr;
-		
 		Program::UniformMap _uniforms;
 		std::vector<Attribute> _attributes;
 		std::map<int, float> _floatCache;

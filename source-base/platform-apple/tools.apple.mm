@@ -401,14 +401,14 @@ et::vec2i et::nativeScreenSize()
 	CGSize size = [[UIScreen mainScreen] bounds].size;
 	
 	if (UIInterfaceOrientationIsLandscape([[UIApplication sharedApplication] statusBarOrientation]))
-		return vec2i(static_cast<int>(size.height), static_cast<int>(size.width));
+		return vec2i(static_cast<int32_t>(size.height), static_cast<int32_t>(size.width));
 	else
-		return vec2i(static_cast<int>(size.width), static_cast<int>(size.height));
+		return vec2i(static_cast<int32_t>(size.width), static_cast<int32_t>(size.height));
 	
 #else
 	
 	NSSize size = [[NSScreen mainScreen] frame].size;
-	return vec2i(static_cast<int>(size.width), static_cast<int>(size.height));
+	return vec2i(static_cast<int32_t>(size.width), static_cast<int32_t>(size.height));
 	
 #endif
 }
@@ -422,7 +422,7 @@ et::vec2i et::availableScreenSize()
 #else 
 	
 	auto size = [[NSScreen mainScreen] visibleFrame].size;
-	return vec2i(static_cast<int>(size.width), static_cast<int>(size.height));
+	return vec2i(static_cast<int32_t>(size.width), static_cast<int32_t>(size.height));
 	
 #endif
 	
@@ -472,11 +472,11 @@ et::Screen nsScreenToScreen(NSScreen* screen)
     float scaleFactor = [screen backingScaleFactor];
 #endif
 		
-	auto aFrame = et::recti(static_cast<int>(frame.origin.x), static_cast<int>(frame.origin.y),
-		static_cast<int>(frame.size.width), static_cast<int>(frame.size.height));
+	auto aFrame = et::recti(static_cast<int32_t>(frame.origin.x), static_cast<int32_t>(frame.origin.y),
+		static_cast<int32_t>(frame.size.width), static_cast<int32_t>(frame.size.height));
 	
-	auto aAvailable = et::recti(static_cast<int>(available.origin.x), static_cast<int>(available.origin.y),
-		static_cast<int>(available.size.width), static_cast<int>(available.size.height));
+	auto aAvailable = et::recti(static_cast<int32_t>(available.origin.x), static_cast<int32_t>(available.origin.y),
+		static_cast<int32_t>(available.size.width), static_cast<int32_t>(available.size.height));
 	
 	return et::Screen(aFrame, aAvailable, scaleFactor);
 }

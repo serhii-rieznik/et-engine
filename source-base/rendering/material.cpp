@@ -97,38 +97,50 @@ void Material::loadFromJson(const std::string& jsonString, const std::string& ba
 
 void Material::setBlendState(const BlendState& state)
 {
-	_blend = state;
+	_pipelineState.blend = state;
 }
 
 void Material::setDepthState(const DepthState& state)
 {
-	_depth = state;
+	_pipelineState.depth = state;
 }
 
 void Material::setCullMode(CullMode cm)
 {
-	_cullMode = cm;
+	_pipelineState.cull = cm;
 }
 
 void Material::setProgram(Program::Pointer program)
 {
-	_program = program;
+	_pipelineState.program = program;
 	loadProperties();
 }
 
-
-void Material::enableInRenderState(RenderState& rs)
+PipelineState::Pointer Material::createPipelineStateForVertexStream(VertexArrayObject::Pointer vertexStream)
 {
-	rs.setCulling(_cullMode);
-	rs.setBlendState(_blend);
-	rs.setDepthState(_depth);
+	auto psInfo = _pipelineState;
+	psInfo.vertexStream = vertexStream;
+	psInfo.vertexInput = vertexStream->vertexBuffer()->declaration();
+	for (const auto& tex : _textures)
+	{
+		psInfo.textureBinding.emplace(tex.second.unit, tex.second.texture);
+	}
+	return PipelineState::Pointer::create(psInfo);
+}
+
+void Material::enableInRenderState(RenderState::Pointer rs)
+{
+	rs->setCullMode(_pipelineState.cull);
+	rs->setBlendState(_pipelineState.blend);
+	rs->setDepthState(_pipelineState.depth);
 
 	for (auto& i : _textures)
 	{
-		rs.bindTexture(i.second.unit, i.second.texture);
+		i.second.texture->bind(i.second.unit);
 	}
-	
-	rs.bindProgram(_program);
+
+	_pipelineState.program->bind();
+
 	for (auto& i : _properties)
 	{
 		if (i.second.requireUpdate)
@@ -146,18 +158,18 @@ void Material::loadProperties()
 	_propertiesData.resize(0);
 
 	uint32_t textureUnitCounter = 0;
-	for (const auto& u : _program->uniforms())
+	for (const auto& u : _pipelineState.program->uniforms())
 	{
 		String name(u.first.c_str());
-		if (_program->isSamplerUniformType(u.second.type))
+		if (_pipelineState.program->isSamplerUniformType(u.second.type))
 		{
 			addTexture(name, u.second.location, textureUnitCounter);
-			_program->setUniform(u.second.location, u.second.type, textureUnitCounter);
+			_pipelineState.program->setUniform(u.second.location, u.second.type, textureUnitCounter);
 			++textureUnitCounter;
 		}
-		else if (!_program->isBuiltInUniformName(u.first))
+		else if (!_pipelineState.program->isBuiltInUniformName(u.first))
 		{
-			addDataProperty(name, _program->uniformTypeToDataType(u.second.type), u.second.location);
+			addDataProperty(name, _pipelineState.program->uniformTypeToDataType(u.second.type), u.second.location);
 		}
 	}
 }
@@ -220,7 +232,7 @@ void Material::setTexutre(const String& name, const Texture::Pointer& tex)
 
 uint32_t Material::sortingKey() const
 {
-	return _depth.sortingKey() | _blend.sortingKey() << 8 | _additionalPriority << 16;
+	return _pipelineState.depth.sortingKey() | _pipelineState.blend.sortingKey() << 8 | _additionalPriority << 16;
 }
 
 uint64_t Material::makeSnapshot()
@@ -236,11 +248,8 @@ uint64_t Material::makeSnapshot()
 	_snapshots.emplace_back();
 	
 	auto& snapshot = _snapshots.back();
-	
-	snapshot.blend = _blend;
-	snapshot.depth = _depth;
-	snapshot.cullMode = _cullMode;
-	
+	snapshot.pipelineState = _pipelineState;
+
 	snapshot.textures.reserve(_textures.size());
 	for (const auto& t : _textures)
 	{
@@ -260,21 +269,22 @@ uint64_t Material::makeSnapshot()
 	return _lastShapshotIndex;
 }
 
-void Material::enableSnapshotInRenderState(RenderState& rs, uint64_t index)
+void Material::enableSnapshotInRenderState(RenderState::Pointer rs, uint64_t index)
 {
 	ET_ASSERT(index < _snapshots.size());
 	
 	const auto& snapshot = _snapshots.at(static_cast<size_t>(index));
-	rs.setCulling(snapshot.cullMode);
-	rs.setBlendState(snapshot.blend);
-	rs.setDepthState(snapshot.depth);
-	
+
+	rs->setCullMode(snapshot.pipelineState.cull);
+	rs->setBlendState(snapshot.pipelineState.blend);
+	rs->setDepthState(snapshot.pipelineState.depth);
+
 	for (auto& i : snapshot.textures)
 	{
-		rs.bindTexture(i.unit, i.texture);
+		i.texture->bind(i.unit);
 	}
-	
-	rs.bindProgram(_program);
+
+	_pipelineState.program->bind();
 	for (const auto& i : snapshot.properties)
 	{
 		applyProperty(i, snapshot.propertiesData);
@@ -285,7 +295,7 @@ void Material::applyProperty(const DataProperty& prop, const BinaryDataStorage& 
 {
 	auto format = dataTypeDataFormat(prop.type);
 	auto ptr = data.element_ptr(prop.offset);
-	auto programPtr = _program.ptr();
+	auto programPtr = _pipelineState.program.ptr();
 	if (format == DataFormat::Int)
 	{
 		auto& fn = _setIntFunctions[uint32_t(prop.type)];

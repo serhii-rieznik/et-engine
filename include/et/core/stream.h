@@ -19,7 +19,7 @@ namespace et
 	class InputStream : public Shared
 	{
 	public:
-		ET_DECLARE_POINTER(InputStream)
+		ET_DECLARE_POINTER(InputStream);
 		
 	public:
 		InputStream();

@@ -12,8 +12,9 @@
 
 namespace et
 {
-#	define ET_DECLARE_POINTER(T)					using Pointer = et::IntrusivePtr<T>;
-	
+#	define ET_DECLARE_POINTER(T)					using Pointer = et::IntrusivePtr<T>
+#	define ET_FORWARD_DECLARE_POINTER(T)			class T; using T##Pointer = et::IntrusivePtr<T>
+
 	ObjectFactory& sharedObjectFactory();
     
     class Shared

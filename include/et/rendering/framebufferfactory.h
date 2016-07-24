@@ -17,7 +17,7 @@ namespace et
 	class FramebufferFactory : public APIObjectFactory
 	{
 	public:
-		ET_DECLARE_POINTER(FramebufferFactory)
+		ET_DECLARE_POINTER(FramebufferFactory);
 		
 	public:
 		FramebufferFactory(RenderContext* rc) :

@@ -16,7 +16,7 @@ namespace et
 	class VertexArrayObject : public APIObject
 	{
 	public:
-		ET_DECLARE_POINTER(VertexArrayObject)
+		ET_DECLARE_POINTER(VertexArrayObject);
 		
 	public:
 		VertexArrayObject(RenderContext*, VertexBuffer::Pointer, IndexBuffer::Pointer,
@@ -25,6 +25,8 @@ namespace et
 		VertexArrayObject(RenderContext*, const std::string& name = emptyString);
 		
 		~VertexArrayObject();
+
+		void bind();
 
 		VertexBuffer::Pointer& vertexBuffer()
 			{ return _vb; };
@@ -44,9 +46,9 @@ namespace et
 
 	private:
 		void init();
+		void rebind();
 
 	private:
-		RenderContext* _rc = nullptr;
 		VertexBuffer::Pointer _vb;
 		IndexBuffer::Pointer _ib;
 	};

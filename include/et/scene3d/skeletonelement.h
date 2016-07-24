@@ -16,7 +16,7 @@ namespace et
 		class SkeletonElement : public BaseElement
 		{
 		public:
-			ET_DECLARE_POINTER(SkeletonElement)
+			ET_DECLARE_POINTER(SkeletonElement);
 			
 		public:
 			SkeletonElement(const std::string& name, BaseElement* parent) :

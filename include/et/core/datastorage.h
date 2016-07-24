@@ -119,7 +119,7 @@ namespace et
 			{ ET_ASSERT(mutableData()); return reinterpret_cast<char*>(_mutableData); }
 		
 		DataTypeReference operator [] (int32_t aIndex)
-			{ ET_ASSERT(mutableData() && (aIndex >= 0) && (aIndex < static_cast<int>(_size))); return _mutableData[aIndex]; }
+			{ ET_ASSERT(mutableData() && (aIndex >= 0) && (aIndex < static_cast<int32_t>(_size))); return _mutableData[aIndex]; }
 		
 		DataTypeReference operator [] (uint32_t aIndex)
 			{ ET_ASSERT(mutableData() && (aIndex < _size)); return _mutableData[aIndex]; }
@@ -149,7 +149,7 @@ namespace et
 			{ return _immutableData; }
 		
 		DataTypeConstReference operator [] (int32_t i) const
-			{ ET_ASSERT((i >= 0) && (i < static_cast<int>(_size))); return _immutableData[i]; }
+			{ ET_ASSERT((i >= 0) && (i < static_cast<int32_t>(_size))); return _immutableData[i]; }
 
 		DataTypeConstReference operator [] (uint32_t i) const
 			{ ET_ASSERT(i < _size); return _immutableData[i]; }
@@ -346,6 +346,6 @@ namespace et
 	};
 
 	typedef DataStorage<float> FloatDataStorage;
-	typedef DataStorage<unsigned char> BinaryDataStorage;
+	typedef DataStorage<uint8_t> BinaryDataStorage;
 	typedef DataStorage<char> StringDataStorage;
 }

@@ -120,7 +120,7 @@ Texture::Pointer TextureFactory::loadTexture(const std::string& fileName, Object
 		TextureDescription::Pointer desc =
 			async ? et::loadTextureDescription(file, false) : et::loadTexture(file);
 		
-		int maxTextureSize = static_cast<int>(RenderingCapabilities::instance().maxTextureSize());
+		int maxTextureSize = static_cast<int32_t>(RenderingCapabilities::instance().maxTextureSize());
 		if ((desc->size.x > maxTextureSize) || (desc->size.y > maxTextureSize))
 		{
 			log::warning("Attempt to load texture with dimensions (%d x %d) larger than max allowed (%d)",
@@ -262,10 +262,10 @@ Texture::Pointer TextureFactory::genNoiseTexture(const vec2i& size, bool norm, c
 		if (norm)
 			rand_f.xyz().normalize();
 		
-		randata[i].x = static_cast<unsigned char>(255.0f * clamp(0.5f + 0.5f * rand_f.x, 0.0f, 1.0f));
-		randata[i].y = static_cast<unsigned char>(255.0f * clamp(0.5f + 0.5f * rand_f.y, 0.0f, 1.0f));
-		randata[i].z = static_cast<unsigned char>(255.0f * clamp(0.5f + 0.5f * rand_f.z, 0.0f, 1.0f));
-		randata[i].w = static_cast<unsigned char>(255.0f * clamp(0.5f + 0.5f * rand_f.w, 0.0f, 1.0f));
+		randata[i].x = static_cast<uint8_t>(255.0f * clamp(0.5f + 0.5f * rand_f.x, 0.0f, 1.0f));
+		randata[i].y = static_cast<uint8_t>(255.0f * clamp(0.5f + 0.5f * rand_f.y, 0.0f, 1.0f));
+		randata[i].z = static_cast<uint8_t>(255.0f * clamp(0.5f + 0.5f * rand_f.z, 0.0f, 1.0f));
+		randata[i].w = static_cast<uint8_t>(255.0f * clamp(0.5f + 0.5f * rand_f.w, 0.0f, 1.0f));
 	}
 
 	TextureDescription::Pointer desc = TextureDescription::Pointer::create();
@@ -311,7 +311,7 @@ Texture::Pointer TextureFactory::loadTexturesToCubemap(const std::string& posx, 
 		et::loadTexture(application().resolveFileName(negz))
 	};
 
-	int maxCubemapSize = static_cast<int>(RenderingCapabilities::instance().maxCubemapTextureSize());
+	int maxCubemapSize = static_cast<int32_t>(RenderingCapabilities::instance().maxCubemapTextureSize());
 	
 	for (size_t l = 0; l < 6; ++l)
 	{
