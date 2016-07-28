@@ -12,7 +12,7 @@
 #include <et/scene3d/storage.h>
 #include <et/scene3d/modelloader.h>
 #include <et/rendering/rendercontext.h>
-#include <et/rendering/vertexstorage.h>
+#include <et/rendering/base/vertexstorage.h>
 
 namespace et
 {

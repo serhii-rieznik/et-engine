@@ -7,10 +7,12 @@
 
 #include <et/platform-win/context_win.h>
 
+#if (ET_PLATFORM_WIN)
+
 namespace et
 {
 
-PlatformDependentContext ApplicationContextFactoryWin::createContextWithOptions(ContextOptions&)
+PlatformDependentContext ApplicationContextFactoryWin::createContextWithOptions(RenderingAPI, ContextOptions&)
 {
 	return PlatformDependentContext();
 }
@@ -20,3 +22,5 @@ void ApplicationContextFactoryWin::destroyContext(PlatformDependentContext conte
 }
 
 }
+
+#endif

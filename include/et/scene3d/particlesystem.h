@@ -50,12 +50,11 @@ namespace et
 			void onTimerUpdated(NotifyTimer*);
 						
 		private:
+			particles::PointSpriteEmitter _emitter;
 			VertexArrayObject::Pointer _vao;
 			VertexDeclaration _decl;
-			VertexArray::Description _vertexData;
-			
-			particles::PointSpriteEmitter _emitter;
 			NotifyTimer _timer;
+			size_t _capacity = 0;
 		};
 	}
 }

@@ -8,8 +8,9 @@
 #pragma once
 
 #include <et/rendering/rendering.h>
-#include <et/rendering/vertexdeclaration.h>
 #include <et/rendering/vertexarrayobject.h>
+
+#include <et/rendering/base/vertexdeclaration.h>
 
 namespace et
 {

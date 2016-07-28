@@ -8,7 +8,7 @@
 #pragma once
 
 #include <et/rendering/rendercontextparams.h>
-#include <et/rendering/renderpass.h>
+#include <et/rendering/interface/renderpass.h>
 
 namespace et
 {
@@ -35,6 +35,13 @@ namespace et
 		virtual void submitRenderPass(RenderPass::Pointer) = 0;
 
 		virtual void drawIndexedPrimitive(PrimitiveType, IndexArrayFormat, uint32_t first, uint32_t count) = 0;
+
+		/*
+		 * Constructors
+		 */
+		virtual VertexBuffer::Pointer createVertexBuffer(const std::string&, VertexStorage::Pointer, BufferDrawType) = 0;
+		virtual IndexBuffer::Pointer createIndexBuffer(const std::string&, IndexArray::Pointer, BufferDrawType) = 0;
+		virtual VertexArrayObject::Pointer createVertexArrayObject(const std::string&) = 0;
 
 	private:
 		RenderContext* _rc = nullptr;

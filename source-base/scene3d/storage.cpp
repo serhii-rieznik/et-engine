@@ -277,12 +277,12 @@ void Storage::buildVertexArrayObjects(RenderContext* rc)
     for (auto vs : _vertexStorages)
     {
         std::string vaoName = "vao-" + intToStr(_vertexArrayObjects.size() + 1);
-        auto vao = rc->vertexBufferFactory().createVertexArrayObject(vaoName);
+        auto vao = rc->renderer()->createVertexArrayObject(vaoName);
         if (ib.invalid())
         {
-            ib = rc->vertexBufferFactory().createIndexBuffer("mainIndexBuffer", _indexArray, BufferDrawType::Static);
+            ib = rc->renderer()->createIndexBuffer("mainIndexBuffer", _indexArray, BufferDrawType::Static);
         }
-        auto vb = rc->vertexBufferFactory().createVertexBuffer(vs->name(), vs, BufferDrawType::Static);
+        auto vb = rc->renderer()->createVertexBuffer(vs->name(), vs, BufferDrawType::Static);
         vao->setBuffers(vb, ib);
         _vertexArrayObjects.insert(vao);
     }

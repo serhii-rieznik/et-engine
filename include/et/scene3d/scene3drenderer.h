@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include <et/rendering/renderpass.h>
+#include <et/rendering/interface/renderpass.h>
 #include <et/scene3d/scene3d.h>
 
 namespace et

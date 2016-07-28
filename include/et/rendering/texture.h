@@ -7,43 +7,36 @@
 
 #pragma once
 
-#include <et/rendering/apiobject.h>
 #include <et/imaging/texturedescription.h>
 
 namespace et
 {
-	class RenderContext;
-
-	class Texture : public APIObject
+	class Texture : public LoadableObject
 	{
 	public:
 		ET_DECLARE_POINTER(Texture);
 		
 	public:
-		Texture(RenderContext*, const TextureDescription::Pointer&, const std::string&, bool deferred);
-		Texture(RenderContext*, uint32_t texture, const vec2i& size, const std::string& name);
+		Texture(const TextureDescription::Pointer&, const std::string&, bool deferred);
+		Texture(uint32_t texture, const vec2i& size, const std::string& name);
 		~Texture();
 
 		void bind(uint32_t unit) const;
+		void setWrap(TextureWrap s, TextureWrap t, TextureWrap r = TextureWrap::ClampToEdge);
+		void setFiltration(TextureFiltration minFiltration, TextureFiltration magFiltration);
 
-		void setWrap(RenderContext*, TextureWrap s, TextureWrap t,
-			TextureWrap r = TextureWrap::ClampToEdge);
+		void setMaxLod(uint32_t value);
+		void setAnisotropyLevel(float);
 
-		void setFiltration(RenderContext*, TextureFiltration minFiltration,
-			TextureFiltration magFiltration);
-
-		void setMaxLod(RenderContext*, uint32_t value);
-		void setAnisotropyLevel(RenderContext*, float);
-
-		void compareRefToTexture(RenderContext*, bool enable, int32_t compareFunc);
-		void generateMipMaps(RenderContext* rc);
+		void compareRefToTexture(bool enable, int32_t compareFunc);
+		void generateMipMaps();
 
 		vec2 getTexCoord(const vec2& ivec, TextureOrigin origin = TextureOrigin::TopLeft) const;
 
-		void updateData(RenderContext*, TextureDescription::Pointer desc);
-		void updateDataDirectly(RenderContext*, const vec2i& size, const char* data, size_t dataSize);
+		void updateData(TextureDescription::Pointer desc);
+		void updateDataDirectly(const vec2i& size, const char* data, size_t dataSize);
 
-		void updatePartialDataDirectly(RenderContext*, const vec2i& offset, const vec2i& size,
+		void updatePartialDataDirectly(const vec2i& offset, const vec2i& size,
 			const char* data, size_t dataSize);
 
 		TextureFormat internalFormat() const
@@ -76,11 +69,16 @@ namespace et
 		const TextureDescription::Pointer description() const
 			{ return _desc; }
 
+		uint32_t apiHandle() const { return _ah; }
+
 	private:
-		void generateTexture(RenderContext* rc);
+		void generateTexture();
 		void buildProperies();
-		void build(RenderContext* rc);
+		void build();
         void buildData(const char* ptr, size_t dataSize);
+
+		uint32_t _ah = 0;
+		void setAPIHandle(uint32_t ah) { _ah = ah; }
 
 	private:
 		TextureDescription::Pointer _desc;

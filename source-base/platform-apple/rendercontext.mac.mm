@@ -15,17 +15,17 @@
 
 #include <et/platform/platformtools.h>
 #include <et/core/threading.h>
-#include <et/rendering/renderhelper.h>
+
+#include <et/rendering/base/helpers.h>
 
 #include <AppKit/NSOpenGL.h>
 #include <AppKit/NSOpenGLView.h>
-#include <et/opengl/openglrenderer.h>
-#include <et/opengl/openglrenderstate.h>
+#include <et/rendering/opengl/opengl_renderer.h>
+#include <et/rendering/opengl/opengl_renderstate.h>
 
-#include <Metal/Metal.h>
-#include <QuartzCore/CAMetalLayer.h>
-#include <et/metal/metalrenderer.h>
-#include <et/metal/metalrenderstate.h>
+#include <et/rendering/metal/metal.h>
+#include <et/rendering/metal/metal_renderer.h>
+#include <et/rendering/metal/metal_renderstate.h>
 
 #include <et/app/application.h>
 
@@ -66,10 +66,8 @@ RenderContext::RenderContext(const RenderContextParameters& inParams, Applicatio
 
 	_renderer->init(_params);
 
-	_textureFactory = TextureFactory::Pointer::create(this);
-	_framebufferFactory = FramebufferFactory::Pointer::create(this);
-	_materialFactory = MaterialFactory::Pointer::create(this);
-	_vertexBufferFactory = VertexBufferFactory::Pointer::create(this);
+	_textureFactory = TextureFactory::Pointer::create();
+	_materialFactory = MaterialFactory::Pointer::create();
 
 	NSWindow* mainWindow = (__bridge NSWindow*)(ctx.objects[0]);
 	NSView* mainView = nil;
@@ -91,10 +89,7 @@ RenderContext::RenderContext(const RenderContextParameters& inParams, Applicatio
 		[mainView setWantsLayer:YES];
 	}
 
-	// CGSize viewSize = mainView.bounds.size;
-	// _defaultFramebuffer = _framebufferFactory->createFramebufferWrapper(0);
-	// _defaultFramebuffer->resize(vec2i(static_cast<int32_t>(viewSize.width),  static_cast<int32_t>(viewSize.height)));
-	// renderhelper::init(this);
+	renderhelper::init(this);
 
 	[mainWindow makeKeyAndOrderFront:[NSApplication sharedApplication]];
 	[mainWindow orderFrontRegardless];
@@ -171,7 +166,7 @@ void RenderContext::popRenderingContext()
 
 void RenderContext::performResizing(const vec2i& newSize)
 {
-	_defaultFramebuffer->resize(newSize);
+	_size = newSize;
 }
 
 CVReturn etDisplayLinkOutputCallback(CVDisplayLinkRef, const CVTimeStamp*, const CVTimeStamp*,

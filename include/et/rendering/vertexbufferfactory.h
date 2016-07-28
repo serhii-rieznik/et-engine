@@ -7,21 +7,20 @@
 
 #pragma once
 
-#include <et/rendering/apiobject.h>
+/*
 #include <et/rendering/vertexarrayobject.h>
 
 namespace et
 {
 	class VertexDeclaration;
 
-	class VertexBufferFactory : public APIObjectFactory
+	class VertexBufferFactory : public Shared
 	{
 	public:
 		ET_DECLARE_POINTER(VertexBufferFactory);
-		
-	public:
-		VertexBufferFactory(RenderContext* rc);
+		ET_DENY_COPY(VertexBufferFactory)
 
+	public:
 		VertexBuffer::Pointer createVertexBuffer(const std::string&, VertexArray::Pointer, BufferDrawType);
 		VertexBuffer::Pointer createVertexBuffer(const std::string&, VertexStorage::Pointer, BufferDrawType);
 		
@@ -37,9 +36,7 @@ namespace et
 
 		VertexArrayObject::Pointer createVertexArrayObject(const std::string&, VertexStorage::Pointer, BufferDrawType,
 			IndexBuffer::Pointer);
-
-	private:
-		ET_DENY_COPY(VertexBufferFactory)
 	};
 
 }
+*/

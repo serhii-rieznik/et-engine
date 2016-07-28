@@ -8,18 +8,17 @@
 #pragma once
 
 #include <et/rendering/material.h>
-#include <et/rendering/apiobject.h>
 
 namespace et
 {
 	class MaterialFactoryPrivate;
-	class MaterialFactory : public APIObjectFactory
+	class MaterialFactory : public Shared
 	{
 	public:
 		ET_DECLARE_POINTER(MaterialFactory);
 		
 	public:
-		MaterialFactory(RenderContext* rc);
+		MaterialFactory();
 		~MaterialFactory();
 
 		/*

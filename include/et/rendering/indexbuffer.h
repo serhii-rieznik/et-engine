@@ -7,21 +7,18 @@
 
 #pragma once
 
-#include <et/rendering/apiobject.h>
-#include <et/rendering/indexarray.h>
+#include <et/rendering/base/indexarray.h>
 
 namespace et
 {
 	class RenderState;
-	class IndexBuffer : public APIObject
+	class IndexBuffer : public Object
 	{
 	public:
 		ET_DECLARE_POINTER(IndexBuffer);
 
 	public:
-		IndexBuffer(RenderContext* rc, IndexArray::Pointer i, BufferDrawType drawType,
-			const std::string& name = emptyString);
-		
+		IndexBuffer(IndexArray::Pointer i, BufferDrawType drawType, const std::string& name);
 		~IndexBuffer();
 
 		PrimitiveType primitiveType() const
@@ -57,6 +54,10 @@ namespace et
 		void build(const IndexArray::Pointer& i);
 		
 		void internal_setData(const unsigned char* data, uint32_t size);
+
+		uint32_t _ah = 0;
+		uint32_t apiHandle() const { return _ah; }
+		void setAPIHandle(uint32_t ah) { _ah = ah; }
 
 	private:
 		uint32_t _size = 0;

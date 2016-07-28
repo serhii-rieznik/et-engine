@@ -7,23 +7,20 @@
 
 #pragma once
 
-#include <et/rendering/vertexbuffer.h>
+#include <et/rendering/interface/vertexbuffer.h>
 #include <et/rendering/indexbuffer.h>
 
 namespace et
 {
 	class RenderState;
-	class VertexArrayObject : public APIObject
+	class VertexArrayObject : public Object
 	{
 	public:
 		ET_DECLARE_POINTER(VertexArrayObject);
 		
 	public:
-		VertexArrayObject(RenderContext*, VertexBuffer::Pointer, IndexBuffer::Pointer,
-			const std::string& name = emptyString);
-		
-		VertexArrayObject(RenderContext*, const std::string& name = emptyString);
-		
+		explicit VertexArrayObject(const std::string& name);
+		VertexArrayObject(VertexBuffer::Pointer, IndexBuffer::Pointer, const std::string& name);
 		~VertexArrayObject();
 
 		void bind();
@@ -47,6 +44,10 @@ namespace et
 	private:
 		void init();
 		void rebind();
+
+		uint32_t _ah = 0;
+		uint32_t apiHandle() { return _ah; }
+		void setAPIHandle(uint32_t ah) { _ah = ah; }
 
 	private:
 		VertexBuffer::Pointer _vb;

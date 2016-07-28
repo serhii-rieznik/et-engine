@@ -9,20 +9,18 @@
 
 #include <et/app/events.h>
 #include <et/rendering/texture.h>
-#include <et/rendering/apiobject.h>
 #include <et/imaging/textureloaderthread.h>
 
 namespace et
 {
 	class TextureFactoryPrivate;
-	class TextureFactory : public APIObjectFactory, public TextureLoadingThreadDelegate
+	class TextureFactory : public Shared, public TextureLoadingThreadDelegate
 	{
 	public:
 		ET_DECLARE_POINTER(TextureFactory);
 		
 	public:
-		TextureFactory(RenderContext*);
-		
+		TextureFactory();
 		~TextureFactory();
 		
 		Texture::Pointer loadTexture(const std::string& file, ObjectsCache& cache, bool async = false,

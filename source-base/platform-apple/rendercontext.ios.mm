@@ -5,14 +5,14 @@
  *
  */
 
-#include <et/opengl/opengl.h>
-#include <et/opengl/openglcaps.h>
 #include <et/app/application.h>
-#include <et/rendering/rendercontext.h>
-#include <et/rendering/renderer.h>
 
 #if (ET_PLATFORM_IOS)
 
+#include <et/rendering/opengl/opengl.h>
+#include <et/rendering/opengl/opengl_caps.h>
+#include <et/rendering/interface/renderer.h>
+#include <et/rendering/rendercontext.h>
 #include <et/platform-ios/openglviewcontroller.h>
 
 using namespace et;
@@ -28,8 +28,7 @@ public:
 };
 
 RenderContext::RenderContext(const RenderContextParameters& params, Application* app) :
-	_params(params), _app(app), _programFactory(nullptr), _textureFactory(nullptr), _framebufferFactory(nullptr),
-	_vertexBufferFactory(nullptr), _renderer(nullptr)
+	_params(params), _app(app)
 {
 	ET_PIMPL_INIT(RenderContext, params)
 	
@@ -43,7 +42,6 @@ RenderContext::RenderContext(const RenderContextParameters& params, Application*
 	
 	_programFactory = ProgramFactory::Pointer::create(this);
 	_textureFactory = TextureFactory::Pointer::create(this);
-	_framebufferFactory = FramebufferFactory::Pointer::create(this);
 	_vertexBufferFactory = VertexBufferFactory::Pointer::create(this);
 	_renderer = Renderer::Pointer::create(this);
 	

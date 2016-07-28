@@ -34,7 +34,7 @@ namespace et
 		bool depthIsRenderbuffer = false;
 	};
 
-	class Framebuffer : public APIObject
+	class Framebuffer : public Object
 	{
 	public:
 		ET_DECLARE_POINTER(Framebuffer);
@@ -101,8 +101,6 @@ namespace et
 		void invalidate(bool color, bool depth);
 
 	private:
-		friend class FramebufferFactory;
-		
 		uint32_t buildColorRenderbuffer(uint32_t);
 		void createOrUpdateDepthRenderbuffer();
 
@@ -114,6 +112,10 @@ namespace et
 		
 		Texture::Pointer buildTexture(const vec3i&, TextureTarget, TextureFormat, 
 			TextureFormat, DataFormat);
+
+		uint32_t _ah = 0;
+		uint32_t apiHandle() const { return _ah; }
+		void setAPIHandle(uint32_t ah) { _ah = ah; }
 
 	private:
 		RenderContext* _rc;

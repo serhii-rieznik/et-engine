@@ -17,7 +17,6 @@
 #include <et/rendering/renderingcaps.h>
 #include <et/rendering/materialfactory.h>
 #include <et/rendering/texturefactory.h>
-#include <et/rendering/framebufferfactory.h>
 #include <et/rendering/vertexbufferfactory.h>
 
 namespace et
@@ -41,10 +40,7 @@ namespace et
 			{ return _params; }
 
 		const vec2i& size() const
-			{ return _defaultFramebuffer->size(); }
-
-		Framebuffer::Pointer defaultFramebuffer() const
-			{ return _defaultFramebuffer; }
+			{ return _size; }
 
 		RenderState::Pointer renderState()
 			{ return _renderState; }
@@ -57,12 +53,6 @@ namespace et
 
 		TextureFactory& textureFactory()
 			{ return _textureFactory.reference(); }
-		
-		FramebufferFactory& framebufferFactory()
-			{ return _framebufferFactory.reference(); }
-
-		VertexBufferFactory& vertexBufferFactory()
-			{ return _vertexBufferFactory.reference(); }
 
 		void pushRenderingContext();
 		bool activateRenderingContext();
@@ -90,12 +80,11 @@ namespace et
 
 		RenderState::Pointer _renderState;
 		RenderInterface::Pointer _renderer;
-		Framebuffer::Pointer _defaultFramebuffer;
-		
+
 		MaterialFactory::Pointer _materialFactory;
 		TextureFactory::Pointer _textureFactory;
-		FramebufferFactory::Pointer _framebufferFactory;
-		VertexBufferFactory::Pointer _vertexBufferFactory;
+
+		vec2i _size;
 	};
 
 }

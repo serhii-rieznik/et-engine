@@ -8,7 +8,7 @@
 #include <et/app/application.h>
 #include <et/core/conversion.h>
 #include <et/core/filesystem.h>
-#include <et/rendering/primitives.h>
+#include <et/rendering/base/primitives.h>
 #include <et/rendering/material.h>
 #include <et/scene3d/objloader.h>
 
@@ -827,8 +827,10 @@ s3d::ElementContainer::Pointer OBJLoader::generateVertexBuffers(s3d::Storage& st
 		storage.addMaterial(m);
 	}
 	
-	VertexArrayObject::Pointer vao = _rc->vertexBufferFactory().createVertexArrayObject("model-vao", _vertexData,
-		BufferDrawType::Static, _indices, BufferDrawType::Static);
+	VertexArrayObject::Pointer vao = _rc->renderer()->createVertexArrayObject("model-vao");
+	VertexBuffer::Pointer vb = _rc->renderer()->createVertexBuffer("model-vb", _vertexData, BufferDrawType::Static);
+	IndexBuffer::Pointer ib = _rc->renderer()->createIndexBuffer("model-ib", _indices, BufferDrawType::Static);
+	vao->setBuffers(vb, ib);
 
 	for (const auto& i : _meshes)
 	{

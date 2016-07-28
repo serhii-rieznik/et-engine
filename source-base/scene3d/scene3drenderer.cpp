@@ -6,8 +6,8 @@
  */
 
 #include <et/scene3d/scene3drenderer.h>
-#include <et/rendering/primitives.h>
 #include <et/rendering/rendercontext.h>
+#include <et/rendering/base/primitives.h>
 
 using namespace et;
 using namespace et::s3d;
@@ -88,6 +88,9 @@ void s3d::Renderer::renderMeshList(RenderPass::Pointer pass, const s3d::BaseElem
 
 void s3d::Renderer::initDebugObjects(RenderContext* rc, Material::Pointer bboxMaterial)
 {
+	/*
+	 * TODO
+	 *
 	VertexDeclaration decl(false, et::VertexAttributeUsage::Position, et::DataType::Vec3);
 	VertexArray::Pointer va = VertexArray::Pointer::create(decl, 0);
 	primitives::createBox(va, vec3(1.0f));
@@ -95,8 +98,13 @@ void s3d::Renderer::initDebugObjects(RenderContext* rc, Material::Pointer bboxMa
 	IndexArray::Pointer ia = IndexArray::Pointer::create(IndexArrayFormat::Format_16bit, va->size(), PrimitiveType::Triangles);
 	ia->linearize(ia->capacity());
 	
-	auto cube = rc->vertexBufferFactory().createVertexArrayObject("cube-vao", va, BufferDrawType::Static, ia, BufferDrawType::Static);
+	auto cube = rc->renderer()->createVertexArrayObject("cube-vao");
+	auto cubeVB = rc->renderer()->createVertexBuffer("cube-vb", va, BufferDrawType::Static);
+	auto cubeIB = rc->renderer()->createIndexBuffer("cube-ib", ia, BufferDrawType::Static);
+	cube->setBuffers(cubeVB, cubeIB);
+
 	_bboxBatch = RenderBatch::Pointer::create(bboxMaterial, cube);
+	*/
 }
 
 void s3d::Renderer::renderTransformedBoundingBox(RenderPass::Pointer pass, const BoundingBox& b, const mat4& t)

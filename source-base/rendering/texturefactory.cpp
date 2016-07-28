@@ -50,8 +50,7 @@ namespace et
 
 using namespace et;
 
-TextureFactory::TextureFactory(RenderContext* rc) :
-	APIObjectFactory(rc)
+TextureFactory::TextureFactory()
 {
 	ET_PIMPL_INIT(TextureFactory, this)
 	
@@ -131,7 +130,7 @@ Texture::Pointer TextureFactory::loadTexture(const std::string& fileName, Object
 		{
 			bool calledFromAnotherThread = !threading::inMainThread();
 			
-			texture = Texture::Pointer::create(renderContext(), desc, desc->origin(), async || calledFromAnotherThread);
+			texture = Texture::Pointer::create(desc, desc->origin(), async || calledFromAnotherThread);
 			cache.manage(texture, _private->loader);
 			
 			if (async)
@@ -195,7 +194,7 @@ Texture::Pointer TextureFactory::genTexture(TextureTarget target, TextureFormat 
 	
 	desc->data = data;
 	
-	return Texture::Pointer::create(renderContext(), desc, id, false);
+	return Texture::Pointer::create(desc, id, false);
 }
 
 Texture::Pointer TextureFactory::genCubeTexture(TextureFormat internalformat, uint32_t size, TextureFormat format,
@@ -217,7 +216,7 @@ Texture::Pointer TextureFactory::genCubeTexture(TextureFormat internalformat, ui
 	
 	desc->data = BinaryDataStorage(desc->layersCount * desc->dataSizeForAllMipLevels(), 0);
 	
-	return Texture::Pointer::create(renderContext(), desc, aName, false);
+	return Texture::Pointer::create(desc, aName, false);
 }
 
 Texture::Pointer TextureFactory::genTexture2DArray(const vec3i& size, TextureTarget textureTarget, 
@@ -243,12 +242,12 @@ Texture::Pointer TextureFactory::genTexture2DArray(const vec3i& size, TextureTar
 
 	desc->data = data;
 
-	return Texture::Pointer::create(renderContext(), desc, aName, false);
+	return Texture::Pointer::create(desc, aName, false);
 }
 
 Texture::Pointer TextureFactory::genTexture(TextureDescription::Pointer desc)
 {
-	return Texture::Pointer::create(renderContext(), desc, desc->origin(), false);
+	return Texture::Pointer::create(desc, desc->origin(), false);
 }
 
 Texture::Pointer TextureFactory::genNoiseTexture(const vec2i& size, bool norm, const std::string& id)
@@ -281,14 +280,14 @@ Texture::Pointer TextureFactory::genNoiseTexture(const vec2i& size, bool norm, c
     
 	etCopyMemory(desc->data.data(), randata.data(), randata.dataSize());
 
-	return Texture::Pointer::create(renderContext(), desc, id, false);
+	return Texture::Pointer::create(desc, id, false);
 }
 
 void TextureFactory::textureLoadingThreadDidLoadTextureData(TextureLoadingRequest* request)
 {
 	CriticalSectionScope lock(_csTextureLoading);
 
-	request->texture->updateData(renderContext(), request->textureDescription);
+	request->texture->updateData(request->textureDescription);
 	textureDidLoad.invoke(request->texture);
 
 	if (request->delegate)
@@ -366,7 +365,7 @@ Texture::Pointer TextureFactory::loadTexturesToCubemap(const std::string& posx, 
 	for (size_t l = 0; l < desc->layersCount; ++l)
 		etCopyMemory(desc->data.element_ptr(l * layerSize), layers[l]->data.element_ptr(0), layerSize);
 
-	Texture::Pointer result = Texture::Pointer::create(renderContext(), desc, texId, false);
+	Texture::Pointer result = Texture::Pointer::create(desc, texId, false);
 	
 	for (size_t i = 0; i < 6; ++i)
 		result->addOrigin(layers[i]->origin());
@@ -378,7 +377,7 @@ Texture::Pointer TextureFactory::loadTexturesToCubemap(const std::string& posx, 
 
 Texture::Pointer TextureFactory::createTextureWrapper(uint32_t texture, const vec2i& size, const std::string& name)
 {
-	return Texture::Pointer::create(renderContext(), texture, size, name);
+	return Texture::Pointer::create(texture, size, name);
 }
 
 void TextureFactory::reloadObject(LoadableObject::Pointer object, ObjectsCache&)
@@ -386,5 +385,5 @@ void TextureFactory::reloadObject(LoadableObject::Pointer object, ObjectsCache&)
 	TextureDescription::Pointer newData = et::loadTexture(object->origin());
 	
 	if (newData.valid())
-		Texture::Pointer(object)->updateData(renderContext(), newData);
+		Texture::Pointer(object)->updateData(newData);
 }

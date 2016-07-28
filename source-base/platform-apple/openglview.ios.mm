@@ -6,9 +6,8 @@
  *
  */
 
-#include <et/opengl/opengl.h>
+#include <et/rendering/opengl/opengl.h>
 #include <et/rendering/rendercontext.h>
-#include <et/app/applicationnotifier.h>
 
 #if (ET_PLATFORM_IOS)
 

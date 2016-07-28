@@ -7,7 +7,6 @@
 
 #pragma once
 
-#include <et/rendering/apiobject.h>
 #include <et/rendering/rendering.h>
 
 namespace et
@@ -15,7 +14,7 @@ namespace et
 	class Camera;
 	class RenderState;
 	
-	class Program : public APIObject
+	class Program : public LoadableObject
 	{
 	public:
 		ET_DECLARE_POINTER(Program);
@@ -39,9 +38,9 @@ namespace et
 		typedef std::unordered_map<std::string, Uniform> UniformMap;
 		
 	public:
-		Program(RenderContext*);
+		Program();
 		
-		Program(RenderContext*, const std::string& vertexShader, const std::string& geometryShader,
+		Program(const std::string& vertexShader, const std::string& geometryShader,
 			const std::string& fragmentShader, const std::string& objName, const std::string& origin,
 			const StringList& defines);
 
@@ -166,6 +165,10 @@ namespace et
 		void printShaderLog(uint32_t, size_t, const char*);
 		void printShaderSource(uint32_t, size_t, const char*);
 		void initBuiltInUniforms();
+
+		uint32_t _ah = 0;
+		uint32_t apiHandle() const { return _ah; }
+		void setAPIHandle(uint32_t ah) { _ah = ah; }
 
 	private:
 		Program::UniformMap _uniforms;

@@ -21,20 +21,24 @@ ParticleSystem::ParticleSystem(RenderContext* rc, uint32_t maxSize, const std::s
 	/*
 	 * Init geometry
 	 */
-	VertexArray::Pointer va = VertexArray::Pointer::create(_decl, maxSize);
+	VertexStorage::Pointer vs = VertexStorage::Pointer::create(_decl, maxSize);
 	IndexArray::Pointer ia = IndexArray::Pointer::create(IndexArrayFormat::Format_16bit, maxSize, PrimitiveType::Points);
-	auto pos = va->chunk(VertexAttributeUsage::Position).accessData<vec3>(0);
-	auto clr = va->chunk(VertexAttributeUsage::Color).accessData<vec4>(0);
+	auto pos = vs->accessData<DataType::Vec3>(VertexAttributeUsage::Position, 0);
+	auto clr = vs->accessData<DataType::Vec4>(VertexAttributeUsage::Color, 0);
 	for (uint32_t i = 0; i < pos.size(); ++i)
 	{
 		const auto& p = _emitter.particle(i);
 		pos[i] = p.position;
 		clr[i] = p.color;
 	}
-	ia->linearize(va->size());
-	
-	_vao = rc->vertexBufferFactory().createVertexArrayObject(name, va, BufferDrawType::Stream, ia, BufferDrawType::Static);
-	_vertexData = va->generateDescription();
+	ia->linearize(maxSize);
+
+	_capacity = vs->capacity();
+
+	_vao = rc->renderer()->createVertexArrayObject(name);
+	auto vb = rc->renderer()->createVertexBuffer(name + "-vb", vs, BufferDrawType::Stream);
+	auto ib = rc->renderer()->createIndexBuffer(name + "-ib", ia, BufferDrawType::Static);
+	_vao->setBuffers(vb, ib);
 	
 	_timer.expired.connect(this, &ParticleSystem::onTimerUpdated);
 	_timer.start(currentTimerPool(), 0.0f, NotifyTimer::RepeatForever);
@@ -52,14 +56,14 @@ void ParticleSystem::onTimerUpdated(NotifyTimer* timer)
 
 	_vao->bind();
 	
-	void* bufferData = bufferData = _vao->vertexBuffer()->map(0, _vertexData.data.dataSize(),
+	void* bufferData = bufferData = _vao->vertexBuffer()->map(0, _capacity,
 		MapBufferOptions::Write | MapBufferOptions::InvalidateBuffer);
 
 	auto posOffset = _decl.elementForUsage(VertexAttributeUsage::Position).offset();
 	auto clrOffset = _decl.elementForUsage(VertexAttributeUsage::Color).offset();
 	
-	RawDataAcessor<vec3> pos(reinterpret_cast<char*>(bufferData), _vertexData.data.dataSize(), _decl.dataSize(), posOffset);
-	RawDataAcessor<vec4> clr(reinterpret_cast<char*>(bufferData), _vertexData.data.dataSize() + clrOffset, _decl.dataSize(), clrOffset);
+	RawDataAcessor<vec3> pos(reinterpret_cast<char*>(bufferData), _capacity, _decl.dataSize(), posOffset);
+	RawDataAcessor<vec4> clr(reinterpret_cast<char*>(bufferData), _capacity + clrOffset, _decl.dataSize(), clrOffset);
 	
 	for (uint32_t i = 0; i < _emitter.activeParticlesCount(); ++i)
 	{

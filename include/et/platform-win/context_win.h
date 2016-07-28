@@ -9,12 +9,16 @@
 
 #include <et/app/context.h>
 
+#if (ET_PLATFORM_WIN)
+
 namespace et
 {
     class ApplicationContextFactoryWin : public ApplicationContextFactory
     {
     public:
-        PlatformDependentContext createContextWithOptions(ContextOptions&) override;
+        PlatformDependentContext createContextWithOptions(RenderingAPI, ContextOptions&) override;
         void destroyContext(PlatformDependentContext) override;
     };
 }
+
+#endif

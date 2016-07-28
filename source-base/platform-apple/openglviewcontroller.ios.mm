@@ -5,7 +5,7 @@
  *
  */
 
-#include <et/app/applicationnotifier.h>
+#include <et/app/application.h>
 
 #if (ET_PLATFORM_IOS)
 

@@ -5,19 +5,16 @@
  *
  */
 
+/*
+ 
 #include <et/rendering/vertexbufferfactory.h>
 
 using namespace et;
 
-VertexBufferFactory::VertexBufferFactory(et::RenderContext* rc) :
-	APIObjectFactory(rc)
-{
-}
-
 VertexBuffer::Pointer VertexBufferFactory::createVertexBuffer(const std::string& name,
 	VertexArray::Pointer data, BufferDrawType drawType)
 {
-	VertexBuffer::Pointer vb = VertexBuffer::Pointer::create(renderContext(), data->generateDescription(),
+	VertexBuffer::Pointer vb = VertexBuffer::Pointer::create(data->generateDescription(),
 		drawType, name);
 	vb->setSourceObjectName(data->name());
 	return vb;
@@ -26,8 +23,7 @@ VertexBuffer::Pointer VertexBufferFactory::createVertexBuffer(const std::string&
 VertexBuffer::Pointer VertexBufferFactory::createVertexBuffer(const std::string& name,
 	VertexStorage::Pointer data, BufferDrawType drawType)
 {
-	VertexBuffer::Pointer vb = VertexBuffer::Pointer::create(renderContext(), data->declaration(),
-		data->data(), drawType, name);
+	VertexBuffer::Pointer vb = VertexBuffer::Pointer::create(data->declaration(), data->data(), drawType, name);
 	vb->setSourceObjectName(data->name());
 	return vb;
 }
@@ -35,21 +31,21 @@ VertexBuffer::Pointer VertexBufferFactory::createVertexBuffer(const std::string&
 IndexBuffer::Pointer VertexBufferFactory::createIndexBuffer(const std::string& name, IndexArray::Pointer data,
 	BufferDrawType drawType)
 {
-	IndexBuffer::Pointer ib = IndexBuffer::Pointer::create(renderContext(), data, drawType, name);
+	IndexBuffer::Pointer ib = IndexBuffer::Pointer::create(data, drawType, name);
 	ib->setSourceObjectName(data->name());
 	return ib;
 }
 
 VertexArrayObject::Pointer VertexBufferFactory::createVertexArrayObject(const std::string& name)
 {
-	return VertexArrayObject::Pointer::create(renderContext(), name);
+	return VertexArrayObject::Pointer::create(name);
 }
 
 VertexArrayObject::Pointer VertexBufferFactory::createVertexArrayObject(const std::string& name, 
 	VertexArray::Pointer vertexData, BufferDrawType vertexDrawType, IndexArray::Pointer indexData,
 	BufferDrawType indexDrawType)
 {
-	VertexArrayObject::Pointer result = VertexArrayObject::Pointer::create(renderContext(), name);
+	VertexArrayObject::Pointer result = VertexArrayObject::Pointer::create(name);
 
 	result->setBuffers(createVertexBuffer(name + "-vb", vertexData, vertexDrawType),
 		createIndexBuffer(name + "-ib", indexData, indexDrawType));
@@ -61,7 +57,7 @@ VertexArrayObject::Pointer VertexBufferFactory::createVertexArrayObject(const st
 	VertexStorage::Pointer vertexData, BufferDrawType vertexDrawType, IndexArray::Pointer indexData,
 	BufferDrawType indexDrawType)
 {
-	VertexArrayObject::Pointer result = VertexArrayObject::Pointer::create(renderContext(), name);
+	VertexArrayObject::Pointer result = VertexArrayObject::Pointer::create(name);
 	
 	auto vb = createVertexBuffer(name + "-vb", vertexData, vertexDrawType);
 	auto ib = IndexBuffer::Pointer();
@@ -77,8 +73,9 @@ VertexArrayObject::Pointer VertexBufferFactory::createVertexArrayObject(const st
 VertexArrayObject::Pointer VertexBufferFactory::createVertexArrayObject(const std::string& name, VertexStorage::Pointer vertexData,
 	BufferDrawType vertexDrawType, IndexBuffer::Pointer ib)
 {
-	VertexArrayObject::Pointer result = VertexArrayObject::Pointer::create(renderContext(), name);
+	VertexArrayObject::Pointer result = VertexArrayObject::Pointer::create(name);
 	result->setBuffers(createVertexBuffer(name + "-vb", vertexData, vertexDrawType), ib);
 	return result;
 }
 
+*/
