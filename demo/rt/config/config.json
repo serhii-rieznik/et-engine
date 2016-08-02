@@ -1,6 +1,6 @@
 {
 	"reference" : "cornellbox.json",
-	"method" : "backward",
+	"method" : "forward",
 	"threads" : 0,
 	"rays-per-pixel" : 1,
 	"max-path-length" : 1024

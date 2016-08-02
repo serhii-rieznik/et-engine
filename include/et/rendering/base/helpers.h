@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include <et/rendering/interface/renderbatch.h>
+#include <et/rendering/base/renderbatch.h>
 
 namespace et
 {

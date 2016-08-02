@@ -5,6 +5,7 @@
  *
  */
 
+#include <et/app/application.h>
 #include <et/rendering/rendercontext.h>
 #include <et/rendering/base/helpers.h>
 
@@ -45,12 +46,14 @@ void init(RenderContext* rc)
     
     rh_local::plainMaterial = rc->materialFactory().createMaterial();
     rh_local::plainMaterial->setDepthState(rh_local::disabledDepthState);
-    
-/*
-	Program::Pointer fullScreenProgram = rc->materialFactory().genProgram("rh_local::program",
-		rh_local::vertexShader, rh_local::fragmentShader);
-	rh_local::plainMaterial->setProgram(fullScreenProgram);
-*/
+  
+    Program::Pointer fullScreenProgram;
+    if (application().parameters().renderingAPI == RenderingAPI::OpenGL)
+    {
+        fullScreenProgram = rc->materialFactory().genProgram("rh_local::program",
+            rh_local::vertexShader, rh_local::fragmentShader);
+        rh_local::plainMaterial->setProgram(fullScreenProgram);
+    }
 }
 
 void release()

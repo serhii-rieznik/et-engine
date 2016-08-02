@@ -91,11 +91,12 @@ void MainController::applicationDidLoad(et::RenderContext* rc)
         auto objVb = _rc->renderer()->createVertexBuffer("shpere-vb", va, et::BufferDrawType::Static);
         auto objIb = _rc->renderer()->createIndexBuffer("sphere-ib", ia, et::BufferDrawType::Static);
         obj->setBuffers(objVb, objIb);
-        // _rc->vertexBufferFactory().createVertexArrayObject("sphere", va, et::BufferDrawType::Static, ia, et::BufferDrawType::Static);
-		auto mesh = et::s3d::Mesh::Pointer::create("sphere", mat, _scene.ptr());
+        
 		et::RenderBatch::Pointer rb = et::RenderBatch::Pointer::create(et::Material::Pointer(), obj);
 		rb->setVertexStorage(va);
 		rb->setIndexArray(ia);
+        
+        auto mesh = et::s3d::Mesh::Pointer::create("sphere", mat, _scene.ptr());
 		mesh->addRenderBatch(rb);
 	}
 	et::Raytrace::Options rtOptions;
@@ -202,10 +203,10 @@ void MainController::start()
 
     et::TextureDescription::Pointer desc = et::TextureDescription::Pointer::create();
     desc->target = et::TextureTarget::Texture_2D;
-    desc->bitsPerPixel = 32;
-    desc->internalformat = et::TextureFormat::RGBA8;
+    desc->bitsPerPixel = 128;
+    desc->internalformat = et::TextureFormat::RGBA32F;
     desc->format = et::TextureFormat::RGBA;
-    desc->type = et::DataFormat::UnsignedChar;
+    desc->type = et::DataFormat::Float;
     desc->size = textureSize;
     desc->data = et::BinaryDataStorage(reinterpret_cast<unsigned char*>(_textureData.data()), _textureData.dataSize());
     _texture = _rc->renderer()->createTexture(desc);

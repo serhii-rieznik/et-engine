@@ -8,7 +8,7 @@
 #include <et/geometry/geometry.h>
 #include <et/geometry/collision.h>
 #include <et/core/conversion.h>
-#include <et/rendering/interface/renderbatch.h>
+#include <et/rendering/base/renderbatch.h>
 
 using namespace et;
 

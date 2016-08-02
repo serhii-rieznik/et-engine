@@ -53,17 +53,23 @@ namespace et
         uint32_t size() const
             { return _size; }
         
+        void setSize(uint32_t sz)
+            { _size = sz; }
+        
 		BufferDrawType drawType() const
 			{ return _drawType; }
 
-        PrimitiveType primitiveType() const
-            { return _primitiveType; }
-        
         IndexArrayFormat format() const
             { return _format; }
         
         DataFormat dataFormat() const
             { return _dataFormat; }
+        
+        PrimitiveType primitiveType() const
+            { return _primitiveType; }
+        
+        void overridePrimitiveType(PrimitiveType pt)
+            { _primitiveType = pt; }
         
 		const std::string& sourceObjectName() const
 			{ return _sourceObjectName; }

@@ -47,7 +47,7 @@ void OpenGLIndexBuffer::build(const IndexArray::Pointer& i)
 		setAPIHandle(buffer);
 	}
 
-	internal_setData(i->data(), static_cast<uint32_t>(i->format()) * _size);
+	internal_setData(i->data(), static_cast<uint32_t>(i->format()) * size());
 }
 
 void OpenGLIndexBuffer::internal_setData(const unsigned char* data, uint32_t size)
@@ -55,13 +55,13 @@ void OpenGLIndexBuffer::internal_setData(const unsigned char* data, uint32_t siz
 	ET_ASSERT(size > 0);
 
 	bind();
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, static_cast<GLsizeiptr>(size), data, drawTypeValue(_drawType));
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, static_cast<GLsizeiptr>(size), data, drawTypeValue(drawType()));
 	checkOpenGLError("glBufferData(GL_ELEMENT_ARRAY_BUFFER, %u, 0x%08X, ..,)", size, data);
 }
 
 void* OpenGLIndexBuffer::indexOffset(uint32_t offset) const
 {
-	return reinterpret_cast<void*>(static_cast<uintptr_t>(_format) * offset);
+	return reinterpret_cast<void*>(static_cast<uintptr_t>(format()) * offset);
 }
 
 void OpenGLIndexBuffer::setData(const IndexArray::Pointer& i)
@@ -71,11 +71,6 @@ void OpenGLIndexBuffer::setData(const IndexArray::Pointer& i)
 
 void OpenGLIndexBuffer::clear()
 {
-	_size = 0;
+	setSize(0);
 	internal_setData(nullptr, 0);
-}
-
-void OpenGLIndexBuffer::overridePrimitiveType(PrimitiveType pt)
-{
-	_primitiveType = pt;
 }

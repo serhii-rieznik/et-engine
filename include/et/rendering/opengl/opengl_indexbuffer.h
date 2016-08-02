@@ -29,21 +29,11 @@ namespace et
 		void overridePrimitiveType(PrimitiveType);
 
 	private:
-		void setProperties(const IndexArray::Pointer& i);
 		void build(const IndexArray::Pointer& i);
-		
 		void internal_setData(const unsigned char* data, uint32_t size);
 
 		uint32_t _ah = 0;
 		uint32_t apiHandle() const { return _ah; }
 		void setAPIHandle(uint32_t ah) { _ah = ah; }
-
-	private:
-		uint32_t _size = 0;
-		std::string _sourceObjectName = 0;
-		DataFormat _dataType = DataFormat::UnsignedChar;
-		PrimitiveType _primitiveType = PrimitiveType::Points;
-		IndexArrayFormat _format = IndexArrayFormat::Format_16bit;
-		BufferDrawType _drawType = BufferDrawType::Static;
 	};
 }
