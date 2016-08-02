@@ -50,7 +50,6 @@
 		5C7F567E1D4A985E00F567C4 /* pngloader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5C7F55FA1D4A985E00F567C4 /* pngloader.cpp */; };
 		5C7F567F1D4A985E00F567C4 /* pvrdecompressor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5C7F55FB1D4A985E00F567C4 /* pvrdecompressor.cpp */; };
 		5C7F56801D4A985E00F567C4 /* pvrloader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5C7F55FC1D4A985E00F567C4 /* pvrloader.cpp */; };
-		5C7F56811D4A985E00F567C4 /* textureloader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5C7F55FD1D4A985E00F567C4 /* textureloader.cpp */; };
 		5C7F56821D4A985E00F567C4 /* tgaloader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5C7F55FE1D4A985E00F567C4 /* tgaloader.cpp */; };
 		5C7F56831D4A985E00F567C4 /* gestures.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5C7F56001D4A985E00F567C4 /* gestures.cpp */; };
 		5C7F56841D4A985E00F567C4 /* input.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5C7F56011D4A985E00F567C4 /* input.cpp */; };
@@ -198,8 +197,6 @@
 		5C7F57F31D4A986B00F567C4 /* pngloader.h in Headers */ = {isa = PBXBuildFile; fileRef = 5C7F57331D4A986B00F567C4 /* pngloader.h */; };
 		5C7F57F41D4A986B00F567C4 /* pvrloader.h in Headers */ = {isa = PBXBuildFile; fileRef = 5C7F57341D4A986B00F567C4 /* pvrloader.h */; };
 		5C7F57F51D4A986B00F567C4 /* texturedescription.h in Headers */ = {isa = PBXBuildFile; fileRef = 5C7F57351D4A986B00F567C4 /* texturedescription.h */; };
-		5C7F57F61D4A986B00F567C4 /* textureloader.h in Headers */ = {isa = PBXBuildFile; fileRef = 5C7F57361D4A986B00F567C4 /* textureloader.h */; };
-		5C7F57F71D4A986B00F567C4 /* textureloaderthread.h in Headers */ = {isa = PBXBuildFile; fileRef = 5C7F57371D4A986B00F567C4 /* textureloaderthread.h */; };
 		5C7F57F81D4A986B00F567C4 /* tgaloader.h in Headers */ = {isa = PBXBuildFile; fileRef = 5C7F57381D4A986B00F567C4 /* tgaloader.h */; };
 		5C7F57F91D4A986B00F567C4 /* gestures.h in Headers */ = {isa = PBXBuildFile; fileRef = 5C7F573A1D4A986B00F567C4 /* gestures.h */; };
 		5C7F57FA1D4A986B00F567C4 /* input.h in Headers */ = {isa = PBXBuildFile; fileRef = 5C7F573B1D4A986B00F567C4 /* input.h */; };
@@ -273,7 +270,6 @@
 		5C7F58991D4AA5D700F567C4 /* renderbatch.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5C7F587C1D4AA5D700F567C4 /* renderbatch.cpp */; };
 		5C7F589A1D4AA5D700F567C4 /* rendering.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5C7F587D1D4AA5D700F567C4 /* rendering.cpp */; };
 		5C7F589B1D4AA5D700F567C4 /* texturefactory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5C7F587E1D4AA5D700F567C4 /* texturefactory.cpp */; };
-		5C7F589C1D4AA5D700F567C4 /* textureloadingthread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5C7F587F1D4AA5D700F567C4 /* textureloadingthread.cpp */; };
 		5C7F589D1D4AA5D700F567C4 /* vertexbufferfactory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5C7F58801D4AA5D700F567C4 /* vertexbufferfactory.cpp */; };
 		5C7F58CA1D4AA63800F567C4 /* helpers.h in Headers */ = {isa = PBXBuildFile; fileRef = 5C7F58A11D4AA63800F567C4 /* helpers.h */; };
 		5C7F58CB1D4AA63800F567C4 /* indexarray.h in Headers */ = {isa = PBXBuildFile; fileRef = 5C7F58A21D4AA63800F567C4 /* indexarray.h */; };
@@ -283,7 +279,6 @@
 		5C7F58CF1D4AA63800F567C4 /* vertexdeclaration.h in Headers */ = {isa = PBXBuildFile; fileRef = 5C7F58A61D4AA63800F567C4 /* vertexdeclaration.h */; };
 		5C7F58D01D4AA63800F567C4 /* vertexstorage.h in Headers */ = {isa = PBXBuildFile; fileRef = 5C7F58A71D4AA63800F567C4 /* vertexstorage.h */; };
 		5C7F58D11D4AA63800F567C4 /* framebuffer.h in Headers */ = {isa = PBXBuildFile; fileRef = 5C7F58A81D4AA63800F567C4 /* framebuffer.h */; };
-		5C7F58D31D4AA63800F567C4 /* indexbuffer.h in Headers */ = {isa = PBXBuildFile; fileRef = 5C7F58AA1D4AA63800F567C4 /* indexbuffer.h */; };
 		5C7F58D41D4AA63800F567C4 /* pipelinestate.h in Headers */ = {isa = PBXBuildFile; fileRef = 5C7F58AC1D4AA63800F567C4 /* pipelinestate.h */; };
 		5C7F58D51D4AA63800F567C4 /* renderbatch.h in Headers */ = {isa = PBXBuildFile; fileRef = 5C7F58AD1D4AA63800F567C4 /* renderbatch.h */; };
 		5C7F58D61D4AA63800F567C4 /* renderer.h in Headers */ = {isa = PBXBuildFile; fileRef = 5C7F58AE1D4AA63800F567C4 /* renderer.h */; };
@@ -295,7 +290,6 @@
 		5C7F58DC1D4AA63800F567C4 /* metal_renderer.h in Headers */ = {isa = PBXBuildFile; fileRef = 5C7F58B51D4AA63800F567C4 /* metal_renderer.h */; };
 		5C7F58DD1D4AA63800F567C4 /* metal_renderpass.h in Headers */ = {isa = PBXBuildFile; fileRef = 5C7F58B61D4AA63800F567C4 /* metal_renderpass.h */; };
 		5C7F58DE1D4AA63800F567C4 /* metal_renderstate.h in Headers */ = {isa = PBXBuildFile; fileRef = 5C7F58B71D4AA63800F567C4 /* metal_renderstate.h */; };
-		5C7F58DF1D4AA63800F567C4 /* opengl.h in Headers */ = {isa = PBXBuildFile; fileRef = 5C7F58B91D4AA63800F567C4 /* opengl.h */; };
 		5C7F58E01D4AA63800F567C4 /* opengl_caps.h in Headers */ = {isa = PBXBuildFile; fileRef = 5C7F58BA1D4AA63800F567C4 /* opengl_caps.h */; };
 		5C7F58E11D4AA63800F567C4 /* opengl_renderer.h in Headers */ = {isa = PBXBuildFile; fileRef = 5C7F58BB1D4AA63800F567C4 /* opengl_renderer.h */; };
 		5C7F58E21D4AA63800F567C4 /* opengl_renderpass.h in Headers */ = {isa = PBXBuildFile; fileRef = 5C7F58BC1D4AA63800F567C4 /* opengl_renderpass.h */; };
@@ -306,7 +300,6 @@
 		5C7F58E71D4AA63800F567C4 /* rendering.h in Headers */ = {isa = PBXBuildFile; fileRef = 5C7F58C11D4AA63800F567C4 /* rendering.h */; };
 		5C7F58E81D4AA63800F567C4 /* renderingcaps.h in Headers */ = {isa = PBXBuildFile; fileRef = 5C7F58C21D4AA63800F567C4 /* renderingcaps.h */; };
 		5C7F58E91D4AA63800F567C4 /* renderstate.h in Headers */ = {isa = PBXBuildFile; fileRef = 5C7F58C31D4AA63800F567C4 /* renderstate.h */; };
-		5C7F58EA1D4AA63800F567C4 /* texture.h in Headers */ = {isa = PBXBuildFile; fileRef = 5C7F58C41D4AA63800F567C4 /* texture.h */; };
 		5C7F58EB1D4AA63800F567C4 /* texturefactory.h in Headers */ = {isa = PBXBuildFile; fileRef = 5C7F58C51D4AA63800F567C4 /* texturefactory.h */; };
 		5C7F58EC1D4AA63800F567C4 /* vertexarrayobject.h in Headers */ = {isa = PBXBuildFile; fileRef = 5C7F58C61D4AA63800F567C4 /* vertexarrayobject.h */; };
 		5C7F58EE1D4AA63800F567C4 /* vertexbufferfactory.h in Headers */ = {isa = PBXBuildFile; fileRef = 5C7F58C81D4AA63800F567C4 /* vertexbufferfactory.h */; };
@@ -314,6 +307,17 @@
 		5C7F58F21D4AA86000F567C4 /* opengl_vertexbuffer.h in Headers */ = {isa = PBXBuildFile; fileRef = 5C7F58F11D4AA86000F567C4 /* opengl_vertexbuffer.h */; };
 		5C7F58F61D4AAC9B00F567C4 /* metal_vertexbuffer.h in Headers */ = {isa = PBXBuildFile; fileRef = 5C7F58F51D4AAC9B00F567C4 /* metal_vertexbuffer.h */; };
 		5C7F58F81D4AB72700F567C4 /* metal_vertexbuffer.mm in Sources */ = {isa = PBXBuildFile; fileRef = 5C7F58F71D4AB72700F567C4 /* metal_vertexbuffer.mm */; };
+		6E4CE9561D51129700322956 /* texture.h in Headers */ = {isa = PBXBuildFile; fileRef = 6E4CE9551D51129700322956 /* texture.h */; };
+		6E4CE9581D51159900322956 /* metal_texture.h in Headers */ = {isa = PBXBuildFile; fileRef = 6E4CE9571D51159900322956 /* metal_texture.h */; };
+		6E4CE95A1D5116E200322956 /* opengl_texture.h in Headers */ = {isa = PBXBuildFile; fileRef = 6E4CE9591D5116E200322956 /* opengl_texture.h */; };
+		6E4CE95C1D51171100322956 /* opengl.h in Headers */ = {isa = PBXBuildFile; fileRef = 6E4CE95B1D51171100322956 /* opengl.h */; };
+		6E4CE95E1D5119C800322956 /* texturedescription.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6E4CE95D1D5119C800322956 /* texturedescription.cpp */; };
+		6E4CE9601D512A7700322956 /* metal_texture.mm in Sources */ = {isa = PBXBuildFile; fileRef = 6E4CE95F1D512A7700322956 /* metal_texture.mm */; };
+		6E4CE9621D513EC500322956 /* metal.mm in Sources */ = {isa = PBXBuildFile; fileRef = 6E4CE9611D513EC500322956 /* metal.mm */; };
+		6E4CE9641D51456A00322956 /* opengl_indexbuffer.h in Headers */ = {isa = PBXBuildFile; fileRef = 6E4CE9631D51456A00322956 /* opengl_indexbuffer.h */; };
+		6E4CE9661D51458500322956 /* indexbuffer.h in Headers */ = {isa = PBXBuildFile; fileRef = 6E4CE9651D51458500322956 /* indexbuffer.h */; };
+		6E62167A1D5147870002F1A3 /* metal_indexbuffer.h in Headers */ = {isa = PBXBuildFile; fileRef = 6E6216791D5147870002F1A3 /* metal_indexbuffer.h */; };
+		6E62167C1D5147B10002F1A3 /* metal_indexbuffer.mm in Sources */ = {isa = PBXBuildFile; fileRef = 6E62167B1D5147B10002F1A3 /* metal_indexbuffer.mm */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -360,7 +364,6 @@
 		5C7F55FA1D4A985E00F567C4 /* pngloader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = pngloader.cpp; sourceTree = "<group>"; };
 		5C7F55FB1D4A985E00F567C4 /* pvrdecompressor.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = pvrdecompressor.cpp; sourceTree = "<group>"; };
 		5C7F55FC1D4A985E00F567C4 /* pvrloader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = pvrloader.cpp; sourceTree = "<group>"; };
-		5C7F55FD1D4A985E00F567C4 /* textureloader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = textureloader.cpp; sourceTree = "<group>"; };
 		5C7F55FE1D4A985E00F567C4 /* tgaloader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = tgaloader.cpp; sourceTree = "<group>"; };
 		5C7F56001D4A985E00F567C4 /* gestures.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = gestures.cpp; sourceTree = "<group>"; };
 		5C7F56011D4A985E00F567C4 /* input.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = input.cpp; sourceTree = "<group>"; };
@@ -508,8 +511,6 @@
 		5C7F57331D4A986B00F567C4 /* pngloader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = pngloader.h; sourceTree = "<group>"; };
 		5C7F57341D4A986B00F567C4 /* pvrloader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = pvrloader.h; sourceTree = "<group>"; };
 		5C7F57351D4A986B00F567C4 /* texturedescription.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = texturedescription.h; sourceTree = "<group>"; };
-		5C7F57361D4A986B00F567C4 /* textureloader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = textureloader.h; sourceTree = "<group>"; };
-		5C7F57371D4A986B00F567C4 /* textureloaderthread.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = textureloaderthread.h; sourceTree = "<group>"; };
 		5C7F57381D4A986B00F567C4 /* tgaloader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tgaloader.h; sourceTree = "<group>"; };
 		5C7F573A1D4A986B00F567C4 /* gestures.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = gestures.h; sourceTree = "<group>"; };
 		5C7F573B1D4A986B00F567C4 /* input.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = input.h; sourceTree = "<group>"; };
@@ -583,7 +584,6 @@
 		5C7F587C1D4AA5D700F567C4 /* renderbatch.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = renderbatch.cpp; sourceTree = "<group>"; };
 		5C7F587D1D4AA5D700F567C4 /* rendering.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = rendering.cpp; sourceTree = "<group>"; };
 		5C7F587E1D4AA5D700F567C4 /* texturefactory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = texturefactory.cpp; sourceTree = "<group>"; };
-		5C7F587F1D4AA5D700F567C4 /* textureloadingthread.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = textureloadingthread.cpp; sourceTree = "<group>"; };
 		5C7F58801D4AA5D700F567C4 /* vertexbufferfactory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = vertexbufferfactory.cpp; sourceTree = "<group>"; };
 		5C7F58A11D4AA63800F567C4 /* helpers.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = helpers.h; sourceTree = "<group>"; };
 		5C7F58A21D4AA63800F567C4 /* indexarray.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = indexarray.h; sourceTree = "<group>"; };
@@ -593,7 +593,6 @@
 		5C7F58A61D4AA63800F567C4 /* vertexdeclaration.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = vertexdeclaration.h; sourceTree = "<group>"; };
 		5C7F58A71D4AA63800F567C4 /* vertexstorage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = vertexstorage.h; sourceTree = "<group>"; };
 		5C7F58A81D4AA63800F567C4 /* framebuffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = framebuffer.h; sourceTree = "<group>"; };
-		5C7F58AA1D4AA63800F567C4 /* indexbuffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = indexbuffer.h; sourceTree = "<group>"; };
 		5C7F58AC1D4AA63800F567C4 /* pipelinestate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = pipelinestate.h; sourceTree = "<group>"; };
 		5C7F58AD1D4AA63800F567C4 /* renderbatch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = renderbatch.h; sourceTree = "<group>"; };
 		5C7F58AE1D4AA63800F567C4 /* renderer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = renderer.h; sourceTree = "<group>"; };
@@ -605,7 +604,6 @@
 		5C7F58B51D4AA63800F567C4 /* metal_renderer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = metal_renderer.h; sourceTree = "<group>"; };
 		5C7F58B61D4AA63800F567C4 /* metal_renderpass.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = metal_renderpass.h; sourceTree = "<group>"; };
 		5C7F58B71D4AA63800F567C4 /* metal_renderstate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = metal_renderstate.h; sourceTree = "<group>"; };
-		5C7F58B91D4AA63800F567C4 /* opengl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = opengl.h; sourceTree = "<group>"; };
 		5C7F58BA1D4AA63800F567C4 /* opengl_caps.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = opengl_caps.h; sourceTree = "<group>"; };
 		5C7F58BB1D4AA63800F567C4 /* opengl_renderer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = opengl_renderer.h; sourceTree = "<group>"; };
 		5C7F58BC1D4AA63800F567C4 /* opengl_renderpass.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = opengl_renderpass.h; sourceTree = "<group>"; };
@@ -616,7 +614,6 @@
 		5C7F58C11D4AA63800F567C4 /* rendering.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rendering.h; sourceTree = "<group>"; };
 		5C7F58C21D4AA63800F567C4 /* renderingcaps.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = renderingcaps.h; sourceTree = "<group>"; };
 		5C7F58C31D4AA63800F567C4 /* renderstate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = renderstate.h; sourceTree = "<group>"; };
-		5C7F58C41D4AA63800F567C4 /* texture.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = texture.h; sourceTree = "<group>"; };
 		5C7F58C51D4AA63800F567C4 /* texturefactory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = texturefactory.h; sourceTree = "<group>"; };
 		5C7F58C61D4AA63800F567C4 /* vertexarrayobject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = vertexarrayobject.h; sourceTree = "<group>"; };
 		5C7F58C81D4AA63800F567C4 /* vertexbufferfactory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = vertexbufferfactory.h; sourceTree = "<group>"; };
@@ -624,6 +621,17 @@
 		5C7F58F11D4AA86000F567C4 /* opengl_vertexbuffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = opengl_vertexbuffer.h; sourceTree = "<group>"; };
 		5C7F58F51D4AAC9B00F567C4 /* metal_vertexbuffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = metal_vertexbuffer.h; sourceTree = "<group>"; };
 		5C7F58F71D4AB72700F567C4 /* metal_vertexbuffer.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = metal_vertexbuffer.mm; sourceTree = "<group>"; };
+		6E4CE9551D51129700322956 /* texture.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = texture.h; sourceTree = "<group>"; };
+		6E4CE9571D51159900322956 /* metal_texture.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = metal_texture.h; sourceTree = "<group>"; };
+		6E4CE9591D5116E200322956 /* opengl_texture.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = opengl_texture.h; sourceTree = "<group>"; };
+		6E4CE95B1D51171100322956 /* opengl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = opengl.h; sourceTree = "<group>"; };
+		6E4CE95D1D5119C800322956 /* texturedescription.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = texturedescription.cpp; sourceTree = "<group>"; };
+		6E4CE95F1D512A7700322956 /* metal_texture.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = metal_texture.mm; sourceTree = "<group>"; };
+		6E4CE9611D513EC500322956 /* metal.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = metal.mm; sourceTree = "<group>"; };
+		6E4CE9631D51456A00322956 /* opengl_indexbuffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = opengl_indexbuffer.h; sourceTree = "<group>"; };
+		6E4CE9651D51458500322956 /* indexbuffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = indexbuffer.h; sourceTree = "<group>"; };
+		6E6216791D5147870002F1A3 /* metal_indexbuffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = metal_indexbuffer.h; sourceTree = "<group>"; };
+		6E62167B1D5147B10002F1A3 /* metal_indexbuffer.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = metal_indexbuffer.mm; sourceTree = "<group>"; };
 		6EBE15B11C66B4AD00AF7206 /* libet-static-mac.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libet-static-mac.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -732,7 +740,7 @@
 				5C7F55FA1D4A985E00F567C4 /* pngloader.cpp */,
 				5C7F55FB1D4A985E00F567C4 /* pvrdecompressor.cpp */,
 				5C7F55FC1D4A985E00F567C4 /* pvrloader.cpp */,
-				5C7F55FD1D4A985E00F567C4 /* textureloader.cpp */,
+				6E4CE95D1D5119C800322956 /* texturedescription.cpp */,
 				5C7F55FE1D4A985E00F567C4 /* tgaloader.cpp */,
 			);
 			path = imaging;
@@ -961,8 +969,6 @@
 				5C7F57331D4A986B00F567C4 /* pngloader.h */,
 				5C7F57341D4A986B00F567C4 /* pvrloader.h */,
 				5C7F57351D4A986B00F567C4 /* texturedescription.h */,
-				5C7F57361D4A986B00F567C4 /* textureloader.h */,
-				5C7F57371D4A986B00F567C4 /* textureloaderthread.h */,
 				5C7F57381D4A986B00F567C4 /* tgaloader.h */,
 			);
 			name = imaging;
@@ -1081,7 +1087,6 @@
 				5C7F587C1D4AA5D700F567C4 /* renderbatch.cpp */,
 				5C7F587D1D4AA5D700F567C4 /* rendering.cpp */,
 				5C7F587E1D4AA5D700F567C4 /* texturefactory.cpp */,
-				5C7F587F1D4AA5D700F567C4 /* textureloadingthread.cpp */,
 				5C7F58801D4AA5D700F567C4 /* vertexbufferfactory.cpp */,
 			);
 			path = rendering;
@@ -1104,9 +1109,12 @@
 		5C7F586B1D4AA5D700F567C4 /* metal */ = {
 			isa = PBXGroup;
 			children = (
+				6E4CE9611D513EC500322956 /* metal.mm */,
+				6E62167B1D5147B10002F1A3 /* metal_indexbuffer.mm */,
 				5C7F586C1D4AA5D700F567C4 /* metal_renderer.mm */,
 				5C7F586D1D4AA5D700F567C4 /* metal_renderpass.mm */,
 				5C7F586E1D4AA5D700F567C4 /* metal_renderstate.mm */,
+				6E4CE95F1D512A7700322956 /* metal_texture.mm */,
 				5C7F58F71D4AB72700F567C4 /* metal_vertexbuffer.mm */,
 			);
 			path = metal;
@@ -1139,7 +1147,6 @@
 				5C7F58B31D4AA63800F567C4 /* metal */,
 				5C7F58B81D4AA63800F567C4 /* opengl */,
 				5C7F58A81D4AA63800F567C4 /* framebuffer.h */,
-				5C7F58AA1D4AA63800F567C4 /* indexbuffer.h */,
 				5C7F58B11D4AA63800F567C4 /* material.h */,
 				5C7F58B21D4AA63800F567C4 /* materialfactory.h */,
 				5C7F58BE1D4AA63800F567C4 /* program.h */,
@@ -1148,7 +1155,6 @@
 				5C7F58C11D4AA63800F567C4 /* rendering.h */,
 				5C7F58C21D4AA63800F567C4 /* renderingcaps.h */,
 				5C7F58C31D4AA63800F567C4 /* renderstate.h */,
-				5C7F58C41D4AA63800F567C4 /* texture.h */,
 				5C7F58C51D4AA63800F567C4 /* texturefactory.h */,
 				5C7F58C61D4AA63800F567C4 /* vertexarrayobject.h */,
 				5C7F58C81D4AA63800F567C4 /* vertexbufferfactory.h */,
@@ -1174,11 +1180,13 @@
 		5C7F58AB1D4AA63800F567C4 /* interface */ = {
 			isa = PBXGroup;
 			children = (
+				6E4CE9651D51458500322956 /* indexbuffer.h */,
 				5C7F58AC1D4AA63800F567C4 /* pipelinestate.h */,
 				5C7F58AD1D4AA63800F567C4 /* renderbatch.h */,
 				5C7F58AE1D4AA63800F567C4 /* renderer.h */,
 				5C7F58AF1D4AA63800F567C4 /* renderpass.h */,
 				5C7F58B01D4AA63800F567C4 /* renderstate.h */,
+				6E4CE9551D51129700322956 /* texture.h */,
 				5C7F58EF1D4AA85200F567C4 /* vertexbuffer.h */,
 			);
 			path = interface;
@@ -1188,9 +1196,11 @@
 			isa = PBXGroup;
 			children = (
 				5C7F58B41D4AA63800F567C4 /* metal.h */,
+				6E6216791D5147870002F1A3 /* metal_indexbuffer.h */,
 				5C7F58B51D4AA63800F567C4 /* metal_renderer.h */,
 				5C7F58B61D4AA63800F567C4 /* metal_renderpass.h */,
 				5C7F58B71D4AA63800F567C4 /* metal_renderstate.h */,
+				6E4CE9571D51159900322956 /* metal_texture.h */,
 				5C7F58F51D4AAC9B00F567C4 /* metal_vertexbuffer.h */,
 			);
 			path = metal;
@@ -1199,11 +1209,13 @@
 		5C7F58B81D4AA63800F567C4 /* opengl */ = {
 			isa = PBXGroup;
 			children = (
-				5C7F58B91D4AA63800F567C4 /* opengl.h */,
+				6E4CE95B1D51171100322956 /* opengl.h */,
 				5C7F58BA1D4AA63800F567C4 /* opengl_caps.h */,
+				6E4CE9631D51456A00322956 /* opengl_indexbuffer.h */,
 				5C7F58BB1D4AA63800F567C4 /* opengl_renderer.h */,
 				5C7F58BC1D4AA63800F567C4 /* opengl_renderpass.h */,
 				5C7F58BD1D4AA63800F567C4 /* opengl_renderstate.h */,
+				6E4CE9591D5116E200322956 /* opengl_texture.h */,
 				5C7F58F11D4AA86000F567C4 /* opengl_vertexbuffer.h */,
 			);
 			path = opengl;
@@ -1266,7 +1278,6 @@
 				5C7F58431D4A986B00F567C4 /* serialization.h in Headers */,
 				5C7F57FE1D4A986B00F567C4 /* platform.h in Headers */,
 				5C7F57F81D4A986B00F567C4 /* tgaloader.h in Headers */,
-				5C7F57F61D4A986B00F567C4 /* textureloader.h in Headers */,
 				5C7F583D1D4A986B00F567C4 /* objloader.h in Headers */,
 				5C7F579B1D4A986B00F567C4 /* events.h in Headers */,
 				5C7F58001D4A986B00F567C4 /* apple.h in Headers */,
@@ -1276,6 +1287,7 @@
 				5C7F58E41D4AA63800F567C4 /* program.h in Headers */,
 				5C7F579E1D4A986B00F567C4 /* pathresolver.h in Headers */,
 				5C7F580D1D4A986B00F567C4 /* context_win.h in Headers */,
+				6E4CE9661D51458500322956 /* indexbuffer.h in Headers */,
 				5C7F579A1D4A986B00F567C4 /* context.h in Headers */,
 				5C7F57B41D4A986B00F567C4 /* hardware.h in Headers */,
 				5C7F58491D4A986B00F567C4 /* streamingthread.h in Headers */,
@@ -1316,13 +1328,13 @@
 				5C7F58471D4A986B00F567C4 /* player.h in Headers */,
 				5C7F57E51D4A986B00F567C4 /* triangleex.h in Headers */,
 				5C7F57A41D4A986B00F567C4 /* frustum.h in Headers */,
+				6E4CE95C1D51171100322956 /* opengl.h in Headers */,
 				5C7F58E31D4AA63800F567C4 /* opengl_renderstate.h in Headers */,
 				5C7F58CA1D4AA63800F567C4 /* helpers.h in Headers */,
 				5C7F57A61D4A986B00F567C4 /* base64.h in Headers */,
 				5C7F57CB1D4A986B00F567C4 /* tasks.h in Headers */,
 				5C7F579F1D4A986B00F567C4 /* runloop.h in Headers */,
 				5C7F57BE1D4A986B00F567C4 /* mutex.h in Headers */,
-				5C7F58D31D4AA63800F567C4 /* indexbuffer.h in Headers */,
 				5C7F57B01D4A986B00F567C4 /* dictionary.h in Headers */,
 				5C7F58011D4A986B00F567C4 /* applicationdelegate.h in Headers */,
 				5C7F57DB1D4A986B00F567C4 /* quaternion.h in Headers */,
@@ -1332,7 +1344,6 @@
 				5C7F57C11D4A986B00F567C4 /* objectscache.h in Headers */,
 				5C7F57D41D4A986B00F567C4 /* collision.h in Headers */,
 				5C7F57C31D4A986B00F567C4 /* sequence.h in Headers */,
-				5C7F57F71D4A986B00F567C4 /* textureloaderthread.h in Headers */,
 				5C7F57C71D4A986B00F567C4 /* staticdatastorage.h in Headers */,
 				5C7F58E21D4AA63800F567C4 /* opengl_renderpass.h in Headers */,
 				5C7F584A1D4A986B00F567C4 /* track.h in Headers */,
@@ -1374,6 +1385,7 @@
 				5C7F57B71D4A986B00F567C4 /* interpolationvalue.h in Headers */,
 				5C7F58391D4A986B00F567C4 /* material.parameters.h in Headers */,
 				5C7F57E71D4A986B00F567C4 /* vector3.h in Headers */,
+				6E4CE9561D51129700322956 /* texture.h in Headers */,
 				5C7F57CA1D4A986B00F567C4 /* taskpool.h in Headers */,
 				5C7F579D1D4A986B00F567C4 /* invocation.h in Headers */,
 				5C7F57F51D4A986B00F567C4 /* texturedescription.h in Headers */,
@@ -1384,6 +1396,7 @@
 				5C7F58CB1D4AA63800F567C4 /* indexarray.h in Headers */,
 				5C7F57B81D4A986B00F567C4 /* intervaltimer.h in Headers */,
 				5C7F57C21D4A986B00F567C4 /* rawdataaccessor.h in Headers */,
+				6E4CE95A1D5116E200322956 /* opengl_texture.h in Headers */,
 				5C7F57CD1D4A986B00F567C4 /* threading.h in Headers */,
 				5C7F583F1D4A986B00F567C4 /* renderableelement.h in Headers */,
 				5C7F58D91D4AA63800F567C4 /* material.h in Headers */,
@@ -1397,13 +1410,14 @@
 				5C7F57CE1D4A986B00F567C4 /* timedobject.h in Headers */,
 				5C7F58461D4A986B00F567C4 /* openal.h in Headers */,
 				5C7F57F31D4A986B00F567C4 /* pngloader.h in Headers */,
+				6E4CE9641D51456A00322956 /* opengl_indexbuffer.h in Headers */,
 				5C7F58DA1D4AA63800F567C4 /* materialfactory.h in Headers */,
 				5C7F57A71D4A986B00F567C4 /* constants.h in Headers */,
 				5C7F57AA1D4A986B00F567C4 /* conversion.h in Headers */,
 				5C7F58CC1D4AA63800F567C4 /* primitives.h in Headers */,
+				6E4CE9581D51159900322956 /* metal_texture.h in Headers */,
 				5C7F57A51D4A986B00F567C4 /* animator.h in Headers */,
 				5C7F58EB1D4AA63800F567C4 /* texturefactory.h in Headers */,
-				5C7F58DF1D4AA63800F567C4 /* opengl.h in Headers */,
 				5C7F58CF1D4AA63800F567C4 /* vertexdeclaration.h in Headers */,
 				5C7F57A31D4A986B00F567C4 /* cameraorbitcontroller.h in Headers */,
 				5C7F57971D4A986B00F567C4 /* application.h in Headers */,
@@ -1418,6 +1432,7 @@
 				5C7F57B11D4A986B00F567C4 /* et.h in Headers */,
 				5C7F57AF1D4A986B00F567C4 /* debug.h in Headers */,
 				5C7F58F01D4AA85200F567C4 /* vertexbuffer.h in Headers */,
+				6E62167A1D5147870002F1A3 /* metal_indexbuffer.h in Headers */,
 				5C7F58E71D4AA63800F567C4 /* rendering.h in Headers */,
 				5C7F57D51D4A986B00F567C4 /* equations.h in Headers */,
 				5C7F57DF1D4A986B00F567C4 /* segment2d.h in Headers */,
@@ -1436,7 +1451,6 @@
 				5C7F58481D4A986B00F567C4 /* sound.h in Headers */,
 				5C7F57981D4A986B00F567C4 /* applicationdelegate.h in Headers */,
 				5C7F58331D4A986B00F567C4 /* animation.h in Headers */,
-				5C7F58EA1D4AA63800F567C4 /* texture.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1506,7 +1520,6 @@
 				5C7F588C1D4AA5D700F567C4 /* metal_renderstate.mm in Sources */,
 				5C7F589A1D4AA5D700F567C4 /* rendering.cpp in Sources */,
 				5C7F56891D4A985E00F567C4 /* iap.apple.mm in Sources */,
-				5C7F589C1D4AA5D700F567C4 /* textureloadingthread.cpp in Sources */,
 				5C7F56871D4A985E00F567C4 /* applicationdelegate.ios.mm in Sources */,
 				5C7F56921D4A985E00F567C4 /* openglview.ios.mm in Sources */,
 				5C7F56581D4A985E00F567C4 /* events.cpp in Sources */,
@@ -1528,10 +1541,12 @@
 				5C7F56641D4A985E00F567C4 /* debug.cpp in Sources */,
 				5C7F56701D4A985E00F567C4 /* threading.cpp in Sources */,
 				5C7F567F1D4A985E00F567C4 /* pvrdecompressor.cpp in Sources */,
+				6E4CE9601D512A7700322956 /* metal_texture.mm in Sources */,
 				5C7F56651D4A985E00F567C4 /* dictionary.cpp in Sources */,
 				5C7F56D01D4A985E00F567C4 /* track.cpp in Sources */,
 				5C7F567B1D4A985E00F567C4 /* imageoperations.cpp in Sources */,
 				5C7F58951D4AA5D700F567C4 /* opengl_renderstate.cpp in Sources */,
+				6E62167C1D5147B10002F1A3 /* metal_indexbuffer.mm in Sources */,
 				5C7F58821D4AA5D700F567C4 /* indexarray.cpp in Sources */,
 				5C7F56951D4A985E00F567C4 /* printer.ios.mm in Sources */,
 				5C7F56621D4A985E00F567C4 /* constants.cpp in Sources */,
@@ -1554,6 +1569,7 @@
 				5C7F56CA1D4A985E00F567C4 /* skeletonelement.cpp in Sources */,
 				5C7F56CD1D4A985E00F567C4 /* player.cpp in Sources */,
 				5C7F58961D4AA5D700F567C4 /* opengl_texture.cpp in Sources */,
+				6E4CE9621D513EC500322956 /* metal.mm in Sources */,
 				5C7F56851D4A985E00F567C4 /* application.ios.mm in Sources */,
 				5C7F58F81D4AB72700F567C4 /* metal_vertexbuffer.mm in Sources */,
 				5C7F569A1D4A985E00F567C4 /* application.win.cpp in Sources */,
@@ -1561,6 +1577,7 @@
 				5C7F56561D4A985E00F567C4 /* application.cpp in Sources */,
 				5C7F56A11D4A985E00F567C4 /* rendercontext.win.cpp in Sources */,
 				5C7F56671D4A985E00F567C4 /* json.cpp in Sources */,
+				6E4CE95E1D5119C800322956 /* texturedescription.cpp in Sources */,
 				5C7F56CB1D4A985E00F567C4 /* storage.cpp in Sources */,
 				5C7F58981D4AA5D700F567C4 /* opengl_vertexbuffer.cpp in Sources */,
 				5C7F56C31D4A985E00F567C4 /* meshdeformer.cpp in Sources */,
@@ -1604,7 +1621,6 @@
 				5C7F58921D4AA5D700F567C4 /* opengl_program.cpp in Sources */,
 				5C7F567A1D4A985E00F567C4 /* hdrloader.cpp in Sources */,
 				5C7F566A1D4A985E00F567C4 /* notifytimer.cpp in Sources */,
-				5C7F56811D4A985E00F567C4 /* textureloader.cpp in Sources */,
 				5C7F588F1D4AA5D700F567C4 /* opengl_framebuffer.cpp in Sources */,
 				5C7F569F1D4A985E00F567C4 /* memory.win.cpp in Sources */,
 				5C7F588E1D4AA5D700F567C4 /* opengl_caps.cpp in Sources */,

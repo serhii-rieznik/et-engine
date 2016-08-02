@@ -51,9 +51,6 @@ namespace et
 		MaterialFactory& materialFactory()
 			{ return _materialFactory.reference(); }
 
-		TextureFactory& textureFactory()
-			{ return _textureFactory.reference(); }
-
 		void pushRenderingContext();
 		bool activateRenderingContext();
 		bool pushAndActivateRenderingContext();
@@ -82,7 +79,6 @@ namespace et
 		RenderInterface::Pointer _renderer;
 
 		MaterialFactory::Pointer _materialFactory;
-		TextureFactory::Pointer _textureFactory;
 
 		vec2i _size;
 	};

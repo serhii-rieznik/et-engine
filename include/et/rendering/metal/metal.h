@@ -10,7 +10,10 @@
 #if defined(__OBJC__)
 
 #include <Metal/Metal.h>
+#include <MetalKit/MetalKit.h>
 #include <QuartzCore/CAMetalLayer.h>
+#include <et/rendering/rendering.h>
+#include <et/platform-apple/objc.h>
 
 namespace et
 {
@@ -25,6 +28,12 @@ struct MetalState
 	id<MTLCommandBuffer> mainCommandBuffer = nil;
 	id<CAMetalDrawable> mainDrawable = nil;
 };
+
+namespace metal
+{
+    MTLTextureType textureTargetValue(TextureTarget, uint32_t samples);
+    MTLPixelFormat textureFormatValue(TextureFormat);
+}
 
 }
 #endif

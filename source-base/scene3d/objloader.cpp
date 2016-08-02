@@ -145,10 +145,8 @@ OBJLoader::~OBJLoader()
 		materialFile.close();
 }
 
-void OBJLoader::loadData(bool async, ObjectsCache& cache)
+void OBJLoader::loadData(ObjectsCache& cache)
 {
-	ET_ASSERT(!async && "Async loading is currently disabled");
-	
 	std::string line;
 	int lineNumber = 0;
 	char key = 0;
@@ -176,7 +174,7 @@ void OBJLoader::loadData(bool async, ObjectsCache& cache)
 			{
 				std::string matName;
 				inputFile >> matName;
-				loadMaterials(matName, async, cache);
+				loadMaterials(matName, cache);
 			}
 			else
 			{
@@ -342,7 +340,7 @@ s3d::ElementContainer::Pointer OBJLoader::load(et::RenderContext* rc, MaterialPr
 	_normals.reserve(1024);
 	_texCoords.reserve(1024);
 
-	loadData(false, cache);
+	loadData(cache);
 	
 	processLoadedData();
 
@@ -351,7 +349,7 @@ s3d::ElementContainer::Pointer OBJLoader::load(et::RenderContext* rc, MaterialPr
 	return result;
 }
 
-void OBJLoader::loadMaterials(const std::string& fileName, bool async, ObjectsCache& cache)
+void OBJLoader::loadMaterials(const std::string& fileName, ObjectsCache& cache)
 {
 	application().pushSearchPath(inputFilePath);
 	std::string filePath = application().resolveFileName(fileName);
@@ -407,7 +405,7 @@ void OBJLoader::loadMaterials(const std::string& fileName, bool async, ObjectsCa
 						_lastMaterial->setFloat(MaterialParameter::BumpFactor, value);
 						
 						getLine(materialFile, line);
-						_lastMaterial->setTexture(MaterialParameter::NormalMap, _rc->textureFactory().loadTexture(line, cache, async));
+						_lastMaterial->setTexture(MaterialParameter::NormalMap, _rc->renderer()->loadTexture(line, cache));
 					}
 					else
 					{
@@ -418,7 +416,7 @@ void OBJLoader::loadMaterials(const std::string& fileName, bool async, ObjectsCa
 				else
 				{
 					getLine(materialFile, line);
-					_lastMaterial->setTexture(MaterialParameter::NormalMap, _rc->textureFactory().loadTexture(line, cache, async) );
+					_lastMaterial->setTexture(MaterialParameter::NormalMap, _rc->renderer()->loadTexture(line, cache) );
 				}
 			}
 			else
@@ -512,22 +510,22 @@ void OBJLoader::loadMaterials(const std::string& fileName, bool async, ObjectsCa
 					if (subId == 'd')
 					{
 						getLine(materialFile, line);
-						_lastMaterial->setTexture(MaterialParameter::DiffuseMap, _rc->textureFactory().loadTexture(line, cache, async) );
+						_lastMaterial->setTexture(MaterialParameter::DiffuseMap, _rc->renderer()->loadTexture(line, cache) );
 					}
 					else if (subId == 'a')
 					{
 						getLine(materialFile, line);
-						_lastMaterial->setTexture(MaterialParameter::AmbientMap, _rc->textureFactory().loadTexture(line, cache, async) );
+						_lastMaterial->setTexture(MaterialParameter::AmbientMap, _rc->renderer()->loadTexture(line, cache) );
 					}
 					else if (subId == 's')
 					{
 						getLine(materialFile, line);
-						_lastMaterial->setTexture(MaterialParameter::SpecularMap, _rc->textureFactory().loadTexture(line, cache, async) );
+						_lastMaterial->setTexture(MaterialParameter::SpecularMap, _rc->renderer()->loadTexture(line, cache) );
 					}
 					else if (subId == 'e')
 					{
 						getLine(materialFile, line);
-						_lastMaterial->setTexture(MaterialParameter::EmissiveMap, _rc->textureFactory().loadTexture(line, cache, async) );
+						_lastMaterial->setTexture(MaterialParameter::EmissiveMap, _rc->renderer()->loadTexture(line, cache) );
 					}
 					else
 					{
@@ -564,7 +562,7 @@ void OBJLoader::loadMaterials(const std::string& fileName, bool async, ObjectsCa
 								_lastMaterial->setFloat(MaterialParameter::BumpFactor, value);
 								
 								getLine(materialFile, line);
-								_lastMaterial->setTexture(MaterialParameter::NormalMap, _rc->textureFactory().loadTexture(line, cache, async));
+								_lastMaterial->setTexture(MaterialParameter::NormalMap, _rc->renderer()->loadTexture(line, cache));
 							}
 							else
 							{
@@ -575,7 +573,7 @@ void OBJLoader::loadMaterials(const std::string& fileName, bool async, ObjectsCa
 						else
 						{
 							getLine(materialFile, line);
-							_lastMaterial->setTexture(MaterialParameter::NormalMap, _rc->textureFactory().loadTexture(line, cache, async) );
+							_lastMaterial->setTexture(MaterialParameter::NormalMap, _rc->renderer()->loadTexture(line, cache) );
 						}
 					}
 					else
@@ -586,7 +584,7 @@ void OBJLoader::loadMaterials(const std::string& fileName, bool async, ObjectsCa
 				else if (mapId == 'd')
 				{
 					getLine(materialFile, line);
-					_lastMaterial->setTexture(MaterialParameter::OpacityMap, _rc->textureFactory().loadTexture(line, cache, async) );
+					_lastMaterial->setTexture(MaterialParameter::OpacityMap, _rc->renderer()->loadTexture(line, cache) );
 				}
 				else
 				{

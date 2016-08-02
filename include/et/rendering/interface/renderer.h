@@ -37,11 +37,17 @@ namespace et
 		virtual void drawIndexedPrimitive(PrimitiveType, IndexArrayFormat, uint32_t first, uint32_t count) = 0;
 
 		/*
-		 * Constructors
+		 * Vertex buffes
 		 */
 		virtual VertexBuffer::Pointer createVertexBuffer(const std::string&, VertexStorage::Pointer, BufferDrawType) = 0;
 		virtual IndexBuffer::Pointer createIndexBuffer(const std::string&, IndexArray::Pointer, BufferDrawType) = 0;
 		virtual VertexArrayObject::Pointer createVertexArrayObject(const std::string&) = 0;
+        
+        /*
+         * Textures
+         */
+        virtual Texture::Pointer loadTexture(const std::string& fileName, ObjectsCache& cache) = 0;
+        virtual Texture::Pointer createTexture(TextureDescription::Pointer) = 0;
 
 	private:
 		RenderContext* _rc = nullptr;

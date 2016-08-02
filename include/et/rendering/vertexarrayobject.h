@@ -8,7 +8,7 @@
 #pragma once
 
 #include <et/rendering/interface/vertexbuffer.h>
-#include <et/rendering/indexbuffer.h>
+#include <et/rendering/interface/indexbuffer.h>
 
 namespace et
 {

@@ -8,9 +8,12 @@
 #pragma once
 
 #include <et/scene3d/scenematerial.h>
-#include <et/rendering/vertexarrayobject.h>
 #include <et/rendering/base/indexarray.h>
 #include <et/rendering/base/vertexstorage.h>
+#include <et/rendering/interface/texture.h>
+
+// TODO : replace
+#include <et/rendering/vertexarrayobject.h>
 
 namespace et
 {

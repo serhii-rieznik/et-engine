@@ -96,7 +96,7 @@ namespace et
 	do { \
 		if (!(C)) \
 		{ \
-			et::log::warning("Condition: %s\nfailed at: %s [%d]", (#C), __FILE__, __LINE__); \
+			et::log::error("Condition: %s\nfailed at: %s [%d]", (#C), __FILE__, __LINE__); \
 			et::debug::debugBreak(); \
 		} \
 	} while (0)

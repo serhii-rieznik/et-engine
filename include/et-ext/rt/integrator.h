@@ -18,7 +18,7 @@ namespace rt
     class Integrator : public Object
     {
     public:
-        ET_DECLARE_POINTER(Integrator)
+        ET_DECLARE_POINTER(Integrator);
         
     public:
         virtual ~Integrator() { }
@@ -29,7 +29,7 @@ namespace rt
 	class NormalsIntegrator : public Integrator
 	{
 	public:
-		ET_DECLARE_POINTER(NormalsIntegrator)
+        ET_DECLARE_POINTER(NormalsIntegrator);
 
 	public:
 		float4 gather(const Ray& inRay, size_t depth, size_t& maxDepth,
@@ -39,7 +39,7 @@ namespace rt
 	class FresnelIntegrator : public Integrator
 	{
 	public:
-		ET_DECLARE_POINTER(FresnelIntegrator)
+        ET_DECLARE_POINTER(FresnelIntegrator);
 
 	public:
 		float4 gather(const Ray& inRay, size_t depth, size_t& maxDepth,
@@ -49,7 +49,7 @@ namespace rt
     class AmbientOcclusionIntegrator : public Integrator
     {
     public:
-        ET_DECLARE_POINTER(AmbientOcclusionIntegrator)
+        ET_DECLARE_POINTER(AmbientOcclusionIntegrator);
         
     public:
         float4 gather(const Ray& inRay, size_t depth, size_t& maxDepth,
@@ -59,7 +59,7 @@ namespace rt
     class PathTraceIntegrator : public Integrator
     {
     public:
-        ET_DECLARE_POINTER(PathTraceIntegrator)
+        ET_DECLARE_POINTER(PathTraceIntegrator);
         
 		enum : uint32_t
         {
@@ -68,7 +68,7 @@ namespace rt
         
     public:
         float4 gather(const Ray& inRay, size_t depth, size_t& maxDepth,
-            KDTree& tree, EnvironmentSampler::Pointer&, const Material::Collection&) override;
+            KDTree& tree, EnvironmentSampler::Pointer&, const Material::Collection&) ;
 /*
 		static float4 reflectance(const float4& incidence, float4& normal, const Material& mat,
             float4& color, float_type& brdf);

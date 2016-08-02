@@ -97,6 +97,9 @@ void Raytrace::perform(s3d::Scene::Pointer scene, const Camera& cam, const vec2i
 	_private->camera = cam;
 	_private->viewportSize = dimension;
 	_private->buildMaterialAndTriangles(scene);
+    
+    ET_ASSERT(_private->viewportSize.x > 0);
+    ET_ASSERT(_private->viewportSize.y > 0);
 
 	_private->buildRegions(vec2i(static_cast<int>(_private->options.renderRegionSize)));
 
@@ -339,6 +342,9 @@ void RaytracePrivate::buildRegions(const vec2i& aSize)
 		regionSize.x = viewportSize.x;
 	if (regionSize.y > viewportSize.y)
 		regionSize.y = viewportSize.y;
+    
+    ET_ASSERT(regionSize.x > 0);
+    ET_ASSERT(regionSize.y > 0);
 
 	int xr = viewportSize.x / regionSize.x;
 	int yr = viewportSize.y / regionSize.y;

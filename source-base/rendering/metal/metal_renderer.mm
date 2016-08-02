@@ -9,7 +9,9 @@
 #include <et/rendering/metal/metal.h>
 #include <et/rendering/metal/metal_renderer.h>
 #include <et/rendering/metal/metal_renderpass.h>
+#include <et/rendering/metal/metal_texture.h>
 #include <et/rendering/metal/metal_vertexbuffer.h>
+#include <et/rendering/metal/metal_indexbuffer.h>
 #include <et/platform-apple/objc.h>
 
 #if (ET_PLATFORM_MAC)
@@ -93,21 +95,36 @@ void MetalRenderer::drawIndexedPrimitive(PrimitiveType pt, IndexArrayFormat fmt,
 }
 
 /*
- * Constructors
+ * Vertex buffers
  */
 VertexBuffer::Pointer MetalRenderer::createVertexBuffer(const std::string& name, VertexStorage::Pointer vs, BufferDrawType dt)
 {
 	return MetalVertexBuffer::Pointer::create(vs->declaration(), vs->data(), dt, name);
 }
 
-IndexBuffer::Pointer MetalRenderer::createIndexBuffer(const std::string&, IndexArray::Pointer, BufferDrawType)
+IndexBuffer::Pointer MetalRenderer::createIndexBuffer(const std::string& name, IndexArray::Pointer ia, BufferDrawType dt)
 {
-	return IndexBuffer::Pointer();
+    return MetalIndexBuffer::Pointer::create(ia, dt, name);
 }
 
 VertexArrayObject::Pointer MetalRenderer::createVertexArrayObject(const std::string& name)
 {
 	return VertexArrayObject::Pointer::create(name);
+}
+
+/*
+ * Textures
+ */
+Texture::Pointer MetalRenderer::loadTexture(const std::string& fileName, ObjectsCache& /* cache */)
+{
+    TextureDescription::Pointer desc = TextureDescription::Pointer::create();
+    desc->load(fileName);
+    return createTexture(desc);
+}
+
+Texture::Pointer MetalRenderer::createTexture(TextureDescription::Pointer desc)
+{
+    return MetalTexture::Pointer::create(desc, _private->metal);
 }
 
 }

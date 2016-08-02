@@ -42,12 +42,15 @@ void init(RenderContext* rc)
 	rh_local::disabledDepthState.compareFunction = CompareFunction::Always;
 	rh_local::disabledDepthState.depthTestEnabled = false;
 	rh_local::disabledDepthState.depthWriteEnabled = false;
-
+    
+    rh_local::plainMaterial = rc->materialFactory().createMaterial();
+    rh_local::plainMaterial->setDepthState(rh_local::disabledDepthState);
+    
+/*
 	Program::Pointer fullScreenProgram = rc->materialFactory().genProgram("rh_local::program",
 		rh_local::vertexShader, rh_local::fragmentShader);
-	rh_local::plainMaterial = rc->materialFactory().createMaterial();
 	rh_local::plainMaterial->setProgram(fullScreenProgram);
-	rh_local::plainMaterial->setDepthState(rh_local::disabledDepthState);
+*/
 }
 
 void release()

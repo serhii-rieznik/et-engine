@@ -1,26 +1,27 @@
-#include <et/scene3d/objloader.h>
-#include <et/camera/camera.h>
-#include <et/rendering/rendercontext.h>
-#include <et/rendering/primitives.h>
-#include <et/rendering/renderhelper.h>
 #include <et/core/json.h>
 #include <et/core/conversion.h>
-#include <et/imaging/textureloader.h>
+#include <et/camera/camera.h>
+#include <et/scene3d/objloader.h>
+#include <et/rendering/base/primitives.h>
+#include <et/rendering/base/helpers.h>
+#include <et/rendering/rendercontext.h>
+#include <et/imaging/texturedescription.h>
 #include "maincontroller.hpp"
 
-using namespace et;
-using namespace demo;
+namespace demo
+{
 
 void MainController::setApplicationParameters(et::ApplicationParameters& p)
 {
-    p.context.style |= ContextOptions::Style::Sizable;
+    p.renderingAPI = et::RenderingAPI::Metal;
+    p.context.style |= et::ContextOptions::Style::Sizable;
     p.context.supportsHighResolution = true;
     p.context.size = 4 * et::currentScreen().frame.size() / 5;
 }
 
 void MainController::setRenderContextParameters(et::RenderContextParameters& p)
 {
-	p.multisamplingQuality = MultisamplingQuality::None;
+    p.multisamplingQuality = et::MultisamplingQuality::None;
 }
 
 void MainController::applicationDidLoad(et::RenderContext* rc)
@@ -28,7 +29,7 @@ void MainController::applicationDidLoad(et::RenderContext* rc)
 	_rc = rc;
 	srand(static_cast<unsigned int>(time(nullptr)));
 
-	ObjectsCache localCache;
+    et::ObjectsCache localCache;
 
 #if (ET_PLATFORM_WIN)
 	application().pushSearchPath("..");
@@ -38,21 +39,21 @@ void MainController::applicationDidLoad(et::RenderContext* rc)
 	application().pushSearchPath("Q:\\SDK\\Models");
 	application().pushSearchPath("Q:\\SDK\\Textures");
 #elif (ET_PLATFORM_MAC)
-	application().pushSearchPath("/Volumes/Development/SDK/Models");
-	application().pushSearchPath("/Volumes/Development/SDK/Textures");
+	et::application().pushSearchPath("/Volumes/Development/SDK/Models");
+	et::application().pushSearchPath("/Volumes/Development/SDK/Textures");
 #endif
 
-	auto configName = application().resolveFileName("config/config.json");
-	VariantClass vc = VariantClass::Invalid;
-	_options = json::deserialize(loadTextFile(configName), vc);
-	ET_ASSERT(vc == VariantClass::Dictionary);
+	auto configName = et::application().resolveFileName("config/config.json");
+	et::VariantClass vc = et::VariantClass::Invalid;
+	_options = et::json::deserialize(et::loadTextFile(configName), vc);
+    ET_ASSERT(vc == et::VariantClass::Dictionary);
 
 	if (_options.hasKey("reference"))
 	{
-		vc = VariantClass::Invalid;
-		configName = application().resolveFileName("config/" + _options.stringForKey("reference")->content);
-		et::Dictionary reference = json::deserialize(loadTextFile(configName), vc);
-		ET_ASSERT(vc == VariantClass::Dictionary);
+		vc = et::VariantClass::Invalid;
+		configName = et::application().resolveFileName("config/" + _options.stringForKey("reference")->content);
+		et::Dictionary reference = et::json::deserialize(et::loadTextFile(configName), vc);
+		ET_ASSERT(vc == et::VariantClass::Dictionary);
 
 		for (auto& kv : reference->content)
 		{
@@ -60,40 +61,44 @@ void MainController::applicationDidLoad(et::RenderContext* rc)
 		}
 	}
 
-	auto modelName = application().resolveFileName(_options.stringForKey("model-name")->content);
+	auto modelName = et::application().resolveFileName(_options.stringForKey("model-name")->content);
 
-	VertexDeclaration decl(true, et::VertexAttributeUsage::Position, et::DataType::Vec3);
+	et::VertexDeclaration decl(true, et::VertexAttributeUsage::Position, et::DataType::Vec3);
 	decl.push_back(et::VertexAttributeUsage::Normal, et::DataType::Vec3);
 	decl.push_back(et::VertexAttributeUsage::TexCoord0, et::DataType::Vec2);
 
-	_scene = s3d::Scene::Pointer::create();
-	if (fileExists(modelName))
+	_scene = et::s3d::Scene::Pointer::create();
+	if (et::fileExists(modelName))
 	{
-		OBJLoader loader(modelName, OBJLoader::Option_CalculateTangents);
+		et::OBJLoader loader(modelName, et::OBJLoader::Option_CalculateTangents);
 		auto model = loader.load(rc, this, _scene->storage(), localCache);
 		model->setParent(_scene.ptr());
 	}
 	else
 	{
-		vec2i density(30);
-		VertexStorage::Pointer va = VertexStorage::Pointer::create(decl, 0);
-		IndexArray::Pointer ia = IndexArray::Pointer::create(IndexArrayFormat::Format_32bit,
-			primitives::indexCountForRegularMesh(density, et::PrimitiveType::Triangles), et::PrimitiveType::Triangles);
-		primitives::createSphere(va, 1.0f, density);
-		primitives::buildTrianglesIndexes(ia, density, 0, 0);
+		et::vec2i density(30);
+		et::VertexStorage::Pointer va = et::VertexStorage::Pointer::create(decl, 0);
+        et::IndexArray::Pointer ia = et::IndexArray::Pointer::create(et::IndexArrayFormat::Format_32bit,
+			et::primitives::indexCountForRegularMesh(density, et::PrimitiveType::Triangles), et::PrimitiveType::Triangles);
+		et::primitives::createSphere(va, 1.0f, density);
+		et::primitives::buildTrianglesIndexes(ia, density, 0, 0);
 
-		s3d::SceneMaterial::Pointer mat = s3d::SceneMaterial::Pointer::create();
-		mat->setVector(et::MaterialParameter::DiffuseColor, vec4(1.0f, 0.5f, 0.25f, 1.0f));
+		et::s3d::SceneMaterial::Pointer mat = et::s3d::SceneMaterial::Pointer::create();
+        mat->setVector(et::MaterialParameter::DiffuseColor, et::vec4(1.0f, 0.5f, 0.25f, 1.0f));
         mat->setFloat(et::MaterialParameter::Roughness, 1.0f);
 		
-		auto obj = _rc->vertexBufferFactory().createVertexArrayObject("sphere", va, et::BufferDrawType::Static, ia, et::BufferDrawType::Static);
-		auto mesh = s3d::Mesh::Pointer::create("sphere", mat, _scene.ptr());
-		RenderBatch::Pointer rb = RenderBatch::Pointer::create(Material::Pointer(), obj);
+        auto obj = _rc->renderer()->createVertexArrayObject("sphere");
+        auto objVb = _rc->renderer()->createVertexBuffer("shpere-vb", va, et::BufferDrawType::Static);
+        auto objIb = _rc->renderer()->createIndexBuffer("sphere-ib", ia, et::BufferDrawType::Static);
+        obj->setBuffers(objVb, objIb);
+        // _rc->vertexBufferFactory().createVertexArrayObject("sphere", va, et::BufferDrawType::Static, ia, et::BufferDrawType::Static);
+		auto mesh = et::s3d::Mesh::Pointer::create("sphere", mat, _scene.ptr());
+		et::RenderBatch::Pointer rb = et::RenderBatch::Pointer::create(et::Material::Pointer(), obj);
 		rb->setVertexStorage(va);
 		rb->setIndexArray(ia);
 		mesh->addRenderBatch(rb);
 	}
-	Raytrace::Options rtOptions;
+	et::Raytrace::Options rtOptions;
 	rtOptions.raysPerPixel = static_cast<size_t>(_options.integerForKey("rays-per-pixel", 32)->content);
 	rtOptions.maxKDTreeDepth = static_cast<size_t>(_options.integerForKey("kd-tree-max-depth", 4)->content);
 	rtOptions.maxPathLength = static_cast<size_t>(_options.integerForKey("max-path-length", 1)->content);
@@ -101,22 +106,22 @@ void MainController::applicationDidLoad(et::RenderContext* rc)
 	rtOptions.threads = static_cast<size_t>(_options.integerForKey("threads", 0ll)->content);
 	rtOptions.renderKDTree = _options.integerForKey("render-kd-tree", 0ll)->content != 0;
 
-	if ((rtOptions.maxPathLength == 0) || (rtOptions.maxPathLength > rt::PathTraceIntegrator::MaxTraverseDepth))
+	if ((rtOptions.maxPathLength == 0) || (rtOptions.maxPathLength > et::rt::PathTraceIntegrator::MaxTraverseDepth))
 	{
-		rtOptions.maxPathLength = rt::PathTraceIntegrator::MaxTraverseDepth;
+		rtOptions.maxPathLength = et::rt::PathTraceIntegrator::MaxTraverseDepth;
 	}
 
 	if (_options.stringForKey("method")->content == "forward")
 	{
-		rtOptions.method = Raytrace::Method::LightTracing;
+		rtOptions.method = et::Raytrace::Method::LightTracing;
 	}
 	else
 	{
-		rtOptions.method = Raytrace::Method::PathTracing;
+		rtOptions.method = et::Raytrace::Method::PathTracing;
 	}
 	_rt.setOptions(rtOptions);
 
-	_rt.setOutputMethod([this](const vec2i& pixel, const vec4& color)
+	_rt.setOutputMethod([this](const et::vec2i& pixel, const et::vec4& color)
 	{
 		if ((pixel.x >= 0) && (pixel.y >= 0) && (pixel.x < _texture->size().x) &&  (pixel.y < _texture->size().y))
         {
@@ -132,82 +137,88 @@ void MainController::applicationDidLoad(et::RenderContext* rc)
 	auto integrator = _options.stringForKey("integrator", "path-trace")->content;
 	if (integrator == "ao")
 	{
-		_rt.setIntegrator(rt::AmbientOcclusionIntegrator::Pointer::create());
+		_rt.setIntegrator(et::rt::AmbientOcclusionIntegrator::Pointer::create());
 	}
 	else if (integrator == "normals")
 	{
-		_rt.setIntegrator(rt::NormalsIntegrator::Pointer::create());
+		_rt.setIntegrator(et::rt::NormalsIntegrator::Pointer::create());
 	}
 	else if (integrator == "fresnel")
 	{
-		_rt.setIntegrator(rt::FresnelIntegrator::Pointer::create());
+		_rt.setIntegrator(et::rt::FresnelIntegrator::Pointer::create());
 	}
 	else
 	{
-		_rt.setIntegrator(rt::PathTraceIntegrator::Pointer::create());
+		_rt.setIntegrator(et::rt::PathTraceIntegrator::Pointer::create());
 	}
 
-	rt::float4 envColor(et::arrayToVec4(_options.arrayForKey("env-color")));
+	et::rt::float4 envColor(et::arrayToVec4(_options.arrayForKey("env-color")));
 
 	auto envMap = _options.stringForKey("env-map")->content;
 	if (envMap.empty() == false)
-		envMap = application().resolveFileName(envMap);
+		envMap = et::application().resolveFileName(envMap);
 
-	if (fileExists(envMap))
+	if (et::fileExists(envMap))
 	{
-		auto texture = loadTexture(envMap);
-		_rt.setEnvironmentSampler(rt::EnvironmentEquirectangularMapSampler::Pointer::create(texture, envColor));
+        et::TextureDescription::Pointer texture = et::TextureDescription::Pointer::create(envMap);
+		_rt.setEnvironmentSampler(et::rt::EnvironmentEquirectangularMapSampler::Pointer::create(texture, envColor));
 	}
 	else
 	{
         auto envType = _options.stringForKey("env-type", "uniform")->content;
         if (envType == "directional")
         {
-            rt::float4 light(et::arrayToVec4(_options.arrayForKey("light-direction")));
-            _rt.setEnvironmentSampler(rt::DirectionalLightSampler::Pointer::create(light, envColor));
+            et::rt::float4 light(et::arrayToVec4(_options.arrayForKey("light-direction")));
+            _rt.setEnvironmentSampler(et::rt::DirectionalLightSampler::Pointer::create(light, envColor));
         }
         else
         {
-            _rt.setEnvironmentSampler(rt::EnvironmentColorSampler::Pointer::create(envColor));
+            _rt.setEnvironmentSampler(et::rt::EnvironmentColorSampler::Pointer::create(envColor));
         }
 	}
 
-	Input::instance().keyPressed.connect([this](size_t key) {
+	et::Input::instance().keyPressed.connect([this](size_t key) {
 		if (key == ET_KEY_SPACE)
 			start();
 	});
 
-	_gestures.click.connect([this](const PointerInputInfo& p) {
-		vec2i pixel(int(p.pos.x), int(p.pos.y));
-		vec4 color = _rt.performAtPoint(_scene, _camera, _texture->size(), pixel);
-		_rt.output(vec2i(pixel.x, _texture->size().y - pixel.y), color);
+	_gestures.click.connect([this](const et::PointerInputInfo& p) {
+		et::vec2i pixel(int(p.pos.x), int(p.pos.y));
+		et::vec4 color = _rt.performAtPoint(_scene, _camera, _texture->size(), pixel);
+		_rt.output(et::vec2i(pixel.x, _texture->size().y - pixel.y), color);
 	});
 
-	Input::instance().keyPressed.invokeInMainRunLoop(ET_KEY_SPACE);
+	et::Input::instance().keyPressed.invokeInMainRunLoop(ET_KEY_SPACE);
 }
 
 void MainController::start()
 {
 	_rt.stop();
 
-	vec2i textureSize = _rc->size();
+	et::vec2i textureSize = _rc->size();
 
-	_textureData.resize(textureSize.square() * sizeof(vec4));
+	_textureData.resize(textureSize.square() * sizeof(et::vec4));
 	_textureData.fill(0);
 
-	BinaryDataStorage proxy(reinterpret_cast<unsigned char*>(_textureData.data()), _textureData.dataSize());
-	_texture = _rc->textureFactory().genTexture(TextureTarget::Texture_2D, TextureFormat::RGBA32F,
-		textureSize, TextureFormat::RGBA, DataFormat::Float, proxy, "output-texture");
+    et::TextureDescription::Pointer desc = et::TextureDescription::Pointer::create();
+    desc->target = et::TextureTarget::Texture_2D;
+    desc->bitsPerPixel = 32;
+    desc->internalformat = et::TextureFormat::RGBA8;
+    desc->format = et::TextureFormat::RGBA;
+    desc->type = et::DataFormat::UnsignedChar;
+    desc->size = textureSize;
+    desc->data = et::BinaryDataStorage(reinterpret_cast<unsigned char*>(_textureData.data()), _textureData.dataSize());
+    _texture = _rc->renderer()->createTexture(desc);
 
-	const vec3 lookPoint = arrayToVec3(_options.arrayForKey("camera-view-point"));
-	const vec3 offset = arrayToVec3(_options.arrayForKey("camera-offset"));
+	const et::vec3 lookPoint = arrayToVec3(_options.arrayForKey("camera-view-point"));
+	const et::vec3 offset = arrayToVec3(_options.arrayForKey("camera-offset"));
 	float cameraFOV = _options.floatForKey("camera-fov", 60.0f)->content * TO_RADIANS;
 	float cameraPhi = _options.floatForKey("camera-phi", 0.0f)->content * TO_RADIANS;
 	float cameraTheta = _options.floatForKey("camera-theta", 0.0f)->content * TO_RADIANS;
 	float cameraDistance = _options.floatForKey("camera-distance", 3.0f)->content;
 	_camera.perspectiveProjection(cameraFOV, vector2ToFloat(textureSize).aspect(), 0.1f, 2048.0f);
-	_camera.lookAt(cameraDistance * fromSpherical(cameraTheta, cameraPhi) + offset, lookPoint);
-    log::info("Camera position: %f, %f, %f", _camera.position().x, _camera.position().y, _camera.position().z);
+	_camera.lookAt(cameraDistance * et::fromSpherical(cameraTheta, cameraPhi) + offset, lookPoint);
+    et::log::info("Camera position: %f, %f, %f", _camera.position().x, _camera.position().y, _camera.position().z);
 
 	_rt.perform(_scene, _camera, _texture->size());
 }
@@ -223,20 +234,30 @@ void MainController::render(et::RenderContext* rc)
 
 	if (_texture.valid())
 	{
-		_texture->updateDataDirectly(rc, _texture->size(), _textureData.binary(), _textureData.dataSize());
-		pass->pushRenderBatch(renderhelper::createFullscreenRenderBatch(_texture));
+        auto desc = _texture->description();
+        desc->data = et::BinaryDataStorage(reinterpret_cast<uint8_t*>(_textureData.data()), _textureData.dataSize());
+        _texture->update(desc);
+        
+        pass->pushRenderBatch(et::renderhelper::createFullscreenRenderBatch(_texture));
 	}
 
 	rc->renderer()->submitRenderPass(pass);
 }
 
-Material::Pointer MainController::materialWithName(const std::string&)
+et::Material::Pointer MainController::materialWithName(const std::string&)
 {
-	return Material::Pointer();
+	return et::Material::Pointer();
+}
+    
+et::ApplicationIdentifier demo::MainController::applicationIdentifier() const
+{
+    return et::ApplicationIdentifier(et::applicationIdentifierForCurrentProject(), "Cheetek", "RT demo");
+}
+    
 }
 
 et::IApplicationDelegate* et::Application::initApplicationDelegate()
-{ return sharedObjectFactory().createObject<MainController>(); }
+{
+    return sharedObjectFactory().createObject<demo::MainController>();
+}
 
-et::ApplicationIdentifier MainController::applicationIdentifier() const
-{ return et::ApplicationIdentifier(applicationIdentifierForCurrentProject(), "Cheetek", "RT demo"); }

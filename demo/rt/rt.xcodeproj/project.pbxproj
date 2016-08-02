@@ -14,14 +14,16 @@
 		6E225A781CB408D900AE27BD /* integrator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6E225A741CB408D900AE27BD /* integrator.cpp */; };
 		6E225A791CB408D900AE27BD /* kdtree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6E225A751CB408D900AE27BD /* kdtree.cpp */; };
 		6E225A7A1CB408D900AE27BD /* raytrace.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6E225A761CB408D900AE27BD /* raytrace.cpp */; };
+		6E4CE94C1D510B3200322956 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A5E2B0521B7D4C5E00DE53DD /* OpenGL.framework */; };
+		6E4CE94F1D510B3600322956 /* Metal.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6E4CE94D1D510B3600322956 /* Metal.framework */; };
+		6E4CE9501D510B3600322956 /* MetalKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6E4CE94E1D510B3600322956 /* MetalKit.framework */; };
+		6E4CE9511D510B3A00322956 /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A5E2B0561B7D4C6D00DE53DD /* AppKit.framework */; };
+		6E4CE9521D510B4200322956 /* CoreVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A5E2B0541B7D4C6800DE53DD /* CoreVideo.framework */; };
+		6E4CE9541D510B4700322956 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6E4CE9531D510B4700322956 /* QuartzCore.framework */; };
 		A52329041B8278C400D00DD6 /* config in Resources */ = {isa = PBXBuildFile; fileRef = A52329031B8278C400D00DD6 /* config */; };
 		A52329071B827D1900D00DD6 /* media in Resources */ = {isa = PBXBuildFile; fileRef = A52329061B827D1900D00DD6 /* media */; };
 		A5E2AEBD1B7D4A7700DE53DD /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5E2AEBA1B7D4A7700DE53DD /* main.cpp */; };
 		A5E2AEBE1B7D4A7700DE53DD /* maincontroller.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5E2AEBB1B7D4A7700DE53DD /* maincontroller.cpp */; };
-		A5E2B0511B7D4C5A00DE53DD /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A5E2B0501B7D4C5A00DE53DD /* CoreGraphics.framework */; };
-		A5E2B0531B7D4C5E00DE53DD /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A5E2B0521B7D4C5E00DE53DD /* OpenGL.framework */; };
-		A5E2B0551B7D4C6800DE53DD /* CoreVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A5E2B0541B7D4C6800DE53DD /* CoreVideo.framework */; };
-		A5E2B0571B7D4C6D00DE53DD /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A5E2B0561B7D4C6D00DE53DD /* AppKit.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -48,6 +50,9 @@
 		6E225A741CB408D900AE27BD /* integrator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = integrator.cpp; path = "../../source-ext/rt/integrator.cpp"; sourceTree = "<group>"; };
 		6E225A751CB408D900AE27BD /* kdtree.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = kdtree.cpp; path = "../../source-ext/rt/kdtree.cpp"; sourceTree = "<group>"; };
 		6E225A761CB408D900AE27BD /* raytrace.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = raytrace.cpp; path = "../../source-ext/rt/raytrace.cpp"; sourceTree = "<group>"; };
+		6E4CE94D1D510B3600322956 /* Metal.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Metal.framework; path = System/Library/Frameworks/Metal.framework; sourceTree = SDKROOT; };
+		6E4CE94E1D510B3600322956 /* MetalKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MetalKit.framework; path = System/Library/Frameworks/MetalKit.framework; sourceTree = SDKROOT; };
+		6E4CE9531D510B4700322956 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		A52329031B8278C400D00DD6 /* config */ = {isa = PBXFileReference; lastKnownFileType = folder; path = config; sourceTree = "<group>"; };
 		A52329061B827D1900D00DD6 /* media */ = {isa = PBXFileReference; lastKnownFileType = folder; name = media; path = ../media; sourceTree = "<group>"; };
 		A5E2AE941B7D4A1800DE53DD /* rt.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = rt.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -66,11 +71,13 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6E4CE9541D510B4700322956 /* QuartzCore.framework in Frameworks */,
+				6E4CE9521D510B4200322956 /* CoreVideo.framework in Frameworks */,
+				6E4CE9511D510B3A00322956 /* AppKit.framework in Frameworks */,
+				6E4CE94F1D510B3600322956 /* Metal.framework in Frameworks */,
+				6E4CE9501D510B3600322956 /* MetalKit.framework in Frameworks */,
+				6E4CE94C1D510B3200322956 /* OpenGL.framework in Frameworks */,
 				5C3C4FF71C9E13A700C5B47A /* libet-static-mac.a in Frameworks */,
-				A5E2B0571B7D4C6D00DE53DD /* AppKit.framework in Frameworks */,
-				A5E2B0551B7D4C6800DE53DD /* CoreVideo.framework in Frameworks */,
-				A5E2B0531B7D4C5E00DE53DD /* OpenGL.framework in Frameworks */,
-				A5E2B0511B7D4C5A00DE53DD /* CoreGraphics.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -139,6 +146,9 @@
 		A5E2AE971B7D4A1800DE53DD /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
+				6E4CE9531D510B4700322956 /* QuartzCore.framework */,
+				6E4CE94D1D510B3600322956 /* Metal.framework */,
+				6E4CE94E1D510B3600322956 /* MetalKit.framework */,
 				A5E2B0561B7D4C6D00DE53DD /* AppKit.framework */,
 				A5E2B0541B7D4C6800DE53DD /* CoreVideo.framework */,
 				A5E2B0521B7D4C5E00DE53DD /* OpenGL.framework */,

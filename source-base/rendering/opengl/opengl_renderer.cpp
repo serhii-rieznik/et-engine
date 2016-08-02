@@ -10,7 +10,9 @@
 #include <et/rendering/opengl/opengl_caps.h>
 #include <et/rendering/opengl/opengl_renderer.h>
 #include <et/rendering/opengl/opengl_renderpass.h>
+#include <et/rendering/opengl/opengl_texture.h>
 #include <et/rendering/opengl/opengl_vertexbuffer.h>
+#include <et/rendering/opengl/opengl_indexbuffer.h>
 #include <et/rendering/renderstate.h>
 #include <et/rendering/rendercontext.h>
 #include <et/rendering/material.h>
@@ -180,7 +182,7 @@ void OpenGLRenderer::submitRenderPass(RenderPass::Pointer in_pass)
 }
 
 /*
- * Constructors
+ * Vertex buffers
  */
 VertexBuffer::Pointer OpenGLRenderer::createVertexBuffer(const std::string& name, VertexStorage::Pointer vs, BufferDrawType dt)
 {
@@ -189,12 +191,27 @@ VertexBuffer::Pointer OpenGLRenderer::createVertexBuffer(const std::string& name
 
 IndexBuffer::Pointer OpenGLRenderer::createIndexBuffer(const std::string& name, IndexArray::Pointer ia, BufferDrawType dt)
 {
-	return IndexBuffer::Pointer::create(ia, dt, name);
+	return OpenGLIndexBuffer::Pointer::create(ia, dt, name);
 }
 
 VertexArrayObject::Pointer OpenGLRenderer::createVertexArrayObject(const std::string& name)
 {
 	return VertexArrayObject::Pointer::create(name);
+}
+
+/*
+ * Textures
+ */
+Texture::Pointer OpenGLRenderer::loadTexture(const std::string& fileName, ObjectsCache& cache)
+{
+    TextureDescription::Pointer desc = TextureDescription::Pointer::create();
+    desc->load(fileName);
+    return createTexture(desc);
+}
+
+Texture::Pointer OpenGLRenderer::createTexture(TextureDescription::Pointer desc)
+{
+    return OpenGLTexture::Pointer::create(desc);
 }
 
 }

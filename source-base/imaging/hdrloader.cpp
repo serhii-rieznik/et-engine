@@ -105,9 +105,10 @@ void et::hdr::loadFromStream(std::istream& source, TextureDescription& desc)
 
 	auto sourcePos = source.tellg();
 
-	size_t rowSize = desc.size.x * 4;
-	size_t square = desc.size.square();
-	size_t maxDataSize = square * desc.bitsPerPixel / 8;
+    size_t square = desc.size.square();
+    size_t maxDataSize = square * desc.bitsPerPixel / 8;
+    
+    desc.rowSize = desc.size.x * 4;
 	BinaryDataStorage inData(maxDataSize, 0);
 	source.read(inData.binary(), maxDataSize);
 	auto ptr = inData.begin();
@@ -121,7 +122,7 @@ void et::hdr::loadFromStream(std::istream& source, TextureDescription& desc)
 
 		for (int y = 0; y < desc.size.y; ++y)
 		{
-			auto rowPtr = rgbeData.binary() + rowSize * (desc.size.y - 1 - y);
+			auto rowPtr = rgbeData.binary() + desc.rowSize * (desc.size.y - 1 - y);
 			ptr = readScanline(ptr, desc.size.x, reinterpret_cast<vec4ub*>(rowPtr));
 		}
 
@@ -130,10 +131,10 @@ void et::hdr::loadFromStream(std::istream& source, TextureDescription& desc)
 	}
 	else
 	{
-		desc.data.resize(desc.size.y * rowSize);
+		desc.data.resize(desc.size.y * desc.rowSize);
 		for (int y = 0; y < desc.size.y; ++y)
 		{
-			auto rowPtr = desc.data.element_ptr((desc.size.y - 1 - y) * rowSize);
+			auto rowPtr = desc.data.element_ptr((desc.size.y - 1 - y) * desc.rowSize);
 			ptr = readScanline(ptr, desc.size.x, reinterpret_cast<vec4ub*>(rowPtr));
 		}
 	}

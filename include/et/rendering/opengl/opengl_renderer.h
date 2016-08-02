@@ -32,12 +32,18 @@ namespace et
 		void submitRenderPass(RenderPass::Pointer) override;
 
 		/*
-		 * Constructors
+		 * Vertex buffers
 		 */
 		VertexBuffer::Pointer createVertexBuffer(const std::string&, VertexStorage::Pointer, BufferDrawType) override;
 		IndexBuffer::Pointer createIndexBuffer(const std::string&, IndexArray::Pointer, BufferDrawType) override;
 		VertexArrayObject::Pointer createVertexArrayObject(const std::string&) override;
 
+        /*
+         * Textures
+         */
+        Texture::Pointer loadTexture(const std::string& fileName, ObjectsCache& cache);
+        Texture::Pointer createTexture(TextureDescription::Pointer);
+        
 		/*
 		 * Low level stuff
 		 */

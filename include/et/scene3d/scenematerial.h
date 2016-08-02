@@ -8,8 +8,8 @@
 #pragma once
 
 #include <et/app/events.h>
-#include <et/imaging/textureloaderthread.h>
 #include <et/rendering/renderstate.h>
+#include <et/rendering/interface/texture.h>
 #include <et/scene3d/serialization.h>
 #include <et/scene3d/material.parameters.h>
 
@@ -18,7 +18,7 @@ namespace et
 	class Material;
 	namespace s3d
 	{
-		class SceneMaterial : public LoadableObject, public TextureLoaderDelegate
+		class SceneMaterial : public LoadableObject
 		{
 		public:
 			ET_DECLARE_POINTER(SceneMaterial);

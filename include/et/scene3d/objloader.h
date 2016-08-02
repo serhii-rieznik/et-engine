@@ -81,12 +81,12 @@ namespace et
 		};
 
 	private:
-		void loadData(bool async, ObjectsCache& cache);
+		void loadData(ObjectsCache& cache);
 		void processLoadedData();
 		
 		s3d::ElementContainer::Pointer generateVertexBuffers(s3d::Storage&);
 
-		void loadMaterials(const std::string& fileName, bool async, ObjectsCache& cache);
+		void loadMaterials(const std::string& fileName, ObjectsCache& cache);
 		void threadFinished();
 
 	private:

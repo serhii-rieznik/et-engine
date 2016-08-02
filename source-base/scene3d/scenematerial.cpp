@@ -111,7 +111,7 @@ void SceneMaterial::deserializeWithOptions(Dictionary stream, RenderContext* rc,
 			if (!fileExists(textureFileName))
 				textureFileName = basePath + textureFileName;
 			
-			setTexture(i, rc->textureFactory().loadTexture(textureFileName, cache));
+			setTexture(i, rc->renderer()->loadTexture(textureFileName, cache));
 		}
 	}
 }
@@ -124,7 +124,7 @@ Texture::Pointer SceneMaterial::loadTexture(RenderContext* rc, const std::string
 
 	auto paths = application().resolveFolderNames(basePath);
 	application().pushSearchPaths(paths);
-	auto result = rc->textureFactory().loadTexture(normalizeFilePath(path), cache, async, this);
+	auto result = rc->renderer()->loadTexture(normalizeFilePath(path), cache);
 	application().popSearchPaths(paths.size());
 	
 	return result;

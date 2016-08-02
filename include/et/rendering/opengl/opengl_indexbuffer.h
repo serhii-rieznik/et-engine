@@ -7,46 +7,25 @@
 
 #pragma once
 
-#include <et/rendering/base/indexarray.h>
+#include <et/rendering/interface/indexbuffer.h>
 
 namespace et
 {
 	class RenderState;
-	class IndexBuffer : public Object
+	class OpenGLIndexBuffer : public IndexBuffer
 	{
 	public:
-		ET_DECLARE_POINTER(IndexBuffer);
+		ET_DECLARE_POINTER(OpenGLIndexBuffer);
 
 	public:
-		IndexBuffer(IndexArray::Pointer i, BufferDrawType drawType, const std::string& name);
-		~IndexBuffer();
+		OpenGLIndexBuffer(IndexArray::Pointer i, BufferDrawType drawType, const std::string& name);
+		~OpenGLIndexBuffer();
 
-		PrimitiveType primitiveType() const
-			{ return _primitiveType; }
-		
-		IndexArrayFormat format() const
-			{ return _format; }
-
-		DataFormat dataFormat() const
-			{ return _dataType; }
-
+        void bind() override;
+        void clear() override;
+        
 		void* indexOffset(uint32_t offset) const;
-
-		uint32_t size() const
-			{ return _size; }
-
-		void setSourceObjectName(const std::string& tag)
-			{ _sourceObjectName = tag; }
-
-		const std::string& sourceObjectName() const
-			{ return _sourceObjectName; }
-
-		void bind();
-
 		void setData(const IndexArray::Pointer& i);
-
-		void clear();
-		
 		void overridePrimitiveType(PrimitiveType);
 
 	private:

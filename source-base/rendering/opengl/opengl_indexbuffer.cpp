@@ -5,66 +5,35 @@
  *
  */
 
+#include <et/rendering/opengl/opengl_indexbuffer.h>
 #include <et/rendering/opengl/opengl.h>
-#include <et/rendering/rendercontext.h>
 
 using namespace et;
 
-IndexBuffer::IndexBuffer(IndexArray::Pointer i, BufferDrawType drawType, const std::string& aName) :
-	Object(aName), _size(i->actualSize()), _sourceObjectName(i->name()), _drawType(drawType)
+OpenGLIndexBuffer::OpenGLIndexBuffer(IndexArray::Pointer i, BufferDrawType dt, const std::string& aName) :
+    IndexBuffer(i, dt, aName)
 {
 	build(i);
 }
 
-IndexBuffer::~IndexBuffer()
+OpenGLIndexBuffer::~OpenGLIndexBuffer()
 {
 	uint32_t buffer = apiHandle();
 	if ((buffer != 0) && glIsBuffer(buffer))
 	{
 #	if (ET_EXPOSE_OLD_RENDER_STATE)
-		_rc->renderState()->indexBufferDeleted(buffer);
+		_rc->renderState()->OpenGLIndexBufferDeleted(buffer);
 #	endif
 		glDeleteBuffers(1, &buffer);
 	}
 }
 
-void IndexBuffer::bind()
+void OpenGLIndexBuffer::bind()
 {
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, apiHandle());
 }
 
-void IndexBuffer::setProperties(const IndexArray::Pointer& i)
-{
-	_size = i->actualSize();
-	_primitiveType = i->primitiveType();
-	_format = i->format();
-
-	switch (_format)
-	{
-		case IndexArrayFormat::Format_8bit:
-		{
-			_dataType = DataFormat::UnsignedChar;
-			break;
-		}
-			
-		case IndexArrayFormat::Format_16bit:
-		{
-			_dataType = DataFormat::UnsignedShort;
-			break;
-		}
-			
-		case IndexArrayFormat::Format_32bit:
-		{
-			_dataType = DataFormat::UnsignedInt;
-			break;
-		}
-			
-		default:
-			ET_FAIL_FMT("Invalid IndexArrayFormat value: %u", static_cast<uint32_t>(_format));
-	}
-}
-
-void IndexBuffer::build(const IndexArray::Pointer& i)
+void OpenGLIndexBuffer::build(const IndexArray::Pointer& i)
 {
 	ET_ASSERT(i.valid());
 
@@ -73,16 +42,15 @@ void IndexBuffer::build(const IndexArray::Pointer& i)
 		uint32_t buffer = 0;
 		
 		glGenBuffers(1, &buffer);
-		checkOpenGLError("glGenBuffers(1, &_indexBuffer)");
+		checkOpenGLError("glGenBuffers(1, &_OpenGLIndexBuffer)");
 		
 		setAPIHandle(buffer);
 	}
 
-	setProperties(i);
 	internal_setData(i->data(), static_cast<uint32_t>(i->format()) * _size);
 }
 
-void IndexBuffer::internal_setData(const unsigned char* data, uint32_t size)
+void OpenGLIndexBuffer::internal_setData(const unsigned char* data, uint32_t size)
 {
 	ET_ASSERT(size > 0);
 
@@ -91,23 +59,23 @@ void IndexBuffer::internal_setData(const unsigned char* data, uint32_t size)
 	checkOpenGLError("glBufferData(GL_ELEMENT_ARRAY_BUFFER, %u, 0x%08X, ..,)", size, data);
 }
 
-void* IndexBuffer::indexOffset(uint32_t offset) const
+void* OpenGLIndexBuffer::indexOffset(uint32_t offset) const
 {
 	return reinterpret_cast<void*>(static_cast<uintptr_t>(_format) * offset);
 }
 
-void IndexBuffer::setData(const IndexArray::Pointer& i)
+void OpenGLIndexBuffer::setData(const IndexArray::Pointer& i)
 {
 	build(i);
 }
 
-void IndexBuffer::clear()
+void OpenGLIndexBuffer::clear()
 {
 	_size = 0;
 	internal_setData(nullptr, 0);
 }
 
-void IndexBuffer::overridePrimitiveType(PrimitiveType pt)
+void OpenGLIndexBuffer::overridePrimitiveType(PrimitiveType pt)
 {
 	_primitiveType = pt;
 }

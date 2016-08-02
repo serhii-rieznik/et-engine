@@ -17,7 +17,13 @@ namespace et
 	public:
 		ET_DECLARE_POINTER(TextureDescription);
 
-	public:
+    public:
+        TextureDescription();
+        TextureDescription(const std::string& fileName);
+        
+        bool load(const std::string& name);
+        bool preload(const std::string& name, bool fillWithZero);
+        
 		vec2i sizeForMipLevel(size_t level)
 		{
 			vec2i result = size;
@@ -91,8 +97,8 @@ namespace et
 		uint32_t compressed = 0;
 		uint32_t bitsPerPixel = 0;
 		uint32_t channels = 0;
-		uint32_t mipMapCount = 0;
-		uint32_t layersCount = 0;
+		uint32_t mipMapCount = 1;
+		uint32_t layersCount = 1;
 		uint32_t alignment = 1;
 		uint32_t rowSize = 0;
 

@@ -9,7 +9,7 @@
 
 #include <et/core/datastorage.h>
 #include <et/rendering/program.h>
-#include <et/rendering/texture.h>
+#include <et/rendering/interface/texture.h>
 #include <et/rendering/interface/renderstate.h>
 #include <et/rendering/interface/pipelinestate.h>
 

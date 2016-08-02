@@ -1,7 +1,7 @@
 #include "MainController.h"
 #include <et/rendering/base/primitives.h>
 
-const et::RenderingAPI api = et::RenderingAPI::OpenGL;
+const et::RenderingAPI api = et::RenderingAPI::Metal;
 
 void demo::MainController::setApplicationParameters(et::ApplicationParameters& p)
 {

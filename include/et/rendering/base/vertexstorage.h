@@ -41,8 +41,8 @@ namespace et
 		{
 			ET_ASSERT(hasAttributeWithType(usage, T));
 			
-			return VertexDataAccessor<T>(data().binary(), data().dataSize(), stride(),
-				offset * stride() + offsetOfAttribute(usage));
+			return VertexDataAccessor<T>(data().binary(), static_cast<uint32_t>(data().dataSize()),
+                stride(), offset * stride() + offsetOfAttribute(usage));
 		}
 		
 		BinaryDataStorage& data();

@@ -273,7 +273,7 @@ void Material::enableSnapshotInRenderState(RenderState::Pointer rs, uint64_t ind
 {
 	ET_ASSERT(index < _snapshots.size());
 	
-	const auto& snapshot = _snapshots.at(static_cast<size_t>(index));
+	Snapshot& snapshot = _snapshots.at(static_cast<size_t>(index));
 
 	rs->setCullMode(snapshot.pipelineState.cull);
 	rs->setBlendState(snapshot.pipelineState.blend);

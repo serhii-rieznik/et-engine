@@ -5,6 +5,7 @@
  *
  */
 
+/*
 #include <et/core/objectscache.h>
 #include <et/core/threading.h>
 #include <et/app/application.h>
@@ -387,3 +388,4 @@ void TextureFactory::reloadObject(LoadableObject::Pointer object, ObjectsCache&)
 	if (newData.valid())
 		Texture::Pointer(object)->updateData(newData);
 }
+*/

@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include <et/rendering/texture.h>
+#include <et/rendering/interface/texture.h>
 
 namespace et
 {

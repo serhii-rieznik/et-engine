@@ -66,7 +66,6 @@ RenderContext::RenderContext(const RenderContextParameters& inParams, Applicatio
 
 	_renderer->init(_params);
 
-	_textureFactory = TextureFactory::Pointer::create();
 	_materialFactory = MaterialFactory::Pointer::create();
 
 	NSWindow* mainWindow = (__bridge NSWindow*)(ctx.objects[0]);
@@ -78,7 +77,7 @@ RenderContext::RenderContext(const RenderContextParameters& inParams, Applicatio
 		CGLContextObj glContext = reinterpret_cast<CGLContextObj>(ctx.objects[4]);
 		[openGlView setOpenGLContext:[[NSOpenGLContext alloc] initWithCGLContextObj:glContext]];
 		mainView = openGlView;
-	}
+    }
 	else if (application().parameters().renderingAPI == RenderingAPI::Metal)
 	{
 		mainView = (__bridge NSView*)(ctx.objects[2]);
@@ -89,9 +88,13 @@ RenderContext::RenderContext(const RenderContextParameters& inParams, Applicatio
 		[mainView setWantsLayer:YES];
 	}
 
-	renderhelper::init(this);
-
-	[mainWindow makeKeyAndOrderFront:[NSApplication sharedApplication]];
+    renderhelper::init(this);
+    
+    NSRect backingRect = [mainView convertRectToBacking:NSMakeRect(0.0f, 0.0f, mainView.bounds.size.width, mainView.bounds.size.height)];
+    _size.x = static_cast<int>(backingRect.size.width);
+    _size.y = static_cast<int>(backingRect.size.height);
+    
+    [mainWindow makeKeyAndOrderFront:[NSApplication sharedApplication]];
 	[mainWindow orderFrontRegardless];
 	[[NSApplication sharedApplication] activateIgnoringOtherApps:YES];
 }

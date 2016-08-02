@@ -149,7 +149,8 @@ bool Framebuffer::checkStatus()
 Texture::Pointer Framebuffer::buildTexture(const vec3i& aSize, TextureTarget aTarget,
 	TextureFormat aInternalFormat, TextureFormat aFormat, DataFormat aType)
 {
-	switch (aTarget)
+    /*
+    switch (aTarget)
 	{
 		case TextureTarget::Texture_2D:
 		case TextureTarget::Texture_Rectangle:
@@ -175,30 +176,33 @@ Texture::Pointer Framebuffer::buildTexture(const vec3i& aSize, TextureTarget aTa
 		default:
 			ET_FAIL_FMT("Invalid or unsupported texture target: %u", static_cast<uint32_t>(aTarget));
 	}
-
+    */
 	return Texture::Pointer();
 }
 
 void Framebuffer::buildColorAttachment()
 {
-	Texture::Pointer target = buildTexture(_description.size, _description.target, 
+    /*
+     Texture::Pointer target = buildTexture(_description.size, _description.target,
 		_description.colorInternalformat, _description.colorFormat, _description.colorType);
 	target->setWrap(TextureWrap::ClampToEdge, TextureWrap::ClampToEdge);
 	addRenderTarget(target);
+    */
 }
 
 void Framebuffer::buildDepthAttachment()
 {
+    /*
 	Texture::Pointer target = buildTexture(_description.size, _description.target,
 		_description.depthInternalformat, _description.depthFormat, _description.depthType);
-
 	target->setWrap(TextureWrap::ClampToEdge, TextureWrap::ClampToEdge);
-
 	setDepthTarget(target);
+    */
 }
 
 void Framebuffer::attachTexture(const Texture::Pointer& rt, uint32_t target)
 {
+    /*
 	ET_ASSERT(rt.valid());
 	ET_ASSERT(rt->size() == _description.size.xy());
 	ET_ASSERT(glIsTexture(static_cast<uint32_t>(rt->apiHandle())));
@@ -229,6 +233,7 @@ void Framebuffer::attachTexture(const Texture::Pointer& rt, uint32_t target)
 		checkOpenGLError("glFramebufferTexture(...) - %s", name().c_str());
 	}
 #endif
+    */
 }
 
 void Framebuffer::addRenderTarget(const Texture::Pointer& rt)
@@ -248,6 +253,7 @@ void Framebuffer::setDepthTarget(const Texture::Pointer& texture)
 
 void Framebuffer::addSameRendertarget()
 {
+    /*
 	if (_description.colorIsRenderbuffer)
 	{
 		ET_ASSERT(!_colorRenderBuffers.empty());
@@ -267,6 +273,7 @@ void Framebuffer::addSameRendertarget()
 		target->setWrap(TextureWrap::ClampToEdge, TextureWrap::ClampToEdge);
 		addRenderTarget(target);
 	}
+    */
 }
 
 void Framebuffer::setRenderTargetAtIndex(const Texture::Pointer& texture, uint32_t index)
@@ -288,6 +295,7 @@ void Framebuffer::setCurrentRenderTarget(uint32_t index)
 
 void Framebuffer::setCurrentCubemapFace(uint32_t faceIndex)
 {
+    /*
 	ET_ASSERT((_description.target == TextureTarget::Texture_Cube) && (faceIndex < 6));
 	
 	bind();
@@ -310,10 +318,12 @@ void Framebuffer::setCurrentCubemapFace(uint32_t faceIndex)
 			static_cast<uint32_t>(_depthBuffer->apiHandle()), 0);
 		checkOpenGLError("setCurrentCubemapFace -> depth");
 	}
+    */
 }
 
 void Framebuffer::setCurrentLayer(uint32_t layerIndex)
 {
+    /*
 #if (!ET_OPENGLES)
 	ET_ASSERT(layerIndex < static_cast<uint32_t>(_description.size.z));
 	bind();
@@ -332,6 +342,7 @@ void Framebuffer::setCurrentLayer(uint32_t layerIndex)
 			static_cast<GLuint>(_depthBuffer->apiHandle()), 0, layerIndex);
 	}
 #endif
+    */
 }
 
 uint32_t Framebuffer::buildColorRenderbuffer(uint32_t input)
@@ -417,7 +428,7 @@ void Framebuffer::resize(const vec2i& sz)
 				desc->size = sz;
 				desc->data.resize(desc->layersCount * desc->dataSizeForAllMipLevels());
 				desc->data.fill(0);
-				rt->updateData(desc);
+				rt->update(desc);
 				setCurrentRenderTarget(rt);
 			}
 		}
@@ -435,7 +446,7 @@ void Framebuffer::resize(const vec2i& sz)
 			desc->size = sz;
 			desc->data.resize(desc->layersCount * desc->dataSizeForAllMipLevels());
 			desc->data.fill(0);
-			_depthBuffer->updateData(desc);
+			_depthBuffer->update(desc);
 			setDepthTarget(_depthBuffer);
 		}
 	}
