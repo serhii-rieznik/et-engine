@@ -7,24 +7,18 @@
 
 #pragma once
 
-#include <et/rendering/rendering.h>
+#include <et/rendering/interface/program.h>
 
 namespace et
 {
 	class Camera;
 	class RenderState;
 	
-	class Program : public LoadableObject
+	class OpenGLProgram : public Program
 	{
 	public:
-		ET_DECLARE_POINTER(Program);
+		ET_DECLARE_POINTER(OpenGLProgram);
 
-		struct Uniform
-		{
-			uint32_t type = 0;
-			int32_t location = -1;
-		};
-		
 		struct Attribute
 		{
 			std::string name;
@@ -34,23 +28,24 @@ namespace et
 			Attribute(const std::string& aName, VertexAttributeUsage aUsage, bool isBuiltIn) :
 				name(aName), usage(aUsage), builtIn(isBuiltIn ? 1 : 0) { }
 		};
-		
-		typedef std::unordered_map<std::string, Uniform> UniformMap;
-		
+		        
+        static const std::string& commonHeader();
+        static const std::string& vertexShaderHeader();
+        static const std::string& fragmentShaderHeader();
+        
 	public:
-		Program();
+		OpenGLProgram();
 		
-		Program(const std::string& vertexShader, const std::string& geometryShader,
+		OpenGLProgram(const std::string& vertexShader, const std::string& geometryShader,
 			const std::string& fragmentShader, const std::string& objName, const std::string& origin,
 			const StringList& defines);
 
-		~Program();
+		~OpenGLProgram();
 
 		int getUniformLocation(const std::string& uniform) const;
 		uint32_t getUniformType(const std::string& uniform) const;
-		Program::Uniform getUniform(const std::string& uniform) const;
+		ShaderConstant getUniform(const std::string& uniform) const;
 
-		void bind();
 		bool validate() const;
 		
 		int viewMatrixUniformLocation() const 
@@ -74,18 +69,11 @@ namespace et
 		void setViewMatrix(const mat4 &m, bool force = false);
 		void setViewProjectionMatrix(const mat4 &m, bool force = false);
 		void setCameraPosition(const vec3& p, bool force = false);
-		void setDefaultLightPosition(const vec3& p, bool force = false);
 		void setLightProjectionMatrix(const mat4 &m, bool force = false);
-		void setTransformMatrix(const mat4 &m, bool force = false);
-
-		void setCameraProperties(const Camera& cam);
-		
+        
 		bool isBuiltInUniformName(const std::string&);
 		bool isSamplerUniformType(uint32_t);
 		DataType uniformTypeToDataType(uint32_t);
-
-		const Program::UniformMap& uniforms() const 
-			{ return _uniforms; }
 
 		void setUniform(int, uint32_t, const int32_t, bool force = false);
 		void setUniform(int, uint32_t, const uint32_t, bool force = false);
@@ -127,40 +115,38 @@ namespace et
 		template <typename T>
 		void setUniform(const std::string& name, const T& value, bool force = false)
 		{
-			auto i = findUniform(name);
-			if (i != _uniforms.end())
+			auto i = findConstant(name);
+			if (i != shaderConstants().end())
 				setUniform(i->second.location, i->second.type, value, force);
 		}
 
 		template <typename T>
 		void setUniform(const std::string& name, const T* value, size_t amount)
 		{
-			auto i = findUniform(name);
-			if (i != _uniforms.end())
+			auto i = findConstant(name);
+			if (i != shaderConstants().end())
 				setUniform(i->second.location, i->second.type, value, amount);
 		}
 		
 		template <typename T>
-		void setUniform(const Program::Uniform& u, const T& value, bool force = false)
+		void setUniform(const ShaderConstant& u, const T& value, bool force = false)
 			{ setUniform(u.location, u.type, value, force); }
 
 		template <typename T>
-		void setUniformDirectly(const Program::Uniform& u, const T& value)
+		void setUniformDirectly(const ShaderConstant& u, const T& value)
 			{ setUniformDirectly(u.location, u.type, value); }
 		
 		template <typename T>
-		void setUniform(const Program::Uniform& u, const T* value, size_t amount)
+		void setUniform(const ShaderConstant& u, const T* value, size_t amount)
 			{ setUniform(u.location, u.type, value, amount); }
 		
-		void buildProgram(const std::string& vertex_source, const std::string& geom_source,
-			const std::string& frag_source);
-		
-		const StringList& defines() const
-			{ return _defines; }
-		
+        void bind() override;
+        void build(const std::string& vertexSource, const std::string& fragmentSource) override;
+        void setTransformMatrix(const mat4 &m, bool force) override;
+        void setCameraProperties(const Camera& cam) override;
+        void setDefaultLightPosition(const vec3& p, bool force) override;
+        
 	private:
-		Program::UniformMap::const_iterator findUniform(const std::string& name) const;
-		
 		int link(bool);
 		void printShaderLog(uint32_t, size_t, const char*);
 		void printShaderSource(uint32_t, size_t, const char*);
@@ -171,7 +157,6 @@ namespace et
 		void setAPIHandle(uint32_t ah) { _ah = ah; }
 
 	private:
-		Program::UniformMap _uniforms;
 		std::vector<Attribute> _attributes;
 		std::map<int, float> _floatCache;
 		std::map<int, vec2> _vec2Cache;
@@ -191,6 +176,5 @@ namespace et
 		int _matWorldLocation = -1;
 
 		std::unordered_map<std::string, int*> _builtInUniforms;
-		StringList _defines;
 	};
 }

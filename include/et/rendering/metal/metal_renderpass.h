@@ -19,7 +19,7 @@ namespace et
 		ET_DECLARE_POINTER(MetalRenderPass);
 
 	public:
-		MetalRenderPass(const RenderPass::ConstructionInfo&, MetalState&);
+		MetalRenderPass(MetalState&, const RenderPass::ConstructionInfo&);
 		~MetalRenderPass();
 		
 		void pushRenderBatch(RenderBatch::Pointer) override;

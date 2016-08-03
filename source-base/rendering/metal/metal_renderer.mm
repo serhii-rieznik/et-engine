@@ -12,14 +12,7 @@
 #include <et/rendering/metal/metal_texture.h>
 #include <et/rendering/metal/metal_vertexbuffer.h>
 #include <et/rendering/metal/metal_indexbuffer.h>
-#include <et/platform-apple/objc.h>
-
-#if (ET_PLATFORM_MAC)
-#	include <Metal/Metal.h>
-#	include <MetalKit/MetalKit.h>
-#else
-#	error Not implemented for this platform
-#endif
+#include <et/rendering/metal/metal_program.h>
 
 namespace et
 {
@@ -78,7 +71,7 @@ void MetalRenderer::present()
 
 RenderPass::Pointer MetalRenderer::allocateRenderPass(const RenderPass::ConstructionInfo& info)
 {
-	MetalRenderPass::Pointer result = MetalRenderPass::Pointer::create(info, _private->metal);
+	MetalRenderPass::Pointer result = MetalRenderPass::Pointer::create(_private->metal, info);
 
 	return result;
 }
@@ -99,12 +92,12 @@ void MetalRenderer::drawIndexedPrimitive(PrimitiveType pt, IndexArrayFormat fmt,
  */
 VertexBuffer::Pointer MetalRenderer::createVertexBuffer(const std::string& name, VertexStorage::Pointer vs, BufferDrawType dt)
 {
-	return MetalVertexBuffer::Pointer::create(vs->declaration(), vs->data(), dt, name);
+	return MetalVertexBuffer::Pointer::create(_private->metal, vs->declaration(), vs->data(), dt, name);
 }
 
 IndexBuffer::Pointer MetalRenderer::createIndexBuffer(const std::string& name, IndexArray::Pointer ia, BufferDrawType dt)
 {
-    return MetalIndexBuffer::Pointer::create(ia, dt, name);
+    return MetalIndexBuffer::Pointer::create(_private->metal, ia, dt, name);
 }
 
 VertexArrayObject::Pointer MetalRenderer::createVertexArrayObject(const std::string& name)
@@ -124,7 +117,17 @@ Texture::Pointer MetalRenderer::loadTexture(const std::string& fileName, Objects
 
 Texture::Pointer MetalRenderer::createTexture(TextureDescription::Pointer desc)
 {
-    return MetalTexture::Pointer::create(desc, _private->metal);
+    return MetalTexture::Pointer::create(_private->metal, desc);
 }
 
+/*
+ * Programs
+ */
+Program::Pointer MetalRenderer::createProgram(const std::string& vs, const std::string& fs,
+    const StringList& defines, const std::string& baseFolder)
+{
+    MetalProgram::Pointer program = MetalProgram::Pointer::create(_private->metal);
+    return program;
+}
+    
 }

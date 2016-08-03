@@ -63,8 +63,7 @@ void OpenGLVertexBuffer::bind()
 	for (size_t i = 0; i < declaration().numElements(); ++i)
 	{
 		const VertexElement& e = declaration().element(i);
-		uint32_t dataOffset = i * (declaration().interleaved() ? declaration().dataSize() : dataTypeSize(e.type()));
-
+        
 		auto usage = GLuint(e.usage());
 		auto components = static_cast<GLint>(e.components());
 		auto dataFormat = dataFormatValue(e.dataFormat());

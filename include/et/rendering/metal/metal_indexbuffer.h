@@ -11,6 +11,7 @@
 
 namespace et
 {
+    class MetalState;
 	class MetalIndexBufferPrivate;
 	class MetalIndexBuffer : public IndexBuffer
 	{
@@ -18,7 +19,7 @@ namespace et
 		ET_DECLARE_POINTER(MetalIndexBuffer);
 		
 	public:
-        MetalIndexBuffer(IndexArray::Pointer i, BufferDrawType drawType, const std::string& name);
+        MetalIndexBuffer(MetalState& metal, IndexArray::Pointer i, BufferDrawType drawType, const std::string& name);
 		~MetalIndexBuffer();
 
 		void bind() override;

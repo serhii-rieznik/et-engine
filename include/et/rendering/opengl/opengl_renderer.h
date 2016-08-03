@@ -41,8 +41,14 @@ namespace et
         /*
          * Textures
          */
-        Texture::Pointer loadTexture(const std::string& fileName, ObjectsCache& cache);
-        Texture::Pointer createTexture(TextureDescription::Pointer);
+        Texture::Pointer loadTexture(const std::string& fileName, ObjectsCache& cache) override;
+        Texture::Pointer createTexture(TextureDescription::Pointer) override;
+        
+        /*
+         * Programs
+         */
+        Program::Pointer createProgram(const std::string& vs, const std::string& fs,
+            const StringList& defines, const std::string& baseFolder) override;
         
 		/*
 		 * Low level stuff

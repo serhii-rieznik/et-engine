@@ -7,9 +7,11 @@
 
 #include <et/core/et.h>
 
-using namespace et;
+namespace et
+{
 
-const std::string et::emptyString;
+const std::string emptyString;
+const StringList emptyStringList;
 
 static struct SharedEngineObjects
 {
@@ -26,17 +28,19 @@ SharedEngineObjects::SharedEngineObjects()
 	objectFactory.setAllocator(&blockMemoryAllocator);
 }
 
-BlockMemoryAllocator& et::sharedBlockAllocator()
+BlockMemoryAllocator& sharedBlockAllocator()
 {
 	return sharedEngineObjects.blockMemoryAllocator;
 }
 
-ObjectFactory& et::sharedObjectFactory()
+ObjectFactory& sharedObjectFactory()
 {
 	return sharedEngineObjects.objectFactory;
 }
 
-std::vector<log::Output::Pointer>& et::sharedLogOutputs()
+std::vector<log::Output::Pointer>& sharedLogOutputs()
 {
 	return sharedEngineObjects.logOutputs;
+}
+
 }

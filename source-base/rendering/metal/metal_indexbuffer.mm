@@ -5,19 +5,23 @@
  *
  */
 
-#include <et/rendering/metal/metal_IndexBuffer.h>
+#include <et/rendering/metal/metal_indexbuffer.h>
+#include <et/rendering/metal/metal.h>
 
 namespace et
 {
 
 class MetalIndexBufferPrivate
 {
+public:
+    id<MTLBuffer> buffer;
 };
 
-MetalIndexBuffer::MetalIndexBuffer(IndexArray::Pointer i, BufferDrawType dt, const std::string& name)
+MetalIndexBuffer::MetalIndexBuffer(MetalState& metal, IndexArray::Pointer i, BufferDrawType dt, const std::string& name)
     : et::IndexBuffer(i, dt, name)
 {
 	ET_PIMPL_INIT(MetalIndexBuffer);
+    _private->buffer = [metal.device newBufferWithBytes:i->data() length:i->actualSize() options:MTLResourceCPUCacheModeDefaultCache];
 }
 
 MetalIndexBuffer::~MetalIndexBuffer()

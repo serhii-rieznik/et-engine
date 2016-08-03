@@ -11,6 +11,7 @@
 
 namespace et
 {
+    class MetalState;
 	class MetalVertexBufferPrivate;
 	class MetalVertexBuffer : public VertexBuffer
 	{
@@ -18,7 +19,7 @@ namespace et
 		ET_DECLARE_POINTER(MetalVertexBuffer);
 		
 	public:
-		MetalVertexBuffer(const VertexDeclaration&, const BinaryDataStorage&, BufferDrawType, const std::string&);
+		MetalVertexBuffer(MetalState&, const VertexDeclaration&, const BinaryDataStorage&, BufferDrawType, const std::string&);
 		~MetalVertexBuffer();
 
 		void bind() override;

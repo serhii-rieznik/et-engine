@@ -18,7 +18,7 @@ public:
     id<MTLTexture> texture = nullptr;
 };
     
-MetalTexture::MetalTexture(TextureDescription::Pointer desc, MetalState& metal)
+MetalTexture::MetalTexture(MetalState& metal, TextureDescription::Pointer desc)
     : Texture(desc)
 {
     ET_PIMPL_INIT(MetalTexture);

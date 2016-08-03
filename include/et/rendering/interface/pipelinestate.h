@@ -9,7 +9,6 @@
 
 #include <et/rendering/rendering.h>
 #include <et/rendering/vertexarrayobject.h>
-
 #include <et/rendering/base/vertexdeclaration.h>
 
 namespace et

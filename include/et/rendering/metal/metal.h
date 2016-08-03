@@ -18,8 +18,9 @@
 namespace et
 {
 
-struct MetalState
+class MetalState
 {
+public:
 	CAMetalLayer* layer = nil;
 	
 	id<MTLDevice> device = nil;

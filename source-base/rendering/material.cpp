@@ -7,7 +7,8 @@
 
 #include <et/app/application.h>
 #include <et/rendering/renderstate.h>
-#include <et/rendering/materialfactory.h>
+#include <et/rendering/interface/renderer.h>
+#include <et/rendering/opengl/opengl_program.h>
 
 using namespace et;
 
@@ -19,20 +20,21 @@ namespace
 	const std::string kRenderPriority = "render-priority";
 }
 
-Material::Material(MaterialFactory* mf) :
-	_factory(mf), _propertiesData(2 * sizeof(mat4), 0)
+Material::Material(RenderInterface* renderer) :
+	_renderer(renderer), _propertiesData(2 * sizeof(mat4), 0)
 {
-	_setFloatFunctions[uint32_t(DataType::Float)] = &Program::setFloatUniform;
-	_setFloatFunctions[uint32_t(DataType::Vec2)] = &Program::setFloat2Uniform;
-	_setFloatFunctions[uint32_t(DataType::Vec3)] = &Program::setFloat3Uniform;
-	_setFloatFunctions[uint32_t(DataType::Vec4)] = &Program::setFloat4Uniform;
-	_setFloatFunctions[uint32_t(DataType::Mat3)] = &Program::setMatrix3Uniform;
-	_setFloatFunctions[uint32_t(DataType::Mat4)] = &Program::setMatrix4Uniform;
+	_setFloatFunctions[uint32_t(DataType::Float)] = &OpenGLProgram::setFloatUniform;
+	_setFloatFunctions[uint32_t(DataType::Vec2)] = &OpenGLProgram::setFloat2Uniform;
+	_setFloatFunctions[uint32_t(DataType::Vec3)] = &OpenGLProgram::setFloat3Uniform;
+	_setFloatFunctions[uint32_t(DataType::Vec4)] = &OpenGLProgram::setFloat4Uniform;
 	
-	_setIntFunctions[uint32_t(DataType::Int)] = &Program::setIntUniform;
-	_setIntFunctions[uint32_t(DataType::IntVec2)] = &Program::setInt2Uniform;
-	_setIntFunctions[uint32_t(DataType::IntVec3)] = &Program::setInt3Uniform;
-	_setIntFunctions[uint32_t(DataType::IntVec4)] = &Program::setInt4Uniform;
+    _setFloatFunctions[uint32_t(DataType::Mat3)] = &OpenGLProgram::setMatrix3Uniform;
+	_setFloatFunctions[uint32_t(DataType::Mat4)] = &OpenGLProgram::setMatrix4Uniform;
+    
+	_setIntFunctions[uint32_t(DataType::Int)] = &OpenGLProgram::setIntUniform;
+	_setIntFunctions[uint32_t(DataType::IntVec2)] = &OpenGLProgram::setInt2Uniform;
+	_setIntFunctions[uint32_t(DataType::IntVec3)] = &OpenGLProgram::setInt3Uniform;
+	_setIntFunctions[uint32_t(DataType::IntVec4)] = &OpenGLProgram::setInt4Uniform;
 }
 
 void Material::loadFromJson(const std::string& jsonString, const std::string& baseFolder)
@@ -77,7 +79,9 @@ void Material::loadFromJson(const std::string& jsonString, const std::string& ba
 		if (!define.empty())
 		{
 			std::transform(define.begin(), define.end(), define.begin(), [](char c)
-						   { return (c == '=') ? ' ' : c; });
+            {
+                return (c == '=') ? ' ' : c;
+            });
 			defines.push_back("#define " + define + "\n");
 		}
 	};
@@ -89,7 +93,8 @@ void Material::loadFromJson(const std::string& jsonString, const std::string& ba
 			addDefine(StringValue(def)->content);
 		}
 	}
-	Program::Pointer program = _factory->genProgram(name, loadTextFile(vertexSource), loadTextFile(fragmentSource), defines, baseFolder);
+    Program::Pointer program = _renderer->createProgram(loadTextFile(vertexSource), loadTextFile(fragmentSource));
+    // _factory->genProgram(name, loadTextFile(vertexSource), loadTextFile(fragmentSource), defines, baseFolder);
 	program->addOrigin(vertexSource);
 	program->addOrigin(fragmentSource);
 	setProgram(program);
@@ -157,21 +162,26 @@ void Material::loadProperties()
 	_properties.clear();
 	_propertiesData.resize(0);
 
+    /*
+     * TODO : load actual properties
+     */
 	uint32_t textureUnitCounter = 0;
-	for (const auto& u : _pipelineState.program->uniforms())
+    OpenGLProgram::Pointer openglProgram = _pipelineState.program;
+	for (const auto& u : openglProgram->shaderConstants())
 	{
 		String name(u.first.c_str());
-		if (_pipelineState.program->isSamplerUniformType(u.second.type))
+		if (openglProgram->isSamplerUniformType(u.second.type))
 		{
 			addTexture(name, u.second.location, textureUnitCounter);
-			_pipelineState.program->setUniform(u.second.location, u.second.type, textureUnitCounter);
+			openglProgram->setUniform(u.second.location, u.second.type, textureUnitCounter);
 			++textureUnitCounter;
 		}
-		else if (!_pipelineState.program->isBuiltInUniformName(u.first))
+		else if (!openglProgram->isBuiltInUniformName(u.first))
 		{
-			addDataProperty(name, _pipelineState.program->uniformTypeToDataType(u.second.type), u.second.location);
+			addDataProperty(name, openglProgram->uniformTypeToDataType(u.second.type), u.second.location);
 		}
 	}
+    // */
 }
 
 void Material::addTexture(const String& name, int32_t location, uint32_t unit)
@@ -295,7 +305,7 @@ void Material::applyProperty(const DataProperty& prop, const BinaryDataStorage& 
 {
 	auto format = dataTypeDataFormat(prop.type);
 	auto ptr = data.element_ptr(prop.offset);
-	auto programPtr = _pipelineState.program.ptr();
+    OpenGLProgram* programPtr = static_cast<OpenGLProgram*>(_pipelineState.program.ptr());
 	if (format == DataFormat::Int)
 	{
 		auto& fn = _setIntFunctions[uint32_t(prop.type)];

@@ -9,9 +9,10 @@
 #include <et/core/tools.h>
 #include <et/core/cout.h>
 
-using namespace et;
+namespace et
+{
 
-size_t et::streamSize(std::istream& s)
+size_t streamSize(std::istream& s)
 {
 	std::streamoff currentPos = s.tellg();
 	
@@ -22,7 +23,7 @@ size_t et::streamSize(std::istream& s)
 	return static_cast<size_t>(endPos);
 }
 
-std::string et::loadTextFile(const std::string& fileName)
+std::string loadTextFile(const std::string& fileName)
 {
 	InputStream file(fileName, StreamMode_Binary);
 	if (file.invalid()) return emptyString;
@@ -33,7 +34,7 @@ std::string et::loadTextFile(const std::string& fileName)
 	return std::string(data.data());
 }
 
-std::string et::addTrailingSlash(const std::string& path)
+std::string addTrailingSlash(const std::string& path)
 {
 	if (path.empty() || (path.back() == pathDelimiter))
 	{
@@ -51,7 +52,7 @@ std::string et::addTrailingSlash(const std::string& path)
 	}
 }
 
-std::string et::replaceFileExt(const std::string& fileName, const std::string& newExt)
+std::string replaceFileExt(const std::string& fileName, const std::string& newExt)
 {
 	std::string name = getFileName(fileName);
 	std::string path = getFilePath(fileName);
@@ -64,7 +65,7 @@ std::string et::replaceFileExt(const std::string& fileName, const std::string& n
 	return path + name + newExt;
 }
 
-std::string et::removeFileExt(const std::string& fileName)
+std::string removeFileExt(const std::string& fileName)
 {
 	std::string name = getFileName(fileName);
 	std::string path = getFilePath(fileName);
@@ -77,7 +78,7 @@ std::string et::removeFileExt(const std::string& fileName)
 	return path + name;
 }
 
-std::string& et::trim(std::string& str)
+std::string& trim(std::string& str)
 {
 	size_t strSize = str.length();
 	if (!strSize) return str;
@@ -101,7 +102,7 @@ std::string& et::trim(std::string& str)
 	return str;
 }
 
-std::string et::capitalize(std::string v)
+std::string capitalize(std::string v)
 {
 	v[0] = ::toupper(v[0]) & 0xff;
 	for (size_t i = 1; i < v.length(); ++i)
@@ -112,7 +113,7 @@ std::string et::capitalize(std::string v)
 	return v;
 }
 
-bool et::isUtf8String(const std::string& s)
+bool isUtf8String(const std::string& s)
 {
 	for (auto c : s)
 	{
@@ -123,25 +124,25 @@ bool et::isUtf8String(const std::string& s)
 	return false;
 }
 
-std::string et::getFilePath(const std::string& name)
+std::string getFilePath(const std::string& name)
 {
 	std::string::size_type p = normalizeFilePath(name).find_last_of(pathDelimiter);
 	return (p == std::string::npos) ? emptyString : name.substr(0, ++p);
 }
 
-std::string et::getFileFolder(const std::string& name)
+std::string getFileFolder(const std::string& name)
 {
 	std::string::size_type p = normalizeFilePath(name).find_last_of(pathDelimiter);
 	return (p == std::string::npos) ? emptyString : name.substr(0, p);
 }
 
-std::string et::getFileName(const std::string& fullPath)
+std::string getFileName(const std::string& fullPath)
 {
 	std::string::size_type p = normalizeFilePath(fullPath).find_last_of(pathDelimiter);
 	return (p  == std::string::npos) ? fullPath : fullPath.substr(p + 1);
 }
 
-std::string et::removeUpDir(std::string name)
+std::string removeUpDir(std::string name)
 {
 	std::string::size_type dotsPos = name.find("..");
 	
@@ -151,14 +152,14 @@ std::string et::removeUpDir(std::string name)
 	return name;
 }
 
-std::string et::normalizeFilePath(const std::string& s)
+std::string normalizeFilePath(const std::string& s)
 {
 	auto result = s;
 	normalizeFilePath(result);
 	return result;
 }
 
-std::string& et::normalizeFilePath(std::string& s)
+std::string& normalizeFilePath(std::string& s)
 {
 	for (char& i : s)
 	{
@@ -168,7 +169,7 @@ std::string& et::normalizeFilePath(std::string& s)
 	return s;
 }
 
-std::string et::getFileExt(std::string name)
+std::string getFileExt(std::string name)
 {
 	name = normalizeFilePath(name);
 
@@ -186,7 +187,7 @@ std::string et::getFileExt(std::string name)
 	return emptyString;
 }
 
-float et::extractFloat(std::string& s)
+float extractFloat(std::string& s)
 {
 	size_t len = s.length();
 	const char* data = s.c_str();
@@ -231,7 +232,7 @@ float et::extractFloat(std::string& s)
 	return hasMinus ? -value : value;
 }
 
-StringList et::split(const std::string& s, const std::string& delim)
+StringList split(const std::string& s, const std::string& delim)
 {
 	StringList result;
 	result.reserve(1 + s.size() / 2);
@@ -254,7 +255,7 @@ StringList et::split(const std::string& s, const std::string& delim)
 	return result;
 }
 
-std::ostream& et::operator << (std::ostream& stream, const StringList& list)
+std::ostream& operator << (std::ostream& stream, const StringList& list)
 {
 	stream << "{" << std::endl;
 	for (const auto& i : list)
@@ -264,7 +265,7 @@ std::ostream& et::operator << (std::ostream& stream, const StringList& list)
 	return stream;
 }
 
-std::string et::removeWhitespace(const std::string& s)
+std::string removeWhitespace(const std::string& s)
 {
     std::string result(s.size(), 0);
     size_t i = 0;
@@ -274,4 +275,96 @@ std::string et::removeWhitespace(const std::string& s)
             result[i++] = c;
     }
     return result;
+}
+
+StringList parseDefines(std::string defines, std::string separators)
+{
+    StringList result;
+    
+    auto addDefine = [&result](std::string& define)
+    {
+        if (define.empty()) return;
+        
+        std::transform(define.begin(), define.end(), define.begin(), [](char c)
+                       { return (c == '=') ? ' ' : c; });
+        result.push_back("#define " + define + "\n");
+    };
+    
+    if (separators.length() == 0)
+        separators = ",; \t";
+    
+    while (defines.length() > 0)
+    {
+        std::string::size_type separator_pos = std::string::npos;
+        
+        for (auto& s_i : separators)
+        {
+            std::string::size_type s = defines.find_first_of(s_i);
+            if (s != std::string::npos)
+            {
+                separator_pos = s;
+                break;
+            }
+        }
+        
+        if (separator_pos == std::string::npos)
+        {
+            addDefine(defines);
+            break;
+        }
+        else
+        {
+            std::string define = defines.substr(0, separator_pos);
+            defines.erase(0, separator_pos + 1);
+            addDefine(define);
+        }
+    }
+    
+    return result;
+}
+    
+void parseIncludes(std::string& source, const std::string& workFolder)
+{
+    std::string::size_type ip = source.find("#include");
+    
+    while (ip != std::string::npos)
+    {
+        std::string before = source.substr(0, ip);
+        
+        source.erase(0, before.size());
+        std::string ifname = source.substr(0, source.find_first_of(char(10)));
+        source.erase(0, ifname.size());
+        std::string after = source.substr();
+        
+        if (ifname.find_first_of('"') != std::string::npos)
+        {
+            ifname.erase(0, ifname.find_first_of('"') + 1);
+            ifname.erase(ifname.find_last_of('"'));
+        }
+        else
+        {
+            ifname.erase(0, ifname.find_first_of('<') + 1);
+            ifname.erase(ifname.find_last_of('>'));
+        }
+        
+        std::string include = "";
+        
+        std::string baseName = removeUpDir(workFolder + ifname);
+        while (baseName.find("..") != std::string::npos)
+            baseName = removeUpDir(baseName);
+        
+        if (fileExists(baseName))
+        {
+            include = loadTextFile(baseName);
+        }
+        else
+        {
+            log::error("failed to include %s, starting from folder %s", ifname.c_str(), workFolder.c_str());
+        }
+        
+        source = before + include + after;
+        ip = source.find("#include");
+    }
+}
+
 }

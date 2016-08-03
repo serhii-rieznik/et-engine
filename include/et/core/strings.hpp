@@ -67,4 +67,7 @@ namespace et
 	std::string& trim(std::string &str);
 	std::string removeWhitespace(const std::string&);
 	StringList split(const std::string& s, const std::string& delim);
+    
+    StringList parseDefines(std::string defines, std::string separators);
+    void parseIncludes(std::string& source, const std::string& workFolder);
 }

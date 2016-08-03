@@ -17,7 +17,7 @@ extern const uint32_t* drawBufferTargets();
 extern std::string FramebufferStatusToString(uint32_t status);
 
 Framebuffer::Framebuffer(RenderContext* rc, const FramebufferDescription& desc,
-	const std::string& aName) : Object(aName), _rc(rc), _description(desc)
+	const std::string& aName) : Object(aName), _description(desc)
 {
 	checkOpenGLError("Framebuffer::Framebuffer %s", name().c_str());
 
@@ -79,7 +79,7 @@ void Framebuffer::bind(uint32_t target, uint32_t uid) const
 }
 
 Framebuffer::Framebuffer(RenderContext* rc, uint32_t fboId, const std::string& aName) :
-	Object(aName), _rc(rc)
+	Object(aName)
 {
 	if (glIsFramebuffer(fboId) == false)
 		return;

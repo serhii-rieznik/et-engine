@@ -118,7 +118,6 @@ namespace et
 		void setAPIHandle(uint32_t ah) { _ah = ah; }
 
 	private:
-		RenderContext* _rc;
 		FramebufferDescription _description;
 		
 		std::vector<Texture::Pointer> _renderTargets;

@@ -308,7 +308,6 @@
 		6E62170A1D514CB60002F1A3 /* opengl_renderstate.h in Headers */ = {isa = PBXBuildFile; fileRef = 6E6216E01D514CB60002F1A3 /* opengl_renderstate.h */; };
 		6E62170B1D514CB60002F1A3 /* opengl_texture.h in Headers */ = {isa = PBXBuildFile; fileRef = 6E6216E11D514CB60002F1A3 /* opengl_texture.h */; };
 		6E62170C1D514CB60002F1A3 /* opengl_vertexbuffer.h in Headers */ = {isa = PBXBuildFile; fileRef = 6E6216E21D514CB60002F1A3 /* opengl_vertexbuffer.h */; };
-		6E62170D1D514CB60002F1A3 /* program.h in Headers */ = {isa = PBXBuildFile; fileRef = 6E6216E31D514CB60002F1A3 /* program.h */; };
 		6E62170E1D514CB60002F1A3 /* rendercontext.h in Headers */ = {isa = PBXBuildFile; fileRef = 6E6216E41D514CB60002F1A3 /* rendercontext.h */; };
 		6E62170F1D514CB60002F1A3 /* rendercontextparams.h in Headers */ = {isa = PBXBuildFile; fileRef = 6E6216E51D514CB60002F1A3 /* rendercontextparams.h */; };
 		6E6217101D514CB60002F1A3 /* rendering.h in Headers */ = {isa = PBXBuildFile; fileRef = 6E6216E61D514CB60002F1A3 /* rendering.h */; };
@@ -317,6 +316,10 @@
 		6E6217131D514CB60002F1A3 /* texturefactory.h in Headers */ = {isa = PBXBuildFile; fileRef = 6E6216E91D514CB60002F1A3 /* texturefactory.h */; };
 		6E6217141D514CB60002F1A3 /* vertexarrayobject.h in Headers */ = {isa = PBXBuildFile; fileRef = 6E6216EA1D514CB60002F1A3 /* vertexarrayobject.h */; };
 		6E6217151D514CB60002F1A3 /* vertexbufferfactory.h in Headers */ = {isa = PBXBuildFile; fileRef = 6E6216EB1D514CB60002F1A3 /* vertexbufferfactory.h */; };
+		6E6217181D51EFEC0002F1A3 /* opengl_program.h in Headers */ = {isa = PBXBuildFile; fileRef = 6E6217171D51EFEC0002F1A3 /* opengl_program.h */; };
+		6E62171A1D51F1610002F1A3 /* program.h in Headers */ = {isa = PBXBuildFile; fileRef = 6E6217191D51F1610002F1A3 /* program.h */; };
+		6E62171C1D51FFE40002F1A3 /* metal_program.h in Headers */ = {isa = PBXBuildFile; fileRef = 6E62171B1D51FFE40002F1A3 /* metal_program.h */; };
+		6E62171E1D5203680002F1A3 /* metal_program.mm in Sources */ = {isa = PBXBuildFile; fileRef = 6E62171D1D5203680002F1A3 /* metal_program.mm */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -621,7 +624,6 @@
 		6E6216E01D514CB60002F1A3 /* opengl_renderstate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = opengl_renderstate.h; sourceTree = "<group>"; };
 		6E6216E11D514CB60002F1A3 /* opengl_texture.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = opengl_texture.h; sourceTree = "<group>"; };
 		6E6216E21D514CB60002F1A3 /* opengl_vertexbuffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = opengl_vertexbuffer.h; sourceTree = "<group>"; };
-		6E6216E31D514CB60002F1A3 /* program.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = program.h; sourceTree = "<group>"; };
 		6E6216E41D514CB60002F1A3 /* rendercontext.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rendercontext.h; sourceTree = "<group>"; };
 		6E6216E51D514CB60002F1A3 /* rendercontextparams.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rendercontextparams.h; sourceTree = "<group>"; };
 		6E6216E61D514CB60002F1A3 /* rendering.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rendering.h; sourceTree = "<group>"; };
@@ -630,6 +632,10 @@
 		6E6216E91D514CB60002F1A3 /* texturefactory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = texturefactory.h; sourceTree = "<group>"; };
 		6E6216EA1D514CB60002F1A3 /* vertexarrayobject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = vertexarrayobject.h; sourceTree = "<group>"; };
 		6E6216EB1D514CB60002F1A3 /* vertexbufferfactory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = vertexbufferfactory.h; sourceTree = "<group>"; };
+		6E6217171D51EFEC0002F1A3 /* opengl_program.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = opengl_program.h; sourceTree = "<group>"; };
+		6E6217191D51F1610002F1A3 /* program.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = program.h; sourceTree = "<group>"; };
+		6E62171B1D51FFE40002F1A3 /* metal_program.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = metal_program.h; sourceTree = "<group>"; };
+		6E62171D1D5203680002F1A3 /* metal_program.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = metal_program.mm; sourceTree = "<group>"; };
 		6EBE15B11C66B4AD00AF7206 /* libet-static-mac.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libet-static-mac.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -1108,6 +1114,7 @@
 			children = (
 				6E6216891D514C850002F1A3 /* metal.mm */,
 				6E62168A1D514C850002F1A3 /* metal_indexbuffer.mm */,
+				6E62171D1D5203680002F1A3 /* metal_program.mm */,
 				6E62168B1D514C850002F1A3 /* metal_renderer.mm */,
 				6E62168C1D514C850002F1A3 /* metal_renderpass.mm */,
 				6E62168D1D514C850002F1A3 /* metal_renderstate.mm */,
@@ -1146,7 +1153,6 @@
 				6E6216D11D514CB60002F1A3 /* materialfactory.h */,
 				6E6216D21D514CB60002F1A3 /* metal */,
 				6E6216DA1D514CB60002F1A3 /* opengl */,
-				6E6216E31D514CB60002F1A3 /* program.h */,
 				6E6216E41D514CB60002F1A3 /* rendercontext.h */,
 				6E6216E51D514CB60002F1A3 /* rendercontextparams.h */,
 				6E6216E61D514CB60002F1A3 /* rendering.h */,
@@ -1178,6 +1184,7 @@
 		6E6216C81D514CB60002F1A3 /* interface */ = {
 			isa = PBXGroup;
 			children = (
+				6E6217191D51F1610002F1A3 /* program.h */,
 				6E6216C91D514CB60002F1A3 /* indexbuffer.h */,
 				6E6216CA1D514CB60002F1A3 /* pipelinestate.h */,
 				6E6216CB1D514CB60002F1A3 /* renderer.h */,
@@ -1194,6 +1201,7 @@
 			children = (
 				6E6216D31D514CB60002F1A3 /* metal.h */,
 				6E6216D41D514CB60002F1A3 /* metal_indexbuffer.h */,
+				6E62171B1D51FFE40002F1A3 /* metal_program.h */,
 				6E6216D51D514CB60002F1A3 /* metal_renderer.h */,
 				6E6216D61D514CB60002F1A3 /* metal_renderpass.h */,
 				6E6216D71D514CB60002F1A3 /* metal_renderstate.h */,
@@ -1209,6 +1217,7 @@
 				6E6216DB1D514CB60002F1A3 /* opengl.h */,
 				6E6216DC1D514CB60002F1A3 /* opengl_caps.h */,
 				6E6216DD1D514CB60002F1A3 /* opengl_indexbuffer.h */,
+				6E6217171D51EFEC0002F1A3 /* opengl_program.h */,
 				6E6216DE1D514CB60002F1A3 /* opengl_renderer.h */,
 				6E6216DF1D514CB60002F1A3 /* opengl_renderpass.h */,
 				6E6216E01D514CB60002F1A3 /* opengl_renderstate.h */,
@@ -1316,7 +1325,6 @@
 				5C7F57C01D4A986B00F567C4 /* object.h in Headers */,
 				5C7F57CF1D4A986B00F567C4 /* timerpool.h in Headers */,
 				5C7F57F91D4A986B00F567C4 /* gestures.h in Headers */,
-				6E62170D1D514CB60002F1A3 /* program.h in Headers */,
 				5C7F58061D4A986B00F567C4 /* mailcomposer.h in Headers */,
 				5C7F57B21D4A986B00F567C4 /* filesystem.h in Headers */,
 				5C7F58351D4A986B00F567C4 /* baseelement.h in Headers */,
@@ -1341,6 +1349,7 @@
 				5C7F58011D4A986B00F567C4 /* applicationdelegate.h in Headers */,
 				5C7F57DB1D4A986B00F567C4 /* quaternion.h in Headers */,
 				5C7F57A11D4A986B00F567C4 /* cameracontroller.h in Headers */,
+				6E62171C1D51FFE40002F1A3 /* metal_program.h in Headers */,
 				5C7F57EA1D4A986B00F567C4 /* vector4-simd.neon.h in Headers */,
 				5C7F58381D4A986B00F567C4 /* lineelement.h in Headers */,
 				5C7F57C11D4A986B00F567C4 /* objectscache.h in Headers */,
@@ -1362,8 +1371,10 @@
 				5C7F57D81D4A986B00F567C4 /* matrix3.h in Headers */,
 				5C7F58031D4A986B00F567C4 /* iap.h in Headers */,
 				5C7F57BF1D4A986B00F567C4 /* notifytimer.h in Headers */,
+				6E6217181D51EFEC0002F1A3 /* opengl_program.h in Headers */,
 				5C7F57F41D4A986B00F567C4 /* pvrloader.h in Headers */,
 				5C7F57D61D4A986B00F567C4 /* geometry.h in Headers */,
+				6E62171A1D51F1610002F1A3 /* program.h in Headers */,
 				5C7F58021D4A986B00F567C4 /* context_osx.h in Headers */,
 				6E6216F31D514CB60002F1A3 /* vertexstorage.h in Headers */,
 				5C7F57AE1D4A986B00F567C4 /* datastorage.h in Headers */,
@@ -1583,6 +1594,7 @@
 				5C7F565B1D4A985E00F567C4 /* runloop.cpp in Sources */,
 				5C7F56631D4A985E00F567C4 /* conversion.cpp in Sources */,
 				5C7F568A1D4A985E00F567C4 /* imagepicker.ios.mm in Sources */,
+				6E62171E1D5203680002F1A3 /* metal_program.mm in Sources */,
 				5C7F56611D4A985E00F567C4 /* base64.cpp in Sources */,
 				5C7F569C1D4A985E00F567C4 /* input.win.cpp in Sources */,
 				5C7F566F1D4A985E00F567C4 /* taskpool.cpp in Sources */,

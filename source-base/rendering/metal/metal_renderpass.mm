@@ -17,7 +17,7 @@ public:
 	id<MTLRenderCommandEncoder> encoder = nil;
 };
 
-MetalRenderPass::MetalRenderPass(const RenderPass::ConstructionInfo& info, MetalState& state) :
+MetalRenderPass::MetalRenderPass(MetalState& state, const RenderPass::ConstructionInfo& info) :
 	RenderPass(info)
 {
 	ET_PIMPL_INIT(MetalRenderPass)

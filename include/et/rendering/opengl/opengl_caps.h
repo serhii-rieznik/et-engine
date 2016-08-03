@@ -10,6 +10,7 @@
 #include <et/core/singleton.h>
 #include <et/core/flags.h>
 #include <et/rendering/rendering.h>
+#include <et/rendering/opengl/opengl.h>
 
 namespace et
 {

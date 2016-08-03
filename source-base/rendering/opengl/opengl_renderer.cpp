@@ -13,6 +13,7 @@
 #include <et/rendering/opengl/opengl_texture.h>
 #include <et/rendering/opengl/opengl_vertexbuffer.h>
 #include <et/rendering/opengl/opengl_indexbuffer.h>
+#include <et/rendering/opengl/opengl_program.h>
 #include <et/rendering/renderstate.h>
 #include <et/rendering/rendercontext.h>
 #include <et/rendering/material.h>
@@ -172,9 +173,9 @@ void OpenGLRenderer::submitRenderPass(RenderPass::Pointer in_pass)
 		auto& ib = vao.indexBuffer().reference();
 
 		mat.enableSnapshotInRenderState(rc()->renderState(), batch.materialSnapshot());
-		prog.setTransformMatrix(batch.transformation());
+		prog.setTransformMatrix(batch.transformation(), false);
 		prog.setCameraProperties(pass->info().camera);
-		prog.setDefaultLightPosition(pass->info().defaultLightPosition);
+		prog.setDefaultLightPosition(pass->info().defaultLightPosition, false);
 		
 		vao.bind();
 		drawIndexedPrimitive(ib.primitiveType(), ib.format(), batch.firstIndex(), batch.numIndexes());
@@ -213,7 +214,33 @@ Texture::Pointer OpenGLRenderer::createTexture(TextureDescription::Pointer desc)
 {
     return OpenGLTexture::Pointer::create(desc);
 }
-
+    
+/*
+ * Programs
+ */
+Program::Pointer OpenGLRenderer::createProgram(const std::string& vs, const std::string& fs,
+    const StringList& defines, const std::string& baseFolder)
+{
+    std::string vertexSource = OpenGLProgram::commonHeader() + OpenGLProgram::vertexShaderHeader();
+    std::string fragmentSource = OpenGLProgram::commonHeader() + OpenGLProgram::fragmentShaderHeader();
+    
+    for (const std::string& define : defines)
+    {
+        vertexSource += "\n" + define + "\n";
+        fragmentSource += "\n" + define + "\n";
+    }
+    
+    vertexSource += vs;
+    fragmentSource += fs;
+    
+    parseIncludes(vertexSource, baseFolder);
+    parseIncludes(fragmentSource, baseFolder);
+    
+    OpenGLProgram::Pointer program = OpenGLProgram::Pointer::create();
+    program->build(vertexSource, fragmentSource);
+    return program;
+}
+    
 }
 
 

@@ -48,6 +48,15 @@ namespace et
          */
         virtual Texture::Pointer loadTexture(const std::string& fileName, ObjectsCache& cache) = 0;
         virtual Texture::Pointer createTexture(TextureDescription::Pointer) = 0;
+        
+        /*
+         * Programs
+         */
+        virtual Program::Pointer createProgram(const std::string& vs, const std::string& fs,
+            const StringList& defines, const std::string& baseFolder) = 0;
+        
+        inline Program::Pointer createProgram(const std::string& vs, const std::string& fs)
+            { return createProgram(vs, fs, emptyStringList, emptyString); }
 
 	private:
 		RenderContext* _rc = nullptr;

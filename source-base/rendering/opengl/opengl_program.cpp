@@ -5,30 +5,29 @@
  *
  */
 
+#include <et/rendering/opengl/opengl_program.h>
+#include <et/rendering/opengl/opengl_caps.h>
 #include <et/rendering/opengl/opengl.h>
 #include <et/app/application.h>
 #include <et/camera/camera.h>
-#include <et/rendering/rendercontext.h>
-#include <et/rendering/program.h>
 
-using namespace et;
-
-static const std::string etNoShader = "none";
-
-Program::Program()
+namespace et
+{
+OpenGLProgram::OpenGLProgram()
 {
 	initBuiltInUniforms();
 }
 
-Program::Program(const std::string& vertexShader, const std::string& geometryShader,
+OpenGLProgram::OpenGLProgram(const std::string& vertexShader, const std::string& geometryShader,
 	const std::string& fragmentShader, const std::string& objName, const std::string& origin,
-	const StringList& defines) : LoadableObject(objName, origin), _defines(defines)
+	const StringList& defines) : Program(objName, origin)
 {
+    setDefines(defines);
 	initBuiltInUniforms();
-	buildProgram(vertexShader, geometryShader, fragmentShader);
+	build(vertexShader, fragmentShader);
 }
 
-Program::~Program()
+OpenGLProgram::~OpenGLProgram()
 {
 	uint32_t program = apiHandle();
 
@@ -42,12 +41,12 @@ Program::~Program()
 	}
 }
 
-void Program::bind()
+void OpenGLProgram::bind()
 {
 	etUseProgram(apiHandle());
 }
 
-void Program::initBuiltInUniforms()
+void OpenGLProgram::initBuiltInUniforms()
 {
 	_builtInUniforms["matWorld"] = &_matWorldLocation;
 	_builtInUniforms["matView"] = &_matViewLocation;
@@ -57,67 +56,61 @@ void Program::initBuiltInUniforms()
 	_builtInUniforms["defaultLight"] = &_defaultLightLocation;
 }
 
-Program::UniformMap::const_iterator Program::findUniform(const std::string& name) const
-{
-	ET_ASSERT(apiHandle() != 0);
-	return _uniforms.find(name);
-}
-
-int Program::getUniformLocation(const std::string& uniform) const
+int OpenGLProgram::getUniformLocation(const std::string& uniform) const
 {
 	ET_ASSERT(apiHandle() != 0);
 
-	auto i = findUniform(uniform);
-	return (i == _uniforms.end()) ? -1 : i->second.location;
+	auto i = findConstant(uniform);
+	return (i == shaderConstants().end()) ? -1 : i->second.location;
 }
 
-uint32_t Program::getUniformType(const std::string& uniform) const
+uint32_t OpenGLProgram::getUniformType(const std::string& uniform) const
 {
 	ET_ASSERT(apiHandle() != 0);
 
-	auto i = findUniform(uniform);
-	return (i == _uniforms.end()) ? 0 : i->second.type;
+	auto i = findConstant(uniform);
+	return (i == shaderConstants().end()) ? 0 : i->second.type;
 }
 
-Program::Uniform Program::getUniform(const std::string& uniform) const
+Program::ShaderConstant OpenGLProgram::getUniform(const std::string& uniform) const
 {
 	ET_ASSERT(apiHandle() != 0);
 
-	auto i = findUniform(uniform);
-	return (i == _uniforms.end()) ? Program::Uniform() : i->second;
+	auto i = findConstant(uniform);
+	return (i == shaderConstants().end()) ? Program::ShaderConstant() : i->second;
 }
 
-void Program::setViewMatrix(const mat4& m, bool forced)
+void OpenGLProgram::setViewMatrix(const mat4& m, bool forced)
 {
 	setUniform(_matViewLocation, GL_FLOAT_MAT4, m, forced);
 }
 
-void Program::setViewProjectionMatrix(const mat4& m, bool forced)
+void OpenGLProgram::setViewProjectionMatrix(const mat4& m, bool forced)
 {
 	setUniform(_matViewProjectionLocation, GL_FLOAT_MAT4, m, forced);
 }
 
-void Program::setCameraPosition(const vec3& p, bool forced)
+void OpenGLProgram::setCameraPosition(const vec3& p, bool forced)
 {
 	setUniform(_defaultCameraLocation, GL_FLOAT_VEC3, p, forced);
 }
 
-void Program::setDefaultLightPosition(const vec3& p, bool forced)
+void OpenGLProgram::setDefaultLightPosition(const vec3& p, bool forced)
 {
 	setUniform(_defaultLightLocation, GL_FLOAT_VEC3, p, forced);
 }
 
-void Program::setLightProjectionMatrix(const mat4& m, bool forced)
+void OpenGLProgram::setLightProjectionMatrix(const mat4& m, bool forced)
 {
 	setUniform(_matLightViewProjectionLocation, GL_FLOAT_MAT4, m, forced);
 }
 
-void Program::setTransformMatrix(const mat4& m, bool forced)
+void OpenGLProgram::setTransformMatrix(const mat4& m, bool forced)
 {
 	setUniform(_matWorldLocation, GL_FLOAT_MAT4, m, forced);
 }
 
-void Program::setCameraProperties(const Camera& cam)
+void OpenGLProgram::setCameraProperties(const Camera& cam)
 {
 	ET_ASSERT(apiHandle() != 0);
 
@@ -126,7 +119,7 @@ void Program::setCameraProperties(const Camera& cam)
 	setCameraPosition(cam.position());
 }
 
-void Program::printShaderSource(uint32_t shader, size_t initialSize, const char* tag)
+void OpenGLProgram::printShaderSource(uint32_t shader, size_t initialSize, const char* tag)
 {
 	GLsizei sourceLength = 0;
 	DataStorage<GLchar> buffer(initialSize + 1, 0);
@@ -153,7 +146,7 @@ void Program::printShaderSource(uint32_t shader, size_t initialSize, const char*
 	log::info("Program: %s, %s shader source:\n%s", name().c_str(), tag, stringBuffer.data());
 }
 
-void Program::printShaderLog(uint32_t shader, size_t initialSize, const char* tag)
+void OpenGLProgram::printShaderLog(uint32_t shader, size_t initialSize, const char* tag)
 {
 	GLsizei nLogLen = 0;
 	DataStorage<GLchar> infoLog(initialSize + 1, 0);
@@ -161,8 +154,7 @@ void Program::printShaderLog(uint32_t shader, size_t initialSize, const char* ta
 	log::info("Program %s, %s shader info log:\n%s", name().c_str(), tag, infoLog.data());
 }
 
-void Program::buildProgram(const std::string& vertex_source, const std::string& geom_source,
-	const std::string& frag_source)
+void OpenGLProgram::build(const std::string& vertex_source, const std::string& frag_source)
 {
 	_floatCache.clear();
 	_vec2Cache.clear();
@@ -170,10 +162,12 @@ void Program::buildProgram(const std::string& vertex_source, const std::string& 
 	_vec4Cache.clear();
 	_mat3Cache.clear();
 	_mat4Cache.clear();
-	_uniforms.clear();
+    clearShaderConstants();
 	
+    std::string geom_source;
+    
 #if (ET_OPENGLES)
-	if (geom_source.length() && (geom_source != etNoShader))
+	if (!geom_source.empty())
 		log::info("[Program] Geometry shader skipped in OpenGL ES");
 #endif
 	
@@ -226,7 +220,7 @@ void Program::buildProgram(const std::string& vertex_source, const std::string& 
 	uint32_t GeometryShader = 0;
 
 #if defined(GL_GEOMETRY_SHADER)
-	if ((geom_source.length() > 0) && (geom_source != etNoShader)) 
+	if (!geom_source.empty())
 	{
 		GeometryShader = glCreateShader(GL_GEOMETRY_SHADER);
 		checkOpenGLError("glCreateShader<GEOM> - %s", name().c_str());
@@ -329,7 +323,7 @@ void Program::buildProgram(const std::string& vertex_source, const std::string& 
 		if (linkStatus == GL_TRUE)
 		{
 			int activeUniforms = 0;
-			_uniforms.clear();
+            clearShaderConstants();
 			glGetProgramiv(program, GL_ACTIVE_UNIFORMS, &activeUniforms);
 			glGetProgramiv(program, GL_ACTIVE_UNIFORM_MAX_LENGTH, &maxNameLength);
 			for (uint32_t i = 0, e = static_cast<uint32_t>(activeUniforms); i < e; i++)
@@ -337,17 +331,17 @@ void Program::buildProgram(const std::string& vertex_source, const std::string& 
 				int uSize = 0;
 				GLsizei uLenght = 0;
 				StringDataStorage uniformName(maxNameLength + 1, 0);
-				Program::Uniform P;
-				glGetActiveUniform(program, i, maxNameLength, &uLenght, &uSize, &P.type, uniformName.binary());
-				P.location = glGetUniformLocation(program, uniformName.binary());
+				Program::ShaderConstant shaderConts;
+				glGetActiveUniform(program, i, maxNameLength, &uLenght, &uSize, &shaderConts.type, uniformName.binary());
+				shaderConts.location = glGetUniformLocation(program, uniformName.binary());
 				
 				std::string uniformNameString(uniformName.binary());
-				_uniforms.emplace(uniformNameString, P);
+				shaderConstants().emplace(uniformNameString, shaderConts);
 
 				auto builtIn = _builtInUniforms.find(uniformNameString);
 				if (builtIn != _builtInUniforms.end())
 				{
-					*(builtIn->second) = P.location;
+					*(builtIn->second) = shaderConts.location;
 				}
 			}
 		}
@@ -389,10 +383,10 @@ void Program::buildProgram(const std::string& vertex_source, const std::string& 
 		checkOpenGLError("glDeleteShader(FragmentShader)");
 	}
 
-	checkOpenGLError("Program::buildProgram -> end");
+	checkOpenGLError("OpenGLProgram::buildProgram -> end");
 }
 
-int Program::link(bool enableOutput)
+int OpenGLProgram::link(bool enableOutput)
 {
 	int result = 0;
 	
@@ -426,7 +420,7 @@ int Program::link(bool enableOutput)
 	return result;
 }
 
-bool Program::validate() const
+bool OpenGLProgram::validate() const
 {
 	auto glId = static_cast<GLuint>(apiHandle());
 	glValidateProgram(glId);
@@ -453,7 +447,7 @@ bool Program::validate() const
  * Uniform setters
  */
 
-void Program::setUniform(int nLoc, uint32_t type, int32_t value, bool)
+void OpenGLProgram::setUniform(int nLoc, uint32_t type, int32_t value, bool)
 {
 	(void)type;
 	ET_ASSERT((type == GL_INT) || isSamplerUniformType(type));
@@ -463,7 +457,7 @@ void Program::setUniform(int nLoc, uint32_t type, int32_t value, bool)
 	checkOpenGLError("glUniform1i");
 }
 
-void Program::setUniform(int nLoc, uint32_t type, uint32_t value, bool)
+void OpenGLProgram::setUniform(int nLoc, uint32_t type, uint32_t value, bool)
 {
 	(void)type;
 	ET_ASSERT((type == GL_INT) || isSamplerUniformType(type));
@@ -473,7 +467,7 @@ void Program::setUniform(int nLoc, uint32_t type, uint32_t value, bool)
 	checkOpenGLError("glUniform1i");
 }
 
-void Program::setUniform(int nLoc, uint32_t type, int64_t value, bool)
+void OpenGLProgram::setUniform(int nLoc, uint32_t type, int64_t value, bool)
 {
 	(void)type;
 	ET_ASSERT((type == GL_INT) || isSamplerUniformType(type));
@@ -483,7 +477,7 @@ void Program::setUniform(int nLoc, uint32_t type, int64_t value, bool)
 	checkOpenGLError("glUniform1i");
 }
 
-void Program::setUniform(int nLoc, uint32_t type, uint64_t value, bool)
+void OpenGLProgram::setUniform(int nLoc, uint32_t type, uint64_t value, bool)
 {
 	(void)type;
 	ET_ASSERT((type == GL_INT) || isSamplerUniformType(type));
@@ -503,7 +497,7 @@ namespace
 	}
 }
 
-void Program::setUniform(int nLoc, uint32_t type, const float value, bool forced)
+void OpenGLProgram::setUniform(int nLoc, uint32_t type, const float value, bool forced)
 {
 	(void)type;
 	ET_ASSERT(type == GL_FLOAT);
@@ -517,7 +511,7 @@ void Program::setUniform(int nLoc, uint32_t type, const float value, bool forced
 	}
 }
 
-void Program::setUniform(int nLoc, uint32_t type, const vec2& value, bool forced)
+void OpenGLProgram::setUniform(int nLoc, uint32_t type, const vec2& value, bool forced)
 {
 	(void)type;
 	ET_ASSERT(type == GL_FLOAT_VEC2);
@@ -531,7 +525,7 @@ void Program::setUniform(int nLoc, uint32_t type, const vec2& value, bool forced
 	}
 }
 
-void Program::setUniform(int nLoc, uint32_t type, const vec3& value, bool forced)
+void OpenGLProgram::setUniform(int nLoc, uint32_t type, const vec3& value, bool forced)
 {
 	(void)type;
 	ET_ASSERT(type == GL_FLOAT_VEC3);
@@ -545,7 +539,7 @@ void Program::setUniform(int nLoc, uint32_t type, const vec3& value, bool forced
 	}
 }
 
-void Program::setUniform(int nLoc, uint32_t type, const vec4& value, bool forced)
+void OpenGLProgram::setUniform(int nLoc, uint32_t type, const vec4& value, bool forced)
 {
 	(void)type;
 	ET_ASSERT(type == GL_FLOAT_VEC4);
@@ -559,7 +553,7 @@ void Program::setUniform(int nLoc, uint32_t type, const vec4& value, bool forced
 	}
 }
 
-void Program::setUniform(int nLoc, uint32_t type, const vec2i& value, bool forced)
+void OpenGLProgram::setUniform(int nLoc, uint32_t type, const vec2i& value, bool forced)
 {
 	(void)type;
 	ET_ASSERT(type == GL_INT_VEC2);
@@ -573,7 +567,7 @@ void Program::setUniform(int nLoc, uint32_t type, const vec2i& value, bool force
 	}
 }
 
-void Program::setUniform(int nLoc, uint32_t type, const vec3i& value, bool forced)
+void OpenGLProgram::setUniform(int nLoc, uint32_t type, const vec3i& value, bool forced)
 {
 	(void)type;
 	ET_ASSERT(type == GL_INT_VEC3);
@@ -587,7 +581,7 @@ void Program::setUniform(int nLoc, uint32_t type, const vec3i& value, bool force
 	}
 }
 
-void Program::setUniform(int nLoc, uint32_t type, const vec4i& value, bool forced)
+void OpenGLProgram::setUniform(int nLoc, uint32_t type, const vec4i& value, bool forced)
 {
 	(void)type;
 	ET_ASSERT(type == GL_INT_VEC4);
@@ -601,7 +595,7 @@ void Program::setUniform(int nLoc, uint32_t type, const vec4i& value, bool force
 	}
 }
 
-void Program::setUniformDirectly(int nLoc, uint32_t type, const vec4& value)
+void OpenGLProgram::setUniformDirectly(int nLoc, uint32_t type, const vec4& value)
 {
 	(void)type;
 	ET_ASSERT(type == GL_FLOAT_VEC4);
@@ -611,7 +605,7 @@ void Program::setUniformDirectly(int nLoc, uint32_t type, const vec4& value)
 	checkOpenGLError("glUniform4fv");
 }
 
-void Program::setUniform(int nLoc, uint32_t type, const mat3& value, bool forced)
+void OpenGLProgram::setUniform(int nLoc, uint32_t type, const mat3& value, bool forced)
 {
 	(void)type;
 	ET_ASSERT(type == GL_FLOAT_MAT3);
@@ -625,7 +619,7 @@ void Program::setUniform(int nLoc, uint32_t type, const mat3& value, bool forced
 	}
 }
 
-void Program::setUniform(int nLoc, uint32_t type, const mat4& value, bool forced)
+void OpenGLProgram::setUniform(int nLoc, uint32_t type, const mat4& value, bool forced)
 {
 	(void)type;
 	ET_ASSERT(type == GL_FLOAT_MAT4);
@@ -639,7 +633,7 @@ void Program::setUniform(int nLoc, uint32_t type, const mat4& value, bool forced
 	}
 }
 
-void Program::setUniformDirectly(int nLoc, uint32_t type, const mat4& value)
+void OpenGLProgram::setUniformDirectly(int nLoc, uint32_t type, const mat4& value)
 {
 	(void)type;
 	ET_ASSERT(type == GL_FLOAT_MAT4);
@@ -649,7 +643,7 @@ void Program::setUniformDirectly(int nLoc, uint32_t type, const mat4& value)
 	checkOpenGLError("glUniformMatrix4fv");
 }
 
-void Program::setUniform(int nLoc, uint32_t type, const int* value, size_t amount)
+void OpenGLProgram::setUniform(int nLoc, uint32_t type, const int* value, size_t amount)
 {
 	(void)type;
 	ET_ASSERT(apiHandle() != 0);
@@ -658,7 +652,7 @@ void Program::setUniform(int nLoc, uint32_t type, const int* value, size_t amoun
 	checkOpenGLError("glUniform1iv");
 }
 
-void Program::setUniform(int nLoc, uint32_t /* type */, const float* value, size_t amount)
+void OpenGLProgram::setUniform(int nLoc, uint32_t /* type */, const float* value, size_t amount)
 {
 	ET_ASSERT(apiHandle() != 0);
 
@@ -666,7 +660,7 @@ void Program::setUniform(int nLoc, uint32_t /* type */, const float* value, size
 	checkOpenGLError("glUniform1fv");
 }
 
-void Program::setUniform(int nLoc, uint32_t type, const vec2* value, size_t amount)
+void OpenGLProgram::setUniform(int nLoc, uint32_t type, const vec2* value, size_t amount)
 {
 	(void)type;
 	ET_ASSERT(type == GL_FLOAT_VEC2);
@@ -676,7 +670,7 @@ void Program::setUniform(int nLoc, uint32_t type, const vec2* value, size_t amou
 	checkOpenGLError("glUniform2fv");
 }
 
-void Program::setUniform(int nLoc, uint32_t type, const vec3* value, size_t amount)
+void OpenGLProgram::setUniform(int nLoc, uint32_t type, const vec3* value, size_t amount)
 {
 	(void)type;
 	ET_ASSERT(type == GL_FLOAT_VEC3);
@@ -686,7 +680,7 @@ void Program::setUniform(int nLoc, uint32_t type, const vec3* value, size_t amou
 	checkOpenGLError("glUniform3fv");
 }
 
-void Program::setUniform(int nLoc, uint32_t type, const vec4* value, size_t amount)
+void OpenGLProgram::setUniform(int nLoc, uint32_t type, const vec4* value, size_t amount)
 {
 	(void)type;
 	ET_ASSERT(type == GL_FLOAT_VEC4);
@@ -696,7 +690,7 @@ void Program::setUniform(int nLoc, uint32_t type, const vec4* value, size_t amou
 	checkOpenGLError("glUniform4fv");
 }
 
-void Program::setUniform(int nLoc, uint32_t type, const mat4* value, size_t amount)
+void OpenGLProgram::setUniform(int nLoc, uint32_t type, const mat4* value, size_t amount)
 {
 	(void)type;
 	ET_ASSERT(type == GL_FLOAT_MAT4);
@@ -706,82 +700,82 @@ void Program::setUniform(int nLoc, uint32_t type, const mat4* value, size_t amou
 	checkOpenGLError("glUniformMatrix4fv");
 }
 
-void Program::setIntUniform(int location, const int* data, uint32_t amount)
+void OpenGLProgram::setIntUniform(int location, const int* data, uint32_t amount)
 {
 	ET_ASSERT(apiHandle() != 0);
 	glUniform1iv(location, amount, data);
 	checkOpenGLError("glUniform1iv");
 }
 
-void Program::setInt2Uniform(int location, const int* data, uint32_t amount)
+void OpenGLProgram::setInt2Uniform(int location, const int* data, uint32_t amount)
 {
 	ET_ASSERT(apiHandle() != 0);
 	glUniform2iv(location, amount, data);
 	checkOpenGLError("glUniform1iv");
 }
 
-void Program::setInt3Uniform(int location, const int* data, uint32_t amount)
+void OpenGLProgram::setInt3Uniform(int location, const int* data, uint32_t amount)
 {
 	ET_ASSERT(apiHandle() != 0);
 	glUniform3iv(location, amount, data);
 	checkOpenGLError("glUniform1iv");
 }
 
-void Program::setInt4Uniform(int location, const int* data, uint32_t amount)
+void OpenGLProgram::setInt4Uniform(int location, const int* data, uint32_t amount)
 {
 	ET_ASSERT(apiHandle() != 0);
 	glUniform4iv(location, amount, data);
 	checkOpenGLError("glUniform1iv");
 }
 
-void Program::setFloatUniform(int location, const float* data, uint32_t amount)
+void OpenGLProgram::setFloatUniform(int location, const float* data, uint32_t amount)
 {
 	ET_ASSERT(apiHandle() != 0);
 	glUniform1fv(location, amount, data);
 	checkOpenGLError("glUniform1fv");
 }
 
-void Program::setFloat2Uniform(int location, const float* data, uint32_t amount)
+void OpenGLProgram::setFloat2Uniform(int location, const float* data, uint32_t amount)
 {
 	ET_ASSERT(apiHandle() != 0);
 	glUniform2fv(location, amount, data);
 	checkOpenGLError("glUniform1fv");
 }
 
-void Program::setFloat3Uniform(int location, const float* data, uint32_t amount)
+void OpenGLProgram::setFloat3Uniform(int location, const float* data, uint32_t amount)
 {
 	ET_ASSERT(apiHandle() != 0);
 	glUniform3fv(location, amount, data);
 	checkOpenGLError("glUniform1fv");
 }
 
-void Program::setFloat4Uniform(int location, const float* data, uint32_t amount)
+void OpenGLProgram::setFloat4Uniform(int location, const float* data, uint32_t amount)
 {
 	ET_ASSERT(apiHandle() != 0);
 	glUniform4fv(location, amount, data);
 	checkOpenGLError("glUniform1fv");
 }
 
-void Program::setMatrix3Uniform(int location, const float* data, uint32_t amount)
+void OpenGLProgram::setMatrix3Uniform(int location, const float* data, uint32_t amount)
 {
 	ET_ASSERT(apiHandle() != 0);
 	glUniformMatrix3fv(location, amount, false, data);
 	checkOpenGLError("glUniformMatrix3fv");
 }
 
-void Program::setMatrix4Uniform(int location, const float* data, uint32_t amount)
+void OpenGLProgram::setMatrix4Uniform(int location, const float* data, uint32_t amount)
 {
 	ET_ASSERT(apiHandle() != 0);
 	glUniformMatrix4fv(location, amount, false, data);
 	checkOpenGLError("glUniformMatrix4fv");
 }
 
-bool Program::isBuiltInUniformName(const std::string& name)
+bool OpenGLProgram::isBuiltInUniformName(const std::string& name)
 {
 	return _builtInUniforms.count(name) > 0;
 }
 
-bool Program::isSamplerUniformType(uint32_t value)
+bool OpenGLProgram::isSamplerUniformType(uint32_t value)
 {
 	return
 #if defined(GL_SAMPLER_1D)
@@ -804,10 +798,166 @@ bool Program::isSamplerUniformType(uint32_t value)
 	(value == GL_SAMPLER_2D) || (value == GL_SAMPLER_CUBE);
 }
 
-DataType Program::uniformTypeToDataType(uint32_t t)
+DataType OpenGLProgram::uniformTypeToDataType(uint32_t t)
 {
 	if (isSamplerUniformType(t))
 		return DataType::Int;
 	
 	return openglTypeToDataType(t);
+}
+
+const std::string& OpenGLProgram::commonHeader()
+{
+    static std::string _commonHeader;
+    
+    if (_commonHeader.empty())
+    {
+#if (ET_OPENGLES)
+        _commonHeader =
+        "#define etLowp         lowp\n"
+        "#define etMediump		mediump\n"
+        "#define etHighp		highp\n"
+        "#define ET_OPENGL_ES	1\n";
+        
+        if (OpenGLCapabilities::instance().version() >= OpenGLVersion::Version_3x)
+        {
+            _commonHeader = "#version " + OpenGLCapabilities::instance().glslVersionShortString() + " es\n" +
+            _commonHeader + "#define ET_OPENGL_ES_3\n";
+        }
+        else
+        {
+            _commonHeader += "#define ET_OPENGL_ES_2\n";
+        }
+        
+#else
+        _commonHeader = "#version " + OpenGLCapabilities::instance().glslVersionShortString() + "\n";
+        
+        if (OpenGLCapabilities::instance().glslVersionShortString() < "130")
+            _commonHeader += "#extension GL_EXT_gpu_shader4 : enable\n";
+        
+        _commonHeader +=
+        "#define etLowp\n"
+        "#define etMediump\n"
+        "#define etHighp\n";
+#endif
+    }
+    return _commonHeader;
+}
+    
+extern const std::string openGl2VertexHeader;
+extern const std::string openGl3VertexHeader;
+
+const std::string& OpenGLProgram::vertexShaderHeader()
+{
+    static std::string _vertShaderHeader;
+    
+    if (_vertShaderHeader.empty())
+    {
+        if (OpenGLCapabilities::instance().version() == OpenGLVersion::Version_2x)
+        {
+            _vertShaderHeader = openGl2VertexHeader;
+        }
+        else
+        {
+            _vertShaderHeader = openGl3VertexHeader;
+        }
+    }
+    
+    return _vertShaderHeader;
+}
+
+extern const std::string openGl2FragmentHeader;
+extern const std::string openGl3FragmentHeader;
+ 
+const std::string& OpenGLProgram::fragmentShaderHeader()
+{
+    static std::string _fragShaderHeader;
+    
+    if (_fragShaderHeader.empty())
+    {
+        if (OpenGLCapabilities::instance().version() == OpenGLVersion::Version_2x)
+        {
+            _fragShaderHeader = openGl2FragmentHeader;
+        }
+        else
+        {
+            _fragShaderHeader = openGl3FragmentHeader;
+        }
+    }
+    
+    return _fragShaderHeader;
+}
+
+const std::string openGl2VertexHeader = R"(
+#define etShadow2D			shadow2D
+#define etTexture2D			texture2D
+#define etTextureCube		textureCube
+#define etShadow2DProj		shadow2DProj
+#define etTexture2DProj		texture2DProj
+#define etTexture2DLod		texture2DLod
+#define etTexture2DArray	texture2DArray
+#define etTextureCubeLod	textureCubeLod
+#define etTextureRect		texture2DRect
+#define etVertexIn			attribute
+#define etVertexOut			varying
+)";
+    
+const std::string openGl3VertexHeader = R"(
+#define etShadow2D			texture
+#define etTexture2D			texture
+#define etTextureCube		texture
+#define etTextureRect		texture
+#define etTexture2DArray	texture
+#define etShadow2DProj		textureProj
+#define etTexture2DProj		textureProj
+#define etTexture2DLod		textureLod
+#define etTextureCubeLod	textureLod
+#define etVertexIn			in
+#define etVertexOut			out
+)";
+    
+    const std::string openGl2FragmentHeader = R"(
+#define etShadow2D			shadow2D
+#define etTexture2D			texture2D
+#define etTextureCube		textureCube
+#define etShadow2DProj		shadow2DProj
+#define etTexture2DProj		texture2DProj
+#define etTexture2DLod		textureLod
+#define etTexture2DArray	texture2DArray
+#define etTextureCubeLod	textureCubeLod
+#define etTextureRect		texture2DRect
+#define etFragmentIn		varying
+#define etFragmentOut		gl_FragColor
+#define etFragmentOut0		gl_FragData[0]
+#define etFragmentOut1		gl_FragData[1]
+#define etFragmentOut2		gl_FragData[2]
+#define etFragmentOut3		gl_FragData[3]
+#define etFragmentOut4		gl_FragData[4]
+#define etFragmentOut5		gl_FragData[5]
+#define etFragmentOut6		gl_FragData[6]
+#define etFragmentOut7		gl_FragData[7]
+)";
+    
+const std::string openGl3FragmentHeader = R"(
+#define etShadow2D			texture
+#define etTexture2D			texture
+#define etTextureCube		texture
+#define etTextureRect		texture
+#define etTexture2DArray	texture
+#define etShadow2DProj		textureProj
+#define etTexture2DProj		textureProj
+#define etTexture2DLod		textureLod
+#define etTextureCubeLod	textureLod
+#define etFragmentIn		in
+#define etFragmentOut		etFragmentOut0
+layout (location = 0) out etHighp vec4 etFragmentOut0;
+layout (location = 1) out etHighp vec4 etFragmentOut1;
+layout (location = 2) out etHighp vec4 etFragmentOut2;
+layout (location = 3) out etHighp vec4 etFragmentOut3;
+layout (location = 4) out etHighp vec4 etFragmentOut4;
+layout (location = 5) out etHighp vec4 etFragmentOut5;
+layout (location = 6) out etHighp vec4 etFragmentOut6;
+layout (location = 7) out etHighp vec4 etFragmentOut7;
+)";
+    
 }

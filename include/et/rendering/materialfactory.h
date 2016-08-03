@@ -11,7 +11,7 @@
 
 namespace et
 {
-	class MaterialFactoryPrivate;
+/*
 	class MaterialFactory : public Shared
 	{
 	public:
@@ -19,11 +19,7 @@ namespace et
 		
 	public:
 		MaterialFactory();
-		~MaterialFactory();
 
-		/*
-		 * Programs loading
-		 */
 		Program::Pointer loadProgram(const std::string& file, ObjectsCache&,
 			const std::string& defines = emptyString);
 
@@ -39,12 +35,6 @@ namespace et
 		Program ::Pointer genProgram(const std::string& name, const std::string& vs, const std::string& gs,
 			const std::string& fs, const StringList& defines = StringList(), const std::string& workFolder = ".");
 		
-		/*
-		 * Material loading
-		 */
-		Material::Pointer createMaterial();
-		Material::Pointer loadMaterial(const std::string& fileName);
-
 	private:
 		enum class ShaderType : uint32_t
 		{
@@ -60,17 +50,11 @@ namespace et
 		void parseSourceCode(ShaderType type, std::string& code,
 			const StringList& defines, const std::string& workFolder);
 		
-		void reloadObject(LoadableObject::Pointer, ObjectsCache&);
-		
 		StringList loadProgramSources(const std::string&, std::string&, std::string&, std::string&,
 			const StringList& defines = StringList());
 		
 	private:
 		ObjectLoader::Pointer _objectLoader;
-		std::string _commonHeader;
-		std::string _fragShaderHeader;
-		std::string _vertShaderHeader;
-		
-		ET_DECLARE_PIMPL(MaterialFactory, 32)
 	};
+*/ 
 }

@@ -44,16 +44,11 @@ void init(RenderContext* rc)
 	rh_local::disabledDepthState.depthTestEnabled = false;
 	rh_local::disabledDepthState.depthWriteEnabled = false;
     
-    rh_local::plainMaterial = rc->materialFactory().createMaterial();
+    Program::Pointer fullScreenProgram = rc->renderer()->createProgram(rh_local::vertexShader, rh_local::fragmentShader);
+    
+    rh_local::plainMaterial = Material::Pointer::create(nullptr);
     rh_local::plainMaterial->setDepthState(rh_local::disabledDepthState);
-  
-    Program::Pointer fullScreenProgram;
-    if (application().parameters().renderingAPI == RenderingAPI::OpenGL)
-    {
-        fullScreenProgram = rc->materialFactory().genProgram("rh_local::program",
-            rh_local::vertexShader, rh_local::fragmentShader);
-        rh_local::plainMaterial->setProgram(fullScreenProgram);
-    }
+    rh_local::plainMaterial->setProgram(fullScreenProgram);
 }
 
 void release()

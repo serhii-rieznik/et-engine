@@ -8,22 +8,23 @@
 #pragma once
 
 #include <et/core/datastorage.h>
-#include <et/rendering/program.h>
+#include <et/rendering/interface/program.h>
 #include <et/rendering/interface/texture.h>
 #include <et/rendering/interface/renderstate.h>
 #include <et/rendering/interface/pipelinestate.h>
 
 namespace et
 {
+    class OpenGLProgram;
 	class RenderState;
-	class MaterialFactory;
+    class RenderInterface;
 	class Material : public LoadableObject
 	{
 	public:
 		ET_DECLARE_POINTER(Material);
 		
 	public:
-		Material(MaterialFactory*);
+		Material(RenderInterface*);
 		
 		void loadFromJson(const std::string&, const std::string& baseFolder);
 		
@@ -103,8 +104,8 @@ namespace et
 			PipelineState::ConstructInfo pipelineState;
 		};
 		
-		using ProgramSetIntFunction = void (Program::*)(int, const int*, uint32_t);
-		using ProgramSetFloatFunction = void (Program::*)(int, const float*, uint32_t);
+		using ProgramSetIntFunction = void (OpenGLProgram::*)(int, const int*, uint32_t);
+		using ProgramSetFloatFunction = void (OpenGLProgram::*)(int, const float*, uint32_t);
 		
 		void loadProperties();
 		void addDataProperty(const String&, DataType, int32_t location);
@@ -114,7 +115,7 @@ namespace et
 		void applyProperty(const DataProperty&, const BinaryDataStorage&);
 		
 	public:
-		MaterialFactory* _factory = nullptr;
+        RenderInterface* _renderer = nullptr;
 		Vector<Snapshot> _snapshots;
 		UnorderedMap<String, DataProperty> _properties;
 		UnorderedMap<String, TextureProperty> _textures;

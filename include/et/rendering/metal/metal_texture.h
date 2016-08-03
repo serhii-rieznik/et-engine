@@ -20,7 +20,7 @@ namespace et
         
     public:
         MetalTexture() = default;
-        MetalTexture(TextureDescription::Pointer, MetalState& metal);
+        MetalTexture(MetalState&, TextureDescription::Pointer);
         ~MetalTexture();
         
         void bind(uint32_t) override;

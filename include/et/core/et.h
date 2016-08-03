@@ -225,4 +225,5 @@ namespace et
 	extern const mat4 lightProjectionMatrix;
 	
 	extern const std::string emptyString;
+    extern const StringList emptyStringList;
 }

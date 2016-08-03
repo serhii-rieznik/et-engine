@@ -13,7 +13,7 @@ namespace demo
 
 void MainController::setApplicationParameters(et::ApplicationParameters& p)
 {
-    p.renderingAPI = et::RenderingAPI::Metal;
+    p.renderingAPI = et::RenderingAPI::OpenGL;
     p.context.style |= et::ContextOptions::Style::Sizable;
     p.context.supportsHighResolution = true;
     p.context.size = 4 * et::currentScreen().frame.size() / 5;

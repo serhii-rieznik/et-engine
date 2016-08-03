@@ -66,8 +66,6 @@ RenderContext::RenderContext(const RenderContextParameters& inParams, Applicatio
 
 	_renderer->init(_params);
 
-	_materialFactory = MaterialFactory::Pointer::create();
-
 	NSWindow* mainWindow = (__bridge NSWindow*)(ctx.objects[0]);
 	NSView* mainView = nil;
 
