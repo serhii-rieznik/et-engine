@@ -14,14 +14,14 @@ namespace et
 class MetalIndexBufferPrivate
 {
 public:
-    id<MTLBuffer> buffer;
+	MetalBuffer buffer;
 };
 
 MetalIndexBuffer::MetalIndexBuffer(MetalState& metal, IndexArray::Pointer i, BufferDrawType dt, const std::string& name)
     : et::IndexBuffer(i, dt, name)
 {
 	ET_PIMPL_INIT(MetalIndexBuffer);
-    _private->buffer = [metal.device newBufferWithBytes:i->data() length:i->actualSize() options:MTLResourceCPUCacheModeDefaultCache];
+	_private->buffer = MetalBuffer(metal, i->data(), i->actualSize());
 }
 
 MetalIndexBuffer::~MetalIndexBuffer()
@@ -31,10 +31,12 @@ MetalIndexBuffer::~MetalIndexBuffer()
 
 void MetalIndexBuffer::bind()
 {
+
 }
 
 void MetalIndexBuffer::clear()
 {
+
 }
 
 }

@@ -19,8 +19,8 @@ namespace rh_local
 	VertexArrayObject::Pointer fullscreenMesh;
 	Material::Pointer plainMaterial;
 	DepthState disabledDepthState;
-	extern const std::string vertexShader;
-	extern const std::string fragmentShader;
+	extern const std::string vertexShader[static_cast<uint32_t>(RenderingAPI::Count)];
+	extern const std::string fragmentShader[static_cast<uint32_t>(RenderingAPI::Count)];
 }
 
 void init(RenderContext* rc)
@@ -43,9 +43,12 @@ void init(RenderContext* rc)
 	rh_local::disabledDepthState.compareFunction = CompareFunction::Always;
 	rh_local::disabledDepthState.depthTestEnabled = false;
 	rh_local::disabledDepthState.depthWriteEnabled = false;
+
+	uint32_t renderAPI = static_cast<uint32_t>(rc->renderer()->api());
     
-    Program::Pointer fullScreenProgram = rc->renderer()->createProgram(rh_local::vertexShader, rh_local::fragmentShader);
-    
+    Program::Pointer fullScreenProgram = rc->renderer()->createProgram(rh_local::vertexShader[renderAPI],
+																	   rh_local::fragmentShader[renderAPI]);
+
     rh_local::plainMaterial = Material::Pointer::create(nullptr);
     rh_local::plainMaterial->setDepthState(rh_local::disabledDepthState);
     rh_local::plainMaterial->setProgram(fullScreenProgram);
@@ -61,10 +64,6 @@ RenderBatch::Pointer createFullscreenRenderBatch(Texture::Pointer texture)
 {
 	ET_ASSERT(rh_local::plainMaterial.valid());
 	ET_ASSERT(rh_local::fullscreenMesh.valid());
-
-	PipelineState::ConstructInfo psInfo;
-	PipelineState::Pointer ps = PipelineState::Pointer::create(psInfo);
-
 	rh_local::plainMaterial->setTexutre("color_texture", texture);
 	return RenderBatch::Pointer::create(rh_local::plainMaterial, rh_local::fullscreenMesh);
 }
@@ -75,27 +74,48 @@ RenderBatch::Pointer createFullscreenRenderBatch(Texture::Pointer texture)
 /*
  * Shaders
  */
-const std::string et::renderhelper::rh_local::vertexShader = R"(
+const std::string et::renderhelper::rh_local::vertexShader[static_cast<uint32_t>(RenderingAPI::Count)] =
+{
+R"(
 etVertexIn vec2 Vertex;
 etVertexOut vec2 TexCoord;
 void main()
 {
 	TexCoord = 0.5 * Vertex + vec2(0.5);
 	gl_Position = vec4(Vertex, 0.0, 1.0);
-})";
+})"
+,
+R"(
+struct VertexOutput
+{
+	float4 position [[position]];
+	float2 texCoord;
+};
 
-const std::string et::renderhelper::rh_local::fragmentShader = R"(
+vertex VertexOutput vertexMain(constant float2* vertices [[buffer(0)]], uint vertexId [[vertex_id]])
+{
+	VertexOutput vo;
+	vo.position = float4(vertices[vertexId], 0.0, 1.0);
+	vo.texCoord = 0.5 * vertices[vertexId] + 0.5;
+	return vo;
+})"
+
+};
+
+const std::string et::renderhelper::rh_local::fragmentShader[static_cast<uint32_t>(RenderingAPI::Count)] =
+{
+R"(
 #if defined(TEXTURE_CUBE)
 uniform etLowp samplerCube color_texture;
 #elif defined(TEXTURE_RECTANGLE)
 uniform etLowp sampler2DRect color_texture;
+uniform etHighp vec2 color_texture_size;
 #elif defined(TEXTURE_2D_ARRAY)
 uniform etLowp sampler2DArray color_texture;
 #else
 uniform etLowp sampler2D color_texture;
 #endif
 
-uniform etHighp vec2 color_texture_size;
 etFragmentIn etHighp vec2 TexCoord;
 
 void main()
@@ -109,4 +129,14 @@ void main()
 #else
 	etFragmentOut = etTexture2D(color_texture, TexCoord);
 #endif
-})";
+})"
+,
+R"(
+fragment float4 fragmentMain(VertexOutput vOutput [[stage_in]],
+							 texture2d<float> color_texture [[texture(0)]])
+{
+	constexpr sampler defaultSampler;
+	return color_texture.sample(defaultSampler, vOutput.texCoord);
+})"
+
+};

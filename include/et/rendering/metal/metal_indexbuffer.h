@@ -8,6 +8,7 @@
 #pragma once
 
 #include <et/rendering/interface/indexbuffer.h>
+#include <et/rendering/metal/metal_buffer.h>
 
 namespace et
 {

@@ -22,6 +22,9 @@ namespace et
 		OpenGLRenderer(RenderContext*);
 		~OpenGLRenderer();
 
+		RenderingAPI api() const override
+			{ return RenderingAPI::OpenGL; }
+
 		void init(const RenderContextParameters& params) override;
 		void shutdown() override;
 
@@ -49,7 +52,12 @@ namespace et
          */
         Program::Pointer createProgram(const std::string& vs, const std::string& fs,
             const StringList& defines, const std::string& baseFolder) override;
-        
+
+		/*
+		 * Pipeline state
+		 */
+		PipelineState::Pointer createPipelineState() override;
+
 		/*
 		 * Low level stuff
 		 */

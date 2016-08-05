@@ -437,7 +437,8 @@ namespace et
 		Clear,
 		Load,
 		Store,
-		Discard
+		Discard,
+		MultisampleResolve
 	};
 	
 	DataFormat dataTypeDataFormat(DataType t);

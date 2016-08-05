@@ -15,7 +15,6 @@
 
 namespace et
 {
-    class OpenGLProgram;
 	class RenderState;
     class RenderInterface;
 	class Material : public LoadableObject
@@ -28,7 +27,7 @@ namespace et
 		
 		void loadFromJson(const std::string&, const std::string& baseFolder);
 		
-		PipelineState::Pointer createPipelineStateForVertexStream(VertexArrayObject::Pointer vertexStream);
+		PipelineState::Pointer createPipelineState();
 
 		void enableInRenderState(RenderState::Pointer);
 		void enableSnapshotInRenderState(RenderState::Pointer, uint64_t);
@@ -39,19 +38,19 @@ namespace et
 		void setProgram(Program::Pointer);
 		
 		et::Program::Pointer& program()
-			{ return _pipelineState.program; }
+			{ return _program; }
 		
 		const et::Program::Pointer& program() const
-			{ return _pipelineState.program; }
+			{ return _program; }
 		
 		const DepthState& depthState() const
-			{ return _pipelineState.depth; }
+			{ return _depth; }
 		
 		const BlendState& blendState() const
-			{ return _pipelineState.blend; }
+			{ return _blend; }
 		
 		CullMode cullMode() const
-			{ return _pipelineState.cull; }
+			{ return _cull; }
 		
 		uint64_t makeSnapshot();
 		void clearSnapshots();
@@ -101,11 +100,7 @@ namespace et
 			Vector<DataProperty> properties;
 			Vector<TextureProperty> textures;
 			BinaryDataStorage propertiesData;
-			PipelineState::ConstructInfo pipelineState;
 		};
-		
-		using ProgramSetIntFunction = void (OpenGLProgram::*)(int, const int*, uint32_t);
-		using ProgramSetFloatFunction = void (OpenGLProgram::*)(int, const float*, uint32_t);
 		
 		void loadProperties();
 		void addDataProperty(const String&, DataType, int32_t location);
@@ -120,10 +115,12 @@ namespace et
 		UnorderedMap<String, DataProperty> _properties;
 		UnorderedMap<String, TextureProperty> _textures;
 
-		PipelineState::ConstructInfo _pipelineState;
+		Program::Pointer _program;
+		DepthState _depth;
+		BlendState _blend;
+		CullMode _cull = CullMode::Disabled;
+
 		BinaryDataStorage _propertiesData;
-		ProgramSetIntFunction _setIntFunctions[DataType_max];
-		ProgramSetFloatFunction _setFloatFunctions[DataType_max];
 		uint32_t _additionalPriority = 0;
 		uint64_t _lastShapshotIndex = uint64_t(-1);
 		bool _shouldUpdateSnapshot = true;

@@ -244,6 +244,10 @@
 		5C7F58481D4A986B00F567C4 /* sound.h in Headers */ = {isa = PBXBuildFile; fileRef = 5C7F57931D4A986B00F567C4 /* sound.h */; };
 		5C7F58491D4A986B00F567C4 /* streamingthread.h in Headers */ = {isa = PBXBuildFile; fileRef = 5C7F57941D4A986B00F567C4 /* streamingthread.h */; };
 		5C7F584A1D4A986B00F567C4 /* track.h in Headers */ = {isa = PBXBuildFile; fileRef = 5C7F57951D4A986B00F567C4 /* track.h */; };
+		5C97C5E91D5504080015F193 /* metal_buffer.h in Headers */ = {isa = PBXBuildFile; fileRef = 5C97C5E81D5504080015F193 /* metal_buffer.h */; };
+		5C97C5EB1D55122A0015F193 /* metal_pipelinestate.h in Headers */ = {isa = PBXBuildFile; fileRef = 5C97C5EA1D55122A0015F193 /* metal_pipelinestate.h */; };
+		5C97C5ED1D5512900015F193 /* opengl_pipelinestate.h in Headers */ = {isa = PBXBuildFile; fileRef = 5C97C5EC1D5512900015F193 /* opengl_pipelinestate.h */; };
+		5C97C5EF1D5519DE0015F193 /* metal_pipelinestate.mm in Sources */ = {isa = PBXBuildFile; fileRef = 5C97C5EE1D5519DE0015F193 /* metal_pipelinestate.mm */; };
 		6E4CE95E1D5119C800322956 /* texturedescription.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6E4CE95D1D5119C800322956 /* texturedescription.cpp */; };
 		6E62169F1D514C850002F1A3 /* helpers.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6E62167F1D514C850002F1A3 /* helpers.cpp */; };
 		6E6216A01D514C850002F1A3 /* indexarray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6E6216801D514C850002F1A3 /* indexarray.cpp */; };
@@ -560,6 +564,10 @@
 		5C7F57931D4A986B00F567C4 /* sound.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sound.h; sourceTree = "<group>"; };
 		5C7F57941D4A986B00F567C4 /* streamingthread.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = streamingthread.h; sourceTree = "<group>"; };
 		5C7F57951D4A986B00F567C4 /* track.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = track.h; sourceTree = "<group>"; };
+		5C97C5E81D5504080015F193 /* metal_buffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = metal_buffer.h; sourceTree = "<group>"; };
+		5C97C5EA1D55122A0015F193 /* metal_pipelinestate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = metal_pipelinestate.h; sourceTree = "<group>"; };
+		5C97C5EC1D5512900015F193 /* opengl_pipelinestate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = opengl_pipelinestate.h; sourceTree = "<group>"; };
+		5C97C5EE1D5519DE0015F193 /* metal_pipelinestate.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = metal_pipelinestate.mm; sourceTree = "<group>"; };
 		6E4CE95D1D5119C800322956 /* texturedescription.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = texturedescription.cpp; sourceTree = "<group>"; };
 		6E62167F1D514C850002F1A3 /* helpers.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = helpers.cpp; sourceTree = "<group>"; };
 		6E6216801D514C850002F1A3 /* indexarray.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = indexarray.cpp; sourceTree = "<group>"; };
@@ -1114,6 +1122,7 @@
 			children = (
 				6E6216891D514C850002F1A3 /* metal.mm */,
 				6E62168A1D514C850002F1A3 /* metal_indexbuffer.mm */,
+				5C97C5EE1D5519DE0015F193 /* metal_pipelinestate.mm */,
 				6E62171D1D5203680002F1A3 /* metal_program.mm */,
 				6E62168B1D514C850002F1A3 /* metal_renderer.mm */,
 				6E62168C1D514C850002F1A3 /* metal_renderpass.mm */,
@@ -1200,7 +1209,9 @@
 			isa = PBXGroup;
 			children = (
 				6E6216D31D514CB60002F1A3 /* metal.h */,
+				5C97C5E81D5504080015F193 /* metal_buffer.h */,
 				6E6216D41D514CB60002F1A3 /* metal_indexbuffer.h */,
+				5C97C5EA1D55122A0015F193 /* metal_pipelinestate.h */,
 				6E62171B1D51FFE40002F1A3 /* metal_program.h */,
 				6E6216D51D514CB60002F1A3 /* metal_renderer.h */,
 				6E6216D61D514CB60002F1A3 /* metal_renderpass.h */,
@@ -1217,6 +1228,7 @@
 				6E6216DB1D514CB60002F1A3 /* opengl.h */,
 				6E6216DC1D514CB60002F1A3 /* opengl_caps.h */,
 				6E6216DD1D514CB60002F1A3 /* opengl_indexbuffer.h */,
+				5C97C5EC1D5512900015F193 /* opengl_pipelinestate.h */,
 				6E6217171D51EFEC0002F1A3 /* opengl_program.h */,
 				6E6216DE1D514CB60002F1A3 /* opengl_renderer.h */,
 				6E6216DF1D514CB60002F1A3 /* opengl_renderpass.h */,
@@ -1355,6 +1367,7 @@
 				5C7F57C11D4A986B00F567C4 /* objectscache.h in Headers */,
 				5C7F57D41D4A986B00F567C4 /* collision.h in Headers */,
 				5C7F57C31D4A986B00F567C4 /* sequence.h in Headers */,
+				5C97C5EB1D55122A0015F193 /* metal_pipelinestate.h in Headers */,
 				5C7F57C71D4A986B00F567C4 /* staticdatastorage.h in Headers */,
 				5C7F584A1D4A986B00F567C4 /* track.h in Headers */,
 				5C7F57DE1D4A986B00F567C4 /* rectplacer.h in Headers */,
@@ -1384,6 +1397,7 @@
 				5C7F57BB1D4A986B00F567C4 /* log.h in Headers */,
 				6E6217021D514CB60002F1A3 /* metal_renderstate.h in Headers */,
 				6E6216F21D514CB60002F1A3 /* vertexdeclaration.h in Headers */,
+				5C97C5E91D5504080015F193 /* metal_buffer.h in Headers */,
 				5C7F58081D4A986B00F567C4 /* opengl.ios.h in Headers */,
 				6E6216FF1D514CB60002F1A3 /* metal_indexbuffer.h in Headers */,
 				6E62170F1D514CB60002F1A3 /* rendercontextparams.h in Headers */,
@@ -1443,6 +1457,7 @@
 				5C7F57DF1D4A986B00F567C4 /* segment2d.h in Headers */,
 				5C7F579C1D4A986B00F567C4 /* events.inl.h in Headers */,
 				5C7F57FC1D4A986B00F567C4 /* locale.hpp in Headers */,
+				5C97C5ED1D5512900015F193 /* opengl_pipelinestate.h in Headers */,
 				6E6217001D514CB60002F1A3 /* metal_renderer.h in Headers */,
 				5C7F57A81D4A986B00F567C4 /* containers.h in Headers */,
 				5C7F580C1D4A986B00F567C4 /* social.h in Headers */,
@@ -1580,6 +1595,7 @@
 				5C7F56CA1D4A985E00F567C4 /* skeletonelement.cpp in Sources */,
 				5C7F56CD1D4A985E00F567C4 /* player.cpp in Sources */,
 				6E6216B21D514C850002F1A3 /* opengl_indexbuffer.cpp in Sources */,
+				5C97C5EF1D5519DE0015F193 /* metal_pipelinestate.mm in Sources */,
 				5C7F56851D4A985E00F567C4 /* application.ios.mm in Sources */,
 				5C7F569A1D4A985E00F567C4 /* application.win.cpp in Sources */,
 				5C7F56561D4A985E00F567C4 /* application.cpp in Sources */,

@@ -39,7 +39,9 @@ namespace et
 	enum class RenderingAPI : uint32_t
 	{
 		OpenGL,
-		Metal
+		Metal,
+		
+		Count
 	};
     
     struct ApplicationParameters

@@ -8,7 +8,6 @@
 #include <et/app/application.h>
 #include <et/rendering/renderstate.h>
 #include <et/rendering/interface/renderer.h>
-#include <et/rendering/opengl/opengl_program.h>
 
 using namespace et;
 
@@ -23,18 +22,6 @@ namespace
 Material::Material(RenderInterface* renderer) :
 	_renderer(renderer), _propertiesData(2 * sizeof(mat4), 0)
 {
-	_setFloatFunctions[uint32_t(DataType::Float)] = &OpenGLProgram::setFloatUniform;
-	_setFloatFunctions[uint32_t(DataType::Vec2)] = &OpenGLProgram::setFloat2Uniform;
-	_setFloatFunctions[uint32_t(DataType::Vec3)] = &OpenGLProgram::setFloat3Uniform;
-	_setFloatFunctions[uint32_t(DataType::Vec4)] = &OpenGLProgram::setFloat4Uniform;
-	
-    _setFloatFunctions[uint32_t(DataType::Mat3)] = &OpenGLProgram::setMatrix3Uniform;
-	_setFloatFunctions[uint32_t(DataType::Mat4)] = &OpenGLProgram::setMatrix4Uniform;
-    
-	_setIntFunctions[uint32_t(DataType::Int)] = &OpenGLProgram::setIntUniform;
-	_setIntFunctions[uint32_t(DataType::IntVec2)] = &OpenGLProgram::setInt2Uniform;
-	_setIntFunctions[uint32_t(DataType::IntVec3)] = &OpenGLProgram::setInt3Uniform;
-	_setIntFunctions[uint32_t(DataType::IntVec4)] = &OpenGLProgram::setInt4Uniform;
 }
 
 void Material::loadFromJson(const std::string& jsonString, const std::string& baseFolder)
@@ -93,8 +80,8 @@ void Material::loadFromJson(const std::string& jsonString, const std::string& ba
 			addDefine(StringValue(def)->content);
 		}
 	}
-    Program::Pointer program = _renderer->createProgram(loadTextFile(vertexSource), loadTextFile(fragmentSource));
-    // _factory->genProgram(name, loadTextFile(vertexSource), loadTextFile(fragmentSource), defines, baseFolder);
+
+	Program::Pointer program = _renderer->createProgram(loadTextFile(vertexSource), loadTextFile(fragmentSource));
 	program->addOrigin(vertexSource);
 	program->addOrigin(fragmentSource);
 	setProgram(program);
@@ -102,27 +89,33 @@ void Material::loadFromJson(const std::string& jsonString, const std::string& ba
 
 void Material::setBlendState(const BlendState& state)
 {
-	_pipelineState.blend = state;
+	_blend = state;
 }
 
 void Material::setDepthState(const DepthState& state)
 {
-	_pipelineState.depth = state;
+	_depth = state;
 }
 
 void Material::setCullMode(CullMode cm)
 {
-	_pipelineState.cull = cm;
+	_cull = cm;
 }
 
 void Material::setProgram(Program::Pointer program)
 {
-	_pipelineState.program = program;
+	_program = program;
 	loadProperties();
 }
 
-PipelineState::Pointer Material::createPipelineStateForVertexStream(VertexArrayObject::Pointer vertexStream)
+PipelineState::Pointer Material::createPipelineState()
 {
+	PipelineState::Pointer result = _renderer->createPipelineState();
+	result->setDepthState(_depth);
+	result->setBlendState(_blend);
+	result->setCullMode(_cull);
+	result->setProgram(_program);
+/*
 	auto psInfo = _pipelineState;
 	psInfo.vertexStream = vertexStream;
 	psInfo.vertexInput = vertexStream->vertexBuffer()->declaration();
@@ -130,21 +123,22 @@ PipelineState::Pointer Material::createPipelineStateForVertexStream(VertexArrayO
 	{
 		psInfo.textureBinding.emplace(tex.second.unit, tex.second.texture);
 	}
-	return PipelineState::Pointer::create(psInfo);
+*/
+	return result;
 }
 
 void Material::enableInRenderState(RenderState::Pointer rs)
 {
-	rs->setCullMode(_pipelineState.cull);
-	rs->setBlendState(_pipelineState.blend);
-	rs->setDepthState(_pipelineState.depth);
+	rs->setCullMode(_cull);
+	rs->setBlendState(_blend);
+	rs->setDepthState(_depth);
 
 	for (auto& i : _textures)
 	{
 		i.second.texture->bind(i.second.unit);
 	}
 
-	_pipelineState.program->bind();
+	_program->bind();
 
 	for (auto& i : _properties)
 	{
@@ -164,9 +158,9 @@ void Material::loadProperties()
 
     /*
      * TODO : load actual properties
-     */
+     *
 	uint32_t textureUnitCounter = 0;
-    OpenGLProgram::Pointer openglProgram = _pipelineState.program;
+    OpenGLProgram::Pointer openglProgram = ;
 	for (const auto& u : openglProgram->shaderConstants())
 	{
 		String name(u.first.c_str());
@@ -242,11 +236,13 @@ void Material::setTexutre(const String& name, const Texture::Pointer& tex)
 
 uint32_t Material::sortingKey() const
 {
-	return _pipelineState.depth.sortingKey() | _pipelineState.blend.sortingKey() << 8 | _additionalPriority << 16;
+	return _depth.sortingKey() | _blend.sortingKey() << 8 | _additionalPriority << 16;
 }
 
 uint64_t Material::makeSnapshot()
 {
+	return 0;
+	/*
 	if (_shouldUpdateSnapshot == false)
 	{
 		return _lastShapshotIndex;
@@ -277,10 +273,12 @@ uint64_t Material::makeSnapshot()
 	_shouldUpdateSnapshot = false;
 	_lastShapshotIndex = _snapshots.size() - 1;
 	return _lastShapshotIndex;
+	*/
 }
 
 void Material::enableSnapshotInRenderState(RenderState::Pointer rs, uint64_t index)
 {
+	/*
 	ET_ASSERT(index < _snapshots.size());
 	
 	Snapshot& snapshot = _snapshots.at(static_cast<size_t>(index));
@@ -294,18 +292,20 @@ void Material::enableSnapshotInRenderState(RenderState::Pointer rs, uint64_t ind
 		i.texture->bind(i.unit);
 	}
 
-	_pipelineState.program->bind();
+	_program->bind();
 	for (const auto& i : snapshot.properties)
 	{
 		applyProperty(i, snapshot.propertiesData);
 	}
+	*/ 
 }
 
 void Material::applyProperty(const DataProperty& prop, const BinaryDataStorage& data)
 {
+	/*
 	auto format = dataTypeDataFormat(prop.type);
 	auto ptr = data.element_ptr(prop.offset);
-    OpenGLProgram* programPtr = static_cast<OpenGLProgram*>(_pipelineState.program.ptr());
+    OpenGLProgram* programPtr = static_cast<OpenGLProgram*>(_program.ptr());
 	if (format == DataFormat::Int)
 	{
 		auto& fn = _setIntFunctions[uint32_t(prop.type)];
@@ -316,6 +316,7 @@ void Material::applyProperty(const DataProperty& prop, const BinaryDataStorage& 
 		auto& fn = _setFloatFunctions[uint32_t(prop.type)];
 		(programPtr->*fn)(prop.locationInProgram, reinterpret_cast<const float*>(ptr), 1);
 	}
+	*/ 
 }
 
 void Material::clearSnapshots()

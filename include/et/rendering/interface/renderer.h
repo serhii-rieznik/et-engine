@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <et/app/context.h>
 #include <et/rendering/rendercontextparams.h>
 #include <et/rendering/interface/renderpass.h>
 
@@ -24,6 +25,8 @@ namespace et
 
 		RenderContext* rc() const
 			{ return _rc; }
+
+		virtual RenderingAPI api() const = 0;
 
 		virtual void init(const RenderContextParameters& params) = 0;
 		virtual void shutdown() = 0;
@@ -57,6 +60,11 @@ namespace et
         
         inline Program::Pointer createProgram(const std::string& vs, const std::string& fs)
             { return createProgram(vs, fs, emptyStringList, emptyString); }
+
+		/*
+		 * Pipeline state
+		 */
+		virtual PipelineState::Pointer createPipelineState() = 0;
 
 	private:
 		RenderContext* _rc = nullptr;

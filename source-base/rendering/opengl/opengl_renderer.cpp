@@ -14,6 +14,7 @@
 #include <et/rendering/opengl/opengl_vertexbuffer.h>
 #include <et/rendering/opengl/opengl_indexbuffer.h>
 #include <et/rendering/opengl/opengl_program.h>
+#include <et/rendering/opengl/opengl_pipelinestate.h>
 #include <et/rendering/renderstate.h>
 #include <et/rendering/rendercontext.h>
 #include <et/rendering/material.h>
@@ -240,7 +241,15 @@ Program::Pointer OpenGLRenderer::createProgram(const std::string& vs, const std:
     program->build(vertexSource, fragmentSource);
     return program;
 }
-    
+
+/*
+ * Pipeline state
+ */
+PipelineState::Pointer OpenGLRenderer::createPipelineState()
+{
+	return OpenGLPipelineState::Pointer::create();
+}
+
 }
 
 

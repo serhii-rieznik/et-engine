@@ -13,6 +13,7 @@
 #include <et/rendering/metal/metal_vertexbuffer.h>
 #include <et/rendering/metal/metal_indexbuffer.h>
 #include <et/rendering/metal/metal_program.h>
+#include <et/rendering/metal/metal_pipelinestate.h>
 
 namespace et
 {
@@ -127,7 +128,16 @@ Program::Pointer MetalRenderer::createProgram(const std::string& vs, const std::
     const StringList& defines, const std::string& baseFolder)
 {
     MetalProgram::Pointer program = MetalProgram::Pointer::create(_private->metal);
+	program->build(vs, fs);
     return program;
 }
-    
+
+/*
+ * Pipeline state
+ */
+PipelineState::Pointer MetalRenderer::createPipelineState()
+{
+	return MetalPipelineState::Pointer::create(_private->metal);
+}
+
 }

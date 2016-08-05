@@ -6,6 +6,7 @@
  */
 
 #include <et/rendering/metal/metal_renderpass.h>
+#include <et/rendering/metal/metal_pipelinestate.h>
 #include <et/rendering/metal/metal.h>
 
 namespace et
@@ -38,7 +39,9 @@ MetalRenderPass::MetalRenderPass(MetalState& state, const RenderPass::Constructi
 
 void MetalRenderPass::pushRenderBatch(RenderBatch::Pointer batch)
 {
-	
+	MetalPipelineState::Pointer ps = batch->material()->createPipelineState();
+	ps->setVertexStream(batch->vao());
+	ps->build();
 }
 
 void MetalRenderPass::endEncoding()
