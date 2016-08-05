@@ -324,6 +324,7 @@
 		6E62171A1D51F1610002F1A3 /* program.h in Headers */ = {isa = PBXBuildFile; fileRef = 6E6217191D51F1610002F1A3 /* program.h */; };
 		6E62171C1D51FFE40002F1A3 /* metal_program.h in Headers */ = {isa = PBXBuildFile; fileRef = 6E62171B1D51FFE40002F1A3 /* metal_program.h */; };
 		6E62171E1D5203680002F1A3 /* metal_program.mm in Sources */ = {isa = PBXBuildFile; fileRef = 6E62171D1D5203680002F1A3 /* metal_program.mm */; };
+		6EAA66271D55272B00921E64 /* opengl_pipelinestate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6EAA66261D55272B00921E64 /* opengl_pipelinestate.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -644,6 +645,7 @@
 		6E6217191D51F1610002F1A3 /* program.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = program.h; sourceTree = "<group>"; };
 		6E62171B1D51FFE40002F1A3 /* metal_program.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = metal_program.h; sourceTree = "<group>"; };
 		6E62171D1D5203680002F1A3 /* metal_program.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = metal_program.mm; sourceTree = "<group>"; };
+		6EAA66261D55272B00921E64 /* opengl_pipelinestate.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = opengl_pipelinestate.cpp; sourceTree = "<group>"; };
 		6EBE15B11C66B4AD00AF7206 /* libet-static-mac.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libet-static-mac.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -1141,6 +1143,7 @@
 				6E6216931D514C850002F1A3 /* opengl_framebuffer.cpp */,
 				6E6216941D514C850002F1A3 /* opengl_indexbuffer.cpp */,
 				6E6216951D514C850002F1A3 /* opengl_materialfactory.cpp */,
+				6EAA66261D55272B00921E64 /* opengl_pipelinestate.cpp */,
 				6E6216961D514C850002F1A3 /* opengl_program.cpp */,
 				6E6216971D514C850002F1A3 /* opengl_renderer.cpp */,
 				6E6216981D514C850002F1A3 /* opengl_renderpass.cpp */,
@@ -1633,6 +1636,7 @@
 				6E6216B81D514C850002F1A3 /* opengl_texture.cpp in Sources */,
 				5C7F568C1D4A985E00F567C4 /* input.mac.mm in Sources */,
 				6E6216A31D514C850002F1A3 /* vertexarray.cpp in Sources */,
+				6EAA66271D55272B00921E64 /* opengl_pipelinestate.cpp in Sources */,
 				5C7F56C71D4A985E00F567C4 /* scene3d.cpp in Sources */,
 				5C7F56771D4A985E00F567C4 /* rectplacer.cpp in Sources */,
 				5C7F56A21D4A985E00F567C4 /* tools.win.cpp in Sources */,

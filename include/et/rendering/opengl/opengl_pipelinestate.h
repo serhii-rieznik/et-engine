@@ -17,7 +17,7 @@ namespace et
 		ET_DECLARE_POINTER(OpenGLPipelineState);
 
 	public:
-		OpenGLPipelineState();
+        OpenGLPipelineState() = default;
 		void build() override { }
 	};
 }

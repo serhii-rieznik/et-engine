@@ -17,13 +17,14 @@ namespace et
 {
 	class RenderState;
     class RenderInterface;
+    
 	class Material : public LoadableObject
 	{
 	public:
 		ET_DECLARE_POINTER(Material);
 		
 	public:
-		Material(RenderInterface*);
+        Material(RenderInterface*);
 		
 		void loadFromJson(const std::string&, const std::string& baseFolder);
 		

@@ -49,7 +49,7 @@ void init(RenderContext* rc)
     Program::Pointer fullScreenProgram = rc->renderer()->createProgram(rh_local::vertexShader[renderAPI],
 																	   rh_local::fragmentShader[renderAPI]);
 
-    rh_local::plainMaterial = Material::Pointer::create(nullptr);
+    rh_local::plainMaterial = Material::Pointer::create(rc->renderer().ptr());
     rh_local::plainMaterial->setDepthState(rh_local::disabledDepthState);
     rh_local::plainMaterial->setProgram(fullScreenProgram);
 }
