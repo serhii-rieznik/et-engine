@@ -11,7 +11,8 @@
 
 namespace et
 {
-    class MetalState;
+    struct MetalState;
+    class MetalNativeBuffer;
 	class MetalVertexBufferPrivate;
 	class MetalVertexBuffer : public VertexBuffer
 	{
@@ -21,6 +22,8 @@ namespace et
 	public:
 		MetalVertexBuffer(MetalState&, const VertexDeclaration&, const BinaryDataStorage&, BufferDrawType, const std::string&);
 		~MetalVertexBuffer();
+        
+        const MetalNativeBuffer& nativeBuffer() const;
 
 		void bind() override;
 

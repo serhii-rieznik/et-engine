@@ -11,7 +11,8 @@
 
 namespace et
 {
-    class MetalState;
+    struct MetalState;
+    struct MetalNativeProgram;
 	class MetalProgramPrivate;
 	class MetalProgram : public Program
 	{
@@ -28,6 +29,8 @@ namespace et
         void setTransformMatrix(const mat4 &m, bool force) override;
         void setCameraProperties(const Camera& cam) override;
         void setDefaultLightPosition(const vec3& p, bool force) override;
+        
+        const MetalNativeProgram& nativeProgram() const;
         
 	private:
 		ET_DECLARE_PIMPL(MetalProgram, 32)

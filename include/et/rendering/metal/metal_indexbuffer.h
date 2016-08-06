@@ -8,11 +8,11 @@
 #pragma once
 
 #include <et/rendering/interface/indexbuffer.h>
-#include <et/rendering/metal/metal_buffer.h>
 
 namespace et
 {
-    class MetalState;
+    struct MetalState;
+    class MetalNativeBuffer;
 	class MetalIndexBufferPrivate;
 	class MetalIndexBuffer : public IndexBuffer
 	{
@@ -25,6 +25,8 @@ namespace et
 
 		void bind() override;
         void clear() override;
+        
+        const MetalNativeBuffer& nativeBuffer() const;
 
 	private:
 		ET_DECLARE_PIMPL(MetalIndexBuffer, 32)

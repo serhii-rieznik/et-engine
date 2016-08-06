@@ -14,7 +14,7 @@ namespace et
 class MetalVertexBufferPrivate
 {
 public:
-    id<MTLBuffer> buffer = nullptr;
+    MetalNativeBuffer buffer;
 };
 
 MetalVertexBuffer::MetalVertexBuffer(MetalState& metal, const VertexDeclaration& decl,
@@ -22,15 +22,19 @@ MetalVertexBuffer::MetalVertexBuffer(MetalState& metal, const VertexDeclaration&
     : VertexBuffer(decl, drawType, aName)
 {
 	ET_PIMPL_INIT(MetalVertexBuffer);
-    _private->buffer = [metal.device newBufferWithBytes:data.data() length:data.size() options:MTLResourceCPUCacheModeDefaultCache];
+    _private->buffer = MetalNativeBuffer(metal, data.data(), data.size());
 }
 
 MetalVertexBuffer::~MetalVertexBuffer()
 {
-    ET_OBJC_RELEASE(_private->buffer);
 	ET_PIMPL_FINALIZE(MetalVertexBuffer);
 }
 
+const MetalNativeBuffer& MetalVertexBuffer::nativeBuffer() const
+{
+    return _private->buffer;
+}
+    
 void MetalVertexBuffer::bind()
 {
     
@@ -47,7 +51,7 @@ void MetalVertexBuffer::setDataWithOffset(const void* data, size_t offset, size_
 
 uint64_t MetalVertexBuffer::dataSize()
 {
-	return [_private->buffer length];
+	return [_private->buffer.buffer() length];
 }
 
 void* MetalVertexBuffer::map(size_t offset, size_t dataSize, uint32_t options)

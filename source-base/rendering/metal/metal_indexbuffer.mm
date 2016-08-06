@@ -14,19 +14,25 @@ namespace et
 class MetalIndexBufferPrivate
 {
 public:
-	MetalBuffer buffer;
+	MetalNativeBuffer buffer;
 };
 
 MetalIndexBuffer::MetalIndexBuffer(MetalState& metal, IndexArray::Pointer i, BufferDrawType dt, const std::string& name)
     : et::IndexBuffer(i, dt, name)
 {
 	ET_PIMPL_INIT(MetalIndexBuffer);
-	_private->buffer = MetalBuffer(metal, i->data(), i->actualSize());
+    uint32_t actualDataSize = i->actualSize() * static_cast<uint32_t>(i->format());
+	_private->buffer = MetalNativeBuffer(metal, i->data(), actualDataSize);
 }
 
 MetalIndexBuffer::~MetalIndexBuffer()
 {
 	ET_PIMPL_FINALIZE(MetalIndexBuffer);
+}
+    
+const MetalNativeBuffer& MetalIndexBuffer::nativeBuffer() const
+{
+    return _private->buffer;
 }
 
 void MetalIndexBuffer::bind()

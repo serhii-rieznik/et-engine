@@ -63,8 +63,8 @@ void ParticleSystem::onTimerUpdated(NotifyTimer* timer)
 	auto posOffset = _decl.elementForUsage(VertexAttributeUsage::Position).offset();
 	auto clrOffset = _decl.elementForUsage(VertexAttributeUsage::Color).offset();
 	
-	RawDataAcessor<vec3> pos(reinterpret_cast<char*>(bufferData), _capacity, _decl.dataSize(), posOffset);
-	RawDataAcessor<vec4> clr(reinterpret_cast<char*>(bufferData), _capacity + clrOffset, _decl.dataSize(), clrOffset);
+	RawDataAcessor<vec3> pos(reinterpret_cast<char*>(bufferData), _capacity, _decl.totalSize(), posOffset);
+	RawDataAcessor<vec4> clr(reinterpret_cast<char*>(bufferData), _capacity + clrOffset, _decl.totalSize(), clrOffset);
 	
 	for (uint32_t i = 0; i < _emitter.activeParticlesCount(); ++i)
 	{

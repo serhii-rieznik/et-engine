@@ -429,10 +429,8 @@ et::Dictionary et::serializeDepthState(const DepthState& _depth)
 {
 	Dictionary depth;
 	depth.setBooleanForKey(kDepthWriteEnabled, _depth.depthWriteEnabled);
-	depth.setBooleanForKey(kDepthTestEnabled, _depth.depthTestEnabled);
 	depth.setStringForKey(kDepthFunction, compareFunctionToString(_depth.compareFunction));
 	return depth;
-	
 }
 
 et::Dictionary et::serializeBlendState(const BlendState& _blend)
@@ -462,7 +460,6 @@ DepthState et::deserializeDepthState(const et::Dictionary& depth)
 	DepthState _depth;
 	_depth.compareFunction = stringToCompareFunction(depth.stringForKey(kDepthFunction, compareFunctionToString(CompareFunction::Less))->content);
 	_depth.depthWriteEnabled = depth.boolForKey(kDepthWriteEnabled, true)->content != 0;
-	_depth.depthTestEnabled = depth.boolForKey(kDepthTestEnabled, true)->content != 0;
 	return _depth;
 }
 

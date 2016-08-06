@@ -11,7 +11,9 @@
 
 namespace et
 {
-	class MetalState;
+	struct MetalState;
+    struct MetalNativePipelineState;
+    
 	class MetalPipelineStatePrivate;
 	class MetalPipelineState : public PipelineState
 	{
@@ -23,6 +25,8 @@ namespace et
 		~MetalPipelineState();
 
 		void build() override;
+        
+        const MetalNativePipelineState& nativeState() const;
 
 	private:
 		ET_DECLARE_PIMPL(MetalPipelineState, 64);

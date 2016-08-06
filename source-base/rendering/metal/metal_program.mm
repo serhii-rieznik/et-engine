@@ -17,8 +17,7 @@ public:
 		: state(mtl) { }
 
 	MetalState& state;
-	id<MTLFunction> vertexFunction = nil;
-	id<MTLFunction> fragmentFunction = nil;
+    MetalNativeProgram program;
 };
 
 MetalProgram::MetalProgram(MetalState& state)
@@ -54,19 +53,24 @@ void MetalProgram::build(const std::string& vertexSource, const std::string& fra
 			id<MTLFunction> func = [lib newFunctionWithName:functionName];
 			if (func.functionType == MTLFunctionTypeVertex)
 			{
-				_private->vertexFunction = func;
+				_private->program.vertexFunction = func;
 			}
 			else if (func.functionType == MTLFunctionTypeFragment)
 			{
-				_private->fragmentFunction = func;
+				_private->program.fragmentFunction = func;
 			}
 		}
 	}
 
-	ET_ASSERT(_private->vertexFunction != nil);
-	ET_ASSERT(_private->fragmentFunction != nil);
+	ET_ASSERT(_private->program.vertexFunction != nil);
+	ET_ASSERT(_private->program.fragmentFunction != nil);
 
 	ET_OBJC_RELEASE(lib);
+}
+    
+const MetalNativeProgram& MetalProgram::nativeProgram() const
+{
+    return _private->program;
 }
 
 void MetalProgram::setTransformMatrix(const mat4 &m, bool force)

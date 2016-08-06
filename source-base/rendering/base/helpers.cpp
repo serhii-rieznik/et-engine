@@ -26,7 +26,7 @@ namespace rh_local
 void init(RenderContext* rc)
 {
 	auto vd = VertexDeclaration(false, VertexAttributeUsage::Position, DataType::Vec2);
-	IndexArray::Pointer ia = IndexArray::Pointer::create(IndexArrayFormat::Format_8bit, 4, PrimitiveType::TriangleStrips);
+	IndexArray::Pointer ia = IndexArray::Pointer::create(IndexArrayFormat::Format_16bit, 4, PrimitiveType::TriangleStrips);
 	VertexStorage::Pointer vs = VertexStorage::Pointer::create(vd, 4);
 	auto pos = vs->accessData<DataType::Vec2>(VertexAttributeUsage::Position, 0);
 	pos[0] = vec2(-1.0f, -1.0f);
@@ -41,7 +41,6 @@ void init(RenderContext* rc)
 	rh_local::fullscreenMesh->setBuffers(vb, ib);
 
 	rh_local::disabledDepthState.compareFunction = CompareFunction::Always;
-	rh_local::disabledDepthState.depthTestEnabled = false;
 	rh_local::disabledDepthState.depthWriteEnabled = false;
 
 	uint32_t renderAPI = static_cast<uint32_t>(rc->renderer()->api());
@@ -132,11 +131,12 @@ void main()
 })"
 ,
 R"(
-fragment float4 fragmentMain(VertexOutput vOutput [[stage_in]],
-							 texture2d<float> color_texture [[texture(0)]])
+fragment float4 fragmentMain(VertexOutput vOutput [[stage_in]]
+                             // , texture2d<float> color_texture [[texture(0)]]
+                             )
 {
-	constexpr sampler defaultSampler;
-	return color_texture.sample(defaultSampler, vOutput.texCoord);
+	// constexpr sampler defaultSampler;
+    return float4(1.0, 0.5, 0.25, 1.0); // color_texture.sample(defaultSampler, vOutput.texCoord);
 })"
 
 };

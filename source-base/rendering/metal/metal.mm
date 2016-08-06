@@ -45,5 +45,54 @@ MTLPixelFormat textureFormatValue(TextureFormat value)
     return _map.at(value);
 }
     
+MTLPrimitiveType primitiveTypeValue(PrimitiveType value)
+{
+    static const std::map<PrimitiveType, MTLPrimitiveType> _map =
+    {
+        { PrimitiveType::Points, MTLPrimitiveTypePoint },
+        { PrimitiveType::Lines, MTLPrimitiveTypeLine },
+        { PrimitiveType::LineStrips, MTLPrimitiveTypeLineStrip },
+        { PrimitiveType::Triangles, MTLPrimitiveTypeTriangle },
+        { PrimitiveType::TriangleStrips, MTLPrimitiveTypeTriangleStrip },
+    };
+    ET_ASSERT(_map.count(value) > 0);
+    return _map.at(value);
+}
+    
+MTLPrimitiveTopologyClass primitiveTypeToTopology(PrimitiveType pt)
+{
+    switch (pt)
+    {
+        case PrimitiveType::Points:
+            return MTLPrimitiveTopologyClassPoint;
+        case PrimitiveType::Lines:
+        case PrimitiveType::LineStrips:
+            return MTLPrimitiveTopologyClassLine;
+        case PrimitiveType::Triangles:
+        case PrimitiveType::TriangleStrips:
+            return MTLPrimitiveTopologyClassTriangle;
+        default:
+            ET_FAIL("Unsupported primitive type");
+            return MTLPrimitiveTopologyClassPoint;
+    }
+}
+    
+MTLVertexFormat dataTypeToVertexFormat(DataType value)
+{
+    static const std::map<DataType, MTLVertexFormat> _map =
+    {
+        { DataType::Int, MTLVertexFormatInt },
+        { DataType::IntVec2, MTLVertexFormatInt2 },
+        { DataType::IntVec3, MTLVertexFormatInt3 },
+        { DataType::IntVec4, MTLVertexFormatInt4 },
+        { DataType::Float, MTLVertexFormatFloat },
+        { DataType::Vec2, MTLVertexFormatFloat2 },
+        { DataType::Vec3, MTLVertexFormatFloat3 },
+        { DataType::Vec4, MTLVertexFormatFloat4 },
+    };
+    ET_ASSERT(_map.count(value) > 0);
+    return _map.at(value);
+}
+    
 }
 }

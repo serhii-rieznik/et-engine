@@ -11,7 +11,7 @@
 
 namespace et
 {
-	class MetalState;
+	struct MetalState;
 	class MetalRenderPassPrivate;
 	class MetalRenderPass : public RenderPass
 	{

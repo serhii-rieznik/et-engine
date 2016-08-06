@@ -5,9 +5,11 @@
  *
  */
 
+#include <et/rendering/metal/metal.h>
 #include <et/rendering/metal/metal_renderpass.h>
 #include <et/rendering/metal/metal_pipelinestate.h>
-#include <et/rendering/metal/metal.h>
+#include <et/rendering/metal/metal_vertexbuffer.h>
+#include <et/rendering/metal/metal_indexbuffer.h>
 
 namespace et
 {
@@ -42,6 +44,19 @@ void MetalRenderPass::pushRenderBatch(RenderBatch::Pointer batch)
 	MetalPipelineState::Pointer ps = batch->material()->createPipelineState();
 	ps->setVertexStream(batch->vao());
 	ps->build();
+    
+    MetalVertexBuffer::Pointer vb = batch->vao()->vertexBuffer();
+    MetalIndexBuffer::Pointer ib = batch->vao()->indexBuffer();
+    
+    [_private->encoder setRenderPipelineState:ps->nativeState().pipelineState];
+    [_private->encoder setDepthStencilState:ps->nativeState().depthStencilState];
+    [_private->encoder setVertexBuffer:vb->nativeBuffer().buffer() offset:0 atIndex:0];
+    
+    [_private->encoder drawIndexedPrimitives:metal::primitiveTypeValue(ib->primitiveType())
+                                  indexCount:batch->numIndexes()
+                                   indexType:MTLIndexTypeUInt16
+                                 indexBuffer:ib->nativeBuffer().buffer()
+                           indexBufferOffset:batch->firstIndex()];
 }
 
 void MetalRenderPass::endEncoding()

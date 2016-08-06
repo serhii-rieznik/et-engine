@@ -26,8 +26,8 @@ void OpenGLRenderState::setCullMode(const et::CullMode& mode)
 
 void OpenGLRenderState::setDepthState(const et::DepthState& state)
 {
-	(state.depthTestEnabled ? glEnable : glDisable)(GL_DEPTH_TEST);
-
+    ((state.compareFunction == CompareFunction::Always) ? glDisable : glEnable)(GL_DEPTH_TEST);
+    
 	glDepthMask(state.depthWriteEnabled);
 	glDepthFunc(compareFunctionValue(state.compareFunction));
 }

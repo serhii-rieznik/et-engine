@@ -335,16 +335,15 @@ namespace et
 	{
 		CompareFunction compareFunction = CompareFunction::Less;
 		bool depthWriteEnabled = true;
-		bool depthTestEnabled = true;
 		
 		DepthState() = default;
 		
-		DepthState(bool write, bool test) :
-			depthWriteEnabled(write), depthTestEnabled(test) { }
+		DepthState(bool write, CompareFunction func) :
+			depthWriteEnabled(write), compareFunction(func) { }
 		
 		uint32_t sortingKey() const
 		{
-			return static_cast<uint32_t>(depthWriteEnabled) << 1 | static_cast<uint32_t>(depthWriteEnabled);
+			return static_cast<uint32_t>(depthWriteEnabled) << 1 | static_cast<uint32_t>(compareFunction);
 		}
 	};
 	

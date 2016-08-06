@@ -88,7 +88,7 @@ namespace et
 		size_t numElements() const
 			{ return _list.size(); }
 
-		uint32_t dataSize() const
+		uint32_t totalSize() const
 			{ return _totalSize; }
 
 		bool interleaved() const

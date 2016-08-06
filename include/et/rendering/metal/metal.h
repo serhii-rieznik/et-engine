@@ -18,9 +18,8 @@
 namespace et
 {
 
-class MetalState
+struct MetalState
 {
-public:
 	CAMetalLayer* layer = nil;
 	
 	id<MTLDevice> device = nil;
@@ -29,11 +28,44 @@ public:
 	id<MTLCommandBuffer> mainCommandBuffer = nil;
 	id<CAMetalDrawable> mainDrawable = nil;
 };
+    
+struct MetalNativeProgram
+{
+    id<MTLFunction> vertexFunction;
+    id<MTLFunction> fragmentFunction;
+};
+    
+struct MetalNativePipelineState
+{
+    id<MTLRenderPipelineState> pipelineState;
+    id<MTLDepthStencilState> depthStencilState;
+};
 
+class MetalNativeBuffer
+{
+public:
+    MetalNativeBuffer() = default;
+    
+    MetalNativeBuffer(MetalState& metal, const void* data, uint32_t size)
+        { _buffer = [metal.device newBufferWithBytes:data length:size options:MTLResourceCPUCacheModeDefaultCache]; }
+    
+    ~MetalNativeBuffer()
+        { ET_OBJC_RELEASE(_buffer); }
+    
+    id<MTLBuffer> buffer() const
+        { return _buffer; }
+    
+private:
+    id<MTLBuffer> _buffer = nil;
+};
+    
 namespace metal
 {
     MTLTextureType textureTargetValue(TextureTarget, uint32_t samples);
     MTLPixelFormat textureFormatValue(TextureFormat);
+    MTLPrimitiveType primitiveTypeValue(PrimitiveType);
+    MTLPrimitiveTopologyClass primitiveTypeToTopology(PrimitiveType);
+    MTLVertexFormat dataTypeToVertexFormat(DataType);
 }
 
 }

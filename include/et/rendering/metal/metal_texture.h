@@ -11,7 +11,7 @@
 
 namespace et
 {
-    class MetalState;
+    struct MetalState;
     class MetalTexturePrivate;
 	class MetalTexture : public Texture
 	{

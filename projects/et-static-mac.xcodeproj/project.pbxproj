@@ -244,7 +244,6 @@
 		5C7F58481D4A986B00F567C4 /* sound.h in Headers */ = {isa = PBXBuildFile; fileRef = 5C7F57931D4A986B00F567C4 /* sound.h */; };
 		5C7F58491D4A986B00F567C4 /* streamingthread.h in Headers */ = {isa = PBXBuildFile; fileRef = 5C7F57941D4A986B00F567C4 /* streamingthread.h */; };
 		5C7F584A1D4A986B00F567C4 /* track.h in Headers */ = {isa = PBXBuildFile; fileRef = 5C7F57951D4A986B00F567C4 /* track.h */; };
-		5C97C5E91D5504080015F193 /* metal_buffer.h in Headers */ = {isa = PBXBuildFile; fileRef = 5C97C5E81D5504080015F193 /* metal_buffer.h */; };
 		5C97C5EB1D55122A0015F193 /* metal_pipelinestate.h in Headers */ = {isa = PBXBuildFile; fileRef = 5C97C5EA1D55122A0015F193 /* metal_pipelinestate.h */; };
 		5C97C5ED1D5512900015F193 /* opengl_pipelinestate.h in Headers */ = {isa = PBXBuildFile; fileRef = 5C97C5EC1D5512900015F193 /* opengl_pipelinestate.h */; };
 		5C97C5EF1D5519DE0015F193 /* metal_pipelinestate.mm in Sources */ = {isa = PBXBuildFile; fileRef = 5C97C5EE1D5519DE0015F193 /* metal_pipelinestate.mm */; };
@@ -565,7 +564,6 @@
 		5C7F57931D4A986B00F567C4 /* sound.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sound.h; sourceTree = "<group>"; };
 		5C7F57941D4A986B00F567C4 /* streamingthread.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = streamingthread.h; sourceTree = "<group>"; };
 		5C7F57951D4A986B00F567C4 /* track.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = track.h; sourceTree = "<group>"; };
-		5C97C5E81D5504080015F193 /* metal_buffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = metal_buffer.h; sourceTree = "<group>"; };
 		5C97C5EA1D55122A0015F193 /* metal_pipelinestate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = metal_pipelinestate.h; sourceTree = "<group>"; };
 		5C97C5EC1D5512900015F193 /* opengl_pipelinestate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = opengl_pipelinestate.h; sourceTree = "<group>"; };
 		5C97C5EE1D5519DE0015F193 /* metal_pipelinestate.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = metal_pipelinestate.mm; sourceTree = "<group>"; };
@@ -1212,7 +1210,6 @@
 			isa = PBXGroup;
 			children = (
 				6E6216D31D514CB60002F1A3 /* metal.h */,
-				5C97C5E81D5504080015F193 /* metal_buffer.h */,
 				6E6216D41D514CB60002F1A3 /* metal_indexbuffer.h */,
 				5C97C5EA1D55122A0015F193 /* metal_pipelinestate.h */,
 				6E62171B1D51FFE40002F1A3 /* metal_program.h */,
@@ -1400,7 +1397,6 @@
 				5C7F57BB1D4A986B00F567C4 /* log.h in Headers */,
 				6E6217021D514CB60002F1A3 /* metal_renderstate.h in Headers */,
 				6E6216F21D514CB60002F1A3 /* vertexdeclaration.h in Headers */,
-				5C97C5E91D5504080015F193 /* metal_buffer.h in Headers */,
 				5C7F58081D4A986B00F567C4 /* opengl.ios.h in Headers */,
 				6E6216FF1D514CB60002F1A3 /* metal_indexbuffer.h in Headers */,
 				6E62170F1D514CB60002F1A3 /* rendercontextparams.h in Headers */,
