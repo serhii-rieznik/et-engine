@@ -245,7 +245,7 @@ Program::Pointer OpenGLRenderer::createProgram(const std::string& vs, const std:
 /*
  * Pipeline state
  */
-PipelineState::Pointer OpenGLRenderer::createPipelineState()
+PipelineState::Pointer OpenGLRenderer::createPipelineState(RenderPass::Pointer, Material::Pointer, VertexArrayObject::Pointer)
 {
 	return OpenGLPipelineState::Pointer::create();
 }

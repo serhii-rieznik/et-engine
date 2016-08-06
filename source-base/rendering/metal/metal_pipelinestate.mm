@@ -57,7 +57,14 @@ void MetalPipelineState::build()
     }
     
     NSError* error = nil;
-    _private->state.pipelineState = [_private->metal.device newRenderPipelineStateWithDescriptor:desc error:&error];
+    MTLRenderPipelineReflection* reflection = nil;
+    
+    _private->state.pipelineState = [_private->metal.device newRenderPipelineStateWithDescriptor:desc
+        options:MTLPipelineOptionArgumentInfo | MTLPipelineOptionBufferTypeInfo
+        reflection:&reflection error:&error];
+    
+    _private->state.reflection = reflection;
+
     if (error != nil)
     {
         log::error("Failed to create pipeline:\n%s", [[error description] UTF8String]);

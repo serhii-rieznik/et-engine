@@ -31,14 +31,21 @@ struct MetalState
     
 struct MetalNativeProgram
 {
-    id<MTLFunction> vertexFunction;
-    id<MTLFunction> fragmentFunction;
+    id<MTLFunction> vertexFunction = nil;
+    id<MTLFunction> fragmentFunction = nil;
 };
     
+struct MetalNativeTexture
+{
+    id<MTLTexture> texture = nil;
+};
+
 struct MetalNativePipelineState
 {
-    id<MTLRenderPipelineState> pipelineState;
-    id<MTLDepthStencilState> depthStencilState;
+    id<MTLRenderPipelineState> pipelineState = nil;
+    id<MTLDepthStencilState> depthStencilState = nil;
+    
+    MTLRenderPipelineReflection* reflection = nil;
 };
 
 class MetalNativeBuffer

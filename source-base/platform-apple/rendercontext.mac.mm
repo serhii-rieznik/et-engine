@@ -79,10 +79,7 @@ RenderContext::RenderContext(const RenderContextParameters& inParams, Applicatio
 	else if (application().parameters().renderingAPI == RenderingAPI::Metal)
 	{
 		mainView = (__bridge NSView*)(ctx.objects[2]);
-		id<MTLDevice> metalDevice = (__bridge id<MTLDevice>)(ctx.objects[3]);
-		CAMetalLayer* metalLayer = (__bridge CAMetalLayer*)(ctx.objects[4]);
-		metalLayer.drawableSize = mainView.bounds.size;
-		mainView.layer = metalLayer;
+		mainView.layer = (__bridge CAMetalLayer*)(ctx.objects[4]);
 		[mainView setWantsLayer:YES];
 	}
 

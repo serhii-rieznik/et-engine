@@ -108,25 +108,6 @@ void Material::setProgram(Program::Pointer program)
 	loadProperties();
 }
 
-PipelineState::Pointer Material::createPipelineState()
-{
-	PipelineState::Pointer result = _renderer->createPipelineState();
-	result->setDepthState(_depth);
-	result->setBlendState(_blend);
-	result->setCullMode(_cull);
-	result->setProgram(_program);
-/*
-	auto psInfo = _pipelineState;
-	psInfo.vertexStream = vertexStream;
-	psInfo.vertexInput = vertexStream->vertexBuffer()->declaration();
-	for (const auto& tex : _textures)
-	{
-		psInfo.textureBinding.emplace(tex.second.unit, tex.second.texture);
-	}
-*/
-	return result;
-}
-
 void Material::enableInRenderState(RenderState::Pointer rs)
 {
 	rs->setCullMode(_cull);
@@ -227,11 +208,21 @@ void Material::setProperty(const String& name, const mat4& value) ET_SET_PROPERT
 void Material::setTexutre(const String& name, const Texture::Pointer& tex)
 {
 	auto i = _textures.find(name);
-	if ((i != _textures.end()) && (i->second.texture != tex))
+    if (i == _textures.end())
+    {
+        _textures[name].texture = tex;
+    }
+	else if (i->second.texture != tex)
 	{
 		i->second.texture = tex;
 		_shouldUpdateSnapshot = true;
 	}
+}
+
+Texture::Pointer Material::texture(const String& name)
+{
+    auto i = _textures.find(name);
+    return (i == _textures.end()) ? Texture::Pointer() : i->second.texture;
 }
 
 uint32_t Material::sortingKey() const

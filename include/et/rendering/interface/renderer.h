@@ -10,6 +10,7 @@
 #include <et/app/context.h>
 #include <et/rendering/rendercontextparams.h>
 #include <et/rendering/interface/renderpass.h>
+#include <et/rendering/interface/pipelinestate.h>
 
 namespace et
 {
@@ -64,7 +65,7 @@ namespace et
 		/*
 		 * Pipeline state
 		 */
-		virtual PipelineState::Pointer createPipelineState() = 0;
+        virtual PipelineState::Pointer createPipelineState(RenderPass::Pointer, Material::Pointer, VertexArrayObject::Pointer) = 0;
 
 	private:
 		RenderContext* _rc = nullptr;

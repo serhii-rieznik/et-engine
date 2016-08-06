@@ -668,7 +668,6 @@
 				5C7F55F31D4A985E00F567C4 /* imaging */,
 				5C7F55FF1D4A985E00F567C4 /* input */,
 				5C7F56021D4A985E00F567C4 /* platform-apple */,
-				5C7F56181D4A985E00F567C4 /* platform-unix */,
 				5C7F56191D4A985E00F567C4 /* platform-win */,
 				6E62167D1D514C850002F1A3 /* rendering */,
 				5C7F56421D4A985E00F567C4 /* scene3d */,
@@ -793,13 +792,6 @@
 				5C7F56171D4A985E00F567C4 /* tools.apple.mm */,
 			);
 			path = "platform-apple";
-			sourceTree = "<group>";
-		};
-		5C7F56181D4A985E00F567C4 /* platform-unix */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = "platform-unix";
 			sourceTree = "<group>";
 		};
 		5C7F56191D4A985E00F567C4 /* platform-win */ = {

@@ -56,7 +56,7 @@ namespace et
 		/*
 		 * Pipeline state
 		 */
-		PipelineState::Pointer createPipelineState() override;
+		PipelineState::Pointer createPipelineState(RenderPass::Pointer, Material::Pointer, VertexArrayObject::Pointer) override;
 
 		/*
 		 * Low level stuff

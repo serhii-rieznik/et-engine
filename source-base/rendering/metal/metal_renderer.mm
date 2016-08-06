@@ -72,7 +72,7 @@ void MetalRenderer::present()
 
 RenderPass::Pointer MetalRenderer::allocateRenderPass(const RenderPass::ConstructionInfo& info)
 {
-	MetalRenderPass::Pointer result = MetalRenderPass::Pointer::create(_private->metal, info);
+	MetalRenderPass::Pointer result = MetalRenderPass::Pointer::create(this, _private->metal, info);
 
 	return result;
 }
@@ -135,9 +135,16 @@ Program::Pointer MetalRenderer::createProgram(const std::string& vs, const std::
 /*
  * Pipeline state
  */
-PipelineState::Pointer MetalRenderer::createPipelineState()
+PipelineState::Pointer MetalRenderer::createPipelineState(RenderPass::Pointer pass, Material::Pointer mtl,
+    VertexArrayObject::Pointer vs)
 {
-	return MetalPipelineState::Pointer::create(_private->metal);
+    PipelineState::Pointer result = MetalPipelineState::Pointer::create(_private->metal);
+    result->setDepthState(mtl->depthState());
+    result->setBlendState(mtl->blendState());
+    result->setCullMode(mtl->cullMode());
+    result->setProgram(mtl->program());
+    result->setVertexStream(vs);
+	return result;
 }
 
 }

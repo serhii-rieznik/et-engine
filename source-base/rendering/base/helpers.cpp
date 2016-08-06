@@ -131,12 +131,10 @@ void main()
 })"
 ,
 R"(
-fragment float4 fragmentMain(VertexOutput vOutput [[stage_in]]
-                             // , texture2d<float> color_texture [[texture(0)]]
-                             )
+fragment float4 fragmentMain(VertexOutput vOutput [[stage_in]], texture2d<float> color_texture [[texture(0)]])
 {
-	// constexpr sampler defaultSampler;
-    return float4(1.0, 0.5, 0.25, 1.0); // color_texture.sample(defaultSampler, vOutput.texCoord);
+	constexpr sampler defaultSampler;
+    return color_texture.sample(defaultSampler, vOutput.texCoord);
 })"
 
 };

@@ -12,6 +12,7 @@
 namespace et
 {
     struct MetalState;
+    struct MetalNativeTexture;
     class MetalTexturePrivate;
 	class MetalTexture : public Texture
 	{
@@ -22,6 +23,8 @@ namespace et
         MetalTexture() = default;
         MetalTexture(MetalState&, TextureDescription::Pointer);
         ~MetalTexture();
+        
+        const MetalNativeTexture& nativeTexture() const;
         
         void bind(uint32_t) override;
         void update(TextureDescription::Pointer) override;

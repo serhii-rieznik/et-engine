@@ -12,6 +12,7 @@
 namespace et
 {
 	struct MetalState;
+    class MetalRenderer;
 	class MetalRenderPassPrivate;
 	class MetalRenderPass : public RenderPass
 	{
@@ -19,7 +20,7 @@ namespace et
 		ET_DECLARE_POINTER(MetalRenderPass);
 
 	public:
-		MetalRenderPass(MetalState&, const RenderPass::ConstructionInfo&);
+		MetalRenderPass(MetalRenderer*, MetalState&, const RenderPass::ConstructionInfo&);
 		~MetalRenderPass();
 		
 		void pushRenderBatch(RenderBatch::Pointer) override;

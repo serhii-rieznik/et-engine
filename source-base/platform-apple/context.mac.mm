@@ -42,11 +42,6 @@
 }
 @end
 
-@interface etMetalView : NSView
-
-@end
-
-
 /*
  * OpenGL View implementation
  */
@@ -308,17 +303,12 @@ PlatformDependentContext ApplicationContextFactoryOSX::createContextWithOptions(
     options.size = vec2i(static_cast<int32_t>(contentRect.size.width),
         static_cast<int32_t>(contentRect.size.height));
 
-	NSView* view = nil;
-
+	NSView* view = [[etOpenGLView alloc] init];
+    
 	if (api == RenderingAPI::OpenGL)
 	{
-		etOpenGLView* openGlView = [[etOpenGLView alloc] init];
+        NSOpenGLView* openGlView = view;
 		[openGlView setWantsBestResolutionOpenGLSurface:options.supportsHighResolution ? YES : NO];
-		view = openGlView;
-	}
-	else if (api == RenderingAPI::Metal)
-	{
-		view = [[NSView alloc] init];
 	}
 
 	[view setAcceptsTouchEvents:YES];
@@ -328,7 +318,6 @@ PlatformDependentContext ApplicationContextFactoryOSX::createContextWithOptions(
 	{
         [mainWindow setCollectionBehavior:NSWindowCollectionBehaviorFullScreenPrimary];
 	}
-
 
 	[mainWindow setContentView:view];
     [mainWindow setDelegate:windowController];

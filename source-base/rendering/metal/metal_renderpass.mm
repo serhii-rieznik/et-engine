@@ -6,10 +6,12 @@
  */
 
 #include <et/rendering/metal/metal.h>
+#include <et/rendering/metal/metal_renderer.h>
 #include <et/rendering/metal/metal_renderpass.h>
 #include <et/rendering/metal/metal_pipelinestate.h>
 #include <et/rendering/metal/metal_vertexbuffer.h>
 #include <et/rendering/metal/metal_indexbuffer.h>
+#include <et/rendering/metal/metal_texture.h>
 
 namespace et
 {
@@ -18,12 +20,14 @@ class MetalRenderPassPrivate
 {
 public:
 	id<MTLRenderCommandEncoder> encoder = nil;
+    MetalRenderer* renderer = nullptr;
 };
 
-MetalRenderPass::MetalRenderPass(MetalState& state, const RenderPass::ConstructionInfo& info) :
-	RenderPass(info)
+MetalRenderPass::MetalRenderPass(MetalRenderer* renderer, MetalState& state,
+    const RenderPass::ConstructionInfo& info) : RenderPass(info)
 {
 	ET_PIMPL_INIT(MetalRenderPass)
+    _private->renderer = renderer;
 
 	MTLRenderPassDescriptor* pass = [MTLRenderPassDescriptor renderPassDescriptor];
 	pass.colorAttachments[0].texture = state.mainDrawable.texture;
@@ -34,23 +38,25 @@ MetalRenderPass::MetalRenderPass(MetalState& state, const RenderPass::Constructi
 	_private->encoder = [state.mainCommandBuffer renderCommandEncoderWithDescriptor:pass];
 }
 
-	MetalRenderPass::~MetalRenderPass()
+MetalRenderPass::~MetalRenderPass()
 {
 	ET_PIMPL_FINALIZE(MetalRenderPass)
 }
 
 void MetalRenderPass::pushRenderBatch(RenderBatch::Pointer batch)
 {
-	MetalPipelineState::Pointer ps = batch->material()->createPipelineState();
-	ps->setVertexStream(batch->vao());
-	ps->build();
-    
+    MetalPipelineState::Pointer ps = _private->renderer->createPipelineState(RenderPass::Pointer(this), batch->material(), batch->vao());
     MetalVertexBuffer::Pointer vb = batch->vao()->vertexBuffer();
     MetalIndexBuffer::Pointer ib = batch->vao()->indexBuffer();
+
+    ps->build();
+    
+    MetalTexture::Pointer tex = batch->material()->texture("color_texture");
     
     [_private->encoder setRenderPipelineState:ps->nativeState().pipelineState];
     [_private->encoder setDepthStencilState:ps->nativeState().depthStencilState];
     [_private->encoder setVertexBuffer:vb->nativeBuffer().buffer() offset:0 atIndex:0];
+    [_private->encoder setFragmentTexture:tex->nativeTexture().texture atIndex:0];
     
     [_private->encoder drawIndexedPrimitives:metal::primitiveTypeValue(ib->primitiveType())
                                   indexCount:batch->numIndexes()

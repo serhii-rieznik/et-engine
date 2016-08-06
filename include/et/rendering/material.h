@@ -11,7 +11,6 @@
 #include <et/rendering/interface/program.h>
 #include <et/rendering/interface/texture.h>
 #include <et/rendering/interface/renderstate.h>
-#include <et/rendering/interface/pipelinestate.h>
 
 namespace et
 {
@@ -27,8 +26,6 @@ namespace et
         Material(RenderInterface*);
 		
 		void loadFromJson(const std::string&, const std::string& baseFolder);
-		
-		PipelineState::Pointer createPipelineState();
 
 		void enableInRenderState(RenderState::Pointer);
 		void enableSnapshotInRenderState(RenderState::Pointer, uint64_t);
@@ -67,6 +64,7 @@ namespace et
 		void setProperty(const String& name, const mat3& value);
 		void setProperty(const String& name, const mat4& value);
 		
+        Texture::Pointer texture(const String& name);
 		void setTexutre(const String& name, const Texture::Pointer&);
 		
 		uint32_t sortingKey() const;
@@ -91,6 +89,7 @@ namespace et
 			uint32_t unit = 0;
 			Texture::Pointer texture;
 			
+            TextureProperty() = default;
 			TextureProperty(const TextureProperty&) = default;
 			TextureProperty(int32_t loc, uint32_t u) :
 				locationInProgram(loc), unit(u) { }

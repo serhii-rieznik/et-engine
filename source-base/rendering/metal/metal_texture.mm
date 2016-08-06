@@ -14,8 +14,8 @@ namespace et
 class MetalTexturePrivate
 {
 public:
+    MetalNativeTexture texture;
     MTLTextureDescriptor* textureDesc = nullptr;
-    id<MTLTexture> texture = nullptr;
 };
     
 MetalTexture::MetalTexture(MetalState& metal, TextureDescription::Pointer desc)
@@ -24,14 +24,12 @@ MetalTexture::MetalTexture(MetalState& metal, TextureDescription::Pointer desc)
     ET_PIMPL_INIT(MetalTexture);
     
     _private->textureDesc = [[MTLTextureDescriptor alloc] init];
-    update(desc);
-    
     _private->textureDesc.textureType = metal::textureTargetValue(desc->target, 1); // TODO : add samples
     _private->textureDesc.pixelFormat = metal::textureFormatValue(desc->internalformat);
     _private->textureDesc.width = desc->size.x;
     _private->textureDesc.height = desc->size.y;
     _private->textureDesc.mipmapLevelCount = std::max(1u, desc->mipMapCount);
-    _private->texture = [metal.device newTextureWithDescriptor:_private->textureDesc];
+    _private->texture.texture = [metal.device newTextureWithDescriptor:_private->textureDesc];
     
     update(desc);
 }
@@ -40,6 +38,11 @@ MetalTexture::~MetalTexture()
 {
     ET_OBJC_RELEASE(_private->textureDesc);
     ET_PIMPL_FINALIZE(MetalTexture)
+}
+    
+const MetalNativeTexture& MetalTexture::nativeTexture() const
+{
+    return _private->texture;
 }
 
 void MetalTexture::bind(uint32_t)
@@ -66,8 +69,8 @@ void MetalTexture::update(TextureDescription::Pointer desc)
             const char* ptr = (aDataPtr && (mipOffset < aDataSize)) ? (aDataPtr + mipOffset) : nullptr;
             
             // TODO : implement proper bytesPerRow
-            [_private->texture replaceRegion:region mipmapLevel:level slice:0
-                                   withBytes:ptr bytesPerRow:mipDataSize / mipSize.y bytesPerImage:mipDataSize];
+            [_private->texture.texture replaceRegion:region mipmapLevel:level slice:0
+                withBytes:ptr bytesPerRow:mipDataSize / mipSize.y bytesPerImage:mipDataSize];
         }
     }
     else if (desc->target == TextureTarget::Texture_Cube)
