@@ -157,19 +157,16 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\source-ext\rt\bsdf.cpp" />
     <ClCompile Include="..\..\source-ext\rt\environment.cpp" />
     <ClCompile Include="..\..\source-ext\rt\integrator.cpp" />
     <ClCompile Include="..\..\source-ext\rt\kdtree.cpp" />
     <ClCompile Include="..\..\source-ext\rt\raytrace.cpp" />
+    <ClCompile Include="..\..\source-ext\rt\raytraceobjects.cpp" />
     <ClCompile Include="source\main.cpp" />
     <ClCompile Include="source\maincontroller.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\include\et-ext\rt\environment.h" />
-    <ClInclude Include="..\..\include\et-ext\rt\integrator.h" />
-    <ClInclude Include="..\..\include\et-ext\rt\kdtree.h" />
-    <ClInclude Include="..\..\include\et-ext\rt\raytrace.h" />
-    <ClInclude Include="..\..\include\et-ext\rt\raytraceobjects.h" />
     <ClInclude Include="source\maincontroller.hpp" />
   </ItemGroup>
   <ItemGroup>

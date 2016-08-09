@@ -16,7 +16,7 @@ using namespace et;
 
 PointerInputInfo Input::currentPointer()
 {
-	HWND mainWindow = reinterpret_cast<HWND>(application().context().pointers[0]);
+	HWND mainWindow = reinterpret_cast<HWND>(application().context().objects[0]);
 
 	POINT pt = { };
 	RECT r = { };

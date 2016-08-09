@@ -11,7 +11,7 @@
     <Filter Include="media">
       <UniqueIdentifier>{cf4a634a-e1c2-49bf-8d56-134eae09b770}</UniqueIdentifier>
     </Filter>
-    <Filter Include="et-ext">
+    <Filter Include="rt">
       <UniqueIdentifier>{6773a314-c189-4362-a43c-2c96c9fe730c}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -22,37 +22,28 @@
     <ClCompile Include="source\maincontroller.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\source-ext\rt\bsdf.cpp">
+      <Filter>rt</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\source-ext\rt\environment.cpp">
-      <Filter>et-ext</Filter>
+      <Filter>rt</Filter>
     </ClCompile>
     <ClCompile Include="..\..\source-ext\rt\integrator.cpp">
-      <Filter>et-ext</Filter>
+      <Filter>rt</Filter>
     </ClCompile>
     <ClCompile Include="..\..\source-ext\rt\kdtree.cpp">
-      <Filter>et-ext</Filter>
+      <Filter>rt</Filter>
     </ClCompile>
     <ClCompile Include="..\..\source-ext\rt\raytrace.cpp">
-      <Filter>et-ext</Filter>
+      <Filter>rt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-ext\rt\raytraceobjects.cpp">
+      <Filter>rt</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\maincontroller.hpp">
       <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\et-ext\rt\environment.h">
-      <Filter>et-ext</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\et-ext\rt\integrator.h">
-      <Filter>et-ext</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\et-ext\rt\kdtree.h">
-      <Filter>et-ext</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\et-ext\rt\raytrace.h">
-      <Filter>et-ext</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\et-ext\rt\raytraceobjects.h">
-      <Filter>et-ext</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

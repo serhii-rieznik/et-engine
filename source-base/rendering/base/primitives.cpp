@@ -86,7 +86,7 @@ void primitives::createPhotonMap(VertexArray::Pointer buffer, const vec2i& densi
 void primitives::createSphere(VertexStorage::Pointer data, float radius, const vec2i& density,
 	const vec3& center, const vec2& hemiSphere)
 {
-	size_t lastIndex = data->capacity();
+	uint32_t lastIndex = data->capacity();
 	data->increaseSize(static_cast<uint32_t>(density.square()));
 
 	auto pos = data->accessData<et::DataType::Vec3>(et::VertexAttributeUsage::Position, lastIndex);

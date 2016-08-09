@@ -22,10 +22,8 @@
 #include <et/rendering/base/vertexstorage.h>
 
 #if (ET_PLATFORM_MAC)
-#	include <opengl/opengl.h>
+#	include <OpenGL/OpenGL.h>
 #	include <OpenGL/CGLTypes.h>
-#else
-#	error Not implemented for this platform
 #endif
 
 namespace et
@@ -34,8 +32,10 @@ namespace et
 class OpenGLRendererPrivate
 {
 public:
+#if (ET_PLATFORM_MAC)
 	CGLPixelFormatObj glPixelFormat = nullptr;
 	CGLContextObj glContext = nullptr;
+#endif
 };
 
 OpenGLRenderer::OpenGLRenderer(RenderContext* rc)
@@ -51,6 +51,7 @@ OpenGLRenderer::~OpenGLRenderer()
 
 void OpenGLRenderer::init(const RenderContextParameters& params)
 {
+#if (ET_PLATFORM_MAC)
 	bool msaaEnabled = params.multisamplingQuality != MultisamplingQuality::None;
 	CGLPixelFormatAttribute attribs[128] =
 	{
@@ -86,33 +87,40 @@ void OpenGLRenderer::init(const RenderContextParameters& params)
 	GLint swap = static_cast<GLint>(params.swapInterval);
 	CGLSetParameter(_private->glContext, kCGLCPSwapInterval, &swap);
 
-	glViewport(0, 0, 640, 480);
-
 	application().context().objects[3] = _private->glPixelFormat;
 	application().context().objects[4] = _private->glContext;
+#elif (ET_PLATFORM_WIN)
 	
+#endif
+
 	OpenGLCapabilities::instance().checkCaps();
 }
 
 void OpenGLRenderer::shutdown()
 {
+#if (ET_PLATFORM_MAC)
 	CGLDestroyContext(_private->glContext);
 	CGLDestroyPixelFormat(_private->glPixelFormat);
+#endif
 }
 
 void OpenGLRenderer::begin()
 {
+#if (ET_PLATFORM_MAC)
 	CGLSetCurrentContext(_private->glContext);
 	CGLLockContext(_private->glContext);
+#endif
 }
 
 void OpenGLRenderer::present()
 {
 	checkOpenGLError("OpenGLRenderer::present()");
 
+#if (ET_PLATFORM_MAC)
 	ET_ASSERT(CGLGetCurrentContext() == _private->glContext);
 	CGLFlushDrawable(_private->glContext);
 	CGLUnlockContext(_private->glContext);
+#endif
 }
 
 void OpenGLRenderer::drawIndexedPrimitive(PrimitiveType pt, IndexArrayFormat fmt, uint32_t first, uint32_t count)

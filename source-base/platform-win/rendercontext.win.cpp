@@ -56,14 +56,6 @@ RenderContext::~RenderContext()
 
 void RenderContext::init()
 {
-	RECT r = { };
-	HWND mainWindow = reinterpret_cast<HWND>(application().context().pointers[0]);
-
-	GetClientRect(mainWindow, &r);
-
-	_renderState.setMainViewportSize(vec2i(r.right - r.left, r.bottom - r.top));
-	_fpsTimer.expired.connect(this, &RenderContext::onFPSTimerExpired);
-	_fpsTimer.start(mainTimerPool().ptr(), 1.0f, -1);
 }
 
 bool RenderContext::valid()
@@ -78,7 +70,6 @@ bool RenderContext::beginRender()
 		pushAndActivateRenderingContext();
 	}
 
-	_renderState.bindDefaultFramebuffer();
 	return true;
 }
 

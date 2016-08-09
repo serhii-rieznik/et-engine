@@ -11,17 +11,22 @@ namespace et
 {
 
 const std::string emptyString;
-const StringList emptyStringList;
 
 static struct SharedEngineObjects
 {
 	ObjectFactory objectFactory;
 	BlockMemoryAllocator blockMemoryAllocator;
 	std::vector<log::Output::Pointer> logOutputs;
+	StringList emptyStringList;
 	
 	SharedEngineObjects();
 }
 sharedEngineObjects;
+
+const StringList& emptyStringList()
+{
+	return sharedEngineObjects.emptyStringList;
+}
 
 SharedEngineObjects::SharedEngineObjects()
 {

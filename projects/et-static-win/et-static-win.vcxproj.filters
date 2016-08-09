@@ -75,8 +75,20 @@
     <Filter Include="Source Files\platform-win">
       <UniqueIdentifier>{a7470628-3770-463a-8f42-50cdb55d0196}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\opengl">
-      <UniqueIdentifier>{d80eda42-a938-41db-8d46-101ee1379305}</UniqueIdentifier>
+    <Filter Include="Source Files\rendering\base">
+      <UniqueIdentifier>{a0a749df-d54f-481e-b380-44c9ac10f423}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\rendering\opengl">
+      <UniqueIdentifier>{88b9557b-c059-411d-9d6a-1346f2e095d3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\rendering\base">
+      <UniqueIdentifier>{7af8744c-14f7-4745-bbdd-25e04fa3505b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\rendering\interface">
+      <UniqueIdentifier>{63752428-d0d9-48f1-99f3-95cb5a979900}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\rendering\opengl">
+      <UniqueIdentifier>{008e5c95-dbb6-40d7-9033-2528f08e3cde}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -398,87 +410,6 @@
     <ClInclude Include="..\..\include\et\platform-win\glee.h">
       <Filter>Header Files\platform-win</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\et\rendering\apiobject.h">
-      <Filter>Header Files\rendering</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\et\rendering\framebuffer.h">
-      <Filter>Header Files\rendering</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\et\rendering\framebufferfactory.h">
-      <Filter>Header Files\rendering</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\et\rendering\indexarray.h">
-      <Filter>Header Files\rendering</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\et\rendering\indexbuffer.h">
-      <Filter>Header Files\rendering</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\et\rendering\material.h">
-      <Filter>Header Files\rendering</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\et\rendering\materialfactory.h">
-      <Filter>Header Files\rendering</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\et\rendering\primitives.h">
-      <Filter>Header Files\rendering</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\et\rendering\program.h">
-      <Filter>Header Files\rendering</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\et\rendering\renderbatch.h">
-      <Filter>Header Files\rendering</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\et\rendering\rendercontext.h">
-      <Filter>Header Files\rendering</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\et\rendering\rendercontextparams.h">
-      <Filter>Header Files\rendering</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\et\rendering\renderer.h">
-      <Filter>Header Files\rendering</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\et\rendering\rendering.h">
-      <Filter>Header Files\rendering</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\et\rendering\renderingcaps.h">
-      <Filter>Header Files\rendering</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\et\rendering\renderpass.h">
-      <Filter>Header Files\rendering</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\et\rendering\renderstate.h">
-      <Filter>Header Files\rendering</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\et\rendering\rendersystem.h">
-      <Filter>Header Files\rendering</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\et\rendering\texture.h">
-      <Filter>Header Files\rendering</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\et\rendering\texturefactory.h">
-      <Filter>Header Files\rendering</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\et\rendering\vertexarray.h">
-      <Filter>Header Files\rendering</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\et\rendering\vertexarrayobject.h">
-      <Filter>Header Files\rendering</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\et\rendering\vertexbuffer.h">
-      <Filter>Header Files\rendering</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\et\rendering\vertexbufferfactory.h">
-      <Filter>Header Files\rendering</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\et\rendering\vertexdatachunk.h">
-      <Filter>Header Files\rendering</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\et\rendering\vertexdeclaration.h">
-      <Filter>Header Files\rendering</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\et\rendering\vertexstorage.h">
-      <Filter>Header Files\rendering</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\et\scene3d\animation.h">
       <Filter>Header Files\scene3d</Filter>
     </ClInclude>
@@ -562,6 +493,117 @@
     </ClInclude>
     <ClInclude Include="..\..\include\et\platform-win\context_win.h">
       <Filter>Header Files\platform-win</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\framebuffer.h">
+      <Filter>Header Files\rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\material.h">
+      <Filter>Header Files\rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\materialfactory.h">
+      <Filter>Header Files\rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\rendercontext.h">
+      <Filter>Header Files\rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\rendercontextparams.h">
+      <Filter>Header Files\rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\rendering.h">
+      <Filter>Header Files\rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\renderingcaps.h">
+      <Filter>Header Files\rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\renderstate.h">
+      <Filter>Header Files\rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\texturefactory.h">
+      <Filter>Header Files\rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\vertexarrayobject.h">
+      <Filter>Header Files\rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\vertexbufferfactory.h">
+      <Filter>Header Files\rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\base\helpers.h">
+      <Filter>Header Files\rendering\base</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\base\indexarray.h">
+      <Filter>Header Files\rendering\base</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\base\primitives.h">
+      <Filter>Header Files\rendering\base</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\base\renderbatch.h">
+      <Filter>Header Files\rendering\base</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\base\vertexarray.h">
+      <Filter>Header Files\rendering\base</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\base\vertexdatachunk.h">
+      <Filter>Header Files\rendering\base</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\base\vertexdeclaration.h">
+      <Filter>Header Files\rendering\base</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\base\vertexstorage.h">
+      <Filter>Header Files\rendering\base</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\interface\indexbuffer.h">
+      <Filter>Header Files\rendering\interface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\interface\pipelinestate.h">
+      <Filter>Header Files\rendering\interface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\interface\program.h">
+      <Filter>Header Files\rendering\interface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\interface\renderer.h">
+      <Filter>Header Files\rendering\interface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\interface\renderpass.h">
+      <Filter>Header Files\rendering\interface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\interface\renderstate.h">
+      <Filter>Header Files\rendering\interface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\interface\texture.h">
+      <Filter>Header Files\rendering\interface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\interface\vertexbuffer.h">
+      <Filter>Header Files\rendering\interface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\opengl\opengl.h">
+      <Filter>Header Files\rendering\opengl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\opengl\opengl_caps.h">
+      <Filter>Header Files\rendering\opengl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\opengl\opengl_indexbuffer.h">
+      <Filter>Header Files\rendering\opengl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\opengl\opengl_pipelinestate.h">
+      <Filter>Header Files\rendering\opengl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\opengl\opengl_program.h">
+      <Filter>Header Files\rendering\opengl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\opengl\opengl_renderer.h">
+      <Filter>Header Files\rendering\opengl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\opengl\opengl_renderpass.h">
+      <Filter>Header Files\rendering\opengl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\opengl\opengl_renderstate.h">
+      <Filter>Header Files\rendering\opengl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\opengl\opengl_texture.h">
+      <Filter>Header Files\rendering\opengl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\opengl\opengl_vertexbuffer.h">
+      <Filter>Header Files\rendering\opengl</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -652,54 +694,6 @@
     <ClCompile Include="..\..\source-base\scene3d\storage.cpp">
       <Filter>Source Files\scene3d</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source-base\rendering\framebufferfactory.cpp">
-      <Filter>Source Files\rendering</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\rendering\indexarray.cpp">
-      <Filter>Source Files\rendering</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\rendering\material.cpp">
-      <Filter>Source Files\rendering</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\rendering\primitives.cpp">
-      <Filter>Source Files\rendering</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\rendering\renderbatch.cpp">
-      <Filter>Source Files\rendering</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\rendering\rendercontext.cpp">
-      <Filter>Source Files\rendering</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\rendering\rendering.cpp">
-      <Filter>Source Files\rendering</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\rendering\renderpass.cpp">
-      <Filter>Source Files\rendering</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\rendering\rendersystem.cpp">
-      <Filter>Source Files\rendering</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\rendering\texturefactory.cpp">
-      <Filter>Source Files\rendering</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\rendering\textureloadingthread.cpp">
-      <Filter>Source Files\rendering</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\rendering\vertexarray.cpp">
-      <Filter>Source Files\rendering</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\rendering\vertexbufferfactory.cpp">
-      <Filter>Source Files\rendering</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\rendering\vertexdatachunk.cpp">
-      <Filter>Source Files\rendering</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\rendering\vertexdeclaration.cpp">
-      <Filter>Source Files\rendering</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\rendering\vertexstorage.cpp">
-      <Filter>Source Files\rendering</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\source-base\platform-win\application.win.cpp">
       <Filter>Source Files\platform-win</Filter>
     </ClCompile>
@@ -727,77 +721,11 @@
     <ClCompile Include="..\..\source-base\platform-win\tools.win.cpp">
       <Filter>Source Files\platform-win</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source-base\opengl\capabilities.cpp">
-      <Filter>Source Files\opengl</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\opengl\framebuffer.cpp">
-      <Filter>Source Files\opengl</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\opengl\indexbuffer.cpp">
-      <Filter>Source Files\opengl</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\opengl\materialfactory.cpp">
-      <Filter>Source Files\opengl</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\opengl\opengl.cpp">
-      <Filter>Source Files\opengl</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\opengl\program.cpp">
-      <Filter>Source Files\opengl</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\opengl\renderer.cpp">
-      <Filter>Source Files\opengl</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\opengl\renderstate.cpp">
-      <Filter>Source Files\opengl</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\opengl\texture.cpp">
-      <Filter>Source Files\opengl</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\opengl\vertexarrayobject.cpp">
-      <Filter>Source Files\opengl</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\opengl\vertexbuffer.cpp">
-      <Filter>Source Files\opengl</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\source-base\input\gestures.cpp">
       <Filter>Source Files\input</Filter>
     </ClCompile>
     <ClCompile Include="..\..\source-base\input\input.cpp">
       <Filter>Source Files\input</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\imaging\bmploader.cpp">
-      <Filter>Source Files\imaging</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\imaging\ddsloader.cpp">
-      <Filter>Source Files\imaging</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\imaging\hdrloader.cpp">
-      <Filter>Source Files\imaging</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\imaging\imageoperations.cpp">
-      <Filter>Source Files\imaging</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\imaging\imagewriter.cpp">
-      <Filter>Source Files\imaging</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\imaging\jpegloader.cpp">
-      <Filter>Source Files\imaging</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\imaging\pngloader.cpp">
-      <Filter>Source Files\imaging</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\imaging\pvrdecompressor.cpp">
-      <Filter>Source Files\imaging</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\imaging\pvrloader.cpp">
-      <Filter>Source Files\imaging</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\imaging\textureloader.cpp">
-      <Filter>Source Files\imaging</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\imaging\tgaloader.cpp">
-      <Filter>Source Files\imaging</Filter>
     </ClCompile>
     <ClCompile Include="..\..\source-base\geometry\collision.cpp">
       <Filter>Source Files\geometry</Filter>
@@ -867,6 +795,111 @@
     </ClCompile>
     <ClCompile Include="..\..\source-base\core\transformable.cpp">
       <Filter>Source Files\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\rendering\base\helpers.cpp">
+      <Filter>Source Files\rendering\base</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\rendering\base\indexarray.cpp">
+      <Filter>Source Files\rendering\base</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\rendering\base\primitives.cpp">
+      <Filter>Source Files\rendering\base</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\rendering\base\renderbatch.cpp">
+      <Filter>Source Files\rendering\base</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\rendering\base\vertexarray.cpp">
+      <Filter>Source Files\rendering\base</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\rendering\base\vertexdatachunk.cpp">
+      <Filter>Source Files\rendering\base</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\rendering\base\vertexdeclaration.cpp">
+      <Filter>Source Files\rendering\base</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\rendering\base\vertexstorage.cpp">
+      <Filter>Source Files\rendering\base</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\rendering\opengl\opengl.cpp">
+      <Filter>Source Files\rendering\opengl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\rendering\opengl\opengl_caps.cpp">
+      <Filter>Source Files\rendering\opengl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\rendering\opengl\opengl_framebuffer.cpp">
+      <Filter>Source Files\rendering\opengl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\rendering\opengl\opengl_indexbuffer.cpp">
+      <Filter>Source Files\rendering\opengl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\rendering\opengl\opengl_materialfactory.cpp">
+      <Filter>Source Files\rendering\opengl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\rendering\opengl\opengl_pipelinestate.cpp">
+      <Filter>Source Files\rendering\opengl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\rendering\opengl\opengl_program.cpp">
+      <Filter>Source Files\rendering\opengl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\rendering\opengl\opengl_renderer.cpp">
+      <Filter>Source Files\rendering\opengl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\rendering\opengl\opengl_renderpass.cpp">
+      <Filter>Source Files\rendering\opengl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\rendering\opengl\opengl_renderstate.cpp">
+      <Filter>Source Files\rendering\opengl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\rendering\opengl\opengl_texture.cpp">
+      <Filter>Source Files\rendering\opengl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\rendering\opengl\opengl_vertexarrayobject.cpp">
+      <Filter>Source Files\rendering\opengl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\rendering\opengl\opengl_vertexbuffer.cpp">
+      <Filter>Source Files\rendering\opengl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\rendering\material.cpp">
+      <Filter>Source Files\rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\rendering\rendering.cpp">
+      <Filter>Source Files\rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\rendering\vertexbufferfactory.cpp">
+      <Filter>Source Files\rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\imaging\bmploader.cpp">
+      <Filter>Source Files\imaging</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\imaging\ddsloader.cpp">
+      <Filter>Source Files\imaging</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\imaging\hdrloader.cpp">
+      <Filter>Source Files\imaging</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\imaging\imageoperations.cpp">
+      <Filter>Source Files\imaging</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\imaging\imagewriter.cpp">
+      <Filter>Source Files\imaging</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\imaging\jpegloader.cpp">
+      <Filter>Source Files\imaging</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\imaging\pngloader.cpp">
+      <Filter>Source Files\imaging</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\imaging\pvrdecompressor.cpp">
+      <Filter>Source Files\imaging</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\imaging\pvrloader.cpp">
+      <Filter>Source Files\imaging</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\imaging\texturedescription.cpp">
+      <Filter>Source Files\imaging</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\imaging\tgaloader.cpp">
+      <Filter>Source Files\imaging</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

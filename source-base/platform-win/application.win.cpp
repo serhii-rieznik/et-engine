@@ -126,7 +126,7 @@ Application::~Application()
 void Application::setTitle(const std::string& s)
 {
 	auto stringValue = ET_STRING_TO_PARAM_TYPE(s);
-	HWND window = reinterpret_cast<HWND>(_context.pointers[0]);
+	HWND window = reinterpret_cast<HWND>(_context.objects[0]);
 	SendMessage(window, WM_SETTEXT, 0, reinterpret_cast<LPARAM>(stringValue.c_str()));
 }
 
@@ -135,7 +135,7 @@ void Application::requestUserAttention()
 	FLASHWINFO fi = { };
 	fi.cbSize = sizeof(fi);
 	fi.dwFlags = FLASHW_ALL | FLASHW_TIMERNOFG;
-	fi.hwnd = reinterpret_cast<HWND>(_context.pointers[0]);
+	fi.hwnd = reinterpret_cast<HWND>(_context.objects[0]);
 	fi.uCount = std::numeric_limits<UINT>::max();
 	FlashWindowEx(&fi);
 }

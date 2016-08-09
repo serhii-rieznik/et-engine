@@ -60,7 +60,7 @@ namespace et
             const StringList& defines, const std::string& baseFolder) = 0;
         
         inline Program::Pointer createProgram(const std::string& vs, const std::string& fs)
-            { return createProgram(vs, fs, emptyStringList, emptyString); }
+            { return createProgram(vs, fs, emptyStringList(), emptyString); }
 
 		/*
 		 * Pipeline state
