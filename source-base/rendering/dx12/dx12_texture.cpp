@@ -5,12 +5,18 @@
  *
  */
 
-#include <et/rendering/opengl/opengl_pipelinestate.h>
+#pragma once
+
+#include <et/rendering/dx12/dx12_texture.h>
 
 namespace et
 {
 
-void OpenGLPipelineState::build()
+void DX12Texture::bind(uint32_t)
+{
+}
+
+void DX12Texture::update(TextureDescription::Pointer)
 {
 }
 

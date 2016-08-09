@@ -11,8 +11,6 @@
 
 namespace et
 {
-	class RenderState;
-	
 	class IndexBuffer : public Object
 	{
 	public:

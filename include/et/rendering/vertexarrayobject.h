@@ -12,7 +12,6 @@
 
 namespace et
 {
-	class RenderState;
 	class VertexArrayObject : public Object
 	{
 	public:

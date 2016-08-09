@@ -11,7 +11,6 @@
 
 namespace et
 {
-	class RenderState;
 	class OpenGLIndexBuffer : public IndexBuffer
 	{
 	public:

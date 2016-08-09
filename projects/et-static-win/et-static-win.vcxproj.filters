@@ -90,6 +90,21 @@
     <Filter Include="Header Files\rendering\opengl">
       <UniqueIdentifier>{008e5c95-dbb6-40d7-9033-2528f08e3cde}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\rendering\vulkan">
+      <UniqueIdentifier>{55e276ba-0fb1-4a78-8d68-d141b6d7e79a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\rendering\vulkan\vulkan">
+      <UniqueIdentifier>{892b5381-e7f3-4c8d-8429-d1d231a72ecb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\rendering\vulkan">
+      <UniqueIdentifier>{b8baf77b-fe1b-4129-9d11-6121cf77a842}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\rendering\dx12">
+      <UniqueIdentifier>{917ac29c-1419-4771-9d7d-06cc436b46e2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\rendering\dx12">
+      <UniqueIdentifier>{78d59f3c-3d6d-46d9-9391-a64944554b36}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\et\app\appevironment.h">
@@ -563,9 +578,6 @@
     <ClInclude Include="..\..\include\et\rendering\interface\renderpass.h">
       <Filter>Header Files\rendering\interface</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\et\rendering\interface\renderstate.h">
-      <Filter>Header Files\rendering\interface</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\et\rendering\interface\texture.h">
       <Filter>Header Files\rendering\interface</Filter>
     </ClInclude>
@@ -593,9 +605,6 @@
     <ClInclude Include="..\..\include\et\rendering\opengl\opengl_renderpass.h">
       <Filter>Header Files\rendering\opengl</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\et\rendering\opengl\opengl_renderstate.h">
-      <Filter>Header Files\rendering\opengl</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\et\rendering\opengl\opengl_texture.h">
       <Filter>Header Files\rendering\opengl</Filter>
     </ClInclude>
@@ -604,6 +613,75 @@
     </ClInclude>
     <ClInclude Include="..\..\include\et\platform-win\context.win.h">
       <Filter>Header Files\platform-win</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\vulkan\vulkan_indexbuffer.h">
+      <Filter>Header Files\rendering\vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\vulkan\vulkan_pipelinestate.h">
+      <Filter>Header Files\rendering\vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\vulkan\vulkan_program.h">
+      <Filter>Header Files\rendering\vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\vulkan\vulkan_renderer.h">
+      <Filter>Header Files\rendering\vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\vulkan\vulkan_renderpass.h">
+      <Filter>Header Files\rendering\vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\vulkan\vulkan_texture.h">
+      <Filter>Header Files\rendering\vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\vulkan\vulkan_vertexbuffer.h">
+      <Filter>Header Files\rendering\vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\vulkan\vulkan\GLSL.std.450.h">
+      <Filter>Header Files\rendering\vulkan\vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\vulkan\vulkan\icd-spv.h">
+      <Filter>Header Files\rendering\vulkan\vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\vulkan\vulkan\spirv.h">
+      <Filter>Header Files\rendering\vulkan\vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\vulkan\vulkan\spirv.hpp">
+      <Filter>Header Files\rendering\vulkan\vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\vulkan\vulkan\vk_icd.h">
+      <Filter>Header Files\rendering\vulkan\vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\vulkan\vulkan\vk_layer.h">
+      <Filter>Header Files\rendering\vulkan\vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\vulkan\vulkan\vk_platform.h">
+      <Filter>Header Files\rendering\vulkan\vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\vulkan\vulkan\vk_sdk_platform.h">
+      <Filter>Header Files\rendering\vulkan\vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\vulkan\vulkan\vulkan.h">
+      <Filter>Header Files\rendering\vulkan\vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\dx12\dx12_renderpass.h">
+      <Filter>Header Files\rendering\dx12</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\dx12\dx12_texture.h">
+      <Filter>Header Files\rendering\dx12</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\dx12\dx12_vertexbuffer.h">
+      <Filter>Header Files\rendering\dx12</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\dx12\dx12_indexbuffer.h">
+      <Filter>Header Files\rendering\dx12</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\dx12\dx12_pipelinestate.h">
+      <Filter>Header Files\rendering\dx12</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\dx12\dx12_program.h">
+      <Filter>Header Files\rendering\dx12</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\dx12\dx12_renderer.h">
+      <Filter>Header Files\rendering\dx12</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -844,9 +922,6 @@
     <ClCompile Include="..\..\source-base\rendering\opengl\opengl_renderpass.cpp">
       <Filter>Source Files\rendering\opengl</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source-base\rendering\opengl\opengl_renderstate.cpp">
-      <Filter>Source Files\rendering\opengl</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\source-base\rendering\opengl\opengl_texture.cpp">
       <Filter>Source Files\rendering\opengl</Filter>
     </ClCompile>
@@ -900,6 +975,48 @@
     </ClCompile>
     <ClCompile Include="..\..\source-base\platform-win\context.win.cpp">
       <Filter>Source Files\platform-win</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\rendering\vulkan\vulkan_program.cpp">
+      <Filter>Source Files\rendering\vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\rendering\vulkan\vulkan_renderer.cpp">
+      <Filter>Source Files\rendering\vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\rendering\vulkan\vulkan_renderpass.cpp">
+      <Filter>Source Files\rendering\vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\rendering\vulkan\vulkan_texture.cpp">
+      <Filter>Source Files\rendering\vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\rendering\vulkan\vulkan_vertexbuffer.cpp">
+      <Filter>Source Files\rendering\vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\rendering\vulkan\vulkan_indexbuffer.cpp">
+      <Filter>Source Files\rendering\vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\rendering\vulkan\vulkan_pipelinestate.cpp">
+      <Filter>Source Files\rendering\vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\rendering\dx12\dx12_indexbuffer.cpp">
+      <Filter>Source Files\rendering\dx12</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\rendering\dx12\dx12_pipelinestate.cpp">
+      <Filter>Source Files\rendering\dx12</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\rendering\dx12\dx12_program.cpp">
+      <Filter>Source Files\rendering\dx12</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\rendering\dx12\dx12_renderer.cpp">
+      <Filter>Source Files\rendering\dx12</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\rendering\dx12\dx12_renderpass.cpp">
+      <Filter>Source Files\rendering\dx12</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\rendering\dx12\dx12_texture.cpp">
+      <Filter>Source Files\rendering\dx12</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\rendering\dx12\dx12_vertexbuffer.cpp">
+      <Filter>Source Files\rendering\dx12</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

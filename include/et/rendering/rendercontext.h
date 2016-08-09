@@ -12,7 +12,6 @@
 #include <et/rendering/rendercontextparams.h>
 
 #include <et/rendering/interface/renderer.h>
-#include <et/rendering/interface/renderstate.h>
 
 #include <et/rendering/renderingcaps.h>
 #include <et/rendering/materialfactory.h>
@@ -42,9 +41,6 @@ namespace et
 		const vec2i& size() const
 			{ return _size; }
 
-		RenderState::Pointer renderState()
-			{ return _renderState; }
-
 		RenderInterface::Pointer renderer()
 			{ return _renderer; }
 
@@ -64,17 +60,11 @@ namespace et
 		RenderContext& operator = (const RenderContext&) = delete;
 
 	private:
-		friend class RenderContextPrivate;
-
 		ET_DECLARE_PIMPL(RenderContext, 256)
 
 		RenderContextParameters _params;
-
 		Application* _app = nullptr;
-
-		RenderState::Pointer _renderState;
 		RenderInterface::Pointer _renderer;
-
 		vec2i _size;
 	};
 

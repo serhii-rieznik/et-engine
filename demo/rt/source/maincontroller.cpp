@@ -13,8 +13,13 @@ namespace demo
 
 void MainController::setApplicationParameters(et::ApplicationParameters& p)
 {
+#if (ET_PLATFORM_WIN)
+    p.renderingAPI = et::RenderingAPI::DX12;
+#elif (ET_PLATFORM_MAC)
     p.renderingAPI = et::RenderingAPI::Metal;
-    p.context.style |= et::ContextOptions::Style::Sizable;
+#endif
+    
+	p.context.style |= et::ContextOptions::Style::Sizable;
     p.context.supportsHighResolution = true;
     p.context.size = 4 * et::currentScreen().frame.size() / 5;
 }

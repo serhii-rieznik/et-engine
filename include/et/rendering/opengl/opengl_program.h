@@ -10,10 +10,7 @@
 #include <et/rendering/interface/program.h>
 
 namespace et
-{
-	class Camera;
-	class RenderState;
-	
+{	
 	class OpenGLProgram : public Program
 	{
 	public:

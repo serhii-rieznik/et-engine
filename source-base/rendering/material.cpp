@@ -6,7 +6,6 @@
  */
 
 #include <et/app/application.h>
-#include <et/rendering/renderstate.h>
 #include <et/rendering/interface/renderer.h>
 
 using namespace et;
@@ -108,6 +107,7 @@ void Material::setProgram(Program::Pointer program)
 	loadProperties();
 }
 
+/*
 void Material::enableInRenderState(RenderState::Pointer rs)
 {
 	rs->setCullMode(_cull);
@@ -130,6 +130,7 @@ void Material::enableInRenderState(RenderState::Pointer rs)
 		}
 	}
 }
+*/
 
 void Material::loadProperties()
 {
@@ -267,9 +268,11 @@ uint64_t Material::makeSnapshot()
 	*/
 }
 
+/*
+ * TODO
+ *
 void Material::enableSnapshotInRenderState(RenderState::Pointer rs, uint64_t index)
 {
-	/*
 	ET_ASSERT(index < _snapshots.size());
 	
 	Snapshot& snapshot = _snapshots.at(static_cast<size_t>(index));
@@ -288,8 +291,8 @@ void Material::enableSnapshotInRenderState(RenderState::Pointer rs, uint64_t ind
 	{
 		applyProperty(i, snapshot.propertiesData);
 	}
-	*/ 
 }
+*/
 
 void Material::applyProperty(const DataProperty& prop, const BinaryDataStorage& data)
 {

@@ -5,12 +5,18 @@
  *
  */
 
-#include <et/rendering/opengl/opengl_pipelinestate.h>
+#pragma once
+
+#include <et/rendering/vulkan/vulkan_texture.h>
 
 namespace et
 {
 
-void OpenGLPipelineState::build()
+void VulkanTexture::bind(uint32_t)
+{
+}
+
+void VulkanTexture::update(TextureDescription::Pointer)
 {
 }
 

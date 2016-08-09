@@ -5,12 +5,14 @@
  *
  */
 
-#include <et/rendering/opengl/opengl_pipelinestate.h>
+#pragma once
+
+#include <et/rendering/dx12/dx12_pipelinestate.h>
 
 namespace et
 {
 
-void OpenGLPipelineState::build()
+void DX12PipelineState::build()
 {
 }
 

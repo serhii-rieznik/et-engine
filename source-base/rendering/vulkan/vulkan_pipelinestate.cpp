@@ -5,12 +5,14 @@
  *
  */
 
-#include <et/rendering/opengl/opengl_pipelinestate.h>
+#pragma once
+
+#include <et/rendering/vulkan/vulkan_pipelinestate.h>
 
 namespace et
 {
 
-void OpenGLPipelineState::build()
+void VulkanPipelineState::build()
 {
 }
 

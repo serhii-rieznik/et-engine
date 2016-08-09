@@ -15,7 +15,6 @@
 #include <et/rendering/opengl/opengl_indexbuffer.h>
 #include <et/rendering/opengl/opengl_program.h>
 #include <et/rendering/opengl/opengl_pipelinestate.h>
-#include <et/rendering/renderstate.h>
 #include <et/rendering/rendercontext.h>
 #include <et/rendering/material.h>
 #include <et/rendering/base/indexarray.h>
@@ -180,6 +179,9 @@ RenderPass::Pointer OpenGLRenderer::allocateRenderPass(const RenderPass::Constru
 
 void OpenGLRenderer::submitRenderPass(RenderPass::Pointer in_pass)
 {
+	/*
+	 * TODO : implement
+	 *
 	OpenGLRenderPass::Pointer pass = in_pass;
 
 	GLbitfield clearMask = 0;
@@ -230,6 +232,7 @@ void OpenGLRenderer::submitRenderPass(RenderPass::Pointer in_pass)
 		vao.bind();
 		drawIndexedPrimitive(ib.primitiveType(), ib.format(), batch.firstIndex(), batch.numIndexes());
 	}
+	*/
 }
 
 /*

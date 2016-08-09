@@ -10,11 +10,9 @@
 #include <et/core/datastorage.h>
 #include <et/rendering/interface/program.h>
 #include <et/rendering/interface/texture.h>
-#include <et/rendering/interface/renderstate.h>
 
 namespace et
 {
-	class RenderState;
     class RenderInterface;
     
 	class Material : public LoadableObject
@@ -26,9 +24,6 @@ namespace et
         Material(RenderInterface*);
 		
 		void loadFromJson(const std::string&, const std::string& baseFolder);
-
-		void enableInRenderState(RenderState::Pointer);
-		void enableSnapshotInRenderState(RenderState::Pointer, uint64_t);
 
 		void setBlendState(const BlendState&);
 		void setDepthState(const DepthState&);

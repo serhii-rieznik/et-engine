@@ -9,7 +9,9 @@
 
 #if (ET_PLATFORM_WIN)
 
+#include <et/rendering/dx12/dx12_renderer.h>
 #include <et/rendering/opengl/opengl_renderer.h>
+#include <et/rendering/vulkan/vulkan_renderer.h>
 #include <et/rendering/base/helpers.h>
 
 #include <et/app/application.h>
@@ -35,7 +37,22 @@ RenderContext::RenderContext(const RenderContextParameters& inParams, Applicatio
 
 	application().initContext();
 
-	_renderer = OpenGLRenderer::Pointer::create(this);
+	if  (app->parameters().renderingAPI == RenderingAPI::OpenGL)
+	{
+		_renderer = OpenGLRenderer::Pointer::create(this);
+	}
+	else if (app->parameters().renderingAPI == RenderingAPI::Vulkan)
+	{
+		_renderer = VulkanRenderer::Pointer::create(this);
+	}
+		else if (app->parameters().renderingAPI == RenderingAPI::DX12)
+	{
+		_renderer = DX12Renderer::Pointer::create(this);
+	}
+	else 
+	{
+		ET_FAIL("Invalid or unsupported rendering api provided");
+	}
 	_renderer->init(inParams);
 
 	HWND wnd = reinterpret_cast<HWND>(application().context().objects[0]);

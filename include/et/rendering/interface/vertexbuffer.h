@@ -12,8 +12,6 @@
 
 namespace et
 {
-	class RenderState;
-	
 	class VertexBuffer : public Object
 	{
 	public:

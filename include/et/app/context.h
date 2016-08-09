@@ -40,6 +40,8 @@ namespace et
 	{
 		OpenGL,
 		Metal,
+		Vulkan,
+		DX12,
 		
 		Count
 	};
