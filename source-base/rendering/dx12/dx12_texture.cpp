@@ -11,9 +11,14 @@
 
 namespace et
 {
+DX12Texture::DX12Texture(TextureDescription::Pointer desc) 
+	: Texture(desc)
+{
+}
 
 void DX12Texture::bind(uint32_t)
 {
+
 }
 
 void DX12Texture::update(TextureDescription::Pointer)

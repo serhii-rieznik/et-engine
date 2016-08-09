@@ -17,6 +17,8 @@ namespace et
 		ET_DECLARE_POINTER(DX12Texture);
 		
 	public:
+		DX12Texture(TextureDescription::Pointer);
+
 		void bind(uint32_t) override;
         void update(TextureDescription::Pointer) override;
 	};
