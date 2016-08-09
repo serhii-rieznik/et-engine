@@ -87,8 +87,6 @@ namespace et
 
 #		if (ET_PLATFORM_APPLE)
 			pthread_setname_np(_name.c_str());
-#		else
-			ET_FAIL("Not implemented");
 #		endif
 		}
 

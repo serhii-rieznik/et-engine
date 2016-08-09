@@ -491,9 +491,6 @@
     <ClInclude Include="..\..\include\et\input\input.h">
       <Filter>Header Files\input</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\et\platform-win\context_win.h">
-      <Filter>Header Files\platform-win</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\et\rendering\framebuffer.h">
       <Filter>Header Files\rendering</Filter>
     </ClInclude>
@@ -604,6 +601,9 @@
     </ClInclude>
     <ClInclude Include="..\..\include\et\rendering\opengl\opengl_vertexbuffer.h">
       <Filter>Header Files\rendering\opengl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\platform-win\context.win.h">
+      <Filter>Header Files\platform-win</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

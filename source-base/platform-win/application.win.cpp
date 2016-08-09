@@ -10,7 +10,7 @@
 #if (ET_PLATFORM_WIN)
 
 #include <et/rendering/rendercontext.h>
-#include <et/platform-win/context_win.h>
+#include <et/platform-win/context.win.h>
 #include <ShellScalingAPI.h>
 #include <MMSystem.h>
 #include <DbgHelp.h>

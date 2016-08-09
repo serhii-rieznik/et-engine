@@ -120,7 +120,7 @@
     <ClInclude Include="..\..\include\et\locale\locale.hpp" />
     <ClInclude Include="..\..\include\et\opengl\opengl.h" />
     <ClInclude Include="..\..\include\et\opengl\openglcaps.h" />
-    <ClInclude Include="..\..\include\et\platform-win\context_win.h" />
+    <ClInclude Include="..\..\include\et\platform-win\context.win.h" />
     <ClInclude Include="..\..\include\et\platform-win\glee.h" />
     <ClInclude Include="..\..\include\et\rendering\base\helpers.h" />
     <ClInclude Include="..\..\include\et\rendering\base\indexarray.h" />
@@ -294,14 +294,14 @@
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
-    <CharacterSet>MultiByte</CharacterSet>
+    <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
-    <CharacterSet>MultiByte</CharacterSet>
+    <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">

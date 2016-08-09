@@ -35,6 +35,8 @@ public:
 #if (ET_PLATFORM_MAC)
 	CGLPixelFormatObj glPixelFormat = nullptr;
 	CGLContextObj glContext = nullptr;
+#elif (ET_PLATFORM_WIN)
+	HDC dc = nullptr;
 #endif
 };
 
@@ -52,6 +54,7 @@ OpenGLRenderer::~OpenGLRenderer()
 void OpenGLRenderer::init(const RenderContextParameters& params)
 {
 #if (ET_PLATFORM_MAC)
+	
 	bool msaaEnabled = params.multisamplingQuality != MultisamplingQuality::None;
 	CGLPixelFormatAttribute attribs[128] =
 	{
@@ -89,8 +92,42 @@ void OpenGLRenderer::init(const RenderContextParameters& params)
 
 	application().context().objects[3] = _private->glPixelFormat;
 	application().context().objects[4] = _private->glContext;
+
 #elif (ET_PLATFORM_WIN)
+
+	PIXELFORMATDESCRIPTOR pfd = { sizeof(PIXELFORMATDESCRIPTOR) };
+	pfd.nVersion = 1;
+	pfd.cColorBits = 24;
+	pfd.cAlphaBits = 8;
+	pfd.cDepthBits = 24;
+	pfd.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER | PFD_SUPPORT_COMPOSITION;
+
+	_private->dc = reinterpret_cast<HDC>(application().context().objects[1]);
 	
+	int pixelFormat = ChoosePixelFormat(_private->dc, &pfd);
+	ET_ASSERT(pixelFormat != 0);
+
+	SetPixelFormat(_private->dc, pixelFormat, &pfd);
+
+	HGLRC tempContext = wglCreateContext(_private->dc);
+	wglMakeCurrent(_private->dc, tempContext);
+
+	auto local_wglCreateContextAttribsARB = (GLEEPFNWGLCREATECONTEXTATTRIBSARBPROC)wglGetProcAddress("wglCreateContextAttribsARB");
+
+	int contextAttribs[] = 
+	{
+		WGL_CONTEXT_MAJOR_VERSION_ARB, params.contextTargetVersion.x,
+		WGL_CONTEXT_MINOR_VERSION_ARB, params.contextTargetVersion.y,
+		WGL_CONTEXT_PROFILE_MASK_ARB, WGL_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB,
+		0
+	};
+
+	HGLRC glRC = local_wglCreateContextAttribsARB(_private->dc, nullptr, contextAttribs);
+	wglMakeCurrent(_private->dc, glRC);
+	wglDeleteContext(tempContext);
+
+	application().context().objects[2] = glRC;
+
 #endif
 
 	OpenGLCapabilities::instance().checkCaps();
@@ -109,6 +146,8 @@ void OpenGLRenderer::begin()
 #if (ET_PLATFORM_MAC)
 	CGLSetCurrentContext(_private->glContext);
 	CGLLockContext(_private->glContext);
+#elif (ET_PLATFORM_WIN)
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 #endif
 }
 
@@ -120,6 +159,8 @@ void OpenGLRenderer::present()
 	ET_ASSERT(CGLGetCurrentContext() == _private->glContext);
 	CGLFlushDrawable(_private->glContext);
 	CGLUnlockContext(_private->glContext);
+#elif (ET_PLATFORM_WIN)
+	SwapBuffers(_private->dc);
 #endif
 }
 

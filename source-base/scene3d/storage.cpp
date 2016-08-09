@@ -199,7 +199,7 @@ void Storage::deserializeWithOptions(RenderContext* rc, Dictionary stream, Seria
 			decl.push_back(stringToVertexAttributeUsage(e.stringForKey(kUsage)->content, comp),
 				stringToDataType(e.stringForKey(kType)->content));
 		}
-		size_t capacity = static_cast<size_t>(storage.integerForKey(kDataSize)->content) / decl.totalSize();
+		uint32_t capacity = static_cast<uint32_t>(storage.integerForKey(kDataSize)->content) / decl.totalSize();
 
 		VertexStorage::Pointer vs = VertexStorage::Pointer::create(decl, capacity);
 		vs->setName(storage.stringForKey(kName)->content);

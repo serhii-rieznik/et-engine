@@ -6,6 +6,8 @@
  */
 
 #include <et/rendering/opengl/opengl_renderpass.h>
+#include <et/rendering/opengl/opengl_indexbuffer.h>
+#include <et/rendering/opengl/opengl.h>
 
 namespace et
 {
@@ -26,8 +28,20 @@ OpenGLRenderPass::~OpenGLRenderPass()
 
 void OpenGLRenderPass::pushRenderBatch(RenderBatch::Pointer batch)
 {
-	batch->makeMaterialSnapshot();
-	_renderBatches.push_back(batch);
+	auto& vs = batch->vao();
+	auto& prog = batch->material()->program();
+
+	OpenGLIndexBuffer::Pointer ib = vs->indexBuffer();
+
+	vs->bind();
+	prog->bind();
+	batch->material()->texture("color_texture")->bind(0);
+
+	etDrawElements(primitiveTypeValue(ib->primitiveType()), batch->numIndexes(), 
+		dataFormatValue(ib->dataFormat()), ib->indexOffset(batch->firstIndex()));
+	// etDrawElements()
+	// batch->makeMaterialSnapshot();
+	// _renderBatches.push_back(batch);
 }
 
 }

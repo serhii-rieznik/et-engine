@@ -10,6 +10,7 @@
 #if (ET_PLATFORM_WIN)
 
 #include <et/rendering/opengl/opengl_renderer.h>
+#include <et/rendering/base/helpers.h>
 
 #include <et/app/application.h>
 #include <Windows.h>
@@ -35,8 +36,19 @@ RenderContext::RenderContext(const RenderContextParameters& inParams, Applicatio
 	application().initContext();
 
 	_renderer = OpenGLRenderer::Pointer::create(this);
+	_renderer->init(inParams);
 
-	// TODO: DO STUFF
+	HWND wnd = reinterpret_cast<HWND>(application().context().objects[0]);
+	RECT clientRect = { };
+	GetClientRect(wnd, &clientRect);
+	_size.x = clientRect.right - clientRect.left;
+	_size.y = clientRect.bottom - clientRect.top;
+
+	renderhelper::init(this);
+
+	ShowWindow(wnd, SW_SHOW);
+	SetForegroundWindow(wnd);
+	SetFocus(wnd);
 
 	if (app->parameters().shouldPreserveRenderContext)
 	{
@@ -78,11 +90,15 @@ bool RenderContext::beginRender()
 		pushAndActivateRenderingContext();
 	}
 
+	_renderer->begin();
+
 	return true;
 }
 
 void RenderContext::endRender()
 {
+	_renderer->present();
+
 	if (application().parameters().shouldPreserveRenderContext)
 	{
 		popRenderingContext();
