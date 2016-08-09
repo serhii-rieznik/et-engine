@@ -256,13 +256,6 @@ VertexArrayObject::Pointer OpenGLRenderer::createVertexArrayObject(const std::st
 /*
  * Textures
  */
-Texture::Pointer OpenGLRenderer::loadTexture(const std::string& fileName, ObjectsCache& cache)
-{
-    TextureDescription::Pointer desc = TextureDescription::Pointer::create();
-    desc->load(fileName);
-    return createTexture(desc);
-}
-
 Texture::Pointer OpenGLRenderer::createTexture(TextureDescription::Pointer desc)
 {
     return OpenGLTexture::Pointer::create(desc);

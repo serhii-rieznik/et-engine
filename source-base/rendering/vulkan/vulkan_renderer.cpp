@@ -52,14 +52,9 @@ VertexArrayObject::Pointer VulkanRenderer::createVertexArrayObject(const std::st
 	return VertexArrayObject::Pointer::create(name);
 }
 
-Texture::Pointer VulkanRenderer::loadTexture(const std::string& fileName, ObjectsCache& cache)
+Texture::Pointer VulkanRenderer::createTexture(TextureDescription::Pointer desc)
 {
-	return VulkanTexture::Pointer::create();
-}
-
-Texture::Pointer VulkanRenderer::createTexture(TextureDescription::Pointer)
-{
-	return VulkanTexture::Pointer::create();
+	return VulkanTexture::Pointer::create(desc);
 }
 
 Program::Pointer VulkanRenderer::createProgram(const std::string& vs, const std::string& fs,

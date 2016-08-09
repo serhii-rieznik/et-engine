@@ -50,10 +50,16 @@ namespace et
         /*
          * Textures
          */
-        virtual Texture::Pointer loadTexture(const std::string& fileName, ObjectsCache& cache) = 0;
         virtual Texture::Pointer createTexture(TextureDescription::Pointer) = 0;
+
+		inline Texture::Pointer loadTexture(const std::string& fileName, ObjectsCache& cache)
+		{
+			TextureDescription::Pointer desc = TextureDescription::Pointer::create();
+			desc->load(fileName);
+			return createTexture(desc);
+		}
         
-        /*
+		/*
          * Programs
          */
         virtual Program::Pointer createProgram(const std::string& vs, const std::string& fs,

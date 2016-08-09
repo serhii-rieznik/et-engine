@@ -52,14 +52,9 @@ VertexArrayObject::Pointer DX12Renderer::createVertexArrayObject(const std::stri
 	return VertexArrayObject::Pointer::create(name);
 }
 
-Texture::Pointer DX12Renderer::loadTexture(const std::string& fileName, ObjectsCache& cache)
+Texture::Pointer DX12Renderer::createTexture(TextureDescription::Pointer desc)
 {
-	return DX12Texture::Pointer::create();
-}
-
-Texture::Pointer DX12Renderer::createTexture(TextureDescription::Pointer)
-{
-	return DX12Texture::Pointer::create();
+	return DX12Texture::Pointer::create(desc);
 }
 
 Program::Pointer DX12Renderer::createProgram(const std::string& vs, const std::string& fs,

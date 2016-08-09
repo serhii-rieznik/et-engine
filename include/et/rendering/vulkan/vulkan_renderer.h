@@ -44,7 +44,6 @@ namespace et
         /*
          * Textures
          */
-        Texture::Pointer loadTexture(const std::string& fileName, ObjectsCache& cache);
         Texture::Pointer createTexture(TextureDescription::Pointer);
         
         /*

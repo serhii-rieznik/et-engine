@@ -12,6 +12,11 @@
 namespace et
 {
 
+VulkanTexture::VulkanTexture(TextureDescription::Pointer desc) 
+	: Texture(desc)
+{
+}
+
 void VulkanTexture::bind(uint32_t)
 {
 }

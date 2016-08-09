@@ -17,6 +17,9 @@ namespace et
 		ET_DECLARE_POINTER(VulkanTexture);
 		
 	public:
+		VulkanTexture() = default;
+		VulkanTexture(TextureDescription::Pointer);
+
 		void bind(uint32_t) override;
         void update(TextureDescription::Pointer) override;
 	};

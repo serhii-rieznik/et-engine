@@ -44,7 +44,6 @@ namespace et
         /*
          * Textures
          */
-        Texture::Pointer loadTexture(const std::string& fileName, ObjectsCache& cache) override;
         Texture::Pointer createTexture(TextureDescription::Pointer) override;
         
         /*

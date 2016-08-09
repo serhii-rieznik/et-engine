@@ -14,7 +14,7 @@ namespace demo
 void MainController::setApplicationParameters(et::ApplicationParameters& p)
 {
 #if (ET_PLATFORM_WIN)
-    p.renderingAPI = et::RenderingAPI::DX12;
+    p.renderingAPI = et::RenderingAPI::Vulkan;
 #elif (ET_PLATFORM_MAC)
     p.renderingAPI = et::RenderingAPI::Metal;
 #endif
