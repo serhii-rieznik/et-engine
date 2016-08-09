@@ -21368,6 +21368,9 @@ void __GLeeWriteError(const char * errorStr)
 
 int __GLeeGetVersionNumber(char *versionStr)
 {
+	if (versionStr == nullptr)
+		return 0;
+
 	int major = (int)versionStr[0] - (int)'0';
 	int minor = (int)versionStr[2] - (int)'0';
 	return major << 8 | minor;

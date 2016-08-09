@@ -9,6 +9,8 @@
 
 #if (ET_PLATFORM_WIN)
 
+#include <et/rendering/opengl/opengl_renderer.h>
+
 #include <et/app/application.h>
 #include <Windows.h>
 
@@ -30,6 +32,10 @@ RenderContext::RenderContext(const RenderContextParameters& inParams, Applicatio
 		pushAndActivateRenderingContext();
 	}
 
+	application().initContext();
+
+	_renderer = OpenGLRenderer::Pointer::create(this);
+
 	// TODO: DO STUFF
 
 	if (app->parameters().shouldPreserveRenderContext)
@@ -44,6 +50,8 @@ RenderContext::~RenderContext()
 	{
 		pushAndActivateRenderingContext();
 	}
+
+	application().freeContext();
 
 	// TODO: DO STUFF
 

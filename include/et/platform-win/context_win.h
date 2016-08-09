@@ -13,12 +13,8 @@
 
 namespace et
 {
-    class ApplicationContextFactoryWin : public ApplicationContextFactory
-    {
-    public:
-        PlatformDependentContext createContextWithOptions(RenderingAPI, ContextOptions&) override;
-        void destroyContext(PlatformDependentContext) override;
-    };
+    PlatformDependentContext createWindowsContextWithOptions(RenderingAPI, ContextOptions&);
+    void destroyWindowsContext(PlatformDependentContext);
 }
 
 #endif

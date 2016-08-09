@@ -5,24 +5,26 @@
  *
  */
 
-#include <et/rendering/rendercontext.h>
 #include <et/app/application.h>
 
 #if (ET_PLATFORM_WIN)
 
+#include <et/rendering/rendercontext.h>
+#include <et/platform-win/context_win.h>
 #include <ShellScalingAPI.h>
 #include <MMSystem.h>
 #include <DbgHelp.h>
-
-using namespace et;
-
+	
 #if defined(_MSC_VER)
 #	pragma comment(lib, "winmm.lib")
 #	pragma comment(lib, "psapi.lib")
 #	pragma comment(lib, "Dbghelp.lib")
 #endif
 
-#define IF_CASE(A) case A: return #A;
+#define CASE_TO_STRING(A) case A: return #A;
+
+namespace et
+{
 
 void enableDPIAwareness();
 std::string exceptionCodeToString(DWORD);
@@ -59,10 +61,12 @@ void Application::platformFinalize()
 
 void Application::platformSuspend()
 {
+
 }
 
 void Application::platformResume()
 {
+
 }
 
 void Application::platformActivate()
@@ -73,6 +77,16 @@ void Application::platformActivate()
 void Application::platformDeactivate()
 {
 	timeEndPeriod(1);
+}
+
+void Application::initContext()
+{
+	_context = createWindowsContextWithOptions(RenderingAPI::OpenGL, _parameters.context);
+}
+
+void Application::freeContext()
+{
+	destroyWindowsContext(_context);
 }
 
 int Application::platformRun(int, char*[])
@@ -147,29 +161,28 @@ std::string exceptionCodeToString(DWORD code)
 {
     switch (code)
     {
-        IF_CASE(EXCEPTION_ACCESS_VIOLATION)
-        IF_CASE(EXCEPTION_DATATYPE_MISALIGNMENT)
-        IF_CASE(EXCEPTION_BREAKPOINT)
-        IF_CASE(EXCEPTION_SINGLE_STEP)
-        IF_CASE(EXCEPTION_ARRAY_BOUNDS_EXCEEDED)
-        IF_CASE(EXCEPTION_FLT_DENORMAL_OPERAND)
-        IF_CASE(EXCEPTION_FLT_DIVIDE_BY_ZERO)
-        IF_CASE(EXCEPTION_FLT_INEXACT_RESULT)
-        IF_CASE(EXCEPTION_FLT_INVALID_OPERATION)
-        IF_CASE(EXCEPTION_FLT_OVERFLOW)
-        IF_CASE(EXCEPTION_FLT_STACK_CHECK)
-        IF_CASE(EXCEPTION_FLT_UNDERFLOW)
-        IF_CASE(EXCEPTION_INT_DIVIDE_BY_ZERO)
-        IF_CASE(EXCEPTION_INT_OVERFLOW)
-        IF_CASE(EXCEPTION_PRIV_INSTRUCTION)
-        IF_CASE(EXCEPTION_IN_PAGE_ERROR)
-        IF_CASE(EXCEPTION_ILLEGAL_INSTRUCTION)
-        IF_CASE(EXCEPTION_NONCONTINUABLE_EXCEPTION)
-        IF_CASE(EXCEPTION_STACK_OVERFLOW)
-        IF_CASE(EXCEPTION_INVALID_DISPOSITION)
-        IF_CASE(EXCEPTION_GUARD_PAGE)
-        IF_CASE(EXCEPTION_INVALID_HANDLE)
-
+        CASE_TO_STRING(EXCEPTION_ACCESS_VIOLATION)
+        CASE_TO_STRING(EXCEPTION_DATATYPE_MISALIGNMENT)
+        CASE_TO_STRING(EXCEPTION_BREAKPOINT)
+        CASE_TO_STRING(EXCEPTION_SINGLE_STEP)
+        CASE_TO_STRING(EXCEPTION_ARRAY_BOUNDS_EXCEEDED)
+        CASE_TO_STRING(EXCEPTION_FLT_DENORMAL_OPERAND)
+        CASE_TO_STRING(EXCEPTION_FLT_DIVIDE_BY_ZERO)
+        CASE_TO_STRING(EXCEPTION_FLT_INEXACT_RESULT)
+        CASE_TO_STRING(EXCEPTION_FLT_INVALID_OPERATION)
+        CASE_TO_STRING(EXCEPTION_FLT_OVERFLOW)
+        CASE_TO_STRING(EXCEPTION_FLT_STACK_CHECK)
+        CASE_TO_STRING(EXCEPTION_FLT_UNDERFLOW)
+        CASE_TO_STRING(EXCEPTION_INT_DIVIDE_BY_ZERO)
+        CASE_TO_STRING(EXCEPTION_INT_OVERFLOW)
+        CASE_TO_STRING(EXCEPTION_PRIV_INSTRUCTION)
+        CASE_TO_STRING(EXCEPTION_IN_PAGE_ERROR)
+        CASE_TO_STRING(EXCEPTION_ILLEGAL_INSTRUCTION)
+        CASE_TO_STRING(EXCEPTION_NONCONTINUABLE_EXCEPTION)
+        CASE_TO_STRING(EXCEPTION_STACK_OVERFLOW)
+        CASE_TO_STRING(EXCEPTION_INVALID_DISPOSITION)
+        CASE_TO_STRING(EXCEPTION_GUARD_PAGE)
+        CASE_TO_STRING(EXCEPTION_INVALID_HANDLE)
     default:
         return "Unknown exception code: " + intToStr(code);
     }
@@ -237,6 +250,8 @@ void enableDPIAwareness()
 
 		FreeLibrary(shCore);
 	}
+}
+
 }
 
 #endif //ET_PLATFORM_WIN

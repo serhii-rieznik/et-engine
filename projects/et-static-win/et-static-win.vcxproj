@@ -232,7 +232,7 @@
     <ClCompile Include="..\..\source-base\input\gestures.cpp" />
     <ClCompile Include="..\..\source-base\input\input.cpp" />
     <ClCompile Include="..\..\source-base\platform-win\application.win.cpp" />
-    <ClCompile Include="..\..\source-base\platform-win\context_win.cpp" />
+    <ClCompile Include="..\..\source-base\platform-win\context.win.cpp" />
     <ClCompile Include="..\..\source-base\platform-win\input.win.cpp" />
     <ClCompile Include="..\..\source-base\platform-win\locale.win.cpp" />
     <ClCompile Include="..\..\source-base\platform-win\log.win.cpp" />

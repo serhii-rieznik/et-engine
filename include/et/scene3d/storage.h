@@ -66,8 +66,8 @@ namespace et
 
 			void setIndexArray(const IndexArray::Pointer&);
 			
-			VertexStorage::Pointer addVertexStorageWithDeclaration(const VertexDeclaration& decl, size_t size);
-			VertexStorage::Pointer vertexStorageWithDeclarationForAppendingSize(const VertexDeclaration& decl, size_t size);
+			VertexStorage::Pointer addVertexStorageWithDeclaration(const VertexDeclaration& decl, uint32_t size);
+			VertexStorage::Pointer vertexStorageWithDeclarationForAppendingSize(const VertexDeclaration& decl, uint32_t size);
 			
 			int indexOfVertexStorage(const VertexStorage::Pointer& va);
 			

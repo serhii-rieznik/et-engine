@@ -65,13 +65,4 @@ namespace et
 			std::fill(objects.begin(), objects.end(), nullptr);
 		}
     };
-    
-    class ApplicationContextFactory
-    {
-    public:
-        virtual PlatformDependentContext createContextWithOptions(RenderingAPI, ContextOptions&) = 0;
-        virtual void destroyContext(PlatformDependentContext) = 0;
-        
-        virtual ~ApplicationContextFactory() = default;
-    };
 }

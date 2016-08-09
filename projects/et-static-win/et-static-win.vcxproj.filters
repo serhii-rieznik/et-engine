@@ -697,9 +697,6 @@
     <ClCompile Include="..\..\source-base\platform-win\application.win.cpp">
       <Filter>Source Files\platform-win</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source-base\platform-win\context_win.cpp">
-      <Filter>Source Files\platform-win</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\source-base\platform-win\input.win.cpp">
       <Filter>Source Files\platform-win</Filter>
     </ClCompile>
@@ -900,6 +897,9 @@
     </ClCompile>
     <ClCompile Include="..\..\source-base\imaging\tgaloader.cpp">
       <Filter>Source Files\imaging</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\platform-win\context.win.cpp">
+      <Filter>Source Files\platform-win</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

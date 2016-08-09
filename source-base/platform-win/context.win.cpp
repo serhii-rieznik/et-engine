@@ -12,13 +12,14 @@
 namespace et
 {
 
-PlatformDependentContext ApplicationContextFactoryWin::createContextWithOptions(RenderingAPI, ContextOptions&)
+PlatformDependentContext createWindowsContextWithOptions(RenderingAPI, ContextOptions&)
 {
 	return PlatformDependentContext();
 }
 
-void ApplicationContextFactoryWin::destroyContext(PlatformDependentContext context)
+void destroyWindowsContext(PlatformDependentContext context)
 {
+
 }
 
 }

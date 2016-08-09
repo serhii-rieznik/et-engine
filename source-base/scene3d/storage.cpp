@@ -27,7 +27,7 @@ void Storage::setIndexArray(const IndexArray::Pointer& ia)
 	_indexArray = ia;
 }
 
-VertexStorage::Pointer Storage::addVertexStorageWithDeclaration(const VertexDeclaration& decl, size_t size)
+VertexStorage::Pointer Storage::addVertexStorageWithDeclaration(const VertexDeclaration& decl, uint32_t size)
 {
 	auto storage = VertexStorage::Pointer::create(decl, size);
 	storage->setName("vertexStorage" + intToStr(_vertexStorages.size()));
@@ -35,7 +35,7 @@ VertexStorage::Pointer Storage::addVertexStorageWithDeclaration(const VertexDecl
     return storage;
 }
 
-VertexStorage::Pointer Storage::vertexStorageWithDeclarationForAppendingSize(const VertexDeclaration& decl, size_t size)
+VertexStorage::Pointer Storage::vertexStorageWithDeclarationForAppendingSize(const VertexDeclaration& decl, uint32_t size)
 {
 	for (const auto&  i : _vertexStorages)
 	{

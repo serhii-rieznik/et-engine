@@ -33,9 +33,10 @@ PointerInputInfo Input::currentPointer()
 		mainRunLoop().time(), PointerOrigin_Mouse);
 }
 
-
 bool Input::canGetCurrentPointerInfo()
-	{ return true; }
+{
+	return true; 
+}
 
 void Input::activateSoftwareKeyboard()
 {
