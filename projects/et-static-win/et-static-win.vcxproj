@@ -206,118 +206,216 @@
     <ClInclude Include="..\..\include\et\sound\track.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\source-base\app\application.cpp" />
-    <ClCompile Include="..\..\source-base\app\backgroundthread.cpp" />
-    <ClCompile Include="..\..\source-base\app\events.cpp" />
-    <ClCompile Include="..\..\source-base\app\invocation.cpp" />
-    <ClCompile Include="..\..\source-base\app\pathresolver.cpp" />
-    <ClCompile Include="..\..\source-base\app\runloop.cpp" />
-    <ClCompile Include="..\..\source-base\camera\camera.cpp" />
-    <ClCompile Include="..\..\source-base\camera\cameracontroller.cpp" />
-    <ClCompile Include="..\..\source-base\camera\cameramovingcontroller.cpp" />
-    <ClCompile Include="..\..\source-base\camera\cameraorbitcontroller.cpp" />
-    <ClCompile Include="..\..\source-base\camera\frustum.cpp" />
-    <ClCompile Include="..\..\source-base\core\base64.cpp" />
-    <ClCompile Include="..\..\source-base\core\constants.cpp" />
-    <ClCompile Include="..\..\source-base\core\conversion.cpp" />
-    <ClCompile Include="..\..\source-base\core\debug.cpp" />
-    <ClCompile Include="..\..\source-base\core\dictionary.cpp" />
-    <ClCompile Include="..\..\source-base\core\et.cpp" />
-    <ClCompile Include="..\..\source-base\core\json.cpp" />
-    <ClCompile Include="..\..\source-base\core\locale.cpp" />
-    <ClCompile Include="..\..\source-base\core\memoryallocator.cpp" />
-    <ClCompile Include="..\..\source-base\core\notifytimer.cpp" />
-    <ClCompile Include="..\..\source-base\core\objectscache.cpp" />
-    <ClCompile Include="..\..\source-base\core\sequence.cpp" />
-    <ClCompile Include="..\..\source-base\core\stream.cpp" />
-    <ClCompile Include="..\..\source-base\core\synchronization.cpp" />
-    <ClCompile Include="..\..\source-base\core\taskpool.cpp" />
-    <ClCompile Include="..\..\source-base\core\threading.cpp" />
-    <ClCompile Include="..\..\source-base\core\timedobject.cpp" />
-    <ClCompile Include="..\..\source-base\core\timerpool.cpp" />
-    <ClCompile Include="..\..\source-base\core\tools.cpp" />
-    <ClCompile Include="..\..\source-base\core\transformable.cpp" />
-    <ClCompile Include="..\..\source-base\geometry\collision.cpp" />
-    <ClCompile Include="..\..\source-base\geometry\geometry.cpp" />
-    <ClCompile Include="..\..\source-base\geometry\rectplacer.cpp" />
-    <ClCompile Include="..\..\source-base\imaging\bmploader.cpp" />
-    <ClCompile Include="..\..\source-base\imaging\ddsloader.cpp" />
-    <ClCompile Include="..\..\source-base\imaging\hdrloader.cpp" />
-    <ClCompile Include="..\..\source-base\imaging\imageoperations.cpp" />
-    <ClCompile Include="..\..\source-base\imaging\imagewriter.cpp" />
-    <ClCompile Include="..\..\source-base\imaging\jpegloader.cpp" />
-    <ClCompile Include="..\..\source-base\imaging\pngloader.cpp" />
-    <ClCompile Include="..\..\source-base\imaging\pvrdecompressor.cpp" />
-    <ClCompile Include="..\..\source-base\imaging\pvrloader.cpp" />
-    <ClCompile Include="..\..\source-base\imaging\texturedescription.cpp" />
-    <ClCompile Include="..\..\source-base\imaging\tgaloader.cpp" />
-    <ClCompile Include="..\..\source-base\input\gestures.cpp" />
-    <ClCompile Include="..\..\source-base\input\input.cpp" />
-    <ClCompile Include="..\..\source-base\platform-win\application.win.cpp" />
-    <ClCompile Include="..\..\source-base\platform-win\context.win.cpp" />
-    <ClCompile Include="..\..\source-base\platform-win\input.win.cpp" />
-    <ClCompile Include="..\..\source-base\platform-win\locale.win.cpp" />
-    <ClCompile Include="..\..\source-base\platform-win\log.win.cpp" />
-    <ClCompile Include="..\..\source-base\platform-win\memory.win.cpp" />
-    <ClCompile Include="..\..\source-base\platform-win\opengl.win.cpp" />
-    <ClCompile Include="..\..\source-base\platform-win\rendercontext.win.cpp" />
-    <ClCompile Include="..\..\source-base\platform-win\tools.win.cpp" />
-    <ClCompile Include="..\..\source-base\rendering\base\helpers.cpp" />
-    <ClCompile Include="..\..\source-base\rendering\base\indexarray.cpp" />
-    <ClCompile Include="..\..\source-base\rendering\base\primitives.cpp" />
-    <ClCompile Include="..\..\source-base\rendering\base\renderbatch.cpp" />
-    <ClCompile Include="..\..\source-base\rendering\base\vertexarray.cpp" />
-    <ClCompile Include="..\..\source-base\rendering\base\vertexdatachunk.cpp" />
-    <ClCompile Include="..\..\source-base\rendering\base\vertexdeclaration.cpp" />
-    <ClCompile Include="..\..\source-base\rendering\base\vertexstorage.cpp" />
-    <ClCompile Include="..\..\source-base\rendering\dx12\dx12_indexbuffer.cpp" />
-    <ClCompile Include="..\..\source-base\rendering\dx12\dx12_pipelinestate.cpp" />
-    <ClCompile Include="..\..\source-base\rendering\dx12\dx12_program.cpp" />
-    <ClCompile Include="..\..\source-base\rendering\dx12\dx12_renderer.cpp" />
-    <ClCompile Include="..\..\source-base\rendering\dx12\dx12_renderpass.cpp" />
-    <ClCompile Include="..\..\source-base\rendering\dx12\dx12_texture.cpp" />
-    <ClCompile Include="..\..\source-base\rendering\dx12\dx12_vertexbuffer.cpp" />
-    <ClCompile Include="..\..\source-base\rendering\material.cpp" />
-    <ClCompile Include="..\..\source-base\rendering\opengl\opengl.cpp" />
-    <ClCompile Include="..\..\source-base\rendering\opengl\opengl_caps.cpp" />
-    <ClCompile Include="..\..\source-base\rendering\opengl\opengl_framebuffer.cpp" />
-    <ClCompile Include="..\..\source-base\rendering\opengl\opengl_indexbuffer.cpp" />
-    <ClCompile Include="..\..\source-base\rendering\opengl\opengl_materialfactory.cpp" />
-    <ClCompile Include="..\..\source-base\rendering\opengl\opengl_pipelinestate.cpp" />
-    <ClCompile Include="..\..\source-base\rendering\opengl\opengl_program.cpp" />
-    <ClCompile Include="..\..\source-base\rendering\opengl\opengl_renderer.cpp" />
-    <ClCompile Include="..\..\source-base\rendering\opengl\opengl_renderpass.cpp" />
-    <ClCompile Include="..\..\source-base\rendering\opengl\opengl_texture.cpp" />
-    <ClCompile Include="..\..\source-base\rendering\opengl\opengl_vertexarrayobject.cpp" />
-    <ClCompile Include="..\..\source-base\rendering\opengl\opengl_vertexbuffer.cpp" />
-    <ClCompile Include="..\..\source-base\rendering\rendering.cpp" />
-    <ClCompile Include="..\..\source-base\rendering\vertexbufferfactory.cpp" />
-    <ClCompile Include="..\..\source-base\rendering\vulkan\vulkan.cpp" />
-    <ClCompile Include="..\..\source-base\rendering\vulkan\vulkan_indexbuffer.cpp" />
-    <ClCompile Include="..\..\source-base\rendering\vulkan\vulkan_pipelinestate.cpp" />
-    <ClCompile Include="..\..\source-base\rendering\vulkan\vulkan_program.cpp" />
-    <ClCompile Include="..\..\source-base\rendering\vulkan\vulkan_renderer.cpp" />
-    <ClCompile Include="..\..\source-base\rendering\vulkan\vulkan_renderpass.cpp" />
-    <ClCompile Include="..\..\source-base\rendering\vulkan\vulkan_texture.cpp" />
-    <ClCompile Include="..\..\source-base\rendering\vulkan\vulkan_vertexbuffer.cpp" />
-    <ClCompile Include="..\..\source-base\scene3d\animation.cpp" />
-    <ClCompile Include="..\..\source-base\scene3d\baseelement.cpp" />
-    <ClCompile Include="..\..\source-base\scene3d\lineelement.cpp" />
-    <ClCompile Include="..\..\source-base\scene3d\mesh.cpp" />
-    <ClCompile Include="..\..\source-base\scene3d\meshdeformer.cpp" />
-    <ClCompile Include="..\..\source-base\scene3d\objloader.cpp" />
-    <ClCompile Include="..\..\source-base\scene3d\particlesystem.cpp" />
-    <ClCompile Include="..\..\source-base\scene3d\renderableelement.cpp" />
-    <ClCompile Include="..\..\source-base\scene3d\scene3d.cpp" />
-    <ClCompile Include="..\..\source-base\scene3d\scene3drenderer.cpp" />
-    <ClCompile Include="..\..\source-base\scene3d\scenematerial.cpp" />
-    <ClCompile Include="..\..\source-base\scene3d\skeletonelement.cpp" />
-    <ClCompile Include="..\..\source-base\scene3d\storage.cpp" />
-    <ClCompile Include="..\..\source-base\sound\platform-dependent.cpp" />
-    <ClCompile Include="..\..\source-base\sound\player.cpp" />
-    <ClCompile Include="..\..\source-base\sound\sound.cpp" />
-    <ClCompile Include="..\..\source-base\sound\streamingthread.cpp" />
-    <ClCompile Include="..\..\source-base\sound\track.cpp" />
+    <ClCompile Include="..\..\source-base\camera\_camera_pack.cxx" />
+    <ClCompile Include="..\..\source-base\core\_core_pack.cxx" />
+    <ClCompile Include="..\..\source-base\geometry\_geometry_pack.cxx" />
+    <ClCompile Include="..\..\source-base\imaging\_imaging_pack.cxx" />
+    <ClCompile Include="..\..\source-base\input\_input_pack.cxx" />
+    <ClCompile Include="..\..\source-base\platform-win\_platform.win_pack.cxx" />
+    <ClCompile Include="..\..\source-base\rendering\_rendering_pack.cxx" />
+    <ClCompile Include="..\..\source-base\scene3d\_scene3d_pack.cxx" />
+    <ClCompile Include="..\..\source-base\sound\_sound_pack.cxx" />
+    <ClInclude Include="..\..\source-base\app\application.cpp" />
+    <ClInclude Include="..\..\source-base\app\backgroundthread.cpp" />
+    <ClInclude Include="..\..\source-base\app\events.cpp" />
+    <ClInclude Include="..\..\source-base\app\invocation.cpp" />
+    <ClInclude Include="..\..\source-base\app\pathresolver.cpp" />
+    <ClInclude Include="..\..\source-base\app\runloop.cpp" />
+    <ClInclude Include="..\..\source-base\camera\camera.cpp" />
+    <ClInclude Include="..\..\source-base\camera\cameracontroller.cpp" />
+    <ClInclude Include="..\..\source-base\camera\cameramovingcontroller.cpp" />
+    <ClInclude Include="..\..\source-base\camera\cameraorbitcontroller.cpp" />
+    <ClInclude Include="..\..\source-base\camera\frustum.cpp" />
+    <ClInclude Include="..\..\source-base\core\base64.cpp">
+      <FileType>CppCode</FileType>
+    </ClInclude>
+    <ClInclude Include="..\..\source-base\core\constants.cpp">
+      <FileType>CppCode</FileType>
+    </ClInclude>
+    <ClInclude Include="..\..\source-base\core\conversion.cpp">
+      <FileType>CppCode</FileType>
+    </ClInclude>
+    <ClInclude Include="..\..\source-base\core\debug.cpp">
+      <FileType>CppCode</FileType>
+    </ClInclude>
+    <ClInclude Include="..\..\source-base\core\dictionary.cpp">
+      <FileType>CppCode</FileType>
+    </ClInclude>
+    <ClInclude Include="..\..\source-base\core\et.cpp">
+      <FileType>CppCode</FileType>
+    </ClInclude>
+    <ClInclude Include="..\..\source-base\core\json.cpp">
+      <FileType>CppCode</FileType>
+    </ClInclude>
+    <ClInclude Include="..\..\source-base\core\locale.cpp">
+      <FileType>CppCode</FileType>
+    </ClInclude>
+    <ClInclude Include="..\..\source-base\core\memoryallocator.cpp">
+      <FileType>CppCode</FileType>
+    </ClInclude>
+    <ClInclude Include="..\..\source-base\core\notifytimer.cpp">
+      <FileType>CppCode</FileType>
+    </ClInclude>
+    <ClInclude Include="..\..\source-base\core\objectscache.cpp">
+      <FileType>CppCode</FileType>
+    </ClInclude>
+    <ClInclude Include="..\..\source-base\core\sequence.cpp">
+      <FileType>CppCode</FileType>
+    </ClInclude>
+    <ClInclude Include="..\..\source-base\core\stream.cpp">
+      <FileType>CppCode</FileType>
+    </ClInclude>
+    <ClInclude Include="..\..\source-base\core\synchronization.cpp">
+      <FileType>CppCode</FileType>
+    </ClInclude>
+    <ClInclude Include="..\..\source-base\core\taskpool.cpp">
+      <FileType>CppCode</FileType>
+    </ClInclude>
+    <ClInclude Include="..\..\source-base\core\threading.cpp">
+      <FileType>CppCode</FileType>
+    </ClInclude>
+    <ClInclude Include="..\..\source-base\core\timedobject.cpp">
+      <FileType>CppCode</FileType>
+    </ClInclude>
+    <ClInclude Include="..\..\source-base\core\timerpool.cpp">
+      <FileType>CppCode</FileType>
+    </ClInclude>
+    <ClInclude Include="..\..\source-base\core\tools.cpp">
+      <FileType>CppCode</FileType>
+    </ClInclude>
+    <ClInclude Include="..\..\source-base\core\transformable.cpp">
+      <FileType>CppCode</FileType>
+    </ClInclude>
+    <ClInclude Include="..\..\source-base\geometry\collision.cpp" />
+    <ClInclude Include="..\..\source-base\geometry\geometry.cpp" />
+    <ClInclude Include="..\..\source-base\geometry\rectplacer.cpp" />
+    <ClInclude Include="..\..\source-base\imaging\bmploader.cpp">
+      <FileType>CppHeader</FileType>
+    </ClInclude>
+    <ClInclude Include="..\..\source-base\imaging\ddsloader.cpp">
+      <FileType>CppHeader</FileType>
+    </ClInclude>
+    <ClInclude Include="..\..\source-base\imaging\hdrloader.cpp">
+      <FileType>CppHeader</FileType>
+    </ClInclude>
+    <ClInclude Include="..\..\source-base\imaging\imageoperations.cpp">
+      <FileType>CppHeader</FileType>
+    </ClInclude>
+    <ClInclude Include="..\..\source-base\imaging\imagewriter.cpp">
+      <FileType>CppHeader</FileType>
+    </ClInclude>
+    <ClInclude Include="..\..\source-base\imaging\jpegloader.cpp">
+      <FileType>CppHeader</FileType>
+    </ClInclude>
+    <ClInclude Include="..\..\source-base\imaging\pngloader.cpp">
+      <FileType>CppHeader</FileType>
+    </ClInclude>
+    <ClInclude Include="..\..\source-base\imaging\pvrdecompressor.cpp">
+      <FileType>CppHeader</FileType>
+    </ClInclude>
+    <ClInclude Include="..\..\source-base\imaging\pvrloader.cpp">
+      <FileType>CppHeader</FileType>
+    </ClInclude>
+    <ClInclude Include="..\..\source-base\imaging\texturedescription.cpp">
+      <FileType>CppHeader</FileType>
+    </ClInclude>
+    <ClInclude Include="..\..\source-base\imaging\tgaloader.cpp">
+      <FileType>CppHeader</FileType>
+    </ClInclude>
+    <ClCompile Include="..\..\source-base\app\_app_pack.cxx" />
+    <ClInclude Include="..\..\source-base\input\gestures.cpp" />
+    <ClInclude Include="..\..\source-base\input\input.cpp" />
+    <ClInclude Include="..\..\source-base\platform-win\application.win.cpp" />
+    <ClInclude Include="..\..\source-base\platform-win\context.win.cpp" />
+    <ClInclude Include="..\..\source-base\platform-win\input.win.cpp" />
+    <ClInclude Include="..\..\source-base\platform-win\locale.win.cpp" />
+    <ClInclude Include="..\..\source-base\platform-win\log.win.cpp" />
+    <ClInclude Include="..\..\source-base\platform-win\memory.win.cpp" />
+    <ClInclude Include="..\..\source-base\platform-win\opengl.win.cpp" />
+    <ClInclude Include="..\..\source-base\platform-win\rendercontext.win.cpp" />
+    <ClInclude Include="..\..\source-base\platform-win\tools.win.cpp" />
+    <ClInclude Include="..\..\source-base\rendering\base\helpers.cpp" />
+    <ClInclude Include="..\..\source-base\rendering\base\indexarray.cpp" />
+    <ClInclude Include="..\..\source-base\rendering\base\primitives.cpp" />
+    <ClInclude Include="..\..\source-base\rendering\base\renderbatch.cpp" />
+    <ClInclude Include="..\..\source-base\rendering\base\vertexarray.cpp" />
+    <ClInclude Include="..\..\source-base\rendering\base\vertexdatachunk.cpp" />
+    <ClInclude Include="..\..\source-base\rendering\base\vertexdeclaration.cpp" />
+    <ClInclude Include="..\..\source-base\rendering\base\vertexstorage.cpp" />
+    <ClInclude Include="..\..\source-base\rendering\dx12\dx12_indexbuffer.cpp" />
+    <ClInclude Include="..\..\source-base\rendering\dx12\dx12_pipelinestate.cpp" />
+    <ClInclude Include="..\..\source-base\rendering\dx12\dx12_program.cpp" />
+    <ClInclude Include="..\..\source-base\rendering\dx12\dx12_renderer.cpp" />
+    <ClInclude Include="..\..\source-base\rendering\dx12\dx12_renderpass.cpp" />
+    <ClInclude Include="..\..\source-base\rendering\dx12\dx12_texture.cpp" />
+    <ClInclude Include="..\..\source-base\rendering\dx12\dx12_vertexbuffer.cpp" />
+    <ClInclude Include="..\..\source-base\rendering\material.cpp" />
+    <ClInclude Include="..\..\source-base\rendering\opengl\opengl.cpp" />
+    <ClInclude Include="..\..\source-base\rendering\opengl\opengl_caps.cpp" />
+    <ClInclude Include="..\..\source-base\rendering\opengl\opengl_framebuffer.cpp" />
+    <ClInclude Include="..\..\source-base\rendering\opengl\opengl_indexbuffer.cpp" />
+    <ClInclude Include="..\..\source-base\rendering\opengl\opengl_materialfactory.cpp" />
+    <ClInclude Include="..\..\source-base\rendering\opengl\opengl_pipelinestate.cpp" />
+    <ClInclude Include="..\..\source-base\rendering\opengl\opengl_program.cpp" />
+    <ClInclude Include="..\..\source-base\rendering\opengl\opengl_renderer.cpp" />
+    <ClInclude Include="..\..\source-base\rendering\opengl\opengl_renderpass.cpp" />
+    <ClInclude Include="..\..\source-base\rendering\opengl\opengl_texture.cpp" />
+    <ClInclude Include="..\..\source-base\rendering\opengl\opengl_vertexarrayobject.cpp" />
+    <ClInclude Include="..\..\source-base\rendering\opengl\opengl_vertexbuffer.cpp" />
+    <ClInclude Include="..\..\source-base\rendering\rendering.cpp" />
+    <ClInclude Include="..\..\source-base\rendering\vertexbufferfactory.cpp" />
+    <ClInclude Include="..\..\source-base\rendering\vulkan\vulkan.cpp" />
+    <ClInclude Include="..\..\source-base\rendering\vulkan\vulkan_indexbuffer.cpp" />
+    <ClInclude Include="..\..\source-base\rendering\vulkan\vulkan_pipelinestate.cpp" />
+    <ClInclude Include="..\..\source-base\rendering\vulkan\vulkan_program.cpp" />
+    <ClInclude Include="..\..\source-base\rendering\vulkan\vulkan_renderer.cpp" />
+    <ClInclude Include="..\..\source-base\rendering\vulkan\vulkan_renderpass.cpp" />
+    <ClInclude Include="..\..\source-base\rendering\vulkan\vulkan_texture.cpp" />
+    <ClInclude Include="..\..\source-base\rendering\vulkan\vulkan_vertexbuffer.cpp" />
+    <ClInclude Include="..\..\source-base\scene3d\animation.cpp">
+      <FileType>CppCode</FileType>
+    </ClInclude>
+    <ClInclude Include="..\..\source-base\scene3d\baseelement.cpp">
+      <FileType>CppCode</FileType>
+    </ClInclude>
+    <ClInclude Include="..\..\source-base\scene3d\lineelement.cpp">
+      <FileType>CppCode</FileType>
+    </ClInclude>
+    <ClInclude Include="..\..\source-base\scene3d\mesh.cpp">
+      <FileType>CppCode</FileType>
+    </ClInclude>
+    <ClInclude Include="..\..\source-base\scene3d\meshdeformer.cpp">
+      <FileType>CppCode</FileType>
+    </ClInclude>
+    <ClInclude Include="..\..\source-base\scene3d\objloader.cpp">
+      <FileType>CppCode</FileType>
+    </ClInclude>
+    <ClInclude Include="..\..\source-base\scene3d\particlesystem.cpp">
+      <FileType>CppCode</FileType>
+    </ClInclude>
+    <ClInclude Include="..\..\source-base\scene3d\renderableelement.cpp">
+      <FileType>CppCode</FileType>
+    </ClInclude>
+    <ClInclude Include="..\..\source-base\scene3d\scene3d.cpp">
+      <FileType>CppCode</FileType>
+    </ClInclude>
+    <ClInclude Include="..\..\source-base\scene3d\scene3drenderer.cpp">
+      <FileType>CppCode</FileType>
+    </ClInclude>
+    <ClInclude Include="..\..\source-base\scene3d\scenematerial.cpp">
+      <FileType>CppCode</FileType>
+    </ClInclude>
+    <ClInclude Include="..\..\source-base\scene3d\skeletonelement.cpp">
+      <FileType>CppCode</FileType>
+    </ClInclude>
+    <ClInclude Include="..\..\source-base\scene3d\storage.cpp">
+      <FileType>CppCode</FileType>
+    </ClInclude>
+    <ClInclude Include="..\..\source-base\sound\platform-dependent.cpp" />
+    <ClInclude Include="..\..\source-base\sound\player.cpp" />
+    <ClInclude Include="..\..\source-base\sound\sound.cpp" />
+    <ClInclude Include="..\..\source-base\sound\streamingthread.cpp" />
+    <ClInclude Include="..\..\source-base\sound\track.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{C16E6F9D-51E8-4DC3-BEA8-3822B46E3EDF}</ProjectGuid>
@@ -399,7 +497,7 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
     <Lib>
-      <AdditionalDependencies>jansson.lib;jpeg.lib;ogg.lib;openal32.lib;png.lib;vorbis.lib;vorbisfile.lib;z.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>jansson.lib;jpeg.lib;ogg.lib;openal32.lib;png.lib;vorbis.lib;vorbisfile.lib;vulkan-1.lib;z.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Lib>
     <Lib>
       <IgnoreAllDefaultLibraries>true</IgnoreAllDefaultLibraries>

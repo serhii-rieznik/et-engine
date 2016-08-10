@@ -36,7 +36,7 @@
 
 #define ET_DECLARE_PIMPL(T, SZ)		private:\
 										T##Private* _private = nullptr; \
-										char _privateData[SZ];
+										char _privateData[SZ] { };
 
 #define ET_PIMPL_INIT(T, ...)		static_assert(sizeof(_privateData) >= sizeof(T##Private), "Invalid configuration"); \
 									memset(_privateData, 0, sizeof(_privateData)); \

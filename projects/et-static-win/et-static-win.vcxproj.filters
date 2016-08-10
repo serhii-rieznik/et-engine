@@ -105,6 +105,9 @@
     <Filter Include="Header Files\rendering\dx12">
       <UniqueIdentifier>{78d59f3c-3d6d-46d9-9391-a64944554b36}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\compile_packs">
+      <UniqueIdentifier>{ca591add-25a8-4934-b408-2e3ddce6a81a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\et\app\appevironment.h">
@@ -943,39 +946,6 @@
     <ClCompile Include="..\..\source-base\rendering\vertexbufferfactory.cpp">
       <Filter>Source Files\rendering</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source-base\imaging\bmploader.cpp">
-      <Filter>Source Files\imaging</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\imaging\ddsloader.cpp">
-      <Filter>Source Files\imaging</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\imaging\hdrloader.cpp">
-      <Filter>Source Files\imaging</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\imaging\imageoperations.cpp">
-      <Filter>Source Files\imaging</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\imaging\imagewriter.cpp">
-      <Filter>Source Files\imaging</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\imaging\jpegloader.cpp">
-      <Filter>Source Files\imaging</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\imaging\pngloader.cpp">
-      <Filter>Source Files\imaging</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\imaging\pvrdecompressor.cpp">
-      <Filter>Source Files\imaging</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\imaging\pvrloader.cpp">
-      <Filter>Source Files\imaging</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\imaging\texturedescription.cpp">
-      <Filter>Source Files\imaging</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\imaging\tgaloader.cpp">
-      <Filter>Source Files\imaging</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\source-base\platform-win\context.win.cpp">
       <Filter>Source Files\platform-win</Filter>
     </ClCompile>
@@ -1023,6 +993,69 @@
     </ClCompile>
     <ClCompile Include="..\..\source-base\rendering\vulkan\vulkan.cpp">
       <Filter>Source Files\rendering\vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\imaging\bmploader.cpp">
+      <Filter>Source Files\imaging</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\imaging\ddsloader.cpp">
+      <Filter>Source Files\imaging</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\imaging\hdrloader.cpp">
+      <Filter>Source Files\imaging</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\imaging\imageoperations.cpp">
+      <Filter>Source Files\imaging</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\imaging\imagewriter.cpp">
+      <Filter>Source Files\imaging</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\imaging\jpegloader.cpp">
+      <Filter>Source Files\imaging</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\imaging\pngloader.cpp">
+      <Filter>Source Files\imaging</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\imaging\pvrdecompressor.cpp">
+      <Filter>Source Files\imaging</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\imaging\pvrloader.cpp">
+      <Filter>Source Files\imaging</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\imaging\texturedescription.cpp">
+      <Filter>Source Files\imaging</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\imaging\tgaloader.cpp">
+      <Filter>Source Files\imaging</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\app\_app_pack.cxx">
+      <Filter>Source Files\compile_packs</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\sound\_sound_pack.cxx">
+      <Filter>Source Files\compile_packs</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\platform-win\_platform.win_pack.cxx">
+      <Filter>Source Files\compile_packs</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\core\_core_pack.cxx">
+      <Filter>Source Files\compile_packs</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\scene3d\_scene3d_pack.cxx">
+      <Filter>Source Files\compile_packs</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\imaging\_imaging_pack.cxx">
+      <Filter>Source Files\compile_packs</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\input\_input_pack.cxx">
+      <Filter>Source Files\compile_packs</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\geometry\_geometry_pack.cxx">
+      <Filter>Source Files\compile_packs</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\camera\_camera_pack.cxx">
+      <Filter>Source Files\compile_packs</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\rendering\_rendering_pack.cxx">
+      <Filter>Source Files\compile_packs</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
