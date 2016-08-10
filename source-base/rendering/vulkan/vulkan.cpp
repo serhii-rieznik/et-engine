@@ -136,4 +136,10 @@ void VulkanSwapchain::create(VulkanState& vulkan)
 	}
 }
 
+void VulkanSwapchain::acquireNextImage(VulkanState& vulkan)
+{
+	VULKAN_CALL(vkAcquireNextImageKHR(vulkan.device, swapchain, UINT64_MAX, 
+		vulkan.semaphores.present, nullptr, &currentImageIndex));
+}
+
 }

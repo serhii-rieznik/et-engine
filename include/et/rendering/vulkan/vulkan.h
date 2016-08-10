@@ -27,8 +27,12 @@ struct VulkanSwapchain
 	void init(VulkanState& vulkan, const RenderContextParameters& params, HWND window);
 	void create(VulkanState& vulkan);
 
+	void acquireNextImage(VulkanState& vulkan);
+
 	VkSurfaceKHR surface = nullptr;
 	VkSwapchainKHR swapchain = nullptr;
+	
+	uint32_t currentImageIndex = static_cast<uint32_t>(-1);
 	VkSurfaceFormatKHR surfaceFormat { };
 	Vector<VkImage> images;
 	Vector<VkImageView> imageViews;

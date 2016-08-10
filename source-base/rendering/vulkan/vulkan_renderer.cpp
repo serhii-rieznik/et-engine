@@ -115,24 +115,31 @@ void VulkanRenderer::init(const RenderContextParameters& params)
 	setupCBInfo.commandBufferCount = 1;
 	VULKAN_CALL(vkAllocateCommandBuffers(_private->device, &setupCBInfo, &_private->setupCommandBuffer));
 
-	VkCommandBufferBeginInfo setupBeginInfo = { VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO }; 
-	vkBeginCommandBuffer(_private->setupCommandBuffer, &setupBeginInfo);
+	// VkCommandBufferBeginInfo setupBeginInfo = { VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO }; 
+	// vkBeginCommandBuffer(_private->setupCommandBuffer, &setupBeginInfo);
+
 	_private->swapchain.create(_private->vulkan());
 }
 
 void VulkanRenderer::shutdown()
 {
-	vkDestroyInstance(_private->instance, nullptr);
+	// TODO : kill all
 }
 
 void VulkanRenderer::begin()
 {
-
+	_private->swapchain.acquireNextImage(_private->vulkan());
 }
 
 void VulkanRenderer::present()
 {
-
+	VkPresentInfoKHR info = { VK_STRUCTURE_TYPE_PRESENT_INFO_KHR };
+	info.swapchainCount = 1;
+	info.pSwapchains = &_private->swapchain.swapchain;
+	info.pImageIndices = &_private->swapchain.currentImageIndex;
+	info.waitSemaphoreCount = 1;
+	info.pWaitSemaphores = &_private->semaphores.render;
+	VULKAN_CALL(vkQueuePresentKHR(_private->queue, &info));
 }
 
 VertexBuffer::Pointer VulkanRenderer::createVertexBuffer(const std::string& name, VertexStorage::Pointer vs, BufferDrawType dt)
