@@ -40,9 +40,9 @@ const char* vulkanResultToString(VkResult result)
 	return nullptr;
 }
 
-void vkGetPhysicalDeviceSurfaceFormatsKHRWrapper(const VulkanState& state, uint32_t* count, VkSurfaceFormatKHR* formats)
+VkResult vkGetPhysicalDeviceSurfaceFormatsKHRWrapper(const VulkanState& state, uint32_t* count, VkSurfaceFormatKHR* formats)
 {
-	vkGetPhysicalDeviceSurfaceFormatsKHR(state.physicalDevice, state.swapchain.surface, count, formats);
+	return vkGetPhysicalDeviceSurfaceFormatsKHR(state.physicalDevice, state.swapchain.surface, count, formats);
 }
 
 void VulkanSwapchain::init(VulkanState& vulkan, const RenderContextParameters& params, HWND window)
@@ -69,14 +69,14 @@ void VulkanSwapchain::init(VulkanState& vulkan, const RenderContextParameters& p
 	surfaceFormat = formats.front();
 }
 
-void vkGetPhysicalDeviceSurfacePresentModesKHRWrapper(const VulkanState& state, uint32_t* count, VkPresentModeKHR* modes)
+VkResult vkGetPhysicalDeviceSurfacePresentModesKHRWrapper(const VulkanState& state, uint32_t* count, VkPresentModeKHR* modes)
 {
-	vkGetPhysicalDeviceSurfacePresentModesKHR(state.physicalDevice, state.swapchain.surface, count, modes);
+	return vkGetPhysicalDeviceSurfacePresentModesKHR(state.physicalDevice, state.swapchain.surface, count, modes);
 }
 
-void vkGetSwapchainImagesKHRWrapper(const VulkanState& state, uint32_t* count, VkImage* images)
+VkResult vkGetSwapchainImagesKHRWrapper(const VulkanState& state, uint32_t* count, VkImage* images)
 {
-	vkGetSwapchainImagesKHR(state.device, state.swapchain.swapchain, count, images);
+	return vkGetSwapchainImagesKHR(state.device, state.swapchain.swapchain, count, images);
 }
 
 void VulkanSwapchain::create(VulkanState& vulkan)
@@ -85,7 +85,7 @@ void VulkanSwapchain::create(VulkanState& vulkan)
 	vkGetPhysicalDeviceSurfaceCapabilitiesKHR(vulkan.physicalDevice, surface, &surfaceCaps);
 
 	auto presentModes = enumerateVulkanObjects<VkPresentModeKHR>(vulkan, vkGetPhysicalDeviceSurfacePresentModesKHRWrapper);
-	VkExtent2D swapchainExtent = surfaceCaps.currentExtent;
+	extent = surfaceCaps.currentExtent;
 
 	VkPresentModeKHR presentMode = VK_PRESENT_MODE_FIFO_KHR;
 	// TODO : handle v-sync
@@ -104,7 +104,7 @@ void VulkanSwapchain::create(VulkanState& vulkan)
 	swapchainInfo.minImageCount = numImages;
 	swapchainInfo.imageColorSpace = surfaceFormat.colorSpace;
 	swapchainInfo.imageFormat = surfaceFormat.format;
-	swapchainInfo.imageExtent = swapchainExtent;
+	swapchainInfo.imageExtent = extent;
 	swapchainInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 	swapchainInfo.preTransform = static_cast<VkSurfaceTransformFlagBitsKHR>(preTransform);
 	swapchainInfo.imageArrayLayers = 1;
@@ -120,7 +120,6 @@ void VulkanSwapchain::create(VulkanState& vulkan)
 	imageViews.resize(images.size());
 
 	VkImageView* imageViewPtr = imageViews.data();
-
 	for (VkImage image : images)
 	{
 		VkImageViewCreateInfo viewInfo = { VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO };
@@ -139,7 +138,7 @@ void VulkanSwapchain::create(VulkanState& vulkan)
 void VulkanSwapchain::acquireNextImage(VulkanState& vulkan)
 {
 	VULKAN_CALL(vkAcquireNextImageKHR(vulkan.device, swapchain, UINT64_MAX, 
-		vulkan.semaphores.present, nullptr, &currentImageIndex));
+		vulkan.semaphores.imageAvailable, nullptr, &currentImageIndex));
 }
 
 }

@@ -32,15 +32,17 @@ struct VulkanSwapchain
 	VkSurfaceKHR surface = nullptr;
 	VkSwapchainKHR swapchain = nullptr;
 	
-	uint32_t currentImageIndex = static_cast<uint32_t>(-1);
+	VkExtent2D extent { };
 	VkSurfaceFormatKHR surfaceFormat { };
 	Vector<VkImage> images;
 	Vector<VkImageView> imageViews;
+	uint32_t currentImageIndex = static_cast<uint32_t>(-1);
 };
 
 struct VulkanState
 {
 	VkInstance instance = nullptr;
+	VkDebugReportCallbackEXT debugCallback = nullptr;
 	VkPhysicalDevice physicalDevice = nullptr;
 	VkDevice device = nullptr;
 	VkCommandPool commandPool = nullptr;
@@ -48,11 +50,10 @@ struct VulkanState
 
 	struct Semaphores
 	{
-		VkSemaphore present = nullptr;
+		VkSemaphore imageAvailable = nullptr;
 		VkSemaphore render = nullptr;
 	} semaphores;
 
-	VkSubmitInfo submitInfo { VK_STRUCTURE_TYPE_SUBMIT_INFO };
 	VkCommandBuffer setupCommandBuffer = nullptr;
 	
 	Vector<VkQueueFamilyProperties> queueProperties;

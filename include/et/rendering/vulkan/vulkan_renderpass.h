@@ -11,13 +11,24 @@
 
 namespace et
 {
-	class VulkanRenderPass : public RenderPass
-	{
-	public:
-		ET_DECLARE_POINTER(VulkanRenderPass);
 
-	public:
-		VulkanRenderPass(const RenderPass::ConstructionInfo&);
-		void pushRenderBatch(RenderBatch::Pointer) override;
-	};
+class VulkanState;
+class VulkanRenderPassPrivate;
+class VulkanRenderPass : public RenderPass
+{
+public:
+	ET_DECLARE_POINTER(VulkanRenderPass);
+
+public:
+	VulkanRenderPass(VulkanState&, const RenderPass::ConstructionInfo&);
+	~VulkanRenderPass();
+
+	void pushRenderBatch(RenderBatch::Pointer) override;
+	
+	void endRenderPass();
+	void submit();
+
+private:
+	ET_DECLARE_PIMPL(VulkanRenderPass, 64);
+};
 }

@@ -37,14 +37,51 @@ VulkanRenderer::~VulkanRenderer()
 	ET_PIMPL_FINALIZE(VulkanRenderer)
 }
 
+VkResult vkEnumerateInstanceLayerPropertiesWrapper(int, uint32_t* count, VkLayerProperties* props)
+{
+	return vkEnumerateInstanceLayerProperties(count, props);
+}
+
+VkBool32 vulkanDebugCallback(VkDebugReportFlagsEXT flags, VkDebugReportObjectTypeEXT objType, uint64_t obj,
+	size_t location, int32_t code, const char* layerPrefix, const char* msg, void* userData)
+{
+	if (flags & VK_DEBUG_REPORT_ERROR_BIT_EXT)
+	{
+		ET_FAIL_FMT("%s : %s", layerPrefix, msg);
+	}
+	else if (flags & VK_DEBUG_REPORT_WARNING_BIT_EXT)
+	{
+		log::warning("%s : %s", layerPrefix, msg);
+	}
+	else
+	{
+		log::info("%s : %s", layerPrefix, msg);
+	}
+	return VK_FALSE;
+}
+
 void VulkanRenderer::init(const RenderContextParameters& params)
 {
 	std::vector<const char*> enabledExtensions = 
 	{ 
 		VK_KHR_SURFACE_EXTENSION_NAME, 
 		VK_KHR_WIN32_SURFACE_EXTENSION_NAME, 
-		VK_EXT_DEBUG_REPORT_EXTENSION_NAME
+		VK_EXT_DEBUG_REPORT_EXTENSION_NAME,
 	};
+
+	Vector<const char*> validationLayers;
+
+#if (ET_DEBUG)
+	auto layerProps = enumerateVulkanObjects<VkLayerProperties>(0, vkEnumerateInstanceLayerPropertiesWrapper);
+	validationLayers.reserve(4);
+	for (const auto& layerProp : layerProps)
+	{
+		if (strstr(layerProp.layerName, "validation"))
+		{
+			validationLayers.push_back(layerProp.layerName);
+		}
+	}
+#endif
 
 	VkApplicationInfo appInfo = { VK_STRUCTURE_TYPE_APPLICATION_INFO };
 	appInfo.pApplicationName = application().identifier().applicationName.c_str();
@@ -54,7 +91,22 @@ void VulkanRenderer::init(const RenderContextParameters& params)
 	instanceCreateInfo.pApplicationInfo = &appInfo;
 	instanceCreateInfo.enabledExtensionCount = static_cast<uint32_t>(enabledExtensions.size());
 	instanceCreateInfo.ppEnabledExtensionNames = enabledExtensions.data();
+	instanceCreateInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
+	instanceCreateInfo.ppEnabledLayerNames = validationLayers.data();
 	VULKAN_CALL(vkCreateInstance(&instanceCreateInfo, nullptr, &_private->instance));
+
+#if (ET_DEBUG)
+	PFN_vkCreateDebugReportCallbackEXT createDebugCb = 
+		reinterpret_cast<PFN_vkCreateDebugReportCallbackEXT>(vkGetInstanceProcAddr(_private->instance, "vkCreateDebugReportCallbackEXT"));
+
+	if (createDebugCb)
+	{
+		VkDebugReportCallbackCreateInfoEXT debugInfo = { VK_STRUCTURE_TYPE_DEBUG_REPORT_CALLBACK_CREATE_INFO_EXT };
+		debugInfo.flags = VK_DEBUG_REPORT_PERFORMANCE_WARNING_BIT_EXT | VK_DEBUG_REPORT_WARNING_BIT_EXT | VK_DEBUG_REPORT_ERROR_BIT_EXT;
+		debugInfo.pfnCallback = reinterpret_cast<PFN_vkDebugReportCallbackEXT>(vulkanDebugCallback);
+		VULKAN_CALL(createDebugCb(_private->instance, &debugInfo, nullptr, &_private->debugCallback));
+	}
+#endif
 
 	auto physicalDevices = enumerateVulkanObjects<VkPhysicalDevice>(_private->instance, vkEnumeratePhysicalDevices);
 	ET_ASSERT(!physicalDevices.empty());
@@ -99,12 +151,7 @@ void VulkanRenderer::init(const RenderContextParameters& params)
 
 	VkSemaphoreCreateInfo semaphoreInfo = { VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO };
 	VULKAN_CALL(vkCreateSemaphore(_private->device, &semaphoreInfo, nullptr, &_private->semaphores.render));
-	VULKAN_CALL(vkCreateSemaphore(_private->device, &semaphoreInfo, nullptr, &_private->semaphores.present));
-
-	_private->submitInfo.signalSemaphoreCount = 1;
-	_private->submitInfo.pSignalSemaphores = &_private->semaphores.render;
-	_private->submitInfo.waitSemaphoreCount = 1;
-	_private->submitInfo.pWaitSemaphores = &_private->semaphores.present;
+	VULKAN_CALL(vkCreateSemaphore(_private->device, &semaphoreInfo, nullptr, &_private->semaphores.imageAvailable));
 
 	HWND window = reinterpret_cast<HWND>(application().context().objects[0]);
 	_private->swapchain.init(_private->vulkan(), params, window);
@@ -137,7 +184,7 @@ void VulkanRenderer::present()
 	info.swapchainCount = 1;
 	info.pSwapchains = &_private->swapchain.swapchain;
 	info.pImageIndices = &_private->swapchain.currentImageIndex;
-	info.waitSemaphoreCount = 1;
+	info.waitSemaphoreCount = 0;
 	info.pWaitSemaphores = &_private->semaphores.render;
 	VULKAN_CALL(vkQueuePresentKHR(_private->queue, &info));
 }
@@ -175,12 +222,14 @@ PipelineState::Pointer VulkanRenderer::createPipelineState(RenderPass::Pointer, 
 
 RenderPass::Pointer VulkanRenderer::allocateRenderPass(const RenderPass::ConstructionInfo& info)
 {
-	return VulkanRenderPass::Pointer::create(info);
+	return VulkanRenderPass::Pointer::create(_private->vulkan(), info);
 }
 
-void VulkanRenderer::submitRenderPass(RenderPass::Pointer)
+void VulkanRenderer::submitRenderPass(RenderPass::Pointer pass)
 {
-
+	VulkanRenderPass::Pointer vkPass = pass;
+	vkPass->endRenderPass();
+	vkPass->submit();
 }
 
 void VulkanRenderer::drawIndexedPrimitive(PrimitiveType, IndexArrayFormat, uint32_t first, uint32_t count)
