@@ -164,6 +164,7 @@
     <ClInclude Include="..\..\include\et\rendering\texturefactory.h" />
     <ClInclude Include="..\..\include\et\rendering\vertexarrayobject.h" />
     <ClInclude Include="..\..\include\et\rendering\vertexbufferfactory.h" />
+    <ClInclude Include="..\..\include\et\rendering\vulkan\vulkan.h" />
     <ClInclude Include="..\..\include\et\rendering\vulkan\vulkan\GLSL.std.450.h" />
     <ClInclude Include="..\..\include\et\rendering\vulkan\vulkan\icd-spv.h" />
     <ClInclude Include="..\..\include\et\rendering\vulkan\vulkan\spirv.h" />
@@ -291,6 +292,7 @@
     <ClCompile Include="..\..\source-base\rendering\opengl\opengl_vertexbuffer.cpp" />
     <ClCompile Include="..\..\source-base\rendering\rendering.cpp" />
     <ClCompile Include="..\..\source-base\rendering\vertexbufferfactory.cpp" />
+    <ClCompile Include="..\..\source-base\rendering\vulkan\vulkan.cpp" />
     <ClCompile Include="..\..\source-base\rendering\vulkan\vulkan_indexbuffer.cpp" />
     <ClCompile Include="..\..\source-base\rendering\vulkan\vulkan_pipelinestate.cpp" />
     <ClCompile Include="..\..\source-base\rendering\vulkan\vulkan_program.cpp" />
@@ -375,7 +377,7 @@
       <SubSystem>Windows</SubSystem>
     </Link>
     <Lib>
-      <AdditionalDependencies>jansson.lib;jpeg.lib;ogg.lib;openal32.lib;png.lib;vorbis.lib;vorbisfile.lib;z.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>jansson.lib;jpeg.lib;ogg.lib;openal32.lib;png.lib;vorbis.lib;vorbisfile.lib;vulkan-1.lib;z.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreAllDefaultLibraries>true</IgnoreAllDefaultLibraries>
     </Lib>
   </ItemDefinitionGroup>

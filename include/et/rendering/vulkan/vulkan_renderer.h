@@ -11,6 +11,7 @@
 
 namespace et
 {
+	class VulkanRendererPrivate;
 	class VulkanRenderer : public RenderInterface
 	{
 	public:
@@ -20,8 +21,8 @@ namespace et
 		RenderingAPI api() const override
 			{  return RenderingAPI::Vulkan; }
 
-		VulkanRenderer(RenderContext* rc) : 
-			RenderInterface(rc) { }
+		VulkanRenderer(RenderContext* rc);
+		~VulkanRenderer();
 
 		void init(const RenderContextParameters& params);
 		void shutdown();
@@ -59,5 +60,8 @@ namespace et
 		 * Pipeline state
 		 */
         PipelineState::Pointer createPipelineState(RenderPass::Pointer, Material::Pointer, VertexArrayObject::Pointer);
+	
+	private:
+		ET_DECLARE_PIMPL(VulkanRenderer, 1024);
 	};
 }

@@ -683,6 +683,9 @@
     <ClInclude Include="..\..\include\et\rendering\dx12\dx12_renderer.h">
       <Filter>Header Files\rendering\dx12</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\vulkan\vulkan.h">
+      <Filter>Header Files\rendering\vulkan</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\source-base\app\application.cpp">
@@ -1017,6 +1020,9 @@
     </ClCompile>
     <ClCompile Include="..\..\source-base\rendering\dx12\dx12_vertexbuffer.cpp">
       <Filter>Source Files\rendering\dx12</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\rendering\vulkan\vulkan.cpp">
+      <Filter>Source Files\rendering\vulkan</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
