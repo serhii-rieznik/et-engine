@@ -15,6 +15,9 @@
 #include <et/rendering/metal/metal_program.h>
 #include <et/rendering/metal/metal_pipelinestate.h>
 
+@interface CAMetalLayer(ShutUpDisplay) @end
+@implementation CAMetalLayer(ShutUpDisplay) - (void)display { } @end
+
 namespace et
 {
 
@@ -57,11 +60,28 @@ void MetalRenderer::shutdown()
 
 void MetalRenderer::begin()
 {
-	_private->metal.mainDrawable = [_private->metal.layer nextDrawable];
-	ET_ASSERT(_private->metal.mainDrawable != nil);
+	MetalState& mtl = _private->metal;
 
-	_private->metal.mainCommandBuffer = [_private->metal.queue commandBuffer];
-	ET_ASSERT(_private->metal.mainCommandBuffer != nil);
+	mtl.mainDrawable = [mtl.layer nextDrawable];
+	ET_ASSERT(mtl.mainDrawable != nil);
+
+	id<MTLTexture> mainTexture = mtl.mainDrawable.texture;
+
+	if ((mtl.defaultDepthBuffer == nil) ||
+		(mainTexture.width != mtl.defaultDepthBuffer.width) ||
+		(mainTexture.height != mtl.defaultDepthBuffer.height))
+	{
+		MTLTextureDescriptor* depthDesc = [MTLTextureDescriptor
+										   texture2DDescriptorWithPixelFormat:MTLPixelFormatDepth32Float
+										   width:mainTexture.width height:mainTexture.height mipmapped:NO];
+		depthDesc.usage = MTLTextureUsageRenderTarget;
+		depthDesc.storageMode = MTLStorageModePrivate;
+		mtl.defaultDepthBuffer = [mtl.device newTextureWithDescriptor:depthDesc];
+		ET_OBJC_RELEASE(depthDesc);
+	}
+
+	mtl.mainCommandBuffer = [mtl.queue commandBuffer];
+	ET_ASSERT(mtl.mainCommandBuffer != nil);
 }
 
 void MetalRenderer::present()

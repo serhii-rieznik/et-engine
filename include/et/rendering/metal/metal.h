@@ -27,6 +27,8 @@ struct MetalState
 
 	id<MTLCommandBuffer> mainCommandBuffer = nil;
 	id<CAMetalDrawable> mainDrawable = nil;
+
+	id<MTLTexture> defaultDepthBuffer = nil;
 };
     
 struct MetalNativeProgram
@@ -80,6 +82,7 @@ namespace metal
     MTLPrimitiveType primitiveTypeValue(PrimitiveType);
     MTLPrimitiveTopologyClass primitiveTypeToTopology(PrimitiveType);
     MTLVertexFormat dataTypeToVertexFormat(DataType);
+	MTLCompareFunction compareFunctionValue(CompareFunction);
 }
 
 }

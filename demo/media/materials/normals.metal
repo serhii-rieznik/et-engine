@@ -10,11 +10,19 @@ struct VSOutput
 	float3 normal;
 };
 
-vertex VSOutput vertex_main(device VSInput* vsInput [[buffer(0)]], uint vertexId [[vertex_id]])
+struct Uniforms
+{
+	float4x4 viewProjection;
+	float4x4 transform;
+};
+
+vertex VSOutput vertex_main(device VSInput* vsInput [[buffer(0)]],
+							constant Uniforms& uniforms [[buffer(1)]],
+							uint vertexId [[vertex_id]])
 {
 	VSOutput result;
-	result.position = float4(0.1f * vsInput[vertexId].position, 1.0);
-	result.normal = vsInput[vertexId].normal;
+	result.position = uniforms.viewProjection * uniforms.transform * float4(vsInput[vertexId].position, 1.0);
+	result.normal = (uniforms.transform * float4(vsInput[vertexId].normal, 0.0)).xyz;
 	return result;
 }
 

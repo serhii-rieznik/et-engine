@@ -76,7 +76,30 @@ MTLPrimitiveTopologyClass primitiveTypeToTopology(PrimitiveType pt)
             return MTLPrimitiveTopologyClassPoint;
     }
 }
-    
+
+MTLCompareFunction compareFunctionValue(CompareFunction func)
+{
+	switch (func)
+	{
+		case CompareFunction::Never:
+			return MTLCompareFunctionNever;
+		case CompareFunction::Less:
+			return MTLCompareFunctionLess;
+		case CompareFunction::LessOrEqual:
+			return MTLCompareFunctionLessEqual;
+		case CompareFunction::Equal:
+			return MTLCompareFunctionEqual;
+		case CompareFunction::GreaterOrEqual:
+			return MTLCompareFunctionGreaterEqual;
+		case CompareFunction::Greater:
+			return MTLCompareFunctionGreater;
+		case CompareFunction::Always:
+			return MTLCompareFunctionAlways;
+		default:
+			ET_FAIL("Invalid CompareFunction specified.");
+	}
+}
+
 MTLVertexFormat dataTypeToVertexFormat(DataType value)
 {
     static const std::map<DataType, MTLVertexFormat> _map =

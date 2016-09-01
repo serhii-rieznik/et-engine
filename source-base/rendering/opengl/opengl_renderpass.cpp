@@ -35,7 +35,12 @@ void OpenGLRenderPass::pushRenderBatch(RenderBatch::Pointer batch)
 
 	vs->bind();
 	prog->bind();
-	batch->material()->texture("color_texture")->bind(0);
+
+	Texture::Pointer colorTexture = batch->material()->texture("color_texture");
+	if (colorTexture.valid())
+	{
+		colorTexture->bind(0);
+	}
 
 	etDrawElements(primitiveTypeValue(ib->primitiveType()), batch->numIndexes(), 
 		dataFormatValue(ib->dataFormat()), ib->indexOffset(batch->firstIndex()));

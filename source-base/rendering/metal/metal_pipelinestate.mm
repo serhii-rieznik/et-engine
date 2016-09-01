@@ -58,6 +58,7 @@ void MetalPipelineState::build()
     desc.vertexFunction = mtlProgram->nativeProgram().vertexFunction;
     desc.fragmentFunction = mtlProgram->nativeProgram().fragmentFunction;
     desc.colorAttachments[0].pixelFormat = MTLPixelFormatBGRA8Unorm;
+	desc.depthAttachmentPixelFormat = _private->metal.defaultDepthBuffer.pixelFormat;
     desc.inputPrimitiveTopology = metal::primitiveTypeToTopology(vertexStream()->indexBuffer()->primitiveType());
 	desc.vertexDescriptor = vertexDesc;
 
@@ -77,7 +78,7 @@ void MetalPipelineState::build()
     
     MTLDepthStencilDescriptor* dsDesc = [[MTLDepthStencilDescriptor alloc] init];
     dsDesc.depthWriteEnabled = depthState().depthWriteEnabled;
-    dsDesc.depthCompareFunction = MTLCompareFunctionAlways;
+	dsDesc.depthCompareFunction = metal::compareFunctionValue(depthState().compareFunction);
     _private->state.depthStencilState = [_private->metal.device newDepthStencilStateWithDescriptor:dsDesc];
     
     ET_OBJC_RELEASE(desc);

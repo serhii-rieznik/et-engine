@@ -20,6 +20,7 @@ void demo::MainController::applicationDidLoad(et::RenderContext* rc)
 	_camera.lookAt(et::vec3(20.0f));
 	createModels(rc);
 	loadProgram(rc);
+	applicationWillResizeContext(rc->size());
 	_frameTimeTimer.run();
 }
 
@@ -69,8 +70,7 @@ void demo::MainController::render(et::RenderContext* rc)
 	et::RenderPass::Pointer pass = rc->renderer()->allocateRenderPass(passInfo);
 	{
 		_transformMatrix *= rotationYXZMatrix(et::vec3(2.0f, 0.5f, -1.0f) * _frameTimeTimer.lap());
-		et::RenderBatch::Pointer batch = et::RenderBatch::Pointer::create(_defaultMaterial,
-			_testModel, _transformMatrix);
+		et::RenderBatch::Pointer batch = et::RenderBatch::Pointer::create(_defaultMaterial, _testModel, _transformMatrix);
 		pass->pushRenderBatch(batch);
 	}
 	rc->renderer()->submitRenderPass(pass);
