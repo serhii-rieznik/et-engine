@@ -9,29 +9,20 @@
 
 #if (ET_PLATFORM_MAC)
 
-#include <AppKit/NSApplication.h>
-#include <AppKit/NSWindow.h>
-#include <CoreVideo/CVDisplayLink.h>
+#import <CoreVideo/CVDisplayLink.h>
 
 #include <et/platform/platformtools.h>
 #include <et/core/threading.h>
-
 #include <et/rendering/base/helpers.h>
-
-#include <AppKit/NSOpenGL.h>
-#include <AppKit/NSOpenGLView.h>
 #include <et/rendering/opengl/opengl_renderer.h>
-#include <et/rendering/opengl/opengl_renderstate.h>
-
 #include <et/rendering/metal/metal.h>
 #include <et/rendering/metal/metal_renderer.h>
-#include <et/rendering/metal/metal_renderstate.h>
-
 #include <et/app/application.h>
 
-using namespace et;
+namespace et
+{
 
-class et::RenderContextPrivate
+class RenderContextPrivate
 {
 public:
 	CVDisplayLinkRef displayLink = nullptr;
@@ -56,12 +47,10 @@ RenderContext::RenderContext(const RenderContextParameters& inParams, Applicatio
 	if (application().parameters().renderingAPI == RenderingAPI::OpenGL)
 	{
 		_renderer = OpenGLRenderer::Pointer::create(this);
-		_renderState = OpenGLRenderState::Pointer::create();
 	}
 	else if (application().parameters().renderingAPI == RenderingAPI::Metal)
 	{
 		_renderer = MetalRenderer::Pointer::create(this);
-		_renderState = MetalRenderState::Pointer::create();
 	}
 
 	_renderer->init(_params);
@@ -191,4 +180,5 @@ CVReturn etDisplayLinkOutputCallback(CVDisplayLinkRef, const CVTimeStamp*, const
 	}
 }
 
+}
 #endif // ET_PLATFORM_MAC

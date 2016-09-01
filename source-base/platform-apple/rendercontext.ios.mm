@@ -15,7 +15,8 @@
 #include <et/rendering/rendercontext.h>
 #include <et/platform-ios/openglviewcontroller.h>
 
-using namespace et;
+namespace et
+{
 
 etOpenGLViewController* sharedOpenGLViewController = nil;
 
@@ -120,6 +121,8 @@ RenderContextPrivate::RenderContextPrivate(const RenderContextParameters& params
 #if !defined(ET_EMBEDDED_APPLICATION)
 	sharedOpenGLViewController = [[etOpenGLViewController alloc] initWithParameters:params];
 #endif
+}
+
 }
 
 #endif // ET_PLATFORM_IOS

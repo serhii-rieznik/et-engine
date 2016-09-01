@@ -51,7 +51,8 @@ namespace et
 	};
 }
 
-using namespace et;
+namespace et
+{
 
 ImagePicker::ImagePicker()
 {
@@ -351,4 +352,5 @@ void ImagePickerPrivate::pick(ImagePickerSource s)
 
 @end
 
+}
 #endif // ET_PLATFORM_IOS

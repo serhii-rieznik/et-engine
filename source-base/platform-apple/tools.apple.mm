@@ -12,17 +12,9 @@
 #include <et/core/hardware.h>
 #include <et/platform-apple/apple.h>
 
-#if (ET_PLATFORM_MAC)
-#	include <Foundation/NSFileManager.h>
-#	include <Foundation/NSPredicate.h>
-#	include <Foundation/NSString.h>
-#	include <Foundation/NSURL.h>
-#	include <Foundation/NSBundle.h>
-#	include <AppKit/NSWorkspace.h>
-#	include <AppKit/NSScreen.h>
-#elif (ET_PLATFORM_IOS)
-#	include <UIKit/UIApplication.h>
-#	include <UIKit/UIScreen.h>
+#if (ET_PLATFORM_IOS)
+#	import <UIKit/UIApplication.h>
+#	import <UIKit/UIScreen.h>
 #endif
 
 static uint64_t startTime = 0;

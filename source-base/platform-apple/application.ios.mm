@@ -20,7 +20,8 @@
 NSString* etKeyboardRequiredNotification = @"etKeyboardRequiredNotification";
 NSString* etKeyboardNotRequiredNotification = @"etKeyboardNotRequiredNotification";
 
-using namespace et;
+namespace et
+{
 
 void Application::platformInit()
 {
@@ -174,6 +175,8 @@ void Application::enableRemoteNotifications()
 	}
 	
 #endif
+}
+
 }
 
 #endif // ET_PLATFORM_IOS)

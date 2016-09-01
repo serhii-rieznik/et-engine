@@ -7,8 +7,10 @@
 
 #include <et-ext/rt/environment.h>
 
-using namespace et;
-using namespace et::rt;
+namespace et
+{
+namespace rt
+{
 
 EnvironmentEquirectangularMapSampler::EnvironmentEquirectangularMapSampler(
 	TextureDescription::Pointer data, const float4& scale) : _data(data), _scale(scale)
@@ -65,4 +67,7 @@ float4 DirectionalLightSampler::sampleInDirection(const float4& inDirection)
 {
 	float_type dp = std::max(0.0f, inDirection.dot(_direction));
     return _color * std::pow(dp, 128.0f);
+}
+
+}
 }

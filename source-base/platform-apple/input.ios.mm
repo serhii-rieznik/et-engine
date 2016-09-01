@@ -9,10 +9,10 @@
 
 #if (ET_PLATFORM_IOS)
 
-#include <Foundation/NSNotification.h>
 #include <et/input/input.h>
 
-using namespace et;
+namespace et
+{
 
 extern NSString* etKeyboardRequiredNotification;
 extern NSString* etKeyboardNotRequiredNotification;
@@ -38,4 +38,5 @@ void Input::deactivateSoftwareKeyboard()
 		postNotificationName:etKeyboardNotRequiredNotification object:nil];
 }
 
+}
 #endif // ET_PLATFORM_IOS

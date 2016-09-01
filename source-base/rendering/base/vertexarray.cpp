@@ -8,7 +8,8 @@
 #include <et/core/serialization.h>
 #include <et/rendering/base/vertexarray.h>
 
-using namespace et;
+namespace et
+{
 
 VertexArray::VertexArray(const VertexDeclaration& decl, uint32_t size) : _size(size),
 	_decl(decl.interleaved()), _smoothing(VertexAttributeUsage::Smoothing, DataType::Int, size)
@@ -121,4 +122,6 @@ VertexArray* VertexArray::duplicate()
 		c->copyTo(result->chunk(c->usage()).reference());
 
 	return result;
+}
+
 }

@@ -24,7 +24,8 @@ public:
 		{ rc->resized(sz); }
 };
 
-using namespace et;
+namespace et
+{
 
 @interface etOpenGLView()
 {
@@ -334,4 +335,5 @@ using namespace et;
 
 @end
 
+}
 #endif // ET_PLATFORM_IOS

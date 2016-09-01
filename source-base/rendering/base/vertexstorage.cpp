@@ -8,7 +8,8 @@
 #include <et/core/datastorage.h>
 #include <et/rendering/base/vertexstorage.h>
 
-using namespace et;
+namespace et
+{
 
 class et::VertexStoragePrivate
 {
@@ -110,5 +111,7 @@ void VertexStorage::resize(uint32_t sz)
 VertexStoragePrivate::VertexStoragePrivate(const VertexDeclaration& d, uint32_t cap) :
 	decl(d), data(d.totalSize() * cap, 0), capacity(cap)
 {
+
+}
 
 }

@@ -9,22 +9,11 @@
 
 #if (ET_PLATFORM_MAC)
 
-#include <AppKit/NSApplication.h>
-#include <AppKit/NSMenu.h>
-#include <AppKit/NSWindow.h>
-#include <AppKit/NSAlert.h>
-
 #include <et/core/base64.h>
 #include <et/core/json.h>
 #include <et/platform-apple/context_osx.h>
 #include <et/app/application.h>
 #include <et/rendering/rendercontext.h>
-
-using namespace et;
-
-/*
- * etApplicationDelegate Interface
- */
 
 @interface etApplicationDelegate : NSObject<NSApplicationDelegate>
 {
@@ -33,6 +22,9 @@ using namespace et;
 }
 
 @end
+
+namespace et
+{
 
 /*
  * Application implementation
@@ -171,18 +163,19 @@ void Application::enableRemoteNotifications()
 		NSRemoteNotificationTypeSound | NSRemoteNotificationTypeAlert];
 }
 
+} // namespace et
+
 /*
  *
  * etApplicationDelegate implementation
  *
  */
-
 @implementation etApplicationDelegate
 
 - (void)handleURLEventWithURL:(NSString*)url
 {
 	et::Dictionary systemEvent;
-	systemEvent.setStringForKey(kSystemEventType, kSystemEventOpenURL);
+	systemEvent.setStringForKey(et::kSystemEventType, et::kSystemEventOpenURL);
 	systemEvent.setStringForKey("url", std::string([url UTF8String]));
 	et::application().systemEvent.invokeInMainRunLoop(systemEvent);
 }
@@ -210,13 +203,13 @@ void Application::enableRemoteNotifications()
 		andSelector:@selector(handleURLEvent:withReplyEvent:)
 		forEventClass:kInternetEventClass andEventID:kAEGetURL];
 
-	et::application().systemEvent.invokeInMainRunLoop(Dictionary());
+	et::application().systemEvent.invokeInMainRunLoop(et::Dictionary());
 }
 
 - (void)applicationDidFinishLaunching:(NSNotification*)notification
 {
     (void)notification;
-    application().load();
+    et::application().load();
 	
 	_launchingFinished = YES;
 		
@@ -233,13 +226,13 @@ void Application::enableRemoteNotifications()
 - (void)applicationWillBecomeActive:(NSNotification*)notification
 {
     (void)notification;
-    application().setActive(true);
+    et::application().setActive(true);
 }
 
 - (void)applicationWillResignActive:(NSNotification*)notification
 {
     (void)notification;
-    application().setActive(false);
+    et::application().setActive(false);
 }
 
 - (void)applicationWillTerminate:(NSNotification*)notification
@@ -256,11 +249,11 @@ void Application::enableRemoteNotifications()
 - (void)application:(NSApplication *)application didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken
 {
 	(void)application;
-	BinaryDataStorage dataWrapper(reinterpret_cast<const unsigned char*>([deviceToken bytes]), [deviceToken length]);
+	et::BinaryDataStorage dataWrapper(reinterpret_cast<const unsigned char*>([deviceToken bytes]), [deviceToken length]);
 	
-	Dictionary event;
-	event.setStringForKey(kSystemEventType, kSystemEventRemoteNotificationStatusChanged);
-	event.setStringForKey("token", base64::encode(dataWrapper));
+	et::Dictionary event;
+	event.setStringForKey(et::kSystemEventType, et::kSystemEventRemoteNotificationStatusChanged);
+	event.setStringForKey("token", et::base64::encode(dataWrapper));
 	
 	et::application().systemEvent.invokeInMainRunLoop(event);
 }
@@ -269,8 +262,8 @@ void Application::enableRemoteNotifications()
 {
 	(void)application;
 	
-	Dictionary event;
-	event.setStringForKey(kSystemEventType, kSystemEventRemoteNotificationStatusChanged);
+	et::Dictionary event;
+	event.setStringForKey(et::kSystemEventType, et::kSystemEventRemoteNotificationStatusChanged);
 	event.setStringForKey("error", std::string([[error localizedDescription] UTF8String]));
 	et::application().systemEvent.invokeInMainRunLoop(event);
 }
@@ -283,15 +276,15 @@ void Application::enableRemoteNotifications()
 	NSData* jsonData = [NSJSONSerialization dataWithJSONObject:userInfo options:NSJSONWritingPrettyPrinted error:&error];
 	if (jsonData != nil)
 	{
-		Dictionary systemEvent;
-		systemEvent.setStringForKey(kSystemEventType, kSystemEventRemoteNotification);
+		et::Dictionary systemEvent;
+		systemEvent.setStringForKey(et::kSystemEventType, et::kSystemEventRemoteNotification);
 		
-		VariantClass vc = VariantClass::Invalid;
-		auto object = json::deserialize(reinterpret_cast<const char*>([jsonData bytes]), [jsonData length], vc);
-		if (vc == VariantClass::Invalid)
+		et::VariantClass vc = et::VariantClass::Invalid;
+		auto object = et::json::deserialize(reinterpret_cast<const char*>([jsonData bytes]), [jsonData length], vc);
+		if (vc == et::VariantClass::Invalid)
 		{
-			log::error("Unable to get remote notification info.");
-			systemEvent.setObjectForKey("info", Dictionary());
+			et::log::error("Unable to get remote notification info.");
+			systemEvent.setObjectForKey("info", et::Dictionary());
 		}
 		else
 		{

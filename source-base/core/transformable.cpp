@@ -8,7 +8,8 @@
 #include <et/geometry/geometry.h>
 #include <et/core/transformable.h>
 
-using namespace et;
+namespace et
+{
 
 const mat4& ComponentTransformable::transform()
 {
@@ -190,4 +191,6 @@ const quaternion& ComponentTransformable::orientation()
 		setTransform(_cachedTransform);
 
 	return _orientation; 
+}
+
 }

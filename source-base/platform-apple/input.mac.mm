@@ -10,11 +10,8 @@
 
 #if (ET_PLATFORM_MAC)
 
-#include <AppKit/NSApplication.h>
-#include <AppKit/NSWindow.h>
-#include <AppKit/NSView.h>
-
-using namespace et;
+namespace et
+{
 
 bool Input::canGetCurrentPointerInfo()
 {
@@ -51,6 +48,8 @@ void Input::activateSoftwareKeyboard()
 
 void Input::deactivateSoftwareKeyboard()
 {
+}
+
 }
 
 #endif // ET_PLATFORM_MAC

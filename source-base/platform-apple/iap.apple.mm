@@ -8,7 +8,8 @@
 #include <StoreKit/StoreKit.h>
 #include <et/platform-apple/iap.h>
 
-using namespace et;
+namespace et
+{
 
 @interface SharedPurchasesManager : NSObject <SKPaymentTransactionObserver, SKProductsRequestDelegate>
 {
@@ -405,3 +406,5 @@ Dictionary PurchasesManager::receiptData() const
 }
 
 @end
+
+}

@@ -8,7 +8,8 @@
 #include <et/core/serialization.h>
 #include <et/rendering/base/vertexdatachunk.h>
 
-using namespace et;
+namespace et
+{
 
 VertexDataChunkData::VertexDataChunkData(VertexAttributeUsage aUsage, DataType aType, uint32_t aSize) :
 	_usage(aUsage), _type(aType)
@@ -51,4 +52,6 @@ void VertexDataChunkData::copyTo(VertexDataChunkData& c) const
 	c._usage = _usage;
 	c._type = _type;
 	c._data = _data;
+}
+
 }

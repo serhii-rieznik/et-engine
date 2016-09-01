@@ -8,7 +8,8 @@
 #include <et/core/serialization.h>
 #include <et/rendering/base/vertexdeclaration.h>
 
-using namespace et;
+namespace et
+{
 
 static VertexElement _emptyVertexElement;
 
@@ -113,4 +114,6 @@ bool VertexDeclaration::hasSameElementsAs(const VertexDeclaration& r) const
 	}
 
 	return true;
+}
+
 }

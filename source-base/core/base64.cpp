@@ -7,7 +7,8 @@
 
 #include <et/core/base64.h>
 
-using namespace et;
+namespace et
+{
 
 static const std::string base64_chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
@@ -165,4 +166,6 @@ std::string base64::encode(const BinaryDataStorage& bytes_to_encode)
 	
 	return ret;
 	
+}
+
 }

@@ -13,7 +13,8 @@
 #include <et/opengl/opengl.h>
 #include <et/platform-ios/openglviewcontroller.h>
 
-using namespace et;
+namespace et
+{
 
 extern NSString* etKeyboardRequiredNotification;
 extern NSString* etKeyboardNotRequiredNotification;
@@ -256,4 +257,5 @@ extern NSString* etKeyboardNotRequiredNotification;
 
 @end
 
+}
 #endif // ET_PLATFORM_IOS

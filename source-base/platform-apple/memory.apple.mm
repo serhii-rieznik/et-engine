@@ -9,9 +9,10 @@
 #include <objc/runtime.h>
 #include <et/core/memory.h>
 
-using namespace et;
+namespace et
+{
 
-size_t et::memoryUsage()
+size_t memoryUsage()
 {
 	struct task_basic_info info = { };
 	mach_msg_type_number_t size = sizeof(info);
@@ -19,7 +20,7 @@ size_t et::memoryUsage()
 	return (kerr == KERN_SUCCESS) ? info.resident_size : 0;
 }
 
-size_t et::availableMemory()
+size_t availableMemory()
 {
 	mach_port_t host_port = mach_host_self();
 	mach_msg_type_number_t host_size = sizeof(vm_statistics_data_t) / sizeof(integer_t);
@@ -32,14 +33,16 @@ size_t et::availableMemory()
 	return vm_stat.free_count * pagesize;
 }
 
-void* et::allocateVirtualMemory(size_t size)
+void* allocateVirtualMemory(size_t size)
 {
 	vm_address_t* result = nullptr;
 	vm_allocate(mach_task_self(), reinterpret_cast<vm_address_t*>(&result), size, VM_FLAGS_ANYWHERE);
 	return result;
 }
 
-void et::deallocateVirtualMemory(void* ptr, size_t size)
+void deallocateVirtualMemory(void* ptr, size_t size)
 {
 	vm_deallocate(mach_task_self(), reinterpret_cast<vm_address_t>(ptr), size);
+}
+
 }

@@ -10,13 +10,8 @@
 #include <et/locale/locale.hpp>
 #include <et/platform-apple/apple.h>
 
-#include <Foundation/NSDateFormatter.h>
-#include <Foundation/NSLocale.h>
-#include <Foundation/NSString.h>
-#include <Foundation/NSDate.h>
-#include <Foundation/NSBundle.h>
-
-using namespace et;
+namespace et
+{
 
 std::string locale::time()
 {
@@ -51,4 +46,6 @@ std::string locale::currentLocale()
 {
     NSString* localeId = [[[[NSBundle mainBundle] preferredLocalizations] objectAtIndex:0] lowercaseString];
 	return std::string([localeId cStringUsingEncoding:NSUTF8StringEncoding]);
+}
+
 }

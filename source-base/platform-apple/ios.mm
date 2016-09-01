@@ -31,7 +31,8 @@
 
 @end
 
-using namespace et;
+namespace et
+{
 
 static UIDocumentInteractionController* sharedInteractionController = nil;
 
@@ -225,4 +226,5 @@ void et::alert(const std::string& title, const std::string& message, const std::
 
 @end
 
+}
 #endif // ET_PLATFORM_IOS

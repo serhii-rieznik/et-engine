@@ -79,7 +79,8 @@ public:
     size_t flushCounter = 0;
 };
 
-using namespace et;
+namespace et
+{
 
 Raytrace::Raytrace()
 {
@@ -866,4 +867,6 @@ void RaytracePrivate::flushToForwardTraceBuffer(const Vector<rt::float4>& localB
 		vec2i px(static_cast<int>(i % viewportSize.x), static_cast<int>(i / viewportSize.x));
 		owner->output(px, output);
     }
+}
+
 }

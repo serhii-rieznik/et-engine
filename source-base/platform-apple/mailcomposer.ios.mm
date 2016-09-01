@@ -13,7 +13,8 @@
 #include <et/platform-apple/objc.h>
 #include <et/platform-ios/mailcomposer.h>
 
-using namespace et;
+namespace et
+{
 
 class et::MailComposerPrivate
 {
@@ -152,4 +153,5 @@ bool MailComposer::canSendEmail()
 	return [MFMailComposeViewController canSendMail];
 }
 
+}
 #endif // ET_PLATFORM_IOS

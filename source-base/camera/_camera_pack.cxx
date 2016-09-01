@@ -1,5 +1,0 @@
-#include "camera.cpp"
-#include "cameracontroller.cpp"
-#include "cameramovingcontroller.cpp"
-#include "cameraorbitcontroller.cpp"
-#include "frustum.cpp"

@@ -58,13 +58,17 @@ void MetalRenderer::shutdown()
 void MetalRenderer::begin()
 {
 	_private->metal.mainDrawable = [_private->metal.layer nextDrawable];
+	ET_ASSERT(_private->metal.mainDrawable != nil);
+
 	_private->metal.mainCommandBuffer = [_private->metal.queue commandBuffer];
+	ET_ASSERT(_private->metal.mainCommandBuffer != nil);
 }
 
 void MetalRenderer::present()
 {
 	[_private->metal.mainCommandBuffer presentDrawable:_private->metal.mainDrawable];
 	[_private->metal.mainCommandBuffer commit];
+	[_private->metal.mainCommandBuffer waitUntilCompleted];
 	
 	_private->metal.mainCommandBuffer = nil;
 	_private->metal.mainDrawable = nil;
@@ -109,13 +113,6 @@ VertexArrayObject::Pointer MetalRenderer::createVertexArrayObject(const std::str
 /*
  * Textures
  */
-Texture::Pointer MetalRenderer::loadTexture(const std::string& fileName, ObjectsCache& /* cache */)
-{
-    TextureDescription::Pointer desc = TextureDescription::Pointer::create();
-    desc->load(fileName);
-    return createTexture(desc);
-}
-
 Texture::Pointer MetalRenderer::createTexture(TextureDescription::Pointer desc)
 {
     return MetalTexture::Pointer::create(_private->metal, desc);
@@ -139,7 +136,8 @@ PipelineState::Pointer MetalRenderer::createPipelineState(RenderPass::Pointer pa
     VertexArrayObject::Pointer vs)
 {
     PipelineState::Pointer result = MetalPipelineState::Pointer::create(_private->metal);
-    result->setDepthState(mtl->depthState());
+	result->setInputLayout(vs->vertexBuffer()->declaration());
+	result->setDepthState(mtl->depthState());
     result->setBlendState(mtl->blendState());
     result->setCullMode(mtl->cullMode());
     result->setProgram(mtl->program());

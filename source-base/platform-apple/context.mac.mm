@@ -11,14 +11,6 @@
 #include <et/app/application.h>
 #include <et/input/input.h>
 
-#include <AppKit/NSWindow.h>
-#include <AppKit/NSWindowController.h>
-#include <AppKit/NSScreen.h>
-#include <AppKit/NSMenu.h>
-#include <AppKit/NSView.h>
-#include <AppKit/NSTrackingArea.h>
-#include <AppKit/NSOpenGLView.h>
-
 @interface etWindowController : NSWindowController<NSWindowDelegate>
 
 @end

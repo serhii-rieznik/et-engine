@@ -5,9 +5,6 @@
  *
  */
 
-#include <Foundation/NSString.h>
-#include <Foundation/NSFileHandle.h>
-
 #include <et/core/et.h>
 #include <et/platform-apple/apple.h>
 
@@ -19,24 +16,27 @@
 										va_end(args); \
 									}
 
-using namespace et;
-using namespace log;
+namespace et
+{
 
-void et::log::addOutput(Output::Pointer ptr)
+namespace log
+{
+
+void addOutput(Output::Pointer ptr)
 {
 	sharedLogOutputs().push_back(ptr);
 }
 
-void et::log::removeOutput(Output::Pointer ptr)
+void removeOutput(Output::Pointer ptr)
 {
 	sharedLogOutputs().erase(std::remove_if(sharedLogOutputs().begin(), sharedLogOutputs().end(),
 		[ptr](Output::Pointer out) { return out == ptr; }), sharedLogOutputs().end());
 }
 
-void et::log::debug(const char* format, ...) { PASS_TO_OUTPUTS(debug) }
-void et::log::info(const char* format, ...) { PASS_TO_OUTPUTS(info) }
-void et::log::warning(const char* format, ...) { PASS_TO_OUTPUTS(warning) }
-void et::log::error(const char* format, ...) { PASS_TO_OUTPUTS(error) }
+void debug(const char* format, ...) { PASS_TO_OUTPUTS(debug) }
+void info(const char* format, ...) { PASS_TO_OUTPUTS(info) }
+void warning(const char* format, ...) { PASS_TO_OUTPUTS(warning) }
+void error(const char* format, ...) { PASS_TO_OUTPUTS(error) }
 
 ConsoleOutput::ConsoleOutput() :
 	FileOutput(stdout)
@@ -141,4 +141,8 @@ void FileOutput::error(const char* format, va_list args)
 {
 	fprintf(_file, "ERROR: ");
 	info(format, args);
+}
+
+}
+
 }

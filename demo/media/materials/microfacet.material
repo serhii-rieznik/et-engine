@@ -1,8 +1,10 @@
 {
 	"name" : "diffuse",
 
-	"vertex-source" : "default.vsh",
-	"fragment-source" : "microfacet.fsh",
+	"vertex-source-gl" : "default.vsh",
+	"fragment-source-gl" : "microfacet.fsh",
+
+	"program-source-metal" : "default.metal",
 
 	"defines" : ["MICROFACET_MATERIAL"],
 

@@ -10,85 +10,80 @@
 #	include <external/vorbis/vorbisfile.h>
 #endif
 
-
 #include <et/core/containers.h>
 #include <et/sound/sound.h>
 
 namespace et
 {
-    namespace audio
-    {
-		const int BuffersCount = 3;
-		const int BufferDuration = 4;
-		
-        class TrackPrivate
-        {
-		public:
-			TrackPrivate(const std::string& filename);
-			~TrackPrivate();
-			
-			void loadWAVE();
-			bool fillNextBuffer();
+namespace audio
+{
 
-			void rewind();
-			void rewindPCM();
-			bool fillNextPCMBuffer();
+const int BuffersCount = 3;
+const int BufferDuration = 4;
 
-#		if !defined(ET_DISABLE_OGG)
-			void loadOGG();
-			void rewindOGG();
-			bool fillNextOGGBuffer();
-#		endif
+class TrackPrivate
+{
+public:
+	TrackPrivate(const std::string& filename);
+	~TrackPrivate();
+	
+	void loadWAVE();
+	bool fillNextBuffer();
 
-			enum SourceFormat
-			{
-				SourceFormat_Undefined,
-				SourceFormat_PCM,
+	void rewind();
+	void rewindPCM();
+	bool fillNextPCMBuffer();
 
-#			if !defined(ET_DISABLE_OGG)
-				SourceFormat_OGG,
-#			endif
-			};
-			
-		public:
-			Track* owner = nullptr;
-			
-			InputStream::Pointer stream;
-			std::string _filename;
-			
-			float duration = 0.0f;
-			
-			size_t channels = 0;
-			size_t bitDepth = 0;
-			size_t format = 0;
-			size_t sampleSize = 0;
-			size_t numSamples = 0;
-			
-			size_t pcmDataSize = 0;
-			size_t pcmStartPosition = 0;
-			size_t pcmReadOffset = 0;
-			size_t pcmBufferSize = 0;
-			
-			ALsizei sampleRate = 0;
-			ALuint buffers[BuffersCount];
-			
-			int bufferIndex = 0;
-			int buffersCount = 0;
-			int totalBuffers = 0;
-			
-#		if !defined(ET_DISABLE_OGG)
-			OggVorbis_File oggFile;
-			ov_callbacks oggCallbacks;
-			size_t oggStartPosition = 0;
-#		endif			
+#if !defined(ET_DISABLE_OGG)
+	void loadOGG();
+	void rewindOGG();
+	bool fillNextOGGBuffer();
+#endif
 
-			SourceFormat sourceFormat = SourceFormat_Undefined;
-        };
-    }
-}
+	enum SourceFormat
+	{
+		SourceFormat_Undefined,
+		SourceFormat_PCM,
 
-using namespace et;
-using namespace et::audio;
+#if !defined(ET_DISABLE_OGG)
+		SourceFormat_OGG,
+#endif
+	};
+	
+public:
+	Track* owner = nullptr;
+	
+	InputStream::Pointer stream;
+	std::string _filename;
+	
+	float duration = 0.0f;
+	
+	size_t channels = 0;
+	size_t bitDepth = 0;
+	size_t format = 0;
+	size_t sampleSize = 0;
+	size_t numSamples = 0;
+	
+	size_t pcmDataSize = 0;
+	size_t pcmStartPosition = 0;
+	size_t pcmReadOffset = 0;
+	size_t pcmBufferSize = 0;
+	
+	ALsizei sampleRate = 0;
+	ALuint buffers[BuffersCount];
+	
+	int bufferIndex = 0;
+	int buffersCount = 0;
+	int totalBuffers = 0;
+	
+#if !defined(ET_DISABLE_OGG)
+	OggVorbis_File oggFile;
+	ov_callbacks oggCallbacks;
+	size_t oggStartPosition = 0;
+#endif
+
+	SourceFormat sourceFormat = SourceFormat_Undefined;
+};
 
 void checkOGGError(long, const char*, const char* filename);
 
@@ -599,4 +594,8 @@ void checkOGGError(long code, const char* tag, const char* filename)
 			break;
 	}
 }
+
+}
+}
+
 #endif

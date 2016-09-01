@@ -9,7 +9,8 @@
 #include <et/app/application.h>
 #include <et/app/backgroundthread.h>
 
-using namespace et;
+namespace et
+{
 
 void BackgroundRunLoop::setOwner(BackgroundThread* owner)
 	{ _owner = owner; }
@@ -43,4 +44,6 @@ void BackgroundThread::main()
 		}
 	}
 	unregisterRunLoop(_runLoop);
+}
+
 }

@@ -38,25 +38,30 @@ void MetalPipelineState::build()
 {
     MetalProgram::Pointer mtlProgram = program();
     const VertexDeclaration& decl = inputLayout();
-    
-    MTLRenderPipelineDescriptor* desc = [[MTLRenderPipelineDescriptor alloc] init];
+
+	MTLVertexDescriptor* vertexDesc = [MTLVertexDescriptor vertexDescriptor];
+
+	vertexDesc.layouts[0].stride = decl.totalSize();
+	vertexDesc.layouts[0].stepRate = 1;
+	vertexDesc.layouts[0].stepFunction = MTLVertexStepFunctionPerVertex;
+
+	NSUInteger index = 0;
+	for (const VertexElement& element : decl.elements())
+	{
+		vertexDesc.attributes[index].format = metal::dataTypeToVertexFormat(element.type());
+		vertexDesc.attributes[index].offset = element.offset();
+		vertexDesc.attributes[index].bufferIndex = 0;
+		++index;
+	}
+
+	MTLRenderPipelineDescriptor* desc = [[MTLRenderPipelineDescriptor alloc] init];
     desc.vertexFunction = mtlProgram->nativeProgram().vertexFunction;
     desc.fragmentFunction = mtlProgram->nativeProgram().fragmentFunction;
     desc.colorAttachments[0].pixelFormat = MTLPixelFormatBGRA8Unorm;
     desc.inputPrimitiveTopology = metal::primitiveTypeToTopology(vertexStream()->indexBuffer()->primitiveType());
-    desc.vertexDescriptor = [MTLVertexDescriptor vertexDescriptor];
-    desc.vertexDescriptor.layouts[0].stride = decl.totalSize();
-    desc.vertexDescriptor.layouts[0].stepRate = 1;
-    desc.vertexDescriptor.layouts[0].stepFunction = MTLVertexStepFunctionPerVertex;
-    uint32_t index = 0;
-    for (const VertexElement& element : decl.elements())
-    {
-        desc.vertexDescriptor.attributes[index].format = metal::dataTypeToVertexFormat(element.type());
-        desc.vertexDescriptor.attributes[index].offset = element.offset();
-        desc.vertexDescriptor.attributes[index].bufferIndex = 0;
-    }
-    
-    NSError* error = nil;
+	desc.vertexDescriptor = vertexDesc;
+
+	NSError* error = nil;
     MTLRenderPipelineReflection* reflection = nil;
     
     _private->state.pipelineState = [_private->metal.device newRenderPipelineStateWithDescriptor:desc

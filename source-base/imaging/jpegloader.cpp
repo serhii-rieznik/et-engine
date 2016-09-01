@@ -5,7 +5,6 @@
  *
  */
 
-#include <basetsd.h>
 #include <et/imaging/jpegloader.h>
 #include <external/libjpeg/jpeglib.h>
 #include <setjmp.h>

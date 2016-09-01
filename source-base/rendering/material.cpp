@@ -12,8 +12,9 @@ using namespace et;
 
 namespace
 {
-	const std::string kVertexSource = "vertex-source";
-	const std::string kFragmentSource = "fragment-source";
+	const std::string kVertexSourceGL = "vertex-source-gl";
+	const std::string kFragmentSourceGL = "fragment-source-gl";
+	const std::string kProgramSourceMetal = "program-source-metal";
 	const std::string kDefines = "defines";
 	const std::string kRenderPriority = "render-priority";
 }
@@ -37,9 +38,29 @@ void Material::loadFromJson(const std::string& jsonString, const std::string& ba
 	auto name = obj.stringForKey(kName)->content;
 	auto cullMode = obj.stringForKey(kCullMode)->content;
 	auto definesArray = obj.arrayForKey(kDefines);
-	auto vertexSource = application().resolveFileName(obj.stringForKey(kVertexSource)->content);
-	auto fragmentSource = application().resolveFileName(obj.stringForKey(kFragmentSource)->content);
-	
+
+	std::string vertexSource;
+	std::string fragmentSource;
+
+	if (_renderer->api() == RenderingAPI::OpenGL)
+	{
+		vertexSource = application().resolveFileName(obj.stringForKey(kVertexSourceGL)->content);
+		fragmentSource = application().resolveFileName(obj.stringForKey(kFragmentSourceGL)->content);
+	}
+	else if (_renderer->api() == RenderingAPI::Metal)
+	{
+		vertexSource = application().resolveFileName(obj.stringForKey(kProgramSourceMetal)->content);
+	}
+	else
+	{
+		ET_FAIL("Not implemented");
+	}
+
+	if (fileExists(vertexSource))
+		vertexSource = loadTextFile(vertexSource);
+	if (fileExists(fragmentSource))
+		fragmentSource = loadTextFile(fragmentSource);
+
 	application().popSearchPaths();
 	
 	setName(name);
@@ -80,10 +101,7 @@ void Material::loadFromJson(const std::string& jsonString, const std::string& ba
 		}
 	}
 
-	Program::Pointer program = _renderer->createProgram(loadTextFile(vertexSource), loadTextFile(fragmentSource));
-	program->addOrigin(vertexSource);
-	program->addOrigin(fragmentSource);
-	setProgram(program);
+	setProgram(_renderer->createProgram(vertexSource, fragmentSource));
 }
 
 void Material::setBlendState(const BlendState& state)

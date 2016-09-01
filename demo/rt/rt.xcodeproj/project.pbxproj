@@ -8,7 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		5C31ABB61CE51E16008C9E03 /* bsdf.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5C31ABB51CE51E16008C9E03 /* bsdf.cpp */; };
-		5C3C4FF71C9E13A700C5B47A /* libet-static-mac.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5C3C4FEF1C9E135700C5B47A /* libet-static-mac.a */; };
+		5C9B587B1D68EF3B00136794 /* libet-static-mac.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5C3C4FEF1C9E135700C5B47A /* libet-static-mac.a */; };
 		5CE405F91CC6D3E400EA12EC /* raytraceobjects.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5CE405F81CC6D3E400EA12EC /* raytraceobjects.cpp */; };
 		6E225A771CB408D900AE27BD /* environment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6E225A731CB408D900AE27BD /* environment.cpp */; };
 		6E225A781CB408D900AE27BD /* integrator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6E225A741CB408D900AE27BD /* integrator.cpp */; };
@@ -71,13 +71,13 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5C9B587B1D68EF3B00136794 /* libet-static-mac.a in Frameworks */,
 				6E4CE9541D510B4700322956 /* QuartzCore.framework in Frameworks */,
 				6E4CE9521D510B4200322956 /* CoreVideo.framework in Frameworks */,
 				6E4CE9511D510B3A00322956 /* AppKit.framework in Frameworks */,
 				6E4CE94F1D510B3600322956 /* Metal.framework in Frameworks */,
 				6E4CE9501D510B3600322956 /* MetalKit.framework in Frameworks */,
 				6E4CE94C1D510B3200322956 /* OpenGL.framework in Frameworks */,
-				5C3C4FF71C9E13A700C5B47A /* libet-static-mac.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

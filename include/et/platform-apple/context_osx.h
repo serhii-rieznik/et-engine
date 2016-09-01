@@ -11,10 +11,10 @@
 
 namespace et
 {
-    class ApplicationContextFactoryOSX : public ApplicationContextFactory
+    class ApplicationContextFactoryOSX
     {
     public:
-        PlatformDependentContext createContextWithOptions(RenderingAPI, ContextOptions&) override;
-        void destroyContext(PlatformDependentContext) override;
+        PlatformDependentContext createContextWithOptions(RenderingAPI, ContextOptions&);
+        void destroyContext(PlatformDependentContext);
     };
 }

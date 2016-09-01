@@ -59,7 +59,7 @@ namespace et
 			{ return _distributedOrigins; }
 		
 		void addOrigin(const std::string& origin)
-			{ _distributedOrigins.push_back(origin); }
+			{ ET_ASSERT(!origin.empty()); _distributedOrigins.push_back(origin); }
 
 		bool canBeReloaded() const
 			{ return !(_origin.empty() && _distributedOrigins.empty()); }

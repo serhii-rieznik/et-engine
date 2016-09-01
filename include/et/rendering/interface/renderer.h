@@ -24,6 +24,8 @@ namespace et
 		RenderInterface(RenderContext* rc)
 			: _rc(rc) { }
 
+		virtual ~RenderInterface() = default;
+
 		RenderContext* rc() const
 			{ return _rc; }
 

@@ -9,11 +9,7 @@
 
 #if (ET_PLATFORM_MAC)
 
-#include <AppKit/NSAlert.h>
-#include <AppKit/NSOpenPanel.h>
 #include <et/platform-apple/apple.h>
-
-using namespace et;
 
 typedef void (^filePickerCallback)(__strong NSString* path);
 
@@ -24,12 +20,15 @@ typedef void (^filePickerCallback)(__strong NSString* path);
 	filePickerCallback _callback;
 }
 - (instancetype)initWithDefaultName:(NSString*)name fileTypes:(NSArray*)fileTypes
-	callback:(filePickerCallback)cb;
+						   callback:(filePickerCallback)cb;
 - (void)openFile;
 - (void)saveFile;
 @end
 
-void et::alert(const std::string& title, const std::string& message, const std::string& button, AlertType type)
+namespace et
+{
+
+void alert(const std::string& title, const std::string& message, const std::string& button, AlertType type)
 {
 #if (__MAC_OS_X_VERSION_MIN_REQUIRED >= __MAC_10_10)
 	NSAlert* alert = [[NSAlert alloc] init];
@@ -55,13 +54,13 @@ void et::alert(const std::string& title, const std::string& message, const std::
 #endif
 }
 
-bool et::canOpenURL(const std::string& s)
+bool canOpenURL(const std::string& s)
 {
 	return [[NSWorkspace sharedWorkspace] URLForApplicationToOpenURL:
 			[NSURL URLWithString:[NSString stringWithUTF8String:s.c_str()]]] != nil;
 }
 
-std::string et::selectFile(const StringList& allowedTypes, SelectFileMode mode, const std::string& defName)
+std::string selectFile(const StringList& allowedTypes, SelectFileMode mode, const std::string& defName)
 {
 	SEL selector = nil;
 	
@@ -89,6 +88,8 @@ std::string et::selectFile(const StringList& allowedTypes, SelectFileMode mode, 
 	
 	return result;
 }
+
+} // namespace et
 
 @implementation FilePicker
 

@@ -14,8 +14,10 @@
 #include <et/platform-apple/objc.h>
 #include <et/platform-ios/social.h>
 
-using namespace et;
-using namespace social;
+namespace et
+{
+namespace social
+{
 
 Event1<bool> et::social::notifications::sharingFinished = Event1<bool>();
 
@@ -120,5 +122,8 @@ void et::social::postToFacebook(const std::string& text, const std::string& path
 
 
 @end
+
+}
+}
 
 #endif // ET_PLATFORM_IOS

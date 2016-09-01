@@ -54,8 +54,15 @@ public:
     MetalNativeBuffer() = default;
     
     MetalNativeBuffer(MetalState& metal, const void* data, uint32_t size)
-        { _buffer = [metal.device newBufferWithBytes:data length:size options:MTLResourceCPUCacheModeDefaultCache]; }
-    
+	{
+		_buffer = [metal.device newBufferWithBytes:data length:size options:MTLResourceCPUCacheModeDefaultCache];
+	}
+
+	MetalNativeBuffer(MetalState& metal, uint32_t size)
+	{
+		_buffer = [metal.device newBufferWithLength:size options:MTLResourceCPUCacheModeDefaultCache];
+	}
+
     ~MetalNativeBuffer()
         { ET_OBJC_RELEASE(_buffer); }
     
@@ -76,4 +83,6 @@ namespace metal
 }
 
 }
+#else
+#	error This file should only be included in .mm
 #endif

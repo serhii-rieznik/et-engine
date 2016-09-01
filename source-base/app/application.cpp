@@ -8,12 +8,10 @@
 #include <et/rendering/rendercontext.h>
 #include <et/app/application.h>
 
-using namespace et;
-
 namespace et
 {
-	uint32_t randomInteger(uint32_t limit);
-}
+
+uint32_t randomInteger(uint32_t limit);
 
 Application::Application()
 {
@@ -293,38 +291,38 @@ namespace
 	}
 }
 
-Application& et::application()
+Application& application()
 {
     return Application::instance();
 }
 
-RunLoop& et::mainRunLoop()
+RunLoop& mainRunLoop()
 {
 	return application().mainRunLoop();
 }
 
-RunLoop& et::backgroundRunLoop()
+RunLoop& backgroundRunLoop()
 {
 	return application().backgroundRunLoop();
 }
 
-RunLoop& et::currentRunLoop()
+RunLoop& currentRunLoop()
 {
 	auto i = allRunLoops.find(threading::currentThread());
 	return (i == allRunLoops.end()) ? mainRunLoop() : *(i->second);
 }
 
-TimerPool::Pointer& et::mainTimerPool()
+TimerPool::Pointer& mainTimerPool()
 {
 	return application().mainRunLoop().firstTimerPool();
 }
 
-TimerPool::Pointer et::currentTimerPool()
+TimerPool::Pointer currentTimerPool()
 {
 	return currentRunLoop().firstTimerPool();
 }
 
-void et::registerRunLoop(RunLoop& runLoop)
+void registerRunLoop(RunLoop& runLoop)
 {
 	auto currentThread = threading::currentThread();
 	ET_ASSERT(allRunLoops.count(currentThread) == 0);
@@ -333,7 +331,7 @@ void et::registerRunLoop(RunLoop& runLoop)
 	allRunLoops.insert({currentThread, &runLoop});
 }
 
-void et::unregisterRunLoop(RunLoop& runLoop)
+void unregisterRunLoop(RunLoop& runLoop)
 {
 	auto success = removeRunLoopFromMap(&runLoop);
 	if (!success)
@@ -342,7 +340,9 @@ void et::unregisterRunLoop(RunLoop& runLoop)
 	}
 }
 
-const std::string et::kSystemEventType = "kSystemEventType";
-const std::string et::kSystemEventRemoteNotification = "kSystemEventRemoteNotification";
-const std::string et::kSystemEventRemoteNotificationStatusChanged = "kSystemEventRemoteNotificationStatusChanged";
-const std::string et::kSystemEventOpenURL = "kSystemEventOpenURL";
+const std::string kSystemEventType = "kSystemEventType";
+const std::string kSystemEventRemoteNotification = "kSystemEventRemoteNotification";
+const std::string kSystemEventRemoteNotificationStatusChanged = "kSystemEventRemoteNotificationStatusChanged";
+const std::string kSystemEventOpenURL = "kSystemEventOpenURL";
+
+}

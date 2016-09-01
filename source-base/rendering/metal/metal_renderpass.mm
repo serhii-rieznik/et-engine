@@ -29,6 +29,8 @@ MetalRenderPass::MetalRenderPass(MetalRenderer* renderer, MetalState& state,
 	ET_PIMPL_INIT(MetalRenderPass)
     _private->renderer = renderer;
 
+	ET_ASSERT(state.mainDrawable != nil);
+
 	MTLRenderPassDescriptor* pass = [MTLRenderPassDescriptor renderPassDescriptor];
 	pass.colorAttachments[0].texture = state.mainDrawable.texture;
 	pass.colorAttachments[0].loadAction = MTLLoadActionClear;
@@ -46,19 +48,25 @@ MetalRenderPass::~MetalRenderPass()
 void MetalRenderPass::pushRenderBatch(RenderBatch::Pointer batch)
 {
     MetalPipelineState::Pointer ps = _private->renderer->createPipelineState(RenderPass::Pointer(this), batch->material(), batch->vao());
+
     MetalVertexBuffer::Pointer vb = batch->vao()->vertexBuffer();
     MetalIndexBuffer::Pointer ib = batch->vao()->indexBuffer();
 
     ps->build();
-    
-    MetalTexture::Pointer tex = batch->material()->texture("color_texture");
-    
+
     [_private->encoder setRenderPipelineState:ps->nativeState().pipelineState];
     [_private->encoder setDepthStencilState:ps->nativeState().depthStencilState];
     [_private->encoder setVertexBuffer:vb->nativeBuffer().buffer() offset:0 atIndex:0];
-    [_private->encoder setFragmentTexture:tex->nativeTexture().texture atIndex:0];
-    
-    [_private->encoder drawIndexedPrimitives:metal::primitiveTypeValue(ib->primitiveType())
+	// MTLViewport vp = { 0.0f, 0.0f, 640.0f, 480.0f, 1.0f, 1.0f };
+	// [_private->encoder setViewport:vp];
+
+	MetalTexture::Pointer tex = batch->material()->texture("color_texture");
+	if (tex.valid())
+	{
+		[_private->encoder setFragmentTexture:tex->nativeTexture().texture atIndex:0];
+	}
+
+	[_private->encoder drawIndexedPrimitives:metal::primitiveTypeValue(ib->primitiveType())
                                   indexCount:batch->numIndexes()
                                    indexType:MTLIndexTypeUInt16
                                  indexBuffer:ib->nativeBuffer().buffer()

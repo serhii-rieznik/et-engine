@@ -20,7 +20,8 @@
 #include <et/platform-ios/applicationdelegate.h>
 #include <et/platform-ios/openglviewcontroller.h>
 
-using namespace et;
+namespace et
+{
 
 @interface etApplicationDelegate()
 {
@@ -297,4 +298,5 @@ extern etOpenGLViewController* sharedOpenGLViewController;
 
 @end
 
+}
 #endif // ET_PLATFORM_IOS
