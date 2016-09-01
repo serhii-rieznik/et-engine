@@ -1014,12 +1014,12 @@
 			isa = PBXGroup;
 			children = (
 				6E6216BE1D514CB60002F1A3 /* base */,
-				6E6216C71D514CB60002F1A3 /* framebuffer.h */,
 				6E6216C81D514CB60002F1A3 /* interface */,
-				6E6216D01D514CB60002F1A3 /* material.h */,
-				6E6216D11D514CB60002F1A3 /* materialfactory.h */,
 				6E6216D21D514CB60002F1A3 /* metal */,
 				6E6216DA1D514CB60002F1A3 /* opengl */,
+				6E6216C71D514CB60002F1A3 /* framebuffer.h */,
+				6E6216D01D514CB60002F1A3 /* material.h */,
+				6E6216D11D514CB60002F1A3 /* materialfactory.h */,
 				6E6216E41D514CB60002F1A3 /* rendercontext.h */,
 				6E6216E51D514CB60002F1A3 /* rendercontextparams.h */,
 				6E6216E61D514CB60002F1A3 /* rendering.h */,

@@ -1,7 +1,7 @@
 struct VSInput
 {
-	packed_float3 position;
-	packed_float3 normal;
+	packed_float3 position [[attribute(0)]];
+	packed_float3 normal [[attribute(1)]];
 };
 
 struct VSOutput
