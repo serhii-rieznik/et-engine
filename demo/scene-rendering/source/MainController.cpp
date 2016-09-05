@@ -2,20 +2,18 @@
 #include <et/rendering/rendercontext.h>
 #include "MainController.h"
 
-using namespace et;
-using namespace demo;
-
-void MainController::setApplicationParameters(et::ApplicationParameters& params)
+void demo::MainController::setApplicationParameters(et::ApplicationParameters& params)
 {
-    params.context.size = vec2i(1024, 768);
+	params.renderingAPI = et::RenderingAPI::Metal;
+	params.context.size = et::vec2i(1024, 640);
 }
 
-void MainController::setRenderContextParameters(et::RenderContextParameters& params)
+void demo::MainController::setRenderContextParameters(et::RenderContextParameters& params)
 {
-    params.multisamplingQuality = MultisamplingQuality::Best;
+	params.multisamplingQuality = et::MultisamplingQuality::Best;
 }
 
-void MainController::applicationDidLoad(et::RenderContext* rc)
+void demo::MainController::applicationDidLoad(et::RenderContext* rc)
 {
 #if (ET_PLATFORM_WIN)
 	application().pushRelativeSearchPath("..");
@@ -24,45 +22,37 @@ void MainController::applicationDidLoad(et::RenderContext* rc)
 	application().pushSearchPath("Q:\\SDK\\Models\\");
 	application().pushSearchPath("Q:\\SDK\\");
 #elif (ET_PLATFORM_MAC)
-	application().pushSearchPath("/Volumes/Development/SDK/");
-	application().pushSearchPath("/Volumes/Development/SDK/Models/");
+	et::application().pushSearchPath("/Volumes/Development/SDK/");
+	et::application().pushSearchPath("/Volumes/Development/SDK/Models/");
 #endif
 
-	rc->renderState().setClearColor(vec4(0.25f, 0.0f));
-	
-	rc->renderingInfoUpdated.connect([this](const et::RenderingInfo& info)
-	{
-//		log::info("Rendering stats: %lu fps, %lu polys, %lu draw calls", info.averageFramePerSecond,
-//			info.averagePolygonsPerSecond, info.averageDIPPerSecond);
-	});
-    
-    _camera.lookAt(vec3(500.0f));
+    _camera.lookAt(et::vec3(500.0f));
     _cameraController = et::CameraMovingController::Pointer::create(_camera, true);
     _cameraController->setIntepolationRate(10.0f);
-    _cameraController->setMovementSpeed(vec3(100.0f));
+    _cameraController->setMovementSpeed(et::vec3(100.0f));
     _cameraController->synchronize(_camera);
     _cameraController->startUpdates();
 		
 	_loader.init(rc);
 	_renderer.init(rc);
 	
-	auto loadedScene = _loader.loadFromFile(application().resolveFileName("media/material-test.obj"));
+	auto loadedScene = _loader.loadFromFile(et::application().resolveFileName("media/material-test.obj"));
 	_renderer.setScene(loadedScene);
 }
 
- void MainController::applicationWillResizeContext(const et::vec2i& sz)
+void demo::MainController::applicationWillResizeContext(const et::vec2i& sz)
 {
-    vec2 fSz = vector2ToFloat(sz);
+	et::vec2 fSz = vector2ToFloat(sz);
     _camera.perspectiveProjection(DEG_45, fSz.aspect(), 1.0f, 1024.0f);
 }
 
-void MainController::render(et::RenderContext* rc)
+void demo::MainController::render(et::RenderContext* rc)
 {
 	_renderer.render(_camera, _camera);
 }
 
 et::IApplicationDelegate* et::Application::initApplicationDelegate()
-	{ return sharedObjectFactory().createObject<MainController>(); }
+	{ return sharedObjectFactory().createObject<demo::MainController>(); }
 
-et::ApplicationIdentifier MainController::applicationIdentifier() const
-	{ return ApplicationIdentifier("com.cheetek.scenerendering", "Cheetek", "Scene Rendering Demo"); }
+et::ApplicationIdentifier demo::MainController::applicationIdentifier() const
+	{ return et::ApplicationIdentifier("com.cheetek.scenerendering", "Cheetek", "Scene Rendering Demo"); }

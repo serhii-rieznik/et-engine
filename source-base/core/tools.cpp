@@ -347,22 +347,22 @@ void parseIncludes(std::string& source, const std::string& workFolder)
             ifname.erase(ifname.find_last_of('>'));
         }
         
-        std::string include = "";
-        
         std::string baseName = removeUpDir(workFolder + ifname);
         while (baseName.find("..") != std::string::npos)
+		{
             baseName = removeUpDir(baseName);
-        
+		}
+		
         if (fileExists(baseName))
         {
-            include = loadTextFile(baseName);
-        }
+			std::string include = loadTextFile(baseName);
+			source = before + include + after;
+		}
         else
         {
             log::error("failed to include %s, starting from folder %s", ifname.c_str(), workFolder.c_str());
         }
         
-        source = before + include + after;
         ip = source.find("#include");
     }
 }

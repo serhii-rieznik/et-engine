@@ -64,11 +64,11 @@ namespace et
 		/*
          * Programs
          */
-        virtual Program::Pointer createProgram(const std::string& vs, const std::string& fs,
+        virtual Program::Pointer createProgram(const std::string& source,
             const StringList& defines, const std::string& baseFolder) = 0;
         
-        inline Program::Pointer createProgram(const std::string& vs, const std::string& fs)
-            { return createProgram(vs, fs, emptyStringList(), emptyString); }
+        inline Program::Pointer createProgram(const std::string& source)
+            { return createProgram(source, emptyStringList(), emptyString); }
 
 		/*
 		 * Pipeline state

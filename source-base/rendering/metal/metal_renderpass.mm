@@ -60,28 +60,51 @@ void MetalRenderPass::pushRenderBatch(RenderBatch::Pointer batch)
 	const Camera& cam = info().camera;
 
     MetalPipelineState::Pointer ps = _private->renderer->createPipelineState(RenderPass::Pointer(this), batch->material(), batch->vao());
+	ps->build();
+	
     MetalVertexBuffer::Pointer vb = batch->vao()->vertexBuffer();
     MetalIndexBuffer::Pointer ib = batch->vao()->indexBuffer();
 
-	BinaryDataStorage uniformData(2 * sizeof(mat4), 0);
-	memcpy(uniformData.element_ptr(0), cam.viewProjectionMatrix().data(), sizeof(mat4));
-	memcpy(uniformData.element_ptr(sizeof(mat4)), batch->transformation().data(), sizeof(mat4));
-	MetalNativeBuffer uniforms(_private->state, uniformData.data(), static_cast<uint32_t>(uniformData.size()));
+	uint8_t* uniformData = reinterpret_cast<uint8_t*>([ps->uniformsBuffer().buffer() contents]);
+	memcpy(uniformData, cam.viewProjectionMatrix().data(), sizeof(mat4));
+	memcpy(uniformData + sizeof(mat4), batch->transformation().data(), sizeof(mat4));
 
-    ps->build();
-
-	MTLViewport viewport = { 0.0, 0.0, 1024.0, 640.0, 0.0, 1.0 };
-
-	[_private->encoder setViewport:viewport];
     [_private->encoder setRenderPipelineState:ps->nativeState().pipelineState];
     [_private->encoder setDepthStencilState:ps->nativeState().depthStencilState];
     [_private->encoder setVertexBuffer:vb->nativeBuffer().buffer() offset:0 atIndex:0];
-	[_private->encoder setVertexBuffer:uniforms.buffer() offset:0 atIndex:1];
 
-	MetalTexture::Pointer tex = batch->material()->texture("color_texture");
-	if (tex.valid())
+	for (MTLArgument* arg in ps->nativeState().reflection.vertexArguments)
 	{
-		[_private->encoder setFragmentTexture:tex->nativeTexture().texture atIndex:0];
+		if (arg.type == MTLArgumentTypeTexture)
+		{
+			MetalTexture::Pointer tex = batch->material()->texture([arg.name UTF8String]);
+			ET_ASSERT(tex.valid());
+			[_private->encoder setVertexTexture:tex->nativeTexture().texture atIndex:arg.index];
+		}
+		else if (arg.type == MTLArgumentTypeBuffer)
+		{
+			if ([arg.name isEqualToString:@"uniforms"])
+			{
+				[_private->encoder setVertexBuffer:ps->uniformsBuffer().buffer() offset:0 atIndex:arg.index];
+			}
+		}
+	}
+
+	for (MTLArgument* arg in ps->nativeState().reflection.fragmentArguments)
+	{
+		if (arg.type == MTLArgumentTypeTexture)
+		{
+			MetalTexture::Pointer tex = batch->material()->texture([arg.name UTF8String]);
+			ET_ASSERT(tex.valid());
+			[_private->encoder setFragmentTexture:tex->nativeTexture().texture atIndex:arg.index];
+		}
+		else if (arg.type == MTLArgumentTypeBuffer)
+		{
+			if ([arg.name isEqualToString:@"uniforms"])
+			{
+				[_private->encoder setFragmentBuffer:ps->uniformsBuffer().buffer() offset:0 atIndex:arg.index];
+			}
+		}
 	}
 
 	[_private->encoder drawIndexedPrimitives:metal::primitiveTypeValue(ib->primitiveType())

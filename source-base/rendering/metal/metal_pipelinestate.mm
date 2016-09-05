@@ -20,6 +20,7 @@ public:
 
 	MetalState& metal;
     MetalNativePipelineState state;
+	MetalNativeBuffer uniforms;
 };
 
 MetalPipelineState::MetalPipelineState(MetalState& mtl)
@@ -75,6 +76,15 @@ void MetalPipelineState::build()
     {
         log::error("Failed to create pipeline:\n%s", [[error description] UTF8String]);
     }
+
+	for (MTLArgument* arg in reflection.vertexArguments)
+	{
+		if ((arg.type == MTLArgumentTypeBuffer) && [arg.name isEqualToString:@"uniforms"])
+		{
+			ET_ASSERT(arg.bufferDataType == MTLDataTypeStruct);
+			_private->uniforms = MetalNativeBuffer(_private->metal, static_cast<uint32_t>(arg.bufferDataSize));
+		}
+	}
     
     MTLDepthStencilDescriptor* dsDesc = [[MTLDepthStencilDescriptor alloc] init];
     dsDesc.depthWriteEnabled = depthState().depthWriteEnabled;
@@ -88,6 +98,11 @@ void MetalPipelineState::build()
 const MetalNativePipelineState& MetalPipelineState::nativeState() const
 {
     return _private->state;
+}
+
+const MetalNativeBuffer& MetalPipelineState::uniformsBuffer() const
+{
+	return _private->uniforms;
 }
 
 }

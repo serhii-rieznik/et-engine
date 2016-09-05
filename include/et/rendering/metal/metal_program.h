@@ -24,7 +24,7 @@ namespace et
 		~MetalProgram();
         
         void bind() override;
-        void build(const std::string& vertexSource, const std::string& fragmentSource) override;
+        void build(const std::string& programSource, const std::string& = emptyString) override;
 
         void setTransformMatrix(const mat4 &m, bool force) override;
         void setCameraProperties(const Camera& cam) override;

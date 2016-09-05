@@ -37,6 +37,9 @@ void s3d::Renderer::render(RenderContext* rc, const Scene& scene, const Camera& 
     }
     
 	RenderPass::ConstructionInfo passInfo;
+	passInfo.target.colorLoadOperation = et::FramebufferOperation::Clear;
+	passInfo.target.depthLoadOperation = et::FramebufferOperation::Clear;
+	passInfo.target.clearColor = vec4(0.25f, 0.3333f, 0.5f, 1.0f);
 	passInfo.camera = camera;
 	passInfo.defaultLightPosition = lightPosition;
 

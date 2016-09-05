@@ -76,7 +76,8 @@ void Application::load()
 	delegate()->setRenderContextParameters(parameters);
 	
 	_renderContext = etCreateObject<RenderContext>(parameters, this);
-	
+	_standardPathResolver.setRenderContext(_renderContext);
+
 	_runLoop.updateTime(_lastQueuedTimeMSec);
 	enterRunLoop();
 }

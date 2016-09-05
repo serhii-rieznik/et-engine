@@ -72,8 +72,6 @@ RenderContext::RenderContext(const RenderContextParameters& inParams, Applicatio
 		[mainView setWantsLayer:YES];
 	}
 
-    renderhelper::init(this);
-    
     NSRect backingRect = [mainView convertRectToBacking:NSMakeRect(0.0f, 0.0f, mainView.bounds.size.width, mainView.bounds.size.height)];
     _size.x = static_cast<int>(backingRect.size.width);
     _size.y = static_cast<int>(backingRect.size.height);
@@ -91,6 +89,8 @@ RenderContext::~RenderContext()
 
 void RenderContext::init()
 {
+	renderhelper::init(this);
+	
 	if (_private->displayLink == nil)
 	{
 		CVReturn result = CVDisplayLinkCreateWithActiveCGDisplays(&_private->displayLink);

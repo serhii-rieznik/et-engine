@@ -1,3 +1,27 @@
+#if defined(VERTEX_SHADER)
+
+uniform mat4 matWorld;
+uniform mat4 matViewProjection;
+uniform vec3 defaultCamera;
+uniform vec3 defaultLight;
+
+etVertexIn vec3 Vertex;
+etVertexIn vec3 Normal;
+etVertexOut vec3 vNormalWS;
+etVertexOut vec3 vCameraDirectionWS;
+etVertexOut vec3 vLightDirectionWS;
+
+void main()
+{
+	vec4 vVertexWS = matWorld * vec4(Vertex, 1.0);
+	vNormalWS = normalize(mat3(matWorld) * Normal);
+	vCameraDirectionWS = defaultCamera - vVertexWS.xyz;
+	vLightDirectionWS = defaultLight;
+	gl_Position = matViewProjection * vVertexWS;
+}
+
+#elif defined(FRAGMENT_SHADER)
+
 uniform sampler2D diffuse_map;
 uniform sampler2D opacity_map;
 uniform vec4 diffuse_color;
@@ -9,7 +33,7 @@ etFragmentIn vec2 vTexCoord0;
 etFragmentIn vec3 vCameraDirectionWS;
 etFragmentIn vec3 vLightDirectionWS;
 
-#include "common.fsh"
+#include "microfacet.h"
 
 void main()
 {
@@ -28,3 +52,5 @@ void main()
     
     etFragmentOut = diffuse_color * kD + specular_color * kS;
 }
+
+#endif

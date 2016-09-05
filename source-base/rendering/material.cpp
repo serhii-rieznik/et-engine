@@ -12,8 +12,7 @@ using namespace et;
 
 namespace
 {
-	const std::string kVertexSourceGL = "vertex-source-gl";
-	const std::string kFragmentSourceGL = "fragment-source-gl";
+	const std::string kProgramSourceGL = "program-source-gl";
 	const std::string kProgramSourceMetal = "program-source-metal";
 	const std::string kDefines = "defines";
 	const std::string kRenderPriority = "render-priority";
@@ -39,27 +38,25 @@ void Material::loadFromJson(const std::string& jsonString, const std::string& ba
 	auto cullMode = obj.stringForKey(kCullMode)->content;
 	auto definesArray = obj.arrayForKey(kDefines);
 
-	std::string vertexSource;
-	std::string fragmentSource;
+	std::string programSource;
 
 	if (_renderer->api() == RenderingAPI::OpenGL)
 	{
-		vertexSource = application().resolveFileName(obj.stringForKey(kVertexSourceGL)->content);
-		fragmentSource = application().resolveFileName(obj.stringForKey(kFragmentSourceGL)->content);
+		programSource = application().resolveFileName(obj.stringForKey(kProgramSourceGL)->content);
 	}
 	else if (_renderer->api() == RenderingAPI::Metal)
 	{
-		vertexSource = application().resolveFileName(obj.stringForKey(kProgramSourceMetal)->content);
+		programSource = application().resolveFileName(obj.stringForKey(kProgramSourceMetal)->content);
 	}
 	else
 	{
 		ET_FAIL("Not implemented");
 	}
 
-	if (fileExists(vertexSource))
-		vertexSource = loadTextFile(vertexSource);
-	if (fileExists(fragmentSource))
-		fragmentSource = loadTextFile(fragmentSource);
+	if (fileExists(programSource))
+	{
+		programSource = loadTextFile(programSource);
+	}
 
 	application().popSearchPaths();
 	
@@ -101,7 +98,7 @@ void Material::loadFromJson(const std::string& jsonString, const std::string& ba
 		}
 	}
 
-	setProgram(_renderer->createProgram(vertexSource, fragmentSource));
+	setProgram(_renderer->createProgram(programSource, defines, baseFolder));
 }
 
 void Material::setBlendState(const BlendState& state)

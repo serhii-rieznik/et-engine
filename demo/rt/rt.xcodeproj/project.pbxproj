@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		5C31ABB61CE51E16008C9E03 /* bsdf.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5C31ABB51CE51E16008C9E03 /* bsdf.cpp */; };
+		5C4515501D7E01C100D093EB /* engine_data in Resources */ = {isa = PBXBuildFile; fileRef = 5C45154F1D7E01C100D093EB /* engine_data */; };
 		5C9B587B1D68EF3B00136794 /* libet-static-mac.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5C3C4FEF1C9E135700C5B47A /* libet-static-mac.a */; };
 		5CE405F91CC6D3E400EA12EC /* raytraceobjects.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5CE405F81CC6D3E400EA12EC /* raytraceobjects.cpp */; };
 		6E225A771CB408D900AE27BD /* environment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6E225A731CB408D900AE27BD /* environment.cpp */; };
@@ -40,6 +41,7 @@
 		5C31ABB51CE51E16008C9E03 /* bsdf.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = bsdf.cpp; path = "../../source-ext/rt/bsdf.cpp"; sourceTree = "<group>"; };
 		5C31ABB81CE51E2A008C9E03 /* bsdf.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = bsdf.h; path = "../../include/et-ext/rt/bsdf.h"; sourceTree = "<group>"; };
 		5C3C4FEA1C9E135700C5B47A /* et-static-mac.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "et-static-mac.xcodeproj"; path = "../../projects/et-static-mac.xcodeproj"; sourceTree = "<group>"; };
+		5C45154F1D7E01C100D093EB /* engine_data */ = {isa = PBXFileReference; lastKnownFileType = folder; name = engine_data; path = ../../engine_data; sourceTree = "<group>"; };
 		5CE405F81CC6D3E400EA12EC /* raytraceobjects.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = raytraceobjects.cpp; path = "../../source-ext/rt/raytraceobjects.cpp"; sourceTree = "<group>"; };
 		6E225A6D1CB408CD00AE27BD /* environment.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = environment.h; path = "../../include/et-ext/rt/environment.h"; sourceTree = "<group>"; };
 		6E225A6E1CB408CD00AE27BD /* integrator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = integrator.h; path = "../../include/et-ext/rt/integrator.h"; sourceTree = "<group>"; };
@@ -114,6 +116,7 @@
 		A5E2AE8B1B7D4A1800DE53DD = {
 			isa = PBXGroup;
 			children = (
+				5C45154F1D7E01C100D093EB /* engine_data */,
 				A52329031B8278C400D00DD6 /* config */,
 				A52329061B827D1900D00DD6 /* media */,
 				5C3C4FEA1C9E135700C5B47A /* et-static-mac.xcodeproj */,
@@ -193,7 +196,7 @@
 		A5E2AE8C1B7D4A1800DE53DD /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0700;
+				LastUpgradeCheck = 0800;
 				ORGANIZATIONNAME = "Serhii Rieznik";
 				TargetAttributes = {
 					A5E2AE931B7D4A1800DE53DD = {
@@ -241,6 +244,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				A52329041B8278C400D00DD6 /* config in Resources */,
+				5C4515501D7E01C100D093EB /* engine_data in Resources */,
 				A52329071B827D1900D00DD6 /* media in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -279,8 +283,10 @@
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CLANG_X86_VECTOR_INSTRUCTIONS = sse4.2;
@@ -336,8 +342,10 @@
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CLANG_X86_VECTOR_INSTRUCTIONS = sse4.2;

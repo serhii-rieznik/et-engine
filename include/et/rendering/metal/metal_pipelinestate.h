@@ -27,6 +27,7 @@ namespace et
 		void build() override;
         
         const MetalNativePipelineState& nativeState() const;
+		const MetalNativeBuffer& uniformsBuffer() const;
 
 	private:
 		ET_DECLARE_PIMPL(MetalPipelineState, 64);

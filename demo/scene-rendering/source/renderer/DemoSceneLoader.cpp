@@ -1,4 +1,4 @@
-#include <et/rendering/primitives.h>
+#include <et/rendering/base/primitives.h>
 #include <et/scene3d/objloader.h>
 #include <et/app/application.h>
 
@@ -9,8 +9,11 @@ using namespace demo;
 
 void SceneLoader::init(et::RenderContext* rc)
 {
+	std::string materialFile = application().resolveFileName("media/materials/microfacet.material");
+
 	_rc = rc;
-    _defaultMaterial = rc->materialFactory().loadMaterial(application().resolveFileName("media/materials/microfacet.material"));
+	_defaultMaterial = Material::Pointer::create(_rc->renderer().ptr());
+	_defaultMaterial->loadFromJson(loadTextFile(materialFile), getFilePath(materialFile));
 }
 
 et::s3d::Scene::Pointer SceneLoader::loadFromFile(const std::string& fileName)

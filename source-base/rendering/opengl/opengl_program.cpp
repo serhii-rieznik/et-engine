@@ -900,6 +900,7 @@ const std::string openGl2VertexHeader = R"(
 #define etTextureRect		texture2DRect
 #define etVertexIn			attribute
 #define etVertexOut			varying
+#define VERTEX_SHADER 1
 )";
     
 const std::string openGl3VertexHeader = R"(
@@ -914,9 +915,10 @@ const std::string openGl3VertexHeader = R"(
 #define etTextureCubeLod	textureLod
 #define etVertexIn			in
 #define etVertexOut			out
+#define VERTEX_SHADER 1
 )";
     
-    const std::string openGl2FragmentHeader = R"(
+const std::string openGl2FragmentHeader = R"(
 #define etShadow2D			shadow2D
 #define etTexture2D			texture2D
 #define etTextureCube		textureCube
@@ -936,6 +938,7 @@ const std::string openGl3VertexHeader = R"(
 #define etFragmentOut5		gl_FragData[5]
 #define etFragmentOut6		gl_FragData[6]
 #define etFragmentOut7		gl_FragData[7]
+#define FRAGMENT_SHADER 1
 )";
     
 const std::string openGl3FragmentHeader = R"(
@@ -950,6 +953,7 @@ const std::string openGl3FragmentHeader = R"(
 #define etTextureCubeLod	textureLod
 #define etFragmentIn		in
 #define etFragmentOut		etFragmentOut0
+#define FRAGMENT_SHADER 1
 layout (location = 0) out etHighp vec4 etFragmentOut0;
 layout (location = 1) out etHighp vec4 etFragmentOut1;
 layout (location = 2) out etHighp vec4 etFragmentOut2;

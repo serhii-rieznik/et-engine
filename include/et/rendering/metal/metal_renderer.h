@@ -49,8 +49,7 @@ namespace et
         /*
          * Programs
          */
-        Program::Pointer createProgram(const std::string& vs, const std::string& fs, const StringList& defines,
-            const std::string& baseFolder) override;
+        Program::Pointer createProgram(const std::string& program, const StringList& defines, const std::string& baseFolder) override;
 
 		/*
 		 * Pipeline state

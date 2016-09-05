@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		5C3C50181C9EA09300C5B47A /* libet-static-mac.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5C3C50171C9EA08900C5B47A /* libet-static-mac.a */; };
+		5C4515491D7DE5AE00D093EB /* engine_data in Resources */ = {isa = PBXBuildFile; fileRef = 5C4515481D7DE5AE00D093EB /* engine_data */; };
 		5C484B9F1D3D700800E02180 /* media in Resources */ = {isa = PBXBuildFile; fileRef = 5C484B9E1D3D700800E02180 /* media */; };
 		5C8E1A0E1D44DC4100E2682B /* Metal.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5C8E1A0D1D44DC4000E2682B /* Metal.framework */; };
 		5C8E1A131D44DC5E00E2682B /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5C8E1A121D44DC5E00E2682B /* QuartzCore.framework */; };
@@ -32,6 +33,7 @@
 
 /* Begin PBXFileReference section */
 		5C3C50121C9EA08900C5B47A /* et-static-mac.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "et-static-mac.xcodeproj"; path = "../../../projects/et-static-mac.xcodeproj"; sourceTree = "<group>"; };
+		5C4515481D7DE5AE00D093EB /* engine_data */ = {isa = PBXFileReference; lastKnownFileType = folder; name = engine_data; path = ../../../engine_data; sourceTree = "<group>"; };
 		5C484B9E1D3D700800E02180 /* media */ = {isa = PBXFileReference; lastKnownFileType = folder; name = media; path = ../../media; sourceTree = "<group>"; };
 		5C8E1A0D1D44DC4000E2682B /* Metal.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Metal.framework; path = System/Library/Frameworks/Metal.framework; sourceTree = SDKROOT; };
 		5C8E1A121D44DC5E00E2682B /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
@@ -77,6 +79,7 @@
 		A5A21CA01A65477B004AD95C = {
 			isa = PBXGroup;
 			children = (
+				5C4515481D7DE5AE00D093EB /* engine_data */,
 				5C484B9E1D3D700800E02180 /* media */,
 				5C3C50121C9EA08900C5B47A /* et-static-mac.xcodeproj */,
 				A5A21CCC1A6547B9004AD95C /* Source */,
@@ -192,6 +195,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5C4515491D7DE5AE00D093EB /* engine_data in Resources */,
 				5C484B9F1D3D700800E02180 /* media in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		5C4515551D7E029000D093EB /* engine_data in Resources */ = {isa = PBXBuildFile; fileRef = 5C4515541D7E029000D093EB /* engine_data */; };
+		5C4515571D7E035600D093EB /* Metal.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5C4515561D7E035600D093EB /* Metal.framework */; };
+		5C4515591D7E035D00D093EB /* MetalKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5C4515581D7E035D00D093EB /* MetalKit.framework */; };
+		5C45155B1D7E039F00D093EB /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5C45155A1D7E039F00D093EB /* QuartzCore.framework */; };
 		6E12DA2B1CD690F6006037A5 /* libet-static-mac.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 6E12DA2A1CD686C8006037A5 /* libet-static-mac.a */; };
 		6E12DA2D1CD69147006037A5 /* libfbxsdk.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 6E12DA2C1CD69147006037A5 /* libfbxsdk.dylib */; };
 		6E12DA2E1CD691A3006037A5 /* libfbxsdk.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 6E12DA2C1CD69147006037A5 /* libfbxsdk.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
@@ -48,6 +52,10 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		5C4515541D7E029000D093EB /* engine_data */ = {isa = PBXFileReference; lastKnownFileType = folder; name = engine_data; path = ../../../engine_data; sourceTree = "<group>"; };
+		5C4515561D7E035600D093EB /* Metal.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Metal.framework; path = System/Library/Frameworks/Metal.framework; sourceTree = SDKROOT; };
+		5C4515581D7E035D00D093EB /* MetalKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MetalKit.framework; path = System/Library/Frameworks/MetalKit.framework; sourceTree = SDKROOT; };
+		5C45155A1D7E039F00D093EB /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		6E12DA251CD686C8006037A5 /* et-static-mac.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "et-static-mac.xcodeproj"; path = "../../../projects/et-static-mac.xcodeproj"; sourceTree = "<group>"; };
 		6E12DA2C1CD69147006037A5 /* libfbxsdk.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libfbxsdk.dylib; path = ../../../../../../../SDK/FBX/lib/clang/release/libfbxsdk.dylib; sourceTree = "<group>"; };
 		6E12DA2F1CD6926C006037A5 /* media */ = {isa = PBXFileReference; lastKnownFileType = folder; name = media; path = ../../media; sourceTree = "<group>"; };
@@ -74,14 +82,17 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				6E12DA2D1CD69147006037A5 /* libfbxsdk.dylib in Frameworks */,
-				6E12DA2B1CD690F6006037A5 /* libet-static-mac.a in Frameworks */,
+				5C45155B1D7E039F00D093EB /* QuartzCore.framework in Frameworks */,
 				A57B42921A58DAB800C896E1 /* StoreKit.framework in Frameworks */,
 				A57B42901A58DAB400C896E1 /* OpenAL.framework in Frameworks */,
 				A5D8EC3D1A3CDF5F00E3620B /* AppKit.framework in Frameworks */,
 				A5D8EC3B1A3CDF5C00E3620B /* CoreGraphics.framework in Frameworks */,
 				A5D8EC391A3CDF5900E3620B /* CoreVideo.framework in Frameworks */,
 				A5D8EC371A3CDF5600E3620B /* OpenGL.framework in Frameworks */,
+				5C4515591D7E035D00D093EB /* MetalKit.framework in Frameworks */,
+				5C4515571D7E035600D093EB /* Metal.framework in Frameworks */,
+				6E12DA2D1CD69147006037A5 /* libfbxsdk.dylib in Frameworks */,
+				6E12DA2B1CD690F6006037A5 /* libet-static-mac.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -99,6 +110,7 @@
 		A5D8EA8A1A3CD5A600E3620B = {
 			isa = PBXGroup;
 			children = (
+				5C4515541D7E029000D093EB /* engine_data */,
 				6E12DA2F1CD6926C006037A5 /* media */,
 				A5D8EC421A3CE2EE00E3620B /* data */,
 				6E12DA251CD686C8006037A5 /* et-static-mac.xcodeproj */,
@@ -141,6 +153,9 @@
 		A5D8EC411A3CE18D00E3620B /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				5C45155A1D7E039F00D093EB /* QuartzCore.framework */,
+				5C4515581D7E035D00D093EB /* MetalKit.framework */,
+				5C4515561D7E035600D093EB /* Metal.framework */,
 				6E12DA2C1CD69147006037A5 /* libfbxsdk.dylib */,
 				A57B42911A58DAB800C896E1 /* StoreKit.framework */,
 				A57B428F1A58DAB400C896E1 /* OpenAL.framework */,
@@ -190,7 +205,7 @@
 		A5D8EA8B1A3CD5A600E3620B /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0730;
+				LastUpgradeCheck = 0800;
 				ORGANIZATIONNAME = Cheetek;
 				TargetAttributes = {
 					A5D8EA921A3CD5A600E3620B = {
@@ -238,6 +253,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				A5D8EC431A3CE2EE00E3620B /* data in Resources */,
+				5C4515551D7E029000D093EB /* engine_data in Resources */,
 				6E12DA301CD6926C006037A5 /* media in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -272,8 +288,10 @@
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_IDENTITY = "-";
@@ -282,6 +300,7 @@
 				ENABLE_TESTABILITY = YES;
 				GCC_C_LANGUAGE_STANDARD = c99;
 				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"ET_HAVE_FBX_SDK=1",
@@ -320,8 +339,10 @@
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_IDENTITY = "-";
@@ -330,6 +351,7 @@
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_C_LANGUAGE_STANDARD = c99;
+				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"ET_HAVE_FBX_SDK=1",
 					NDEBUG,

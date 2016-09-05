@@ -1,12 +1,8 @@
 {
 	"name" : "diffuse",
 
-	"vertex-source-gl" : "default.vsh",
-	"fragment-source-gl" : "normals.fsh",
-
+	"program-source-gl" : "normals.glsl",
 	"program-source-metal" : "normals.metal",
-
-	"defines" : [],
 
 	"depth-state":
 	{

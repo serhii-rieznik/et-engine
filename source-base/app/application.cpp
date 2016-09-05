@@ -63,7 +63,6 @@ void Application::enterRunLoop()
 	if (_parameters.shouldPreserveRenderContext)
 		_renderContext->pushAndActivateRenderingContext();
 	
-	_standardPathResolver.setRenderContext(_renderContext);
 	delegate()->applicationDidLoad(_renderContext);
 	
 	_renderContext->init();

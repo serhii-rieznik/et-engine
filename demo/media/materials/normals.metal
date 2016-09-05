@@ -14,9 +14,11 @@ struct Uniforms
 {
 	float4x4 viewProjection;
 	float4x4 transform;
+	float3 onotole;
+	float4x4 shit;
 };
 
-vertex VSOutput vertex_main(device VSInput* vsInput [[buffer(0)]],
+vertex VSOutput vertex_main(constant VSInput* vsInput [[buffer(0)]],
 							constant Uniforms& uniforms [[buffer(1)]],
 							uint vertexId [[vertex_id]])
 {

@@ -264,8 +264,8 @@ Texture::Pointer OpenGLRenderer::createTexture(TextureDescription::Pointer desc)
 /*
  * Programs
  */
-Program::Pointer OpenGLRenderer::createProgram(const std::string& vs, const std::string& fs,
-    const StringList& defines, const std::string& baseFolder)
+Program::Pointer OpenGLRenderer::createProgram(const std::string& source,
+	const StringList& defines, const std::string& baseFolder)
 {
     std::string vertexSource = OpenGLProgram::commonHeader() + OpenGLProgram::vertexShaderHeader();
     std::string fragmentSource = OpenGLProgram::commonHeader() + OpenGLProgram::fragmentShaderHeader();
@@ -276,8 +276,8 @@ Program::Pointer OpenGLRenderer::createProgram(const std::string& vs, const std:
         fragmentSource += "\n" + define + "\n";
     }
     
-    vertexSource += vs;
-    fragmentSource += fs;
+    vertexSource += source;
+    fragmentSource += source;
     
     parseIncludes(vertexSource, baseFolder);
     parseIncludes(fragmentSource, baseFolder);
