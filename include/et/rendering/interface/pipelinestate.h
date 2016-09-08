@@ -75,4 +75,19 @@ namespace et
 		CullMode _cull = CullMode::Disabled;
 		TextureFormat _renderTargetFormat = TextureFormat::RGBA8;
 	};
+
+	class PipelineStateCachePrivate;
+	class PipelineStateCache
+	{
+	public:
+		PipelineStateCache();
+		~PipelineStateCache();
+		
+		PipelineState::Pointer find(const VertexDeclaration&, VertexArrayObject::Pointer, Program::Pointer,
+									const DepthState&, const BlendState&, CullMode, TextureFormat);
+
+		void addToCache(PipelineState::Pointer);
+	private:
+		ET_DECLARE_PIMPL(PipelineStateCache, 256);
+	};
 }

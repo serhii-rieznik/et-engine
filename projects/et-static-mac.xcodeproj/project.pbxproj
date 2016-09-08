@@ -448,6 +448,7 @@
 		5C9B58881D68F09E00136794 /* rendering.pack.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = rendering.pack.cxx; sourceTree = "<group>"; };
 		5C9B58891D68F09E00136794 /* scene3d.pack.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = scene3d.pack.cxx; sourceTree = "<group>"; };
 		5C9B588A1D68F09E00136794 /* sound.pack.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = sound.pack.cxx; sourceTree = "<group>"; };
+		5CD267641D808C9700555DA2 /* pipelinestate.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = pipelinestate.cpp; sourceTree = "<group>"; };
 		6E4CE95D1D5119C800322956 /* texturedescription.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = texturedescription.cpp; sourceTree = "<group>"; };
 		6E62167F1D514C850002F1A3 /* helpers.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = helpers.cpp; sourceTree = "<group>"; };
 		6E6216801D514C850002F1A3 /* indexarray.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = indexarray.cpp; sourceTree = "<group>"; };
@@ -966,6 +967,7 @@
 			children = (
 				6E62167F1D514C850002F1A3 /* helpers.cpp */,
 				6E6216801D514C850002F1A3 /* indexarray.cpp */,
+				5CD267641D808C9700555DA2 /* pipelinestate.cpp */,
 				6E6216811D514C850002F1A3 /* primitives.cpp */,
 				6E6216821D514C850002F1A3 /* renderbatch.cpp */,
 				6E6216831D514C850002F1A3 /* vertexarray.cpp */,

@@ -50,19 +50,40 @@ struct MetalNativePipelineState
     MTLRenderPipelineReflection* reflection = nil;
 };
 
-class MetalNativeBuffer
+struct MetalNativeEncoder
+{
+	id<MTLRenderCommandEncoder> encoder = nil;
+};
+
+class MetalNativeBuffer : public Shared
 {
 public:
-    MetalNativeBuffer() = default;
-    
+	ET_DECLARE_POINTER(MetalNativeBuffer);
+
+public:
+	MetalNativeBuffer() = default;
+	MetalNativeBuffer(const MetalNativeBuffer&) = delete;
+	MetalNativeBuffer(MetalNativeBuffer&&) = delete;
+	MetalNativeBuffer& operator = (const MetalNativeBuffer&) = delete;
+
     MetalNativeBuffer(MetalState& metal, const void* data, uint32_t size)
 	{
-		_buffer = [metal.device newBufferWithBytes:data length:size options:MTLResourceCPUCacheModeDefaultCache];
+		construct(metal, data, size);
 	}
 
 	MetalNativeBuffer(MetalState& metal, uint32_t size)
 	{
-		_buffer = [metal.device newBufferWithLength:size options:MTLResourceCPUCacheModeDefaultCache];
+		construct(metal, size);
+	}
+
+	void construct(MetalState& metal, const void* data, uint32_t size)
+	{
+		_buffer = [metal.device newBufferWithBytes:data length:size options:MTLResourceCPUCacheModeDefaultCache];
+	}
+
+	void construct(MetalState& metal, uint32_t size)
+	{
+		_buffer = [metal.device newBufferWithLength:size options:MTLResourceStorageModeManaged];
 	}
 
     ~MetalNativeBuffer()
@@ -70,6 +91,9 @@ public:
     
     id<MTLBuffer> buffer() const
         { return _buffer; }
+
+	bool valid() const
+		{ return _buffer != nil; }
     
 private:
     id<MTLBuffer> _buffer = nil;
@@ -79,7 +103,8 @@ namespace metal
 {
     MTLTextureType textureTargetValue(TextureTarget, uint32_t samples);
     MTLPixelFormat textureFormatValue(TextureFormat);
-    MTLPrimitiveType primitiveTypeValue(PrimitiveType);
+	MTLPixelFormat renderableTextureFormatValue(TextureFormat);
+	MTLPrimitiveType primitiveTypeValue(PrimitiveType);
     MTLPrimitiveTopologyClass primitiveTypeToTopology(PrimitiveType);
     MTLVertexFormat dataTypeToVertexFormat(DataType);
 	MTLCompareFunction compareFunctionValue(CompareFunction);

@@ -13,6 +13,7 @@ namespace et
 {
 	struct MetalState;
     struct MetalNativePipelineState;
+	struct MetalNativeEncoder;
     
 	class MetalPipelineStatePrivate;
 	class MetalPipelineState : public PipelineState
@@ -29,7 +30,18 @@ namespace et
         const MetalNativePipelineState& nativeState() const;
 		const MetalNativeBuffer& uniformsBuffer() const;
 
+		void bind(MetalNativeEncoder&);
+
+		template <typename T>
+		void setProgramVariable(const std::string& name, const T& t)
+		{
+			uploadProgramVariable(name, &t, sizeof(T));
+		}
+
 	private:
-		ET_DECLARE_PIMPL(MetalPipelineState, 64);
+		void uploadProgramVariable(const std::string& name, const void* ptr, uint32_t size);
+
+	private:
+		ET_DECLARE_PIMPL(MetalPipelineState, 256);
 	};
 }

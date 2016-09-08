@@ -6,6 +6,7 @@
 
 #include "../rendering/base/helpers.cpp"
 #include "../rendering/base/indexarray.cpp"
+#include "../rendering/base/pipelinestate.cpp"
 #include "../rendering/base/primitives.cpp"
 #include "../rendering/base/renderbatch.cpp"
 #include "../rendering/base/vertexarray.cpp"

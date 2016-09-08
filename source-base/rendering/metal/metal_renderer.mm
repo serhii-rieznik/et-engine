@@ -25,6 +25,7 @@ class MetalRendererPrivate
 {
 public:
 	MetalState metal;
+	PipelineStateCache cache;
 };
 
 MetalRenderer::MetalRenderer(RenderContext* rc)
@@ -155,13 +156,24 @@ Program::Pointer MetalRenderer::createProgram(const std::string& source,
 PipelineState::Pointer MetalRenderer::createPipelineState(RenderPass::Pointer pass, Material::Pointer mtl,
     VertexArrayObject::Pointer vs)
 {
-    PipelineState::Pointer result = MetalPipelineState::Pointer::create(_private->metal);
-	result->setInputLayout(vs->vertexBuffer()->declaration());
-	result->setDepthState(mtl->depthState());
-    result->setBlendState(mtl->blendState());
-    result->setCullMode(mtl->cullMode());
-    result->setProgram(mtl->program());
-    result->setVertexStream(vs);
+	PipelineState::Pointer result = _private->cache.find(vs->vertexBuffer()->declaration(), vs,
+		mtl->program(), mtl->depthState(), mtl->blendState(), mtl->cullMode(), TextureFormat::RGBA8);
+
+	if (result.invalid())
+	{
+		result = MetalPipelineState::Pointer::create(_private->metal);
+		result->setRenderTargetFormat(TextureFormat::RGBA8);
+		result->setInputLayout(vs->vertexBuffer()->declaration());
+		result->setDepthState(mtl->depthState());
+		result->setBlendState(mtl->blendState());
+		result->setCullMode(mtl->cullMode());
+		result->setProgram(mtl->program());
+		result->setVertexStream(vs);
+		result->build();
+		
+		_private->cache.addToCache(result);
+	}
+
 	return result;
 }
 

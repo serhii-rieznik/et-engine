@@ -22,7 +22,7 @@ MetalVertexBuffer::MetalVertexBuffer(MetalState& metal, const VertexDeclaration&
     : VertexBuffer(decl, drawType, aName)
 {
 	ET_PIMPL_INIT(MetalVertexBuffer);
-    _private->buffer = MetalNativeBuffer(metal, data.data(), static_cast<uint32_t>(data.size()));
+    _private->buffer.construct(metal, data.data(), static_cast<uint32_t>(data.size()));
 
 	setData(data.data(), data.size(), false);
 }

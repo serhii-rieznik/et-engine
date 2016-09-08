@@ -62,6 +62,6 @@ namespace et
 		void drawIndexedPrimitive(PrimitiveType, IndexArrayFormat, uint32_t first, uint32_t count) override;
 		
 	private:
-		ET_DECLARE_PIMPL(MetalRenderer, 256)
+		ET_DECLARE_PIMPL(MetalRenderer, 512)
 	};
 }

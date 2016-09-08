@@ -38,6 +38,8 @@ void demo::MainController::applicationDidLoad(et::RenderContext* rc)
 	
 	auto loadedScene = _loader.loadFromFile(et::application().resolveFileName("media/material-test.obj"));
 	_renderer.setScene(loadedScene);
+
+	applicationWillResizeContext(rc->size());
 }
 
 void demo::MainController::applicationWillResizeContext(const et::vec2i& sz)

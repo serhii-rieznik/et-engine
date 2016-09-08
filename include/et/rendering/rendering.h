@@ -345,6 +345,17 @@ namespace et
 		{
 			return static_cast<uint32_t>(depthWriteEnabled) << 1 | static_cast<uint32_t>(compareFunction);
 		}
+
+		bool operator == (const DepthState& r) const
+		{
+			return (compareFunction == r.compareFunction) && (depthWriteEnabled == r.depthWriteEnabled);
+		}
+
+		bool operator != (const DepthState& r) const
+		{
+			return (compareFunction != r.compareFunction) || (depthWriteEnabled != r.depthWriteEnabled);
+		}
+
 	};
 	
 	class BlendState
@@ -386,7 +397,15 @@ namespace et
 				(perRenderTargetBlendEnabled == bs.perRenderTargetBlendEnabled) &&
 				(colorOperation == bs.colorOperation) && (alphaOperation == bs.alphaOperation);
 		}
-		
+
+		bool operator != (const BlendState& bs) const
+		{
+			return (color != bs.color) || (enabled != bs.enabled) || (alpha != bs.alpha) ||
+				(alphaToCoverageEnabled != bs.alphaToCoverageEnabled) ||
+				(perRenderTargetBlendEnabled != bs.perRenderTargetBlendEnabled) ||
+				(colorOperation != bs.colorOperation) || (alphaOperation != bs.alphaOperation);
+		}
+
 	public:
 		Blend color;
 		BlendOperation colorOperation = BlendOperation::Add;

@@ -22,7 +22,7 @@ MetalIndexBuffer::MetalIndexBuffer(MetalState& metal, IndexArray::Pointer i, Buf
 {
 	ET_PIMPL_INIT(MetalIndexBuffer);
     uint32_t actualDataSize = i->actualSize() * static_cast<uint32_t>(i->format());
-	_private->buffer = MetalNativeBuffer(metal, i->data(), actualDataSize);
+	_private->buffer.construct(metal, i->data(), actualDataSize);
 }
 
 MetalIndexBuffer::~MetalIndexBuffer()

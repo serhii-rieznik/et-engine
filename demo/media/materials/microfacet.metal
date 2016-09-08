@@ -13,25 +13,27 @@ struct VSOutput
 	float3 lightDirection;
 };
 
-struct Uniforms
+struct Variables
 {
 	float4x4 viewProjection;
 	float4x4 transform;
+	packed_float3 cameraPosition;
+	packed_float3 cameraDirection;
 };
 
 vertex VSOutput vertexMain(constant VSInput* vsInput [[buffer(0)]],
-						   constant Uniforms& uniforms [[buffer(1)]],
+						   constant Variables& variables [[buffer(1)]],
 						   uint vertexId [[vertex_id]])
 {
 	VSOutput vOut;
-	vOut.position = uniforms.viewProjection * uniforms.transform * float4(vsInput[vertexId].position, 1.0);
+	vOut.position = variables.viewProjection * float4(vsInput[vertexId].position, 1.0);
 	vOut.normal = float3(0.0, 1.0, 0.0);
 	vOut.cameraDirection = float3(0.0, 1.0, 0.0);
 	vOut.lightDirection = float3(0.0, 1.0, 0.0);
 	return vOut;
 }
 
-fragment float4 fragmentMain(VSOutput fragmentIn [[stage_in]])
+fragment float4 fragmentMain(VSOutput fragmentIn [[stage_in]], constant Variables& variables [[buffer(1)]])
 {
 	return float4(1.0, 0.5, 0.25, 1.0);
 }

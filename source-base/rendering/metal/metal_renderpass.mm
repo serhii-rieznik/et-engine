@@ -19,7 +19,7 @@ namespace et
 class MetalRenderPassPrivate
 {
 public:
-	id<MTLRenderCommandEncoder> encoder = nil;
+	MetalNativeEncoder encoder;
     MetalRenderer* renderer = nullptr;
 	MetalState& state;
 
@@ -47,7 +47,7 @@ MetalRenderPass::MetalRenderPass(MetalRenderer* renderer, MetalState& state,
 	pass.depthAttachment.storeAction = MTLStoreActionDontCare;
 	pass.depthAttachment.clearDepth = info.target.clearDepth;
 	
-	_private->encoder = [state.mainCommandBuffer renderCommandEncoderWithDescriptor:pass];
+	_private->encoder.encoder = [state.mainCommandBuffer renderCommandEncoderWithDescriptor:pass];
 }
 
 MetalRenderPass::~MetalRenderPass()
@@ -59,19 +59,14 @@ void MetalRenderPass::pushRenderBatch(RenderBatch::Pointer batch)
 {
 	const Camera& cam = info().camera;
 
+	MetalIndexBuffer::Pointer ib = batch->vao()->indexBuffer();
+	MetalVertexBuffer::Pointer vb = batch->vao()->vertexBuffer();
     MetalPipelineState::Pointer ps = _private->renderer->createPipelineState(RenderPass::Pointer(this), batch->material(), batch->vao());
-	ps->build();
-	
-    MetalVertexBuffer::Pointer vb = batch->vao()->vertexBuffer();
-    MetalIndexBuffer::Pointer ib = batch->vao()->indexBuffer();
+	ps->setProgramVariable("viewProjection", cam.viewProjectionMatrix());
+	ps->setProgramVariable("transform", batch->transformation());
+	ps->bind(_private->encoder);
 
-	uint8_t* uniformData = reinterpret_cast<uint8_t*>([ps->uniformsBuffer().buffer() contents]);
-	memcpy(uniformData, cam.viewProjectionMatrix().data(), sizeof(mat4));
-	memcpy(uniformData + sizeof(mat4), batch->transformation().data(), sizeof(mat4));
-
-    [_private->encoder setRenderPipelineState:ps->nativeState().pipelineState];
-    [_private->encoder setDepthStencilState:ps->nativeState().depthStencilState];
-    [_private->encoder setVertexBuffer:vb->nativeBuffer().buffer() offset:0 atIndex:0];
+    [_private->encoder.encoder setVertexBuffer:vb->nativeBuffer().buffer() offset:0 atIndex:0];
 
 	for (MTLArgument* arg in ps->nativeState().reflection.vertexArguments)
 	{
@@ -79,13 +74,13 @@ void MetalRenderPass::pushRenderBatch(RenderBatch::Pointer batch)
 		{
 			MetalTexture::Pointer tex = batch->material()->texture([arg.name UTF8String]);
 			ET_ASSERT(tex.valid());
-			[_private->encoder setVertexTexture:tex->nativeTexture().texture atIndex:arg.index];
+			[_private->encoder.encoder setVertexTexture:tex->nativeTexture().texture atIndex:arg.index];
 		}
 		else if (arg.type == MTLArgumentTypeBuffer)
 		{
 			if ([arg.name isEqualToString:@"uniforms"])
 			{
-				[_private->encoder setVertexBuffer:ps->uniformsBuffer().buffer() offset:0 atIndex:arg.index];
+				[_private->encoder.encoder setVertexBuffer:ps->uniformsBuffer().buffer() offset:0 atIndex:arg.index];
 			}
 		}
 	}
@@ -96,18 +91,18 @@ void MetalRenderPass::pushRenderBatch(RenderBatch::Pointer batch)
 		{
 			MetalTexture::Pointer tex = batch->material()->texture([arg.name UTF8String]);
 			ET_ASSERT(tex.valid());
-			[_private->encoder setFragmentTexture:tex->nativeTexture().texture atIndex:arg.index];
+			[_private->encoder.encoder setFragmentTexture:tex->nativeTexture().texture atIndex:arg.index];
 		}
 		else if (arg.type == MTLArgumentTypeBuffer)
 		{
 			if ([arg.name isEqualToString:@"uniforms"])
 			{
-				[_private->encoder setFragmentBuffer:ps->uniformsBuffer().buffer() offset:0 atIndex:arg.index];
+				[_private->encoder.encoder setFragmentBuffer:ps->uniformsBuffer().buffer() offset:0 atIndex:arg.index];
 			}
 		}
 	}
 
-	[_private->encoder drawIndexedPrimitives:metal::primitiveTypeValue(ib->primitiveType())
+	[_private->encoder.encoder drawIndexedPrimitives:metal::primitiveTypeValue(ib->primitiveType())
                                   indexCount:batch->numIndexes()
                                    indexType:MTLIndexTypeUInt16
                                  indexBuffer:ib->nativeBuffer().buffer()
@@ -116,8 +111,8 @@ void MetalRenderPass::pushRenderBatch(RenderBatch::Pointer batch)
 
 void MetalRenderPass::endEncoding()
 {
-	[_private->encoder endEncoding];
-	_private->encoder = nil;
+	[_private->encoder.encoder endEncoding];
+	_private->encoder.encoder = nil;
 }
 
 }

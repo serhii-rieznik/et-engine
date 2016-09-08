@@ -44,7 +44,18 @@ MTLPixelFormat textureFormatValue(TextureFormat value)
     ET_ASSERT(_map.count(value) > 0);
     return _map.at(value);
 }
-    
+
+MTLPixelFormat renderableTextureFormatValue(TextureFormat value)
+{
+	static const std::map<TextureFormat, MTLPixelFormat> _map =
+	{
+		{TextureFormat::RGBA8, MTLPixelFormatBGRA8Unorm},
+		// TODO : add more
+	};
+	ET_ASSERT(_map.count(value) > 0);
+	return _map.at(value);
+}
+
 MTLPrimitiveType primitiveTypeValue(PrimitiveType value)
 {
     static const std::map<PrimitiveType, MTLPrimitiveType> _map =
