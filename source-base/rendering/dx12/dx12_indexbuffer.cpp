@@ -21,8 +21,4 @@ void DX12IndexBuffer::bind()
 {
 }
 
-void DX12IndexBuffer::clear()
-{
-}
-
 }

@@ -32,13 +32,13 @@ namespace et
 		DataStorage() :
 			_mutableData(nullptr), _flags(DataStorageFlag_OwnsMutableData) { }
 		
-		explicit DataStorage(size_t size) :
+		explicit DataStorage(uint32_t size) :
 			_mutableData(nullptr), _flags(DataStorageFlag_OwnsMutableData)
 		{
 			resize(size);
 		}
 
-		DataStorage(size_t size, int initValue) :
+		DataStorage(uint32_t size, int initValue) :
 			_mutableData(nullptr), _flags(DataStorageFlag_OwnsMutableData)
 		{
 			resize(size); 
@@ -71,11 +71,11 @@ namespace et
 			mv._immutableData = nullptr;
 		}
 		
-		DataStorage(DataTypePointer data, size_t dataSize) :
+		DataStorage(DataTypePointer data, uint32_t dataSize) :
 			_mutableData(data), _size(dataSize / dataTypeSize), _dataSize(dataSize),
 			_flags(DataStorageFlag_Mutable) { }
 
-		DataStorage(DataTypeConstPointer data, size_t dataSize) :
+		DataStorage(DataTypeConstPointer data, uint32_t dataSize) :
 			_immutableData(data), _size(dataSize / dataTypeSize), _dataSize(dataSize) { }
 
 		~DataStorage()
@@ -130,7 +130,7 @@ namespace et
 		DataTypePointer current_ptr()
 			{ ET_ASSERT(mutableData() && (_lastElementIndex < _size)); return _mutableData + _lastElementIndex; }
 		
-		DataTypePointer element_ptr(size_t aIndex)
+		DataTypePointer element_ptr(uint32_t aIndex)
 			{ ET_ASSERT(aIndex < _size); return (_mutableData + aIndex); }
 		
 		DataTypePointer begin()
@@ -160,7 +160,7 @@ namespace et
 		DataTypeConstPointer current_ptr() const
 			{ ET_ASSERT(_lastElementIndex < _size); return _immutableData + _lastElementIndex; }
 		
-		DataTypeConstPointer element_ptr(size_t i) const
+		DataTypeConstPointer element_ptr(uint32_t i) const
 			{ ET_ASSERT(i < _size); return _immutableData + i; }
 		
 		DataTypeConstPointer begin() const
@@ -172,10 +172,10 @@ namespace et
 		const char* binary() const
 			{ return reinterpret_cast<const char*>(_immutableData); }
 		
-		size_t size() const
+		uint32_t size() const
 			{ return _size; }
 		
-		size_t dataSize() const
+		uint32_t dataSize() const
 			{ return _dataSize; }
 
 		/*
@@ -199,12 +199,12 @@ namespace et
 		void fill(int value)
 			{ ET_ASSERT(mutableData()); etFillMemory(_mutableData, value, _dataSize); }
 		
-		void resize(size_t newSize)
+		void resize(uint32_t newSize)
 		{
 			if (_size == newSize) return;
 			
 			DataTypePointer new_data = nullptr;
-			size_t min_size = (newSize < _size) ? newSize : _size;
+			uint32_t min_size = (newSize < _size) ? newSize : _size;
 			_size = newSize;
 			_dataSize = _size * dataTypeSize;
 			
@@ -233,22 +233,22 @@ namespace et
 			_mutableData[_lastElementIndex++] = value;
 		}
 		
-		void append(DataTypeConstPointer values, size_t count)
+		void append(DataTypeConstPointer values, uint32_t count)
 		{
 			ET_ASSERT(mutableData());
 			
-			size_t currentSize = _size;
+			uint32_t currentSize = _size;
 			resize(_size + count);
 			etCopyMemory(&_mutableData[currentSize], values, count * dataTypeSize);
 		}
 		
-		void appendData(const void* ptr, size_t dataSize)
+		void appendData(const void* ptr, uint32_t dataSize)
 		{
 			ET_ASSERT(mutableData());
 			ET_ASSERT(ptr);
 			
-			size_t currentSize = _size;
-			size_t numElements = dataSize / dataTypeSize + ((dataSize % dataTypeSize > 0) ? 1 : 0);
+			uint32_t currentSize = _size;
+			uint32_t numElements = dataSize / dataTypeSize + ((dataSize % dataTypeSize > 0) ? 1 : 0);
 			resize(_size + numElements);
 			etCopyMemory(&_mutableData[currentSize], ptr, dataSize);
 		}
@@ -263,9 +263,9 @@ namespace et
 			return value;
 		}
 
-		void fitToSize(size_t size)
+		void fitToSize(uint32_t size)
 		{
-			size_t need_size = _lastElementIndex + size;
+			uint32_t need_size = _lastElementIndex + size;
 			if (need_size > _size)
 				resize(need_size);
 		}
@@ -339,8 +339,8 @@ namespace et
 		};
 		
 	private:
-		size_t _size = 0;
-		size_t _dataSize = 0;
+		uint32_t _size = 0;
+		uint32_t _dataSize = 0;
 		uint32_t _lastElementIndex = 0;
 		uint32_t _flags = 0;
 	};

@@ -34,10 +34,10 @@ namespace et
 
 		vec2 getTexCoord(const vec2& ivec, TextureOrigin origin = TextureOrigin::TopLeft) const;
 
-		void updateDataDirectly(const vec2i& size, const char* data, size_t dataSize);
+		void updateDataDirectly(const vec2i& size, const char* data, uint32_t dataSize);
 
 		void updatePartialDataDirectly(const vec2i& offset, const vec2i& size,
-			const char* data, size_t dataSize);
+			const char* data, uint32_t dataSize);
 
 		uint32_t apiHandle() const { return _ah; }
 
@@ -45,7 +45,7 @@ namespace et
 		void generateTexture();
 		void buildProperies();
 		void build();
-        void buildData(const char* ptr, size_t dataSize);
+        void buildData(const char* ptr, uint32_t dataSize);
 
 		uint32_t _ah = 0;
 		void setAPIHandle(uint32_t ah) { _ah = ah; }

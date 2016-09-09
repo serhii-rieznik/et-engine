@@ -141,4 +141,69 @@ void VulkanSwapchain::acquireNextImage(VulkanState& vulkan)
 		vulkan.semaphores.imageAvailable, nullptr, &currentImageIndex));
 }
 
+uint32_t getVulkanMemoryType(VulkanState& vulkan, uint32_t typeFilter, VkMemoryPropertyFlags properties) 
+{
+	static bool propertiesRetreived = false;
+	static VkPhysicalDeviceMemoryProperties memProperties = { };
+
+	if (propertiesRetreived == false)
+	{
+		vkGetPhysicalDeviceMemoryProperties(vulkan.physicalDevice, &memProperties);
+		propertiesRetreived = true;
+	}
+
+	for (uint32_t i = 0; i < memProperties.memoryTypeCount; ++i)
+	{
+		if ((typeFilter & (1 << i)) && (memProperties.memoryTypes[i].propertyFlags & properties) == properties)
+		{
+			return i;
+		}
+	}
+
+	ET_FAIL("Unable to get memory type");
+}
+
+VulkanNativeBuffer::VulkanNativeBuffer(VulkanState& vulkan, uint32_t size, uint32_t usage) : 
+	_vulkan(vulkan)
+{
+	VkBufferCreateInfo info = { VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO };
+	info.size = size;
+	info.usage = usage;
+	info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+	VULKAN_CALL(vkCreateBuffer(_vulkan.device, &info, nullptr, &_buffer));
+
+	VkMemoryRequirements req = { };
+	vkGetBufferMemoryRequirements(_vulkan.device, _buffer, &req);
+
+	VkMemoryAllocateInfo allocInfo = { VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO };
+	allocInfo.allocationSize = req.size;
+	allocInfo.memoryTypeIndex = getVulkanMemoryType(_vulkan, 
+		req.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+	VULKAN_CALL(vkAllocateMemory(vulkan.device, &allocInfo, nullptr, &_memory));
+}
+
+VulkanNativeBuffer::~VulkanNativeBuffer()
+{
+	vkDestroyBuffer(_vulkan.device, _buffer, nullptr);
+	vkFreeMemory(_vulkan.device, _memory, nullptr);
+}
+
+void* VulkanNativeBuffer::map(uint32_t offset, uint32_t size)
+{
+	void* pointer = nullptr;
+	{
+		ET_ASSERT(_mapped == false);
+		VULKAN_CALL(vkMapMemory(_vulkan.device, _memory, offset, size, 0, &pointer));
+		_mapped = true;
+	}
+	return pointer;
+}
+
+void VulkanNativeBuffer::unmap()
+{
+	ET_ASSERT(_mapped);
+	vkUnmapMemory(_vulkan.device, _memory);
+	_mapped = false;
+}
+
 }

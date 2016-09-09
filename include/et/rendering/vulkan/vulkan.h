@@ -119,4 +119,28 @@ Vector<EnumeratedClass> enumerateVulkanObjects(const Holder& holder, Function ca
 	return enumerator(holder, callable);
 }
 
+uint32_t getVulkanMemoryType(VulkanState& vulkan, uint32_t typeFilter, VkMemoryPropertyFlags properties);
+
+class VulkanNativeBuffer
+{
+public:
+	VulkanNativeBuffer(VulkanState& vulkan, uint32_t size, uint32_t usage);
+	~VulkanNativeBuffer();
+
+	void* map(uint32_t offset, uint32_t size);
+	void unmap();
+
+	VkBuffer buffer() const 
+		{ return _buffer; }
+
+	bool mapped() const 
+		{ return _mapped; }
+
+private:
+	VulkanState& _vulkan;
+	VkBuffer _buffer = nullptr;
+	VkDeviceMemory _memory = nullptr;
+	std::atomic_bool _mapped{false};
+};
+
 }

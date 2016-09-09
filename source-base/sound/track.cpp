@@ -412,7 +412,7 @@ bool TrackPrivate::fillNextPCMBuffer()
 {
 	checkOpenALError("fillNextPCMBuffer");
 	
-	BinaryDataStorage data(pcmBufferSize, 0);
+	BinaryDataStorage data(static_cast<uint32_t>(pcmBufferSize), 0);
 	auto& inStream = stream->stream();
 	inStream.read(data.binary(), std::min(pcmBufferSize, pcmDataSize - pcmReadOffset));
 	pcmReadOffset += static_cast<size_t>(inStream.gcount());
@@ -490,7 +490,7 @@ bool TrackPrivate::fillNextOGGBuffer()
 	if (stream.invalid())
 		return false;
 	
-	BinaryDataStorage data(pcmBufferSize, 0);
+	BinaryDataStorage data(static_cast<uint32_t>(pcmBufferSize), 0);
 	
 	bool errorOccured = false;
 	

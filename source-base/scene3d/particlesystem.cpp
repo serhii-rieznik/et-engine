@@ -57,7 +57,7 @@ void ParticleSystem::onTimerUpdated(NotifyTimer* timer)
 
 	_vao->bind();
 	
-	void* bufferData = bufferData = _vao->vertexBuffer()->map(0, _capacity,
+	void* bufferData = _vao->vertexBuffer()->map(0, _capacity,
 		MapBufferOptions::Write | MapBufferOptions::InvalidateBuffer);
 
 	auto posOffset = _decl.elementForUsage(VertexAttributeUsage::Position).offset();

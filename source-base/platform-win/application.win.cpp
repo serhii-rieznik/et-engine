@@ -98,28 +98,27 @@ int Application::platformRun(int, char*[])
 	_runLoop.updateTime(_lastQueuedTimeMSec);
 
 	_renderContext = sharedObjectFactory().createObject<RenderContext>(params, this);
-	if (_renderContext->valid())
+	_standardPathResolver.setRenderContext(_renderContext);
+	
+	enterRunLoop();
+	_delegate->applicationWillResizeContext(_renderContext->size());
+
+	MSG msg = { };
+	while (_running)
 	{
-		enterRunLoop();
-		_delegate->applicationWillResizeContext(_renderContext->size());
-
-		MSG msg = { };
-		while (_running)
+		if (PeekMessageW(&msg, 0, 0, 0, PM_REMOVE))
 		{
-			if (PeekMessageW(&msg, 0, 0, 0, PM_REMOVE))
-			{
-				TranslateMessage(&msg);
-				DispatchMessageW(&msg);
-			}
-			else if (shouldPerformRendering())
-			{
-				performUpdateAndRender();
-			}
+			TranslateMessage(&msg);
+			DispatchMessageW(&msg);
 		}
-
-		stop();
-		platformFinalize();
+		else if (shouldPerformRendering())
+		{
+			performUpdateAndRender();
+		}
 	}
+
+	stop();
+	platformFinalize();
 
 	return _exitCode;
 }

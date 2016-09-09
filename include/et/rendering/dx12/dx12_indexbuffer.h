@@ -20,6 +20,5 @@ namespace et
 		DX12IndexBuffer(IndexArray::Pointer, BufferDrawType, const std::string&);
 
 		void bind() override;
-        void clear() override;
 	};
 }

@@ -22,6 +22,12 @@ namespace rh_local
 
 void init(RenderContext* rc)
 {
+#if (ET_PLATFORM_WIN)
+	application().pushRelativeSearchPath("../");
+	application().pushRelativeSearchPath("../../");
+	application().pushRelativeSearchPath("../../../");
+	application().pushRelativeSearchPath("../../../../");
+#endif
 	ET_ASSERT(rh_local::default2DPlane.invalid());
 	ET_ASSERT(rh_local::default2DMaterial.invalid());
 

@@ -129,7 +129,7 @@ void OpenGLTexture::generateTexture()
 	}
 }
 
-void OpenGLTexture::buildData(const char* aDataPtr, size_t aDataSize)
+void OpenGLTexture::buildData(const char* aDataPtr, uint32_t aDataSize)
 {
 	glPixelStorei(GL_UNPACK_ALIGNMENT, description()->alignment);
 	checkOpenGLError("glPixelStorei");
@@ -150,11 +150,11 @@ void OpenGLTexture::buildData(const char* aDataPtr, size_t aDataSize)
 
 	if ((description()->target == TextureTarget::Texture_2D) || (description()->target == TextureTarget::Texture_Rectangle))
 	{
-		for (size_t level = 0; level < description()->mipMapCount; ++level)
+		for (uint32_t level = 0; level < description()->mipMapCount; ++level)
 		{
 			vec2i t_mipSize = description()->sizeForMipLevel(level);
 			GLsizei t_dataSize = static_cast<GLsizei>(description()->dataSizeForMipLevel(level));
-			size_t t_offset = description()->dataOffsetForMipLevel(level, 0);
+			uint32_t t_offset = description()->dataOffsetForMipLevel(level, 0);
 			
 			const char* ptr = (aDataPtr && (t_offset < aDataSize)) ? &aDataPtr[t_offset] : 0;
 			if (description()->compressed && ptr)
@@ -173,12 +173,12 @@ void OpenGLTexture::buildData(const char* aDataPtr, size_t aDataSize)
 	{
 		uint32_t target = GL_TEXTURE_CUBE_MAP_POSITIVE_X;
 		
-		for (size_t layer = 0; layer < description()->layersCount; ++layer, ++target)
+		for (uint32_t layer = 0; layer < description()->layersCount; ++layer, ++target)
 		{
-			for (size_t level = 0; level < description()->mipMapCount; ++level)
+			for (uint32_t level = 0; level < description()->mipMapCount; ++level)
 			{
 				vec2i t_mipSize = description()->sizeForMipLevel(level);
-				size_t t_offset = description()->dataOffsetForMipLevel(level, layer);
+				uint32_t t_offset = description()->dataOffsetForMipLevel(level, layer);
 				
 				const char* ptr = (aDataPtr && (t_offset < aDataSize)) ? &aDataPtr[t_offset] : nullptr;
 				if (description()->compressed && (ptr != nullptr))
@@ -268,7 +268,7 @@ void OpenGLTexture::update(TextureDescription::Pointer desc)
 	build();
 }
 
-void OpenGLTexture::updateDataDirectly(const vec2i& size, const char* data, size_t dataSize)
+void OpenGLTexture::updateDataDirectly(const vec2i& size, const char* data, uint32_t dataSize)
 {
 	if (apiHandle() == 0)
 		generateTexture();
@@ -279,7 +279,7 @@ void OpenGLTexture::updateDataDirectly(const vec2i& size, const char* data, size
 	buildData(data, dataSize);
 }
 
-void OpenGLTexture::updatePartialDataDirectly(const vec2i& offset, const vec2i& aSize, const char* data, size_t)
+void OpenGLTexture::updatePartialDataDirectly(const vec2i& offset, const vec2i& aSize, const char* data, uint32_t)
 {
 	ET_ASSERT((description()->target == TextureTarget::Texture_2D) && !description()->compressed);
 	ET_ASSERT((offset.x >= 0) && (offset.y >= 0));

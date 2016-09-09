@@ -21,11 +21,11 @@ void DX12VertexBuffer::bind()
 {
 }
 
-void DX12VertexBuffer::setData(const void * data, size_t dataSize, bool invalidateExistingData)
+void DX12VertexBuffer::setData(const void * data, uint32_t dataSize, bool invalidateExistingData)
 {
 }
 
-void DX12VertexBuffer::setDataWithOffset(const void * data, size_t offset, size_t dataSize)
+void DX12VertexBuffer::setDataWithOffset(const void * data, uint32_t offset, uint32_t dataSize)
 {
 }
 
@@ -38,7 +38,7 @@ uint64_t DX12VertexBuffer::dataSize()
 	return uint64_t();
 }
 
-void* DX12VertexBuffer::map(size_t offset, size_t dataSize, uint32_t options /* see MapBufferOptions */)
+void* DX12VertexBuffer::map(uint32_t offset, uint32_t dataSize, uint32_t options /* see MapBufferOptions */)
 {
 	return nullptr; 
 }

@@ -119,7 +119,7 @@ void OpenGLProgram::setCameraProperties(const Camera& cam)
 	setCameraPosition(cam.position());
 }
 
-void OpenGLProgram::printShaderSource(uint32_t shader, size_t initialSize, const char* tag)
+void OpenGLProgram::printShaderSource(uint32_t shader, uint32_t initialSize, const char* tag)
 {
 	GLsizei sourceLength = 0;
 	DataStorage<GLchar> buffer(initialSize + 1, 0);
@@ -146,7 +146,7 @@ void OpenGLProgram::printShaderSource(uint32_t shader, size_t initialSize, const
 	log::info("Program: %s, %s shader source:\n%s", name().c_str(), tag, stringBuffer.data());
 }
 
-void OpenGLProgram::printShaderLog(uint32_t shader, size_t initialSize, const char* tag)
+void OpenGLProgram::printShaderLog(uint32_t shader, uint32_t initialSize, const char* tag)
 {
 	GLsizei nLogLen = 0;
 	DataStorage<GLchar> infoLog(initialSize + 1, 0);
@@ -208,7 +208,7 @@ void OpenGLProgram::build(const std::string& vertex_source, const std::string& f
 	if (nLogLen > 1)
 	{
 		printShaderLog(VertexShader, nLogLen, "vertex");
-		printShaderSource(VertexShader, vertex_source.size(), "vertex");
+		printShaderSource(VertexShader, static_cast<uint32_t>(vertex_source.size()), "vertex");
 	}
 
 	if (vertStatus == GL_TRUE)
@@ -239,8 +239,8 @@ void OpenGLProgram::build(const std::string& vertex_source, const std::string& f
 		glGetShaderiv(GeometryShader, GL_INFO_LOG_LENGTH, &nLogLen);
 		if (nLogLen > 1)
 		{
-			printShaderLog(GeometryShader, geom_source.size(), "geometry");
-			printShaderSource(GeometryShader, geom_source.size(), "geometry");
+			printShaderLog(GeometryShader, static_cast<uint32_t>(geom_source.size()), "geometry");
+			printShaderSource(GeometryShader, static_cast<uint32_t>(geom_source.size()), "geometry");
 		}
 		
 		if (geomStatus == GL_TRUE)
@@ -271,8 +271,8 @@ void OpenGLProgram::build(const std::string& vertex_source, const std::string& f
 	glGetShaderiv(FragmentShader, GL_INFO_LOG_LENGTH, &nLogLen);
 	if (nLogLen > 1)
 	{
-		printShaderLog(FragmentShader, frag_source.size(), "fragment");
-		printShaderSource(FragmentShader, frag_source.size(), "fragment");
+		printShaderLog(FragmentShader, static_cast<uint32_t>(frag_source.size()), "fragment");
+		printShaderSource(FragmentShader, static_cast<uint32_t>(frag_source.size()), "fragment");
 	}
 
 	if (fragStatus == GL_TRUE)

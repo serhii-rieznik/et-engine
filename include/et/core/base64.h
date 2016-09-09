@@ -13,7 +13,7 @@ namespace et
 {
 	namespace base64
 	{
-		size_t decodedDataSize(const std::string&);
+		uint32_t decodedDataSize(const std::string&);
 		BinaryDataStorage decode(const std::string&);
 		std::string encode(const BinaryDataStorage&);
 	}

@@ -40,7 +40,7 @@ void Material::loadFromJson(const std::string& jsonString, const std::string& ba
 
 	std::string programSource;
 
-	if (_renderer->api() == RenderingAPI::OpenGL)
+	if ((_renderer->api() == RenderingAPI::OpenGL) || (_renderer->api() == RenderingAPI::Vulkan))
 	{
 		programSource = application().resolveFileName(obj.stringForKey(kProgramSourceGL)->content);
 	}
@@ -187,7 +187,7 @@ void Material::addDataProperty(const String& name, DataType type, int32_t locati
 	uint32_t currentSize = _propertiesData.lastElementIndex();
 	if (currentSize + requiredSpace > _propertiesData.size())
 	{
-		_propertiesData.resize(std::max(2 * _propertiesData.size(), size_t(currentSize + requiredSpace)));
+		_propertiesData.resize(std::max(2 * _propertiesData.size(), currentSize + requiredSpace));
 	}
 	_properties.emplace(name, DataProperty(type, location, currentSize, requiredSpace));
 	_propertiesData.applyOffset(requiredSpace);

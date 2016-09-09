@@ -54,7 +54,7 @@ namespace et
 			VertexArrayObject::Pointer _vao;
 			VertexDeclaration _decl;
 			NotifyTimer _timer;
-			size_t _capacity = 0;
+			uint32_t _capacity = 0;
 		};
 	}
 }

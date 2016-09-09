@@ -61,8 +61,6 @@ RenderContext::RenderContext(const RenderContextParameters& inParams, Applicatio
 	_size.x = clientRect.right - clientRect.left;
 	_size.y = clientRect.bottom - clientRect.top;
 
-	renderhelper::init(this);
-
 	ShowWindow(wnd, SW_SHOW);
 	SetForegroundWindow(wnd);
 	SetFocus(wnd);
@@ -93,11 +91,12 @@ RenderContext::~RenderContext()
 
 void RenderContext::init()
 {
+	renderhelper::init(this);
 }
 
-bool RenderContext::valid()
+void RenderContext::shutdown()
 {
-	return _private != nullptr;
+
 }
 
 bool RenderContext::beginRender()

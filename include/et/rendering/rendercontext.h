@@ -29,7 +29,6 @@ namespace et
 		~RenderContext();
 
 		void init();
-		bool valid();
 		void shutdown();
 		
         RenderContextParameters& parameters()

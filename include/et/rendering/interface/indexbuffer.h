@@ -76,7 +76,6 @@ namespace et
 			{ _sourceObjectName = tag; }
 
         virtual void bind() = 0;
-        virtual void clear() = 0;
         
 	private:
 		std::string _sourceObjectName;

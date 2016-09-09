@@ -12,7 +12,7 @@
 namespace et
 {
 
-size_t streamSize(std::istream& s)
+uint32_t streamSize(std::istream& s)
 {
 	std::streamoff currentPos = s.tellg();
 	
@@ -20,7 +20,7 @@ size_t streamSize(std::istream& s)
 	std::streamoff endPos = s.tellg();
 	s.seekg(currentPos, std::ios::beg);
 	
-	return static_cast<size_t>(endPos);
+	return static_cast<uint32_t>(endPos);
 }
 
 std::string loadTextFile(const std::string& fileName)

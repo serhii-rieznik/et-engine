@@ -31,9 +31,9 @@ namespace et
 	 */
 	std::string applicationIdentifierForCurrentProject();
 	
-	size_t streamSize(std::istream& s);
+	uint32_t streamSize(std::istream& s);
 	
- 	inline size_t roundToHighestPowerOfTwo(size_t x)
+ 	inline uint32_t roundToHighestPowerOfTwo(uint32_t x)
 	{
 		x = x - 1;
 		x |= (x >> 1);

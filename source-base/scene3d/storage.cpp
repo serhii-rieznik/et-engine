@@ -84,7 +84,7 @@ Dictionary Storage::serialize(const std::string& basePath)
 		std::string libraryName = replaceFileExt(basePath, "-materials.json");
 
 		auto serializedData = json::serialize(materialsDictionary, json::SerializationFlag_ReadableFormat);
-		BinaryDataStorage binaryData(serializedData.size() + 1, 0);
+		BinaryDataStorage binaryData(static_cast<uint32_t>(serializedData.size() + 1), 0);
 		etCopyMemory(binaryData.data(), serializedData.data(), serializedData.size());
 		binaryData.writeToFile(libraryName);
 
@@ -134,7 +134,7 @@ Dictionary Storage::serialize(const std::string& basePath)
     Dictionary indexArrayDictionary;
     if (_indexArray.valid())
     {
-        indexesDataSize = std::min(_indexArray->dataSize(), _indexArray->actualSize() * static_cast<size_t>(_indexArray->format()));
+        indexesDataSize = std::min(_indexArray->dataSize(), _indexArray->actualSize() * static_cast<uint32_t>(_indexArray->format()));
         indexArrayDictionary.setStringForKey(kBinary, getFileName(binaryName));
         indexArrayDictionary.setIntegerForKey(kDataSize, indexesDataSize);
         indexArrayDictionary.setIntegerForKey(kIndexesCount, _indexArray->actualSize());

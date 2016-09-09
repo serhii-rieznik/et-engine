@@ -15,9 +15,9 @@ static const std::string base64_chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklm
 inline bool is_base64(unsigned char c)
 	{ return (isalnum(c) || (c == '+') || (c == '/')); }
 
-size_t et::base64::decodedDataSize(const std::string& encoded_string)
+uint32_t et::base64::decodedDataSize(const std::string& encoded_string)
 {
-	size_t result = 0;
+	uint32_t result = 0;
 	
 	size_t in_len = encoded_string.size();
 	

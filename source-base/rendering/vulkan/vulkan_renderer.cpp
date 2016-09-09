@@ -191,12 +191,12 @@ void VulkanRenderer::present()
 
 VertexBuffer::Pointer VulkanRenderer::createVertexBuffer(const std::string& name, VertexStorage::Pointer vs, BufferDrawType dt)
 {
-	return VulkanVertexBuffer::Pointer::create(vs->declaration(), dt, name);
+	return VulkanVertexBuffer::Pointer::create(_private->vulkan(), vs->declaration(), vs->data(), dt, name);
 }
 
 IndexBuffer::Pointer VulkanRenderer::createIndexBuffer(const std::string& name, IndexArray::Pointer ia, BufferDrawType dt)
 {
-	return VulkanIndexBuffer::Pointer::create(ia, dt, name);
+	return VulkanIndexBuffer::Pointer::create(_private->vulkan(), ia, dt, name);
 }
 
 VertexArrayObject::Pointer VulkanRenderer::createVertexArrayObject(const std::string& name)
@@ -209,8 +209,7 @@ Texture::Pointer VulkanRenderer::createTexture(TextureDescription::Pointer desc)
 	return VulkanTexture::Pointer::create(desc);
 }
 
-Program::Pointer VulkanRenderer::createProgram(const std::string& vs, const std::string& fs,
-	const StringList& defines, const std::string& baseFolder)
+Program::Pointer VulkanRenderer::createProgram(const std::string& source, const StringList& defines, const std::string& baseFolder)
 {
 	return VulkanProgram::Pointer::create();
 }

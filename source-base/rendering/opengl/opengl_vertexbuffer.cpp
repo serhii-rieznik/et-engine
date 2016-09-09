@@ -81,7 +81,7 @@ void OpenGLVertexBuffer::bind()
 	}
 }
 
-void OpenGLVertexBuffer::setData(const void* data, size_t dataSize, bool invalidateExistingData)
+void OpenGLVertexBuffer::setData(const void* data, uint32_t dataSize, bool invalidateExistingData)
 {
 	bind();
 	
@@ -96,13 +96,12 @@ void OpenGLVertexBuffer::setData(const void* data, size_t dataSize, bool invalid
 	checkOpenGLError("glBufferData(GL_ARRAY_BUFFER, %u, 0x%08X, %d)", _private->dataSize, data, drawType());
 }
 
-void OpenGLVertexBuffer::setDataWithOffset(const void* data, size_t offset, size_t dataSize)
+void OpenGLVertexBuffer::setDataWithOffset(const void* data, uint32_t offset, uint32_t dataSize)
 {
 	bind();
 
 	glBufferSubData(GL_ARRAY_BUFFER, offset, dataSize, data);
-	checkOpenGLError("glBufferSubData(GL_ARRAY_BUFFER, %llu, %llu, 0x%08X)", uint64_t(offset),
-		uint64_t(_private->dataSize), data);
+	checkOpenGLError("glBufferSubData(GL_ARRAY_BUFFER, %lu, %lu, 0x%08X)", offset, _private->dataSize, data);
 }
 
 uint64_t OpenGLVertexBuffer::dataSize()
@@ -110,7 +109,7 @@ uint64_t OpenGLVertexBuffer::dataSize()
 	return _private->dataSize;
 }
 
-void* OpenGLVertexBuffer::map(size_t offset, size_t dataSize, uint32_t options)
+void* OpenGLVertexBuffer::map(uint32_t offset, uint32_t dataSize, uint32_t options)
 {
 	ET_ASSERT(!_private->mapped);
 	ET_ASSERT(dataSize > 0);

@@ -11,15 +11,22 @@
 
 namespace et
 {
-	class VulkanIndexBuffer : public IndexBuffer
-	{
-	public:
-		ET_DECLARE_POINTER(VulkanIndexBuffer);
-		
-	public:
-		VulkanIndexBuffer(IndexArray::Pointer, BufferDrawType, const std::string&);
 
-		void bind() override;
-        void clear() override;
-	};
+class VulkanState;
+class VulkanIndexBufferPrivate;
+class VulkanIndexBuffer : public IndexBuffer
+{
+public:
+	ET_DECLARE_POINTER(VulkanIndexBuffer);
+		
+public:
+	VulkanIndexBuffer(VulkanState& vulkan, IndexArray::Pointer, BufferDrawType, const std::string&);
+	~VulkanIndexBuffer();
+
+	void bind() override;
+
+private:
+	ET_DECLARE_PIMPL(VulkanIndexBuffer, 32);
+};
+
 }

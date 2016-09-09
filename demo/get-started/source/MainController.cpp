@@ -1,7 +1,11 @@
 #include "MainController.h"
 #include <et/rendering/base/primitives.h>
 
+#if (ET_PLATFORM_WIN)
+const et::RenderingAPI api = et::RenderingAPI::Vulkan;
+#else
 const et::RenderingAPI api = et::RenderingAPI::Metal;
+#endif
 
 void demo::MainController::setApplicationParameters(et::ApplicationParameters& p)
 {

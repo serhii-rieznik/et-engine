@@ -418,7 +418,7 @@ void dds::loadFromStream(std::istream& source, TextureDescription& desc)
 	
 	loadInfoFromStream(source, desc);
 	
-	size_t dataSize = desc.layersCount * desc.dataSizeForAllMipLevels();
+	uint32_t dataSize = desc.layersCount * desc.dataSizeForAllMipLevels();
 	if (dataSize)
 	{
 		desc.data = BinaryDataStorage(dataSize);

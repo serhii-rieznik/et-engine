@@ -24,42 +24,38 @@ namespace et
 		VulkanRenderer(RenderContext* rc);
 		~VulkanRenderer();
 
-		void init(const RenderContextParameters& params);
-		void shutdown();
+		void init(const RenderContextParameters& params) override;
+		void shutdown() override;
 
-		void begin();
-		void present();
+		void begin() override;
+		void present() override;
 
-		RenderPass::Pointer allocateRenderPass(const RenderPass::ConstructionInfo&);
-		void submitRenderPass(RenderPass::Pointer);
+		RenderPass::Pointer allocateRenderPass(const RenderPass::ConstructionInfo&) override;
+		void submitRenderPass(RenderPass::Pointer) override;
 
-		void drawIndexedPrimitive(PrimitiveType, IndexArrayFormat, uint32_t first, uint32_t count);
+		void drawIndexedPrimitive(PrimitiveType, IndexArrayFormat, uint32_t first, uint32_t count) override;
 
 		/*
 		 * Vertex buffes
 		 */
-		VertexBuffer::Pointer createVertexBuffer(const std::string&, VertexStorage::Pointer, BufferDrawType);
-		IndexBuffer::Pointer createIndexBuffer(const std::string&, IndexArray::Pointer, BufferDrawType);
-		VertexArrayObject::Pointer createVertexArrayObject(const std::string&);
+		VertexBuffer::Pointer createVertexBuffer(const std::string&, VertexStorage::Pointer, BufferDrawType) override;
+		IndexBuffer::Pointer createIndexBuffer(const std::string&, IndexArray::Pointer, BufferDrawType) override;
+		VertexArrayObject::Pointer createVertexArrayObject(const std::string&) override;
         
         /*
          * Textures
          */
-        Texture::Pointer createTexture(TextureDescription::Pointer);
+        Texture::Pointer createTexture(TextureDescription::Pointer) override;
         
         /*
          * Programs
          */
-        Program::Pointer createProgram(const std::string& vs, const std::string& fs,
-            const StringList& defines, const std::string& baseFolder);
+        Program::Pointer createProgram(const std::string& source, const StringList& defines, const std::string& baseFolder) override;
         
-        inline Program::Pointer createProgram(const std::string& vs, const std::string& fs)
-            { return createProgram(vs, fs, emptyStringList(), emptyString); }
-
 		/*
 		 * Pipeline state
 		 */
-        PipelineState::Pointer createPipelineState(RenderPass::Pointer, Material::Pointer, VertexArrayObject::Pointer);
+        PipelineState::Pointer createPipelineState(RenderPass::Pointer, Material::Pointer, VertexArrayObject::Pointer) override;
 	
 	private:
 		ET_DECLARE_PIMPL(VulkanRenderer, 1024);

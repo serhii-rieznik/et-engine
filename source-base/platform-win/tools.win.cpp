@@ -398,7 +398,8 @@ std::string et::selectFile(const StringList&, SelectFileMode mode, const std::st
 {
 	ET_STRING_TYPE defaultFileName = ET_STRING_TO_PARAM_TYPE(defaultName);
 
-	DataStorage<ET_CHAR_TYPE> defaultFileNameData(std::max(size_t(MAX_PATH), defaultFileName.size()) + 1, 0);
+	uint32_t fileNameSize = static_cast<uint32_t>(std::max(size_t(MAX_PATH), defaultFileName.size()) + 1, 0);
+	DataStorage<ET_CHAR_TYPE> defaultFileNameData(fileNameSize);
 	etCopyMemory(defaultFileNameData.data(), defaultFileName.data(), defaultFileName.size());
 
 	OPENFILENAME of = { };

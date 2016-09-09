@@ -21,11 +21,11 @@ namespace et
 		~OpenGLIndexBuffer();
 
         void bind() override;
-        void clear() override;
         
 		void* indexOffset(uint32_t offset) const;
 		void setData(const IndexArray::Pointer& i);
-		void overridePrimitiveType(PrimitiveType);
+
+		void clear();
 
 	private:
 		void build(const IndexArray::Pointer& i);

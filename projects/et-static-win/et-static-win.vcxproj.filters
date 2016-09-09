@@ -45,42 +45,6 @@
     <Filter Include="Header Files\camera">
       <UniqueIdentifier>{0a8a0dbb-241a-4c5d-9ed6-76bbc9fbcd79}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\app">
-      <UniqueIdentifier>{da55a591-5331-473d-b2c0-1312caa9bfb8}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\camera">
-      <UniqueIdentifier>{89be62af-b515-4df6-9e15-1c21bb617267}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\core">
-      <UniqueIdentifier>{8e5483d9-fbd6-42c7-8e1b-d61b51f65fe5}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\geometry">
-      <UniqueIdentifier>{f3b58606-e9a7-4030-8332-3b0c03612563}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\imaging">
-      <UniqueIdentifier>{4e4bb8bc-2f46-4b3d-9eba-50c83df5a464}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\input">
-      <UniqueIdentifier>{6ecafa56-c72d-42a5-948c-00b358439883}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\sound">
-      <UniqueIdentifier>{b37a9a76-405a-4619-a694-536a04526df8}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\scene3d">
-      <UniqueIdentifier>{06190f0b-df17-4e1f-94f2-3b67127c470f}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\rendering">
-      <UniqueIdentifier>{28d894a4-039b-4759-b40c-6f8510a32276}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\platform-win">
-      <UniqueIdentifier>{a7470628-3770-463a-8f42-50cdb55d0196}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\rendering\base">
-      <UniqueIdentifier>{a0a749df-d54f-481e-b380-44c9ac10f423}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\rendering\opengl">
-      <UniqueIdentifier>{88b9557b-c059-411d-9d6a-1346f2e095d3}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\rendering\base">
       <UniqueIdentifier>{7af8744c-14f7-4745-bbdd-25e04fa3505b}</UniqueIdentifier>
     </Filter>
@@ -96,17 +60,53 @@
     <Filter Include="Header Files\rendering\vulkan\vulkan">
       <UniqueIdentifier>{892b5381-e7f3-4c8d-8429-d1d231a72ecb}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\rendering\vulkan">
-      <UniqueIdentifier>{b8baf77b-fe1b-4129-9d11-6121cf77a842}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\rendering\dx12">
-      <UniqueIdentifier>{917ac29c-1419-4771-9d7d-06cc436b46e2}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\rendering\dx12">
       <UniqueIdentifier>{78d59f3c-3d6d-46d9-9391-a64944554b36}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\app">
+      <UniqueIdentifier>{44af5344-2ea5-451d-a077-bd347356dfe6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\camera">
+      <UniqueIdentifier>{61a91ca2-0443-4bfc-a157-3f7e151b8d87}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Source Files\compile_packs">
-      <UniqueIdentifier>{ca591add-25a8-4934-b408-2e3ddce6a81a}</UniqueIdentifier>
+      <UniqueIdentifier>{5ff86217-ce7b-4dcc-a57d-84c5f4c1ae6e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\core">
+      <UniqueIdentifier>{13edc148-45cc-412f-819a-52759a1f1534}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\geometry">
+      <UniqueIdentifier>{b809a79d-9746-49ab-ab5f-7bfcfb7fd2d5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\imaging">
+      <UniqueIdentifier>{02c4fdd8-1084-4c89-894c-979907b9a5e4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\input">
+      <UniqueIdentifier>{d7e7a8af-4a83-45e1-8f63-f96cfded165b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\sound">
+      <UniqueIdentifier>{9f694d64-773f-4a8b-b5b9-2c9ec6d57e1b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\scene3d">
+      <UniqueIdentifier>{913ae978-aea0-4a43-aaea-ef02116ce280}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\rendering">
+      <UniqueIdentifier>{a52be8bf-011b-4264-a765-4e9540d81810}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\platform-win">
+      <UniqueIdentifier>{adcfc4bd-8843-4264-8d2f-990f5d0f9355}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\rendering\base">
+      <UniqueIdentifier>{a527efa1-6768-470f-b668-53f2c7ec6dd2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\rendering\dx12">
+      <UniqueIdentifier>{fd2f5bb3-d587-4408-85a7-bf25ba9fdfed}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\rendering\opengl">
+      <UniqueIdentifier>{acb69bbb-8c37-4083-aaf8-c05378c4e39b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\rendering\vulkan">
+      <UniqueIdentifier>{24eda458-f98b-4793-aff3-99f8098d992a}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -689,40 +689,46 @@
     <ClInclude Include="..\..\include\et\rendering\vulkan\vulkan.h">
       <Filter>Header Files\rendering\vulkan</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\source-base\app\application.cpp">
+      <Filter>Source Files\app</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source-base\imaging\texturedescription.cpp">
+      <Filter>Source Files\imaging</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source-base\rendering\vertexbufferfactory.cpp">
+      <Filter>Source Files\rendering</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\source-base\app\application.cpp">
-      <Filter>Source Files\app</Filter>
+    <ClCompile Include="..\..\source-base\compile_packs\app.pack.cxx">
+      <Filter>Source Files\compile_packs</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source-base\app\backgroundthread.cpp">
-      <Filter>Source Files\app</Filter>
+    <ClCompile Include="..\..\source-base\compile_packs\camera.pack.cxx">
+      <Filter>Source Files\compile_packs</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source-base\app\events.cpp">
-      <Filter>Source Files\app</Filter>
+    <ClCompile Include="..\..\source-base\compile_packs\core.pack.cxx">
+      <Filter>Source Files\compile_packs</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source-base\app\invocation.cpp">
-      <Filter>Source Files\app</Filter>
+    <ClCompile Include="..\..\source-base\compile_packs\geometry.pack.cxx">
+      <Filter>Source Files\compile_packs</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source-base\app\pathresolver.cpp">
-      <Filter>Source Files\app</Filter>
+    <ClCompile Include="..\..\source-base\compile_packs\imaging.pack.cxx">
+      <Filter>Source Files\compile_packs</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source-base\app\runloop.cpp">
-      <Filter>Source Files\app</Filter>
+    <ClCompile Include="..\..\source-base\compile_packs\input.pack.cxx">
+      <Filter>Source Files\compile_packs</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source-base\camera\camera.cpp">
-      <Filter>Source Files\camera</Filter>
+    <ClCompile Include="..\..\source-base\compile_packs\platform-win.pack.cxx">
+      <Filter>Source Files\compile_packs</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source-base\camera\cameracontroller.cpp">
-      <Filter>Source Files\camera</Filter>
+    <ClCompile Include="..\..\source-base\compile_packs\rendering.pack.cxx">
+      <Filter>Source Files\compile_packs</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source-base\camera\cameramovingcontroller.cpp">
-      <Filter>Source Files\camera</Filter>
+    <ClCompile Include="..\..\source-base\compile_packs\scene3d.pack.cxx">
+      <Filter>Source Files\compile_packs</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source-base\camera\cameraorbitcontroller.cpp">
-      <Filter>Source Files\camera</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\camera\frustum.cpp">
-      <Filter>Source Files\camera</Filter>
+    <ClCompile Include="..\..\source-base\compile_packs\sound.pack.cxx">
+      <Filter>Source Files\compile_packs</Filter>
     </ClCompile>
     <ClCompile Include="..\..\source-base\sound\platform-dependent.cpp">
       <Filter>Source Files\sound</Filter>
@@ -781,6 +787,9 @@
     <ClCompile Include="..\..\source-base\platform-win\application.win.cpp">
       <Filter>Source Files\platform-win</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\source-base\platform-win\context.win.cpp">
+      <Filter>Source Files\platform-win</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\source-base\platform-win\input.win.cpp">
       <Filter>Source Files\platform-win</Filter>
     </ClCompile>
@@ -807,6 +816,36 @@
     </ClCompile>
     <ClCompile Include="..\..\source-base\input\input.cpp">
       <Filter>Source Files\input</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\imaging\bmploader.cpp">
+      <Filter>Source Files\imaging</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\imaging\ddsloader.cpp">
+      <Filter>Source Files\imaging</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\imaging\hdrloader.cpp">
+      <Filter>Source Files\imaging</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\imaging\imageoperations.cpp">
+      <Filter>Source Files\imaging</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\imaging\imagewriter.cpp">
+      <Filter>Source Files\imaging</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\imaging\jpegloader.cpp">
+      <Filter>Source Files\imaging</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\imaging\pngloader.cpp">
+      <Filter>Source Files\imaging</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\imaging\pvrdecompressor.cpp">
+      <Filter>Source Files\imaging</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\imaging\pvrloader.cpp">
+      <Filter>Source Files\imaging</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\imaging\tgaloader.cpp">
+      <Filter>Source Files\imaging</Filter>
     </ClCompile>
     <ClCompile Include="..\..\source-base\geometry\collision.cpp">
       <Filter>Source Files\geometry</Filter>
@@ -877,29 +916,65 @@
     <ClCompile Include="..\..\source-base\core\transformable.cpp">
       <Filter>Source Files\core</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source-base\rendering\base\helpers.cpp">
-      <Filter>Source Files\rendering\base</Filter>
+    <ClCompile Include="..\..\source-base\camera\cameracontroller.cpp">
+      <Filter>Source Files\camera</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source-base\rendering\base\indexarray.cpp">
-      <Filter>Source Files\rendering\base</Filter>
+    <ClCompile Include="..\..\source-base\camera\cameramovingcontroller.cpp">
+      <Filter>Source Files\camera</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source-base\rendering\base\primitives.cpp">
-      <Filter>Source Files\rendering\base</Filter>
+    <ClCompile Include="..\..\source-base\camera\cameraorbitcontroller.cpp">
+      <Filter>Source Files\camera</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source-base\rendering\base\renderbatch.cpp">
-      <Filter>Source Files\rendering\base</Filter>
+    <ClCompile Include="..\..\source-base\camera\frustum.cpp">
+      <Filter>Source Files\camera</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source-base\rendering\base\vertexarray.cpp">
-      <Filter>Source Files\rendering\base</Filter>
+    <ClCompile Include="..\..\source-base\camera\camera.cpp">
+      <Filter>Source Files\camera</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source-base\rendering\base\vertexdatachunk.cpp">
-      <Filter>Source Files\rendering\base</Filter>
+    <ClCompile Include="..\..\source-base\app\backgroundthread.cpp">
+      <Filter>Source Files\app</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source-base\rendering\base\vertexdeclaration.cpp">
-      <Filter>Source Files\rendering\base</Filter>
+    <ClCompile Include="..\..\source-base\app\events.cpp">
+      <Filter>Source Files\app</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source-base\rendering\base\vertexstorage.cpp">
-      <Filter>Source Files\rendering\base</Filter>
+    <ClCompile Include="..\..\source-base\app\invocation.cpp">
+      <Filter>Source Files\app</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\app\pathresolver.cpp">
+      <Filter>Source Files\app</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\app\runloop.cpp">
+      <Filter>Source Files\app</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\rendering\material.cpp">
+      <Filter>Source Files\rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\rendering\rendering.cpp">
+      <Filter>Source Files\rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\rendering\vulkan\vulkan.cpp">
+      <Filter>Source Files\rendering\vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\rendering\vulkan\vulkan_indexbuffer.cpp">
+      <Filter>Source Files\rendering\vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\rendering\vulkan\vulkan_pipelinestate.cpp">
+      <Filter>Source Files\rendering\vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\rendering\vulkan\vulkan_program.cpp">
+      <Filter>Source Files\rendering\vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\rendering\vulkan\vulkan_renderer.cpp">
+      <Filter>Source Files\rendering\vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\rendering\vulkan\vulkan_renderpass.cpp">
+      <Filter>Source Files\rendering\vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\rendering\vulkan\vulkan_texture.cpp">
+      <Filter>Source Files\rendering\vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source-base\rendering\vulkan\vulkan_vertexbuffer.cpp">
+      <Filter>Source Files\rendering\vulkan</Filter>
     </ClCompile>
     <ClCompile Include="..\..\source-base\rendering\opengl\opengl.cpp">
       <Filter>Source Files\rendering\opengl</Filter>
@@ -937,39 +1012,6 @@
     <ClCompile Include="..\..\source-base\rendering\opengl\opengl_vertexbuffer.cpp">
       <Filter>Source Files\rendering\opengl</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source-base\rendering\material.cpp">
-      <Filter>Source Files\rendering</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\rendering\rendering.cpp">
-      <Filter>Source Files\rendering</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\rendering\vertexbufferfactory.cpp">
-      <Filter>Source Files\rendering</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\platform-win\context.win.cpp">
-      <Filter>Source Files\platform-win</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\rendering\vulkan\vulkan_program.cpp">
-      <Filter>Source Files\rendering\vulkan</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\rendering\vulkan\vulkan_renderer.cpp">
-      <Filter>Source Files\rendering\vulkan</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\rendering\vulkan\vulkan_renderpass.cpp">
-      <Filter>Source Files\rendering\vulkan</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\rendering\vulkan\vulkan_texture.cpp">
-      <Filter>Source Files\rendering\vulkan</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\rendering\vulkan\vulkan_vertexbuffer.cpp">
-      <Filter>Source Files\rendering\vulkan</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\rendering\vulkan\vulkan_indexbuffer.cpp">
-      <Filter>Source Files\rendering\vulkan</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\rendering\vulkan\vulkan_pipelinestate.cpp">
-      <Filter>Source Files\rendering\vulkan</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\source-base\rendering\dx12\dx12_indexbuffer.cpp">
       <Filter>Source Files\rendering\dx12</Filter>
     </ClCompile>
@@ -991,71 +1033,32 @@
     <ClCompile Include="..\..\source-base\rendering\dx12\dx12_vertexbuffer.cpp">
       <Filter>Source Files\rendering\dx12</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source-base\rendering\vulkan\vulkan.cpp">
-      <Filter>Source Files\rendering\vulkan</Filter>
+    <ClCompile Include="..\..\source-base\rendering\base\helpers.cpp">
+      <Filter>Source Files\rendering\base</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source-base\imaging\bmploader.cpp">
-      <Filter>Source Files\imaging</Filter>
+    <ClCompile Include="..\..\source-base\rendering\base\indexarray.cpp">
+      <Filter>Source Files\rendering\base</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source-base\imaging\ddsloader.cpp">
-      <Filter>Source Files\imaging</Filter>
+    <ClCompile Include="..\..\source-base\rendering\base\pipelinestate.cpp">
+      <Filter>Source Files\rendering\base</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source-base\imaging\hdrloader.cpp">
-      <Filter>Source Files\imaging</Filter>
+    <ClCompile Include="..\..\source-base\rendering\base\primitives.cpp">
+      <Filter>Source Files\rendering\base</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source-base\imaging\imageoperations.cpp">
-      <Filter>Source Files\imaging</Filter>
+    <ClCompile Include="..\..\source-base\rendering\base\renderbatch.cpp">
+      <Filter>Source Files\rendering\base</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source-base\imaging\imagewriter.cpp">
-      <Filter>Source Files\imaging</Filter>
+    <ClCompile Include="..\..\source-base\rendering\base\vertexarray.cpp">
+      <Filter>Source Files\rendering\base</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source-base\imaging\jpegloader.cpp">
-      <Filter>Source Files\imaging</Filter>
+    <ClCompile Include="..\..\source-base\rendering\base\vertexdatachunk.cpp">
+      <Filter>Source Files\rendering\base</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source-base\imaging\pngloader.cpp">
-      <Filter>Source Files\imaging</Filter>
+    <ClCompile Include="..\..\source-base\rendering\base\vertexdeclaration.cpp">
+      <Filter>Source Files\rendering\base</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source-base\imaging\pvrdecompressor.cpp">
-      <Filter>Source Files\imaging</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\imaging\pvrloader.cpp">
-      <Filter>Source Files\imaging</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\imaging\texturedescription.cpp">
-      <Filter>Source Files\imaging</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\imaging\tgaloader.cpp">
-      <Filter>Source Files\imaging</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\app\_app_pack.cxx">
-      <Filter>Source Files\compile_packs</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\sound\_sound_pack.cxx">
-      <Filter>Source Files\compile_packs</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\platform-win\_platform.win_pack.cxx">
-      <Filter>Source Files\compile_packs</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\core\_core_pack.cxx">
-      <Filter>Source Files\compile_packs</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\scene3d\_scene3d_pack.cxx">
-      <Filter>Source Files\compile_packs</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\imaging\_imaging_pack.cxx">
-      <Filter>Source Files\compile_packs</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\input\_input_pack.cxx">
-      <Filter>Source Files\compile_packs</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\geometry\_geometry_pack.cxx">
-      <Filter>Source Files\compile_packs</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\camera\_camera_pack.cxx">
-      <Filter>Source Files\compile_packs</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source-base\rendering\_rendering_pack.cxx">
-      <Filter>Source Files\compile_packs</Filter>
+    <ClCompile Include="..\..\source-base\rendering\base\vertexstorage.cpp">
+      <Filter>Source Files\rendering\base</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

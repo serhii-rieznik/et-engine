@@ -145,8 +145,8 @@ namespace et
         
 	private:
 		int link(bool);
-		void printShaderLog(uint32_t, size_t, const char*);
-		void printShaderSource(uint32_t, size_t, const char*);
+		void printShaderLog(uint32_t, uint32_t, const char*);
+		void printShaderSource(uint32_t, uint32_t, const char*);
 		void initBuiltInUniforms();
 
 		uint32_t _ah = 0;

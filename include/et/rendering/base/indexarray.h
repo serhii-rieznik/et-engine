@@ -35,8 +35,8 @@ namespace et
 		const unsigned char* data() const
 			{ return _data.data(); }
 
-		size_t dataSize() const
-			{ return _data.dataSize(); }
+		uint32_t dataSize() const
+			{ return static_cast<uint32_t>(_data.dataSize()); }
 
 		uint32_t capacity() const
 			{ return static_cast<uint32_t>(_data.dataSize()) / static_cast<uint32_t>(_format); }
