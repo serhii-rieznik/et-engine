@@ -21,6 +21,14 @@ void demo::MainController::setRenderContextParameters(et::RenderContextParameter
 
 void demo::MainController::applicationDidLoad(et::RenderContext* rc)
 {
+#if (ET_PLATFORM_WIN)
+	et::application().pushRelativeSearchPath("../../");
+	et::application().pushRelativeSearchPath("../../../");
+	et::application().pushRelativeSearchPath("../../../../../");
+	et::application().pushRelativeSearchPath("../../../../../../");
+	et::application().pushRelativeSearchPath("../../../../../../../");
+#endif
+
 	_camera.lookAt(et::vec3(20.0f));
 	createModels(rc);
 	loadProgram(rc);

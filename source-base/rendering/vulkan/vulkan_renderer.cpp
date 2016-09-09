@@ -209,9 +209,12 @@ Texture::Pointer VulkanRenderer::createTexture(TextureDescription::Pointer desc)
 	return VulkanTexture::Pointer::create(desc);
 }
 
-Program::Pointer VulkanRenderer::createProgram(const std::string& source, const StringList& defines, const std::string& baseFolder)
+Program::Pointer VulkanRenderer::createProgram(const std::string& vs, const std::string& fs, 
+	const StringList& defines, const std::string& baseFolder)
 {
-	return VulkanProgram::Pointer::create();
+	VulkanProgram::Pointer program = VulkanProgram::Pointer::create(_private->vulkan());
+	program->build(vs, fs);
+	return program;
 }
 
 PipelineState::Pointer VulkanRenderer::createPipelineState(RenderPass::Pointer, Material::Pointer, VertexArrayObject::Pointer)

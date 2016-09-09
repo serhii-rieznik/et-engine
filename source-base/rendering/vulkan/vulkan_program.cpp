@@ -8,15 +8,35 @@
 #pragma once
 
 #include <et/rendering/vulkan/vulkan_program.h>
+#include <et/rendering/vulkan/vulkan.h>
 
 namespace et
 {
+
+class VulkanProgramPrivate
+{
+public:
+	VulkanProgramPrivate(VulkanState& v) 
+		: vulkan(v) { }
+
+	VulkanState& vulkan;
+};
+
+VulkanProgram::VulkanProgram(VulkanState& v)
+{
+	ET_PIMPL_INIT(VulkanProgram, v);
+}
+
+VulkanProgram::~VulkanProgram()
+{
+	ET_PIMPL_FINALIZE(VulkanProgram)
+}
 
 void VulkanProgram::bind()
 {
 }
 
-void VulkanProgram::build(const std::string & vertexSource, const std::string & fragmentSource)
+void VulkanProgram::build(const std::string & source, const std::string & fragmentSource)
 {
 }
 

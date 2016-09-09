@@ -57,7 +57,7 @@ Texture::Pointer DX12Renderer::createTexture(TextureDescription::Pointer desc)
 	return DX12Texture::Pointer::create(desc);
 }
 
-Program::Pointer DX12Renderer::createProgram(const std::string& source, const StringList& defines, const std::string& baseFolder)
+Program::Pointer DX12Renderer::createProgram(const std::string& vs, const std::string& fs, const StringList& defines, const std::string& baseFolder)
 {
 	return DX12Program::Pointer::create();
 }

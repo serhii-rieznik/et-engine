@@ -14,6 +14,7 @@ namespace
 {
 	const std::string kProgramSourceGL = "program-source-gl";
 	const std::string kProgramSourceMetal = "program-source-metal";
+	const std::string kProgramSourceVulkan = "program-source-vulkan";
 	const std::string kDefines = "defines";
 	const std::string kRenderPriority = "render-priority";
 }
@@ -38,28 +39,61 @@ void Material::loadFromJson(const std::string& jsonString, const std::string& ba
 	auto cullMode = obj.stringForKey(kCullMode)->content;
 	auto definesArray = obj.arrayForKey(kDefines);
 
-	std::string programSource;
+	bool programIsBinary = false;
+	std::string programSources[2];
 
-	if ((_renderer->api() == RenderingAPI::OpenGL) || (_renderer->api() == RenderingAPI::Vulkan))
+	if (_renderer->api() == RenderingAPI::OpenGL)
 	{
-		programSource = application().resolveFileName(obj.stringForKey(kProgramSourceGL)->content);
+		programSources[0] = application().resolveFileName(obj.stringForKey(kProgramSourceGL)->content);
 	}
 	else if (_renderer->api() == RenderingAPI::Metal)
 	{
-		programSource = application().resolveFileName(obj.stringForKey(kProgramSourceMetal)->content);
+		programSources[0] = application().resolveFileName(obj.stringForKey(kProgramSourceMetal)->content);
+	}
+	else if (_renderer->api() == RenderingAPI::Vulkan)
+	{
+		std::string baseName = obj.stringForKey(kProgramSourceVulkan)->content;
+		programSources[0] = application().resolveFileName(replaceFileExt(baseName, ".vert.spv"));
+		programSources[1] = application().resolveFileName(replaceFileExt(baseName, ".frag.spv"));
+		programIsBinary = true;
 	}
 	else
 	{
 		ET_FAIL("Not implemented");
 	}
 
-	if (fileExists(programSource))
+	application().popSearchPaths();
+
+	if (fileExists(programSources[0]))
 	{
-		programSource = loadTextFile(programSource);
+		if (programIsBinary)
+		{
+			std::ifstream fIn(programSources[0]);
+			uint32_t fileSize = streamSize(fIn);
+			programSources[0].resize(fileSize);
+			fIn.read(&programSources[0].front(), fileSize);
+		}
+		else
+		{
+			programSources[0] = loadTextFile(programSources[0]);
+		}
 	}
 
-	application().popSearchPaths();
-	
+	if (fileExists(programSources[1]))
+	{
+		if (programIsBinary)
+		{
+			std::ifstream fIn(programSources[1]);
+			uint32_t fileSize = streamSize(fIn);
+			programSources[1].resize(fileSize);
+			fIn.read(&programSources[1].front(), fileSize);
+		}
+		else
+		{
+			programSources[1] = loadTextFile(programSources[0]);
+		}
+	}
+
 	setName(name);
 	setOrigin(baseFolder);
 	
@@ -98,7 +132,7 @@ void Material::loadFromJson(const std::string& jsonString, const std::string& ba
 		}
 	}
 
-	setProgram(_renderer->createProgram(programSource, defines, baseFolder));
+	setProgram(_renderer->createProgram(programSources[0], programSources[1], defines, baseFolder));
 }
 
 void Material::setBlendState(const BlendState& state)

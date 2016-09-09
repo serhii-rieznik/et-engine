@@ -3,6 +3,7 @@
 
 	"program-source-gl" : "2d.glsl",
 	"program-source-metal" : "2d.metal",
+	"program-source-vulkan" : "2d.spv",
 
 	"depth-state":
 	{

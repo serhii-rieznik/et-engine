@@ -12,17 +12,25 @@
 namespace et
 {
     class Camera;
+	class VulkanState;
+	class VulkanProgramPrivate;
     class VulkanProgram : public Program
     {
     public:
         ET_DECLARE_POINTER(VulkanProgram);
 
     public:
+		VulkanProgram(VulkanState&);
+		~VulkanProgram();
+
         void bind() override;
-        void build(const std::string& vertexSource, const std::string& fragmentSource) override;
+        void build(const std::string& source, const std::string& fragmentSource) override;
         
         void setTransformMatrix(const mat4 &m, bool force) override;
 		void setCameraProperties(const Camera& cam) override;
         void setDefaultLightPosition(const vec3& p, bool force) override;
+
+	private:
+		ET_DECLARE_PIMPL(VulkanProgram, 32);
     };
 }

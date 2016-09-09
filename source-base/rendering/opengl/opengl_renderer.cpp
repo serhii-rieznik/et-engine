@@ -264,7 +264,7 @@ Texture::Pointer OpenGLRenderer::createTexture(TextureDescription::Pointer desc)
 /*
  * Programs
  */
-Program::Pointer OpenGLRenderer::createProgram(const std::string& source,
+Program::Pointer OpenGLRenderer::createProgram(const std::string& source, const std::string&,
 	const StringList& defines, const std::string& baseFolder)
 {
     std::string vertexSource = OpenGLProgram::commonHeader() + OpenGLProgram::vertexShaderHeader();
