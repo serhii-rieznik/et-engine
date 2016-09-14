@@ -40,9 +40,4 @@ void MetalIndexBuffer::bind()
 
 }
 
-void MetalIndexBuffer::clear()
-{
-
-}
-
 }

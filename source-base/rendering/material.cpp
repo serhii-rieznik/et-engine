@@ -156,63 +156,16 @@ void Material::setProgram(Program::Pointer program)
 	loadProperties();
 }
 
-/*
-void Material::enableInRenderState(RenderState::Pointer rs)
-{
-	rs->setCullMode(_cull);
-	rs->setBlendState(_blend);
-	rs->setDepthState(_depth);
-
-	for (auto& i : _textures)
-	{
-		i.second.texture->bind(i.second.unit);
-	}
-
-	_program->bind();
-
-	for (auto& i : _properties)
-	{
-		if (i.second.requireUpdate)
-		{
-			applyProperty(i.second, _propertiesData);
-			i.second.requireUpdate = false;
-		}
-	}
-}
-*/
-
 void Material::loadProperties()
 {
 	_textures.clear();
 	_properties.clear();
 	_propertiesData.resize(0);
-
-    /*
-     * TODO : load actual properties
-     *
-	uint32_t textureUnitCounter = 0;
-    OpenGLProgram::Pointer openglProgram = ;
-	for (const auto& u : openglProgram->shaderConstants())
-	{
-		String name(u.first.c_str());
-		if (openglProgram->isSamplerUniformType(u.second.type))
-		{
-			addTexture(name, u.second.location, textureUnitCounter);
-			openglProgram->setUniform(u.second.location, u.second.type, textureUnitCounter);
-			++textureUnitCounter;
-		}
-		else if (!openglProgram->isBuiltInUniformName(u.first))
-		{
-			addDataProperty(name, openglProgram->uniformTypeToDataType(u.second.type), u.second.location);
-		}
-	}
-    // */
 }
 
 void Material::addTexture(const String& name, int32_t location, uint32_t unit)
 {
 	_textures.emplace(name, TextureProperty(location, unit));
-	_shouldUpdateSnapshot = true;
 }
 
 void Material::addDataProperty(const String& name, DataType type, int32_t location)
@@ -225,7 +178,6 @@ void Material::addDataProperty(const String& name, DataType type, int32_t locati
 	}
 	_properties.emplace(name, DataProperty(type, location, currentSize, requiredSpace));
 	_propertiesData.applyOffset(requiredSpace);
-	_shouldUpdateSnapshot = true;
 }
 
 void Material::updateDataProperty(DataProperty& prop, const void* src)
@@ -233,7 +185,6 @@ void Material::updateDataProperty(DataProperty& prop, const void* src)
 	auto dst = _propertiesData.element_ptr(prop.offset);
 	if (memcmp(src, dst, prop.length) != 0)
 	{
-		_shouldUpdateSnapshot = true;
 		memcpy(dst, src, prop.length);
 		prop.requireUpdate = true;
 	}
@@ -265,7 +216,6 @@ void Material::setTexutre(const String& name, const Texture::Pointer& tex)
 	else if (i->second.texture != tex)
 	{
 		i->second.texture = tex;
-		_shouldUpdateSnapshot = true;
 	}
 }
 
@@ -278,93 +228,4 @@ Texture::Pointer Material::texture(const String& name)
 uint32_t Material::sortingKey() const
 {
 	return _depth.sortingKey() | _blend.sortingKey() << 8 | _additionalPriority << 16;
-}
-
-uint64_t Material::makeSnapshot()
-{
-	return 0;
-	/*
-	if (_shouldUpdateSnapshot == false)
-	{
-		return _lastShapshotIndex;
-	}
-	
-	if (_snapshots.empty())
-		_snapshots.reserve(8);
-
-	_snapshots.emplace_back();
-	
-	auto& snapshot = _snapshots.back();
-	snapshot.pipelineState = _pipelineState;
-
-	snapshot.textures.reserve(_textures.size());
-	for (const auto& t : _textures)
-	{
-		snapshot.textures.emplace_back(t.second);
-	}
-	
-	snapshot.properties.reserve(_properties.size());
-	for (const auto& p : _properties)
-	{
-		snapshot.properties.emplace_back(p.second);
-	}
-    
-    snapshot.propertiesData = _propertiesData;
-	
-	_shouldUpdateSnapshot = false;
-	_lastShapshotIndex = _snapshots.size() - 1;
-	return _lastShapshotIndex;
-	*/
-}
-
-/*
- * TODO
- *
-void Material::enableSnapshotInRenderState(RenderState::Pointer rs, uint64_t index)
-{
-	ET_ASSERT(index < _snapshots.size());
-	
-	Snapshot& snapshot = _snapshots.at(static_cast<size_t>(index));
-
-	rs->setCullMode(snapshot.pipelineState.cull);
-	rs->setBlendState(snapshot.pipelineState.blend);
-	rs->setDepthState(snapshot.pipelineState.depth);
-
-	for (auto& i : snapshot.textures)
-	{
-		i.texture->bind(i.unit);
-	}
-
-	_program->bind();
-	for (const auto& i : snapshot.properties)
-	{
-		applyProperty(i, snapshot.propertiesData);
-	}
-}
-*/
-
-void Material::applyProperty(const DataProperty& prop, const BinaryDataStorage& data)
-{
-	/*
-	auto format = dataTypeDataFormat(prop.type);
-	auto ptr = data.element_ptr(prop.offset);
-    OpenGLProgram* programPtr = static_cast<OpenGLProgram*>(_program.ptr());
-	if (format == DataFormat::Int)
-	{
-		auto& fn = _setIntFunctions[uint32_t(prop.type)];
-		(programPtr->*fn)(prop.locationInProgram, reinterpret_cast<const int*>(ptr), 1);
-	}
-	else
-	{
-		auto& fn = _setFloatFunctions[uint32_t(prop.type)];
-		(programPtr->*fn)(prop.locationInProgram, reinterpret_cast<const float*>(ptr), 1);
-	}
-	*/ 
-}
-
-void Material::clearSnapshots()
-{
-	_snapshots.clear();
-	_lastShapshotIndex = uint64_t(-1);
-	_shouldUpdateSnapshot = true;
 }

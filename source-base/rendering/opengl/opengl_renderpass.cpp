@@ -20,10 +20,7 @@ OpenGLRenderPass::OpenGLRenderPass(const RenderPass::ConstructionInfo& info) :
 
 OpenGLRenderPass::~OpenGLRenderPass()
 {
-	for (auto& batch : _renderBatches)
-	{
-		batch->material()->clearSnapshots();
-	}
+
 }
 
 void OpenGLRenderPass::pushRenderBatch(RenderBatch::Pointer batch)

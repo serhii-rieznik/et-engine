@@ -24,7 +24,6 @@ namespace et
 		~MetalIndexBuffer();
 
 		void bind() override;
-        void clear() override;
         
         const MetalNativeBuffer& nativeBuffer() const;
 

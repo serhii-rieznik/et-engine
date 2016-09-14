@@ -42,12 +42,12 @@ void MetalVertexBuffer::bind()
     
 }
 
-void MetalVertexBuffer::setData(const void* data, size_t dataSize, bool invalidateExistingData)
+void MetalVertexBuffer::setData(const void* data, uint32_t dataSize, bool invalidateExistingData)
 {
 	setDataWithOffset(data, 0, dataSize);
 }
 
-void MetalVertexBuffer::setDataWithOffset(const void* data, size_t offset, size_t sz)
+void MetalVertexBuffer::setDataWithOffset(const void* data, uint32_t offset, uint32_t sz)
 {
 	ET_ASSERT(offset + sz <= dataSize());
 	
@@ -61,7 +61,7 @@ uint64_t MetalVertexBuffer::dataSize()
 	return [_private->buffer.buffer() length];
 }
 
-void* MetalVertexBuffer::map(size_t offset, size_t dataSize, uint32_t options)
+void* MetalVertexBuffer::map(uint32_t offset, uint32_t dataSize, uint32_t options)
 {
 	return nullptr;
 }

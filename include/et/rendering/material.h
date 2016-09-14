@@ -44,10 +44,7 @@ public:
 	
 	CullMode cullMode() const
 		{ return _cull; }
-	
-	uint64_t makeSnapshot();
-	void clearSnapshots();
-	
+
 	void setProperty(const String& name, const float value);
 	void setProperty(const String& name, const vec2& value);
 	void setProperty(const String& name, const vec3& value);
@@ -89,14 +86,7 @@ private:
 		TextureProperty(int32_t loc, uint32_t u) :
 			locationInProgram(loc), unit(u) { }
 	};
-	
-	struct Snapshot
-	{
-		Vector<DataProperty> properties;
-		Vector<TextureProperty> textures;
-		BinaryDataStorage propertiesData;
-	};
-	
+
 	void loadProperties();
 	void addDataProperty(const String&, DataType, int32_t location);
 	void addTexture(const String&, int32_t location, uint32_t unit);
@@ -106,7 +96,6 @@ private:
 	
 public:
 	RenderInterface* _renderer = nullptr;
-	Vector<Snapshot> _snapshots;
 	UnorderedMap<String, DataProperty> _properties;
 	UnorderedMap<String, TextureProperty> _textures;
 
@@ -114,11 +103,8 @@ public:
 	DepthState _depth;
 	BlendState _blend;
 	CullMode _cull = CullMode::Disabled;
-
 	BinaryDataStorage _propertiesData;
 	uint32_t _additionalPriority = 0;
-	uint64_t _lastShapshotIndex = uint64_t(-1);
-	bool _shouldUpdateSnapshot = true;
 };
 
 class MaterialProvider

@@ -76,13 +76,6 @@ void MetalRenderPass::pushRenderBatch(RenderBatch::Pointer batch)
 			ET_ASSERT(tex.valid());
 			[_private->encoder.encoder setVertexTexture:tex->nativeTexture().texture atIndex:arg.index];
 		}
-		else if (arg.type == MTLArgumentTypeBuffer)
-		{
-			if ([arg.name isEqualToString:@"uniforms"])
-			{
-				[_private->encoder.encoder setVertexBuffer:ps->uniformsBuffer().buffer() offset:0 atIndex:arg.index];
-			}
-		}
 	}
 
 	for (MTLArgument* arg in ps->nativeState().reflection.fragmentArguments)
@@ -92,13 +85,6 @@ void MetalRenderPass::pushRenderBatch(RenderBatch::Pointer batch)
 			MetalTexture::Pointer tex = batch->material()->texture([arg.name UTF8String]);
 			ET_ASSERT(tex.valid());
 			[_private->encoder.encoder setFragmentTexture:tex->nativeTexture().texture atIndex:arg.index];
-		}
-		else if (arg.type == MTLArgumentTypeBuffer)
-		{
-			if ([arg.name isEqualToString:@"uniforms"])
-			{
-				[_private->encoder.encoder setFragmentBuffer:ps->uniformsBuffer().buffer() offset:0 atIndex:arg.index];
-			}
 		}
 	}
 

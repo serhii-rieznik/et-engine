@@ -142,7 +142,7 @@ Texture::Pointer MetalRenderer::createTexture(TextureDescription::Pointer desc)
 /*
  * Programs
  */
-Program::Pointer MetalRenderer::createProgram(const std::string& source,
+Program::Pointer MetalRenderer::createProgram(const std::string& source, const std::string&,
     const StringList& defines, const std::string& baseFolder)
 {
     MetalProgram::Pointer program = MetalProgram::Pointer::create(_private->metal);

@@ -27,11 +27,11 @@ namespace et
 
 		void bind() override;
 
-		void setData(const void* data, size_t dataSize, bool invalidateExistingData) override;
-		void setDataWithOffset(const void* data, size_t offset, size_t dataSize) override;
+		void setData(const void* data, uint32_t dataSize, bool invalidateExistingData) override;
+		void setDataWithOffset(const void* data, uint32_t offset, uint32_t dataSize) override;
 		uint64_t dataSize() override;
 
-		void* map(size_t offset, size_t dataSize, uint32_t options /* see MapBufferOptions */) override;
+		void* map(uint32_t offset, uint32_t dataSize, uint32_t options /* see MapBufferOptions */) override;
 		bool mapped() const override;
 		void unmap() override;
 
