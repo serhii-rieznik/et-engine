@@ -116,69 +116,65 @@ void VulkanSwapchain::create(VulkanState& vulkan)
 
 	VULKAN_CALL(vkCreateSwapchainKHR(vulkan.device, &swapchainInfo, nullptr, &swapchain));
 
-	images = enumerateVulkanObjects<VkImage>(vulkan, vkGetSwapchainImagesKHRWrapper);
-	imageViews.resize(images.size());
+	Vector<VkImage> swapchainImages = enumerateVulkanObjects<VkImage>(vulkan, vkGetSwapchainImagesKHRWrapper);
 
-	prePresentCommands.resize(images.size());
-	preRenderCommands.resize(images.size());
+	images.resize(swapchainImages.size());
 
-	VkCommandBufferAllocateInfo allocInfo = { VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO };
-	allocInfo.commandPool = vulkan.commandPool;
-	allocInfo.commandBufferCount = static_cast<uint32_t>(images.size());
-	VULKAN_CALL(vkAllocateCommandBuffers(vulkan.device, &allocInfo, prePresentCommands.data()));
-	VULKAN_CALL(vkAllocateCommandBuffers(vulkan.device, &allocInfo, preRenderCommands.data()));
+	VkCommandBufferAllocateInfo cmdBufAllocInfo = { VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO };
+	cmdBufAllocInfo.commandPool = vulkan.commandPool;
+	cmdBufAllocInfo.commandBufferCount = 1;
 
+	VkImage* swapchainImagesPtr = swapchainImages.data();
 	uint32_t index = 0;
-	VkImageView* imageViewPtr = imageViews.data();
-	for (VkImage image : images)
+	for (RenderTarget& rt : images)
 	{
+		rt.image = *swapchainImagesPtr++;
+
 		VkImageViewCreateInfo viewInfo = { VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO };
-		viewInfo.image = image;
+		viewInfo.image = rt.image;
 		viewInfo.format = surfaceFormat.format;
 		viewInfo.components = { VK_COMPONENT_SWIZZLE_R, VK_COMPONENT_SWIZZLE_G, VK_COMPONENT_SWIZZLE_B, VK_COMPONENT_SWIZZLE_A };
 		viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-		viewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-		viewInfo.subresourceRange.levelCount = 1;
-		viewInfo.subresourceRange.layerCount = 1;
-		VULKAN_CALL(vkCreateImageView(vulkan.device, &viewInfo, nullptr, imageViewPtr));
-		++imageViewPtr;
+		viewInfo.subresourceRange = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1};
+		VULKAN_CALL(vkCreateImageView(vulkan.device, &viewInfo, nullptr, &rt.imageView));
 
 		VkCommandBufferBeginInfo beginInfo = { VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO };
-
-		VULKAN_CALL(vkBeginCommandBuffer(preRenderCommands[index], &beginInfo));
+		VULKAN_CALL(vkAllocateCommandBuffers(vulkan.device, &cmdBufAllocInfo, &rt.preRenderBarrier));
+		VULKAN_CALL(vkBeginCommandBuffer(rt.preRenderBarrier, &beginInfo));
 		{
-			VkImageMemoryBarrier preRenderBarrier = { VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER };
-			preRenderBarrier.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-			preRenderBarrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-			preRenderBarrier.newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-			preRenderBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-			preRenderBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-			preRenderBarrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-			preRenderBarrier.subresourceRange.layerCount = 1;
-			preRenderBarrier.subresourceRange.levelCount = 1;
-			preRenderBarrier.image = image;
-			vkCmdPipelineBarrier(preRenderCommands[index], VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,
-				0, 0, nullptr, 0, nullptr, 1, &preRenderBarrier);
+			VkImageMemoryBarrier barrierInfo = { VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER };
+			barrierInfo.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+			barrierInfo.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+			barrierInfo.newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+			barrierInfo.srcQueueFamilyIndex = vulkan.graphicsQueueIndex;
+			barrierInfo.dstQueueFamilyIndex = vulkan.presentQueueIndex;
+			barrierInfo.subresourceRange = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 };
+			barrierInfo.image = rt.image;
+			vkCmdPipelineBarrier(rt.preRenderBarrier, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+				VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, 0, 0, nullptr, 0, nullptr, 1, &barrierInfo);
 		}
-		vkEndCommandBuffer(preRenderCommands[index]);
+		vkEndCommandBuffer(rt.preRenderBarrier);
+		rt.preRenderSubmit.commandBufferCount = 1;
+		rt.preRenderSubmit.pCommandBuffers = &rt.preRenderBarrier;
 
-		VULKAN_CALL(vkBeginCommandBuffer(prePresentCommands[index], &beginInfo));
+		VULKAN_CALL(vkAllocateCommandBuffers(vulkan.device, &cmdBufAllocInfo, &rt.prePresentBarrier));
+		VULKAN_CALL(vkBeginCommandBuffer(rt.prePresentBarrier, &beginInfo));
 		{
-			VkImageMemoryBarrier prePresentBarrier = { VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER };
-			prePresentBarrier.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-			prePresentBarrier.dstAccessMask = 0;
-			prePresentBarrier.oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-			prePresentBarrier.newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-			prePresentBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-			prePresentBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-			prePresentBarrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-			prePresentBarrier.subresourceRange.layerCount = 1;
-			prePresentBarrier.subresourceRange.levelCount = 1;
-			prePresentBarrier.image = image;
-			vkCmdPipelineBarrier(prePresentCommands[index], VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,
-				0, 0, nullptr, 0, nullptr, 1, &prePresentBarrier);
+			VkImageMemoryBarrier barrierInfo = { VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER };
+			barrierInfo.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+			barrierInfo.dstAccessMask = VK_ACCESS_MEMORY_READ_BIT;
+			barrierInfo.oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+			barrierInfo.newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+			barrierInfo.srcQueueFamilyIndex = vulkan.presentQueueIndex;
+			barrierInfo.dstQueueFamilyIndex = vulkan.graphicsQueueIndex;
+			barrierInfo.subresourceRange = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 };
+			barrierInfo.image = rt.image;
+			vkCmdPipelineBarrier(rt.prePresentBarrier, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+				VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, 0, 0, nullptr, 0, nullptr, 1, &barrierInfo);
 		}
-		vkEndCommandBuffer(prePresentCommands[index]);
+		vkEndCommandBuffer(rt.prePresentBarrier);
+		rt.prePresentSubmit.commandBufferCount = 1;
+		rt.prePresentSubmit.pCommandBuffers = &rt.prePresentBarrier;
 		
 		++index;
 	}
@@ -189,18 +185,12 @@ void VulkanSwapchain::acquireNextImage(VulkanState& vulkan)
 	VULKAN_CALL(vkAcquireNextImageKHR(vulkan.device, swapchain, UINT64_MAX, 
 		vulkan.semaphores.presentComplete, nullptr, &currentImageIndex));
 
-	VkSubmitInfo preRender = { VK_STRUCTURE_TYPE_SUBMIT_INFO };
-	preRender.commandBufferCount = 1;
-	preRender.pCommandBuffers = preRenderCommands.data() + currentImageIndex;
-	VULKAN_CALL(vkQueueSubmit(vulkan.queue, 1, &preRender, nullptr));
+	VULKAN_CALL(vkQueueSubmit(vulkan.queue, 1, &images.at(currentImageIndex).preRenderSubmit, nullptr));
 }
 
 void VulkanSwapchain::present(VulkanState& vulkan)
 {
-	VkSubmitInfo submitInfo = { VK_STRUCTURE_TYPE_SUBMIT_INFO };
-	submitInfo.commandBufferCount = 1;
-	submitInfo.pCommandBuffers = prePresentCommands.data() + currentImageIndex;
-	VULKAN_CALL(vkQueueSubmit(vulkan.queue, 1, &submitInfo, nullptr));
+	VULKAN_CALL(vkQueueSubmit(vulkan.queue, 1, &images.at(currentImageIndex).prePresentSubmit, nullptr));
 
 	VkPresentInfoKHR info = { VK_STRUCTURE_TYPE_PRESENT_INFO_KHR };
 	info.swapchainCount = 1;

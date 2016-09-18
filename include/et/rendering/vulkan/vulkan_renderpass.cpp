@@ -49,8 +49,8 @@ VulkanRenderPass::VulkanRenderPass(VulkanRenderer* renderer, VulkanState& vulkan
 	attachments[0].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
 	attachments[0].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;;
 	attachments[0].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-	attachments[0].initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-	attachments[0].finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+	attachments[0].initialLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+	attachments[0].finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
 	VkAttachmentReference colorReference = { };
 	colorReference.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
@@ -70,7 +70,7 @@ VulkanRenderPass::VulkanRenderPass(VulkanRenderer* renderer, VulkanState& vulkan
 
 	VkFramebufferCreateInfo framebufferInfo = { VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO };
 	framebufferInfo.attachmentCount = 1;
-	framebufferInfo.pAttachments = &_private->vulkan.swapchain.imageViews.at(_private->vulkan.swapchain.currentImageIndex);
+	framebufferInfo.pAttachments = &_private->vulkan.swapchain.images.at(_private->vulkan.swapchain.currentImageIndex).imageView;
 	framebufferInfo.width = _private->vulkan.swapchain.extent.width;
 	framebufferInfo.height = _private->vulkan.swapchain.extent.height;
 	framebufferInfo.layers = 1;
@@ -79,9 +79,19 @@ VulkanRenderPass::VulkanRenderPass(VulkanRenderer* renderer, VulkanState& vulkan
 
 	VkCommandBufferBeginInfo commandBufferBeginInfo = { VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO };
 	vkBeginCommandBuffer(_private->nativePass.commandBuffer, &commandBufferBeginInfo);
-
+/*
+	VkImageMemoryBarrier barrierInfo = { VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER };
+	barrierInfo.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+	barrierInfo.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+	barrierInfo.newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+	barrierInfo.srcQueueFamilyIndex = vulkan.graphicsQueueIndex;
+	barrierInfo.dstQueueFamilyIndex = vulkan.presentQueueIndex;
+	barrierInfo.subresourceRange = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 };
+	barrierInfo.image = _private->vulkan.swapchain.images.at(_private->vulkan.swapchain.currentImageIndex);
+	vkCmdPipelineBarrier(_private->nativePass.commandBuffer, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+		VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, 0, 0, nullptr, 0, nullptr, 1, &barrierInfo);
+*/
 	VkClearValue clearValues[1] = { { 1.0f, 0.5f, 0.25f, 1.0f } };
-
 	VkRenderPassBeginInfo renderPassBeginInfo = { VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO };
 	renderPassBeginInfo.clearValueCount = 1;
 	renderPassBeginInfo.pClearValues = clearValues;
@@ -111,6 +121,19 @@ const VulkanNativeRenderPass& VulkanRenderPass::nativeRenderPass() const
 void VulkanRenderPass::endRenderPass()
 {
 	vkCmdEndRenderPass(_private->nativePass.commandBuffer);
+/*
+	VkImageMemoryBarrier barrierInfo = { VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER };
+	barrierInfo.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+	barrierInfo.dstAccessMask = VK_ACCESS_MEMORY_READ_BIT;
+	barrierInfo.oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+	barrierInfo.newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;	
+	barrierInfo.srcQueueFamilyIndex = _private->vulkan.presentQueueIndex;
+	barrierInfo.dstQueueFamilyIndex = _private->vulkan.graphicsQueueIndex;
+	barrierInfo.subresourceRange = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 };
+	barrierInfo.image = _private->vulkan.swapchain.images.at(_private->vulkan.swapchain.currentImageIndex);
+	vkCmdPipelineBarrier(_private->nativePass.commandBuffer, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, 
+		VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, 0, 0, nullptr, 0, nullptr, 1, &barrierInfo);
+*/
 	vkEndCommandBuffer(_private->nativePass.commandBuffer);
 }
 

@@ -35,10 +35,17 @@ struct VulkanSwapchain
 	
 	VkExtent2D extent { };
 	VkSurfaceFormatKHR surfaceFormat { };
-	Vector<VkImage> images;
-	Vector<VkImageView> imageViews;
-	Vector<VkCommandBuffer> preRenderCommands;
-	Vector<VkCommandBuffer> prePresentCommands;
+
+	struct RenderTarget
+	{
+		VkImage image = nullptr;
+		VkImageView imageView = nullptr;
+		VkCommandBuffer preRenderBarrier = nullptr;
+		VkSubmitInfo preRenderSubmit { VK_STRUCTURE_TYPE_SUBMIT_INFO };
+		VkCommandBuffer prePresentBarrier = nullptr;
+		VkSubmitInfo prePresentSubmit { VK_STRUCTURE_TYPE_SUBMIT_INFO };
+	};
+	Vector<RenderTarget> images;
 	uint32_t currentImageIndex = static_cast<uint32_t>(-1);
 };
 
