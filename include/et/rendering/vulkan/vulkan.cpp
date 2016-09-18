@@ -119,6 +119,16 @@ void VulkanSwapchain::create(VulkanState& vulkan)
 	images = enumerateVulkanObjects<VkImage>(vulkan, vkGetSwapchainImagesKHRWrapper);
 	imageViews.resize(images.size());
 
+	prePresentCommands.resize(images.size());
+	preRenderCommands.resize(images.size());
+
+	VkCommandBufferAllocateInfo allocInfo = { VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO };
+	allocInfo.commandPool = vulkan.commandPool;
+	allocInfo.commandBufferCount = static_cast<uint32_t>(images.size());
+	VULKAN_CALL(vkAllocateCommandBuffers(vulkan.device, &allocInfo, prePresentCommands.data()));
+	VULKAN_CALL(vkAllocateCommandBuffers(vulkan.device, &allocInfo, preRenderCommands.data()));
+
+	uint32_t index = 0;
 	VkImageView* imageViewPtr = imageViews.data();
 	for (VkImage image : images)
 	{
@@ -132,13 +142,73 @@ void VulkanSwapchain::create(VulkanState& vulkan)
 		viewInfo.subresourceRange.layerCount = 1;
 		VULKAN_CALL(vkCreateImageView(vulkan.device, &viewInfo, nullptr, imageViewPtr));
 		++imageViewPtr;
+
+		VkCommandBufferBeginInfo beginInfo = { VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO };
+
+		VULKAN_CALL(vkBeginCommandBuffer(preRenderCommands[index], &beginInfo));
+		{
+			VkImageMemoryBarrier preRenderBarrier = { VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER };
+			preRenderBarrier.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+			preRenderBarrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+			preRenderBarrier.newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+			preRenderBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+			preRenderBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+			preRenderBarrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+			preRenderBarrier.subresourceRange.layerCount = 1;
+			preRenderBarrier.subresourceRange.levelCount = 1;
+			preRenderBarrier.image = image;
+			vkCmdPipelineBarrier(preRenderCommands[index], VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,
+				0, 0, nullptr, 0, nullptr, 1, &preRenderBarrier);
+		}
+		vkEndCommandBuffer(preRenderCommands[index]);
+
+		VULKAN_CALL(vkBeginCommandBuffer(prePresentCommands[index], &beginInfo));
+		{
+			VkImageMemoryBarrier prePresentBarrier = { VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER };
+			prePresentBarrier.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+			prePresentBarrier.dstAccessMask = 0;
+			prePresentBarrier.oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+			prePresentBarrier.newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+			prePresentBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+			prePresentBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+			prePresentBarrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+			prePresentBarrier.subresourceRange.layerCount = 1;
+			prePresentBarrier.subresourceRange.levelCount = 1;
+			prePresentBarrier.image = image;
+			vkCmdPipelineBarrier(prePresentCommands[index], VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,
+				0, 0, nullptr, 0, nullptr, 1, &prePresentBarrier);
+		}
+		vkEndCommandBuffer(prePresentCommands[index]);
+		
+		++index;
 	}
 }
 
 void VulkanSwapchain::acquireNextImage(VulkanState& vulkan)
 {
 	VULKAN_CALL(vkAcquireNextImageKHR(vulkan.device, swapchain, UINT64_MAX, 
-		vulkan.semaphores.imageAvailable, nullptr, &currentImageIndex));
+		vulkan.semaphores.presentComplete, nullptr, &currentImageIndex));
+
+	VkSubmitInfo preRender = { VK_STRUCTURE_TYPE_SUBMIT_INFO };
+	preRender.commandBufferCount = 1;
+	preRender.pCommandBuffers = preRenderCommands.data() + currentImageIndex;
+	VULKAN_CALL(vkQueueSubmit(vulkan.queue, 1, &preRender, nullptr));
+}
+
+void VulkanSwapchain::present(VulkanState& vulkan)
+{
+	VkSubmitInfo submitInfo = { VK_STRUCTURE_TYPE_SUBMIT_INFO };
+	submitInfo.commandBufferCount = 1;
+	submitInfo.pCommandBuffers = prePresentCommands.data() + currentImageIndex;
+	VULKAN_CALL(vkQueueSubmit(vulkan.queue, 1, &submitInfo, nullptr));
+
+	VkPresentInfoKHR info = { VK_STRUCTURE_TYPE_PRESENT_INFO_KHR };
+	info.swapchainCount = 1;
+	info.pSwapchains = &swapchain;
+	info.pImageIndices = &currentImageIndex;
+	info.waitSemaphoreCount = 1;
+	info.pWaitSemaphores = &vulkan.semaphores.renderComplete;
+	VULKAN_CALL(vkQueuePresentKHR(vulkan.queue, &info));
 }
 
 uint32_t getVulkanMemoryType(VulkanState& vulkan, uint32_t typeFilter, VkMemoryPropertyFlags properties) 

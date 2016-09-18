@@ -117,11 +117,14 @@ void VulkanRenderPass::endRenderPass()
 void VulkanRenderPass::submit()
 {
 	VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
+
 	VkSubmitInfo submitInfo = { VK_STRUCTURE_TYPE_SUBMIT_INFO };
 	submitInfo.commandBufferCount = 1;
 	submitInfo.pCommandBuffers = &_private->nativePass.commandBuffer;
 	submitInfo.waitSemaphoreCount = 1;
-	submitInfo.pWaitSemaphores = &_private->vulkan.semaphores.imageAvailable;
+	submitInfo.pWaitSemaphores = &_private->vulkan.semaphores.presentComplete;
+	submitInfo.signalSemaphoreCount = 1;
+	submitInfo.pSignalSemaphores = &_private->vulkan.semaphores.renderComplete;
 	submitInfo.pWaitDstStageMask = waitStages;
 
 	VULKAN_CALL(vkQueueSubmit(_private->vulkan.queue, 1, &submitInfo, _private->nativePass.submitFence));
@@ -130,6 +133,8 @@ void VulkanRenderPass::submit()
 
 void VulkanRenderPass::pushRenderBatch(RenderBatch::Pointer batch)
 {
+	return;
+
 	VulkanPipelineState::Pointer ps = _private->renderer->createPipelineState(RenderPass::Pointer(this), batch->material(), batch->vertexStream());
 	VulkanIndexBuffer::Pointer ib = batch->vertexStream()->indexBuffer();
 	VulkanVertexBuffer::Pointer vb = batch->vertexStream()->vertexBuffer();

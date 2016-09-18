@@ -155,8 +155,8 @@ void VulkanRenderer::init(const RenderContextParameters& params)
 	vkGetDeviceQueue(_private->device, _private->graphicsQueueIndex, 0, &_private->queue);
 
 	VkSemaphoreCreateInfo semaphoreInfo = { VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO };
-	VULKAN_CALL(vkCreateSemaphore(_private->device, &semaphoreInfo, nullptr, &_private->semaphores.render));
-	VULKAN_CALL(vkCreateSemaphore(_private->device, &semaphoreInfo, nullptr, &_private->semaphores.imageAvailable));
+	VULKAN_CALL(vkCreateSemaphore(_private->device, &semaphoreInfo, nullptr, &_private->semaphores.renderComplete));
+	VULKAN_CALL(vkCreateSemaphore(_private->device, &semaphoreInfo, nullptr, &_private->semaphores.presentComplete));
 
 	HWND window = reinterpret_cast<HWND>(application().context().objects[0]);
 	_private->swapchain.init(_private->vulkan(), params, window);
@@ -185,13 +185,7 @@ void VulkanRenderer::begin()
 
 void VulkanRenderer::present()
 {
-	VkPresentInfoKHR info = { VK_STRUCTURE_TYPE_PRESENT_INFO_KHR };
-	info.swapchainCount = 1;
-	info.pSwapchains = &_private->swapchain.swapchain;
-	info.pImageIndices = &_private->swapchain.currentImageIndex;
-	info.waitSemaphoreCount = 0;
-	info.pWaitSemaphores = &_private->semaphores.render;
-	VULKAN_CALL(vkQueuePresentKHR(_private->queue, &info));
+	_private->swapchain.present(_private->vulkan());
 }
 
 VertexBuffer::Pointer VulkanRenderer::createVertexBuffer(const std::string& name, VertexStorage::Pointer vs, BufferDrawType dt)

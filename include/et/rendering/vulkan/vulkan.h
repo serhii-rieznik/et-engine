@@ -28,6 +28,7 @@ struct VulkanSwapchain
 	void create(VulkanState& vulkan);
 
 	void acquireNextImage(VulkanState& vulkan);
+	void present(VulkanState& vulkan);
 
 	VkSurfaceKHR surface = nullptr;
 	VkSwapchainKHR swapchain = nullptr;
@@ -36,6 +37,8 @@ struct VulkanSwapchain
 	VkSurfaceFormatKHR surfaceFormat { };
 	Vector<VkImage> images;
 	Vector<VkImageView> imageViews;
+	Vector<VkCommandBuffer> preRenderCommands;
+	Vector<VkCommandBuffer> prePresentCommands;
 	uint32_t currentImageIndex = static_cast<uint32_t>(-1);
 };
 
@@ -51,8 +54,8 @@ struct VulkanState
 
 	struct Semaphores
 	{
-		VkSemaphore imageAvailable = nullptr;
-		VkSemaphore render = nullptr;
+		VkSemaphore presentComplete = nullptr;
+		VkSemaphore renderComplete = nullptr;
 	} semaphores;
 
 	VkCommandBuffer setupCommandBuffer = nullptr;
