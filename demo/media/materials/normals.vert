@@ -10,9 +10,14 @@ layout (location = 1) in vec3 Normal;
 
 layout (location = 0) out vec3 vNormalWS;
 
+out gl_PerVertex
+{
+  vec4 gl_Position;
+};
+
 void main()
 {
 	vec4 vVertexWS = variables.matWorld * vec4(Vertex, 1.0);
-	vNormalWS = normalize(mat3(variables.matWorld) * Normal);
-	gl_Position = variables.matViewProjection * vVertexWS;
+	vNormalWS = normalize(Normal); // mat3(variables.matWorld) * Normal);
+	gl_Position = vec4(0.1 * Vertex, 1.0); //variables.matViewProjection * vVertexWS;
 }

@@ -117,15 +117,9 @@ void VulkanSwapchain::create(VulkanState& vulkan)
 	VULKAN_CALL(vkCreateSwapchainKHR(vulkan.device, &swapchainInfo, nullptr, &swapchain));
 
 	Vector<VkImage> swapchainImages = enumerateVulkanObjects<VkImage>(vulkan, vkGetSwapchainImagesKHRWrapper);
-
 	images.resize(swapchainImages.size());
 
-	VkCommandBufferAllocateInfo cmdBufAllocInfo = { VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO };
-	cmdBufAllocInfo.commandPool = vulkan.commandPool;
-	cmdBufAllocInfo.commandBufferCount = 1;
-
 	VkImage* swapchainImagesPtr = swapchainImages.data();
-	uint32_t index = 0;
 	for (RenderTarget& rt : images)
 	{
 		rt.image = *swapchainImagesPtr++;
@@ -137,61 +131,17 @@ void VulkanSwapchain::create(VulkanState& vulkan)
 		viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
 		viewInfo.subresourceRange = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1};
 		VULKAN_CALL(vkCreateImageView(vulkan.device, &viewInfo, nullptr, &rt.imageView));
-
-		VkCommandBufferBeginInfo beginInfo = { VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO };
-		VULKAN_CALL(vkAllocateCommandBuffers(vulkan.device, &cmdBufAllocInfo, &rt.preRenderBarrier));
-		VULKAN_CALL(vkBeginCommandBuffer(rt.preRenderBarrier, &beginInfo));
-		{
-			VkImageMemoryBarrier barrierInfo = { VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER };
-			barrierInfo.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-			barrierInfo.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-			barrierInfo.newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-			barrierInfo.srcQueueFamilyIndex = vulkan.graphicsQueueIndex;
-			barrierInfo.dstQueueFamilyIndex = vulkan.presentQueueIndex;
-			barrierInfo.subresourceRange = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 };
-			barrierInfo.image = rt.image;
-			vkCmdPipelineBarrier(rt.preRenderBarrier, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
-				VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, 0, 0, nullptr, 0, nullptr, 1, &barrierInfo);
-		}
-		vkEndCommandBuffer(rt.preRenderBarrier);
-		rt.preRenderSubmit.commandBufferCount = 1;
-		rt.preRenderSubmit.pCommandBuffers = &rt.preRenderBarrier;
-
-		VULKAN_CALL(vkAllocateCommandBuffers(vulkan.device, &cmdBufAllocInfo, &rt.prePresentBarrier));
-		VULKAN_CALL(vkBeginCommandBuffer(rt.prePresentBarrier, &beginInfo));
-		{
-			VkImageMemoryBarrier barrierInfo = { VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER };
-			barrierInfo.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-			barrierInfo.dstAccessMask = VK_ACCESS_MEMORY_READ_BIT;
-			barrierInfo.oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-			barrierInfo.newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-			barrierInfo.srcQueueFamilyIndex = vulkan.presentQueueIndex;
-			barrierInfo.dstQueueFamilyIndex = vulkan.graphicsQueueIndex;
-			barrierInfo.subresourceRange = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 };
-			barrierInfo.image = rt.image;
-			vkCmdPipelineBarrier(rt.prePresentBarrier, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
-				VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, 0, 0, nullptr, 0, nullptr, 1, &barrierInfo);
-		}
-		vkEndCommandBuffer(rt.prePresentBarrier);
-		rt.prePresentSubmit.commandBufferCount = 1;
-		rt.prePresentSubmit.pCommandBuffers = &rt.prePresentBarrier;
-		
-		++index;
 	}
 }
 
 void VulkanSwapchain::acquireNextImage(VulkanState& vulkan)
 {
 	VULKAN_CALL(vkAcquireNextImageKHR(vulkan.device, swapchain, UINT64_MAX, 
-		vulkan.semaphores.presentComplete, nullptr, &currentImageIndex));
-
-	VULKAN_CALL(vkQueueSubmit(vulkan.queue, 1, &images.at(currentImageIndex).preRenderSubmit, nullptr));
+		vulkan.semaphores.imageAvailable, nullptr, &currentImageIndex));
 }
 
 void VulkanSwapchain::present(VulkanState& vulkan)
 {
-	VULKAN_CALL(vkQueueSubmit(vulkan.queue, 1, &images.at(currentImageIndex).prePresentSubmit, nullptr));
-
 	VkPresentInfoKHR info = { VK_STRUCTURE_TYPE_PRESENT_INFO_KHR };
 	info.swapchainCount = 1;
 	info.pSwapchains = &swapchain;
@@ -339,6 +289,19 @@ VkCullModeFlags cullModeFlags(CullMode mode)
 		return VkCullModeFlagBits::VK_CULL_MODE_BACK_BIT;
 	default:
 		ET_FAIL("Invalid CullMode");
+	}
+}
+
+VkIndexType indexBufferFormat(IndexArrayFormat fmt)
+{
+	switch (fmt)
+	{
+	case IndexArrayFormat::Format_16bit:
+		return VkIndexType::VK_INDEX_TYPE_UINT16;
+	case IndexArrayFormat::Format_32bit:
+		return VkIndexType::VK_INDEX_TYPE_UINT32;
+	default:
+		ET_FAIL("Invalid IndexArrayFormat");
 	}
 }
 

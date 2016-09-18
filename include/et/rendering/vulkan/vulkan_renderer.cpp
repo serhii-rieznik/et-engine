@@ -17,6 +17,8 @@
 #include <et/rendering/vulkan/vulkan.h>
 #include <et/app/application.h>
 
+#define VULKAN_ENABLE_VALIDATION 0
+
 namespace et
 {
 class VulkanRendererPrivate : public VulkanState
@@ -69,14 +71,14 @@ void VulkanRenderer::init(const RenderContextParameters& params)
 	{ 
 		VK_KHR_SURFACE_EXTENSION_NAME, 
 		VK_KHR_WIN32_SURFACE_EXTENSION_NAME, 
-#	if (ET_DEBUG)
+#	if (VULKAN_ENABLE_VALIDATION)
 		VK_EXT_DEBUG_REPORT_EXTENSION_NAME,
 #	endif
 	};
 
 	Vector<const char*> validationLayers;
 
-#if (ET_DEBUG)
+#if (VULKAN_ENABLE_VALIDATION)
 	auto layerProps = enumerateVulkanObjects<VkLayerProperties>(0, vkEnumerateInstanceLayerPropertiesWrapper);
 	validationLayers.reserve(4);
 	for (const auto& layerProp : layerProps)
@@ -100,7 +102,7 @@ void VulkanRenderer::init(const RenderContextParameters& params)
 	instanceCreateInfo.ppEnabledLayerNames = validationLayers.data();
 	VULKAN_CALL(vkCreateInstance(&instanceCreateInfo, nullptr, &_private->instance));
 
-#if (ET_DEBUG)
+#if (VULKAN_ENABLE_VALIDATION)
 	PFN_vkCreateDebugReportCallbackEXT createDebugCb = 
 		reinterpret_cast<PFN_vkCreateDebugReportCallbackEXT>(vkGetInstanceProcAddr(_private->instance, "vkCreateDebugReportCallbackEXT"));
 
@@ -156,7 +158,7 @@ void VulkanRenderer::init(const RenderContextParameters& params)
 
 	VkSemaphoreCreateInfo semaphoreInfo = { VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO };
 	VULKAN_CALL(vkCreateSemaphore(_private->device, &semaphoreInfo, nullptr, &_private->semaphores.renderComplete));
-	VULKAN_CALL(vkCreateSemaphore(_private->device, &semaphoreInfo, nullptr, &_private->semaphores.presentComplete));
+	VULKAN_CALL(vkCreateSemaphore(_private->device, &semaphoreInfo, nullptr, &_private->semaphores.imageAvailable));
 
 	HWND window = reinterpret_cast<HWND>(application().context().objects[0]);
 	_private->swapchain.init(_private->vulkan(), params, window);

@@ -40,13 +40,12 @@ struct VulkanSwapchain
 	{
 		VkImage image = nullptr;
 		VkImageView imageView = nullptr;
-		VkCommandBuffer preRenderBarrier = nullptr;
-		VkSubmitInfo preRenderSubmit { VK_STRUCTURE_TYPE_SUBMIT_INFO };
-		VkCommandBuffer prePresentBarrier = nullptr;
-		VkSubmitInfo prePresentSubmit { VK_STRUCTURE_TYPE_SUBMIT_INFO };
 	};
 	Vector<RenderTarget> images;
 	uint32_t currentImageIndex = static_cast<uint32_t>(-1);
+
+	VkImage currentImage() const 
+		{ return images.at(currentImageIndex).image; }
 };
 
 struct VulkanState
@@ -61,7 +60,7 @@ struct VulkanState
 
 	struct Semaphores
 	{
-		VkSemaphore presentComplete = nullptr;
+		VkSemaphore imageAvailable = nullptr;
 		VkSemaphore renderComplete = nullptr;
 	} semaphores;
 
@@ -90,7 +89,6 @@ struct VulkanNativeRenderPass
 	VkFramebuffer framebuffer = nullptr;
 	VkCommandBuffer commandBuffer = nullptr;
 	VkRenderPass renderPass = nullptr;
-	VkFence submitFence = nullptr;
 	VkViewport viewport { };
 	VkRect2D scissor { };
 };
@@ -109,6 +107,7 @@ VkCompareOp depthCompareOperation(CompareFunction);
 VkFormat dataTypeValue(DataType);
 VkPrimitiveTopology primitiveTopology(PrimitiveType);
 VkCullModeFlags cullModeFlags(CullMode);
+VkIndexType indexBufferFormat(IndexArrayFormat);
 
 }
 

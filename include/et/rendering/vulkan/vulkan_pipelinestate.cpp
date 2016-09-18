@@ -58,8 +58,8 @@ void VulkanPipelineState::build()
 		VkPipelineColorBlendAttachmentState attachmentInfo = { };
 		attachmentInfo.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | 
 			VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
-		blendInfo.attachmentCount = 1;
 		blendInfo.pAttachments = &attachmentInfo;
+		blendInfo.attachmentCount = 1;
 	}
 
 	VkPipelineDepthStencilStateCreateInfo depthInfo = { VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO };
@@ -77,7 +77,7 @@ void VulkanPipelineState::build()
 	VkPipelineRasterizationStateCreateInfo rasterizerInfo = { VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO };
 	{
 		rasterizerInfo.cullMode = vulkan::cullModeFlags(cullMode());
-		rasterizerInfo.frontFace = VkFrontFace::VK_FRONT_FACE_COUNTER_CLOCKWISE;
+		rasterizerInfo.frontFace = VkFrontFace::VK_FRONT_FACE_CLOCKWISE;
 		rasterizerInfo.polygonMode = VkPolygonMode::VK_POLYGON_MODE_FILL;
 		rasterizerInfo.lineWidth = 1.0f;
 	}
