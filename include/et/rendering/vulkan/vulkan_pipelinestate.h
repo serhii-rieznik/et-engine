@@ -11,12 +11,23 @@
 
 namespace et
 {
+	class VulkanState;
+	class VulkanNativePipeline;
+	class VulkanPipelineStatePrivate;
 	class VulkanPipelineState : public PipelineState
 	{
 	public:
 		ET_DECLARE_POINTER(VulkanPipelineState);
 
 	public:
-		void build();
+		VulkanPipelineState(VulkanState&);
+		~VulkanPipelineState();
+
+		const VulkanNativePipeline& nativePipeline() const;
+
+		void build() override;
+
+	private:
+		ET_DECLARE_PIMPL(VulkanPipelineState, 32);
 	};
 }

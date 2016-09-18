@@ -34,8 +34,6 @@ namespace et
 		void setSourceObjectName(const std::string& tag)
 			{ _sourceObjectName = tag; }
 
-		virtual void bind() = 0;
-
 		virtual void setData(const void* data, uint32_t dataSize, bool invalidateExistingData) = 0;
 		virtual void setDataWithOffset(const void* data, uint32_t offset, uint32_t dataSize) = 0;
 

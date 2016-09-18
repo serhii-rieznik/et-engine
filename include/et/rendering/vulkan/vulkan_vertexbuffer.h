@@ -12,6 +12,7 @@
 namespace et
 {
 class VulkanState;
+class VulkanNativeBuffer;
 class VulkanVertexBufferPrivate;
 class VulkanVertexBuffer : public VertexBuffer
 {
@@ -21,9 +22,10 @@ public:
 public:
 	VulkanVertexBuffer(VulkanState& vulkan, const VertexDeclaration&, const BinaryDataStorage& data,
 		BufferDrawType, const std::string&);
+	
 	~VulkanVertexBuffer();
-			
-	void bind() override;
+
+	const VulkanNativeBuffer& nativeBuffer() const;
 
 	void setData(const void* data, uint32_t dataSize, bool invalidateExistingData) override;
 	void setDataWithOffset(const void* data, uint32_t offset, uint32_t dataSize) override;

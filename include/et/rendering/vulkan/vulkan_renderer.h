@@ -33,14 +33,11 @@ namespace et
 		RenderPass::Pointer allocateRenderPass(const RenderPass::ConstructionInfo&) override;
 		void submitRenderPass(RenderPass::Pointer) override;
 
-		void drawIndexedPrimitive(PrimitiveType, IndexArrayFormat, uint32_t first, uint32_t count) override;
-
 		/*
 		 * Vertex buffes
 		 */
 		VertexBuffer::Pointer createVertexBuffer(const std::string&, VertexStorage::Pointer, BufferDrawType) override;
 		IndexBuffer::Pointer createIndexBuffer(const std::string&, IndexArray::Pointer, BufferDrawType) override;
-		VertexArrayObject::Pointer createVertexArrayObject(const std::string&) override;
         
         /*
          * Textures
@@ -56,7 +53,7 @@ namespace et
 		/*
 		 * Pipeline state
 		 */
-        PipelineState::Pointer createPipelineState(RenderPass::Pointer, Material::Pointer, VertexArrayObject::Pointer) override;
+        PipelineState::Pointer createPipelineState(RenderPass::Pointer, Material::Pointer, VertexStream::Pointer) override;
 	
 	private:
 		ET_DECLARE_PIMPL(VulkanRenderer, 1024);

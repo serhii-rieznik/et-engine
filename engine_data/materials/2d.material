@@ -1,22 +1,16 @@
 {
 	"name" : "2d",
-
-	"program-source-gl" : "2d.glsl",
-	"program-source-metal" : "2d.metal",
-	"program-source-vulkan" : "2d.spv",
-
+	"program-source" : "2d",
 	"depth-state":
 	{
 		"depth-function": "always",
 		"depth-test": false,
 		"depth-write": false
 	},
-	
 	"blend-state":
 	{
 		"blend-configuration" : "disabled"
 	},
-
 	"render-priority" : 0,
 	"cull-mode" : "disabled"
 }

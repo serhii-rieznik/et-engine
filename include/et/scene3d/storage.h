@@ -10,10 +10,8 @@
 #include <et/scene3d/scenematerial.h>
 #include <et/rendering/base/indexarray.h>
 #include <et/rendering/base/vertexstorage.h>
+#include <et/rendering/base/vertexstream.h>
 #include <et/rendering/interface/texture.h>
-
-// TODO : replace
-#include <et/rendering/vertexarrayobject.h>
 
 namespace et
 {
@@ -53,8 +51,8 @@ namespace et
 			const Set<Texture::Pointer>& textures() const
 				{ return _textures; }
             
-            const Set<VertexArrayObject::Pointer>& vertexArrayObjects() const
-                { return _vertexArrayObjects; }
+            const Set<VertexStream::Pointer>& vertexStreams() const
+                { return _vertexStreams; }
             
 			void addTexture(Texture::Pointer t)
 				{ _textures.insert(t); }
@@ -82,7 +80,7 @@ namespace et
 		private:
 			Set<VertexStorage::Pointer> _vertexStorages;
             Set<Texture::Pointer> _textures;
-            Set<VertexArrayObject::Pointer> _vertexArrayObjects;
+            Set<VertexStream::Pointer> _vertexStreams;
 			IndexArray::Pointer _indexArray;
 			SceneMaterial::Map _materials;
 		};

@@ -9,7 +9,7 @@
 
 #include <et/geometry/geometry.h>
 #include <et/rendering/material.h>
-#include <et/rendering/vertexarrayobject.h>
+#include <et/rendering/base/vertexstream.h>
 #include <et/rendering/base/vertexstorage.h>
 #include <et/rendering/base/indexarray.h>
 
@@ -22,8 +22,8 @@ namespace et
 		
 	public:
 		RenderBatch() = default;
-		RenderBatch(const Material::Pointer&, const VertexArrayObject::Pointer&, const mat4& transform = identityMatrix);
-		RenderBatch(const Material::Pointer&, const VertexArrayObject::Pointer&, const mat4& transform, uint32_t, uint32_t);
+		RenderBatch(const Material::Pointer&, const VertexStream::Pointer&, const mat4& transform = identityMatrix);
+		RenderBatch(const Material::Pointer&, const VertexStream::Pointer&, const mat4& transform, uint32_t, uint32_t);
 
 		Material::Pointer& material()
 			{ return _material; }
@@ -31,10 +31,10 @@ namespace et
 			{ return _material; }
         void setMaterial(Material::Pointer);
 		
-		VertexArrayObject::Pointer& vao()
-			{ return _vao; }
-		const VertexArrayObject::Pointer& vao() const
-			{ return _vao; }
+		VertexStream::Pointer& vertexStream()
+			{ return _vertexStream; }
+		const VertexStream::Pointer& vertexStream() const
+			{ return _vertexStream; }
 		
 		uint32_t firstIndex() const
 			{ return _firstIndex; }
@@ -74,17 +74,12 @@ namespace et
 		bool intersectsLocalSpaceRay(const ray3d&, vec3& intersection);
 		
 		Dictionary serialize() const;
-		
-		void makeMaterialSnapshot();
-		
-		uint64_t materialSnapshot() const
-			{ return _materialSnapshot; }
-		
+			
 		RenderBatch* duplicate() const;
 		
 	private:
 		Material::Pointer _material;
-		VertexArrayObject::Pointer _vao;
+		VertexStream::Pointer _vertexStream;
 		VertexStorage::Pointer _vertexStorage;
 		IndexArray::Pointer _indexArray;
 		mat4 _transformation = identityMatrix;
@@ -94,7 +89,6 @@ namespace et
 		BoundingBox _transformedBoudingBox;
 		uint32_t _firstIndex = 0;
 		uint32_t _numIndexes = 0;
-		uint64_t _materialSnapshot = uint64_t(-1);
 		bool _transformedBoxValid = false;
 	};
 }

@@ -8,8 +8,9 @@
 #pragma once
 
 #include <et/rendering/rendering.h>
-#include <et/rendering/vertexarrayobject.h>
 #include <et/rendering/interface/program.h>
+#include <et/rendering/interface/renderpass.h>
+#include <et/rendering/base/vertexstream.h>
 #include <et/rendering/base/vertexdeclaration.h>
 
 namespace et
@@ -24,16 +25,22 @@ namespace et
 
 		virtual void build() = 0;
 
+		const RenderPass::Pointer renderPass() const 
+			{ return _renderPass; }
+
+		void setRenderPass(RenderPass::Pointer pass) 
+			{ _renderPass = pass;  }
+
 		const VertexDeclaration& inputLayout() const
 			{ return _decl; }
 
-		void setInputLayout(VertexDeclaration decl)
+		void setInputLayout(const VertexDeclaration& decl)
 			{ _decl = decl; }
 
-		VertexArrayObject::Pointer vertexStream() const
+		VertexStream::Pointer vertexStream() const
 			{ return _vertexStream; }
 
-		void setVertexStream(VertexArrayObject::Pointer vs)
+		void setVertexStream(VertexStream::Pointer vs)
 			{ _vertexStream = vs; }
 
 		const BlendState& blendState() const
@@ -68,7 +75,8 @@ namespace et
 
 	private:
 		VertexDeclaration _decl;
-		VertexArrayObject::Pointer _vertexStream;
+		RenderPass::Pointer _renderPass;
+		VertexStream::Pointer _vertexStream;
 		Program::Pointer _program;
 		BlendState _blend;
 		DepthState _depth;
@@ -83,7 +91,7 @@ namespace et
 		PipelineStateCache();
 		~PipelineStateCache();
 		
-		PipelineState::Pointer find(const VertexDeclaration&, VertexArrayObject::Pointer, Program::Pointer,
+		PipelineState::Pointer find(const VertexDeclaration&, VertexStream::Pointer, Program::Pointer,
 									const DepthState&, const BlendState&, CullMode, TextureFormat);
 
 		void addToCache(PipelineState::Pointer);

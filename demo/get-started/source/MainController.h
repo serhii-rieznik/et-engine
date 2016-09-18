@@ -25,7 +25,7 @@ namespace demo
 
 	private:
 		et::Camera _camera;
-		et::VertexArrayObject::Pointer _testModel;
+		et::VertexStream::Pointer _testModel;
 		et::Material::Pointer _defaultMaterial;
 		et::IntervalTimer _frameTimeTimer;
 		et::mat4 _transformMatrix;

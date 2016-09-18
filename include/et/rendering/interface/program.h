@@ -51,7 +51,6 @@ namespace et
         void setDefines(const StringList& defines)
             { _defines = defines; }
         
-        virtual void bind() = 0;
         virtual void build(const std::string& vertexSource, const std::string& fragmentSource) = 0;
         
         virtual void setTransformMatrix(const mat4 &m, bool force) = 0;

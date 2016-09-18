@@ -27,11 +27,11 @@ namespace et
 			
 			ParticleSystem* duplicate();
 			
-			const VertexArrayObject::Pointer& vao() const
-				{ return _vao; }
+			const VertexStream::Pointer& vertexStream() const
+				{ return _vertexStream; }
 
 			const IndexBuffer::Pointer& indexBuffer() const
-				{ return _vao->indexBuffer(); }
+				{ return _vertexStream->indexBuffer(); }
 			
 			size_t activeParticlesCount() const
 				{ return _emitter.activeParticlesCount(); }
@@ -51,7 +51,7 @@ namespace et
 						
 		private:
 			particles::PointSpriteEmitter _emitter;
-			VertexArrayObject::Pointer _vao;
+			VertexStream::Pointer _vertexStream;
 			VertexDeclaration _decl;
 			NotifyTimer _timer;
 			uint32_t _capacity = 0;

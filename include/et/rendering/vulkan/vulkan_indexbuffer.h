@@ -13,6 +13,7 @@ namespace et
 {
 
 class VulkanState;
+class VulkanNativeBuffer;
 class VulkanIndexBufferPrivate;
 class VulkanIndexBuffer : public IndexBuffer
 {
@@ -23,7 +24,7 @@ public:
 	VulkanIndexBuffer(VulkanState& vulkan, IndexArray::Pointer, BufferDrawType, const std::string&);
 	~VulkanIndexBuffer();
 
-	void bind() override;
+	const VulkanNativeBuffer& nativeBuffer() const;
 
 private:
 	ET_DECLARE_PIMPL(VulkanIndexBuffer, 32);

@@ -12,9 +12,9 @@
 
 namespace et
 {
+	class VertexStream;
 	class VertexStorage;
 	class IndexArray;
-	class VertexArrayObject;
 	class Material;
 	
 	namespace s3d
@@ -32,7 +32,7 @@ namespace et
 			
 			virtual IntrusivePtr<SceneMaterial> sceneMaterialWithName(const std::string&) = 0;
 			
-			virtual IntrusivePtr<VertexArrayObject> vertexArrayWithStorageName(const std::string&) = 0;
+			virtual IntrusivePtr<VertexStream> vertexStreamWithStorageName(const std::string&) = 0;
 			virtual IntrusivePtr<Material> materialWithName(const std::string&) = 0;
 
 		public:

@@ -18,7 +18,6 @@ namespace et
         ET_DECLARE_POINTER(DX12Program);
 
     public:
-        void bind() override;
         void build(const std::string& vertexSource, const std::string& fragmentSource) override;
         
         void setTransformMatrix(const mat4 &m, bool force) override;

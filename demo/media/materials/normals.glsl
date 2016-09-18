@@ -1,11 +1,13 @@
+#define VERTEX_SHADER
+
 #if defined(VERTEX_SHADER)
 
 uniform mat4 matWorld;
 uniform mat4 matViewProjection;
 
-etVertexIn vec3 Vertex;
-etVertexIn vec3 Normal;
-etVertexOut vec3 vNormalWS;
+in vec3 Vertex;
+in vec3 Normal;
+out vec3 vNormalWS;
 
 void main()
 {

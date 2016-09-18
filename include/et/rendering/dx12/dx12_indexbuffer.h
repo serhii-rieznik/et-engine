@@ -18,7 +18,5 @@ namespace et
 		
 	public:
 		DX12IndexBuffer(IndexArray::Pointer, BufferDrawType, const std::string&);
-
-		void bind() override;
 	};
 }

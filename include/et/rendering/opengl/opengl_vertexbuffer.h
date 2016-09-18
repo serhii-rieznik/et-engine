@@ -21,7 +21,7 @@ namespace et
 		OpenGLVertexBuffer(const VertexDeclaration&, const BinaryDataStorage&, BufferDrawType, const std::string&);
 		~OpenGLVertexBuffer();
 
-		void bind() override;
+		void bind();
 		
 		void setData(const void* data, uint32_t dataSize, bool invalidateExistingData) override;
 		void setDataWithOffset(const void* data, uint32_t offset, uint32_t dataSize) override;

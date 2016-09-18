@@ -47,6 +47,7 @@ struct VulkanState
 	VkDevice device = nullptr;
 	VkCommandPool commandPool = nullptr;
 	VkQueue queue = nullptr;
+	VkPipelineCache pipelineCache = nullptr;
 
 	struct Semaphores
 	{
@@ -62,6 +63,44 @@ struct VulkanState
 
 	VulkanSwapchain swapchain;
 };
+
+struct VulkanShaderModules
+{
+	VkShaderModule fragment = nullptr;
+	VkShaderModule vertex = nullptr;
+	VkPipelineShaderStageCreateInfo stageCreateInfo[2]
+	{ 
+		{ VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO }, 
+		{ VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO } 
+	};
+};
+
+struct VulkanNativeRenderPass
+{
+	VkFramebuffer framebuffer = nullptr;
+	VkCommandBuffer commandBuffer = nullptr;
+	VkRenderPass renderPass = nullptr;
+	VkFence submitFence = nullptr;
+	VkViewport viewport { };
+	VkRect2D scissor { };
+};
+
+struct VulkanNativePipeline
+{
+	VkDescriptorSetLayout descriptorSetLayout = nullptr;
+	VkPipelineLayout layout = nullptr;
+	VkPipeline pipeline = nullptr;
+};
+
+namespace vulkan
+{
+
+VkCompareOp depthCompareOperation(CompareFunction);
+VkFormat dataTypeValue(DataType);
+VkPrimitiveTopology primitiveTopology(PrimitiveType);
+VkCullModeFlags cullModeFlags(CullMode);
+
+}
 
 const char* vulkanResultToString(VkResult result);
 

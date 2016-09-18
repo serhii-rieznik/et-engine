@@ -16,7 +16,6 @@
 #include <et/rendering/renderingcaps.h>
 #include <et/rendering/materialfactory.h>
 #include <et/rendering/texturefactory.h>
-#include <et/rendering/vertexbufferfactory.h>
 
 namespace et
 {

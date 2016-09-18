@@ -1,8 +1,7 @@
 {
 	"name" : "diffuse",
 
-	"program-source-gl" : "normals.glsl",
-	"program-source-metal" : "normals.metal",
+	"program-source" : "normals",
 
 	"depth-state":
 	{

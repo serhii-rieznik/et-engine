@@ -75,8 +75,6 @@ namespace et
 		void setSourceObjectName(const std::string& tag)
 			{ _sourceObjectName = tag; }
 
-        virtual void bind() = 0;
-        
 	private:
 		std::string _sourceObjectName;
         BufferDrawType _drawType = BufferDrawType::Static;

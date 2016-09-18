@@ -49,10 +49,9 @@ void demo::MainController::createModels(et::RenderContext* rc)
 		vertices->capacity(), et::PrimitiveType::Triangles);
 	indices->linearize(vertices->capacity());
 
-	_testModel = rc->renderer()->createVertexArrayObject("test-model");
 	auto vb = rc->renderer()->createVertexBuffer("test-vb", vertices, et::BufferDrawType::Static);
 	auto ib = rc->renderer()->createIndexBuffer("test-ib", indices, et::BufferDrawType::Static);
-	_testModel->setBuffers(vb, ib);
+	_testModel = et::VertexStream::Pointer::create(vb, ib);
 
 	_transformMatrix = et::identityMatrix;
 }

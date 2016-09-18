@@ -20,7 +20,7 @@ namespace et
 		OpenGLIndexBuffer(IndexArray::Pointer i, BufferDrawType drawType, const std::string& name);
 		~OpenGLIndexBuffer();
 
-        void bind() override;
+        void bind();
         
 		void* indexOffset(uint32_t offset) const;
 		void setData(const IndexArray::Pointer& i);

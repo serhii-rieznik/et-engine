@@ -58,7 +58,7 @@ namespace et
 			IndexArray::Pointer indexArrayWithName(const std::string&) override;
 			VertexStorage::Pointer vertexStorageWithName(const std::string&) override;
 			
-			VertexArrayObject::Pointer vertexArrayWithStorageName(const std::string&) override;
+			VertexStream::Pointer vertexStreamWithStorageName(const std::string&) override;
 						
 		private:
 			Storage _storage;

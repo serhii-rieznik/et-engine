@@ -137,7 +137,7 @@ namespace et
 		void setUniform(const ShaderConstant& u, const T* value, size_t amount)
 			{ setUniform(u.location, u.type, value, amount); }
 		
-        void bind() override;
+        void bind();
         void build(const std::string& vertexSource, const std::string& fragmentSource) override;
         void setTransformMatrix(const mat4 &m, bool force) override;
         void setCameraProperties(const Camera& cam) override;

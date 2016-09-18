@@ -40,14 +40,11 @@ namespace et
 		virtual RenderPass::Pointer allocateRenderPass(const RenderPass::ConstructionInfo&) = 0;
 		virtual void submitRenderPass(RenderPass::Pointer) = 0;
 
-		virtual void drawIndexedPrimitive(PrimitiveType, IndexArrayFormat, uint32_t first, uint32_t count) = 0;
-
 		/*
 		 * Vertex buffes
 		 */
 		virtual VertexBuffer::Pointer createVertexBuffer(const std::string&, VertexStorage::Pointer, BufferDrawType) = 0;
 		virtual IndexBuffer::Pointer createIndexBuffer(const std::string&, IndexArray::Pointer, BufferDrawType) = 0;
-		virtual VertexArrayObject::Pointer createVertexArrayObject(const std::string&) = 0;
         
         /*
          * Textures
@@ -73,7 +70,7 @@ namespace et
 		/*
 		 * Pipeline state
 		 */
-        virtual PipelineState::Pointer createPipelineState(RenderPass::Pointer, Material::Pointer, VertexArrayObject::Pointer) = 0;
+        virtual PipelineState::Pointer createPipelineState(RenderPass::Pointer, Material::Pointer, VertexStream::Pointer) = 0;
 
 	private:
 		RenderContext* _rc = nullptr;
