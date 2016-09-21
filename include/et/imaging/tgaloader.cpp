@@ -217,34 +217,31 @@ void et::tga::loadFromStream(std::istream& source, TextureDescription& desc)
 	source.read(reinterpret_cast<char*>(&info), sizeof(TGADescription));
 	
 	desc.target = TextureTarget::Texture_2D;
-	desc.type = DataFormat::UnsignedChar;
 	desc.size.x = info.width;
 	desc.size.y = info.height;
-	desc.bitsPerPixel = info.bitsPerPixel;
 	desc.mipMapCount = 1;
 	desc.layersCount = 1;
-	desc.channels = desc.bitsPerPixel/ 8;
+	
+	uint32_t channels = info.bitsPerPixel/ 8;
 
-	if (desc.channels == 3)
+	if (channels == 3)
 	{
-		desc.internalformat = TextureFormat::RGB;
-		desc.format = TextureFormat::RGB;
+		ET_FAIL("Not implemented");
 	}
-	else if (desc.channels == 4)
+	else if (channels == 4)
 	{
-		desc.internalformat = TextureFormat::RGBA;
-		desc.format = TextureFormat::RGBA;
+		desc.format = TextureFormat::RGBA8;
 	}
 	else
 	{
 		ET_FAIL("Not implemented");
 	}
 	
-	desc.data.resize(desc.size.square() * desc.channels);
+	desc.data.resize(desc.size.square() * channels);
 	source.read(desc.data.binary(), desc.data.size());
 	
 	unsigned char* pixels = desc.data.data();
-	for (size_t i = 0; i < desc.data.size(); i += desc.channels)
+	for (size_t i = 0; i < desc.data.size(); i += channels)
 	{
 		pixels[i] ^= pixels[i+2];
 		pixels[i+2] ^= pixels[i];

@@ -73,24 +73,9 @@ void et::hdr::loadInfoFromStream(std::istream& source, TextureDescription& desc)
 	
 	desc.size.x = strToInt(ws);
 	desc.size.y = strToInt(hs);
-	
 	desc.target = TextureTarget::Texture_2D;
-	desc.format = TextureFormat::RGB;
-	
-	if (shouldConvertRGBEToFloat)
-	{
-		desc.internalformat = TextureFormat::RGBA32F;
-		desc.type = DataFormat::Float;
-		desc.bitsPerPixel = 128;
-	}
-	else
-	{
-		desc.internalformat = TextureFormat::RGBA;
-		desc.type = DataFormat::UnsignedChar;
-		desc.bitsPerPixel = 32;
-	}
-	
-	desc.channels = 4;
+	desc.format = TextureFormat::RGBA8;
+	desc.format = shouldConvertRGBEToFloat ? TextureFormat::RGBA32F : TextureFormat::RGBA8;	
 	desc.mipMapCount = 1;
 	desc.layersCount = 1;
 	desc.compressed = 0;
@@ -106,7 +91,7 @@ void et::hdr::loadFromStream(std::istream& source, TextureDescription& desc)
 	auto sourcePos = source.tellg();
 
     uint32_t square = desc.size.square();
-    uint32_t maxDataSize = square * desc.bitsPerPixel / 8;
+    uint32_t maxDataSize = square * bitsPerPixelForTextureFormat(desc.format) / 8;
     
     desc.rowSize = desc.size.x * 4;
 	BinaryDataStorage inData(maxDataSize, 0);

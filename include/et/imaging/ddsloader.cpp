@@ -226,116 +226,69 @@ void dds::loadInfoFromStream(std::istream& source, TextureDescription& desc)
 	desc.size = vec2i(static_cast<int32_t>(header.dwWidth), static_cast<int32_t>(header.dwHeight));
 	desc.mipMapCount = (header.dwMipMapCount < 1) ? 1 : header.dwMipMapCount;
 	desc.minimalSizeForCompressedFormat = vec2i(4);
-	
-	if (header.dwCaps2 & DDSCAPS2_CUBEMAP)
+	desc.target = (header.dwCaps2 & DDSCAPS2_CUBEMAP) ? TextureTarget::Texture_Cube : TextureTarget::Texture_2D;
+	if (desc.target == TextureTarget::Texture_Cube)
 	{
-		desc.target = TextureTarget::Texture_Cube;
-		desc.layersCount = ((header.dwCaps2 & DDSCAPS2_CUBEMAP_POSITIVEX) ? 1 : 0) +
+		desc.layersCount =
+			((header.dwCaps2 & DDSCAPS2_CUBEMAP_POSITIVEX) ? 1 : 0) +
 			((header.dwCaps2 & DDSCAPS2_CUBEMAP_NEGATIVEX) ? 1 : 0) +
 			((header.dwCaps2 & DDSCAPS2_CUBEMAP_POSITIVEY) ? 1 : 0) +
 			((header.dwCaps2 & DDSCAPS2_CUBEMAP_NEGATIVEY) ? 1 : 0) +
 			((header.dwCaps2 & DDSCAPS2_CUBEMAP_POSITIVEZ) ? 1 : 0) +
 			((header.dwCaps2 & DDSCAPS2_CUBEMAP_NEGATIVEZ) ? 1 : 0);
-	}
-	else
-	{
-		desc.target = TextureTarget::Texture_2D;
-		desc.layersCount = 1;
+		ET_ASSERT(desc.layersCount == 6);
 	}
 		
 	switch (header.ddspf.dwFourCC)
 	{
 		case 0:
 		{
-			desc.channels = header.ddspf.dwRGBBitCount / 8;
-			desc.bitsPerPixel = header.ddspf.dwRGBBitCount;
-
-			bool isRGB = (desc.channels == 3);
+			uint32_t channels = header.ddspf.dwRGBBitCount / 8;
+			ET_ASSERT(channels == 4);
 			bool isBGR = (header.ddspf.dwBBitMask == 255);
-			desc.internalformat = isRGB ? TextureFormat::RGB : TextureFormat::RGBA;
-			desc.format = isBGR ? (isRGB  ? TextureFormat::BGR : TextureFormat::BGRA) :
-				(isRGB  ? TextureFormat::RGB : TextureFormat::RGBA);
-			desc.type = DataFormat::UnsignedChar;
-			break;
-		}
-			
-		case 20:
-		{
-			desc.channels = header.ddspf.dwRGBBitCount / 8;
-			desc.bitsPerPixel = header.ddspf.dwRGBBitCount;
-			desc.internalformat = TextureFormat::RGB;
-			desc.format = TextureFormat::BGR;
-			desc.type = DataFormat::UnsignedChar;
+			desc.format = isBGR  ? TextureFormat::BGRA8 : TextureFormat::RGBA8;
 			break;
 		}
 			
 		case 34:
 		{
-			desc.channels = 2;
-			desc.bitsPerPixel = 16 * desc.channels;
-			desc.internalformat = TextureFormat::RG16;
-			desc.format = TextureFormat::RG;
-			desc.type = DataFormat::UnsignedShort;
+			desc.format = TextureFormat::RG16;
 			break;
 		}
 
 		case 36:
 		{
-			desc.channels = 4;
-			desc.bitsPerPixel = 16 * desc.channels;
-			desc.internalformat = TextureFormat::RGBA16;
-			desc.format = TextureFormat::RGBA;
-			desc.type = DataFormat::UnsignedShort;
+			desc.format = TextureFormat::RGBA16;
 			break;
 		}
 
 		case 111:
 		{
-			desc.channels = 1;
-			desc.bitsPerPixel = 16 * desc.channels;
-			desc.internalformat = TextureFormat::R16F;
-			desc.format = TextureFormat::R;
-			desc.type = DataFormat::Half;
+			desc.format = TextureFormat::R16F;
 			break;
 		}
 
 		case 112:
 		{
-			desc.channels = 2;
-			desc.bitsPerPixel = 16 * desc.channels;
-			desc.internalformat = TextureFormat::RG16F;
-			desc.format = TextureFormat::RG;
-			desc.type = DataFormat::Half;
+			desc.format = TextureFormat::RG16F;
 			break;
 		}
 
 		case 114:
 		{
-			desc.channels = 1;
-			desc.bitsPerPixel = 32 * desc.channels;
-			desc.internalformat = TextureFormat::R32F;
-			desc.format = TextureFormat::R;
-			desc.type = DataFormat::Float;
+			desc.format = TextureFormat::R32F;
 			break;
 		}
 
 		case 115:
 		{
-			desc.channels = 2;
-			desc.bitsPerPixel = 32 * desc.channels;
-			desc.internalformat = TextureFormat::R32F;
-			desc.format = TextureFormat::R;
-			desc.type = DataFormat::Float;
+			desc.format = TextureFormat::R32F; // something wrong here - see 114 above
 			break;
 		}
 
 		case 113:
 		{
-			desc.channels = 4;
-			desc.bitsPerPixel = 16 * desc.channels;
-			desc.internalformat = TextureFormat::RGBA16F;
-			desc.format = TextureFormat::RGBA;
-			desc.type = DataFormat::Half;
+			desc.format = TextureFormat::RGBA16F;
 			break;
 		}
 
@@ -349,44 +302,28 @@ void dds::loadInfoFromStream(std::istream& source, TextureDescription& desc)
 		{
 			bool hasAlpha = header.ddspf.dwFlags & DDPF_ALPHAPIXELS;
 			desc.compressed = true;
-			desc.channels = 4;
-			desc.bitsPerPixel = 1 * desc.channels;
-			desc.internalformat = hasAlpha ? TextureFormat::DXT1_RGB : TextureFormat::DXT1_RGBA;
-			desc.format = hasAlpha ? TextureFormat::RGB : TextureFormat::RGBA;
-			desc.type = DataFormat::UnsignedChar;
+			desc.format = hasAlpha ? TextureFormat::DXT1_RGB : TextureFormat::DXT1_RGBA;
 			break;
 		}
 
 		case FOURCC_DXT3:
 		{
 			desc.compressed = true;
-			desc.channels = 4;
-			desc.bitsPerPixel = 2 * desc.channels;
-			desc.internalformat = TextureFormat::DXT3;
-			desc.format = TextureFormat::RGBA;
-			desc.type = DataFormat::UnsignedChar;
+			desc.format = TextureFormat::DXT3;
 			break;
 		}
 
 		case FOURCC_DXT5:
 		{
 			desc.compressed = true;
-			desc.channels = 4;
-			desc.bitsPerPixel = 2 * desc.channels;
-			desc.internalformat = TextureFormat::DXT5;
-			desc.format = TextureFormat::RGBA;
-			desc.type = DataFormat::UnsignedChar;
+			desc.format = TextureFormat::DXT5;
 			break;
 		}
 			
 		case FOURCC_ATI2:
 		{
 			desc.compressed = true;
-			desc.channels = 2;
-			desc.bitsPerPixel = 4 * desc.channels;
-			desc.internalformat = TextureFormat::RGTC2;
-			desc.format = TextureFormat::RG;
-			desc.type = DataFormat::UnsignedChar;
+			desc.format = TextureFormat::RGTC2;
 			break;
 		}
 			
@@ -456,29 +393,17 @@ void fillDescriptionWithFormat(TextureDescription& desc, DXGI_FORMAT format)
 		case DXGI_FORMAT_R8_UNORM:
 		case DXGI_FORMAT_R8_UINT:
 		{
-			desc.channels = 1;
-			desc.bitsPerPixel = 8 * desc.channels;
-			desc.internalformat = TextureFormat::R8;
-			desc.format = TextureFormat::R;
-			desc.type = DataFormat::UnsignedChar;
+			desc.format = TextureFormat::R8;
 			break;
 		}
 		case DXGI_FORMAT_R8G8B8A8_UNORM:
 		{
-			desc.channels = 4;
-			desc.bitsPerPixel = 8 * desc.channels;
-			desc.internalformat = TextureFormat::RGBA8;
-			desc.format = TextureFormat::RGBA;
-			desc.type = DataFormat::UnsignedChar;
+			desc.format = TextureFormat::RGBA8;
 			break;
 		}
 		case DXGI_FORMAT_R32G32B32A32_FLOAT:
 		{
-			desc.channels = 4;
-			desc.bitsPerPixel = 32 * desc.channels;
-			desc.internalformat = TextureFormat::RGBA32F;
-			desc.format = TextureFormat::RGBA;
-			desc.type = DataFormat::Float;
+			desc.format = TextureFormat::RGBA32F;
 			break;
 		}
 			

@@ -207,10 +207,7 @@ void MainController::start()
 
     et::TextureDescription::Pointer desc = et::TextureDescription::Pointer::create();
     desc->target = et::TextureTarget::Texture_2D;
-    desc->bitsPerPixel = 128;
-    desc->internalformat = et::TextureFormat::RGBA32F;
-    desc->format = et::TextureFormat::RGBA;
-    desc->type = et::DataFormat::Float;
+    desc->format = et::TextureFormat::RGBA32F;
     desc->size = textureSize;
     desc->data = et::BinaryDataStorage(reinterpret_cast<unsigned char*>(_textureData.data()), _textureData.dataSize());
     _texture = _rc->renderer()->createTexture(desc);

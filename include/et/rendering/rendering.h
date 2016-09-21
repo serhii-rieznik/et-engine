@@ -171,48 +171,29 @@ namespace et
 	enum class TextureFormat : uint32_t
 	{
 		Invalid,
-		
-		R,
 		R8,
-		R16,
+		R16,		
 		R16F,
 		R32F,
-		
-		RG,
 		RG8,
 		RG16,
 		RG16F,
 		RG32F,
-		
-		RGB,
-		RGB8,
-		RGB16,
-		RGB16F,
-		RGB32F,
-		
-		BGR,
-		
-		RGBA,
+		RGB565,
 		RGBA8,
+		BGRA8,
 		RGBA16,
 		RGBA16F,
 		RGBA32F,
-		
-		BGRA,
-				
 		DXT1_RGB,
 		DXT1_RGBA,
 		DXT3,
 		DXT5,
-		
 		RGTC2,
-		
-		Depth,
 		Depth16,
 		Depth24,
 		Depth32,
 		Depth32F,
-		
 		PVR_2bpp_RGB,
 		PVR_2bpp_sRGB,
 		PVR_2bpp_RGBA,
@@ -221,9 +202,7 @@ namespace et
 		PVR_4bpp_sRGB,
 		PVR_4bpp_RGBA,
 		PVR_4bpp_sRGBA,
-
 		R11G11B10F,
-		
 		max
 	};
 	
@@ -483,7 +462,7 @@ namespace et
 	uint32_t dataTypeComponents(DataType t);
 
 	uint32_t bitsPerPixelForDataFormat(DataFormat type);
-	uint32_t bitsPerPixelForTextureFormat(TextureFormat internalFormat, DataFormat type);
+	uint32_t bitsPerPixelForTextureFormat(TextureFormat internalFormat);
 	uint32_t channelsForTextureFormat(TextureFormat internalFormat);
 	
 	const std::string& compareFunctionToString(CompareFunction);

@@ -190,21 +190,17 @@ void loadInfoFromHeader(TextureDescription& desc, jpeg_decompress_struct& cinfo)
 {
 	desc.size.x = cinfo.output_width;
 	desc.size.y = cinfo.output_height;
-	desc.channels = cinfo.out_color_components;
-	desc.bitsPerPixel = 8 * cinfo.output_components;
 	desc.mipMapCount = 1;
 	desc.layersCount = 1;
-	desc.type = DataFormat::UnsignedChar;
 	
 	if (cinfo.out_color_space == JCS_GRAYSCALE)
 	{
-		desc.internalformat = TextureFormat::R;
-		desc.format = TextureFormat::R;
+		desc.format = TextureFormat::R8;
 	}
 	else if (cinfo.out_color_space == JCS_RGB)
 	{
-		desc.internalformat = TextureFormat::RGB;
-		desc.format = TextureFormat::RGB;
+		ET_FAIL("Not implemented");
+		desc.format = TextureFormat::RGBA8;
 	}
 	else
 	{

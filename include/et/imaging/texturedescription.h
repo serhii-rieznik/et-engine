@@ -34,8 +34,9 @@ namespace et
 
 		uint32_t dataSizeForMipLevel(uint32_t level)
 		{
-			uint32_t actualSize = static_cast<uint32_t>(sizeForMipLevel(level).square()) * bitsPerPixel / 8;
-			uint32_t minimumSize = static_cast<uint32_t>(minimalSizeForCompressedFormat.square()) * bitsPerPixel / 8;
+			uint32_t bpp = bitsPerPixelForTextureFormat(format) / 8;
+			uint32_t actualSize = static_cast<uint32_t>(sizeForMipLevel(level).square()) * bpp;
+			uint32_t minimumSize = static_cast<uint32_t>(minimalSizeForCompressedFormat.square()) * bpp;
 			return compressed ? std::max(minimalDataSize, std::max(minimumSize, actualSize)) : actualSize;
 		}
 
@@ -95,8 +96,6 @@ namespace et
 		vec2i minimalSizeForCompressedFormat;
 		
 		uint32_t compressed = 0;
-		uint32_t bitsPerPixel = 0;
-		uint32_t channels = 0;
 		uint32_t mipMapCount = 1;
 		uint32_t layersCount = 1;
 		uint32_t alignment = 1;
@@ -104,9 +103,7 @@ namespace et
 		uint32_t minimalDataSize = 0;
 		
 		TextureTarget target = TextureTarget::Texture_2D;
-		TextureFormat internalformat = TextureFormat::Invalid;
 		TextureFormat format = TextureFormat::Invalid;
-		DataFormat type = DataFormat::UnsignedChar;
 		
 		TextureDataLayout dataLayout = TextureDataLayout::FacesFirst;
 	};

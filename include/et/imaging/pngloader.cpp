@@ -10,7 +10,7 @@
 
 using namespace et;
 
-void parseFormat(TextureDescription& desc, png_structp pngPtr, png_infop infoPtr, png_size_t* rowBytes);
+void parseFormat(TextureDescription& desc, png_structp pngPtr, png_infop infoPtr, png_size_t* rowBytes, uint32_t& channels);
 
 void streamReadData(png_structp pngPtr, png_bytep data, png_size_t length);
 
@@ -47,10 +47,11 @@ void et::png::loadInfoFromStream(std::istream& source, TextureDescription& desc)
 		return;
 	}
 
+	uint32_t channels = 0;
 	png_set_read_fn(pngPtr, (png_voidp)&source, streamReadData);
 	png_set_sig_bytes(pngPtr, PNGSIGSIZE);
 	png_read_info(pngPtr, infoPtr); 
-	parseFormat(desc, pngPtr, infoPtr, 0);
+	parseFormat(desc, pngPtr, infoPtr, nullptr, channels);
 	png_destroy_info_struct(pngPtr, &infoPtr);
 	png_destroy_read_struct(&pngPtr, 0, 0);
 }
@@ -92,14 +93,16 @@ void et::png::loadFromStream(std::istream& source, TextureDescription& desc, boo
 		return;
 	}
 
+	uint32_t channels = 0;
 	png_size_t rowBytes = 0;
 
 	png_set_read_fn(pngPtr, (png_voidp)&source, streamReadData);
 	png_set_sig_bytes(pngPtr, PNGSIGSIZE);
 	png_read_info(pngPtr, infoPtr); 
-	parseFormat(desc, pngPtr, infoPtr, &rowBytes);
+	parseFormat(desc, pngPtr, infoPtr, &rowBytes, channels);
 
-	desc.data.resize(static_cast<size_t>(desc.size.square()) * desc.bitsPerPixel / 8);
+	uint32_t bpp = bitsPerPixelForTextureFormat(desc.format) / 8;
+	desc.data.resize(static_cast<size_t>(desc.size.square()) * bpp);
 	png_bytepp row_pointers = reinterpret_cast<png_bytepp>(sharedBlockAllocator().allocate(sizeof(png_bytep) * desc.size.y));
 	png_bytep ptr0 = desc.data.data();
 	
@@ -119,7 +122,7 @@ void et::png::loadFromStream(std::istream& source, TextureDescription& desc, boo
 	png_destroy_info_struct(pngPtr, &infoPtr);
 	png_destroy_read_struct(&pngPtr, 0, 0);
 
-	if (desc.bitsPerPixel / desc.channels == 16)
+	if (bpp == 16 * channels)
 	{
 		uint16_t* data_ptr = reinterpret_cast<uint16_t*>(desc.data.binary());
 		for (size_t i = 0; i < desc.data.dataSize() / 2; ++i)
@@ -155,15 +158,14 @@ void et::png::loadInfoFromFile(const std::string& path, TextureDescription& desc
 /*
  * Internal stuff
  */
-
-void parseFormat(TextureDescription& desc, png_structp pngPtr, png_infop infoPtr, png_size_t* rowBytes)
+void parseFormat(TextureDescription& desc, png_structp pngPtr, png_infop infoPtr, png_size_t* rowBytes, uint32_t& channels)
 {
 	desc.mipMapCount = 1;
 	desc.layersCount = 1;
 	desc.size.x = static_cast<int32_t>(png_get_image_width(pngPtr, infoPtr));
 	desc.size.y = static_cast<int32_t>(png_get_image_height(pngPtr, infoPtr));
-	desc.channels = png_get_channels(pngPtr, infoPtr);
 	
+	channels = png_get_channels(pngPtr, infoPtr);
 	int color_type = png_get_color_type(pngPtr, infoPtr); 
 	int interlace_method = png_get_interlace_type(pngPtr, infoPtr);
 	int compression = png_get_compression_type(pngPtr, infoPtr);
@@ -172,66 +174,63 @@ void parseFormat(TextureDescription& desc, png_structp pngPtr, png_infop infoPtr
 	if (color_type == PNG_COLOR_TYPE_PALETTE)
 	{
 		png_set_palette_to_rgb(pngPtr);
-		desc.channels = 3;
+		channels = 3;
 	}
 	else if (color_type == PNG_COLOR_TYPE_GRAY)
 	{
-		desc.channels = 1;
+		channels = 1;
 	}
 	else if (color_type == PNG_COLOR_TYPE_GRAY_ALPHA)
 	{
-		desc.channels = 2;
+		channels = 2;
 	}
 	
 	if (png_get_valid(pngPtr, infoPtr, PNG_INFO_tRNS)) 
 	{        
 		png_set_tRNS_to_alpha(pngPtr);        
-		desc.channels += 1;
+		channels += 1;
 	}    
 	
 	int bpp = 0;
 	png_read_update_info(pngPtr, infoPtr);
 	png_get_IHDR(pngPtr, infoPtr, (png_uint_32p)&desc.size.x, (png_uint_32p)&desc.size.y, 
 				 &bpp, &color_type, &interlace_method, &compression, &filter);
-	
-	desc.bitsPerPixel = desc.channels * static_cast<uint32_t>(bpp);
-	desc.type = (bpp == 16) ? DataFormat::UnsignedShort : DataFormat::UnsignedChar;
-	
+		
 	if (rowBytes)
 		*rowBytes = png_get_rowbytes(pngPtr, infoPtr);
 	
-	switch (desc.channels)
+	switch (channels)
 	{
 		case 1:
 		{
-			desc.internalformat = (bpp == 16) ? TextureFormat::R16 : TextureFormat::R;
-			desc.format = TextureFormat::R;
+			desc.format = (bpp == 16) ? TextureFormat::R16 : TextureFormat::R8;
 			break;
 		};
 
 		case 2:
 		{
-			desc.internalformat = (bpp == 16) ? TextureFormat::RG16 : TextureFormat::RG;
-			desc.format = TextureFormat::RG;
+			desc.format = (bpp == 16) ? TextureFormat::RG16 : TextureFormat::RG8;
 			break;
 		}
 
 		case 3:
 		{
+			ET_FAIL("Not implemented");
+			/*
 			desc.internalformat = (bpp == 16) ? TextureFormat::RGB16 : TextureFormat::RGB;
 			desc.format = TextureFormat::RGB;
+			*/
 			break;
 		}
 
 		case 4:
 		{ 
-			desc.internalformat = (bpp == 16) ? TextureFormat::RGBA16 : TextureFormat::RGBA;
-			desc.format = TextureFormat::RGBA;
+			desc.format = (bpp == 16) ? TextureFormat::RGBA16 : TextureFormat::RGBA8;
 			break;
 		}
 
 		default: 
-			ET_FAIL_FMT("Unknown PNG texture format with %u channels", desc.channels);
+			ET_FAIL_FMT("Unknown PNG texture format with %u channels", channels);
 	}
 }
 

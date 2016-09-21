@@ -252,7 +252,7 @@ uint32_t et::sizeOfDataFormat(DataFormat type)
 	}
 }
 
-uint32_t et::bitsPerPixelForTextureFormat(TextureFormat format, DataFormat type)
+uint32_t et::bitsPerPixelForTextureFormat(TextureFormat format)
 {
 	switch (format)
 	{
@@ -262,74 +262,33 @@ uint32_t et::bitsPerPixelForTextureFormat(TextureFormat format, DataFormat type)
 		case TextureFormat::R16:
 		case TextureFormat::R16F:
 		case TextureFormat::RG8:
+		case TextureFormat::RGB565:
 		case TextureFormat::Depth16:
 			return 16;
 			
-		case TextureFormat::RGB8:
 		case TextureFormat::Depth24:
 			return 24;
 			
 		case TextureFormat::RG16:
 		case TextureFormat::RG16F:
 		case TextureFormat::RGBA8:
+		case TextureFormat::BGRA8:
 		case TextureFormat::Depth32:
 		case TextureFormat::Depth32F:
 		case TextureFormat::R11G11B10F:
 			return 32;
-			
-		case TextureFormat::RGB16:
-		case TextureFormat::RGB16F:
-			return 48;
-			
+						
 		case TextureFormat::RG32F:
 		case TextureFormat::RGBA16:
 		case TextureFormat::RGBA16F:
 			return 64;
-			
-		case TextureFormat::RGB32F:
-			return 96;
-			
+						
 		case TextureFormat::RGBA32F:
 			return 128;
-			
-		case TextureFormat::R:
-		case TextureFormat::Depth:
-			return bitsPerPixelForDataFormat(type);
-			
-		case TextureFormat::RG:
-			return 2 * bitsPerPixelForDataFormat(type);
-			
-		case TextureFormat::RGB:
-		case TextureFormat::BGR:
-		{
-			switch (type)
-			{
-				case DataFormat::UnsignedShort_565:
-					return 16;
-					
-				default:
-					return 3 * bitsPerPixelForDataFormat(type);
-			}
-		}
-			
-		case TextureFormat::RGBA:
-		case TextureFormat::BGRA:
-		{
-			switch (type)
-			{
-				case DataFormat::UnsignedShort_4444:
-				case DataFormat::UnsignedShort_5551:
-					return 16;
-					
-				default:
-					return 4 * bitsPerPixelForDataFormat(type);
-			}
-		}
-			
+
 		default:
 		{
-			ET_FAIL_FMT("Not yet implemented for this format: %u, with data type: %u",
-						static_cast<uint32_t>(format), static_cast<uint32_t>(type));
+			ET_FAIL_FMT("Not yet implemented for this format: %u", static_cast<uint32_t>(format));
 			return 0;
 		}
 	}
@@ -376,12 +335,10 @@ uint32_t et::channelsForTextureFormat(TextureFormat internalFormat)
 {
 	switch (internalFormat)
 	{
-		case TextureFormat::Depth:
 		case TextureFormat::Depth16:
 		case TextureFormat::Depth24:
 		case TextureFormat::Depth32:
 		case TextureFormat::Depth32F:
-		case TextureFormat::R:
 		case TextureFormat::R8:
 		case TextureFormat::R16:
 		case TextureFormat::R16F:
@@ -389,7 +346,6 @@ uint32_t et::channelsForTextureFormat(TextureFormat internalFormat)
 		case TextureFormat::R11G11B10F:
 			return 1;
 			
-		case TextureFormat::RG:
 		case TextureFormat::RG8:
 		case TextureFormat::RG16:
 		case TextureFormat::RG16F:
@@ -397,18 +353,11 @@ uint32_t et::channelsForTextureFormat(TextureFormat internalFormat)
 		case TextureFormat::RGTC2:
 			return 2;
 			
-		case TextureFormat::RGB:
-		case TextureFormat::BGR:
-		case TextureFormat::RGB8:
-		case TextureFormat::RGB16:
-		case TextureFormat::RGB16F:
-		case TextureFormat::RGB32F:
 		case TextureFormat::DXT1_RGB:
 			return 3;
 			
-		case TextureFormat::RGBA:
-		case TextureFormat::BGRA:
 		case TextureFormat::RGBA8:
+		case TextureFormat::BGRA8:
 		case TextureFormat::RGBA16:
 		case TextureFormat::RGBA16F:
 		case TextureFormat::RGBA32F:

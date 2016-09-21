@@ -15,7 +15,7 @@ namespace rt
 EnvironmentEquirectangularMapSampler::EnvironmentEquirectangularMapSampler(
 	TextureDescription::Pointer data, const float4& scale) : _data(data), _scale(scale)
 {
-	if (_data->bitsPerPixel != 128)
+	if (bitsPerPixelForTextureFormat(_data->format) != 128)
 	{
 		ET_FAIL("Only RGBA32F textures are supported at this time")
 	}

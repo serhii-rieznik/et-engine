@@ -31,16 +31,10 @@ namespace et
         
         void setDescription(TextureDescription::Pointer desc)
             { _desc = desc; }
-        
-        TextureFormat internalFormat() const
-            { return _desc->internalformat; }
-        
+                
         TextureFormat format() const
             { return _desc->format; }
-        
-        DataFormat dataType() const
-            { return _desc->type; }
-        
+                
         TextureTarget target() const
             { return _desc->target; }
         
