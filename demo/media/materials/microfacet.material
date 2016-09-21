@@ -1,8 +1,7 @@
 {
-	"name" : "diffuse",
+	"name" : "microfacet",
 
-	"program-source-gl" : "microfacet.glsl",
-	"program-source-metal" : "microfacet.metal",
+	"program-source" : "microfacet",
 
 	"depth-state":
 	{
