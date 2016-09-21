@@ -23,7 +23,6 @@ void pvr::loadInfoFromStream(std::istream& stream, TextureDescription& desc)
 {
 	std::istream::off_type offset = stream.tellg();
 
-	desc.minimalDataSize = 32;
 	desc.dataLayout = TextureDataLayout::MipsFirst;
 
 	PVR_Texture_Header header2 = {};
@@ -75,12 +74,9 @@ void pvr::loadFromStream(std::istream& stream, TextureDescription& desc)
 	if (decompress)
 	{
 		BinaryDataStorage rgbaData(desc.size.square() * 4, 0);
-
 		PVRTDecompressPVRTC(desc.data.data(), (bitsPerPixelForTextureFormat(desc.format) == 2), desc.size.x, desc.size.y, rgbaData.data());
-
 		desc.mipMapCount = 1;
 		desc.format = TextureFormat::RGBA8;
-		desc.compressed = 0;
 		desc.data = rgbaData;
 	}
 }
@@ -137,33 +133,25 @@ void parseTextureFormat(const PVRTextureHeaderV3& sTextureHeader, TextureDescrip
 		{
 		case ePVRTPF_PVRTCI_2bpp_RGB:
 		{
-			desc.format = (sTextureHeader.u32ColourSpace == ePVRTCSpacesRGB) ?
-				TextureFormat::PVR_2bpp_sRGB : TextureFormat::PVR_2bpp_RGB;
-			desc.compressed = true;
+			desc.format = (sTextureHeader.u32ColourSpace == ePVRTCSpacesRGB) ? TextureFormat::PVR_2bpp_sRGB : TextureFormat::PVR_2bpp_RGB;
 			return;
 		}
 
 		case ePVRTPF_PVRTCI_2bpp_RGBA:
 		{
-			desc.format = (sTextureHeader.u32ColourSpace == ePVRTCSpacesRGB) ?
-				TextureFormat::PVR_2bpp_sRGBA : TextureFormat::PVR_2bpp_RGBA;
-			desc.compressed = true;
+			desc.format = (sTextureHeader.u32ColourSpace == ePVRTCSpacesRGB) ? TextureFormat::PVR_2bpp_sRGBA : TextureFormat::PVR_2bpp_RGBA;
 			return;
 		}
 
 		case ePVRTPF_PVRTCI_4bpp_RGB:
 		{
-			desc.format = (sTextureHeader.u32ColourSpace == ePVRTCSpacesRGB) ?
-				TextureFormat::PVR_4bpp_sRGB : TextureFormat::PVR_4bpp_RGB;
-			desc.compressed = true;
+			desc.format = (sTextureHeader.u32ColourSpace == ePVRTCSpacesRGB) ? TextureFormat::PVR_4bpp_sRGB : TextureFormat::PVR_4bpp_RGB;
 			return;
 		}
 
 		case ePVRTPF_PVRTCI_4bpp_RGBA:
 		{
-			desc.format = (sTextureHeader.u32ColourSpace == ePVRTCSpacesRGB) ?
-				TextureFormat::PVR_4bpp_sRGBA : TextureFormat::PVR_4bpp_RGBA;
-			desc.compressed = true;
+			desc.format = (sTextureHeader.u32ColourSpace == ePVRTCSpacesRGB) ? TextureFormat::PVR_4bpp_sRGBA : TextureFormat::PVR_4bpp_RGBA;
 			return;
 		}
 
@@ -173,8 +161,6 @@ void parseTextureFormat(const PVRTextureHeaderV3& sTextureHeader, TextureDescrip
 	}
 	else
 	{
-		desc.compressed = 0;
-
 		switch (ChannelType)
 		{
 		case ePVRTVarTypeFloat:

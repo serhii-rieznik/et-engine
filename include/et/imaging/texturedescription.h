@@ -17,6 +17,19 @@ namespace et
 	public:
 		ET_DECLARE_POINTER(TextureDescription);
 
+	public:
+		BinaryDataStorage data;
+
+		vec2i size;
+		TextureTarget target = TextureTarget::Texture_2D;
+		TextureFormat format = TextureFormat::Invalid;
+		TextureDataLayout dataLayout = TextureDataLayout::FacesFirst;
+		uint32_t mipMapCount = 1;
+		uint32_t layersCount = 1;
+
+		const uint32_t minimalDataSize = 32;
+		const vec2i minimalSizeForCompressedFormat = vec2i(4);
+
     public:
         TextureDescription();
         TextureDescription(const std::string& fileName);
@@ -37,7 +50,7 @@ namespace et
 			uint32_t bpp = bitsPerPixelForTextureFormat(format) / 8;
 			uint32_t actualSize = static_cast<uint32_t>(sizeForMipLevel(level).square()) * bpp;
 			uint32_t minimumSize = static_cast<uint32_t>(minimalSizeForCompressedFormat.square()) * bpp;
-			return compressed ? std::max(minimalDataSize, std::max(minimumSize, actualSize)) : actualSize;
+			return isCompressedTextureFormat(format) ? std::max(minimalDataSize, std::max(minimumSize, actualSize)) : actualSize;
 		}
 
 		uint32_t dataSizeForAllMipLevels()
@@ -88,24 +101,6 @@ namespace et
 		
 		bool valid() const
 			{ return (size.square() > 0); }
-
-	public:
-		BinaryDataStorage data;
-
-		vec2i size;
-		vec2i minimalSizeForCompressedFormat;
-		
-		uint32_t compressed = 0;
-		uint32_t mipMapCount = 1;
-		uint32_t layersCount = 1;
-		uint32_t alignment = 1;
-		uint32_t rowSize = 0;
-		uint32_t minimalDataSize = 0;
-		
-		TextureTarget target = TextureTarget::Texture_2D;
-		TextureFormat format = TextureFormat::Invalid;
-		
-		TextureDataLayout dataLayout = TextureDataLayout::FacesFirst;
 	};
 
 }

@@ -259,7 +259,7 @@ namespace et
 		max,
 	};
 	
-	enum class TextureOrigin
+	enum class TextureOrigin : uint32_t
 	{
 		TopLeft,
 		BottomLeft,
@@ -267,7 +267,7 @@ namespace et
 		max
 	};
 	
-	enum class TextureDataLayout
+	enum class TextureDataLayout : uint32_t
 	{
 		FacesFirst,
 		MipsFirst,
@@ -464,6 +464,7 @@ namespace et
 	uint32_t bitsPerPixelForDataFormat(DataFormat type);
 	uint32_t bitsPerPixelForTextureFormat(TextureFormat internalFormat);
 	uint32_t channelsForTextureFormat(TextureFormat internalFormat);
+	bool isCompressedTextureFormat(TextureFormat internalFormat);
 	
 	const std::string& compareFunctionToString(CompareFunction);
 	const std::string& blendFunctionToString(BlendFunction);

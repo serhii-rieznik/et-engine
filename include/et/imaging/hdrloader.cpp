@@ -78,7 +78,6 @@ void et::hdr::loadInfoFromStream(std::istream& source, TextureDescription& desc)
 	desc.format = shouldConvertRGBEToFloat ? TextureFormat::RGBA32F : TextureFormat::RGBA8;	
 	desc.mipMapCount = 1;
 	desc.layersCount = 1;
-	desc.compressed = 0;
 }
 
 void et::hdr::loadFromStream(std::istream& source, TextureDescription& desc)
@@ -93,7 +92,7 @@ void et::hdr::loadFromStream(std::istream& source, TextureDescription& desc)
     uint32_t square = desc.size.square();
     uint32_t maxDataSize = square * bitsPerPixelForTextureFormat(desc.format) / 8;
     
-    desc.rowSize = desc.size.x * 4;
+    int32_t rowSize = desc.size.x * 4;
 	BinaryDataStorage inData(maxDataSize, 0);
 	source.read(inData.binary(), maxDataSize);
 	auto ptr = inData.begin();
@@ -107,7 +106,7 @@ void et::hdr::loadFromStream(std::istream& source, TextureDescription& desc)
 
 		for (int y = 0; y < desc.size.y; ++y)
 		{
-			auto rowPtr = rgbeData.binary() + desc.rowSize * (desc.size.y - 1 - y);
+			auto rowPtr = rgbeData.binary() + rowSize * (desc.size.y - 1 - y);
 			ptr = readScanline(ptr, desc.size.x, reinterpret_cast<vec4ub*>(rowPtr));
 		}
 
@@ -116,10 +115,10 @@ void et::hdr::loadFromStream(std::istream& source, TextureDescription& desc)
 	}
 	else
 	{
-		desc.data.resize(desc.size.y * desc.rowSize);
+		desc.data.resize(desc.size.y * rowSize);
 		for (int y = 0; y < desc.size.y; ++y)
 		{
-			auto rowPtr = desc.data.element_ptr((desc.size.y - 1 - y) * desc.rowSize);
+			auto rowPtr = desc.data.element_ptr((desc.size.y - 1 - y) * rowSize);
 			ptr = readScanline(ptr, desc.size.x, reinterpret_cast<vec4ub*>(rowPtr));
 		}
 	}

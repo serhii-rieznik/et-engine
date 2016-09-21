@@ -331,6 +331,30 @@ uint32_t et::bitsPerPixelForDataFormat(DataFormat type)
 	}
 }
 
+bool isCompressedTextureFormat(TextureFormat internalFormat)
+{
+	switch (internalFormat)
+	{
+	case TextureFormat::PVR_2bpp_RGB:
+	case TextureFormat::PVR_2bpp_sRGB:
+	case TextureFormat::PVR_2bpp_RGBA:
+	case TextureFormat::PVR_2bpp_sRGBA:
+	case TextureFormat::PVR_4bpp_RGB:
+	case TextureFormat::PVR_4bpp_sRGB:
+	case TextureFormat::PVR_4bpp_RGBA:
+	case TextureFormat::PVR_4bpp_sRGBA:
+	case TextureFormat::DXT1_RGB:
+	case TextureFormat::DXT1_RGBA:
+	case TextureFormat::DXT3:
+	case TextureFormat::DXT5:
+	case TextureFormat::RGTC2:
+		return false;
+
+	default:
+		return false;
+	}
+}
+
 uint32_t et::channelsForTextureFormat(TextureFormat internalFormat)
 {
 	switch (internalFormat)

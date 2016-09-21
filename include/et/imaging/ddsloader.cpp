@@ -225,7 +225,6 @@ void dds::loadInfoFromStream(std::istream& source, TextureDescription& desc)
 	
 	desc.size = vec2i(static_cast<int32_t>(header.dwWidth), static_cast<int32_t>(header.dwHeight));
 	desc.mipMapCount = (header.dwMipMapCount < 1) ? 1 : header.dwMipMapCount;
-	desc.minimalSizeForCompressedFormat = vec2i(4);
 	desc.target = (header.dwCaps2 & DDSCAPS2_CUBEMAP) ? TextureTarget::Texture_Cube : TextureTarget::Texture_2D;
 	if (desc.target == TextureTarget::Texture_Cube)
 	{
@@ -301,28 +300,24 @@ void dds::loadInfoFromStream(std::istream& source, TextureDescription& desc)
 		case FOURCC_DXT1:
 		{
 			bool hasAlpha = header.ddspf.dwFlags & DDPF_ALPHAPIXELS;
-			desc.compressed = true;
 			desc.format = hasAlpha ? TextureFormat::DXT1_RGB : TextureFormat::DXT1_RGBA;
 			break;
 		}
 
 		case FOURCC_DXT3:
 		{
-			desc.compressed = true;
 			desc.format = TextureFormat::DXT3;
 			break;
 		}
 
 		case FOURCC_DXT5:
 		{
-			desc.compressed = true;
 			desc.format = TextureFormat::DXT5;
 			break;
 		}
 			
 		case FOURCC_ATI2:
 		{
-			desc.compressed = true;
 			desc.format = TextureFormat::RGTC2;
 			break;
 		}
