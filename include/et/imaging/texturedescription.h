@@ -101,7 +101,6 @@ namespace et
 		uint32_t layersCount = 1;
 		uint32_t alignment = 1;
 		uint32_t rowSize = 0;
-
 		uint32_t minimalDataSize = 0;
 		
 		TextureTarget target = TextureTarget::Texture_2D;

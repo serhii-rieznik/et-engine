@@ -239,10 +239,7 @@ void MainController::render(et::RenderContext* rc)
 
 	if (_texture.valid())
 	{
-        auto desc = _texture->description();
-        desc->data = et::BinaryDataStorage(reinterpret_cast<uint8_t*>(_textureData.data()), _textureData.dataSize());
-        _texture->update(desc);
-        
+        _texture->setImageData(et::BinaryDataStorage(reinterpret_cast<uint8_t*>(_textureData.data()), _textureData.dataSize()));
         pass->pushRenderBatch(et::renderhelper::createFullscreenRenderBatch(_texture));
 	}
 

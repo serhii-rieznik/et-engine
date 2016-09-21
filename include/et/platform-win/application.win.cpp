@@ -81,7 +81,7 @@ void Application::platformDeactivate()
 
 void Application::initContext()
 {
-	_context = createWindowsContextWithOptions(RenderingAPI::OpenGL, _parameters.context);
+	_context = createWindowsContextWithOptions(_parameters.context);
 }
 
 void Application::freeContext()
@@ -110,6 +110,9 @@ int Application::platformRun(int, char*[])
 		{
 			TranslateMessage(&msg);
 			DispatchMessageW(&msg);
+
+			if (msg.message == WM_QUIT)
+				_running = false;
 		}
 		else if (shouldPerformRendering())
 		{

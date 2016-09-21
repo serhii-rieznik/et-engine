@@ -572,3 +572,101 @@ bool et::stringToCullMode(const std::string& mode, CullMode& outMode)
 	log::error("Unable to convert cull mode string `%s` to CullMode value", mode.c_str());
 	return false;
 }
+
+template <class T>
+using ValueNamePair = const std::pair<T, std::string>;
+
+static ValueNamePair<et::CompareFunction> compareFunctionsMap[CompareFunction_max] =
+{
+	{et::CompareFunction::Never, "never"},
+	{et::CompareFunction::Less, "less"},
+	{et::CompareFunction::LessOrEqual, "less-or-equal"},
+	{et::CompareFunction::Equal, "equal"},
+	{et::CompareFunction::GreaterOrEqual, "greater-or-equal"},
+	{et::CompareFunction::Greater, "greater"},
+	{et::CompareFunction::Always, "always"},
+};
+
+static ValueNamePair<et::BlendFunction> blendFunctionsMap[BlendFunction_max] =
+{
+	{et::BlendFunction::Zero, "zero"}, // Zero,
+	{et::BlendFunction::One, "one"}, // One,
+	{et::BlendFunction::SourceColor, "src-color"}, // SourceColor,
+	{et::BlendFunction::InvSourceColor, "inv-src-color"}, // InvSourceColor,
+	{et::BlendFunction::SourceAlpha, "src-alpha"}, // SourceAlpha,
+	{et::BlendFunction::InvSourceAlpha, "inv-src-alpha"}, // InvSourceAlpha,
+	{et::BlendFunction::DestColor, "dst-color"}, // DestColor,
+	{et::BlendFunction::InvDestColor, "inv-dst-color"}, // InvDestColor,
+	{et::BlendFunction::DestAlpha, "dst-alpha"}, // DestAlpha,
+	{et::BlendFunction::InvDestAlpha, "inv-dst-alpha"}, // InvDestAlpha,
+};
+
+static ValueNamePair<et::BlendOperation> blendOperationsMap[BlendOperation_max] =
+{
+	{et::BlendOperation::Add, "add"}, // Add,
+	{et::BlendOperation::Subtract, "subtract"}, // Subtract,
+	{et::BlendOperation::ReverseSubtract, "reverse-subtract"}, // ReverseSubtract,
+};
+
+template <class ENUM>
+const ValueNamePair<ENUM>& sampleValueFromMap(ENUM value, const ValueNamePair<ENUM>* fromMap)
+{
+	ET_ASSERT(value < ENUM::max);
+	return fromMap[static_cast<uint32_t>(value)];
+}
+
+template <class ENUM>
+ENUM findValueInMap(uint32_t value, const ValueNamePair<ENUM>* inMap, size_t mapSize)
+{
+	for (size_t i = 0; i < mapSize; ++i)
+	{
+		if (value == inMap[i].first)
+			return static_cast<ENUM>(i);
+	}
+	log::error("Unable to find enum value in map: %x (%s - %s)",
+		value, inMap[0].second.c_str(), inMap[mapSize-1].second.c_str());
+	return static_cast<ENUM>(0);
+}
+
+template <class ENUM>
+ENUM findStringInMap(const std::string& value, const ValueNamePair<ENUM>* inMap, size_t mapSize)
+{
+	for (size_t i = 0; i < mapSize; ++i)
+	{
+		if (value == inMap[i].second)
+			return static_cast<ENUM>(i);
+	}
+	log::error("Unable to find enum value in map: %s (%s - %s)",
+		value.c_str(), inMap[0].second.c_str(), inMap[mapSize-1].second.c_str());
+	return static_cast<ENUM>(0);
+}
+
+const std::string& et::compareFunctionToString(CompareFunction value)
+{
+	return sampleValueFromMap(value, compareFunctionsMap).second;
+}
+
+const std::string& et::blendFunctionToString(BlendFunction value)
+{
+	return sampleValueFromMap(value, blendFunctionsMap).second;
+}
+
+const std::string& et::blendOperationToString(BlendOperation value)
+{
+	return sampleValueFromMap(value, blendOperationsMap).second;
+}
+
+CompareFunction et::stringToCompareFunction(const std::string& value)
+{
+	return findStringInMap<CompareFunction>(value, compareFunctionsMap, sizeof(compareFunctionsMap) / sizeof(compareFunctionsMap[0]));
+}
+
+BlendFunction et::stringToBlendFunction(const std::string& value)
+{
+	return findStringInMap<BlendFunction>(value, blendFunctionsMap, sizeof(blendFunctionsMap) / sizeof(blendFunctionsMap[0]));
+}
+
+BlendOperation et::stringToBlendOperation(const std::string& value)
+{
+	return findStringInMap<BlendOperation>(value, blendOperationsMap, sizeof(blendOperationsMap) / sizeof(blendOperationsMap[0]));
+}

@@ -19,7 +19,6 @@ namespace et
 	public:
 		DX12Texture(TextureDescription::Pointer);
 
-		void bind(uint32_t) override;
-        void update(TextureDescription::Pointer) override;
+        void setImageData(const BinaryDataStorage&) override;
 	};
 }

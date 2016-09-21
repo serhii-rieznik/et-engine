@@ -59,8 +59,7 @@ namespace et
         vec2 texel() const
             { return vec2(1.0f / static_cast<float>(_desc->size.x), 1.0f / static_cast<float>(_desc->size.y)); }
 
-        virtual void bind(uint32_t) = 0;
-        virtual void update(TextureDescription::Pointer) = 0;
+        virtual void setImageData(const BinaryDataStorage&) = 0;
         
     private:
         TextureDescription::Pointer _desc;

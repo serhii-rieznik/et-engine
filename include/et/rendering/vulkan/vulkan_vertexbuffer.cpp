@@ -17,7 +17,7 @@ class VulkanVertexBufferPrivate
 {
 public:
 	VulkanVertexBufferPrivate(VulkanState& v, uint32_t size) 
-		: nativeBuffer(v, size, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT)
+		: nativeBuffer(v, size, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, false)
 		, dataSize(size)
 	{ 
 	}

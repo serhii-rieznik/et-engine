@@ -17,7 +17,7 @@ class VulkanIndexBufferPrivate
 {
 public:
 	VulkanIndexBufferPrivate(VulkanState& v, uint32_t size) 
-		:  nativeBuffer(v, size, VK_BUFFER_USAGE_INDEX_BUFFER_BIT)
+		:  nativeBuffer(v, size, VK_BUFFER_USAGE_INDEX_BUFFER_BIT, false)
 	{
 	}
 

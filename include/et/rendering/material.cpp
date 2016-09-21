@@ -41,11 +41,7 @@ void Material::loadFromJson(const std::string& jsonString, const std::string& ba
 	std::string programSources[2];
 	std::string baseName = obj.stringForKey(kProgramSource)->content;
 
-	if (_renderer->api() == RenderingAPI::OpenGL)
-	{
-		programSources[0] = application().resolveFileName(baseName + ".glsl");
-	}
-	else if (_renderer->api() == RenderingAPI::Metal)
+	if (_renderer->api() == RenderingAPI::Metal)
 	{
 		programSources[0] = application().resolveFileName(baseName + ".metal");
 	}

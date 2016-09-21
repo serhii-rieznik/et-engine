@@ -16,12 +16,7 @@ DX12Texture::DX12Texture(TextureDescription::Pointer desc)
 {
 }
 
-void DX12Texture::bind(uint32_t)
-{
-
-}
-
-void DX12Texture::update(TextureDescription::Pointer)
+void DX12Texture::setImageData(const BinaryDataStorage&)
 {
 }
 

@@ -38,7 +38,6 @@ namespace et
 
 	enum class RenderingAPI : uint32_t
 	{
-		OpenGL,
 		Metal,
 		Vulkan,
 		DX12,
@@ -49,7 +48,11 @@ namespace et
     struct ApplicationParameters
     {
         ContextOptions context;
-		RenderingAPI renderingAPI = RenderingAPI::OpenGL;
+#	if (ET_PLATFORM_WIN)
+		RenderingAPI renderingAPI = RenderingAPI::Vulkan;
+#	elif (ET_PLATFORM_MAC)
+		RenderingAPI renderingAPI = RenderingAPI::Metal;
+#	endif
         bool shouldSuspendOnDeactivate = PlatformOptions::IsMobile;
         bool shouldPreserveRenderContext = false;
     };

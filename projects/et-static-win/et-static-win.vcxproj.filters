@@ -41,9 +41,6 @@
     <Filter Include="Source\rendering\dx12">
       <UniqueIdentifier>{fd2f5bb3-d587-4408-85a7-bf25ba9fdfed}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source\rendering\opengl">
-      <UniqueIdentifier>{acb69bbb-8c37-4083-aaf8-c05378c4e39b}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source\rendering\vulkan">
       <UniqueIdentifier>{24eda458-f98b-4793-aff3-99f8098d992a}</UniqueIdentifier>
     </Filter>
@@ -325,42 +322,6 @@
     <ClInclude Include="..\..\include\et\rendering\vulkan\vulkan_vertexbuffer.cpp">
       <Filter>Source\rendering\vulkan</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\et\rendering\opengl\opengl.cpp">
-      <Filter>Source\rendering\opengl</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\et\rendering\opengl\opengl_caps.cpp">
-      <Filter>Source\rendering\opengl</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\et\rendering\opengl\opengl_framebuffer.cpp">
-      <Filter>Source\rendering\opengl</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\et\rendering\opengl\opengl_indexbuffer.cpp">
-      <Filter>Source\rendering\opengl</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\et\rendering\opengl\opengl_materialfactory.cpp">
-      <Filter>Source\rendering\opengl</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\et\rendering\opengl\opengl_pipelinestate.cpp">
-      <Filter>Source\rendering\opengl</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\et\rendering\opengl\opengl_program.cpp">
-      <Filter>Source\rendering\opengl</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\et\rendering\opengl\opengl_renderer.cpp">
-      <Filter>Source\rendering\opengl</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\et\rendering\opengl\opengl_renderpass.cpp">
-      <Filter>Source\rendering\opengl</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\et\rendering\opengl\opengl_texture.cpp">
-      <Filter>Source\rendering\opengl</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\et\rendering\opengl\opengl_vertexarrayobject.cpp">
-      <Filter>Source\rendering\opengl</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\et\rendering\opengl\opengl_vertexbuffer.cpp">
-      <Filter>Source\rendering\opengl</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\et\rendering\dx12\dx12_indexbuffer.cpp">
       <Filter>Source\rendering\dx12</Filter>
     </ClInclude>
@@ -403,6 +364,7 @@
     <ClInclude Include="..\..\include\et\rendering\base\vertexdeclaration.cpp">
       <Filter>Source\rendering\base</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\base\vertexstream.h" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\et\sound\openal.h">
@@ -840,12 +802,6 @@
     <ClInclude Include="..\..\include\et\rendering\vertexarrayobject.h">
       <Filter>Source\rendering</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\et\rendering\vertexbufferfactory.h">
-      <Filter>Source\rendering</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\et\rendering\vertexbufferfactory.cpp">
-      <Filter>Source\rendering</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\et\rendering\vulkan\vulkan\GLSL.std.450.h">
       <Filter>Source\rendering\vulkan\vulkan</Filter>
     </ClInclude>
@@ -896,33 +852,6 @@
     </ClInclude>
     <ClInclude Include="..\..\include\et\rendering\vulkan\vulkan_vertexbuffer.h">
       <Filter>Source\rendering\vulkan</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\et\rendering\opengl\opengl.h">
-      <Filter>Source\rendering\opengl</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\et\rendering\opengl\opengl_caps.h">
-      <Filter>Source\rendering\opengl</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\et\rendering\opengl\opengl_indexbuffer.h">
-      <Filter>Source\rendering\opengl</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\et\rendering\opengl\opengl_pipelinestate.h">
-      <Filter>Source\rendering\opengl</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\et\rendering\opengl\opengl_program.h">
-      <Filter>Source\rendering\opengl</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\et\rendering\opengl\opengl_renderer.h">
-      <Filter>Source\rendering\opengl</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\et\rendering\opengl\opengl_renderpass.h">
-      <Filter>Source\rendering\opengl</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\et\rendering\opengl\opengl_texture.h">
-      <Filter>Source\rendering\opengl</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\et\rendering\opengl\opengl_vertexbuffer.h">
-      <Filter>Source\rendering\opengl</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\et\rendering\dx12\dx12_indexbuffer.h">
       <Filter>Source\rendering\dx12</Filter>

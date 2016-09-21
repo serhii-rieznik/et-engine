@@ -42,7 +42,7 @@ void registerWindowClass()
 	classRegistered = result != 0;
 }
 
-PlatformDependentContext createWindowsContextWithOptions(RenderingAPI, ContextOptions& options)
+PlatformDependentContext createWindowsContextWithOptions(ContextOptions& options)
 {
 	registerWindowClass();
 

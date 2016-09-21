@@ -30,15 +30,3 @@
 #	include "../rendering/vulkan/vulkan_texture.cpp"
 #	include "../rendering/vulkan/vulkan_vertexbuffer.cpp"
 #endif
-
-#include "../rendering/opengl/opengl.cpp"
-#include "../rendering/opengl/opengl_caps.cpp"
-#include "../rendering/opengl/opengl_framebuffer.cpp"
-#include "../rendering/opengl/opengl_indexbuffer.cpp"
-#include "../rendering/opengl/opengl_pipelinestate.cpp"
-#include "../rendering/opengl/opengl_program.cpp"
-#include "../rendering/opengl/opengl_renderer.cpp"
-#include "../rendering/opengl/opengl_renderpass.cpp"
-#include "../rendering/opengl/opengl_texture.cpp"
-#include "../rendering/opengl/opengl_vertexarrayobject.cpp"
-#include "../rendering/opengl/opengl_vertexbuffer.cpp"

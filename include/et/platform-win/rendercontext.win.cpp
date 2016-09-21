@@ -10,7 +10,6 @@
 #if (ET_PLATFORM_WIN)
 
 #include <et/rendering/dx12/dx12_renderer.h>
-#include <et/rendering/opengl/opengl_renderer.h>
 #include <et/rendering/vulkan/vulkan_renderer.h>
 #include <et/rendering/base/helpers.h>
 
@@ -37,11 +36,7 @@ RenderContext::RenderContext(const RenderContextParameters& inParams, Applicatio
 
 	application().initContext();
 
-	if  (app->parameters().renderingAPI == RenderingAPI::OpenGL)
-	{
-		_renderer = OpenGLRenderer::Pointer::create(this);
-	}
-	else if (app->parameters().renderingAPI == RenderingAPI::Vulkan)
+	if (app->parameters().renderingAPI == RenderingAPI::Vulkan)
 	{
 		_renderer = VulkanRenderer::Pointer::create(this);
 	}

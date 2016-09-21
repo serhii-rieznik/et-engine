@@ -11,16 +11,19 @@
 
 namespace et
 {
-	class VulkanTexture : public Texture
-	{
-	public:
-		ET_DECLARE_POINTER(VulkanTexture);
-		
-	public:
-		VulkanTexture() = default;
-		VulkanTexture(TextureDescription::Pointer);
+class VulkanTexturePrivate;
+class VulkanTexture : public Texture
+{
+public:
+	ET_DECLARE_POINTER(VulkanTexture);
 
-		void bind(uint32_t) override;
-        void update(TextureDescription::Pointer) override;
-	};
+public:
+	VulkanTexture(VulkanState&, TextureDescription::Pointer);
+	~VulkanTexture();
+
+	void setImageData(const BinaryDataStorage&) override;
+
+private:
+	ET_DECLARE_PIMPL(VulkanTexture, 64)
+};
 }

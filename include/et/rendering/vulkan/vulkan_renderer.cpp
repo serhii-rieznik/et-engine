@@ -17,7 +17,7 @@
 #include <et/rendering/vulkan/vulkan.h>
 #include <et/app/application.h>
 
-#define VULKAN_ENABLE_VALIDATION 0
+#define VULKAN_ENABLE_VALIDATION 1
 
 namespace et
 {
@@ -202,7 +202,7 @@ IndexBuffer::Pointer VulkanRenderer::createIndexBuffer(const std::string& name, 
 
 Texture::Pointer VulkanRenderer::createTexture(TextureDescription::Pointer desc)
 {
-	return VulkanTexture::Pointer::create(desc);
+	return VulkanTexture::Pointer::create(_private->vulkan(), desc);
 }
 
 Program::Pointer VulkanRenderer::createProgram(const std::string& vs, const std::string& fs, 

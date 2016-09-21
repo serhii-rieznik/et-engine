@@ -151,7 +151,59 @@ void VulkanSwapchain::present(VulkanState& vulkan)
 	VULKAN_CALL(vkQueuePresentKHR(vulkan.queue, &info));
 }
 
-uint32_t getVulkanMemoryType(VulkanState& vulkan, uint32_t typeFilter, VkMemoryPropertyFlags properties) 
+VulkanNativeBuffer::VulkanNativeBuffer(VulkanState& vulkan, uint32_t size, uint32_t usage, bool hostVisible) : 
+	_vulkan(vulkan), _hostVisible(hostVisible)
+{
+	VkBufferCreateInfo info = { VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO };
+	info.size = size;
+	info.usage = usage;
+	info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+	VULKAN_CALL(vkCreateBuffer(_vulkan.device, &info, nullptr, &_buffer));
+
+	VkMemoryRequirements req = { };
+	vkGetBufferMemoryRequirements(_vulkan.device, _buffer, &req);
+
+	VkMemoryPropertyFlags memoryProperties = _hostVisible 
+		? VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
+		: VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
+
+	VkMemoryAllocateInfo allocInfo = { VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO };
+	allocInfo.allocationSize = req.size;
+	allocInfo.memoryTypeIndex = vulkan::getMemoryTypeIndex(_vulkan, req.memoryTypeBits, memoryProperties);
+	VULKAN_CALL(vkAllocateMemory(vulkan.device, &allocInfo, nullptr, &_memory));
+
+	VULKAN_CALL(vkBindBufferMemory(vulkan.device, _buffer, _memory, 0));
+}
+
+VulkanNativeBuffer::~VulkanNativeBuffer()
+{
+	vkDestroyBuffer(_vulkan.device, _buffer, nullptr);
+	vkFreeMemory(_vulkan.device, _memory, nullptr);
+}
+
+void* VulkanNativeBuffer::map(uint32_t offset, uint32_t size)
+{
+	ET_ASSERT(_hostVisible);
+	void* pointer = nullptr;
+	{
+		ET_ASSERT(_mapped == false);
+		VULKAN_CALL(vkMapMemory(_vulkan.device, _memory, offset, size, 0, &pointer));
+		_mapped = true;
+	}
+	return pointer;
+}
+
+void VulkanNativeBuffer::unmap()
+{
+	ET_ASSERT(_mapped);
+	vkUnmapMemory(_vulkan.device, _memory);
+	_mapped = false;
+}
+
+namespace vulkan
+{
+
+uint32_t getMemoryTypeIndex(VulkanState& vulkan, uint32_t typeFilter, VkMemoryPropertyFlags properties) 
 {
 	static bool propertiesRetreived = false;
 	static VkPhysicalDeviceMemoryProperties memProperties = { };
@@ -172,54 +224,6 @@ uint32_t getVulkanMemoryType(VulkanState& vulkan, uint32_t typeFilter, VkMemoryP
 
 	ET_FAIL("Unable to get memory type");
 }
-
-VulkanNativeBuffer::VulkanNativeBuffer(VulkanState& vulkan, uint32_t size, uint32_t usage) : 
-	_vulkan(vulkan)
-{
-	VkBufferCreateInfo info = { VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO };
-	info.size = size;
-	info.usage = usage;
-	info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-	VULKAN_CALL(vkCreateBuffer(_vulkan.device, &info, nullptr, &_buffer));
-
-	VkMemoryRequirements req = { };
-	vkGetBufferMemoryRequirements(_vulkan.device, _buffer, &req);
-
-	VkMemoryAllocateInfo allocInfo = { VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO };
-	allocInfo.allocationSize = req.size;
-	allocInfo.memoryTypeIndex = getVulkanMemoryType(_vulkan, 
-		req.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-	VULKAN_CALL(vkAllocateMemory(vulkan.device, &allocInfo, nullptr, &_memory));
-
-	VULKAN_CALL(vkBindBufferMemory(vulkan.device, _buffer, _memory, 0));
-}
-
-VulkanNativeBuffer::~VulkanNativeBuffer()
-{
-	vkDestroyBuffer(_vulkan.device, _buffer, nullptr);
-	vkFreeMemory(_vulkan.device, _memory, nullptr);
-}
-
-void* VulkanNativeBuffer::map(uint32_t offset, uint32_t size)
-{
-	void* pointer = nullptr;
-	{
-		ET_ASSERT(_mapped == false);
-		VULKAN_CALL(vkMapMemory(_vulkan.device, _memory, offset, size, 0, &pointer));
-		_mapped = true;
-	}
-	return pointer;
-}
-
-void VulkanNativeBuffer::unmap()
-{
-	ET_ASSERT(_mapped);
-	vkUnmapMemory(_vulkan.device, _memory);
-	_mapped = false;
-}
-
-namespace vulkan
-{
 
 VkCompareOp depthCompareOperation(CompareFunction func)
 {
@@ -259,6 +263,29 @@ VkFormat dataTypeValue(DataType fmt)
 	};
 	ET_ASSERT(lookup.count(fmt) > 0);
 	return lookup.at(fmt);
+}
+
+VkFormat textureFormatValue(TextureFormat fmt)
+{
+	static const Map<TextureFormat, VkFormat> lookup =
+	{
+		{ TextureFormat::RGBA8, VkFormat::VK_FORMAT_R8G8B8A8_UNORM },
+	};
+	ET_ASSERT(lookup.count(fmt) > 0);
+	return lookup.at(fmt);
+}
+
+VkImageType textureTargetToImageType(TextureTarget target)
+{
+	switch (target)
+	{
+	case TextureTarget::Texture_2D:
+		return VkImageType::VK_IMAGE_TYPE_2D;
+	case TextureTarget::Texture_Cube:
+		return VkImageType::VK_IMAGE_TYPE_3D;
+	default:
+		ET_FAIL("Invalid TextureTarget specified");
+	}
 }
 
 VkPrimitiveTopology primitiveTopology(PrimitiveType type)

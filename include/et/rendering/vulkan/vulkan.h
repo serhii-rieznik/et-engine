@@ -100,6 +100,13 @@ struct VulkanNativePipeline
 	VkPipeline pipeline = nullptr;
 };
 
+struct VulkanNativeTexture
+{
+	VkImage image = nullptr;
+	VkDeviceMemory memory = nullptr;
+	VkMemoryRequirements memoryRequirements { };
+};
+
 namespace vulkan
 {
 
@@ -108,6 +115,9 @@ VkFormat dataTypeValue(DataType);
 VkPrimitiveTopology primitiveTopology(PrimitiveType);
 VkCullModeFlags cullModeFlags(CullMode);
 VkIndexType indexBufferFormat(IndexArrayFormat);
+VkFormat textureFormatValue(TextureFormat);
+VkImageType textureTargetToImageType(TextureTarget);
+uint32_t getMemoryTypeIndex(VulkanState& vulkan, uint32_t typeFilter, VkMemoryPropertyFlags properties);
 
 }
 
@@ -167,12 +177,10 @@ Vector<EnumeratedClass> enumerateVulkanObjects(const Holder& holder, Function ca
 	return enumerator(holder, callable);
 }
 
-uint32_t getVulkanMemoryType(VulkanState& vulkan, uint32_t typeFilter, VkMemoryPropertyFlags properties);
-
 class VulkanNativeBuffer
 {
 public:
-	VulkanNativeBuffer(VulkanState& vulkan, uint32_t size, uint32_t usage);
+	VulkanNativeBuffer(VulkanState& vulkan, uint32_t size, uint32_t usage, bool hostVisible);
 	~VulkanNativeBuffer();
 
 	void* map(uint32_t offset, uint32_t size);
@@ -189,6 +197,7 @@ private:
 	VkBuffer _buffer = nullptr;
 	VkDeviceMemory _memory = nullptr;
 	std::atomic_bool _mapped{false};
+	bool _hostVisible = false;
 };
 
 }

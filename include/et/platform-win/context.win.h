@@ -13,7 +13,7 @@
 
 namespace et
 {
-    PlatformDependentContext createWindowsContextWithOptions(RenderingAPI, ContextOptions&);
+    PlatformDependentContext createWindowsContextWithOptions(ContextOptions&);
     void destroyWindowsContext(PlatformDependentContext);
 }
 
