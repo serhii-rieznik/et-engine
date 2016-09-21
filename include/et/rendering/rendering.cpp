@@ -331,7 +331,7 @@ uint32_t et::bitsPerPixelForDataFormat(DataFormat type)
 	}
 }
 
-bool isCompressedTextureFormat(TextureFormat internalFormat)
+bool et::isCompressedTextureFormat(TextureFormat internalFormat)
 {
 	switch (internalFormat)
 	{
@@ -348,7 +348,7 @@ bool isCompressedTextureFormat(TextureFormat internalFormat)
 	case TextureFormat::DXT3:
 	case TextureFormat::DXT5:
 	case TextureFormat::RGTC2:
-		return false;
+		return true;
 
 	default:
 		return false;

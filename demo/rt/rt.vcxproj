@@ -158,12 +158,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\include\et-ext\rt\bsdf.cpp" />
-    <ClCompile Include="..\..\include\et-ext\rt\environment.cpp" />
-    <ClCompile Include="..\..\include\et-ext\rt\integrator.cpp" />
-    <ClCompile Include="..\..\include\et-ext\rt\kdtree.cpp" />
-    <ClCompile Include="..\..\include\et-ext\rt\raytrace.cpp" />
-    <ClCompile Include="..\..\include\et-ext\rt\raytraceobjects.cpp" />
+    <ClInclude Include="..\..\include\et-ext\rt\bsdf.cpp" />
+    <ClInclude Include="..\..\include\et-ext\rt\environment.cpp" />
+    <ClInclude Include="..\..\include\et-ext\rt\integrator.cpp" />
+    <ClInclude Include="..\..\include\et-ext\rt\kdtree.cpp" />
+    <ClInclude Include="..\..\include\et-ext\rt\raytrace.cpp" />
+    <ClInclude Include="..\..\include\et-ext\rt\raytraceobjects.cpp" />
+    <ClCompile Include="..\..\include\et-ext\rt\rt.pack.cxx" />
     <ClCompile Include="source\main.cpp" />
     <ClCompile Include="source\maincontroller.cpp" />
   </ItemGroup>
