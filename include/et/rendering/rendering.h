@@ -316,7 +316,7 @@ namespace et
 		DepthState() = default;
 		
 		DepthState(bool write, CompareFunction func) :
-			depthWriteEnabled(write), compareFunction(func) { }
+			compareFunction(func), depthWriteEnabled(write) { }
 		
 		uint32_t sortingKey() const
 		{

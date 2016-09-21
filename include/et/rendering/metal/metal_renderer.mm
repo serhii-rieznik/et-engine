@@ -108,11 +108,6 @@ void MetalRenderer::submitRenderPass(RenderPass::Pointer in_pass)
 	pass->endEncoding();
 }
 
-void MetalRenderer::drawIndexedPrimitive(PrimitiveType pt, IndexArrayFormat fmt, uint32_t first, uint32_t count)
-{
-
-}
-
 /*
  * Vertex buffers
  */
@@ -124,11 +119,6 @@ VertexBuffer::Pointer MetalRenderer::createVertexBuffer(const std::string& name,
 IndexBuffer::Pointer MetalRenderer::createIndexBuffer(const std::string& name, IndexArray::Pointer ia, BufferDrawType dt)
 {
     return MetalIndexBuffer::Pointer::create(_private->metal, ia, dt, name);
-}
-
-VertexArrayObject::Pointer MetalRenderer::createVertexArrayObject(const std::string& name)
-{
-	return VertexArrayObject::Pointer::create(name);
 }
 
 /*
@@ -154,7 +144,7 @@ Program::Pointer MetalRenderer::createProgram(const std::string& source, const s
  * Pipeline state
  */
 PipelineState::Pointer MetalRenderer::createPipelineState(RenderPass::Pointer pass, Material::Pointer mtl,
-    VertexArrayObject::Pointer vs)
+    VertexStream::Pointer vs)
 {
 	PipelineState::Pointer result = _private->cache.find(vs->vertexBuffer()->declaration(), vs,
 		mtl->program(), mtl->depthState(), mtl->blendState(), mtl->cullMode(), TextureFormat::RGBA8);

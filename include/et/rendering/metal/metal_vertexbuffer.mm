@@ -24,7 +24,7 @@ MetalVertexBuffer::MetalVertexBuffer(MetalState& metal, const VertexDeclaration&
 	ET_PIMPL_INIT(MetalVertexBuffer);
     _private->buffer.construct(metal, data.data(), static_cast<uint32_t>(data.size()));
 
-	setData(data.data(), data.size(), false);
+	setData(data.data(), data.size());
 }
 
 MetalVertexBuffer::~MetalVertexBuffer()
@@ -36,13 +36,8 @@ const MetalNativeBuffer& MetalVertexBuffer::nativeBuffer() const
 {
     return _private->buffer;
 }
-    
-void MetalVertexBuffer::bind()
-{
-    
-}
 
-void MetalVertexBuffer::setData(const void* data, uint32_t dataSize, bool invalidateExistingData)
+void MetalVertexBuffer::setData(const void* data, uint32_t dataSize)
 {
 	setDataWithOffset(data, 0, dataSize);
 }
@@ -73,11 +68,7 @@ bool MetalVertexBuffer::mapped() const
 
 void MetalVertexBuffer::unmap()
 {
-}
 
-void MetalVertexBuffer::clear()
-{
-    
 }
 
 }

@@ -30,10 +30,6 @@ MetalProgram::~MetalProgram()
 	ET_PIMPL_FINALIZE(MetalProgram)
 }
     
-void MetalProgram::bind()
-{
-}
-
 void MetalProgram::build(const std::string& vertexSource, const std::string& fragmentSource)
 {
 	std::string fusedSource = "using namespace metal;\n" + vertexSource + "\n" + fragmentSource;

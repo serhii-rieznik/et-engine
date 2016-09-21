@@ -22,8 +22,6 @@ namespace et
 	public:
         MetalIndexBuffer(MetalState& metal, IndexArray::Pointer i, BufferDrawType drawType, const std::string& name);
 		~MetalIndexBuffer();
-
-		void bind() override;
         
         const MetalNativeBuffer& nativeBuffer() const;
 

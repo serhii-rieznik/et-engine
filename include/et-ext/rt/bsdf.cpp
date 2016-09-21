@@ -8,7 +8,7 @@
 #include <et-ext/rt/bsdf.h>
 
 et::rt::BSDFSample::BSDFSample(const et::rt::float4& _wi, const et::rt::float4& _n,
-	const Material& mat, Direction _d) : Wi(_wi), n(_n), IdotN(_wi.dot(_n)), dir(_d), alpha(mat.roughness)
+	const Material& mat, Direction _d) : Wi(_wi), n(_n), IdotN(_wi.dot(_n)), alpha(mat.roughness), dir(_d)
 {
 	switch (mat.cls)
 	{
@@ -90,8 +90,8 @@ et::rt::BSDFSample::BSDFSample(const et::rt::float4& _wi, const et::rt::float4& 
 	, n(_n)
 	, IdotN(_wi.dot(_n))
 	, OdotN(_wo.dot(_n))
-	, dir(_d)
 	, alpha(mat.roughness)
+	, dir(_d)
 {
 	switch (mat.cls)
 	{

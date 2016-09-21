@@ -10,7 +10,7 @@ struct VSOutput
 	float3 normal;
 };
 
-struct Uniforms
+struct Variables
 {
 	float4x4 viewProjection;
 	float4x4 transform;
@@ -19,12 +19,12 @@ struct Uniforms
 };
 
 vertex VSOutput vertex_main(constant VSInput* vsInput [[buffer(0)]],
-							constant Uniforms& uniforms [[buffer(1)]],
+							constant Variables& variables [[buffer(1)]],
 							uint vertexId [[vertex_id]])
 {
 	VSOutput result;
-	result.position = uniforms.viewProjection * uniforms.transform * float4(vsInput[vertexId].position, 1.0);
-	result.normal = (uniforms.transform * float4(vsInput[vertexId].normal, 0.0)).xyz;
+	result.position = variables.viewProjection * variables.transform * float4(vsInput[vertexId].position, 1.0);
+	result.normal = (variables.transform * float4(vsInput[vertexId].normal, 0.0)).xyz;
 	return result;
 }
 

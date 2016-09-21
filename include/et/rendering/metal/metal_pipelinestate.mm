@@ -32,10 +32,10 @@ public:
 	MetalNativeBuffer::Pointer fragmentVariables;
 	Map<std::string, ProgramVariable> variables;
 
-	uint32_t vertexBufferIndex = static_cast<uint32_t>(-1);
+	uint32_t vertexBufferIndex = InvalidIndex;
 	uint32_t vertexBufferSize = 0;
 
-	uint32_t fragmentBufferIndex = static_cast<uint32_t>(-1);
+	uint32_t fragmentBufferIndex = InvalidIndex;
 	uint32_t fragmentBufferSize = 0;
 
 	void loadVariables(MTLArgument* arg, uint32_t shaderIndex, uint32_t bufferIndex);
@@ -180,12 +180,12 @@ void MetalPipelineState::bind(MetalNativeEncoder& e)
 	[e.encoder setRenderPipelineState:_private->state.pipelineState];
 	[e.encoder setDepthStencilState:_private->state.depthStencilState];
 
-	if (_private->vertexVariables.valid())
+	if (_private->vertexVariables.valid() && (_private->vertexBufferIndex != InvalidIndex))
 	{
 		[e.encoder setVertexBuffer:_private->vertexVariables->buffer() offset:0 atIndex:_private->vertexBufferIndex];
 	}
 
-	if (_private->fragmentVariables.valid())
+	if (_private->fragmentVariables.valid() && (_private->fragmentBufferIndex != InvalidIndex))
 	{
 		[e.encoder setFragmentBuffer:_private->fragmentVariables->buffer() offset:0 atIndex:_private->fragmentBufferIndex];
 	}

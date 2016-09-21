@@ -296,13 +296,6 @@ PlatformDependentContext ApplicationContextFactoryOSX::createContextWithOptions(
         static_cast<int32_t>(contentRect.size.height));
 
 	NSView* view = [[etOpenGLView alloc] init];
-    
-	if (api == RenderingAPI::OpenGL)
-	{
-        NSOpenGLView* openGlView = view;
-		[openGlView setWantsBestResolutionOpenGLSurface:options.supportsHighResolution ? YES : NO];
-	}
-
 	[view setAcceptsTouchEvents:YES];
 	CFBridgingRetain(view);
 

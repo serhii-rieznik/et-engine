@@ -59,9 +59,10 @@ void MetalRenderPass::pushRenderBatch(RenderBatch::Pointer batch)
 {
 	const Camera& cam = info().camera;
 
-	MetalIndexBuffer::Pointer ib = batch->vao()->indexBuffer();
-	MetalVertexBuffer::Pointer vb = batch->vao()->vertexBuffer();
-    MetalPipelineState::Pointer ps = _private->renderer->createPipelineState(RenderPass::Pointer(this), batch->material(), batch->vao());
+	MetalIndexBuffer::Pointer ib = batch->vertexStream()->indexBuffer();
+	MetalVertexBuffer::Pointer vb = batch->vertexStream()->vertexBuffer();
+    MetalPipelineState::Pointer ps = _private->renderer->createPipelineState(RenderPass::Pointer(this),
+		batch->material(), batch->vertexStream());
 	ps->setProgramVariable("viewProjection", cam.viewProjectionMatrix());
 	ps->setProgramVariable("transform", batch->transformation());
 	ps->bind(_private->encoder);

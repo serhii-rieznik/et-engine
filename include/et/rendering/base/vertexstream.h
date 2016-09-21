@@ -26,10 +26,16 @@ public:
 	void setBuffers(VertexBuffer::Pointer vb, IndexBuffer::Pointer ib)
 		{ _vb = vb; _ib = ib; }
 
-	VertexBuffer::Pointer vertexBuffer() const 
+	VertexBuffer::Pointer& vertexBuffer()
 		{ return _vb; }
 
-	IndexBuffer::Pointer indexBuffer() const 
+	IndexBuffer::Pointer& indexBuffer()
+		{ return _ib; }
+
+	const VertexBuffer::Pointer& vertexBuffer() const
+		{ return _vb; }
+
+	const IndexBuffer::Pointer& indexBuffer() const
 		{ return _ib; }
 
 private:

@@ -7,14 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		5C31ABB61CE51E16008C9E03 /* bsdf.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5C31ABB51CE51E16008C9E03 /* bsdf.cpp */; };
 		5C4515501D7E01C100D093EB /* engine_data in Resources */ = {isa = PBXBuildFile; fileRef = 5C45154F1D7E01C100D093EB /* engine_data */; };
 		5C9B587B1D68EF3B00136794 /* libet-static-mac.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5C3C4FEF1C9E135700C5B47A /* libet-static-mac.a */; };
-		5CE405F91CC6D3E400EA12EC /* raytraceobjects.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5CE405F81CC6D3E400EA12EC /* raytraceobjects.cpp */; };
-		6E225A771CB408D900AE27BD /* environment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6E225A731CB408D900AE27BD /* environment.cpp */; };
-		6E225A781CB408D900AE27BD /* integrator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6E225A741CB408D900AE27BD /* integrator.cpp */; };
-		6E225A791CB408D900AE27BD /* kdtree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6E225A751CB408D900AE27BD /* kdtree.cpp */; };
-		6E225A7A1CB408D900AE27BD /* raytrace.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6E225A761CB408D900AE27BD /* raytrace.cpp */; };
+		5CD5A9DA1D932FFD003FD770 /* rt.pack.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 5CD5A9D91D932FF4003FD770 /* rt.pack.cxx */; };
 		6E4CE94C1D510B3200322956 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A5E2B0521B7D4C5E00DE53DD /* OpenGL.framework */; };
 		6E4CE94F1D510B3600322956 /* Metal.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6E4CE94D1D510B3600322956 /* Metal.framework */; };
 		6E4CE9501D510B3600322956 /* MetalKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6E4CE94E1D510B3600322956 /* MetalKit.framework */; };
@@ -38,20 +33,21 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		5C31ABB51CE51E16008C9E03 /* bsdf.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = bsdf.cpp; path = "../../source-ext/rt/bsdf.cpp"; sourceTree = "<group>"; };
-		5C31ABB81CE51E2A008C9E03 /* bsdf.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = bsdf.h; path = "../../include/et-ext/rt/bsdf.h"; sourceTree = "<group>"; };
 		5C3C4FEA1C9E135700C5B47A /* et-static-mac.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "et-static-mac.xcodeproj"; path = "../../projects/et-static-mac.xcodeproj"; sourceTree = "<group>"; };
 		5C45154F1D7E01C100D093EB /* engine_data */ = {isa = PBXFileReference; lastKnownFileType = folder; name = engine_data; path = ../../engine_data; sourceTree = "<group>"; };
-		5CE405F81CC6D3E400EA12EC /* raytraceobjects.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = raytraceobjects.cpp; path = "../../source-ext/rt/raytraceobjects.cpp"; sourceTree = "<group>"; };
-		6E225A6D1CB408CD00AE27BD /* environment.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = environment.h; path = "../../include/et-ext/rt/environment.h"; sourceTree = "<group>"; };
-		6E225A6E1CB408CD00AE27BD /* integrator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = integrator.h; path = "../../include/et-ext/rt/integrator.h"; sourceTree = "<group>"; };
-		6E225A6F1CB408CD00AE27BD /* kdtree.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = kdtree.h; path = "../../include/et-ext/rt/kdtree.h"; sourceTree = "<group>"; };
-		6E225A701CB408CD00AE27BD /* raytrace.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = raytrace.h; path = "../../include/et-ext/rt/raytrace.h"; sourceTree = "<group>"; };
-		6E225A711CB408CD00AE27BD /* raytraceobjects.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = raytraceobjects.h; path = "../../include/et-ext/rt/raytraceobjects.h"; sourceTree = "<group>"; };
-		6E225A731CB408D900AE27BD /* environment.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = environment.cpp; path = "../../source-ext/rt/environment.cpp"; sourceTree = "<group>"; };
-		6E225A741CB408D900AE27BD /* integrator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = integrator.cpp; path = "../../source-ext/rt/integrator.cpp"; sourceTree = "<group>"; };
-		6E225A751CB408D900AE27BD /* kdtree.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = kdtree.cpp; path = "../../source-ext/rt/kdtree.cpp"; sourceTree = "<group>"; };
-		6E225A761CB408D900AE27BD /* raytrace.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = raytrace.cpp; path = "../../source-ext/rt/raytrace.cpp"; sourceTree = "<group>"; };
+		5CD5A9CD1D932FF4003FD770 /* bsdf.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; path = bsdf.cpp; sourceTree = "<group>"; };
+		5CD5A9CE1D932FF4003FD770 /* bsdf.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; path = bsdf.h; sourceTree = "<group>"; };
+		5CD5A9CF1D932FF4003FD770 /* environment.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; path = environment.cpp; sourceTree = "<group>"; };
+		5CD5A9D01D932FF4003FD770 /* environment.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; path = environment.h; sourceTree = "<group>"; };
+		5CD5A9D11D932FF4003FD770 /* integrator.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; path = integrator.cpp; sourceTree = "<group>"; };
+		5CD5A9D21D932FF4003FD770 /* integrator.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; path = integrator.h; sourceTree = "<group>"; };
+		5CD5A9D31D932FF4003FD770 /* kdtree.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; path = kdtree.cpp; sourceTree = "<group>"; };
+		5CD5A9D41D932FF4003FD770 /* kdtree.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; path = kdtree.h; sourceTree = "<group>"; };
+		5CD5A9D51D932FF4003FD770 /* raytrace.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; path = raytrace.cpp; sourceTree = "<group>"; };
+		5CD5A9D61D932FF4003FD770 /* raytrace.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; path = raytrace.h; sourceTree = "<group>"; };
+		5CD5A9D71D932FF4003FD770 /* raytraceobjects.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; path = raytraceobjects.cpp; sourceTree = "<group>"; };
+		5CD5A9D81D932FF4003FD770 /* raytraceobjects.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; path = raytraceobjects.h; sourceTree = "<group>"; };
+		5CD5A9D91D932FF4003FD770 /* rt.pack.cxx */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = rt.pack.cxx; sourceTree = "<group>"; };
 		6E4CE94D1D510B3600322956 /* Metal.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Metal.framework; path = System/Library/Frameworks/Metal.framework; sourceTree = SDKROOT; };
 		6E4CE94E1D510B3600322956 /* MetalKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MetalKit.framework; path = System/Library/Frameworks/MetalKit.framework; sourceTree = SDKROOT; };
 		6E4CE9531D510B4700322956 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
@@ -94,21 +90,31 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		5CD5A9CC1D932FF4003FD770 /* rt */ = {
+			isa = PBXGroup;
+			children = (
+				5CD5A9CD1D932FF4003FD770 /* bsdf.cpp */,
+				5CD5A9CE1D932FF4003FD770 /* bsdf.h */,
+				5CD5A9CF1D932FF4003FD770 /* environment.cpp */,
+				5CD5A9D01D932FF4003FD770 /* environment.h */,
+				5CD5A9D11D932FF4003FD770 /* integrator.cpp */,
+				5CD5A9D21D932FF4003FD770 /* integrator.h */,
+				5CD5A9D31D932FF4003FD770 /* kdtree.cpp */,
+				5CD5A9D41D932FF4003FD770 /* kdtree.h */,
+				5CD5A9D51D932FF4003FD770 /* raytrace.cpp */,
+				5CD5A9D61D932FF4003FD770 /* raytrace.h */,
+				5CD5A9D71D932FF4003FD770 /* raytraceobjects.cpp */,
+				5CD5A9D81D932FF4003FD770 /* raytraceobjects.h */,
+				5CD5A9D91D932FF4003FD770 /* rt.pack.cxx */,
+			);
+			name = rt;
+			path = "../../include/et-ext/rt";
+			sourceTree = "<group>";
+		};
 		6E225A6B1CB408C800AE27BD /* et-ext */ = {
 			isa = PBXGroup;
 			children = (
-				5C31ABB81CE51E2A008C9E03 /* bsdf.h */,
-				5C31ABB51CE51E16008C9E03 /* bsdf.cpp */,
-				6E225A711CB408CD00AE27BD /* raytraceobjects.h */,
-				5CE405F81CC6D3E400EA12EC /* raytraceobjects.cpp */,
-				6E225A6D1CB408CD00AE27BD /* environment.h */,
-				6E225A731CB408D900AE27BD /* environment.cpp */,
-				6E225A6E1CB408CD00AE27BD /* integrator.h */,
-				6E225A741CB408D900AE27BD /* integrator.cpp */,
-				6E225A6F1CB408CD00AE27BD /* kdtree.h */,
-				6E225A751CB408D900AE27BD /* kdtree.cpp */,
-				6E225A701CB408CD00AE27BD /* raytrace.h */,
-				6E225A761CB408D900AE27BD /* raytrace.cpp */,
+				5CD5A9CC1D932FF4003FD770 /* rt */,
 			);
 			name = "et-ext";
 			sourceTree = "<group>";
@@ -256,14 +262,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				5C31ABB61CE51E16008C9E03 /* bsdf.cpp in Sources */,
-				6E225A7A1CB408D900AE27BD /* raytrace.cpp in Sources */,
 				A5E2AEBE1B7D4A7700DE53DD /* maincontroller.cpp in Sources */,
-				6E225A771CB408D900AE27BD /* environment.cpp in Sources */,
-				5CE405F91CC6D3E400EA12EC /* raytraceobjects.cpp in Sources */,
-				6E225A791CB408D900AE27BD /* kdtree.cpp in Sources */,
-				6E225A781CB408D900AE27BD /* integrator.cpp in Sources */,
 				A5E2AEBD1B7D4A7700DE53DD /* main.cpp in Sources */,
+				5CD5A9DA1D932FFD003FD770 /* rt.pack.cxx in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -326,6 +327,7 @@
 					"-lz",
 				);
 				SDKROOT = macosx;
+				WARNING_CFLAGS = "-Wall";
 			};
 			name = Debug;
 		};
@@ -380,6 +382,7 @@
 					"-lz",
 				);
 				SDKROOT = macosx;
+				WARNING_CFLAGS = "-Wall";
 			};
 			name = Release;
 		};

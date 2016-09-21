@@ -35,9 +35,4 @@ const MetalNativeBuffer& MetalIndexBuffer::nativeBuffer() const
     return _private->buffer;
 }
 
-void MetalIndexBuffer::bind()
-{
-
-}
-
 }

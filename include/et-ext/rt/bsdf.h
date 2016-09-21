@@ -13,7 +13,7 @@ namespace et
 {
 namespace rt
 {
-	class Material;
+	struct Material;
 
 	struct ET_ALIGNED(16) BSDFSample
 	{

@@ -14,7 +14,6 @@
 #include <et/platform/platformtools.h>
 #include <et/core/threading.h>
 #include <et/rendering/base/helpers.h>
-#include <et/rendering/opengl/opengl_renderer.h>
 #include <et/rendering/metal/metal.h>
 #include <et/rendering/metal/metal_renderer.h>
 #include <et/app/application.h>
@@ -44,13 +43,13 @@ RenderContext::RenderContext(const RenderContextParameters& inParams, Applicatio
 	application().initContext();
 	const auto& ctx = application().context();
 
-	if (application().parameters().renderingAPI == RenderingAPI::OpenGL)
-	{
-		_renderer = OpenGLRenderer::Pointer::create(this);
-	}
-	else if (application().parameters().renderingAPI == RenderingAPI::Metal)
+	if (application().parameters().renderingAPI == RenderingAPI::Metal)
 	{
 		_renderer = MetalRenderer::Pointer::create(this);
+	}
+	else
+	{
+		ET_FAIL("Invalid rendering API specified");
 	}
 
 	_renderer->init(_params);
@@ -58,14 +57,7 @@ RenderContext::RenderContext(const RenderContextParameters& inParams, Applicatio
 	NSWindow* mainWindow = (__bridge NSWindow*)(ctx.objects[0]);
 	NSView* mainView = nil;
 
-	if (application().parameters().renderingAPI == RenderingAPI::OpenGL)
-	{
-		NSOpenGLView* openGlView = (__bridge NSOpenGLView*)(ctx.objects[2]);
-		CGLContextObj glContext = reinterpret_cast<CGLContextObj>(ctx.objects[4]);
-		[openGlView setOpenGLContext:[[NSOpenGLContext alloc] initWithCGLContextObj:glContext]];
-		mainView = openGlView;
-    }
-	else if (application().parameters().renderingAPI == RenderingAPI::Metal)
+	if (application().parameters().renderingAPI == RenderingAPI::Metal)
 	{
 		mainView = (__bridge NSView*)(ctx.objects[2]);
 		mainView.layer = (__bridge CAMetalLayer*)(ctx.objects[4]);

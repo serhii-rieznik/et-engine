@@ -11,25 +11,24 @@
 
 namespace et
 {
-    struct MetalState;
-    struct MetalNativeTexture;
-    class MetalTexturePrivate;
-	class MetalTexture : public Texture
-	{
-	public:
-		ET_DECLARE_POINTER(MetalTexture);
-        
-    public:
-        MetalTexture() = default;
-        MetalTexture(MetalState&, TextureDescription::Pointer);
-        ~MetalTexture();
-        
-        const MetalNativeTexture& nativeTexture() const;
-        
-        void bind(uint32_t) override;
-        void update(TextureDescription::Pointer) override;
-    
-    private:
-        ET_DECLARE_PIMPL(MetalTexture, 64)
-    };
+struct MetalState;
+struct MetalNativeTexture;
+class MetalTexturePrivate;
+class MetalTexture : public Texture
+{
+public:
+	ET_DECLARE_POINTER(MetalTexture);
+	
+public:
+	MetalTexture() = default;
+	MetalTexture(MetalState&, TextureDescription::Pointer);
+	~MetalTexture();
+	
+	const MetalNativeTexture& nativeTexture() const;
+	
+	void setImageData(const BinaryDataStorage&) override;
+
+private:
+	ET_DECLARE_PIMPL(MetalTexture, 64)
+};
 }
