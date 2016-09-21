@@ -92,12 +92,11 @@ void MainController::applicationDidLoad(et::RenderContext* rc)
         mat->setVector(et::MaterialParameter::DiffuseColor, et::vec4(1.0f, 0.5f, 0.25f, 1.0f));
         mat->setFloat(et::MaterialParameter::Roughness, 1.0f);
 		
-        auto obj = _rc->renderer()->createVertexArrayObject("sphere");
         auto objVb = _rc->renderer()->createVertexBuffer("shpere-vb", va, et::BufferDrawType::Static);
         auto objIb = _rc->renderer()->createIndexBuffer("sphere-ib", ia, et::BufferDrawType::Static);
-        obj->setBuffers(objVb, objIb);
+		auto vStream = et::VertexStream::Pointer::create(objVb, objIb);
         
-		et::RenderBatch::Pointer rb = et::RenderBatch::Pointer::create(et::Material::Pointer(), obj);
+		et::RenderBatch::Pointer rb = et::RenderBatch::Pointer::create(et::Material::Pointer(), vStream);
 		rb->setVertexStorage(va);
 		rb->setIndexArray(ia);
         

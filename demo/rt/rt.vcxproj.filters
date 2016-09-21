@@ -22,28 +22,46 @@
     <ClCompile Include="source\maincontroller.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source-ext\rt\bsdf.cpp">
+    <ClCompile Include="..\..\include\et-ext\rt\bsdf.cpp">
       <Filter>rt</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source-ext\rt\environment.cpp">
+    <ClCompile Include="..\..\include\et-ext\rt\environment.cpp">
       <Filter>rt</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source-ext\rt\integrator.cpp">
+    <ClCompile Include="..\..\include\et-ext\rt\integrator.cpp">
       <Filter>rt</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source-ext\rt\kdtree.cpp">
+    <ClCompile Include="..\..\include\et-ext\rt\kdtree.cpp">
       <Filter>rt</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source-ext\rt\raytrace.cpp">
+    <ClCompile Include="..\..\include\et-ext\rt\raytrace.cpp">
       <Filter>rt</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source-ext\rt\raytraceobjects.cpp">
+    <ClCompile Include="..\..\include\et-ext\rt\raytraceobjects.cpp">
       <Filter>rt</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\maincontroller.hpp">
       <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et-ext\rt\bsdf.h">
+      <Filter>rt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et-ext\rt\environment.h">
+      <Filter>rt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et-ext\rt\integrator.h">
+      <Filter>rt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et-ext\rt\kdtree.h">
+      <Filter>rt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et-ext\rt\raytrace.h">
+      <Filter>rt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et-ext\rt\raytraceobjects.h">
+      <Filter>rt</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
