@@ -27,7 +27,7 @@ public:
 
 	const VulkanNativeBuffer& nativeBuffer() const;
 
-	void setData(const void* data, uint32_t dataSize, bool invalidateExistingData) override;
+	void setData(const void* data, uint32_t dataSize) override;
 	void setDataWithOffset(const void* data, uint32_t offset, uint32_t dataSize) override;
 
 	uint64_t dataSize() override;
@@ -36,9 +36,7 @@ public:
 	bool mapped() const override;
 	void unmap() override;
 
-	void clear() override;
-
 private:
-	ET_DECLARE_PIMPL(VulkanVertexBuffer, 64)
+	ET_DECLARE_PIMPL(VulkanVertexBuffer, 128)
 };
 }

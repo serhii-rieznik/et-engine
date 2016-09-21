@@ -127,7 +127,7 @@ void VulkanPipelineState::build()
 	
 	VkDescriptorSetLayoutBinding binding = { };
 	binding.stageFlags = VK_SHADER_STAGE_ALL_GRAPHICS;
-	binding.descriptorType = VkDescriptorType::VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
+	binding.descriptorType = VkDescriptorType::VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
 	binding.descriptorCount = 1;
 	
 	VkDescriptorSetLayoutCreateInfo descriptorSetInfo = { VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO };

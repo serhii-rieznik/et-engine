@@ -52,7 +52,7 @@ VkBool32 vulkanDebugCallback(VkDebugReportFlagsEXT flags, VkDebugReportObjectTyp
 	if (flags & VK_DEBUG_REPORT_ERROR_BIT_EXT)
 	{
 		log::error("%s : %s", layerPrefix, msg);
-		// debug::debugBreak();
+		debug::debugBreak();
 	}
 	else if (flags & VK_DEBUG_REPORT_WARNING_BIT_EXT)
 	{
@@ -163,14 +163,11 @@ void VulkanRenderer::init(const RenderContextParameters& params)
 	HWND window = reinterpret_cast<HWND>(application().context().objects[0]);
 	_private->swapchain.init(_private->vulkan(), params, window);
 
-	VkCommandBufferAllocateInfo setupCBInfo = { VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO };
-	setupCBInfo.commandPool = _private->commandPool;
-	setupCBInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-	setupCBInfo.commandBufferCount = 1;
-	VULKAN_CALL(vkAllocateCommandBuffers(_private->device, &setupCBInfo, &_private->setupCommandBuffer));
-
-	// VkCommandBufferBeginInfo setupBeginInfo = { VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO }; 
-	// vkBeginCommandBuffer(_private->setupCommandBuffer, &setupBeginInfo);
+	VkCommandBufferAllocateInfo serviceBufferInfo = { VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO };
+	serviceBufferInfo.commandPool = _private->commandPool;
+	serviceBufferInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+	serviceBufferInfo.commandBufferCount = 1;
+	VULKAN_CALL(vkAllocateCommandBuffers(_private->device, &serviceBufferInfo, &_private->serviceCommandBuffer));
 
 	_private->swapchain.create(_private->vulkan());
 }

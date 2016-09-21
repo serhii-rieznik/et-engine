@@ -202,7 +202,7 @@ void MainController::start()
 
 	et::vec2i textureSize = _rc->size();
 
-	_textureData.resize(textureSize.square() * sizeof(et::vec4));
+	_textureData.resize(textureSize.square());
 	_textureData.fill(0);
 
     et::TextureDescription::Pointer desc = et::TextureDescription::Pointer::create();

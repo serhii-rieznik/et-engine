@@ -21,6 +21,7 @@ public:
 
 	VulkanState& vulkan;
 	VulkanNativeRenderPass nativePass;
+	VkFence fence = nullptr;
 	VulkanRenderer* renderer = nullptr;
 };
 
@@ -28,6 +29,9 @@ VulkanRenderPass::VulkanRenderPass(VulkanRenderer* renderer, VulkanState& vulkan
 	: RenderPass(passInfo)
 {
 	ET_PIMPL_INIT(VulkanRenderPass, vulkan, renderer);
+
+	VkFenceCreateInfo fenceInfo = { VK_STRUCTURE_TYPE_FENCE_CREATE_INFO };
+	VULKAN_CALL(vkCreateFence(vulkan.device, &fenceInfo, nullptr, &_private->fence));
 
 	_private->nativePass.viewport.width = static_cast<float>(_private->vulkan.swapchain.extent.width);
 	_private->nativePass.viewport.height = static_cast<float>(_private->vulkan.swapchain.extent.height);
@@ -80,24 +84,17 @@ VulkanRenderPass::VulkanRenderPass(VulkanRenderer* renderer, VulkanState& vulkan
 	VkCommandBufferBeginInfo commandBufferBeginInfo = { VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO };
 	vkBeginCommandBuffer(_private->nativePass.commandBuffer, &commandBufferBeginInfo);
 
-	{
-		VkImageMemoryBarrier barrierInfo = { VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER };
-		barrierInfo.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-		barrierInfo.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-		barrierInfo.newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-		barrierInfo.srcQueueFamilyIndex = vulkan.graphicsQueueIndex;
-		barrierInfo.dstQueueFamilyIndex = vulkan.presentQueueIndex;
-		barrierInfo.subresourceRange = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 };
-		barrierInfo.image = _private->vulkan.swapchain.currentImage();
-		vkCmdPipelineBarrier(_private->nativePass.commandBuffer, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
-			VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, 0, 0, nullptr, 0, nullptr, 1, &barrierInfo);
-	}
+	vulkan::imageBarrier(_private->vulkan, _private->nativePass.commandBuffer, _private->vulkan.swapchain.currentImage(), 
+		0, VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT, 
+		VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, 
+		VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT);
 
-	VkClearValue clearValue = { };
-	clearValue.color.float32[0] = passInfo.target.clearColor.x;
-	clearValue.color.float32[1] = passInfo.target.clearColor.y;
-	clearValue.color.float32[2] = passInfo.target.clearColor.z;
-	clearValue.color.float32[3] = passInfo.target.clearColor.w;
+	VkClearValue clearValue = { 
+		passInfo.target.clearColor.x, 
+		passInfo.target.clearColor.y, 
+		passInfo.target.clearColor.z, 
+		passInfo.target.clearColor.w
+	};
 
 	VkRenderPassBeginInfo renderPassBeginInfo = { VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO };
 	renderPassBeginInfo.clearValueCount = 1;
@@ -124,19 +121,12 @@ const VulkanNativeRenderPass& VulkanRenderPass::nativeRenderPass() const
 void VulkanRenderPass::endRenderPass()
 {
 	vkCmdEndRenderPass(_private->nativePass.commandBuffer);
-	{
-		VkImageMemoryBarrier barrierInfo = { VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER };
-		barrierInfo.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-		barrierInfo.dstAccessMask = VK_ACCESS_MEMORY_READ_BIT;
-		barrierInfo.oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-		barrierInfo.newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-		barrierInfo.srcQueueFamilyIndex = _private->vulkan.presentQueueIndex;
-		barrierInfo.dstQueueFamilyIndex = _private->vulkan.graphicsQueueIndex;
-		barrierInfo.subresourceRange = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 };
-		barrierInfo.image = _private->vulkan.swapchain.currentImage();
-		vkCmdPipelineBarrier(_private->nativePass.commandBuffer, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
-			VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, 0, 0, nullptr, 0, nullptr, 1, &barrierInfo);
-	}
+
+	vulkan::imageBarrier(_private->vulkan, _private->nativePass.commandBuffer, _private->vulkan.swapchain.currentImage(), 
+		VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT, VK_ACCESS_MEMORY_READ_BIT,
+		VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
+		VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT);
+
 	vkEndCommandBuffer(_private->nativePass.commandBuffer);
 }
 
@@ -153,7 +143,8 @@ void VulkanRenderPass::submit()
 	submitInfo.pSignalSemaphores = &_private->vulkan.semaphores.renderComplete;
 	submitInfo.pWaitDstStageMask = waitStages;
 
-	VULKAN_CALL(vkQueueSubmit(_private->vulkan.queue, 1, &submitInfo, nullptr));
+	VULKAN_CALL(vkQueueSubmit(_private->vulkan.queue, 1, &submitInfo, _private->fence));
+	VULKAN_CALL(vkWaitForFences(_private->vulkan.device, 1, &_private->fence, VK_TRUE, ~0ull));
 }
 
 void VulkanRenderPass::pushRenderBatch(RenderBatch::Pointer batch)

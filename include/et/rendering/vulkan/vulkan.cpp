@@ -151,8 +151,8 @@ void VulkanSwapchain::present(VulkanState& vulkan)
 	VULKAN_CALL(vkQueuePresentKHR(vulkan.queue, &info));
 }
 
-VulkanNativeBuffer::VulkanNativeBuffer(VulkanState& vulkan, uint32_t size, uint32_t usage, bool hostVisible) : 
-	_vulkan(vulkan), _hostVisible(hostVisible)
+VulkanNativeBuffer::VulkanNativeBuffer(VulkanState& vulkan, uint32_t size, uint32_t usage, bool cpuReadable) : 
+	_vulkan(vulkan), _cpuReadable(cpuReadable)
 {
 	VkBufferCreateInfo info = { VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO };
 	info.size = size;
@@ -160,16 +160,13 @@ VulkanNativeBuffer::VulkanNativeBuffer(VulkanState& vulkan, uint32_t size, uint3
 	info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 	VULKAN_CALL(vkCreateBuffer(_vulkan.device, &info, nullptr, &_buffer));
 
-	VkMemoryRequirements req = { };
-	vkGetBufferMemoryRequirements(_vulkan.device, _buffer, &req);
+	vkGetBufferMemoryRequirements(_vulkan.device, _buffer, &_memoryRequirements);
 
-	VkMemoryPropertyFlags memoryProperties = _hostVisible 
-		? VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
-		: VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
+	VkMemoryPropertyFlags memoryProperties = cpuReadable ? VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT : VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
 
 	VkMemoryAllocateInfo allocInfo = { VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO };
-	allocInfo.allocationSize = req.size;
-	allocInfo.memoryTypeIndex = vulkan::getMemoryTypeIndex(_vulkan, req.memoryTypeBits, memoryProperties);
+	allocInfo.allocationSize = _memoryRequirements.size;
+	allocInfo.memoryTypeIndex = vulkan::getMemoryTypeIndex(_vulkan, _memoryRequirements.memoryTypeBits, memoryProperties);
 	VULKAN_CALL(vkAllocateMemory(vulkan.device, &allocInfo, nullptr, &_memory));
 
 	VULKAN_CALL(vkBindBufferMemory(vulkan.device, _buffer, _memory, 0));
@@ -183,11 +180,15 @@ VulkanNativeBuffer::~VulkanNativeBuffer()
 
 void* VulkanNativeBuffer::map(uint32_t offset, uint32_t size)
 {
-	ET_ASSERT(_hostVisible);
+	ET_ASSERT(_cpuReadable);
+
 	void* pointer = nullptr;
 	{
 		ET_ASSERT(_mapped == false);
 		VULKAN_CALL(vkMapMemory(_vulkan.device, _memory, offset, size, 0, &pointer));
+		_mappedRange.memory = _memory;
+		_mappedRange.offset = offset;
+		_mappedRange.size = VK_WHOLE_SIZE;
 		_mapped = true;
 	}
 	return pointer;
@@ -197,7 +198,31 @@ void VulkanNativeBuffer::unmap()
 {
 	ET_ASSERT(_mapped);
 	vkUnmapMemory(_vulkan.device, _memory);
+	vkFlushMappedMemoryRanges(_vulkan.device, 1, &_mappedRange);
+	_mappedRange = { };
 	_mapped = false;
+}
+
+void VulkanNativeBuffer::copyFrom(VulkanNativeBuffer& source)
+{
+	ET_ASSERT(_memoryRequirements.size == source._memoryRequirements.size);
+
+	VkBufferCopy region = { };
+	region.srcOffset = 0;
+	region.dstOffset = 0;
+	region.size = _memoryRequirements.size;
+
+	VkCommandBufferBeginInfo beginInfo = { VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO };
+	beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+	VULKAN_CALL(vkBeginCommandBuffer(_vulkan.serviceCommandBuffer, &beginInfo));
+	vkCmdCopyBuffer(_vulkan.serviceCommandBuffer, source.buffer(), buffer(), 1, &region);
+	VULKAN_CALL(vkEndCommandBuffer(_vulkan.serviceCommandBuffer));
+
+	VkSubmitInfo submit = { VK_STRUCTURE_TYPE_SUBMIT_INFO };
+	submit.commandBufferCount = 1;
+	submit.pCommandBuffers = &_vulkan.serviceCommandBuffer;
+	VULKAN_CALL(vkQueueSubmit(_vulkan.queue, 1, &submit, nullptr));
+	VULKAN_CALL(vkQueueWaitIdle(_vulkan.queue));
 }
 
 namespace vulkan
@@ -223,6 +248,23 @@ uint32_t getMemoryTypeIndex(VulkanState& vulkan, uint32_t typeFilter, VkMemoryPr
 	}
 
 	ET_FAIL("Unable to get memory type");
+}
+
+void imageBarrier(VulkanState& vulkan, VkCommandBuffer cmd, VkImage image,
+	VkAccessFlags accessFrom, VkAccessFlags accessTo,
+	VkImageLayout layoutFrom, VkImageLayout layoutTo,
+	VkPipelineStageFlags stageFrom, VkPipelineStageFlags stageTo)
+{
+	VkImageMemoryBarrier barrierInfo = { VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER };
+	barrierInfo.srcAccessMask = accessFrom;
+	barrierInfo.dstAccessMask = accessTo;
+	barrierInfo.oldLayout = layoutFrom;
+	barrierInfo.newLayout = layoutTo;
+	barrierInfo.srcQueueFamilyIndex = vulkan.presentQueueIndex;
+	barrierInfo.dstQueueFamilyIndex = vulkan.graphicsQueueIndex;
+	barrierInfo.subresourceRange = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 };
+	barrierInfo.image = image;
+	vkCmdPipelineBarrier(cmd, stageFrom, stageTo, 0, 0, nullptr, 0, nullptr, 1, &barrierInfo);
 }
 
 VkCompareOp depthCompareOperation(CompareFunction func)
@@ -270,6 +312,7 @@ VkFormat textureFormatValue(TextureFormat fmt)
 	static const Map<TextureFormat, VkFormat> lookup =
 	{
 		{ TextureFormat::RGBA8, VkFormat::VK_FORMAT_R8G8B8A8_UNORM },
+		{ TextureFormat::RGBA32F, VkFormat::VK_FORMAT_R32G32B32A32_SFLOAT },
 	};
 	ET_ASSERT(lookup.count(fmt) > 0);
 	return lookup.at(fmt);
@@ -280,9 +323,24 @@ VkImageType textureTargetToImageType(TextureTarget target)
 	switch (target)
 	{
 	case TextureTarget::Texture_2D:
-		return VkImageType::VK_IMAGE_TYPE_2D;
 	case TextureTarget::Texture_Cube:
-		return VkImageType::VK_IMAGE_TYPE_3D;
+	case TextureTarget::Texture_2D_Array:
+		return VkImageType::VK_IMAGE_TYPE_2D;
+	default:
+		ET_FAIL("Invalid TextureTarget specified");
+	}
+}
+
+VkImageViewType textureTargetToImageViewType(TextureTarget target)
+{
+	switch (target)
+	{
+	case TextureTarget::Texture_2D:
+		return VkImageViewType::VK_IMAGE_VIEW_TYPE_2D;
+	case TextureTarget::Texture_2D_Array:
+		return VkImageViewType::VK_IMAGE_VIEW_TYPE_2D_ARRAY;
+	case TextureTarget::Texture_Cube:
+		return VkImageViewType::VK_IMAGE_VIEW_TYPE_CUBE;
 	default:
 		ET_FAIL("Invalid TextureTarget specified");
 	}

@@ -16,12 +16,14 @@ namespace et
 class VulkanVertexBufferPrivate
 {
 public:
-	VulkanVertexBufferPrivate(VulkanState& v, uint32_t size) 
-		: nativeBuffer(v, size, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, true)
+	VulkanVertexBufferPrivate(VulkanState& v, uint32_t size, bool cpuReadable) 
+		: vulkan(v)
+		, nativeBuffer(v, size, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | (cpuReadable ? 0 : VK_BUFFER_USAGE_TRANSFER_DST_BIT), cpuReadable)
 		, dataSize(size)
 	{ 
 	}
 
+	VulkanState& vulkan;
 	VulkanNativeBuffer nativeBuffer;
 	uint32_t dataSize = 0;
 };
@@ -29,8 +31,8 @@ public:
 VulkanVertexBuffer::VulkanVertexBuffer(VulkanState& vulkan, const VertexDeclaration& decl, const BinaryDataStorage& data, 
 	BufferDrawType dt, const std::string& name) : VertexBuffer(decl, dt, name) 
 {
-	ET_PIMPL_INIT(VulkanVertexBuffer, vulkan, data.size());
-	setData(data.data(), _private->dataSize, true);
+	ET_PIMPL_INIT(VulkanVertexBuffer, vulkan, data.size(), drawType() == BufferDrawType::Dynamic);
+	setData(data.data(), _private->dataSize);
 }
 
 VulkanVertexBuffer::~VulkanVertexBuffer()
@@ -38,7 +40,7 @@ VulkanVertexBuffer::~VulkanVertexBuffer()
 	ET_PIMPL_FINALIZE(VulkanVertexBuffer);
 }
 
-void VulkanVertexBuffer::setData(const void * data, uint32_t dataSize, bool invalidateExistingData)
+void VulkanVertexBuffer::setData(const void * data, uint32_t dataSize)
 {
 	setDataWithOffset(data, 0, dataSize);
 }
@@ -47,13 +49,20 @@ void VulkanVertexBuffer::setDataWithOffset(const void * data, uint32_t offset, u
 {
 	ET_ASSERT(offset + dataSize <= _private->dataSize);
 
-	void* ptr = map(offset, dataSize, 0);
-	memcpy(ptr, data, dataSize);
-	unmap();
-}
-
-void VulkanVertexBuffer::clear()
-{
+	if (drawType() == BufferDrawType::Dynamic)
+	{
+		void* ptr = map(offset, dataSize, 0);
+		memcpy(ptr, data, dataSize);
+		unmap();
+	}
+	else
+	{
+		VulkanNativeBuffer stagingBuffer(_private->vulkan, _private->dataSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, true);
+		void* ptr = stagingBuffer.map(offset, dataSize);
+		memcpy(ptr, data, dataSize);
+		stagingBuffer.unmap();
+		_private->nativeBuffer.copyFrom(stagingBuffer);
+	}
 }
 
 uint64_t VulkanVertexBuffer::dataSize()

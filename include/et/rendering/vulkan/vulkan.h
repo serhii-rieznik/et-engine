@@ -64,7 +64,7 @@ struct VulkanState
 		VkSemaphore renderComplete = nullptr;
 	} semaphores;
 
-	VkCommandBuffer setupCommandBuffer = nullptr;
+	VkCommandBuffer serviceCommandBuffer = nullptr;
 	
 	Vector<VkQueueFamilyProperties> queueProperties;
 	uint32_t graphicsQueueIndex = static_cast<uint32_t>(-1);
@@ -103,6 +103,8 @@ struct VulkanNativePipeline
 struct VulkanNativeTexture
 {
 	VkImage image = nullptr;
+	VkImageView imageView = nullptr;
+	VkSampler sampler = nullptr;
 	VkDeviceMemory memory = nullptr;
 	VkMemoryRequirements memoryRequirements { };
 };
@@ -117,20 +119,26 @@ VkCullModeFlags cullModeFlags(CullMode);
 VkIndexType indexBufferFormat(IndexArrayFormat);
 VkFormat textureFormatValue(TextureFormat);
 VkImageType textureTargetToImageType(TextureTarget);
+VkImageViewType textureTargetToImageViewType(TextureTarget);
 uint32_t getMemoryTypeIndex(VulkanState& vulkan, uint32_t typeFilter, VkMemoryPropertyFlags properties);
+
+void imageBarrier(VulkanState&, VkCommandBuffer, VkImage,
+	VkAccessFlags accessFrom, VkAccessFlags accessTo,
+	VkImageLayout layoutFrom, VkImageLayout layoutTo,
+	VkPipelineStageFlags stageFrom, VkPipelineStageFlags stageTo);
 
 }
 
 const char* vulkanResultToString(VkResult result);
 
-#define VULKAN_CALL(expr) { \
+#define VULKAN_CALL(expr) do { \
 	auto result = (expr); \
 	if (result != VkResult::VK_SUCCESS) \
 	{ \
 		et::log::error("Vulkan call failed: %s\nat %s [%d]\nresult = %s", \
 			(#expr), __FILE__, __LINE__, vulkanResultToString(result)); \
 		et::debug::debugBreak(); \
-	}}
+	}} while (0)
 
 template <class EnumeratedClass, class Holder, typename Function, typename ReturnClass>
 struct VulkanObjectsEnumerator;
@@ -180,7 +188,7 @@ Vector<EnumeratedClass> enumerateVulkanObjects(const Holder& holder, Function ca
 class VulkanNativeBuffer
 {
 public:
-	VulkanNativeBuffer(VulkanState& vulkan, uint32_t size, uint32_t usage, bool hostVisible);
+	VulkanNativeBuffer(VulkanState& vulkan, uint32_t size, uint32_t usage, bool cpuReadable);
 	~VulkanNativeBuffer();
 
 	void* map(uint32_t offset, uint32_t size);
@@ -192,12 +200,16 @@ public:
 	bool mapped() const 
 		{ return _mapped; }
 
+	void copyFrom(VulkanNativeBuffer&);
+
 private:
 	VulkanState& _vulkan;
 	VkBuffer _buffer = nullptr;
+	VkMemoryRequirements _memoryRequirements { };
 	VkDeviceMemory _memory = nullptr;
+	VkMappedMemoryRange _mappedRange { VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE };
 	std::atomic_bool _mapped{false};
-	bool _hostVisible = false;
+	bool _cpuReadable = false;
 };
 
 }

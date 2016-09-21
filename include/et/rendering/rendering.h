@@ -144,8 +144,6 @@ namespace et
 	{
 		Static,
 		Dynamic,
-		Stream,
-		
 		max
 	};
 	

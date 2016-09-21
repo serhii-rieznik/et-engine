@@ -36,7 +36,7 @@ ParticleSystem::ParticleSystem(RenderContext* rc, uint32_t maxSize, const std::s
 
 	_capacity = vs->capacity();
 
-	auto vb = rc->renderer()->createVertexBuffer(name + "-vb", vs, BufferDrawType::Stream);
+	auto vb = rc->renderer()->createVertexBuffer(name + "-vb", vs, BufferDrawType::Dynamic);
 	auto ib = rc->renderer()->createIndexBuffer(name + "-ib", ia, BufferDrawType::Static);
 	_vertexStream = VertexStream::Pointer::create(vb, ib);
 	

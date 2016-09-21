@@ -34,7 +34,7 @@ namespace et
 		void setSourceObjectName(const std::string& tag)
 			{ _sourceObjectName = tag; }
 
-		virtual void setData(const void* data, uint32_t dataSize, bool invalidateExistingData) = 0;
+		virtual void setData(const void* data, uint32_t dataSize) = 0;
 		virtual void setDataWithOffset(const void* data, uint32_t offset, uint32_t dataSize) = 0;
 
 		virtual uint64_t dataSize() = 0;
@@ -42,8 +42,6 @@ namespace et
 		virtual void* map(uint32_t offset, uint32_t dataSize, uint32_t options /* see MapBufferOptions */) = 0;
 		virtual bool mapped() const = 0;
 		virtual void unmap() = 0;
-
-		virtual void clear() = 0;
 
 	private:
 		VertexDeclaration _decl;

@@ -27,7 +27,7 @@ public:
 	const VulkanNativeBuffer& nativeBuffer() const;
 
 private:
-	ET_DECLARE_PIMPL(VulkanIndexBuffer, 32);
+	ET_DECLARE_PIMPL(VulkanIndexBuffer, 128);
 };
 
 }

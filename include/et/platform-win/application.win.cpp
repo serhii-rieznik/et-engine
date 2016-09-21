@@ -110,9 +110,6 @@ int Application::platformRun(int, char*[])
 		{
 			TranslateMessage(&msg);
 			DispatchMessageW(&msg);
-
-			if (msg.message == WM_QUIT)
-				_running = false;
 		}
 		else if (shouldPerformRendering())
 		{
