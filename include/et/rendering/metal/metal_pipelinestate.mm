@@ -26,17 +26,19 @@ public:
 		uint32_t shader = 0;
 	};
 
+	struct BufferDescription
+	{
+		MetalNativeBuffer::Pointer buffer;
+		uint32_t index = InvalidIndex;
+		uint32_t size = 0;
+		NSRange modifiedRange { };
+	};
+
 	MetalState& metal;
     MetalNativePipelineState state;
-	MetalNativeBuffer::Pointer vertexVariables;
-	MetalNativeBuffer::Pointer fragmentVariables;
+	BufferDescription vertexVariables;
+	BufferDescription fragmentVariables;
 	Map<std::string, ProgramVariable> variables;
-
-	uint32_t vertexBufferIndex = InvalidIndex;
-	uint32_t vertexBufferSize = 0;
-
-	uint32_t fragmentBufferIndex = InvalidIndex;
-	uint32_t fragmentBufferSize = 0;
 
 	void loadVariables(MTLArgument* arg, uint32_t shaderIndex, uint32_t bufferIndex);
 };
@@ -91,9 +93,9 @@ void MetalPipelineState::build()
 		if ([arg.name isEqualToString:@"variables"] &&
 			(arg.type == MTLArgumentTypeBuffer) && (arg.bufferDataType == MTLDataTypeStruct))
 		{
-			_private->vertexBufferIndex = static_cast<uint32_t>(arg.index);
-			_private->vertexBufferSize = static_cast<uint32_t>(arg.bufferDataSize);
-			_private->loadVariables(arg, (1 << 0), _private->vertexBufferIndex);
+			_private->vertexVariables.index = static_cast<uint32_t>(arg.index);
+			_private->vertexVariables.size = static_cast<uint32_t>(arg.bufferDataSize);
+			_private->loadVariables(arg, (1 << 0), _private->vertexVariables.index);
 		}
 	}
 
@@ -102,22 +104,24 @@ void MetalPipelineState::build()
 		if ([arg.name isEqualToString:@"variables"] &&
 			(arg.type == MTLArgumentTypeBuffer) && (arg.bufferDataType == MTLDataTypeStruct))
 		{
-			_private->fragmentBufferIndex = static_cast<uint32_t>(arg.index);
-			_private->fragmentBufferSize = static_cast<uint32_t>(arg.bufferDataSize);
-			_private->loadVariables(arg, (1 << 1), _private->fragmentBufferIndex);
+			_private->fragmentVariables.index = static_cast<uint32_t>(arg.index);
+			_private->fragmentVariables.size = static_cast<uint32_t>(arg.bufferDataSize);
+			_private->loadVariables(arg, (1 << 1), _private->fragmentVariables.index);
 		}
 	}
 
-	if (_private->vertexBufferSize > 0)
+	if (_private->vertexVariables.size > 0)
 	{
-		_private->vertexVariables = MetalNativeBuffer::Pointer::create(_private->metal, _private->vertexBufferSize);
+		_private->vertexVariables.buffer =
+			MetalNativeBuffer::Pointer::create(_private->metal, _private->vertexVariables.size);
 	}
 
-	if ((_private->fragmentBufferSize > 0) &&
-		((_private->fragmentBufferIndex != _private->vertexBufferIndex) ||
-		(_private->fragmentBufferIndex != _private->vertexBufferIndex)))
+	if ((_private->fragmentVariables.size > 0) &&
+		((_private->fragmentVariables.index != _private->vertexVariables.index) ||
+		(_private->fragmentVariables.index != _private->vertexVariables.index)))
 	{
-		_private->fragmentVariables = MetalNativeBuffer::Pointer::create(_private->metal, _private->fragmentBufferSize);
+		_private->fragmentVariables.buffer =
+			MetalNativeBuffer::Pointer::create(_private->metal, _private->fragmentVariables.size);
 	}
 	else
 	{
@@ -143,9 +147,14 @@ const MetalNativePipelineState& MetalPipelineState::nativeState() const
     return _private->state;
 }
 
-const MetalNativeBuffer& MetalPipelineState::uniformsBuffer() const
+const MetalNativeBuffer& MetalPipelineState::vertexVariables() const
 {
-	return _private->vertexVariables.reference();
+	return _private->vertexVariables.buffer.reference();
+}
+
+const MetalNativeBuffer& MetalPipelineState::fragmentVariables() const
+{
+	return _private->fragmentVariables.buffer.reference();
 }
 
 void MetalPipelineState::uploadProgramVariable(const std::string& name, const void* ptr, uint32_t size)
@@ -154,15 +163,15 @@ void MetalPipelineState::uploadProgramVariable(const std::string& name, const vo
 	if (var == _private->variables.end())
 		return;
 
-	id<MTLBuffer> buffer = nil;
+	MetalPipelineStatePrivate::BufferDescription* desc = nullptr;
 
 	if (var->second.shader & (1 << 0))
 	{
-		buffer = _private->vertexVariables->buffer();
+		desc = &_private->vertexVariables;
 	}
 	else if (var->second.shader & (1 << 1))
 	{
-		buffer = _private->fragmentVariables->buffer();
+		desc = &_private->fragmentVariables;
 	}
 	else
 	{
@@ -170,9 +179,13 @@ void MetalPipelineState::uploadProgramVariable(const std::string& name, const vo
 		return;
 	}
 
-	uint8_t* bufferData = reinterpret_cast<uint8_t*>([buffer contents]);
+	uint8_t* bufferData = reinterpret_cast<uint8_t*>([desc->buffer->buffer() contents]);
 	memcpy(bufferData + var->second.offset, ptr, size);
-	[buffer didModifyRange:NSMakeRange(var->second.offset, size)];
+
+	uint32_t endLocation = var->second.offset + size;
+	uint32_t currentEndLocation = static_cast<uint32_t>(desc->modifiedRange.location + desc->modifiedRange.length);
+	desc->modifiedRange.location = std::min(static_cast<uint32_t>(desc->modifiedRange.location), var->second.offset);
+	desc->modifiedRange.length = std::max(endLocation, currentEndLocation) - desc->modifiedRange.location;
 }
 
 void MetalPipelineState::bind(MetalNativeEncoder& e)
@@ -180,14 +193,24 @@ void MetalPipelineState::bind(MetalNativeEncoder& e)
 	[e.encoder setRenderPipelineState:_private->state.pipelineState];
 	[e.encoder setDepthStencilState:_private->state.depthStencilState];
 
-	if (_private->vertexVariables.valid() && (_private->vertexBufferIndex != InvalidIndex))
+	if (_private->vertexVariables.buffer.valid() && (_private->vertexVariables.index != InvalidIndex))
 	{
-		[e.encoder setVertexBuffer:_private->vertexVariables->buffer() offset:0 atIndex:_private->vertexBufferIndex];
+		id<MTLBuffer> buffer = _private->vertexVariables.buffer->buffer();
+		if (_private->vertexVariables.modifiedRange.length > 0)
+		{
+			[buffer didModifyRange:_private->vertexVariables.modifiedRange];
+		}
+		[e.encoder setVertexBuffer:buffer offset:0 atIndex:_private->vertexVariables.index];
 	}
 
-	if (_private->fragmentVariables.valid() && (_private->fragmentBufferIndex != InvalidIndex))
+	if (_private->fragmentVariables.buffer.valid() && (_private->fragmentVariables.index != InvalidIndex))
 	{
-		[e.encoder setFragmentBuffer:_private->fragmentVariables->buffer() offset:0 atIndex:_private->fragmentBufferIndex];
+		id<MTLBuffer> buffer = _private->fragmentVariables.buffer->buffer();
+		if (_private->fragmentVariables.modifiedRange.length > 0)
+		{
+			[buffer didModifyRange:_private->vertexVariables.modifiedRange];
+		}
+		[e.encoder setFragmentBuffer:buffer offset:0 atIndex:_private->fragmentVariables.index];
 	}
 }
 

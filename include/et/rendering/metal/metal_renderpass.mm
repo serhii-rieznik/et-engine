@@ -63,6 +63,8 @@ void MetalRenderPass::pushRenderBatch(RenderBatch::Pointer batch)
 	MetalVertexBuffer::Pointer vb = batch->vertexStream()->vertexBuffer();
     MetalPipelineState::Pointer ps = _private->renderer->createPipelineState(RenderPass::Pointer(this),
 		batch->material(), batch->vertexStream());
+	ps->setProgramVariable("lightPosition", info().defaultLightPosition);
+	ps->setProgramVariable("cameraPosition", cam.position());
 	ps->setProgramVariable("viewProjection", cam.viewProjectionMatrix());
 	ps->setProgramVariable("transform", batch->transformation());
 	ps->bind(_private->encoder);
@@ -93,7 +95,7 @@ void MetalRenderPass::pushRenderBatch(RenderBatch::Pointer batch)
                                   indexCount:batch->numIndexes()
                                    indexType:MTLIndexTypeUInt16
                                  indexBuffer:ib->nativeBuffer().buffer()
-                           indexBufferOffset:batch->firstIndex()];
+                           indexBufferOffset:ib->byteOffsetForIndex(batch->firstIndex())];
 }
 
 void MetalRenderPass::endEncoding()

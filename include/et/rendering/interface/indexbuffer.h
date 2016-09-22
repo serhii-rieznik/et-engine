@@ -65,7 +65,10 @@ namespace et
         
         PrimitiveType primitiveType() const
             { return _primitiveType; }
-        
+
+		uint32_t byteOffsetForIndex(uint32_t index) const
+			{ return index * static_cast<uint32_t>(_format); }
+
         void overridePrimitiveType(PrimitiveType pt)
             { _primitiveType = pt; }
         

@@ -28,15 +28,14 @@ namespace et
 		void build() override;
         
         const MetalNativePipelineState& nativeState() const;
-		const MetalNativeBuffer& uniformsBuffer() const;
+		const MetalNativeBuffer& vertexVariables() const;
+		const MetalNativeBuffer& fragmentVariables() const;
 
 		void bind(MetalNativeEncoder&);
 
 		template <typename T>
 		void setProgramVariable(const std::string& name, const T& t)
-		{
-			uploadProgramVariable(name, &t, sizeof(T));
-		}
+			{ uploadProgramVariable(name, &t, sizeof(T)); }
 
 	private:
 		void uploadProgramVariable(const std::string& name, const void* ptr, uint32_t size);

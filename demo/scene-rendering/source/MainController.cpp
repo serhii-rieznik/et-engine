@@ -26,7 +26,7 @@ void demo::MainController::applicationDidLoad(et::RenderContext* rc)
 	et::application().pushSearchPath("/Volumes/Development/SDK/Models/");
 #endif
 
-    _camera.lookAt(et::vec3(500.0f));
+    _camera.lookAt(et::vec3(300.0f));
     _cameraController = et::CameraMovingController::Pointer::create(_camera, true);
     _cameraController->setIntepolationRate(10.0f);
     _cameraController->setMovementSpeed(et::vec3(100.0f));

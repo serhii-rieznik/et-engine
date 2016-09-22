@@ -37,13 +37,17 @@ void MetalProgram::build(const std::string& vertexSource, const std::string& fra
 
 	id<MTLLibrary> lib = [_private->state.device newLibraryWithSource:[NSString stringWithUTF8String:fusedSource.c_str()]
 													 options:nil error:&error];
-	if (error != nil)
+	if ((lib == nil) && (error != nil))
 	{
 		log::error("Failed to compile Metal shader:\n%s", [[error description] UTF8String]);
 	}
 	else
 	{
-		ET_ASSERT(lib != nil);
+		if (error != nil)
+		{
+			log::error("Metal shader compile report:\n%s", [[error description] UTF8String]);
+		}
+
 		for (NSString* functionName in lib.functionNames)
 		{
 			id<MTLFunction> func = [lib newFunctionWithName:functionName];
