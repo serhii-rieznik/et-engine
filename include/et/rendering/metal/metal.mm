@@ -69,7 +69,18 @@ MTLPrimitiveType primitiveTypeValue(PrimitiveType value)
     ET_ASSERT(_map.count(value) > 0);
     return _map.at(value);
 }
-    
+
+MTLIndexType indexArrayFormat(IndexArrayFormat value)
+{
+	static const std::map<IndexArrayFormat, MTLIndexType> _map =
+	{
+		{ IndexArrayFormat::Format_16bit, MTLIndexTypeUInt16 },
+		{ IndexArrayFormat::Format_32bit, MTLIndexTypeUInt32 },
+	};
+	ET_ASSERT(_map.count(value) > 0);
+	return _map.at(value);
+}
+
 MTLPrimitiveTopologyClass primitiveTypeToTopology(PrimitiveType pt)
 {
     switch (pt)

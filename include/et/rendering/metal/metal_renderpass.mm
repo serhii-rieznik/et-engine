@@ -92,10 +92,10 @@ void MetalRenderPass::pushRenderBatch(RenderBatch::Pointer batch)
 	}
 
 	[_private->encoder.encoder drawIndexedPrimitives:metal::primitiveTypeValue(ib->primitiveType())
-                                  indexCount:batch->numIndexes()
-                                   indexType:MTLIndexTypeUInt16
-                                 indexBuffer:ib->nativeBuffer().buffer()
-                           indexBufferOffset:ib->byteOffsetForIndex(batch->firstIndex())];
+										  indexCount:batch->numIndexes()
+										   indexType:metal::indexArrayFormat(ib->format())
+										 indexBuffer:ib->nativeBuffer().buffer()
+								   indexBufferOffset:ib->byteOffsetForIndex(batch->firstIndex())];
 }
 
 void MetalRenderPass::endEncoding()

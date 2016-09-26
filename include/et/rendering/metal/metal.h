@@ -108,6 +108,7 @@ namespace metal
     MTLPrimitiveTopologyClass primitiveTypeToTopology(PrimitiveType);
     MTLVertexFormat dataTypeToVertexFormat(DataType);
 	MTLCompareFunction compareFunctionValue(CompareFunction);
+	MTLIndexType indexArrayFormat(IndexArrayFormat);
 }
 
 }
