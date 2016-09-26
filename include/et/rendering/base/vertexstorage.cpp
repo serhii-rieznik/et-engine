@@ -11,7 +11,7 @@
 namespace et
 {
 
-class et::VertexStoragePrivate
+class VertexStoragePrivate
 {
 public:
 	VertexStoragePrivate(const VertexDeclaration&, uint32_t);

@@ -19,7 +19,7 @@ namespace et
 	public:
 		using OutputMethod = std::function<void(const vec2i&, const vec4&)>;
 
-		enum class Method : size_t
+		enum class Method : uint32_t
 		{
 			PathTracing,
 			LightTracing
@@ -27,11 +27,11 @@ namespace et
 		
 		struct Options
 		{
-			size_t threads = 0;
-			size_t raysPerPixel = 32;
-			size_t maxPathLength = 1;
-			size_t maxKDTreeDepth = 0;
-            size_t renderRegionSize = 32;
+			uint32_t threads = 0;
+			uint32_t raysPerPixel = 32;
+			uint32_t maxPathLength = 1;
+			uint32_t maxKDTreeDepth = 0;
+            uint32_t renderRegionSize = 32;
 			Method method = Method::PathTracing;
 			bool renderKDTree = false;
 		};

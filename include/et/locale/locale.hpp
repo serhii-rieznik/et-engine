@@ -60,13 +60,17 @@ namespace et
 		std::string date();
 		std::string localeLanguage(const std::string&);
 		std::string localeSubLanguage(const std::string&);
-		
 		std::string dateTimeFromTimestamp(uint64_t);
-
 		std::string currentLocale();
 	}
 	
 	std::string localized(const std::string& key);
-	
-#	include <et/locale/locale.ext.h>
+
+	template <typename ...args>
+	std::string localizedPrintf(const std::string& key, args&&...a)
+	{
+		StringDataStorage buffer(static_cast<uint32_t>(1024 + key.size()), 0); \
+		sprintf(buffer.data(), localized(key).c_str(), a...);
+		return std::string(buffer.data());
+	}
 }

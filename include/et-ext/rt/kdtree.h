@@ -19,14 +19,20 @@ namespace rt
 	public:
 		struct ET_ALIGNED(16) Node
 		{
-			float distance;
-			int_fast32_t axis;
-			index startIndex;
-			index endIndex;
-			index children[2];
+			float_type distance = 0.0f;
+			index children[2] { InvalidIndex, InvalidIndex };
+			index axis = InvalidIndex;
+			index startIndex = 0;
+			index endIndex = 0;
 
 			inline index numIndexes() const
 				{ return endIndex - startIndex; }
+
+			inline bool empty() const
+				{ return startIndex == endIndex; }
+
+			inline bool nonEmpty() const
+				{ return startIndex != endIndex; }
 		};
 
 		struct Stats

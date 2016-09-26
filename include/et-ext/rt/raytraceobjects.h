@@ -26,6 +26,7 @@ namespace et
 		enum : index
 		{
 			InvalidIndex = index(-1),
+			MaxAxisIndex = 2
 		};
 
 		struct Constants
@@ -217,14 +218,14 @@ namespace et
 			return fres - 1.0f;
 		}
 
-		inline uint_fast32_t floatIsNegative(float& a)
+		inline index floatIsNegative(float& a)
 		{
-			return reinterpret_cast<uint_fast32_t&>(a) >> 31;
+			return reinterpret_cast<index&>(a) >> 31;
 		}
 
-		inline uint_fast32_t floatIsPositive(float& a)
+		inline index floatIsPositive(float& a)
 		{
-			return (~reinterpret_cast<uint_fast32_t&>(a)) >> 31;
+			return (~reinterpret_cast<index&>(a)) >> 31;
 		}
 
 		inline float4 perpendicularVector(const float4& normal)

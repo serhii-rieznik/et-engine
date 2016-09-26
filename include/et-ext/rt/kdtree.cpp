@@ -53,11 +53,6 @@ rt::KDTree::Node KDTree::buildRootNode()
     _boundingBoxes.push_back(_sceneBoundingBox);
 	
 	KDTree::Node result;
-	result.children[0] = InvalidIndex;
-	result.children[1] = InvalidIndex;
-	result.axis = -1;
-	result.distance = 0.0f;
-	result.startIndex = 0;
 	result.endIndex = static_cast<index>(_triangles.size());
 	for (index i = 0; i < result.endIndex; ++i)
 	{
@@ -106,7 +101,7 @@ void KDTree::buildSplitBoxesUsingAxisAndPosition(size_t nodeIndex, int axis, flo
 	_nodes.emplace_back();
 	_nodes.back().children[0] = InvalidIndex;
 	_nodes.back().children[1] = InvalidIndex;
-	_nodes.back().axis = -1;
+	_nodes.back().axis = InvalidIndex;
 	_nodes.back().distance = 0.0f;
 
 	_boundingBoxes.emplace_back(bbox.center * axisScale + posScale * (middlePoint - leftSize),
@@ -116,7 +111,7 @@ void KDTree::buildSplitBoxesUsingAxisAndPosition(size_t nodeIndex, int axis, flo
 	_nodes.emplace_back();
 	_nodes.back().children[0] = InvalidIndex;
 	_nodes.back().children[1] = InvalidIndex;
-	_nodes.back().axis = -1;
+	_nodes.back().axis = InvalidIndex;
 	_nodes.back().distance = 0.0f;
 
 	_boundingBoxes.emplace_back(bbox.center * axisScale + posScale * (middlePoint + rightSize),
@@ -293,7 +288,7 @@ void KDTree::printStructure()
 void KDTree::printStructure(const Node& node, const std::string& tag)
 {
 	const char* axis[] = { "X", "Y", "Z" };
-	if (node.axis >= 0)
+	if (node.axis <= MaxAxisIndex)
 	{
 		log::info("%s %s, %.2f", tag.c_str(), axis[node.axis], node.distance);
 		printStructure(_nodes.at(node.children[0]), tag + "--|");
@@ -320,6 +315,11 @@ struct KDTreeSearchNode
         ind(n), time(t) { }
 };
 
+bool floatIsZero(float& v)
+{
+	return reinterpret_cast<uint32_t&>(v) == 0;
+}
+
 KDTree::TraverseResult KDTree::traverse(const Ray& ray)
 {
 	KDTree::TraverseResult result;
@@ -336,7 +336,7 @@ KDTree::TraverseResult KDTree::traverse(const Ray& ray)
 		tNear = 0.0f;
 
 	ET_ALIGNED(16) float_type direction[4];
-	ray.direction.loadToFloats(direction);
+	ray.direction.reciprocal().loadToFloats(direction);
 
 	ET_ALIGNED(16) float_type originDivDirection[4];
 	(ray.origin / (ray.direction + rt::float4(std::numeric_limits<float>::epsilon()))).loadToFloats(originDivDirection);
@@ -345,10 +345,10 @@ KDTree::TraverseResult KDTree::traverse(const Ray& ray)
 	FastStack<DepthLimit + 1, KDTreeSearchNode> traverseStack;
 	for (;;)
 	{
-		while (localNode.axis >= 0)
+		while (localNode.axis <= MaxAxisIndex)
 		{
 			int side = floatIsNegative(direction[localNode.axis]);
-			float_type tSplit = localNode.distance / direction[localNode.axis] - originDivDirection[localNode.axis];
+			float_type tSplit = localNode.distance * direction[localNode.axis] - originDivDirection[localNode.axis];
             
 			if (tSplit < tNear)
 			{
@@ -366,19 +366,19 @@ KDTree::TraverseResult KDTree::traverse(const Ray& ray)
 			}
 		}
 
-		if (localNode.numIndexes() > 0)
+		if (localNode.nonEmpty())
 		{
 			result.triangleIndex = InvalidIndex;
 
-			float_type minDistance = std::numeric_limits<float>::max();
+			ET_ALIGNED(16) float_type minDistance = std::numeric_limits<float>::max();
 			for (index i = localNode.startIndex, e = localNode.endIndex; i < e; ++i)
 			{
-				auto triangleIndex = _indices[i];
-				auto data = _intersectionData[triangleIndex];
+				index triangleIndex = _indices[i];
+				IntersectionData data = _intersectionData[triangleIndex];
 				
 				float4 pvec = ray.direction.crossXYZ(data.edge2to0);
                 float det = data.edge1to0.dot(pvec);
-                if (det == 0.0f)
+                if (floatIsZero(det))
 					continue;
 
 				float inv_dev = 1.0f / det;
@@ -432,15 +432,13 @@ KDTree::Stats KDTree::nodesStatistics() const
 	result.totalNodes = _nodes.size();
 	result.maxDepth = _maxBuildDepth;
 	result.totalTriangles = _triangles.size();
-	
-	uint32_t index = 0;
 	for (const auto& node : _nodes)
 	{
-		if (node.axis == -1)
+		if (node.axis == InvalidIndex)
 		{
 			++result.leafNodes;
 
-			if (node.numIndexes() == 0)
+			if (node.empty())
 				++result.emptyLeafNodes;
 		}
 		
@@ -451,8 +449,6 @@ KDTree::Stats KDTree::nodesStatistics() const
 		}
 		
 		result.distributedTriangles += node.numIndexes();
-		
-		++index;
 	}
 	return result;
 }

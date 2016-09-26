@@ -180,7 +180,6 @@
 		5CD5A8F71D932CF4003FD770 /* gestures.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = gestures.h; sourceTree = "<group>"; };
 		5CD5A8F81D932CF4003FD770 /* input.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; path = input.cpp; sourceTree = "<group>"; };
 		5CD5A8F91D932CF4003FD770 /* input.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = input.h; sourceTree = "<group>"; };
-		5CD5A8FB1D932CF4003FD770 /* locale.ext.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = locale.ext.h; sourceTree = "<group>"; };
 		5CD5A8FC1D932CF4003FD770 /* locale.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = locale.hpp; sourceTree = "<group>"; };
 		5CD5A8FE1D932CF4003FD770 /* compileoptions.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = compileoptions.h; sourceTree = "<group>"; };
 		5CD5A8FF1D932CF4003FD770 /* platform.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = platform.h; sourceTree = "<group>"; };
@@ -584,7 +583,6 @@
 		5CD5A8FA1D932CF4003FD770 /* locale */ = {
 			isa = PBXGroup;
 			children = (
-				5CD5A8FB1D932CF4003FD770 /* locale.ext.h */,
 				5CD5A8FC1D932CF4003FD770 /* locale.hpp */,
 			);
 			name = locale;

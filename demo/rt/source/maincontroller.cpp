@@ -104,11 +104,11 @@ void MainController::applicationDidLoad(et::RenderContext* rc)
 		mesh->addRenderBatch(rb);
 	}
 	et::Raytrace::Options rtOptions;
-	rtOptions.raysPerPixel = static_cast<size_t>(_options.integerForKey("rays-per-pixel", 32)->content);
-	rtOptions.maxKDTreeDepth = static_cast<size_t>(_options.integerForKey("kd-tree-max-depth", 4)->content);
-	rtOptions.maxPathLength = static_cast<size_t>(_options.integerForKey("max-path-length", 1)->content);
-	rtOptions.renderRegionSize = static_cast<size_t>(_options.integerForKey("render-region-size", 32)->content);
-	rtOptions.threads = static_cast<size_t>(_options.integerForKey("threads", 0ll)->content);
+	rtOptions.raysPerPixel = static_cast<uint32_t>(_options.integerForKey("rays-per-pixel", 32)->content);
+	rtOptions.maxKDTreeDepth = static_cast<uint32_t>(_options.integerForKey("kd-tree-max-depth", 4)->content);
+	rtOptions.maxPathLength = static_cast<uint32_t>(_options.integerForKey("max-path-length", 1)->content);
+	rtOptions.renderRegionSize = static_cast<uint32_t>(_options.integerForKey("render-region-size", 32)->content);
+	rtOptions.threads = static_cast<uint32_t>(_options.integerForKey("threads", 0ll)->content);
 	rtOptions.renderKDTree = _options.integerForKey("render-kd-tree", 0ll)->content != 0;
 
 	if ((rtOptions.maxPathLength == 0) || (rtOptions.maxPathLength > et::rt::PathTraceIntegrator::MaxTraverseDepth))

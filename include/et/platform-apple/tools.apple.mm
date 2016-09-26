@@ -334,7 +334,7 @@ std::string et::unicodeToUtf8(const std::wstring& w)
 	[s getBytes:0 maxLength:0 usedLength:&actualLength
 	   encoding:NSUTF8StringEncoding options:0 range:NSMakeRange(0, [s length]) remainingRange:0];
 	
-	BinaryDataStorage result(actualLength + sizeof(char), 0);
+	BinaryDataStorage result(static_cast<uint32_t>(actualLength + sizeof(char)), 0);
 	
 	[s getBytes:result.data() maxLength:result.dataSize() usedLength:0
 	   encoding:NSUTF8StringEncoding options:0 range:NSMakeRange(0, [s length]) remainingRange:0];
@@ -363,7 +363,7 @@ std::wstring et::utf8ToUnicode(const std::string& mbcs)
 	[s getBytes:0 maxLength:0 usedLength:&actualLength
 	   encoding:NSUTF32LittleEndianStringEncoding options:0 range:NSMakeRange(0, [s length]) remainingRange:0];
 	
-	BinaryDataStorage result(actualLength + sizeof(wchar_t), 0);
+	BinaryDataStorage result(static_cast<uint32_t>(actualLength + sizeof(wchar_t)), 0);
 	
 	[s getBytes:result.data() maxLength:result.dataSize() usedLength:0
 	   encoding:NSUTF32LittleEndianStringEncoding options:0 range:NSMakeRange(0, [s length]) remainingRange:0];

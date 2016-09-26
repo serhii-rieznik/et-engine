@@ -102,7 +102,7 @@ void et::png::loadFromStream(std::istream& source, TextureDescription& desc, boo
 	parseFormat(desc, pngPtr, infoPtr, &rowBytes, channels);
 
 	uint32_t bpp = bitsPerPixelForTextureFormat(desc.format) / 8;
-	desc.data.resize(static_cast<size_t>(desc.size.square()) * bpp);
+	desc.data.resize(static_cast<uint32_t>(desc.size.square()) * bpp);
 	png_bytepp row_pointers = reinterpret_cast<png_bytepp>(sharedBlockAllocator().allocate(sizeof(png_bytep) * desc.size.y));
 	png_bytep ptr0 = desc.data.data();
 	

@@ -250,8 +250,13 @@ void Application::enableRemoteNotifications()
 - (void)application:(NSApplication *)application didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken
 {
 	(void)application;
-	et::BinaryDataStorage dataWrapper(reinterpret_cast<const unsigned char*>([deviceToken bytes]), [deviceToken length]);
-	
+
+	et::BinaryDataStorage dataWrapper
+	(
+		reinterpret_cast<const unsigned char*>([deviceToken bytes]),
+		static_cast<uint32_t>([deviceToken length])
+	 );
+
 	et::Dictionary event;
 	event.setStringForKey(et::kSystemEventType, et::kSystemEventRemoteNotificationStatusChanged);
 	event.setStringForKey("token", et::base64::encode(dataWrapper));

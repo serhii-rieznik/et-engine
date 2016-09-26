@@ -601,6 +601,8 @@ void RaytracePrivate::forwardPathTraceThreadFunction(uint32_t threadId)
 
 void RaytracePrivate::backwardPathTraceThreadFunction(uint32_t threadId)
 {
+	DataStorage<vec4> localData(sqr(options.renderRegionSize), 0);
+	
 	while (running)
 	{
 		auto region = getNextRegion();
@@ -609,7 +611,6 @@ void RaytracePrivate::backwardPathTraceThreadFunction(uint32_t threadId)
 
 		auto runTime = et::queryContiniousTimeInMilliSeconds();
 
-		//*
 		vec2i pixel;
 		for (pixel.y = region.origin.y; pixel.y < region.origin.y + region.size.y; ++pixel.y)
 		{
@@ -622,24 +623,33 @@ void RaytracePrivate::backwardPathTraceThreadFunction(uint32_t threadId)
 			owner->_outputMethod(vec2i(pixel.x, region.origin.y + region.size.y - 1), vec4(1.0f, 0.0f, 0.0f, 1.0f));
 		}
 
+		uint32_t k = 0;
 		for (pixel.y = region.origin.y; running && (pixel.y < region.origin.y + region.size.y); ++pixel.y)
 		{
 			for (pixel.x = region.origin.x; running && (pixel.x < region.origin.x + region.size.x); ++pixel.x)
 			{
 				size_t bounces = 0;
-				owner->_outputMethod(pixel, raytracePixel(pixel, options.raysPerPixel, bounces));
+				localData[k++] = raytracePixel(pixel, options.raysPerPixel, bounces);
 			}
 		}
-        // */
-        
+
+		k = 0;
+		for (pixel.y = region.origin.y; running && (pixel.y < region.origin.y + region.size.y); ++pixel.y)
+		{
+			for (pixel.x = region.origin.x; running && (pixel.x < region.origin.x + region.size.x); ++pixel.x)
+			{
+				owner->_outputMethod(pixel, localData[k++]);
+			}
+		}
+
 		elapsedTime += et::queryContiniousTimeInMilliSeconds() - runTime;
+/*
 		rt::float_type averageTime = static_cast<rt::float_type>(elapsedTime) / static_cast<rt::float_type>(1000 * sampledRegions);
-
 		auto actualElapsed = et::queryContiniousTimeInMilliSeconds() - startTime;
-
 		log::info("Elapsed: %s, estimated: %s",
 			floatToTimeStr(static_cast<rt::float_type>(actualElapsed) / 1000.f, false).c_str(),
 			floatToTimeStr(averageTime * static_cast<rt::float_type>(regions.size() - sampledRegions), false).c_str());
+*/ 
 	}
 
 	--threadCounter;
@@ -742,7 +752,7 @@ void RaytracePrivate::renderKDTreeRecursive(size_t nodeIndex, size_t index)
 
 	const auto& node = kdTree.nodeAt(nodeIndex);
 
-	if (node.axis >= 0)
+	if (node.axis <= rt::MaxAxisIndex)
 	{
 		renderKDTreeRecursive(node.children[0], index + 1);
 		renderKDTreeRecursive(node.children[1], index + 1);

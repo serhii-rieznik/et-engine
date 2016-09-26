@@ -36,7 +36,6 @@ CVReturn etDisplayLinkOutputCallback(CVDisplayLinkRef, const CVTimeStamp*, const
 
 RenderContext::RenderContext(const RenderContextParameters& inParams, Application* app)
 	: _params(inParams)
-	, _app(app)
 {
 	ET_PIMPL_INIT(RenderContext)
 

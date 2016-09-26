@@ -61,7 +61,6 @@ namespace et
 		ET_DECLARE_PIMPL(RenderContext, 256)
 
 		RenderContextParameters _params;
-		Application* _app = nullptr;
 		RenderInterface::Pointer _renderer;
 		vec2i _size;
 	};

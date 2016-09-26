@@ -1,7 +1,7 @@
 {
-	"reference" : "cornellbox.json",
+	"reference" : "cornellbox-sphere.json",
 	"method" : "backward",
 	"threads" : 0,
-	"rays-per-pixel" : 1,
+	"rays-per-pixel" : 256,
 	"max-path-length" : 1024
 }
