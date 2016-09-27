@@ -67,7 +67,6 @@ void MetalRenderPass::pushRenderBatch(RenderBatch::Pointer batch)
 	MetalVertexBuffer::Pointer vb = batch->vertexStream()->vertexBuffer();
 
     MetalPipelineState::Pointer ps = _private->renderer->createPipelineState(RenderPass::Pointer(this), batch->material(), batch->vertexStream());
-	ps->setProgramVariable("roughness", 0.25);
 	ps->setProgramVariable("lightPosition", info().defaultLightPosition);
 	ps->setProgramVariable("worldTransform", batch->transformation());
 	ps->bind(_private->encoder, material);
