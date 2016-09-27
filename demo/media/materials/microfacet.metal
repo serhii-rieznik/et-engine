@@ -1,3 +1,17 @@
+#define VertexStreamBufferIndex 0
+#define ProgramSpecificBufferIndex 4
+#define SharedVariablesBufferIndex 5
+
+struct SharedVariables
+{
+	float4x4 viewProjection;
+	float4x4 projection;
+	float4x4 view;
+	packed_float3 cameraPosition;
+	packed_float3 cameraDirection;
+	packed_float3 cameraUp;
+};
+
 struct VSInput
 {
 	packed_float3 position;
@@ -13,27 +27,31 @@ struct VSOutput
 	float3 lightDirection;
 };
 
-struct Variables
+struct ProgramSpecificVariables
 {
-	float4x4 viewProjection;
-	float4x4 transform;
-	packed_float3 cameraPosition;
+	float4x4 worldTransform;
+	float4 diffuseColor;
+	float4 specularColor;
 	packed_float3 lightPosition;
 	float roughness;
 };
 
-vertex VSOutput vertexMain(constant VSInput* vsInput [[buffer(0)]],
-						   constant Variables& variables [[buffer(1)]],
-						   uint vertexId [[vertex_id]])
+vertex VSOutput vertexMain(constant VSInput* vsInput [[buffer(VertexStreamBufferIndex)]],
+	constant SharedVariables& sharedVariables [[buffer(SharedVariablesBufferIndex)]],
+	constant ProgramSpecificVariables& specificVariables [[buffer(ProgramSpecificBufferIndex)]],
+	uint vertexId [[vertex_id]])
 {
-	float3x3 rotationMatrix = float3x3(variables.transform[0].xyz, variables.transform[1].xyz, variables.transform[2].xyz);
-	float4 transformedVertex = variables.transform * float4(vsInput[vertexId].position, 1.0);
+	constant float4x4& w = specificVariables.worldTransform;
+	constant float4x4& vp = sharedVariables.viewProjection;
+
+	float3x3 rotationMatrix = float3x3(w[0].xyz, w[1].xyz, w[2].xyz);
+	float4 transformedVertex = w * float4(vsInput[vertexId].position, 1.0);
 
 	VSOutput vOut;
-	vOut.position = variables.viewProjection * transformedVertex;
+	vOut.position = vp * transformedVertex;
 	vOut.normal = rotationMatrix * float3(vsInput[vertexId].normal);
-	vOut.cameraDirection = variables.cameraPosition - transformedVertex.xyz;
-	vOut.lightDirection = variables.lightPosition - transformedVertex.xyz;
+	vOut.cameraDirection = sharedVariables.cameraPosition - transformedVertex.xyz;
+	vOut.lightDirection = specificVariables.lightPosition - transformedVertex.xyz;
 	return vOut;
 }
 
@@ -47,11 +65,10 @@ float burleyDiffuse(float LdotN, float VdotN, float LdotH, float alpha);
 float smithGGX(float a2, float cosTheta);
 float microfacetSpecular(float NdotL, float NdotV, float NdotH, float alpha);
 
-fragment float4 fragmentMain(VSOutput fragmentIn [[stage_in]], constant Variables& variables [[buffer(1)]])
+fragment float4 fragmentMain(VSOutput fragmentIn [[stage_in]],
+	constant SharedVariables& sharedVariables [[buffer(SharedVariablesBufferIndex)]],
+	constant ProgramSpecificVariables& specificVariables[[buffer(ProgramSpecificBufferIndex)]])
 {
-	const float4 diffuseColor = float4(1.0);
-	const float4 specularColor = float4(1.0);
-
 	float3 vNormal = normalize(fragmentIn.normal);
 	float3 vView = normalize(fragmentIn.cameraDirection);
 	float3 vLight = normalize(fragmentIn.lightDirection);
@@ -62,10 +79,10 @@ fragment float4 fragmentMain(VSOutput fragmentIn [[stage_in]], constant Variable
 	float HdotL = dot(vHalf, vLight);
 	float NdotH = dot(vNormal, vHalf);
 
-	float kS = microfacetSpecular(NdotL, NdotV, NdotH, variables.roughness) * invPi;
-	float kD = burleyDiffuse(NdotL, NdotV, HdotL, variables.roughness) * invPi;
+	float kS = microfacetSpecular(NdotL, NdotV, NdotH, specificVariables.roughness) * invPi;
+	float kD = burleyDiffuse(NdotL, NdotV, HdotL, specificVariables.roughness) * invPi;
 
-	return diffuseColor * kD + specularColor * kS;
+	return specificVariables.diffuseColor * kD + specificVariables.specularColor * kS;
 }
 
 /*

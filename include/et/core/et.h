@@ -169,6 +169,19 @@ namespace et
 	template <typename T, typename ... Arg>
 	UniquePtr<T> makeUnique(Arg&&... arg)
 		{ return UniquePtr<T>(etCreateObject<T>(std::forward<Arg>(arg...)...)); }
+
+	inline constexpr uint32_t alignUpTo(uint32_t sz, uint32_t al)
+	{
+		ET_ASSERT(al > 0);
+		uint32_t m = al - 1;
+		return sz + m & (~m);
+	}
+
+	inline constexpr uint32_t alignDownTo(uint32_t sz, uint32_t al)
+	{
+		ET_ASSERT(al > 0);
+		return sz & (~(al - 1));
+	}
 }
 
 #include <et/core/strings.hpp>

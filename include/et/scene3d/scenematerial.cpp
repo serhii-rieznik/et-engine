@@ -116,8 +116,8 @@ void SceneMaterial::deserializeWithOptions(Dictionary stream, RenderContext* rc,
 	}
 }
 
-Texture::Pointer SceneMaterial::loadTexture(RenderContext* rc, const std::string& path, const std::string& basePath,
-	ObjectsCache& cache, bool async)
+Texture::Pointer SceneMaterial::loadTexture(RenderContext* rc, const std::string& path,
+	const std::string& basePath, ObjectsCache& cache)
 {
 	if (path.empty())
 		return Texture::Pointer();
@@ -210,47 +210,6 @@ void SceneMaterial::reloadObject(LoadableObject::Pointer, ObjectsCache&)
 	ET_FAIL("Material reloading is disabled.");
 }
 
-void SceneMaterial::textureDidStartLoading(Texture::Pointer t)
-{
-#if (ET_DEBUG)
-	ET_ASSERT(t.valid());
-	bool pendingTextureFound = false;
-	
-	for (uint32_t i = 0; i < MaterialParameter_max; ++i)
-	{
-		auto param = static_cast<MaterialParameter>(i);
-		if ((_textureParams[param].value == t) && (_texturesToLoad.count(param) > 0))
-		{
-			pendingTextureFound = true;
-			break;
-		}
-	}
-	
-	ET_ASSERT(pendingTextureFound);
-#else
-	(void)t;
-#endif
-}
-
-void SceneMaterial::textureDidLoad(Texture::Pointer t)
-{
-	ET_ASSERT(t.valid());
-	
-	for (uint32_t i = 0; i < MaterialParameter_max; ++i)
-	{
-		auto param = static_cast<MaterialParameter>(i);
-		if ((_textureParams[param].value == t) && (_texturesToLoad.count(param) > 0))
-		{
-			_texturesToLoad.erase(param);
-			if (_texturesToLoad.size() == 0)
-			{
-				loaded.invokeInMainRunLoop(this);
-				break;
-			}
-		}
-	}
-}
-
 void SceneMaterial::bindToMaterial(et::Material::Pointer& m)
 {
 	for (uint32_t i = 0; i < MaterialParameter_max; ++i)
@@ -280,25 +239,25 @@ void SceneMaterial::bindToMaterial(et::Material::Pointer& m)
  */
 const String materialKeys[MaterialParameter_max] =
 {
-	String("ambient_map"), // AmbientMap,
-	String("diffuse_map"), // DiffuseMap,
-	String("specular_map"), // SpecularMap,
-	String("emissive_map"), // EmissiveMap,
-	String("normal_map"), // NormalMap,
-	String("bump_map"), // BumpMap,
-	String("reflection_map"), // ReflectionMap,
-	String("opacity_map"), // OpacityMap,
+	String("ambientMap"), // AmbientMap,
+	String("diffuseMap"), // DiffuseMap,
+	String("specularMap"), // SpecularMap,
+	String("emissiveMap"), // EmissiveMap,
+	String("normalMap"), // NormalMap,
+	String("bumpMap"), // BumpMap,
+	String("reflectionMap"), // ReflectionMap,
+	String("opacityMap"), // OpacityMap,
 	
-	String("ambient_color"), // AmbientColor,
-	String("diffuse_color"), // DiffuseColor,
-	String("specular_color"), // SpecularColor,
-	String("emissive_color"), // EmissiveColor,
+	String("ambientColor"), // AmbientColor,
+	String("diffuseColor"), // DiffuseColor,
+	String("specularColor"), // SpecularColor,
+	String("emissiveColor"), // EmissiveColor,
 	
-	String("ambient_factor"), // AmbientFactor,
-	String("diffuse_factor"), // DiffuseFactor,
-	String("specular_factor"), // SpecularFactor,
-	String("emissive_factor"), // EmissiveFactor,
-	String("bump_factor"), // BumpFactor,
+	String("ambientFactor"), // AmbientFactor,
+	String("diffuseFactor"), // DiffuseFactor,
+	String("specularFactor"), // SpecularFactor,
+	String("emissiveFactor"), // EmissiveFactor,
+	String("bumpFactor"), // BumpFactor,
 	
 	String("transparency"), // Transparency,
 	String("roughness"), // Roughness,

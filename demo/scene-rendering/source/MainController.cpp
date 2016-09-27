@@ -34,10 +34,8 @@ void demo::MainController::applicationDidLoad(et::RenderContext* rc)
     _cameraController->startUpdates();
 		
 	_loader.init(rc);
-	_renderer.init(rc);
-	
-	auto loadedScene = _loader.loadFromFile(et::application().resolveFileName("media/material-test.obj"));
-	_renderer.setScene(loadedScene);
+
+	_scene = _loader.loadFromFile(et::application().resolveFileName("media/material-test.obj"));
 
 	applicationWillResizeContext(rc->size());
 }
@@ -50,7 +48,7 @@ void demo::MainController::applicationWillResizeContext(const et::vec2i& sz)
 
 void demo::MainController::render(et::RenderContext* rc)
 {
-	_renderer.render(_camera, _camera);
+	_renderer.render(rc, _scene.reference(), _camera);
 }
 
 et::IApplicationDelegate* et::Application::initApplicationDelegate()

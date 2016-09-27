@@ -12,6 +12,7 @@
 #include <et/rendering/metal/metal_texture.h>
 #include <et/rendering/metal/metal_vertexbuffer.h>
 #include <et/rendering/metal/metal_indexbuffer.h>
+#include <et/rendering/metal/metal_databuffer.h>
 #include <et/rendering/metal/metal_program.h>
 #include <et/rendering/metal/metal_pipelinestate.h>
 
@@ -51,10 +52,14 @@ void MetalRenderer::init(const RenderContextParameters& params)
 
 	application().context().objects[3] = (__bridge void*)(_private->metal.device);
 	application().context().objects[4] = (__bridge void*)_private->metal.layer;
+
+	variables().init(this);
 }
 
 void MetalRenderer::shutdown()
 {
+	variables().shutdown();
+	
 	ET_OBJC_RELEASE(_private->metal.queue);
 	ET_OBJC_RELEASE(_private->metal.device);
 }
@@ -109,8 +114,18 @@ void MetalRenderer::submitRenderPass(RenderPass::Pointer in_pass)
 }
 
 /*
- * Vertex buffers
+ * Buffers
  */
+DataBuffer::Pointer MetalRenderer::createDataBuffer(const std::string& name, uint32_t size)
+{
+	return MetalDataBuffer::Pointer::create(_private->metal, size);
+}
+
+DataBuffer::Pointer MetalRenderer::createDataBuffer(const std::string& name, const BinaryDataStorage& data)
+{
+	return MetalDataBuffer::Pointer::create(_private->metal, data);
+}
+
 VertexBuffer::Pointer MetalRenderer::createVertexBuffer(const std::string& name, VertexStorage::Pointer vs, BufferDrawType dt)
 {
 	return MetalVertexBuffer::Pointer::create(_private->metal, vs->declaration(), vs->data(), dt, name);

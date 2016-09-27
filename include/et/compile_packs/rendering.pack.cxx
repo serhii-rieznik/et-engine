@@ -2,6 +2,7 @@
 
 #include "../rendering/material.cpp"
 #include "../rendering/rendering.cpp"
+#include "../rendering/sharedvariables.cpp"
 
 #include "../rendering/base/helpers.cpp"
 #include "../rendering/base/indexarray.cpp"

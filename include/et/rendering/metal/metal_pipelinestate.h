@@ -28,17 +28,16 @@ namespace et
 		void build() override;
         
         const MetalNativePipelineState& nativeState() const;
-		const MetalNativeBuffer& vertexVariables() const;
-		const MetalNativeBuffer& fragmentVariables() const;
+		const MetalNativeBuffer& variablesBuffer() const;
 
-		void bind(MetalNativeEncoder&);
+		void bind(MetalNativeEncoder&, Material::Pointer);
 
 		template <typename T>
-		void setProgramVariable(const std::string& name, const T& t)
+		void setProgramVariable(const String& name, const T& t)
 			{ uploadProgramVariable(name, &t, sizeof(T)); }
 
 	private:
-		void uploadProgramVariable(const std::string& name, const void* ptr, uint32_t size);
+		void uploadProgramVariable(const String& name, const void* ptr, uint32_t size);
 
 	private:
 		ET_DECLARE_PIMPL(MetalPipelineState, 256);

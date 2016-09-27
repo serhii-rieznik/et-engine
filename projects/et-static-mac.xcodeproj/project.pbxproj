@@ -7,6 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		5C4F7F171D9AF84C0054FA50 /* sharedvariables.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5C4F7F151D9AF84C0054FA50 /* sharedvariables.cpp */; };
+		5C4F7F181D9AF84C0054FA50 /* sharedvariables.h in Headers */ = {isa = PBXBuildFile; fileRef = 5C4F7F161D9AF84C0054FA50 /* sharedvariables.h */; };
+		5C4F7F1A1D9AF98D0054FA50 /* databuffer.h in Headers */ = {isa = PBXBuildFile; fileRef = 5C4F7F191D9AF98D0054FA50 /* databuffer.h */; };
+		5C4F7F1D1D9AFB470054FA50 /* metal_databuffer.mm in Sources */ = {isa = PBXBuildFile; fileRef = 5C4F7F1B1D9AFB470054FA50 /* metal_databuffer.mm */; };
+		5C4F7F1E1D9AFB470054FA50 /* metal_databuffer.h in Headers */ = {isa = PBXBuildFile; fileRef = 5C4F7F1C1D9AFB470054FA50 /* metal_databuffer.h */; };
 		5CD5A9BE1D932CFA003FD770 /* app.pack.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 5CD5A8721D932CF4003FD770 /* app.pack.cxx */; };
 		5CD5A9BF1D932CFA003FD770 /* camera.pack.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 5CD5A8731D932CF4003FD770 /* camera.pack.cxx */; };
 		5CD5A9C01D932CFA003FD770 /* core.pack.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 5CD5A8741D932CF4003FD770 /* core.pack.cxx */; };
@@ -22,6 +27,11 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		5C4F7F151D9AF84C0054FA50 /* sharedvariables.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; fileEncoding = 4; path = sharedvariables.cpp; sourceTree = "<group>"; };
+		5C4F7F161D9AF84C0054FA50 /* sharedvariables.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sharedvariables.h; sourceTree = "<group>"; };
+		5C4F7F191D9AF98D0054FA50 /* databuffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = databuffer.h; sourceTree = "<group>"; };
+		5C4F7F1B1D9AFB470054FA50 /* metal_databuffer.mm */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; fileEncoding = 4; path = metal_databuffer.mm; sourceTree = "<group>"; };
+		5C4F7F1C1D9AFB470054FA50 /* metal_databuffer.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; fileEncoding = 4; path = metal_databuffer.h; sourceTree = "<group>"; };
 		5CD5A8561D932CF4003FD770 /* appevironment.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = appevironment.h; sourceTree = "<group>"; };
 		5CD5A8571D932CF4003FD770 /* application.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; path = application.cpp; sourceTree = "<group>"; };
 		5CD5A8581D932CF4003FD770 /* application.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = application.h; sourceTree = "<group>"; };
@@ -272,22 +282,22 @@
 		5CD5A95C1D932CF4003FD770 /* material.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; path = material.cpp; sourceTree = "<group>"; };
 		5CD5A95D1D932CF4003FD770 /* material.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = material.h; sourceTree = "<group>"; };
 		5CD5A95E1D932CF4003FD770 /* materialfactory.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = materialfactory.h; sourceTree = "<group>"; };
-		5CD5A9601D932CF4003FD770 /* metal.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = metal.h; sourceTree = "<group>"; };
-		5CD5A9611D932CF4003FD770 /* metal.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = metal.mm; sourceTree = "<group>"; };
-		5CD5A9621D932CF4003FD770 /* metal_indexbuffer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = metal_indexbuffer.h; sourceTree = "<group>"; };
-		5CD5A9631D932CF4003FD770 /* metal_indexbuffer.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = metal_indexbuffer.mm; sourceTree = "<group>"; };
-		5CD5A9641D932CF4003FD770 /* metal_pipelinestate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = metal_pipelinestate.h; sourceTree = "<group>"; };
-		5CD5A9651D932CF4003FD770 /* metal_pipelinestate.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = metal_pipelinestate.mm; sourceTree = "<group>"; };
-		5CD5A9661D932CF4003FD770 /* metal_program.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = metal_program.h; sourceTree = "<group>"; };
-		5CD5A9671D932CF4003FD770 /* metal_program.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = metal_program.mm; sourceTree = "<group>"; };
-		5CD5A9681D932CF4003FD770 /* metal_renderer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = metal_renderer.h; sourceTree = "<group>"; };
-		5CD5A9691D932CF4003FD770 /* metal_renderer.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = metal_renderer.mm; sourceTree = "<group>"; };
-		5CD5A96A1D932CF4003FD770 /* metal_renderpass.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = metal_renderpass.h; sourceTree = "<group>"; };
-		5CD5A96B1D932CF4003FD770 /* metal_renderpass.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = metal_renderpass.mm; sourceTree = "<group>"; };
-		5CD5A96C1D932CF4003FD770 /* metal_texture.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = metal_texture.h; sourceTree = "<group>"; };
-		5CD5A96D1D932CF4003FD770 /* metal_texture.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = metal_texture.mm; sourceTree = "<group>"; };
-		5CD5A96E1D932CF4003FD770 /* metal_vertexbuffer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = metal_vertexbuffer.h; sourceTree = "<group>"; };
-		5CD5A96F1D932CF4003FD770 /* metal_vertexbuffer.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = metal_vertexbuffer.mm; sourceTree = "<group>"; };
+		5CD5A9601D932CF4003FD770 /* metal.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; path = metal.h; sourceTree = "<group>"; };
+		5CD5A9611D932CF4003FD770 /* metal.mm */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; path = metal.mm; sourceTree = "<group>"; };
+		5CD5A9621D932CF4003FD770 /* metal_indexbuffer.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; path = metal_indexbuffer.h; sourceTree = "<group>"; };
+		5CD5A9631D932CF4003FD770 /* metal_indexbuffer.mm */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; path = metal_indexbuffer.mm; sourceTree = "<group>"; };
+		5CD5A9641D932CF4003FD770 /* metal_pipelinestate.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; path = metal_pipelinestate.h; sourceTree = "<group>"; };
+		5CD5A9651D932CF4003FD770 /* metal_pipelinestate.mm */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; path = metal_pipelinestate.mm; sourceTree = "<group>"; };
+		5CD5A9661D932CF4003FD770 /* metal_program.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; path = metal_program.h; sourceTree = "<group>"; };
+		5CD5A9671D932CF4003FD770 /* metal_program.mm */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; path = metal_program.mm; sourceTree = "<group>"; };
+		5CD5A9681D932CF4003FD770 /* metal_renderer.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; path = metal_renderer.h; sourceTree = "<group>"; };
+		5CD5A9691D932CF4003FD770 /* metal_renderer.mm */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; path = metal_renderer.mm; sourceTree = "<group>"; };
+		5CD5A96A1D932CF4003FD770 /* metal_renderpass.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; path = metal_renderpass.h; sourceTree = "<group>"; };
+		5CD5A96B1D932CF4003FD770 /* metal_renderpass.mm */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; path = metal_renderpass.mm; sourceTree = "<group>"; };
+		5CD5A96C1D932CF4003FD770 /* metal_texture.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; path = metal_texture.h; sourceTree = "<group>"; };
+		5CD5A96D1D932CF4003FD770 /* metal_texture.mm */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; path = metal_texture.mm; sourceTree = "<group>"; };
+		5CD5A96E1D932CF4003FD770 /* metal_vertexbuffer.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; path = metal_vertexbuffer.h; sourceTree = "<group>"; };
+		5CD5A96F1D932CF4003FD770 /* metal_vertexbuffer.mm */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; path = metal_vertexbuffer.mm; sourceTree = "<group>"; };
 		5CD5A9701D932CF4003FD770 /* rendercontext.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = rendercontext.h; sourceTree = "<group>"; };
 		5CD5A9711D932CF4003FD770 /* rendercontextparams.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = rendercontextparams.h; sourceTree = "<group>"; };
 		5CD5A9721D932CF4003FD770 /* rendering.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; path = rendering.cpp; sourceTree = "<group>"; };
@@ -677,6 +687,8 @@
 				5CD5A9721D932CF4003FD770 /* rendering.cpp */,
 				5CD5A9731D932CF4003FD770 /* rendering.h */,
 				5CD5A9741D932CF4003FD770 /* renderingcaps.h */,
+				5C4F7F151D9AF84C0054FA50 /* sharedvariables.cpp */,
+				5C4F7F161D9AF84C0054FA50 /* sharedvariables.h */,
 				5CD5A9751D932CF4003FD770 /* texturefactory.h */,
 				5CD5A9761D932CF4003FD770 /* vulkan */,
 			);
@@ -733,6 +745,7 @@
 		5CD5A9541D932CF4003FD770 /* interface */ = {
 			isa = PBXGroup;
 			children = (
+				5C4F7F191D9AF98D0054FA50 /* databuffer.h */,
 				5CD5A9551D932CF4003FD770 /* indexbuffer.h */,
 				5CD5A9561D932CF4003FD770 /* pipelinestate.h */,
 				5CD5A9571D932CF4003FD770 /* program.h */,
@@ -763,6 +776,8 @@
 				5CD5A96D1D932CF4003FD770 /* metal_texture.mm */,
 				5CD5A96E1D932CF4003FD770 /* metal_vertexbuffer.h */,
 				5CD5A96F1D932CF4003FD770 /* metal_vertexbuffer.mm */,
+				5C4F7F1B1D9AFB470054FA50 /* metal_databuffer.mm */,
+				5C4F7F1C1D9AFB470054FA50 /* metal_databuffer.h */,
 			);
 			path = metal;
 			sourceTree = "<group>";
@@ -902,6 +917,9 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5C4F7F1A1D9AF98D0054FA50 /* databuffer.h in Headers */,
+				5C4F7F181D9AF84C0054FA50 /* sharedvariables.h in Headers */,
+				5C4F7F1E1D9AFB470054FA50 /* metal_databuffer.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -961,6 +979,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				5CD5A9C71D932CFA003FD770 /* rendering_metal.pack.mm in Sources */,
+				5C4F7F1D1D9AFB470054FA50 /* metal_databuffer.mm in Sources */,
 				5CD5A9C91D932CFA003FD770 /* sound.pack.cxx in Sources */,
 				5CD5A9C21D932CFA003FD770 /* imaging.pack.cxx in Sources */,
 				5CD5A9BF1D932CFA003FD770 /* camera.pack.cxx in Sources */,
@@ -972,6 +991,7 @@
 				5CD5A9BE1D932CFA003FD770 /* app.pack.cxx in Sources */,
 				5CD5A9C31D932CFA003FD770 /* input.pack.cxx in Sources */,
 				5CD5A9C11D932CFA003FD770 /* geometry.pack.cxx in Sources */,
+				5C4F7F171D9AF84C0054FA50 /* sharedvariables.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

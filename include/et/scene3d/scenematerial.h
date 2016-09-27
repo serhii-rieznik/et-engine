@@ -60,17 +60,13 @@ namespace et
 			 * Textures loading stuff
 			 */
 			Texture::Pointer loadTexture(RenderContext* rc, const std::string& path,
-				const std::string& basePath, ObjectsCache& cache, bool async);
-			
-			void textureDidStartLoading(Texture::Pointer);
-			void textureDidLoad(Texture::Pointer);
+				const std::string& basePath, ObjectsCache& cache);
 
 		private:
 			ParameterSet<int64_t> _intParams;
 			ParameterSet<float> _floatParams;
 			ParameterSet<vec4> _vectorParams;
 			ParameterSet<Texture::Pointer> _textureParams;
-			std::map<MaterialParameter, std::string> _texturesToLoad;
 		};
 		
 		typedef ObjectsCache MaterialCache;

@@ -45,67 +45,50 @@ public:
 	CullMode cullMode() const
 		{ return _cull; }
 
-	void setProperty(const String& name, const float value);
-	void setProperty(const String& name, const vec2& value);
-	void setProperty(const String& name, const vec3& value);
-	void setProperty(const String& name, const vec4& value);
-	void setProperty(const String& name, const int value);
-	void setProperty(const String& name, const vec2i& value);
-	void setProperty(const String& name, const vec3i& value);
-	void setProperty(const String& name, const vec4i& value);
-	void setProperty(const String& name, const mat3& value);
-	void setProperty(const String& name, const mat4& value);
-	
-	Texture::Pointer texture(const String& name);
-	void setTexutre(const String& name, const Texture::Pointer&);
-	
 	uint32_t sortingKey() const;
 
-private:
-	struct DataProperty
+public:
+	struct Property
 	{
-		DataType type = DataType::max;
-		int32_t locationInProgram = -1;
-		uint32_t offset = 0;
 		uint32_t length = 0;
-		bool requireUpdate = true;
-		
-		DataProperty(const DataProperty&) = default;
-		DataProperty(DataType dt, int32_t loc, uint32_t o, uint32_t len) :
-			type(dt), locationInProgram(loc), offset(o), length(len) { }
+		char data[sizeof(mat4)] { };
+		Property(uint32_t sz)
+			: length(sz) { }
 	};
-	
-	struct TextureProperty
-	{
-		int32_t locationInProgram = -1;
-		uint32_t unit = 0;
-		Texture::Pointer texture;
-		
-		TextureProperty() = default;
-		TextureProperty(const TextureProperty&) = default;
-		TextureProperty(int32_t loc, uint32_t u) :
-			locationInProgram(loc), unit(u) { }
-	};
+	using PropertyMap = UnorderedMap<String, Property>;
+	using TextureMap = UnorderedMap<String, Texture::Pointer>;
 
-	void loadProperties();
-	void addDataProperty(const String&, DataType, int32_t location);
-	void addTexture(const String&, int32_t location, uint32_t unit);
-	void updateDataProperty(DataProperty&, const void*);
-	
-	void applyProperty(const DataProperty&, const BinaryDataStorage&);
-	
+	void setTexutre(const String& name, const Texture::Pointer&);
+	const TextureMap& textures() const { return _textures; }
+
+	template <class T>
+	void setProperty(const String& name, const T& value);
+	const PropertyMap& properties() const { return _properties; }
+
+private:
+	void uploadPropertyData(Property& prop, const void* src, uint32_t sz);
+
 public:
 	RenderInterface* _renderer = nullptr;
-	UnorderedMap<String, DataProperty> _properties;
-	UnorderedMap<String, TextureProperty> _textures;
-
+	PropertyMap _properties;
+	TextureMap _textures;
 	Program::Pointer _program;
 	DepthState _depth;
 	BlendState _blend;
 	CullMode _cull = CullMode::Disabled;
-	BinaryDataStorage _propertiesData;
 	uint32_t _additionalPriority = 0;
 };
+
+template <class T>
+inline void Material::setProperty(const String& aName, const T& value)
+{
+	auto i = _properties.find(aName);
+	if (i == _properties.end())
+	{
+		i = _properties.emplace(aName, sizeof(value)).first;
+	}
+	uploadPropertyData(i->second, &value, sizeof(value));
+}
 
 class MaterialProvider
 {

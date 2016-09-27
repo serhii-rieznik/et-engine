@@ -3,7 +3,7 @@
 #include <et/app/application.h>
 #include <et/input/gestures.h>
 #include <et/camera/cameramovingcontroller.h>
-#include "renderer/DemoSceneRenderer.h"
+#include <et/scene3d/scene3drenderer.h>
 #include "renderer/DemoSceneLoader.h"
 
 namespace demo
@@ -24,7 +24,8 @@ namespace demo
 	private:
         et::Camera _camera;
         et::CameraMovingController::Pointer _cameraController;
-		demo::SceneRenderer _renderer;
+		et::s3d::Scene::Pointer _scene;
+		et::s3d::Renderer _renderer;
 		demo::SceneLoader _loader;
 	};
 }

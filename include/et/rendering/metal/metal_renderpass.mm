@@ -58,44 +58,27 @@ MetalRenderPass::~MetalRenderPass()
 void MetalRenderPass::pushRenderBatch(RenderBatch::Pointer batch)
 {
 	const Camera& cam = info().camera;
+	Material::Pointer material = batch->material();
+
+	SharedVariables& sharedVariables = _private->renderer->variables();
+	sharedVariables.loadCameraProperties(cam);
 
 	MetalIndexBuffer::Pointer ib = batch->vertexStream()->indexBuffer();
 	MetalVertexBuffer::Pointer vb = batch->vertexStream()->vertexBuffer();
-    MetalPipelineState::Pointer ps = _private->renderer->createPipelineState(RenderPass::Pointer(this),
-		batch->material(), batch->vertexStream());
+
+    MetalPipelineState::Pointer ps = _private->renderer->createPipelineState(RenderPass::Pointer(this), batch->material(), batch->vertexStream());
+	ps->setProgramVariable("roughness", 0.25);
 	ps->setProgramVariable("lightPosition", info().defaultLightPosition);
-	ps->setProgramVariable("cameraPosition", cam.position());
-	ps->setProgramVariable("viewProjection", cam.viewProjectionMatrix());
-	ps->setProgramVariable("transform", batch->transformation());
-	ps->bind(_private->encoder);
+	ps->setProgramVariable("worldTransform", batch->transformation());
+	ps->bind(_private->encoder, material);
 
-    [_private->encoder.encoder setVertexBuffer:vb->nativeBuffer().buffer() offset:0 atIndex:0];
+	MetalDataBuffer::Pointer sv = sharedVariables.buffer();
 
-	for (MTLArgument* arg in ps->nativeState().reflection.vertexArguments)
-	{
-		if (arg.type == MTLArgumentTypeTexture)
-		{
-			MetalTexture::Pointer tex = batch->material()->texture([arg.name UTF8String]);
-			ET_ASSERT(tex.valid());
-			[_private->encoder.encoder setVertexTexture:tex->nativeTexture().texture atIndex:arg.index];
-		}
-	}
-
-	for (MTLArgument* arg in ps->nativeState().reflection.fragmentArguments)
-	{
-		if (arg.type == MTLArgumentTypeTexture)
-		{
-			MetalTexture::Pointer tex = batch->material()->texture([arg.name UTF8String]);
-			ET_ASSERT(tex.valid());
-			[_private->encoder.encoder setFragmentTexture:tex->nativeTexture().texture atIndex:arg.index];
-		}
-	}
-
+	[_private->encoder.encoder setVertexBuffer:sv->nativeBuffer().buffer() offset:0 atIndex:SharedVariablesBufferIndex];
+	[_private->encoder.encoder setVertexBuffer:vb->nativeBuffer().buffer() offset:0 atIndex:VertexStreamBufferIndex];
 	[_private->encoder.encoder drawIndexedPrimitives:metal::primitiveTypeValue(ib->primitiveType())
-										  indexCount:batch->numIndexes()
-										   indexType:metal::indexArrayFormat(ib->format())
-										 indexBuffer:ib->nativeBuffer().buffer()
-								   indexBufferOffset:ib->byteOffsetForIndex(batch->firstIndex())];
+		indexCount:batch->numIndexes() indexType:metal::indexArrayFormat(ib->format())
+		indexBuffer:ib->nativeBuffer().buffer() indexBufferOffset:ib->byteOffsetForIndex(batch->firstIndex())];
 }
 
 void MetalRenderPass::endEncoding()

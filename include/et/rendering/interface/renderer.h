@@ -9,6 +9,8 @@
 
 #include <et/app/context.h>
 #include <et/rendering/rendercontextparams.h>
+#include <et/rendering/sharedvariables.h>
+#include <et/rendering/interface/databuffer.h>
 #include <et/rendering/interface/renderpass.h>
 #include <et/rendering/interface/pipelinestate.h>
 
@@ -29,6 +31,9 @@ namespace et
 		RenderContext* rc() const
 			{ return _rc; }
 
+		SharedVariables& variables()
+			{ return _sharedVariables; }
+
 		virtual RenderingAPI api() const = 0;
 
 		virtual void init(const RenderContextParameters& params) = 0;
@@ -41,11 +46,13 @@ namespace et
 		virtual void submitRenderPass(RenderPass::Pointer) = 0;
 
 		/*
-		 * Vertex buffes
+		 * Buffers
 		 */
-		virtual VertexBuffer::Pointer createVertexBuffer(const std::string&, VertexStorage::Pointer, BufferDrawType) = 0;
+		virtual DataBuffer::Pointer createDataBuffer(const std::string&, uint32_t size) = 0;
+		virtual DataBuffer::Pointer createDataBuffer(const std::string&, const BinaryDataStorage&) = 0;
 		virtual IndexBuffer::Pointer createIndexBuffer(const std::string&, IndexArray::Pointer, BufferDrawType) = 0;
-        
+		virtual VertexBuffer::Pointer createVertexBuffer(const std::string&, VertexStorage::Pointer, BufferDrawType) = 0;
+
         /*
          * Textures
          */
@@ -74,6 +81,7 @@ namespace et
 
 	private:
 		RenderContext* _rc = nullptr;
+		SharedVariables _sharedVariables;
 	};
 
 /*

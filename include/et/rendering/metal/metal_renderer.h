@@ -37,8 +37,10 @@ namespace et
 		/*
 		 * Vertex buffers
 		 */
-		VertexBuffer::Pointer createVertexBuffer(const std::string&, VertexStorage::Pointer, BufferDrawType) override;
+		DataBuffer::Pointer createDataBuffer(const std::string&, uint32_t size) override;
+		DataBuffer::Pointer createDataBuffer(const std::string&, const BinaryDataStorage&) override;
 		IndexBuffer::Pointer createIndexBuffer(const std::string&, IndexArray::Pointer, BufferDrawType) override;
+		VertexBuffer::Pointer createVertexBuffer(const std::string&, VertexStorage::Pointer, BufferDrawType) override;
 
         /*
          * Textures

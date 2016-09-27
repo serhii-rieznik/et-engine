@@ -7,6 +7,7 @@
 
 #include <et/rendering/metal/metal.h>
 #include <et/rendering/metal/metal_program.h>
+#include <et/rendering/metal/metal_texture.h>
 #include <et/rendering/metal/metal_pipelinestate.h>
 
 namespace et
@@ -18,29 +19,25 @@ public:
 	MetalPipelineStatePrivate(MetalState& mtl) :
 		metal(mtl) { }
 
+	void loadVariables(MTLArgument* arg);
+	void validateVariables(MTLArgument* arg);
+
 	struct ProgramVariable
 	{
 		uint32_t offset = 0;
 		uint32_t size = 0;
-		uint32_t bufferIndex = 0; // vertex/fragment
-		uint32_t shader = 0;
-	};
-
-	struct BufferDescription
-	{
-		MetalNativeBuffer::Pointer buffer;
-		uint32_t index = InvalidIndex;
-		uint32_t size = 0;
-		NSRange modifiedRange { };
 	};
 
 	MetalState& metal;
     MetalNativePipelineState state;
-	BufferDescription vertexVariables;
-	BufferDescription fragmentVariables;
-	Map<std::string, ProgramVariable> variables;
 
-	void loadVariables(MTLArgument* arg, uint32_t shaderIndex, uint32_t bufferIndex);
+	Map<String, ProgramVariable> variables;
+	MetalNativeBuffer::Pointer variablesBuffer;
+	uint32_t variablesBufferSize = 0;
+	NSRange modifiedRange { };
+
+	bool bindVariablesToVertex = false;
+	bool bindVariablesToFragment = false;
 };
 
 MetalPipelineState::MetalPipelineState(MetalState& mtl)
@@ -90,42 +87,33 @@ void MetalPipelineState::build()
 
 	for (MTLArgument* arg in reflection.vertexArguments)
 	{
-		if ([arg.name isEqualToString:@"variables"] &&
-			(arg.type == MTLArgumentTypeBuffer) && (arg.bufferDataType == MTLDataTypeStruct))
+		if ((arg.index == ProgramSpecificBufferIndex) && (arg.type == MTLArgumentTypeBuffer) && (arg.bufferDataType == MTLDataTypeStruct))
 		{
-			_private->vertexVariables.index = static_cast<uint32_t>(arg.index);
-			_private->vertexVariables.size = static_cast<uint32_t>(arg.bufferDataSize);
-			_private->loadVariables(arg, (1 << 0), _private->vertexVariables.index);
+			_private->loadVariables(arg);
+			_private->bindVariablesToVertex = true;
 		}
 	}
 
 	for (MTLArgument* arg in reflection.fragmentArguments)
 	{
-		if ([arg.name isEqualToString:@"variables"] &&
-			(arg.type == MTLArgumentTypeBuffer) && (arg.bufferDataType == MTLDataTypeStruct))
+		if ((arg.index == ProgramSpecificBufferIndex) && (arg.type == MTLArgumentTypeBuffer) &&
+			(arg.bufferDataType == MTLDataTypeStruct))
 		{
-			_private->fragmentVariables.index = static_cast<uint32_t>(arg.index);
-			_private->fragmentVariables.size = static_cast<uint32_t>(arg.bufferDataSize);
-			_private->loadVariables(arg, (1 << 1), _private->fragmentVariables.index);
+			if (_private->bindVariablesToVertex)
+			{
+				_private->validateVariables(arg);
+			}
+			else
+			{
+				_private->loadVariables(arg);
+			}
+			_private->bindVariablesToFragment = true;
 		}
 	}
 
-	if (_private->vertexVariables.size > 0)
+	if (!_private->variables.empty())
 	{
-		_private->vertexVariables.buffer =
-			MetalNativeBuffer::Pointer::create(_private->metal, _private->vertexVariables.size);
-	}
-
-	if ((_private->fragmentVariables.size > 0) &&
-		((_private->fragmentVariables.index != _private->vertexVariables.index) ||
-		(_private->fragmentVariables.index != _private->vertexVariables.index)))
-	{
-		_private->fragmentVariables.buffer =
-			MetalNativeBuffer::Pointer::create(_private->metal, _private->fragmentVariables.size);
-	}
-	else
-	{
-		_private->fragmentVariables = _private->vertexVariables;
+		_private->variablesBuffer = MetalNativeBuffer::Pointer::create(_private->metal, _private->variablesBufferSize);
 	}
 
     if (error != nil)
@@ -147,85 +135,77 @@ const MetalNativePipelineState& MetalPipelineState::nativeState() const
     return _private->state;
 }
 
-const MetalNativeBuffer& MetalPipelineState::vertexVariables() const
+const MetalNativeBuffer& MetalPipelineState::variablesBuffer() const
 {
-	return _private->vertexVariables.buffer.reference();
+	return _private->variablesBuffer.reference();
 }
 
-const MetalNativeBuffer& MetalPipelineState::fragmentVariables() const
-{
-	return _private->fragmentVariables.buffer.reference();
-}
-
-void MetalPipelineState::uploadProgramVariable(const std::string& name, const void* ptr, uint32_t size)
+void MetalPipelineState::uploadProgramVariable(const String& name, const void* ptr, uint32_t size)
 {
 	auto var = _private->variables.find(name);
 	if (var == _private->variables.end())
 		return;
 
-	MetalPipelineStatePrivate::BufferDescription* desc = nullptr;
-
-	if (var->second.shader & (1 << 0))
-	{
-		desc = &_private->vertexVariables;
-	}
-	else if (var->second.shader & (1 << 1))
-	{
-		desc = &_private->fragmentVariables;
-	}
-	else
-	{
-		ET_FAIL("Unable to figure out buffer for variable");
-		return;
-	}
-
-	uint8_t* bufferData = reinterpret_cast<uint8_t*>([desc->buffer->buffer() contents]);
+	uint8_t* bufferData = reinterpret_cast<uint8_t*>([_private->variablesBuffer->buffer() contents]);
 	memcpy(bufferData + var->second.offset, ptr, size);
 
 	uint32_t endLocation = var->second.offset + size;
-	uint32_t currentEndLocation = static_cast<uint32_t>(desc->modifiedRange.location + desc->modifiedRange.length);
-	desc->modifiedRange.location = std::min(static_cast<uint32_t>(desc->modifiedRange.location), var->second.offset);
-	desc->modifiedRange.length = std::max(endLocation, currentEndLocation) - desc->modifiedRange.location;
+	uint32_t currentEndLocation = static_cast<uint32_t>(_private->modifiedRange.location + _private->modifiedRange.length);
+	_private->modifiedRange.location = std::min(static_cast<uint32_t>(_private->modifiedRange.location), var->second.offset);
+	_private->modifiedRange.length = std::max(endLocation, currentEndLocation) - _private->modifiedRange.location;
 }
 
-void MetalPipelineState::bind(MetalNativeEncoder& e)
+void MetalPipelineState::bind(MetalNativeEncoder& e, Material::Pointer material)
 {
-	[e.encoder setRenderPipelineState:_private->state.pipelineState];
+	for (const auto& p : material->properties())
+	{
+		const Material::Property& prop = p.second;
+		uploadProgramVariable(p.first, prop.data, prop.length);
+	}
+
+	// TODO : set textures
+	for (auto tex : material->textures())
+	{
+
+	}
+
+	if (_private->bindVariablesToVertex)
+	{
+		[e.encoder setVertexBuffer:_private->variablesBuffer->buffer() offset:0 atIndex:ProgramSpecificBufferIndex];
+	}
+
+	if (_private->bindVariablesToFragment)
+	{
+		[e.encoder setFragmentBuffer:_private->variablesBuffer->buffer() offset:0 atIndex:ProgramSpecificBufferIndex];
+	}
+
 	[e.encoder setDepthStencilState:_private->state.depthStencilState];
-
-	if (_private->vertexVariables.buffer.valid() && (_private->vertexVariables.index != InvalidIndex))
-	{
-		id<MTLBuffer> buffer = _private->vertexVariables.buffer->buffer();
-		if (_private->vertexVariables.modifiedRange.length > 0)
-		{
-			[buffer didModifyRange:_private->vertexVariables.modifiedRange];
-		}
-		[e.encoder setVertexBuffer:buffer offset:0 atIndex:_private->vertexVariables.index];
-	}
-
-	if (_private->fragmentVariables.buffer.valid() && (_private->fragmentVariables.index != InvalidIndex))
-	{
-		id<MTLBuffer> buffer = _private->fragmentVariables.buffer->buffer();
-		if (_private->fragmentVariables.modifiedRange.length > 0)
-		{
-			[buffer didModifyRange:_private->vertexVariables.modifiedRange];
-		}
-		[e.encoder setFragmentBuffer:buffer offset:0 atIndex:_private->fragmentVariables.index];
-	}
+	[e.encoder setRenderPipelineState:_private->state.pipelineState];
 }
 
 /*
  * Private
  */
-void MetalPipelineStatePrivate::loadVariables(MTLArgument* arg, uint32_t shaderIndex, uint32_t bufferIndex)
+void MetalPipelineStatePrivate::loadVariables(MTLArgument* arg)
 {
+	variablesBufferSize = static_cast<uint32_t>(arg.bufferDataSize);
 	MTLStructType* structType = [arg bufferStructType];
 	for (MTLStructMember* member in structType.members)
 	{
-		std::string name([member.name UTF8String]);
+		String name([member.name UTF8String]);
 		variables[name].offset = static_cast<uint32_t>(member.offset);
-		variables[name].shader |= shaderIndex;
-		variables[name].bufferIndex = bufferIndex;
+	}
+}
+
+void MetalPipelineStatePrivate::validateVariables(MTLArgument* arg)
+{
+	ET_ASSERT(arg.bufferDataSize == variablesBufferSize);
+	MTLStructType* structType = [arg bufferStructType];
+	for (MTLStructMember* member in structType.members)
+	{
+		String name([member.name UTF8String]);
+		ET_ASSERT(variables.count(name) > 0);
+		ET_ASSERT(variables[name].offset == member.offset);
 	}
 }
 

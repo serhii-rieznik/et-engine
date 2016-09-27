@@ -18,7 +18,7 @@ const std::string kRenderPriority = "render-priority";
 }
 
 Material::Material(RenderInterface* renderer) :
-	_renderer(renderer), _propertiesData(2 * sizeof(mat4), 0)
+	_renderer(renderer)
 {
 }
 
@@ -140,76 +140,17 @@ void Material::setCullMode(CullMode cm)
 void Material::setProgram(Program::Pointer program)
 {
 	_program = program;
-	loadProperties();
 }
 
-void Material::loadProperties()
+void Material::uploadPropertyData(Property& prop, const void* src, uint32_t sz)
 {
-	_textures.clear();
-	_properties.clear();
-	_propertiesData.resize(0);
+	ET_ASSERT(sz == prop.length);
+	memcpy(prop.data, src, sz);
 }
-
-void Material::addTexture(const String& name, int32_t location, uint32_t unit)
-{
-	_textures.emplace(name, TextureProperty(location, unit));
-}
-
-void Material::addDataProperty(const String& name, DataType type, int32_t location)
-{
-	uint32_t requiredSpace = dataTypeSize(type);
-	uint32_t currentSize = _propertiesData.lastElementIndex();
-	if (currentSize + requiredSpace > _propertiesData.size())
-	{
-		_propertiesData.resize(std::max(2 * _propertiesData.size(), currentSize + requiredSpace));
-	}
-	_properties.emplace(name, DataProperty(type, location, currentSize, requiredSpace));
-	_propertiesData.applyOffset(requiredSpace);
-}
-
-void Material::updateDataProperty(DataProperty& prop, const void* src)
-{
-	auto dst = _propertiesData.element_ptr(prop.offset);
-	if (memcmp(src, dst, prop.length) != 0)
-	{
-		memcpy(dst, src, prop.length);
-		prop.requireUpdate = true;
-	}
-}
-
-#define ET_SET_PROPERTY_IMPL(TYPE) 	{ auto i = _properties.find(name); \
-									if ((i != _properties.end()) && (i->second.type == DataType::TYPE)) { \
-										updateDataProperty(i->second, &value); \
-									}}
-
-void Material::setProperty(const String& name, const float value) ET_SET_PROPERTY_IMPL(Float)
-void Material::setProperty(const String& name, const vec2& value) ET_SET_PROPERTY_IMPL(Vec2)
-void Material::setProperty(const String& name, const vec3& value) ET_SET_PROPERTY_IMPL(Vec3)
-void Material::setProperty(const String& name, const vec4& value) ET_SET_PROPERTY_IMPL(Vec4)
-void Material::setProperty(const String& name, const int value) ET_SET_PROPERTY_IMPL(Int)
-void Material::setProperty(const String& name, const vec2i& value) ET_SET_PROPERTY_IMPL(IntVec2)
-void Material::setProperty(const String& name, const vec3i& value) ET_SET_PROPERTY_IMPL(IntVec3)
-void Material::setProperty(const String& name, const vec4i& value) ET_SET_PROPERTY_IMPL(IntVec4)
-void Material::setProperty(const String& name, const mat3& value) ET_SET_PROPERTY_IMPL(Mat3)
-void Material::setProperty(const String& name, const mat4& value) ET_SET_PROPERTY_IMPL(Mat4)
 
 void Material::setTexutre(const String& name, const Texture::Pointer& tex)
 {
-	auto i = _textures.find(name);
-	if (i == _textures.end())
-	{
-		_textures[name].texture = tex;
-	}
-	else if (i->second.texture != tex)
-	{
-		i->second.texture = tex;
-	}
-}
-
-Texture::Pointer Material::texture(const String& name)
-{
-	auto i = _textures.find(name);
-	return (i == _textures.end()) ? Texture::Pointer() : i->second.texture;
+	_textures[name] = tex;
 }
 
 uint32_t Material::sortingKey() const

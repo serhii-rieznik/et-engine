@@ -1,4 +1,5 @@
 #include "../rendering/metal/metal.mm"
+#include "../rendering/metal/metal_databuffer.mm"
 #include "../rendering/metal/metal_indexbuffer.mm"
 #include "../rendering/metal/metal_pipelinestate.mm"
 #include "../rendering/metal/metal_program.mm"

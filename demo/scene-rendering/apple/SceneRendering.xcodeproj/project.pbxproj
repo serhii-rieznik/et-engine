@@ -16,7 +16,6 @@
 		6E12DA2E1CD691A3006037A5 /* libfbxsdk.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 6E12DA2C1CD69147006037A5 /* libfbxsdk.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		6E12DA301CD6926C006037A5 /* media in Resources */ = {isa = PBXBuildFile; fileRef = 6E12DA2F1CD6926C006037A5 /* media */; };
 		A566F2841A3E761F00E5A513 /* DemoSceneLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A566F27F1A3E761F00E5A513 /* DemoSceneLoader.cpp */; };
-		A566F2851A3E761F00E5A513 /* DemoSceneRenderer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A566F2811A3E761F00E5A513 /* DemoSceneRenderer.cpp */; };
 		A57B42901A58DAB400C896E1 /* OpenAL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A57B428F1A58DAB400C896E1 /* OpenAL.framework */; };
 		A57B42921A58DAB800C896E1 /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A57B42911A58DAB800C896E1 /* StoreKit.framework */; };
 		A5D8EABE1A3CD89300E3620B /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5D8EABD1A3CD89300E3620B /* main.cpp */; };
@@ -61,8 +60,6 @@
 		6E12DA2F1CD6926C006037A5 /* media */ = {isa = PBXFileReference; lastKnownFileType = folder; name = media; path = ../../media; sourceTree = "<group>"; };
 		A566F27F1A3E761F00E5A513 /* DemoSceneLoader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DemoSceneLoader.cpp; path = renderer/DemoSceneLoader.cpp; sourceTree = "<group>"; };
 		A566F2801A3E761F00E5A513 /* DemoSceneLoader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DemoSceneLoader.h; path = renderer/DemoSceneLoader.h; sourceTree = "<group>"; };
-		A566F2811A3E761F00E5A513 /* DemoSceneRenderer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DemoSceneRenderer.cpp; path = renderer/DemoSceneRenderer.cpp; sourceTree = "<group>"; };
-		A566F2821A3E761F00E5A513 /* DemoSceneRenderer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DemoSceneRenderer.h; path = renderer/DemoSceneRenderer.h; sourceTree = "<group>"; };
 		A57B428F1A58DAB400C896E1 /* OpenAL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenAL.framework; path = System/Library/Frameworks/OpenAL.framework; sourceTree = SDKROOT; };
 		A57B42911A58DAB800C896E1 /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
 		A5D8EA931A3CD5A600E3620B /* SceneRendering.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SceneRendering.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -172,8 +169,6 @@
 			children = (
 				A566F27F1A3E761F00E5A513 /* DemoSceneLoader.cpp */,
 				A566F2801A3E761F00E5A513 /* DemoSceneLoader.h */,
-				A566F2811A3E761F00E5A513 /* DemoSceneRenderer.cpp */,
-				A566F2821A3E761F00E5A513 /* DemoSceneRenderer.h */,
 			);
 			name = renderer;
 			sourceTree = "<group>";
@@ -268,7 +263,6 @@
 				A5D8EABE1A3CD89300E3620B /* main.cpp in Sources */,
 				A566F2841A3E761F00E5A513 /* DemoSceneLoader.cpp in Sources */,
 				A5D8EC401A3CE18900E3620B /* MainController.cpp in Sources */,
-				A566F2851A3E761F00E5A513 /* DemoSceneRenderer.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

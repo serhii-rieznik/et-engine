@@ -18,6 +18,13 @@
 namespace et
 {
 
+enum : uint32_t
+{
+	VertexStreamBufferIndex = 0,
+	ProgramSpecificBufferIndex = 4,
+	SharedVariablesBufferIndex = 5,
+};
+
 struct MetalState
 {
 	CAMetalLayer* layer = nil;
