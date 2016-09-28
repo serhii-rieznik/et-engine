@@ -833,11 +833,12 @@ s3d::ElementContainer::Pointer OBJLoader::generateVertexBuffers(s3d::Storage& st
 	{
 		auto material = _materialProvider->materialWithName(i.material->name());
 		
-		auto rb = RenderBatch::Pointer::create(material, vao, translationMatrix(i.center), i.start, i.count);
+		auto rb = RenderBatch::Pointer::create(material, vao, identityMatrix, i.start, i.count);
 		rb->setVertexStorage(_vertexData);
 		rb->setIndexArray(_indices);
 		
 		s3d::Mesh::Pointer object = Mesh::Pointer::create(i.name, i.material, result.ptr());
+		object->setTranslation(i.center);
 		object->addRenderBatch(rb);
         object->calculateSupportData();
 	}

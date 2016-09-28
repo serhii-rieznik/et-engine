@@ -8,8 +8,9 @@
 #pragma once
 
 #include <et/app/context.h>
-#include <et/rendering/rendercontextparams.h>
+#include <et/rendering/constbuffer.h>
 #include <et/rendering/sharedvariables.h>
+#include <et/rendering/rendercontextparams.h>
 #include <et/rendering/interface/databuffer.h>
 #include <et/rendering/interface/renderpass.h>
 #include <et/rendering/interface/pipelinestate.h>
@@ -33,6 +34,9 @@ namespace et
 
 		SharedVariables& variables()
 			{ return _sharedVariables; }
+
+		ConstBuffer& sharedConstBuffer()
+			{ return _sharedConstBuffer; }
 
 		virtual RenderingAPI api() const = 0;
 
@@ -82,6 +86,7 @@ namespace et
 	private:
 		RenderContext* _rc = nullptr;
 		SharedVariables _sharedVariables;
+		ConstBuffer _sharedConstBuffer;
 	};
 
 /*

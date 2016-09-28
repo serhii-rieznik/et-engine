@@ -27,7 +27,7 @@ public:
 	MetalDataBuffer(MetalState&, uint32_t size);
 	~MetalDataBuffer();
 
-	void setData(const BinaryDataStorage&) override;
+	void setData(const void* ptr, uint32_t offset, uint32_t size) override;
 	uint32_t size() const override;
 
 	const MetalNativeBuffer& nativeBuffer() const;

@@ -178,11 +178,8 @@ namespace et
 		uint32_t dataSize() const
 			{ return _dataSize; }
 
-		/*
-		 * unsafe access 
-		 */
-		DataTypePointer mutableDataUnsafe()
-			{ return _mutableData; }
+		bool empty() const
+			{ return _size == 0; }
 
 		/*
 		 * wrappers

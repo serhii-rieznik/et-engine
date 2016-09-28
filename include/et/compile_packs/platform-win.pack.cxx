@@ -4,6 +4,5 @@
 #include "../platform-win/locale.win.cpp"
 #include "../platform-win/log.win.cpp"
 #include "../platform-win/memory.win.cpp"
-#include "../platform-win/opengl.win.cpp"
 #include "../platform-win/rendercontext.win.cpp"
 #include "../platform-win/tools.win.cpp"

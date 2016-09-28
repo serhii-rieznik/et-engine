@@ -6,7 +6,6 @@
  */
 
 #include <et/core/criticalsection.h>
-#include <et/core/mutex.h>
 
 #if (ET_PLATFORM_WIN)
 #   include <Windows.h>
@@ -71,61 +70,6 @@ namespace et
 #       endif
         }
 	};
-
-    class MutexPrivate
-    {
-    private:
-#   if (ET_PLATFORM_WIN)
-        HANDLE _mutex;
-#   else
-        pthread_mutex_t mutex;
-#   endif
-        
-    public:
-        MutexPrivate()
-        {
-#       if (ET_PLATFORM_WIN)
-            _mutex = CreateMutex(0, false, 0);
-#       else
-            pthread_mutexattr_t attrib = { };
-            pthread_mutexattr_init(&attrib);
-            pthread_mutexattr_settype(&attrib, PTHREAD_MUTEX_ERRORCHECK);
-            pthread_mutex_init(&mutex, &attrib);
-            pthread_mutexattr_destroy(&attrib);
-#       endif
-        }
-        
-        ~MutexPrivate()
-        {
-#       if (ET_PLATFORM_WIN)
-            CloseHandle(_mutex);
-#       else
-            pthread_mutex_destroy(&mutex);
-#       endif
-        }
-        
-        void lock()
-        {
-#       if (ET_PLATFORM_WIN)
-            WaitForSingleObject(_mutex, INFINITE);
-#       else
-            int result = pthread_mutex_lock(&mutex);
-            if (result == EBUSY)
-                log::error("Mutex already locked.");
-#       endif
-        }
-        
-        void unlock()
-        {
-#       if (ET_PLATFORM_WIN)
-            ReleaseMutex(_mutex);
-#       else
-            int result = pthread_mutex_unlock(&mutex);
-            if (result == EPERM)
-                log::error("Mutex already unlocked or was locked from another thread.");
-#       endif
-        }
-    };
 }
 
 using namespace et;
@@ -148,24 +92,4 @@ void CriticalSection::enter()
 void CriticalSection::leave()
 {
     _private->leave();
-}
-
-Mutex::Mutex()
-{
-    ET_PIMPL_INIT(Mutex)
-}
-
-Mutex::~Mutex()
-{
-    ET_PIMPL_FINALIZE(Mutex)
-}
-
-void Mutex::lock()
-{
-    _private->lock();
-}
-
-void Mutex::unlock()
-{
-    _private->unlock();
 }

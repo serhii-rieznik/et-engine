@@ -54,6 +54,7 @@ void MetalRenderer::init(const RenderContextParameters& params)
 	application().context().objects[4] = (__bridge void*)_private->metal.layer;
 
 	variables().init(this);
+	sharedConstBuffer().init(this);
 }
 
 void MetalRenderer::shutdown()
@@ -94,8 +95,6 @@ void MetalRenderer::present()
 {
 	[_private->metal.mainCommandBuffer presentDrawable:_private->metal.mainDrawable];
 	[_private->metal.mainCommandBuffer commit];
-	[_private->metal.mainCommandBuffer waitUntilCompleted];
-	
 	_private->metal.mainCommandBuffer = nil;
 	_private->metal.mainDrawable = nil;
 }
@@ -166,7 +165,7 @@ PipelineState::Pointer MetalRenderer::createPipelineState(RenderPass::Pointer pa
 
 	if (result.invalid())
 	{
-		result = MetalPipelineState::Pointer::create(_private->metal);
+		result = MetalPipelineState::Pointer::create(this, _private->metal);
 		result->setRenderTargetFormat(TextureFormat::RGBA8);
 		result->setInputLayout(vs->vertexBuffer()->declaration());
 		result->setDepthState(mtl->depthState());

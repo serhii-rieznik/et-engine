@@ -12,6 +12,8 @@
 		5C4F7F1A1D9AF98D0054FA50 /* databuffer.h in Headers */ = {isa = PBXBuildFile; fileRef = 5C4F7F191D9AF98D0054FA50 /* databuffer.h */; };
 		5C4F7F1D1D9AFB470054FA50 /* metal_databuffer.mm in Sources */ = {isa = PBXBuildFile; fileRef = 5C4F7F1B1D9AFB470054FA50 /* metal_databuffer.mm */; };
 		5C4F7F1E1D9AFB470054FA50 /* metal_databuffer.h in Headers */ = {isa = PBXBuildFile; fileRef = 5C4F7F1C1D9AFB470054FA50 /* metal_databuffer.h */; };
+		5C4F7F221D9C324F0054FA50 /* constbuffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5C4F7F201D9C324F0054FA50 /* constbuffer.cpp */; };
+		5C4F7F231D9C324F0054FA50 /* constbuffer.h in Headers */ = {isa = PBXBuildFile; fileRef = 5C4F7F211D9C324F0054FA50 /* constbuffer.h */; };
 		5CD5A9BE1D932CFA003FD770 /* app.pack.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 5CD5A8721D932CF4003FD770 /* app.pack.cxx */; };
 		5CD5A9BF1D932CFA003FD770 /* camera.pack.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 5CD5A8731D932CF4003FD770 /* camera.pack.cxx */; };
 		5CD5A9C01D932CFA003FD770 /* core.pack.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 5CD5A8741D932CF4003FD770 /* core.pack.cxx */; };
@@ -32,6 +34,8 @@
 		5C4F7F191D9AF98D0054FA50 /* databuffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = databuffer.h; sourceTree = "<group>"; };
 		5C4F7F1B1D9AFB470054FA50 /* metal_databuffer.mm */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; fileEncoding = 4; path = metal_databuffer.mm; sourceTree = "<group>"; };
 		5C4F7F1C1D9AFB470054FA50 /* metal_databuffer.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; fileEncoding = 4; path = metal_databuffer.h; sourceTree = "<group>"; };
+		5C4F7F201D9C324F0054FA50 /* constbuffer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = constbuffer.cpp; sourceTree = "<group>"; };
+		5C4F7F211D9C324F0054FA50 /* constbuffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = constbuffer.h; sourceTree = "<group>"; };
 		5CD5A8561D932CF4003FD770 /* appevironment.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = appevironment.h; sourceTree = "<group>"; };
 		5CD5A8571D932CF4003FD770 /* application.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; path = application.cpp; sourceTree = "<group>"; };
 		5CD5A8581D932CF4003FD770 /* application.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = application.h; sourceTree = "<group>"; };
@@ -104,7 +108,6 @@
 		5CD5A89E1D932CF4003FD770 /* memory.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = memory.h; sourceTree = "<group>"; };
 		5CD5A89F1D932CF4003FD770 /* memoryallocator.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; path = memoryallocator.cpp; sourceTree = "<group>"; };
 		5CD5A8A01D932CF4003FD770 /* memoryallocator.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = memoryallocator.h; sourceTree = "<group>"; };
-		5CD5A8A11D932CF4003FD770 /* mutex.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = mutex.h; sourceTree = "<group>"; };
 		5CD5A8A21D932CF4003FD770 /* notifytimer.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; path = notifytimer.cpp; sourceTree = "<group>"; };
 		5CD5A8A31D932CF4003FD770 /* notifytimer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = notifytimer.h; sourceTree = "<group>"; };
 		5CD5A8A41D932CF4003FD770 /* object.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = object.h; sourceTree = "<group>"; };
@@ -231,12 +234,10 @@
 		5CD5A9251D932CF4003FD770 /* application.win.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; path = application.win.cpp; sourceTree = "<group>"; };
 		5CD5A9261D932CF4003FD770 /* context.win.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; path = context.win.cpp; sourceTree = "<group>"; };
 		5CD5A9271D932CF4003FD770 /* context.win.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = context.win.h; sourceTree = "<group>"; };
-		5CD5A9281D932CF4003FD770 /* glee.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = glee.h; sourceTree = "<group>"; };
 		5CD5A9291D932CF4003FD770 /* input.win.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; path = input.win.cpp; sourceTree = "<group>"; };
 		5CD5A92A1D932CF4003FD770 /* locale.win.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; path = locale.win.cpp; sourceTree = "<group>"; };
 		5CD5A92B1D932CF4003FD770 /* log.win.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; path = log.win.cpp; sourceTree = "<group>"; };
 		5CD5A92C1D932CF4003FD770 /* memory.win.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; path = memory.win.cpp; sourceTree = "<group>"; };
-		5CD5A92D1D932CF4003FD770 /* opengl.win.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; path = opengl.win.cpp; sourceTree = "<group>"; };
 		5CD5A92E1D932CF4003FD770 /* rendercontext.win.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; path = rendercontext.win.cpp; sourceTree = "<group>"; };
 		5CD5A92F1D932CF4003FD770 /* tools.win.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; path = tools.win.cpp; sourceTree = "<group>"; };
 		5CD5A9321D932CF4003FD770 /* helpers.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; path = helpers.cpp; sourceTree = "<group>"; };
@@ -475,7 +476,6 @@
 				5CD5A89E1D932CF4003FD770 /* memory.h */,
 				5CD5A89F1D932CF4003FD770 /* memoryallocator.cpp */,
 				5CD5A8A01D932CF4003FD770 /* memoryallocator.h */,
-				5CD5A8A11D932CF4003FD770 /* mutex.h */,
 				5CD5A8A21D932CF4003FD770 /* notifytimer.cpp */,
 				5CD5A8A31D932CF4003FD770 /* notifytimer.h */,
 				5CD5A8A41D932CF4003FD770 /* object.h */,
@@ -658,12 +658,10 @@
 				5CD5A9251D932CF4003FD770 /* application.win.cpp */,
 				5CD5A9261D932CF4003FD770 /* context.win.cpp */,
 				5CD5A9271D932CF4003FD770 /* context.win.h */,
-				5CD5A9281D932CF4003FD770 /* glee.h */,
 				5CD5A9291D932CF4003FD770 /* input.win.cpp */,
 				5CD5A92A1D932CF4003FD770 /* locale.win.cpp */,
 				5CD5A92B1D932CF4003FD770 /* log.win.cpp */,
 				5CD5A92C1D932CF4003FD770 /* memory.win.cpp */,
-				5CD5A92D1D932CF4003FD770 /* opengl.win.cpp */,
 				5CD5A92E1D932CF4003FD770 /* rendercontext.win.cpp */,
 				5CD5A92F1D932CF4003FD770 /* tools.win.cpp */,
 			);
@@ -677,6 +675,8 @@
 				5CD5A9311D932CF4003FD770 /* base */,
 				5CD5A9441D932CF4003FD770 /* dx12 */,
 				5CD5A9531D932CF4003FD770 /* framebuffer.h */,
+				5C4F7F201D9C324F0054FA50 /* constbuffer.cpp */,
+				5C4F7F211D9C324F0054FA50 /* constbuffer.h */,
 				5CD5A9541D932CF4003FD770 /* interface */,
 				5CD5A95C1D932CF4003FD770 /* material.cpp */,
 				5CD5A95D1D932CF4003FD770 /* material.h */,
@@ -919,6 +919,7 @@
 			files = (
 				5C4F7F1A1D9AF98D0054FA50 /* databuffer.h in Headers */,
 				5C4F7F181D9AF84C0054FA50 /* sharedvariables.h in Headers */,
+				5C4F7F231D9C324F0054FA50 /* constbuffer.h in Headers */,
 				5C4F7F1E1D9AFB470054FA50 /* metal_databuffer.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -978,6 +979,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5C4F7F221D9C324F0054FA50 /* constbuffer.cpp in Sources */,
 				5CD5A9C71D932CFA003FD770 /* rendering_metal.pack.mm in Sources */,
 				5C4F7F1D1D9AFB470054FA50 /* metal_databuffer.mm in Sources */,
 				5CD5A9C91D932CFA003FD770 /* sound.pack.cxx in Sources */,

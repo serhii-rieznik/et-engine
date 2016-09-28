@@ -59,7 +59,7 @@ DataBuffer::Pointer SharedVariables::buffer()
 {
 	if (!_bufferDataValid)
 	{
-		_buffer->setData(_localData);
+		_buffer->setData(_localData.binary(), 0, _localData.size());
 		_bufferDataValid = true;
 	}
 

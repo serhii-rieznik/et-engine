@@ -6,6 +6,7 @@
  */
 
 #include <et/rendering/metal/metal.h>
+#include <et/rendering/metal/metal_renderer.h>
 #include <et/rendering/metal/metal_program.h>
 #include <et/rendering/metal/metal_texture.h>
 #include <et/rendering/metal/metal_pipelinestate.h>
@@ -16,8 +17,8 @@ namespace et
 class MetalPipelineStatePrivate
 {
 public:
-	MetalPipelineStatePrivate(MetalState& mtl) :
-		metal(mtl) { }
+	MetalPipelineStatePrivate(MetalState& mtl, MetalRenderer* ren) :
+		metal(mtl), renderer(ren) { }
 
 	void loadVariables(MTLArgument* arg);
 	void validateVariables(MTLArgument* arg);
@@ -29,20 +30,21 @@ public:
 	};
 
 	MetalState& metal;
+	MetalRenderer* renderer = nullptr;
     MetalNativePipelineState state;
 
 	Map<String, ProgramVariable> variables;
-	MetalNativeBuffer::Pointer variablesBuffer;
+	BinaryDataStorage variablesBuffer;
 	uint32_t variablesBufferSize = 0;
-	NSRange modifiedRange { };
 
 	bool bindVariablesToVertex = false;
 	bool bindVariablesToFragment = false;
+	bool buildConstBuffer = false;
 };
 
-MetalPipelineState::MetalPipelineState(MetalState& mtl)
+MetalPipelineState::MetalPipelineState(MetalRenderer* renderer, MetalState& mtl)
 {
-	ET_PIMPL_INIT(MetalPipelineState, mtl);
+	ET_PIMPL_INIT(MetalPipelineState, mtl, renderer);
 }
 
 MetalPipelineState::~MetalPipelineState()
@@ -111,10 +113,7 @@ void MetalPipelineState::build()
 		}
 	}
 
-	if (!_private->variables.empty())
-	{
-		_private->variablesBuffer = MetalNativeBuffer::Pointer::create(_private->metal, _private->variablesBufferSize);
-	}
+	_private->buildConstBuffer = _private->bindVariablesToVertex || _private->bindVariablesToFragment;
 
     if (error != nil)
     {
@@ -135,24 +134,18 @@ const MetalNativePipelineState& MetalPipelineState::nativeState() const
     return _private->state;
 }
 
-const MetalNativeBuffer& MetalPipelineState::variablesBuffer() const
-{
-	return _private->variablesBuffer.reference();
-}
-
 void MetalPipelineState::uploadProgramVariable(const String& name, const void* ptr, uint32_t size)
 {
 	auto var = _private->variables.find(name);
-	if (var == _private->variables.end())
-		return;
-
-	uint8_t* bufferData = reinterpret_cast<uint8_t*>([_private->variablesBuffer->buffer() contents]);
-	memcpy(bufferData + var->second.offset, ptr, size);
-
-	uint32_t endLocation = var->second.offset + size;
-	uint32_t currentEndLocation = static_cast<uint32_t>(_private->modifiedRange.location + _private->modifiedRange.length);
-	_private->modifiedRange.location = std::min(static_cast<uint32_t>(_private->modifiedRange.location), var->second.offset);
-	_private->modifiedRange.length = std::max(endLocation, currentEndLocation) - _private->modifiedRange.location;
+	if (var != _private->variables.end())
+	{
+		if (_private->variablesBuffer.empty())
+		{
+			_private->variablesBuffer.resize(_private->variablesBufferSize);
+		}
+		auto* dst = _private->variablesBuffer.element_ptr(var->second.offset);
+		memcpy(dst, ptr, size);
+	}
 }
 
 void MetalPipelineState::bind(MetalNativeEncoder& e, Material::Pointer material)
@@ -169,14 +162,24 @@ void MetalPipelineState::bind(MetalNativeEncoder& e, Material::Pointer material)
 
 	}
 
+	uint32_t sharedBufferOffset = 0;
+	MetalDataBuffer::Pointer sharedBuffer = _private->renderer->sharedConstBuffer().buffer();
+	id<MTLBuffer> mtlSharedBuffer = sharedBuffer->nativeBuffer().buffer();
+	if (_private->buildConstBuffer)
+	{
+		uint8_t* dst = nullptr;
+		_private->renderer->sharedConstBuffer().allocateData(_private->variablesBufferSize, &dst, sharedBufferOffset);
+		memcpy(dst, _private->variablesBuffer.data(), _private->variablesBufferSize);
+	}
+
 	if (_private->bindVariablesToVertex)
 	{
-		[e.encoder setVertexBuffer:_private->variablesBuffer->buffer() offset:0 atIndex:ProgramSpecificBufferIndex];
+		[e.encoder setVertexBuffer:mtlSharedBuffer offset:sharedBufferOffset atIndex:ProgramSpecificBufferIndex];
 	}
 
 	if (_private->bindVariablesToFragment)
 	{
-		[e.encoder setFragmentBuffer:_private->variablesBuffer->buffer() offset:0 atIndex:ProgramSpecificBufferIndex];
+		[e.encoder setFragmentBuffer:mtlSharedBuffer offset:sharedBufferOffset atIndex:ProgramSpecificBufferIndex];
 	}
 
 	[e.encoder setDepthStencilState:_private->state.depthStencilState];

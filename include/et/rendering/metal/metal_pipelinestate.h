@@ -14,7 +14,7 @@ namespace et
 	struct MetalState;
     struct MetalNativePipelineState;
 	struct MetalNativeEncoder;
-    
+    class MetalRenderer;
 	class MetalPipelineStatePrivate;
 	class MetalPipelineState : public PipelineState
 	{
@@ -22,13 +22,12 @@ namespace et
 		ET_DECLARE_POINTER(MetalPipelineState);
 
 	public:
-		MetalPipelineState(MetalState&);
+		MetalPipelineState(MetalRenderer*, MetalState&);
 		~MetalPipelineState();
 
 		void build() override;
         
         const MetalNativePipelineState& nativeState() const;
-		const MetalNativeBuffer& variablesBuffer() const;
 
 		void bind(MetalNativeEncoder&, Material::Pointer);
 

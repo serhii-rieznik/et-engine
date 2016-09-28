@@ -40,7 +40,7 @@ et::s3d::Scene::Pointer SceneLoader::loadFromFile(const std::string& fileName)
 void SceneLoader::loadObjFile(const std::string& fileName, et::s3d::Scene::Pointer scene)
 {
 	ObjectsCache localCache;
-    OBJLoader loader(fileName, OBJLoader::Option_JustLoad);
+    OBJLoader loader(fileName, OBJLoader::Option_CalculateTransforms);
     auto container = loader.load(_rc, this, scene->storage(), localCache);
 
     // compute bounding box

@@ -82,6 +82,8 @@ void MetalRenderPass::pushRenderBatch(RenderBatch::Pointer batch)
 
 void MetalRenderPass::endEncoding()
 {
+	_private->renderer->sharedConstBuffer().flush();
+	
 	[_private->encoder.encoder endEncoding];
 	_private->encoder.encoder = nil;
 }

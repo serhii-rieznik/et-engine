@@ -45,14 +45,14 @@ uint32_t MetalDataBuffer::size() const
 	return static_cast<uint32_t>([_private->buffer.buffer() length]);
 }
 
-void MetalDataBuffer::setData(const BinaryDataStorage& data)
+void MetalDataBuffer::setData(const void* src, uint32_t offset, uint32_t sz)
 {
 	ET_ASSERT(_private->writable);
-	ET_ASSERT(data.size() <= size());
+	ET_ASSERT(offset + sz <= size());
 
 	id<MTLBuffer> buf = _private->buffer.buffer();
-	memcpy([buf contents], data.binary(), data.size());
-	[buf didModifyRange:NSMakeRange(0, data.size())];
+	memcpy(reinterpret_cast<uint8_t*>([buf contents]) + offset, src, sz);
+	[buf didModifyRange:NSMakeRange(offset, sz)];
 }
 
 const MetalNativeBuffer& MetalDataBuffer::nativeBuffer() const

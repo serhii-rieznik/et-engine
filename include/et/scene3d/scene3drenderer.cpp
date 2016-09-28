@@ -23,11 +23,6 @@ void s3d::Renderer::render(RenderContext* rc, const Scene& scene, const Camera& 
     if (hasFlag(RenderMeshes) == false)
         return;
 
-#if (ET_EXPOSE_OLD_RENDER_STATE)
-    auto rs = rc->renderState();
-	rs.setFillMode(hasFlag(Wireframe) ? FillMode::Wireframe : FillMode::Solid);
-#endif
-
     auto lights = scene.childrenOfType(et::s3d::ElementType::Light);
     auto lightPosition = camera.position();
     if (lights.empty() == false)
@@ -46,10 +41,6 @@ void s3d::Renderer::render(RenderContext* rc, const Scene& scene, const Camera& 
 	RenderPass::Pointer pass = rc->renderer()->allocateRenderPass(passInfo);
 	renderMeshList(pass, scene.childrenOfType(s3d::ElementType::Mesh));
 	rc->renderer()->submitRenderPass(pass);
-    
-#if (ET_EXPOSE_OLD_RENDER_STATE)
-	rs.setFillMode(FillMode::Solid);
-#endif
 }
 
 void s3d::Renderer::renderMeshList(RenderPass::Pointer pass, const s3d::BaseElement::List& meshes)
