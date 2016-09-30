@@ -20,6 +20,9 @@ namespace et
 	public:
 		ET_DECLARE_POINTER(PipelineState);
 
+		static const String& kWorldTransform()
+			{ static String value("worldTransform"); return value; }
+
 	public:
 		virtual ~PipelineState() = default;
 

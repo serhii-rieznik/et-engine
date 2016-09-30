@@ -33,7 +33,7 @@ namespace et
 		{
 			Target target;
 			Camera camera;
-			vec3 defaultLightPosition;
+			Camera light;
 		};
 
 	public:

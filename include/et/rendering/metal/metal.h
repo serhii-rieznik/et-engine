@@ -21,8 +21,9 @@ namespace et
 enum : uint32_t
 {
 	VertexStreamBufferIndex = 0,
-	ProgramSpecificBufferIndex = 4,
-	SharedVariablesBufferIndex = 5,
+	ObjectVariablesBufferIndex = 4,
+	MaterialVariablesBufferIndex = 5,
+	PassVariablesBufferIndex = 6,
 };
 
 struct MetalState

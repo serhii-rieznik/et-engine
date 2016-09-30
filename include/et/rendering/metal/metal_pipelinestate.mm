@@ -20,26 +20,34 @@ public:
 	MetalPipelineStatePrivate(MetalState& mtl, MetalRenderer* ren) :
 		metal(mtl), renderer(ren) { }
 
-	void loadVariables(MTLArgument* arg);
-	void validateVariables(MTLArgument* arg);
-
 	struct ProgramVariable
 	{
 		uint32_t offset = 0;
 		uint32_t size = 0;
 	};
+	using VariablesMap = UnorderedMap<String, ProgramVariable>;
+	void loadVariables(MTLArgument*, VariablesMap&, uint32_t& bufferSize);
+	void validateVariables(MTLArgument*, const VariablesMap&, uint32_t bufferSize);
 
 	MetalState& metal;
 	MetalRenderer* renderer = nullptr;
     MetalNativePipelineState state;
 
-	Map<String, ProgramVariable> variables;
-	BinaryDataStorage variablesBuffer;
-	uint32_t variablesBufferSize = 0;
+	VariablesMap materialVariables;
+	BinaryDataStorage materialVariablesBuffer;
+	uint32_t materialVariablesBufferSize = 0;
 
-	bool bindVariablesToVertex = false;
-	bool bindVariablesToFragment = false;
-	bool buildConstBuffer = false;
+	VariablesMap objectVariables;
+	BinaryDataStorage objectVariablesBuffer;
+	uint32_t objectVariablesBufferSize = 0;
+
+	bool bindMaterialVariablesToVertex = false;
+	bool bindMaterialVariablesToFragment = false;
+	bool buildMaterialBuffer = false;
+
+	bool bindObjectVariablesToVertex = false;
+	bool bindObjectVariablesToFragment = false;
+	bool buildObjectBuffer = false;
 };
 
 MetalPipelineState::MetalPipelineState(MetalRenderer* renderer, MetalState& mtl)
@@ -89,31 +97,46 @@ void MetalPipelineState::build()
 
 	for (MTLArgument* arg in reflection.vertexArguments)
 	{
-		if ((arg.index == ProgramSpecificBufferIndex) && (arg.type == MTLArgumentTypeBuffer) && (arg.bufferDataType == MTLDataTypeStruct))
+		if ((arg.type == MTLArgumentTypeBuffer) && (arg.bufferDataType == MTLDataTypeStruct))
 		{
-			_private->loadVariables(arg);
-			_private->bindVariablesToVertex = true;
+			if (arg.index == MaterialVariablesBufferIndex)
+			{
+				_private->loadVariables(arg, _private->materialVariables, _private->materialVariablesBufferSize);
+				_private->bindMaterialVariablesToVertex = true;
+			}
+			else if (arg.index == ObjectVariablesBufferIndex)
+			{
+				_private->loadVariables(arg, _private->objectVariables, _private->objectVariablesBufferSize);
+				_private->bindObjectVariablesToVertex = true;
+			}
 		}
 	}
 
 	for (MTLArgument* arg in reflection.fragmentArguments)
 	{
-		if ((arg.index == ProgramSpecificBufferIndex) && (arg.type == MTLArgumentTypeBuffer) &&
-			(arg.bufferDataType == MTLDataTypeStruct))
+		if ((arg.type == MTLArgumentTypeBuffer) && (arg.bufferDataType == MTLDataTypeStruct))
 		{
-			if (_private->bindVariablesToVertex)
+			if (arg.index == MaterialVariablesBufferIndex)
 			{
-				_private->validateVariables(arg);
+				if (_private->bindMaterialVariablesToVertex)
+					_private->validateVariables(arg, _private->materialVariables, _private->materialVariablesBufferSize);
+				else
+					_private->loadVariables(arg, _private->materialVariables, _private->materialVariablesBufferSize);
+				_private->bindMaterialVariablesToFragment = true;
 			}
-			else
+			else if (arg.index == ObjectVariablesBufferIndex)
 			{
-				_private->loadVariables(arg);
+				if (_private->bindObjectVariablesToVertex)
+					_private->validateVariables(arg, _private->objectVariables, _private->objectVariablesBufferSize);
+				else
+					_private->loadVariables(arg, _private->objectVariables, _private->objectVariablesBufferSize);
+				_private->bindObjectVariablesToVertex = true;
 			}
-			_private->bindVariablesToFragment = true;
 		}
 	}
 
-	_private->buildConstBuffer = _private->bindVariablesToVertex || _private->bindVariablesToFragment;
+	_private->buildMaterialBuffer = _private->bindMaterialVariablesToVertex || _private->bindMaterialVariablesToFragment;
+	_private->buildObjectBuffer = _private->bindMaterialVariablesToVertex || _private->bindObjectVariablesToFragment;
 
     if (error != nil)
     {
@@ -134,16 +157,30 @@ const MetalNativePipelineState& MetalPipelineState::nativeState() const
     return _private->state;
 }
 
-void MetalPipelineState::uploadProgramVariable(const String& name, const void* ptr, uint32_t size)
+void MetalPipelineState::uploadMaterialVariable(const String& name, const void* ptr, uint32_t size)
 {
-	auto var = _private->variables.find(name);
-	if (var != _private->variables.end())
+	auto var = _private->materialVariables.find(name);
+	if (var != _private->materialVariables.end())
 	{
-		if (_private->variablesBuffer.empty())
+		if (_private->materialVariablesBuffer.empty())
 		{
-			_private->variablesBuffer.resize(_private->variablesBufferSize);
+			_private->materialVariablesBuffer.resize(_private->materialVariablesBufferSize);
 		}
-		auto* dst = _private->variablesBuffer.element_ptr(var->second.offset);
+		auto* dst = _private->materialVariablesBuffer.element_ptr(var->second.offset);
+		memcpy(dst, ptr, size);
+	}
+}
+
+void MetalPipelineState::uploadObjectVariable(const String& name, const void* ptr, uint32_t size)
+{
+	auto var = _private->objectVariables.find(name);
+	if (var != _private->objectVariables.end())
+	{
+		if (_private->objectVariablesBuffer.empty())
+		{
+			_private->objectVariablesBuffer.resize(_private->objectVariablesBufferSize);
+		}
+		auto* dst = _private->objectVariablesBuffer.element_ptr(var->second.offset);
 		memcpy(dst, ptr, size);
 	}
 }
@@ -153,7 +190,7 @@ void MetalPipelineState::bind(MetalNativeEncoder& e, Material::Pointer material)
 	for (const auto& p : material->properties())
 	{
 		const Material::Property& prop = p.second;
-		uploadProgramVariable(p.first, prop.data, prop.length);
+		uploadMaterialVariable(p.first, prop.data, prop.length);
 	}
 
 	// TODO : set textures
@@ -162,24 +199,43 @@ void MetalPipelineState::bind(MetalNativeEncoder& e, Material::Pointer material)
 
 	}
 
-	uint32_t sharedBufferOffset = 0;
 	MetalDataBuffer::Pointer sharedBuffer = _private->renderer->sharedConstBuffer().buffer();
 	id<MTLBuffer> mtlSharedBuffer = sharedBuffer->nativeBuffer().buffer();
-	if (_private->buildConstBuffer)
+
+	uint32_t materialBufferOffset = 0;
+	if (_private->buildMaterialBuffer)
 	{
 		uint8_t* dst = nullptr;
-		_private->renderer->sharedConstBuffer().allocateData(_private->variablesBufferSize, &dst, sharedBufferOffset);
-		memcpy(dst, _private->variablesBuffer.data(), _private->variablesBufferSize);
+		_private->renderer->sharedConstBuffer().allocateData(_private->materialVariablesBufferSize, &dst, materialBufferOffset);
+		memcpy(dst, _private->materialVariablesBuffer.data(), _private->materialVariablesBufferSize);
 	}
 
-	if (_private->bindVariablesToVertex)
+	uint32_t objectBufferOffset = 0;
+	if (_private->buildObjectBuffer)
 	{
-		[e.encoder setVertexBuffer:mtlSharedBuffer offset:sharedBufferOffset atIndex:ProgramSpecificBufferIndex];
+		uint8_t* dst = nullptr;
+		_private->renderer->sharedConstBuffer().allocateData(_private->objectVariablesBufferSize, &dst, objectBufferOffset);
+		memcpy(dst, _private->objectVariablesBuffer.data(), _private->objectVariablesBufferSize);
 	}
 
-	if (_private->bindVariablesToFragment)
+	if (_private->bindMaterialVariablesToVertex)
 	{
-		[e.encoder setFragmentBuffer:mtlSharedBuffer offset:sharedBufferOffset atIndex:ProgramSpecificBufferIndex];
+		[e.encoder setVertexBuffer:mtlSharedBuffer offset:materialBufferOffset atIndex:MaterialVariablesBufferIndex];
+	}
+
+	if (_private->bindMaterialVariablesToFragment)
+	{
+		[e.encoder setFragmentBuffer:mtlSharedBuffer offset:materialBufferOffset atIndex:MaterialVariablesBufferIndex];
+	}
+
+	if (_private->bindObjectVariablesToVertex)
+	{
+		[e.encoder setVertexBuffer:mtlSharedBuffer offset:objectBufferOffset atIndex:ObjectVariablesBufferIndex];
+	}
+
+	if (_private->bindObjectVariablesToFragment)
+	{
+		[e.encoder setFragmentBuffer:mtlSharedBuffer offset:objectBufferOffset atIndex:ObjectVariablesBufferIndex];
 	}
 
 	[e.encoder setDepthStencilState:_private->state.depthStencilState];
@@ -189,9 +245,9 @@ void MetalPipelineState::bind(MetalNativeEncoder& e, Material::Pointer material)
 /*
  * Private
  */
-void MetalPipelineStatePrivate::loadVariables(MTLArgument* arg)
+void MetalPipelineStatePrivate::loadVariables(MTLArgument* arg, VariablesMap& variables, uint32_t& bufferSize)
 {
-	variablesBufferSize = static_cast<uint32_t>(arg.bufferDataSize);
+	bufferSize = static_cast<uint32_t>(arg.bufferDataSize);
 	MTLStructType* structType = [arg bufferStructType];
 	for (MTLStructMember* member in structType.members)
 	{
@@ -200,15 +256,15 @@ void MetalPipelineStatePrivate::loadVariables(MTLArgument* arg)
 	}
 }
 
-void MetalPipelineStatePrivate::validateVariables(MTLArgument* arg)
+void MetalPipelineStatePrivate::validateVariables(MTLArgument* arg, const VariablesMap& variables, uint32_t bufferSize)
 {
-	ET_ASSERT(arg.bufferDataSize == variablesBufferSize);
+	ET_ASSERT(arg.bufferDataSize == bufferSize);
 	MTLStructType* structType = [arg bufferStructType];
 	for (MTLStructMember* member in structType.members)
 	{
 		String name([member.name UTF8String]);
 		ET_ASSERT(variables.count(name) > 0);
-		ET_ASSERT(variables[name].offset == member.offset);
+		ET_ASSERT(variables.at(name).offset == member.offset);
 	}
 }
 

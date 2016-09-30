@@ -48,6 +48,9 @@ MetalRenderPass::MetalRenderPass(MetalRenderer* renderer, MetalState& state,
 	pass.depthAttachment.clearDepth = info.target.clearDepth;
 	
 	_private->encoder.encoder = [state.mainCommandBuffer renderCommandEncoderWithDescriptor:pass];
+	log::info("start");
+
+	_private->renderer->sharedConstBuffer().flush();
 }
 
 MetalRenderPass::~MetalRenderPass()
@@ -57,33 +60,36 @@ MetalRenderPass::~MetalRenderPass()
 
 void MetalRenderPass::pushRenderBatch(RenderBatch::Pointer batch)
 {
-	const Camera& cam = info().camera;
 	Material::Pointer material = batch->material();
 
 	SharedVariables& sharedVariables = _private->renderer->variables();
-	sharedVariables.loadCameraProperties(cam);
+	sharedVariables.loadCameraProperties(info().camera);
+	sharedVariables.loadLightProperties(info().light);
 
-	MetalIndexBuffer::Pointer ib = batch->vertexStream()->indexBuffer();
-	MetalVertexBuffer::Pointer vb = batch->vertexStream()->vertexBuffer();
-
-    MetalPipelineState::Pointer ps = _private->renderer->createPipelineState(RenderPass::Pointer(this), batch->material(), batch->vertexStream());
-	ps->setProgramVariable("lightPosition", info().defaultLightPosition);
-	ps->setProgramVariable("worldTransform", batch->transformation());
+    MetalPipelineState::Pointer ps = _private->renderer->createPipelineState(RenderPass::Pointer(this),
+		batch->material(), batch->vertexStream());
+	ps->setObjectVariable(PipelineState::kWorldTransform(), batch->transformation());
 	ps->bind(_private->encoder, material);
 
 	MetalDataBuffer::Pointer sv = sharedVariables.buffer();
+	[_private->encoder.encoder setVertexBuffer:sv->nativeBuffer().buffer() offset:0 atIndex:PassVariablesBufferIndex];
 
-	[_private->encoder.encoder setVertexBuffer:sv->nativeBuffer().buffer() offset:0 atIndex:SharedVariablesBufferIndex];
+	MetalVertexBuffer::Pointer vb = batch->vertexStream()->vertexBuffer();
 	[_private->encoder.encoder setVertexBuffer:vb->nativeBuffer().buffer() offset:0 atIndex:VertexStreamBufferIndex];
+
+	MetalIndexBuffer::Pointer ib = batch->vertexStream()->indexBuffer();
 	[_private->encoder.encoder drawIndexedPrimitives:metal::primitiveTypeValue(ib->primitiveType())
 		indexCount:batch->numIndexes() indexType:metal::indexArrayFormat(ib->format())
 		indexBuffer:ib->nativeBuffer().buffer() indexBufferOffset:ib->byteOffsetForIndex(batch->firstIndex())];
+
+	vec3 t = batch->transformation()[3].xyz();
+	log::info("%p / %p / %p, %.3f, %.3f, %.3f", batch.ptr(), batch->material().ptr(), ps.ptr(), t.x, t.y, t.z);
 }
 
 void MetalRenderPass::endEncoding()
 {
+	log::info("endEncoding");
 	_private->renderer->sharedConstBuffer().flush();
-	
 	[_private->encoder.encoder endEncoding];
 	_private->encoder.encoder = nil;
 }

@@ -16,14 +16,15 @@ namespace et
  float4x4 viewProjection;
  float4x4 projection;
  float4x4 view;
- packed_float3 cameraPosition;
- packed_float3 cameraDirection;
- packed_float3 cameraUp;
+ float4 cameraPosition;
+ float4 cameraDirection;
+ float4 cameraUp;
+ float4 lightPosition;
  */
 
 enum : uint32_t
 {
-	SharedVariablesDataSize = alignUpTo(3 * sizeof(mat4) + 3 * sizeof(vec3), 16)
+	SharedVariablesDataSize = alignUpTo(3 * sizeof(mat4) + 4 * sizeof(vec4), 16)
 };
 
 void SharedVariables::init(RenderInterface* renderer)
@@ -47,11 +48,18 @@ void SharedVariables::loadCameraProperties(const Camera& cam)
 	*mPtr++ = cam.projectionMatrix();
 	*mPtr++ = cam.viewMatrix();
 
-	vec3* vPtr = reinterpret_cast<vec3*>(mPtr);
-	*vPtr++ = cam.position();
-	*vPtr++ = cam.direction();
-	*vPtr++ = cam.up();
+	vec4* vPtr = reinterpret_cast<vec4*>(mPtr);
+	*vPtr++ = vec4(cam.position(), 1.0f);
+	*vPtr++ = vec4(cam.direction(), 0.0f);
+	*vPtr++ = vec4(cam.up(), 0.0f);
 
+	_bufferDataValid = false;
+}
+
+void SharedVariables::loadLightProperties(const Camera& light)
+{
+	vec4* vPtr = reinterpret_cast<vec4*>(_localData.binary());
+	*(vPtr + 15) = vec4(light.position(), 0.0f);
 	_bufferDataValid = false;
 }
 

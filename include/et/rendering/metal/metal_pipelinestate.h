@@ -32,11 +32,16 @@ namespace et
 		void bind(MetalNativeEncoder&, Material::Pointer);
 
 		template <typename T>
-		void setProgramVariable(const String& name, const T& t)
-			{ uploadProgramVariable(name, &t, sizeof(T)); }
+		void setMaterialVariable(const String& name, const T& t)
+			{ uploadMaterialVariable(name, &t, sizeof(T)); }
+
+		template <typename T>
+		void setObjectVariable(const String& name, const T& t)
+			{ uploadObjectVariable(name, &t, sizeof(T)); }
 
 	private:
-		void uploadProgramVariable(const String& name, const void* ptr, uint32_t size);
+		void uploadObjectVariable(const String& name, const void* ptr, uint32_t size);
+		void uploadMaterialVariable(const String& name, const void* ptr, uint32_t size);
 
 	private:
 		ET_DECLARE_PIMPL(MetalPipelineState, 256);

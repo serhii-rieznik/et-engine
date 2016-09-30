@@ -23,6 +23,7 @@ namespace et
 		DataBuffer::Pointer buffer();
 
 		void loadCameraProperties(const Camera&);
+		void loadLightProperties(const Camera&);
 
 	private:
 		DataBuffer::Pointer _buffer;

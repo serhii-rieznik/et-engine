@@ -24,8 +24,9 @@ void s3d::Renderer::render(RenderContext* rc, const Scene& scene, const Camera& 
         return;
 
     auto lights = scene.childrenOfType(et::s3d::ElementType::Light);
-    auto lightPosition = camera.position();
-    if (lights.empty() == false)
+
+    vec3 lightPosition = camera.position();
+    if (!lights.empty())
     {
         auto light = static_cast<s3d::Light::Pointer>(lights.front());
         lightPosition = light->camera().position();
@@ -35,8 +36,8 @@ void s3d::Renderer::render(RenderContext* rc, const Scene& scene, const Camera& 
 	passInfo.target.colorLoadOperation = et::FramebufferOperation::Clear;
 	passInfo.target.depthLoadOperation = et::FramebufferOperation::Clear;
 	passInfo.target.clearColor = vec4(0.25f, 0.3333f, 0.5f, 1.0f);
+	passInfo.light.setPosition(lightPosition);
 	passInfo.camera = camera;
-	passInfo.defaultLightPosition = lightPosition;
 
 	RenderPass::Pointer pass = rc->renderer()->allocateRenderPass(passInfo);
 	renderMeshList(pass, scene.childrenOfType(s3d::ElementType::Mesh));
@@ -62,6 +63,8 @@ void s3d::Renderer::renderMeshList(RenderPass::Pointer pass, const s3d::BaseElem
 	auto cameraPosition = pass->info().camera.position();
 	for (auto& rbv : _latestBatches)
 	{
+		std::random_shuffle(rbv.second.begin(), rbv.second.end());
+/*
 		std::sort(rbv.second.begin(), rbv.second.end(), [cameraPosition](BatchFromMesh& l, BatchFromMesh& r)
 		{
 			auto lip = l.first->transformation() * l.first->boundingBox().center;
@@ -71,7 +74,7 @@ void s3d::Renderer::renderMeshList(RenderPass::Pointer pass, const s3d::BaseElem
 			else
 				return (lip - cameraPosition).dotSelf() < (rip - cameraPosition).dotSelf();
 		});
-
+*/
 		for (auto& rb : rbv.second)
 		{
 			rb.second->material()->bindToMaterial(rb.first->material());
