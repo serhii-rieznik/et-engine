@@ -89,6 +89,8 @@ void MetalRenderer::begin()
 
 	mtl.mainCommandBuffer = [mtl.queue commandBuffer];
 	ET_ASSERT(mtl.mainCommandBuffer != nil);
+
+	// sharedConstBuffer().reset();
 }
 
 void MetalRenderer::present()

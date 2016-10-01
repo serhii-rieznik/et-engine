@@ -24,7 +24,7 @@ MetalVertexBuffer::MetalVertexBuffer(MetalState& metal, const VertexDeclaration&
 	ET_PIMPL_INIT(MetalVertexBuffer);
     _private->buffer.construct(metal, data.data(), static_cast<uint32_t>(data.size()));
 
-	setData(data.data(), data.size());
+	setData(data.data(), 0, data.size());
 }
 
 MetalVertexBuffer::~MetalVertexBuffer()
@@ -37,18 +37,15 @@ const MetalNativeBuffer& MetalVertexBuffer::nativeBuffer() const
     return _private->buffer;
 }
 
-void MetalVertexBuffer::setData(const void* data, uint32_t dataSize)
+void MetalVertexBuffer::setData(const void* data, uint32_t offset, uint32_t length)
 {
-	setDataWithOffset(data, 0, dataSize);
-}
+	ET_ASSERT(offset + length <= dataSize());
 
-void MetalVertexBuffer::setDataWithOffset(const void* data, uint32_t offset, uint32_t sz)
-{
-	ET_ASSERT(offset + sz <= dataSize());
-	
 	id<MTLBuffer> buf = _private->buffer.buffer();
-	uint8_t* ptr = reinterpret_cast<uint8_t*>([buf contents]);
-	memcpy(ptr + offset, data, sz);
+	memcpy(reinterpret_cast<uint8_t*>([buf contents]) + offset, data, length);
+
+	// TODO : update depending on draw type
+	// [buf didModifyRange:NSMakeRange(offset, length)];
 }
 
 uint64_t MetalVertexBuffer::dataSize()

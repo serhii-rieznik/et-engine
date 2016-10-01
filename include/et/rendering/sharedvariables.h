@@ -21,7 +21,8 @@ namespace et
 		void shutdown();
 
 		DataBuffer::Pointer buffer();
-
+		void flushBuffer();
+		
 		void loadCameraProperties(const Camera&);
 		void loadLightProperties(const Camera&);
 

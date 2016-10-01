@@ -25,8 +25,7 @@ namespace et
         
         const MetalNativeBuffer& nativeBuffer() const;
 
-		void setData(const void* data, uint32_t dataSize) override;
-		void setDataWithOffset(const void* data, uint32_t offset, uint32_t dataSize) override;
+		void setData(const void* data, uint32_t offset, uint32_t length) override;
 		uint64_t dataSize() override;
 
 		void* map(uint32_t offset, uint32_t dataSize, uint32_t options /* see MapBufferOptions */) override;

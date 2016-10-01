@@ -49,10 +49,7 @@ void MetalDataBuffer::setData(const void* src, uint32_t offset, uint32_t sz)
 {
 	ET_ASSERT(_private->writable);
 	ET_ASSERT(offset + sz <= size());
-
-	id<MTLBuffer> buf = _private->buffer.buffer();
-	memcpy(reinterpret_cast<uint8_t*>([buf contents]) + offset, src, sz);
-	[buf didModifyRange:NSMakeRange(offset, sz)];
+	memcpy(_private->buffer.bufferContents() + offset, src, sz);
 }
 
 const MetalNativeBuffer& MetalDataBuffer::nativeBuffer() const

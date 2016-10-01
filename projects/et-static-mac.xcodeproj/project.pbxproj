@@ -10,9 +10,6 @@
 		5C4F7F171D9AF84C0054FA50 /* sharedvariables.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5C4F7F151D9AF84C0054FA50 /* sharedvariables.cpp */; };
 		5C4F7F181D9AF84C0054FA50 /* sharedvariables.h in Headers */ = {isa = PBXBuildFile; fileRef = 5C4F7F161D9AF84C0054FA50 /* sharedvariables.h */; };
 		5C4F7F1A1D9AF98D0054FA50 /* databuffer.h in Headers */ = {isa = PBXBuildFile; fileRef = 5C4F7F191D9AF98D0054FA50 /* databuffer.h */; };
-		5C4F7F1D1D9AFB470054FA50 /* metal_databuffer.mm in Sources */ = {isa = PBXBuildFile; fileRef = 5C4F7F1B1D9AFB470054FA50 /* metal_databuffer.mm */; };
-		5C4F7F1E1D9AFB470054FA50 /* metal_databuffer.h in Headers */ = {isa = PBXBuildFile; fileRef = 5C4F7F1C1D9AFB470054FA50 /* metal_databuffer.h */; };
-		5C4F7F221D9C324F0054FA50 /* constbuffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5C4F7F201D9C324F0054FA50 /* constbuffer.cpp */; };
 		5C4F7F231D9C324F0054FA50 /* constbuffer.h in Headers */ = {isa = PBXBuildFile; fileRef = 5C4F7F211D9C324F0054FA50 /* constbuffer.h */; };
 		5CD5A9BE1D932CFA003FD770 /* app.pack.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 5CD5A8721D932CF4003FD770 /* app.pack.cxx */; };
 		5CD5A9BF1D932CFA003FD770 /* camera.pack.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 5CD5A8731D932CF4003FD770 /* camera.pack.cxx */; };
@@ -762,6 +759,8 @@
 			children = (
 				5CD5A9601D932CF4003FD770 /* metal.h */,
 				5CD5A9611D932CF4003FD770 /* metal.mm */,
+				5C4F7F1B1D9AFB470054FA50 /* metal_databuffer.mm */,
+				5C4F7F1C1D9AFB470054FA50 /* metal_databuffer.h */,
 				5CD5A9621D932CF4003FD770 /* metal_indexbuffer.h */,
 				5CD5A9631D932CF4003FD770 /* metal_indexbuffer.mm */,
 				5CD5A9641D932CF4003FD770 /* metal_pipelinestate.h */,
@@ -776,8 +775,6 @@
 				5CD5A96D1D932CF4003FD770 /* metal_texture.mm */,
 				5CD5A96E1D932CF4003FD770 /* metal_vertexbuffer.h */,
 				5CD5A96F1D932CF4003FD770 /* metal_vertexbuffer.mm */,
-				5C4F7F1B1D9AFB470054FA50 /* metal_databuffer.mm */,
-				5C4F7F1C1D9AFB470054FA50 /* metal_databuffer.h */,
 			);
 			path = metal;
 			sourceTree = "<group>";
@@ -920,7 +917,6 @@
 				5C4F7F1A1D9AF98D0054FA50 /* databuffer.h in Headers */,
 				5C4F7F181D9AF84C0054FA50 /* sharedvariables.h in Headers */,
 				5C4F7F231D9C324F0054FA50 /* constbuffer.h in Headers */,
-				5C4F7F1E1D9AFB470054FA50 /* metal_databuffer.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -979,9 +975,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				5C4F7F221D9C324F0054FA50 /* constbuffer.cpp in Sources */,
 				5CD5A9C71D932CFA003FD770 /* rendering_metal.pack.mm in Sources */,
-				5C4F7F1D1D9AFB470054FA50 /* metal_databuffer.mm in Sources */,
 				5CD5A9C91D932CFA003FD770 /* sound.pack.cxx in Sources */,
 				5CD5A9C21D932CFA003FD770 /* imaging.pack.cxx in Sources */,
 				5CD5A9BF1D932CFA003FD770 /* camera.pack.cxx in Sources */,

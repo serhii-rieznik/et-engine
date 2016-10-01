@@ -48,9 +48,6 @@ MetalRenderPass::MetalRenderPass(MetalRenderer* renderer, MetalState& state,
 	pass.depthAttachment.clearDepth = info.target.clearDepth;
 	
 	_private->encoder.encoder = [state.mainCommandBuffer renderCommandEncoderWithDescriptor:pass];
-	log::info("start");
-
-	_private->renderer->sharedConstBuffer().flush();
 }
 
 MetalRenderPass::~MetalRenderPass()
@@ -81,15 +78,13 @@ void MetalRenderPass::pushRenderBatch(RenderBatch::Pointer batch)
 	[_private->encoder.encoder drawIndexedPrimitives:metal::primitiveTypeValue(ib->primitiveType())
 		indexCount:batch->numIndexes() indexType:metal::indexArrayFormat(ib->format())
 		indexBuffer:ib->nativeBuffer().buffer() indexBufferOffset:ib->byteOffsetForIndex(batch->firstIndex())];
-
-	vec3 t = batch->transformation()[3].xyz();
-	log::info("%p / %p / %p, %.3f, %.3f, %.3f", batch.ptr(), batch->material().ptr(), ps.ptr(), t.x, t.y, t.z);
 }
 
 void MetalRenderPass::endEncoding()
 {
-	log::info("endEncoding");
+	_private->renderer->variables().flushBuffer();
 	_private->renderer->sharedConstBuffer().flush();
+
 	[_private->encoder.encoder endEncoding];
 	_private->encoder.encoder = nil;
 }

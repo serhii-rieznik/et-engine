@@ -91,7 +91,7 @@ public:
 
 	void construct(MetalState& metal, uint32_t size)
 	{
-		_buffer = [metal.device newBufferWithLength:size options:MTLResourceStorageModeManaged];
+		_buffer = [metal.device newBufferWithLength:size options:MTLResourceStorageModeShared];
 	}
 
     ~MetalNativeBuffer()
@@ -99,6 +99,9 @@ public:
     
     id<MTLBuffer> buffer() const
         { return _buffer; }
+
+	uint8_t* bufferContents() const
+		{ return reinterpret_cast<uint8_t*>([_buffer contents]); }
 
 	bool valid() const
 		{ return _buffer != nil; }

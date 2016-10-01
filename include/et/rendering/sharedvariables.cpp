@@ -65,14 +65,16 @@ void SharedVariables::loadLightProperties(const Camera& light)
 
 DataBuffer::Pointer SharedVariables::buffer()
 {
+	return _buffer;
+}
+
+void SharedVariables::flushBuffer()
+{
 	if (!_bufferDataValid)
 	{
 		_buffer->setData(_localData.binary(), 0, _localData.size());
-		_bufferDataValid = true;
 	}
-
 	_bufferDataValid = true;
-	return _buffer;
 }
 
 }

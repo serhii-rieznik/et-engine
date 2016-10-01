@@ -202,42 +202,28 @@ void MetalPipelineState::bind(MetalNativeEncoder& e, Material::Pointer material)
 	MetalDataBuffer::Pointer sharedBuffer = _private->renderer->sharedConstBuffer().buffer();
 	id<MTLBuffer> mtlSharedBuffer = sharedBuffer->nativeBuffer().buffer();
 
-	uint32_t materialBufferOffset = 0;
 	if (_private->buildMaterialBuffer)
 	{
-		uint8_t* dst = nullptr;
-		_private->renderer->sharedConstBuffer().allocateData(_private->materialVariablesBufferSize, &dst, materialBufferOffset);
+		uint32_t materialBufferOffset = 0;
+		uint8_t* dst = _private->renderer->sharedConstBuffer().allocateData(_private->materialVariablesBufferSize, materialBufferOffset);
 		memcpy(dst, _private->materialVariablesBuffer.data(), _private->materialVariablesBufferSize);
+		if (_private->bindMaterialVariablesToVertex)
+			[e.encoder setVertexBuffer:mtlSharedBuffer offset:materialBufferOffset atIndex:MaterialVariablesBufferIndex];
+		if (_private->bindMaterialVariablesToFragment)
+			[e.encoder setFragmentBuffer:mtlSharedBuffer offset:materialBufferOffset atIndex:MaterialVariablesBufferIndex];
 	}
 
-	uint32_t objectBufferOffset = 0;
 	if (_private->buildObjectBuffer)
 	{
-		uint8_t* dst = nullptr;
-		_private->renderer->sharedConstBuffer().allocateData(_private->objectVariablesBufferSize, &dst, objectBufferOffset);
+		uint32_t objectBufferOffset = 0;
+		uint8_t* dst = _private->renderer->sharedConstBuffer().allocateData(_private->objectVariablesBufferSize, objectBufferOffset);
 		memcpy(dst, _private->objectVariablesBuffer.data(), _private->objectVariablesBufferSize);
-	}
 
-	if (_private->bindMaterialVariablesToVertex)
-	{
-		[e.encoder setVertexBuffer:mtlSharedBuffer offset:materialBufferOffset atIndex:MaterialVariablesBufferIndex];
+		if (_private->bindObjectVariablesToVertex)
+			[e.encoder setVertexBuffer:mtlSharedBuffer offset:objectBufferOffset atIndex:ObjectVariablesBufferIndex];
+		if (_private->bindObjectVariablesToFragment)
+			[e.encoder setFragmentBuffer:mtlSharedBuffer offset:objectBufferOffset atIndex:ObjectVariablesBufferIndex];
 	}
-
-	if (_private->bindMaterialVariablesToFragment)
-	{
-		[e.encoder setFragmentBuffer:mtlSharedBuffer offset:materialBufferOffset atIndex:MaterialVariablesBufferIndex];
-	}
-
-	if (_private->bindObjectVariablesToVertex)
-	{
-		[e.encoder setVertexBuffer:mtlSharedBuffer offset:objectBufferOffset atIndex:ObjectVariablesBufferIndex];
-	}
-
-	if (_private->bindObjectVariablesToFragment)
-	{
-		[e.encoder setFragmentBuffer:mtlSharedBuffer offset:objectBufferOffset atIndex:ObjectVariablesBufferIndex];
-	}
-
 	[e.encoder setDepthStencilState:_private->state.depthStencilState];
 	[e.encoder setRenderPipelineState:_private->state.pipelineState];
 }

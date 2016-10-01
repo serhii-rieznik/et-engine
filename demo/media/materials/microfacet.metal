@@ -42,7 +42,7 @@ struct VSOutput
 	float3 lightDirection;
 };
 
-vertex VSOutput vertexMain(constant VSInput* vsInput [[buffer(VertexStreamBufferIndex)]],
+vertex VSOutput vertexMain(device VSInput* vsInput [[buffer(VertexStreamBufferIndex)]],
 	constant ObjectVariables& objectVariables [[buffer(ObjectVariablesBufferIndex)]],
 	constant MaterialVariables& materialVariables [[buffer(MaterialVariablesBufferIndex)]],
 	constant PassVariables& passVariables [[buffer(PassVariablesBufferIndex)]],

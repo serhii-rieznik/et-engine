@@ -19,22 +19,14 @@ void ConstBuffer::init(RenderInterface* renderer)
 	_buffer->setData(shit.data(), 0, Capacity);
 
 	_localData.resize(Capacity);
-	vec4* vi = reinterpret_cast<vec4*>(_localData.binary());
-	vec4* ve = vi + _localData.dataSize() / sizeof(vec4);
-	while (vi != ve)
-	{
-		*vi++ = vec4(1.0f / 3.0f);
-	}
-	// _localData.fill(0);
+	_localData.fill(0);
 }
 
-void ConstBuffer::allocateData(uint32_t size, uint8_t** ptr, uint32_t& baseOffset)
+uint8_t* ConstBuffer::allocateData(uint32_t size, uint32_t& baseOffset)
 {
 	ET_ASSERT(size < Capacity);
-	ET_ASSERT(ptr != nullptr);
 
 	std::unique_lock<std::mutex> lock(_lock);
-
 	if (_offset + size >= Capacity)
 	{
 		log::info("ConstBuffer rewinded");
@@ -43,19 +35,23 @@ void ConstBuffer::allocateData(uint32_t size, uint8_t** ptr, uint32_t& baseOffse
 	}
 
 	baseOffset = _offset;
-	*ptr = _localData.element_ptr(_offset);
-	_offset += alignUpTo(size, 256);
+	_offset += alignUpTo(size, Alignment);
+	return _localData.data() + baseOffset;
 }
 
 void ConstBuffer::flush()
 {
 	if (_offset > _startOffset)
 	{
-		_buffer->setData(_localData.binary(), _startOffset, _offset - _startOffset);
+		_buffer->setData(_localData.element_ptr(_startOffset), _startOffset, _offset - _startOffset);
 		_startOffset = _offset;
 	}
-	// _offset = 0;
-	// _startOffset = 0;
+}
+
+void ConstBuffer::reset()
+{
+	_offset = 0;
+	_startOffset = 0;
 }
 
 }

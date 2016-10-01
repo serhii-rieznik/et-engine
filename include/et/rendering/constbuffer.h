@@ -18,12 +18,14 @@ public:
 	enum : uint32_t
 	{
 		Capacity = 4 * 1024 * 1024,
+		Alignment = 256
 	};
 
 public:
 	void init(RenderInterface*);
-	void allocateData(uint32_t size, uint8_t** ptr, uint32_t& baseOffset);
+	uint8_t* allocateData(uint32_t size, uint32_t& baseOffset);
 	void flush();
+	void reset();
 
 	DataBuffer::Pointer buffer() const
 		{ return _buffer; }
