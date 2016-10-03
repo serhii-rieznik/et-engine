@@ -42,6 +42,7 @@ namespace et
 	private:
 		void uploadObjectVariable(const String& name, const void* ptr, uint32_t size);
 		void uploadMaterialVariable(const String& name, const void* ptr, uint32_t size);
+		void buildReflection();
 
 	private:
 		ET_DECLARE_PIMPL(MetalPipelineState, 256);

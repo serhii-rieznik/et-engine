@@ -12,8 +12,9 @@ vertex VSOutput vertexMain(constant float2* position [[buffer(0)]], uint vertexI
 	return vo;
 }
 
-fragment float4 fragmentMain(VSOutput vertexOut [[stage_in]], texture2d<float> color_texture [[texture(0)]])
+fragment float4 fragmentMain(VSOutput vertexOut [[stage_in]],
+	texture2d<float> albedoTexture [[texture(0)]])
 {
 	constexpr sampler defaultSampler;
-	return color_texture.sample(defaultSampler, vertexOut.texCoord);
+	return albedoTexture.sample(defaultSampler, vertexOut.texCoord);
 }

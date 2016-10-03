@@ -118,7 +118,6 @@ void et::png::loadFromStream(std::istream& source, TextureDescription& desc, boo
 	}
 
 	png_read_image(pngPtr, row_pointers);
-
 	png_destroy_info_struct(pngPtr, &infoPtr);
 	png_destroy_read_struct(&pngPtr, 0, 0);
 
@@ -129,6 +128,20 @@ void et::png::loadFromStream(std::istream& source, TextureDescription& desc, boo
 		{
 			uint16_t value = data_ptr[i];
 			data_ptr[i] = static_cast<uint16_t>(((value >> 8) & 0xff) + ((value << 8) & 0xff));
+		}
+	}
+
+	if (channels == 3)
+	{
+		// convert RGB to RGBA
+		auto RGBData = desc.data;
+		const vec3ub* rgb = reinterpret_cast<const vec3ub*>(RGBData.data());
+		vec4ub* rgba = reinterpret_cast<vec4ub*>(desc.data.binary());
+		for (uint32_t i = 0, e = desc.data.size() / 4; i < e; ++i)
+		{
+			*rgba = vec4ub(*rgb, 255);
+			++rgb;
+			++rgba;
 		}
 	}
 
@@ -198,7 +211,8 @@ void parseFormat(TextureDescription& desc, png_structp pngPtr, png_infop infoPtr
 		
 	if (rowBytes)
 		*rowBytes = png_get_rowbytes(pngPtr, infoPtr);
-	
+
+	bool convertRGBtoRGBA = false;
 	switch (channels)
 	{
 		case 1:
@@ -215,11 +229,8 @@ void parseFormat(TextureDescription& desc, png_structp pngPtr, png_infop infoPtr
 
 		case 3:
 		{
-			ET_FAIL("Not implemented");
-			/*
-			desc.internalformat = (bpp == 16) ? TextureFormat::RGB16 : TextureFormat::RGB;
-			desc.format = TextureFormat::RGB;
-			*/
+			convertRGBtoRGBA = true;
+			desc.format = (bpp == 16) ? TextureFormat::RGBA16 : TextureFormat::RGBA8;
 			break;
 		}
 

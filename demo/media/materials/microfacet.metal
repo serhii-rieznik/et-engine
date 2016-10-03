@@ -40,6 +40,7 @@ struct VSOutput
 	float3 normal;
 	float3 cameraDirection;
 	float3 lightDirection;
+	float2 texCoord;
 };
 
 vertex VSOutput vertexMain(device VSInput* vsInput [[buffer(VertexStreamBufferIndex)]],
@@ -59,6 +60,7 @@ vertex VSOutput vertexMain(device VSInput* vsInput [[buffer(VertexStreamBufferIn
 	vOut.normal = rotationMatrix * float3(vsInput[vertexId].normal);
 	vOut.cameraDirection = passVariables.cameraPosition.xyz - transformedVertex.xyz;
 	vOut.lightDirection = passVariables.lightPosition.xyz - transformedVertex.xyz * passVariables.lightPosition.w;
+	vOut.texCoord = vsInput[vertexId].texCoord;
 	return vOut;
 }
 
@@ -71,12 +73,17 @@ float fresnelShlickApproximation(float f0, float cosTheta);
 float burleyDiffuse(float LdotN, float VdotN, float LdotH, float alpha);
 float smithGGX(float a2, float cosTheta);
 float microfacetSpecular(float NdotL, float NdotV, float NdotH, float alpha);
+float remapSpecularPowerToRoughness(float Ns);
 
 fragment float4 fragmentMain(VSOutput fragmentIn [[stage_in]],
 	constant ObjectVariables& objectVariables [[buffer(ObjectVariablesBufferIndex)]],
 	constant MaterialVariables& materialVariables [[buffer(MaterialVariablesBufferIndex)]],
-	constant PassVariables& passVariables [[buffer(PassVariablesBufferIndex)]])
+	constant PassVariables& passVariables [[buffer(PassVariablesBufferIndex)]],
+	texture2d<float> albedoTexture [[texture(0)]])
 {
+	constexpr sampler defaultSampler(coord::normalized, address::repeat, filter::linear);
+	float4 albedo = albedoTexture.sample(defaultSampler, fragmentIn.texCoord);
+
 	float3 vNormal = normalize(fragmentIn.normal);
 	float3 vView = normalize(fragmentIn.cameraDirection);
 	float3 vLight = normalize(fragmentIn.lightDirection);
@@ -87,10 +94,12 @@ fragment float4 fragmentMain(VSOutput fragmentIn [[stage_in]],
 	float HdotL = dot(vHalf, vLight);
 	float NdotH = dot(vNormal, vHalf);
 
-	float kS = microfacetSpecular(NdotL, NdotV, NdotH, materialVariables.roughness) * invPi;
-	float kD = burleyDiffuse(NdotL, NdotV, HdotL, materialVariables.roughness) * invPi;
+	float alpha = remapSpecularPowerToRoughness(materialVariables.roughness);
+	float kS = microfacetSpecular(NdotL, NdotV, NdotH, alpha) * invPi;
+	float kD = burleyDiffuse(NdotL, NdotV, HdotL, alpha) * invPi;
 
-	return materialVariables.diffuseColor * kD + materialVariables.specularColor * kS;
+	return albedo * materialVariables.diffuseColor * kD;
+	// ; // * kD + materialVariables.specularColor * kS;
 }
 
 /*
@@ -124,4 +133,9 @@ float microfacetSpecular(float NdotL, float NdotV, float NdotH, float alpha)
 	float ggxF = fresnelShlickApproximation(0.2f, NdotV);
 	float ggxV = smithGGX(a2, NdotV) * smithGGX(a2, NdotL);
 	return (ggxF * ggxD * ggxV) / max(0.00001, 4.0 * NdotL * NdotV);
+}
+
+float remapSpecularPowerToRoughness(float Ns)
+{
+	return 1.0 / (Ns + 1.0);
 }

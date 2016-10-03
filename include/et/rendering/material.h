@@ -56,14 +56,18 @@ public:
 			: length(sz) { }
 	};
 	using PropertyMap = UnorderedMap<String, Property>;
-	using TextureMap = UnorderedMap<String, Texture::Pointer>;
-
-	void setTexutre(const String& name, const Texture::Pointer&);
-	const TextureMap& textures() const { return _textures; }
 
 	template <class T>
 	void setProperty(const String& name, const T& value);
-	const PropertyMap& properties() const { return _properties; }
+	const PropertyMap& properties() const
+		{ return _properties; }
+
+	static const String kAlbedo;
+	using TextureMap = UnorderedMap<String, Texture::Pointer>;
+
+	void setTexutre(const String& name, const Texture::Pointer&);
+	const TextureMap& textures() const
+		{ return _textures; }
 
 private:
 	void uploadPropertyData(Property& prop, const void* src, uint32_t sz);

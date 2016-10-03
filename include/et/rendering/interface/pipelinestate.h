@@ -23,6 +23,22 @@ namespace et
 		static const String& kWorldTransform()
 			{ static String value("worldTransform"); return value; }
 
+		struct Variable
+		{
+			uint32_t offset = 0;
+			uint32_t size = 0;
+		};
+		using VariableMap = UnorderedMap<String, Variable>;
+
+		struct Reflection
+		{
+			UnorderedMap<String, uint32_t> vertexTextures;
+			UnorderedMap<String, uint32_t> fragmentTextures;
+			VariableMap passVariables;
+			VariableMap materialVariables;
+			VariableMap objectVariables;
+		};
+
 	public:
 		virtual ~PipelineState() = default;
 
@@ -75,6 +91,10 @@ namespace et
 		
 		void setRenderTargetFormat(TextureFormat fmt)
 			{ _renderTargetFormat = fmt; }
+
+	protected:
+		Reflection reflection;
+		void printReflection();
 
 	private:
 		VertexDeclaration _decl;

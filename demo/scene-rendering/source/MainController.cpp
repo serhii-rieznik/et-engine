@@ -35,7 +35,7 @@ void demo::MainController::applicationDidLoad(et::RenderContext* rc)
 		
 	_loader.init(rc);
 
-	_scene = _loader.loadFromFile(et::application().resolveFileName("media/material-test.obj"));
+	_scene = _loader.loadFromFile(et::application().resolveFileName("media/sponza/sponza.obj"));
 
 	applicationWillResizeContext(rc->size());
 }
@@ -43,7 +43,7 @@ void demo::MainController::applicationDidLoad(et::RenderContext* rc)
 void demo::MainController::applicationWillResizeContext(const et::vec2i& sz)
 {
 	et::vec2 fSz = vector2ToFloat(sz);
-    _camera.perspectiveProjection(DEG_45, fSz.aspect(), 1.0f, 1024.0f);
+    _camera.perspectiveProjection(DEG_45, fSz.aspect(), 1.0f, 2048.0f);
 }
 
 void demo::MainController::render(et::RenderContext* rc)

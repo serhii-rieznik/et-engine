@@ -17,6 +17,8 @@ const std::string kDefines = "defines";
 const std::string kRenderPriority = "render-priority";
 }
 
+const String Material::kAlbedo = "albedoTexture";
+
 Material::Material(RenderInterface* renderer) :
 	_renderer(renderer)
 {

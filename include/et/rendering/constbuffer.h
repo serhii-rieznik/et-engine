@@ -17,7 +17,7 @@ class ConstBuffer
 public:
 	enum : uint32_t
 	{
-		Capacity = 4 * 1024 * 1024,
+		Capacity = 16 * 1024 * 1024,
 		Alignment = 256
 	};
 

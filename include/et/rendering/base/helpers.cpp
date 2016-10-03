@@ -56,7 +56,7 @@ RenderBatch::Pointer createFullscreenRenderBatch(Texture::Pointer texture)
 {
 	ET_ASSERT(rh_local::default2DMaterial.valid());
 	ET_ASSERT(rh_local::default2DPlane.valid());
-	rh_local::default2DMaterial->setTexutre("color_texture", texture);
+	rh_local::default2DMaterial->setTexutre(Material::kAlbedo, texture);
 	return RenderBatch::Pointer::create(rh_local::default2DMaterial, rh_local::default2DPlane);
 }
 

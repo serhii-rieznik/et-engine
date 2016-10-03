@@ -1,0 +1,18 @@
+{
+	"model-name" : "sponza/sponza.obj",
+	"env-map" : "media/background.hdr",
+	"env-color" : [1.0, 1.0, 1.0, 1.0],
+	"env-type" : "uniform",
+	"light-direction" : [0.0, 1.0, 0.0, 0.0],
+	"integrator" : "normals",
+	"rays-per-pixel" : 1,
+	"camera-fov" : 30.0,
+	"camera-distance" : 10.0,
+	"camera-phi" : 100.0,
+	"camera-theta" : 35.0,
+	"camera-offset" : [0.0, 0.9, 0.0],
+	"camera-view-point" : [0.0, 0.9, 0.0],
+	"render-region-size" : 16,
+	"kd-tree-max-depth" : 31,
+	"render-kd-tree" : 0
+}

@@ -72,8 +72,10 @@ inline void splitAndWrite(const std::string& s, char token, F func)
 
 inline std::istream& operator >> (std::istream& stream, vec2& value)
 {
-	std::string ln;
+	static std::string ln;
 	ln.reserve(128);
+	ln.clear();
+
 	std::getline(stream, ln);
 	trim(ln);
 
@@ -88,8 +90,10 @@ inline std::istream& operator >> (std::istream& stream, vec2& value)
 
 inline std::istream& operator >> (std::istream& stream, vec3& value)
 {
-	std::string ln;
+	static std::string ln;
 	ln.reserve(128);
+	ln.clear();
+
 	std::getline(stream, ln);
 	trim(ln);
 
@@ -106,8 +110,10 @@ inline std::istream& operator >> (std::istream& stream, vec3& value)
 
 inline std::istream& operator >> (std::istream& stream, vec4& value)
 {
-	std::string ln;
+	static std::string ln;
 	ln.reserve(128);
+	ln.clear();
+
 	std::getline(stream, ln);
 	trim(ln);
 
@@ -346,6 +352,7 @@ s3d::ElementContainer::Pointer OBJLoader::load(et::RenderContext* rc, MaterialPr
 
 	s3d::ElementContainer::Pointer result = generateVertexBuffers(storage);
 	loaded.invoke(result);
+
 	return result;
 }
 
@@ -405,7 +412,8 @@ void OBJLoader::loadMaterials(const std::string& fileName, ObjectsCache& cache)
 						_lastMaterial->setFloat(MaterialParameter::BumpFactor, value);
 						
 						getLine(materialFile, line);
-						_lastMaterial->setTexture(MaterialParameter::NormalMap, _rc->renderer()->loadTexture(line, cache));
+						std::string actualName = application().resolveFileName(line);
+						_lastMaterial->setTexture(MaterialParameter::NormalMap, _rc->renderer()->loadTexture(actualName, cache));
 					}
 					else
 					{
@@ -416,7 +424,8 @@ void OBJLoader::loadMaterials(const std::string& fileName, ObjectsCache& cache)
 				else
 				{
 					getLine(materialFile, line);
-					_lastMaterial->setTexture(MaterialParameter::NormalMap, _rc->renderer()->loadTexture(line, cache) );
+					std::string actualName = application().resolveFileName(line);
+					_lastMaterial->setTexture(MaterialParameter::NormalMap, _rc->renderer()->loadTexture(actualName, cache) );
 				}
 			}
 			else
@@ -510,22 +519,26 @@ void OBJLoader::loadMaterials(const std::string& fileName, ObjectsCache& cache)
 					if (subId == 'd')
 					{
 						getLine(materialFile, line);
-						_lastMaterial->setTexture(MaterialParameter::DiffuseMap, _rc->renderer()->loadTexture(line, cache) );
+						std::string actualName = application().resolveFileName(line);
+						_lastMaterial->setTexture(MaterialParameter::DiffuseMap, _rc->renderer()->loadTexture(actualName, cache) );
 					}
 					else if (subId == 'a')
 					{
 						getLine(materialFile, line);
-						_lastMaterial->setTexture(MaterialParameter::AmbientMap, _rc->renderer()->loadTexture(line, cache) );
+						std::string actualName = application().resolveFileName(line);
+						_lastMaterial->setTexture(MaterialParameter::AmbientMap, _rc->renderer()->loadTexture(actualName, cache) );
 					}
 					else if (subId == 's')
 					{
 						getLine(materialFile, line);
-						_lastMaterial->setTexture(MaterialParameter::SpecularMap, _rc->renderer()->loadTexture(line, cache) );
+						std::string actualName = application().resolveFileName(line);
+						_lastMaterial->setTexture(MaterialParameter::SpecularMap, _rc->renderer()->loadTexture(actualName, cache) );
 					}
 					else if (subId == 'e')
 					{
 						getLine(materialFile, line);
-						_lastMaterial->setTexture(MaterialParameter::EmissiveMap, _rc->renderer()->loadTexture(line, cache) );
+						std::string actualName = application().resolveFileName(line);
+						_lastMaterial->setTexture(MaterialParameter::EmissiveMap, _rc->renderer()->loadTexture(actualName, cache) );
 					}
 					else
 					{
@@ -562,7 +575,8 @@ void OBJLoader::loadMaterials(const std::string& fileName, ObjectsCache& cache)
 								_lastMaterial->setFloat(MaterialParameter::BumpFactor, value);
 								
 								getLine(materialFile, line);
-								_lastMaterial->setTexture(MaterialParameter::NormalMap, _rc->renderer()->loadTexture(line, cache));
+								std::string actualName = application().resolveFileName(line);
+								_lastMaterial->setTexture(MaterialParameter::NormalMap, _rc->renderer()->loadTexture(actualName, cache));
 							}
 							else
 							{
@@ -573,7 +587,8 @@ void OBJLoader::loadMaterials(const std::string& fileName, ObjectsCache& cache)
 						else
 						{
 							getLine(materialFile, line);
-							_lastMaterial->setTexture(MaterialParameter::NormalMap, _rc->renderer()->loadTexture(line, cache) );
+							std::string actualName = application().resolveFileName(line);
+							_lastMaterial->setTexture(MaterialParameter::NormalMap, _rc->renderer()->loadTexture(actualName, cache) );
 						}
 					}
 					else
@@ -584,7 +599,8 @@ void OBJLoader::loadMaterials(const std::string& fileName, ObjectsCache& cache)
 				else if (mapId == 'd')
 				{
 					getLine(materialFile, line);
-					_lastMaterial->setTexture(MaterialParameter::OpacityMap, _rc->renderer()->loadTexture(line, cache) );
+					std::string actualName = application().resolveFileName(line);
+					_lastMaterial->setTexture(MaterialParameter::OpacityMap, _rc->renderer()->loadTexture(actualName, cache) );
 				}
 				else
 				{
@@ -862,13 +878,13 @@ void OBJLoader::threadFinished()
 void getLine(std::ifstream& stream, std::string& line)
 {
 	std::getline(stream, line);
+
+	if (line.empty())
+		return;
+
+	if (line.back() == '\r')
+		line.erase(line.end() - 1);
 	
-	if (line.size() > 0)
-	{
-		if (line[line.size() - 1] == '\r')
-			line.erase(line.end() - 1);
-		
-		while ((line.size() > 0) && (line[0] == ' '))
-			line = line.substr(1, line.size() - 1);
-	}
+	while (!line.empty() && (line.front() == ' '))
+		line.erase(line.begin());
 }

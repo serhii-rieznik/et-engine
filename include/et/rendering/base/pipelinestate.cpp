@@ -9,6 +9,45 @@
 
 namespace et
 {
+
+void PipelineState::printReflection()
+{
+	log::info("Pass variables: { ");
+	for (const auto& pv : reflection.passVariables)
+	{
+		log::info("\t%s : %u", pv.first.c_str(), pv.second.offset);
+	}
+	log::info("}");
+
+	log::info("Material variables: { ");
+	for (const auto& pv : reflection.materialVariables)
+	{
+		log::info("\t%s : %u", pv.first.c_str(), pv.second.offset);
+	}
+	log::info("}");
+
+	log::info("Object variables: { ");
+	for (const auto& pv : reflection.objectVariables)
+	{
+		log::info("\t%s : %u", pv.first.c_str(), pv.second.offset);
+	}
+	log::info("}");
+
+	log::info("Vertex textures: { ");
+	for (const auto& pv : reflection.vertexTextures)
+	{
+		log::info("\t%s : %u", pv.first.c_str(), pv.second);
+	}
+	log::info("}");
+
+	log::info("Fragment textures: { ");
+	for (const auto& pv : reflection.fragmentTextures)
+	{
+		log::info("\t%s : %u", pv.first.c_str(), pv.second);
+	}
+	log::info("}");
+}
+
 class PipelineStateCachePrivate
 {
 public:

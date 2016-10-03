@@ -14,7 +14,7 @@
 namespace et
 {
 
-class MetalState;
+struct MetalState;
 class MetalNativeBuffer;
 class MetalDataBufferPrivate;
 class MetalDataBuffer : public DataBuffer

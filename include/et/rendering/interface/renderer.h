@@ -17,80 +17,106 @@
 
 namespace et
 {
-	class RenderContext;
-	class RenderInterface : public Shared
+class RenderContext;
+class RenderInterface : public Shared
+{
+public:
+	ET_DECLARE_POINTER(RenderInterface);
+
+public:
+	RenderInterface(RenderContext* rc)
+		: _rc(rc) { }
+
+	virtual ~RenderInterface() = default;
+
+	RenderContext* rc() const
+		{ return _rc; }
+
+	SharedVariables& variables()
+		{ return _sharedVariables; }
+
+	ConstBuffer& sharedConstBuffer()
+		{ return _sharedConstBuffer; }
+
+	virtual RenderingAPI api() const = 0;
+
+	virtual void init(const RenderContextParameters& params) = 0;
+	virtual void shutdown() = 0;
+
+	virtual void begin() = 0;
+	virtual void present() = 0;
+
+	virtual RenderPass::Pointer allocateRenderPass(const RenderPass::ConstructionInfo&) = 0;
+	virtual void submitRenderPass(RenderPass::Pointer) = 0;
+
+	/*
+	 * Buffers
+	 */
+	virtual DataBuffer::Pointer createDataBuffer(const std::string&, uint32_t size) = 0;
+	virtual DataBuffer::Pointer createDataBuffer(const std::string&, const BinaryDataStorage&) = 0;
+	virtual IndexBuffer::Pointer createIndexBuffer(const std::string&, IndexArray::Pointer, BufferDrawType) = 0;
+	virtual VertexBuffer::Pointer createVertexBuffer(const std::string&, VertexStorage::Pointer, BufferDrawType) = 0;
+
+	/*
+	 * Textures
+	 */
+	virtual Texture::Pointer createTexture(TextureDescription::Pointer) = 0;
+
+	Texture::Pointer loadTexture(const std::string& fileName, ObjectsCache& cache);
+	Texture::Pointer defaultTexture();
+	
+	/*
+	 * Programs
+	 */
+	virtual Program::Pointer createProgram(const std::string& vs, const std::string& fs,
+		const StringList& defines, const std::string& baseFolder) = 0;
+	
+	inline Program::Pointer createProgram(const std::string& vs, const std::string& fs)
+		{ return createProgram(vs, fs, emptyStringList(), emptyString); }
+
+	/*
+	 * Pipeline state
+	 */
+	virtual PipelineState::Pointer createPipelineState(RenderPass::Pointer, Material::Pointer, VertexStream::Pointer) = 0;
+
+private:
+	RenderContext* _rc = nullptr;
+	SharedVariables _sharedVariables;
+	ConstBuffer _sharedConstBuffer;
+	Texture::Pointer _defaultTexture;
+};
+
+inline Texture::Pointer RenderInterface::loadTexture(const std::string& fileName, ObjectsCache& cache)
+{
+	TextureDescription::Pointer desc = TextureDescription::Pointer::create();
+	if (desc->load(fileName))
 	{
-	public:
-		ET_DECLARE_POINTER(RenderInterface);
+		return createTexture(desc);
+	}
+	log::error("Unable to load texture from %s", fileName.c_str());
+	return defaultTexture();
+}
 
-	public:
-		RenderInterface(RenderContext* rc)
-			: _rc(rc) { }
+inline Texture::Pointer RenderInterface::defaultTexture()
+{
+	if (_defaultTexture.invalid())
+	{
+		TextureDescription::Pointer desc = TextureDescription::Pointer::create();
+		desc->size = vec2i(4);
+		desc->format = TextureFormat::RGBA8;
+		desc->data.resize(64);
+		uint32_t* data = reinterpret_cast<uint32_t*>(desc->data.data());
+		data[ 0] = 0xFF0000FF; data[ 1] = 0xFFFFFFFF; data[ 2] = 0xFF0000FF; data[ 3] = 0xFFFFFFFF;
+		data[ 4] = 0xFFFFFFFF; data[ 5] = 0xFF0000FF; data[ 6] = 0xFFFFFFFF; data[ 7] = 0xFF0000FF;
+		data[ 8] = 0xFF0000FF; data[ 9] = 0xFFFFFFFF; data[10] = 0xFF0000FF; data[11] = 0xFFFFFFFF;
+		data[12] = 0xFFFFFFFF; data[13] = 0xFF0000FF; data[14] = 0xFFFFFFFF; data[15] = 0xFF0000FF;
+		_defaultTexture = createTexture(desc);
+	}
+	return _defaultTexture;
+}
 
-		virtual ~RenderInterface() = default;
-
-		RenderContext* rc() const
-			{ return _rc; }
-
-		SharedVariables& variables()
-			{ return _sharedVariables; }
-
-		ConstBuffer& sharedConstBuffer()
-			{ return _sharedConstBuffer; }
-
-		virtual RenderingAPI api() const = 0;
-
-		virtual void init(const RenderContextParameters& params) = 0;
-		virtual void shutdown() = 0;
-
-		virtual void begin() = 0;
-		virtual void present() = 0;
-
-		virtual RenderPass::Pointer allocateRenderPass(const RenderPass::ConstructionInfo&) = 0;
-		virtual void submitRenderPass(RenderPass::Pointer) = 0;
-
-		/*
-		 * Buffers
-		 */
-		virtual DataBuffer::Pointer createDataBuffer(const std::string&, uint32_t size) = 0;
-		virtual DataBuffer::Pointer createDataBuffer(const std::string&, const BinaryDataStorage&) = 0;
-		virtual IndexBuffer::Pointer createIndexBuffer(const std::string&, IndexArray::Pointer, BufferDrawType) = 0;
-		virtual VertexBuffer::Pointer createVertexBuffer(const std::string&, VertexStorage::Pointer, BufferDrawType) = 0;
-
-        /*
-         * Textures
-         */
-        virtual Texture::Pointer createTexture(TextureDescription::Pointer) = 0;
-
-		inline Texture::Pointer loadTexture(const std::string& fileName, ObjectsCache& cache)
-		{
-			TextureDescription::Pointer desc = TextureDescription::Pointer::create();
-			desc->load(fileName);
-			return createTexture(desc);
-		}
-        
-		/*
-         * Programs
-         */
-        virtual Program::Pointer createProgram(const std::string& vs, const std::string& fs,
-            const StringList& defines, const std::string& baseFolder) = 0;
-        
-        inline Program::Pointer createProgram(const std::string& vs, const std::string& fs)
-            { return createProgram(vs, fs, emptyStringList(), emptyString); }
-
-		/*
-		 * Pipeline state
-		 */
-        virtual PipelineState::Pointer createPipelineState(RenderPass::Pointer, Material::Pointer, VertexStream::Pointer) = 0;
-
-	private:
-		RenderContext* _rc = nullptr;
-		SharedVariables _sharedVariables;
-		ConstBuffer _sharedConstBuffer;
-	};
-
-/*
-	class RenderContext;
+	/*
+	 class RenderContext;
 	class Renderer : public RendererInterface
 	{
 	public:

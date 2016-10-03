@@ -240,7 +240,7 @@ void SceneMaterial::bindToMaterial(et::Material::Pointer& m)
 const String materialKeys[MaterialParameter_max] =
 {
 	String("ambientMap"), // AmbientMap,
-	String("diffuseMap"), // DiffuseMap,
+	String("albedoTexture"), // DiffuseMap,
 	String("specularMap"), // SpecularMap,
 	String("emissiveMap"), // EmissiveMap,
 	String("normalMap"), // NormalMap,

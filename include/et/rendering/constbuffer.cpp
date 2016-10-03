@@ -29,9 +29,9 @@ uint8_t* ConstBuffer::allocateData(uint32_t size, uint32_t& baseOffset)
 	std::unique_lock<std::mutex> lock(_lock);
 	if (_offset + size >= Capacity)
 	{
+		flush();
+		reset();
 		log::info("ConstBuffer rewinded");
-		_offset = 0;
-		_startOffset = 0;
 	}
 
 	baseOffset = _offset;
