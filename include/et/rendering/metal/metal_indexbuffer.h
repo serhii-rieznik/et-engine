@@ -11,21 +11,21 @@
 
 namespace et
 {
-    struct MetalState;
-    class MetalNativeBuffer;
-	class MetalIndexBufferPrivate;
-	class MetalIndexBuffer : public IndexBuffer
-	{
-	public:
-		ET_DECLARE_POINTER(MetalIndexBuffer);
-		
-	public:
-        MetalIndexBuffer(MetalState& metal, IndexArray::Pointer i, BufferDrawType drawType, const std::string& name);
-		~MetalIndexBuffer();
-        
-        const MetalNativeBuffer& nativeBuffer() const;
+struct MetalState;
+class MetalNativeBuffer;
+class MetalIndexBufferPrivate;
+class MetalIndexBuffer : public IndexBuffer
+{
+public:
+	ET_DECLARE_POINTER(MetalIndexBuffer);
+	
+public:
+	MetalIndexBuffer(MetalState& metal, IndexArray::Pointer i, BufferDrawType drawType, const std::string& name);
+	~MetalIndexBuffer();
+	
+	const MetalNativeBuffer& nativeBuffer() const;
 
-	private:
-		ET_DECLARE_PIMPL(MetalIndexBuffer, 32)
-	};
+private:
+	ET_DECLARE_PIMPL(MetalIndexBuffer, 32)
+};
 }

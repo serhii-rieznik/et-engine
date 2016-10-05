@@ -11,11 +11,11 @@
 		5C4515571D7E035600D093EB /* Metal.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5C4515561D7E035600D093EB /* Metal.framework */; };
 		5C4515591D7E035D00D093EB /* MetalKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5C4515581D7E035D00D093EB /* MetalKit.framework */; };
 		5C45155B1D7E039F00D093EB /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5C45155A1D7E039F00D093EB /* QuartzCore.framework */; };
+		5C6587FD1DA59BBC007F8DB1 /* DemoSceneLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5C6587FB1DA59BBC007F8DB1 /* DemoSceneLoader.cpp */; };
 		6E12DA2B1CD690F6006037A5 /* libet-static-mac.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 6E12DA2A1CD686C8006037A5 /* libet-static-mac.a */; };
 		6E12DA2D1CD69147006037A5 /* libfbxsdk.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 6E12DA2C1CD69147006037A5 /* libfbxsdk.dylib */; };
 		6E12DA2E1CD691A3006037A5 /* libfbxsdk.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 6E12DA2C1CD69147006037A5 /* libfbxsdk.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		6E12DA301CD6926C006037A5 /* media in Resources */ = {isa = PBXBuildFile; fileRef = 6E12DA2F1CD6926C006037A5 /* media */; };
-		A566F2841A3E761F00E5A513 /* DemoSceneLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A566F27F1A3E761F00E5A513 /* DemoSceneLoader.cpp */; };
 		A57B42901A58DAB400C896E1 /* OpenAL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A57B428F1A58DAB400C896E1 /* OpenAL.framework */; };
 		A57B42921A58DAB800C896E1 /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A57B42911A58DAB800C896E1 /* StoreKit.framework */; };
 		A5D8EABE1A3CD89300E3620B /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5D8EABD1A3CD89300E3620B /* main.cpp */; };
@@ -55,11 +55,11 @@
 		5C4515561D7E035600D093EB /* Metal.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Metal.framework; path = System/Library/Frameworks/Metal.framework; sourceTree = SDKROOT; };
 		5C4515581D7E035D00D093EB /* MetalKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MetalKit.framework; path = System/Library/Frameworks/MetalKit.framework; sourceTree = SDKROOT; };
 		5C45155A1D7E039F00D093EB /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
+		5C6587FB1DA59BBC007F8DB1 /* DemoSceneLoader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DemoSceneLoader.cpp; sourceTree = "<group>"; };
+		5C6587FC1DA59BBC007F8DB1 /* DemoSceneLoader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DemoSceneLoader.h; sourceTree = "<group>"; };
 		6E12DA251CD686C8006037A5 /* et-static-mac.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "et-static-mac.xcodeproj"; path = "../../../projects/et-static-mac.xcodeproj"; sourceTree = "<group>"; };
 		6E12DA2C1CD69147006037A5 /* libfbxsdk.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libfbxsdk.dylib; path = ../../../../../../../SDK/FBX/lib/clang/release/libfbxsdk.dylib; sourceTree = "<group>"; };
 		6E12DA2F1CD6926C006037A5 /* media */ = {isa = PBXFileReference; lastKnownFileType = folder; name = media; path = ../../media; sourceTree = "<group>"; };
-		A566F27F1A3E761F00E5A513 /* DemoSceneLoader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DemoSceneLoader.cpp; path = renderer/DemoSceneLoader.cpp; sourceTree = "<group>"; };
-		A566F2801A3E761F00E5A513 /* DemoSceneLoader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DemoSceneLoader.h; path = renderer/DemoSceneLoader.h; sourceTree = "<group>"; };
 		A57B428F1A58DAB400C896E1 /* OpenAL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenAL.framework; path = System/Library/Frameworks/OpenAL.framework; sourceTree = SDKROOT; };
 		A57B42911A58DAB800C896E1 /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
 		A5D8EA931A3CD5A600E3620B /* SceneRendering.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SceneRendering.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -138,7 +138,8 @@
 		A5D8EABC1A3CD89300E3620B /* source */ = {
 			isa = PBXGroup;
 			children = (
-				A5D8EC441A3CF50E00E3620B /* renderer */,
+				5C6587FB1DA59BBC007F8DB1 /* DemoSceneLoader.cpp */,
+				5C6587FC1DA59BBC007F8DB1 /* DemoSceneLoader.h */,
 				A5D8EABD1A3CD89300E3620B /* main.cpp */,
 				A5D8EC3E1A3CE18900E3620B /* MainController.cpp */,
 				A5D8EC3F1A3CE18900E3620B /* MainController.h */,
@@ -162,15 +163,6 @@
 				A5D8EC361A3CDF5600E3620B /* OpenGL.framework */,
 			);
 			name = Frameworks;
-			sourceTree = "<group>";
-		};
-		A5D8EC441A3CF50E00E3620B /* renderer */ = {
-			isa = PBXGroup;
-			children = (
-				A566F27F1A3E761F00E5A513 /* DemoSceneLoader.cpp */,
-				A566F2801A3E761F00E5A513 /* DemoSceneLoader.h */,
-			);
-			name = renderer;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -261,8 +253,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				A5D8EABE1A3CD89300E3620B /* main.cpp in Sources */,
-				A566F2841A3E761F00E5A513 /* DemoSceneLoader.cpp in Sources */,
 				A5D8EC401A3CE18900E3620B /* MainController.cpp in Sources */,
+				5C6587FD1DA59BBC007F8DB1 /* DemoSceneLoader.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

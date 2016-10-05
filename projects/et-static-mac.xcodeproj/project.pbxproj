@@ -9,6 +9,8 @@
 /* Begin PBXBuildFile section */
 		5C4F7F1A1D9AF98D0054FA50 /* databuffer.h in Headers */ = {isa = PBXBuildFile; fileRef = 5C4F7F191D9AF98D0054FA50 /* databuffer.h */; };
 		5C4F7F231D9C324F0054FA50 /* constbuffer.h in Headers */ = {isa = PBXBuildFile; fileRef = 5C4F7F211D9C324F0054FA50 /* constbuffer.h */; };
+		5C6587FF1DA59D27007F8DB1 /* sampler.h in Headers */ = {isa = PBXBuildFile; fileRef = 5C6587FE1DA59D27007F8DB1 /* sampler.h */; };
+		5C6588031DA59D4E007F8DB1 /* metal_sampler.h in Headers */ = {isa = PBXBuildFile; fileRef = 5C6588011DA59D4E007F8DB1 /* metal_sampler.h */; };
 		5CD5A9BE1D932CFA003FD770 /* app.pack.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 5CD5A8721D932CF4003FD770 /* app.pack.cxx */; };
 		5CD5A9BF1D932CFA003FD770 /* camera.pack.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 5CD5A8731D932CF4003FD770 /* camera.pack.cxx */; };
 		5CD5A9C01D932CFA003FD770 /* core.pack.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 5CD5A8741D932CF4003FD770 /* core.pack.cxx */; };
@@ -31,6 +33,9 @@
 		5C4F7F1C1D9AFB470054FA50 /* metal_databuffer.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; fileEncoding = 4; path = metal_databuffer.h; sourceTree = "<group>"; };
 		5C4F7F201D9C324F0054FA50 /* constbuffer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = constbuffer.cpp; sourceTree = "<group>"; };
 		5C4F7F211D9C324F0054FA50 /* constbuffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = constbuffer.h; sourceTree = "<group>"; };
+		5C6587FE1DA59D27007F8DB1 /* sampler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sampler.h; sourceTree = "<group>"; };
+		5C6588001DA59D4E007F8DB1 /* metal_sampler.mm */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; fileEncoding = 4; path = metal_sampler.mm; sourceTree = "<group>"; };
+		5C6588011DA59D4E007F8DB1 /* metal_sampler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = metal_sampler.h; sourceTree = "<group>"; };
 		5CD5A8561D932CF4003FD770 /* appevironment.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = appevironment.h; sourceTree = "<group>"; };
 		5CD5A8571D932CF4003FD770 /* application.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; path = application.cpp; sourceTree = "<group>"; };
 		5CD5A8581D932CF4003FD770 /* application.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = application.h; sourceTree = "<group>"; };
@@ -683,6 +688,7 @@
 				5CD5A9571D932CF4003FD770 /* program.h */,
 				5CD5A9581D932CF4003FD770 /* renderer.h */,
 				5CD5A9591D932CF4003FD770 /* renderpass.h */,
+				5C6587FE1DA59D27007F8DB1 /* sampler.h */,
 				5CD5A95A1D932CF4003FD770 /* texture.h */,
 				5CD5A95B1D932CF4003FD770 /* vertexbuffer.h */,
 			);
@@ -694,8 +700,8 @@
 			children = (
 				5CD5A9601D932CF4003FD770 /* metal.h */,
 				5CD5A9611D932CF4003FD770 /* metal.mm */,
-				5C4F7F1B1D9AFB470054FA50 /* metal_databuffer.mm */,
 				5C4F7F1C1D9AFB470054FA50 /* metal_databuffer.h */,
+				5C4F7F1B1D9AFB470054FA50 /* metal_databuffer.mm */,
 				5CD5A9621D932CF4003FD770 /* metal_indexbuffer.h */,
 				5CD5A9631D932CF4003FD770 /* metal_indexbuffer.mm */,
 				5CD5A9641D932CF4003FD770 /* metal_pipelinestate.h */,
@@ -706,6 +712,8 @@
 				5CD5A9691D932CF4003FD770 /* metal_renderer.mm */,
 				5CD5A96A1D932CF4003FD770 /* metal_renderpass.h */,
 				5CD5A96B1D932CF4003FD770 /* metal_renderpass.mm */,
+				5C6588011DA59D4E007F8DB1 /* metal_sampler.h */,
+				5C6588001DA59D4E007F8DB1 /* metal_sampler.mm */,
 				5CD5A96C1D932CF4003FD770 /* metal_texture.h */,
 				5CD5A96D1D932CF4003FD770 /* metal_texture.mm */,
 				5CD5A96E1D932CF4003FD770 /* metal_vertexbuffer.h */,
@@ -809,7 +817,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				5C4F7F1A1D9AF98D0054FA50 /* databuffer.h in Headers */,
+				5C6588031DA59D4E007F8DB1 /* metal_sampler.h in Headers */,
 				5C4F7F231D9C324F0054FA50 /* constbuffer.h in Headers */,
+				5C6587FF1DA59D27007F8DB1 /* sampler.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

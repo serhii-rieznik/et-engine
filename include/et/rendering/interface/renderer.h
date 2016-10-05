@@ -14,6 +14,7 @@
 #include <et/rendering/interface/databuffer.h>
 #include <et/rendering/interface/renderpass.h>
 #include <et/rendering/interface/pipelinestate.h>
+#include <et/rendering/interface/sampler.h>
 
 namespace et
 {
@@ -78,6 +79,11 @@ public:
 	 * Pipeline state
 	 */
 	virtual PipelineState::Pointer createPipelineState(RenderPass::Pointer, Material::Pointer, VertexStream::Pointer) = 0;
+
+	/*
+	 * Sampler
+	 */
+	virtual Sampler::Pointer createSampler() = 0;
 
 private:
 	RenderContext* _rc = nullptr;

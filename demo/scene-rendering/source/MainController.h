@@ -1,10 +1,11 @@
 #pragma once
 
+#include "DemoSceneLoader.h"
+
 #include <et/app/application.h>
 #include <et/input/gestures.h>
 #include <et/camera/cameramovingcontroller.h>
 #include <et/scene3d/scene3drenderer.h>
-#include "renderer/DemoSceneLoader.h"
 
 namespace demo
 {

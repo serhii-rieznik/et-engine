@@ -18,7 +18,6 @@ struct MaterialVariables
 {
 	float4 diffuseColor;
 	float4 specularColor;
-	float3 lightPosition;
 	float roughness;
 };
 

@@ -9,7 +9,7 @@ using namespace demo;
 
 void SceneLoader::init(et::RenderContext* rc)
 {
-	std::string materialFile = application().resolveFileName("media/materials/microfacet.material");
+	std::string materialFile = application().resolveFileName("engine_data/materials/diffuse.material");
 
 	_rc = rc;
 	_defaultMaterial = Material::Pointer::create(_rc->renderer().ptr());

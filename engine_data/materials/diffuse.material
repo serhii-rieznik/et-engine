@@ -1,0 +1,19 @@
+{
+	"name" : "microfacet",
+
+	"program-source" : "diffuse",
+
+	"depth-state": {
+		"depth-function": "less",
+		"depth-test": true,
+		"depth-write": true
+	},
+
+	"blend-state": {
+		"blend-configuration" : "disabled"
+	},
+
+	"render-priority" : 0,
+
+	"cull-mode" : "back"
+}

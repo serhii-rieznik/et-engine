@@ -33,7 +33,9 @@ namespace et
 		struct Reflection
 		{
 			UnorderedMap<String, uint32_t> vertexTextures;
+			UnorderedMap<String, uint32_t> vertexSamplers;
 			UnorderedMap<String, uint32_t> fragmentTextures;
+			UnorderedMap<String, uint32_t> fragmentSamplers;
 			VariableMap passVariables;
 			VariableMap materialVariables;
 			VariableMap objectVariables;

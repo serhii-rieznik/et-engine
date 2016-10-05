@@ -9,6 +9,7 @@
 #include <et/rendering/metal/metal_renderer.h>
 #include <et/rendering/metal/metal_program.h>
 #include <et/rendering/metal/metal_texture.h>
+#include <et/rendering/metal/metal_sampler.h>
 #include <et/rendering/metal/metal_pipelinestate.h>
 
 namespace et
@@ -26,6 +27,7 @@ public:
 	MetalState& metal;
 	MetalRenderer* renderer = nullptr;
     MetalNativePipelineState state;
+	MetalSampler::Pointer sampler;
 
 	uint32_t passVariablesBufferSize = 0;
 
@@ -58,6 +60,8 @@ MetalPipelineState::~MetalPipelineState()
 
 void MetalPipelineState::build()
 {
+	_private->sampler = _private->renderer->createSampler();
+	
     MetalProgram::Pointer mtlProgram = program();
     const VertexDeclaration& decl = inputLayout();
 
@@ -189,6 +193,16 @@ void MetalPipelineState::bind(MetalNativeEncoder& e, Material::Pointer material)
 		[e.encoder setFragmentTexture:tex->nativeTexture().texture atIndex:rt.second];
 	}
 
+	for (const auto& sm : reflection.vertexSamplers)
+	{
+		[e.encoder setVertexSamplerState:_private->sampler->nativeSampler().sampler atIndex:sm.second];
+	}
+
+	for (const auto& sm : reflection.fragmentSamplers)
+	{
+		[e.encoder setFragmentSamplerState:_private->sampler->nativeSampler().sampler atIndex:sm.second];
+	}
+
 	[e.encoder setDepthStencilState:_private->state.depthStencilState];
 	[e.encoder setRenderPipelineState:_private->state.pipelineState];
 }
@@ -218,6 +232,11 @@ void MetalPipelineState::buildReflection()
 		{
 			String argName([arg.name UTF8String]);
 			reflection.vertexTextures[argName] = static_cast<uint32_t>(arg.index);
+		}
+		else if (arg.active && (arg.type == MTLArgumentTypeSampler))
+		{
+			String argName([arg.name UTF8String]);
+			reflection.vertexSamplers[argName] = static_cast<uint32_t>(arg.index);
 		}
 	}
 
@@ -254,7 +273,12 @@ void MetalPipelineState::buildReflection()
 			String argName([arg.name UTF8String]);
 			reflection.fragmentTextures[argName] = static_cast<uint32_t>(arg.index);
 		}
-	}
+		else if (arg.active && (arg.type == MTLArgumentTypeSampler))
+		{
+			String argName([arg.name UTF8String]);
+			reflection.fragmentSamplers[argName] = static_cast<uint32_t>(arg.index);
+		}
+}
 
 	printReflection();
 

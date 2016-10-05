@@ -11,23 +11,23 @@
 
 namespace et
 {
-	struct MetalState;
-    class MetalRenderer;
-	class MetalRenderPassPrivate;
-	class MetalRenderPass : public RenderPass
-	{
-	public:
-		ET_DECLARE_POINTER(MetalRenderPass);
+struct MetalState;
+class MetalRenderer;
+class MetalRenderPassPrivate;
+class MetalRenderPass : public RenderPass
+{
+public:
+	ET_DECLARE_POINTER(MetalRenderPass);
 
-	public:
-		MetalRenderPass(MetalRenderer*, MetalState&, const RenderPass::ConstructionInfo&);
-		~MetalRenderPass();
-		
-		void pushRenderBatch(RenderBatch::Pointer) override;
+public:
+	MetalRenderPass(MetalRenderer*, MetalState&, const RenderPass::ConstructionInfo&);
+	~MetalRenderPass();
+	
+	void pushRenderBatch(RenderBatch::Pointer) override;
 
-		void endEncoding();
+	void endEncoding();
 
-	private:
-		ET_DECLARE_PIMPL(MetalRenderPass, 256);
-	};
+private:
+	ET_DECLARE_PIMPL(MetalRenderPass, 256);
+};
 }

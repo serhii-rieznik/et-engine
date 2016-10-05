@@ -11,27 +11,27 @@
 
 namespace et
 {
-    struct MetalState;
-    struct MetalNativeProgram;
-	class MetalProgramPrivate;
-	class MetalProgram : public Program
-	{
-	public:
-		ET_DECLARE_POINTER(MetalProgram);
-		
-	public:
-        MetalProgram(MetalState&);
-		~MetalProgram();
+struct MetalState;
+struct MetalNativeProgram;
+class MetalProgramPrivate;
+class MetalProgram : public Program
+{
+public:
+	ET_DECLARE_POINTER(MetalProgram);
+	
+public:
+	MetalProgram(MetalState&);
+	~MetalProgram();
 
-		void build(const std::string& programSource, const std::string& = emptyString) override;
+	void build(const std::string& programSource, const std::string& = emptyString) override;
 
-        void setTransformMatrix(const mat4 &m, bool force) override;
-        void setCameraProperties(const Camera& cam) override;
-        void setDefaultLightPosition(const vec3& p, bool force) override;
-        
-        const MetalNativeProgram& nativeProgram() const;
-        
-	private:
-		ET_DECLARE_PIMPL(MetalProgram, 32)
-	};
+	void setTransformMatrix(const mat4 &m, bool force) override;
+	void setCameraProperties(const Camera& cam) override;
+	void setDefaultLightPosition(const vec3& p, bool force) override;
+	
+	const MetalNativeProgram& nativeProgram() const;
+	
+private:
+	ET_DECLARE_PIMPL(MetalProgram, 32)
+};
 }

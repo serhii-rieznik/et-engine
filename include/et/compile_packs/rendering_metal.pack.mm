@@ -5,5 +5,6 @@
 #include "../rendering/metal/metal_program.mm"
 #include "../rendering/metal/metal_renderer.mm"
 #include "../rendering/metal/metal_renderpass.mm"
+#include "../rendering/metal/metal_sampler.mm"
 #include "../rendering/metal/metal_texture.mm"
 #include "../rendering/metal/metal_vertexbuffer.mm"

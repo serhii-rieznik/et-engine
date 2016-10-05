@@ -183,4 +183,12 @@ PipelineState::Pointer MetalRenderer::createPipelineState(RenderPass::Pointer pa
 	return result;
 }
 
+/*
+ * Sampler
+ */
+Sampler::Pointer MetalRenderer::createSampler()
+{
+	return MetalSampler::Pointer::create(_private->metal);
+}
+
 }

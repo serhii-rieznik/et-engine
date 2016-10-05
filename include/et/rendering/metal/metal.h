@@ -63,6 +63,11 @@ struct MetalNativeEncoder
 	id<MTLRenderCommandEncoder> encoder = nil;
 };
 
+struct MetalNativeSampler
+{
+	id<MTLSamplerState> sampler = nil;
+};
+
 class MetalNativeBuffer : public Shared
 {
 public:

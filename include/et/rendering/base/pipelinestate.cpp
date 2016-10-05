@@ -12,40 +12,61 @@ namespace et
 
 void PipelineState::printReflection()
 {
-	log::info("Pass variables: { ");
-	for (const auto& pv : reflection.passVariables)
+	if (!reflection.passVariables.empty())
 	{
-		log::info("\t%s : %u", pv.first.c_str(), pv.second.offset);
+		log::info("Pass variables: { ");
+		for (const auto& pv : reflection.passVariables)
+			log::info("\t%s : %u", pv.first.c_str(), pv.second.offset);
+		log::info("}");
 	}
-	log::info("}");
 
-	log::info("Material variables: { ");
-	for (const auto& pv : reflection.materialVariables)
+	if (!reflection.materialVariables.empty())
 	{
-		log::info("\t%s : %u", pv.first.c_str(), pv.second.offset);
+		log::info("Material variables: { ");
+		for (const auto& pv : reflection.materialVariables)
+			log::info("\t%s : %u", pv.first.c_str(), pv.second.offset);
+		log::info("}");
 	}
-	log::info("}");
 
-	log::info("Object variables: { ");
-	for (const auto& pv : reflection.objectVariables)
+	if (!reflection.objectVariables.empty())
 	{
-		log::info("\t%s : %u", pv.first.c_str(), pv.second.offset);
+		log::info("Object variables: { ");
+		for (const auto& pv : reflection.objectVariables)
+			log::info("\t%s : %u", pv.first.c_str(), pv.second.offset);
+		log::info("}");
 	}
-	log::info("}");
 
-	log::info("Vertex textures: { ");
-	for (const auto& pv : reflection.vertexTextures)
+	if (!reflection.vertexTextures.empty())
 	{
-		log::info("\t%s : %u", pv.first.c_str(), pv.second);
+		log::info("Vertex textures: { ");
+		for (const auto& pv : reflection.vertexTextures)
+			log::info("\t%s : %u", pv.first.c_str(), pv.second);
+		log::info("}");
 	}
-	log::info("}");
 
-	log::info("Fragment textures: { ");
-	for (const auto& pv : reflection.fragmentTextures)
+	if (!reflection.vertexSamplers.empty())
 	{
-		log::info("\t%s : %u", pv.first.c_str(), pv.second);
+		log::info("Vertex samplers: { ");
+		for (const auto& pv : reflection.vertexSamplers)
+			log::info("\t%s : %u", pv.first.c_str(), pv.second);
+		log::info("}");
 	}
-	log::info("}");
+
+	if (!reflection.fragmentTextures.empty())
+	{
+		log::info("Fragment textures: { ");
+		for (const auto& pv : reflection.fragmentTextures)
+			log::info("\t%s : %u", pv.first.c_str(), pv.second);
+		log::info("}");
+	}
+
+	if (!reflection.fragmentSamplers.empty())
+	{
+		log::info("Fragment samplers: { ");
+		for (const auto& pv : reflection.fragmentSamplers)
+			log::info("\t%s : %u", pv.first.c_str(), pv.second);
+		log::info("}");
+	}
 }
 
 class PipelineStateCachePrivate
