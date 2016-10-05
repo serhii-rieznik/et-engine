@@ -32,7 +32,7 @@ public:
 	RenderContext* rc() const
 		{ return _rc; }
 
-	SharedVariables& variables()
+	SharedVariables& sharedVariables()
 		{ return _sharedVariables; }
 
 	ConstBuffer& sharedConstBuffer()

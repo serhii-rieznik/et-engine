@@ -67,12 +67,5 @@ void SceneLoader::loadObjFile(const std::string& fileName, et::s3d::Scene::Point
 
 et::Material::Pointer SceneLoader::materialWithName(const std::string& key)
 {
-    auto i = _materialMap.find(key);
-    if (i == _materialMap.end())
-    {
-        log::error("No material for key: %s", key.c_str());
-        return _defaultMaterial;
-    }
-    
-    return i->second;
-}
+	return _defaultMaterial;
+ }

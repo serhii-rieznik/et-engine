@@ -18,6 +18,5 @@ namespace demo
 	private:
 		et::RenderContext* _rc = nullptr;
         et::Material::Pointer _defaultMaterial;
-        et::UnorderedMap<std::string, et::Material::Pointer> _materialMap;
 	};
 }

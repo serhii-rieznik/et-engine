@@ -27,6 +27,8 @@ public:
 	MetalRenderer* renderer = nullptr;
     MetalNativePipelineState state;
 
+	uint32_t passVariablesBufferSize = 0;
+
 	BinaryDataStorage materialVariablesBuffer;
 	uint32_t materialVariablesBufferSize = 0;
 
@@ -167,22 +169,24 @@ void MetalPipelineState::bind(MetalNativeEncoder& e, Material::Pointer material)
 			[e.encoder setFragmentBuffer:mtlSharedBuffer offset:objectBufferOffset atIndex:ObjectVariablesBufferIndex];
 	}
 
-	for (const auto& tex : material->textures())
+	for (const auto& rt : reflection.vertexTextures)
 	{
-		MetalTexture::Pointer texture = tex.second;
-		ET_ASSERT(texture.valid());
-
-		auto vt = reflection.vertexTextures.find(tex.first);
-		if (vt != reflection.vertexTextures.end())
+		MetalTexture::Pointer tex = material->texture(rt.first);
+		if (tex.invalid())
 		{
-			[e.encoder setVertexTexture:texture->nativeTexture().texture atIndex:vt->second];
+			tex = _private->renderer->defaultTexture();
 		}
+		[e.encoder setVertexTexture:tex->nativeTexture().texture atIndex:rt.second];
+	}
 
-		auto ft = reflection.fragmentTextures.find(tex.first);
-		if (ft != reflection.fragmentTextures.end())
+	for (const auto& rt : reflection.fragmentTextures)
+	{
+		MetalTexture::Pointer tex = material->texture(rt.first);
+		if (tex.invalid())
 		{
-			[e.encoder setFragmentTexture:texture->nativeTexture().texture atIndex:ft->second];
+			tex = _private->renderer->defaultTexture();
 		}
+		[e.encoder setFragmentTexture:tex->nativeTexture().texture atIndex:rt.second];
 	}
 
 	[e.encoder setDepthStencilState:_private->state.depthStencilState];
@@ -195,7 +199,11 @@ void MetalPipelineState::buildReflection()
 	{
 		if (arg.active && (arg.type == MTLArgumentTypeBuffer) && (arg.bufferDataType == MTLDataTypeStruct))
 		{
-			if (arg.index == MaterialVariablesBufferIndex)
+			if (arg.index == PassVariablesBufferIndex)
+			{
+				_private->loadVariables(arg, reflection.passVariables, _private->passVariablesBufferSize);
+			}
+			else if (arg.index == MaterialVariablesBufferIndex)
 			{
 				_private->loadVariables(arg, reflection.materialVariables, _private->materialVariablesBufferSize);
 				_private->bindMaterialVariablesToVertex = true;
@@ -217,7 +225,14 @@ void MetalPipelineState::buildReflection()
 	{
 		if (arg.active && (arg.type == MTLArgumentTypeBuffer) && (arg.bufferDataType == MTLDataTypeStruct))
 		{
-			if (arg.index == MaterialVariablesBufferIndex)
+			if (arg.index == PassVariablesBufferIndex)
+			{
+				if (_private->passVariablesBufferSize > 0)
+					_private->validateVariables(arg, reflection.passVariables, _private->passVariablesBufferSize);
+				else
+					_private->loadVariables(arg, reflection.passVariables, _private->passVariablesBufferSize);
+			}
+			else if (arg.index == MaterialVariablesBufferIndex)
 			{
 				if (_private->bindMaterialVariablesToVertex)
 					_private->validateVariables(arg, reflection.materialVariables, _private->materialVariablesBufferSize);

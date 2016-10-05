@@ -98,7 +98,7 @@ fragment float4 fragmentMain(VSOutput fragmentIn [[stage_in]],
 	float kS = microfacetSpecular(NdotL, NdotV, NdotH, alpha) * invPi;
 	float kD = burleyDiffuse(NdotL, NdotV, HdotL, alpha) * invPi;
 
-	return albedo * materialVariables.diffuseColor * kD;
+	return albedo * materialVariables.diffuseColor;// * kD;
 	// ; // * kD + materialVariables.specularColor * kS;
 }
 

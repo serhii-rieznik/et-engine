@@ -59,7 +59,7 @@ void MetalRenderPass::pushRenderBatch(RenderBatch::Pointer batch)
 {
 	Material::Pointer material = batch->material();
 
-	SharedVariables& sharedVariables = _private->renderer->variables();
+	SharedVariables& sharedVariables = _private->renderer->sharedVariables();
 	sharedVariables.loadCameraProperties(info().camera);
 	sharedVariables.loadLightProperties(info().light);
 
@@ -82,7 +82,7 @@ void MetalRenderPass::pushRenderBatch(RenderBatch::Pointer batch)
 
 void MetalRenderPass::endEncoding()
 {
-	_private->renderer->variables().flushBuffer();
+	_private->renderer->sharedVariables().flushBuffer();
 	_private->renderer->sharedConstBuffer().flush();
 
 	[_private->encoder.encoder endEncoding];

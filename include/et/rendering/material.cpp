@@ -155,6 +155,12 @@ void Material::setTexutre(const String& name, const Texture::Pointer& tex)
 	_textures[name] = tex;
 }
 
+Texture::Pointer Material::texture(const String& name) const
+{
+	auto i = _textures.find(name);
+	return (i == _textures.end()) ? Texture::Pointer() : i->second;
+}
+
 uint32_t Material::sortingKey() const
 {
 	return _depth.sortingKey() | _blend.sortingKey() << 8 | _additionalPriority << 16;

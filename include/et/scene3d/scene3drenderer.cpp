@@ -64,7 +64,8 @@ void s3d::Renderer::renderMeshList(RenderPass::Pointer pass, const s3d::BaseElem
 	for (auto& rbv : _latestBatches)
 	{
 		std::random_shuffle(rbv.second.begin(), rbv.second.end());
-/*
+
+		/*
 		std::sort(rbv.second.begin(), rbv.second.end(), [cameraPosition](BatchFromMesh& l, BatchFromMesh& r)
 		{
 			auto lip = l.first->transformation() * l.first->boundingBox().center;
@@ -74,7 +75,8 @@ void s3d::Renderer::renderMeshList(RenderPass::Pointer pass, const s3d::BaseElem
 			else
 				return (lip - cameraPosition).dotSelf() < (rip - cameraPosition).dotSelf();
 		});
-*/
+		// */
+		
 		for (auto& rb : rbv.second)
 		{
 			rb.second->material()->bindToMaterial(rb.first->material());

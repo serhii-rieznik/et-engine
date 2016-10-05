@@ -286,32 +286,6 @@
 		5CD5A9731D932CF4003FD770 /* rendering.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = rendering.h; sourceTree = "<group>"; };
 		5CD5A9741D932CF4003FD770 /* renderingcaps.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = renderingcaps.h; sourceTree = "<group>"; };
 		5CD5A9751D932CF4003FD770 /* texturefactory.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = texturefactory.h; sourceTree = "<group>"; };
-		5CD5A9781D932CF4003FD770 /* GLSL.std.450.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GLSL.std.450.h; sourceTree = "<group>"; };
-		5CD5A9791D932CF4003FD770 /* icd-spv.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "icd-spv.h"; sourceTree = "<group>"; };
-		5CD5A97A1D932CF4003FD770 /* spirv.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = spirv.h; sourceTree = "<group>"; };
-		5CD5A97B1D932CF4003FD770 /* spirv.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = spirv.hpp; sourceTree = "<group>"; };
-		5CD5A97C1D932CF4003FD770 /* vk_icd.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = vk_icd.h; sourceTree = "<group>"; };
-		5CD5A97D1D932CF4003FD770 /* vk_layer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = vk_layer.h; sourceTree = "<group>"; };
-		5CD5A97E1D932CF4003FD770 /* vk_platform.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = vk_platform.h; sourceTree = "<group>"; };
-		5CD5A97F1D932CF4003FD770 /* vk_sdk_platform.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = vk_sdk_platform.h; sourceTree = "<group>"; };
-		5CD5A9801D932CF4003FD770 /* vulkan.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = vulkan.h; sourceTree = "<group>"; };
-		5CD5A9811D932CF4003FD770 /* vulkan.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = vulkan.hpp; sourceTree = "<group>"; };
-		5CD5A9821D932CF4003FD770 /* vulkan.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; path = vulkan.cpp; sourceTree = "<group>"; };
-		5CD5A9831D932CF4003FD770 /* vulkan.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = vulkan.h; sourceTree = "<group>"; };
-		5CD5A9841D932CF4003FD770 /* vulkan_indexbuffer.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; path = vulkan_indexbuffer.cpp; sourceTree = "<group>"; };
-		5CD5A9851D932CF4003FD770 /* vulkan_indexbuffer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = vulkan_indexbuffer.h; sourceTree = "<group>"; };
-		5CD5A9861D932CF4003FD770 /* vulkan_pipelinestate.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; path = vulkan_pipelinestate.cpp; sourceTree = "<group>"; };
-		5CD5A9871D932CF4003FD770 /* vulkan_pipelinestate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = vulkan_pipelinestate.h; sourceTree = "<group>"; };
-		5CD5A9881D932CF4003FD770 /* vulkan_program.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; path = vulkan_program.cpp; sourceTree = "<group>"; };
-		5CD5A9891D932CF4003FD770 /* vulkan_program.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = vulkan_program.h; sourceTree = "<group>"; };
-		5CD5A98A1D932CF4003FD770 /* vulkan_renderer.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; path = vulkan_renderer.cpp; sourceTree = "<group>"; };
-		5CD5A98B1D932CF4003FD770 /* vulkan_renderer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = vulkan_renderer.h; sourceTree = "<group>"; };
-		5CD5A98C1D932CF4003FD770 /* vulkan_renderpass.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; path = vulkan_renderpass.cpp; sourceTree = "<group>"; };
-		5CD5A98D1D932CF4003FD770 /* vulkan_renderpass.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = vulkan_renderpass.h; sourceTree = "<group>"; };
-		5CD5A98E1D932CF4003FD770 /* vulkan_texture.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; path = vulkan_texture.cpp; sourceTree = "<group>"; };
-		5CD5A98F1D932CF4003FD770 /* vulkan_texture.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = vulkan_texture.h; sourceTree = "<group>"; };
-		5CD5A9901D932CF4003FD770 /* vulkan_vertexbuffer.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; path = vulkan_vertexbuffer.cpp; sourceTree = "<group>"; };
-		5CD5A9911D932CF4003FD770 /* vulkan_vertexbuffer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = vulkan_vertexbuffer.h; sourceTree = "<group>"; };
 		5CD5A9931D932CF4003FD770 /* animation.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; path = animation.cpp; sourceTree = "<group>"; };
 		5CD5A9941D932CF4003FD770 /* animation.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = animation.h; sourceTree = "<group>"; };
 		5CD5A9951D932CF4003FD770 /* base.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = base.h; sourceTree = "<group>"; };
@@ -670,7 +644,6 @@
 				5C4F7F151D9AF84C0054FA50 /* sharedvariables.cpp */,
 				5C4F7F161D9AF84C0054FA50 /* sharedvariables.h */,
 				5CD5A9751D932CF4003FD770 /* texturefactory.h */,
-				5CD5A9761D932CF4003FD770 /* vulkan */,
 			);
 			name = rendering;
 			path = ../include/et/rendering;
@@ -739,47 +712,6 @@
 				5CD5A96F1D932CF4003FD770 /* metal_vertexbuffer.mm */,
 			);
 			path = metal;
-			sourceTree = "<group>";
-		};
-		5CD5A9761D932CF4003FD770 /* vulkan */ = {
-			isa = PBXGroup;
-			children = (
-				5CD5A9771D932CF4003FD770 /* vulkan */,
-				5CD5A9821D932CF4003FD770 /* vulkan.cpp */,
-				5CD5A9831D932CF4003FD770 /* vulkan.h */,
-				5CD5A9841D932CF4003FD770 /* vulkan_indexbuffer.cpp */,
-				5CD5A9851D932CF4003FD770 /* vulkan_indexbuffer.h */,
-				5CD5A9861D932CF4003FD770 /* vulkan_pipelinestate.cpp */,
-				5CD5A9871D932CF4003FD770 /* vulkan_pipelinestate.h */,
-				5CD5A9881D932CF4003FD770 /* vulkan_program.cpp */,
-				5CD5A9891D932CF4003FD770 /* vulkan_program.h */,
-				5CD5A98A1D932CF4003FD770 /* vulkan_renderer.cpp */,
-				5CD5A98B1D932CF4003FD770 /* vulkan_renderer.h */,
-				5CD5A98C1D932CF4003FD770 /* vulkan_renderpass.cpp */,
-				5CD5A98D1D932CF4003FD770 /* vulkan_renderpass.h */,
-				5CD5A98E1D932CF4003FD770 /* vulkan_texture.cpp */,
-				5CD5A98F1D932CF4003FD770 /* vulkan_texture.h */,
-				5CD5A9901D932CF4003FD770 /* vulkan_vertexbuffer.cpp */,
-				5CD5A9911D932CF4003FD770 /* vulkan_vertexbuffer.h */,
-			);
-			path = vulkan;
-			sourceTree = "<group>";
-		};
-		5CD5A9771D932CF4003FD770 /* vulkan */ = {
-			isa = PBXGroup;
-			children = (
-				5CD5A9781D932CF4003FD770 /* GLSL.std.450.h */,
-				5CD5A9791D932CF4003FD770 /* icd-spv.h */,
-				5CD5A97A1D932CF4003FD770 /* spirv.h */,
-				5CD5A97B1D932CF4003FD770 /* spirv.hpp */,
-				5CD5A97C1D932CF4003FD770 /* vk_icd.h */,
-				5CD5A97D1D932CF4003FD770 /* vk_layer.h */,
-				5CD5A97E1D932CF4003FD770 /* vk_platform.h */,
-				5CD5A97F1D932CF4003FD770 /* vk_sdk_platform.h */,
-				5CD5A9801D932CF4003FD770 /* vulkan.h */,
-				5CD5A9811D932CF4003FD770 /* vulkan.hpp */,
-			);
-			path = vulkan;
 			sourceTree = "<group>";
 		};
 		5CD5A9921D932CF4003FD770 /* scene3d */ = {

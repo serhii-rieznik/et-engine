@@ -53,13 +53,13 @@ void MetalRenderer::init(const RenderContextParameters& params)
 	application().context().objects[3] = (__bridge void*)(_private->metal.device);
 	application().context().objects[4] = (__bridge void*)_private->metal.layer;
 
-	variables().init(this);
+	sharedVariables().init(this);
 	sharedConstBuffer().init(this);
 }
 
 void MetalRenderer::shutdown()
 {
-	variables().shutdown();
+	sharedVariables().shutdown();
 	
 	ET_OBJC_RELEASE(_private->metal.queue);
 	ET_OBJC_RELEASE(_private->metal.device);
@@ -90,7 +90,7 @@ void MetalRenderer::begin()
 	mtl.mainCommandBuffer = [mtl.queue commandBuffer];
 	ET_ASSERT(mtl.mainCommandBuffer != nil);
 
-	// sharedConstBuffer().reset();
+	sharedConstBuffer().reset();
 }
 
 void MetalRenderer::present()

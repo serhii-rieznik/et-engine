@@ -66,6 +66,8 @@ public:
 	using TextureMap = UnorderedMap<String, Texture::Pointer>;
 
 	void setTexutre(const String& name, const Texture::Pointer&);
+	Texture::Pointer texture(const String& name) const;
+	
 	const TextureMap& textures() const
 		{ return _textures; }
 
