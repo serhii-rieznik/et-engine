@@ -1,5 +1,6 @@
 #include <et/core/json.h>
 #include <et/core/conversion.h>
+#include <et/core/hardware.h>
 #include <et/camera/camera.h>
 #include <et/scene3d/objloader.h>
 #include <et/rendering/base/primitives.h>

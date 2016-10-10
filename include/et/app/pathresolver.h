@@ -8,7 +8,6 @@
 #pragma once
 
 #include <deque>
-#include <et/core/et.h>
 
 namespace et
 {

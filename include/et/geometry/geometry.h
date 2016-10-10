@@ -7,7 +7,6 @@
 
 #pragma once
 
-#include <et/core/et.h>
 #include <et/geometry/ray.h>
 #include <et/geometry/triangleex.h>
 #include <et/geometry/segment2d.h>

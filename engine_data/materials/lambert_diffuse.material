@@ -1,0 +1,26 @@
+{
+	"name" : "lit_diffuse",
+
+	"program-source" : "materials",
+
+	"defines" : [
+		"POSITION_SIZE=3",
+		"NORMAL_SIZE=3",
+		"TEXCOORD0_SIZE=2",
+		"DIFFUSE_LAMBERT=1"
+	],
+
+	"depth-state": {
+		"depth-function": "less",
+		"depth-test": true,
+		"depth-write": true
+	},
+
+	"blend-state": {
+		"blend-configuration" : "disabled"
+	},
+
+	"render-priority" : 0,
+
+	"cull-mode" : "back"
+}

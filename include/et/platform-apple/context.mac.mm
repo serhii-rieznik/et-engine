@@ -5,7 +5,6 @@
  *
  */
 
-#include <et/core/et.h>
 #include <et/platform-apple/objc.h>
 #include <et/platform-apple/context_osx.h>
 #include <et/app/application.h>

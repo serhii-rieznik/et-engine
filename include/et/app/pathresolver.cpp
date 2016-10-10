@@ -5,10 +5,11 @@
  *
  */
 
-#include <et/locale/locale.hpp>
+#include <et/core/hardware.h>
 #include <et/app/application.h>
-#include <et/rendering/rendercontext.h>
 #include <et/app/pathresolver.h>
+#include <et/locale/locale.hpp>
+#include <et/rendering/rendercontext.h>
 
 using namespace et;
 

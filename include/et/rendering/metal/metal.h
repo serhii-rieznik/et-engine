@@ -18,14 +18,6 @@
 namespace et
 {
 
-enum : uint32_t
-{
-	VertexStreamBufferIndex = 0,
-	ObjectVariablesBufferIndex = 4,
-	MaterialVariablesBufferIndex = 5,
-	PassVariablesBufferIndex = 6,
-};
-
 struct MetalState
 {
 	CAMetalLayer* layer = nil;
@@ -125,6 +117,8 @@ namespace metal
     MTLVertexFormat dataTypeToVertexFormat(DataType);
 	MTLCompareFunction compareFunctionValue(CompareFunction);
 	MTLIndexType indexArrayFormat(IndexArrayFormat);
+
+	DataType mtlDataTypeToDataType(MTLDataType);
 }
 
 }

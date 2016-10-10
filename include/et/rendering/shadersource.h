@@ -7,9 +7,9 @@
 
 #pragma once
 
-#include <et/platform-apple/objc.h>
-
 namespace et
 {
-	std::string bundleVersion();
+
+void parseShaderSource(std::string& source, const std::string& baseFolder, const StringList& defines);
+
 }

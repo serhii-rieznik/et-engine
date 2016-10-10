@@ -9,7 +9,7 @@ using namespace demo;
 
 void SceneLoader::init(et::RenderContext* rc)
 {
-	std::string materialFile = application().resolveFileName("engine_data/materials/diffuse.material");
+	std::string materialFile = application().resolveFileName("engine_data/materials/burley_diffuse.material");
 
 	_rc = rc;
 	_defaultMaterial = Material::Pointer::create(_rc->renderer().ptr());

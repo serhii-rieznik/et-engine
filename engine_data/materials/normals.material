@@ -1,0 +1,26 @@
+{
+	"name" : "normals",
+
+	"program-source" : "materials",
+
+	"defines" : [
+		"POSITION_SIZE=3",
+		"NORMAL_SIZE=3",
+		"TEXCOORD0_SIZE=0",
+		"DISPLAY_NORMALS=1"
+	],
+
+	"depth-state": {
+		"depth-function": "less",
+		"depth-test": true,
+		"depth-write": true
+	},
+
+	"blend-state": {
+		"blend-configuration" : "disabled"
+	},
+
+	"render-priority" : 0,
+
+	"cull-mode" : "back"
+}

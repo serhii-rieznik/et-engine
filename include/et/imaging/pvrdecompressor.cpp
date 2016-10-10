@@ -17,7 +17,6 @@
 /*****************************************************************************
  * INCLUDES
  *****************************************************************************/
-#include <et/core/et.h>
 #include <external/pvr/PVRTTexture.h>
 #include <external/pvr/PVRTDecompress.h>
 

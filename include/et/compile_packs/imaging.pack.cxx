@@ -1,3 +1,5 @@
+#include <et/core/et.h>
+
 #include "../imaging/bmploader.cpp"
 #include "../imaging/ddsloader.cpp"
 #include "../imaging/hdrloader.cpp"

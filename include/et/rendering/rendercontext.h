@@ -7,7 +7,6 @@
 
 #pragma once
 
-#include <et/core/et.h>
 #include <et/core/objectscache.h>
 #include <et/rendering/rendercontextparams.h>
 

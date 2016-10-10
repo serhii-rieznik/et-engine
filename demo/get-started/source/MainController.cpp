@@ -1,4 +1,5 @@
 #include "MainController.h"
+#include <et/core/hardware.h>
 #include <et/rendering/base/primitives.h>
 
 #if (ET_PLATFORM_WIN)
@@ -58,7 +59,7 @@ void demo::MainController::createModels(et::RenderContext* rc)
 
 void demo::MainController::loadProgram(et::RenderContext* rc)
 {
-	auto materialFile = et::application().resolveFileName("media/materials/normals.material");
+	auto materialFile = et::application().resolveFileName("engine_data/materials/normals.material");
 	_defaultMaterial = et::Material::Pointer::create(rc->renderer().ptr());
 	_defaultMaterial->loadFromJson(et::loadTextFile(materialFile), et::getFileFolder(materialFile));
 }

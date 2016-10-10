@@ -1,3 +1,5 @@
+#include <et/core/et.h>
+
 #include "../app/application.cpp"
 #include "../app/backgroundthread.cpp"
 #include "../app/events.cpp"

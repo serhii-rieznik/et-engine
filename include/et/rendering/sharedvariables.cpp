@@ -24,7 +24,7 @@ namespace et
 
 enum : uint32_t
 {
-	SharedVariablesDataSize = alignUpTo(3 * sizeof(mat4) + 4 * sizeof(vec4), 16)
+	SharedVariablesDataSize = AlignUpTo<3 * sizeof(mat4) + 4 * sizeof(vec4), 16>::value
 };
 
 void SharedVariables::init(RenderInterface* renderer)

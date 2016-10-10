@@ -8,7 +8,6 @@
 #pragma once
 
 #include <et/core/et.h>
-#include <et/core/hardware.h>
 
 namespace et
 {

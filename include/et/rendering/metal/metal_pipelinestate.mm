@@ -23,6 +23,7 @@ public:
 
 	void loadVariables(MTLArgument*, PipelineState::VariableMap&, uint32_t& bufferSize);
 	void validateVariables(MTLArgument*, const PipelineState::VariableMap&, uint32_t bufferSize);
+	void buildVertexDeclaration(MTLArgument*);
 
 	MetalState& metal;
 	MetalRenderer* renderer = nullptr;
@@ -71,17 +72,16 @@ void MetalPipelineState::build()
 	desc.colorAttachments[0].pixelFormat = metal::renderableTextureFormatValue(renderTargetFormat());
 	desc.depthAttachmentPixelFormat = _private->metal.defaultDepthBuffer.pixelFormat;
 	desc.inputPrimitiveTopology = metal::primitiveTypeToTopology(vertexStream()->indexBuffer()->primitiveType());
-	desc.vertexDescriptor.layouts[0].stepFunction = MTLVertexStepFunctionPerVertex;
-	desc.vertexDescriptor.layouts[0].stride = decl.totalSize();
-	desc.vertexDescriptor.layouts[0].stepRate = 1;
 
-	NSUInteger index = 0;
+	desc.vertexDescriptor.layouts[VertexStreamBufferIndex].stepFunction = MTLVertexStepFunctionPerVertex;
+	desc.vertexDescriptor.layouts[VertexStreamBufferIndex].stride = decl.totalSize();
+	desc.vertexDescriptor.layouts[VertexStreamBufferIndex].stepRate = 1;
 	for (const VertexElement& element : decl.elements())
 	{
+		NSUInteger index = static_cast<NSUInteger>(element.usage());
 		desc.vertexDescriptor.attributes[index].format = metal::dataTypeToVertexFormat(element.type());
 		desc.vertexDescriptor.attributes[index].offset = element.offset();
-		desc.vertexDescriptor.attributes[index].bufferIndex = 0;
-		++index;
+		desc.vertexDescriptor.attributes[index].bufferIndex = VertexStreamBufferIndex;
 	}
 
 	NSError* error = nil;
@@ -116,10 +116,6 @@ void MetalPipelineState::uploadMaterialVariable(const String& name, const void* 
 	auto var = reflection.materialVariables.find(name);
 	if (var != reflection.materialVariables.end())
 	{
-		if (_private->materialVariablesBuffer.empty())
-		{
-			_private->materialVariablesBuffer.resize(_private->materialVariablesBufferSize);
-		}
 		auto* dst = _private->materialVariablesBuffer.element_ptr(var->second.offset);
 		memcpy(dst, ptr, size);
 	}
@@ -130,10 +126,6 @@ void MetalPipelineState::uploadObjectVariable(const String& name, const void* pt
 	auto var = reflection.objectVariables.find(name);
 	if (var != reflection.objectVariables.end())
 	{
-		if (_private->objectVariablesBuffer.empty())
-		{
-			_private->objectVariablesBuffer.resize(_private->objectVariablesBufferSize);
-		}
 		auto* dst = _private->objectVariablesBuffer.element_ptr(var->second.offset);
 		memcpy(dst, ptr, size);
 	}
@@ -278,12 +270,23 @@ void MetalPipelineState::buildReflection()
 			String argName([arg.name UTF8String]);
 			reflection.fragmentSamplers[argName] = static_cast<uint32_t>(arg.index);
 		}
-}
+	}
 
 	printReflection();
 
 	_private->buildMaterialBuffer = _private->bindMaterialVariablesToVertex || _private->bindMaterialVariablesToFragment;
+	if (_private->buildMaterialBuffer)
+	{
+		_private->materialVariablesBuffer.resize(alignUpTo(_private->materialVariablesBufferSize, 32));
+		_private->materialVariablesBuffer.fill(0);
+	}
+
 	_private->buildObjectBuffer = _private->bindObjectVariablesToVertex || _private->bindObjectVariablesToFragment;
+	if (_private->buildObjectBuffer)
+	{
+		_private->objectVariablesBuffer.resize(alignUpTo(_private->objectVariablesBufferSize, 32));
+		_private->objectVariablesBuffer.fill(0);
+	}
 }
 
 /*

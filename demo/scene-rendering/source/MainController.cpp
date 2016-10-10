@@ -35,7 +35,7 @@ void demo::MainController::applicationDidLoad(et::RenderContext* rc)
 		
 	_loader.init(rc);
 
-	_scene = _loader.loadFromFile(et::application().resolveFileName("media/sponza/sponza.obj"));
+	_scene = _loader.loadFromFile(et::application().resolveFileName("media/material-test.obj"));
 
 	applicationWillResizeContext(rc->size());
 }

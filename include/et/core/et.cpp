@@ -5,8 +5,6 @@
  *
  */
 
-#include <et/core/et.h>
-
 namespace et
 {
 

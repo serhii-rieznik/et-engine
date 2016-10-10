@@ -50,6 +50,9 @@ namespace et
 		void setStride(int s)
 			{ _stride = s; }
 
+		bool operator < (const VertexElement& r) const
+			{ return _usage < r._usage; }
+
 	private:
 		VertexAttributeUsage _usage = VertexAttributeUsage::Position;
 		DataType _type = DataType::Float;
@@ -58,8 +61,7 @@ namespace et
 		uint32_t _offset = 0;
 		uint32_t _components = 0;
 	};
-
-    using VertexElementList = Vector<VertexElement>;
+    using VertexElementSet = Set<VertexElement>;
 
 	class VertexDeclaration
 	{
@@ -76,17 +78,20 @@ namespace et
 		bool remove(VertexAttributeUsage usage);
 		void clear();
 
-		const VertexElement& element(size_t) const;
+		const VertexElement& element(uint32_t) const;
 		const VertexElement& elementForUsage(VertexAttributeUsage) const;
 
-		const VertexElementList& elements() const
-			{ return _list; }   
+		VertexElementSet& elements()
+			{ return _elements; }
+		
+		const VertexElementSet& elements() const
+			{ return _elements; }   
 
-		VertexElement& operator [](uint32_t i)
-			{ return _list.at(i); }
+		const VertexElement& operator [](uint32_t i) const
+			{ return element(i); }
 
-		size_t numElements() const
-			{ return _list.size(); }
+		uint32_t numElements() const
+			{ return static_cast<uint32_t>(_elements.size()); }
 
 		uint32_t totalSize() const
 			{ return _totalSize; }
@@ -102,7 +107,7 @@ namespace et
 		bool hasSameElementsAs(const VertexDeclaration&) const;
 
 	private:  
-		VertexElementList _list;
+		VertexElementSet _elements;
 		uint32_t _totalSize = 0;
 		uint32_t _usageMask = 0;
 		bool _interleaved = true;

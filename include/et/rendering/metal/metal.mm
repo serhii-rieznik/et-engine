@@ -138,6 +138,25 @@ MTLVertexFormat dataTypeToVertexFormat(DataType value)
     ET_ASSERT(_map.count(value) > 0);
     return _map.at(value);
 }
-    
+
+DataType mtlDataTypeToDataType(MTLDataType value)
+{
+	static const std::map<MTLDataType, DataType> _map =
+	{
+		{ MTLDataTypeFloat, DataType::Float },
+		{ MTLDataTypeFloat2, DataType::Vec2 },
+		{ MTLDataTypeFloat3, DataType::Vec3 },
+		{ MTLDataTypeFloat4, DataType::Vec4 },
+		{ MTLDataTypeInt, DataType::Int },
+		{ MTLDataTypeInt2, DataType::IntVec2 },
+		{ MTLDataTypeInt3, DataType::IntVec3 },
+		{ MTLDataTypeInt4, DataType::IntVec4 },
+		{ MTLDataTypeFloat3x3, DataType::Mat3 },
+		{ MTLDataTypeFloat4x4, DataType::Mat4 },
+	};
+	ET_ASSERT(_map.count(value) > 0);
+	return _map.at(value);
+}
+
 }
 }

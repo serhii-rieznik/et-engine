@@ -36,19 +36,26 @@ bool VertexDeclaration::has(VertexAttributeUsage usage) const
 bool VertexDeclaration::push_back(VertexAttributeUsage usage, DataType type)
 	{ return push_back(VertexElement(usage, type, 0, _totalSize)); }
 
-bool VertexDeclaration::push_back(const VertexElement& element)
+bool VertexDeclaration::push_back(const VertexElement& el)
 {
-	if (has(element.usage())) return false;
+	if (has(el.usage()))
+		return false;
 
-	_usageMask = _usageMask | vertexAttributeUsageMask(element.usage());
+	_usageMask = _usageMask | vertexAttributeUsageMask(el.usage());
 	
-	_totalSize += dataTypeSize(element.type());
-	_list.push_back(element);
+	_totalSize += dataTypeSize(el.type());
+	_elements.insert(el);
 
 	if (_interleaved)
 	{
-		for (auto& i : _list)
-			i.setStride(static_cast<int32_t>(_totalSize));
+		VertexElementSet rebuild = _elements;
+		
+		_elements.clear();
+		for (VertexElement e : rebuild)
+		{
+			e.setStride(_totalSize);
+			_elements.insert(e);
+		}
 	}
 
 	return true;
@@ -56,10 +63,11 @@ bool VertexDeclaration::push_back(const VertexElement& element)
 
 bool VertexDeclaration::remove(VertexAttributeUsage usage)
 {
-	auto i = std::find(_list.begin(), _list.end(), usage);
-	if (i == _list.end()) return false;
+	auto i = std::find(_elements.begin(), _elements.end(), usage);
+	if (i == _elements.end())
+		return false;
 
-	_list.erase(i);
+	_elements.erase(i);
 	_usageMask = _usageMask & (~vertexAttributeUsageMask(usage));
 
 	return true;
@@ -67,17 +75,20 @@ bool VertexDeclaration::remove(VertexAttributeUsage usage)
 
 void VertexDeclaration::clear()
 {
-	_list.clear();
+	_elements.clear();
 }
 
-const VertexElement& VertexDeclaration::element(size_t i) const
+const VertexElement& VertexDeclaration::element(uint32_t i) const
 {
-	return (i >= _list.size()) ? _emptyVertexElement : _list[i];
+	ET_ASSERT(i < _elements.size());
+	auto it = _elements.begin();
+	std::advance(it, i);
+	return (*it);
 }
 
 const VertexElement& VertexDeclaration::elementForUsage(VertexAttributeUsage u) const
 {
-	for (auto& e : _list)
+	for (auto& e : _elements)
 	{
 		if (e.usage() == u)
 			return e;
@@ -88,13 +99,16 @@ const VertexElement& VertexDeclaration::elementForUsage(VertexAttributeUsage u) 
 
 bool VertexDeclaration::operator == (const VertexDeclaration& r) const
 {
-	if ((r._interleaved != _interleaved) || (_list.size() != r._list.size())) return false;
+	if ((r._interleaved != _interleaved) || (_elements.size() != r._elements.size()))
+		return false;
 
-	auto si = _list.begin();
-	auto ri = r._list.begin();
-	while ((si != _list.end()) && (ri != r._list.end()))
+	auto si = _elements.begin();
+	auto ri = r._elements.begin();
+	while ((si != _elements.end()) && (ri != r._elements.end()))
 	{
-		if ((*si) != (*ri))	return false;
+		if ((*si) != (*ri))
+			return false;
+
 		++si;
 		++ri;
 	}
@@ -104,9 +118,10 @@ bool VertexDeclaration::operator == (const VertexDeclaration& r) const
 
 bool VertexDeclaration::hasSameElementsAs(const VertexDeclaration& r) const
 {
-	if (r.elements().size() != _list.size()) return false;
+	if (r.elements().size() != _elements.size())
+		return false;
 
-	for (const auto& ownElement : _list)
+	for (const auto& ownElement : _elements)
 	{
 		auto usage = ownElement.usage();
 		if (!r.has(usage) || (ownElement != r.elementForUsage(usage)))

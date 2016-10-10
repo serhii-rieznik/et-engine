@@ -1,3 +1,5 @@
+#include <et/core/et.h>
+
 #include "../platform-win/application.win.cpp"
 #include "../platform-win/context.win.cpp"
 #include "../platform-win/input.win.cpp"

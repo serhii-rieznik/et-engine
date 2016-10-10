@@ -6,6 +6,7 @@
  */
 
 #include <et/app/application.h>
+#include <et/rendering/shadersource.h>
 #include <et/rendering/interface/renderer.h>
 
 using namespace et;
@@ -119,6 +120,9 @@ void Material::loadFromJson(const std::string& jsonString, const std::string& ba
 			ET_ASSERT(define->variantClass() == VariantClass::String);
 			addDefine(StringValue(define)->content);
 		}
+
+		parseShaderSource(programSources[0], baseFolder, defines);
+		parseShaderSource(programSources[1], baseFolder, defines);
 	}
 
 	setProgram(_renderer->createProgram(programSources[0], programSources[1], defines, baseFolder));

@@ -5,7 +5,6 @@
 *
 */
 
-#include <et/core/et.h>
 #include <et/core/memory.h>
 
 #if (ET_PLATFORM_WIN)

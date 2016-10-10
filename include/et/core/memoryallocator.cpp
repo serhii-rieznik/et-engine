@@ -5,7 +5,6 @@
  *
  */
 
-#include <et/core/et.h>
 #include <et/core/criticalsection.h>
 #include <et/core/staticdatastorage.h>
 

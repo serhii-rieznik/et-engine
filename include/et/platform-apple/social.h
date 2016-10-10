@@ -7,22 +7,23 @@
 
 #pragma once
 
-#include <et/core/et.h>
 #include <et/app/events.h>
 
 namespace et
 {
-	namespace social
-	{
-		bool canTweet();
-		void tweet(const std::string& text, const std::string& pathToImage, const std::string& url);
-		
-		bool canPostToFacebook();
-		void postToFacebook(const std::string& text, const std::string& pathToImage, const std::string& url);
-		
-		struct notifications
-		{
-			static Event1<bool> sharingFinished;
-		};
-	}
+namespace social
+{
+
+bool canTweet();
+void tweet(const std::string& text, const std::string& pathToImage, const std::string& url);
+
+bool canPostToFacebook();
+void postToFacebook(const std::string& text, const std::string& pathToImage, const std::string& url);
+
+struct notifications
+{
+	static Event1<bool> sharingFinished;
+};
+
+}
 }

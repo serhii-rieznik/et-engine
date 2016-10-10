@@ -7,8 +7,6 @@
 
 #pragma once
 
-#include <et/core/et.h>
-
 namespace et
 {
 	struct Screen

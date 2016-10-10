@@ -5,8 +5,6 @@
  *
  */
 
-#include <et/core/et.h>
-
 static et::threading::ThreadIdentifier mainThreadId = 0;
 
 et::threading::ThreadIdentifier et::threading::currentThread()

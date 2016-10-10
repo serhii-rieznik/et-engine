@@ -5,8 +5,6 @@
  *
  */
 
-#include <et/core/et.h>
-
 #if (ET_PLATFORM_WIN)
 
 #include <Windows.h>

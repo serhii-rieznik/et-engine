@@ -5,7 +5,6 @@
  *
  */
 
-#include <et/core/et.h>
 #include <et/core/dictionary.h>
 #include <et/core/json.h>
 

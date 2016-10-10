@@ -1,3 +1,5 @@
+#include <et/core/et.h>
+
 #include "../scene3d/animation.cpp"
 #include "../scene3d/baseelement.cpp"
 #include "../scene3d/lineelement.cpp"

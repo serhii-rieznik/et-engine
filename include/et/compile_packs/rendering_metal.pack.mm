@@ -1,3 +1,5 @@
+#include <et/core/et.h>
+
 #include "../rendering/metal/metal.mm"
 #include "../rendering/metal/metal_databuffer.mm"
 #include "../rendering/metal/metal_indexbuffer.mm"

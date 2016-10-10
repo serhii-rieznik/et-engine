@@ -170,14 +170,25 @@ namespace et
 	UniquePtr<T> makeUnique(Arg&&... arg)
 		{ return UniquePtr<T>(etCreateObject<T>(std::forward<Arg>(arg...)...)); }
 
-	inline constexpr uint32_t alignUpTo(uint32_t sz, uint32_t al)
+	template <uint32_t val, uint32_t al>
+	class AlignUpTo
+	{
+		static_assert(al > 0, "Invalid alignment");
+		enum : uint32_t { m = al - 1, e = m & (~m) };
+	public:
+		enum : uint32_t {
+			value = val + e
+		};
+	};
+
+	inline uint32_t alignUpTo(uint32_t sz, uint32_t al)
 	{
 		ET_ASSERT(al > 0);
 		uint32_t m = al - 1;
 		return sz + m & (~m);
 	}
 
-	inline constexpr uint32_t alignDownTo(uint32_t sz, uint32_t al)
+	inline uint32_t alignDownTo(uint32_t sz, uint32_t al)
 	{
 		ET_ASSERT(al > 0);
 		return sz & (~(al - 1));

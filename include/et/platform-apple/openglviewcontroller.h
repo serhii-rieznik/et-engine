@@ -10,7 +10,6 @@
 #import <UIKit/UIKit.h>
 #import <OpenGLES/EAGL.h>
 
-#include <et/core/et.h>
 #include <et/rendering/rendercontextparams.h>
 #include <et/platform-ios/openglview.h>
 

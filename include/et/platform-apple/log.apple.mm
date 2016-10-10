@@ -5,11 +5,9 @@
  *
  */
 
-#include <et/core/et.h>
 #include <et/platform-apple/apple.h>
 
-#define PASS_TO_OUTPUTS(FUNC)		for (Output::Pointer output : sharedLogOutputs()) \
-									{ \
+#define PASS_TO_OUTPUTS(FUNC)		for (Output::Pointer output : sharedLogOutputs()) { \
 										va_list args; \
 										va_start(args, format); \
 										output->FUNC(format, args); \

@@ -11,19 +11,21 @@
 
 namespace et
 {
-	namespace json
-	{
-		enum SerializationFlags
-		{
-			SerializationFlag_ReadableFormat = 0x01,
-			SerializationFlag_ConvertUnicode = 0x02
-		};
-		
-		std::string serialize(const et::Dictionary&, size_t = 0);
-		std::string serialize(const et::ArrayValue&, size_t = 0);
-		
-		et::VariantBase::Pointer deserialize(const char*, size_t, et::VariantClass&, bool printErrors = true);
-		et::VariantBase::Pointer deserialize(const char*, et::VariantClass&, bool printErrors = true);
-		et::VariantBase::Pointer deserialize(const std::string&, et::VariantClass&, bool printErrors = true);
-	}
+namespace json
+{
+
+enum SerializationFlags
+{
+	SerializationFlag_ReadableFormat = 0x01,
+	SerializationFlag_ConvertUnicode = 0x02
+};
+
+std::string serialize(const et::Dictionary&, size_t = 0);
+std::string serialize(const et::ArrayValue&, size_t = 0);
+
+et::VariantBase::Pointer deserialize(const char*, size_t, et::VariantClass&, bool printErrors = true);
+et::VariantBase::Pointer deserialize(const char*, et::VariantClass&, bool printErrors = true);
+et::VariantBase::Pointer deserialize(const std::string&, et::VariantClass&, bool printErrors = true);
+
+}
 }

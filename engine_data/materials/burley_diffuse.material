@@ -1,7 +1,14 @@
 {
-	"name" : "microfacet",
+	"name" : "lit_diffuse",
 
-	"program-source" : "diffuse",
+	"program-source" : "materials",
+
+	"defines" : [
+		"POSITION_SIZE=3",
+		"NORMAL_SIZE=3",
+		"TEXCOORD0_SIZE=2",
+		"DIFFUSE_BURLEY=1"
+	],
 
 	"depth-state": {
 		"depth-function": "less",

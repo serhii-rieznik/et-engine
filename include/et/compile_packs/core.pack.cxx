@@ -1,3 +1,5 @@
+#include <et/core/et.h>
+
 #include "../core/base64.cpp"
 #include "../core/constants.cpp"
 #include "../core/conversion.cpp"

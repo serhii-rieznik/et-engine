@@ -7,8 +7,6 @@
 
 #pragma once
 
-#include <et/core/et.h>
-
 namespace et
 {
 	/*
@@ -281,7 +279,7 @@ namespace et
 		InvalidateRange = 0x08,
 		InvalidateBuffer = 0x10,
 	};
-	
+
 	enum : uint32_t
 	{
 		/*
@@ -292,7 +290,6 @@ namespace et
 		CompareFunction_max = static_cast<uint32_t>(CompareFunction::max),
 		CullMode_max = static_cast<uint32_t>(CullMode::max),
 		FillMode_max = static_cast<uint32_t>(FillMode::max),
-		
 		VertexAttributeUsage_max = static_cast<uint32_t>(VertexAttributeUsage::max),
 		DataType_max = static_cast<uint32_t>(DataType::max),
 		PrimitiveType_max = static_cast<uint32_t>(PrimitiveType::max),
@@ -300,9 +297,21 @@ namespace et
 		DataFormat_max = static_cast<uint32_t>(DataFormat::max),
 		TextureTarget_max = static_cast<uint32_t>(TextureTarget::max),
 		TextureFormat_max = static_cast<uint32_t>(TextureFormat::max),
+
+		/*
+		 * Invalid indices
+		 */
 		InvalidIndex = static_cast<uint32_t>(-1),
 		InvalidShortIndex = static_cast<uint16_t>(-1),
 		InvalidSmallIndex = static_cast<uint8_t>(-1),
+
+		/*
+		 * Shader buffer indices
+		 */
+		VertexStreamBufferIndex = 0,
+		ObjectVariablesBufferIndex = 4,
+		MaterialVariablesBufferIndex = 5,
+		PassVariablesBufferIndex = 6,
 
 		MaxRenderTargets = 8,
 		MaxTextureUnits = 8
