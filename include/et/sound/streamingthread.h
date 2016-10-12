@@ -32,7 +32,7 @@ namespace et
 			void main();
 			
 		private:
-			ET_DECLARE_PIMPL(StreamingThread, 256)
+			ET_DECLARE_PIMPL(StreamingThread, 256);
 		};
 	}
 }

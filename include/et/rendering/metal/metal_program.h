@@ -32,6 +32,6 @@ public:
 	const MetalNativeProgram& nativeProgram() const;
 	
 private:
-	ET_DECLARE_PIMPL(MetalProgram, 32)
+	ET_DECLARE_PIMPL(MetalProgram, 32);
 };
 }

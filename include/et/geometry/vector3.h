@@ -12,13 +12,10 @@
 namespace et 
 {
 	template <typename T>
-	struct vector3
+	union vector3
 	{
-		union
-		{
-			struct { T x, y, z; };
-			T c[3];
-		};
+		struct { T x, y, z; };
+		T c[3];
 
 		vector3()
 #	if !defined(ET_DISABLE_VECTOR_INITIALIZATION)

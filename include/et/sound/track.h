@@ -45,8 +45,8 @@ namespace et
 			friend class Player;
 			friend class Manager;
 			
-			ET_DENY_COPY(Track)
-			ET_DECLARE_PIMPL(Track, 1536)
+			ET_DENY_COPY(Track);
+			ET_DECLARE_PIMPL(Track, 1536);
         };
 	}
 }

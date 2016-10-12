@@ -39,13 +39,13 @@ namespace et
 				{ return _streamingThread; }
            
         private:
-            ET_SINGLETON_COPY_DENY(Manager)
+            ET_SINGLETON_COPY_DENY(Manager);
             
         private:
             friend class ManagerPrivate;
 			friend class Player;
 			
-			ET_DECLARE_PIMPL(Manager, 32)
+			ET_DECLARE_PIMPL(Manager, 32);
 			
 			StreamingThread _streamingThread;
         };

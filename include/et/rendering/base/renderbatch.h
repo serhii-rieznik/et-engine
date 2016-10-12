@@ -8,7 +8,7 @@
 #pragma once
 
 #include <et/geometry/geometry.h>
-#include <et/rendering/material.h>
+#include <et/rendering/base/Material.h>
 #include <et/rendering/base/vertexstream.h>
 #include <et/rendering/base/vertexstorage.h>
 #include <et/rendering/base/indexarray.h>
@@ -22,14 +22,14 @@ namespace et
 		
 	public:
 		RenderBatch() = default;
-		RenderBatch(const Material::Pointer&, const VertexStream::Pointer&, const mat4& transform = identityMatrix);
-		RenderBatch(const Material::Pointer&, const VertexStream::Pointer&, const mat4& transform, uint32_t, uint32_t);
+		RenderBatch(const MaterialInstance::Pointer&, const VertexStream::Pointer&, const mat4& transform = identityMatrix);
+		RenderBatch(const MaterialInstance::Pointer&, const VertexStream::Pointer&, const mat4& transform, uint32_t, uint32_t);
 
-		Material::Pointer& material()
+		MaterialInstance::Pointer& material()
 			{ return _material; }
-		const Material::Pointer& material() const
+		const MaterialInstance::Pointer& material() const
 			{ return _material; }
-        void setMaterial(Material::Pointer);
+        void setMaterial(MaterialInstance::Pointer);
 		
 		VertexStream::Pointer& vertexStream()
 			{ return _vertexStream; }
@@ -78,7 +78,7 @@ namespace et
 		RenderBatch* duplicate() const;
 		
 	private:
-		Material::Pointer _material;
+		MaterialInstance::Pointer _material;
 		VertexStream::Pointer _vertexStream;
 		VertexStorage::Pointer _vertexStorage;
 		IndexArray::Pointer _indexArray;

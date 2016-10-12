@@ -35,7 +35,7 @@ namespace et
 		uint64_t getObjectProperty(LoadableObject::Pointer);
 
 	private:
-		ET_DENY_COPY(ObjectsCache)
+		ET_DENY_COPY(ObjectsCache);
 
 		void performUpdate();
 		void update(float t);

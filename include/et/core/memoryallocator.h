@@ -28,7 +28,7 @@ namespace et
 		virtual void printInfo() const { }
 		
 	private:
-		ET_DENY_COPY(MemoryAllocatorBase)
+		ET_DENY_COPY(MemoryAllocatorBase);
 	};
 	
 	class ObjectFactory
@@ -72,7 +72,7 @@ namespace et
 		}
 		
 	private:
-		ET_DENY_COPY(ObjectFactory)
+		ET_DENY_COPY(ObjectFactory);
 		
 	private:
 		MemoryAllocatorBase* _allocator = nullptr;

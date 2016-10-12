@@ -96,9 +96,4 @@ inline void Material::setProperty(const String& aName, const T& value)
 	uploadPropertyData(i->second, &value, sizeof(value));
 }
 
-class MaterialProvider
-{
-public:
-	virtual Material::Pointer materialWithName(const std::string&) = 0;
-};
 }

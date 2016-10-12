@@ -25,14 +25,9 @@ namespace et
 		public:
 			virtual const std::string& serializationBasePath() const = 0;
 			virtual IntrusivePtr<BaseElement> createElementOfType(ElementType, BaseElement*) = 0;
-			
 			virtual IntrusivePtr<VertexStorage> vertexStorageWithName(const std::string&) = 0;
 			virtual IntrusivePtr<IndexArray> indexArrayWithName(const std::string&) = 0;
-			
-			virtual IntrusivePtr<SceneMaterial> sceneMaterialWithName(const std::string&) = 0;
-			
 			virtual IntrusivePtr<VertexStream> vertexStreamWithStorageName(const std::string&) = 0;
-			virtual IntrusivePtr<Material> materialWithName(const std::string&) = 0;
 
 		public:
 			virtual ~SerializationHelper() { }

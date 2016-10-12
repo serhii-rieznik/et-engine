@@ -12,8 +12,10 @@ void SceneLoader::init(et::RenderContext* rc)
 	std::string materialFile = application().resolveFileName("engine_data/materials/burley_diffuse.material");
 
 	_rc = rc;
+	/*/ TODO : retreive from renderer
 	_defaultMaterial = Material::Pointer::create(_rc->renderer().ptr());
 	_defaultMaterial->loadFromJson(loadTextFile(materialFile), getFilePath(materialFile));
+	// */
 }
 
 et::s3d::Scene::Pointer SceneLoader::loadFromFile(const std::string& fileName)
@@ -41,7 +43,7 @@ void SceneLoader::loadObjFile(const std::string& fileName, et::s3d::Scene::Point
 {
 	ObjectsCache localCache;
     OBJLoader loader(fileName, OBJLoader::Option_CalculateTransforms);
-    auto container = loader.load(_rc, this, scene->storage(), localCache);
+    auto container = loader.load(_rc, scene->storage(), localCache);
 
     // compute bounding box
     vec3 minVertex(std::numeric_limits<float>::max());
@@ -64,8 +66,3 @@ void SceneLoader::loadObjFile(const std::string& fileName, et::s3d::Scene::Point
     lp->camera().setPosition(vec3(bboxCenter.x, maxVertex.y + 2.0f * std::abs(maxVertex.y), bboxCenter.z));
     lp->setParent(scene.ptr());
 }
-
-et::Material::Pointer SceneLoader::materialWithName(const std::string& key)
-{
-	return _defaultMaterial;
- }

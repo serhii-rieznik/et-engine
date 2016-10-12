@@ -29,6 +29,6 @@ public:
 	void setImageData(const BinaryDataStorage&) override;
 
 private:
-	ET_DECLARE_PIMPL(MetalTexture, 64)
+	ET_DECLARE_PIMPL(MetalTexture, 64);
 };
 }

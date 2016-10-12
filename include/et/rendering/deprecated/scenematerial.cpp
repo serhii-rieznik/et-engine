@@ -257,7 +257,7 @@ const String materialKeys[MaterialParameter_max] =
 	String("diffuseFactor"), // DiffuseFactor,
 	String("specularFactor"), // SpecularFactor,
 	String("emissiveFactor"), // EmissiveFactor,
-	String("bumpFactor"), // BumpFactor,
+	String("MaterialParameter::NormalTextureScale"), // MaterialParameter::NormalTextureScale,
 	
 	String("transparency"), // Transparency,
 	String("roughness"), // Roughness,

@@ -47,7 +47,7 @@ namespace et
 			ET_DECLARE_EVENT1(finished, Player*)
 
         private:
-			ET_DENY_COPY(Player)
+			ET_DENY_COPY(Player);
 
 			void init();
 			void linkTrack(Track::Pointer);
@@ -62,7 +62,7 @@ namespace et
 			friend class StreamingThread;
 
 		private:
-			ET_DECLARE_PIMPL(Player, 32)
+			ET_DECLARE_PIMPL(Player, 32);
 			
 			Track::Pointer _track;
 			FloatAnimator _volumeAnimator;

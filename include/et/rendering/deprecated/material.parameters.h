@@ -29,7 +29,7 @@ namespace et
 		DiffuseFactor,
 		SpecularFactor,
 		EmissiveFactor,
-		BumpFactor,
+		MaterialParameter::NormalTextureScale,
 		
 		Transparency,
 		Roughness,

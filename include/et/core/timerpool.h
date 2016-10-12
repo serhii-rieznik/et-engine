@@ -33,7 +33,7 @@ namespace et
 		bool hasObjects();
 
 	private:
-		ET_DENY_COPY(TimerPool)
+		ET_DENY_COPY(TimerPool);
 		
 		enum QueueAction
 		{

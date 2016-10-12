@@ -34,7 +34,7 @@ namespace et
 		void checkCaps();
 
 	private:
-		ET_SINGLETON_CONSTRUCTORS(RenderingCapabilities)
+		ET_SINGLETON_CONSTRUCTORS(RenderingCapabilities);
 		
 	private:
 		uint32_t _maxTextureSize = 0;

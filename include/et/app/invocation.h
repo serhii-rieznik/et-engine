@@ -62,7 +62,7 @@ namespace et
 			{ return etCreateObject<InvocationTarget>(_object, _method); }
 
 	private:
-		ET_DENY_COPY(InvocationTarget)
+		ET_DENY_COPY(InvocationTarget);
 		
 	private:
 		T* _object = nullptr;
@@ -83,7 +83,7 @@ namespace et
 			{ return etCreateObject<DirectInvocationTarget<F>>(_func); }
 		
 	private:
-		ET_DENY_COPY(DirectInvocationTarget)
+		ET_DENY_COPY(DirectInvocationTarget);
 		
 	private:
 		F _func;
@@ -106,7 +106,7 @@ namespace et
 			{ return etCreateObject<Invocation1Target>(_object, _method, _param); }
 
 	private:
-		ET_DENY_COPY(Invocation1Target)
+		ET_DENY_COPY(Invocation1Target);
 
 	private:
 		T* _object = nullptr;
@@ -131,7 +131,7 @@ namespace et
 			{ return etCreateObject<DirectInvocation1Target>(_func, _param); }
 		
 	private:
-		ET_DENY_COPY(DirectInvocation1Target)
+		ET_DENY_COPY(DirectInvocation1Target);
 		
 	private:
 		F _func;
@@ -185,7 +185,7 @@ namespace et
 			{ return etCreateObject<DirectInvocation2Target>(_func, _param1, _param2); }
 		
 	private:
-		ET_DENY_COPY(DirectInvocation2Target)
+		ET_DENY_COPY(DirectInvocation2Target);
 		
 	private:
 		F _func;

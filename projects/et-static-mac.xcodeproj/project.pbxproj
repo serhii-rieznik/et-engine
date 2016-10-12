@@ -10,6 +10,8 @@
 		5C4D4FE81DAC2C5400157711 /* shadersource.h in Headers */ = {isa = PBXBuildFile; fileRef = 5C4D4FE61DAC2C5400157711 /* shadersource.h */; };
 		5C4F7F1A1D9AF98D0054FA50 /* databuffer.h in Headers */ = {isa = PBXBuildFile; fileRef = 5C4F7F191D9AF98D0054FA50 /* databuffer.h */; };
 		5C4F7F231D9C324F0054FA50 /* constbuffer.h in Headers */ = {isa = PBXBuildFile; fileRef = 5C4F7F211D9C324F0054FA50 /* constbuffer.h */; };
+		5C5ECAFF1DAEA83C00B52F05 /* material.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5C5ECAFD1DAEA83C00B52F05 /* material.cpp */; };
+		5C5ECB001DAEA83C00B52F05 /* material.h in Headers */ = {isa = PBXBuildFile; fileRef = 5C5ECAFE1DAEA83C00B52F05 /* material.h */; };
 		5C6587FF1DA59D27007F8DB1 /* sampler.h in Headers */ = {isa = PBXBuildFile; fileRef = 5C6587FE1DA59D27007F8DB1 /* sampler.h */; };
 		5C6588031DA59D4E007F8DB1 /* metal_sampler.h in Headers */ = {isa = PBXBuildFile; fileRef = 5C6588011DA59D4E007F8DB1 /* metal_sampler.h */; };
 		5CD5A9BE1D932CFA003FD770 /* app.pack.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 5CD5A8721D932CF4003FD770 /* app.pack.cxx */; };
@@ -36,6 +38,13 @@
 		5C4F7F1C1D9AFB470054FA50 /* metal_databuffer.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; fileEncoding = 4; path = metal_databuffer.h; sourceTree = "<group>"; };
 		5C4F7F201D9C324F0054FA50 /* constbuffer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = constbuffer.cpp; sourceTree = "<group>"; };
 		5C4F7F211D9C324F0054FA50 /* constbuffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = constbuffer.h; sourceTree = "<group>"; };
+		5C5ECAFD1DAEA83C00B52F05 /* material.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = material.cpp; sourceTree = "<group>"; };
+		5C5ECAFE1DAEA83C00B52F05 /* material.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = material.h; sourceTree = "<group>"; };
+		5C5ECB031DAECB2900B52F05 /* material.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = material.cpp; sourceTree = "<group>"; };
+		5C5ECB041DAECB2900B52F05 /* material.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = material.h; sourceTree = "<group>"; };
+		5C5ECB051DAECB2900B52F05 /* material.parameters.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = material.parameters.h; sourceTree = "<group>"; };
+		5C5ECB061DAECB2900B52F05 /* scenematerial.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = scenematerial.cpp; sourceTree = "<group>"; };
+		5C5ECB071DAECB2900B52F05 /* scenematerial.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = scenematerial.h; sourceTree = "<group>"; };
 		5C6587FE1DA59D27007F8DB1 /* sampler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sampler.h; sourceTree = "<group>"; };
 		5C6588001DA59D4E007F8DB1 /* metal_sampler.mm */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; fileEncoding = 4; path = metal_sampler.mm; sourceTree = "<group>"; };
 		5C6588011DA59D4E007F8DB1 /* metal_sampler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = metal_sampler.h; sourceTree = "<group>"; };
@@ -269,9 +278,6 @@
 		5CD5A9591D932CF4003FD770 /* renderpass.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = renderpass.h; sourceTree = "<group>"; };
 		5CD5A95A1D932CF4003FD770 /* texture.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = texture.h; sourceTree = "<group>"; };
 		5CD5A95B1D932CF4003FD770 /* vertexbuffer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = vertexbuffer.h; sourceTree = "<group>"; };
-		5CD5A95C1D932CF4003FD770 /* material.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; path = material.cpp; sourceTree = "<group>"; };
-		5CD5A95D1D932CF4003FD770 /* material.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = material.h; sourceTree = "<group>"; };
-		5CD5A95E1D932CF4003FD770 /* materialfactory.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = materialfactory.h; sourceTree = "<group>"; };
 		5CD5A9601D932CF4003FD770 /* metal.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; path = metal.h; sourceTree = "<group>"; };
 		5CD5A9611D932CF4003FD770 /* metal.mm */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; path = metal.mm; sourceTree = "<group>"; };
 		5CD5A9621D932CF4003FD770 /* metal_indexbuffer.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; path = metal_indexbuffer.h; sourceTree = "<group>"; };
@@ -293,7 +299,6 @@
 		5CD5A9721D932CF4003FD770 /* rendering.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; path = rendering.cpp; sourceTree = "<group>"; };
 		5CD5A9731D932CF4003FD770 /* rendering.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = rendering.h; sourceTree = "<group>"; };
 		5CD5A9741D932CF4003FD770 /* renderingcaps.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = renderingcaps.h; sourceTree = "<group>"; };
-		5CD5A9751D932CF4003FD770 /* texturefactory.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = texturefactory.h; sourceTree = "<group>"; };
 		5CD5A9931D932CF4003FD770 /* animation.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; path = animation.cpp; sourceTree = "<group>"; };
 		5CD5A9941D932CF4003FD770 /* animation.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = animation.h; sourceTree = "<group>"; };
 		5CD5A9951D932CF4003FD770 /* base.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = base.h; sourceTree = "<group>"; };
@@ -303,7 +308,6 @@
 		5CD5A9991D932CF4003FD770 /* light.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = light.h; sourceTree = "<group>"; };
 		5CD5A99A1D932CF4003FD770 /* lineelement.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; path = lineelement.cpp; sourceTree = "<group>"; };
 		5CD5A99B1D932CF4003FD770 /* lineelement.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = lineelement.h; sourceTree = "<group>"; };
-		5CD5A99C1D932CF4003FD770 /* material.parameters.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = material.parameters.h; sourceTree = "<group>"; };
 		5CD5A99D1D932CF4003FD770 /* mesh.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; path = mesh.cpp; sourceTree = "<group>"; };
 		5CD5A99E1D932CF4003FD770 /* mesh.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = mesh.h; sourceTree = "<group>"; };
 		5CD5A99F1D932CF4003FD770 /* meshdeformer.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; path = meshdeformer.cpp; sourceTree = "<group>"; };
@@ -319,8 +323,6 @@
 		5CD5A9A91D932CF4003FD770 /* scene3d.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = scene3d.h; sourceTree = "<group>"; };
 		5CD5A9AA1D932CF4003FD770 /* scene3drenderer.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; path = scene3drenderer.cpp; sourceTree = "<group>"; };
 		5CD5A9AB1D932CF4003FD770 /* scene3drenderer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = scene3drenderer.h; sourceTree = "<group>"; };
-		5CD5A9AC1D932CF4003FD770 /* scenematerial.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; path = scenematerial.cpp; sourceTree = "<group>"; };
-		5CD5A9AD1D932CF4003FD770 /* scenematerial.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = scenematerial.h; sourceTree = "<group>"; };
 		5CD5A9AE1D932CF4003FD770 /* serialization.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = serialization.h; sourceTree = "<group>"; };
 		5CD5A9AF1D932CF4003FD770 /* skeletonelement.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; path = skeletonelement.cpp; sourceTree = "<group>"; };
 		5CD5A9B01D932CF4003FD770 /* skeletonelement.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = skeletonelement.h; sourceTree = "<group>"; };
@@ -340,6 +342,18 @@
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
+		5C5ECB021DAECB2900B52F05 /* deprecated */ = {
+			isa = PBXGroup;
+			children = (
+				5C5ECB031DAECB2900B52F05 /* material.cpp */,
+				5C5ECB041DAECB2900B52F05 /* material.h */,
+				5C5ECB051DAECB2900B52F05 /* material.parameters.h */,
+				5C5ECB061DAECB2900B52F05 /* scenematerial.cpp */,
+				5C5ECB071DAECB2900B52F05 /* scenematerial.h */,
+			);
+			path = deprecated;
+			sourceTree = "<group>";
+		};
 		5CD5A8551D932CF4003FD770 /* app */ = {
 			isa = PBXGroup;
 			children = (
@@ -635,15 +649,13 @@
 		5CD5A9301D932CF4003FD770 /* rendering */ = {
 			isa = PBXGroup;
 			children = (
+				5C5ECB021DAECB2900B52F05 /* deprecated */,
 				5CD5A9311D932CF4003FD770 /* base */,
 				5CD5A9541D932CF4003FD770 /* interface */,
 				5CD5A95F1D932CF4003FD770 /* metal */,
 				5CD5A9531D932CF4003FD770 /* framebuffer.h */,
 				5C4F7F201D9C324F0054FA50 /* constbuffer.cpp */,
 				5C4F7F211D9C324F0054FA50 /* constbuffer.h */,
-				5CD5A95C1D932CF4003FD770 /* material.cpp */,
-				5CD5A95D1D932CF4003FD770 /* material.h */,
-				5CD5A95E1D932CF4003FD770 /* materialfactory.h */,
 				5CD5A9701D932CF4003FD770 /* rendercontext.h */,
 				5CD5A9711D932CF4003FD770 /* rendercontextparams.h */,
 				5CD5A9721D932CF4003FD770 /* rendering.cpp */,
@@ -651,7 +663,6 @@
 				5CD5A9741D932CF4003FD770 /* renderingcaps.h */,
 				5C4F7F151D9AF84C0054FA50 /* sharedvariables.cpp */,
 				5C4F7F161D9AF84C0054FA50 /* sharedvariables.h */,
-				5CD5A9751D932CF4003FD770 /* texturefactory.h */,
 				5C4D4FE51DAC2C5400157711 /* shadersource.cpp */,
 				5C4D4FE61DAC2C5400157711 /* shadersource.h */,
 			);
@@ -680,6 +691,8 @@
 				5CD5A9411D932CF4003FD770 /* vertexstorage.cpp */,
 				5CD5A9421D932CF4003FD770 /* vertexstorage.h */,
 				5CD5A9431D932CF4003FD770 /* vertexstream.h */,
+				5C5ECAFD1DAEA83C00B52F05 /* material.cpp */,
+				5C5ECAFE1DAEA83C00B52F05 /* material.h */,
 			);
 			path = base;
 			sourceTree = "<group>";
@@ -739,7 +752,6 @@
 				5CD5A9991D932CF4003FD770 /* light.h */,
 				5CD5A99A1D932CF4003FD770 /* lineelement.cpp */,
 				5CD5A99B1D932CF4003FD770 /* lineelement.h */,
-				5CD5A99C1D932CF4003FD770 /* material.parameters.h */,
 				5CD5A99D1D932CF4003FD770 /* mesh.cpp */,
 				5CD5A99E1D932CF4003FD770 /* mesh.h */,
 				5CD5A99F1D932CF4003FD770 /* meshdeformer.cpp */,
@@ -755,8 +767,6 @@
 				5CD5A9A91D932CF4003FD770 /* scene3d.h */,
 				5CD5A9AA1D932CF4003FD770 /* scene3drenderer.cpp */,
 				5CD5A9AB1D932CF4003FD770 /* scene3drenderer.h */,
-				5CD5A9AC1D932CF4003FD770 /* scenematerial.cpp */,
-				5CD5A9AD1D932CF4003FD770 /* scenematerial.h */,
 				5CD5A9AE1D932CF4003FD770 /* serialization.h */,
 				5CD5A9AF1D932CF4003FD770 /* skeletonelement.cpp */,
 				5CD5A9B01D932CF4003FD770 /* skeletonelement.h */,
@@ -823,6 +833,7 @@
 			files = (
 				5C4F7F1A1D9AF98D0054FA50 /* databuffer.h in Headers */,
 				5C6588031DA59D4E007F8DB1 /* metal_sampler.h in Headers */,
+				5C5ECB001DAEA83C00B52F05 /* material.h in Headers */,
 				5C4D4FE81DAC2C5400157711 /* shadersource.h in Headers */,
 				5C4F7F231D9C324F0054FA50 /* constbuffer.h in Headers */,
 				5C6587FF1DA59D27007F8DB1 /* sampler.h in Headers */,
@@ -886,6 +897,7 @@
 			files = (
 				5CD5A9C71D932CFA003FD770 /* rendering_metal.pack.mm in Sources */,
 				5CD5A9C91D932CFA003FD770 /* sound.pack.cxx in Sources */,
+				5C5ECAFF1DAEA83C00B52F05 /* material.cpp in Sources */,
 				5CD5A9C21D932CFA003FD770 /* imaging.pack.cxx in Sources */,
 				5CD5A9BF1D932CFA003FD770 /* camera.pack.cxx in Sources */,
 				5CD5A9C01D932CFA003FD770 /* core.pack.cxx in Sources */,
@@ -924,7 +936,7 @@
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
-				GCC_C_LANGUAGE_STANDARD = c99;
+				GCC_C_LANGUAGE_STANDARD = c11;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;
@@ -969,7 +981,7 @@
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				GCC_C_LANGUAGE_STANDARD = c99;
+				GCC_C_LANGUAGE_STANDARD = c11;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;

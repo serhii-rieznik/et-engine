@@ -8,7 +8,6 @@
 #pragma once
 
 #include <et/scene3d/mesh.h>
-#include <et/scene3d/scenematerial.h>
 #include <et/scene3d/storage.h>
 #include <et/scene3d/modelloader.h>
 #include <et/rendering/rendercontext.h>
@@ -33,7 +32,7 @@ namespace et
 		OBJLoader(const std::string& inFile, size_t options);
 		~OBJLoader();
 
-		s3d::ElementContainer::Pointer load(RenderContext*, MaterialProvider*, s3d::Storage&, ObjectsCache&);
+		s3d::ElementContainer::Pointer load(RenderContext*, s3d::Storage&, ObjectsCache&) override;
 
 		ET_DECLARE_EVENT1(loaded, s3d::ElementContainer::Pointer)
 
@@ -44,9 +43,9 @@ namespace et
 			uint32_t start = 0;
 			uint32_t count = 0;
 			et::vec3 center;
-			s3d::SceneMaterial::Pointer material;
+			MaterialInstance::Pointer material;
 
-			OBJMeshIndexBounds(const std::string& n, uint32_t s, uint32_t c, s3d::SceneMaterial::Pointer m, const vec3& aCenter) :
+			OBJMeshIndexBounds(const std::string& n, uint32_t s, uint32_t c, MaterialInstance::Pointer m, const vec3& aCenter) :
 				name(n), start(s), count(c), center(aCenter), material(m) { }
 		};
 
@@ -93,15 +92,14 @@ namespace et
 		friend class OBJLoaderThread;
 
 		RenderContext* _rc = nullptr;
-		MaterialProvider* _materialProvider = nullptr;
 
 		std::string inputFileName;
 		std::string inputFilePath;
 		std::ifstream inputFile;
 		std::ifstream materialFile;
 
-		s3d::SceneMaterial::Pointer _lastMaterial;
-		s3d::SceneMaterial::Collection _materials;
+		MaterialInstance::Pointer _lastMaterial;
+		MaterialInstance::Collection _materials;
 		Vector<OBJMeshIndexBounds> _meshes;
 		
         IndexArray::Pointer _indices;

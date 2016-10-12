@@ -10,20 +10,17 @@
 namespace et
 {
 	template <typename T>
-	struct Rect
+	union Rect
 	{
-		union
+		struct
 		{
-			struct
-			{
-				T left;
-				T top;
-				T width;
-				T height;
-			};
-
-			T c[4];
+			T left;
+			T top;
+			T width;
+			T height;
 		};
+
+		T c[4];
 
 		Rect() :
 			left(0), top(0), width(0), height(0) { }

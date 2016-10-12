@@ -33,7 +33,7 @@ public:
 	const MetalNativeBuffer& nativeBuffer() const;
 
 private:
-	ET_DECLARE_PIMPL(MetalDataBuffer, 32)
+	ET_DECLARE_PIMPL(MetalDataBuffer, 32);
 };
 
 }

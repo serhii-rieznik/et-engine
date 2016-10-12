@@ -114,7 +114,7 @@ namespace et
 		void onGesturePerformed(GestureInputInfo);
 
 	private:
-		ET_DENY_COPY(GesturesRecognizer)
+		ET_DENY_COPY(GesturesRecognizer);
 		
 		void update(float);
 		void handlePointersMovement();

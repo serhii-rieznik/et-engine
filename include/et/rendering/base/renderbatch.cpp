@@ -12,13 +12,13 @@
 
 using namespace et;
 
-RenderBatch::RenderBatch(const Material::Pointer& m, const VertexStream::Pointer& v, const mat4& transform) :
-	_material(m), _vertexStream(v), _transformation(transform), _numIndexes(v->indexBuffer()->size())
+RenderBatch::RenderBatch(const MaterialInstance::Pointer& m, const VertexStream::Pointer& v,
+	const mat4& transform) : _material(m), _vertexStream(v), _transformation(transform), _numIndexes(v->indexBuffer()->size())
 {
 	
 }
 
-RenderBatch::RenderBatch(const Material::Pointer& m, const VertexStream::Pointer& v,
+RenderBatch::RenderBatch(const MaterialInstance::Pointer& m, const VertexStream::Pointer& v,
 	const mat4& transform, uint32_t i, uint32_t ni) : _material(m), _vertexStream(v), 
 	_transformation(transform), _firstIndex(i), _numIndexes(ni)
 {
@@ -131,7 +131,7 @@ RenderBatch* RenderBatch::duplicate() const
 	return result;
 }
 
-void RenderBatch::setMaterial(Material::Pointer mat)
+void RenderBatch::setMaterial(MaterialInstance::Pointer mat)
 {
     _material = mat;
 }

@@ -33,6 +33,6 @@ namespace et
 		void unmap() override;
 
 	private:
-		ET_DECLARE_PIMPL(MetalVertexBuffer, 32)
+		ET_DECLARE_PIMPL(MetalVertexBuffer, 32);
 	};
 }

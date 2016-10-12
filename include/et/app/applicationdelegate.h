@@ -13,7 +13,7 @@ namespace et
 {
 	class RenderContext;
 	struct RenderContextParameters;
-	template <typename T> struct vector2;
+	template <typename T> union vector2;
 	typedef vector2<int32_t> vec2i;
 	
 	class IApplicationDelegate

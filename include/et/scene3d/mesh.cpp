@@ -19,15 +19,8 @@ static IndexBuffer::Pointer _emptyIndexBuffer;
 static VertexBuffer::Pointer _emptyVertexBuffer;
 
 Mesh::Mesh(const std::string& name, BaseElement* parent) :
-	RenderableElement(name, parent)
+	RenderableElement(name, parent), _undeformedTransformationMatrices(4, identityMatrix)
 {
-	_undeformedTransformationMatrices.resize(4);
-}
-
-Mesh::Mesh(const std::string& aName, const SceneMaterial::Pointer& mat, BaseElement* parent) :
-	RenderableElement(aName, mat, parent)
-{
-	_undeformedTransformationMatrices.resize(4);
 }
 
 void Mesh::calculateSupportData()
@@ -67,13 +60,9 @@ Mesh* Mesh::duplicate()
 	result->_boundingSphereRadius = _boundingSphereRadius;
 	result->_undeformedTransformationMatrices = _undeformedTransformationMatrices;
 	
-	// renderable element
-	result->setMaterial(SceneMaterial::Pointer(material()->duplicate()));
 	for (auto batch : renderBatches())
-	{
 		result->addRenderBatch(RenderBatch::Pointer(batch->duplicate()));
-	}
-	
+
 	// base object
 	duplicateBasePropertiesToObject(result);
 	duplicateChildrenToObject(result);

@@ -150,7 +150,7 @@ namespace et
 
 	private:
 		Input();
-		ET_SINGLETON_COPY_DENY(Input)
+		ET_SINGLETON_COPY_DENY(Input);
 
 		friend class KeyboardInputSource;
 		friend class PointerInputSource;

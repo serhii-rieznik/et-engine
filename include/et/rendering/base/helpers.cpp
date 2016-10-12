@@ -16,7 +16,7 @@ namespace renderhelper
 
 namespace rh_local
 {
-	Material::Pointer default2DMaterial;
+	MaterialInstance::Pointer default2DMaterial;
 	VertexStream::Pointer default2DPlane;
 }
 
@@ -42,8 +42,9 @@ void init(RenderContext* rc)
 	auto materialFile = application().resolveFileName("engine_data/materials/2d.material");
 	ET_ASSERT(fileExists(materialFile));
 
-    rh_local::default2DMaterial = Material::Pointer::create(rc->renderer().ptr());
-	rh_local::default2DMaterial->loadFromJson(loadTextFile(materialFile), getFilePath(materialFile));
+	// TODO : retreive material from renderer
+    rh_local::default2DMaterial = MaterialInstance::Pointer::create(); // rc->renderer().ptr());
+	// rh_local::default2DMaterial->loadFromJson(loadTextFile(materialFile), getFilePath(materialFile));
 }
 
 void release()
@@ -56,7 +57,8 @@ RenderBatch::Pointer createFullscreenRenderBatch(Texture::Pointer texture)
 {
 	ET_ASSERT(rh_local::default2DMaterial.valid());
 	ET_ASSERT(rh_local::default2DPlane.valid());
-	rh_local::default2DMaterial->setTexutre(Material::kAlbedo, texture);
+
+	rh_local::default2DMaterial->setTexture(MaterialTexture::Albedo, texture);
 	return RenderBatch::Pointer::create(rh_local::default2DMaterial, rh_local::default2DPlane);
 }
 

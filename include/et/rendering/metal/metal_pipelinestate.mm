@@ -131,13 +131,16 @@ void MetalPipelineState::uploadObjectVariable(const String& name, const void* pt
 	}
 }
 
-void MetalPipelineState::bind(MetalNativeEncoder& e, Material::Pointer material)
+void MetalPipelineState::bind(MetalNativeEncoder& e, MaterialInstance::Pointer material)
 {
+	// TODO : bind properties
+	/*
 	for (const auto& p : material->properties())
 	{
 		const Material::Property& prop = p.second;
 		uploadMaterialVariable(p.first, prop.data, prop.length);
 	}
+	*/
 
 	MetalDataBuffer::Pointer sharedBuffer = _private->renderer->sharedConstBuffer().buffer();
 	id<MTLBuffer> mtlSharedBuffer = sharedBuffer->nativeBuffer().buffer();
@@ -165,6 +168,7 @@ void MetalPipelineState::bind(MetalNativeEncoder& e, Material::Pointer material)
 			[e.encoder setFragmentBuffer:mtlSharedBuffer offset:objectBufferOffset atIndex:ObjectVariablesBufferIndex];
 	}
 
+	/*/ TODO : get textures
 	for (const auto& rt : reflection.vertexTextures)
 	{
 		MetalTexture::Pointer tex = material->texture(rt.first);
@@ -174,7 +178,9 @@ void MetalPipelineState::bind(MetalNativeEncoder& e, Material::Pointer material)
 		}
 		[e.encoder setVertexTexture:tex->nativeTexture().texture atIndex:rt.second];
 	}
+	// */
 
+	/*/ TODO : get textures
 	for (const auto& rt : reflection.fragmentTextures)
 	{
 		MetalTexture::Pointer tex = material->texture(rt.first);
@@ -184,6 +190,7 @@ void MetalPipelineState::bind(MetalNativeEncoder& e, Material::Pointer material)
 		}
 		[e.encoder setFragmentTexture:tex->nativeTexture().texture atIndex:rt.second];
 	}
+	// */
 
 	for (const auto& sm : reflection.vertexSamplers)
 	{

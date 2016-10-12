@@ -9,8 +9,8 @@
 
 #include <et/core/et.h>
 
-#define ET_SINGLETON_CONSTRUCTORS(t)	ET_DENY_COPY(t) friend class et::Singleton<t>; t() { }
-#define ET_SINGLETON_COPY_DENY(t)		ET_DENY_COPY(t) friend class et::Singleton<t>;
+#define ET_SINGLETON_CONSTRUCTORS(t)	friend class et::Singleton<t>; t() { } ET_DENY_COPY(t)
+#define ET_SINGLETON_COPY_DENY(t)		friend class et::Singleton<t>; ET_DENY_COPY(t)
 
 namespace et
 { 
@@ -26,6 +26,6 @@ namespace et
 
 	protected:
 		Singleton() { };
-		ET_DENY_COPY(Singleton)
+		ET_DENY_COPY(Singleton);
 	};
 }

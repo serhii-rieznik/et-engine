@@ -66,7 +66,7 @@ namespace et
 		
 	private:
 		PurchasesManager();
-		ET_DENY_COPY(PurchasesManager)
+		ET_DENY_COPY(PurchasesManager);
 		
 		friend PurchasesManager& sharedPurchasesManager();
     };

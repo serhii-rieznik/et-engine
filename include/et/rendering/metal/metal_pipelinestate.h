@@ -29,7 +29,7 @@ namespace et
         
         const MetalNativePipelineState& nativeState() const;
 
-		void bind(MetalNativeEncoder&, Material::Pointer);
+		void bind(MetalNativeEncoder&, MaterialInstance::Pointer);
 
 		template <typename T>
 		void setMaterialVariable(const String& name, const T& t)

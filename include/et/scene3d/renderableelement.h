@@ -8,7 +8,6 @@
 #pragma once
 
 #include <et/rendering/base/renderbatch.h>
-#include <et/scene3d/scenematerial.h>
 #include <et/scene3d/elementcontainer.h>
 
 namespace et
@@ -22,16 +21,7 @@ namespace et
 			
 		public:
 			RenderableElement(const std::string& name, BaseElement* parent);
-			RenderableElement(const std::string& name, const SceneMaterial::Pointer& mat, BaseElement* parent);
-			
-			SceneMaterial::Pointer& material()
-				{ return _material; }
 
-			const SceneMaterial::Pointer& material() const
-				{ return _material; }
-			void setMaterial(const SceneMaterial::Pointer& material)
-				{ _material = material; }
-			
 			void addRenderBatch(RenderBatch::Pointer);
 			void prepareRenderBatches();
 			
@@ -42,7 +32,6 @@ namespace et
 			void deserialize(Dictionary, SerializationHelper*);
 						
 		private:
-			SceneMaterial::Pointer _material;
 			Vector<RenderBatch::Pointer> _renderBatches;
 		};
 	}

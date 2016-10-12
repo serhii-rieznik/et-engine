@@ -10,13 +10,10 @@
 namespace et 
 {
 	template <typename T> 
-	struct vector2
+	union vector2
 	{
-		union
-		{
-			struct { T x, y; };
-			T c[2];
-		};
+		struct { T x, y; };
+		T c[2];
 
 		vector2() :
 			x(static_cast<T>(0)), y(static_cast<T>(0)) { }

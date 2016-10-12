@@ -64,7 +64,7 @@ namespace et
 		uint32_t sizeOfAttribute(VertexAttributeUsage usage) const;
 		
 	private:
-		ET_DECLARE_PIMPL(VertexStorage, 128)
+		ET_DECLARE_PIMPL(VertexStorage, 128);
 	};
 	
 #define ET_DECLARE_ACCESSOR(vat, base) \

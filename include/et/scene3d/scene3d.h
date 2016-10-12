@@ -32,7 +32,7 @@ namespace et
 			Dictionary serialize(const std::string& basePath);
 			void serialize(Dictionary, const std::string&) override;
 			
-			void deserializeWithOptions(et::RenderContext*, MaterialProvider*, Dictionary,
+			void deserializeWithOptions(et::RenderContext*, Dictionary,
 				const std::string& basePath, ObjectsCache&, uint32_t options);
 
 			Storage& storage()
@@ -46,9 +46,11 @@ namespace et
 
 		private:
 			void cleanupGeometry();
-			
+
+			/*
 			SceneMaterial::Pointer sceneMaterialWithName(const std::string&) override;
 			Material::Pointer materialWithName(const std::string&) override;
+			*/
 
 			BaseElement::Pointer createElementOfType(ElementType, BaseElement*) override;
 
@@ -62,7 +64,7 @@ namespace et
 						
 		private:
 			Storage _storage;
-			MaterialProvider* _currentMaterialProvider = nullptr;
+			// MaterialProvider* _currentMaterialProvider = nullptr;
 			std::string _serializationBasePath;
 			IndexBuffer::Pointer _mainIndexBuffer;
 		};

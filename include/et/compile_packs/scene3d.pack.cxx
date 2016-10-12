@@ -10,6 +10,5 @@
 #include "../scene3d/renderableelement.cpp"
 #include "../scene3d/scene3d.cpp"
 #include "../scene3d/scene3drenderer.cpp"
-#include "../scene3d/scenematerial.cpp"
 #include "../scene3d/skeletonelement.cpp"
 #include "../scene3d/storage.cpp"

@@ -33,6 +33,6 @@ namespace et
 		std::istream& stream();
 
 	private:
-		ET_DECLARE_PIMPL(InputStream, 32)
+		ET_DECLARE_PIMPL(InputStream, 32);
 	};
 }

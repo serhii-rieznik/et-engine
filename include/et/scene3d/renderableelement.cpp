@@ -15,15 +15,8 @@ RenderableElement::RenderableElement(const std::string& name, BaseElement* paren
 {
 }
 
-RenderableElement::RenderableElement(const std::string& name, const SceneMaterial::Pointer& mat,
-	BaseElement* parent) : ElementContainer(name, parent), _material(mat)
-{
-}
-
 void RenderableElement::serialize(Dictionary stream, const std::string& basePath)
 {
-	stream.setStringForKey(kMaterialName, material()->name());
-	
 	ArrayValue batches;
 	batches->content.reserve(renderBatches().size());
 	for (const auto& rb : renderBatches())
@@ -37,31 +30,7 @@ void RenderableElement::serialize(Dictionary stream, const std::string& basePath
 
 void RenderableElement::deserialize(Dictionary stream, SerializationHelper* helper)
 {
-	auto batches = stream.arrayForKey(kRenderBatches);
-	for (Dictionary rb : batches->content)
-	{
-		uint32_t startIndex = static_cast<uint32_t>(rb.integerForKey(kStartIndex)->content);
-		uint32_t numIndexes = static_cast<uint32_t>(rb.integerForKey(kIndexesCount)->content);
-		auto storageName = rb.stringForKey(kVertexStorageName)->content;
-		auto indexName = rb.stringForKey(kIndexArrayName)->content;
-		auto materialName = rb.stringForKey(kMaterialName)->content;
-		
-		auto mat = helper->materialWithName(materialName);
-		auto vstream = helper->vertexStreamWithStorageName(storageName);
-		auto vstorage = helper->vertexStorageWithName(storageName);
-		auto ia = helper->indexArrayWithName(indexName);
-
-		auto batch = RenderBatch::Pointer::create(mat, vstream, identityMatrix, startIndex, numIndexes);
-		batch->setVertexStorage(vstorage);
-		batch->setIndexArray(ia);
-		batch->calculateBoundingBox();
-		
-		addRenderBatch(batch);
-	}
-
-	auto materialName = stream.stringForKey(kMaterialName)->content;
-	setMaterial(helper->sceneMaterialWithName(materialName));
-	ElementContainer::deserialize(stream, helper);
+	ET_FAIL("Rewrite serialization!");
 }
 
 void RenderableElement::addRenderBatch(RenderBatch::Pointer rb)

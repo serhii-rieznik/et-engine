@@ -79,39 +79,23 @@ void s3d::Renderer::renderMeshList(RenderPass::Pointer pass, const s3d::BaseElem
 		
 		for (auto& rb : rbv.second)
 		{
-			rb.second->material()->bindToMaterial(rb.first->material());
+			// rb.second->material()->bindToMaterial(rb.first->material());
 			pass->pushRenderBatch(rb.first);
 		}
 	}
 }
 
-void s3d::Renderer::initDebugObjects(RenderContext* rc, Material::Pointer bboxMaterial)
+void s3d::Renderer::initDebugObjects(RenderContext* rc)
 {
-	/*
-	 * TODO
-	 *
-	VertexDeclaration decl(false, et::VertexAttributeUsage::Position, et::DataType::Vec3);
-	VertexArray::Pointer va = VertexArray::Pointer::create(decl, 0);
-	primitives::createBox(va, vec3(1.0f));
-	
-	IndexArray::Pointer ia = IndexArray::Pointer::create(IndexArrayFormat::Format_16bit, va->size(), PrimitiveType::Triangles);
-	ia->linearize(ia->capacity());
-	
-	auto cube = rc->renderer()->createVertexArrayObject("cube-vao");
-	auto cubeVB = rc->renderer()->createVertexBuffer("cube-vb", va, BufferDrawType::Static);
-	auto cubeIB = rc->renderer()->createIndexBuffer("cube-ib", ia, BufferDrawType::Static);
-	cube->setBuffers(cubeVB, cubeIB);
-
-	_bboxBatch = RenderBatch::Pointer::create(bboxMaterial, cube);
-	*/
+	ET_FAIL("Not implemented")
 }
 
 void s3d::Renderer::renderTransformedBoundingBox(RenderPass::Pointer pass, const BoundingBox& b, const mat4& t)
 {
     if (hasFlag(RenderDebugObjects))
     {
-        _bboxBatch->material()->setProperty("bboxScale", b.halfDimension);
-        _bboxBatch->material()->setProperty("bboxCenter", b.center);
+        // _bboxBatch->material()->setProperty("bboxScale", b.halfDimension);
+        // _bboxBatch->material()->setProperty("bboxCenter", b.center);
         _bboxBatch->setTransformation(t);
         pass->pushRenderBatch(_bboxBatch);
     }

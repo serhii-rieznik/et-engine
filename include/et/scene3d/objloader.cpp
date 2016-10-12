@@ -9,7 +9,7 @@
 #include <et/core/conversion.h>
 #include <et/core/filesystem.h>
 #include <et/rendering/base/primitives.h>
-#include <et/rendering/material.h>
+#include <et/rendering/base/Material.h>
 #include <et/scene3d/objloader.h>
 
 using namespace et;
@@ -334,13 +334,11 @@ void OBJLoader::loadData(ObjectsCache& cache)
 	}
 }
 
-s3d::ElementContainer::Pointer OBJLoader::load(et::RenderContext* rc, MaterialProvider* mp,
-	s3d::Storage& storage, ObjectsCache& cache)
+s3d::ElementContainer::Pointer OBJLoader::load(et::RenderContext* rc, s3d::Storage& storage, ObjectsCache& cache)
 {
 	storage.flush();
 
 	_rc = rc;
-	_materialProvider = mp;
 	_groups.reserve(4);
 	_vertices.reserve(1024);
 	_normals.reserve(1024);
@@ -409,11 +407,11 @@ void OBJLoader::loadMaterials(const std::string& fileName, ObjectsCache& cache)
 					{
 						float value = 0.0f;
 						materialFile >> value;
-						_lastMaterial->setFloat(MaterialParameter::BumpFactor, value);
+						_lastMaterial->setFloat(MaterialParameter::NormalTextureScale, value);
 						
 						getLine(materialFile, line);
 						std::string actualName = application().resolveFileName(line);
-						_lastMaterial->setTexture(MaterialParameter::NormalMap, _rc->renderer()->loadTexture(actualName, cache));
+						_lastMaterial->setTexture(MaterialTexture::Normal, _rc->renderer()->loadTexture(actualName, cache));
 					}
 					else
 					{
@@ -425,7 +423,7 @@ void OBJLoader::loadMaterials(const std::string& fileName, ObjectsCache& cache)
 				{
 					getLine(materialFile, line);
 					std::string actualName = application().resolveFileName(line);
-					_lastMaterial->setTexture(MaterialParameter::NormalMap, _rc->renderer()->loadTexture(actualName, cache) );
+					_lastMaterial->setTexture(MaterialTexture::Normal, _rc->renderer()->loadTexture(actualName, cache) );
 				}
 			}
 			else
@@ -487,7 +485,7 @@ void OBJLoader::loadMaterials(const std::string& fileName, ObjectsCache& cache)
 			{
 				float value = 0.0f;
 				materialFile >> value;
-				_lastMaterial->setFloat(MaterialParameter::Transparency, value);
+				_lastMaterial->setFloat(MaterialParameter::Opacity, 1.0f - value);
 			}
 			else if (next == 'f') // skip
 			{
@@ -520,25 +518,24 @@ void OBJLoader::loadMaterials(const std::string& fileName, ObjectsCache& cache)
 					{
 						getLine(materialFile, line);
 						std::string actualName = application().resolveFileName(line);
-						_lastMaterial->setTexture(MaterialParameter::DiffuseMap, _rc->renderer()->loadTexture(actualName, cache) );
+						_lastMaterial->setTexture(MaterialTexture::Albedo, _rc->renderer()->loadTexture(actualName, cache) );
 					}
 					else if (subId == 'a')
 					{
 						getLine(materialFile, line);
-						std::string actualName = application().resolveFileName(line);
-						_lastMaterial->setTexture(MaterialParameter::AmbientMap, _rc->renderer()->loadTexture(actualName, cache) );
+						log::warning("[OBJLoader] Ambient textures are not supported");
 					}
 					else if (subId == 's')
 					{
 						getLine(materialFile, line);
 						std::string actualName = application().resolveFileName(line);
-						_lastMaterial->setTexture(MaterialParameter::SpecularMap, _rc->renderer()->loadTexture(actualName, cache) );
+						_lastMaterial->setTexture(MaterialTexture::Reflectance, _rc->renderer()->loadTexture(actualName, cache) );
 					}
 					else if (subId == 'e')
 					{
 						getLine(materialFile, line);
 						std::string actualName = application().resolveFileName(line);
-						_lastMaterial->setTexture(MaterialParameter::EmissiveMap, _rc->renderer()->loadTexture(actualName, cache) );
+						_lastMaterial->setTexture(MaterialTexture::Emissive, _rc->renderer()->loadTexture(actualName, cache) );
 					}
 					else
 					{
@@ -572,11 +569,11 @@ void OBJLoader::loadMaterials(const std::string& fileName, ObjectsCache& cache)
 							{
 								float value;
 								materialFile >> value;
-								_lastMaterial->setFloat(MaterialParameter::BumpFactor, value);
+								_lastMaterial->setFloat(MaterialParameter::NormalTextureScale, value);
 								
 								getLine(materialFile, line);
 								std::string actualName = application().resolveFileName(line);
-								_lastMaterial->setTexture(MaterialParameter::NormalMap, _rc->renderer()->loadTexture(actualName, cache));
+								_lastMaterial->setTexture(MaterialTexture::Normal, _rc->renderer()->loadTexture(actualName, cache));
 							}
 							else
 							{
@@ -588,7 +585,7 @@ void OBJLoader::loadMaterials(const std::string& fileName, ObjectsCache& cache)
 						{
 							getLine(materialFile, line);
 							std::string actualName = application().resolveFileName(line);
-							_lastMaterial->setTexture(MaterialParameter::NormalMap, _rc->renderer()->loadTexture(actualName, cache) );
+							_lastMaterial->setTexture(MaterialTexture::Normal, _rc->renderer()->loadTexture(actualName, cache) );
 						}
 					}
 					else
@@ -600,7 +597,7 @@ void OBJLoader::loadMaterials(const std::string& fileName, ObjectsCache& cache)
 				{
 					getLine(materialFile, line);
 					std::string actualName = application().resolveFileName(line);
-					_lastMaterial->setTexture(MaterialParameter::OpacityMap, _rc->renderer()->loadTexture(actualName, cache) );
+					_lastMaterial->setTexture(MaterialTexture::Opacity, _rc->renderer()->loadTexture(actualName, cache) );
 				}
 				else
 				{
@@ -667,8 +664,9 @@ void OBJLoader::loadMaterials(const std::string& fileName, ObjectsCache& cache)
 				{
 					std::string name;
 					materialFile >> name;
-					
-					_lastMaterial = SceneMaterial::Pointer::create();
+
+					// TODO : retrieve material instance from renderer
+					_lastMaterial = MaterialInstance::Pointer::create();
 					_lastMaterial->setName(name);
 					
 					_materials.push_back(_lastMaterial);
@@ -804,8 +802,9 @@ void OBJLoader::processLoadedData()
 				PUSH_VERTEX(face.vertexLinks[i+1], center);
 			}
 		}
-		
-		SceneMaterial::Pointer m = SceneMaterial::Pointer::create();
+
+		// TODO : retrieve material from renderer
+		MaterialInstance::Pointer m = MaterialInstance::Pointer::create();
 		
 		for (auto mat : _materials)
 		{
@@ -847,15 +846,14 @@ s3d::ElementContainer::Pointer OBJLoader::generateVertexBuffers(s3d::Storage& st
 
 	for (const auto& i : _meshes)
 	{
-		auto material = _materialProvider->materialWithName(i.material->name());
-		
-		auto rb = RenderBatch::Pointer::create(material, vao, identityMatrix, i.start, i.count);
+		s3d::Mesh::Pointer object = Mesh::Pointer::create(i.name, result.ptr());
+		object->setTranslation(i.center);
+
+		auto rb = RenderBatch::Pointer::create(i.material, vao, identityMatrix, i.start, i.count);
 		rb->setVertexStorage(_vertexData);
 		rb->setIndexArray(_indices);
-		
-		s3d::Mesh::Pointer object = Mesh::Pointer::create(i.name, i.material, result.ptr());
-		object->setTranslation(i.center);
 		object->addRenderBatch(rb);
+
         object->calculateSupportData();
 	}
 

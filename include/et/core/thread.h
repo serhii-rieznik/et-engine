@@ -98,7 +98,7 @@ namespace et
 		}
 
 	private:
-		ET_DENY_COPY(Thread)
+		ET_DENY_COPY(Thread);
 		Thread(Thread&&) = delete;
 
 		std::thread _thread;

@@ -9,12 +9,8 @@
 
 #include <et/core/objectscache.h>
 #include <et/rendering/rendercontextparams.h>
-
 #include <et/rendering/interface/renderer.h>
-
 #include <et/rendering/renderingcaps.h>
-#include <et/rendering/materialfactory.h>
-#include <et/rendering/texturefactory.h>
 
 namespace et
 {
@@ -57,7 +53,7 @@ namespace et
 		RenderContext& operator = (const RenderContext&) = delete;
 
 	private:
-		ET_DECLARE_PIMPL(RenderContext, 256)
+		ET_DECLARE_PIMPL(RenderContext, 256);
 
 		RenderContextParameters _params;
 		RenderInterface::Pointer _renderer;

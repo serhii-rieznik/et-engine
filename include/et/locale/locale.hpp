@@ -47,7 +47,7 @@ namespace et
 		
 		std::string localizedStringFromObject(const VariantBase::Pointer&, const std::string&);
 
-		ET_SINGLETON_COPY_DENY(Locale)
+		ET_SINGLETON_COPY_DENY(Locale);
 		
 	private:
 		Dictionary _localeMap;

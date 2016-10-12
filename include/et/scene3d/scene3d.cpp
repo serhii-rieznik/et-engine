@@ -65,6 +65,7 @@ BaseElement::Pointer Scene::createElementOfType(ElementType type, BaseElement* p
 	}
 }
 
+/*
 Material::Pointer Scene::materialWithName(const std::string& name)
 {
 	ET_ASSERT(_currentMaterialProvider != nullptr);
@@ -91,6 +92,7 @@ SceneMaterial::Pointer Scene::sceneMaterialWithName(const std::string& mName)
 	
 	return SceneMaterial::Pointer();
 }
+*/
 
 /*
  * Serialization stuff
@@ -108,10 +110,9 @@ Dictionary Scene::serialize(const std::string& basePath)
 	return result;
 }
 
-void Scene::deserializeWithOptions(et::RenderContext* rc, MaterialProvider* mp,
-	Dictionary info, const std::string& basePath, ObjectsCache& cache, uint32_t options)
+void Scene::deserializeWithOptions(et::RenderContext* rc, Dictionary info,
+	const std::string& basePath, ObjectsCache& cache, uint32_t options)
 {
-	_currentMaterialProvider = mp;
 	_serializationBasePath = basePath;
 	_storage.deserializeWithOptions(rc,  info.dictionaryForKey(kStorage), this, cache, options);
 	

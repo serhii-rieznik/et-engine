@@ -32,6 +32,6 @@ namespace et
 		ET_DECLARE_EVENT0(cancelled)
 		
 	private:
-		ET_DECLARE_PIMPL(ImagePicker, 32)
+		ET_DECLARE_PIMPL(ImagePicker, 32);
 	};
 }

@@ -26,7 +26,7 @@ namespace et
 	private:
 		void joinTasks();
 		
-		ET_DENY_COPY(TaskPool)
+		ET_DENY_COPY(TaskPool);
 		
 	private:
 		CriticalSection _csModifying;

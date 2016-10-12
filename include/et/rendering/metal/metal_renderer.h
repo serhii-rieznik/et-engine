@@ -64,6 +64,6 @@ public:
 	Sampler::Pointer createSampler() override;
 	
 private:
-	ET_DECLARE_PIMPL(MetalRenderer, 512)
+	ET_DECLARE_PIMPL(MetalRenderer, 512);
 };
 }

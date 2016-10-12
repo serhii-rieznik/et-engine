@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include <et/scene3d/scenematerial.h>
+#include <et/rendering/base/Material.h>
 #include <et/rendering/base/indexarray.h>
 #include <et/rendering/base/vertexstorage.h>
 #include <et/rendering/base/vertexstream.h>
@@ -39,10 +39,10 @@ namespace et
 			const IndexArray::Pointer indexArray() const
 				{ return _indexArray; }
 
-			SceneMaterial::Map& materials()
+			MaterialInstance::Map& materials()
 				{ return _materials; }
 
-			const SceneMaterial::Map& materials() const
+			const MaterialInstance::Map& materials() const
 				{ return _materials; }
 
 			Set<Texture::Pointer>& textures()
@@ -57,7 +57,7 @@ namespace et
 			void addTexture(Texture::Pointer t)
 				{ _textures.insert(t); }
 
-			void addMaterial(SceneMaterial::Pointer m)
+			void addMaterial(MaterialInstance::Pointer m)
 				{ _materials.insert({m->name(), m}); }
 
 			void addVertexStorage(const VertexStorage::Pointer&);
@@ -82,7 +82,7 @@ namespace et
             Set<Texture::Pointer> _textures;
             Set<VertexStream::Pointer> _vertexStreams;
 			IndexArray::Pointer _indexArray;
-			SceneMaterial::Map _materials;
+			MaterialInstance::Map _materials;
 		};
 	}
 }

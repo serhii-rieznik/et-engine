@@ -1,7 +1,6 @@
 #include <et/core/et.h>
 
 #include "../rendering/constbuffer.cpp"
-#include "../rendering/material.cpp"
 #include "../rendering/rendering.cpp"
 #include "../rendering/sharedvariables.cpp"
 #include "../rendering/shadersource.cpp"
@@ -15,6 +14,7 @@
 #include "../rendering/base/vertexdatachunk.cpp"
 #include "../rendering/base/vertexdeclaration.cpp"
 #include "../rendering/base/vertexstorage.cpp"
+#include "../rendering/base/Material.cpp"
 
 #if (ET_PLATFORM_WIN)
 #	include "../rendering/dx12/dx12_indexbuffer.cpp"

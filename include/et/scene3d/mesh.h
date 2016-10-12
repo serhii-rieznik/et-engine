@@ -23,7 +23,6 @@ namespace et
 
 		public:
 			Mesh(const std::string& = defaultMeshName, BaseElement* = nullptr);
-			Mesh(const std::string&, const SceneMaterial::Pointer&, BaseElement* = nullptr);
 			
 			ElementType type() const override
 				{ return ElementType::Mesh; }

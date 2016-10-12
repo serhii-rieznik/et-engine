@@ -120,6 +120,7 @@ namespace et
 									const DepthState&, const BlendState&, CullMode, TextureFormat);
 
 		void addToCache(PipelineState::Pointer);
+
 	private:
 		ET_DECLARE_PIMPL(PipelineStateCache, 256);
 	};
