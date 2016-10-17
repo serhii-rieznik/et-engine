@@ -493,4 +493,21 @@ namespace et
 	
 	std::string cullModeToString(CullMode);
 	bool stringToCullMode(const std::string&, CullMode&);
+
+	template <class T>
+	DataType dataTypeFromClass();
+
+	template <> inline DataType dataTypeFromClass<float>() { return DataType::Float; }
+	template <> inline DataType dataTypeFromClass<vec2>() { return DataType::Vec2; }
+	template <> inline DataType dataTypeFromClass<vec3>() { return DataType::Vec3; }
+	template <> inline DataType dataTypeFromClass<vec4>() { return DataType::Vec4; }
+	template <> inline DataType dataTypeFromClass<mat3>() { return DataType::Mat3; }
+	template <> inline DataType dataTypeFromClass<mat4>() { return DataType::Mat4; }
+	template <> inline DataType dataTypeFromClass<int32_t>() { return DataType::Int; }
+	template <> inline DataType dataTypeFromClass<uint32_t>() { return DataType::Int; }
+	template <> inline DataType dataTypeFromClass<int64_t>() { return DataType::Int; }
+	template <> inline DataType dataTypeFromClass<uint64_t>() { return DataType::Int; }
+	template <> inline DataType dataTypeFromClass<vec2i>() { return DataType::IntVec2; }
+	template <> inline DataType dataTypeFromClass<vec3i>() { return DataType::IntVec3; }
+	template <> inline DataType dataTypeFromClass<vec4i>() { return DataType::IntVec4; }
 }

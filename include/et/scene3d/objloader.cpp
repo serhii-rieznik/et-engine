@@ -666,7 +666,7 @@ void OBJLoader::loadMaterials(const std::string& fileName, ObjectsCache& cache)
 					materialFile >> name;
 
 					// TODO : retrieve material instance from renderer
-					_lastMaterial = MaterialInstance::Pointer::create();
+					// _lastMaterial = MaterialInstance::Pointer::create();
 					_lastMaterial->setName(name);
 					
 					_materials.push_back(_lastMaterial);
@@ -804,8 +804,7 @@ void OBJLoader::processLoadedData()
 		}
 
 		// TODO : retrieve material from renderer
-		MaterialInstance::Pointer m = MaterialInstance::Pointer::create();
-		
+		MaterialInstance::Pointer m; //  = MaterialInstance::Pointer::create();
 		for (auto mat : _materials)
 		{
 			if (mat->name() == group.material)

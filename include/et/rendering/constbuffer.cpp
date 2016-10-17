@@ -22,6 +22,11 @@ void ConstBuffer::init(RenderInterface* renderer)
 	_localData.fill(0);
 }
 
+void ConstBuffer::shutdown()
+{
+
+}
+
 uint8_t* ConstBuffer::allocateData(uint32_t size, uint32_t& baseOffset)
 {
 	ET_ASSERT(size < Capacity);

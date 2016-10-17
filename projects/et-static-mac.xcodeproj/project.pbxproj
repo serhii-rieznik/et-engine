@@ -10,10 +10,10 @@
 		5C4D4FE81DAC2C5400157711 /* shadersource.h in Headers */ = {isa = PBXBuildFile; fileRef = 5C4D4FE61DAC2C5400157711 /* shadersource.h */; };
 		5C4F7F1A1D9AF98D0054FA50 /* databuffer.h in Headers */ = {isa = PBXBuildFile; fileRef = 5C4F7F191D9AF98D0054FA50 /* databuffer.h */; };
 		5C4F7F231D9C324F0054FA50 /* constbuffer.h in Headers */ = {isa = PBXBuildFile; fileRef = 5C4F7F211D9C324F0054FA50 /* constbuffer.h */; };
-		5C5ECAFF1DAEA83C00B52F05 /* material.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5C5ECAFD1DAEA83C00B52F05 /* material.cpp */; };
 		5C5ECB001DAEA83C00B52F05 /* material.h in Headers */ = {isa = PBXBuildFile; fileRef = 5C5ECAFE1DAEA83C00B52F05 /* material.h */; };
 		5C6587FF1DA59D27007F8DB1 /* sampler.h in Headers */ = {isa = PBXBuildFile; fileRef = 5C6587FE1DA59D27007F8DB1 /* sampler.h */; };
 		5C6588031DA59D4E007F8DB1 /* metal_sampler.h in Headers */ = {isa = PBXBuildFile; fileRef = 5C6588011DA59D4E007F8DB1 /* metal_sampler.h */; };
+		5C8278B51DB555F900EB2DF2 /* materiallibrary.h in Headers */ = {isa = PBXBuildFile; fileRef = 5C8278B31DB555F900EB2DF2 /* materiallibrary.h */; };
 		5CD5A9BE1D932CFA003FD770 /* app.pack.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 5CD5A8721D932CF4003FD770 /* app.pack.cxx */; };
 		5CD5A9BF1D932CFA003FD770 /* camera.pack.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 5CD5A8731D932CF4003FD770 /* camera.pack.cxx */; };
 		5CD5A9C01D932CFA003FD770 /* core.pack.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 5CD5A8741D932CF4003FD770 /* core.pack.cxx */; };
@@ -48,6 +48,8 @@
 		5C6587FE1DA59D27007F8DB1 /* sampler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sampler.h; sourceTree = "<group>"; };
 		5C6588001DA59D4E007F8DB1 /* metal_sampler.mm */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; fileEncoding = 4; path = metal_sampler.mm; sourceTree = "<group>"; };
 		5C6588011DA59D4E007F8DB1 /* metal_sampler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = metal_sampler.h; sourceTree = "<group>"; };
+		5C8278B21DB555F900EB2DF2 /* materiallibrary.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = materiallibrary.cpp; sourceTree = "<group>"; };
+		5C8278B31DB555F900EB2DF2 /* materiallibrary.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = materiallibrary.h; sourceTree = "<group>"; };
 		5CD5A8561D932CF4003FD770 /* appevironment.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = appevironment.h; sourceTree = "<group>"; };
 		5CD5A8571D932CF4003FD770 /* application.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; path = application.cpp; sourceTree = "<group>"; };
 		5CD5A8581D932CF4003FD770 /* application.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = application.h; sourceTree = "<group>"; };
@@ -677,6 +679,10 @@
 				5CD5A9331D932CF4003FD770 /* helpers.h */,
 				5CD5A9341D932CF4003FD770 /* indexarray.cpp */,
 				5CD5A9351D932CF4003FD770 /* indexarray.h */,
+				5C5ECAFD1DAEA83C00B52F05 /* material.cpp */,
+				5C5ECAFE1DAEA83C00B52F05 /* material.h */,
+				5C8278B21DB555F900EB2DF2 /* materiallibrary.cpp */,
+				5C8278B31DB555F900EB2DF2 /* materiallibrary.h */,
 				5CD5A9361D932CF4003FD770 /* pipelinestate.cpp */,
 				5CD5A9371D932CF4003FD770 /* primitives.cpp */,
 				5CD5A9381D932CF4003FD770 /* primitives.h */,
@@ -691,8 +697,6 @@
 				5CD5A9411D932CF4003FD770 /* vertexstorage.cpp */,
 				5CD5A9421D932CF4003FD770 /* vertexstorage.h */,
 				5CD5A9431D932CF4003FD770 /* vertexstream.h */,
-				5C5ECAFD1DAEA83C00B52F05 /* material.cpp */,
-				5C5ECAFE1DAEA83C00B52F05 /* material.h */,
 			);
 			path = base;
 			sourceTree = "<group>";
@@ -832,6 +836,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				5C4F7F1A1D9AF98D0054FA50 /* databuffer.h in Headers */,
+				5C8278B51DB555F900EB2DF2 /* materiallibrary.h in Headers */,
 				5C6588031DA59D4E007F8DB1 /* metal_sampler.h in Headers */,
 				5C5ECB001DAEA83C00B52F05 /* material.h in Headers */,
 				5C4D4FE81DAC2C5400157711 /* shadersource.h in Headers */,
@@ -897,7 +902,6 @@
 			files = (
 				5CD5A9C71D932CFA003FD770 /* rendering_metal.pack.mm in Sources */,
 				5CD5A9C91D932CFA003FD770 /* sound.pack.cxx in Sources */,
-				5C5ECAFF1DAEA83C00B52F05 /* material.cpp in Sources */,
 				5CD5A9C21D932CFA003FD770 /* imaging.pack.cxx in Sources */,
 				5CD5A9BF1D932CFA003FD770 /* camera.pack.cxx in Sources */,
 				5CD5A9C01D932CFA003FD770 /* core.pack.cxx in Sources */,

@@ -128,23 +128,21 @@ namespace et
 			return *this;
 		}
 
-		void reset(T* data) 
+		void reset(T* newData)
 		{
-			if (data == _data)
+			if (newData == _data)
                 return;
             
             T* oldData = _data;
-            
-            _data = data;
-			if (_data != nullptr)
-            {
-				_data->retain();
-            }
-            
-            if (oldData != nullptr)
+
+			if (newData)
+				newData->retain();
+
+			std::swap(_data, newData);
+
+            if (oldData)
             {
                 ET_ASSERT(oldData->retainCount() > 0);
-                
                 oldData->release();
                 if (oldData->retainCount() == 0)
                 {

@@ -11,6 +11,7 @@
 #include <et/rendering/constbuffer.h>
 #include <et/rendering/sharedvariables.h>
 #include <et/rendering/rendercontextparams.h>
+#include <et/rendering/base/materiallibrary.h>
 #include <et/rendering/interface/databuffer.h>
 #include <et/rendering/interface/renderpass.h>
 #include <et/rendering/interface/pipelinestate.h>
@@ -38,6 +39,9 @@ public:
 
 	ConstBuffer& sharedConstBuffer()
 		{ return _sharedConstBuffer; }
+
+	MaterialLibrary& sharedMaterialLibrary()
+		{ return _materialLibrary; }
 
 	virtual RenderingAPI api() const = 0;
 
@@ -89,6 +93,7 @@ private:
 	RenderContext* _rc = nullptr;
 	SharedVariables _sharedVariables;
 	ConstBuffer _sharedConstBuffer;
+	MaterialLibrary _materialLibrary;
 	Texture::Pointer _defaultTexture;
 };
 

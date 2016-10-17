@@ -23,6 +23,8 @@ public:
 
 public:
 	void init(RenderInterface*);
+	void shutdown();
+
 	uint8_t* allocateData(uint32_t size, uint32_t& baseOffset);
 	void flush();
 	void reset();

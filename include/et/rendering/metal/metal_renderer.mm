@@ -55,12 +55,15 @@ void MetalRenderer::init(const RenderContextParameters& params)
 
 	sharedVariables().init(this);
 	sharedConstBuffer().init(this);
+	sharedMaterialLibrary().init(this);
 }
 
 void MetalRenderer::shutdown()
 {
+	sharedMaterialLibrary().shutdown();
+	sharedConstBuffer().shutdown();
 	sharedVariables().shutdown();
-	
+
 	ET_OBJC_RELEASE(_private->metal.queue);
 	ET_OBJC_RELEASE(_private->metal.device);
 }
@@ -176,8 +179,8 @@ PipelineState::Pointer MetalRenderer::createPipelineState(RenderPass::Pointer pa
 		result->setDepthState(mtl->depthState());
 		result->setBlendState(mtl->blendState());
 		result->setCullMode(mtl->cullMode());
-		result->setProgram(mtl->program());
 		// */
+		result->setProgram(mtl->program());
 		result->setVertexStream(vs);
 		result->build();
 		

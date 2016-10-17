@@ -43,7 +43,7 @@ void init(RenderContext* rc)
 	ET_ASSERT(fileExists(materialFile));
 
 	// TODO : retreive material from renderer
-    rh_local::default2DMaterial = MaterialInstance::Pointer::create(); // rc->renderer().ptr());
+    rh_local::default2DMaterial; //  = MaterialInstance::Pointer::create(); // rc->renderer().ptr());
 	// rh_local::default2DMaterial->loadFromJson(loadTextFile(materialFile), getFilePath(materialFile));
 }
 
