@@ -79,12 +79,19 @@ public:
 		char data[sizeof(vec4)] { };
 
 		template <class T>
-		const T& as()
+		const T& as() const
 		{
 			static_assert(sizeof(T) <= sizeof(vec4), "Requested type is too large");
-			ET_ASSERT(storedType == dataTypeFromClass<T>());
-			return *(reinterpret_cast<T*>(data));
+			ET_ASSERT(is<T>());
+			return *(reinterpret_cast<const T*>(data));
 		};
+
+		template <class T>
+		bool is() const
+		{
+			static_assert(sizeof(T) <= sizeof(vec4), "Requested type is too large");
+			return storedType == dataTypeFromClass<T>();
+		}
 
 		template <class T>
 		void operator = (const T& value)
@@ -93,6 +100,7 @@ public:
 			*(reinterpret_cast<T*>(data)) = value;
 			storedType = dataTypeFromClass<T>();
 		}
+
 
 		void clear()
 		{
@@ -112,8 +120,12 @@ public:
 
 	void setTexture(MaterialTexture, Texture::Pointer);
 	void setSampler(MaterialTexture, Sampler::Pointer);
+
 	void setVector(MaterialParameter, const vec4&);
+	vec4 getVector(MaterialParameter) const;
+
 	void setFloat(MaterialParameter, float);
+	float getFloat(MaterialParameter) const;
 
 	Program::Pointer program();
 
@@ -123,6 +135,9 @@ public:
 	
 private:
 	friend class MaterialInstance;
+
+	template <class T>
+	T getParameter(MaterialParameter) const;
 
 private:
 	RenderInterface* _renderer = nullptr;
@@ -152,5 +167,21 @@ private:
 private:
 	Material::Pointer _base;
 };
+
+std::string materialParameterToString(MaterialParameter);
+
+template <class T>
+inline T Material::getParameter(MaterialParameter p) const
+{
+	uint32_t pIndex = static_cast<uint32_t>(p);
+	if (_params[pIndex].is<T>())
+		return _params[pIndex].as<T>();
+	
+	log::warning("Material %s does not contain parameter %s of type %s", name().c_str(),
+		materialParameterToString(p).c_str(), classToString<T>());
+	return T();
+}
+
+
 
 }

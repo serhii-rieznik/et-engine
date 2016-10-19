@@ -73,37 +73,17 @@ void MainController::applicationDidLoad(et::RenderContext* rc)
 	decl.push_back(et::VertexAttributeUsage::Normal, et::DataType::Vec3);
 	decl.push_back(et::VertexAttributeUsage::TexCoord0, et::DataType::Vec2);
 
-	_scene = et::s3d::Scene::Pointer::create();
-	if (et::fileExists(modelName))
+	if (!et::fileExists(modelName))
 	{
-		et::OBJLoader loader(modelName, et::OBJLoader::Option_CalculateTangents);
-		auto model = loader.load(rc, this, _scene->storage(), localCache);
-		model->setParent(_scene.ptr());
+		ET_FAIL("Unable to load specified model");
 	}
-	else
-	{
-		et::vec2i density(30);
-		et::VertexStorage::Pointer va = et::VertexStorage::Pointer::create(decl, 0);
-        et::IndexArray::Pointer ia = et::IndexArray::Pointer::create(et::IndexArrayFormat::Format_32bit,
-			et::primitives::indexCountForRegularMesh(density, et::PrimitiveType::Triangles), et::PrimitiveType::Triangles);
-		et::primitives::createSphere(va, 1.0f, density);
-		et::primitives::buildTrianglesIndexes(ia, density, 0, 0);
 
-		et::s3d::SceneMaterial::Pointer mat = et::s3d::SceneMaterial::Pointer::create();
-        mat->setVector(et::MaterialParameter::DiffuseColor, et::vec4(1.0f, 0.5f, 0.25f, 1.0f));
-        mat->setFloat(et::MaterialParameter::Roughness, 1.0f);
-		
-        auto objVb = _rc->renderer()->createVertexBuffer("shpere-vb", va, et::BufferDrawType::Static);
-        auto objIb = _rc->renderer()->createIndexBuffer("sphere-ib", ia, et::BufferDrawType::Static);
-		auto vStream = et::VertexStream::Pointer::create(objVb, objIb);
-        
-		et::RenderBatch::Pointer rb = et::RenderBatch::Pointer::create(et::Material::Pointer(), vStream);
-		rb->setVertexStorage(va);
-		rb->setIndexArray(ia);
-        
-        auto mesh = et::s3d::Mesh::Pointer::create("sphere", mat, _scene.ptr());
-		mesh->addRenderBatch(rb);
-	}
+	_scene = et::s3d::Scene::Pointer::create();
+	
+	et::OBJLoader loader(modelName, et::OBJLoader::Option_CalculateTangents);
+	auto model = loader.load(rc->renderer(), _scene->storage(), localCache);
+	model->setParent(_scene.ptr());
+
 	et::Raytrace::Options rtOptions;
 	rtOptions.raysPerPixel = static_cast<uint32_t>(_options.integerForKey("rays-per-pixel", 32)->content);
 	rtOptions.maxKDTreeDepth = static_cast<uint32_t>(_options.integerForKey("kd-tree-max-depth", 4)->content);
@@ -242,11 +222,6 @@ void MainController::render(et::RenderContext* rc)
 	}
 
 	rc->renderer()->submitRenderPass(pass);
-}
-
-et::Material::Pointer MainController::materialWithName(const std::string&)
-{
-	return et::Material::Pointer();
 }
     
 et::ApplicationIdentifier demo::MainController::applicationIdentifier() const

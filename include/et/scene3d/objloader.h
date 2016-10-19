@@ -10,7 +10,7 @@
 #include <et/scene3d/mesh.h>
 #include <et/scene3d/storage.h>
 #include <et/scene3d/modelloader.h>
-#include <et/rendering/rendercontext.h>
+#include <et/rendering/interface/renderer.h>
 #include <et/rendering/base/vertexstorage.h>
 
 namespace et
@@ -32,7 +32,7 @@ namespace et
 		OBJLoader(const std::string& inFile, size_t options);
 		~OBJLoader();
 
-		s3d::ElementContainer::Pointer load(RenderContext*, s3d::Storage&, ObjectsCache&) override;
+		s3d::ElementContainer::Pointer load(RenderInterface::Pointer, s3d::Storage&, ObjectsCache&) override;
 
 		ET_DECLARE_EVENT1(loaded, s3d::ElementContainer::Pointer)
 
@@ -89,9 +89,7 @@ namespace et
 		void threadFinished();
 
 	private:
-		friend class OBJLoaderThread;
-
-		RenderContext* _rc = nullptr;
+		RenderInterface::Pointer _renderer;
 
 		std::string inputFileName;
 		std::string inputFilePath;

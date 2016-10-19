@@ -334,11 +334,11 @@ void OBJLoader::loadData(ObjectsCache& cache)
 	}
 }
 
-s3d::ElementContainer::Pointer OBJLoader::load(et::RenderContext* rc, s3d::Storage& storage, ObjectsCache& cache)
+s3d::ElementContainer::Pointer OBJLoader::load(et::RenderInterface::Pointer ren, s3d::Storage& storage, ObjectsCache& cache)
 {
 	storage.flush();
 
-	_rc = rc;
+	_renderer = ren;
 	_groups.reserve(4);
 	_vertices.reserve(1024);
 	_normals.reserve(1024);
@@ -411,7 +411,7 @@ void OBJLoader::loadMaterials(const std::string& fileName, ObjectsCache& cache)
 						
 						getLine(materialFile, line);
 						std::string actualName = application().resolveFileName(line);
-						_lastMaterial->setTexture(MaterialTexture::Normal, _rc->renderer()->loadTexture(actualName, cache));
+						_lastMaterial->setTexture(MaterialTexture::Normal, _renderer->loadTexture(actualName, cache));
 					}
 					else
 					{
@@ -423,7 +423,7 @@ void OBJLoader::loadMaterials(const std::string& fileName, ObjectsCache& cache)
 				{
 					getLine(materialFile, line);
 					std::string actualName = application().resolveFileName(line);
-					_lastMaterial->setTexture(MaterialTexture::Normal, _rc->renderer()->loadTexture(actualName, cache) );
+					_lastMaterial->setTexture(MaterialTexture::Normal, _renderer->loadTexture(actualName, cache) );
 				}
 			}
 			else
@@ -518,7 +518,7 @@ void OBJLoader::loadMaterials(const std::string& fileName, ObjectsCache& cache)
 					{
 						getLine(materialFile, line);
 						std::string actualName = application().resolveFileName(line);
-						_lastMaterial->setTexture(MaterialTexture::Albedo, _rc->renderer()->loadTexture(actualName, cache) );
+						_lastMaterial->setTexture(MaterialTexture::Albedo, _renderer->loadTexture(actualName, cache) );
 					}
 					else if (subId == 'a')
 					{
@@ -529,13 +529,13 @@ void OBJLoader::loadMaterials(const std::string& fileName, ObjectsCache& cache)
 					{
 						getLine(materialFile, line);
 						std::string actualName = application().resolveFileName(line);
-						_lastMaterial->setTexture(MaterialTexture::Reflectance, _rc->renderer()->loadTexture(actualName, cache) );
+						_lastMaterial->setTexture(MaterialTexture::Reflectance, _renderer->loadTexture(actualName, cache) );
 					}
 					else if (subId == 'e')
 					{
 						getLine(materialFile, line);
 						std::string actualName = application().resolveFileName(line);
-						_lastMaterial->setTexture(MaterialTexture::Emissive, _rc->renderer()->loadTexture(actualName, cache) );
+						_lastMaterial->setTexture(MaterialTexture::Emissive, _renderer->loadTexture(actualName, cache) );
 					}
 					else
 					{
@@ -573,7 +573,7 @@ void OBJLoader::loadMaterials(const std::string& fileName, ObjectsCache& cache)
 								
 								getLine(materialFile, line);
 								std::string actualName = application().resolveFileName(line);
-								_lastMaterial->setTexture(MaterialTexture::Normal, _rc->renderer()->loadTexture(actualName, cache));
+								_lastMaterial->setTexture(MaterialTexture::Normal, _renderer->loadTexture(actualName, cache));
 							}
 							else
 							{
@@ -585,7 +585,7 @@ void OBJLoader::loadMaterials(const std::string& fileName, ObjectsCache& cache)
 						{
 							getLine(materialFile, line);
 							std::string actualName = application().resolveFileName(line);
-							_lastMaterial->setTexture(MaterialTexture::Normal, _rc->renderer()->loadTexture(actualName, cache) );
+							_lastMaterial->setTexture(MaterialTexture::Normal, _renderer->loadTexture(actualName, cache) );
 						}
 					}
 					else
@@ -597,7 +597,7 @@ void OBJLoader::loadMaterials(const std::string& fileName, ObjectsCache& cache)
 				{
 					getLine(materialFile, line);
 					std::string actualName = application().resolveFileName(line);
-					_lastMaterial->setTexture(MaterialTexture::Opacity, _rc->renderer()->loadTexture(actualName, cache) );
+					_lastMaterial->setTexture(MaterialTexture::Opacity, _renderer->loadTexture(actualName, cache) );
 				}
 				else
 				{
@@ -665,10 +665,9 @@ void OBJLoader::loadMaterials(const std::string& fileName, ObjectsCache& cache)
 					std::string name;
 					materialFile >> name;
 
-					// TODO : retrieve material instance from renderer
-					// _lastMaterial = MaterialInstance::Pointer::create();
+					_lastMaterial = _renderer->sharedMaterialLibrary().loadDefaultMaterial(DefaultMaterial::Phong);
 					_lastMaterial->setName(name);
-					
+
 					_materials.push_back(_lastMaterial);
 				}
 				else
@@ -839,8 +838,8 @@ s3d::ElementContainer::Pointer OBJLoader::generateVertexBuffers(s3d::Storage& st
 		storage.addMaterial(m);
 	}
 	
-	VertexBuffer::Pointer vb = _rc->renderer()->createVertexBuffer("model-vb", _vertexData, BufferDrawType::Static);
-	IndexBuffer::Pointer ib = _rc->renderer()->createIndexBuffer("model-ib", _indices, BufferDrawType::Static);
+	VertexBuffer::Pointer vb = _renderer->createVertexBuffer("model-vb", _vertexData, BufferDrawType::Static);
+	IndexBuffer::Pointer ib = _renderer->createIndexBuffer("model-ib", _indices, BufferDrawType::Static);
 	VertexStream::Pointer vao = VertexStream::Pointer::create(vb, ib);
 
 	for (const auto& i : _meshes)

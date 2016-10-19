@@ -20,9 +20,9 @@ public:
 	~RaytracePrivate();
 
 	void backwardPathTraceThreadFunction(uint32_t index);
-    void forwardPathTraceThreadFunction(uint32_t index);
-    void visualizeDistributionThreadFunction(uint32_t index);
-    
+	void forwardPathTraceThreadFunction(uint32_t index);
+	void visualizeDistributionThreadFunction(uint32_t index);
+
 	void emitWorkerThreads();
 	void stopWorkerThreads();
 
@@ -47,8 +47,8 @@ public:
 
 	void fillRegionWithColor(const rt::Region&, const vec4& color);
 	void renderTriangle(const rt::Triangle&);
-    
-    void flushToForwardTraceBuffer(const Vector<rt::float4>&);
+
+	void flushToForwardTraceBuffer(const Vector<rt::float4>&);
 
 public:
 	Raytrace* owner = nullptr;
@@ -76,7 +76,7 @@ public:
 
 	Vector<rt::float4> forwardTraceBuffer;
 	std::mutex forwardTraceBufferMutex;
-    size_t flushCounter = 0;
+	size_t flushCounter = 0;
 };
 
 namespace et
@@ -98,9 +98,9 @@ void Raytrace::perform(s3d::Scene::Pointer scene, const Camera& cam, const vec2i
 	_private->camera = cam;
 	_private->viewportSize = dimension;
 	_private->buildMaterialAndTriangles(scene);
-    
-    ET_ASSERT(_private->viewportSize.x > 0);
-    ET_ASSERT(_private->viewportSize.y > 0);
+
+	ET_ASSERT(_private->viewportSize.x > 0);
+	ET_ASSERT(_private->viewportSize.y > 0);
 
 	_private->buildRegions(vec2i(static_cast<int>(_private->options.renderRegionSize)));
 
@@ -162,7 +162,7 @@ void Raytrace::setIntegrator(rt::Integrator::Pointer integrator)
  * Private implementation
  */
 RaytracePrivate::RaytracePrivate(Raytrace* o) :
-	owner(o), running(false)
+owner(o), running(false)
 {
 }
 
@@ -183,7 +183,7 @@ void RaytracePrivate::emitWorkerThreads()
 
 	uint64_t totalRays = static_cast<uint64_t>(viewportSize.square()) * options.raysPerPixel;
 	log::info("Rendering started: %d x %d, %llu rpp, %llu total rays",
-		viewportSize.x, viewportSize.y, static_cast<uint64_t>(options.raysPerPixel), totalRays);
+			  viewportSize.x, viewportSize.y, static_cast<uint64_t>(options.raysPerPixel), totalRays);
 
 	running = true;
 
@@ -191,12 +191,12 @@ void RaytracePrivate::emitWorkerThreads()
 	{
 		options.threads = std::thread::hardware_concurrency();
 	}
-	
+
 	threadCounter.store(options.threads);
 	for (uint32_t i = 0; i < options.threads; ++i)
 	{
 #   if (ET_RT_EVALUATE_DISTRIBUTION)
-        workerThreads.emplace_back(&RaytracePrivate::visualizeDistributionThreadFunction, this, i);
+		workerThreads.emplace_back(&RaytracePrivate::visualizeDistributionThreadFunction, this, i);
 #	else
 		if (options.method == Raytrace::Method::LightTracing)
 		{
@@ -231,41 +231,43 @@ void RaytracePrivate::buildMaterialAndTriangles(s3d::Scene::Pointer scene)
 	auto meshes = scene->childrenOfType(s3d::ElementType::Mesh);
 	for (s3d::Mesh::Pointer mesh : meshes)
 	{
-		bool isEmitter = false;
-		auto meshMaterial = mesh->material();
-
-		auto materialIndex = materialIndexWithName(meshMaterial->name());
-		if (materialIndex == InvalidIndex)
-		{
-			float alpha = clamp(meshMaterial->getFloat(MaterialParameter::Roughness), 0.0f, 1.0f);
-			float eta = meshMaterial->getFloat(MaterialParameter::Transparency);
-
-			rt::Material::Class cls = rt::Material::Class::Diffuse;
-			if (alpha < 1.0f)
-			{
-				cls = (eta == 0.0f) ? rt::Material::Class::Conductor : rt::Material::Class::Dielectric;
-			}
-
-			materialIndex = materials.size();
-			materials.emplace_back(cls);
-			auto& mat = materials.back();
-
-			mat.name = meshMaterial->name();
-			mat.diffuse = rt::float4(meshMaterial->getVector(MaterialParameter::DiffuseColor));
-			mat.specular = rt::float4(meshMaterial->getVector(MaterialParameter::SpecularColor));
-            mat.emissive = rt::float4(meshMaterial->getVector(MaterialParameter::EmissiveColor));
-			mat.roughness = clamp(sqr(alpha), std::sqrt(rt::Constants::epsilon), 1.0f);
-			mat.ior = eta;
-			
-			isEmitter = mat.emissive.length() > 0.0f;
-		}
-
 		mesh->prepareRenderBatches();
 		for (const auto& rb : mesh->renderBatches())
 		{
-			auto& vs = rb->vertexStorage();
-			auto& ia = rb->indexArray();
-			if (vs.invalid() || ia.invalid()) continue;
+			bool isEmitter = false;
+			Material::Pointer batchMaterial = rb->material();
+
+			auto materialIndex = materialIndexWithName(batchMaterial->name());
+			if (materialIndex == InvalidIndex)
+			{
+				float alpha = clamp(batchMaterial->getFloat(MaterialParameter::Roughness), 0.0f, 1.0f);
+				float eta = batchMaterial->getFloat(MaterialParameter::Opacity);
+
+				rt::Material::Class cls = rt::Material::Class::Diffuse;
+				if (alpha < 1.0f)
+				{
+					cls = (eta == 0.0f) ? rt::Material::Class::Conductor : rt::Material::Class::Dielectric;
+				}
+
+				materialIndex = materials.size();
+				materials.emplace_back(cls);
+				auto& mat = materials.back();
+
+				mat.name = batchMaterial->name();
+				mat.diffuse = rt::float4(batchMaterial->getVector(MaterialParameter::DiffuseColor));
+				mat.specular = rt::float4(batchMaterial->getVector(MaterialParameter::SpecularColor));
+				mat.emissive = rt::float4(batchMaterial->getVector(MaterialParameter::EmissiveColor));
+				mat.roughness = clamp(sqr(alpha), std::sqrt(rt::Constants::epsilon), 1.0f);
+				mat.ior = eta;
+
+				isEmitter = mat.emissive.length() > 0.0f;
+			}
+
+			VertexStorage::Pointer vs = rb->vertexStorage();
+			ET_ASSERT(vs.valid());
+
+			IndexArray::Pointer ia = rb->indexArray();
+			ET_ASSERT(ia.valid());
 
 			const mat4& t = rb->transformation();
 
@@ -289,10 +291,10 @@ void RaytracePrivate::buildMaterialAndTriangles(s3d::Scene::Pointer scene)
 				tri.n[1] = rt::float4(t.rotationMultiply(nrm[i1]).normalized(), 0.0f);
 				tri.n[2] = rt::float4(t.rotationMultiply(nrm[i2]).normalized(), 0.0f);
 				/*
-				tri.t[0] = rt::float4(uv0[i0].x, uv0[i0].y, 0.0f, 0.0f);
-				tri.t[1] = rt::float4(uv0[i1].x, uv0[i1].y, 0.0f, 0.0f);
-				tri.t[2] = rt::float4(uv0[i2].x, uv0[i2].y, 0.0f, 0.0f);
-				*/
+				 tri.t[0] = rt::float4(uv0[i0].x, uv0[i0].y, 0.0f, 0.0f);
+				 tri.t[1] = rt::float4(uv0[i1].x, uv0[i1].y, 0.0f, 0.0f);
+				 tri.t[2] = rt::float4(uv0[i2].x, uv0[i2].y, 0.0f, 0.0f);
+				 */
 				tri.materialIndex = static_cast<rt::index>(materialIndex);
 				tri.computeSupportData();
 
@@ -343,9 +345,9 @@ void RaytracePrivate::buildRegions(const vec2i& aSize)
 		regionSize.x = viewportSize.x;
 	if (regionSize.y > viewportSize.y)
 		regionSize.y = viewportSize.y;
-    
-    ET_ASSERT(regionSize.x > 0);
-    ET_ASSERT(regionSize.y > 0);
+
+	ET_ASSERT(regionSize.x > 0);
+	ET_ASSERT(regionSize.y > 0);
 
 	int xr = viewportSize.x / regionSize.x;
 	int yr = viewportSize.y / regionSize.y;
@@ -422,7 +424,7 @@ void RaytracePrivate::visualizeDistributionThreadFunction(uint32_t index)
 	auto distribution = rt::ggxDistribution;
 	float alpha = 0.1f;
 
-    if (index > 0)
+	if (index > 0)
 	{
 		float l = camera.position().length() / 10.0f;
 		for (size_t i = 0; running && (i < renderTestCount); ++i)
@@ -431,60 +433,60 @@ void RaytracePrivate::visualizeDistributionThreadFunction(uint32_t index)
 			vec2 e = projectPoint(n * l);
 			renderPixel(e, vec4(1.0f, 0.01f));
 		}
-        return;
+		return;
 	}
 
-    const size_t sampleCount = 1000;
-    Vector<size_t> prob(sampleCount, 0);
-    for (size_t i = 0; running && (i < sampleTestCount); ++i)
-    {
+	const size_t sampleCount = 1000;
+	Vector<size_t> prob(sampleCount, 0);
+	for (size_t i = 0; running && (i < sampleTestCount); ++i)
+	{
 		auto v = rt::randomVectorOnHemisphere(testDirection, distribution, alpha).dot(testDirection);
-        size_t VdotN = static_cast<size_t>(clamp(v, 0.0f, 1.0f) * static_cast<float>(sampleCount));
-        prob[VdotN] += 1;
-    }
-    
-    size_t maxValue = prob.front();
-    for (auto i : prob)
-    {
-        maxValue = std::max(maxValue, i);
-    }
-    float vScale = static_cast<float>(sampleTestCount) / static_cast<float>(maxValue);
-    
-    const float off = 10.0f;
-    vec2 p00(off);
-    vec2 p01(viewportSize.x - off, off);
-    vec2 p10(off, viewportSize.y - off);
-    renderLine(p00, p01, vec4(1.0f));
-    renderLine(p00, p10, vec4(1.0f));
-    
-    float ds = 1.0f / static_cast<float>(sampleCount - 1);
-    float lastHeight = vScale * static_cast<float>(prob.front()) / static_cast<float>(sampleTestCount);
-    for (size_t i = 1; running && (i < sampleCount); ++i)
-    {
-        float delta = static_cast<float>(i) * ds;
-        float x0 = off + (delta - ds)* (viewportSize.x - 2.0f * off);
-        float x1 = off + delta * (viewportSize.x - 2.0f * off);
-        float newHeight = vScale * static_cast<float>(prob[i]) / static_cast<float>(sampleTestCount);
+		size_t VdotN = static_cast<size_t>(clamp(v, 0.0f, 1.0f) * static_cast<float>(sampleCount));
+		prob[VdotN] += 1;
+	}
 
-        vec2 ph1(x0, off + (viewportSize.y - 2.0f * off) * lastHeight);
-        vec2 ph2(x1, off + (viewportSize.y - 2.0f * off) * newHeight);
-        renderLine(ph1, ph2, vec4(1.0f, 1.0f, 0.0f, 1.0f));
+	size_t maxValue = prob.front();
+	for (auto i : prob)
+	{
+		maxValue = std::max(maxValue, i);
+	}
+	float vScale = static_cast<float>(sampleTestCount) / static_cast<float>(maxValue);
+
+	const float off = 10.0f;
+	vec2 p00(off);
+	vec2 p01(viewportSize.x - off, off);
+	vec2 p10(off, viewportSize.y - off);
+	renderLine(p00, p01, vec4(1.0f));
+	renderLine(p00, p10, vec4(1.0f));
+
+	float ds = 1.0f / static_cast<float>(sampleCount - 1);
+	float lastHeight = vScale * static_cast<float>(prob.front()) / static_cast<float>(sampleTestCount);
+	for (size_t i = 1; running && (i < sampleCount); ++i)
+	{
+		float delta = static_cast<float>(i) * ds;
+		float x0 = off + (delta - ds)* (viewportSize.x - 2.0f * off);
+		float x1 = off + delta * (viewportSize.x - 2.0f * off);
+		float newHeight = vScale * static_cast<float>(prob[i]) / static_cast<float>(sampleTestCount);
+
+		vec2 ph1(x0, off + (viewportSize.y - 2.0f * off) * lastHeight);
+		vec2 ph2(x1, off + (viewportSize.y - 2.0f * off) * newHeight);
+		renderLine(ph1, ph2, vec4(1.0f, 1.0f, 0.0f, 1.0f));
 
 		ph1.y = off + (viewportSize.y - 2.0f * off) * distribution(delta - ds, alpha);
 		ph2.y = off + (viewportSize.y - 2.0f * off) * distribution(delta, alpha);
 		renderLine(ph1, ph2, vec4(1.0f, 0.0f, 0.0f, 1.0f));
 
-        lastHeight = newHeight;
-    }
+		lastHeight = newHeight;
+	}
 }
 
 void RaytracePrivate::forwardPathTraceThreadFunction(uint32_t threadId)
 {
-    if (lightTriangles.empty())
-    {
-        log::error("No light sources found in scene");
-        return;
-    }
+	if (lightTriangles.empty())
+	{
+		log::error("No light sources found in scene");
+		return;
+	}
 
 	const int raysPerIteration = viewportSize.square() / 4;
 
@@ -497,7 +499,7 @@ void RaytracePrivate::forwardPathTraceThreadFunction(uint32_t threadId)
 	vec3 viewport = vector3ToFloat(vec3i(viewportSize, 0));
 
 	auto projectToCamera = [&](const rt::Ray& inRay, const rt::KDTree::TraverseResult& hit,
-		const rt::float4& color, const rt::float4& nrm)
+							   const rt::float4& color, const rt::float4& nrm)
 	{
 		rt::float4 toCamera = cameraPos - hit.intersectionPoint;
 		toCamera.normalize();
@@ -551,7 +553,7 @@ void RaytracePrivate::forwardPathTraceThreadFunction(uint32_t threadId)
 
 			rt::float4 triangleNormal = emitterTriangle.interpolatedNormal(source.intersectionPointBarycentric);
 			rt::float4 sourceDir = rt::randomVectorOnHemisphere(triangleNormal, rt::cosineDistribution);
-			
+
 			float pickProb = 1.0f / static_cast<float>(lightTriangles.size());
 			float area = emitterTriangle.area();
 
@@ -595,14 +597,14 @@ void RaytracePrivate::forwardPathTraceThreadFunction(uint32_t threadId)
 		log::info("Iteration finished");
 		flushToForwardTraceBuffer(localBuffer);
 		std::fill(localBuffer.begin(), localBuffer.end(), rt::float4(0.0f));
-    }
+	}
 	log::info("Thread finished");
 }
 
 void RaytracePrivate::backwardPathTraceThreadFunction(uint32_t threadId)
 {
 	DataStorage<vec4> localData(sqr(options.renderRegionSize), 0);
-	
+
 	while (running)
 	{
 		auto region = getNextRegion();
@@ -643,13 +645,13 @@ void RaytracePrivate::backwardPathTraceThreadFunction(uint32_t threadId)
 		}
 
 		elapsedTime += et::queryContiniousTimeInMilliSeconds() - runTime;
-/*
-		rt::float_type averageTime = static_cast<rt::float_type>(elapsedTime) / static_cast<rt::float_type>(1000 * sampledRegions);
-		auto actualElapsed = et::queryContiniousTimeInMilliSeconds() - startTime;
-		log::info("Elapsed: %s, estimated: %s",
-			floatToTimeStr(static_cast<rt::float_type>(actualElapsed) / 1000.f, false).c_str(),
-			floatToTimeStr(averageTime * static_cast<rt::float_type>(regions.size() - sampledRegions), false).c_str());
-*/ 
+		/*
+		 rt::float_type averageTime = static_cast<rt::float_type>(elapsedTime) / static_cast<rt::float_type>(1000 * sampledRegions);
+		 auto actualElapsed = et::queryContiniousTimeInMilliSeconds() - startTime;
+		 log::info("Elapsed: %s, estimated: %s",
+		 floatToTimeStr(static_cast<rt::float_type>(actualElapsed) / 1000.f, false).c_str(),
+		 floatToTimeStr(averageTime * static_cast<rt::float_type>(regions.size() - sampledRegions), false).c_str());
+		 */
 	}
 
 	--threadCounter;
@@ -688,19 +690,19 @@ vec4 RaytracePrivate::raytracePixel(const vec2i& pixel, size_t samples, size_t& 
 		vec2 jitter = pixelSize * vec2(2.0f * rt::fastRandomFloat() - 1.0f, 2.0f * rt::fastRandomFloat() - 1.0f);
 		result += integrator->gather(camera.castRay(pixelBase + jitter), 0, bounces, kdTree, sampler, materials);
 	}
-    
+
 	vec4 output = result.toVec4() / static_cast<float>(samples);
-    output = maxv(minv(output, vec4(1.0f)), vec4(0.0f));
+	output = maxv(minv(output, vec4(1.0f)), vec4(0.0f));
 
 #if (ET_RT_ENABLE_GAMMA_CORRECTION)
-    output.x = std::pow(output.x, 1.0f / 2.2f);
-    output.y = std::pow(output.y, 1.0f / 2.2f);
-    output.z = std::pow(output.z, 1.0f / 2.2f);
-    ET_ASSERT(!isnan(output.x));
-    ET_ASSERT(!isnan(output.y));
-    ET_ASSERT(!isnan(output.z));
+	output.x = std::pow(output.x, 1.0f / 2.2f);
+	output.y = std::pow(output.y, 1.0f / 2.2f);
+	output.z = std::pow(output.z, 1.0f / 2.2f);
+	ET_ASSERT(!isnan(output.x));
+	ET_ASSERT(!isnan(output.y));
+	ET_ASSERT(!isnan(output.z));
 #endif
-    
+
 	output.w = 1.0f;
 	return output;
 }
@@ -727,14 +729,14 @@ void RaytracePrivate::estimateRegionsOrder()
 		for (size_t i = 0; i < maxSamples; ++i)
 		{
 			size_t bounces = 0;
-            vec2i px = r.origin + vec2i(sx[i].x * r.size.x / sx[i].y, sy[i].x * r.size.y / sy[i].y);
+			vec2i px = r.origin + vec2i(sx[i].x * r.size.x / sx[i].y, sy[i].x * r.size.y / sy[i].y);
 			estimatedColor += raytracePixel(px, 1, bounces);
 			r.estimatedBounces += bounces;
 		}
 	}
 
 	std::sort(regions.begin(), regions.end(), [](const rt::Region& l, const rt::Region& r)
-		{ return l.estimatedBounces > r.estimatedBounces; });
+			  { return l.estimatedBounces > r.estimatedBounces; });
 
 	emitWorkerThreads();
 }
@@ -850,21 +852,21 @@ void RaytracePrivate::renderTriangle(const rt::Triangle& tri)
 
 void RaytracePrivate::flushToForwardTraceBuffer(const Vector<rt::float4>& localBuffer)
 {
-    std::lock_guard<std::mutex> lock(forwardTraceBufferMutex);
+	std::lock_guard<std::mutex> lock(forwardTraceBufferMutex);
 
 	flushCounter++;
-    
-    float rsScale = 1.0f / static_cast<float>(flushCounter);
-    
-    auto src = localBuffer.data();
-    auto dst = forwardTraceBuffer.data();
-    for (size_t i = 0; i < forwardTraceBuffer.size(); ++i, ++dst, ++src)
-    {
-        *dst += *src;
-        
-        vec4 output = dst->toVec4() * rsScale;
-		output.w = 1.0f;
 
+	float rsScale = 1.0f / static_cast<float>(flushCounter);
+	
+	auto src = localBuffer.data();
+	auto dst = forwardTraceBuffer.data();
+	for (size_t i = 0; i < forwardTraceBuffer.size(); ++i, ++dst, ++src)
+	{
+		*dst += *src;
+		
+		vec4 output = dst->toVec4() * rsScale;
+		output.w = 1.0f;
+		
 #   if (ET_RT_ENABLE_GAMMA_CORRECTION)
 		output.x = std::pow(output.x, 1.0f / 2.2f);
 		output.y = std::pow(output.y, 1.0f / 2.2f);
@@ -873,10 +875,10 @@ void RaytracePrivate::flushToForwardTraceBuffer(const Vector<rt::float4>& localB
 		ET_ASSERT(!isnan(output.y));
 		ET_ASSERT(!isnan(output.z));
 #    endif
-            
+		
 		vec2i px(static_cast<int>(i % viewportSize.x), static_cast<int>(i / viewportSize.x));
 		owner->output(px, output);
-    }
+	}
 }
-
+	
 }

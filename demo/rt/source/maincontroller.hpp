@@ -7,7 +7,7 @@
 
 namespace demo
 {
-	class MainController : public et::IApplicationDelegate, public et::MaterialProvider
+	class MainController : public et::IApplicationDelegate
 	{
 		et::ApplicationIdentifier applicationIdentifier() const override;
 		void setApplicationParameters(et::ApplicationParameters&) override;
@@ -17,7 +17,6 @@ namespace demo
 		void applicationWillTerminate() override;
         
         void start();
-		et::Material::Pointer materialWithName(const std::string&) override;
 		
 	private:
         et::Dictionary _options;

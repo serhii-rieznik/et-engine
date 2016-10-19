@@ -1,0 +1,19 @@
+{
+	"input-layout" :
+	{
+		"position" : 3,
+		"texcoord0" : 2
+	},
+
+	"properties" :
+	{
+
+	},
+
+	"flags" :
+	{
+		"ALBEDO_TEXTURE" : 1
+	},
+
+	"code" : "materials"
+}

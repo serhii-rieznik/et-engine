@@ -12,8 +12,9 @@
 namespace et
 {
 
-class MetalState;
-class MetalNativeSampler;
+struct MetalState;
+struct MetalNativeSampler;
+	
 class MetalSamplerPrivate;
 class MetalSampler : public Sampler
 {
