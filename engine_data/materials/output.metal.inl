@@ -9,5 +9,5 @@ struct VSOutput
 
 struct FSOutput
 {
-	float4 color0 [[color0]];
+	float4 color0 [[color(0)]];
 };

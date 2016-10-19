@@ -10,6 +10,7 @@
 #include <et/rendering/interface/texture.h>
 #include <et/rendering/interface/sampler.h>
 #include <et/rendering/interface/program.h>
+#include <et/rendering/base/vertexdeclaration.h>
 
 namespace et
 {
@@ -110,7 +111,7 @@ public:
 	};
 
 	using Textures = std::array<MaterialOptionalObject<Texture::Pointer>, MaterialTexture_Max>;
-	using Samplers = std::array<MaterialOptionalObject<Sampler::Pointer>, MaterialTexture_Max>;
+	using Samplers = std::array<Sampler::Pointer, MaterialParameter_Max>;
 	using Parameters = std::array<MaterialOptionalValue, MaterialParameter_Max>;
 
 public:
@@ -119,7 +120,6 @@ public:
 	MaterialInstancePointer instance();
 
 	void setTexture(MaterialTexture, Texture::Pointer);
-	void setSampler(MaterialTexture, Sampler::Pointer);
 
 	void setVector(MaterialParameter, const vec4&);
 	vec4 getVector(MaterialParameter) const;
@@ -139,12 +139,15 @@ private:
 	template <class T>
 	T getParameter(MaterialParameter) const;
 
-private:
-	RenderInterface* _renderer = nullptr;
+private: // overrided by instanaces
 	Textures _textures;
-	Samplers _samplers;
 	Parameters _params;
+
+private: // permanent private data
+	RenderInterface* _renderer = nullptr;
+	Samplers _samplers;
 	Program::Pointer _program;
+	VertexDeclaration _inputLayout;
 };
 
 class MaterialInstance : public Material

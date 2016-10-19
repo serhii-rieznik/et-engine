@@ -16,5 +16,5 @@
 		}
 	}
 
-	"code" : "materials"
+	"code" : "shaders/textured"
 }

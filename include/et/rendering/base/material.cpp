@@ -29,11 +29,6 @@ void Material::setTexture(MaterialTexture t, Texture::Pointer tex)
 	_textures[static_cast<size_t>(t)] = tex;
 }
 
-void Material::setSampler(MaterialTexture t, Sampler::Pointer s)
-{
-	_samplers[static_cast<size_t>(t)] = s;
-}
-
 void Material::setVector(MaterialParameter p, const vec4& v)
 {
 	_params[static_cast<size_t>(p)] = v;
@@ -69,7 +64,6 @@ MaterialInstancePointer Material::instance()
 {
 	MaterialInstance::Pointer result = MaterialInstance::Pointer::create(Material::Pointer(this));
 	result->_textures = _textures;
-	result->_samplers = _samplers;
 	result->_params = _params;
 	return result;
 }

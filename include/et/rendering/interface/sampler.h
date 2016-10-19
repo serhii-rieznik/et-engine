@@ -15,5 +15,10 @@ class Sampler : public Object
 {
 public:
 	ET_DECLARE_POINTER(Sampler);
+
+	struct Description
+	{
+
+	};
 };
 }
