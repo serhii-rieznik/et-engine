@@ -5,15 +5,16 @@
 		"texcoord0" : 2
 	},
 
-	"properties" :
+	"textures" :
 	{
-
-	},
-
-	"flags" :
-	{
-		"ALBEDO_TEXTURE" : 1
-	},
+		"albedo" :
+		{
+			"sampler" :
+			{
+				
+			}
+		}
+	}
 
 	"code" : "materials"
 }
