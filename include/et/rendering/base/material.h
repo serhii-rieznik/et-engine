@@ -160,8 +160,6 @@ public:
 public:
 	Material::Pointer base();
 
-	void serialize(Dictionary, const std::string& baseFolder);
-
 private:
 	friend class Material;
 	friend class ObjectFactory;

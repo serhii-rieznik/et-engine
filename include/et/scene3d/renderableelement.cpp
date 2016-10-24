@@ -15,24 +15,6 @@ RenderableElement::RenderableElement(const std::string& name, BaseElement* paren
 {
 }
 
-void RenderableElement::serialize(Dictionary stream, const std::string& basePath)
-{
-	ArrayValue batches;
-	batches->content.reserve(renderBatches().size());
-	for (const auto& rb : renderBatches())
-	{
-		batches->content.push_back(rb->serialize());
-	}
-	stream.setArrayForKey(kRenderBatches, batches);
-	
-	ElementContainer::serialize(stream, basePath);
-}
-
-void RenderableElement::deserialize(Dictionary stream, SerializationHelper* helper)
-{
-	ET_FAIL("Rewrite serialization!");
-}
-
 void RenderableElement::addRenderBatch(RenderBatch::Pointer rb)
 {
 	_renderBatches.push_back(rb);

@@ -12,65 +12,62 @@
 
 namespace et
 {
-	namespace s3d
+namespace s3d
+{
+class Mesh : public RenderableElement
+{
+public:
+	ET_DECLARE_POINTER(Mesh);
+	
+	static const std::string defaultMeshName;
+
+public:
+	Mesh(const std::string& = defaultMeshName, BaseElement* = nullptr);
+	
+	ElementType type() const override
+		{ return ElementType::Mesh; }
+
+	Mesh* duplicate() override;
+	
+	void calculateSupportData();
+	
+	const Sphere& boundingSphere();
+	const Sphere& boundingSphereUntransformed();
+	
+	const BoundingBox& tranformedBoundingBox();
+	
+	float finalTransformScale();
+	
+	MeshDeformer::Pointer deformer()
+		{ return _deformer; }
+	
+	void setDeformer(MeshDeformer::Pointer d)
+		{ _deformer = d; }
+	
+	const Vector<mat4>& deformationMatrices();
+
+	bool skinned() const;
+	VertexStorage::Pointer bakeDeformations();
+	
+protected:
+	void transformInvalidated() override;
+	
+	struct SupportData
 	{
-		class Mesh : public RenderableElement
-		{
-		public:
-			ET_DECLARE_POINTER(Mesh);
-			
-			static const std::string defaultMeshName;
+		Sphere untranfromedBoundingSphere;
+		Sphere tranfromedBoundingSphere;
+		BoundingBox transformedBoundingBox;
+		bool shouldUpdateBoundingBox = true;
+		bool shouldUpdateBoundingSphere = true;
+		bool shouldUpdateBoundingSphereUntransformed = true;
+	};
 
-		public:
-			Mesh(const std::string& = defaultMeshName, BaseElement* = nullptr);
-			
-			ElementType type() const override
-				{ return ElementType::Mesh; }
-
-			Mesh* duplicate() override;
-			
-			void serialize(Dictionary, const std::string&) override;
-			void deserialize(Dictionary, SerializationHelper*) override;
-
-			void calculateSupportData();
-			
-			const Sphere& boundingSphere();
-			const Sphere& boundingSphereUntransformed();
-			
-			const BoundingBox& tranformedBoundingBox();
-			
-			float finalTransformScale();
-			
-			MeshDeformer::Pointer deformer()
-				{ return _deformer; }
-			
-			void setDeformer(MeshDeformer::Pointer d)
-				{ _deformer = d; }
-			
-			const Vector<mat4>& deformationMatrices();
-
-			bool skinned() const;
-			VertexStorage::Pointer bakeDeformations();
-			
-		protected:
-			void transformInvalidated() override;
-			
-			struct SupportData
-			{
-				Sphere untranfromedBoundingSphere;
-				Sphere tranfromedBoundingSphere;
-				BoundingBox transformedBoundingBox;
-				bool shouldUpdateBoundingBox = true;
-				bool shouldUpdateBoundingSphere = true;
-				bool shouldUpdateBoundingSphereUntransformed = true;
-			};
-
-		private:
-			MeshDeformer::Pointer _deformer;
-			SupportData _supportData;
-			BoundingBox _boundingBox;
-			float _boundingSphereRadius = 0.0f;
-			Vector<mat4> _undeformedTransformationMatrices;
-		};
-	}
+private:
+	MeshDeformer::Pointer _deformer;
+	SupportData _supportData;
+	BoundingBox _boundingBox;
+	float _boundingSphereRadius = 0.0f;
+	Vector<mat4> _undeformedTransformationMatrices;
+};
+}
 }

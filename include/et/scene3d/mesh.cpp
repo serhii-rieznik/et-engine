@@ -70,18 +70,6 @@ Mesh* Mesh::duplicate()
 	return result;
 }
 
-void Mesh::serialize(Dictionary stream, const std::string& basePath)
-{
-	// TODO : write deformer
-	RenderableElement::serialize(stream, basePath);
-}
-
-void Mesh::deserialize(Dictionary stream, SerializationHelper* helper)
-{
-	RenderableElement::deserialize(stream, helper);
-	calculateSupportData();
-}
-
 void Mesh::transformInvalidated()
 {
 	_supportData.shouldUpdateBoundingBox = true;

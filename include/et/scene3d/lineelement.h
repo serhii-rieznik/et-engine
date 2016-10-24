@@ -12,30 +12,30 @@
 
 namespace et
 {
-	namespace s3d
-	{
-		class LineElement : public ElementContainer
-		{
-		public:
-			ET_DECLARE_POINTER(LineElement);
-			
-		public:
-			LineElement(const std::string& name, BaseElement* parent);
+namespace s3d
+{
 
-			ElementType type() const 
-				{ return ElementType::Line; }
+class LineElement : public ElementContainer
+{
+public:
+	ET_DECLARE_POINTER(LineElement);
+	
+public:
+	LineElement(const std::string& name, BaseElement* parent);
 
-			void serialize(Dictionary, const std::string&);
-			void deserialize(Dictionary, SerializationHelper*);
-			LineElement* duplicate();
+	ElementType type() const override
+		{ return ElementType::Line; }
 
-			const std::vector<vec3>& points() const 
-				{ return _points; }
+	LineElement* duplicate() override;
 
-			void addPoint(const vec3&);
+	const std::vector<vec3>& points() const 
+		{ return _points; }
 
-		private:
-			std::vector<vec3> _points;
-		};
-	}
+	void addPoint(const vec3&);
+
+private:
+	std::vector<vec3> _points;
+};
+
+}
 }

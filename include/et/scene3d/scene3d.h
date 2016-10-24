@@ -29,12 +29,6 @@ namespace et
 		public:
 			Scene(const std::string& name = "scene");
 
-			Dictionary serialize(const std::string& basePath);
-			void serialize(Dictionary, const std::string&) override;
-			
-			void deserializeWithOptions(et::RenderContext*, Dictionary,
-				const std::string& basePath, ObjectsCache&, uint32_t options);
-
 			Storage& storage()
 				{ return _storage; }
 

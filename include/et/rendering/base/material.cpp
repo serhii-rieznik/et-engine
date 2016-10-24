@@ -86,10 +86,6 @@ Material::Pointer MaterialInstance::base()
 	return _base;
 }
 
-void MaterialInstance::serialize(Dictionary, const std::string& baseFolder)
-{
-}
-
 /*
  * Service
  */

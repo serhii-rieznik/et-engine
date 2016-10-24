@@ -21,16 +21,6 @@ void LineElement::addPoint(const vec3& p)
 	_points.push_back(p);
 }
 
-void LineElement::serialize(Dictionary, const std::string&)
-{
-	ET_FAIL("Not implemented")
-}
-
-void LineElement::deserialize(Dictionary, SerializationHelper*)
-{
-	ET_FAIL("Not implemented")
-}
-
 LineElement* LineElement::duplicate()
 {
 	ET_FAIL("Not implemented")

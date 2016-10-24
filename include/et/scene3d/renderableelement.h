@@ -12,27 +12,24 @@
 
 namespace et
 {
-	namespace s3d
-	{
-		class RenderableElement : public ElementContainer
-		{
-		public:
-			ET_DECLARE_POINTER(RenderableElement);
-			
-		public:
-			RenderableElement(const std::string& name, BaseElement* parent);
+namespace s3d
+{
+class RenderableElement : public ElementContainer
+{
+public:
+	ET_DECLARE_POINTER(RenderableElement);
+	
+public:
+	RenderableElement(const std::string& name, BaseElement* parent);
 
-			void addRenderBatch(RenderBatch::Pointer);
-			void prepareRenderBatches();
-			
-			Vector<RenderBatch::Pointer>& renderBatches();
-			const Vector<RenderBatch::Pointer>& renderBatches() const;
+	void addRenderBatch(RenderBatch::Pointer);
+	void prepareRenderBatches();
+	
+	Vector<RenderBatch::Pointer>& renderBatches();
+	const Vector<RenderBatch::Pointer>& renderBatches() const;
 
-			void serialize(Dictionary, const std::string&);
-			void deserialize(Dictionary, SerializationHelper*);
-						
-		private:
-			Vector<RenderBatch::Pointer> _renderBatches;
-		};
-	}
+private:
+	Vector<RenderBatch::Pointer> _renderBatches;
+};
+}
 }

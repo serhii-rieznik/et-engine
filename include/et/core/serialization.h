@@ -13,154 +13,157 @@
 
 namespace et
 {
-	inline void serializeInt32(std::ostream& stream, int32_t value)
-	{
-		ET_ASSERT(stream.good());
-		
-		stream.write(reinterpret_cast<const char*>(&value), 4);
-	}
-	inline int32_t deserializeInt32(std::istream& stream)
-	{
-		ET_ASSERT(stream.good());
-		
-		int32_t value = 0;
-		stream.read(reinterpret_cast<char*>(&value), 4);
-		return value;
-	}
-	inline void serializeInt64(std::ostream& stream, int64_t value)
-	{
-		ET_ASSERT(stream.good());
-		
-		stream.write(reinterpret_cast<const char*>(&value), 8);
-	}
-	inline int64_t deserializeInt64(std::istream& stream)
-	{
-		ET_ASSERT(stream.good());
-		
-		int64_t value = 0;
-		stream.read(reinterpret_cast<char*>(&value), 8);
-		return value;
-	}
-
-	inline void serializeUInt32(std::ostream& stream, uint32_t value)
-	{
-		ET_ASSERT(stream.good());
-		
-		stream.write(reinterpret_cast<const char*>(&value), 4);
-	}
-	inline uint32_t deserializeUInt32(std::istream& stream)
-	{
-		ET_ASSERT(stream.good());
-		
-		uint32_t value = 0;
-		stream.read(reinterpret_cast<char*>(&value), 4);
-		return value;
-	}
-	inline void serializeUInt64(std::ostream& stream, uint64_t value)
-	{
-		ET_ASSERT(stream.good());
-		stream.write(reinterpret_cast<const char*>(&value), 8);
-	}
-	inline uint64_t deserializeUInt64(std::istream& stream)
-	{
-		ET_ASSERT(stream.good());
-		
-		uint64_t value = 0;
-		stream.read(reinterpret_cast<char*>(&value), 8);
-		return value;
-	}
+inline void serializeInt32(std::ostream& stream, int32_t value)
+{
+	ET_ASSERT(stream.good());
 	
-	inline void serializeString(std::ostream& stream, const std::string& s)
-	{
-		ET_ASSERT(stream.good());
+	stream.write(reinterpret_cast<const char*>(&value), 4);
+}
 
-		serializeUInt32(stream, static_cast<uint32_t>(s.size()));
-        
-		if (s.size() > 0)
-			stream.write(s.c_str(), s.size());
+inline int32_t deserializeInt32(std::istream& stream)
+{
+	ET_ASSERT(stream.good());
+	
+	int32_t value = 0;
+	stream.read(reinterpret_cast<char*>(&value), 4);
+	return value;
+}
+
+inline void serializeInt64(std::ostream& stream, int64_t value)
+{
+	ET_ASSERT(stream.good());
+	stream.write(reinterpret_cast<const char*>(&value), 8);
+}
+
+inline int64_t deserializeInt64(std::istream& stream)
+{
+	ET_ASSERT(stream.good());
+	
+	int64_t value = 0;
+	stream.read(reinterpret_cast<char*>(&value), 8);
+	return value;
+}
+
+inline void serializeUInt32(std::ostream& stream, uint32_t value)
+{
+	ET_ASSERT(stream.good());
+	stream.write(reinterpret_cast<const char*>(&value), 4);
+}
+
+inline uint32_t deserializeUInt32(std::istream& stream)
+{
+	ET_ASSERT(stream.good());
+	
+	uint32_t value = 0;
+	stream.read(reinterpret_cast<char*>(&value), 4);
+	return value;
+}
+
+inline void serializeUInt64(std::ostream& stream, uint64_t value)
+{
+	ET_ASSERT(stream.good());
+	stream.write(reinterpret_cast<const char*>(&value), 8);
+}
+
+inline uint64_t deserializeUInt64(std::istream& stream)
+{
+	ET_ASSERT(stream.good());
+	
+	uint64_t value = 0;
+	stream.read(reinterpret_cast<char*>(&value), 8);
+	return value;
+}
+
+inline void serializeString(std::ostream& stream, const std::string& s)
+{
+	ET_ASSERT(stream.good());
+
+	serializeUInt32(stream, static_cast<uint32_t>(s.size()));
+	
+	if (s.size() > 0)
+		stream.write(s.c_str(), s.size());
+}
+
+inline std::string deserializeString(std::istream& stream)
+{
+	ET_ASSERT(stream.good());
+
+	uint32_t size = deserializeUInt32(stream);
+	if (size > 0)
+	{
+		StringDataStorage value(size + 1, 0);
+		stream.read(value.binary(), size);
+		return std::string(value.binary());
 	}
 
-	inline std::string deserializeString(std::istream& stream)
-	{
-		ET_ASSERT(stream.good());
+	return emptyString;
+}
 
-		uint32_t size = deserializeUInt32(stream);
-		if (size > 0)
-		{
-			StringDataStorage value(size + 1, 0);
-			stream.read(value.binary(), size);
-			return std::string(value.binary());
-		}
+inline void serializeFloat(std::ostream& stream, float value)
+{
+	ET_ASSERT(stream.good());
 
-		return emptyString;
-	}
+	stream.write(reinterpret_cast<const char*>(&value), sizeof(value));
+}
 
-	inline void serializeFloat(std::ostream& stream, float value)
-	{
-		ET_ASSERT(stream.good());
+inline float deserializeFloat(std::istream& stream)
+{
+	ET_ASSERT(stream.good());
 
-		stream.write(reinterpret_cast<const char*>(&value), sizeof(value));
-	}
+	float value = 0;
+	stream.read(reinterpret_cast<char*>(&value), sizeof(value)); 
+	return value;
+}
 
-	inline float deserializeFloat(std::istream& stream)
-	{
-		ET_ASSERT(stream.good());
+template <typename T>
+inline void serializeVector(std::ostream& stream, const T& value)
+{
+	ET_ASSERT(stream.good());
 
-		float value = 0;
-		stream.read(reinterpret_cast<char*>(&value), sizeof(value)); 
-		return value;
-	}
+	stream.write(value.binary(), sizeof(value)); 
+}
 
-	template <typename T>
-	inline void serializeVector(std::ostream& stream, const T& value)
-	{
-		ET_ASSERT(stream.good());
+template <typename T>
+inline T deserializeVector(std::istream& stream)
+{
+	ET_ASSERT(stream.good());
 
-		stream.write(value.binary(), sizeof(value)); 
-	}
+	T value;
+	stream.read(value.binary(), sizeof(value)); 
+	return value;
+}
 
-	template <typename T>
-	inline T deserializeVector(std::istream& stream)
-	{
-		ET_ASSERT(stream.good());
+inline void serializeQuaternion(std::ostream& stream, const quaternion& value)
+{
+	ET_ASSERT(stream.good());
 
-		T value;
-		stream.read(value.binary(), sizeof(value)); 
-		return value;
-	}
+	serializeFloat(stream, value.scalar);
+	serializeVector(stream, value.vector);
+}
 
-	inline void serializeQuaternion(std::ostream& stream, const quaternion& value)
-	{
-		ET_ASSERT(stream.good());
+inline quaternion deserializeQuaternion(std::istream& stream)
+{
+	ET_ASSERT(stream.good());
 
-		serializeFloat(stream, value.scalar);
-		serializeVector(stream, value.vector);
-	}
+	quaternion result;
+	result.scalar = deserializeFloat(stream);
+	result.vector = deserializeVector<vec3>(stream);
+	return result;
+}
 
-	inline quaternion deserializeQuaternion(std::istream& stream)
-	{
-		ET_ASSERT(stream.good());
+inline void serializeMatrix(std::ostream& stream, const mat4& value)
+{
+	ET_ASSERT(stream.good());
 
-		quaternion result;
-		result.scalar = deserializeFloat(stream);
-		result.vector = deserializeVector<vec3>(stream);
-		return result;
-	}
+	stream.write(value.binary(), sizeof(value));
+}
 
-	inline void serializeMatrix(std::ostream& stream, const mat4& value)
-	{
-		ET_ASSERT(stream.good());
+inline mat4 deserializeMatrix(std::istream& stream)
+{
+	ET_ASSERT(stream.good());
 
-		stream.write(value.binary(), sizeof(value));
-	}
-
-	inline mat4 deserializeMatrix(std::istream& stream)
-	{
-		ET_ASSERT(stream.good());
-
-		mat4 value;
-		stream.read(value.binary(), sizeof(value));
-		return value;
-	}
-
+	mat4 value;
+	stream.read(value.binary(), sizeof(value));
+	return value;
+}
 }

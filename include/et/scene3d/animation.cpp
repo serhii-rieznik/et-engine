@@ -13,12 +13,10 @@ using namespace et::s3d;
 
 Animation::Animation()
 {
-	
 }
 
 Animation::Animation(Dictionary stream)
 {
-	deserialize(stream);
 }
 
 void Animation::addKeyFrame(float t, const vec3& tr, const quaternion& o, const vec3& s)
@@ -111,61 +109,6 @@ mat4 Animation::transformation(float time) const
 	result.setOrientation(o);
 	result.setScale(s);
 	return result.transform();
-}
-
-void Animation::serialize(Dictionary /* stream */) const
-{
-	/*
-	serializeInt32(stream, animationCurrentVersion);
-	serializeUInt32(stream, static_cast<uint32_t>(3 * sizeof(float) + 2 * sizeof(uint32_t) + _frames.size() * sizeof(Frame)));
-	serializeFloat(stream, _startTime);
-	serializeFloat(stream, _stopTime);
-	serializeFloat(stream, _frameRate);
-	serializeInt32(stream, _outOfRangeMode);
-	serializeUInt32(stream, _frames.size());
-	for (const auto& frame : _frames)
-	{
-		serializeFloat(stream, frame.time);
-		serializeVector(stream, frame.translation);
-		serializeQuaternion(stream, frame.orientation);
-		serializeVector(stream, frame.scale);
-	}
-	*/
-}
-
-void Animation::deserialize(Dictionary /* stream */)
-{
-	/*
-	_frames.clear();
-	
-	int version = deserializeInt32(stream);
-	if (version == animationVersion_1)
-	{
-		deserializeUInt32(stream);
-		
-		_startTime = deserializeFloat(stream);
-		_stopTime = deserializeFloat(stream);
-		_frameRate = deserializeFloat(stream);
-		_outOfRangeMode = static_cast<OutOfRangeMode>(deserializeInt32(stream));
-		
-		uint32_t numFrames = deserializeUInt32(stream);
-		
-		_frames.reserve(numFrames);
-		for (uint32_t i = 0; i < numFrames; ++i)
-		{
-			float t = deserializeFloat(stream);
-			vec3 tr = deserializeVector<vec3>(stream);
-			quaternion q = deserializeQuaternion(stream);
-			vec3 s = deserializeVector<vec3>(stream);
-			addKeyFrame(t, tr, q, s);
-		}
-	}
-	else
-	{
-		uint32_t dataSize = deserializeUInt32(stream);
-		stream.seekg(dataSize, std::ios_base::cur);
-	}
-	*/
 }
 
 void Animation::setOutOfRangeMode(OutOfRangeMode mode)

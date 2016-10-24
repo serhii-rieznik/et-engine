@@ -61,19 +61,6 @@ int Storage::indexOfVertexStorage(const VertexStorage::Pointer& vs)
 	return -1;
 }
 
-Dictionary Storage::serialize(const std::string& basePath)
-{
-	Dictionary stream;
-	ET_FAIL("Not implemented");
-	return stream;
-}
-
-void Storage::deserializeWithOptions(RenderContext* rc, Dictionary stream, SerializationHelper* helper,
-	ObjectsCache& cache, uint32_t options)
-{
-	ET_FAIL("Not implemented");
-}
-
 void Storage::flush()
 {
 	auto vi = _vertexStorages.begin();

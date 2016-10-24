@@ -14,7 +14,7 @@ namespace et
 const std::string defaultMaterials[static_cast<uint32_t>(DefaultMaterial::max)] =
 {
 	std::string("engine_data/materials/textured.json"),
-	std::string("engine_data/materials/phong.material"),
+	std::string("engine_data/materials/phong.json"),
 };
 
 void MaterialLibrary::init(RenderInterface* ren)

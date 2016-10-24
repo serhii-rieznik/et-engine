@@ -11,26 +11,26 @@
 
 namespace et
 {
-	namespace s3d
+namespace s3d
+{
+class ElementContainer : public BaseElement
+{
+public:
+	ET_DECLARE_POINTER(ElementContainer);
+	
+public:
+	ElementContainer(const std::string& name, BaseElement* parent) :
+		BaseElement(name, parent) { }
+
+	ElementType type() const override
+		{ return ElementType::Container; }
+
+	ElementContainer* duplicate() override
 	{
-		class ElementContainer : public BaseElement
-		{
-		public:
-			ET_DECLARE_POINTER(ElementContainer);
-			
-		public:
-			ElementContainer(const std::string& name, BaseElement* parent) :
-				BaseElement(name, parent) { }
-
-			ElementType type() const 
-				{ return ElementType::Container; }
-
-			ElementContainer* duplicate()
-			{
-				ElementContainer* result = etCreateObject<ElementContainer>(name(), parent());
-				duplicateChildrenToObject(result);
-				return result; 
-			}
-		};
+		ElementContainer* result = etCreateObject<ElementContainer>(name(), parent());
+		duplicateChildrenToObject(result);
+		return result; 
 	}
+};
+}
 }
