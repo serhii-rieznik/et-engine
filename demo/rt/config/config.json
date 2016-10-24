@@ -2,6 +2,6 @@
 	"reference" : "sponza.json",
 	"method" : "backward",
 	"threads" : 0,
-	"rays-per-pixel" : 8,
+	"rays-per-pixel" : 64,
 	"max-path-length" : 1024
 }
