@@ -30,13 +30,13 @@ MetalProgram::~MetalProgram()
 	ET_PIMPL_FINALIZE(MetalProgram)
 }
     
-void MetalProgram::build(const std::string& vertexSource, const std::string& fragmentSource)
+void MetalProgram::build(const std::string& source, const std::string& shouldBeEmpty)
 {
-	std::string fusedSource = "using namespace metal;\n" + vertexSource + "\n" + fragmentSource;
-	NSError* error = nil;
+	ET_ASSERT(shouldBeEmpty.empty());
 
-	id<MTLLibrary> lib = [_private->state.device newLibraryWithSource:[NSString stringWithUTF8String:fusedSource.c_str()]
-													 options:nil error:&error];
+	NSError* error = nil;
+	id<MTLLibrary> lib = [_private->state.device newLibraryWithSource:[NSString stringWithUTF8String:source.c_str()] options:nil error:&error];
+
 	if ((lib == nil) && (error != nil))
 	{
 		log::error("Failed to compile Metal shader:\n%s", [[error description] UTF8String]);
@@ -60,6 +60,11 @@ void MetalProgram::build(const std::string& vertexSource, const std::string& fra
 				_private->program.fragmentFunction = func;
 			}
 		}
+	}
+
+	if ((_private->program.vertexFunction == nil) || (_private->program.fragmentFunction == nil))
+	{
+		log::error("Shader source code does not contain all required functions:\n%s", source.c_str());
 	}
 
 	ET_ASSERT(_private->program.vertexFunction != nil);

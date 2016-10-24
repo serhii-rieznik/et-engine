@@ -9,7 +9,7 @@
 
 struct VSOutput {
 	float4 position [[position]];
-	float2 texCoord0;
+	float3 normal;
 };
 
 struct FSOutput {
@@ -29,7 +29,7 @@ vertex VSOutput vertexMain(VSInput in [[stage_in]],
 {
 	VSOutput out;
 	out.position = passVariables.viewProjection * objectVariables.worldTransform * float4(in.position, 1.0);
-	out.texCoord0 = in.texCoord0;
+	out.normal = in.normal;
 	return out;
 }
 
@@ -39,6 +39,6 @@ vertex VSOutput vertexMain(VSInput in [[stage_in]],
 fragment FSOutput fragmentMain(VSOutput in [[stage_in]])
 {
 	FSOutput out;
-	out.color0 = float4(in.texCoord0, 0.25f, 1.0f);
+	out.color0 = float4(0.5 + 0.5 * normalize(in.normal), 1.0);
 	return out;
 }

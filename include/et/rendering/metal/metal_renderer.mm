@@ -165,21 +165,17 @@ Program::Pointer MetalRenderer::createProgram(const std::string& source, const s
 PipelineState::Pointer MetalRenderer::createPipelineState(RenderPass::Pointer pass, Material::Pointer mtl,
     VertexStream::Pointer vs)
 {
-	// TODO : get from material
-	// = _private->cache.find(vs->vertexBuffer()->declaration(), vs, mtl->program(), mtl->depthState(), mtl->blendState(), mtl->cullMode(), TextureFormat::RGBA8);
+	PipelineState::Pointer result = _private->cache.find(vs->vertexBuffer()->declaration(), vs,
+		mtl->program(), mtl->depthState(), mtl->blendState(), mtl->cullMode(), TextureFormat::RGBA8);
 
-	PipelineState::Pointer result;
-	// if (result.invalid())
+	if (result.invalid())
 	{
 		result = MetalPipelineState::Pointer::create(this, _private->metal);
 		result->setRenderTargetFormat(TextureFormat::RGBA8);
 		result->setInputLayout(vs->vertexBuffer()->declaration());
-
-		/*/ TODO : get from material
 		result->setDepthState(mtl->depthState());
 		result->setBlendState(mtl->blendState());
 		result->setCullMode(mtl->cullMode());
-		// */
 		result->setProgram(mtl->program());
 		result->setVertexStream(vs);
 		result->build();

@@ -1,7 +1,7 @@
 {
 	"input-layout" : {
 		"position" : 3,
-		"texcoord0" : 2
+		"normal" : 3
 	},
 
 	"depth-state": {
@@ -16,5 +16,5 @@
 
 	"cull-mode" : "back",
 
-	"code" : "shaders/textured"
+	"code" : "shaders/normals"
 }

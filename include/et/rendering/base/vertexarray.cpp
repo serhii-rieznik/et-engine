@@ -12,7 +12,7 @@ namespace et
 {
 
 VertexArray::VertexArray(const VertexDeclaration& decl, uint32_t size) : _size(size),
-	_decl(decl.interleaved()), _smoothing(VertexAttributeUsage::Smoothing, DataType::Int, size)
+	_decl(decl.interleaved())
 {
 	for (uint32_t i = 0; i < decl.numElements(); ++i)
 	{
@@ -96,11 +96,8 @@ VertexDataChunk VertexArray::chunk(VertexAttributeUsage usage)
 void VertexArray::resize(uint32_t size)
 {
 	_size = size;
-	
 	for (auto& i :_chunks)
 		i->resize(_size);
-	
-	_smoothing->resize(_size);
 }
 
 void VertexArray::increase(uint32_t count)

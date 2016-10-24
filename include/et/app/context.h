@@ -7,6 +7,8 @@
 
 #pragma once
 
+#include <et/rendering/rendering.h>
+
 namespace et
 {
     struct ContextOptions
@@ -33,15 +35,6 @@ namespace et
         bool keepAspectOnResize = false;
         bool supportsHighResolution = true;
     };
-
-	enum class RenderingAPI : uint32_t
-	{
-		Metal,
-		Vulkan,
-		DX12,
-		
-		Count
-	};
     
     struct ApplicationParameters
     {

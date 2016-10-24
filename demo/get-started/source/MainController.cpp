@@ -59,7 +59,7 @@ void demo::MainController::createModels(et::RenderContext* rc)
 
 void demo::MainController::loadProgram(et::RenderContext* rc)
 {
-	auto materialFile = et::application().resolveFileName("engine_data/materials/normals.material");
+	auto materialFile = et::application().resolveFileName("engine_data/materials/normals.json");
 	_defaultMaterial = rc->renderer()->sharedMaterialLibrary().loadMaterial(materialFile);
 }
 

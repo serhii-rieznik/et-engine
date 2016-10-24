@@ -9,9 +9,16 @@
 
 namespace et
 {
-/*
- * Common declarations
- */
+
+enum class RenderingAPI : uint32_t
+{
+	Metal,
+	Vulkan,
+	DX12,
+
+	Count
+};
+
 enum class CompareFunction : uint32_t
 {
 	Never,
@@ -82,15 +89,10 @@ enum class VertexAttributeUsage : uint32_t
 	TexCoord1,
 	TexCoord2,
 	TexCoord3,
-	
-	Smoothing,
-	BuiltIn_InstanceId,
-	BuiltIn_InstanceIdExt,
+
 	BlendWeights,
 	BlendIndices,
-	
-	BuiltIn_VertexId,
-	
+
 	Unknown,
 	max
 };
@@ -447,12 +449,12 @@ enum class FramebufferOperation : uint32_t
 
 DataFormat dataTypeDataFormat(DataType t);
 
-VertexAttributeUsage stringToVertexAttributeUsage(const std::string& s, bool& builtIn);
-DataType stringToDataType(const std::string& s);
+VertexAttributeUsage stringToVertexAttributeUsage(const std::string& s);
+DataType stringToDataType(const std::string& s, RenderingAPI);
 DataFormat stringToDataFormat(const std::string&);
 
 std::string vertexAttributeUsageToString(VertexAttributeUsage);
-std::string dataTypeToString(DataType);
+std::string dataTypeToString(DataType, RenderingAPI);
 std::string dataFormatToString(DataFormat);
 
 std::string primitiveTypeToString(PrimitiveType);

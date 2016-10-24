@@ -20,7 +20,8 @@
 		"blend-configuration" : "disabled"
 	},
 
-	"render-priority" : 0,
 
 	"cull-mode" : "back"
+
+"render-priority" : 0,
 }

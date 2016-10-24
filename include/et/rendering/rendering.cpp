@@ -11,17 +11,19 @@ using namespace et;
 
 const std::string vertexAttributeUsageNames[VertexAttributeUsage_max] =
 {
-	"Vertex", "Normal", "Color", "Tangent", "Binormal",
-	"TexCoord0", "TexCoord1", "TexCoord2", "TexCoord3",
-	"SmoothingGroup", "gl_InstanceID", "gl_InstanceIDEXT",
-	"BlendWeights", "BlendIndices", "gl_VertexID"
+	"position", "normal", "color", "tangent", "binormal",
+	"texCoord0", "texCoord1", "texCoord2", "texCoord3",
+	"smoothingGroup" "blendWeights", "blendIndices"
 };
 
-const std::string dataTypeNames[DataType_max] =
+const std::string dataTypeNames[static_cast<uint32_t>(RenderingAPI::Count)][DataType_max] =
 {
-	"float", "vec2", "vec3", "vec4",
-	"mat3", "mat4",
-	"int", "ivec2", "ivec3", "ivec4"
+	// metal
+	{ "float", "float2", "float3", "float4", "float3x3", "float4x4", "int", "int2", "int3", "int4" },
+	// vulkan
+	{ "float", "vec2", "vec3", "vec4", "mat3", "mat4", "int", "ivec2", "ivec3", "ivec4" },
+	// dx12
+	{ "float", "vec2", "vec3", "vec4", "mat3", "mat4", "int", "ivec2", "ivec3", "ivec4" },
 };
 
 const std::string dataFormatNames[DataFormat_max] =
@@ -54,45 +56,34 @@ const std::string primitiveTypeNames[PrimitiveType_max] =
 
 const uint32_t vertexAttributeUsageMasks[VertexAttributeUsage_max] =
 {
-	0x0001, 0x0002, 0x0004, 0x0008, 0x0010,
-	0x0020, 0x0040, 0x0080, 0x0100,
-	0x0200, 0x0400, 0x0800, 0x1000, 0x2000,
-	0x0000
+	0x0001, 0x0002, 0x0004, 0x0008, 0x0010, 0x0020, 0x0040, 0x0080, 0x0100, 0x0200, 0x0400, 0x0000
 };
 
-VertexAttributeUsage et::stringToVertexAttributeUsage(const std::string& s, bool& builtIn)
+VertexAttributeUsage et::stringToVertexAttributeUsage(const std::string& s)
 {
+	std::string lcS = lowercase(s);
+
 	VertexAttributeUsage result = VertexAttributeUsage::Unknown;
-	
-	if (s.empty())
-		return result;
-	
 	for (uint32_t i = 0, e = VertexAttributeUsage_max; i < e; ++i)
 	{
-		if (s == vertexAttributeUsageNames[i])
+		if (lcS == lowercase(vertexAttributeUsageNames[i]))
 		{
 			result = static_cast<VertexAttributeUsage>(i);
 			break;
 		}
 	}
-	
 	if (result == VertexAttributeUsage::Unknown)
 	{
 		log::warning("Unknown vertex attribute usage: %s", s.c_str());
 	}
-	else
-	{
-		builtIn = (s.find("gl_") == 0);
-	}
-	
 	return result;
 }
 
-DataType et::stringToDataType(const std::string& s)
+DataType et::stringToDataType(const std::string& s, RenderingAPI api)
 {
 	for (uint32_t i = 0, e = DataType_max; i < e; ++i)
 	{
-		if (s == dataTypeNames[i])
+		if (s == dataTypeNames[static_cast<uint32_t>(api)][i])
 			return static_cast<DataType>(i);
 	}
 	
@@ -140,9 +131,9 @@ std::string et::vertexAttributeUsageToString(VertexAttributeUsage va)
 	intToStr(static_cast<uint32_t>(va));
 }
 
-std::string et::dataTypeToString(DataType vat)
+std::string et::dataTypeToString(DataType vat, RenderingAPI api)
 {
-	return (vat < DataType::max) ? dataTypeNames[static_cast<uint32_t>(vat)] :
+	return (vat < DataType::max) ? dataTypeNames[static_cast<uint32_t>(api)][static_cast<uint32_t>(vat)] :
 	intToStr(static_cast<uint32_t>(vat));
 }
 

@@ -3,23 +3,19 @@
 #define MaterialVariablesBufferIndex    5
 #define PassVariablesBufferIndex        6
 
-#define PositionAttribute               0
-#define NormalAttribute                 1
-#define Color                           2
-#define Tangent                         3
-#define Binormal                        4
-
-#define TexCoord0                       5
-#define TexCoord1                       6
-#define TexCoord2                       7
-#define TexCoord3                       8
-
 #define PI                              3.1415926536
 #define HALF_PI                         1.5707963268
 #define INV_PI                          0.3183098862
 
-#define FLOAT_IMPL(N)                   float##N
-#define FLOAT(N)                        FLOAT_IMPL(N)
+using namespace metal;
 
-#define PACKED_FLOAT_IMPL(N)            packed_float##N
-#define PACKED_FLOAT(N)                 PACKED_FLOAT_IMPL(N)
+struct PassVariables
+{
+	float4x4 viewProjection;
+	float4x4 projection;
+	float4x4 view;
+	float4 cameraPosition;
+	float4 cameraDirection;
+	float4 cameraUp;
+	float4 lightPosition;
+};

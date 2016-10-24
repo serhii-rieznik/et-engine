@@ -56,7 +56,7 @@ public:
 	ET_DECLARE_POINTER(Material);
 
 	template <class T>
-	struct MaterialOptionalObject
+	struct OptionalObject
 	{
 		T value = T(0);
 		bool assigned = false;
@@ -74,7 +74,7 @@ public:
 		}
 	};
 
-	struct MaterialOptionalValue
+	struct OptionalValue
 	{
 		DataType storedType = DataType::max;
 		char data[sizeof(vec4)] { };
@@ -110,9 +110,9 @@ public:
 		}
 	};
 
-	using Textures = std::array<MaterialOptionalObject<Texture::Pointer>, MaterialTexture_Max>;
+	using Textures = std::array<OptionalObject<Texture::Pointer>, MaterialTexture_Max>;
 	using Samplers = std::array<Sampler::Pointer, MaterialParameter_Max>;
-	using Parameters = std::array<MaterialOptionalValue, MaterialParameter_Max>;
+	using Parameters = std::array<OptionalValue, MaterialParameter_Max>;
 
 public:
 	Material(RenderInterface*);
@@ -128,6 +128,15 @@ public:
 	float getFloat(MaterialParameter) const;
 
 	Program::Pointer program();
+	
+	const DepthState& depthState() const
+		{ return _depthState; }
+
+	const BlendState& blendState() const
+		{ return _blendState; };
+
+	CullMode cullMode() const
+		{ return _cullMode; }
 
 	uint64_t sortingKey() const;
 
@@ -139,6 +148,10 @@ private:
 	template <class T>
 	T getParameter(MaterialParameter) const;
 
+	void loadInputLayout(Dictionary);
+	void loadCode(const std::string&, const std::string& baseFolder);
+	void generateInputLayout(std::string& code);
+
 private: // overrided by instanaces
 	Textures _textures;
 	Parameters _params;
@@ -148,6 +161,9 @@ private: // permanent private data
 	Samplers _samplers;
 	Program::Pointer _program;
 	VertexDeclaration _inputLayout;
+	DepthState _depthState;
+	BlendState _blendState;
+	CullMode _cullMode = CullMode::Disabled;
 };
 
 class MaterialInstance : public Material

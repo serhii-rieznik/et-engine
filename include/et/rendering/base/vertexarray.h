@@ -27,12 +27,6 @@ namespace et
 		VertexArray() = default;
 		VertexArray(const VertexDeclaration& decl, uint32_t size);
 		
-		VertexDataChunk& smoothing()
-			{ return _smoothing; }
-
-		const VertexDataChunk& smoothing() const
-			{ return _smoothing; }
-
 		VertexDataChunk chunk(VertexAttributeUsage usage);
 		
 		const VertexDataChunk chunk(VertexAttributeUsage usage) const;
@@ -58,6 +52,5 @@ namespace et
 		uint32_t _size = 0;
 		VertexDeclaration _decl = VertexDeclaration(true);
 		VertexDataChunkList _chunks;
-		VertexDataChunk _smoothing = VertexDataChunk(VertexAttributeUsage::Smoothing, DataType::Int, 0);
 	};
 }
