@@ -43,7 +43,10 @@ void init(RenderContext* rc)
 	auto ib = rc->renderer()->createIndexBuffer("rh_local::ib", ia, BufferDrawType::Static);
 	rh_local::default2DPlane = VertexStream::Pointer::create(vb, ib);
 
-	rh_local::texturedMaterial = rc->renderer()->sharedMaterialLibrary().loadDefaultMaterial(DefaultMaterial::Textured);
+	rh_local::texturedMaterial = rc->renderer()->sharedMaterialLibrary().loadDefaultMaterial(DefaultMaterial::Textured2D);
+
+	Sampler::Description defaultSampler;
+	rh_local::texturedMaterial->setSampler(MaterialTexture::Albedo, rc->renderer()->createSampler(defaultSampler));
 }
 
 void release()

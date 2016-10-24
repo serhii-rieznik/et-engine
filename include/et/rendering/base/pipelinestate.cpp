@@ -12,30 +12,24 @@ namespace et
 
 void PipelineState::printReflection()
 {
-	if (!reflection.passVariables.empty())
-	{
-		log::info("Pass variables: { ");
-		for (const auto& pv : reflection.passVariables)
-			log::info("\t%s : %u", pv.first.c_str(), pv.second.offset);
-		log::info("}");
-	}
+	std::map<uint32_t, String> sortedFields;
+	auto printVariables = [&sortedFields](const char* tag, const PipelineState::VariableMap& input) {
+		if (input.empty()) return;
 
-	if (!reflection.materialVariables.empty())
-	{
-		log::info("Material variables: { ");
-		for (const auto& pv : reflection.materialVariables)
-			log::info("\t%s : %u", pv.first.c_str(), pv.second.offset);
-		log::info("}");
-	}
+		sortedFields.clear();
+		for (const auto& pv : input)
+			sortedFields.emplace(pv.second.offset, pv.first);
 
-	if (!reflection.objectVariables.empty())
-	{
-		log::info("Object variables: { ");
-		for (const auto& pv : reflection.objectVariables)
-			log::info("\t%s : %u", pv.first.c_str(), pv.second.offset);
+		log::info("%s: { ", tag);
+		for (const auto& pv : sortedFields)
+			log::info("\t%s : %u", pv.second.c_str(), pv.first);
 		log::info("}");
-	}
+	};
 
+	printVariables("Pass variables", reflection.passVariables);
+	printVariables("Material variables", reflection.materialVariables);
+	printVariables("Object variables", reflection.objectVariables);
+	
 	if (!reflection.vertexTextures.empty())
 	{
 		log::info("Vertex textures: { ");

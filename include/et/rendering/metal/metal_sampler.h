@@ -22,7 +22,7 @@ public:
 	ET_DECLARE_POINTER(MetalSampler);
 
 public:
-	MetalSampler(MetalState&);
+	MetalSampler(MetalState&, const Description&);
 	~MetalSampler();
 
 	const MetalNativeSampler& nativeSampler() const;

@@ -27,6 +27,7 @@ class MetalRendererPrivate
 public:
 	MetalState metal;
 	PipelineStateCache cache;
+	Map<uint64_t, Sampler::Pointer> samplersCache;
 };
 
 MetalRenderer::MetalRenderer(RenderContext* rc)
@@ -81,13 +82,12 @@ void MetalRenderer::begin()
 		(mainTexture.width != mtl.defaultDepthBuffer.width) ||
 		(mainTexture.height != mtl.defaultDepthBuffer.height))
 	{
-		MTLTextureDescriptor* depthDesc = [MTLTextureDescriptor
-										   texture2DDescriptorWithPixelFormat:MTLPixelFormatDepth32Float
-										   width:mainTexture.width height:mainTexture.height mipmapped:NO];
+		MTLTextureDescriptor* depthDesc =
+			[MTLTextureDescriptor texture2DDescriptorWithPixelFormat:MTLPixelFormatDepth32Float
+			width:mainTexture.width height:mainTexture.height mipmapped:NO];
 		depthDesc.usage = MTLTextureUsageRenderTarget;
 		depthDesc.storageMode = MTLStorageModePrivate;
 		mtl.defaultDepthBuffer = [mtl.device newTextureWithDescriptor:depthDesc];
-		ET_OBJC_RELEASE(depthDesc);
 	}
 
 	mtl.mainCommandBuffer = [mtl.queue commandBuffer];
@@ -107,14 +107,12 @@ void MetalRenderer::present()
 RenderPass::Pointer MetalRenderer::allocateRenderPass(const RenderPass::ConstructionInfo& info)
 {
 	MetalRenderPass::Pointer result = MetalRenderPass::Pointer::create(this, _private->metal, info);
-
 	return result;
 }
 
 void MetalRenderer::submitRenderPass(RenderPass::Pointer in_pass)
 {
-	MetalRenderPass::Pointer pass = in_pass;
-	pass->endEncoding();
+	
 }
 
 /*
@@ -151,8 +149,7 @@ Texture::Pointer MetalRenderer::createTexture(TextureDescription::Pointer desc)
 /*
  * Programs
  */
-Program::Pointer MetalRenderer::createProgram(const std::string& source, const std::string&,
-    const StringList& defines, const std::string& baseFolder)
+Program::Pointer MetalRenderer::createProgram(const std::string& source, const std::string&)
 {
     MetalProgram::Pointer program = MetalProgram::Pointer::create(_private->metal);
 	program->build(source);
@@ -189,9 +186,15 @@ PipelineState::Pointer MetalRenderer::createPipelineState(RenderPass::Pointer pa
 /*
  * Sampler
  */
-Sampler::Pointer MetalRenderer::createSampler()
+Sampler::Pointer MetalRenderer::createSampler(const Sampler::Description& desc)
 {
-	return MetalSampler::Pointer::create(_private->metal);
+	auto i = _private->samplersCache.find(desc.hash);
+	if (i != _private->samplersCache.end())
+		return i->second;
+
+	MetalSampler::Pointer smp = MetalSampler::Pointer::create(_private->metal, desc);
+	_private->samplersCache.emplace(desc.hash, smp);
+	return smp;
 }
 
 }

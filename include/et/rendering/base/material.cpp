@@ -13,6 +13,7 @@ namespace et
 
 const std::string kCode = "code";
 const std::string kInputLayout = "input-layout";
+const std::string kOptions = "options";
 const std::string kBuiltInInput = "%built-in-input%";
 
 /*
@@ -30,12 +31,23 @@ uint64_t Material::sortingKey() const
 
 void Material::setTexture(MaterialTexture t, Texture::Pointer tex)
 {
-	_textures[static_cast<size_t>(t)] = tex;
+	Textures::value_type& entry = _textures[static_cast<uint32_t>(t)];
+	entry.object = tex;
+	entry.index = static_cast<uint32_t>(t);
+	entry.name = materialTextureToString(t);
+}
+
+void Material::setSampler(MaterialTexture t, Sampler::Pointer smp)
+{
+	Samplers::value_type& entry = _samplers[static_cast<uint32_t>(t)];
+	entry.object = smp;
+	entry.index = static_cast<uint32_t>(t);
+	entry.name = materialSamplerToString(t);
 }
 
 void Material::setVector(MaterialParameter p, const vec4& v)
 {
-	_params[static_cast<size_t>(p)] = v;
+	_params[static_cast<uint32_t>(p)] = v;
 }
 
 vec4 Material::getVector(MaterialParameter p) const
@@ -45,12 +57,22 @@ vec4 Material::getVector(MaterialParameter p) const
 
 void Material::setFloat(MaterialParameter p, float f)
 {
-	_params[static_cast<size_t>(p)] = f;
+	_params[static_cast<uint32_t>(p)] = f;
 }
 
 float Material::getFloat(MaterialParameter p) const
 {
 	return getParameter<float>(p);
+}
+
+Texture::Pointer Material::texture(MaterialTexture t)
+{
+	return _textures[static_cast<uint32_t>(t)].object;
+}
+
+Sampler::Pointer Material::sampler(MaterialTexture t)
+{
+	return _samplers[static_cast<uint32_t>(t)].object;
 }
 
 void Material::loadFromJson(const std::string& source, const std::string& baseFolder)
@@ -74,7 +96,7 @@ void Material::loadFromJson(const std::string& source, const std::string& baseFo
 
 	loadInputLayout(obj.dictionaryForKey(kInputLayout));
 	
-	loadCode(obj.stringForKey(kCode)->content, baseFolder);
+	loadCode(obj.stringForKey(kCode)->content, baseFolder, obj.dictionaryForKey(kOptions));
 }
 
 void Material::loadInputLayout(Dictionary layout)
@@ -109,7 +131,6 @@ void Material::generateInputLayout(std::string& source)
 	std::string layout;
 	layout.reserve(1024);
 
-
 	if (_renderer->api() == RenderingAPI::Metal)
 	{
 		layout.append("struct VSInput {\n");
@@ -132,7 +153,7 @@ void Material::generateInputLayout(std::string& source)
 	source.replace(b, b + kBuiltInInput.length(), layout);
 }
 
-void Material::loadCode(const std::string& codeString, const std::string& baseFolder)
+void Material::loadCode(const std::string& codeString, const std::string& baseFolder, Dictionary defines)
 {
 	std::string codeFileName;
 
@@ -150,11 +171,33 @@ void Material::loadCode(const std::string& codeString, const std::string& baseFo
 	std::string programSource;
 	if (fileExists(codeFileName))
 	{
-		StringList defines;
+		StringList allDefines;
+		for (const auto& kv : defines->content)
+		{
+			char buffer[1024] = { };
+			if (kv.second->variantClass() == VariantClass::Integer)
+			{
+				sprintf(buffer, "#define %s %llu", kv.first.c_str(), IntegerValue(kv.second)->content);
+			}
+			else if (kv.second->variantClass() == VariantClass::Float)
+			{
+				sprintf(buffer, "#define %s %0.7f", kv.first.c_str(), FloatValue(kv.second)->content);
+			}
+			else if (kv.second->variantClass() == VariantClass::String)
+			{
+				sprintf(buffer, "#define %s %s", kv.first.c_str(), StringValue(kv.second)->content.c_str());
+			}
+			else
+			{
+				ET_FAIL("Unsupported type in defines");
+			}
+			allDefines.emplace_back(buffer);
+		}
+
 		programSource = loadTextFile(codeFileName);
-		parseShaderSource(programSource, baseFolder, defines);
+		parseShaderSource(programSource, baseFolder, allDefines);
 		generateInputLayout(programSource);
-		_program = _renderer->createProgram(programSource, emptyString, defines, baseFolder);
+		_program = _renderer->createProgram(programSource, emptyString);
 	}
 }
 
@@ -162,6 +205,7 @@ MaterialInstancePointer Material::instance()
 {
 	MaterialInstance::Pointer result = MaterialInstance::Pointer::create(Material::Pointer(this));
 	result->_textures = _textures;
+	result->_samplers = _samplers;
 	result->_params = _params;
 	return result;
 }
@@ -187,22 +231,50 @@ Material::Pointer MaterialInstance::base()
 /*
  * Service
  */
-#define MTL_CASE(X) case MaterialParameter::X: return #X;
 std::string materialParameterToString(MaterialParameter p)
 {
-	switch (p)
-	{
-		MTL_CASE(AmbientColor)
-		MTL_CASE(DiffuseColor)
-		MTL_CASE(SpecularColor)
-		MTL_CASE(EmissiveColor)
-		MTL_CASE(Roughness)
-		MTL_CASE(Opacity)
-		MTL_CASE(NormalTextureScale)
-		default:
-			ET_FAIL_FMT("Invalid or unknown material parameter provided: %u", static_cast<uint32_t>(p));
-	}
+	ET_ASSERT(p < MaterialParameter::Count);
+	static const std::array<std::string, MaterialParametersCount> names =
+	{{
+		"ambientColor",
+		"diffuseColor",
+		"specularColor",
+		"emissiveColor",
+		"roughness",
+		"opacity",
+		"normalTextureScale",
+	}};
+	return names[static_cast<uint32_t>(p)];
 }
-#undef MTL_CASE
+
+const std::string& materialTextureToString(MaterialTexture t)
+{
+	ET_ASSERT(t < MaterialTexture::Count);
+	static const std::array<std::string, MaterialTexturesCount> names =
+	{{
+		"albedoTexture",
+		"reflectanceTexture",
+		"roughnessTexture",
+		"emissiveTexture",
+		"opacityTexture",
+		"normalTexture",
+	}};
+	return names[static_cast<uint32_t>(t)];
+}
+
+const std::string& materialSamplerToString(MaterialTexture t)
+{
+	ET_ASSERT(t < MaterialTexture::Count);
+	static const std::array<std::string, MaterialTexturesCount> names =
+	{{
+		"albedoSampler",
+		"reflectanceSampler",
+		"roughnessSampler",
+		"emissiveSampler",
+		"opacitySampler",
+		"normalSampler",
+	}};
+	return names[static_cast<uint32_t>(t)];
+}
 
 }

@@ -14,10 +14,16 @@ namespace et
 
 enum class DefaultMaterial : uint32_t
 {
+	Textured2D,
 	Textured,
 	Phong,
 
-	max
+	Count
+};
+
+enum : uint32_t
+{
+	DefaultMaterialCount = static_cast<uint32_t>(DefaultMaterial::Count)
 };
 
 class RenderInterface;
@@ -33,6 +39,8 @@ public:
 
 private:
 	RenderInterface* _renderer = nullptr;
+	Map<std::string, Material::Pointer> _cache;
+	std::array<Material::Pointer, DefaultMaterialCount> _defaultMaterials;
 };
 
 }

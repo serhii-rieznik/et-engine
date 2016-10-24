@@ -22,6 +22,7 @@ public:
 	MetalNativeEncoder encoder;
     MetalRenderer* renderer = nullptr;
 	MetalState& state;
+	MTLRenderPassDescriptor* descriptor = nil;
 
 	MetalRenderPassPrivate(MetalState& s)
 		: state(s) { }
@@ -33,41 +34,47 @@ MetalRenderPass::MetalRenderPass(MetalRenderer* renderer, MetalState& state,
 	ET_PIMPL_INIT(MetalRenderPass, state)
     _private->renderer = renderer;
 
-	ET_ASSERT(state.mainDrawable != nil);
-
-	MTLRenderPassDescriptor* pass = [MTLRenderPassDescriptor renderPassDescriptor];
-
-	pass.colorAttachments[0].texture = state.mainDrawable.texture;
-	pass.colorAttachments[0].loadAction = MTLLoadActionClear;
-	pass.colorAttachments[0].storeAction = MTLStoreActionDontCare;
-	pass.colorAttachments[0].clearColor = MTLClearColorMake(info.target.clearColor.x, info.target.clearColor.y, info.target.clearColor.z, info.target.clearColor.w);
-
-	pass.depthAttachment.texture = state.defaultDepthBuffer;
-	pass.depthAttachment.loadAction = MTLLoadActionClear;
-	pass.depthAttachment.storeAction = MTLStoreActionDontCare;
-	pass.depthAttachment.clearDepth = info.target.clearDepth;
-	
-	_private->encoder.encoder = [state.mainCommandBuffer renderCommandEncoderWithDescriptor:pass];
+	_private->descriptor = ET_OBJC_RETAIN([MTLRenderPassDescriptor renderPassDescriptor]);
+	_private->descriptor.colorAttachments[0].loadAction = MTLLoadActionClear;
+	_private->descriptor.colorAttachments[0].storeAction = MTLStoreActionDontCare;
+	_private->descriptor.colorAttachments[0].clearColor = MTLClearColorMake(info.target.clearColor.x, info.target.clearColor.y, info.target.clearColor.z, info.target.clearColor.w);
+	_private->descriptor.depthAttachment.loadAction = MTLLoadActionClear;
+	_private->descriptor.depthAttachment.storeAction = MTLStoreActionDontCare;
+	_private->descriptor.depthAttachment.clearDepth = info.target.clearDepth;
 }
 
 MetalRenderPass::~MetalRenderPass()
 {
+	ET_OBJC_RELEASE(_private->descriptor);
 	ET_PIMPL_FINALIZE(MetalRenderPass)
+}
+
+void MetalRenderPass::begin()
+{
+	ET_ASSERT(_private->state.mainDrawable != nil);
+
+	_private->descriptor.colorAttachments[0].texture = _private->state.mainDrawable.texture;
+	_private->descriptor.depthAttachment.texture = _private->state.defaultDepthBuffer;
+	_private->encoder.encoder = [_private->state.mainCommandBuffer renderCommandEncoderWithDescriptor:_private->descriptor];
 }
 
 void MetalRenderPass::pushRenderBatch(RenderBatch::Pointer batch)
 {
 	MaterialInstance::Pointer material = batch->material();
 
-	SharedVariables& sharedVariables = _private->renderer->sharedVariables();
-	sharedVariables.loadCameraProperties(info().camera);
-	sharedVariables.loadLightProperties(info().light);
-
-    MetalPipelineState::Pointer ps = _private->renderer->createPipelineState(RenderPass::Pointer(this),
-		batch->material()->base(), batch->vertexStream());
+	MetalPipelineState::Pointer ps = _private->renderer->createPipelineState(RenderPass::Pointer(this), material->base(), batch->vertexStream());
 	ps->setObjectVariable(PipelineState::kWorldTransform(), batch->transformation());
 	ps->bind(_private->encoder, material);
 
+	SharedVariables& sharedVariables = _private->renderer->sharedVariables();
+	if (info().camera.valid())
+	{
+		sharedVariables.loadCameraProperties(info().camera);
+	}
+	if (info().light.valid())
+	{
+		sharedVariables.loadLightProperties(info().light);
+	}
 	MetalDataBuffer::Pointer sv = sharedVariables.buffer();
 	[_private->encoder.encoder setVertexBuffer:sv->nativeBuffer().buffer() offset:0 atIndex:PassVariablesBufferIndex];
 
@@ -80,7 +87,7 @@ void MetalRenderPass::pushRenderBatch(RenderBatch::Pointer batch)
 		indexBuffer:ib->nativeBuffer().buffer() indexBufferOffset:ib->byteOffsetForIndex(batch->firstIndex())];
 }
 
-void MetalRenderPass::endEncoding()
+void MetalRenderPass::end()
 {
 	_private->renderer->sharedVariables().flushBuffer();
 	_private->renderer->sharedConstBuffer().flush();

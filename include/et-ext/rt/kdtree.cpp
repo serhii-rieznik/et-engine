@@ -6,6 +6,7 @@
  */
 
 #include <et-ext/rt/kdtree.h>
+#include <et/core/tools.h>
 
 namespace et
 {
@@ -50,13 +51,13 @@ rt::KDTree::Node KDTree::buildRootNode()
 	float4 halfSize = (maxVertex - minVertex) * float4(0.5f);
     _sceneBoundingBox = BoundingBox(center, halfSize);
 	_indices.reserve(10 * _triangles.size());
-    _boundingBoxes.push_back(_sceneBoundingBox);
+    _boundingBoxes.emplace_back(_sceneBoundingBox);
 	
 	KDTree::Node result;
 	result.endIndex = static_cast<index>(_triangles.size());
 	for (index i = 0; i < result.endIndex; ++i)
 	{
-		_indices.push_back(i);
+		_indices.emplace_back(i);
 	}
 	return result;
 }
@@ -70,9 +71,12 @@ void KDTree::build(const TriangleList& triangles, size_t maxDepth)
 	
 	_maxDepth = std::min(DepthLimit, maxDepth);
 	_nodes.reserve(maxDepth * maxDepth);
-	_nodes.push_back(buildRootNode());
-	
+	_nodes.emplace_back(buildRootNode());
+
+	uint64_t t0 = queryContiniousTimeInMilliSeconds();
 	splitNodeUsingSortedArray(0, 0);
+	uint64_t t1 = queryContiniousTimeInMilliSeconds();
+	log::info("kD-tree building time: %llu", t1 - t0);
 }
 
 void KDTree::buildSplitBoxesUsingAxisAndPosition(size_t nodeIndex, int axis, float_type position)
@@ -125,11 +129,13 @@ void KDTree::distributeTrianglesToChildren(size_t nodeIndex)
 	
 	auto& node = _nodes.at(nodeIndex);
 
-	Vector<index> rightIndexes;
-	rightIndexes.reserve(node.numIndexes());
+	static Vector<index> rightIndexes;
+	rightIndexes.reserve(32 * 1024);
+	rightIndexes.clear();
 	
-	Vector<index> leftIndexes;
-	leftIndexes.reserve(node.numIndexes());
+	static Vector<index> leftIndexes;
+	leftIndexes.reserve(32 * 1024);
+	leftIndexes.clear();
 
 	for (index i = node.startIndex, e = node.startIndex + node.numIndexes(); i < e; ++i)
 	{
@@ -140,19 +146,18 @@ void KDTree::distributeTrianglesToChildren(size_t nodeIndex)
 		
 		if (minVertex[node.axis] > node.distance)
 		{
-			rightIndexes.push_back(triIndex);
+			rightIndexes.emplace_back(triIndex);
 		}
 		else if (maxVertex[node.axis] < node.distance)
 		{
-			leftIndexes.push_back(triIndex);
+			leftIndexes.emplace_back(triIndex);
 		}
 		else
 		{
-			rightIndexes.push_back(triIndex);
-			leftIndexes.push_back(triIndex);
+			rightIndexes.emplace_back(triIndex);
+			leftIndexes.emplace_back(triIndex);
 		}
 	}
-
 
 	auto& left = _nodes.at(node.children[0]);
 	left.startIndex = static_cast<index>(_indices.size());
@@ -173,7 +178,7 @@ void KDTree::cleanUp()
 
 void KDTree::splitNodeUsingSortedArray(size_t nodeIndex, size_t depth)
 {
-	auto numTriangles = _nodes[nodeIndex].numIndexes();
+	auto numTriangles = _nodes.at(nodeIndex).numIndexes();
 	if ((depth > _maxDepth) || (numTriangles < MinTrianglesToSubdivide))
 	{
 		return;
@@ -220,15 +225,18 @@ void KDTree::splitNodeUsingSortedArray(size_t nodeIndex, size_t depth)
 	
 	const auto& localNode = _nodes.at(nodeIndex);
 
-	Vector<float3> minPoints;
-	Vector<float3> maxPoints;
-	minPoints.reserve(localNode.numIndexes());
-	maxPoints.reserve(localNode.numIndexes());
+	static Vector<float3> minPoints;
+	static Vector<float3> maxPoints;
+	minPoints.reserve(32 * 1024);
+	maxPoints.reserve(32 * 1024);
+
+	minPoints.clear();
+	maxPoints.clear();
 	for (index i = localNode.startIndex, e = localNode.endIndex; i < e; ++i)
 	{
 		const auto& tri = _triangles.at(_indices[i]);
-		minPoints.push_back(tri.minVertex().xyz() - float3(Constants::epsilon));
-		maxPoints.push_back(tri.maxVertex().xyz() + float3(Constants::epsilon));
+		minPoints.emplace_back(tri.minVertex().xyz() - float3(Constants::epsilon));
+		maxPoints.emplace_back(tri.maxVertex().xyz() + float3(Constants::epsilon));
 	}
 	
 	float3 splitPosition = minPoints.at(minPoints.size() / 2);
@@ -236,15 +244,16 @@ void KDTree::splitNodeUsingSortedArray(size_t nodeIndex, size_t depth)
 	
 	bool splitFound = false;
 	int numElements = static_cast<int>(minPoints.size());
-	
-	for (int currentAxis = 0; currentAxis < 3; ++currentAxis)
+
+	static int currentAxis = 0;
+	for (currentAxis = 0; currentAxis < 3; ++currentAxis)
 	{
-		std::sort(minPoints.begin(), minPoints.end(), [&currentAxis](const vec3& l, const vec3& r)
+		std::sort(minPoints.begin(), minPoints.end(), [](const vec3& l, const vec3& r)
 			{ return l[currentAxis] < r[currentAxis]; });
 		
-		std::sort(maxPoints.begin(), maxPoints.end(), [&currentAxis](const vec3& l, const vec3& r)
+		std::sort(maxPoints.begin(), maxPoints.end(), [](const vec3& l, const vec3& r)
 			{ return l[currentAxis] < r[currentAxis]; });
-		
+
 		for (int i = 1; i + 1 < numElements; ++i)
 		{
 			float_type costMin = estimateCostAtSplit(minPoints.at(i)[currentAxis], i, numElements - i, currentAxis);

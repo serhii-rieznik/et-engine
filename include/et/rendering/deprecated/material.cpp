@@ -38,9 +38,7 @@ void Material::loadFromJson(const std::string& jsonString, const std::string& ba
 	auto name = obj.stringForKey(kName)->content;
 	auto cullMode = obj.stringForKey(kCullMode)->content;
 	auto definesArray = obj.arrayForKey(kDefines);
-
-
-
+	
 	setName(name);
 	setOrigin(baseFolder);
 

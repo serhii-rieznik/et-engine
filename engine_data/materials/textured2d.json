@@ -5,20 +5,16 @@
 	},
 
 	"depth-state": {
-		"depth-function": "less",
-		"depth-test": true,
-		"depth-write": true
+		"depth-function": "always",
+		"depth-test": false,
+		"depth-write": false
 	},
 
 	"blend-state": {
 		"blend-configuration" : "disabled"
 	},
 
-	"options" : {
-		"TRANSFORM_INPUT_POSITION" : 1
-	},
-
-	"cull-mode" : "back",
+	"cull-mode" : "disabled",
 
 	"code" : "shaders/textured"
 }

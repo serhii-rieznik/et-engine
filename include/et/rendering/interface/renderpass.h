@@ -32,8 +32,8 @@ namespace et
 		struct ConstructionInfo
 		{
 			Target target;
-			Camera camera;
-			Camera light;
+			Camera::Pointer camera;
+			Camera::Pointer light;
 		};
 
 	public:
@@ -41,8 +41,10 @@ namespace et
 			_info(info) { }
 
 		virtual ~RenderPass() = default;
-		
+
+		virtual void begin() = 0;
 		virtual void pushRenderBatch(RenderBatch::Pointer) = 0;
+		virtual void end() = 0;
 
         const ConstructionInfo& info() const
             { return _info; }

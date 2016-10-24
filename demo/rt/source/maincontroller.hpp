@@ -1,6 +1,8 @@
 #pragma once
 
 #include <et/app/application.h>
+#include <et/rendering/interface/renderer.h>
+
 #include <et/camera/camera.h>
 #include <et/input/gestures.h>
 #include <et-ext/rt/raytrace.h>
@@ -21,6 +23,8 @@ namespace demo
 	private:
         et::Dictionary _options;
         et::RenderContext* _rc = nullptr;
+		et::RenderPass::Pointer _mainPass;
+		et::RenderBatch::Pointer _fullscreenQuad;
 		et::Raytrace _rt;
 		et::Texture::Pointer _texture;
 		et::DataStorage<et::vec4> _textureData;

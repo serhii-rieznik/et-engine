@@ -73,11 +73,7 @@ public:
 	/*
 	 * Programs
 	 */
-	virtual Program::Pointer createProgram(const std::string& vs, const std::string& fs,
-		const StringList& defines, const std::string& baseFolder) = 0;
-	
-	inline Program::Pointer createProgram(const std::string& vs, const std::string& fs)
-		{ return createProgram(vs, fs, emptyStringList(), emptyString); }
+	virtual Program::Pointer createProgram(const std::string& vs, const std::string& fs) = 0;
 
 	/*
 	 * Pipeline state
@@ -87,7 +83,7 @@ public:
 	/*
 	 * Sampler
 	 */
-	virtual Sampler::Pointer createSampler() = 0;
+	virtual Sampler::Pointer createSampler(const Sampler::Description&) = 0;
 
 private:
 	RenderContext* _rc = nullptr;

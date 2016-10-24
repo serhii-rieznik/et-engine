@@ -22,10 +22,10 @@ public:
 public:
 	MetalRenderPass(MetalRenderer*, MetalState&, const RenderPass::ConstructionInfo&);
 	~MetalRenderPass();
-	
-	void pushRenderBatch(RenderBatch::Pointer) override;
 
-	void endEncoding();
+	void begin() override;
+	void pushRenderBatch(RenderBatch::Pointer) override;
+	void end() override;
 
 private:
 	ET_DECLARE_PIMPL(MetalRenderPass, 256);

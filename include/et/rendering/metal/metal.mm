@@ -158,5 +158,39 @@ DataType mtlDataTypeToDataType(MTLDataType value)
 	return _map.at(value);
 }
 
+MTLSamplerAddressMode wrapModeToAddressMode(TextureWrap value)
+{
+	static const std::map<TextureWrap, MTLSamplerAddressMode> _map =
+	{
+		{ TextureWrap::Repeat, MTLSamplerAddressModeRepeat },
+		{ TextureWrap::ClampToEdge, MTLSamplerAddressModeClampToEdge },
+		{ TextureWrap::MirrorRepeat, MTLSamplerAddressModeMirrorRepeat },
+	};
+	ET_ASSERT(_map.count(value) > 0);
+	return _map.at(value);
+}
+
+MTLSamplerMipFilter textureFilteringToMipFilter(TextureFiltration value)
+{
+	static const std::map<TextureFiltration, MTLSamplerMipFilter> _map =
+	{
+		{ TextureFiltration::Nearest, MTLSamplerMipFilterNearest },
+		{ TextureFiltration::Linear, MTLSamplerMipFilterLinear },
+	};
+	ET_ASSERT(_map.count(value) > 0);
+	return _map.at(value);
+}
+
+MTLSamplerMinMagFilter textureFilteringToSamplerFilter(TextureFiltration value)
+{
+	static const std::map<TextureFiltration, MTLSamplerMinMagFilter> _map =
+	{
+		{ TextureFiltration::Nearest, MTLSamplerMinMagFilterNearest },
+		{ TextureFiltration::Linear, MTLSamplerMinMagFilterLinear },
+	};
+	ET_ASSERT(_map.count(value) > 0);
+	return _map.at(value);
+}
+
 }
 }

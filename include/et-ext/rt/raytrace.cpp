@@ -95,7 +95,8 @@ Raytrace::~Raytrace()
 
 void Raytrace::perform(s3d::Scene::Pointer scene, const Camera& cam, const vec2i& dimension)
 {
-	_private->camera = cam;
+	_private->camera.getValuesFromCamera(cam);
+
 	_private->viewportSize = dimension;
 	_private->buildMaterialAndTriangles(scene);
 
@@ -120,7 +121,7 @@ vec4 Raytrace::performAtPoint(s3d::Scene::Pointer scene, const Camera& cam, cons
 {
 	_private->stopWorkerThreads();
 
-	_private->camera = cam;
+	_private->camera.getValuesFromCamera(cam);
 	_private->viewportSize = dimension;
 	_private->buildMaterialAndTriangles(scene);
 

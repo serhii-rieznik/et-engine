@@ -11,8 +11,9 @@
 namespace et
 {
 
-const std::string defaultMaterials[static_cast<uint32_t>(DefaultMaterial::max)] =
+const std::string defaultMaterials[DefaultMaterialCount] =
 {
+	std::string("engine_data/materials/textured2d.json"),
 	std::string("engine_data/materials/textured.json"),
 	std::string("engine_data/materials/phong.json"),
 };
@@ -29,14 +30,25 @@ void MaterialLibrary::shutdown()
 
 Material::Pointer MaterialLibrary::loadDefaultMaterial(DefaultMaterial mtl)
 {
-	ET_ASSERT(mtl < DefaultMaterial::max);
-	std::string fileName = application().resolveFileName(defaultMaterials[static_cast<uint32_t>(mtl)]);
-	return loadMaterial(fileName);
+	ET_ASSERT(mtl < DefaultMaterial::Count);
+
+	uint32_t mtlIndex = static_cast<uint32_t>(mtl);
+	if (_defaultMaterials[mtlIndex].invalid())
+	{
+		std::string fileName = application().resolveFileName(defaultMaterials[mtlIndex]);
+		_defaultMaterials[mtlIndex] = loadMaterial(fileName);
+	}
+	return _defaultMaterials[mtlIndex];
 }
 
 Material::Pointer MaterialLibrary::loadMaterial(const std::string& fileName)
 {
-	return loadMaterialFromJson(loadTextFile(fileName), getFilePath(fileName));
+	auto i = _cache.find(fileName);
+	if (i != _cache.end())
+		return i->second;
+
+	Material::Pointer mtl = loadMaterialFromJson(loadTextFile(fileName), getFilePath(fileName));
+	return _cache.emplace(fileName, mtl).first->second;
 }
 
 Material::Pointer MaterialLibrary::loadMaterialFromJson(const std::string& json, const std::string& baseFolder)

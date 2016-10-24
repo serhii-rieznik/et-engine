@@ -665,7 +665,8 @@ void OBJLoader::loadMaterials(const std::string& fileName, ObjectsCache& cache)
 					std::string name;
 					materialFile >> name;
 
-					_lastMaterial = _renderer->sharedMaterialLibrary().loadDefaultMaterial(DefaultMaterial::Phong);
+					Material::Pointer mtl = _renderer->sharedMaterialLibrary().loadDefaultMaterial(DefaultMaterial::Phong);
+					_lastMaterial = mtl->instance();
 					_lastMaterial->setName(name);
 
 					_materials.push_back(_lastMaterial);

@@ -18,25 +18,24 @@ s3d::Renderer::Renderer() :
 	
 }
 
-void s3d::Renderer::render(RenderContext* rc, const Scene& scene, const Camera& camera)
+void s3d::Renderer::render(RenderContext* rc, const Scene& scene, Camera::Pointer camera)
 {
     if (hasFlag(RenderMeshes) == false)
         return;
 
-    auto lights = scene.childrenOfType(et::s3d::ElementType::Light);
 
-    vec3 lightPosition = camera.position();
-    if (!lights.empty())
+	RenderPass::ConstructionInfo passInfo;
+
+	auto lights = scene.childrenOfType(et::s3d::ElementType::Light);
+    if (lights.size() > 0)
     {
         auto light = static_cast<s3d::Light::Pointer>(lights.front());
-        lightPosition = light->camera().position();
+        passInfo.light = light->camera();
     }
     
-	RenderPass::ConstructionInfo passInfo;
 	passInfo.target.colorLoadOperation = et::FramebufferOperation::Clear;
 	passInfo.target.depthLoadOperation = et::FramebufferOperation::Clear;
 	passInfo.target.clearColor = vec4(0.25f, 0.3333f, 0.5f, 1.0f);
-	passInfo.light.setPosition(lightPosition);
 	passInfo.camera = camera;
 
 	RenderPass::Pointer pass = rc->renderer()->allocateRenderPass(passInfo);
@@ -60,7 +59,7 @@ void s3d::Renderer::renderMeshList(RenderPass::Pointer pass, const s3d::BaseElem
 		}
 	}
 
-	auto cameraPosition = pass->info().camera.position();
+	auto cameraPosition = pass->info().camera->position();
 	for (auto& rbv : _latestBatches)
 	{
 		std::random_shuffle(rbv.second.begin(), rbv.second.end());

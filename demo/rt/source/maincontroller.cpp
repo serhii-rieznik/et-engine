@@ -193,6 +193,9 @@ void MainController::start()
     desc->data = et::BinaryDataStorage(reinterpret_cast<unsigned char*>(_textureData.data()), _textureData.dataSize());
     _texture = _rc->renderer()->createTexture(desc);
 
+	_mainPass = _rc->renderer()->allocateRenderPass(et::RenderPass::ConstructionInfo());
+	_fullscreenQuad = et::renderhelper::createFullscreenRenderBatch(_texture);
+
 	const et::vec3 lookPoint = arrayToVec3(_options.arrayForKey("camera-view-point"));
 	const et::vec3 offset = arrayToVec3(_options.arrayForKey("camera-offset"));
 	float cameraFOV = _options.floatForKey("camera-fov", 60.0f)->content * TO_RADIANS;
@@ -213,15 +216,16 @@ void MainController::applicationWillTerminate()
 
 void MainController::render(et::RenderContext* rc)
 {
-	auto pass = rc->renderer()->allocateRenderPass(et::RenderPass::ConstructionInfo());
-
 	if (_texture.valid())
 	{
         _texture->setImageData(et::BinaryDataStorage(reinterpret_cast<uint8_t*>(_textureData.data()), _textureData.dataSize()));
-        pass->pushRenderBatch(et::renderhelper::createFullscreenRenderBatch(_texture));
 	}
 
-	rc->renderer()->submitRenderPass(pass);
+	_mainPass->begin();
+	_mainPass->pushRenderBatch(_fullscreenQuad);
+	_mainPass->end();
+
+	rc->renderer()->submitRenderPass(_mainPass);
 }
     
 et::ApplicationIdentifier demo::MainController::applicationIdentifier() const

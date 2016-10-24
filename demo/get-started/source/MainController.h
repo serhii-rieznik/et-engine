@@ -24,8 +24,10 @@ namespace demo
 		void loadProgram(et::RenderContext*);
 
 	private:
-		et::Camera _camera;
+		et::Camera::Pointer _camera;
 		et::VertexStream::Pointer _testModel;
+		et::RenderPass::Pointer _mainPass;
+		et::RenderBatch::Pointer _mainBatch;
 		et::Material::Pointer _defaultMaterial;
 		et::IntervalTimer _frameTimeTimer;
 		et::mat4 _transformMatrix;

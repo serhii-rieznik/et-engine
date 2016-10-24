@@ -24,7 +24,7 @@ enum class MaterialTexture : uint32_t
 	Opacity,
 	Normal,
 
-	Max
+	Count
 };
 
 enum class MaterialParameter : uint32_t
@@ -37,13 +37,16 @@ enum class MaterialParameter : uint32_t
 	Opacity,
 	NormalTextureScale,
 	
-	Max
+	Count
 };
+
+const std::string& materialTextureToString(MaterialTexture);
+const std::string& materialSamplerToString(MaterialTexture);
 
 enum : uint32_t
 {
-	MaterialTexture_Max = static_cast<uint32_t>(MaterialTexture::Max),
-	MaterialParameter_Max = static_cast<uint32_t>(MaterialParameter::Max),
+	MaterialTexturesCount = static_cast<uint32_t>(MaterialTexture::Count),
+	MaterialParametersCount = static_cast<uint32_t>(MaterialParameter::Count),
 };
 
 class RenderInterface;
@@ -58,18 +61,16 @@ public:
 	template <class T>
 	struct OptionalObject
 	{
-		T value = T(0);
+		T object;
+		std::string name;
+		uint32_t index = 0;
 		bool assigned = false;
-
-		void operator = (const T& v)
-		{
-			value = v;
-			assigned = true;
-		}
 
 		void clear()
 		{
-			value = T(0);
+			index = 0;
+			object = nullptr;
+			name.clear();
 			assigned = false;
 		}
 	};
@@ -110,9 +111,9 @@ public:
 		}
 	};
 
-	using Textures = std::array<OptionalObject<Texture::Pointer>, MaterialTexture_Max>;
-	using Samplers = std::array<Sampler::Pointer, MaterialParameter_Max>;
-	using Parameters = std::array<OptionalValue, MaterialParameter_Max>;
+	using Textures = std::array<OptionalObject<Texture::Pointer>, MaterialTexturesCount>;
+	using Samplers = std::array<OptionalObject<Sampler::Pointer>, MaterialTexturesCount>;
+	using Parameters = std::array<OptionalValue, MaterialParametersCount>;
 
 public:
 	Material(RenderInterface*);
@@ -120,12 +121,25 @@ public:
 	MaterialInstancePointer instance();
 
 	void setTexture(MaterialTexture, Texture::Pointer);
+	void setSampler(MaterialTexture, Sampler::Pointer);
+
+	Texture::Pointer texture(MaterialTexture);
+	Sampler::Pointer sampler(MaterialTexture);
 
 	void setVector(MaterialParameter, const vec4&);
 	vec4 getVector(MaterialParameter) const;
 
 	void setFloat(MaterialParameter, float);
 	float getFloat(MaterialParameter) const;
+
+	const Textures& allTextures() const
+		{ return _textures; }
+
+	const Samplers& allSamplers() const
+		{ return _samplers; }
+
+	const Parameters& allParameters() const
+		{ return _params; }
 
 	Program::Pointer program();
 	
@@ -149,16 +163,16 @@ private:
 	T getParameter(MaterialParameter) const;
 
 	void loadInputLayout(Dictionary);
-	void loadCode(const std::string&, const std::string& baseFolder);
+	void loadCode(const std::string&, const std::string& baseFolder, Dictionary defines);
 	void generateInputLayout(std::string& code);
 
 private: // overrided by instanaces
 	Textures _textures;
+	Samplers _samplers;
 	Parameters _params;
 
 private: // permanent private data
 	RenderInterface* _renderer = nullptr;
-	Samplers _samplers;
 	Program::Pointer _program;
 	VertexDeclaration _inputLayout;
 	DepthState _depthState;

@@ -8,11 +8,11 @@
 #pragma once
 
 #include <et/core/containers.h>
+#include <et/camera/camera.h>
 #include <et/rendering/interface/databuffer.h>
 
 namespace et
 {
-	class Camera;
 	class RenderInterface;
 	class SharedVariables
 	{
@@ -23,8 +23,8 @@ namespace et
 		DataBuffer::Pointer buffer();
 		void flushBuffer();
 		
-		void loadCameraProperties(const Camera&);
-		void loadLightProperties(const Camera&);
+		void loadCameraProperties(const Camera::Pointer&);
+		void loadLightProperties(const Camera::Pointer&);
 
 	private:
 		DataBuffer::Pointer _buffer;

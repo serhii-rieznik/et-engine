@@ -117,6 +117,9 @@ namespace metal
     MTLVertexFormat dataTypeToVertexFormat(DataType);
 	MTLCompareFunction compareFunctionValue(CompareFunction);
 	MTLIndexType indexArrayFormat(IndexArrayFormat);
+	MTLSamplerAddressMode wrapModeToAddressMode(TextureWrap);
+	MTLSamplerMipFilter textureFilteringToMipFilter(TextureFiltration);
+	MTLSamplerMinMagFilter textureFilteringToSamplerFilter(TextureFiltration);
 
 	DataType mtlDataTypeToDataType(MTLDataType);
 }

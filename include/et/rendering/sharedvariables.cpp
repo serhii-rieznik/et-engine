@@ -41,25 +41,29 @@ void SharedVariables::shutdown()
 	_localData.resize(0);
 }
 
-void SharedVariables::loadCameraProperties(const Camera& cam)
+void SharedVariables::loadCameraProperties(const Camera::Pointer& cam)
 {
+	ET_ASSERT(cam.valid());
+
 	mat4* mPtr = reinterpret_cast<mat4*>(_localData.binary());
-	*mPtr++ = cam.viewProjectionMatrix();
-	*mPtr++ = cam.projectionMatrix();
-	*mPtr++ = cam.viewMatrix();
+	*mPtr++ = cam->viewProjectionMatrix();
+	*mPtr++ = cam->projectionMatrix();
+	*mPtr++ = cam->viewMatrix();
 
 	vec4* vPtr = reinterpret_cast<vec4*>(mPtr);
-	*vPtr++ = vec4(cam.position(), 1.0f);
-	*vPtr++ = vec4(cam.direction(), 0.0f);
-	*vPtr++ = vec4(cam.up(), 0.0f);
+	*vPtr++ = vec4(cam->position(), 1.0f);
+	*vPtr++ = vec4(cam->direction(), 0.0f);
+	*vPtr++ = vec4(cam->up(), 0.0f);
 
 	_bufferDataValid = false;
 }
 
-void SharedVariables::loadLightProperties(const Camera& light)
+void SharedVariables::loadLightProperties(const Camera::Pointer& light)
 {
+	ET_ASSERT(light.valid());
+
 	vec4* vPtr = reinterpret_cast<vec4*>(_localData.binary());
-	*(vPtr + 15) = vec4(light.position(), 0.0f);
+	*(vPtr + 15) = vec4(light->position(), 0.0f);
 	_bufferDataValid = false;
 }
 

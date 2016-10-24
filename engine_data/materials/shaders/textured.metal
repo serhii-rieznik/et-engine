@@ -28,7 +28,13 @@ vertex VSOutput vertexMain(VSInput in [[stage_in]],
 	constant PassVariables& passVariables [[buffer(PassVariablesBufferIndex)]])
 {
 	VSOutput out;
+
+#if (TRANSFORM_INPUT_POSITION)
 	out.position = passVariables.viewProjection * objectVariables.worldTransform * float4(in.position, 1.0);
+#else
+	out.position = float4(in.position, 1.0);
+#endif
+
 	out.texCoord0 = in.texCoord0;
 	return out;
 }
@@ -36,9 +42,11 @@ vertex VSOutput vertexMain(VSInput in [[stage_in]],
 /*
  * Fragment shader
  */
-fragment FSOutput fragmentMain(VSOutput in [[stage_in]])
+fragment FSOutput fragmentMain(VSOutput in [[stage_in]],
+	texture2d<float> albedoTexture[[texture(0)]],
+	sampler albedoSampler[[sampler(0)]])
 {
 	FSOutput out;
-	out.color0 = float4(in.texCoord0, 0.25f, 1.0f);
+	out.color0 = albedoTexture.sample(albedoSampler, in.texCoord0);
 	return out;
 }

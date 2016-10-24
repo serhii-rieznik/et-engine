@@ -292,6 +292,25 @@ vec4 Camera::unproject(const vec4& v) const
 	return inverseViewProjectionMatrix() * v;
 }
 
+void Camera::getValuesFromCamera(const Camera& r)
+{
+	#define COPY_PROP(PROP) PROP = r.PROP
+	COPY_PROP(_viewMatrix);
+	COPY_PROP(_inverseViewMatrix);
+	COPY_PROP(_projectionMatrix);
+	COPY_PROP(_inverseProjectionMatrix);
+	COPY_PROP(_viewProjectionMatrix);
+	COPY_PROP(_inverseViewProjectionMatrix);
+	COPY_PROP(_frustum);
+	COPY_PROP( _upLocked);
+	COPY_PROP(_zNear);
+	COPY_PROP(_zFar);
+	COPY_PROP(_perspecitveAspect);
+	COPY_PROP(_fov);
+	COPY_PROP(_lockUpVector);
+	#undef COPY_PROP
+}
+
 CubemapProjectionMatrixArray et::cubemapMatrixProjectionArray(const mat4& proj, const vec3& point)
 {
 	CubemapProjectionMatrixArray result;

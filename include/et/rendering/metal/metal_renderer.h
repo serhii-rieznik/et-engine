@@ -50,8 +50,7 @@ public:
 	/*
 	 * Programs
 	 */
-	Program::Pointer createProgram(const std::string& vertex, const std::string& fragment,
-		const StringList& defines, const std::string& baseFolder) override;
+	Program::Pointer createProgram(const std::string& source, const std::string&) override;
 
 	/*
 	 * Pipeline state
@@ -61,7 +60,7 @@ public:
 	/*
 	 * Sampler
 	 */
-	Sampler::Pointer createSampler() override;
+	Sampler::Pointer createSampler(const Sampler::Description&) override;
 	
 private:
 	ET_DECLARE_PIMPL(MetalRenderer, 512);

@@ -26,20 +26,20 @@ namespace et
             ElementType type() const override
                 { return ElementType::Light; };
             
-            Camera& camera()
+            Camera::Pointer& camera()
                 { return _camera; }
             
-            const Camera& camera() const
+            const Camera::Pointer& camera() const
                 { return _camera; }
 
-            void setCamera(const Camera& cam)
+            void setCamera(const Camera::Pointer& cam)
                 { _camera = cam; }
             
             BaseElement* duplicate() override
                 { ET_FAIL("TODO"); return nullptr; }
             
         private:
-            Camera _camera;
+			Camera::Pointer _camera;
         };
     }
 }
