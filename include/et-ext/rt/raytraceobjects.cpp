@@ -18,6 +18,40 @@ const float_type Constants::oneMinusEpsilon = 1.0f - epsilon;
 const float_type Constants::epsilonSquared = epsilon * epsilon;
 const float_type Constants::initialSplitValue = std::numeric_limits<float>::max();
 
+/*
+float reflectionMicrofacet(const float4& n, const float4& Wi, const float4& Wo, float r, float f)
+{
+	auto h = Wo - Wi + n * Constants::epsilonSquared;
+	h.normalize();
+
+	float NdotO = n.dot(Wo);
+	float NdotI = -n.dot(Wi);
+	float HdotO = h.dot(Wo);
+	float HdotI = -h.dot(Wi);
+	float NdotH = n.dot(h);
+	float rSq = r * r + Constants::epsilon;
+
+	float g1 = G_ggx(NdotI, rSq) * float(HdotI / NdotI > 0.0f);
+	float g2 = G_ggx(NdotO, rSq) * float(HdotO / NdotO > 0.0f);
+	float g = g1 * g2;
+	ET_ASSERT(!isnan(g));
+
+	// float d = D_ggx(rSq, NdotH) * float(NdotH > 0.0f);
+	// float brdf = (d * g * f) / (4.0f * NdotI * NdotO);
+	// float pdf = d * NdotH / (4.0f * HdotI);
+
+	float result = (g * f * HdotI) / (NdotI * NdotH + Constants::epsilon); // x NdotO
+	ET_ASSERT(!isnan(result));
+
+	return result;
+}
+
+float refractionMicrofacet(const float4& n, const float4& Wi, const float4& Wo, float r, float f, float eta)
+{
+
+}
+*/
+
 const float4& defaultLightDirection()
 {
 	static float4 d(0.0f, 1.0f, 1.0f, 0.0f);
@@ -47,14 +81,10 @@ float4 computeReflectionVector(const float4& incidence, const float4& normal, fl
     auto idealReflection = reflect(incidence, normal);
 	
 	auto result = randomVectorOnHemisphere(idealReflection, ggxDistribution, roughness);
-
-	uint32_t attempts = 0;
-	while ((result.dot(normal) <= 0.0f) && (attempts < 16))
+	for (size_t attempt = 0; (attempt < 16) && (result.dot(normal) <= 0.0f); ++attempt)
 	{
 		result = randomVectorOnHemisphere(idealReflection, ggxDistribution, roughness);
-		++attempts;
 	}
-
 	return result;
 #endif
 }
@@ -64,34 +94,41 @@ float4 computeRefractionVector(const float4& Wi, const float4& n, float_type eta
 {
     auto idealRefraction = Wi * eta - n * (cosThetaI * eta - cosThetaT);
 	auto result = randomVectorOnHemisphere(idealRefraction, ggxDistribution, roughness);
-
-	uint32_t attempts = 0;
-	while ((result.dot(n) >= 0.0f) && (attempts < 16))
+	for (size_t attempt = 0; (attempt < 16) && (result.dot(n) >= 0.0f); ++attempt)
 	{
 		result = randomVectorOnHemisphere(idealRefraction, ggxDistribution, roughness);
-		++attempts;
 	}
-
 	return result;
 }
 
 bool rayToBoundingBox(const Ray& r, const BoundingBox& box, float& tNear, float& tFar)
 {
-	ET_ALIGNED(16) float_type localDir[4];
-	ET_ALIGNED(16) float_type bounds[2][4];
-
-	r.direction.loadToFloats(localDir);
-	((box.minVertex() - r.origin) / r.direction).loadToFloats(bounds[0]);
-	((box.maxVertex() - r.origin) / r.direction).loadToFloats(bounds[1]);
-
-	index xNegative = floatIsNegative(localDir[0]);
-	index yNegative = floatIsNegative(localDir[1]);
-	float_type tmin = bounds[xNegative][0];
-	float_type tmax = bounds[1 - xNegative][0];
-
-	float_type tymin = bounds[yNegative][1];
-	float_type tymax = bounds[1 - yNegative][1];
-
+    float4 bounds[2] = { box.minVertex(), box.maxVertex() };
+    
+    float_type tmin, tmax, tymin, tymax, tzmin, tzmax;
+    
+    if (r.direction.cX() >= 0)
+    {
+        tmin = (bounds[0].cX() - r.origin.cX()) / r.direction.cX() - Constants::epsilon;
+        tmax = (bounds[1].cX() - r.origin.cX()) / r.direction.cX() + Constants::epsilon;
+    }
+    else
+    {
+        tmin = (bounds[1].cX() - r.origin.cX()) / r.direction.cX() - Constants::epsilon;
+        tmax = (bounds[0].cX() - r.origin.cX()) / r.direction.cX() + Constants::epsilon;
+    }
+    
+    if (r.direction.cY() >= 0)
+    {
+        tymin = (bounds[0].cY() - r.origin.cY()) / r.direction.cY() - Constants::epsilon;
+        tymax = (bounds[1].cY() - r.origin.cY()) / r.direction.cY() + Constants::epsilon;
+    }
+    else
+    {
+        tymin = (bounds[1].cY() - r.origin.cY()) / r.direction.cY() - Constants::epsilon;
+        tymax = (bounds[0].cY() - r.origin.cY()) / r.direction.cY() + Constants::epsilon;
+    }
+    
     if ((tmin > tymax) || (tymin > tmax))
         return false;
     
@@ -101,9 +138,16 @@ bool rayToBoundingBox(const Ray& r, const BoundingBox& box, float& tNear, float&
     if (tymax < tmax)
         tmax = tymax;
     
-	index zNegative = floatIsNegative(localDir[2]);
-	float_type tzmin = bounds[zNegative][2];
-	float_type tzmax = bounds[1 - zNegative][2];
+    if (r.direction.cZ() >= 0)
+    {
+        tzmin = (bounds[0].cZ() - r.origin.cZ()) / r.direction.cZ() - Constants::epsilon;
+        tzmax = (bounds[1].cZ() - r.origin.cZ()) / r.direction.cZ() + Constants::epsilon;
+    }
+    else
+    {
+        tzmin = (bounds[1].cZ() - r.origin.cZ()) / r.direction.cZ() - Constants::epsilon;
+        tzmax = (bounds[0].cZ() - r.origin.cZ()) / r.direction.cZ() + Constants::epsilon;
+    }
     
     if ((tmin > tzmax) || (tzmin > tmax))
         return false;

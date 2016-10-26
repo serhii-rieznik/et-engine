@@ -1,7 +1,7 @@
 {
-	"reference" : "material-test.json",
+	"reference" : "sponza.json",
 	"method" : "backward",
 	"threads" : 0,
-	"rays-per-pixel" : 256,
+	"rays-per-pixel" : 64,
 	"max-path-length" : 1024
 }

@@ -5,6 +5,7 @@
     "env-type" : "uniform",
     "light-direction" : [0.0, 1.0, 0.0, 0.0],
 	"integrator" : "path-trace",
+	"rays-per-pixel" : 64,
 	"camera-fov" : 40.0,
 	"camera-distance" : 400.0,
 	"camera-phi" : 30.0,

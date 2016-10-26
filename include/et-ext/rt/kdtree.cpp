@@ -324,6 +324,11 @@ struct KDTreeSearchNode
         ind(n), time(t) { }
 };
 
+bool floatIsZero(float& v)
+{
+	return reinterpret_cast<uint32_t&>(v) == 0;
+}
+
 KDTree::TraverseResult KDTree::traverse(const Ray& ray)
 {
 	KDTree::TraverseResult result;
@@ -381,43 +386,29 @@ KDTree::TraverseResult KDTree::traverse(const Ray& ray)
 				IntersectionData data = _intersectionData[triangleIndex];
 				
 				float4 pvec = ray.direction.crossXYZ(data.edge2to0);
-				union
+                float det = data.edge1to0.dot(pvec);
+                if (floatIsZero(det))
+					continue;
+
+				float inv_dev = 1.0f / det;
+
+				float4 tvec = ray.origin - data.v0;
+				float u = tvec.dot(pvec) * inv_dev;
+				if ((u < 0.0f) || (u > 1.0f))
+					continue;
+
+				float4 qvec = tvec.crossXYZ(data.edge1to0);
+				float v = ray.direction.dot(qvec) * inv_dev;
+				float uv = u + v;
+				if ((v < 0.0f) || (uv > 1.0f))
+					continue;
+
+				float t = data.edge2to0.dot(qvec) * inv_dev;
+				if ((t < minDistance) && (t <= tFar) && (t > 0.0f))
 				{
-					float f;
-					uint32_t i;
-				} det = { data.edge1to0.dot(pvec) };
-
-				if (det.i & 0x7fffffff)
-				{
-					float inv_dev = 1.0f / det.f;
-
-					float4 tvec = ray.origin - data.v0;
-					union
-					{
-						float f;
-						uint32_t i;
-					} u = { tvec.dot(pvec) * inv_dev };
-					if (u.i & 0x80000000) continue;
-
-					float4 qvec = tvec.crossXYZ(data.edge1to0);
-					union
-					{
-						float f;
-						uint32_t i;
-					} v = { ray.direction.dot(qvec) * inv_dev };
-					if (v.i & 0x80000000) continue;
-
-					float uv = u.f + v.f;
-					if (uv <= 1.0f)
-					{
-						float t = data.edge2to0.dot(qvec) * inv_dev;
-						if ((t < minDistance) && (t <= tFar) && (t > 0.0f))
-						{
-							minDistance = t;
-							result.triangleIndex = triangleIndex;
-							result.intersectionPointBarycentric = float4(1.0f - uv, u.f, v.f, 0.0f);
-						}
-					}
+					minDistance = t;
+					result.triangleIndex = triangleIndex;
+					result.intersectionPointBarycentric = float4(1.0f - uv, u, v, 0.0f);
 				}
 			}
 
