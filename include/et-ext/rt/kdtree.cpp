@@ -324,11 +324,6 @@ struct KDTreeSearchNode
         ind(n), time(t) { }
 };
 
-bool floatIsZero(float& v)
-{
-	return reinterpret_cast<uint32_t&>(v) == 0;
-}
-
 KDTree::TraverseResult KDTree::traverse(const Ray& ray)
 {
 	KDTree::TraverseResult result;
@@ -386,11 +381,16 @@ KDTree::TraverseResult KDTree::traverse(const Ray& ray)
 				IntersectionData data = _intersectionData[triangleIndex];
 				
 				float4 pvec = ray.direction.crossXYZ(data.edge2to0);
-                float det = data.edge1to0.dot(pvec);
-                if (floatIsZero(det))
+				union
+				{
+					float f;
+					uint32_t i;
+				} det = { data.edge1to0.dot(pvec) };
+
+				if (!(det.i & 0x7fffffff))
 					continue;
 
-				float inv_dev = 1.0f / det;
+				float inv_dev = 1.0f / det.f;
 
 				float4 tvec = ray.origin - data.v0;
 				float u = tvec.dot(pvec) * inv_dev;

@@ -11,7 +11,7 @@
 namespace et {
 namespace rt {
 
-const float_type Constants::epsilon = 0.001f;
+const float_type Constants::epsilon = 0.0001f;
 const float_type Constants::minusEpsilon = -epsilon;
 const float_type Constants::onePlusEpsilon = 1.0f + epsilon;
 const float_type Constants::oneMinusEpsilon = 1.0f - epsilon;
@@ -81,10 +81,14 @@ float4 computeReflectionVector(const float4& incidence, const float4& normal, fl
     auto idealReflection = reflect(incidence, normal);
 	
 	auto result = randomVectorOnHemisphere(idealReflection, ggxDistribution, roughness);
-	for (size_t attempt = 0; (attempt < 16) && (result.dot(normal) <= 0.0f); ++attempt)
+
+	uint32_t attempts = 0;
+	while ((result.dot(normal) <= 0.0f) && (attempts < 16))
 	{
 		result = randomVectorOnHemisphere(idealReflection, ggxDistribution, roughness);
+		++attempts;
 	}
+
 	return result;
 #endif
 }
@@ -94,10 +98,14 @@ float4 computeRefractionVector(const float4& Wi, const float4& n, float_type eta
 {
     auto idealRefraction = Wi * eta - n * (cosThetaI * eta - cosThetaT);
 	auto result = randomVectorOnHemisphere(idealRefraction, ggxDistribution, roughness);
-	for (size_t attempt = 0; (attempt < 16) && (result.dot(n) >= 0.0f); ++attempt)
+
+	uint32_t attempts = 0;
+	while ((result.dot(n) >= 0.0f) && (attempts < 16))
 	{
 		result = randomVectorOnHemisphere(idealRefraction, ggxDistribution, roughness);
+		++attempts;
 	}
+
 	return result;
 }
 
