@@ -55,7 +55,17 @@ namespace rt
         float4 gather(const Ray& inRay, size_t depth, size_t& maxDepth,
             KDTree& tree, EnvironmentSampler::Pointer&, const Material::Collection&) override;
     };
-    
+
+	class AmbientOcclusionHackIntegrator : public Integrator
+	{
+	public:
+		ET_DECLARE_POINTER(AmbientOcclusionHackIntegrator);
+
+	public:
+		float4 gather(const Ray& inRay, size_t depth, size_t& maxDepth,
+			KDTree& tree, EnvironmentSampler::Pointer&, const Material::Collection&) override;
+	};
+
     class PathTraceIntegrator : public Integrator
     {
     public:

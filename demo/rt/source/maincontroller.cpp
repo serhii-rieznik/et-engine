@@ -125,6 +125,10 @@ void MainController::applicationDidLoad(et::RenderContext* rc)
 	{
 		_rt.setIntegrator(et::rt::AmbientOcclusionIntegrator::Pointer::create());
 	}
+	else if (integrator == "hack-ao")
+	{
+		_rt.setIntegrator(et::rt::AmbientOcclusionHackIntegrator::Pointer::create());
+	}
 	else if (integrator == "normals")
 	{
 		_rt.setIntegrator(et::rt::NormalsIntegrator::Pointer::create());

@@ -124,5 +124,30 @@ float4 AmbientOcclusionIntegrator::gather(const Ray& inRay, size_t depth, size_t
 	return float4(0.0f);
 }
 
+// hack-ao
+float4 AmbientOcclusionHackIntegrator::gather(const Ray& inRay, size_t depth, size_t& maxDepth,
+	KDTree& tree, EnvironmentSampler::Pointer& env, const Material::Collection&)
+{
+	KDTree::TraverseResult hit0 = tree.traverse(inRay);
+	if (hit0.triangleIndex == InvalidIndex)
+		return env->sampleInDirection(inRay.direction);
+
+	const auto& tri = tree.triangleAtIndex(hit0.triangleIndex);
+	float4 surfaceNormal = tri.interpolatedNormal(hit0.intersectionPointBarycentric);
+
+	float4 nextDirection = randomVectorOnHemisphere(surfaceNormal, uniformDistribution);
+	float4 nextOrigin = hit0.intersectionPoint + nextDirection * Constants::epsilon;
+
+	KDTree::TraverseResult t = tree.traverse(Ray(nextOrigin, nextDirection));
+	if (t.triangleIndex == InvalidIndex)
+	{
+		++maxDepth;
+		return float4(0.0f);
+	}
+
+	float_type distance = (t.intersectionPoint - nextOrigin).length();
+	return float4(1.0f - std::exp(-SQRT_2 * distance));
+}
+
 }
 }
