@@ -1,7 +1,7 @@
 {
-	"reference" : "sponza.json",
+	"reference" : "cornellbox.json",
 	"method" : "backward",
 	"threads" : 0,
-	"rays-per-pixel" : 64,
+	"rays-per-pixel" : 256,
 	"max-path-length" : 1024
 }

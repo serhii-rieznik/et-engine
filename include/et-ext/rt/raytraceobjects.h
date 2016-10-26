@@ -223,11 +223,6 @@ namespace et
 			return reinterpret_cast<index&>(a) >> 31;
 		}
 
-		inline index floatIsPositive(float& a)
-		{
-			return (~reinterpret_cast<index&>(a)) >> 31;
-		}
-
 		inline float4 perpendicularVector(const float4& normal)
 		{
 			auto componentsLength = (normal * normal).xyz();
