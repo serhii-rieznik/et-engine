@@ -69,15 +69,13 @@ namespace rt
 			cls(cl) { }
 
 	public:
-		std::string name;
-		Class cls;
-
-		float4 diffuse;
-		float4 specular;
-		float4 emissive;
-		
+		float4 diffuse = float4(1.0f);
+		float4 specular = float4(1.0f);
+		float4 emissive = float4(0.0f);
 		float_type roughness = 0.0f;
 		float_type ior = 0.0f;
+		Class cls = Class::Diffuse;
+		std::string name;
 	};
 }
 }

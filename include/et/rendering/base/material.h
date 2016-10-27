@@ -19,8 +19,9 @@ enum class MaterialTexture : uint32_t
 {
 	Albedo,
 	Reflectance,
-	Roughness,
 	Emissive,
+
+	Roughness,
 	Opacity,
 	Normal,
 
@@ -29,13 +30,16 @@ enum class MaterialTexture : uint32_t
 
 enum class MaterialParameter : uint32_t
 {
-	AmbientColor,
-	DiffuseColor,
-	SpecularColor,
+	AlbedoColor,
+	ReflectanceColor,
 	EmissiveColor,
+
 	Roughness,
 	Opacity,
-	NormalTextureScale,
+	NormalScale,
+
+	IndexOfRefraction,
+	SpecularExponent,
 	
 	Count
 };

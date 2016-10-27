@@ -234,47 +234,48 @@ Material::Pointer MaterialInstance::base()
 std::string materialParameterToString(MaterialParameter p)
 {
 	ET_ASSERT(p < MaterialParameter::Count);
-	static const std::array<std::string, MaterialParametersCount> names =
-	{{
-		"ambientColor",
-		"diffuseColor",
-		"specularColor",
-		"emissiveColor",
-		"roughness",
-		"opacity",
-		"normalTextureScale",
-	}};
-	return names[static_cast<uint32_t>(p)];
+	static const Map<MaterialParameter, std::string> names =
+	{
+		{ MaterialParameter::AlbedoColor, "albedoColor" },
+		{ MaterialParameter::ReflectanceColor, "reflectanceColor" },
+		{ MaterialParameter::EmissiveColor, "emissiveColor" },
+		{ MaterialParameter::Roughness, "roughness" },
+		{ MaterialParameter::Opacity, "ppacity" },
+		{ MaterialParameter::NormalScale, "normalScale" },
+		{ MaterialParameter::IndexOfRefraction, "indexOfRefraction" },
+		{ MaterialParameter::SpecularExponent, "specularExponent" },
+	};
+	return names.at(p);
 }
 
 const std::string& materialTextureToString(MaterialTexture t)
 {
 	ET_ASSERT(t < MaterialTexture::Count);
-	static const std::array<std::string, MaterialTexturesCount> names =
-	{{
-		"albedoTexture",
-		"reflectanceTexture",
-		"roughnessTexture",
-		"emissiveTexture",
-		"opacityTexture",
-		"normalTexture",
-	}};
-	return names[static_cast<uint32_t>(t)];
+	static const Map<MaterialTexture, std::string> names =
+	{
+		{ MaterialTexture::Albedo, "albedoTexture" },
+		{ MaterialTexture::Reflectance, "reflectanceTexture" },
+		{ MaterialTexture::Roughness, "roughnessTexture" },
+		{ MaterialTexture::Emissive, "emissiveTexture" },
+		{ MaterialTexture::Opacity, "opacityTexture" },
+		{ MaterialTexture::Normal, "normalTexture" },
+	};
+	return names.at(t);
 }
 
 const std::string& materialSamplerToString(MaterialTexture t)
 {
 	ET_ASSERT(t < MaterialTexture::Count);
-	static const std::array<std::string, MaterialTexturesCount> names =
-	{{
-		"albedoSampler",
-		"reflectanceSampler",
-		"roughnessSampler",
-		"emissiveSampler",
-		"opacitySampler",
-		"normalSampler",
-	}};
-	return names[static_cast<uint32_t>(t)];
+	static const Map<MaterialTexture, std::string> names =
+	{
+		{ MaterialTexture::Albedo, "albedoSampler" },
+		{ MaterialTexture::Reflectance, "reflectanceSampler" },
+		{ MaterialTexture::Roughness, "roughnessSampler" },
+		{ MaterialTexture::Emissive, "emissiveSampler" },
+		{ MaterialTexture::Opacity, "opacitySampler" },
+		{ MaterialTexture::Normal, "normalSampler" },
+	};
+	return names.at(t);
 }
 
 }

@@ -1,73 +1,73 @@
 newmtl wire_194194194
 #	plane
-	Ns 1.0
-	Tr 0.0
+	Pr 1.0
+	Ni 0.0
 	Kd 0.76080 0.76080 0.76080
 	Ks 1.0 1.0 1.0
 newmtl wire_154215229
 #	big cube
-	Ns 0.01
-	Tr 1.98
+	Pr 0.01
+	Ni 1.98
 	Kd 0.60390 0.84310 0.8980
 	Ks 1.0 1.0 1.0
 newmtl wire_177026088
 #	small cube under the "stick"
-	Ns 0.120
-	Tr 0.0
+	Pr 0.120
+	Ni 0.0
 	Kd 0.99410 0.5020 0.74510
 	Ks 1.0 1.0 1.0
 newmtl wire_140088225
-#	small far cube
-	Ns 0.333333
-	Tr 0.0
+#	small cube
+	Pr 0.333333
+	Ni 0.0
 	Kd 0.8490 0.44510 0.98240
 	Ks 0.8490 0.44510 0.98240
 newmtl wire_166229229
-	Ns 0.4
-	Tr 0.0
+	Pr 0.4
+	Ni 0.0
 	Kd 0.6510 0.8980 0.8980
 	Ks 1.0 1.0 1.0
 newmtl wire_028089177
-	Ns 0.5
-	Tr 0.0
+	Pr 0.5
+	Ni 0.0
 	Kd 0.10980 0.3490 0.69410
 	Ks 1.0 1.0 1.0
 newmtl wire_214229166
 #	stick
-	Ns 0.0
-	Tr 1.41
+	Pr 0.0
+	Ni 1.41
 	Kd 0.83920 0.8980 0.6510
 	Ks 1.0 1.0 1.0
 newmtl wire_176026026
-	Ns 0.7
-	Tr 0.0
+	Pr 0.7
+	Ni 0.0
 	Kd 0.69020 0.1020 0.1020
 	Ks 1.0 1.0 1.0
 newmtl wire_087224087
 #	largest cube
-	Ns 0.8
-	Tr 0.0
+	Pr 0.8
+	Ni 0.0
 	Kd 0.34120 0.87840 0.34120
 	Ks 1.0 1.0 1.0
 newmtl wire_154185229
-	Ns 0.2
-	Tr 0.0
+	Pr 0.2
+	Ni 0.0
 	Kd 0.60390 0.72550 0.8980
 	Ks 0.990 0.350 0.750
 newmtl wire_224143087
-	Ns 1.0
-	Tr 1.86
+	Pr 1.0
+	Ni 1.86
 	Kd 0.87840 0.56080 0.34120
 	Ks 1.0 1.0 1.0
 	Ke 0.87840 0.56080 0.34120
 newmtl wire_224086086
-	Ns 0.0
-	Tr 1.41
+	Pr 0.0
+	Ni 1.41
 	Kd 0.87840 0.33730 0.33730
 	Ks 1.0 1.0 1.0
 newmtl wire_228214153
 #	large sphere
-	Ns 0.05
-	Tr 0.0
+	Pr 0.05
+	Ni 0.0
 	Kd 0.89410 0.83920 0.60
 	Ks 1.0 1.0 1.0

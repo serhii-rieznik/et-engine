@@ -242,7 +242,7 @@ void RaytracePrivate::buildMaterialAndTriangles(s3d::Scene::Pointer scene)
 			if (materialIndex == InvalidIndex)
 			{
 				float alpha = clamp(batchMaterial->getFloat(MaterialParameter::Roughness), 0.0f, 1.0f);
-				float eta = batchMaterial->getFloat(MaterialParameter::Opacity);
+				float eta = batchMaterial->getFloat(MaterialParameter::IndexOfRefraction);
 
 				rt::Material::Class cls = rt::Material::Class::Diffuse;
 				if (alpha < 1.0f)
@@ -255,10 +255,10 @@ void RaytracePrivate::buildMaterialAndTriangles(s3d::Scene::Pointer scene)
 				auto& mat = materials.back();
 
 				mat.name = batchMaterial->name();
-				mat.diffuse = rt::float4(batchMaterial->getVector(MaterialParameter::DiffuseColor));
-				mat.specular = rt::float4(batchMaterial->getVector(MaterialParameter::SpecularColor));
+				mat.diffuse = rt::float4(batchMaterial->getVector(MaterialParameter::AlbedoColor));
+				mat.specular = rt::float4(batchMaterial->getVector(MaterialParameter::ReflectanceColor));
 				mat.emissive = rt::float4(batchMaterial->getVector(MaterialParameter::EmissiveColor));
-				mat.roughness = clamp(sqr(alpha), std::sqrt(rt::Constants::epsilon), 1.0f);
+				mat.roughness = sqr(alpha);
 				mat.ior = eta;
 
 				isEmitter = mat.emissive.length() > 0.0f;

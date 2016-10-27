@@ -11,52 +11,52 @@
 # http://www.cs.cmu.edu/~djames/15-864/pics/cornellBox.jpg
 #
 newmtl leftSphere
-	Ns 0.001
-	Tr 0.46
+	Pr 0.001
+	Ni 0.46
     Ka 0.01 0.01 0.01
 	Kd 0.95 0.95 0.95
 	Ks 0.95 0.95 0.95
 
 newmtl rightSphere
-	Ns 0.001
-	Tr 1.42
+	Pr 0.001
+	Ni 1.42
     Ka 0.01 0.01 0.01
 	Kd 1.00 1.00 1.00
 	Ks 1.00 1.00 1.00
 
 newmtl floor
-    Ns 1.0000
+    Pr 1.0000
     Ka 0.7250 0.7100 0.6800
     Kd 0.7250 0.7100 0.6800
 	Ks 0.0000 0.0000 0.0000
 
 newmtl ceiling
-    Ns 1.0000
+    Pr 1.0000
     Ka 0.7250 0.7100 0.6800
     Kd 0.7250 0.7100 0.6800
     Ks 0.0000 0.0000 0.0000
 
 newmtl backWall
-	Ns 1.0000
+	Pr 1.0000
 	illum 2
 	Ka 0.7250 0.7100 0.6800
 	Kd 0.7250 0.7100 0.6800
 	Ks 0.0000 0.0000 0.0000
 
 newmtl rightWall
-    Ns 1.0000
+    Pr 1.0000
     Ka 0.161 0.133 0.427
 	Kd 0.161 0.133 0.427
 	Ks 0.0000 0.0000 0.0000
 
 newmtl leftWall
-	Ns 1.0000
+	Pr 1.0000
 	Ka 0.6300 0.0650 0.0500
 	Kd 0.6300 0.0650 0.0500
 	Ks 0.0000 0.0000 0.0000
 
 newmtl light
-	Ns 10.0000
+	Pr 10.0000
 	Ka 0.7800 0.7800 0.7800
 	Kd 0.7800 0.7800 0.7800
     Ke 50 30 20

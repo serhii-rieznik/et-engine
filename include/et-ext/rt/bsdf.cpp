@@ -163,7 +163,8 @@ inline float G_ggx(float t, float rSq)
 
 inline float D_ggx(float rSq, float ct)
 {
-	return rSq / (PI * et::sqr(ct * ct * (rSq - 1.0f) + 1.0f));
+	union { float f; uint32_t i; } x = { ct * ct * (rSq - 1.0f) + 1.0f };
+	return (x.i & 0x7fffffff) ? (rSq / (PI * et::sqr(x.f))) : 1.0f;
 }
 
 float et::rt::BSDFSample::bsdf()
@@ -201,7 +202,7 @@ float et::rt::BSDFSample::bsdf()
 		float d = D_ggx(rSq, NdotH) * float(NdotH > 0.0f);
 		float denom = sqr(HdotI + eta * HdotO);
 
-		return ((1 - fresnel) * d * g * etaSq * HdotI * HdotO) / (IdotN * denom);
+		return ((1.0f - fresnel) * d * g * etaSq * HdotI * HdotO) / (IdotN * denom + Constants::epsilon);
 	}
 
 	ET_FAIL("Invalid material class");
@@ -245,10 +246,6 @@ float et::rt::BSDFSample::pdf()
 
 et::rt::float4 et::rt::BSDFSample::evaluate()
 {
-	float pdfValue = pdf();
-
-	if (pdfValue == 0.0f)
-		return float4(0.0f);
-
-	return color * (cosTheta * bsdf() / pdfValue);
+	union { float f; uint32_t i; } x = { pdf() };
+	return (x.i & 0x7fffffff) ? color * (cosTheta * bsdf() / x.f) : float4(0.0f);
 }

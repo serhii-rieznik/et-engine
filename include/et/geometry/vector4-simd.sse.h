@@ -60,7 +60,7 @@ namespace et
 			loadToFloats(data);
 			return vector3<float>(data[0], data[1], data[2]);
 		};
-		
+
 	public:
 		void clear()
 		{
@@ -255,6 +255,12 @@ namespace et
 		vec4simd operator / (float r) const
 		{
 			return vec4simd(_mm_div_ps(_data, _mm_set_ps1(r)));
+		}
+
+		vec4simd operator & (uint32_t v) const
+		{
+			union { uint32_t i; float f; } cast = { v };
+			return vec4simd(_mm_and_ps(_data, _mm_set_ps1(cast.f)));
 		}
 
 	public:

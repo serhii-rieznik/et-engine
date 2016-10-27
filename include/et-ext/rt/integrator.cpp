@@ -38,6 +38,7 @@ float4 PathTraceIntegrator::gather(const Ray& inRay, size_t depth, size_t& maxDe
             bounce.add = env->sampleInDirection(currentRay.direction);
             break;
         }
+		++maxDepth;
 
 		const auto& tri = tree.triangleAtIndex(traverse.triangleIndex);
 		const auto& mat = materials[tri.materialIndex];
@@ -55,7 +56,6 @@ float4 PathTraceIntegrator::gather(const Ray& inRay, size_t depth, size_t& maxDe
 		currentRay.origin = traverse.intersectionPoint + currentRay.direction * Constants::epsilon;
 #	endif
     }
-	maxDepth = bounces.size();
 
     float4 result(0.0f);
     do
@@ -116,11 +116,9 @@ float4 AmbientOcclusionIntegrator::gather(const Ray& inRay, size_t depth, size_t
     float4 nextOrigin = hit0.intersectionPoint + nextDirection * Constants::epsilon;
 
 	if (tree.traverse(Ray(nextOrigin, nextDirection)).triangleIndex == InvalidIndex)
-	{
-		++maxDepth;
 		return env->sampleInDirection(nextDirection);
-	}
 
+	++maxDepth;
 	return float4(0.0f);
 }
 
@@ -140,10 +138,9 @@ float4 AmbientOcclusionHackIntegrator::gather(const Ray& inRay, size_t depth, si
 
 	KDTree::TraverseResult t = tree.traverse(Ray(nextOrigin, nextDirection));
 	if (t.triangleIndex == InvalidIndex)
-	{
-		++maxDepth;
-		return float4(0.0f);
-	}
+		return float4(1.0f);
+
+	++maxDepth;
 
 	float_type distance = (t.intersectionPoint - nextOrigin).length();
 	return float4(1.0f - std::exp(-SQRT_2 * distance));

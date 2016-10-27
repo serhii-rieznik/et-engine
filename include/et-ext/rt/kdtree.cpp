@@ -13,7 +13,7 @@ namespace et
 namespace rt
 {
 
-const size_t DepthLimit = 31;
+const size_t DepthLimit = 128;
 const size_t MinTrianglesToSubdivide = 12;
 
 struct Split

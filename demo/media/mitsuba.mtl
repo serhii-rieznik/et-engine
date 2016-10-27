@@ -2,19 +2,19 @@
 # File Created: 05.12.2012 22:27:27
 
 newmtl case
-	Ns 0.01
-	Tr 1.71720
+	Pr 0.01
+	Ni 1.71720
 	Kd 1.0 0.950 0.90
 	Ks 0.90 0.950 1.0
 
 newmtl inside
-	Ns 0.250
-	Tr 0.0
+	Pr 0.0
+	Ni 0.45
 	Kd 0.7330316742 0.9517345399 1.0
 	Ks 0.7330316742 0.9517345399 1.0
 
 newmtl backdrop
-	Ns 0.05
-	Tr 0.0
+	Pr 1.0
+	Ni 0.0
 	Kd 1 1 1
 	Ks 1 1 1

@@ -407,7 +407,7 @@ void OBJLoader::loadMaterials(const std::string& fileName, ObjectsCache& cache)
 					{
 						float value = 0.0f;
 						materialFile >> value;
-						_lastMaterial->setFloat(MaterialParameter::NormalTextureScale, value);
+						_lastMaterial->setFloat(MaterialParameter::NormalScale, value);
 						
 						getLine(materialFile, line);
 						std::string actualName = application().resolveFileName(line);
@@ -446,21 +446,19 @@ void OBJLoader::loadMaterials(const std::string& fileName, ObjectsCache& cache)
 				
 				if (next == 'a')
 				{
-					vec4 value(0.0f);
-					materialFile >> value;
-					_lastMaterial->setVector(MaterialParameter::AmbientColor, value);
-				} 
+					getLine(materialFile, line);
+				}
 				else if (next == 'd')
 				{
 					vec4 value(0.0f);
 					materialFile >> value;
-					_lastMaterial->setVector(MaterialParameter::DiffuseColor, value);
+					_lastMaterial->setVector(MaterialParameter::AlbedoColor, value);
 				} 
 				else if (next == 's')
 				{
 					vec4 value(0.0f);
 					materialFile >> value;
-					_lastMaterial->setVector(MaterialParameter::SpecularColor, value);
+					_lastMaterial->setVector(MaterialParameter::ReflectanceColor, value);
 				} 
 				else if (next == 'e')
 				{
@@ -475,6 +473,19 @@ void OBJLoader::loadMaterials(const std::string& fileName, ObjectsCache& cache)
 				}
 			}
 		}
+		else if (key == 'p')
+		{
+			char next = 0;
+			materialFile >> next;
+			next = static_cast<char>(tolower(next));
+
+			if (next == 'r')
+			{
+				float value = 0.0f;
+				materialFile >> value;
+				_lastMaterial->setFloat(MaterialParameter::Roughness, value);
+			}
+		}
 		else if (key == 't')
 		{
 			char next = 0;
@@ -485,7 +496,7 @@ void OBJLoader::loadMaterials(const std::string& fileName, ObjectsCache& cache)
 			{
 				float value = 0.0f;
 				materialFile >> value;
-				_lastMaterial->setFloat(MaterialParameter::Opacity, 1.0f - value);
+				_lastMaterial->setFloat(MaterialParameter::Opacity, clamp(1.0f - value, 0.0f, 1.0f));
 			}
 			else if (next == 'f') // skip
 			{
@@ -523,7 +534,6 @@ void OBJLoader::loadMaterials(const std::string& fileName, ObjectsCache& cache)
 					else if (subId == 'a')
 					{
 						getLine(materialFile, line);
-						log::warning("[OBJLoader] Ambient textures are not supported");
 					}
 					else if (subId == 's')
 					{
@@ -569,7 +579,7 @@ void OBJLoader::loadMaterials(const std::string& fileName, ObjectsCache& cache)
 							{
 								float value;
 								materialFile >> value;
-								_lastMaterial->setFloat(MaterialParameter::NormalTextureScale, value);
+								_lastMaterial->setFloat(MaterialParameter::NormalScale, value);
 								
 								getLine(materialFile, line);
 								std::string actualName = application().resolveFileName(line);
@@ -648,11 +658,13 @@ void OBJLoader::loadMaterials(const std::string& fileName, ObjectsCache& cache)
 			{
 				float value = 0.0f;
 				materialFile >> value;
-				_lastMaterial->setFloat(MaterialParameter::Roughness, value);
+				_lastMaterial->setFloat(MaterialParameter::SpecularExponent, value);
 			}
 			else if (next == 'i')
 			{
-				getLine(materialFile, line);
+				float value = 0.0f;
+				materialFile >> value;
+				_lastMaterial->setFloat(MaterialParameter::IndexOfRefraction, value);
 			}
 			else if (next == 'e')
 			{

@@ -10,55 +10,55 @@
 # http://www.graphics.cornell.edu/online/box/data.html
 #
 newmtl leftSphere
-	Ns 0.01
-	Tr 0.0
+	Pr 0.01
+	Ni 0.0
 	Kd 1.0 1.0 1.0
     Ks 0.95 0.95 0.95
 
 newmtl rightSphere
-	Ns 0.01
-	Tr 0.7
+	Pr 0.01
+	Ni 0.7
 	Kd 1.0 1.0 1.0
 	Ks 0.30 0.30 0.30
 
 newmtl floor
-	Ns 1.0
-	Tr 0.0
+	Pr 1.0
+	Ni 0.0
     Kd 0.7250 0.710 0.680
 	Ks 0 0 0
 
 newmtl ceiling
-    Ns 1.0
-	Tr 0.0
+    Pr 1.0
+	Ni 0.0
     Kd 0.7250 0.710 0.680
     Ks 0.0 0.0 0.0
 
 newmtl backWall
-	Ns 1.0
-	Tr 0.0
+	Pr 1.0
+	Ni 0.0
 	Kd 0.7250 0.710 0.680
 	Ks 0.0 0.0 0.0
 
 newmtl rightWall
-    Ns 1.0
-	Tr 0.0
+    Pr 1.0
+	Ni 0.0
     Kd 0.161 0.133 0.427
 	Ks 0 0 0
     
 newmtl leftWall
-	Ns 1.0
-	Tr 0.0
+	Pr 1.0
+	Ni 0.0
 	Kd 0.630 0.0650 0.050
 	Ks 0 0 0
 
 newmtl light
-	Ns 1.0
-	Tr 0.0
+	Pr 1.0
+	Ni 0.0
 	Kd 1.0 1.0 1.0
 	Ke 8.0 7.0 6.0
 
 newmtl water
-	Ns 0.0
-	Tr 1.7333
+	Pr 0.0
+	Ni 1.7333
 	Kd 0.72 0.839 1.0
     Ks 0.73 0.87 1.0

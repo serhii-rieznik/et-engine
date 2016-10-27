@@ -2,6 +2,7 @@
 	"reference" : "cornellbox.json",
 	"method" : "backward",
 	"threads" : 0,
-	"rays-per-pixel" : 256,
+	"render-region-size" : 4,
+	"rays-per-pixel" : 128,
 	"max-path-length" : 1024
 }

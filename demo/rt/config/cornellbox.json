@@ -1,6 +1,6 @@
 {
 	"model-name" : "media/cornellbox.obj",
-	"env-map" : "media/background.hdr.no",
+	"env-map" : "media/background.hdroff",
 	"env-color" : [0.0, 0.0, 0.0, 1.0],
     "env-type" : "uniform",
     "light-direction" : [0.0, 1.0, 0.0, 0.0],
@@ -11,7 +11,6 @@
 	"camera-theta" : 0.0,
 	"camera-offset" : [0.0, 1.0, 0.0],
 	"camera-view-point" : [0.0, 1.0, 0.0],
-    "render-region-size" : 8,
 	"kd-tree-max-depth" : 31,
 	"render-kd-tree" : 0,
 	"debug-rendering" : 0

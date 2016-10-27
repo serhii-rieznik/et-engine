@@ -42,10 +42,8 @@ void MainController::applicationDidLoad(et::RenderContext* rc)
 	et::application().pushSearchPath("..\\..");
 	et::application().pushSearchPath("..\\..\\..");
 	et::application().pushSearchPath("..\\..\\..\\..");
-	et::application().pushSearchPath("Q:\\SDK\\Models");
 	et::application().pushSearchPath("Q:\\SDK\\Textures");
 #elif (ET_PLATFORM_MAC)
-	et::application().pushSearchPath("/Volumes/Development/SDK/Models");
 	et::application().pushSearchPath("/Volumes/Development/SDK/Textures");
 #endif
 
