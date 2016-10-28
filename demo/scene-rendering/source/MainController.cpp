@@ -26,7 +26,8 @@ void demo::MainController::applicationDidLoad(et::RenderContext* rc)
 	et::application().pushSearchPath("/Volumes/Development/SDK/Models/");
 #endif
 
-    _camera.lookAt(et::vec3(300.0f));
+	_camera = et::Camera::Pointer::create();
+    _camera->lookAt(et::vec3(300.0f));
     _cameraController = et::CameraMovingController::Pointer::create(_camera, true);
     _cameraController->setIntepolationRate(10.0f);
     _cameraController->setMovementSpeed(et::vec3(100.0f));
@@ -43,7 +44,7 @@ void demo::MainController::applicationDidLoad(et::RenderContext* rc)
 void demo::MainController::applicationWillResizeContext(const et::vec2i& sz)
 {
 	et::vec2 fSz = vector2ToFloat(sz);
-    _camera.perspectiveProjection(DEG_45, fSz.aspect(), 1.0f, 2048.0f);
+    _camera->perspectiveProjection(DEG_45, fSz.aspect(), 1.0f, 2048.0f);
 }
 
 void demo::MainController::render(et::RenderContext* rc)

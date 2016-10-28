@@ -19,7 +19,7 @@ namespace et
 		ET_DECLARE_POINTER(CameraOrbitController);
 		
 	public:
-		CameraOrbitController(Camera&, bool autoConnectToEvents);
+		CameraOrbitController(Camera::Pointer, bool autoConnectToEvents);
 		
 		void setTargetPoint(const vec3&);
 		void setMovementSpeed(const vec3&);
@@ -28,7 +28,7 @@ namespace et
 		void startUpdates() override;
 		void cancelUpdates() override;
 		
-		void synchronize(const Camera&) override;
+		void synchronize(const Camera::Pointer) override;
 		
 	private:
 		void update(float) override;

@@ -19,12 +19,12 @@ namespace et
 		ET_DECLARE_POINTER(CameraController);
 		
 	public:
-		CameraController(Camera& cam, bool autoConnectToInput);
+		CameraController(Camera::Pointer cam, bool autoConnectToInput);
 		
-		Camera& camera()
+		Camera::Pointer camera()
 			{ return _camera; }
 		
-		const Camera& camera() const
+		const Camera::Pointer camera() const
 			{ return _camera; }
 		
 		void setPointerEventsEnabled(bool);
@@ -39,7 +39,7 @@ namespace et
 		virtual void startUpdates();
 		virtual void cancelUpdates();
 		
-		virtual void synchronize(const Camera&) { }
+		virtual void synchronize(const Camera::Pointer) { }
 		
 		virtual void onKeyPressed(size_t) { }
 		virtual void onKeyReleased(size_t) { }
@@ -59,7 +59,7 @@ namespace et
 			{ return _keyboardEventsEnabled; }
 		
 	private:
-		Camera& _camera;
+		Camera::Pointer _camera;
 		NotifyTimer _updateTimer;
 		float _lastUpdateTime = 0.0f;
 		bool _pointerEventsEnabled = true;

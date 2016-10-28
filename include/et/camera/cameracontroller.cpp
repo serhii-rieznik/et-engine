@@ -10,7 +10,7 @@
 
 using namespace et;
 
-CameraController::CameraController(Camera& cam, bool connectInput) :
+CameraController::CameraController(Camera::Pointer cam, bool connectInput) :
 	_camera(cam)
 {
 	if (connectInput)

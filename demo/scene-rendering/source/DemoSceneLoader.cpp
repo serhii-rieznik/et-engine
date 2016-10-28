@@ -1,4 +1,5 @@
 #include <et/rendering/base/primitives.h>
+#include <et/rendering/rendercontext.h>
 #include <et/scene3d/objloader.h>
 #include <et/app/application.h>
 
@@ -43,7 +44,7 @@ void SceneLoader::loadObjFile(const std::string& fileName, et::s3d::Scene::Point
 {
 	ObjectsCache localCache;
     OBJLoader loader(fileName, OBJLoader::Option_CalculateTransforms);
-    auto container = loader.load(_rc, scene->storage(), localCache);
+    auto container = loader.load(_rc->renderer(), scene->storage(), localCache);
 
     // compute bounding box
     vec3 minVertex(std::numeric_limits<float>::max());
@@ -63,6 +64,6 @@ void SceneLoader::loadObjFile(const std::string& fileName, et::s3d::Scene::Point
     // add light
     s3d::Light::Pointer lp = s3d::Light::Pointer::create();
 	vec3 bboxCenter = 0.5f * (minVertex + maxVertex);
-    lp->camera().setPosition(vec3(bboxCenter.x, maxVertex.y + 2.0f * std::abs(maxVertex.y), bboxCenter.z));
+    lp->camera()->setPosition(vec3(bboxCenter.x, maxVertex.y + 2.0f * std::abs(maxVertex.y), bboxCenter.z));
     lp->setParent(scene.ptr());
 }

@@ -9,16 +9,16 @@
 
 using namespace et;
 
-CameraMovingController::CameraMovingController(Camera& cam, bool connectInput) :
+CameraMovingController::CameraMovingController(Camera::Pointer cam, bool connectInput) :
 	CameraController(cam, connectInput), _gestures(false)
 {
-	camera().lockUpVector(unitY);
+	camera()->lockUpVector(unitY);
 	
 	_positionAnimator.valueUpdated.connect([this](const vec3& p)
-		{ camera().setPosition(p); });
+		{ camera()->setPosition(p); });
 
 	_directionAnimator.valueUpdated.connect([this](const vec2& p)
-		{ camera().setDirection(fromSpherical(p.y, p.x)); });
+		{ camera()->setDirection(fromSpherical(p.y, p.x)); });
 
 	_gestures.drag.connect([this](const GesturesRecognizer::DragGesture& drag)
 	{
@@ -97,7 +97,7 @@ void CameraMovingController::update(float dt)
 	{
 		movement.normalize();
 		float multiplier = dt * static_cast<float>(1.0f + _pressedKeys.count(ET_KEY_SHIFT));
-		vec3 direction = camera().side() * movement.x - camera().direction() * movement.z;
+		vec3 direction = camera()->side() * movement.x - camera()->direction() * movement.z;
 		_positionAnimator.addTargetValue(_movementSpeed * multiplier * direction);
 	}
 }
@@ -118,11 +118,11 @@ void CameraMovingController::validateCameraAngles(vec2& angles)
 	angles.y = clamp(angles.y, -HALF_PI + DEG_15, HALF_PI - DEG_15);
 }
 
-void CameraMovingController::synchronize(const Camera&)
+void CameraMovingController::synchronize(const Camera::Pointer)
 {
-	vec2 angles = toSpherical(camera().direction()).xy();
+	vec2 angles = toSpherical(camera()->direction()).xy();
 	_directionAnimator.setValue(angles);
 	_directionAnimator.setTargetValue(angles);
-	_positionAnimator.setValue(camera().position());
-	_positionAnimator.setTargetValue(camera().position());
+	_positionAnimator.setValue(camera()->position());
+	_positionAnimator.setTargetValue(camera()->position());
 }

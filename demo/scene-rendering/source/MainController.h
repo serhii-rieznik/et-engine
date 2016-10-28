@@ -23,7 +23,7 @@ namespace demo
 		void render(et::RenderContext*);
 		
 	private:
-        et::Camera _camera;
+		et::Camera::Pointer _camera;
         et::CameraMovingController::Pointer _cameraController;
 		et::s3d::Scene::Pointer _scene;
 		et::s3d::Renderer _renderer;

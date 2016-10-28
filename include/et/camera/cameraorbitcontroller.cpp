@@ -9,10 +9,10 @@
 
 using namespace et;
 
-CameraOrbitController::CameraOrbitController(Camera& cam, bool connectInput) :
+CameraOrbitController::CameraOrbitController(Camera::Pointer cam, bool connectInput) :
 	CameraController(cam, connectInput), _gestures(false)
 {
-	camera().lockUpVector(unitY);
+	camera()->lockUpVector(unitY);
 	
 	_anglesDistanceAnimator.valueUpdated.connect([this](const vec3& p)
 		{ _shouldRebuildMatrix = true; });
@@ -102,7 +102,7 @@ void CameraOrbitController::update(float)
 	{
 		const auto& a = _anglesDistanceAnimator.value();
 		const auto& t = _targetPoint.value();
-		camera().lookAt(t + fromSpherical(a.y, a.x) * a.z, t);
+		camera()->lookAt(t + fromSpherical(a.y, a.x) * a.z, t);
 		_shouldRebuildMatrix = false;
 	}
 
@@ -149,8 +149,8 @@ void CameraOrbitController::setTargetPoint(const vec3& tp)
 	_targetPoint.setTargetValue(tp);
 }
 
-void CameraOrbitController::synchronize(const Camera& cam)
+void CameraOrbitController::synchronize(const Camera::Pointer cam)
 {
-	_anglesDistanceAnimator.setTargetValue(toSpherical(cam.position() - _targetPoint.targetValue()));
+	_anglesDistanceAnimator.setTargetValue(toSpherical(cam->position() - _targetPoint.targetValue()));
 	_anglesDistanceAnimator.finishInterpolation();
 }
