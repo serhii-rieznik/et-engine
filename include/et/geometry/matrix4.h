@@ -308,10 +308,23 @@ namespace et
 				c0.z * v.x + c1.z * v.y + c2.z * v.z);
 		}
 
-		matrix4 inverse() const
+		matrix4 inversed() const
 		{
 			T det = determinant();
 			return (det * det > 0) ? adjugateMatrix() / det : matrix4(0);
+		}
+
+		matrix4 transposed() const
+		{
+			matrix4 result;
+			for (uint32_t r = 0; r < 4; ++r)
+			{
+				for (uint32_t c = 0; c < 4; ++c)
+				{
+					result.mat[r][c] = mat[c][r];
+				}
+			}
+			return result;
 		}
 
 		bool isOrthonormal()

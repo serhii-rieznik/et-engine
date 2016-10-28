@@ -18,6 +18,7 @@ struct FSOutput {
 
 struct ObjectVariables {
 	float4x4 worldTransform;
+	float4x4 worldRotationTransform;
 };
 
 /*
@@ -29,7 +30,7 @@ vertex VSOutput vertexMain(VSInput in [[stage_in]],
 {
 	VSOutput out;
 	out.position = passVariables.viewProjection * objectVariables.worldTransform * float4(in.position, 1.0);
-	out.normal = in.normal;
+	out.normal = (objectVariables.worldRotationTransform * float4(in.normal, 0.0)).xyz;
 	return out;
 }
 

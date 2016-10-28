@@ -64,6 +64,7 @@ void MetalRenderPass::pushRenderBatch(RenderBatch::Pointer batch)
 
 	MetalPipelineState::Pointer ps = _private->renderer->createPipelineState(RenderPass::Pointer(this), material->base(), batch->vertexStream());
 	ps->setObjectVariable(PipelineState::kWorldTransform(), batch->transformation());
+	ps->setObjectVariable(PipelineState::kWorldRotationTransform(), batch->rotationTransformation());
 	ps->bind(_private->encoder, material);
 
 	SharedVariables& sharedVariables = _private->renderer->sharedVariables();

@@ -27,7 +27,7 @@ void Frustum::build(const mat4& mvp)
 	_planes[FrustumPlane_Far] = normalizePlane(vec4(mvp(3) - mvp(2), mvp(7) - mvp(6), mvp(11) - mvp(10), mvp(15) - mvp(14)));
 	_planes[FrustumPlane_Near] = normalizePlane(vec4(mvp(3) + mvp(2), mvp(7) + mvp(6), mvp(11) + mvp(10), mvp(15) + mvp(14)));
 	
-	mat4 invMVP = mvp.inverse();
+	mat4 invMVP = mvp.inversed();
 	
 	_corners[0] = invMVP * vec4(-1.0f, -1.0f, -1.0f, 1.0f);
 	_corners[1] = invMVP * vec4(-1.0f, -1.0f,  1.0f, 1.0f);

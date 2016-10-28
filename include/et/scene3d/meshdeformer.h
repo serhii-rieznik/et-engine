@@ -57,7 +57,7 @@ namespace et
 			mat4 transformMatrix();
 			
 			void setLinkInitialTransform(const mat4& m)
-				{ _linkInitialTransformInverse = m.inverse(); }
+				{ _linkInitialTransformInverse = m.inversed(); }
 
 			void setMeshInitialTransform(const mat4& m)
 				{ _meshInitialTransform = m; }

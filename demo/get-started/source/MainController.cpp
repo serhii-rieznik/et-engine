@@ -39,7 +39,7 @@ void demo::MainController::applicationDidLoad(et::RenderContext* rc)
 	et::RenderPass::ConstructionInfo passInfo;
 	passInfo.target.colorLoadOperation = et::FramebufferOperation::Clear;
 	passInfo.target.depthLoadOperation = et::FramebufferOperation::Clear;
-	passInfo.target.clearColor = et::vec4(0.5f + 0.5f * std::cos(et::queryContiniousTimeInSeconds()), 0.2f, 0.3f, 1.0f);
+	passInfo.target.clearColor = et::vec4(0.3f, 0.3f, 0.4f, 1.0f);
 	passInfo.target.clearDepth = 1.0f;
 	passInfo.camera = _camera;
 

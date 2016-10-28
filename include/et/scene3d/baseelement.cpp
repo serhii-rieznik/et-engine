@@ -57,7 +57,7 @@ void BaseElement::buildTransform()
 		_cachedFinalTransform *= parent()->finalTransform();
 	}
 	
-	_cachedFinalInverseTransform = _cachedFinalTransform.inverse();
+	_cachedFinalInverseTransform = _cachedFinalTransform.inversed();
 }
 
 const mat4& BaseElement::localTransform()

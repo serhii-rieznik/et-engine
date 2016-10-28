@@ -23,6 +23,9 @@ namespace et
 		static const String& kWorldTransform()
 			{ static String value("worldTransform"); return value; }
 
+		static const String& kWorldRotationTransform()
+			{ static String value("worldRotationTransform"); return value; }
+
 		struct Variable
 		{
 			uint32_t offset = 0;

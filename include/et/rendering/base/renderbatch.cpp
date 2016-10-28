@@ -135,3 +135,11 @@ void RenderBatch::setMaterial(MaterialInstance::Pointer mat)
 {
     _material = mat;
 }
+
+void RenderBatch::setTransformation(const mat4& m)
+{
+	_transformation = m;
+	_rotationTransformation = _transformation.inversed().transposed();
+	_rotationTransformation[3] = vec4(0.0f, 0.0f, 0.0f, 1.0f);
+
+}

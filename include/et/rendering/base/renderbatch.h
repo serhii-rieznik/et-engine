@@ -43,9 +43,10 @@ namespace et
 		
 		const mat4& transformation() const
 			{ return _transformation; }
-		void setTransformation(const mat4& m)
-			{ _transformation = m ; }
-		
+		const mat4& rotationTransformation() const
+			{ return _rotationTransformation; }
+		void setTransformation(const mat4& m);
+
 		VertexStorage::Pointer& vertexStorage()
 			{ return _vertexStorage; }
 		const VertexStorage::Pointer& vertexStorage() const
@@ -83,6 +84,7 @@ namespace et
 		VertexStorage::Pointer _vertexStorage;
 		IndexArray::Pointer _indexArray;
 		mat4 _transformation = identityMatrix;
+		mat4 _rotationTransformation = identityMatrix;
 		vec3 _minExtent;
 		vec3 _maxExtent;
 		BoundingBox _boundingBox;
