@@ -159,7 +159,7 @@ Program::Pointer MetalRenderer::createProgram(const std::string& source, const s
 /*
  * Pipeline state
  */
-PipelineState::Pointer MetalRenderer::createPipelineState(RenderPass::Pointer pass, Material::Pointer mtl,
+PipelineState::Pointer MetalRenderer::acquirePipelineState(RenderPass::Pointer pass, Material::Pointer mtl,
     VertexStream::Pointer vs)
 {
 	PipelineState::Pointer result = _private->cache.find(vs->vertexBuffer()->declaration(), vs,

@@ -39,7 +39,7 @@ namespace et
                 { ET_FAIL("TODO"); return nullptr; }
             
         private:
-			Camera::Pointer _camera;
+			Camera::Pointer _camera = Camera::Pointer::create();
         };
     }
 }

@@ -7,12 +7,11 @@
 
 #pragma once
 
-#include <et/rendering/interface/renderpass.h>
+#include <et/rendering/interface/renderer.h>
 #include <et/scene3d/scene3d.h>
 
 namespace et
 {
-	class Camera;
 	namespace s3d
 	{		
 		class Renderer : public FlagsHolder
@@ -31,9 +30,8 @@ namespace et
 			
 		public:
 			Renderer();
-			void render(RenderContext*, const Scene&, Camera::Pointer);
 
-			void initDebugObjects(RenderContext*);
+			void render(RenderInterface::Pointer, const Scene&, Camera::Pointer);
 			void renderTransformedBoundingBox(RenderPass::Pointer, const BoundingBox&, const mat4&);
 			
 		private:
@@ -41,8 +39,11 @@ namespace et
 			
 		private:
 			using BatchFromMesh = std::pair<et::RenderBatch::Pointer, et::s3d::Mesh::Pointer>;
-			std::map<uint64_t, Vector<BatchFromMesh>, std::greater<uint32_t>> _latestBatches;
+			using BatchMap = std::map<uint64_t, Vector<BatchFromMesh>, std::greater<uint32_t>>;
+
+			RenderPass::Pointer _mainPass;
 			RenderBatch::Pointer _bboxBatch;
+			BatchMap _latestBatches;
 		};
 	}
 }

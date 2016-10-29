@@ -49,7 +49,7 @@ void demo::MainController::applicationWillResizeContext(const et::vec2i& sz)
 
 void demo::MainController::render(et::RenderContext* rc)
 {
-	_renderer.render(rc, _scene.reference(), _camera);
+	_renderer.render(rc->renderer(), _scene.reference(), _camera);
 }
 
 et::IApplicationDelegate* et::Application::initApplicationDelegate()

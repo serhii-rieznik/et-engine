@@ -55,7 +55,7 @@ public:
 	/*
 	 * Pipeline state
 	 */
-	PipelineState::Pointer createPipelineState(RenderPass::Pointer, Material::Pointer, VertexStream::Pointer) override;
+	PipelineState::Pointer acquirePipelineState(RenderPass::Pointer, Material::Pointer, VertexStream::Pointer) override;
 
 	/*
 	 * Sampler

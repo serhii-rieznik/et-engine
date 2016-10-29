@@ -677,7 +677,7 @@ void OBJLoader::loadMaterials(const std::string& fileName, ObjectsCache& cache)
 					std::string name;
 					materialFile >> name;
 
-					Material::Pointer mtl = _renderer->sharedMaterialLibrary().loadDefaultMaterial(DefaultMaterial::Phong);
+					Material::Pointer mtl = _renderer->sharedMaterialLibrary().loadDefaultMaterial(DefaultMaterial::Microfacet);
 					_lastMaterial = mtl->instance();
 					_lastMaterial->setName(name);
 

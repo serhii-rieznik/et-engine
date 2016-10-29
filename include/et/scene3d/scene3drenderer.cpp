@@ -18,29 +18,31 @@ s3d::Renderer::Renderer() :
 	
 }
 
-void s3d::Renderer::render(RenderContext* rc, const Scene& scene, Camera::Pointer camera)
+void s3d::Renderer::render(RenderInterface::Pointer renderer, const Scene& scene, Camera::Pointer camera)
 {
-    if (hasFlag(RenderMeshes) == false)
-        return;
+	if (_mainPass.invalid())
+	{
+		Camera::Pointer lightCamera;
+		auto lights = scene.childrenOfType(et::s3d::ElementType::Light);
+		if (!lights.empty())
+		{
+			lightCamera = static_cast<s3d::Light::Pointer>(lights.front())->camera();
+		}
 
+		RenderPass::ConstructionInfo passInfo;
+		passInfo.target.colorLoadOperation = et::FramebufferOperation::Clear;
+		passInfo.target.depthLoadOperation = et::FramebufferOperation::Clear;
+		passInfo.target.clearColor = vec4(0.25f, 0.3333f, 0.5f, 1.0f);
+		passInfo.camera = camera;
+		passInfo.light = lightCamera;
+		_mainPass = renderer->allocateRenderPass(passInfo);
+	}
 
-	RenderPass::ConstructionInfo passInfo;
+	_mainPass->begin();
+	renderMeshList(_mainPass, scene.childrenOfType(s3d::ElementType::Mesh));
+	_mainPass->end();
 
-	auto lights = scene.childrenOfType(et::s3d::ElementType::Light);
-    if (lights.size() > 0)
-    {
-        auto light = static_cast<s3d::Light::Pointer>(lights.front());
-        passInfo.light = light->camera();
-    }
-    
-	passInfo.target.colorLoadOperation = et::FramebufferOperation::Clear;
-	passInfo.target.depthLoadOperation = et::FramebufferOperation::Clear;
-	passInfo.target.clearColor = vec4(0.25f, 0.3333f, 0.5f, 1.0f);
-	passInfo.camera = camera;
-
-	RenderPass::Pointer pass = rc->renderer()->allocateRenderPass(passInfo);
-	renderMeshList(pass, scene.childrenOfType(s3d::ElementType::Mesh));
-	rc->renderer()->submitRenderPass(pass);
+	renderer->submitRenderPass(_mainPass);
 }
 
 void s3d::Renderer::renderMeshList(RenderPass::Pointer pass, const s3d::BaseElement::List& meshes)
@@ -78,15 +80,9 @@ void s3d::Renderer::renderMeshList(RenderPass::Pointer pass, const s3d::BaseElem
 		
 		for (auto& rb : rbv.second)
 		{
-			// rb.second->material()->bindToMaterial(rb.first->material());
 			pass->pushRenderBatch(rb.first);
 		}
 	}
-}
-
-void s3d::Renderer::initDebugObjects(RenderContext* rc)
-{
-	ET_FAIL("Not implemented")
 }
 
 void s3d::Renderer::renderTransformedBoundingBox(RenderPass::Pointer pass, const BoundingBox& b, const mat4& t)

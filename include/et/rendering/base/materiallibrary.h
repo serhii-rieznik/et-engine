@@ -16,7 +16,7 @@ enum class DefaultMaterial : uint32_t
 {
 	Textured2D,
 	Textured,
-	Phong,
+	Microfacet,
 
 	Count
 };

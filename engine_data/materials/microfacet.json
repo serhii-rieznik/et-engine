@@ -1,0 +1,24 @@
+{
+	"input-layout" : {
+		"position" : 3,
+		"normal" : 3,
+		"texcoord0" : 2
+	},
+
+	"depth-state": {
+		"depth-function": "less",
+		"depth-test": true,
+		"depth-write": true
+	},
+
+	"blend-state": {
+		"blend-configuration" : "disabled"
+	},
+
+	"options" : {
+	},
+
+	"cull-mode" : "back",
+
+	"code" : "shaders/microfacet"
+}

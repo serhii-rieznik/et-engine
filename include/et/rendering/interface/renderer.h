@@ -78,7 +78,7 @@ public:
 	/*
 	 * Pipeline state
 	 */
-	virtual PipelineState::Pointer createPipelineState(RenderPass::Pointer, Material::Pointer, VertexStream::Pointer) = 0;
+	virtual PipelineState::Pointer acquirePipelineState(RenderPass::Pointer, Material::Pointer, VertexStream::Pointer) = 0;
 
 	/*
 	 * Sampler

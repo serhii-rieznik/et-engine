@@ -10,13 +10,7 @@ using namespace demo;
 
 void SceneLoader::init(et::RenderContext* rc)
 {
-	std::string materialFile = application().resolveFileName("engine_data/materials/burley_diffuse.material");
-
 	_rc = rc;
-	/*/ TODO : retreive from renderer
-	_defaultMaterial = Material::Pointer::create(_rc->renderer().ptr());
-	_defaultMaterial->loadFromJson(loadTextFile(materialFile), getFilePath(materialFile));
-	// */
 }
 
 et::s3d::Scene::Pointer SceneLoader::loadFromFile(const std::string& fileName)
