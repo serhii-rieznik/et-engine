@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		5C1538BE1DBEBE710049E1F5 /* light.h in Headers */ = {isa = PBXBuildFile; fileRef = 5C1538BD1DBEBE710049E1F5 /* light.h */; };
+		5C2ECCB61DC4B95700E639C7 /* materialhelpers.h in Headers */ = {isa = PBXBuildFile; fileRef = 5C2ECCB51DC4B95700E639C7 /* materialhelpers.h */; };
 		5C4D4FE81DAC2C5400157711 /* shadersource.h in Headers */ = {isa = PBXBuildFile; fileRef = 5C4D4FE61DAC2C5400157711 /* shadersource.h */; };
 		5C4F7F1A1D9AF98D0054FA50 /* databuffer.h in Headers */ = {isa = PBXBuildFile; fileRef = 5C4F7F191D9AF98D0054FA50 /* databuffer.h */; };
 		5C4F7F231D9C324F0054FA50 /* constbuffer.h in Headers */ = {isa = PBXBuildFile; fileRef = 5C4F7F211D9C324F0054FA50 /* constbuffer.h */; };
@@ -31,6 +32,7 @@
 
 /* Begin PBXFileReference section */
 		5C1538BD1DBEBE710049E1F5 /* light.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = light.h; sourceTree = "<group>"; };
+		5C2ECCB51DC4B95700E639C7 /* materialhelpers.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = materialhelpers.h; sourceTree = "<group>"; };
 		5C4D4FE51DAC2C5400157711 /* shadersource.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = shadersource.cpp; sourceTree = "<group>"; };
 		5C4D4FE61DAC2C5400157711 /* shadersource.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = shadersource.h; sourceTree = "<group>"; };
 		5C4F7F151D9AF84C0054FA50 /* sharedvariables.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; fileEncoding = 4; path = sharedvariables.cpp; sourceTree = "<group>"; };
@@ -42,11 +44,6 @@
 		5C4F7F211D9C324F0054FA50 /* constbuffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = constbuffer.h; sourceTree = "<group>"; };
 		5C5ECAFD1DAEA83C00B52F05 /* material.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = material.cpp; sourceTree = "<group>"; };
 		5C5ECAFE1DAEA83C00B52F05 /* material.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = material.h; sourceTree = "<group>"; };
-		5C5ECB031DAECB2900B52F05 /* material.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = material.cpp; sourceTree = "<group>"; };
-		5C5ECB041DAECB2900B52F05 /* material.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = material.h; sourceTree = "<group>"; };
-		5C5ECB051DAECB2900B52F05 /* material.parameters.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = material.parameters.h; sourceTree = "<group>"; };
-		5C5ECB061DAECB2900B52F05 /* scenematerial.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = scenematerial.cpp; sourceTree = "<group>"; };
-		5C5ECB071DAECB2900B52F05 /* scenematerial.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = scenematerial.h; sourceTree = "<group>"; };
 		5C6587FE1DA59D27007F8DB1 /* sampler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sampler.h; sourceTree = "<group>"; };
 		5C6588001DA59D4E007F8DB1 /* metal_sampler.mm */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; fileEncoding = 4; path = metal_sampler.mm; sourceTree = "<group>"; };
 		5C6588011DA59D4E007F8DB1 /* metal_sampler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = metal_sampler.h; sourceTree = "<group>"; };
@@ -345,18 +342,6 @@
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
-		5C5ECB021DAECB2900B52F05 /* deprecated */ = {
-			isa = PBXGroup;
-			children = (
-				5C5ECB031DAECB2900B52F05 /* material.cpp */,
-				5C5ECB041DAECB2900B52F05 /* material.h */,
-				5C5ECB051DAECB2900B52F05 /* material.parameters.h */,
-				5C5ECB061DAECB2900B52F05 /* scenematerial.cpp */,
-				5C5ECB071DAECB2900B52F05 /* scenematerial.h */,
-			);
-			path = deprecated;
-			sourceTree = "<group>";
-		};
 		5CD5A8551D932CF4003FD770 /* app */ = {
 			isa = PBXGroup;
 			children = (
@@ -652,7 +637,6 @@
 		5CD5A9301D932CF4003FD770 /* rendering */ = {
 			isa = PBXGroup;
 			children = (
-				5C5ECB021DAECB2900B52F05 /* deprecated */,
 				5CD5A9311D932CF4003FD770 /* base */,
 				5CD5A9541D932CF4003FD770 /* interface */,
 				5CD5A95F1D932CF4003FD770 /* metal */,
@@ -682,6 +666,7 @@
 				5CD5A9351D932CF4003FD770 /* indexarray.h */,
 				5C5ECAFD1DAEA83C00B52F05 /* material.cpp */,
 				5C5ECAFE1DAEA83C00B52F05 /* material.h */,
+				5C2ECCB51DC4B95700E639C7 /* materialhelpers.h */,
 				5C8278B21DB555F900EB2DF2 /* materiallibrary.cpp */,
 				5C8278B31DB555F900EB2DF2 /* materiallibrary.h */,
 				5CD5A9361D932CF4003FD770 /* pipelinestate.cpp */,
@@ -836,6 +821,7 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5C2ECCB61DC4B95700E639C7 /* materialhelpers.h in Headers */,
 				5C4F7F1A1D9AF98D0054FA50 /* databuffer.h in Headers */,
 				5C8278B51DB555F900EB2DF2 /* materiallibrary.h in Headers */,
 				5C6588031DA59D4E007F8DB1 /* metal_sampler.h in Headers */,
@@ -872,7 +858,7 @@
 		6EBE15A91C66B4AD00AF7206 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0720;
+				LastUpgradeCheck = 0810;
 				ORGANIZATIONNAME = Cheetek;
 				TargetAttributes = {
 					6EBE15B01C66B4AD00AF7206 = {
@@ -933,8 +919,10 @@
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_IDENTITY = "-";
@@ -952,6 +940,8 @@
 				);
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_HIDDEN_VIRTUAL_FUNCTIONS = YES;
+				GCC_WARN_NON_VIRTUAL_DESTRUCTOR = YES;
 				GCC_WARN_UNDECLARED_SELECTOR = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
@@ -978,8 +968,10 @@
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_IDENTITY = "-";
@@ -991,6 +983,8 @@
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_HIDDEN_VIRTUAL_FUNCTIONS = YES;
+				GCC_WARN_NON_VIRTUAL_DESTRUCTOR = YES;
 				GCC_WARN_UNDECLARED_SELECTOR = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;

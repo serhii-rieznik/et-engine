@@ -1,5 +1,4 @@
-#include "common.metal.inl"
-
+#include "include/common.metal.inl"
 
 /*
  * Inputs / outputs

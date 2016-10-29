@@ -1,4 +1,5 @@
-#include "common.metal.inl"
+#include "include/common.metal.inl"
+#include "include/lighting.inl"
 
 /*
  * Inputs / outputs
@@ -15,6 +16,13 @@ struct VSOutput {
 
 struct FSOutput {
 	float4 color0 [[color(0)]];
+};
+
+struct MaterialVariables {
+	float4 albedoColor;
+	float4 reflectanceColor;
+	float roughness;
+	float metallness;
 };
 
 struct ObjectVariables {
@@ -41,9 +49,37 @@ vertex VSOutput vertexMain(VSInput in [[stage_in]],
 /*
  * Fragment shader
  */
-fragment FSOutput fragmentMain(VSOutput in [[stage_in]])
+
+fragment FSOutput fragmentMain(VSOutput in [[stage_in]],
+	constant MaterialVariables& materialVariables [[buffer(MaterialVariablesBufferIndex)]])
 {
+	float3 normal = normalize(in.normal);
+	float3 lightNormal = normalize(in.toLight);
+	float3 viewNormal = normalize(in.toCamera);
+	float3 halfVector = normalize(lightNormal + viewNormal);
+
+	float linearRoughness = materialVariables.roughness;
+	linearRoughness *= linearRoughness;
+
+	PBSLightEnvironment env;
+	env.alpha = linearRoughness * linearRoughness;
+	env.metallness = materialVariables.metallness;
+	env.LdotN = dot(lightNormal, normal);
+	env.VdotN = dot(viewNormal, normal);
+	env.LdotH = dot(lightNormal, halfVector);
+	env.VdotH = dot(viewNormal, halfVector);
+	env.NdotH = dot(normal, halfVector);
+	env.viewFresnel = fresnelShlick(materialVariables.metallness, env.VdotN);
+
 	FSOutput out;
-	out.color0 = float4(0.5 + 0.5 * normalize(in.normal), 1.0);
+
+	out.color0 =
+	/*
+		materialVariables.albedoColor * burleyDiffuse(env) +
+		materialVariables.reflectanceColor * microfacetSpecular(env);
+	// */
+	float4(burleyDiffuse(env));
+	// float4(microfacetSpecular(env));
+
 	return out;
 }

@@ -67,6 +67,10 @@ void parseShaderSource(std::string& source, const std::string& baseFolder, const
 				"\n// -------- end auto included file ---------\n" +
 				after;
 		}
+		else
+		{
+			ET_FAIL("Failed to preprocess shader source");
+		}
 	}
 
 	application().popSearchPaths();

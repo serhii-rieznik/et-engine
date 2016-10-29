@@ -242,8 +242,7 @@ void dds::loadInfoFromStream(std::istream& source, TextureDescription& desc)
 	{
 		case 0:
 		{
-			uint32_t channels = header.ddspf.dwRGBBitCount / 8;
-			ET_ASSERT(channels == 4);
+			ET_ASSERT(header.ddspf.dwRGBBitCount == 32);
 			bool isBGR = (header.ddspf.dwBBitMask == 255);
 			desc.format = isBGR  ? TextureFormat::BGRA8 : TextureFormat::RGBA8;
 			break;

@@ -298,6 +298,19 @@ namespace et
 		float cY() const { return y; }
 		float cZ() const { return z; }
 		float cW() const { return w; }
+
+		vector4<T> operator & (const uint32_t value) const
+		{
+			union { T t; uint32_t i; } cx = { x };
+			union { T t; uint32_t i; } cy = { y };
+			union { T t; uint32_t i; } cz = { z };
+			union { T t; uint32_t i; } cw = { w };
+			cx.i &= value;
+			cy.i &= value;
+			cz.i &= value;
+			cw.i &= value;
+			return vector4<T>(cx.t, cy.t, cz.t, cw.t);
+		}
 	};
 
 	template <typename T>

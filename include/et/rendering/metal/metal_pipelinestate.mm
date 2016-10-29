@@ -130,13 +130,10 @@ void MetalPipelineState::uploadObjectVariable(const String& name, const void* pt
 
 void MetalPipelineState::bind(MetalNativeEncoder& e, MaterialInstance::Pointer material)
 {
-	/*/ TODO : parameters
-	for (const auto& p : material->properties())
+	for (const auto& prop : material->usedProperties())
 	{
-		const Material::Property& prop = p.second;
-		uploadMaterialVariable(p.first, prop.data, prop.length);
+		uploadMaterialVariable(prop.first, prop.second.data, prop.second.size);
 	}
-	// */
 
 	MetalDataBuffer::Pointer sharedBuffer = _private->renderer->sharedConstBuffer().buffer();
 	id<MTLBuffer> mtlSharedBuffer = sharedBuffer->nativeBuffer().buffer();
@@ -164,43 +161,37 @@ void MetalPipelineState::bind(MetalNativeEncoder& e, MaterialInstance::Pointer m
 			[e.encoder setFragmentBuffer:mtlSharedBuffer offset:objectBufferOffset atIndex:ObjectVariablesBufferIndex];
 	}
 
-	for (const auto& tx : material->allTextures())
+	for (const auto& tx : material->usedTextures())
 	{
-		if (tx.object.valid())
+		auto vt = reflection.vertexTextures.find(tx.first);
+		if (vt != reflection.vertexTextures.end())
 		{
-			auto vt = reflection.vertexTextures.find(tx.name);
-			if (vt != reflection.vertexTextures.end())
-			{
-				MetalTexture::Pointer tex = tx.object;
-				[e.encoder setVertexTexture:tex->nativeTexture().texture atIndex:vt->second];
-			}
-
-			auto ft = reflection.fragmentTextures.find(tx.name);
-			if (ft != reflection.fragmentTextures.end())
-			{
-				MetalTexture::Pointer tex = tx.object;
-				[e.encoder setFragmentTexture:tex->nativeTexture().texture atIndex:ft->second];
-			}
+			MetalTexture::Pointer tex = tx.second.texture;
+			[e.encoder setVertexTexture:tex->nativeTexture().texture atIndex:vt->second];
 		}
+		auto ft = reflection.fragmentTextures.find(tx.first);
+		if (ft != reflection.fragmentTextures.end())
+		{
+			MetalTexture::Pointer tex = tx.second.texture;
+			[e.encoder setFragmentTexture:tex->nativeTexture().texture atIndex:ft->second];
+		}
+
 	}
 
-	for (const auto& sm : material->allSamplers())
+	for (const auto& sm : material->usedSamplers())
 	{
-		if (sm.object.valid())
+		auto vs = reflection.vertexSamplers.find(sm.first);
+		if (vs != reflection.vertexSamplers.end())
 		{
-			auto vs = reflection.vertexSamplers.find(sm.name);
-			if (vs != reflection.vertexSamplers.end())
-			{
-				MetalSampler::Pointer smp = sm.object;
-				[e.encoder setVertexSamplerState:smp->nativeSampler().sampler atIndex:vs->second];
-			}
+			MetalSampler::Pointer smp = sm.second.sampler;
+			[e.encoder setVertexSamplerState:smp->nativeSampler().sampler atIndex:vs->second];
+		}
 
-			auto fs = reflection.fragmentSamplers.find(sm.name);
-			if (fs != reflection.fragmentSamplers.end())
-			{
-				MetalSampler::Pointer smp = sm.object;
-				[e.encoder setFragmentSamplerState:smp->nativeSampler().sampler atIndex:fs->second];
-			}
+		auto fs = reflection.fragmentSamplers.find(sm.first);
+		if (fs != reflection.fragmentSamplers.end())
+		{
+			MetalSampler::Pointer smp = sm.second.sampler;
+			[e.encoder setFragmentSamplerState:smp->nativeSampler().sampler atIndex:fs->second];
 		}
 	}
 
@@ -231,12 +222,12 @@ void MetalPipelineState::buildReflection()
 		}
 		else if (arg.active && (arg.type == MTLArgumentTypeTexture))
 		{
-			std::string argName([arg.name UTF8String]);
+			String argName([arg.name UTF8String]);
 			reflection.vertexTextures[argName] = static_cast<uint32_t>(arg.index);
 		}
 		else if (arg.active && (arg.type == MTLArgumentTypeSampler))
 		{
-			std::string argName([arg.name UTF8String]);
+			String argName([arg.name UTF8String]);
 			reflection.vertexSamplers[argName] = static_cast<uint32_t>(arg.index);
 		}
 	}
@@ -271,12 +262,12 @@ void MetalPipelineState::buildReflection()
 		}
 		else if (arg.active && (arg.type == MTLArgumentTypeTexture))
 		{
-			std::string argName([arg.name UTF8String]);
+			String argName([arg.name UTF8String]);
 			reflection.fragmentTextures[argName] = static_cast<uint32_t>(arg.index);
 		}
 		else if (arg.active && (arg.type == MTLArgumentTypeSampler))
 		{
-			std::string argName([arg.name UTF8String]);
+			String argName([arg.name UTF8String]);
 			reflection.fragmentSamplers[argName] = static_cast<uint32_t>(arg.index);
 		}
 	}

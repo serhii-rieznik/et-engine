@@ -7,8 +7,7 @@
 
 #include <et-ext/rt/bsdf.h>
 
-et::rt::BSDFSample::BSDFSample(const et::rt::float4& _wi, const et::rt::float4& _n,
-	const Material& mat, Direction _d) : Wi(_wi), n(_n), IdotN(_wi.dot(_n)), alpha(mat.roughness), dir(_d)
+et::rt::BSDFSample::BSDFSample(const et::rt::float4& _wi, const et::rt::float4& _n, const Material& mat, Direction _d) : Wi(_wi), n(_n), IdotN(_wi.dot(_n)), alpha(mat.roughness), dir(_d)
 {
 	switch (mat.cls)
 	{
@@ -24,7 +23,7 @@ et::rt::BSDFSample::BSDFSample(const et::rt::float4& _wi, const et::rt::float4& 
 		{
 			cls = BSDFSample::Class::Reflection;
 			Wo = computeReflectionVector(Wi, n, mat.roughness);
-			fresnel = 0.98f;
+			fresnel = fresnelShlickApproximation(IdotN, 0.025f);
 			color = mat.specular;
 			break;
 		}
@@ -105,7 +104,7 @@ et::rt::BSDFSample::BSDFSample(const et::rt::float4& _wi, const et::rt::float4& 
 		case Material::Class::Conductor:
 		{
 			cls = BSDFSample::Class::Reflection;
-			fresnel = 0.98f;
+			fresnel = fresnelShlickApproximation(IdotN, 0.025f);
 			color = mat.specular;
 			break;
 		}
@@ -155,16 +154,16 @@ et::rt::BSDFSample::BSDFSample(const et::rt::float4& _wi, const et::rt::float4& 
 	cosTheta = std::abs((dir == BSDFSample::Direction::Backward ? OdotN : IdotN));
 }
 
-inline float G_ggx(float t, float rSq)
+inline float G_ggx(float t, float alpha)
 {
-	t *= t;
-	return 2.0f / (1.0f + std::hypot(1.0f, rSq * (1.0f - t) / t));
+	float tanThetaSquared = (1.0f - t * t) / (t * t);
+	return 2.0f / (1.0f + std::sqrt(1.0f + alpha * alpha * tanThetaSquared));
 }
 
-inline float D_ggx(float rSq, float ct)
+inline float D_ggx(float alphaSquared, float cosTheta)
 {
-	union { float f; uint32_t i; } x = { ct * ct * (rSq - 1.0f) + 1.0f };
-	return (x.i & 0x7fffffff) ? (rSq / (PI * et::sqr(x.f))) : 1.0f;
+	union { float f; uint32_t i; } x = { cosTheta * cosTheta * (alphaSquared - 1.0f) + 1.0f };
+	return (x.i & 0x7fffffff) ? (alphaSquared / (PI * et::sqr(x.f))) : 1.0f;
 }
 
 float et::rt::BSDFSample::bsdf()
@@ -180,10 +179,9 @@ float et::rt::BSDFSample::bsdf()
 		float HdotO = h.dot(Wo);
 		float HdotI = -h.dot(Wi);
 		float NdotH = n.dot(h);
-		float rSq = sqr(alpha);
-		float ndf = D_ggx(rSq, NdotH);
-		float g1 = G_ggx(NdotI, rSq) * float(HdotI / NdotI > 0.0f);
-		float g2 = G_ggx(NdotO, rSq) * float(HdotO / NdotO > 0.0f);
+		float ndf = D_ggx(alpha * alpha, NdotH);
+		float g1 = G_ggx(NdotI, alpha) * float(HdotI / NdotI > 0.0f);
+		float g2 = G_ggx(NdotO, alpha) * float(HdotO / NdotO > 0.0f);
 		float g = g1 * g2;
 		return (ndf * g * fresnel) / (4.0f * NdotI * NdotO);
 	}
@@ -191,15 +189,12 @@ float et::rt::BSDFSample::bsdf()
 	{
 		float HdotO = h.dot(Wo);
 		float HdotI = h.dot(Wi);
-		float rSq = sqr(alpha);
-
-		float g1 = G_ggx(IdotN, rSq) * float(HdotI / IdotN > 0.0f);
-		float g2 = G_ggx(OdotN, rSq) * float(HdotO / OdotN > 0.0f);
+		float g1 = G_ggx(IdotN, alpha) * float(HdotI / IdotN > 0.0f);
+		float g2 = G_ggx(OdotN, alpha) * float(HdotO / OdotN > 0.0f);
 		float g = g1 * g2;
-
 		float NdotH = n.dot(h);
 		float etaSq = eta * eta;
-		float d = D_ggx(rSq, NdotH) * float(NdotH > 0.0f);
+		float d = D_ggx(alpha * alpha, NdotH) * float(NdotH > 0.0f);
 		float denom = sqr(HdotI + eta * HdotO);
 
 		return ((1.0f - fresnel) * d * g * etaSq * HdotI * HdotO) / (IdotN * denom + Constants::epsilon);
@@ -249,3 +244,39 @@ et::rt::float4 et::rt::BSDFSample::evaluate()
 	union { float f; uint32_t i; } x = { pdf() };
 	return (x.i & 0x7fffffff) ? color * (cosTheta * bsdf() / x.f) : float4(0.0f);
 }
+
+et::rt::float4 et::rt::BSDFSample::combinedEvaluate()
+{
+	if (cls == Class::Diffuse)
+		return color;
+
+	if (cls == Class::Reflection)
+	{
+		h = Wo - Wi;
+		h.normalize();
+		ET_ASSERT(h.dotSelf() > 0.0f);
+		float HdotO = h.dot(Wo);
+		float NdotH = n.dot(h);
+		float HdotIdivIdotN = h.dot(Wi) / IdotN;
+		float g1 = G_ggx(-IdotN, alpha) * float(HdotIdivIdotN > 0.0f);
+		float g2 = G_ggx( OdotN, alpha) * float(HdotO / OdotN > 0.0f);
+		return color * (g1 * g2 * fresnel * HdotIdivIdotN / NdotH);
+	}
+
+	if (cls == BSDFSample::Class::Transmittance)
+	{
+		h = Wi + Wo * eta;
+		h.normalize();
+		h *= 2.0f * float(h.dot(n) > 0.0f) - 1.0f;
+		float HdotO = h.dot(Wo);
+		float HdotI = h.dot(Wi);
+		float HdotIdivIdotN = HdotI / IdotN;
+		float g1 = G_ggx(IdotN, alpha) * float(HdotIdivIdotN > 0.0f);
+		float g2 = G_ggx(OdotN, alpha) * float(HdotO / OdotN > 0.0f);
+		return color * (cosTheta * (1.0f - fresnel) * g1 * g2 * HdotIdivIdotN * HdotO / HdotO);
+	}
+
+	ET_FAIL("Invalid material class");
+	return float4(0.0f);
+}
+

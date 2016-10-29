@@ -36,6 +36,7 @@ namespace rt
 		float pdf();
 		float bsdf();
 		float4 evaluate();
+		float4 combinedEvaluate();
 
 		float4 Wi = float4(0.0f);
 		float4 Wo = float4(0.0f);

@@ -31,33 +31,47 @@ uint64_t Material::sortingKey() const
 
 void Material::setTexture(MaterialTexture t, Texture::Pointer tex)
 {
-	Textures::value_type& entry = _textures[static_cast<uint32_t>(t)];
+	mtl::OptionalObject<Texture::Pointer>& entry = textures[static_cast<uint32_t>(t)];
 	entry.object = tex;
 	entry.index = static_cast<uint32_t>(t);
-	entry.name = materialTextureToString(t);
+	entry.binding = t;
+
+	for (auto& i : _instances)
+		i->invalidateUsedTextures();
 }
 
 void Material::setSampler(MaterialTexture t, Sampler::Pointer smp)
 {
-	Samplers::value_type& entry = _samplers[static_cast<uint32_t>(t)];
+	mtl::OptionalObject<Sampler::Pointer>& entry = samplers[static_cast<uint32_t>(t)];
 	entry.object = smp;
 	entry.index = static_cast<uint32_t>(t);
-	entry.name = materialSamplerToString(t);
+	entry.binding = t;
+
+	for (auto& i : _instances)
+		i->invalidateUsedSamplers();
 }
 
 void Material::setVector(MaterialParameter p, const vec4& v)
 {
-	_params[static_cast<uint32_t>(p)] = v;
+	properties[static_cast<uint32_t>(p)] = v;
+	properties[static_cast<uint32_t>(p)].binding = p;
+
+	for (auto& i : _instances)
+		i->invalidateUsedProperties();
+}
+
+void Material::setFloat(MaterialParameter p, float f)
+{
+	properties[static_cast<uint32_t>(p)] = f;
+	properties[static_cast<uint32_t>(p)].binding = p;
+
+	for (auto& i : _instances)
+		i->invalidateUsedProperties();
 }
 
 vec4 Material::getVector(MaterialParameter p) const
 {
 	return getParameter<vec4>(p);
-}
-
-void Material::setFloat(MaterialParameter p, float f)
-{
-	_params[static_cast<uint32_t>(p)] = f;
 }
 
 float Material::getFloat(MaterialParameter p) const
@@ -67,12 +81,12 @@ float Material::getFloat(MaterialParameter p) const
 
 Texture::Pointer Material::texture(MaterialTexture t)
 {
-	return _textures[static_cast<uint32_t>(t)].object;
+	return textures[static_cast<uint32_t>(t)].object;
 }
 
 Sampler::Pointer Material::sampler(MaterialTexture t)
 {
-	return _samplers[static_cast<uint32_t>(t)].object;
+	return samplers[static_cast<uint32_t>(t)].object;
 }
 
 void Material::loadFromJson(const std::string& source, const std::string& baseFolder)
@@ -204,9 +218,10 @@ void Material::loadCode(const std::string& codeString, const std::string& baseFo
 MaterialInstancePointer Material::instance()
 {
 	MaterialInstance::Pointer result = MaterialInstance::Pointer::create(Material::Pointer(this));
-	result->_textures = _textures;
-	result->_samplers = _samplers;
-	result->_params = _params;
+	result->textures = textures;
+	result->samplers = samplers;
+	result->properties = properties;
+	_instances.emplace_back(result);
 	return result;
 }
 
@@ -228,19 +243,125 @@ Material::Pointer MaterialInstance::base()
 	return _base;
 }
 
+void MaterialInstance::buildUsedTextures()
+{
+	_usedTextures.clear();
+
+	auto setFunc = [this](const mtl::OptionalObject<Texture::Pointer>& t) {
+		if (t.object.valid())
+		{
+			MaterialTextureHolder& tex = _usedTextures[mtl::materialTextureToString(t.binding)];
+			tex.binding = t.binding;
+			tex.texture = t.object;
+		}
+	};
+
+	for (const auto& t : base()->textures)
+		setFunc(t);
+	for (const auto& t : textures)
+		setFunc(t);
+
+	_texturesValid = true;
+}
+
+void MaterialInstance::buildUsedSamplers()
+{
+	_usedSamplers.clear();
+
+	auto setFunc = [this](const mtl::OptionalObject<Sampler::Pointer>& t) {
+		if (t.object.valid())
+		{
+			MaterialSamplerHolder& smp = _usedSamplers[mtl::materialSamplerToString(t.binding)];
+			smp.binding = t.binding;
+			smp.sampler = t.object;
+		}
+	};
+
+	for (const auto& t : base()->samplers)
+		setFunc(t);
+	for (const auto& t : samplers)
+		setFunc(t);
+
+	_samplersValid = true;
+}
+
+void MaterialInstance::buildUsedProperties()
+{
+	_usedProperties.clear();
+
+	auto setFunc = [this](const mtl::OptionalValue& p) {
+		if (p.isSet())
+		{
+			ET_ASSERT(p.size <= sizeof(MaterialPropertyHolder::data));
+			MaterialPropertyHolder& holder = _usedProperties[mtl::materialParameterToString(p.binding)];
+			holder.binding = p.binding;
+			holder.size = p.size;
+			memcpy(holder.data, p.data, p.size);
+		}
+	};
+
+	for (const auto& p : base()->properties)
+		setFunc(p);
+
+	for (const auto& p : properties)
+		setFunc(p);
+
+	_propertiesValid = true;
+}
+
+const MaterialTexturesCollection& MaterialInstance::usedTextures()
+{
+	if (!_texturesValid)
+		buildUsedTextures();
+
+	return _usedTextures;
+}
+
+const MaterialSamplersCollection& MaterialInstance::usedSamplers()
+{
+	if (!_samplersValid)
+		buildUsedSamplers();
+	
+	return _usedSamplers;
+}
+
+const MaterialPropertiesCollection& MaterialInstance::usedProperties()
+{
+	if (!_propertiesValid)
+		buildUsedProperties();
+
+	return _usedProperties;
+}
+
+void MaterialInstance::invalidateUsedTextures()
+{
+	_texturesValid = false;
+}
+
+void MaterialInstance::invalidateUsedSamplers()
+{
+	_samplersValid = false;
+}
+
+void MaterialInstance::invalidateUsedProperties()
+{
+	_propertiesValid = false;
+}
+
 /*
  * Service
  */
-std::string materialParameterToString(MaterialParameter p)
+const String& mtl::materialParameterToString(MaterialParameter p)
 {
 	ET_ASSERT(p < MaterialParameter::Count);
-	static const Map<MaterialParameter, std::string> names =
+	static const Map<MaterialParameter, String> names =
 	{
 		{ MaterialParameter::AlbedoColor, "albedoColor" },
 		{ MaterialParameter::ReflectanceColor, "reflectanceColor" },
 		{ MaterialParameter::EmissiveColor, "emissiveColor" },
 		{ MaterialParameter::Roughness, "roughness" },
-		{ MaterialParameter::Opacity, "ppacity" },
+		{ MaterialParameter::Metallness, "metallness" },
+		{ MaterialParameter::Opacity, "opacity" },
 		{ MaterialParameter::NormalScale, "normalScale" },
 		{ MaterialParameter::IndexOfRefraction, "indexOfRefraction" },
 		{ MaterialParameter::SpecularExponent, "specularExponent" },
@@ -248,10 +369,10 @@ std::string materialParameterToString(MaterialParameter p)
 	return names.at(p);
 }
 
-const std::string& materialTextureToString(MaterialTexture t)
+const String& mtl::materialTextureToString(MaterialTexture t)
 {
 	ET_ASSERT(t < MaterialTexture::Count);
-	static const Map<MaterialTexture, std::string> names =
+	static const Map<MaterialTexture, String> names =
 	{
 		{ MaterialTexture::Albedo, "albedoTexture" },
 		{ MaterialTexture::Reflectance, "reflectanceTexture" },
@@ -263,10 +384,10 @@ const std::string& materialTextureToString(MaterialTexture t)
 	return names.at(t);
 }
 
-const std::string& materialSamplerToString(MaterialTexture t)
+const String& mtl::materialSamplerToString(MaterialTexture t)
 {
 	ET_ASSERT(t < MaterialTexture::Count);
-	static const Map<MaterialTexture, std::string> names =
+	static const Map<MaterialTexture, String> names =
 	{
 		{ MaterialTexture::Albedo, "albedoSampler" },
 		{ MaterialTexture::Reflectance, "reflectanceSampler" },

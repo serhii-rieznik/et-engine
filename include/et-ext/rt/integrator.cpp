@@ -45,7 +45,7 @@ float4 PathTraceIntegrator::gather(const Ray& inRay, size_t depth, size_t& maxDe
         auto nrm = tri.interpolatedNormal(traverse.intersectionPointBarycentric);
 
 		BSDFSample sample(currentRay.direction, nrm, mat, et::rt::BSDFSample::Direction::Backward);
-		bounce.scale = sample.evaluate();
+		bounce.scale = sample.combinedEvaluate();
 		bounce.add = mat.emissive;
 
 #	if ET_RT_VISUALIZE_BRDF

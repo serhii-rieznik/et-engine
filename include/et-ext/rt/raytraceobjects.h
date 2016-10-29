@@ -20,7 +20,7 @@ namespace et
 
 		using float_type = float;
 		using float3 = vector3<float_type>;
-		using float4 = vec4simd;
+		using float4 = vec4;//simd;
 		using index = uint_fast32_t;
 
 		enum : index
@@ -32,6 +32,7 @@ namespace et
 		struct Constants
 		{
 			static const float_type epsilon;
+			static const float_type distanceEpsilon;
 			static const float_type minusEpsilon;
 			static const float_type onePlusEpsilon;
 			static const float_type oneMinusEpsilon;
@@ -128,13 +129,6 @@ namespace et
 			float_type _dot01 = 0.0f;
 			float_type _dot11 = 0.0f;
 			float_type _area = 0.0f;
-
-			/*
-			float4 interpolatedTexCoord(const float4& b) const
-			{
-				return t[0] * b.shuffle<0, 0, 0, 3>() + t[1] * b.shuffle<1, 1, 1, 3>() + t[2] * b.shuffle<2, 2, 2, 3>();
-			}
-			*/
 		};
 		using TriangleList = Vector<rt::Triangle>;
 

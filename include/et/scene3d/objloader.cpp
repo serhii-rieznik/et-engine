@@ -485,6 +485,12 @@ void OBJLoader::loadMaterials(const std::string& fileName, ObjectsCache& cache)
 				materialFile >> value;
 				_lastMaterial->setFloat(MaterialParameter::Roughness, value);
 			}
+			else if (next == 'm')
+			{
+				float value = 0.0f;
+				materialFile >> value;
+				_lastMaterial->setFloat(MaterialParameter::Metallness, value);
+			}
 		}
 		else if (key == 't')
 		{

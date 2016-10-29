@@ -7,51 +7,10 @@
 
 #pragma once
 
-#include <et/rendering/interface/texture.h>
-#include <et/rendering/interface/sampler.h>
-#include <et/rendering/interface/program.h>
-#include <et/rendering/base/vertexdeclaration.h>
+#include <et/rendering/base/materialhelpers.h>
 
 namespace et
 {
-
-enum class MaterialTexture : uint32_t
-{
-	Albedo,
-	Reflectance,
-	Emissive,
-
-	Roughness,
-	Opacity,
-	Normal,
-
-	Count
-};
-
-enum class MaterialParameter : uint32_t
-{
-	AlbedoColor,
-	ReflectanceColor,
-	EmissiveColor,
-
-	Roughness,
-	Opacity,
-	NormalScale,
-
-	IndexOfRefraction,
-	SpecularExponent,
-	
-	Count
-};
-
-const std::string& materialTextureToString(MaterialTexture);
-const std::string& materialSamplerToString(MaterialTexture);
-
-enum : uint32_t
-{
-	MaterialTexturesCount = static_cast<uint32_t>(MaterialTexture::Count),
-	MaterialParametersCount = static_cast<uint32_t>(MaterialParameter::Count),
-};
 
 class RenderInterface;
 class MaterialInstance;
@@ -61,63 +20,6 @@ class Material : public Object
 {
 public:
 	ET_DECLARE_POINTER(Material);
-
-	template <class T>
-	struct OptionalObject
-	{
-		T object;
-		std::string name;
-		uint32_t index = 0;
-		bool assigned = false;
-
-		void clear()
-		{
-			index = 0;
-			object = nullptr;
-			name.clear();
-			assigned = false;
-		}
-	};
-
-	struct OptionalValue
-	{
-		DataType storedType = DataType::max;
-		char data[sizeof(vec4)] { };
-
-		template <class T>
-		const T& as() const
-		{
-			static_assert(sizeof(T) <= sizeof(vec4), "Requested type is too large");
-			ET_ASSERT(is<T>());
-			return *(reinterpret_cast<const T*>(data));
-		};
-
-		template <class T>
-		bool is() const
-		{
-			static_assert(sizeof(T) <= sizeof(vec4), "Requested type is too large");
-			return storedType == dataTypeFromClass<T>();
-		}
-
-		template <class T>
-		void operator = (const T& value)
-		{
-			static_assert(sizeof(T) <= sizeof(vec4), "Requested type is too large");
-			*(reinterpret_cast<T*>(data)) = value;
-			storedType = dataTypeFromClass<T>();
-		}
-
-
-		void clear()
-		{
-			memset(data, 0, sizeof(data));
-			storedType = DataType::max;
-		}
-	};
-
-	using Textures = std::array<OptionalObject<Texture::Pointer>, MaterialTexturesCount>;
-	using Samplers = std::array<OptionalObject<Sampler::Pointer>, MaterialTexturesCount>;
-	using Parameters = std::array<OptionalValue, MaterialParametersCount>;
 
 public:
 	Material(RenderInterface*);
@@ -136,15 +38,6 @@ public:
 	void setFloat(MaterialParameter, float);
 	float getFloat(MaterialParameter) const;
 
-	const Textures& allTextures() const
-		{ return _textures; }
-
-	const Samplers& allSamplers() const
-		{ return _samplers; }
-
-	const Parameters& allParameters() const
-		{ return _params; }
-
 	Program::Pointer program();
 	
 	const DepthState& depthState() const
@@ -159,7 +52,7 @@ public:
 	uint64_t sortingKey() const;
 
 	void loadFromJson(const std::string& json, const std::string& baseFolder);
-	
+
 private:
 	friend class MaterialInstance;
 
@@ -170,13 +63,14 @@ private:
 	void loadCode(const std::string&, const std::string& baseFolder, Dictionary defines);
 	void generateInputLayout(std::string& code);
 
-private: // overrided by instanaces
-	Textures _textures;
-	Samplers _samplers;
-	Parameters _params;
+protected: // overrided / read by instanaces
+	mtl::Textures textures;
+	mtl::Samplers samplers;
+	mtl::Parameters properties;
 
 private: // permanent private data
 	RenderInterface* _renderer = nullptr;
+	Vector<MaterialInstancePointer> _instances;
 	Program::Pointer _program;
 	VertexDeclaration _inputLayout;
 	DepthState _depthState;
@@ -194,26 +88,42 @@ public:
 public:
 	Material::Pointer base();
 
+	const MaterialTexturesCollection& usedTextures();
+	const MaterialSamplersCollection& usedSamplers();
+	const MaterialPropertiesCollection& usedProperties();
+
+	void invalidateUsedTextures();
+	void invalidateUsedSamplers();
+	void invalidateUsedProperties();
+
 private:
 	friend class Material;
 	friend class ObjectFactory;
 	MaterialInstance(Material::Pointer base);
 
+	void buildUsedTextures();
+	void buildUsedSamplers();
+	void buildUsedProperties();
+
 private:
 	Material::Pointer _base;
+	MaterialTexturesCollection _usedTextures;
+	MaterialSamplersCollection _usedSamplers;
+	MaterialPropertiesCollection _usedProperties;
+	bool _texturesValid = false;
+	bool _samplersValid = false;
+	bool _propertiesValid = false;
 };
-
-std::string materialParameterToString(MaterialParameter);
 
 template <class T>
 inline T Material::getParameter(MaterialParameter p) const
 {
 	uint32_t pIndex = static_cast<uint32_t>(p);
-	if (_params[pIndex].is<T>())
-		return _params[pIndex].as<T>();
+	if (properties[pIndex].is<T>())
+		return properties[pIndex].as<T>();
 	
 	log::warning("Material %s does not contain parameter %s of type %s", name().c_str(),
-		materialParameterToString(p).c_str(), classToString<T>());
+		mtl::materialParameterToString(p).c_str(), classToString<T>());
 	return T();
 }
 

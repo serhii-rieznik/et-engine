@@ -404,7 +404,7 @@ KDTree::TraverseResult KDTree::traverse(const Ray& ray)
 					continue;
 
 				float t = data.edge2to0.dot(qvec) * inv_dev;
-				if ((t < minDistance) && (t <= tFar) && (t > 0.0f))
+				if ((t < minDistance) && (t <= tFar) && (t > Constants::distanceEpsilon))
 				{
 					minDistance = t;
 					result.triangleIndex = triangleIndex;

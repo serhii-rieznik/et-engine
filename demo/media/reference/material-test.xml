@@ -1,0 +1,116 @@
+<?xml version='1.0' encoding='utf-8'?>
+
+<scene version="0.5.0">
+	<integrator type="volpath">
+		<integer name="rrDepth" value="1024"/>
+	</integrator>
+
+	<bsdf type="diffuse" id="wire_057008136_material">
+		<rgb name="reflectance" value="1 1 1"/>
+	</bsdf>
+
+	<bsdf type="roughconductor" id="01___Default_material">
+		<string name="material" value="Ag"/>
+		<float name="alpha" value="0.01"/>
+		<rgb name="reflectance" value="1 1 1"/>
+	</bsdf>
+
+	<bsdf type="roughconductor" id="02___Default_material">
+		<string name="material" value="Ag"/>
+		<float name="alpha" value="0.25"/>
+		<rgb name="reflectance" value="1 1 1"/>
+	</bsdf>
+
+	<bsdf type="roughconductor" id="03___Default_material">
+		<string name="material" value="Ag"/>
+		<float name="alpha" value="0.5"/>
+		<rgb name="reflectance" value="1 1 1"/>
+	</bsdf>
+
+	<bsdf type="roughconductor" id="07___Default_material">
+		<string name="material" value="Ag"/>
+		<float name="alpha" value="0.75"/>
+		<rgb name="reflectance" value="1 1 1"/>
+	</bsdf>
+
+	<bsdf type="roughconductor" id="08___Default_material">
+		<string name="material" value="Ag"/>
+		<float name="alpha" value="0.99"/>
+		<rgb name="reflectance" value="1 1 1"/>
+	</bsdf>
+
+	<shape type="serialized" id="Plane001_mesh">
+		<string name="filename" value="material-test.serialized"/>
+		<integer name="shapeIndex" value="0"/>
+
+		<ref name="bsdf" id="wire_057008136_material"/>
+	</shape>
+
+	<shape type="serialized" id="GeoSphere001_mesh">
+		<string name="filename" value="material-test.serialized"/>
+		<integer name="shapeIndex" value="1"/>
+
+		<ref name="bsdf" id="01___Default_material"/>
+	</shape>
+
+	<shape type="serialized" id="GeoSphere002_mesh">
+		<string name="filename" value="material-test.serialized"/>
+		<integer name="shapeIndex" value="2"/>
+
+		<ref name="bsdf" id="02___Default_material"/>
+	</shape>
+
+	<shape type="serialized" id="GeoSphere003_mesh">
+		<string name="filename" value="material-test.serialized"/>
+		<integer name="shapeIndex" value="3"/>
+
+		<ref name="bsdf" id="03___Default_material"/>
+	</shape>
+
+	<shape type="serialized" id="GeoSphere004_mesh">
+		<string name="filename" value="material-test.serialized"/>
+		<integer name="shapeIndex" value="4"/>
+
+		<ref name="bsdf" id="07___Default_material"/>
+	</shape>
+
+	<shape type="serialized" id="GeoSphere005_mesh">
+		<string name="filename" value="material-test.serialized"/>
+		<integer name="shapeIndex" value="5"/>
+
+		<ref name="bsdf" id="08___Default_material"/>
+	</shape>
+
+	<emitter type="constant"/>
+	<!--
+	<emitter type="envmap">
+		<string name="filename" value="/Volumes/Development/SDK/Textures/background.hdr"/>
+		<transform name="toWorld">
+			<rotate y="1" angle="90"/>
+		</transform>
+	</emitter>
+-->
+
+	<sensor type="perspective">
+		<float name="farClip" value="1024"/>
+		<float name="focusDistance" value="213.64"/>
+		<float name="fov" value="50"/>
+		<string name="fovAxis" value="x"/>
+		<float name="nearClip" value="1"/>
+		<transform name="toWorld">
+
+			<lookat target="-249.019, 49.804, 0" origin="-250, 50, 0" up="0.196018, 0.9806, 0"/>
+		</transform>
+
+		<sampler type="independent">
+			<integer name="sampleCount" value="128"/>
+		</sampler>
+
+		<film type="hdrfilm">
+			<integer name="height" value="576"/>
+			<integer name="width" value="768"/>
+
+			<rfilter type="box"/>
+		</film>
+	</sensor>
+</scene>

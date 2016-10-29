@@ -1,6 +1,6 @@
 {
 	"model-name" : "media/shaderart.obj",
-	"env-map" : "media/background.hdr.no",
+	"env-map" : "media/background.hdr",
 	"env-color" : [1.0, 1.0, 1.0, 1.0],
     "env-type" : "uniform",
     "light-direction" : [0.0, 1.0, 0.0, 0.0],

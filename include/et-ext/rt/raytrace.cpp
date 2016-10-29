@@ -247,7 +247,20 @@ void RaytracePrivate::buildMaterialAndTriangles(s3d::Scene::Pointer scene)
 				rt::Material::Class cls = rt::Material::Class::Diffuse;
 				if (alpha < 1.0f)
 				{
-					cls = (eta == 0.0f) ? rt::Material::Class::Conductor : rt::Material::Class::Dielectric;
+					if (eta == 0.0f)
+					{
+						log::info("Adding new conductor material: %s", batchMaterial->name().c_str());
+						cls = rt::Material::Class::Conductor;
+					}
+					else
+					{
+						log::info("Adding new dielectric material: %s", batchMaterial->name().c_str());
+						cls = rt::Material::Class::Dielectric;
+					};
+				}
+				else
+				{
+					log::info("Adding new diffuse material: %s", batchMaterial->name().c_str());
 				}
 
 				materialIndex = materials.size();
@@ -258,7 +271,7 @@ void RaytracePrivate::buildMaterialAndTriangles(s3d::Scene::Pointer scene)
 				mat.diffuse = rt::float4(batchMaterial->getVector(MaterialParameter::AlbedoColor));
 				mat.specular = rt::float4(batchMaterial->getVector(MaterialParameter::ReflectanceColor));
 				mat.emissive = rt::float4(batchMaterial->getVector(MaterialParameter::EmissiveColor));
-				mat.roughness = sqr(alpha);
+				mat.roughness = alpha;
 				mat.ior = eta;
 
 				isEmitter = mat.emissive.length() > 0.0f;

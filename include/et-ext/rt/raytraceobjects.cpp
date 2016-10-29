@@ -11,11 +11,12 @@
 namespace et {
 namespace rt {
 
-const float_type Constants::epsilon = 0.01f;
-const float_type Constants::minusEpsilon = -epsilon;
-const float_type Constants::onePlusEpsilon = 1.0f + epsilon;
-const float_type Constants::oneMinusEpsilon = 1.0f - epsilon;
-const float_type Constants::epsilonSquared = epsilon * epsilon;
+const float_type Constants::epsilon = 0.0005f;
+const float_type Constants::distanceEpsilon = 20.0f * Constants::epsilon;
+const float_type Constants::minusEpsilon = -Constants::epsilon;
+const float_type Constants::onePlusEpsilon = 1.0f + Constants::epsilon;
+const float_type Constants::oneMinusEpsilon = 1.0f - Constants::epsilon;
+const float_type Constants::epsilonSquared = epsilon * Constants::epsilon;
 const float_type Constants::initialSplitValue = std::numeric_limits<float>::max();
 
 const float4& defaultLightDirection()
@@ -45,11 +46,13 @@ float4 computeReflectionVector(const float4& incidence, const float4& normal, fl
     return defaultLightDirection();
 #else
     auto idealReflection = reflect(incidence, normal);
+	ET_ASSERT(idealReflection.dot(normal) >= 0.0f);
 	
-	auto result = randomVectorOnHemisphere(idealReflection, ggxDistribution, roughness);
+#	define MAX_REFLECTION_ATTEMPTS 16
 
 	uint32_t attempts = 0;
-	while ((result.dot(normal) <= 0.0f) && (attempts < 16))
+	auto result = randomVectorOnHemisphere(idealReflection, ggxDistribution, roughness);
+	while ((result.dot(normal) <= 0.0f) && (attempts < MAX_REFLECTION_ATTEMPTS))
 	{
 		result = randomVectorOnHemisphere(idealReflection, ggxDistribution, roughness);
 		++attempts;
@@ -65,8 +68,10 @@ float4 computeRefractionVector(const float4& Wi, const float4& n, float_type eta
     auto idealRefraction = Wi * eta - n * (cosThetaI * eta - cosThetaT);
 	auto result = randomVectorOnHemisphere(idealRefraction, ggxDistribution, roughness);
 
+#	define MAX_REFRACTION_ATTEMPTS 32
+
 	uint32_t attempts = 0;
-	while ((result.dot(n) >= 0.0f) && (attempts < 16))
+	while ((result.dot(n) >= 0.0f) && (attempts < MAX_REFRACTION_ATTEMPTS))
 	{
 		result = randomVectorOnHemisphere(idealRefraction, ggxDistribution, roughness);
 		++attempts;
