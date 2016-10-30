@@ -244,15 +244,6 @@
 		5CD5A9211D932CF4003FD770 /* social.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = social.h; sourceTree = "<group>"; };
 		5CD5A9221D932CF4003FD770 /* social.ios.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = social.ios.mm; sourceTree = "<group>"; };
 		5CD5A9231D932CF4003FD770 /* tools.apple.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = tools.apple.mm; sourceTree = "<group>"; };
-		5CD5A9251D932CF4003FD770 /* application.win.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; path = application.win.cpp; sourceTree = "<group>"; };
-		5CD5A9261D932CF4003FD770 /* context.win.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; path = context.win.cpp; sourceTree = "<group>"; };
-		5CD5A9271D932CF4003FD770 /* context.win.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = context.win.h; sourceTree = "<group>"; };
-		5CD5A9291D932CF4003FD770 /* input.win.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; path = input.win.cpp; sourceTree = "<group>"; };
-		5CD5A92A1D932CF4003FD770 /* locale.win.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; path = locale.win.cpp; sourceTree = "<group>"; };
-		5CD5A92B1D932CF4003FD770 /* log.win.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; path = log.win.cpp; sourceTree = "<group>"; };
-		5CD5A92C1D932CF4003FD770 /* memory.win.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; path = memory.win.cpp; sourceTree = "<group>"; };
-		5CD5A92E1D932CF4003FD770 /* rendercontext.win.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; path = rendercontext.win.cpp; sourceTree = "<group>"; };
-		5CD5A92F1D932CF4003FD770 /* tools.win.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; path = tools.win.cpp; sourceTree = "<group>"; };
 		5CD5A9321D932CF4003FD770 /* helpers.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; path = helpers.cpp; sourceTree = "<group>"; };
 		5CD5A9331D932CF4003FD770 /* helpers.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = helpers.h; sourceTree = "<group>"; };
 		5CD5A9341D932CF4003FD770 /* indexarray.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; path = indexarray.cpp; sourceTree = "<group>"; };
@@ -617,23 +608,6 @@
 			path = "../include/et/platform-apple";
 			sourceTree = "<group>";
 		};
-		5CD5A9241D932CF4003FD770 /* platform-win */ = {
-			isa = PBXGroup;
-			children = (
-				5CD5A9251D932CF4003FD770 /* application.win.cpp */,
-				5CD5A9261D932CF4003FD770 /* context.win.cpp */,
-				5CD5A9271D932CF4003FD770 /* context.win.h */,
-				5CD5A9291D932CF4003FD770 /* input.win.cpp */,
-				5CD5A92A1D932CF4003FD770 /* locale.win.cpp */,
-				5CD5A92B1D932CF4003FD770 /* log.win.cpp */,
-				5CD5A92C1D932CF4003FD770 /* memory.win.cpp */,
-				5CD5A92E1D932CF4003FD770 /* rendercontext.win.cpp */,
-				5CD5A92F1D932CF4003FD770 /* tools.win.cpp */,
-			);
-			name = "platform-win";
-			path = "../include/et/platform-win";
-			sourceTree = "<group>";
-		};
 		5CD5A9301D932CF4003FD770 /* rendering */ = {
 			isa = PBXGroup;
 			children = (
@@ -798,7 +772,6 @@
 				5CD5A8FA1D932CF4003FD770 /* locale */,
 				5CD5A8FD1D932CF4003FD770 /* platform */,
 				5CD5A9011D932CF4003FD770 /* platform-apple */,
-				5CD5A9241D932CF4003FD770 /* platform-win */,
 				5CD5A9301D932CF4003FD770 /* rendering */,
 				5CD5A9921D932CF4003FD770 /* scene3d */,
 				5CD5A9B31D932CF4003FD770 /* sound */,

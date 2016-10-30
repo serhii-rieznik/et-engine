@@ -23,10 +23,12 @@ namespace demo
 		void render(et::RenderContext*);
 		
 	private:
+		et::Dictionary _options;
 		et::Camera::Pointer _camera;
         et::CameraMovingController::Pointer _cameraController;
 		et::s3d::Scene::Pointer _scene;
 		et::s3d::Renderer _renderer;
 		demo::SceneLoader _loader;
+		float _cameraFOV = QUARTER_PI;
 	};
 }

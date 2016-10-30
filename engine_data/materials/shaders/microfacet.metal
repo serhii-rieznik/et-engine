@@ -12,6 +12,7 @@ struct VSOutput {
 	float3 normal;
 	float3 toCamera;
 	float3 toLight;
+	float2 texCoord0;
 };
 
 struct FSOutput {
@@ -43,6 +44,7 @@ vertex VSOutput vertexMain(VSInput in [[stage_in]],
 	out.normal = (objectVariables.worldRotationTransform * float4(in.normal, 0.0)).xyz;
 	out.toCamera = (passVariables.cameraPosition - transformedPosition).xyz;
 	out.toLight = (passVariables.lightPosition - transformedPosition * passVariables.lightPosition.w).xyz;
+	out.texCoord0 = in.texCoord0;
 	return out;
 }
 
@@ -51,7 +53,9 @@ vertex VSOutput vertexMain(VSInput in [[stage_in]],
  */
 
 fragment FSOutput fragmentMain(VSOutput in [[stage_in]],
-	constant MaterialVariables& materialVariables [[buffer(MaterialVariablesBufferIndex)]])
+	constant MaterialVariables& materialVariables [[buffer(MaterialVariablesBufferIndex)]],
+	texture2d<float> albedoTexture [[texture(0)]],
+	sampler albedoSampler [[sampler(0)]])
 {
 	float3 normal = normalize(in.normal);
 	float3 lightNormal = normalize(in.toLight);
@@ -71,15 +75,12 @@ fragment FSOutput fragmentMain(VSOutput in [[stage_in]],
 	env.NdotH = dot(normal, halfVector);
 	env.viewFresnel = fresnelShlick(materialVariables.metallness, env.VdotN);
 
+	float4 albedoSample = albedoTexture.sample(albedoSampler, in.texCoord0);
+	
+	float4 diffuse = (albedoSample * materialVariables.albedoColor) * normalizedLambert(env);
+	float4 specular = materialVariables.reflectanceColor * microfacetSpecular(env);
+
 	FSOutput out;
-
-	out.color0 =
-	/*
-		materialVariables.albedoColor * burleyDiffuse(env) +
-		materialVariables.reflectanceColor * microfacetSpecular(env);
-	// */
-	float4(burleyDiffuse(env));
-	// float4(microfacetSpecular(env));
-
+	out.color0 = diffuse + specular;
 	return out;
 }

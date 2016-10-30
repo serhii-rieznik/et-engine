@@ -821,8 +821,7 @@ void OBJLoader::processLoadedData()
 			}
 		}
 
-		// TODO : retrieve material from renderer
-		MaterialInstance::Pointer m = _renderer->sharedMaterialLibrary().loadDefaultMaterial(DefaultMaterial::Microfacet)->instance();
+		MaterialInstance::Pointer m;
 		for (auto mat : _materials)
 		{
 			if (mat->name() == group.material)
@@ -830,6 +829,13 @@ void OBJLoader::processLoadedData()
 				m = mat;
 				break;
 			}
+		}
+
+		if (m.invalid())
+		{
+			Material::Pointer microfacet = _renderer->sharedMaterialLibrary().loadDefaultMaterial(DefaultMaterial::Microfacet);
+			m = microfacet->instance();
+			m->setName("missing_material");
 		}
 		
 		uint32_t startIndex_u32 = static_cast<uint32_t>(startIndex);

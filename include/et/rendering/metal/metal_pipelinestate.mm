@@ -157,42 +157,47 @@ void MetalPipelineState::bind(MetalNativeEncoder& e, MaterialInstance::Pointer m
 
 		if (_private->bindObjectVariablesToVertex)
 			[e.encoder setVertexBuffer:mtlSharedBuffer offset:objectBufferOffset atIndex:ObjectVariablesBufferIndex];
+
 		if (_private->bindObjectVariablesToFragment)
 			[e.encoder setFragmentBuffer:mtlSharedBuffer offset:objectBufferOffset atIndex:ObjectVariablesBufferIndex];
 	}
 
-	for (const auto& tx : material->usedTextures())
+	for (const auto& vt : reflection.vertexTextures)
 	{
-		auto vt = reflection.vertexTextures.find(tx.first);
-		if (vt != reflection.vertexTextures.end())
-		{
-			MetalTexture::Pointer tex = tx.second.texture;
-			[e.encoder setVertexTexture:tex->nativeTexture().texture atIndex:vt->second];
-		}
-		auto ft = reflection.fragmentTextures.find(tx.first);
-		if (ft != reflection.fragmentTextures.end())
-		{
-			MetalTexture::Pointer tex = tx.second.texture;
-			[e.encoder setFragmentTexture:tex->nativeTexture().texture atIndex:ft->second];
-		}
-
+		auto i = material->usedTextures().find(vt.first);
+		MetalTexture::Pointer tex;
+		if (i == material->usedTextures().end())
+			tex = _private->renderer->defaultTexture();
+		else
+			tex = i->second.texture;
+		[e.encoder setVertexTexture:tex->nativeTexture().texture atIndex:vt.second];
 	}
 
-	for (const auto& sm : material->usedSamplers())
+	for (const auto& ft : reflection.fragmentTextures)
 	{
-		auto vs = reflection.vertexSamplers.find(sm.first);
-		if (vs != reflection.vertexSamplers.end())
-		{
-			MetalSampler::Pointer smp = sm.second.sampler;
-			[e.encoder setVertexSamplerState:smp->nativeSampler().sampler atIndex:vs->second];
-		}
+		auto i = material->usedTextures().find(ft.first);
+		MetalTexture::Pointer tex;
+		if (i == material->usedTextures().end())
+			tex = _private->renderer->defaultTexture();
+		else
+			tex = i->second.texture;
+		[e.encoder setFragmentTexture:tex->nativeTexture().texture atIndex:ft.second];
+	}
 
-		auto fs = reflection.fragmentSamplers.find(sm.first);
-		if (fs != reflection.fragmentSamplers.end())
-		{
-			MetalSampler::Pointer smp = sm.second.sampler;
-			[e.encoder setFragmentSamplerState:smp->nativeSampler().sampler atIndex:fs->second];
-		}
+	for (const auto& vs : reflection.vertexSamplers)
+	{
+		auto i = material->usedSamplers().find(vs.first);
+		MetalSampler::Pointer smp = (i == material->usedSamplers().end()) ?
+			_private->renderer->defaultSampler() : i->second.sampler;
+		[e.encoder setVertexSamplerState:smp->nativeSampler().sampler atIndex:vs.second];
+	}
+
+	for (const auto& fs : reflection.fragmentSamplers)
+	{
+		auto i = material->usedSamplers().find(fs.first);
+		MetalSampler::Pointer smp = (i == material->usedSamplers().end()) ?
+			_private->renderer->defaultSampler() : i->second.sampler;
+		[e.encoder setFragmentSamplerState:smp->nativeSampler().sampler atIndex:fs.second];
 	}
 
 	[e.encoder setDepthStencilState:_private->state.depthStencilState];

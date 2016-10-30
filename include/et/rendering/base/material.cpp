@@ -225,6 +225,16 @@ MaterialInstancePointer Material::instance()
 	return result;
 }
 
+const MaterialInstanceCollection& Material::instances() const
+{
+	return _instances;
+}
+
+void Material::releaseInstances()
+{
+	_instances.clear();
+}
+
 Program::Pointer Material::program()
 {
 	return _program;

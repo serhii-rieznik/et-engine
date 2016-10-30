@@ -25,7 +25,20 @@ void MaterialLibrary::init(RenderInterface* ren)
 
 void MaterialLibrary::shutdown()
 {
+	for (Material::Pointer mat : _defaultMaterials)
+	{
+		if (mat.valid())
+		{
+			mat->releaseInstances();
+			mat.reset(nullptr);
+		}
+	}
 
+	for (auto& kv : _cache)
+	{
+		kv.second->releaseInstances();
+	}
+	_cache.clear();
 }
 
 Material::Pointer MaterialLibrary::loadDefaultMaterial(DefaultMaterial mtl)

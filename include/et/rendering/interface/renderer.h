@@ -84,6 +84,7 @@ public:
 	 * Sampler
 	 */
 	virtual Sampler::Pointer createSampler(const Sampler::Description&) = 0;
+	Sampler::Pointer defaultSampler();
 
 private:
 	RenderContext* _rc = nullptr;
@@ -91,6 +92,7 @@ private:
 	ConstBuffer _sharedConstBuffer;
 	MaterialLibrary _materialLibrary;
 	Texture::Pointer _defaultTexture;
+	Sampler::Pointer _defaultSampler;
 };
 
 inline Texture::Pointer RenderInterface::loadTexture(const std::string& fileName, ObjectsCache& cache)
@@ -120,6 +122,17 @@ inline Texture::Pointer RenderInterface::defaultTexture()
 		_defaultTexture = createTexture(desc);
 	}
 	return _defaultTexture;
+}
+
+inline Sampler::Pointer RenderInterface::defaultSampler()
+{
+	if (_defaultSampler.invalid())
+	{
+		Sampler::Description desc;
+		_defaultSampler = createSampler(desc);
+	}
+
+	return _defaultSampler;
 }
 
 	/*

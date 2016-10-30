@@ -29,8 +29,6 @@ enum : uint32_t
 
 void SharedVariables::init(RenderInterface* renderer)
 {
-	et::sharedBlockAllocator().allocate(10);
-	
 	_localData.resize(SharedVariablesDataSize);
 	_buffer = renderer->createDataBuffer("SharedVariablesBuffer", SharedVariablesDataSize);
 }

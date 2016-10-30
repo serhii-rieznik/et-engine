@@ -11,6 +11,7 @@
 		5C4515571D7E035600D093EB /* Metal.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5C4515561D7E035600D093EB /* Metal.framework */; };
 		5C4515591D7E035D00D093EB /* MetalKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5C4515581D7E035D00D093EB /* MetalKit.framework */; };
 		5C45155B1D7E039F00D093EB /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5C45155A1D7E039F00D093EB /* QuartzCore.framework */; };
+		5C559F0D1DC662AA00E0A578 /* config in Resources */ = {isa = PBXBuildFile; fileRef = 5C559F0C1DC662AA00E0A578 /* config */; };
 		5C6587FD1DA59BBC007F8DB1 /* DemoSceneLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5C6587FB1DA59BBC007F8DB1 /* DemoSceneLoader.cpp */; };
 		6E12DA2B1CD690F6006037A5 /* libet-static-mac.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 6E12DA2A1CD686C8006037A5 /* libet-static-mac.a */; };
 		6E12DA2D1CD69147006037A5 /* libfbxsdk.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 6E12DA2C1CD69147006037A5 /* libfbxsdk.dylib */; };
@@ -55,6 +56,7 @@
 		5C4515561D7E035600D093EB /* Metal.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Metal.framework; path = System/Library/Frameworks/Metal.framework; sourceTree = SDKROOT; };
 		5C4515581D7E035D00D093EB /* MetalKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MetalKit.framework; path = System/Library/Frameworks/MetalKit.framework; sourceTree = SDKROOT; };
 		5C45155A1D7E039F00D093EB /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
+		5C559F0C1DC662AA00E0A578 /* config */ = {isa = PBXFileReference; lastKnownFileType = folder; name = config; path = ../../config; sourceTree = "<group>"; };
 		5C6587FB1DA59BBC007F8DB1 /* DemoSceneLoader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DemoSceneLoader.cpp; sourceTree = "<group>"; };
 		5C6587FC1DA59BBC007F8DB1 /* DemoSceneLoader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DemoSceneLoader.h; sourceTree = "<group>"; };
 		6E12DA251CD686C8006037A5 /* et-static-mac.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "et-static-mac.xcodeproj"; path = "../../../projects/et-static-mac.xcodeproj"; sourceTree = "<group>"; };
@@ -108,6 +110,7 @@
 			isa = PBXGroup;
 			children = (
 				5C4515541D7E029000D093EB /* engine_data */,
+				5C559F0C1DC662AA00E0A578 /* config */,
 				6E12DA2F1CD6926C006037A5 /* media */,
 				A5D8EC421A3CE2EE00E3620B /* data */,
 				6E12DA251CD686C8006037A5 /* et-static-mac.xcodeproj */,
@@ -239,6 +242,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5C559F0D1DC662AA00E0A578 /* config in Resources */,
 				A5D8EC431A3CE2EE00E3620B /* data in Resources */,
 				5C4515551D7E029000D093EB /* engine_data in Resources */,
 				6E12DA301CD6926C006037A5 /* media in Resources */,

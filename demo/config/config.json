@@ -1,5 +1,5 @@
 {
-	"reference" : "cornellbox.json",
+	"reference" : "material-test.json",
 	"method" : "backward",
 	"threads" : 0,
 	"render-region-size" : 32,

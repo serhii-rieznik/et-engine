@@ -17,6 +17,10 @@ namespace et
 	class MemoryAllocatorBase
 	{
 	public:
+#	if (ET_DEBUG)
+		static std::atomic<uint32_t> allocationIndex;
+#	endif
+	public:
 		MemoryAllocatorBase() { }
 		virtual ~MemoryAllocatorBase() { }
 		

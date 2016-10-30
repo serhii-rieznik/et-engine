@@ -112,6 +112,7 @@ newmtl Material__47
 	Pr 1.0
 	Ni 0.0000
 	Kd 1.0 1.0 1.0
+
 newmtl flagpole
 	Pr 1.0
 	Ni 0.0000

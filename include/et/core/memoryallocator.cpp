@@ -10,233 +10,249 @@
 
 namespace et
 {
-	enum : uint32_t
-	{
-		
-#	if (ET_DEBUG)
-		minimumAllocationStatisticsSize = 96,
-		maximumAllocationStatisticsSize = (uint32_t)((2048 + minimumAllocationStatisticsSize) / minimumAllocationStatisticsSize),
-#	endif
-
-		megabytes = 1024 * 1024,
-		allocatedValue = 0x00000000,
-		notAllocatedValue = 0xffffffff,
-		defaultChunkSize = 16 * megabytes,
-		minimumAllocationSize = 32,
-		smallBlockSize = 60,
-		mediumBlockSize = 124,
-	};
-
-	struct MemoryChunkInfo
-	{
-		union
-		{
-			struct
-			{
-				uint32_t allocated;
-				uint32_t begin;
-				uint32_t length;
-				uint32_t dummy;
-			};
-			
-			struct
-			{
-				uint64_t v0;
-				uint64_t v1;
-			};
-		};
-
-		MemoryChunkInfo() : 
-			allocated(notAllocatedValue), begin(0), length(0), dummy(0) { }
-		
-		void swapWith(MemoryChunkInfo* info)
-		{
-			auto& iv0 = info->v0;
-			auto& iv1 = info->v1;
-			v0 ^= iv0;
-			iv0 ^= v0;
-			v0 ^= iv0;
-			v1 ^= iv1;
-			iv1 ^= v1;
-			v1 ^= iv1;
-		}
-	};
-	
-	class MemoryChunk
-	{
-	public:
-		MemoryChunk(uint32_t);
-		
-		~MemoryChunk();
-		
-		bool allocate(uint32_t size, void*& result);
-		bool free(char*);
-		
-		bool containsPointer(char*);
-		
-		void compress();
-		
-#	if (ET_DEBUG)
-		void setBreakOnAllocation()
-			{ breakOnAllocation = true; }
-#	endif
-		
-	private:
-		inline void validateInfo(MemoryChunkInfo*);
-		
-	private:
-		MemoryChunk(const MemoryChunk&) = delete;
-		MemoryChunk& operator = (const BlockMemoryAllocator&) = delete;
-		
-	public:
-		uint32_t compressCounter = 0;
-		uint32_t size = 0;
-		uint32_t actualDataOffset = 0;
-		uint32_t index = 0;
-		
-		MemoryChunkInfo* firstInfo = nullptr;
-		MemoryChunkInfo* lastInfo = nullptr;
-		
-		char* allocatedMemoryBegin = nullptr;
-		char* allocatedMemoryEnd = nullptr;
-		
 #if (ET_DEBUG)
-		StaticDataStorage<uint32_t, maximumAllocationStatisticsSize> allocationStatistics;
-		StaticDataStorage<uint32_t, maximumAllocationStatisticsSize> deallocationStatistics;
-		bool breakOnAllocation = false;
+	std::atomic<uint32_t> MemoryAllocatorBase::allocationIndex(0);
 #endif
-	};
-	
-	
-	template <int blockSize>
-	class SmallMemoryBlockAllocator
-	{
-	public:
-		enum
-		{
-			BlockSize = blockSize
-		};
-		
-		SmallMemoryBlockAllocator()
-		{
-			auto sizeToAllocate = blocksCount * sizeof(SmallMemoryBlock);
-			blocks = reinterpret_cast<SmallMemoryBlock*>(calloc(1, sizeToAllocate));
-			firstBlock = blocks;
-			currentBlock = firstBlock;
-			lastBlock = firstBlock + blocksCount;
-		}
-		
-		~SmallMemoryBlockAllocator()
-		{
-			log::ConsoleOutput lOut;
-			for (auto i = firstBlock; i != lastBlock; ++i)
-			{
-				if (i->blockAllocated)
-					lOut.info("Memory leak detected: %d bytes, offset %lld", blockSize, (int64_t)(i - firstBlock));
-			}
-			::free(blocks);
-		}
-		
-		bool allocate(void*& result)
-		{
-			auto startBlock = currentBlock;
-			
-			while (currentBlock->blockAllocated)
-			{
-				currentBlock = advance(currentBlock);
-				if (currentBlock == startBlock)
-				{
-					_haveFreeBlocks = false;
-					log::warning("Small memory block (%d) filled.", blockSize);
-					return false;
-				}
-			}
-			
-			currentBlock->blockAllocated = 1;
-			result = currentBlock->data;
-			currentBlock = advance(currentBlock);
-			
-			return true;
-		}
-		
-		void free(void* ptr)
-		{
-			SmallMemoryBlock* block = reinterpret_cast<SmallMemoryBlock*>(ptr);
-			
-			if ((ptr < firstBlock) || (ptr > lastBlock))
-				ET_FAIL_FMT("Pointer being freed (0x%016llx) was not allocated via this allocator.", (int64_t)ptr);
-			
-			block->blockAllocated = 0;
-			
-			if (!_haveFreeBlocks)
-				currentBlock = block;
 
-			_haveFreeBlocks = true;
-		}
-		
-		bool containsPointer(void* ptr)
-		{
-			SmallMemoryBlock* block = reinterpret_cast<SmallMemoryBlock*>(ptr);
-			return (block >= firstBlock) && (block < lastBlock);
-		}
-		
-		bool haveFreeBlocks()
-			{ return _haveFreeBlocks; }
-		
-	private:
-		enum
-		{
-			blocksCount = 8 * megabytes / (blockSize + 4)
-		};
-		
-		struct SmallMemoryBlock
-		{
-			static_assert((blockSize + sizeof(uint32_t)) % 32 == 0,
-				"Invalid block size will cause troubles allocating aligned objects");
-			
-			char data[blockSize];
-			uint32_t blockAllocated = 0;
-		};
-		
-		SmallMemoryBlock* advance(SmallMemoryBlock* b)
-		{
-			++b;
-			return (b == lastBlock) ? firstBlock : b;
-		}
-		
-	public:
-		SmallMemoryBlock* blocks = nullptr;
-		SmallMemoryBlock* firstBlock = nullptr;
-		SmallMemoryBlock* lastBlock = nullptr;
-		SmallMemoryBlock* currentBlock = nullptr;
-		bool _haveFreeBlocks = true;
-	};
-	
-	class BlockMemoryAllocatorPrivate
-	{
-	public:
-		BlockMemoryAllocatorPrivate();
-		
-		void* alloc(uint32_t);
-		void free(void*);
-		
-		bool validate(void*, bool abortOnFail = true);
-		
-		void flushUnusedBlocks();
-		
-		void printInfo();
-		
-	private:
-		CriticalSection _csLock;
-		std::list<MemoryChunk> _chunks;
-		
-		SmallMemoryBlockAllocator<smallBlockSize> _allocatorSmall;
-		SmallMemoryBlockAllocator<mediumBlockSize> _allocatorMedium;
-	};
-}
-
-namespace et
+enum : uint32_t
 {
+	
+#	if (ET_DEBUG)
+	minimumAllocationStatisticsSize = 96,
+	maximumAllocationStatisticsSize = (uint32_t)((2048 + minimumAllocationStatisticsSize) / minimumAllocationStatisticsSize),
+#	endif
+
+	megabytes = 1024 * 1024,
+	allocatedValue = 0x00000000,
+	notAllocatedValue = 0xffffffff,
+	defaultChunkSize = 16 * megabytes,
+	minimumAllocationSize = 32,
+	smallBlockSize = 60,
+	mediumBlockSize = 124,
+};
+
+struct MemoryChunkInfo
+{
+	union
+	{
+		struct
+		{
+			uint32_t allocated;
+			uint32_t begin;
+			uint32_t length;
+			uint32_t dummy;
+		};
+		
+		struct
+		{
+			uint64_t v0;
+			uint64_t v1;
+		};
+	};
+
+	MemoryChunkInfo() : 
+		allocated(notAllocatedValue), begin(0), length(0), dummy(0) { }
+	
+	void swapWith(MemoryChunkInfo* info)
+	{
+		auto& iv0 = info->v0;
+		auto& iv1 = info->v1;
+		v0 ^= iv0;
+		iv0 ^= v0;
+		v0 ^= iv0;
+		v1 ^= iv1;
+		iv1 ^= v1;
+		v1 ^= iv1;
+	}
+};
+
+class MemoryChunk
+{
+public:
+	MemoryChunk(uint32_t);
+	
+	~MemoryChunk();
+	
+	bool allocate(uint32_t size, void*& result);
+	bool free(char*);
+	
+	bool containsPointer(char*);
+	
+	void compress();
+	
+#	if (ET_DEBUG)
+	void setBreakOnAllocation()
+		{ breakOnAllocation = true; }
+#	endif
+	
+private:
+	inline void validateInfo(MemoryChunkInfo*);
+	
+private:
+	MemoryChunk(const MemoryChunk&) = delete;
+	MemoryChunk& operator = (const BlockMemoryAllocator&) = delete;
+	
+public:
+	uint32_t compressCounter = 0;
+	uint32_t size = 0;
+	uint32_t actualDataOffset = 0;
+	uint32_t index = 0;
+	
+	MemoryChunkInfo* firstInfo = nullptr;
+	MemoryChunkInfo* lastInfo = nullptr;
+	
+	char* allocatedMemoryBegin = nullptr;
+	char* allocatedMemoryEnd = nullptr;
+	
+#if (ET_DEBUG)
+	StaticDataStorage<uint32_t, maximumAllocationStatisticsSize> allocationStatistics;
+	StaticDataStorage<uint32_t, maximumAllocationStatisticsSize> deallocationStatistics;
+	bool breakOnAllocation = false;
+#endif
+};
+
+
+template <int blockSize>
+class SmallMemoryBlockAllocator
+{
+public:
+	enum
+	{
+		BlockSize = blockSize
+	};
+	
+	SmallMemoryBlockAllocator()
+	{
+		auto sizeToAllocate = blocksCount * sizeof(SmallMemoryBlock);
+		blocks = reinterpret_cast<SmallMemoryBlock*>(calloc(1, sizeToAllocate));
+		firstBlock = blocks;
+		currentBlock = firstBlock;
+		lastBlock = firstBlock + blocksCount;
+	}
+	
+	~SmallMemoryBlockAllocator()
+	{
+	#if (ET_DEBUG)
+		uint64_t totalLeaked = 0;
+		log::ConsoleOutput lOut;
+		for (auto i = firstBlock; i != lastBlock; ++i)
+		{
+			if (i->blockAllocated)
+			{
+				totalLeaked += blockSize;
+				lOut.info("Memory leak detected: %d bytes, index %u", blockSize, i->allocIndex);
+			}
+		}
+		if (totalLeaked > 0)
+		{
+			lOut.info("Total leaked: %llu", totalLeaked);
+		}
+	#endif
+		::free(blocks);
+	}
+	
+	bool allocate(void*& result)
+	{
+		auto startBlock = currentBlock;
+		
+		while (currentBlock->blockAllocated)
+		{
+			currentBlock = advance(currentBlock);
+			if (currentBlock == startBlock)
+			{
+				_haveFreeBlocks = false;
+				log::warning("Small memory block (%d) filled.", blockSize);
+				return false;
+			}
+		}
+		
+		currentBlock->blockAllocated = 1;
+#	if (ET_DEBUG)
+		currentBlock->allocIndex = MemoryAllocatorBase::allocationIndex++;
+#	endif
+		result = currentBlock->data;
+		currentBlock = advance(currentBlock);
+		
+		return true;
+	}
+	
+	void free(void* ptr)
+	{
+		SmallMemoryBlock* block = reinterpret_cast<SmallMemoryBlock*>(ptr);
+		
+		if ((ptr < firstBlock) || (ptr > lastBlock))
+			ET_FAIL_FMT("Pointer being freed (0x%016llx) was not allocated via this allocator.", (int64_t)ptr);
+		
+		block->blockAllocated = 0;
+		
+		if (!_haveFreeBlocks)
+			currentBlock = block;
+
+		_haveFreeBlocks = true;
+	}
+	
+	bool containsPointer(void* ptr)
+	{
+		SmallMemoryBlock* block = reinterpret_cast<SmallMemoryBlock*>(ptr);
+		return (block >= firstBlock) && (block < lastBlock);
+	}
+	
+	bool haveFreeBlocks()
+		{ return _haveFreeBlocks; }
+	
+private:
+	enum
+	{
+		blocksCount = 8 * megabytes / (blockSize + 4)
+	};
+	
+	struct SmallMemoryBlock
+	{
+		static_assert((blockSize + sizeof(uint32_t)) % 32 == 0,
+			"Invalid block size will cause troubles allocating aligned objects");
+		
+		char data[blockSize];
+		uint32_t blockAllocated = 0;
+#	if (ET_DEBUG)
+		uint32_t allocIndex = 0;
+#	endif
+	};
+	
+	SmallMemoryBlock* advance(SmallMemoryBlock* b)
+	{
+		++b;
+		return (b == lastBlock) ? firstBlock : b;
+	}
+	
+public:
+	SmallMemoryBlock* blocks = nullptr;
+	SmallMemoryBlock* firstBlock = nullptr;
+	SmallMemoryBlock* lastBlock = nullptr;
+	SmallMemoryBlock* currentBlock = nullptr;
+	bool _haveFreeBlocks = true;
+};
+
+class BlockMemoryAllocatorPrivate
+{
+public:
+	BlockMemoryAllocatorPrivate();
+	
+	void* alloc(uint32_t);
+	void free(void*);
+	
+	bool validate(void*, bool abortOnFail = true);
+	
+	void flushUnusedBlocks();
+	
+	void printInfo();
+	
+private:
+	CriticalSection _csLock;
+	std::list<MemoryChunk> _chunks;
+	
+	SmallMemoryBlockAllocator<smallBlockSize> _allocatorSmall;
+	SmallMemoryBlockAllocator<mediumBlockSize> _allocatorMedium;
+};
 
 BlockMemoryAllocator::BlockMemoryAllocator()
 {
@@ -512,14 +528,21 @@ MemoryChunk::~MemoryChunk()
 	if (allocatedMemoryBegin)
 	{
 		log::ConsoleOutput lOut;
-		
+
+		uint64_t totalLeaked = 0;
 		MemoryChunkInfo* info = firstInfo;
 		while (info < lastInfo)
 		{
 			if (info->allocated == allocatedValue)
+			{
+				totalLeaked += info->length;
 				lOut.info("Memory leak detected: %u bytes\n", info->length);
-			
+			}
 			++info;
+		}
+		if (totalLeaked > 0)
+		{
+			lOut.info("Total memory leaked: %llu", totalLeaked);
 		}
 		
 #	if (ET_PLATFORM_WIN)

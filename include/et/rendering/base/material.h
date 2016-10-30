@@ -15,6 +15,7 @@ namespace et
 class RenderInterface;
 class MaterialInstance;
 using MaterialInstancePointer = IntrusivePtr<MaterialInstance>;
+using MaterialInstanceCollection = Vector<MaterialInstancePointer>;
 
 class Material : public Object
 {
@@ -25,6 +26,8 @@ public:
 	Material(RenderInterface*);
 
 	MaterialInstancePointer instance();
+	const MaterialInstanceCollection& instances() const;
+	void releaseInstances();
 
 	void setTexture(MaterialTexture, Texture::Pointer);
 	void setSampler(MaterialTexture, Sampler::Pointer);
@@ -70,7 +73,7 @@ protected: // overrided / read by instanaces
 
 private: // permanent private data
 	RenderInterface* _renderer = nullptr;
-	Vector<MaterialInstancePointer> _instances;
+	MaterialInstanceCollection _instances;
 	Program::Pointer _program;
 	VertexDeclaration _inputLayout;
 	DepthState _depthState;

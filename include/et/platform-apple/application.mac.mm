@@ -21,6 +21,8 @@
 	BOOL _launchingFinished;
 }
 
+- (void)onQuit:(id)sender;
+
 @end
 
 namespace et
@@ -49,7 +51,7 @@ void Application::initContext()
     
     NSString* quitTitle = [NSString stringWithFormat:@"Quit %@", [[NSProcessInfo processInfo] processName]];
     NSMenuItem* quitItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:quitTitle
-        action:@selector(terminate:) keyEquivalent:@"q"];
+        action:@selector(onQuit:) keyEquivalent:@"q"];
     [applicationMenu addItem:quitItem];
     
     [applicationMenuItem setSubmenu:applicationMenu];
@@ -84,20 +86,21 @@ void Application::load()
 
 Application::~Application()
 {
-	exitRunLoop();
-
-	_renderContext->shutdown();
-
-	_backgroundThread.stop();
-	_backgroundThread.join();
-
 	platformFinalize();
     freeContext();
 }
 
 void Application::quit(int code)
 {
-	[[NSApplication sharedApplication] performSelectorOnMainThread:@selector(terminate:) withObject:nil waitUntilDone:NO];
+	stop();
+
+	exitRunLoop();
+	
+	_renderContext->shutdown();
+	_backgroundThread.stop();
+	_backgroundThread.join();
+
+	[[NSApplication sharedApplication] performSelectorOnMainThread:@selector(terminate:) withObject:nil waitUntilDone:YES];
 	(void)code;
 }
 
@@ -302,6 +305,11 @@ void Application::enableRemoteNotifications()
 	{
 		NSLog(@"Unable to convert remote notification info to JSON: %@", error);
 	}
+}
+
+- (void)onQuit:(id)sender
+{
+	et::application().quit(0);
 }
 
 @end
