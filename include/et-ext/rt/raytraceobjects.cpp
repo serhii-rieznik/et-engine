@@ -11,12 +11,8 @@
 namespace et {
 namespace rt {
 
-const float_type Constants::epsilon = 0.0005f;
+const float_type Constants::epsilon = 0.0001f;
 const float_type Constants::distanceEpsilon = 20.0f * Constants::epsilon;
-const float_type Constants::minusEpsilon = -Constants::epsilon;
-const float_type Constants::onePlusEpsilon = 1.0f + Constants::epsilon;
-const float_type Constants::oneMinusEpsilon = 1.0f - Constants::epsilon;
-const float_type Constants::epsilonSquared = epsilon * Constants::epsilon;
 const float_type Constants::initialSplitValue = std::numeric_limits<float>::max();
 
 const float4& defaultLightDirection()
@@ -45,6 +41,8 @@ float4 computeReflectionVector(const float4& incidence, const float4& normal, fl
 #if (ET_RT_VISUALIZE_BRDF)
     return defaultLightDirection();
 #else
+	ET_ASSERT(incidence.dot(normal) < 0.0f);
+
     auto idealReflection = reflect(incidence, normal);
 	ET_ASSERT(idealReflection.dot(normal) >= 0.0f);
 	
@@ -62,13 +60,14 @@ float4 computeReflectionVector(const float4& incidence, const float4& normal, fl
 #endif
 }
 
-float4 computeRefractionVector(const float4& Wi, const float4& n, float_type eta, float roughness,
-    float cosThetaI, float cosThetaT)
+float4 computeRefractionVector(const float4& Wi, const float4& n, float_type eta, float roughness, float sinTheta, float IdotN)
 {
-    auto idealRefraction = Wi * eta - n * (cosThetaI * eta - cosThetaT);
-	auto result = randomVectorOnHemisphere(idealRefraction, ggxDistribution, roughness);
+#	define MAX_REFRACTION_ATTEMPTS 16
 
-#	define MAX_REFRACTION_ATTEMPTS 32
+	ET_ASSERT(sinTheta > 0);
+
+	float4 idealRefraction = Wi * eta - n * (eta * IdotN + std::sqrt(sinTheta));
+	float4 result = randomVectorOnHemisphere(idealRefraction, ggxDistribution, roughness);
 
 	uint32_t attempts = 0;
 	while ((result.dot(n) >= 0.0f) && (attempts < MAX_REFRACTION_ATTEMPTS))
@@ -76,8 +75,7 @@ float4 computeRefractionVector(const float4& Wi, const float4& n, float_type eta
 		result = randomVectorOnHemisphere(idealRefraction, ggxDistribution, roughness);
 		++attempts;
 	}
-
-	return result;
+	return randomVectorOnHemisphere(idealRefraction, ggxDistribution, roughness);
 }
 
 #define SIGN_MASK 0x80000000

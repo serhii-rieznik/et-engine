@@ -9,34 +9,44 @@
 		<rgb name="reflectance" value="1 1 1"/>
 	</bsdf>
 
-	<bsdf type="roughconductor" id="01___Default_material">
+	<bsdf type="roughdielectric" id="01___Default_material">
 		<string name="material" value="Ag"/>
 		<float name="alpha" value="0.01"/>
 		<rgb name="reflectance" value="1 1 1"/>
+		<string name="intIOR" value="water"/>
+		<string name="extIOR" value="air"/>
 	</bsdf>
 
-	<bsdf type="roughconductor" id="02___Default_material">
+	<bsdf type="roughdielectric" id="02___Default_material">
+		<string name="material" value="Ag"/>
+		<float name="alpha" value="0.125"/>
+		<rgb name="reflectance" value="1 1 1"/>
+		<string name="intIOR" value="water"/>
+		<string name="extIOR" value="air"/>
+	</bsdf>
+
+	<bsdf type="roughdielectric" id="03___Default_material">
 		<string name="material" value="Ag"/>
 		<float name="alpha" value="0.25"/>
 		<rgb name="reflectance" value="1 1 1"/>
+		<string name="intIOR" value="water"/>
+		<string name="extIOR" value="air"/>
 	</bsdf>
 
-	<bsdf type="roughconductor" id="03___Default_material">
+	<bsdf type="roughdielectric" id="07___Default_material">
+		<string name="material" value="Ag"/>
+		<float name="alpha" value="0.375"/>
+		<rgb name="reflectance" value="1 1 1"/>
+		<string name="intIOR" value="water"/>
+		<string name="extIOR" value="air"/>
+	</bsdf>
+
+	<bsdf type="roughdielectric" id="08___Default_material">
 		<string name="material" value="Ag"/>
 		<float name="alpha" value="0.5"/>
 		<rgb name="reflectance" value="1 1 1"/>
-	</bsdf>
-
-	<bsdf type="roughconductor" id="07___Default_material">
-		<string name="material" value="Ag"/>
-		<float name="alpha" value="0.75"/>
-		<rgb name="reflectance" value="1 1 1"/>
-	</bsdf>
-
-	<bsdf type="roughconductor" id="08___Default_material">
-		<string name="material" value="Ag"/>
-		<float name="alpha" value="0.99"/>
-		<rgb name="reflectance" value="1 1 1"/>
+		<string name="intIOR" value="water"/>
+		<string name="extIOR" value="air"/>
 	</bsdf>
 
 	<shape type="serialized" id="Plane001_mesh">
@@ -81,15 +91,12 @@
 		<ref name="bsdf" id="08___Default_material"/>
 	</shape>
 
-	<emitter type="constant"/>
-	<!--
 	<emitter type="envmap">
 		<string name="filename" value="/Volumes/Development/SDK/Textures/background.hdr"/>
 		<transform name="toWorld">
 			<rotate y="1" angle="90"/>
 		</transform>
 	</emitter>
--->
 
 	<sensor type="perspective">
 		<float name="farClip" value="1024"/>
@@ -99,7 +106,7 @@
 		<float name="nearClip" value="1"/>
 		<transform name="toWorld">
 
-			<lookat target="-249.019, 49.804, 0" origin="-250, 50, 0" up="0.196018, 0.9806, 0"/>
+			<lookat target="-249.019, 49.8041, 0" origin="-250, 50, 0" up="0.195923, 0.980619, 0"/>
 		</transform>
 
 		<sampler type="independent">

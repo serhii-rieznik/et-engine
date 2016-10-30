@@ -7,7 +7,8 @@
 
 #include <et-ext/rt/bsdf.h>
 
-et::rt::BSDFSample::BSDFSample(const et::rt::float4& _wi, const et::rt::float4& _n, const Material& mat, Direction _d) : Wi(_wi), n(_n), IdotN(_wi.dot(_n)), alpha(mat.roughness), dir(_d)
+et::rt::BSDFSample::BSDFSample(const et::rt::float4& _wi, const et::rt::float4& _n, const Material& mat, Direction _d) :
+	Wi(_wi), n(_n), IdotN(_wi.dot(_n)), alpha(mat.roughness), dir(_d)
 {
 	switch (mat.cls)
 	{
@@ -34,10 +35,17 @@ et::rt::BSDFSample::BSDFSample(const et::rt::float4& _wi, const et::rt::float4& 
 			if (eta > 1.0f) // refractive
 			{
 				if (IdotN < 0.0f)
+				{
 					eta = 1.0f / eta;
+				}
+				else
+				{
+					n = -n;
+					IdotN = -IdotN;
+				}
 
-				float refractionK = 1.0f - sqr(eta) * (1.0f - sqr(IdotN));
-				fresnel = (refractionK > 0.0f) ? fresnelShlickApproximation(IdotN, eta) : 1.0f;
+				float sinTheta = 1.0f - sqr(eta) * (1.0f - sqr(IdotN));
+				fresnel = (sinTheta > 0.0f) ? fresnelShlickApproximation(IdotN, eta) : 1.0f;
 				if (fastRandomFloat() <= fresnel)
 				{
 					cls = BSDFSample::Class::Reflection;
@@ -47,8 +55,8 @@ et::rt::BSDFSample::BSDFSample(const et::rt::float4& _wi, const et::rt::float4& 
 				else
 				{
 					cls = BSDFSample::Class::Transmittance;
+					Wo = computeRefractionVector(Wi, n, eta, mat.roughness, sinTheta, IdotN);
 					color = mat.diffuse;
-					Wo = computeRefractionVector(Wi, n, eta, mat.roughness, IdotN, std::sqrt(refractionK) * signNoZero(IdotN));
 				}
 			}
 			else // non-refractive material

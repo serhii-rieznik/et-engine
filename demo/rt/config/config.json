@@ -1,8 +1,8 @@
 {
-	"reference" : "material-test.json",
+	"reference" : "cornellbox.json",
 	"method" : "backward",
 	"threads" : 0,
 	"render-region-size" : 32,
-	"rays-per-pixel" : 64,
+	"rays-per-pixel" : 128,
 	"max-path-length" : 1024
 }

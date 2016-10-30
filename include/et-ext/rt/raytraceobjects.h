@@ -33,10 +33,6 @@ namespace et
 		{
 			static const float_type epsilon;
 			static const float_type distanceEpsilon;
-			static const float_type minusEpsilon;
-			static const float_type onePlusEpsilon;
-			static const float_type oneMinusEpsilon;
-			static const float_type epsilonSquared;
 			static const float_type initialSplitValue;
 		};
 
@@ -285,10 +281,8 @@ namespace et
 
 		const float4& defaultLightDirection();
 
-		float4 computeDiffuseVector(const float4& incidence, const float4& normal, float roughness);
-
-		float4 computeReflectionVector(const float4& incidence, const float4& normal, float roughness);
-			
-		float4 computeRefractionVector(const float4& incidence, const float4& normal, float_type eta, float roughness, float cosTheta, float cosThetaTSqr);
+		float4 computeDiffuseVector(const float4& i, const float4& n, float r);
+		float4 computeReflectionVector(const float4& i, const float4& n, float r);
+		float4 computeRefractionVector(const float4& i, const float4& n, float_type eta, float r, float sinTheta, float IdotN);
 	}
 }

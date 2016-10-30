@@ -271,7 +271,7 @@ void RaytracePrivate::buildMaterialAndTriangles(s3d::Scene::Pointer scene)
 				mat.diffuse = rt::float4(batchMaterial->getVector(MaterialParameter::AlbedoColor));
 				mat.specular = rt::float4(batchMaterial->getVector(MaterialParameter::ReflectanceColor));
 				mat.emissive = rt::float4(batchMaterial->getVector(MaterialParameter::EmissiveColor));
-				mat.roughness = alpha;
+				mat.roughness = std::pow(alpha, 2.0f);
 				mat.ior = eta;
 
 				isEmitter = mat.emissive.length() > 0.0f;

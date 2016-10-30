@@ -822,7 +822,7 @@ void OBJLoader::processLoadedData()
 		}
 
 		// TODO : retrieve material from renderer
-		MaterialInstance::Pointer m; //  = MaterialInstance::Pointer::create();
+		MaterialInstance::Pointer m = _renderer->sharedMaterialLibrary().loadDefaultMaterial(DefaultMaterial::Microfacet)->instance();
 		for (auto mat : _materials)
 		{
 			if (mat->name() == group.material)
