@@ -247,6 +247,7 @@ void Application::enableRemoteNotifications()
 - (BOOL)applicationShouldTerminateAfterLastWindowClosed:(NSApplication*)sender
 {
     (void)sender;
+	et::application().quit(0);
 	return YES;
 }
 
