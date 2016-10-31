@@ -47,7 +47,7 @@ namespace et
 		{
 			float4 v[3];
 			float4 n[3];
-			// float4 t[3];
+			float4 t[3];
 			float4 edge1to0;
 			float4 edge2to0;
 			float4 _invDenom;
@@ -86,6 +86,16 @@ namespace et
 					n[0] * b.shuffle<0, 0, 0, 3>() +
 					n[1] * b.shuffle<1, 1, 1, 3>() +
 					n[2] * b.shuffle<2, 2, 2, 3>();
+				result.normalize();
+				return result;
+			}
+
+			float4 interpolatedTexCoord0(const float4& b) const
+			{
+				auto result =
+					t[0] * b.shuffle<0, 0, 0, 3>() +
+					t[1] * b.shuffle<1, 1, 1, 3>() +
+					t[2] * b.shuffle<2, 2, 2, 3>();
 				result.normalize();
 				return result;
 			}

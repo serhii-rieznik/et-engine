@@ -289,7 +289,13 @@ void RaytracePrivate::buildMaterialAndTriangles(s3d::Scene::Pointer scene)
 
 			const auto pos = vs->accessData<DataType::Vec3>(VertexAttributeUsage::Position, 0);
 			const auto nrm = vs->accessData<DataType::Vec3>(VertexAttributeUsage::Normal, 0);
-			// const auto uv0 = vs->accessData<DataType::Vec2>(VertexAttributeUsage::TexCoord0, 0);
+			bool hasUV = vs->hasAttribute(VertexAttributeUsage::TexCoord0);
+			VertexDataAccessor<DataType::Vec2> uv0;
+			if (hasUV)
+			{
+				uv0 = vs->accessData<DataType::Vec2>(VertexAttributeUsage::TexCoord0, 0);
+			}
+
 			for (uint32_t i = 0; i < rb->numIndexes(); i += 3)
 			{
 				uint32_t i0 = ia->getIndex(rb->firstIndex() + i + 0);
@@ -304,11 +310,16 @@ void RaytracePrivate::buildMaterialAndTriangles(s3d::Scene::Pointer scene)
 				tri.n[0] = rt::float4(t.rotationMultiply(nrm[i0]).normalized(), 0.0f);
 				tri.n[1] = rt::float4(t.rotationMultiply(nrm[i1]).normalized(), 0.0f);
 				tri.n[2] = rt::float4(t.rotationMultiply(nrm[i2]).normalized(), 0.0f);
-				/*
-				 tri.t[0] = rt::float4(uv0[i0].x, uv0[i0].y, 0.0f, 0.0f);
-				 tri.t[1] = rt::float4(uv0[i1].x, uv0[i1].y, 0.0f, 0.0f);
-				 tri.t[2] = rt::float4(uv0[i2].x, uv0[i2].y, 0.0f, 0.0f);
-				 */
+				if (hasUV)
+				{
+					tri.t[0] = rt::float4(uv0[i0].x, uv0[i0].y, 0.0f, 0.0f);
+					tri.t[1] = rt::float4(uv0[i1].x, uv0[i1].y, 0.0f, 0.0f);
+					tri.t[2] = rt::float4(uv0[i2].x, uv0[i2].y, 0.0f, 0.0f);
+				}
+				else
+				{
+					tri.t[0] = tri.t[1] = tri.t[2] = rt::float4(0.0f);
+				}
 				tri.materialIndex = static_cast<rt::index>(materialIndex);
 				tri.computeSupportData();
 
