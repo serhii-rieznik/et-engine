@@ -36,6 +36,7 @@ MTLPixelFormat textureFormatValue(TextureFormat value)
 {
     static const std::map<TextureFormat, MTLPixelFormat> _map =
     {
+		{TextureFormat::R8, MTLPixelFormatR8Unorm},
         {TextureFormat::RGBA8, MTLPixelFormatRGBA8Unorm},
         {TextureFormat::RGBA16F, MTLPixelFormatRGBA16Float},
         {TextureFormat::RGBA32F, MTLPixelFormatRGBA32Float},
