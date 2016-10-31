@@ -424,7 +424,7 @@ struct RenderStateCache
 	uint32_t boundRenderbuffer = 0;
 	uint32_t boundArrayBuffer = 0;
 	uint32_t boundElementArrayBuffer = 0;
-	uint32_t boundVertexArrayObject = 0;
+	uint32_t boundVertexStream = 0;
 	uint32_t boundProgram = 0;
 	recti viewport = recti(0, 0, 0, 0);
 	

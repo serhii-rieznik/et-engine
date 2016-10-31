@@ -40,6 +40,7 @@ namespace et
 			{ uploadObjectVariable(name, &t, sizeof(T)); }
 
 	private:
+		void buildRequiredLayout();
 		void uploadObjectVariable(const String& name, const void* ptr, uint32_t size);
 		void uploadMaterialVariable(const String& name, const void* ptr, uint32_t size);
 		void buildReflection();

@@ -11,7 +11,6 @@
 
 #import <CoreVideo/CVDisplayLink.h>
 
-#include <et/platform/platformtools.h>
 #include <et/core/threading.h>
 #include <et/rendering/base/helpers.h>
 #include <et/rendering/metal/metal.h>

@@ -25,7 +25,6 @@
 		A5D8EC3B1A3CDF5C00E3620B /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A5D8EC3A1A3CDF5C00E3620B /* CoreGraphics.framework */; };
 		A5D8EC3D1A3CDF5F00E3620B /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A5D8EC3C1A3CDF5E00E3620B /* AppKit.framework */; };
 		A5D8EC401A3CE18900E3620B /* MainController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5D8EC3E1A3CE18900E3620B /* MainController.cpp */; };
-		A5D8EC431A3CE2EE00E3620B /* data in Resources */ = {isa = PBXBuildFile; fileRef = A5D8EC421A3CE2EE00E3620B /* data */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -73,7 +72,6 @@
 		A5D8EC3C1A3CDF5E00E3620B /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
 		A5D8EC3E1A3CE18900E3620B /* MainController.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MainController.cpp; sourceTree = "<group>"; };
 		A5D8EC3F1A3CE18900E3620B /* MainController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MainController.h; sourceTree = "<group>"; };
-		A5D8EC421A3CE2EE00E3620B /* data */ = {isa = PBXFileReference; lastKnownFileType = folder; name = data; path = ../data; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -112,7 +110,6 @@
 				5C4515541D7E029000D093EB /* engine_data */,
 				5C559F0C1DC662AA00E0A578 /* config */,
 				6E12DA2F1CD6926C006037A5 /* media */,
-				A5D8EC421A3CE2EE00E3620B /* data */,
 				6E12DA251CD686C8006037A5 /* et-static-mac.xcodeproj */,
 				A5D8EABC1A3CD89300E3620B /* source */,
 				A5D8EA961A3CD5A600E3620B /* Supporting Files */,
@@ -243,7 +240,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				5C559F0D1DC662AA00E0A578 /* config in Resources */,
-				A5D8EC431A3CE2EE00E3620B /* data in Resources */,
 				5C4515551D7E029000D093EB /* engine_data in Resources */,
 				6E12DA301CD6926C006037A5 /* media in Resources */,
 			);

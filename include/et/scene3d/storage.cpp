@@ -94,7 +94,7 @@ void Storage::flush()
 	}
 }
 
-void Storage::buildVertexArrayObjects(RenderContext* rc)
+void Storage::buildVertexStreams(RenderContext* rc)
 {
     IndexBuffer::Pointer ib;
     for (auto vs : _vertexStorages)

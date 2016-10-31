@@ -28,6 +28,7 @@ public:
 	MetalState& metal;
 	MetalRenderer* renderer = nullptr;
     MetalNativePipelineState state;
+	VertexDeclaration requiredLayout;
 
 	uint32_t passVariablesBufferSize = 0;
 
@@ -60,8 +61,14 @@ MetalPipelineState::~MetalPipelineState()
 
 void MetalPipelineState::build()
 {
+	buildRequiredLayout();
+	const VertexDeclaration& decl = inputLayout();
+	for (const auto& el : decl.elements())
+	{
+		ET_ASSERT(decl.has(el.usage()));
+	}
+
     MetalProgram::Pointer mtlProgram = program();
-    const VertexDeclaration& decl = inputLayout();
 
 	MTLRenderPipelineDescriptor* desc = [[MTLRenderPipelineDescriptor alloc] init];
 	desc.vertexFunction = mtlProgram->nativeProgram().vertexFunction;
@@ -91,6 +98,7 @@ void MetalPipelineState::build()
     if (error != nil)
     {
         log::error("Failed to create pipeline:\n%s", [[error description] UTF8String]);
+		debug::debugBreak();
     }
 	buildReflection();
 
@@ -291,6 +299,24 @@ void MetalPipelineState::buildReflection()
 	{
 		_private->objectVariablesBuffer.resize(alignUpTo(_private->objectVariablesBufferSize, 32));
 		_private->objectVariablesBuffer.fill(0);
+	}
+}
+
+void MetalPipelineState::buildRequiredLayout()
+{
+	_private->requiredLayout.clear();
+
+	MetalProgram::Pointer mtlProgram = program();
+	id<MTLFunction> vertexFunction = mtlProgram->nativeProgram().vertexFunction;
+	for (MTLVertexAttribute* attrib in vertexFunction.vertexAttributes)
+	{
+		std::string name([attrib.name UTF8String]);
+		VertexAttributeUsage usage = stringToVertexAttributeUsage(name);
+		if (usage != VertexAttributeUsage::Unknown)
+		{
+			DataType type = metal::mtlDataTypeToDataType(attrib.attributeType);
+			_private->requiredLayout.push_back(usage, type);
+		}
 	}
 }
 

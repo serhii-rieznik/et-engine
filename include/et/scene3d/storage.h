@@ -66,7 +66,7 @@ public:
 	
 	void flush();
 	
-	void buildVertexArrayObjects(RenderContext* rc);
+	void buildVertexStreams(RenderContext* rc);
 
 private:
 	Storage* duplicate()

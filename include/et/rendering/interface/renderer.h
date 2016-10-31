@@ -167,7 +167,7 @@ inline Sampler::Pointer RenderInterface::defaultSampler()
 		void drawAllElements(const IndexBuffer::Pointer& ib);
 
 		void drawElementsInstanced(const IndexBuffer::Pointer& ib, uint32_t first, uint32_t count, uint32_t instances);
-		void drawElementsBaseIndex(const VertexArrayObject::Pointer& vao, int base, uint32_t first, uint32_t count);
+		void drawElementsBaseIndex(const VertexStream::Pointer& vao, int base, uint32_t first, uint32_t count);
 		void drawElementsSequentially(PrimitiveType, uint32_t first, uint32_t count);
 		
 		BinaryDataStorage readFramebufferData(const vec2i&, TextureFormat, DataFormat);
@@ -194,7 +194,7 @@ inline Sampler::Pointer RenderInterface::defaultSampler()
 		uint32_t _defaultTextureBindingUnit = 7;
 		
 		ObjectsCache _sharedCache;
-		VertexArrayObject::Pointer _fullscreenQuadVao;
+		VertexStream::Pointer _fullscreenQuadVao;
 		
 		Program::Pointer _fullscreenProgram[TextureTarget_max];
 		Program::Pointer _fullscreenDepthProgram;

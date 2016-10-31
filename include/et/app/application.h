@@ -60,7 +60,7 @@ namespace et
         const ApplicationParameters& parameters() const
 			{ return _parameters; }
 
-		const StringList& launchParamters() const
+		const StringList& launchParameters() const
 			{ return _launchParameters; }
 
 		const ApplicationIdentifier& identifier() const;
