@@ -531,7 +531,8 @@ void RaytracePrivate::forwardPathTraceThreadFunction(uint32_t threadId)
 
 		const auto& tri = kdTree.triangleAtIndex(hit.triangleIndex);
 		const auto& mat = materials.at(tri.materialIndex);
-		rt::BSDFSample sample(inRay.direction, toCamera, nrm, mat, rt::BSDFSample::Direction::Forward);
+		rt::float4 uv0 = tri.interpolatedTexCoord0(hit.intersectionPointBarycentric);
+		rt::BSDFSample sample(inRay.direction, toCamera, nrm, mat, uv0, rt::BSDFSample::Direction::Forward);
 
 		if (sample.OdotN <= 0.0f)
 			return;
@@ -603,8 +604,9 @@ void RaytracePrivate::forwardPathTraceThreadFunction(uint32_t threadId)
 					break;
 				}
 
-				auto nrm = tri.interpolatedNormal(hit.intersectionPointBarycentric);
-				rt::BSDFSample sample(currentRay.direction, nrm, mat, rt::BSDFSample::Direction::Forward);
+				rt::float4 nrm = tri.interpolatedNormal(hit.intersectionPointBarycentric);
+				rt::float4 uv0 = tri.interpolatedTexCoord0(hit.intersectionPointBarycentric);
+				rt::BSDFSample sample(currentRay.direction, nrm, mat, uv0, rt::BSDFSample::Direction::Forward);
 
 #			if (ET_RT_VISUALIZE_BRDF)
 				projectToCamera(currentRay, hit, rt::float4(sample.bsdf()), nrm);

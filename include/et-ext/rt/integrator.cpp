@@ -42,9 +42,10 @@ float4 PathTraceIntegrator::gather(const Ray& inRay, size_t depth, size_t& maxDe
 
 		const auto& tri = tree.triangleAtIndex(traverse.triangleIndex);
 		const auto& mat = materials[tri.materialIndex];
-        auto nrm = tri.interpolatedNormal(traverse.intersectionPointBarycentric);
+        float4 nrm = tri.interpolatedNormal(traverse.intersectionPointBarycentric);
+		float4 uv0 = tri.interpolatedTexCoord0(traverse.intersectionPointBarycentric);
 
-		BSDFSample sample(currentRay.direction, nrm, mat, et::rt::BSDFSample::Direction::Backward);
+		BSDFSample sample(currentRay.direction, nrm, mat, uv0, et::rt::BSDFSample::Direction::Backward);
 		bounce.scale = sample.combinedEvaluate();
 		bounce.add = mat.emissive;
 
@@ -97,7 +98,8 @@ float4 FresnelIntegrator::gather(const Ray& inRay, size_t depth, size_t& maxDept
 	const auto& tri = tree.triangleAtIndex(hit0.triangleIndex);
 	const auto& mat = materials[tri.materialIndex];
     float4 nrm = tri.interpolatedNormal(hit0.intersectionPointBarycentric);
-	BSDFSample sample(inRay.direction, nrm, mat, BSDFSample::Direction::Backward);
+	float4 uv0 = tri.interpolatedTexCoord0(hit0.intersectionPointBarycentric);
+	BSDFSample sample(inRay.direction, nrm, mat, uv0, BSDFSample::Direction::Backward);
 	return float4(sample.fresnel);
 }
 

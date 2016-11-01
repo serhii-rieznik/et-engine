@@ -7,8 +7,8 @@
 
 #include <et-ext/rt/bsdf.h>
 
-et::rt::BSDFSample::BSDFSample(const et::rt::float4& _wi, const et::rt::float4& _n, const Material& mat, Direction _d) :
-	Wi(_wi), n(_n), IdotN(_wi.dot(_n)), alpha(mat.roughness), dir(_d)
+et::rt::BSDFSample::BSDFSample(const et::rt::float4& _wi, const et::rt::float4& _n, const Material& mat,
+	const et::rt::float4& uv, Direction _d) : Wi(_wi), n(_n), IdotN(_wi.dot(_n)), alpha(mat.roughness), dir(_d)
 {
 	switch (mat.cls)
 	{
@@ -23,7 +23,7 @@ et::rt::BSDFSample::BSDFSample(const et::rt::float4& _wi, const et::rt::float4& 
 		case Material::Class::Conductor:
 		{
 			cls = BSDFSample::Class::Reflection;
-			Wo = computeReflectionVector(Wi, n, mat.roughness);
+			Wo = computeReflectionVector(Wi, n, alpha);
 			fresnel = fresnelShlickApproximation(IdotN, 0.025f);
 			color = mat.specular;
 			break;
@@ -49,13 +49,13 @@ et::rt::BSDFSample::BSDFSample(const et::rt::float4& _wi, const et::rt::float4& 
 				if (fastRandomFloat() <= fresnel)
 				{
 					cls = BSDFSample::Class::Reflection;
-					Wo = computeReflectionVector(Wi, n, mat.roughness);
+					Wo = computeReflectionVector(Wi, n, alpha);
 					color = mat.specular;
 				}
 				else
 				{
 					cls = BSDFSample::Class::Transmittance;
-					Wo = computeRefractionVector(Wi, n, eta, mat.roughness, sinTheta, IdotN);
+					Wo = computeRefractionVector(Wi, n, eta, alpha, sinTheta, IdotN);
 					color = mat.diffuse;
 				}
 			}
@@ -65,13 +65,13 @@ et::rt::BSDFSample::BSDFSample(const et::rt::float4& _wi, const et::rt::float4& 
 				if (fastRandomFloat() <= fresnel)
 				{
 					cls = BSDFSample::Class::Reflection;
-					Wo = computeReflectionVector(Wi, n, mat.roughness);
+					Wo = computeReflectionVector(Wi, n, alpha);
 					color = mat.specular;
 				}
 				else
 				{
 					cls = BSDFSample::Class::Diffuse;
-					Wo = computeDiffuseVector(Wi, n, mat.roughness);
+					Wo = computeDiffuseVector(Wi, n, alpha);
 					color = mat.diffuse;
 				}
 			}
@@ -91,7 +91,7 @@ et::rt::BSDFSample::BSDFSample(const et::rt::float4& _wi, const et::rt::float4& 
 }
 
 et::rt::BSDFSample::BSDFSample(const et::rt::float4& _wi, const et::rt::float4& _wo, const et::rt::float4& _n,
-	const Material& mat, Direction _d)
+	const Material& mat, const et::rt::float4& uv, Direction _d)
 	: Wi(_wi)
 	, Wo(_wo)
 	, n(_n)

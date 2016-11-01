@@ -30,8 +30,8 @@ namespace rt
 			Backward
 		};
 
-		BSDFSample(const rt::float4& _wi, const rt::float4& _n, const Material&, Direction _dir);
-		BSDFSample(const rt::float4& _wi, const rt::float4& _wo, const rt::float4& _n, const Material&, Direction _dir);
+		BSDFSample(const float4& _wi, const float4& _n, const Material&, const float4& uv, Direction _dir);
+		BSDFSample(const float4& _wi, const float4& _wo, const float4& _n, const Material&, const float4& uv, Direction _dir);
 
 		float pdf();
 		float bsdf();
