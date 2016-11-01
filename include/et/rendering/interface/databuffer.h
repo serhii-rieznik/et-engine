@@ -19,6 +19,5 @@ namespace et
 	public:
 		virtual uint32_t size() const = 0;
 		virtual void setData(const void* ptr, uint32_t offset, uint32_t size) = 0;
-
 	};
 }

@@ -23,7 +23,6 @@
 		5CD5A9C21D932CFA003FD770 /* imaging.pack.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 5CD5A8761D932CF4003FD770 /* imaging.pack.cxx */; };
 		5CD5A9C31D932CFA003FD770 /* input.pack.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 5CD5A8771D932CF4003FD770 /* input.pack.cxx */; };
 		5CD5A9C41D932CFA003FD770 /* platform-apple.pack.mm in Sources */ = {isa = PBXBuildFile; fileRef = 5CD5A8781D932CF4003FD770 /* platform-apple.pack.mm */; };
-		5CD5A9C51D932CFA003FD770 /* platform-win.pack.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 5CD5A8791D932CF4003FD770 /* platform-win.pack.cxx */; };
 		5CD5A9C61D932CFA003FD770 /* rendering.pack.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 5CD5A87A1D932CF4003FD770 /* rendering.pack.cxx */; };
 		5CD5A9C71D932CFA003FD770 /* rendering_metal.pack.mm in Sources */ = {isa = PBXBuildFile; fileRef = 5CD5A87B1D932CF4003FD770 /* rendering_metal.pack.mm */; };
 		5CD5A9C81D932CFA003FD770 /* scene3d.pack.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 5CD5A87C1D932CF4003FD770 /* scene3d.pack.cxx */; };
@@ -82,7 +81,6 @@
 		5CD5A8761D932CF4003FD770 /* imaging.pack.cxx */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = imaging.pack.cxx; sourceTree = "<group>"; };
 		5CD5A8771D932CF4003FD770 /* input.pack.cxx */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = input.pack.cxx; sourceTree = "<group>"; };
 		5CD5A8781D932CF4003FD770 /* platform-apple.pack.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = "platform-apple.pack.mm"; sourceTree = "<group>"; };
-		5CD5A8791D932CF4003FD770 /* platform-win.pack.cxx */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = "platform-win.pack.cxx"; sourceTree = "<group>"; };
 		5CD5A87A1D932CF4003FD770 /* rendering.pack.cxx */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = rendering.pack.cxx; sourceTree = "<group>"; };
 		5CD5A87B1D932CF4003FD770 /* rendering_metal.pack.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = rendering_metal.pack.mm; sourceTree = "<group>"; };
 		5CD5A87C1D932CF4003FD770 /* scene3d.pack.cxx */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = scene3d.pack.cxx; sourceTree = "<group>"; };
@@ -385,7 +383,6 @@
 				5CD5A8761D932CF4003FD770 /* imaging.pack.cxx */,
 				5CD5A8771D932CF4003FD770 /* input.pack.cxx */,
 				5CD5A8781D932CF4003FD770 /* platform-apple.pack.mm */,
-				5CD5A8791D932CF4003FD770 /* platform-win.pack.cxx */,
 				5CD5A87A1D932CF4003FD770 /* rendering.pack.cxx */,
 				5CD5A87B1D932CF4003FD770 /* rendering_metal.pack.mm */,
 				5CD5A87C1D932CF4003FD770 /* scene3d.pack.cxx */,
@@ -867,7 +864,6 @@
 				5CD5A9BF1D932CFA003FD770 /* camera.pack.cxx in Sources */,
 				5CD5A9C01D932CFA003FD770 /* core.pack.cxx in Sources */,
 				5CD5A9C81D932CFA003FD770 /* scene3d.pack.cxx in Sources */,
-				5CD5A9C51D932CFA003FD770 /* platform-win.pack.cxx in Sources */,
 				5CD5A9C61D932CFA003FD770 /* rendering.pack.cxx in Sources */,
 				5CD5A9C41D932CFA003FD770 /* platform-apple.pack.mm in Sources */,
 				5CD5A9BE1D932CFA003FD770 /* app.pack.cxx in Sources */,

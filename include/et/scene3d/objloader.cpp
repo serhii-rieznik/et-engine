@@ -869,7 +869,7 @@ s3d::ElementContainer::Pointer OBJLoader::generateVertexBuffers(s3d::Storage& st
 
 	for (const auto& i : _meshes)
 	{
-		s3d::Mesh::Pointer object = Mesh::Pointer::create(i.name, result.ptr());
+		s3d::Mesh::Pointer object = Mesh::Pointer::create(i.name, result.pointer());
 		object->setTranslation(i.center);
 
 		auto rb = RenderBatch::Pointer::create(i.material, vao, identityMatrix, i.start, i.count);

@@ -65,15 +65,17 @@ namespace et
 		template <typename T>
 		RawDataAcessor<T> accessData(size_t elementOffset) 
 		{
-			return valid() ? RawDataAcessor<T>(ptr()->data(), ptr()->dataSize(), ptr()->typeSize(),
-				elementOffset * ptr()->typeSize()) : RawDataAcessor<T>();
+			auto _this = pointer();
+			return valid() ? RawDataAcessor<T>(_this->data(), _this->dataSize(), _this->typeSize(),
+				elementOffset * _this->typeSize()) : RawDataAcessor<T>();
 		}
 		
 		template <typename T>
 		const RawDataAcessor<T> accessData(size_t elementOffset) const
 		{
-			return valid() ? RawDataAcessor<T>(ptr()->data(), ptr()->dataSize(), ptr()->typeSize(),
-				elementOffset * ptr()->typeSize()) : RawDataAcessor<T>();
+			auto _this = pointer();
+			return valid() ? RawDataAcessor<T>(_this->data(), _this->dataSize(), _this->typeSize(),
+				elementOffset * _this->typeSize()) : RawDataAcessor<T>();
 		}
 	};
     using VertexDataChunkList = Vector<VertexDataChunk>;

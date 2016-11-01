@@ -11,12 +11,10 @@
 
 namespace et
 {
-
 class RenderInterface;
 class MaterialInstance;
 using MaterialInstancePointer = IntrusivePtr<MaterialInstance>;
 using MaterialInstanceCollection = Vector<MaterialInstancePointer>;
-
 class Material : public Object
 {
 public:

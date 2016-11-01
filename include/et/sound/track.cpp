@@ -442,7 +442,7 @@ bool TrackPrivate::fillNextPCMBuffer()
 
 void TrackPrivate::loadOGG()
 {
-	int result = ov_open_callbacks(stream.ptr(), &oggFile, nullptr, -1, oggCallbacks);
+	int result = ov_open_callbacks(stream.pointer(), &oggFile, nullptr, -1, oggCallbacks);
 	if (result < 0)
 	{
 		checkOGGError(result, "ov_open_callbacks", _filename.c_str());

@@ -53,7 +53,7 @@ namespace et
 		
 		template <typename R>
 		IntrusivePtr(IntrusivePtr<R> r)
-			{ reset(static_cast<T*>(r.ptr()));  }
+			{ reset(static_cast<T*>(r.pointer()));  }
 
 		explicit IntrusivePtr(T* data)
 			{ reset(data); }
@@ -85,10 +85,10 @@ namespace et
 		const T* operator -> () const 
 			{ ET_ASSERT(valid()); return _data; }
 
-		T* ptr()
+		T* pointer()
 			{ return _data; }
 
-		const T* ptr() const 
+		const T* pointer() const 
 			{ return _data; }
 
 		T& reference()
@@ -124,7 +124,7 @@ namespace et
 		template <typename R>
 		IntrusivePtr<T>& operator = (IntrusivePtr<R> r)
 		{
-			reset(static_cast<T*>(r.ptr()));
+			reset(static_cast<T*>(r.pointer()));
 			return *this;
 		}
 

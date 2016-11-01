@@ -57,7 +57,7 @@ namespace et
 			_startTime(0.0f), _duration(0.0f) { initDefaultInterpolators(); }
 
 		Animator(TimerPool::Pointer tp) :
-			BaseAnimator(0, tp.ptr()), _from(), _to(), _value(), _valuePointer(nullptr),
+			BaseAnimator(0, tp.pointer()), _from(), _to(), _value(), _valuePointer(nullptr),
 			_startTime(0.0f), _duration(0.0f) { initDefaultInterpolators(); }
 
 		/*
@@ -68,7 +68,7 @@ namespace et
 			_startTime(0.0f), _duration(0.0f) { initDefaultInterpolators(); }
 
 		Animator(int64_t tag, TimerPool::Pointer tp) :
-			BaseAnimator(tag, tp.ptr()), _from(), _to(), _value(), _valuePointer(nullptr),
+			BaseAnimator(tag, tp.pointer()), _from(), _to(), _value(), _valuePointer(nullptr),
 			_startTime(0.0f), _duration(0.0f) { initDefaultInterpolators(); }
 
 		/*
@@ -79,7 +79,7 @@ namespace et
 			_startTime(0.0f), _duration(0.0f) { initDefaultInterpolators(); }
 		
 		Animator(const T& value, TimerPool::Pointer tp) :
-			BaseAnimator(0, tp.ptr()), _from(), _to(), _value(value), _valuePointer(nullptr),
+			BaseAnimator(0, tp.pointer()), _from(), _to(), _value(value), _valuePointer(nullptr),
 			_startTime(0.0f), _duration(0.0f) { initDefaultInterpolators(); }
 		
 		/*
@@ -93,7 +93,7 @@ namespace et
 		}
 
 		Animator(T* value, const T& from, const T& to, float duration, int tag, TimerPool::Pointer tp) :
-			BaseAnimator(tag, tp.ptr()), _from(), _to(), _value(), _valuePointer(nullptr), _startTime(0.0f), _duration(0.0f)
+			BaseAnimator(tag, tp.pointer()), _from(), _to(), _value(), _valuePointer(nullptr), _startTime(0.0f), _duration(0.0f)
 		{
 			initDefaultInterpolators();
 			animate(value, from, to, duration);

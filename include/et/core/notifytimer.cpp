@@ -25,7 +25,7 @@ void NotifyTimer::start(TimerPool* tp, float period, int64_t repeatCount)
 
 void NotifyTimer::start(TimerPool::Pointer tp, float period, int64_t repeatCount)
 {
-	start(tp.ptr(), period, repeatCount);
+	start(tp.pointer(), period, repeatCount);
 }
 
 void NotifyTimer::update(float t)

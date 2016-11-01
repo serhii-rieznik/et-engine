@@ -95,7 +95,7 @@ namespace et
 		bool notFound = true;
 		for (auto i = _children.begin(), e = _children.end(); i != e; ++i)
 		{
-			if (i->ptr() == c)
+			if (i->pointer() == c)
 			{
 				notFound = false;
 				break;
@@ -115,7 +115,7 @@ namespace et
 		
 		for (auto i = _children.begin(), e = _children.end(); i != e; ++i)
 		{
-			if (i->ptr() == c)
+			if (i->pointer() == c)
 			{
 				childRemoved(c);
 				
@@ -133,7 +133,7 @@ namespace et
 	{
 		for (auto i = _children.begin(), e = _children.end(); i != e; ++i)
 		{
-			if (i->ptr() == c)
+			if (i->pointer() == c)
 			{
 				auto pointer = *i;
 
@@ -150,7 +150,7 @@ namespace et
 	{
 		for (auto i = _children.begin(), e = _children.end(); i != e; ++i)
 		{
-			if (i->ptr() == c)
+			if (i->pointer() == c)
 			{
 				auto pointer = *i;
 

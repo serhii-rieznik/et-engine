@@ -13,7 +13,6 @@
 
 namespace et
 {
-	class RenderInterface;
 	class SharedVariables
 	{
 	public:

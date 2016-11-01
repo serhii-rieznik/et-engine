@@ -66,7 +66,7 @@ void Storage::flush()
 	auto vi = _vertexStorages.begin();
 	while (vi != _vertexStorages.end())
 	{
-		if (vi->ptr()->retainCount() == 1)
+		if (vi->pointer()->retainCount() == 1)
 			vi = _vertexStorages.erase(vi);
 		else
 			++vi;
@@ -78,7 +78,7 @@ void Storage::flush()
 	MaterialInstance::Map::iterator mi = _materials.begin();
 	while (mi != _materials.end())
 	{
-		if (mi->second.ptr()->retainCount() == 1)
+		if (mi->second.pointer()->retainCount() == 1)
 			mi = _materials.erase(mi);
 		else
 			++mi;
@@ -87,7 +87,7 @@ void Storage::flush()
 	auto ti = _textures.begin();
 	while (ti != _textures.end())
 	{
-		if (ti->ptr()->retainCount() == 1)
+		if (ti->pointer()->retainCount() == 1)
 			ti = _textures.erase(ti);
 		else
 			++ti;

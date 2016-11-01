@@ -30,7 +30,7 @@ TimedObject::~TimedObject()
 
 TimerPool* TimedObject::timerPool()
 {
-	return _owner ? _owner : currentTimerPool().ptr();
+	return _owner ? _owner : currentTimerPool().pointer();
 }
 
 void TimedObject::startUpdates(TimerPool* timerPool)
@@ -42,7 +42,7 @@ void TimedObject::startUpdates(TimerPool* timerPool)
 
 	_running = true;
 	
-	_owner = (timerPool == nullptr) ? currentTimerPool().ptr() : timerPool;
+	_owner = (timerPool == nullptr) ? currentTimerPool().pointer() : timerPool;
 	_owner->attachTimedObject(this);
 	
 	_startTime = _owner->actualTime();

@@ -26,7 +26,6 @@ enum : uint32_t
 	DefaultMaterialCount = static_cast<uint32_t>(DefaultMaterial::Count)
 };
 
-class RenderInterface;
 class MaterialLibrary
 {
 public:
