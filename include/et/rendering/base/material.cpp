@@ -89,6 +89,27 @@ Sampler::Pointer Material::sampler(MaterialTexture t)
 	return samplers[static_cast<uint32_t>(t)].object;
 }
 
+void Material::setProgram(Program::Pointer p)
+{
+	_program = p;
+}
+
+void Material::setDepthState(const DepthState& ds)
+{
+	_depthState = ds;
+}
+
+void Material::setBlendState(const BlendState& bs)
+{
+	_blendState = bs;
+}
+
+void Material::setCullMode(CullMode cm)
+{
+	_cullMode = cm;
+}
+
+
 void Material::loadFromJson(const std::string& source, const std::string& baseFolder)
 {
 	VariantClass cls = VariantClass::Invalid;
@@ -99,9 +120,9 @@ void Material::loadFromJson(const std::string& source, const std::string& baseFo
 		return;
 	}
 
-	_depthState = deserializeDepthState(obj.dictionaryForKey(kDepthState));
+	setDepthState(deserializeDepthState(obj.dictionaryForKey(kDepthState)));
 
-	_blendState = deserializeBlendState(obj.dictionaryForKey(kBlendState));
+	setBlendState(deserializeBlendState(obj.dictionaryForKey(kBlendState)));
 
 	if (obj.hasKey(kCullMode) && !stringToCullMode(obj.stringForKey(kCullMode)->content, _cullMode))
 	{
@@ -211,7 +232,7 @@ void Material::loadCode(const std::string& codeString, const std::string& baseFo
 		programSource = loadTextFile(codeFileName);
 		parseShaderSource(programSource, baseFolder, allDefines);
 		generateInputLayout(programSource);
-		_program = _renderer->createProgram(programSource, emptyString);
+		setProgram(_renderer->createProgram(programSource, emptyString));
 	}
 }
 

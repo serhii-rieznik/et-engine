@@ -52,6 +52,11 @@ public:
 	CullMode cullMode() const
 		{ return _cullMode; }
 
+	void setProgram(Program::Pointer);
+	void setDepthState(const DepthState&);
+	void setBlendState(const BlendState&);
+	void setCullMode(CullMode);
+
 	uint64_t sortingKey() const;
 
 	void loadFromJson(const std::string& json, const std::string& baseFolder);
