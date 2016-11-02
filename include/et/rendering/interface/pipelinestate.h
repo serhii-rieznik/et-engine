@@ -61,12 +61,6 @@ namespace et
 		void setInputLayout(const VertexDeclaration& decl)
 			{ _decl = decl; }
 
-		VertexStream::Pointer vertexStream() const
-			{ return _vertexStream; }
-
-		void setVertexStream(VertexStream::Pointer vs)
-			{ _vertexStream = vs; }
-
 		const BlendState& blendState() const
 			{ return _blend; }
 
@@ -97,6 +91,12 @@ namespace et
 		void setRenderTargetFormat(TextureFormat fmt)
 			{ _renderTargetFormat = fmt; }
 
+		PrimitiveType primitiveType() const
+			{ return _primitiveType; }
+
+		void setPrimitiveType(PrimitiveType pt)
+			{ _primitiveType = pt; }
+
 	protected:
 		Reflection reflection;
 		void printReflection();
@@ -104,12 +104,12 @@ namespace et
 	private:
 		VertexDeclaration _decl;
 		RenderPass::Pointer _renderPass;
-		VertexStream::Pointer _vertexStream;
 		Program::Pointer _program;
 		BlendState _blend;
 		DepthState _depth;
 		CullMode _cull = CullMode::Disabled;
 		TextureFormat _renderTargetFormat = TextureFormat::RGBA8;
+		PrimitiveType _primitiveType = PrimitiveType::Triangles;
 	};
 
 	class PipelineStateCachePrivate;
@@ -119,8 +119,8 @@ namespace et
 		PipelineStateCache();
 		~PipelineStateCache();
 		
-		PipelineState::Pointer find(const VertexDeclaration&, VertexStream::Pointer, Program::Pointer,
-									const DepthState&, const BlendState&, CullMode, TextureFormat);
+		PipelineState::Pointer find(const VertexDeclaration&, Program::Pointer, const DepthState&,
+			const BlendState&, CullMode, TextureFormat, PrimitiveType);
 
 		void addToCache(PipelineState::Pointer);
 

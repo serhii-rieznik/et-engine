@@ -14,7 +14,7 @@ namespace et
 const std::string kCode = "code";
 const std::string kInputLayout = "input-layout";
 const std::string kOptions = "options";
-const std::string kBuiltInInput = "%built-in-input%";
+extern const std::string kMetalDefaultHeader;
 
 /*
  * Material
@@ -158,14 +158,10 @@ void Material::loadInputLayout(Dictionary layout)
 	}
 }
 
-void Material::generateInputLayout(std::string& source)
+std::string Material::generateInputLayout()
 {
-	uint64_t idPos = source.find(kBuiltInInput);
-	ET_ASSERT(idPos != std::string::npos);
-
 	std::string layout;
 	layout.reserve(1024);
-
 	if (_renderer->api() == RenderingAPI::Metal)
 	{
 		layout.append("struct VSInput {\n");
@@ -183,9 +179,7 @@ void Material::generateInputLayout(std::string& source)
 	{
 		ET_FAIL("Not implemented");
 	}
-
-	auto b = source.begin() + idPos;
-	source.replace(b, b + kBuiltInInput.length(), layout);
+	return layout;
 }
 
 void Material::loadCode(const std::string& codeString, const std::string& baseFolder, Dictionary defines)
@@ -230,8 +224,24 @@ void Material::loadCode(const std::string& codeString, const std::string& baseFo
 		}
 
 		programSource = loadTextFile(codeFileName);
-		parseShaderSource(programSource, baseFolder, allDefines);
-		generateInputLayout(programSource);
+		parseShaderSource(programSource, getFilePath(codeFileName), allDefines,
+			[this](ParseDirective what, std::string& code, uint32_t positionInCode)
+		{
+			if (what == ParseDirective::InputLayout)
+			{
+				std::string layout = generateInputLayout();
+				code.insert(positionInCode, layout);
+			}
+			else if (what == ParseDirective::DefaultHeader)
+			{
+				code.insert(positionInCode, kMetalDefaultHeader);
+			}
+			else
+			{
+				log::warning("Unknown directive in source code");
+			}
+		});
+
 		setProgram(_renderer->createProgram(programSource, emptyString));
 	}
 }
@@ -429,5 +439,29 @@ const String& mtl::materialSamplerToString(MaterialTexture t)
 	};
 	return names.at(t);
 }
+
+const std::string kMetalDefaultHeader = R"(
+#define VertexStreamBufferIndex         0
+#define ObjectVariablesBufferIndex      4
+#define MaterialVariablesBufferIndex    5
+#define PassVariablesBufferIndex        6
+
+#define PI                              3.1415926536
+#define HALF_PI                         1.5707963268
+#define INV_PI                          0.3183098862
+
+using namespace metal;
+
+struct PassVariables
+{
+	float4x4 viewProjection;
+	float4x4 projection;
+	float4x4 view;
+	float4 cameraPosition;
+	float4 cameraDirection;
+	float4 cameraUp;
+	float4 lightPosition;
+};
+)";
 
 }

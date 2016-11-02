@@ -1,11 +1,9 @@
-#include "include/common.metal.inl"
-#include "include/lighting.inl"
+#include <et>
+#include <inputlayout>
 
 /*
  * Inputs / outputs
  */
-
-%built-in-input%
 
 struct VSOutput {
 	float4 position [[position]];
@@ -51,6 +49,8 @@ vertex VSOutput vertexMain(VSInput in [[stage_in]],
 /*
  * Fragment shader
  */
+
+#include "lighting.inl"
 
 fragment FSOutput fragmentMain(VSOutput in [[stage_in]],
 	constant MaterialVariables& materialVariables [[buffer(MaterialVariablesBufferIndex)]],

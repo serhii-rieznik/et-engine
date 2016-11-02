@@ -11,7 +11,12 @@
 namespace et
 {
 #if (ET_DEBUG)
-	std::atomic<uint32_t> MemoryAllocatorBase::allocationIndex(0);
+std::atomic<uint32_t> MemoryAllocatorBase::allocationIndex(0);
+static std::set<uint32_t> _breakOnAllocations;
+void MemoryAllocatorBase::allocateOnBreaks(const std::set<uint32_t>& indices)
+{
+	_breakOnAllocations.insert(indices.begin(), indices.end());
+}
 #endif
 
 enum : uint32_t
@@ -40,7 +45,7 @@ struct MemoryChunkInfo
 			uint32_t allocated;
 			uint32_t begin;
 			uint32_t length;
-			uint32_t dummy;
+			uint32_t allocIndex;
 		};
 		
 		struct
@@ -50,9 +55,6 @@ struct MemoryChunkInfo
 		};
 	};
 
-	MemoryChunkInfo() : 
-		allocated(notAllocatedValue), begin(0), length(0), dummy(0) { }
-	
 	void swapWith(MemoryChunkInfo* info)
 	{
 		auto& iv0 = info->v0;
@@ -133,19 +135,31 @@ public:
 	~SmallMemoryBlockAllocator()
 	{
 	#if (ET_DEBUG)
-		uint64_t totalLeaked = 0;
+		std::vector<uint32_t> detectedLeaks;
+		detectedLeaks.reserve(1024);
+		uint32_t totalLeaked = 0;
+
 		log::ConsoleOutput lOut;
 		for (auto i = firstBlock; i != lastBlock; ++i)
 		{
 			if (i->blockAllocated)
 			{
 				totalLeaked += blockSize;
-				lOut.info("Memory leak detected: %d bytes, index %u", blockSize, i->allocIndex);
+				detectedLeaks.emplace_back(i->allocIndex);
 			}
 		}
+
 		if (totalLeaked > 0)
 		{
-			lOut.info("Total leaked: %llu", totalLeaked);
+			char buffer[1024 * 10] = { };
+
+			int printPos = 0;
+			for (uint32_t i : detectedLeaks)
+				printPos += sprintf(buffer + printPos, "%u, ", i);
+			buffer[printPos - 2] = 0;
+
+			lOut.info("Total memory leaked: %llu from small blocks, use debug funtion:", totalLeaked);
+			lOut.info("et::MemoryAllocatorBase::allocateOnBreaks({ %s })", buffer);
 		}
 	#endif
 		::free(blocks);
@@ -169,6 +183,10 @@ public:
 		currentBlock->blockAllocated = 1;
 #	if (ET_DEBUG)
 		currentBlock->allocIndex = MemoryAllocatorBase::allocationIndex++;
+		if (_breakOnAllocations.count(currentBlock->allocIndex))
+		{
+			debug::debugBreak();
+		}
 #	endif
 		result = currentBlock->data;
 		currentBlock = advance(currentBlock);
@@ -517,32 +535,38 @@ MemoryChunk::MemoryChunk(uint32_t capacity) :
 	lastInfo = firstInfo + 1;
 }
 
-template <typename ...args>
-void printlog(const char* fmt, args&... a)
-{
-	printf(fmt, a...);
-}
-
 MemoryChunk::~MemoryChunk()
 {
 	if (allocatedMemoryBegin)
 	{
 		log::ConsoleOutput lOut;
 
-		uint64_t totalLeaked = 0;
+		std::vector<uint32_t> detectedLeaks;
+		detectedLeaks.reserve(1024);
+
+		uint32_t totalLeaked = 0;
 		MemoryChunkInfo* info = firstInfo;
 		while (info < lastInfo)
 		{
 			if (info->allocated == allocatedValue)
 			{
 				totalLeaked += info->length;
-				lOut.info("Memory leak detected: %u bytes\n", info->length);
+				detectedLeaks.emplace_back(info->allocIndex);
 			}
 			++info;
 		}
+
 		if (totalLeaked > 0)
 		{
-			lOut.info("Total memory leaked: %llu", totalLeaked);
+			char buffer[1024 * 10] = { };
+
+			int printPos = 0;
+			for (uint32_t i : detectedLeaks)
+				printPos += sprintf(buffer + printPos, "%u, ", i);
+			buffer[printPos - 2] = 0;
+
+			lOut.info("Total memory leaked: %llu, use debug funtion:", totalLeaked);
+			lOut.info("et::MemoryAllocatorBase::allocateOnBreaks({ %s })", buffer);
 		}
 		
 #	if (ET_PLATFORM_WIN)
@@ -565,6 +589,13 @@ bool MemoryChunk::allocate(uint32_t sizeToAllocate, void*& result)
 			
 			info->allocated = allocatedValue;
 			info->length = sizeToAllocate;
+#		if ET_DEBUG
+			info->allocIndex = MemoryAllocatorBase::allocationIndex++;
+			if (_breakOnAllocations.count(info->allocIndex))
+			{
+				debug::debugBreak();
+			}
+#		endif
 			
 			if (remaining > minimumAllocationSize)
 			{

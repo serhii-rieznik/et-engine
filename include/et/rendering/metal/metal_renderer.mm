@@ -162,19 +162,20 @@ Program::Pointer MetalRenderer::createProgram(const std::string& source, const s
 PipelineState::Pointer MetalRenderer::acquirePipelineState(RenderPass::Pointer pass, Material::Pointer mtl,
     VertexStream::Pointer vs)
 {
-	PipelineState::Pointer result = _private->cache.find(vs->vertexBuffer()->declaration(), vs,
-		mtl->program(), mtl->depthState(), mtl->blendState(), mtl->cullMode(), TextureFormat::RGBA8);
+	PipelineState::Pointer result = _private->cache.find(vs->vertexBuffer()->declaration(),
+		mtl->program(), mtl->depthState(), mtl->blendState(), mtl->cullMode(), TextureFormat::RGBA8,
+		vs->indexBuffer()->primitiveType());
 
 	if (result.invalid())
 	{
 		result = MetalPipelineState::Pointer::create(this, _private->metal);
-		result->setRenderTargetFormat(TextureFormat::RGBA8);
-		result->setInputLayout(vs->vertexBuffer()->declaration());
+		result->setProgram(mtl->program());
+		result->setCullMode(mtl->cullMode());
 		result->setDepthState(mtl->depthState());
 		result->setBlendState(mtl->blendState());
-		result->setCullMode(mtl->cullMode());
-		result->setProgram(mtl->program());
-		result->setVertexStream(vs);
+		result->setRenderTargetFormat(TextureFormat::RGBA8);
+		result->setInputLayout(vs->vertexBuffer()->declaration());
+		result->setPrimitiveType(vs->indexBuffer()->primitiveType());
 		result->build();
 		
 		_private->cache.addToCache(result);

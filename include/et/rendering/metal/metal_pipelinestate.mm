@@ -61,26 +61,29 @@ MetalPipelineState::~MetalPipelineState()
 
 void MetalPipelineState::build()
 {
-	buildRequiredLayout();
-	const VertexDeclaration& decl = inputLayout();
-	for (const auto& el : decl.elements())
-	{
-		ET_ASSERT(decl.has(el.usage()));
-	}
 
-    MetalProgram::Pointer mtlProgram = program();
+	MetalProgram::Pointer mtlProgram = program();
+	const VertexDeclaration& providedLayout = inputLayout();
+
+#if ET_DEBUG
+	buildRequiredLayout();
+	for (const VertexElement& requiredElement : _private->requiredLayout.elements())
+	{
+		ET_ASSERT(providedLayout.has(requiredElement.usage()));
+	}
+#endif
 
 	MTLRenderPipelineDescriptor* desc = [[MTLRenderPipelineDescriptor alloc] init];
 	desc.vertexFunction = mtlProgram->nativeProgram().vertexFunction;
 	desc.fragmentFunction = mtlProgram->nativeProgram().fragmentFunction;
 	desc.colorAttachments[0].pixelFormat = metal::renderableTextureFormatValue(renderTargetFormat());
 	desc.depthAttachmentPixelFormat = _private->metal.defaultDepthBuffer.pixelFormat;
-	desc.inputPrimitiveTopology = metal::primitiveTypeToTopology(vertexStream()->indexBuffer()->primitiveType());
+	desc.inputPrimitiveTopology = metal::primitiveTypeToTopology(primitiveType());
 
 	desc.vertexDescriptor.layouts[VertexStreamBufferIndex].stepFunction = MTLVertexStepFunctionPerVertex;
-	desc.vertexDescriptor.layouts[VertexStreamBufferIndex].stride = decl.totalSize();
+	desc.vertexDescriptor.layouts[VertexStreamBufferIndex].stride = providedLayout.totalSize();
 	desc.vertexDescriptor.layouts[VertexStreamBufferIndex].stepRate = 1;
-	for (const VertexElement& element : decl.elements())
+	for (const VertexElement& element : providedLayout.elements())
 	{
 		NSUInteger index = static_cast<NSUInteger>(element.usage());
 		desc.vertexDescriptor.attributes[index].format = metal::dataTypeToVertexFormat(element.type());

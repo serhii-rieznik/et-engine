@@ -1,10 +1,10 @@
-#include "include/common.metal.inl"
+#include <et>
 
 /*
  * Inputs / outputs
  */
 
-%built-in-input%
+#include <inputlayout>
 
 struct VSOutput {
 	float4 position [[position]];

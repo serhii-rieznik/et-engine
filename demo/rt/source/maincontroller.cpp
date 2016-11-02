@@ -80,7 +80,7 @@ void MainController::applicationDidLoad(et::RenderContext* rc)
 	
 	et::OBJLoader loader(modelName, et::OBJLoader::Option_CalculateTangents);
 	auto model = loader.load(rc->renderer(), _scene->storage(), localCache);
-	model->setParent(_scene.ptr());
+	model->setParent(_scene.pointer());
 
 	et::Raytrace::Options rtOptions;
 	rtOptions.raysPerPixel = static_cast<uint32_t>(_options.integerForKey("rays-per-pixel", 32)->content);

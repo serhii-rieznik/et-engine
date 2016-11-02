@@ -14,107 +14,108 @@
 
 namespace et
 {
-	class MemoryAllocatorBase
-	{
-	public:
+class MemoryAllocatorBase
+{
+public:
 #	if (ET_DEBUG)
-		static std::atomic<uint32_t> allocationIndex;
+	static std::atomic<uint32_t> allocationIndex;
+	static void allocateOnBreaks(const std::set<uint32_t>&);
 #	endif
-	public:
-		MemoryAllocatorBase() { }
-		virtual ~MemoryAllocatorBase() { }
-		
-		virtual void* allocate(size_t) = 0;
-		virtual void release(void* ptr) = 0;
-		
-		virtual bool validatePointer(void*, bool = true) { return false; }
-		
-		virtual void printInfo() const { }
-		
-	private:
-		ET_DENY_COPY(MemoryAllocatorBase);
-	};
+public:
+	MemoryAllocatorBase() { }
+	virtual ~MemoryAllocatorBase() { }
 	
-	class ObjectFactory
-	{
-	public:
-		ObjectFactory()
-			{ }
-		
-		ObjectFactory(MemoryAllocatorBase* al) :
-			_allocator(al) { }
-		
-		void setAllocator(MemoryAllocatorBase* al)
-			{ _allocator = al; }
-		
-		MemoryAllocatorBase* allocator()
-			{ return _allocator; }
+	virtual void* allocate(size_t) = 0;
+	virtual void release(void* ptr) = 0;
+	
+	virtual bool validatePointer(void*, bool = true) { return false; }
+	
+	virtual void printInfo() const { }
+	
+private:
+	ET_DENY_COPY(MemoryAllocatorBase);
+};
 
-		const MemoryAllocatorBase* allocator() const
-			{ return _allocator; }
-		
-		template <typename O, typename ... args>
-		O* createObject(args&&...a)
+class ObjectFactory
+{
+public:
+	ObjectFactory()
+		{ }
+	
+	ObjectFactory(MemoryAllocatorBase* al) :
+		_allocator(al) { }
+	
+	void setAllocator(MemoryAllocatorBase* al)
+		{ _allocator = al; }
+	
+	MemoryAllocatorBase* allocator()
+		{ return _allocator; }
+
+	const MemoryAllocatorBase* allocator() const
+		{ return _allocator; }
+	
+	template <typename O, typename ... args>
+	O* createObject(args&&...a)
+	{
+		ET_ASSERT(_allocator != nullptr);
+		return new (_allocator->allocate(sizeof(O))) O(a...);\
+	}
+	
+	template <typename O>
+	void deleteObject(O* obj)
+	{
+		ET_ASSERT(_allocator != nullptr);
+		if (obj != nullptr)
 		{
-			ET_ASSERT(_allocator != nullptr);
-			return new (_allocator->allocate(sizeof(O))) O(a...);\
-		}
-		
-		template <typename O>
-		void deleteObject(O* obj)
-		{
-			ET_ASSERT(_allocator != nullptr);
-			if (obj != nullptr)
-			{
 #			if (ET_DEBUG)
-				_allocator->validatePointer(obj);
+			_allocator->validatePointer(obj);
 #			endif
-				
-				obj->~O();
-				_allocator->release(obj);
-			}
+			
+			obj->~O();
+			_allocator->release(obj);
 		}
-		
-	private:
-		ET_DENY_COPY(ObjectFactory);
-		
-	private:
-		MemoryAllocatorBase* _allocator = nullptr;
-	};
+	}
 	
-	class DefaultMemoryAllocator : public MemoryAllocatorBase
-	{
-		void* release(size_t sz)
-			{ return malloc(sz); }
-		
-		void release(void* ptr)
-			{ ::free(ptr); }
-		
-		bool validatePointer(void*, bool = true)
-			{ return true; }
-		
-		void printInfo() const
-			{ log::info("Not available for DefaultMemoryAllocator"); }
-	};
+private:
+	ET_DENY_COPY(ObjectFactory);
 	
-	class BlockMemoryAllocatorPrivate;
-	class BlockMemoryAllocator : public MemoryAllocatorBase
-	{
-	public:
-		BlockMemoryAllocator();
-		~BlockMemoryAllocator();
-		
-		void* allocate(size_t);
-		void release(void* ptr);
+private:
+	MemoryAllocatorBase* _allocator = nullptr;
+};
 
-		bool validatePointer(void*, bool = true);
+class DefaultMemoryAllocator : public MemoryAllocatorBase
+{
+	void* release(size_t sz)
+		{ return malloc(sz); }
+	
+	void release(void* ptr)
+		{ ::free(ptr); }
+	
+	bool validatePointer(void*, bool = true)
+		{ return true; }
+	
+	void printInfo() const
+		{ log::info("Not available for DefaultMemoryAllocator"); }
+};
 
-		void printInfo() const;
-		
-		void flushUnusedBlocks();
-				
-	private:
-		BlockMemoryAllocatorPrivate* _private = nullptr;
-		char _privateData[256];
-	};
+class BlockMemoryAllocatorPrivate;
+class BlockMemoryAllocator : public MemoryAllocatorBase
+{
+public:
+	BlockMemoryAllocator();
+	~BlockMemoryAllocator();
+	
+	void* allocate(size_t);
+	void release(void* ptr);
+
+	bool validatePointer(void*, bool = true);
+
+	void printInfo() const;
+	
+	void flushUnusedBlocks();
+			
+private:
+	BlockMemoryAllocatorPrivate* _private = nullptr;
+	char _privateData[256];
+};
 }

@@ -15,6 +15,7 @@ class MetalVertexBufferPrivate
 {
 public:
     MetalNativeBuffer buffer;
+	std::atomic_bool mapped { false };
 };
 
 MetalVertexBuffer::MetalVertexBuffer(MetalState& metal, const VertexDeclaration& decl,
@@ -53,19 +54,24 @@ uint64_t MetalVertexBuffer::dataSize()
 	return [_private->buffer.buffer() length];
 }
 
-void* MetalVertexBuffer::map(uint32_t offset, uint32_t dataSize, uint32_t options)
+void* MetalVertexBuffer::map(uint32_t offset, uint32_t length, uint32_t options)
 {
-	return nullptr;
+	ET_ASSERT(offset + length <= dataSize());
+
+	_private->mapped = true;
+	uint8_t* data = reinterpret_cast<uint8_t*>([_private->buffer.buffer() contents]);
+	return data + offset;
 }
 
 bool MetalVertexBuffer::mapped() const
 {
-	return false;
+	return _private->mapped;
 }
 
 void MetalVertexBuffer::unmap()
 {
-
+	ET_ASSERT(_private->mapped);
+	_private->mapped = false;
 }
 
 }

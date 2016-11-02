@@ -67,7 +67,7 @@ private:
 
 	void loadInputLayout(Dictionary);
 	void loadCode(const std::string&, const std::string& baseFolder, Dictionary defines);
-	void generateInputLayout(std::string& code);
+	std::string generateInputLayout();
 
 protected: // overrided / read by instanaces
 	mtl::Textures textures;

@@ -53,11 +53,11 @@ void SceneLoader::loadObjFile(const std::string& fileName, et::s3d::Scene::Point
     // move objects to scene
 	auto allObjects = container->children();
 	for (auto c : allObjects)
-		c->setParent(scene.ptr());
+		c->setParent(scene.pointer());
     
     // add light
     s3d::Light::Pointer lp = s3d::Light::Pointer::create();
 	vec3 bboxCenter = 0.5f * (minVertex + maxVertex);
     lp->camera()->setPosition(vec3(bboxCenter.x, maxVertex.y + 2.0f * std::abs(maxVertex.y), bboxCenter.z));
-    lp->setParent(scene.ptr());
+    lp->setParent(scene.pointer());
 }
