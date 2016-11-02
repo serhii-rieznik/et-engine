@@ -13,7 +13,10 @@
 #include <et/app/application.h>
 #include <et/camera/camera.h>
 
-class et::RaytracePrivate
+namespace et
+{
+
+class RaytracePrivate
 {
 public:
 	RaytracePrivate(Raytrace* owner);
@@ -77,10 +80,10 @@ public:
 	Vector<rt::float4> forwardTraceBuffer;
 	std::mutex forwardTraceBufferMutex;
 	size_t flushCounter = 0;
-};
 
-namespace et
-{
+	ray3d centerRay;
+	float focalDistance = 1.0f;
+};
 
 Raytrace::Raytrace()
 {
@@ -134,7 +137,7 @@ void Raytrace::stop()
 	_private->stopWorkerThreads();
 }
 
-void Raytrace::setOptions(const et::Raytrace::Options& options)
+void Raytrace::setOptions(const Raytrace::Options& options)
 {
 	_private->options = options;
 }
@@ -334,13 +337,24 @@ void RaytracePrivate::buildMaterialAndTriangles(s3d::Scene::Pointer scene)
 
 	kdTree.build(triangles, options.maxKDTreeDepth);
 
+	centerRay = camera.castRay(vec2(0.0f));
+	rt::KDTree::TraverseResult centerHit = kdTree.traverse(centerRay);
+	if (centerHit.triangleIndex != InvalidIndex)
+	{
+		focalDistance = (centerHit.intersectionPoint - rt::float4(centerRay.origin)).length();
+	}
+	focalDistance += options.focalDistanceCorrection;
+
 	auto stats = kdTree.nodesStatistics();
 	log::info("KD-Tree statistics:\n\t%llu nodes\n\t%llu leaf nodes\n\t%llu empty leaf nodes"
 			  "\n\t%llu max depth\n\t%llu min triangles per node\n\t%llu max triangles per node"
-			  "\n\t%llu total triangles\n\t%llu distributed triangles\n\t%llu light triangles",
+			  "\n\t%llu total triangles\n\t%llu distributed triangles\n\t%llu light triangles"
+			  "\n\t%.2f focal distance"
+			  "\n\t%.2f aperture size",
 			  uint64_t(stats.totalNodes), uint64_t(stats.leafNodes), uint64_t(stats.emptyLeafNodes),
 			  uint64_t(stats.maxDepth), uint64_t(stats.minTrianglesPerNode), uint64_t(stats.maxTrianglesPerNode),
-			  uint64_t(stats.totalTriangles), uint64_t(stats.distributedTriangles), uint64_t(lightTriangles.size()));
+			  uint64_t(stats.totalTriangles), uint64_t(stats.distributedTriangles), uint64_t(lightTriangles.size()),
+			  focalDistance, options.apertureSize);
 
 	if (options.renderKDTree)
 	{
@@ -638,7 +652,7 @@ void RaytracePrivate::backwardPathTraceThreadFunction(uint32_t threadId)
 		if (region.sampled == false)
 			break;
 
-		auto runTime = et::queryContiniousTimeInMilliSeconds();
+		auto runTime = queryContiniousTimeInMilliSeconds();
 
 		vec2i pixel;
 		for (pixel.y = region.origin.y; pixel.y < region.origin.y + region.size.y; ++pixel.y)
@@ -671,13 +685,13 @@ void RaytracePrivate::backwardPathTraceThreadFunction(uint32_t threadId)
 			}
 		}
 
-		elapsedTime += et::queryContiniousTimeInMilliSeconds() - runTime;
+		elapsedTime += queryContiniousTimeInMilliSeconds() - runTime;
 		/*
-		 rt::float_type averageTime = static_cast<rt::float_type>(elapsedTime) / static_cast<rt::float_type>(1000 * sampledRegions);
-		 auto actualElapsed = et::queryContiniousTimeInMilliSeconds() - startTime;
+		 float averageTime = static_cast<float>(elapsedTime) / static_cast<float>(1000 * sampledRegions);
+		 auto actualElapsed = queryContiniousTimeInMilliSeconds() - startTime;
 		 log::info("Elapsed: %s, estimated: %s",
-		 floatToTimeStr(static_cast<rt::float_type>(actualElapsed) / 1000.f, false).c_str(),
-		 floatToTimeStr(averageTime * static_cast<rt::float_type>(regions.size() - sampledRegions), false).c_str());
+		 floatToTimeStr(static_cast<float>(actualElapsed) / 1000.f, false).c_str(),
+		 floatToTimeStr(averageTime * static_cast<float>(regions.size() - sampledRegions), false).c_str());
 		 */
 	}
 
@@ -711,11 +725,28 @@ vec4 RaytracePrivate::raytracePixel(const vec2i& pixel, size_t samples, size_t& 
 	vec2 pixelSize = vec2(1.0f) / vector2ToFloat(viewportSize);
 	vec2 pixelBase = 2.0f * (vector2ToFloat(pixel) * pixelSize) - vec2(1.0f);
 
-	rt::float4 result = integrator->gather(camera.castRay(pixelBase), 0, bounces, kdTree, sampler, materials);
+	ray3d baseRay = camera.castRay(pixelBase);
+	vec3 uOffset = perpendicularVector(baseRay.direction);
+	vec3 vOffset = cross(uOffset, baseRay.direction);
+
+	float cosTheta = baseRay.direction.dot(centerRay.direction);
+	float distanceToFocalPlane = focalDistance / cosTheta;
+
+	vec3 focalPoint = baseRay.origin + distanceToFocalPlane * baseRay.direction;
+
+	rt::float4 result = integrator->gather(baseRay, 0, bounces, kdTree, sampler, materials);
 	for (size_t m = 1; m < samples; ++m)
 	{
-		vec2 jitter = pixelSize * vec2(2.0f * rt::fastRandomFloat() - 1.0f, 2.0f * rt::fastRandomFloat() - 1.0f);
-		result += integrator->gather(camera.castRay(pixelBase + jitter), 0, bounces, kdTree, sampler, materials);
+		float phi = rt::fastRandomFloat() * DOUBLE_PI;
+		float r = std::sqrt(rt::fastRandomFloat());
+		float uScale = std::sin(phi) * options.apertureSize * r;
+		float vScale = std::cos(phi) * options.apertureSize * r;
+		vec3 worldSpaceOffset = uOffset * uScale + vOffset * vScale;
+
+		vec3 origin = camera.position() + worldSpaceOffset;
+		vec3 direction = (focalPoint - origin).normalize();
+
+		result += integrator->gather(ray3d(origin, direction), 0, bounces, kdTree, sampler, materials);
 	}
 
 	vec4 output = result.toVec4() / static_cast<float>(samples);
@@ -819,9 +850,9 @@ void RaytracePrivate::renderBoundingBox(const rt::BoundingBox& box, const vec4& 
 
 void RaytracePrivate::renderLine(const vec2& from, const vec2& to, const vec4& color)
 {
-	rt::float_type dt = 1.0f / length(to - from);
+	float dt = 1.0f / length(to - from);
 
-	rt::float_type t = 0.0f;
+	float t = 0.0f;
 	while (t <= 1.0f)
 	{
 		renderPixel(mix(from, to, t), color);
@@ -838,7 +869,7 @@ void RaytracePrivate::renderPixel(const vec2& pixel, const vec4& color)
 	nearPixels[3] = nearPixels[0] + vec2(1.0f, 1.0f);
 	for (size_t i = 0; i < 4; ++i)
 	{
-		rt::float_type d = length(nearPixels[i] - pixel);
+		float d = length(nearPixels[i] - pixel);
 		vec2i px(static_cast<int>(nearPixels[i].x), static_cast<int>(nearPixels[i].y));
 		owner->_outputMethod(px, color * vec4(1.0f, 1.0f, 1.0f, 1.0f - d));
 	}
@@ -907,5 +938,5 @@ void RaytracePrivate::flushToForwardTraceBuffer(const Vector<rt::float4>& localB
 		owner->output(px, output);
 	}
 }
-	
+
 }

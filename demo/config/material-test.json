@@ -1,16 +1,22 @@
 {
 	"model-name" : "media/material-test.obj",
+
 	"env-map" : "media/background.hdr",
 	"env-color" : [1.0, 1.0, 1.0, 1.0],
     "env-type" : "uniform",
     "light-direction" : [0.0, 1.0, 0.0, 0.0],
+
 	"integrator" : "path-trace",
+
 	"camera-fov" : 45.0,
 	"camera-distance" : 190.0,
 	"camera-phi" : 180.0,
 	"camera-theta" : 15.0,
 	"camera-offset" : [0.0, 0.9, 0.0],
 	"camera-view-point" : [0.0, 0.9, 0.0],
+	"aperture-size" : 1.0,
+	"focal-distance-correction" : 1.0,
+
 	"kd-tree-max-depth" : 31,
 	"render-kd-tree" : 0
 }
