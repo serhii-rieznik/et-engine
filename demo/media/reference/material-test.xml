@@ -9,15 +9,15 @@
 		<rgb name="reflectance" value="1 1 1"/>
 	</bsdf>
 
-	<bsdf type="roughdielectric" id="01___Default_material">
+	<bsdf type="roughconductor" id="01___Default_material">
 		<string name="material" value="Ag"/>
-		<float name="alpha" value="0.01"/>
+		<float name="alpha" value="0.1"/>
 		<rgb name="reflectance" value="1 1 1"/>
 		<string name="intIOR" value="water"/>
 		<string name="extIOR" value="air"/>
 	</bsdf>
 
-	<bsdf type="roughdielectric" id="02___Default_material">
+	<bsdf type="conductor" id="02___Default_material">
 		<string name="material" value="Ag"/>
 		<float name="alpha" value="0.125"/>
 		<rgb name="reflectance" value="1 1 1"/>
@@ -25,7 +25,7 @@
 		<string name="extIOR" value="air"/>
 	</bsdf>
 
-	<bsdf type="roughdielectric" id="03___Default_material">
+	<bsdf type="plastic" id="03___Default_material">
 		<string name="material" value="Ag"/>
 		<float name="alpha" value="0.25"/>
 		<rgb name="reflectance" value="1 1 1"/>
@@ -33,7 +33,7 @@
 		<string name="extIOR" value="air"/>
 	</bsdf>
 
-	<bsdf type="roughdielectric" id="07___Default_material">
+	<bsdf type="dielectric" id="07___Default_material">
 		<string name="material" value="Ag"/>
 		<float name="alpha" value="0.375"/>
 		<rgb name="reflectance" value="1 1 1"/>
@@ -43,7 +43,7 @@
 
 	<bsdf type="roughdielectric" id="08___Default_material">
 		<string name="material" value="Ag"/>
-		<float name="alpha" value="0.5"/>
+		<float name="alpha" value="0.1"/>
 		<rgb name="reflectance" value="1 1 1"/>
 		<string name="intIOR" value="water"/>
 		<string name="extIOR" value="air"/>

@@ -29,7 +29,7 @@ public:
 	{
 		uint32_t threads = 0;
 		uint32_t raysPerPixel = 32;
-		uint32_t maxPathLength = 1;
+		uint32_t maxPathLength = 0;
 		uint32_t maxKDTreeDepth = 0;
 		uint32_t renderRegionSize = 32;
 		float apertureSize = 0.0f;

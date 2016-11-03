@@ -85,17 +85,12 @@ void MainController::applicationDidLoad(et::RenderContext* rc)
 	et::Raytrace::Options rtOptions;
 	rtOptions.raysPerPixel = static_cast<uint32_t>(_options.integerForKey("rays-per-pixel", 32)->content);
 	rtOptions.maxKDTreeDepth = static_cast<uint32_t>(_options.integerForKey("kd-tree-max-depth", 4)->content);
-	rtOptions.maxPathLength = static_cast<uint32_t>(_options.integerForKey("max-path-length", 1)->content);
+	rtOptions.maxPathLength = static_cast<uint32_t>(_options.integerForKey("max-path-length", 0ll)->content);
 	rtOptions.renderRegionSize = static_cast<uint32_t>(_options.integerForKey("render-region-size", 32)->content);
 	rtOptions.threads = static_cast<uint32_t>(_options.integerForKey("threads", 0ll)->content);
 	rtOptions.renderKDTree = _options.integerForKey("render-kd-tree", 0ll)->content != 0;
 	rtOptions.apertureSize = _options.floatForKey("aperture-size", 0.0f)->content;
 	rtOptions.focalDistanceCorrection = _options.floatForKey("focal-distance-correction", 0.0f)->content;
-
-	if ((rtOptions.maxPathLength == 0) || (rtOptions.maxPathLength > et::rt::PathTraceIntegrator::MaxTraverseDepth))
-	{
-		rtOptions.maxPathLength = et::rt::PathTraceIntegrator::MaxTraverseDepth;
-	}
 
 	if (_options.stringForKey("method")->content == "forward")
 	{

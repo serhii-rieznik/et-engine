@@ -31,18 +31,18 @@ public:
 
 	void buildMaterialAndTriangles(s3d::Scene::Pointer);
 
-	size_t materialIndexWithName(const std::string&);
+	uint32_t materialIndexWithName(const std::string&);
 
 	void buildRegions(const vec2i& size);
 	void estimateRegionsOrder();
 
-	vec4 raytracePixel(const vec2i&, size_t samples, size_t& bounces);
-	rt::float4 gatherAtPixel(const vec2&, size_t&);
+	vec4 raytracePixel(const vec2i&, uint32_t samples, uint32_t& bounces);
+	rt::float4 gatherAtPixel(const vec2&, uint32_t&);
 
 	rt::Region getNextRegion();
 
 	void renderSpacePartitioning();
-	void renderKDTreeRecursive(size_t nodeIndex, size_t index);
+	void renderKDTreeRecursive(uint32_t nodeIndex, uint32_t index);
 	void renderBoundingBox(const rt::BoundingBox&, const vec4& color);
 	void renderLine(const vec2& from, const vec2& to, const vec4& color);
 	void renderPixel(const vec2&, const vec4& color);
@@ -61,14 +61,14 @@ public:
 	rt::Integrator::Pointer integrator;
 	rt::Material::Collection materials;
 	rt::TriangleList lightTriangles;
-	Map<size_t, rt::index> lightTriangleToIndex;
+	Map<uint32_t, rt::index> lightTriangleToIndex;
 	Camera camera;
 	vec2i viewportSize;
 	vec2i regionSize;
 
 	Vector<std::thread> workerThreads;
-	std::atomic<size_t> threadCounter;
-	std::atomic<size_t> sampledRegions;
+	std::atomic<uint32_t> threadCounter;
+	std::atomic<uint32_t> sampledRegions;
 
 	Vector<rt::Region> regions;
 	std::mutex regionsLock;
@@ -79,7 +79,7 @@ public:
 
 	Vector<rt::float4> forwardTraceBuffer;
 	std::mutex forwardTraceBufferMutex;
-	size_t flushCounter = 0;
+	uint32_t flushCounter = 0;
 
 	ray3d centerRay;
 	float focalDistance = 1.0f;
@@ -128,7 +128,7 @@ vec4 Raytrace::performAtPoint(s3d::Scene::Pointer scene, const Camera& cam, cons
 	_private->viewportSize = dimension;
 	_private->buildMaterialAndTriangles(scene);
 
-	size_t bounces = 0;
+	uint32_t bounces = 0;
 	vec4 color = _private->raytracePixel(vec2i(pixel.x, dimension.y - pixel.y), _private->options.raysPerPixel, bounces);
 	log::info("Sampled color:\n\tsRGB: %.4f, %.4f, %.4f\n\tRGB: %.4f, %.4f, %.4f",
 		color.x, color.y, color.z, std::pow(color.x, 2.2f), std::pow(color.y, 2.2f), std::pow(color.z, 2.2f));
@@ -269,7 +269,7 @@ void RaytracePrivate::buildMaterialAndTriangles(s3d::Scene::Pointer scene)
 					log::info("Adding new diffuse material: %s", batchMaterial->name().c_str());
 				}
 
-				materialIndex = materials.size();
+				materialIndex = static_cast<uint32_t>(materials.size());
 				materials.emplace_back(cls);
 				auto& mat = materials.back();
 
@@ -331,7 +331,8 @@ void RaytracePrivate::buildMaterialAndTriangles(s3d::Scene::Pointer scene)
 
 				if (isEmitter)
 				{
-					lightTriangleToIndex[lightTriangles.size()] = static_cast<rt::index>(triangles.size() - 1);
+					uint32_t lIndex = static_cast<uint32_t>(lightTriangles.size());
+					lightTriangleToIndex[lIndex] = static_cast<rt::index>(triangles.size() - 1);
 					lightTriangles.push_back(tri);
 				}
 			}
@@ -365,12 +366,12 @@ void RaytracePrivate::buildMaterialAndTriangles(s3d::Scene::Pointer scene)
 	}
 }
 
-size_t RaytracePrivate::materialIndexWithName(const std::string& n)
+uint32_t RaytracePrivate::materialIndexWithName(const std::string& n)
 {
 	for (size_t i = 0, e = materials.size(); i < e; ++i)
 	{
 		if (materials.at(i).name == n)
-			return i;
+			return static_cast<uint32_t>(i);
 	}
 	return InvalidIndex;
 }
@@ -452,8 +453,8 @@ rt::Region RaytracePrivate::getNextRegion()
  */
 void RaytracePrivate::visualizeDistributionThreadFunction(uint32_t index)
 {
-	const size_t sampleTestCount = 100000000;
-	const size_t renderTestCount = 1000000;
+	const uint32_t sampleTestCount = 100000000;
+	const uint32_t renderTestCount = 1000000;
 
 	static rt::float4 testDirection;
 
@@ -469,7 +470,7 @@ void RaytracePrivate::visualizeDistributionThreadFunction(uint32_t index)
 	if (index > 0)
 	{
 		float l = camera.position().length() / 10.0f;
-		for (size_t i = 0; running && (i < renderTestCount); ++i)
+		for (uint32_t i = 0; running && (i < renderTestCount); ++i)
 		{
 			auto n = rt::randomVectorOnHemisphere(testDirection, distribution, alpha);
 			vec2 e = projectPoint(n * l);
@@ -478,16 +479,16 @@ void RaytracePrivate::visualizeDistributionThreadFunction(uint32_t index)
 		return;
 	}
 
-	const size_t sampleCount = 1000;
-	Vector<size_t> prob(sampleCount, 0);
-	for (size_t i = 0; running && (i < sampleTestCount); ++i)
+	const uint32_t sampleCount = 1000;
+	Vector<uint32_t> prob(sampleCount, 0);
+	for (uint32_t i = 0; running && (i < sampleTestCount); ++i)
 	{
 		auto v = rt::randomVectorOnHemisphere(testDirection, distribution, alpha).dot(testDirection);
-		size_t VdotN = static_cast<size_t>(clamp(v, 0.0f, 1.0f) * static_cast<float>(sampleCount));
+		uint32_t VdotN = static_cast<uint32_t>(clamp(v, 0.0f, 1.0f) * static_cast<float>(sampleCount));
 		prob[VdotN] += 1;
 	}
 
-	size_t maxValue = prob.front();
+	uint32_t maxValue = prob.front();
 	for (auto i : prob)
 	{
 		maxValue = std::max(maxValue, i);
@@ -503,7 +504,7 @@ void RaytracePrivate::visualizeDistributionThreadFunction(uint32_t index)
 
 	float ds = 1.0f / static_cast<float>(sampleCount - 1);
 	float lastHeight = vScale * static_cast<float>(prob.front()) / static_cast<float>(sampleTestCount);
-	for (size_t i = 1; running && (i < sampleCount); ++i)
+	for (uint32_t i = 1; running && (i < sampleCount); ++i)
 	{
 		float delta = static_cast<float>(i) * ds;
 		float x0 = off + (delta - ds)* (viewportSize.x - 2.0f * off);
@@ -586,7 +587,7 @@ void RaytracePrivate::forwardPathTraceThreadFunction(uint32_t threadId)
 	{
 		for (int ir = 0; running && (ir < raysPerIteration); ++ir)
 		{
-			size_t emitterIndex = rand() % lightTriangles.size();
+			uint32_t emitterIndex = rand() % lightTriangles.size();
 			const auto& emitterTriangle = lightTriangles[emitterIndex];
 
 			rt::KDTree::TraverseResult source;
@@ -605,7 +606,7 @@ void RaytracePrivate::forwardPathTraceThreadFunction(uint32_t threadId)
 
 			projectToCamera(currentRay, source, color, triangleNormal);
 
-			for (size_t pathLength = 0; pathLength < options.maxPathLength; ++pathLength)
+			for (uint32_t pathLength = 0; pathLength < options.maxPathLength; ++pathLength)
 			{
 				auto hit = kdTree.traverse(currentRay);
 				if (hit.triangleIndex == InvalidIndex)
@@ -674,7 +675,7 @@ void RaytracePrivate::backwardPathTraceThreadFunction(uint32_t threadId)
 		{
 			for (pixel.x = region.origin.x; running && (pixel.x < region.origin.x + region.size.x); ++pixel.x)
 			{
-				size_t bounces = 0;
+				uint32_t bounces = 0;
 				localData[k++] = raytracePixel(pixel, options.raysPerPixel, bounces);
 			}
 		}
@@ -715,7 +716,7 @@ void RaytracePrivate::backwardPathTraceThreadFunction(uint32_t threadId)
 	}
 }
 
-vec4 RaytracePrivate::raytracePixel(const vec2i& pixel, size_t samples, size_t& bounces)
+vec4 RaytracePrivate::raytracePixel(const vec2i& pixel, uint32_t samples, uint32_t& bounces)
 {
 	ET_ASSERT(samples > 0);
 
@@ -728,28 +729,29 @@ vec4 RaytracePrivate::raytracePixel(const vec2i& pixel, size_t samples, size_t& 
 	vec2 pixelSize = vec2(1.0f) / vector2ToFloat(viewportSize);
 	vec2 pixelBase = 2.0f * (vector2ToFloat(pixel) * pixelSize) - vec2(1.0f);
 
-	ray3d baseRay = camera.castRay(pixelBase);
-	vec3 uOffset = perpendicularVector(baseRay.direction);
-	vec3 vOffset = cross(uOffset, baseRay.direction);
-
-	float cosTheta = baseRay.direction.dot(centerRay.direction);
-	float distanceToFocalPlane = focalDistance / cosTheta;
-
-	vec3 focalPoint = camera.position() + distanceToFocalPlane * baseRay.direction;
-
-	rt::float4 result = integrator->gather(baseRay, 0, bounces, kdTree, sampler, materials);
-	for (size_t m = 1; m < samples; ++m)
+	rt::float4 result(0.0f);
+	for (uint32_t m = 0; m < samples; ++m)
 	{
+		vec2 jitter = pixelSize * vec2(2.0f * rt::fastRandomFloat() - 1.0f, 2.0f * rt::fastRandomFloat() - 1.0f);
+		ray3d baseRay = camera.castRay(pixelBase + jitter);
+
 		float phi = rt::fastRandomFloat() * DOUBLE_PI;
 		float r = std::sqrt(rt::fastRandomFloat());
-		float uScale = std::sin(phi) * options.apertureSize * r;
-		float vScale = std::cos(phi) * options.apertureSize * r;
-		vec3 worldSpaceOffset = uOffset * uScale + vOffset * vScale;
 
-		vec3 shiftedOrigin = camera.position() + worldSpaceOffset;
+		vec3 uOffset = perpendicularVector(baseRay.direction);
+		float uScale = std::sin(phi) * options.apertureSize * r;
+
+		vec3 vOffset = cross(uOffset, baseRay.direction);
+		float vScale = std::cos(phi) * options.apertureSize * r;
+
+		vec3 shiftedOrigin = camera.position() + uOffset * uScale + vOffset * vScale;
+
+		float distanceToFocalPlane = focalDistance / baseRay.direction.dot(centerRay.direction);
+		vec3 focalPoint = camera.position() + distanceToFocalPlane * baseRay.direction;
 		vec3 direction = (focalPoint - shiftedOrigin).normalize();
 
-		result += integrator->gather(ray3d(shiftedOrigin, direction), 0, bounces, kdTree, sampler, materials);
+		result += integrator->gather(ray3d(shiftedOrigin, direction), options.maxPathLength, bounces,
+		kdTree, sampler, materials);
 	}
 
 	vec4 output = result.toVec4() / static_cast<float>(samples);
@@ -770,7 +772,7 @@ vec4 RaytracePrivate::raytracePixel(const vec2i& pixel, size_t samples, size_t& 
 
 void RaytracePrivate::estimateRegionsOrder()
 {
-	const size_t maxSamples = 5;
+	const uint32_t maxSamples = 5;
 
 	const vec2i sx[maxSamples] =
 	{
@@ -787,9 +789,9 @@ void RaytracePrivate::estimateRegionsOrder()
 	{
 		r.estimatedBounces = 0;
 		vec4 estimatedColor(0.0);
-		for (size_t i = 0; i < maxSamples; ++i)
+		for (uint32_t i = 0; i < maxSamples; ++i)
 		{
-			size_t bounces = 0;
+			uint32_t bounces = 0;
 			vec2i px = r.origin + vec2i(sx[i].x * r.size.x / sx[i].y, sy[i].x * r.size.y / sy[i].y);
 			estimatedColor += raytracePixel(px, 1, bounces);
 			r.estimatedBounces += bounces;
@@ -808,7 +810,7 @@ void RaytracePrivate::renderSpacePartitioning()
 	renderKDTreeRecursive(0, 0);
 }
 
-void RaytracePrivate::renderKDTreeRecursive(size_t nodeIndex, size_t index)
+void RaytracePrivate::renderKDTreeRecursive(uint32_t nodeIndex, uint32_t index)
 {
 	const vec4 colorOdd(1.0f, 1.0f, 0.0f, 1.0f);
 	const vec4 colorEven(0.0f, 1.0f, 1.0f, 1.0f);
@@ -870,7 +872,7 @@ void RaytracePrivate::renderPixel(const vec2& pixel, const vec4& color)
 	nearPixels[1] = nearPixels[0] + vec2(1.0f, 0.0f);
 	nearPixels[2] = nearPixels[0] + vec2(0.0f, 1.0f);
 	nearPixels[3] = nearPixels[0] + vec2(1.0f, 1.0f);
-	for (size_t i = 0; i < 4; ++i)
+	for (uint32_t i = 0; i < 4; ++i)
 	{
 		float d = length(nearPixels[i] - pixel);
 		vec2i px(static_cast<int>(nearPixels[i].x), static_cast<int>(nearPixels[i].y));
@@ -921,7 +923,7 @@ void RaytracePrivate::flushToForwardTraceBuffer(const Vector<rt::float4>& localB
 	
 	auto src = localBuffer.data();
 	auto dst = forwardTraceBuffer.data();
-	for (size_t i = 0; i < forwardTraceBuffer.size(); ++i, ++dst, ++src)
+	for (uint32_t i = 0; i < forwardTraceBuffer.size(); ++i, ++dst, ++src)
 	{
 		*dst += *src;
 		

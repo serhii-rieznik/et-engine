@@ -22,8 +22,8 @@ namespace rt
         
     public:
         virtual ~Integrator() { }
-        virtual float4 gather(const Ray& inRay, size_t depth, size_t& maxDepth,
-            KDTree& tree, EnvironmentSampler::Pointer&, const Material::Collection&) = 0;
+        virtual float4 gather(const Ray& inRay, uint32_t maxPathLength, uint32_t& pathLength,
+			KDTree&, EnvironmentSampler::Pointer&, const Material::Collection&) = 0;
     };
 
 	class NormalsIntegrator : public Integrator
@@ -32,8 +32,8 @@ namespace rt
         ET_DECLARE_POINTER(NormalsIntegrator);
 
 	public:
-		float4 gather(const Ray& inRay, size_t depth, size_t& maxDepth,
-			KDTree& tree, EnvironmentSampler::Pointer&, const Material::Collection&) override;
+		float4 gather(const Ray& inRay, uint32_t maxPathLength,
+			uint32_t& pathLength, KDTree&, EnvironmentSampler::Pointer&, const Material::Collection&) override;
 	};
 
 	class FresnelIntegrator : public Integrator
@@ -42,8 +42,8 @@ namespace rt
         ET_DECLARE_POINTER(FresnelIntegrator);
 
 	public:
-		float4 gather(const Ray& inRay, size_t depth, size_t& maxDepth,
-			KDTree& tree, EnvironmentSampler::Pointer&, const Material::Collection&) override;
+		float4 gather(const Ray& inRay, uint32_t maxPathLength,
+			uint32_t& pathLength, KDTree&, EnvironmentSampler::Pointer&, const Material::Collection&) override;
 	};
 
     class AmbientOcclusionIntegrator : public Integrator
@@ -52,8 +52,8 @@ namespace rt
         ET_DECLARE_POINTER(AmbientOcclusionIntegrator);
         
     public:
-        float4 gather(const Ray& inRay, size_t depth, size_t& maxDepth,
-            KDTree& tree, EnvironmentSampler::Pointer&, const Material::Collection&) override;
+		float4 gather(const Ray& inRay, uint32_t maxPathLength,
+			uint32_t& pathLength, KDTree&, EnvironmentSampler::Pointer&, const Material::Collection&) override;
     };
 
 	class AmbientOcclusionHackIntegrator : public Integrator
@@ -62,27 +62,18 @@ namespace rt
 		ET_DECLARE_POINTER(AmbientOcclusionHackIntegrator);
 
 	public:
-		float4 gather(const Ray& inRay, size_t depth, size_t& maxDepth,
-			KDTree& tree, EnvironmentSampler::Pointer&, const Material::Collection&) override;
+		float4 gather(const Ray& inRay, uint32_t maxPathLength,
+			uint32_t& pathLength, KDTree&, EnvironmentSampler::Pointer&, const Material::Collection&) override;
 	};
 
     class PathTraceIntegrator : public Integrator
     {
     public:
         ET_DECLARE_POINTER(PathTraceIntegrator);
-        
-		enum : uint32_t
-        {
-            MaxTraverseDepth = 1024
-        };
-        
+
     public:
-        float4 gather(const Ray& inRay, size_t depth, size_t& maxDepth,
-            KDTree& tree, EnvironmentSampler::Pointer&, const Material::Collection&) ;
-/*
-		static float4 reflectance(const float4& incidence, float4& normal, const Material& mat,
-            float4& color, float_type& brdf);
-*/ 
+		float4 gather(const Ray& inRay, uint32_t maxPathLength,
+			uint32_t& pathLength, KDTree&, EnvironmentSampler::Pointer&, const Material::Collection&) override;
     };
 }
 }

@@ -2,7 +2,7 @@
 	"model-name" : "media/material-test.obj",
 
 	"env-map" : "media/background.hdr",
-	"env-color" : [1.0, 1.0, 1.0, 1.0],
+	"env-color" : [1.0, 1.0, 1.0, 0.0],
     "env-type" : "uniform",
     "light-direction" : [0.0, 1.0, 0.0, 0.0],
 

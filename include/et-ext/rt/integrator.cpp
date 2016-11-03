@@ -12,29 +12,20 @@ namespace et
 namespace rt
 {
 
-#define ET_RT_NEW_STYLE 1
-
 /*
  * PathTraceIntegrator
  */
-struct ET_ALIGNED(16) Bounce
+float4 PathTraceIntegrator::gather(const Ray& inRay, uint32_t maxPathLength, uint32_t& pathLength,
+	KDTree& tree, EnvironmentSampler::Pointer& env, const Material::Collection& materials)
 {
-    float4 scale;
-    float4 add;
-};
-    
-float4 PathTraceIntegrator::gather(const Ray& inRay, size_t depth, size_t& maxDepth,
-    KDTree& tree, EnvironmentSampler::Pointer& env, const Material::Collection& materials)
-{
-	maxDepth = 0;
+	if (maxPathLength == 0)
+		maxPathLength = 0x7fffffff;
+
 	float4 result(0.0f);
     Ray currentRay = inRay;
 
-#if (ET_RT_NEW_STYLE)
-
-	const size_t maximumPathLength = 0x00ffffff;
 	float4 throughput(1.0f);
-	for (; maxDepth < maximumPathLength; ++maxDepth)
+	for (pathLength = 0; pathLength < maxPathLength; ++pathLength)
 	{
 		KDTree::TraverseResult traverse = tree.traverse(currentRay);
 		if (traverse.triangleIndex == InvalidIndex)
@@ -62,7 +53,7 @@ float4 PathTraceIntegrator::gather(const Ray& inRay, size_t depth, size_t& maxDe
 		// */
 
 		//
-		if (maxDepth > 5)
+		if (pathLength > 5)
 		{
 			float q = std::min(maxComponent, 0.95f);
 			if (rt::fastRandomFloat() >= q)
@@ -75,56 +66,14 @@ float4 PathTraceIntegrator::gather(const Ray& inRay, size_t depth, size_t& maxDe
 		currentRay.direction = sample.Wo;
 	}
 
-	static size_t aMax = 0;
-	static size_t aMin = 100000000;
-	if ((maxDepth < aMin) || (maxDepth > aMax))
+	static uint32_t aMax = 0;
+	static uint32_t aMin = 100000000;
+	if ((pathLength < aMin) || (pathLength > aMax))
 	{
-		aMin = std::min(aMin, maxDepth);
-		aMax = std::max(aMax, maxDepth);
+		aMin = std::min(aMin, pathLength);
+		aMax = std::max(aMax, pathLength);
 		log::info("Min/Max path length: %llu / %llu", static_cast<uint64_t>(aMin), static_cast<uint64_t>(aMax));
 	}
-
-#else
-
-	FastStack<MaxTraverseDepth, Bounce> bounces;
-    while (bounces.size() < MaxTraverseDepth)
-    {
-        Bounce& bounce = bounces.emplace_back();
-
-        KDTree::TraverseResult traverse = tree.traverse(currentRay);
-        if (traverse.triangleIndex == InvalidIndex)
-        {
-            bounce.add = env->sampleInDirection(currentRay.direction);
-            break;
-        }
-		++maxDepth;
-
-		const auto& tri = tree.triangleAtIndex(traverse.triangleIndex);
-		const auto& mat = materials[tri.materialIndex];
-        float4 nrm = tri.interpolatedNormal(traverse.intersectionPointBarycentric);
-		float4 uv0 = tri.interpolatedTexCoord0(traverse.intersectionPointBarycentric);
-
-		BSDFSample sample(currentRay.direction, nrm, mat, uv0, et::rt::BSDFSample::Direction::Backward);
-		bounce.scale = sample.combinedEvaluate();
-		bounce.add = mat.emissive;
-
-#	if ET_RT_VISUALIZE_BRDF
-		maxDepth = 5;
-		return bounce.scale;
-#	else
-		currentRay.direction = sample.Wo;
-		currentRay.origin = traverse.intersectionPoint + currentRay.direction * Constants::epsilon;
-#	endif
-    }
-
-    do
-    {
-        result *= bounces.top().scale;
-        result += bounces.top().add;
-        bounces.pop();
-    }
-    while (bounces.hasSomething());
-#endif
 
     return result;
 }
@@ -132,8 +81,8 @@ float4 PathTraceIntegrator::gather(const Ray& inRay, size_t depth, size_t& maxDe
 /*
  * Normals
  */
-float4 NormalsIntegrator::gather(const Ray& inRay, size_t depth, size_t& maxDepth, KDTree& tree,
-	EnvironmentSampler::Pointer& env, const Material::Collection&)
+float4 NormalsIntegrator::gather(const Ray& inRay, uint32_t maxPathLength,
+	uint32_t& pathLenght, KDTree& tree, EnvironmentSampler::Pointer& env, const Material::Collection&)
 {
 	KDTree::TraverseResult hit0 = tree.traverse(inRay);
 	if (hit0.triangleIndex == InvalidIndex)
@@ -146,14 +95,14 @@ float4 NormalsIntegrator::gather(const Ray& inRay, size_t depth, size_t& maxDept
 /*
  * Fresnel
  */
-float4 FresnelIntegrator::gather(const Ray& inRay, size_t depth, size_t& maxDepth, KDTree& tree,
-	EnvironmentSampler::Pointer& env, const Material::Collection& materials)
+float4 FresnelIntegrator::gather(const Ray& inRay, uint32_t maxPathLength,
+	uint32_t& pathLength, KDTree& tree, EnvironmentSampler::Pointer& env, const Material::Collection& materials)
 {
 	KDTree::TraverseResult hit0 = tree.traverse(inRay);
 	if (hit0.triangleIndex == InvalidIndex)
 		return env->sampleInDirection(inRay.direction);
 
-	++maxDepth;
+	++pathLength;
 	const auto& tri = tree.triangleAtIndex(hit0.triangleIndex);
 	const auto& mat = materials[tri.materialIndex];
     float4 nrm = tri.interpolatedNormal(hit0.intersectionPointBarycentric);
@@ -163,8 +112,8 @@ float4 FresnelIntegrator::gather(const Ray& inRay, size_t depth, size_t& maxDept
 }
 
 // ao
-float4 AmbientOcclusionIntegrator::gather(const Ray& inRay, size_t depth, size_t& maxDepth,
-	KDTree& tree, EnvironmentSampler::Pointer& env, const Material::Collection&)
+float4 AmbientOcclusionIntegrator::gather(const Ray& inRay, uint32_t maxPathLength,
+	uint32_t& pathLength, KDTree& tree, EnvironmentSampler::Pointer& env, const Material::Collection&)
 {
 	KDTree::TraverseResult hit0 = tree.traverse(inRay);
 	if (hit0.triangleIndex == InvalidIndex)
@@ -179,13 +128,13 @@ float4 AmbientOcclusionIntegrator::gather(const Ray& inRay, size_t depth, size_t
 	if (tree.traverse(Ray(nextOrigin, nextDirection)).triangleIndex == InvalidIndex)
 		return env->sampleInDirection(nextDirection);
 
-	++maxDepth;
+	++pathLength;
 	return float4(0.0f);
 }
 
 // hack-ao
-float4 AmbientOcclusionHackIntegrator::gather(const Ray& inRay, size_t depth, size_t& maxDepth,
-	KDTree& tree, EnvironmentSampler::Pointer& env, const Material::Collection&)
+float4 AmbientOcclusionHackIntegrator::gather(const Ray& inRay, uint32_t maxPathLength,
+	uint32_t& pathLength, KDTree& tree, EnvironmentSampler::Pointer& env, const Material::Collection&)
 {
 	KDTree::TraverseResult hit0 = tree.traverse(inRay);
 	if (hit0.triangleIndex == InvalidIndex)
@@ -201,7 +150,7 @@ float4 AmbientOcclusionHackIntegrator::gather(const Ray& inRay, size_t depth, si
 	if (t.triangleIndex == InvalidIndex)
 		return float4(1.0f);
 
-	++maxDepth;
+	++pathLength;
 
 	float_type distance = (t.intersectionPoint - nextOrigin).length();
 	return float4(1.0f - std::exp(-SQRT_2 * distance));
