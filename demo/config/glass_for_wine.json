@@ -8,9 +8,11 @@
 	"camera-fov" : 45.0,
 	"camera-distance" : 20.0,
 	"camera-phi" : 135.0,
-	"camera-theta" : 30.0,
+	"camera-theta" : 0.0,
 	"camera-offset" : [0.0, 5.0, 0.0],
 	"camera-view-point" : [0.0, 5.0, 0.0],
+	"aperture-size" : 1.0,
+	"focal-distance-correction" : 19.0,
 	"kd-tree-max-depth" : 31,
 	"render-kd-tree" : 0
 }

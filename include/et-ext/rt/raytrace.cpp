@@ -732,7 +732,7 @@ vec4 RaytracePrivate::raytracePixel(const vec2i& pixel, size_t samples, size_t& 
 	float cosTheta = baseRay.direction.dot(centerRay.direction);
 	float distanceToFocalPlane = focalDistance / cosTheta;
 
-	vec3 focalPoint = baseRay.origin + distanceToFocalPlane * baseRay.direction;
+	vec3 focalPoint = camera.position() + distanceToFocalPlane * baseRay.direction;
 
 	rt::float4 result = integrator->gather(baseRay, 0, bounces, kdTree, sampler, materials);
 	for (size_t m = 1; m < samples; ++m)
@@ -743,10 +743,10 @@ vec4 RaytracePrivate::raytracePixel(const vec2i& pixel, size_t samples, size_t& 
 		float vScale = std::cos(phi) * options.apertureSize * r;
 		vec3 worldSpaceOffset = uOffset * uScale + vOffset * vScale;
 
-		vec3 origin = camera.position() + worldSpaceOffset;
-		vec3 direction = (focalPoint - origin).normalize();
+		vec3 shiftedOrigin = camera.position() + worldSpaceOffset;
+		vec3 direction = (focalPoint - shiftedOrigin).normalize();
 
-		result += integrator->gather(ray3d(origin, direction), 0, bounces, kdTree, sampler, materials);
+		result += integrator->gather(ray3d(shiftedOrigin, direction), 0, bounces, kdTree, sampler, materials);
 	}
 
 	vec4 output = result.toVec4() / static_cast<float>(samples);

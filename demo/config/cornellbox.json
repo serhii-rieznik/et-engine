@@ -11,6 +11,7 @@
 	"camera-theta" : 0.0,
 	"camera-offset" : [0.0, 1.0, 0.0],
 	"camera-view-point" : [0.0, 1.0, 0.0],
+	"aperture-size" : 0.01,
 	"kd-tree-max-depth" : 31,
 	"render-kd-tree" : 0,
 	"debug-rendering" : 0
