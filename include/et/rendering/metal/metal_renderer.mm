@@ -50,6 +50,7 @@ void MetalRenderer::init(const RenderContextParameters& params)
 	_private->metal.layer.device = _private->metal.device;
 	_private->metal.layer.framebufferOnly = YES;
 	_private->metal.layer.pixelFormat = MTLPixelFormatBGRA8Unorm;
+    _private->metal.layer.contentsScale = [[NSScreen mainScreen] backingScaleFactor];
 
 	application().context().objects[3] = (__bridge void*)(_private->metal.device);
 	application().context().objects[4] = (__bridge void*)_private->metal.layer;
