@@ -208,14 +208,13 @@ namespace et
 
 		inline float_type fastRandomFloat()
 		{
+			static uint32_t seed = static_cast<uint32_t>(time(nullptr));
 			union
 			{
-				float_type fres;
-				unsigned int ires;
-			};
-			static unsigned int seed = 1;
-			ires = (((seed *= 16807) >> 9) | 0x3f800000);
-			return fres - 1.0f;
+				uint32_t u;
+				float_type f;
+			} wrap = { ((seed *= 16807) >> 9) | 0x3f800000 };
+			return wrap.f - 1.0f;
 		}
 
 		inline index floatIsNegative(float& a)

@@ -12,6 +12,8 @@ namespace et
 namespace rt
 {
 
+#define ET_RT_NEW_STYLE 1
+
 /*
  * PathTraceIntegrator
  */
@@ -24,13 +26,70 @@ struct ET_ALIGNED(16) Bounce
 float4 PathTraceIntegrator::gather(const Ray& inRay, size_t depth, size_t& maxDepth,
     KDTree& tree, EnvironmentSampler::Pointer& env, const Material::Collection& materials)
 {
-    auto currentRay = inRay;
-
 	maxDepth = 0;
-    FastStack<MaxTraverseDepth, Bounce> bounces;
+	float4 result(0.0f);
+    Ray currentRay = inRay;
+
+#if (ET_RT_NEW_STYLE)
+
+	const size_t maximumPathLength = 0x00ffffff;
+	float4 throughput(1.0f);
+	for (; maxDepth < maximumPathLength; ++maxDepth)
+	{
+		KDTree::TraverseResult traverse = tree.traverse(currentRay);
+		if (traverse.triangleIndex == InvalidIndex)
+		{
+			result += throughput * env->sampleInDirection(currentRay.direction);
+			break;
+		}
+
+		const rt::Triangle& tri = tree.triangleAtIndex(traverse.triangleIndex);
+		const rt::Material& mat = materials[tri.materialIndex];
+		float4 nrm = tri.interpolatedNormal(traverse.intersectionPointBarycentric);
+		float4 uv0 = tri.interpolatedTexCoord0(traverse.intersectionPointBarycentric);
+
+		BSDFSample sample(currentRay.direction, nrm, mat, uv0, et::rt::BSDFSample::Direction::Backward);
+
+		result += throughput * mat.emissive;
+		throughput *= sample.combinedEvaluate();
+
+		ET_ALIGNED(16) float local[4] = { };
+		throughput.loadToFloats(local);
+		float maxComponent = std::max(local[0], std::max(local[1], local[2]));
+		//
+		if (maxComponent < rt::Constants::epsilon)
+			break;
+		// */
+
+		//
+		if (maxDepth > 5)
+		{
+			float q = std::min(maxComponent, 0.95f);
+			if (rt::fastRandomFloat() >= q)
+				break;
+			throughput /= q;
+		}
+		// */
+
+		currentRay.origin = traverse.intersectionPoint + sample.Wo * Constants::epsilon;
+		currentRay.direction = sample.Wo;
+	}
+
+	static size_t aMax = 0;
+	static size_t aMin = 100000000;
+	if ((maxDepth < aMin) || (maxDepth > aMax))
+	{
+		aMin = std::min(aMin, maxDepth);
+		aMax = std::max(aMax, maxDepth);
+		log::info("Min/Max path length: %llu / %llu", static_cast<uint64_t>(aMin), static_cast<uint64_t>(aMax));
+	}
+
+#else
+
+	FastStack<MaxTraverseDepth, Bounce> bounces;
     while (bounces.size() < MaxTraverseDepth)
     {
-        auto& bounce = bounces.emplace_back();
+        Bounce& bounce = bounces.emplace_back();
 
         KDTree::TraverseResult traverse = tree.traverse(currentRay);
         if (traverse.triangleIndex == InvalidIndex)
@@ -58,7 +117,6 @@ float4 PathTraceIntegrator::gather(const Ray& inRay, size_t depth, size_t& maxDe
 #	endif
     }
 
-    float4 result(0.0f);
     do
     {
         result *= bounces.top().scale;
@@ -66,7 +124,8 @@ float4 PathTraceIntegrator::gather(const Ray& inRay, size_t depth, size_t& maxDe
         bounces.pop();
     }
     while (bounces.hasSomething());
-    
+#endif
+
     return result;
 }
 

@@ -129,7 +129,10 @@ vec4 Raytrace::performAtPoint(s3d::Scene::Pointer scene, const Camera& cam, cons
 	_private->buildMaterialAndTriangles(scene);
 
 	size_t bounces = 0;
-	return _private->raytracePixel(vec2i(pixel.x, dimension.y - pixel.y), _private->options.raysPerPixel, bounces);
+	vec4 color = _private->raytracePixel(vec2i(pixel.x, dimension.y - pixel.y), _private->options.raysPerPixel, bounces);
+	log::info("Sampled color:\n\tsRGB: %.4f, %.4f, %.4f\n\tRGB: %.4f, %.4f, %.4f",
+		color.x, color.y, color.z, std::pow(color.x, 2.2f), std::pow(color.y, 2.2f), std::pow(color.z, 2.2f));
+	return color;
 }
 
 void Raytrace::stop()
