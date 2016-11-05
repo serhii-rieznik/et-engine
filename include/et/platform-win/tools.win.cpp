@@ -10,6 +10,7 @@
 #if (ET_PLATFORM_WIN)
 
 #include <et/platform/platformtools.h>
+#include <et/core/hardware.h>
 #include <et/core/filesystem.h>
 #include <et/core/containers.h>
 

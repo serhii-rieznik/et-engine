@@ -27,9 +27,10 @@ public:
 
 	const VulkanNativeRenderPass& nativeRenderPass() const;
 
+	void begin() override;
 	void pushRenderBatch(RenderBatch::Pointer) override;
+	void end() override;
 	
-	void endRenderPass();
 	void submit();
 
 private:

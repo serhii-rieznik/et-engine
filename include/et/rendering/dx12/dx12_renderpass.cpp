@@ -17,7 +17,15 @@ DX12RenderPass::DX12RenderPass(const RenderPass::ConstructionInfo& info)
 {
 }
 
+void DX12RenderPass::begin()
+{
+}
+
 void DX12RenderPass::pushRenderBatch(RenderBatch::Pointer)
+{
+}
+
+void DX12RenderPass::end()
 {
 }
 

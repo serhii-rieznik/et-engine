@@ -7,12 +7,14 @@
 
 #pragma once
 
+#include <et/rendering/vulkan/vulkan_databuffer.h>
 #include <et/rendering/vulkan/vulkan_indexbuffer.h>
+#include <et/rendering/vulkan/vulkan_vertexbuffer.h>
 #include <et/rendering/vulkan/vulkan_pipelinestate.h>
 #include <et/rendering/vulkan/vulkan_program.h>
 #include <et/rendering/vulkan/vulkan_renderpass.h>
 #include <et/rendering/vulkan/vulkan_texture.h>
-#include <et/rendering/vulkan/vulkan_vertexbuffer.h>
+#include <et/rendering/vulkan/vulkan_sampler.h>
 #include <et/rendering/vulkan/vulkan_renderer.h>
 #include <et/rendering/vulkan/vulkan.h>
 #include <et/app/application.h>
@@ -170,10 +172,14 @@ void VulkanRenderer::init(const RenderContextParameters& params)
 	VULKAN_CALL(vkAllocateCommandBuffers(_private->device, &serviceBufferInfo, &_private->serviceCommandBuffer));
 
 	_private->swapchain.create(_private->vulkan());
+	
+	initInternalStructures();
 }
 
 void VulkanRenderer::shutdown()
 {
+	shutdownInternalStructures();
+
 	// TODO : kill all
 }
 
@@ -185,6 +191,16 @@ void VulkanRenderer::begin()
 void VulkanRenderer::present()
 {
 	_private->swapchain.present(_private->vulkan());
+}
+
+DataBuffer::Pointer VulkanRenderer::createDataBuffer(const std::string& name, uint32_t size)
+{
+	return VulkanDataBuffer::Pointer::create(_private->vulkan(), size);
+}
+
+DataBuffer::Pointer VulkanRenderer::createDataBuffer(const std::string& name, const BinaryDataStorage& data)
+{
+	return VulkanDataBuffer::Pointer::create(_private->vulkan(), data);
 }
 
 VertexBuffer::Pointer VulkanRenderer::createVertexBuffer(const std::string& name, VertexStorage::Pointer vs, BufferDrawType dt)
@@ -202,18 +218,22 @@ Texture::Pointer VulkanRenderer::createTexture(TextureDescription::Pointer desc)
 	return VulkanTexture::Pointer::create(_private->vulkan(), desc);
 }
 
-Program::Pointer VulkanRenderer::createProgram(const std::string& vs, const std::string& fs, 
-	const StringList& defines, const std::string& baseFolder)
+Sampler::Pointer VulkanRenderer::createSampler(const Sampler::Description& desc)
+{
+	return VulkanSampler::Pointer::create(_private->vulkan(), desc);
+}
+
+Program::Pointer VulkanRenderer::createProgram(const std::string& vs, const std::string& fs)
 {
 	VulkanProgram::Pointer program = VulkanProgram::Pointer::create(_private->vulkan());
 	program->build(vs, fs);
 	return program;
 }
 
-PipelineState::Pointer VulkanRenderer::createPipelineState(RenderPass::Pointer pass, Material::Pointer mat, VertexStream::Pointer vs)
+PipelineState::Pointer VulkanRenderer::acquirePipelineState(RenderPass::Pointer pass, Material::Pointer mat, VertexStream::Pointer vs)
 {
-	auto ps = _private->pipelineCache.find(vs->vertexBuffer()->declaration(), vs, mat->program(), 
-		mat->depthState(), mat->blendState(), mat->cullMode(), TextureFormat::RGBA8);
+	auto ps = _private->pipelineCache.find(vs->vertexBuffer()->declaration(), mat->program(), mat->depthState(),
+		mat->blendState(), mat->cullMode(), TextureFormat::RGBA8, vs->indexBuffer()->primitiveType());
 
 	if (ps.invalid())
 	{
@@ -224,7 +244,7 @@ PipelineState::Pointer VulkanRenderer::createPipelineState(RenderPass::Pointer p
 		ps->setDepthState(mat->depthState());
 		ps->setInputLayout(vs->vertexBuffer()->declaration());
 		ps->setProgram(mat->program());
-		ps->setVertexStream(vs);
+		ps->setPrimitiveType(vs->indexBuffer()->primitiveType());
 		ps->build();
 		_private->pipelineCache.addToCache(ps);
 	}
@@ -240,7 +260,7 @@ RenderPass::Pointer VulkanRenderer::allocateRenderPass(const RenderPass::Constru
 void VulkanRenderer::submitRenderPass(RenderPass::Pointer pass)
 {
 	VulkanRenderPass::Pointer vkPass = pass;
-	vkPass->endRenderPass();
+	vkPass->end();
 	vkPass->submit();
 }
 

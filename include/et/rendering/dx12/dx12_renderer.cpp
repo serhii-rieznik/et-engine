@@ -37,6 +37,16 @@ void DX12Renderer::present()
 
 }
 
+DataBuffer::Pointer DX12Renderer::createDataBuffer(const std::string&, uint32_t size)
+{
+	return DataBuffer::Pointer();
+}
+
+DataBuffer::Pointer DX12Renderer::createDataBuffer(const std::string&, const BinaryDataStorage&)
+{
+	return DataBuffer::Pointer();
+}
+
 VertexBuffer::Pointer DX12Renderer::createVertexBuffer(const std::string& name, VertexStorage::Pointer vs, BufferDrawType dt)
 {
 	return DX12VertexBuffer::Pointer::create(vs->declaration(), dt, name);
@@ -52,14 +62,19 @@ Texture::Pointer DX12Renderer::createTexture(TextureDescription::Pointer desc)
 	return DX12Texture::Pointer::create(desc);
 }
 
-Program::Pointer DX12Renderer::createProgram(const std::string& vs, const std::string& fs, const StringList& defines, const std::string& baseFolder)
+Sampler::Pointer DX12Renderer::createSampler(const Sampler::Description &)
 {
-	return DX12Program::Pointer::create();
+	return Sampler::Pointer();
 }
 
-PipelineState::Pointer DX12Renderer::createPipelineState(RenderPass::Pointer, Material::Pointer, VertexStream::Pointer)
+PipelineState::Pointer DX12Renderer::acquirePipelineState(RenderPass::Pointer, Material::Pointer, VertexStream::Pointer)
 {
-	return DX12PipelineState::Pointer::create();
+	return PipelineState::Pointer();
+}
+
+Program::Pointer DX12Renderer::createProgram(const std::string& vs, const std::string& fs)
+{
+	return DX12Program::Pointer::create();
 }
 
 RenderPass::Pointer DX12Renderer::allocateRenderPass(const RenderPass::ConstructionInfo& info)
@@ -69,7 +84,6 @@ RenderPass::Pointer DX12Renderer::allocateRenderPass(const RenderPass::Construct
 
 void DX12Renderer::submitRenderPass(RenderPass::Pointer)
 {
-
 }
 
 }

@@ -25,12 +25,15 @@
 #	include "../rendering/dx12/dx12_renderpass.cpp"
 #	include "../rendering/dx12/dx12_texture.cpp"
 #	include "../rendering/dx12/dx12_vertexbuffer.cpp"
+
 #	include "../rendering/vulkan/vulkan.cpp"
+#	include "../rendering/vulkan/vulkan_databuffer.cpp"
 #	include "../rendering/vulkan/vulkan_indexbuffer.cpp"
 #	include "../rendering/vulkan/vulkan_pipelinestate.cpp"
 #	include "../rendering/vulkan/vulkan_program.cpp"
 #	include "../rendering/vulkan/vulkan_renderer.cpp"
 #	include "../rendering/vulkan/vulkan_renderpass.cpp"
 #	include "../rendering/vulkan/vulkan_texture.cpp"
+#	include "../rendering/vulkan/vulkan_sampler.cpp"
 #	include "../rendering/vulkan/vulkan_vertexbuffer.cpp"
 #endif

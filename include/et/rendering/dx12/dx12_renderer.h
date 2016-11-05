@@ -33,8 +33,10 @@ namespace et
 		void submitRenderPass(RenderPass::Pointer) override;
 
 		/*
-		 * Vertex buffes
+		 * Buffers
 		 */
+		DataBuffer::Pointer createDataBuffer(const std::string&, uint32_t size) override;
+		DataBuffer::Pointer createDataBuffer(const std::string&, const BinaryDataStorage&) override;
 		VertexBuffer::Pointer createVertexBuffer(const std::string&, VertexStorage::Pointer, BufferDrawType) override;
 		IndexBuffer::Pointer createIndexBuffer(const std::string&, IndexArray::Pointer, BufferDrawType) override;
         
@@ -42,16 +44,16 @@ namespace et
          * Textures
          */
         Texture::Pointer createTexture(TextureDescription::Pointer) override;
+		Sampler::Pointer createSampler(const Sampler::Description&) override;
         
         /*
          * Programs
          */
-        Program::Pointer createProgram(const std::string& vs, const std::string& fs, 
-			const StringList& defines, const std::string& baseFolder) override;
+        Program::Pointer createProgram(const std::string& vs, const std::string& fs) override;
         
 		/*
 		 * Pipeline state
 		 */
-        PipelineState::Pointer createPipelineState(RenderPass::Pointer, Material::Pointer, VertexStream::Pointer) override;
+        PipelineState::Pointer acquirePipelineState(RenderPass::Pointer, Material::Pointer, VertexStream::Pointer) override;
 	};
 }

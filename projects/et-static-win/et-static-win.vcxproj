@@ -13,6 +13,8 @@
   <ItemGroup>
     <ClInclude Include="..\..\include\et\rendering\base\helpers.cpp" />
     <ClInclude Include="..\..\include\et\rendering\base\indexarray.cpp" />
+    <ClInclude Include="..\..\include\et\rendering\base\material.cpp" />
+    <ClInclude Include="..\..\include\et\rendering\base\materiallibrary.cpp" />
     <ClInclude Include="..\..\include\et\rendering\base\pipelinestate.cpp" />
     <ClInclude Include="..\..\include\et\rendering\base\primitives.cpp" />
     <ClInclude Include="..\..\include\et\rendering\base\renderbatch.cpp" />
@@ -22,6 +24,9 @@
     <ClInclude Include="..\..\include\et\rendering\base\vertexstorage.cpp" />
     <ClInclude Include="..\..\include\et\rendering\base\helpers.h" />
     <ClInclude Include="..\..\include\et\rendering\base\indexarray.h" />
+    <ClInclude Include="..\..\include\et\rendering\base\material.h" />
+    <ClInclude Include="..\..\include\et\rendering\base\materialhelpers.h" />
+    <ClInclude Include="..\..\include\et\rendering\base\materiallibrary.h" />
     <ClInclude Include="..\..\include\et\rendering\base\primitives.h" />
     <ClInclude Include="..\..\include\et\rendering\base\renderbatch.h" />
     <ClInclude Include="..\..\include\et\rendering\base\vertexarray.h" />
@@ -29,6 +34,9 @@
     <ClInclude Include="..\..\include\et\rendering\base\vertexdeclaration.h" />
     <ClInclude Include="..\..\include\et\rendering\base\vertexstorage.h" />
     <ClInclude Include="..\..\include\et\rendering\base\vertexstream.h" />
+    <ClInclude Include="..\..\include\et\rendering\vulkan\vulkan_databuffer.cpp" />
+    <ClInclude Include="..\..\include\et\rendering\vulkan\vulkan_databuffer.h" />
+    <ClInclude Include="..\..\include\et\rendering\vulkan\vulkan_sampler.cpp" />
     <ClInclude Include="..\..\include\et\rendering\dx12\dx12_indexbuffer.cpp" />
     <ClInclude Include="..\..\include\et\rendering\dx12\dx12_pipelinestate.cpp" />
     <ClInclude Include="..\..\include\et\rendering\dx12\dx12_program.cpp" />
@@ -49,9 +57,9 @@
     <ClInclude Include="..\..\include\et\rendering\vulkan\vulkan_program.cpp" />
     <ClInclude Include="..\..\include\et\rendering\vulkan\vulkan_renderer.cpp" />
     <ClInclude Include="..\..\include\et\rendering\vulkan\vulkan_renderpass.cpp" />
+    <ClInclude Include="..\..\include\et\rendering\vulkan\vulkan_sampler.h" />
     <ClInclude Include="..\..\include\et\rendering\vulkan\vulkan_texture.cpp" />
     <ClInclude Include="..\..\include\et\rendering\vulkan\vulkan_vertexbuffer.cpp" />
-    <ClInclude Include="..\..\include\et\rendering\material.cpp" />
     <ClInclude Include="..\..\include\et\rendering\rendering.cpp" />
     <ClInclude Include="..\..\include\et\app\application.cpp" />
     <ClInclude Include="..\..\include\et\app\backgroundthread.cpp" />
@@ -120,14 +128,10 @@
     <ClInclude Include="..\..\include\et\platform-win\rendercontext.win.cpp" />
     <ClInclude Include="..\..\include\et\platform-win\tools.win.cpp" />
     <ClInclude Include="..\..\include\et\rendering\framebuffer.h" />
-    <ClInclude Include="..\..\include\et\rendering\material.h" />
-    <ClInclude Include="..\..\include\et\rendering\materialfactory.h" />
     <ClInclude Include="..\..\include\et\rendering\rendercontext.h" />
     <ClInclude Include="..\..\include\et\rendering\rendercontextparams.h" />
     <ClInclude Include="..\..\include\et\rendering\rendering.h" />
     <ClInclude Include="..\..\include\et\rendering\renderingcaps.h" />
-    <ClInclude Include="..\..\include\et\rendering\texturefactory.h" />
-    <ClInclude Include="..\..\include\et\rendering\vertexarrayobject.h" />
     <ClInclude Include="..\..\include\et\rendering\vulkan\vulkan.h" />
     <ClInclude Include="..\..\include\et\rendering\vulkan\vulkan\GLSL.std.450.h" />
     <ClInclude Include="..\..\include\et\rendering\vulkan\vulkan\icd-spv.h" />
@@ -300,7 +304,6 @@
     <ProjectGuid>{C16E6F9D-51E8-4DC3-BEA8-3822B46E3EDF}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>etstaticwin</RootNamespace>
-    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
@@ -331,13 +334,13 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LibraryPath>$(ProjectDir)..\..\lib\vs2015;$(LibraryPath)</LibraryPath>
     <IncludePath>$(ProjectDir)..\..\include;$(IncludePath)</IncludePath>
-    <TargetName>et-debug</TargetName>
+    <TargetName>et-$(Configuration)</TargetName>
     <OutDir>$(ProjectDir)..\..\lib\vs2015\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LibraryPath>$(ProjectDir)..\..\lib\vs2015;$(LibraryPath)</LibraryPath>
     <IncludePath>$(ProjectDir)..\..\include;$(IncludePath)</IncludePath>
-    <TargetName>et-release</TargetName>
+    <TargetName>et-$(Configuration)</TargetName>
     <OutDir>$(ProjectDir)..\..\lib\vs2015\</OutDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -356,7 +359,7 @@
       <SubSystem>Windows</SubSystem>
     </Link>
     <Lib>
-      <AdditionalDependencies>jansson.lib;jpeg.lib;ogg.lib;openal32.lib;png.lib;vorbis.lib;vorbisfile.lib;vulkan-1.lib;z.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>vulkan-1.lib;jansson.lib;jpeg.lib;ogg.lib;openal32.lib;png.lib;vorbis.lib;vorbisfile.lib;z.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreAllDefaultLibraries>true</IgnoreAllDefaultLibraries>
     </Lib>
   </ItemDefinitionGroup>
@@ -379,7 +382,7 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
     <Lib>
-      <AdditionalDependencies>jansson.lib;jpeg.lib;ogg.lib;openal32.lib;png.lib;vorbis.lib;vorbisfile.lib;vulkan-1.lib;z.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>vulkan-1.lib;jansson.lib;jpeg.lib;ogg.lib;openal32.lib;png.lib;vorbis.lib;vorbisfile.lib;z.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Lib>
     <Lib>
       <IgnoreAllDefaultLibraries>true</IgnoreAllDefaultLibraries>

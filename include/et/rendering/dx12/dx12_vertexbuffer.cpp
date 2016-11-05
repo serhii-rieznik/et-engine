@@ -17,12 +17,7 @@ DX12VertexBuffer::DX12VertexBuffer(const VertexDeclaration& decl, BufferDrawType
 {
 }
 
-
-void DX12VertexBuffer::setData(const void * data, uint32_t dataSize)
-{
-}
-
-void DX12VertexBuffer::setDataWithOffset(const void * data, uint32_t offset, uint32_t dataSize)
+void DX12VertexBuffer::setData(const void * data, uint32_t offset, uint32_t dataSize)
 {
 }
 

@@ -191,59 +191,62 @@ void Material::loadCode(const std::string& codeString, const std::string& baseFo
 	{
 		codeFileName = application().resolveFileName(codeString + ".metal");
 	}
+	else if (_renderer->api() == RenderingAPI::Vulkan)
+	{
+		codeFileName = application().resolveFileName(codeString + ".glsl");
+	}
 	else
 	{
+		debug::debugBreak();
 		ET_FAIL("Not implemented");
 	}
 	application().popSearchPaths();
 
-	std::string programSource;
-	if (fileExists(codeFileName))
+	ET_ASSERT(fileExists(codeFileName));
+
+	StringList allDefines;
+	for (const auto& kv : defines->content)
 	{
-		StringList allDefines;
-		for (const auto& kv : defines->content)
+		char buffer[1024] = {};
+		if (kv.second->variantClass() == VariantClass::Integer)
 		{
-			char buffer[1024] = { };
-			if (kv.second->variantClass() == VariantClass::Integer)
-			{
-				sprintf(buffer, "#define %s %llu", kv.first.c_str(), IntegerValue(kv.second)->content);
-			}
-			else if (kv.second->variantClass() == VariantClass::Float)
-			{
-				sprintf(buffer, "#define %s %0.7f", kv.first.c_str(), FloatValue(kv.second)->content);
-			}
-			else if (kv.second->variantClass() == VariantClass::String)
-			{
-				sprintf(buffer, "#define %s %s", kv.first.c_str(), StringValue(kv.second)->content.c_str());
-			}
-			else
-			{
-				ET_FAIL("Unsupported type in defines");
-			}
-			allDefines.emplace_back(buffer);
+			sprintf(buffer, "#define %s %llu", kv.first.c_str(), IntegerValue(kv.second)->content);
 		}
-
-		programSource = loadTextFile(codeFileName);
-		parseShaderSource(programSource, getFilePath(codeFileName), allDefines,
-			[this](ParseDirective what, std::string& code, uint32_t positionInCode)
+		else if (kv.second->variantClass() == VariantClass::Float)
 		{
-			if (what == ParseDirective::InputLayout)
-			{
-				std::string layout = generateInputLayout();
-				code.insert(positionInCode, layout);
-			}
-			else if (what == ParseDirective::DefaultHeader)
-			{
-				code.insert(positionInCode, kMetalDefaultHeader);
-			}
-			else
-			{
-				log::warning("Unknown directive in source code");
-			}
-		});
-
-		setProgram(_renderer->createProgram(programSource, emptyString));
+			sprintf(buffer, "#define %s %0.7f", kv.first.c_str(), FloatValue(kv.second)->content);
+		}
+		else if (kv.second->variantClass() == VariantClass::String)
+		{
+			sprintf(buffer, "#define %s %s", kv.first.c_str(), StringValue(kv.second)->content.c_str());
+		}
+		else
+		{
+			ET_FAIL("Unsupported type in defines");
+		}
+		allDefines.emplace_back(buffer);
 	}
+
+	std::string programSource = loadTextFile(codeFileName);
+	parseShaderSource(programSource, getFilePath(codeFileName), allDefines,
+		[this](ParseDirective what, std::string& code, uint32_t positionInCode)
+	{
+		if (what == ParseDirective::InputLayout)
+		{
+			std::string layout = generateInputLayout();
+			code.insert(positionInCode, layout);
+		}
+		else if (what == ParseDirective::DefaultHeader)
+		{
+			code.insert(positionInCode, kMetalDefaultHeader);
+		}
+		else
+		{
+			log::warning("Unknown directive in source code");
+		}
+	});
+
+	setProgram(_renderer->createProgram(programSource, emptyString));
 }
 
 MaterialInstancePointer Material::instance()

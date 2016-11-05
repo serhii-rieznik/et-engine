@@ -50,8 +50,6 @@ const VulkanNativePipeline& VulkanPipelineState::nativePipeline() const
 void VulkanPipelineState::build()
 {
 	VulkanRenderPass::Pointer pass = renderPass();
-	VulkanVertexBuffer::Pointer vBuffer = vertexStream()->vertexBuffer();
-	VulkanIndexBuffer::Pointer iBuffer = vertexStream()->indexBuffer();
 
 	VkPipelineColorBlendStateCreateInfo blendInfo = { VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO };
 	{
@@ -85,14 +83,14 @@ void VulkanPipelineState::build()
 	VkPipelineInputAssemblyStateCreateInfo assemblyInfo = { VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO };
 	{
 		assemblyInfo.primitiveRestartEnable = VK_FALSE;
-		assemblyInfo.topology = vulkan::primitiveTopology(iBuffer->primitiveType());
+		assemblyInfo.topology = vulkan::primitiveTopology(primitiveType());
 	}
 
 	VkPipelineVertexInputStateCreateInfo vertexInfo = { VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO };
 	{
 		Vector<VkVertexInputAttributeDescription> attribs;
-		attribs.reserve(vBuffer->declaration().numElements());
-		for (const auto& e : vBuffer->declaration().elements())
+		attribs.reserve(inputLayout().numElements());
+		for (const auto& e : inputLayout().elements())
 		{
 			attribs.emplace_back();
 			attribs.back().offset = e.offset();
@@ -102,7 +100,7 @@ void VulkanPipelineState::build()
 
 		VkVertexInputBindingDescription binding = { };
 		binding.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
-		binding.stride = vBuffer->declaration().totalSize();
+		binding.stride = inputLayout().totalSize();
 
 		vertexInfo.pVertexBindingDescriptions = &binding;
 		vertexInfo.vertexBindingDescriptionCount = 1;

@@ -118,18 +118,6 @@ const VulkanNativeRenderPass& VulkanRenderPass::nativeRenderPass() const
 	return _private->nativePass;
 }
 
-void VulkanRenderPass::endRenderPass()
-{
-	vkCmdEndRenderPass(_private->nativePass.commandBuffer);
-
-	vulkan::imageBarrier(_private->vulkan, _private->nativePass.commandBuffer, _private->vulkan.swapchain.currentImage(), 
-		VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT, VK_ACCESS_MEMORY_READ_BIT,
-		VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
-		VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT);
-
-	vkEndCommandBuffer(_private->nativePass.commandBuffer);
-}
-
 void VulkanRenderPass::submit()
 {
 	VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
@@ -147,12 +135,8 @@ void VulkanRenderPass::submit()
 	VULKAN_CALL(vkWaitForFences(_private->vulkan.device, 1, &_private->fence, VK_TRUE, ~0ull));
 }
 
-void VulkanRenderPass::pushRenderBatch(RenderBatch::Pointer batch)
+void VulkanRenderPass::begin()
 {
-	VulkanPipelineState::Pointer ps = _private->renderer->createPipelineState(RenderPass::Pointer(this), batch->material(), batch->vertexStream());
-	VulkanIndexBuffer::Pointer ib = batch->vertexStream()->indexBuffer();
-	VulkanVertexBuffer::Pointer vb = batch->vertexStream()->vertexBuffer();
-
 	VkCommandBuffer cmd = _private->nativePass.commandBuffer;
 	
 	VkViewport vp[1] = { _private->nativePass.viewport };
@@ -160,15 +144,35 @@ void VulkanRenderPass::pushRenderBatch(RenderBatch::Pointer batch)
 
 	VkRect2D sc[1] = { _private->nativePass.scissor };
 	vkCmdSetScissor(cmd, 1, 1, sc);
+}
 
+void VulkanRenderPass::pushRenderBatch(RenderBatch::Pointer batch)
+{
+	VulkanPipelineState::Pointer ps = _private->renderer->acquirePipelineState(RenderPass::Pointer(this), 
+		batch->material(), batch->vertexStream());
+
+	VkCommandBuffer cmd = _private->nativePass.commandBuffer;
 	vkCmdBindPipeline(cmd, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_GRAPHICS, ps->nativePipeline().pipeline);
 
+	VulkanVertexBuffer::Pointer vb = batch->vertexStream()->vertexBuffer();
+	VulkanIndexBuffer::Pointer ib = batch->vertexStream()->indexBuffer();
 	VkDeviceSize vOffsets[1] = { 0 };
 	VkBuffer vBuffers[1] = { vb->nativeBuffer().buffer() };
 	vkCmdBindVertexBuffers(cmd, 0, 1, vBuffers, vOffsets );
-
 	vkCmdBindIndexBuffer(cmd, ib->nativeBuffer().buffer(), 0, vulkan::indexBufferFormat(ib->format()));
 	vkCmdDrawIndexed(cmd, batch->numIndexes(), 1, batch->firstIndex(), 0, 0);
+}
+
+void VulkanRenderPass::end()
+{
+	vkCmdEndRenderPass(_private->nativePass.commandBuffer);
+
+	vulkan::imageBarrier(_private->vulkan, _private->nativePass.commandBuffer, _private->vulkan.swapchain.currentImage(), 
+		VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT, VK_ACCESS_MEMORY_READ_BIT,
+		VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
+		VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT);
+
+	vkEndCommandBuffer(_private->nativePass.commandBuffer);
 }
 
 }

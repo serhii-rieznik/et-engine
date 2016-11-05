@@ -32,7 +32,7 @@ VulkanVertexBuffer::VulkanVertexBuffer(VulkanState& vulkan, const VertexDeclarat
 	BufferDrawType dt, const std::string& name) : VertexBuffer(decl, dt, name) 
 {
 	ET_PIMPL_INIT(VulkanVertexBuffer, vulkan, data.size(), drawType() == BufferDrawType::Dynamic);
-	setData(data.data(), _private->dataSize);
+	setData(data.data(), 0, _private->dataSize);
 }
 
 VulkanVertexBuffer::~VulkanVertexBuffer()
@@ -40,12 +40,7 @@ VulkanVertexBuffer::~VulkanVertexBuffer()
 	ET_PIMPL_FINALIZE(VulkanVertexBuffer);
 }
 
-void VulkanVertexBuffer::setData(const void * data, uint32_t dataSize)
-{
-	setDataWithOffset(data, 0, dataSize);
-}
-
-void VulkanVertexBuffer::setDataWithOffset(const void * data, uint32_t offset, uint32_t dataSize)
+void VulkanVertexBuffer::setData(const void * data, uint32_t offset, uint32_t dataSize)
 {
 	ET_ASSERT(offset + dataSize <= _private->dataSize);
 

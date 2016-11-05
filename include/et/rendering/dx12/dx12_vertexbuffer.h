@@ -19,8 +19,7 @@ namespace et
 	public:
 		DX12VertexBuffer(const VertexDeclaration&, BufferDrawType, const std::string&);
 
-		void setData(const void* data, uint32_t dataSize) override;
-		void setDataWithOffset(const void* data, uint32_t offset, uint32_t dataSize) override;
+		void setData(const void* data, uint32_t offset, uint32_t dataSize) override;
 
 		uint64_t dataSize() override;
 

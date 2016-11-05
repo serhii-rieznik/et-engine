@@ -109,6 +109,11 @@ struct VulkanNativeTexture
 	VkMemoryRequirements memoryRequirements { };
 };
 
+struct VulkanNativeSampler
+{
+	VkSampler sampler = nullptr;
+};
+
 namespace vulkan
 {
 

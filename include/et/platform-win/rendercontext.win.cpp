@@ -25,7 +25,7 @@ class RenderContextPrivate
 };
 
 RenderContext::RenderContext(const RenderContextParameters& inParams, Application* app) : 
-	_params(inParams), _app(app)
+	_params(inParams)
 {
 	ET_PIMPL_INIT(RenderContext)
 

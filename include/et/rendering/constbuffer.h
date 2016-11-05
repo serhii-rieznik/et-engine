@@ -8,6 +8,7 @@
 #pragma once
 
 #include <et/rendering/interface/databuffer.h>
+#include <mutex>
 
 namespace et
 {

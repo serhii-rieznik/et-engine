@@ -57,7 +57,8 @@ void s3d::Renderer::renderMeshList(RenderPass::Pointer pass, const s3d::BaseElem
 		mesh->prepareRenderBatches();
 		for (auto& rb : mesh->renderBatches())
 		{
-			_latestBatches[rb->material()->sortingKey()].emplace_back(rb, mesh);
+			uint64_t key = rb->material()->sortingKey();
+			_latestBatches[key].emplace_back(rb, mesh);
 		}
 	}
 
