@@ -3,9 +3,10 @@
 #include <et/rendering/base/primitives.h>
 
 #if (ET_PLATFORM_WIN)
-const et::RenderingAPI api = et::RenderingAPI::Vulkan;
+#	include "../windows/WorkingDirectory.hpp"
+	const et::RenderingAPI api = et::RenderingAPI::Vulkan;
 #else
-const et::RenderingAPI api = et::RenderingAPI::Metal;
+	const et::RenderingAPI api = et::RenderingAPI::Metal;
 #endif
 
 void demo::MainController::setApplicationParameters(et::ApplicationParameters& p)
@@ -23,11 +24,7 @@ void demo::MainController::setRenderContextParameters(et::RenderContextParameter
 void demo::MainController::applicationDidLoad(et::RenderContext* rc)
 {
 #if (ET_PLATFORM_WIN)
-	et::application().pushRelativeSearchPath("../../");
-	et::application().pushRelativeSearchPath("../../../");
-	et::application().pushRelativeSearchPath("../../../../../");
-	et::application().pushRelativeSearchPath("../../../../../../");
-	et::application().pushRelativeSearchPath("../../../../../../../");
+	et::application().pushRelativeSearchPath(workingDirectory);
 #endif
 
 	_camera = et::Camera::Pointer::create();

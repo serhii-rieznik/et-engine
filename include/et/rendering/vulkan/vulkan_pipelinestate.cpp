@@ -110,17 +110,9 @@ void VulkanPipelineState::build()
 
 	VkPipelineDynamicStateCreateInfo dynamicState = { VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO };
 	{
-		VkDynamicState dynamicStates = VK_DYNAMIC_STATE_VIEWPORT;
-		dynamicState.dynamicStateCount = 1;
-		dynamicState.pDynamicStates = &dynamicStates;
-	}
-
-	VkPipelineViewportStateCreateInfo viewportInfo = { VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO };
-	{
-		viewportInfo.pViewports = &pass->nativeRenderPass().viewport;
-		viewportInfo.viewportCount = 1;
-		viewportInfo.pScissors = &pass->nativeRenderPass().scissor;
-		viewportInfo.scissorCount = 1;
+		VkDynamicState dynamicStates[2] = { VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR };
+		dynamicState.dynamicStateCount = 2;
+		dynamicState.pDynamicStates = dynamicStates;
 	}
 	
 	VkDescriptorSetLayoutBinding binding = { };
@@ -147,7 +139,6 @@ void VulkanPipelineState::build()
 		info.pRasterizationState = &rasterizerInfo;
 		info.pVertexInputState = &vertexInfo;
 		info.pDynamicState = &dynamicState;
-		info.pViewportState = &viewportInfo;
 		info.layout = _private->nativePipeline.layout;
 		info.renderPass = pass->nativeRenderPass().renderPass;
 		info.pStages = VulkanProgram::Pointer(program())->shaderModules().stageCreateInfo;

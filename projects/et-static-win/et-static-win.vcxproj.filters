@@ -388,6 +388,36 @@
     <ClInclude Include="..\..\include\et\rendering\base\vertexstorage.cpp">
       <Filter>Source\rendering\base</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\base\helpers.cpp">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\base\indexarray.cpp">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\base\material.cpp">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\base\materiallibrary.cpp">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\base\pipelinestate.cpp">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\base\primitives.cpp">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\base\renderbatch.cpp">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\base\vertexarray.cpp">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\base\vertexdatachunk.cpp">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\base\vertexdeclaration.cpp">
+      <Filter>Source</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\et\sound\openal.h">
@@ -888,37 +918,5 @@
     <ClInclude Include="..\..\include\et\rendering\dx12\dx12_vertexbuffer.cpp">
       <Filter>Source\rendering\dx12</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="..\..\include\et\rendering\base\helpers.cpp">
-      <Filter>Source\rendering\base</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\include\et\rendering\base\indexarray.cpp">
-      <Filter>Source\rendering\base</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\include\et\rendering\base\material.cpp">
-      <Filter>Source\rendering\base</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\include\et\rendering\base\materiallibrary.cpp">
-      <Filter>Source\rendering\base</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\include\et\rendering\base\pipelinestate.cpp">
-      <Filter>Source\rendering\base</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\include\et\rendering\base\primitives.cpp">
-      <Filter>Source\rendering\base</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\include\et\rendering\base\renderbatch.cpp">
-      <Filter>Source\rendering\base</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\include\et\rendering\base\vertexarray.cpp">
-      <Filter>Source\rendering\base</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\include\et\rendering\base\vertexdatachunk.cpp">
-      <Filter>Source\rendering\base</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\include\et\rendering\base\vertexdeclaration.cpp">
-      <Filter>Source\rendering\base</Filter>
-    </ClCompile>
   </ItemGroup>
 </Project>

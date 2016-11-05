@@ -23,6 +23,7 @@ public:
 	VulkanNativeRenderPass nativePass;
 	VkFence fence = nullptr;
 	VulkanRenderer* renderer = nullptr;
+	VkClearValue clearColor { };
 };
 
 VulkanRenderPass::VulkanRenderPass(VulkanRenderer* renderer, VulkanState& vulkan, const RenderPass::ConstructionInfo& passInfo) 
@@ -33,12 +34,12 @@ VulkanRenderPass::VulkanRenderPass(VulkanRenderer* renderer, VulkanState& vulkan
 	VkFenceCreateInfo fenceInfo = { VK_STRUCTURE_TYPE_FENCE_CREATE_INFO };
 	VULKAN_CALL(vkCreateFence(vulkan.device, &fenceInfo, nullptr, &_private->fence));
 
-	_private->nativePass.viewport.width = static_cast<float>(_private->vulkan.swapchain.extent.width);
-	_private->nativePass.viewport.height = static_cast<float>(_private->vulkan.swapchain.extent.height);
-	_private->nativePass.viewport.maxDepth = 1.0f;
-
-	_private->nativePass.scissor.extent.width = _private->vulkan.swapchain.extent.width;
-	_private->nativePass.scissor.extent.height = _private->vulkan.swapchain.extent.height;
+	_private->clearColor = { 
+		passInfo.target.clearColor.x, 
+		passInfo.target.clearColor.y, 
+		passInfo.target.clearColor.z, 
+		passInfo.target.clearColor.w
+	};
 
 	VkCommandBufferAllocateInfo info = { VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO };
 	info.commandPool = vulkan.commandPool;
@@ -71,38 +72,6 @@ VulkanRenderPass::VulkanRenderPass(VulkanRenderer* renderer, VulkanState& vulkan
 	createInfo.pSubpasses = &subpassInfo;
 
 	VULKAN_CALL(vkCreateRenderPass(vulkan.device, &createInfo, nullptr, &_private->nativePass.renderPass));
-
-	VkFramebufferCreateInfo framebufferInfo = { VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO };
-	framebufferInfo.attachmentCount = 1;
-	framebufferInfo.pAttachments = &_private->vulkan.swapchain.images.at(_private->vulkan.swapchain.currentImageIndex).imageView;
-	framebufferInfo.width = _private->vulkan.swapchain.extent.width;
-	framebufferInfo.height = _private->vulkan.swapchain.extent.height;
-	framebufferInfo.layers = 1;
-	framebufferInfo.renderPass = _private->nativePass.renderPass;
-	VULKAN_CALL(vkCreateFramebuffer(vulkan.device, &framebufferInfo, nullptr, &_private->nativePass.framebuffer));
-
-	VkCommandBufferBeginInfo commandBufferBeginInfo = { VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO };
-	vkBeginCommandBuffer(_private->nativePass.commandBuffer, &commandBufferBeginInfo);
-
-	vulkan::imageBarrier(_private->vulkan, _private->nativePass.commandBuffer, _private->vulkan.swapchain.currentImage(), 
-		0, VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT, 
-		VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, 
-		VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT);
-
-	VkClearValue clearValue = { 
-		passInfo.target.clearColor.x, 
-		passInfo.target.clearColor.y, 
-		passInfo.target.clearColor.z, 
-		passInfo.target.clearColor.w
-	};
-
-	VkRenderPassBeginInfo renderPassBeginInfo = { VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO };
-	renderPassBeginInfo.clearValueCount = 1;
-	renderPassBeginInfo.pClearValues = &clearValue;
-	renderPassBeginInfo.renderPass = _private->nativePass.renderPass;
-	renderPassBeginInfo.renderArea.extent = vulkan.swapchain.extent;
-	renderPassBeginInfo.framebuffer = _private->nativePass.framebuffer;
-	vkCmdBeginRenderPass(_private->nativePass.commandBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
 }
 
 VulkanRenderPass::~VulkanRenderPass()
@@ -138,12 +107,42 @@ void VulkanRenderPass::submit()
 void VulkanRenderPass::begin()
 {
 	VkCommandBuffer cmd = _private->nativePass.commandBuffer;
-	
-	VkViewport vp[1] = { _private->nativePass.viewport };
-	vkCmdSetViewport(cmd, 0, 1, vp);
 
-	VkRect2D sc[1] = { _private->nativePass.scissor };
-	vkCmdSetScissor(cmd, 1, 1, sc);
+	VkFramebufferCreateInfo framebufferInfo = { VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO };
+	framebufferInfo.attachmentCount = 1;
+	framebufferInfo.pAttachments = &_private->vulkan.swapchain.images.at(_private->vulkan.swapchain.currentImageIndex).imageView;
+	framebufferInfo.width = _private->vulkan.swapchain.extent.width;
+	framebufferInfo.height = _private->vulkan.swapchain.extent.height;
+	framebufferInfo.layers = 1;
+	framebufferInfo.renderPass = _private->nativePass.renderPass;
+	VULKAN_CALL(vkCreateFramebuffer(_private->vulkan.device, &framebufferInfo, nullptr, &_private->nativePass.framebuffer));
+
+	VkCommandBufferBeginInfo commandBufferBeginInfo = { VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO };
+	vkBeginCommandBuffer(_private->nativePass.commandBuffer, &commandBufferBeginInfo);
+
+	vulkan::imageBarrier(_private->vulkan, _private->nativePass.commandBuffer, _private->vulkan.swapchain.currentImage(), 
+		0, VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT, 
+		VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, 
+		VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT);
+
+	VkRenderPassBeginInfo renderPassBeginInfo = { VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO };
+	renderPassBeginInfo.clearValueCount = 1;
+	renderPassBeginInfo.pClearValues = &_private->clearColor;
+	renderPassBeginInfo.renderPass = _private->nativePass.renderPass;
+	renderPassBeginInfo.renderArea.extent = _private->vulkan.swapchain.extent;
+	renderPassBeginInfo.framebuffer = _private->nativePass.framebuffer;
+	vkCmdBeginRenderPass(_private->nativePass.commandBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
+	
+	VkViewport viewports[1] = { };
+	viewports[0].width = static_cast<float>(_private->vulkan.swapchain.extent.width);
+	viewports[0].height = static_cast<float>(_private->vulkan.swapchain.extent.height);	
+	viewports[0].maxDepth = 1.0f;
+	vkCmdSetViewport(cmd, 0, 1, viewports);
+
+	VkRect2D scissors[1] = { };
+	scissors[0].extent.width = _private->vulkan.swapchain.extent.width;
+	scissors[0].extent.height = _private->vulkan.swapchain.extent.height;
+	vkCmdSetScissor(cmd, 1, 1, scissors);
 }
 
 void VulkanRenderPass::pushRenderBatch(RenderBatch::Pointer batch)

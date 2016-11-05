@@ -18,5 +18,8 @@
     <ClInclude Include="..\source\MainController.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="WorkingDirectory.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
