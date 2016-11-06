@@ -72,7 +72,7 @@ PipelineState::Pointer DX12Renderer::acquirePipelineState(RenderPass::Pointer, M
 	return PipelineState::Pointer();
 }
 
-Program::Pointer DX12Renderer::createProgram(const std::string& vs, const std::string& fs)
+Program::Pointer DX12Renderer::createProgram(const std::string&)
 {
 	return DX12Program::Pointer::create();
 }

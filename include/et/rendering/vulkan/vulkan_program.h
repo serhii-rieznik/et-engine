@@ -24,13 +24,9 @@ namespace et
 		VulkanProgram(VulkanState&);
 		~VulkanProgram();
 
-        void build(const std::string& source, const std::string& fragmentSource) override;
+        void build(const std::string& source) override;
 
 		const VulkanShaderModules& shaderModules() const;
-        
-        void setTransformMatrix(const mat4 &m, bool force) override;
-		void setCameraProperties(const Camera& cam) override;
-        void setDefaultLightPosition(const vec3& p, bool force) override;
 
 	private:
 		ET_DECLARE_PIMPL(VulkanProgram, 128);

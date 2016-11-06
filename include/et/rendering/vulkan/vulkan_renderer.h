@@ -50,7 +50,7 @@ namespace et
         /*
          * Programs
          */
-        Program::Pointer createProgram(const std::string& vs, const std::string& fs) override;
+        Program::Pointer createProgram(const std::string& source) override;
         
 		/*
 		 * Pipeline state

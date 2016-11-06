@@ -1,0 +1,3 @@
+[submodule "include/external/glslang"]
+	path = include/external/glslang
+	url = https://github.com/KhronosGroup/glslang.git

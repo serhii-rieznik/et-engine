@@ -14,7 +14,7 @@ namespace et
 const std::string kCode = "code";
 const std::string kInputLayout = "input-layout";
 const std::string kOptions = "options";
-extern const std::string kMetalDefaultHeader;
+extern const std::string shaderDefaultHeaders[static_cast<uint32_t>(RenderingAPI::Count)];
 
 /*
  * Material
@@ -175,6 +175,18 @@ std::string Material::generateInputLayout()
 		}
 		layout.append("};\n");
 	}
+	else if (_renderer->api() == RenderingAPI::Vulkan)
+	{
+		for (const auto& element : _inputLayout.elements())
+		{
+			char buffer[256] = {};
+			sprintf(buffer, "layout (location = %u) in %s %s; \n", 
+				static_cast<uint32_t>(element.usage()),
+				dataTypeToString(element.type(), _renderer->api()).c_str(), 
+				vertexAttributeUsageToString(element.usage()).c_str());
+			layout.append(buffer);
+		}
+	}
 	else
 	{
 		ET_FAIL("Not implemented");
@@ -238,15 +250,15 @@ void Material::loadCode(const std::string& codeString, const std::string& baseFo
 		}
 		else if (what == ParseDirective::DefaultHeader)
 		{
-			code.insert(positionInCode, kMetalDefaultHeader);
+			code.insert(positionInCode, shaderDefaultHeaders[static_cast<uint32_t>(_renderer->api())]);
 		}
-		else
+		else if (what != ParseDirective::StageDefine)
 		{
 			log::warning("Unknown directive in source code");
 		}
-	});
+	}, {ParseDirective::StageDefine});
 
-	setProgram(_renderer->createProgram(programSource, emptyString));
+	setProgram(_renderer->createProgram(programSource));
 }
 
 MaterialInstancePointer Material::instance()
@@ -392,6 +404,11 @@ void MaterialInstance::invalidateUsedProperties()
 	_propertiesValid = false;
 }
 
+Program::Pointer MaterialInstance::program()
+{
+	return _base->program();
+}
+
 /*
  * Service
  */
@@ -443,12 +460,13 @@ const String& mtl::materialSamplerToString(MaterialTexture t)
 	return names.at(t);
 }
 
-const std::string kMetalDefaultHeader = R"(
+const std::string shaderDefaultHeaders[static_cast<uint32_t>(RenderingAPI::Count)] = 
+{
+R"(
 #define VertexStreamBufferIndex         0
 #define ObjectVariablesBufferIndex      4
 #define MaterialVariablesBufferIndex    5
 #define PassVariablesBufferIndex        6
-
 #define PI                              3.1415926536
 #define HALF_PI                         1.5707963268
 #define INV_PI                          0.3183098862
@@ -465,6 +483,32 @@ struct PassVariables
 	float4 cameraUp;
 	float4 lightPosition;
 };
-)";
+)",
+
+R"(
+#version 450
+#define VertexStreamBufferIndex         0
+#define ObjectVariablesBufferIndex      4
+#define MaterialVariablesBufferIndex    5
+#define PassVariablesBufferIndex        6
+#define PI                              3.1415926536
+#define HALF_PI                         1.5707963268
+#define INV_PI                          0.3183098862
+
+#define PassVariabless PassVariabless { \
+	mat4 viewProjection; \
+	mat4 projection; \
+	mat4 view; \
+	vec4 cameraPosition; \
+	vec4 cameraDirection; \
+	vec4 cameraUp; \
+	vec4 lightPosition; \
+}
+)",
+
+R"(
+DX12 not implemented yet
+)"
+};
 
 }

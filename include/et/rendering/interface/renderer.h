@@ -73,7 +73,7 @@ public:
 	/*
 	 * Programs
 	 */
-	virtual Program::Pointer createProgram(const std::string& vs, const std::string& fs) = 0;
+	virtual Program::Pointer createProgram(const std::string& source) = 0;
 
 	/*
 	 * Pipeline state

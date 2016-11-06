@@ -5,8 +5,6 @@
  *
  */
 
-#pragma once
-
 #include <et/rendering/vulkan/vulkan_databuffer.h>
 #include <et/rendering/vulkan/vulkan.h>
 

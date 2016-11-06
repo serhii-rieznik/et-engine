@@ -56,6 +56,9 @@
     <Filter Include="Source\rendering\vulkan\vulkan">
       <UniqueIdentifier>{9161c841-3c70-4eb3-b8a1-9524b2c8111f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\rendering\vulkan\glslang">
+      <UniqueIdentifier>{4575e941-a49d-4905-9633-d7ff84a6228a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\et\sound\platform-dependent.cpp">
@@ -385,38 +388,44 @@
     <ClInclude Include="..\..\include\et\rendering\base\vertexstream.h">
       <Filter>Source\rendering\base</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\base\helpers.cpp">
+      <Filter>Source\rendering\base</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\base\indexarray.cpp">
+      <Filter>Source\rendering\base</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\base\material.cpp">
+      <Filter>Source\rendering\base</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\base\materiallibrary.cpp">
+      <Filter>Source\rendering\base</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\base\pipelinestate.cpp">
+      <Filter>Source\rendering\base</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\base\primitives.cpp">
+      <Filter>Source\rendering\base</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\base\renderbatch.cpp">
+      <Filter>Source\rendering\base</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\base\vertexarray.cpp">
+      <Filter>Source\rendering\base</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\base\vertexdatachunk.cpp">
+      <Filter>Source\rendering\base</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\base\vertexdeclaration.cpp">
+      <Filter>Source\rendering\base</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\include\et\rendering\base\vertexstorage.cpp">
       <Filter>Source\rendering\base</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\et\rendering\base\helpers.cpp">
-      <Filter>Source</Filter>
+    <ClInclude Include="..\..\include\et\rendering\vulkan\glslang\vulkan_glslang.h">
+      <Filter>Source\rendering\vulkan\glslang</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\et\rendering\base\indexarray.cpp">
-      <Filter>Source</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\et\rendering\base\material.cpp">
-      <Filter>Source</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\et\rendering\base\materiallibrary.cpp">
-      <Filter>Source</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\et\rendering\base\pipelinestate.cpp">
-      <Filter>Source</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\et\rendering\base\primitives.cpp">
-      <Filter>Source</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\et\rendering\base\renderbatch.cpp">
-      <Filter>Source</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\et\rendering\base\vertexarray.cpp">
-      <Filter>Source</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\et\rendering\base\vertexdatachunk.cpp">
-      <Filter>Source</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\et\rendering\base\vertexdeclaration.cpp">
-      <Filter>Source</Filter>
+    <ClInclude Include="..\..\include\et\rendering\vulkan\glslang\vulkan_glslang.cpp">
+      <Filter>Source\rendering\vulkan\glslang</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -918,5 +927,8 @@
     <ClInclude Include="..\..\include\et\rendering\dx12\dx12_vertexbuffer.cpp">
       <Filter>Source\rendering\dx12</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="et_info.cpp" />
   </ItemGroup>
 </Project>

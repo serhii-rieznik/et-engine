@@ -7,6 +7,8 @@
 
 #pragma once
 
+#include <et/rendering/shadersource.h>
+#include <et/rendering/vulkan/glslang/vulkan_glslang.h>
 #include <et/rendering/vulkan/vulkan_program.h>
 #include <et/rendering/vulkan/vulkan.h>
 #include <fstream>
@@ -36,53 +38,49 @@ VulkanProgram::~VulkanProgram()
 	ET_PIMPL_FINALIZE(VulkanProgram)
 }
 
-void VulkanProgram::build(const std::string& vertexSource, const std::string& fragmentSource)
+void VulkanProgram::build(const std::string& source)
 {
-	Vector<char> code;
-	VkShaderModuleCreateInfo createInfo = { VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO };
+	std::string vertexSource = source;
+	parseShaderSource(vertexSource, emptyString, StringList(), [](ParseDirective dir, std::string& code, uint32_t pos) 
 	{
-		std::ifstream fIn(vertexSource.c_str(), std::ios::in | std::ios::binary);
-		code.resize(streamSize(fIn));
-		fIn.read(code.data(), code.size());
-		fIn.close();
-		ET_ASSERT(code.size() % 4 == 0);
-	}
-	createInfo.pCode = reinterpret_cast<const uint32_t*>(code.data());
-	createInfo.codeSize = code.size();
-	VULKAN_CALL(vkCreateShaderModule(_private->vulkan.device, &createInfo, nullptr, &_private->modules.vertex));
-	_private->modules.stageCreateInfo[0].stage = VK_SHADER_STAGE_VERTEX_BIT;
-	_private->modules.stageCreateInfo[0].module = _private->modules.vertex;
-	_private->modules.stageCreateInfo[0].pName = "main";
-	
+		if (dir == ParseDirective::StageDefine) {
+			code.insert(pos, "#define ET_VERTEX_SHADER 1");
+		}
+	}, { });
+
+	std::string fragmentSource = source;
+	parseShaderSource(fragmentSource, emptyString, StringList(), [](ParseDirective dir, std::string& code, uint32_t pos)
 	{
-		std::ifstream fIn(fragmentSource.c_str(), std::ios::in | std::ios::binary);
-		code.resize(streamSize(fIn));
-		fIn.read(code.data(), code.size());
-		fIn.close();
-		ET_ASSERT(code.size() % 4 == 0);
+		if (dir == ParseDirective::StageDefine) {
+			code.insert(pos, "#define ET_FRAGMENT_SHADER 1");
+		}
+	}, { });
+
+	std::vector<uint32_t> vertexBin;
+	std::vector<uint32_t> fragmentBin;
+	if (glslToSPIRV(vertexSource, fragmentSource, vertexBin, fragmentBin))
+	{
+		VkShaderModuleCreateInfo createInfo = { VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO };
+
+		createInfo.pCode = vertexBin.data();
+		createInfo.codeSize = vertexBin.size() * sizeof(uint32_t);
+		VULKAN_CALL(vkCreateShaderModule(_private->vulkan.device, &createInfo, nullptr, &_private->modules.vertex));
+		_private->modules.stageCreateInfo[0].stage = VK_SHADER_STAGE_VERTEX_BIT;
+		_private->modules.stageCreateInfo[0].module = _private->modules.vertex;
+		_private->modules.stageCreateInfo[0].pName = "vertexMain";
+
+		createInfo.pCode = fragmentBin.data();
+		createInfo.codeSize = fragmentBin.size() * sizeof(uint32_t);
+		VULKAN_CALL(vkCreateShaderModule(_private->vulkan.device, &createInfo, nullptr, &_private->modules.fragment));
+		_private->modules.stageCreateInfo[1].stage = VK_SHADER_STAGE_FRAGMENT_BIT;
+		_private->modules.stageCreateInfo[1].module = _private->modules.fragment;
+		_private->modules.stageCreateInfo[1].pName = "fragmentMain";
 	}
-	createInfo.pCode = reinterpret_cast<const uint32_t*>(code.data());
-	createInfo.codeSize = code.size();
-	VULKAN_CALL(vkCreateShaderModule(_private->vulkan.device, &createInfo, nullptr, &_private->modules.fragment));
-	_private->modules.stageCreateInfo[1].stage = VK_SHADER_STAGE_FRAGMENT_BIT;
-	_private->modules.stageCreateInfo[1].module = _private->modules.fragment;
-	_private->modules.stageCreateInfo[1].pName = "main";}
+}
 
 const VulkanShaderModules& VulkanProgram::shaderModules() const
 {
 	return _private->modules;
-}
-
-void VulkanProgram::setTransformMatrix(const mat4 & m, bool force)
-{
-}
-
-void VulkanProgram::setCameraProperties(const Camera & cam)
-{
-}
-
-void VulkanProgram::setDefaultLightPosition(const vec3 & p, bool force)
-{
 }
 
 }

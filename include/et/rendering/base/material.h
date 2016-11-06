@@ -39,7 +39,7 @@ public:
 	void setFloat(MaterialParameter, float);
 	float getFloat(MaterialParameter) const;
 
-	Program::Pointer program();
+	virtual Program::Pointer program();
 	
 	const DepthState& depthState() const
 		{ return _depthState; }
@@ -102,6 +102,8 @@ public:
 	void invalidateUsedSamplers();
 	void invalidateUsedProperties();
 
+	Program::Pointer program() override;
+
 private:
 	friend class Material;
 	friend class ObjectFactory;
@@ -132,7 +134,5 @@ inline T Material::getParameter(MaterialParameter p) const
 		mtl::materialParameterToString(p).c_str(), classToString<T>());
 	return T();
 }
-
-
 
 }

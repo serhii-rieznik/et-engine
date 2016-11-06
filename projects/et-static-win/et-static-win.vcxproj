@@ -34,6 +34,7 @@
     <ClInclude Include="..\..\include\et\rendering\base\vertexdeclaration.h" />
     <ClInclude Include="..\..\include\et\rendering\base\vertexstorage.h" />
     <ClInclude Include="..\..\include\et\rendering\base\vertexstream.h" />
+    <ClInclude Include="..\..\include\et\rendering\vulkan\glslang\vulkan_glslang.h" />
     <ClInclude Include="..\..\include\et\rendering\vulkan\vulkan_databuffer.cpp" />
     <ClInclude Include="..\..\include\et\rendering\vulkan\vulkan_databuffer.h" />
     <ClInclude Include="..\..\include\et\rendering\vulkan\vulkan_sampler.cpp" />
@@ -167,6 +168,10 @@
     <ClInclude Include="..\..\include\et\sound\sound.cpp" />
     <ClInclude Include="..\..\include\et\sound\streamingthread.cpp" />
     <ClInclude Include="..\..\include\et\sound\track.cpp" />
+    <ClInclude Include="..\..\include\et\rendering\vulkan\glslang\vulkan_glslang.cpp" />
+    <ClCompile Include="et_info.cpp">
+      <FileType>CppHeader</FileType>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\et\app\appevironment.h" />
@@ -332,13 +337,13 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <LibraryPath>$(ProjectDir)..\..\lib\vs2015;$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(ProjectDir)..\..\lib\vs2015;$(ProjectDir)..\..\lib\vs2015\glslang-$(Configuration)</LibraryPath>
     <IncludePath>$(ProjectDir)..\..\include;$(IncludePath)</IncludePath>
     <TargetName>et-$(Configuration)</TargetName>
     <OutDir>$(ProjectDir)..\..\lib\vs2015\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <LibraryPath>$(ProjectDir)..\..\lib\vs2015;$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(ProjectDir)..\..\lib\vs2015;$(ProjectDir)..\..\lib\vs2015\glslang-$(Configuration)</LibraryPath>
     <IncludePath>$(ProjectDir)..\..\include;$(IncludePath)</IncludePath>
     <TargetName>et-$(Configuration)</TargetName>
     <OutDir>$(ProjectDir)..\..\lib\vs2015\</OutDir>
@@ -363,7 +368,15 @@
       <IgnoreAllDefaultLibraries>true</IgnoreAllDefaultLibraries>
     </Lib>
     <PreBuildEvent>
-      <Command>echo $(ProjectDir)</Command>
+      <Command>echo #pragma once &gt; et_info.cpp
+echo. &gt;&gt; et_info.cpp
+echo namespace et  &gt;&gt; et_info.cpp
+echo { &gt;&gt; et_info.cpp
+echo const char* etWorkingFolder = R"($(ProjectDir)..\..\)"; &gt;&gt; et_info.cpp
+git log -1 --pretty=format:"const char* etCommit = \"%%h\";" &gt;&gt; et_info.cpp
+echo. &gt;&gt; et_info.cpp
+echo } &gt;&gt; et_info.cpp
+</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -391,7 +404,15 @@
       <IgnoreAllDefaultLibraries>true</IgnoreAllDefaultLibraries>
     </Lib>
     <PreBuildEvent>
-      <Command>echo $(ProjectDir)</Command>
+      <Command>echo #pragma once &gt; et_info.cpp
+echo. &gt;&gt; et_info.cpp
+echo namespace et  &gt;&gt; et_info.cpp
+echo { &gt;&gt; et_info.cpp
+echo const char* etWorkingFolder = R"($(ProjectDir)..\..\)"; &gt;&gt; et_info.cpp
+git log -1 --pretty=format:"const char* etCommit = \"%%h\";" &gt;&gt; et_info.cpp
+echo. &gt;&gt; et_info.cpp
+echo } &gt;&gt; et_info.cpp
+</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

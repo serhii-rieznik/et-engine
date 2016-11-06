@@ -14,9 +14,11 @@ namespace et
 const std::string kInclude = "#include";
 const std::string kDirectiveDefaultHeader = "et";
 const std::string kDirectiveInputLayout = "inputlayout";
+const std::string kDirectiveInputDefines = "inputdefines";
+const std::string kDirectiveStageDefine = "stagedefine";
 
-inline bool getIncludeFileName(const std::string& source, size_t& pos, std::string& fileName,
-	ParseDirective& directive)
+inline bool getDirective(const std::string& source, size_t& pos, std::string& fileName,
+	ParseDirective& directive, const Set<ParseDirective>& skipDirectives)
 {
 	pos += kInclude.length();
 
@@ -51,15 +53,17 @@ inline bool getIncludeFileName(const std::string& source, size_t& pos, std::stri
 
 	if (isDirective)
 	{
-		directive = ParseDirective::UserDefined;
+		static const std::unordered_map<std::string, ParseDirective> validDirectives =
+		{
+			{ kDirectiveInputLayout, ParseDirective::InputLayout },
+			{ kDirectiveDefaultHeader, ParseDirective::DefaultHeader },
+			{ kDirectiveStageDefine, ParseDirective::StageDefine },
+			{ kDirectiveInputDefines, ParseDirective::InputDefines },
+		};
 
-		if (fileName == kDirectiveInputLayout)
-			directive = ParseDirective::InputLayout;
-
-		if (fileName == kDirectiveDefaultHeader)
-			directive = ParseDirective::DefaultHeader;
-
-		return true;
+		auto i = validDirectives.find(fileName);
+		directive = (i == validDirectives.end()) ? ParseDirective::UserDefined : i->second;
+		return skipDirectives.count(directive) == 0;
 	}
 
 	directive = ParseDirective::Include;
@@ -68,53 +72,66 @@ inline bool getIncludeFileName(const std::string& source, size_t& pos, std::stri
 }
 
 void parseShaderSource(std::string& source, const std::string& baseFolder, const StringList& defines,
-	ParseDirectiveCallback cb)
+	ParseDirectiveCallback cb, const Set<ParseDirective>& skipDirectives)
 {
 	if (source.empty())
 		return;
 
 	application().pushSearchPath(baseFolder);
 
-	size_t includePos = std::string::npos;
-	while ((includePos = source.find(kInclude)) != std::string::npos)
+	bool sourceModified = false;
+	Set<size_t> skippedLocations = { std::string::npos };
+	do
 	{
-		std::string includeName;
-		size_t endPos = includePos;
-		ParseDirective directive = ParseDirective::None;
-		if (getIncludeFileName(source, endPos, includeName, directive))
+		sourceModified = false;
+		for (size_t offset = 0; offset < source.size(); )
 		{
-			if (directive == ParseDirective::Include)
+			size_t includePos = source.find(kInclude, offset);
+			if (skippedLocations.count(includePos) == 0)
 			{
-				std::string before = source.substr(0, includePos);
-				std::string include = loadTextFile(includeName);
-				std::string after = source.substr(endPos);
-
-				source = before +
-					"\n// ------- begin auto included file --------\n" +
-					include +
-					"\n// -------- end auto included file ---------\n" +
-					after;
+				sourceModified = true;
+				std::string includeName;
+				size_t endPos = includePos;
+				ParseDirective directive = ParseDirective::None;
+				if (getDirective(source, endPos, includeName, directive, skipDirectives))
+				{
+					sourceModified = true;
+					source.erase(includePos, endPos - includePos);
+					if (directive == ParseDirective::Include)
+					{
+						source.insert(includePos, loadTextFile(includeName));
+					}
+					else if ((directive == ParseDirective::InputDefines) && !defines.empty())
+					{
+						std::string definesString;
+						definesString.reserve(64 * defines.size());
+						for (const std::string& def : defines)
+							definesString += def;
+						source.insert(includePos, definesString);
+					}
+					else
+					{
+						cb(directive, source, static_cast<uint32_t>(includePos));
+					}
+				}
+				else
+				{
+					skippedLocations.insert(includePos);
+					offset = includePos + 1;
+				}
 			}
 			else
 			{
-				source.erase(includePos, endPos - includePos);
-				cb(directive, source, static_cast<uint32_t>(includePos));
+				if (includePos == std::string::npos)
+					break;
+
+				offset = includePos + 1;
 			}
 		}
-		else
-		{
-			ET_FAIL("Failed to preprocess shader source");
-		}
 	}
+	while (sourceModified);
 
 	application().popSearchPaths();
-
-	std::string definesString;
-	definesString.reserve(64 * defines.size());
-	for (const std::string& def : defines)
-		definesString += def;
-
-	source.insert(0, definesString);
 }
 
 }

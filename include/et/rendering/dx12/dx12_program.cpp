@@ -12,19 +12,7 @@
 namespace et
 {
 
-void DX12Program::build(const std::string & vertexSource, const std::string & fragmentSource)
-{
-}
-
-void DX12Program::setTransformMatrix(const mat4 & m, bool force)
-{
-}
-
-void DX12Program::setCameraProperties(const Camera & cam)
-{
-}
-
-void DX12Program::setDefaultLightPosition(const vec3 & p, bool force)
+void DX12Program::build(const std::string& source)
 {
 }
 

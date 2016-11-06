@@ -36,4 +36,5 @@
 #	include "../rendering/vulkan/vulkan_texture.cpp"
 #	include "../rendering/vulkan/vulkan_sampler.cpp"
 #	include "../rendering/vulkan/vulkan_vertexbuffer.cpp"
+#	include "../rendering/vulkan/glslang/vulkan_glslang.cpp"
 #endif
