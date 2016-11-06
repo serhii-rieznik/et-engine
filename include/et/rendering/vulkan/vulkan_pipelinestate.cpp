@@ -107,13 +107,6 @@ void VulkanPipelineState::build()
 		vertexInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(attribs.size());
 		vertexInfo.pVertexAttributeDescriptions = attribs.data();
 	}
-
-	VkPipelineDynamicStateCreateInfo dynamicState = { VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO };
-	{
-		VkDynamicState dynamicStates[2] = { VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR };
-		dynamicState.pDynamicStates = dynamicStates;
-		dynamicState.dynamicStateCount = 2;
-	}
 	
 	VkDescriptorSetLayoutBinding binding = { };
 	binding.stageFlags = VK_SHADER_STAGE_ALL_GRAPHICS;
@@ -131,6 +124,15 @@ void VulkanPipelineState::build()
 	VULKAN_CALL(vkCreatePipelineLayout(_private->vulkan.device, &layoutInfo, nullptr, &_private->nativePipeline.layout));
 
 	VkPipelineViewportStateCreateInfo viewportState = { VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO }; 
+	viewportState.scissorCount = 1;
+	viewportState.viewportCount = 1;
+
+	VkPipelineDynamicStateCreateInfo dynamicState = { VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO };
+	{
+		VkDynamicState dynamicStates[] = { VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR };
+		dynamicState.pDynamicStates = dynamicStates;
+		dynamicState.dynamicStateCount = sizeof(dynamicStates) / sizeof(dynamicStates[0]);
+	}
 
 	VkGraphicsPipelineCreateInfo info = { VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO };
 	{

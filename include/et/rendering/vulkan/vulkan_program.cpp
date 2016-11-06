@@ -67,14 +67,14 @@ void VulkanProgram::build(const std::string& source)
 		VULKAN_CALL(vkCreateShaderModule(_private->vulkan.device, &createInfo, nullptr, &_private->modules.vertex));
 		_private->modules.stageCreateInfo[0].stage = VK_SHADER_STAGE_VERTEX_BIT;
 		_private->modules.stageCreateInfo[0].module = _private->modules.vertex;
-		_private->modules.stageCreateInfo[0].pName = "vertexMain";
+		_private->modules.stageCreateInfo[0].pName = "main";
 
 		createInfo.pCode = fragmentBin.data();
 		createInfo.codeSize = fragmentBin.size() * sizeof(uint32_t);
 		VULKAN_CALL(vkCreateShaderModule(_private->vulkan.device, &createInfo, nullptr, &_private->modules.fragment));
 		_private->modules.stageCreateInfo[1].stage = VK_SHADER_STAGE_FRAGMENT_BIT;
 		_private->modules.stageCreateInfo[1].module = _private->modules.fragment;
-		_private->modules.stageCreateInfo[1].pName = "fragmentMain";
+		_private->modules.stageCreateInfo[1].pName = "main";
 	}
 }
 
