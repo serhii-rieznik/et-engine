@@ -118,11 +118,6 @@ const TBuiltInResource defaultBuiltInResource = {
 		/* .generalConstantMatrixVectorIndexing = */ 1,
 	} };
 
-	std::array<unsigned int, EShLangCount> baseSamplerBinding = {};
-	std::array<unsigned int, EShLangCount> baseTextureBinding = {};
-	std::array<unsigned int, EShLangCount> baseUboBinding = {};
-
-
 bool glslToSPIRV(const std::string& vertexSource, const std::string& fragmentSource,
 	std::vector<uint32_t>& vertexBin, std::vector<uint32_t>& fragmentBin)
 {
@@ -137,19 +132,11 @@ bool glslToSPIRV(const std::string& vertexSource, const std::string& fragmentSou
 
 	glslang::TShader vertexShader(EShLanguage::EShLangVertex);
 	vertexShader.setStringsWithLengthsAndNames(vertexSourceCStr, nullptr, vertexFileNames, 1);
-	vertexShader.setEntryPoint("vertexMain");
 	vertexShader.setAutoMapBindings(true);
 
 	glslang::TShader fragmentShader(EShLanguage::EShLangFragment);
 	fragmentShader.setStringsWithLengthsAndNames(fragmentSourceCStr, nullptr, fragmentFileNames, 1);
-	fragmentShader.setEntryPoint("fragmentMain");
 	fragmentShader.setAutoMapBindings(true);
-
-	/*
-	vertexShader.setShiftSamplerBinding(baseSamplerBinding[EShLanguage::EShLangVertex]);
-	vertexShader.setShiftTextureBinding(baseTextureBinding[EShLanguage::EShLangVertex]);
-	vertexShader.setShiftUboBinding(baseUboBinding[EShLanguage::EShLangVertex]);
-	*/
 
 	struct OnExit
 	{
@@ -165,12 +152,14 @@ bool glslToSPIRV(const std::string& vertexSource, const std::string& fragmentSou
 	if (!vertexShader.parse(&defaultBuiltInResource, 100, true, messages))
 	{
 		log::error("Failed to parse vertex shader:\n%s", vertexShader.getInfoLog());
+		debug::debugBreak();
 		return false;
 	}
 	
 	if (!fragmentShader.parse(&defaultBuiltInResource, 100, true, messages))
 	{
 		log::error("Failed to parse fragment shader:\n%s", fragmentShader.getInfoLog());
+		debug::debugBreak();
 		return false;
 	}
 	
@@ -180,11 +169,13 @@ bool glslToSPIRV(const std::string& vertexSource, const std::string& fragmentSou
 	if (!program->link(messages))
 	{
 		log::error("Failed to link program:\n%s", program->getInfoLog());
+		debug::debugBreak();
 		return false;
 	}
 	if (!program->mapIO())
 	{
 		log::error("Failed to map program's IO:\n%s", program->getInfoLog());
+		debug::debugBreak();
 		return false;
 	}
 
@@ -195,6 +186,7 @@ bool glslToSPIRV(const std::string& vertexSource, const std::string& fragmentSou
 	if (vertexIntermediate == nullptr)
 	{
 		log::error("Failed to get vertex binary:\n%s", program->getInfoLog());
+		debug::debugBreak();
 		return false;
 	}
 	
@@ -202,6 +194,7 @@ bool glslToSPIRV(const std::string& vertexSource, const std::string& fragmentSou
 	if (fragmentIntermediate == nullptr)
 	{
 		log::error("Failed to get fragment binary:\n%s", program->getInfoLog());
+		debug::debugBreak();
 		return false;
 	}
 

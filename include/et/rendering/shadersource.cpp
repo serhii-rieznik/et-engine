@@ -101,13 +101,16 @@ void parseShaderSource(std::string& source, const std::string& baseFolder, const
 					{
 						source.insert(includePos, loadTextFile(includeName));
 					}
-					else if ((directive == ParseDirective::InputDefines) && !defines.empty())
+					else if (directive == ParseDirective::InputDefines)
 					{
-						std::string definesString;
-						definesString.reserve(64 * defines.size());
-						for (const std::string& def : defines)
-							definesString += def;
-						source.insert(includePos, definesString);
+						if (!defines.empty())
+						{
+							std::string definesString;
+							definesString.reserve(64 * defines.size());
+							for (const std::string& def : defines)
+								definesString += def;
+							source.insert(includePos, definesString);
+						}
 					}
 					else
 					{
