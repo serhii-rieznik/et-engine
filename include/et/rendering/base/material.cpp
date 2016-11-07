@@ -109,7 +109,6 @@ void Material::setCullMode(CullMode cm)
 	_cullMode = cm;
 }
 
-
 void Material::loadFromJson(const std::string& source, const std::string& baseFolder)
 {
 	VariantClass cls = VariantClass::Invalid;
@@ -267,6 +266,10 @@ MaterialInstancePointer Material::instance()
 	result->textures = textures;
 	result->samplers = samplers;
 	result->properties = properties;
+	result->setCullMode(cullMode());
+	result->setDepthState(depthState());
+	result->setBlendState(blendState());
+	result->setProgram(program());
 	_instances.emplace_back(result);
 	return result;
 }
@@ -279,11 +282,6 @@ const MaterialInstanceCollection& Material::instances() const
 void Material::releaseInstances()
 {
 	_instances.clear();
-}
-
-Program::Pointer Material::program()
-{
-	return _program;
 }
 
 /*
@@ -402,11 +400,6 @@ void MaterialInstance::invalidateUsedSamplers()
 void MaterialInstance::invalidateUsedProperties()
 {
 	_propertiesValid = false;
-}
-
-Program::Pointer MaterialInstance::program()
-{
-	return _base->program();
 }
 
 /*

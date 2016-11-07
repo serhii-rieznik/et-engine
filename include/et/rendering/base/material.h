@@ -39,7 +39,8 @@ public:
 	void setFloat(MaterialParameter, float);
 	float getFloat(MaterialParameter) const;
 
-	virtual Program::Pointer program();
+	Program::Pointer program() const 
+		{ return _program; }
 	
 	const DepthState& depthState() const
 		{ return _depthState; }
@@ -77,6 +78,7 @@ protected: // overrided / read by instanaces
 private: // permanent private data
 	RenderInterface* _renderer = nullptr;
 	MaterialInstanceCollection _instances;
+
 	Program::Pointer _program;
 	VertexDeclaration _inputLayout;
 	DepthState _depthState;
@@ -101,8 +103,6 @@ public:
 	void invalidateUsedTextures();
 	void invalidateUsedSamplers();
 	void invalidateUsedProperties();
-
-	Program::Pointer program() override;
 
 private:
 	friend class Material;
