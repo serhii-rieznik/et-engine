@@ -34,6 +34,14 @@
     <ClInclude Include="..\..\include\et\rendering\base\vertexdeclaration.h" />
     <ClInclude Include="..\..\include\et\rendering\base\vertexstorage.h" />
     <ClInclude Include="..\..\include\et\rendering\base\vertexstream.h" />
+    <ClInclude Include="..\..\include\et\rendering\constbuffer.h" />
+    <ClInclude Include="..\..\include\et\rendering\framebuffer.h" />
+    <ClInclude Include="..\..\include\et\rendering\rendercontext.h" />
+    <ClInclude Include="..\..\include\et\rendering\rendercontextparams.h" />
+    <ClInclude Include="..\..\include\et\rendering\rendering.h" />
+    <ClInclude Include="..\..\include\et\rendering\renderingcaps.h" />
+    <ClInclude Include="..\..\include\et\rendering\shadersource.h" />
+    <ClInclude Include="..\..\include\et\rendering\sharedvariables.h" />
     <ClInclude Include="..\..\include\et\rendering\vulkan\glslang\vulkan_glslang.h" />
     <ClInclude Include="..\..\include\et\rendering\vulkan\vulkan_databuffer.cpp" />
     <ClInclude Include="..\..\include\et\rendering\vulkan\vulkan_databuffer.h" />
@@ -61,7 +69,6 @@
     <ClInclude Include="..\..\include\et\rendering\vulkan\vulkan_sampler.h" />
     <ClInclude Include="..\..\include\et\rendering\vulkan\vulkan_texture.cpp" />
     <ClInclude Include="..\..\include\et\rendering\vulkan\vulkan_vertexbuffer.cpp" />
-    <ClInclude Include="..\..\include\et\rendering\rendering.cpp" />
     <ClInclude Include="..\..\include\et\app\application.cpp" />
     <ClInclude Include="..\..\include\et\app\backgroundthread.cpp" />
     <ClInclude Include="..\..\include\et\app\events.cpp" />
@@ -128,11 +135,6 @@
     <ClInclude Include="..\..\include\et\platform-win\opengl.win.cpp" />
     <ClInclude Include="..\..\include\et\platform-win\rendercontext.win.cpp" />
     <ClInclude Include="..\..\include\et\platform-win\tools.win.cpp" />
-    <ClInclude Include="..\..\include\et\rendering\framebuffer.h" />
-    <ClInclude Include="..\..\include\et\rendering\rendercontext.h" />
-    <ClInclude Include="..\..\include\et\rendering\rendercontextparams.h" />
-    <ClInclude Include="..\..\include\et\rendering\rendering.h" />
-    <ClInclude Include="..\..\include\et\rendering\renderingcaps.h" />
     <ClInclude Include="..\..\include\et\rendering\vulkan\vulkan.h" />
     <ClInclude Include="..\..\include\et\rendering\vulkan\vulkan\GLSL.std.450.h" />
     <ClInclude Include="..\..\include\et\rendering\vulkan\vulkan\icd-spv.h" />
@@ -169,6 +171,10 @@
     <ClInclude Include="..\..\include\et\sound\streamingthread.cpp" />
     <ClInclude Include="..\..\include\et\sound\track.cpp" />
     <ClInclude Include="..\..\include\et\rendering\vulkan\glslang\vulkan_glslang.cpp" />
+    <ClInclude Include="..\..\include\et\rendering\constbuffer.cpp" />
+    <ClInclude Include="..\..\include\et\rendering\rendering.cpp" />
+    <ClInclude Include="..\..\include\et\rendering\shadersource.cpp" />
+    <ClInclude Include="..\..\include\et\rendering\sharedvariables.cpp" />
     <ClCompile Include="et_info.cpp">
       <FileType>CppHeader</FileType>
     </ClCompile>

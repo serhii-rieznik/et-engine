@@ -22,9 +22,14 @@ namespace et
 
 		static const String& kWorldTransform()
 			{ static String value("worldTransform"); return value; }
-
 		static const String& kWorldRotationTransform()
 			{ static String value("worldRotationTransform"); return value; }
+		static const String& kObjectVariables()
+			{ static String value("ObjectVariables"); return value; }
+		static const String& kMaterialVariables()
+			{ static String value("MaterialVariables"); return value; }
+		static const String& kPassVariables()
+			{ static String value("PassVariables"); return value; }
 
 		struct Variable
 		{
@@ -35,13 +40,21 @@ namespace et
 
 		struct Reflection
 		{
+			VertexDeclaration inputLayout;
+			
+			VariableMap passVariables;
+			uint32_t passVariablesBufferSize = 0;
+
+			VariableMap materialVariables;
+			uint32_t materialVariablesBufferSize = 0;
+
+			VariableMap objectVariables;
+			uint32_t objectVariablesBufferSize = 0;
+
 			UnorderedMap<String, uint32_t> vertexTextures;
 			UnorderedMap<String, uint32_t> vertexSamplers;
 			UnorderedMap<String, uint32_t> fragmentTextures;
 			UnorderedMap<String, uint32_t> fragmentSamplers;
-			VariableMap passVariables;
-			VariableMap materialVariables;
-			VariableMap objectVariables;
 		};
 
 	public:

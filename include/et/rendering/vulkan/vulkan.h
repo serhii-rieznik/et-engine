@@ -89,8 +89,6 @@ struct VulkanNativeRenderPass
 	VkFramebuffer framebuffer = nullptr;
 	VkCommandBuffer commandBuffer = nullptr;
 	VkRenderPass renderPass = nullptr;
-	// VkViewport viewport { };
-	// VkRect2D scissor { };
 };
 
 struct VulkanNativePipeline
@@ -126,6 +124,12 @@ VkFormat textureFormatValue(TextureFormat);
 VkImageType textureTargetToImageType(TextureTarget);
 VkImageViewType textureTargetToImageViewType(TextureTarget);
 uint32_t getMemoryTypeIndex(VulkanState& vulkan, uint32_t typeFilter, VkMemoryPropertyFlags properties);
+
+namespace gl
+{
+	DataType dataTypeFromOpenGLType(int glType);
+	bool isSamplerType(int glType);
+}
 
 void imageBarrier(VulkanState&, VkCommandBuffer, VkImage,
 	VkAccessFlags accessFrom, VkAccessFlags accessTo,

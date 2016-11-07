@@ -38,7 +38,7 @@
 										T##Private* _private = nullptr; \
 										char _privateData[SZ] { }
 
-#define ET_PIMPL_INIT(T, ...)		static_assert(sizeof(_privateData) >= sizeof(T##Private), "Invalid configuration"); \
+#define ET_PIMPL_INIT(T, ...)		static_assert(sizeof(_privateData) >= sizeof(T##Private), "Not enough storage for private implementation"); \
 									memset(_privateData, 0, sizeof(_privateData)); \
 									_private = new (_privateData) T##Private(__VA_ARGS__);
 

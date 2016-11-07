@@ -8,9 +8,11 @@
 #pragma once
 
 #include <string>
+#include <et/rendering/interface/pipelinestate.h>
 
 namespace et
 {
+
 bool glslToSPIRV(const std::string& vertexSource, const std::string& fragmentSource, 
-	std::vector<uint32_t>& vertexBin, std::vector<uint32_t>& fragmentBin);
+	std::vector<uint32_t>& vertexBin, std::vector<uint32_t>& fragmentBin, PipelineState::Reflection& reflection);
 }

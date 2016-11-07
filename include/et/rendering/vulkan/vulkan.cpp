@@ -1,3 +1,6 @@
+#include <Windows.h>
+#include <gl/gl.h>
+#include <et/rendering/opengl/gl/glext.h>
 #include <et/rendering/vulkan/vulkan.h>
 
 namespace et
@@ -388,6 +391,47 @@ VkIndexType indexBufferFormat(IndexArrayFormat fmt)
 	default:
 		ET_FAIL("Invalid IndexArrayFormat");
 	}
+}
+
+namespace gl
+{
+DataType dataTypeFromGLType(int glType)
+{
+	static std::map<int, DataType> validTypes = {
+		{ GL_FLOAT, DataType::Float },
+		{ GL_FLOAT_VEC2, DataType::Vec2 },
+		{ GL_FLOAT_VEC3, DataType::Vec3 },
+		{ GL_FLOAT_VEC4, DataType::Vec4 },
+		{ GL_INT, DataType::Int },
+		{ GL_INT_VEC2, DataType::IntVec2 },
+		{ GL_INT_VEC3, DataType::IntVec3 },
+		{ GL_INT_VEC4, DataType::IntVec4 },
+		{ GL_FLOAT_MAT3, DataType::Mat3 },
+		{ GL_FLOAT_MAT4, DataType::Mat4 },
+	};
+	ET_ASSERT(validTypes.count(glType) > 0);
+	return validTypes.at(glType);
+}
+
+bool isSamplerType(int glType)
+{
+	static std::set<int> validTypes = { 
+		GL_SAMPLER_1D,
+		GL_SAMPLER_2D,
+		GL_SAMPLER_3D,
+		GL_SAMPLER_CUBE,
+		GL_SAMPLER_1D_SHADOW,
+		GL_SAMPLER_2D_SHADOW,
+		GL_SAMPLER_1D_ARRAY,
+		GL_SAMPLER_2D_ARRAY,
+		GL_SAMPLER_1D_ARRAY_SHADOW,
+		GL_SAMPLER_2D_ARRAY_SHADOW,
+		GL_SAMPLER_CUBE_SHADOW,
+		GL_SAMPLER_2D_RECT,
+		GL_SAMPLER_2D_RECT_SHADOW,
+	};
+	return validTypes.count(glType) > 0;
+}
 }
 
 }

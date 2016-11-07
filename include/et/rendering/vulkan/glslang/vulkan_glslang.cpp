@@ -118,8 +118,10 @@ const TBuiltInResource defaultBuiltInResource = {
 		/* .generalConstantMatrixVectorIndexing = */ 1,
 	} };
 
+void buildProgramReflection(glslang::TProgram*, PipelineState::Reflection& reflection);
+
 bool glslToSPIRV(const std::string& vertexSource, const std::string& fragmentSource,
-	std::vector<uint32_t>& vertexBin, std::vector<uint32_t>& fragmentBin)
+	std::vector<uint32_t>& vertexBin, std::vector<uint32_t>& fragmentBin, PipelineState::Reflection& reflection)
 {
 	glslang::TProgram* program = nullptr;
 	EShMessages messages = static_cast<EShMessages>(EShMsgVulkanRules | EShMsgSpvRules);
@@ -179,8 +181,14 @@ bool glslToSPIRV(const std::string& vertexSource, const std::string& fragmentSou
 		return false;
 	}
 
-	program->buildReflection();
-	program->dumpReflection();
+	if (program->buildReflection() == false) 
+	{
+		log::error("Failed to build reflection:\n%s", program->getInfoLog());
+		debug::debugBreak();
+		return false;
+	}
+
+	buildProgramReflection(program, reflection);
 
 	glslang::TIntermediate* vertexIntermediate = program->getIntermediate(EShLanguage::EShLangVertex);
 	if (vertexIntermediate == nullptr)
@@ -205,7 +213,6 @@ bool glslToSPIRV(const std::string& vertexSource, const std::string& fragmentSou
 		std::string allMessages = logger.getAllMessages();
 		if (!allMessages.empty())
 			log::info("Vertex GLSL to SPV:\n%s", allMessages.c_str());
-		// glslang::OutputSpvBin(vertexBin, vertexFileNames[0]);
 	}
 
 	{
@@ -215,10 +222,107 @@ bool glslToSPIRV(const std::string& vertexSource, const std::string& fragmentSou
 		std::string allMessages = logger.getAllMessages();
 		if (!allMessages.empty())
 			log::info("Fragment GLSL to SPV:\n%s", allMessages.c_str());
-		// glslang::OutputSpvBin(fragmentBin, vertexFileNames[0]);
 	}
 
 	return true;
+}
+
+void buildProgramReflection(glslang::TProgram* program, PipelineState::Reflection& reflection)
+{
+	reflection.inputLayout.clear();
+	int attribs = program->getNumLiveAttributes();
+	for (int attrib = 0; attrib < attribs; ++attrib)
+	{
+		const char* attribName = program->getAttributeName(attrib);
+		VertexAttributeUsage usage = stringToVertexAttributeUsage(attribName);
+		if (usage != VertexAttributeUsage::Unknown)
+		{
+			int attribType = program->getAttributeType(attrib);
+			DataType dataType = vulkan::gl::dataTypeFromGLType(attribType);
+			reflection.inputLayout.push_back(usage, dataType);
+		}
+		else
+		{
+			log::info("Unknown vertex attribute: %s", attribName);
+		}
+	}
+
+	int blocks = program->getNumLiveUniformBlocks();
+	for (int block = 0; block < blocks; ++block)
+	{
+		String blockName(program->getUniformBlockName(block));
+		int blockSize = program->getUniformBlockSize(block);
+		if (blockName == PipelineState::kObjectVariables())
+		{
+			reflection.objectVariablesBufferSize = blockSize;
+		}
+		else if (blockName == PipelineState::kMaterialVariables())
+		{
+			reflection.materialVariablesBufferSize = blockSize;
+		}
+		else if (blockName == PipelineState::kPassVariables())
+		{
+			reflection.passVariablesBufferSize = blockSize;
+		}
+		else
+		{
+			log::error("Unknown uniform block: %s", blockName.c_str());
+		}
+		int blockIndex = program->getUniformBlockIndex(block);
+		int blockOffset = program->getUniformBufferOffset(block);
+		// log::info("Block: %s at %d, size: %d", blockName.c_str(), blockIndex, blockSize);
+	}
+
+	int uniforms = program->getNumLiveUniformVariables();
+	for (int uniform = 0; uniform < uniforms; ++uniform)
+	{
+		String uniformName(program->getUniformName(uniform));
+		int uniformIndex = program->getUniformIndex(uniformName.c_str());
+		int uniformType = program->getUniformType(uniform);
+
+		size_t dotPos = uniformName.find(".");
+		if (dotPos == String::npos)
+		{
+			if (vulkan::gl::isSamplerType(uniformType))
+			{
+				MaterialTexture tex = mtl::stringToMaterialTexture(uniformName);
+				const String& samplerName = mtl::materialSamplerToString(tex);
+
+				reflection.vertexTextures.emplace(uniformName, uniformIndex);
+				reflection.fragmentTextures.emplace(uniformName, uniformIndex);
+				reflection.vertexSamplers.emplace(samplerName, uniformIndex);
+				reflection.fragmentSamplers.emplace(samplerName, uniformIndex);
+				// log::info("Texture %s, index: %d", uniformName.c_str(), uniformIndex);
+			}
+			else
+			{
+				log::error("Unsupported uniform found in program: %s", uniformName.c_str());
+			}
+		}
+		else
+		{
+			int uniformOffset = program->getUniformBufferOffset(uniform);
+			// log::info("Uniform %s, offset: %d, index: %d, type: %x", uniformName.c_str(), uniformOffset, uniformIndex, uniformType);
+			String blockName = uniformName.substr(0, dotPos);
+			uniformName.erase(0, dotPos + 1);
+			if (blockName == PipelineState::kObjectVariables())
+			{
+				reflection.objectVariables[uniformName].offset = static_cast<uint32_t>(uniformOffset);
+			}
+			else if (blockName == PipelineState::kMaterialVariables())
+			{
+				reflection.materialVariables[uniformName].offset = static_cast<uint32_t>(uniformOffset);
+			}
+			else if (blockName == PipelineState::kPassVariables())
+			{
+				reflection.passVariables[uniformName].offset = static_cast<uint32_t>(uniformOffset);
+			}
+			else
+			{
+				log::error("Unknown uniform block: %s for uniform %s", blockName.c_str(), uniformName.c_str());
+			}
+		}
+	}
 }
 
 }

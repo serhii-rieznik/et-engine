@@ -20,12 +20,11 @@ class VulkanProgramPrivate
 {
 public:
 	VulkanProgramPrivate(VulkanState& v)
-		: vulkan(v)
-	{
-	}
+		: vulkan(v) { }
 
 	VulkanState& vulkan;
 	VulkanShaderModules modules;
+	PipelineState::Reflection reflection;
 };
 
 VulkanProgram::VulkanProgram(VulkanState& v)
@@ -58,7 +57,7 @@ void VulkanProgram::build(const std::string& source)
 
 	std::vector<uint32_t> vertexBin;
 	std::vector<uint32_t> fragmentBin;
-	if (glslToSPIRV(vertexSource, fragmentSource, vertexBin, fragmentBin))
+	if (glslToSPIRV(vertexSource, fragmentSource, vertexBin, fragmentBin, _private->reflection))
 	{
 		VkShaderModuleCreateInfo createInfo = { VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO };
 
@@ -81,6 +80,11 @@ void VulkanProgram::build(const std::string& source)
 const VulkanShaderModules& VulkanProgram::shaderModules() const
 {
 	return _private->modules;
+}
+
+const PipelineState::Reflection& VulkanProgram::reflection() const
+{
+	return _private->reflection;
 }
 
 }

@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include <et/rendering/interface/program.h>
+#include <et/rendering/interface/pipelinestate.h>
 
 namespace et
 {
@@ -27,8 +27,9 @@ namespace et
         void build(const std::string& source) override;
 
 		const VulkanShaderModules& shaderModules() const;
+		const PipelineState::Reflection& reflection() const;
 
 	private:
-		ET_DECLARE_PIMPL(VulkanProgram, 128);
+		ET_DECLARE_PIMPL(VulkanProgram, 1024);
     };
 }

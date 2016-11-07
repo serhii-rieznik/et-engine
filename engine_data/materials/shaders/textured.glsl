@@ -1,6 +1,6 @@
 #include <et>
 
-layout (std140, set = 0, location = PassVariablesBufferIndex) uniform PassVariabless passVariabless;
+layout (std140, set = 0, location = PassVariablesBufferIndex) uniform PassVariables passVariables;
 
 layout (std140, set = 0, location = ObjectVariablesBufferIndex) uniform ObjectVariables {
 	mat4 worldTransform;
@@ -16,6 +16,7 @@ struct VSOutput {
 #if defined(ET_VERTEX_SHADER)
 
 #include <inputlayout>
+
 layout(location = 0) out VSOutput vsOut;
 
 void main()
@@ -31,15 +32,13 @@ void main()
 
 #elif defined(ET_FRAGMENT_SHADER)
 
-//	texture2d<float> albedoTexture[[texture(0)]],
-//	sampler albedoSampler[[sampler(0)]])
-
-layout(location = 0) in VSOutput vsOut;
+layout(location = 0, set = 0) uniform sampler2D albedoTexture;
+layout(location = 0) in VSOutput fsIn;
 layout(location = 0) out vec4 outColor0;
 
 void main()
 {
-	outColor0 = vec4(1.0); // albedoTexture.sample(albedoSampler, in.texCoord0);
+	outColor0 = texture(albedoTexture, fsIn.texCoord0);
 }
 
 #else

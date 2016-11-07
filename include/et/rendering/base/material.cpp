@@ -430,19 +430,31 @@ const String& mtl::materialParameterToString(MaterialParameter p)
 	return names.at(p);
 }
 
+static const Map<MaterialTexture, String> materialTextureNames =
+{
+	{ MaterialTexture::Albedo, "albedoTexture" },
+	{ MaterialTexture::Reflectance, "reflectanceTexture" },
+	{ MaterialTexture::Roughness, "roughnessTexture" },
+	{ MaterialTexture::Emissive, "emissiveTexture" },
+	{ MaterialTexture::Opacity, "opacityTexture" },
+	{ MaterialTexture::Normal, "normalTexture" },
+};
+
 const String& mtl::materialTextureToString(MaterialTexture t)
 {
 	ET_ASSERT(t < MaterialTexture::Count);
-	static const Map<MaterialTexture, String> names =
+	return materialTextureNames.at(t);
+}
+
+MaterialTexture mtl::stringToMaterialTexture(const String& name)
+{
+	for (const auto& ts : materialTextureNames)
 	{
-		{ MaterialTexture::Albedo, "albedoTexture" },
-		{ MaterialTexture::Reflectance, "reflectanceTexture" },
-		{ MaterialTexture::Roughness, "roughnessTexture" },
-		{ MaterialTexture::Emissive, "emissiveTexture" },
-		{ MaterialTexture::Opacity, "opacityTexture" },
-		{ MaterialTexture::Normal, "normalTexture" },
-	};
-	return names.at(t);
+		if (ts.second == name)
+			return ts.first;
+	}
+	log::error("Unknown texture name %s", name.c_str());
+	return MaterialTexture::Count;
 }
 
 const String& mtl::materialSamplerToString(MaterialTexture t)
@@ -495,7 +507,7 @@ R"(
 #define HALF_PI                         1.5707963268
 #define INV_PI                          0.3183098862
 
-#define PassVariabless PassVariabless { \
+#define PassVariables PassVariables { \
 	mat4 viewProjection; \
 	mat4 projection; \
 	mat4 view; \

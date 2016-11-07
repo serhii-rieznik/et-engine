@@ -19,7 +19,7 @@
 #include <et/rendering/vulkan/vulkan.h>
 #include <et/app/application.h>
 
-#define VULKAN_ENABLE_VALIDATION 1
+#define VULKAN_ENABLE_VALIDATION VK_TRUE
 
 namespace et
 {
@@ -260,7 +260,6 @@ RenderPass::Pointer VulkanRenderer::allocateRenderPass(const RenderPass::Constru
 void VulkanRenderer::submitRenderPass(RenderPass::Pointer pass)
 {
 	VulkanRenderPass::Pointer vkPass = pass;
-	vkPass->end();
 	vkPass->submit();
 }
 

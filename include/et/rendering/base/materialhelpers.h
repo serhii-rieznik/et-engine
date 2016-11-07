@@ -138,8 +138,10 @@ using Samplers = std::array<OptionalObject<Sampler::Pointer>, MaterialTexturesCo
 using Parameters = std::array<OptionalValue, MaterialParametersCount>;
 
 const String& materialParameterToString(MaterialParameter);
-const String& materialTextureToString(MaterialTexture);
 const String& materialSamplerToString(MaterialTexture);
+
+const String& materialTextureToString(MaterialTexture);
+MaterialTexture stringToMaterialTexture(const String&);
 
 }
 }

@@ -102,6 +102,7 @@ void VulkanRenderPass::submit()
 
 	VULKAN_CALL(vkQueueSubmit(_private->vulkan.queue, 1, &submitInfo, _private->fence));
 	VULKAN_CALL(vkWaitForFences(_private->vulkan.device, 1, &_private->fence, VK_TRUE, ~0ull));
+	VULKAN_CALL(vkResetFences(_private->vulkan.device, 1, &_private->fence));
 }
 
 void VulkanRenderPass::begin()
@@ -150,8 +151,18 @@ void VulkanRenderPass::pushRenderBatch(RenderBatch::Pointer batch)
 	VulkanPipelineState::Pointer ps = _private->renderer->acquirePipelineState(RenderPass::Pointer(this), 
 		batch->material(), batch->vertexStream());
 
+	VkRect2D scissors[1] = { };
+	VkViewport viewports[1] = { };
+	scissors[0].extent.width = static_cast<uint32_t>(_private->renderer->rc()->size().x);
+	scissors[0].extent.height = static_cast<uint32_t>(_private->renderer->rc()->size().y);
+	viewports[0].width = static_cast<float>(_private->renderer->rc()->size().x);
+	viewports[0].height = static_cast<float>(_private->renderer->rc()->size().y);
+	viewports[0].maxDepth = 1.0f;
+
 	VkCommandBuffer cmd = _private->nativePass.commandBuffer;
 	vkCmdBindPipeline(cmd, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_GRAPHICS, ps->nativePipeline().pipeline);
+	vkCmdSetScissor(cmd, 0, 1, scissors);
+	vkCmdSetViewport(cmd, 0, 1, viewports);
 
 	VulkanVertexBuffer::Pointer vb = batch->vertexStream()->vertexBuffer();
 	VulkanIndexBuffer::Pointer ib = batch->vertexStream()->indexBuffer();
