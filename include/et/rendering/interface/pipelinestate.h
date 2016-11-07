@@ -110,9 +110,17 @@ namespace et
 		void setPrimitiveType(PrimitiveType pt)
 			{ _primitiveType = pt; }
 
+		template <typename T>
+		void setObjectVariable(const String& name, const T& t)
+			{ uploadObjectVariable(name, &t, sizeof(T)); }
+
 	protected:
 		Reflection reflection;
+		BinaryDataStorage objectVariablesBuffer;
+		void buildBuffers();
 		void printReflection();
+
+		void uploadObjectVariable(const String& name, const void* ptr, uint32_t size);
 
 	private:
 		VertexDeclaration _decl;

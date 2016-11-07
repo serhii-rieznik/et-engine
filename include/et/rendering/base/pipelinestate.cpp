@@ -10,6 +10,22 @@
 namespace et
 {
 
+void PipelineState::buildBuffers()
+{
+	objectVariablesBuffer.resize(reflection.objectVariablesBufferSize);
+	objectVariablesBuffer.fill(0);
+}
+
+void PipelineState::uploadObjectVariable(const String& name, const void* ptr, uint32_t size)
+{
+	auto var = reflection.objectVariables.find(name);
+	if (var != reflection.objectVariables.end())
+	{
+		auto* dst = objectVariablesBuffer.element_ptr(var->second.offset);
+		memcpy(dst, ptr, size);
+	}
+}
+
 void PipelineState::printReflection()
 {
 	std::map<uint32_t, String> sortedFields;

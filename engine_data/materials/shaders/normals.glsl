@@ -24,7 +24,7 @@ layout (location = 0) out VSOutput vsOut;
 void main()
 {
 	vsOut.normal = (objectVariables.worldRotationTransform * vec4(normal, 0.0)).xyz;
-	gl_Position = /* passVariables.viewProjection * objectVariables.worldTransform */ vec4(position, 1.0);
+	gl_Position = passVariables.viewProjection * objectVariables.worldTransform * vec4(position, 1.0);
 }
 
 #elif defined(ET_FRAGMENT_SHADER)
@@ -34,7 +34,7 @@ layout (location = 0) out vec4 outColor0;
 
 void main()
 {
-	outColor0 = vec4(1.0); // 0.5 + 0.5 * normalize(vsOut.normal), 1.0);
+	outColor0 = vec4(0.5 + 0.5 * normalize(vsOut.normal), 1.0);
 }
 
 #else

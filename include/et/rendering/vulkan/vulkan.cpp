@@ -202,7 +202,7 @@ void VulkanNativeBuffer::unmap()
 	ET_ASSERT(_mapped);
 	vkUnmapMemory(_vulkan.device, _memory);
 	vkFlushMappedMemoryRanges(_vulkan.device, 1, &_mappedRange);
-	_mappedRange = { };
+	_mappedRange = { VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE };
 	_mapped = false;
 }
 

@@ -134,36 +134,29 @@ void VulkanRenderPass::begin()
 	renderPassBeginInfo.framebuffer = _private->nativePass.framebuffer;
 	vkCmdBeginRenderPass(_private->nativePass.commandBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
 	
-	VkViewport viewports[1] = { };
-	viewports[0].width = static_cast<float>(_private->vulkan.swapchain.extent.width);
-	viewports[0].height = static_cast<float>(_private->vulkan.swapchain.extent.height);	
-	viewports[0].maxDepth = 1.0f;
-	vkCmdSetViewport(cmd, 0, 1, viewports);
-
-	VkRect2D scissors[1] = { };
-	scissors[0].extent.width = _private->vulkan.swapchain.extent.width;
-	scissors[0].extent.height = _private->vulkan.swapchain.extent.height;
-	vkCmdSetScissor(cmd, 1, 1, scissors);
+	_private->nativePass.scissor.extent.width = static_cast<uint32_t>(_private->renderer->rc()->size().x);
+	_private->nativePass.scissor.extent.height = static_cast<uint32_t>(_private->renderer->rc()->size().y);
+	_private->nativePass.viewport.width = static_cast<float>(_private->renderer->rc()->size().x);
+	_private->nativePass.viewport.height = static_cast<float>(_private->renderer->rc()->size().y);
+	_private->nativePass.viewport.maxDepth = 1.0f;
 }
 
 void VulkanRenderPass::pushRenderBatch(RenderBatch::Pointer batch)
 {
-	VulkanPipelineState::Pointer ps = _private->renderer->acquirePipelineState(RenderPass::Pointer(this), 
-		batch->material(), batch->vertexStream());
+	VulkanRenderPass::Pointer vulkanRenderPass(this);
 
-	VkRect2D scissors[1] = { };
-	VkViewport viewports[1] = { };
-	scissors[0].extent.width = static_cast<uint32_t>(_private->renderer->rc()->size().x);
-	scissors[0].extent.height = static_cast<uint32_t>(_private->renderer->rc()->size().y);
-	viewports[0].width = static_cast<float>(_private->renderer->rc()->size().x);
-	viewports[0].height = static_cast<float>(_private->renderer->rc()->size().y);
-	viewports[0].maxDepth = 1.0f;
+	SharedVariables& sharedVariables = _private->renderer->sharedVariables();
+	if (info().camera.valid())
+		sharedVariables.loadCameraProperties(info().camera);
+	if (info().light.valid())
+		sharedVariables.loadLightProperties(info().light);
+
+	VulkanPipelineState::Pointer ps = _private->renderer->acquirePipelineState(vulkanRenderPass, batch->material(), batch->vertexStream());
+	ps->setObjectVariable(PipelineState::kWorldTransform(), batch->transformation());
+	ps->setObjectVariable(PipelineState::kWorldRotationTransform(), batch->rotationTransformation());
+	ps->bind(_private->nativePass, batch->material());
 
 	VkCommandBuffer cmd = _private->nativePass.commandBuffer;
-	vkCmdBindPipeline(cmd, VkPipelineBindPoint::VK_PIPELINE_BIND_POINT_GRAPHICS, ps->nativePipeline().pipeline);
-	vkCmdSetScissor(cmd, 0, 1, scissors);
-	vkCmdSetViewport(cmd, 0, 1, viewports);
-
 	VulkanVertexBuffer::Pointer vb = batch->vertexStream()->vertexBuffer();
 	VulkanIndexBuffer::Pointer ib = batch->vertexStream()->indexBuffer();
 	VkDeviceSize vOffsets[1] = { 0 };
@@ -175,6 +168,9 @@ void VulkanRenderPass::pushRenderBatch(RenderBatch::Pointer batch)
 
 void VulkanRenderPass::end()
 {
+	_private->renderer->sharedVariables().flushBuffer();
+	_private->renderer->sharedConstBuffer().flush();
+
 	vkCmdEndRenderPass(_private->nativePass.commandBuffer);
 
 	vulkan::imageBarrier(_private->vulkan, _private->nativePass.commandBuffer, _private->vulkan.swapchain.currentImage(), 

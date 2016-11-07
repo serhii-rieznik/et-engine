@@ -89,6 +89,8 @@ struct VulkanNativeRenderPass
 	VkFramebuffer framebuffer = nullptr;
 	VkCommandBuffer commandBuffer = nullptr;
 	VkRenderPass renderPass = nullptr;
+	VkViewport viewport { };
+	VkRect2D scissor { };
 };
 
 struct VulkanNativePipeline

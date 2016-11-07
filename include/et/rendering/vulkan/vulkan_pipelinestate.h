@@ -12,7 +12,9 @@
 namespace et
 {
 	class VulkanState;
+	class VulkanRenderer;
 	class VulkanNativePipeline;
+	class VulkanNativeRenderPass;
 	class VulkanPipelineStatePrivate;
 	class VulkanPipelineState : public PipelineState
 	{
@@ -20,14 +22,15 @@ namespace et
 		ET_DECLARE_POINTER(VulkanPipelineState);
 
 	public:
-		VulkanPipelineState(VulkanState&);
+		VulkanPipelineState(VulkanRenderer*, VulkanState&);
 		~VulkanPipelineState();
 
 		const VulkanNativePipeline& nativePipeline() const;
 
 		void build() override;
+		void bind(VulkanNativeRenderPass&, MaterialInstance::Pointer&);
 
 	private:
-		ET_DECLARE_PIMPL(VulkanPipelineState, 32);
+		ET_DECLARE_PIMPL(VulkanPipelineState, 256);
 	};
 }

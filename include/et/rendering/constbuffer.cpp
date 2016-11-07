@@ -15,6 +15,7 @@ void ConstBuffer::init(RenderInterface* renderer)
 {
 	_buffer = renderer->createDataBuffer("SharedConstBuffer", Capacity);
 
+	// TODO : remove shit
 	std::vector<vec4> shit(Capacity / sizeof(vec4), vec4(1.0f / 9.0f));
 	_buffer->setData(shit.data(), 0, Capacity);
 

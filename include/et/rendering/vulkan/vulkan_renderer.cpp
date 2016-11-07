@@ -237,7 +237,7 @@ PipelineState::Pointer VulkanRenderer::acquirePipelineState(RenderPass::Pointer 
 
 	if (ps.invalid())
 	{
-		ps = VulkanPipelineState::Pointer::create(_private->vulkan());
+		ps = VulkanPipelineState::Pointer::create(this, _private->vulkan());
 		ps->setRenderPass(pass);
 		ps->setBlendState(mat->blendState());
 		ps->setCullMode(mat->cullMode());

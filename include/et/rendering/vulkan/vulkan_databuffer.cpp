@@ -16,7 +16,7 @@ class VulkanDataBufferPrivate
 public:
 	VulkanDataBufferPrivate(VulkanState& v, uint32_t size, bool readable) 
 		: vulkan(v)
-		, nativeBuffer(v, size, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | (readable ? 0 : VK_BUFFER_USAGE_TRANSFER_DST_BIT), readable)
+		, nativeBuffer(v, size, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT | (readable ? 0 : VK_BUFFER_USAGE_TRANSFER_DST_BIT), readable)
 		, dataSize(size)
 		, cpuReadable(readable)
 	{ 
