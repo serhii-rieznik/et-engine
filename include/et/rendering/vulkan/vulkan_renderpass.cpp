@@ -23,7 +23,7 @@ public:
 	VulkanNativeRenderPass nativePass;
 	VkFence fence = nullptr;
 	VulkanRenderer* renderer = nullptr;
-	VkClearValue clearColor { };
+	VkClearValue clearValues[2] { };
 };
 
 VulkanRenderPass::VulkanRenderPass(VulkanRenderer* renderer, VulkanState& vulkan, const RenderPass::ConstructionInfo& passInfo) 
@@ -34,11 +34,14 @@ VulkanRenderPass::VulkanRenderPass(VulkanRenderer* renderer, VulkanState& vulkan
 	VkFenceCreateInfo fenceInfo = { VK_STRUCTURE_TYPE_FENCE_CREATE_INFO };
 	VULKAN_CALL(vkCreateFence(vulkan.device, &fenceInfo, nullptr, &_private->fence));
 
-	_private->clearColor = { 
+	_private->clearValues[0] = { 
 		passInfo.target.clearColor.x, 
 		passInfo.target.clearColor.y, 
 		passInfo.target.clearColor.z, 
 		passInfo.target.clearColor.w
+	};
+	_private->clearValues[1] = {
+		passInfo.target.clearDepth
 	};
 
 	VkCommandBufferAllocateInfo info = { VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO };
@@ -47,7 +50,7 @@ VulkanRenderPass::VulkanRenderPass(VulkanRenderer* renderer, VulkanState& vulkan
 	info.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;	
 	VULKAN_CALL(vkAllocateCommandBuffers(vulkan.device, &info, &_private->nativePass.commandBuffer));	
 
-	VkAttachmentDescription attachments[1] = { };
+	VkAttachmentDescription attachments[2] = { };
 	attachments[0].format = vulkan.swapchain.surfaceFormat.format;
 	attachments[0].samples = VK_SAMPLE_COUNT_1_BIT;
 	attachments[0].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
@@ -57,16 +60,26 @@ VulkanRenderPass::VulkanRenderPass(VulkanRenderer* renderer, VulkanState& vulkan
 	attachments[0].initialLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 	attachments[0].finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
-	VkAttachmentReference colorReference = { };
-	colorReference.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+	attachments[1].format = vulkan.swapchain.depthFormat;
+	attachments[1].samples = VK_SAMPLE_COUNT_1_BIT;
+	attachments[1].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+	attachments[1].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+	attachments[1].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;;
+	attachments[1].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+	attachments[1].initialLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+	attachments[1].finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+
+	VkAttachmentReference colorReference = { 0, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL };
+	VkAttachmentReference depthReference = { 1, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL };
 
 	VkSubpassDescription subpassInfo = { };
 	subpassInfo.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-	subpassInfo.colorAttachmentCount = 1;									// Subpass uses one color attachment
-	subpassInfo.pColorAttachments = &colorReference;							// Reference to the color attachment in slot 0
+	subpassInfo.colorAttachmentCount = 1;
+	subpassInfo.pColorAttachments = &colorReference;
+	subpassInfo.pDepthStencilAttachment = &depthReference;
 
 	VkRenderPassCreateInfo createInfo = { VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO };
-	createInfo.attachmentCount = 1;
+	createInfo.attachmentCount = sizeof(attachments) / sizeof(attachments[0]);
 	createInfo.pAttachments = attachments;
 	createInfo.subpassCount = 1;
 	createInfo.pSubpasses = &subpassInfo;
@@ -107,11 +120,14 @@ void VulkanRenderPass::submit()
 
 void VulkanRenderPass::begin()
 {
-	VkCommandBuffer cmd = _private->nativePass.commandBuffer;
+	VkImageView attachments[] = {
+		_private->vulkan.swapchain.currentRenderTarget().colorView,
+		_private->vulkan.swapchain.currentRenderTarget().depthView
+	};
 
 	VkFramebufferCreateInfo framebufferInfo = { VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO };
-	framebufferInfo.attachmentCount = 1;
-	framebufferInfo.pAttachments = &_private->vulkan.swapchain.images.at(_private->vulkan.swapchain.currentImageIndex).imageView;
+	framebufferInfo.attachmentCount = sizeof(attachments) / sizeof(attachments[0]);
+	framebufferInfo.pAttachments = attachments;
 	framebufferInfo.width = _private->vulkan.swapchain.extent.width;
 	framebufferInfo.height = _private->vulkan.swapchain.extent.height;
 	framebufferInfo.layers = 1;
@@ -121,14 +137,14 @@ void VulkanRenderPass::begin()
 	VkCommandBufferBeginInfo commandBufferBeginInfo = { VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO };
 	vkBeginCommandBuffer(_private->nativePass.commandBuffer, &commandBufferBeginInfo);
 
-	vulkan::imageBarrier(_private->vulkan, _private->nativePass.commandBuffer, _private->vulkan.swapchain.currentImage(), 
-		0, VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT, 
+	vulkan::imageBarrier(_private->vulkan, _private->nativePass.commandBuffer, _private->vulkan.swapchain.currentColorImage(), 
+		VK_IMAGE_ASPECT_COLOR_BIT, 0, VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT, 
 		VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, 
 		VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT);
 
 	VkRenderPassBeginInfo renderPassBeginInfo = { VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO };
-	renderPassBeginInfo.clearValueCount = 1;
-	renderPassBeginInfo.pClearValues = &_private->clearColor;
+	renderPassBeginInfo.clearValueCount = sizeof(_private->clearValues) / sizeof(_private->clearValues[0]);
+	renderPassBeginInfo.pClearValues = _private->clearValues;
 	renderPassBeginInfo.renderPass = _private->nativePass.renderPass;
 	renderPassBeginInfo.renderArea.extent = _private->vulkan.swapchain.extent;
 	renderPassBeginInfo.framebuffer = _private->nativePass.framebuffer;
@@ -173,8 +189,8 @@ void VulkanRenderPass::end()
 
 	vkCmdEndRenderPass(_private->nativePass.commandBuffer);
 
-	vulkan::imageBarrier(_private->vulkan, _private->nativePass.commandBuffer, _private->vulkan.swapchain.currentImage(), 
-		VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT, VK_ACCESS_MEMORY_READ_BIT,
+	vulkan::imageBarrier(_private->vulkan, _private->nativePass.commandBuffer, _private->vulkan.swapchain.currentColorImage(), 
+		VK_IMAGE_ASPECT_COLOR_BIT, VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT, VK_ACCESS_MEMORY_READ_BIT,
 		VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
 		VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT);
 

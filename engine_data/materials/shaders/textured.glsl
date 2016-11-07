@@ -1,8 +1,8 @@
 #include <et>
 
-layout (std140, set = 0, location = PassVariablesBufferIndex) uniform PassVariables passVariables;
+layout (std140, set = 0, binding = PassVariablesBufferIndex) uniform PassVariables passVariables;
 
-layout (std140, set = 0, location = ObjectVariablesBufferIndex) uniform ObjectVariables {
+layout (std140, set = 0, binding = ObjectVariablesBufferIndex) uniform ObjectVariables {
 	mat4 worldTransform;
 } objectVariables;
 
@@ -32,7 +32,7 @@ void main()
 
 #elif defined(ET_FRAGMENT_SHADER)
 
-layout(location = 0, set = 0) uniform sampler2D albedoTexture;
+layout(binding = 0, set = 1) uniform sampler2D albedoTexture;
 layout(location = 0) in VSOutput fsIn;
 layout(location = 0) out vec4 outColor0;
 

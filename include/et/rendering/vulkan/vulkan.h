@@ -30,22 +30,35 @@ struct VulkanSwapchain
 	void acquireNextImage(VulkanState& vulkan);
 	void present(VulkanState& vulkan);
 
+	bool createDepthImage(VulkanState& vulkan, VkImage& image, VkDeviceMemory& memory);
+	VkImageView createImageView(VulkanState&, VkImage, VkImageAspectFlags, VkFormat);
+
 	VkSurfaceKHR surface = nullptr;
 	VkSwapchainKHR swapchain = nullptr;
 	
 	VkExtent2D extent { };
 	VkSurfaceFormatKHR surfaceFormat { };
+	VkFormat depthFormat = VK_FORMAT_D32_SFLOAT;
 
 	struct RenderTarget
 	{
-		VkImage image = nullptr;
-		VkImageView imageView = nullptr;
+		VkImage color = nullptr;
+		VkImageView colorView = nullptr;
+		VkImage depth = nullptr;
+		VkImageView depthView = nullptr;
+		VkDeviceMemory depthMemory = nullptr;
 	};
 	Vector<RenderTarget> images;
 	uint32_t currentImageIndex = static_cast<uint32_t>(-1);
 
-	VkImage currentImage() const 
-		{ return images.at(currentImageIndex).image; }
+	const RenderTarget& currentRenderTarget() const
+		{ return images.at(currentImageIndex); }
+
+	VkImage currentColorImage() const 
+		{ return images.at(currentImageIndex).color; }
+
+	VkImage currentDepthImage() const 
+		{ return images.at(currentImageIndex).depth; }
 };
 
 struct VulkanState
@@ -71,6 +84,8 @@ struct VulkanState
 	uint32_t presentQueueIndex = static_cast<uint32_t>(-1);
 
 	VulkanSwapchain swapchain;
+
+	void executeServiceCommands(std::function<void()>);
 };
 
 struct VulkanShaderModules
@@ -133,7 +148,7 @@ namespace gl
 	bool isSamplerType(int glType);
 }
 
-void imageBarrier(VulkanState&, VkCommandBuffer, VkImage,
+void imageBarrier(VulkanState&, VkCommandBuffer, VkImage, VkImageAspectFlags aspect,
 	VkAccessFlags accessFrom, VkAccessFlags accessTo,
 	VkImageLayout layoutFrom, VkImageLayout layoutTo,
 	VkPipelineStageFlags stageFrom, VkPipelineStageFlags stageTo);
@@ -143,11 +158,11 @@ void imageBarrier(VulkanState&, VkCommandBuffer, VkImage,
 const char* vulkanResultToString(VkResult result);
 
 #define VULKAN_CALL(expr) do { \
-	auto result = (expr); \
-	if (result != VkResult::VK_SUCCESS) \
+	auto localVkResult = (expr); \
+	if (localVkResult != VkResult::VK_SUCCESS) \
 	{ \
 		et::log::error("Vulkan call failed: %s\nat %s [%d]\nresult = %s", \
-			(#expr), __FILE__, __LINE__, vulkanResultToString(result)); \
+			(#expr), __FILE__, __LINE__, vulkanResultToString(localVkResult)); \
 		et::debug::debugBreak(); \
 	}} while (0)
 

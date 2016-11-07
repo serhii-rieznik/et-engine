@@ -48,6 +48,26 @@ VkResult vkGetPhysicalDeviceSurfaceFormatsKHRWrapper(const VulkanState& state, u
 	return vkGetPhysicalDeviceSurfaceFormatsKHR(state.physicalDevice, state.swapchain.surface, count, formats);
 }
 
+void VulkanState::executeServiceCommands(std::function<void()> commands)
+{
+	VkCommandBufferBeginInfo beginInfo = { VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO };
+	beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+
+	VkSubmitInfo submit = { VK_STRUCTURE_TYPE_SUBMIT_INFO };
+	submit.commandBufferCount = 1;
+	submit.pCommandBuffers = &serviceCommandBuffer;
+
+	VULKAN_CALL(vkBeginCommandBuffer(serviceCommandBuffer, &beginInfo));
+	commands();
+	VULKAN_CALL(vkEndCommandBuffer(serviceCommandBuffer));
+	VULKAN_CALL(vkQueueSubmit(queue, 1, &submit, nullptr));
+	VULKAN_CALL(vkQueueWaitIdle(queue));
+}
+
+/*
+ * Swapchain
+ */
+
 void VulkanSwapchain::init(VulkanState& vulkan, const RenderContextParameters& params, HWND window)
 {
 	VkWin32SurfaceCreateInfoKHR surfaceInfo = { VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR };
@@ -80,6 +100,63 @@ VkResult vkGetPhysicalDeviceSurfacePresentModesKHRWrapper(const VulkanState& sta
 VkResult vkGetSwapchainImagesKHRWrapper(const VulkanState& state, uint32_t* count, VkImage* images)
 {
 	return vkGetSwapchainImagesKHR(state.device, state.swapchain.swapchain, count, images);
+}
+
+bool VulkanSwapchain::createDepthImage(VulkanState& vulkan, VkImage& image, VkDeviceMemory& memory)
+{
+	VkImageCreateInfo imageInfo = { VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO };
+	imageInfo.format = depthFormat;
+	imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+	imageInfo.usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
+	imageInfo.extent.width = extent.width;
+	imageInfo.extent.height = extent.height;
+	imageInfo.extent.depth = 1;
+	imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
+	imageInfo.imageType = VK_IMAGE_TYPE_2D;
+	imageInfo.mipLevels = 1;
+	imageInfo.arrayLayers = 1;
+	imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+
+	VkFormatProperties formatProperties = { };
+	vkGetPhysicalDeviceFormatProperties(vulkan.physicalDevice, imageInfo.format, &formatProperties);
+	if (formatProperties.optimalTilingFeatures & VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT)
+		imageInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
+	else if (formatProperties.linearTilingFeatures & VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT)
+		imageInfo.tiling = VK_IMAGE_TILING_LINEAR;
+	else
+		return false;
+
+	VULKAN_CALL(vkCreateImage(vulkan.device, &imageInfo, nullptr, &image));
+
+	VkMemoryRequirements memoryRequirements = { };
+	vkGetImageMemoryRequirements(vulkan.device, image, &memoryRequirements);
+
+	VkMemoryAllocateInfo allocInfo = { VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO };
+	allocInfo.allocationSize = memoryRequirements.size;
+	allocInfo.memoryTypeIndex = vulkan::getMemoryTypeIndex(vulkan, memoryRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+	VULKAN_CALL(vkAllocateMemory(vulkan.device, &allocInfo, nullptr, &memory));
+	VULKAN_CALL(vkBindImageMemory(vulkan.device, image, memory, 0));
+
+	vulkan::imageBarrier(vulkan, vulkan.serviceCommandBuffer, image, VK_IMAGE_ASPECT_DEPTH_BIT,
+		0, VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT, 
+		VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
+		VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT);
+
+	return true;
+}
+
+VkImageView VulkanSwapchain::createImageView(VulkanState& vulkan, VkImage image, VkImageAspectFlags aspect, VkFormat format)
+{
+	VkImageViewCreateInfo viewInfo = { VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO };
+	viewInfo.image = image;
+	viewInfo.format = format;
+	viewInfo.components = { VK_COMPONENT_SWIZZLE_R, VK_COMPONENT_SWIZZLE_G, VK_COMPONENT_SWIZZLE_B, VK_COMPONENT_SWIZZLE_A };
+	viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+	viewInfo.subresourceRange = { aspect, 0, 1, 0, 1 };
+	
+	VkImageView result = nullptr;
+	VULKAN_CALL(vkCreateImageView(vulkan.device, &viewInfo, nullptr, &result));
+	return result;
 }
 
 void VulkanSwapchain::create(VulkanState& vulkan)
@@ -122,19 +199,19 @@ void VulkanSwapchain::create(VulkanState& vulkan)
 	Vector<VkImage> swapchainImages = enumerateVulkanObjects<VkImage>(vulkan, vkGetSwapchainImagesKHRWrapper);
 	images.resize(swapchainImages.size());
 
-	VkImage* swapchainImagesPtr = swapchainImages.data();
-	for (RenderTarget& rt : images)
+	vulkan.executeServiceCommands([&]()
 	{
-		rt.image = *swapchainImagesPtr++;
-
-		VkImageViewCreateInfo viewInfo = { VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO };
-		viewInfo.image = rt.image;
-		viewInfo.format = surfaceFormat.format;
-		viewInfo.components = { VK_COMPONENT_SWIZZLE_R, VK_COMPONENT_SWIZZLE_G, VK_COMPONENT_SWIZZLE_B, VK_COMPONENT_SWIZZLE_A };
-		viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-		viewInfo.subresourceRange = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1};
-		VULKAN_CALL(vkCreateImageView(vulkan.device, &viewInfo, nullptr, &rt.imageView));
-	}
+		VkImage* swapchainImagesPtr = swapchainImages.data();
+		for (RenderTarget& rt : images)
+		{
+			rt.color = *swapchainImagesPtr++;
+			rt.colorView = createImageView(vulkan, rt.color, VK_IMAGE_ASPECT_COLOR_BIT, surfaceFormat.format);
+			if (createDepthImage(vulkan, rt.depth, rt.depthMemory))
+			{
+				rt.depthView = createImageView(vulkan, rt.depth, VK_IMAGE_ASPECT_DEPTH_BIT, depthFormat);
+			}
+		}
+	});
 }
 
 void VulkanSwapchain::acquireNextImage(VulkanState& vulkan)
@@ -153,6 +230,10 @@ void VulkanSwapchain::present(VulkanState& vulkan)
 	info.pWaitSemaphores = &vulkan.semaphores.renderComplete;
 	VULKAN_CALL(vkQueuePresentKHR(vulkan.queue, &info));
 }
+
+/*
+ * Native buffer
+ */
 
 VulkanNativeBuffer::VulkanNativeBuffer(VulkanState& vulkan, uint32_t size, uint32_t usage, bool cpuReadable) : 
 	_vulkan(vulkan), _cpuReadable(cpuReadable)
@@ -215,17 +296,9 @@ void VulkanNativeBuffer::copyFrom(VulkanNativeBuffer& source)
 	region.dstOffset = 0;
 	region.size = _memoryRequirements.size;
 
-	VkCommandBufferBeginInfo beginInfo = { VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO };
-	beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
-	VULKAN_CALL(vkBeginCommandBuffer(_vulkan.serviceCommandBuffer, &beginInfo));
-	vkCmdCopyBuffer(_vulkan.serviceCommandBuffer, source.buffer(), buffer(), 1, &region);
-	VULKAN_CALL(vkEndCommandBuffer(_vulkan.serviceCommandBuffer));
-
-	VkSubmitInfo submit = { VK_STRUCTURE_TYPE_SUBMIT_INFO };
-	submit.commandBufferCount = 1;
-	submit.pCommandBuffers = &_vulkan.serviceCommandBuffer;
-	VULKAN_CALL(vkQueueSubmit(_vulkan.queue, 1, &submit, nullptr));
-	VULKAN_CALL(vkQueueWaitIdle(_vulkan.queue));
+	_vulkan.executeServiceCommands([&](){
+		vkCmdCopyBuffer(_vulkan.serviceCommandBuffer, source.buffer(), buffer(), 1, &region);
+	});;
 }
 
 namespace vulkan
@@ -253,7 +326,7 @@ uint32_t getMemoryTypeIndex(VulkanState& vulkan, uint32_t typeFilter, VkMemoryPr
 	ET_FAIL("Unable to get memory type");
 }
 
-void imageBarrier(VulkanState& vulkan, VkCommandBuffer cmd, VkImage image,
+void imageBarrier(VulkanState& vulkan, VkCommandBuffer cmd, VkImage image, VkImageAspectFlags aspect,
 	VkAccessFlags accessFrom, VkAccessFlags accessTo,
 	VkImageLayout layoutFrom, VkImageLayout layoutTo,
 	VkPipelineStageFlags stageFrom, VkPipelineStageFlags stageTo)
@@ -265,7 +338,7 @@ void imageBarrier(VulkanState& vulkan, VkCommandBuffer cmd, VkImage image,
 	barrierInfo.newLayout = layoutTo;
 	barrierInfo.srcQueueFamilyIndex = vulkan.presentQueueIndex;
 	barrierInfo.dstQueueFamilyIndex = vulkan.graphicsQueueIndex;
-	barrierInfo.subresourceRange = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 };
+	barrierInfo.subresourceRange = { aspect, 0, 1, 0, 1 };
 	barrierInfo.image = image;
 	vkCmdPipelineBarrier(cmd, stageFrom, stageTo, 0, 0, nullptr, 0, nullptr, 1, &barrierInfo);
 }
