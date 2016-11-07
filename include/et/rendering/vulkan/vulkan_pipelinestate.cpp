@@ -68,13 +68,10 @@ const VulkanNativePipeline& VulkanPipelineState::nativePipeline() const
 
 void VulkanPipelineState::build()
 {
-	VulkanRenderPass::Pointer pass = renderPass();
-
 	VkPipelineColorBlendStateCreateInfo blendInfo = { VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO };
 	{
 		VkPipelineColorBlendAttachmentState attachmentInfo = { };
-		attachmentInfo.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | 
-			VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
+		attachmentInfo.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
 		blendInfo.pAttachments = &attachmentInfo;
 		blendInfo.attachmentCount = 1;
 	}
@@ -101,7 +98,6 @@ void VulkanPipelineState::build()
 
 	VkPipelineInputAssemblyStateCreateInfo assemblyInfo = { VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO };
 	{
-		assemblyInfo.primitiveRestartEnable = VK_FALSE;
 		assemblyInfo.topology = vulkan::primitiveTopology(primitiveType());
 	}
 	
@@ -140,7 +136,6 @@ void VulkanPipelineState::build()
 		info.pDynamicState = &dynamicState;
 		info.pViewportState = &viewportState;
 		info.layout = _private->nativePipeline.layout;
-		info.renderPass = pass->nativeRenderPass().renderPass;
 		info.pStages = prog->shaderModules().stageCreateInfo;
 		info.stageCount = 2;
 	}
