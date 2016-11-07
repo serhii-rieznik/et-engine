@@ -448,6 +448,18 @@
     <ClInclude Include="..\..\include\et\rendering\sharedvariables.h">
       <Filter>Source\rendering</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\sharedvariables.cpp">
+      <Filter>Source\rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\constbuffer.cpp">
+      <Filter>Source\rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\rendering.cpp">
+      <Filter>Source\rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\shadersource.cpp">
+      <Filter>Source\rendering</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\et\sound\openal.h">
@@ -936,17 +948,5 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="et_info.cpp" />
-    <ClCompile Include="..\..\include\et\rendering\constbuffer.cpp">
-      <Filter>Source\rendering</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\include\et\rendering\rendering.cpp">
-      <Filter>Source\rendering</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\include\et\rendering\shadersource.cpp">
-      <Filter>Source\rendering</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\include\et\rendering\sharedvariables.cpp">
-      <Filter>Source\rendering</Filter>
-    </ClCompile>
   </ItemGroup>
 </Project>
