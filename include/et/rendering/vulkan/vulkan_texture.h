@@ -11,6 +11,7 @@
 
 namespace et
 {
+class VulkanNativeTexture;
 class VulkanTexturePrivate;
 class VulkanTexture : public Texture
 {
@@ -22,6 +23,8 @@ public:
 	~VulkanTexture();
 
 	void setImageData(const BinaryDataStorage&) override;
+
+	const VulkanNativeTexture& nativeTexture() const;
 
 private:
 	ET_DECLARE_PIMPL(VulkanTexture, 64);

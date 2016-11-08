@@ -423,25 +423,29 @@ const String& mtl::materialParameterToString(MaterialParameter p)
 	return names.at(p);
 }
 
-static const Map<MaterialTexture, String> materialTextureNames =
-{
-	{ MaterialTexture::Albedo, "albedoTexture" },
-	{ MaterialTexture::Reflectance, "reflectanceTexture" },
-	{ MaterialTexture::Roughness, "roughnessTexture" },
-	{ MaterialTexture::Emissive, "emissiveTexture" },
-	{ MaterialTexture::Opacity, "opacityTexture" },
-	{ MaterialTexture::Normal, "normalTexture" },
-};
+const Map<MaterialTexture, String>& materialTextureNames()
+{ 
+	static const Map<MaterialTexture, String> localMap =
+	{
+		{ MaterialTexture::Albedo, "albedoTexture" },
+		{ MaterialTexture::Reflectance, "reflectanceTexture" },
+		{ MaterialTexture::Roughness, "roughnessTexture" },
+		{ MaterialTexture::Emissive, "emissiveTexture" },
+		{ MaterialTexture::Opacity, "opacityTexture" },
+		{ MaterialTexture::Normal, "normalTexture" },
+	};
+	return localMap;
+}
 
 const String& mtl::materialTextureToString(MaterialTexture t)
 {
 	ET_ASSERT(t < MaterialTexture::Count);
-	return materialTextureNames.at(t);
+	return materialTextureNames().at(t);
 }
 
 MaterialTexture mtl::stringToMaterialTexture(const String& name)
 {
-	for (const auto& ts : materialTextureNames)
+	for (const auto& ts : materialTextureNames())
 	{
 		if (ts.second == name)
 			return ts.first;

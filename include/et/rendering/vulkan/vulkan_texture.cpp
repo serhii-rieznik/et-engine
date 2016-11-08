@@ -60,17 +60,19 @@ VulkanTexture::VulkanTexture(VulkanState& vulkan, TextureDescription::Pointer de
 	imageViewInfo.subresourceRange = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 };
 	VULKAN_CALL(vkCreateImageView(vulkan.device, &imageViewInfo, nullptr, &_private->texture.imageView));
 
+	if (desc->data.size() > 0)
+	{
+		setImageData(desc->data);
+	}
+
+	/*
 	VkSamplerCreateInfo samplerInfo = { VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO };
 	samplerInfo.magFilter = VK_FILTER_LINEAR;
 	samplerInfo.minFilter = VK_FILTER_LINEAR;
 	samplerInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
 	samplerInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
 	VULKAN_CALL(vkCreateSampler(vulkan.device, &samplerInfo, nullptr, &_private->texture.sampler));
-
-	if (desc->data.size() > 0)
-	{
-		setImageData(desc->data);
-	}
+	*/
 }
 
 VulkanTexture::~VulkanTexture()
@@ -116,7 +118,13 @@ void VulkanTexture::setImageData(const BinaryDataStorage& data)
 	submitInfo.pCommandBuffers = &_private->vulkan.serviceCommandBuffer;
 	VULKAN_CALL(vkQueueSubmit(_private->vulkan.queue, 1, &submitInfo, nullptr));
 	VULKAN_CALL(vkQueueWaitIdle(_private->vulkan.queue));
+
+	_private->texture.layout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 }
 
+const VulkanNativeTexture& VulkanTexture::nativeTexture() const
+{
+	return _private->texture;
+}
 
 }

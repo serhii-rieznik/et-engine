@@ -110,7 +110,8 @@ struct VulkanNativeRenderPass
 
 struct VulkanNativePipeline
 {
-	VkDescriptorSetLayout descriptorSetLayout = nullptr;
+	VkDescriptorSetLayout buffersDescriptorSetLayout = nullptr;
+	VkDescriptorSetLayout texturesDescriptorSetLayout = nullptr;
 	VkPipelineLayout layout = nullptr;
 	VkPipeline pipeline = nullptr;
 };
@@ -119,9 +120,9 @@ struct VulkanNativeTexture
 {
 	VkImage image = nullptr;
 	VkImageView imageView = nullptr;
-	VkSampler sampler = nullptr;
 	VkDeviceMemory memory = nullptr;
 	VkMemoryRequirements memoryRequirements { };
+	VkImageLayout layout = VK_IMAGE_LAYOUT_UNDEFINED;
 };
 
 struct VulkanNativeSampler
