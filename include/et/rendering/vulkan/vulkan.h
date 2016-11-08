@@ -108,12 +108,20 @@ struct VulkanNativeRenderPass
 	VkRect2D scissor { };
 };
 
+enum DescriptorSetClass : uint32_t
+{
+	Buffers,
+	Textures,
+	Count
+};
+
 struct VulkanNativePipeline
 {
-	VkDescriptorSetLayout buffersDescriptorSetLayout = nullptr;
-	VkDescriptorSetLayout texturesDescriptorSetLayout = nullptr;
-	VkPipelineLayout layout = nullptr;
 	VkPipeline pipeline = nullptr;
+	VkPipelineLayout layout = nullptr;
+	VkDescriptorPool descriptprPool = nullptr;
+	VkDescriptorSetLayout descriptorSetLayouts[DescriptorSetClass::Count] { };
+	VkDescriptorSet descriptorSets[DescriptorSetClass::Count] { };
 };
 
 struct VulkanNativeTexture

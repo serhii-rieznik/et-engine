@@ -19,8 +19,7 @@
 
 namespace et
 {
-
-class VulkanPipelineStatePrivate
+class VulkanPipelineStatePrivate : public VulkanNativePipeline
 {
 public:
 	VulkanPipelineStatePrivate(VulkanRenderer* r, VulkanState& v) :
@@ -36,20 +35,14 @@ public:
 
 	VulkanRenderer* renderer = nullptr;
 	VulkanState& vulkan;
-	VulkanNativePipeline nativePipeline;
 
-	VkDescriptorPool descriptprPool = nullptr;
 	Vector<VkWriteDescriptorSet> writeDescriptorSets;
 	Vector<VkDescriptorBufferInfo> bufferInfoPool;
 	Vector<VkDescriptorImageInfo> textureInfoPool;
-	VkDescriptorSet descriptorsSet[2] { };
 
 	uint32_t objectVariablesIndex = InvalidIndex;
 	uint32_t materialVariablesIndex = InvalidIndex;
 	uint32_t passVariablesIndex = InvalidIndex;
-	uint32_t buffersSetIndex = InvalidIndex;
-	uint32_t texturesSetIndex = InvalidIndex;
-	uint32_t descriptorSetCount = 0;
 };
 
 VulkanPipelineState::VulkanPipelineState(VulkanRenderer* renderer, VulkanState& vulkan)
@@ -59,27 +52,18 @@ VulkanPipelineState::VulkanPipelineState(VulkanRenderer* renderer, VulkanState& 
 
 VulkanPipelineState::~VulkanPipelineState()
 {
-	vkDestroyPipeline(_private->vulkan.device, _private->nativePipeline.pipeline, nullptr);
-	vkDestroyPipelineLayout(_private->vulkan.device, _private->nativePipeline.layout, nullptr);
-	
-	if (_private->nativePipeline.buffersDescriptorSetLayout != nullptr)
-	{
-		vkDestroyDescriptorSetLayout(_private->vulkan.device, _private->nativePipeline.buffersDescriptorSetLayout, nullptr);
-	}
-	
-	if (_private->nativePipeline.texturesDescriptorSetLayout != nullptr)
-	{
-		vkDestroyDescriptorSetLayout(_private->vulkan.device, _private->nativePipeline.texturesDescriptorSetLayout, nullptr);
-	}
-
-	vkFreeDescriptorSets(_private->vulkan.device, _private->descriptprPool, _private->descriptorSetCount, _private->descriptorsSet);
+	vkDestroyPipeline(_private->vulkan.device, _private->pipeline, nullptr);
+	vkDestroyPipelineLayout(_private->vulkan.device, _private->layout, nullptr);
+	vkDestroyDescriptorSetLayout(_private->vulkan.device, _private->descriptorSetLayouts[DescriptorSetClass::Buffers], nullptr);
+	vkDestroyDescriptorSetLayout(_private->vulkan.device, _private->descriptorSetLayouts[DescriptorSetClass::Textures], nullptr);
+	vkFreeDescriptorSets(_private->vulkan.device, _private->descriptprPool, DescriptorSetClass::Count, _private->descriptorSets);
 	vkDestroyDescriptorPool(_private->vulkan.device, _private->descriptprPool, nullptr);
 	ET_PIMPL_FINALIZE(VulkanPipelineState);
 }
 
 const VulkanNativePipeline& VulkanPipelineState::nativePipeline() const
 {
-	return _private->nativePipeline;
+	return (*_private);
 }
 
 void VulkanPipelineState::build()
@@ -151,13 +135,13 @@ void VulkanPipelineState::build()
 		info.pVertexInputState = &vertexInfo;
 		info.pDynamicState = &dynamicState;
 		info.pViewportState = &viewportState;
-		info.layout = _private->nativePipeline.layout;
+		info.layout = _private->layout;
 		info.pStages = prog->shaderModules().stageCreateInfo;
 		info.renderPass = VulkanRenderPass::Pointer(renderPass())->nativeRenderPass().renderPass;
 		info.stageCount = 2;
 	}
 	VULKAN_CALL(vkCreateGraphicsPipelines(_private->vulkan.device, _private->vulkan.pipelineCache, 1, &info,
-		nullptr, &_private->nativePipeline.pipeline));
+		nullptr, &_private->pipeline));
 }
 
 void VulkanPipelineState::bind(VulkanNativeRenderPass& pass, MaterialInstance::Pointer& material)
@@ -209,6 +193,7 @@ void VulkanPipelineState::bind(VulkanNativeRenderPass& pass, MaterialInstance::P
 				_private->textureInfoPool[texInfoIndex].imageLayout = texture->nativeTexture().layout;
 				_private->textureInfoPool[texInfoIndex].imageView = texture->nativeTexture().imageView;
 				_private->textureInfoPool[texInfoIndex].sampler = sampler->nativeSampler().sampler;
+				wd.pImageInfo = _private->textureInfoPool.data() + texInfoIndex;
 				++texInfoIndex;
 			}
 		}
@@ -217,9 +202,9 @@ void VulkanPipelineState::bind(VulkanNativeRenderPass& pass, MaterialInstance::P
 			_private->writeDescriptorSets.data(), 0, nullptr);
 	}
 
-	vkCmdBindPipeline(pass.commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _private->nativePipeline.pipeline);
-	vkCmdBindDescriptorSets(pass.commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _private->nativePipeline.layout, 
-		0, _private->descriptorSetCount, _private->descriptorsSet, 0, nullptr);
+	vkCmdBindPipeline(pass.commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _private->pipeline);
+	vkCmdBindDescriptorSets(pass.commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _private->layout, 
+		0, DescriptorSetClass::Count, _private->descriptorSets, 0, nullptr);
 
 	vkCmdSetScissor(pass.commandBuffer, 0, 1, &pass.scissor);
 	vkCmdSetViewport(pass.commandBuffer, 0, 1, &pass.viewport);
@@ -325,43 +310,22 @@ void VulkanPipelineStatePrivate::generatePipelineLayout(const PipelineState::Ref
 	for (const auto& tex : reflection.fragmentTextures)
 		addUniform(tex.second, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER);
 
-	descriptorSetCount = 0;
-	Vector<VkDescriptorSetLayout> setLayouts;
-	setLayouts.reserve(2);
-	
-	if (bufferBindings.size() > 0)
 	{
-		buffersSetIndex = static_cast<uint32_t>(setLayouts.size());
-
 		VkDescriptorSetLayoutCreateInfo buffersSetInfo = { VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO };
 		buffersSetInfo.bindingCount = static_cast<uint32_t>(bufferBindings.size());
 		buffersSetInfo.pBindings = bufferBindings.data();
-		VULKAN_CALL(vkCreateDescriptorSetLayout(vulkan.device, &buffersSetInfo, nullptr, &nativePipeline.buffersDescriptorSetLayout));
-
-		setLayouts.emplace_back(nativePipeline.buffersDescriptorSetLayout);
-		++descriptorSetCount;
-	}
-	
-	if (textureBindings.size() > 0)
-	{
-		texturesSetIndex = static_cast<uint32_t>(setLayouts.size());
+		VULKAN_CALL(vkCreateDescriptorSetLayout(vulkan.device, &buffersSetInfo, nullptr, descriptorSetLayouts + DescriptorSetClass::Buffers));
 
 		VkDescriptorSetLayoutCreateInfo texturesSetInfo = { VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO };
 		texturesSetInfo.bindingCount = static_cast<uint32_t>(textureBindings.size());
 		texturesSetInfo.pBindings = textureBindings.data();
-		VULKAN_CALL(vkCreateDescriptorSetLayout(vulkan.device, &texturesSetInfo, nullptr, &nativePipeline.texturesDescriptorSetLayout));
-		
-		setLayouts.emplace_back(nativePipeline.texturesDescriptorSetLayout);
-		++descriptorSetCount;
+		VULKAN_CALL(vkCreateDescriptorSetLayout(vulkan.device, &texturesSetInfo, nullptr, descriptorSetLayouts + DescriptorSetClass::Textures));
 	}
 
 	VkPipelineLayoutCreateInfo layoutInfo = { VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO };
-	layoutInfo.pSetLayouts = setLayouts.data();
-	layoutInfo.setLayoutCount = static_cast<uint32_t>(setLayouts.size());
-	VULKAN_CALL(vkCreatePipelineLayout(vulkan.device, &layoutInfo, nullptr, &nativePipeline.layout));
-
-	if (setLayouts.empty())
-		return;
+	layoutInfo.pSetLayouts = descriptorSetLayouts;
+	layoutInfo.setLayoutCount = DescriptorSetClass::Count;
+	VULKAN_CALL(vkCreatePipelineLayout(vulkan.device, &layoutInfo, nullptr, &layout));
 	
 	VkDescriptorPoolSize poolSizes[2] = {
 		{ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, static_cast<uint32_t>(bufferBindings.size()) },
@@ -369,23 +333,23 @@ void VulkanPipelineStatePrivate::generatePipelineLayout(const PipelineState::Ref
 	};
 
 	VkDescriptorPoolCreateInfo poolInfo = { VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO };
-	poolInfo.maxSets = 2;
+	poolInfo.maxSets = DescriptorSetClass::Count;
 	poolInfo.poolSizeCount = sizeof(poolSizes) / sizeof(poolSizes[0]);
 	poolInfo.pPoolSizes = poolSizes;
 	VULKAN_CALL(vkCreateDescriptorPool(vulkan.device, &poolInfo, nullptr, &descriptprPool));
 
 	VkDescriptorSetAllocateInfo setInfo = { VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO };
-	setInfo.descriptorSetCount = static_cast<uint32_t>(setLayouts.size());
-	setInfo.pSetLayouts = setLayouts.data();
+	setInfo.descriptorSetCount = DescriptorSetClass::Count;
+	setInfo.pSetLayouts = descriptorSetLayouts;
 	setInfo.descriptorPool = descriptprPool;
-	VULKAN_CALL(vkAllocateDescriptorSets(vulkan.device, &setInfo, descriptorsSet));
+	VULKAN_CALL(vkAllocateDescriptorSets(vulkan.device, &setInfo, descriptorSets));
 
 	for (auto& wd : writeDescriptorSets)
 	{
 		if (wd.descriptorType == VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER)
-			wd.dstSet = descriptorsSet[buffersSetIndex];
+			wd.dstSet = descriptorSets[DescriptorSetClass::Buffers];
 		else if (wd.descriptorType == VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER)
-			wd.dstSet = descriptorsSet[texturesSetIndex];
+			wd.dstSet = descriptorSets[DescriptorSetClass::Textures];
 	}
 }
 
