@@ -7,6 +7,8 @@
 
 #include <et-ext/rt/bsdf.h>
 
+#define ET_RT_USE_COSINE_WEIGHTED_SAMPLING 0
+
 et::rt::BSDFSample::BSDFSample(const et::rt::float4& _wi, const et::rt::float4& _n, const Material& mat,
 	const et::rt::float4& uv, Direction _d) : Wi(_wi), n(_n), IdotN(_wi.dot(_n)), alpha(mat.roughness), dir(_d)
 {
@@ -15,7 +17,11 @@ et::rt::BSDFSample::BSDFSample(const et::rt::float4& _wi, const et::rt::float4& 
 		case Material::Class::Diffuse:
 		{
 			cls = BSDFSample::Class::Diffuse;
+#		if (ET_RT_USE_COSINE_WEIGHTED_SAMPLING)
 			Wo = randomVectorOnHemisphere(n, et::rt::cosineDistribution);
+#		else
+			Wo = randomVectorOnHemisphere(n, et::rt::uniformDistribution);
+#		endif
 			color = mat.diffuse;
 			break;
 		}
@@ -40,7 +46,7 @@ et::rt::BSDFSample::BSDFSample(const et::rt::float4& _wi, const et::rt::float4& 
 				}
 				else
 				{
-					n = -n;
+					n *= -1.0f;
 					IdotN = -IdotN;
 				}
 
@@ -215,7 +221,13 @@ float et::rt::BSDFSample::bsdf()
 float et::rt::BSDFSample::pdf()
 {
 	if (cls == Class::Diffuse)
+	{
+#	if (ET_RT_USE_COSINE_WEIGHTED_SAMPLING)
 		return cosTheta / PI;
+#	else
+		return 1.0f / DOUBLE_PI;
+#	endif
+	}
 
 	if (cls == Class::Reflection)
 	{
@@ -256,7 +268,13 @@ et::rt::float4 et::rt::BSDFSample::evaluate()
 et::rt::float4 et::rt::BSDFSample::combinedEvaluate()
 {
 	if (cls == Class::Diffuse)
+	{
+#	if (ET_RT_USE_COSINE_WEIGHTED_SAMPLING)
 		return color;
+#	else
+		return color * (2.0f * cosTheta);
+#	endif
+	}
 
 	if (cls == Class::Reflection)
 	{

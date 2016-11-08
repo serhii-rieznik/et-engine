@@ -20,7 +20,7 @@ namespace et
 
 		using float_type = float;
 		using float3 = vector3<float_type>;
-		using float4 = vec4;//simd;
+		using float4 = vec4simd;
 		using index = uint_fast32_t;
 
 		enum : index
@@ -252,7 +252,7 @@ namespace et
 
 		inline float ggxDistribution(float Xi, float alpha)
 		{
-			return sqrt((1.0f - Xi) / ((sqr(alpha) - 1.0f) * Xi + 1.0f));
+			return std::sqrt((1.0f - Xi) / ((sqr(alpha) - 1.0f) * Xi + 1.0f));
 		}
 
 		template <typename F, typename ... Arg>

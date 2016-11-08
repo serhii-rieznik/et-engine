@@ -21,7 +21,7 @@ layout(location = 0) out VSOutput vsOut;
 
 void main()
 {
-	vsOut.texCoord0 = texCoord0;
+	vsOut.texCoord0 = vec2(texCoord0.x, 1.0 - texCoord0.y);
 
 #if (TRANSFORM_INPUT_POSITION)
 	gl_Position = passVariables.viewProjection * objectVariables.worldTransform * vec4(position, 1.0);

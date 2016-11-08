@@ -345,7 +345,7 @@ void RaytracePrivate::buildMaterialAndTriangles(s3d::Scene::Pointer scene)
 	rt::KDTree::TraverseResult centerHit = kdTree.traverse(centerRay);
 	if (centerHit.triangleIndex != InvalidIndex)
 	{
-		focalDistance = (centerHit.intersectionPoint - rt::float4(centerRay.origin)).length();
+		focalDistance = (centerHit.intersectionPoint - rt::float4(centerRay.origin, 0.0f)).length();
 	}
 	focalDistance += options.focalDistanceCorrection;
 
@@ -464,7 +464,7 @@ void RaytracePrivate::visualizeDistributionThreadFunction(uint32_t index)
 		testDirection.normalize();
 	}
 
-	auto distribution = rt::ggxDistribution;
+	auto distribution = rt::cosineDistribution;
 	float alpha = 0.1f;
 
 	if (index > 0)
