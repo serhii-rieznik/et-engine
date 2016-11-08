@@ -9,6 +9,7 @@
 
 #include <et/geometry/vector4-simd.h>
 #include <et/scene3d/scene3d.h>
+#include <random>
 
 namespace et
 {
@@ -208,19 +209,11 @@ namespace et
 
 		inline float_type fastRandomFloat()
 		{
-			static uint32_t seed = static_cast<uint32_t>(time(nullptr));
-			union
-			{
-				uint32_t u;
-				float_type f;
-			} wrap = { ((seed *= 16807) >> 9) | 0x3f800000 };
-			return wrap.f - 1.0f;
-		}
-
-		inline index floatIsNegative(float& a)
-		{
-			return reinterpret_cast<index&>(a) >> 31;
-		}
+			static std::random_device rd;
+			static std::mt19937 gen(rd());
+			static std::uniform_real_distribution<float> dis(0.0f, 1.0f);
+			return dis(gen);
+	    }
 
 		inline float4 perpendicularVector(const float4& normal)
 		{
@@ -273,7 +266,7 @@ namespace et
 			return v - two * n * v.dotVector(n);
 		}
 
-        bool rayToBoundingBox(const Ray& r, const BoundingBox& box, float& tNear, float& tFar);
+        bool rayToBoundingBox(Ray r, BoundingBox box, float& tNear, float& tFar);
 
         inline float fresnelShlickApproximation(float cosTheta, float eta)
         {

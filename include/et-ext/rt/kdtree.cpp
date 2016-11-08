@@ -187,7 +187,7 @@ void KDTree::splitNodeUsingSortedArray(size_t nodeIndex, size_t depth)
 	_maxBuildDepth = std::max(_maxBuildDepth, depth);
 	const auto& bbox = _boundingBoxes.at(nodeIndex);
 	
-	auto estimateCostAtSplit = [&bbox, nodeIndex, this](float_type splitPlane, size_t leftTriangles,
+	auto estimateCostAtSplit = [bbox, nodeIndex, this](float_type splitPlane, size_t leftTriangles,
 		size_t rightTriangles, int axis) -> float
 	{
 		ET_ASSERT((leftTriangles + rightTriangles) == _nodes.at(nodeIndex).numIndexes());

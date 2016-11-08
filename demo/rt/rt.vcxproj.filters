@@ -5,12 +5,6 @@
       <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
       <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
-    <Filter Include="config">
-      <UniqueIdentifier>{34b68e15-c575-4ef1-892d-0dad6d0890d3}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="media">
-      <UniqueIdentifier>{cf4a634a-e1c2-49bf-8d56-134eae09b770}</UniqueIdentifier>
-    </Filter>
     <Filter Include="rt">
       <UniqueIdentifier>{6773a314-c189-4362-a43c-2c96c9fe730c}</UniqueIdentifier>
     </Filter>
@@ -66,52 +60,5 @@
     <ClInclude Include="..\..\include\et-ext\rt\bsdf.cpp">
       <Filter>rt</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="config\config.json">
-      <Filter>config</Filter>
-    </None>
-    <None Include="..\media\bunny.mtl">
-      <Filter>media</Filter>
-    </None>
-    <None Include="..\media\cornellbox.mtl">
-      <Filter>media</Filter>
-    </None>
-    <None Include="..\media\CornellBox-Sphere.mtl">
-      <Filter>media</Filter>
-    </None>
-    <None Include="..\media\material-test.mtl">
-      <Filter>media</Filter>
-    </None>
-    <None Include="..\media\shaderart.mtl">
-      <Filter>media</Filter>
-    </None>
-    <None Include="..\media\cube.mtl">
-      <Filter>media</Filter>
-    </None>
-    <None Include="..\media\test.mtl">
-      <Filter>media</Filter>
-    </None>
-    <None Include="..\media\bunny.obj">
-      <Filter>media</Filter>
-    </None>
-    <None Include="..\media\cornellbox.obj">
-      <Filter>media</Filter>
-    </None>
-    <None Include="..\media\CornellBox-Sphere.obj">
-      <Filter>media</Filter>
-    </None>
-    <None Include="..\media\cube.obj">
-      <Filter>media</Filter>
-    </None>
-    <None Include="..\media\material-test.obj">
-      <Filter>media</Filter>
-    </None>
-    <None Include="..\media\shaderart.obj">
-      <Filter>media</Filter>
-    </None>
-    <None Include="..\media\test.obj">
-      <Filter>media</Filter>
-    </None>
   </ItemGroup>
 </Project>

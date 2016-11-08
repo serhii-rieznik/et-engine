@@ -81,7 +81,7 @@ float4 computeRefractionVector(const float4& Wi, const float4& n, float_type eta
 #define SIGN_MASK 0x80000000
 #define SIGN_SHIFT 29
 
-bool rayToBoundingBox(const Ray& r, const BoundingBox& box, float& tNear, float& tFar)
+bool rayToBoundingBox(Ray r, BoundingBox box, float& tNear, float& tFar)
 {
 	ET_ALIGNED(16) union { float a; uint32_t i; } diff;
 	ET_ALIGNED(16) union { float f[4]; uint32_t i[4]; } dir;

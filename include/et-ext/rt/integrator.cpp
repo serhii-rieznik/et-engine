@@ -12,6 +12,8 @@ namespace et
 namespace rt
 {
 
+#define ET_RT_USE_RUSSIAN_ROULETTE 1
+
 /*
  * PathTraceIntegrator
  */
@@ -35,13 +37,14 @@ float4 PathTraceIntegrator::gather(const Ray& inRay, uint32_t maxPathLength, uin
 		}
 
 		const rt::Triangle& tri = tree.triangleAtIndex(traverse.triangleIndex);
+
 		const rt::Material& mat = materials[tri.materialIndex];
+		result += throughput * mat.emissive;
+
 		float4 nrm = tri.interpolatedNormal(traverse.intersectionPointBarycentric);
 		float4 uv0 = tri.interpolatedTexCoord0(traverse.intersectionPointBarycentric);
 
 		BSDFSample sample(currentRay.direction, nrm, mat, uv0, et::rt::BSDFSample::Direction::Backward);
-
-		result += throughput * mat.emissive;
 		throughput *= sample.combinedEvaluate();
 
 		ET_ALIGNED(16) float local[4] = { };
@@ -52,27 +55,25 @@ float4 PathTraceIntegrator::gather(const Ray& inRay, uint32_t maxPathLength, uin
 			break;
 		// */
 
-		//
-		if (pathLength > 5)
+#	if (ET_RT_USE_RUSSIAN_ROULETTE)
+		if (pathLength > 16)
 		{
 			float q = std::min(maxComponent, 0.95f);
 			if (rt::fastRandomFloat() >= q)
 				break;
 			throughput /= q;
 		}
-		// */
+#	endif
 
 		currentRay.origin = traverse.intersectionPoint + sample.Wo * Constants::epsilon;
 		currentRay.direction = sample.Wo;
 	}
 
 	static uint32_t aMax = 0;
-	static uint32_t aMin = 100000000;
-	if ((pathLength < aMin) || (pathLength > aMax))
+	if (pathLength > aMax)
 	{
-		aMin = std::min(aMin, pathLength);
 		aMax = std::max(aMax, pathLength);
-		log::info("Min/Max path length: %llu / %llu", static_cast<uint64_t>(aMin), static_cast<uint64_t>(aMax));
+		log::info("Max path length: %llu / %llu", static_cast<uint64_t>(aMax));
 	}
 
     return result;

@@ -6,35 +6,35 @@
 	</integrator>
 
 	<bsdf type="diffuse" id="leftWall_material">
-		<rgb name="reflectance" value="1 0.0100228 0.0100228"/>
+		<srgb name="reflectance" value="1 0 0"/>
 	</bsdf>
 
 	<bsdf type="diffuse" id="rightWall_material">
-		<rgb name="reflectance" value="0.0100228 1 0.0100228"/>
+		<srgb name="reflectance" value="0 1 0"/>
 	</bsdf>
 
 	<bsdf type="diffuse" id="floor_material">
-		<rgb name="reflectance" value="1 1 1"/>
+		<srgb name="reflectance" value="1 1 1"/>
 	</bsdf>
 
 	<bsdf type="diffuse" id="ceiling_material">
-		<rgb name="reflectance" value="1 1 1"/>
+		<srgb name="reflectance" value="1 1 1"/>
 	</bsdf>
 
 	<bsdf type="diffuse" id="backWall_material">
-		<rgb name="reflectance" value="1 0 1"/>
+		<srgb name="reflectance" value="1 0 1"/>
 	</bsdf>
 
 	<bsdf type="diffuse" id="frontWall_material">
-		<rgb name="reflectance" value="1 1 1"/>
+		<srgb name="reflectance" value="1 1 1"/>
 	</bsdf>
 
 	<bsdf type="diffuse" id="shortBox_material">
-		<rgb name="reflectance" value="1 1 1"/>
+		<srgb name="reflectance" value="1 1 1"/>
 	</bsdf>
 
 	<bsdf type="diffuse" id="tallBox_material">
-		<rgb name="reflectance" value="1 1 1"/>
+		<srgb name="reflectance" value="1 1 1"/>
 	</bsdf>
 
 	<shape type="serialized" id="ceiling Mesh_mesh">
@@ -98,7 +98,7 @@
 	<sensor type="perspective">
 		<float name="farClip" value="128"/>
 		<float name="focusDistance" value="3.41421"/>
-		<float name="fov" value="45"/>
+		<float name="fov" value="57.8048"/>
 		<string name="fovAxis" value="x"/>
 		<float name="nearClip" value="0.1"/>
 		<transform name="toWorld">
@@ -111,8 +111,8 @@
 		</sampler>
 
 		<film type="hdrfilm">
-			<integer name="height" value="576"/>
-			<integer name="width" value="768"/>
+			<integer name="height" value="691"/>
+			<integer name="width" value="1228"/>
 
 			<rfilter type="box"/>
 		</film>

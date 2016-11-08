@@ -81,12 +81,13 @@ namespace rt
 		void distributeTrianglesToChildren(size_t nodeIndex);
         
 	private:
+        BoundingBox _sceneBoundingBox;
+
 		Vector<Node> _nodes;
         Vector<index> _indices;
         Vector<IntersectionData> _intersectionData;
 		Vector<BoundingBox> _boundingBoxes;
         
-        BoundingBox _sceneBoundingBox;
 		TriangleList _triangles;
 		size_t _maxDepth = 0;
 		size_t _maxBuildDepth = 0;
