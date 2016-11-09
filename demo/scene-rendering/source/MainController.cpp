@@ -6,8 +6,13 @@
 
 void demo::MainController::setApplicationParameters(et::ApplicationParameters& params)
 {
-	params.renderingAPI = et::RenderingAPI::Metal;
-	params.context.size = et::vec2i(1024, 640);
+#if (ET_PLATFORM_WIN)
+	params.renderingAPI = et::RenderingAPI::Vulkan;
+#elif (ET_PLATFORM_MAC)
+    params.renderingAPI = et::RenderingAPI::Metal;
+#endif
+	
+    params.context.size = et::vec2i(1024, 640);
 }
 
 void demo::MainController::setRenderContextParameters(et::RenderContextParameters& params)
@@ -18,14 +23,10 @@ void demo::MainController::setRenderContextParameters(et::RenderContextParameter
 void demo::MainController::applicationDidLoad(et::RenderContext* rc)
 {
 #if (ET_PLATFORM_WIN)
-	application().pushRelativeSearchPath("..");
-	application().pushRelativeSearchPath("..\\..");
-	application().pushRelativeSearchPath("..\\..\\..");
-	application().pushSearchPath("Q:\\SDK\\Models\\");
-	application().pushSearchPath("Q:\\SDK\\");
-#elif (ET_PLATFORM_MAC)
-	et::application().pushSearchPath("/Volumes/Development/SDK/");
-	et::application().pushSearchPath("/Volumes/Development/SDK/Models/");
+    et::application().pushSearchPath("..");
+    et::application().pushSearchPath("..\\..");
+    et::application().pushSearchPath("..\\..\\..");
+    et::application().pushSearchPath("..\\..\\..\\..");
 #endif
 
 	_loader.init(rc);

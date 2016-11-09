@@ -21,7 +21,8 @@ namespace et
 
 class RenderContextPrivate
 {
-
+public:
+    LRESULT mainWindowProc(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam);
 };
 
 RenderContext::RenderContext(const RenderContextParameters& inParams, Application* app) : 
@@ -35,6 +36,9 @@ RenderContext::RenderContext(const RenderContextParameters& inParams, Applicatio
 	}
 
 	application().initContext();
+
+    HWND mainWindow = reinterpret_cast<HWND>(application().context().objects[0]);
+    SetWindowLongPtr(mainWindow, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(_private));
 
 	if (app->parameters().renderingAPI == RenderingAPI::Vulkan)
 	{
@@ -50,15 +54,14 @@ RenderContext::RenderContext(const RenderContextParameters& inParams, Applicatio
 	}
 	_renderer->init(inParams);
 
-	HWND wnd = reinterpret_cast<HWND>(application().context().objects[0]);
-	RECT clientRect = { };
-	GetClientRect(wnd, &clientRect);
+    RECT clientRect = { };
+	GetClientRect(mainWindow, &clientRect);
 	_size.x = clientRect.right - clientRect.left;
 	_size.y = clientRect.bottom - clientRect.top;
 
-	ShowWindow(wnd, SW_SHOW);
-	SetForegroundWindow(wnd);
-	SetFocus(wnd);
+	ShowWindow(mainWindow, SW_SHOW);
+	SetForegroundWindow(mainWindow);
+	SetFocus(mainWindow);
 
 	if (app->parameters().shouldPreserveRenderContext)
 	{
@@ -137,6 +140,32 @@ bool RenderContext::pushAndActivateRenderingContext()
 
 void RenderContext::popRenderingContext()
 {
+
+}
+
+LRESULT RenderContextPrivate::mainWindowProc(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+    switch (msg)
+    {
+        case WM_CLOSE:
+        case WM_QUIT:
+        {
+            application().quit(0);
+            return 0;
+        }
+    }
+    return DefWindowProc(wnd, msg, wParam, lParam);
+}
+
+/*
+* Windows procedure
+*/
+LRESULT WINAPI mainWindowProc(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+    LONG_PTR context = GetWindowLongPtr(wnd, GWLP_USERDATA);
+    return (context != 0) ? 
+        reinterpret_cast<RenderContextPrivate*>(context)->mainWindowProc(wnd, msg, wParam, lParam) : 
+        DefWindowProc(wnd, msg, wParam, lParam);
 }
 
 }

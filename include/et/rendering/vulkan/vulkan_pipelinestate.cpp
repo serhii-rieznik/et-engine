@@ -333,6 +333,7 @@ void VulkanPipelineStatePrivate::generatePipelineLayout(const PipelineState::Ref
 	};
 
 	VkDescriptorPoolCreateInfo poolInfo = { VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO };
+	poolInfo.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
 	poolInfo.maxSets = DescriptorSetClass::Count;
 	poolInfo.poolSizeCount = sizeof(poolSizes) / sizeof(poolSizes[0]);
 	poolInfo.pPoolSizes = poolSizes;

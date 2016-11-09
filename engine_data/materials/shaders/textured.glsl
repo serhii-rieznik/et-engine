@@ -21,7 +21,7 @@ layout(location = 0) out VSOutput vsOut;
 
 void main()
 {
-	vsOut.texCoord0 = vec2(texCoord0.x, 1.0 - texCoord0.y);
+	vsOut.texCoord0 = vec2(texCoord0.x, texCoord0.y);
 
 #if (TRANSFORM_INPUT_POSITION)
 	gl_Position = passVariables.viewProjection * objectVariables.worldTransform * vec4(position, 1.0);
@@ -38,7 +38,7 @@ layout(location = 0) out vec4 outColor0;
 
 void main()
 {
-	outColor0 = texture(albedoTexture, fsIn.texCoord0);
+	outColor0 = 0.0 * texture(albedoTexture, fsIn.texCoord0) + vec4(fsIn.texCoord0, 0.0, 1.0);
 }
 
 #else

@@ -16,6 +16,8 @@ class Camera : public Shared
 public:
 	ET_DECLARE_POINTER(Camera);
 
+	static float renderingOriginTransform;
+
 public:
 	Camera();
 

@@ -35,7 +35,8 @@ public:
 VulkanRenderer::VulkanRenderer(RenderContext* rc) 
 	: RenderInterface(rc)
 {
-	ET_PIMPL_INIT(VulkanRenderer)
+	ET_PIMPL_INIT(VulkanRenderer);
+	Camera::renderingOriginTransform = -1.0f;
 }
 
 VulkanRenderer::~VulkanRenderer()

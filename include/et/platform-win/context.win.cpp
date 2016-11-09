@@ -17,10 +17,7 @@ namespace et
 
 const wchar_t* windowClassName = L"et::window";
 
-LRESULT WINAPI defaultWindowProc(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam)
-{
-	return DefWindowProc(wnd, msg, wParam, lParam);
-}
+extern LRESULT WINAPI mainWindowProc(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 void registerWindowClass()
 {
@@ -32,7 +29,7 @@ void registerWindowClass()
 	WNDCLASSEX wndClass = { };
 	wndClass.cbSize = sizeof(wndClass);
 	wndClass.style = CS_OWNDC;
-	wndClass.lpfnWndProc = defaultWindowProc;
+	wndClass.lpfnWndProc = mainWindowProc;
 	wndClass.hInstance = GetModuleHandle(nullptr);
 	wndClass.hCursor = LoadCursor(nullptr, IDC_ARROW);
 	wndClass.lpszClassName = windowClassName;

@@ -157,6 +157,7 @@ void Application::requestUserAttention()
 	FlashWindowEx(&fi);
 }
 
+
 /*
  * Service functions
  */

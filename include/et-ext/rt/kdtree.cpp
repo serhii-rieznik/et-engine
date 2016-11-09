@@ -351,21 +351,22 @@ KDTree::TraverseResult KDTree::traverse(const Ray& ray)
 	{
 		while (localNode.axis <= MaxAxisIndex)
 		{
-			int side = floatIsNegative(direction[localNode.axis]);
+            union { float f; int i; } side = { direction[localNode.axis] };
+            side.i = (side.i & 0x80000000) >> 31;
 			float_type tSplit = localNode.distance * direction[localNode.axis] - originDivDirection[localNode.axis];
             
 			if (tSplit < tNear)
 			{
-				localNode = _nodes[localNode.children[1 - side]];
+				localNode = _nodes[localNode.children[1 - side.i]];
 			}
 			else if (tSplit > tFar)
 			{
-				localNode = _nodes[localNode.children[side]];
+				localNode = _nodes[localNode.children[side.i]];
 			}
 			else
 			{
-				traverseStack.emplace(localNode.children[1 - side], tFar);
-				localNode = _nodes[localNode.children[side]];
+				traverseStack.emplace(localNode.children[1 - side.i], tFar);
+				localNode = _nodes[localNode.children[side.i]];
 				tFar = tSplit;
 			}
 		}

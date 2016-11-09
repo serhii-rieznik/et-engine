@@ -9,6 +9,8 @@
 
 using namespace et;
 
+float Camera::renderingOriginTransform = 1.0f;
+
 Camera::Camera() :
 	_viewMatrix(1.0f),
 	_inverseViewMatrix(1.0f),
@@ -49,7 +51,7 @@ const mat4& Camera::perspectiveProjection(float fov, float aspect, float zNear, 
 	float dz = _zFar - _zNear;
 
 	_projectionMatrix[0][0] = cotan / aspect;
-	_projectionMatrix[1][1] = cotan;
+	_projectionMatrix[1][1] = renderingOriginTransform * cotan;
 	_projectionMatrix[2][2] = -(_zFar + _zNear) / dz;
 	_projectionMatrix[3][3] =  0.0f;
 	_projectionMatrix[2][3] = -1.0f;

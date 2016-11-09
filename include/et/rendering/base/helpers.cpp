@@ -33,10 +33,10 @@ void init(RenderContext* rc)
 
 	auto pos = vs->accessData<DataType::Vec3>(VertexAttributeUsage::Position, 0);
 	auto tc0 = vs->accessData<DataType::Vec2>(VertexAttributeUsage::TexCoord0, 0);
-	pos[0] = vec3(-1.0f, -1.0f, 0.0f); tc0[0] = vec2(0.0f, 0.0f);
-	pos[1] = vec3( 1.0f, -1.0f, 0.0f); tc0[1] = vec2(1.0f, 0.0f);
-	pos[2] = vec3(-1.0f,  1.0f, 0.0f); tc0[2] = vec2(0.0f, 1.0f);
-	pos[3] = vec3( 1.0f,  1.0f, 0.0f); tc0[3] = vec2(1.0f, 1.0f);
+	pos[0] = vec3(-1.0f, -1.0f * Camera::renderingOriginTransform, 0.0f); tc0[0] = vec2(0.0f, 0.0f);
+	pos[1] = vec3( 1.0f, -1.0f * Camera::renderingOriginTransform, 0.0f); tc0[1] = vec2(1.0f, 0.0f);
+	pos[2] = vec3(-1.0f,  1.0f * Camera::renderingOriginTransform, 0.0f); tc0[2] = vec2(0.0f, 1.0f);
+	pos[3] = vec3( 1.0f,  1.0f * Camera::renderingOriginTransform, 0.0f); tc0[3] = vec2(1.0f, 1.0f);
 	ia->linearize(4);
 
 	auto vb = rc->renderer()->createVertexBuffer("rh_local::vb", vs, BufferDrawType::Static);
