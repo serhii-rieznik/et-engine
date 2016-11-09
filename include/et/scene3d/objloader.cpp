@@ -234,21 +234,27 @@ void OBJLoader::loadData(ObjectsCache& cache)
 			OBJFace face;
 			std::getline(inputFile, line);
 			trim(line);
+			
+			static StringList faces;
+			faces.reserve(5);
+			faces.clear();
 
-			auto faces = split(line, " ");
+			splitAndWrite(line, ' ', [](const std::string& s) {
+				faces.emplace_back(s);
+			});
 			ET_ASSERT((faces.size() > 2) && (faces.size() < 6));
 
 			for (auto inFace : faces)
 			{
-				OBJFace::VertexLink vertex;
-				vertex.fill(0);
-
-				Vector<int32_t> indexes;
+				static Vector<int32_t> indexes;
 				indexes.reserve(3);
-				splitAndWrite(inFace, '/', [&indexes](const std::string& s)
+				indexes.clear();
+
+				splitAndWrite(inFace, '/', [](const std::string& s)
 					{ indexes.push_back(strToInt(s)); });
 
 				uint32_t i = 0;
+				face.vertexLinks[face.vertexLinksCount].fill(0);
 				for (auto iValue : indexes)
 				{
 					if (iValue == std::numeric_limits<int32_t>::max())
@@ -260,27 +266,27 @@ void OBJLoader::loadData(ObjectsCache& cache)
 						if (i == 0)
 						{
 							ET_ASSERT(szValue <= _vertices.size());
-							vertex[i] = _vertices.size() - szValue;
+							face.vertexLinks[face.vertexLinksCount][i] = _vertices.size() - szValue;
 						}
 						else if (i == 1)
 						{
 							ET_ASSERT(szValue <= _texCoords.size());
-							vertex[i] = _texCoords.size() - szValue;
+							face.vertexLinks[face.vertexLinksCount][i] = _texCoords.size() - szValue;
 						}
 						else if (i == 2)
 						{
 							ET_ASSERT(szValue <= _normals.size());
-							vertex[i] = _normals.size() - szValue;
+							face.vertexLinks[face.vertexLinksCount][i] = _normals.size() - szValue;
 						}
 					}
 					else
 					{
-						vertex[i] = iValue - 1;
+						face.vertexLinks[face.vertexLinksCount][i] = iValue - 1;
 					}
 					++i;
 				}
 				
-				face.vertexLinks[face.vertexLinksCount++] = vertex;
+				++face.vertexLinksCount;
 			}
 			
 			if (_groups.empty())

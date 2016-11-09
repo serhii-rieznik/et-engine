@@ -31,7 +31,7 @@ enum : uint32_t
 	allocatedValue = 0x00000000,
 	notAllocatedValue = 0xffffffff,
 	defaultChunkSize = 16 * megabytes,
-	minimumAllocationSize = 32,
+	minimumAllocationSize = 128,
 	smallBlockSize = 60,
 	mediumBlockSize = 124,
 };
@@ -518,6 +518,11 @@ MemoryChunk::MemoryChunk(uint32_t capacity) :
 #elif (ET_PLATFORM_WIN)
 	
 	allocatedMemoryBegin = static_cast<char*>(_aligned_malloc(sizeToAllocate, minimumAllocationSize));
+	if (allocatedMemoryBegin == nullptr)
+	{
+		ET_FAIL_FMT("Failed to allocate %llu bytes (%llu requested + %llu info)", 
+			static_cast<uint64_t>(sizeToAllocate), static_cast<uint64_t>(capacity), static_cast<uint64_t>(actualDataOffset));
+	}
 	
 #else
 #

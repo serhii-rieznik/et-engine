@@ -38,7 +38,7 @@ layout(location = 0) out vec4 outColor0;
 
 void main()
 {
-	outColor0 = 0.0 * texture(albedoTexture, fsIn.texCoord0) + vec4(fsIn.texCoord0, 0.0, 1.0);
+	outColor0 = texture(albedoTexture, fsIn.texCoord0);
 }
 
 #else

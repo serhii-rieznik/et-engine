@@ -93,11 +93,11 @@ std::string& trim(std::string& str)
 	while ((pos > 0) && isWhitespaceChar(str[pos--])) 
 		++trailingWhitespace;
 
-	if (leadingWhitespace)
-		str.erase(0, leadingWhitespace);
-
 	if (trailingWhitespace)
 		str.erase(str.length() - trailingWhitespace);
+	
+	if (leadingWhitespace)
+		str.erase(0, leadingWhitespace);
 
 	return str;
 }
