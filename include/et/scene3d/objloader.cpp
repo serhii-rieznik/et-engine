@@ -839,6 +839,7 @@ void OBJLoader::processLoadedData()
 
 		if (m.invalid())
 		{
+			log::error("Unable to find material `%s`", group.material.c_str());
 			Material::Pointer microfacet = _renderer->sharedMaterialLibrary().loadDefaultMaterial(DefaultMaterial::Microfacet);
 			m = microfacet->instance();
 			m->setName("missing_material");
