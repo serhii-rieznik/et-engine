@@ -50,7 +50,7 @@ public:
 	/*
 	 * Programs
 	 */
-	Program::Pointer createProgram(const std::string& source, const std::string&) override;
+	Program::Pointer createProgram(const std::string& source) override;
 
 	/*
 	 * Pipeline state

@@ -117,6 +117,7 @@ namespace et
 	protected:
 		Reflection reflection;
 		BinaryDataStorage objectVariablesBuffer;
+        
 		void buildBuffers();
 		void printReflection();
 

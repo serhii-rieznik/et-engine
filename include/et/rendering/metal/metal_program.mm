@@ -30,10 +30,8 @@ MetalProgram::~MetalProgram()
 	ET_PIMPL_FINALIZE(MetalProgram)
 }
     
-void MetalProgram::build(const std::string& source, const std::string& shouldBeEmpty)
+void MetalProgram::build(const std::string& source)
 {
-	ET_ASSERT(shouldBeEmpty.empty());
-
 	NSError* error = nil;
 	id<MTLLibrary> lib = [_private->state.device newLibraryWithSource:[NSString stringWithUTF8String:source.c_str()] options:nil error:&error];
 
@@ -78,16 +76,4 @@ const MetalNativeProgram& MetalProgram::nativeProgram() const
     return _private->program;
 }
 
-void MetalProgram::setTransformMatrix(const mat4 &m, bool force)
-{
-}
-
-void MetalProgram::setCameraProperties(const Camera& cam)
-{
-}
-
-void MetalProgram::setDefaultLightPosition(const vec3& p, bool force)
-{
-}
-    
 }

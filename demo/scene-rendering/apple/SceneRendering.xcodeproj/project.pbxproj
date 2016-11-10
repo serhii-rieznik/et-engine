@@ -14,8 +14,6 @@
 		5C559F0D1DC662AA00E0A578 /* config in Resources */ = {isa = PBXBuildFile; fileRef = 5C559F0C1DC662AA00E0A578 /* config */; };
 		5C6587FD1DA59BBC007F8DB1 /* DemoSceneLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5C6587FB1DA59BBC007F8DB1 /* DemoSceneLoader.cpp */; };
 		6E12DA2B1CD690F6006037A5 /* libet-static-mac.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 6E12DA2A1CD686C8006037A5 /* libet-static-mac.a */; };
-		6E12DA2D1CD69147006037A5 /* libfbxsdk.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 6E12DA2C1CD69147006037A5 /* libfbxsdk.dylib */; };
-		6E12DA2E1CD691A3006037A5 /* libfbxsdk.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 6E12DA2C1CD69147006037A5 /* libfbxsdk.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		6E12DA301CD6926C006037A5 /* media in Resources */ = {isa = PBXBuildFile; fileRef = 6E12DA2F1CD6926C006037A5 /* media */; };
 		A57B42901A58DAB400C896E1 /* OpenAL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A57B428F1A58DAB400C896E1 /* OpenAL.framework */; };
 		A57B42921A58DAB800C896E1 /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A57B42911A58DAB800C896E1 /* StoreKit.framework */; };
@@ -44,7 +42,6 @@
 			dstPath = "";
 			dstSubfolderSpec = 6;
 			files = (
-				6E12DA2E1CD691A3006037A5 /* libfbxsdk.dylib in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -59,7 +56,6 @@
 		5C6587FB1DA59BBC007F8DB1 /* DemoSceneLoader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DemoSceneLoader.cpp; sourceTree = "<group>"; };
 		5C6587FC1DA59BBC007F8DB1 /* DemoSceneLoader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DemoSceneLoader.h; sourceTree = "<group>"; };
 		6E12DA251CD686C8006037A5 /* et-static-mac.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "et-static-mac.xcodeproj"; path = "../../../projects/et-static-mac.xcodeproj"; sourceTree = "<group>"; };
-		6E12DA2C1CD69147006037A5 /* libfbxsdk.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libfbxsdk.dylib; path = ../../../../../../../SDK/FBX/lib/clang/release/libfbxsdk.dylib; sourceTree = "<group>"; };
 		6E12DA2F1CD6926C006037A5 /* media */ = {isa = PBXFileReference; lastKnownFileType = folder; name = media; path = ../../media; sourceTree = "<group>"; };
 		A57B428F1A58DAB400C896E1 /* OpenAL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenAL.framework; path = System/Library/Frameworks/OpenAL.framework; sourceTree = SDKROOT; };
 		A57B42911A58DAB800C896E1 /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
@@ -88,7 +84,6 @@
 				A5D8EC371A3CDF5600E3620B /* OpenGL.framework in Frameworks */,
 				5C4515591D7E035D00D093EB /* MetalKit.framework in Frameworks */,
 				5C4515571D7E035600D093EB /* Metal.framework in Frameworks */,
-				6E12DA2D1CD69147006037A5 /* libfbxsdk.dylib in Frameworks */,
 				6E12DA2B1CD690F6006037A5 /* libet-static-mac.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -154,7 +149,6 @@
 				5C45155A1D7E039F00D093EB /* QuartzCore.framework */,
 				5C4515581D7E035D00D093EB /* MetalKit.framework */,
 				5C4515561D7E035600D093EB /* Metal.framework */,
-				6E12DA2C1CD69147006037A5 /* libfbxsdk.dylib */,
 				A57B42911A58DAB800C896E1 /* StoreKit.framework */,
 				A57B428F1A58DAB400C896E1 /* OpenAL.framework */,
 				A5D8EC3C1A3CDF5E00E3620B /* AppKit.framework */,
@@ -370,17 +364,13 @@
 				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
 				INFOPLIST_FILE = "$(SRCROOT)/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
-				LIBRARY_SEARCH_PATHS = (
-					"\"$PROJECT_DIR/../../../lib/osx\"",
-					/Volumes/Development/SDK/FBX/lib/clang/release,
-				);
+				LIBRARY_SEARCH_PATHS = "\"$PROJECT_DIR/../../../lib/osx\"";
 				OTHER_LDFLAGS = (
 					"-lpng",
 					"-ljpeg",
 					"-lz",
 					"-lxml2",
 					"-ljansson",
-					"-lfbxsdk",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.cheetek.scenerendering;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -395,17 +385,13 @@
 				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
 				INFOPLIST_FILE = "$(SRCROOT)/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
-				LIBRARY_SEARCH_PATHS = (
-					"\"$PROJECT_DIR/../../../lib/osx\"",
-					/Volumes/Development/SDK/FBX/lib/clang/release,
-				);
+				LIBRARY_SEARCH_PATHS = "\"$PROJECT_DIR/../../../lib/osx\"";
 				OTHER_LDFLAGS = (
 					"-lpng",
 					"-ljpeg",
 					"-lz",
 					"-lxml2",
 					"-ljansson",
-					"-lfbxsdk",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.cheetek.scenerendering;
 				PRODUCT_NAME = "$(TARGET_NAME)";

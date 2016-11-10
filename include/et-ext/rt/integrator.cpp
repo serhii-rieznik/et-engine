@@ -73,7 +73,7 @@ float4 PathTraceIntegrator::gather(const Ray& inRay, uint32_t maxPathLength, uin
 	if (pathLength > aMax)
 	{
 		aMax = std::max(aMax, pathLength);
-		log::info("Max path length: %llu / %llu", static_cast<uint64_t>(aMax));
+		log::info("Max path length: %llu", static_cast<uint64_t>(aMax));
 	}
 
     return result;

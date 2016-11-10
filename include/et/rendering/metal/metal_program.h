@@ -23,12 +23,8 @@ public:
 	MetalProgram(MetalState&);
 	~MetalProgram();
 
-	void build(const std::string& programSource, const std::string& = emptyString) override;
-
-	void setTransformMatrix(const mat4 &m, bool force) override;
-	void setCameraProperties(const Camera& cam) override;
-	void setDefaultLightPosition(const vec3& p, bool force) override;
-	
+	void build(const std::string& programSource) override;
+    
 	const MetalNativeProgram& nativeProgram() const;
 	
 private:
