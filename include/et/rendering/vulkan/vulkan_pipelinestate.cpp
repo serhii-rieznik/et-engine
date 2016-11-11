@@ -144,8 +144,7 @@ void VulkanPipelineState::build()
 		info.renderPass = pass->nativeRenderPass().renderPass;
 		info.stageCount = 2;
 	}
-	VULKAN_CALL(vkCreateGraphicsPipelines(_private->vulkan.device, _private->vulkan.pipelineCache, 1, &info,
-		nullptr, &_private->pipeline));
+	VULKAN_CALL(vkCreateGraphicsPipelines(_private->vulkan.device, _private->vulkan.pipelineCache, 1, &info, nullptr, &_private->pipeline));
 }
 
 bool bbb = false;

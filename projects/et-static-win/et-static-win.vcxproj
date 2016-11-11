@@ -162,7 +162,6 @@
     <ClInclude Include="..\..\include\et\scene3d\renderableelement.cpp" />
     <ClInclude Include="..\..\include\et\scene3d\scene3d.cpp" />
     <ClInclude Include="..\..\include\et\scene3d\scene3drenderer.cpp" />
-    <ClInclude Include="..\..\include\et\scene3d\scenematerial.cpp" />
     <ClInclude Include="..\..\include\et\scene3d\skeletonelement.cpp" />
     <ClInclude Include="..\..\include\et\scene3d\storage.cpp" />
     <ClInclude Include="..\..\include\et\sound\platform-dependent.cpp" />
@@ -301,7 +300,6 @@
     <ClInclude Include="..\..\include\et\scene3d\renderableelement.h" />
     <ClInclude Include="..\..\include\et\scene3d\scene3d.h" />
     <ClInclude Include="..\..\include\et\scene3d\scene3drenderer.h" />
-    <ClInclude Include="..\..\include\et\scene3d\scenematerial.h" />
     <ClInclude Include="..\..\include\et\scene3d\serialization.h" />
     <ClInclude Include="..\..\include\et\scene3d\skeletonelement.h" />
     <ClInclude Include="..\..\include\et\scene3d\storage.h" />

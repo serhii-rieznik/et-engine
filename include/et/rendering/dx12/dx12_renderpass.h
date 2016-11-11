@@ -18,7 +18,9 @@ namespace et
 
 	public:
 		DX12RenderPass(const RenderPass::ConstructionInfo&);
+		
 		void begin() override;
+		void validateRenderBatch(RenderBatch::Pointer) override;
 		void pushRenderBatch(RenderBatch::Pointer) override;
 		void end() override;
 	};

@@ -103,9 +103,6 @@
     <ClInclude Include="..\..\include\et\scene3d\scene3drenderer.cpp">
       <Filter>Source\scene3d</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\et\scene3d\scenematerial.cpp">
-      <Filter>Source\scene3d</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\et\scene3d\skeletonelement.cpp">
       <Filter>Source\scene3d</Filter>
     </ClInclude>
@@ -520,9 +517,6 @@
       <Filter>Source\scene3d</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\et\scene3d\scene3drenderer.h">
-      <Filter>Source\scene3d</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\et\scene3d\scenematerial.h">
       <Filter>Source\scene3d</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\et\scene3d\serialization.h">

@@ -175,6 +175,8 @@ void VulkanRenderer::init(const RenderContextParameters& params)
 	_private->swapchain.create(_private->vulkan());
 	
 	initInternalStructures();
+	defaultTexture();
+	defaultSampler();
 }
 
 void VulkanRenderer::shutdown()

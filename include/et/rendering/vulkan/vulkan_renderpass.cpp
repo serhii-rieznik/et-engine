@@ -100,24 +100,6 @@ const VulkanNativeRenderPass& VulkanRenderPass::nativeRenderPass() const
 	return _private->nativePass;
 }
 
-void VulkanRenderPass::submit()
-{
-	VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
-
-	VkSubmitInfo submitInfo = { VK_STRUCTURE_TYPE_SUBMIT_INFO };
-	submitInfo.commandBufferCount = 1;
-	submitInfo.pCommandBuffers = &_private->nativePass.commandBuffer;
-	submitInfo.waitSemaphoreCount = 1;
-	submitInfo.pWaitSemaphores = &_private->vulkan.semaphores.imageAvailable;
-	submitInfo.signalSemaphoreCount = 1;
-	submitInfo.pSignalSemaphores = &_private->vulkan.semaphores.renderComplete;
-	submitInfo.pWaitDstStageMask = waitStages;
-
-	VULKAN_CALL(vkQueueSubmit(_private->vulkan.queue, 1, &submitInfo, _private->fence));
-	VULKAN_CALL(vkWaitForFences(_private->vulkan.device, 1, &_private->fence, VK_TRUE, ~0ull));
-	VULKAN_CALL(vkResetFences(_private->vulkan.device, 1, &_private->fence));
-}
-
 void VulkanRenderPass::begin()
 {
 	VkImageView attachments[] = {
@@ -161,6 +143,12 @@ void VulkanRenderPass::begin()
 	vkCmdSetViewport(_private->nativePass.commandBuffer, 0, 1, &_private->nativePass.viewport);
 }
 
+void VulkanRenderPass::validateRenderBatch(RenderBatch::Pointer batch)
+{
+	VulkanRenderPass::Pointer vulkanRenderPass(this);
+	_private->renderer->acquirePipelineState(vulkanRenderPass, batch->material(), batch->vertexStream());
+}
+
 void VulkanRenderPass::pushRenderBatch(RenderBatch::Pointer batch)
 {
 	VulkanRenderPass::Pointer vulkanRenderPass(this);
@@ -201,6 +189,24 @@ void VulkanRenderPass::end()
 
 	VULKAN_CALL(vkEndCommandBuffer(_private->nativePass.commandBuffer));
 	bbb = false;
+}
+
+void VulkanRenderPass::submit()
+{
+	VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
+
+	VkSubmitInfo submitInfo = { VK_STRUCTURE_TYPE_SUBMIT_INFO };
+	submitInfo.commandBufferCount = 1;
+	submitInfo.pCommandBuffers = &_private->nativePass.commandBuffer;
+	submitInfo.waitSemaphoreCount = 1;
+	submitInfo.pWaitSemaphores = &_private->vulkan.semaphores.imageAvailable;
+	submitInfo.signalSemaphoreCount = 1;
+	submitInfo.pSignalSemaphores = &_private->vulkan.semaphores.renderComplete;
+	submitInfo.pWaitDstStageMask = waitStages;
+
+	VULKAN_CALL(vkQueueSubmit(_private->vulkan.queue, 1, &submitInfo, _private->fence));
+	VULKAN_CALL(vkWaitForFences(_private->vulkan.device, 1, &_private->fence, VK_TRUE, ~0ull));
+	VULKAN_CALL(vkResetFences(_private->vulkan.device, 1, &_private->fence));
 }
 
 }

@@ -43,6 +43,7 @@ namespace et
 		virtual ~RenderPass() = default;
 
 		virtual void begin() = 0;
+		virtual void validateRenderBatch(RenderBatch::Pointer) = 0;
 		virtual void pushRenderBatch(RenderBatch::Pointer) = 0;
 		virtual void end() = 0;
 
