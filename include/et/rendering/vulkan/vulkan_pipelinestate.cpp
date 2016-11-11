@@ -91,7 +91,7 @@ void VulkanPipelineState::build()
 	VkPipelineRasterizationStateCreateInfo rasterizerInfo = { VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO };
 	{
 		rasterizerInfo.cullMode = vulkan::cullModeFlags(cullMode());
-		rasterizerInfo.frontFace = VkFrontFace::VK_FRONT_FACE_CLOCKWISE;
+		rasterizerInfo.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
 		rasterizerInfo.polygonMode = VkPolygonMode::VK_POLYGON_MODE_FILL;
 		rasterizerInfo.lineWidth = 1.0f;
 	}
@@ -114,11 +114,15 @@ void VulkanPipelineState::build()
 	VkPipelineVertexInputStateCreateInfo vertexInfo = { };
 	_private->generateInputLayout(inputLayout(), vertexInfo, attribs, binding);
 
+	VulkanRenderPass::Pointer pass = renderPass();
+
 	VkPipelineViewportStateCreateInfo viewportState = { VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO }; 
 	viewportState.scissorCount = 1;
 	viewportState.viewportCount = 1;
+	viewportState.pViewports = &pass->nativeRenderPass().viewport;
+	viewportState.pScissors = &pass->nativeRenderPass().scissor;
 
-	VkDynamicState dynamicStates[] = { VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR };
+	VkDynamicState dynamicStates[2] = { VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR };
 	VkPipelineDynamicStateCreateInfo dynamicState = { VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO };
 	{
 		dynamicState.pDynamicStates = dynamicStates;
@@ -137,12 +141,14 @@ void VulkanPipelineState::build()
 		info.pViewportState = &viewportState;
 		info.layout = _private->layout;
 		info.pStages = prog->shaderModules().stageCreateInfo;
-		info.renderPass = VulkanRenderPass::Pointer(renderPass())->nativeRenderPass().renderPass;
+		info.renderPass = pass->nativeRenderPass().renderPass;
 		info.stageCount = 2;
 	}
 	VULKAN_CALL(vkCreateGraphicsPipelines(_private->vulkan.device, _private->vulkan.pipelineCache, 1, &info,
 		nullptr, &_private->pipeline));
 }
+
+bool bbb = false;
 
 void VulkanPipelineState::bind(VulkanNativeRenderPass& pass, MaterialInstance::Pointer& material)
 {
@@ -188,8 +194,15 @@ void VulkanPipelineState::bind(VulkanNativeRenderPass& pass, MaterialInstance::P
 			else if (wd.descriptorType == VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER)
 			{
 				MaterialTexture textureId = static_cast<MaterialTexture>(wd.dstBinding);
+				
 				VulkanTexture::Pointer texture = material->texture(textureId);
+				if (texture.invalid())
+					texture = _private->renderer->defaultTexture();
+
 				VulkanSampler::Pointer sampler = material->sampler(textureId);
+				if (sampler.invalid())
+					sampler = _private->renderer->defaultSampler();
+
 				_private->textureInfoPool[texInfoIndex].imageLayout = texture->nativeTexture().layout;
 				_private->textureInfoPool[texInfoIndex].imageView = texture->nativeTexture().imageView;
 				_private->textureInfoPool[texInfoIndex].sampler = sampler->nativeSampler().sampler;
@@ -203,73 +216,9 @@ void VulkanPipelineState::bind(VulkanNativeRenderPass& pass, MaterialInstance::P
 	}
 
 	vkCmdBindPipeline(pass.commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _private->pipeline);
+	
 	vkCmdBindDescriptorSets(pass.commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _private->layout, 
 		0, DescriptorSetClass::Count, _private->descriptorSets, 0, nullptr);
-
-	vkCmdSetScissor(pass.commandBuffer, 0, 1, &pass.scissor);
-	vkCmdSetViewport(pass.commandBuffer, 0, 1, &pass.viewport);
-
-	/*
-	for (const auto& prop : material->usedProperties())
-	{
-		uploadMaterialVariable(prop.first, prop.second.data, prop.second.size);
-	}
-
-	MetalDataBuffer::Pointer sharedBuffer = _private->renderer->sharedConstBuffer().buffer();
-	id<MTLBuffer> mtlSharedBuffer = sharedBuffer->nativeBuffer().buffer();
-
-	if (_private->buildMaterialBuffer)
-	{
-		uint32_t materialBufferOffset = 0;
-		uint8_t* dst = _private->renderer->sharedConstBuffer().allocateData(_private->materialVariablesBufferSize, materialBufferOffset);
-		memcpy(dst, _private->materialVariablesBuffer.data(), _private->materialVariablesBufferSize);
-		if (_private->bindMaterialVariablesToVertex)
-			[e.encoder setVertexBuffer:mtlSharedBuffer offset:materialBufferOffset atIndex:MaterialVariablesBufferIndex];
-		if (_private->bindMaterialVariablesToFragment)
-			[e.encoder setFragmentBuffer:mtlSharedBuffer offset:materialBufferOffset atIndex:MaterialVariablesBufferIndex];
-	}
-
-	for (const auto& vt : reflection.vertexTextures)
-	{
-		auto i = material->usedTextures().find(vt.first);
-		MetalTexture::Pointer tex;
-		if (i == material->usedTextures().end())
-			tex = _private->renderer->defaultTexture();
-		else
-			tex = i->second.texture;
-		[e.encoder setVertexTexture:tex->nativeTexture().texture atIndex:vt.second];
-	}
-
-	for (const auto& ft : reflection.fragmentTextures)
-	{
-		auto i = material->usedTextures().find(ft.first);
-		MetalTexture::Pointer tex;
-		if (i == material->usedTextures().end())
-			tex = _private->renderer->defaultTexture();
-		else
-			tex = i->second.texture;
-		[e.encoder setFragmentTexture:tex->nativeTexture().texture atIndex:ft.second];
-	}
-
-	for (const auto& vs : reflection.vertexSamplers)
-	{
-		auto i = material->usedSamplers().find(vs.first);
-		MetalSampler::Pointer smp = (i == material->usedSamplers().end()) ?
-			_private->renderer->defaultSampler() : i->second.sampler;
-		[e.encoder setVertexSamplerState:smp->nativeSampler().sampler atIndex:vs.second];
-	}
-
-	for (const auto& fs : reflection.fragmentSamplers)
-	{
-		auto i = material->usedSamplers().find(fs.first);
-		MetalSampler::Pointer smp = (i == material->usedSamplers().end()) ?
-			_private->renderer->defaultSampler() : i->second.sampler;
-		[e.encoder setFragmentSamplerState:smp->nativeSampler().sampler atIndex:fs.second];
-	}
-
-	[e.encoder setDepthStencilState:_private->state.depthStencilState];
-	[e.encoder setRenderPipelineState:_private->state.pipelineState];
-	*/
 }
 
 void VulkanPipelineStatePrivate::generatePipelineLayout(const PipelineState::Reflection& reflection)

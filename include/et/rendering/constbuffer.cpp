@@ -25,7 +25,7 @@ void ConstBuffer::init(RenderInterface* renderer)
 
 void ConstBuffer::shutdown()
 {
-
+	_buffer.reset(nullptr);
 }
 
 uint8_t* ConstBuffer::allocateData(uint32_t size, uint32_t& baseOffset)

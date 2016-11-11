@@ -30,7 +30,7 @@ struct VulkanSwapchain
 	void acquireNextImage(VulkanState& vulkan);
 	void present(VulkanState& vulkan);
 
-	bool createDepthImage(VulkanState& vulkan, VkImage& image, VkDeviceMemory& memory);
+	bool createDepthImage(VulkanState& vulkan, VkImage& image, VkDeviceMemory& memory, VkCommandBuffer cmdBuffer);
 	VkImageView createImageView(VulkanState&, VkImage, VkImageAspectFlags, VkFormat);
 
 	VkSurfaceKHR surface = nullptr;
@@ -70,14 +70,13 @@ struct VulkanState
 	VkCommandPool commandPool = nullptr;
 	VkQueue queue = nullptr;
 	VkPipelineCache pipelineCache = nullptr;
+	VkCommandBuffer serviceCommandBuffer = nullptr;
 
 	struct Semaphores
 	{
 		VkSemaphore imageAvailable = nullptr;
 		VkSemaphore renderComplete = nullptr;
 	} semaphores;
-
-	VkCommandBuffer serviceCommandBuffer = nullptr;
 	
 	Vector<VkQueueFamilyProperties> queueProperties;
 	uint32_t graphicsQueueIndex = static_cast<uint32_t>(-1);
@@ -85,7 +84,8 @@ struct VulkanState
 
 	VulkanSwapchain swapchain;
 
-	void executeServiceCommands(std::function<void()>);
+	using ServiceCommands = std::function<void(VkCommandBuffer)>;
+	void executeServiceCommands(ServiceCommands);
 };
 
 struct VulkanShaderModules

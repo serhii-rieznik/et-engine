@@ -191,6 +191,12 @@ void OBJLoader::loadData(ObjectsCache& cache)
 		{
 			getLine(inputFile, line);
 			trim(line);
+			
+			if (!_groups.empty())
+			{
+				_groups.back().faces.shrink_to_fit();
+			}
+
             _groups.emplace_back(line);
 		}
 		else if (key == 'u') // group's material

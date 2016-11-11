@@ -73,7 +73,7 @@ namespace et
 				{ faces.reserve(0xffff); }
 			
 			OBJGroup(const std::string& aName) :
-				name(aName) { faces.reserve(0xffff); }
+				name(aName) { faces.reserve(0x00ff); }
 			
 			OBJGroup(const std::string& aName, const std::string& aMat) :
 				name(aName), material(aMat) { faces.reserve(0xffff); }

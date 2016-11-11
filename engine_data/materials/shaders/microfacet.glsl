@@ -7,8 +7,11 @@ layout (std140, set = 0, binding = ObjectVariablesBufferIndex) uniform ObjectVar
 	mat4 worldRotationTransform;	
 } objectVariables;
 
+layout(binding = 0, set = 1) uniform sampler2D albedoTexture;
+
 struct VSOutput {
 	vec3 normal;
+	vec2 texCoord0;
 };
 
 #include <inputdefines>
@@ -24,17 +27,18 @@ layout (location = 0) out VSOutput vsOut;
 void main()
 {
 	vsOut.normal = (objectVariables.worldRotationTransform * vec4(normal, 0.0)).xyz;
+	vsOut.texCoord0 = texCoord0;
 	gl_Position = passVariables.viewProjection * objectVariables.worldTransform * vec4(position, 1.0);
 }
 
 #elif defined(ET_FRAGMENT_SHADER)
 
-layout (location = 0) in VSOutput vsOut;
+layout (location = 0) in VSOutput fsIn;
 layout (location = 0) out vec4 outColor0;
 
 void main()
 {
-	outColor0 = vec4(0.5 + 0.5 * normalize(vsOut.normal), 1.0);
+	outColor0 = texture(albedoTexture, fsIn.texCoord0);
 }
 
 #else

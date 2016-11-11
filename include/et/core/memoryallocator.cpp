@@ -31,6 +31,7 @@ enum : uint32_t
 	allocatedValue = 0x00000000,
 	notAllocatedValue = 0xffffffff,
 	defaultChunkSize = 16 * megabytes,
+	allocGranularity = 4 * megabytes,
 	minimumAllocationSize = 128,
 	smallBlockSize = 60,
 	mediumBlockSize = 124,
@@ -324,7 +325,7 @@ void* BlockMemoryAllocatorPrivate::alloc(uint32_t allocSize)
 			return result;
 	}
 	
-	_chunks.emplace_back(alignUpTo(allocSize, defaultChunkSize));
+	_chunks.emplace_back(alignUpTo(std::max(allocSize, static_cast<uint32_t>(defaultChunkSize)), allocGranularity));
 	
 	auto& lastChunk = _chunks.back();
 	lastChunk.allocate(allocSize, result);

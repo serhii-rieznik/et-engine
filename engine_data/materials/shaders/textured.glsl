@@ -6,6 +6,8 @@ layout (std140, set = 0, binding = ObjectVariablesBufferIndex) uniform ObjectVar
 	mat4 worldTransform;
 } objectVariables;
 
+layout(binding = 0, set = 1) uniform sampler2D albedoTexture;
+
 struct VSOutput {
 	vec2 texCoord0;
 };
@@ -32,7 +34,6 @@ void main()
 
 #elif defined(ET_FRAGMENT_SHADER)
 
-layout(binding = 0, set = 1) uniform sampler2D albedoTexture;
 layout(location = 0) in VSOutput fsIn;
 layout(location = 0) out vec4 outColor0;
 

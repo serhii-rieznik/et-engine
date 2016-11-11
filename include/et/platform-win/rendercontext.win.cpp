@@ -94,7 +94,8 @@ void RenderContext::init()
 
 void RenderContext::shutdown()
 {
-
+	renderhelper::release();
+	_renderer->shutdown();
 }
 
 bool RenderContext::beginRender()

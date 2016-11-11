@@ -115,7 +115,6 @@ public:
 	void flushUnusedBlocks();
 			
 private:
-	BlockMemoryAllocatorPrivate* _private = nullptr;
-	char _privateData[256];
+	ET_DECLARE_PIMPL(BlockMemoryAllocator, 256);
 };
 }

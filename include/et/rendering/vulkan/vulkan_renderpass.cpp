@@ -135,7 +135,8 @@ void VulkanRenderPass::begin()
 	VULKAN_CALL(vkCreateFramebuffer(_private->vulkan.device, &framebufferInfo, nullptr, &_private->nativePass.framebuffer));
 
 	VkCommandBufferBeginInfo commandBufferBeginInfo = { VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO };
-	vkBeginCommandBuffer(_private->nativePass.commandBuffer, &commandBufferBeginInfo);
+	commandBufferBeginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+	VULKAN_CALL(vkBeginCommandBuffer(_private->nativePass.commandBuffer, &commandBufferBeginInfo));
 
 	vulkan::imageBarrier(_private->vulkan, _private->nativePass.commandBuffer, _private->vulkan.swapchain.currentColorImage(), 
 		VK_IMAGE_ASPECT_COLOR_BIT, 0, VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT, 
@@ -155,6 +156,9 @@ void VulkanRenderPass::begin()
 	_private->nativePass.viewport.width = static_cast<float>(_private->renderer->rc()->size().x);
 	_private->nativePass.viewport.height = static_cast<float>(_private->renderer->rc()->size().y);
 	_private->nativePass.viewport.maxDepth = 1.0f;
+
+	vkCmdSetScissor(_private->nativePass.commandBuffer, 0, 1, &_private->nativePass.scissor);
+	vkCmdSetViewport(_private->nativePass.commandBuffer, 0, 1, &_private->nativePass.viewport);
 }
 
 void VulkanRenderPass::pushRenderBatch(RenderBatch::Pointer batch)
@@ -179,6 +183,7 @@ void VulkanRenderPass::pushRenderBatch(RenderBatch::Pointer batch)
 	VkBuffer vBuffers[1] = { vb->nativeBuffer().buffer() };
 	vkCmdBindVertexBuffers(cmd, 0, 1, vBuffers, vOffsets );
 	vkCmdBindIndexBuffer(cmd, ib->nativeBuffer().buffer(), 0, vulkan::indexBufferFormat(ib->format()));
+	
 	vkCmdDrawIndexed(cmd, batch->numIndexes(), 1, batch->firstIndex(), 0, 0);
 }
 
@@ -194,7 +199,8 @@ void VulkanRenderPass::end()
 		VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
 		VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT);
 
-	vkEndCommandBuffer(_private->nativePass.commandBuffer);
+	VULKAN_CALL(vkEndCommandBuffer(_private->nativePass.commandBuffer));
+	bbb = false;
 }
 
 }

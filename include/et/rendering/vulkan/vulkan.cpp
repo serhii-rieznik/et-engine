@@ -48,7 +48,7 @@ VkResult vkGetPhysicalDeviceSurfaceFormatsKHRWrapper(const VulkanState& state, u
 	return vkGetPhysicalDeviceSurfaceFormatsKHR(state.physicalDevice, state.swapchain.surface, count, formats);
 }
 
-void VulkanState::executeServiceCommands(std::function<void()> commands)
+void VulkanState::executeServiceCommands(ServiceCommands commands)
 {
 	VkCommandBufferBeginInfo beginInfo = { VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO };
 	beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
@@ -58,7 +58,7 @@ void VulkanState::executeServiceCommands(std::function<void()> commands)
 	submit.pCommandBuffers = &serviceCommandBuffer;
 
 	VULKAN_CALL(vkBeginCommandBuffer(serviceCommandBuffer, &beginInfo));
-	commands();
+	commands(serviceCommandBuffer);
 	VULKAN_CALL(vkEndCommandBuffer(serviceCommandBuffer));
 	VULKAN_CALL(vkQueueSubmit(queue, 1, &submit, nullptr));
 	VULKAN_CALL(vkQueueWaitIdle(queue));
@@ -102,7 +102,7 @@ VkResult vkGetSwapchainImagesKHRWrapper(const VulkanState& state, uint32_t* coun
 	return vkGetSwapchainImagesKHR(state.device, state.swapchain.swapchain, count, images);
 }
 
-bool VulkanSwapchain::createDepthImage(VulkanState& vulkan, VkImage& image, VkDeviceMemory& memory)
+bool VulkanSwapchain::createDepthImage(VulkanState& vulkan, VkImage& image, VkDeviceMemory& memory, VkCommandBuffer cmdBuffer)
 {
 	VkImageCreateInfo imageInfo = { VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO };
 	imageInfo.format = depthFormat;
@@ -137,7 +137,7 @@ bool VulkanSwapchain::createDepthImage(VulkanState& vulkan, VkImage& image, VkDe
 	VULKAN_CALL(vkAllocateMemory(vulkan.device, &allocInfo, nullptr, &memory));
 	VULKAN_CALL(vkBindImageMemory(vulkan.device, image, memory, 0));
 
-	vulkan::imageBarrier(vulkan, vulkan.serviceCommandBuffer, image, VK_IMAGE_ASPECT_DEPTH_BIT,
+	vulkan::imageBarrier(vulkan, cmdBuffer, image, VK_IMAGE_ASPECT_DEPTH_BIT,
 		0, VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT, 
 		VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
 		VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT);
@@ -199,14 +199,15 @@ void VulkanSwapchain::create(VulkanState& vulkan)
 	Vector<VkImage> swapchainImages = enumerateVulkanObjects<VkImage>(vulkan, vkGetSwapchainImagesKHRWrapper);
 	images.resize(swapchainImages.size());
 
-	vulkan.executeServiceCommands([&]()
+	vulkan.executeServiceCommands([&](VkCommandBuffer cmdBuffer)
 	{
 		VkImage* swapchainImagesPtr = swapchainImages.data();
 		for (RenderTarget& rt : images)
 		{
 			rt.color = *swapchainImagesPtr++;
 			rt.colorView = createImageView(vulkan, rt.color, VK_IMAGE_ASPECT_COLOR_BIT, surfaceFormat.format);
-			if (createDepthImage(vulkan, rt.depth, rt.depthMemory))
+			
+			if (createDepthImage(vulkan, rt.depth, rt.depthMemory, cmdBuffer))
 			{
 				rt.depthView = createImageView(vulkan, rt.depth, VK_IMAGE_ASPECT_DEPTH_BIT, depthFormat);
 			}
@@ -296,8 +297,8 @@ void VulkanNativeBuffer::copyFrom(VulkanNativeBuffer& source)
 	region.dstOffset = 0;
 	region.size = _memoryRequirements.size;
 
-	_vulkan.executeServiceCommands([&](){
-		vkCmdCopyBuffer(_vulkan.serviceCommandBuffer, source.buffer(), buffer(), 1, &region);
+	_vulkan.executeServiceCommands([&](VkCommandBuffer cmdBuffer) {
+		vkCmdCopyBuffer(cmdBuffer, source.buffer(), buffer(), 1, &region);
 	});;
 }
 

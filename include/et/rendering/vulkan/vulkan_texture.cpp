@@ -74,17 +74,14 @@ VulkanTexture::~VulkanTexture()
 void VulkanTexture::setImageData(const BinaryDataStorage& data)
 {
 	ET_ASSERT(data.size() <= _private->texture.memoryRequirements.size);
-	VulkanNativeBuffer stagingBuffer(_private->vulkan, static_cast<uint32_t>(_private->texture.memoryRequirements.size), 
-		VK_BUFFER_USAGE_TRANSFER_SRC_BIT, true);
+
+	VulkanNativeBuffer stagingBuffer(_private->vulkan, static_cast<uint32_t>(_private->texture.memoryRequirements.size), VK_BUFFER_USAGE_TRANSFER_SRC_BIT, true);
 	void* ptr = stagingBuffer.map(0, data.size());
 	memcpy(ptr, data.data(), data.size());
 	stagingBuffer.unmap();
 
-	VkCommandBufferBeginInfo beginInfo = { VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO };
-	beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
-	VULKAN_CALL(vkBeginCommandBuffer(_private->vulkan.serviceCommandBuffer, &beginInfo));
-	{
-		vulkan::imageBarrier(_private->vulkan, _private->vulkan.serviceCommandBuffer, _private->texture.image,
+	_private->vulkan.executeServiceCommands([this, &stagingBuffer](VkCommandBuffer cmdBuffer) {
+		vulkan::imageBarrier(_private->vulkan, cmdBuffer, _private->texture.image,
 			VK_IMAGE_ASPECT_COLOR_BIT, 0, VK_ACCESS_TRANSFER_WRITE_BIT, 
 			VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
 			VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT);
@@ -94,21 +91,14 @@ void VulkanTexture::setImageData(const BinaryDataStorage& data)
 		region.imageExtent.width = static_cast<uint32_t>(description()->size.x);
 		region.imageExtent.height = static_cast<uint32_t>(description()->size.y);
 		region.imageExtent.depth = 1;
-		vkCmdCopyBufferToImage(_private->vulkan.serviceCommandBuffer, stagingBuffer.buffer(), 
+		vkCmdCopyBufferToImage(cmdBuffer, stagingBuffer.buffer(), 
 			_private->texture.image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region);
 
-		vulkan::imageBarrier(_private->vulkan, _private->vulkan.serviceCommandBuffer, _private->texture.image,
+		vulkan::imageBarrier(_private->vulkan, cmdBuffer, _private->texture.image,
 			VK_IMAGE_ASPECT_COLOR_BIT, VK_ACCESS_TRANSFER_WRITE_BIT, VK_ACCESS_SHADER_READ_BIT, 
 			VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, 
 			VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT);
-	}
-	VULKAN_CALL(vkEndCommandBuffer(_private->vulkan.serviceCommandBuffer));
-
-	VkSubmitInfo submitInfo = { VK_STRUCTURE_TYPE_SUBMIT_INFO };
-	submitInfo.commandBufferCount = 1;
-	submitInfo.pCommandBuffers = &_private->vulkan.serviceCommandBuffer;
-	VULKAN_CALL(vkQueueSubmit(_private->vulkan.queue, 1, &submitInfo, nullptr));
-	VULKAN_CALL(vkQueueWaitIdle(_private->vulkan.queue));
+	});
 
 	_private->texture.layout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 }

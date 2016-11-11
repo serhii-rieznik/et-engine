@@ -57,6 +57,7 @@ void Application::platformFinalize()
 	if (_parameters.shouldPreserveRenderContext)
 		_renderContext->popRenderingContext();
 
+	_renderContext->shutdown();
 	sharedObjectFactory().deleteObject(_renderContext);
 
 	_delegate = nullptr;

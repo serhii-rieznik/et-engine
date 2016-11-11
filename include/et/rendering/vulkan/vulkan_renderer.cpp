@@ -88,7 +88,7 @@ void VulkanRenderer::init(const RenderContextParameters& params)
 	{
 		if (strstr(layerProp.layerName, "validation"))
 		{
-			validationLayers.push_back(layerProp.layerName);
+			validationLayers.emplace_back(layerProp.layerName);
 		}
 	}
 #endif

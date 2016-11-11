@@ -270,14 +270,12 @@ void buildProgramReflection(glslang::TProgram* program, PipelineState::Reflectio
 		}
 		int blockIndex = program->getUniformBlockIndex(block);
 		int blockOffset = program->getUniformBufferOffset(block);
-		// log::info("Block: %s at %d, size: %d", blockName.c_str(), blockIndex, blockSize);
 	}
 
 	int uniforms = program->getNumLiveUniformVariables();
 	for (int uniform = 0; uniform < uniforms; ++uniform)
 	{
 		String uniformName(program->getUniformName(uniform));
-		int uniformIndex = program->getUniformIndex(uniformName.c_str());
 		int uniformType = program->getUniformType(uniform);
 
 		size_t dotPos = uniformName.find(".");
@@ -288,11 +286,11 @@ void buildProgramReflection(glslang::TProgram* program, PipelineState::Reflectio
 				MaterialTexture tex = mtl::stringToMaterialTexture(uniformName);
 				const String& samplerName = mtl::materialSamplerToString(tex);
 
-				reflection.vertexTextures.emplace(uniformName, uniformIndex);
-				reflection.fragmentTextures.emplace(uniformName, uniformIndex);
-				reflection.vertexSamplers.emplace(samplerName, uniformIndex);
-				reflection.fragmentSamplers.emplace(samplerName, uniformIndex);
-				// log::info("Texture %s, index: %d", uniformName.c_str(), uniformIndex);
+				uint32_t binding = static_cast<uint32_t>(tex);
+				reflection.vertexTextures.emplace(uniformName, binding);
+				reflection.fragmentTextures.emplace(uniformName, binding);
+				reflection.vertexSamplers.emplace(samplerName, binding);
+				reflection.fragmentSamplers.emplace(samplerName, binding);
 			}
 			else
 			{
@@ -302,7 +300,6 @@ void buildProgramReflection(glslang::TProgram* program, PipelineState::Reflectio
 		else
 		{
 			int uniformOffset = program->getUniformBufferOffset(uniform);
-			// log::info("Uniform %s, offset: %d, index: %d, type: %x", uniformName.c_str(), uniformOffset, uniformIndex, uniformType);
 			String blockName = uniformName.substr(0, dotPos);
 			uniformName.erase(0, dotPos + 1);
 			if (blockName == PipelineState::kObjectVariables())
