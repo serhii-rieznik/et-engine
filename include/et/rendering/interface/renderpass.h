@@ -8,11 +8,12 @@
 #pragma once
 
 #include <et/camera/camera.h>
-#include <et/rendering/framebuffer.h>
 #include <et/rendering/base/renderbatch.h>
+#include <et/rendering/sharedconstbuffer.h>
 
 namespace et
 {
+class RenderInterface;
 class RenderPass : public Shared
 {
 public:
@@ -20,7 +21,7 @@ public:
 
 	struct Target
 	{
-		Framebuffer::Pointer destination;
+		// TODO : add render target
 		FramebufferOperation colorLoadOperation = FramebufferOperation::DontCare;
 		FramebufferOperation colorStoreOperation = FramebufferOperation::DontCare;
 		FramebufferOperation depthLoadOperation = FramebufferOperation::DontCare;
@@ -48,24 +49,41 @@ public:
 	};
 
 public:
-	RenderPass(const ConstructionInfo& info) :
-		_info(info)
-	{
-	}
-
-	virtual ~RenderPass() = default;
+	RenderPass(RenderInterface* renderer, const ConstructionInfo& info);
+	virtual ~RenderPass();
 
 	virtual void begin() = 0;
 	virtual void validateRenderBatch(RenderBatch::Pointer) = 0;
 	virtual void pushRenderBatch(RenderBatch::Pointer) = 0;
 	virtual void end() = 0;
 
-	const ConstructionInfo& info() const
-	{
-		return _info;
-	}
+	const ConstructionInfo& info() const;
+	SharedConstBuffer& sharedConstBuffer();
 
 private:
 	ConstructionInfo _info;
+	SharedConstBuffer _sharedConstBuffer;
 };
+
+inline RenderPass::RenderPass(RenderInterface* renderer, const ConstructionInfo& info) :
+	_info(info)
+{
+	_sharedConstBuffer.init(renderer);
+}
+
+inline RenderPass::~RenderPass()
+{
+	_sharedConstBuffer.shutdown();
+}
+
+inline const RenderPass::ConstructionInfo& RenderPass::info() const
+{
+	return _info;
+}
+
+inline SharedConstBuffer& RenderPass::sharedConstBuffer()
+{
+	return _sharedConstBuffer;
+}
+
 }

@@ -24,12 +24,20 @@ public:
 	VkFence fence = nullptr;
 	VulkanRenderer* renderer = nullptr;
 	VkClearValue clearValues[2] { };
+	
+	RenderPass::Variables* variablesData = nullptr;
+	uint32_t variablesDataBufferOffset = 0;
+
+	void loadVariables(Camera::Pointer camera, Camera::Pointer light);
 };
 
 VulkanRenderPass::VulkanRenderPass(VulkanRenderer* renderer, VulkanState& vulkan, const RenderPass::ConstructionInfo& passInfo) 
-	: RenderPass(passInfo)
+	: RenderPass(renderer, passInfo)
 {
 	ET_PIMPL_INIT(VulkanRenderPass, vulkan, renderer);
+
+	uint8_t* dataPtr = sharedConstBuffer().staticAllocate(sizeof(Variables), _private->variablesDataBufferOffset);
+	_private->variablesData = reinterpret_cast<RenderPass::Variables*>(dataPtr);
 
 	VkFenceCreateInfo fenceInfo = { VK_STRUCTURE_TYPE_FENCE_CREATE_INFO };
 	VULKAN_CALL(vkCreateFence(vulkan.device, &fenceInfo, nullptr, &_private->fence));
@@ -92,6 +100,9 @@ VulkanRenderPass::~VulkanRenderPass()
 	vkDestroyFramebuffer(_private->vulkan.device, _private->nativePass.framebuffer, nullptr);
 	vkDestroyRenderPass(_private->vulkan.device, _private->nativePass.renderPass, nullptr);
 	vkFreeCommandBuffers(_private->vulkan.device, _private->vulkan.commandPool, 1, &_private->nativePass.commandBuffer);
+	
+	sharedConstBuffer().free(reinterpret_cast<uint8_t*>(_private->variablesData));
+
 	ET_PIMPL_FINALIZE(VulkanRenderPass)
 }
 
@@ -138,6 +149,8 @@ void VulkanRenderPass::begin()
 	_private->nativePass.viewport.width = static_cast<float>(_private->renderer->rc()->size().x);
 	_private->nativePass.viewport.height = static_cast<float>(_private->renderer->rc()->size().y);
 	_private->nativePass.viewport.maxDepth = 1.0f;
+	
+	_private->loadVariables(info().camera, info().light);
 
 	vkCmdSetScissor(_private->nativePass.commandBuffer, 0, 1, &_private->nativePass.scissor);
 	vkCmdSetViewport(_private->nativePass.commandBuffer, 0, 1, &_private->nativePass.viewport);
@@ -153,16 +166,10 @@ void VulkanRenderPass::pushRenderBatch(RenderBatch::Pointer batch)
 {
 	VulkanRenderPass::Pointer vulkanRenderPass(this);
 
-	SharedVariables& sharedVariables = _private->renderer->sharedVariables();
-	if (info().camera.valid())
-		sharedVariables.loadCameraProperties(info().camera);
-	if (info().light.valid())
-		sharedVariables.loadLightProperties(info().light);
-
 	VulkanPipelineState::Pointer ps = _private->renderer->acquirePipelineState(vulkanRenderPass, batch->material(), batch->vertexStream());
 	ps->setObjectVariable(PipelineState::kWorldTransform(), batch->transformation());
 	ps->setObjectVariable(PipelineState::kWorldRotationTransform(), batch->rotationTransformation());
-	ps->bind(_private->nativePass, batch->material());
+	ps->bind(vulkanRenderPass, batch->material());
 
 	VkCommandBuffer cmd = _private->nativePass.commandBuffer;
 	VulkanVertexBuffer::Pointer vb = batch->vertexStream()->vertexBuffer();
@@ -177,9 +184,6 @@ void VulkanRenderPass::pushRenderBatch(RenderBatch::Pointer batch)
 
 void VulkanRenderPass::end()
 {
-	_private->renderer->sharedVariables().flushBuffer();
-	_private->renderer->sharedConstBuffer().flush();
-
 	vkCmdEndRenderPass(_private->nativePass.commandBuffer);
 
 	vulkan::imageBarrier(_private->vulkan, _private->nativePass.commandBuffer, _private->vulkan.swapchain.currentColorImage(), 
@@ -188,7 +192,7 @@ void VulkanRenderPass::end()
 		VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT);
 
 	VULKAN_CALL(vkEndCommandBuffer(_private->nativePass.commandBuffer));
-	bbb = false;
+	sharedConstBuffer().flush();
 }
 
 void VulkanRenderPass::submit()
@@ -207,6 +211,25 @@ void VulkanRenderPass::submit()
 	VULKAN_CALL(vkQueueSubmit(_private->vulkan.queue, 1, &submitInfo, _private->fence));
 	VULKAN_CALL(vkWaitForFences(_private->vulkan.device, 1, &_private->fence, VK_TRUE, ~0ull));
 	VULKAN_CALL(vkResetFences(_private->vulkan.device, 1, &_private->fence));
+}
+
+void VulkanRenderPassPrivate::loadVariables(Camera::Pointer camera, Camera::Pointer light)
+{
+	if (camera.valid())
+	{
+		variablesData->cameraDirection = vec4(camera->direction());
+		variablesData->cameraPosition = vec4(camera->position());
+		variablesData->cameraUp = vec4(camera->up());
+		
+		variablesData->view = camera->viewMatrix();
+		variablesData->projection = camera->projectionMatrix();
+		variablesData->viewProjection = camera->viewProjectionMatrix();
+	}
+
+	if (light.valid())
+	{
+		variablesData->lightPosition = vec4(light->position());
+	}
 }
 
 }

@@ -1,8 +1,6 @@
 #include <et/core/et.h>
 
-#include "../rendering/constbuffer.cpp"
 #include "../rendering/rendering.cpp"
-#include "../rendering/sharedvariables.cpp"
 #include "../rendering/shadersource.cpp"
 #include "../rendering/sharedconstbuffer.cpp"
 

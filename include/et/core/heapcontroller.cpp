@@ -6,6 +6,7 @@
  */
 
 #include <et/core/et.h>
+#include "heapcontroller.h"
 
 namespace et
 {
@@ -60,16 +61,15 @@ public:
 	void compress();
 };
 
+HeapController::HeapController()
+{
+	ET_PIMPL_INIT(HeapController);
+}
+
 HeapController::HeapController(uint32_t cap, uint32_t gr)
 {
 	ET_PIMPL_INIT(HeapController);
-	_private->capacity = cap;
-	_private->granularity = gr;
-
-	ET_ASSERT(_private->capacity > 0);
-	ET_ASSERT(_private->granularity > 0);
-
-	_private->maxInfoChunks = (_private->capacity + _private->granularity - 1) / (_private->granularity);
+	init(cap, gr);
 }
 
 HeapController::~HeapController()
@@ -77,8 +77,23 @@ HeapController::~HeapController()
 	ET_PIMPL_FINALIZE(HeapController);
 }
 
+void HeapController::init(uint32_t cap, uint32_t gr)
+{
+	_private->capacity = cap;
+	_private->granularity = gr;
+	
+	ET_ASSERT(_private->capacity > 0);
+	ET_ASSERT(_private->granularity > 0);
+	_private->maxInfoChunks = (_private->capacity + _private->granularity - 1) / (_private->granularity);
+}
+
 bool HeapController::allocate(uint32_t sizeToAllocate, uint32_t& offset)
 {
+	ET_ASSERT(_private->capacity > 0);
+	ET_ASSERT(_private->infoStorage != nullptr);
+
+	sizeToAllocate = alignUpTo(sizeToAllocate, _private->granularity);
+
 	HeapChunkInfo* info = _private->firstInfo;
 	while (info < _private->lastInfo)
 	{
@@ -98,7 +113,7 @@ bool HeapController::allocate(uint32_t sizeToAllocate, uint32_t& offset)
 			}
 #		endif
 
-			if (remaining > minimumAllocationSize)
+			if (remaining > _private->granularity)
 			{
 				HeapChunkInfo* nextInfo = info + 1;
 
@@ -202,6 +217,16 @@ bool HeapController::empty() const
 			return false;
 	}
 	return true;
+}
+
+void HeapController::clear()
+{
+	_private->capacity = 0;
+	_private->granularity = 0;
+	_private->maxInfoChunks = 0;
+	_private->firstInfo = nullptr;
+	_private->lastInfo = nullptr;
+	_private->infoStorage = nullptr;
 }
 
 uint32_t HeapController::currentlyAllocatedSize() const

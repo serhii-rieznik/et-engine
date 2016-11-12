@@ -11,26 +11,28 @@
 
 namespace et
 {
-	class VulkanState;
-	class VulkanRenderer;
-	class VulkanNativePipeline;
-	class VulkanNativeRenderPass;
-	class VulkanPipelineStatePrivate;
-	class VulkanPipelineState : public PipelineState
-	{
-	public:
-		ET_DECLARE_POINTER(VulkanPipelineState);
+class VulkanState;
+class VulkanRenderer;
+class VulkanRenderPass;
+class VulkanNativePipeline;
+using VulkanRenderPassPointer = IntrusivePtr<VulkanRenderPass>;
 
-	public:
-		VulkanPipelineState(VulkanRenderer*, VulkanState&);
-		~VulkanPipelineState();
+class VulkanPipelineStatePrivate;
+class VulkanPipelineState : public PipelineState
+{
+public:
+	ET_DECLARE_POINTER(VulkanPipelineState);
 
-		const VulkanNativePipeline& nativePipeline() const;
+public:
+	VulkanPipelineState(VulkanRenderer*, VulkanState&);
+	~VulkanPipelineState();
 
-		void build() override;
-		void bind(VulkanNativeRenderPass&, MaterialInstance::Pointer&);
+	const VulkanNativePipeline& nativePipeline() const;
 
-	private:
-		ET_DECLARE_PIMPL(VulkanPipelineState, 256);
-	};
+	void build() override;
+	void bind(VulkanRenderPassPointer, MaterialInstance::Pointer&);
+
+private:
+	ET_DECLARE_PIMPL(VulkanPipelineState, 256);
+};
 }

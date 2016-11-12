@@ -8,8 +8,6 @@
 #pragma once
 
 #include <et/app/context.h>
-#include <et/rendering/constbuffer.h>
-#include <et/rendering/sharedvariables.h>
 #include <et/rendering/rendercontextparams.h>
 #include <et/rendering/base/materiallibrary.h>
 #include <et/rendering/interface/databuffer.h>
@@ -33,12 +31,6 @@ public:
 
 	RenderContext* rc() const
 		{ return _rc; }
-
-	SharedVariables& sharedVariables()
-		{ return _sharedVariables; }
-
-	ConstBuffer& sharedConstBuffer()
-		{ return _sharedConstBuffer; }
 
 	MaterialLibrary& sharedMaterialLibrary()
 		{ return _sharedMaterialLibrary; }
@@ -92,8 +84,6 @@ protected:
 
 private:
 	RenderContext* _rc = nullptr;
-	SharedVariables _sharedVariables;
-	ConstBuffer _sharedConstBuffer;
 	MaterialLibrary _sharedMaterialLibrary;
 	Texture::Pointer _defaultTexture;
 	Sampler::Pointer _defaultSampler;
@@ -141,16 +131,12 @@ inline Sampler::Pointer RenderInterface::defaultSampler()
 
 inline void RenderInterface::initInternalStructures()
 {
-	_sharedVariables.init(this);
-	_sharedConstBuffer.init(this);
 	_sharedMaterialLibrary.init(this);
 }
 
 inline void RenderInterface::shutdownInternalStructures()
 {
 	_sharedMaterialLibrary.shutdown();
-	_sharedConstBuffer.shutdown();
-	_sharedVariables.shutdown();
 }
 
 }

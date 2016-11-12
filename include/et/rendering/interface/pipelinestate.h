@@ -145,6 +145,7 @@ namespace et
 			const BlendState&, CullMode, TextureFormat, PrimitiveType);
 
 		void addToCache(PipelineState::Pointer);
+		void clear();
 
 	private:
 		ET_DECLARE_PIMPL(PipelineStateCache, 256);

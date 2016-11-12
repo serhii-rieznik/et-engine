@@ -424,9 +424,6 @@
     <ClInclude Include="..\..\include\et\rendering\vulkan\glslang\vulkan_glslang.cpp">
       <Filter>Source\rendering\vulkan\glslang</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\et\rendering\constbuffer.h">
-      <Filter>Source\rendering</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\et\rendering\framebuffer.h">
       <Filter>Source\rendering</Filter>
     </ClInclude>
@@ -443,15 +440,6 @@
       <Filter>Source\rendering</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\et\rendering\shadersource.h">
-      <Filter>Source\rendering</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\et\rendering\sharedvariables.h">
-      <Filter>Source\rendering</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\et\rendering\sharedvariables.cpp">
-      <Filter>Source\rendering</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\et\rendering\constbuffer.cpp">
       <Filter>Source\rendering</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\et\rendering\rendering.cpp">

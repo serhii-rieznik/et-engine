@@ -16,12 +16,15 @@ class HeapControllerPrivate;
 class HeapController
 {
 public:
+	HeapController();
 	HeapController(uint32_t capacity, uint32_t granularity);
 	~HeapController();
 
 	uint32_t capacity() const;
 	uint32_t requiredInfoSize() const;
 	uint32_t currentlyAllocatedSize() const;
+
+	void init(uint32_t capacity, uint32_t granularity);
 	void setInfoStorage(void*);
 
 	bool allocate(uint32_t size, uint32_t& offset);
@@ -29,6 +32,7 @@ public:
 	bool release(uint32_t offset);
 
 	bool empty() const;
+	void clear();
 
 	void getAllocationIndexes(std::vector<uint32_t>&) const;
 

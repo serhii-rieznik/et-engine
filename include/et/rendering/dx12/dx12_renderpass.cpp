@@ -13,7 +13,7 @@ namespace et
 {
 
 DX12RenderPass::DX12RenderPass(const RenderPass::ConstructionInfo& info) 
-	: RenderPass(info)
+	: RenderPass(nullptr, info)
 {
 }
 

@@ -127,4 +127,9 @@ void PipelineStateCache::addToCache(PipelineState::Pointer ps)
 	}
 }
 
+void PipelineStateCache::clear()
+{
+	_private->cache.clear();
+}
+
 }

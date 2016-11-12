@@ -181,9 +181,8 @@ void VulkanRenderer::init(const RenderContextParameters& params)
 
 void VulkanRenderer::shutdown()
 {
+	_private->pipelineCache.clear();
 	shutdownInternalStructures();
-
-	// TODO : kill all
 }
 
 void VulkanRenderer::begin()

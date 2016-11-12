@@ -18,11 +18,29 @@ class SharedConstBufferPrivate;
 class SharedConstBuffer
 {
 public:
+	enum
+	{
+		Capacity = 16 * 1024 * 1024,
+		Granularity = 512
+	};
+
+public:
+	SharedConstBuffer();
+	~SharedConstBuffer();
+
 	void init(RenderInterface*);
 	void shutdown();
 
+	DataBuffer::Pointer buffer() const;
+	void flush();
+
+	uint8_t* staticAllocate(uint32_t size, uint32_t& bufferOffset);
+	uint8_t* dynamicAllocate(uint32_t size, uint32_t& bufferOffset);
+	
+	void free(uint8_t*);
+
 private:
-	ET_DECLARE_PIMPL(SharedConstBuffer, 128);
+	ET_DECLARE_PIMPL(SharedConstBuffer, 256);
 };
 
 }

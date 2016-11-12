@@ -147,14 +147,12 @@ void VulkanPipelineState::build()
 	VULKAN_CALL(vkCreateGraphicsPipelines(_private->vulkan.device, _private->vulkan.pipelineCache, 1, &info, nullptr, &_private->pipeline));
 }
 
-bool bbb = false;
-
-void VulkanPipelineState::bind(VulkanNativeRenderPass& pass, MaterialInstance::Pointer& material)
+void VulkanPipelineState::bind(VulkanRenderPass::Pointer pass, MaterialInstance::Pointer& material)
 {
 	uint32_t objectBufferOffset = 0;
 	if (reflection.objectVariablesBufferSize > 0)
 	{
-		uint8_t* dst = _private->renderer->sharedConstBuffer().allocateData(reflection.objectVariablesBufferSize, objectBufferOffset);
+		uint8_t* dst = pass->sharedConstBuffer().dynamicAllocate(reflection.objectVariablesBufferSize, objectBufferOffset);
 		memcpy(dst, objectVariablesBuffer.data(), reflection.objectVariablesBufferSize);
 	}
 
@@ -164,14 +162,14 @@ void VulkanPipelineState::bind(VulkanNativeRenderPass& pass, MaterialInstance::P
 		uint32_t texInfoIndex = 0;
 		for (auto& wd : _private->writeDescriptorSets)
 		{
-			if (wd.descriptorType == VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC)
+			if (wd.descriptorType == VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER)
 			{
 				uint32_t offset = 0;
 				uint32_t length = 0;
 				VulkanDataBuffer::Pointer sharedBuffer;
 				if (wd.dstBinding == ObjectVariablesBufferIndex)
 				{
-					sharedBuffer = _private->renderer->sharedConstBuffer().buffer();
+					sharedBuffer = pass->sharedConstBuffer().buffer();
 					offset = objectBufferOffset;
 					length = reflection.objectVariablesBufferSize;
 				}
@@ -181,7 +179,7 @@ void VulkanPipelineState::bind(VulkanNativeRenderPass& pass, MaterialInstance::P
 				}
 				else if (wd.dstBinding == PassVariablesBufferIndex)
 				{
-					sharedBuffer = _private->renderer->sharedVariables().buffer();
+					sharedBuffer = pass->sharedConstBuffer().buffer();
 					length = reflection.passVariablesBufferSize;
 				}
 				_private->bufferInfoPool[bufferInfoIndex].buffer = sharedBuffer->nativeBuffer().buffer();
@@ -214,11 +212,10 @@ void VulkanPipelineState::bind(VulkanNativeRenderPass& pass, MaterialInstance::P
 			_private->writeDescriptorSets.data(), 0, nullptr);
 	}
 
-	vkCmdBindPipeline(pass.commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _private->pipeline);
+	vkCmdBindPipeline(pass->nativeRenderPass().commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _private->pipeline);
 	
-	uint32_t dynamicOffsets[2] = { };
-	vkCmdBindDescriptorSets(pass.commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _private->layout, 
-		0, DescriptorSetClass::Count, _private->descriptorSets, 2, dynamicOffsets);
+	vkCmdBindDescriptorSets(pass->nativeRenderPass().commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _private->layout, 
+		0, DescriptorSetClass::Count, _private->descriptorSets, 0, nullptr);
 }
 
 void VulkanPipelineStatePrivate::generatePipelineLayout(const PipelineState::Reflection& reflection)
@@ -232,7 +229,7 @@ void VulkanPipelineStatePrivate::generatePipelineLayout(const PipelineState::Ref
 	textureInfoPool.resize(8);
 
 	auto addUniform = [&](uint32_t bindingIndex, VkDescriptorType descType) {
-		auto& bindings = (descType == VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC) ? bufferBindings : textureBindings;
+		auto& bindings = (descType == VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER) ? bufferBindings : textureBindings;
 
 		bindings.emplace_back();
 		bindings.back().binding = bindingIndex;
@@ -248,13 +245,13 @@ void VulkanPipelineStatePrivate::generatePipelineLayout(const PipelineState::Ref
 	};
 	 
 	if (reflection.objectVariablesBufferSize > 0)
-		addUniform(ObjectVariablesBufferIndex, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC);
+		addUniform(ObjectVariablesBufferIndex, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER);
 
 	if (reflection.materialVariablesBufferSize > 0)
-		addUniform(MaterialVariablesBufferIndex, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC);
+		addUniform(MaterialVariablesBufferIndex, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER);
 
 	if (reflection.passVariablesBufferSize > 0)
-		addUniform(PassVariablesBufferIndex, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC);
+		addUniform(PassVariablesBufferIndex, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER);
 
 	for (const auto& tex : reflection.fragmentTextures)
 		addUniform(tex.second, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER);
@@ -277,7 +274,7 @@ void VulkanPipelineStatePrivate::generatePipelineLayout(const PipelineState::Ref
 	VULKAN_CALL(vkCreatePipelineLayout(vulkan.device, &layoutInfo, nullptr, &layout));
 	
 	VkDescriptorPoolSize poolSizes[2] = {
-		{ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, static_cast<uint32_t>(bufferBindings.size()) },
+		{ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, static_cast<uint32_t>(bufferBindings.size()) },
 		{ VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, static_cast<uint32_t>(textureBindings.size()) }
 	};
 
@@ -296,7 +293,7 @@ void VulkanPipelineStatePrivate::generatePipelineLayout(const PipelineState::Ref
 
 	for (auto& wd : writeDescriptorSets)
 	{
-		if (wd.descriptorType == VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC)
+		if (wd.descriptorType == VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER)
 			wd.dstSet = descriptorSets[DescriptorSetClass::Buffers];
 		else if (wd.descriptorType == VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER)
 			wd.dstSet = descriptorSets[DescriptorSetClass::Textures];
