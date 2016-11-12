@@ -59,6 +59,9 @@
     <Filter Include="Source\rendering\vulkan\glslang">
       <UniqueIdentifier>{4575e941-a49d-4905-9633-d7ff84a6228a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\rendering\interface">
+      <UniqueIdentifier>{8ab294c6-fadc-420e-8493-fb71bd2ae147}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\et\sound\platform-dependent.cpp">
@@ -457,6 +460,45 @@
     <ClInclude Include="..\..\include\et\rendering\shadersource.cpp">
       <Filter>Source\rendering</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\et\core\heapcontroller.h">
+      <Filter>Source\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\core\heapcontroller.cpp">
+      <Filter>Source\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\interface\databuffer.h">
+      <Filter>Source\rendering\interface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\interface\indexbuffer.h">
+      <Filter>Source\rendering\interface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\interface\pipelinestate.h">
+      <Filter>Source\rendering\interface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\interface\program.h">
+      <Filter>Source\rendering\interface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\interface\renderer.h">
+      <Filter>Source\rendering\interface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\interface\renderpass.h">
+      <Filter>Source\rendering\interface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\interface\sampler.h">
+      <Filter>Source\rendering\interface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\interface\texture.h">
+      <Filter>Source\rendering\interface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\interface\vertexbuffer.h">
+      <Filter>Source\rendering\interface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\sharedconstbuffer.h">
+      <Filter>Source\rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\sharedconstbuffer.cpp">
+      <Filter>Source\rendering</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\et\sound\openal.h">
@@ -490,9 +532,6 @@
       <Filter>Source\scene3d</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\et\scene3d\lineelement.h">
-      <Filter>Source\scene3d</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\et\scene3d\material.parameters.h">
       <Filter>Source\scene3d</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\et\scene3d\mesh.h">
@@ -738,9 +777,6 @@
     <ClInclude Include="..\..\include\et\core\memoryallocator.h">
       <Filter>Source\core</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\et\core\mutex.h">
-      <Filter>Source\core</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\et\core\notifytimer.h">
       <Filter>Source\core</Filter>
     </ClInclude>
@@ -757,9 +793,6 @@
       <Filter>Source\core</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\et\core\serialization.h">
-      <Filter>Source\core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\et\core\sharedptr.h">
       <Filter>Source\core</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\et\core\singleton.h">

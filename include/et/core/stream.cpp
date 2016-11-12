@@ -13,17 +13,17 @@
 
 namespace et
 {
-	class InputStreamPrivate
+class InputStreamPrivate
+{
+public:
+	~InputStreamPrivate()
 	{
-	public:
-		~InputStreamPrivate()
-		{
-			etDestroyObject(stream);
-		}
+		etDestroyObject(stream);
+	}
 
-	public:
-		std::istream* stream = nullptr;
-	};
+public:
+	std::istream* stream = nullptr;
+};
 }
 
 using namespace et;

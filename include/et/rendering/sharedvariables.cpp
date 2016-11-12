@@ -10,18 +10,6 @@
 
 namespace et
 {
-/*
- * Layout
- *
- float4x4 viewProjection;
- float4x4 projection;
- float4x4 view;
- float4 cameraPosition;
- float4 cameraDirection;
- float4 cameraUp;
- float4 lightPosition;
- */
-
 enum : uint32_t
 {
 	SharedVariablesDataSize = AlignUpTo<3 * sizeof(mat4) + 4 * sizeof(vec4), 16>::value

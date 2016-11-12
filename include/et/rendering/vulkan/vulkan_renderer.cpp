@@ -19,7 +19,7 @@
 #include <et/rendering/vulkan/vulkan.h>
 #include <et/app/application.h>
 
-#define VULKAN_ENABLE_VALIDATION 1
+#define VULKAN_ENABLE_VALIDATION 0
 
 namespace et
 {
@@ -241,14 +241,15 @@ PipelineState::Pointer VulkanRenderer::acquirePipelineState(RenderPass::Pointer 
 	if (ps.invalid())
 	{
 		ps = VulkanPipelineState::Pointer::create(this, _private->vulkan());
-		ps->setRenderPass(pass);
+		ps->setPrimitiveType(vs->indexBuffer()->primitiveType());
+		ps->setInputLayout(vs->vertexBuffer()->declaration());
+		ps->setDepthState(mat->depthState());
 		ps->setBlendState(mat->blendState());
 		ps->setCullMode(mat->cullMode());
-		ps->setDepthState(mat->depthState());
-		ps->setInputLayout(vs->vertexBuffer()->declaration());
 		ps->setProgram(mat->program());
-		ps->setPrimitiveType(vs->indexBuffer()->primitiveType());
+		ps->setRenderPass(pass);
 		ps->build();
+		
 		_private->pipelineCache.addToCache(ps);
 	}
 

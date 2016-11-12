@@ -9,30 +9,30 @@
 
 namespace et
 {
-	enum StreamMode
-	{
-		StreamMode_Text,
-		StreamMode_Binary
-	};
+enum StreamMode
+{
+	StreamMode_Text,
+	StreamMode_Binary
+};
 
-	class InputStreamPrivate;
-	class InputStream : public Shared
-	{
-	public:
-		ET_DECLARE_POINTER(InputStream);
-		
-	public:
-		InputStream();
-		InputStream(const std::string& file, StreamMode mode);
+class InputStreamPrivate;
+class InputStream : public Shared
+{
+public:
+	ET_DECLARE_POINTER(InputStream);
 
-		~InputStream();
+public:
+	InputStream();
+	InputStream(const std::string& file, StreamMode mode);
 
-		bool valid();
-		bool invalid();
+	~InputStream();
 
-		std::istream& stream();
+	bool valid();
+	bool invalid();
 
-	private:
-		ET_DECLARE_PIMPL(InputStream, 32);
-	};
+	std::istream& stream();
+
+private:
+	ET_DECLARE_PIMPL(InputStream, 32);
+};
 }

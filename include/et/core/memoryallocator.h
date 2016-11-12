@@ -14,107 +14,88 @@
 
 namespace et
 {
-class MemoryAllocatorBase
-{
-public:
-#	if (ET_DEBUG)
-	static std::atomic<uint32_t> allocationIndex;
-	static void allocateOnBreaks(const std::set<uint32_t>&);
-#	endif
-public:
-	MemoryAllocatorBase() { }
-	virtual ~MemoryAllocatorBase() { }
-	
-	virtual void* allocate(size_t) = 0;
-	virtual void release(void* ptr) = 0;
-	
-	virtual bool validatePointer(void*, bool = true) { return false; }
-	
-	virtual void printInfo() const { }
-	
-private:
-	ET_DENY_COPY(MemoryAllocatorBase);
-};
-
+class BlockMemoryAllocator;
 class ObjectFactory
 {
 public:
-	ObjectFactory()
-		{ }
-	
-	ObjectFactory(MemoryAllocatorBase* al) :
-		_allocator(al) { }
-	
-	void setAllocator(MemoryAllocatorBase* al)
-		{ _allocator = al; }
-	
-	MemoryAllocatorBase* allocator()
-		{ return _allocator; }
-
-	const MemoryAllocatorBase* allocator() const
-		{ return _allocator; }
+	ObjectFactory() = default;
+		
+	void setAllocator(BlockMemoryAllocator* al);
+	BlockMemoryAllocator* allocator();
+	const BlockMemoryAllocator* allocator() const;
 	
 	template <typename O, typename ... args>
-	O* createObject(args&&...a)
-	{
-		ET_ASSERT(_allocator != nullptr);
-		return new (_allocator->allocate(sizeof(O))) O(a...);\
-	}
+	O* createObject(args&&...a);
 	
 	template <typename O>
-	void deleteObject(O* obj)
-	{
-		ET_ASSERT(_allocator != nullptr);
-		if (obj != nullptr)
-		{
-#			if (ET_DEBUG)
-			_allocator->validatePointer(obj);
-#			endif
-			
-			obj->~O();
-			_allocator->release(obj);
-		}
-	}
+	void deleteObject(O* obj);
 	
 private:
 	ET_DENY_COPY(ObjectFactory);
-	
-private:
-	MemoryAllocatorBase* _allocator = nullptr;
-};
-
-class DefaultMemoryAllocator : public MemoryAllocatorBase
-{
-	void* release(size_t sz)
-		{ return malloc(sz); }
-	
-	void release(void* ptr)
-		{ ::free(ptr); }
-	
-	bool validatePointer(void*, bool = true)
-		{ return true; }
-	
-	void printInfo() const
-		{ log::info("Not available for DefaultMemoryAllocator"); }
+	BlockMemoryAllocator* _allocator = nullptr;
 };
 
 class BlockMemoryAllocatorPrivate;
-class BlockMemoryAllocator : public MemoryAllocatorBase
+class BlockMemoryAllocator
 {
+public:
+#if (ET_DEBUG)
+	static void allocateOnBreaks(const std::set<uint32_t>&);
+	static std::atomic<uint32_t> allocationIndex;
+#endif
+
 public:
 	BlockMemoryAllocator();
 	~BlockMemoryAllocator();
 	
 	void* allocate(size_t);
+	bool validatePointer(void*, bool = true);
 	void release(void* ptr);
 
-	bool validatePointer(void*, bool = true);
-
 	void printInfo() const;
-	
 	void flushUnusedBlocks();
 			
 private:
 	ET_DECLARE_PIMPL(BlockMemoryAllocator, 256);
 };
+
+/*
+ * ObjectFactory implementation
+ */
+inline void ObjectFactory::setAllocator(BlockMemoryAllocator* al)
+{
+	_allocator = al;
+}
+
+inline BlockMemoryAllocator* ObjectFactory::allocator()
+{
+	return _allocator;
+}
+
+inline const BlockMemoryAllocator* ObjectFactory::allocator() const
+{
+	return _allocator;
+}
+
+template <typename O, typename ... args>
+inline O* ObjectFactory::createObject(args&&...a)
+{
+	ET_ASSERT(_allocator != nullptr);
+	return new (_allocator->allocate(sizeof(O))) O(a...); \
+}
+
+template <typename O>
+inline void ObjectFactory::deleteObject(O* obj)
+{
+	ET_ASSERT(_allocator != nullptr);
+	if (obj != nullptr)
+	{
+#	if (ET_DEBUG)
+		_allocator->validatePointer(obj);
+#	endif
+		obj->~O();
+		_allocator->release(obj);
+	}
+}
+
 }

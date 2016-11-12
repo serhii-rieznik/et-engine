@@ -11,6 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\include\et\core\heapcontroller.h" />
     <ClInclude Include="..\..\include\et\rendering\base\helpers.cpp" />
     <ClInclude Include="..\..\include\et\rendering\base\indexarray.cpp" />
     <ClInclude Include="..\..\include\et\rendering\base\material.cpp" />
@@ -36,11 +37,21 @@
     <ClInclude Include="..\..\include\et\rendering\base\vertexstream.h" />
     <ClInclude Include="..\..\include\et\rendering\constbuffer.h" />
     <ClInclude Include="..\..\include\et\rendering\framebuffer.h" />
+    <ClInclude Include="..\..\include\et\rendering\interface\databuffer.h" />
+    <ClInclude Include="..\..\include\et\rendering\interface\indexbuffer.h" />
+    <ClInclude Include="..\..\include\et\rendering\interface\pipelinestate.h" />
+    <ClInclude Include="..\..\include\et\rendering\interface\program.h" />
+    <ClInclude Include="..\..\include\et\rendering\interface\renderer.h" />
+    <ClInclude Include="..\..\include\et\rendering\interface\renderpass.h" />
+    <ClInclude Include="..\..\include\et\rendering\interface\sampler.h" />
+    <ClInclude Include="..\..\include\et\rendering\interface\texture.h" />
+    <ClInclude Include="..\..\include\et\rendering\interface\vertexbuffer.h" />
     <ClInclude Include="..\..\include\et\rendering\rendercontext.h" />
     <ClInclude Include="..\..\include\et\rendering\rendercontextparams.h" />
     <ClInclude Include="..\..\include\et\rendering\rendering.h" />
     <ClInclude Include="..\..\include\et\rendering\renderingcaps.h" />
     <ClInclude Include="..\..\include\et\rendering\shadersource.h" />
+    <ClInclude Include="..\..\include\et\rendering\sharedconstbuffer.h" />
     <ClInclude Include="..\..\include\et\rendering\sharedvariables.h" />
     <ClInclude Include="..\..\include\et\rendering\vulkan\glslang\vulkan_glslang.h" />
     <ClInclude Include="..\..\include\et\rendering\vulkan\vulkan_databuffer.cpp" />
@@ -174,6 +185,8 @@
     <ClInclude Include="..\..\include\et\rendering\rendering.cpp" />
     <ClInclude Include="..\..\include\et\rendering\shadersource.cpp" />
     <ClInclude Include="..\..\include\et\rendering\sharedvariables.cpp" />
+    <ClInclude Include="..\..\include\et\core\heapcontroller.cpp" />
+    <ClInclude Include="..\..\include\et\rendering\sharedconstbuffer.cpp" />
     <ClCompile Include="et_info.cpp">
       <FileType>CppHeader</FileType>
     </ClCompile>
@@ -219,14 +232,12 @@
     <ClInclude Include="..\..\include\et\core\log.h" />
     <ClInclude Include="..\..\include\et\core\memory.h" />
     <ClInclude Include="..\..\include\et\core\memoryallocator.h" />
-    <ClInclude Include="..\..\include\et\core\mutex.h" />
     <ClInclude Include="..\..\include\et\core\notifytimer.h" />
     <ClInclude Include="..\..\include\et\core\object.h" />
     <ClInclude Include="..\..\include\et\core\objectscache.h" />
     <ClInclude Include="..\..\include\et\core\rawdataaccessor.h" />
     <ClInclude Include="..\..\include\et\core\sequence.h" />
     <ClInclude Include="..\..\include\et\core\serialization.h" />
-    <ClInclude Include="..\..\include\et\core\sharedptr.h" />
     <ClInclude Include="..\..\include\et\core\singleton.h" />
     <ClInclude Include="..\..\include\et\core\staticdatastorage.h" />
     <ClInclude Include="..\..\include\et\core\stream.h" />
@@ -291,7 +302,6 @@
     <ClInclude Include="..\..\include\et\scene3d\elementcontainer.h" />
     <ClInclude Include="..\..\include\et\scene3d\light.h" />
     <ClInclude Include="..\..\include\et\scene3d\lineelement.h" />
-    <ClInclude Include="..\..\include\et\scene3d\material.parameters.h" />
     <ClInclude Include="..\..\include\et\scene3d\mesh.h" />
     <ClInclude Include="..\..\include\et\scene3d\meshdeformer.h" />
     <ClInclude Include="..\..\include\et\scene3d\modelloader.h" />
