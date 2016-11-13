@@ -50,7 +50,7 @@
     <ClInclude Include="..\..\include\et\rendering\rendering.h" />
     <ClInclude Include="..\..\include\et\rendering\renderingcaps.h" />
     <ClInclude Include="..\..\include\et\rendering\shadersource.h" />
-    <ClInclude Include="..\..\include\et\rendering\sharedconstbuffer.h" />
+    <ClInclude Include="..\..\include\et\rendering\constantbuffer.h" />
     <ClInclude Include="..\..\include\et\rendering\vulkan\glslang\vulkan_glslang.h" />
     <ClInclude Include="..\..\include\et\rendering\vulkan\vulkan_databuffer.cpp" />
     <ClInclude Include="..\..\include\et\rendering\vulkan\vulkan_databuffer.h" />
@@ -182,7 +182,7 @@
     <ClInclude Include="..\..\include\et\rendering\rendering.cpp" />
     <ClInclude Include="..\..\include\et\rendering\shadersource.cpp" />
     <ClInclude Include="..\..\include\et\core\heapcontroller.cpp" />
-    <ClInclude Include="..\..\include\et\rendering\sharedconstbuffer.cpp" />
+    <ClInclude Include="..\..\include\et\rendering\constantbuffer.cpp" />
     <ClCompile Include="et_info.cpp">
       <FileType>CppHeader</FileType>
     </ClCompile>

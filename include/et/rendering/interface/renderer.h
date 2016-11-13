@@ -35,6 +35,9 @@ public:
 	MaterialLibrary& sharedMaterialLibrary()
 		{ return _sharedMaterialLibrary; }
 
+	ConstantBuffer& sharedConstantBuffer() 
+		{ return _sharedConstantBuffer; }
+
 	virtual RenderingAPI api() const = 0;
 
 	virtual void init(const RenderContextParameters& params) = 0;
@@ -85,6 +88,7 @@ protected:
 private:
 	RenderContext* _rc = nullptr;
 	MaterialLibrary _sharedMaterialLibrary;
+	ConstantBuffer _sharedConstantBuffer;
 	Texture::Pointer _defaultTexture;
 	Sampler::Pointer _defaultSampler;
 };
@@ -131,12 +135,14 @@ inline Sampler::Pointer RenderInterface::defaultSampler()
 
 inline void RenderInterface::initInternalStructures()
 {
+	_sharedConstantBuffer.init(this);
 	_sharedMaterialLibrary.init(this);
 }
 
 inline void RenderInterface::shutdownInternalStructures()
 {
 	_sharedMaterialLibrary.shutdown();
+	_sharedConstantBuffer.shutdown();
 }
 
 }

@@ -2,7 +2,7 @@
 
 #include "../rendering/rendering.cpp"
 #include "../rendering/shadersource.cpp"
-#include "../rendering/sharedconstbuffer.cpp"
+#include "../rendering/constantbuffer.cpp"
 
 #include "../rendering/base/helpers.cpp"
 #include "../rendering/base/indexarray.cpp"

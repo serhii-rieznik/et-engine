@@ -9,7 +9,7 @@
 
 #include <et/camera/camera.h>
 #include <et/rendering/base/renderbatch.h>
-#include <et/rendering/sharedconstbuffer.h>
+#include <et/rendering/constantbuffer.h>
 
 namespace et
 {
@@ -58,22 +58,22 @@ public:
 	virtual void end() = 0;
 
 	const ConstructionInfo& info() const;
-	SharedConstBuffer& sharedConstBuffer();
+	ConstantBuffer& dynamicConstantBuffer();
 
 private:
 	ConstructionInfo _info;
-	SharedConstBuffer _sharedConstBuffer;
+	ConstantBuffer _dynamicConstantBuffer;
 };
 
 inline RenderPass::RenderPass(RenderInterface* renderer, const ConstructionInfo& info) :
 	_info(info)
 {
-	_sharedConstBuffer.init(renderer);
+	_dynamicConstantBuffer.init(renderer);
 }
 
 inline RenderPass::~RenderPass()
 {
-	_sharedConstBuffer.shutdown();
+	_dynamicConstantBuffer.shutdown();
 }
 
 inline const RenderPass::ConstructionInfo& RenderPass::info() const
@@ -81,9 +81,9 @@ inline const RenderPass::ConstructionInfo& RenderPass::info() const
 	return _info;
 }
 
-inline SharedConstBuffer& RenderPass::sharedConstBuffer()
+inline ConstantBuffer& RenderPass::dynamicConstantBuffer()
 {
-	return _sharedConstBuffer;
+	return _dynamicConstantBuffer;
 }
 
 }

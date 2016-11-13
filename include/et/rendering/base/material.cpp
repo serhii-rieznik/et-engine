@@ -343,7 +343,8 @@ void MaterialInstance::buildUsedProperties()
 {
 	_usedProperties.clear();
 
-	auto setFunc = [this](const mtl::OptionalValue& p) {
+	auto setFunc = [this](const mtl::OptionalValue& p) 
+	{
 		if (p.isSet())
 		{
 			ET_ASSERT(p.size <= sizeof(MaterialPropertyHolder::data));

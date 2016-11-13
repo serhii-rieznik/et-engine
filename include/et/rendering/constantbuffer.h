@@ -14,19 +14,19 @@
 namespace et
 {
 
-class SharedConstBufferPrivate;
-class SharedConstBuffer
+class ConstantBufferPrivate;
+class ConstantBuffer
 {
 public:
 	enum
 	{
 		Capacity = 16 * 1024 * 1024,
-		Granularity = 512
+		Granularity = 256
 	};
 
 public:
-	SharedConstBuffer();
-	~SharedConstBuffer();
+	ConstantBuffer();
+	~ConstantBuffer();
 
 	void init(RenderInterface*);
 	void shutdown();
@@ -40,7 +40,7 @@ public:
 	void free(uint8_t*);
 
 private:
-	ET_DECLARE_PIMPL(SharedConstBuffer, 256);
+	ET_DECLARE_PIMPL(ConstantBuffer, 256);
 };
 
 }

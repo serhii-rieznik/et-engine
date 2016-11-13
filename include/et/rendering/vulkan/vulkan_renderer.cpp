@@ -19,7 +19,7 @@
 #include <et/rendering/vulkan/vulkan.h>
 #include <et/app/application.h>
 
-#define VULKAN_ENABLE_VALIDATION 0
+#define VULKAN_ENABLE_VALIDATION 1
 
 namespace et
 {
@@ -172,6 +172,20 @@ void VulkanRenderer::init(const RenderContextParameters& params)
 	serviceBufferInfo.commandBufferCount = 1;
 	VULKAN_CALL(vkAllocateCommandBuffers(_private->device, &serviceBufferInfo, &_private->serviceCommandBuffer));
 
+	uint32_t defaultPoolSize = 1024;
+	VkDescriptorPoolSize poolSizes[] = {
+		{ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, defaultPoolSize },
+		{ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, defaultPoolSize },
+		{ VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, defaultPoolSize }
+	};
+
+	VkDescriptorPoolCreateInfo poolInfo = { VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO };
+	poolInfo.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
+	poolInfo.maxSets = defaultPoolSize;
+	poolInfo.poolSizeCount = sizeof(poolSizes) / sizeof(poolSizes[0]);
+	poolInfo.pPoolSizes = poolSizes;
+	VULKAN_CALL(vkCreateDescriptorPool(_private->device, &poolInfo, nullptr, &_private->descriptprPool));
+
 	_private->swapchain.create(_private->vulkan());
 	
 	initInternalStructures();
@@ -183,6 +197,9 @@ void VulkanRenderer::shutdown()
 {
 	_private->pipelineCache.clear();
 	shutdownInternalStructures();
+	
+	vkDestroyDescriptorPool(_private->device, _private->descriptprPool, nullptr);
+	// TODO : clean up Vulkan
 }
 
 void VulkanRenderer::begin()

@@ -6,11 +6,11 @@
  */
 
 #include <et/rendering/interface/renderer.h>
-#include <et/rendering/sharedconstbuffer.h>
+#include <et/rendering/constantbuffer.h>
 
 namespace et
 {
-class SharedConstBufferPrivate
+class ConstantBufferPrivate
 {
 public:
 	HeapController heap;
@@ -21,17 +21,17 @@ public:
 	Vector<uint8_t*> dynamicAllocations;
 };
 
-SharedConstBuffer::SharedConstBuffer()
+ConstantBuffer::ConstantBuffer()
 {
-	ET_PIMPL_INIT(SharedConstBuffer);
+	ET_PIMPL_INIT(ConstantBuffer);
 }
 
-SharedConstBuffer::~SharedConstBuffer()
+ConstantBuffer::~ConstantBuffer()
 {
-	ET_PIMPL_FINALIZE(SharedConstBuffer);
+	ET_PIMPL_FINALIZE(ConstantBuffer);
 }
 
-void SharedConstBuffer::init(RenderInterface* renderer)
+void ConstantBuffer::init(RenderInterface* renderer)
 {
 	_private->heap.init(Capacity, Granularity);
 	_private->heapInfo.resize(_private->heap.requiredInfoSize());
@@ -44,7 +44,7 @@ void SharedConstBuffer::init(RenderInterface* renderer)
 	_private->dynamicAllocations.reserve(1024);
 }
 
-void SharedConstBuffer::shutdown()
+void ConstantBuffer::shutdown()
 {
 	_private->buffer.reset(nullptr);
 	_private->heap.clear();
@@ -52,12 +52,12 @@ void SharedConstBuffer::shutdown()
 	_private->heapInfo.resize(0);
 }
 
-DataBuffer::Pointer SharedConstBuffer::buffer() const
+DataBuffer::Pointer ConstantBuffer::buffer() const
 {
 	return _private->buffer;
 }
 
-void SharedConstBuffer::flush()
+void ConstantBuffer::flush()
 {
 	_private->buffer->setData(_private->localData.begin(), 0, _private->localData.size());
 	
@@ -67,7 +67,7 @@ void SharedConstBuffer::flush()
 	_private->dynamicAllocations.clear();
 }
 
-uint8_t* SharedConstBuffer::staticAllocate(uint32_t size, uint32_t& offset)
+uint8_t* ConstantBuffer::staticAllocate(uint32_t size, uint32_t& offset)
 {
 	offset = 0;
 	
@@ -77,13 +77,13 @@ uint8_t* SharedConstBuffer::staticAllocate(uint32_t size, uint32_t& offset)
 	return _private->localData.begin() + offset;
 }
 
-uint8_t* SharedConstBuffer::dynamicAllocate(uint32_t size, uint32_t& offset)
+uint8_t* ConstantBuffer::dynamicAllocate(uint32_t size, uint32_t& offset)
 {
 	_private->dynamicAllocations.emplace_back(staticAllocate(size, offset));
 	return _private->dynamicAllocations.back();
 }
 
-void SharedConstBuffer::free(uint8_t* ptr)
+void ConstantBuffer::free(uint8_t* ptr)
 {
 	ET_ASSERT(ptr >= _private->localData.begin());
 	ET_ASSERT(ptr < _private->localData.end());

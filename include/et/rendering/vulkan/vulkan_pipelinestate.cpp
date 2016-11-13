@@ -31,13 +31,12 @@ public:
 		VkPipelineVertexInputStateCreateInfo& vertexInfo, Vector<VkVertexInputAttributeDescription>& attribs,
 		VkVertexInputBindingDescription& binding);
 
-	void generatePipelineLayout(const PipelineState::Reflection& reflection);
+	void generatePipelineLayout(const PipelineState::Reflection& reflection, VulkanRenderPass::Pointer pass);
 
 	VulkanRenderer* renderer = nullptr;
 	VulkanState& vulkan;
 
 	Vector<VkWriteDescriptorSet> writeDescriptorSets;
-	Vector<VkDescriptorBufferInfo> bufferInfoPool;
 	Vector<VkDescriptorImageInfo> textureInfoPool;
 
 	uint32_t objectVariablesIndex = InvalidIndex;
@@ -54,10 +53,8 @@ VulkanPipelineState::~VulkanPipelineState()
 {
 	vkDestroyPipeline(_private->vulkan.device, _private->pipeline, nullptr);
 	vkDestroyPipelineLayout(_private->vulkan.device, _private->layout, nullptr);
-	vkDestroyDescriptorSetLayout(_private->vulkan.device, _private->descriptorSetLayouts[DescriptorSetClass::Buffers], nullptr);
-	vkDestroyDescriptorSetLayout(_private->vulkan.device, _private->descriptorSetLayouts[DescriptorSetClass::Textures], nullptr);
-	vkFreeDescriptorSets(_private->vulkan.device, _private->descriptprPool, DescriptorSetClass::Count, _private->descriptorSets);
-	vkDestroyDescriptorPool(_private->vulkan.device, _private->descriptprPool, nullptr);
+	vkDestroyDescriptorSetLayout(_private->vulkan.device, _private->texturesSetLayout, nullptr);
+	vkFreeDescriptorSets(_private->vulkan.device, _private->vulkan.descriptprPool, 1, &_private->texturesSet);
 	ET_PIMPL_FINALIZE(VulkanPipelineState);
 }
 
@@ -107,14 +104,13 @@ void VulkanPipelineState::build()
 
 	printReflection();
 	
-	_private->generatePipelineLayout(reflection);
+	VulkanRenderPass::Pointer pass = renderPass();
+	_private->generatePipelineLayout(reflection, pass);
 
 	VkVertexInputBindingDescription binding = { };
 	Vector<VkVertexInputAttributeDescription> attribs;
 	VkPipelineVertexInputStateCreateInfo vertexInfo = { };
 	_private->generateInputLayout(inputLayout(), vertexInfo, attribs, binding);
-
-	VulkanRenderPass::Pointer pass = renderPass();
 
 	VkPipelineViewportStateCreateInfo viewportState = { VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO }; 
 	viewportState.scissorCount = 1;
@@ -149,154 +145,111 @@ void VulkanPipelineState::build()
 
 void VulkanPipelineState::bind(VulkanRenderPass::Pointer pass, MaterialInstance::Pointer& material)
 {
+	vkCmdBindPipeline(pass->nativeRenderPass().commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _private->pipeline);
+
 	uint32_t objectBufferOffset = 0;
 	if (reflection.objectVariablesBufferSize > 0)
 	{
-		uint8_t* dst = pass->sharedConstBuffer().dynamicAllocate(reflection.objectVariablesBufferSize, objectBufferOffset);
+		uint8_t* dst = pass->dynamicConstantBuffer().dynamicAllocate(reflection.objectVariablesBufferSize, objectBufferOffset);
 		memcpy(dst, objectVariablesBuffer.data(), reflection.objectVariablesBufferSize);
 	}
 
-	if (_private->writeDescriptorSets.size() > 0)
+	VkDescriptorSet descriptors[DescriptorSetClass::Count] = 
 	{
-		uint32_t bufferInfoIndex = 0;
-		uint32_t texInfoIndex = 0;
-		for (auto& wd : _private->writeDescriptorSets)
-		{
-			if (wd.descriptorType == VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER)
-			{
-				uint32_t offset = 0;
-				uint32_t length = 0;
-				VulkanDataBuffer::Pointer sharedBuffer;
-				if (wd.dstBinding == ObjectVariablesBufferIndex)
-				{
-					sharedBuffer = pass->sharedConstBuffer().buffer();
-					offset = objectBufferOffset;
-					length = reflection.objectVariablesBufferSize;
-				}
-				else if (wd.dstBinding == MaterialVariablesBufferIndex)
-				{
-					length = reflection.materialVariablesBufferSize;
-				}
-				else if (wd.dstBinding == PassVariablesBufferIndex)
-				{
-					sharedBuffer = pass->sharedConstBuffer().buffer();
-					length = reflection.passVariablesBufferSize;
-				}
-				_private->bufferInfoPool[bufferInfoIndex].buffer = sharedBuffer->nativeBuffer().buffer();
-				_private->bufferInfoPool[bufferInfoIndex].offset = offset;
-				_private->bufferInfoPool[bufferInfoIndex].range = length;
-				wd.pBufferInfo = _private->bufferInfoPool.data() + bufferInfoIndex;
-				++bufferInfoIndex;
-			}
-			else if (wd.descriptorType == VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER)
-			{
-				MaterialTexture textureId = static_cast<MaterialTexture>(wd.dstBinding);
-				
-				VulkanTexture::Pointer texture = material->texture(textureId);
-				if (texture.invalid())
-					texture = _private->renderer->defaultTexture();
+		pass->nativeRenderPass().dynamicDescriptorSet,
+		_private->texturesSet
+	};
+	uint32_t dynamicOffsets[] = { objectBufferOffset, 0 };
 
-				VulkanSampler::Pointer sampler = material->sampler(textureId);
-				if (sampler.invalid())
-					sampler = _private->renderer->defaultSampler();
-
-				_private->textureInfoPool[texInfoIndex].imageLayout = texture->nativeTexture().layout;
-				_private->textureInfoPool[texInfoIndex].imageView = texture->nativeTexture().imageView;
-				_private->textureInfoPool[texInfoIndex].sampler = sampler->nativeSampler().sampler;
-				wd.pImageInfo = _private->textureInfoPool.data() + texInfoIndex;
-				++texInfoIndex;
-			}
-		}
-
-		vkUpdateDescriptorSets(_private->vulkan.device, static_cast<uint32_t>(_private->writeDescriptorSets.size()), 
-			_private->writeDescriptorSets.data(), 0, nullptr);
-	}
-
-	vkCmdBindPipeline(pass->nativeRenderPass().commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _private->pipeline);
-	
-	vkCmdBindDescriptorSets(pass->nativeRenderPass().commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _private->layout, 
-		0, DescriptorSetClass::Count, _private->descriptorSets, 0, nullptr);
+	vkCmdBindDescriptorSets(pass->nativeRenderPass().commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, 
+		_private->layout, 0, 2, descriptors, 2, dynamicOffsets);
 }
 
-void VulkanPipelineStatePrivate::generatePipelineLayout(const PipelineState::Reflection& reflection)
+void VulkanPipelineStatePrivate::generatePipelineLayout(const PipelineState::Reflection& reflection, VulkanRenderPass::Pointer pass)
 {
-	Vector<VkDescriptorSetLayoutBinding> bufferBindings;
 	Vector<VkDescriptorSetLayoutBinding> textureBindings;
 
-	bufferBindings.reserve(8);
 	textureBindings.reserve(8);
-	bufferInfoPool.resize(8);
 	textureInfoPool.resize(8);
 
-	auto addUniform = [&](uint32_t bindingIndex, VkDescriptorType descType) {
-		auto& bindings = (descType == VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER) ? bufferBindings : textureBindings;
+	auto addUniform = [&](uint32_t bindingIndex, VkDescriptorType descType)
+	{
+		Vector<VkDescriptorSetLayoutBinding>* bindings = nullptr;
+		switch (descType)
+		{
+		case VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER:
+			bindings = &textureBindings;
+			break;
+		default:
+			ET_FAIL("Invalid or unsupported binding type provided");
+			break;
+		}
 
-		bindings.emplace_back();
-		bindings.back().binding = bindingIndex;
-		bindings.back().stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
-		bindings.back().descriptorType = descType;
-		bindings.back().descriptorCount = 1;
+		bindings->emplace_back();
+		bindings->back().binding = bindingIndex;
+		bindings->back().stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
+		bindings->back().descriptorType = descType;
+		bindings->back().descriptorCount = 1;
 
-		writeDescriptorSets.emplace_back();
-		writeDescriptorSets.back().sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-		writeDescriptorSets.back().descriptorCount = bindings.back().descriptorCount;
-		writeDescriptorSets.back().descriptorType = bindings.back().descriptorType;
-		writeDescriptorSets.back().dstBinding = bindings.back().binding;
+		if (descType == VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER)
+		{
+			writeDescriptorSets.emplace_back();
+			writeDescriptorSets.back().sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+			writeDescriptorSets.back().descriptorCount = bindings->back().descriptorCount;
+			writeDescriptorSets.back().descriptorType = bindings->back().descriptorType;
+			writeDescriptorSets.back().dstBinding = bindings->back().binding;
+		}
 	};
-	 
-	if (reflection.objectVariablesBufferSize > 0)
-		addUniform(ObjectVariablesBufferIndex, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER);
-
-	if (reflection.materialVariablesBufferSize > 0)
-		addUniform(MaterialVariablesBufferIndex, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER);
-
-	if (reflection.passVariablesBufferSize > 0)
-		addUniform(PassVariablesBufferIndex, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER);
 
 	for (const auto& tex : reflection.fragmentTextures)
 		addUniform(tex.second, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER);
 
+	VkDescriptorSetLayoutCreateInfo layoutSetInfo = { VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO };
+	layoutSetInfo.bindingCount = static_cast<uint32_t>(textureBindings.size());
+	layoutSetInfo.pBindings = textureBindings.data();
+	VULKAN_CALL(vkCreateDescriptorSetLayout(vulkan.device, &layoutSetInfo, nullptr, &texturesSetLayout));
+
+	VkDescriptorSetLayout layouts[] = 
 	{
-		VkDescriptorSetLayoutCreateInfo buffersSetInfo = { VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO };
-		buffersSetInfo.bindingCount = static_cast<uint32_t>(bufferBindings.size());
-		buffersSetInfo.pBindings = bufferBindings.data();
-		VULKAN_CALL(vkCreateDescriptorSetLayout(vulkan.device, &buffersSetInfo, nullptr, descriptorSetLayouts + DescriptorSetClass::Buffers));
-
-		VkDescriptorSetLayoutCreateInfo texturesSetInfo = { VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO };
-		texturesSetInfo.bindingCount = static_cast<uint32_t>(textureBindings.size());
-		texturesSetInfo.pBindings = textureBindings.data();
-		VULKAN_CALL(vkCreateDescriptorSetLayout(vulkan.device, &texturesSetInfo, nullptr, descriptorSetLayouts + DescriptorSetClass::Textures));
-	}
-
-	VkPipelineLayoutCreateInfo layoutInfo = { VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO };
-	layoutInfo.pSetLayouts = descriptorSetLayouts;
-	layoutInfo.setLayoutCount = DescriptorSetClass::Count;
-	VULKAN_CALL(vkCreatePipelineLayout(vulkan.device, &layoutInfo, nullptr, &layout));
-	
-	VkDescriptorPoolSize poolSizes[2] = {
-		{ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, static_cast<uint32_t>(bufferBindings.size()) },
-		{ VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, static_cast<uint32_t>(textureBindings.size()) }
+		pass->nativeRenderPass().dynamicDescriptorSetLayout,
+		texturesSetLayout
 	};
 
-	VkDescriptorPoolCreateInfo poolInfo = { VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO };
-	poolInfo.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
-	poolInfo.maxSets = DescriptorSetClass::Count;
-	poolInfo.poolSizeCount = sizeof(poolSizes) / sizeof(poolSizes[0]);
-	poolInfo.pPoolSizes = poolSizes;
-	VULKAN_CALL(vkCreateDescriptorPool(vulkan.device, &poolInfo, nullptr, &descriptprPool));
+	VkPipelineLayoutCreateInfo layoutInfo = { VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO };
+	layoutInfo.pSetLayouts = layouts;
+	layoutInfo.setLayoutCount = sizeof(layouts) / sizeof(layouts[0]);
+	VULKAN_CALL(vkCreatePipelineLayout(vulkan.device, &layoutInfo, nullptr, &layout));
 
 	VkDescriptorSetAllocateInfo setInfo = { VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO };
-	setInfo.descriptorSetCount = DescriptorSetClass::Count;
-	setInfo.pSetLayouts = descriptorSetLayouts;
-	setInfo.descriptorPool = descriptprPool;
-	VULKAN_CALL(vkAllocateDescriptorSets(vulkan.device, &setInfo, descriptorSets));
+	setInfo.descriptorPool = vulkan.descriptprPool;
+	setInfo.pSetLayouts = &texturesSetLayout;
+	setInfo.descriptorSetCount = 1;
+	VULKAN_CALL(vkAllocateDescriptorSets(vulkan.device, &setInfo, &texturesSet));
 
 	for (auto& wd : writeDescriptorSets)
 	{
-		if (wd.descriptorType == VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER)
-			wd.dstSet = descriptorSets[DescriptorSetClass::Buffers];
-		else if (wd.descriptorType == VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER)
-			wd.dstSet = descriptorSets[DescriptorSetClass::Textures];
+		wd.dstSet = texturesSet;
+	}
+
+
+	if (writeDescriptorSets.size() > 0)
+	{
+		uint32_t texInfoIndex = 0;
+		for (auto& wd : writeDescriptorSets)
+		{
+			if (wd.descriptorType == VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER)
+			{
+				MaterialTexture textureId = static_cast<MaterialTexture>(wd.dstBinding);
+				VulkanTexture::Pointer texture = renderer->defaultTexture();
+				VulkanSampler::Pointer sampler = renderer->defaultSampler();
+				textureInfoPool[texInfoIndex].imageLayout = texture->nativeTexture().layout;
+				textureInfoPool[texInfoIndex].imageView = texture->nativeTexture().imageView;
+				textureInfoPool[texInfoIndex].sampler = sampler->nativeSampler().sampler;
+				wd.pImageInfo = textureInfoPool.data() + texInfoIndex;
+				++texInfoIndex;
+			}
+		}
+		vkUpdateDescriptorSets(vulkan.device, static_cast<uint32_t>(writeDescriptorSets.size()), writeDescriptorSets.data(), 0, nullptr);
 	}
 }
 

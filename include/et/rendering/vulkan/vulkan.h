@@ -68,6 +68,7 @@ struct VulkanState
 	VkPhysicalDevice physicalDevice = nullptr;
 	VkDevice device = nullptr;
 	VkCommandPool commandPool = nullptr;
+	VkDescriptorPool descriptprPool = nullptr;
 	VkQueue queue = nullptr;
 	VkPipelineCache pipelineCache = nullptr;
 	VkCommandBuffer serviceCommandBuffer = nullptr;
@@ -104,6 +105,10 @@ struct VulkanNativeRenderPass
 	VkFramebuffer framebuffer = nullptr;
 	VkCommandBuffer commandBuffer = nullptr;
 	VkRenderPass renderPass = nullptr;
+
+	VkDescriptorSetLayout dynamicDescriptorSetLayout = nullptr;
+	VkDescriptorSet dynamicDescriptorSet = nullptr;
+	
 	VkViewport viewport { };
 	VkRect2D scissor { };
 };
@@ -119,9 +124,8 @@ struct VulkanNativePipeline
 {
 	VkPipeline pipeline = nullptr;
 	VkPipelineLayout layout = nullptr;
-	VkDescriptorPool descriptprPool = nullptr;
-	VkDescriptorSetLayout descriptorSetLayouts[DescriptorSetClass::Count] { };
-	VkDescriptorSet descriptorSets[DescriptorSetClass::Count] { };
+	VkDescriptorSetLayout texturesSetLayout = nullptr;
+	VkDescriptorSet texturesSet = nullptr;
 };
 
 struct VulkanNativeTexture
