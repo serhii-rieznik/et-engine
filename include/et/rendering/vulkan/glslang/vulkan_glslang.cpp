@@ -118,10 +118,10 @@ const TBuiltInResource defaultBuiltInResource = {
 		/* .generalConstantMatrixVectorIndexing = */ 1,
 	} };
 
-void buildProgramReflection(glslang::TProgram*, PipelineState::Reflection& reflection);
+void buildProgramReflection(glslang::TProgram*, Program::Reflection& reflection);
 
 bool glslToSPIRV(const std::string& vertexSource, const std::string& fragmentSource,
-	std::vector<uint32_t>& vertexBin, std::vector<uint32_t>& fragmentBin, PipelineState::Reflection& reflection)
+	std::vector<uint32_t>& vertexBin, std::vector<uint32_t>& fragmentBin, Program::Reflection& reflection)
 {
 	glslang::TProgram* program = nullptr;
 	EShMessages messages = static_cast<EShMessages>(EShMsgVulkanRules | EShMsgSpvRules);
@@ -227,7 +227,7 @@ bool glslToSPIRV(const std::string& vertexSource, const std::string& fragmentSou
 	return true;
 }
 
-void buildProgramReflection(glslang::TProgram* program, PipelineState::Reflection& reflection)
+void buildProgramReflection(glslang::TProgram* program, Program::Reflection& reflection)
 {
 	reflection.inputLayout.clear();
 	int attribs = program->getNumLiveAttributes();
@@ -287,10 +287,10 @@ void buildProgramReflection(glslang::TProgram* program, PipelineState::Reflectio
 				const String& samplerName = mtl::materialSamplerToString(tex);
 
 				uint32_t binding = static_cast<uint32_t>(tex);
-				reflection.vertexTextures.emplace(uniformName, binding);
-				reflection.fragmentTextures.emplace(uniformName, binding);
-				reflection.vertexSamplers.emplace(samplerName, binding);
-				reflection.fragmentSamplers.emplace(samplerName, binding);
+				reflection.textures.vertexTextures.emplace(uniformName, binding);
+				reflection.textures.fragmentTextures.emplace(uniformName, binding);
+				reflection.textures.vertexSamplers.emplace(samplerName, binding);
+				reflection.textures.fragmentSamplers.emplace(samplerName, binding);
 			}
 			else
 			{

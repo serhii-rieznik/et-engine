@@ -2,6 +2,7 @@
 #include <et/core/conversion.h>
 #include <et/core/json.h>
 #include <et/rendering/rendercontext.h>
+#include <et/core/hardware.h>
 #include "MainController.h"
 
 void demo::MainController::setApplicationParameters(et::ApplicationParameters& params)
@@ -12,7 +13,7 @@ void demo::MainController::setApplicationParameters(et::ApplicationParameters& p
     params.renderingAPI = et::RenderingAPI::Metal;
 #endif
 	
-    params.context.size = et::vec2i(1024, 640);
+    params.context.size = 4 * et::currentScreen().frame.size() / 5;
 }
 
 void demo::MainController::setRenderContextParameters(et::RenderContextParameters& params)

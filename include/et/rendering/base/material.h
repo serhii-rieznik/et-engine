@@ -96,31 +96,27 @@ public:
 public:
 	Material::Pointer base();
 
-	const MaterialTexturesCollection& usedTextures();
-	const MaterialSamplersCollection& usedSamplers();
-	const MaterialPropertiesCollection& usedProperties();
+	TextureSet::Pointer textureSet();
+	uint32_t sharedConstantBufferOffset();
 
-	void invalidateUsedTextures();
-	void invalidateUsedSamplers();
-	void invalidateUsedProperties();
+	void invalidateTextureSet();
+	void invalidateConstantBuffer();
 
 private:
 	friend class Material;
 	friend class ObjectFactory;
 	MaterialInstance(Material::Pointer base);
 
-	void buildUsedTextures();
-	void buildUsedSamplers();
-	void buildUsedProperties();
+	void buildTextureSet();
+	void buildConstantBuffer();
 
 private:
 	Material::Pointer _base;
-	MaterialTexturesCollection _usedTextures;
-	MaterialSamplersCollection _usedSamplers;
-	MaterialPropertiesCollection _usedProperties;
-	bool _texturesValid = false;
-	bool _samplersValid = false;
-	bool _propertiesValid = false;
+	TextureSet::Pointer _textureSet;
+	uint8_t* _constBufferData = nullptr;
+	uint32_t _constBufferOffset = 0;
+	bool _textureSetValid = false;
+	bool _constantBufferValid = false;
 };
 
 template <class T>

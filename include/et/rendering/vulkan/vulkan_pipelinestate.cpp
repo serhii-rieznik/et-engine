@@ -31,7 +31,7 @@ public:
 		VkPipelineVertexInputStateCreateInfo& vertexInfo, Vector<VkVertexInputAttributeDescription>& attribs,
 		VkVertexInputBindingDescription& binding);
 
-	void generatePipelineLayout(const PipelineState::Reflection& reflection, VulkanRenderPass::Pointer pass);
+	void generatePipelineLayout(const Program::Reflection& reflection, VulkanRenderPass::Pointer pass);
 
 	VulkanRenderer* renderer = nullptr;
 	VulkanState& vulkan;
@@ -99,13 +99,10 @@ void VulkanPipelineState::build()
 	}
 	
 	VulkanProgram::Pointer prog = program();
-	reflection = prog->reflection();
 	buildBuffers();
-
-	printReflection();
 	
 	VulkanRenderPass::Pointer pass = renderPass();
-	_private->generatePipelineLayout(reflection, pass);
+	_private->generatePipelineLayout(program()->reflection(), pass);
 
 	VkVertexInputBindingDescription binding = { };
 	Vector<VkVertexInputAttributeDescription> attribs;
@@ -148,10 +145,10 @@ void VulkanPipelineState::bind(VulkanRenderPass::Pointer pass, MaterialInstance:
 	vkCmdBindPipeline(pass->nativeRenderPass().commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _private->pipeline);
 
 	uint32_t objectBufferOffset = 0;
-	if (reflection.objectVariablesBufferSize > 0)
+	if (program()->reflection().objectVariablesBufferSize > 0)
 	{
-		uint8_t* dst = pass->dynamicConstantBuffer().dynamicAllocate(reflection.objectVariablesBufferSize, objectBufferOffset);
-		memcpy(dst, objectVariablesBuffer.data(), reflection.objectVariablesBufferSize);
+		uint8_t* dst = pass->dynamicConstantBuffer().dynamicAllocate(program()->reflection().objectVariablesBufferSize, objectBufferOffset);
+		memcpy(dst, objectVariablesBuffer.data(), program()->reflection().objectVariablesBufferSize);
 	}
 
 	VkDescriptorSet descriptors[DescriptorSetClass::Count] = 
@@ -159,13 +156,13 @@ void VulkanPipelineState::bind(VulkanRenderPass::Pointer pass, MaterialInstance:
 		pass->nativeRenderPass().dynamicDescriptorSet,
 		_private->texturesSet
 	};
-	uint32_t dynamicOffsets[] = { objectBufferOffset, 0 };
+	uint32_t dynamicOffsets[] = { objectBufferOffset, material->sharedConstantBufferOffset() };
 
 	vkCmdBindDescriptorSets(pass->nativeRenderPass().commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, 
 		_private->layout, 0, 2, descriptors, 2, dynamicOffsets);
 }
 
-void VulkanPipelineStatePrivate::generatePipelineLayout(const PipelineState::Reflection& reflection, VulkanRenderPass::Pointer pass)
+void VulkanPipelineStatePrivate::generatePipelineLayout(const Program::Reflection& reflection, VulkanRenderPass::Pointer pass)
 {
 	Vector<VkDescriptorSetLayoutBinding> textureBindings;
 
@@ -201,7 +198,7 @@ void VulkanPipelineStatePrivate::generatePipelineLayout(const PipelineState::Ref
 		}
 	};
 
-	for (const auto& tex : reflection.fragmentTextures)
+	for (const auto& tex : reflection.textures.fragmentTextures)
 		addUniform(tex.second, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER);
 
 	VkDescriptorSetLayoutCreateInfo layoutSetInfo = { VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO };

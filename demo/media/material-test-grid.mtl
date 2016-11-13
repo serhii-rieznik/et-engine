@@ -1,0 +1,184 @@
+# 3ds Max Wavefront OBJ Exporter v0.97b - (c)207 guruware
+# File Created: 14.11.2016 0:32:41
+
+newmtl Plane
+	Pr 1.0
+	Pm 0.0
+	Ni 0.0
+	Kd 1.0 1.0 1.0
+	Ks 1.280 1.280 1.280
+
+newmtl Sphere01
+	Pr 0.0
+	Pm 0.0
+	Ni 0.0
+	Kd 1.0 1.0 1.0
+	Ks 1.0 1.0 1.0
+
+newmtl Sphere02
+	Pr 0.25
+	Pm 0.0
+	Ni 0.0
+	Kd 1.0 1.0 1.0
+	Ks 1.0 1.0 1.0
+
+newmtl Sphere03
+	Pr 0.5
+	Pm 0.0
+	Ni 0.0
+	Kd 1.0 1.0 1.0
+	Ks 1.0 1.0 1.0
+
+newmtl Sphere04
+	Pr 0.75
+	Pm 0.0
+	Ni 0.0
+	Kd 1.0 1.0 1.0
+	Ks 1.0 1.0 1.0
+
+newmtl Sphere05
+	Pr 1.0
+	Pm 0.0
+	Ni 0.0
+	Kd 1.0 1.0 1.0
+	Ks 1.0 1.0 1.0
+
+newmtl Sphere06
+	Pr 0.0
+	Pm 0.25
+	Ni 0.0
+	Kd 1.0 1.0 1.0
+	Ks 1.0 1.0 1.0
+
+newmtl Sphere07
+	Pr 0.25
+	Pm 0.25
+	Ni 0.0
+	Kd 1.0 1.0 1.0
+	Ks 1.0 1.0 1.0
+
+newmtl Sphere08
+	Pr 0.5
+	Pm 0.25
+	Ni 0.0
+	Kd 1.0 1.0 1.0
+	Ks 1.0 1.0 1.0
+
+newmtl Sphere09
+	Pr 0.75
+	Pm 0.25
+	Ni 0.0
+	Kd 1.0 1.0 1.0
+	Ks 1.0 1.0 1.0
+
+newmtl Sphere10
+	Pr 1.0
+	Pm 0.25
+	Ni 0.0
+	Kd 1.0 1.0 1.0
+	Ks 1.0 1.0 1.0
+
+newmtl Sphere11
+	Pr 0.0
+	Pm 0.5
+	Ni 0.0
+	Kd 1.0 1.0 1.0
+	Ks 1.0 1.0 1.0
+
+newmtl Sphere12
+	Pr 0.25
+	Pm 0.5
+	Ni 0.0
+	Kd 1.0 1.0 1.0
+	Ks 1.0 1.0 1.0
+
+newmtl Sphere13
+	Pr 0.5
+	Pm 0.5
+	Ni 0.0
+	Kd 1.0 1.0 1.0
+	Ks 1.0 1.0 1.0
+
+newmtl Sphere14
+	Pr 0.75
+	Pm 0.5
+	Ni 0.0
+	Kd 1.0 1.0 1.0
+	Ks 1.0 1.0 1.0
+
+newmtl Sphere15
+	Pr 1.0
+	Pm 0.5
+	Ni 0.0
+	Kd 1.0 1.0 1.0
+	Ks 1.0 1.0 1.0
+
+newmtl Sphere16
+	Pr 0.0
+	Pm 0.75
+	Ni 0.0
+	Kd 1.0 1.0 1.0
+	Ks 1.0 1.0 1.0
+
+newmtl Sphere17
+	Pr 0.25
+	Pm 0.75
+	Ni 0.0
+	Kd 1.0 1.0 1.0
+	Ks 1.0 1.0 1.0
+
+newmtl Sphere18
+	Pr 0.5
+	Pm 0.75
+	Ni 0.0
+	Kd 1.0 1.0 1.0
+	Ks 1.0 1.0 1.0
+
+newmtl Sphere19
+	Pr 0.75
+	Pm 0.75
+	Ni 0.0
+	Kd 1.0 1.0 1.0
+	Ks 1.0 1.0 1.0
+
+newmtl Sphere20
+	Pr 1.0
+	Pm 0.5
+	Ni 0.0
+	Kd 1.0 1.0 1.0
+	Ks 1.0 1.0 1.0
+
+newmtl Sphere21
+	Pr 0.0
+	Pm 1.0
+	Ni 0.0
+	Kd 1.0 1.0 1.0
+	Ks 1.0 1.0 1.0
+
+newmtl Sphere22
+	Pr 0.25
+	Pm 1.0
+	Ni 0.0
+	Kd 1.0 1.0 1.0
+	Ks 1.0 1.0 1.0
+
+newmtl Sphere23
+	Pr 0.5
+	Pm 1.0
+	Ni 0.0
+	Kd 1.0 1.0 1.0
+	Ks 1.0 1.0 1.0
+
+newmtl Sphere24
+	Pr 0.75
+	Pm 1.0
+	Ni 0.0
+	Kd 1.0 1.0 1.0
+	Ks 1.0 1.0 1.0
+
+newmtl Sphere25
+	Pr 1.0
+	Pm 1.0
+	Ni 0.0
+	Kd 1.0 1.0 1.0
+	Ks 1.0 1.0 1.0

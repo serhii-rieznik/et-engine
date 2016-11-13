@@ -487,6 +487,9 @@
     <ClInclude Include="..\..\include\et\rendering\constantbuffer.cpp">
       <Filter>Source\rendering</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\interface\textureset.h">
+      <Filter>Source\rendering\interface</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\et\sound\openal.h">

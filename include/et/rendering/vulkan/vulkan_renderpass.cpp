@@ -175,6 +175,8 @@ void VulkanRenderPass::validateRenderBatch(RenderBatch::Pointer batch)
 {
 	VulkanRenderPass::Pointer vulkanRenderPass(this);
 	_private->renderer->acquirePipelineState(vulkanRenderPass, batch->material(), batch->vertexStream());
+	batch->material()->textureSet();
+	batch->material()->sharedConstantBufferOffset();
 }
 
 void VulkanRenderPass::pushRenderBatch(RenderBatch::Pointer batch)
@@ -211,6 +213,7 @@ void VulkanRenderPass::end()
 
 void VulkanRenderPass::submit()
 {
+	_private->renderer->sharedConstantBuffer().flush();
 	dynamicConstantBuffer().flush();
 
 	VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };

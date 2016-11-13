@@ -7,9 +7,8 @@
 
 #pragma once
 
-#include <et/rendering/interface/texture.h>
-#include <et/rendering/interface/sampler.h>
 #include <et/rendering/interface/program.h>
+#include <et/rendering/interface/textureset.h>
 #include <et/rendering/base/vertexdeclaration.h>
 
 namespace et

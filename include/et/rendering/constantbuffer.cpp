@@ -19,6 +19,7 @@ public:
 	DataBuffer::Pointer buffer;
 	
 	Vector<uint8_t*> dynamicAllocations;
+	bool modified = true;
 };
 
 ConstantBuffer::ConstantBuffer()
@@ -59,12 +60,18 @@ DataBuffer::Pointer ConstantBuffer::buffer() const
 
 void ConstantBuffer::flush()
 {
-	_private->buffer->setData(_private->localData.begin(), 0, _private->localData.size());
-	
-	for (uint8_t* allocation : _private->dynamicAllocations)
-		free(allocation);
-	
-	_private->dynamicAllocations.clear();
+	if (_private->modified)
+	{
+		_private->buffer->setData(_private->localData.begin(), 0, _private->localData.size());
+		for (uint8_t* allocation : _private->dynamicAllocations)
+			free(allocation);
+		_private->dynamicAllocations.clear();
+		_private->modified = false;
+	}
+	else
+	{
+		ET_ASSERT(_private->dynamicAllocations.empty());
+	}
 }
 
 uint8_t* ConstantBuffer::staticAllocate(uint32_t size, uint32_t& offset)
@@ -74,6 +81,7 @@ uint8_t* ConstantBuffer::staticAllocate(uint32_t size, uint32_t& offset)
 	if (!_private->heap.allocate(size, offset))
 		ET_FAIL("Failed to allocate data in shared constant buffer")
 
+	_private->modified = true;
 	return _private->localData.begin() + offset;
 }
 

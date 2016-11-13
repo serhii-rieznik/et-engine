@@ -37,7 +37,7 @@ void Material::setTexture(MaterialTexture t, Texture::Pointer tex)
 	entry.binding = t;
 
 	for (auto& i : _instances)
-		i->invalidateUsedTextures();
+		i->invalidateTextureSet();
 }
 
 void Material::setSampler(MaterialTexture t, Sampler::Pointer smp)
@@ -48,7 +48,7 @@ void Material::setSampler(MaterialTexture t, Sampler::Pointer smp)
 	entry.binding = t;
 
 	for (auto& i : _instances)
-		i->invalidateUsedSamplers();
+		i->invalidateTextureSet();
 }
 
 void Material::setVector(MaterialParameter p, const vec4& v)
@@ -57,7 +57,7 @@ void Material::setVector(MaterialParameter p, const vec4& v)
 	properties[static_cast<uint32_t>(p)].binding = p;
 
 	for (auto& i : _instances)
-		i->invalidateUsedProperties();
+		i->invalidateConstantBuffer();
 }
 
 void Material::setFloat(MaterialParameter p, float f)
@@ -66,7 +66,7 @@ void Material::setFloat(MaterialParameter p, float f)
 	properties[static_cast<uint32_t>(p)].binding = p;
 
 	for (auto& i : _instances)
-		i->invalidateUsedProperties();
+		i->invalidateConstantBuffer();
 }
 
 vec4 Material::getVector(MaterialParameter p) const
@@ -297,61 +297,42 @@ Material::Pointer MaterialInstance::base()
 	return _base;
 }
 
-void MaterialInstance::buildUsedTextures()
+void MaterialInstance::buildTextureSet()
 {
-	_usedTextures.clear();
-
-	auto setFunc = [this](const mtl::OptionalObject<Texture::Pointer>& t) {
-		if (t.object.valid())
-		{
-			MaterialTextureHolder& tex = _usedTextures[mtl::materialTextureToString(t.binding)];
-			tex.binding = t.binding;
-			tex.texture = t.object;
-		}
-	};
-
-	for (const auto& t : base()->textures)
-		setFunc(t);
-	for (const auto& t : textures)
-		setFunc(t);
-
-	_texturesValid = true;
+	_textureSetValid = true;
 }
 
-void MaterialInstance::buildUsedSamplers()
+void MaterialInstance::buildConstantBuffer()
 {
-	_usedSamplers.clear();
+	ET_ASSERT(program().valid());
 
-	auto setFunc = [this](const mtl::OptionalObject<Sampler::Pointer>& t) {
-		if (t.object.valid())
-		{
-			MaterialSamplerHolder& smp = _usedSamplers[mtl::materialSamplerToString(t.binding)];
-			smp.binding = t.binding;
-			smp.sampler = t.object;
-		}
-	};
+	_constBufferOffset = 0;
+	
+	if (_constBufferData != nullptr)
+	{
+		_renderer->sharedConstantBuffer().free(_constBufferData);
+		_constBufferData = nullptr;
+	}
+	
+	const Program::Reflection& reflection = program()->reflection();
+	if (reflection.materialVariablesBufferSize == 0)
+	{
+		_constantBufferValid = true;
+		return;
+	}
 
-	for (const auto& t : base()->samplers)
-		setFunc(t);
-	for (const auto& t : samplers)
-		setFunc(t);
+	_constBufferData = _renderer->sharedConstantBuffer().staticAllocate(reflection.materialVariablesBufferSize, _constBufferOffset);
 
-	_samplersValid = true;
-}
-
-void MaterialInstance::buildUsedProperties()
-{
-	_usedProperties.clear();
-
-	auto setFunc = [this](const mtl::OptionalValue& p) 
+	auto setFunc = [&, this](const mtl::OptionalValue& p) 
 	{
 		if (p.isSet())
 		{
-			ET_ASSERT(p.size <= sizeof(MaterialPropertyHolder::data));
-			MaterialPropertyHolder& holder = _usedProperties[mtl::materialParameterToString(p.binding)];
-			holder.binding = p.binding;
-			holder.size = p.size;
-			memcpy(holder.data, p.data, p.size);
+			const String& name = mtl::materialParameterToString(p.binding);
+			auto var = reflection.materialVariables.find(name);
+			if (var != reflection.materialVariables.end())
+			{
+				memcpy(_constBufferData + var->second.offset, p.data, p.size);
+			}
 		}
 	};
 
@@ -361,46 +342,34 @@ void MaterialInstance::buildUsedProperties()
 	for (const auto& p : properties)
 		setFunc(p);
 
-	_propertiesValid = true;
+	_constantBufferValid = true;
 }
 
-const MaterialTexturesCollection& MaterialInstance::usedTextures()
+TextureSet::Pointer MaterialInstance::textureSet()
 {
-	if (!_texturesValid)
-		buildUsedTextures();
+	if (!_textureSetValid)
+		buildTextureSet();
 
-	return _usedTextures;
+	return _textureSet;
 }
 
-const MaterialSamplersCollection& MaterialInstance::usedSamplers()
+
+uint32_t MaterialInstance::sharedConstantBufferOffset()
 {
-	if (!_samplersValid)
-		buildUsedSamplers();
-	
-	return _usedSamplers;
+	if (!_constantBufferValid)
+		buildConstantBuffer();
+
+	return _constBufferOffset;
 }
 
-const MaterialPropertiesCollection& MaterialInstance::usedProperties()
+void MaterialInstance::invalidateTextureSet()
 {
-	if (!_propertiesValid)
-		buildUsedProperties();
-
-	return _usedProperties;
+	_textureSetValid = false;
 }
 
-void MaterialInstance::invalidateUsedTextures()
+void MaterialInstance::invalidateConstantBuffer()
 {
-	_texturesValid = false;
-}
-
-void MaterialInstance::invalidateUsedSamplers()
-{
-	_samplersValid = false;
-}
-
-void MaterialInstance::invalidateUsedProperties()
-{
-	_propertiesValid = false;
+	_constantBufferValid = false;
 }
 
 /*

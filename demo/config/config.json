@@ -1,5 +1,5 @@
 {
-	"reference" : "material-test.json",
+	"reference" : "material-test-grid.json",
 	"rays-per-pixel" : 512,
 	"method" : "backward",
 	"render-region-size" : 32,

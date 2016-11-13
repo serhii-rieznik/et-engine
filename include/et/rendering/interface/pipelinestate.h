@@ -10,6 +10,7 @@
 #include <et/rendering/rendering.h>
 #include <et/rendering/interface/program.h>
 #include <et/rendering/interface/renderpass.h>
+#include <et/rendering/interface/textureset.h>
 #include <et/rendering/base/vertexstream.h>
 #include <et/rendering/base/vertexdeclaration.h>
 
@@ -40,32 +41,6 @@ public:
 	{
 		static String value("PassVariables"); return value;
 	}
-
-	struct Variable
-	{
-		uint32_t offset = 0;
-		uint32_t size = 0;
-	};
-	using VariableMap = UnorderedMap<String, Variable>;
-
-	struct Reflection
-	{
-		VertexDeclaration inputLayout;
-
-		VariableMap passVariables;
-		uint32_t passVariablesBufferSize = 0;
-
-		VariableMap materialVariables;
-		uint32_t materialVariablesBufferSize = 0;
-
-		VariableMap objectVariables;
-		uint32_t objectVariablesBufferSize = 0;
-
-		UnorderedMap<String, uint32_t> vertexTextures;
-		UnorderedMap<String, uint32_t> vertexSamplers;
-		UnorderedMap<String, uint32_t> fragmentTextures;
-		UnorderedMap<String, uint32_t> fragmentSamplers;
-	};
 
 public:
 	virtual ~PipelineState() = default;
@@ -159,7 +134,6 @@ public:
 	}
 
 protected:
-	Reflection reflection;
 	BinaryDataStorage objectVariablesBuffer;
 
 	void buildBuffers();

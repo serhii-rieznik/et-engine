@@ -12,70 +12,17 @@ namespace et
 
 void PipelineState::buildBuffers()
 {
-	objectVariablesBuffer.resize(reflection.objectVariablesBufferSize);
+	objectVariablesBuffer.resize(program()->reflection().objectVariablesBufferSize);
 	objectVariablesBuffer.fill(0);
 }
 
 void PipelineState::uploadObjectVariable(const String& name, const void* ptr, uint32_t size)
 {
-	auto var = reflection.objectVariables.find(name);
-	if (var != reflection.objectVariables.end())
+	auto var = program()->reflection().objectVariables.find(name);
+	if (var != program()->reflection().objectVariables.end())
 	{
 		auto* dst = objectVariablesBuffer.element_ptr(var->second.offset);
 		memcpy(dst, ptr, size);
-	}
-}
-
-void PipelineState::printReflection()
-{
-	std::map<uint32_t, String> sortedFields;
-	auto printVariables = [&sortedFields](const char* tag, const PipelineState::VariableMap& input) {
-		if (input.empty()) return;
-
-		sortedFields.clear();
-		for (const auto& pv : input)
-			sortedFields.emplace(pv.second.offset, pv.first);
-
-		log::info("%s: { ", tag);
-		for (const auto& pv : sortedFields)
-			log::info("\t%s : %u", pv.second.c_str(), pv.first);
-		log::info("}");
-	};
-
-	printVariables("Pass variables", reflection.passVariables);
-	printVariables("Material variables", reflection.materialVariables);
-	printVariables("Object variables", reflection.objectVariables);
-	
-	if (!reflection.vertexTextures.empty())
-	{
-		log::info("Vertex textures: { ");
-		for (const auto& pv : reflection.vertexTextures)
-			log::info("\t%s : %u", pv.first.c_str(), pv.second);
-		log::info("}");
-	}
-
-	if (!reflection.vertexSamplers.empty())
-	{
-		log::info("Vertex samplers: { ");
-		for (const auto& pv : reflection.vertexSamplers)
-			log::info("\t%s : %u", pv.first.c_str(), pv.second);
-		log::info("}");
-	}
-
-	if (!reflection.fragmentTextures.empty())
-	{
-		log::info("Fragment textures: { ");
-		for (const auto& pv : reflection.fragmentTextures)
-			log::info("\t%s : %u", pv.first.c_str(), pv.second);
-		log::info("}");
-	}
-
-	if (!reflection.fragmentSamplers.empty())
-	{
-		log::info("Fragment samplers: { ");
-		for (const auto& pv : reflection.fragmentSamplers)
-			log::info("\t%s : %u", pv.first.c_str(), pv.second);
-		log::info("}");
 	}
 }
 
