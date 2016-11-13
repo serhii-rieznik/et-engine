@@ -10,16 +10,18 @@
 # http://www.graphics.cornell.edu/online/box/data.html
 #
 newmtl leftSphere
-	Pr 0.01
+	Pr 0.0
+	Pm 1.0
 	Ni 0.0
 	Kd 1.0 1.0 1.0
-    Ks 0.95 0.95 0.95
+    Ks 1.0 1.0 1.0
 
 newmtl rightSphere
-	Pr 0.01
-	Ni 0.7
+	Pr 0.0
+	Pm 0.025
+	Ni 1.77
 	Kd 1.0 1.0 1.0
-	Ks 0.30 0.30 0.30
+	Ks 1.0 1.0 1.0
 
 newmtl floor
 	Pr 1.0
@@ -58,7 +60,8 @@ newmtl light
 	Ke 8.0 7.0 6.0
 
 newmtl water
+	Pm 0.3
 	Pr 0.0
-	Ni 1.7333
+	Ni 1.333
 	Kd 0.72 0.839 1.0
-    Ks 0.73 0.87 1.0
+    Ks 1.0 1.0 1.0

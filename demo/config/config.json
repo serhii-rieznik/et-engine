@@ -1,6 +1,6 @@
 {
-	"reference" : "material-test-grid.json",
-	"rays-per-pixel" : 512,
+	"reference" : "cornellbox-water.json",
+	"rays-per-pixel" : 256,
 	"method" : "backward",
 	"render-region-size" : 32,
 	"threads" : 0,
