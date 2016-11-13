@@ -62,6 +62,11 @@ Texture::Pointer DX12Renderer::createTexture(TextureDescription::Pointer desc)
 	return DX12Texture::Pointer::create(desc);
 }
 
+TextureSet::Pointer DX12Renderer::createTextureSet(const TextureSet::Description&)
+{
+	return TextureSet::Pointer();
+}
+
 Sampler::Pointer DX12Renderer::createSampler(const Sampler::Description &)
 {
 	return Sampler::Pointer();

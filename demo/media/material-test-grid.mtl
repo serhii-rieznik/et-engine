@@ -2,43 +2,43 @@
 # File Created: 14.11.2016 0:32:41
 
 newmtl Plane
-	Pr 1.0
-	Pm 0.0
+	Pr 0.01
+	Pm 0.01
 	Ni 0.0
 	Kd 1.0 1.0 1.0
 	Ks 1.280 1.280 1.280
 
 newmtl Sphere01
 	Pr 0.0
-	Pm 0.0
+	Pm 0.01
 	Ni 0.0
 	Kd 1.0 1.0 1.0
 	Ks 1.0 1.0 1.0
 
 newmtl Sphere02
 	Pr 0.25
-	Pm 0.0
+	Pm 0.01
 	Ni 0.0
 	Kd 1.0 1.0 1.0
 	Ks 1.0 1.0 1.0
 
 newmtl Sphere03
 	Pr 0.5
-	Pm 0.0
+	Pm 0.01
 	Ni 0.0
 	Kd 1.0 1.0 1.0
 	Ks 1.0 1.0 1.0
 
 newmtl Sphere04
 	Pr 0.75
-	Pm 0.0
+	Pm 0.01
 	Ni 0.0
 	Kd 1.0 1.0 1.0
 	Ks 1.0 1.0 1.0
 
 newmtl Sphere05
 	Pr 1.0
-	Pm 0.0
+	Pm 0.01
 	Ni 0.0
 	Kd 1.0 1.0 1.0
 	Ks 1.0 1.0 1.0

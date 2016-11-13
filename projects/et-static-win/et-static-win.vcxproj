@@ -78,6 +78,7 @@
     <ClInclude Include="..\..\include\et\rendering\vulkan\vulkan_renderpass.cpp" />
     <ClInclude Include="..\..\include\et\rendering\vulkan\vulkan_sampler.h" />
     <ClInclude Include="..\..\include\et\rendering\vulkan\vulkan_texture.cpp" />
+    <ClInclude Include="..\..\include\et\rendering\vulkan\vulkan_textureset.h" />
     <ClInclude Include="..\..\include\et\rendering\vulkan\vulkan_vertexbuffer.cpp" />
     <ClInclude Include="..\..\include\et\app\application.cpp" />
     <ClInclude Include="..\..\include\et\app\backgroundthread.cpp" />
@@ -184,6 +185,7 @@
     <ClInclude Include="..\..\include\et\rendering\shadersource.cpp" />
     <ClInclude Include="..\..\include\et\core\heapcontroller.cpp" />
     <ClInclude Include="..\..\include\et\rendering\constantbuffer.cpp" />
+    <ClInclude Include="..\..\include\et\rendering\vulkan\vulkan_textureset.cpp" />
     <ClCompile Include="et_info.cpp">
       <FileType>CppHeader</FileType>
     </ClCompile>

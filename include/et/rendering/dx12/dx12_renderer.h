@@ -11,49 +11,58 @@
 
 namespace et
 {
-	class DX12Renderer : public RenderInterface
+class DX12Renderer : public RenderInterface
+{
+public:
+	ET_DECLARE_POINTER(DX12Renderer);
+
+public:
+	RenderingAPI api() const override
 	{
-	public:
-		ET_DECLARE_POINTER(DX12Renderer);
+		return RenderingAPI::DX12;
+	}
 
-	public:
-		RenderingAPI api() const override
-			{  return RenderingAPI::DX12; }
+	DX12Renderer(RenderContext* rc) :
+		RenderInterface(rc)
+	{
+	}
 
-		DX12Renderer(RenderContext* rc) : 
-			RenderInterface(rc) { }
+	void init(const RenderContextParameters& params) override;
+	void shutdown() override;
 
-		void init(const RenderContextParameters& params) override;
-		void shutdown() override;
+	void begin() override;
+	void present() override;
 
-		void begin() override;
-		void present() override;
+	RenderPass::Pointer allocateRenderPass(const RenderPass::ConstructionInfo&) override;
+	void submitRenderPass(RenderPass::Pointer) override;
 
-		RenderPass::Pointer allocateRenderPass(const RenderPass::ConstructionInfo&) override;
-		void submitRenderPass(RenderPass::Pointer) override;
+	/*
+	 * Buffers
+	 */
+	DataBuffer::Pointer createDataBuffer(const std::string&, uint32_t size) override;
+	DataBuffer::Pointer createDataBuffer(const std::string&, const BinaryDataStorage&) override;
+	VertexBuffer::Pointer createVertexBuffer(const std::string&, VertexStorage::Pointer, BufferDrawType) override;
+	IndexBuffer::Pointer createIndexBuffer(const std::string&, IndexArray::Pointer, BufferDrawType) override;
 
-		/*
-		 * Buffers
-		 */
-		DataBuffer::Pointer createDataBuffer(const std::string&, uint32_t size) override;
-		DataBuffer::Pointer createDataBuffer(const std::string&, const BinaryDataStorage&) override;
-		VertexBuffer::Pointer createVertexBuffer(const std::string&, VertexStorage::Pointer, BufferDrawType) override;
-		IndexBuffer::Pointer createIndexBuffer(const std::string&, IndexArray::Pointer, BufferDrawType) override;
-        
-        /*
-         * Textures
-         */
-        Texture::Pointer createTexture(TextureDescription::Pointer) override;
-		Sampler::Pointer createSampler(const Sampler::Description&) override;
-        
-        /*
-         * Programs
-         */
-        Program::Pointer createProgram(const std::string&) override;
-        
-		/*
-		 * Pipeline state
-		 */
-        PipelineState::Pointer acquirePipelineState(RenderPass::Pointer, Material::Pointer, VertexStream::Pointer) override;
-	};
+	/*
+	 * Textures
+	 */
+	Texture::Pointer createTexture(TextureDescription::Pointer) override;
+	TextureSet::Pointer createTextureSet(const TextureSet::Description&) override;
+
+	/*
+	 * Samplers
+	 */
+	Sampler::Pointer createSampler(const Sampler::Description&) override;
+
+	/*
+	 * Programs
+	 */
+	Program::Pointer createProgram(const std::string&) override;
+
+	/*
+	 * Pipeline state
+	 */
+	PipelineState::Pointer acquirePipelineState(RenderPass::Pointer, Material::Pointer, VertexStream::Pointer) override;
+};
 }

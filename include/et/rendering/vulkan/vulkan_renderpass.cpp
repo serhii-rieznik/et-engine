@@ -243,21 +243,21 @@ void VulkanRenderPassPrivate::generateDynamicDescriptorSet(RenderPass* pass)
 	VkWriteDescriptorSet writeSets[] = { { VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET }, { VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET }, { VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET } };
 	{
 		bindings[0] = { ObjectVariablesBufferIndex, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1 };
-		bindings[0].stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
+		bindings[0].stageFlags = VK_SHADER_STAGE_ALL;
 		writeSets[0].descriptorCount = bindings[0].descriptorCount;
 		writeSets[0].descriptorType = bindings[0].descriptorType;
 		writeSets[0].dstBinding = bindings[0].binding;
 		writeSets[0].pBufferInfo = &objectBufferInfo;
 		
 		bindings[1] = { MaterialVariablesBufferIndex, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1 };
-		bindings[1].stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
+		bindings[1].stageFlags = VK_SHADER_STAGE_ALL;
 		writeSets[1].descriptorCount = bindings[1].descriptorCount;
 		writeSets[1].descriptorType = bindings[1].descriptorType;
 		writeSets[1].dstBinding = bindings[1].binding;
 		writeSets[1].pBufferInfo = &materialBufferInfo;
 
 		bindings[2] = { PassVariablesBufferIndex, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1 };
-		bindings[2].stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
+		bindings[2].stageFlags = VK_SHADER_STAGE_ALL;
 		writeSets[2].descriptorCount = bindings[2].descriptorCount;
 		writeSets[2].descriptorType = bindings[2].descriptorType;
 		writeSets[2].dstBinding = bindings[2].binding;

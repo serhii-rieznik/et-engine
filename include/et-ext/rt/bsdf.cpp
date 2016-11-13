@@ -14,77 +14,77 @@ et::rt::BSDFSample::BSDFSample(const et::rt::float4& _wi, const et::rt::float4& 
 {
 	switch (mat.cls)
 	{
-		case Material::Class::Diffuse:
-		{
-			cls = BSDFSample::Class::Diffuse;
+	case Material::Class::Diffuse:
+	{
+		cls = BSDFSample::Class::Diffuse;
 #		if (ET_RT_USE_COSINE_WEIGHTED_SAMPLING)
-			Wo = randomVectorOnHemisphere(n, et::rt::cosineDistribution);
+		Wo = randomVectorOnHemisphere(n, et::rt::cosineDistribution);
 #		else
-			Wo = randomVectorOnHemisphere(n, et::rt::uniformDistribution);
+		Wo = randomVectorOnHemisphere(n, et::rt::uniformDistribution);
 #		endif
-			color = mat.diffuse;
-			break;
-		}
+		color = mat.diffuse;
+		break;
+	}
 
-		case Material::Class::Conductor:
+	case Material::Class::Conductor:
+	{
+		cls = BSDFSample::Class::Reflection;
+		Wo = computeReflectionVector(Wi, n, alpha);
+		fresnel = fresnelShlickApproximation(1.0f, IdotN);
+		color = mat.specular;
+		break;
+	}
+
+	case Material::Class::Dielectric:
+	{
+		eta = mat.ior;
+		if (eta > 1.0f) // refractive
 		{
-			cls = BSDFSample::Class::Reflection;
-			Wo = computeReflectionVector(Wi, n, alpha);
-			fresnel = fresnelShlickApproximation(IdotN, 0.025f);
-			color = mat.specular;
-			break;
-		}
+			if (IdotN < 0.0f)
+			{
+				eta = 1.0f / eta;
+			}
+			else
+			{
+				n *= -1.0f;
+				IdotN = -IdotN;
+			}
 
-		case Material::Class::Dielectric:
+			float sinTheta = 1.0f - sqr(eta) * (1.0f - sqr(IdotN));
+			fresnel = (sinTheta > 0.0f) ? fresnelShlickApproximation(mat.metallness, IdotN) : 1.0f;
+			if (fastRandomFloat() <= fresnel)
+			{
+				cls = BSDFSample::Class::Reflection;
+				Wo = computeReflectionVector(Wi, n, alpha);
+				color = mat.specular;
+			}
+			else
+			{
+				cls = BSDFSample::Class::Transmittance;
+				Wo = computeRefractionVector(Wi, n, eta, alpha, sinTheta, IdotN);
+				color = mat.diffuse;
+			}
+		}
+		else // non-refractive material
 		{
-			eta = mat.ior;
-			if (eta > 1.0f) // refractive
+			fresnel = fresnelShlickApproximation(mat.metallness, IdotN);
+			if (fastRandomFloat() <= fresnel)
 			{
-				if (IdotN < 0.0f)
-				{
-					eta = 1.0f / eta;
-				}
-				else
-				{
-					n *= -1.0f;
-					IdotN = -IdotN;
-				}
-
-				float sinTheta = 1.0f - sqr(eta) * (1.0f - sqr(IdotN));
-				fresnel = (sinTheta > 0.0f) ? fresnelShlickApproximation(IdotN, eta) : 1.0f;
-				if (fastRandomFloat() <= fresnel)
-				{
-					cls = BSDFSample::Class::Reflection;
-					Wo = computeReflectionVector(Wi, n, alpha);
-					color = mat.specular;
-				}
-				else
-				{
-					cls = BSDFSample::Class::Transmittance;
-					Wo = computeRefractionVector(Wi, n, eta, alpha, sinTheta, IdotN);
-					color = mat.diffuse;
-				}
+				cls = BSDFSample::Class::Reflection;
+				Wo = computeReflectionVector(Wi, n, alpha);
+				color = mat.specular;
 			}
-			else // non-refractive material
+			else
 			{
-				fresnel = fresnelShlickApproximation(IdotN, eta);
-				if (fastRandomFloat() <= fresnel)
-				{
-					cls = BSDFSample::Class::Reflection;
-					Wo = computeReflectionVector(Wi, n, alpha);
-					color = mat.specular;
-				}
-				else
-				{
-					cls = BSDFSample::Class::Diffuse;
-					Wo = computeDiffuseVector(Wi, n, alpha);
-					color = mat.diffuse;
-				}
+				cls = BSDFSample::Class::Diffuse;
+				Wo = computeDiffuseVector(Wi, n, alpha);
+				color = mat.diffuse;
 			}
-			break;
 		}
+		break;
+	}
 
-		default:
+	default:
 		ET_FAIL("Invalid material class");
 	}
 
@@ -108,61 +108,61 @@ et::rt::BSDFSample::BSDFSample(const et::rt::float4& _wi, const et::rt::float4& 
 {
 	switch (mat.cls)
 	{
-		case Material::Class::Diffuse:
-		{
-			cls = BSDFSample::Class::Diffuse;
-			color = mat.diffuse;
-			break;
-		}
+	case Material::Class::Diffuse:
+	{
+		cls = BSDFSample::Class::Diffuse;
+		color = mat.diffuse;
+		break;
+	}
 
-		case Material::Class::Conductor:
-		{
-			cls = BSDFSample::Class::Reflection;
-			fresnel = fresnelShlickApproximation(IdotN, 0.025f);
-			color = mat.specular;
-			break;
-		}
+	case Material::Class::Conductor:
+	{
+		cls = BSDFSample::Class::Reflection;
+		fresnel = fresnelShlickApproximation(mat.metallness, IdotN);
+		color = mat.specular;
+		break;
+	}
 
-		case Material::Class::Dielectric:
+	case Material::Class::Dielectric:
+	{
+		eta = mat.ior;
+		if (eta > 1.0f) // refractive
 		{
-			eta = mat.ior;
-			if (eta > 1.0f) // refractive
+			if (IdotN < 0.0f)
+				eta = 1.0f / eta;
+
+			float refractionK = 1.0f - sqr(eta) * (1.0f - sqr(IdotN));
+			fresnel = (refractionK > 0.0f) ? fresnelShlickApproximation(mat.metallness, IdotN) : 1.0f;
+			if (fastRandomFloat() <= fresnel)
 			{
-				if (IdotN < 0.0f)
-					eta = 1.0f / eta;
-
-				float refractionK = 1.0f - sqr(eta) * (1.0f - sqr(IdotN));
-				fresnel = (refractionK > 0.0f) ? fresnelShlickApproximation(IdotN, eta) : 1.0f;
-				if (fastRandomFloat() <= fresnel)
-				{
-					cls = BSDFSample::Class::Reflection;
-					color = mat.specular;
-				}
-				else
-				{
-					cls = BSDFSample::Class::Transmittance;
-					color = mat.diffuse;
-				}
+				cls = BSDFSample::Class::Reflection;
+				color = mat.specular;
 			}
-			else // non-refractive material
+			else
 			{
-				fresnel = fresnelShlickApproximation(IdotN, eta);
-				if (fastRandomFloat() <= fresnel)
-				{
-					cls = BSDFSample::Class::Reflection;
-					color = mat.specular;
-				}
-				else
-				{
-					cls = BSDFSample::Class::Diffuse;
-					color = mat.diffuse;
-				}
+				cls = BSDFSample::Class::Transmittance;
+				color = mat.diffuse;
 			}
-			break;
 		}
+		else // non-refractive material
+		{
+			fresnel = fresnelShlickApproximation(mat.metallness, IdotN);
+			if (fastRandomFloat() <= fresnel)
+			{
+				cls = BSDFSample::Class::Reflection;
+				color = mat.specular;
+			}
+			else
+			{
+				cls = BSDFSample::Class::Diffuse;
+				color = mat.diffuse;
+			}
+		}
+		break;
+	}
 
-		default:
-			ET_FAIL("Invalid material class");
+	default:
+		ET_FAIL("Invalid material class");
 	}
 
 	cosTheta = std::abs((dir == BSDFSample::Direction::Backward ? OdotN : IdotN));
@@ -285,7 +285,7 @@ et::rt::float4 et::rt::BSDFSample::combinedEvaluate()
 		float NdotH = n.dot(h);
 		float HdotIdivIdotN = h.dot(Wi) / IdotN;
 		float g1 = G_ggx(-IdotN, alpha) * float(HdotIdivIdotN > 0.0f);
-		float g2 = G_ggx( OdotN, alpha) * float(HdotO / OdotN > 0.0f);
+		float g2 = G_ggx(OdotN, alpha) * float(HdotO / OdotN > 0.0f);
 		return color * (g1 * g2 * fresnel * HdotIdivIdotN / NdotH);
 	}
 

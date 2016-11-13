@@ -299,6 +299,39 @@ Material::Pointer MaterialInstance::base()
 
 void MaterialInstance::buildTextureSet()
 {
+	_textureSet.reset(nullptr);
+
+	ET_ASSERT(program().valid());
+	
+	const Program::Reflection& reflection = program()->reflection();
+
+	TextureSet::Description description;
+	for (const auto& i : program()->reflection().textures.fragmentTextures)
+	{
+		description.fragmentTextures[i.second] = base()->textures[i.second].object;
+		if (textures[i.second].object.valid())
+			description.fragmentTextures[i.second] = textures[i.second].object;
+	}
+	for (const auto& i : program()->reflection().textures.vertexTextures)
+	{
+		description.vertexTextures[i.second] = base()->textures[i.second].object;
+		if (textures[i.second].object.valid())
+			description.vertexTextures[i.second] = textures[i.second].object;
+	}
+	for (const auto& i : program()->reflection().textures.fragmentSamplers)
+	{
+		description.fragmentSamplers[i.second] = base()->samplers[i.second].object;
+		if (samplers[i.second].object.valid())
+			description.fragmentSamplers[i.second] = samplers[i.second].object;
+	}
+	for (const auto& i : program()->reflection().textures.vertexSamplers)
+	{
+		description.vertexSamplers[i.second] = base()->samplers[i.second].object;
+		if (samplers[i.second].object.valid())
+			description.vertexSamplers[i.second] = samplers[i.second].object;
+	}
+
+	_textureSet = _renderer->createTextureSet(description);
 	_textureSetValid = true;
 }
 

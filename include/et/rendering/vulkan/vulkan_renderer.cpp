@@ -14,6 +14,7 @@
 #include <et/rendering/vulkan/vulkan_program.h>
 #include <et/rendering/vulkan/vulkan_renderpass.h>
 #include <et/rendering/vulkan/vulkan_texture.h>
+#include <et/rendering/vulkan/vulkan_textureset.h>
 #include <et/rendering/vulkan/vulkan_sampler.h>
 #include <et/rendering/vulkan/vulkan_renderer.h>
 #include <et/rendering/vulkan/vulkan.h>
@@ -235,6 +236,11 @@ IndexBuffer::Pointer VulkanRenderer::createIndexBuffer(const std::string& name, 
 Texture::Pointer VulkanRenderer::createTexture(TextureDescription::Pointer desc)
 {
 	return VulkanTexture::Pointer::create(_private->vulkan(), desc);
+}
+
+TextureSet::Pointer VulkanRenderer::createTextureSet(const TextureSet::Description& desc)
+{
+	return VulkanTextureSet::Pointer::create(this, _private->vulkan(), desc);
 }
 
 Sampler::Pointer VulkanRenderer::createSampler(const Sampler::Description& desc)

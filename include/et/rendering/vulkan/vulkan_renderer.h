@@ -45,6 +45,11 @@ namespace et
          * Textures
          */
         Texture::Pointer createTexture(TextureDescription::Pointer) override;
+		TextureSet::Pointer createTextureSet(const TextureSet::Description&) override;
+
+		/*
+		 * Samplers
+		 */
 		Sampler::Pointer createSampler(const Sampler::Description&) override;
         
         /*

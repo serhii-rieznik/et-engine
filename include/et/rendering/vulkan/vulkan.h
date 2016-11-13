@@ -124,8 +124,7 @@ struct VulkanNativePipeline
 {
 	VkPipeline pipeline = nullptr;
 	VkPipelineLayout layout = nullptr;
-	VkDescriptorSetLayout texturesSetLayout = nullptr;
-	VkDescriptorSet texturesSet = nullptr;
+	VkDescriptorSetLayout texturesLayout = nullptr;
 };
 
 struct VulkanNativeTexture
@@ -140,6 +139,12 @@ struct VulkanNativeTexture
 struct VulkanNativeSampler
 {
 	VkSampler sampler = nullptr;
+};
+
+struct VulkanNativeTextureSet
+{
+	VkDescriptorSetLayout descriptorSetLayout = nullptr;
+	VkDescriptorSet descriptorSet = nullptr;
 };
 
 namespace vulkan

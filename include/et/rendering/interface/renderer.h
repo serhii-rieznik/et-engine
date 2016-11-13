@@ -61,6 +61,7 @@ public:
 	 * Textures
 	 */
 	virtual Texture::Pointer createTexture(TextureDescription::Pointer) = 0;
+	virtual TextureSet::Pointer createTextureSet(const TextureSet::Description&) = 0;
 
 	Texture::Pointer loadTexture(const std::string& fileName, ObjectsCache& cache);
 	Texture::Pointer defaultTexture();

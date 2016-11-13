@@ -71,7 +71,7 @@ void main()
 	env.NdotH = dot(normal, halfVector);
 	env.viewFresnel = fresnelShlick(env.metallness, env.VdotN);
 
-	vec4 albedoSample = vec4(1.0); // albedoTexture.sample(albedoSampler, fsIn.texCoord0);
+	vec4 albedoSample = texture(albedoTexture, fsIn.texCoord0);
 	
 	vec4 diffuse = (albedoSample * materialVariables.albedoColor) * normalizedLambert(env);
 	vec4 specular = materialVariables.reflectanceColor * microfacetSpecular(env);

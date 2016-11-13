@@ -490,6 +490,9 @@
     <ClInclude Include="..\..\include\et\rendering\interface\textureset.h">
       <Filter>Source\rendering\interface</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\vulkan\vulkan_textureset.h">
+      <Filter>Source\rendering\vulkan</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\et\sound\openal.h">
@@ -966,5 +969,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="et_info.cpp" />
+    <ClCompile Include="..\..\include\et\rendering\vulkan\vulkan_textureset.cpp">
+      <Filter>Source\rendering\vulkan</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
