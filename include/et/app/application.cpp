@@ -82,9 +82,9 @@ bool Application::shouldPerformRendering()
 	uint64_t currentTime = queryContiniousTimeInMilliSeconds();
 	uint64_t elapsedTime = currentTime - _lastQueuedTimeMSec;
 
-	if (elapsedTime < _fpsLimitMSec)
+	if ((_fpsLimitMSec > 0) && (elapsedTime < _fpsLimitMSec))
 	{
-		uint64_t sleepInterval = (_fpsLimitMSec - elapsedTime) +
+		uint64_t sleepInterval = (_fpsLimitMSec - elapsedTime) + 
 			(randomInteger(1000) > _fpsLimitMSecFractPart ? 0 : static_cast<uint64_t>(-1));
 		
 		threading::sleepMSec(sleepInterval);

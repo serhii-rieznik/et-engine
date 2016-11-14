@@ -73,6 +73,13 @@ void demo::MainController::applicationDidLoad(et::RenderContext* rc)
 	_scene = _loader.loadFromFile(modelName);
 
 	applicationWillResizeContext(rc->size());
+
+	_fpsTimer.expired.connect([this](et::NotifyTimer*){
+		et::log::info("%u fps", _framesRendered);
+		_framesRendered = 0;
+	});
+	_fpsTimer.start(et::mainTimerPool(), 1.0f, -1);
+	et::application().setFrameRateLimit(0);
 }
 
 void demo::MainController::applicationWillResizeContext(const et::vec2i& sz)
@@ -84,6 +91,7 @@ void demo::MainController::applicationWillResizeContext(const et::vec2i& sz)
 void demo::MainController::render(et::RenderContext* rc)
 {
 	_renderer.render(rc->renderer(), _scene.reference(), _camera);
+	++_framesRendered;
 }
 
 et::IApplicationDelegate* et::Application::initApplicationDelegate()

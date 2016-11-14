@@ -9,26 +9,28 @@
 
 namespace demo
 {
-	class MainController : public et::IApplicationDelegate
-	{
-	private:
-		et::ApplicationIdentifier applicationIdentifier() const;
-		
-		void setApplicationParameters(et::ApplicationParameters&);
-		void setRenderContextParameters(et::RenderContextParameters&);
-		
-		void applicationDidLoad(et::RenderContext*);
-		void applicationWillResizeContext(const et::vec2i&);
-		
-		void render(et::RenderContext*);
-		
-	private:
-		et::Dictionary _options;
-		et::Camera::Pointer _camera;
-        et::CameraMovingController::Pointer _cameraController;
-		et::s3d::Scene::Pointer _scene;
-		et::s3d::Renderer _renderer;
-		demo::SceneLoader _loader;
-		float _cameraFOV = QUARTER_PI;
-	};
+class MainController : public et::IApplicationDelegate
+{
+private:
+	et::ApplicationIdentifier applicationIdentifier() const;
+
+	void setApplicationParameters(et::ApplicationParameters&);
+	void setRenderContextParameters(et::RenderContextParameters&);
+
+	void applicationDidLoad(et::RenderContext*);
+	void applicationWillResizeContext(const et::vec2i&);
+
+	void render(et::RenderContext*);
+
+private:
+	et::Dictionary _options;
+	et::Camera::Pointer _camera;
+	et::CameraMovingController::Pointer _cameraController;
+	et::s3d::Scene::Pointer _scene;
+	et::s3d::Renderer _renderer;
+	et::NotifyTimer _fpsTimer;
+	demo::SceneLoader _loader;
+	float _cameraFOV = QUARTER_PI;
+	uint32_t _framesRendered = 0;
+};
 }
