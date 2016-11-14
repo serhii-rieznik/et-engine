@@ -14,6 +14,36 @@
 namespace et
 {
 
+class ConstantBufferEntry
+{
+public:
+	ConstantBufferEntry() = default;
+
+	ConstantBufferEntry(uint32_t off, uint32_t sz, uint8_t* ptr) :
+		_data(ptr), _offset(off), _length(sz) { }
+
+	uint32_t offset() const
+		{ return _offset; }
+	
+	uint32_t length() const 
+		{ return _length; }
+
+	uint8_t* data() 
+		{ return _data; }
+	
+	const uint8_t* data() const 
+		{ return _data; }
+
+	bool valid() const
+		{ return (_length > 0) && (_data != nullptr); }
+
+private:
+	uint8_t* _data = nullptr;
+	uint32_t _offset = 0;
+	uint32_t _length = 0;
+};
+
+class RenderInterface;
 class ConstantBufferPrivate;
 class ConstantBuffer
 {
@@ -34,10 +64,10 @@ public:
 	DataBuffer::Pointer buffer() const;
 	void flush();
 
-	uint8_t* staticAllocate(uint32_t size, uint32_t& bufferOffset);
-	uint8_t* dynamicAllocate(uint32_t size, uint32_t& bufferOffset);
-	
-	void free(uint8_t*);
+	ConstantBufferEntry staticAllocate(uint32_t size);
+	ConstantBufferEntry dynamicAllocate(uint32_t size);
+
+	void free(const ConstantBufferEntry&);
 
 private:
 	ET_DECLARE_PIMPL(ConstantBuffer, 256);

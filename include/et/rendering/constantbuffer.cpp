@@ -18,7 +18,7 @@ public:
 	BinaryDataStorage localData;
 	DataBuffer::Pointer buffer;
 	
-	Vector<uint8_t*> dynamicAllocations;
+	Vector<ConstantBufferEntry> dynamicAllocations;
 	bool modified = true;
 };
 
@@ -63,8 +63,10 @@ void ConstantBuffer::flush()
 	if (_private->modified)
 	{
 		_private->buffer->setData(_private->localData.begin(), 0, _private->localData.size());
-		for (uint8_t* allocation : _private->dynamicAllocations)
+		for (ConstantBufferEntry allocation : _private->dynamicAllocations)
+		{
 			free(allocation);
+		}
 		_private->dynamicAllocations.clear();
 		_private->modified = false;
 	}
@@ -74,30 +76,29 @@ void ConstantBuffer::flush()
 	}
 }
 
-uint8_t* ConstantBuffer::staticAllocate(uint32_t size, uint32_t& offset)
+ConstantBufferEntry ConstantBuffer::staticAllocate(uint32_t size)
 {
-	offset = 0;
+	uint32_t offset = 0;
 	
 	if (!_private->heap.allocate(size, offset))
 		ET_FAIL("Failed to allocate data in shared constant buffer")
 
-	_private->modified = true;
-	return _private->localData.begin() + offset;
+	_private->modified = true;	
+	return ConstantBufferEntry(offset, size, _private->localData.begin() + offset);
 }
 
-uint8_t* ConstantBuffer::dynamicAllocate(uint32_t size, uint32_t& offset)
+ConstantBufferEntry ConstantBuffer::dynamicAllocate(uint32_t size)
 {
-	_private->dynamicAllocations.emplace_back(staticAllocate(size, offset));
+	_private->dynamicAllocations.emplace_back(staticAllocate(size));
 	return _private->dynamicAllocations.back();
 }
 
-void ConstantBuffer::free(uint8_t* ptr)
+void ConstantBuffer::free(const ConstantBufferEntry& entry)
 {
-	ET_ASSERT(ptr >= _private->localData.begin());
-	ET_ASSERT(ptr < _private->localData.end());
+	ET_ASSERT(entry.data() >= _private->localData.begin());
+	ET_ASSERT(entry.data() < _private->localData.end());
 
-	uint32_t offset = static_cast<uint32_t>(ptr - _private->localData.begin());
-	if (_private->heap.release(offset) == false)
+	if (_private->heap.release(entry.offset()) == false)
 	{
 		ET_FAIL_FMT("Attempt to release memory which was not allocated here");
 	}

@@ -339,12 +339,10 @@ void MaterialInstance::buildConstantBuffer()
 {
 	ET_ASSERT(program().valid());
 
-	_constBufferOffset = 0;
-	
-	if (_constBufferData != nullptr)
+	if (_constBufferData.valid())
 	{
 		_renderer->sharedConstantBuffer().free(_constBufferData);
-		_constBufferData = nullptr;
+		_constBufferData = { };
 	}
 	
 	const Program::Reflection& reflection = program()->reflection();
@@ -354,7 +352,7 @@ void MaterialInstance::buildConstantBuffer()
 		return;
 	}
 
-	_constBufferData = _renderer->sharedConstantBuffer().staticAllocate(reflection.materialVariablesBufferSize, _constBufferOffset);
+	_constBufferData = _renderer->sharedConstantBuffer().staticAllocate(reflection.materialVariablesBufferSize);
 
 	auto setFunc = [&, this](const mtl::OptionalValue& p) 
 	{
@@ -364,7 +362,7 @@ void MaterialInstance::buildConstantBuffer()
 			auto var = reflection.materialVariables.find(name);
 			if (var != reflection.materialVariables.end())
 			{
-				memcpy(_constBufferData + var->second.offset, p.data, p.size);
+				memcpy(_constBufferData.data() + var->second.offset, p.data, p.size);
 			}
 		}
 	};
@@ -386,13 +384,12 @@ TextureSet::Pointer MaterialInstance::textureSet()
 	return _textureSet;
 }
 
-
-uint32_t MaterialInstance::sharedConstantBufferOffset()
+ConstantBufferEntry MaterialInstance::constantBufferData()
 {
 	if (!_constantBufferValid)
 		buildConstantBuffer();
 
-	return _constBufferOffset;
+	return _constBufferData;
 }
 
 void MaterialInstance::invalidateTextureSet()

@@ -34,7 +34,7 @@ public:
 	VulkanRenderer* renderer = nullptr;
 	VkClearValue clearValues[2] { };
 	
-	RenderPass::Variables* variablesData = nullptr;
+	ConstantBufferEntry variablesData;
 	uint32_t variablesDataBufferOffset = 0;
 	Vector<VulkanRenderBatch> pendingBatches;
 
@@ -47,8 +47,7 @@ VulkanRenderPass::VulkanRenderPass(VulkanRenderer* renderer, VulkanState& vulkan
 {
 	ET_PIMPL_INIT(VulkanRenderPass, vulkan, renderer);
 
-	uint8_t* dataPtr = dynamicConstantBuffer().staticAllocate(sizeof(Variables), _private->variablesDataBufferOffset);
-	_private->variablesData = reinterpret_cast<RenderPass::Variables*>(dataPtr);
+	_private->variablesData = dynamicConstantBuffer().staticAllocate(sizeof(Variables));
 	_private->pendingBatches.reserve(128);
 	_private->generateDynamicDescriptorSet(this);
 
@@ -116,7 +115,7 @@ VulkanRenderPass::~VulkanRenderPass()
 	vkFreeDescriptorSets(_private->vulkan.device, _private->vulkan.descriptprPool, 1, &_private->dynamicDescriptorSet);
 	vkDestroyDescriptorSetLayout(_private->vulkan.device, _private->dynamicDescriptorSetLayout, nullptr);
 	
-	dynamicConstantBuffer().free(reinterpret_cast<uint8_t*>(_private->variablesData));
+	dynamicConstantBuffer().free(_private->variablesData);
 
 	ET_PIMPL_FINALIZE(VulkanRenderPass)
 }
@@ -176,7 +175,7 @@ void VulkanRenderPass::validateRenderBatch(RenderBatch::Pointer batch)
 	VulkanRenderPass::Pointer vulkanRenderPass(this);
 	_private->renderer->acquirePipelineState(vulkanRenderPass, batch->material(), batch->vertexStream());
 	batch->material()->textureSet();
-	batch->material()->sharedConstantBufferOffset();
+	batch->material()->constantBufferData();
 }
 
 void VulkanRenderPass::pushRenderBatch(RenderBatch::Pointer batch)
@@ -284,19 +283,20 @@ void VulkanRenderPassPrivate::generateDynamicDescriptorSet(RenderPass* pass)
 
 void VulkanRenderPassPrivate::loadVariables(Camera::Pointer camera, Camera::Pointer light)
 {
+	RenderPass::Variables* vptr = reinterpret_cast<RenderPass::Variables*>(variablesData.data());
 	if (camera.valid())
 	{
-		variablesData->viewProjection = camera->viewProjectionMatrix();
-		variablesData->projection = camera->projectionMatrix();
-		variablesData->view = camera->viewMatrix();
-		variablesData->cameraPosition = vec4(camera->position());
-		variablesData->cameraDirection = vec4(camera->direction());
-		variablesData->cameraUp = vec4(camera->up());
+		vptr->viewProjection = camera->viewProjectionMatrix();
+		vptr->projection = camera->projectionMatrix();
+		vptr->view = camera->viewMatrix();
+		vptr->cameraPosition = vec4(camera->position());
+		vptr->cameraDirection = vec4(camera->direction());
+		vptr->cameraUp = vec4(camera->up());
 	}
 
 	if (light.valid())
 	{
-		variablesData->lightPosition = vec4(light->position());
+		vptr->lightPosition = vec4(light->position());
 	}
 }
 

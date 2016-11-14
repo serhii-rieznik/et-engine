@@ -8,6 +8,7 @@
 #pragma once
 
 #include <et/rendering/base/materialhelpers.h>
+#include <et/rendering/constantbuffer.h>
 
 namespace et
 {
@@ -97,7 +98,7 @@ public:
 	Material::Pointer base();
 
 	TextureSet::Pointer textureSet();
-	uint32_t sharedConstantBufferOffset();
+	ConstantBufferEntry constantBufferData();
 
 	void invalidateTextureSet();
 	void invalidateConstantBuffer();
@@ -113,8 +114,7 @@ private:
 private:
 	Material::Pointer _base;
 	TextureSet::Pointer _textureSet;
-	uint8_t* _constBufferData = nullptr;
-	uint32_t _constBufferOffset = 0;
+	ConstantBufferEntry _constBufferData;
 	bool _textureSetValid = false;
 	bool _constantBufferValid = false;
 };
