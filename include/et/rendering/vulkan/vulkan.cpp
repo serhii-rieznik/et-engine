@@ -13,33 +13,33 @@ const char* vulkanResultToString(VkResult result)
 	switch (result)
 	{
 		CASE_TO_STRING(VK_SUCCESS)
-		CASE_TO_STRING(VK_NOT_READY)
-		CASE_TO_STRING(VK_TIMEOUT)
-		CASE_TO_STRING(VK_EVENT_SET)
-		CASE_TO_STRING(VK_EVENT_RESET)
-		CASE_TO_STRING(VK_INCOMPLETE)
-		CASE_TO_STRING(VK_ERROR_OUT_OF_HOST_MEMORY)
-		CASE_TO_STRING(VK_ERROR_OUT_OF_DEVICE_MEMORY)
-		CASE_TO_STRING(VK_ERROR_INITIALIZATION_FAILED)
-		CASE_TO_STRING(VK_ERROR_DEVICE_LOST)
-		CASE_TO_STRING(VK_ERROR_MEMORY_MAP_FAILED)
-		CASE_TO_STRING(VK_ERROR_LAYER_NOT_PRESENT)
-		CASE_TO_STRING(VK_ERROR_EXTENSION_NOT_PRESENT)
-		CASE_TO_STRING(VK_ERROR_FEATURE_NOT_PRESENT)
-		CASE_TO_STRING(VK_ERROR_INCOMPATIBLE_DRIVER)
-		CASE_TO_STRING(VK_ERROR_TOO_MANY_OBJECTS)
-		CASE_TO_STRING(VK_ERROR_FORMAT_NOT_SUPPORTED)
-		CASE_TO_STRING(VK_ERROR_SURFACE_LOST_KHR)
-		CASE_TO_STRING(VK_ERROR_NATIVE_WINDOW_IN_USE_KHR)
-		CASE_TO_STRING(VK_SUBOPTIMAL_KHR)
-		CASE_TO_STRING(VK_ERROR_OUT_OF_DATE_KHR)
-		CASE_TO_STRING(VK_ERROR_INCOMPATIBLE_DISPLAY_KHR)
-		CASE_TO_STRING(VK_ERROR_VALIDATION_FAILED_EXT)
-		CASE_TO_STRING(VK_ERROR_INVALID_SHADER_NV)
-		default:
-			ET_FAIL_FMT("Unknown Vulkan error: %d", static_cast<int>(result));
+			CASE_TO_STRING(VK_NOT_READY)
+			CASE_TO_STRING(VK_TIMEOUT)
+			CASE_TO_STRING(VK_EVENT_SET)
+			CASE_TO_STRING(VK_EVENT_RESET)
+			CASE_TO_STRING(VK_INCOMPLETE)
+			CASE_TO_STRING(VK_ERROR_OUT_OF_HOST_MEMORY)
+			CASE_TO_STRING(VK_ERROR_OUT_OF_DEVICE_MEMORY)
+			CASE_TO_STRING(VK_ERROR_INITIALIZATION_FAILED)
+			CASE_TO_STRING(VK_ERROR_DEVICE_LOST)
+			CASE_TO_STRING(VK_ERROR_MEMORY_MAP_FAILED)
+			CASE_TO_STRING(VK_ERROR_LAYER_NOT_PRESENT)
+			CASE_TO_STRING(VK_ERROR_EXTENSION_NOT_PRESENT)
+			CASE_TO_STRING(VK_ERROR_FEATURE_NOT_PRESENT)
+			CASE_TO_STRING(VK_ERROR_INCOMPATIBLE_DRIVER)
+			CASE_TO_STRING(VK_ERROR_TOO_MANY_OBJECTS)
+			CASE_TO_STRING(VK_ERROR_FORMAT_NOT_SUPPORTED)
+			CASE_TO_STRING(VK_ERROR_SURFACE_LOST_KHR)
+			CASE_TO_STRING(VK_ERROR_NATIVE_WINDOW_IN_USE_KHR)
+			CASE_TO_STRING(VK_SUBOPTIMAL_KHR)
+			CASE_TO_STRING(VK_ERROR_OUT_OF_DATE_KHR)
+			CASE_TO_STRING(VK_ERROR_INCOMPATIBLE_DISPLAY_KHR)
+			CASE_TO_STRING(VK_ERROR_VALIDATION_FAILED_EXT)
+			CASE_TO_STRING(VK_ERROR_INVALID_SHADER_NV)
+	default:
+		ET_FAIL_FMT("Unknown Vulkan error: %d", static_cast<int>(result));
 	}
-	
+
 	return nullptr;
 }
 
@@ -117,7 +117,7 @@ bool VulkanSwapchain::createDepthImage(VulkanState& vulkan, VkImage& image, VkDe
 	imageInfo.arrayLayers = 1;
 	imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
-	VkFormatProperties formatProperties = { };
+	VkFormatProperties formatProperties = {};
 	vkGetPhysicalDeviceFormatProperties(vulkan.physicalDevice, imageInfo.format, &formatProperties);
 	if (formatProperties.optimalTilingFeatures & VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT)
 		imageInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
@@ -128,7 +128,7 @@ bool VulkanSwapchain::createDepthImage(VulkanState& vulkan, VkImage& image, VkDe
 
 	VULKAN_CALL(vkCreateImage(vulkan.device, &imageInfo, nullptr, &image));
 
-	VkMemoryRequirements memoryRequirements = { };
+	VkMemoryRequirements memoryRequirements = {};
 	vkGetImageMemoryRequirements(vulkan.device, image, &memoryRequirements);
 
 	VkMemoryAllocateInfo allocInfo = { VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO };
@@ -138,7 +138,7 @@ bool VulkanSwapchain::createDepthImage(VulkanState& vulkan, VkImage& image, VkDe
 	VULKAN_CALL(vkBindImageMemory(vulkan.device, image, memory, 0));
 
 	vulkan::imageBarrier(vulkan, cmdBuffer, image, VK_IMAGE_ASPECT_DEPTH_BIT,
-		0, VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT, 
+		0, VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT,
 		VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
 		VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT);
 
@@ -153,7 +153,7 @@ VkImageView VulkanSwapchain::createImageView(VulkanState& vulkan, VkImage image,
 	viewInfo.components = { VK_COMPONENT_SWIZZLE_R, VK_COMPONENT_SWIZZLE_G, VK_COMPONENT_SWIZZLE_B, VK_COMPONENT_SWIZZLE_A };
 	viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
 	viewInfo.subresourceRange = { aspect, 0, 1, 0, 1 };
-	
+
 	VkImageView result = nullptr;
 	VULKAN_CALL(vkCreateImageView(vulkan.device, &viewInfo, nullptr, &result));
 	return result;
@@ -161,7 +161,7 @@ VkImageView VulkanSwapchain::createImageView(VulkanState& vulkan, VkImage image,
 
 void VulkanSwapchain::create(VulkanState& vulkan)
 {
-	VkSurfaceCapabilitiesKHR surfaceCaps = { };
+	VkSurfaceCapabilitiesKHR surfaceCaps = {};
 	vkGetPhysicalDeviceSurfaceCapabilitiesKHR(vulkan.physicalDevice, surface, &surfaceCaps);
 
 	auto presentModes = enumerateVulkanObjects<VkPresentModeKHR>(vulkan, vkGetPhysicalDeviceSurfacePresentModesKHRWrapper);
@@ -206,7 +206,7 @@ void VulkanSwapchain::create(VulkanState& vulkan)
 		{
 			rt.color = *swapchainImagesPtr++;
 			rt.colorView = createImageView(vulkan, rt.color, VK_IMAGE_ASPECT_COLOR_BIT, surfaceFormat.format);
-			
+
 			if (createDepthImage(vulkan, rt.depth, rt.depthMemory, cmdBuffer))
 			{
 				rt.depthView = createImageView(vulkan, rt.depth, VK_IMAGE_ASPECT_DEPTH_BIT, depthFormat);
@@ -217,7 +217,7 @@ void VulkanSwapchain::create(VulkanState& vulkan)
 
 void VulkanSwapchain::acquireNextImage(VulkanState& vulkan)
 {
-	VULKAN_CALL(vkAcquireNextImageKHR(vulkan.device, swapchain, UINT64_MAX, 
+	VULKAN_CALL(vkAcquireNextImageKHR(vulkan.device, swapchain, UINT64_MAX,
 		vulkan.semaphores.imageAvailable, nullptr, &currentImageIndex));
 }
 
@@ -236,7 +236,7 @@ void VulkanSwapchain::present(VulkanState& vulkan)
  * Native buffer
  */
 
-VulkanNativeBuffer::VulkanNativeBuffer(VulkanState& vulkan, uint32_t size, uint32_t usage, bool cpuReadable) : 
+VulkanNativeBuffer::VulkanNativeBuffer(VulkanState& vulkan, uint32_t size, uint32_t usage, bool cpuReadable) :
 	_vulkan(vulkan), _cpuReadable(cpuReadable)
 {
 	VkBufferCreateInfo info = { VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO };
@@ -292,12 +292,13 @@ void VulkanNativeBuffer::copyFrom(VulkanNativeBuffer& source)
 {
 	ET_ASSERT(_memoryRequirements.size == source._memoryRequirements.size);
 
-	VkBufferCopy region = { };
+	VkBufferCopy region = {};
 	region.srcOffset = 0;
 	region.dstOffset = 0;
 	region.size = _memoryRequirements.size;
 
-	_vulkan.executeServiceCommands([&](VkCommandBuffer cmdBuffer) {
+	_vulkan.executeServiceCommands([&](VkCommandBuffer cmdBuffer)
+	{
 		vkCmdCopyBuffer(cmdBuffer, source.buffer(), buffer(), 1, &region);
 	});;
 }
@@ -305,10 +306,10 @@ void VulkanNativeBuffer::copyFrom(VulkanNativeBuffer& source)
 namespace vulkan
 {
 
-uint32_t getMemoryTypeIndex(VulkanState& vulkan, uint32_t typeFilter, VkMemoryPropertyFlags properties) 
+uint32_t getMemoryTypeIndex(VulkanState& vulkan, uint32_t typeFilter, VkMemoryPropertyFlags properties)
 {
 	static bool propertiesRetreived = false;
-	static VkPhysicalDeviceMemoryProperties memProperties = { };
+	static VkPhysicalDeviceMemoryProperties memProperties = {};
 
 	if (propertiesRetreived == false)
 	{
@@ -467,6 +468,40 @@ VkIndexType indexBufferFormat(IndexArrayFormat fmt)
 	}
 }
 
+VkSamplerAddressMode textureWrapToSamplerAddressMode(TextureWrap wrap)
+{
+	static std::map<TextureWrap, VkSamplerAddressMode> values =
+	{
+		{ TextureWrap::Repeat, VK_SAMPLER_ADDRESS_MODE_REPEAT },
+		{ TextureWrap::MirrorRepeat, VK_SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT },
+		{ TextureWrap::ClampToEdge, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE },
+	};
+	ET_ASSERT(values.count(wrap) > 0);
+	return values.at(wrap);
+}
+
+VkFilter textureFiltrationValue(TextureFiltration flt)
+{
+	static std::map<TextureFiltration, VkFilter> values =
+	{
+		{ TextureFiltration::Nearest, VK_FILTER_NEAREST },
+		{ TextureFiltration::Linear, VK_FILTER_LINEAR },
+	};
+	ET_ASSERT(values.count(flt) > 0);
+	return values.at(flt);
+}
+
+VkSamplerMipmapMode textureFiltrationValueToSamplerMipMapMode(TextureFiltration flt)
+{
+	static std::map<TextureFiltration, VkSamplerMipmapMode> values =
+	{
+		{ TextureFiltration::Nearest, VK_SAMPLER_MIPMAP_MODE_NEAREST },
+		{ TextureFiltration::Linear, VK_SAMPLER_MIPMAP_MODE_LINEAR },
+	};
+	ET_ASSERT(values.count(flt) > 0);
+	return values.at(flt);
+}
+
 namespace gl
 {
 DataType dataTypeFromGLType(int glType)
@@ -489,7 +524,7 @@ DataType dataTypeFromGLType(int glType)
 
 bool isSamplerType(int glType)
 {
-	static std::set<int> validTypes = { 
+	static std::set<int> validTypes = {
 		GL_SAMPLER_1D,
 		GL_SAMPLER_2D,
 		GL_SAMPLER_3D,

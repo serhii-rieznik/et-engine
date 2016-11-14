@@ -30,7 +30,15 @@ VulkanSampler::VulkanSampler(VulkanState& vulkan, const Sampler::Description& de
 	ET_PIMPL_INIT(VulkanSampler, vulkan);
 
 	VkSamplerCreateInfo info = { VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO };
-	// TODO : fill structure
+	info.addressModeU = vulkan::textureWrapToSamplerAddressMode(desc.wrapU);
+	info.addressModeV = vulkan::textureWrapToSamplerAddressMode(desc.wrapV);
+	info.addressModeW = vulkan::textureWrapToSamplerAddressMode(desc.wrapW);
+	info.minFilter = vulkan::textureFiltrationValue(desc.minFilter);
+	info.magFilter = vulkan::textureFiltrationValue(desc.magFilter);
+	info.mipmapMode = vulkan::textureFiltrationValueToSamplerMipMapMode(desc.mipFilter);
+	info.anisotropyEnable = desc.maxAnisotropy > 1.0f;
+	info.maxAnisotropy = desc.maxAnisotropy;
+	
 	vkCreateSampler(vulkan.device, &info, nullptr, &_private->sampler.sampler);
 }
 

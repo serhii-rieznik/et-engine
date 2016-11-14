@@ -208,7 +208,7 @@ enum class TextureFiltration : uint32_t
 {
 	Nearest,
 	Linear,
-	
+
 	max
 };
 

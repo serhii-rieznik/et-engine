@@ -21,11 +21,6 @@ void DX12RenderPass::begin()
 {
 }
 
-void DX12RenderPass::validateRenderBatch(RenderBatch::Pointer)
-{
-
-}
-
 void DX12RenderPass::pushRenderBatch(RenderBatch::Pointer)
 {
 }

@@ -40,13 +40,7 @@ void s3d::Renderer::render(RenderInterface::Pointer renderer, const Scene& scene
 
 	s3d::BaseElement::List meshes = scene.childrenOfType(s3d::ElementType::Mesh);
 	for (s3d::Mesh::Pointer mesh : meshes)
-	{
 		mesh->prepareRenderBatches();
-		for (RenderBatch::Pointer batch : mesh->renderBatches())
-		{
-			_mainPass->validateRenderBatch(batch);
-		}
-	}
 	
 	_mainPass->begin();
 	renderMeshList(_mainPass, meshes);

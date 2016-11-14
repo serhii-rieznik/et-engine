@@ -117,7 +117,9 @@ enum DescriptorSetClass : uint32_t
 {
 	Buffers,
 	Textures,
-	Count
+	Count,
+	
+	DynamicDescriptorsCount = 2
 };
 
 struct VulkanNativePipeline
@@ -159,6 +161,9 @@ VkFormat textureFormatValue(TextureFormat);
 VkImageType textureTargetToImageType(TextureTarget);
 VkImageViewType textureTargetToImageViewType(TextureTarget);
 uint32_t getMemoryTypeIndex(VulkanState& vulkan, uint32_t typeFilter, VkMemoryPropertyFlags properties);
+VkSamplerAddressMode textureWrapToSamplerAddressMode(TextureWrap);
+VkFilter textureFiltrationValueToFilter(TextureFiltration);
+VkSamplerMipmapMode textureFiltrationValueToSamplerMipMapMode(TextureFiltration);
 
 namespace gl
 {

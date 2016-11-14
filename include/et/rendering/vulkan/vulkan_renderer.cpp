@@ -20,7 +20,7 @@
 #include <et/rendering/vulkan/vulkan.h>
 #include <et/app/application.h>
 
-#define VULKAN_ENABLE_VALIDATION 1
+#define VULKAN_ENABLE_VALIDATION 0
 
 namespace et
 {
