@@ -167,7 +167,7 @@ void VulkanSwapchain::create(VulkanState& vulkan)
 	auto presentModes = enumerateVulkanObjects<VkPresentModeKHR>(vulkan, vkGetPhysicalDeviceSurfacePresentModesKHRWrapper);
 	extent = surfaceCaps.currentExtent;
 
-	VkPresentModeKHR presentMode = VK_PRESENT_MODE_FIFO_KHR;
+	VkPresentModeKHR presentMode = VK_PRESENT_MODE_IMMEDIATE_KHR;
 	// TODO : handle v-sync
 
 	uint32_t numImages = surfaceCaps.minImageCount + 1;
@@ -288,7 +288,7 @@ void VulkanNativeBuffer::unmap()
 	vkUnmapMemory(_vulkan.device, _memory);
 	if (_autoFlush)
 	{
-	vkFlushMappedMemoryRanges(_vulkan.device, 1, &_mappedRange);
+		vkFlushMappedMemoryRanges(_vulkan.device, 1, &_mappedRange);
 	}
 	_mappedRange = { VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE };
 	_mapped = false;
