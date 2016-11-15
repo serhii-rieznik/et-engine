@@ -236,7 +236,7 @@ Vector<EnumeratedClass> enumerateVulkanObjects(const Holder& holder, Function ca
 class VulkanNativeBuffer
 {
 public:
-	VulkanNativeBuffer(VulkanState& vulkan, uint32_t size, uint32_t usage, bool cpuReadable);
+	VulkanNativeBuffer(VulkanState& vulkan, uint32_t size, uint32_t usage, bool cpuReadable, bool autoFlush);
 	~VulkanNativeBuffer();
 
 	void* map(uint32_t offset, uint32_t size);
@@ -244,6 +244,9 @@ public:
 
 	VkBuffer buffer() const 
 		{ return _buffer; }
+
+	VkDeviceMemory memory() const 
+		{ return _memory; }
 
 	bool mapped() const 
 		{ return _mapped; }
@@ -258,6 +261,7 @@ private:
 	VkMappedMemoryRange _mappedRange { VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE };
 	std::atomic_bool _mapped{false};
 	bool _cpuReadable = false;
+	bool _autoFlush = true;
 };
 
 }

@@ -30,6 +30,8 @@ public:
 	uint8_t* map(uint32_t offset, uint32_t size) override;
 	void unmap() override;
 
+	void flushRanges(const Vector<Range>&) override;
+
 	const VulkanNativeBuffer& nativeBuffer() const;
 
 private:

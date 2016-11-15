@@ -16,10 +16,14 @@ public:
 	HeapController heap;
 	DataBuffer::Pointer buffer;
 	BinaryDataStorage heapInfo;
-	BinaryDataStorage mappedData;
+	BinaryDataStorage localData;
 
-	Vector<ConstantBufferEntry> dynamicAllocations;
+	Vector<ConstantBufferEntry> allocations;
+	Vector<DataBuffer::Range> flushRanges;
 	bool modified = true;
+
+	const ConstantBufferEntry& internalAlloc(uint32_t, bool);
+	void internalFree(const ConstantBufferEntry&);
 };
 
 ConstantBuffer::ConstantBuffer()
@@ -40,7 +44,8 @@ void ConstantBuffer::init(RenderInterface* renderer)
 	_private->heap.setAutoCompress(false);
 
 	_private->buffer = renderer->createDataBuffer("shared-const-buffer", Capacity);
-	_private->dynamicAllocations.reserve(1024);
+	_private->allocations.reserve(1024);
+	_private->flushRanges.reserve(1024);
 }
 
 void ConstantBuffer::shutdown()
@@ -48,7 +53,7 @@ void ConstantBuffer::shutdown()
 	_private->buffer.reset(nullptr);
 	_private->heap.clear();
 	_private->heapInfo.resize(0);
-	_private->mappedData.resize(0);
+	_private->localData.resize(0);
 }
 
 DataBuffer::Pointer ConstantBuffer::buffer() const
@@ -58,77 +63,82 @@ DataBuffer::Pointer ConstantBuffer::buffer() const
 
 void ConstantBuffer::flush()
 {
-	if (_private->modified)
+	if (!_private->modified)
+		return;
+
+	_private->flushRanges.clear();
+	uint8_t* mappedMemory = _private->buffer->map(0, Capacity);
+	for (const ConstantBufferEntry& allocation : _private->allocations)
 	{
-		_private->buffer->unmap();
-
-		for (ConstantBufferEntry allocation : _private->dynamicAllocations)
-			dynamicFree(allocation);
-		_private->dynamicAllocations.clear();
-		_private->heap.compress();
-
-		_private->mappedData.resize(0);
-		_private->modified = false;
+		_private->flushRanges.emplace_back(allocation.offset(), allocation.length());
+		memcpy(mappedMemory + allocation.offset(), _private->localData.begin() + allocation.offset(), allocation.length());
 	}
-	else
+	_private->buffer->unmap();
+	_private->buffer->flushRanges(_private->flushRanges);
+
+	for (const ConstantBufferEntry& allocation : _private->allocations)
 	{
-		ET_ASSERT(_private->dynamicAllocations.empty());
+		if (allocation.isDynamic())
+			free(allocation);
 	}
-}
-
-ConstantBufferEntry ConstantBuffer::staticAllocate(uint32_t size)
-{
-	uint32_t offset = 0;
-
-	if (!_private->heap.allocate(size, offset))
-		ET_FAIL("Failed to allocate data in shared constant buffer");
-
-	if (_private->mappedData.data() == nullptr)
-		_private->mappedData = BinaryDataStorage(_private->buffer->map(0, Capacity), Capacity);
-
-	_private->modified = true;
-	return ConstantBufferEntry(offset, size, _private->mappedData.begin() + offset, false);
-}
-
-ConstantBufferEntry ConstantBuffer::dynamicAllocate(uint32_t size)
-{
-	uint32_t offset = 0;
-
-	if (!_private->heap.allocate(size, offset))
-		ET_FAIL("Failed to allocate data in shared constant buffer");
-
-	if (_private->mappedData.data() == nullptr)
-		_private->mappedData = BinaryDataStorage(_private->buffer->map(0, Capacity), Capacity);
-
-	_private->modified = true;
-	_private->dynamicAllocations.emplace_back(offset, size, _private->mappedData.begin() + offset, true);
-	return _private->dynamicAllocations.back();
-}
-
-void ConstantBuffer::dynamicFree(const ConstantBufferEntry& entry)
-{
-	ET_ASSERT(entry.data() >= _private->localData.begin());
-	ET_ASSERT(entry.data() < _private->localData.end());
-	ET_ASSERT(entry.isDynamic());
-
-	if (_private->heap.release(entry.offset()) == false)
-	{
-		ET_FAIL_FMT("Attempt to release memory which was not allocated here");
-	}
-}
-
-void ConstantBuffer::staticFree(const ConstantBufferEntry& entry)
-{
-	ET_ASSERT(entry.data() >= _private->localData.begin());
-	ET_ASSERT(entry.data() < _private->localData.end());
-	ET_ASSERT(entry.isDynamic() == false);
-
-	if (_private->heap.release(entry.offset()) == false)
-	{
-		ET_FAIL_FMT("Attempt to release memory which was not allocated here");
-	}
-
+	auto toErase = std::remove_if(_private->allocations.begin(), _private->allocations.end(), [](const ConstantBufferEntry& allocation){
+		return allocation.isDynamic();
+	});
+	_private->allocations.erase(toErase, _private->allocations.end());
 	_private->heap.compress();
+	_private->modified = false;
+}
+
+const ConstantBufferEntry& ConstantBuffer::staticAllocate(uint32_t size)
+{
+	return _private->internalAlloc(size, false);
+}
+
+const ConstantBufferEntry& ConstantBuffer::dynamicAllocate(uint32_t size)
+{
+	return _private->internalAlloc(size, true);
+}
+
+void ConstantBuffer::free(const ConstantBufferEntry& entry)
+{
+	_private->internalFree(entry);
+
+	if (entry.isDynamic() == false)
+		_private->heap.compress();
+}
+
+const ConstantBufferEntry& ConstantBufferPrivate::internalAlloc(uint32_t size, bool dyn)
+{
+	uint32_t offset = 0;
+
+	if (!heap.allocate(size, offset))
+		ET_FAIL("Failed to allocate data in shared constant buffer");
+
+	if (localData.empty())
+	{
+		localData.resize(ConstantBuffer::Capacity);
+		localData.fill(0);
+	}
+
+	modified = true;
+	allocations.emplace_back(offset, size, localData.begin() + offset, dyn);
+	return allocations.back();
+}
+
+void ConstantBufferPrivate::internalFree(const ConstantBufferEntry& entry)
+{
+	ET_ASSERT(entry.data() >= localData.begin());
+	ET_ASSERT(entry.data() < localData.end());
+	
+	if (heap.release(entry.offset()) == false)
+		ET_ASSERT(!"Attempt to release memory which was not allocated here");
+
+	if (entry.isDynamic() == false)
+	{
+		auto allocation = std::find(allocations.begin(), allocations.end(), entry);
+		ET_ASSERT(allocation != allocations.end());
+		allocations.erase(allocation);
+	}
 }
 
 }

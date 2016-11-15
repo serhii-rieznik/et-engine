@@ -128,7 +128,7 @@ VulkanRenderPass::~VulkanRenderPass()
 	vkFreeDescriptorSets(_private->vulkan.device, _private->vulkan.descriptprPool, 1, &_private->dynamicDescriptorSet);
 	vkDestroyDescriptorSetLayout(_private->vulkan.device, _private->dynamicDescriptorSetLayout, nullptr);
 	
-	dynamicConstantBuffer().staticFree(_private->variablesData);
+	dynamicConstantBuffer().free(_private->variablesData);
 
 	ET_PIMPL_FINALIZE(VulkanRenderPass)
 }

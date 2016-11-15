@@ -73,8 +73,11 @@ void main()
 
 	vec4 albedoSample = texture(albedoTexture, fsIn.texCoord0);
 	
-	vec4 diffuse = (albedoSample * materialVariables.albedoColor) * normalizedLambert(env);
-	vec4 specular = materialVariables.reflectanceColor * microfacetSpecular(env);
+	float diffuseComponent = 0.5 + 0.5 * normalizedLambert(env);
+	float specularComponent = microfacetSpecular(env);
+
+	vec4 diffuse = (albedoSample * materialVariables.albedoColor) * (diffuseComponent * diffuseComponent);
+	vec4 specular = materialVariables.reflectanceColor * specularComponent;
 
 	outColor0 = diffuse + specular;
 }

@@ -75,7 +75,8 @@ void VulkanTexture::setImageData(const BinaryDataStorage& data)
 {
 	ET_ASSERT(data.size() <= _private->texture.memoryRequirements.size);
 
-	VulkanNativeBuffer stagingBuffer(_private->vulkan, static_cast<uint32_t>(_private->texture.memoryRequirements.size), VK_BUFFER_USAGE_TRANSFER_SRC_BIT, true);
+	uint32_t bufferLength = static_cast<uint32_t>(_private->texture.memoryRequirements.size);
+	VulkanNativeBuffer stagingBuffer(_private->vulkan, bufferLength, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, true, true);
 	void* ptr = stagingBuffer.map(0, data.size());
 	memcpy(ptr, data.data(), data.size());
 	stagingBuffer.unmap();

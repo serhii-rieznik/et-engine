@@ -16,10 +16,8 @@ namespace et
 class VulkanIndexBufferPrivate
 {
 public:
-	VulkanIndexBufferPrivate(VulkanState& v, uint32_t size, bool cpuReadable)
-		: nativeBuffer(v, size, VK_BUFFER_USAGE_INDEX_BUFFER_BIT | (cpuReadable ? 0 : VK_BUFFER_USAGE_TRANSFER_DST_BIT), cpuReadable)
-	{
-	}
+	VulkanIndexBufferPrivate(VulkanState& v, uint32_t size, uint32_t usage, bool cpuReadable)
+		: nativeBuffer(v, size, usage, cpuReadable, true) { }
 
 	VulkanNativeBuffer nativeBuffer;
 };
@@ -27,7 +25,10 @@ public:
 VulkanIndexBuffer::VulkanIndexBuffer(VulkanState& vulkan, IndexArray::Pointer i,
 	BufferDrawType dt, const std::string& name) : IndexBuffer(i, dt, name)
 {
-	ET_PIMPL_INIT(VulkanIndexBuffer, vulkan, i->dataSize(), drawType() == BufferDrawType::Dynamic);
+	bool cpuReadable = drawType() == BufferDrawType::Dynamic;
+	uint32_t usage = VK_BUFFER_USAGE_INDEX_BUFFER_BIT | (cpuReadable ? 0 : VK_BUFFER_USAGE_TRANSFER_DST_BIT);
+
+	ET_PIMPL_INIT(VulkanIndexBuffer, vulkan, i->dataSize(), usage, cpuReadable);
 
 	if (drawType() == BufferDrawType::Dynamic)
 	{
@@ -37,7 +38,7 @@ VulkanIndexBuffer::VulkanIndexBuffer(VulkanState& vulkan, IndexArray::Pointer i,
 	}
 	else
 	{
-		VulkanNativeBuffer stagingBuffer(vulkan, i->dataSize(), VK_BUFFER_USAGE_TRANSFER_SRC_BIT, true);
+		VulkanNativeBuffer stagingBuffer(vulkan, i->dataSize(), VK_BUFFER_USAGE_TRANSFER_SRC_BIT, true, true);
 		void* ptr = stagingBuffer.map(0, i->dataSize());
 		memcpy(ptr, i->data(), i->dataSize());
 		stagingBuffer.unmap();

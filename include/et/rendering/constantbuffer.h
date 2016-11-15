@@ -40,6 +40,11 @@ public:
 	bool isDynamic() const 
 		{ return _isDynamic; }
 
+	bool operator == (const ConstantBufferEntry& r) const 
+	{
+		return (_data == r._data) && (_offset == r._offset) && (_length == r._length) && (_isDynamic == r._isDynamic);
+	}
+
 private:
 	uint8_t* _data = nullptr;
 	uint32_t _offset = 0;
@@ -68,11 +73,10 @@ public:
 	DataBuffer::Pointer buffer() const;
 	void flush();
 
-	ConstantBufferEntry staticAllocate(uint32_t size);
-	ConstantBufferEntry dynamicAllocate(uint32_t size);
+	const ConstantBufferEntry& staticAllocate(uint32_t size);
+	const ConstantBufferEntry& dynamicAllocate(uint32_t size);
 
-	void staticFree(const ConstantBufferEntry&);
-	void dynamicFree(const ConstantBufferEntry&);
+	void free(const ConstantBufferEntry&);
 
 private:
 	ET_DECLARE_PIMPL(ConstantBuffer, 256);

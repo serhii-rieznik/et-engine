@@ -236,8 +236,8 @@ void VulkanSwapchain::present(VulkanState& vulkan)
  * Native buffer
  */
 
-VulkanNativeBuffer::VulkanNativeBuffer(VulkanState& vulkan, uint32_t size, uint32_t usage, bool cpuReadable) :
-	_vulkan(vulkan), _cpuReadable(cpuReadable)
+VulkanNativeBuffer::VulkanNativeBuffer(VulkanState& vulkan, uint32_t size, uint32_t usage, bool cpuReadable, bool autoFlush) :
+	_vulkan(vulkan), _cpuReadable(cpuReadable), _autoFlush(autoFlush)
 {
 	VkBufferCreateInfo info = { VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO };
 	info.size = size;
@@ -248,7 +248,7 @@ VulkanNativeBuffer::VulkanNativeBuffer(VulkanState& vulkan, uint32_t size, uint3
 	vkGetBufferMemoryRequirements(_vulkan.device, _buffer, &_memoryRequirements);
 
 	VkMemoryPropertyFlags memoryProperties = cpuReadable ?
-		VK_MEMORY_PROPERTY_HOST_CACHED_BIT : 
+		VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT : 
 		VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
 
 	VkMemoryAllocateInfo allocInfo = { VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO };
@@ -268,14 +268,14 @@ VulkanNativeBuffer::~VulkanNativeBuffer()
 void* VulkanNativeBuffer::map(uint32_t offset, uint32_t size)
 {
 	ET_ASSERT(_cpuReadable);
+	ET_ASSERT(_mapped == false);
 
 	void* pointer = nullptr;
 	{
-		ET_ASSERT(_mapped == false);
 		VULKAN_CALL(vkMapMemory(_vulkan.device, _memory, offset, size, 0, &pointer));
 		_mappedRange.memory = _memory;
 		_mappedRange.offset = offset;
-		_mappedRange.size = VK_WHOLE_SIZE;
+		_mappedRange.size = size;
 		_mapped = true;
 	}
 	return pointer;
@@ -284,8 +284,12 @@ void* VulkanNativeBuffer::map(uint32_t offset, uint32_t size)
 void VulkanNativeBuffer::unmap()
 {
 	ET_ASSERT(_mapped);
+
 	vkUnmapMemory(_vulkan.device, _memory);
+	if (_autoFlush)
+	{
 	vkFlushMappedMemoryRanges(_vulkan.device, 1, &_mappedRange);
+	}
 	_mappedRange = { VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE };
 	_mapped = false;
 }
