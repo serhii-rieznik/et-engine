@@ -19,8 +19,8 @@ class ConstantBufferEntry
 public:
 	ConstantBufferEntry() = default;
 
-	ConstantBufferEntry(uint32_t off, uint32_t sz, uint8_t* ptr) :
-		_data(ptr), _offset(off), _length(sz) { }
+	ConstantBufferEntry(uint32_t off, uint32_t sz, uint8_t* ptr, bool dyn) :
+		_data(ptr), _offset(off), _length(sz), _isDynamic(dyn) { }
 
 	uint32_t offset() const
 		{ return _offset; }
@@ -37,10 +37,14 @@ public:
 	bool valid() const
 		{ return (_length > 0) && (_data != nullptr); }
 
+	bool isDynamic() const 
+		{ return _isDynamic; }
+
 private:
 	uint8_t* _data = nullptr;
 	uint32_t _offset = 0;
 	uint32_t _length = 0;
+	bool _isDynamic = false;
 };
 
 class RenderInterface;
@@ -67,7 +71,8 @@ public:
 	ConstantBufferEntry staticAllocate(uint32_t size);
 	ConstantBufferEntry dynamicAllocate(uint32_t size);
 
-	void free(const ConstantBufferEntry&);
+	void staticFree(const ConstantBufferEntry&);
+	void dynamicFree(const ConstantBufferEntry&);
 
 private:
 	ET_DECLARE_PIMPL(ConstantBuffer, 256);

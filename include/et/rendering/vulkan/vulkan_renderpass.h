@@ -28,12 +28,12 @@ public:
 	const VulkanNativeRenderPass& nativeRenderPass() const;
 
 	void begin() override;
-	void pushRenderBatch(RenderBatch::Pointer) override;
+	void pushRenderBatch(const RenderBatch::Pointer&) override;
 	void end() override;
 	
 	void submit();
 
 private:
-	ET_DECLARE_PIMPL(VulkanRenderPass, 256);
+	ET_DECLARE_PIMPL(VulkanRenderPass, 288);
 };
 }

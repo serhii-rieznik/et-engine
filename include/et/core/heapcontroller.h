@@ -26,12 +26,14 @@ public:
 
 	void init(uint32_t capacity, uint32_t granularity);
 	void setInfoStorage(void*);
+	void setAutoCompress(bool);
 
 	bool allocate(uint32_t size, uint32_t& offset);
 	bool containsAllocationWithOffset(uint32_t offset);
 	bool release(uint32_t offset);
-
+	
 	bool empty() const;
+	void compress();
 	void clear();
 
 	void getAllocationIndexes(std::vector<uint32_t>&) const;

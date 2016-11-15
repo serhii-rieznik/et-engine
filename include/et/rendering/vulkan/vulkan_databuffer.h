@@ -26,6 +26,9 @@ public:
 
 	uint32_t size() const override;
 	void setData(const void* data, uint32_t offset, uint32_t dataSize) override;
+	
+	uint8_t* map(uint32_t offset, uint32_t size) override;
+	void unmap() override;
 
 	const VulkanNativeBuffer& nativeBuffer() const;
 

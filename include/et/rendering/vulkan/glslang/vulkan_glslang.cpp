@@ -11,14 +11,6 @@
 #include <et/core/et.h>
 #include <functional>
 
-#pragma comment(lib, "glslang-default-resource-limits.lib")
-#pragma comment(lib, "glslang.lib")
-#pragma comment(lib, "OGLCompiler.lib")
-#pragma comment(lib, "OSDependent.lib")
-#pragma comment(lib, "SPIRV.lib")
-#pragma comment(lib, "SPVRemapper.lib")
-#pragma comment(lib, "HLSL.lib")
-
 namespace et
 {
 

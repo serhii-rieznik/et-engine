@@ -45,6 +45,7 @@ public:
 	
 	ConstantBufferEntry variablesData;
 	Vector<VulkanRenderBatch> batches;
+	Map<VkImageView, VkFramebuffer> framebuffers;
 
 	std::atomic_bool recording { false };
 
@@ -119,13 +120,15 @@ VulkanRenderPass::VulkanRenderPass(VulkanRenderer* renderer, VulkanState& vulkan
 
 VulkanRenderPass::~VulkanRenderPass()
 {
-	vkDestroyFramebuffer(_private->vulkan.device, _private->framebuffer, nullptr);
+	for (const auto& fb : _private->framebuffers)
+		vkDestroyFramebuffer(_private->vulkan.device, fb.second, nullptr);
+
 	vkDestroyRenderPass(_private->vulkan.device, _private->renderPass, nullptr);
 	vkFreeCommandBuffers(_private->vulkan.device, _private->vulkan.commandPool, 1, &_private->commandBuffer);
 	vkFreeDescriptorSets(_private->vulkan.device, _private->vulkan.descriptprPool, 1, &_private->dynamicDescriptorSet);
 	vkDestroyDescriptorSetLayout(_private->vulkan.device, _private->dynamicDescriptorSetLayout, nullptr);
 	
-	dynamicConstantBuffer().free(_private->variablesData);
+	dynamicConstantBuffer().staticFree(_private->variablesData);
 
 	ET_PIMPL_FINALIZE(VulkanRenderPass)
 }
@@ -139,25 +142,29 @@ void VulkanRenderPass::begin()
 {
 	ET_ASSERT(_private->recording == false);
 
-	VkImageView attachments[] = {
-		_private->vulkan.swapchain.currentRenderTarget().colorView,
-		_private->vulkan.swapchain.currentRenderTarget().depthView
-	};
+	const VulkanSwapchain::RenderTarget& currentRenderTarget = _private->vulkan.swapchain.currentRenderTarget();
+	VkFramebuffer currentFramebuffer = _private->framebuffers[currentRenderTarget.colorView];
 
-	VkFramebufferCreateInfo framebufferInfo = { VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO };
-	framebufferInfo.attachmentCount = sizeof(attachments) / sizeof(attachments[0]);
-	framebufferInfo.pAttachments = attachments;
-	framebufferInfo.width = _private->vulkan.swapchain.extent.width;
-	framebufferInfo.height = _private->vulkan.swapchain.extent.height;
-	framebufferInfo.layers = 1;
-	framebufferInfo.renderPass = _private->renderPass;
-	VULKAN_CALL(vkCreateFramebuffer(_private->vulkan.device, &framebufferInfo, nullptr, &_private->framebuffer));
+	if (currentFramebuffer == nullptr)
+	{
+		VkImageView attachments[] = { currentRenderTarget.colorView, currentRenderTarget.depthView };
+		VkFramebufferCreateInfo framebufferInfo = { VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO };
+		framebufferInfo.attachmentCount = sizeof(attachments) / sizeof(attachments[0]);
+		framebufferInfo.pAttachments = attachments;
+		framebufferInfo.width = _private->vulkan.swapchain.extent.width;
+		framebufferInfo.height = _private->vulkan.swapchain.extent.height;
+		framebufferInfo.layers = 1;
+		framebufferInfo.renderPass = _private->renderPass;
+		VULKAN_CALL(vkCreateFramebuffer(_private->vulkan.device, &framebufferInfo, nullptr, &currentFramebuffer));
+		
+		_private->framebuffers[currentRenderTarget.colorView] = currentFramebuffer;
+	}
 
 	_private->beginInfo.clearValueCount = sizeof(_private->clearValues) / sizeof(_private->clearValues[0]);
 	_private->beginInfo.pClearValues = _private->clearValues;
 	_private->beginInfo.renderPass = _private->renderPass;
 	_private->beginInfo.renderArea.extent = _private->vulkan.swapchain.extent;
-	_private->beginInfo.framebuffer = _private->framebuffer;
+	_private->beginInfo.framebuffer = currentFramebuffer;
 	
 	_private->scissor.extent.width = static_cast<uint32_t>(_private->renderer->rc()->size().x);
 	_private->scissor.extent.height = static_cast<uint32_t>(_private->renderer->rc()->size().y);
@@ -169,17 +176,18 @@ void VulkanRenderPass::begin()
 	_private->recording = true;
 }
 
-void VulkanRenderPass::pushRenderBatch(RenderBatch::Pointer inBatch)
+void VulkanRenderPass::pushRenderBatch(const RenderBatch::Pointer& inBatch)
 {
 	ET_ASSERT(_private->recording);
 
 	VulkanRenderPass::Pointer vulkanRenderPass(this);
 	MaterialInstance::Pointer batchMaterial = inBatch->material();
-	VulkanProgram::Pointer program = batchMaterial->program();
-	VulkanVertexBuffer::Pointer vb = inBatch->vertexStream()->vertexBuffer();
-	VulkanIndexBuffer::Pointer ib = inBatch->vertexStream()->indexBuffer();
-	VulkanTextureSet::Pointer textureSet = batchMaterial->textureSet();
 	VulkanPipelineState::Pointer ps = _private->renderer->acquirePipelineState(vulkanRenderPass, batchMaterial, inBatch->vertexStream());
+	
+	const VulkanProgram::Pointer& program = batchMaterial->program();
+	const VulkanVertexBuffer::Pointer& vb = inBatch->vertexStream()->vertexBuffer();
+	const VulkanIndexBuffer::Pointer& ib = inBatch->vertexStream()->indexBuffer();
+	const VulkanTextureSet::Pointer& textureSet = batchMaterial->textureSet();
 
 	ConstantBufferEntry objectVariables;
 	if (program->reflection().objectVariablesBufferSize > 0)

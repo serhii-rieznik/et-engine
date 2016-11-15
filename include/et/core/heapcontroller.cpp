@@ -56,6 +56,7 @@ public:
 	HeapChunkInfo* infoStorage = nullptr;
 	HeapChunkInfo* firstInfo = nullptr;
 	HeapChunkInfo* lastInfo = nullptr;
+	bool autoCompress = true;
 
 	void validateInfo(HeapChunkInfo* info);
 	void compress();
@@ -160,7 +161,8 @@ bool HeapController::release(uint32_t offset)
 			else
 			{
 				i->allocationMask = HeapChunkInfo::Available;
-				_private->compress();
+				if (_private->autoCompress)
+					_private->compress();
 				return true;
 			}
 		}
@@ -209,6 +211,14 @@ void HeapController::setInfoStorage(void* ptr)
 	_private->lastInfo = _private->firstInfo + 1;
 }
 
+void HeapController::setAutoCompress(bool value)
+{
+	_private->autoCompress = value;
+	
+	if (value)
+		_private->compress();
+}
+
 bool HeapController::empty() const
 {
 	for (HeapChunkInfo* i = _private->firstInfo; i < _private->lastInfo; ++i)
@@ -217,6 +227,11 @@ bool HeapController::empty() const
 			return false;
 	}
 	return true;
+}
+
+void HeapController::compress()
+{
+	_private->compress();
 }
 
 void HeapController::clear()

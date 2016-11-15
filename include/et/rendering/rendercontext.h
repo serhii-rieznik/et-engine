@@ -34,7 +34,10 @@ namespace et
 		const vec2i& size() const
 			{ return _size; }
 
-		RenderInterface::Pointer renderer()
+		RenderInterface::Pointer& renderer()
+			{ return _renderer; }
+		
+		const RenderInterface::Pointer& renderer() const
 			{ return _renderer; }
 
 		void pushRenderingContext();

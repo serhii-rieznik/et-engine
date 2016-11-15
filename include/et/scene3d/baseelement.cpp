@@ -88,11 +88,11 @@ bool BaseElement::isKindOf(ElementType t) const
 	return (t == ElementType::DontCare) || (type() == t);
 }
 
-BaseElement::Pointer BaseElement::childWithName(const std::string& name, ElementType ofType, bool assertFail)
+const BaseElement::Pointer& BaseElement::childWithName(const std::string& name, ElementType ofType, bool assertFail)
 {
 	for (const BaseElement::Pointer& i : children())
 	{
-		BaseElement::Pointer element = childWithNameCallback(name, i, ofType);
+		const BaseElement::Pointer& element = childWithNameCallback(name, i, ofType);
 		if (element.valid())
 			return element;
 	}
@@ -100,12 +100,14 @@ BaseElement::Pointer BaseElement::childWithName(const std::string& name, Element
 	if (assertFail)
 		ET_FAIL_FMT("Unable to find child: %s", name.c_str());
 
-	return BaseElement::Pointer();
+	static BaseElement::Pointer empty;
+	return empty;
 }
 
 BaseElement::List BaseElement::childrenOfType(ElementType ofType) const
 {
 	BaseElement::List list;
+	list.reserve(4 * children().size());
 	
 	for (const BaseElement::Pointer& i : children())
 		childrenOfTypeCallback(ofType, list, i);
@@ -123,21 +125,22 @@ BaseElement::List BaseElement::childrenHavingFlag(size_t flag) const
 	return list;
 }
 
-BaseElement::Pointer BaseElement::childWithNameCallback(const std::string& name, BaseElement::Pointer root, ElementType ofType)
+const BaseElement::Pointer& BaseElement::childWithNameCallback(const std::string& name, const BaseElement::Pointer& root, ElementType ofType)
 {
 	if (root->isKindOf(ofType) && (root->name() == name)) return root;
 
-	for (const auto& i : root->children())
+	for (const BaseElement::Pointer& i : root->children())
 	{
-		BaseElement::Pointer element = childWithNameCallback(name, i, ofType);
+		const BaseElement::Pointer& element = childWithNameCallback(name, i, ofType);
 		if (element.valid() && element->isKindOf(ofType))
 			return element;
 	}
 
-	return BaseElement::Pointer();
+	static BaseElement::Pointer empty;
+	return empty;
 }
 
-void BaseElement::childrenOfTypeCallback(ElementType t, BaseElement::List& list, BaseElement::Pointer root) const
+void BaseElement::childrenOfTypeCallback(ElementType t, BaseElement::List& list, const BaseElement::Pointer& root) const
 {
 	if (root->isKindOf(t))
 		list.push_back(root);
@@ -146,7 +149,7 @@ void BaseElement::childrenOfTypeCallback(ElementType t, BaseElement::List& list,
 		childrenOfTypeCallback(t, list, i);
 }
 
-void BaseElement::childrenHavingFlagCallback(size_t flag, BaseElement::List& list, BaseElement::Pointer root) const
+void BaseElement::childrenHavingFlagCallback(size_t flag, BaseElement::List& list, const BaseElement::Pointer& root) const
 {
 	if (root->hasFlag(flag))
 		list.push_back(root);

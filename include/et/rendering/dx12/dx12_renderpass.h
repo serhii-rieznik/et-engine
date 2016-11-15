@@ -20,7 +20,7 @@ namespace et
 		DX12RenderPass(const RenderPass::ConstructionInfo&);
 		
 		void begin() override;
-		void pushRenderBatch(RenderBatch::Pointer) override;
+		void pushRenderBatch(const RenderBatch::Pointer&) override;
 		void end() override;
 	};
 }

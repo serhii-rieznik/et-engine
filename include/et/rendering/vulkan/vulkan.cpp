@@ -247,7 +247,9 @@ VulkanNativeBuffer::VulkanNativeBuffer(VulkanState& vulkan, uint32_t size, uint3
 
 	vkGetBufferMemoryRequirements(_vulkan.device, _buffer, &_memoryRequirements);
 
-	VkMemoryPropertyFlags memoryProperties = cpuReadable ? VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT : VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
+	VkMemoryPropertyFlags memoryProperties = cpuReadable ?
+		VK_MEMORY_PROPERTY_HOST_CACHED_BIT : 
+		VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
 
 	VkMemoryAllocateInfo allocInfo = { VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO };
 	allocInfo.allocationSize = _memoryRequirements.size;

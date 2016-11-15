@@ -53,7 +53,7 @@ public:
 	virtual ~RenderPass();
 
 	virtual void begin() = 0;
-	virtual void pushRenderBatch(RenderBatch::Pointer) = 0;
+	virtual void pushRenderBatch(const RenderBatch::Pointer&) = 0;
 	virtual void end() = 0;
 
 	const ConstructionInfo& info() const;

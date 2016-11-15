@@ -341,7 +341,7 @@ void MaterialInstance::buildConstantBuffer()
 
 	if (_constBufferData.valid())
 	{
-		_renderer->sharedConstantBuffer().free(_constBufferData);
+		_renderer->sharedConstantBuffer().staticFree(_constBufferData);
 		_constBufferData = { };
 	}
 	

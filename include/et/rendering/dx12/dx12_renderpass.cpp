@@ -21,7 +21,7 @@ void DX12RenderPass::begin()
 {
 }
 
-void DX12RenderPass::pushRenderBatch(RenderBatch::Pointer)
+void DX12RenderPass::pushRenderBatch(const RenderBatch::Pointer&)
 {
 }
 

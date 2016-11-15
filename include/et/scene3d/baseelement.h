@@ -57,7 +57,7 @@ public:
 
 	void setParent(BaseElement* p);
 
-	Pointer childWithName(const std::string& name, ElementType ofType = ElementType::DontCare,
+	const Pointer& childWithName(const std::string& name, ElementType ofType = ElementType::DontCare,
 		bool assertFail = false);
 	
 	BaseElement::List childrenOfType(ElementType ofType) const;
@@ -88,9 +88,9 @@ protected:
 	void duplicateBasePropertiesToObject(BaseElement* object);
 	
 private:
-	Pointer childWithNameCallback(const std::string& name, Pointer root, ElementType ofType);
-	void childrenOfTypeCallback(ElementType t, BaseElement::List& list, Pointer root) const;
-	void childrenHavingFlagCallback(size_t flag, BaseElement::List& list, Pointer root) const;
+	const Pointer& childWithNameCallback(const std::string& name, const Pointer& root, ElementType ofType);
+	void childrenOfTypeCallback(ElementType t, BaseElement::List& list, const Pointer& root) const;
+	void childrenHavingFlagCallback(size_t flag, BaseElement::List& list, const Pointer& root) const;
 	
 	void buildTransform();
 

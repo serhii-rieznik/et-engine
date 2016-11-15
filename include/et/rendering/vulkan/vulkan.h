@@ -102,7 +102,6 @@ struct VulkanShaderModules
 
 struct VulkanNativeRenderPass
 {
-	VkFramebuffer framebuffer = nullptr;
 	VkCommandBuffer commandBuffer = nullptr;
 	VkRenderPass renderPass = nullptr;
 

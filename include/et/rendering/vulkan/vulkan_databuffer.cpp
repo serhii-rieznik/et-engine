@@ -14,7 +14,7 @@ namespace et
 class VulkanDataBufferPrivate
 {
 public:
-	VulkanDataBufferPrivate(VulkanState& v, uint32_t size, bool readable) 
+	VulkanDataBufferPrivate(VulkanState& v, uint32_t size, bool readable)
 		: vulkan(v)
 		, nativeBuffer(v, size, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT | (readable ? 0 : VK_BUFFER_USAGE_TRANSFER_DST_BIT), readable)
 		, dataSize(size)
@@ -26,6 +26,7 @@ public:
 	VulkanNativeBuffer nativeBuffer;
 	uint32_t dataSize = 0;
 	bool cpuReadable = false;
+	bool mapped = false;
 };
 
 VulkanDataBuffer::VulkanDataBuffer(VulkanState& vulkan, uint32_t size) 
@@ -51,9 +52,9 @@ void VulkanDataBuffer::setData(const void* data, uint32_t offset, uint32_t dataS
 
 	if (_private->cpuReadable)
 	{
-		void* ptr = _private->nativeBuffer.map(offset, dataSize);
+		uint8_t* ptr = map(offset, dataSize);
 		memcpy(ptr, data, dataSize);
-		_private->nativeBuffer.unmap();
+		unmap();
 	}
 	else
 	{
@@ -76,5 +77,20 @@ const VulkanNativeBuffer& VulkanDataBuffer::nativeBuffer() const
 	return _private->nativeBuffer;
 }
 
+uint8_t* VulkanDataBuffer::map(uint32_t offset, uint32_t size)
+{
+	ET_ASSERT(_private->cpuReadable);
+	ET_ASSERT(_private->mapped == false);
+	
+	_private->mapped = true;
+	return reinterpret_cast<uint8_t*>(_private->nativeBuffer.map(offset, size));
+}
+
+void VulkanDataBuffer::unmap()
+{
+	ET_ASSERT(_private->mapped);
+	_private->nativeBuffer.unmap();
+	_private->mapped = false;
+}
 
 }

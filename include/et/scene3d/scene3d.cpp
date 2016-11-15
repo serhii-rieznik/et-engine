@@ -68,9 +68,8 @@ BaseElement::Pointer Scene::createElementOfType(ElementType type, BaseElement* p
 void Scene::cleanupGeometry()
 {
 	auto meshes = childrenOfType(ElementType::Mesh);
-	for (s3d::Mesh::Pointer mesh : meshes)
-	{
+	for (s3d::BaseElement::Pointer& mesh : meshes)
         mesh->setParent(nullptr);
-	}
+
 	_storage.flush();
 }
