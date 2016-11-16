@@ -185,8 +185,8 @@ void VulkanRenderPass::pushRenderBatch(const RenderBatch::Pointer& inBatch)
 	VulkanPipelineState::Pointer ps = _private->renderer->acquirePipelineState(vulkanRenderPass, batchMaterial, inBatch->vertexStream());
 	
 	const VulkanProgram::Pointer& program = batchMaterial->program();
-	const VulkanVertexBuffer::Pointer& vb = inBatch->vertexStream()->vertexBuffer();
-	const VulkanIndexBuffer::Pointer& ib = inBatch->vertexStream()->indexBuffer();
+	const VulkanBuffer::Pointer& vb = inBatch->vertexStream()->vertexBuffer();
+	const VulkanBuffer::Pointer& ib = inBatch->vertexStream()->indexBuffer();
 	const VulkanTextureSet::Pointer& textureSet = batchMaterial->textureSet();
 
 	ConstantBufferEntry objectVariables;
@@ -207,11 +207,11 @@ void VulkanRenderPass::pushRenderBatch(const RenderBatch::Pointer& inBatch)
 
 	_private->batches.emplace_back();
 	VulkanRenderBatch& batch = _private->batches.back();
-	batch.indexBuffer = ib->nativeBuffer().buffer();
-	batch.indexBufferFormat = vulkan::indexBufferFormat(ib->format());
+	batch.indexBuffer = ib->nativeBuffer().buffer;
+	batch.indexBufferFormat = vulkan::indexBufferFormat(inBatch->vertexStream()->indexArrayFormat());
 	batch.startIndex = inBatch->firstIndex();
 	batch.indexCount = inBatch->numIndexes();
-	batch.vertexBuffers[0] =  vb->nativeBuffer().buffer();
+	batch.vertexBuffers[0] = vb->nativeBuffer().buffer;
 	batch.vertexBuffersOffset[0] = 0;
 	batch.pipeline = ps->nativePipeline().pipeline;
 	batch.pipelineLayout = ps->nativePipeline().layout;
@@ -304,11 +304,11 @@ void VulkanRenderPass::submit()
 
 void VulkanRenderPassPrivate::generateDynamicDescriptorSet(RenderPass* pass)
 {
-	VulkanDataBuffer::Pointer db = pass->dynamicConstantBuffer().buffer();
-	VulkanDataBuffer::Pointer sb = renderer->sharedConstantBuffer().buffer();
-	VkDescriptorBufferInfo passBufferInfo = { db->nativeBuffer().buffer(), variablesData.offset(), sizeof(RenderPass::Variables) };
-	VkDescriptorBufferInfo objectBufferInfo = { db->nativeBuffer().buffer(), 0, VK_WHOLE_SIZE }; // TODO : calculate offset and size
-	VkDescriptorBufferInfo materialBufferInfo = { sb->nativeBuffer().buffer(), 0, VK_WHOLE_SIZE }; // TODO : calculate offset and size
+	VulkanBuffer::Pointer db = pass->dynamicConstantBuffer().buffer();
+	VulkanBuffer::Pointer sb = renderer->sharedConstantBuffer().buffer();
+	VkDescriptorBufferInfo passBufferInfo = { db->nativeBuffer().buffer, variablesData.offset(), sizeof(RenderPass::Variables) };
+	VkDescriptorBufferInfo objectBufferInfo = { db->nativeBuffer().buffer, 0, VK_WHOLE_SIZE }; // TODO : calculate offset and size
+	VkDescriptorBufferInfo materialBufferInfo = { sb->nativeBuffer().buffer, 0, VK_WHOLE_SIZE }; // TODO : calculate offset and size
 	VkDescriptorSetLayoutBinding bindings[] = { { }, {  }, {  } };
 	VkWriteDescriptorSet writeSets[] = { { VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET }, { VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET }, { VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET } };
 	{

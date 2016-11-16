@@ -81,7 +81,7 @@ uint32_t VertexStorage::sizeOfAttribute(VertexAttributeUsage usage) const
 
 uint32_t VertexStorage::stride() const
 {
-	return declaration().totalSize();
+	return declaration().sizeInBytes();
 }
 
 const VertexDeclaration& VertexStorage::declaration() const
@@ -102,16 +102,15 @@ void VertexStorage::increaseSize(uint32_t sz)
 void VertexStorage::resize(uint32_t sz)
 {
 	_private->capacity = sz;
-	_private->data.resize(_private->capacity * _private->decl.totalSize());
+	_private->data.resize(_private->capacity * _private->decl.sizeInBytes());
 }
 
 /*
  * Private
  */
 VertexStoragePrivate::VertexStoragePrivate(const VertexDeclaration& d, uint32_t cap) :
-	decl(d), data(d.totalSize() * cap, 0), capacity(cap)
+	decl(d), data(d.sizeInBytes() * cap, 0), capacity(cap)
 {
-
 }
 
 }

@@ -124,9 +124,13 @@ bool HeapController::allocate(uint32_t sizeToAllocate, uint32_t& offset)
 				}
 				else
 				{
-					for (auto i = _private->lastInfo, prev = _private->lastInfo - 1; i > nextInfo; --i, --prev)
+					HeapChunkInfo* i = _private->lastInfo;
+					HeapChunkInfo* prev = i - 1;
+					while (i > nextInfo)
 					{
 						prev->swapWith(i);
+						--prev;
+						--i;
 					}
 					++_private->lastInfo;
 				}

@@ -63,7 +63,7 @@ public:
 		reset(static_cast<T*>(r.pointer()));
 	}
 
-	explicit IntrusivePtr(T* data)
+	explicit IntrusivePtr(T* data, uint32_t flags = 0)
 	{
 		reset(data);
 	}

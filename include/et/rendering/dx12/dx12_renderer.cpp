@@ -7,12 +7,10 @@
 
 #pragma once
 
-#include <et/rendering/dx12/dx12_indexbuffer.h>
-#include <et/rendering/dx12/dx12_pipelinestate.h>
 #include <et/rendering/dx12/dx12_program.h>
-#include <et/rendering/dx12/dx12_renderpass.h>
 #include <et/rendering/dx12/dx12_texture.h>
-#include <et/rendering/dx12/dx12_vertexbuffer.h>
+#include <et/rendering/dx12/dx12_renderpass.h>
+#include <et/rendering/dx12/dx12_pipelinestate.h>
 #include <et/rendering/dx12/dx12_renderer.h>
 
 namespace et
@@ -34,27 +32,11 @@ void DX12Renderer::begin()
 
 void DX12Renderer::present()
 {
-
 }
 
-DataBuffer::Pointer DX12Renderer::createDataBuffer(const std::string&, uint32_t size)
+Buffer::Pointer DX12Renderer::createBuffer(const Buffer::Description&)
 {
-	return DataBuffer::Pointer();
-}
-
-DataBuffer::Pointer DX12Renderer::createDataBuffer(const std::string&, const BinaryDataStorage&)
-{
-	return DataBuffer::Pointer();
-}
-
-VertexBuffer::Pointer DX12Renderer::createVertexBuffer(const std::string& name, VertexStorage::Pointer vs, BufferDrawType dt)
-{
-	return DX12VertexBuffer::Pointer::create(vs->declaration(), dt, name);
-}
-
-IndexBuffer::Pointer DX12Renderer::createIndexBuffer(const std::string& name, IndexArray::Pointer ia, BufferDrawType dt)
-{
-	return DX12IndexBuffer::Pointer::create(ia, dt, name);
+	return Buffer::Pointer();
 }
 
 Texture::Pointer DX12Renderer::createTexture(TextureDescription::Pointer desc)
@@ -72,7 +54,7 @@ Sampler::Pointer DX12Renderer::createSampler(const Sampler::Description &)
 	return Sampler::Pointer();
 }
 
-PipelineState::Pointer DX12Renderer::acquirePipelineState(RenderPass::Pointer, Material::Pointer, VertexStream::Pointer)
+PipelineState::Pointer DX12Renderer::acquirePipelineState(const RenderPass::Pointer&, const Material::Pointer&, const VertexStream::Pointer&)
 {
 	return PipelineState::Pointer();
 }

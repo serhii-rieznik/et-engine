@@ -7,14 +7,13 @@
 
 #pragma once
 
-#include <et/rendering/vulkan/vulkan_pipelinestate.h>
-#include <et/rendering/vulkan/vulkan_vertexbuffer.h>
-#include <et/rendering/vulkan/vulkan_indexbuffer.h>
-#include <et/rendering/vulkan/vulkan_renderpass.h>
+#include <et/rendering/vulkan/vulkan_buffer.h>
 #include <et/rendering/vulkan/vulkan_program.h>
 #include <et/rendering/vulkan/vulkan_texture.h>
-#include <et/rendering/vulkan/vulkan_textureset.h>
 #include <et/rendering/vulkan/vulkan_sampler.h>
+#include <et/rendering/vulkan/vulkan_textureset.h>
+#include <et/rendering/vulkan/vulkan_renderpass.h>
+#include <et/rendering/vulkan/vulkan_pipelinestate.h>
 #include <et/rendering/vulkan/vulkan_renderer.h>
 #include <et/rendering/vulkan/vulkan.h>
 
@@ -188,7 +187,7 @@ void VulkanPipelineStatePrivate::generateInputLayout(const VertexDeclaration& de
 
 	binding = { };
 	binding.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
-	binding.stride = decl.totalSize();
+	binding.stride = decl.sizeInBytes();
 
 	vertexInfo = { VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO };
 	vertexInfo.pVertexBindingDescriptions = &binding;

@@ -75,11 +75,12 @@ void VulkanTexture::setImageData(const BinaryDataStorage& data)
 {
 	ET_ASSERT(data.size() <= _private->texture.memoryRequirements.size);
 
-	uint32_t bufferLength = static_cast<uint32_t>(_private->texture.memoryRequirements.size);
-	VulkanNativeBuffer stagingBuffer(_private->vulkan, bufferLength, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, true, true);
-	void* ptr = stagingBuffer.map(0, data.size());
-	memcpy(ptr, data.data(), data.size());
-	stagingBuffer.unmap();
+	Buffer::Description stagingDesc;
+	stagingDesc.initialData = BinaryDataStorage(data.data(), data.size());
+	stagingDesc.location = Buffer::Location::Host;
+	stagingDesc.usage = Buffer::Usage::Staging;
+	stagingDesc.size = data.size();
+	VulkanBuffer stagingBuffer(_private->vulkan, stagingDesc);
 
 	_private->vulkan.executeServiceCommands([this, &stagingBuffer](VkCommandBuffer cmdBuffer) {
 		vulkan::imageBarrier(_private->vulkan, cmdBuffer, _private->texture.image,
@@ -92,7 +93,7 @@ void VulkanTexture::setImageData(const BinaryDataStorage& data)
 		region.imageExtent.width = static_cast<uint32_t>(description()->size.x);
 		region.imageExtent.height = static_cast<uint32_t>(description()->size.y);
 		region.imageExtent.depth = 1;
-		vkCmdCopyBufferToImage(cmdBuffer, stagingBuffer.buffer(), 
+		vkCmdCopyBufferToImage(cmdBuffer, stagingBuffer.nativeBuffer().buffer,
 			_private->texture.image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region);
 
 		vulkan::imageBarrier(_private->vulkan, cmdBuffer, _private->texture.image,

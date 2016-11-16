@@ -15,9 +15,6 @@ using namespace et::s3d;
 
 const std::string Mesh::defaultMeshName = "mesh";
 
-static IndexBuffer::Pointer _emptyIndexBuffer;
-static VertexBuffer::Pointer _emptyVertexBuffer;
-
 Mesh::Mesh(const std::string& name, BaseElement* parent) :
 	RenderableElement(name, parent), _undeformedTransformationMatrices(4, identityMatrix)
 {

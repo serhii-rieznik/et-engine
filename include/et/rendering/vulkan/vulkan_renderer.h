@@ -34,12 +34,9 @@ namespace et
 		void submitRenderPass(RenderPass::Pointer) override;
 
 		/*
-		 * Vertex buffes
+		 * Buffers
 		 */
-		DataBuffer::Pointer createDataBuffer(const std::string&, uint32_t size) override;
-		DataBuffer::Pointer createDataBuffer(const std::string&, const BinaryDataStorage&) override;
-		VertexBuffer::Pointer createVertexBuffer(const std::string&, VertexStorage::Pointer, BufferDrawType) override;
-		IndexBuffer::Pointer createIndexBuffer(const std::string&, IndexArray::Pointer, BufferDrawType) override;
+		Buffer::Pointer createBuffer(const Buffer::Description&) override;
         
         /*
          * Textures
@@ -60,7 +57,7 @@ namespace et
 		/*
 		 * Pipeline state
 		 */
-        PipelineState::Pointer acquirePipelineState(RenderPass::Pointer, Material::Pointer, VertexStream::Pointer) override;
+        PipelineState::Pointer acquirePipelineState(const RenderPass::Pointer&, const Material::Pointer&, const VertexStream::Pointer&) override;
 	
 	private:
 		ET_DECLARE_PIMPL(VulkanRenderer, 1024);

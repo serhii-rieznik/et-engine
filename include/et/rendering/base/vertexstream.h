@@ -7,8 +7,7 @@
 
 #pragma once
 
-#include <et/rendering/interface/vertexbuffer.h>
-#include <et/rendering/interface/indexbuffer.h>
+#include <et/rendering/interface/buffer.h>
 
 namespace et
 {
@@ -20,26 +19,53 @@ public:
 public:
 	VertexStream() = default;
 
-	VertexStream(VertexBuffer::Pointer vb, IndexBuffer::Pointer ib)
-		{  setBuffers(vb, ib); }
+	void setVertexBuffer(const Buffer::Pointer& vb, const VertexDeclaration& decl);
+	void setIndexBuffer(const Buffer::Pointer& ib, IndexArrayFormat format, PrimitiveType pt);
 
-	void setBuffers(VertexBuffer::Pointer vb, IndexBuffer::Pointer ib)
-		{ _vb = vb; _ib = ib; }
+	const VertexDeclaration& vertexDeclaration() const 
+		{ return _vbDeclaration; }
 
-	VertexBuffer::Pointer& vertexBuffer()
+	IndexArrayFormat indexArrayFormat() const 
+		{ return _ibFormat; }
+
+	PrimitiveType primitiveType() const 
+		{ return _primitiveType; }
+
+	Buffer::Pointer& vertexBuffer()
 		{ return _vb; }
-
-	IndexBuffer::Pointer& indexBuffer()
+	Buffer::Pointer& indexBuffer()
+		{ return _ib; }
+	const Buffer::Pointer& vertexBuffer() const
+		{ return _vb; }
+	const Buffer::Pointer& indexBuffer() const
 		{ return _ib; }
 
-	const VertexBuffer::Pointer& vertexBuffer() const
-		{ return _vb; }
-
-	const IndexBuffer::Pointer& indexBuffer() const
-		{ return _ib; }
+	uint32_t vertexCount() const;
 
 private:
-	VertexBuffer::Pointer _vb;
-	IndexBuffer::Pointer _ib;
+	Buffer::Pointer _vb;
+	Buffer::Pointer _ib;
+	VertexDeclaration _vbDeclaration;
+	IndexArrayFormat _ibFormat = IndexArrayFormat::Count;
+	PrimitiveType _primitiveType = PrimitiveType::Points;
 };
+
+inline void VertexStream::setVertexBuffer(const Buffer::Pointer& vb, const VertexDeclaration& decl)
+{
+	_vb = vb;
+	_vbDeclaration = decl;
+}
+
+inline void VertexStream::setIndexBuffer(const Buffer::Pointer& ib, IndexArrayFormat format, PrimitiveType pt)
+{
+	_ib = ib;
+	_ibFormat = format;
+	_primitiveType = pt;
+}
+
+inline uint32_t VertexStream::vertexCount() const
+{
+	return _vb->size() / _vbDeclaration.sizeInBytes();
+}
+
 }

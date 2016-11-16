@@ -322,9 +322,6 @@
     <ClInclude Include="..\..\include\et\rendering\vulkan\vulkan.cpp">
       <Filter>Source\rendering\vulkan</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\et\rendering\vulkan\vulkan_indexbuffer.cpp">
-      <Filter>Source\rendering\vulkan</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\et\rendering\vulkan\vulkan_pipelinestate.cpp">
       <Filter>Source\rendering\vulkan</Filter>
     </ClInclude>
@@ -339,12 +336,6 @@
     </ClInclude>
     <ClInclude Include="..\..\include\et\rendering\vulkan\vulkan_texture.cpp">
       <Filter>Source\rendering\vulkan</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\et\rendering\vulkan\vulkan_vertexbuffer.cpp">
-      <Filter>Source\rendering\vulkan</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\et\rendering\dx12\dx12_indexbuffer.cpp">
-      <Filter>Source\rendering\dx12</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\et\rendering\dx12\dx12_pipelinestate.cpp">
       <Filter>Source\rendering\dx12</Filter>
@@ -365,12 +356,6 @@
       <Filter>Source\rendering\vulkan</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\et\rendering\vulkan\vulkan_sampler.cpp">
-      <Filter>Source\rendering\vulkan</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\et\rendering\vulkan\vulkan_databuffer.h">
-      <Filter>Source\rendering\vulkan</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\et\rendering\vulkan\vulkan_databuffer.cpp">
       <Filter>Source\rendering\vulkan</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\et\rendering\base\helpers.h">
@@ -478,12 +463,6 @@
     <ClInclude Include="..\..\include\et\core\heapcontroller.cpp">
       <Filter>Source\core</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\et\rendering\interface\databuffer.h">
-      <Filter>Source\rendering\interface</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\et\rendering\interface\indexbuffer.h">
-      <Filter>Source\rendering\interface</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\et\rendering\interface\pipelinestate.h">
       <Filter>Source\rendering\interface</Filter>
     </ClInclude>
@@ -500,9 +479,6 @@
       <Filter>Source\rendering\interface</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\et\rendering\interface\texture.h">
-      <Filter>Source\rendering\interface</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\et\rendering\interface\vertexbuffer.h">
       <Filter>Source\rendering\interface</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\et\rendering\constantbuffer.h">
@@ -636,6 +612,15 @@
     </ClInclude>
     <ClInclude Include="..\..\include\external\glslang\hlsl\hlslTokenStream.h">
       <Filter>glslang\hlsl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\interface\buffer.h">
+      <Filter>Source\rendering\interface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\vulkan\vulkan_buffer.h">
+      <Filter>Source\rendering\vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\vulkan\vulkan_buffer.cpp">
+      <Filter>Source\rendering\vulkan</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1065,9 +1050,6 @@
     <ClInclude Include="..\..\include\et\rendering\vulkan\vulkan.h">
       <Filter>Source\rendering\vulkan</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\et\rendering\vulkan\vulkan_indexbuffer.h">
-      <Filter>Source\rendering\vulkan</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\et\rendering\vulkan\vulkan_pipelinestate.h">
       <Filter>Source\rendering\vulkan</Filter>
     </ClInclude>
@@ -1083,12 +1065,6 @@
     <ClInclude Include="..\..\include\et\rendering\vulkan\vulkan_texture.h">
       <Filter>Source\rendering\vulkan</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\et\rendering\vulkan\vulkan_vertexbuffer.h">
-      <Filter>Source\rendering\vulkan</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\et\rendering\dx12\dx12_indexbuffer.h">
-      <Filter>Source\rendering\dx12</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\et\rendering\dx12\dx12_pipelinestate.h">
       <Filter>Source\rendering\dx12</Filter>
     </ClInclude>
@@ -1102,12 +1078,6 @@
       <Filter>Source\rendering\dx12</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\et\rendering\dx12\dx12_texture.h">
-      <Filter>Source\rendering\dx12</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\et\rendering\dx12\dx12_vertexbuffer.h">
-      <Filter>Source\rendering\dx12</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\et\rendering\dx12\dx12_vertexbuffer.cpp">
       <Filter>Source\rendering\dx12</Filter>
     </ClInclude>
   </ItemGroup>

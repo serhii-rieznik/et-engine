@@ -30,7 +30,7 @@ namespace et
 			const VertexStream::Pointer& vertexStream() const
 				{ return _vertexStream; }
 
-			const IndexBuffer::Pointer& indexBuffer() const
+			const Buffer::Pointer& indexBuffer() const
 				{ return _vertexStream->indexBuffer(); }
 			
 			size_t activeParticlesCount() const

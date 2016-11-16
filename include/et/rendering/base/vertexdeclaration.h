@@ -93,8 +93,8 @@ namespace et
 		uint32_t numElements() const
 			{ return static_cast<uint32_t>(_elements.size()); }
 
-		uint32_t totalSize() const
-			{ return _totalSize; }
+		uint32_t sizeInBytes() const
+			{ return _size; }
 
 		bool interleaved() const
 			{ return _interleaved; }
@@ -108,7 +108,7 @@ namespace et
 
 	private:  
 		VertexElementSet _elements;
-		uint32_t _totalSize = 0;
+		uint32_t _size = 0;
 		uint32_t _usageMask = 0;
 		bool _interleaved = true;
 	};

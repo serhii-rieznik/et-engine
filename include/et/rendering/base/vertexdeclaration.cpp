@@ -34,7 +34,7 @@ bool VertexDeclaration::has(VertexAttributeUsage usage) const
 	{ return (_usageMask & vertexAttributeUsageMask(usage)) != 0; }
 
 bool VertexDeclaration::push_back(VertexAttributeUsage usage, DataType type)
-	{ return push_back(VertexElement(usage, type, 0, _totalSize)); }
+	{ return push_back(VertexElement(usage, type, 0, _size)); }
 
 bool VertexDeclaration::push_back(const VertexElement& el)
 {
@@ -43,7 +43,7 @@ bool VertexDeclaration::push_back(const VertexElement& el)
 
 	_usageMask = _usageMask | vertexAttributeUsageMask(el.usage());
 	
-	_totalSize += dataTypeSize(el.type());
+	_size += dataTypeSize(el.type());
 	_elements.insert(el);
 
 	if (_interleaved)
@@ -53,7 +53,7 @@ bool VertexDeclaration::push_back(const VertexElement& el)
 		_elements.clear();
 		for (VertexElement e : rebuild)
 		{
-			e.setStride(_totalSize);
+			e.setStride(_size);
 			_elements.insert(e);
 		}
 	}

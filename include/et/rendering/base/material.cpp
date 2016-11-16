@@ -262,7 +262,10 @@ void Material::loadCode(const std::string& codeString, const std::string& baseFo
 
 MaterialInstancePointer Material::instance()
 {
+	retain();
 	MaterialInstance::Pointer result = MaterialInstance::Pointer::create(Material::Pointer(this));
+	release();
+
 	result->textures = textures;
 	result->samplers = samplers;
 	result->properties = properties;

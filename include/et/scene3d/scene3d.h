@@ -41,11 +41,6 @@ namespace et
 		private:
 			void cleanupGeometry();
 
-			/*
-			SceneMaterial::Pointer sceneMaterialWithName(const std::string&) override;
-			Material::Pointer materialWithName(const std::string&) override;
-			*/
-
 			BaseElement::Pointer createElementOfType(ElementType, BaseElement*) override;
 
 			const std::string& serializationBasePath() const override
@@ -58,9 +53,8 @@ namespace et
 						
 		private:
 			Storage _storage;
-			// MaterialProvider* _currentMaterialProvider = nullptr;
 			std::string _serializationBasePath;
-			IndexBuffer::Pointer _mainIndexBuffer;
+			Buffer::Pointer _mainIndexBuffer;
 		};
 	}
 }

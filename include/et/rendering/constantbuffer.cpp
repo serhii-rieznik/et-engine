@@ -14,12 +14,10 @@ class ConstantBufferPrivate
 {
 public:
 	HeapController heap;
-	DataBuffer::Pointer buffer;
+	Buffer::Pointer buffer;
 	BinaryDataStorage heapInfo;
 	BinaryDataStorage localData;
-
 	Vector<ConstantBufferEntry> allocations;
-	Vector<DataBuffer::Range> flushRanges;
 	bool modified = true;
 
 	const ConstantBufferEntry& internalAlloc(uint32_t, bool);
@@ -45,7 +43,6 @@ void ConstantBuffer::init(RenderInterface* renderer)
 
 	_private->buffer = renderer->createDataBuffer("shared-const-buffer", Capacity);
 	_private->allocations.reserve(1024);
-	_private->flushRanges.reserve(1024);
 }
 
 void ConstantBuffer::shutdown()
@@ -56,7 +53,7 @@ void ConstantBuffer::shutdown()
 	_private->localData.resize(0);
 }
 
-DataBuffer::Pointer ConstantBuffer::buffer() const
+Buffer::Pointer ConstantBuffer::buffer() const
 {
 	return _private->buffer;
 }
@@ -66,15 +63,13 @@ void ConstantBuffer::flush()
 	if (!_private->modified)
 		return;
 
-	_private->flushRanges.clear();
 	uint8_t* mappedMemory = _private->buffer->map(0, Capacity);
 	for (const ConstantBufferEntry& allocation : _private->allocations)
 	{
-		_private->flushRanges.emplace_back(allocation.offset(), allocation.length());
 		memcpy(mappedMemory + allocation.offset(), _private->localData.begin() + allocation.offset(), allocation.length());
+		_private->buffer->modifyRange(allocation.offset(), allocation.length());
 	}
 	_private->buffer->unmap();
-	_private->buffer->flushRanges(_private->flushRanges);
 
 	for (const ConstantBufferEntry& allocation : _private->allocations)
 	{

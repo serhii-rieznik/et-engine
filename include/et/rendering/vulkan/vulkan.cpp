@@ -13,29 +13,29 @@ const char* vulkanResultToString(VkResult result)
 	switch (result)
 	{
 		CASE_TO_STRING(VK_SUCCESS)
-			CASE_TO_STRING(VK_NOT_READY)
-			CASE_TO_STRING(VK_TIMEOUT)
-			CASE_TO_STRING(VK_EVENT_SET)
-			CASE_TO_STRING(VK_EVENT_RESET)
-			CASE_TO_STRING(VK_INCOMPLETE)
-			CASE_TO_STRING(VK_ERROR_OUT_OF_HOST_MEMORY)
-			CASE_TO_STRING(VK_ERROR_OUT_OF_DEVICE_MEMORY)
-			CASE_TO_STRING(VK_ERROR_INITIALIZATION_FAILED)
-			CASE_TO_STRING(VK_ERROR_DEVICE_LOST)
-			CASE_TO_STRING(VK_ERROR_MEMORY_MAP_FAILED)
-			CASE_TO_STRING(VK_ERROR_LAYER_NOT_PRESENT)
-			CASE_TO_STRING(VK_ERROR_EXTENSION_NOT_PRESENT)
-			CASE_TO_STRING(VK_ERROR_FEATURE_NOT_PRESENT)
-			CASE_TO_STRING(VK_ERROR_INCOMPATIBLE_DRIVER)
-			CASE_TO_STRING(VK_ERROR_TOO_MANY_OBJECTS)
-			CASE_TO_STRING(VK_ERROR_FORMAT_NOT_SUPPORTED)
-			CASE_TO_STRING(VK_ERROR_SURFACE_LOST_KHR)
-			CASE_TO_STRING(VK_ERROR_NATIVE_WINDOW_IN_USE_KHR)
-			CASE_TO_STRING(VK_SUBOPTIMAL_KHR)
-			CASE_TO_STRING(VK_ERROR_OUT_OF_DATE_KHR)
-			CASE_TO_STRING(VK_ERROR_INCOMPATIBLE_DISPLAY_KHR)
-			CASE_TO_STRING(VK_ERROR_VALIDATION_FAILED_EXT)
-			CASE_TO_STRING(VK_ERROR_INVALID_SHADER_NV)
+		CASE_TO_STRING(VK_NOT_READY)
+		CASE_TO_STRING(VK_TIMEOUT)
+		CASE_TO_STRING(VK_EVENT_SET)
+		CASE_TO_STRING(VK_EVENT_RESET)
+		CASE_TO_STRING(VK_INCOMPLETE)
+		CASE_TO_STRING(VK_ERROR_OUT_OF_HOST_MEMORY)
+		CASE_TO_STRING(VK_ERROR_OUT_OF_DEVICE_MEMORY)
+		CASE_TO_STRING(VK_ERROR_INITIALIZATION_FAILED)
+		CASE_TO_STRING(VK_ERROR_DEVICE_LOST)
+		CASE_TO_STRING(VK_ERROR_MEMORY_MAP_FAILED)
+		CASE_TO_STRING(VK_ERROR_LAYER_NOT_PRESENT)
+		CASE_TO_STRING(VK_ERROR_EXTENSION_NOT_PRESENT)
+		CASE_TO_STRING(VK_ERROR_FEATURE_NOT_PRESENT)
+		CASE_TO_STRING(VK_ERROR_INCOMPATIBLE_DRIVER)
+		CASE_TO_STRING(VK_ERROR_TOO_MANY_OBJECTS)
+		CASE_TO_STRING(VK_ERROR_FORMAT_NOT_SUPPORTED)
+		CASE_TO_STRING(VK_ERROR_SURFACE_LOST_KHR)
+		CASE_TO_STRING(VK_ERROR_NATIVE_WINDOW_IN_USE_KHR)
+		CASE_TO_STRING(VK_SUBOPTIMAL_KHR)
+		CASE_TO_STRING(VK_ERROR_OUT_OF_DATE_KHR)
+		CASE_TO_STRING(VK_ERROR_INCOMPATIBLE_DISPLAY_KHR)
+		CASE_TO_STRING(VK_ERROR_VALIDATION_FAILED_EXT)
+		CASE_TO_STRING(VK_ERROR_INVALID_SHADER_NV)
 	default:
 		ET_FAIL_FMT("Unknown Vulkan error: %d", static_cast<int>(result));
 	}
@@ -161,14 +161,14 @@ VkImageView VulkanSwapchain::createImageView(VulkanState& vulkan, VkImage image,
 
 void VulkanSwapchain::create(VulkanState& vulkan)
 {
-	VkSurfaceCapabilitiesKHR surfaceCaps = {};
+	VkSurfaceCapabilitiesKHR surfaceCaps = { };
 	vkGetPhysicalDeviceSurfaceCapabilitiesKHR(vulkan.physicalDevice, surface, &surfaceCaps);
 
-	auto presentModes = enumerateVulkanObjects<VkPresentModeKHR>(vulkan, vkGetPhysicalDeviceSurfacePresentModesKHRWrapper);
+	Vector<VkPresentModeKHR> presentModes = enumerateVulkanObjects<VkPresentModeKHR>(vulkan, vkGetPhysicalDeviceSurfacePresentModesKHRWrapper);
 	extent = surfaceCaps.currentExtent;
 
-	VkPresentModeKHR presentMode = VK_PRESENT_MODE_IMMEDIATE_KHR;
-	// TODO : handle v-sync
+	// TODO : check if supported
+	VkPresentModeKHR presentMode = VK_PRESENT_MODE_FIFO_KHR;
 
 	uint32_t numImages = surfaceCaps.minImageCount + 1;
 	if ((surfaceCaps.maxImageCount > 0) && (numImages > surfaceCaps.maxImageCount))
@@ -230,83 +230,6 @@ void VulkanSwapchain::present(VulkanState& vulkan)
 	info.waitSemaphoreCount = 1;
 	info.pWaitSemaphores = &vulkan.semaphores.renderComplete;
 	VULKAN_CALL(vkQueuePresentKHR(vulkan.queue, &info));
-}
-
-/*
- * Native buffer
- */
-
-VulkanNativeBuffer::VulkanNativeBuffer(VulkanState& vulkan, uint32_t size, uint32_t usage, bool cpuReadable, bool autoFlush) :
-	_vulkan(vulkan), _cpuReadable(cpuReadable), _autoFlush(autoFlush)
-{
-	VkBufferCreateInfo info = { VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO };
-	info.size = size;
-	info.usage = usage;
-	info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-	VULKAN_CALL(vkCreateBuffer(_vulkan.device, &info, nullptr, &_buffer));
-
-	vkGetBufferMemoryRequirements(_vulkan.device, _buffer, &_memoryRequirements);
-
-	VkMemoryPropertyFlags memoryProperties = cpuReadable ?
-		VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT : 
-		VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
-
-	VkMemoryAllocateInfo allocInfo = { VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO };
-	allocInfo.allocationSize = _memoryRequirements.size;
-	allocInfo.memoryTypeIndex = vulkan::getMemoryTypeIndex(_vulkan, _memoryRequirements.memoryTypeBits, memoryProperties);
-	VULKAN_CALL(vkAllocateMemory(vulkan.device, &allocInfo, nullptr, &_memory));
-
-	VULKAN_CALL(vkBindBufferMemory(vulkan.device, _buffer, _memory, 0));
-}
-
-VulkanNativeBuffer::~VulkanNativeBuffer()
-{
-	vkDestroyBuffer(_vulkan.device, _buffer, nullptr);
-	vkFreeMemory(_vulkan.device, _memory, nullptr);
-}
-
-void* VulkanNativeBuffer::map(uint32_t offset, uint32_t size)
-{
-	ET_ASSERT(_cpuReadable);
-	ET_ASSERT(_mapped == false);
-
-	void* pointer = nullptr;
-	{
-		VULKAN_CALL(vkMapMemory(_vulkan.device, _memory, offset, size, 0, &pointer));
-		_mappedRange.memory = _memory;
-		_mappedRange.offset = offset;
-		_mappedRange.size = size;
-		_mapped = true;
-	}
-	return pointer;
-}
-
-void VulkanNativeBuffer::unmap()
-{
-	ET_ASSERT(_mapped);
-
-	vkUnmapMemory(_vulkan.device, _memory);
-	if (_autoFlush)
-	{
-		vkFlushMappedMemoryRanges(_vulkan.device, 1, &_mappedRange);
-	}
-	_mappedRange = { VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE };
-	_mapped = false;
-}
-
-void VulkanNativeBuffer::copyFrom(VulkanNativeBuffer& source)
-{
-	ET_ASSERT(_memoryRequirements.size == source._memoryRequirements.size);
-
-	VkBufferCopy region = {};
-	region.srcOffset = 0;
-	region.dstOffset = 0;
-	region.size = _memoryRequirements.size;
-
-	_vulkan.executeServiceCommands([&](VkCommandBuffer cmdBuffer)
-	{
-		vkCmdCopyBuffer(cmdBuffer, source.buffer(), buffer(), 1, &region);
-	});;
 }
 
 namespace vulkan

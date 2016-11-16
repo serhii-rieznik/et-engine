@@ -9,7 +9,7 @@
 
 #include <et/core/containers.h>
 #include <et/camera/camera.h>
-#include <et/rendering/interface/databuffer.h>
+#include <et/rendering/interface/buffer.h>
 
 namespace et
 {
@@ -70,7 +70,7 @@ public:
 	void init(RenderInterface*);
 	void shutdown();
 
-	DataBuffer::Pointer buffer() const;
+	Buffer::Pointer buffer() const;
 	void flush();
 
 	const ConstantBufferEntry& staticAllocate(uint32_t size);

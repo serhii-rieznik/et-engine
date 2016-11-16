@@ -148,6 +148,13 @@ struct VulkanNativeTextureSet
 	VkDescriptorSet descriptorSet = nullptr;
 };
 
+struct VulkanNativeBuffer
+{
+	VkBuffer buffer = nullptr;
+	VkDeviceMemory memory = nullptr;
+	VkMemoryRequirements memoryRequirements { };
+};
+
 namespace vulkan
 {
 
@@ -232,36 +239,5 @@ Vector<EnumeratedClass> enumerateVulkanObjects(const Holder& holder, Function ca
 	VulkanObjectsEnumerator<EnumeratedClass, Holder, Function, ReturnClass> enumerator;
 	return enumerator(holder, callable);
 }
-
-class VulkanNativeBuffer
-{
-public:
-	VulkanNativeBuffer(VulkanState& vulkan, uint32_t size, uint32_t usage, bool cpuReadable, bool autoFlush);
-	~VulkanNativeBuffer();
-
-	void* map(uint32_t offset, uint32_t size);
-	void unmap();
-
-	VkBuffer buffer() const 
-		{ return _buffer; }
-
-	VkDeviceMemory memory() const 
-		{ return _memory; }
-
-	bool mapped() const 
-		{ return _mapped; }
-
-	void copyFrom(VulkanNativeBuffer&);
-
-private:
-	VulkanState& _vulkan;
-	VkBuffer _buffer = nullptr;
-	VkMemoryRequirements _memoryRequirements { };
-	VkDeviceMemory _memory = nullptr;
-	VkMappedMemoryRange _mappedRange { VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE };
-	std::atomic_bool _mapped{false};
-	bool _cpuReadable = false;
-	bool _autoFlush = true;
-};
 
 }

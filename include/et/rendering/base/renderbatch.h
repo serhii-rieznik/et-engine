@@ -22,8 +22,9 @@ namespace et
 		
 	public:
 		RenderBatch() = default;
-		RenderBatch(const MaterialInstance::Pointer&, const VertexStream::Pointer&, const mat4& transform = identityMatrix);
-		RenderBatch(const MaterialInstance::Pointer&, const VertexStream::Pointer&, const mat4& transform, uint32_t, uint32_t);
+
+		RenderBatch(const MaterialInstance::Pointer&, const VertexStream::Pointer&, const mat4& transform, 
+			uint32_t firstIndex, uint32_t indexCount);
 
 		MaterialInstance::Pointer& material()
 			{ return _material; }

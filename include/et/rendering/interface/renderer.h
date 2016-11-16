@@ -10,7 +10,7 @@
 #include <et/app/context.h>
 #include <et/rendering/rendercontextparams.h>
 #include <et/rendering/base/materiallibrary.h>
-#include <et/rendering/interface/databuffer.h>
+#include <et/rendering/interface/buffer.h>
 #include <et/rendering/interface/renderpass.h>
 #include <et/rendering/interface/pipelinestate.h>
 #include <et/rendering/interface/sampler.h>
@@ -52,10 +52,12 @@ public:
 	/*
 	 * Buffers
 	 */
-	virtual DataBuffer::Pointer createDataBuffer(const std::string&, uint32_t size) = 0;
-	virtual DataBuffer::Pointer createDataBuffer(const std::string&, const BinaryDataStorage&) = 0;
-	virtual IndexBuffer::Pointer createIndexBuffer(const std::string&, IndexArray::Pointer, BufferDrawType) = 0;
-	virtual VertexBuffer::Pointer createVertexBuffer(const std::string&, VertexStorage::Pointer, BufferDrawType) = 0;
+	virtual Buffer::Pointer createBuffer(const Buffer::Description&) = 0;
+
+	Buffer::Pointer createDataBuffer(const std::string&, uint32_t size);
+	Buffer::Pointer createDataBuffer(const std::string&, const BinaryDataStorage&);
+	Buffer::Pointer createIndexBuffer(const std::string&, const IndexArray::Pointer&, Buffer::Location);
+	Buffer::Pointer createVertexBuffer(const std::string&, const VertexStorage::Pointer&, Buffer::Location);
 
 	/*
 	 * Textures
@@ -74,7 +76,7 @@ public:
 	/*
 	 * Pipeline state
 	 */
-	virtual PipelineState::Pointer acquirePipelineState(RenderPass::Pointer, Material::Pointer, VertexStream::Pointer) = 0;
+	virtual PipelineState::Pointer acquirePipelineState(const RenderPass::Pointer&, const Material::Pointer&, const VertexStream::Pointer&) = 0;
 
 	/*
 	 * Sampler
@@ -144,6 +146,45 @@ inline void RenderInterface::shutdownInternalStructures()
 {
 	_sharedMaterialLibrary.shutdown();
 	_sharedConstantBuffer.shutdown();
+}
+
+inline Buffer::Pointer RenderInterface::createDataBuffer(const std::string& name, uint32_t size)
+{
+	Buffer::Description desc;
+	desc.size = size;
+	desc.location = Buffer::Location::Host;
+	desc.usage = Buffer::Usage::Constant;
+	return createBuffer(desc);
+}
+
+inline Buffer::Pointer RenderInterface::createDataBuffer(const std::string& name, const BinaryDataStorage& data)
+{
+	Buffer::Description desc;
+	desc.size = data.size();
+	desc.location = Buffer::Location::Host;
+	desc.usage = Buffer::Usage::Constant;
+	desc.initialData = BinaryDataStorage(data.data(), data.size());
+	return createBuffer(desc);
+}
+
+inline Buffer::Pointer RenderInterface::createVertexBuffer(const std::string& name, const VertexStorage::Pointer& vs, Buffer::Location location)
+{
+	Buffer::Description desc;
+	desc.size = vs->data().size();
+	desc.location = location;
+	desc.usage = Buffer::Usage::Vertex;
+	desc.initialData = BinaryDataStorage(vs->data().data(), vs->data().size());
+	return createBuffer(desc);
+}
+
+inline Buffer::Pointer RenderInterface::createIndexBuffer(const std::string& name, const IndexArray::Pointer& ia , Buffer::Location location)
+{
+	Buffer::Description desc;
+	desc.size = ia->dataSize();
+	desc.location = location;
+	desc.usage = Buffer::Usage::Index;
+	desc.initialData = BinaryDataStorage(ia->data(), ia->dataSize());
+	return createBuffer(desc);
 }
 
 }

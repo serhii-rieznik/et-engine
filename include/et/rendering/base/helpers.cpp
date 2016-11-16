@@ -39,9 +39,12 @@ void init(RenderContext* rc)
 	pos[3] = vec3( 1.0f,  1.0f, 0.0f); tc0[3] = vec2(1.0f, 1.0f);
 	ia->linearize(4);
 
-	auto vb = rc->renderer()->createVertexBuffer("rh_local::vb", vs, BufferDrawType::Static);
-	auto ib = rc->renderer()->createIndexBuffer("rh_local::ib", ia, BufferDrawType::Static);
-	rh_local::default2DPlane = VertexStream::Pointer::create(vb, ib);
+	auto vb = rc->renderer()->createVertexBuffer("rh_local::vb", vs, Buffer::Location::Device);
+	auto ib = rc->renderer()->createIndexBuffer("rh_local::ib", ia, Buffer::Location::Device);
+	
+	rh_local::default2DPlane = VertexStream::Pointer::create();
+	rh_local::default2DPlane->setVertexBuffer(vb, vs->declaration());
+	rh_local::default2DPlane->setIndexBuffer(ib, ia->format(), ia->primitiveType());
 
 	rh_local::texturedMaterial = rc->renderer()->sharedMaterialLibrary().loadDefaultMaterial(DefaultMaterial::Textured2D);
 
@@ -63,7 +66,8 @@ RenderBatch::Pointer createFullscreenRenderBatch(Texture::Pointer texture)
 	MaterialInstance::Pointer materialInstance = rh_local::texturedMaterial->instance();
 	materialInstance->setTexture(MaterialTexture::Albedo, texture);
 	
-	return RenderBatch::Pointer::create(materialInstance, rh_local::default2DPlane);
+	return RenderBatch::Pointer::create(materialInstance, rh_local::default2DPlane, identityMatrix, 0, 
+		rh_local::default2DPlane->vertexCount());
 }
 
 }

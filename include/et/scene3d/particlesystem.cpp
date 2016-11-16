@@ -36,9 +36,12 @@ ParticleSystem::ParticleSystem(RenderContext* rc, uint32_t maxSize, const std::s
 
 	_capacity = vs->capacity();
 
-	auto vb = rc->renderer()->createVertexBuffer(name + "-vb", vs, BufferDrawType::Dynamic);
-	auto ib = rc->renderer()->createIndexBuffer(name + "-ib", ia, BufferDrawType::Static);
-	_vertexStream = VertexStream::Pointer::create(vb, ib);
+	auto vb = rc->renderer()->createVertexBuffer(name + "-vb", vs, Buffer::Location::Host);
+	auto ib = rc->renderer()->createIndexBuffer(name + "-ib", ia, Buffer::Location::Device);
+	
+	_vertexStream = VertexStream::Pointer::create();
+	_vertexStream->setVertexBuffer(vb, vs->declaration());
+	_vertexStream->setIndexBuffer(ib, ia->format(), ia->primitiveType());
 	
 	_timer.expired.connect(this, &ParticleSystem::onTimerUpdated);
 	_timer.start(currentTimerPool(), 0.0f, NotifyTimer::RepeatForever);
@@ -53,17 +56,14 @@ ParticleSystem* ParticleSystem::duplicate()
 void ParticleSystem::onTimerUpdated(NotifyTimer* timer)
 {
 	_emitter.update(timer->actualTime());
-
-	// _vao->bind();
 	
-	void* bufferData = _vertexStream->vertexBuffer()->map(0, _capacity,
-		MapBufferOptions::Write | MapBufferOptions::InvalidateBuffer);
+	void* bufferData = _vertexStream->vertexBuffer()->map(0, _capacity);
 
 	auto posOffset = _decl.elementForUsage(VertexAttributeUsage::Position).offset();
 	auto clrOffset = _decl.elementForUsage(VertexAttributeUsage::Color).offset();
 	
-	RawDataAcessor<vec3> pos(reinterpret_cast<char*>(bufferData), _capacity, _decl.totalSize(), posOffset);
-	RawDataAcessor<vec4> clr(reinterpret_cast<char*>(bufferData), _capacity + clrOffset, _decl.totalSize(), clrOffset);
+	RawDataAcessor<vec3> pos(reinterpret_cast<char*>(bufferData), _capacity, _decl.sizeInBytes(), posOffset);
+	RawDataAcessor<vec4> clr(reinterpret_cast<char*>(bufferData), _capacity + clrOffset, _decl.sizeInBytes(), clrOffset);
 	
 	for (uint32_t i = 0; i < _emitter.activeParticlesCount(); ++i)
 	{

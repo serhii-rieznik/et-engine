@@ -96,15 +96,19 @@ void Storage::flush()
 
 void Storage::buildVertexStreams(RenderContext* rc)
 {
-    IndexBuffer::Pointer ib;
-    for (auto vs : _vertexStorages)
+    Buffer::Pointer ib;
+    for (const VertexStorage::Pointer& vs : _vertexStorages)
     {
         std::string vaoName = "vao-" + intToStr(_vertexStreams.size() + 1);
         if (ib.invalid())
         {
-            ib = rc->renderer()->createIndexBuffer("mainIndexBuffer", _indexArray, BufferDrawType::Static);
+            ib = rc->renderer()->createIndexBuffer("mainIndexBuffer", _indexArray, Buffer::Location::Device);
         }
-        auto vb = rc->renderer()->createVertexBuffer(vs->name(), vs, BufferDrawType::Static);
-        _vertexStreams.insert(VertexStream::Pointer::create(vb, ib));
+        Buffer::Pointer vb = rc->renderer()->createVertexBuffer(vs->name(), vs, Buffer::Location::Device);
+		
+		VertexStream::Pointer vertexStream = VertexStream::Pointer::create();
+		vertexStream->setVertexBuffer(vb, vs->declaration());
+		vertexStream->setIndexBuffer(ib, _indexArray->format(), _indexArray->primitiveType());
+        _vertexStreams.insert(vertexStream);
     }
 }

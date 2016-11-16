@@ -32,7 +32,7 @@ VertexArray::Description VertexArray::generateDescription() const
 
 	for (auto& chunk : _chunks)
 	{
-		uint32_t t_stride = static_cast<uint32_t>(_decl.interleaved() ? _decl.totalSize() : 0);
+		uint32_t t_stride = static_cast<uint32_t>(_decl.interleaved() ? _decl.sizeInBytes() : 0);
 		uint32_t t_offset = static_cast<uint32_t>(_decl.interleaved() ? offset : dataSize);
 		desc.declaration.push_back(VertexElement(chunk->usage(), chunk->type(), t_stride, t_offset));
 		dataSize += chunk->dataSize();
@@ -40,7 +40,7 @@ VertexArray::Description VertexArray::generateDescription() const
 	}
 
 	desc.data.resize(dataSize);
-	uint32_t numElements = dataSize / desc.declaration.totalSize();
+	uint32_t numElements = dataSize / desc.declaration.sizeInBytes();
 	char* ptr0 = desc.data.binary();
 
 	uint32_t entry_i = 0;

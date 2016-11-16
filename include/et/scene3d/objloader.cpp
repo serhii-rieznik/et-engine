@@ -876,9 +876,12 @@ s3d::ElementContainer::Pointer OBJLoader::generateVertexBuffers(s3d::Storage& st
 		storage.addMaterial(m);
 	}
 	
-	VertexBuffer::Pointer vb = _renderer->createVertexBuffer("model-vb", _vertexData, BufferDrawType::Static);
-	IndexBuffer::Pointer ib = _renderer->createIndexBuffer("model-ib", _indices, BufferDrawType::Static);
-	VertexStream::Pointer vao = VertexStream::Pointer::create(vb, ib);
+	Buffer::Pointer vb = _renderer->createVertexBuffer("model-vb", _vertexData, Buffer::Location::Device);
+	Buffer::Pointer ib = _renderer->createIndexBuffer("model-ib", _indices, Buffer::Location::Device);
+	
+	VertexStream::Pointer vao = VertexStream::Pointer::create();
+	vao->setVertexBuffer(vb, _vertexData->declaration());
+	vao->setIndexBuffer(ib, _indices->format(), _indices->primitiveType());
 
 	for (const auto& i : _meshes)
 	{

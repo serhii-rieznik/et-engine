@@ -13,16 +13,9 @@
 using namespace et;
 
 RenderBatch::RenderBatch(const MaterialInstance::Pointer& m, const VertexStream::Pointer& v,
-	const mat4& transform) : _material(m), _vertexStream(v), _transformation(transform), _numIndexes(v->indexBuffer()->size())
-{
-	
-}
-
-RenderBatch::RenderBatch(const MaterialInstance::Pointer& m, const VertexStream::Pointer& v,
 	const mat4& transform, uint32_t i, uint32_t ni) : _material(m), _vertexStream(v), 
 	_transformation(transform), _firstIndex(i), _numIndexes(ni)
 {
-	
 }
 
 void RenderBatch::calculateBoundingBox()
