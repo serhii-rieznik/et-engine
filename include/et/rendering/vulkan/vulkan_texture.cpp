@@ -13,7 +13,7 @@
 namespace et
 {
 
-class VulkanTexturePrivate
+class VulkanTexturePrivate : public VulkanNativeTexture
 {
 public:
 	VulkanTexturePrivate(VulkanState& v) :
@@ -22,7 +22,6 @@ public:
 	}
 
 	VulkanState& vulkan;
-	VulkanNativeTexture texture;
 	TextureDescription description;
 };
 
@@ -49,24 +48,24 @@ VulkanTexture::VulkanTexture(VulkanState& vulkan, const TextureDescription::Poin
 	info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 	info.tiling = VK_IMAGE_TILING_OPTIMAL;
 	info.usage = VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
-	VULKAN_CALL(vkCreateImage(vulkan.device, &info, nullptr, &_private->texture.image));
+	VULKAN_CALL(vkCreateImage(vulkan.device, &info, nullptr, &_private->image));
 
-	vkGetImageMemoryRequirements(vulkan.device, _private->texture.image, &_private->texture.memoryRequirements);
+	vkGetImageMemoryRequirements(vulkan.device, _private->image, &_private->memoryRequirements);
 
 	VkMemoryPropertyFlags memoryProperties = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
 
 	VkMemoryAllocateInfo allocInfo = { VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO };
-	allocInfo.allocationSize = _private->texture.memoryRequirements.size;
-	allocInfo.memoryTypeIndex = vulkan::getMemoryTypeIndex(vulkan, _private->texture.memoryRequirements.memoryTypeBits, memoryProperties);
-	VULKAN_CALL(vkAllocateMemory(vulkan.device, &allocInfo, nullptr, &_private->texture.memory));
-	VULKAN_CALL(vkBindImageMemory(vulkan.device, _private->texture.image, _private->texture.memory, 0));
+	allocInfo.allocationSize = _private->memoryRequirements.size;
+	allocInfo.memoryTypeIndex = vulkan::getMemoryTypeIndex(vulkan, _private->memoryRequirements.memoryTypeBits, memoryProperties);
+	VULKAN_CALL(vkAllocateMemory(vulkan.device, &allocInfo, nullptr, &_private->memory));
+	VULKAN_CALL(vkBindImageMemory(vulkan.device, _private->image, _private->memory, 0));
 
 	VkImageViewCreateInfo imageViewInfo = { VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO };
-	imageViewInfo.image = _private->texture.image;
+	imageViewInfo.image = _private->image;
 	imageViewInfo.viewType = vulkan::textureTargetToImageViewType(desc->target);
 	imageViewInfo.format = vulkan::textureFormatValue(desc->format);
 	imageViewInfo.subresourceRange = { VK_IMAGE_ASPECT_COLOR_BIT, 0, desc->mipMapCount, 0, 1 };
-	VULKAN_CALL(vkCreateImageView(vulkan.device, &imageViewInfo, nullptr, &_private->texture.imageView));
+	VULKAN_CALL(vkCreateImageView(vulkan.device, &imageViewInfo, nullptr, &_private->imageView));
 
 	if (desc->data.size() > 0)
 	{
@@ -76,12 +75,15 @@ VulkanTexture::VulkanTexture(VulkanState& vulkan, const TextureDescription::Poin
 
 VulkanTexture::~VulkanTexture()
 {
+	vkDestroyImageView(_private->vulkan.device, _private->imageView, nullptr);
+	vkDestroyImage(_private->vulkan.device, _private->image, nullptr);
+	vkFreeMemory(_private->vulkan.device, _private->memory, nullptr);
 	ET_PIMPL_FINALIZE(VulkanTexture)
 }
 
 void VulkanTexture::setImageData(const BinaryDataStorage& data)
 {
-	ET_ASSERT(data.size() <= _private->texture.memoryRequirements.size);
+	ET_ASSERT(data.size() <= _private->memoryRequirements.size);
 
 	Buffer::Description stagingDesc;
 	stagingDesc.initialData = BinaryDataStorage(data.data(), data.size());
@@ -90,52 +92,48 @@ void VulkanTexture::setImageData(const BinaryDataStorage& data)
 	stagingDesc.size = data.size();
 	VulkanBuffer stagingBuffer(_private->vulkan, stagingDesc);
 
-	_private->vulkan.executeServiceCommands([this, &stagingBuffer](VkCommandBuffer cmdBuffer)
+	Vector<VkBufferImageCopy> regions;
+	regions.reserve(_private->description.mipMapCount);
+
+	VkBufferImageCopy region = { };
+	region.imageSubresource = { VK_IMAGE_ASPECT_COLOR_BIT };
+	region.imageSubresource.layerCount = 1;
+	region.imageExtent.depth = 1;
+	for (uint32_t m = 0; m < _private->description.mipMapCount; ++m)
 	{
-		vulkan::imageBarrier(_private->vulkan, cmdBuffer, _private->texture.image,
+		region.imageSubresource.mipLevel = m;
+		region.imageExtent.width = static_cast<uint32_t>(_private->description.sizeForMipLevel(m).x);
+		region.imageExtent.height = static_cast<uint32_t>(_private->description.sizeForMipLevel(m).y);
+		region.bufferOffset = _private->description.dataOffsetForMipLevel(m, 0);
+		region.bufferImageHeight = region.imageExtent.height;
+		regions.emplace_back(region);
+	};
+
+	_private->vulkan.executeServiceCommands([&](VkCommandBuffer cmdBuffer)
+	{
+		vulkan::imageBarrier(_private->vulkan, cmdBuffer, _private->image,
 			VK_IMAGE_ASPECT_COLOR_BIT, 0, VK_ACCESS_TRANSFER_WRITE_BIT, 
 			VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
 			VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT, 
 			0, _private->description.mipMapCount);
 
-		Vector<VkBufferImageCopy> regions;
-		regions.reserve(_private->description.mipMapCount);
-
-		VkBufferImageCopy region = { };
-		region.imageSubresource = { VK_IMAGE_ASPECT_COLOR_BIT };
-		region.imageSubresource.layerCount = 1;
-		region.imageExtent.depth = 1;
-
-		uint32_t baseWidth = static_cast<uint32_t>(description()->size.x);
-		uint32_t baseHeight = static_cast<uint32_t>(description()->size.y);
-		for (uint32_t m = 0; m < _private->description.mipMapCount; ++m)
-		{
-			region.imageSubresource.mipLevel = m;
-			region.imageExtent.width = baseWidth;
-			region.imageExtent.height = baseHeight;
-			region.bufferOffset = _private->description.dataOffsetForMipLevel(m, 0);
-			region.bufferImageHeight = baseHeight;
-			baseWidth /= 2;
-			baseHeight /= 2;
-			regions.emplace_back(region);
-		}
 		vkCmdCopyBufferToImage(cmdBuffer, stagingBuffer.nativeBuffer().buffer,
-			_private->texture.image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+			_private->image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
 			static_cast<uint32_t>(regions.size()), regions.data());
 
-		vulkan::imageBarrier(_private->vulkan, cmdBuffer, _private->texture.image,
+		vulkan::imageBarrier(_private->vulkan, cmdBuffer, _private->image,
 			VK_IMAGE_ASPECT_COLOR_BIT, VK_ACCESS_TRANSFER_WRITE_BIT, VK_ACCESS_SHADER_READ_BIT, 
 			VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, 
 			VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 
 			0, _private->description.mipMapCount);
 	});
 
-	_private->texture.layout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+	_private->layout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 }
 
 const VulkanNativeTexture& VulkanTexture::nativeTexture() const
 {
-	return _private->texture;
+	return *(_private);
 }
 
 }

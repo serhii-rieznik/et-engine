@@ -13,7 +13,7 @@
 namespace et
 {
 
-class VulkanSamplerPrivate
+class VulkanSamplerPrivate : public VulkanNativeSampler
 {
 public:
 	VulkanSamplerPrivate(VulkanState& v) :
@@ -22,7 +22,6 @@ public:
 	}
 
 	VulkanState& vulkan;
-	VulkanNativeSampler sampler;
 };
 
 VulkanSampler::VulkanSampler(VulkanState& vulkan, const Sampler::Description& desc)
@@ -40,17 +39,18 @@ VulkanSampler::VulkanSampler(VulkanState& vulkan, const Sampler::Description& de
 	info.anisotropyEnable = desc.maxAnisotropy > 1.0f ? VK_TRUE : VK_FALSE;
 	info.maxAnisotropy = desc.maxAnisotropy;
 	
-	vkCreateSampler(vulkan.device, &info, nullptr, &_private->sampler.sampler);
+	vkCreateSampler(vulkan.device, &info, nullptr, &_private->sampler);
 }
 
 VulkanSampler::~VulkanSampler()
 {
+	vkDestroySampler(_private->vulkan.device, _private->sampler, nullptr);
 	ET_PIMPL_FINALIZE(VulkanSampler);
 }
 
 const VulkanNativeSampler& VulkanSampler::nativeSampler() const
 {
-	return _private->sampler;
+	return *(_private);
 }
 
 }

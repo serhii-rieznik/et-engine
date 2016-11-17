@@ -493,9 +493,6 @@
     <ClInclude Include="..\..\include\et\rendering\vulkan\vulkan_textureset.h">
       <Filter>Source\rendering\vulkan</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\et\rendering\vulkan\vulkan_textureset.cpp">
-      <Filter>Source</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\external\glslang\OGLCompilersDLL\InitializeDll.h">
       <Filter>glslang\OGLCompilersDLL</Filter>
     </ClInclude>
@@ -620,6 +617,9 @@
       <Filter>Source\rendering\vulkan</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\et\rendering\vulkan\vulkan_buffer.cpp">
+      <Filter>Source\rendering\vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\vulkan\vulkan_textureset.cpp">
       <Filter>Source\rendering\vulkan</Filter>
     </ClInclude>
   </ItemGroup>

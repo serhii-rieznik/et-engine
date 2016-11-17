@@ -16,14 +16,13 @@
 namespace et
 {
 
-class VulkanProgramPrivate
+class VulkanProgramPrivate : public VulkanShaderModules
 {
 public:
 	VulkanProgramPrivate(VulkanState& v)
 		: vulkan(v) { }
 
 	VulkanState& vulkan;
-	VulkanShaderModules modules;
 };
 
 VulkanProgram::VulkanProgram(VulkanState& v)
@@ -33,6 +32,8 @@ VulkanProgram::VulkanProgram(VulkanState& v)
 
 VulkanProgram::~VulkanProgram()
 {
+	vkDestroyShaderModule(_private->vulkan.device, _private->vertex, nullptr);
+	vkDestroyShaderModule(_private->vulkan.device, _private->fragment, nullptr);
 	ET_PIMPL_FINALIZE(VulkanProgram)
 }
 
@@ -64,23 +65,24 @@ void VulkanProgram::build(const std::string& source)
 
 		createInfo.pCode = vertexBin.data();
 		createInfo.codeSize = vertexBin.size() * sizeof(uint32_t);
-		VULKAN_CALL(vkCreateShaderModule(_private->vulkan.device, &createInfo, nullptr, &_private->modules.vertex));
-		_private->modules.stageCreateInfo[0].stage = VK_SHADER_STAGE_VERTEX_BIT;
-		_private->modules.stageCreateInfo[0].module = _private->modules.vertex;
-		_private->modules.stageCreateInfo[0].pName = "main";
+		VULKAN_CALL(vkCreateShaderModule(_private->vulkan.device, &createInfo, nullptr, &_private->vertex));
 
 		createInfo.pCode = fragmentBin.data();
 		createInfo.codeSize = fragmentBin.size() * sizeof(uint32_t);
-		VULKAN_CALL(vkCreateShaderModule(_private->vulkan.device, &createInfo, nullptr, &_private->modules.fragment));
-		_private->modules.stageCreateInfo[1].stage = VK_SHADER_STAGE_FRAGMENT_BIT;
-		_private->modules.stageCreateInfo[1].module = _private->modules.fragment;
-		_private->modules.stageCreateInfo[1].pName = "main";
+		VULKAN_CALL(vkCreateShaderModule(_private->vulkan.device, &createInfo, nullptr, &_private->fragment));
+
+		_private->stageCreateInfo[0].stage = VK_SHADER_STAGE_VERTEX_BIT;
+		_private->stageCreateInfo[0].module = _private->vertex;
+		_private->stageCreateInfo[0].pName = "main";
+		_private->stageCreateInfo[1].stage = VK_SHADER_STAGE_FRAGMENT_BIT;
+		_private->stageCreateInfo[1].module = _private->fragment;
+		_private->stageCreateInfo[1].pName = "main";
 	}
 }
 
 const VulkanShaderModules& VulkanProgram::shaderModules() const
 {
-	return _private->modules;
+	return *(_private);
 }
 
 }
