@@ -25,7 +25,7 @@ void MaterialLibrary::init(RenderInterface* ren)
 
 void MaterialLibrary::shutdown()
 {
-	for (Material::Pointer mat : _defaultMaterials)
+	for (Material::Pointer& mat : _defaultMaterials)
 	{
 		if (mat.valid())
 		{
@@ -35,9 +35,7 @@ void MaterialLibrary::shutdown()
 	}
 
 	for (auto& kv : _cache)
-	{
 		kv.second->releaseInstances();
-	}
 	_cache.clear();
 }
 
