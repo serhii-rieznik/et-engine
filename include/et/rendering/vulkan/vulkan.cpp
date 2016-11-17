@@ -258,9 +258,8 @@ uint32_t getMemoryTypeIndex(VulkanState& vulkan, uint32_t typeFilter, VkMemoryPr
 }
 
 void imageBarrier(VulkanState& vulkan, VkCommandBuffer cmd, VkImage image, VkImageAspectFlags aspect,
-	VkAccessFlags accessFrom, VkAccessFlags accessTo,
-	VkImageLayout layoutFrom, VkImageLayout layoutTo,
-	VkPipelineStageFlags stageFrom, VkPipelineStageFlags stageTo)
+	VkAccessFlags accessFrom, VkAccessFlags accessTo, VkImageLayout layoutFrom, VkImageLayout layoutTo,
+	VkPipelineStageFlags stageFrom, VkPipelineStageFlags stageTo, uint32_t startMipLevel, uint32_t mipLevelsCount)
 {
 	VkImageMemoryBarrier barrierInfo = { VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER };
 	barrierInfo.srcAccessMask = accessFrom;
@@ -269,7 +268,7 @@ void imageBarrier(VulkanState& vulkan, VkCommandBuffer cmd, VkImage image, VkIma
 	barrierInfo.newLayout = layoutTo;
 	barrierInfo.srcQueueFamilyIndex = vulkan.presentQueueIndex;
 	barrierInfo.dstQueueFamilyIndex = vulkan.graphicsQueueIndex;
-	barrierInfo.subresourceRange = { aspect, 0, 1, 0, 1 };
+	barrierInfo.subresourceRange = { aspect, startMipLevel, mipLevelsCount, 0, 1 };
 	barrierInfo.image = image;
 	vkCmdPipelineBarrier(cmd, stageFrom, stageTo, 0, 0, nullptr, 0, nullptr, 1, &barrierInfo);
 }
@@ -319,6 +318,7 @@ VkFormat textureFormatValue(TextureFormat fmt)
 	static const Map<TextureFormat, VkFormat> lookup =
 	{
 		{ TextureFormat::RGBA8, VkFormat::VK_FORMAT_R8G8B8A8_UNORM },
+		{ TextureFormat::BGRA8, VkFormat::VK_FORMAT_B8G8R8A8_UNORM },
 		{ TextureFormat::RGBA32F, VkFormat::VK_FORMAT_R32G32B32A32_SFLOAT },
 	};
 	ET_ASSERT(lookup.count(fmt) > 0);

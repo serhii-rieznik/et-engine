@@ -15,20 +15,14 @@ namespace et
 
 struct VulkanRenderBatch
 {
-	VkBuffer indexBuffer = nullptr;
+	VulkanPipelineState::Pointer pipeline;
+	VulkanTextureSet::Pointer textureSet;
+	VulkanBuffer::Pointer vertexBuffer;
+	VulkanBuffer::Pointer indexBuffer;
 	VkIndexType indexBufferFormat = VkIndexType::VK_INDEX_TYPE_MAX_ENUM;
-	uint32_t startIndex = 0;
-	uint32_t indexCount = 0;
-
-	VkBuffer vertexBuffers[1] { };
-	VkDeviceSize vertexBuffersOffset[1] { };
-
-	VkPipeline pipeline = nullptr;
-	VkPipelineLayout pipelineLayout = nullptr;
-	ConstantBufferEntry objectVariables;
-	ConstantBufferEntry materialVariables;
-	VkDescriptorSet	descriptorSets[DescriptorSetClass::Count] { };
 	uint32_t dynamicOffsets[DescriptorSetClass::DynamicDescriptorsCount] { };
+	uint32_t startIndex = InvalidIndex;
+	uint32_t indexCount = InvalidIndex;
 };
 
 class VulkanRenderPassPrivate : public VulkanNativeRenderPass
@@ -180,14 +174,11 @@ void VulkanRenderPass::pushRenderBatch(const RenderBatch::Pointer& inBatch)
 {
 	ET_ASSERT(_private->recording);
 
-	VulkanRenderPass::Pointer vulkanRenderPass(this);
-	MaterialInstance::Pointer batchMaterial = inBatch->material();
-	VulkanPipelineState::Pointer ps = _private->renderer->acquirePipelineState(vulkanRenderPass, batchMaterial, inBatch->vertexStream());
-	
-	const VulkanProgram::Pointer& program = batchMaterial->program();
-	const VulkanBuffer::Pointer& vb = inBatch->vertexStream()->vertexBuffer();
-	const VulkanBuffer::Pointer& ib = inBatch->vertexStream()->indexBuffer();
-	const VulkanTextureSet::Pointer& textureSet = batchMaterial->textureSet();
+	_private->batches.emplace_back();
+	VulkanRenderBatch& batch = _private->batches.back();
+
+	MaterialInstance::Pointer material = inBatch->material();
+	const VulkanProgram::Pointer& program = material->program();
 
 	ConstantBufferEntry objectVariables;
 	if (program->reflection().objectVariablesBufferSize > 0)
@@ -205,20 +196,17 @@ void VulkanRenderPass::pushRenderBatch(const RenderBatch::Pointer& inBatch)
 		}
 	}
 
-	_private->batches.emplace_back();
-	VulkanRenderBatch& batch = _private->batches.back();
-	batch.indexBuffer = ib->nativeBuffer().buffer;
+	retain();
+	batch.pipeline = _private->renderer->acquirePipelineState(VulkanRenderPass::Pointer(this), material, inBatch->vertexStream());
+	batch.textureSet = material->textureSet();
+	batch.dynamicOffsets[0] = objectVariables.offset();
+	batch.dynamicOffsets[1] = material->constantBufferData().offset();
+	batch.vertexBuffer = inBatch->vertexStream()->vertexBuffer();
+	batch.indexBuffer = inBatch->vertexStream()->indexBuffer();
 	batch.indexBufferFormat = vulkan::indexBufferFormat(inBatch->vertexStream()->indexArrayFormat());
 	batch.startIndex = inBatch->firstIndex();
 	batch.indexCount = inBatch->numIndexes();
-	batch.vertexBuffers[0] = vb->nativeBuffer().buffer;
-	batch.vertexBuffersOffset[0] = 0;
-	batch.pipeline = ps->nativePipeline().pipeline;
-	batch.pipelineLayout = ps->nativePipeline().layout;
-	batch.descriptorSets[0] = _private->dynamicDescriptorSet;
-	batch.descriptorSets[1] = textureSet->nativeSet().descriptorSet;
-	batch.dynamicOffsets[0] = objectVariables.offset();
-	batch.dynamicOffsets[1] = batchMaterial->constantBufferData().offset();
+	release();
 }
 
 void VulkanRenderPass::end()
@@ -248,33 +236,38 @@ void VulkanRenderPass::submit()
 	VkBuffer lastVertexBuffer = nullptr;
 	VkBuffer lastIndexBuffer = nullptr;
 	VkIndexType lastIndexType = VkIndexType::VK_INDEX_TYPE_MAX_ENUM;
-	VkDeviceSize lastVertexBufferOffset = InvalidIndex;
+
+	VkDescriptorSet descriptorSets[DescriptorSetClass::Count] = {
+		_private->dynamicDescriptorSet
+	};
 
 	vkCmdBeginRenderPass(_private->commandBuffer, &_private->beginInfo, VK_SUBPASS_CONTENTS_INLINE);
 	for (const auto& batch : _private->batches)
 	{
-		if (batch.pipeline != lastPipeline)
+		if (batch.pipeline->nativePipeline().pipeline != lastPipeline)
 		{
-			vkCmdBindPipeline(_private->commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, batch.pipeline);
-			lastPipeline = batch.pipeline;
+			lastPipeline = batch.pipeline->nativePipeline().pipeline;
+			vkCmdBindPipeline(_private->commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, lastPipeline);
 		}
 		
-		if ((batch.vertexBuffers[0] != lastVertexBuffer) || (batch.vertexBuffersOffset[0] != lastVertexBufferOffset))
+		if (batch.vertexBuffer->nativeBuffer().buffer != lastVertexBuffer)
 		{
-			vkCmdBindVertexBuffers(_private->commandBuffer, 0, 1, batch.vertexBuffers, batch.vertexBuffersOffset);
-			lastVertexBuffer = batch.vertexBuffers[0];
-			lastVertexBufferOffset = batch.vertexBuffersOffset[0];
+			VkDeviceSize nullOffset = 0;
+			lastVertexBuffer = batch.vertexBuffer->nativeBuffer().buffer;
+			vkCmdBindVertexBuffers(_private->commandBuffer, 0, 1, &lastVertexBuffer, &nullOffset);
 		}
 		
-		if ((batch.indexBuffer != lastIndexBuffer) || (batch.indexBufferFormat != lastIndexType))
+		if ((batch.indexBuffer->nativeBuffer().buffer != lastIndexBuffer) || (batch.indexBufferFormat != lastIndexType))
 		{
-			vkCmdBindIndexBuffer(_private->commandBuffer, batch.indexBuffer, 0, batch.indexBufferFormat);
-			lastIndexBuffer = batch.indexBuffer;
+			lastIndexBuffer = batch.indexBuffer->nativeBuffer().buffer;
 			lastIndexType = batch.indexBufferFormat;
+			vkCmdBindIndexBuffer(_private->commandBuffer, lastIndexBuffer, 0, lastIndexType);
 		}
 		
-		vkCmdBindDescriptorSets(_private->commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, batch.pipelineLayout, 0, 
-			DescriptorSetClass::Count, batch.descriptorSets, DescriptorSetClass::DynamicDescriptorsCount, batch.dynamicOffsets);
+		descriptorSets[1] = batch.textureSet->nativeSet().descriptorSet;
+		vkCmdBindDescriptorSets(_private->commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, 
+			batch.pipeline->nativePipeline().layout, 0, 
+			DescriptorSetClass::Count, descriptorSets, DescriptorSetClass::DynamicDescriptorsCount, batch.dynamicOffsets);
 		
 		vkCmdDrawIndexed(_private->commandBuffer, batch.indexCount, 1, batch.startIndex, 0, 0);
 	}

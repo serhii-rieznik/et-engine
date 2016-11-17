@@ -180,7 +180,8 @@ namespace gl
 void imageBarrier(VulkanState&, VkCommandBuffer, VkImage, VkImageAspectFlags aspect,
 	VkAccessFlags accessFrom, VkAccessFlags accessTo,
 	VkImageLayout layoutFrom, VkImageLayout layoutTo,
-	VkPipelineStageFlags stageFrom, VkPipelineStageFlags stageTo);
+	VkPipelineStageFlags stageFrom, VkPipelineStageFlags stageTo, 
+	uint32_t startMipLevel = 0, uint32_t mipLevelsCount = 1);
 
 }
 

@@ -36,7 +36,8 @@ VulkanSampler::VulkanSampler(VulkanState& vulkan, const Sampler::Description& de
 	info.minFilter = vulkan::textureFiltrationValue(desc.minFilter);
 	info.magFilter = vulkan::textureFiltrationValue(desc.magFilter);
 	info.mipmapMode = vulkan::textureFiltrationValueToSamplerMipMapMode(desc.mipFilter);
-	info.anisotropyEnable = desc.maxAnisotropy > 1.0f;
+	info.maxLod = std::numeric_limits<float>::max();
+	info.anisotropyEnable = desc.maxAnisotropy > 1.0f ? VK_TRUE : VK_FALSE;
 	info.maxAnisotropy = desc.maxAnisotropy;
 	
 	vkCreateSampler(vulkan.device, &info, nullptr, &_private->sampler.sampler);
