@@ -146,6 +146,8 @@ inline void RenderInterface::shutdownInternalStructures()
 {
 	_sharedMaterialLibrary.shutdown();
 	_sharedConstantBuffer.shutdown();
+	_defaultSampler.reset(nullptr);
+	_defaultTexture.reset(nullptr);
 }
 
 inline Buffer::Pointer RenderInterface::createDataBuffer(const std::string& name, uint32_t size)
