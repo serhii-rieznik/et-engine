@@ -12,31 +12,13 @@
 
 namespace et
 {
-	enum FrustumPlane
-	{
-		FrustumPlane_Right,
-		FrustumPlane_Left,
-		FrustumPlane_Bottom,
-		FrustumPlane_Top,
-		FrustumPlane_Far,
-		FrustumPlane_Near,
-		FrustumPlane_max
-	};
 
-	class Frustum
-	{
-	public:
-		Frustum();
-		Frustum(const mat4& vpMatrix);
+struct Frustum
+{
+	StaticDataStorage<plane, 6> planes;
 
-		void build(const mat4& vpMatrix);
-		
-		bool containsSphere(const Sphere& sphere) const;
-		bool containsBoundingBox(const BoundingBox& aabb) const;
-
-	private:
-		StaticDataStorage<vec4, FrustumPlane_max> _planes;
-		StaticDataStorage<vec4, 8> _corners;
-	};
+	void build(const mat4& inverseViewProjectionMatrix);
+	bool containsBoundingBox(const BoundingBox& aabb) const;
+};
 
 }

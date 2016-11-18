@@ -18,7 +18,7 @@ public:
 	BinaryDataStorage heapInfo;
 	BinaryDataStorage localData;
 	Vector<ConstantBufferEntry> allocations;
-	bool modified = true;
+	bool modified = false;
 
 	const ConstantBufferEntry& internalAlloc(uint32_t, bool);
 	void internalFree(const ConstantBufferEntry&);

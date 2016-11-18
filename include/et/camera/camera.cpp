@@ -241,7 +241,7 @@ void Camera::updateViewProjectionMatrix()
 {
 	_viewProjectionMatrix = _viewMatrix * _projectionMatrix;
 	_inverseViewProjectionMatrix = _viewProjectionMatrix.inversed();
-	_frustum.build(_viewProjectionMatrix);
+	_frustum.build(_inverseViewProjectionMatrix);
 }
 
 void Camera::lockUpVector(const vec3& u)

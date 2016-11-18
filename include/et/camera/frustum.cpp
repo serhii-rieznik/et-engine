@@ -7,66 +7,48 @@
 
 #include <et/camera/frustum.h>
 
-using namespace et;
-
-Frustum::Frustum()
+namespace et
 {
-}
 
-Frustum::Frustum(const mat4& mvp)
+void Frustum::build(const mat4& invVP)
 {
-	build(mvp);
-}
-
-void Frustum::build(const mat4& mvp)
-{
-	_planes[FrustumPlane_Right] = normalizePlane(vec4(mvp(3) - mvp(0), mvp(7) - mvp(4), mvp(11) - mvp(8), mvp(15) - mvp(12)));
-	_planes[FrustumPlane_Left] = normalizePlane(vec4(mvp(3) + mvp(0), mvp(7) + mvp(4), mvp(11) + mvp(8), mvp(15) + mvp(12)));
-	_planes[FrustumPlane_Bottom] = normalizePlane(vec4(mvp(3) + mvp(1), mvp(7) + mvp(5), mvp(11) + mvp(9), mvp(15) + mvp(13)));
-	_planes[FrustumPlane_Top]	= normalizePlane(vec4(mvp(3) - mvp(1), mvp(7) - mvp(5), mvp(11) - mvp(9), mvp(15) - mvp(13)));
-	_planes[FrustumPlane_Far] = normalizePlane(vec4(mvp(3) - mvp(2), mvp(7) - mvp(6), mvp(11) - mvp(10), mvp(15) - mvp(14)));
-	_planes[FrustumPlane_Near] = normalizePlane(vec4(mvp(3) + mvp(2), mvp(7) + mvp(6), mvp(11) + mvp(10), mvp(15) + mvp(14)));
-	
-	mat4 invMVP = mvp.inversed();
-	
-	_corners[0] = invMVP * vec4(-1.0f, -1.0f, -1.0f, 1.0f);
-	_corners[1] = invMVP * vec4(-1.0f, -1.0f,  1.0f, 1.0f);
-	_corners[2] = invMVP * vec4(-1.0f,  1.0f, -1.0f, 1.0f);
-	_corners[3] = invMVP * vec4(-1.0f,  1.0f,  1.0f, 1.0f);
-	_corners[4] = invMVP * vec4( 1.0f, -1.0f, -1.0f, 1.0f);
-	_corners[5] = invMVP * vec4( 1.0f, -1.0f,  1.0f, 1.0f);
-	_corners[6] = invMVP * vec4( 1.0f,  1.0f, -1.0f, 1.0f);
-	_corners[7] = invMVP * vec4( 1.0f,  1.0f,  1.0f, 1.0f);
-}
-
-bool Frustum::containsSphere(const Sphere& sphere) const
-{
-	for (uint32_t p = FrustumPlane_Right; p < FrustumPlane_max; ++p)
-	{
-		if (_planes[p].dot(vec4(sphere.center(), 1.0f)) + sphere.radius() <= 0.0f)
-			return false;
-	}
-
-	return true;
+	vec3 c000 = invVP * vec3(-1.0f, -1.0f, -1.0f);
+	vec3 c100 = invVP * vec3( 1.0f, -1.0f, -1.0f);
+	vec3 c010 = invVP * vec3(-1.0f,  1.0f, -1.0f);
+	vec3 c110 = invVP * vec3( 1.0f,  1.0f, -1.0f);	
+	vec3 c001 = invVP * vec3(-1.0f, -1.0f,  1.0f);
+	vec3 c101 = invVP * vec3( 1.0f, -1.0f,  1.0f);
+	vec3 c011 = invVP * vec3(-1.0f,  1.0f,  1.0f);
+	vec3 c111 = invVP * vec3( 1.0f,  1.0f,  1.0f);
+	planes[0] = plane(triangle(c000, c010, c100));
+	planes[1] = plane(triangle(c001, c101, c011));
+	planes[2] = plane(triangle(c000, c100, c001));
+	planes[3] = plane(triangle(c010, c011, c110));
+	planes[4] = plane(triangle(c000, c001, c010));
+	planes[5] = plane(triangle(c100, c110, c101));
 }
 
 bool Frustum::containsBoundingBox(const BoundingBox& aabb) const
 {
 	BoundingBox::Corners corners;
 	aabb.calculateCorners(corners);
-	
-	for (const vec4& frustumPlane : _planes)
+
+	for (const plane& frustumPlane : planes)
 	{
 		uint32_t outCorners = 0;
 		for (const vec3& corner : corners)
-			outCorners += uint32_t(dot(frustumPlane.xyz(), corner) >= frustumPlane.w);
-		
+		{
+			if (dot(frustumPlane.equation.xyz(), corner) > frustumPlane.equation.w)
+				++outCorners;
+		}
 		if (outCorners == corners.size())
 			return false;
 	}
-	
+
 	// TODO : check behind
 	// http://iquilezles.org/www/articles/frustumcorrect/frustumcorrect.htm
-	
+
 	return true;
+}
+
 }
