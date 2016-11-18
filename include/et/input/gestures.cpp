@@ -9,7 +9,8 @@
 #include <et/app/application.h>
 #include <et/input/gestures.h>
 
-using namespace et;
+namespace et
+{
 
 const float GesturesRecognizer::defaultClickTemporalThreshold = 0.25f;
 const float GesturesRecognizer::defaultClickSpatialTreshold = std::sqrt(50.0f);
@@ -22,24 +23,24 @@ GesturesRecognizer::GesturesRecognizer(bool automaticMode) :
 
 void GesturesRecognizer::handlePointersMovement()
 {
-    if (_pointers.size() == 2)
-    {
-        vec2 currentPositions[2];
-        vec2 previousPositions[2];
-		
-        size_t index = 0;
+	if (_pointers.size() == 2)
+	{
+		vec2 currentPositions[2];
+		vec2 previousPositions[2];
+
+		size_t index = 0;
 		for (auto& i : _pointers)
-        {
-            currentPositions[index] = i.second.current.normalizedPos;
-            previousPositions[index] = i.second.previous.normalizedPos;
+		{
+			currentPositions[index] = i.second.current.normalizedPos;
+			previousPositions[index] = i.second.previous.normalizedPos;
 			i.second.moved = false;
 			++index;
-        }
-		
+		}
+
 		vec2 dir0 = currentPositions[0] - previousPositions[0];
 		vec2 dir1 = currentPositions[1] - previousPositions[1];
 		vec2 center = 0.5f * (previousPositions[0] + previousPositions[1]);
-		
+
 		RecognizedGesture gesture = _gesture;
 		if (gesture == RecognizedGesture_NoGesture)
 		{
@@ -71,44 +72,44 @@ void GesturesRecognizer::handlePointersMovement()
 				gesture = RecognizedGesture_Swipe;
 			}
 		}
-		
+
 		switch (gesture)
 		{
-			case RecognizedGesture_Zoom:
-			{
-				float zoomValue = (currentPositions[0] - currentPositions[1]).length() /
-					(previousPositions[0] - previousPositions[1]).length();
-				
-				zoomAroundPoint.invoke(zoomValue, center);
-				zoom.invoke(zoomValue);
-				break;
-			}
-				
-			case RecognizedGesture_Rotate:
-			{
-				vec2 centerToCurrent0 = currentPositions[0] - center;
-				vec2 centerToCurrent1 = currentPositions[1] - center;
-				float angle0 = std::atan2(dir0.length(), centerToCurrent0.length());
-				float angle1 = std::atan2(dir1.length(), centerToCurrent1.length());
-				float angleValue = (outerProduct(centerToCurrent0, dir0) < 0.0f ? 0.5f : -0.5f) * (angle0 + angle1);
-				rotate.invoke(angleValue);
-				break;
-			}
-				
-			case RecognizedGesture_Swipe:
-			{
-				swipe.invoke(0.5f * (dir0 + dir1), 2);
-				break;
-			}
+		case RecognizedGesture_Zoom:
+		{
+			float zoomValue = (currentPositions[0] - currentPositions[1]).length() /
+				(previousPositions[0] - previousPositions[1]).length();
 
-			default:
-				break;
+			zoomAroundPoint.invoke(zoomValue, center);
+			zoom.invoke(zoomValue);
+			break;
 		}
-		
+
+		case RecognizedGesture_Rotate:
+		{
+			vec2 centerToCurrent0 = currentPositions[0] - center;
+			vec2 centerToCurrent1 = currentPositions[1] - center;
+			float angle0 = std::atan2(dir0.length(), centerToCurrent0.length());
+			float angle1 = std::atan2(dir1.length(), centerToCurrent1.length());
+			float angleValue = (outerProduct(centerToCurrent0, dir0) < 0.0f ? 0.5f : -0.5f) * (angle0 + angle1);
+			rotate.invoke(angleValue);
+			break;
+		}
+
+		case RecognizedGesture_Swipe:
+		{
+			swipe.invoke(0.5f * (dir0 + dir1), 2);
+			break;
+		}
+
+		default:
+			break;
+		}
+
 		if (_lockGestures)
 			_gesture = gesture;
 
-    }
+	}
 }
 
 void GesturesRecognizer::cancelWaitingForClicks()
@@ -128,14 +129,14 @@ void GesturesRecognizer::update(float t)
 	}
 }
 
-void GesturesRecognizer::onPointerPressed(et::PointerInputInfo pi)
+void GesturesRecognizer::onPointerPressed(PointerInputInfo pi)
 {
 	pointerPressed.invoke(pi);
 
 	_pointers[pi.id] = PointersInputDelta(pi, pi);
-	
+
 	pressed.invoke(pi.normalizedPos, pi.type);
-	
+
 	if (_pointers.size() == 1)
 	{
 		if (_shouldPerformClick)
@@ -148,7 +149,7 @@ void GesturesRecognizer::onPointerPressed(et::PointerInputInfo pi)
 			else
 			{
 				click.invoke(_singlePointer);
-				
+
 				_singlePointer = pi;
 				_shouldPerformClick = true;
 				_shouldPerformDoubleClick = false;
@@ -159,7 +160,7 @@ void GesturesRecognizer::onPointerPressed(et::PointerInputInfo pi)
 			_shouldPerformClick = true;
 			_singlePointer = pi;
 		}
-		
+
 		_singlePointer.id = pi.id;
 	}
 	else
@@ -169,23 +170,23 @@ void GesturesRecognizer::onPointerPressed(et::PointerInputInfo pi)
 	}
 }
 
-void GesturesRecognizer::onPointerMoved(et::PointerInputInfo pi)
+void GesturesRecognizer::onPointerMoved(PointerInputInfo pi)
 {
 	pointerMoved.invoke(pi);
-	
+
 	if ((pi.id == 0) || (_pointers.count(pi.id) == 0)) return;
 
 	if (_pointers.size() == 1)
 	{
 		bool hasPressedPointer = (_singlePointer.id != 0);
 		bool shouldPerformMovement = !hasPressedPointer;
-		
+
 		if (hasPressedPointer && (pi.id == _singlePointer.id))
 		{
 			float len = (pi.pos - _singlePointer.pos).dotSelf();
 			shouldPerformMovement = (len >= sqr(_clickSpatialThreshold));
 		}
-		
+
 		if (shouldPerformMovement)
 		{
 			if (hasPressedPointer)
@@ -193,19 +194,19 @@ void GesturesRecognizer::onPointerMoved(et::PointerInputInfo pi)
 				cancelWaitingForClicks();
 				clickCancelled.invoke();
 			}
-			
+
 			_pointers[pi.id].moved = true;
 			_pointers[pi.id].previous = _pointers[pi.id].current;
 			_pointers[pi.id].current = pi;
-			
+
 			const PointerInputInfo& pPrev = _pointers[pi.id].previous;
-			const PointerInputInfo& pCurr = _pointers[pi.id].current; 
+			const PointerInputInfo& pCurr = _pointers[pi.id].current;
 
 			vec2 offset = pCurr.normalizedPos - pPrev.normalizedPos;
 			vec2 speed = offset / std::max(0.01f, pCurr.timestamp - pPrev.timestamp);
-			
+
 			moved.invoke(pi.normalizedPos, pi.type);
-			
+
 			DragGesture info;
 			info.delta = offset;
 			info.velocity = speed;
@@ -216,11 +217,11 @@ void GesturesRecognizer::onPointerMoved(et::PointerInputInfo pi)
 	else
 	{
 		cancelWaitingForClicks();
-		
+
 		_pointers[pi.id].moved = true;
 		_pointers[pi.id].previous = _pointers[pi.id].current;
 		_pointers[pi.id].current = pi;
-		
+
 		bool allMoved = true;
 		for (auto& p : _pointers)
 		{
@@ -230,21 +231,21 @@ void GesturesRecognizer::onPointerMoved(et::PointerInputInfo pi)
 				break;
 			}
 		};
-		
+
 		if (allMoved)
 			handlePointersMovement();
 	}
 }
 
-void GesturesRecognizer::onPointerReleased(et::PointerInputInfo pi)
+void GesturesRecognizer::onPointerReleased(PointerInputInfo pi)
 {
 	pointerReleased.invoke(pi);
 
 	_gesture = RecognizedGesture_NoGesture;
 	_pointers.erase(pi.id);
-	
+
 	released.invoke(pi.normalizedPos, pi.type);
-	
+
 	if (pi.id == _singlePointer.id)
 	{
 		if ((pi.normalizedPos - _singlePointer.normalizedPos).dotSelf() > sqr(_clickSpatialThreshold))
@@ -272,18 +273,18 @@ void GesturesRecognizer::onPointerReleased(et::PointerInputInfo pi)
 	}
 }
 
-void GesturesRecognizer::onPointerCancelled(et::PointerInputInfo pi)
+void GesturesRecognizer::onPointerCancelled(PointerInputInfo pi)
 {
 	pointerCancelled.invoke(pi);
-	
+
 	_pointers.erase(pi.id);
 	cancelled.invoke(pi.normalizedPos, pi.type);
-	
+
 	if (pi.id == _singlePointer.id)
 		cancelWaitingForClicks();
 }
 
-void GesturesRecognizer::onPointerScrolled(et::PointerInputInfo i)
+void GesturesRecognizer::onPointerScrolled(PointerInputInfo i)
 {
 	pointerScrolled.invoke(i);
 	scroll.invoke(i.scroll, i.origin);
@@ -300,7 +301,7 @@ void GesturesRecognizer::onGesturePerformed(GestureInputInfo i)
 		info.delta = i.swipe;
 		drag.invoke(info);
 	}
-	
+
 	if (i.mask & GestureTypeMask_Rotate)
 		rotate.invokeInMainRunLoop(i.rotation);
 }
@@ -308,7 +309,7 @@ void GesturesRecognizer::onGesturePerformed(GestureInputInfo i)
 void GesturesRecognizer::setRecognizedGestures(size_t values)
 {
 	_recognizedGestures = values;
-	
+
 	if ((values & _gesture) == 0)
 		_gesture = RecognizedGesture_NoGesture;
 }
@@ -317,4 +318,6 @@ void GesturesRecognizer::cancelRecognition()
 {
 	_gesture = RecognizedGesture_NoGesture;
 	cancelWaitingForClicks();
+}
+
 }

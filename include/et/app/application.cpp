@@ -20,11 +20,9 @@ Application::Application()
 
 	_lastQueuedTimeMSec = queryContiniousTimeInMilliSeconds();
 	
-	threading::setMainThreadIdentifier(threading::currentThread());
-
-	delegate()->setApplicationParameters(_parameters);
-
 	platformInit();
+	threading::setMainThreadIdentifier(threading::currentThread());
+	delegate()->setApplicationParameters(_parameters);
 	platformActivate();
 	
 	_backgroundThread.run();

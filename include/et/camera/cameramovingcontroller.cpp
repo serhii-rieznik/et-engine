@@ -7,7 +7,8 @@
 
 #include <et/camera/cameramovingcontroller.h>
 
-using namespace et;
+namespace et
+{
 
 CameraMovingController::CameraMovingController(Camera::Pointer cam, bool connectInput) :
 	CameraController(cam, connectInput), _gestures(false)
@@ -22,7 +23,7 @@ CameraMovingController::CameraMovingController(Camera::Pointer cam, bool connect
 
 	_gestures.drag.connect([this](const GesturesRecognizer::DragGesture& drag)
 	{
-		if (pointerEventsEnabled() && (drag.pointerType == PointerType_General))
+		if (pointerEventsEnabled() && (drag.pointerType == PointerTypeMask::General))
 		{
 			vec2 delta = _directionAnimator.targetValue() + vec2(drag.delta.x, -drag.delta.y);
 			validateCameraAngles(delta);
@@ -45,12 +46,12 @@ void CameraMovingController::cancelUpdates()
 	_directionAnimator.cancelUpdates();
 }
 
-void CameraMovingController::onKeyPressed(size_t key)
+void CameraMovingController::onKeyPressed(uint32_t key)
 {
 	_pressedKeys[key] = 1;
 }
 
-void CameraMovingController::onKeyReleased(size_t key)
+void CameraMovingController::onKeyReleased(uint32_t key)
 {
 	_pressedKeys[key] = 0;
 }
@@ -125,4 +126,6 @@ void CameraMovingController::synchronize(const Camera::Pointer)
 	_directionAnimator.setTargetValue(angles);
 	_positionAnimator.setValue(camera()->position());
 	_positionAnimator.setTargetValue(camera()->position());
+}
+
 }

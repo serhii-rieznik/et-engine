@@ -31,7 +31,7 @@ namespace et
 		{
 			vec2 delta = vec2(0.0f);
 			vec2 velocity = vec2(0.0f);
-			PointerType pointerType = PointerType_None;
+			PointerType pointerType = 0;
 		};
 		
 	public:

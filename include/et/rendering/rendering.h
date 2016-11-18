@@ -131,7 +131,6 @@ enum class BlendConfiguration : uint32_t
 
 enum ColorMask : uint32_t
 {
-	None = 0x00,
 	Red = 0x01,
 	Green = 0x02,
 	Blue = 0x04,

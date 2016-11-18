@@ -14,7 +14,7 @@
 #include <et/rendering/base/helpers.h>
 
 #include <et/app/application.h>
-#include <Windows.h>
+#include <windowsx.h>
 
 namespace et
 {
@@ -22,8 +22,17 @@ namespace et
 class RenderContextPrivate
 {
 public:
-    LRESULT mainWindowProc(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam);
-};
+	Input::PointerInputSource pointerInput;
+	Input::KeyboardInputSource keyboardInput;
+	LRESULT mainWindowProc(HWND wnd, UINT msg, WPARAM wParam, LPARAM lParam);
+	PointerInputInfo mouseInputInfo(uint32_t, uint32_t, uint32_t mask);
+	void captureMouse();
+	void releaseMouse();
+
+	HWND mainWindow = nullptr;
+	RECT clientRect { };
+	uint32_t mouseCaptureCounter = 0;
+}; 
 
 RenderContext::RenderContext(const RenderContextParameters& inParams, Application* app) : 
 	_params(inParams)
@@ -37,8 +46,8 @@ RenderContext::RenderContext(const RenderContextParameters& inParams, Applicatio
 
 	application().initContext();
 
-    HWND mainWindow = reinterpret_cast<HWND>(application().context().objects[0]);
-    SetWindowLongPtr(mainWindow, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(_private));
+    _private->mainWindow = reinterpret_cast<HWND>(application().context().objects[0]);
+    SetWindowLongPtr(_private->mainWindow, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(_private));
 
 	if (app->parameters().renderingAPI == RenderingAPI::Vulkan)
 	{
@@ -54,14 +63,13 @@ RenderContext::RenderContext(const RenderContextParameters& inParams, Applicatio
 	}
 	_renderer->init(inParams);
 
-    RECT clientRect = { };
-	GetClientRect(mainWindow, &clientRect);
-	_size.x = clientRect.right - clientRect.left;
-	_size.y = clientRect.bottom - clientRect.top;
+	GetClientRect(_private->mainWindow, &_private->clientRect);
+	_size.x = _private->clientRect.right - _private->clientRect.left;
+	_size.y = _private->clientRect.bottom - _private->clientRect.top;
 
-	ShowWindow(mainWindow, SW_SHOW);
-	SetForegroundWindow(mainWindow);
-	SetFocus(mainWindow);
+	ShowWindow(_private->mainWindow, SW_SHOW);
+	SetForegroundWindow(_private->mainWindow);
+	SetFocus(_private->mainWindow);
 
 	if (app->parameters().shouldPreserveRenderContext)
 	{
@@ -154,9 +162,148 @@ LRESULT RenderContextPrivate::mainWindowProc(HWND wnd, UINT msg, WPARAM wParam, 
             application().quit(0);
             return 0;
         }
+
+		/*
+		 * Keyboard messages
+		 */
+		case WM_KEYDOWN:
+		{
+			keyboardInput.keyPressed(static_cast<uint32_t>(wParam));
+			return 0;
+		}
+		case WM_KEYUP:
+		{
+			keyboardInput.keyReleased(static_cast<uint32_t>(wParam));
+			return 0;
+		}
+		case WM_UNICHAR:
+		{
+			if (wParam >= ET_SPACE)
+			{
+				wchar_t wChars[2] = { static_cast<wchar_t>(wParam), 0 };
+				keyboardInput.charactersEntered(unicodeToUtf8(wChars));
+
+			}
+			return 0;
+		}
+		case WM_CHAR:
+		{
+			if (wParam >= ET_SPACE)
+			{
+				wchar_t wChars[2] = { static_cast<wchar_t>(wParam), 0 };
+				keyboardInput.charactersEntered(unicodeToUtf8(wChars));
+			}
+			return 0;
+
+		}
+		/*
+		 * Mouse messages
+		 */
+		case WM_LBUTTONDOWN:
+		{
+			pointerInput.pointerPressed(mouseInputInfo(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), PointerTypeMask::General));
+			return 0;
+		}
+		case WM_LBUTTONUP:
+		{
+			pointerInput.pointerPressed(mouseInputInfo(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), PointerTypeMask::General));
+			return 0;
+		}
+		case WM_RBUTTONDOWN:
+		{
+			pointerInput.pointerPressed(mouseInputInfo(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), PointerTypeMask::RightButton));
+			return 0;
+		}
+		case WM_RBUTTONUP:
+		{
+			pointerInput.pointerPressed(mouseInputInfo(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), PointerTypeMask::RightButton));
+			return 0;
+		}
+		case WM_MBUTTONDOWN:
+		{
+			pointerInput.pointerPressed(mouseInputInfo(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), PointerTypeMask::MiddleButton));
+			return 0;
+		}
+		case WM_MBUTTONUP:
+		{
+			pointerInput.pointerPressed(mouseInputInfo(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), PointerTypeMask::MiddleButton));
+			return 0;
+		}
+		case WM_MOUSEMOVE:
+		{
+			uint32_t mask = 0;
+			mask |= (wParam & MK_LBUTTON) ? PointerTypeMask::General : 0;
+			mask |= (wParam & MK_RBUTTON) ? PointerTypeMask::RightButton : 0;
+			mask |= (wParam & MK_MBUTTON) ? PointerTypeMask::MiddleButton : 0;
+			pointerInput.pointerMoved(mouseInputInfo(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), mask));
+			return 0;
+		}
+		case WM_MOUSEWHEEL:
+		{
+			uint32_t mask = 0;
+			mask |= (wParam & MK_LBUTTON) ? PointerTypeMask::General : 0;
+			mask |= (wParam & MK_RBUTTON) ? PointerTypeMask::RightButton : 0;
+			mask |= (wParam & MK_MBUTTON) ? PointerTypeMask::MiddleButton : 0;
+
+			POINT pt = { GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) };
+			ScreenToClient(mainWindow, &pt);
+
+			PointerInputInfo inputInfo = mouseInputInfo(pt.x, pt.y, mask);
+			inputInfo.scroll = vec2(0.0f, static_cast<float>(GET_WHEEL_DELTA_WPARAM(wParam)) / static_cast<float>(WHEEL_DELTA));
+			pointerInput.pointerScrolled(inputInfo);
+			return 0;
+		}
+
+		/*
+		 * Application messages
+		 */
+		case WM_ACTIVATE:
+		{
+			application().setActive(wParam != WA_INACTIVE);
+			return 0;
+		}
+		case WM_SIZE:
+		{
+			application().resizeContext(vec2i(LOWORD(lParam), HIWORD(lParam)));
+			return 0;
+		}
+		
+		default:
+			break;
     }
     return DefWindowProc(wnd, msg, wParam, lParam);
 }
+
+PointerInputInfo RenderContextPrivate::mouseInputInfo(uint32_t x, uint32_t y, uint32_t mask)
+{
+	PointerInputInfo info;
+	info.id = 1;
+	info.type = mask;
+	info.origin = PointerOrigin::Mouse;
+	info.pos.x = static_cast<float>(x);
+	info.pos.y = static_cast<float>(y);
+	info.normalizedPos.x = 2.0f * info.pos.x / static_cast<float>(clientRect.right - clientRect.left) - 1.0f;
+	info.normalizedPos.y = 1.0f - 2.0f * info.pos.y / static_cast<float>(clientRect.bottom - clientRect.top);
+	info.timestamp = queryContiniousTimeInSeconds();
+	return info;
+}
+
+void RenderContextPrivate::captureMouse()
+{
+	++mouseCaptureCounter;
+	SetCapture(mainWindow);
+}
+
+void RenderContextPrivate::releaseMouse()
+{
+	ET_ASSERT(mouseCaptureCounter > 0);
+	--mouseCaptureCounter;
+	if (mouseCaptureCounter == 0)
+	{
+		ReleaseCapture();
+	}
+}
+
 
 /*
 * Windows procedure

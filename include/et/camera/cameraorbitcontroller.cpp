@@ -7,7 +7,8 @@
 
 #include <et/camera/cameraorbitcontroller.h>
 
-using namespace et;
+namespace et
+{
 
 CameraOrbitController::CameraOrbitController(Camera::Pointer cam, bool connectInput) :
 	CameraController(cam, connectInput), _gestures(false)
@@ -21,7 +22,7 @@ CameraOrbitController::CameraOrbitController(Camera::Pointer cam, bool connectIn
 
 	_gestures.drag.connect([this](const GesturesRecognizer::DragGesture& drag)
 	{
-		if (drag.pointerType == PointerType_General)
+		if (drag.pointerType == PointerTypeMask::General)
 		{
 			vec3 currentValue = _anglesDistanceAnimator.targetValue();
 			vec2 delta(currentValue.x + drag.delta.x, currentValue.y - drag.delta.y);
@@ -39,7 +40,7 @@ CameraOrbitController::CameraOrbitController(Camera::Pointer cam, bool connectIn
 	
 	_gestures.scroll.connect([this](vec2 value, PointerOrigin origin)
 	{
-		if (origin == PointerOrigin_Mouse)
+		if (origin == PointerOrigin::Mouse)
 		{
 			vec3 newValue = _anglesDistanceAnimator.targetValue() + vec3(0.0f, 0.0f, value.y);
 			_anglesDistanceAnimator.setTargetValue(newValue);
@@ -61,12 +62,12 @@ void CameraOrbitController::cancelUpdates()
 	_targetPoint.cancelInterpolation();
 }
 
-void CameraOrbitController::onKeyPressed(size_t key)
+void CameraOrbitController::onKeyPressed(uint32_t key)
 {
 	_pressedKeys[key] = 1;
 }
 
-void CameraOrbitController::onKeyReleased(size_t key)
+void CameraOrbitController::onKeyReleased(uint32_t key)
 {
 	_pressedKeys[key] = 0;
 }
@@ -153,4 +154,6 @@ void CameraOrbitController::synchronize(const Camera::Pointer cam)
 {
 	_anglesDistanceAnimator.setTargetValue(toSpherical(cam->position() - _targetPoint.targetValue()));
 	_anglesDistanceAnimator.finishInterpolation();
+}
+
 }

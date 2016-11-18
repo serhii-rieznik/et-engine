@@ -8,9 +8,10 @@
 
 #include <et/input/input.h>
 
-using namespace et;
+namespace et
+{
 
-Input& et::input()
+Input& input()
 {
     return Input::instance();
 }
@@ -21,20 +22,20 @@ Input::Input()
 
 void Input::pushKeyboardInputAction(const std::string& chars, InputAction action)
 {
-	ET_ASSERT(action == InputAction_Characters);
+	ET_ASSERT(action == InputAction::Characters);
 	(void)action;
 	
 	charactersEntered.invokeInMainRunLoop(chars);
 }
 
-void Input::pushKeyboardInputAction(size_t key, InputAction action)
+void Input::pushKeyboardInputAction(uint32_t key, InputAction action)
 {
-	if (action == InputAction_KeyDown)
+	if (action == InputAction::KeyDown)
 	{
 		_pressedKeys[key] = 1;
 		keyPressed.invokeInMainRunLoop(key);
 	} 
-	else if (action == InputAction_KeyUp)
+	else if (action == InputAction::KeyUp)
 	{
 		_pressedKeys.erase(key);
 		keyReleased.invokeInMainRunLoop(key);
@@ -49,35 +50,35 @@ void Input::pushPointerInputAction(const PointerInputInfo& info, InputAction act
 {
 	switch (action)
 	{
-        case InputAction_PointerPressed:
+        case InputAction::PointerPressed:
 		{
 			addPointerInfo(info);
 			pointerPressed.invokeInMainRunLoop(info);
 			break;
 		}
             
-        case InputAction_PointerMoved:
+        case InputAction::PointerMoved:
 		{
 			pointerMoved.invokeInMainRunLoop(info);
 			updatePointerInfo(info);
 			break;
 		}
             
-        case InputAction_PointerReleased:
+        case InputAction::PointerReleased:
 		{
 			pointerReleased.invokeInMainRunLoop(info);
 			removePointerInfo(info);
 			break;
 		}
             
-        case InputAction_PointerCancelled:
+        case InputAction::PointerCancelled:
 		{
 			pointerCancelled.invokeInMainRunLoop(info);
 			removePointerInfo(info);
 			break;
 		}
             
-        case InputAction_PointerScrolled:
+        case InputAction::PointerScrolled:
 		{
 			pointerScrolled.invokeInMainRunLoop(info);
 			break;
@@ -127,7 +128,7 @@ void Input::removePointerInfo(const PointerInputInfo& info)
 	}
 }
 
-void Input::pushGestureInputAction(const et::GestureInputInfo& g)
+void Input::pushGestureInputAction(const GestureInputInfo& g)
 {
 	gesturePerformed.invokeInMainRunLoop(g);
 }
@@ -169,4 +170,6 @@ void InputHandler::connectInputEvents()
 	ET_CONNECT_EVENT(input().pointerScrolled, InputHandler::onPointerScrolled)
 	
 	ET_CONNECT_EVENT(input().gesturePerformed, InputHandler::onGesturePerformed)
+}
+
 }

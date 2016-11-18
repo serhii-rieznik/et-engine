@@ -14,131 +14,130 @@
 namespace et
 {
 
-	enum InputAction
+enum class InputAction : uint32_t
+{
+	KeyDown,
+	KeyUp,
+	Characters,
+	PointerPressed,
+	PointerMoved,
+	PointerReleased,
+	PointerCancelled,
+	PointerScrolled
+};
+
+enum PointerTypeMask : uint32_t
+{
+	General = 0x01,
+	RightButton = 0x02,
+	MiddleButton = 0x04,
+};
+
+enum class PointerOrigin : uint32_t
+{
+	Mouse,
+	Trackpad,
+	Touchscreen,
+	Any
+};
+
+using PointerType = uint32_t;
+
+struct PointerInputInfo
+{
+	uint32_t id = 0;
+	float timestamp = 0.0f;
+	vec2 pos = vec2(0.0f);
+	vec2 normalizedPos = vec2(0.0f);
+	vec2 scroll = vec2(0.0f);
+	PointerType type = 0;
+	PointerOrigin origin = PointerOrigin::Any;
+	char tag = 0;
+
+	PointerInputInfo() = default;
+
+	PointerInputInfo(const PointerInputInfo& p) :
+		id(p.id), timestamp(p.timestamp), pos(p.pos), normalizedPos(p.normalizedPos), scroll(p.scroll),
+		type(p.type), origin(p.origin), tag(p.tag) { }
+
+	PointerInputInfo(PointerInputInfo&& r) : id(r.id), timestamp(r.timestamp), pos(r.pos),
+		normalizedPos(r.normalizedPos), scroll(r.scroll), type(r.type), origin(r.origin), tag(r.tag) { }
+
+	PointerInputInfo(PointerType t, const vec2& p, const vec2& np, const vec2& aScroll,
+		uint32_t aId, float time, PointerOrigin o) : id(aId), timestamp(time), pos(p), normalizedPos(np),
+		scroll(aScroll), type(t), origin(o), tag(0) { }
+
+	PointerInputInfo& operator = (const PointerInputInfo& p)
 	{
-		InputAction_KeyDown,
-		InputAction_KeyUp,
-		InputAction_Characters,
-		InputAction_PointerPressed,
-		InputAction_PointerMoved,
-		InputAction_PointerReleased,
-        InputAction_PointerCancelled,
-		InputAction_PointerScrolled
-	};
+		id = p.id;
+		timestamp = p.timestamp;
+		pos = p.pos;
+		normalizedPos = p.normalizedPos;
+		scroll = p.scroll;
+		type = p.type;
+		origin = p.origin;
+		tag = p.tag;
+		return *this;
+	}
+};
 
-	enum PointerTypeMask
+enum GestureTypeMask
+{
+	GestureTypeMask_Zoom = 0x01,
+	GestureTypeMask_Rotate = 0x02,
+	GestureTypeMask_Swipe = 0x04,
+	GestureTypeMask_Shake = 0x08
+};
+
+struct GestureInputInfo
+{
+	vec2 swipe = vec2(0.0f);
+	float zoom = 0.0f;
+	float rotation = 0.0f;
+	uint32_t mask = 0;
+
+	GestureInputInfo() = default;
+
+	GestureInputInfo(uint32_t m) :
+		mask(m) { }
+
+	GestureInputInfo(uint32_t m, float v) : mask(m)
 	{
-		PointerType_None = 0x00,
-		PointerType_General = 0x01,
-		PointerType_RightButton = 0x02,
-		PointerType_MiddleButton = 0x04,
-	};
+		if (m & GestureTypeMask_Zoom)
+			zoom = v;
+		else if (m & GestureTypeMask_Rotate)
+			rotation = v;
+	}
 
-	enum PointerOrigin
+	GestureInputInfo(uint32_t m, float x, float y) :
+		swipe(x, y), mask(m) { }
+};
+
+class Input : public Singleton<Input>
+{
+public:
+	static bool canGetCurrentPointerInfo();
+	static PointerInputInfo currentPointer();
+
+public:
+	class KeyboardInputSource;
+	class PointerInputSource;
+	class GestureInputSource;
+
+	bool isKeyPressed(uint32_t key) const
 	{
-		PointerOrigin_Mouse,
-		PointerOrigin_Trackpad,
-		PointerOrigin_Touchscreen,
-		PointerOrigin_Any
-	};
+		return _pressedKeys.count(key) > 0;
+	}
 
-	typedef size_t PointerType;
+	bool isPointerPressed(PointerType type) const;
 
-	struct PointerInputInfo
-	{
-		size_t id = 0;
-		float timestamp = 0.0f;
-		vec2 pos = vec2(0.0f);
-		vec2 normalizedPos = vec2(0.0f);
-		vec2 scroll = vec2(0.0f);
-		PointerType type = PointerType_None;
-		PointerOrigin origin = PointerOrigin_Any;
-		char tag = 0;
+	void activateSoftwareKeyboard();
+	void deactivateSoftwareKeyboard();
 
-		PointerInputInfo() :
-			id(0), timestamp(0), scroll(0), type(PointerType_None), origin(PointerOrigin_Any), tag(0) { }
-		
-		PointerInputInfo(const PointerInputInfo& p) :
-			id(p.id), timestamp(p.timestamp), pos(p.pos), normalizedPos(p.normalizedPos), scroll(p.scroll), 
-			type(p.type), origin(p.origin), tag(p.tag) { }
-
-		PointerInputInfo(PointerInputInfo&& r) : id(r.id), timestamp(r.timestamp), pos(r.pos),
-			normalizedPos(r.normalizedPos), scroll(r.scroll), type(r.type), origin(r.origin), tag(r.tag) { }
-		
-		PointerInputInfo(PointerType t, const vec2& p, const vec2& np, const vec2& aScroll,
-			size_t aId, float time, PointerOrigin o) : id(aId), timestamp(time), pos(p), normalizedPos(np),
-			scroll(aScroll), type(t), origin(o), tag(0) { }
-
-		PointerInputInfo& operator = (const PointerInputInfo& p)
-		{
-			id = p.id;
-			timestamp = p.timestamp;
-			pos = p.pos;
-			normalizedPos = p.normalizedPos;
-			scroll = p.scroll;
-			type = p.type;
-			origin = p.origin;
-			tag = p.tag;
-			return *this;
-		}
-	};
-
-	enum GestureTypeMask
-	{
-		GestureTypeMask_Zoom = 0x01,
-		GestureTypeMask_Rotate = 0x02,
-		GestureTypeMask_Swipe = 0x04,
-		GestureTypeMask_Shake = 0x08
-	};
-
-	struct GestureInputInfo
-	{
-		vec2 swipe = vec2(0.0f);
-		float zoom = 0.0f;
-		float rotation = 0.0f;
-		size_t mask = 0;
-
-		GestureInputInfo() 
-			{ }
-
-		GestureInputInfo(size_t m) : 
-			mask(m) { }
-
-		GestureInputInfo(size_t m, float v) : mask(m)
-		{
-			if (m & GestureTypeMask_Zoom)
-				zoom = v;
-			else if (m & GestureTypeMask_Rotate)
-				rotation = v;
-		}
-
-		GestureInputInfo(size_t m, float x, float y) :
-			swipe(x, y), mask(m) { }
-	};
-
-	class Input : public Singleton<Input>
-	{
-	public:
-		static bool canGetCurrentPointerInfo();
-		static PointerInputInfo currentPointer();
-		
-	public:
-		class KeyboardInputSource;
-		class PointerInputSource;
-		class GestureInputSource;
-
-		bool isKeyPressed(size_t key) const
-			{ return _pressedKeys.count(key) > 0; }
-				
-		bool isPointerPressed(PointerType type) const;
-
-		void activateSoftwareKeyboard();
-		void deactivateSoftwareKeyboard();
-
-	public:
-		ET_DECLARE_EVENT1(keyPressed, size_t)  
+public:
+	ET_DECLARE_EVENT1(keyPressed, uint32_t)
 		ET_DECLARE_EVENT1(charactersEntered, std::string)
-		ET_DECLARE_EVENT1(keyReleased, size_t)  
+		ET_DECLARE_EVENT1(keyReleased, uint32_t)
 
 		ET_DECLARE_EVENT1(pointerPressed, PointerInputInfo)
 		ET_DECLARE_EVENT1(pointerMoved, PointerInputInfo)
@@ -148,92 +147,110 @@ namespace et
 
 		ET_DECLARE_EVENT1(gesturePerformed, GestureInputInfo)
 
-	private:
-		Input();
-		ET_SINGLETON_COPY_DENY(Input);
+private:
+	Input();
+	ET_SINGLETON_COPY_DENY(Input);
 
-		friend class KeyboardInputSource;
-		friend class PointerInputSource;
-		friend class GestureInputSource;
+	friend class KeyboardInputSource;
+	friend class PointerInputSource;
+	friend class GestureInputSource;
 
-		void pushKeyboardInputAction(size_t key, InputAction action);
-		void pushKeyboardInputAction(const std::string&, InputAction action);
-		
-		void pushPointerInputAction(const PointerInputInfo& info, InputAction action);
-		void pushGestureInputAction(const GestureInputInfo&);
+	void pushKeyboardInputAction(uint32_t key, InputAction action);
+	void pushKeyboardInputAction(const std::string&, InputAction action);
 
-		void addPointerInfo(const PointerInputInfo& info);
-		void updatePointerInfo(const PointerInputInfo& info);
-		void removePointerInfo(const PointerInputInfo& info);
+	void pushPointerInputAction(const PointerInputInfo& info, InputAction action);
+	void pushGestureInputAction(const GestureInputInfo&);
 
-	private:
-        using KeysMap = std::map<size_t, size_t>;
-        using PointerInputInfoList = Vector<PointerInputInfo>;
-		
-		KeysMap _pressedKeys;
-		PointerInputInfoList _pointers;
-	};
+	void addPointerInfo(const PointerInputInfo& info);
+	void updatePointerInfo(const PointerInputInfo& info);
+	void removePointerInfo(const PointerInputInfo& info);
 
-	class Input::KeyboardInputSource
+private:
+	using KeysMap = std::map<uint32_t, uint32_t>;
+	using PointerInputInfoList = Vector<PointerInputInfo>;
+
+	KeysMap _pressedKeys;
+	PointerInputInfoList _pointers;
+};
+
+class Input::KeyboardInputSource
+{
+public:
+	void keyPressed(uint32_t key)
 	{
-	public:
-		void keyPressed(size_t key)
-			{ Input::instance().pushKeyboardInputAction(key, InputAction_KeyDown); }
+		Input::instance().pushKeyboardInputAction(key, InputAction::KeyDown);
+	}
 
-		void charactersEntered(const std::string& chars)
-			{ Input::instance().pushKeyboardInputAction(chars, InputAction_Characters); }
-
-		void keyReleased(size_t key)
-			{ Input::instance().pushKeyboardInputAction(key, InputAction_KeyUp); }
-	};
-
-	class Input::PointerInputSource 
+	void charactersEntered(const std::string& chars)
 	{
-	public:
-		void pointerPressed(const PointerInputInfo& info)
-			{ Input::instance().pushPointerInputAction(info, InputAction_PointerPressed); }
+		Input::instance().pushKeyboardInputAction(chars, InputAction::Characters);
+	}
 
-		void pointerMoved(const PointerInputInfo& info)
-			{ Input::instance().pushPointerInputAction(info, InputAction_PointerMoved); }
-
-		void pointerReleased(const PointerInputInfo& info)
-			{ Input::instance().pushPointerInputAction(info, InputAction_PointerReleased); }
-
-		void pointerCancelled(const PointerInputInfo& info)
-            { Input::instance().pushPointerInputAction(info, InputAction_PointerCancelled); }
-        
-		void pointerScrolled(const PointerInputInfo& info)
-			{ Input::instance().pushPointerInputAction(info, InputAction_PointerScrolled); }
-	};
-
-	class Input::GestureInputSource
+	void keyReleased(uint32_t key)
 	{
-	public:
-		void gesturePerformed(const GestureInputInfo& info)
-			{ Input::instance().pushGestureInputAction(info); }
-	};
+		Input::instance().pushKeyboardInputAction(key, InputAction::KeyUp);
+	}
+};
 
-	class InputHandler : public EventReceiver
+class Input::PointerInputSource
+{
+public:
+	void pointerPressed(const PointerInputInfo& info)
 	{
-	protected:
-		InputHandler(bool connect = true);
-		virtual ~InputHandler();
+		Input::instance().pushPointerInputAction(info, InputAction::PointerPressed);
+	}
 
-		void connectInputEvents();
+	void pointerMoved(const PointerInputInfo& info)
+	{
+		Input::instance().pushPointerInputAction(info, InputAction::PointerMoved);
+	}
 
-	protected:
-		virtual void onPointerPressed(et::PointerInputInfo) { }
-		virtual void onPointerMoved(et::PointerInputInfo) { }
-		virtual void onPointerReleased(et::PointerInputInfo) { }
-		virtual void onPointerCancelled(et::PointerInputInfo) { }
-		virtual void onPointerScrolled(et::PointerInputInfo) { }
-		
-		virtual void onKeyPressed(size_t) { }
-		virtual void onCharactersEntered(std::string) { }
-		virtual void onKeyReleased(size_t) { }
+	void pointerReleased(const PointerInputInfo& info)
+	{
+		Input::instance().pushPointerInputAction(info, InputAction::PointerReleased);
+	}
 
-		virtual void onGesturePerformed(et::GestureInputInfo) { }
-	};
+	void pointerCancelled(const PointerInputInfo& info)
+	{
+		Input::instance().pushPointerInputAction(info, InputAction::PointerCancelled);
+	}
 
-    Input& input();
+	void pointerScrolled(const PointerInputInfo& info)
+	{
+		Input::instance().pushPointerInputAction(info, InputAction::PointerScrolled);
+	}
+};
+
+class Input::GestureInputSource
+{
+public:
+	void gesturePerformed(const GestureInputInfo& info)
+	{
+		Input::instance().pushGestureInputAction(info);
+	}
+};
+
+class InputHandler : public EventReceiver
+{
+protected:
+	InputHandler(bool connect = true);
+	virtual ~InputHandler();
+
+	void connectInputEvents();
+
+protected:
+	virtual void onPointerPressed(et::PointerInputInfo) {}
+	virtual void onPointerMoved(et::PointerInputInfo) {}
+	virtual void onPointerReleased(et::PointerInputInfo) {}
+	virtual void onPointerCancelled(et::PointerInputInfo) {}
+	virtual void onPointerScrolled(et::PointerInputInfo) {}
+
+	virtual void onKeyPressed(uint32_t) {}
+	virtual void onCharactersEntered(std::string) {}
+	virtual void onKeyReleased(uint32_t) {}
+
+	virtual void onGesturePerformed(et::GestureInputInfo) {}
+};
+
+Input& input();
 }

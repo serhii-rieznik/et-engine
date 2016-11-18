@@ -13,39 +13,39 @@
 
 namespace et
 {
-	class CameraMovingController : public CameraController
-	{
-	public:
-		ET_DECLARE_POINTER(CameraMovingController);
-		
-	public:
-		CameraMovingController(Camera::Pointer, bool autoConnectToEvents);
-		
-		void synchronize(const Camera::Pointer) override;
-		
-		void setMovementSpeed(const vec3&);
-		void setIntepolationRate(float);
+class CameraMovingController : public CameraController
+{
+public:
+	ET_DECLARE_POINTER(CameraMovingController);
 
-		void startUpdates() override;
-		void cancelUpdates() override;
-		
-	private:
-		void update(float) override;
-		
-		void onKeyPressed(size_t) override;
-		void onKeyReleased(size_t) override;
-		void onPointerPressed(PointerInputInfo) override;
-		void onPointerMoved(PointerInputInfo) override;
-		void onPointerReleased(PointerInputInfo) override;
-		void onPointerCancelled(PointerInputInfo) override;
-		
-		void validateCameraAngles(vec2&);
-		
-	private:
-		GesturesRecognizer _gestures;
-		std::map<size_t, int> _pressedKeys;
-		InterpolationValue<vec3> _positionAnimator;
-		InterpolationValue<vec2> _directionAnimator;
-		vec3 _movementSpeed = vec3(1.0f);
-	};
+public:
+	CameraMovingController(Camera::Pointer, bool autoConnectToEvents);
+
+	void synchronize(const Camera::Pointer) override;
+
+	void setMovementSpeed(const vec3&);
+	void setIntepolationRate(float);
+
+	void startUpdates() override;
+	void cancelUpdates() override;
+
+private:
+	void update(float) override;
+
+	void onKeyPressed(uint32_t) override;
+	void onKeyReleased(uint32_t) override;
+	void onPointerPressed(PointerInputInfo) override;
+	void onPointerMoved(PointerInputInfo) override;
+	void onPointerReleased(PointerInputInfo) override;
+	void onPointerCancelled(PointerInputInfo) override;
+
+	void validateCameraAngles(vec2&);
+
+private:
+	GesturesRecognizer _gestures;
+	std::map<uint32_t, int> _pressedKeys;
+	InterpolationValue<vec3> _positionAnimator;
+	InterpolationValue<vec2> _directionAnimator;
+	vec3 _movementSpeed = vec3(1.0f);
+};
 }

@@ -29,8 +29,7 @@ PointerInputInfo Input::currentPointer()
 	normPt.x = 2.0f * ptf.x / static_cast<float>(r.right) - 1.0f;
 	normPt.y = 1.0f - 2.0f * ptf.y / static_cast<float>(r.bottom);
 
-	return PointerInputInfo(PointerType_None, ptf, normPt, vec2(0.0f), 0,
-		mainRunLoop().time(), PointerOrigin_Mouse);
+	return PointerInputInfo(0, ptf, normPt, vec2(0.0f), 0, mainRunLoop().time(), PointerOrigin::Mouse);
 }
 
 bool Input::canGetCurrentPointerInfo()
