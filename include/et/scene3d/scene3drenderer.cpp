@@ -62,9 +62,9 @@ void s3d::Renderer::renderMeshList(RenderPass::Pointer pass, const s3d::BaseElem
 		for (auto& rb : mesh->renderBatches())
 		{
 			BoundingBox transformedBox = rb->boundingBox().transform(rb->transformation());
-			uint64_t key = rb->material()->sortingKey();
 			if (pass->info().camera->frustum().containsBoundingBox(transformedBox))
 			{
+				uint64_t key = rb->material()->sortingKey();
 				_latestBatches[key].emplace_back(rb, transformedBox);
 			}
 		}
