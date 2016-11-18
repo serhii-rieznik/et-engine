@@ -61,31 +61,37 @@ void s3d::Renderer::renderMeshList(RenderPass::Pointer pass, const s3d::BaseElem
 		mesh->prepareRenderBatches();
 		for (auto& rb : mesh->renderBatches())
 		{
+			BoundingBox transformedBox = rb->boundingBox().transform(rb->transformation());
 			uint64_t key = rb->material()->sortingKey();
-			_latestBatches[key].emplace_back(rb, mesh);
+			if (pass->info().camera->frustum().containsBoundingBox(transformedBox))
+			{
+				_latestBatches[key].emplace_back(rb, transformedBox);
+			}
 		}
 	}
 
-	auto cameraPosition = pass->info().camera->position();
+	vec3 cameraPosition = pass->info().camera->position();
 	for (auto& rbv : _latestBatches)
 	{
-		std::random_shuffle(rbv.second.begin(), rbv.second.end());
-
-		/*
 		std::sort(rbv.second.begin(), rbv.second.end(), [cameraPosition](BatchFromMesh& l, BatchFromMesh& r)
 		{
-			auto lip = l.first->transformation() * l.first->boundingBox().center;
-			auto rip = r.first->transformation() * r.first->boundingBox().center;
-			if (l.first->material()->blendState().enabled)
-				return (lip - cameraPosition).dotSelf() > (rip - cameraPosition).dotSelf();
-			else
-				return (lip - cameraPosition).dotSelf() < (rip - cameraPosition).dotSelf();
+			const BlendState& lbs = l.batch->material()->blendState();
+			const BlendState& rbs = r.batch->material()->blendState();
+			float delta = (l.transformedBox.center - cameraPosition).dotSelf() - (r.transformedBox.center - cameraPosition).dotSelf();
+			
+			if (lbs.enabled && rbs.enabled)
+				return delta >= 0.0f;
+			else if (lbs.enabled)
+				return true;
+			else if (rbs.enabled)
+				return false;
+			
+			return delta <= 0.0f;
 		});
-		// */
-		
+
 		for (auto& rb : rbv.second)
 		{
-			pass->pushRenderBatch(rb.first);
+			pass->pushRenderBatch(rb.batch);
 		}
 	}
 }

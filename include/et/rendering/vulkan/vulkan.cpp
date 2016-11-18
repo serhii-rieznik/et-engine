@@ -168,7 +168,7 @@ void VulkanSwapchain::create(VulkanState& vulkan)
 	extent = surfaceCaps.currentExtent;
 
 	// TODO : check if supported
-	VkPresentModeKHR presentMode = VK_PRESENT_MODE_FIFO_KHR;
+	VkPresentModeKHR presentMode = VK_PRESENT_MODE_MAILBOX_KHR;
 
 	uint32_t numImages = surfaceCaps.minImageCount + 1;
 	if ((surfaceCaps.maxImageCount > 0) && (numImages > surfaceCaps.maxImageCount))

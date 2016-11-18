@@ -52,13 +52,21 @@ bool Frustum::containsSphere(const Sphere& sphere) const
 
 bool Frustum::containsBoundingBox(const BoundingBox& aabb) const
 {
-	// TODO : use box's transform
+	BoundingBox::Corners corners;
+	aabb.calculateCorners(corners);
 	
-	for (const auto& frustumPlane : _planes)
+	for (const vec4& frustumPlane : _planes)
 	{
-		if (dot(aabb.center, frustumPlane.xyz()) + 2.0 * dot(aabb.halfDimension, absv(frustumPlane.xyz())) < -frustumPlane.w)
+		uint32_t outCorners = 0;
+		for (const vec3& corner : corners)
+			outCorners += uint32_t(dot(frustumPlane.xyz(), corner) >= frustumPlane.w);
+		
+		if (outCorners == corners.size())
 			return false;
 	}
+	
+	// TODO : check behind
+	// http://iquilezles.org/www/articles/frustumcorrect/frustumcorrect.htm
 	
 	return true;
 }
