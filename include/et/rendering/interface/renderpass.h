@@ -35,6 +35,7 @@ public:
 		Target target;
 		Camera::Pointer camera;
 		Camera::Pointer light;
+		uint32_t priority = 0;
 	};
 
 	struct Variables

@@ -29,6 +29,7 @@ public:
 		{ return *this; }
 
 	PipelineStateCache pipelineCache;
+	Vector<VulkanRenderPass::Pointer> passes;
 };
 
 VulkanRenderer::VulkanRenderer(RenderContext* rc) 
@@ -201,16 +202,6 @@ void VulkanRenderer::shutdown()
 	// TODO : clean up Vulkan
 }
 
-void VulkanRenderer::begin()
-{
-	_private->swapchain.acquireNextImage(_private->vulkan());
-}
-
-void VulkanRenderer::present()
-{
-	_private->swapchain.present(_private->vulkan());
-}
-
 Buffer::Pointer VulkanRenderer::createBuffer(const Buffer::Description& desc)
 {
 	return VulkanBuffer::Pointer::create(_private->vulkan(), desc);
@@ -269,8 +260,28 @@ RenderPass::Pointer VulkanRenderer::allocateRenderPass(const RenderPass::Constru
 
 void VulkanRenderer::submitRenderPass(RenderPass::Pointer pass)
 {
-	VulkanRenderPass::Pointer vkPass = pass;
-	vkPass->submit();
+	_private->passes.emplace_back(pass);
 }
+
+void VulkanRenderer::begin()
+{
+	_private->swapchain.acquireNextImage(_private->vulkan());
+}
+
+void VulkanRenderer::present()
+{
+	std::sort(_private->passes.begin(), _private->passes.end(), [](const VulkanRenderPass::Pointer& l, const VulkanRenderPass::Pointer& r) {
+		return l->info().priority > r->info().priority;
+	});
+
+	for (VulkanRenderPass::Pointer& pass : _private->passes)
+	{
+		pass->submit();
+	}
+
+	_private->passes.clear();
+	_private->swapchain.present(_private->vulkan());
+}
+
 
 }
