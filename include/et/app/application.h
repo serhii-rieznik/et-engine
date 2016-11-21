@@ -18,169 +18,193 @@
 
 namespace et
 {
-	extern const std::string kSystemEventType;
-	extern const std::string kSystemEventRemoteNotification;
-	extern const std::string kSystemEventRemoteNotificationStatusChanged;
-	extern const std::string kSystemEventOpenURL;
-	
-	class Application : public Singleton<Application>
+extern const std::string kSystemEventType;
+extern const std::string kSystemEventRemoteNotification;
+extern const std::string kSystemEventRemoteNotificationStatusChanged;
+extern const std::string kSystemEventOpenURL;
+
+class Application : public Singleton<Application>
+{
+public:
+	int run(int argc, char* argv[]);
+
+	void quit(int exitCode = 0);
+
+	IApplicationDelegate* delegate();
+	IApplicationDelegate* initApplicationDelegate();
+
+	void initContext();
+	void freeContext();
+
+	RunLoop& mainRunLoop()
 	{
-	public: 
-		int run(int argc, char* argv[]);
-		
-		void quit(int exitCode = 0);
+		return _runLoop;
+	}
 
-		IApplicationDelegate* delegate();
-		IApplicationDelegate* initApplicationDelegate();
-        
-        void initContext();
-        void freeContext();
+	BackgroundThread& backgroundThread()
+	{
+		return _backgroundThread;
+	}
 
-		RunLoop& mainRunLoop()
-			{ return _runLoop; }
+	RunLoop& backgroundRunLoop()
+	{
+		return _backgroundThread.runLoop();
+	}
 
-		BackgroundThread& backgroundThread()
-			{ return _backgroundThread; }
+	PlatformDependentContext& context()
+	{
+		return _context;
+	}
 
-		RunLoop& backgroundRunLoop()
-			{ return _backgroundThread.runLoop(); }
-		
-		PlatformDependentContext& context()
-			{ return _context; }
-		
-		const PlatformDependentContext& context() const
-			{ return _context; }
+	const PlatformDependentContext& context() const
+	{
+		return _context;
+	}
 
-		Environment& environment()
-			{ return _env; }
+	Environment& environment()
+	{
+		return _env;
+	}
 
-        ApplicationParameters& parameters()
-            { return _parameters; }
-        
-        const ApplicationParameters& parameters() const
-			{ return _parameters; }
+	ApplicationParameters& parameters()
+	{
+		return _parameters;
+	}
 
-		const StringList& launchParameters() const
-			{ return _launchParameters; }
+	const ApplicationParameters& parameters() const
+	{
+		return _parameters;
+	}
 
-		const ApplicationIdentifier& identifier() const;
+	const StringList& launchParameters() const
+	{
+		return _launchParameters;
+	}
 
-		bool running() const 
-			{ return _running; }
+	const ApplicationIdentifier& identifier() const;
 
-		bool active() const 
-			{ return _active; }
+	bool running() const
+	{
+		return _running;
+	}
 
-		bool suspended() const
-			{ return _suspended; }
+	bool active() const
+	{
+		return _active;
+	}
 
-		std::string resolveFileName(const std::string&);
-		std::string resolveFolderName(const std::string&);
-		std::set<std::string> resolveFolderNames(const std::string&);
-		
-		void pushSearchPath(const std::string&);
-		void pushRelativeSearchPath(const std::string&);
-		void pushSearchPaths(const std::set<std::string>&);
-		void popSearchPaths(size_t = 1);
-		void setShouldSilentPathResolverErrors(bool);
-		
-		void setPathResolver(PathResolver::Pointer);
+	bool suspended() const
+	{
+		return _suspended;
+	}
 
-		void setTitle(const std::string& s);
-		void setFrameRateLimit(size_t value);
+	std::string resolveFileName(const std::string&);
+	std::string resolveFolderName(const std::string&);
+	std::set<std::string> resolveFolderNames(const std::string&);
 
-		void requestUserAttention();
-		
-		void enableRemoteNotifications();
-		
-		ET_DECLARE_EVENT1(systemEvent, Dictionary)
-        
-    public:
-        void load();
-        void suspend();
-        void resume();
-        void stop();
-        
-        void setActive(bool active);
-        void resizeContext(const vec2i& size);
-        
-        bool shouldPerformRendering();
-        void performUpdateAndRender();
-        
-	private:
-		friend class RenderContext;
+	void pushSearchPath(const std::string&);
+	void pushRelativeSearchPath(const std::string&);
+	void pushSearchPaths(const std::set<std::string>&);
+	void popSearchPaths(size_t = 1);
+	void setShouldSilentPathResolverErrors(bool);
 
-		RenderContext* renderContext() 
-			{ return _renderContext; }
+	void setPathResolver(PathResolver::Pointer);
 
-		int platformRun(int, char* []);
-		
-		void platformInit();
-		void platformFinalize();
-		void platformActivate();
-		void platformDeactivate();
-		void platformSuspend();
-		void platformResume();
-				
-		void enterRunLoop();
-		void exitRunLoop();
-				
-		void updateTimers(float dt);
-        
-	private:		
-		Application();
-		~Application();
+	void setTitle(const std::string& s);
+	void setFrameRateLimit(size_t value);
 
-		Application(const Application&) = delete;
-		Application(Application&&) = delete;
-		Application& operator = (const Application&) = delete;
-		
-		friend class et::Singleton<Application>;
+	void requestUserAttention();
 
-	private:
-		ApplicationParameters _parameters;
-		ApplicationIdentifier _identifier;
-		
-		RenderContext* _renderContext = nullptr;
-		IApplicationDelegate* _delegate = nullptr;
-		
-        PlatformDependentContext _context;
-        
-        Environment _env;
-		StandardPathResolver _standardPathResolver;
-		PathResolver::Pointer _customPathResolver;
-		
-		RunLoop _runLoop;
-		BackgroundThread _backgroundThread;
+	void enableRemoteNotifications();
 
-		std::string _emptyParamter;
-		StringList _launchParameters;
+	ET_DECLARE_EVENT1(systemEvent, Dictionary)
 
-		std::atomic<bool> _running;
-		std::atomic<bool> _active;
-		std::atomic<bool> _suspended;
-		
-		uint64_t _lastQueuedTimeMSec = 0;
-		uint64_t _fpsLimitMSec = 15;
-		uint64_t _fpsLimitMSecFractPart = 0;
-		
-		int _exitCode = 0;
-        vec2i _scheduledSize;
-		bool _scheduleResize = false;
-	};
+public:
+	void load();
+	void suspend();
+	void resume();
+	void stop();
 
-	/*
-	 * currentRunLoop - returns background run loop if called in background and mainRunLoop otherwise
-	 */
-    Application& application();
-	
-	RunLoop& mainRunLoop();
-	RunLoop& backgroundRunLoop();
-	RunLoop& currentRunLoop();
-	
-	TimerPool::Pointer& mainTimerPool();
-	TimerPool::Pointer currentTimerPool();
-	
-	void registerRunLoop(RunLoop&);
-	void unregisterRunLoop(RunLoop&);
+	void setActive(bool active);
+	void resizeContext(const vec2i& size);
+
+	bool shouldPerformRendering();
+	void performUpdateAndRender();
+
+private:
+	friend class RenderContext;
+
+	RenderContext* renderContext()
+	{
+		return _renderContext;
+	}
+
+	int platformRun(int, char*[]);
+
+	void platformInit();
+	void platformFinalize();
+	void platformActivate();
+	void platformDeactivate();
+	void platformSuspend();
+	void platformResume();
+
+	void enterRunLoop();
+	void exitRunLoop();
+
+private:
+	Application();
+	~Application();
+
+	Application(const Application&) = delete;
+	Application(Application&&) = delete;
+	Application& operator = (const Application&) = delete;
+
+	friend class et::Singleton<Application>;
+
+private:
+	ApplicationParameters _parameters;
+	ApplicationIdentifier _identifier;
+
+	RenderContext* _renderContext = nullptr;
+	IApplicationDelegate* _delegate = nullptr;
+
+	PlatformDependentContext _context;
+
+	Environment _env;
+	StandardPathResolver _standardPathResolver;
+	PathResolver::Pointer _customPathResolver;
+
+	RunLoop _runLoop;
+	BackgroundThread _backgroundThread;
+
+	std::string _emptyParamter;
+	StringList _launchParameters;
+
+	std::atomic<bool> _running{ false };
+	std::atomic<bool> _active{ false };
+	std::atomic<bool> _suspended{ false };
+
+	uint64_t _lastQueuedTimeMSec = 0;
+	uint64_t _fpsLimitMSec = 15;
+	uint64_t _fpsLimitMSecFractPart = 0;
+
+	int _exitCode = 0;
+	vec2i _scheduledSize;
+	bool _scheduleResize = false;
+};
+
+/*
+ * currentRunLoop - returns background run loop if called in background and mainRunLoop otherwise
+ */
+Application& application();
+
+RunLoop& mainRunLoop();
+RunLoop& backgroundRunLoop();
+RunLoop& currentRunLoop();
+
+TimerPool::Pointer& mainTimerPool();
+TimerPool::Pointer currentTimerPool();
+
+void registerRunLoop(RunLoop&);
+void unregisterRunLoop(RunLoop&);
 }

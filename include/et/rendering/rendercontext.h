@@ -14,53 +14,57 @@
 
 namespace et
 {
-	class Application;
-	class RenderContextPrivate;
-	class RenderContext
+class Application;
+class RenderContextPrivate;
+class RenderContext
+{
+public:
+	RenderContext(const RenderContextParameters& params, Application* app);
+	~RenderContext();
+
+	void init();
+	void shutdown();
+	const vec2i& size() const;
+
+	RenderContextParameters& parameters()
 	{
-	public:
-		RenderContext(const RenderContextParameters& params, Application* app);
-		~RenderContext();
+		return _params;
+	}
 
-		void init();
-		void shutdown();
-		
-        RenderContextParameters& parameters()
-            { return _params; }
-        
-        const RenderContextParameters& parameters() const
-			{ return _params; }
+	const RenderContextParameters& parameters() const
+	{
+		return _params;
+	}
 
-		const vec2i& size() const
-			{ return _size; }
+	RenderInterface::Pointer& renderer()
+	{
+		return _renderer;
+	}
 
-		RenderInterface::Pointer& renderer()
-			{ return _renderer; }
-		
-		const RenderInterface::Pointer& renderer() const
-			{ return _renderer; }
+	const RenderInterface::Pointer& renderer() const
+	{
+		return _renderer;
+	}
 
-		void pushRenderingContext();
-		bool activateRenderingContext();
-		bool pushAndActivateRenderingContext();
-		void popRenderingContext();
+	void pushRenderingContext();
+	bool activateRenderingContext();
+	bool pushAndActivateRenderingContext();
+	void popRenderingContext();
 
-		bool beginRender();
-		void endRender();
-        
-        void performResizing(const vec2i&);
+	bool beginRender();
+	void endRender();
 
-	private:
-		RenderContext(RenderContext&&) = delete;
-		RenderContext(const RenderContext&) = delete;
-		RenderContext& operator = (const RenderContext&) = delete;
+	void performResizing(const vec2i&);
 
-	private:
-		ET_DECLARE_PIMPL(RenderContext, 256);
+private:
+	RenderContext(RenderContext&&) = delete;
+	RenderContext(const RenderContext&) = delete;
+	RenderContext& operator = (const RenderContext&) = delete;
 
-		RenderContextParameters _params;
-		RenderInterface::Pointer _renderer;
-		vec2i _size;
-	};
+private:
+	ET_DECLARE_PIMPL(RenderContext, 256);
+	RenderContextParameters _params;
+	RenderInterface::Pointer _renderer;
+};
 
 }

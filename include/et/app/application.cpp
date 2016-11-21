@@ -103,7 +103,7 @@ void Application::performUpdateAndRender()
         if (_scheduleResize)
         {
             _renderContext->performResizing(_scheduledSize);
-            _delegate->applicationWillResizeContext(_renderContext->size());
+            _delegate->applicationWillResizeContext(_scheduledSize);
             _scheduleResize = false;
         }
         

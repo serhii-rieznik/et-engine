@@ -4,16 +4,16 @@
 
 #if (ET_PLATFORM_WIN)
 #	include "../windows/WorkingDirectory.hpp"
-	const et::RenderingAPI api = et::RenderingAPI::Vulkan;
+const et::RenderingAPI api = et::RenderingAPI::Vulkan;
 #else
-	const et::RenderingAPI api = et::RenderingAPI::Metal;
+const et::RenderingAPI api = et::RenderingAPI::Metal;
 #endif
 
 void demo::MainController::setApplicationParameters(et::ApplicationParameters& p)
 {
 	p.renderingAPI = api;
 	p.context.style = et::ContextOptions::Style::Sizable | et::ContextOptions::Style::Caption;
-    p.context.size = 4 * et::currentScreen().frame.size() / 5;
+	p.context.size = 4 * et::currentScreen().frame.size() / 5;
 }
 
 void demo::MainController::setRenderContextParameters(et::RenderContextParameters& params)
@@ -30,8 +30,8 @@ void demo::MainController::applicationDidLoad(et::RenderContext* rc)
 	_camera = et::Camera::Pointer::create();
 	_camera->lookAt(et::vec3(20.0f));
 
-	createModels(rc);
 	loadProgram(rc);
+	createModels(rc);
 
 	et::RenderPass::ConstructionInfo passInfo;
 	passInfo.target.colorLoadOperation = et::FramebufferOperation::Clear;
@@ -41,7 +41,6 @@ void demo::MainController::applicationDidLoad(et::RenderContext* rc)
 	passInfo.camera = _camera;
 
 	_mainPass = rc->renderer()->allocateRenderPass(passInfo);
-	_mainBatch = et::RenderBatch::Pointer::create(_defaultMaterial->instance(), _testModel, _transformMatrix);
 
 	applicationWillResizeContext(rc->size());
 	_frameTimeTimer.run();
@@ -60,11 +59,15 @@ void demo::MainController::createModels(et::RenderContext* rc)
 		vertices->capacity(), et::PrimitiveType::Triangles);
 	indices->linearize(vertices->capacity());
 
-	auto vb = rc->renderer()->createVertexBuffer("test-vb", vertices, et::BufferDrawType::Static);
-	auto ib = rc->renderer()->createIndexBuffer("test-ib", indices, et::BufferDrawType::Static);
-	_testModel = et::VertexStream::Pointer::create(vb, ib);
+	auto vb = rc->renderer()->createVertexBuffer("test-vb", vertices, et::Buffer::Location::Device);
+	auto ib = rc->renderer()->createIndexBuffer("test-ib", indices, et::Buffer::Location::Device);
 
-	_transformMatrix = et::identityMatrix;
+	et::VertexStream::Pointer vs = et::VertexStream::Pointer::create();
+	vs->setIndexBuffer(ib, indices->format(), indices->primitiveType());
+	vs->setVertexBuffer(vb, vertices->declaration());
+
+	_mainBatch = et::RenderBatch::Pointer::create(_defaultMaterial->instance(), vs,
+		_transformMatrix, 0, indices->actualSize());
 }
 
 void demo::MainController::loadProgram(et::RenderContext* rc)
@@ -73,7 +76,7 @@ void demo::MainController::loadProgram(et::RenderContext* rc)
 	_defaultMaterial = rc->renderer()->sharedMaterialLibrary().loadMaterial(materialFile);
 }
 
- void demo::MainController::applicationWillResizeContext(const et::vec2i& sz)
+void demo::MainController::applicationWillResizeContext(const et::vec2i& sz)
 {
 	et::vec2 floatSize = vector2ToFloat(sz);
 	_camera->perspectiveProjection(QUARTER_PI, floatSize.aspect(), 1.0f, 100.0f);

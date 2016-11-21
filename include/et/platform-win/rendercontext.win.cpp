@@ -65,8 +65,6 @@ RenderContext::RenderContext(const RenderContextParameters& inParams, Applicatio
 	_renderer->init(inParams);
 
 	GetClientRect(_private->mainWindow, &_private->clientRect);
-	_size.x = _private->clientRect.right - _private->clientRect.left;
-	_size.y = _private->clientRect.bottom - _private->clientRect.top;
 
 	ShowWindow(_private->mainWindow, SW_SHOW);
 	SetForegroundWindow(_private->mainWindow);
@@ -105,6 +103,14 @@ void RenderContext::shutdown()
 {
 	renderhelper::release();
 	_renderer->shutdown();
+}
+
+const vec2i& RenderContext::size() const
+{
+	static vec2i result;
+	result.x = _private->clientRect.right - _private->clientRect.left;
+	result.y = _private->clientRect.bottom - _private->clientRect.top;
+	return result;
 }
 
 bool RenderContext::beginRender()

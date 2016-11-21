@@ -1,8 +1,8 @@
 #include <et>
 
-layout (std140, set = 0, binding = PassVariablesBufferIndex) uniform PassVariables passVariables;
+layout (std140, set = VariablesSetIndex, binding = PassVariablesBufferIndex) uniform PassVariables passVariables;
 
-layout (std140, set = 0, binding = ObjectVariablesBufferIndex) uniform ObjectVariables {
+layout (std140, set = VariablesSetIndex, binding = ObjectVariablesBufferIndex) uniform ObjectVariables {
 	mat4 worldTransform;
 	mat4 worldRotationTransform;	
 } objectVariables;

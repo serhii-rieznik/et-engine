@@ -1,12 +1,6 @@
 #include <et>
 
-layout (std140, set = 0, binding = PassVariablesBufferIndex) uniform PassVariables passVariables;
-
-layout (std140, set = 0, binding = ObjectVariablesBufferIndex) uniform ObjectVariables {
-	mat4 worldTransform;
-} objectVariables;
-
-layout(binding = 0, set = 1) uniform sampler2D albedoTexture;
+layout (binding = AlbedoTextureBinding, set = TexturesSetIndex) uniform sampler2D albedoTexture;
 
 struct VSOutput {
 	vec2 texCoord0;
@@ -18,6 +12,13 @@ struct VSOutput {
 #if defined(ET_VERTEX_SHADER)
 
 #include <inputlayout>
+
+#if (TRANSFORM_INPUT_POSITION)
+	layout (std140, set = VariablesSetIndex, binding = PassVariablesBufferIndex) uniform PassVariables passVariables;
+	layout (std140, set = VariablesSetIndex, binding = ObjectVariablesBufferIndex) uniform ObjectVariables { 
+		mat4 worldTransform; 
+	} objectVariables;
+#endif
 
 layout(location = 0) out VSOutput vsOut;
 
