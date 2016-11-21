@@ -25,6 +25,10 @@ void DX12Renderer::shutdown()
 
 }
 
+void DX12Renderer::resize(const vec2i &)
+{
+}
+
 void DX12Renderer::begin()
 {
 

@@ -18,7 +18,11 @@
 #include <et/rendering/vulkan/vulkan.h>
 #include <et/app/application.h>
 
-#define VULKAN_ENABLE_VALIDATION 0
+#if (ET_DEBUG)
+#	define VULKAN_ENABLE_VALIDATION 1
+#else
+#	define VULKAN_ENABLE_VALIDATION 1
+#endif
 
 namespace et
 {
@@ -97,6 +101,7 @@ void VulkanRenderer::init(const RenderContextParameters& params)
 	appInfo.pApplicationName = application().identifier().applicationName.c_str();
 	appInfo.pEngineName = "et-engine";
 	appInfo.apiVersion = VK_API_VERSION_1_0;
+	
 	VkInstanceCreateInfo instanceCreateInfo = { VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO };
 	instanceCreateInfo.pApplicationInfo = &appInfo;
 	instanceCreateInfo.enabledExtensionCount = static_cast<uint32_t>(enabledExtensions.size());
@@ -163,8 +168,8 @@ void VulkanRenderer::init(const RenderContextParameters& params)
 	VULKAN_CALL(vkCreateSemaphore(_private->device, &semaphoreInfo, nullptr, &_private->semaphores.renderComplete));
 	VULKAN_CALL(vkCreateSemaphore(_private->device, &semaphoreInfo, nullptr, &_private->semaphores.imageAvailable));
 
-	HWND window = reinterpret_cast<HWND>(application().context().objects[0]);
-	_private->swapchain.init(_private->vulkan(), params, window);
+	HWND mainWindow = reinterpret_cast<HWND>(application().context().objects[0]);
+	_private->swapchain.init(_private->vulkan(), params, mainWindow);
 
 	VkCommandBufferAllocateInfo serviceBufferInfo = { VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO };
 	serviceBufferInfo.commandPool = _private->commandPool;
@@ -186,7 +191,9 @@ void VulkanRenderer::init(const RenderContextParameters& params)
 	poolInfo.pPoolSizes = poolSizes;
 	VULKAN_CALL(vkCreateDescriptorPool(_private->device, &poolInfo, nullptr, &_private->descriptprPool));
 
-	_private->swapchain.create(_private->vulkan());
+	RECT clientRect = { };
+	GetClientRect(mainWindow, &clientRect);
+	resize(vec2i(clientRect.right - clientRect.left, clientRect.bottom - clientRect.top));
 	
 	initInternalStructures();
 	defaultTexture();
@@ -200,6 +207,11 @@ void VulkanRenderer::shutdown()
 	
 	vkDestroyDescriptorPool(_private->device, _private->descriptprPool, nullptr);
 	// TODO : clean up Vulkan
+}
+
+void VulkanRenderer::resize(const vec2i& sz)
+{
+	_private->swapchain.createSizeDependentResources(_private->vulkan(), sz);
 }
 
 Buffer::Pointer VulkanRenderer::createBuffer(const Buffer::Description& desc)

@@ -20,7 +20,6 @@ struct VSOutput {
 
 layout (location = 0) out VSOutput vsOut;
 
-
 void main()
 {
 	vsOut.normal = (objectVariables.worldRotationTransform * vec4(normal, 0.0)).xyz;

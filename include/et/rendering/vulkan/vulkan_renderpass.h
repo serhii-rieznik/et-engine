@@ -34,6 +34,6 @@ public:
 	void submit();
 
 private:
-	ET_DECLARE_PIMPL(VulkanRenderPass, 288);
+	ET_DECLARE_PIMPL(VulkanRenderPass, 384);
 };
 }

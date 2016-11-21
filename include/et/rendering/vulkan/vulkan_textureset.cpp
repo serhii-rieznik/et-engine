@@ -50,8 +50,10 @@ public:
 
 	for (const auto& b : mergedData)
 	{
-		VulkanTexture::Pointer texture = b.second.first.valid() ? b.second.first : renderer->defaultTexture();
-		VulkanSampler::Pointer sampler = b.second.second.valid() ? b.second.second : renderer->defaultSampler();
+		if (b.second.first.invalid())
+			ET_FAIL("Invalid texture provided to texture set");
+		if (b.second.second.invalid())
+			ET_FAIL("Invalid sampler provided to texture set");
 
 		bindings.emplace_back();
 		imageInfos.emplace_back();
@@ -64,9 +66,9 @@ public:
 		binding.stageFlags = VK_SHADER_STAGE_ALL;
 
 		VkDescriptorImageInfo& info = imageInfos.back();
-		info.imageView = texture->nativeTexture().imageView;
-		info.imageLayout = texture->nativeTexture().layout;
-		info.sampler = sampler->nativeSampler().sampler;
+		info.imageView = VulkanTexture::Pointer(b.second.first)->nativeTexture().imageView;
+		info.imageLayout = VulkanTexture::Pointer(b.second.first)->nativeTexture().layout;
+		info.sampler = VulkanSampler::Pointer(b.second.second)->nativeSampler().sampler;
 
 		VkWriteDescriptorSet& ws = writeSet.back();
 		ws.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;

@@ -25,7 +25,7 @@ struct RenderContextParameters;
 struct VulkanSwapchain
 {
 	void init(VulkanState& vulkan, const RenderContextParameters& params, HWND window);
-	void create(VulkanState& vulkan);
+	void createSizeDependentResources(VulkanState& vulkan, const vec2i&);
 
 	void acquireNextImage(VulkanState& vulkan);
 	void present(VulkanState& vulkan);

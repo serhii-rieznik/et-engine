@@ -159,25 +159,25 @@ VkImageView VulkanSwapchain::createImageView(VulkanState& vulkan, VkImage image,
 	return result;
 }
 
-void VulkanSwapchain::create(VulkanState& vulkan)
+void VulkanSwapchain::createSizeDependentResources(VulkanState& vulkan, const vec2i& sz)
 {
+	extent.width = static_cast<uint32_t>(sz.x);
+	extent.height = static_cast<uint32_t>(sz.y);
+
 	VkSurfaceCapabilitiesKHR surfaceCaps = { };
 	vkGetPhysicalDeviceSurfaceCapabilitiesKHR(vulkan.physicalDevice, surface, &surfaceCaps);
 
-	Vector<VkPresentModeKHR> presentModes = enumerateVulkanObjects<VkPresentModeKHR>(vulkan, vkGetPhysicalDeviceSurfacePresentModesKHRWrapper);
-	extent = surfaceCaps.currentExtent;
-
-	// TODO : check if supported
-	VkPresentModeKHR presentMode = VK_PRESENT_MODE_MAILBOX_KHR;
-
 	uint32_t numImages = surfaceCaps.minImageCount + 1;
 	if ((surfaceCaps.maxImageCount > 0) && (numImages > surfaceCaps.maxImageCount))
-	{
 		numImages = surfaceCaps.maxImageCount;
-	}
 
 	VkSurfaceTransformFlagsKHR preTransform = VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR;
 	ET_ASSERT(surfaceCaps.supportedTransforms & VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR);
+
+	Vector<VkPresentModeKHR> presentModes = enumerateVulkanObjects<VkPresentModeKHR>(vulkan, vkGetPhysicalDeviceSurfacePresentModesKHRWrapper);
+	VkPresentModeKHR presentMode = VK_PRESENT_MODE_MAILBOX_KHR;
+
+	VkSwapchainKHR currentSwapchain = swapchain;
 
 	VkSwapchainCreateInfoKHR swapchainInfo = { VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR };
 	swapchainInfo.surface = surface;
@@ -190,11 +190,30 @@ void VulkanSwapchain::create(VulkanState& vulkan)
 	swapchainInfo.imageArrayLayers = 1;
 	swapchainInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
 	swapchainInfo.presentMode = presentMode;
-	swapchainInfo.oldSwapchain = nullptr;
+	swapchainInfo.oldSwapchain = currentSwapchain;
 	swapchainInfo.clipped = VK_TRUE;
 	swapchainInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
 
 	VULKAN_CALL(vkCreateSwapchainKHR(vulkan.device, &swapchainInfo, nullptr, &swapchain));
+
+	if (currentSwapchain != nullptr)
+	{
+		for (RenderTarget& rt : images)
+		{
+			vkDestroyImageView(vulkan.device, rt.colorView, nullptr);
+			rt.colorView = nullptr;
+
+			vkDestroyImageView(vulkan.device, rt.depthView, nullptr);
+			rt.depthView = nullptr;
+			
+			vkDestroyImage(vulkan.device, rt.depth, nullptr);
+			rt.depth = nullptr;
+			
+			vkFreeMemory(vulkan.device, rt.depthMemory, nullptr);
+			rt.depthMemory = nullptr;
+		}
+		vkDestroySwapchainKHR(vulkan.device, currentSwapchain, nullptr);
+	}
 
 	Vector<VkImage> swapchainImages = enumerateVulkanObjects<VkImage>(vulkan, vkGetSwapchainImagesKHRWrapper);
 	images.resize(swapchainImages.size());

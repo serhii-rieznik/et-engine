@@ -334,6 +334,27 @@ void MaterialInstance::buildTextureSet()
 			description.vertexSamplers[i.second] = samplers[i.second].object;
 	}
 
+	for (auto& i : description.fragmentTextures)
+	{
+		if (i.second.invalid())
+			i.second = _renderer->defaultTexture();
+	}
+	for (auto& i : description.vertexTextures)
+	{
+		if (i.second.invalid())
+			i.second = _renderer->defaultTexture();
+	}
+	for (auto& i : description.fragmentSamplers)
+	{
+		if (i.second.invalid())
+			i.second = _renderer->defaultSampler();
+	}
+	for (auto& i : description.vertexSamplers)
+	{
+		if (i.second.invalid())
+			i.second = _renderer->defaultSampler();
+	}
+	
 	_textureSet = _renderer->createTextureSet(description);
 	_textureSetValid = true;
 }
@@ -479,6 +500,8 @@ R"(
 #define ObjectVariablesBufferIndex      4
 #define MaterialVariablesBufferIndex    5
 #define PassVariablesBufferIndex        6
+#define VariablesSetIndex				0
+#define TexturesSetIndex				1
 #define PI                              3.1415926536
 #define HALF_PI                         1.5707963268
 #define INV_PI                          0.3183098862
@@ -503,6 +526,14 @@ R"(
 #define ObjectVariablesBufferIndex      4
 #define MaterialVariablesBufferIndex    5
 #define PassVariablesBufferIndex        6
+#define VariablesSetIndex				0
+#define TexturesSetIndex				1
+#define AlbedoTextureBinding			0
+#define ReflectanceTextureBinding		1
+#define EmissiveTextureBinding			2
+#define RoughnessTextureBinding			3
+#define OpacityTextureBinding			4
+#define NormalTextureBinding			5
 #define PI                              3.1415926536
 #define HALF_PI                         1.5707963268
 #define INV_PI                          0.3183098862

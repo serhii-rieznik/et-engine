@@ -32,6 +32,7 @@ public:
 	HWND mainWindow = nullptr;
 	RECT clientRect { };
 	uint32_t mouseCaptureCounter = 0;
+	bool resizeScheduled = false;
 }; 
 
 RenderContext::RenderContext(const RenderContextParameters& inParams, Application* app) : 
@@ -113,6 +114,14 @@ bool RenderContext::beginRender()
 		pushAndActivateRenderingContext();
 	}
 
+	if (_private->resizeScheduled)
+	{
+		GetClientRect(_private->mainWindow, &_private->clientRect);
+		_renderer->resize(vec2i(_private->clientRect.right - _private->clientRect.left,
+			_private->clientRect.bottom - _private->clientRect.top));
+		_private->resizeScheduled = false;
+	}
+
 	_renderer->begin();
 
 	return true;
@@ -130,7 +139,7 @@ void RenderContext::endRender()
 
 void RenderContext::performResizing(const vec2i&)
 {
-	ET_FAIL("Not implemented");
+	_private->resizeScheduled = true;
 }
 
 void RenderContext::pushRenderingContext()

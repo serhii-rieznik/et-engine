@@ -71,28 +71,22 @@ void s3d::Renderer::renderMeshList(RenderPass::Pointer pass, const s3d::BaseElem
 	}
 
 	vec3 cameraPosition = pass->info().camera->position();
+	auto cmp = [cameraPosition](const BatchFromMesh& l, const BatchFromMesh& r) {
+		const BlendState& lbs = l.batch->material()->blendState();
+		const BlendState& rbs = r.batch->material()->blendState();
+		if (lbs.enabled == rbs.enabled)
+		{
+			float delta = (l.transformedBox.center - cameraPosition).dotSelf() - (r.transformedBox.center - cameraPosition).dotSelf();
+			return lbs.enabled ? (delta >= 0.0f) : (delta < 0.0f);
+		}
+		return static_cast<int>(lbs.enabled) < static_cast<int>(rbs.enabled);
+	};
+
 	for (auto& rbv : _latestBatches)
 	{
-		std::sort(rbv.second.begin(), rbv.second.end(), [cameraPosition](BatchFromMesh& l, BatchFromMesh& r)
-		{
-			const BlendState& lbs = l.batch->material()->blendState();
-			const BlendState& rbs = r.batch->material()->blendState();
-			float delta = (l.transformedBox.center - cameraPosition).dotSelf() - (r.transformedBox.center - cameraPosition).dotSelf();
-			
-			if (lbs.enabled && rbs.enabled)
-				return delta >= 0.0f;
-			else if (lbs.enabled)
-				return true;
-			else if (rbs.enabled)
-				return false;
-			
-			return delta <= 0.0f;
-		});
-
-		for (auto& rb : rbv.second)
-		{
+		std::stable_sort(rbv.second.begin(), rbv.second.end(), cmp);
+		for (const BatchFromMesh& rb : rbv.second)
 			pass->pushRenderBatch(rb.batch);
-		}
 	}
 }
 

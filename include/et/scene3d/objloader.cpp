@@ -860,7 +860,9 @@ void OBJLoader::processLoadedData()
 		primitives::calculateNormals(_vertexData, _indices, 0, _indices->primitivesCount());
 
 	if (hasTexCoords && ((_loadOptions & Option_CalculateTangents) == Option_CalculateTangents))
+	{ 	
 		primitives::calculateTangents(_vertexData, _indices, 0, _indices->primitivesCount() & 0xffffffff);
+	}
 }
 
 s3d::ElementContainer::Pointer OBJLoader::generateVertexBuffers(s3d::Storage& storage)

@@ -27,6 +27,8 @@ namespace et
 		void init(const RenderContextParameters& params) override;
 		void shutdown() override;
 
+		void resize(const vec2i&) override;
+
 		void begin() override;
 		void present() override;
 

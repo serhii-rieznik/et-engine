@@ -35,11 +35,12 @@ public:
 	VkFence fence = nullptr;
 	VulkanRenderer* renderer = nullptr;
 	VkClearValue clearValues[2] { };
+	VkFramebufferCreateInfo framebufferInfo = { VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO };
 	VkRenderPassBeginInfo beginInfo = { VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO };
 	
 	ConstantBufferEntry variablesData;
 	Vector<VulkanRenderBatch> batches;
-	Map<VkImageView, VkFramebuffer> framebuffers;
+	Map<uint32_t, VkFramebuffer> framebuffers;
 
 	std::atomic_bool recording { false };
 
@@ -136,34 +137,47 @@ void VulkanRenderPass::begin()
 {
 	ET_ASSERT(_private->recording == false);
 
-	const VulkanSwapchain::RenderTarget& currentRenderTarget = _private->vulkan.swapchain.currentRenderTarget();
-	VkFramebuffer currentFramebuffer = _private->framebuffers[currentRenderTarget.colorView];
+	uint32_t rtWidth = _private->vulkan.swapchain.extent.width;
+	uint32_t rtHeight = _private->vulkan.swapchain.extent.height;
+	uint32_t currentImageIndex = _private->vulkan.swapchain.currentImageIndex;
+	if ((_private->framebufferInfo.width != rtWidth) || (_private->framebufferInfo.height != rtHeight))
+	{
+		for (auto& fb : _private->framebuffers)
+		{
+			if (fb.second)
+			{
+				vkDestroyFramebuffer(_private->vulkan.device, fb.second, nullptr);
+			}
+			fb.second = nullptr;
+		}
+	}
 
+	VkFramebuffer currentFramebuffer = _private->framebuffers[currentImageIndex];
 	if (currentFramebuffer == nullptr)
 	{
+		const VulkanSwapchain::RenderTarget& currentRenderTarget = _private->vulkan.swapchain.currentRenderTarget();
 		VkImageView attachments[] = { currentRenderTarget.colorView, currentRenderTarget.depthView };
-		VkFramebufferCreateInfo framebufferInfo = { VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO };
-		framebufferInfo.attachmentCount = sizeof(attachments) / sizeof(attachments[0]);
-		framebufferInfo.pAttachments = attachments;
-		framebufferInfo.width = _private->vulkan.swapchain.extent.width;
-		framebufferInfo.height = _private->vulkan.swapchain.extent.height;
-		framebufferInfo.layers = 1;
-		framebufferInfo.renderPass = _private->renderPass;
-		VULKAN_CALL(vkCreateFramebuffer(_private->vulkan.device, &framebufferInfo, nullptr, &currentFramebuffer));
-		
-		_private->framebuffers[currentRenderTarget.colorView] = currentFramebuffer;
+		_private->framebufferInfo.attachmentCount = sizeof(attachments) / sizeof(attachments[0]);
+		_private->framebufferInfo.pAttachments = attachments;
+		_private->framebufferInfo.width = rtWidth;
+		_private->framebufferInfo.height = rtHeight;
+		_private->framebufferInfo.layers = 1;
+		_private->framebufferInfo.renderPass = _private->renderPass;
+
+		VULKAN_CALL(vkCreateFramebuffer(_private->vulkan.device, &_private->framebufferInfo, nullptr, &currentFramebuffer));
+		_private->framebuffers[currentImageIndex] = currentFramebuffer;
 	}
 
 	_private->beginInfo.clearValueCount = sizeof(_private->clearValues) / sizeof(_private->clearValues[0]);
 	_private->beginInfo.pClearValues = _private->clearValues;
 	_private->beginInfo.renderPass = _private->renderPass;
-	_private->beginInfo.renderArea.extent = _private->vulkan.swapchain.extent;
+	_private->beginInfo.renderArea.extent.width = rtWidth;
+	_private->beginInfo.renderArea.extent.height = rtHeight;
 	_private->beginInfo.framebuffer = currentFramebuffer;
 	
-	_private->scissor.extent.width = static_cast<uint32_t>(_private->renderer->rc()->size().x);
-	_private->scissor.extent.height = static_cast<uint32_t>(_private->renderer->rc()->size().y);
-	_private->viewport.width = static_cast<float>(_private->renderer->rc()->size().x);
-	_private->viewport.height = static_cast<float>(_private->renderer->rc()->size().y);
+	_private->scissor.extent = _private->beginInfo.renderArea.extent;
+	_private->viewport.width = static_cast<float>(rtWidth);
+	_private->viewport.height = static_cast<float>(rtHeight);
 	_private->viewport.maxDepth = 1.0f;
 	_private->loadVariables(info().camera, info().light);
 

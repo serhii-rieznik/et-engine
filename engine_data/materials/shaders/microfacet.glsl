@@ -1,23 +1,24 @@
 #include <et>
 
-layout (std140, set = 0, binding = PassVariablesBufferIndex) uniform PassVariables passVariables;
+layout (std140, set = VariablesSetIndex, binding = PassVariablesBufferIndex) uniform PassVariables passVariables;
 
-layout (std140, set = 0, binding = MaterialVariablesBufferIndex) uniform MaterialVariables {
+layout (std140, set = VariablesSetIndex, binding = MaterialVariablesBufferIndex) uniform MaterialVariables {
 	vec4 albedoColor;
 	vec4 reflectanceColor;
+	vec4 emissiveColor;
 	float roughness;
 	float metallness;
 } materialVariables;
 
-layout (std140, set = 0, binding = ObjectVariablesBufferIndex) uniform ObjectVariables {
+layout (std140, set = VariablesSetIndex, binding = ObjectVariablesBufferIndex) uniform ObjectVariables {
 	mat4 worldTransform;
 	mat4 worldRotationTransform;	
 } objectVariables;
 
-layout(binding = 0, set = 1) uniform sampler2D albedoTexture;
+layout(binding = AlbedoTextureBinding, set = TexturesSetIndex) uniform sampler2D albedoTexture;
+layout(binding = NormalTextureBinding, set = TexturesSetIndex) uniform sampler2D normalTexture;
 
 struct VSOutput {
-	vec3 normal;
 	vec3 toLight;
 	vec3 toCamera;
 	vec2 texCoord0;
@@ -34,11 +35,21 @@ layout (location = 0) out VSOutput vsOut;
 
 void main()
 {
+	mat3 rotationTransform = mat3(objectVariables.worldRotationTransform);
 	vec4 transformedPosition = objectVariables.worldTransform * vec4(position, 1.0);
+
+	vec3 tNormal = rotationTransform * normal;
+	vec3 tTangent = rotationTransform * tangent;
+	vec3 tBiTangent = cross(tNormal, tTangent);
+	vec3 tCamera = (passVariables.cameraPosition - transformedPosition).xyz;
+	vec3 tLight = (passVariables.lightPosition - transformedPosition * passVariables.lightPosition.w).xyz;
 	
-	vsOut.normal = (objectVariables.worldRotationTransform * vec4(normal, 0.0)).xyz;
-	vsOut.toCamera = (passVariables.cameraPosition - transformedPosition).xyz;
-	vsOut.toLight = (passVariables.lightPosition - transformedPosition * passVariables.lightPosition.w).xyz;
+	vsOut.toCamera.x = dot(tTangent, tCamera);
+	vsOut.toCamera.y = dot(tBiTangent, tCamera);
+	vsOut.toCamera.z = dot(tNormal, tCamera);
+	vsOut.toLight.x = dot(tTangent, tLight);
+	vsOut.toLight.y = dot(tBiTangent, tLight);
+	vsOut.toLight.z = dot(tNormal, tLight);
 	vsOut.texCoord0 = texCoord0;
 
 	gl_Position = passVariables.viewProjection * transformedPosition;
@@ -53,7 +64,8 @@ layout (location = 0) out vec4 outColor0;
 
 void main()
 {
-	vec3 normal = normalize(fsIn.normal);
+	vec3 normal = normalize(texture(normalTexture, fsIn.texCoord0).xyz - 0.5);
+
 	vec3 lightNormal = normalize(fsIn.toLight);
 	vec3 viewNormal = normalize(fsIn.toCamera);
 	vec3 halfVector = normalize(lightNormal + viewNormal);
@@ -79,7 +91,7 @@ void main()
 	vec4 diffuse = (albedoSample * materialVariables.albedoColor) * diffuseComponent;
 	vec4 specular = materialVariables.reflectanceColor * specularComponent;
 
-	outColor0 = diffuse + specular;
+	outColor0 = materialVariables.emissiveColor + diffuse + specular;
 }
 
 #else

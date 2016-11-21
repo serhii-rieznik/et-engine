@@ -60,7 +60,7 @@ namespace et
 			uint32_t first, uint32_t last);
 		void calculateTangents(VertexStorage::Pointer data, const IndexArray::Pointer& buffer,
 			uint32_t first, uint32_t last);
-		void smoothTangents(VertexArray::Pointer data, const IndexArray::Pointer& buffer,
+		void smoothTangents(VertexStorage::Pointer data, const IndexArray::Pointer& buffer,
 			uint32_t first, uint32_t last);
 		
 		void createBox(VertexArray::Pointer data, const vec3& size, const vec3& center = vec3(0.0f));

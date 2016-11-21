@@ -43,6 +43,8 @@ public:
 	virtual void init(const RenderContextParameters& params) = 0;
 	virtual void shutdown() = 0;
 
+	virtual void resize(const vec2i&) = 0;
+
 	virtual void begin() = 0;
 	virtual void present() = 0;
 
@@ -111,15 +113,20 @@ inline Texture::Pointer RenderInterface::defaultTexture()
 {
 	if (_defaultTexture.invalid())
 	{
+		const uint32_t colors[] = { 0xFF000000, 0xFFFFFFFF };
+
 		TextureDescription::Pointer desc = TextureDescription::Pointer::create();
-		desc->size = vec2i(4);
+		desc->size = vec2i(16);
 		desc->format = TextureFormat::RGBA8;
-		desc->data.resize(64);
+		desc->data.resize(4 * desc->size.square());
+		
 		uint32_t* data = reinterpret_cast<uint32_t*>(desc->data.data());
-		data[ 0] = 0xFF0000FF; data[ 1] = 0xFFFFFFFF; data[ 2] = 0xFF0000FF; data[ 3] = 0xFFFFFFFF;
-		data[ 4] = 0xFFFFFFFF; data[ 5] = 0xFF0000FF; data[ 6] = 0xFFFFFFFF; data[ 7] = 0xFF0000FF;
-		data[ 8] = 0xFF0000FF; data[ 9] = 0xFFFFFFFF; data[10] = 0xFF0000FF; data[11] = 0xFFFFFFFF;
-		data[12] = 0xFFFFFFFF; data[13] = 0xFF0000FF; data[14] = 0xFFFFFFFF; data[15] = 0xFF0000FF;
+		for (int p = 0, e = desc->size.square(); p < e; ++p)
+		{
+			uint32_t colorIndex = ((p / desc->size.x) + (p % desc->size.x)) % (sizeof(colors) / sizeof(colors[0]));
+			data[p] = colors[colorIndex];
+		}
+
 		_defaultTexture = createTexture(desc);
 	}
 	return _defaultTexture;

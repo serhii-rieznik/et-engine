@@ -2,7 +2,8 @@
 	"input-layout" : {
 		"position" : 3,
 		"normal" : 3,
-		"texCoord0" : 2
+		"texCoord0" : 2,
+		"tangent" : 3
 	},
 
 	"depth-state": {

@@ -14,6 +14,7 @@ void demo::MainController::setApplicationParameters(et::ApplicationParameters& p
 #endif
 	
     params.context.size = 4 * et::currentScreen().frame.size() / 5;
+	params.context.style |= et::ContextOptions::Style::Sizable;
 }
 
 void demo::MainController::setRenderContextParameters(et::RenderContextParameters& params)
