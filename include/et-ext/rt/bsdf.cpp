@@ -88,10 +88,6 @@ et::rt::BSDFSample::BSDFSample(const et::rt::float4& _wi, const et::rt::float4& 
 		ET_FAIL("Invalid material class");
 	}
 
-#if ET_RT_VISUALIZE_BRDF
-	Wo = float4(0.0f, 1.0f, 0.0f, 0.0f);
-#endif
-
 	OdotN = Wo.dot(n);
 	cosTheta = std::abs((dir == BSDFSample::Direction::Backward ? OdotN : IdotN));
 }

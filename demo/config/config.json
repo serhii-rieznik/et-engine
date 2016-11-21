@@ -1,7 +1,9 @@
 {
-	"reference" : "cornellbox-water.json",
-	"rays-per-pixel" : 256,
+	"reference" : "importance-sampling.json",
+	"rays-per-pixel" : 144,
 	"method" : "backward",
+	"sampler" : "stratified",
+	"reconstruction" : "triangle",
 	"render-region-size" : 32,
 	"threads" : 0,
 	"max-path-length" : 0

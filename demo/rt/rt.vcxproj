@@ -91,7 +91,10 @@
     <ClInclude Include="..\..\include\et-ext\rt\kdtree.cpp" />
     <ClInclude Include="..\..\include\et-ext\rt\raytrace.cpp" />
     <ClInclude Include="..\..\include\et-ext\rt\raytraceobjects.cpp" />
+    <ClInclude Include="..\..\include\et-ext\rt\reconstruction.cpp" />
     <ClCompile Include="..\..\include\et-ext\rt\rt.pack.cxx" />
+    <ClInclude Include="..\..\include\et-ext\rt\reconstruction.h" />
+    <ClInclude Include="..\..\include\et-ext\rt\sampler.cpp" />
     <ClCompile Include="source\main.cpp" />
     <ClCompile Include="source\maincontroller.cpp" />
   </ItemGroup>
@@ -102,6 +105,7 @@
     <ClInclude Include="..\..\include\et-ext\rt\kdtree.h" />
     <ClInclude Include="..\..\include\et-ext\rt\raytrace.h" />
     <ClInclude Include="..\..\include\et-ext\rt\raytraceobjects.h" />
+    <ClInclude Include="..\..\include\et-ext\rt\sampler.h" />
     <ClInclude Include="source\maincontroller.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

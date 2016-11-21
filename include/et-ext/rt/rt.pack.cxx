@@ -6,3 +6,5 @@
 #include "kdtree.cpp"
 #include "raytrace.cpp"
 #include "raytraceobjects.cpp"
+#include "reconstruction.cpp"
+#include "sampler.cpp"

@@ -235,8 +235,8 @@ void KDTree::splitNodeUsingSortedArray(size_t nodeIndex, size_t depth)
 	for (index i = localNode.startIndex, e = localNode.endIndex; i < e; ++i)
 	{
 		const auto& tri = _triangles.at(_indices[i]);
-		minPoints.emplace_back(tri.minVertex().xyz() - float3(Constants::epsilon));
-		maxPoints.emplace_back(tri.maxVertex().xyz() + float3(Constants::epsilon));
+		minPoints.emplace_back(tri.minVertex().xyz());
+		maxPoints.emplace_back(tri.maxVertex().xyz());
 	}
 	
 	float3 splitPosition = minPoints.at(minPoints.size() / 2);

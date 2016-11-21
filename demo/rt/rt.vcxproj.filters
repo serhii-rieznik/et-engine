@@ -19,6 +19,12 @@
     <ClCompile Include="..\..\include\et-ext\rt\rt.pack.cxx">
       <Filter>rt</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\include\et-ext\rt\sampler.cpp">
+      <Filter>rt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\include\et-ext\rt\reconstruction.cpp">
+      <Filter>rt</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\maincontroller.hpp">
@@ -58,6 +64,12 @@
       <Filter>rt</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\et-ext\rt\bsdf.cpp">
+      <Filter>rt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et-ext\rt\sampler.h">
+      <Filter>rt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et-ext\rt\reconstruction.h">
       <Filter>rt</Filter>
     </ClInclude>
   </ItemGroup>

@@ -206,7 +206,7 @@ LRESULT RenderContextPrivate::mainWindowProc(HWND wnd, UINT msg, WPARAM wParam, 
 		}
 		case WM_LBUTTONUP:
 		{
-			pointerInput.pointerPressed(mouseInputInfo(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), PointerTypeMask::General));
+			pointerInput.pointerReleased(mouseInputInfo(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), PointerTypeMask::General));
 			return 0;
 		}
 		case WM_RBUTTONDOWN:
@@ -216,7 +216,7 @@ LRESULT RenderContextPrivate::mainWindowProc(HWND wnd, UINT msg, WPARAM wParam, 
 		}
 		case WM_RBUTTONUP:
 		{
-			pointerInput.pointerPressed(mouseInputInfo(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), PointerTypeMask::RightButton));
+			pointerInput.pointerReleased(mouseInputInfo(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), PointerTypeMask::RightButton));
 			return 0;
 		}
 		case WM_MBUTTONDOWN:
@@ -226,7 +226,7 @@ LRESULT RenderContextPrivate::mainWindowProc(HWND wnd, UINT msg, WPARAM wParam, 
 		}
 		case WM_MBUTTONUP:
 		{
-			pointerInput.pointerPressed(mouseInputInfo(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), PointerTypeMask::MiddleButton));
+			pointerInput.pointerReleased(mouseInputInfo(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), PointerTypeMask::MiddleButton));
 			return 0;
 		}
 		case WM_MOUSEMOVE:
