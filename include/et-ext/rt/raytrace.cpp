@@ -787,10 +787,8 @@ vec4 RaytracePrivate::raytracePixel(const vec2i& intCoord, uint32_t samples, uin
 	float weight = 0.0f;
 	vec2 pixelSize = vec2(1.0f) / vector2ToFloat(viewportSize);
 	vec2 baseCoordinate = vector2ToFloat(intCoord);
-	// rt::RandomSampler sampler(samples);
-	// rt::UniformSampler sampler(samples);
+	
 	rt::StratifiedSampler sampler(samples, 0.075f, 0.85f);
-	// rt::BoxFilter filter;
 	rt::TriangleFilter filter;
 
 	vec2 sample(0.0f);

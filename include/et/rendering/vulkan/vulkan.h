@@ -70,6 +70,7 @@ struct VulkanState
 	VkCommandPool commandPool = nullptr;
 	VkDescriptorPool descriptprPool = nullptr;
 	VkQueue queue = nullptr;
+	VkFence submitFence = nullptr;
 	VkPipelineCache pipelineCache = nullptr;
 	VkCommandBuffer serviceCommandBuffer = nullptr;
 
@@ -102,11 +103,13 @@ struct VulkanShaderModules
 
 struct VulkanNativeRenderPass
 {
-	VkCommandBuffer commandBuffer = nullptr;
 	VkRenderPass renderPass = nullptr;
+	VkCommandBuffer commandBuffer { };
 
 	VkDescriptorSetLayout dynamicDescriptorSetLayout = nullptr;
 	VkDescriptorSet dynamicDescriptorSet = nullptr;
+
+	VkSemaphore semaphore = nullptr;
 	
 	VkViewport viewport { };
 	VkRect2D scissor { };
@@ -170,6 +173,8 @@ uint32_t getMemoryTypeIndex(VulkanState& vulkan, uint32_t typeFilter, VkMemoryPr
 VkSamplerAddressMode textureWrapToSamplerAddressMode(TextureWrap);
 VkFilter textureFiltrationValueToFilter(TextureFiltration);
 VkSamplerMipmapMode textureFiltrationValueToSamplerMipMapMode(TextureFiltration);
+VkAttachmentLoadOp frameBufferOperationToLoadOperation(FramebufferOperation);
+VkAttachmentStoreOp frameBufferOperationToStoreOperation(FramebufferOperation);
 
 namespace gl
 {

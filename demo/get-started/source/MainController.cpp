@@ -34,10 +34,9 @@ void demo::MainController::applicationDidLoad(et::RenderContext* rc)
 	createModels(rc);
 
 	et::RenderPass::ConstructionInfo passInfo;
-	passInfo.target.colorLoadOperation = et::FramebufferOperation::Clear;
-	passInfo.target.depthLoadOperation = et::FramebufferOperation::Clear;
-	passInfo.target.clearColor = et::vec4(0.3f, 0.3f, 0.4f, 1.0f);
-	passInfo.target.clearDepth = 1.0f;
+	passInfo.color[0].clearValue = et::vec4(0.3f, 0.3f, 0.4f, 1.0f);
+	passInfo.color[0].enabled = true;
+	passInfo.depth.enabled = true;
 	passInfo.camera = _camera;
 
 	_mainPass = rc->renderer()->allocateRenderPass(passInfo);

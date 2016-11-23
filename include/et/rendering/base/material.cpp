@@ -14,7 +14,7 @@ namespace et
 const std::string kCode = "code";
 const std::string kInputLayout = "input-layout";
 const std::string kOptions = "options";
-extern const std::string shaderDefaultHeaders[static_cast<uint32_t>(RenderingAPI::Count)];
+extern const std::string shaderDefaultHeader;
 
 /*
  * Material
@@ -249,7 +249,7 @@ void Material::loadCode(const std::string& codeString, const std::string& baseFo
 		}
 		else if (what == ParseDirective::DefaultHeader)
 		{
-			code.insert(positionInCode, shaderDefaultHeaders[static_cast<uint32_t>(_renderer->api())]);
+			code.insert(positionInCode, shaderDefaultHeader);
 		}
 		else if (what != ParseDirective::StageDefine)
 		{
@@ -457,6 +457,7 @@ const Map<MaterialTexture, String>& materialTextureNames()
 		{ MaterialTexture::Emissive, "emissiveTexture" },
 		{ MaterialTexture::Opacity, "opacityTexture" },
 		{ MaterialTexture::Normal, "normalTexture" },
+		{ MaterialTexture::Shadow, "shadowTexture" },
 	};
 	return localMap;
 }
@@ -489,37 +490,12 @@ const String& mtl::materialSamplerToString(MaterialTexture t)
 		{ MaterialTexture::Emissive, "emissiveSampler" },
 		{ MaterialTexture::Opacity, "opacitySampler" },
 		{ MaterialTexture::Normal, "normalSampler" },
+		{ MaterialTexture::Shadow, "shadowSampler" },
 	};
 	return names.at(t);
 }
 
-const std::string shaderDefaultHeaders[static_cast<uint32_t>(RenderingAPI::Count)] = 
-{
-R"(
-#define VertexStreamBufferIndex         0
-#define ObjectVariablesBufferIndex      4
-#define MaterialVariablesBufferIndex    5
-#define PassVariablesBufferIndex        6
-#define VariablesSetIndex				0
-#define TexturesSetIndex				1
-#define PI                              3.1415926536
-#define HALF_PI                         1.5707963268
-#define INV_PI                          0.3183098862
-
-using namespace metal;
-
-struct PassVariables
-{
-	float4x4 viewProjection;
-	float4x4 projection;
-	float4x4 view;
-	float4 cameraPosition;
-	float4 cameraDirection;
-	float4 cameraUp;
-	float4 lightPosition;
-};
-)",
-
+const std::string shaderDefaultHeader =
 R"(
 #version 450
 #define VertexStreamBufferIndex         0
@@ -534,6 +510,7 @@ R"(
 #define RoughnessTextureBinding			3
 #define OpacityTextureBinding			4
 #define NormalTextureBinding			5
+#define ShadowTextureBinding			6
 #define PI                              3.1415926536
 #define HALF_PI                         1.5707963268
 #define INV_PI                          0.3183098862
@@ -547,11 +524,6 @@ R"(
 	vec4 cameraUp; \
 	vec4 lightPosition; \
 }
-)",
-
-R"(
-DX12 not implemented yet
-)"
-};
+)";
 
 }

@@ -19,42 +19,49 @@
 
 namespace et
 {
-	namespace s3d
-	{		
-		class Scene : public ElementContainer, public SerializationHelper
-		{
-		public:
-			ET_DECLARE_POINTER(Scene);
-						
-		public:
-			Scene(const std::string& name = "scene");
+namespace s3d
+{
+class Scene : public ElementContainer, public SerializationHelper
+{
+public:
+	ET_DECLARE_POINTER(Scene);
 
-			Storage& storage()
-				{ return _storage; }
+public:
+	Scene(const std::string& name = "scene");
 
-			const Storage& storage() const
-				{ return _storage; }
+	Storage& storage()
+		{ return _storage; }
 
-		public:
-			ET_DECLARE_EVENT1(deserializationFinished, bool)
+	const Storage& storage() const
+		{ return _storage; }
 
-		private:
-			void cleanupGeometry();
+	Camera::Pointer& mainCamera() 
+		{ return _mainCamera; }
+	
+	const Camera::Pointer& mainCamera() const
+		{ return _mainCamera; }
 
-			BaseElement::Pointer createElementOfType(ElementType, BaseElement*) override;
+	void setMainCamera(const Camera::Pointer& cam) 
+		{ _mainCamera = cam; }
 
-			const std::string& serializationBasePath() const override
-				{ return _serializationBasePath; }
+public:
+	ET_DECLARE_EVENT1(deserializationFinished, bool)
 
-			IndexArray::Pointer indexArrayWithName(const std::string&) override;
-			VertexStorage::Pointer vertexStorageWithName(const std::string&) override;
-			
-			VertexStream::Pointer vertexStreamWithStorageName(const std::string&) override;
-						
-		private:
-			Storage _storage;
-			std::string _serializationBasePath;
-			Buffer::Pointer _mainIndexBuffer;
-		};
-	}
+private:
+	void cleanupGeometry();
+
+	BaseElement::Pointer createElementOfType(ElementType, BaseElement*) override;
+	IndexArray::Pointer indexArrayWithName(const std::string&) override;
+	VertexStorage::Pointer vertexStorageWithName(const std::string&) override;
+	VertexStream::Pointer vertexStreamWithStorageName(const std::string&) override;
+
+	const std::string& serializationBasePath() const override
+		{ return _serializationBasePath; }
+
+private:
+	Storage _storage;
+	std::string _serializationBasePath;
+	Camera::Pointer _mainCamera;
+};
+}
 }

@@ -56,8 +56,13 @@ void SceneLoader::loadObjFile(const std::string& fileName, et::s3d::Scene::Point
 		c->setParent(scene.pointer());
     
     // add light
+	vec3 bboxSize = maxVertex - minVertex;
+	float rx = randomFloat(-bboxSize.x, bboxSize.x);
+	float rz = randomFloat(-bboxSize.z, bboxSize.z);
+	vec3 lightPos = vec3(rx + 0.1f, maxVertex.y + 5.0f * std::abs(bboxSize.y), rz + 0.1f);
+
     s3d::Light::Pointer lp = s3d::Light::Pointer::create();
-	vec3 bboxCenter = 0.5f * (minVertex + maxVertex);
-    lp->camera()->setPosition(vec3(bboxCenter.x, maxVertex.y + 2.0f * std::abs(maxVertex.y), bboxCenter.z));
+	lp->camera()->perspectiveProjection(QUARTER_PI, 1.0f, 1.0f, 2.0f * bboxSize.length());
+	lp->camera()->lookAt(lightPos);
     lp->setParent(scene.pointer());
 }

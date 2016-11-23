@@ -11,57 +11,59 @@
 
 namespace et
 {
-	class VulkanRendererPrivate;
-	class VulkanRenderer : public RenderInterface
+class VulkanRendererPrivate;
+class VulkanRenderer : public RenderInterface
+{
+public:
+	ET_DECLARE_POINTER(VulkanRenderer);
+
+public:
+	RenderingAPI api() const override
 	{
-	public:
-		ET_DECLARE_POINTER(VulkanRenderer);
+		return RenderingAPI::Vulkan;
+	}
 
-	public:
-		RenderingAPI api() const override
-			{  return RenderingAPI::Vulkan; }
+	VulkanRenderer(RenderContext* rc);
+	~VulkanRenderer();
 
-		VulkanRenderer(RenderContext* rc);
-		~VulkanRenderer();
+	void init(const RenderContextParameters& params) override;
+	void shutdown() override;
 
-		void init(const RenderContextParameters& params) override;
-		void shutdown() override;
+	void resize(const vec2i&) override;
 
-		void resize(const vec2i&) override;
+	void begin() override;
+	void present() override;
 
-		void begin() override;
-		void present() override;
+	RenderPass::Pointer allocateRenderPass(const RenderPass::ConstructionInfo&) override;
+	void submitRenderPass(RenderPass::Pointer) override;
 
-		RenderPass::Pointer allocateRenderPass(const RenderPass::ConstructionInfo&) override;
-		void submitRenderPass(RenderPass::Pointer) override;
+	/*
+	 * Buffers
+	 */
+	Buffer::Pointer createBuffer(const Buffer::Description&) override;
 
-		/*
-		 * Buffers
-		 */
-		Buffer::Pointer createBuffer(const Buffer::Description&) override;
-        
-        /*
-         * Textures
-         */
-        Texture::Pointer createTexture(TextureDescription::Pointer) override;
-		TextureSet::Pointer createTextureSet(const TextureSet::Description&) override;
+	/*
+	 * Textures
+	 */
+	Texture::Pointer createTexture(TextureDescription::Pointer) override;
+	TextureSet::Pointer createTextureSet(const TextureSet::Description&) override;
 
-		/*
-		 * Samplers
-		 */
-		Sampler::Pointer createSampler(const Sampler::Description&) override;
-        
-        /*
-         * Programs
-         */
-        Program::Pointer createProgram(const std::string& source) override;
-        
-		/*
-		 * Pipeline state
-		 */
-        PipelineState::Pointer acquirePipelineState(const RenderPass::Pointer&, const Material::Pointer&, const VertexStream::Pointer&) override;
-	
-	private:
-		ET_DECLARE_PIMPL(VulkanRenderer, 1024);
-	};
+	/*
+	 * Samplers
+	 */
+	Sampler::Pointer createSampler(const Sampler::Description&) override;
+
+	/*
+	 * Programs
+	 */
+	Program::Pointer createProgram(const std::string& source) override;
+
+	/*
+	 * Pipeline state
+	 */
+	PipelineState::Pointer acquirePipelineState(const RenderPass::Pointer&, const Material::Pointer&, const VertexStream::Pointer&) override;
+
+private:
+	ET_DECLARE_PIMPL(VulkanRenderer, 1024);
+};
 }

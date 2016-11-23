@@ -10,10 +10,10 @@ void demo::MainController::setApplicationParameters(et::ApplicationParameters& p
 #if (ET_PLATFORM_WIN)
 	params.renderingAPI = et::RenderingAPI::Vulkan;
 #elif (ET_PLATFORM_MAC)
-    params.renderingAPI = et::RenderingAPI::Metal;
+	params.renderingAPI = et::RenderingAPI::Metal;
 #endif
-	
-    params.context.size = 4 * et::currentScreen().frame.size() / 5;
+
+	params.context.size = 4 * et::currentScreen().frame.size() / 5;
 	params.context.style |= et::ContextOptions::Style::Sizable;
 }
 
@@ -25,10 +25,10 @@ void demo::MainController::setRenderContextParameters(et::RenderContextParameter
 void demo::MainController::applicationDidLoad(et::RenderContext* rc)
 {
 #if (ET_PLATFORM_WIN)
-    et::application().pushSearchPath("..");
-    et::application().pushSearchPath("..\\..");
-    et::application().pushSearchPath("..\\..\\..");
-    et::application().pushSearchPath("..\\..\\..\\..");
+	et::application().pushSearchPath("..");
+	et::application().pushSearchPath("..\\..");
+	et::application().pushSearchPath("..\\..\\..");
+	et::application().pushSearchPath("..\\..\\..\\..");
 #endif
 
 	_loader.init(rc);
@@ -72,10 +72,12 @@ void demo::MainController::applicationDidLoad(et::RenderContext* rc)
 	_cameraController->startUpdates();
 
 	_scene = _loader.loadFromFile(modelName);
+	_scene->setMainCamera(_camera);
 
 	applicationWillResizeContext(rc->size());
 
-	_fpsTimer.expired.connect([this](et::NotifyTimer*){
+	_fpsTimer.expired.connect([this](et::NotifyTimer*)
+	{
 		et::log::info("%u fps", _framesRendered);
 		_framesRendered = 0;
 	});
@@ -86,17 +88,21 @@ void demo::MainController::applicationDidLoad(et::RenderContext* rc)
 void demo::MainController::applicationWillResizeContext(const et::vec2i& sz)
 {
 	et::vec2 fSz = vector2ToFloat(sz);
-    _camera->perspectiveProjection(_cameraFOV, fSz.aspect(), 1.0f, 2048.0f);
+	_camera->perspectiveProjection(_cameraFOV, fSz.aspect(), 1.0f, 2048.0f);
 }
 
 void demo::MainController::render(et::RenderContext* rc)
 {
-	_renderer.render(rc->renderer(), _scene.reference(), _camera);
+	_renderer.render(rc->renderer(), _scene);
 	++_framesRendered;
 }
 
 et::IApplicationDelegate* et::Application::initApplicationDelegate()
-	{ return sharedObjectFactory().createObject<demo::MainController>(); }
+{
+	return sharedObjectFactory().createObject<demo::MainController>();
+}
 
 et::ApplicationIdentifier demo::MainController::applicationIdentifier() const
-	{ return et::ApplicationIdentifier("com.cheetek.scenerendering", "Cheetek", "Scene Rendering Demo"); }
+{
+	return et::ApplicationIdentifier("com.cheetek.scenerendering", "Cheetek", "Scene Rendering Demo");
+}

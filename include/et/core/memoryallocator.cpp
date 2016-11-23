@@ -451,9 +451,14 @@ MemoryChunk::~MemoryChunk()
 	{
 		char buffer[1024 * 10] = {};
 
+		uint32_t leakNumber = 0;
 		int printPos = 0;
 		for (uint32_t i : detectedLeaks)
+		{
 			printPos += sprintf(buffer + printPos, "%u, ", i);
+			if (++leakNumber >= 1024)
+				break;
+		}
 		buffer[printPos - 2] = 0;
 
 		log::ConsoleOutput lOut;

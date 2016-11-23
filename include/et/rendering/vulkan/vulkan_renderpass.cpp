@@ -20,7 +20,7 @@ struct VulkanRenderBatch
 	VulkanBuffer::Pointer vertexBuffer;
 	VulkanBuffer::Pointer indexBuffer;
 	VkIndexType indexBufferFormat = VkIndexType::VK_INDEX_TYPE_MAX_ENUM;
-	uint32_t dynamicOffsets[DescriptorSetClass::DynamicDescriptorsCount] { };
+	uint32_t dynamicOffsets[DescriptorSetClass::DynamicDescriptorsCount]{};
 	uint32_t startIndex = InvalidIndex;
 	uint32_t indexCount = InvalidIndex;
 };
@@ -28,27 +28,28 @@ struct VulkanRenderBatch
 class VulkanRenderPassPrivate : public VulkanNativeRenderPass
 {
 public:
-	VulkanRenderPassPrivate(VulkanState& v, VulkanRenderer* r) 
-		: vulkan(v), renderer(r) { }
+	VulkanRenderPassPrivate(VulkanState& v, VulkanRenderer* r)
+		: vulkan(v), renderer(r)
+	{
+	}
 
 	VulkanState& vulkan;
-	VkFence fence = nullptr;
 	VulkanRenderer* renderer = nullptr;
-	VkClearValue clearValues[2] { };
+	VkClearValue clearValues[2]{};
 	VkFramebufferCreateInfo framebufferInfo = { VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO };
 	VkRenderPassBeginInfo beginInfo = { VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO };
-	
+
 	ConstantBufferEntry variablesData;
 	Vector<VulkanRenderBatch> batches;
 	Map<uint32_t, VkFramebuffer> framebuffers;
 
-	std::atomic_bool recording { false };
+	std::atomic_bool recording{ false };
 
 	void generateDynamicDescriptorSet(RenderPass* pass);
 	void loadVariables(Camera::Pointer camera, Camera::Pointer light);
 };
 
-VulkanRenderPass::VulkanRenderPass(VulkanRenderer* renderer, VulkanState& vulkan, const RenderPass::ConstructionInfo& passInfo) 
+VulkanRenderPass::VulkanRenderPass(VulkanRenderer* renderer, VulkanState& vulkan, const RenderPass::ConstructionInfo& passInfo)
 	: RenderPass(renderer, passInfo)
 {
 	ET_PIMPL_INIT(VulkanRenderPass, vulkan, renderer);
@@ -57,56 +58,95 @@ VulkanRenderPass::VulkanRenderPass(VulkanRenderer* renderer, VulkanState& vulkan
 	_private->batches.reserve(128);
 	_private->generateDynamicDescriptorSet(this);
 
-	VkFenceCreateInfo fenceInfo = { VK_STRUCTURE_TYPE_FENCE_CREATE_INFO };
-	VULKAN_CALL(vkCreateFence(vulkan.device, &fenceInfo, nullptr, &_private->fence));
+	VkSemaphoreCreateInfo semaphoreInfo = { VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO };
+	VULKAN_CALL(vkCreateSemaphore(vulkan.device, &semaphoreInfo, nullptr, &_private->semaphore));
 
-	_private->clearValues[0] = { 
-		passInfo.target.clearColor.x, 
-		passInfo.target.clearColor.y, 
-		passInfo.target.clearColor.z, 
-		passInfo.target.clearColor.w
-	};
-	_private->clearValues[1] = {
-		passInfo.target.clearDepth
-	};
+	const vec4& cl = passInfo.color[0].clearValue;
+	_private->clearValues[0].color = { cl.x, cl.y, cl.z, cl.w };
+	_private->clearValues[1].depthStencil.depth = passInfo.depth.clearValue.x;
 
 	VkCommandBufferAllocateInfo info = { VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO };
 	info.commandPool = vulkan.commandPool;
 	info.commandBufferCount = 1;
-	info.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;	
-	VULKAN_CALL(vkAllocateCommandBuffers(vulkan.device, &info, &_private->commandBuffer));	
+	info.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+	VULKAN_CALL(vkAllocateCommandBuffers(vulkan.device, &info, &_private->commandBuffer));
 
-	VkAttachmentDescription attachments[2] = { };
-	attachments[0].format = vulkan.swapchain.surfaceFormat.format;
-	attachments[0].samples = VK_SAMPLE_COUNT_1_BIT;
-	attachments[0].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-	attachments[0].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-	attachments[0].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;;
-	attachments[0].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-	attachments[0].initialLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-	attachments[0].finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+	uint32_t colorAttachmentCount = 0;
+	Vector<VkAttachmentDescription> attachments;
+	Vector<VkAttachmentReference> colorAttachmentReferences;
+	attachments.reserve(4);
+	colorAttachmentReferences.reserve(4);
 
-	attachments[1].format = vulkan.swapchain.depthFormat;
-	attachments[1].samples = VK_SAMPLE_COUNT_1_BIT;
-	attachments[1].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-	attachments[1].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-	attachments[1].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;;
-	attachments[1].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-	attachments[1].initialLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-	attachments[1].finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+	for (const RenderTarget& target : passInfo.color)
+	{
+		if (target.enabled)
+		{
+			colorAttachmentReferences.emplace_back();
+			VkAttachmentReference& ref = colorAttachmentReferences.back();
+			ref.attachment = colorAttachmentCount;
+			ref.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
-	VkAttachmentReference colorReference = { 0, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL };
-	VkAttachmentReference depthReference = { 1, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL };
+			attachments.emplace_back();
+			VkAttachmentDescription& attachment = attachments.back();
+			attachment.loadOp = vulkan::frameBufferOperationToLoadOperation(target.loadOperation);
+			attachment.storeOp = vulkan::frameBufferOperationToStoreOperation(target.storeOperation);
+			attachment.samples = VK_SAMPLE_COUNT_1_BIT;
+			attachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+			attachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
 
-	VkSubpassDescription subpassInfo = { };
+			if (target.isDefaultRenderTarget)
+			{
+				attachment.format = vulkan.swapchain.surfaceFormat.format;
+				attachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+				attachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+			}
+			else
+			{
+				// TODO : get from texture
+				attachment.format = vulkan.swapchain.surfaceFormat.format;
+				attachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+				attachment.finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+			}
+
+			++colorAttachmentCount;
+		}
+	}
+
+	if (passInfo.depth.enabled)
+	{
+		attachments.emplace_back();
+		VkAttachmentDescription& attachment = attachments.back();
+		attachment.loadOp = vulkan::frameBufferOperationToLoadOperation(passInfo.depth.loadOperation);
+		attachment.storeOp = vulkan::frameBufferOperationToStoreOperation(passInfo.depth.storeOperation);
+		attachment.samples = VK_SAMPLE_COUNT_1_BIT;
+		attachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+		attachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+		attachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+
+		if (passInfo.depth.isDefaultRenderTarget)
+		{
+			attachment.format = vulkan.swapchain.depthFormat;
+			attachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+		}
+		else
+		{
+			// TODO : get from texture
+			attachment.format = vulkan.swapchain.depthFormat;
+			attachment.finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		}
+	}
+
+	VkAttachmentReference depthAttachmentReference = { colorAttachmentCount, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL };
+
+	VkSubpassDescription subpassInfo = {};
 	subpassInfo.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-	subpassInfo.colorAttachmentCount = 1;
-	subpassInfo.pColorAttachments = &colorReference;
-	subpassInfo.pDepthStencilAttachment = &depthReference;
+	subpassInfo.colorAttachmentCount = static_cast<uint32_t>(colorAttachmentReferences.size());
+	subpassInfo.pColorAttachments = colorAttachmentReferences.data();
+	subpassInfo.pDepthStencilAttachment = passInfo.depth.enabled ? &depthAttachmentReference : nullptr;
 
 	VkRenderPassCreateInfo createInfo = { VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO };
-	createInfo.attachmentCount = sizeof(attachments) / sizeof(attachments[0]);
-	createInfo.pAttachments = attachments;
+	createInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
+	createInfo.pAttachments = attachments.data();
 	createInfo.subpassCount = 1;
 	createInfo.pSubpasses = &subpassInfo;
 
@@ -122,7 +162,7 @@ VulkanRenderPass::~VulkanRenderPass()
 	vkFreeCommandBuffers(_private->vulkan.device, _private->vulkan.commandPool, 1, &_private->commandBuffer);
 	vkFreeDescriptorSets(_private->vulkan.device, _private->vulkan.descriptprPool, 1, &_private->dynamicDescriptorSet);
 	vkDestroyDescriptorSetLayout(_private->vulkan.device, _private->dynamicDescriptorSetLayout, nullptr);
-	
+
 	dynamicConstantBuffer().free(_private->variablesData);
 
 	ET_PIMPL_FINALIZE(VulkanRenderPass)
@@ -174,7 +214,7 @@ void VulkanRenderPass::begin()
 	_private->beginInfo.renderArea.extent.width = rtWidth;
 	_private->beginInfo.renderArea.extent.height = rtHeight;
 	_private->beginInfo.framebuffer = currentFramebuffer;
-	
+
 	_private->scissor.extent = _private->beginInfo.renderArea.extent;
 	_private->viewport.width = static_cast<float>(rtWidth);
 	_private->viewport.height = static_cast<float>(rtHeight);
@@ -228,23 +268,21 @@ void VulkanRenderPass::end()
 	_private->recording = false;
 }
 
-void VulkanRenderPass::submit()
+void VulkanRenderPass::recordCommandBuffer()
 {
 	ET_ASSERT(_private->recording == false);
 
 	_private->renderer->sharedConstantBuffer().flush();
 	dynamicConstantBuffer().flush();
 
+	VkCommandBuffer commandBuffer = _private->commandBuffer;
+
 	VkCommandBufferBeginInfo commandBufferBeginInfo = { VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO };
 	commandBufferBeginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
-	VULKAN_CALL(vkBeginCommandBuffer(_private->commandBuffer, &commandBufferBeginInfo));
-	vulkan::imageBarrier(_private->vulkan, _private->commandBuffer, _private->vulkan.swapchain.currentColorImage(), 
-		VK_IMAGE_ASPECT_COLOR_BIT, 0, VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT, 
-		VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, 
-		VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT);
+	VULKAN_CALL(vkBeginCommandBuffer(commandBuffer, &commandBufferBeginInfo));
 
-	vkCmdSetScissor(_private->commandBuffer, 0, 1, &_private->scissor);
-	vkCmdSetViewport(_private->commandBuffer, 0, 1, &_private->viewport);
+	vkCmdSetScissor(commandBuffer, 0, 1, &_private->scissor);
+	vkCmdSetViewport(commandBuffer, 0, 1, &_private->viewport);
 
 	VkPipeline lastPipeline = nullptr;
 	VkBuffer lastVertexBuffer = nullptr;
@@ -255,58 +293,40 @@ void VulkanRenderPass::submit()
 		_private->dynamicDescriptorSet
 	};
 
-	vkCmdBeginRenderPass(_private->commandBuffer, &_private->beginInfo, VK_SUBPASS_CONTENTS_INLINE);
+	vkCmdBeginRenderPass(commandBuffer, &_private->beginInfo, VK_SUBPASS_CONTENTS_INLINE);
 	for (const auto& batch : _private->batches)
 	{
 		if (batch.pipeline->nativePipeline().pipeline != lastPipeline)
 		{
 			lastPipeline = batch.pipeline->nativePipeline().pipeline;
-			vkCmdBindPipeline(_private->commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, lastPipeline);
+			vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, lastPipeline);
 		}
-		
+
 		if (batch.vertexBuffer->nativeBuffer().buffer != lastVertexBuffer)
 		{
 			VkDeviceSize nullOffset = 0;
 			lastVertexBuffer = batch.vertexBuffer->nativeBuffer().buffer;
-			vkCmdBindVertexBuffers(_private->commandBuffer, 0, 1, &lastVertexBuffer, &nullOffset);
+			vkCmdBindVertexBuffers(commandBuffer, 0, 1, &lastVertexBuffer, &nullOffset);
 		}
-		
+
 		if ((batch.indexBuffer->nativeBuffer().buffer != lastIndexBuffer) || (batch.indexBufferFormat != lastIndexType))
 		{
 			lastIndexBuffer = batch.indexBuffer->nativeBuffer().buffer;
 			lastIndexType = batch.indexBufferFormat;
-			vkCmdBindIndexBuffer(_private->commandBuffer, lastIndexBuffer, 0, lastIndexType);
+			vkCmdBindIndexBuffer(commandBuffer, lastIndexBuffer, 0, lastIndexType);
 		}
-		
+
 		descriptorSets[1] = batch.textureSet->nativeSet().descriptorSet;
-		vkCmdBindDescriptorSets(_private->commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, 
-			batch.pipeline->nativePipeline().layout, 0, 
+		vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
+			batch.pipeline->nativePipeline().layout, 0,
 			DescriptorSetClass::Count, descriptorSets, DescriptorSetClass::DynamicDescriptorsCount, batch.dynamicOffsets);
-		
-		vkCmdDrawIndexed(_private->commandBuffer, batch.indexCount, 1, batch.startIndex, 0, 0);
+
+		vkCmdDrawIndexed(commandBuffer, batch.indexCount, 1, batch.startIndex, 0, 0);
 	}
-	vkCmdEndRenderPass(_private->commandBuffer);
-	vulkan::imageBarrier(_private->vulkan, _private->commandBuffer, _private->vulkan.swapchain.currentColorImage(),
-		VK_IMAGE_ASPECT_COLOR_BIT, VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT, VK_ACCESS_MEMORY_READ_BIT,
-		VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
-		VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT);
-	VULKAN_CALL(vkEndCommandBuffer(_private->commandBuffer));
+	vkCmdEndRenderPass(commandBuffer);
+	VULKAN_CALL(vkEndCommandBuffer(commandBuffer));
 
 	_private->batches.clear();
-
-	VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
-	VkSubmitInfo submitInfo = { VK_STRUCTURE_TYPE_SUBMIT_INFO };
-	submitInfo.commandBufferCount = 1;
-	submitInfo.pCommandBuffers = &_private->commandBuffer;
-	submitInfo.waitSemaphoreCount = 1;
-	submitInfo.pWaitSemaphores = &_private->vulkan.semaphores.imageAvailable;
-	submitInfo.signalSemaphoreCount = 1;
-	submitInfo.pSignalSemaphores = &_private->vulkan.semaphores.renderComplete;
-	submitInfo.pWaitDstStageMask = waitStages;
-
-	VULKAN_CALL(vkQueueSubmit(_private->vulkan.queue, 1, &submitInfo, _private->fence));
-	VULKAN_CALL(vkWaitForFences(_private->vulkan.device, 1, &_private->fence, VK_TRUE, ~0ull));
-	VULKAN_CALL(vkResetFences(_private->vulkan.device, 1, &_private->fence));
 }
 
 void VulkanRenderPassPrivate::generateDynamicDescriptorSet(RenderPass* pass)
@@ -325,7 +345,7 @@ void VulkanRenderPassPrivate::generateDynamicDescriptorSet(RenderPass* pass)
 		writeSets[0].descriptorType = bindings[0].descriptorType;
 		writeSets[0].dstBinding = bindings[0].binding;
 		writeSets[0].pBufferInfo = &objectBufferInfo;
-		
+
 		bindings[1] = { MaterialVariablesBufferIndex, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1 };
 		bindings[1].stageFlags = VK_SHADER_STAGE_ALL;
 		writeSets[1].descriptorCount = bindings[1].descriptorCount;
@@ -354,7 +374,7 @@ void VulkanRenderPassPrivate::generateDynamicDescriptorSet(RenderPass* pass)
 
 	for (VkWriteDescriptorSet& wd : writeSets)
 		wd.dstSet = dynamicDescriptorSet;
-	
+
 	uint32_t writeSetsCount = static_cast<uint32_t>(sizeof(writeSets) / sizeof(writeSets[0]));
 	vkUpdateDescriptorSets(vulkan.device, writeSetsCount, writeSets, 0, nullptr);
 }

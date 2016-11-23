@@ -17,6 +17,7 @@ layout (std140, set = VariablesSetIndex, binding = ObjectVariablesBufferIndex) u
 
 layout(binding = AlbedoTextureBinding, set = TexturesSetIndex) uniform sampler2D albedoTexture;
 layout(binding = NormalTextureBinding, set = TexturesSetIndex) uniform sampler2D normalTexture;
+layout(binding = ShadowTextureBinding, set = TexturesSetIndex) uniform sampler2D shadowTexture;
 
 struct VSOutput {
 	vec3 toLight;

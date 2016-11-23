@@ -13,26 +13,28 @@
 
 namespace et
 {
+
+struct RenderTarget
+{
+	Texture::Pointer texture;
+	FramebufferOperation loadOperation = FramebufferOperation::Clear;
+	FramebufferOperation storeOperation = FramebufferOperation::Store;
+	vec4 clearValue = vec4(1.0f);
+	bool isDefaultRenderTarget = true;
+	bool enabled = false;
+};
+
 class RenderInterface;
 class RenderPass : public Shared
 {
 public:
 	ET_DECLARE_POINTER(RenderPass);
 
-	struct Target
-	{
-		// TODO : add render target
-		FramebufferOperation colorLoadOperation = FramebufferOperation::DontCare;
-		FramebufferOperation colorStoreOperation = FramebufferOperation::DontCare;
-		FramebufferOperation depthLoadOperation = FramebufferOperation::DontCare;
-		FramebufferOperation depthStoreOperation = FramebufferOperation::DontCare;
-		vec4 clearColor = vec4(0.0f);
-		float clearDepth = 1.0f;
-	};
-
 	struct ConstructionInfo
 	{
-		Target target;
+		RenderTarget color[MaxRenderTargets];
+		RenderTarget depth;
+		
 		Camera::Pointer camera;
 		Camera::Pointer light;
 		uint32_t priority = 0;

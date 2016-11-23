@@ -31,25 +31,36 @@ public:
 public:
 	Renderer();
 
-	void render(RenderInterface::Pointer, const Scene&, Camera::Pointer);
-	void renderTransformedBoundingBox(RenderPass::Pointer, const BoundingBox&, const mat4&);
+	void render(RenderInterface::Pointer&, const Scene::Pointer&);
 
 private:
-	void renderMeshList(RenderPass::Pointer, const s3d::BaseElement::List&);
-
-private:
-	struct BatchFromMesh
+	struct RenderBatchInfo
 	{
+		uint64_t priority = 0;
 		RenderBatch::Pointer batch;
 		BoundingBox transformedBox;
-		BatchFromMesh(RenderBatch::Pointer b, const BoundingBox& bb) : 
-			batch(b), transformedBox(bb) { } 
-	};
-	using BatchMap = std::map<uint64_t, Vector<BatchFromMesh>, std::greater<uint64_t>>;
 
+		RenderBatchInfo(uint64_t p, RenderBatch::Pointer b, const BoundingBox& bb) :
+			priority(p), batch(b), transformedBox(bb) { }
+	};
+
+	using RenderBatchCollection = Vector<RenderBatch::Pointer>;
+	using RenderBatchInfoCollection = Vector<RenderBatchInfo>;
+
+	void extractBatches(const Scene::Pointer&);
+	void clip(RenderPass::Pointer& pass, const RenderBatchCollection&, RenderBatchInfoCollection&);
+	void render(RenderPass::Pointer& pass, const RenderBatchInfoCollection&);
+	void validateMainPass(RenderInterface::Pointer&, const Scene::Pointer&);
+	void validateShadowPass(RenderInterface::Pointer&);
+
+private:
+	RenderBatchCollection _renderBatches;
+
+	RenderBatchInfoCollection _mainPassBatches;
 	RenderPass::Pointer _mainPass;
-	RenderBatch::Pointer _bboxBatch;
-	BatchMap _latestBatches;
+
+	RenderBatchInfoCollection _shadowPassBatches;
+	RenderPass::Pointer _shadowPass;
 };
 }
 }

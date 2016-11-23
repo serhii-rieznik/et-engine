@@ -23,6 +23,8 @@ enum class MaterialTexture : uint32_t
 	Opacity,
 	Normal,
 
+	Shadow,
+
 	Count
 };
 

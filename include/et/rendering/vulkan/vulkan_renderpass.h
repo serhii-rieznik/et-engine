@@ -31,7 +31,7 @@ public:
 	void pushRenderBatch(const RenderBatch::Pointer&) override;
 	void end() override;
 	
-	void submit();
+	void recordCommandBuffer();
 
 private:
 	ET_DECLARE_PIMPL(VulkanRenderPass, 384);

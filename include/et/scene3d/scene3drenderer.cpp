@@ -9,69 +9,107 @@
 #include <et/rendering/rendercontext.h>
 #include <et/rendering/base/primitives.h>
 
-using namespace et;
-using namespace et::s3d;
+namespace et
+{
+namespace s3d
+{
 
-s3d::Renderer::Renderer() :
+Renderer::Renderer() :
 	FlagsHolder(RenderAll)
 {
 	
 }
 
-void s3d::Renderer::render(RenderInterface::Pointer renderer, const Scene& scene, Camera::Pointer camera)
+void Renderer::render(RenderInterface::Pointer& renderer, const Scene::Pointer& scene)
 {
-	if (_mainPass.invalid())
-	{
-		Camera::Pointer lightCamera;
-		auto lights = scene.childrenOfType(et::s3d::ElementType::Light);
-		if (!lights.empty())
-		{
-			lightCamera = static_cast<s3d::Light::Pointer>(lights.front())->camera();
-		}
+	validateMainPass(renderer, scene);
+	validateShadowPass(renderer);
 
-		RenderPass::ConstructionInfo passInfo;
-		passInfo.target.colorLoadOperation = et::FramebufferOperation::Clear;
-		passInfo.target.depthLoadOperation = et::FramebufferOperation::Clear;
-		passInfo.target.clearColor = vec4(0.25f, 0.3333f, 0.5f, 1.0f);
-		passInfo.camera = camera;
-		passInfo.light = lightCamera;
-		_mainPass = renderer->allocateRenderPass(passInfo);
-	}
+	extractBatches(scene);
 
-	s3d::BaseElement::List meshes = scene.childrenOfType(s3d::ElementType::Mesh);
-	for (s3d::Mesh::Pointer mesh : meshes)
-		mesh->prepareRenderBatches();
+	// clip(_shadowPass, _renderBatches, _shadowPassBatches);
+	// render(_shadowPass, _shadowPassBatches);
+	// renderer->submitRenderPass(_shadowPass);
+
+	clip(_mainPass, _renderBatches, _mainPassBatches);
+	render(_mainPass, _mainPassBatches);
 	
-	_mainPass->begin();
-	renderMeshList(_mainPass, meshes);
-	_mainPass->end();
-
 	renderer->submitRenderPass(_mainPass);
 }
 
-void s3d::Renderer::renderMeshList(RenderPass::Pointer pass, const s3d::BaseElement::List& meshes)
+void Renderer::validateMainPass(RenderInterface::Pointer& renderer, const Scene::Pointer& scene)
 {
-	for (auto& lb : _latestBatches)
+	Camera::Pointer lightCamera;
+
+	BaseElement::List lights = scene->childrenOfType(ElementType::Light);
+	if (lights.size() > 0)
+		lightCamera = static_cast<Light::Pointer>(lights.front())->camera();
+
+	if (_mainPass.invalid() || (_mainPass->info().camera != scene->mainCamera()) || (_mainPass->info().light != lightCamera))
 	{
-		lb.second.clear();
+		RenderPass::ConstructionInfo passInfo;
+		passInfo.camera = scene->mainCamera();
+		passInfo.light = lightCamera;
+		passInfo.color[0].loadOperation = FramebufferOperation::Clear;
+		passInfo.color[0].storeOperation = FramebufferOperation::Store;
+		passInfo.color[0].enabled = true;
+		passInfo.depth.loadOperation = FramebufferOperation::Clear;
+		passInfo.depth.storeOperation = FramebufferOperation::DontCare;
+		passInfo.depth.enabled = true;
+		_mainPass = renderer->allocateRenderPass(passInfo);
 	}
-	
-	for (s3d::Mesh::Pointer mesh : meshes)
+}
+
+void Renderer::validateShadowPass(RenderInterface::Pointer& renderer)
+{
+	if (_shadowPass.invalid() || (_shadowPass->info().camera != _mainPass->info().light))
+	{
+		RenderPass::ConstructionInfo passInfo;
+		passInfo.priority = 5;
+		passInfo.camera = _mainPass->info().light;
+		passInfo.light = _mainPass->info().light;
+		passInfo.depth.loadOperation = FramebufferOperation::Clear;
+		passInfo.depth.storeOperation = FramebufferOperation::Store;
+		passInfo.depth.enabled = true;
+		passInfo.color[0].enabled = false;
+		_shadowPass = renderer->allocateRenderPass(passInfo);
+	}
+}
+
+void Renderer::extractBatches(const Scene::Pointer& scene)
+{
+	BaseElement::List meshes = scene->childrenOfType(ElementType::Mesh);
+
+	_renderBatches.clear();
+	_renderBatches.reserve(2 * meshes.size());
+	for (Mesh::Pointer mesh : meshes)
 	{
 		mesh->prepareRenderBatches();
-		for (auto& rb : mesh->renderBatches())
+		_renderBatches.insert(_renderBatches.end(), mesh->renderBatches().begin(), mesh->renderBatches().end());
+	}
+}
+
+void Renderer::clip(RenderPass::Pointer& pass, const RenderBatchCollection& inBatches, RenderBatchInfoCollection& passBatches)
+{
+	passBatches.clear();
+	passBatches.reserve(inBatches.size());
+
+	for (const RenderBatch::Pointer& batch : inBatches)
+	{
+		BoundingBox transformedBox = batch->boundingBox().transform(batch->transformation());
+		if (pass->info().camera->frustum().containsBoundingBox(transformedBox))
 		{
-			BoundingBox transformedBox = rb->boundingBox().transform(rb->transformation());
-			if (pass->info().camera->frustum().containsBoundingBox(transformedBox))
-			{
-				uint64_t key = rb->material()->sortingKey();
-				_latestBatches[key].emplace_back(rb, transformedBox);
-			}
+			uint64_t key = batch->material()->sortingKey();
+			passBatches.emplace_back(key, batch, transformedBox);
 		}
 	}
 
 	vec3 cameraPosition = pass->info().camera->position();
-	auto cmp = [cameraPosition](const BatchFromMesh& l, const BatchFromMesh& r) {
+	auto cmp = [cameraPosition](const RenderBatchInfo& l, const RenderBatchInfo& r) 
+	{
+		if (l.priority != r.priority)
+			return l.priority > r.priority;
+
 		const BlendState& lbs = l.batch->material()->blendState();
 		const BlendState& rbs = r.batch->material()->blendState();
 		if (lbs.enabled == rbs.enabled)
@@ -82,21 +120,17 @@ void s3d::Renderer::renderMeshList(RenderPass::Pointer pass, const s3d::BaseElem
 		return static_cast<int>(lbs.enabled) < static_cast<int>(rbs.enabled);
 	};
 
-	for (auto& rbv : _latestBatches)
-	{
-		std::stable_sort(rbv.second.begin(), rbv.second.end(), cmp);
-		for (const BatchFromMesh& rb : rbv.second)
-			pass->pushRenderBatch(rb.batch);
-	}
+	std::stable_sort(passBatches.begin(), passBatches.end(), cmp);
 }
 
-void s3d::Renderer::renderTransformedBoundingBox(RenderPass::Pointer pass, const BoundingBox& b, const mat4& t)
+void Renderer::render(RenderPass::Pointer& pass, const RenderBatchInfoCollection& batches)
 {
-    if (hasFlag(RenderDebugObjects))
-    {
-        // _bboxBatch->material()->setProperty("bboxScale", b.halfDimension);
-        // _bboxBatch->material()->setProperty("bboxCenter", b.center);
-        _bboxBatch->setTransformation(t);
-        pass->pushRenderBatch(_bboxBatch);
-    }
+	pass->begin();
+	for (const RenderBatchInfo& rb : batches)
+		pass->pushRenderBatch(rb.batch);
+	pass->end();
+
+}
+
+}
 }

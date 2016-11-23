@@ -450,6 +450,29 @@ VkSamplerMipmapMode textureFiltrationValueToSamplerMipMapMode(TextureFiltration 
 	return values.at(flt);
 }
 
+VkAttachmentLoadOp frameBufferOperationToLoadOperation(FramebufferOperation val)
+{
+	static std::map<FramebufferOperation, VkAttachmentLoadOp> values =
+	{
+		{ FramebufferOperation::Clear, VK_ATTACHMENT_LOAD_OP_CLEAR },
+		{ FramebufferOperation::Load, VK_ATTACHMENT_LOAD_OP_LOAD },
+		{ FramebufferOperation::DontCare, VK_ATTACHMENT_LOAD_OP_DONT_CARE },
+	};
+	ET_ASSERT(values.count(val) > 0);
+	return values.at(val);
+}
+
+VkAttachmentStoreOp frameBufferOperationToStoreOperation(FramebufferOperation val)
+{
+	static std::map<FramebufferOperation, VkAttachmentStoreOp> values =
+	{
+		{ FramebufferOperation::Store, VK_ATTACHMENT_STORE_OP_STORE },
+		{ FramebufferOperation::DontCare, VK_ATTACHMENT_STORE_OP_DONT_CARE },
+	};
+	ET_ASSERT(values.count(val) > 0);
+	return values.at(val);
+}
+
 namespace gl
 {
 DataType dataTypeFromGLType(int glType)
