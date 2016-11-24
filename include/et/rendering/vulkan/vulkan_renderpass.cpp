@@ -214,12 +214,11 @@ void VulkanRenderPass::begin()
 		Vector<VkImageView> attachments;
 		attachments.reserve(MaxRenderTargets + 1);
 
-		const VulkanSwapchain::RenderTarget& currentRenderTarget = _private->vulkan.swapchain.currentRenderTarget();
 		for (const RenderTarget& rt : info().color)
 		{
 			if (rt.enabled && rt.isDefaultRenderTarget)
 			{
-				attachments.emplace_back(currentRenderTarget.colorView);
+				attachments.emplace_back(_private->vulkan.swapchain.currentRenderTarget().colorView);
 			}
 			else if (rt.enabled)
 			{
@@ -228,9 +227,10 @@ void VulkanRenderPass::begin()
 				attachments.emplace_back(texture->nativeTexture().imageView);
 			}
 		}
+		
 		if (info().depth.enabled && info().depth.isDefaultRenderTarget)
 		{
-			attachments.emplace_back(currentRenderTarget.depthView);
+			attachments.emplace_back(_private->vulkan.swapchain.currentRenderTarget().depthView);
 		}
 		else if (info().depth.enabled)
 		{

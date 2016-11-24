@@ -54,6 +54,7 @@ void Renderer::validateMainPass(RenderInterface::Pointer& renderer, const Scene:
 		passInfo.color[0].loadOperation = FramebufferOperation::Clear;
 		passInfo.color[0].storeOperation = FramebufferOperation::Store;
 		passInfo.color[0].enabled = true;
+		passInfo.color[0].clearValue = vec4(0.5f, 0.25f, 0.125f, 1.0f);
 		passInfo.depth.loadOperation = FramebufferOperation::Clear;
 		passInfo.depth.storeOperation = FramebufferOperation::DontCare;
 		passInfo.depth.enabled = true;
@@ -71,9 +72,6 @@ void Renderer::validateShadowPass(RenderInterface::Pointer& renderer)
 		desc->format = TextureFormat::Depth32F;
 		_shadowTexture = renderer->createTexture(desc);
 
-		desc->format = TextureFormat::RGBA8;
-		_shadowColorTexture = renderer->createTexture(desc);
-
 		Material::Pointer defaultMaterial = renderer->sharedMaterialLibrary().loadDefaultMaterial(DefaultMaterial::Microfacet);
 		defaultMaterial->setTexture(MaterialTexture::Shadow, _shadowTexture);
 	}
@@ -83,18 +81,11 @@ void Renderer::validateShadowPass(RenderInterface::Pointer& renderer)
 		RenderPass::ConstructionInfo passInfo;
 		passInfo.camera = _mainPass->info().light;
 		passInfo.light = _mainPass->info().light;
-		
 		passInfo.depth.texture = _shadowTexture;
 		passInfo.depth.loadOperation = FramebufferOperation::Clear;
 		passInfo.depth.storeOperation = FramebufferOperation::Store;
 		passInfo.depth.isDefaultRenderTarget = false;
-		passInfo.depth.enabled = true;
-		
-		passInfo.color[0].texture = _shadowColorTexture;
-		passInfo.color[0].loadOperation = FramebufferOperation::Clear;
-		passInfo.color[0].storeOperation = FramebufferOperation::Store;
-		passInfo.color[0].enabled = false;
-		
+		passInfo.depth.enabled = true;		
 		passInfo.priority = 5;
 		_shadowPass = renderer->allocateRenderPass(passInfo);
 	}

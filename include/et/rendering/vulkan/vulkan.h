@@ -53,12 +53,6 @@ struct VulkanSwapchain
 
 	const RenderTarget& currentRenderTarget() const
 		{ return images.at(currentImageIndex); }
-
-	VkImage currentColorImage() const 
-		{ return images.at(currentImageIndex).color; }
-
-	VkImage currentDepthImage() const 
-		{ return images.at(currentImageIndex).depth; }
 };
 
 struct VulkanState

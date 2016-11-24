@@ -60,7 +60,6 @@ private:
 	RenderPass::Pointer _mainPass;
 
 	Texture::Pointer _shadowTexture;
-	Texture::Pointer _shadowColorTexture;
 	RenderBatchInfoCollection _shadowPassBatches;
 	RenderPass::Pointer _shadowPass;
 };
