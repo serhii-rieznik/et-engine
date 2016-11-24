@@ -127,6 +127,7 @@ void VulkanRenderer::init(const RenderContextParameters& params)
 	ET_ASSERT(!physicalDevices.empty());
 
 	_private->physicalDevice = physicalDevices.front();
+	vkGetPhysicalDeviceProperties(_private->physicalDevice, &_private->physicalDeviceProperties);
 
 	_private->queueProperties = enumerateVulkanObjects<VkQueueFamilyProperties>(_private->physicalDevice, vkGetPhysicalDeviceQueueFamilyProperties);
 	ET_ASSERT(!_private->queueProperties.empty());

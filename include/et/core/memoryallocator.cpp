@@ -225,9 +225,9 @@ BlockMemoryAllocator::~BlockMemoryAllocator()
 	ET_PIMPL_FINALIZE(BlockMemoryAllocator)
 }
 
-void* BlockMemoryAllocator::allocate(size_t sz)
+void* BlockMemoryAllocator::allocate(uint32_t sz)
 {
-	return _private->alloc(alignUpTo(sz & 0xffffffff, minimumAllocationSize));
+	return _private->alloc(alignUpTo(sz, uint32_t(minimumAllocationSize)));
 }
 
 void BlockMemoryAllocator::release(void* ptr)
@@ -277,7 +277,7 @@ void* BlockMemoryAllocatorPrivate::alloc(uint32_t allocSize)
 			return result;
 	}
 
-	_chunks.emplace_back(alignUpTo(std::max(allocSize, static_cast<uint32_t>(defaultChunkSize)), allocGranularity));
+	_chunks.emplace_back(alignUpTo(std::max(allocSize, uint32_t(defaultChunkSize)), uint32_t(allocGranularity)));
 
 	auto& lastChunk = _chunks.back();
 	lastChunk.allocate(allocSize, result);
@@ -412,7 +412,7 @@ MemoryChunk::MemoryChunk(uint32_t capacity) :
 	heap(capacity, minimumAllocationSize)
 {
 	uint32_t actualDataOffset = heap.requiredInfoSize();
-	uint32_t totalSize = alignUpTo(actualDataOffset + capacity, minimumAllocationSize);
+	uint32_t totalSize = alignUpTo(actualDataOffset + capacity, uint32_t(minimumAllocationSize));
 
 #if (ET_PLATFORM_APPLE)
 

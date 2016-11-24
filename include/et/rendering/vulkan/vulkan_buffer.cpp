@@ -37,10 +37,10 @@ VulkanBuffer::VulkanBuffer(VulkanState& vulkan, const Description& desc)
 
 	_private->desc.location = desc.location;
 	_private->desc.usage = desc.usage;
-	_private->desc.size = desc.size;
+	_private->desc.size = alignUpTo(desc.size, uint32_t(_private->vulkan.physicalDeviceProperties.limits.nonCoherentAtomSize));
 
 	VkBufferCreateInfo createInfo = { VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO };
-	createInfo.size = desc.size;
+	createInfo.size = _private->desc.size;
 	createInfo.usage = usageFlags[desc.usage];
 	createInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 	createInfo.usage |= (desc.location == Location::Device) ? VK_BUFFER_USAGE_TRANSFER_DST_BIT : 0;
@@ -117,9 +117,11 @@ const VulkanNativeBuffer& VulkanBuffer::nativeBuffer() const
 uint8_t* VulkanBuffer::map(uint32_t offset, uint32_t size)
 {
 	ET_ASSERT(size > 0);
-	ET_ASSERT(offset + size <= _private->desc.size);
 	ET_ASSERT(_private->desc.location == Location::Host);
 	ET_ASSERT(_private->mapped == false);
+
+	size = alignUpTo(size, uint32_t(_private->vulkan.physicalDeviceProperties.limits.nonCoherentAtomSize));
+	ET_ASSERT(offset + size <= _private->desc.size);
 
 	void* pointer = nullptr;
 	VULKAN_CALL(vkMapMemory(_private->vulkan.device, _private->memory, offset, size, 0, &pointer));
@@ -147,7 +149,7 @@ void VulkanBuffer::unmap()
 		r.sType = VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE;
 		r.memory = _private->memory;
 		r.offset = range.begin;
-		r.size = range.length;
+		r.size = alignUpTo(range.length, _private->vulkan.physicalDeviceProperties.limits.nonCoherentAtomSize);
 	}
 
 	VULKAN_CALL(vkFlushMappedMemoryRanges(_private->vulkan.device, static_cast<uint32_t>(vkRanges.size()), vkRanges.data()));

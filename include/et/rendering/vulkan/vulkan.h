@@ -65,7 +65,10 @@ struct VulkanState
 {
 	VkInstance instance = nullptr;
 	VkDebugReportCallbackEXT debugCallback = nullptr;
+
 	VkPhysicalDevice physicalDevice = nullptr;
+	VkPhysicalDeviceProperties physicalDeviceProperties { };
+
 	VkDevice device = nullptr;
 	VkCommandPool commandPool = nullptr;
 	VkDescriptorPool descriptprPool = nullptr;
@@ -83,6 +86,7 @@ struct VulkanState
 	Vector<VkQueueFamilyProperties> queueProperties;
 	uint32_t graphicsQueueIndex = static_cast<uint32_t>(-1);
 	uint32_t presentQueueIndex = static_cast<uint32_t>(-1);
+
 
 	VulkanSwapchain swapchain;
 

@@ -22,16 +22,17 @@ Renderer::Renderer() :
 
 void Renderer::render(RenderInterface::Pointer& renderer, const Scene::Pointer& scene)
 {
+	validateMainPass(renderer, scene);
+	validateShadowPass(renderer);
+
 	extractBatches(scene);
 	
-	/*
-	validateShadowPass(renderer);
+	//*
 	clip(_shadowPass, _renderBatches, _shadowPassBatches);
 	render(_shadowPass, _shadowPassBatches);
 	renderer->submitRenderPass(_shadowPass);
 	// */
 
-	validateMainPass(renderer, scene);
 	clip(_mainPass, _renderBatches, _mainPassBatches);
 	render(_mainPass, _mainPassBatches);
 	renderer->submitRenderPass(_mainPass);

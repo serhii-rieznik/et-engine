@@ -48,7 +48,7 @@ public:
 	BlockMemoryAllocator();
 	~BlockMemoryAllocator();
 	
-	void* allocate(size_t);
+	void* allocate(uint32_t);
 	bool validatePointer(void*, bool = true);
 	void release(void* ptr);
 

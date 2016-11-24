@@ -190,7 +190,8 @@ bool HeapController::containsAllocationWithOffset(uint32_t offset)
 
 uint32_t HeapController::requiredInfoSize() const
 {
-	return alignUpTo(_private->maxInfoChunks * sizeof(HeapChunkInfo), _private->granularity);
+	uint32_t sz = static_cast<uint32_t>(_private->maxInfoChunks * sizeof(HeapChunkInfo));
+	return alignUpTo(sz, _private->granularity);
 }
 
 uint32_t HeapController::capacity() const

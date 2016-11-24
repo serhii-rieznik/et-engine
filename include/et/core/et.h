@@ -87,7 +87,8 @@ struct SharedBlockAllocatorSTDProxy
 
 	pointer allocate(size_type n)
 	{
-		return reinterpret_cast<pointer>(sharedBlockAllocator().allocate(n * sizeof(T)));
+		uint32_t sz = static_cast<uint32_t>(n * sizeof(T));
+		return reinterpret_cast<pointer>(sharedBlockAllocator().allocate(sz));
 	}
 
 	void deallocate(pointer ptr, size_type)
@@ -188,10 +189,12 @@ public:
 	};
 };
 
-inline uint32_t alignUpTo(uint32_t sz, uint32_t al)
+template <class INT_T>
+inline INT_T alignUpTo(INT_T sz, INT_T al)
 {
+	static_assert(std::is_integral<INT_T>::value, "alignUpTo can only be used with integral types");
 	ET_ASSERT(al > 0);
-	uint32_t m = al - 1;
+	INT_T m = al - 1;
 	return sz + m & (~m);
 }
 

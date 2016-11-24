@@ -64,6 +64,6 @@ public:
 	PipelineState::Pointer acquirePipelineState(const RenderPass::Pointer&, const Material::Pointer&, const VertexStream::Pointer&) override;
 
 private:
-	ET_DECLARE_PIMPL(VulkanRenderer, 1024);
+	ET_DECLARE_PIMPL(VulkanRenderer, 2048);
 };
 }
