@@ -22,18 +22,18 @@ Renderer::Renderer() :
 
 void Renderer::render(RenderInterface::Pointer& renderer, const Scene::Pointer& scene)
 {
-	validateMainPass(renderer, scene);
-	validateShadowPass(renderer);
-
 	extractBatches(scene);
+	
+	/*
+	validateShadowPass(renderer);
+	clip(_shadowPass, _renderBatches, _shadowPassBatches);
+	render(_shadowPass, _shadowPassBatches);
+	renderer->submitRenderPass(_shadowPass);
+	// */
 
-	// clip(_shadowPass, _renderBatches, _shadowPassBatches);
-	// render(_shadowPass, _shadowPassBatches);
-	// renderer->submitRenderPass(_shadowPass);
-
+	validateMainPass(renderer, scene);
 	clip(_mainPass, _renderBatches, _mainPassBatches);
 	render(_mainPass, _mainPassBatches);
-	
 	renderer->submitRenderPass(_mainPass);
 }
 
@@ -62,16 +62,39 @@ void Renderer::validateMainPass(RenderInterface::Pointer& renderer, const Scene:
 
 void Renderer::validateShadowPass(RenderInterface::Pointer& renderer)
 {
+	if (_shadowTexture.invalid())
+	{
+		TextureDescription::Pointer desc = TextureDescription::Pointer::create();
+		desc->isRenderTarget = true;
+		desc->size = vec2i(1024);
+		desc->format = TextureFormat::Depth32F;
+		_shadowTexture = renderer->createTexture(desc);
+
+		desc->format = TextureFormat::RGBA8;
+		_shadowColorTexture = renderer->createTexture(desc);
+
+		Material::Pointer defaultMaterial = renderer->sharedMaterialLibrary().loadDefaultMaterial(DefaultMaterial::Microfacet);
+		defaultMaterial->setTexture(MaterialTexture::Shadow, _shadowTexture);
+	}
+
 	if (_shadowPass.invalid() || (_shadowPass->info().camera != _mainPass->info().light))
 	{
 		RenderPass::ConstructionInfo passInfo;
-		passInfo.priority = 5;
 		passInfo.camera = _mainPass->info().light;
 		passInfo.light = _mainPass->info().light;
+		
+		passInfo.depth.texture = _shadowTexture;
 		passInfo.depth.loadOperation = FramebufferOperation::Clear;
 		passInfo.depth.storeOperation = FramebufferOperation::Store;
+		passInfo.depth.isDefaultRenderTarget = false;
 		passInfo.depth.enabled = true;
+		
+		passInfo.color[0].texture = _shadowColorTexture;
+		passInfo.color[0].loadOperation = FramebufferOperation::Clear;
+		passInfo.color[0].storeOperation = FramebufferOperation::Store;
 		passInfo.color[0].enabled = false;
+		
+		passInfo.priority = 5;
 		_shadowPass = renderer->allocateRenderPass(passInfo);
 	}
 }

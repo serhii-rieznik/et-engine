@@ -26,6 +26,7 @@ namespace et
 		TextureDataLayout dataLayout = TextureDataLayout::FacesFirst;
 		uint32_t mipMapCount = 1;
 		uint32_t layersCount = 1;
+		bool isRenderTarget = false;
 
 		const uint32_t minimalDataSize = 32;
 		const vec2i minimalSizeForCompressedFormat = vec2i(4);

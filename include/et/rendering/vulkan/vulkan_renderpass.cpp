@@ -29,15 +29,13 @@ class VulkanRenderPassPrivate : public VulkanNativeRenderPass
 {
 public:
 	VulkanRenderPassPrivate(VulkanState& v, VulkanRenderer* r)
-		: vulkan(v), renderer(r)
-	{
-	}
+		: vulkan(v), renderer(r) { }
 
 	VulkanState& vulkan;
 	VulkanRenderer* renderer = nullptr;
-	VkClearValue clearValues[2]{};
 	VkFramebufferCreateInfo framebufferInfo = { VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO };
 	VkRenderPassBeginInfo beginInfo = { VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO };
+	Vector<VkClearValue> clearValues;
 
 	ConstantBufferEntry variablesData;
 	Vector<VulkanRenderBatch> batches;
@@ -60,10 +58,6 @@ VulkanRenderPass::VulkanRenderPass(VulkanRenderer* renderer, VulkanState& vulkan
 
 	VkSemaphoreCreateInfo semaphoreInfo = { VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO };
 	VULKAN_CALL(vkCreateSemaphore(vulkan.device, &semaphoreInfo, nullptr, &_private->semaphore));
-
-	const vec4& cl = passInfo.color[0].clearValue;
-	_private->clearValues[0].color = { cl.x, cl.y, cl.z, cl.w };
-	_private->clearValues[1].depthStencil.depth = passInfo.depth.clearValue.x;
 
 	VkCommandBufferAllocateInfo info = { VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO };
 	info.commandPool = vulkan.commandPool;
@@ -102,16 +96,21 @@ VulkanRenderPass::VulkanRenderPass(VulkanRenderer* renderer, VulkanState& vulkan
 			}
 			else
 			{
-				// TODO : get from texture
-				attachment.format = vulkan.swapchain.surfaceFormat.format;
+				ET_ASSERT(target.texture.valid());
+				VulkanTexture::Pointer texture = target.texture;
+				attachment.format = texture->nativeTexture().format;
 				attachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 				attachment.finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 			}
 
+			const vec4& cl = target.clearValue;
+			_private->clearValues.emplace_back();
+			_private->clearValues.back().color = { cl.x, cl.y, cl.z, cl.w };
 			++colorAttachmentCount;
 		}
 	}
 
+	VkAttachmentReference depthAttachmentReference = { colorAttachmentCount };
 	if (passInfo.depth.enabled)
 	{
 		attachments.emplace_back();
@@ -130,18 +129,21 @@ VulkanRenderPass::VulkanRenderPass(VulkanRenderer* renderer, VulkanState& vulkan
 		}
 		else
 		{
-			// TODO : get from texture
-			attachment.format = vulkan.swapchain.depthFormat;
-			attachment.finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+			ET_ASSERT(passInfo.depth.texture.valid());
+			VulkanTexture::Pointer texture = passInfo.depth.texture;
+			attachment.format = texture->nativeTexture().format;
+			attachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 		}
+		
+		_private->clearValues.emplace_back();
+		_private->clearValues.back().depthStencil = { passInfo.depth.clearValue.x };
+		depthAttachmentReference.layout = attachment.finalLayout;
 	}
-
-	VkAttachmentReference depthAttachmentReference = { colorAttachmentCount, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL };
 
 	VkSubpassDescription subpassInfo = {};
 	subpassInfo.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
 	subpassInfo.colorAttachmentCount = static_cast<uint32_t>(colorAttachmentReferences.size());
-	subpassInfo.pColorAttachments = colorAttachmentReferences.data();
+	subpassInfo.pColorAttachments = colorAttachmentReferences.empty() ? nullptr : colorAttachmentReferences.data();
 	subpassInfo.pDepthStencilAttachment = passInfo.depth.enabled ? &depthAttachmentReference : nullptr;
 
 	VkRenderPassCreateInfo createInfo = { VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO };
@@ -180,6 +182,20 @@ void VulkanRenderPass::begin()
 	uint32_t rtWidth = _private->vulkan.swapchain.extent.width;
 	uint32_t rtHeight = _private->vulkan.swapchain.extent.height;
 	uint32_t currentImageIndex = _private->vulkan.swapchain.currentImageIndex;
+
+	if (!info().color[0].isDefaultRenderTarget && info().color[0].texture.valid())
+	{
+		rtWidth = static_cast<uint32_t>(info().color[0].texture->size().x);
+		rtWidth = static_cast<uint32_t>(info().color[0].texture->size().y);
+		currentImageIndex = 0;
+	}
+	else if (!info().depth.isDefaultRenderTarget && info().depth.texture.valid())
+	{
+		rtWidth = static_cast<uint32_t>(info().depth.texture->size().x);
+		rtWidth = static_cast<uint32_t>(info().depth.texture->size().y);
+		currentImageIndex = 0;
+	}
+
 	if ((_private->framebufferInfo.width != rtWidth) || (_private->framebufferInfo.height != rtHeight))
 	{
 		for (auto& fb : _private->framebuffers)
@@ -195,10 +211,36 @@ void VulkanRenderPass::begin()
 	VkFramebuffer currentFramebuffer = _private->framebuffers[currentImageIndex];
 	if (currentFramebuffer == nullptr)
 	{
+		Vector<VkImageView> attachments;
+		attachments.reserve(MaxRenderTargets + 1);
+
 		const VulkanSwapchain::RenderTarget& currentRenderTarget = _private->vulkan.swapchain.currentRenderTarget();
-		VkImageView attachments[] = { currentRenderTarget.colorView, currentRenderTarget.depthView };
-		_private->framebufferInfo.attachmentCount = sizeof(attachments) / sizeof(attachments[0]);
-		_private->framebufferInfo.pAttachments = attachments;
+		for (const RenderTarget& rt : info().color)
+		{
+			if (rt.enabled && rt.isDefaultRenderTarget)
+			{
+				attachments.emplace_back(currentRenderTarget.colorView);
+			}
+			else if (rt.enabled)
+			{
+				ET_ASSERT(rt.texture.valid());
+				VulkanTexture::Pointer texture = rt.texture;
+				attachments.emplace_back(texture->nativeTexture().imageView);
+			}
+		}
+		if (info().depth.enabled && info().depth.isDefaultRenderTarget)
+		{
+			attachments.emplace_back(currentRenderTarget.depthView);
+		}
+		else if (info().depth.enabled)
+		{
+			ET_ASSERT(info().depth.texture.valid());
+			VulkanTexture::Pointer texture = info().depth.texture;
+			attachments.emplace_back(texture->nativeTexture().imageView);
+		}
+
+		_private->framebufferInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
+		_private->framebufferInfo.pAttachments = attachments.data();
 		_private->framebufferInfo.width = rtWidth;
 		_private->framebufferInfo.height = rtHeight;
 		_private->framebufferInfo.layers = 1;
@@ -208,8 +250,8 @@ void VulkanRenderPass::begin()
 		_private->framebuffers[currentImageIndex] = currentFramebuffer;
 	}
 
-	_private->beginInfo.clearValueCount = sizeof(_private->clearValues) / sizeof(_private->clearValues[0]);
-	_private->beginInfo.pClearValues = _private->clearValues;
+	_private->beginInfo.clearValueCount = static_cast<uint32_t>(_private->clearValues.size());
+	_private->beginInfo.pClearValues = _private->clearValues.data();
 	_private->beginInfo.renderPass = _private->renderPass;
 	_private->beginInfo.renderArea.extent.width = rtWidth;
 	_private->beginInfo.renderArea.extent.height = rtHeight;

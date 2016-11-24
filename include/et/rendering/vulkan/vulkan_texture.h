@@ -27,6 +27,6 @@ public:
 	const VulkanNativeTexture& nativeTexture() const;
 
 private:
-	ET_DECLARE_PIMPL(VulkanTexture, 256);
+	ET_DECLARE_PIMPL(VulkanTexture, 384);
 };
 }

@@ -469,6 +469,7 @@ uint32_t bitsPerPixelForDataFormat(DataFormat type);
 uint32_t bitsPerPixelForTextureFormat(TextureFormat internalFormat);
 uint32_t channelsForTextureFormat(TextureFormat internalFormat);
 bool isCompressedTextureFormat(TextureFormat internalFormat);
+bool isDepthTextureFormat(TextureFormat internalFormat);
 
 const std::string& compareFunctionToString(CompareFunction);
 const std::string& blendFunctionToString(BlendFunction);

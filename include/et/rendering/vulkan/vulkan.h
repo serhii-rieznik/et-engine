@@ -138,6 +138,8 @@ struct VulkanNativeTexture
 	VkDeviceMemory memory = nullptr;
 	VkMemoryRequirements memoryRequirements { };
 	VkImageLayout layout = VK_IMAGE_LAYOUT_UNDEFINED;
+	VkFormat format = VK_FORMAT_UNDEFINED;
+	VkImageAspectFlags aspect = VkImageAspectFlagBits::VK_IMAGE_ASPECT_FLAG_BITS_MAX_ENUM;
 };
 
 struct VulkanNativeSampler

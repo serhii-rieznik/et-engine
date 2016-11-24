@@ -17,9 +17,7 @@ class VulkanTexturePrivate : public VulkanNativeTexture
 {
 public:
 	VulkanTexturePrivate(VulkanState& v) :
-		vulkan(v)
-	{
-	}
+		vulkan(v) { }
 
 	VulkanState& vulkan;
 	TextureDescription description;
@@ -36,10 +34,12 @@ VulkanTexture::VulkanTexture(VulkanState& vulkan, const TextureDescription::Poin
 	_private->description.layersCount = desc->layersCount;
 	_private->description.dataLayout = desc->dataLayout;
 	_private->description.mipMapCount = desc->mipMapCount;
+	_private->format = vulkan::textureFormatValue(desc->format);
+	_private->aspect = isDepthTextureFormat(desc->format) ? VK_IMAGE_ASPECT_DEPTH_BIT : VK_IMAGE_ASPECT_COLOR_BIT;
 
 	VkImageCreateInfo info = { VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO };
 	info.extent = { static_cast<uint32_t>(desc->size.x), static_cast<uint32_t>(desc->size.y), 1 };
-	info.format = vulkan::textureFormatValue(desc->format);
+	info.format = _private->format;
 	info.imageType = vulkan::textureTargetToImageType(desc->target);
 	info.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 	info.mipLevels = desc->mipMapCount;
@@ -48,6 +48,14 @@ VulkanTexture::VulkanTexture(VulkanState& vulkan, const TextureDescription::Poin
 	info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 	info.tiling = VK_IMAGE_TILING_OPTIMAL;
 	info.usage = VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+	
+	if (desc->isRenderTarget)
+	{
+		info.usage |= isDepthTextureFormat(desc->format) ? 
+			VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT : 
+			VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+	}
+	
 	VULKAN_CALL(vkCreateImage(vulkan.device, &info, nullptr, &_private->image));
 
 	vkGetImageMemoryRequirements(vulkan.device, _private->image, &_private->memoryRequirements);
@@ -64,7 +72,7 @@ VulkanTexture::VulkanTexture(VulkanState& vulkan, const TextureDescription::Poin
 	imageViewInfo.image = _private->image;
 	imageViewInfo.viewType = vulkan::textureTargetToImageViewType(desc->target);
 	imageViewInfo.format = vulkan::textureFormatValue(desc->format);
-	imageViewInfo.subresourceRange = { VK_IMAGE_ASPECT_COLOR_BIT, 0, desc->mipMapCount, 0, 1 };
+	imageViewInfo.subresourceRange = { _private->aspect, 0, desc->mipMapCount, 0, 1 };
 	VULKAN_CALL(vkCreateImageView(vulkan.device, &imageViewInfo, nullptr, &_private->imageView));
 
 	if (desc->data.size() > 0)
@@ -96,7 +104,7 @@ void VulkanTexture::setImageData(const BinaryDataStorage& data)
 	regions.reserve(_private->description.mipMapCount);
 
 	VkBufferImageCopy region = { };
-	region.imageSubresource = { VK_IMAGE_ASPECT_COLOR_BIT };
+	region.imageSubresource = { _private->aspect };
 	region.imageSubresource.layerCount = 1;
 	region.imageExtent.depth = 1;
 	for (uint32_t m = 0; m < _private->description.mipMapCount; ++m)
@@ -112,7 +120,7 @@ void VulkanTexture::setImageData(const BinaryDataStorage& data)
 	_private->vulkan.executeServiceCommands([&](VkCommandBuffer cmdBuffer)
 	{
 		vulkan::imageBarrier(_private->vulkan, cmdBuffer, _private->image,
-			VK_IMAGE_ASPECT_COLOR_BIT, 0, VK_ACCESS_TRANSFER_WRITE_BIT, 
+			_private->aspect, 0, VK_ACCESS_TRANSFER_WRITE_BIT, 
 			VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
 			VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT, 
 			0, _private->description.mipMapCount);
@@ -122,7 +130,7 @@ void VulkanTexture::setImageData(const BinaryDataStorage& data)
 			static_cast<uint32_t>(regions.size()), regions.data());
 
 		vulkan::imageBarrier(_private->vulkan, cmdBuffer, _private->image,
-			VK_IMAGE_ASPECT_COLOR_BIT, VK_ACCESS_TRANSFER_WRITE_BIT, VK_ACCESS_SHADER_READ_BIT, 
+			_private->aspect, VK_ACCESS_TRANSFER_WRITE_BIT, VK_ACCESS_SHADER_READ_BIT, 
 			VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, 
 			VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 
 			0, _private->description.mipMapCount);

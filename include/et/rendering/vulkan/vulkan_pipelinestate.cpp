@@ -57,12 +57,21 @@ const VulkanNativePipeline& VulkanPipelineState::nativePipeline() const
 
 void VulkanPipelineState::build()
 {
-	VkPipelineColorBlendAttachmentState attachmentInfo = { };
+	Vector<VkPipelineColorBlendAttachmentState> attachmentInfo;
+	attachmentInfo.reserve(MaxRenderTargets);
+
+	for (const RenderTarget& rt : renderPass()->info().color)
+	{
+		if (rt.enabled)
+		{
+			attachmentInfo.emplace_back();
+			attachmentInfo.back().colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
+		}
+	}
 	VkPipelineColorBlendStateCreateInfo blendInfo = { VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO };
 	{
-		attachmentInfo.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
-		blendInfo.pAttachments = &attachmentInfo;
-		blendInfo.attachmentCount = 1;
+		blendInfo.pAttachments = attachmentInfo.data();
+		blendInfo.attachmentCount = static_cast<uint32_t>(attachmentInfo.size());
 	}
 
 	VkPipelineDepthStencilStateCreateInfo depthInfo = { VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO };

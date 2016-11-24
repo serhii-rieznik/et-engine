@@ -319,14 +319,14 @@ VkFormat dataTypeValue(DataType fmt)
 {
 	static const Map<DataType, VkFormat> lookup =
 	{
-		{ DataType::Float, VkFormat::VK_FORMAT_R32_SFLOAT },
-		{ DataType::Vec2, VkFormat::VK_FORMAT_R32G32_SFLOAT },
-		{ DataType::Vec3, VkFormat::VK_FORMAT_R32G32B32_SFLOAT },
-		{ DataType::Vec4, VkFormat::VK_FORMAT_R32G32B32A32_SFLOAT },
-		{ DataType::Int, VkFormat::VK_FORMAT_R32_SINT },
-		{ DataType::IntVec2, VkFormat::VK_FORMAT_R32G32_SINT },
-		{ DataType::IntVec3, VkFormat::VK_FORMAT_R32G32B32_SINT },
-		{ DataType::IntVec4, VkFormat::VK_FORMAT_R32G32B32A32_SINT },
+		{ DataType::Float, VK_FORMAT_R32_SFLOAT },
+		{ DataType::Vec2, VK_FORMAT_R32G32_SFLOAT },
+		{ DataType::Vec3, VK_FORMAT_R32G32B32_SFLOAT },
+		{ DataType::Vec4, VK_FORMAT_R32G32B32A32_SFLOAT },
+		{ DataType::Int, VK_FORMAT_R32_SINT },
+		{ DataType::IntVec2, VK_FORMAT_R32G32_SINT },
+		{ DataType::IntVec3, VK_FORMAT_R32G32B32_SINT },
+		{ DataType::IntVec4, VK_FORMAT_R32G32B32A32_SINT },
 	};
 	ET_ASSERT(lookup.count(fmt) > 0);
 	return lookup.at(fmt);
@@ -336,9 +336,12 @@ VkFormat textureFormatValue(TextureFormat fmt)
 {
 	static const Map<TextureFormat, VkFormat> lookup =
 	{
-		{ TextureFormat::RGBA8, VkFormat::VK_FORMAT_R8G8B8A8_UNORM },
-		{ TextureFormat::BGRA8, VkFormat::VK_FORMAT_B8G8R8A8_UNORM },
-		{ TextureFormat::RGBA32F, VkFormat::VK_FORMAT_R32G32B32A32_SFLOAT },
+		{ TextureFormat::RGBA8, VK_FORMAT_R8G8B8A8_UNORM },
+		{ TextureFormat::BGRA8, VK_FORMAT_B8G8R8A8_UNORM },
+		{ TextureFormat::RGBA32F, VK_FORMAT_R32G32B32A32_SFLOAT },
+		{ TextureFormat::Depth16, VK_FORMAT_D16_UNORM },
+		{ TextureFormat::Depth24, VK_FORMAT_D24_UNORM_S8_UINT },
+		{ TextureFormat::Depth32F, VK_FORMAT_D32_SFLOAT },
 	};
 	ET_ASSERT(lookup.count(fmt) > 0);
 	return lookup.at(fmt);
