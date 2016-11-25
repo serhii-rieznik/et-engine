@@ -67,7 +67,6 @@ struct VulkanState
 	VkCommandPool commandPool = nullptr;
 	VkDescriptorPool descriptprPool = nullptr;
 	VkQueue queue = nullptr;
-	VkFence submitFence = nullptr;
 	VkPipelineCache pipelineCache = nullptr;
 	VkCommandBuffer serviceCommandBuffer = nullptr;
 

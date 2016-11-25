@@ -172,9 +172,6 @@ void VulkanRenderer::init(const RenderContextParameters& params)
 	VULKAN_CALL(vkCreateSemaphore(_private->device, &semaphoreInfo, nullptr, &_private->semaphores.renderComplete));
 	VULKAN_CALL(vkCreateSemaphore(_private->device, &semaphoreInfo, nullptr, &_private->semaphores.imageAvailable));
 
-	VkFenceCreateInfo fenceInfo = { VK_STRUCTURE_TYPE_FENCE_CREATE_INFO };
-	VULKAN_CALL(vkCreateFence(_private->device, &fenceInfo, nullptr, &_private->submitFence));
-
 	HWND mainWindow = reinterpret_cast<HWND>(application().context().objects[0]);
 	_private->swapchain.init(_private->vulkan(), params, mainWindow);
 
@@ -361,10 +358,8 @@ void VulkanRenderer::present()
 		commandBuffersOffset += submitInfo.commandBufferCount;
 		waitOffset += submitInfo.waitSemaphoreCount;
 		signalOffset += submitInfo.signalSemaphoreCount;
-		VULKAN_CALL(vkQueueSubmit(_private->queue, static_cast<uint32_t>(allSubmits.size()), allSubmits.data(), nullptr));
-		allSubmits.clear();
 	}
-	// VULKAN_CALL(vkQueueSubmit(_private->queue, static_cast<uint32_t>(allSubmits.size()), allSubmits.data(), nullptr));
+	VULKAN_CALL(vkQueueSubmit(_private->queue, static_cast<uint32_t>(allSubmits.size()), allSubmits.data(), nullptr));
 	_private->swapchain.present(_private->vulkan());
 	_private->passes.clear();
 	VULKAN_CALL(vkQueueWaitIdle(_private->queue));
