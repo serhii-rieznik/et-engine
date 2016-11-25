@@ -64,12 +64,11 @@ void Renderer::validateShadowPass(RenderInterface::Pointer& renderer)
 {
 	if (_shadowTexture.invalid())
 	{
-		TextureDescription::Pointer desc = TextureDescription::Pointer::create();
-		desc->isRenderTarget = true;
-		desc->size = vec2i(1024);
-		desc->format = TextureFormat::Depth32F;
-		_shadowTexture = renderer->createTexture(desc);
-
+        TextureDescription::Pointer desc = TextureDescription::Pointer::create();
+        desc->isRenderTarget = true;
+        desc->size = vec2i(1024); // TODO : variable size
+        desc->format = TextureFormat::Depth32F;
+        _shadowTexture = renderer->createTexture(desc);
 		Material::Pointer defaultMaterial = renderer->sharedMaterialLibrary().loadDefaultMaterial(DefaultMaterial::Microfacet);
 		defaultMaterial->setTexture(MaterialTexture::Shadow, _shadowTexture);
 	}
@@ -79,13 +78,14 @@ void Renderer::validateShadowPass(RenderInterface::Pointer& renderer)
 		RenderPass::ConstructionInfo passInfo;
 		passInfo.camera = _mainPass->info().light;
 		passInfo.light = _mainPass->info().light;
+        passInfo.priority = 5;
 		passInfo.depth.texture = _shadowTexture;
 		passInfo.depth.loadOperation = FramebufferOperation::Clear;
 		passInfo.depth.storeOperation = FramebufferOperation::Store;
-		passInfo.depth.isDefaultRenderTarget = false;
+		passInfo.depth.useDefaultRenderTarget = false;
 		passInfo.depth.enabled = true;		
-		passInfo.priority = 5;
-		_shadowPass = renderer->allocateRenderPass(passInfo);
+        passInfo.color[0].enabled = false;
+        _shadowPass = renderer->allocateRenderPass(passInfo);
 	}
 }
 

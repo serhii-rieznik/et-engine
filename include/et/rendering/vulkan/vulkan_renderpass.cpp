@@ -88,7 +88,7 @@ VulkanRenderPass::VulkanRenderPass(VulkanRenderer* renderer, VulkanState& vulkan
 			attachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
 			attachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
 
-			if (target.isDefaultRenderTarget)
+			if (target.useDefaultRenderTarget)
 			{
 				attachment.format = vulkan.swapchain.surfaceFormat.format;
 				attachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
@@ -122,7 +122,7 @@ VulkanRenderPass::VulkanRenderPass(VulkanRenderer* renderer, VulkanState& vulkan
 		attachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
 		attachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 
-		if (passInfo.depth.isDefaultRenderTarget)
+		if (passInfo.depth.useDefaultRenderTarget)
 		{
 			attachment.format = vulkan.swapchain.depthFormat;
 			attachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
@@ -183,13 +183,13 @@ void VulkanRenderPass::begin()
 	uint32_t rtHeight = _private->vulkan.swapchain.extent.height;
 	uint32_t currentImageIndex = _private->vulkan.swapchain.currentImageIndex;
 
-	if (!info().color[0].isDefaultRenderTarget && info().color[0].texture.valid())
+	if (!info().color[0].useDefaultRenderTarget && info().color[0].texture.valid())
 	{
 		rtWidth = static_cast<uint32_t>(info().color[0].texture->size().x);
         rtHeight = static_cast<uint32_t>(info().color[0].texture->size().y);
 		currentImageIndex = 0;
 	}
-	else if (!info().depth.isDefaultRenderTarget && info().depth.texture.valid())
+	else if (!info().depth.useDefaultRenderTarget && info().depth.texture.valid())
 	{
 		rtWidth = static_cast<uint32_t>(info().depth.texture->size().x);
 		rtHeight = static_cast<uint32_t>(info().depth.texture->size().y);
@@ -216,7 +216,7 @@ void VulkanRenderPass::begin()
 
 		for (const RenderTarget& rt : info().color)
 		{
-			if (rt.enabled && rt.isDefaultRenderTarget)
+			if (rt.enabled && rt.useDefaultRenderTarget)
 			{
 				attachments.emplace_back(_private->vulkan.swapchain.currentRenderTarget().colorView);
 			}
@@ -228,7 +228,7 @@ void VulkanRenderPass::begin()
 			}
 		}
 		
-		if (info().depth.enabled && info().depth.isDefaultRenderTarget)
+		if (info().depth.enabled && info().depth.useDefaultRenderTarget)
 		{
 			attachments.emplace_back(_private->vulkan.swapchain.currentRenderTarget().depthView);
 		}

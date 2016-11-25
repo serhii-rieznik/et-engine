@@ -20,7 +20,7 @@ struct RenderTarget
 	FramebufferOperation loadOperation = FramebufferOperation::Clear;
 	FramebufferOperation storeOperation = FramebufferOperation::Store;
 	vec4 clearValue = vec4(1.0f);
-	bool isDefaultRenderTarget = true;
+	bool useDefaultRenderTarget = true;
 	bool enabled = false;
 };
 
