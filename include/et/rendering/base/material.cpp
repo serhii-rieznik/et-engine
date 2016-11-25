@@ -79,6 +79,16 @@ float Material::getFloat(MaterialParameter p) const
 	return getParameter<float>(p);
 }
 
+Program::Pointer Material::program(RenderPassClass pt) const
+{
+	auto i = _programs.find(pt);
+	if (i != _programs.end())
+		return i->second;
+
+	log::error("Material %s does not contain program for pass type %d", name().c_str(), static_cast<uint32_t>(pt));
+	return Program::Pointer();
+}
+
 Texture::Pointer Material::texture(MaterialTexture t)
 {
 	return textures[static_cast<uint32_t>(t)].object;
@@ -89,9 +99,9 @@ Sampler::Pointer Material::sampler(MaterialTexture t)
 	return samplers[static_cast<uint32_t>(t)].object;
 }
 
-void Material::setProgram(Program::Pointer p)
+void Material::setProgram(const Program::Pointer& prog, RenderPassClass pt)
 {
-	_program = p;
+	_programs[pt] = prog;
 }
 
 void Material::setDepthState(const DepthState& ds)
@@ -129,8 +139,18 @@ void Material::loadFromJson(const std::string& source, const std::string& baseFo
 	}
 
 	loadInputLayout(obj.dictionaryForKey(kInputLayout));
-	
-	loadCode(obj.stringForKey(kCode)->content, baseFolder, obj.dictionaryForKey(kOptions));
+
+	Dictionary codeContainer;
+	{
+		VariantBase::Pointer codeObj = obj.objectForKey(kCode);
+		if (codeObj->variantClass() == VariantClass::String)
+			codeContainer.setObjectForKey("forward", codeObj);
+		else if (codeObj->variantClass() == VariantClass::Dictionary)
+			codeContainer = codeObj;
+		else 
+			ET_FAIL("Invalid type for `code` parameter in material. Should be string or dictionary");
+	}
+	loadCode(codeContainer, baseFolder, obj.dictionaryForKey(kOptions));
 }
 
 void Material::loadInputLayout(Dictionary layout)
@@ -193,7 +213,17 @@ std::string Material::generateInputLayout()
 	return layout;
 }
 
-void Material::loadCode(const std::string& codeString, const std::string& baseFolder, Dictionary defines)
+void Material::loadCode(const Dictionary& codes, const std::string& baseFolder, Dictionary defines)
+{
+	for (const auto& kv : codes->content)
+	{
+		ET_ASSERT(kv.second->variantClass() == VariantClass::String);
+		RenderPassClass cls = stringToRenderPassClass(kv.first);
+		loadCode(StringValue(kv.second)->content, cls, baseFolder, defines);
+	}
+}
+
+void Material::loadCode(const std::string& codeString, RenderPassClass passCls, const std::string& baseFolder, Dictionary defines)
 {
 	std::string codeFileName;
 
@@ -257,7 +287,7 @@ void Material::loadCode(const std::string& codeString, const std::string& baseFo
 		}
 	}, {ParseDirective::StageDefine});
 
-	setProgram(_renderer->createProgram(programSource));
+	setProgram(_renderer->createProgram(programSource), passCls);
 }
 
 MaterialInstancePointer Material::instance()
@@ -269,10 +299,10 @@ MaterialInstancePointer Material::instance()
 	result->textures = textures;
 	result->samplers = samplers;
 	result->properties = properties;
+	result->_programs = _programs;
 	result->setCullMode(cullMode());
 	result->setDepthState(depthState());
 	result->setBlendState(blendState());
-	result->setProgram(program());
 	_instances.emplace_back(result);
 	return result;
 }
@@ -300,34 +330,33 @@ Material::Pointer MaterialInstance::base()
 	return _base;
 }
 
-void MaterialInstance::buildTextureSet()
+void MaterialInstance::buildTextureSet(RenderPassClass pt)
 {
-	_textureSet.reset(nullptr);
-
-	ET_ASSERT(program().valid());
+	ET_ASSERT(program(pt).valid());
 	
-	const Program::Reflection& reflection = program()->reflection();
+	Program::Pointer prog = program(pt);
+	const Program::Reflection& reflection = prog->reflection();
 
 	TextureSet::Description description;
-	for (const auto& i : program()->reflection().textures.fragmentTextures)
+	for (const auto& i : prog->reflection().textures.fragmentTextures)
 	{
 		description.fragmentTextures[i.second] = base()->textures[i.second].object;
 		if (textures[i.second].object.valid())
 			description.fragmentTextures[i.second] = textures[i.second].object;
 	}
-	for (const auto& i : program()->reflection().textures.vertexTextures)
+	for (const auto& i : prog->reflection().textures.vertexTextures)
 	{
 		description.vertexTextures[i.second] = base()->textures[i.second].object;
 		if (textures[i.second].object.valid())
 			description.vertexTextures[i.second] = textures[i.second].object;
 	}
-	for (const auto& i : program()->reflection().textures.fragmentSamplers)
+	for (const auto& i : prog->reflection().textures.fragmentSamplers)
 	{
 		description.fragmentSamplers[i.second] = base()->samplers[i.second].object;
 		if (samplers[i.second].object.valid())
 			description.fragmentSamplers[i.second] = samplers[i.second].object;
 	}
-	for (const auto& i : program()->reflection().textures.vertexSamplers)
+	for (const auto& i : prog->reflection().textures.vertexSamplers)
 	{
 		description.vertexSamplers[i.second] = base()->samplers[i.second].object;
 		if (samplers[i.second].object.valid())
@@ -355,28 +384,28 @@ void MaterialInstance::buildTextureSet()
 			i.second = _renderer->defaultSampler();
 	}
 	
-	_textureSet = _renderer->createTextureSet(description);
-	_textureSetValid = true;
+	_textureSets[pt].obj = _renderer->createTextureSet(description);
+	_textureSets[pt].valid = true;
 }
 
-void MaterialInstance::buildConstantBuffer()
+void MaterialInstance::buildConstantBuffer(RenderPassClass pt)
 {
-	ET_ASSERT(program().valid());
+	Program::Pointer prog = program(pt);
+	ET_ASSERT(prog.valid());
 
-	if (_constBufferData.valid())
-	{
-		_renderer->sharedConstantBuffer().free(_constBufferData);
-		_constBufferData = { };
-	}
+	ConstantBufferEntry entry = _constBuffers[pt].obj;
+	if (entry.valid())
+		_renderer->sharedConstantBuffer().free(entry);
 	
-	const Program::Reflection& reflection = program()->reflection();
+	const Program::Reflection& reflection = prog->reflection();
 	if (reflection.materialVariablesBufferSize == 0)
 	{
-		_constantBufferValid = true;
+		_constBuffers[pt].obj = { };
+		_constBuffers[pt].valid = true;
 		return;
 	}
 
-	_constBufferData = _renderer->sharedConstantBuffer().staticAllocate(reflection.materialVariablesBufferSize);
+	entry = _renderer->sharedConstantBuffer().staticAllocate(reflection.materialVariablesBufferSize);
 
 	auto setFunc = [&, this](const mtl::OptionalValue& p) 
 	{
@@ -386,7 +415,7 @@ void MaterialInstance::buildConstantBuffer()
 			auto var = reflection.materialVariables.find(name);
 			if (var != reflection.materialVariables.end())
 			{
-				memcpy(_constBufferData.data() + var->second.offset, p.data, p.size);
+				memcpy(entry.data() + var->second.offset, p.data, p.size);
 			}
 		}
 	};
@@ -397,33 +426,36 @@ void MaterialInstance::buildConstantBuffer()
 	for (const auto& p : properties)
 		setFunc(p);
 
-	_constantBufferValid = true;
+	_constBuffers[pt].obj = entry;
+	_constBuffers[pt].valid = true;
 }
 
-TextureSet::Pointer MaterialInstance::textureSet()
+TextureSet::Pointer MaterialInstance::textureSet(RenderPassClass pt)
 {
-	if (!_textureSetValid)
-		buildTextureSet();
+	if (!_textureSets[pt].valid)
+		buildTextureSet(pt);
 
-	return _textureSet;
+	return _textureSets.at(pt).obj;
 }
 
-ConstantBufferEntry MaterialInstance::constantBufferData()
+ConstantBufferEntry MaterialInstance::constantBufferData(RenderPassClass pt)
 {
-	if (!_constantBufferValid)
-		buildConstantBuffer();
+	if (!_constBuffers[pt].valid)
+		buildConstantBuffer(pt);
 
-	return _constBufferData;
+	return _constBuffers.at(pt).obj;
 }
 
 void MaterialInstance::invalidateTextureSet()
 {
-	_textureSetValid = false;
+	for (auto& hld : _textureSets)
+		hld.second.valid = false;
 }
 
 void MaterialInstance::invalidateConstantBuffer()
 {
-	_constantBufferValid = false;
+	for (auto& hld : _constBuffers)
+		hld.second.valid = false;
 }
 
 /*

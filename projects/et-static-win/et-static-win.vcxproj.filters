@@ -310,9 +310,6 @@
     <ClCompile Include="..\..\include\et\compile_packs\platform-win.pack.cxx">
       <Filter>Source\compile_packs</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\include\et\compile_packs\rendering.pack.cxx">
-      <Filter>Source\compile_packs</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\include\et\compile_packs\scene3d.pack.cxx">
       <Filter>Source\compile_packs</Filter>
     </ClCompile>
@@ -1220,6 +1217,12 @@
     </ClCompile>
     <ClCompile Include="..\..\include\external\glslang\glslang\OSDependent\Windows\ossource.cpp">
       <Filter>glslang\glslang\OSDependent</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\include\et\compile_packs\rendering.pack_1.cxx">
+      <Filter>Source\compile_packs</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\include\et\compile_packs\rendering.pack_2.cxx">
+      <Filter>Source\compile_packs</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -90,7 +90,8 @@
     <ClCompile Include="..\..\include\et\compile_packs\imaging.pack.cxx" />
     <ClCompile Include="..\..\include\et\compile_packs\input.pack.cxx" />
     <ClCompile Include="..\..\include\et\compile_packs\platform-win.pack.cxx" />
-    <ClCompile Include="..\..\include\et\compile_packs\rendering.pack.cxx" />
+    <ClCompile Include="..\..\include\et\compile_packs\rendering.pack_1.cxx" />
+    <ClCompile Include="..\..\include\et\compile_packs\rendering.pack_2.cxx" />
     <ClCompile Include="..\..\include\et\compile_packs\scene3d.pack.cxx" />
     <ClCompile Include="..\..\include\et\compile_packs\sound.pack.cxx" />
     <ClInclude Include="..\..\include\et\core\base64.cpp" />

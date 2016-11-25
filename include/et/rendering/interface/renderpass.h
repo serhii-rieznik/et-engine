@@ -8,8 +8,9 @@
 #pragma once
 
 #include <et/camera/camera.h>
-#include <et/rendering/base/renderbatch.h>
+#include <et/rendering/rendering.h>
 #include <et/rendering/constantbuffer.h>
+#include <et/rendering/base/renderbatch.h>
 
 namespace et
 {
@@ -37,6 +38,8 @@ public:
 		
 		Camera::Pointer camera;
 		Camera::Pointer light;
+		
+		RenderPassClass renderPassClass = RenderPassClass::Forward;
 		uint32_t priority = 0;
 	};
 

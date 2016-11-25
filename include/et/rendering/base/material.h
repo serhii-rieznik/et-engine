@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <et/rendering/rendering.h>
 #include <et/rendering/base/materialhelpers.h>
 #include <et/rendering/constantbuffer.h>
 
@@ -40,9 +41,8 @@ public:
 	void setFloat(MaterialParameter, float);
 	float getFloat(MaterialParameter) const;
 
-	Program::Pointer program() const 
-		{ return _program; }
-	
+	Program::Pointer program(RenderPassClass) const;
+
 	const DepthState& depthState() const
 		{ return _depthState; }
 
@@ -52,7 +52,7 @@ public:
 	CullMode cullMode() const
 		{ return _cullMode; }
 
-	void setProgram(Program::Pointer);
+	void setProgram(const Program::Pointer&, RenderPassClass);
 	void setDepthState(const DepthState&);
 	void setBlendState(const BlendState&);
 	void setCullMode(CullMode);
@@ -68,7 +68,8 @@ private:
 	T getParameter(MaterialParameter) const;
 
 	void loadInputLayout(Dictionary);
-	void loadCode(const std::string&, const std::string& baseFolder, Dictionary defines);
+	void loadCode(const Dictionary & codes, const std::string & baseFolder, Dictionary defines);
+	void loadCode(const std::string&, RenderPassClass passCls, const std::string& baseFolder, Dictionary defines);
 	std::string generateInputLayout();
 
 protected: // overrided / read by instanaces
@@ -78,9 +79,8 @@ protected: // overrided / read by instanaces
 
 private: // permanent private data
 	RenderInterface* _renderer = nullptr;
+	std::map<RenderPassClass, Program::Pointer> _programs;
 	MaterialInstanceCollection _instances;
-
-	Program::Pointer _program;
 	VertexDeclaration _inputLayout;
 	DepthState _depthState;
 	BlendState _blendState;
@@ -97,8 +97,8 @@ public:
 public:
 	Material::Pointer base();
 
-	TextureSet::Pointer textureSet();
-	ConstantBufferEntry constantBufferData();
+	TextureSet::Pointer textureSet(RenderPassClass);
+	ConstantBufferEntry constantBufferData(RenderPassClass);
 
 	void invalidateTextureSet();
 	void invalidateConstantBuffer();
@@ -108,15 +108,21 @@ private:
 	friend class ObjectFactory;
 	MaterialInstance(Material::Pointer base);
 
-	void buildTextureSet();
-	void buildConstantBuffer();
+	void buildTextureSet(RenderPassClass);
+	void buildConstantBuffer(RenderPassClass);
+
+private:
+	template <class T>
+	struct Holder
+	{
+		T obj;
+		bool valid = false;
+	};
 
 private:
 	Material::Pointer _base;
-	TextureSet::Pointer _textureSet;
-	ConstantBufferEntry _constBufferData;
-	bool _textureSetValid = false;
-	bool _constantBufferValid = false;
+	std::map<RenderPassClass, Holder<TextureSet::Pointer>> _textureSets;
+	std::map<RenderPassClass, Holder<ConstantBufferEntry>> _constBuffers;
 };
 
 template <class T>

@@ -550,6 +550,17 @@ bool stringToCullMode(const std::string& mode, CullMode& outMode)
 	return false;
 }
 
+RenderPassClass stringToRenderPassClass(const std::string& cls)
+{
+	static const std::unordered_map<std::string, RenderPassClass> values = 
+	{
+		{ "forward", RenderPassClass::Forward },
+		{ "depth", RenderPassClass::Depth },
+	};
+	ET_ASSERT(values.count(cls) > 0);
+	return values.at(cls);
+}
+
 template <class T>
 using ValueNamePair = const std::pair<T, std::string>;
 

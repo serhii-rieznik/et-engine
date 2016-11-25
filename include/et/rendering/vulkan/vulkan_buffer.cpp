@@ -37,10 +37,11 @@ VulkanBuffer::VulkanBuffer(VulkanState& vulkan, const Description& desc)
 
 	_private->desc.location = desc.location;
 	_private->desc.usage = desc.usage;
-	_private->desc.size = alignUpTo(desc.size, uint32_t(_private->vulkan.physicalDeviceProperties.limits.nonCoherentAtomSize));
+	_private->desc.size = desc.size;
+	_private->desc.alignedSize = alignUpTo(desc.size, uint32_t(_private->vulkan.physicalDeviceProperties.limits.nonCoherentAtomSize));
 
 	VkBufferCreateInfo createInfo = { VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO };
-	createInfo.size = _private->desc.size;
+	createInfo.size = _private->desc.alignedSize;
 	createInfo.usage = usageFlags[desc.usage];
 	createInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 	createInfo.usage |= (desc.location == Location::Device) ? VK_BUFFER_USAGE_TRANSFER_DST_BIT : 0;
@@ -73,7 +74,7 @@ VulkanBuffer::~VulkanBuffer()
 
 void VulkanBuffer::updateData(uint32_t offset, const BinaryDataStorage& data)
 {
-	ET_ASSERT(offset + data.size() <= _private->desc.size);
+	ET_ASSERT(offset + data.size() <= _private->desc.alignedSize);
 
 	if (_private->desc.location == Location::Host)
 	{
@@ -121,7 +122,7 @@ uint8_t* VulkanBuffer::map(uint32_t offset, uint32_t size)
 	ET_ASSERT(_private->mapped == false);
 
 	size = alignUpTo(size, uint32_t(_private->vulkan.physicalDeviceProperties.limits.nonCoherentAtomSize));
-	ET_ASSERT(offset + size <= _private->desc.size);
+	ET_ASSERT(offset + size <= _private->desc.alignedSize);
 
 	void* pointer = nullptr;
 	VULKAN_CALL(vkMapMemory(_private->vulkan.device, _private->memory, offset, size, 0, &pointer));

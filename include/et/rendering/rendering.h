@@ -74,6 +74,12 @@ enum class FillMode : uint32_t
 	max
 };
 
+enum class RenderPassClass : uint32_t
+{
+	Forward,
+	Depth
+};
+
 /*
  * Engine-specific declarations
  */
@@ -491,6 +497,8 @@ BlendState deserializeBlendState(const Dictionary&);
 
 std::string cullModeToString(CullMode);
 bool stringToCullMode(const std::string&, CullMode&);
+
+RenderPassClass stringToRenderPassClass(const std::string&);
 
 template <class T>
 DataType dataTypeFromClass();

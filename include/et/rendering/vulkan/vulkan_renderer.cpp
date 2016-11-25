@@ -29,14 +29,16 @@ namespace et
 class VulkanRendererPrivate : public VulkanState
 {
 public:
-	VulkanState& vulkan() 
-		{ return *this; }
+	VulkanState& vulkan()
+	{
+		return *this;
+	}
 
 	PipelineStateCache pipelineCache;
 	Vector<VulkanRenderPass::Pointer> passes;
 };
 
-VulkanRenderer::VulkanRenderer(RenderContext* rc) 
+VulkanRenderer::VulkanRenderer(RenderContext* rc)
 	: RenderInterface(rc)
 {
 	ET_PIMPL_INIT(VulkanRenderer);
@@ -74,10 +76,10 @@ VkBool32 vulkanDebugCallback(VkDebugReportFlagsEXT flags, VkDebugReportObjectTyp
 
 void VulkanRenderer::init(const RenderContextParameters& params)
 {
-	std::vector<const char*> enabledExtensions = 
-	{ 
-		VK_KHR_SURFACE_EXTENSION_NAME, 
-		VK_KHR_WIN32_SURFACE_EXTENSION_NAME, 
+	std::vector<const char*> enabledExtensions =
+	{
+		VK_KHR_SURFACE_EXTENSION_NAME,
+		VK_KHR_WIN32_SURFACE_EXTENSION_NAME,
 #	if (VULKAN_ENABLE_VALIDATION)
 		VK_EXT_DEBUG_REPORT_EXTENSION_NAME,
 #	endif
@@ -93,7 +95,7 @@ void VulkanRenderer::init(const RenderContextParameters& params)
 		if (strstr(layerProp.layerName, "validation"))
 		{
 			validationLayers.emplace_back(layerProp.layerName);
-            log::info("Vulkan validation layer used: %s (%s)", layerProp.layerName, layerProp.description);
+			log::info("Vulkan validation layer used: %s (%s)", layerProp.layerName, layerProp.description);
 		}
 	}
 #endif
@@ -102,7 +104,7 @@ void VulkanRenderer::init(const RenderContextParameters& params)
 	appInfo.pApplicationName = application().identifier().applicationName.c_str();
 	appInfo.pEngineName = "et-engine";
 	appInfo.apiVersion = VK_API_VERSION_1_0;
-	
+
 	VkInstanceCreateInfo instanceCreateInfo = { VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO };
 	instanceCreateInfo.pApplicationInfo = &appInfo;
 	instanceCreateInfo.enabledExtensionCount = static_cast<uint32_t>(enabledExtensions.size());
@@ -112,7 +114,7 @@ void VulkanRenderer::init(const RenderContextParameters& params)
 	VULKAN_CALL(vkCreateInstance(&instanceCreateInfo, nullptr, &_private->instance));
 
 #if (VULKAN_ENABLE_VALIDATION)
-	PFN_vkCreateDebugReportCallbackEXT createDebugCb = 
+	PFN_vkCreateDebugReportCallbackEXT createDebugCb =
 		reinterpret_cast<PFN_vkCreateDebugReportCallbackEXT>(vkGetInstanceProcAddr(_private->instance, "vkCreateDebugReportCallbackEXT"));
 
 	if (createDebugCb)
@@ -196,10 +198,10 @@ void VulkanRenderer::init(const RenderContextParameters& params)
 	poolInfo.pPoolSizes = poolSizes;
 	VULKAN_CALL(vkCreateDescriptorPool(_private->device, &poolInfo, nullptr, &_private->descriptprPool));
 
-	RECT clientRect = { };
+	RECT clientRect = {};
 	GetClientRect(mainWindow, &clientRect);
 	resize(vec2i(clientRect.right - clientRect.left, clientRect.bottom - clientRect.top));
-	
+
 	initInternalStructures();
 	defaultTexture();
 	defaultSampler();
@@ -209,7 +211,7 @@ void VulkanRenderer::shutdown()
 {
 	_private->pipelineCache.clear();
 	shutdownInternalStructures();
-	
+
 	vkDestroyDescriptorPool(_private->device, _private->descriptprPool, nullptr);
 	// TODO : clean up Vulkan
 }
@@ -246,11 +248,11 @@ Program::Pointer VulkanRenderer::createProgram(const std::string& source)
 	return program;
 }
 
-PipelineState::Pointer VulkanRenderer::acquirePipelineState(const RenderPass::Pointer& pass, const Material::Pointer& mat, 
+PipelineState::Pointer VulkanRenderer::acquirePipelineState(const RenderPass::Pointer& pass, const Material::Pointer& mat,
 	const VertexStream::Pointer& vs)
 {
-	auto ps = _private->pipelineCache.find(vs->vertexDeclaration(), mat->program(), pass, 
-        mat->depthState(), mat->blendState(), mat->cullMode(), vs->primitiveType());
+	auto ps = _private->pipelineCache.find(vs->vertexDeclaration(), mat->program(pass->info().renderPassClass),
+		pass, mat->depthState(), mat->blendState(), mat->cullMode(), vs->primitiveType());
 
 	if (ps.invalid())
 	{
@@ -260,10 +262,10 @@ PipelineState::Pointer VulkanRenderer::acquirePipelineState(const RenderPass::Po
 		ps->setDepthState(mat->depthState());
 		ps->setBlendState(mat->blendState());
 		ps->setCullMode(mat->cullMode());
-		ps->setProgram(mat->program());
+		ps->setProgram(mat->program(pass->info().renderPassClass));
 		ps->setRenderPass(pass);
 		ps->build();
-		
+
 		_private->pipelineCache.addToCache(ps);
 	}
 
@@ -289,7 +291,8 @@ void VulkanRenderer::begin()
 
 void VulkanRenderer::present()
 {
-	std::stable_sort(_private->passes.begin(), _private->passes.end(), [](const VulkanRenderPass::Pointer& l, const VulkanRenderPass::Pointer& r) {
+	std::stable_sort(_private->passes.begin(), _private->passes.end(), [](const VulkanRenderPass::Pointer& l, const VulkanRenderPass::Pointer& r)
+	{
 		return l->info().priority > r->info().priority;
 	});
 
@@ -302,7 +305,7 @@ void VulkanRenderer::present()
 	Vector<VkCommandBuffer> commandBuffers;
 	allSubmits.reserve(_private->passes.size());
 	commandBuffers.reserve(_private->passes.size());
-	waitStages.reserve(_private->passes.size() + 2);	
+	waitStages.reserve(_private->passes.size() + 2);
 	waitSemaphores.reserve(_private->passes.size() + 2);
 	signalSemaphores.reserve(_private->passes.size() + 2);
 
@@ -327,15 +330,15 @@ void VulkanRenderer::present()
 		const VulkanRenderPass::Pointer& passI = *i;
 		signalSemaphores.emplace_back(passI->nativeRenderPass().semaphore);
 		commandBuffers.emplace_back(passI->nativeRenderPass().commandBuffer);
-        
+
 		for (auto j = i + 1; (j != e) && ((*j)->info().priority == (*i)->info().priority); ++j, ++i)
 		{
 			const VulkanRenderPass::Pointer& passJ = *j;
 			commandBuffers.emplace_back(passJ->nativeRenderPass().commandBuffer);
 			signalSemaphores.emplace_back(passJ->nativeRenderPass().semaphore);
 		}
-		
-        if (i + 1 == e)
+
+		if (i + 1 == e)
 		{
 			signalSemaphores.emplace_back(_private->semaphores.renderComplete);
 			signalOffset = static_cast<uint32_t>(signalSemaphores.size()) - 1;
@@ -344,7 +347,7 @@ void VulkanRenderer::present()
 		allSubmits.emplace_back();
 		VkSubmitInfo& submitInfo = allSubmits.back();
 		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-		
+
 		submitInfo.commandBufferCount = static_cast<uint32_t>(commandBuffers.size()) - commandBuffersOffset;
 		submitInfo.pCommandBuffers = commandBuffers.data() + commandBuffersOffset;
 
@@ -358,12 +361,13 @@ void VulkanRenderer::present()
 		commandBuffersOffset += submitInfo.commandBufferCount;
 		waitOffset += submitInfo.waitSemaphoreCount;
 		signalOffset += submitInfo.signalSemaphoreCount;
-    }
-    VULKAN_CALL(vkQueueSubmit(_private->queue, static_cast<uint32_t>(allSubmits.size()), allSubmits.data(), nullptr));
+		VULKAN_CALL(vkQueueSubmit(_private->queue, static_cast<uint32_t>(allSubmits.size()), allSubmits.data(), nullptr));
+		allSubmits.clear();
+	}
+	// VULKAN_CALL(vkQueueSubmit(_private->queue, static_cast<uint32_t>(allSubmits.size()), allSubmits.data(), nullptr));
 	_private->swapchain.present(_private->vulkan());
-    VULKAN_CALL(vkQueueWaitIdle(_private->queue));
-
-    _private->passes.clear();
+	_private->passes.clear();
+	VULKAN_CALL(vkQueueWaitIdle(_private->queue));
 }
 
 

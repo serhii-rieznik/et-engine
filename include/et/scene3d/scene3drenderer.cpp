@@ -70,7 +70,7 @@ void Renderer::validateShadowPass(RenderInterface::Pointer& renderer)
         desc->format = TextureFormat::Depth32F;
         _shadowTexture = renderer->createTexture(desc);
 		Material::Pointer defaultMaterial = renderer->sharedMaterialLibrary().loadDefaultMaterial(DefaultMaterial::Microfacet);
-		defaultMaterial->setTexture(MaterialTexture::Shadow, _shadowTexture);
+		defaultMaterial->setTexture(MaterialTexture::Shadow, _shadowTexture); // TODO : set shadow separately
 	}
 
 	if (_shadowPass.invalid() || (_shadowPass->info().camera != _mainPass->info().light))
@@ -85,6 +85,7 @@ void Renderer::validateShadowPass(RenderInterface::Pointer& renderer)
 		passInfo.depth.useDefaultRenderTarget = false;
 		passInfo.depth.enabled = true;		
         passInfo.color[0].enabled = false;
+		passInfo.renderPassClass = RenderPassClass::Depth;
         _shadowPass = renderer->allocateRenderPass(passInfo);
 	}
 }

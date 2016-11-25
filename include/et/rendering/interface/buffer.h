@@ -41,6 +41,7 @@ public:
 	struct Description
 	{
 		uint32_t size = 0;
+		uint32_t alignedSize = 0;
 		Usage usage = Usage::Constant;
 		Location location = Location::Device;
 		BinaryDataStorage initialData;

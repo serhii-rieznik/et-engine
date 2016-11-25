@@ -8,7 +8,7 @@
 #pragma once
 
 #include <et/geometry/geometry.h>
-#include <et/rendering/base/Material.h>
+#include <et/rendering/base/material.h>
 #include <et/rendering/base/vertexstream.h>
 #include <et/rendering/base/vertexstorage.h>
 #include <et/rendering/base/indexarray.h>

@@ -21,5 +21,9 @@
 
 	"cull-mode" : "back",
 
-	"code" : "shaders/microfacet"
+	"code" : 
+	{
+		"forward" : "shaders/microfacet",
+		"depth" : "shaders/depth"
+	}
 }
