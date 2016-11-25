@@ -26,8 +26,8 @@ PipelineStateCache::~PipelineStateCache()
 	ET_PIMPL_FINALIZE(PipelineStateCache)
 }
 
-PipelineState::Pointer PipelineStateCache::find(const VertexDeclaration& decl, Program::Pointer program,
-	const DepthState& ds, const BlendState& bs, CullMode cm, TextureFormat tf, PrimitiveType pt)
+PipelineState::Pointer PipelineStateCache::find(const VertexDeclaration& decl, const Program::Pointer& program, 
+    const RenderPass::Pointer& rp, const DepthState& ds, const BlendState& bs, CullMode cm, PrimitiveType pt)
 {
 	for (const PipelineState::Pointer& ps : _private->cache)
 	{
@@ -36,7 +36,7 @@ PipelineState::Pointer PipelineStateCache::find(const VertexDeclaration& decl, P
 		if (ps->depthState() != ds) continue;
 		if (ps->blendState() != bs) continue;
 		if (ps->cullMode() != cm) continue;
-		if (ps->renderTargetFormat() != tf) continue;
+		if (ps->renderPass() != rp) continue;
 		if (ps->primitiveType() != pt) continue;
 
 		return ps;
@@ -45,10 +45,10 @@ PipelineState::Pointer PipelineStateCache::find(const VertexDeclaration& decl, P
 	return PipelineState::Pointer();
 }
 
-void PipelineStateCache::addToCache(PipelineState::Pointer ps)
+void PipelineStateCache::addToCache(const PipelineState::Pointer& ps)
 {
-	PipelineState::Pointer existingState = find(ps->inputLayout(), ps->program(), ps->depthState(),
-		ps->blendState(), ps->cullMode(), ps->renderTargetFormat(), ps->primitiveType());
+	PipelineState::Pointer existingState = find(ps->inputLayout(), ps->program(), ps->renderPass(), 
+        ps->depthState(), ps->blendState(), ps->cullMode(), ps->primitiveType());
 
 	ET_ASSERT(existingState.invalid());
 

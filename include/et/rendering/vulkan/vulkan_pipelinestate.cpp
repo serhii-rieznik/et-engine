@@ -139,11 +139,6 @@ void VulkanPipelineState::build()
 	VULKAN_CALL(vkCreateGraphicsPipelines(_private->vulkan.device, _private->vulkan.pipelineCache, 1, &info, nullptr, &_private->pipeline));
 }
 
-void VulkanPipelineState::bind(VulkanRenderPass::Pointer pass, MaterialInstance::Pointer& material)
-{
-
-}
-
 void VulkanPipelineStatePrivate::generatePipelineLayout(const Program::Reflection& reflection, VulkanRenderPass::Pointer pass)
 {
 	Set<uint32_t> allTextureBindings;

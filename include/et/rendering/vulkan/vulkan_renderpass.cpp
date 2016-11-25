@@ -186,13 +186,13 @@ void VulkanRenderPass::begin()
 	if (!info().color[0].isDefaultRenderTarget && info().color[0].texture.valid())
 	{
 		rtWidth = static_cast<uint32_t>(info().color[0].texture->size().x);
-		rtWidth = static_cast<uint32_t>(info().color[0].texture->size().y);
+        rtHeight = static_cast<uint32_t>(info().color[0].texture->size().y);
 		currentImageIndex = 0;
 	}
 	else if (!info().depth.isDefaultRenderTarget && info().depth.texture.valid())
 	{
 		rtWidth = static_cast<uint32_t>(info().depth.texture->size().x);
-		rtWidth = static_cast<uint32_t>(info().depth.texture->size().y);
+		rtHeight = static_cast<uint32_t>(info().depth.texture->size().y);
 		currentImageIndex = 0;
 	}
 

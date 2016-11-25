@@ -28,7 +28,7 @@ et::s3d::Scene::Pointer SceneLoader::loadFromFile(const std::string& fileName)
 	}
 	else
 	{
-		ET_FAIL("Not implemented")
+		ET_FAIL_FMT("File with invalid or unsupported extension supplied to DemoSceneLoader: `%s`", ext.c_str());
 	}
 	
 	return result;

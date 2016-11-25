@@ -27,11 +27,9 @@ void Renderer::render(RenderInterface::Pointer& renderer, const Scene::Pointer& 
 
 	extractBatches(scene);
 	
-	//*
 	clip(_shadowPass, _renderBatches, _shadowPassBatches);
 	render(_shadowPass, _shadowPassBatches);
 	renderer->submitRenderPass(_shadowPass);
-	// */
 
 	clip(_mainPass, _renderBatches, _mainPassBatches);
 	render(_mainPass, _mainPassBatches);

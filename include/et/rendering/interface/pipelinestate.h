@@ -102,19 +102,9 @@ public:
 		return _program;
 	}
 
-	void setProgram(Program::Pointer prog)
+	void setProgram(const Program::Pointer& prog)
 	{
 		_program = prog;
-	}
-
-	TextureFormat renderTargetFormat() const
-	{
-		return _renderTargetFormat;
-	}
-
-	void setRenderTargetFormat(TextureFormat fmt)
-	{
-		_renderTargetFormat = fmt;
 	}
 
 	PrimitiveType primitiveType() const
@@ -134,7 +124,6 @@ private:
 	BlendState _blend;
 	DepthState _depth;
 	CullMode _cull = CullMode::Disabled;
-	TextureFormat _renderTargetFormat = TextureFormat::RGBA8;
 	PrimitiveType _primitiveType = PrimitiveType::Triangles;
 };
 
@@ -145,10 +134,10 @@ public:
 	PipelineStateCache();
 	~PipelineStateCache();
 
-	PipelineState::Pointer find(const VertexDeclaration&, Program::Pointer, const DepthState&,
-		const BlendState&, CullMode, TextureFormat, PrimitiveType);
+	PipelineState::Pointer find(const VertexDeclaration&, const Program::Pointer&, const RenderPass::Pointer&, 
+        const DepthState&, const BlendState&, CullMode, PrimitiveType);
 
-	void addToCache(PipelineState::Pointer);
+	void addToCache(const PipelineState::Pointer&);
 	void clear();
 
 private:

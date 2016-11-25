@@ -93,6 +93,7 @@ void VulkanRenderer::init(const RenderContextParameters& params)
 		if (strstr(layerProp.layerName, "validation"))
 		{
 			validationLayers.emplace_back(layerProp.layerName);
+            log::info("Vulkan validation layer used: %s (%s)", layerProp.layerName, layerProp.description);
 		}
 	}
 #endif
@@ -248,8 +249,8 @@ Program::Pointer VulkanRenderer::createProgram(const std::string& source)
 PipelineState::Pointer VulkanRenderer::acquirePipelineState(const RenderPass::Pointer& pass, const Material::Pointer& mat, 
 	const VertexStream::Pointer& vs)
 {
-	auto ps = _private->pipelineCache.find(vs->vertexDeclaration(), mat->program(), mat->depthState(),
-		mat->blendState(), mat->cullMode(), TextureFormat::RGBA8, vs->primitiveType());
+	auto ps = _private->pipelineCache.find(vs->vertexDeclaration(), mat->program(), pass, 
+        mat->depthState(), mat->blendState(), mat->cullMode(), vs->primitiveType());
 
 	if (ps.invalid())
 	{
@@ -326,13 +327,15 @@ void VulkanRenderer::present()
 		const VulkanRenderPass::Pointer& passI = *i;
 		signalSemaphores.emplace_back(passI->nativeRenderPass().semaphore);
 		commandBuffers.emplace_back(passI->nativeRenderPass().commandBuffer);
+        
 		for (auto j = i + 1; (j != e) && ((*j)->info().priority == (*i)->info().priority); ++j, ++i)
 		{
 			const VulkanRenderPass::Pointer& passJ = *j;
 			commandBuffers.emplace_back(passJ->nativeRenderPass().commandBuffer);
 			signalSemaphores.emplace_back(passJ->nativeRenderPass().semaphore);
 		}
-		if (i + 1 == e)
+		
+        if (i + 1 == e)
 		{
 			signalSemaphores.emplace_back(_private->semaphores.renderComplete);
 			signalOffset = static_cast<uint32_t>(signalSemaphores.size()) - 1;
@@ -355,13 +358,12 @@ void VulkanRenderer::present()
 		commandBuffersOffset += submitInfo.commandBufferCount;
 		waitOffset += submitInfo.waitSemaphoreCount;
 		signalOffset += submitInfo.signalSemaphoreCount;
-	}
-	
-	VULKAN_CALL(vkQueueSubmit(_private->queue, static_cast<uint32_t>(allSubmits.size()), allSubmits.data(), nullptr));
-	VULKAN_CALL(vkQueueWaitIdle(_private->queue));
-
+    }
+    VULKAN_CALL(vkQueueSubmit(_private->queue, static_cast<uint32_t>(allSubmits.size()), allSubmits.data(), nullptr));
 	_private->swapchain.present(_private->vulkan());
-	_private->passes.clear();
+    VULKAN_CALL(vkQueueWaitIdle(_private->queue));
+
+    _private->passes.clear();
 }
 
 
