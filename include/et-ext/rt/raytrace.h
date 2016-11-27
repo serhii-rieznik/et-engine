@@ -59,7 +59,7 @@ public:
 	
 	void renderSpacePartitioning();
 	
-	ET_DECLARE_EVENT0(renderFinished)
+	ET_DECLARE_EVENT0(renderFinished);
 
 private:
 	friend class RaytracePrivate;

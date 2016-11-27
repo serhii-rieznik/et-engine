@@ -1,8 +1,0 @@
-# 3ds Max Wavefront OBJ Exporter v0.97b - (c)2007 guruware
-# File Created: 19.09.2015 00:38:47
-
-newmtl default_Mesh_default
-	Pr 0.025
-	Ni 0.77
-	Kd 0.970000 1.00000 0.385000
-	Ks 1.00000 1.00000 1.00000
