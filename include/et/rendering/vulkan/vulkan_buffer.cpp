@@ -14,18 +14,20 @@ namespace et
 class VulkanBufferPrivate : public VulkanNativeBuffer
 {
 public:
-	VulkanBufferPrivate(VulkanState& v) 
-		: vulkan(v) { }
+	VulkanBufferPrivate(VulkanState& v)
+		: vulkan(v)
+	{
+	}
 
 	VulkanState& vulkan;
 	Buffer::Description desc;
 	Vector<Buffer::Range> modifiedRanges;
-	std::atomic_bool mapped { false };
+	std::atomic_bool mapped{ false };
 };
 
 VulkanBuffer::VulkanBuffer(VulkanState& vulkan, const Description& desc)
 {
-	static Map<Usage, uint32_t> usageFlags = 
+	static Map<Usage, uint32_t> usageFlags =
 	{
 		{ Usage::Constant, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT },
 		{ Usage::Vertex, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT },
@@ -48,9 +50,9 @@ VulkanBuffer::VulkanBuffer(VulkanState& vulkan, const Description& desc)
 	VULKAN_CALL(vkCreateBuffer(_private->vulkan.device, &createInfo, nullptr, &_private->buffer));
 
 	vkGetBufferMemoryRequirements(_private->vulkan.device, _private->buffer, &_private->memoryRequirements);
-	
-	uint32_t memoryProperties = (desc.location == Location::Device) ? 
-		VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT : 
+
+	uint32_t memoryProperties = (desc.location == Location::Device) ?
+		VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT :
 		VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT;
 
 	VkMemoryAllocateInfo allocInfo = { VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO };
@@ -90,7 +92,7 @@ void VulkanBuffer::updateData(uint32_t offset, const BinaryDataStorage& data)
 		desc.location = Location::Host;
 		desc.usage = Usage::Staging;
 		desc.size = data.size();
-		
+
 		retain();
 		VulkanBuffer stagingBuffer(_private->vulkan, desc);
 		stagingBuffer.transferData(VulkanBuffer::Pointer(this));
@@ -102,7 +104,7 @@ void VulkanBuffer::transferData(Buffer::Pointer dst)
 {
 	VulkanBuffer::Pointer destination = dst;
 	ET_ASSERT(destination->_private->memoryRequirements.size >= _private->memoryRequirements.size);
-	
+
 	VkBufferCopy region = { 0, 0, _private->memoryRequirements.size };
 	_private->vulkan.executeServiceCommands([&](VkCommandBuffer cmdBuffer)
 	{
@@ -139,21 +141,21 @@ void VulkanBuffer::modifyRange(uint64_t begin, uint64_t length)
 void VulkanBuffer::unmap()
 {
 	ET_ASSERT(_private->mapped);
-	ET_ASSERT(_private->modifiedRanges.size() > 0);
-
-	Vector<VkMappedMemoryRange> vkRanges;
-	vkRanges.reserve(_private->modifiedRanges.size());
-	for (const auto& range : _private->modifiedRanges)
+	if (_private->modifiedRanges.size() > 0)
 	{
-		vkRanges.emplace_back();
-		VkMappedMemoryRange& r = vkRanges.back();
-		r.sType = VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE;
-		r.memory = _private->memory;
-		r.offset = range.begin;
-		r.size = alignUpTo(range.length, _private->vulkan.physicalDeviceProperties.limits.nonCoherentAtomSize);
+		Vector<VkMappedMemoryRange> vkRanges;
+		vkRanges.reserve(_private->modifiedRanges.size());
+		for (const auto& range : _private->modifiedRanges)
+		{
+			vkRanges.emplace_back();
+			VkMappedMemoryRange& r = vkRanges.back();
+			r.sType = VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE;
+			r.memory = _private->memory;
+			r.offset = range.begin;
+			r.size = alignUpTo(range.length, _private->vulkan.physicalDeviceProperties.limits.nonCoherentAtomSize);
+		}
+		VULKAN_CALL(vkFlushMappedMemoryRanges(_private->vulkan.device, static_cast<uint32_t>(vkRanges.size()), vkRanges.data()));
 	}
-
-	VULKAN_CALL(vkFlushMappedMemoryRanges(_private->vulkan.device, static_cast<uint32_t>(vkRanges.size()), vkRanges.data()));
 	vkUnmapMemory(_private->vulkan.device, _private->memory);
 
 	_private->modifiedRanges.clear();

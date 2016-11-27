@@ -20,5 +20,6 @@ namespace et
 		DX12Texture(TextureDescription::Pointer);
 
         void setImageData(const BinaryDataStorage&) override;
+		void updateRegion(const vec2i& pos, const vec2i& size, const BinaryDataStorage&) override;
 	};
 }

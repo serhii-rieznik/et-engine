@@ -23,6 +23,7 @@ public:
 	~VulkanTexture();
 
 	void setImageData(const BinaryDataStorage&) override;
+	void updateRegion(const vec2i& pos, const vec2i& size, const BinaryDataStorage&);
 
 	const VulkanNativeTexture& nativeTexture() const;
 

@@ -336,6 +336,7 @@ VkFormat textureFormatValue(TextureFormat fmt)
 {
 	static const Map<TextureFormat, VkFormat> lookup =
 	{
+		{ TextureFormat::R8, VK_FORMAT_R8_UNORM },
 		{ TextureFormat::RGBA8, VK_FORMAT_R8G8B8A8_UNORM },
 		{ TextureFormat::BGRA8, VK_FORMAT_B8G8R8A8_UNORM },
 		{ TextureFormat::RGBA32F, VK_FORMAT_R32G32B32A32_SFLOAT },
@@ -475,6 +476,38 @@ VkAttachmentStoreOp frameBufferOperationToStoreOperation(FramebufferOperation va
 	ET_ASSERT(values.count(val) > 0);
 	return values.at(val);
 }
+
+VkBlendOp blendOperationValue(BlendOperation val)
+{
+	static std::map<BlendOperation, VkBlendOp> values =
+	{
+		{ BlendOperation::Add, VK_BLEND_OP_ADD },
+		{ BlendOperation::Subtract, VK_BLEND_OP_SUBTRACT },
+		{ BlendOperation::ReverseSubtract, VK_BLEND_OP_REVERSE_SUBTRACT },
+	};
+	ET_ASSERT(values.count(val) > 0);
+	return values.at(val);
+}
+
+VkBlendFactor blendFactorValur(BlendFunction val)
+{
+	static std::map<BlendFunction, VkBlendFactor> values =
+	{
+		{ BlendFunction::Zero, VK_BLEND_FACTOR_ZERO },
+		{ BlendFunction::One, VK_BLEND_FACTOR_ONE },
+		{ BlendFunction::SourceColor, VK_BLEND_FACTOR_SRC_COLOR },
+		{ BlendFunction::InvSourceColor, VK_BLEND_FACTOR_ONE_MINUS_SRC_COLOR },
+		{ BlendFunction::SourceAlpha, VK_BLEND_FACTOR_SRC_ALPHA },
+		{ BlendFunction::InvSourceAlpha, VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA },
+		{ BlendFunction::DestColor, VK_BLEND_FACTOR_DST_COLOR },
+		{ BlendFunction::InvDestColor, VK_BLEND_FACTOR_ONE_MINUS_DST_COLOR },
+		{ BlendFunction::DestAlpha, VK_BLEND_FACTOR_DST_ALPHA },
+		{ BlendFunction::InvDestAlpha, VK_BLEND_FACTOR_ONE_MINUS_DST_ALPHA },
+	};
+	ET_ASSERT(values.count(val) > 0);
+	return values.at(val);
+}
+
 
 namespace gl
 {

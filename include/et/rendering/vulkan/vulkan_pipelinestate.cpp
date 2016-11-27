@@ -65,7 +65,15 @@ void VulkanPipelineState::build()
 		if (rt.enabled)
 		{
 			attachmentInfo.emplace_back();
-			attachmentInfo.back().colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
+			VkPipelineColorBlendAttachmentState& state = attachmentInfo.back();
+			state.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
+			state.blendEnable = blendState().enabled ? VK_TRUE : VK_FALSE;
+			state.colorBlendOp = vulkan::blendOperationValue(blendState().colorOperation);
+			state.srcColorBlendFactor = vulkan::blendFactorValur(blendState().color.source);
+			state.dstColorBlendFactor = vulkan::blendFactorValur(blendState().color.dest);
+			state.alphaBlendOp = vulkan::blendOperationValue(blendState().alphaOperation);
+			state.srcAlphaBlendFactor = vulkan::blendFactorValur(blendState().alpha.source);
+			state.dstAlphaBlendFactor = vulkan::blendFactorValur(blendState().alpha.dest);
 		}
 	}
 	VkPipelineColorBlendStateCreateInfo blendInfo = { VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO };
@@ -84,6 +92,7 @@ void VulkanPipelineState::build()
 	VkPipelineMultisampleStateCreateInfo msInfo = { VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO };
 	{
 		msInfo.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
+		msInfo.alphaToCoverageEnable = blendState().alphaToCoverageEnabled ? VK_TRUE : VK_FALSE;
 	}
 	
 	VkPipelineRasterizationStateCreateInfo rasterizerInfo = { VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO };

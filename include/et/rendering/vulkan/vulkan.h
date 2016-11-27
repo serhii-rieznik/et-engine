@@ -174,6 +174,8 @@ VkFilter textureFiltrationValueToFilter(TextureFiltration);
 VkSamplerMipmapMode textureFiltrationValueToSamplerMipMapMode(TextureFiltration);
 VkAttachmentLoadOp frameBufferOperationToLoadOperation(FramebufferOperation);
 VkAttachmentStoreOp frameBufferOperationToStoreOperation(FramebufferOperation);
+VkBlendOp blendOperationValue(BlendOperation);
+VkBlendFactor blendFactorValur(BlendFunction);
 
 namespace gl
 {

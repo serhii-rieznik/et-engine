@@ -56,6 +56,7 @@ public:
 	vec2 getTexCoord(const vec2& vec, TextureOrigin origin = TextureOrigin::TopLeft) const;
 
 	virtual void setImageData(const BinaryDataStorage&) = 0;
+	virtual void updateRegion(const vec2i& pos, const vec2i& size, const BinaryDataStorage&) = 0;
 	
 private:
 	TextureDescription::Pointer _desc;

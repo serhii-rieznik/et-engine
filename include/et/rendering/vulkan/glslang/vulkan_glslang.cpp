@@ -111,6 +111,7 @@ const TBuiltInResource defaultBuiltInResource = {
 	} };
 
 void buildProgramReflection(glslang::TProgram*, Program::Reflection& reflection);
+void dumpSource(const std::string&);
 
 bool glslToSPIRV(const std::string& vertexSource, const std::string& fragmentSource,
 	std::vector<uint32_t>& vertexBin, std::vector<uint32_t>& fragmentBin, Program::Reflection& reflection)
@@ -146,6 +147,7 @@ bool glslToSPIRV(const std::string& vertexSource, const std::string& fragmentSou
 	if (!vertexShader.parse(&defaultBuiltInResource, 100, true, messages))
 	{
 		log::error("Failed to parse vertex shader:\n%s", vertexShader.getInfoLog());
+		dumpSource(vertexSource);
 		debug::debugBreak();
 		return false;
 	}
@@ -153,6 +155,7 @@ bool glslToSPIRV(const std::string& vertexSource, const std::string& fragmentSou
 	if (!fragmentShader.parse(&defaultBuiltInResource, 100, true, messages))
 	{
 		log::error("Failed to parse fragment shader:\n%s", fragmentShader.getInfoLog());
+		dumpSource(fragmentSource);
 		debug::debugBreak();
 		return false;
 	}
@@ -311,6 +314,18 @@ void buildProgramReflection(glslang::TProgram* program, Program::Reflection& ref
 				log::error("Unknown uniform block: %s for uniform %s", blockName.c_str(), uniformName.c_str());
 			}
 		}
+	}
+}
+
+void dumpSource(const std::string& s)
+{
+	StringList lines = split(s, "\n");
+
+	uint32_t lineIndex = 1;
+	for (const std::string& line : lines)
+	{
+		log::info("%04u: %s", lineIndex, line.c_str());
+		++lineIndex;
 	}
 }
 

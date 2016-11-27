@@ -292,6 +292,8 @@ void Material::loadCode(const std::string& codeString, RenderPassClass passCls, 
 
 MaterialInstancePointer Material::instance()
 {
+	flushInstances();
+
 	retain();
 	MaterialInstance::Pointer result = MaterialInstance::Pointer::create(Material::Pointer(this));
 	release();
@@ -310,6 +312,14 @@ MaterialInstancePointer Material::instance()
 const MaterialInstanceCollection& Material::instances() const
 {
 	return _instances;
+}
+
+void Material::flushInstances()
+{
+	auto i = std::remove_if(_instances.begin(), _instances.end(), [](const MaterialInstance::Pointer& inst) {
+		return inst->retainCount() == 1;
+	});
+	_instances.erase(i, _instances.end());
 }
 
 void Material::releaseInstances()

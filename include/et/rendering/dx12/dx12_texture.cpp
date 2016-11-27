@@ -20,4 +20,8 @@ void DX12Texture::setImageData(const BinaryDataStorage&)
 {
 }
 
+void DX12Texture::updateRegion(const vec2i & pos, const vec2i & size, const BinaryDataStorage &)
+{
+}
+
 }

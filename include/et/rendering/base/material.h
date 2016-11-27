@@ -27,6 +27,7 @@ public:
 
 	MaterialInstancePointer instance();
 	const MaterialInstanceCollection& instances() const;
+	void flushInstances();
 	void releaseInstances();
 
 	void setTexture(MaterialTexture, Texture::Pointer);
