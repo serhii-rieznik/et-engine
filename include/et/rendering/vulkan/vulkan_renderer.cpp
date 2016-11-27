@@ -16,6 +16,7 @@
 #include <et/rendering/vulkan/vulkan_pipelinestate.h>
 #include <et/rendering/vulkan/vulkan_renderer.h>
 #include <et/rendering/vulkan/vulkan.h>
+#include <et/rendering/vulkan/glslang/vulkan_glslang.h>
 #include <et/app/application.h>
 
 #if (ET_DEBUG)
@@ -76,6 +77,8 @@ VkBool32 vulkanDebugCallback(VkDebugReportFlagsEXT flags, VkDebugReportObjectTyp
 
 void VulkanRenderer::init(const RenderContextParameters& params)
 {
+	initGlslangResources();
+
 	std::vector<const char*> enabledExtensions =
 	{
 		VK_KHR_SURFACE_EXTENSION_NAME,
@@ -211,6 +214,8 @@ void VulkanRenderer::shutdown()
 
 	vkDestroyDescriptorPool(_private->device, _private->descriptprPool, nullptr);
 	// TODO : clean up Vulkan
+
+	cleanupGlslangResources();
 }
 
 void VulkanRenderer::resize(const vec2i& sz)

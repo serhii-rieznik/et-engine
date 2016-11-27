@@ -223,9 +223,6 @@
     <ClCompile Include="..\..\include\external\glslang\SPIRV\Logger.cpp" />
     <ClCompile Include="..\..\include\external\glslang\SPIRV\SpvBuilder.cpp" />
     <ClCompile Include="..\..\include\external\glslang\SPIRV\SPVRemapper.cpp" />
-    <ClCompile Include="et_info.cpp">
-      <FileType>CppHeader</FileType>
-    </ClCompile>
     <ClInclude Include="..\..\include\external\glslang\glslang\MachineIndependent\glslang_tab.cpp.h" />
     <ClInclude Include="..\..\include\external\glslang\glslang\MachineIndependent\gl_types.h" />
     <ClInclude Include="..\..\include\external\glslang\glslang\MachineIndependent\Initialize.h" />

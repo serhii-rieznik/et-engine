@@ -30,8 +30,6 @@ void enableDPIAwareness();
 std::string exceptionCodeToString(DWORD);
 LONG WINAPI unhandledExceptionFilter(struct _EXCEPTION_POINTERS* info);
 
-extern const char* etWorkingFolder;
-
 void Application::platformInit()
 {
 #if (ET_DEBUG)
@@ -40,8 +38,6 @@ void Application::platformInit()
 	
 	enableDPIAwareness();
 	SetUnhandledExceptionFilter(unhandledExceptionFilter);
-
-	pushSearchPath(etWorkingFolder);
 }
 
 void Application::platformFinalize()

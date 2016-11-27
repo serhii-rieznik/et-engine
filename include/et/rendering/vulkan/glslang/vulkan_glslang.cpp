@@ -8,8 +8,10 @@
 #include <external/glslang/glslang/Public/ShaderLang.h>
 #include <external/glslang/SPIRV/Logger.h>
 #include <external/glslang/SPIRV/GlslangToSpv.h>
+#include <external/glslang/OGLCompilersDLL/InitializeDll.h>
 #include <et/core/et.h>
 #include <functional>
+#include "vulkan_glslang.h"
 
 namespace et
 {
@@ -123,8 +125,6 @@ bool glslToSPIRV(const std::string& vertexSource, const std::string& fragmentSou
 	const char* fragmentSourceCStr[] = { fragmentSource.c_str() };
 	const char* fragmentFileNames[] = { "Fragment Shader" };
 
-	glslang::InitializeProcess();
-
 	glslang::TShader vertexShader(EShLanguage::EShLangVertex);
 	vertexShader.setStringsWithLengthsAndNames(vertexSourceCStr, nullptr, vertexFileNames, 1);
 	vertexShader.setAutoMapBindings(true);
@@ -141,7 +141,6 @@ bool glslToSPIRV(const std::string& vertexSource, const std::string& fragmentSou
 	} onExit([&]()
 	{
 		etDestroyObject(program);
-		glslang::FinalizeProcess();
 	});
 
 	if (!vertexShader.parse(&defaultBuiltInResource, 100, true, messages))
@@ -220,6 +219,16 @@ bool glslToSPIRV(const std::string& vertexSource, const std::string& fragmentSou
 	}
 
 	return true;
+}
+
+void initGlslangResources()
+{
+	glslang::InitializeProcess();
+}
+
+void cleanupGlslangResources()
+{
+	glslang::FinalizeProcess();
 }
 
 void buildProgramReflection(glslang::TProgram* program, Program::Reflection& reflection)

@@ -1079,7 +1079,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="et_info.cpp" />
     <ClCompile Include="..\..\include\external\glslang\OGLCompilersDLL\InitializeDll.cpp">
       <Filter>glslang\OGLCompilersDLL</Filter>
     </ClCompile>
