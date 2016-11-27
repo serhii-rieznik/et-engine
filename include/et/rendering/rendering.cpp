@@ -405,6 +405,7 @@ uint32_t channelsForTextureFormat(TextureFormat internalFormat)
 Dictionary serializeDepthState(const DepthState& _depth)
 {
 	Dictionary depth;
+	depth.setBooleanForKey(kDepthTestEnabled, _depth.depthTestEnabled);
 	depth.setBooleanForKey(kDepthWriteEnabled, _depth.depthWriteEnabled);
 	depth.setStringForKey(kDepthFunction, compareFunctionToString(_depth.compareFunction));
 	return depth;
@@ -437,6 +438,7 @@ DepthState deserializeDepthState(const Dictionary& depth)
 	DepthState _depth;
 	_depth.compareFunction = stringToCompareFunction(depth.stringForKey(kDepthFunction, compareFunctionToString(CompareFunction::Less))->content);
 	_depth.depthWriteEnabled = depth.boolForKey(kDepthWriteEnabled, true)->content != 0;
+	_depth.depthTestEnabled = depth.boolForKey(kDepthTestEnabled, true)->content != 0;
 	return _depth;
 }
 

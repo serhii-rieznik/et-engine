@@ -130,12 +130,7 @@ template <class T>
 inline T Material::getParameter(MaterialParameter p) const
 {
 	uint32_t pIndex = static_cast<uint32_t>(p);
-	if (properties[pIndex].is<T>())
-		return properties[pIndex].as<T>();
-	
-	log::warning("Material %s does not contain parameter %s of type %s", name().c_str(),
-		mtl::materialParameterToString(p).c_str(), classToString<T>());
-	return T();
+	return properties[pIndex].is<T>() ? properties[pIndex].as<T>() : T();
 }
 
 }

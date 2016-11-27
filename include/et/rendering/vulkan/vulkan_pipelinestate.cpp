@@ -84,7 +84,7 @@ void VulkanPipelineState::build()
 
 	VkPipelineDepthStencilStateCreateInfo depthInfo = { VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO };
 	{
-		depthInfo.depthTestEnable = VK_TRUE;
+		depthInfo.depthTestEnable = depthState().depthTestEnabled ? VK_TRUE : VK_FALSE;
 		depthInfo.depthWriteEnable = depthState().depthWriteEnabled ? VK_TRUE : VK_FALSE;
 		depthInfo.depthCompareOp = vulkan::depthCompareOperation(depthState().compareFunction);
 	}

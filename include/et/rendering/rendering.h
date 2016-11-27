@@ -324,6 +324,7 @@ struct DepthState
 {
 	CompareFunction compareFunction = CompareFunction::Less;
 	bool depthWriteEnabled = true;
+	bool depthTestEnabled = false;
 	
 	DepthState() = default;
 	

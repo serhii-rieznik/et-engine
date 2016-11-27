@@ -85,11 +85,7 @@ float Material::getFloat(MaterialParameter p) const
 Program::Pointer Material::program(RenderPassClass pt) const
 {
 	auto i = _programs.find(pt);
-	if (i != _programs.end())
-		return i->second;
-
-	log::error("Material %s does not contain program for pass type %d", name().c_str(), static_cast<uint32_t>(pt));
-	return Program::Pointer();
+	return (i == _programs.end()) ? Program::Pointer() : i->second;
 }
 
 Texture::Pointer Material::texture(MaterialTexture t)
