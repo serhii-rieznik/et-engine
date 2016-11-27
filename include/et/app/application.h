@@ -117,7 +117,7 @@ public:
 
 	void enableRemoteNotifications();
 
-	ET_DECLARE_EVENT1(systemEvent, Dictionary)
+	ET_DECLARE_EVENT1(systemEvent, Dictionary);
 
 public:
 	void load();

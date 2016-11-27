@@ -58,14 +58,20 @@ struct PointerInputInfo
 
 	PointerInputInfo(const PointerInputInfo& p) :
 		id(p.id), timestamp(p.timestamp), pos(p.pos), normalizedPos(p.normalizedPos), scroll(p.scroll),
-		type(p.type), origin(p.origin), tag(p.tag) { }
+		type(p.type), origin(p.origin), tag(p.tag)
+	{
+	}
 
 	PointerInputInfo(PointerInputInfo&& r) : id(r.id), timestamp(r.timestamp), pos(r.pos),
-		normalizedPos(r.normalizedPos), scroll(r.scroll), type(r.type), origin(r.origin), tag(r.tag) { }
+		normalizedPos(r.normalizedPos), scroll(r.scroll), type(r.type), origin(r.origin), tag(r.tag)
+	{
+	}
 
 	PointerInputInfo(PointerType t, const vec2& p, const vec2& np, const vec2& aScroll,
 		uint32_t aId, float time, PointerOrigin o) : id(aId), timestamp(time), pos(p), normalizedPos(np),
-		scroll(aScroll), type(t), origin(o), tag(0) { }
+		scroll(aScroll), type(t), origin(o), tag(0)
+	{
+	}
 
 	PointerInputInfo& operator = (const PointerInputInfo& p)
 	{
@@ -99,7 +105,9 @@ struct GestureInputInfo
 	GestureInputInfo() = default;
 
 	GestureInputInfo(uint32_t m) :
-		mask(m) { }
+		mask(m)
+	{
+	}
 
 	GestureInputInfo(uint32_t m, float v) : mask(m)
 	{
@@ -110,7 +118,9 @@ struct GestureInputInfo
 	}
 
 	GestureInputInfo(uint32_t m, float x, float y) :
-		swipe(x, y), mask(m) { }
+		swipe(x, y), mask(m)
+	{
+	}
 };
 
 class Input : public Singleton<Input>
@@ -135,17 +145,17 @@ public:
 	void deactivateSoftwareKeyboard();
 
 public:
-	ET_DECLARE_EVENT1(keyPressed, uint32_t)
-		ET_DECLARE_EVENT1(charactersEntered, std::string)
-		ET_DECLARE_EVENT1(keyReleased, uint32_t)
+	ET_DECLARE_EVENT1(keyPressed, uint32_t);
+	ET_DECLARE_EVENT1(charactersEntered, std::string);
+	ET_DECLARE_EVENT1(keyReleased, uint32_t);
 
-		ET_DECLARE_EVENT1(pointerPressed, PointerInputInfo)
-		ET_DECLARE_EVENT1(pointerMoved, PointerInputInfo)
-		ET_DECLARE_EVENT1(pointerReleased, PointerInputInfo)
-		ET_DECLARE_EVENT1(pointerCancelled, PointerInputInfo)
-		ET_DECLARE_EVENT1(pointerScrolled, PointerInputInfo)
+	ET_DECLARE_EVENT1(pointerPressed, PointerInputInfo);
+	ET_DECLARE_EVENT1(pointerMoved, PointerInputInfo);
+	ET_DECLARE_EVENT1(pointerReleased, PointerInputInfo);
+	ET_DECLARE_EVENT1(pointerCancelled, PointerInputInfo);
+	ET_DECLARE_EVENT1(pointerScrolled, PointerInputInfo);
 
-		ET_DECLARE_EVENT1(gesturePerformed, GestureInputInfo)
+	ET_DECLARE_EVENT1(gesturePerformed, GestureInputInfo);
 
 private:
 	Input();

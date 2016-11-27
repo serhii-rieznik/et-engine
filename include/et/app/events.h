@@ -13,13 +13,13 @@
 namespace et
 {
 
-#	define ET_DECLARE_EVENT0(name)									et::Event0 name;
-#	define ET_DECLARE_EVENT1(name, argtype)							et::Event1<argtype> name;
-#	define ET_DECLARE_EVENT2(name, arg1type, arg2type)				et::Event2<arg1type, arg2type> name;
+#	define ET_DECLARE_EVENT0(name)									et::Event0 name
+#	define ET_DECLARE_EVENT1(name, argtype)							et::Event1<argtype> name
+#	define ET_DECLARE_EVENT2(name, arg1type, arg2type)				et::Event2<arg1type, arg2type> name
 	
-#	define ET_CONNECT_EVENT(name, methodName)						name.connect(this, &methodName);
+#	define ET_CONNECT_EVENT(name, methodName)						name.connect(this, &methodName)
 	
-#	define ET_CONNECT_EVENT_TO_OBJECT(name, object, methodName)		name.connect(object, &methodName);
+#	define ET_CONNECT_EVENT_TO_OBJECT(name, object, methodName)		name.connect(object, &methodName)
 
 	class Event;
 	

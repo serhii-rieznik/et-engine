@@ -159,17 +159,17 @@ InputHandler::~InputHandler()
 
 void InputHandler::connectInputEvents()
 {
-	ET_CONNECT_EVENT(input().keyPressed, InputHandler::onKeyPressed)
-	ET_CONNECT_EVENT(input().charactersEntered, InputHandler::onCharactersEntered)
-	ET_CONNECT_EVENT(input().keyReleased, InputHandler::onKeyReleased)
+	ET_CONNECT_EVENT(input().keyPressed, InputHandler::onKeyPressed);
+	ET_CONNECT_EVENT(input().charactersEntered, InputHandler::onCharactersEntered);
+	ET_CONNECT_EVENT(input().keyReleased, InputHandler::onKeyReleased);
 	
-	ET_CONNECT_EVENT(input().pointerPressed, InputHandler::onPointerPressed)
-	ET_CONNECT_EVENT(input().pointerMoved, InputHandler::onPointerMoved)
-	ET_CONNECT_EVENT(input().pointerReleased, InputHandler::onPointerReleased)
-	ET_CONNECT_EVENT(input().pointerCancelled, InputHandler::onPointerCancelled)
-	ET_CONNECT_EVENT(input().pointerScrolled, InputHandler::onPointerScrolled)
+	ET_CONNECT_EVENT(input().pointerPressed, InputHandler::onPointerPressed);
+	ET_CONNECT_EVENT(input().pointerMoved, InputHandler::onPointerMoved);
+	ET_CONNECT_EVENT(input().pointerReleased, InputHandler::onPointerReleased);
+	ET_CONNECT_EVENT(input().pointerCancelled, InputHandler::onPointerCancelled);
+	ET_CONNECT_EVENT(input().pointerScrolled, InputHandler::onPointerScrolled);
 	
-	ET_CONNECT_EVENT(input().gesturePerformed, InputHandler::onGesturePerformed)
+	ET_CONNECT_EVENT(input().gesturePerformed, InputHandler::onGesturePerformed);
 }
 
 }

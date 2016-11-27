@@ -19,9 +19,9 @@ class InterpolationValue : public TimedObject
 public:
 	const float interpolationThreshold = 0.00001f;
 
-	ET_DECLARE_EVENT0(updated)
-		ET_DECLARE_EVENT1(valueUpdated, const T&)
-		ET_DECLARE_EVENT0(finished)
+	ET_DECLARE_EVENT0(updated);
+	ET_DECLARE_EVENT1(valueUpdated, const T&);
+	ET_DECLARE_EVENT0(finished);
 
 public:
 	void run()

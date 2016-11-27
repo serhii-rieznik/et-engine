@@ -9,7 +9,7 @@
 
 using namespace et;
 
-Sequence::Sequence(float duration, float from, float to, Curve curve ) : 
+Sequence::Sequence(float duration, float from, float to, Curve curve) : 
 	_duration(duration), _from(from), _to(to), _dt(to - from), _curve(curve)
 {
 
@@ -34,9 +34,9 @@ void Sequence::update(float t)
 	else
 	{
 		float normalizedTime = (t - _startTime) / _duration;
-		if (_curve == EasyIn)
+		if (_curve == Curve::EasyIn)
 			normalizedTime = ::sqrtf(normalizedTime);
-		else if (_curve == EasyOut)
+		else if (_curve == Curve::EasyOut)
 			normalizedTime *= normalizedTime;
 		updated.invoke(this, _from + _dt * normalizedTime);
 	}

@@ -12,60 +12,62 @@
 
 namespace et
 {
-    namespace audio
-    {
-        class PlayerPrivate;
-        class Player : public Object, public EventReceiver
-        {
-        public:
-			ET_DECLARE_POINTER(Player);
+namespace audio
+{
+class PlayerPrivate;
+class Player : public Object, public EventReceiver
+{
+public:
+	ET_DECLARE_POINTER(Player);
 
-		public:
-			Player();
-			Player(Track::Pointer track);
-			
-			~Player();
+public:
+	Player();
+	Player(Track::Pointer track);
 
-			void play(bool looped = false);
-            void play(Track::Pointer, bool looped = false);
-			void pause();
-			void stop();
-			void rewind();
-			
-			void setVolume(float, float);
-			void setPan(float);
+	~Player();
 
-			float position() const;
+	void play(bool looped = false);
+	void play(Track::Pointer, bool looped = false);
+	void pause();
+	void stop();
+	void rewind();
 
-			bool playing() const;
-			
-			Track::Pointer track() const
-				{ return _track; }
-			
-			unsigned int source() const;
-			
-			ET_DECLARE_EVENT1(finished, Player*)
+	void setVolume(float, float);
+	void setPan(float);
 
-        private:
-			ET_DENY_COPY(Player);
+	float position() const;
 
-			void init();
-			void linkTrack(Track::Pointer);
-			
-			void setActualVolume(float);
-            
-			void handleProcessedBuffers();
-			void handleProcessedSamples();
-			
-        private:
-			friend class Manager;
-			friend class StreamingThread;
+	bool playing() const;
 
-		private:
-			ET_DECLARE_PIMPL(Player, 32);
-			
-			Track::Pointer _track;
-			FloatAnimator _volumeAnimator;
-        };
+	Track::Pointer track() const
+	{
+		return _track;
 	}
+
+	unsigned int source() const;
+
+	ET_DECLARE_EVENT1(finished, Player*);
+
+private:
+	ET_DENY_COPY(Player);
+
+	void init();
+	void linkTrack(Track::Pointer);
+
+	void setActualVolume(float);
+
+	void handleProcessedBuffers();
+	void handleProcessedSamples();
+
+private:
+	friend class Manager;
+	friend class StreamingThread;
+
+private:
+	ET_DECLARE_PIMPL(Player, 32);
+
+	Track::Pointer _track;
+	FloatAnimator _volumeAnimator;
+};
+}
 }
