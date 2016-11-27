@@ -16,13 +16,15 @@ uint32_t randomInteger(uint32_t limit);
 Application::Application()
 {
 	sharedObjectFactory();
-	log::addOutput(log::ConsoleOutput::Pointer::create());
+	platformInit();
 
+	log::addOutput(log::ConsoleOutput::Pointer::create());
 	_lastQueuedTimeMSec = queryContiniousTimeInMilliSeconds();
 	
-	platformInit();
-	threading::setMainThreadIdentifier(threading::currentThread());
 	delegate()->setApplicationParameters(_parameters);
+	_env.updateDocumentsFolder(_identifier);
+
+	threading::setMainThreadIdentifier(threading::currentThread());
 	platformActivate();
 	
 	_backgroundThread.run();

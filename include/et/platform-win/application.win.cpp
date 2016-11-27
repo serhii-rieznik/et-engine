@@ -40,7 +40,6 @@ void Application::platformInit()
 	
 	enableDPIAwareness();
 	SetUnhandledExceptionFilter(unhandledExceptionFilter);
-	_env.updateDocumentsFolder(_identifier);
 
 	pushSearchPath(etWorkingFolder);
 }

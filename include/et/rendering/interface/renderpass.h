@@ -35,10 +35,8 @@ public:
 	{
 		RenderTarget color[MaxRenderTargets];
 		RenderTarget depth;
-		
 		Camera::Pointer camera;
 		Camera::Pointer light;
-		
 		RenderPassClass renderPassClass = RenderPassClass::Forward;
 		uint32_t priority = 0;
 	};
@@ -65,6 +63,12 @@ public:
 	const ConstructionInfo& info() const;
 	ConstantBuffer& dynamicConstantBuffer();
 
+	void setCamera(const Camera::Pointer& cam);
+	void setLightCamera(const Camera::Pointer& cam);
+
+	Camera::Pointer& camera();
+	const Camera::Pointer& camera() const;
+
 private:
 	ConstructionInfo _info;
 	ConstantBuffer _dynamicConstantBuffer;
@@ -89,6 +93,26 @@ inline const RenderPass::ConstructionInfo& RenderPass::info() const
 inline ConstantBuffer& RenderPass::dynamicConstantBuffer()
 {
 	return _dynamicConstantBuffer;
+}
+
+inline void RenderPass::setCamera(const Camera::Pointer& cam)
+{
+	_info.camera = cam;
+}
+
+inline void RenderPass::setLightCamera(const Camera::Pointer& cam)
+{
+	_info.light = cam;
+}
+
+inline Camera::Pointer& RenderPass::camera() 
+{
+	return _info.camera; 
+}
+
+inline const Camera::Pointer& RenderPass::camera() const
+{
+	return _info.camera; 
 }
 
 }

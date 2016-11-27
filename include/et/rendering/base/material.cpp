@@ -32,12 +32,15 @@ uint64_t Material::sortingKey() const
 void Material::setTexture(MaterialTexture t, Texture::Pointer tex)
 {
 	mtl::OptionalObject<Texture::Pointer>& entry = textures[static_cast<uint32_t>(t)];
-	entry.object = tex;
-	entry.index = static_cast<uint32_t>(t);
-	entry.binding = t;
+	if (entry.object != tex)
+	{
+		entry.object = tex;
+		entry.index = static_cast<uint32_t>(t);
+		entry.binding = t;
 
-	for (auto& i : _instances)
-		i->invalidateTextureSet();
+		for (auto& i : _instances)
+			i->invalidateTextureSet();
+	}
 }
 
 void Material::setSampler(MaterialTexture t, Sampler::Pointer smp)
