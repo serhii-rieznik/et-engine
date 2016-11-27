@@ -11,8 +11,8 @@
 
 namespace et
 {
-DX12Texture::DX12Texture(TextureDescription::Pointer desc) 
-	: Texture(desc)
+
+DX12Texture::DX12Texture(const Description &, const BinaryDataStorage &)
 {
 }
 

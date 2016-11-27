@@ -16,60 +16,60 @@
 
 namespace et
 {
-	class CriticalSectionPrivate
-	{
-	private:
+class CriticalSectionPrivate
+{
+private:
 #   if (ET_PLATFORM_WIN)
-        RTL_CRITICAL_SECTION _cs;
+	RTL_CRITICAL_SECTION _cs;
 #   else
-		pthread_mutex_t _cs;
+	pthread_mutex_t _cs;
 #   endif
-    public:
-        
-        CriticalSectionPrivate()
-        {
-#       if (ET_PLATFORM_WIN)
-            InitializeCriticalSection(&_cs);
-#       else
-            pthread_mutexattr_t attrib = { };
-            pthread_mutexattr_init(&attrib);
-            pthread_mutexattr_settype(&attrib, PTHREAD_MUTEX_RECURSIVE);
-            pthread_mutex_init(&_cs, &attrib);
-            pthread_mutexattr_destroy(&attrib);
-#       endif
-        }
-        
-        ~CriticalSectionPrivate()
-        {
-#       if (ET_PLATFORM_WIN)
-            DeleteCriticalSection(&_cs);
-#       else
-            pthread_mutex_destroy(&_cs);
-#       endif
-        }
+public:
 
-        void enter()
-        {
+	CriticalSectionPrivate()
+	{
 #       if (ET_PLATFORM_WIN)
-            EnterCriticalSection(&_cs);
+		InitializeCriticalSection(&_cs);
 #       else
-            int result = pthread_mutex_lock(&_cs);
-            if (result == EBUSY)
-                log::warning("Mutex already locked.");
+		pthread_mutexattr_t attrib = {};
+		pthread_mutexattr_init(&attrib);
+		pthread_mutexattr_settype(&attrib, PTHREAD_MUTEX_RECURSIVE);
+		pthread_mutex_init(&_cs, &attrib);
+		pthread_mutexattr_destroy(&attrib);
 #       endif
-        }
-        
-        void leave()
-        {
+	}
+
+	~CriticalSectionPrivate()
+	{
 #       if (ET_PLATFORM_WIN)
-            LeaveCriticalSection(&_cs);
+		DeleteCriticalSection(&_cs);
 #       else
-            int result = pthread_mutex_unlock(&_cs);
-            if (result == EPERM)
-                log::warning("Mutex already unlocked or was locked from another thread.");
+		pthread_mutex_destroy(&_cs);
 #       endif
-        }
-	};
+	}
+
+	void enter()
+	{
+#       if (ET_PLATFORM_WIN)
+		EnterCriticalSection(&_cs);
+#       else
+		int result = pthread_mutex_lock(&_cs);
+		if (result == EBUSY)
+			log::warning("Mutex already locked.");
+#       endif
+	}
+
+	void leave()
+	{
+#       if (ET_PLATFORM_WIN)
+		LeaveCriticalSection(&_cs);
+#       else
+		int result = pthread_mutex_unlock(&_cs);
+		if (result == EPERM)
+			log::warning("Mutex already unlocked or was locked from another thread.");
+#       endif
+	}
+};
 }
 
 using namespace et;
@@ -86,10 +86,10 @@ CriticalSection::~CriticalSection()
 
 void CriticalSection::enter()
 {
-    _private->enter();
+	_private->enter();
 }
 
 void CriticalSection::leave()
 {
-    _private->leave();
+	_private->leave();
 }

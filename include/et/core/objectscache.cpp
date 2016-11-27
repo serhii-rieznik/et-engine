@@ -24,7 +24,7 @@ void ObjectsCache::manage(const LoadableObject::Pointer& o, const ObjectLoader::
 	if (o.valid() && o->canBeReloaded())
 	{
 		CriticalSectionScope lock(_lock);
-		
+
 		if (_objects.count(o->origin()) > 0)
 		{
 			ObjectPropertyList& list = _objects[o->origin()];
@@ -50,38 +50,39 @@ void ObjectsCache::manage(const LoadableObject::Pointer& o, const ObjectLoader::
 	}
 }
 
-std::vector<LoadableObject::Pointer> ObjectsCache::findObjects(const std::string& key)
+LoadableObject::Collection ObjectsCache::findObjects(const std::string& key)
 {
 	CriticalSectionScope lock(_lock);
 	auto i = _objects.find(key);
 	if (i == _objects.end())
-		return std::vector<LoadableObject::Pointer>();
-		
-	std::vector<LoadableObject::Pointer> result;
-	
+		return LoadableObject::Collection();
+
+	LoadableObject::Collection result;
+	result.reserve(i->second.size());
+
 	for (auto prop : i->second)
 		result.push_back(prop.object);
-	
+
 	return result;
 }
 
 LoadableObject::Pointer ObjectsCache::findAnyObject(const std::string& key, uint64_t* property)
 {
 	CriticalSectionScope lock(_lock);
-	
+
 	auto i = _objects.find(key);
 	if (i == _objects.end())
 	{
 		if (property)
 			*property = 0;
-		
+
 		return LoadableObject::Pointer();
 	}
 	else
 	{
 		if (property)
 			*property = i->second.front().identifiers[key];
-		
+
 		return i->second.front().object;
 	}
 }
@@ -93,7 +94,7 @@ void ObjectsCache::discard(const LoadableObject::Pointer& o)
 	{
 		CriticalSectionScope lock(_lock);
 		if (_objects.count(o->origin()) == 0) return;
-		
+
 		ObjectPropertyList& list = _objects[o->origin()];
 		for (auto i = list.begin(), e = list.end(); i != e; ++i)
 		{
@@ -103,7 +104,7 @@ void ObjectsCache::discard(const LoadableObject::Pointer& o)
 				break;
 			}
 		}
-		
+
 		if (list.empty())
 			_objects.erase(o->origin());
 	}
@@ -118,9 +119,9 @@ void ObjectsCache::clear()
 void ObjectsCache::flush()
 {
 	CriticalSectionScope lock(_lock);
-	
+
 	size_t objectsErased = 0;
-	
+
 	for (auto& lv : _objects)
 	{
 		auto obj = lv.second.begin();
@@ -137,7 +138,7 @@ void ObjectsCache::flush()
 			}
 		}
 	}
-	
+
 	auto i = _objects.begin();
 	while (i != _objects.end())
 	{
@@ -150,7 +151,7 @@ void ObjectsCache::flush()
 			++i;
 		}
 	}
-	
+
 	if (objectsErased > 0)
 		log::info("[ObjectsCache] %llu objects flushed.", static_cast<uint64_t>(objectsErased));
 }
@@ -168,10 +169,10 @@ void ObjectsCache::stopMonitoring()
 void ObjectsCache::update(float t)
 {
 	static const float updateInterval = 0.5f;
-	
+
 	if (_updateTime == 0.0f)
 		_updateTime = t;
-	
+
 	float dt = t - _updateTime;
 
 	if (dt > updateInterval)
@@ -189,7 +190,7 @@ uint64_t ObjectsCache::getFileProperty(const std::string& p)
 uint64_t ObjectsCache::getObjectProperty(LoadableObject::Pointer ptr)
 {
 	CriticalSectionScope lock(_lock);
-	
+
 	for (auto& entry : _objects)
 	{
 		for (auto& p : entry.second)
@@ -198,14 +199,14 @@ uint64_t ObjectsCache::getObjectProperty(LoadableObject::Pointer ptr)
 				return p.identifiers[ptr->origin()];
 		}
 	}
-	
+
 	return 0;
 }
 
 void ObjectsCache::performUpdate()
 {
 	ObjectsCache& cache = *this;
-	
+
 	for (auto& entry : _objects)
 	{
 		for (auto& p : entry.second)
@@ -213,7 +214,7 @@ void ObjectsCache::performUpdate()
 			if (p.loader.valid() && p.object->canBeReloaded())
 			{
 				bool shouldReload = false;
-				
+
 				const auto& origin = p.object->origin();
 				uint64_t originProp = getFileProperty(origin);
 				if (p.identifiers[origin] != originProp)
@@ -234,7 +235,7 @@ void ObjectsCache::performUpdate()
 						}
 					}
 				}
-				
+
 				if (shouldReload)
 					p.loader->reloadObject(p.object, cache);
 			}

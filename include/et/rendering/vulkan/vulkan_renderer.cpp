@@ -230,7 +230,7 @@ Buffer::Pointer VulkanRenderer::createBuffer(const Buffer::Description& desc)
 
 Texture::Pointer VulkanRenderer::createTexture(TextureDescription::Pointer desc)
 {
-	return VulkanTexture::Pointer::create(_private->vulkan(), desc);
+	return VulkanTexture::Pointer::create(_private->vulkan(), desc.reference(), desc->data);
 }
 
 TextureSet::Pointer VulkanRenderer::createTextureSet(const TextureSet::Description& desc)

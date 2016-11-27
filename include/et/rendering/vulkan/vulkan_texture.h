@@ -19,7 +19,7 @@ public:
 	ET_DECLARE_POINTER(VulkanTexture);
 
 public:
-	VulkanTexture(VulkanState&, const TextureDescription::Pointer&);
+	VulkanTexture(VulkanState&, const Description&, const BinaryDataStorage&);
 	~VulkanTexture();
 
 	void setImageData(const BinaryDataStorage&) override;

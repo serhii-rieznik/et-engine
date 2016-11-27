@@ -11,34 +11,41 @@
 
 namespace et
 {
-	class CriticalSectionPrivate;
-	class CriticalSection
+class CriticalSectionPrivate;
+class CriticalSection
+{
+public:
+	CriticalSection();
+	~CriticalSection();
+
+	void enter();
+	void leave();
+
+private:
+	ET_DECLARE_PIMPL(CriticalSection, 64);
+};
+
+class CriticalSectionScope
+{
+public:
+	CriticalSectionScope(CriticalSection& section) :
+		_cs(section)
 	{
-	public:
-		CriticalSection();
-		~CriticalSection();
+		_cs.enter();
+	}
 
-		void enter();
-		void leave();
-
-	private:
-		ET_DECLARE_PIMPL(CriticalSection, 64);
-	};
-
-	class CriticalSectionScope
+	~CriticalSectionScope()
 	{
-	public:
-		CriticalSectionScope(CriticalSection& section) :
-			_cs(section) { _cs.enter(); }
+		_cs.leave();
+	}
 
-		~CriticalSectionScope()
-			{ _cs.leave(); }
+private:
+	CriticalSectionScope& operator = (const CriticalSectionScope&)
+	{
+		return *this;
+	}
 
-	private:
-		CriticalSectionScope& operator = (const CriticalSectionScope&) 
-			{ return *this; }
-
-	private:
-		CriticalSection& _cs;
-	};
+private:
+	CriticalSection& _cs;
+};
 }

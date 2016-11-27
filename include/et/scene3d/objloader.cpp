@@ -363,6 +363,8 @@ s3d::ElementContainer::Pointer OBJLoader::load(et::RenderInterface::Pointer ren,
 	s3d::ElementContainer::Pointer result = generateVertexBuffers(storage);
 	loaded.invoke(result);
 
+	sharedBlockAllocator().flushUnusedBlocks();
+
 	return result;
 }
 

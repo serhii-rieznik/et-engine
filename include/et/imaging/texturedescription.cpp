@@ -16,15 +16,6 @@
 
 namespace et
 {
-    
-TextureDescription::TextureDescription()
-{
-}
-    
-TextureDescription::TextureDescription(const std::string& fileName)
-{
-    load(fileName);
-}
 
 bool TextureDescription::preload(const std::string& fileName, bool initWithZero)
 {

@@ -8,6 +8,8 @@
 #pragma once
 
 #include <et/app/context.h>
+#include <et/core/objectscache.h>
+#include <et/imaging/texturedescription.h>
 #include <et/rendering/rendercontextparams.h>
 #include <et/rendering/base/materiallibrary.h>
 #include <et/rendering/interface/buffer.h>
@@ -100,11 +102,23 @@ private:
 
 inline Texture::Pointer RenderInterface::loadTexture(const std::string& fileName, ObjectsCache& cache)
 {
-	TextureDescription::Pointer desc = TextureDescription::Pointer::create();
-	if (desc->load(fileName))
+	LoadableObject::Collection existingObjects = cache.findObjects(fileName);
+	if (existingObjects.empty())
 	{
-		return createTexture(desc);
+		TextureDescription::Pointer desc = TextureDescription::Pointer::create();
+		if (desc->load(fileName))
+		{
+			Texture::Pointer texture = createTexture(desc);
+			texture->setOrigin(fileName);
+			cache.manage(texture, ObjectLoader::Pointer());
+			return texture;
+		}
 	}
+	else 
+	{
+		return existingObjects.front();
+	}
+
 	log::error("Unable to load texture from %s", fileName.c_str());
 	return defaultTexture();
 }

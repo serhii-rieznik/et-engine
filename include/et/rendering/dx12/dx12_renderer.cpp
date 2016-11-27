@@ -45,7 +45,7 @@ Buffer::Pointer DX12Renderer::createBuffer(const Buffer::Description&)
 
 Texture::Pointer DX12Renderer::createTexture(TextureDescription::Pointer desc)
 {
-	return DX12Texture::Pointer::create(desc);
+	return DX12Texture::Pointer::create(desc.reference(), desc->data);
 }
 
 TextureSet::Pointer DX12Renderer::createTextureSet(const TextureSet::Description&)
