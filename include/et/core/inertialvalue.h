@@ -12,69 +12,88 @@
 
 namespace et
 {
-	template <typename T>
-	class InertialValue : public TimedObject
+template <typename T>
+class InertialValue : public TimedObject
+{
+public:
+	InertialValue() :
+		_velocity(0), _value(0), _deccelerationRate(1.0f), _latestDelta(0), _time(0.0f),
+		_precision(std::numeric_limits<float>::epsilon())
 	{
-	public:
-		InertialValue() : 
-			_velocity(0), _value(0), _deccelerationRate(1.0f), _latestDelta(0), _time(0.0f),
-			_precision(std::numeric_limits<float>::epsilon()) { }
+	}
 
-		InertialValue(const T& val) :
-			_velocity(0), _value(val), _deccelerationRate(1.0f), _latestDelta(0), _time(0.0f),
-			_precision(std::numeric_limits<float>::epsilon()) { }
-		
-		ET_DECLARE_PROPERTY_GET_REF_SET_REF(T, value, setValue)
-		ET_DECLARE_PROPERTY_GET_REF_SET_REF(T, velocity, setVelocity)
-		ET_DECLARE_PROPERTY_GET_REF_SET_REF(float, deccelerationRate, setDeccelerationRate)
-		ET_DECLARE_PROPERTY_GET_REF(T, latestDelta)
-		
-	public:
-		void addVelocity(const T& t)
-			{ _velocity += t; }
+	InertialValue(const T& val) :
+		_velocity(0), _value(val), _deccelerationRate(1.0f), _latestDelta(0), _time(0.0f),
+		_precision(std::numeric_limits<float>::epsilon())
+	{
+	}
 
-		void scaleVelocity(const T& t)
-			{ _velocity *= t; }
+	const T& value() const { return _value; }
+	const T& velocity() const { return _velocity; }
+	const T& latestDelta() const { return _latestDelta; }
 
-		void addValue(const T& v)
-			{ _value += v;}
+	void setDeccelerationRate(float value) { _deccelerationRate = value; }
 
-		void setPrecision(float p)
-			{ _precision = p; }
+public:
+	void addVelocity(const T& t)
+	{
+		_velocity += t;
+	}
 
-		void run()
+	void scaleVelocity(const T& t)
+	{
+		_velocity *= t;
+	}
+
+	void addValue(const T& v)
+	{
+		_value += v;
+	}
+
+	void setPrecision(float p)
+	{
+		_precision = p;
+	}
+
+	void run()
+	{
+		TimedObject::startUpdates(nullptr);
+		_time = actualTime();
+	}
+
+public:
+	ET_DECLARE_EVENT0(updated);
+	ET_DECLARE_EVENT1(valueUpdated, const T&);
+
+private:
+	void startUpdates(TimerPool* timerPool = nullptr) override
+	{
+		TimedObject::startUpdates(timerPool);
+	}
+
+	void update(float t) override
+	{
+		float dt = _deccelerationRate * (t - _time);
+		_velocity *= std::max(0.0f, 1.0f - dt);
+
+		_latestDelta = dt * _velocity;
+
+		if (length(_latestDelta) > _precision)
 		{
-			TimedObject::startUpdates(nullptr);
-			_time = actualTime();
+			_value += _latestDelta;
+			valueUpdated.invoke(_value);
+			updated.invoke();
 		}
 
-	public:
-		ET_DECLARE_EVENT0(updated)
-		ET_DECLARE_EVENT1(valueUpdated, const T&)
+		_time = t;
+	}
 
-	private:
-		void startUpdates(TimerPool* timerPool = nullptr) override
-			{ TimedObject::startUpdates(timerPool); }
-
-		void update(float t) override
-		{
-			float dt = _deccelerationRate * (t - _time);
-			_velocity *= std::max(0.0f, 1.0f - dt);
-			
-			_latestDelta = dt * _velocity;
-			
-			if (length(_latestDelta) > _precision)
-			{
-				_value += _latestDelta;
-				valueUpdated.invoke(_value);
-				updated.invoke();
-			}
-			
-			_time = t;
-		}
-
-	private:
-		float _time;
-		float _precision;
-	};
+private:
+	T _value;
+	T _velocity;
+	T _latestDelta;
+	float _time = 0.0f;
+	float _precision = 0.0f;
+	float _deccelerationRate = 1.0f;
+};
 }

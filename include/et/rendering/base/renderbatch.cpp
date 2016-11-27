@@ -132,7 +132,7 @@ void RenderBatch::setMaterial(MaterialInstance::Pointer mat)
 void RenderBatch::setTransformation(const mat4& m)
 {
 	_transformation = m;
-	_rotationTransformation = _transformation.inversed().transposed();
+	_rotationTransformation = _transformation.inverted().transposed();
 	_rotationTransformation[0].w = 0.0f;
 	_rotationTransformation[1].w = 0.0f;
 	_rotationTransformation[2].w = 0.0f;

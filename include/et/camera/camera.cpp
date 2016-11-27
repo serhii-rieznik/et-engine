@@ -212,7 +212,7 @@ ray3d Camera::castRay(const vec2& pt) const
 
 void Camera::viewUpdated()
 {
-	_inverseViewMatrix = _viewMatrix.inversed();
+	_inverseViewMatrix = _viewMatrix.inverted();
 
 	if (_lockUpVector)
 	{
@@ -225,7 +225,7 @@ void Camera::viewUpdated()
 		_viewMatrix[1] = vec4(s.y, u.y, -d.y, 0.0f);
 		_viewMatrix[2] = vec4(s.z, u.z, -d.z, 0.0f);
 		_viewMatrix[3] = vec4(e.x, e.y,  e.z, 1.0f);
-		_inverseViewMatrix = _viewMatrix.inversed();
+		_inverseViewMatrix = _viewMatrix.inverted();
 	}
 	
 	updateViewProjectionMatrix();
@@ -233,14 +233,14 @@ void Camera::viewUpdated()
 
 void Camera::projectionUpdated()
 {
-	_inverseProjectionMatrix = _projectionMatrix.inversed();
+	_inverseProjectionMatrix = _projectionMatrix.inverted();
 	updateViewProjectionMatrix();
 }
 
 void Camera::updateViewProjectionMatrix()
 {
 	_viewProjectionMatrix = _viewMatrix * _projectionMatrix;
-	_inverseViewProjectionMatrix = _viewProjectionMatrix.inversed();
+	_inverseViewProjectionMatrix = _viewProjectionMatrix.inverted();
 	_frustum.build(_inverseViewProjectionMatrix);
 }
 

@@ -62,6 +62,16 @@ private:
 	TextureDescription::Pointer _desc;
 };
 
+class Framebuffer : public Shared
+{
+public:
+	ET_DECLARE_POINTER(Framebuffer);
+
+public:
+	Texture::Pointer color[MaxRenderTargets];
+	Texture::Pointer depth;
+};
+
 inline vec2 Texture::getTexCoord(const vec2& vec, TextureOrigin origin) const
 {
 	vec2 tx = texel();
