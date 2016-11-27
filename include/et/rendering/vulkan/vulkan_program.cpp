@@ -59,8 +59,6 @@ void VulkanProgram::build(const std::string& source)
 	std::vector<uint32_t> fragmentBin;
 	if (glslToSPIRV(vertexSource, fragmentSource, vertexBin, fragmentBin, _reflection))
 	{
-		printReflection();
-
 		VkShaderModuleCreateInfo createInfo = { VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO };
 
 		createInfo.pCode = vertexBin.data();

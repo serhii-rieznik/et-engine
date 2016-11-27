@@ -19,7 +19,9 @@ void BackgroundRunLoop::addTask(Task* t, float delay)
 {
 	updateTime(queryContiniousTimeInMilliSeconds());
 	RunLoop::addTask(t, delay);
-	_owner->resume();
+
+	if (_owner->suspended())
+		_owner->resume();
 }
 
 BackgroundThread::BackgroundThread()
