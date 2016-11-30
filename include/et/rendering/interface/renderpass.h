@@ -8,8 +8,8 @@
 #pragma once
 
 #include <et/camera/camera.h>
-#include <et/rendering/rendering.h>
-#include <et/rendering/constantbuffer.h>
+#include <et/rendering/base/rendering.h>
+#include <et/rendering/base/constantbuffer.h>
 #include <et/rendering/base/renderbatch.h>
 
 namespace et
@@ -38,6 +38,8 @@ public:
 		Camera::Pointer camera;
 		Camera::Pointer light;
 		RenderPassClass renderPassClass = RenderPassClass::Forward;
+		float depthBias = 0.0f;
+		float depthSlope = 0.0f;
 		uint32_t priority = 0;
 	};
 
@@ -50,6 +52,7 @@ public:
 		vec4 cameraDirection;
 		vec4 cameraUp;
 		vec4 lightPosition;
+		mat4 lightProjection;
 	};
 
 public:
@@ -69,50 +72,19 @@ public:
 	Camera::Pointer& camera();
 	const Camera::Pointer& camera() const;
 
+	void setSharedTexture(MaterialTexture, const Texture::Pointer&, const Sampler::Pointer&);
+	const TextureSet::Pointer& sharedTexturesSet();
+
 private:
+	void buildSharedTexturesSet();
+
+private:
+	RenderInterface* _renderer = nullptr;
 	ConstructionInfo _info;
 	ConstantBuffer _dynamicConstantBuffer;
+	std::map<MaterialTexture, std::pair<Texture::Pointer, Sampler::Pointer>> _sharedTextures;
+	TextureSet::Pointer _sharedTexturesSet;
+	bool _sharedTexturesSetValid = false;
 };
-
-inline RenderPass::RenderPass(RenderInterface* renderer, const ConstructionInfo& info) :
-	_info(info)
-{
-	_dynamicConstantBuffer.init(renderer);
-}
-
-inline RenderPass::~RenderPass()
-{
-	_dynamicConstantBuffer.shutdown();
-}
-
-inline const RenderPass::ConstructionInfo& RenderPass::info() const
-{
-	return _info;
-}
-
-inline ConstantBuffer& RenderPass::dynamicConstantBuffer()
-{
-	return _dynamicConstantBuffer;
-}
-
-inline void RenderPass::setCamera(const Camera::Pointer& cam)
-{
-	_info.camera = cam;
-}
-
-inline void RenderPass::setLightCamera(const Camera::Pointer& cam)
-{
-	_info.light = cam;
-}
-
-inline Camera::Pointer& RenderPass::camera() 
-{
-	return _info.camera; 
-}
-
-inline const Camera::Pointer& RenderPass::camera() const
-{
-	return _info.camera; 
-}
 
 }

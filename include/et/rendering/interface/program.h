@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include <et/rendering/rendering.h>
+#include <et/rendering/base/rendering.h>
 #include <et/rendering/base/vertexdeclaration.h>
 #include <et/rendering/interface/textureset.h>
 

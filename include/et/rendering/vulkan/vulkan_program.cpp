@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include <et/rendering/shadersource.h>
+#include <et/rendering/base/shadersource.h>
 #include <et/rendering/vulkan/glslang/vulkan_glslang.h>
 #include <et/rendering/vulkan/vulkan_program.h>
 #include <et/rendering/vulkan/vulkan.h>

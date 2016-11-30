@@ -6,7 +6,7 @@
  */
 
 #include <et/app/application.h>
-#include <et/rendering/shadersource.h>
+#include <et/rendering/base/shadersource.h>
 
 namespace et
 {

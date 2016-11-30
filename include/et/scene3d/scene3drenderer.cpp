@@ -57,6 +57,13 @@ void Renderer::validateMainPass(RenderInterface::Pointer& renderer, const Scene:
 		passInfo.depth.storeOperation = FramebufferOperation::DontCare;
 		passInfo.depth.enabled = true;
 		_mainPass = renderer->allocateRenderPass(passInfo);
+
+		if (_envTexture.invalid())
+		{
+			ObjectsCache localCache;
+			_envTexture = renderer->loadTexture("media/textures/background.dds", localCache);
+			_mainPass->setSharedTexture(MaterialTexture::Environment, _envTexture, renderer->defaultSampler());
+		}
 	}
 }
 
@@ -66,11 +73,18 @@ void Renderer::validateShadowPass(RenderInterface::Pointer& renderer)
 	{
         TextureDescription::Pointer desc = TextureDescription::Pointer::create();
         desc->isRenderTarget = true;
-        desc->size = vec2i(1024); // TODO : variable size
+        desc->size = vec2i(2048); // TODO : variable size
         desc->format = TextureFormat::Depth32F;
         _shadowTexture = renderer->createTexture(desc);
-		Material::Pointer defaultMaterial = renderer->sharedMaterialLibrary().loadDefaultMaterial(DefaultMaterial::Microfacet);
-		defaultMaterial->setTexture(MaterialTexture::Shadow, _shadowTexture); // TODO : set shadow separately
+
+		Sampler::Description smpDesc;
+		smpDesc.minFilter = TextureFiltration::Linear;
+		smpDesc.magFilter = TextureFiltration::Linear;
+		smpDesc.wrapU = TextureWrap::ClampToEdge;
+		smpDesc.wrapV = TextureWrap::ClampToEdge;
+		Sampler::Pointer smp = renderer->createSampler(smpDesc);
+
+		_mainPass->setSharedTexture(MaterialTexture::Shadow, _shadowTexture, smp);
 	}
 
 	if (_shadowPass.invalid() || (_shadowPass->info().camera != _mainPass->info().light))
@@ -85,6 +99,8 @@ void Renderer::validateShadowPass(RenderInterface::Pointer& renderer)
 		passInfo.depth.useDefaultRenderTarget = false;
 		passInfo.depth.enabled = true;		
         passInfo.color[0].enabled = false;
+		passInfo.depthBias = 1.0f;
+		passInfo.depthSlope = 1.0f;
 		passInfo.renderPassClass = RenderPassClass::Depth;
         _shadowPass = renderer->allocateRenderPass(passInfo);
 	}

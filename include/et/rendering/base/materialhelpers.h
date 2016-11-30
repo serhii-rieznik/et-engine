@@ -22,10 +22,14 @@ enum class MaterialTexture : uint32_t
 	Roughness,
 	Opacity,
 	Normal,
-
+	
 	Shadow,
+	AmbientOcclusion,
+	Environment,
 
-	Count
+	Count,
+
+	FirstSharedTexture = Shadow,
 };
 
 enum class MaterialParameter : uint32_t

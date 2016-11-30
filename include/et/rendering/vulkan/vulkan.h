@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include <et/rendering/rendering.h>
+#include <et/rendering/base/rendering.h>
 
 #if (ET_PLATFORM_WIN)
 #	define VK_USE_PLATFORM_WIN32_KHR
@@ -119,6 +119,7 @@ enum DescriptorSetClass : uint32_t
 {
 	Buffers,
 	Textures,
+	SharedTextures,
 	Count,
 	
 	DynamicDescriptorsCount = 2
@@ -129,6 +130,7 @@ struct VulkanNativePipeline
 	VkPipeline pipeline = nullptr;
 	VkPipelineLayout layout = nullptr;
 	VkDescriptorSetLayout texturesLayout = nullptr;
+	VkDescriptorSetLayout sharedTexturesLayout = nullptr;
 };
 
 struct VulkanNativeTexture

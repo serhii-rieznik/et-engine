@@ -40,10 +40,12 @@ public:
 	ConstantBufferEntry variablesData;
 	Vector<VulkanRenderBatch> batches;
 	Map<uint32_t, VkFramebuffer> framebuffers;
+	VulkanTextureSet::Pointer sharedTextures;
 
 	std::atomic_bool recording{ false };
 
 	void generateDynamicDescriptorSet(RenderPass* pass);
+	void updateSharedTexturesDescriptorSet(RenderPass* pass);
 	void loadVariables(Camera::Pointer camera, Camera::Pointer light);
 };
 
@@ -162,9 +164,10 @@ VulkanRenderPass::~VulkanRenderPass()
 
 	vkDestroyRenderPass(_private->vulkan.device, _private->renderPass, nullptr);
 	vkFreeCommandBuffers(_private->vulkan.device, _private->vulkan.commandPool, 1, &_private->commandBuffer);
+	
 	vkFreeDescriptorSets(_private->vulkan.device, _private->vulkan.descriptprPool, 1, &_private->dynamicDescriptorSet);
 	vkDestroyDescriptorSetLayout(_private->vulkan.device, _private->dynamicDescriptorSetLayout, nullptr);
-
+	
 	dynamicConstantBuffer().free(_private->variablesData);
 
 	ET_PIMPL_FINALIZE(VulkanRenderPass)
@@ -262,6 +265,7 @@ void VulkanRenderPass::begin()
 	_private->viewport.height = static_cast<float>(rtHeight);
 	_private->viewport.maxDepth = 1.0f;
 	_private->loadVariables(info().camera, info().light);
+	_private->updateSharedTexturesDescriptorSet(this);
 
 	_private->recording = true;
 }
@@ -313,6 +317,7 @@ void VulkanRenderPass::end()
 void VulkanRenderPass::recordCommandBuffer()
 {
 	ET_ASSERT(_private->recording == false);
+	ET_ASSERT(_private->sharedTextures.valid());
 
 	_private->renderer->sharedConstantBuffer().flush();
 	dynamicConstantBuffer().flush();
@@ -332,7 +337,9 @@ void VulkanRenderPass::recordCommandBuffer()
 	VkIndexType lastIndexType = VkIndexType::VK_INDEX_TYPE_MAX_ENUM;
 
 	VkDescriptorSet descriptorSets[DescriptorSetClass::Count] = {
-		_private->dynamicDescriptorSet
+		_private->dynamicDescriptorSet,
+		nullptr,
+		_private->sharedTextures->nativeSet().descriptorSet,
 	};
 
 	vkCmdBeginRenderPass(commandBuffer, &_private->beginInfo, VK_SUBPASS_CONTENTS_INLINE);
@@ -358,9 +365,9 @@ void VulkanRenderPass::recordCommandBuffer()
 			vkCmdBindIndexBuffer(commandBuffer, lastIndexBuffer, 0, lastIndexType);
 		}
 
-		descriptorSets[1] = batch.textureSet->nativeSet().descriptorSet;
-		vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
-			batch.pipeline->nativePipeline().layout, 0,
+		descriptorSets[DescriptorSetClass::Textures] = batch.textureSet->nativeSet().descriptorSet;
+
+		vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, batch.pipeline->nativePipeline().layout, 0,
 			DescriptorSetClass::Count, descriptorSets, DescriptorSetClass::DynamicDescriptorsCount, batch.dynamicOffsets);
 
 		vkCmdDrawIndexed(commandBuffer, batch.indexCount, 1, batch.startIndex, 0, 0);
@@ -437,6 +444,15 @@ void VulkanRenderPassPrivate::loadVariables(Camera::Pointer camera, Camera::Poin
 	if (light.valid())
 	{
 		vptr->lightPosition = vec4(light->position());
+		vptr->lightProjection = light->viewProjectionMatrix() * lightProjectionMatrix;
+	}
+}
+
+void VulkanRenderPassPrivate::updateSharedTexturesDescriptorSet(RenderPass* pass)
+{
+	if (pass->sharedTexturesSet() != sharedTextures)
+	{
+		sharedTextures = pass->sharedTexturesSet();
 	}
 }
 

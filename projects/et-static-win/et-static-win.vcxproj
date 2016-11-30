@@ -12,17 +12,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\et\core\heapcontroller.h" />
-    <ClInclude Include="..\..\include\et\rendering\base\helpers.cpp" />
-    <ClInclude Include="..\..\include\et\rendering\base\indexarray.cpp" />
-    <ClInclude Include="..\..\include\et\rendering\base\material.cpp" />
-    <ClInclude Include="..\..\include\et\rendering\base\materiallibrary.cpp" />
-    <ClInclude Include="..\..\include\et\rendering\base\pipelinestate.cpp" />
-    <ClInclude Include="..\..\include\et\rendering\base\primitives.cpp" />
-    <ClInclude Include="..\..\include\et\rendering\base\renderbatch.cpp" />
-    <ClInclude Include="..\..\include\et\rendering\base\vertexarray.cpp" />
-    <ClInclude Include="..\..\include\et\rendering\base\vertexdatachunk.cpp" />
-    <ClInclude Include="..\..\include\et\rendering\base\vertexdeclaration.cpp" />
-    <ClInclude Include="..\..\include\et\rendering\base\vertexstorage.cpp" />
+    <ClInclude Include="..\..\include\et\rendering\base\constantbuffer.h" />
     <ClInclude Include="..\..\include\et\rendering\base\helpers.h" />
     <ClInclude Include="..\..\include\et\rendering\base\indexarray.h" />
     <ClInclude Include="..\..\include\et\rendering\base\material.h" />
@@ -30,6 +20,8 @@
     <ClInclude Include="..\..\include\et\rendering\base\materiallibrary.h" />
     <ClInclude Include="..\..\include\et\rendering\base\primitives.h" />
     <ClInclude Include="..\..\include\et\rendering\base\renderbatch.h" />
+    <ClInclude Include="..\..\include\et\rendering\base\rendering.h" />
+    <ClInclude Include="..\..\include\et\rendering\base\shadersource.h" />
     <ClInclude Include="..\..\include\et\rendering\base\vertexarray.h" />
     <ClInclude Include="..\..\include\et\rendering\base\vertexdatachunk.h" />
     <ClInclude Include="..\..\include\et\rendering\base\vertexdeclaration.h" />
@@ -46,10 +38,7 @@
     <ClInclude Include="..\..\include\et\rendering\interface\textureset.h" />
     <ClInclude Include="..\..\include\et\rendering\rendercontext.h" />
     <ClInclude Include="..\..\include\et\rendering\rendercontextparams.h" />
-    <ClInclude Include="..\..\include\et\rendering\rendering.h" />
     <ClInclude Include="..\..\include\et\rendering\renderingcaps.h" />
-    <ClInclude Include="..\..\include\et\rendering\shadersource.h" />
-    <ClInclude Include="..\..\include\et\rendering\constantbuffer.h" />
     <ClInclude Include="..\..\include\et\rendering\vulkan\glslang\vulkan_glslang.h" />
     <ClInclude Include="..\..\include\et\rendering\vulkan\vulkan_buffer.cpp" />
     <ClInclude Include="..\..\include\et\rendering\vulkan\vulkan_buffer.h" />
@@ -172,11 +161,23 @@
     <ClInclude Include="..\..\include\et\sound\streamingthread.cpp" />
     <ClInclude Include="..\..\include\et\sound\track.cpp" />
     <ClInclude Include="..\..\include\et\rendering\vulkan\glslang\vulkan_glslang.cpp" />
-    <ClInclude Include="..\..\include\et\rendering\rendering.cpp" />
-    <ClInclude Include="..\..\include\et\rendering\shadersource.cpp" />
     <ClInclude Include="..\..\include\et\core\heapcontroller.cpp" />
-    <ClInclude Include="..\..\include\et\rendering\constantbuffer.cpp" />
     <ClInclude Include="..\..\include\et\rendering\vulkan\vulkan_textureset.cpp" />
+    <ClInclude Include="..\..\include\et\rendering\base\constantbuffer.cpp" />
+    <ClInclude Include="..\..\include\et\rendering\base\helpers.cpp" />
+    <ClInclude Include="..\..\include\et\rendering\base\indexarray.cpp" />
+    <ClInclude Include="..\..\include\et\rendering\base\material.cpp" />
+    <ClInclude Include="..\..\include\et\rendering\base\materiallibrary.cpp" />
+    <ClInclude Include="..\..\include\et\rendering\base\pipelinestate.cpp" />
+    <ClInclude Include="..\..\include\et\rendering\base\primitives.cpp" />
+    <ClInclude Include="..\..\include\et\rendering\base\renderbatch.cpp" />
+    <ClInclude Include="..\..\include\et\rendering\base\rendering.cpp" />
+    <ClInclude Include="..\..\include\et\rendering\base\renderpass.cpp" />
+    <ClInclude Include="..\..\include\et\rendering\base\shadersource.cpp" />
+    <ClInclude Include="..\..\include\et\rendering\base\vertexarray.cpp" />
+    <ClInclude Include="..\..\include\et\rendering\base\vertexdatachunk.cpp" />
+    <ClInclude Include="..\..\include\et\rendering\base\vertexdeclaration.cpp" />
+    <ClInclude Include="..\..\include\et\rendering\base\vertexstorage.cpp" />
     <ClCompile Include="..\..\include\external\glslang\glslang\GenericCodeGen\CodeGen.cpp" />
     <ClCompile Include="..\..\include\external\glslang\glslang\GenericCodeGen\Link.cpp" />
     <ClCompile Include="..\..\include\external\glslang\glslang\MachineIndependent\Constant.cpp" />

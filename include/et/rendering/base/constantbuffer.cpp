@@ -6,7 +6,7 @@
  */
 
 #include <et/rendering/interface/renderer.h>
-#include <et/rendering/constantbuffer.h>
+#include <et/rendering/base/constantbuffer.h>
 
 namespace et
 {

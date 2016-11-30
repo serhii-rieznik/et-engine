@@ -7,9 +7,9 @@
 
 #pragma once
 
-#include <et/rendering/rendering.h>
+#include <et/rendering/base/rendering.h>
 #include <et/rendering/base/materialhelpers.h>
-#include <et/rendering/constantbuffer.h>
+#include <et/rendering/base/constantbuffer.h>
 
 namespace et
 {

@@ -10,7 +10,6 @@
 #include <et/core/objectscache.h>
 #include <et/rendering/rendercontextparams.h>
 #include <et/rendering/interface/renderer.h>
-#include <et/rendering/renderingcaps.h>
 
 namespace et
 {

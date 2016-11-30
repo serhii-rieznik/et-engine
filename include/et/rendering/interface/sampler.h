@@ -24,7 +24,9 @@ public:
 		TextureWrap wrapU = TextureWrap::Repeat;
 		TextureWrap wrapV = TextureWrap::Repeat;
 		TextureWrap wrapW = TextureWrap::Repeat;
+		CompareFunction compareFunction = CompareFunction::Always;
 		float maxAnisotropy = 16.0f;
+		bool compareEnabled = false;
 	};
 };
 }

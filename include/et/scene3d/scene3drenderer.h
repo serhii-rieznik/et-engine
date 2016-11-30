@@ -62,6 +62,7 @@ private:
 	RenderPass::Pointer _shadowPass;
 
     Texture::Pointer _shadowTexture;
+	Texture::Pointer _envTexture;
 };
 }
 }

@@ -6,6 +6,8 @@
  */
 
 #include <et/rendering/base/material.h>
+#include <et/rendering/base/rendering.h>
+#include <et/rendering/base/shadersource.h>
 #include <et/core/json.h>
 
 namespace et
@@ -349,27 +351,39 @@ void MaterialInstance::buildTextureSet(RenderPassClass pt)
 	TextureSet::Description description;
 	for (const auto& i : prog->reflection().textures.fragmentTextures)
 	{
-		description.fragmentTextures[i.second] = base()->textures[i.second].object;
-		if (textures[i.second].object.valid())
-			description.fragmentTextures[i.second] = textures[i.second].object;
+		if (i.second < static_cast<uint32_t>(MaterialTexture::FirstSharedTexture))
+		{
+			description.fragmentTextures[i.second] = base()->textures[i.second].object;
+			if (textures[i.second].object.valid())
+				description.fragmentTextures[i.second] = textures[i.second].object;
+		}
 	}
 	for (const auto& i : prog->reflection().textures.vertexTextures)
 	{
-		description.vertexTextures[i.second] = base()->textures[i.second].object;
-		if (textures[i.second].object.valid())
-			description.vertexTextures[i.second] = textures[i.second].object;
+		if (i.second < static_cast<uint32_t>(MaterialTexture::FirstSharedTexture))
+		{
+			description.vertexTextures[i.second] = base()->textures[i.second].object;
+			if (textures[i.second].object.valid())
+				description.vertexTextures[i.second] = textures[i.second].object;
+		}
 	}
 	for (const auto& i : prog->reflection().textures.fragmentSamplers)
 	{
-		description.fragmentSamplers[i.second] = base()->samplers[i.second].object;
-		if (samplers[i.second].object.valid())
-			description.fragmentSamplers[i.second] = samplers[i.second].object;
+		if (i.second < static_cast<uint32_t>(MaterialTexture::FirstSharedTexture))
+		{
+			description.fragmentSamplers[i.second] = base()->samplers[i.second].object;
+			if (samplers[i.second].object.valid())
+				description.fragmentSamplers[i.second] = samplers[i.second].object;
+		}
 	}
 	for (const auto& i : prog->reflection().textures.vertexSamplers)
 	{
-		description.vertexSamplers[i.second] = base()->samplers[i.second].object;
-		if (samplers[i.second].object.valid())
-			description.vertexSamplers[i.second] = samplers[i.second].object;
+		if (i.second < static_cast<uint32_t>(MaterialTexture::FirstSharedTexture))
+		{
+			description.vertexSamplers[i.second] = base()->samplers[i.second].object;
+			if (samplers[i.second].object.valid())
+				description.vertexSamplers[i.second] = samplers[i.second].object;
+		}
 	}
 
 	for (auto& i : description.fragmentTextures)
@@ -499,6 +513,8 @@ const Map<MaterialTexture, String>& materialTextureNames()
 		{ MaterialTexture::Opacity, "opacityTexture" },
 		{ MaterialTexture::Normal, "normalTexture" },
 		{ MaterialTexture::Shadow, "shadowTexture" },
+		{ MaterialTexture::AmbientOcclusion, "aoTexture" },
+		{ MaterialTexture::Environment, "environmentTexture" },
 	};
 	return localMap;
 }
@@ -532,6 +548,8 @@ const String& mtl::materialSamplerToString(MaterialTexture t)
 		{ MaterialTexture::Opacity, "opacitySampler" },
 		{ MaterialTexture::Normal, "normalSampler" },
 		{ MaterialTexture::Shadow, "shadowSampler" },
+		{ MaterialTexture::AmbientOcclusion, "aoSampler" },
+		{ MaterialTexture::Environment, "environmentSampler" },
 	};
 	return names.at(t);
 }
@@ -540,20 +558,28 @@ const std::string shaderDefaultHeader =
 R"(
 #version 450
 #define VertexStreamBufferIndex         0
-#define ObjectVariablesBufferIndex      4
-#define MaterialVariablesBufferIndex    5
-#define PassVariablesBufferIndex        6
+
 #define VariablesSetIndex				0
+#	define ObjectVariablesBufferIndex   4
+#	define MaterialVariablesBufferIndex 5
+#	define PassVariablesBufferIndex     6
+
 #define TexturesSetIndex				1
-#define AlbedoTextureBinding			0
-#define ReflectanceTextureBinding		1
-#define EmissiveTextureBinding			2
-#define RoughnessTextureBinding			3
-#define OpacityTextureBinding			4
-#define NormalTextureBinding			5
-#define ShadowTextureBinding			6
+#	define AlbedoTextureBinding			0
+#	define ReflectanceTextureBinding	1
+#	define EmissiveTextureBinding		2
+#	define RoughnessTextureBinding		3
+#	define OpacityTextureBinding		4
+#	define NormalTextureBinding			5
+
+#define SharedTexturesSetIndex			2
+#	define ShadowTextureBinding			6
+#	define AOTextureBinding				7
+#	define EnvironmentTextureBinding	8
+
 #define PI                              3.1415926536
 #define HALF_PI                         1.5707963268
+#define DOUBLE_PI                       6.2831853072
 #define INV_PI                          0.3183098862
 
 #define PassVariables PassVariables { \
@@ -564,6 +590,7 @@ R"(
 	vec4 cameraDirection; \
 	vec4 cameraUp; \
 	vec4 lightPosition; \
+	mat4 lightProjection; \
 }
 )";
 

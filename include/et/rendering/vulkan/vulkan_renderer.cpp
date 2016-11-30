@@ -25,6 +25,8 @@
 #	define VULKAN_ENABLE_VALIDATION 0
 #endif
 
+#define VULKAN_COMBINED_SUBMIT 0
+
 namespace et
 {
 class VulkanRendererPrivate : public VulkanState
@@ -363,8 +365,17 @@ void VulkanRenderer::present()
 		commandBuffersOffset += submitInfo.commandBufferCount;
 		waitOffset += submitInfo.waitSemaphoreCount;
 		signalOffset += submitInfo.signalSemaphoreCount;
+	
+#if (VULKAN_COMBINED_SUBMIT == 0)
+		VULKAN_CALL(vkQueueSubmit(_private->queue, static_cast<uint32_t>(allSubmits.size()), allSubmits.data(), nullptr));
+		allSubmits.clear();
+	#endif
 	}
+
+#if (VULKAN_COMBINED_SUBMIT)
 	VULKAN_CALL(vkQueueSubmit(_private->queue, static_cast<uint32_t>(allSubmits.size()), allSubmits.data(), nullptr));
+#endif
+	
 	_private->swapchain.present(_private->vulkan());
 	_private->passes.clear();
 	VULKAN_CALL(vkQueueWaitIdle(_private->queue));
