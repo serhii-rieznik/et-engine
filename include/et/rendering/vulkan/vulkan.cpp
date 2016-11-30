@@ -202,17 +202,18 @@ void VulkanSwapchain::createSizeDependentResources(VulkanState& vulkan, const ve
 		{
 			vkDestroyImageView(vulkan.device, rt.colorView, nullptr);
 			rt.colorView = nullptr;
-
-			vkDestroyImageView(vulkan.device, rt.depthView, nullptr);
-			rt.depthView = nullptr;
-			
-			vkDestroyImage(vulkan.device, rt.depth, nullptr);
-			rt.depth = nullptr;
-			
-			vkFreeMemory(vulkan.device, rt.depthMemory, nullptr);
-			rt.depthMemory = nullptr;
 		}
-		vkDestroySwapchainKHR(vulkan.device, currentSwapchain, nullptr);
+        
+        vkDestroyImageView(vulkan.device, depthBuffer.depthView, nullptr);
+        depthBuffer.depthView = nullptr;
+
+        vkDestroyImage(vulkan.device, depthBuffer.depth, nullptr);
+        depthBuffer.depth = nullptr;
+
+        vkFreeMemory(vulkan.device, depthBuffer.depthMemory, nullptr);
+        depthBuffer.depthMemory = nullptr;
+		
+        vkDestroySwapchainKHR(vulkan.device, currentSwapchain, nullptr);
 	}
 
 	Vector<VkImage> swapchainImages = enumerateVulkanObjects<VkImage>(vulkan, vkGetSwapchainImagesKHRWrapper);
@@ -225,13 +226,12 @@ void VulkanSwapchain::createSizeDependentResources(VulkanState& vulkan, const ve
 		{
 			rt.color = *swapchainImagesPtr++;
 			rt.colorView = createImageView(vulkan, rt.color, VK_IMAGE_ASPECT_COLOR_BIT, surfaceFormat.format);
-
-			if (createDepthImage(vulkan, rt.depth, rt.depthMemory, cmdBuffer))
-			{
-				rt.depthView = createImageView(vulkan, rt.depth, VK_IMAGE_ASPECT_DEPTH_BIT, depthFormat);
-			}
 		}
-	});
+        if (createDepthImage(vulkan, depthBuffer.depth, depthBuffer.depthMemory, cmdBuffer))
+        {
+            depthBuffer.depthView = createImageView(vulkan, depthBuffer.depth, VK_IMAGE_ASPECT_DEPTH_BIT, depthFormat);
+        }
+    });
 }
 
 void VulkanSwapchain::acquireNextImage(VulkanState& vulkan)

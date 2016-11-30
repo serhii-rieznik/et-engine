@@ -230,7 +230,7 @@ void VulkanRenderPass::begin()
 		
 		if (info().depth.enabled && info().depth.useDefaultRenderTarget)
 		{
-			attachments.emplace_back(_private->vulkan.swapchain.currentRenderTarget().depthView);
+			attachments.emplace_back(_private->vulkan.swapchain.depthBuffer.depthView);
 		}
 		else if (info().depth.enabled)
 		{

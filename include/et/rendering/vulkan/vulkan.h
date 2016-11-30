@@ -44,10 +44,13 @@ struct VulkanSwapchain
 	{
 		VkImage color = nullptr;
 		VkImageView colorView = nullptr;
-		VkImage depth = nullptr;
-		VkImageView depthView = nullptr;
-		VkDeviceMemory depthMemory = nullptr;
 	};
+    struct DepthBuffer
+    {
+        VkImage depth = nullptr;
+        VkImageView depthView = nullptr;
+        VkDeviceMemory depthMemory = nullptr;
+    } depthBuffer;
 	Vector<RenderTarget> images;
 	uint32_t currentImageIndex = static_cast<uint32_t>(-1);
 
