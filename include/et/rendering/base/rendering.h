@@ -14,7 +14,7 @@ enum class RenderingAPI : uint32_t
 {
 	Metal,
 	Vulkan,
-	DX12,
+	DirectX12,
 
 	Count
 };

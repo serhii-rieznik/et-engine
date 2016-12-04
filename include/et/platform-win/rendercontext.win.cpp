@@ -54,7 +54,7 @@ RenderContext::RenderContext(const RenderContextParameters& inParams, Applicatio
 	{
 		_renderer = VulkanRenderer::Pointer::create(this);
 	}
-		else if (app->parameters().renderingAPI == RenderingAPI::DX12)
+		else if (app->parameters().renderingAPI == RenderingAPI::DirectX12)
 	{
 		_renderer = DX12Renderer::Pointer::create(this);
 	}

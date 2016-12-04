@@ -11,6 +11,7 @@
 
 namespace et
 {
+class DX12RendererPrivate;
 class DX12Renderer : public RenderInterface
 {
 public:
@@ -19,13 +20,11 @@ public:
 public:
 	RenderingAPI api() const override
 	{
-		return RenderingAPI::DX12;
+		return RenderingAPI::DirectX12;
 	}
 
-	DX12Renderer(RenderContext* rc) :
-		RenderInterface(rc)
-	{
-	}
+	DX12Renderer(RenderContext* rc);
+	~DX12Renderer();
 
 	void init(const RenderContextParameters& params) override;
 	void shutdown() override;
@@ -63,5 +62,8 @@ public:
 	 * Pipeline state
 	 */
 	PipelineState::Pointer acquirePipelineState(const RenderPass::Pointer&, const Material::Pointer&, const VertexStream::Pointer&) override;
+
+private:
+	ET_DECLARE_PIMPL(DX12Renderer, 256);
 };
 }

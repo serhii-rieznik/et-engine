@@ -237,6 +237,10 @@ void Material::loadCode(const std::string& codeString, RenderPassClass passCls, 
 	{
 		codeFileName = application().resolveFileName(codeString + ".glsl");
 	}
+	else if (_renderer->api() == RenderingAPI::DirectX12)
+	{
+		codeFileName = application().resolveFileName(codeString + ".hlsl");
+	}
 	else
 	{
 		debug::debugBreak();

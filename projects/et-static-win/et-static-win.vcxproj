@@ -27,6 +27,7 @@
     <ClInclude Include="..\..\include\et\rendering\base\vertexdeclaration.h" />
     <ClInclude Include="..\..\include\et\rendering\base\vertexstorage.h" />
     <ClInclude Include="..\..\include\et\rendering\base\vertexstream.h" />
+    <ClInclude Include="..\..\include\et\rendering\dx12\dx12.h" />
     <ClInclude Include="..\..\include\et\rendering\framebuffer.h" />
     <ClInclude Include="..\..\include\et\rendering\interface\buffer.h" />
     <ClInclude Include="..\..\include\et\rendering\interface\pipelinestate.h" />
@@ -178,6 +179,7 @@
     <ClInclude Include="..\..\include\et\rendering\base\vertexdatachunk.cpp" />
     <ClInclude Include="..\..\include\et\rendering\base\vertexdeclaration.cpp" />
     <ClInclude Include="..\..\include\et\rendering\base\vertexstorage.cpp" />
+    <ClInclude Include="..\..\include\et\rendering\dx12\dx12.cpp" />
     <ClCompile Include="..\..\include\external\glslang\glslang\GenericCodeGen\CodeGen.cpp" />
     <ClCompile Include="..\..\include\external\glslang\glslang\GenericCodeGen\Link.cpp" />
     <ClCompile Include="..\..\include\external\glslang\glslang\MachineIndependent\Constant.cpp" />
@@ -396,6 +398,7 @@
     <ProjectGuid>{C16E6F9D-51E8-4DC3-BEA8-3822B46E3EDF}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>etstaticwin</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0.14393.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
@@ -426,16 +429,16 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <LibraryPath>$(ProjectDir)..\..\lib\vs2015;$(ProjectDir)..\..\lib\vs2015\glslang-$(Configuration)</LibraryPath>
     <IncludePath>$(ProjectDir)..\..\include;$(IncludePath)</IncludePath>
     <TargetName>et-$(Configuration)</TargetName>
     <OutDir>$(ProjectDir)..\..\lib\vs2015\</OutDir>
+    <LibraryPath>$(ProjectDir)..\..\lib\vs2015;$(ProjectDir)..\..\lib\vs2015\glslang-$(Configuration);$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <LibraryPath>$(ProjectDir)..\..\lib\vs2015;$(ProjectDir)..\..\lib\vs2015\glslang-$(Configuration)</LibraryPath>
     <IncludePath>$(ProjectDir)..\..\include;$(IncludePath)</IncludePath>
     <TargetName>et-$(Configuration)</TargetName>
     <OutDir>$(ProjectDir)..\..\lib\vs2015\</OutDir>
+    <LibraryPath>$(ProjectDir)..\..\lib\vs2015;$(ProjectDir)..\..\lib\vs2015\glslang-$(Configuration);$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -453,7 +456,7 @@
       <SubSystem>Windows</SubSystem>
     </Link>
     <Lib>
-      <AdditionalDependencies>vulkan-1.lib;jansson.lib;jpeg.lib;ogg.lib;openal32.lib;png.lib;vorbis.lib;vorbisfile.lib;z.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>d3d12.lib;dxgi.lib;d3dcompiler.lib;vulkan-1.lib;jansson.lib;jpeg.lib;ogg.lib;openal32.lib;png.lib;vorbis.lib;vorbisfile.lib;z.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreAllDefaultLibraries>true</IgnoreAllDefaultLibraries>
     </Lib>
     <PreBuildEvent />
@@ -477,7 +480,7 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
     <Lib>
-      <AdditionalDependencies>vulkan-1.lib;jansson.lib;jpeg.lib;ogg.lib;openal32.lib;png.lib;vorbis.lib;vorbisfile.lib;z.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>d3d12.lib;dxgi.lib;d3dcompiler.lib;vulkan-1.lib;jansson.lib;jpeg.lib;ogg.lib;openal32.lib;png.lib;vorbis.lib;vorbisfile.lib;z.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Lib>
     <Lib>
       <IgnoreAllDefaultLibraries>true</IgnoreAllDefaultLibraries>

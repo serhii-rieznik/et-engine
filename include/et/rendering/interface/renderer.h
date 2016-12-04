@@ -161,6 +161,8 @@ inline void RenderInterface::initInternalStructures()
 {
 	_sharedConstantBuffer.init(this);
 	_sharedMaterialLibrary.init(this);
+	defaultTexture();
+	defaultSampler();
 }
 
 inline void RenderInterface::shutdownInternalStructures()

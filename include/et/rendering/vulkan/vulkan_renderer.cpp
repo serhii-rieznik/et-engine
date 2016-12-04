@@ -205,8 +205,6 @@ void VulkanRenderer::init(const RenderContextParameters& params)
 	resize(vec2i(clientRect.right - clientRect.left, clientRect.bottom - clientRect.top));
 
 	initInternalStructures();
-	defaultTexture();
-	defaultSampler();
 }
 
 void VulkanRenderer::shutdown()
