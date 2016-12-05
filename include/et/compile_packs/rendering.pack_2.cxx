@@ -1,6 +1,7 @@
 #include <et/core/et.h>
 
 #if (ET_PLATFORM_WIN)
+#	include "../rendering/dx12/dx12.cpp"
 #	include "../rendering/dx12/dx12_pipelinestate.cpp"
 #	include "../rendering/dx12/dx12_program.cpp"
 #	include "../rendering/dx12/dx12_renderer.cpp"

@@ -625,6 +625,15 @@
     <ClInclude Include="..\..\include\et\rendering\dx12\dx12.h">
       <Filter>Source\rendering\dx12</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\dx12\dx12.cpp">
+      <Filter>Source\rendering\dx12</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\dx12\dx12_buffer.h">
+      <Filter>Source\rendering\dx12</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\dx12\dx12_buffer.cpp">
+      <Filter>Source\rendering\dx12</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\et\sound\openal.h">
@@ -1228,9 +1237,6 @@
     </ClCompile>
     <ClCompile Include="..\..\include\et\compile_packs\rendering.pack_2.cxx">
       <Filter>Source\compile_packs</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\include\et\rendering\dx12\dx12.cpp">
-      <Filter>Source\rendering\dx12</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

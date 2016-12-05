@@ -8,12 +8,13 @@
 #pragma once
 
 #include <et/rendering/dx12/dx12_renderpass.h>
+#include <et/rendering/dx12/dx12.h>
 
 namespace et
 {
 
-DX12RenderPass::DX12RenderPass(const RenderPass::ConstructionInfo& info) 
-	: RenderPass(nullptr, info)
+DX12RenderPass::DX12RenderPass(RenderInterface* renderer, DX12& dx12, const RenderPass::ConstructionInfo& info) 
+	: RenderPass(renderer, info)
 {
 }
 

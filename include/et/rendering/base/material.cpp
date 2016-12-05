@@ -207,6 +207,19 @@ std::string Material::generateInputLayout()
 			layout.append(buffer);
 		}
 	}
+	else if (_renderer->api() == RenderingAPI::DirectX12)
+	{
+		layout.append("struct VSInput {\n");
+		for (const auto& element : _inputLayout.elements())
+		{
+			char buffer[256] = {};
+			sprintf(buffer, "%s %s : %s; \n", 
+				dataTypeToString(element.type(), _renderer->api()).c_str(), 
+				vertexAttributeUsageToString(element.usage()).c_str());
+			layout.append(buffer);
+		}
+		layout.append("};\n");
+	}
 	else
 	{
 		ET_FAIL("Not implemented");

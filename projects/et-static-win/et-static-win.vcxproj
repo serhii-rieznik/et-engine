@@ -28,6 +28,7 @@
     <ClInclude Include="..\..\include\et\rendering\base\vertexstorage.h" />
     <ClInclude Include="..\..\include\et\rendering\base\vertexstream.h" />
     <ClInclude Include="..\..\include\et\rendering\dx12\dx12.h" />
+    <ClInclude Include="..\..\include\et\rendering\dx12\dx12_buffer.h" />
     <ClInclude Include="..\..\include\et\rendering\framebuffer.h" />
     <ClInclude Include="..\..\include\et\rendering\interface\buffer.h" />
     <ClInclude Include="..\..\include\et\rendering\interface\pipelinestate.h" />
@@ -180,6 +181,7 @@
     <ClInclude Include="..\..\include\et\rendering\base\vertexdeclaration.cpp" />
     <ClInclude Include="..\..\include\et\rendering\base\vertexstorage.cpp" />
     <ClInclude Include="..\..\include\et\rendering\dx12\dx12.cpp" />
+    <ClInclude Include="..\..\include\et\rendering\dx12\dx12_buffer.cpp" />
     <ClCompile Include="..\..\include\external\glslang\glslang\GenericCodeGen\CodeGen.cpp" />
     <ClCompile Include="..\..\include\external\glslang\glslang\GenericCodeGen\Link.cpp" />
     <ClCompile Include="..\..\include\external\glslang\glslang\MachineIndependent\Constant.cpp" />

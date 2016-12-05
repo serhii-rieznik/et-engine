@@ -11,16 +11,17 @@
 
 namespace et
 {
-	class DX12RenderPass : public RenderPass
-	{
-	public:
-		ET_DECLARE_POINTER(DX12RenderPass);
+class DX12;
+class DX12RenderPass : public RenderPass
+{
+public:
+	ET_DECLARE_POINTER(DX12RenderPass);
 
-	public:
-		DX12RenderPass(const RenderPass::ConstructionInfo&);
-		
-		void begin() override;
-		void pushRenderBatch(const RenderBatch::Pointer&) override;
-		void end() override;
-	};
+public:
+	DX12RenderPass(RenderInterface*, DX12&, const RenderPass::ConstructionInfo&);
+
+	void begin() override;
+	void pushRenderBatch(const RenderBatch::Pointer&) override;
+	void end() override;
+};
 }
