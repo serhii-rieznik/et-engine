@@ -37,6 +37,10 @@ public:
 	ComPtr<ID3D12Debug> debug;
 	ComPtr<ID3D12Device> device;
 	ComPtr<ID3D12CommandQueue> commandQueue;
+	ComPtr<ID3D12CommandAllocator> commandAllocator;
+
+	ComPtr<ID3D12Fence> fence;
+	HANDLE fenceEvent = nullptr;
 
 	ComPtr<ID3D12DescriptorHeap> rtvDescriptorHeap;
 	D3D12_CPU_DESCRIPTOR_HANDLE rtvFirstHandle{};
@@ -54,6 +58,19 @@ public:
 	UINT dsvDescriptorHeapIncrementSize = 0;
 
 	UINT currentFrameIndex = 0;
+	UINT64 fenceValue = 0;
+
+	using ServiceCommands = std::function<void(ID3D12GraphicsCommandList*)>;
+	void executeServiceCommands(ServiceCommands);
+	
+	void waitForExecution();
+};
+
+struct DX12NativeBuffer
+{
+	ComPtr<ID3D12Resource> buffer;
+	D3D12_RESOURCE_STATES currentState = D3D12_RESOURCE_STATE_COMMON;
+	D3D12_RESOURCE_STATES targetState = D3D12_RESOURCE_STATE_COMMON;
 };
 
 namespace dx12

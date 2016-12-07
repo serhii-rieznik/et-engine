@@ -215,7 +215,7 @@ std::string Material::generateInputLayout()
 			char buffer[256] = {};
 			sprintf(buffer, "%s %s : %s; \n", 
 				dataTypeToString(element.type(), _renderer->api()).c_str(), 
-				vertexAttributeUsageToString(element.usage()).c_str());
+				vertexAttributeUsageToString(element.usage()).c_str(), "???");
 			layout.append(buffer);
 		}
 		layout.append("};\n");

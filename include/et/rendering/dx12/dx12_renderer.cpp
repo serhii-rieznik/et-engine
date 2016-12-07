@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <et/rendering/dx12/dx12_buffer.h>
 #include <et/rendering/dx12/dx12_program.h>
 #include <et/rendering/dx12/dx12_texture.h>
 #include <et/rendering/dx12/dx12_renderpass.h>
@@ -48,9 +49,12 @@ void DX12Renderer::init(const RenderContextParameters& params)
 
 	_private->enumAdapters();
 	DX12_CALL(D3D12CreateDevice(_private->adapter.Get(), D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(_private->device.GetAddressOf())));
+	DX12_CALL(_private->device->CreateFence(_private->fenceValue, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(_private->fence.GetAddressOf())));
+	_private->fenceEvent = CreateEvent(nullptr, FALSE, FALSE, nullptr);
 
 	D3D12_COMMAND_QUEUE_DESC queueDesc = {};
 	DX12_CALL(_private->device->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(_private->commandQueue.GetAddressOf())));
+	DX12_CALL(_private->device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(_private->commandAllocator.GetAddressOf())));
 
 	RECT clientRect = { };
 	HWND mainWindow = reinterpret_cast<HWND>(application().context().objects[0]);
@@ -94,6 +98,7 @@ void DX12Renderer::init(const RenderContextParameters& params)
 void DX12Renderer::shutdown()
 {
 	shutdownInternalStructures();
+	CloseHandle(_private->fenceEvent);
 }
 
 void DX12Renderer::resize(const vec2i& size)
@@ -142,11 +147,12 @@ void DX12Renderer::begin()
 void DX12Renderer::present()
 {
 	DX12_CALL(_private->swapChain->Present(1, 0));
+	_private->waitForExecution();
 }
 
-Buffer::Pointer DX12Renderer::createBuffer(const Buffer::Description&)
+Buffer::Pointer DX12Renderer::createBuffer(const Buffer::Description& desc)
 {
-	return Buffer::Pointer();
+	return DX12Buffer::Pointer::create(_private->dx12(), desc);
 }
 
 Texture::Pointer DX12Renderer::createTexture(TextureDescription::Pointer desc)
