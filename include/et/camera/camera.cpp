@@ -304,7 +304,7 @@ void Camera::getValuesFromCamera(const Camera& r)
 	COPY_PROP(_viewProjectionMatrix);
 	COPY_PROP(_inverseViewProjectionMatrix);
 	COPY_PROP(_frustum);
-	COPY_PROP( _upLocked);
+	COPY_PROP(_upLocked);
 	COPY_PROP(_zNear);
 	COPY_PROP(_zFar);
 	COPY_PROP(_perspecitveAspect);

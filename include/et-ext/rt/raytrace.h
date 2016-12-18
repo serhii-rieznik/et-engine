@@ -9,34 +9,18 @@
 
 #include <et-ext/rt/kdtree.h>
 #include <et-ext/rt/integrator.h>
-#include <et-ext/rt/environment.h>
+#include <et-ext/rt/rtscene.h>
 
-namespace et {
+namespace et 
+{
+namespace rt
+{
 
 class RaytracePrivate;
 class Raytrace
 {
 public:
 	using OutputMethod = std::function<void(const vec2i&, const vec4&)>;
-
-	enum class Method : uint32_t
-	{
-		PathTracing,
-		LightTracing
-	};
-	
-	struct Options
-	{
-		uint32_t threads = 0;
-		uint32_t raysPerPixel = 32;
-		uint32_t maxPathLength = 0;
-		uint32_t maxKDTreeDepth = 0;
-		uint32_t renderRegionSize = 32;
-		float apertureSize = 0.0f;
-		float focalDistanceCorrection = 0.0f;
-		Method method = Method::PathTracing;
-		bool renderKDTree = false;
-	};
 
 public:
 	Raytrace();
@@ -46,13 +30,12 @@ public:
 	void setOutputMethod(F func)
 		{ _outputMethod = func; }
 	
-	void setIntegrator(rt::Integrator::Pointer);
-	void setEnvironmentSampler(rt::EnvironmentSampler::Pointer);
+	void setIntegrator(Integrator::Pointer);
 	
 	void output(const vec2i&, const vec4&);
 
-	void perform(s3d::Scene::Pointer, const Camera&, const vec2i&);
-	vec4 performAtPoint(s3d::Scene::Pointer, const Camera&, const vec2i&, const vec2i&);
+	void perform(s3d::Scene::Pointer, const vec2i&);
+	vec4 performAtPoint(s3d::Scene::Pointer, const vec2i&, const vec2i&);
 
 	void stop();
 	void setOptions(const Options&);
@@ -67,4 +50,5 @@ private:
 	OutputMethod _outputMethod;
 };
 
+}
 }

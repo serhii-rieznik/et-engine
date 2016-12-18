@@ -5,13 +5,46 @@
  *
  */
 
-#include <et-ext/rt/environment.h>
+#include <et-ext/rt/emitter.h>
 
 namespace et
 {
 namespace rt
 {
 
+UniformEmitter::UniformEmitter(const float4& color) : 
+	_color(color)
+{
+}
+
+float4 UniformEmitter::sample(const Scene&, const float4 & position, const float4 & direction)
+{
+	return _color;
+}
+
+EnvironmentEmitter::EnvironmentEmitter(const Image::Pointer& img) : 
+	_image(img)
+{
+}
+
+float4 EnvironmentEmitter::sample(const Scene&, const float4 & position, const float4 & direction)
+{
+	return float4(0.25, 0.75, 1.0, 1.0);
+}
+
+MeshEmitter::MeshEmitter(index firstTriangle, index numTriangles, index materialIndex) 
+	: _firstTriangle(firstTriangle), _numTriangles(numTriangles), _materialIndex(materialIndex)
+{
+
+}
+
+float4 MeshEmitter::sample(const Scene&, const float4 & position, const float4 & direction)
+{
+	return float4(0.75f, 0.5f, 1.0f, 1.0f);
+}
+
+
+/*
 EnvironmentEquirectangularMapSampler::EnvironmentEquirectangularMapSampler(
 	TextureDescription::Pointer data, const float4& scale) : _data(data), _scale(scale)
 {
@@ -68,6 +101,6 @@ float4 DirectionalLightSampler::sampleInDirection(const float4& inDirection)
 	float_type dp = std::max(0.0f, inDirection.dot(_direction));
     return _color * std::pow(dp, 128.0f);
 }
-
+*/
 }
 }

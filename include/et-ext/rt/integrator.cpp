@@ -20,6 +20,8 @@ namespace rt
 float4 PathTraceIntegrator::gather(const Ray& inRay, uint32_t maxPathLength, uint32_t& pathLength,
 	KDTree& tree, EnvironmentSampler::Pointer& env, const Material::Collection& materials)
 {
+	/* TODO : to be removed, use evaluate instead
+
 	if (maxPathLength == 0)
 		maxPathLength = 0x7fffffff;
 
@@ -50,10 +52,6 @@ float4 PathTraceIntegrator::gather(const Ray& inRay, uint32_t maxPathLength, uin
 		ET_ALIGNED(16) float local[4] = { };
 		throughput.loadToFloats(local);
 		float maxComponent = std::max(local[0], std::max(local[1], local[2]));
-		//
-		if (maxComponent < rt::Constants::epsilon)
-			break;
-		// */
 
 #	if (ET_RT_USE_RUSSIAN_ROULETTE)
 		if (pathLength > 16)
@@ -75,8 +73,9 @@ float4 PathTraceIntegrator::gather(const Ray& inRay, uint32_t maxPathLength, uin
 		aMax = std::max(aMax, pathLength);
 		log::info("Max path length: %llu", static_cast<uint64_t>(aMax));
 	}
+	*/
 
-    return result;
+	return float4(0.0f);
 }
 
 /*
@@ -87,7 +86,7 @@ float4 NormalsIntegrator::gather(const Ray& inRay, uint32_t maxPathLength,
 {
 	KDTree::TraverseResult hit0 = tree.traverse(inRay);
 	if (hit0.triangleIndex == InvalidIndex)
-		return env->sampleInDirection(inRay.direction);
+		return float4(1.0f); // TODO : sample light? env->sampleInDirection(inRay.direction);
 
 	const auto& tri = tree.triangleAtIndex(hit0.triangleIndex);
 	return tri.interpolatedNormal(hit0.intersectionPointBarycentric) * 0.5f + float4(0.5f);
@@ -101,7 +100,7 @@ float4 FresnelIntegrator::gather(const Ray& inRay, uint32_t maxPathLength,
 {
 	KDTree::TraverseResult hit0 = tree.traverse(inRay);
 	if (hit0.triangleIndex == InvalidIndex)
-		return env->sampleInDirection(inRay.direction);
+		return float4(1.0f); // TODO : sample light? env->sampleInDirection(inRay.direction);
 
 	++pathLength;
 	const auto& tri = tree.triangleAtIndex(hit0.triangleIndex);
@@ -118,7 +117,7 @@ float4 AmbientOcclusionIntegrator::gather(const Ray& inRay, uint32_t maxPathLeng
 {
 	KDTree::TraverseResult hit0 = tree.traverse(inRay);
 	if (hit0.triangleIndex == InvalidIndex)
-		return env->sampleInDirection(inRay.direction);
+		return float4(1.0f); // TODO : sample light? env->sampleInDirection(inRay.direction);
 
 	const auto& tri = tree.triangleAtIndex(hit0.triangleIndex);
 	float4 surfaceNormal = tri.interpolatedNormal(hit0.intersectionPointBarycentric);
@@ -127,7 +126,7 @@ float4 AmbientOcclusionIntegrator::gather(const Ray& inRay, uint32_t maxPathLeng
     float4 nextOrigin = hit0.intersectionPoint + nextDirection * Constants::epsilon;
 
 	if (tree.traverse(Ray(nextOrigin, nextDirection)).triangleIndex == InvalidIndex)
-		return env->sampleInDirection(nextDirection);
+		return float4(1.0f); // TODO : sample light? env->sampleInDirection(nextDirection);
 
 	++pathLength;
 	return float4(0.0f);
@@ -139,7 +138,7 @@ float4 AmbientOcclusionHackIntegrator::gather(const Ray& inRay, uint32_t maxPath
 {
 	KDTree::TraverseResult hit0 = tree.traverse(inRay);
 	if (hit0.triangleIndex == InvalidIndex)
-		return env->sampleInDirection(inRay.direction);
+		return float4(1.0f); // TODO : sample light? env->sampleInDirection(inRay.direction);
 
 	const auto& tri = tree.triangleAtIndex(hit0.triangleIndex);
 	float4 surfaceNormal = tri.interpolatedNormal(hit0.intersectionPointBarycentric);
@@ -155,6 +154,11 @@ float4 AmbientOcclusionHackIntegrator::gather(const Ray& inRay, uint32_t maxPath
 
 	float_type distance = (t.intersectionPoint - nextOrigin).length();
 	return float4(1.0f - std::exp(-SQRT_2 * distance));
+}
+
+float4 BackwardPathTracingIntegrator::evaluate(const Scene &, const Ray & inRay, uint32_t maxPathLength, uint32_t & pathLength)
+{
+	return float4(0.25f, 0.5f, 0.125f, 1.0f);
 }
 
 }

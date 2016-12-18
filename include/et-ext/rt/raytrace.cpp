@@ -16,6 +16,8 @@
 
 namespace et
 {
+namespace rt
+{
 
 class RaytracePrivate
 {
@@ -31,38 +33,34 @@ public:
 	void emitWorkerThreads();
 	void stopWorkerThreads();
 
-	void buildMaterialAndTriangles(s3d::Scene::Pointer);
-
-	uint32_t materialIndexWithName(const std::string&);
+	void buildScene(const s3d::Scene::Pointer&);	
 
 	void buildRegions(const vec2i& size);
 	void estimateRegionsOrder();
 
 	vec4 raytracePixel(const vec2i&, uint32_t samples, uint32_t& bounces);
 
-	rt::Region getNextRegion();
+	Region getNextRegion();
 
 	void renderSpacePartitioning();
 	void renderKDTreeRecursive(uint32_t nodeIndex, uint32_t index);
-	void renderBoundingBox(const rt::BoundingBox&, const vec4& color);
+	void renderBoundingBox(const BoundingBox&, const vec4& color);
 	void renderLine(const vec2& from, const vec2& to, const vec4& color);
 	void renderPixel(const vec2&, const vec4& color);
-	vec2 projectPoint(const rt::float4&);
+	vec2 projectPoint(const float4&);
 
-	void fillRegionWithColor(const rt::Region&, const vec4& color);
-	void renderTriangle(const rt::Triangle&);
+	void fillRegionWithColor(const Region&, const vec4& color);
+	void renderTriangle(const Triangle&);
 
-	void flushToForwardTraceBuffer(const Vector<rt::float4>&);
+	void flushToForwardTraceBuffer(const Vector<float4>&);
 
 public:
 	Raytrace* owner = nullptr;
-	Raytrace::Options options;
-	rt::KDTree kdTree;
-	rt::EnvironmentSampler::Pointer environmentSampler;
-	rt::Integrator::Pointer integrator;
-	rt::Material::Collection materials;
-	rt::TriangleList lightTriangles;
-	Map<uint32_t, rt::index> lightTriangleToIndex;
+	Options options;
+	Scene scene;
+	Integrator::Pointer integrator;
+	TriangleList lightTriangles;
+	Map<uint32_t, index> lightTriangleToIndex;
 	Camera camera;
 	vec2i viewportSize;
 	vec2i regionSize;
@@ -71,19 +69,16 @@ public:
 	std::atomic<uint32_t> threadCounter;
 	std::atomic<uint32_t> sampledRegions;
 
-	Vector<rt::Region> regions;
+	Vector<Region> regions;
 	std::mutex regionsLock;
 
 	std::atomic<bool> running;
 	std::atomic<uint64_t> startTime;
 	std::atomic<uint64_t> elapsedTime;
 
-	Vector<rt::float4> forwardTraceBuffer;
+	Vector<float4> forwardTraceBuffer;
 	std::mutex forwardTraceBufferMutex;
 	uint32_t flushCounter = 0;
-
-	ray3d centerRay;
-	float focalDistance = 1.0f;
 };
 
 Raytrace::Raytrace()
@@ -97,19 +92,19 @@ Raytrace::~Raytrace()
 	ET_PIMPL_FINALIZE(Raytrace)
 }
 
-void Raytrace::perform(s3d::Scene::Pointer scene, const Camera& cam, const vec2i& dimension)
+void Raytrace::perform(s3d::Scene::Pointer scene, const vec2i& dimension)
 {
-	_private->camera.getValuesFromCamera(cam);
+	_private->camera.getValuesFromCamera(scene->mainCamera().reference());
 
 	_private->viewportSize = dimension;
-	_private->buildMaterialAndTriangles(scene);
+	_private->buildScene(scene);
 
 	ET_ASSERT(_private->viewportSize.x > 0);
 	ET_ASSERT(_private->viewportSize.y > 0);
 
 	_private->buildRegions(vec2i(static_cast<int>(_private->options.renderRegionSize)));
 
-	if (_private->options.method == Raytrace::Method::PathTracing)
+	if (_private->options.method == RaytraceMethod::BackwardPathTracing)
 	{
 		Invocation([this]()
 		{
@@ -122,18 +117,20 @@ void Raytrace::perform(s3d::Scene::Pointer scene, const Camera& cam, const vec2i
 	}
 }
 
-vec4 Raytrace::performAtPoint(s3d::Scene::Pointer scene, const Camera& cam, const vec2i& dimension, const vec2i& pixel)
+vec4 Raytrace::performAtPoint(s3d::Scene::Pointer scene, const vec2i& dimension, const vec2i& pixel)
 {
 	_private->stopWorkerThreads();
 
-	_private->camera.getValuesFromCamera(cam);
+	_private->camera.getValuesFromCamera(scene->mainCamera().reference());
 	_private->viewportSize = dimension;
-	_private->buildMaterialAndTriangles(scene);
+	_private->buildScene(scene);
 
 	uint32_t bounces = 0;
 	vec4 color = _private->raytracePixel(vec2i(pixel.x, dimension.y - pixel.y), _private->options.raysPerPixel, bounces);
-	log::info("Sampled color:\n\tsRGB: %.4f, %.4f, %.4f\n\tRGB: %.4f, %.4f, %.4f",
-		color.x, color.y, color.z, std::pow(color.x, 2.2f), std::pow(color.y, 2.2f), std::pow(color.z, 2.2f));
+	log::info("Sampled color:\n\tsRGB: %.4f, %.4f, %.4f\n\tRGB: %.4f, %.4f, %.4f, (%u bounces)",
+		color.x, color.y, color.z, std::pow(color.x, 2.2f), std::pow(color.y, 2.2f), std::pow(color.z, 2.2f),
+		bounces);
+	
 	return color;
 }
 
@@ -142,7 +139,7 @@ void Raytrace::stop()
 	_private->stopWorkerThreads();
 }
 
-void Raytrace::setOptions(const Raytrace::Options& options)
+void Raytrace::setOptions(const Options& options)
 {
 	_private->options = options;
 }
@@ -157,12 +154,7 @@ void Raytrace::output(const vec2i& pos, const vec4& color)
 	_outputMethod(pos, color);
 }
 
-void Raytrace::setEnvironmentSampler(rt::EnvironmentSampler::Pointer sampler)
-{
-	_private->environmentSampler = sampler;
-}
-
-void Raytrace::setIntegrator(rt::Integrator::Pointer integrator)
+void Raytrace::setIntegrator(Integrator::Pointer integrator)
 {
 	_private->integrator = integrator;
 }
@@ -188,7 +180,7 @@ void RaytracePrivate::emitWorkerThreads()
 
 	forwardTraceBuffer.clear();
 	forwardTraceBuffer.resize(viewportSize.square());
-	std::fill(forwardTraceBuffer.begin(), forwardTraceBuffer.end(), rt::float4(0.0f, 0.0f, 0.0f, 0.0f));
+	std::fill(forwardTraceBuffer.begin(), forwardTraceBuffer.end(), float4(0.0f, 0.0f, 0.0f, 0.0f));
 
 	uint64_t totalRays = static_cast<uint64_t>(viewportSize.square()) * options.raysPerPixel;
 	log::info("Rendering started: %d x %d, %llu rpp, %llu total rays",
@@ -209,7 +201,7 @@ void RaytracePrivate::emitWorkerThreads()
 #	elif (ET_RT_EVALUATE_SAMPLER)
 		workerThreads.emplace_back(&RaytracePrivate::visualizeSamplerThreadFunction, this, i);
 #	else
-		if (options.method == Raytrace::Method::LightTracing)
+		if (options.method == RaytraceMethod::ForwardLightTracing)
 		{
 			workerThreads.emplace_back(&RaytracePrivate::forwardPathTraceThreadFunction, this, i);
 		}
@@ -229,154 +221,19 @@ void RaytracePrivate::stopWorkerThreads()
 	workerThreads.clear();
 }
 
-void RaytracePrivate::buildMaterialAndTriangles(s3d::Scene::Pointer scene)
+void RaytracePrivate::buildScene(const s3d::Scene::Pointer& input)
 {
-	materials.clear();
-	lightTriangles.clear();
+	Vector<RenderBatch::Pointer> batches;
+	batches.reserve(256);
 
-	rt::TriangleList triangles;
-	triangles.reserve(0xffff);
-
-	lightTriangles.reserve(0xffff);
-
-	auto meshes = scene->childrenOfType(s3d::ElementType::Mesh);
+	auto meshes = input->childrenOfType(s3d::ElementType::Mesh);
 	for (s3d::Mesh::Pointer mesh : meshes)
 	{
 		mesh->prepareRenderBatches();
-		for (const auto& rb : mesh->renderBatches())
-		{
-			bool isEmitter = false;
-			Material::Pointer batchMaterial = rb->material();
-
-			auto materialIndex = materialIndexWithName(batchMaterial->name());
-			if (materialIndex == InvalidIndex)
-			{
-				float alpha = clamp(batchMaterial->getFloat(MaterialParameter::Roughness), 0.0f, 1.0f);
-				float metallness = clamp(batchMaterial->getFloat(MaterialParameter::Metallness), 0.0f, 1.0f);
-				float eta = batchMaterial->getFloat(MaterialParameter::IndexOfRefraction);
-
-				rt::Material::Class cls = rt::Material::Class::Diffuse;
-				if (metallness == 1.0f)
-				{
-					log::info("Adding new conductor material: %s", batchMaterial->name().c_str());
-					cls = rt::Material::Class::Conductor;
-				}
-				else if (metallness > 0.0f)
-				{
-					log::info("Adding new dielectric material: %s", batchMaterial->name().c_str());
-					cls = rt::Material::Class::Dielectric;
-				}
-				else
-				{
-					log::info("Adding new diffuse material: %s", batchMaterial->name().c_str());
-				}
-
-				materialIndex = static_cast<uint32_t>(materials.size());
-				materials.emplace_back(cls);
-				auto& mat = materials.back();
-
-				mat.name = batchMaterial->name();
-				mat.diffuse = rt::float4(batchMaterial->getVector(MaterialParameter::AlbedoColor));
-				mat.specular = rt::float4(batchMaterial->getVector(MaterialParameter::ReflectanceColor));
-				mat.emissive = rt::float4(batchMaterial->getVector(MaterialParameter::EmissiveColor));
-				mat.roughness = sqr(alpha);
-				mat.metallness = sqr(metallness);
-				mat.ior = eta;
-
-				isEmitter = mat.emissive.length() > 0.0f;
-			}
-
-			VertexStorage::Pointer vs = rb->vertexStorage();
-			ET_ASSERT(vs.valid());
-
-			IndexArray::Pointer ia = rb->indexArray();
-			ET_ASSERT(ia.valid());
-
-			const mat4& t = rb->transformation();
-
-			triangles.reserve(triangles.size() + rb->numIndexes());
-
-			const auto pos = vs->accessData<DataType::Vec3>(VertexAttributeUsage::Position, 0);
-			const auto nrm = vs->accessData<DataType::Vec3>(VertexAttributeUsage::Normal, 0);
-			bool hasUV = vs->hasAttribute(VertexAttributeUsage::TexCoord0);
-			VertexDataAccessor<DataType::Vec2> uv0;
-			if (hasUV)
-			{
-				uv0 = vs->accessData<DataType::Vec2>(VertexAttributeUsage::TexCoord0, 0);
-			}
-
-			for (uint32_t i = 0; i < rb->numIndexes(); i += 3)
-			{
-				uint32_t i0 = ia->getIndex(rb->firstIndex() + i + 0);
-				uint32_t i1 = ia->getIndex(rb->firstIndex() + i + 1);
-				uint32_t i2 = ia->getIndex(rb->firstIndex() + i + 2);
-
-				triangles.emplace_back();
-				auto& tri = triangles.back();
-				tri.v[0] = rt::float4(t * pos[i0], 1.0f);
-				tri.v[1] = rt::float4(t * pos[i1], 1.0f);
-				tri.v[2] = rt::float4(t * pos[i2], 1.0f);
-				tri.n[0] = rt::float4(t.rotationMultiply(nrm[i0]).normalized(), 0.0f);
-				tri.n[1] = rt::float4(t.rotationMultiply(nrm[i1]).normalized(), 0.0f);
-				tri.n[2] = rt::float4(t.rotationMultiply(nrm[i2]).normalized(), 0.0f);
-				if (hasUV)
-				{
-					tri.t[0] = rt::float4(uv0[i0].x, uv0[i0].y, 0.0f, 0.0f);
-					tri.t[1] = rt::float4(uv0[i1].x, uv0[i1].y, 0.0f, 0.0f);
-					tri.t[2] = rt::float4(uv0[i2].x, uv0[i2].y, 0.0f, 0.0f);
-				}
-				else
-				{
-					tri.t[0] = tri.t[1] = tri.t[2] = rt::float4(0.0f);
-				}
-				tri.materialIndex = static_cast<rt::index>(materialIndex);
-				tri.computeSupportData();
-
-				if (isEmitter)
-				{
-					uint32_t lIndex = static_cast<uint32_t>(lightTriangles.size());
-					lightTriangleToIndex[lIndex] = static_cast<rt::index>(triangles.size() - 1);
-					lightTriangles.push_back(tri);
-				}
-			}
-		}
+		batches.insert(batches.end(), mesh->renderBatches().begin(), mesh->renderBatches().end());
 	}
-
-	kdTree.build(triangles, options.maxKDTreeDepth);
-
-	centerRay = camera.castRay(vec2(0.0f));
-	rt::KDTree::TraverseResult centerHit = kdTree.traverse(centerRay);
-	if (centerHit.triangleIndex != InvalidIndex)
-	{
-		focalDistance = (centerHit.intersectionPoint - rt::float4(centerRay.origin, 0.0f)).length();
-	}
-	focalDistance += options.focalDistanceCorrection;
-
-	auto stats = kdTree.nodesStatistics();
-	log::info("KD-Tree statistics:\n\t%llu nodes\n\t%llu leaf nodes\n\t%llu empty leaf nodes"
-		"\n\t%llu max depth\n\t%llu min triangles per node\n\t%llu max triangles per node"
-		"\n\t%llu total triangles\n\t%llu distributed triangles\n\t%llu light triangles"
-		"\n\t%.2f focal distance"
-		"\n\t%.2f aperture size",
-		uint64_t(stats.totalNodes), uint64_t(stats.leafNodes), uint64_t(stats.emptyLeafNodes),
-		uint64_t(stats.maxDepth), uint64_t(stats.minTrianglesPerNode), uint64_t(stats.maxTrianglesPerNode),
-		uint64_t(stats.totalTriangles), uint64_t(stats.distributedTriangles), uint64_t(lightTriangles.size()),
-		focalDistance, options.apertureSize);
-
-	if (options.renderKDTree)
-	{
-		kdTree.printStructure();
-	}
-}
-
-uint32_t RaytracePrivate::materialIndexWithName(const std::string& n)
-{
-	for (size_t i = 0, e = materials.size(); i < e; ++i)
-	{
-		if (materials.at(i).name == n)
-			return static_cast<uint32_t>(i);
-	}
-	return InvalidIndex;
+	
+	scene.build(batches, input->mainCamera(), options);
 }
 
 void RaytracePrivate::buildRegions(const vec2i& aSize)
@@ -436,7 +293,7 @@ void RaytracePrivate::buildRegions(const vec2i& aSize)
 	}
 }
 
-rt::Region RaytracePrivate::getNextRegion()
+Region RaytracePrivate::getNextRegion()
 {
 	std::unique_lock<std::mutex> lock(regionsLock);
 	for (auto& rgn : regions)
@@ -448,7 +305,7 @@ rt::Region RaytracePrivate::getNextRegion()
 			return rgn;
 		}
 	}
-	return rt::Region();
+	return Region();
 }
 
 /*
@@ -479,12 +336,12 @@ void RaytracePrivate::visualizeSamplerThreadFunction(uint32_t index)
 	renderLine(tr, br, gridColor);
 
 	uint32_t subdivs = 50;
-	rt::Sampler::Pointer samplers[4] =
+	Sampler::Pointer samplers[4] =
 	{
-		rt::RandomSampler::Pointer::create(subdivs * subdivs),
-		rt::UniformSampler::Pointer::create(subdivs * subdivs),
-		rt::StratifiedSampler::Pointer::create(subdivs * subdivs, 0.0f, 1.0f),
-		rt::StratifiedSampler::Pointer::create(subdivs * subdivs, 0.1f, 0.8f),
+		RandomSampler::Pointer::create(subdivs * subdivs),
+		UniformSampler::Pointer::create(subdivs * subdivs),
+		StratifiedSampler::Pointer::create(subdivs * subdivs, 0.0f, 1.0f),
+		StratifiedSampler::Pointer::create(subdivs * subdivs, 0.1f, 0.8f),
 	};
 
 	float dp = gridSize / static_cast<float>(subdivs);
@@ -503,10 +360,10 @@ void RaytracePrivate::visualizeSamplerThreadFunction(uint32_t index)
 	while (samplers[index]->next(sample))
 	{
 		renderPixel(tl + sample * gridSize, pixelColor);
-		renderPixel(tl + sample * gridSize + vec2(-1.0f,  0.0f), pixelColor);
-		renderPixel(tl + sample * gridSize + vec2(+1.0f,  0.0f), pixelColor);
-		renderPixel(tl + sample * gridSize + vec2( 0.0f, +1.0f), pixelColor);
-		renderPixel(tl + sample * gridSize + vec2( 0.0f, -1.0f), pixelColor);
+		renderPixel(tl + sample * gridSize + vec2(-1.0f, 0.0f), pixelColor);
+		renderPixel(tl + sample * gridSize + vec2(+1.0f, 0.0f), pixelColor);
+		renderPixel(tl + sample * gridSize + vec2(0.0f, +1.0f), pixelColor);
+		renderPixel(tl + sample * gridSize + vec2(0.0f, -1.0f), pixelColor);
 	}
 }
 
@@ -515,15 +372,15 @@ void RaytracePrivate::visualizeDistributionThreadFunction(uint32_t index)
 	const uint32_t sampleTestCount = 100000000;
 	const uint32_t renderTestCount = 1000000;
 
-	static rt::float4 testDirection;
+	static float4 testDirection;
 
 	if (index == 0)
 	{
-		testDirection = rt::float4(2.0f * rt::fastRandomFloat() - 1.0f, 2.0f * rt::fastRandomFloat() - 1.0f, 2.0f * rt::fastRandomFloat() - 1.0f, 0.0f);
+		testDirection = float4(2.0f * fastRandomFloat() - 1.0f, 2.0f * fastRandomFloat() - 1.0f, 2.0f * fastRandomFloat() - 1.0f, 0.0f);
 		testDirection.normalize();
 	}
 
-	auto distribution = rt::cosineDistribution;
+	auto distribution = cosineDistribution;
 	float alpha = 0.1f;
 
 	if (index > 0)
@@ -531,7 +388,7 @@ void RaytracePrivate::visualizeDistributionThreadFunction(uint32_t index)
 		float l = camera.position().length() / 10.0f;
 		for (uint32_t i = 0; running && (i < renderTestCount); ++i)
 		{
-			auto n = rt::randomVectorOnHemisphere(testDirection, distribution, alpha);
+			auto n = randomVectorOnHemisphere(testDirection, distribution, alpha);
 			vec2 e = projectPoint(n * l);
 			renderPixel(e, vec4(1.0f, 0.01f));
 		}
@@ -542,7 +399,7 @@ void RaytracePrivate::visualizeDistributionThreadFunction(uint32_t index)
 	Vector<uint32_t> prob(sampleCount, 0);
 	for (uint32_t i = 0; running && (i < sampleTestCount); ++i)
 	{
-		auto v = rt::randomVectorOnHemisphere(testDirection, distribution, alpha).dot(testDirection);
+		auto v = randomVectorOnHemisphere(testDirection, distribution, alpha).dot(testDirection);
 		uint32_t VdotN = static_cast<uint32_t>(clamp(v, 0.0f, 1.0f) * static_cast<float>(sampleCount));
 		prob[VdotN] += 1;
 	}
@@ -594,22 +451,22 @@ void RaytracePrivate::forwardPathTraceThreadFunction(uint32_t threadId)
 
 	float imagePlaneDistanceSq = 2.0f * sqr(static_cast<float>(viewportSize.x) / std::tan(camera.fieldOfView()));
 
-	Vector<rt::float4> localBuffer(viewportSize.square(), rt::float4(0.0f));
+	Vector<float4> localBuffer(viewportSize.square(), float4(0.0f));
 
-	rt::float4 cameraPos(camera.position(), 0.0f);
-	rt::float4 cameraDir(-camera.direction(), 0.0f);
+	float4 cameraPos(camera.position(), 0.0f);
+	float4 cameraDir(-camera.direction(), 0.0f);
 	vec3 viewport = vector3ToFloat(vec3i(viewportSize, 0));
 
-	auto projectToCamera = [&](const rt::Ray& inRay, const rt::KDTree::TraverseResult& hit,
-		const rt::float4& color, const rt::float4& nrm)
+	auto projectToCamera = [&](const Ray& inRay, const KDTree::TraverseResult& hit,
+		const float4& color, const float4& nrm)
 	{
-		rt::float4 toCamera = cameraPos - hit.intersectionPoint;
+		float4 toCamera = cameraPos - hit.intersectionPoint;
 		toCamera.normalize();
 
-		const auto& tri = kdTree.triangleAtIndex(hit.triangleIndex);
-		const auto& mat = materials.at(tri.materialIndex);
-		rt::float4 uv0 = tri.interpolatedTexCoord0(hit.intersectionPointBarycentric);
-		rt::BSDFSample sample(inRay.direction, toCamera, nrm, mat, uv0, rt::BSDFSample::Direction::Forward);
+		const auto& tri = scene.kdTree.triangleAtIndex(hit.triangleIndex);
+		const auto& mat = scene.materials.at(tri.materialIndex);
+		float4 uv0 = tri.interpolatedTexCoord0(hit.intersectionPointBarycentric);
+		BSDFSample sample(inRay.direction, toCamera, nrm, mat, uv0, BSDFSample::Direction::Forward);
 
 		if (sample.OdotN <= 0.0f)
 			return;
@@ -618,7 +475,7 @@ void RaytracePrivate::forwardPathTraceThreadFunction(uint32_t threadId)
 		if ((projected.x * projected.x > 1.0f) || (projected.y * projected.y > 1.0f) || (projected.z * projected.z > 1.0f))
 			return;
 
-		auto backHit = kdTree.traverse(rt::Ray(cameraPos, sample.Wo * (-1.0f)));
+		auto backHit = scene.kdTree.traverse(Ray(cameraPos, sample.Wo * (-1.0f)));
 		if (backHit.triangleIndex != hit.triangleIndex)
 			return;
 
@@ -649,44 +506,44 @@ void RaytracePrivate::forwardPathTraceThreadFunction(uint32_t threadId)
 			uint32_t emitterIndex = rand() % lightTriangles.size();
 			const auto& emitterTriangle = lightTriangles[emitterIndex];
 
-			rt::KDTree::TraverseResult source;
-			source.intersectionPointBarycentric = rt::randomBarycentric();
+			KDTree::TraverseResult source;
+			source.intersectionPointBarycentric = randomBarycentric();
 			source.intersectionPoint = emitterTriangle.interpolatedPosition(source.intersectionPointBarycentric);
 			source.triangleIndex = lightTriangleToIndex[emitterIndex];
 
-			rt::float4 triangleNormal = emitterTriangle.interpolatedNormal(source.intersectionPointBarycentric);
-			rt::float4 sourceDir = rt::randomVectorOnHemisphere(triangleNormal, rt::cosineDistribution);
+			float4 triangleNormal = emitterTriangle.interpolatedNormal(source.intersectionPointBarycentric);
+			float4 sourceDir = randomVectorOnHemisphere(triangleNormal, cosineDistribution);
 
 			float pickProb = 1.0f / static_cast<float>(lightTriangles.size());
 			float area = emitterTriangle.area();
 
-			rt::float4 color = materials.at(emitterTriangle.materialIndex).emissive * (area / pickProb);
-			rt::Ray currentRay(source.intersectionPoint + sourceDir * rt::Constants::epsilon, sourceDir);
+			float4 color = scene.materials.at(emitterTriangle.materialIndex).emissive * (area / pickProb);
+			Ray currentRay(source.intersectionPoint + sourceDir * Constants::epsilon, sourceDir);
 
 			projectToCamera(currentRay, source, color, triangleNormal);
 
 			for (uint32_t pathLength = 0; pathLength < options.maxPathLength; ++pathLength)
 			{
-				auto hit = kdTree.traverse(currentRay);
+				auto hit = scene.kdTree.traverse(currentRay);
 				if (hit.triangleIndex == InvalidIndex)
 				{
 					break;
 				}
 
-				const auto& tri = kdTree.triangleAtIndex(hit.triangleIndex);
-				const auto& mat = materials.at(tri.materialIndex);
+				const auto& tri = scene.kdTree.triangleAtIndex(hit.triangleIndex);
+				const auto& mat = scene.materials.at(tri.materialIndex);
 
 				if (mat.emissive.dotSelf() > 0.0f)
 				{
 					break;
 				}
 
-				rt::float4 nrm = tri.interpolatedNormal(hit.intersectionPointBarycentric);
-				rt::float4 uv0 = tri.interpolatedTexCoord0(hit.intersectionPointBarycentric);
-				rt::BSDFSample sample(currentRay.direction, nrm, mat, uv0, rt::BSDFSample::Direction::Forward);
+				float4 nrm = tri.interpolatedNormal(hit.intersectionPointBarycentric);
+				float4 uv0 = tri.interpolatedTexCoord0(hit.intersectionPointBarycentric);
+				BSDFSample sample(currentRay.direction, nrm, mat, uv0, BSDFSample::Direction::Forward);
 
 #			if (ET_RT_VISUALIZE_BRDF)
-				projectToCamera(currentRay, hit, rt::float4(sample.bsdf()), nrm);
+				projectToCamera(currentRay, hit, float4(sample.bsdf()), nrm);
 				break;
 #			else
 				color *= sample.evaluate();
@@ -694,13 +551,13 @@ void RaytracePrivate::forwardPathTraceThreadFunction(uint32_t threadId)
 #			endif
 
 				currentRay.direction = sample.Wo;
-				currentRay.origin = hit.intersectionPoint + currentRay.direction * rt::Constants::epsilon;
+				currentRay.origin = hit.intersectionPoint + currentRay.direction * Constants::epsilon;
 			}
 		}
 
 		log::info("Iteration finished");
 		flushToForwardTraceBuffer(localBuffer);
-		std::fill(localBuffer.begin(), localBuffer.end(), rt::float4(0.0f));
+		std::fill(localBuffer.begin(), localBuffer.end(), float4(0.0f));
 	}
 	log::info("Thread finished");
 }
@@ -783,24 +640,24 @@ vec4 RaytracePrivate::raytracePixel(const vec2i& intCoord, uint32_t samples, uin
 		return vec4(0.0f);
 	}
 
-	rt::float4 result(0.0f);
+	float4 result(0.0f);
 	float weight = 0.0f;
 	vec2 pixelSize = vec2(1.0f) / vector2ToFloat(viewportSize);
 	vec2 baseCoordinate = vector2ToFloat(intCoord);
-	
-	rt::StratifiedSampler sampler(samples, 0.075f, 0.85f);
-	rt::TriangleFilter filter;
+
+	StratifiedSampler sampler(samples, 0.075f, 0.85f);
+	TriangleFilter filter;
 
 	vec2 sample(0.0f);
 	while (sampler.next(sample))
 	{
 		vec2 normalizedCoordinate = 2.0f * (baseCoordinate + sample) * pixelSize - vec2(1.0f);
 		ray3d baseRay = camera.castRay(normalizedCoordinate);
-		float distanceToFocalPlane = focalDistance / baseRay.direction.dot(centerRay.direction);
+		float distanceToFocalPlane = scene.focalDistance / baseRay.direction.dot(scene.centerRay.direction);
 		vec3 focalPoint = camera.position() + distanceToFocalPlane * baseRay.direction;
 
-		float phi = rt::fastRandomFloat() * DOUBLE_PI;
-		float r = std::sqrt(rt::fastRandomFloat());
+		float phi = fastRandomFloat() * DOUBLE_PI;
+		float r = std::sqrt(fastRandomFloat());
 		float uScale = std::sin(phi) * options.apertureSize * r;
 		float vScale = std::cos(phi) * options.apertureSize * r;
 		vec3 uOffset = perpendicularVector(baseRay.direction);
@@ -810,10 +667,8 @@ vec4 RaytracePrivate::raytracePixel(const vec2i& intCoord, uint32_t samples, uin
 		vec3 shiftedDirection = (focalPoint - shiftedOrigin).normalize();
 
 		float w = filter.weight(sample);
+		result += integrator->evaluate(scene, ray3d(shiftedOrigin, shiftedDirection), options.maxPathLength, bounces) * w;
 		weight += w;
-		result += integrator->gather(ray3d(shiftedOrigin, shiftedDirection), 
-			options.maxPathLength, bounces, kdTree, environmentSampler, materials) * w;
-
 	}
 	vec3 output = result.xyz() / weight;
 
@@ -857,7 +712,7 @@ void RaytracePrivate::estimateRegionsOrder()
 		}
 	}
 
-	std::sort(regions.begin(), regions.end(), [](const rt::Region& l, const rt::Region& r)
+	std::sort(regions.begin(), regions.end(), [](const Region& l, const Region& r)
 	{
 		return l.estimatedBounces > r.estimatedBounces;
 	});
@@ -867,7 +722,7 @@ void RaytracePrivate::estimateRegionsOrder()
 
 void RaytracePrivate::renderSpacePartitioning()
 {
-	renderBoundingBox(kdTree.bboxAt(0), vec4(1.0f, 0.0f, 1.0f, 1.0f));
+	renderBoundingBox(scene.kdTree.bboxAt(0), vec4(1.0f, 0.0f, 1.0f, 1.0f));
 	renderKDTreeRecursive(0, 0);
 }
 
@@ -876,29 +731,29 @@ void RaytracePrivate::renderKDTreeRecursive(uint32_t nodeIndex, uint32_t index)
 	const vec4 colorOdd(1.0f, 1.0f, 0.0f, 1.0f);
 	const vec4 colorEven(0.0f, 1.0f, 1.0f, 1.0f);
 
-	const auto& node = kdTree.nodeAt(nodeIndex);
+	const auto& node = scene.kdTree.nodeAt(nodeIndex);
 
-	if (node.axis <= rt::MaxAxisIndex)
+	if (node.axis <= MaxAxisIndex)
 	{
 		renderKDTreeRecursive(node.children[0], index + 1);
 		renderKDTreeRecursive(node.children[1], index + 1);
 	}
 	else
 	{
-		renderBoundingBox(kdTree.bboxAt(nodeIndex), (index % 2) ? colorOdd : colorEven);
+		renderBoundingBox(scene.kdTree.bboxAt(nodeIndex), (index % 2) ? colorOdd : colorEven);
 	}
 }
 
-void RaytracePrivate::renderBoundingBox(const rt::BoundingBox& box, const vec4& color)
+void RaytracePrivate::renderBoundingBox(const BoundingBox& box, const vec4& color)
 {
-	vec2 c0 = projectPoint(box.center + box.halfSize * rt::float4(-1.0f, -1.0f, -1.0f, 0.0f));
-	vec2 c1 = projectPoint(box.center + box.halfSize * rt::float4(1.0f, -1.0f, -1.0f, 0.0f));
-	vec2 c2 = projectPoint(box.center + box.halfSize * rt::float4(-1.0f, 1.0f, -1.0f, 0.0f));
-	vec2 c3 = projectPoint(box.center + box.halfSize * rt::float4(1.0f, 1.0f, -1.0f, 0.0f));
-	vec2 c4 = projectPoint(box.center + box.halfSize * rt::float4(-1.0f, -1.0f, 1.0f, 0.0f));
-	vec2 c5 = projectPoint(box.center + box.halfSize * rt::float4(1.0f, -1.0f, 1.0f, 0.0f));
-	vec2 c6 = projectPoint(box.center + box.halfSize * rt::float4(-1.0f, 1.0f, 1.0f, 0.0f));
-	vec2 c7 = projectPoint(box.center + box.halfSize * rt::float4(1.0f, 1.0f, 1.0f, 0.0f));
+	vec2 c0 = projectPoint(box.center + box.halfSize * float4(-1.0f, -1.0f, -1.0f, 0.0f));
+	vec2 c1 = projectPoint(box.center + box.halfSize * float4(1.0f, -1.0f, -1.0f, 0.0f));
+	vec2 c2 = projectPoint(box.center + box.halfSize * float4(-1.0f, 1.0f, -1.0f, 0.0f));
+	vec2 c3 = projectPoint(box.center + box.halfSize * float4(1.0f, 1.0f, -1.0f, 0.0f));
+	vec2 c4 = projectPoint(box.center + box.halfSize * float4(-1.0f, -1.0f, 1.0f, 0.0f));
+	vec2 c5 = projectPoint(box.center + box.halfSize * float4(1.0f, -1.0f, 1.0f, 0.0f));
+	vec2 c6 = projectPoint(box.center + box.halfSize * float4(-1.0f, 1.0f, 1.0f, 0.0f));
+	vec2 c7 = projectPoint(box.center + box.halfSize * float4(1.0f, 1.0f, 1.0f, 0.0f));
 
 	renderLine(c0, c1, color);
 	renderLine(c0, c2, color);
@@ -941,13 +796,13 @@ void RaytracePrivate::renderPixel(const vec2& pixel, const vec4& color)
 	}
 }
 
-vec2 RaytracePrivate::projectPoint(const rt::float4& p)
+vec2 RaytracePrivate::projectPoint(const float4& p)
 {
 	return vector2ToFloat(viewportSize) *
 		(vec2(0.5f, 0.5f) + vec2(0.5f, 0.5f) * camera.project(p.xyz()).xy());
 }
 
-void RaytracePrivate::fillRegionWithColor(const rt::Region& region, const vec4& color)
+void RaytracePrivate::fillRegionWithColor(const Region& region, const vec4& color)
 {
 	ET_ASSERT(!isinf(color.x));
 	ET_ASSERT(!isinf(color.y));
@@ -962,7 +817,7 @@ void RaytracePrivate::fillRegionWithColor(const rt::Region& region, const vec4& 
 	}
 }
 
-void RaytracePrivate::renderTriangle(const rt::Triangle& tri)
+void RaytracePrivate::renderTriangle(const Triangle& tri)
 {
 	const vec4 lineColor(5.0f, 0.9f, 0.8f, 1.0f);
 
@@ -974,7 +829,7 @@ void RaytracePrivate::renderTriangle(const rt::Triangle& tri)
 	renderLine(c2, c0, lineColor);
 }
 
-void RaytracePrivate::flushToForwardTraceBuffer(const Vector<rt::float4>& localBuffer)
+void RaytracePrivate::flushToForwardTraceBuffer(const Vector<float4>& localBuffer)
 {
 	std::lock_guard<std::mutex> lock(forwardTraceBufferMutex);
 
@@ -1005,4 +860,5 @@ void RaytracePrivate::flushToForwardTraceBuffer(const Vector<rt::float4>& localB
 	}
 }
 
+}
 }

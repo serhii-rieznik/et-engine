@@ -7,73 +7,94 @@
 
 #pragma once
 
-#include <et-ext/rt/kdtree.h>
-#include <et-ext/rt/bsdf.h>
-#include <et-ext/rt/environment.h>
+#include <et-ext/rt/rtscene.h>
 
 namespace et
 {
 namespace rt
 {
-    class Integrator : public Object
-    {
-    public:
-        ET_DECLARE_POINTER(Integrator);
-        
-    public:
-        virtual ~Integrator() { }
-        virtual float4 gather(const Ray& inRay, uint32_t maxPathLength, uint32_t& pathLength,
-			KDTree&, EnvironmentSampler::Pointer&, const Material::Collection&) = 0;
-    };
 
-	class NormalsIntegrator : public Integrator
+// dummy, to be removed
+struct EnvironmentSampler : public Shared { ET_DECLARE_POINTER(EnvironmentSampler); };
+
+class Integrator : public Object
+{
+public:
+	ET_DECLARE_POINTER(Integrator);
+
+public:
+	virtual ~Integrator() {}
+
+	virtual float4 evaluate(const Scene&, const Ray& inRay, uint32_t maxPathLength, uint32_t& pathLength) 
 	{
-	public:
-        ET_DECLARE_POINTER(NormalsIntegrator);
+		return float4(0.18f);
+	}
 
-	public:
-		float4 gather(const Ray& inRay, uint32_t maxPathLength,
-			uint32_t& pathLength, KDTree&, EnvironmentSampler::Pointer&, const Material::Collection&) override;
-	};
-
-	class FresnelIntegrator : public Integrator
+	virtual float4 gather(const Ray& inRay, uint32_t maxPathLength, uint32_t& pathLength,
+		KDTree&, EnvironmentSampler::Pointer&, const Material::Collection&)
 	{
-	public:
-        ET_DECLARE_POINTER(FresnelIntegrator);
+		return float4(0.18f);
+	}
+};
 
-	public:
-		float4 gather(const Ray& inRay, uint32_t maxPathLength,
-			uint32_t& pathLength, KDTree&, EnvironmentSampler::Pointer&, const Material::Collection&) override;
-	};
+class NormalsIntegrator : public Integrator
+{
+public:
+	ET_DECLARE_POINTER(NormalsIntegrator);
 
-    class AmbientOcclusionIntegrator : public Integrator
-    {
-    public:
-        ET_DECLARE_POINTER(AmbientOcclusionIntegrator);
-        
-    public:
-		float4 gather(const Ray& inRay, uint32_t maxPathLength,
-			uint32_t& pathLength, KDTree&, EnvironmentSampler::Pointer&, const Material::Collection&) override;
-    };
+public:
+	float4 gather(const Ray& inRay, uint32_t maxPathLength, uint32_t& pathLength, 
+		KDTree&, EnvironmentSampler::Pointer&, const Material::Collection&) override;
+};
 
-	class AmbientOcclusionHackIntegrator : public Integrator
-	{
-	public:
-		ET_DECLARE_POINTER(AmbientOcclusionHackIntegrator);
+class FresnelIntegrator : public Integrator
+{
+public:
+	ET_DECLARE_POINTER(FresnelIntegrator);
 
-	public:
-		float4 gather(const Ray& inRay, uint32_t maxPathLength,
-			uint32_t& pathLength, KDTree&, EnvironmentSampler::Pointer&, const Material::Collection&) override;
-	};
+public:
+	float4 gather(const Ray& inRay, uint32_t maxPathLength, uint32_t& pathLength, 
+		KDTree&, EnvironmentSampler::Pointer&, const Material::Collection&) override;
+};
 
-    class PathTraceIntegrator : public Integrator
-    {
-    public:
-        ET_DECLARE_POINTER(PathTraceIntegrator);
+class AmbientOcclusionIntegrator : public Integrator
+{
+public:
+	ET_DECLARE_POINTER(AmbientOcclusionIntegrator);
 
-    public:
-		float4 gather(const Ray& inRay, uint32_t maxPathLength,
-			uint32_t& pathLength, KDTree&, EnvironmentSampler::Pointer&, const Material::Collection&) override;
-    };
+public:
+	float4 gather(const Ray& inRay, uint32_t maxPathLength, uint32_t& pathLength, 
+		KDTree&, EnvironmentSampler::Pointer&, const Material::Collection&) override;
+};
+
+class AmbientOcclusionHackIntegrator : public Integrator
+{
+public:
+	ET_DECLARE_POINTER(AmbientOcclusionHackIntegrator);
+
+public:
+	float4 gather(const Ray& inRay, uint32_t maxPathLength, uint32_t& pathLength, 
+		KDTree&, EnvironmentSampler::Pointer&, const Material::Collection&) override;
+};
+
+class PathTraceIntegrator : public Integrator
+{
+public:
+	ET_DECLARE_POINTER(PathTraceIntegrator);
+
+public:
+	float4 gather(const Ray& inRay, uint32_t maxPathLength, uint32_t& pathLength, 
+		KDTree&, EnvironmentSampler::Pointer&, const Material::Collection&) override;
+};
+
+struct BackwardPathTracingIntegrator : public Integrator
+{
+public:
+	ET_DECLARE_POINTER(BackwardPathTracingIntegrator);
+
+public:
+	float4 evaluate(const Scene&, const Ray& inRay, uint32_t maxPathLength, uint32_t& pathLength) override;
+};
+
 }
 }

@@ -45,6 +45,25 @@ enum class SamplingMethod : uint32_t
 	RaisedCosine
 };
 
+enum class RaytraceMethod : uint32_t
+{
+	BackwardPathTracing,
+	ForwardLightTracing
+};
+
+struct Options
+{
+	uint32_t threads = 0;
+	uint32_t raysPerPixel = 32;
+	uint32_t maxPathLength = 0;
+	uint32_t maxKDTreeDepth = 0;
+	uint32_t renderRegionSize = 32;
+	float apertureSize = 0.0f;
+	float focalDistanceCorrection = 0.0f;
+	RaytraceMethod method = RaytraceMethod::BackwardPathTracing;
+	bool renderKDTree = false;
+};
+
 struct ET_ALIGNED(16) Triangle
 {
 	float4 v[3];
