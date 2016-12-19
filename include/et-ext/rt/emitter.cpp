@@ -17,7 +17,7 @@ UniformEmitter::UniformEmitter(const float4& color) :
 {
 }
 
-float4 UniformEmitter::sample(const Scene&, const float4 & position, const float4 & direction)
+float4 UniformEmitter::sample(const Scene&, const float4& position, const float4& normal) const
 {
 	return _color;
 }
@@ -27,7 +27,7 @@ EnvironmentEmitter::EnvironmentEmitter(const Image::Pointer& img) :
 {
 }
 
-float4 EnvironmentEmitter::sample(const Scene&, const float4 & position, const float4 & direction)
+float4 EnvironmentEmitter::sample(const Scene&, const float4& position, const float4& normal) const
 {
 	return float4(0.25, 0.75, 1.0, 1.0);
 }
@@ -38,9 +38,29 @@ MeshEmitter::MeshEmitter(index firstTriangle, index numTriangles, index material
 
 }
 
-float4 MeshEmitter::sample(const Scene&, const float4 & position, const float4 & direction)
+float4 MeshEmitter::sample(const Scene& scene, const float4& position, const float4& normal) const
 {
-	return float4(0.75f, 0.5f, 1.0f, 1.0f);
+	uint32_t emitterIndex = _firstTriangle + rand() % _numTriangles;
+	const Triangle& emitterTriangle = scene.kdTree.triangleAtIndex(emitterIndex);
+	float4 bc = randomBarycentric();
+	float4 emitterPos = emitterTriangle.interpolatedPosition(bc) + float4(0.0f, 0.0f, 0.0f, 1.0f);
+	float4 emitterNormal = emitterTriangle.interpolatedNormal(bc);
+
+	float4 dir = normalize(emitterPos - position);
+
+	float NdotL = normal.dot(dir);
+	float NdotD = emitterNormal.dot(dir);
+	if ((NdotL < 0.0f) || (NdotD > 0.0f))
+		return float4(0.0f); // from behind
+
+	KDTree::TraverseResult hit = scene.kdTree.traverse(Ray(position, dir));
+	if (hit.triangleIndex != emitterIndex)
+		return float4(0.0f); // miss
+
+	float pickProb = 1.0f / static_cast<float>(_numTriangles);
+	float area = emitterTriangle.area();
+	float4 emissiveColor = scene.materials.at(_materialIndex).emissive;
+	return emissiveColor * (NdotL * area / pickProb);
 }
 
 

@@ -18,7 +18,7 @@ namespace et
 namespace rt
 {
 
-class Scene
+class ET_ALIGNED(16) Scene
 {
 public:
 	void build(const Vector<RenderBatch::Pointer>&, const Camera::Pointer&, const Options&);

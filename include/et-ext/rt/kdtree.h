@@ -76,7 +76,7 @@ public:
 		return _boundingBoxes.at(i);
 	}
 
-	TraverseResult traverse(const Ray& r);
+	TraverseResult traverse(const Ray& r) const;
 
 	void printStructure();
 

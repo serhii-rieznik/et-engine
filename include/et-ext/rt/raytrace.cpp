@@ -19,7 +19,7 @@ namespace et
 namespace rt
 {
 
-class RaytracePrivate
+class ET_ALIGNED(16) RaytracePrivate
 {
 public:
 	RaytracePrivate(Raytrace* owner);
@@ -55,30 +55,31 @@ public:
 	void flushToForwardTraceBuffer(const Vector<float4>&);
 
 public:
+	Scene scene;
+
 	Raytrace* owner = nullptr;
 	Options options;
-	Scene scene;
 	Integrator::Pointer integrator;
-	TriangleList lightTriangles;
-	Map<uint32_t, index> lightTriangleToIndex;
 	Camera camera;
-	vec2i viewportSize;
-	vec2i regionSize;
 
 	Vector<std::thread> workerThreads;
-	std::atomic<uint32_t> threadCounter;
-	std::atomic<uint32_t> sampledRegions;
 
+	Map<uint32_t, index> lightTriangleToIndex;
 	Vector<Region> regions;
-	std::mutex regionsLock;
-
-	std::atomic<bool> running;
-	std::atomic<uint64_t> startTime;
-	std::atomic<uint64_t> elapsedTime;
-
 	Vector<float4> forwardTraceBuffer;
+	TriangleList lightTriangles;
+
+	std::mutex regionsLock;
 	std::mutex forwardTraceBufferMutex;
+	std::atomic<bool> running{false};
+	std::atomic<uint32_t> threadCounter{0};
+	std::atomic<uint32_t> sampledRegions{0};
+	std::atomic<uint64_t> startTime{0};
+	std::atomic<uint64_t> elapsedTime{0};
+
 	uint32_t flushCounter = 0;
+	vec2i viewportSize;
+	vec2i regionSize;
 };
 
 Raytrace::Raytrace()
@@ -126,7 +127,7 @@ vec4 Raytrace::performAtPoint(s3d::Scene::Pointer scene, const vec2i& dimension,
 	_private->buildScene(scene);
 
 	uint32_t bounces = 0;
-	vec4 color = _private->raytracePixel(vec2i(pixel.x, dimension.y - pixel.y), _private->options.raysPerPixel, bounces);
+	vec4 color = _private->raytracePixel(vec2i(pixel.x, pixel.y), _private->options.raysPerPixel, bounces);
 	log::info("Sampled color:\n\tsRGB: %.4f, %.4f, %.4f\n\tRGB: %.4f, %.4f, %.4f, (%u bounces)",
 		color.x, color.y, color.z, std::pow(color.x, 2.2f), std::pow(color.y, 2.2f), std::pow(color.z, 2.2f),
 		bounces);
@@ -316,11 +317,52 @@ void RaytracePrivate::visualizeSamplerThreadFunction(uint32_t index)
 	if (index >= 4)
 		return;
 
+	const float gap = 50.0f;
+	const float yOffset = 5.0f + gap;
+
+	if (index == 0)
+	{
+		const uint32_t randomBufferSize = 2000;
+		const uint32_t randomBufferSamples = randomBufferSize * randomBufferSize;
+		Vector<float> occurences;
+		occurences.resize(randomBufferSize + 1);
+
+		log::info("Calculating random sampler distribution...");
+		float upper = 0.0f;
+		float lower = std::numeric_limits<float>::max();
+		for (uint32_t i = 0; i < randomBufferSamples; ++i)
+		{
+			float Xi = fastRandomFloat();
+			uint32_t bin = static_cast<uint32_t>(static_cast<float>(randomBufferSize) * Xi);
+			occurences[bin] += 1.0f;
+			lower = std::min(lower, Xi);
+			upper = std::max(upper, Xi);
+		}
+		log::info("Bounds: [%f, %f]", lower, upper);
+
+		upper = 0.0f;
+		lower = std::numeric_limits<float>::max();
+		for (float occ : occurences)
+		{
+			lower = std::min(lower, occ);
+			upper = std::max(upper, occ);
+		}
+		log::info("Distribution: [%f, %f]", lower, upper);
+
+		float x = 10.0f;
+		float dx = static_cast<float>(viewportSize.x - 20) / static_cast<float>(randomBufferSize);
+		for (uint32_t i = 0; i + 1 < randomBufferSize; ++i, x += dx)
+		{
+			float y0 = 5.0f + gap * (1.0f - occurences[i+0] / (upper - lower));
+			float y1 = 5.0f + gap * (1.0f - occurences[i+1] / (upper - lower));
+			renderLine(vec2(x, y0), vec2(x + dx, y1), vec4(1.0f, 0.5f, 0.25f, 1.0f));
+		}
+	}
+
 	vec2 vp = vector2ToFloat(viewportSize);
-	float gap = 20.0f;
-	float gridSize = (std::min(vp.x, vp.y) - 3.0f * gap) / 2.0f;
+	float gridSize = (std::min(vp.x, vp.y - yOffset) - 3.0f * gap) / 2.0f;
 	vec2 infoSize = vec2(2.0f * gridSize + 3.0f * gap);
-	vec2 offset = 0.5f * (vp - infoSize) + vec2(gap);
+	vec2 offset = 0.5f * (vec2(vp.x, vp.y + yOffset) - infoSize) + vec2(yOffset + gap, gap);
 
 	vec2 tl = offset + vec2((gridSize + gap) * float(index % 2), (gridSize + gap) * float(index / 2));
 	vec2 br = tl + vec2(gridSize);

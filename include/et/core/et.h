@@ -35,8 +35,8 @@
 #define ET_CORE_INCLUDES
 
 #define ET_DECLARE_PIMPL(T, SZ)		private:\
-										T##Private* _private = nullptr; \
-										char _privateData[SZ] { }
+										char _privateData[SZ] { }; \
+										T##Private* _private = nullptr
 
 #define ET_PIMPL_INIT(T, ...)		static_assert(sizeof(_privateData) >= sizeof(T##Private), "Not enough storage for private implementation"); \
 									memset(_privateData, 0, sizeof(_privateData)); \

@@ -7,7 +7,7 @@
 
 #include <et-ext/rt/bsdf.h>
 
-#define ET_RT_USE_COSINE_WEIGHTED_SAMPLING 0
+#define ET_RT_USE_COSINE_WEIGHTED_SAMPLING 1
 
 et::rt::BSDFSample::BSDFSample(const et::rt::float4& _wi, const et::rt::float4& _n, const Material& mat,
 	const et::rt::float4& uv, Direction _d) : Wi(_wi), n(_n), IdotN(_wi.dot(_n)), alpha(mat.roughness), dir(_d)

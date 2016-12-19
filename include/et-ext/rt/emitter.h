@@ -25,7 +25,9 @@ public:
 
 public:
 	virtual ~Emitter() = default;
-	virtual float4 sample(const Scene&, const float4& position, const float4& direction) = 0;
+	virtual float4 sample(const Scene&, const float4& position, const float4& normal) const = 0;
+
+	virtual index materialIndex() const { return InvalidIndex; }
 };
 
 class UniformEmitter : public Emitter
@@ -35,7 +37,7 @@ public:
 
 public:
 	UniformEmitter(const float4& color);
-	float4 sample(const Scene&, const float4& position, const float4& direction) override;
+	float4 sample(const Scene&, const float4& position, const float4& normal) const override;
 
 private:
 	float4 _color;
@@ -48,7 +50,7 @@ public:
 
 public:
 	EnvironmentEmitter(const Image::Pointer&);
-	float4 sample(const Scene&, const float4& position, const float4& direction) override;
+	float4 sample(const Scene&, const float4& position, const float4& normal) const override;
 
 private:
 	Image::Pointer _image;
@@ -61,7 +63,9 @@ public:
 
 public:
 	MeshEmitter(index firstTriangle, index numTriangles, index materialIndex);
-	float4 sample(const Scene&, const float4& position, const float4& direction) override;
+	float4 sample(const Scene&, const float4& position, const float4& normal) const override;
+
+	index materialIndex() const override { return _materialIndex; }
 
 private:
 	index _firstTriangle = InvalidIndex;

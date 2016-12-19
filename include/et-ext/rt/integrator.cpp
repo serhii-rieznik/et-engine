@@ -156,9 +156,66 @@ float4 AmbientOcclusionHackIntegrator::gather(const Ray& inRay, uint32_t maxPath
 	return float4(1.0f - std::exp(-SQRT_2 * distance));
 }
 
-float4 BackwardPathTracingIntegrator::evaluate(const Scene &, const Ray & inRay, uint32_t maxPathLength, uint32_t & pathLength)
+float4 BackwardPathTracingIntegrator::evaluate(const Scene& scene, const Ray& inRay, uint32_t maxPathLength, uint32_t& pathLength)
 {
-	return float4(0.25f, 0.5f, 0.125f, 1.0f);
+	if (maxPathLength == 0)
+		maxPathLength = 0x7FFFFFFF;
+
+	const uint32_t lightSamples = 1;
+
+	float4 result(0.0f);
+	float4 throughput(1.0f);
+
+    Ray currentRay = inRay;
+	for (pathLength = 0; pathLength < maxPathLength; ++pathLength)
+	{
+		KDTree::TraverseResult hit = scene.kdTree.traverse(currentRay);
+		if (hit.triangleIndex == InvalidIndex)
+			break;
+
+		const Triangle& tri = scene.kdTree.triangleAtIndex(hit.triangleIndex);
+		const Material& mtl = scene.materials[tri.materialIndex];
+		float4 nrm = tri.interpolatedNormal(hit.intersectionPointBarycentric);
+		float4 nextPosition = hit.intersectionPoint + nrm * Constants::epsilon;
+		float4 uv0 = tri.interpolatedTexCoord0(hit.intersectionPointBarycentric);
+
+		BSDFSample sample(currentRay.direction, nrm, mtl, uv0, et::rt::BSDFSample::Direction::Backward);
+		throughput *= sample.combinedEvaluate();
+
+		if (lightSamples > 0)
+		{
+			float4 lightSamplesContrib = float4(0.0f);
+			for (uint32_t ls = 0; ls < lightSamples; ++ls)
+			{
+				for (const Emitter::Pointer emitter : scene.emitters)
+				{
+					if (emitter->materialIndex() != tri.materialIndex)
+						lightSamplesContrib += throughput * emitter->sample(scene, nextPosition, nrm);
+				}
+			}
+			result += lightSamplesContrib / static_cast<float>(lightSamples);
+		}
+		
+		result += throughput * mtl.emissive;
+
+#	if (ET_RT_USE_RUSSIAN_ROULETTE)
+		if (pathLength > 16)
+		{
+			ET_ALIGNED(16) float local[4] = {};
+			throughput.loadToFloats(local);
+			float maxComponent = std::max(local[0], std::max(local[1], local[2]));
+			float q = std::min(maxComponent, 0.95f);
+			if (rt::fastRandomFloat() >= q)
+				break;
+			throughput /= q;
+		}
+#	endif
+
+		currentRay.origin = nextPosition;
+		currentRay.direction = sample.Wo;
+	}
+
+	return result;
 }
 
 }

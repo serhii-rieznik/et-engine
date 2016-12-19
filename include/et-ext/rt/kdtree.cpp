@@ -324,7 +324,7 @@ struct KDTreeSearchNode
         ind(n), time(t) { }
 };
 
-KDTree::TraverseResult KDTree::traverse(const Ray& ray)
+KDTree::TraverseResult KDTree::traverse(const Ray& ray) const
 {
 	KDTree::TraverseResult result;
 	

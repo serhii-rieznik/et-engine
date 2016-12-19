@@ -241,10 +241,26 @@ struct Region
 
 inline float_type fastRandomFloat()
 {
+#if (ET_RT_USE_MT_GENERATOR)
 	static std::random_device rd;
 	static std::mt19937 gen(rd());
 	static std::uniform_real_distribution<float> dis(0.0f, 1.0f);
 	return dis(gen);
+#else
+	static uint32_t seed = static_cast<uint32_t>(time(nullptr));
+	union
+	{
+		uint32_t u;
+		float_type f;
+	} wrap = { ((seed *= 16807) >> 9) | 0x3f800000 };
+	return wrap.f - 1.0f;
+#endif
+}
+
+inline float4 normalize(float4 n)
+{
+	n.normalize();
+	return n;
 }
 
 inline float4 perpendicularVector(const float4& normal)

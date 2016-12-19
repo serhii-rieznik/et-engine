@@ -12,6 +12,11 @@ namespace et
 namespace rt
 {
 
+inline float4 gammaCorrectedInput(const vec4& c)
+{
+	return float4(std::pow(c.x, 2.2f), std::pow(c.y, 2.2f), std::pow(c.z, 2.2f), 1.0f);
+}
+
 void Scene::build(const Vector<RenderBatch::Pointer>& batches, const Camera::Pointer& camera, const Options& options)
 {
 	materials.clear();
@@ -63,8 +68,8 @@ void Scene::build(const Vector<RenderBatch::Pointer>& batches, const Camera::Poi
 			auto& mat = materials.back();
 
 			mat.name = batchMaterial->name();
-			mat.diffuse = float4(batchMaterial->getVector(MaterialParameter::AlbedoColor));
-			mat.specular = float4(batchMaterial->getVector(MaterialParameter::ReflectanceColor));
+			mat.diffuse = gammaCorrectedInput(batchMaterial->getVector(MaterialParameter::AlbedoColor));
+			mat.specular = gammaCorrectedInput(batchMaterial->getVector(MaterialParameter::ReflectanceColor));
 			mat.emissive = float4(batchMaterial->getVector(MaterialParameter::EmissiveColor));
 			mat.roughness = sqr(alpha);
 			mat.metallness = sqr(metallness);
@@ -122,10 +127,11 @@ void Scene::build(const Vector<RenderBatch::Pointer>& batches, const Camera::Poi
 			tri.computeSupportData();
 		}
 
-		index numTriangles = static_cast<index>(triangles.size());
+		index numTriangles = static_cast<index>(triangles.size()) - firstTriange;
 		if (isEmitter && (numTriangles > 0))
 		{
 			MeshEmitter::Pointer emitter = MeshEmitter::Pointer::create(firstTriange, numTriangles, materialIndex);
+			emitters.push_back(emitter);
 		}
 	}
 
