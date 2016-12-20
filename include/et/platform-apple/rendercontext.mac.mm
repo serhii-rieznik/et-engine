@@ -149,6 +149,12 @@ void RenderContext::performResizing(const vec2i&)
 	ET_FAIL("Not implemented");
 }
 
+const vec2i& RenderContext::size() const
+{
+	static vec2i dummy(1.0f, 1.0f);
+	return dummy;
+}
+
 CVReturn etDisplayLinkOutputCallback(CVDisplayLinkRef, const CVTimeStamp*, const CVTimeStamp*,
 	CVOptionFlags, CVOptionFlags*, void* displayLinkContext)
 {
