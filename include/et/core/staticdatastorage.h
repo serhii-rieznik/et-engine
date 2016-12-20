@@ -14,6 +14,7 @@ namespace et
 	template <typename T, size_t count>
 	class StaticDataStorage : public ContainerBase<T>
 	{
+	static_assert(count > 0, "Invalid StaticDataStorage size");
 	public:
 		StaticDataStorage()
 			{ }

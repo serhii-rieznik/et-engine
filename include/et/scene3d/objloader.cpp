@@ -132,7 +132,7 @@ void getLine(std::ifstream& stream, std::string& line);
  * OBJLoader
  */
 
-OBJLoader::OBJLoader(const std::string& inFile, size_t options) :
+OBJLoader::OBJLoader(const std::string& inFile, uint32_t options) :
 	inputFileName(application().resolveFileName(inFile).c_str()),
 	inputFile(inputFileName.c_str()), _loadOptions(options)
 {
@@ -268,21 +268,21 @@ void OBJLoader::loadData(ObjectsCache& cache)
 					}
 					else if (iValue < 0)
 					{
-						size_t szValue = static_cast<size_t>(-iValue);
+						uint32_t szValue = static_cast<uint32_t>(-iValue);
 						if (i == 0)
 						{
 							ET_ASSERT(szValue <= _vertices.size());
-							face.vertexLinks[face.vertexLinksCount][i] = _vertices.size() - szValue;
+							face.vertexLinks[face.vertexLinksCount][i] = static_cast<uint32_t>(_vertices.size() - szValue);
 						}
 						else if (i == 1)
 						{
 							ET_ASSERT(szValue <= _texCoords.size());
-							face.vertexLinks[face.vertexLinksCount][i] = _texCoords.size() - szValue;
+							face.vertexLinks[face.vertexLinksCount][i] = static_cast<uint32_t>(_texCoords.size() - szValue);
 						}
 						else if (i == 2)
 						{
 							ET_ASSERT(szValue <= _normals.size());
-							face.vertexLinks[face.vertexLinksCount][i] = _normals.size() - szValue;
+							face.vertexLinks[face.vertexLinksCount][i] = static_cast<uint32_t>(_normals.size() - szValue);
 						}
 					}
 					else
@@ -800,18 +800,18 @@ void OBJLoader::processLoadedData()
 	
 	for (auto group : _groups)
 	{
-		size_t startIndex = index;
+		uint32_t startIndex = index;
 		
 		vec3 center(0.0f);
 		
 		if (_loadOptions & Option_CalculateTransforms)
 		{
-			size_t vertexCount = 0;
+			uint32_t vertexCount = 0;
 			
 			for (auto face : group.faces)
 			{
-				size_t numTriangles = face.vertexLinksCount - 2;
-				for (size_t i = 1; i <= numTriangles; ++i)
+				uint32_t numTriangles = face.vertexLinksCount - 2;
+				for (uint32_t i = 1; i <= numTriangles; ++i)
 				{
 					center += _vertices[face.vertexLinks[0][0]];
 					center += _vertices[face.vertexLinks[i][0]];
@@ -826,8 +826,8 @@ void OBJLoader::processLoadedData()
 		
 		for (auto face : group.faces)
 		{
-			size_t numTriangles = face.vertexLinksCount - 2;
-			for (size_t i = 1; i <= numTriangles; ++i)
+			uint32_t numTriangles = face.vertexLinksCount - 2;
+			for (uint32_t i = 1; i <= numTriangles; ++i)
 			{
 				PUSH_VERTEX(face.vertexLinks[0], center);
 				PUSH_VERTEX(face.vertexLinks[i], center);

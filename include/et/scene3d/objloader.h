@@ -29,7 +29,7 @@ public:
 	};
 
 public:
-	OBJLoader(const std::string& inFile, size_t options);
+	OBJLoader(const std::string& inFile, uint32_t options);
 	~OBJLoader();
 
 	s3d::ElementContainer::Pointer load(RenderInterface::Pointer, s3d::Storage&, ObjectsCache&) override;
@@ -53,14 +53,15 @@ private:
 
 	struct OBJFace
 	{
-		enum : size_t
+		enum : uint32_t
 		{
 			MaxVertexLinks = 16,
 			MaxVertexSize = 4
 		};
-		using VertexLink = StaticDataStorage<size_t, MaxVertexSize>;
-
-		StaticDataStorage<VertexLink, MaxVertexLinks> vertexLinks;
+		using VertexLink = StaticDataStorage<uint32_t, MaxVertexSize>;
+		using VertexLinks = StaticDataStorage<VertexLink, MaxVertexLinks>;
+		
+		VertexLinks vertexLinks;
 		uint32_t vertexLinksCount = 0;
 		uint32_t smoothingGroupIndex = 0;
 	};
@@ -73,19 +74,22 @@ private:
 
 		OBJGroup()
 		{
-			faces.reserve(0xffff);
+			log::info("OBJGroup()");
+			faces.reserve(0xff);
 		}
 
 		OBJGroup(const std::string& aName) :
 			name(aName)
 		{
-			faces.reserve(0x00ff);
+			log::info("OBJGroup(%s)", aName.c_str());
+			faces.reserve(0xff);
 		}
 
 		OBJGroup(const std::string& aName, const std::string& aMat) :
 			name(aName), material(aMat)
 		{
-			faces.reserve(0xffff);
+			log::info("OBJGroup(%s, %s)", aName.c_str(), aMat.c_str());
+			faces.reserve(0xff);
 		}
 	};
 
@@ -118,7 +122,7 @@ private:
 	Vector<et::vec2> _texCoords;
 	Vector<OBJGroup> _groups;
 
-	size_t _loadOptions = Option_JustLoad;
+	uint32_t _loadOptions = Option_JustLoad;
 	int _lastSmoothGroup = 0;
 	int _lastGroupId = 0;
 };

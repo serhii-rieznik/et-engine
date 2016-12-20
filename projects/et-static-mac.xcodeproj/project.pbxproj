@@ -120,7 +120,6 @@
 		5CCB9C421E09C84C009FD413 /* openglviewcontroller.h in Headers */ = {isa = PBXBuildFile; fileRef = 5CCB9AD51E09C84C009FD413 /* openglviewcontroller.h */; };
 		5CCB9C451E09C84C009FD413 /* printer.h in Headers */ = {isa = PBXBuildFile; fileRef = 5CCB9AD81E09C84C009FD413 /* printer.h */; };
 		5CCB9C491E09C84C009FD413 /* social.h in Headers */ = {isa = PBXBuildFile; fileRef = 5CCB9ADC1E09C84C009FD413 /* social.h */; };
-		5CCB9C4E1E09C84C009FD413 /* context.win.h in Headers */ = {isa = PBXBuildFile; fileRef = 5CCB9AE21E09C84C009FD413 /* context.win.h */; };
 		5CCB9C561E09C84C009FD413 /* constantbuffer.h in Headers */ = {isa = PBXBuildFile; fileRef = 5CCB9AEC1E09C84C009FD413 /* constantbuffer.h */; };
 		5CCB9C581E09C84C009FD413 /* helpers.h in Headers */ = {isa = PBXBuildFile; fileRef = 5CCB9AEE1E09C84C009FD413 /* helpers.h */; };
 		5CCB9C5A1E09C84C009FD413 /* indexarray.h in Headers */ = {isa = PBXBuildFile; fileRef = 5CCB9AF01E09C84C009FD413 /* indexarray.h */; };
@@ -401,15 +400,6 @@
 		5CCB9ADB1E09C84C009FD413 /* rendercontext.mac.mm */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; fileEncoding = 4; path = rendercontext.mac.mm; sourceTree = "<group>"; };
 		5CCB9ADC1E09C84C009FD413 /* social.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = social.h; sourceTree = "<group>"; };
 		5CCB9ADE1E09C84C009FD413 /* tools.apple.mm */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; fileEncoding = 4; path = tools.apple.mm; sourceTree = "<group>"; };
-		5CCB9AE01E09C84C009FD413 /* application.win.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; fileEncoding = 4; path = application.win.cpp; sourceTree = "<group>"; };
-		5CCB9AE11E09C84C009FD413 /* context.win.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; fileEncoding = 4; path = context.win.cpp; sourceTree = "<group>"; };
-		5CCB9AE21E09C84C009FD413 /* context.win.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = context.win.h; sourceTree = "<group>"; };
-		5CCB9AE31E09C84C009FD413 /* input.win.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; fileEncoding = 4; path = input.win.cpp; sourceTree = "<group>"; };
-		5CCB9AE41E09C84C009FD413 /* locale.win.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; fileEncoding = 4; path = locale.win.cpp; sourceTree = "<group>"; };
-		5CCB9AE51E09C84C009FD413 /* log.win.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; fileEncoding = 4; path = log.win.cpp; sourceTree = "<group>"; };
-		5CCB9AE61E09C84C009FD413 /* memory.win.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; fileEncoding = 4; path = memory.win.cpp; sourceTree = "<group>"; };
-		5CCB9AE71E09C84C009FD413 /* rendercontext.win.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; fileEncoding = 4; path = rendercontext.win.cpp; sourceTree = "<group>"; };
-		5CCB9AE81E09C84C009FD413 /* tools.win.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; fileEncoding = 4; path = tools.win.cpp; sourceTree = "<group>"; };
 		5CCB9AEB1E09C84C009FD413 /* constantbuffer.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; fileEncoding = 4; path = constantbuffer.cpp; sourceTree = "<group>"; };
 		5CCB9AEC1E09C84C009FD413 /* constantbuffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = constantbuffer.h; sourceTree = "<group>"; };
 		5CCB9AED1E09C84C009FD413 /* helpers.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; fileEncoding = 4; path = helpers.cpp; sourceTree = "<group>"; };
@@ -808,23 +798,6 @@
 			path = "../include/et/platform-apple";
 			sourceTree = "<group>";
 		};
-		5CCB9ADF1E09C84C009FD413 /* platform-win */ = {
-			isa = PBXGroup;
-			children = (
-				5CCB9AE01E09C84C009FD413 /* application.win.cpp */,
-				5CCB9AE11E09C84C009FD413 /* context.win.cpp */,
-				5CCB9AE21E09C84C009FD413 /* context.win.h */,
-				5CCB9AE31E09C84C009FD413 /* input.win.cpp */,
-				5CCB9AE41E09C84C009FD413 /* locale.win.cpp */,
-				5CCB9AE51E09C84C009FD413 /* log.win.cpp */,
-				5CCB9AE61E09C84C009FD413 /* memory.win.cpp */,
-				5CCB9AE71E09C84C009FD413 /* rendercontext.win.cpp */,
-				5CCB9AE81E09C84C009FD413 /* tools.win.cpp */,
-			);
-			name = "platform-win";
-			path = "../include/et/platform-win";
-			sourceTree = "<group>";
-		};
 		5CCB9AE91E09C84C009FD413 /* rendering */ = {
 			isa = PBXGroup;
 			children = (
@@ -1056,7 +1029,6 @@
 				5CCB9AB61E09C84C009FD413 /* locale */,
 				5CCB9AB81E09C84C009FD413 /* platform */,
 				5CCB9ABC1E09C84C009FD413 /* platform-apple */,
-				5CCB9ADF1E09C84C009FD413 /* platform-win */,
 				5CCB9AE91E09C84C009FD413 /* rendering */,
 				5CCB9B5E1E09C84C009FD413 /* scene3d */,
 				5CCB9B7C1E09C84C009FD413 /* sound */,
@@ -1234,7 +1206,6 @@
 				5CCB9C331E09C84C009FD413 /* imagepicker.h in Headers */,
 				5CCB9C451E09C84C009FD413 /* printer.h in Headers */,
 				5CCB9BF01E09C84C009FD413 /* boundingbox.h in Headers */,
-				5CCB9C4E1E09C84C009FD413 /* context.win.h in Headers */,
 				5CCB9CA31E09C84C009FD413 /* vulkan_glslang.h in Headers */,
 				5CCB9CD51E09C84C009FD413 /* scene3d.h in Headers */,
 				5CCB9B9E1E09C84C009FD413 /* cameraorbitcontroller.h in Headers */,
@@ -1379,7 +1350,6 @@
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
-				GCC_C_LANGUAGE_STANDARD = c11;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;
@@ -1441,7 +1411,6 @@
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				GCC_C_LANGUAGE_STANDARD = c11;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_TREAT_INCOMPATIBLE_POINTER_TYPE_WARNINGS_AS_ERRORS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
@@ -1472,7 +1441,6 @@
 			buildSettings = {
 				COMBINE_HIDPI_IMAGES = YES;
 				EXECUTABLE_PREFIX = lib;
-				GCC_C_LANGUAGE_STANDARD = c11;
 				MACOSX_DEPLOYMENT_TARGET = 10.8;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -1483,7 +1451,6 @@
 			buildSettings = {
 				COMBINE_HIDPI_IMAGES = YES;
 				EXECUTABLE_PREFIX = lib;
-				GCC_C_LANGUAGE_STANDARD = c11;
 				MACOSX_DEPLOYMENT_TARGET = 10.8;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
