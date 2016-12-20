@@ -23,8 +23,6 @@ const std::string dataTypeNames[static_cast<uint32_t>(RenderingAPI::Count)][Data
 	{ "float", "float2", "float3", "float4", "float3x3", "float4x4", "int", "int2", "int3", "int4" },
 	// vulkan
 	{ "float", "vec2", "vec3", "vec4", "mat3", "mat4", "int", "ivec2", "ivec3", "ivec4" },
-	// dx12
-	{ "float", "vec2", "vec3", "vec4", "mat3", "mat4", "int", "ivec2", "ivec3", "ivec4" },
 };
 
 const std::string dataFormatNames[DataFormat_max] =
