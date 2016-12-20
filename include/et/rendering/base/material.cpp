@@ -366,7 +366,7 @@ void MaterialInstance::buildTextureSet(RenderPassClass pt)
 	const Program::Reflection& reflection = prog->reflection();
 
 	TextureSet::Description description;
-	for (const auto& i : prog->reflection().textures.fragmentTextures)
+	for (const auto& i : reflection.textures.fragmentTextures)
 	{
 		if (i.second < static_cast<uint32_t>(MaterialTexture::FirstSharedTexture))
 		{
@@ -375,7 +375,7 @@ void MaterialInstance::buildTextureSet(RenderPassClass pt)
 				description.fragmentTextures[i.second] = textures[i.second].object;
 		}
 	}
-	for (const auto& i : prog->reflection().textures.vertexTextures)
+	for (const auto& i : reflection.textures.vertexTextures)
 	{
 		if (i.second < static_cast<uint32_t>(MaterialTexture::FirstSharedTexture))
 		{
@@ -384,7 +384,7 @@ void MaterialInstance::buildTextureSet(RenderPassClass pt)
 				description.vertexTextures[i.second] = textures[i.second].object;
 		}
 	}
-	for (const auto& i : prog->reflection().textures.fragmentSamplers)
+	for (const auto& i : reflection.textures.fragmentSamplers)
 	{
 		if (i.second < static_cast<uint32_t>(MaterialTexture::FirstSharedTexture))
 		{
@@ -393,7 +393,7 @@ void MaterialInstance::buildTextureSet(RenderPassClass pt)
 				description.fragmentSamplers[i.second] = samplers[i.second].object;
 		}
 	}
-	for (const auto& i : prog->reflection().textures.vertexSamplers)
+	for (const auto& i : reflection.textures.vertexSamplers)
 	{
 		if (i.second < static_cast<uint32_t>(MaterialTexture::FirstSharedTexture))
 		{

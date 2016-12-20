@@ -15,9 +15,9 @@ CameraOrbitController::CameraOrbitController(Camera::Pointer cam, bool connectIn
 {
 	camera()->lockUpVector(unitY);
 	
-	_anglesDistanceAnimator.valueUpdated.connect([this](const vec3& p)
+	_anglesDistanceAnimator.valueUpdated.connect([this](const vec3&)
 		{ _shouldRebuildMatrix = true; });
-	_anglesDistanceAnimator.valueUpdated.connect([this](const vec3& p)
+	_anglesDistanceAnimator.valueUpdated.connect([this](const vec3&)
 		{ _shouldRebuildMatrix = true; });
 
 	_gestures.drag.connect([this](const GesturesRecognizer::DragGesture& drag)

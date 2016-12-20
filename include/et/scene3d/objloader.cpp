@@ -806,7 +806,7 @@ void OBJLoader::processLoadedData()
 		
 		if (_loadOptions & Option_CalculateTransforms)
 		{
-			size_t totalVertices = 0;
+			size_t vertexCount = 0;
 			
 			for (auto face : group.faces)
 			{
@@ -816,12 +816,12 @@ void OBJLoader::processLoadedData()
 					center += _vertices[face.vertexLinks[0][0]];
 					center += _vertices[face.vertexLinks[i][0]];
 					center += _vertices[face.vertexLinks[i+1][0]];
-					totalVertices += 3;
+					vertexCount += 3;
 				}
 			}
 			
-			if (totalVertices > 0.0f)
-				center /= static_cast<float>(totalVertices);
+			if (vertexCount > 0.0f)
+				center /= static_cast<float>(vertexCount);
 		}
 		
 		for (auto face : group.faces)

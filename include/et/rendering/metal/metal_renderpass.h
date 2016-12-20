@@ -24,7 +24,7 @@ public:
 	~MetalRenderPass();
 
 	void begin() override;
-	void pushRenderBatch(RenderBatch::Pointer) override;
+	void pushRenderBatch(const RenderBatch::Pointer&) override;
 	void end() override;
 
 private:

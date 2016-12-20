@@ -33,15 +33,15 @@ public:
 CVReturn etDisplayLinkOutputCallback(CVDisplayLinkRef, const CVTimeStamp*, const CVTimeStamp*,
 	CVOptionFlags, CVOptionFlags*, void* displayLinkContext);
 
-RenderContext::RenderContext(const RenderContextParameters& inParams, Application* app)
+RenderContext::RenderContext(const RenderContextParameters& inParams, Application* application)
 	: _params(inParams)
 {
 	ET_PIMPL_INIT(RenderContext)
 
-	application().initContext();
-	const auto& ctx = application().context();
+	application->initContext();
+	const auto& ctx = application->context();
 
-	if (application().parameters().renderingAPI == RenderingAPI::Metal)
+	if (application->parameters().renderingAPI == RenderingAPI::Metal)
 	{
 		_renderer = MetalRenderer::Pointer::create(this);
 	}
@@ -55,16 +55,19 @@ RenderContext::RenderContext(const RenderContextParameters& inParams, Applicatio
 	NSWindow* mainWindow = (__bridge NSWindow*)(ctx.objects[0]);
 	NSView* mainView = nil;
 
-	if (application().parameters().renderingAPI == RenderingAPI::Metal)
+	if (application->parameters().renderingAPI == RenderingAPI::Metal)
 	{
 		mainView = (__bridge NSView*)(ctx.objects[2]);
 		mainView.layer = (__bridge CAMetalLayer*)(ctx.objects[4]);
 		[mainView setWantsLayer:YES];
 	}
 
+	/*
+	 * TODO : replace/remove size variable
     NSRect backingRect = [mainView convertRectToBacking:NSMakeRect(0.0f, 0.0f, mainView.bounds.size.width, mainView.bounds.size.height)];
     _size.x = static_cast<int>(backingRect.size.width);
     _size.y = static_cast<int>(backingRect.size.height);
+	// */
     
     [mainWindow makeKeyAndOrderFront:[NSApplication sharedApplication]];
 	[mainWindow orderFrontRegardless];
@@ -141,9 +144,9 @@ void RenderContext::popRenderingContext()
 	ET_FAIL("Not implemented")
 }
 
-void RenderContext::performResizing(const vec2i& newSize)
+void RenderContext::performResizing(const vec2i&)
 {
-	_size = newSize;
+	ET_FAIL("Not implemented");
 }
 
 CVReturn etDisplayLinkOutputCallback(CVDisplayLinkRef, const CVTimeStamp*, const CVTimeStamp*,

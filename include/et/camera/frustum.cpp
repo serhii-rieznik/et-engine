@@ -19,7 +19,7 @@ void Frustum::build(const mat4& invVP)
 	vec3 c001 = invVP * vec3(-1.0f, -1.0f,  1.0f);
 	vec3 c101 = invVP * vec3( 1.0f, -1.0f,  1.0f);
 	vec3 c011 = invVP * vec3(-1.0f,  1.0f,  1.0f);
-	vec3 c111 = invVP * vec3( 1.0f,  1.0f,  1.0f);
+	// vec3 c111 = invVP * vec3( 1.0f,  1.0f,  1.0f); seems to be unused
 	planes[0] = plane(triangle(c000, c010, c100));
 	planes[1] = plane(triangle(c001, c101, c011));
 	planes[2] = plane(triangle(c000, c100, c001));

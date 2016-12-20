@@ -19,7 +19,7 @@ public:
 };
     
 MetalTexture::MetalTexture(MetalState& metal, TextureDescription::Pointer desc)
-    : Texture(desc)
+    : Texture(desc->desc())
 {
     ET_PIMPL_INIT(MetalTexture);
     
@@ -53,13 +53,13 @@ void MetalTexture::setImageData(const BinaryDataStorage& data)
     const char* aDataPtr = data.binary();
 	ET_ASSERT(aDataPtr != nullptr);
 
-    if (description()->target == TextureTarget::Texture_2D)
+    if (description().target == TextureTarget::Texture_2D)
     {
-        for (uint32_t level = 0; level < description()->mipMapCount; ++level)
+        for (uint32_t level = 0; level < description().mipMapCount; ++level)
         {
-            vec2i mipSize = description()->sizeForMipLevel(level);
-            size_t mipOffset = description()->dataOffsetForMipLevel(level, 0);
-            size_t mipDataSize = description()->dataSizeForMipLevel(level);
+            vec2i mipSize = description().sizeForMipLevel(level);
+            size_t mipOffset = description().dataOffsetForMipLevel(level, 0);
+            size_t mipDataSize = description().dataSizeForMipLevel(level);
             MTLRegion region = MTLRegionMake2D(0, 0, mipSize.x, mipSize.y);
             const char* ptr = (aDataPtr && (mipOffset < aDataSize)) ? (aDataPtr + mipOffset) : nullptr;
             
@@ -68,10 +68,15 @@ void MetalTexture::setImageData(const BinaryDataStorage& data)
                 withBytes:ptr bytesPerRow:mipDataSize / mipSize.y bytesPerImage:mipDataSize];
         }
     }
-    else if (description()->target == TextureTarget::Texture_Cube)
+    else if (description().target == TextureTarget::Texture_Cube)
     {
         // TODO : implement
     }
+}
+
+void MetalTexture::updateRegion(const vec2i& pos, const vec2i& size, const BinaryDataStorage&)
+{
+	ET_FAIL("Not implemented");
 }
 
 }

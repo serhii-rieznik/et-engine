@@ -10,7 +10,7 @@
 using namespace et;
 
 Sequence::Sequence(float duration, float from, float to, Curve curve) : 
-	_duration(duration), _from(from), _to(to), _dt(to - from), _curve(curve)
+	_curve(curve), _duration(duration), _from(from), _to(to), _dt(to - from)
 {
 
 }

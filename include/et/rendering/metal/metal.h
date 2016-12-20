@@ -12,7 +12,7 @@
 #include <Metal/Metal.h>
 #include <MetalKit/MetalKit.h>
 #include <QuartzCore/CAMetalLayer.h>
-#include <et/rendering/rendering.h>
+#include <et/rendering/base/rendering.h>
 #include <et/platform-apple/objc.h>
 
 namespace et
@@ -29,6 +29,11 @@ struct MetalState
 	id<CAMetalDrawable> mainDrawable = nil;
 
 	id<MTLTexture> defaultDepthBuffer = nil;
+};
+
+struct MetalNativeBuffer
+{
+	id<MTLBuffer> buffer = nil;
 };
     
 struct MetalNativeProgram
@@ -60,53 +65,6 @@ struct MetalNativeSampler
 	id<MTLSamplerState> sampler = nil;
 };
 
-class MetalNativeBuffer : public Shared
-{
-public:
-	ET_DECLARE_POINTER(MetalNativeBuffer);
-
-public:
-	MetalNativeBuffer() = default;
-	MetalNativeBuffer(const MetalNativeBuffer&) = delete;
-	MetalNativeBuffer(MetalNativeBuffer&&) = delete;
-	MetalNativeBuffer& operator = (const MetalNativeBuffer&) = delete;
-
-    MetalNativeBuffer(MetalState& metal, const void* data, uint32_t size)
-	{
-		construct(metal, data, size);
-	}
-
-	MetalNativeBuffer(MetalState& metal, uint32_t size)
-	{
-		construct(metal, size);
-	}
-
-	void construct(MetalState& metal, const void* data, uint32_t size)
-	{
-		_buffer = [metal.device newBufferWithBytes:data length:size options:MTLResourceCPUCacheModeDefaultCache];
-	}
-
-	void construct(MetalState& metal, uint32_t size)
-	{
-		_buffer = [metal.device newBufferWithLength:size options:MTLResourceStorageModeShared];
-	}
-
-    ~MetalNativeBuffer()
-        { ET_OBJC_RELEASE(_buffer); }
-    
-    id<MTLBuffer> buffer() const
-        { return _buffer; }
-
-	uint8_t* bufferContents() const
-		{ return reinterpret_cast<uint8_t*>([_buffer contents]); }
-
-	bool valid() const
-		{ return _buffer != nil; }
-    
-private:
-    id<MTLBuffer> _buffer = nil;
-};
-    
 namespace metal
 {
     MTLTextureType textureTargetValue(TextureTarget, uint32_t samples);

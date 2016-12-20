@@ -31,21 +31,20 @@ public:
 	void begin() override;
 	void present() override;
 
+	void resize(const vec2i&) override;
+
 	RenderPass::Pointer allocateRenderPass(const RenderPass::ConstructionInfo&) override;
 	void submitRenderPass(RenderPass::Pointer) override;
 
 	/*
-	 * Vertex buffers
+	 * Buffer
 	 */
-	DataBuffer::Pointer createDataBuffer(const std::string&, uint32_t size) override;
-	DataBuffer::Pointer createDataBuffer(const std::string&, const BinaryDataStorage&) override;
-	IndexBuffer::Pointer createIndexBuffer(const std::string&, IndexArray::Pointer, BufferDrawType) override;
-	VertexBuffer::Pointer createVertexBuffer(const std::string&, VertexStorage::Pointer, BufferDrawType) override;
-
+	Buffer::Pointer createBuffer(const std::string&, const Buffer::Description& desc) override;
 	/*
 	 * Textures
 	 */
 	Texture::Pointer createTexture(TextureDescription::Pointer) override;
+	TextureSet::Pointer createTextureSet(const TextureSet::Description&) override;
 	
 	/*
 	 * Programs
@@ -55,7 +54,8 @@ public:
 	/*
 	 * Pipeline state
 	 */
-	PipelineState::Pointer acquirePipelineState(RenderPass::Pointer, Material::Pointer, VertexStream::Pointer) override;
+	PipelineState::Pointer acquirePipelineState(const RenderPass::Pointer&,
+		const Material::Pointer&, const VertexStream::Pointer&) override;
 
 	/*
 	 * Sampler

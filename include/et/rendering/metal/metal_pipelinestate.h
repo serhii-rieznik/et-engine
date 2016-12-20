@@ -41,8 +41,6 @@ namespace et
 
 	private:
 		void buildRequiredLayout(VertexDeclaration& decl);
-		void uploadObjectVariable(const String& name, const void* ptr, uint32_t size);
-		void uploadMaterialVariable(const String& name, const void* ptr, uint32_t size);
 		void buildReflection();
 
 	private:

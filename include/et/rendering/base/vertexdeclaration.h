@@ -47,7 +47,7 @@ namespace et
 		DataFormat dataFormat() const
 			{ return _dataFormat; }
 
-		void setStride(int s)
+		void setStride(uint32_t s)
 			{ _stride = s; }
 
 		bool operator < (const VertexElement& r) const

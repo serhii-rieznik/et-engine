@@ -9,10 +9,8 @@
 #include <et/rendering/metal/metal.h>
 #include <et/rendering/metal/metal_renderer.h>
 #include <et/rendering/metal/metal_renderpass.h>
+#include <et/rendering/metal/metal_buffer.h>
 #include <et/rendering/metal/metal_texture.h>
-#include <et/rendering/metal/metal_vertexbuffer.h>
-#include <et/rendering/metal/metal_indexbuffer.h>
-#include <et/rendering/metal/metal_databuffer.h>
 #include <et/rendering/metal/metal_program.h>
 #include <et/rendering/metal/metal_pipelinestate.h>
 
@@ -27,7 +25,6 @@ class MetalRendererPrivate
 public:
 	MetalState metal;
 	PipelineStateCache cache;
-	Map<uint64_t, Sampler::Pointer> samplersCache;
 };
 
 MetalRenderer::MetalRenderer(RenderContext* rc)
@@ -55,16 +52,14 @@ void MetalRenderer::init(const RenderContextParameters& params)
 	application().context().objects[3] = (__bridge void*)(_private->metal.device);
 	application().context().objects[4] = (__bridge void*)_private->metal.layer;
 
-	sharedVariables().init(this);
-	sharedConstBuffer().init(this);
+	sharedConstantBuffer().init(this);
 	sharedMaterialLibrary().init(this);
 }
 
 void MetalRenderer::shutdown()
 {
 	sharedMaterialLibrary().shutdown();
-	sharedConstBuffer().shutdown();
-	sharedVariables().shutdown();
+	sharedConstantBuffer().shutdown();
 
 	ET_OBJC_RELEASE(_private->metal.queue);
 	ET_OBJC_RELEASE(_private->metal.device);
@@ -93,8 +88,6 @@ void MetalRenderer::begin()
 
 	mtl.mainCommandBuffer = [mtl.queue commandBuffer];
 	ET_ASSERT(mtl.mainCommandBuffer != nil);
-
-	sharedConstBuffer().reset();
 }
 
 void MetalRenderer::present()
@@ -111,7 +104,7 @@ RenderPass::Pointer MetalRenderer::allocateRenderPass(const RenderPass::Construc
 	return result;
 }
 
-void MetalRenderer::submitRenderPass(RenderPass::Pointer in_pass)
+void MetalRenderer::submitRenderPass(RenderPass::Pointer)
 {
 	
 }
@@ -119,24 +112,9 @@ void MetalRenderer::submitRenderPass(RenderPass::Pointer in_pass)
 /*
  * Buffers
  */
-DataBuffer::Pointer MetalRenderer::createDataBuffer(const std::string& name, uint32_t size)
+Buffer::Pointer MetalRenderer::createBuffer(const std::string& name, const Buffer::Description& desc)
 {
-	return MetalDataBuffer::Pointer::create(_private->metal, size);
-}
-
-DataBuffer::Pointer MetalRenderer::createDataBuffer(const std::string& name, const BinaryDataStorage& data)
-{
-	return MetalDataBuffer::Pointer::create(_private->metal, data);
-}
-
-VertexBuffer::Pointer MetalRenderer::createVertexBuffer(const std::string& name, VertexStorage::Pointer vs, BufferDrawType dt)
-{
-	return MetalVertexBuffer::Pointer::create(_private->metal, vs->declaration(), vs->data(), dt, name);
-}
-
-IndexBuffer::Pointer MetalRenderer::createIndexBuffer(const std::string& name, IndexArray::Pointer ia, BufferDrawType dt)
-{
-    return MetalIndexBuffer::Pointer::create(_private->metal, ia, dt, name);
+	return MetalBuffer::Pointer::create(_private->metal, desc);
 }
 
 /*
@@ -145,6 +123,11 @@ IndexBuffer::Pointer MetalRenderer::createIndexBuffer(const std::string& name, I
 Texture::Pointer MetalRenderer::createTexture(TextureDescription::Pointer desc)
 {
     return MetalTexture::Pointer::create(_private->metal, desc);
+}
+
+TextureSet::Pointer MetalRenderer::createTextureSet(const TextureSet::Description&)
+{
+	return TextureSet::Pointer();
 }
 
 /*
@@ -160,9 +143,13 @@ Program::Pointer MetalRenderer::createProgram(const std::string& source)
 /*
  * Pipeline state
  */
-PipelineState::Pointer MetalRenderer::acquirePipelineState(RenderPass::Pointer pass, Material::Pointer mtl,
-    VertexStream::Pointer vs)
+PipelineState::Pointer MetalRenderer::acquirePipelineState(const RenderPass::Pointer&,
+	const Material::Pointer&, const VertexStream::Pointer&)
 {
+	return PipelineState::Pointer();
+	/*
+	 * TODO : rewrite
+	 *
 	PipelineState::Pointer result = _private->cache.find(vs->vertexBuffer()->declaration(),
 		mtl->program(), mtl->depthState(), mtl->blendState(), mtl->cullMode(), TextureFormat::RGBA8,
 		vs->indexBuffer()->primitiveType());
@@ -183,6 +170,7 @@ PipelineState::Pointer MetalRenderer::acquirePipelineState(RenderPass::Pointer p
 	}
 
 	return result;
+	// */
 }
 
 /*
@@ -190,13 +178,12 @@ PipelineState::Pointer MetalRenderer::acquirePipelineState(RenderPass::Pointer p
  */
 Sampler::Pointer MetalRenderer::createSampler(const Sampler::Description& desc)
 {
-	auto i = _private->samplersCache.find(desc.hash);
-	if (i != _private->samplersCache.end())
-		return i->second;
+	return MetalSampler::Pointer::create(_private->metal, desc);
+}
 
-	MetalSampler::Pointer smp = MetalSampler::Pointer::create(_private->metal, desc);
-	_private->samplersCache.emplace(desc.hash, smp);
-	return smp;
+void MetalRenderer::resize(const vec2i&)
+{
+	ET_FAIL("Not implemented");
 }
 
 }
