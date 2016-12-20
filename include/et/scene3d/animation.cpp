@@ -15,7 +15,7 @@ Animation::Animation()
 {
 }
 
-Animation::Animation(Dictionary stream)
+Animation::Animation(Dictionary)
 {
 }
 

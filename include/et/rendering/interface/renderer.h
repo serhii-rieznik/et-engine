@@ -56,7 +56,7 @@ public:
 	/*
 	 * Buffers
 	 */
-	virtual Buffer::Pointer createBuffer(const Buffer::Description&) = 0;
+	virtual Buffer::Pointer createBuffer(const std::string&, const Buffer::Description&) = 0;
 
 	Buffer::Pointer createDataBuffer(const std::string&, uint32_t size);
 	Buffer::Pointer createDataBuffer(const std::string&, const BinaryDataStorage&);
@@ -128,16 +128,18 @@ inline Texture::Pointer RenderInterface::defaultTexture()
 	if (_defaultTexture.invalid())
 	{
 		const uint32_t colors[] = { 0xFF000000, 0xFFFFFFFF };
-
+		uint32_t numColors = static_cast<uint32_t>(sizeof(colors) / sizeof(colors[0]));
+		
 		TextureDescription::Pointer desc = TextureDescription::Pointer::create();
 		desc->size = vec2i(16);
 		desc->format = TextureFormat::RGBA8;
-		desc->data.resize(4 * desc->size.square());
+		desc->data.resize(4 * static_cast<uint32_t>(desc->size.square()));
 		
 		uint32_t* data = reinterpret_cast<uint32_t*>(desc->data.data());
-		for (int p = 0, e = desc->size.square(); p < e; ++p)
+		for (uint32_t p = 0, e = static_cast<uint32_t>(desc->size.square()); p < e; ++p)
 		{
-			uint32_t colorIndex = ((p / desc->size.x) + (p % desc->size.x)) % (sizeof(colors) / sizeof(colors[0]));
+			uint32_t ux = static_cast<uint32_t>(desc->size.x);
+			uint32_t colorIndex = ((p / ux) + (p % ux)) % numColors;
 			data[p] = colors[colorIndex];
 		}
 
@@ -179,7 +181,7 @@ inline Buffer::Pointer RenderInterface::createDataBuffer(const std::string& name
 	desc.size = size;
 	desc.location = Buffer::Location::Host;
 	desc.usage = Buffer::Usage::Constant;
-	return createBuffer(desc);
+	return createBuffer(name, desc);
 }
 
 inline Buffer::Pointer RenderInterface::createDataBuffer(const std::string& name, const BinaryDataStorage& data)
@@ -189,7 +191,7 @@ inline Buffer::Pointer RenderInterface::createDataBuffer(const std::string& name
 	desc.location = Buffer::Location::Host;
 	desc.usage = Buffer::Usage::Constant;
 	desc.initialData = BinaryDataStorage(data.data(), data.size());
-	return createBuffer(desc);
+	return createBuffer(name, desc);
 }
 
 inline Buffer::Pointer RenderInterface::createVertexBuffer(const std::string& name, const VertexStorage::Pointer& vs, Buffer::Location location)
@@ -199,7 +201,7 @@ inline Buffer::Pointer RenderInterface::createVertexBuffer(const std::string& na
 	desc.location = location;
 	desc.usage = Buffer::Usage::Vertex;
 	desc.initialData = BinaryDataStorage(vs->data().data(), vs->data().size());
-	return createBuffer(desc);
+	return createBuffer(name, desc);
 }
 
 inline Buffer::Pointer RenderInterface::createIndexBuffer(const std::string& name, const IndexArray::Pointer& ia , Buffer::Location location)
@@ -209,7 +211,7 @@ inline Buffer::Pointer RenderInterface::createIndexBuffer(const std::string& nam
 	desc.location = location;
 	desc.usage = Buffer::Usage::Index;
 	desc.initialData = BinaryDataStorage(ia->data(), ia->dataSize());
-	return createBuffer(desc);
+	return createBuffer(name, desc);
 }
 
 }

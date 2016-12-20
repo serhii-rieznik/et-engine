@@ -8,10 +8,9 @@
 #include <et/rendering/metal/metal.h>
 #include <et/rendering/metal/metal_renderer.h>
 #include <et/rendering/metal/metal_renderpass.h>
-#include <et/rendering/metal/metal_pipelinestate.h>
-#include <et/rendering/metal/metal_vertexbuffer.h>
-#include <et/rendering/metal/metal_indexbuffer.h>
+#include <et/rendering/metal/metal_buffer.h>
 #include <et/rendering/metal/metal_texture.h>
+#include <et/rendering/metal/metal_pipelinestate.h>
 
 namespace et
 {
@@ -29,18 +28,20 @@ public:
 };
 
 MetalRenderPass::MetalRenderPass(MetalRenderer* renderer, MetalState& state,
-    const RenderPass::ConstructionInfo& info) : RenderPass(info)
+    const RenderPass::ConstructionInfo& info) : RenderPass(renderer, info)
 {
 	ET_PIMPL_INIT(MetalRenderPass, state)
     _private->renderer = renderer;
 
+	const vec4& cl0 = info.color[0].clearValue;
+
 	_private->descriptor = ET_OBJC_RETAIN([MTLRenderPassDescriptor renderPassDescriptor]);
 	_private->descriptor.colorAttachments[0].loadAction = MTLLoadActionClear;
 	_private->descriptor.colorAttachments[0].storeAction = MTLStoreActionDontCare;
-	_private->descriptor.colorAttachments[0].clearColor = MTLClearColorMake(info.target.clearColor.x, info.target.clearColor.y, info.target.clearColor.z, info.target.clearColor.w);
+	_private->descriptor.colorAttachments[0].clearColor = MTLClearColorMake(cl0.x, cl0.y, cl0.z, cl0.w);
 	_private->descriptor.depthAttachment.loadAction = MTLLoadActionClear;
 	_private->descriptor.depthAttachment.storeAction = MTLStoreActionDontCare;
-	_private->descriptor.depthAttachment.clearDepth = info.target.clearDepth;
+	_private->descriptor.depthAttachment.clearDepth = info.depth.clearValue.x;
 }
 
 MetalRenderPass::~MetalRenderPass()
@@ -58,8 +59,11 @@ void MetalRenderPass::begin()
 	_private->encoder.encoder = [_private->state.mainCommandBuffer renderCommandEncoderWithDescriptor:_private->descriptor];
 }
 
-void MetalRenderPass::pushRenderBatch(RenderBatch::Pointer batch)
+void MetalRenderPass::pushRenderBatch(const RenderBatch::Pointer&)
 {
+	/*
+	 * TODO : rewrite / update
+	 *
 	MaterialInstance::Pointer material = batch->material();
 
 	MetalPipelineState::Pointer ps = _private->renderer->acquirePipelineState(RenderPass::Pointer(this), material->base(), batch->vertexStream());
@@ -86,13 +90,12 @@ void MetalRenderPass::pushRenderBatch(RenderBatch::Pointer batch)
 	[_private->encoder.encoder drawIndexedPrimitives:metal::primitiveTypeValue(ib->primitiveType())
 		indexCount:batch->numIndexes() indexType:metal::indexArrayFormat(ib->format())
 		indexBuffer:ib->nativeBuffer().buffer() indexBufferOffset:ib->byteOffsetForIndex(batch->firstIndex())];
+	*/
 }
 
 void MetalRenderPass::end()
 {
-	_private->renderer->sharedVariables().flushBuffer();
-	_private->renderer->sharedConstBuffer().flush();
-
+	_private->renderer->sharedConstantBuffer().flush();
 	[_private->encoder.encoder endEncoding];
 	_private->encoder.encoder = nil;
 }

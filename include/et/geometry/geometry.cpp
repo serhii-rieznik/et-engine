@@ -42,7 +42,7 @@ float et::signNoZero(float s)
 
 uint32_t et::randomInteger(uint32_t limit)
 {
-	return rand() % limit;
+	return static_cast<uint32_t>(rand()) % limit;
 }
 
 vec3 et::randVector(float sx, float sy, float sz)

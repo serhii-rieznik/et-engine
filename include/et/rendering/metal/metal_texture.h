@@ -27,6 +27,7 @@ public:
 	const MetalNativeTexture& nativeTexture() const;
 	
 	void setImageData(const BinaryDataStorage&) override;
+	void updateRegion(const vec2i& pos, const vec2i& size, const BinaryDataStorage&) override;
 
 private:
 	ET_DECLARE_PIMPL(MetalTexture, 64);

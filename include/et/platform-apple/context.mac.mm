@@ -59,43 +59,43 @@
     et::vec2 np(2.0f * p.x / static_cast<float>(ownFrame.size.width) - 1.0f,
             1.0f - 2.0f * p.y / static_cast<float>(ownFrame.size.height));
     
-    return et::PointerInputInfo(type, p, np, et::vec2(0.0f), static_cast<size_t>([theEvent eventNumber]),
-        et::mainTimerPool()->actualTime(), et::PointerOrigin_Any);
+    return et::PointerInputInfo(type, p, np, et::vec2(0.0f), static_cast<uint32_t>([theEvent eventNumber]),
+        et::mainTimerPool()->actualTime(), et::PointerOrigin::Any);
 }
 
 - (void)mouseDown:(NSEvent*)theEvent
 {
-    pointerInputSource.pointerPressed([self mousePointerInfo:theEvent withType:et::PointerType_General]);
+    pointerInputSource.pointerPressed([self mousePointerInfo:theEvent withType:et::PointerTypeMask::General]);
 }
 
 - (void)mouseMoved:(NSEvent*)theEvent
 {
-    pointerInputSource.pointerMoved([self mousePointerInfo:theEvent withType:et::PointerType_None]);
+    pointerInputSource.pointerMoved([self mousePointerInfo:theEvent withType:0]);
 }
 
 - (void)mouseDragged:(NSEvent*)theEvent
 {
-    pointerInputSource.pointerMoved([self mousePointerInfo:theEvent withType:et::PointerType_General]);
+    pointerInputSource.pointerMoved([self mousePointerInfo:theEvent withType:et::PointerTypeMask::General]);
 }
 
 - (void)mouseUp:(NSEvent*)theEvent
 {
-    pointerInputSource.pointerReleased([self mousePointerInfo:theEvent withType:et::PointerType_General]);
+    pointerInputSource.pointerReleased([self mousePointerInfo:theEvent withType:et::PointerTypeMask::General]);
 }
 
 - (void)rightMouseDown:(NSEvent*)theEvent
 {
-    pointerInputSource.pointerPressed([self mousePointerInfo:theEvent withType:et::PointerType_RightButton]);
+    pointerInputSource.pointerPressed([self mousePointerInfo:theEvent withType:et::PointerTypeMask::RightButton]);
 }
 
 - (void)rightMouseDragged:(NSEvent*)theEvent
 {
-    pointerInputSource.pointerMoved([self mousePointerInfo:theEvent withType:et::PointerType_RightButton]);
+    pointerInputSource.pointerMoved([self mousePointerInfo:theEvent withType:et::PointerTypeMask::RightButton]);
 }
 
 - (void)rightMouseUp:(NSEvent*)theEvent
 {
-    pointerInputSource.pointerReleased([self mousePointerInfo:theEvent withType:et::PointerType_RightButton]);
+    pointerInputSource.pointerReleased([self mousePointerInfo:theEvent withType:et::PointerTypeMask::RightButton]);
 }
 
 - (void)scrollWheel:(NSEvent*)theEvent
@@ -113,10 +113,10 @@
                 static_cast<float>([theEvent deltaY] / ownFrame.size.height));
     
     et::PointerOrigin origin = (([theEvent momentumPhase] != NSEventPhaseNone) || ([theEvent phase] != NSEventPhaseNone)) ?
-        et::PointerOrigin_Trackpad : et::PointerOrigin_Mouse;
+        et::PointerOrigin::Trackpad : et::PointerOrigin::Mouse;
     
-    pointerInputSource.pointerScrolled(et::PointerInputInfo(et::PointerType_General, p, np,
-        scroll, [theEvent hash], static_cast<float>([theEvent timestamp]), origin));
+    pointerInputSource.pointerScrolled(et::PointerInputInfo(et::PointerTypeMask::General, p, np,
+        scroll, static_cast<uint32_t>([theEvent hash]), static_cast<float>([theEvent timestamp]), origin));
 }
 
 - (void)magnifyWithEvent:(NSEvent*)event
@@ -229,7 +229,7 @@
 namespace et
 {
     
-PlatformDependentContext ApplicationContextFactoryOSX::createContextWithOptions(RenderingAPI api, ContextOptions& options)
+PlatformDependentContext ApplicationContextFactoryOSX::createContextWithOptions(RenderingAPI, ContextOptions& options)
 {
     NSUInteger windowMask = NSBorderlessWindowMask | NSClosableWindowMask;
     

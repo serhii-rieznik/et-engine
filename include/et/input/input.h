@@ -32,6 +32,7 @@ enum PointerTypeMask : uint32_t
 	RightButton = 0x02,
 	MiddleButton = 0x04,
 };
+using PointerType = uint32_t;
 
 enum class PointerOrigin : uint32_t
 {
@@ -41,7 +42,13 @@ enum class PointerOrigin : uint32_t
 	Any
 };
 
-using PointerType = uint32_t;
+enum GestureTypeMask : uint32_t
+{
+	GestureTypeMask_Zoom = 0x01,
+	GestureTypeMask_Rotate = 0x02,
+	GestureTypeMask_Swipe = 0x04,
+	GestureTypeMask_Shake = 0x08
+};
 
 struct PointerInputInfo
 {
@@ -85,14 +92,6 @@ struct PointerInputInfo
 		tag = p.tag;
 		return *this;
 	}
-};
-
-enum GestureTypeMask
-{
-	GestureTypeMask_Zoom = 0x01,
-	GestureTypeMask_Rotate = 0x02,
-	GestureTypeMask_Swipe = 0x04,
-	GestureTypeMask_Shake = 0x08
 };
 
 struct GestureInputInfo
@@ -249,17 +248,17 @@ protected:
 	void connectInputEvents();
 
 protected:
-	virtual void onPointerPressed(et::PointerInputInfo) {}
-	virtual void onPointerMoved(et::PointerInputInfo) {}
-	virtual void onPointerReleased(et::PointerInputInfo) {}
-	virtual void onPointerCancelled(et::PointerInputInfo) {}
-	virtual void onPointerScrolled(et::PointerInputInfo) {}
+	virtual void onPointerPressed(PointerInputInfo) {}
+	virtual void onPointerMoved(PointerInputInfo) {}
+	virtual void onPointerReleased(PointerInputInfo) {}
+	virtual void onPointerCancelled(PointerInputInfo) {}
+	virtual void onPointerScrolled(PointerInputInfo) {}
 
 	virtual void onKeyPressed(uint32_t) {}
 	virtual void onCharactersEntered(std::string) {}
 	virtual void onKeyReleased(uint32_t) {}
 
-	virtual void onGesturePerformed(et::GestureInputInfo) {}
+	virtual void onGesturePerformed(GestureInputInfo) {}
 };
 
 Input& input();

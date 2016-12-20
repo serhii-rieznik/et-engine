@@ -311,6 +311,7 @@ void Application::enableRemoteNotifications()
 - (void)onQuit:(id)sender
 {
 	et::application().quit(0);
+	(void)sender;
 }
 
 @end

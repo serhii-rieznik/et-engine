@@ -286,7 +286,7 @@ namespace et
 			
 			if (atomically)
 			{
-				int64_t hash = std::time(nullptr) ^ reinterpret_cast<int64_t>(&fileName);
+				uint64_t hash = static_cast<uint64_t>(std::time(nullptr)) ^ reinterpret_cast<uint64_t>(&fileName);
 				targetFileName += intToStr(hash ^ 0xdeadbeefaaaaaaaa);
 			}
 

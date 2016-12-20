@@ -417,7 +417,7 @@ MemoryChunk::MemoryChunk(uint32_t capacity) :
 #if (ET_PLATFORM_APPLE)
 
 	void* allocatedPtr = nullptr;
-	posix_memalign(&allocatedPtr, minimumAllocationSize, sizeToAllocate);
+	posix_memalign(&allocatedPtr, minimumAllocationSize, capacity);
 	allocatedMemoryBegin = static_cast<char*>(allocatedPtr);
 
 #elif (ET_PLATFORM_WIN)
@@ -432,7 +432,7 @@ MemoryChunk::MemoryChunk(uint32_t capacity) :
 
 	if (allocatedMemoryBegin == nullptr)
 	{
-		ET_FAIL_FMT("Failed to allocate %llu bytes (%u requested + %u info)", totalSize, capacity, actualDataOffset);
+		ET_FAIL_FMT("Failed to allocate %u bytes (%u requested + %u info)", totalSize, capacity, actualDataOffset);
 	}
 
 	actualDataMemory = allocatedMemoryBegin + actualDataOffset;

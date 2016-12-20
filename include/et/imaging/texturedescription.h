@@ -23,6 +23,8 @@ public:
 	bool load(const std::string& name);
 	bool preload(const std::string& name, bool fillWithZero);
 
+	const Texture::Description& desc() const { return *this; }
+
 public:
 	TextureDescription() = default;
 	TextureDescription(const std::string& fileName) { load(fileName); }

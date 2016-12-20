@@ -461,7 +461,7 @@ et::Screen nsScreenToScreen(NSScreen* screen)
 {
 	NSRect frame = [screen frame];
 	NSRect available = [screen visibleFrame];
-    float scaleFactor = [screen backingScaleFactor];
+    float scaleFactor = static_cast<float>([screen backingScaleFactor]);
 #endif
 		
 	auto aFrame = et::recti(static_cast<int32_t>(frame.origin.x), static_cast<int32_t>(frame.origin.y),

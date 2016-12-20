@@ -22,13 +22,13 @@ MetalSampler::MetalSampler(MetalState& metal, const Description& ds)
 	ET_PIMPL_INIT(MetalSampler);
 
 	MTLSamplerDescriptor* desc = [[MTLSamplerDescriptor alloc] init];
-	desc.sAddressMode = metal::wrapModeToAddressMode(ds.params.wrapU);
-	desc.tAddressMode = metal::wrapModeToAddressMode(ds.params.wrapV);
-	desc.rAddressMode = metal::wrapModeToAddressMode(ds.params.wrapW);
-	desc.minFilter = metal::textureFilteringToSamplerFilter(ds.params.minFilter);
-	desc.magFilter = metal::textureFilteringToSamplerFilter(ds.params.magFilter);
-	desc.mipFilter = metal::textureFilteringToMipFilter(ds.params.mipFilter);
-	desc.maxAnisotropy = ds.params.maxAnisotropy;
+	desc.sAddressMode = metal::wrapModeToAddressMode(ds.wrapU);
+	desc.tAddressMode = metal::wrapModeToAddressMode(ds.wrapV);
+	desc.rAddressMode = metal::wrapModeToAddressMode(ds.wrapW);
+	desc.minFilter = metal::textureFilteringToSamplerFilter(ds.minFilter);
+	desc.magFilter = metal::textureFilteringToSamplerFilter(ds.magFilter);
+	desc.mipFilter = metal::textureFilteringToMipFilter(ds.mipFilter);
+	desc.maxAnisotropy = static_cast<NSUInteger>(ds.maxAnisotropy + 0.5f);
 	_private->sampler.sampler = [metal.device newSamplerStateWithDescriptor:desc];
 
 	ET_OBJC_RELEASE(desc);
