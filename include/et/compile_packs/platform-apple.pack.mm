@@ -21,6 +21,4 @@
 #	include "../platform-apple/input.mac.mm"
 #	include "../platform-apple/platformtools.mac.mm"
 #	include "../platform-apple/rendercontext.mac.mm"
-#elif (ET_PLATFORM_IOS)
-#	error TODO
 #endif

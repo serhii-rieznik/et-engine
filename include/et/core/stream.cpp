@@ -5,12 +5,6 @@
 *
 */
 
-#if (ET_PLATFORM_ANDROID)
-#
-#	error Please include platform-android implementation instead
-#
-#endif
-
 namespace et
 {
 class InputStreamPrivate

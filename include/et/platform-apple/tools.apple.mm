@@ -12,11 +12,6 @@
 #include <et/core/hardware.h>
 #include <et/platform-apple/apple.h>
 
-#if (ET_PLATFORM_IOS)
-#	import <UIKit/UIApplication.h>
-#	import <UIKit/UIScreen.h>
-#endif
-
 static uint64_t startTime = 0;
 static bool startTimeInitialized = false;
 
@@ -293,23 +288,11 @@ void et::findSubfolders(const std::string& folder, bool recursive, StringList& l
 
 void et::openUrl(const std::string& url)
 {
-	if (url.empty()) return;
-	
-#if (ET_PLATFORM_IOS)
-#
-#	define URLProcessor [UIApplication sharedApplication]
-#
-#else
-#
-#	define URLProcessor [NSWorkspace sharedWorkspace]
-#
-#endif
-	
+	ET_ASSERT(!url.empty());
+
 	NSString* urlString = [NSString stringWithUTF8String:url.c_str()];
 	NSURL* aUrl = fileExists(url) ? [NSURL fileURLWithPath:urlString] : [NSURL URLWithString:urlString];
-	[URLProcessor openURL:aUrl];
-	
-#undef URLProcessor
+	[[NSWorkspace sharedWorkspace] openURL:aUrl];
 }
 
 std::string et::unicodeToUtf8(const std::wstring& w)
@@ -385,90 +368,43 @@ std::string et::bundleVersion()
 	return versionString == nil ? emptyString : std::string([versionString UTF8String]);
 }
 
-
 et::vec2i et::nativeScreenSize()
 {
-#if (ET_PLATFORM_IOS)
-
-	CGSize size = [[UIScreen mainScreen] bounds].size;
-	
-	if (UIInterfaceOrientationIsLandscape([[UIApplication sharedApplication] statusBarOrientation]))
-		return vec2i(static_cast<int32_t>(size.height), static_cast<int32_t>(size.width));
-	else
-		return vec2i(static_cast<int32_t>(size.width), static_cast<int32_t>(size.height));
-	
-#else
-	
 	NSSize size = [[NSScreen mainScreen] frame].size;
 	return vec2i(static_cast<int32_t>(size.width), static_cast<int32_t>(size.height));
-	
-#endif
 }
 
 et::vec2i et::availableScreenSize()
 {
-#if (ET_PLATFORM_IOS)
-	
-	return nativeScreenSize();
-	
-#else 
-	
 	auto size = [[NSScreen mainScreen] visibleFrame].size;
 	return vec2i(static_cast<int32_t>(size.width), static_cast<int32_t>(size.height));
-	
-#endif
-	
 }
 
-#if (ET_PLATFORM_IOS)
-	et::Screen uiScreenToScreen(UIScreen* screen);
-#else
-	et::Screen nsScreenToScreen(NSScreen* screen);
-#endif
+et::Screen nsScreenToScreen(NSScreen* screen)
+{
+	NSRect frame = [screen frame];
+	NSRect available = [screen visibleFrame];
+	float scaleFactor = static_cast<float>([screen backingScaleFactor]);
+
+	auto aFrame = et::recti(static_cast<int32_t>(frame.origin.x), static_cast<int32_t>(frame.origin.y),
+		static_cast<int32_t>(frame.size.width), static_cast<int32_t>(frame.size.height));
+
+	auto aAvailable = et::recti(static_cast<int32_t>(available.origin.x), static_cast<int32_t>(available.origin.y),
+		static_cast<int32_t>(available.size.width), static_cast<int32_t>(available.size.height));
+
+	return et::Screen(aFrame, aAvailable, scaleFactor);
+}
 
 et::Screen et::currentScreen()
 {
-#if (ET_PLATFORM_IOS)
-	return uiScreenToScreen([UIScreen mainScreen]);
-#else
 	return nsScreenToScreen([NSScreen mainScreen]);
-#endif
 }
 
 et::Vector<et::Screen> et::availableScreens()
 {
 	Vector<et::Screen> result;
-	
-#if (ET_PLATFORM_IOS)
-	for (UIScreen* screen in [UIScreen screens])
-		result.push_back(uiScreenToScreen(screen));
-#else
 	for (NSScreen* screen in [NSScreen screens])
 		result.push_back(nsScreenToScreen(screen));
-#endif
-	
 	return result;
 }
 
-#if (ET_PLATFORM_IOS)
-et::Screen uiScreenToScreen(UIScreen* screen)
-{
-	CGRect frame = [screen bounds];
-	CGRect available = frame;
-    float scaleFactor = [screen scale];
-#else
-et::Screen nsScreenToScreen(NSScreen* screen)
-{
-	NSRect frame = [screen frame];
-	NSRect available = [screen visibleFrame];
-    float scaleFactor = static_cast<float>([screen backingScaleFactor]);
-#endif
-		
-	auto aFrame = et::recti(static_cast<int32_t>(frame.origin.x), static_cast<int32_t>(frame.origin.y),
-		static_cast<int32_t>(frame.size.width), static_cast<int32_t>(frame.size.height));
-	
-	auto aAvailable = et::recti(static_cast<int32_t>(available.origin.x), static_cast<int32_t>(available.origin.y),
-		static_cast<int32_t>(available.size.width), static_cast<int32_t>(available.size.height));
-	
-	return et::Screen(aFrame, aAvailable, scaleFactor);
-}

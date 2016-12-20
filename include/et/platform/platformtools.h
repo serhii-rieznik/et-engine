@@ -12,7 +12,9 @@
 namespace et
 {
 inline bool platformHasHardwareKeyboard()
-	{ return PlatformOptions::IsDesktop; }
+{
+	return true;
+}
 
 enum class SelectFileMode : uint32_t
 {

@@ -114,10 +114,8 @@
 		5CCB9C301E09C84C009FD413 /* context_osx.h in Headers */ = {isa = PBXBuildFile; fileRef = 5CCB9AC31E09C84C009FD413 /* context_osx.h */; };
 		5CCB9C321E09C84C009FD413 /* iap.h in Headers */ = {isa = PBXBuildFile; fileRef = 5CCB9AC51E09C84C009FD413 /* iap.h */; };
 		5CCB9C331E09C84C009FD413 /* imagepicker.h in Headers */ = {isa = PBXBuildFile; fileRef = 5CCB9AC61E09C84C009FD413 /* imagepicker.h */; };
-		5CCB9C371E09C84C009FD413 /* ios.h in Headers */ = {isa = PBXBuildFile; fileRef = 5CCB9ACA1E09C84C009FD413 /* ios.h */; };
 		5CCB9C3B1E09C84C009FD413 /* mailcomposer.h in Headers */ = {isa = PBXBuildFile; fileRef = 5CCB9ACE1E09C84C009FD413 /* mailcomposer.h */; };
 		5CCB9C3E1E09C84C009FD413 /* objc.h in Headers */ = {isa = PBXBuildFile; fileRef = 5CCB9AD11E09C84C009FD413 /* objc.h */; };
-		5CCB9C3F1E09C84C009FD413 /* opengl.ios.h in Headers */ = {isa = PBXBuildFile; fileRef = 5CCB9AD21E09C84C009FD413 /* opengl.ios.h */; };
 		5CCB9C401E09C84C009FD413 /* openglview.h in Headers */ = {isa = PBXBuildFile; fileRef = 5CCB9AD31E09C84C009FD413 /* openglview.h */; };
 		5CCB9C421E09C84C009FD413 /* openglviewcontroller.h in Headers */ = {isa = PBXBuildFile; fileRef = 5CCB9AD51E09C84C009FD413 /* openglviewcontroller.h */; };
 		5CCB9C451E09C84C009FD413 /* printer.h in Headers */ = {isa = PBXBuildFile; fileRef = 5CCB9AD81E09C84C009FD413 /* printer.h */; };
@@ -383,38 +381,25 @@
 		5CCB9ABA1E09C84C009FD413 /* platform.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = platform.h; sourceTree = "<group>"; };
 		5CCB9ABB1E09C84C009FD413 /* platformtools.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = platformtools.h; sourceTree = "<group>"; };
 		5CCB9ABD1E09C84C009FD413 /* apple.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = apple.h; sourceTree = "<group>"; };
-		5CCB9ABE1E09C84C009FD413 /* application.ios.mm */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; fileEncoding = 4; path = application.ios.mm; sourceTree = "<group>"; };
 		5CCB9ABF1E09C84C009FD413 /* application.mac.mm */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; fileEncoding = 4; path = application.mac.mm; sourceTree = "<group>"; };
 		5CCB9AC01E09C84C009FD413 /* applicationdelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = applicationdelegate.h; sourceTree = "<group>"; };
-		5CCB9AC11E09C84C009FD413 /* applicationdelegate.ios.mm */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; fileEncoding = 4; path = applicationdelegate.ios.mm; sourceTree = "<group>"; };
 		5CCB9AC21E09C84C009FD413 /* context.mac.mm */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; fileEncoding = 4; path = context.mac.mm; sourceTree = "<group>"; };
 		5CCB9AC31E09C84C009FD413 /* context_osx.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = context_osx.h; sourceTree = "<group>"; };
 		5CCB9AC41E09C84C009FD413 /* iap.apple.mm */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; fileEncoding = 4; path = iap.apple.mm; sourceTree = "<group>"; };
 		5CCB9AC51E09C84C009FD413 /* iap.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = iap.h; sourceTree = "<group>"; };
 		5CCB9AC61E09C84C009FD413 /* imagepicker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = imagepicker.h; sourceTree = "<group>"; };
-		5CCB9AC71E09C84C009FD413 /* imagepicker.ios.mm */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; fileEncoding = 4; path = imagepicker.ios.mm; sourceTree = "<group>"; };
-		5CCB9AC81E09C84C009FD413 /* input.ios.mm */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; fileEncoding = 4; path = input.ios.mm; sourceTree = "<group>"; };
 		5CCB9AC91E09C84C009FD413 /* input.mac.mm */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; fileEncoding = 4; path = input.mac.mm; sourceTree = "<group>"; };
-		5CCB9ACA1E09C84C009FD413 /* ios.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ios.h; sourceTree = "<group>"; };
-		5CCB9ACB1E09C84C009FD413 /* ios.mm */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; fileEncoding = 4; path = ios.mm; sourceTree = "<group>"; };
 		5CCB9ACC1E09C84C009FD413 /* locale.apple.mm */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; fileEncoding = 4; path = locale.apple.mm; sourceTree = "<group>"; };
 		5CCB9ACD1E09C84C009FD413 /* log.apple.mm */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; fileEncoding = 4; path = log.apple.mm; sourceTree = "<group>"; };
 		5CCB9ACE1E09C84C009FD413 /* mailcomposer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = mailcomposer.h; sourceTree = "<group>"; };
-		5CCB9ACF1E09C84C009FD413 /* mailcomposer.ios.mm */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; fileEncoding = 4; path = mailcomposer.ios.mm; sourceTree = "<group>"; };
 		5CCB9AD01E09C84C009FD413 /* memory.apple.mm */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; fileEncoding = 4; path = memory.apple.mm; sourceTree = "<group>"; };
 		5CCB9AD11E09C84C009FD413 /* objc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = objc.h; sourceTree = "<group>"; };
-		5CCB9AD21E09C84C009FD413 /* opengl.ios.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = opengl.ios.h; sourceTree = "<group>"; };
 		5CCB9AD31E09C84C009FD413 /* openglview.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = openglview.h; sourceTree = "<group>"; };
-		5CCB9AD41E09C84C009FD413 /* openglview.ios.mm */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; fileEncoding = 4; path = openglview.ios.mm; sourceTree = "<group>"; };
 		5CCB9AD51E09C84C009FD413 /* openglviewcontroller.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = openglviewcontroller.h; sourceTree = "<group>"; };
-		5CCB9AD61E09C84C009FD413 /* openglviewcontroller.ios.mm */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; fileEncoding = 4; path = openglviewcontroller.ios.mm; sourceTree = "<group>"; };
 		5CCB9AD71E09C84C009FD413 /* platformtools.mac.mm */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; fileEncoding = 4; path = platformtools.mac.mm; sourceTree = "<group>"; };
 		5CCB9AD81E09C84C009FD413 /* printer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = printer.h; sourceTree = "<group>"; };
-		5CCB9AD91E09C84C009FD413 /* printer.ios.mm */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; fileEncoding = 4; path = printer.ios.mm; sourceTree = "<group>"; };
-		5CCB9ADA1E09C84C009FD413 /* rendercontext.ios.mm */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; fileEncoding = 4; path = rendercontext.ios.mm; sourceTree = "<group>"; };
 		5CCB9ADB1E09C84C009FD413 /* rendercontext.mac.mm */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; fileEncoding = 4; path = rendercontext.mac.mm; sourceTree = "<group>"; };
 		5CCB9ADC1E09C84C009FD413 /* social.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = social.h; sourceTree = "<group>"; };
-		5CCB9ADD1E09C84C009FD413 /* social.ios.mm */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; fileEncoding = 4; path = social.ios.mm; sourceTree = "<group>"; };
 		5CCB9ADE1E09C84C009FD413 /* tools.apple.mm */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; fileEncoding = 4; path = tools.apple.mm; sourceTree = "<group>"; };
 		5CCB9AE01E09C84C009FD413 /* application.win.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; fileEncoding = 4; path = application.win.cpp; sourceTree = "<group>"; };
 		5CCB9AE11E09C84C009FD413 /* context.win.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; fileEncoding = 4; path = context.win.cpp; sourceTree = "<group>"; };
@@ -798,38 +783,25 @@
 			isa = PBXGroup;
 			children = (
 				5CCB9ABD1E09C84C009FD413 /* apple.h */,
-				5CCB9ABE1E09C84C009FD413 /* application.ios.mm */,
 				5CCB9ABF1E09C84C009FD413 /* application.mac.mm */,
 				5CCB9AC01E09C84C009FD413 /* applicationdelegate.h */,
-				5CCB9AC11E09C84C009FD413 /* applicationdelegate.ios.mm */,
 				5CCB9AC21E09C84C009FD413 /* context.mac.mm */,
 				5CCB9AC31E09C84C009FD413 /* context_osx.h */,
 				5CCB9AC41E09C84C009FD413 /* iap.apple.mm */,
 				5CCB9AC51E09C84C009FD413 /* iap.h */,
 				5CCB9AC61E09C84C009FD413 /* imagepicker.h */,
-				5CCB9AC71E09C84C009FD413 /* imagepicker.ios.mm */,
-				5CCB9AC81E09C84C009FD413 /* input.ios.mm */,
 				5CCB9AC91E09C84C009FD413 /* input.mac.mm */,
-				5CCB9ACA1E09C84C009FD413 /* ios.h */,
-				5CCB9ACB1E09C84C009FD413 /* ios.mm */,
 				5CCB9ACC1E09C84C009FD413 /* locale.apple.mm */,
 				5CCB9ACD1E09C84C009FD413 /* log.apple.mm */,
 				5CCB9ACE1E09C84C009FD413 /* mailcomposer.h */,
-				5CCB9ACF1E09C84C009FD413 /* mailcomposer.ios.mm */,
 				5CCB9AD01E09C84C009FD413 /* memory.apple.mm */,
 				5CCB9AD11E09C84C009FD413 /* objc.h */,
-				5CCB9AD21E09C84C009FD413 /* opengl.ios.h */,
 				5CCB9AD31E09C84C009FD413 /* openglview.h */,
-				5CCB9AD41E09C84C009FD413 /* openglview.ios.mm */,
 				5CCB9AD51E09C84C009FD413 /* openglviewcontroller.h */,
-				5CCB9AD61E09C84C009FD413 /* openglviewcontroller.ios.mm */,
 				5CCB9AD71E09C84C009FD413 /* platformtools.mac.mm */,
 				5CCB9AD81E09C84C009FD413 /* printer.h */,
-				5CCB9AD91E09C84C009FD413 /* printer.ios.mm */,
-				5CCB9ADA1E09C84C009FD413 /* rendercontext.ios.mm */,
 				5CCB9ADB1E09C84C009FD413 /* rendercontext.mac.mm */,
 				5CCB9ADC1E09C84C009FD413 /* social.h */,
-				5CCB9ADD1E09C84C009FD413 /* social.ios.mm */,
 				5CCB9ADE1E09C84C009FD413 /* tools.apple.mm */,
 			);
 			name = "platform-apple";
@@ -1115,7 +1087,6 @@
 				5CCB9C581E09C84C009FD413 /* helpers.h in Headers */,
 				5CCB9C121E09C84C009FD413 /* hdrloader.h in Headers */,
 				5CCB9C2D1E09C84C009FD413 /* applicationdelegate.h in Headers */,
-				5CCB9C3F1E09C84C009FD413 /* opengl.ios.h in Headers */,
 				5CCB9CB51E09C84C009FD413 /* vulkan_program.h in Headers */,
 				5CCB9C051E09C84C009FD413 /* triangleex.h in Headers */,
 				5CCB9C871E09C84C009FD413 /* textureset.h in Headers */,
@@ -1292,7 +1263,6 @@
 				5CCB9C6D1E09C84C009FD413 /* vertexdatachunk.h in Headers */,
 				5CCB9C961E09C84C009FD413 /* metal_sampler.h in Headers */,
 				5CCB9C1A1E09C84C009FD413 /* pngloader.h in Headers */,
-				5CCB9C371E09C84C009FD413 /* ios.h in Headers */,
 				5CCB9C9F1E09C84C009FD413 /* wglext.h in Headers */,
 				5CCB9BEA1E09C84C009FD413 /* timerpool.h in Headers */,
 				5CCB9CB11E09C84C009FD413 /* vulkan_buffer.h in Headers */,

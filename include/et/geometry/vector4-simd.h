@@ -8,11 +8,4 @@
 #pragma once
 
 #include <et/core/et.h>
-
-#if (ET_PLATFORM_IOS)
-#	include "vector4-simd.neon.h"
-#elif (ET_PLATFORM_MAC || ET_PLATFORM_WIN)
-#	include "vector4-simd.sse.h"
-#else
-#	error Unsupported platform selected
-#endif
+#include "vector4-simd.sse.h"

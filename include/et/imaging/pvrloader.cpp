@@ -61,16 +61,7 @@ void pvr::loadFromStream(std::istream& stream, TextureDescription& desc)
 	desc.data.resize(desc.layersCount * desc.dataSizeForAllMipLevels());
 	stream.read(desc.data.binary(), desc.data.dataSize());
 
-#if (ET_PLATFORM_IOS)
-
-	bool decompress = false;
-
-#else 
-
 	bool decompress = (desc.format >= TextureFormat::PVR_2bpp_RGB) && (desc.format <= TextureFormat::PVR_4bpp_sRGBA);
-
-#endif
-
 	if (decompress)
 	{
 		BinaryDataStorage rgbaData(desc.size.square() * 4, 0);

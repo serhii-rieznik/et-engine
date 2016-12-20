@@ -65,24 +65,6 @@
 #	define ET_KEY_D						2
 #	define ET_KEY_H						4
 #
-#elif (ET_PLATFORM_IOS)
-#
-#	define ET_KEY_RETURN				1
-#	define ET_KEY_TAB					2
-#	define ET_KEY_SPACE					3
-#	define ET_KEY_ESCAPE				4
-#	define ET_KEY_BACKSPACE				5
-#
-#	define ET_KEY_LEFT					6
-#	define ET_KEY_RIGHT					7
-#	define ET_KEY_DOWN					8
-#	define ET_KEY_UP					9
-#
-#	define ET_KEY_A						10
-#	define ET_KEY_D						11
-#	define ET_KEY_S						12
-#	define ET_KEY_W						13
-#
 #elif (ET_PLATFORM_WIN)
 #
 #	define ET_KEY_RETURN				0x0D
@@ -106,19 +88,6 @@
 #	define ET_KEY_1						49
 #	define ET_KEY_2						50
 #	define ET_KEY_3						51
-#
-#elif (ET_PLATFORM_ANDROID)
-#
-#	define ET_KEY_RETURN				13
-#	define ET_KEY_TAB					9
-#	define ET_KEY_SPACE					32
-#	define ET_KEY_ESCAPE				27
-#	define ET_KEY_BACKSPACE				8
-#
-#	define ET_KEY_LEFT					123
-#	define ET_KEY_RIGHT					124
-#	define ET_KEY_DOWN					125
-#	define ET_KEY_UP					126
 #
 #endif
 

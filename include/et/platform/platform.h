@@ -38,20 +38,10 @@
 #		define ET_STRING_FROM_CONST_CHAR(str)	str
 #	endif
 #
-#elif (TARGET_OS_IPHONE)
-#
-#	define ET_PLATFORM_IOS				1
-#	define CurrentPlatform				Platform::iOS
-#
 #elif (TARGET_OS_MAC)
 #
 #	define ET_PLATFORM_MAC				1
 #	define CurrentPlatform				Platform::Mac
-#
-#elif (__ANDROID__)
-#
-#	define ET_PLATFORM_ANDROID			1
-#	define CurrentPlatform				Platform::Android
 #
 #else
 #
@@ -59,7 +49,7 @@
 #
 #endif
 
-#if (ET_PLATFORM_IOS || ET_PLATFORM_MAC)
+#if (ET_PLATFORM_MAC)
 #	define ET_PLATFORM_APPLE	1
 #else
 #	define ET_PLATFORM_APPLE	0
@@ -87,9 +77,7 @@ namespace et
 	enum class Platform : uint32_t
 	{
 		Windows,
-		iOS,
 		Mac,
-		Android
 	};
 	
 	enum Architecture : uint32_t
@@ -102,13 +90,5 @@ namespace et
 	enum PlatformOptions : uint32_t
 	{
 		BitDepth = 8 * sizeof(decltype(nullptr)),
-		
-#	if (ET_PLATFORM_IOS || ET_PLATFORM_ANDROID)
-		IsDesktop = 0,
-		IsMobile = 1,
-#	elif (ET_PLATFORM_MAC || ET_PLATFORM_WIN)
-		IsDesktop = 1,
-		IsMobile = 0,
-#	endif
 	};
 }
