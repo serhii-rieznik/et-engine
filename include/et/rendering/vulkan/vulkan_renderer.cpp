@@ -223,7 +223,7 @@ void VulkanRenderer::resize(const vec2i& sz)
 	_private->swapchain.createSizeDependentResources(_private->vulkan(), sz);
 }
 
-Buffer::Pointer VulkanRenderer::createBuffer(const Buffer::Description& desc)
+Buffer::Pointer VulkanRenderer::createBuffer(const std::string&, const Buffer::Description& desc)
 {
 	return VulkanBuffer::Pointer::create(_private->vulkan(), desc);
 }

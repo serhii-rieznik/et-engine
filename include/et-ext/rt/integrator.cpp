@@ -190,7 +190,12 @@ float4 BackwardPathTracingIntegrator::evaluate(const Scene& scene, const Ray& in
 				for (const Emitter::Pointer emitter : scene.emitters)
 				{
 					if (emitter->materialIndex() != tri.materialIndex)
-						lightSamplesContrib += throughput * emitter->sample(scene, nextPosition, nrm);
+					{
+						EmitterInteraction i = emitter->sample(scene, nextPosition, nrm);
+						float lightBsdf = std::max(0.0f, -i.normal.dot(i.direction));
+						float surfaceBsdf = std::max(0.0f, nrm.dot(i.direction)) / PI;
+						lightSamplesContrib += throughput * i.sample * (lightBsdf * surfaceBsdf);
+					}
 				}
 			}
 			result += lightSamplesContrib / static_cast<float>(lightSamples);

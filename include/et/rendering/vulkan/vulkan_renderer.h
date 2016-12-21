@@ -40,7 +40,7 @@ public:
 	/*
 	 * Buffers
 	 */
-	Buffer::Pointer createBuffer(const Buffer::Description&) override;
+	Buffer::Pointer createBuffer(const std::string&, const Buffer::Description&) override;
 
 	/*
 	 * Textures
