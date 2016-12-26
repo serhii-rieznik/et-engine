@@ -19,6 +19,8 @@ namespace rt
 class RaytracePrivate;
 class ET_ALIGNED(16) Raytrace
 {
+	ET_DECLARE_PIMPL(Raytrace, 4096);
+
 public:
 	using OutputMethod = std::function<void(const vec2i&, const vec4&)>;
 
@@ -46,7 +48,6 @@ public:
 
 private:
 	friend class RaytracePrivate;
-	ET_DECLARE_PIMPL(Raytrace, 4096);
 	OutputMethod _outputMethod;
 };
 

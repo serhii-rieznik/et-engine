@@ -30,8 +30,8 @@ struct ET_ALIGNED(16) BSDFSample
 		Backward
 	};
 
-	BSDFSample(const float4& _wi, const float4& _n, const Material&, const float4& uv, Direction _dir);
-	BSDFSample(const float4& _wi, const float4& _wo, const float4& _n, const Material&, const float4& uv, Direction _dir);
+	BSDFSample(const float4& _wi, const float4& _n, const Material&, const float4& uv, Direction _dir = Direction::Backward);
+	BSDFSample(const float4& _wi, const float4& _wo, const float4& _n, const Material&, const float4& uv, Direction _dir = Direction::Backward);
 
 	float pdf();
 	float bsdf();

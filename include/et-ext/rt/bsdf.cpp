@@ -7,21 +7,21 @@
 
 #include <et-ext/rt/bsdf.h>
 
-#define ET_RT_USE_COSINE_WEIGHTED_SAMPLING 1
+namespace et
+{
 
-et::rt::BSDFSample::BSDFSample(const et::rt::float4& _wi, const et::rt::float4& _n, const Material& mat,
-	const et::rt::float4& uv, Direction _d) : Wi(_wi), n(_n), IdotN(_wi.dot(_n)), alpha(mat.roughness), dir(_d)
+namespace rt
+{
+
+BSDFSample::BSDFSample(const float4& _wi, const float4& _n, const Material& mat,
+	const float4& uv, Direction _d) : Wi(_wi), n(_n), IdotN(_wi.dot(_n)), alpha(mat.roughness), dir(_d)
 {
 	switch (mat.cls)
 	{
 	case Material::Class::Diffuse:
 	{
 		cls = BSDFSample::Class::Diffuse;
-#		if (ET_RT_USE_COSINE_WEIGHTED_SAMPLING)
-		Wo = randomVectorOnHemisphere(n, et::rt::cosineDistribution);
-#		else
-		Wo = randomVectorOnHemisphere(n, et::rt::uniformDistribution);
-#		endif
+		Wo = randomVectorOnHemisphere(n, uniformDistribution);
 		color = mat.diffuse;
 		break;
 	}
@@ -92,8 +92,8 @@ et::rt::BSDFSample::BSDFSample(const et::rt::float4& _wi, const et::rt::float4& 
 	cosTheta = std::abs((dir == BSDFSample::Direction::Backward ? OdotN : IdotN));
 }
 
-et::rt::BSDFSample::BSDFSample(const et::rt::float4& _wi, const et::rt::float4& _wo, const et::rt::float4& _n,
-	const Material& mat, const et::rt::float4& uv, Direction _d)
+BSDFSample::BSDFSample(const float4& _wi, const float4& _wo, const float4& _n,
+	const Material& mat, const float4& uv, Direction _d)
 	: Wi(_wi)
 	, Wo(_wo)
 	, n(_n)
@@ -129,15 +129,15 @@ et::rt::BSDFSample::BSDFSample(const et::rt::float4& _wi, const et::rt::float4& 
 
 			float refractionK = 1.0f - sqr(eta) * (1.0f - sqr(IdotN));
 			fresnel = (refractionK > 0.0f) ? fresnelShlickApproximation(mat.metallness, IdotN) : 1.0f;
-			if (fastRandomFloat() <= fresnel)
-			{
-				cls = BSDFSample::Class::Reflection;
-				color = mat.specular;
-			}
-			else
+			if (OdotN <= 0.0f)
 			{
 				cls = BSDFSample::Class::Transmittance;
 				color = mat.diffuse;
+			}
+			else
+			{
+				cls = BSDFSample::Class::Reflection;
+				color = mat.specular;
 			}
 		}
 		else // non-refractive material
@@ -170,13 +170,13 @@ inline float G_ggx(float t, float alpha)
 	return 2.0f / (1.0f + std::sqrt(1.0f + alpha * alpha * tanThetaSquared));
 }
 
-inline float D_ggx(float alphaSquared, float cosTheta)
+inline float normalDistribution(float alphaSquared, float cosTheta)
 {
-	union { float f; uint32_t i; } x = { cosTheta * cosTheta * (alphaSquared - 1.0f) + 1.0f };
-	return (x.i & 0x7fffffff) ? (alphaSquared / (PI * et::sqr(x.f))) : 1.0f;
+	float denom = sqr(cosTheta) * (alphaSquared - 1.0f) + 1.0f;
+	return ((denom > 0.0f) && (cosTheta > 0.0f)) ? alphaSquared / (PI * denom * denom) : 0.0f;
 }
 
-float et::rt::BSDFSample::bsdf()
+float BSDFSample::bsdf()
 {
 	if (cls == Class::Diffuse)
 		return 1.0f / PI;
@@ -189,7 +189,7 @@ float et::rt::BSDFSample::bsdf()
 		float HdotO = h.dot(Wo);
 		float HdotI = -h.dot(Wi);
 		float NdotH = n.dot(h);
-		float ndf = D_ggx(alpha * alpha, NdotH);
+		float ndf = normalDistribution(alpha * alpha, NdotH);
 		float g1 = G_ggx(NdotI, alpha) * float(HdotI / NdotI > 0.0f);
 		float g2 = G_ggx(NdotO, alpha) * float(HdotO / NdotO > 0.0f);
 		float g = g1 * g2;
@@ -204,36 +204,28 @@ float et::rt::BSDFSample::bsdf()
 		float g = g1 * g2;
 		float NdotH = n.dot(h);
 		float etaSq = eta * eta;
-		float d = D_ggx(alpha * alpha, NdotH) * float(NdotH > 0.0f);
+		float ndf = normalDistribution(alpha * alpha, NdotH);
 		float denom = sqr(HdotI + eta * HdotO);
 
-		return ((1.0f - fresnel) * d * g * etaSq * HdotI * HdotO) / (IdotN * denom + Constants::epsilon);
+		return ((1.0f - fresnel) * ndf * g * etaSq * HdotI * HdotO) / (IdotN * denom + Constants::epsilon);
 	}
 
 	ET_FAIL("Invalid material class");
 	return 0.0f;
 }
 
-float et::rt::BSDFSample::pdf()
+float BSDFSample::pdf()
 {
 	if (cls == Class::Diffuse)
-	{
-#	if (ET_RT_USE_COSINE_WEIGHTED_SAMPLING)
-		return cosTheta / PI;
-#	else
 		return 1.0f / DOUBLE_PI;
-#	endif
-	}
 
 	if (cls == Class::Reflection)
 	{
 		h = Wo - Wi;
 		h.normalize();
-
-		float HdotI = -h.dot(Wi);
-		float NdotH = n.dot(h);
-		float ndf = D_ggx(alpha * alpha, NdotH) * float(NdotH > 0.0f);
-		return (ndf * NdotH) / (4.0f * HdotI);
+		float cTh = std::min(1.0f, n.dot(h));
+		float sTh = std::sqrt(1.0f - cTh * cTh);
+		return normalDistribution(alpha * alpha, cTh) * cTh * sTh;
 	}
 	else if (cls == BSDFSample::Class::Transmittance)
 	{
@@ -247,30 +239,32 @@ float et::rt::BSDFSample::pdf()
 
 		float NdotH = n.dot(h);
 		float etaSq = eta * eta;
-		float d = D_ggx(rSq, NdotH) * float(NdotH > 0.0f);
-		return d * etaSq * HdotO / sqr(HdotI + eta * HdotO);
+		float ndf = normalDistribution(rSq, NdotH);
+		return ndf * etaSq * HdotO / sqr(HdotI + eta * HdotO);
 	}
 
 	ET_FAIL("Invalid material class");
 	return 0.0f;
 }
 
-et::rt::float4 et::rt::BSDFSample::evaluate()
+float4 BSDFSample::evaluate()
 {
-	union { float f; uint32_t i; } x = { pdf() };
-	return (x.i & 0x7fffffff) ? color * (cosTheta * bsdf() / x.f) : float4(0.0f);
+	float pdfValue = pdf();
+	//return float4(pdfValue);
+
+	if (pdfValue == 0.0f)
+		return float4(0.0f);
+
+	float bsdfValue = bsdf();
+	// return float4(bsdfValue);
+
+	return color * (cosTheta * bsdfValue / pdfValue);
 }
 
-et::rt::float4 et::rt::BSDFSample::combinedEvaluate()
+float4 BSDFSample::combinedEvaluate()
 {
 	if (cls == Class::Diffuse)
-	{
-#	if (ET_RT_USE_COSINE_WEIGHTED_SAMPLING)
-		return color;
-#	else
 		return color * (2.0f * cosTheta);
-#	endif
-	}
 
 	if (cls == Class::Reflection)
 	{
@@ -302,3 +296,5 @@ et::rt::float4 et::rt::BSDFSample::combinedEvaluate()
 	return float4(0.0f);
 }
 
+}
+}

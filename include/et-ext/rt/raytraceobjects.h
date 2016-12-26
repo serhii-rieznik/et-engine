@@ -58,6 +58,7 @@ struct Options
 	uint32_t maxPathLength = 0;
 	uint32_t maxKDTreeDepth = 0;
 	uint32_t renderRegionSize = 32;
+	uint32_t lightSamples = 1;
 	float apertureSize = 0.0f;
 	float focalDistanceCorrection = 0.0f;
 	RaytraceMethod method = RaytraceMethod::BackwardPathTracing;

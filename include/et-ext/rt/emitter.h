@@ -20,7 +20,9 @@ struct ET_ALIGNED(16) EmitterInteraction
 {
 	float4 direction;
 	float4 normal;
-	float4 sample = float4(0.0f);
+	float4 color = float4(0.0f);
+	float cosTheta = 0.0f;
+	float pdf = 0.0f;
 };
 
 class Scene;
@@ -33,6 +35,7 @@ public:
 public:
 	virtual ~Emitter() = default;
 	virtual EmitterInteraction sample(const Scene&, const float4& position, const float4& normal) const = 0;
+	virtual void prepare(const Scene&) { }
 
 	virtual index materialIndex() const { return InvalidIndex; }
 };
@@ -70,14 +73,21 @@ public:
 
 public:
 	MeshEmitter(index firstTriangle, index numTriangles, index materialIndex);
+	void prepare(const Scene&) override;
 	EmitterInteraction sample(const Scene&, const float4& position, const float4& normal) const override;
 
 	index materialIndex() const override { return _materialIndex; }
+
+	float4 samplePoint(const Scene&);
+	
+	float4 evaluate(const Scene&, const float4& position, const float4& direction, float4& nrm, float4& pos, float& pdf);
+	float pdf(const float4& position, const float4& direction, const float4& lightPosition, const float4& lightNormal);
 
 private:
 	index _firstTriangle = InvalidIndex;
 	index _numTriangles = 0;
 	index _materialIndex = InvalidIndex;
+	float _area = 0.0f;
 };
 
 }

@@ -17,7 +17,7 @@ inline float4 gammaCorrectedInput(const vec4& c)
 	return float4(std::pow(c.x, 2.2f), std::pow(c.y, 2.2f), std::pow(c.z, 2.2f), 1.0f);
 }
 
-void Scene::build(const Vector<RenderBatch::Pointer>& batches, const Camera::Pointer& camera, const Options& options)
+void Scene::build(const Vector<RenderBatch::Pointer>& batches, const Camera::Pointer& camera)
 {
 	materials.clear();
 	emitters.clear();
@@ -136,6 +136,9 @@ void Scene::build(const Vector<RenderBatch::Pointer>& batches, const Camera::Poi
 	}
 
 	kdTree.build(triangles, options.maxKDTreeDepth);
+
+	for (Emitter::Pointer& em : emitters)
+		em->prepare(*this);
 
 	centerRay = camera->castRay(vec2(0.0f));
 	KDTree::TraverseResult centerHit = kdTree.traverse(centerRay);

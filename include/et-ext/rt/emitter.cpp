@@ -21,7 +21,8 @@ EmitterInteraction UniformEmitter::sample(const Scene&, const float4& position, 
 {
 	EmitterInteraction result;
 	result.direction = normal;
-	result.sample = _color;
+	result.color = _color;
+	result.pdf = 1.0f;
 	return result;
 }
 
@@ -34,7 +35,8 @@ EmitterInteraction EnvironmentEmitter::sample(const Scene&, const float4& positi
 {
 	EmitterInteraction result;
 	result.direction = normal;
-	result.sample = float4(0.25, 0.75, 1.0, 1.0);
+	result.color = float4(0.25, 0.75, 1.0, 1.0);
+	result.pdf = 1.0f;
 	return result;
 }
 
@@ -42,6 +44,14 @@ MeshEmitter::MeshEmitter(index firstTriangle, index numTriangles, index material
 	: _firstTriangle(firstTriangle), _numTriangles(numTriangles), _materialIndex(materialIndex)
 {
 
+}
+
+void MeshEmitter::prepare(const Scene& scene)
+{
+	for (uint32_t i = 0; i < _numTriangles; ++i)
+	{
+		_area += scene.kdTree.triangleAtIndex(_firstTriangle + i).area();
+	}
 }
 
 EmitterInteraction MeshEmitter::sample(const Scene& scene, const float4& position, const float4&) const
@@ -55,22 +65,49 @@ EmitterInteraction MeshEmitter::sample(const Scene& scene, const float4& positio
 	
 	result.normal = emitterTriangle.interpolatedNormal(bc);
 	result.direction = normalize(emitterPos - position);
-
-	float NdotD = result.normal.dot(result.direction);
-	if (NdotD > 0.0f)
+	result.cosTheta = -result.normal.dot(result.direction);
+	
+	if (result.cosTheta < Constants::epsilon)
 		return result; // from behind
 
 	KDTree::TraverseResult hit = scene.kdTree.traverse(Ray(position, result.direction));
 	if (hit.triangleIndex != emitterIndex)
 		return result; // miss
 
-	float area = emitterTriangle.area();
-	float pdf = 1.0f / area;
-
-	result.sample = scene.materials.at(_materialIndex).emissive / pdf;
+	result.color = scene.materials.at(_materialIndex).emissive;
+	result.pdf = (position - emitterPos).dotSelf() / (_area * result.cosTheta); 
 	return result;
 }
 
+float4 MeshEmitter::samplePoint(const Scene& scene)
+{
+	const Triangle& emitterTriangle = scene.kdTree.triangleAtIndex(_firstTriangle + rand() % _numTriangles);
+	float4 bc = randomBarycentric();
+	return emitterTriangle.interpolatedPosition(bc) + float4(0.0f, 0.0f, 0.0f, 1.0f);
+}
+
+float4 MeshEmitter::evaluate(const Scene& scene, const float4& position, const float4& direction, 
+	float4& nrm, float4& pos, float& pdfOut)
+{
+	KDTree::TraverseResult hit = scene.kdTree.traverse(Ray(position, direction));
+	if ((hit.triangleIndex < _firstTriangle) || (hit.triangleIndex >= _firstTriangle + _numTriangles))
+		return float4(0.0f); // miss
+
+	const Triangle& hitTriangle = scene.kdTree.triangleAtIndex(hit.triangleIndex);
+	nrm = hitTriangle.interpolatedNormal(hit.intersectionPointBarycentric);
+	pos = hit.intersectionPoint;
+
+	pdfOut = pdf(position, direction, pos, nrm);
+	return scene.materials.at(_materialIndex).emissive;
+}
+
+float MeshEmitter::pdf(const float4& position, const float4& direction, const float4& lightPosition, const float4& lightNormal)
+{
+	float cosTheta = -lightNormal.dot(direction);
+
+	return (cosTheta < Constants::epsilon) ? 0.0f :
+		(position - lightPosition).dotSelf() / (_area * cosTheta); 
+}
 
 /*
 EnvironmentEquirectangularMapSampler::EnvironmentEquirectangularMapSampler(

@@ -58,7 +58,6 @@ public:
 	Scene scene;
 
 	Raytrace* owner = nullptr;
-	Options options;
 	Integrator::Pointer integrator;
 	Camera camera;
 
@@ -103,9 +102,9 @@ void Raytrace::perform(s3d::Scene::Pointer scene, const vec2i& dimension)
 	ET_ASSERT(_private->viewportSize.x > 0);
 	ET_ASSERT(_private->viewportSize.y > 0);
 
-	_private->buildRegions(vec2i(static_cast<int>(_private->options.renderRegionSize)));
+	_private->buildRegions(vec2i(static_cast<int>(_private->scene.options.renderRegionSize)));
 
-	if (_private->options.method == RaytraceMethod::BackwardPathTracing)
+	if (_private->scene.options.method == RaytraceMethod::BackwardPathTracing)
 	{
 		Invocation([this]()
 		{
@@ -127,7 +126,7 @@ vec4 Raytrace::performAtPoint(s3d::Scene::Pointer scene, const vec2i& dimension,
 	_private->buildScene(scene);
 
 	uint32_t bounces = 0;
-	vec4 color = _private->raytracePixel(vec2i(pixel.x, pixel.y), _private->options.raysPerPixel, bounces);
+	vec4 color = _private->raytracePixel(vec2i(pixel.x, pixel.y), _private->scene.options.raysPerPixel, bounces);
 	log::info("Sampled color:\n\tsRGB: %.4f, %.4f, %.4f\n\tRGB: %.4f, %.4f, %.4f, (%u bounces)",
 		color.x, color.y, color.z, std::pow(color.x, 2.2f), std::pow(color.y, 2.2f), std::pow(color.z, 2.2f),
 		bounces);
@@ -142,7 +141,7 @@ void Raytrace::stop()
 
 void Raytrace::setOptions(const Options& options)
 {
-	_private->options = options;
+	_private->scene.options = options;
 }
 
 void Raytrace::renderSpacePartitioning()
@@ -183,26 +182,26 @@ void RaytracePrivate::emitWorkerThreads()
 	forwardTraceBuffer.resize(viewportSize.square());
 	std::fill(forwardTraceBuffer.begin(), forwardTraceBuffer.end(), float4(0.0f, 0.0f, 0.0f, 0.0f));
 
-	uint64_t totalRays = static_cast<uint64_t>(viewportSize.square()) * options.raysPerPixel;
+	uint64_t totalRays = static_cast<uint64_t>(viewportSize.square()) * scene.options.raysPerPixel;
 	log::info("Rendering started: %d x %d, %llu rpp, %llu total rays",
-		viewportSize.x, viewportSize.y, static_cast<uint64_t>(options.raysPerPixel), totalRays);
+		viewportSize.x, viewportSize.y, static_cast<uint64_t>(scene.options.raysPerPixel), totalRays);
 
 	running = true;
 
-	if (options.threads == 0)
+	if (scene.options.threads == 0)
 	{
-		options.threads = std::thread::hardware_concurrency();
+		scene.options.threads = std::thread::hardware_concurrency();
 	}
 
-	threadCounter.store(options.threads);
-	for (uint32_t i = 0; i < options.threads; ++i)
+	threadCounter.store(scene.options.threads);
+	for (uint32_t i = 0; i < scene.options.threads; ++i)
 	{
 #   if (ET_RT_EVALUATE_DISTRIBUTION)
 		workerThreads.emplace_back(&RaytracePrivate::visualizeDistributionThreadFunction, this, i);
 #	elif (ET_RT_EVALUATE_SAMPLER)
 		workerThreads.emplace_back(&RaytracePrivate::visualizeSamplerThreadFunction, this, i);
 #	else
-		if (options.method == RaytraceMethod::ForwardLightTracing)
+		if (scene.options.method == RaytraceMethod::ForwardLightTracing)
 		{
 			workerThreads.emplace_back(&RaytracePrivate::forwardPathTraceThreadFunction, this, i);
 		}
@@ -234,7 +233,7 @@ void RaytracePrivate::buildScene(const s3d::Scene::Pointer& input)
 		batches.insert(batches.end(), mesh->renderBatches().begin(), mesh->renderBatches().end());
 	}
 	
-	scene.build(batches, input->mainCamera(), options);
+	scene.build(batches, input->mainCamera());
 }
 
 void RaytracePrivate::buildRegions(const vec2i& aSize)
@@ -564,7 +563,7 @@ void RaytracePrivate::forwardPathTraceThreadFunction(uint32_t threadId)
 
 			projectToCamera(currentRay, source, color, triangleNormal);
 
-			for (uint32_t pathLength = 0; pathLength < options.maxPathLength; ++pathLength)
+			for (uint32_t pathLength = 0; pathLength < scene.options.maxPathLength; ++pathLength)
 			{
 				auto hit = scene.kdTree.traverse(currentRay);
 				if (hit.triangleIndex == InvalidIndex)
@@ -606,7 +605,7 @@ void RaytracePrivate::forwardPathTraceThreadFunction(uint32_t threadId)
 
 void RaytracePrivate::backwardPathTraceThreadFunction(uint32_t threadId)
 {
-	DataStorage<vec4> localData(sqr(options.renderRegionSize), 0);
+	DataStorage<vec4> localData(sqr(scene.options.renderRegionSize), 0);
 
 	while (running)
 	{
@@ -634,7 +633,7 @@ void RaytracePrivate::backwardPathTraceThreadFunction(uint32_t threadId)
 			for (pixel.x = region.origin.x; running && (pixel.x < region.origin.x + region.size.x); ++pixel.x)
 			{
 				uint32_t bounces = 0;
-				localData[k++] = raytracePixel(pixel, options.raysPerPixel, bounces);
+				localData[k++] = raytracePixel(pixel, scene.options.raysPerPixel, bounces);
 			}
 		}
 
@@ -661,7 +660,7 @@ void RaytracePrivate::backwardPathTraceThreadFunction(uint32_t threadId)
 
 	if (threadCounter.load() == 0)
 	{
-		if (options.renderKDTree)
+		if (scene.options.renderKDTree)
 			renderSpacePartitioning();
 
 		auto endTime = queryContiniousTimeInMilliSeconds();
@@ -700,8 +699,8 @@ vec4 RaytracePrivate::raytracePixel(const vec2i& intCoord, uint32_t samples, uin
 
 		float phi = fastRandomFloat() * DOUBLE_PI;
 		float r = std::sqrt(fastRandomFloat());
-		float uScale = std::sin(phi) * options.apertureSize * r;
-		float vScale = std::cos(phi) * options.apertureSize * r;
+		float uScale = std::sin(phi) * scene.options.apertureSize * r;
+		float vScale = std::cos(phi) * scene.options.apertureSize * r;
 		vec3 uOffset = perpendicularVector(baseRay.direction);
 		vec3 vOffset = cross(uOffset, baseRay.direction);
 
@@ -709,18 +708,18 @@ vec4 RaytracePrivate::raytracePixel(const vec2i& intCoord, uint32_t samples, uin
 		vec3 shiftedDirection = (focalPoint - shiftedOrigin).normalize();
 
 		float w = filter.weight(sample);
-		result += integrator->evaluate(scene, ray3d(shiftedOrigin, shiftedDirection), options.maxPathLength, bounces) * w;
+		result += integrator->evaluate(scene, ray3d(shiftedOrigin, shiftedDirection), scene.options.maxPathLength, bounces) * w;
 		weight += w;
 	}
 	vec3 output = result.xyz() / weight;
 
 #if (ET_RT_ENABLE_GAMMA_CORRECTION)
+	if (isnan(output.x) || isnan(output.y) || isnan(output.z))
+		output = vec3(1000.0f, 0.0f, 1000.0f);
+
 	output.x = std::pow(output.x, 1.0f / 2.2f);
 	output.y = std::pow(output.y, 1.0f / 2.2f);
 	output.z = std::pow(output.z, 1.0f / 2.2f);
-	ET_ASSERT(!isnan(output.x));
-	ET_ASSERT(!isnan(output.y));
-	ET_ASSERT(!isnan(output.z));
 #endif
 
 	return vec4(output, 1.0f);
@@ -889,12 +888,13 @@ void RaytracePrivate::flushToForwardTraceBuffer(const Vector<float4>& localBuffe
 		output.w = 1.0f;
 
 #   if (ET_RT_ENABLE_GAMMA_CORRECTION)
+
+		if (isnan(output.x) || isnan(output.y) || isnan(output.z))
+			output = vec4(1000.0f, 0.0f, 1000.0f, 1.0f);
+
 		output.x = std::pow(output.x, 1.0f / 2.2f);
 		output.y = std::pow(output.y, 1.0f / 2.2f);
 		output.z = std::pow(output.z, 1.0f / 2.2f);
-		ET_ASSERT(!isnan(output.x));
-		ET_ASSERT(!isnan(output.y));
-		ET_ASSERT(!isnan(output.z));
 #    endif
 
 		vec2i px(static_cast<int>(i % viewportSize.x), static_cast<int>(i / viewportSize.x));

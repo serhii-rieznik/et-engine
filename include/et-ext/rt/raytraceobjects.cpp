@@ -41,10 +41,7 @@ float4 computeReflectionVector(const float4& incidence, const float4& normal, fl
 #if (ET_RT_VISUALIZE_BRDF)
     return defaultLightDirection();
 #else
-	ET_ASSERT(incidence.dot(normal) < 0.0f);
-
-    auto idealReflection = reflect(incidence, normal);
-	ET_ASSERT(idealReflection.dot(normal) >= 0.0f);
+    float4 idealReflection = reflect(incidence, normal);
 	
 #	define MAX_REFLECTION_ATTEMPTS 16
 

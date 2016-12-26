@@ -21,9 +21,11 @@ namespace rt
 class ET_ALIGNED(16) Scene
 {
 public:
-	void build(const Vector<RenderBatch::Pointer>&, const Camera::Pointer&, const Options&);
+	void build(const Vector<RenderBatch::Pointer>&, const Camera::Pointer&);
 
 public:
+	Options options;
+
 	KDTree kdTree;
 	Material::Collection materials;
 	Emitter::Collection emitters;

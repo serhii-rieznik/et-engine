@@ -156,12 +156,17 @@ float4 AmbientOcclusionHackIntegrator::gather(const Ray& inRay, uint32_t maxPath
 	return float4(1.0f - std::exp(-SQRT_2 * distance));
 }
 
+inline float powerHeuristic(float fPdf, float gPdf) 
+{
+    float f = fPdf;
+	float g = gPdf;
+    return (f*f) / (f*f + g*g);
+}
+
 float4 BackwardPathTracingIntegrator::evaluate(const Scene& scene, const Ray& inRay, uint32_t maxPathLength, uint32_t& pathLength)
 {
 	if (maxPathLength == 0)
 		maxPathLength = 0x7FFFFFFF;
-
-	const uint32_t lightSamples = 1;
 
 	float4 result(0.0f);
 	float4 throughput(1.0f);
@@ -179,29 +184,57 @@ float4 BackwardPathTracingIntegrator::evaluate(const Scene& scene, const Ray& in
 		float4 nextPosition = hit.intersectionPoint + nrm * Constants::epsilon;
 		float4 uv0 = tri.interpolatedTexCoord0(hit.intersectionPointBarycentric);
 
+		float4 lightSamplesContrib = float4(0.0f);
+		for (MeshEmitter::Pointer emitter : scene.emitters)
+		{
+			if (emitter->materialIndex() == tri.materialIndex)
+				continue;
+
+			float lightPdf = 0.0f;
+			float4 lightNormal = float4(0.0f);
+			float4 lightPoint = emitter->samplePoint(scene);
+			float4 lightSample = normalize(lightPoint - nextPosition);
+			float4 lightColor = emitter->evaluate(scene, nextPosition, lightSample, lightNormal, lightPoint, lightPdf);
+			if (lightPdf > 0.0f)
+			{
+				BSDFSample f(currentRay.direction, lightSample, nrm, mtl, uv0);
+				float bsdfPdf = f.pdf();
+				float weight = powerHeuristic(lightPdf, bsdfPdf);
+				lightSamplesContrib += f.evaluate() * lightColor * (weight * std::max(0.0f, -lightNormal.dot(lightSample)) / (PI * lightPdf));
+			}
+
+			float bsdfPdf = 0.0f;
+			float4 bsdfNormal = float4(0.0f);
+			float4 bsdfPosition = float4(0.0f);
+			BSDFSample bsdfSample(currentRay.direction, nrm, mtl, uv0);
+			float4 bsdfColor = emitter->evaluate(scene, nextPosition, bsdfSample.Wo, bsdfNormal, bsdfPosition, bsdfPdf);
+
+			if (bsdfPdf > 0.0f)
+			{
+				float lightPdf = emitter->pdf(nextPosition, bsdfSample.Wo, bsdfPosition, bsdfNormal);
+				float weight = powerHeuristic(bsdfPdf, lightPdf);
+				float4 lightContribution = bsdfColor * (std::max(0.0f, -bsdfNormal.dot(lightSample)) / (PI * bsdfPdf));
+				lightSamplesContrib += lightContribution * bsdfSample.evaluate() * weight;
+			}
+
+			/*
+				EmitterInteraction interaction = emitter->sample(scene, nextPosition, nrm);
+				if (interaction.pdf > 0.0f)
+				{
+					float4 lightBsdf = interaction.color * interaction.cosTheta / (PI * interaction.pdf);
+
+					BSDFSample bsdf1(currentRay.direction, nrm, mtl, uv0, BSDFSample::Direction::Backward);
+
+					BSDFSample surfaceBsdf(currentRay.direction, interaction.direction, nrm, mtl, uv0, BSDFSample::Direction::Backward);
+					lightSamplesContrib += bsdf1.evaluate();
+				}
+			*/
+		}
+
+		result += throughput * (lightSamplesContrib + mtl.emissive * 0.0f);
+
 		BSDFSample sample(currentRay.direction, nrm, mtl, uv0, et::rt::BSDFSample::Direction::Backward);
 		throughput *= sample.combinedEvaluate();
-
-		if (lightSamples > 0)
-		{
-			float4 lightSamplesContrib = float4(0.0f);
-			for (uint32_t ls = 0; ls < lightSamples; ++ls)
-			{
-				for (const Emitter::Pointer emitter : scene.emitters)
-				{
-					if (emitter->materialIndex() != tri.materialIndex)
-					{
-						EmitterInteraction i = emitter->sample(scene, nextPosition, nrm);
-						float lightBsdf = std::max(0.0f, -i.normal.dot(i.direction));
-						float surfaceBsdf = std::max(0.0f, nrm.dot(i.direction)) / PI;
-						lightSamplesContrib += throughput * i.sample * (lightBsdf * surfaceBsdf);
-					}
-				}
-			}
-			result += lightSamplesContrib / static_cast<float>(lightSamples);
-		}
-		
-		result += throughput * mtl.emissive;
 
 #	if (ET_RT_USE_RUSSIAN_ROULETTE)
 		if (pathLength > 16)
