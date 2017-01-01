@@ -12,12 +12,12 @@
 
 namespace et
 {
-	class ModelLoader
-	{
-	public:
-		virtual s3d::ElementContainer::Pointer load(RenderInterface::Pointer, s3d::Storage&, ObjectsCache&) = 0;
+class ModelLoader
+{
+public:
+	virtual s3d::ElementContainer::Pointer load(RenderInterface::Pointer, s3d::Storage&, ObjectsCache&) = 0;
 
-	public:
-		virtual ~ModelLoader() { }
-	};
+public:
+	virtual ~ModelLoader() {}
+};
 }

@@ -400,14 +400,16 @@ std::string et::selectFile(const StringList&, SelectFileMode mode, const std::st
 	ET_STRING_TYPE defaultFileName = ET_STRING_TO_PARAM_TYPE(defaultName);
 
 	uint32_t fileNameSize = static_cast<uint32_t>(std::max(size_t(MAX_PATH), defaultFileName.size()) + 1, 0);
-	DataStorage<ET_CHAR_TYPE> defaultFileNameData(fileNameSize);
-	etCopyMemory(defaultFileNameData.data(), defaultFileName.data(), defaultFileName.size());
+	
+	StaticDataStorage<ET_CHAR_TYPE, MAX_PATH> fileNameBuffer(0);
+	etCopyMemory(fileNameBuffer.begin(), defaultName.c_str(), fileNameSize);
 
 	OPENFILENAME of = { };
+	of.hwndOwner = reinterpret_cast<HWND>(application().context().objects[0]);
 	of.lStructSize = sizeof(of);
 	of.hInstance = GetModuleHandle(nullptr);
-	of.Flags = OFN_DONTADDTORECENT | OFN_ENABLESIZING | OFN_EXPLORER | OFN_NOCHANGEDIR | OFN_PATHMUSTEXIST;
-	of.lpstrFile = defaultFileNameData.data();
+	of.Flags = OFN_ENABLESIZING | OFN_EXPLORER | OFN_NOCHANGEDIR | OFN_PATHMUSTEXIST;
+	of.lpstrFile = fileNameBuffer.begin();
 	of.nMaxFile = MAX_PATH;
 
 #if (_UNICODE)
@@ -417,8 +419,10 @@ std::string et::selectFile(const StringList&, SelectFileMode mode, const std::st
 #endif
 
 	auto func = (mode == SelectFileMode::Save) ? GetSaveFileName : GetOpenFileName;
+	if (func(&of))
+		return ET_STRING_TO_OUTPUT_TYPE(of.lpstrFile);
 
-	return func(&of) ? ET_STRING_TO_OUTPUT_TYPE(of.lpstrFile) : emptyString;
+	return emptyString;
 }
 
 void et::alert(const std::string& title, const std::string& message, const std::string&, AlertType type)

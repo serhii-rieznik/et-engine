@@ -28,6 +28,9 @@ public:
 	Vector<RenderBatch::Pointer>& renderBatches();
 	const Vector<RenderBatch::Pointer>& renderBatches() const;
 
+	// Helper function - broadcasts material to all batches
+	void setMaterial(const Material::Pointer&);
+
 	virtual RayIntersection intersectsWorldSpaceRay(const ray3d& ray) { return RayIntersection(); }
 
 private:

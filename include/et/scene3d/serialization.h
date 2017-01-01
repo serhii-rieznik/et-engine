@@ -19,7 +19,6 @@ class Material;
 namespace s3d
 {
 class BaseElement;
-class SceneMaterial;
 class SerializationHelper
 {
 public:

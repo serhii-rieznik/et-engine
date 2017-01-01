@@ -12,18 +12,20 @@
 
 namespace et
 {
-	class RenderContext;
-	class FBXLoader : public ModelLoader
-	{
-	public:
-		FBXLoader(const std::string& filename);
 
-		void setShouldCreateRenderObjects(bool);
+class RenderContext;
+class FBXLoader : public ModelLoader
+{
+public:
+	FBXLoader(const std::string& filename);
 
-		s3d::ElementContainer::Pointer load(RenderContext*, MaterialProvider*, s3d::Storage&, ObjectsCache&) override;
+	void setShouldCreateRenderObjects(bool);
 
-	private:
-		std::string _filename;
-		bool _shouldCreateRenderObjects = true;
-	};
+	s3d::ElementContainer::Pointer load(RenderInterface::Pointer, s3d::Storage&, ObjectsCache&) override;
+
+private:
+	std::string _filename;
+	bool _shouldCreateRenderObjects = true;
+};
+
 }

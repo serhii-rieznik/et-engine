@@ -78,7 +78,7 @@ public:
 	template <typename ...args>
 	static IntrusivePtr create(args&&...a)
 	{
-		return IntrusivePtr<T>(sharedObjectFactory().createObject<T>(a...));
+		return IntrusivePtr<T>(sharedObjectFactory().createObject<T>(std::forward<args>(a)...));
 	}
 
 #else

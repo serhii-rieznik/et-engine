@@ -7,8 +7,11 @@
 
 #include <et/scene3d/renderableelement.h>
 
-using namespace et;
-using namespace et::s3d;
+namespace et 
+{
+
+namespace s3d
+{
 
 RenderableElement::RenderableElement(const std::string& name, BaseElement* parent) :
 	ElementContainer(name, parent)
@@ -36,4 +39,15 @@ Vector<RenderBatch::Pointer>& RenderableElement::renderBatches()
 const Vector<RenderBatch::Pointer>& RenderableElement::renderBatches() const
 {
 	return _renderBatches;
+}
+
+void RenderableElement::setMaterial(const Material::Pointer& mtl)
+{
+	for (RenderBatch::Pointer& rb : renderBatches())
+	{
+		rb->setMaterial(mtl);
+	}
+}
+
+}
 }

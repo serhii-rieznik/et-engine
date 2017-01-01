@@ -27,9 +27,12 @@ void Renderer::render(RenderInterface::Pointer& renderer, const Scene::Pointer& 
 
 	extractBatches(scene);
 	
-	clip(_shadowPass, _renderBatches, _shadowPassBatches);
-	render(_shadowPass, _shadowPassBatches);
-	renderer->submitRenderPass(_shadowPass);
+	if (_shadowPass.valid())
+	{
+		clip(_shadowPass, _renderBatches, _shadowPassBatches);
+		render(_shadowPass, _shadowPassBatches);
+		renderer->submitRenderPass(_shadowPass);
+	}
 
 	clip(_mainPass, _renderBatches, _mainPassBatches);
 	render(_mainPass, _mainPassBatches);
@@ -87,7 +90,7 @@ void Renderer::validateShadowPass(RenderInterface::Pointer& renderer)
 		_mainPass->setSharedTexture(MaterialTexture::Shadow, _shadowTexture, smp);
 	}
 
-	if (_shadowPass.invalid() || (_shadowPass->info().camera != _mainPass->info().light))
+	if (_mainPass->info().light.valid() && (_shadowPass.invalid() || (_shadowPass->info().camera != _mainPass->info().light)))
 	{
 		RenderPass::ConstructionInfo passInfo;
 		passInfo.camera = _mainPass->info().light;

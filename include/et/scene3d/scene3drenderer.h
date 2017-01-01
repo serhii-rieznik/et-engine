@@ -14,7 +14,7 @@ namespace et
 {
 namespace s3d
 {
-class Renderer : public FlagsHolder
+class Renderer : public Shared, public FlagsHolder
 {
 public:
 	ET_DECLARE_POINTER(Renderer);
