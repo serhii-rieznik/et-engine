@@ -76,15 +76,15 @@ Dictionary RenderBatch::serialize() const
 	return result;
 }
 
-bool RenderBatch::intersectsLocalSpaceRay(const ray3d& ray, vec3& intersection)
+RayIntersection RenderBatch::intersectsLocalSpaceRay(const ray3d& ray) const
 {
+	RayIntersection result;
+
 	if (_vertexStorage->hasAttributeWithType(VertexAttributeUsage::Position, DataType::Vec3) == false)
 	{
 		log::error("Unable to calculate intersection - missing position attribute.");
 	}
 	
-	bool found = false;
-	float minDistance = std::numeric_limits<float>::max();
 	const auto pos = _vertexStorage->accessData<DataType::Vec3>(VertexAttributeUsage::Position, 0);
 	uint32_t numTriangles = _numIndexes / 3;
 	for (uint32_t t = 0; t < numTriangles; ++t)
@@ -99,16 +99,15 @@ bool RenderBatch::intersectsLocalSpaceRay(const ray3d& ray, vec3& intersection)
 		if (intersect::rayTriangle(ray, triangle(p0, p1, p2), &ip))
 		{
 			float d = (ip - ray.origin).dotSelf();
-			if (d < minDistance)
+			if (d < result.time)
 			{
-				minDistance = d;
-				intersection = ip;
-				found = true;
+				result.time = d;
+				result.occurred = true;
 			}
 		}
 	}
 	
-	return found;
+	return result;
 }
 
 RenderBatch* RenderBatch::duplicate() const

@@ -107,7 +107,7 @@ public:
 
 	const BoundingBox& transformedBoundingBox();
 
-	bool intersectsLocalSpaceRay(const ray3d&, vec3& intersection);
+	RayIntersection intersectsLocalSpaceRay(const ray3d&) const;
 
 	Dictionary serialize() const;
 

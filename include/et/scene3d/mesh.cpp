@@ -10,8 +10,11 @@
 #include <et/scene3d/mesh.h>
 #include <et/scene3d/storage.h>
 
-using namespace et;
-using namespace et::s3d;
+namespace et 
+{
+
+namespace s3d 
+{
 
 const std::string Mesh::defaultMeshName = "mesh";
 
@@ -289,4 +292,33 @@ VertexStorage::Pointer Mesh::bakeDeformations()
 	return result;
 	// */
 	return VertexStorage::Pointer();
+}
+
+RayIntersection Mesh::intersectsWorldSpaceRay(const ray3d& ray)
+{
+	RayIntersection result;
+	mat4 invTransform = transform().inverted();
+	ray3d localRay(invTransform * ray.origin, invTransform.rotationMultiply(ray.direction));
+	for (const RenderBatch::Pointer& rb : renderBatches())
+	{
+		RayIntersection batchIntersection = rb->intersectsLocalSpaceRay(localRay);
+		if (batchIntersection.occurred && (batchIntersection.time < result.time))
+		{
+			result.occurred = true;
+			result.time = batchIntersection.time;
+		}
+	}
+
+	if (result.occurred)
+	{
+		vec3 worldSpacePos = localRay.origin + result.time * localRay.direction;
+		worldSpacePos = transform() * worldSpacePos;
+		result.time = (worldSpacePos - ray.origin).length();
+	}
+
+	return result;
+}
+
+}
+
 }

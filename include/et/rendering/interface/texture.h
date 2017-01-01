@@ -8,6 +8,7 @@
 #pragma once
 
 #include <et/rendering/base/rendering.h>
+#include <et/core/containers.h>
 
 namespace et
 {

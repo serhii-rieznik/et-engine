@@ -48,6 +48,8 @@ public:
 
 	bool skinned() const;
 	VertexStorage::Pointer bakeDeformations();
+
+	RayIntersection intersectsWorldSpaceRay(const ray3d& ray) override;
 	
 protected:
 	void transformInvalidated() override;
