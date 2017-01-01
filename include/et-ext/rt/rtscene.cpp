@@ -37,7 +37,6 @@ void Scene::build(const Vector<RenderBatch::Pointer>& batches, const Camera::Poi
 
 	for (const auto& rb : batches)
 	{
-		bool isEmitter = false;
 		et::Material::Pointer batchMaterial = rb->material();
 
 		index materialIndex = materialIndexWithName(batchMaterial->name());
@@ -71,11 +70,9 @@ void Scene::build(const Vector<RenderBatch::Pointer>& batches, const Camera::Poi
 			mat.diffuse = gammaCorrectedInput(batchMaterial->getVector(MaterialParameter::AlbedoColor));
 			mat.specular = gammaCorrectedInput(batchMaterial->getVector(MaterialParameter::ReflectanceColor));
 			mat.emissive = float4(batchMaterial->getVector(MaterialParameter::EmissiveColor));
-			mat.roughness = sqr(alpha);
-			mat.metallness = sqr(metallness);
+			mat.roughness = clamp(std::pow(alpha, 4.0f), 0.001f, 1.0f);
+			mat.metallness = metallness;
 			mat.ior = eta;
-
-			isEmitter = mat.emissive.length() > 0.0f;
 		}
 
 		VertexStorage::Pointer vs = rb->vertexStorage();
@@ -128,8 +125,10 @@ void Scene::build(const Vector<RenderBatch::Pointer>& batches, const Camera::Poi
 		}
 
 		index numTriangles = static_cast<index>(triangles.size()) - firstTriange;
+		bool isEmitter = materials.at(materialIndex).emissive.length() > 0.0f;
 		if (isEmitter && (numTriangles > 0))
 		{
+			log::info("Adding area emitter");
 			MeshEmitter::Pointer emitter = MeshEmitter::Pointer::create(firstTriange, numTriangles, materialIndex);
 			emitters.push_back(emitter);
 		}

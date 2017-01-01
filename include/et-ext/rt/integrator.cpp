@@ -92,6 +92,16 @@ float4 NormalsIntegrator::gather(const Ray& inRay, uint32_t maxPathLength,
 	return tri.interpolatedNormal(hit0.intersectionPointBarycentric) * 0.5f + float4(0.5f);
 }
 
+float4 NormalsIntegrator::evaluate(const Scene& scene, const Ray& inRay, uint32_t maxPathLength, uint32_t& pathLength)
+{
+	KDTree::TraverseResult hit0 = scene.kdTree.traverse(inRay);
+	if (hit0.triangleIndex == InvalidIndex)
+		return float4(1.0f); // TODO : sample light? env->sampleInDirection(inRay.direction);
+
+	const auto& tri = scene.kdTree.triangleAtIndex(hit0.triangleIndex);
+	return tri.interpolatedNormal(hit0.intersectionPointBarycentric) * 0.5f + float4(0.5f);
+}
+
 /*
  * Fresnel
  */
@@ -184,57 +194,56 @@ float4 BackwardPathTracingIntegrator::evaluate(const Scene& scene, const Ray& in
 		float4 nextPosition = hit.intersectionPoint + nrm * Constants::epsilon;
 		float4 uv0 = tri.interpolatedTexCoord0(hit.intersectionPointBarycentric);
 
-		float4 lightSamplesContrib = float4(0.0f);
-		for (MeshEmitter::Pointer emitter : scene.emitters)
-		{
-			if (emitter->materialIndex() == tri.materialIndex)
-				continue;
+		float bsdfPdf = 0.0f;
 
+		BSDFSample bsdfSample(currentRay.direction, nrm, mtl, uv0);
+
+		bool hitEmitter = false;
+		for (MeshEmitter::Pointer em : scene.emitters)
+		{
+			if (em->materialIndex() == tri.materialIndex)
+			{
+				hitEmitter = true;
+				break;
+			}
+		}
+		float emitterPdf = 1.0f / static_cast<float>(scene.emitters.size());
+
+		float4 lightSamplesContrib = float4(0.0f);
+		if (hitEmitter)
+		{
+			lightSamplesContrib = mtl.emissive * std::max(0.0f, -currentRay.direction.dot(nrm));
+		}
+		else for (MeshEmitter::Pointer emitter : scene.emitters)
+		{
 			float lightPdf = 0.0f;
 			float4 lightNormal = float4(0.0f);
 			float4 lightPoint = emitter->samplePoint(scene);
-			float4 lightSample = normalize(lightPoint - nextPosition);
-			float4 lightColor = emitter->evaluate(scene, nextPosition, lightSample, lightNormal, lightPoint, lightPdf);
-			if (lightPdf > 0.0f)
+			float4 toLight = normalize(lightPoint - nextPosition);
+			float4 lightColor = emitter->evaluate(scene, nextPosition, toLight, lightNormal, lightPoint, lightPdf);
+			if ((scene.options.lightSamples > 0) && (lightPdf > 0.0f))
 			{
-				BSDFSample f(currentRay.direction, lightSample, nrm, mtl, uv0);
+				BSDFSample f(currentRay.direction, toLight, nrm, mtl, uv0);
 				float bsdfPdf = f.pdf();
 				float weight = powerHeuristic(lightPdf, bsdfPdf);
-				lightSamplesContrib += f.evaluate() * lightColor * (weight * std::max(0.0f, -lightNormal.dot(lightSample)) / (PI * lightPdf));
+				lightSamplesContrib += (lightColor * f.color) * (f.bsdf() * weight * std::max(0.0f, -lightNormal.dot(toLight)) / (PI * lightPdf * emitterPdf));
 			}
 
-			float bsdfPdf = 0.0f;
 			float4 bsdfNormal = float4(0.0f);
 			float4 bsdfPosition = float4(0.0f);
-			BSDFSample bsdfSample(currentRay.direction, nrm, mtl, uv0);
 			float4 bsdfColor = emitter->evaluate(scene, nextPosition, bsdfSample.Wo, bsdfNormal, bsdfPosition, bsdfPdf);
-
-			if (bsdfPdf > 0.0f)
+			if ((scene.options.bsdfSamples > 0) && (bsdfPdf > 0.0f))
 			{
 				float lightPdf = emitter->pdf(nextPosition, bsdfSample.Wo, bsdfPosition, bsdfNormal);
 				float weight = powerHeuristic(bsdfPdf, lightPdf);
-				float4 lightContribution = bsdfColor * (std::max(0.0f, -bsdfNormal.dot(lightSample)) / (PI * bsdfPdf));
+				float4 lightContribution = bsdfColor * (std::max(0.0f, -bsdfNormal.dot(bsdfSample.Wo)) / (PI * bsdfPdf * emitterPdf));
 				lightSamplesContrib += lightContribution * bsdfSample.evaluate() * weight;
 			}
-
-			/*
-				EmitterInteraction interaction = emitter->sample(scene, nextPosition, nrm);
-				if (interaction.pdf > 0.0f)
-				{
-					float4 lightBsdf = interaction.color * interaction.cosTheta / (PI * interaction.pdf);
-
-					BSDFSample bsdf1(currentRay.direction, nrm, mtl, uv0, BSDFSample::Direction::Backward);
-
-					BSDFSample surfaceBsdf(currentRay.direction, interaction.direction, nrm, mtl, uv0, BSDFSample::Direction::Backward);
-					lightSamplesContrib += bsdf1.evaluate();
-				}
-			*/
 		}
 
-		result += throughput * (lightSamplesContrib + mtl.emissive * 0.0f);
+		result += throughput * lightSamplesContrib;
 
-		BSDFSample sample(currentRay.direction, nrm, mtl, uv0, et::rt::BSDFSample::Direction::Backward);
-		throughput *= sample.combinedEvaluate();
+		throughput *= bsdfSample.combinedEvaluate();
 
 #	if (ET_RT_USE_RUSSIAN_ROULETTE)
 		if (pathLength > 16)
@@ -250,7 +259,7 @@ float4 BackwardPathTracingIntegrator::evaluate(const Scene& scene, const Ray& in
 #	endif
 
 		currentRay.origin = nextPosition;
-		currentRay.direction = sample.Wo;
+		currentRay.direction = bsdfSample.Wo;
 	}
 
 	return result;

@@ -45,6 +45,8 @@ public:
 public:
 	float4 gather(const Ray& inRay, uint32_t maxPathLength, uint32_t& pathLength, 
 		KDTree&, EnvironmentSampler::Pointer&, const Material::Collection&) override;
+
+	float4 evaluate(const Scene&, const Ray& inRay, uint32_t maxPathLength, uint32_t& pathLength) override;
 };
 
 class FresnelIntegrator : public Integrator
