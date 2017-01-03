@@ -42,8 +42,8 @@ void Scene::build(const Vector<RenderBatch::Pointer>& batches, const Camera::Poi
 		index materialIndex = materialIndexWithName(batchMaterial->name());
 		if (materialIndex == InvalidIndex)
 		{
-			float alpha = clamp(batchMaterial->getFloat(MaterialParameter::Roughness), 0.0f, 1.0f);
-			float metallness = clamp(batchMaterial->getFloat(MaterialParameter::Metallness), 0.0f, 1.0f);
+			float alpha = clamp(batchMaterial->getFloat(MaterialParameter::RoughnessScale), 0.0f, 1.0f);
+			float metallness = clamp(batchMaterial->getFloat(MaterialParameter::MetallnessScale), 0.0f, 1.0f);
 			float eta = batchMaterial->getFloat(MaterialParameter::IndexOfRefraction);
 
 			Material::Class cls = Material::Class::Diffuse;
@@ -67,8 +67,8 @@ void Scene::build(const Vector<RenderBatch::Pointer>& batches, const Camera::Poi
 			auto& mat = materials.back();
 
 			mat.name = batchMaterial->name();
-			mat.diffuse = gammaCorrectedInput(batchMaterial->getVector(MaterialParameter::AlbedoColor));
-			mat.specular = gammaCorrectedInput(batchMaterial->getVector(MaterialParameter::ReflectanceColor));
+			mat.diffuse = gammaCorrectedInput(batchMaterial->getVector(MaterialParameter::BaseColorScale));
+			mat.specular = gammaCorrectedInput(batchMaterial->getVector(MaterialParameter::BaseColorScale));
 			mat.emissive = float4(batchMaterial->getVector(MaterialParameter::EmissiveColor));
 			mat.roughness = clamp(std::pow(alpha, 4.0f), 0.001f, 1.0f);
 			mat.metallness = metallness;

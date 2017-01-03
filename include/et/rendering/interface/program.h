@@ -11,6 +11,8 @@
 #include <et/rendering/base/vertexdeclaration.h>
 #include <et/rendering/interface/textureset.h>
 
+#define ET_PROGRAM_PREFER_GLSL_INPUT 0
+
 namespace et
 {
 class Program : public LoadableObject

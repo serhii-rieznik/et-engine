@@ -18,12 +18,12 @@ public:
 
 PipelineStateCache::PipelineStateCache()
 {
-	ET_PIMPL_INIT(PipelineStateCache)
+	ET_PIMPL_INIT(PipelineStateCache);
 }
 
 PipelineStateCache::~PipelineStateCache()
 {
-	ET_PIMPL_FINALIZE(PipelineStateCache)
+	ET_PIMPL_FINALIZE(PipelineStateCache);
 }
 
 PipelineState::Pointer PipelineStateCache::find(const VertexDeclaration& decl, const Program::Pointer& program, 

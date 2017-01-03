@@ -183,18 +183,31 @@ std::string Material::generateInputLayout()
 	std::string layout;
 	layout.reserve(1024);
 
+#if (ET_PROGRAM_PREFER_GLSL_INPUT)
+	for (const auto& element : _inputLayout.elements())
+	{
+		char buffer[256] = {};
+		sprintf(buffer, "layout (location = %u) in %s %s;\n",
+			static_cast<uint32_t>(element.usage()),
+			dataTypeToString(element.type(), _renderer->api()).c_str(),
+			vertexAttributeUsageToString(element.usage()).c_str());
+		layout.append(buffer);
+	}
+#else
 	layout.append("struct VSInput {\n");
 	for (const auto& element : _inputLayout.elements())
 	{
 		char buffer[256] = {};
-		sprintf(buffer, "%s %s;\n",
+		sprintf(buffer, "%s %s : %s;\n",
 			dataTypeToString(element.type(), _renderer->api()).c_str(),
-			vertexAttributeUsageToString(element.usage()).c_str()
+			vertexAttributeUsageToString(element.usage()).c_str(),
+			vertexAttributeUsageSemantics(element.usage()).c_str()
 		);
 
 		layout.append(buffer);
 	}
 	layout.append("};\n");
+#endif
 
 	return layout;
 }
@@ -212,7 +225,11 @@ void Material::loadCode(const Dictionary& codes, const std::string& baseFolder, 
 void Material::loadCode(const std::string& codeString, RenderPassClass passCls, const std::string& baseFolder, Dictionary defines)
 {
 	application().pushSearchPath(baseFolder);
+#if (ET_PROGRAM_PREFER_GLSL_INPUT)
+	std::string codeFileName = application().resolveFileName(codeString + ".glsl");
+#else
 	std::string codeFileName = application().resolveFileName(codeString + ".hlsl");
+#endif
 	application().popSearchPaths();
 
 	ET_ASSERT(fileExists(codeFileName));
@@ -512,7 +529,6 @@ MaterialTexture mtl::stringToMaterialTexture(const String& name)
 		if (ts.second == name)
 			return ts.first;
 	}
-	log::error("Unknown texture name %s", name.c_str());
 	return MaterialTexture::Count;
 }
 
@@ -523,59 +539,79 @@ const String& mtl::materialSamplerToString(MaterialTexture t)
 
 }
 
-MaterialTexture samplerToMaterialTexture(const String& name)
+MaterialTexture mtl::samplerToMaterialTexture(const String& name)
 {
 	for (const auto& ts : materialSamplerNames())
 	{
 		if (ts.second == name)
 			return ts.first;
 	}
-	log::error("Unknown sampler name %s", name.c_str());
 	return MaterialTexture::Count;
 }
 
 const std::string shaderDefaultHeader =
+#if (ET_PROGRAM_PREFER_GLSL_INPUT)
 R"(
-#define VertexStreamBufferIndex         0
-
-#define VariablesSetIndex               0
-#	define ObjectVariablesBufferIndex   4
+#version 450
+#define float2 vec2
+#define float3 vec3
+#define float4 vec4
+#define float4x4 mat4
+#define float3x3 mat3
+)"
+#endif
+R"(
+#define VariablesSetIndex 0
+#	define ObjectVariablesBufferIndex 4
 #	define MaterialVariablesBufferIndex 5
-#	define PassVariablesBufferIndex     6
+#	define PassVariablesBufferIndex 6
 
-#define TexturesSetIndex                1
-#   define AlbedoTextureBinding         0
-#   define ReflectanceTextureBinding    1
-#   define EmissiveTextureBinding       2
-#   define RoughnessTextureBinding      3
-#   define OpacityTextureBinding        4
-#   define NormalTextureBinding         5
+#define TexturesSetIndex 1
+#   define BaseColorTextureBinding 0
+#   define NormalRoughnesMetallnessTextureBinding 1
+#   define EmissiveColorTextureBinding 2
 
-#define SharedTexturesSetIndex          2
-#   define ShadowTextureBinding         6
-#   define AOTextureBinding             7
-#   define EnvironmentTextureBinding    8
+#define SharedTexturesSetIndex 2
+#   define ShadowTextureBinding 8
+#   define AOTextureBinding 9
+#   define EnvironmentTextureBinding 10
 
-#define PI                              3.1415926536
-#define HALF_PI                         1.5707963268
-#define DOUBLE_PI                       6.2831853072
-#define INV_PI                          0.3183098862
-
+#define PI 3.1415926536
+#define HALF_PI 1.5707963268
+#define DOUBLE_PI 6.2831853072
+#define INV_PI 0.3183098862
+)"
+#if (ET_PROGRAM_PREFER_GLSL_INPUT)
+R"(
+#define PassVariables PassVariables { \
+    mat4 viewProjection; \
+    mat4 projection; \
+    mat4 view; \
+    vec4 cameraPosition; \
+    vec4 cameraDirection; \
+    vec4 cameraUp; \
+    vec4 lightPosition; \
+    mat4 lightProjection; \
+}
+)"
+#else
+R"(
 #define CONSTANT_LOCATION_IMPL(name, registerName, spaceName) register(name##registerName, space##spaceName)
 #define CONSTANT_LOCATION(name, register, space)              CONSTANT_LOCATION_IMPL(name, register, space)
 
 cbuffer PassVariables : CONSTANT_LOCATION(b, PassVariablesBufferIndex, VariablesSetIndex) 
 {
-	float4x4 viewProjection;
-	float4x4 projection;
-	float4x4 view;
+	row_major float4x4 viewProjection;
+	row_major float4x4 projection;
+	row_major float4x4 view;
 	float4 cameraPosition;
 	float4 cameraDirection;
 	float4 cameraUp;
 	float4 lightPosition;
-	float4x4 lightProjection;
-} passVariables;
-
-)";
+	row_major float4x4 lightProjection;
+};
+)"
+#endif
+;
 
 }

@@ -40,12 +40,12 @@
 
 #define ET_PIMPL_INIT(T, ...)		static_assert(sizeof(_privateData) >= sizeof(T##Private), "Not enough storage for private implementation"); \
 									memset(_privateData, 0, sizeof(_privateData)); \
-									_private = new (_privateData) T##Private(__VA_ARGS__);
+									_private = new (_privateData) T##Private(__VA_ARGS__)
 
 #define ET_PIMPL_FINALIZE(T)		ET_ASSERT(_private != nullptr); \
 									_private->~T##Private(); \
 									_private = nullptr; \
-									memset(_privateData, 0, sizeof(_privateData));
+									memset(_privateData, 0, sizeof(_privateData))
 
 #include <et/platform/compileoptions.h>
 #include <et/platform/platform.h>

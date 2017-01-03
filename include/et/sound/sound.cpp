@@ -32,7 +32,7 @@ ALCcontext* getSharedContext();
 
 Manager::Manager()
 {
-	ET_PIMPL_INIT(Manager)
+	ET_PIMPL_INIT(Manager);
 	nativePreInit();
 	
 	const char* defaultDeviceSpecifier = alcGetString(nullptr, ALC_DEFAULT_DEVICE_SPECIFIER);
@@ -82,7 +82,7 @@ Manager::~Manager()
 	alcDestroyContext(sharedContext);
 	alcCloseDevice(sharedDevice);
 	
-	ET_PIMPL_FINALIZE(Manager)
+	ET_PIMPL_FINALIZE(Manager);
 	
     sharedDevice = nullptr;
 	nativePostRelease();

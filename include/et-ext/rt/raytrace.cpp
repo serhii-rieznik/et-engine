@@ -89,7 +89,7 @@ Raytrace::Raytrace()
 
 Raytrace::~Raytrace()
 {
-	ET_PIMPL_FINALIZE(Raytrace)
+	ET_PIMPL_FINALIZE(Raytrace);
 }
 
 void Raytrace::perform(s3d::Scene::Pointer scene, const vec2i& dimension)

@@ -75,10 +75,6 @@ VertexAttributeUsage stringToVertexAttributeUsage(const std::string& s)
 			break;
 		}
 	}
-	if (result == VertexAttributeUsage::Unknown)
-	{
-		log::warning("Unknown vertex attribute usage: %s", s.c_str());
-	}
 	return result;
 }
 

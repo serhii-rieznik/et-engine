@@ -77,7 +77,7 @@ VulkanTexture::~VulkanTexture()
 	vkDestroyImageView(_private->vulkan.device, _private->imageView, nullptr);
 	vkDestroyImage(_private->vulkan.device, _private->image, nullptr);
 	vkFreeMemory(_private->vulkan.device, _private->memory, nullptr);
-	ET_PIMPL_FINALIZE(VulkanTexture)
+	ET_PIMPL_FINALIZE(VulkanTexture);
 }
 
 void VulkanTexture::setImageData(const BinaryDataStorage& data)

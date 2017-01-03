@@ -1,18 +1,35 @@
-struct VSOutput 
+#include <et>
+#include <inputdefines>
+#include <inputlayout>
+
+cbuffer ObjectVariables : CONSTANT_LOCATION(b, ObjectVariablesBufferIndex, VariablesSetIndex)
 {
-	float4 position : SV_POSITION;
-	float3 normal
+	float4x4 worldTransform;
+	float4x4 worldRotationTransform;	
 };
 
-VSOutput vsMain(VSInput vsIn)
+struct VSOutput 
 {
-	VSOutput result;
-	result.position = 0.1 * float4(vsIn.position, 1.0);
-	result.normal = vsIn.normal;
-	return result;
+	float4 position : SV_Position;
+	float3 normal : NORMAL;
+};
+
+VSOutput vertexMain(VSInput vsIn)
+{
+	VSOutput vsOut;
+	vsOut.normal = mul(float4(vsIn.normal, 0.0), worldRotationTransform).xyz;
+	vsOut.position = mul(mul(float4(vsIn.position, 1.0), worldTransform), viewProjection);
+	return vsOut;
 }
 
-float4 psMain(VSOutput fsIn)
+struct FSOutput
 {
-	return float4(0.5 * fsIn.normal + 0.5, 1.0);
+	float4 color0 : SV_Target0;
+};
+
+FSOutput fragmentMain(VSOutput fsIn)
+{
+	FSOutput fsOut;
+	fsOut.color0 = float4(0.5 + 0.5 * normalize(fsIn.normal), 1.0);
+	return fsOut;
 }

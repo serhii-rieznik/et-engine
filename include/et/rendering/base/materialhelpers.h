@@ -21,7 +21,7 @@ enum class MaterialTexture : uint32_t
 	EmissiveColor,
 	
 	// shared textures
-	Shadow,
+	Shadow = 8,
 	AmbientOcclusion,
 	Environment,
 	

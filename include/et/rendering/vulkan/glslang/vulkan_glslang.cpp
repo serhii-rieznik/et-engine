@@ -12,108 +12,25 @@
 #include <external/glslang/glslang/MachineIndependent/localintermediate.h>
 #include <external/spirvcross/spirv_cross.hpp>
 #include <external/spirvcross/spirv_glsl.hpp>
-#include <et/core/et.h>
-#include <functional>
+#include <external/spirvcross/spirv_msl.hpp>
 #include "vulkan_glslang.h"
+#include <fstream>
+
+#define ET_COMPILE_TEST_HLSL 1
+
+#if (ET_PLATFORM_WIN && ET_COMPILE_TEST_HLSL)
+#	include <d3dcompiler.h>
+#	include <wrl/client.h>
+#	pragma comment(lib, "d3dcompiler.lib")
+#endif
+
+namespace glslang 
+{
+extern const TBuiltInResource DefaultTBuiltInResource;
+}
 
 namespace et
 {
-
-const TBuiltInResource defaultBuiltInResource = {
-	/* .MaxLights = */ 32,
-	/* .MaxClipPlanes = */ 6,
-	/* .MaxTextureUnits = */ 32,
-	/* .MaxTextureCoords = */ 32,
-	/* .MaxVertexAttribs = */ 64,
-	/* .MaxVertexUniformComponents = */ 4096,
-	/* .MaxVaryingFloats = */ 64,
-	/* .MaxVertexTextureImageUnits = */ 32,
-	/* .MaxCombinedTextureImageUnits = */ 80,
-	/* .MaxTextureImageUnits = */ 32,
-	/* .MaxFragmentUniformComponents = */ 4096,
-	/* .MaxDrawBuffers = */ 32,
-	/* .MaxVertexUniformVectors = */ 128,
-	/* .MaxVaryingVectors = */ 8,
-	/* .MaxFragmentUniformVectors = */ 16,
-	/* .MaxVertexOutputVectors = */ 16,
-	/* .MaxFragmentInputVectors = */ 15,
-	/* .MinProgramTexelOffset = */ -8,
-	/* .MaxProgramTexelOffset = */ 7,
-	/* .MaxClipDistances = */ 8,
-	/* .MaxComputeWorkGroupCountX = */ 65535,
-	/* .MaxComputeWorkGroupCountY = */ 65535,
-	/* .MaxComputeWorkGroupCountZ = */ 65535,
-	/* .MaxComputeWorkGroupSizeX = */ 1024,
-	/* .MaxComputeWorkGroupSizeY = */ 1024,
-	/* .MaxComputeWorkGroupSizeZ = */ 64,
-	/* .MaxComputeUniformComponents = */ 1024,
-	/* .MaxComputeTextureImageUnits = */ 16,
-	/* .MaxComputeImageUniforms = */ 8,
-	/* .MaxComputeAtomicCounters = */ 8,
-	/* .MaxComputeAtomicCounterBuffers = */ 1,
-	/* .MaxVaryingComponents = */ 60,
-	/* .MaxVertexOutputComponents = */ 64,
-	/* .MaxGeometryInputComponents = */ 64,
-	/* .MaxGeometryOutputComponents = */ 128,
-	/* .MaxFragmentInputComponents = */ 128,
-	/* .MaxImageUnits = */ 8,
-	/* .MaxCombinedImageUnitsAndFragmentOutputs = */ 8,
-	/* .MaxCombinedShaderOutputResources = */ 8,
-	/* .MaxImageSamples = */ 0,
-	/* .MaxVertexImageUniforms = */ 0,
-	/* .MaxTessControlImageUniforms = */ 0,
-	/* .MaxTessEvaluationImageUniforms = */ 0,
-	/* .MaxGeometryImageUniforms = */ 0,
-	/* .MaxFragmentImageUniforms = */ 8,
-	/* .MaxCombinedImageUniforms = */ 8,
-	/* .MaxGeometryTextureImageUnits = */ 16,
-	/* .MaxGeometryOutputVertices = */ 256,
-	/* .MaxGeometryTotalOutputComponents = */ 1024,
-	/* .MaxGeometryUniformComponents = */ 1024,
-	/* .MaxGeometryVaryingComponents = */ 64,
-	/* .MaxTessControlInputComponents = */ 128,
-	/* .MaxTessControlOutputComponents = */ 128,
-	/* .MaxTessControlTextureImageUnits = */ 16,
-	/* .MaxTessControlUniformComponents = */ 1024,
-	/* .MaxTessControlTotalOutputComponents = */ 4096,
-	/* .MaxTessEvaluationInputComponents = */ 128,
-	/* .MaxTessEvaluationOutputComponents = */ 128,
-	/* .MaxTessEvaluationTextureImageUnits = */ 16,
-	/* .MaxTessEvaluationUniformComponents = */ 1024,
-	/* .MaxTessPatchComponents = */ 120,
-	/* .MaxPatchVertices = */ 32,
-	/* .MaxTessGenLevel = */ 64,
-	/* .MaxViewports = */ 16,
-	/* .MaxVertexAtomicCounters = */ 0,
-	/* .MaxTessControlAtomicCounters = */ 0,
-	/* .MaxTessEvaluationAtomicCounters = */ 0,
-	/* .MaxGeometryAtomicCounters = */ 0,
-	/* .MaxFragmentAtomicCounters = */ 8,
-	/* .MaxCombinedAtomicCounters = */ 8,
-	/* .MaxAtomicCounterBindings = */ 1,
-	/* .MaxVertexAtomicCounterBuffers = */ 0,
-	/* .MaxTessControlAtomicCounterBuffers = */ 0,
-	/* .MaxTessEvaluationAtomicCounterBuffers = */ 0,
-	/* .MaxGeometryAtomicCounterBuffers = */ 0,
-	/* .MaxFragmentAtomicCounterBuffers = */ 1,
-	/* .MaxCombinedAtomicCounterBuffers = */ 1,
-	/* .MaxAtomicCounterBufferSize = */ 16384,
-	/* .MaxTransformFeedbackBuffers = */ 4,
-	/* .MaxTransformFeedbackInterleavedComponents = */ 64,
-	/* .MaxCullDistances = */ 8,
-	/* .MaxCombinedClipAndCullDistances = */ 8,
-	/* .MaxSamples = */ 4,
-	/* .limits = */ {
-		/* .nonInductiveForLoops = */ 1,
-		/* .whileLoops = */ 1,
-		/* .doWhileLoops = */ 1,
-		/* .generalUniformIndexing = */ 1,
-		/* .generalAttributeMatrixVectorIndexing = */ 1,
-		/* .generalVaryingIndexing = */ 1,
-		/* .generalSamplerIndexing = */ 1,
-		/* .generalVariableIndexing = */ 1,
-		/* .generalConstantMatrixVectorIndexing = */ 1,
-	} };
 
 void buildProgramReflection(glslang::TProgram*, Program::Reflection& reflection);
 void dumpSource(const std::string&);
@@ -147,7 +64,7 @@ bool glslToSPIRV(const std::string& vertexSource, const std::string& fragmentSou
 		etDestroyObject(program);
 	});
 
-	if (!vertexShader.parse(&defaultBuiltInResource, 100, true, messages))
+	if (!vertexShader.parse(&glslang::DefaultTBuiltInResource, 100, true, messages))
 	{
 		log::error("Failed to parse vertex shader:\n%s", vertexShader.getInfoLog());
 		dumpSource(vertexSource);
@@ -155,7 +72,7 @@ bool glslToSPIRV(const std::string& vertexSource, const std::string& fragmentSou
 		return false;
 	}
 	
-	if (!fragmentShader.parse(&defaultBuiltInResource, 100, true, messages))
+	if (!fragmentShader.parse(&glslang::DefaultTBuiltInResource, 100, true, messages))
 	{
 		log::error("Failed to parse fragment shader:\n%s", fragmentShader.getInfoLog());
 		dumpSource(fragmentSource);
@@ -229,12 +146,13 @@ class VertexShaderAttribLocationTraverser : public glslang::TIntermTraverser
 {
 	void visitSymbol(glslang::TIntermSymbol* symbol) override
 	{
+		std::string attribName(symbol->getName().c_str());
 		glslang::TQualifier& qualifier = symbol->getQualifier();
+
 		if ((qualifier.storage == glslang::TStorageQualifier::EvqVaryingIn) && qualifier.hasLocation())
 		{
-			std::string attribName(symbol->getName().c_str());
 			VertexAttributeUsage usage = stringToVertexAttributeUsage(attribName);
-			if (usage != VertexAttributeUsage::Unknown)
+			if ((usage != VertexAttributeUsage::Unknown) && (static_cast<int>(usage) != qualifier.layoutLocation))
 			{
 				log::info("Input symbol: %s, location remapped from %d to %d", 
 					attribName.c_str(), qualifier.layoutLocation, static_cast<uint32_t>(usage));
@@ -247,14 +165,50 @@ class VertexShaderAttribLocationTraverser : public glslang::TIntermTraverser
 bool hlslToSPIRV(const std::string& source, std::vector<uint32_t>& vertexBin, std::vector<uint32_t>& fragmentBin,
 	Program::Reflection& reflection)
 {
-	EShMessages messages = static_cast<EShMessages>(EShMsgVulkanRules | EShMsgSpvRules | EShMsgReadHlsl);
-	const char* sourceCStr[] = { source.c_str(), source.c_str() };
-	const char* sourceNames[] = { "vertex_shader_source", "fragment_shader_source" };
+#if (ET_PLATFORM_WIN && ET_COMPILE_TEST_HLSL)
+	Microsoft::WRL::ComPtr<ID3DBlob> vertexBlob = nullptr;
+	Microsoft::WRL::ComPtr<ID3DBlob> vertexErrors = nullptr;
+	HRESULT vResult = D3DCompile(source.c_str(), source.length(), nullptr, nullptr, nullptr, "vertexMain", "vs_5_1", 
+		D3DCOMPILE_DEBUG | D3DCOMPILE_ENABLE_STRICTNESS | D3DCOMPILE_OPTIMIZATION_LEVEL0 | D3DCOMPILE_WARNINGS_ARE_ERRORS, 
+		0, vertexBlob.GetAddressOf(), vertexErrors.GetAddressOf());
+
+	if (FAILED(vResult))
+	{
+		log::error("Compile test of HLSL vertex shader failed");
+		if (vertexErrors)
+		{
+			std::string errorString(reinterpret_cast<const char*>(vertexErrors->GetBufferPointer()), vertexErrors->GetBufferSize());
+			log::error("Errors: %s", errorString.c_str());
+		}
+	}
+
+	Microsoft::WRL::ComPtr<ID3DBlob> fragmentBlob = nullptr;
+	Microsoft::WRL::ComPtr<ID3DBlob> fragmentErrors = nullptr;
+	HRESULT fResult = D3DCompile(source.c_str(), source.length(), nullptr, nullptr, nullptr, "fragmentMain", "ps_5_1", 
+		D3DCOMPILE_DEBUG | D3DCOMPILE_ENABLE_STRICTNESS | D3DCOMPILE_OPTIMIZATION_LEVEL0 | D3DCOMPILE_WARNINGS_ARE_ERRORS, 
+		0, fragmentBlob.GetAddressOf(), fragmentErrors.GetAddressOf());
+	if (FAILED(fResult))
+	{
+		log::error("Compile test of HLSL fragment shader failed");
+		if (fragmentErrors)
+		{
+			std::string errorString(reinterpret_cast<const char*>(fragmentErrors->GetBufferPointer()), fragmentErrors->GetBufferSize());
+			log::error("Errors: %s", errorString.c_str());
+		}
+	}
+#endif
+
+	EShMessages messages = static_cast<EShMessages>(EShMsgSpvRules | EShMsgReadHlsl);
+	const char* vs[] = { source.c_str() };
+	const char* vsName[] = { "vertex_shader_source" };
+	const char* fs[] = { source.c_str() };
+	const char* fsName[] = { "fragment_shader_source" };
 
 	glslang::TShader vertexShader(EShLanguage::EShLangVertex);
-	vertexShader.setStringsWithLengthsAndNames(sourceCStr, nullptr, sourceNames, 1);
+	vertexShader.setStringsWithLengthsAndNames(vs, nullptr, vsName, 1);
+	vertexShader.setAutoMapBindings(true);
 	vertexShader.setEntryPoint("vertexMain");
-	if (!vertexShader.parse(&defaultBuiltInResource, 100, true, messages))
+	if (!vertexShader.parse(&glslang::DefaultTBuiltInResource, 110, true, messages))
 	{
 		log::error("Failed to parse vertex shader:\n%s", vertexShader.getInfoLog());
 		dumpSource(source);
@@ -263,9 +217,10 @@ bool hlslToSPIRV(const std::string& source, std::vector<uint32_t>& vertexBin, st
 	}
 	
 	glslang::TShader fragmentShader(EShLanguage::EShLangFragment);
-	fragmentShader.setStringsWithLengthsAndNames(sourceCStr + 1, nullptr, sourceNames + 1, 1);
+	fragmentShader.setStringsWithLengthsAndNames(fs, nullptr, fsName, 1);
+	fragmentShader.setAutoMapBindings(true);
 	fragmentShader.setEntryPoint("fragmentMain");
-	if (!fragmentShader.parse(&defaultBuiltInResource, 100, true, messages))
+	if (!fragmentShader.parse(&glslang::DefaultTBuiltInResource, 110, true, messages))
 	{
 		log::error("Failed to parse fragment shader:\n%s", fragmentShader.getInfoLog());
 		dumpSource(source);
@@ -282,6 +237,7 @@ bool hlslToSPIRV(const std::string& source, std::vector<uint32_t>& vertexBin, st
 		debug::debugBreak();
 		return false;
 	}
+
 	if (!program->mapIO())
 	{
 		log::error("Failed to map program's IO:\n%s", program->getInfoLog());
@@ -325,7 +281,6 @@ bool hlslToSPIRV(const std::string& source, std::vector<uint32_t>& vertexBin, st
 		std::string allMessages = logger.getAllMessages();
 		if (!allMessages.empty())
 			log::info("Vertex HLSL to SPV:\n%s", allMessages.c_str());
-		crossCompile(vertexBin);
 	}
 
 	{
@@ -335,7 +290,6 @@ bool hlslToSPIRV(const std::string& source, std::vector<uint32_t>& vertexBin, st
 		std::string allMessages = logger.getAllMessages();
 		if (!allMessages.empty())
 			log::info("Fragment HLSL to SPV:\n%s", allMessages.c_str());
-		crossCompile(fragmentBin);
 	}
 
 	return true;
@@ -364,10 +318,6 @@ void buildProgramReflection(glslang::TProgram* program, Program::Reflection& ref
 			int attribType = program->getAttributeType(attrib);
 			DataType dataType = vulkan::gl::dataTypeFromGLType(attribType);
 			reflection.inputLayout.push_back(usage, dataType);
-		}
-		else
-		{
-			log::info("Unknown vertex attribute: %s", attribName);
 		}
 	}
 
@@ -398,32 +348,30 @@ void buildProgramReflection(glslang::TProgram* program, Program::Reflection& ref
 	for (int uniform = 0; uniform < uniforms; ++uniform)
 	{
 		String uniformName(program->getUniformName(uniform));
+		int uniformBlockIndex = program->getUniformBlockIndex(uniform);
 		int uniformType = program->getUniformType(uniform);
 
-		size_t dotPos = uniformName.find(".");
-		if (dotPos == String::npos)
+		String blockName(program->getUniformBlockName(uniformBlockIndex));
+		if (blockName.empty())
 		{
-			if (vulkan::gl::isSamplerType(uniformType))
+			MaterialTexture tex = mtl::stringToMaterialTexture(uniformName);
+			if (tex != MaterialTexture::Count)
 			{
-				MaterialTexture tex = mtl::stringToMaterialTexture(uniformName);
-				const String& samplerName = mtl::materialSamplerToString(tex);
-
 				uint32_t binding = static_cast<uint32_t>(tex);
 				reflection.textures.vertexTextures.emplace(uniformName, binding);
 				reflection.textures.fragmentTextures.emplace(uniformName, binding);
-				reflection.textures.vertexSamplers.emplace(samplerName, binding);
-				reflection.textures.fragmentSamplers.emplace(samplerName, binding);
 			}
-			else
+			MaterialTexture smp = mtl::samplerToMaterialTexture(uniformName);
+			if (smp != MaterialTexture::Count)
 			{
-				log::error("Unsupported uniform found in program: %s", uniformName.c_str());
+				uint32_t binding = static_cast<uint32_t>(smp);
+				reflection.textures.vertexSamplers.emplace(uniformName, binding);
+				reflection.textures.fragmentSamplers.emplace(uniformName, binding);
 			}
 		}
 		else
 		{
 			int uniformOffset = program->getUniformBufferOffset(uniform);
-			String blockName = uniformName.substr(0, dotPos);
-			uniformName.erase(0, dotPos + 1);
 			if (blockName == PipelineState::kObjectVariables())
 			{
 				reflection.objectVariables[uniformName].offset = static_cast<uint32_t>(uniformOffset);
@@ -458,9 +406,107 @@ void dumpSource(const std::string& s)
 
 void crossCompile(const std::vector<uint32_t>& spirv)
 {
-	std::unique_ptr<spirv_cross::Compiler> compiler = std::make_unique<spirv_cross::CompilerGLSL>(spirv);
-	std::string glsl = compiler->compile();
-	dumpSource(glsl);
+	std::unique_ptr<spirv_cross::Compiler> compiler = std::make_unique<spirv_cross::CompilerMSL>(spirv);
+	dumpSource(compiler->compile());
 }
 
+}
+
+namespace glslang
+{
+const TBuiltInResource DefaultTBuiltInResource = {
+    /* .MaxLights = */ 32,
+    /* .MaxClipPlanes = */ 6,
+    /* .MaxTextureUnits = */ 32,
+    /* .MaxTextureCoords = */ 32,
+    /* .MaxVertexAttribs = */ 64,
+    /* .MaxVertexUniformComponents = */ 4096,
+    /* .MaxVaryingFloats = */ 64,
+    /* .MaxVertexTextureImageUnits = */ 32,
+    /* .MaxCombinedTextureImageUnits = */ 80,
+    /* .MaxTextureImageUnits = */ 32,
+    /* .MaxFragmentUniformComponents = */ 4096,
+    /* .MaxDrawBuffers = */ 32,
+    /* .MaxVertexUniformVectors = */ 128,
+    /* .MaxVaryingVectors = */ 8,
+    /* .MaxFragmentUniformVectors = */ 16,
+    /* .MaxVertexOutputVectors = */ 16,
+    /* .MaxFragmentInputVectors = */ 15,
+    /* .MinProgramTexelOffset = */ -8,
+    /* .MaxProgramTexelOffset = */ 7,
+    /* .MaxClipDistances = */ 8,
+    /* .MaxComputeWorkGroupCountX = */ 65535,
+    /* .MaxComputeWorkGroupCountY = */ 65535,
+    /* .MaxComputeWorkGroupCountZ = */ 65535,
+    /* .MaxComputeWorkGroupSizeX = */ 1024,
+    /* .MaxComputeWorkGroupSizeY = */ 1024,
+    /* .MaxComputeWorkGroupSizeZ = */ 64,
+    /* .MaxComputeUniformComponents = */ 1024,
+    /* .MaxComputeTextureImageUnits = */ 16,
+    /* .MaxComputeImageUniforms = */ 8,
+    /* .MaxComputeAtomicCounters = */ 8,
+    /* .MaxComputeAtomicCounterBuffers = */ 1,
+    /* .MaxVaryingComponents = */ 60,
+    /* .MaxVertexOutputComponents = */ 64,
+    /* .MaxGeometryInputComponents = */ 64,
+    /* .MaxGeometryOutputComponents = */ 128,
+    /* .MaxFragmentInputComponents = */ 128,
+    /* .MaxImageUnits = */ 8,
+    /* .MaxCombinedImageUnitsAndFragmentOutputs = */ 8,
+    /* .MaxCombinedShaderOutputResources = */ 8,
+    /* .MaxImageSamples = */ 0,
+    /* .MaxVertexImageUniforms = */ 0,
+    /* .MaxTessControlImageUniforms = */ 0,
+    /* .MaxTessEvaluationImageUniforms = */ 0,
+    /* .MaxGeometryImageUniforms = */ 0,
+    /* .MaxFragmentImageUniforms = */ 8,
+    /* .MaxCombinedImageUniforms = */ 8,
+    /* .MaxGeometryTextureImageUnits = */ 16,
+    /* .MaxGeometryOutputVertices = */ 256,
+    /* .MaxGeometryTotalOutputComponents = */ 1024,
+    /* .MaxGeometryUniformComponents = */ 1024,
+    /* .MaxGeometryVaryingComponents = */ 64,
+    /* .MaxTessControlInputComponents = */ 128,
+    /* .MaxTessControlOutputComponents = */ 128,
+    /* .MaxTessControlTextureImageUnits = */ 16,
+    /* .MaxTessControlUniformComponents = */ 1024,
+    /* .MaxTessControlTotalOutputComponents = */ 4096,
+    /* .MaxTessEvaluationInputComponents = */ 128,
+    /* .MaxTessEvaluationOutputComponents = */ 128,
+    /* .MaxTessEvaluationTextureImageUnits = */ 16,
+    /* .MaxTessEvaluationUniformComponents = */ 1024,
+    /* .MaxTessPatchComponents = */ 120,
+    /* .MaxPatchVertices = */ 32,
+    /* .MaxTessGenLevel = */ 64,
+    /* .MaxViewports = */ 16,
+    /* .MaxVertexAtomicCounters = */ 0,
+    /* .MaxTessControlAtomicCounters = */ 0,
+    /* .MaxTessEvaluationAtomicCounters = */ 0,
+    /* .MaxGeometryAtomicCounters = */ 0,
+    /* .MaxFragmentAtomicCounters = */ 8,
+    /* .MaxCombinedAtomicCounters = */ 8,
+    /* .MaxAtomicCounterBindings = */ 1,
+    /* .MaxVertexAtomicCounterBuffers = */ 0,
+    /* .MaxTessControlAtomicCounterBuffers = */ 0,
+    /* .MaxTessEvaluationAtomicCounterBuffers = */ 0,
+    /* .MaxGeometryAtomicCounterBuffers = */ 0,
+    /* .MaxFragmentAtomicCounterBuffers = */ 1,
+    /* .MaxCombinedAtomicCounterBuffers = */ 1,
+    /* .MaxAtomicCounterBufferSize = */ 16384,
+    /* .MaxTransformFeedbackBuffers = */ 4,
+    /* .MaxTransformFeedbackInterleavedComponents = */ 64,
+    /* .MaxCullDistances = */ 8,
+    /* .MaxCombinedClipAndCullDistances = */ 8,
+    /* .MaxSamples = */ 4,
+    /* .limits = */ {
+        /* .nonInductiveForLoops = */ 1,
+        /* .whileLoops = */ 1,
+        /* .doWhileLoops = */ 1,
+        /* .generalUniformIndexing = */ 1,
+        /* .generalAttributeMatrixVectorIndexing = */ 1,
+        /* .generalVaryingIndexing = */ 1,
+        /* .generalSamplerIndexing = */ 1,
+        /* .generalVariableIndexing = */ 1,
+        /* .generalConstantMatrixVectorIndexing = */ 1,
+    }};
 }

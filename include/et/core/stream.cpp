@@ -24,12 +24,12 @@ using namespace et;
 
 InputStream::InputStream()
 {
-	ET_PIMPL_INIT(InputStream)
+	ET_PIMPL_INIT(InputStream);
 }
 
 InputStream::InputStream(const std::string& file, StreamMode mode)
 {
-	ET_PIMPL_INIT(InputStream)
+	ET_PIMPL_INIT(InputStream);
 	
 	std::ios::openmode openMode = std::ios::in;
 	
@@ -48,7 +48,7 @@ InputStream::InputStream(const std::string& file, StreamMode mode)
 
 InputStream::~InputStream()
 {
-	ET_PIMPL_FINALIZE(InputStream)
+	ET_PIMPL_FINALIZE(InputStream);
 }
 
 bool InputStream::valid()

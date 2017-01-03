@@ -30,13 +30,13 @@ using namespace et::audio;
 StreamingThread::StreamingThread()
 	: Thread("et-audio-streaming-thread")
 {
-	ET_PIMPL_INIT(StreamingThread)
+	ET_PIMPL_INIT(StreamingThread);
 	run();
 }
 
 void StreamingThread::release()
 {
-	ET_PIMPL_FINALIZE(StreamingThread)
+	ET_PIMPL_FINALIZE(StreamingThread);
 }
 
 void StreamingThread::main()

@@ -21,26 +21,11 @@ class PipelineState : public Shared
 public:
 	ET_DECLARE_POINTER(PipelineState);
 
-	static const String& kWorldTransform()
-	{
-		static String value("worldTransform"); return value;
-	}
-	static const String& kWorldRotationTransform()
-	{
-		static String value("worldRotationTransform"); return value;
-	}
-	static const String& kObjectVariables()
-	{
-		static String value("objectVariables"); return value;
-	}
-	static const String& kMaterialVariables()
-	{
-		static String value("materialVariables"); return value;
-	}
-	static const String& kPassVariables()
-	{
-		static String value("passVariables"); return value;
-	}
+	static const String& kWorldTransform() { static String value("worldTransform"); return value; }
+	static const String& kWorldRotationTransform() { static String value("worldRotationTransform"); return value; }
+	static const String& kObjectVariables() { static String value("ObjectVariables"); return value; }
+	static const String& kMaterialVariables() { static String value("MaterialVariables"); return value; }
+	static const String& kPassVariables() { static String value("PassVariables"); return value; }
 
 public:
 	virtual ~PipelineState() = default;

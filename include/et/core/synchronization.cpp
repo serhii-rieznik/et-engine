@@ -76,12 +76,12 @@ using namespace et;
 
 CriticalSection::CriticalSection()
 {
-	ET_PIMPL_INIT(CriticalSection)
+	ET_PIMPL_INIT(CriticalSection);
 }
 
 CriticalSection::~CriticalSection()
 {
-	ET_PIMPL_FINALIZE(CriticalSection)
+	ET_PIMPL_FINALIZE(CriticalSection);
 }
 
 void CriticalSection::enter()

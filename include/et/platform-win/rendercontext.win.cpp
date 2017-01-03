@@ -37,7 +37,7 @@ public:
 RenderContext::RenderContext(const RenderContextParameters& inParams, Application* app) : 
 	_params(inParams)
 {
-	ET_PIMPL_INIT(RenderContext)
+	ET_PIMPL_INIT(RenderContext);
 
 	if (app->parameters().shouldPreserveRenderContext)
 	{
@@ -86,7 +86,7 @@ RenderContext::~RenderContext()
 	{
 		popRenderingContext();
 	}
-	ET_PIMPL_FINALIZE(RenderContext)
+	ET_PIMPL_FINALIZE(RenderContext);
 }
 
 void RenderContext::init()

@@ -227,7 +227,7 @@ void VulkanPipelineStatePrivate::generateInputLayout(const VertexDeclaration& in
 	attribs.reserve(inputLayout.numElements());
 	for (const auto& e : inputLayout.elements())
 	{
-		if (expectedLayout.has(e.usage()))
+		if (1 || expectedLayout.has(e.usage()))
 		{
 			attribs.emplace_back();
 			attribs.back().offset = e.offset();

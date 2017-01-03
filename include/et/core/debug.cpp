@@ -13,17 +13,19 @@
 
 namespace et
 {
-	namespace debug
-	{
-		void debugBreak()
-		{
-#       if (ET_PLATFORM_WIN)
-            ::DebugBreak();
-#       elif (ET_PLATFORM_MAC)
-			__asm { int 3 };
-#       else
+namespace debug
+{
+
+void debugBreak()
+{
+#if (ET_PLATFORM_WIN)
+	::DebugBreak();
+#elif (ET_PLATFORM_MAC)
+	__asm { int 3 };
+#else
 #           error Define breakpoint for current platform
-#       endif
-		}
-	}
+#endif
+}
+
+}
 }

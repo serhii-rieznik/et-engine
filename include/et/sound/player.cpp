@@ -31,14 +31,14 @@ extern ALCcontext* getSharedContext();
 Player::Player() :
 	_volumeAnimator(currentTimerPool())
 {
-	ET_PIMPL_INIT(Player)
+	ET_PIMPL_INIT(Player);
 	init();
 }
 
 Player::Player(Track::Pointer track) : 
 	_volumeAnimator(currentTimerPool())
 {
-	ET_PIMPL_INIT(Player)
+	ET_PIMPL_INIT(Player);
 	
 	init();
 	linkTrack(track);
@@ -51,7 +51,7 @@ Player::~Player()
 	alDeleteSources(1, &_private->source);
     checkOpenALError("alDeleteSources");
 
-	ET_PIMPL_FINALIZE(Player)
+	ET_PIMPL_FINALIZE(Player);
 }
 
 void Player::init()

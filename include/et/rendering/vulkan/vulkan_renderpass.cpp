@@ -170,7 +170,7 @@ VulkanRenderPass::~VulkanRenderPass()
 	
 	dynamicConstantBuffer().free(_private->variablesData);
 
-	ET_PIMPL_FINALIZE(VulkanRenderPass)
+	ET_PIMPL_FINALIZE(VulkanRenderPass);
 }
 
 const VulkanNativeRenderPass& VulkanRenderPass::nativeRenderPass() const

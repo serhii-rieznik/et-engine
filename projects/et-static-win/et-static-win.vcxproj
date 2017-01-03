@@ -18,6 +18,7 @@
     <ClCompile Include="..\..\include\external\spirvcross\spirv_cfg.cpp" />
     <ClCompile Include="..\..\include\external\spirvcross\spirv_cross.cpp" />
     <ClCompile Include="..\..\include\external\spirvcross\spirv_glsl.cpp" />
+    <ClCompile Include="..\..\include\external\spirvcross\spirv_msl.cpp" />
     <ClInclude Include="..\..\include\et\core\heapcontroller.h" />
     <ClInclude Include="..\..\include\et\rendering\base\constantbuffer.h" />
     <ClInclude Include="..\..\include\et\rendering\base\helpers.h" />
@@ -264,6 +265,7 @@
     <ClInclude Include="..\..\include\external\spirvcross\spirv_common.hpp" />
     <ClInclude Include="..\..\include\external\spirvcross\spirv_cross.hpp" />
     <ClInclude Include="..\..\include\external\spirvcross\spirv_glsl.hpp" />
+    <ClInclude Include="..\..\include\external\spirvcross\spirv_msl.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\et\app\appevironment.h" />

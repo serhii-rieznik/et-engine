@@ -1,6 +1,6 @@
 #include <et>
 
-layout (binding = AlbedoTextureBinding, set = TexturesSetIndex) uniform sampler2D albedoTexture;
+layout (binding = AlbedoTextureBinding, set = TexturesSetIndex) uniform sampler2D baseColorTexture;
 
 struct VSOutput {
 	vec2 texCoord0;
@@ -40,7 +40,7 @@ layout(location = 0) out vec4 outColor0;
 
 void main()
 {
-	outColor0 = texture(albedoTexture, fsIn.texCoord0);
+	outColor0 = texture(baseColorTexture, fsIn.texCoord0);
 }
 
 #else

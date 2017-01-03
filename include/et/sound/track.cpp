@@ -93,7 +93,7 @@ void checkOGGError(long, const char*, const char* filename);
 
 Track::Track(const std::string& fileName)
 {
-	ET_PIMPL_INIT(Track, fileName)
+	ET_PIMPL_INIT(Track, fileName);
 	
 	setName(fileName);
 	setOrigin(fileName);
@@ -130,7 +130,7 @@ Track::Track(const std::string& fileName)
 
 Track::~Track()
 {
-	ET_PIMPL_FINALIZE(Track)
+	ET_PIMPL_FINALIZE(Track);
 }
 
 float Track::duration() const

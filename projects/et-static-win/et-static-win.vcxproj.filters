@@ -619,6 +619,9 @@
     <ClInclude Include="..\..\include\external\spirvcross\spirv_cfg.hpp">
       <Filter>spir-v-cross</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\external\spirvcross\spirv_msl.hpp">
+      <Filter>spir-v-cross</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\et\sound\openal.h">
@@ -1215,6 +1218,9 @@
       <Filter>spir-v-cross</Filter>
     </ClCompile>
     <ClCompile Include="..\..\include\external\spirvcross\spirv_cfg.cpp">
+      <Filter>spir-v-cross</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\include\external\spirvcross\spirv_msl.cpp">
       <Filter>spir-v-cross</Filter>
     </ClCompile>
   </ItemGroup>

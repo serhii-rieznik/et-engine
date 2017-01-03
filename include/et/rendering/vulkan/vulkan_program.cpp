@@ -11,7 +11,11 @@
 #include <et/rendering/vulkan/glslang/vulkan_glslang.h>
 #include <et/rendering/vulkan/vulkan_program.h>
 #include <et/rendering/vulkan/vulkan.h>
+#include <et/app/application.h>
+#include <et/core/tools.h>
 #include <fstream>
+
+#define ET_VULKAN_PROGRAM_USE_CACHE 0
 
 namespace et
 {
@@ -20,9 +24,15 @@ class VulkanProgramPrivate : public VulkanShaderModules
 {
 public:
 	VulkanProgramPrivate(VulkanState& v)
-		: vulkan(v) { }
+		: vulkan(v)
+	{
+	}
 
 	VulkanState& vulkan;
+
+	bool loadCached(uint64_t hash, std::vector<uint32_t>& vert, std::vector<uint32_t>& frag);
+	void saveCached(uint64_t hash, const std::vector<uint32_t>& vert, const std::vector<uint32_t>& frag);
+	void build(const std::vector<uint32_t>& vert, const std::vector<uint32_t>& frag);
 };
 
 VulkanProgram::VulkanProgram(VulkanState& v)
@@ -34,37 +44,143 @@ VulkanProgram::~VulkanProgram()
 {
 	vkDestroyShaderModule(_private->vulkan.device, _private->vertex, nullptr);
 	vkDestroyShaderModule(_private->vulkan.device, _private->fragment, nullptr);
-	ET_PIMPL_FINALIZE(VulkanProgram)
+	ET_PIMPL_FINALIZE(VulkanProgram);
 }
 
 void VulkanProgram::build(const std::string& source)
 {
+	bool canBuild = false;
 	std::vector<uint32_t> vertexBin;
 	std::vector<uint32_t> fragmentBin;
-	if (hlslToSPIRV(source, vertexBin, fragmentBin, _reflection))
+	std::hash<std::string> sourceHash;
+	uint64_t hsh = sourceHash(source);
+
+#if (ET_VULKAN_PROGRAM_USE_CACHE)
+	if (_private->loadCached(hsh, vertexBin, fragmentBin))
 	{
-		VkShaderModuleCreateInfo createInfo = { VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO };
+		canBuild = true;
+	}
+	else
+#endif
+	{
+#	if (ET_PROGRAM_PREFER_GLSL_INPUT)
+		std::string vertexSource = source;
+		parseShaderSource(vertexSource, emptyString, StringList(), [](ParseDirective dir, std::string& code, uint32_t pos)
+		{
+			if (dir == ParseDirective::StageDefine)
+			{
+				code.insert(pos, "#define ET_VERTEX_SHADER 1");
+			}
+		}, {});
+		std::string fragmentSource = source;
+		parseShaderSource(fragmentSource, emptyString, StringList(), [](ParseDirective dir, std::string& code, uint32_t pos)
+		{
+			if (dir == ParseDirective::StageDefine)
+			{
+				code.insert(pos, "#define ET_FRAGMENT_SHADER 1");
+			}
+		}, {});
+		canBuild = glslToSPIRV(vertexSource, fragmentSource, vertexBin, fragmentBin, _reflection);
+#	else
+		canBuild = hlslToSPIRV(source, vertexBin, fragmentBin, _reflection);
+#	endif
+	}
 
-		createInfo.pCode = vertexBin.data();
-		createInfo.codeSize = vertexBin.size() * sizeof(uint32_t);
-		VULKAN_CALL(vkCreateShaderModule(_private->vulkan.device, &createInfo, nullptr, &_private->vertex));
-
-		createInfo.pCode = fragmentBin.data();
-		createInfo.codeSize = fragmentBin.size() * sizeof(uint32_t);
-		VULKAN_CALL(vkCreateShaderModule(_private->vulkan.device, &createInfo, nullptr, &_private->fragment));
-
-		_private->stageCreateInfo[0].stage = VK_SHADER_STAGE_VERTEX_BIT;
-		_private->stageCreateInfo[0].module = _private->vertex;
-		_private->stageCreateInfo[0].pName = "vertexMain";
-		_private->stageCreateInfo[1].stage = VK_SHADER_STAGE_FRAGMENT_BIT;
-		_private->stageCreateInfo[1].module = _private->fragment;
-		_private->stageCreateInfo[1].pName = "fragmentMain";
+	if (canBuild)
+	{
+		_private->saveCached(hsh, vertexBin, fragmentBin);
+		_private->build(vertexBin, fragmentBin);
 	}
 }
 
 const VulkanShaderModules& VulkanProgram::shaderModules() const
 {
 	return *(_private);
+}
+
+bool VulkanProgramPrivate::loadCached(uint64_t hash, std::vector<uint32_t>& vert, std::vector<uint32_t>& frag)
+{
+	const std::string& baseFolder = application().environment().applicationDocumentsFolder();
+	std::string vertFile;
+	{
+		char buffer[1024] = {};
+		sprintf(buffer, "%s%016llX.vert", baseFolder.c_str(), hash);
+		vertFile = buffer;
+	}
+	std::string fragFile;
+	{
+		char buffer[1024] = {};
+		sprintf(buffer, "%s%016llX.frag", baseFolder.c_str(), hash);
+		fragFile = buffer;
+	}
+
+	if (!fileExists(vertFile) || !fileExists(fragFile))
+		return false;
+
+	std::ifstream vertIn(vertFile, std::ios::in | std::ios::binary);
+	{
+		uint32_t vertSize = streamSize(vertIn);
+		vert.resize(vertSize / sizeof(uint32_t));
+		vertIn.read(reinterpret_cast<char*>(vert.data()), vertSize);
+	}
+	
+	std::ifstream fragIn(fragFile, std::ios::in | std::ios::binary);
+	{
+		uint32_t fragSize = streamSize(fragIn);
+		frag.resize(fragSize / sizeof(uint32_t));
+		fragIn.read(reinterpret_cast<char*>(frag.data()), fragSize);
+	}
+	
+	return !(vertIn.fail() && fragIn.fail());
+}
+
+void VulkanProgramPrivate::saveCached(uint64_t hash, const std::vector<uint32_t>& vert, const std::vector<uint32_t>& frag)
+{
+	const std::string& baseFolder = application().environment().applicationDocumentsFolder();
+	std::string vertFile;
+	{
+		char buffer[1024] = {};
+		sprintf(buffer, "%s%016llX.vert", baseFolder.c_str(), hash);
+		vertFile = buffer;
+	}
+	std::string fragFile;
+	{
+		char buffer[1024] = {};
+		sprintf(buffer, "%s%016llX.frag", baseFolder.c_str(), hash);
+		fragFile = buffer;
+	}
+
+	std::ofstream vertOut(vertFile, std::ios::out | std::ios::binary);
+	vertOut.write(reinterpret_cast<const char*>(vert.data()), vert.size() * sizeof(uint32_t));
+
+	std::ofstream fragOut(fragFile, std::ios::out | std::ios::binary);
+	fragOut.write(reinterpret_cast<const char*>(frag.data()), frag.size() * sizeof(uint32_t));
+}
+
+void VulkanProgramPrivate::build(const std::vector<uint32_t>& vert, const std::vector<uint32_t>& frag)
+{
+	VkShaderModuleCreateInfo createInfo = { VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO };
+
+	createInfo.pCode = vert.data();
+	createInfo.codeSize = vert.size() * sizeof(uint32_t);
+	VULKAN_CALL(vkCreateShaderModule(vulkan.device, &createInfo, nullptr, &vertex));
+
+	createInfo.pCode = frag.data();
+	createInfo.codeSize = frag.size() * sizeof(uint32_t);
+	VULKAN_CALL(vkCreateShaderModule(vulkan.device, &createInfo, nullptr, &fragment));
+
+	stageCreateInfo[0].stage = VK_SHADER_STAGE_VERTEX_BIT;
+	stageCreateInfo[0].module = vertex;
+	stageCreateInfo[1].stage = VK_SHADER_STAGE_FRAGMENT_BIT;
+	stageCreateInfo[1].module = fragment;
+
+#if (ET_PROGRAM_PREFER_GLSL_INPUT)
+	stageCreateInfo[0].pName = "main";
+	stageCreateInfo[1].pName = "main";
+#else
+	stageCreateInfo[0].pName = "vertexMain";
+	stageCreateInfo[1].pName = "fragmentMain";
+#endif
 }
 
 }

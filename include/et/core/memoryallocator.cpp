@@ -217,12 +217,12 @@ private:
 
 BlockMemoryAllocator::BlockMemoryAllocator()
 {
-	ET_PIMPL_INIT(BlockMemoryAllocator)
+	ET_PIMPL_INIT(BlockMemoryAllocator);
 }
 
 BlockMemoryAllocator::~BlockMemoryAllocator()
 {
-	ET_PIMPL_FINALIZE(BlockMemoryAllocator)
+	ET_PIMPL_FINALIZE(BlockMemoryAllocator);
 }
 
 void* BlockMemoryAllocator::allocate(uint32_t sz)

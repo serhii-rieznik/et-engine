@@ -37,7 +37,7 @@ VertexStorage::VertexStorage(const VertexArray::Pointer& va)
 
 VertexStorage::~VertexStorage()
 {
-	ET_PIMPL_FINALIZE(VertexStorage)
+	ET_PIMPL_FINALIZE(VertexStorage);
 }
 
 bool VertexStorage::hasAttribute(VertexAttributeUsage usage) const

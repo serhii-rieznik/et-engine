@@ -11,24 +11,24 @@
 
 namespace et
 {
-    class Camera;
-	class VulkanState;
-	class VulkanShaderModules;
-	class VulkanProgramPrivate;
-    class VulkanProgram : public Program
-    {
-    public:
-        ET_DECLARE_POINTER(VulkanProgram);
+class Camera;
+class VulkanState;
+class VulkanShaderModules;
+class VulkanProgramPrivate;
+class VulkanProgram : public Program
+{
+public:
+	ET_DECLARE_POINTER(VulkanProgram);
 
-    public:
-		VulkanProgram(VulkanState&);
-		~VulkanProgram();
+public:
+	VulkanProgram(VulkanState&);
+	~VulkanProgram();
 
-        void build(const std::string& source) override;
+	void build(const std::string& source) override;
 
-		const VulkanShaderModules& shaderModules() const;
+	const VulkanShaderModules& shaderModules() const;
 
-	private:
-		ET_DECLARE_PIMPL(VulkanProgram, 1024);
-    };
+private:
+	ET_DECLARE_PIMPL(VulkanProgram, 1024);
+};
 }

@@ -50,7 +50,7 @@ VulkanRenderer::VulkanRenderer(RenderContext* rc)
 
 VulkanRenderer::~VulkanRenderer()
 {
-	ET_PIMPL_FINALIZE(VulkanRenderer)
+	ET_PIMPL_FINALIZE(VulkanRenderer);
 }
 
 VkResult vkEnumerateInstanceLayerPropertiesWrapper(int, uint32_t* count, VkLayerProperties* props)
