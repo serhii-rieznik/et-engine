@@ -31,15 +31,15 @@ public:
 	}
 	static const String& kObjectVariables()
 	{
-		static String value("ObjectVariables"); return value;
+		static String value("objectVariables"); return value;
 	}
 	static const String& kMaterialVariables()
 	{
-		static String value("MaterialVariables"); return value;
+		static String value("materialVariables"); return value;
 	}
 	static const String& kPassVariables()
 	{
-		static String value("PassVariables"); return value;
+		static String value("passVariables"); return value;
 	}
 
 public:

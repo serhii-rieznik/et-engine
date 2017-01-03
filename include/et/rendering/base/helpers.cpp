@@ -49,7 +49,7 @@ void init(RenderContext* rc)
 	rh_local::texturedMaterial = rc->renderer()->sharedMaterialLibrary().loadDefaultMaterial(DefaultMaterial::Textured2D);
 
 	Sampler::Description defaultSampler;
-	rh_local::texturedMaterial->setSampler(MaterialTexture::Albedo, rc->renderer()->createSampler(defaultSampler));
+	rh_local::texturedMaterial->setSampler(MaterialTexture::BaseColor, rc->renderer()->createSampler(defaultSampler));
 }
 
 void release()
@@ -64,7 +64,7 @@ RenderBatch::Pointer createFullscreenRenderBatch(Texture::Pointer texture)
 	ET_ASSERT(rh_local::texturedMaterial.valid());
 
 	MaterialInstance::Pointer materialInstance = rh_local::texturedMaterial->instance();
-	materialInstance->setTexture(MaterialTexture::Albedo, texture);
+	materialInstance->setTexture(MaterialTexture::BaseColor, texture);
 	
 	return RenderBatch::Pointer::create(materialInstance, rh_local::default2DPlane, identityMatrix, 0, 
 		rh_local::default2DPlane->vertexCount());

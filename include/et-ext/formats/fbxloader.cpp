@@ -563,7 +563,7 @@ MaterialInstance::Pointer FBXLoaderPrivate::loadMaterial(FbxSurfaceMaterial* mat
 	loadMaterialValue(m, MaterialParameter::SpecularFactor, mat, FbxSurfaceMaterial::sSpecularFactor);
 	loadMaterialValue(m, MaterialParameter::Transparency, mat, FbxSurfaceMaterial::sTransparencyFactor);
 	loadMaterialValue(m, MaterialParameter::BumpFactor, mat, FbxSurfaceMaterial::sBumpFactor);
-	loadMaterialValue(m, MaterialParameter::Roughness, mat, FbxSurfaceMaterial::sShininess);
+	loadMaterialValue(m, MaterialParameter::RoughnessScale, mat, FbxSurfaceMaterial::sShininess);
 	*/
 
 	return m;

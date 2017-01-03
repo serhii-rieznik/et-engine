@@ -83,6 +83,9 @@
     <Filter Include="glslang\glslang\OSDependent">
       <UniqueIdentifier>{6f0fde73-4cc3-4457-af1c-64c3c05d2e10}</UniqueIdentifier>
     </Filter>
+    <Filter Include="spir-v-cross">
+      <UniqueIdentifier>{61c04ec6-310d-45e4-bbdd-49d214df5425}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\et\sound\platform-dependent.cpp">
@@ -603,6 +606,18 @@
     </ClInclude>
     <ClInclude Include="..\..\include\et\rendering\base\vertexstorage.cpp">
       <Filter>Source\rendering\base</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\external\spirvcross\spirv_cross.hpp">
+      <Filter>spir-v-cross</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\external\spirvcross\spirv_glsl.hpp">
+      <Filter>spir-v-cross</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\external\spirvcross\spirv_common.hpp">
+      <Filter>spir-v-cross</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\external\spirvcross\spirv_cfg.hpp">
+      <Filter>spir-v-cross</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1192,6 +1207,15 @@
     </ClCompile>
     <ClCompile Include="..\..\include\et\compile_packs\rendering.pack_2.cxx">
       <Filter>Source\compile_packs</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\include\external\spirvcross\spirv_cross.cpp">
+      <Filter>spir-v-cross</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\include\external\spirvcross\spirv_glsl.cpp">
+      <Filter>spir-v-cross</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\include\external\spirvcross\spirv_cfg.cpp">
+      <Filter>spir-v-cross</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

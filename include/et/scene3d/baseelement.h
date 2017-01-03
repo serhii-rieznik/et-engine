@@ -24,7 +24,7 @@ class BaseElement : public ElementHierarchy, public FlagsHolder, public Componen
 {
 public:
 	ET_DECLARE_POINTER(BaseElement);
-	using List = Vector<Pointer>;
+	using Collection = Vector<Pointer>;
 
 public:
 	virtual ElementType type() const = 0;

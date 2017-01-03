@@ -15,6 +15,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\include\external\spirvcross\spirv_cfg.cpp" />
+    <ClCompile Include="..\..\include\external\spirvcross\spirv_cross.cpp" />
+    <ClCompile Include="..\..\include\external\spirvcross\spirv_glsl.cpp" />
     <ClInclude Include="..\..\include\et\core\heapcontroller.h" />
     <ClInclude Include="..\..\include\et\rendering\base\constantbuffer.h" />
     <ClInclude Include="..\..\include\et\rendering\base\helpers.h" />
@@ -257,6 +260,10 @@
     <ClInclude Include="..\..\include\external\glslang\SPIRV\SpvBuilder.h" />
     <ClInclude Include="..\..\include\external\glslang\SPIRV\spvIR.h" />
     <ClInclude Include="..\..\include\external\glslang\SPIRV\SPVRemapper.h" />
+    <ClInclude Include="..\..\include\external\spirvcross\spirv_cfg.hpp" />
+    <ClInclude Include="..\..\include\external\spirvcross\spirv_common.hpp" />
+    <ClInclude Include="..\..\include\external\spirvcross\spirv_cross.hpp" />
+    <ClInclude Include="..\..\include\external\spirvcross\spirv_glsl.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\et\app\appevironment.h" />
@@ -464,7 +471,7 @@
       <SubSystem>Windows</SubSystem>
     </Link>
     <Lib>
-      <AdditionalDependencies>d3d12.lib;dxgi.lib;d3dcompiler.lib;vulkan-1.lib;jansson.lib;jpeg.lib;ogg.lib;openal32.lib;png.lib;vorbis.lib;vorbisfile.lib;z.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>vulkan-1.lib;jansson.lib;jpeg.lib;ogg.lib;openal32.lib;png.lib;vorbis.lib;vorbisfile.lib;z.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreAllDefaultLibraries>true</IgnoreAllDefaultLibraries>
     </Lib>
     <PreBuildEvent />
@@ -488,7 +495,7 @@
       <SubSystem>Windows</SubSystem>
     </Link>
     <Lib>
-      <AdditionalDependencies>d3d12.lib;dxgi.lib;d3dcompiler.lib;vulkan-1.lib;jansson.lib;jpeg.lib;ogg.lib;openal32.lib;png.lib;vorbis.lib;vorbisfile.lib;z.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>vulkan-1.lib;jansson.lib;jpeg.lib;ogg.lib;openal32.lib;png.lib;vorbis.lib;vorbisfile.lib;z.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreAllDefaultLibraries>true</IgnoreAllDefaultLibraries>
     </Lib>
     <PreBuildEvent />
@@ -512,7 +519,7 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
     <Lib>
-      <AdditionalDependencies>d3d12.lib;dxgi.lib;d3dcompiler.lib;vulkan-1.lib;jansson.lib;jpeg.lib;ogg.lib;openal32.lib;png.lib;vorbis.lib;vorbisfile.lib;z.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>vulkan-1.lib;jansson.lib;jpeg.lib;ogg.lib;openal32.lib;png.lib;vorbis.lib;vorbisfile.lib;z.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Lib>
     <Lib>
       <IgnoreAllDefaultLibraries>true</IgnoreAllDefaultLibraries>

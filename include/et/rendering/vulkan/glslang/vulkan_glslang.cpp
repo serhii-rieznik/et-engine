@@ -9,6 +9,9 @@
 #include <external/glslang/SPIRV/Logger.h>
 #include <external/glslang/SPIRV/GlslangToSpv.h>
 #include <external/glslang/OGLCompilersDLL/InitializeDll.h>
+#include <external/glslang/glslang/MachineIndependent/localintermediate.h>
+#include <external/spirvcross/spirv_cross.hpp>
+#include <external/spirvcross/spirv_glsl.hpp>
 #include <et/core/et.h>
 #include <functional>
 #include "vulkan_glslang.h"
@@ -114,6 +117,7 @@ const TBuiltInResource defaultBuiltInResource = {
 
 void buildProgramReflection(glslang::TProgram*, Program::Reflection& reflection);
 void dumpSource(const std::string&);
+void crossCompile(const std::vector<uint32_t>&);
 
 bool glslToSPIRV(const std::string& vertexSource, const std::string& fragmentSource,
 	std::vector<uint32_t>& vertexBin, std::vector<uint32_t>& fragmentBin, Program::Reflection& reflection)
@@ -221,6 +225,124 @@ bool glslToSPIRV(const std::string& vertexSource, const std::string& fragmentSou
 	return true;
 }
 
+class VertexShaderAttribLocationTraverser : public glslang::TIntermTraverser
+{
+	void visitSymbol(glslang::TIntermSymbol* symbol) override
+	{
+		glslang::TQualifier& qualifier = symbol->getQualifier();
+		if ((qualifier.storage == glslang::TStorageQualifier::EvqVaryingIn) && qualifier.hasLocation())
+		{
+			std::string attribName(symbol->getName().c_str());
+			VertexAttributeUsage usage = stringToVertexAttributeUsage(attribName);
+			if (usage != VertexAttributeUsage::Unknown)
+			{
+				log::info("Input symbol: %s, location remapped from %d to %d", 
+					attribName.c_str(), qualifier.layoutLocation, static_cast<uint32_t>(usage));
+				// qualifier.layoutLocation = static_cast<int>(usage);
+			}
+		}
+	}
+};
+
+bool hlslToSPIRV(const std::string& source, std::vector<uint32_t>& vertexBin, std::vector<uint32_t>& fragmentBin,
+	Program::Reflection& reflection)
+{
+	EShMessages messages = static_cast<EShMessages>(EShMsgVulkanRules | EShMsgSpvRules | EShMsgReadHlsl);
+	const char* sourceCStr[] = { source.c_str(), source.c_str() };
+	const char* sourceNames[] = { "vertex_shader_source", "fragment_shader_source" };
+
+	glslang::TShader vertexShader(EShLanguage::EShLangVertex);
+	vertexShader.setEntryPoint("vertexMain");
+	vertexShader.setAutoMapBindings(true);
+	vertexShader.setStringsWithLengthsAndNames(sourceCStr, nullptr, sourceNames, 1);
+	if (!vertexShader.parse(&defaultBuiltInResource, 100, true, messages))
+	{
+		log::error("Failed to parse vertex shader:\n%s", vertexShader.getInfoLog());
+		dumpSource(source);
+		debug::debugBreak();
+		return false;
+	}
+	
+	glslang::TShader fragmentShader(EShLanguage::EShLangFragment);
+	fragmentShader.setEntryPoint("fragmentMain");
+	fragmentShader.setStringsWithLengthsAndNames(sourceCStr + 1, nullptr, sourceNames + 1, 1);
+	fragmentShader.setAutoMapBindings(true);
+	if (!fragmentShader.parse(&defaultBuiltInResource, 100, true, messages))
+	{
+		log::error("Failed to parse fragment shader:\n%s", fragmentShader.getInfoLog());
+		dumpSource(source);
+		debug::debugBreak();
+		return false;
+	}
+	
+	std::unique_ptr<glslang::TProgram> program = std::make_unique<glslang::TProgram>();
+	program->addShader(&vertexShader);
+	program->addShader(&fragmentShader);
+	if (!program->link(messages))
+	{
+		log::error("Failed to link program:\n%s", program->getInfoLog());
+		debug::debugBreak();
+		return false;
+	}
+	if (!program->mapIO())
+	{
+		log::error("Failed to map program's IO:\n%s", program->getInfoLog());
+		debug::debugBreak();
+		return false;
+	}
+
+	if (program->buildReflection() == false) 
+	{
+		log::error("Failed to build reflection:\n%s", program->getInfoLog());
+		debug::debugBreak();
+		return false;
+	}
+
+	buildProgramReflection(program.get(), reflection);
+
+	glslang::TIntermediate* vertexIntermediate = program->getIntermediate(EShLanguage::EShLangVertex);
+	if (vertexIntermediate == nullptr)
+	{
+		log::error("Failed to get vertex binary:\n%s", program->getInfoLog());
+		debug::debugBreak();
+		return false;
+	}
+	
+	glslang::TIntermediate* fragmentIntermediate = program->getIntermediate(EShLanguage::EShLangFragment);
+	if (fragmentIntermediate == nullptr)
+	{
+		log::error("Failed to get fragment binary:\n%s", program->getInfoLog());
+		debug::debugBreak();
+		return false;
+	}
+
+	{
+		VertexShaderAttribLocationTraverser attribFixup;
+		vertexIntermediate->getTreeRoot()->traverse(&attribFixup);
+
+		// trav.
+		vertexBin.reserve(10240);
+		spv::SpvBuildLogger logger;
+		glslang::GlslangToSpv(*vertexIntermediate, vertexBin, &logger);
+		std::string allMessages = logger.getAllMessages();
+		if (!allMessages.empty())
+			log::info("Vertex HLSL to SPV:\n%s", allMessages.c_str());
+		crossCompile(vertexBin);
+	}
+
+	{
+		fragmentBin.reserve(10240);
+		spv::SpvBuildLogger logger;
+		glslang::GlslangToSpv(*fragmentIntermediate, fragmentBin, &logger);
+		std::string allMessages = logger.getAllMessages();
+		if (!allMessages.empty())
+			log::info("Fragment HLSL to SPV:\n%s", allMessages.c_str());
+		crossCompile(fragmentBin);
+	}
+
+	return true;
+}
+
 void initGlslangResources()
 {
 	glslang::InitializeProcess();
@@ -272,8 +394,6 @@ void buildProgramReflection(glslang::TProgram* program, Program::Reflection& ref
 		{
 			log::error("Unknown uniform block: %s", blockName.c_str());
 		}
-		int blockIndex = program->getUniformBlockIndex(block);
-		int blockOffset = program->getUniformBufferOffset(block);
 	}
 
 	int uniforms = program->getNumLiveUniformVariables();
@@ -336,6 +456,13 @@ void dumpSource(const std::string& s)
 		log::info("%04u: %s", lineIndex, line.c_str());
 		++lineIndex;
 	}
+}
+
+void crossCompile(const std::vector<uint32_t>& spirv)
+{
+	std::unique_ptr<spirv_cross::Compiler> compiler = std::make_unique<spirv_cross::CompilerGLSL>(spirv);
+	std::string glsl = compiler->compile();
+	dumpSource(glsl);
 }
 
 }

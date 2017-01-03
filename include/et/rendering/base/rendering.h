@@ -14,8 +14,7 @@ enum class RenderingAPI : uint32_t
 {
 	Metal,
 	Vulkan,
-	DirectX12,
-
+	
 	Count
 };
 
@@ -456,6 +455,7 @@ DataType stringToDataType(const std::string& s, RenderingAPI);
 DataFormat stringToDataFormat(const std::string&);
 
 std::string vertexAttributeUsageToString(VertexAttributeUsage);
+std::string vertexAttributeUsageSemantics(VertexAttributeUsage);
 std::string dataTypeToString(DataType, RenderingAPI);
 std::string dataFormatToString(DataFormat);
 

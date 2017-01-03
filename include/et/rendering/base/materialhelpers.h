@@ -15,36 +15,33 @@ namespace et
 {
 enum class MaterialTexture : uint32_t
 {
-	Albedo,
-	Reflectance,
-	Emissive,
-
-	Roughness,
-	Opacity,
-	Normal,
+	// per-object textures
+	BaseColor,
+	NormalRoughnesMetallness,
+	EmissiveColor,
 	
+	// shared textures
 	Shadow,
 	AmbientOcclusion,
 	Environment,
-
+	
 	Count,
 
+	// service values
 	FirstSharedTexture = Shadow,
 };
 
 enum class MaterialParameter : uint32_t
 {
-	AlbedoColor,
-	ReflectanceColor,
-	EmissiveColor,
-
-	Roughness,
-	Metallness,
-	Opacity,
+	BaseColorScale,
+	RoughnessScale,
+	MetallnessScale,
+	OpacityScale,
 	NormalScale,
 
 	IndexOfRefraction,
 	SpecularExponent,
+	EmissiveColor,
 
 	Count
 };
@@ -147,6 +144,7 @@ const String& materialSamplerToString(MaterialTexture);
 
 const String& materialTextureToString(MaterialTexture);
 MaterialTexture stringToMaterialTexture(const String&);
+MaterialTexture samplerToMaterialTexture(const String&);
 
 }
 }

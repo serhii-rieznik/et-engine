@@ -39,25 +39,9 @@ VulkanProgram::~VulkanProgram()
 
 void VulkanProgram::build(const std::string& source)
 {
-	std::string vertexSource = source;
-	parseShaderSource(vertexSource, emptyString, StringList(), [](ParseDirective dir, std::string& code, uint32_t pos) 
-	{
-		if (dir == ParseDirective::StageDefine) {
-			code.insert(pos, "#define ET_VERTEX_SHADER 1");
-		}
-	}, { });
-
-	std::string fragmentSource = source;
-	parseShaderSource(fragmentSource, emptyString, StringList(), [](ParseDirective dir, std::string& code, uint32_t pos)
-	{
-		if (dir == ParseDirective::StageDefine) {
-			code.insert(pos, "#define ET_FRAGMENT_SHADER 1");
-		}
-	}, { });
-
 	std::vector<uint32_t> vertexBin;
 	std::vector<uint32_t> fragmentBin;
-	if (glslToSPIRV(vertexSource, fragmentSource, vertexBin, fragmentBin, _reflection))
+	if (hlslToSPIRV(source, vertexBin, fragmentBin, _reflection))
 	{
 		VkShaderModuleCreateInfo createInfo = { VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO };
 
@@ -71,10 +55,10 @@ void VulkanProgram::build(const std::string& source)
 
 		_private->stageCreateInfo[0].stage = VK_SHADER_STAGE_VERTEX_BIT;
 		_private->stageCreateInfo[0].module = _private->vertex;
-		_private->stageCreateInfo[0].pName = "main";
+		_private->stageCreateInfo[0].pName = "vertexMain";
 		_private->stageCreateInfo[1].stage = VK_SHADER_STAGE_FRAGMENT_BIT;
 		_private->stageCreateInfo[1].module = _private->fragment;
-		_private->stageCreateInfo[1].pName = "main";
+		_private->stageCreateInfo[1].pName = "fragmentMain";
 	}
 }
 

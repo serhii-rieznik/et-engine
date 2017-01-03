@@ -182,48 +182,20 @@ std::string Material::generateInputLayout()
 {
 	std::string layout;
 	layout.reserve(1024);
-	if (_renderer->api() == RenderingAPI::Metal)
+
+	layout.append("struct VSInput {\n");
+	for (const auto& element : _inputLayout.elements())
 	{
-		layout.append("struct VSInput {\n");
-		for (const auto& element : _inputLayout.elements())
-		{
-			char buffer[256] = {};
-			sprintf(buffer, "\t%s %s [[attribute(%u)]]; \n",
-				dataTypeToString(element.type(), _renderer->api()).c_str(),
-				vertexAttributeUsageToString(element.usage()).c_str(), static_cast<uint32_t>(element.usage()));
-			layout.append(buffer);
-		}
-		layout.append("};\n");
+		char buffer[256] = {};
+		sprintf(buffer, "%s %s;\n",
+			dataTypeToString(element.type(), _renderer->api()).c_str(),
+			vertexAttributeUsageToString(element.usage()).c_str()
+		);
+
+		layout.append(buffer);
 	}
-	else if (_renderer->api() == RenderingAPI::Vulkan)
-	{
-		for (const auto& element : _inputLayout.elements())
-		{
-			char buffer[256] = {};
-			sprintf(buffer, "layout (location = %u) in %s %s; \n", 
-				static_cast<uint32_t>(element.usage()),
-				dataTypeToString(element.type(), _renderer->api()).c_str(), 
-				vertexAttributeUsageToString(element.usage()).c_str());
-			layout.append(buffer);
-		}
-	}
-	else if (_renderer->api() == RenderingAPI::DirectX12)
-	{
-		layout.append("struct VSInput {\n");
-		for (const auto& element : _inputLayout.elements())
-		{
-			char buffer[256] = {};
-			sprintf(buffer, "%s %s : %s; \n", 
-				dataTypeToString(element.type(), _renderer->api()).c_str(), 
-				vertexAttributeUsageToString(element.usage()).c_str(), "???");
-			layout.append(buffer);
-		}
-		layout.append("};\n");
-	}
-	else
-	{
-		ET_FAIL("Not implemented");
-	}
+	layout.append("};\n");
+
 	return layout;
 }
 
@@ -239,26 +211,8 @@ void Material::loadCode(const Dictionary& codes, const std::string& baseFolder, 
 
 void Material::loadCode(const std::string& codeString, RenderPassClass passCls, const std::string& baseFolder, Dictionary defines)
 {
-	std::string codeFileName;
-
 	application().pushSearchPath(baseFolder);
-	if (_renderer->api() == RenderingAPI::Metal)
-	{
-		codeFileName = application().resolveFileName(codeString + ".metal");
-	}
-	else if (_renderer->api() == RenderingAPI::Vulkan)
-	{
-		codeFileName = application().resolveFileName(codeString + ".glsl");
-	}
-	else if (_renderer->api() == RenderingAPI::DirectX12)
-	{
-		codeFileName = application().resolveFileName(codeString + ".hlsl");
-	}
-	else
-	{
-		debug::debugBreak();
-		ET_FAIL("Not implemented");
-	}
+	std::string codeFileName = application().resolveFileName(codeString + ".hlsl");
 	application().popSearchPaths();
 
 	ET_ASSERT(fileExists(codeFileName));
@@ -506,15 +460,14 @@ const String& mtl::materialParameterToString(MaterialParameter p)
 	ET_ASSERT(p < MaterialParameter::Count);
 	static const Map<MaterialParameter, String> names =
 	{
-		{ MaterialParameter::AlbedoColor, "albedoColor" },
-		{ MaterialParameter::ReflectanceColor, "reflectanceColor" },
-		{ MaterialParameter::EmissiveColor, "emissiveColor" },
-		{ MaterialParameter::Roughness, "roughness" },
-		{ MaterialParameter::Metallness, "metallness" },
-		{ MaterialParameter::Opacity, "opacity" },
+		{ MaterialParameter::BaseColorScale, "baseColorScale" },
+		{ MaterialParameter::RoughnessScale, "roughnessScale" },
+		{ MaterialParameter::MetallnessScale, "metallnessScale" },
+		{ MaterialParameter::OpacityScale, "opacityScale" },
 		{ MaterialParameter::NormalScale, "normalScale" },
 		{ MaterialParameter::IndexOfRefraction, "indexOfRefraction" },
 		{ MaterialParameter::SpecularExponent, "specularExponent" },
+		{ MaterialParameter::EmissiveColor, "emissiveColor" },
 	};
 	return names.at(p);
 }
@@ -523,17 +476,27 @@ const Map<MaterialTexture, String>& materialTextureNames()
 { 
 	static const Map<MaterialTexture, String> localMap =
 	{
-		{ MaterialTexture::Albedo, "albedoTexture" },
-		{ MaterialTexture::Reflectance, "reflectanceTexture" },
-		{ MaterialTexture::Roughness, "roughnessTexture" },
-		{ MaterialTexture::Emissive, "emissiveTexture" },
-		{ MaterialTexture::Opacity, "opacityTexture" },
-		{ MaterialTexture::Normal, "normalTexture" },
+		{ MaterialTexture::BaseColor, "baseColorTexture" },
+		{ MaterialTexture::NormalRoughnesMetallness, "normalRoughnessMetallnessTexture" },
+		{ MaterialTexture::EmissiveColor, "emissiveColorTexture" },
 		{ MaterialTexture::Shadow, "shadowTexture" },
 		{ MaterialTexture::AmbientOcclusion, "aoTexture" },
 		{ MaterialTexture::Environment, "environmentTexture" },
 	};
 	return localMap;
+}
+
+const Map<MaterialTexture, String>& materialSamplerNames()
+{
+	static const Map<MaterialTexture, String> names =
+	{
+		{ MaterialTexture::BaseColor, "baseColorSampler" },
+		{ MaterialTexture::NormalRoughnesMetallness, "normalRoughnessMetallnessSampler" },
+		{ MaterialTexture::Shadow, "shadowSampler" },
+		{ MaterialTexture::AmbientOcclusion, "aoSampler" },
+		{ MaterialTexture::Environment, "environmentSampler" },
+	};
+	return names;
 }
 
 const String& mtl::materialTextureToString(MaterialTexture t)
@@ -556,59 +519,63 @@ MaterialTexture mtl::stringToMaterialTexture(const String& name)
 const String& mtl::materialSamplerToString(MaterialTexture t)
 {
 	ET_ASSERT(t < MaterialTexture::Count);
-	static const Map<MaterialTexture, String> names =
+	return materialSamplerNames().at(t);
+
+}
+
+MaterialTexture samplerToMaterialTexture(const String& name)
+{
+	for (const auto& ts : materialSamplerNames())
 	{
-		{ MaterialTexture::Albedo, "albedoSampler" },
-		{ MaterialTexture::Reflectance, "reflectanceSampler" },
-		{ MaterialTexture::Roughness, "roughnessSampler" },
-		{ MaterialTexture::Emissive, "emissiveSampler" },
-		{ MaterialTexture::Opacity, "opacitySampler" },
-		{ MaterialTexture::Normal, "normalSampler" },
-		{ MaterialTexture::Shadow, "shadowSampler" },
-		{ MaterialTexture::AmbientOcclusion, "aoSampler" },
-		{ MaterialTexture::Environment, "environmentSampler" },
-	};
-	return names.at(t);
+		if (ts.second == name)
+			return ts.first;
+	}
+	log::error("Unknown sampler name %s", name.c_str());
+	return MaterialTexture::Count;
 }
 
 const std::string shaderDefaultHeader =
 R"(
-#version 450
 #define VertexStreamBufferIndex         0
 
-#define VariablesSetIndex				0
+#define VariablesSetIndex               0
 #	define ObjectVariablesBufferIndex   4
 #	define MaterialVariablesBufferIndex 5
 #	define PassVariablesBufferIndex     6
 
-#define TexturesSetIndex				1
-#	define AlbedoTextureBinding			0
-#	define ReflectanceTextureBinding	1
-#	define EmissiveTextureBinding		2
-#	define RoughnessTextureBinding		3
-#	define OpacityTextureBinding		4
-#	define NormalTextureBinding			5
+#define TexturesSetIndex                1
+#   define AlbedoTextureBinding         0
+#   define ReflectanceTextureBinding    1
+#   define EmissiveTextureBinding       2
+#   define RoughnessTextureBinding      3
+#   define OpacityTextureBinding        4
+#   define NormalTextureBinding         5
 
-#define SharedTexturesSetIndex			2
-#	define ShadowTextureBinding			6
-#	define AOTextureBinding				7
-#	define EnvironmentTextureBinding	8
+#define SharedTexturesSetIndex          2
+#   define ShadowTextureBinding         6
+#   define AOTextureBinding             7
+#   define EnvironmentTextureBinding    8
 
 #define PI                              3.1415926536
 #define HALF_PI                         1.5707963268
 #define DOUBLE_PI                       6.2831853072
 #define INV_PI                          0.3183098862
 
-#define PassVariables PassVariables { \
-	mat4 viewProjection; \
-	mat4 projection; \
-	mat4 view; \
-	vec4 cameraPosition; \
-	vec4 cameraDirection; \
-	vec4 cameraUp; \
-	vec4 lightPosition; \
-	mat4 lightProjection; \
-}
+#define CONSTANT_LOCATION_IMPL(name, registerName, spaceName) register(name##registerName, space##spaceName)
+#define CONSTANT_LOCATION(name, register, space)              CONSTANT_LOCATION_IMPL(name, register, space)
+
+cbuffer PassVariables : CONSTANT_LOCATION(b, PassVariablesBufferIndex, VariablesSetIndex) 
+{
+	float4x4 viewProjection;
+	float4x4 projection;
+	float4x4 view;
+	float4 cameraPosition;
+	float4 cameraDirection;
+	float4 cameraUp;
+	float4 lightPosition;
+	float4x4 lightProjection;
+} passVariables;
+
 )";
 
 }

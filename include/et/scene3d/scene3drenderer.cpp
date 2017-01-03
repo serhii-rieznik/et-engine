@@ -55,7 +55,7 @@ void Renderer::validateMainPass(RenderInterface::Pointer& renderer, const Scene:
 		passInfo.color[0].loadOperation = FramebufferOperation::Clear;
 		passInfo.color[0].storeOperation = FramebufferOperation::Store;
 		passInfo.color[0].enabled = true;
-		passInfo.color[0].clearValue = vec4(0.5f, 0.25f, 0.125f, 1.0f);
+		passInfo.color[0].clearValue = vec4(0.333333f, 0.333333f, 0.333333f, 1.0f);
 		passInfo.depth.loadOperation = FramebufferOperation::Clear;
 		passInfo.depth.storeOperation = FramebufferOperation::DontCare;
 		passInfo.depth.enabled = true;

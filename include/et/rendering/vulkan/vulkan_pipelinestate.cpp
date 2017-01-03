@@ -27,7 +27,7 @@ public:
 	{
 	}
 
-	void generateInputLayout(const VertexDeclaration& decl, 
+	void generateInputLayout(const VertexDeclaration& inputLayout, const VertexDeclaration& expectedLayout,
 		VkPipelineVertexInputStateCreateInfo& vertexInfo, Vector<VkVertexInputAttributeDescription>& attribs,
 		VkVertexInputBindingDescription& binding);
 
@@ -118,7 +118,7 @@ void VulkanPipelineState::build()
 	VkVertexInputBindingDescription binding = { };
 	Vector<VkVertexInputAttributeDescription> attribs;
 	VkPipelineVertexInputStateCreateInfo vertexInfo = { };
-	_private->generateInputLayout(inputLayout(), vertexInfo, attribs, binding);
+	_private->generateInputLayout(inputLayout(), prog->reflection().inputLayout, vertexInfo, attribs, binding);
 
 	VkPipelineViewportStateCreateInfo viewportState = { VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO }; 
 	viewportState.scissorCount = 1;
@@ -219,23 +219,31 @@ void VulkanPipelineStatePrivate::generatePipelineLayout(const Program::Reflectio
 	VULKAN_CALL(vkCreatePipelineLayout(vulkan.device, &layoutInfo, nullptr, &layout));
 }
 
-void VulkanPipelineStatePrivate::generateInputLayout(const VertexDeclaration& decl, 
+void VulkanPipelineStatePrivate::generateInputLayout(const VertexDeclaration& inputLayout, const VertexDeclaration& expectedLayout,
 	VkPipelineVertexInputStateCreateInfo& vertexInfo, Vector<VkVertexInputAttributeDescription>& attribs,
 	VkVertexInputBindingDescription& binding)
 {
 	attribs.clear();
-	attribs.reserve(decl.numElements());
-	for (const auto& e : decl.elements())
+	attribs.reserve(inputLayout.numElements());
+	for (const auto& e : inputLayout.elements())
 	{
-		attribs.emplace_back();
-		attribs.back().offset = e.offset();
-		attribs.back().format = vulkan::dataTypeValue(e.type());
-		attribs.back().location = static_cast<uint32_t>(e.usage());
+		if (expectedLayout.has(e.usage()))
+		{
+			attribs.emplace_back();
+			attribs.back().offset = e.offset();
+			attribs.back().format = vulkan::dataTypeValue(e.type());
+			attribs.back().location = static_cast<uint32_t>(e.usage());
+		}
+		else
+		{
+			log::warning("Vertex attrib %s ignored (not present in required layout)",
+				vertexAttributeUsageToString(e.usage()).c_str());
+		}
 	}
 
 	binding = { };
 	binding.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
-	binding.stride = decl.sizeInBytes();
+	binding.stride = inputLayout.sizeInBytes();
 
 	vertexInfo = { VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO };
 	vertexInfo.pVertexBindingDescriptions = &binding;

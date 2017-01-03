@@ -14,15 +14,19 @@ const std::string vertexAttributeUsageNames[VertexAttributeUsage_max] =
 {
 	"position", "normal", "color", "tangent", "binormal",
 	"texCoord0", "texCoord1", "texCoord2", "texCoord3",
-	"smoothingGroup" "blendWeights", "blendIndices"
+	"smoothingGroup" "blendWeight", "blendIndices"
 };
 
-const std::string dataTypeNames[static_cast<uint32_t>(RenderingAPI::Count)][DataType_max] =
+const std::string vertexAttributeUsageSemanticsNames[VertexAttributeUsage_max] =
 {
-	// metal
-	{ "float", "float2", "float3", "float4", "float3x3", "float4x4", "int", "int2", "int3", "int4" },
-	// vulkan
-	{ "float", "vec2", "vec3", "vec4", "mat3", "mat4", "int", "ivec2", "ivec3", "ivec4" },
+	"POSITION", "NORMAL", "COLOR", "TANGENT", "BINORMAL",
+	"TEXCOORD0", "TEXCOORD1", "TEXCOORD2", "TEXCOORD3",
+	"SMOOTHINGGROUP" "BLENDWEIGHT", "BLENDINDICES"
+};
+
+const std::string dataTypeNames[DataType_max] =
+{
+	"float", "float2", "float3", "float4", "float3x3", "float4x4", "int", "int2", "int3", "int4"
 };
 
 const std::string dataFormatNames[DataFormat_max] =
@@ -82,7 +86,7 @@ DataType stringToDataType(const std::string& s, RenderingAPI api)
 {
 	for (uint32_t i = 0, e = DataType_max; i < e; ++i)
 	{
-		if (s == dataTypeNames[static_cast<uint32_t>(api)][i])
+		if (s == dataTypeNames[i])
 			return static_cast<DataType>(i);
 	}
 
@@ -130,16 +134,20 @@ std::string vertexAttributeUsageToString(VertexAttributeUsage va)
 		intToStr(static_cast<uint32_t>(va));
 }
 
+std::string vertexAttributeUsageSemantics(VertexAttributeUsage va)
+{
+	return (va < VertexAttributeUsage::max) ? vertexAttributeUsageSemanticsNames[static_cast<uint32_t>(va)] :
+		intToStr(static_cast<uint32_t>(va));
+}
+
 std::string dataTypeToString(DataType vat, RenderingAPI api)
 {
-	return (vat < DataType::max) ? dataTypeNames[static_cast<uint32_t>(api)][static_cast<uint32_t>(vat)] :
-		intToStr(static_cast<uint32_t>(vat));
+	return (vat < DataType::max) ? dataTypeNames[static_cast<uint32_t>(vat)] : intToStr(static_cast<uint32_t>(vat));
 }
 
 std::string dataFormatToString(DataFormat dt)
 {
-	return (dt < DataFormat::max) ? dataFormatNames[static_cast<uint32_t>(dt)] :
-		intToStr(static_cast<uint32_t>(dt));
+	return (dt < DataFormat::max) ? dataFormatNames[static_cast<uint32_t>(dt)] : intToStr(static_cast<uint32_t>(dt));
 }
 
 std::string indexArrayFormatToString(IndexArrayFormat fmt)

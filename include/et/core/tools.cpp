@@ -242,7 +242,7 @@ StringList split(const std::string& s, const std::string& delim)
 
 	while (separatorIndex != std::string::npos)
 	{
-		if (separatorIndex > startIndex)
+		if (separatorIndex >= startIndex)
 			result.push_back(s.substr(startIndex, separatorIndex - startIndex));
 
 		startIndex = separatorIndex + 1;

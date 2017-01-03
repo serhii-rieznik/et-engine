@@ -425,7 +425,7 @@ void OBJLoader::loadMaterials(const std::string& fileName, ObjectsCache& cache)
 						
 						getLine(materialFile, line);
 						std::string actualName = application().resolveFileName(line);
-						_lastMaterial->setTexture(MaterialTexture::Normal, _renderer->loadTexture(actualName, cache));
+						_lastMaterial->setTexture(MaterialTexture::NormalRoughnesMetallness, _renderer->loadTexture(actualName, cache));
 					}
 					else
 					{
@@ -437,7 +437,7 @@ void OBJLoader::loadMaterials(const std::string& fileName, ObjectsCache& cache)
 				{
 					getLine(materialFile, line);
 					std::string actualName = application().resolveFileName(line);
-					_lastMaterial->setTexture(MaterialTexture::Normal, _renderer->loadTexture(actualName, cache) );
+					_lastMaterial->setTexture(MaterialTexture::NormalRoughnesMetallness, _renderer->loadTexture(actualName, cache) );
 				}
 			}
 			else
@@ -466,13 +466,14 @@ void OBJLoader::loadMaterials(const std::string& fileName, ObjectsCache& cache)
 				{
 					vec4 value(0.0f);
 					materialFile >> value;
-					_lastMaterial->setVector(MaterialParameter::AlbedoColor, value);
+					_lastMaterial->setVector(MaterialParameter::BaseColorScale, value);
 				} 
 				else if (next == 's')
 				{
 					vec4 value(0.0f);
 					materialFile >> value;
-					_lastMaterial->setVector(MaterialParameter::ReflectanceColor, value);
+					// _lastMaterial->setVector(MaterialParameter::ReflectanceColor, value);
+					log::warning("Reflectance color (Ks) ignored in material");
 				} 
 				else if (next == 'e')
 				{
@@ -497,13 +498,13 @@ void OBJLoader::loadMaterials(const std::string& fileName, ObjectsCache& cache)
 			{
 				float value = 0.0f;
 				materialFile >> value;
-				_lastMaterial->setFloat(MaterialParameter::Roughness, value);
+				_lastMaterial->setFloat(MaterialParameter::RoughnessScale, value);
 			}
 			else if (next == 'm')
 			{
 				float value = 0.0f;
 				materialFile >> value;
-				_lastMaterial->setFloat(MaterialParameter::Metallness, value);
+				_lastMaterial->setFloat(MaterialParameter::MetallnessScale, value);
 			}
 		}
 		else if (key == 't')
@@ -516,7 +517,7 @@ void OBJLoader::loadMaterials(const std::string& fileName, ObjectsCache& cache)
 			{
 				float value = 0.0f;
 				materialFile >> value;
-				_lastMaterial->setFloat(MaterialParameter::Opacity, clamp(1.0f - value, 0.0f, 1.0f));
+				_lastMaterial->setFloat(MaterialParameter::OpacityScale, clamp(1.0f - value, 0.0f, 1.0f));
 			}
 			else if (next == 'f') // skip
 			{
@@ -549,7 +550,7 @@ void OBJLoader::loadMaterials(const std::string& fileName, ObjectsCache& cache)
 					{
 						getLine(materialFile, line);
 						std::string actualName = application().resolveFileName(line);
-						_lastMaterial->setTexture(MaterialTexture::Albedo, _renderer->loadTexture(actualName, cache) );
+						_lastMaterial->setTexture(MaterialTexture::BaseColor, _renderer->loadTexture(actualName, cache) );
 					}
 					else if (subId == 'a')
 					{
@@ -559,13 +560,14 @@ void OBJLoader::loadMaterials(const std::string& fileName, ObjectsCache& cache)
 					{
 						getLine(materialFile, line);
 						std::string actualName = application().resolveFileName(line);
-						_lastMaterial->setTexture(MaterialTexture::Reflectance, _renderer->loadTexture(actualName, cache) );
+						log::warning("Reflectance texture ingored (map_Ks) in material");
+						// _lastMaterial->setTexture(MaterialTexture::Reflectance, _renderer->loadTexture(actualName, cache) );
 					}
 					else if (subId == 'e')
 					{
 						getLine(materialFile, line);
 						std::string actualName = application().resolveFileName(line);
-						_lastMaterial->setTexture(MaterialTexture::Emissive, _renderer->loadTexture(actualName, cache) );
+						_lastMaterial->setTexture(MaterialTexture::EmissiveColor, _renderer->loadTexture(actualName, cache) );
 					}
 					else
 					{
@@ -603,7 +605,7 @@ void OBJLoader::loadMaterials(const std::string& fileName, ObjectsCache& cache)
 								
 								getLine(materialFile, line);
 								std::string actualName = application().resolveFileName(line);
-								_lastMaterial->setTexture(MaterialTexture::Normal, _renderer->loadTexture(actualName, cache));
+								_lastMaterial->setTexture(MaterialTexture::NormalRoughnesMetallness, _renderer->loadTexture(actualName, cache));
 							}
 							else
 							{
@@ -615,7 +617,7 @@ void OBJLoader::loadMaterials(const std::string& fileName, ObjectsCache& cache)
 						{
 							getLine(materialFile, line);
 							std::string actualName = application().resolveFileName(line);
-							_lastMaterial->setTexture(MaterialTexture::Normal, _renderer->loadTexture(actualName, cache) );
+							_lastMaterial->setTexture(MaterialTexture::NormalRoughnesMetallness, _renderer->loadTexture(actualName, cache) );
 						}
 					}
 					else
@@ -627,7 +629,8 @@ void OBJLoader::loadMaterials(const std::string& fileName, ObjectsCache& cache)
 				{
 					getLine(materialFile, line);
 					std::string actualName = application().resolveFileName(line);
-					_lastMaterial->setTexture(MaterialTexture::Opacity, _renderer->loadTexture(actualName, cache) );
+					log::warning("Opacity texture (map_d) ignored in material - move opacity to baseColor's alpha");
+					// _lastMaterial->setTexture(MaterialTexture::Opacity, _renderer->loadTexture(actualName, cache) );
 				}
 				else
 				{
