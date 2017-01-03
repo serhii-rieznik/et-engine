@@ -238,7 +238,7 @@ class VertexShaderAttribLocationTraverser : public glslang::TIntermTraverser
 			{
 				log::info("Input symbol: %s, location remapped from %d to %d", 
 					attribName.c_str(), qualifier.layoutLocation, static_cast<uint32_t>(usage));
-				// qualifier.layoutLocation = static_cast<int>(usage);
+				qualifier.layoutLocation = static_cast<int>(usage);
 			}
 		}
 	}
@@ -252,9 +252,8 @@ bool hlslToSPIRV(const std::string& source, std::vector<uint32_t>& vertexBin, st
 	const char* sourceNames[] = { "vertex_shader_source", "fragment_shader_source" };
 
 	glslang::TShader vertexShader(EShLanguage::EShLangVertex);
-	vertexShader.setEntryPoint("vertexMain");
-	vertexShader.setAutoMapBindings(true);
 	vertexShader.setStringsWithLengthsAndNames(sourceCStr, nullptr, sourceNames, 1);
+	vertexShader.setEntryPoint("vertexMain");
 	if (!vertexShader.parse(&defaultBuiltInResource, 100, true, messages))
 	{
 		log::error("Failed to parse vertex shader:\n%s", vertexShader.getInfoLog());
@@ -264,9 +263,8 @@ bool hlslToSPIRV(const std::string& source, std::vector<uint32_t>& vertexBin, st
 	}
 	
 	glslang::TShader fragmentShader(EShLanguage::EShLangFragment);
-	fragmentShader.setEntryPoint("fragmentMain");
 	fragmentShader.setStringsWithLengthsAndNames(sourceCStr + 1, nullptr, sourceNames + 1, 1);
-	fragmentShader.setAutoMapBindings(true);
+	fragmentShader.setEntryPoint("fragmentMain");
 	if (!fragmentShader.parse(&defaultBuiltInResource, 100, true, messages))
 	{
 		log::error("Failed to parse fragment shader:\n%s", fragmentShader.getInfoLog());
