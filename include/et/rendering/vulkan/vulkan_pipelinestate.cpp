@@ -154,53 +154,45 @@ void VulkanPipelineState::build()
 void VulkanPipelineStatePrivate::generatePipelineLayout(const Program::Reflection& reflection, VulkanRenderPass::Pointer pass)
 {
 	Set<uint32_t> textureBindings;
-	Set<uint32_t> sharedTextureBindings;
-	
 	for (auto& tex : reflection.textures.vertexTextures)
-	{
-		if (tex.second >= static_cast<uint32_t>(MaterialTexture::FirstSharedTexture))
-			sharedTextureBindings.insert(tex.second);
-		else
-			textureBindings.insert(tex.second);
-	}
+		textureBindings.insert(tex.second);
 	
-	for (auto& tex : reflection.textures.fragmentTextures)
-	{
-		if (tex.second >= static_cast<uint32_t>(MaterialTexture::FirstSharedTexture))
-			sharedTextureBindings.insert(tex.second);
-		else
-			textureBindings.insert(tex.second);
-	}
-
+	Set<uint32_t> samplerBindings;
+	for (auto& tex : reflection.textures.vertexSamplers)
+		samplerBindings.insert(tex.second);
+	
 	{
 		Vector<VkDescriptorSetLayoutBinding> textureLayoutBindings;
+		Vector<VkDescriptorSetLayoutBinding> sharedTextureLayoutBindings;
 		textureLayoutBindings.reserve(MaterialTexturesCount);
+		sharedTextureLayoutBindings.reserve(MaterialTexturesCount);
 		for (uint32_t textureBinding : textureBindings)
 		{
-			textureLayoutBindings.emplace_back();
-			textureLayoutBindings.back().binding = textureBinding;
-			textureLayoutBindings.back().stageFlags = VK_SHADER_STAGE_ALL;
-			textureLayoutBindings.back().descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-			textureLayoutBindings.back().descriptorCount = 1;
+			auto& container = (textureBinding >= static_cast<uint32_t>(MaterialTexture::FirstSharedTexture)) ? 
+				sharedTextureLayoutBindings : textureLayoutBindings;
+
+			container.emplace_back();
+			container.back().binding = textureBinding;
+			container.back().stageFlags = VK_SHADER_STAGE_ALL;
+			container.back().descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
+			container.back().descriptorCount = 1;
 		}
-		VkDescriptorSetLayoutCreateInfo layoutSetInfo = { VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO };
+		for (uint32_t samplerBinding : samplerBindings)
+		{
+			auto& container = (samplerBinding >= static_cast<uint32_t>(MaterialTexture::FirstSharedTexture) + MaterialSamplerBindingOffset) ? 
+				sharedTextureLayoutBindings : textureLayoutBindings;
+
+			container.emplace_back();
+			container.back().binding = samplerBinding;
+			container.back().stageFlags = VK_SHADER_STAGE_ALL;
+			container.back().descriptorType = VK_DESCRIPTOR_TYPE_SAMPLER;
+			container.back().descriptorCount = 1;
+		}		VkDescriptorSetLayoutCreateInfo layoutSetInfo = { VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO };
+
 		layoutSetInfo.bindingCount = static_cast<uint32_t>(textureLayoutBindings.size());
 		layoutSetInfo.pBindings = textureLayoutBindings.data();
 		VULKAN_CALL(vkCreateDescriptorSetLayout(vulkan.device, &layoutSetInfo, nullptr, &texturesLayout));
-	}
 
-	{
-		Vector<VkDescriptorSetLayoutBinding> sharedTextureLayoutBindings;
-		sharedTextureLayoutBindings.reserve(MaterialTexturesCount);
-		for (uint32_t textureBinding : sharedTextureBindings)
-		{
-			sharedTextureLayoutBindings.emplace_back();
-			sharedTextureLayoutBindings.back().binding = textureBinding;
-			sharedTextureLayoutBindings.back().stageFlags = VK_SHADER_STAGE_ALL;
-			sharedTextureLayoutBindings.back().descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-			sharedTextureLayoutBindings.back().descriptorCount = 1;
-		}
-		VkDescriptorSetLayoutCreateInfo layoutSetInfo = { VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO };
 		layoutSetInfo.bindingCount = static_cast<uint32_t>(sharedTextureLayoutBindings.size());
 		layoutSetInfo.pBindings = sharedTextureLayoutBindings.data();
 		VULKAN_CALL(vkCreateDescriptorSetLayout(vulkan.device, &layoutSetInfo, nullptr, &sharedTexturesLayout));

@@ -16,14 +16,15 @@ namespace et
 const std::string kCode = "code";
 const std::string kInputLayout = "input-layout";
 const std::string kOptions = "options";
-extern const std::string shaderDefaultHeader;
 
+std::string Material::_shaderDefaultHeader;
 /*
  * Material
  */
 Material::Material(RenderInterface* ren)
 	: _renderer(ren)
 {
+	initDefaultHeader();
 }
 
 uint64_t Material::sortingKey() const
@@ -33,7 +34,7 @@ uint64_t Material::sortingKey() const
 
 void Material::setTexture(MaterialTexture t, Texture::Pointer tex)
 {
-	mtl::OptionalObject<Texture::Pointer>& entry = textures[static_cast<uint32_t>(t)];
+	OptionalObject<Texture::Pointer>& entry = textures[static_cast<uint32_t>(t)];
 	if (entry.object != tex)
 	{
 		entry.object = tex;
@@ -47,7 +48,7 @@ void Material::setTexture(MaterialTexture t, Texture::Pointer tex)
 
 void Material::setSampler(MaterialTexture t, Sampler::Pointer smp)
 {
-	mtl::OptionalObject<Sampler::Pointer>& entry = samplers[static_cast<uint32_t>(t)];
+	OptionalObject<Sampler::Pointer>& entry = samplers[static_cast<uint32_t>(t)];
 	entry.object = smp;
 	entry.index = static_cast<uint32_t>(t);
 	entry.binding = t;
@@ -268,7 +269,7 @@ void Material::loadCode(const std::string& codeString, RenderPassClass passCls, 
 		}
 		else if (what == ParseDirective::DefaultHeader)
 		{
-			code.insert(positionInCode, shaderDefaultHeader);
+			code.insert(positionInCode, _shaderDefaultHeader);
 		}
 		else if (what != ParseDirective::StageDefine)
 		{
@@ -357,7 +358,7 @@ void MaterialInstance::buildTextureSet(RenderPassClass pt)
 	}
 	for (const auto& i : reflection.textures.fragmentSamplers)
 	{
-		if (i.second < static_cast<uint32_t>(MaterialTexture::FirstSharedTexture))
+		if (i.second < static_cast<uint32_t>(MaterialTexture::FirstSharedTexture) + MaterialSamplerBindingOffset)
 		{
 			description.fragmentSamplers[i.second] = base()->samplers[i.second].object;
 			if (samplers[i.second].object.valid())
@@ -418,11 +419,11 @@ void MaterialInstance::buildConstantBuffer(RenderPassClass pt)
 
 	entry = _renderer->sharedConstantBuffer().staticAllocate(reflection.materialVariablesBufferSize);
 
-	auto setFunc = [&, this](const mtl::OptionalValue& p) 
+	auto setFunc = [&, this](const OptionalValue& p) 
 	{
 		if (p.isSet())
 		{
-			const String& name = mtl::materialParameterToString(p.binding);
+			const String& name = materialParameterToString(p.binding);
 			auto var = reflection.materialVariables.find(name);
 			if (var != reflection.materialVariables.end())
 			{
@@ -432,10 +433,10 @@ void MaterialInstance::buildConstantBuffer(RenderPassClass pt)
 	};
 
 	for (const auto& p : base()->properties)
-		setFunc(p);
+		setFunc(p.second);
 
 	for (const auto& p : properties)
-		setFunc(p);
+		setFunc(p.second);
 
 	_constBuffers[pt].obj = entry;
 	_constBuffers[pt].valid = true;
@@ -472,19 +473,19 @@ void MaterialInstance::invalidateConstantBuffer()
 /*
  * Service
  */
-const String& mtl::materialParameterToString(MaterialParameter p)
+const String& materialParameterToString(MaterialParameter p)
 {
 	ET_ASSERT(p < MaterialParameter::Count);
 	static const Map<MaterialParameter, String> names =
 	{
 		{ MaterialParameter::BaseColorScale, "baseColorScale" },
+		{ MaterialParameter::NormalScale, "normalScale" },
 		{ MaterialParameter::RoughnessScale, "roughnessScale" },
 		{ MaterialParameter::MetallnessScale, "metallnessScale" },
+		{ MaterialParameter::EmissiveColor, "emissiveColor" },
 		{ MaterialParameter::OpacityScale, "opacityScale" },
-		{ MaterialParameter::NormalScale, "normalScale" },
 		{ MaterialParameter::IndexOfRefraction, "indexOfRefraction" },
 		{ MaterialParameter::SpecularExponent, "specularExponent" },
-		{ MaterialParameter::EmissiveColor, "emissiveColor" },
 	};
 	return names.at(p);
 }
@@ -494,7 +495,9 @@ const Map<MaterialTexture, String>& materialTextureNames()
 	static const Map<MaterialTexture, String> localMap =
 	{
 		{ MaterialTexture::BaseColor, "baseColorTexture" },
-		{ MaterialTexture::NormalRoughnesMetallness, "normalRoughnessMetallnessTexture" },
+		{ MaterialTexture::Normal, "normalTexture" },
+		{ MaterialTexture::Roughnes, "roughnessTexture" },
+		{ MaterialTexture::Metallness, "metallnessTexture" },
 		{ MaterialTexture::EmissiveColor, "emissiveColorTexture" },
 		{ MaterialTexture::Shadow, "shadowTexture" },
 		{ MaterialTexture::AmbientOcclusion, "aoTexture" },
@@ -508,7 +511,10 @@ const Map<MaterialTexture, String>& materialSamplerNames()
 	static const Map<MaterialTexture, String> names =
 	{
 		{ MaterialTexture::BaseColor, "baseColorSampler" },
-		{ MaterialTexture::NormalRoughnesMetallness, "normalRoughnessMetallnessSampler" },
+		{ MaterialTexture::Normal, "normalSampler" },
+		{ MaterialTexture::Roughnes, "roughnessSampler" },
+		{ MaterialTexture::Metallness, "metallnessSampler" },
+		{ MaterialTexture::EmissiveColor, "emissiveColorSampler" },
 		{ MaterialTexture::Shadow, "shadowSampler" },
 		{ MaterialTexture::AmbientOcclusion, "aoSampler" },
 		{ MaterialTexture::Environment, "environmentSampler" },
@@ -516,13 +522,13 @@ const Map<MaterialTexture, String>& materialSamplerNames()
 	return names;
 }
 
-const String& mtl::materialTextureToString(MaterialTexture t)
+const String& materialTextureToString(MaterialTexture t)
 {
 	ET_ASSERT(t < MaterialTexture::Count);
 	return materialTextureNames().at(t);
 }
 
-MaterialTexture mtl::stringToMaterialTexture(const String& name)
+MaterialTexture stringToMaterialTexture(const String& name)
 {
 	for (const auto& ts : materialTextureNames())
 	{
@@ -532,14 +538,14 @@ MaterialTexture mtl::stringToMaterialTexture(const String& name)
 	return MaterialTexture::Count;
 }
 
-const String& mtl::materialSamplerToString(MaterialTexture t)
+const String& materialSamplerToString(MaterialTexture t)
 {
 	ET_ASSERT(t < MaterialTexture::Count);
 	return materialSamplerNames().at(t);
 
 }
 
-MaterialTexture mtl::samplerToMaterialTexture(const String& name)
+MaterialTexture samplerToMaterialTexture(const String& name)
 {
 	for (const auto& ts : materialSamplerNames())
 	{
@@ -549,7 +555,9 @@ MaterialTexture mtl::samplerToMaterialTexture(const String& name)
 	return MaterialTexture::Count;
 }
 
-const std::string shaderDefaultHeader =
+void Material::initDefaultHeader()
+{
+	_shaderDefaultHeader =
 #if (ET_PROGRAM_PREFER_GLSL_INPUT)
 R"(
 #version 450
@@ -562,20 +570,8 @@ R"(
 #endif
 R"(
 #define VariablesSetIndex 0
-#	define ObjectVariablesBufferIndex 4
-#	define MaterialVariablesBufferIndex 5
-#	define PassVariablesBufferIndex 6
-
 #define TexturesSetIndex 1
-#   define BaseColorTextureBinding 0
-#   define NormalRoughnesMetallnessTextureBinding 1
-#   define EmissiveColorTextureBinding 2
-
 #define SharedTexturesSetIndex 2
-#   define ShadowTextureBinding 8
-#   define AOTextureBinding 9
-#   define EnvironmentTextureBinding 10
-
 #define PI 3.1415926536
 #define HALF_PI 1.5707963268
 #define DOUBLE_PI 6.2831853072
@@ -594,8 +590,41 @@ R"(
     mat4 lightProjection; \
 }
 )"
-#else
-R"(
+#endif
+;
+
+	char buffer[2048] = { };
+	int printPos = 0;
+	for (uint32_t i = static_cast<uint32_t>(MaterialTexture::FirstMaterialTexture), e = static_cast<uint32_t>(MaterialTexture::LastMaterialTexture); i <= e; ++i)
+	{
+		String texName = materialTextureToString(static_cast<MaterialTexture>(i));
+		String smpName = materialSamplerToString(static_cast<MaterialTexture>(i));
+		texName[0] = toupper(texName[0]);
+		smpName[0] = toupper(smpName[0]);
+		printPos += sprintf(buffer + printPos, "#define %sBinding %u\n#define %sBinding %u\n", 
+			texName.c_str(), i, smpName.c_str(), i + MaterialSamplerBindingOffset);
+	}
+	for (uint32_t i = static_cast<uint32_t>(MaterialTexture::FirstSharedTexture), e = static_cast<uint32_t>(MaterialTexture::LastSharedTexture); i <= e; ++i)
+	{
+		String texName = materialTextureToString(static_cast<MaterialTexture>(i));
+		String smpName = materialSamplerToString(static_cast<MaterialTexture>(i));
+		texName[0] = toupper(texName[0]);
+		smpName[0] = toupper(smpName[0]);
+		printPos += sprintf(buffer + printPos, "#define %sBinding %u\n#define %sBinding %u\n", 
+			texName.c_str(), i, smpName.c_str(), i + MaterialSamplerBindingOffset);
+	}
+	{
+		printPos += sprintf(buffer + printPos, 
+			"#define ObjectVariablesBufferIndex %u\n"
+			"#define MaterialVariablesBufferIndex %u\n"
+			"#define PassVariablesBufferIndex %u\n", 
+			ObjectVariablesBufferIndex, MaterialVariablesBufferIndex, PassVariablesBufferIndex);
+	}
+	
+	_shaderDefaultHeader += buffer;
+
+#if (!ET_PROGRAM_PREFER_GLSL_INPUT)
+	_shaderDefaultHeader += R"(
 #define CONSTANT_LOCATION_IMPL(name, registerName, spaceName) register(name##registerName, space##spaceName)
 #define CONSTANT_LOCATION(name, register, space)              CONSTANT_LOCATION_IMPL(name, register, space)
 
@@ -610,8 +639,10 @@ cbuffer PassVariables : CONSTANT_LOCATION(b, PassVariablesBufferIndex, Variables
 	float4 lightPosition;
 	row_major float4x4 lightProjection;
 };
-)"
+)";
 #endif
+
+}
 ;
 
 }

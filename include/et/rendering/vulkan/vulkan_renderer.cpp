@@ -190,7 +190,8 @@ void VulkanRenderer::init(const RenderContextParameters& params)
 	VkDescriptorPoolSize poolSizes[] = {
 		{ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, defaultPoolSize },
 		{ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, defaultPoolSize },
-		{ VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, defaultPoolSize }
+		{ VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, defaultPoolSize },
+		{ VK_DESCRIPTOR_TYPE_SAMPLER, defaultPoolSize },
 	};
 
 	VkDescriptorPoolCreateInfo poolInfo = { VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO };

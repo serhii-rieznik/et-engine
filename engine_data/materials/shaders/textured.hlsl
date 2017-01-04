@@ -5,7 +5,7 @@
 #if (TRANSFORM_INPUT_POSITION)
 cbuffer ObjectVariables : CONSTANT_LOCATION(b, ObjectVariablesBufferIndex, VariablesSetIndex) 
 {
-	float4x4 worldTransform; 
+	row_major float4x4 worldTransform; 
 };
 #endif
 

@@ -4,8 +4,8 @@
 
 cbuffer ObjectVariables : CONSTANT_LOCATION(b, ObjectVariablesBufferIndex, VariablesSetIndex)
 {
-	float4x4 worldTransform;
-	float4x4 worldRotationTransform;	
+	row_major float4x4 worldTransform;
+	row_major float4x4 worldRotationTransform;	
 };
 
 struct VSOutput 

@@ -297,7 +297,6 @@ void VulkanRenderPass::pushRenderBatch(const RenderBatch::Pointer& inBatch)
 	}
 
 	retain();
-	batch.pipeline = _private->renderer->acquirePipelineState(VulkanRenderPass::Pointer(this), material, inBatch->vertexStream());
 	batch.textureSet = material->textureSet(info().renderPassClass);
 	batch.dynamicOffsets[0] = objectVariables.offset();
 	batch.dynamicOffsets[1] = material->constantBufferData(info().renderPassClass).offset();
@@ -306,6 +305,7 @@ void VulkanRenderPass::pushRenderBatch(const RenderBatch::Pointer& inBatch)
 	batch.indexBufferFormat = vulkan::indexBufferFormat(inBatch->vertexStream()->indexArrayFormat());
 	batch.startIndex = inBatch->firstIndex();
 	batch.indexCount = inBatch->numIndexes();
+	batch.pipeline = _private->renderer->acquirePipelineState(VulkanRenderPass::Pointer(this), material, inBatch->vertexStream());
 	release();
 }
 

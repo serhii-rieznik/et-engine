@@ -50,25 +50,28 @@ public:
 
 	for (const auto& b : mergedData)
 	{
-		if (b.second.first.invalid())
-			ET_FAIL("Invalid texture provided to texture set");
-		if (b.second.second.invalid())
-			ET_FAIL("Invalid sampler provided to texture set");
-
 		bindings.emplace_back();
 		imageInfos.emplace_back();
 		writeSet.emplace_back();
 
+		bool isTextureBinding = b.second.first.valid();
+
 		VkDescriptorSetLayoutBinding& binding = bindings.back();
 		binding.binding = b.first;
 		binding.descriptorCount = 1;
-		binding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+		binding.descriptorType = isTextureBinding ? VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE : VK_DESCRIPTOR_TYPE_SAMPLER;
 		binding.stageFlags = VK_SHADER_STAGE_ALL;
 
 		VkDescriptorImageInfo& info = imageInfos.back();
-		info.imageView = VulkanTexture::Pointer(b.second.first)->nativeTexture().imageView;
-		info.imageLayout = VulkanTexture::Pointer(b.second.first)->nativeTexture().layout;
-		info.sampler = VulkanSampler::Pointer(b.second.second)->nativeSampler().sampler;
+		if (isTextureBinding)
+		{
+			info.imageView = VulkanTexture::Pointer(b.second.first)->nativeTexture().imageView;
+			info.imageLayout = VulkanTexture::Pointer(b.second.first)->nativeTexture().layout;
+		}
+		else 
+		{
+			info.sampler = VulkanSampler::Pointer(b.second.second)->nativeSampler().sampler;
+		}
 
 		VkWriteDescriptorSet& ws = writeSet.back();
 		ws.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;

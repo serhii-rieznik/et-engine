@@ -82,7 +82,7 @@ private:
 	RenderInterface* _renderer = nullptr;
 	ConstructionInfo _info;
 	ConstantBuffer _dynamicConstantBuffer;
-	std::map<MaterialTexture, std::pair<Texture::Pointer, Sampler::Pointer>> _sharedTextures;
+	std::map<uint32_t, std::pair<Texture::Pointer, Sampler::Pointer>> _sharedTextures;
 	TextureSet::Pointer _sharedTexturesSet;
 	bool _sharedTexturesSetValid = false;
 };

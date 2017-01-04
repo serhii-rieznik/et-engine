@@ -311,9 +311,10 @@ enum : uint32_t
 	 * Shader buffer indices
 	 */
 	VertexStreamBufferIndex = 0,
-	ObjectVariablesBufferIndex = 4,
-	MaterialVariablesBufferIndex = 5,
-	PassVariablesBufferIndex = 6,
+
+	ObjectVariablesBufferIndex = 0,
+	MaterialVariablesBufferIndex = 1,
+	PassVariablesBufferIndex = 2,
 
 	MaxRenderTargets = 8,
 	MaxTextureUnits = 8

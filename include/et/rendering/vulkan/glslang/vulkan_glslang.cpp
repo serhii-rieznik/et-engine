@@ -162,13 +162,55 @@ class VertexShaderAttribLocationTraverser : public glslang::TIntermTraverser
 	}
 };
 
-bool hlslToSPIRV(const std::string& source, std::vector<uint32_t>& vertexBin, std::vector<uint32_t>& fragmentBin,
+bool hlslToSPIRV(const std::string& _source, std::vector<uint32_t>& vertexBin, std::vector<uint32_t>& fragmentBin,
 	Program::Reflection& reflection)
 {
+	std::string preprocessedVertexShader;
+	std::string preprocessedFragmentShader;
+
+	EShMessages messages = static_cast<EShMessages>(EShMsgSpvRules | EShMsgReadHlsl);
+	const char* vs[] = { _source.c_str() };
+	const char* fs[] = { _source.c_str() };
+	const char* vsName[] = { "vertex_shader_source" };
+	const char* fsName[] = { "fragment_shader_source" };
+
+	glslang::TShader::ForbidInclude defaultIncluder;
+
+	glslang::TShader vertexShader(EShLanguage::EShLangVertex);
+	vertexShader.setStringsWithLengthsAndNames(vs, nullptr, vsName, 1);
+	vertexShader.setAutoMapBindings(true);
+	vertexShader.setEntryPoint("vertexMain");
+	if (!vertexShader.preprocess(&glslang::DefaultTBuiltInResource, 110, EProfile::ECoreProfile, false, true,
+		messages, &preprocessedVertexShader, defaultIncluder))
+	{
+		log::error("Failed to preprocess vertex shader:\n%s", vertexShader.getInfoLog());
+		dumpSource(_source);
+		debug::debugBreak();
+		return false;
+	}
+	vs[0] = { preprocessedVertexShader.c_str() };
+	vertexShader.setStringsWithLengthsAndNames(vs, nullptr, vsName, 1);
+
+	glslang::TShader fragmentShader(EShLanguage::EShLangFragment);
+	fragmentShader.setStringsWithLengthsAndNames(fs, nullptr, fsName, 1);
+	fragmentShader.setAutoMapBindings(true);
+	fragmentShader.setEntryPoint("fragmentMain");
+	if (!fragmentShader.preprocess(&glslang::DefaultTBuiltInResource, 110, EProfile::ECoreProfile, false, true,
+		messages, &preprocessedFragmentShader, defaultIncluder))
+	{
+		log::error("Failed to preprocess fragment shader:\n%s", fragmentShader.getInfoLog());
+		dumpSource(_source);
+		debug::debugBreak();
+		return false;
+	}
+	fs[0] = { preprocessedFragmentShader.c_str() };
+	fragmentShader.setStringsWithLengthsAndNames(fs, nullptr, fsName, 1);
+
 #if (ET_PLATFORM_WIN && ET_COMPILE_TEST_HLSL)
 	Microsoft::WRL::ComPtr<ID3DBlob> vertexBlob = nullptr;
 	Microsoft::WRL::ComPtr<ID3DBlob> vertexErrors = nullptr;
-	HRESULT vResult = D3DCompile(source.c_str(), source.length(), nullptr, nullptr, nullptr, "vertexMain", "vs_5_1", 
+	HRESULT vResult = D3DCompile(preprocessedVertexShader.c_str(), preprocessedVertexShader.length(), 
+		nullptr, nullptr, nullptr, "vertexMain", "vs_5_1", 
 		D3DCOMPILE_DEBUG | D3DCOMPILE_ENABLE_STRICTNESS | D3DCOMPILE_OPTIMIZATION_LEVEL0 | D3DCOMPILE_WARNINGS_ARE_ERRORS, 
 		0, vertexBlob.GetAddressOf(), vertexErrors.GetAddressOf());
 
@@ -184,7 +226,8 @@ bool hlslToSPIRV(const std::string& source, std::vector<uint32_t>& vertexBin, st
 
 	Microsoft::WRL::ComPtr<ID3DBlob> fragmentBlob = nullptr;
 	Microsoft::WRL::ComPtr<ID3DBlob> fragmentErrors = nullptr;
-	HRESULT fResult = D3DCompile(source.c_str(), source.length(), nullptr, nullptr, nullptr, "fragmentMain", "ps_5_1", 
+	HRESULT fResult = D3DCompile(preprocessedFragmentShader.c_str(), preprocessedFragmentShader.length(), 
+		nullptr, nullptr, nullptr, "fragmentMain", "ps_5_1", 
 		D3DCOMPILE_DEBUG | D3DCOMPILE_ENABLE_STRICTNESS | D3DCOMPILE_OPTIMIZATION_LEVEL0 | D3DCOMPILE_WARNINGS_ARE_ERRORS, 
 		0, fragmentBlob.GetAddressOf(), fragmentErrors.GetAddressOf());
 	if (FAILED(fResult))
@@ -198,32 +241,18 @@ bool hlslToSPIRV(const std::string& source, std::vector<uint32_t>& vertexBin, st
 	}
 #endif
 
-	EShMessages messages = static_cast<EShMessages>(EShMsgSpvRules | EShMsgReadHlsl);
-	const char* vs[] = { source.c_str() };
-	const char* vsName[] = { "vertex_shader_source" };
-	const char* fs[] = { source.c_str() };
-	const char* fsName[] = { "fragment_shader_source" };
-
-	glslang::TShader vertexShader(EShLanguage::EShLangVertex);
-	vertexShader.setStringsWithLengthsAndNames(vs, nullptr, vsName, 1);
-	vertexShader.setAutoMapBindings(true);
-	vertexShader.setEntryPoint("vertexMain");
 	if (!vertexShader.parse(&glslang::DefaultTBuiltInResource, 110, true, messages))
 	{
 		log::error("Failed to parse vertex shader:\n%s", vertexShader.getInfoLog());
-		dumpSource(source);
+		dumpSource(preprocessedVertexShader);
 		debug::debugBreak();
 		return false;
 	}
 	
-	glslang::TShader fragmentShader(EShLanguage::EShLangFragment);
-	fragmentShader.setStringsWithLengthsAndNames(fs, nullptr, fsName, 1);
-	fragmentShader.setAutoMapBindings(true);
-	fragmentShader.setEntryPoint("fragmentMain");
 	if (!fragmentShader.parse(&glslang::DefaultTBuiltInResource, 110, true, messages))
 	{
 		log::error("Failed to parse fragment shader:\n%s", fragmentShader.getInfoLog());
-		dumpSource(source);
+		dumpSource(preprocessedFragmentShader);
 		debug::debugBreak();
 		return false;
 	}
@@ -354,17 +383,17 @@ void buildProgramReflection(glslang::TProgram* program, Program::Reflection& ref
 		String blockName(program->getUniformBlockName(uniformBlockIndex));
 		if (blockName.empty())
 		{
-			MaterialTexture tex = mtl::stringToMaterialTexture(uniformName);
+			MaterialTexture tex = stringToMaterialTexture(uniformName);
 			if (tex != MaterialTexture::Count)
 			{
 				uint32_t binding = static_cast<uint32_t>(tex);
 				reflection.textures.vertexTextures.emplace(uniformName, binding);
 				reflection.textures.fragmentTextures.emplace(uniformName, binding);
 			}
-			MaterialTexture smp = mtl::samplerToMaterialTexture(uniformName);
+			MaterialTexture smp = samplerToMaterialTexture(uniformName);
 			if (smp != MaterialTexture::Count)
 			{
-				uint32_t binding = static_cast<uint32_t>(smp);
+				uint32_t binding = static_cast<uint32_t>(smp) + MaterialSamplerBindingOffset;
 				reflection.textures.vertexSamplers.emplace(uniformName, binding);
 				reflection.textures.fragmentSamplers.emplace(uniformName, binding);
 			}

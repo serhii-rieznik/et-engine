@@ -71,16 +71,19 @@ private:
 	void loadInputLayout(Dictionary);
 	void loadCode(const Dictionary & codes, const std::string & baseFolder, Dictionary defines);
 	void loadCode(const std::string&, RenderPassClass passCls, const std::string& baseFolder, Dictionary defines);
+	void initDefaultHeader();
 	std::string generateInputLayout();
 
 protected: // overrided / read by instanaces
-	mtl::Textures textures;
-	mtl::Samplers samplers;
-	mtl::Parameters properties;
+	MaterialTextureSet textures;
+	MaterialSamplerSet samplers;
+	MaterialParameterSet properties;
 
 private: // permanent private data
+	static std::string _shaderDefaultHeader;
+
 	RenderInterface* _renderer = nullptr;
-	std::map<RenderPassClass, Program::Pointer> _programs;
+	Map<RenderPassClass, Program::Pointer> _programs;
 	MaterialInstanceCollection _instances;
 	VertexDeclaration _inputLayout;
 	DepthState _depthState;
@@ -130,7 +133,8 @@ template <class T>
 inline T Material::getParameter(MaterialParameter p) const
 {
 	uint32_t pIndex = static_cast<uint32_t>(p);
-	return properties[pIndex].is<T>() ? properties[pIndex].as<T>() : T();
+	auto i = properties.find(pIndex);
+	return ((i != properties.end()) && i->second.is<T>()) ? i->second.as<T>() : T();
 }
 
 }

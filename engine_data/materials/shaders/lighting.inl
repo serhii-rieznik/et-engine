@@ -8,7 +8,9 @@ struct PBSLightEnvironment
 
 	float alpha;
 	float metallness;
+
 	float viewFresnel;
+	float brdfFresnel;
 };
 
 float fresnelShlick(float fN, float cosTheta);
@@ -52,7 +54,7 @@ float ggxG(float t, float rSq)
 float ggxD(float rSq, float ct)
 {
 	float x = ct * ct * (rSq - 1.0f) + 1.0f;
-	return rSq / (PI * x * x);
+	return rSq / (PI * x * x + 0.000001);
 }
 
 float microfacetSpecular(PBSLightEnvironment env)
@@ -61,5 +63,5 @@ float microfacetSpecular(PBSLightEnvironment env)
 	float ndf = ggxD(rSq, env.NdotH);
 	float g1 = ggxG(env.VdotN, rSq) * float(env.VdotH / env.VdotN > 0.0f);
 	float g2 = ggxG(env.LdotN, rSq) * float(env.LdotH / env.LdotN > 0.0f);
-	return (ndf * g1 * g2 * env.viewFresnel) / (env.VdotN * env.LdotN + 0.0000001) * NORMALIZATION_SCALE;
+	return (ndf * g1 * g2 * env.brdfFresnel) / (env.VdotN * env.LdotN + 0.0000001) * NORMALIZATION_SCALE;
 }

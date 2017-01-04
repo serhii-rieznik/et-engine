@@ -425,7 +425,7 @@ void OBJLoader::loadMaterials(const std::string& fileName, ObjectsCache& cache)
 						
 						getLine(materialFile, line);
 						std::string actualName = application().resolveFileName(line);
-						_lastMaterial->setTexture(MaterialTexture::NormalRoughnesMetallness, _renderer->loadTexture(actualName, cache));
+						_lastMaterial->setTexture(MaterialTexture::Normal, _renderer->loadTexture(actualName, cache));
 					}
 					else
 					{
@@ -437,7 +437,7 @@ void OBJLoader::loadMaterials(const std::string& fileName, ObjectsCache& cache)
 				{
 					getLine(materialFile, line);
 					std::string actualName = application().resolveFileName(line);
-					_lastMaterial->setTexture(MaterialTexture::NormalRoughnesMetallness, _renderer->loadTexture(actualName, cache) );
+					_lastMaterial->setTexture(MaterialTexture::Normal, _renderer->loadTexture(actualName, cache) );
 				}
 			}
 			else
@@ -605,7 +605,7 @@ void OBJLoader::loadMaterials(const std::string& fileName, ObjectsCache& cache)
 								
 								getLine(materialFile, line);
 								std::string actualName = application().resolveFileName(line);
-								_lastMaterial->setTexture(MaterialTexture::NormalRoughnesMetallness, _renderer->loadTexture(actualName, cache));
+								_lastMaterial->setTexture(MaterialTexture::Normal, _renderer->loadTexture(actualName, cache));
 							}
 							else
 							{
@@ -617,7 +617,7 @@ void OBJLoader::loadMaterials(const std::string& fileName, ObjectsCache& cache)
 						{
 							getLine(materialFile, line);
 							std::string actualName = application().resolveFileName(line);
-							_lastMaterial->setTexture(MaterialTexture::NormalRoughnesMetallness, _renderer->loadTexture(actualName, cache) );
+							_lastMaterial->setTexture(MaterialTexture::Normal, _renderer->loadTexture(actualName, cache) );
 						}
 					}
 					else

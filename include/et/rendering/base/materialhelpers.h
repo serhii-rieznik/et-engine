@@ -17,7 +17,9 @@ enum class MaterialTexture : uint32_t
 {
 	// per-object textures
 	BaseColor,
-	NormalRoughnesMetallness,
+	Normal,
+	Roughnes,
+	Metallness,
 	EmissiveColor,
 	
 	// shared textures
@@ -28,20 +30,24 @@ enum class MaterialTexture : uint32_t
 	Count,
 
 	// service values
+	FirstMaterialTexture = BaseColor,
+	LastMaterialTexture = EmissiveColor,
+
 	FirstSharedTexture = Shadow,
+	LastSharedTexture = Environment,
 };
 
 enum class MaterialParameter : uint32_t
 {
 	BaseColorScale,
+	NormalScale,
 	RoughnessScale,
 	MetallnessScale,
-	OpacityScale,
-	NormalScale,
+	EmissiveColor,
 
+	OpacityScale,
 	IndexOfRefraction,
 	SpecularExponent,
-	EmissiveColor,
 
 	Count
 };
@@ -51,6 +57,7 @@ enum : uint32_t
 {
 	MaterialTexturesCount = static_cast<uint32_t>(MaterialTexture::Count),
 	MaterialParametersCount = static_cast<uint32_t>(MaterialParameter::Count),
+	MaterialSamplerBindingOffset = 16
 };
 
 struct MaterialTextureHolder
@@ -76,9 +83,6 @@ struct MaterialPropertyHolder
 	uint32_t size = 0;
 };
 using MaterialPropertiesCollection = UnorderedMap<String, MaterialPropertyHolder>;
-
-namespace mtl
-{
 
 template <class T>
 struct OptionalObject
@@ -135,9 +139,9 @@ struct OptionalValue
 	}
 };
 
-using Textures = std::array<OptionalObject<Texture::Pointer>, MaterialTexturesCount>;
-using Samplers = std::array<OptionalObject<Sampler::Pointer>, MaterialTexturesCount>;
-using Parameters = std::array<OptionalValue, MaterialParametersCount>;
+using MaterialTextureSet = std::map<uint32_t, OptionalObject<Texture::Pointer>>;
+using MaterialSamplerSet = std::map<uint32_t, OptionalObject<Sampler::Pointer>>;
+using MaterialParameterSet = std::map<uint32_t, OptionalValue>;
 
 const String& materialParameterToString(MaterialParameter);
 const String& materialSamplerToString(MaterialTexture);
@@ -146,5 +150,4 @@ const String& materialTextureToString(MaterialTexture);
 MaterialTexture stringToMaterialTexture(const String&);
 MaterialTexture samplerToMaterialTexture(const String&);
 
-}
 }

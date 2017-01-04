@@ -4,7 +4,7 @@
 
 cbuffer ObjectVariables : CONSTANT_LOCATION(b, ObjectVariablesBufferIndex, VariablesSetIndex)
 {
-	float4x4 worldTransform;
+	row_major float4x4 worldTransform;
 };
 
 float4 vertexMain(VSInput vsIn) : SV_Position
