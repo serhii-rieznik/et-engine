@@ -16,7 +16,8 @@
 #include "vulkan_glslang.h"
 #include <fstream>
 
-#define ET_COMPILE_TEST_HLSL 1
+#define ET_COMPILE_TEST_HLSL		  1
+#define ET_CROSS_COMPILE_SHADERS_TEST 0
 
 #if (ET_PLATFORM_WIN && ET_COMPILE_TEST_HLSL)
 #	include <d3dcompiler.h>
@@ -303,13 +304,16 @@ bool hlslToSPIRV(const std::string& _source, std::vector<uint32_t>& vertexBin, s
 		VertexShaderAttribLocationTraverser attribFixup;
 		vertexIntermediate->getTreeRoot()->traverse(&attribFixup);
 
-		// trav.
 		vertexBin.reserve(10240);
 		spv::SpvBuildLogger logger;
 		glslang::GlslangToSpv(*vertexIntermediate, vertexBin, &logger);
 		std::string allMessages = logger.getAllMessages();
 		if (!allMessages.empty())
 			log::info("Vertex HLSL to SPV:\n%s", allMessages.c_str());
+
+#	if (ET_CROSS_COMPILE_SHADERS_TEST)
+		crossCompile(vertexBin);
+#	endif
 	}
 
 	{
@@ -319,6 +323,10 @@ bool hlslToSPIRV(const std::string& _source, std::vector<uint32_t>& vertexBin, s
 		std::string allMessages = logger.getAllMessages();
 		if (!allMessages.empty())
 			log::info("Fragment HLSL to SPV:\n%s", allMessages.c_str());
+
+#	if (ET_CROSS_COMPILE_SHADERS_TEST)
+		crossCompile(fragmentBin);
+#	endif
 	}
 
 	return true;
@@ -435,8 +443,9 @@ void dumpSource(const std::string& s)
 
 void crossCompile(const std::vector<uint32_t>& spirv)
 {
-	std::unique_ptr<spirv_cross::Compiler> compiler = std::make_unique<spirv_cross::CompilerMSL>(spirv);
-	dumpSource(compiler->compile());
+	spirv_cross::CompilerGLSL compiler(spirv);
+	compiler.build_combined_image_samplers();
+	dumpSource(compiler.compile());
 }
 
 }

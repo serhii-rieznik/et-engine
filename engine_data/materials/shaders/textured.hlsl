@@ -9,6 +9,9 @@ cbuffer ObjectVariables : CONSTANT_LOCATION(b, ObjectVariablesBufferIndex, Varia
 };
 #endif
 
+Texture2D<float4> baseColorTexture : CONSTANT_LOCATION(t, BaseColorTextureBinding, TexturesSetIndex);
+SamplerState baseColorSampler : CONSTANT_LOCATION(s, BaseColorSamplerBinding, TexturesSetIndex);
+
 struct VSOutput 
 {
 	float4 position : SV_Position;
@@ -19,18 +22,14 @@ VSOutput vertexMain(VSInput vsIn)
 {
 	VSOutput vsOut;
 	vsOut.texCoord0 = vsIn.texCoord0;
+	vsOut.position = float4(vsIn.position, 1.0);
 
 #if (TRANSFORM_INPUT_POSITION)
-	vsOut.position = mul(mul(float4(position, 1.0), worldTransform), viewProjection);
-#else
-	vsOut.position = float4(vsIn.position, 1.0);
+	vsOut.position = mul(mul(vsOut.position, worldTransform), viewProjection);
 #endif
 
 	return vsOut;
 }
-
-Texture2D<float4> baseColorTexture : CONSTANT_LOCATION(t, BaseColorTextureBinding, TexturesSetIndex);
-SamplerState baseColorSampler;
 
 float4 fragmentMain(VSOutput fsIn) : SV_Target0
 {

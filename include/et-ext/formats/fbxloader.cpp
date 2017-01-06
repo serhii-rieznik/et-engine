@@ -477,8 +477,8 @@ void FBXLoaderPrivate::loadMaterialTextureValue(MaterialInstance::Pointer m, Mat
 		FbxFileTexture* lTexture = value.GetSrcObject<FbxFileTexture>(i);
 		if ((lTexture != nullptr) && lTexture->GetUserDataPtr())
 		{
-			String propString = mtl::materialParameterToString(propName);
-			MaterialTexture texId = mtl::stringToMaterialTexture(propString);
+			String propString = materialParameterToString(propName);
+			MaterialTexture texId = stringToMaterialTexture(propString);
 			m->setTexture(texId, Texture::Pointer(reinterpret_cast<Texture*>(lTexture->GetUserDataPtr())));
 		}
 	}

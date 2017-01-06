@@ -118,7 +118,7 @@ float4 fragmentMain(VSOutput fsIn) : SV_Target0
 	float directDiffuseTerm = shadowSample * normalizedLambert(env);
 
 	float3 directSpecular = microfacetSpecular(env);
-	float3 reflection = env.viewFresnel * sampleEnvironment(reflect(normalize(fsIn.toCamera), wsNormal), 10.0 * roughness);
+	float3 reflection = env.viewFresnel * sampleEnvironment(reflect(normalize(fsIn.toCamera), wsNormal), 10.0 * roughness).xyz;
 
 	float3 diffuse = baseColorScale.xyz * (directDiffuse * directDiffuseTerm + ambientColor) * (1.0 - metallness);
 	float3 specular = reflection + directSpecular * shadowSample;

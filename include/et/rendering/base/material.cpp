@@ -131,8 +131,8 @@ void Material::loadFromJson(const std::string& source, const std::string& baseFo
 		return;
 	}
 
+	setName(obj.stringForKey(kName)->content);
 	setDepthState(deserializeDepthState(obj.dictionaryForKey(kDepthState)));
-
 	setBlendState(deserializeBlendState(obj.dictionaryForKey(kBlendState)));
 
 	if (obj.hasKey(kCullMode) && !stringToCullMode(obj.stringForKey(kCullMode)->content, _cullMode))
