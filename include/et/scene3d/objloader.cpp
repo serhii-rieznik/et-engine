@@ -890,18 +890,29 @@ s3d::ElementContainer::Pointer OBJLoader::generateVertexBuffers(s3d::Storage& st
 	vao->setVertexBuffer(vb, _vertexData->declaration());
 	vao->setIndexBuffer(ib, _indices->format(), _indices->primitiveType());
 
+	vec3 minExtent(+std::numeric_limits<float>::max());
+	vec3 maxExtent(-std::numeric_limits<float>::max());
 	for (const auto& i : _meshes)
 	{
-		s3d::Mesh::Pointer object = Mesh::Pointer::create(i.name, result.pointer());
-		object->setTranslation(i.center);
+		s3d::Mesh::Pointer mesh = Mesh::Pointer::create(i.name, result.pointer());
+		mesh->setTranslation(i.center);
 
 		auto rb = RenderBatch::Pointer::create(i.material, vao, identityMatrix, i.start, i.count);
 		rb->setVertexStorage(_vertexData);
 		rb->setIndexArray(_indices);
-		object->addRenderBatch(rb);
+		mesh->addRenderBatch(rb);
 
-        object->calculateSupportData();
+		mesh->prepareRenderBatches();
+		mesh->calculateSupportData();
+		maxExtent = maxv(maxExtent, mesh->tranformedBoundingBox().maxVertex());
+		minExtent = minv(minExtent, mesh->tranformedBoundingBox().minVertex());
 	}
+
+	float bboxSize = (maxExtent - minExtent).length();
+	s3d::Light::Pointer light = s3d::Light::Pointer::create();
+	light->camera()->orthogonalProjection(-bboxSize, bboxSize, bboxSize, -bboxSize, 1.0f, 2.0f * bboxSize);
+	light->camera()->lookAt(2.0f * maxExtent, 0.5f * (minExtent + maxExtent));
+	light->setParent(result.pointer());
 
 	return result;
 }

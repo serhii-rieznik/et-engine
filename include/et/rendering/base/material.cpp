@@ -85,12 +85,6 @@ float Material::getFloat(MaterialParameter p) const
 	return getParameter<float>(p);
 }
 
-Program::Pointer Material::program(RenderPassClass pt) const
-{
-	auto i = _programs.find(pt);
-	return (i == _programs.end()) ? Program::Pointer() : i->second;
-}
-
 Texture::Pointer Material::texture(MaterialTexture t)
 {
 	return textures[static_cast<uint32_t>(t)].object;
@@ -103,22 +97,22 @@ Sampler::Pointer Material::sampler(MaterialTexture t)
 
 void Material::setProgram(const Program::Pointer& prog, RenderPassClass pt)
 {
-	_programs[pt] = prog;
+	_passes[pt].program = prog;
 }
 
-void Material::setDepthState(const DepthState& ds)
+void Material::setDepthState(const DepthState& ds, RenderPassClass pt)
 {
-	_depthState = ds;
+	_passes[pt].depthState = ds;
 }
 
-void Material::setBlendState(const BlendState& bs)
+void Material::setBlendState(const BlendState& bs, RenderPassClass pt)
 {
-	_blendState = bs;
+	_passes[pt].blendState = bs;
 }
 
-void Material::setCullMode(CullMode cm)
+void Material::setCullMode(CullMode cm, RenderPassClass pt)
 {
-	_cullMode = cm;
+	_passes[pt].cullMode = cm;
 }
 
 void Material::loadFromJson(const std::string& source, const std::string& baseFolder)
@@ -132,32 +126,53 @@ void Material::loadFromJson(const std::string& source, const std::string& baseFo
 	}
 
 	setName(obj.stringForKey(kName)->content);
-	setDepthState(deserializeDepthState(obj.dictionaryForKey(kDepthState)));
-	setBlendState(deserializeBlendState(obj.dictionaryForKey(kBlendState)));
-
-	if (obj.hasKey(kCullMode) && !stringToCullMode(obj.stringForKey(kCullMode)->content, _cullMode))
+	for (const auto& subObj : obj->content)
 	{
-		log::error("Invalid cull mode specified in material: %s", obj.stringForKey(kCullMode)->content.c_str());
+		if (isValidRenderPassName(subObj.first))
+		{
+			if (subObj.second->variantClass() == VariantClass::Dictionary)
+			{
+				loadRenderPass(subObj.first, Dictionary(subObj.second), baseFolder);
+			}
+			else
+			{
+				log::error("Entry `%s` in material `%s` description does not describe render pass", subObj.first.c_str(), name().c_str());
+			}
+		}
+		else if (subObj.first != kName)
+		{
+			log::warning("Entry `%s` in material `%s` description is not recognized", subObj.first.c_str(), name().c_str());
+		}
 	}
-
-	loadInputLayout(obj.dictionaryForKey(kInputLayout));
-
-	Dictionary codeContainer;
-	{
-		VariantBase::Pointer codeObj = obj.objectForKey(kCode);
-		if (codeObj->variantClass() == VariantClass::String)
-			codeContainer.setObjectForKey("forward", codeObj);
-		else if (codeObj->variantClass() == VariantClass::Dictionary)
-			codeContainer = codeObj;
-		else 
-			ET_FAIL("Invalid type for `code` parameter in material. Should be string or dictionary");
-	}
-	loadCode(codeContainer, baseFolder, obj.dictionaryForKey(kOptions));
 }
 
-void Material::loadInputLayout(Dictionary layout)
+const Material::Configuration& Material::configuration(RenderPassClass cls) const
 {
-	_inputLayout.clear();
+	ET_ASSERT(_passes.count(cls) > 0);
+	return _passes.at(cls);
+}
+
+void Material::loadRenderPass(const std::string& name, const Dictionary& obj, const std::string& baseFolder)
+{
+	RenderPassClass cls = stringToRenderPassClass(name);
+
+	CullMode cullMode = CullMode::Disabled;
+	if (obj.hasKey(kCullMode) && !stringToCullMode(obj.stringForKey(kCullMode)->content, cullMode))
+		log::error("Invalid cull mode specified in material: %s", obj.stringForKey(kCullMode)->content.c_str());
+
+	_passes[cls].inputLayout = loadInputLayout(obj.dictionaryForKey(kInputLayout));
+
+	_passes[cls].program = loadCode(obj.stringForKey(kCode)->content, baseFolder, obj.dictionaryForKey(kOptions),
+		_passes[cls].inputLayout, _passes[cls].usedFiles);
+
+	setDepthState(deserializeDepthState(obj.dictionaryForKey(kDepthState)), cls);
+	setBlendState(deserializeBlendState(obj.objectForKey(kBlendState)), cls);
+	setCullMode(cullMode, cls);
+}
+
+VertexDeclaration Material::loadInputLayout(Dictionary layout)
+{
+	VertexDeclaration decl;
 
 	Map<VertexAttributeUsage, uint32_t> sortedContent;
 	for (const auto& kv : layout->content)
@@ -174,29 +189,18 @@ void Material::loadInputLayout(Dictionary layout)
 	}
 
 	for (const auto& kv : sortedContent)
-	{
-		_inputLayout.push_back(kv.first, static_cast<DataType>(kv.second - 1));
-	}
+		decl.push_back(kv.first, static_cast<DataType>(kv.second - 1));
+
+	return decl;
 }
 
-std::string Material::generateInputLayout()
+std::string Material::generateInputLayout(const VertexDeclaration& decl)
 {
 	std::string layout;
 	layout.reserve(1024);
 
-#if (ET_PROGRAM_PREFER_GLSL_INPUT)
-	for (const auto& element : _inputLayout.elements())
-	{
-		char buffer[256] = {};
-		sprintf(buffer, "layout (location = %u) in %s %s;\n",
-			static_cast<uint32_t>(element.usage()),
-			dataTypeToString(element.type(), _renderer->api()).c_str(),
-			vertexAttributeUsageToString(element.usage()).c_str());
-		layout.append(buffer);
-	}
-#else
 	layout.append("struct VSInput {\n");
-	for (const auto& element : _inputLayout.elements())
+	for (const auto& element : decl.elements())
 	{
 		char buffer[256] = {};
 		sprintf(buffer, "%s %s : %s;\n",
@@ -208,29 +212,15 @@ std::string Material::generateInputLayout()
 		layout.append(buffer);
 	}
 	layout.append("};\n");
-#endif
 
 	return layout;
 }
 
-void Material::loadCode(const Dictionary& codes, const std::string& baseFolder, Dictionary defines)
-{
-	for (const auto& kv : codes->content)
-	{
-		ET_ASSERT(kv.second->variantClass() == VariantClass::String);
-		RenderPassClass cls = stringToRenderPassClass(kv.first);
-		loadCode(StringValue(kv.second)->content, cls, baseFolder, defines);
-	}
-}
-
-void Material::loadCode(const std::string& codeString, RenderPassClass passCls, const std::string& baseFolder, Dictionary defines)
+Program::Pointer Material::loadCode(const std::string& codeString, const std::string& baseFolder, 
+	Dictionary defines, const VertexDeclaration& decl, StringList& fileNames)
 {
 	application().pushSearchPath(baseFolder);
-#if (ET_PROGRAM_PREFER_GLSL_INPUT)
-	std::string codeFileName = application().resolveFileName(codeString + ".glsl");
-#else
 	std::string codeFileName = application().resolveFileName(codeString + ".hlsl");
-#endif
 	application().popSearchPaths();
 
 	ET_ASSERT(fileExists(codeFileName));
@@ -259,12 +249,12 @@ void Material::loadCode(const std::string& codeString, RenderPassClass passCls, 
 	}
 
 	std::string programSource = loadTextFile(codeFileName);
-	parseShaderSource(programSource, getFilePath(codeFileName), allDefines,
-		[this](ParseDirective what, std::string& code, uint32_t positionInCode)
+	fileNames = parseShaderSource(programSource, getFilePath(codeFileName), allDefines,
+		[this, &decl](ParseDirective what, std::string& code, uint32_t positionInCode)
 	{
 		if (what == ParseDirective::InputLayout)
 		{
-			std::string layout = generateInputLayout();
+			std::string layout = generateInputLayout(decl);
 			code.insert(positionInCode, layout);
 		}
 		else if (what == ParseDirective::DefaultHeader)
@@ -276,8 +266,10 @@ void Material::loadCode(const std::string& codeString, RenderPassClass passCls, 
 			log::warning("Unknown directive in source code");
 		}
 	}, {ParseDirective::StageDefine});
-
-	setProgram(_renderer->createProgram(programSource), passCls);
+	
+	fileNames.emplace_back(codeFileName);
+	
+	return _renderer->createProgram(programSource);
 }
 
 MaterialInstancePointer Material::instance()
@@ -288,13 +280,10 @@ MaterialInstancePointer Material::instance()
 	MaterialInstance::Pointer result = MaterialInstance::Pointer::create(Material::Pointer(this));
 	release();
 
+	result->setName(name() + "-Instance" + intToStr(_instances.size()));
 	result->textures = textures;
 	result->samplers = samplers;
 	result->properties = properties;
-	result->_programs = _programs;
-	result->setCullMode(cullMode());
-	result->setDepthState(depthState());
-	result->setBlendState(blendState());
 	_instances.emplace_back(result);
 	return result;
 }
@@ -332,47 +321,32 @@ Material::Pointer MaterialInstance::base()
 
 void MaterialInstance::buildTextureSet(RenderPassClass pt)
 {
-	ET_ASSERT(program(pt).valid());
-	
-	Program::Pointer prog = program(pt);
-	const Program::Reflection& reflection = prog->reflection();
+	const Program::Reflection& reflection = configuration(pt).program->reflection();
 
 	TextureSet::Description description;
 	for (const auto& i : reflection.textures.fragmentTextures)
 	{
-		if (i.second < static_cast<uint32_t>(MaterialTexture::FirstSharedTexture))
-		{
-			description.fragmentTextures[i.second] = base()->textures[i.second].object;
-			if (textures[i.second].object.valid())
-				description.fragmentTextures[i.second] = textures[i.second].object;
-		}
+		description.fragmentTextures[i.second] = base()->textures[i.second].object;
+		if (textures[i.second].object.valid())
+			description.fragmentTextures[i.second] = textures[i.second].object;
 	}
 	for (const auto& i : reflection.textures.vertexTextures)
 	{
-		if (i.second < static_cast<uint32_t>(MaterialTexture::FirstSharedTexture))
-		{
-			description.vertexTextures[i.second] = base()->textures[i.second].object;
-			if (textures[i.second].object.valid())
-				description.vertexTextures[i.second] = textures[i.second].object;
-		}
+		description.vertexTextures[i.second] = base()->textures[i.second].object;
+		if (textures[i.second].object.valid())
+			description.vertexTextures[i.second] = textures[i.second].object;
 	}
 	for (const auto& i : reflection.textures.fragmentSamplers)
 	{
-		if (i.second < static_cast<uint32_t>(MaterialTexture::FirstSharedTexture) + MaterialSamplerBindingOffset)
-		{
-			description.fragmentSamplers[i.second] = base()->samplers[i.second].object;
-			if (samplers[i.second].object.valid())
-				description.fragmentSamplers[i.second] = samplers[i.second].object;
-		}
+		description.fragmentSamplers[i.second] = base()->samplers[i.second].object;
+		if (samplers[i.second].object.valid())
+			description.fragmentSamplers[i.second] = samplers[i.second].object;
 	}
 	for (const auto& i : reflection.textures.vertexSamplers)
 	{
-		if (i.second < static_cast<uint32_t>(MaterialTexture::FirstSharedTexture))
-		{
-			description.vertexSamplers[i.second] = base()->samplers[i.second].object;
-			if (samplers[i.second].object.valid())
-				description.vertexSamplers[i.second] = samplers[i.second].object;
-		}
+		description.vertexSamplers[i.second] = base()->samplers[i.second].object;
+		if (samplers[i.second].object.valid())
+			description.vertexSamplers[i.second] = samplers[i.second].object;
 	}
 
 	for (auto& i : description.fragmentTextures)
@@ -402,14 +376,11 @@ void MaterialInstance::buildTextureSet(RenderPassClass pt)
 
 void MaterialInstance::buildConstantBuffer(RenderPassClass pt)
 {
-	Program::Pointer prog = program(pt);
-	ET_ASSERT(prog.valid());
-
 	ConstantBufferEntry entry = _constBuffers[pt].obj;
 	if (entry.valid())
 		_renderer->sharedConstantBuffer().free(entry);
 	
-	const Program::Reflection& reflection = prog->reflection();
+	const Program::Reflection& reflection = configuration(pt).program->reflection();
 	if (reflection.materialVariablesBufferSize == 0)
 	{
 		_constBuffers[pt].obj = { };
@@ -458,6 +429,11 @@ ConstantBufferEntry MaterialInstance::constantBufferData(RenderPassClass pt)
 	return _constBuffers.at(pt).obj;
 }
 
+const Material::Configuration & MaterialInstance::configuration(RenderPassClass cls) const
+{
+	return _base->configuration(cls);
+}
+
 void MaterialInstance::invalidateTextureSet()
 {
 	for (auto& hld : _textureSets)
@@ -496,7 +472,7 @@ const Map<MaterialTexture, String>& materialTextureNames()
 	{
 		{ MaterialTexture::BaseColor, "baseColorTexture" },
 		{ MaterialTexture::Normal, "normalTexture" },
-		{ MaterialTexture::Roughnes, "roughnessTexture" },
+		{ MaterialTexture::Roughness, "roughnessTexture" },
 		{ MaterialTexture::Metallness, "metallnessTexture" },
 		{ MaterialTexture::EmissiveColor, "emissiveColorTexture" },
 		{ MaterialTexture::Shadow, "shadowTexture" },
@@ -512,7 +488,7 @@ const Map<MaterialTexture, String>& materialSamplerNames()
 	{
 		{ MaterialTexture::BaseColor, "baseColorSampler" },
 		{ MaterialTexture::Normal, "normalSampler" },
-		{ MaterialTexture::Roughnes, "roughnessSampler" },
+		{ MaterialTexture::Roughness, "roughnessSampler" },
 		{ MaterialTexture::Metallness, "metallnessSampler" },
 		{ MaterialTexture::EmissiveColor, "emissiveColorSampler" },
 		{ MaterialTexture::Shadow, "shadowSampler" },
@@ -557,54 +533,18 @@ MaterialTexture samplerToMaterialTexture(const String& name)
 
 void Material::initDefaultHeader()
 {
-	_shaderDefaultHeader =
-#if (ET_PROGRAM_PREFER_GLSL_INPUT)
-R"(
-#version 450
-#define float2 vec2
-#define float3 vec3
-#define float4 vec4
-#define float4x4 mat4
-#define float3x3 mat3
-)"
-#endif
-R"(
+	_shaderDefaultHeader = R"(
 #define VariablesSetIndex 0
 #define TexturesSetIndex 1
-#define SharedTexturesSetIndex 2
 #define PI 3.1415926536
 #define HALF_PI 1.5707963268
 #define DOUBLE_PI 6.2831853072
 #define INV_PI 0.3183098862
-)"
-#if (ET_PROGRAM_PREFER_GLSL_INPUT)
-R"(
-#define PassVariables PassVariables { \
-    mat4 viewProjection; \
-    mat4 projection; \
-    mat4 view; \
-    vec4 cameraPosition; \
-    vec4 cameraDirection; \
-    vec4 cameraUp; \
-    vec4 lightPosition; \
-    mat4 lightProjection; \
-}
-)"
-#endif
-;
+)";
 
 	char buffer[2048] = { };
 	int printPos = 0;
-	for (uint32_t i = static_cast<uint32_t>(MaterialTexture::FirstMaterialTexture), e = static_cast<uint32_t>(MaterialTexture::LastMaterialTexture); i <= e; ++i)
-	{
-		String texName = materialTextureToString(static_cast<MaterialTexture>(i));
-		String smpName = materialSamplerToString(static_cast<MaterialTexture>(i));
-		texName[0] = toupper(texName[0]);
-		smpName[0] = toupper(smpName[0]);
-		printPos += sprintf(buffer + printPos, "#define %sBinding %u\n#define %sBinding %u\n", 
-			texName.c_str(), i, smpName.c_str(), i + MaterialSamplerBindingOffset);
-	}
-	for (uint32_t i = static_cast<uint32_t>(MaterialTexture::FirstSharedTexture), e = static_cast<uint32_t>(MaterialTexture::LastSharedTexture); i <= e; ++i)
+	for (uint32_t i = static_cast<uint32_t>(MaterialTexture::FirstMaterialTexture), e = static_cast<uint32_t>(MaterialTexture::Count); i < e; ++i)
 	{
 		String texName = materialTextureToString(static_cast<MaterialTexture>(i));
 		String smpName = materialSamplerToString(static_cast<MaterialTexture>(i));
@@ -623,7 +563,6 @@ R"(
 	
 	_shaderDefaultHeader += buffer;
 
-#if (!ET_PROGRAM_PREFER_GLSL_INPUT)
 	_shaderDefaultHeader += R"(
 #define CONSTANT_LOCATION_IMPL(name, registerName, spaceName) register(name##registerName, space##spaceName)
 #define CONSTANT_LOCATION(name, register, space)              CONSTANT_LOCATION_IMPL(name, register, space)
@@ -640,7 +579,6 @@ cbuffer PassVariables : CONSTANT_LOCATION(b, PassVariablesBufferIndex, Variables
 	row_major float4x4 lightProjection;
 };
 )";
-#endif
 
 }
 ;

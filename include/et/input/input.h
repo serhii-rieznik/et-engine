@@ -59,24 +59,23 @@ struct PointerInputInfo
 	vec2 scroll = vec2(0.0f);
 	PointerType type = 0;
 	PointerOrigin origin = PointerOrigin::Any;
-	char tag = 0;
 
 	PointerInputInfo() = default;
 
 	PointerInputInfo(const PointerInputInfo& p) :
 		id(p.id), timestamp(p.timestamp), pos(p.pos), normalizedPos(p.normalizedPos), scroll(p.scroll),
-		type(p.type), origin(p.origin), tag(p.tag)
+		type(p.type), origin(p.origin)
 	{
 	}
 
 	PointerInputInfo(PointerInputInfo&& r) : id(r.id), timestamp(r.timestamp), pos(r.pos),
-		normalizedPos(r.normalizedPos), scroll(r.scroll), type(r.type), origin(r.origin), tag(r.tag)
+		normalizedPos(r.normalizedPos), scroll(r.scroll), type(r.type), origin(r.origin)
 	{
 	}
 
 	PointerInputInfo(PointerType t, const vec2& p, const vec2& np, const vec2& aScroll,
 		uint32_t aId, float time, PointerOrigin o) : id(aId), timestamp(time), pos(p), normalizedPos(np),
-		scroll(aScroll), type(t), origin(o), tag(0)
+		scroll(aScroll), type(t), origin(o)
 	{
 	}
 
@@ -89,7 +88,6 @@ struct PointerInputInfo
 		scroll = p.scroll;
 		type = p.type;
 		origin = p.origin;
-		tag = p.tag;
 		return *this;
 	}
 };

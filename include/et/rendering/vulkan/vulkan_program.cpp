@@ -55,38 +55,8 @@ void VulkanProgram::build(const std::string& source)
 	std::hash<std::string> sourceHash;
 	uint64_t hsh = sourceHash(source);
 
-#if (ET_VULKAN_PROGRAM_USE_CACHE)
-	if (_private->loadCached(hsh, vertexBin, fragmentBin))
-	{
-		canBuild = true;
-	}
-	else
-#endif
-	{
-#	if (ET_PROGRAM_PREFER_GLSL_INPUT)
-		std::string vertexSource = source;
-		parseShaderSource(vertexSource, emptyString, StringList(), [](ParseDirective dir, std::string& code, uint32_t pos)
-		{
-			if (dir == ParseDirective::StageDefine)
-			{
-				code.insert(pos, "#define ET_VERTEX_SHADER 1");
-			}
-		}, {});
-		std::string fragmentSource = source;
-		parseShaderSource(fragmentSource, emptyString, StringList(), [](ParseDirective dir, std::string& code, uint32_t pos)
-		{
-			if (dir == ParseDirective::StageDefine)
-			{
-				code.insert(pos, "#define ET_FRAGMENT_SHADER 1");
-			}
-		}, {});
-		canBuild = glslToSPIRV(vertexSource, fragmentSource, vertexBin, fragmentBin, _reflection);
-#	else
-		canBuild = hlslToSPIRV(source, vertexBin, fragmentBin, _reflection);
-#	endif
-	}
-
-	if (canBuild)
+	bool cacheLoaded = _private->loadCached(hsh, vertexBin, fragmentBin);
+	if (cacheLoaded || hlslToSPIRV(source, vertexBin, fragmentBin, _reflection))
 	{
 		_private->saveCached(hsh, vertexBin, fragmentBin);
 		_private->build(vertexBin, fragmentBin);
@@ -100,8 +70,9 @@ const VulkanShaderModules& VulkanProgram::shaderModules() const
 
 bool VulkanProgramPrivate::loadCached(uint64_t hash, std::vector<uint32_t>& vert, std::vector<uint32_t>& frag)
 {
+#if ET_VULKAN_PROGRAM_USE_CACHE
 	const std::string& baseFolder = application().environment().applicationDocumentsFolder();
-	std::string vertFile;
+	std::string cacheFile;
 	{
 		char buffer[1024] = {};
 		sprintf(buffer, "%s%016llX.vert", baseFolder.c_str(), hash);
@@ -130,12 +101,15 @@ bool VulkanProgramPrivate::loadCached(uint64_t hash, std::vector<uint32_t>& vert
 		frag.resize(fragSize / sizeof(uint32_t));
 		fragIn.read(reinterpret_cast<char*>(frag.data()), fragSize);
 	}
-	
 	return !(vertIn.fail() && fragIn.fail());
+#else
+	return false;
+#endif
 }
 
 void VulkanProgramPrivate::saveCached(uint64_t hash, const std::vector<uint32_t>& vert, const std::vector<uint32_t>& frag)
 {
+#if (ET_VULKAN_PROGRAM_USE_CACHE)
 	const std::string& baseFolder = application().environment().applicationDocumentsFolder();
 	std::string vertFile;
 	{
@@ -155,6 +129,7 @@ void VulkanProgramPrivate::saveCached(uint64_t hash, const std::vector<uint32_t>
 
 	std::ofstream fragOut(fragFile, std::ios::out | std::ios::binary);
 	fragOut.write(reinterpret_cast<const char*>(frag.data()), frag.size() * sizeof(uint32_t));
+#endif
 }
 
 void VulkanProgramPrivate::build(const std::vector<uint32_t>& vert, const std::vector<uint32_t>& frag)
@@ -174,13 +149,8 @@ void VulkanProgramPrivate::build(const std::vector<uint32_t>& vert, const std::v
 	stageCreateInfo[1].stage = VK_SHADER_STAGE_FRAGMENT_BIT;
 	stageCreateInfo[1].module = fragment;
 
-#if (ET_PROGRAM_PREFER_GLSL_INPUT)
-	stageCreateInfo[0].pName = "main";
-	stageCreateInfo[1].pName = "main";
-#else
 	stageCreateInfo[0].pName = "vertexMain";
 	stageCreateInfo[1].pName = "fragmentMain";
-#endif
 }
 
 }

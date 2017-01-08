@@ -119,7 +119,6 @@ enum DescriptorSetClass : uint32_t
 {
 	Buffers,
 	Textures,
-	SharedTextures,
 	Count,
 	
 	DynamicDescriptorsCount = 2
@@ -130,7 +129,6 @@ struct VulkanNativePipeline
 	VkPipeline pipeline = nullptr;
 	VkPipelineLayout layout = nullptr;
 	VkDescriptorSetLayout texturesLayout = nullptr;
-	VkDescriptorSetLayout sharedTexturesLayout = nullptr;
 };
 
 struct VulkanNativeTexture

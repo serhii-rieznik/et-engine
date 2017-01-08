@@ -73,18 +73,16 @@ public:
 	const Camera::Pointer& camera() const;
 
 	void setSharedTexture(MaterialTexture, const Texture::Pointer&, const Sampler::Pointer&);
-	const TextureSet::Pointer& sharedTexturesSet();
 
-private:
-	void buildSharedTexturesSet();
+protected:
+	using SharedTexturesSet = std::map<MaterialTexture, std::pair<Texture::Pointer, Sampler::Pointer>>;
+	const SharedTexturesSet& sharedTextures() const { return _sharedTextures; }
 
 private:
 	RenderInterface* _renderer = nullptr;
 	ConstructionInfo _info;
 	ConstantBuffer _dynamicConstantBuffer;
-	std::map<uint32_t, std::pair<Texture::Pointer, Sampler::Pointer>> _sharedTextures;
-	TextureSet::Pointer _sharedTexturesSet;
-	bool _sharedTexturesSetValid = false;
+	SharedTexturesSet _sharedTextures;
 };
 
 }

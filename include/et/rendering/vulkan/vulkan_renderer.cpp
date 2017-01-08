@@ -254,18 +254,21 @@ Program::Pointer VulkanRenderer::createProgram(const std::string& source)
 PipelineState::Pointer VulkanRenderer::acquirePipelineState(const RenderPass::Pointer& pass, const Material::Pointer& mat,
 	const VertexStream::Pointer& vs)
 {
-	auto ps = _private->pipelineCache.find(vs->vertexDeclaration(), mat->program(pass->info().renderPassClass),
-		pass, mat->depthState(), mat->blendState(), mat->cullMode(), vs->primitiveType());
+	RenderPassClass cls = pass->info().renderPassClass;
+	const Material::Configuration& config = mat->configuration(cls);
+
+	auto ps = _private->pipelineCache.find(vs->vertexDeclaration(), config.program,
+		pass, config.depthState, config.blendState, config.cullMode, vs->primitiveType());
 
 	if (ps.invalid())
 	{
 		ps = VulkanPipelineState::Pointer::create(this, _private->vulkan());
 		ps->setPrimitiveType(vs->primitiveType());
 		ps->setInputLayout(vs->vertexDeclaration());
-		ps->setDepthState(mat->depthState());
-		ps->setBlendState(mat->blendState());
-		ps->setCullMode(mat->cullMode());
-		ps->setProgram(mat->program(pass->info().renderPassClass));
+		ps->setDepthState(config.depthState);
+		ps->setBlendState(config.blendState);
+		ps->setCullMode(config.cullMode);
+		ps->setProgram(config.program);
 		ps->setRenderPass(pass);
 		ps->build();
 

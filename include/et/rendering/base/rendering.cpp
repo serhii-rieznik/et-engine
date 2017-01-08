@@ -444,29 +444,32 @@ DepthState deserializeDepthState(const Dictionary& depth)
 	return _depth;
 }
 
-BlendState deserializeBlendState(const Dictionary& blend)
+BlendState deserializeBlendState(const VariantBase::Pointer& inBlend)
 {
-	BlendState _blend;
+	if (inBlend->variantClass() == VariantClass::String)
+	{
+		StringValue sv(inBlend);
+		BlendConfiguration config = BlendConfiguration::Disabled;
+		if (stringToBlendConfiguration(sv->content, config))
+			return blendConfigurationToBlendState(config);
 
-	BlendConfiguration config = BlendConfiguration::Disabled;
-	if (stringToBlendConfiguration(blend.stringForKey(kBlendConfiguration)->content, config))
-	{
-		_blend = blendConfigurationToBlendState(config);
+		log::error("Failed to deserialize StringValue to blend: %s", sv->content.c_str());
+		return BlendState();
 	}
-	else
-	{
-		_blend.color.source = stringToBlendFunction(blend.stringForKey(kSourceColor, blendFunctionToString(BlendFunction::One))->content);
-		_blend.color.dest = stringToBlendFunction(blend.stringForKey(kDestColor, blendFunctionToString(BlendFunction::Zero))->content);
-		_blend.colorOperation = stringToBlendOperation(blend.stringForKey(kColorOperation, blendOperationToString(BlendOperation::Add))->content);
-		_blend.alpha.source = stringToBlendFunction(blend.stringForKey(kSourceAlpha, blendFunctionToString(BlendFunction::One))->content);
-		_blend.alpha.dest = stringToBlendFunction(blend.stringForKey(kDestAlpha, blendFunctionToString(BlendFunction::Zero))->content);
-		_blend.alphaOperation = stringToBlendOperation(blend.stringForKey(kAlphaOperation, blendOperationToString(BlendOperation::Add))->content);
-	}
+
+	BlendState _blend;
+	Dictionary blend(inBlend);
+
+	_blend.color.source = stringToBlendFunction(blend.stringForKey(kSourceColor, blendFunctionToString(BlendFunction::One))->content);
+	_blend.color.dest = stringToBlendFunction(blend.stringForKey(kDestColor, blendFunctionToString(BlendFunction::Zero))->content);
+	_blend.colorOperation = stringToBlendOperation(blend.stringForKey(kColorOperation, blendOperationToString(BlendOperation::Add))->content);
+	_blend.alpha.source = stringToBlendFunction(blend.stringForKey(kSourceAlpha, blendFunctionToString(BlendFunction::One))->content);
+	_blend.alpha.dest = stringToBlendFunction(blend.stringForKey(kDestAlpha, blendFunctionToString(BlendFunction::Zero))->content);
+	_blend.alphaOperation = stringToBlendOperation(blend.stringForKey(kAlphaOperation, blendOperationToString(BlendOperation::Add))->content);
 
 	if (blend.hasKey(kBlendEnabled))
-	{
 		_blend.enabled = blend.boolForKey(kBlendEnabled)->content != 0;
-	}
+
 	return _blend;
 }
 
@@ -554,15 +557,21 @@ bool stringToCullMode(const std::string& mode, CullMode& outMode)
 	return false;
 }
 
+static const std::unordered_map<std::string, RenderPassClass> renderPassNames =
+{
+	{ "forward", RenderPassClass::Forward },
+	{ "depth", RenderPassClass::Depth },
+};
+
+bool isValidRenderPassName(const std::string& v)
+{
+	return renderPassNames.count(v) > 0;
+}
+
 RenderPassClass stringToRenderPassClass(const std::string& cls)
 {
-	static const std::unordered_map<std::string, RenderPassClass> values = 
-	{
-		{ "forward", RenderPassClass::Forward },
-		{ "depth", RenderPassClass::Depth },
-	};
-	ET_ASSERT(values.count(cls) > 0);
-	return values.at(cls);
+	ET_ASSERT(isValidRenderPassName(cls));
+	return renderPassNames.at(cls);
 }
 
 template <class T>

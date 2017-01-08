@@ -16,9 +16,6 @@ namespace et
 void initGlslangResources();
 void cleanupGlslangResources();
 
-bool glslToSPIRV(const std::string& vertexSource, const std::string& fragmentSource, 
-	std::vector<uint32_t>& vertexBin, std::vector<uint32_t>& fragmentBin, Program::Reflection& reflection);
-
 bool hlslToSPIRV(const std::string& source, std::vector<uint32_t>& vertexBin, std::vector<uint32_t>& fragmentBin, 
 	Program::Reflection& reflection);
 

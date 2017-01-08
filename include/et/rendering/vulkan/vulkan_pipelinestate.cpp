@@ -44,9 +44,15 @@ VulkanPipelineState::VulkanPipelineState(VulkanRenderer* renderer, VulkanState& 
 
 VulkanPipelineState::~VulkanPipelineState()
 {
-	vkDestroyPipeline(_private->vulkan.device, _private->pipeline, nullptr);
-	vkDestroyPipelineLayout(_private->vulkan.device, _private->layout, nullptr);
-	vkDestroyDescriptorSetLayout(_private->vulkan.device, _private->texturesLayout, nullptr);
+	if (_private->pipeline)
+		vkDestroyPipeline(_private->vulkan.device, _private->pipeline, nullptr);
+
+	if (_private->layout)
+		vkDestroyPipelineLayout(_private->vulkan.device, _private->layout, nullptr);
+
+	if (_private->texturesLayout)
+		vkDestroyDescriptorSetLayout(_private->vulkan.device, _private->texturesLayout, nullptr);
+
 	ET_PIMPL_FINALIZE(VulkanPipelineState);
 }
 
@@ -57,6 +63,10 @@ const VulkanNativePipeline& VulkanPipelineState::nativePipeline() const
 
 void VulkanPipelineState::build()
 {
+	VulkanProgram::Pointer prog = program();
+	if ((prog->shaderModules().vertex == nullptr) || (prog->shaderModules().fragment == nullptr))
+		return;
+	
 	Vector<VkPipelineColorBlendAttachmentState> attachmentInfo;
 	attachmentInfo.reserve(MaxRenderTargets);
 
@@ -111,7 +121,6 @@ void VulkanPipelineState::build()
 		assemblyInfo.topology = vulkan::primitiveTopology(primitiveType());
 	}
 	
-	VulkanProgram::Pointer prog = program();
 	VulkanRenderPass::Pointer pass = renderPass();
 	_private->generatePipelineLayout(prog->reflection(), pass);
 
@@ -163,46 +172,34 @@ void VulkanPipelineStatePrivate::generatePipelineLayout(const Program::Reflectio
 	
 	{
 		Vector<VkDescriptorSetLayoutBinding> textureLayoutBindings;
-		Vector<VkDescriptorSetLayoutBinding> sharedTextureLayoutBindings;
 		textureLayoutBindings.reserve(MaterialTexturesCount);
-		sharedTextureLayoutBindings.reserve(MaterialTexturesCount);
 		for (uint32_t textureBinding : textureBindings)
 		{
-			auto& container = (textureBinding >= static_cast<uint32_t>(MaterialTexture::FirstSharedTexture)) ? 
-				sharedTextureLayoutBindings : textureLayoutBindings;
-
-			container.emplace_back();
-			container.back().binding = textureBinding;
-			container.back().stageFlags = VK_SHADER_STAGE_ALL;
-			container.back().descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
-			container.back().descriptorCount = 1;
+			textureLayoutBindings.emplace_back();
+			textureLayoutBindings.back().binding = textureBinding;
+			textureLayoutBindings.back().stageFlags = VK_SHADER_STAGE_ALL;
+			textureLayoutBindings.back().descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
+			textureLayoutBindings.back().descriptorCount = 1;
 		}
 		for (uint32_t samplerBinding : samplerBindings)
 		{
-			auto& container = (samplerBinding >= static_cast<uint32_t>(MaterialTexture::FirstSharedTexture) + MaterialSamplerBindingOffset) ? 
-				sharedTextureLayoutBindings : textureLayoutBindings;
+			textureLayoutBindings.emplace_back();
+			textureLayoutBindings.back().binding = samplerBinding;
+			textureLayoutBindings.back().stageFlags = VK_SHADER_STAGE_ALL;
+			textureLayoutBindings.back().descriptorType = VK_DESCRIPTOR_TYPE_SAMPLER;
+			textureLayoutBindings.back().descriptorCount = 1;
+		}		
 
-			container.emplace_back();
-			container.back().binding = samplerBinding;
-			container.back().stageFlags = VK_SHADER_STAGE_ALL;
-			container.back().descriptorType = VK_DESCRIPTOR_TYPE_SAMPLER;
-			container.back().descriptorCount = 1;
-		}		VkDescriptorSetLayoutCreateInfo layoutSetInfo = { VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO };
-
+		VkDescriptorSetLayoutCreateInfo layoutSetInfo = { VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO };
 		layoutSetInfo.bindingCount = static_cast<uint32_t>(textureLayoutBindings.size());
 		layoutSetInfo.pBindings = textureLayoutBindings.data();
 		VULKAN_CALL(vkCreateDescriptorSetLayout(vulkan.device, &layoutSetInfo, nullptr, &texturesLayout));
-
-		layoutSetInfo.bindingCount = static_cast<uint32_t>(sharedTextureLayoutBindings.size());
-		layoutSetInfo.pBindings = sharedTextureLayoutBindings.data();
-		VULKAN_CALL(vkCreateDescriptorSetLayout(vulkan.device, &layoutSetInfo, nullptr, &sharedTexturesLayout));
 	}
 
 	VkDescriptorSetLayout layouts[DescriptorSetClass::Count] =
 	{
 		pass->nativeRenderPass().dynamicDescriptorSetLayout,
 		texturesLayout,
-		sharedTexturesLayout
 	};
 
 	VkPipelineLayoutCreateInfo layoutInfo = { VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO };
@@ -219,7 +216,7 @@ void VulkanPipelineStatePrivate::generateInputLayout(const VertexDeclaration& in
 	attribs.reserve(inputLayout.numElements());
 	for (const auto& e : inputLayout.elements())
 	{
-		if (1 || expectedLayout.has(e.usage()))
+		if (expectedLayout.has(e.usage()))
 		{
 			attribs.emplace_back();
 			attribs.back().offset = e.offset();

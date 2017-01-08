@@ -1,20 +1,18 @@
 {
-	"input-layout" : {
-		"position" : 3,
-		"texcoord0" : 2
-	},
-
-	"depth-state": {
-		"depth-function": "always",
-		"depth-test": false,
-		"depth-write": false
-	},
-
-	"blend-state": {
-		"blend-configuration" : "disabled"
-	},
-
-	"cull-mode" : "disabled",
-
-	"code" : "shaders/textured"
+	"name" : "textured-2d",
+	"forward" : 
+	{ 
+		"input-layout" : {
+			"position" : 3,
+			"texcoord0" : 2
+		},
+		"depth-state": {
+			"depth-function": "always",
+			"depth-test": false,
+			"depth-write": false
+		},
+		"blend-state": "disabled",
+		"cull-mode" : "disabled",
+		"code" : "shaders/textured"
+	}
 }

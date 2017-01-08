@@ -71,11 +71,13 @@ inline bool getDirective(const std::string& source, size_t& pos, std::string& fi
 	return fileExists(fileName);
 }
 
-void parseShaderSource(std::string& source, const std::string& baseFolder, const StringList& defines,
+StringList parseShaderSource(std::string& source, const std::string& baseFolder, const StringList& defines,
 	ParseDirectiveCallback cb, const Set<ParseDirective>& skipDirectives)
 {
+	StringList result;
+
 	if (source.empty())
-		return;
+		return result;
 
 	application().pushSearchPath(baseFolder);
 
@@ -100,6 +102,7 @@ void parseShaderSource(std::string& source, const std::string& baseFolder, const
 					if (directive == ParseDirective::Include)
 					{
 						source.insert(includePos, loadTextFile(includeName));
+						result.emplace_back(includeName);
 					}
 					else if (directive == ParseDirective::InputDefines)
 					{
@@ -135,6 +138,7 @@ void parseShaderSource(std::string& source, const std::string& baseFolder, const
 	while (sourceModified);
 
 	application().popSearchPaths();
+	return result;
 }
 
 }

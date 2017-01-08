@@ -23,7 +23,7 @@ void debugBreak()
 #elif (ET_PLATFORM_MAC)
 	__asm { int 3 };
 #else
-#           error Define breakpoint for current platform
+#	error Define breakpoint for current platform
 #endif
 }
 

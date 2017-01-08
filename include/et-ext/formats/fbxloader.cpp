@@ -8,6 +8,7 @@
 #include <et/app/application.h>
 #include <et/rendering/rendercontext.h>
 #include <et/rendering/base/indexarray.h>
+#include <et/rendering/base/primitives.h>
 #include <et-ext/formats/fbxloader.h>
 
 #if (ET_HAVE_FBX_SDK)
@@ -77,12 +78,11 @@ public:
 
 	void linkSkeleton(s3d::ElementContainer::Pointer);
 	void buildBlendWeightsForMesh(s3d::Mesh::Pointer);
+	void loadMaterialTextureValue(MaterialInstance::Pointer, MaterialTexture, FbxSurfaceMaterial* fbxm, const char* fbxprop);
 
-	void loadMaterialValue(MaterialInstance::Pointer m, MaterialParameter propName,
-		FbxSurfaceMaterial* fbxm, const char* fbxprop);
-
-	void loadMaterialTextureValue(MaterialInstance::Pointer m, MaterialParameter propName,
-		FbxSurfaceMaterial* fbxm, const char* fbxprop);
+	template <class Remap>
+	void loadMaterialValue(MaterialInstance::Pointer m, MaterialParameter, FbxSurfaceMaterial* fbxm, 
+		const char* fbxprop, Remap remap);
 
 	mat4 fbxMatrixToMat4(const FbxAMatrix& m)
 	{
@@ -206,10 +206,24 @@ s3d::ElementContainer::Pointer FBXLoaderPrivate::parse(s3d::Storage& storage)
 	if (shouldCreateRenderObjects)
 		buildVertexBuffers(storage);
 
+	vec3 minExtent(+std::numeric_limits<float>::max());
+	vec3 maxExtent(-std::numeric_limits<float>::max());
 	auto meshes = root->childrenOfType(s3d::ElementType::Mesh);
 	for (s3d::Mesh::Pointer mesh : meshes)
 	{
+		mesh->prepareRenderBatches();
 		mesh->calculateSupportData();
+		maxExtent = maxv(maxExtent, mesh->tranformedBoundingBox().maxVertex());
+		minExtent = minv(minExtent, mesh->tranformedBoundingBox().minVertex());
+	}
+	
+	if (root->childrenOfType(s3d::ElementType::Light).empty())
+	{
+		float bboxSize = (maxExtent - minExtent).length();
+		s3d::Light::Pointer light = s3d::Light::Pointer::create();
+		light->camera()->orthogonalProjection(-bboxSize, bboxSize, bboxSize, -bboxSize, 1.0f, 2.0f * bboxSize);
+		light->camera()->lookAt(2.0f * maxExtent, 0.5f * (minExtent + maxExtent));
+		light->setParent(root.pointer());
 	}
 
 	return root;
@@ -241,7 +255,7 @@ void FBXLoaderPrivate::loadTextures()
 		FbxFileTexture* fileTexture = FbxCast<FbxFileTexture>(scene->GetTexture(i));
 		if (fileTexture && (fileTexture->GetUserDataPtr() == nullptr))
 		{
-			const char* fileTextureFileName = fileTexture->GetFileName();
+			const char* fileTextureFileName = fileTexture->GetRelativeFileName();
 			if ((fileTextureFileName != nullptr) && (strlen(fileTextureFileName) > 0))
 			{
 				std::string fileName = normalizeFilePath(std::string(fileTextureFileName));
@@ -462,60 +476,69 @@ void et::FBXLoaderPrivate::loadNode(s3d::Storage& storage, FbxNode* node, s3d::B
 	}
 }
 
-void FBXLoaderPrivate::loadMaterialTextureValue(MaterialInstance::Pointer m, MaterialParameter propName,
+void FBXLoaderPrivate::loadMaterialTextureValue(MaterialInstance::Pointer m, MaterialTexture texId,
 	FbxSurfaceMaterial* fbxm, const char* fbxprop)
 {
 	FbxProperty value = fbxm->FindProperty(fbxprop);
 	if (!value.IsValid())
-	{
 		return;
-	}
 
 	int lTextureCount = value.GetSrcObjectCount<FbxFileTexture>();
 	for (int i = 0; i < lTextureCount; ++i)
 	{
 		FbxFileTexture* lTexture = value.GetSrcObject<FbxFileTexture>(i);
-		if ((lTexture != nullptr) && lTexture->GetUserDataPtr())
-		{
-			String propString = materialParameterToString(propName);
-			MaterialTexture texId = stringToMaterialTexture(propString);
+		if ((lTexture != nullptr) && (lTexture->GetUserDataPtr() != nullptr))
 			m->setTexture(texId, Texture::Pointer(reinterpret_cast<Texture*>(lTexture->GetUserDataPtr())));
-		}
 	}
 }
 
-void FBXLoaderPrivate::loadMaterialValue(MaterialInstance::Pointer m, MaterialParameter propName,
-	FbxSurfaceMaterial* fbxm, const char* fbxprop)
+inline vec4 NullRemap(const vec4& a)
+{
+	return a;
+}
+
+inline vec4 RoughnessRemap(const vec4& a)
+{
+	return sqrtv(vec4(2.0f) / (a + vec4(2.0f)));
+}
+
+inline vec4 TransparencyRemap(const vec4& a)
+{
+	return vec4(1.0f) - a;
+}
+
+template <class Remap>
+inline void FBXLoaderPrivate::loadMaterialValue(MaterialInstance::Pointer m, MaterialParameter propName,
+	FbxSurfaceMaterial* fbxm, const char* fbxprop, Remap remap)
 {
 	const FbxProperty value = fbxm->FindProperty(fbxprop);
 	if (!value.IsValid()) return;
 
 	EFbxType dataType = value.GetPropertyDataType().GetType();
-
 	if (dataType == eFbxFloat)
 	{
-		m->setFloat(propName, value.Get<float>());
+		m->setFloat(propName, remap(vec4(value.Get<float>())).x);
 	}
 	else if (dataType == eFbxDouble)
 	{
-		m->setFloat(propName, static_cast<float>(value.Get<double>()));
+		m->setFloat(propName, remap(vec4(static_cast<float>(value.Get<double>()))).x);
 	}
 	else if (dataType == eFbxDouble2)
 	{
 		FbxDouble2 data = value.Get<FbxDouble2>();
-		m->setVector(propName, vec4(static_cast<float>(data[0]), static_cast<float>(data[1]), 0.0f, 0.0f));
+		m->setVector(propName, remap(vec4(static_cast<float>(data[0]), static_cast<float>(data[1]), 0.0f, 0.0f)));
 	}
 	else if (dataType == eFbxDouble3)
 	{
 		FbxDouble3 data = value.Get<FbxDouble3>();
-		m->setVector(propName, vec4(static_cast<float>(data[0]), static_cast<float>(data[1]),
-			static_cast<float>(data[2]), 1.0f));
+		m->setVector(propName, remap(vec4(static_cast<float>(data[0]), static_cast<float>(data[1]),
+			static_cast<float>(data[2]), 1.0f)));
 	}
 	else if (dataType == eFbxDouble4)
 	{
 		FbxDouble3 data = value.Get<FbxDouble4>();
-		m->setVector(propName, vec4(static_cast<float>(data[0]), static_cast<float>(data[1]),
-			static_cast<float>(data[2]), static_cast<float>(data[3])));
+		m->setVector(propName, remap(vec4(static_cast<float>(data[0]), static_cast<float>(data[1]),
+			static_cast<float>(data[2]), static_cast<float>(data[3]))));
 	}
 	else
 	{
@@ -523,48 +546,80 @@ void FBXLoaderPrivate::loadMaterialValue(MaterialInstance::Pointer m, MaterialPa
 	}
 }
 
+inline void describeFBXProperty(const fbxsdk::FbxProperty& prop)
+{
+	const char* name = prop.GetNameAsCStr();
+	int lTextureCount = prop.GetSrcObjectCount<FbxFileTexture>();
+	for (int i = 0; i < lTextureCount; ++i)
+	{
+		if (prop.GetSrcObject<FbxFileTexture>(i))
+		{
+			log::info("TEXTURE: %s", name);
+			break;
+		}
+	}
+	EFbxType dataType = prop.GetPropertyDataType().GetType();
+	if (dataType == eFbxFloat)
+	{
+		log::info("FLOAT: %s = %f", name, prop.Get<float>());
+	}
+	else if (dataType == eFbxDouble)
+	{
+		log::info("DOUBLE: %s = %g", name, prop.Get<double>());
+	}
+	else if (dataType == eFbxDouble2)
+	{
+		FbxDouble2 data = prop.Get<FbxDouble2>();
+		log::info("VECTOR2: %s = (%g, %g)", name, data[0], data[1]);
+	}
+	else if (dataType == eFbxDouble3)
+	{
+		FbxDouble3 data = prop.Get<FbxDouble3>();
+		log::info("VECTOR3: %s = (%g, %g, %g)", name, data[0], data[1], data[2]);
+	}
+	else if (dataType == eFbxDouble4)
+	{
+		FbxDouble4 data = prop.Get<FbxDouble4>();
+		log::info("VECTOR4: %s = (%g, %g, %g, %g)", name, data[0], data[1], data[2], data[3]);
+	}
+	else
+	{
+		log::info("ANOTHER PROPERTY: %s", name);
+	}
+}
+
 MaterialInstance::Pointer FBXLoaderPrivate::loadMaterial(FbxSurfaceMaterial* mat)
 {
 	MaterialInstance::Pointer m = _renderer->sharedMaterialLibrary().loadDefaultMaterial(DefaultMaterial::Microfacet)->instance();
 	m->setName(mat->GetName());
+	m->setFloat(MaterialParameter::MetallnessScale, 1.0f);
+	m->setFloat(MaterialParameter::RoughnessScale, 1.0f);
+	m->setFloat(MaterialParameter::OpacityScale, 1.0f);
 
 	/*
 	 * enumerate material properties to find something interesting
-	 *
+	 */
 	log::info("Material %s contains properties:", mat->GetName());
 	auto prop = mat->GetFirstProperty();
 	while (prop.IsValid())
 	{
-		log::info("prop: %s", prop.GetNameAsCStr());
+		describeFBXProperty(prop);
 		prop = mat->GetNextProperty(prop);
 	}
 	// */
 
-	/*/ TODO : remap values to microfacet brdf
-
 	if (shouldCreateRenderObjects)
 	{
-		loadMaterialTextureValue(m, MaterialParameter::DiffuseMap, mat, FbxSurfaceMaterial::sDiffuse);
-		loadMaterialTextureValue(m, MaterialParameter::AmbientMap, mat, FbxSurfaceMaterial::sAmbient);
-		loadMaterialTextureValue(m, MaterialParameter::EmissiveMap, mat, FbxSurfaceMaterial::sEmissive);
-		loadMaterialTextureValue(m, MaterialParameter::SpecularMap, mat, FbxSurfaceMaterial::sSpecular);
-		loadMaterialTextureValue(m, MaterialParameter::NormalMap, mat, FbxSurfaceMaterial::sNormalMap);
-		loadMaterialTextureValue(m, MaterialParameter::BumpMap, mat, FbxSurfaceMaterial::sBump);
-		loadMaterialTextureValue(m, MaterialParameter::ReflectionMap, mat, FbxSurfaceMaterial::sReflection);
-		loadMaterialTextureValue(m, MaterialParameter::OpacityMap, mat, FbxSurfaceMaterial::sTransparentColor);
+		loadMaterialTextureValue(m, MaterialTexture::BaseColor, mat, FbxSurfaceMaterial::sDiffuse);
+		loadMaterialTextureValue(m, MaterialTexture::EmissiveColor, mat, FbxSurfaceMaterial::sEmissive);
+		loadMaterialTextureValue(m, MaterialTexture::Normal, mat, FbxSurfaceMaterial::sNormalMap);
+		loadMaterialTextureValue(m, MaterialTexture::Metallness, mat, FbxSurfaceMaterial::sSpecularFactor);
+		loadMaterialTextureValue(m, MaterialTexture::Roughness, mat, FbxSurfaceMaterial::sShininess);
 	}
-
-	loadMaterialValue(m, MaterialParameter::AmbientColor, mat, FbxSurfaceMaterial::sAmbient);
-	loadMaterialValue(m, MaterialParameter::DiffuseColor, mat, FbxSurfaceMaterial::sDiffuse);
-	loadMaterialValue(m, MaterialParameter::SpecularColor, mat, FbxSurfaceMaterial::sSpecular);
-	loadMaterialValue(m, MaterialParameter::EmissiveColor, mat, FbxSurfaceMaterial::sEmissive);
-	loadMaterialValue(m, MaterialParameter::AmbientFactor, mat, FbxSurfaceMaterial::sAmbientFactor);
-	loadMaterialValue(m, MaterialParameter::DiffuseFactor, mat, FbxSurfaceMaterial::sDiffuseFactor);
-	loadMaterialValue(m, MaterialParameter::SpecularFactor, mat, FbxSurfaceMaterial::sSpecularFactor);
-	loadMaterialValue(m, MaterialParameter::Transparency, mat, FbxSurfaceMaterial::sTransparencyFactor);
-	loadMaterialValue(m, MaterialParameter::BumpFactor, mat, FbxSurfaceMaterial::sBumpFactor);
-	loadMaterialValue(m, MaterialParameter::RoughnessScale, mat, FbxSurfaceMaterial::sShininess);
-	*/
+	
+	loadMaterialValue(m, MaterialParameter::BaseColorScale, mat, FbxSurfaceMaterial::sDiffuse, NullRemap);
+	loadMaterialValue(m, MaterialParameter::EmissiveColor, mat, FbxSurfaceMaterial::sEmissive, NullRemap);
+	loadMaterialValue(m, MaterialParameter::NormalScale, mat, FbxSurfaceMaterial::sBumpFactor, NullRemap);
 
 	return m;
 }
@@ -643,15 +698,11 @@ s3d::Mesh::Pointer FBXLoaderPrivate::loadMesh(s3d::Storage& storage, FbxMesh* me
 	}
 
 	VertexDeclaration decl(true, VertexAttributeUsage::Position, DataType::Vec3);
-
-	if (hasNormal)
-		decl.push_back(VertexAttributeUsage::Normal, DataType::Vec3);
+	decl.push_back(VertexAttributeUsage::Normal, DataType::Vec3);
+	decl.push_back(VertexAttributeUsage::Tangent, DataType::Vec3);
 
 	if (hasColor)
 		decl.push_back(VertexAttributeUsage::Color, DataType::Vec4);
-
-	if (hasTangents)
-		decl.push_back(VertexAttributeUsage::Tangent, DataType::Vec3);
 
 	auto uv = mesh->GetElementUV();
 	uint32_t texCoord0 = static_cast<uint32_t>(VertexAttributeUsage::TexCoord0);
@@ -687,6 +738,7 @@ s3d::Mesh::Pointer FBXLoaderPrivate::loadMesh(s3d::Storage& storage, FbxMesh* me
 	{
 		ia->resizeToFit(ia->actualSize() + lPolygonVertexCount);
 	}
+	uint32_t firstIndex = ia->actualSize() / 3;
 
 	VertexDataAccessor<DataType::Vec3> pos;
 	VertexDataAccessor<DataType::Vec3> nrm;
@@ -840,6 +892,12 @@ s3d::Mesh::Pointer FBXLoaderPrivate::loadMesh(s3d::Storage& storage, FbxMesh* me
 		result->setDeformer(deformer);
 	}
 
+	if (!hasNormal)
+		primitives::calculateNormals(vs, ia, firstIndex, firstIndex + static_cast<uint32_t>(lPolygonCount));
+	
+	if (!hasTangents)
+		primitives::calculateTangents(vs, ia, firstIndex, firstIndex + static_cast<uint32_t>(lPolygonCount));
+
 	return result;
 }
 
@@ -866,6 +924,7 @@ void FBXLoaderPrivate::buildVertexBuffers(s3d::Storage& storage)
 				RenderBatch::Pointer rb = RenderBatch::Pointer::create(mc.material, vStream, identityMatrix, mc.startIndex, mc.numIndices);
 				rb->setVertexStorage(i);
 				rb->setIndexArray(storage.indexArray());
+				rb->calculateBoundingBox();
 				mc.owner->addRenderBatch(rb);
 			}
 		}

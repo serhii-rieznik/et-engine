@@ -21,10 +21,9 @@ enum class ParseDirective : uint32_t
 	UserDefined,
 };
 
-// void parseDirective(ParseDirective directive, std::string& code, uint32_t positionInCode)
 using ParseDirectiveCallback = std::function<void(ParseDirective, std::string&, uint32_t)>;
 
-void parseShaderSource(std::string& source, const std::string& baseFolder,
+StringList parseShaderSource(std::string& source, const std::string& baseFolder,
 	const StringList& defines, ParseDirectiveCallback cb, const Set<ParseDirective>& skipDirectives);
 
 }

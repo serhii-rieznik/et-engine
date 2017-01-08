@@ -11,41 +11,63 @@
 
 namespace et
 {
-	float queryContiniousTimeInSeconds();
-	
-	uint64_t queryContiniousTimeInMilliSeconds();
-	
-	uint64_t queryCurrentTimeInMicroSeconds();
+float queryContiniousTimeInSeconds();
+uint64_t queryContiniousTimeInMilliSeconds();
+uint64_t queryCurrentTimeInMicroSeconds();
 
-	/**
-	 * Returns device's screen size in native units.
-	 * For Retina screens returns size in points
-	 */
-	vec2i nativeScreenSize();
+/*
+ * Reads application identifier from package
+ */
+std::string applicationIdentifierForCurrentProject();
 
-	vec2i availableScreenSize();
-	
-	/**
-	 * Reads application identifier from package
-	 */
-	std::string applicationIdentifierForCurrentProject();
-	
-	uint32_t streamSize(std::istream& s);
-	
- 	inline uint32_t roundToHighestPowerOfTwo(uint32_t x)
-	{
-		x = x - 1;
-		x |= (x >> 1);
-		x |= (x >> 2);
-		x |= (x >> 4);
-		x |= (x >> 8);
-		x |= (x >> 16);
-		return x + 1;
-	}
-	
-	inline bool isPowerOfTwo(int x)
-		{ return (x & (x - 1)) == 0; }
-	
-	inline bool isPowerOfTwo(size_t x)
-		{ return (x & (x - 1)) == 0; }
+uint32_t streamSize(std::istream& s);
+
+template <class I>
+inline I roundToHighestPowerOfTwo(I x)
+{
+	static_assert(std::is_unsigned<T> && std::is_integral<T>::value, 
+		"roundToHighestPowerOfTwo works with unsigned integral types only");
+
+	x = x - 1;
+	x |= (x >> 1);
+	x |= (x >> 2);
+	x |= (x >> 4);
+	x |= (x >> 8);
+	x |= (x >> 16);
+	return x + 1;
+}
+
+template <class I>
+inline bool isPowerOfTwo(I x)
+{
+	static_assert(std::is_unsigned<T> && std::is_integral<T>::value, 
+		"roundToHighestPowerOfTwo works with unsigned integral types only");
+
+	return (x & (x - 1)) == 0;
+}
+
+inline bool platformHasHardwareKeyboard()
+{
+	return true;
+}
+
+/*
+ * Platform tools
+ */
+enum class SelectFileMode : uint32_t
+{
+	Open,
+	Save
+};
+
+enum class AlertType : uint32_t
+{
+	Information,
+	Warning,
+	Error
+};
+
+std::string selectFile(const StringList& types, SelectFileMode mode, const std::string& defaultName);
+void alert(const std::string& title, const std::string& message, const std::string& button, AlertType type);
+
 }

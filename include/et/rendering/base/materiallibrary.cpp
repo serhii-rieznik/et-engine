@@ -11,6 +11,17 @@
 namespace et
 {
 
+struct MaterialReloaded : public ObjectLoader
+{
+	ET_DECLARE_POINTER(MaterialReloaded);
+
+	void reloadObject(LoadableObject::Pointer object, ObjectsCache&) override
+	{
+		Material::Pointer mtl = object;
+		mtl->loadFromJson(loadTextFile(mtl->origin()), getFilePath(mtl->origin()));
+	}
+};
+
 const std::string defaultMaterials[DefaultMaterialCount] =
 {
 	std::string("engine_data/materials/textured2d.json"),
@@ -21,22 +32,21 @@ const std::string defaultMaterials[DefaultMaterialCount] =
 void MaterialLibrary::init(RenderInterface* ren)
 {
 	_renderer = ren;
+	_cache.startMonitoring();
 }
 
 void MaterialLibrary::shutdown()
 {
 	for (Material::Pointer& mat : _defaultMaterials)
-	{
-		if (mat.valid())
-		{
-			mat->releaseInstances();
-			mat.reset(nullptr);
-		}
-	}
+		mat.reset(nullptr);
 
-	for (auto& kv : _cache)
-		kv.second->releaseInstances();
-	_cache.clear();
+	for (Material::Pointer& mtl : _loadedMaterials)
+	{
+		mtl->releaseInstances();
+		_cache.discard(mtl);
+	}
+	
+	_loadedMaterials.clear();
 }
 
 Material::Pointer MaterialLibrary::loadDefaultMaterial(DefaultMaterial mtl)
@@ -54,18 +64,33 @@ Material::Pointer MaterialLibrary::loadDefaultMaterial(DefaultMaterial mtl)
 
 Material::Pointer MaterialLibrary::loadMaterial(const std::string& fileName)
 {
-	auto i = _cache.find(fileName);
-	if (i != _cache.end())
-		return i->second;
+	Material::Pointer material = _cache.findAnyObject(fileName);
+	
+	if (material.invalid())
+	{
+		material = loadMaterialFromJson(loadTextFile(fileName), getFilePath(fileName));
+		material->setOrigin(fileName);
+		
+		for (const auto& cfg : material->configurations())
+		{
+			for (const std::string& fn : cfg.second.usedFiles)
+			{
+				material->addOrigin(fn);
+				log::info("Used file: %s", fn.c_str());
+			}
+		}
 
-	Material::Pointer mtl = loadMaterialFromJson(loadTextFile(fileName), getFilePath(fileName));
-	return _cache.emplace(fileName, mtl).first->second;
+		_cache.manage(material, MaterialReloaded::Pointer::create());
+	}
+	
+	return material;
 }
 
 Material::Pointer MaterialLibrary::loadMaterialFromJson(const std::string& json, const std::string& baseFolder)
 {
 	Material::Pointer result = Material::Pointer::create(_renderer);
 	result->loadFromJson(json, baseFolder);
+	_loadedMaterials.emplace_back(result);
 	return result;
 }
 

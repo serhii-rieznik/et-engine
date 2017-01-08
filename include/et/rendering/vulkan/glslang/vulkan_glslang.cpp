@@ -37,112 +37,6 @@ void buildProgramReflection(glslang::TProgram*, Program::Reflection& reflection)
 void dumpSource(const std::string&);
 void crossCompile(const std::vector<uint32_t>&);
 
-bool glslToSPIRV(const std::string& vertexSource, const std::string& fragmentSource,
-	std::vector<uint32_t>& vertexBin, std::vector<uint32_t>& fragmentBin, Program::Reflection& reflection)
-{
-	glslang::TProgram* program = nullptr;
-	EShMessages messages = static_cast<EShMessages>(EShMsgVulkanRules | EShMsgSpvRules);
-	const char* vertexSourceCStr[] = { vertexSource.c_str() };
-	const char* vertexFileNames[] = { "Vertex Shader" };
-	const char* fragmentSourceCStr[] = { fragmentSource.c_str() };
-	const char* fragmentFileNames[] = { "Fragment Shader" };
-
-	glslang::TShader vertexShader(EShLanguage::EShLangVertex);
-	vertexShader.setStringsWithLengthsAndNames(vertexSourceCStr, nullptr, vertexFileNames, 1);
-	vertexShader.setAutoMapBindings(true);
-
-	glslang::TShader fragmentShader(EShLanguage::EShLangFragment);
-	fragmentShader.setStringsWithLengthsAndNames(fragmentSourceCStr, nullptr, fragmentFileNames, 1);
-	fragmentShader.setAutoMapBindings(true);
-
-	struct OnExit
-	{
-		std::function<void()> exitFunction;
-		OnExit(const std::function<void()>& e) : exitFunction(e) { }
-		~OnExit() { exitFunction(); }
-	} onExit([&]()
-	{
-		etDestroyObject(program);
-	});
-
-	if (!vertexShader.parse(&glslang::DefaultTBuiltInResource, 100, true, messages))
-	{
-		log::error("Failed to parse vertex shader:\n%s", vertexShader.getInfoLog());
-		dumpSource(vertexSource);
-		debug::debugBreak();
-		return false;
-	}
-	
-	if (!fragmentShader.parse(&glslang::DefaultTBuiltInResource, 100, true, messages))
-	{
-		log::error("Failed to parse fragment shader:\n%s", fragmentShader.getInfoLog());
-		dumpSource(fragmentSource);
-		debug::debugBreak();
-		return false;
-	}
-	
-	program = etCreateObject<glslang::TProgram>();
-	program->addShader(&vertexShader);
-	program->addShader(&fragmentShader);
-	if (!program->link(messages))
-	{
-		log::error("Failed to link program:\n%s", program->getInfoLog());
-		debug::debugBreak();
-		return false;
-	}
-	if (!program->mapIO())
-	{
-		log::error("Failed to map program's IO:\n%s", program->getInfoLog());
-		debug::debugBreak();
-		return false;
-	}
-
-	if (program->buildReflection() == false) 
-	{
-		log::error("Failed to build reflection:\n%s", program->getInfoLog());
-		debug::debugBreak();
-		return false;
-	}
-
-	buildProgramReflection(program, reflection);
-
-	glslang::TIntermediate* vertexIntermediate = program->getIntermediate(EShLanguage::EShLangVertex);
-	if (vertexIntermediate == nullptr)
-	{
-		log::error("Failed to get vertex binary:\n%s", program->getInfoLog());
-		debug::debugBreak();
-		return false;
-	}
-	
-	glslang::TIntermediate* fragmentIntermediate = program->getIntermediate(EShLanguage::EShLangFragment);
-	if (fragmentIntermediate == nullptr)
-	{
-		log::error("Failed to get fragment binary:\n%s", program->getInfoLog());
-		debug::debugBreak();
-		return false;
-	}
-
-	{
-		vertexBin.reserve(10240);
-		spv::SpvBuildLogger logger;
-		glslang::GlslangToSpv(*vertexIntermediate, vertexBin, &logger);
-		std::string allMessages = logger.getAllMessages();
-		if (!allMessages.empty())
-			log::info("Vertex GLSL to SPV:\n%s", allMessages.c_str());
-	}
-
-	{
-		fragmentBin.reserve(10240);
-		spv::SpvBuildLogger logger;
-		glslang::GlslangToSpv(*fragmentIntermediate, fragmentBin, &logger);
-		std::string allMessages = logger.getAllMessages();
-		if (!allMessages.empty())
-			log::info("Fragment GLSL to SPV:\n%s", allMessages.c_str());
-	}
-
-	return true;
-}
-
 class VertexShaderAttribLocationTraverser : public glslang::TIntermTraverser
 {
 	void visitSymbol(glslang::TIntermSymbol* symbol) override
@@ -154,11 +48,7 @@ class VertexShaderAttribLocationTraverser : public glslang::TIntermTraverser
 		{
 			VertexAttributeUsage usage = stringToVertexAttributeUsage(attribName);
 			if ((usage != VertexAttributeUsage::Unknown) && (static_cast<int>(usage) != qualifier.layoutLocation))
-			{
-				log::info("Input symbol: %s, location remapped from %d to %d", 
-					attribName.c_str(), qualifier.layoutLocation, static_cast<uint32_t>(usage));
 				qualifier.layoutLocation = static_cast<int>(usage);
-			}
 		}
 	}
 };
@@ -222,6 +112,7 @@ bool hlslToSPIRV(const std::string& _source, std::vector<uint32_t>& vertexBin, s
 		{
 			std::string errorString(reinterpret_cast<const char*>(vertexErrors->GetBufferPointer()), vertexErrors->GetBufferSize());
 			log::error("Errors: %s", errorString.c_str());
+			dumpSource(preprocessedVertexShader);
 		}
 	}
 
@@ -238,6 +129,7 @@ bool hlslToSPIRV(const std::string& _source, std::vector<uint32_t>& vertexBin, s
 		{
 			std::string errorString(reinterpret_cast<const char*>(fragmentErrors->GetBufferPointer()), fragmentErrors->GetBufferSize());
 			log::error("Errors: %s", errorString.c_str());
+			dumpSource(preprocessedFragmentShader);
 		}
 	}
 #endif
@@ -246,7 +138,9 @@ bool hlslToSPIRV(const std::string& _source, std::vector<uint32_t>& vertexBin, s
 	{
 		log::error("Failed to parse vertex shader:\n%s", vertexShader.getInfoLog());
 		dumpSource(preprocessedVertexShader);
+#	if (ET_DEBUG)
 		debug::debugBreak();
+#	endif
 		return false;
 	}
 	
@@ -254,7 +148,9 @@ bool hlslToSPIRV(const std::string& _source, std::vector<uint32_t>& vertexBin, s
 	{
 		log::error("Failed to parse fragment shader:\n%s", fragmentShader.getInfoLog());
 		dumpSource(preprocessedFragmentShader);
+#	if (ET_DEBUG)
 		debug::debugBreak();
+#	endif
 		return false;
 	}
 	

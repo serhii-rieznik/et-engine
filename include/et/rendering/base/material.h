@@ -17,10 +17,21 @@ class RenderInterface;
 class MaterialInstance;
 using MaterialInstancePointer = IntrusivePtr<MaterialInstance>;
 using MaterialInstanceCollection = Vector<MaterialInstancePointer>;
-class Material : public Object
+class Material : public LoadableObject
 {
 public:
 	ET_DECLARE_POINTER(Material);
+
+	struct Configuration
+	{
+		Program::Pointer program;
+		VertexDeclaration inputLayout;
+		DepthState depthState;
+		BlendState blendState;
+		CullMode cullMode = CullMode::Disabled;
+		StringList usedFiles;
+	};
+	using ConfigurationMap = Map<RenderPassClass, Configuration>;
 
 public:
 	Material(RenderInterface*);
@@ -42,25 +53,16 @@ public:
 	void setFloat(MaterialParameter, float);
 	float getFloat(MaterialParameter) const;
 
-	Program::Pointer program(RenderPassClass) const;
-
-	const DepthState& depthState() const
-		{ return _depthState; }
-
-	const BlendState& blendState() const
-		{ return _blendState; };
-
-	CullMode cullMode() const
-		{ return _cullMode; }
-
-	void setProgram(const Program::Pointer&, RenderPassClass);
-	void setDepthState(const DepthState&);
-	void setBlendState(const BlendState&);
-	void setCullMode(CullMode);
-
 	uint64_t sortingKey() const;
 
+	virtual const Configuration& configuration(RenderPassClass) const;
+	const ConfigurationMap& configurations() const { return _passes; }
+
 	void loadFromJson(const std::string& json, const std::string& baseFolder);
+	void setProgram(const Program::Pointer&, RenderPassClass);
+	void setDepthState(const DepthState&, RenderPassClass);
+	void setBlendState(const BlendState&, RenderPassClass);
+	void setCullMode(CullMode, RenderPassClass);
 
 private:
 	friend class MaterialInstance;
@@ -68,11 +70,13 @@ private:
 	template <class T>
 	T getParameter(MaterialParameter) const;
 
-	void loadInputLayout(Dictionary);
-	void loadCode(const Dictionary & codes, const std::string & baseFolder, Dictionary defines);
-	void loadCode(const std::string&, RenderPassClass passCls, const std::string& baseFolder, Dictionary defines);
+	VertexDeclaration loadInputLayout(Dictionary);
+	Program::Pointer loadCode(const std::string&, const std::string& baseFolder, 
+		Dictionary defines, const VertexDeclaration&, StringList& fileNames);
+	std::string generateInputLayout(const VertexDeclaration& decl);
+
+	void loadRenderPass(const std::string&, const Dictionary&, const std::string& baseFolder);
 	void initDefaultHeader();
-	std::string generateInputLayout();
 
 protected: // overrided / read by instanaces
 	MaterialTextureSet textures;
@@ -81,14 +85,9 @@ protected: // overrided / read by instanaces
 
 private: // permanent private data
 	static std::string _shaderDefaultHeader;
-
 	RenderInterface* _renderer = nullptr;
-	Map<RenderPassClass, Program::Pointer> _programs;
 	MaterialInstanceCollection _instances;
-	VertexDeclaration _inputLayout;
-	DepthState _depthState;
-	BlendState _blendState;
-	CullMode _cullMode = CullMode::Disabled;
+	ConfigurationMap _passes;
 };
 
 class MaterialInstance : public Material
@@ -103,6 +102,7 @@ public:
 
 	TextureSet::Pointer textureSet(RenderPassClass);
 	ConstantBufferEntry constantBufferData(RenderPassClass);
+	const Configuration& configuration(RenderPassClass) const override;
 
 	void invalidateTextureSet();
 	void invalidateConstantBuffer();

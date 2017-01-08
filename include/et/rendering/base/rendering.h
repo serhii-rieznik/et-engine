@@ -495,12 +495,13 @@ bool stringToBlendConfiguration(const std::string& name, BlendConfiguration& con
 Dictionary serializeDepthState(const DepthState&);
 Dictionary serializeBlendState(const BlendState&);
 DepthState deserializeDepthState(const Dictionary&);
-BlendState deserializeBlendState(const Dictionary&);
+BlendState deserializeBlendState(const VariantBase::Pointer&);
 
 std::string cullModeToString(CullMode);
 bool stringToCullMode(const std::string&, CullMode&);
 
 RenderPassClass stringToRenderPassClass(const std::string&);
+bool isValidRenderPassName(const std::string&);
 
 template <class T>
 DataType dataTypeFromClass();

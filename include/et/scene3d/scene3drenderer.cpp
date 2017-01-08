@@ -22,11 +22,11 @@ Renderer::Renderer() :
 
 void Renderer::render(RenderInterface::Pointer& renderer, const Scene::Pointer& scene)
 {
-	validateMainPass(renderer, scene);
-	validateShadowPass(renderer);
-
 	extractBatches(scene);
-	
+
+	validateMainPass(renderer, scene);
+
+	validateShadowPass(renderer);
 	if (_shadowPass.valid())
 	{
 		clip(_shadowPass, _renderBatches, _shadowPassBatches);
@@ -59,14 +59,14 @@ void Renderer::validateMainPass(RenderInterface::Pointer& renderer, const Scene:
 		passInfo.depth.loadOperation = FramebufferOperation::Clear;
 		passInfo.depth.storeOperation = FramebufferOperation::DontCare;
 		passInfo.depth.enabled = true;
+		
 		_mainPass = renderer->allocateRenderPass(passInfo);
+		_envTexture.reset(nullptr);
+		_shadowTexture.reset(nullptr);
 
-		if (_envTexture.invalid())
-		{
-			ObjectsCache localCache;
-			_envTexture = renderer->loadTexture("media/textures/background.dds", localCache);
-			_mainPass->setSharedTexture(MaterialTexture::Environment, _envTexture, renderer->defaultSampler());
-		}
+		ObjectsCache localCache;
+		_envTexture = renderer->loadTexture("media/textures/background.dds", localCache);
+		_mainPass->setSharedTexture(MaterialTexture::Environment, _envTexture, renderer->defaultSampler());
 	}
 }
 
@@ -130,7 +130,7 @@ void Renderer::clip(RenderPass::Pointer& pass, const RenderBatchCollection& inBa
 	for (const RenderBatch::Pointer& batch : inBatches)
 	{
 		BoundingBox transformedBox = batch->boundingBox().transform(batch->transformation());
-		if (pass->info().camera->frustum().containsBoundingBox(transformedBox))
+		if (1 || pass->info().camera->frustum().containsBoundingBox(transformedBox))
 		{
 			uint64_t key = batch->material()->sortingKey();
 			passBatches.emplace_back(key, batch, transformedBox);
@@ -138,13 +138,13 @@ void Renderer::clip(RenderPass::Pointer& pass, const RenderBatchCollection& inBa
 	}
 
 	vec3 cameraPosition = pass->info().camera->position();
-	auto cmp = [cameraPosition](const RenderBatchInfo& l, const RenderBatchInfo& r) 
+	auto cmp = [cameraPosition, &pass](const RenderBatchInfo& l, const RenderBatchInfo& r) 
 	{
 		if (l.priority != r.priority)
 			return l.priority > r.priority;
 
-		const BlendState& lbs = l.batch->material()->blendState();
-		const BlendState& rbs = r.batch->material()->blendState();
+		const BlendState& lbs = l.batch->material()->configuration(pass->info().renderPassClass).blendState;
+		const BlendState& rbs = r.batch->material()->configuration(pass->info().renderPassClass).blendState;
 		if (lbs.enabled == rbs.enabled)
 		{
 			float delta = (l.transformedBox.center - cameraPosition).dotSelf() - (r.transformedBox.center - cameraPosition).dotSelf();
@@ -162,7 +162,6 @@ void Renderer::render(RenderPass::Pointer& pass, const RenderBatchInfoCollection
 	for (const RenderBatchInfo& rb : batches)
 		pass->pushRenderBatch(rb.batch);
 	pass->end();
-
 }
 
 }

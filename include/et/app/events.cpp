@@ -12,22 +12,21 @@ using namespace et;
 /*
  * EventReceiver
  */
-void EventReceiver::eventConnected(Event* e)
-{
-	_events.push_back(e); 
-}
-
 EventReceiver::~EventReceiver() 
 {
-	for (auto i : _events)
+	for (Event* i : _events)
 		i->receiverDisconnected(this);
+}
+
+void EventReceiver::eventConnected(Event* e)
+{
+	ET_ASSERT(_events.count(e) == 0);
+	_events.insert(e);
 }
 
 void EventReceiver::eventDisconnected(Event* e)
 {
-	auto i = std::find(_events.begin(), _events.end(), e);
-	if (i != _events.end())
-		_events.erase(i);
+	_events.erase(e);
 }
 
 /**

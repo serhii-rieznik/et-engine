@@ -53,32 +53,10 @@ const Camera::Pointer& RenderPass::camera() const
 
 void RenderPass::setSharedTexture(MaterialTexture texId, const Texture::Pointer& tex, const Sampler::Pointer& smp)
 {
-	uint32_t baseId = static_cast<uint32_t>(texId);
-	_sharedTextures[baseId].first = tex;
-	_sharedTextures[baseId + MaterialSamplerBindingOffset].second = smp;
-	_sharedTexturesSetValid = false;
-}
-
-const TextureSet::Pointer& RenderPass::sharedTexturesSet()
-{
-	if (!_sharedTexturesSetValid)
-		buildSharedTexturesSet();
-
-	return _sharedTexturesSet;
-}
-
-void RenderPass::buildSharedTexturesSet()
-{
-	TextureSet::Description desc;
-	for (const auto& i : _sharedTextures)
-	{
-		desc.vertexTextures.emplace(static_cast<uint32_t>(i.first), i.second.first);
-		desc.vertexSamplers.emplace(static_cast<uint32_t>(i.first), i.second.second);
-		desc.fragmentTextures.emplace(static_cast<uint32_t>(i.first), i.second.first);
-		desc.fragmentSamplers.emplace(static_cast<uint32_t>(i.first), i.second.second);
-	}
-	_sharedTexturesSet = _renderer->createTextureSet(desc);
-	_sharedTexturesSetValid = true;
+	ET_ASSERT(texId >= MaterialTexture::FirstSharedTexture);
+	ET_ASSERT(texId <= MaterialTexture::LastSharedTexture);
+	_sharedTextures[texId].first = tex;
+	_sharedTextures[texId].second = smp;
 }
 
 }

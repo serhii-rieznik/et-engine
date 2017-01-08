@@ -40,12 +40,10 @@ public:
 	ConstantBufferEntry variablesData;
 	Vector<VulkanRenderBatch> batches;
 	Map<uint32_t, VkFramebuffer> framebuffers;
-	VulkanTextureSet::Pointer sharedTextures;
 
 	std::atomic_bool recording{ false };
 
 	void generateDynamicDescriptorSet(RenderPass* pass);
-	void updateSharedTexturesDescriptorSet(RenderPass* pass);
 	void loadVariables(Camera::Pointer camera, Camera::Pointer light);
 };
 
@@ -265,7 +263,6 @@ void VulkanRenderPass::begin()
 	_private->viewport.height = static_cast<float>(rtHeight);
 	_private->viewport.maxDepth = 1.0f;
 	_private->loadVariables(info().camera, info().light);
-	_private->updateSharedTexturesDescriptorSet(this);
 
 	_private->recording = true;
 }
@@ -274,11 +271,14 @@ void VulkanRenderPass::pushRenderBatch(const RenderBatch::Pointer& inBatch)
 {
 	ET_ASSERT(_private->recording);
 
-	_private->batches.emplace_back();
-	VulkanRenderBatch& batch = _private->batches.back();
-
+	retain();
 	MaterialInstance::Pointer material = inBatch->material();
-	const VulkanProgram::Pointer& program = material->program(info().renderPassClass);
+	VulkanProgram::Pointer program = inBatch->material()->configuration(info().renderPassClass).program;
+	VulkanPipelineState::Pointer pipelineState = _private->renderer->acquirePipelineState(VulkanRenderPass::Pointer(this), material, inBatch->vertexStream());
+	release();
+
+	if (pipelineState->nativePipeline().pipeline == nullptr)
+		return;
 
 	ConstantBufferEntry objectVariables;
 	if (program->reflection().objectVariablesBufferSize > 0)
@@ -295,8 +295,16 @@ void VulkanRenderPass::pushRenderBatch(const RenderBatch::Pointer& inBatch)
 			memcpy(objectVariables.data() + var->second.offset, inBatch->rotationTransformation().data(), sizeof(inBatch->rotationTransformation()));
 		}
 	}
+	
+	for (const auto& sh : sharedTextures())
+	{
+		material->setTexture(sh.first, sh.second.first);
+		material->setSampler(sh.first, sh.second.second);
+	}
 
-	retain();
+	_private->batches.emplace_back();
+
+	VulkanRenderBatch& batch = _private->batches.back();
 	batch.textureSet = material->textureSet(info().renderPassClass);
 	batch.dynamicOffsets[0] = objectVariables.offset();
 	batch.dynamicOffsets[1] = material->constantBufferData(info().renderPassClass).offset();
@@ -305,8 +313,7 @@ void VulkanRenderPass::pushRenderBatch(const RenderBatch::Pointer& inBatch)
 	batch.indexBufferFormat = vulkan::indexBufferFormat(inBatch->vertexStream()->indexArrayFormat());
 	batch.startIndex = inBatch->firstIndex();
 	batch.indexCount = inBatch->numIndexes();
-	batch.pipeline = _private->renderer->acquirePipelineState(VulkanRenderPass::Pointer(this), material, inBatch->vertexStream());
-	release();
+	batch.pipeline = pipelineState;
 }
 
 void VulkanRenderPass::end()
@@ -317,7 +324,6 @@ void VulkanRenderPass::end()
 void VulkanRenderPass::recordCommandBuffer()
 {
 	ET_ASSERT(_private->recording == false);
-	ET_ASSERT(_private->sharedTextures.valid());
 
 	_private->renderer->sharedConstantBuffer().flush();
 	dynamicConstantBuffer().flush();
@@ -339,7 +345,6 @@ void VulkanRenderPass::recordCommandBuffer()
 	VkDescriptorSet descriptorSets[DescriptorSetClass::Count] = {
 		_private->dynamicDescriptorSet,
 		nullptr,
-		_private->sharedTextures->nativeSet().descriptorSet,
 	};
 
 	vkCmdBeginRenderPass(commandBuffer, &_private->beginInfo, VK_SUBPASS_CONTENTS_INLINE);
@@ -445,14 +450,6 @@ void VulkanRenderPassPrivate::loadVariables(Camera::Pointer camera, Camera::Poin
 	{
 		vptr->lightPosition = vec4(light->position());
 		vptr->lightProjection = light->viewProjectionMatrix() * lightProjectionMatrix;
-	}
-}
-
-void VulkanRenderPassPrivate::updateSharedTexturesDescriptorSet(RenderPass* pass)
-{
-	if (pass->sharedTexturesSet() != sharedTextures)
-	{
-		sharedTextures = pass->sharedTexturesSet();
 	}
 }
 

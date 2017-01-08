@@ -38,7 +38,8 @@ public:
 
 private:
 	RenderInterface* _renderer = nullptr;
-	Map<std::string, Material::Pointer> _cache;
+	ObjectsCache _cache;
+	Vector<Material::Pointer> _loadedMaterials;
 	std::array<Material::Pointer, DefaultMaterialCount> _defaultMaterials;
 };
 

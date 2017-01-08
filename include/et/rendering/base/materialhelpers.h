@@ -18,12 +18,10 @@ enum class MaterialTexture : uint32_t
 	// per-object textures
 	BaseColor,
 	Normal,
-	Roughnes,
+	Roughness,
 	Metallness,
 	EmissiveColor,
-	
-	// shared textures
-	Shadow = 8,
+	Shadow,
 	AmbientOcclusion,
 	Environment,
 	

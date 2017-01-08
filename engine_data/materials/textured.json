@@ -1,24 +1,21 @@
 {
-	"input-layout" : {
-		"position" : 3,
-		"texcoord0" : 2
-	},
-
-	"depth-state": {
-		"depth-function": "less",
-		"depth-test": true,
-		"depth-write": true
-	},
-
-	"blend-state": {
-		"blend-configuration" : "disabled"
-	},
-
-	"options" : {
-		"TRANSFORM_INPUT_POSITION" : 1
-	},
-
-	"cull-mode" : "back",
-
-	"code" : "shaders/textured"
+	"name" : "textured",
+	"forward" : 
+	{ 
+		"input-layout" : {
+			"position" : 3,
+			"texcoord0" : 2
+		},
+		"depth-state": {
+			"depth-function": "less",
+			"depth-test": true,
+			"depth-write": true
+		},
+		"blend-state": "disabled" 
+		"options" : {
+			"TRANSFORM_INPUT_POSITION" : 1
+		},
+		"cull-mode" : "back",
+    	"code" : "shaders/textured"
+	}
 }
