@@ -42,8 +42,12 @@ VulkanProgram::VulkanProgram(VulkanState& v)
 
 VulkanProgram::~VulkanProgram()
 {
-	vkDestroyShaderModule(_private->vulkan.device, _private->vertex, nullptr);
-	vkDestroyShaderModule(_private->vulkan.device, _private->fragment, nullptr);
+	if (_private->vertex)
+		vkDestroyShaderModule(_private->vulkan.device, _private->vertex, nullptr);
+
+	if (_private->fragment)
+		vkDestroyShaderModule(_private->vulkan.device, _private->fragment, nullptr);
+
 	ET_PIMPL_FINALIZE(VulkanProgram);
 }
 

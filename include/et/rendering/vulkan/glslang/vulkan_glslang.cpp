@@ -65,7 +65,7 @@ bool hlslToSPIRV(const std::string& _source, std::vector<uint32_t>& vertexBin, s
 	const char* vsName[] = { "vertex_shader_source" };
 	const char* fsName[] = { "fragment_shader_source" };
 
-	glslang::TShader::ForbidInclude defaultIncluder;
+	glslang::TShader::ForbidIncluder defaultIncluder;
 
 	glslang::TShader vertexShader(EShLanguage::EShLangVertex);
 	vertexShader.setStringsWithLengthsAndNames(vs, nullptr, vsName, 1);
