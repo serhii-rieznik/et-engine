@@ -66,7 +66,7 @@ void pvr::loadFromStream(std::istream& stream, TextureDescription& desc)
 	{
 		BinaryDataStorage rgbaData(desc.size.square() * 4, 0);
 		PVRTDecompressPVRTC(desc.data.data(), (bitsPerPixelForTextureFormat(desc.format) == 2), desc.size.x, desc.size.y, rgbaData.data());
-		desc.mipMapCount = 1;
+		desc.levelCount = 1;
 		desc.format = TextureFormat::RGBA8;
 		desc.data = rgbaData;
 	}
@@ -289,7 +289,7 @@ void loadInfoFromV3Header(const PVRTextureHeaderV3& header, const BinaryDataStor
 	ET_ASSERT((desc.layersCount == 1) || (desc.layersCount == 6));
 
 	desc.size = vec2i(header.u32Width, header.u32Height);
-	desc.mipMapCount = (header.u32MIPMapCount > 0) ? header.u32MIPMapCount : 1;
+	desc.levelCount = (header.u32MIPMapCount > 0) ? header.u32MIPMapCount : 1;
 	desc.target = (desc.layersCount == 6) ? TextureTarget::Texture_Cube : TextureTarget::Texture_2D;
 
 	parseTextureFormat(header, desc);

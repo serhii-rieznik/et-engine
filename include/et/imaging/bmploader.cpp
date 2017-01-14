@@ -50,7 +50,7 @@ void et::bmp::loadFromStream(std::istream& source, TextureDescription& desc)
 
 	desc.target = TextureTarget::Texture_2D;
 	desc.size = vec2i(ih.biWidth, ih.biHeight);
-	desc.mipMapCount = 1;
+	desc.levelCount = 1;
 	desc.layersCount = 1;
 	if (channels == 4)
 	{

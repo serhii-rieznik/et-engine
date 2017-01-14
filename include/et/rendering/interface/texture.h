@@ -30,7 +30,7 @@ public:
 		TextureFormat format = TextureFormat::Invalid;
 		TextureTarget target = TextureTarget::Texture_2D;
 		TextureDataLayout dataLayout = TextureDataLayout::FacesFirst;
-		uint32_t mipMapCount = 1;
+		uint32_t levelCount = 1;
 		uint32_t layersCount = 1;
 		bool isRenderTarget = false;
 
@@ -118,7 +118,7 @@ inline vec2 Texture::getTexCoord(const vec2& vec, TextureOrigin origin) const
 
 inline vec2i Texture::Description::sizeForMipLevel(uint32_t level) const
 {
-	ET_ASSERT(level <= mipMapCount);
+	ET_ASSERT(level <= levelCount);
 	return vec2i(size.x >> static_cast<int32_t>(level), size.y >> static_cast<int32_t>(level));
 }
 
@@ -148,7 +148,7 @@ inline uint32_t Texture::Description::dataOffsetForMipLevel(uint32_t level, uint
 inline uint32_t Texture::Description::dataSizeForAllMipLevels() const
 {
 	uint32_t result = 0;
-	for (uint32_t i = 0; i < mipMapCount; ++i)
+	for (uint32_t i = 0; i < levelCount; ++i)
 		result += dataSizeForMipLevel(i);
 	return result;
 }

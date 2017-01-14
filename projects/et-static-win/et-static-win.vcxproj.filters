@@ -86,6 +86,9 @@
     <Filter Include="spir-v-cross">
       <UniqueIdentifier>{61c04ec6-310d-45e4-bbdd-49d214df5425}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\rendering\objects">
+      <UniqueIdentifier>{b60f4e9f-1241-47be-b7a8-9b796ffd0a72}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\et\sound\platform-dependent.cpp">
@@ -622,6 +625,18 @@
     <ClInclude Include="..\..\include\external\spirvcross\spirv_msl.hpp">
       <Filter>spir-v-cross</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\objects\light.h">
+      <Filter>Source\rendering\objects</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\objects\light.cpp">
+      <Filter>Source\rendering\objects</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\scene3d\lightelement.cpp">
+      <Filter>Source\scene3d</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\scene3d\lightelement.h">
+      <Filter>Source\scene3d</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\et\sound\openal.h">
@@ -649,9 +664,6 @@
       <Filter>Source\scene3d</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\et\scene3d\elementcontainer.h">
-      <Filter>Source\scene3d</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\et\scene3d\light.h">
       <Filter>Source\scene3d</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\et\scene3d\lineelement.h">

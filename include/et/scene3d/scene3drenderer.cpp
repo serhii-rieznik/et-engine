@@ -41,33 +41,43 @@ void Renderer::render(RenderInterface::Pointer& renderer, const Scene::Pointer& 
 
 void Renderer::validateMainPass(RenderInterface::Pointer& renderer, const Scene::Pointer& scene)
 {
+	if (_mainPass.valid() && (_mainPass->info().camera == scene->mainCamera()))
+		return;
+
 	Camera::Pointer lightCamera;
 
 	BaseElement::List lights = scene->childrenOfType(ElementType::Light);
 	if (lights.size() > 0)
-		lightCamera = static_cast<Light::Pointer>(lights.front())->camera();
-
-	if (_mainPass.invalid() || (_mainPass->info().camera != scene->mainCamera()) || (_mainPass->info().light != lightCamera))
 	{
-		RenderPass::ConstructionInfo passInfo;
-		passInfo.camera = scene->mainCamera();
-		passInfo.light = lightCamera;
-		passInfo.color[0].loadOperation = FramebufferOperation::Clear;
-		passInfo.color[0].storeOperation = FramebufferOperation::Store;
-		passInfo.color[0].enabled = true;
-		passInfo.color[0].clearValue = vec4(0.333333f, 0.333333f, 0.333333f, 1.0f);
-		passInfo.depth.loadOperation = FramebufferOperation::Clear;
-		passInfo.depth.storeOperation = FramebufferOperation::DontCare;
-		passInfo.depth.enabled = true;
-		
-		_mainPass = renderer->allocateRenderPass(passInfo);
-		_envTexture.reset(nullptr);
-		_shadowTexture.reset(nullptr);
-
-		ObjectsCache localCache;
-		_envTexture = renderer->loadTexture("media/textures/background.dds", localCache);
-		_mainPass->setSharedTexture(MaterialTexture::Environment, _envTexture, renderer->defaultSampler());
+		for (LightElement::Pointer le : lights)
+		{
+			if (le->light()->type() == Light::Type::Directional)
+			{
+				lightCamera = static_cast<LightElement::Pointer>(lights.front())->light();
+			}
+			else if (le->light()->type() == Light::Type::ImageBasedSky)
+			{
+				_envTexture = renderer->loadTexture(le->light()->environmentMap(), _cache);
+			}
+		}
 	}
+
+	RenderPass::ConstructionInfo passInfo;
+	passInfo.camera = scene->mainCamera();
+	passInfo.light = lightCamera;
+	passInfo.color[0].loadOperation = FramebufferOperation::Clear;
+	passInfo.color[0].storeOperation = FramebufferOperation::Store;
+	passInfo.color[0].enabled = true;
+	passInfo.color[0].clearValue = vec4(0.333333f, 0.333333f, 0.333333f, 1.0f);
+	passInfo.depth.loadOperation = FramebufferOperation::Clear;
+	passInfo.depth.storeOperation = FramebufferOperation::DontCare;
+	passInfo.depth.enabled = true;
+
+	_mainPass = renderer->allocateRenderPass(passInfo);
+	_mainPass->setSharedTexture(MaterialTexture::Environment, _envTexture, renderer->defaultSampler());
+	_mainPass->setSharedTexture(MaterialTexture::HammersleySet, renderer->generateHammersleySet(1024), renderer->nearestSampler());
+
+	_shadowTexture.reset(nullptr);
 }
 
 void Renderer::validateShadowPass(RenderInterface::Pointer& renderer)

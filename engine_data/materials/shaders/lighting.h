@@ -41,7 +41,7 @@ float normalizedLambert(PBSLightEnvironment env)
 float burleyDiffuse(PBSLightEnvironment env)
 {
 	// TODO
-	return 0.0;
+	return 1.0;
 }
 
 float ggxG(float t, float rSq)

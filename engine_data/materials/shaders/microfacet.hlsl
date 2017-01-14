@@ -13,7 +13,7 @@ cbuffer MaterialVariables : CONSTANT_LOCATION(b, MaterialVariablesBufferIndex, V
 cbuffer ObjectVariables : CONSTANT_LOCATION(b, ObjectVariablesBufferIndex, VariablesSetIndex)
 {
 	row_major float4x4 worldTransform;
-	row_major float4x4 worldRotationTransform;	
+	row_major float4x4 worldRotationTransform;
 };
 
 Texture2D<float4> baseColorTexture : CONSTANT_LOCATION(t, BaseColorTextureBinding, TexturesSetIndex);
@@ -68,6 +68,7 @@ VSOutput vertexMain(VSInput vsIn)
 
 #include "lighting.h"
 #include "srgb.h"
+#include "importance-sampling.h"
 
 float sampleShadow(float3 tc)
 {
@@ -77,8 +78,8 @@ float sampleShadow(float3 tc)
 
 float3 sampleEnvironment(float3 i, float lod)
 {
-	float2 sampleCoord = float2((atan2(i.z, i.x) + PI) / DOUBLE_PI, (asin(i.y) + HALF_PI) / PI);
-	return float3(0.0, 0.0, 0.0); // srgbToLinear(environmentTexture.SampleLevel(environmentSampler, sampleCoord, lod).xyz);
+	float2 sampleCoord = float2(atan2(i.z, i.x) / PI, asin(i.y) / HALF_PI);
+	return srgbToLinear(environmentTexture.SampleLevel(environmentSampler, sampleCoord, lod).xyz);
 }
 
 float4 fragmentMain(VSOutput fsIn) : SV_Target0
@@ -95,12 +96,12 @@ float4 fragmentMain(VSOutput fsIn) : SV_Target0
 	float3 viewNormal = normalize(fsIn.toCamera);
 	float3 halfVector = normalize(lightNormal + viewNormal);
 
-	float roughness = clamp(roughnessScale, 0.01, 1.0) * roughnessTexture.Sample(roughnessSampler, fsIn.texCoord0).x;
+	float roughness = clamp(roughnessScale * roughnessTexture.Sample(roughnessSampler, fsIn.texCoord0).x, 0.001, 1.0);
 	float metallness = saturate(metallnessScale) * metallnessTexture.Sample(metallnessSampler, fsIn.texCoord0).x;
 
 	PBSLightEnvironment env;
 	env.alpha = roughness * roughness;
-	env.metallness = metallnessScale;
+	env.metallness = metallness;
 	env.LdotN = dot(lightNormal, wsNormal);
 	env.VdotN = dot(viewNormal, wsNormal);
 	env.LdotH = dot(lightNormal, halfVector);
@@ -122,8 +123,7 @@ float4 fragmentMain(VSOutput fsIn) : SV_Target0
 	float3 diffuse = baseColorScale.xyz * (diffuseColor * directDiffuseTerm + ambientColor) * (1.0 - metallness);
 	float3 specular = reflection + directSpecular * shadowSample;
 
-	float3 result = linearToSRGB(emissiveColor.xyz + diffuse + specular);
-	// result = wsNormal; // env.LdotN;
-
+	float3 result = diffuse; // float3(hammersleySetTexture.Sample(hammersleySetSampler, fsIn.texCoord0).xy, 0.0);
+	                
 	return float4(result, 1.0);
 }

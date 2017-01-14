@@ -15,3 +15,6 @@
 #include "../rendering/base/vertexdatachunk.cpp"
 #include "../rendering/base/vertexdeclaration.cpp"
 #include "../rendering/base/vertexstorage.cpp"
+
+#include "../rendering/objects/light.cpp"
+

@@ -76,7 +76,7 @@ void et::hdr::loadInfoFromStream(std::istream& source, TextureDescription& desc)
 	desc.target = TextureTarget::Texture_2D;
 	desc.format = TextureFormat::RGBA8;
 	desc.format = shouldConvertRGBEToFloat ? TextureFormat::RGBA32F : TextureFormat::RGBA8;	
-	desc.mipMapCount = 1;
+	desc.levelCount = 1;
 	desc.layersCount = 1;
 }
 

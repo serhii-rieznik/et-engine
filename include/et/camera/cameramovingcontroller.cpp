@@ -30,6 +30,8 @@ CameraMovingController::CameraMovingController(Camera::Pointer cam, bool connect
 			_directionAnimator.setTargetValue(delta);
 		}
 	});
+
+	synchronize(cam);
 }
 
 void CameraMovingController::startUpdates()

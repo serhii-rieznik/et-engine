@@ -54,6 +54,7 @@ private:
 	void validateShadowPass(RenderInterface::Pointer&);
 
 private:
+	ObjectsCache _cache;
 	RenderBatchCollection _renderBatches;
 
 	RenderBatchInfoCollection _mainPassBatches;

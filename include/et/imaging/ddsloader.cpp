@@ -224,7 +224,7 @@ void dds::loadInfoFromStream(std::istream& source, TextureDescription& desc)
 	source.read(reinterpret_cast<char*>(&header), sizeof(header));
 	
 	desc.size = vec2i(static_cast<int32_t>(header.dwWidth), static_cast<int32_t>(header.dwHeight));
-	desc.mipMapCount = (header.dwMipMapCount < 1) ? 1 : header.dwMipMapCount;
+	desc.levelCount = (header.dwMipMapCount < 1) ? 1 : header.dwMipMapCount;
 	desc.target = (header.dwCaps2 & DDSCAPS2_CUBEMAP) ? TextureTarget::Texture_Cube : TextureTarget::Texture_2D;
 	if (desc.target == TextureTarget::Texture_Cube)
 	{

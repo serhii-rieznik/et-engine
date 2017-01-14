@@ -21,9 +21,12 @@ enum class MaterialTexture : uint32_t
 	Roughness,
 	Metallness,
 	EmissiveColor,
+
 	Shadow,
+	HammersleySet,
 	AmbientOcclusion,
 	Environment,
+	BRDFLookup,
 	
 	Count,
 
@@ -32,7 +35,7 @@ enum class MaterialTexture : uint32_t
 	LastMaterialTexture = EmissiveColor,
 
 	FirstSharedTexture = Shadow,
-	LastSharedTexture = Environment,
+	LastSharedTexture = BRDFLookup,
 };
 
 enum class MaterialParameter : uint32_t

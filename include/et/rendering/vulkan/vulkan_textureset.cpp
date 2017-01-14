@@ -32,9 +32,9 @@ public:
 	Vector<VkDescriptorSetLayoutBinding> bindings;
 	Vector<VkWriteDescriptorSet> writeSet;
 	Vector<VkDescriptorImageInfo> imageInfos;
-	bindings.reserve(8);
-	writeSet.reserve(8);
-	imageInfos.reserve(8);
+	bindings.reserve(128);
+	writeSet.reserve(128);
+	imageInfos.reserve(128);
 
 	using TSPair = std::pair<Texture::Pointer, Sampler::Pointer>;
 	Map<uint32_t, TSPair> mergedData;
@@ -72,6 +72,9 @@ public:
 		{
 			info.sampler = VulkanSampler::Pointer(b.second.second)->nativeSampler().sampler;
 		}
+
+		if (uintptr_t(info.imageView) == 0x17)
+			printf("");
 
 		VkWriteDescriptorSet& ws = writeSet.back();
 		ws.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;

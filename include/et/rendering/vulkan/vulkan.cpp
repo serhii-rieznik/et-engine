@@ -339,6 +339,8 @@ VkFormat textureFormatValue(TextureFormat fmt)
 		{ TextureFormat::R8, VK_FORMAT_R8_UNORM },
 		{ TextureFormat::RGBA8, VK_FORMAT_R8G8B8A8_UNORM },
 		{ TextureFormat::BGRA8, VK_FORMAT_B8G8R8A8_UNORM },
+		{ TextureFormat::R32F, VK_FORMAT_R32_SFLOAT },
+		{ TextureFormat::RG32F, VK_FORMAT_R32G32_SFLOAT },
 		{ TextureFormat::RGBA32F, VK_FORMAT_R32G32B32A32_SFLOAT },
 		{ TextureFormat::Depth16, VK_FORMAT_D16_UNORM },
 		{ TextureFormat::Depth24, VK_FORMAT_D24_UNORM_S8_UINT },

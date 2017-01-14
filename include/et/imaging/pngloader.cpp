@@ -173,7 +173,7 @@ void et::png::loadInfoFromFile(const std::string& path, TextureDescription& desc
  */
 void parseFormat(TextureDescription& desc, png_structp pngPtr, png_infop infoPtr, png_size_t* rowBytes, uint32_t& channels)
 {
-	desc.mipMapCount = 1;
+	desc.levelCount = 1;
 	desc.layersCount = 1;
 	desc.size.x = static_cast<int32_t>(png_get_image_width(pngPtr, infoPtr));
 	desc.size.y = static_cast<int32_t>(png_get_image_height(pngPtr, infoPtr));

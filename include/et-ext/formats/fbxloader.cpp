@@ -98,6 +98,7 @@ public:
 public:
 	RenderInterface::Pointer _renderer;
 	ObjectsCache& _texCache;
+	std::string _file;
 	std::string _folder;
 	FbxManager* manager = nullptr;
 	FbxImporter* importer = nullptr;
@@ -128,6 +129,7 @@ FBXLoaderPrivate::~FBXLoaderPrivate()
 
 bool FBXLoaderPrivate::import(const std::string& filename)
 {
+	_file = filename;
 	_folder = getFilePath(filename);
 	importer = FbxImporter::Create(manager, nullptr);
 
@@ -217,13 +219,26 @@ s3d::ElementContainer::Pointer FBXLoaderPrivate::parse(s3d::Storage& storage)
 		minExtent = minv(minExtent, mesh->tranformedBoundingBox().minVertex());
 	}
 	
+	/*
 	if (root->childrenOfType(s3d::ElementType::Light).empty())
 	{
 		float bboxSize = (maxExtent - minExtent).length();
-		s3d::Light::Pointer light = s3d::Light::Pointer::create();
-		light->camera()->orthogonalProjection(-bboxSize, bboxSize, bboxSize, -bboxSize, 1.0f, 2.0f * bboxSize);
-		light->camera()->lookAt(2.0f * maxExtent, 0.5f * (minExtent + maxExtent));
-		light->setParent(root.pointer());
+
+		Light::Pointer light = Light::Pointer::create(Light::Type::Directional);
+		light->lookAt(2.0f * maxExtent, 0.5f * (minExtent + maxExtent));
+		light->orthogonalProjection(-bboxSize, bboxSize, bboxSize, -bboxSize, 1.0f, 2.0f * bboxSize);
+
+		s3d::LightElement::Pointer::create(light, root.pointer());
+	}
+	*/
+
+	std::string backgroundFileName = replaceFileExt(_file, emptyString) + "-background.hdr";
+	if (fileExists(backgroundFileName))
+	{
+		Light::Pointer skyLight = Light::Pointer::create(Light::Type::ImageBasedSky);
+		skyLight->setEnvironmentMap(backgroundFileName);
+
+		s3d::LightElement::Pointer::create(skyLight, root.pointer());
 	}
 
 	return root;

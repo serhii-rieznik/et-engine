@@ -190,7 +190,7 @@ void loadInfoFromHeader(TextureDescription& desc, jpeg_decompress_struct& cinfo)
 {
 	desc.size.x = cinfo.output_width;
 	desc.size.y = cinfo.output_height;
-	desc.mipMapCount = 1;
+	desc.levelCount = 1;
 	desc.layersCount = 1;
 	
 	if (cinfo.out_color_space == JCS_GRAYSCALE)

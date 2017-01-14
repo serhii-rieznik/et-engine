@@ -71,6 +71,7 @@ public:
 
 	Texture::Pointer loadTexture(const std::string& fileName, ObjectsCache& cache);
 	Texture::Pointer defaultTexture();
+	Texture::Pointer generateHammersleySet(uint32_t size);
 	
 	/*
 	 * Programs
@@ -87,6 +88,7 @@ public:
 	 */
 	virtual Sampler::Pointer createSampler(const Sampler::Description&) = 0;
 	Sampler::Pointer defaultSampler();
+	Sampler::Pointer nearestSampler();
 
 protected:
 	void initInternalStructures();
@@ -98,6 +100,7 @@ private:
 	ConstantBuffer _sharedConstantBuffer;
 	Texture::Pointer _defaultTexture;
 	Sampler::Pointer _defaultSampler;
+	Sampler::Pointer _nearestSampler;
 };
 
 inline Texture::Pointer RenderInterface::loadTexture(const std::string& fileName, ObjectsCache& cache)
@@ -155,8 +158,19 @@ inline Sampler::Pointer RenderInterface::defaultSampler()
 		Sampler::Description desc;
 		_defaultSampler = createSampler(desc);
 	}
-
 	return _defaultSampler;
+}
+
+inline Sampler::Pointer RenderInterface::nearestSampler()
+{
+	if (_nearestSampler.invalid())
+	{
+		Sampler::Description desc;
+		desc.magFilter = TextureFiltration::Nearest;
+		desc.minFilter = TextureFiltration::Nearest;
+		_nearestSampler = createSampler(desc);
+	}
+	return _nearestSampler;
 }
 
 inline void RenderInterface::initInternalStructures()
@@ -173,6 +187,7 @@ inline void RenderInterface::shutdownInternalStructures()
 	_sharedConstantBuffer.shutdown();
 	_defaultSampler.reset(nullptr);
 	_defaultTexture.reset(nullptr);
+	_nearestSampler.reset(nullptr);
 }
 
 inline Buffer::Pointer RenderInterface::createDataBuffer(const std::string& name, uint32_t size)
@@ -212,6 +227,32 @@ inline Buffer::Pointer RenderInterface::createIndexBuffer(const std::string& nam
 	desc.usage = Buffer::Usage::Index;
 	desc.initialData = BinaryDataStorage(ia->data(), ia->dataSize());
 	return createBuffer(name, desc);
+}
+
+inline Texture::Pointer RenderInterface::generateHammersleySet(uint32_t size)
+{
+	auto inv = [](uint32_t bits) -> float
+	{
+		bits = (bits << 16u) | (bits >> 16u);
+		bits = ((bits & 0x55555555u) << 1u) | ((bits & 0xAAAAAAAAu) >> 1u);
+		bits = ((bits & 0x33333333u) << 2u) | ((bits & 0xCCCCCCCCu) >> 2u);
+		bits = ((bits & 0x0F0F0F0Fu) << 4u) | ((bits & 0xF0F0F0F0u) >> 4u);
+		bits = ((bits & 0x00FF00FFu) << 8u) | ((bits & 0xFF00FF00u) >> 8u);
+		return static_cast<float>(static_cast<double>(bits) * 2.3283064365386963e-10);
+	};
+
+	TextureDescription::Pointer desc = TextureDescription::Pointer::create();
+	desc->size = vec2i(size, 1);
+	desc->format = TextureFormat::RG32F;
+	desc->data.resize(size * sizeof(vec2));
+	desc->data.fill(0);
+	vec2* data = reinterpret_cast<vec2*>(desc->data.binary());
+	for (uint32_t i = 0; i < size; ++i)
+	{
+		float t = static_cast<float>(i) / static_cast<float>(size);
+		*data++ = vec2(t, inv(i));
+	}
+	return createTexture(desc);
 }
 
 }

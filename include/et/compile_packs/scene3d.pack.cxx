@@ -2,6 +2,7 @@
 
 #include "../scene3d/animation.cpp"
 #include "../scene3d/baseelement.cpp"
+#include "../scene3d/lightelement.cpp"
 #include "../scene3d/lineelement.cpp"
 #include "../scene3d/mesh.cpp"
 #include "../scene3d/meshdeformer.cpp"

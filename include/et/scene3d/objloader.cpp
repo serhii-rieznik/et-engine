@@ -909,10 +909,10 @@ s3d::ElementContainer::Pointer OBJLoader::generateVertexBuffers(s3d::Storage& st
 	}
 
 	float bboxSize = (maxExtent - minExtent).length();
-	s3d::Light::Pointer light = s3d::Light::Pointer::create();
-	light->camera()->orthogonalProjection(-bboxSize, bboxSize, bboxSize, -bboxSize, 1.0f, 2.0f * bboxSize);
-	light->camera()->lookAt(2.0f * maxExtent, 0.5f * (minExtent + maxExtent));
-	light->setParent(result.pointer());
+	Light::Pointer light = Light::Pointer::create(Light::Type::Directional);
+	light->setDirection(normalize(minExtent - maxExtent));
+
+	s3d::LightElement::Pointer::create(light, result.pointer());
 
 	return result;
 }

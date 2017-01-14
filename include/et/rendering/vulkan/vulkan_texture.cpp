@@ -35,7 +35,7 @@ VulkanTexture::VulkanTexture(VulkanState& vulkan, const Description& desc, const
 	info.format = _private->format;
 	info.imageType = vulkan::textureTargetToImageType(desc.target);
 	info.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-	info.mipLevels = desc.mipMapCount;
+	info.mipLevels = desc.levelCount;
 	info.arrayLayers = 1;
 	info.samples = VK_SAMPLE_COUNT_1_BIT;
 	info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
@@ -65,7 +65,7 @@ VulkanTexture::VulkanTexture(VulkanState& vulkan, const Description& desc, const
 	imageViewInfo.image = _private->image;
 	imageViewInfo.viewType = vulkan::textureTargetToImageViewType(desc.target);
 	imageViewInfo.format = vulkan::textureFormatValue(desc.format);
-	imageViewInfo.subresourceRange = { _private->aspect, 0, desc.mipMapCount, 0, 1 };
+	imageViewInfo.subresourceRange = { _private->aspect, 0, desc.levelCount, 0, 1 };
 	VULKAN_CALL(vkCreateImageView(vulkan.device, &imageViewInfo, nullptr, &_private->imageView));
 
 	if (data.size() > 0)
@@ -92,13 +92,13 @@ void VulkanTexture::setImageData(const BinaryDataStorage& data)
 	VulkanBuffer stagingBuffer(_private->vulkan, stagingDesc);
 
 	Vector<VkBufferImageCopy> regions;
-	regions.reserve(description().mipMapCount);
+	regions.reserve(description().levelCount);
 
 	VkBufferImageCopy region = { };
 	region.imageSubresource = { _private->aspect };
 	region.imageSubresource.layerCount = 1;
 	region.imageExtent.depth = 1;
-	for (uint32_t m = 0; m < description().mipMapCount; ++m)
+	for (uint32_t m = 0; m < description().levelCount; ++m)
 	{
 		region.imageSubresource.mipLevel = m;
 		region.imageExtent.width = static_cast<uint32_t>(description().sizeForMipLevel(m).x);
@@ -114,7 +114,7 @@ void VulkanTexture::setImageData(const BinaryDataStorage& data)
 			_private->aspect, 0, VK_ACCESS_TRANSFER_WRITE_BIT, 
 			VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
 			VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT, 
-			0, description().mipMapCount);
+			0, description().levelCount);
 
 		vkCmdCopyBufferToImage(cmdBuffer, stagingBuffer.nativeBuffer().buffer,
 			_private->image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
@@ -124,7 +124,7 @@ void VulkanTexture::setImageData(const BinaryDataStorage& data)
 			_private->aspect, VK_ACCESS_TRANSFER_WRITE_BIT, VK_ACCESS_SHADER_READ_BIT, 
 			VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, 
 			VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 
-			0, description().mipMapCount);
+			0, description().levelCount);
 	});
 
 	_private->layout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
