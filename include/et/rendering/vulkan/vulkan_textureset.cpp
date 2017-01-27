@@ -90,7 +90,7 @@ public:
 	VULKAN_CALL(vkCreateDescriptorSetLayout(vulkan.device, &createInfo, nullptr, &_private->descriptorSetLayout));
 
 	VkDescriptorSetAllocateInfo allocInfo = { VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO };
-	allocInfo.descriptorPool = vulkan.descriptprPool;
+	allocInfo.descriptorPool = vulkan.descriptorPool;
 	allocInfo.descriptorSetCount = 1;
 	allocInfo.pSetLayouts = &_private->descriptorSetLayout;
 	VULKAN_CALL(vkAllocateDescriptorSets(vulkan.device, &allocInfo, &_private->descriptorSet));
@@ -103,6 +103,7 @@ public:
 
 VulkanTextureSet::~VulkanTextureSet()
 {
+	VULKAN_CALL(vkFreeDescriptorSets(_private->vulkan.device, _private->vulkan.descriptorPool, 1, &_private->descriptorSet));
 	ET_PIMPL_FINALIZE(VulkanTextureSet);
 }
 

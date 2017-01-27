@@ -40,39 +40,34 @@ void Material::setTexture(MaterialTexture t, Texture::Pointer tex)
 		entry.object = tex;
 		entry.index = static_cast<uint32_t>(t);
 		entry.binding = t;
-
-		for (auto& i : _instances)
-			i->invalidateTextureSet();
+		invalidateTextureSet();
 	}
 }
 
 void Material::setSampler(MaterialTexture t, Sampler::Pointer smp)
 {
 	OptionalObject<Sampler::Pointer>& entry = samplers[static_cast<uint32_t>(t)];
-	entry.object = smp;
-	entry.index = static_cast<uint32_t>(t);
-	entry.binding = t;
-
-	for (auto& i : _instances)
-		i->invalidateTextureSet();
+	if (entry.object != smp)
+	{
+		entry.object = smp;
+		entry.index = static_cast<uint32_t>(t);
+		entry.binding = t;
+		invalidateTextureSet();
+	}
 }
 
 void Material::setVector(MaterialParameter p, const vec4& v)
 {
 	properties[static_cast<uint32_t>(p)] = v;
 	properties[static_cast<uint32_t>(p)].binding = p;
-
-	for (auto& i : _instances)
-		i->invalidateConstantBuffer();
+	invalidateConstantBuffer();
 }
 
 void Material::setFloat(MaterialParameter p, float f)
 {
 	properties[static_cast<uint32_t>(p)] = f;
 	properties[static_cast<uint32_t>(p)].binding = p;
-
-	for (auto& i : _instances)
-		i->invalidateConstantBuffer();
+	invalidateConstantBuffer();
 }
 
 vec4 Material::getVector(MaterialParameter p) const
@@ -144,6 +139,9 @@ void Material::loadFromJson(const std::string& source, const std::string& baseFo
 			log::warning("Entry `%s` in material `%s` description is not recognized", subObj.first.c_str(), name().c_str());
 		}
 	}
+
+	invalidateConstantBuffer();
+	invalidateTextureSet();
 }
 
 const Material::Configuration& Material::configuration(RenderPassClass cls) const
@@ -306,6 +304,19 @@ void Material::releaseInstances()
 	_instances.clear();
 }
 
+void Material::invalidateTextureSet()
+{
+	for (MaterialInstance::Pointer& i : _instances)
+		i->invalidateTextureSet();
+}
+
+void Material::invalidateConstantBuffer()
+{
+	for (MaterialInstance::Pointer& i : _instances)
+		i->invalidateConstantBuffer();
+}
+
+
 /*
  * Material Instance
  */
@@ -352,12 +363,12 @@ void MaterialInstance::buildTextureSet(RenderPassClass pt)
 	for (auto& i : description.fragmentTextures)
 	{
 		if (i.second.invalid())
-			i.second = _renderer->defaultTexture();
+			i.second = _renderer->checkersTexture();
 	}
 	for (auto& i : description.vertexTextures)
 	{
 		if (i.second.invalid())
-			i.second = _renderer->defaultTexture();
+			i.second = _renderer->checkersTexture();
 	}
 	for (auto& i : description.fragmentSamplers)
 	{
@@ -454,7 +465,8 @@ const String& materialParameterToString(MaterialParameter p)
 	ET_ASSERT(p < MaterialParameter::Count);
 	static const Map<MaterialParameter, String> names =
 	{
-		{ MaterialParameter::BaseColorScale, "baseColorScale" },
+		{ MaterialParameter::DiffuseReflectance, "diffuseReflectance" },
+		{ MaterialParameter::SpecularReflectance, "specularReflectance" },
 		{ MaterialParameter::NormalScale, "normalScale" },
 		{ MaterialParameter::RoughnessScale, "roughnessScale" },
 		{ MaterialParameter::MetallnessScale, "metallnessScale" },

@@ -41,10 +41,8 @@ void Renderer::render(RenderInterface::Pointer& renderer, const Scene::Pointer& 
 
 void Renderer::validateMainPass(RenderInterface::Pointer& renderer, const Scene::Pointer& scene)
 {
-	if (_mainPass.valid() && (_mainPass->info().camera == scene->mainCamera()))
-		return;
-
-	Camera::Pointer lightCamera;
+	Light::Pointer directionalLight;
+	Light::Pointer environmentLight;
 
 	BaseElement::List lights = scene->childrenOfType(ElementType::Light);
 	if (lights.size() > 0)
@@ -52,19 +50,32 @@ void Renderer::validateMainPass(RenderInterface::Pointer& renderer, const Scene:
 		for (LightElement::Pointer le : lights)
 		{
 			if (le->light()->type() == Light::Type::Directional)
-			{
-				lightCamera = static_cast<LightElement::Pointer>(lights.front())->light();
-			}
+				directionalLight = le->light();
 			else if (le->light()->type() == Light::Type::ImageBasedSky)
-			{
-				_envTexture = renderer->loadTexture(le->light()->environmentMap(), _cache);
-			}
+				environmentLight = le->light();
 		}
 	}
 
+	bool mainPassValid = _mainPass.valid();
+	
+	bool sameCamera = mainPassValid ? (_mainPass->info().camera == scene->mainCamera()) : true;
+	
+	bool sameDirectionalLight = mainPassValid ? (_mainPass->info().light == directionalLight) : true;
+	
+	bool sameEnvLight = (environmentLight.valid() &&  _envTexture.valid()) ? 
+		(environmentLight->environmentMap() == _envTexture->origin()) : true; 
+
+	if (mainPassValid && sameCamera && sameDirectionalLight && sameEnvLight)
+		return;
+
+	_envTexture = renderer->blackTexture();
+
+	if (environmentLight.valid() && (environmentLight->type() == Light::Type::ImageBasedSky))
+		_envTexture = renderer->loadTexture(environmentLight->environmentMap(), _cache);
+
 	RenderPass::ConstructionInfo passInfo;
 	passInfo.camera = scene->mainCamera();
-	passInfo.light = lightCamera;
+	passInfo.light = directionalLight;
 	passInfo.color[0].loadOperation = FramebufferOperation::Clear;
 	passInfo.color[0].storeOperation = FramebufferOperation::Store;
 	passInfo.color[0].enabled = true;
@@ -78,6 +89,7 @@ void Renderer::validateMainPass(RenderInterface::Pointer& renderer, const Scene:
 	_mainPass->setSharedTexture(MaterialTexture::HammersleySet, renderer->generateHammersleySet(1024), renderer->nearestSampler());
 
 	_shadowTexture.reset(nullptr);
+	_cache.flush();
 }
 
 void Renderer::validateShadowPass(RenderInterface::Pointer& renderer)

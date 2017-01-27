@@ -21,11 +21,10 @@ class OBJLoader : public ModelLoader
 public:
 	enum Options
 	{
-		Option_JustLoad = 0x00,
-		Option_SwapYwithZ = 0x01,
-		Option_ReverseTriangles = 0x02,
-		Option_CalculateTransforms = 0x04,
-		Option_CalculateTangents = 0x08,
+		Option_JustLoad = 0,
+		Option_SwapYwithZ = 1 << 0,
+		Option_CalculateTransforms = 1 << 1,
+		Option_CalculateTangents = 1 << 2,
 	};
 
 public:
@@ -116,6 +115,7 @@ private:
 
 	IndexArray::Pointer _indices;
 	VertexStorage::Pointer _vertexData;
+	Texture::Pointer _defaultNormal;
 
 	Vector<et::vec3> _vertices;
 	Vector<et::vec3> _normals;

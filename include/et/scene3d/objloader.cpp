@@ -356,6 +356,15 @@ s3d::ElementContainer::Pointer OBJLoader::load(et::RenderInterface::Pointer ren,
 	_normals.reserve(1024);
 	_texCoords.reserve(1024);
 
+	TextureDescription::Pointer nrmDesc = TextureDescription::Pointer::create();
+	nrmDesc->size = vec2i(4, 4);
+	nrmDesc->format = TextureFormat::RGBA8;
+	nrmDesc->data.resize(nrmDesc->size.square() * 4);
+	vec4ub* nrmData = reinterpret_cast<vec4ub*>(nrmDesc->data.binary());
+	for (uint32_t i = 0; i < 16; ++i)
+		nrmData[i] = vec4ub(127, 127, 255, 255);
+	_defaultNormal = ren->createTexture(nrmDesc);
+
 	loadData(cache);
 	
 	processLoadedData();
@@ -466,14 +475,13 @@ void OBJLoader::loadMaterials(const std::string& fileName, ObjectsCache& cache)
 				{
 					vec4 value(0.0f);
 					materialFile >> value;
-					_lastMaterial->setVector(MaterialParameter::BaseColorScale, value);
+					_lastMaterial->setVector(MaterialParameter::DiffuseReflectance, value);
 				} 
 				else if (next == 's')
 				{
 					vec4 value(0.0f);
 					materialFile >> value;
-					// _lastMaterial->setVector(MaterialParameter::ReflectanceColor, value);
-					log::warning("Reflectance color (Ks) ignored in material");
+					_lastMaterial->setVector(MaterialParameter::SpecularReflectance, value);
 				} 
 				else if (next == 'e')
 				{
@@ -864,10 +872,8 @@ void OBJLoader::processLoadedData()
 	if (!hasNormals)
 		primitives::calculateNormals(_vertexData, _indices, 0, _indices->primitivesCount());
 
-	if (hasTexCoords && ((_loadOptions & Option_CalculateTangents) == Option_CalculateTangents))
-	{ 	
+	if ((_loadOptions & Option_CalculateTangents) == Option_CalculateTangents)
 		primitives::calculateTangents(_vertexData, _indices, 0, _indices->primitivesCount() & 0xffffffff);
-	}
 }
 
 s3d::ElementContainer::Pointer OBJLoader::generateVertexBuffers(s3d::Storage& storage)
@@ -892,10 +898,13 @@ s3d::ElementContainer::Pointer OBJLoader::generateVertexBuffers(s3d::Storage& st
 
 	vec3 minExtent(+std::numeric_limits<float>::max());
 	vec3 maxExtent(-std::numeric_limits<float>::max());
-	for (const auto& i : _meshes)
+	for (auto& i : _meshes)
 	{
 		s3d::Mesh::Pointer mesh = Mesh::Pointer::create(i.name, result.pointer());
 		mesh->setTranslation(i.center);
+
+		if (i.material->texture(MaterialTexture::Normal).invalid())
+			i.material->setTexture(MaterialTexture::Normal, _defaultNormal);
 
 		auto rb = RenderBatch::Pointer::create(i.material, vao, identityMatrix, i.start, i.count);
 		rb->setVertexStorage(_vertexData);

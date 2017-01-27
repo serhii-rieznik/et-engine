@@ -68,7 +68,7 @@ struct VulkanState
 
 	VkDevice device = nullptr;
 	VkCommandPool commandPool = nullptr;
-	VkDescriptorPool descriptprPool = nullptr;
+	VkDescriptorPool descriptorPool = nullptr;
 	VkQueue queue = nullptr;
 	VkPipelineCache pipelineCache = nullptr;
 	VkCommandBuffer serviceCommandBuffer = nullptr;

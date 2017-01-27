@@ -29,9 +29,6 @@ public:
 	void startUpdates() override;
 	void cancelUpdates() override;
 
-private:
-	void update(float) override;
-
 	void onKeyPressed(uint32_t) override;
 	void onKeyReleased(uint32_t) override;
 	void onPointerPressed(PointerInputInfo) override;
@@ -39,6 +36,8 @@ private:
 	void onPointerReleased(PointerInputInfo) override;
 	void onPointerCancelled(PointerInputInfo) override;
 
+private:
+	void update(float) override;
 	void validateCameraAngles(vec2&);
 
 private:

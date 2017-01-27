@@ -199,7 +199,7 @@ void VulkanRenderer::init(const RenderContextParameters& params)
 	poolInfo.maxSets = defaultPoolSize;
 	poolInfo.poolSizeCount = sizeof(poolSizes) / sizeof(poolSizes[0]);
 	poolInfo.pPoolSizes = poolSizes;
-	VULKAN_CALL(vkCreateDescriptorPool(_private->device, &poolInfo, nullptr, &_private->descriptprPool));
+	VULKAN_CALL(vkCreateDescriptorPool(_private->device, &poolInfo, nullptr, &_private->descriptorPool));
 
 	RECT clientRect = {};
 	GetClientRect(mainWindow, &clientRect);
@@ -213,7 +213,7 @@ void VulkanRenderer::shutdown()
 	_private->pipelineCache.clear();
 	shutdownInternalStructures();
 
-	vkDestroyDescriptorPool(_private->device, _private->descriptprPool, nullptr);
+	vkDestroyDescriptorPool(_private->device, _private->descriptorPool, nullptr);
 	// TODO : clean up Vulkan
 
 	cleanupGlslangResources();

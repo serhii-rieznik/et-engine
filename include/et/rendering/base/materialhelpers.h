@@ -40,7 +40,8 @@ enum class MaterialTexture : uint32_t
 
 enum class MaterialParameter : uint32_t
 {
-	BaseColorScale,
+	DiffuseReflectance,
+	SpecularReflectance,
 	NormalScale,
 	RoughnessScale,
 	MetallnessScale,

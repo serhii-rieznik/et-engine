@@ -44,7 +44,7 @@ public:
 	std::atomic_bool recording{ false };
 
 	void generateDynamicDescriptorSet(RenderPass* pass);
-	void loadVariables(Camera::Pointer camera, Camera::Pointer light);
+	void loadVariables(Camera::Pointer camera, Light::Pointer light);
 };
 
 VulkanRenderPass::VulkanRenderPass(VulkanRenderer* renderer, VulkanState& vulkan, const RenderPass::ConstructionInfo& passInfo)
@@ -163,7 +163,7 @@ VulkanRenderPass::~VulkanRenderPass()
 	vkDestroyRenderPass(_private->vulkan.device, _private->renderPass, nullptr);
 	vkFreeCommandBuffers(_private->vulkan.device, _private->vulkan.commandPool, 1, &_private->commandBuffer);
 	
-	vkFreeDescriptorSets(_private->vulkan.device, _private->vulkan.descriptprPool, 1, &_private->dynamicDescriptorSet);
+	vkFreeDescriptorSets(_private->vulkan.device, _private->vulkan.descriptorPool, 1, &_private->dynamicDescriptorSet);
 	vkDestroyDescriptorSetLayout(_private->vulkan.device, _private->dynamicDescriptorSetLayout, nullptr);
 	
 	dynamicConstantBuffer().free(_private->variablesData);
@@ -183,6 +183,8 @@ void VulkanRenderPass::begin()
 	uint32_t rtWidth = _private->vulkan.swapchain.extent.width;
 	uint32_t rtHeight = _private->vulkan.swapchain.extent.height;
 	uint32_t currentImageIndex = _private->vulkan.swapchain.currentImageIndex;
+
+	ET_ASSERT(currentImageIndex != InvalidIndex);
 
 	if (!info().color[0].useDefaultRenderTarget && info().color[0].texture.valid())
 	{
@@ -422,7 +424,7 @@ void VulkanRenderPassPrivate::generateDynamicDescriptorSet(RenderPass* pass)
 
 	VkDescriptorSetAllocateInfo descriptorAllocInfo = { VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO };
 	descriptorAllocInfo.pSetLayouts = &dynamicDescriptorSetLayout;
-	descriptorAllocInfo.descriptorPool = vulkan.descriptprPool;
+	descriptorAllocInfo.descriptorPool = vulkan.descriptorPool;
 	descriptorAllocInfo.descriptorSetCount = 1;
 	VULKAN_CALL(vkAllocateDescriptorSets(vulkan.device, &descriptorAllocInfo, &dynamicDescriptorSet));
 
@@ -433,7 +435,7 @@ void VulkanRenderPassPrivate::generateDynamicDescriptorSet(RenderPass* pass)
 	vkUpdateDescriptorSets(vulkan.device, writeSetsCount, writeSets, 0, nullptr);
 }
 
-void VulkanRenderPassPrivate::loadVariables(Camera::Pointer camera, Camera::Pointer light)
+void VulkanRenderPassPrivate::loadVariables(Camera::Pointer camera, Light::Pointer light)
 {
 	RenderPass::Variables* vptr = reinterpret_cast<RenderPass::Variables*>(variablesData.data());
 	if (camera.valid())
@@ -448,7 +450,7 @@ void VulkanRenderPassPrivate::loadVariables(Camera::Pointer camera, Camera::Poin
 
 	if (light.valid())
 	{
-		vptr->lightPosition = vec4(light->position());
+		vptr->lightPosition = light->type() == Light::Type::Directional ? vec4(-light->direction(), 0.0f) : vec4(light->position());
 		vptr->lightProjection = light->viewProjectionMatrix() * lightProjectionMatrix;
 	}
 }

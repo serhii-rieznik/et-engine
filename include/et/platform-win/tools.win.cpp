@@ -394,7 +394,7 @@ et::Screen et::currentScreen()
 	return availableScreens().front();
 }
 
-std::string et::selectFile(const StringList&, SelectFileMode mode, const std::string& defaultName)
+std::string et::selectFile(const StringList& filters, SelectFileMode mode, const std::string& defaultName)
 {
 	ET_STRING_TYPE defaultFileName = ET_STRING_TO_PARAM_TYPE(defaultName);
 
@@ -403,6 +403,15 @@ std::string et::selectFile(const StringList&, SelectFileMode mode, const std::st
 	StaticDataStorage<ET_CHAR_TYPE, MAX_PATH> fileNameBuffer(0);
 	etCopyMemory(fileNameBuffer.begin(), defaultName.c_str(), fileNameSize);
 
+	size_t fp = 0;
+	wchar_t fileTypesBuffer[2048] = { };
+	for (const std::string& filter : filters)
+	{
+		std::wstring w = utf8ToUnicode(filter);
+		memcpy(fileTypesBuffer + fp, w.data(), w.length() * sizeof(wchar_t));
+		fp += 1 + w.length();
+	}
+
 	OPENFILENAME of = { };
 	of.hwndOwner = reinterpret_cast<HWND>(application().context().objects[0]);
 	of.lStructSize = sizeof(of);
@@ -410,12 +419,8 @@ std::string et::selectFile(const StringList&, SelectFileMode mode, const std::st
 	of.Flags = OFN_ENABLESIZING | OFN_EXPLORER | OFN_NOCHANGEDIR | OFN_PATHMUSTEXIST;
 	of.lpstrFile = fileNameBuffer.begin();
 	of.nMaxFile = MAX_PATH;
-
-#if (_UNICODE)
-	of.lpstrFilter = L"All Files\0*.*\0\0";
-#else
-	of.lpstrFilter = "All Files\0*.*\0\0";
-#endif
+	of.lpstrFilter = fileTypesBuffer;
+	of.nFilterIndex = filters.empty() ? 0 : 1;
 
 	auto func = (mode == SelectFileMode::Save) ? GetSaveFileName : GetOpenFileName;
 	if (func(&of))

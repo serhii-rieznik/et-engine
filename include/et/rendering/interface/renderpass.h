@@ -8,6 +8,7 @@
 #pragma once
 
 #include <et/camera/camera.h>
+#include <et/rendering/objects/light.h>
 #include <et/rendering/base/rendering.h>
 #include <et/rendering/base/constantbuffer.h>
 #include <et/rendering/base/renderbatch.h>
@@ -36,7 +37,7 @@ public:
 		RenderTarget color[MaxRenderTargets];
 		RenderTarget depth;
 		Camera::Pointer camera;
-		Camera::Pointer light;
+		Light::Pointer light;
 		RenderPassClass renderPassClass = RenderPassClass::Forward;
 		float depthBias = 0.0f;
 		float depthSlope = 0.0f;

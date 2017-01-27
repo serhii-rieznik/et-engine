@@ -4,7 +4,8 @@
 
 cbuffer MaterialVariables : CONSTANT_LOCATION(b, MaterialVariablesBufferIndex, VariablesSetIndex)
 {
-	float4 baseColorScale;
+	float4 diffuseReflectance;
+	float4 specularReflectance;
 	float4 emissiveColor;
 	float roughnessScale;
 	float metallnessScale;
@@ -78,13 +79,14 @@ float sampleShadow(float3 tc)
 
 float3 sampleEnvironment(float3 i, float lod)
 {
-	float2 sampleCoord = float2(atan2(i.z, i.x) / PI, asin(i.y) / HALF_PI);
-	return srgbToLinear(environmentTexture.SampleLevel(environmentSampler, sampleCoord, lod).xyz);
+	float ax = (atan2(i.z, i.x) + PI) / (2.0 * PI);
+	float ay = (0.5 * PI - asin(i.y)) / PI;
+	return environmentTexture.SampleLevel(environmentSampler, float2(ax, ay), lod).xyz;
 }
 
 float4 fragmentMain(VSOutput fsIn) : SV_Target0
 {
-	float3 tsNormal = normalize(normalTexture.Sample(normalSampler, fsIn.texCoord0).xyz + float3(-0.5, -0.5, 0.0));
+	float3 tsNormal = normalize(normalTexture.Sample(normalSampler, fsIn.texCoord0).xyz - 0.5);
 
 	float3 wsNormal;
 	wsNormal.x = dot(fsIn.invTransformT, tsNormal);
@@ -110,20 +112,24 @@ float4 fragmentMain(VSOutput fsIn) : SV_Target0
 	env.viewFresnel = fresnelShlick(env.metallness, env.VdotN);
 	env.brdfFresnel = fresnelShlick(env.metallness, env.LdotH);
 
-	float shadowSample = sampleShadow(fsIn.lightCoord.xyz / fsIn.lightCoord.w);
+	float shadowSample = 1.0; // sampleShadow(fsIn.lightCoord.xyz / fsIn.lightCoord.w);
 
-	float3 ambientColor = sampleEnvironment(wsNormal, 10.0);
+	float3 indirectDiffuse = sampleEnvironment(wsNormal, 10.0);
 
 	float3 diffuseColor = srgbToLinear(baseColorTexture.Sample(baseColorSampler, fsIn.texCoord0).xyz);
 	float directDiffuseTerm = shadowSample * normalizedLambert(env);
 
 	float3 directSpecular = microfacetSpecular(env);
-	float3 reflection = env.viewFresnel * sampleEnvironment(reflect(normalize(fsIn.toCamera), wsNormal), 10.0 * roughness);
+	float3 indirectSpecular = env.viewFresnel * sampleEnvironment(reflect(-normalize(fsIn.toCamera), wsNormal), 8.0 * roughness);
 
-	float3 diffuse = baseColorScale.xyz * (diffuseColor * directDiffuseTerm + ambientColor) * (1.0 - metallness);
-	float3 specular = reflection + directSpecular * shadowSample;
+	float3 diffuse = diffuseReflectance.xyz * (diffuseColor * directDiffuseTerm + indirectDiffuse) * (1.0 - metallness);
+	float3 specular = specularReflectance.xyz * (directSpecular * shadowSample + indirectSpecular);
 
-	float3 result = diffuse; // float3(hammersleySetTexture.Sample(hammersleySetSampler, fsIn.texCoord0).xy, 0.0);
+	float3 result = linearToSRGB(diffuse + specular);
+	// result = indirectSpecular;
+	// float3(hammersleySetTexture.Sample(hammersleySetSampler, fsIn.texCoord0).xy, 0.0);
+	// result = indirectSpecular;
 	                
+	
 	return float4(result, 1.0);
 }

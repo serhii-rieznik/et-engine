@@ -70,7 +70,9 @@ public:
 	virtual TextureSet::Pointer createTextureSet(const TextureSet::Description&) = 0;
 
 	Texture::Pointer loadTexture(const std::string& fileName, ObjectsCache& cache);
-	Texture::Pointer defaultTexture();
+	Texture::Pointer checkersTexture();
+	Texture::Pointer whiteTexture();
+	Texture::Pointer blackTexture();
 	Texture::Pointer generateHammersleySet(uint32_t size);
 	
 	/*
@@ -98,7 +100,9 @@ private:
 	RenderContext* _rc = nullptr;
 	MaterialLibrary _sharedMaterialLibrary;
 	ConstantBuffer _sharedConstantBuffer;
-	Texture::Pointer _defaultTexture;
+	Texture::Pointer _checkersTexture;
+	Texture::Pointer _whiteTexture;
+	Texture::Pointer _blackTexture;
 	Sampler::Pointer _defaultSampler;
 	Sampler::Pointer _nearestSampler;
 };
@@ -123,12 +127,12 @@ inline Texture::Pointer RenderInterface::loadTexture(const std::string& fileName
 	}
 
 	log::error("Unable to load texture from %s", fileName.c_str());
-	return defaultTexture();
+	return checkersTexture();
 }
 
-inline Texture::Pointer RenderInterface::defaultTexture()
+inline Texture::Pointer RenderInterface::checkersTexture()
 {
-	if (_defaultTexture.invalid())
+	if (_checkersTexture.invalid())
 	{
 		const uint32_t colors[] = { 0xFF000000, 0xFFFFFFFF };
 		uint32_t numColors = static_cast<uint32_t>(sizeof(colors) / sizeof(colors[0]));
@@ -146,10 +150,39 @@ inline Texture::Pointer RenderInterface::defaultTexture()
 			data[p] = colors[colorIndex];
 		}
 
-		_defaultTexture = createTexture(desc);
+		_checkersTexture = createTexture(desc);
 	}
-	return _defaultTexture;
+	return _checkersTexture;
 }
+
+inline Texture::Pointer RenderInterface::whiteTexture()
+{
+	if (_whiteTexture.invalid())
+	{
+		TextureDescription::Pointer desc = TextureDescription::Pointer::create();
+		desc->size = vec2i(4);
+		desc->format = TextureFormat::RGBA8;
+		desc->data.resize(4 * static_cast<uint32_t>(desc->size.square()));
+		desc->data.fill(255);
+		_whiteTexture = createTexture(desc);
+	}
+	return _whiteTexture;
+}
+
+inline Texture::Pointer RenderInterface::blackTexture()
+{
+	if (_blackTexture.invalid())
+	{
+		TextureDescription::Pointer desc = TextureDescription::Pointer::create();
+		desc->size = vec2i(4);
+		desc->format = TextureFormat::RGBA8;
+		desc->data.resize(4 * static_cast<uint32_t>(desc->size.square()));
+		desc->data.fill(0);
+		_blackTexture = createTexture(desc);
+	}
+	return _blackTexture;
+}
+
 
 inline Sampler::Pointer RenderInterface::defaultSampler()
 {
@@ -177,7 +210,10 @@ inline void RenderInterface::initInternalStructures()
 {
 	_sharedConstantBuffer.init(this);
 	_sharedMaterialLibrary.init(this);
-	defaultTexture();
+
+	whiteTexture();
+	blackTexture();
+	checkersTexture();
 	defaultSampler();
 }
 
@@ -186,7 +222,9 @@ inline void RenderInterface::shutdownInternalStructures()
 	_sharedMaterialLibrary.shutdown();
 	_sharedConstantBuffer.shutdown();
 	_defaultSampler.reset(nullptr);
-	_defaultTexture.reset(nullptr);
+	_checkersTexture.reset(nullptr);
+	_whiteTexture.reset(nullptr);
+	_blackTexture.reset(nullptr);
 	_nearestSampler.reset(nullptr);
 }
 

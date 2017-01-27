@@ -88,6 +88,7 @@
 #	define ET_KEY_1						49
 #	define ET_KEY_2						50
 #	define ET_KEY_3						51
+#	define ET_KEY_4						52
 #
 #endif
 

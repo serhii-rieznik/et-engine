@@ -78,6 +78,9 @@ private:
 	void loadRenderPass(const std::string&, const Dictionary&, const std::string& baseFolder);
 	void initDefaultHeader();
 
+	virtual void invalidateTextureSet();
+	virtual void invalidateConstantBuffer();
+
 protected: // overrided / read by instanaces
 	MaterialTextureSet textures;
 	MaterialSamplerSet samplers;
@@ -104,8 +107,8 @@ public:
 	ConstantBufferEntry constantBufferData(RenderPassClass);
 	const Configuration& configuration(RenderPassClass) const override;
 
-	void invalidateTextureSet();
-	void invalidateConstantBuffer();
+	void invalidateTextureSet() override;
+	void invalidateConstantBuffer() override;
 
 private:
 	friend class Material;
