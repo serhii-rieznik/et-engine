@@ -191,13 +191,12 @@ void imageBarrier(VulkanState&, VkCommandBuffer, VkImage, VkImageAspectFlags asp
 	VkImageLayout layoutFrom, VkImageLayout layoutTo,
 	VkPipelineStageFlags stageFrom, VkPipelineStageFlags stageTo, 
 	uint32_t startMipLevel = 0, uint32_t mipLevelsCount = 1);
-
 }
 
 const char* vulkanResultToString(VkResult result);
 
 #define VULKAN_CALL(expr) do { \
-	auto localVkResult = (expr); \
+	VkResult localVkResult = (expr); \
 	if (localVkResult != VkResult::VK_SUCCESS) \
 	{ \
 		et::log::error("Vulkan call failed: %s\nat %s [%d]\nresult = %s", \

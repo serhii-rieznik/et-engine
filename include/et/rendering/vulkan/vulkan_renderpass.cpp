@@ -103,9 +103,12 @@ VulkanRenderPass::VulkanRenderPass(VulkanRenderer* renderer, VulkanState& vulkan
 				attachment.finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 			}
 
-			const vec4& cl = target.clearValue;
-			_private->clearValues.emplace_back();
-			_private->clearValues.back().color = { cl.x, cl.y, cl.z, cl.w };
+			if (attachment.loadOp == VK_ATTACHMENT_LOAD_OP_CLEAR)
+			{
+				const vec4& cl = target.clearValue;
+				_private->clearValues.emplace_back();
+				_private->clearValues.back().color = { cl.x, cl.y, cl.z, cl.w };
+			}
 			++colorAttachmentCount;
 		}
 	}
@@ -121,22 +124,23 @@ VulkanRenderPass::VulkanRenderPass(VulkanRenderer* renderer, VulkanState& vulkan
 		attachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
 		attachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
 		attachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+		attachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
 		if (passInfo.depth.useDefaultRenderTarget)
 		{
 			attachment.format = vulkan.swapchain.depthFormat;
-			attachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 		}
 		else
 		{
 			ET_ASSERT(passInfo.depth.texture.valid());
 			VulkanTexture::Pointer texture = passInfo.depth.texture;
 			attachment.format = texture->nativeTexture().format;
-			attachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 		}
-		
-		_private->clearValues.emplace_back();
-		_private->clearValues.back().depthStencil = { passInfo.depth.clearValue.x };
+		if (attachment.loadOp == VK_ATTACHMENT_LOAD_OP_CLEAR)
+		{
+			_private->clearValues.emplace_back();
+			_private->clearValues.back().depthStencil = { passInfo.depth.clearValue.x };
+		}
 		depthAttachmentReference.layout = attachment.finalLayout;
 	}
 

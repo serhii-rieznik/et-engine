@@ -165,9 +165,13 @@ void VulkanPipelineStatePrivate::generatePipelineLayout(const Program::Reflectio
 	Set<uint32_t> textureBindings;
 	for (auto& tex : reflection.textures.vertexTextures)
 		textureBindings.insert(tex.second);
+	for (auto& tex : reflection.textures.fragmentTextures)
+		textureBindings.insert(tex.second);
 	
 	Set<uint32_t> samplerBindings;
 	for (auto& tex : reflection.textures.vertexSamplers)
+		samplerBindings.insert(tex.second);
+	for (auto& tex : reflection.textures.fragmentSamplers)
 		samplerBindings.insert(tex.second);
 	
 	{

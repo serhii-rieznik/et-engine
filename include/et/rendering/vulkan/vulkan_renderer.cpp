@@ -58,23 +58,26 @@ VkResult vkEnumerateInstanceLayerPropertiesWrapper(int, uint32_t* count, VkLayer
 	return vkEnumerateInstanceLayerProperties(count, props);
 }
 
-VkBool32 vulkanDebugCallback(VkDebugReportFlagsEXT flags, VkDebugReportObjectTypeEXT objType, uint64_t obj,
+VkBool32 VKAPI_CALL vulkanDebugCallback(VkDebugReportFlagsEXT flags, VkDebugReportObjectTypeEXT objType, uint64_t obj,
 	size_t location, int32_t code, const char* layerPrefix, const char* msg, void* userData)
 {
+	if (obj == static_cast<uint64_t>(-1))
+		obj = 0;
+
 	if (flags & VK_DEBUG_REPORT_ERROR_BIT_EXT)
 	{
-		log::error("%s : %s", layerPrefix, msg);
+		log::error("%s [%llx] : %s", layerPrefix, obj, msg);
 		debug::debugBreak();
 	}
 	else if (flags & VK_DEBUG_REPORT_WARNING_BIT_EXT)
 	{
-		log::warning("%s : %s", layerPrefix, msg);
+		log::warning("%s [%llx] : %s", layerPrefix, obj, msg);
 	}
 	else
 	{
-		log::info("%s : %s", layerPrefix, msg);
+		log::info("%s [%llx] : %s", layerPrefix, obj, msg);
 	}
-	return VK_TRUE;
+	return VK_FALSE;
 }
 
 void VulkanRenderer::init(const RenderContextParameters& params)
