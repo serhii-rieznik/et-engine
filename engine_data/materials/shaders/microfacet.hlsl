@@ -23,17 +23,8 @@ SamplerState baseColorSampler : CONSTANT_LOCATION(s, BaseColorSamplerBinding, Te
 Texture2D<float4> normalTexture : CONSTANT_LOCATION(t, NormalTextureBinding, TexturesSetIndex);
 SamplerState normalSampler : CONSTANT_LOCATION(s, NormalSamplerBinding, TexturesSetIndex);;
 
-Texture2D<float4> roughnessTexture : CONSTANT_LOCATION(t, RoughnessTextureBinding, TexturesSetIndex);
-SamplerState roughnessSampler : CONSTANT_LOCATION(s, RoughnessSamplerBinding, TexturesSetIndex);;
-
-Texture2D<float4> metallnessTexture : CONSTANT_LOCATION(t, MetallnessTextureBinding, TexturesSetIndex);
-SamplerState metallnessSampler : CONSTANT_LOCATION(s, MetallnessSamplerBinding, TexturesSetIndex);;
-
 Texture2D<float4> shadowTexture : CONSTANT_LOCATION(t, ShadowTextureBinding, TexturesSetIndex);
 SamplerState shadowSampler : CONSTANT_LOCATION(s, ShadowSamplerBinding, TexturesSetIndex);;
-
-Texture2D<float4> environmentTexture : CONSTANT_LOCATION(t, EnvironmentTextureBinding, TexturesSetIndex);
-SamplerState environmentSampler : CONSTANT_LOCATION(s, EnvironmentSamplerBinding, TexturesSetIndex);
 
 struct VSOutput 
 {
@@ -51,8 +42,8 @@ VSOutput vertexMain(VSInput vsIn)
 {
 	float4 transformedPosition = mul(float4(vsIn.position, 1.0), worldTransform);
 
-	float3 tNormal = mul(float4(vsIn.normal, 0.0), worldRotationTransform).xyz;
-	float3 tTangent = mul(float4(vsIn.tangent, 0.0), worldRotationTransform).xyz;
+	float3 tNormal = normalize(mul(float4(vsIn.normal, 0.0), worldRotationTransform).xyz);
+	float3 tTangent = normalize(mul(float4(vsIn.tangent, 0.0), worldRotationTransform).xyz);
 	float3 tBiTangent = cross(tNormal, tTangent);
 
 	VSOutput vsOut;
@@ -67,8 +58,9 @@ VSOutput vertexMain(VSInput vsIn)
 	return vsOut;
 }
 
-#include "lighting.h"
 #include "srgb.h"
+#include "bsdf.h"
+#include "environment.h"
 #include "importance-sampling.h"
 
 float sampleShadow(float3 tc)
@@ -77,16 +69,15 @@ float sampleShadow(float3 tc)
 	return float(tc.z <= shadowSample);
 }
 
-float3 sampleEnvironment(float3 i, float lod)
-{
-	float ax = (atan2(i.z, i.x) + PI) / (2.0 * PI);
-	float ay = (0.5 * PI - asin(i.y)) / PI;
-	return environmentTexture.SampleLevel(environmentSampler, float2(ax, ay), lod).xyz;
-}
-
 float4 fragmentMain(VSOutput fsIn) : SV_Target0
 {
-	float3 tsNormal = normalize(normalTexture.Sample(normalSampler, fsIn.texCoord0).xyz - 0.5);
+	float4 normalSample = normalTexture.Sample(normalSampler, fsIn.texCoord0);
+	float4 baseColorSample = baseColorTexture.Sample(baseColorSampler, fsIn.texCoord0);
+
+	float3 baseColor = srgbToLinear(baseColorSample.xyz);
+	Surface surface = buildSurface(baseColor, normalSample.w * metallnessScale, baseColorSample.w * roughnessScale);
+
+	float3 tsNormal = normalize(normalSample.xyz - 0.5);
 
 	float3 wsNormal;
 	wsNormal.x = dot(fsIn.invTransformT, tsNormal);
@@ -94,42 +85,18 @@ float4 fragmentMain(VSOutput fsIn) : SV_Target0
 	wsNormal.z = dot(fsIn.invTransformN, tsNormal);
 	wsNormal = normalize(wsNormal);
 
-	float3 lightNormal = normalize(fsIn.toLight);
-	float3 viewNormal = normalize(fsIn.toCamera);
-	float3 halfVector = normalize(lightNormal + viewNormal);
+	float3 wsLight = normalize(fsIn.toLight);
+	float3 wsView = normalize(fsIn.toCamera);
+	float3 wsReflected = -reflect(wsView, wsNormal);
 
-	float roughness = clamp(roughnessScale * roughnessTexture.Sample(roughnessSampler, fsIn.texCoord0).x, 0.001, 1.0);
-	float metallness = saturate(metallnessScale) * metallnessTexture.Sample(metallnessSampler, fsIn.texCoord0).x;
+	BSDF bsdf = buildBSDF(wsNormal, wsLight, wsView);
 
-	PBSLightEnvironment env;
-	env.alpha = roughness * roughness;
-	env.metallness = metallness;
-	env.LdotN = dot(lightNormal, wsNormal);
-	env.VdotN = dot(viewNormal, wsNormal);
-	env.LdotH = dot(lightNormal, halfVector);
-	env.VdotH = dot(viewNormal, halfVector);
-	env.NdotH = dot(wsNormal, halfVector);
-	env.viewFresnel = fresnelShlick(env.metallness, env.VdotN);
-	env.brdfFresnel = fresnelShlick(env.metallness, env.LdotH);
+	float3 indirectDiffuse = importanceSampledDiffuse(wsNormal, wsView, surface);
+	float3 indirectSpecular = importanceSampledSpecular(wsNormal, wsView, surface);
 
-	float shadowSample = 1.0; // sampleShadow(fsIn.lightCoord.xyz / fsIn.lightCoord.w);
+	float3 directTerm = directLighting(surface, bsdf);
 
-	float3 indirectDiffuse = sampleEnvironment(wsNormal, 10.0);
-
-	float3 diffuseColor = srgbToLinear(baseColorTexture.Sample(baseColorSampler, fsIn.texCoord0).xyz);
-	float directDiffuseTerm = shadowSample * normalizedLambert(env);
-
-	float3 directSpecular = microfacetSpecular(env);
-	float3 indirectSpecular = env.viewFresnel * sampleEnvironment(reflect(-normalize(fsIn.toCamera), wsNormal), 8.0 * roughness);
-
-	float3 diffuse = diffuseReflectance.xyz * (diffuseColor * directDiffuseTerm + indirectDiffuse) * (1.0 - metallness);
-	float3 specular = specularReflectance.xyz * (directSpecular * shadowSample + indirectSpecular);
-
-	float3 result = linearToSRGB(diffuse + specular);
-	// result = indirectSpecular;
-	// float3(hammersleySetTexture.Sample(hammersleySetSampler, fsIn.texCoord0).xy, 0.0);
-	// result = indirectSpecular;
-	                
+	float3 result = directTerm + float3(0.0, 1.0, 0.0) * indirectSpecular; // directTerm + indirectSpecular + indirectDiffuse; 
 	
 	return float4(result, 1.0);
 }

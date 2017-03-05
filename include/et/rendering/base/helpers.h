@@ -19,7 +19,7 @@ namespace renderhelper
 	void init(RenderContext*);
 	void release();
 
-	RenderBatch::Pointer createFullscreenRenderBatch(Texture::Pointer);
+	RenderBatch::Pointer createFullscreenRenderBatch(const Texture::Pointer&, Material::Pointer = Material::Pointer());
 };
 
 }

@@ -1,4 +1,4 @@
-#define GAMMA_CORRECTION_IN 2.2
+#define GAMMA_CORRECTION_IN  2.2
 #define GAMMA_CORRECTION_OUT 1.0/2.2
 
 float3 srgbToLinear(in float3 l)

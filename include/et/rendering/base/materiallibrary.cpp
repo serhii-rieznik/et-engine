@@ -27,6 +27,7 @@ const std::string defaultMaterials[DefaultMaterialCount] =
 	std::string("engine_data/materials/textured2d.json"),
 	std::string("engine_data/materials/textured.json"),
 	std::string("engine_data/materials/microfacet.json"),
+	std::string("engine_data/materials/environment.json"),
 };
 
 void MaterialLibrary::init(RenderInterface* ren)

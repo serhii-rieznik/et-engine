@@ -8,6 +8,7 @@
 #include <et/scene3d/scene3drenderer.h>
 #include <et/rendering/rendercontext.h>
 #include <et/rendering/base/primitives.h>
+#include <et/rendering/base/helpers.h>
 
 namespace et
 {
@@ -17,7 +18,6 @@ namespace s3d
 Renderer::Renderer() :
 	FlagsHolder(RenderAll)
 {
-	
 }
 
 void Renderer::render(RenderInterface::Pointer& renderer, const Scene::Pointer& scene)
@@ -25,8 +25,11 @@ void Renderer::render(RenderInterface::Pointer& renderer, const Scene::Pointer& 
 	extractBatches(scene);
 
 	validateMainPass(renderer, scene);
-
 	validateShadowPass(renderer);
+
+	if (_envMaterial.invalid())
+		_envMaterial = renderer->sharedMaterialLibrary().loadDefaultMaterial(DefaultMaterial::EnvironmentMap);
+
 	if (_shadowPass.valid())
 	{
 		clip(_shadowPass, _renderBatches, _shadowPassBatches);
@@ -35,6 +38,10 @@ void Renderer::render(RenderInterface::Pointer& renderer, const Scene::Pointer& 
 	}
 
 	clip(_mainPass, _renderBatches, _mainPassBatches);
+
+	if (_envBatch.valid())
+		_mainPassBatches.emplace_back(_envBatch);
+
 	render(_mainPass, _mainPassBatches);
 	renderer->submitRenderPass(_mainPass);
 }
@@ -57,21 +64,23 @@ void Renderer::validateMainPass(RenderInterface::Pointer& renderer, const Scene:
 	}
 
 	bool mainPassValid = _mainPass.valid();
-	
 	bool sameCamera = mainPassValid ? (_mainPass->info().camera == scene->mainCamera()) : true;
-	
 	bool sameDirectionalLight = mainPassValid ? (_mainPass->info().light == directionalLight) : true;
-	
-	bool sameEnvLight = (environmentLight.valid() &&  _envTexture.valid()) ? 
-		(environmentLight->environmentMap() == _envTexture->origin()) : true; 
+	bool sameEnvLight = (environmentLight.valid() && _envTexture.valid()) ? (environmentLight->environmentMap() == _envTexture->origin()) : true;
 
 	if (mainPassValid && sameCamera && sameDirectionalLight && sameEnvLight)
 		return;
 
 	_envTexture = renderer->blackTexture();
-
 	if (environmentLight.valid() && (environmentLight->type() == Light::Type::ImageBasedSky))
+	{
 		_envTexture = renderer->loadTexture(environmentLight->environmentMap(), _cache);
+		_envBatch = renderhelper::createFullscreenRenderBatch(_envTexture, _envMaterial);
+	}
+	else
+	{
+		_envBatch.reset(nullptr);
+	}
 
 	RenderPass::ConstructionInfo passInfo;
 	passInfo.camera = scene->mainCamera();
@@ -96,11 +105,11 @@ void Renderer::validateShadowPass(RenderInterface::Pointer& renderer)
 {
 	if (_shadowTexture.invalid())
 	{
-        TextureDescription::Pointer desc = TextureDescription::Pointer::create();
-        desc->isRenderTarget = true;
-        desc->size = vec2i(2048); // TODO : variable size
-        desc->format = TextureFormat::Depth32F;
-        _shadowTexture = renderer->createTexture(desc);
+		TextureDescription::Pointer desc = TextureDescription::Pointer::create();
+		desc->isRenderTarget = true;
+		desc->size = vec2i(2048); // TODO : variable size
+		desc->format = TextureFormat::Depth32F;
+		_shadowTexture = renderer->createTexture(desc);
 
 		Sampler::Description smpDesc;
 		smpDesc.minFilter = TextureFiltration::Linear;
@@ -117,17 +126,17 @@ void Renderer::validateShadowPass(RenderInterface::Pointer& renderer)
 		RenderPass::ConstructionInfo passInfo;
 		passInfo.camera = _mainPass->info().light;
 		passInfo.light = _mainPass->info().light;
-        passInfo.priority = 5;
+		passInfo.priority = 5;
 		passInfo.depth.texture = _shadowTexture;
 		passInfo.depth.loadOperation = FramebufferOperation::Clear;
 		passInfo.depth.storeOperation = FramebufferOperation::Store;
 		passInfo.depth.useDefaultRenderTarget = false;
-		passInfo.depth.enabled = true;		
-        passInfo.color[0].enabled = false;
+		passInfo.depth.enabled = true;
+		passInfo.color[0].enabled = false;
 		passInfo.depthBias = 1.0f;
 		passInfo.depthSlope = 1.0f;
 		passInfo.renderPassClass = RenderPassClass::Depth;
-        _shadowPass = renderer->allocateRenderPass(passInfo);
+		_shadowPass = renderer->allocateRenderPass(passInfo);
 	}
 }
 
@@ -160,7 +169,7 @@ void Renderer::clip(RenderPass::Pointer& pass, const RenderBatchCollection& inBa
 	}
 
 	vec3 cameraPosition = pass->info().camera->position();
-	auto cmp = [cameraPosition, &pass](const RenderBatchInfo& l, const RenderBatchInfo& r) 
+	auto cmp = [cameraPosition, &pass](const RenderBatchInfo& l, const RenderBatchInfo& r)
 	{
 		if (l.priority != r.priority)
 			return l.priority > r.priority;

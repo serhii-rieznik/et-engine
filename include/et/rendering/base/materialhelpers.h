@@ -21,6 +21,7 @@ enum class MaterialTexture : uint32_t
 	Roughness,
 	Metallness,
 	EmissiveColor,
+	Opacity,
 
 	Shadow,
 	HammersleySet,

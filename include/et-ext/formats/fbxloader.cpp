@@ -289,7 +289,7 @@ void FBXLoaderPrivate::loadTextures()
 				if (texture.invalid())
 				{
 					log::error("Failed to load texture: %s", fileName.c_str());
-					texture = _renderer->defaultTexture();
+					texture = _renderer->checkersTexture();
 					texture->setOrigin(fileName);
 					_texCache.manage(texture, ObjectLoader::Pointer()); // TODO : provide (re)loader
 				}
@@ -613,7 +613,7 @@ MaterialInstance::Pointer FBXLoaderPrivate::loadMaterial(FbxSurfaceMaterial* mat
 
 	/*
 	 * enumerate material properties to find something interesting
-	 */
+	 *
 	log::info("Material %s contains properties:", mat->GetName());
 	auto prop = mat->GetFirstProperty();
 	while (prop.IsValid())
@@ -630,9 +630,11 @@ MaterialInstance::Pointer FBXLoaderPrivate::loadMaterial(FbxSurfaceMaterial* mat
 		loadMaterialTextureValue(m, MaterialTexture::Normal, mat, FbxSurfaceMaterial::sNormalMap);
 		loadMaterialTextureValue(m, MaterialTexture::Metallness, mat, FbxSurfaceMaterial::sSpecularFactor);
 		loadMaterialTextureValue(m, MaterialTexture::Roughness, mat, FbxSurfaceMaterial::sShininess);
+		loadMaterialTextureValue(m, MaterialTexture::Opacity, mat, FbxSurfaceMaterial::sTransparentColor);
 	}
 	
-	loadMaterialValue(m, MaterialParameter::BaseColorScale, mat, FbxSurfaceMaterial::sDiffuse, NullRemap);
+	loadMaterialValue(m, MaterialParameter::DiffuseReflectance, mat, FbxSurfaceMaterial::sDiffuse, NullRemap);
+	loadMaterialValue(m, MaterialParameter::SpecularReflectance, mat, FbxSurfaceMaterial::sSpecular, NullRemap);
 	loadMaterialValue(m, MaterialParameter::EmissiveColor, mat, FbxSurfaceMaterial::sEmissive, NullRemap);
 	loadMaterialValue(m, MaterialParameter::NormalScale, mat, FbxSurfaceMaterial::sBumpFactor, NullRemap);
 

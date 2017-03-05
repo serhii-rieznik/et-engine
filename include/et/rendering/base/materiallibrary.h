@@ -17,6 +17,7 @@ enum class DefaultMaterial : uint32_t
 	Textured2D,
 	Textured,
 	Microfacet,
+	EnvironmentMap,
 	
 	Count
 };

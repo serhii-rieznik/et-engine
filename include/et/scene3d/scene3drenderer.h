@@ -40,7 +40,10 @@ private:
 		RenderBatch::Pointer batch;
 		BoundingBox transformedBox;
 
-		RenderBatchInfo(uint64_t p, RenderBatch::Pointer b, const BoundingBox& bb) :
+		RenderBatchInfo(const RenderBatch::Pointer& b) : 
+			batch(b) { }
+
+		RenderBatchInfo(uint64_t p, const RenderBatch::Pointer& b, const BoundingBox& bb) :
 			priority(p), batch(b), transformedBox(bb) { }
 	};
 
@@ -63,7 +66,10 @@ private:
 	RenderPass::Pointer _shadowPass;
 
     Texture::Pointer _shadowTexture;
+
 	Texture::Pointer _envTexture;
+	Material::Pointer _envMaterial;
+	RenderBatch::Pointer _envBatch;
 };
 }
 }

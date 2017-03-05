@@ -49,6 +49,9 @@ public:
 		mat4 viewProjection;
 		mat4 projection;
 		mat4 view;
+		mat4 inverseViewProjection;
+		mat4 inverseProjection;
+		mat4 inverseView;
 		vec4 cameraPosition;
 		vec4 cameraDirection;
 		vec4 cameraUp;

@@ -447,6 +447,9 @@ void VulkanRenderPassPrivate::loadVariables(Camera::Pointer camera, Light::Point
 		vptr->viewProjection = camera->viewProjectionMatrix();
 		vptr->projection = camera->projectionMatrix();
 		vptr->view = camera->viewMatrix();
+		vptr->inverseViewProjection = camera->inverseViewProjectionMatrix();
+		vptr->inverseProjection = camera->inverseProjectionMatrix();
+		vptr->inverseView = camera->inverseViewMatrix();
 		vptr->cameraPosition = vec4(camera->position());
 		vptr->cameraDirection = vec4(camera->direction());
 		vptr->cameraUp = vec4(camera->up());

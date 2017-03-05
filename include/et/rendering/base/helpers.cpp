@@ -58,16 +58,18 @@ void release()
 	rh_local::texturedMaterial.reset(nullptr);
 }
 	
-RenderBatch::Pointer createFullscreenRenderBatch(Texture::Pointer texture)
+RenderBatch::Pointer renderhelper::createFullscreenRenderBatch(const Texture::Pointer& texture, Material::Pointer mat)
 {
 	ET_ASSERT(rh_local::default2DPlane.valid());
 	ET_ASSERT(rh_local::texturedMaterial.valid());
 
-	MaterialInstance::Pointer materialInstance = rh_local::texturedMaterial->instance();
+	if (mat.invalid())
+		mat = rh_local::texturedMaterial;
+
+	MaterialInstance::Pointer materialInstance = mat->instance();
 	materialInstance->setTexture(MaterialTexture::BaseColor, texture);
 	
-	return RenderBatch::Pointer::create(materialInstance, rh_local::default2DPlane, identityMatrix, 0, 
-		rh_local::default2DPlane->vertexCount());
+	return RenderBatch::Pointer::create(materialInstance, rh_local::default2DPlane, identityMatrix, 0, rh_local::default2DPlane->vertexCount());
 }
 
 }

@@ -487,6 +487,7 @@ const Map<MaterialTexture, String>& materialTextureNames()
 		{ MaterialTexture::Roughness, "roughnessTexture" },
 		{ MaterialTexture::Metallness, "metallnessTexture" },
 		{ MaterialTexture::EmissiveColor, "emissiveColorTexture" },
+		{ MaterialTexture::Opacity, "opacityTexture" },
 		{ MaterialTexture::Shadow, "shadowTexture" },
 		{ MaterialTexture::AmbientOcclusion, "aoTexture" },
 		{ MaterialTexture::Environment, "environmentTexture" },
@@ -505,6 +506,7 @@ const Map<MaterialTexture, String>& materialSamplerNames()
 		{ MaterialTexture::Roughness, "roughnessSampler" },
 		{ MaterialTexture::Metallness, "metallnessSampler" },
 		{ MaterialTexture::EmissiveColor, "emissiveColorSampler" },
+		{ MaterialTexture::Opacity, "opacitySampler" },
 		{ MaterialTexture::Shadow, "shadowSampler" },
 		{ MaterialTexture::AmbientOcclusion, "aoSampler" },
 		{ MaterialTexture::Environment, "environmentSampler" },
@@ -588,6 +590,9 @@ cbuffer PassVariables : CONSTANT_LOCATION(b, PassVariablesBufferIndex, Variables
 	row_major float4x4 viewProjection;
 	row_major float4x4 projection;
 	row_major float4x4 view;
+	row_major float4x4 inverseViewProjection;
+	row_major float4x4 inverseProjection;
+	row_major float4x4 inverseView;
 	float4 cameraPosition;
 	float4 cameraDirection;
 	float4 cameraUp;
