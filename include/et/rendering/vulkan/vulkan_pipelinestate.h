@@ -29,7 +29,7 @@ public:
 
 	const VulkanNativePipeline& nativePipeline() const;
 
-	void build() override;
+	void build(const RenderPass::Pointer&) override;
 
 private:
 	ET_DECLARE_PIMPL(VulkanPipelineState, 256);

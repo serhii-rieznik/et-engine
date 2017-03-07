@@ -8,6 +8,7 @@
 #pragma once
 
 #include <et/rendering/interface/renderer.h>
+#include <et/rendering/systems/cubemapprocessor.h>
 #include <et/scene3d/scene3d.h>
 
 namespace et
@@ -57,6 +58,7 @@ private:
 	void validateShadowPass(RenderInterface::Pointer&);
 
 private:
+	CubemapProcessor _cubemapProcessor;
 	ObjectsCache _cache;
 	RenderBatchCollection _renderBatches;
 
@@ -68,6 +70,7 @@ private:
     Texture::Pointer _shadowTexture;
 
 	Texture::Pointer _envTexture;
+	Texture::Pointer _envCubemap;
 	Material::Pointer _envMaterial;
 	RenderBatch::Pointer _envBatch;
 };

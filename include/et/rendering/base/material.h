@@ -31,7 +31,7 @@ public:
 		CullMode cullMode = CullMode::Disabled;
 		StringList usedFiles;
 	};
-	using ConfigurationMap = Map<RenderPassClass, Configuration>;
+	using ConfigurationMap = Map<std::string, Configuration>;
 
 public:
 	Material(RenderInterface*);
@@ -55,14 +55,14 @@ public:
 
 	uint64_t sortingKey() const;
 
-	virtual const Configuration& configuration(RenderPassClass) const;
+	virtual const Configuration& configuration(const std::string&) const;
 	const ConfigurationMap& configurations() const { return _passes; }
 
 	void loadFromJson(const std::string& json, const std::string& baseFolder);
-	void setProgram(const Program::Pointer&, RenderPassClass);
-	void setDepthState(const DepthState&, RenderPassClass);
-	void setBlendState(const BlendState&, RenderPassClass);
-	void setCullMode(CullMode, RenderPassClass);
+	void setProgram(const Program::Pointer&, const std::string&);
+	void setDepthState(const DepthState&, const std::string&);
+	void setBlendState(const BlendState&, const std::string&);
+	void setCullMode(CullMode, const std::string&);
 
 private:
 	friend class MaterialInstance;
@@ -103,9 +103,9 @@ public:
 public:
 	Material::Pointer base();
 
-	TextureSet::Pointer textureSet(RenderPassClass);
-	ConstantBufferEntry constantBufferData(RenderPassClass);
-	const Configuration& configuration(RenderPassClass) const override;
+	TextureSet::Pointer textureSet(const std::string&);
+	ConstantBufferEntry constantBufferData(const std::string&);
+	const Configuration& configuration(const std::string&) const override;
 
 	void invalidateTextureSet() override;
 	void invalidateConstantBuffer() override;
@@ -115,8 +115,8 @@ private:
 	friend class ObjectFactory;
 	MaterialInstance(Material::Pointer base);
 
-	void buildTextureSet(RenderPassClass);
-	void buildConstantBuffer(RenderPassClass);
+	void buildTextureSet(const std::string&);
+	void buildConstantBuffer(const std::string&);
 
 private:
 	template <class T>
@@ -128,8 +128,8 @@ private:
 
 private:
 	Material::Pointer _base;
-	std::map<RenderPassClass, Holder<TextureSet::Pointer>> _textureSets;
-	std::map<RenderPassClass, Holder<ConstantBufferEntry>> _constBuffers;
+	std::map<std::string, Holder<TextureSet::Pointer>> _textureSets;
+	std::map<std::string, Holder<ConstantBufferEntry>> _constBuffers;
 };
 
 template <class T>

@@ -73,12 +73,6 @@ enum class FillMode : uint32_t
 	max
 };
 
-enum class RenderPassClass : uint32_t
-{
-	Forward,
-	Depth
-};
-
 /*
  * Engine-specific declarations
  */
@@ -155,7 +149,6 @@ enum class TextureTarget : uint32_t
 {
 	Texture_2D,
 	Texture_2D_Array,
-	Texture_Rectangle,
 	Texture_Cube,
 	
 	max,
@@ -500,7 +493,6 @@ BlendState deserializeBlendState(const VariantBase::Pointer&);
 std::string cullModeToString(CullMode);
 bool stringToCullMode(const std::string&, CullMode&);
 
-RenderPassClass stringToRenderPassClass(const std::string&);
 bool isValidRenderPassName(const std::string&);
 
 template <class T>

@@ -31,7 +31,7 @@ public:
 		VkPipelineVertexInputStateCreateInfo& vertexInfo, Vector<VkVertexInputAttributeDescription>& attribs,
 		VkVertexInputBindingDescription& binding);
 
-	void generatePipelineLayout(const Program::Reflection& reflection, VulkanRenderPass::Pointer pass);
+	void generatePipelineLayout(const Program::Reflection& reflection, const VulkanRenderPass::Pointer& pass);
 
 	VulkanRenderer* renderer = nullptr;
 	VulkanState& vulkan;
@@ -61,16 +61,19 @@ const VulkanNativePipeline& VulkanPipelineState::nativePipeline() const
 	return (*_private);
 }
 
-void VulkanPipelineState::build()
+void VulkanPipelineState::build(const RenderPass::Pointer& inPass)
 {
 	VulkanProgram::Pointer prog = program();
 	if ((prog->shaderModules().vertex == nullptr) || (prog->shaderModules().fragment == nullptr))
 		return;
+
+	VulkanRenderPass::Pointer pass = inPass;
+	_renderPassId = pass->identifier();
 	
 	Vector<VkPipelineColorBlendAttachmentState> attachmentInfo;
 	attachmentInfo.reserve(MaxRenderTargets);
 
-	for (const RenderTarget& rt : renderPass()->info().color)
+	for (const RenderTarget& rt : pass->info().color)
 	{
 		if (rt.enabled)
 		{
@@ -111,8 +114,8 @@ void VulkanPipelineState::build()
 		rasterizerInfo.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
 		rasterizerInfo.polygonMode = VkPolygonMode::VK_POLYGON_MODE_FILL;
 		rasterizerInfo.lineWidth = 1.0f;
-		rasterizerInfo.depthBiasConstantFactor = renderPass()->info().depthBias;
-		rasterizerInfo.depthBiasSlopeFactor = renderPass()->info().depthSlope;
+		rasterizerInfo.depthBiasConstantFactor = pass->info().depthBias;
+		rasterizerInfo.depthBiasSlopeFactor = pass->info().depthSlope;
 		rasterizerInfo.depthBiasEnable = (rasterizerInfo.depthBiasConstantFactor > 0.0f) || (rasterizerInfo.depthBiasSlopeFactor > 0.0f);
 	}
 
@@ -121,7 +124,6 @@ void VulkanPipelineState::build()
 		assemblyInfo.topology = vulkan::primitiveTopology(primitiveType());
 	}
 	
-	VulkanRenderPass::Pointer pass = renderPass();
 	_private->generatePipelineLayout(prog->reflection(), pass);
 
 	VkVertexInputBindingDescription binding = { };
@@ -132,8 +134,6 @@ void VulkanPipelineState::build()
 	VkPipelineViewportStateCreateInfo viewportState = { VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO }; 
 	viewportState.scissorCount = 1;
 	viewportState.viewportCount = 1;
-	viewportState.pViewports = &pass->nativeRenderPass().viewport;
-	viewportState.pScissors = &pass->nativeRenderPass().scissor;
 
 	VkDynamicState dynamicStates[2] = { VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR };
 	VkPipelineDynamicStateCreateInfo dynamicState = { VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO };
@@ -160,7 +160,7 @@ void VulkanPipelineState::build()
 	VULKAN_CALL(vkCreateGraphicsPipelines(_private->vulkan.device, _private->vulkan.pipelineCache, 1, &info, nullptr, &_private->pipeline));
 }
 
-void VulkanPipelineStatePrivate::generatePipelineLayout(const Program::Reflection& reflection, VulkanRenderPass::Pointer pass)
+void VulkanPipelineStatePrivate::generatePipelineLayout(const Program::Reflection& reflection, const VulkanRenderPass::Pointer& pass)
 {
 	Set<uint32_t> textureBindings;
 	for (auto& tex : reflection.textures.vertexTextures)

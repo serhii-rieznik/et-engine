@@ -358,6 +358,7 @@ VkImageType textureTargetToImageType(TextureTarget target)
 	case TextureTarget::Texture_Cube:
 	case TextureTarget::Texture_2D_Array:
 		return VkImageType::VK_IMAGE_TYPE_2D;
+
 	default:
 		ET_FAIL("Invalid TextureTarget specified");
 	}

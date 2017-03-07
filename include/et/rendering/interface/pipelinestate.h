@@ -30,17 +30,7 @@ public:
 public:
 	virtual ~PipelineState() = default;
 
-	virtual void build() = 0;
-
-	const RenderPass::Pointer renderPass() const
-	{
-		return _renderPass;
-	}
-
-	void setRenderPass(RenderPass::Pointer pass)
-	{
-		_renderPass = pass;
-	}
+	virtual void build(const RenderPass::Pointer&) = 0;
 
 	const VertexDeclaration& inputLayout() const
 	{
@@ -102,9 +92,16 @@ public:
 		_primitiveType = pt;
 	}
 
+	uint64_t renderPassIdentifier() const
+	{
+		return _renderPassId;
+	}
+
+protected:
+	uint64_t _renderPassId = 0;
+
 private:
 	VertexDeclaration _decl;
-	RenderPass::Pointer _renderPass;
 	Program::Pointer _program;
 	BlendState _blend;
 	DepthState _depth;
@@ -119,10 +116,10 @@ public:
 	PipelineStateCache();
 	~PipelineStateCache();
 
-	PipelineState::Pointer find(const VertexDeclaration&, const Program::Pointer&, const RenderPass::Pointer&, 
-        const DepthState&, const BlendState&, CullMode, PrimitiveType);
+	PipelineState::Pointer find(uint64_t renderPassId, const VertexDeclaration&, const Program::Pointer&, 
+		const DepthState&, const BlendState&, CullMode, PrimitiveType);
 
-	void addToCache(const PipelineState::Pointer&);
+	void addToCache(const RenderPass::Pointer& pass, const PipelineState::Pointer&);
 	void clear();
 
 private:

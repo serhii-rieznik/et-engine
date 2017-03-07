@@ -16,7 +16,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\et\rendering\objects\light.cpp" />
+    <ClInclude Include="..\..\include\et\rendering\systems\cubemapprocessor.h" />
     <ClInclude Include="..\..\include\et\scene3d\lightelement.cpp" />
+    <ClInclude Include="..\..\include\et\rendering\systems\cubemapprocessor.cpp" />
     <ClCompile Include="..\..\include\external\spirvcross\spirv_cfg.cpp" />
     <ClCompile Include="..\..\include\external\spirvcross\spirv_cross.cpp" />
     <ClCompile Include="..\..\include\external\spirvcross\spirv_glsl.cpp" />
@@ -37,7 +39,6 @@
     <ClInclude Include="..\..\include\et\rendering\base\vertexdeclaration.h" />
     <ClInclude Include="..\..\include\et\rendering\base\vertexstorage.h" />
     <ClInclude Include="..\..\include\et\rendering\base\vertexstream.h" />
-    <ClInclude Include="..\..\include\et\rendering\framebuffer.h" />
     <ClInclude Include="..\..\include\et\rendering\interface\buffer.h" />
     <ClInclude Include="..\..\include\et\rendering\interface\pipelinestate.h" />
     <ClInclude Include="..\..\include\et\rendering\interface\program.h" />
@@ -49,7 +50,6 @@
     <ClInclude Include="..\..\include\et\rendering\objects\light.h" />
     <ClInclude Include="..\..\include\et\rendering\rendercontext.h" />
     <ClInclude Include="..\..\include\et\rendering\rendercontextparams.h" />
-    <ClInclude Include="..\..\include\et\rendering\renderingcaps.h" />
     <ClInclude Include="..\..\include\et\rendering\vulkan\glslang\vulkan_glslang.h" />
     <ClInclude Include="..\..\include\et\rendering\vulkan\vulkan_buffer.cpp" />
     <ClInclude Include="..\..\include\et\rendering\vulkan\vulkan_buffer.h" />

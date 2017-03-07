@@ -37,6 +37,18 @@ void Renderer::render(RenderInterface::Pointer& renderer, const Scene::Pointer& 
 		renderer->submitRenderPass(_shadowPass);
 	}
 
+	if (_envCubemap.invalid())
+	{
+		TextureDescription::Pointer cubemapDesc(PointerInit::CreateInplace);
+		cubemapDesc->format = TextureFormat::RGBA32F;
+		cubemapDesc->target = TextureTarget::Texture_Cube;
+		cubemapDesc->size = vec2i(256);
+		cubemapDesc->isRenderTarget = true;
+		_envCubemap = renderer->createTexture(cubemapDesc);
+	}
+
+	_cubemapProcessor.wrapEquirectangularTextureToCubemap(renderer, _envTexture, _envCubemap);
+
 	clip(_mainPass, _renderBatches, _mainPassBatches);
 
 	if (_envBatch.valid())
@@ -92,6 +104,7 @@ void Renderer::validateMainPass(RenderInterface::Pointer& renderer, const Scene:
 	passInfo.depth.loadOperation = FramebufferOperation::Clear;
 	passInfo.depth.storeOperation = FramebufferOperation::DontCare;
 	passInfo.depth.enabled = true;
+	passInfo.name = RenderPass::kPassNameForward;
 
 	_mainPass = renderer->allocateRenderPass(passInfo);
 	_mainPass->setSharedTexture(MaterialTexture::Environment, _envTexture, renderer->defaultSampler());
@@ -135,7 +148,7 @@ void Renderer::validateShadowPass(RenderInterface::Pointer& renderer)
 		passInfo.color[0].enabled = false;
 		passInfo.depthBias = 1.0f;
 		passInfo.depthSlope = 1.0f;
-		passInfo.renderPassClass = RenderPassClass::Depth;
+		passInfo.name = RenderPass::kPassNameDepth;
 		_shadowPass = renderer->allocateRenderPass(passInfo);
 	}
 }
@@ -174,8 +187,8 @@ void Renderer::clip(RenderPass::Pointer& pass, const RenderBatchCollection& inBa
 		if (l.priority != r.priority)
 			return l.priority > r.priority;
 
-		const BlendState& lbs = l.batch->material()->configuration(pass->info().renderPassClass).blendState;
-		const BlendState& rbs = r.batch->material()->configuration(pass->info().renderPassClass).blendState;
+		const BlendState& lbs = l.batch->material()->configuration(pass->info().name).blendState;
+		const BlendState& rbs = r.batch->material()->configuration(pass->info().name).blendState;
 		if (lbs.enabled == rbs.enabled)
 		{
 			float delta = (l.transformedBox.center - cameraPosition).dotSelf() - (r.transformedBox.center - cameraPosition).dotSelf();

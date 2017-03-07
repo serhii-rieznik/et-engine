@@ -45,7 +45,7 @@ public:
 	/*
 	 * Textures
 	 */
-	Texture::Pointer createTexture(TextureDescription::Pointer) override;
+	Texture::Pointer createTexture(const TextureDescription::Pointer&) override;
 	TextureSet::Pointer createTextureSet(const TextureSet::Description&) override;
 
 	/*

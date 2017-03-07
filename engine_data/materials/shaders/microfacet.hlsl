@@ -94,7 +94,9 @@ float4 fragmentMain(VSOutput fsIn) : SV_Target0
 	float3 indirectDiffuse = importanceSampledDiffuse(wsNormal, wsView, surface);
 	float3 indirectSpecular = importanceSampledSpecular(wsNormal, wsView, surface);
 
-	float3 directTerm = directLighting(surface, bsdf);
+	float3 directDiffuse = computeDirectDiffuse(surface, bsdf);
+	float3 directSpecular = computeDirectSpecular(surface, bsdf);
+	float3 directTerm = directDiffuse + directSpecular;
 
 	float3 result = directTerm + float3(0.0, 1.0, 0.0) * indirectSpecular; // directTerm + indirectSpecular + indirectDiffuse; 
 	

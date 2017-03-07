@@ -42,14 +42,14 @@ public:
 	};
 
 public:
-
 	Texture() = default;
+
 	Texture(const Description& desc) :
 		_desc(desc)
 	{
 	}
 
-	const Description& description()
+	const Description& description() const
 	{
 		return _desc;
 	}

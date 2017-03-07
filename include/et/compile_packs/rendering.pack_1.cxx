@@ -18,3 +18,4 @@
 
 #include "../rendering/objects/light.cpp"
 
+#include "../rendering/systems/cubemapprocessor.cpp"

@@ -232,7 +232,7 @@ Buffer::Pointer VulkanRenderer::createBuffer(const std::string&, const Buffer::D
 	return VulkanBuffer::Pointer::create(_private->vulkan(), desc);
 }
 
-Texture::Pointer VulkanRenderer::createTexture(TextureDescription::Pointer desc)
+Texture::Pointer VulkanRenderer::createTexture(const TextureDescription::Pointer& desc)
 {
 	return VulkanTexture::Pointer::create(_private->vulkan(), desc.reference(), desc->data);
 }
@@ -257,11 +257,11 @@ Program::Pointer VulkanRenderer::createProgram(const std::string& source)
 PipelineState::Pointer VulkanRenderer::acquirePipelineState(const RenderPass::Pointer& pass, const Material::Pointer& mat,
 	const VertexStream::Pointer& vs)
 {
-	RenderPassClass cls = pass->info().renderPassClass;
+	const std::string& cls = pass->info().name;
 	const Material::Configuration& config = mat->configuration(cls);
 
-	auto ps = _private->pipelineCache.find(vs->vertexDeclaration(), config.program,
-		pass, config.depthState, config.blendState, config.cullMode, vs->primitiveType());
+	VulkanPipelineState::Pointer ps = _private->pipelineCache.find(pass->identifier(), vs->vertexDeclaration(), config.program,
+		config.depthState, config.blendState, config.cullMode, vs->primitiveType());
 
 	if (ps.invalid())
 	{
@@ -272,10 +272,9 @@ PipelineState::Pointer VulkanRenderer::acquirePipelineState(const RenderPass::Po
 		ps->setBlendState(config.blendState);
 		ps->setCullMode(config.cullMode);
 		ps->setProgram(config.program);
-		ps->setRenderPass(pass);
-		ps->build();
+		ps->build(pass);
 
-		_private->pipelineCache.addToCache(ps);
+		_private->pipelineCache.addToCache(pass, ps);
 	}
 
 	return ps;
@@ -382,8 +381,9 @@ void VulkanRenderer::present()
 #endif
 	
 	_private->swapchain.present(_private->vulkan());
-	_private->passes.clear();
 	VULKAN_CALL(vkQueueWaitIdle(_private->queue));
+
+	_private->passes.clear();
 }
 
 

@@ -52,6 +52,8 @@ VulkanRenderPass::VulkanRenderPass(VulkanRenderer* renderer, VulkanState& vulkan
 {
 	ET_PIMPL_INIT(VulkanRenderPass, vulkan, renderer);
 
+	ET_ASSERT(!passInfo.name.empty());
+
 	_private->variablesData = dynamicConstantBuffer().staticAllocate(sizeof(Variables));
 	_private->batches.reserve(128);
 	_private->generateDynamicDescriptorSet(this);
@@ -186,14 +188,17 @@ void VulkanRenderPass::begin()
 
 	uint32_t rtWidth = _private->vulkan.swapchain.extent.width;
 	uint32_t rtHeight = _private->vulkan.swapchain.extent.height;
+	uint32_t rtLayers = 1;
 	uint32_t currentImageIndex = _private->vulkan.swapchain.currentImageIndex;
 
 	ET_ASSERT(currentImageIndex != InvalidIndex);
 
-	if (!info().color[0].useDefaultRenderTarget && info().color[0].texture.valid())
+	Texture::Pointer texture0 = info().color[0].texture;
+	if (!info().color[0].useDefaultRenderTarget && texture0.valid())
 	{
-		rtWidth = static_cast<uint32_t>(info().color[0].texture->size().x);
-        rtHeight = static_cast<uint32_t>(info().color[0].texture->size().y);
+		rtWidth = static_cast<uint32_t>(texture0->size().x);
+        rtHeight = static_cast<uint32_t>(texture0->size().y);
+		rtLayers = texture0->target() == TextureTarget::Texture_Cube ? 6 : texture0->description().layersCount;
 		currentImageIndex = 0;
 	}
 	else if (!info().depth.useDefaultRenderTarget && info().depth.texture.valid())
@@ -233,6 +238,10 @@ void VulkanRenderPass::begin()
 				VulkanTexture::Pointer texture = rt.texture;
 				attachments.emplace_back(texture->nativeTexture().imageView);
 			}
+			else
+			{
+				break;
+			}
 		}
 		
 		if (info().depth.enabled && info().depth.useDefaultRenderTarget)
@@ -250,7 +259,7 @@ void VulkanRenderPass::begin()
 		_private->framebufferInfo.pAttachments = attachments.data();
 		_private->framebufferInfo.width = rtWidth;
 		_private->framebufferInfo.height = rtHeight;
-		_private->framebufferInfo.layers = 1;
+		_private->framebufferInfo.layers = rtLayers;
 		_private->framebufferInfo.renderPass = _private->renderPass;
 
 		VULKAN_CALL(vkCreateFramebuffer(_private->vulkan.device, &_private->framebufferInfo, nullptr, &currentFramebuffer));
@@ -279,7 +288,7 @@ void VulkanRenderPass::pushRenderBatch(const RenderBatch::Pointer& inBatch)
 
 	retain();
 	MaterialInstance::Pointer material = inBatch->material();
-	VulkanProgram::Pointer program = inBatch->material()->configuration(info().renderPassClass).program;
+	VulkanProgram::Pointer program = inBatch->material()->configuration(info().name).program;
 	VulkanPipelineState::Pointer pipelineState = _private->renderer->acquirePipelineState(VulkanRenderPass::Pointer(this), material, inBatch->vertexStream());
 	release();
 
@@ -311,9 +320,9 @@ void VulkanRenderPass::pushRenderBatch(const RenderBatch::Pointer& inBatch)
 	_private->batches.emplace_back();
 
 	VulkanRenderBatch& batch = _private->batches.back();
-	batch.textureSet = material->textureSet(info().renderPassClass);
+	batch.textureSet = material->textureSet(info().name);
 	batch.dynamicOffsets[0] = objectVariables.offset();
-	batch.dynamicOffsets[1] = material->constantBufferData(info().renderPassClass).offset();
+	batch.dynamicOffsets[1] = material->constantBufferData(info().name).offset();
 	batch.vertexBuffer = inBatch->vertexStream()->vertexBuffer();
 	batch.indexBuffer = inBatch->vertexStream()->indexBuffer();
 	batch.indexBufferFormat = vulkan::indexBufferFormat(inBatch->vertexStream()->indexArrayFormat());

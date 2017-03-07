@@ -10,6 +10,10 @@
 
 namespace et
 {
+const std::string RenderPass::kPassNameForward = "forward";
+const std::string RenderPass::kPassNameDepth = "depth";
+const std::string RenderPass::kPassNameUI = "ui";
+
 RenderPass::RenderPass(RenderInterface* renderer, const ConstructionInfo& info) :
 	_renderer(renderer), _info(info)
 {
@@ -57,6 +61,11 @@ void RenderPass::setSharedTexture(MaterialTexture texId, const Texture::Pointer&
 	ET_ASSERT(texId <= MaterialTexture::LastSharedTexture);
 	_sharedTextures[texId].first = tex;
 	_sharedTextures[texId].second = smp;
+}
+
+uint64_t RenderPass::identifier() const
+{
+	return reinterpret_cast<uintptr_t>(this);
 }
 
 }

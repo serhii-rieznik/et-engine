@@ -26,16 +26,44 @@ public:
 	Shared& operator = (const Shared&) = delete;
 
 	uint_fast32_t retain()
-		{ return ++_retainCount; }
-	
+	{
+#if (ET_DEBUG)
+		if (_trackRetains) debug::debugBreak();
+#endif
+		return ++_retainCount;
+	}
+
 	uint_fast32_t release()
-		{ return --_retainCount; }
-	
+	{
+#if (ET_DEBUG)
+		if (_trackRetains) debug::debugBreak();
+#endif
+		return --_retainCount;
+	}
+
 	uint_fast32_t retainCount() const
-		{ return _retainCount.load(); }
+	{
+		return _retainCount.load();
+	}
+
+	void enableRetainCycleTracking(bool enabled)
+	{
+#if (ET_DEBUG)
+		_trackRetains = enabled ? 1 : 0;
+#endif
+	}
 
 private:
 	std::atomic_uint_fast32_t _retainCount{ 0 };
+#if (ET_DEBUG)
+	uint32_t _trackRetains = 0;
+#endif
+};
+
+enum class PointerInit : uint32_t
+{
+	WithNullptr,
+	CreateInplace
 };
 
 template <typename T>
@@ -46,6 +74,12 @@ class IntrusivePtr
 
 public:
 	IntrusivePtr() = default;
+
+	IntrusivePtr(PointerInit initType)
+	{
+		if (initType == PointerInit::CreateInplace)
+			reset(sharedObjectFactory().createObject<T>());
+	}
 
 	IntrusivePtr(const IntrusivePtr& r)
 	{

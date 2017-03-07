@@ -90,22 +90,22 @@ Sampler::Pointer Material::sampler(MaterialTexture t)
 	return samplers[static_cast<uint32_t>(t)].object;
 }
 
-void Material::setProgram(const Program::Pointer& prog, RenderPassClass pt)
+void Material::setProgram(const Program::Pointer& prog, const std::string& pt)
 {
 	_passes[pt].program = prog;
 }
 
-void Material::setDepthState(const DepthState& ds, RenderPassClass pt)
+void Material::setDepthState(const DepthState& ds, const std::string& pt)
 {
 	_passes[pt].depthState = ds;
 }
 
-void Material::setBlendState(const BlendState& bs, RenderPassClass pt)
+void Material::setBlendState(const BlendState& bs, const std::string& pt)
 {
 	_passes[pt].blendState = bs;
 }
 
-void Material::setCullMode(CullMode cm, RenderPassClass pt)
+void Material::setCullMode(CullMode cm, const std::string& pt)
 {
 	_passes[pt].cullMode = cm;
 }
@@ -144,16 +144,14 @@ void Material::loadFromJson(const std::string& source, const std::string& baseFo
 	invalidateTextureSet();
 }
 
-const Material::Configuration& Material::configuration(RenderPassClass cls) const
+const Material::Configuration& Material::configuration(const std::string& cls) const
 {
 	ET_ASSERT(_passes.count(cls) > 0);
 	return _passes.at(cls);
 }
 
-void Material::loadRenderPass(const std::string& name, const Dictionary& obj, const std::string& baseFolder)
+void Material::loadRenderPass(const std::string& cls, const Dictionary& obj, const std::string& baseFolder)
 {
-	RenderPassClass cls = stringToRenderPassClass(name);
-
 	CullMode cullMode = CullMode::Disabled;
 	if (obj.hasKey(kCullMode) && !stringToCullMode(obj.stringForKey(kCullMode)->content, cullMode))
 		log::error("Invalid cull mode specified in material: %s", obj.stringForKey(kCullMode)->content.c_str());
@@ -330,7 +328,7 @@ Material::Pointer MaterialInstance::base()
 	return _base;
 }
 
-void MaterialInstance::buildTextureSet(RenderPassClass pt)
+void MaterialInstance::buildTextureSet(const std::string& pt)
 {
 	const Program::Reflection& reflection = configuration(pt).program->reflection();
 
@@ -385,7 +383,7 @@ void MaterialInstance::buildTextureSet(RenderPassClass pt)
 	_textureSets[pt].valid = true;
 }
 
-void MaterialInstance::buildConstantBuffer(RenderPassClass pt)
+void MaterialInstance::buildConstantBuffer(const std::string& pt)
 {
 	ConstantBufferEntry entry = _constBuffers[pt].obj;
 	if (entry.valid())
@@ -424,7 +422,7 @@ void MaterialInstance::buildConstantBuffer(RenderPassClass pt)
 	_constBuffers[pt].valid = true;
 }
 
-TextureSet::Pointer MaterialInstance::textureSet(RenderPassClass pt)
+TextureSet::Pointer MaterialInstance::textureSet(const std::string& pt)
 {
 	if (!_textureSets[pt].valid)
 		buildTextureSet(pt);
@@ -432,7 +430,7 @@ TextureSet::Pointer MaterialInstance::textureSet(RenderPassClass pt)
 	return _textureSets.at(pt).obj;
 }
 
-ConstantBufferEntry MaterialInstance::constantBufferData(RenderPassClass pt)
+ConstantBufferEntry MaterialInstance::constantBufferData(const std::string& pt)
 {
 	if (!_constBuffers[pt].valid)
 		buildConstantBuffer(pt);
@@ -440,7 +438,7 @@ ConstantBufferEntry MaterialInstance::constantBufferData(RenderPassClass pt)
 	return _constBuffers.at(pt).obj;
 }
 
-const Material::Configuration & MaterialInstance::configuration(RenderPassClass cls) const
+const Material::Configuration & MaterialInstance::configuration(const std::string& cls) const
 {
 	return _base->configuration(cls);
 }

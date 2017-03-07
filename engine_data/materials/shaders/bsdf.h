@@ -31,12 +31,6 @@ float3 directLighting(in Surface surface, in BSDF bsdf);
 #define MIN_REFLECTANCE 		0.16
 #define MIN_FLOAT				0.0000001
 
-/*
- *
- * Implementation
- *
- */
-                                                                                                     
 Surface buildSurface(in float3 baseColor, in float m, in float r)
 {
 	float defaultReflectance = 0.5;
@@ -83,17 +77,17 @@ float ggxMaskingCombined(in float VdotN, in float LdotN, in float roughnessSquar
 	float a = roughnessSquared;
 	float VdotN2 = VdotN * VdotN;
 	float LdotN2 = LdotN * LdotN;
-	return 1.0 / ((VdotN + sqrt(VdotN2 * (1.0 - a) + a)) * (1.0 + sqrt(1.0 - a + a / (LdotN2 + MIN_FLOAT))));
+	return 1.0 / ((VdotN + sqrt(VdotN2 * (1.0 - roughnessSquared) + roughnessSquared)) * (1.0 + sqrt(1.0 - roughnessSquared + roughnessSquared / (LdotN2 + MIN_FLOAT))));
 }
 
 float diffuseBurley(in float LdotN, in float VdotN, in float LdotH, in float roughness)
 {
-#define USE_FROSTBINE_VARIANT 1
+#define USE_FROSTBITE_VARIANT 1
 
 	float Fl = pow(1.0 - LdotN, 5.0);
 	float Fv = pow(1.0 - VdotN, 5.0);
 
-#if (USE_FROSTBINE_VARIANT)
+#if (USE_FROSTBITE_VARIANT)
 	float factor = lerp(1.0, 1.0 / 1.51, roughness);
 	float fd90 = (0.5 + 2.0 * LdotH * LdotH) * roughness;
 	float lightScatter = 1.0 + (fd90 - 1.0) * Fl;
@@ -107,16 +101,17 @@ float diffuseBurley(in float LdotN, in float VdotN, in float LdotH, in float rou
 #endif
 }
 
-float3 directLighting(in Surface surface, in BSDF bsdf)
+float3 computeDirectDiffuse(in Surface surface, in BSDF bsdf)
 {
 	float diffuseTerm = diffuseBurley(bsdf.LdotN, bsdf.VdotN, bsdf.LdotH, surface.roughness);
-	float3 diffuse = surface.baseColor * saturate(diffuseTerm * bsdf.LdotN * NORMALIZATION_SCALE);
+	return surface.baseColor * saturate(diffuseTerm * bsdf.LdotN * NORMALIZATION_SCALE);
+}
 
+float3 computeDirectSpecular(in Surface surface, in BSDF bsdf)
+{
 	float d = ggxDistribution(bsdf.NdotH, surface.roughnessSquared);
 	float g = ggxMasking(bsdf.VdotN, bsdf.LdotN, surface.roughnessSquared);
-	float3 specular = d * g * lerp(surface.f0, surface.f90, pow(1.0 - bsdf.LdotH, 5.0));
-
-	return 0.0 * diffuse + specular * float3(1.0, 0.0, 0.0);
+	return d * g * lerp(surface.f0, surface.f90, pow(1.0 - bsdf.LdotH, 5.0));
 }
 
 

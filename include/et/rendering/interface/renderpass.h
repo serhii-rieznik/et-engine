@@ -38,10 +38,10 @@ public:
 		RenderTarget depth;
 		Camera::Pointer camera;
 		Light::Pointer light;
-		RenderPassClass renderPassClass = RenderPassClass::Forward;
 		float depthBias = 0.0f;
 		float depthSlope = 0.0f;
 		uint32_t priority = 0;
+		std::string name;
 	};
 
 	struct Variables
@@ -58,6 +58,10 @@ public:
 		vec4 lightPosition;
 		mat4 lightProjection;
 	};
+
+	static const std::string kPassNameForward;
+	static const std::string kPassNameUI;
+	static const std::string kPassNameDepth;
 
 public:
 	RenderPass(RenderInterface* renderer, const ConstructionInfo& info);
@@ -77,6 +81,8 @@ public:
 	const Camera::Pointer& camera() const;
 
 	void setSharedTexture(MaterialTexture, const Texture::Pointer&, const Sampler::Pointer&);
+
+	uint64_t identifier() const;
 
 protected:
 	using SharedTexturesSet = std::map<MaterialTexture, std::pair<Texture::Pointer, Sampler::Pointer>>;

@@ -557,21 +557,10 @@ bool stringToCullMode(const std::string& mode, CullMode& outMode)
 	return false;
 }
 
-static const std::unordered_map<std::string, RenderPassClass> renderPassNames =
-{
-	{ "forward", RenderPassClass::Forward },
-	{ "depth", RenderPassClass::Depth },
-};
-
 bool isValidRenderPassName(const std::string& v)
 {
-	return renderPassNames.count(v) > 0;
-}
-
-RenderPassClass stringToRenderPassClass(const std::string& cls)
-{
-	ET_ASSERT(isValidRenderPassName(cls));
-	return renderPassNames.at(cls);
+	std::string lc = lowercase(v);
+	return lc != "name";
 }
 
 template <class T>

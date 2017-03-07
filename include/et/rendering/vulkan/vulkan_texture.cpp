@@ -36,17 +36,31 @@ VulkanTexture::VulkanTexture(VulkanState& vulkan, const Description& desc, const
 	info.imageType = vulkan::textureTargetToImageType(desc.target);
 	info.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 	info.mipLevels = desc.levelCount;
-	info.arrayLayers = 1;
 	info.samples = VK_SAMPLE_COUNT_1_BIT;
 	info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 	info.tiling = VK_IMAGE_TILING_OPTIMAL;
 	info.usage = VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+
+	switch (desc.target)
+	{
+	case TextureTarget::Texture_2D:
+		info.arrayLayers = 1;
+		break;
+	case TextureTarget::Texture_Cube:
+		info.arrayLayers = 6;
+		info.flags |= VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT;
+		break;
+	case TextureTarget::Texture_2D_Array:
+		info.arrayLayers = desc.layersCount;
+		info.flags |= VK_IMAGE_CREATE_2D_ARRAY_COMPATIBLE_BIT_KHR;
+		break;
+	default:
+		ET_FAIL("Invalid TextureTarget provided");
+	}
 	
 	if (desc.isRenderTarget)
 	{
-		info.usage |= isDepthTextureFormat(desc.format) ? 
-			VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT : 
-			VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+		info.usage |= isDepthTextureFormat(desc.format) ? VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT :  VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 	}
 	
 	VULKAN_CALL(vkCreateImage(vulkan.device, &info, nullptr, &_private->image));
@@ -65,7 +79,7 @@ VulkanTexture::VulkanTexture(VulkanState& vulkan, const Description& desc, const
 	imageViewInfo.image = _private->image;
 	imageViewInfo.viewType = vulkan::textureTargetToImageViewType(desc.target);
 	imageViewInfo.format = vulkan::textureFormatValue(desc.format);
-	imageViewInfo.subresourceRange = { _private->aspect, 0, desc.levelCount, 0, 1 };
+	imageViewInfo.subresourceRange = { _private->aspect, 0, desc.levelCount, 0, info.arrayLayers };
 	VULKAN_CALL(vkCreateImageView(vulkan.device, &imageViewInfo, nullptr, &_private->imageView));
 
 	if (data.size() > 0)

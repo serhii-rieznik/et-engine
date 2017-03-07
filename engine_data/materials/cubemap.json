@@ -1,7 +1,7 @@
 {
-	"name" : "textured-2d",
+	"name" : "cubemap routines",
 
-	"forward" : 
+	"eq-to-cubemap" : 
 	{ 
 		"input-layout" : {
 			"position" : 3,
@@ -12,8 +12,11 @@
 			"depth-test": false,
 			"depth-write": false
 		},
+		"options" : {
+			"EQ_MAP_TO_CUBEMAP" : 1
+		},
 		"blend-state": "disabled",
 		"cull-mode" : "disabled",
-		"code" : "shaders/textured"
+		"code" : "shaders/cubemap"
 	}
 }
