@@ -40,7 +40,7 @@ public:
 		Light::Pointer light;
 		float depthBias = 0.0f;
 		float depthSlope = 0.0f;
-		uint32_t priority = 0;
+		uint32_t priority = RenderPassPriority::Default;
 		std::string name;
 	};
 
@@ -70,6 +70,8 @@ public:
 	virtual void begin() = 0;
 	virtual void pushRenderBatch(const RenderBatch::Pointer&) = 0;
 	virtual void end() = 0;
+
+	void executeSingleRenderBatch(const RenderBatch::Pointer&);
 
 	const ConstructionInfo& info() const;
 	ConstantBuffer& dynamicConstantBuffer();

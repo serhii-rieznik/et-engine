@@ -25,7 +25,7 @@
 #	define VULKAN_ENABLE_VALIDATION 0
 #endif
 
-#define VULKAN_COMBINED_SUBMIT 0
+#define VULKAN_COMBINED_SUBMIT 1
 
 namespace et
 {
@@ -306,6 +306,7 @@ void VulkanRenderer::present()
 
 	uint32_t imageIndex = _private->swapchain.currentImageIndex;
 
+	size_t maxQueueSize = std::min(32ull, sqr(_private->passes.size()));
 	Vector<VkSubmitInfo> allSubmits;
 	Vector<VkSemaphore> waitSemaphores;
 	Vector<VkSemaphore> signalSemaphores;
@@ -313,62 +314,83 @@ void VulkanRenderer::present()
 	Vector<VkCommandBuffer> commandBuffers;
 	allSubmits.reserve(_private->passes.size());
 	commandBuffers.reserve(_private->passes.size());
-	waitStages.reserve(_private->passes.size() + 2);
-	waitSemaphores.reserve(_private->passes.size() + 2);
-	signalSemaphores.reserve(_private->passes.size() + 2);
+	waitStages.reserve(maxQueueSize);
+	waitSemaphores.reserve(maxQueueSize);
+	signalSemaphores.reserve(maxQueueSize);
 
-	uint32_t waitOffset = 0;
-	uint32_t signalOffset = 0;
-	uint32_t commandBuffersOffset = 0;
+	uint32_t commandBuffersBegin = 0;
+	uint32_t waitBegin = 0;
+	uint32_t signalBegin = 0;
 
+	uint32_t submittedCommandBuffers = 0;
+	uint32_t submittedWait = 0;
+	uint32_t submittedSignal = 0;
 	for (auto i = _private->passes.begin(), e = _private->passes.end(); i != e; ++i)
 	{
+		uint32_t commandBuffersEnd = commandBuffersBegin;
+		uint32_t waitEnd = waitBegin;
+		uint32_t signalEnd = signalBegin;
+
 		if (i == _private->passes.begin())
 		{
 			waitSemaphores.emplace_back(_private->semaphores.imageAvailable);
 			waitStages.emplace_back(VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT);
+			++waitEnd;
 		}
 
-		for (const VkSemaphore& oldSignalSemaphore : signalSemaphores)
+		for (auto i = signalSemaphores.begin() + signalBegin - submittedSignal, e = signalSemaphores.end(); i != e; ++i)
 		{
-			waitSemaphores.emplace_back(oldSignalSemaphore);
+			waitSemaphores.emplace_back(*i);
 			waitStages.emplace_back(VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT);
+			++waitEnd;
 		}
 
 		const VulkanRenderPass::Pointer& passI = *i;
 		signalSemaphores.emplace_back(passI->nativeRenderPass().semaphore);
 		commandBuffers.emplace_back(passI->nativeRenderPass().commandBuffer);
+		++commandBuffersEnd;
+		++signalEnd;
 
 		for (auto j = i + 1; (j != e) && ((*j)->info().priority == (*i)->info().priority); ++j, ++i)
 		{
 			const VulkanRenderPass::Pointer& passJ = *j;
 			commandBuffers.emplace_back(passJ->nativeRenderPass().commandBuffer);
 			signalSemaphores.emplace_back(passJ->nativeRenderPass().semaphore);
+			++commandBuffersEnd;
+			++signalEnd;
 		}
 
 		if (i + 1 == e)
 		{
 			signalSemaphores.emplace_back(_private->semaphores.renderComplete);
-			signalOffset = static_cast<uint32_t>(signalSemaphores.size()) - 1;
+			signalBegin = static_cast<uint32_t>(signalSemaphores.size()) - 1;
+			signalEnd = signalBegin + 1;
 		}
+
+		submittedCommandBuffers = commandBuffersEnd - commandBuffersBegin;
+		submittedSignal = signalEnd - signalBegin;
+		submittedWait = waitEnd - waitBegin;
 
 		allSubmits.emplace_back();
 		VkSubmitInfo& submitInfo = allSubmits.back();
 		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 
-		submitInfo.commandBufferCount = static_cast<uint32_t>(commandBuffers.size()) - commandBuffersOffset;
-		submitInfo.pCommandBuffers = commandBuffers.data() + commandBuffersOffset;
+		submitInfo.pCommandBuffers = commandBuffers.data() + commandBuffersBegin;
+		submitInfo.commandBufferCount = submittedCommandBuffers;
+		ET_ASSERT(submitInfo.commandBufferCount > 0);
 
-		submitInfo.signalSemaphoreCount = static_cast<uint32_t>(signalSemaphores.size()) - signalOffset;
-		submitInfo.pSignalSemaphores = signalSemaphores.data() + signalOffset;
+		submitInfo.pSignalSemaphores = signalSemaphores.data() + signalBegin;
+		submitInfo.signalSemaphoreCount = submittedSignal;
+		ET_ASSERT(submitInfo.signalSemaphoreCount > 0);
 
-		submitInfo.waitSemaphoreCount = static_cast<uint32_t>(waitSemaphores.size()) - waitOffset;
-		submitInfo.pWaitSemaphores = waitSemaphores.data() + waitOffset;
-		submitInfo.pWaitDstStageMask = waitStages.data() + waitOffset;
+		submitInfo.pWaitDstStageMask = waitStages.data() + waitBegin;
+		submitInfo.pWaitSemaphores = waitSemaphores.data() + waitBegin;
+		submitInfo.waitSemaphoreCount = submittedWait;
+		ET_ASSERT(submitInfo.waitSemaphoreCount > 0);
 
-		commandBuffersOffset += submitInfo.commandBufferCount;
-		waitOffset += submitInfo.waitSemaphoreCount;
-		signalOffset += submitInfo.signalSemaphoreCount;
+		commandBuffersBegin = commandBuffersEnd;
+		signalBegin = signalEnd;
+		waitBegin = waitEnd;
 	
 #if (VULKAN_COMBINED_SUBMIT == 0)
 		VULKAN_CALL(vkQueueSubmit(_private->queue, static_cast<uint32_t>(allSubmits.size()), allSubmits.data(), nullptr));

@@ -8,7 +8,6 @@
 #pragma once
 
 #include <et/rendering/interface/renderer.h>
-#include <et/rendering/systems/cubemapprocessor.h>
 #include <et/scene3d/scene3d.h>
 
 namespace et
@@ -57,8 +56,15 @@ private:
 	void validateMainPass(RenderInterface::Pointer&, const Scene::Pointer&);
 	void validateShadowPass(RenderInterface::Pointer&);
 
+	void validateWrapCubemapPass(RenderInterface::Pointer&);
+
 private:
-	CubemapProcessor _cubemapProcessor;
+	enum : uint32_t
+	{
+		RebuildCubemap = 1 << 0
+	};
+
+private:
 	ObjectsCache _cache;
 	RenderBatchCollection _renderBatches;
 
@@ -67,12 +73,20 @@ private:
     RenderBatchInfoCollection _shadowPassBatches;
 	RenderPass::Pointer _shadowPass;
 
-    Texture::Pointer _shadowTexture;
+	Material::Pointer _cubemapMaterial;
+	RenderPass::Pointer _wrapCubemapPass;
+	RenderBatch::Pointer _wrapCubemapBatch;
+	
+	RenderPass::Pointer _cubemapDebugPass;
+	RenderBatch::Pointer _cubemapDebugBatch;
 
+    Texture::Pointer _shadowTexture;
 	Texture::Pointer _envTexture;
 	Texture::Pointer _envCubemap;
 	Material::Pointer _envMaterial;
 	RenderBatch::Pointer _envBatch;
+
+	uint32_t _state = 0;
 };
 }
 }

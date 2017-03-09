@@ -489,7 +489,6 @@ const Map<MaterialTexture, String>& materialTextureNames()
 		{ MaterialTexture::Shadow, "shadowTexture" },
 		{ MaterialTexture::AmbientOcclusion, "aoTexture" },
 		{ MaterialTexture::Environment, "environmentTexture" },
-		{ MaterialTexture::HammersleySet, "hammersleySetTexture"},
 		{ MaterialTexture::BRDFLookup, "brdfLookupTexture"},
 	};
 	return localMap;
@@ -508,7 +507,6 @@ const Map<MaterialTexture, String>& materialSamplerNames()
 		{ MaterialTexture::Shadow, "shadowSampler" },
 		{ MaterialTexture::AmbientOcclusion, "aoSampler" },
 		{ MaterialTexture::Environment, "environmentSampler" },
-		{ MaterialTexture::HammersleySet, "hammersleySetSampler"},
 		{ MaterialTexture::BRDFLookup, "brdfLookupSampler"},
 	};
 	return names;

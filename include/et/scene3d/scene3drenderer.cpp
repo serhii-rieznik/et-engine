@@ -26,9 +26,12 @@ void Renderer::render(RenderInterface::Pointer& renderer, const Scene::Pointer& 
 
 	validateMainPass(renderer, scene);
 	validateShadowPass(renderer);
+	validateWrapCubemapPass(renderer);
 
 	if (_envMaterial.invalid())
+	{
 		_envMaterial = renderer->sharedMaterialLibrary().loadDefaultMaterial(DefaultMaterial::EnvironmentMap);
+	}
 
 	if (_shadowPass.valid())
 	{
@@ -37,17 +40,17 @@ void Renderer::render(RenderInterface::Pointer& renderer, const Scene::Pointer& 
 		renderer->submitRenderPass(_shadowPass);
 	}
 
-	if (_envCubemap.invalid())
+	if (_state & RebuildCubemap)
 	{
-		TextureDescription::Pointer cubemapDesc(PointerInit::CreateInplace);
-		cubemapDesc->format = TextureFormat::RGBA32F;
-		cubemapDesc->target = TextureTarget::Texture_Cube;
-		cubemapDesc->size = vec2i(256);
-		cubemapDesc->isRenderTarget = true;
-		_envCubemap = renderer->createTexture(cubemapDesc);
+		_wrapCubemapBatch->material()->setTexture(MaterialTexture::BaseColor, _envTexture);
+		_wrapCubemapPass->executeSingleRenderBatch(_wrapCubemapBatch);
+		renderer->submitRenderPass(_wrapCubemapPass);
+		_state &= ~RebuildCubemap;
 	}
-
-	_cubemapProcessor.wrapEquirectangularTextureToCubemap(renderer, _envTexture, _envCubemap);
+	else
+	{
+		printf(".");
+	}
 
 	clip(_mainPass, _renderBatches, _mainPassBatches);
 
@@ -56,6 +59,9 @@ void Renderer::render(RenderInterface::Pointer& renderer, const Scene::Pointer& 
 
 	render(_mainPass, _mainPassBatches);
 	renderer->submitRenderPass(_mainPass);
+
+	_cubemapDebugPass->executeSingleRenderBatch(_cubemapDebugBatch);
+	renderer->submitRenderPass(_cubemapDebugPass);
 }
 
 void Renderer::validateMainPass(RenderInterface::Pointer& renderer, const Scene::Pointer& scene)
@@ -93,6 +99,8 @@ void Renderer::validateMainPass(RenderInterface::Pointer& renderer, const Scene:
 	{
 		_envBatch.reset(nullptr);
 	}
+	
+	_state |= RebuildCubemap;
 
 	RenderPass::ConstructionInfo passInfo;
 	passInfo.camera = scene->mainCamera();
@@ -108,7 +116,6 @@ void Renderer::validateMainPass(RenderInterface::Pointer& renderer, const Scene:
 
 	_mainPass = renderer->allocateRenderPass(passInfo);
 	_mainPass->setSharedTexture(MaterialTexture::Environment, _envTexture, renderer->defaultSampler());
-	_mainPass->setSharedTexture(MaterialTexture::HammersleySet, renderer->generateHammersleySet(1024), renderer->nearestSampler());
 
 	_shadowTexture.reset(nullptr);
 	_cache.flush();
@@ -139,7 +146,7 @@ void Renderer::validateShadowPass(RenderInterface::Pointer& renderer)
 		RenderPass::ConstructionInfo passInfo;
 		passInfo.camera = _mainPass->info().light;
 		passInfo.light = _mainPass->info().light;
-		passInfo.priority = 5;
+		passInfo.priority = RenderPassPriority::Default - 1;
 		passInfo.depth.texture = _shadowTexture;
 		passInfo.depth.loadOperation = FramebufferOperation::Clear;
 		passInfo.depth.storeOperation = FramebufferOperation::Store;
@@ -206,6 +213,54 @@ void Renderer::render(RenderPass::Pointer& pass, const RenderBatchInfoCollection
 	for (const RenderBatchInfo& rb : batches)
 		pass->pushRenderBatch(rb.batch);
 	pass->end();
+}
+
+void Renderer::validateWrapCubemapPass(RenderInterface::Pointer& renderer)
+{
+	if (_cubemapMaterial.invalid())
+	{
+		_cubemapMaterial = renderer->sharedMaterialLibrary().loadMaterial(application().resolveFileName("engine_data/materials/cubemap.json"));
+	}
+
+	if (_envCubemap.invalid())
+	{
+		TextureDescription::Pointer cubemapDesc(PointerInit::CreateInplace);
+		cubemapDesc->format = TextureFormat::RGBA32F;
+		cubemapDesc->target = TextureTarget::Texture_Cube;
+		cubemapDesc->size = vec2i(256);
+		cubemapDesc->isRenderTarget = true;
+		_envCubemap = renderer->createTexture(cubemapDesc);
+	}
+
+	if (_wrapCubemapPass.invalid())
+	{
+		RenderPass::ConstructionInfo passInfo;
+		passInfo.camera = Camera::Pointer(PointerInit::CreateInplace);
+		passInfo.color[0].enabled = true;
+		passInfo.color[0].texture = _envCubemap;
+		passInfo.color[0].loadOperation = FramebufferOperation::Clear;
+		passInfo.color[0].storeOperation = FramebufferOperation::Store;
+		passInfo.color[0].useDefaultRenderTarget = false;
+		passInfo.name = "eq-to-cubemap";
+		passInfo.priority = RenderPassPriority::Default + 0x100;
+		_wrapCubemapPass = renderer->allocateRenderPass(passInfo);
+		_wrapCubemapBatch = renderhelper::createFullscreenRenderBatch(_envTexture, _cubemapMaterial);
+	}
+
+	if (_cubemapDebugPass.invalid())
+	{
+		RenderPass::ConstructionInfo passInfo;
+		passInfo.camera = Camera::Pointer(PointerInit::CreateInplace);
+		passInfo.color[0].enabled = true;
+		passInfo.color[0].loadOperation = FramebufferOperation::Load;
+		passInfo.color[0].storeOperation = FramebufferOperation::Store;
+		passInfo.color[0].useDefaultRenderTarget = true;
+		passInfo.name = "cubemap-visualize";
+		passInfo.priority = RenderPassPriority::UI - 1;
+		_cubemapDebugPass = renderer->allocateRenderPass(passInfo);
+		_cubemapDebugBatch = renderhelper::createFullscreenRenderBatch(_envCubemap, _cubemapMaterial);
+		_cubemapDebugBatch->setTransformation(scaleMatrix(0.5f, 0.5f * Camera::renderingOriginTransform, 0.5f));
+	}
 }
 
 }

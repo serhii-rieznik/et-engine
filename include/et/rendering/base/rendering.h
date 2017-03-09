@@ -442,6 +442,12 @@ enum class FramebufferOperation : uint32_t
 	MultisampleResolve
 };
 
+enum RenderPassPriority : uint32_t
+{
+	Default = 1 << 24,
+	UI = 1 << 16
+};
+
 DataFormat dataTypeDataFormat(DataType t);
 
 VertexAttributeUsage stringToVertexAttributeUsage(const std::string& s);

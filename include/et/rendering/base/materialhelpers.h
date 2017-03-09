@@ -24,7 +24,6 @@ enum class MaterialTexture : uint32_t
 	Opacity,
 
 	Shadow,
-	HammersleySet,
 	AmbientOcclusion,
 	Environment,
 	BRDFLookup,
