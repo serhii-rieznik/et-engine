@@ -44,6 +44,10 @@ struct VulkanSwapchain
 	{
 		VkImage color = nullptr;
 		VkImageView colorView = nullptr;
+		VkCommandBuffer barrierFromPresent = nullptr;
+		VkSemaphore semaphoreFromPresent = nullptr;
+		VkCommandBuffer barrierToPresent = nullptr;
+		VkSemaphore semaphoreToPresent = nullptr;
 	};
     struct DepthBuffer
     {

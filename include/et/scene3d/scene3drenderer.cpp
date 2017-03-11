@@ -163,7 +163,7 @@ void Renderer::validateShadowPass(RenderInterface::Pointer& renderer)
 		RenderPass::ConstructionInfo passInfo;
 		passInfo.camera = _mainPass->info().light;
 		passInfo.light = _mainPass->info().light;
-		passInfo.priority = RenderPassPriority::Default - 1;
+		passInfo.priority = RenderPassPriority::Default + 1;
 		passInfo.depth.texture = _shadowTexture;
 		passInfo.depth.loadOperation = FramebufferOperation::Clear;
 		passInfo.depth.storeOperation = FramebufferOperation::Store;

@@ -158,19 +158,17 @@ VulkanRenderPass::VulkanRenderPass(VulkanRenderer* renderer, VulkanState& vulkan
 			attachment.samples = VK_SAMPLE_COUNT_1_BIT;
 			attachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
 			attachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+			attachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+			attachment.finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 			if (target.useDefaultRenderTarget)
 			{
 				attachment.format = vulkan.swapchain.surfaceFormat.format;
-				attachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-				attachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
 			}
 			else
 			{
 				ET_ASSERT(target.texture.valid());
-				VulkanTexture::Pointer texture = target.texture;
+				const VulkanTexture::Pointer& texture = target.texture;
 				attachment.format = texture->nativeTexture().format;
-				attachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-				attachment.finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 			}
 			if (attachment.loadOp == VK_ATTACHMENT_LOAD_OP_CLEAR)
 			{

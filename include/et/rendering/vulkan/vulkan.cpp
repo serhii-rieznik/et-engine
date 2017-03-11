@@ -202,6 +202,16 @@ void VulkanSwapchain::createSizeDependentResources(VulkanState& vulkan, const ve
 		{
 			vkDestroyImageView(vulkan.device, rt.colorView, nullptr);
 			rt.colorView = nullptr;
+
+			vkFreeCommandBuffers(vulkan.device, vulkan.commandPool, 1, &rt.barrierFromPresent);
+			rt.barrierFromPresent = nullptr;
+			vkFreeCommandBuffers(vulkan.device, vulkan.commandPool, 1, &rt.barrierToPresent);
+			rt.barrierToPresent = nullptr;
+
+			vkDestroySemaphore(vulkan.device, rt.semaphoreFromPresent, nullptr);
+			rt.semaphoreFromPresent = nullptr;
+			vkDestroySemaphore(vulkan.device, rt.semaphoreToPresent, nullptr);
+			rt.semaphoreToPresent = nullptr;
 		}
         
         vkDestroyImageView(vulkan.device, depthBuffer.depthView, nullptr);
@@ -226,8 +236,35 @@ void VulkanSwapchain::createSizeDependentResources(VulkanState& vulkan, const ve
 		{
 			rt.color = *swapchainImagesPtr++;
 			rt.colorView = createImageView(vulkan, rt.color, VK_IMAGE_ASPECT_COLOR_BIT, surfaceFormat.format);
+
+			VkCommandBufferAllocateInfo allocInfo = { VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO };
+			allocInfo.commandBufferCount = 1;
+			allocInfo.commandPool = vulkan.commandPool;
+			allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+			VULKAN_CALL(vkAllocateCommandBuffers(vulkan.device, &allocInfo, &rt.barrierFromPresent));
+			VULKAN_CALL(vkAllocateCommandBuffers(vulkan.device, &allocInfo, &rt.barrierToPresent));
+
+			VkCommandBufferBeginInfo beginInfo = { VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO };
+			beginInfo.flags = VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT;
+			
+			VULKAN_CALL(vkBeginCommandBuffer(rt.barrierFromPresent, &beginInfo));
+			vulkan::imageBarrier(vulkan, rt.barrierFromPresent, rt.color, VK_IMAGE_ASPECT_COLOR_BIT,
+				0, VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+				VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT);
+			VULKAN_CALL(vkEndCommandBuffer(rt.barrierFromPresent));
+
+			VULKAN_CALL(vkBeginCommandBuffer(rt.barrierToPresent, &beginInfo));
+			vulkan::imageBarrier(vulkan, rt.barrierToPresent, rt.color, VK_IMAGE_ASPECT_COLOR_BIT,
+				0, VK_ACCESS_MEMORY_READ_BIT, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
+				VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT);
+			VULKAN_CALL(vkEndCommandBuffer(rt.barrierToPresent));
+
+			VkSemaphoreCreateInfo semaphoreInfo = { VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO };
+			VULKAN_CALL(vkCreateSemaphore(vulkan.device, &semaphoreInfo, nullptr, &rt.semaphoreFromPresent));
+			VULKAN_CALL(vkCreateSemaphore(vulkan.device, &semaphoreInfo, nullptr, &rt.semaphoreToPresent));
 		}
-        if (createDepthImage(vulkan, depthBuffer.depth, depthBuffer.depthMemory, cmdBuffer))
+        
+		if (createDepthImage(vulkan, depthBuffer.depth, depthBuffer.depthMemory, cmdBuffer))
         {
             depthBuffer.depthView = createImageView(vulkan, depthBuffer.depth, VK_IMAGE_ASPECT_DEPTH_BIT, depthFormat);
         }
