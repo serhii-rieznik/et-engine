@@ -68,9 +68,9 @@ uint64_t RenderPass::identifier() const
 	return reinterpret_cast<uintptr_t>(this);
 }
 
-void RenderPass::executeSingleRenderBatch(const RenderBatch::Pointer& batch, const BeginInfo& beginInfo)
+void RenderPass::executeSingleRenderBatch(const RenderBatch::Pointer& batch, const RenderPassBeginInfo& info)
 {
-	begin(beginInfo);
+	begin(info);
 	pushRenderBatch(batch);
 	end();
 }

@@ -111,8 +111,8 @@ struct VulkanNativeRenderPass
 
 	VkSemaphore semaphore = nullptr;
 	
-	VkViewport viewport { };
-	VkRect2D scissor { };
+	// VkViewport viewport { };
+	// VkRect2D scissor { };
 };
 
 enum DescriptorSetClass : uint32_t

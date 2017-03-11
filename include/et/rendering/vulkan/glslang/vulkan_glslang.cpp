@@ -278,12 +278,14 @@ bool hlslToSPIRV(const std::string& _source, std::vector<uint32_t>& vertexBin, s
 
 void initGlslangResources()
 {
+	glslang::InitProcess();
 	glslang::InitializeProcess();
 }
 
 void cleanupGlslangResources()
 {
 	glslang::FinalizeProcess();
+	glslang::DetachProcess();
 }
 
 void buildProgramInputLayout(const glslang::TProgram& program, Program::Reflection& reflection)

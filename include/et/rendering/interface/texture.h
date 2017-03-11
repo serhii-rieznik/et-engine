@@ -64,32 +64,24 @@ public:
 		return _desc.target;
 	}
 
-	int width() const
+	vec2i size(uint32_t level) const
 	{
-		return _desc.size.x;
+		return _desc.sizeForMipLevel(level);
 	}
 
-	int height() const
+	vec2 sizeFloat(uint32_t level) const
 	{
-		return _desc.size.y;
+		const vec2i sz = size(level);
+		return vec2(static_cast<float>(sz.x), static_cast<float>(sz.y));
 	}
 
-	const vec2i& size() const
+	vec2 texel(uint32_t level) const
 	{
-		return _desc.size;
+		const vec2i sz = size(level);
+		return vec2(1.0f / static_cast<float>(sz.x), 1.0f / static_cast<float>(sz.y));
 	}
 
-	vec2 sizeFloat() const
-	{
-		return vec2(static_cast<float>(_desc.size.x), static_cast<float>(_desc.size.y));
-	}
-
-	vec2 texel() const
-	{
-		return vec2(1.0f / static_cast<float>(_desc.size.x), 1.0f / static_cast<float>(_desc.size.y));
-	}
-
-	vec2 getTexCoord(const vec2& vec, TextureOrigin origin = TextureOrigin::TopLeft) const;
+	vec2 getTexCoord(const vec2& vec, uint32_t level, TextureOrigin origin = TextureOrigin::TopLeft) const;
 
 	virtual void setImageData(const BinaryDataStorage&) = 0;
 	virtual void updateRegion(const vec2i& pos, const vec2i& size, const BinaryDataStorage&) = 0;
@@ -98,19 +90,9 @@ private:
 	Description _desc;
 };
 
-class Framebuffer : public Shared
+inline vec2 Texture::getTexCoord(const vec2& vec, uint32_t level, TextureOrigin origin) const
 {
-public:
-	ET_DECLARE_POINTER(Framebuffer);
-
-public:
-	Texture::Pointer color[MaxRenderTargets];
-	Texture::Pointer depth;
-};
-
-inline vec2 Texture::getTexCoord(const vec2& vec, TextureOrigin origin) const
-{
-	vec2 tx = texel();
+	vec2 tx = texel(level);
 	float ax = vec.x * tx.x;
 	float ay = vec.y * tx.y;
 	return vec2(ax, (origin == TextureOrigin::TopLeft) ? 1.0f - ay : ay);

@@ -40,14 +40,32 @@ void Renderer::render(RenderInterface::Pointer& renderer, const Scene::Pointer& 
 		renderer->submitRenderPass(_shadowPass);
 	}
 
-	if (_state & RebuildCubemap)
+	// if (_state & RebuildCubemap)
 	{
+		RenderPassBeginInfo beginInfo;
+		beginInfo.subpasses.emplace_back(0, 0);
+		beginInfo.subpasses.emplace_back(1, 0);
+		beginInfo.subpasses.emplace_back(2, 0);
+		beginInfo.subpasses.emplace_back(3, 0);
+		beginInfo.subpasses.emplace_back(4, 0);
+		beginInfo.subpasses.emplace_back(5, 0);
+
+		Camera cm;
+		const mat4& proj = cm.perspectiveProjection(HALF_PI, 1.0f, 1.0f, 2.0f);
+		CubemapProjectionMatrixArray projections = cubemapMatrixProjectionArray(proj, vec3(0.0f));
+		for (mat4& m : projections)
+			m = m.inverted();
+
 		_wrapCubemapBatch->material()->setTexture(MaterialTexture::BaseColor, _envTexture);
+		_wrapCubemapPass->begin(beginInfo);
 		for (uint32_t i = 0; i < 6; ++i)
 		{
-			_wrapCubemapPass->executeSingleRenderBatch(_wrapCubemapBatch, { i, 0 });
-			renderer->submitRenderPass(_wrapCubemapPass);
+			_wrapCubemapBatch->setTransformation(projections[i]);
+			_wrapCubemapPass->pushRenderBatch(_wrapCubemapBatch);
+			_wrapCubemapPass->nextSubpass();
 		}
+		_wrapCubemapPass->end();
+		renderer->submitRenderPass(_wrapCubemapPass);
 		_state &= ~RebuildCubemap;
 	}
 
@@ -59,7 +77,7 @@ void Renderer::render(RenderInterface::Pointer& renderer, const Scene::Pointer& 
 	render(_mainPass, _mainPassBatches);
 	renderer->submitRenderPass(_mainPass);
 
-	_cubemapDebugPass->executeSingleRenderBatch(_cubemapDebugBatch, {0, 0});
+	_cubemapDebugPass->executeSingleRenderBatch(_cubemapDebugBatch, { 0, 0 });
 	renderer->submitRenderPass(_cubemapDebugPass);
 }
 
@@ -98,7 +116,7 @@ void Renderer::validateMainPass(RenderInterface::Pointer& renderer, const Scene:
 	{
 		_envBatch.reset(nullptr);
 	}
-	
+
 	_state |= RebuildCubemap;
 
 	RenderPass::ConstructionInfo passInfo;
@@ -208,7 +226,7 @@ void Renderer::clip(RenderPass::Pointer& pass, const RenderBatchCollection& inBa
 
 void Renderer::render(RenderPass::Pointer& pass, const RenderBatchInfoCollection& batches)
 {
-	pass->begin({0, 0});
+	pass->begin({ 0, 0 });
 	for (const RenderBatchInfo& rb : batches)
 		pass->pushRenderBatch(rb.batch);
 	pass->end();

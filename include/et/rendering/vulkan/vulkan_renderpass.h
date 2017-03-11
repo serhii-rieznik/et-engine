@@ -27,7 +27,8 @@ public:
 
 	const VulkanNativeRenderPass& nativeRenderPass() const;
 
-	void begin(const BeginInfo&) override;
+	void begin(const RenderPassBeginInfo&) override;
+	void nextSubpass() override;
 	void pushRenderBatch(const RenderBatch::Pointer&) override;
 	void end() override;
 	

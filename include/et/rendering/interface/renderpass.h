@@ -26,6 +26,35 @@ struct RenderTarget
 	bool enabled = false;
 };
 
+union RenderSubpass
+{
+	struct
+	{
+		uint32_t layer;
+		uint32_t level;
+	};
+	uint64_t hash;
+
+	RenderSubpass() : 
+		hash(0) { }
+
+	RenderSubpass(uint32_t aLayer, uint32_t aLevel) : 
+		layer(aLayer), level(aLevel) { }
+
+	bool operator < (const RenderSubpass& r) 
+		{ return hash < r.hash;  }
+};
+
+struct RenderPassBeginInfo
+{
+	Vector<RenderSubpass> subpasses;
+
+	RenderPassBeginInfo() = default;
+
+	RenderPassBeginInfo(uint32_t l, uint32_t m) : 
+		subpasses(1, { l, m }) { }
+};
+
 class RenderInterface;
 class RenderPass : public Shared
 {
@@ -42,16 +71,6 @@ public:
 		float depthSlope = 0.0f;
 		uint32_t priority = RenderPassPriority::Default;
 		std::string name;
-	};
-
-	struct BeginInfo
-	{
-		uint32_t layerIndex = 0;
-		uint32_t mipLevel = 0; // TODO : handle
-
-		BeginInfo() = default;
-		BeginInfo(uint32_t l) : layerIndex(l) { }
-		BeginInfo(uint32_t l, uint32_t m) : layerIndex(l), mipLevel(m) { }
 	};
 
 	struct Variables
@@ -74,14 +93,15 @@ public:
 	static const std::string kPassNameDepth;
 
 public:
-	RenderPass(RenderInterface* renderer, const ConstructionInfo& info);
+	RenderPass(RenderInterface*, const ConstructionInfo&);
 	virtual ~RenderPass();
 
-	virtual void begin(const BeginInfo&) = 0;
+	virtual void begin(const RenderPassBeginInfo& info) = 0;
+	virtual void nextSubpass() = 0;
 	virtual void pushRenderBatch(const RenderBatch::Pointer&) = 0;
 	virtual void end() = 0;
 
-	void executeSingleRenderBatch(const RenderBatch::Pointer&, const BeginInfo&);
+	void executeSingleRenderBatch(const RenderBatch::Pointer&, const RenderPassBeginInfo&);
 
 	const ConstructionInfo& info() const;
 	ConstantBuffer& dynamicConstantBuffer();

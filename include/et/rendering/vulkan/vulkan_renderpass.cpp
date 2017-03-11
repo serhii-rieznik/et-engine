@@ -25,11 +25,45 @@ struct VulkanRenderBatch
 	uint32_t indexCount = InvalidIndex;
 };
 
-struct VulkanRenderPassBeginInfo
+struct VulkanCommand
+{
+	enum class Type : uint32_t
+	{
+		Undefined,
+		BeginRenderPass,
+		RenderBatch,
+		Barrier,
+		NextRenderPass,
+		EndRenderPass,
+	} type = Type::Undefined;
+
+	VulkanRenderBatch batch;
+	RenderSubpass subpass;
+
+	VulkanCommand(Type t) :
+		type(t) { }
+
+	VulkanCommand(VulkanRenderBatch&& b) :
+		type(Type::RenderBatch), batch(b) { }
+
+	VulkanCommand(const RenderSubpass& sp) :
+		type(Type::BeginRenderPass), subpass(sp) { }
+};
+
+struct VulkanRenderSubpass
 {
 	VkFramebufferCreateInfo framebufferInfo = { VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO };
 	VkRenderPassBeginInfo beginInfo = { VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO };
+	VkViewport viewport { };
+	VkRect2D scissor { };
 };
+
+uint64_t framebufferHash(uint32_t imageIndex, uint32_t mipLevel, uint32_t layer)
+{
+	return static_cast<uint64_t>(layer) | 
+		((static_cast<uint64_t>(mipLevel) & 0xFFFF) << 32) | 
+		((static_cast<uint64_t>(imageIndex) & 0xFFFF) << 48);
+}
 
 class VulkanRenderPassPrivate : public VulkanNativeRenderPass
 {
@@ -41,10 +75,12 @@ public:
 	VulkanRenderer* renderer = nullptr;
 
 	ConstantBufferEntry variablesData;
-	Vector<VulkanRenderBatch> batches;
+	Vector<VulkanCommand> commands;
 	Vector<VkClearValue> clearValues;
-	Map<uint32_t, VulkanRenderPassBeginInfo> framebuffers;
-	uint32_t currentBeginInfoIndex = 0;
+	Map<uint64_t, VulkanRenderSubpass> subpasses;
+	Vector<VulkanRenderSubpass> subpassSequence;
+	uint32_t currentImageIndex = 0;
+	uint32_t currentSubpassIndex = 0;
 
 	std::atomic_bool recording{ false };
 
@@ -60,8 +96,9 @@ VulkanRenderPass::VulkanRenderPass(VulkanRenderer* renderer, VulkanState& vulkan
 	ET_ASSERT(!passInfo.name.empty());
 
 	_private->variablesData = dynamicConstantBuffer().staticAllocate(sizeof(Variables));
-	_private->batches.reserve(128);
+	_private->commands.reserve(256);
 	_private->generateDynamicDescriptorSet(this);
+	_private->subpassSequence.reserve(64);
 
 	VkSemaphoreCreateInfo semaphoreInfo = { VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO };
 	VULKAN_CALL(vkCreateSemaphore(vulkan.device, &semaphoreInfo, nullptr, &_private->semaphore));
@@ -72,54 +109,13 @@ VulkanRenderPass::VulkanRenderPass(VulkanRenderer* renderer, VulkanState& vulkan
 	info.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
 	VULKAN_CALL(vkAllocateCommandBuffers(vulkan.device, &info, &_private->commandBuffer));
 
-	Vector<VkAttachmentReference> colorAttachmentReferences;
-	colorAttachmentReferences.reserve(8);
-
 	Vector<VkAttachmentDescription> attachments;
-	attachments.reserve(8);
+	attachments.reserve(MaxRenderTargets + 1);
+	Vector<VkAttachmentReference> colorAttachmentReferences;
+	colorAttachmentReferences.reserve(MaxRenderTargets + 1);
 
-	for (const RenderTarget& target : passInfo.color)
-	{
-		if (target.enabled)
-		{
-			colorAttachmentReferences.emplace_back();
-			VkAttachmentReference& ref = colorAttachmentReferences.back();
-			ref.attachment = static_cast<uint32_t>(colorAttachmentReferences.size() - 1);
-			ref.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-
-			attachments.emplace_back();
-			VkAttachmentDescription& attachment = attachments.back();
-			attachment.loadOp = vulkan::frameBufferOperationToLoadOperation(target.loadOperation);
-			attachment.storeOp = vulkan::frameBufferOperationToStoreOperation(target.storeOperation);
-			attachment.samples = VK_SAMPLE_COUNT_1_BIT;
-			attachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-			attachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-
-			if (target.useDefaultRenderTarget)
-			{
-				attachment.format = vulkan.swapchain.surfaceFormat.format;
-				attachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-				attachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-			}
-			else
-			{
-				ET_ASSERT(target.texture.valid());
-				VulkanTexture::Pointer texture = target.texture;
-				attachment.format = texture->nativeTexture().format;
-				attachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-				attachment.finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-			}
-
-			if (attachment.loadOp == VK_ATTACHMENT_LOAD_OP_CLEAR)
-			{
-				const vec4& cl = target.clearValue;
-				_private->clearValues.emplace_back();
-				_private->clearValues.back().color = { cl.x, cl.y, cl.z, cl.w };
-			}
-		}
-	}
-
-	VkAttachmentReference depthAttachmentReference = { static_cast<uint32_t>(colorAttachmentReferences.size()) };
+	uint32_t colorAttachmentIndex = 0;
+	VkAttachmentReference depthAttachmentReference = { };
 	if (passInfo.depth.enabled)
 	{
 		attachments.emplace_back();
@@ -148,9 +144,50 @@ VulkanRenderPass::VulkanRenderPass(VulkanRenderer* renderer, VulkanState& vulkan
 			_private->clearValues.back().depthStencil = { passInfo.depth.clearValue.x };
 		}
 		depthAttachmentReference.layout = attachment.finalLayout;
+		++colorAttachmentIndex;
 	}
 
-	VkSubpassDescription subpassInfo = {};
+	for (const RenderTarget& target : passInfo.color)
+	{
+		if (target.enabled)
+		{
+			attachments.emplace_back();
+			VkAttachmentDescription& attachment = attachments.back();
+			attachment.loadOp = vulkan::frameBufferOperationToLoadOperation(target.loadOperation);
+			attachment.storeOp = vulkan::frameBufferOperationToStoreOperation(target.storeOperation);
+			attachment.samples = VK_SAMPLE_COUNT_1_BIT;
+			attachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+			attachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+			if (target.useDefaultRenderTarget)
+			{
+				attachment.format = vulkan.swapchain.surfaceFormat.format;
+				attachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+				attachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+			}
+			else
+			{
+				ET_ASSERT(target.texture.valid());
+				VulkanTexture::Pointer texture = target.texture;
+				attachment.format = texture->nativeTexture().format;
+				attachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+				attachment.finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+			}
+			if (attachment.loadOp == VK_ATTACHMENT_LOAD_OP_CLEAR)
+			{
+				const vec4& cl = target.clearValue;
+				_private->clearValues.emplace_back();
+				_private->clearValues.back().color = { cl.x, cl.y, cl.z, cl.w };
+			}
+			colorAttachmentReferences.push_back({ colorAttachmentIndex, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL });
+			++colorAttachmentIndex;
+		}
+		else
+		{
+			break;
+		}
+	}
+
+	VkSubpassDescription subpassInfo = { };
 	subpassInfo.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
 	subpassInfo.colorAttachmentCount = static_cast<uint32_t>(colorAttachmentReferences.size());
 	subpassInfo.pColorAttachments = colorAttachmentReferences.empty() ? nullptr : colorAttachmentReferences.data();
@@ -167,15 +204,15 @@ VulkanRenderPass::VulkanRenderPass(VulkanRenderer* renderer, VulkanState& vulkan
 
 VulkanRenderPass::~VulkanRenderPass()
 {
-	for (const auto& fb : _private->framebuffers)
+	for (const auto& fb : _private->subpasses)
 		vkDestroyFramebuffer(_private->vulkan.device, fb.second.beginInfo.framebuffer, nullptr);
 
 	vkDestroyRenderPass(_private->vulkan.device, _private->renderPass, nullptr);
 	vkFreeCommandBuffers(_private->vulkan.device, _private->vulkan.commandPool, 1, &_private->commandBuffer);
-	
+
 	vkFreeDescriptorSets(_private->vulkan.device, _private->vulkan.descriptorPool, 1, &_private->dynamicDescriptorSet);
 	vkDestroyDescriptorSetLayout(_private->vulkan.device, _private->dynamicDescriptorSetLayout, nullptr);
-	
+
 	dynamicConstantBuffer().free(_private->variablesData);
 
 	ET_PIMPL_FINALIZE(VulkanRenderPass);
@@ -186,95 +223,125 @@ const VulkanNativeRenderPass& VulkanRenderPass::nativeRenderPass() const
 	return *(_private);
 }
 
-void VulkanRenderPass::begin(const BeginInfo& beginInfo)
+void VulkanRenderPass::begin(const RenderPassBeginInfo& beginInfo)
 {
 	ET_ASSERT(_private->recording == false);
 
-	uint32_t rtWidth = _private->vulkan.swapchain.extent.width;
-	uint32_t rtHeight = _private->vulkan.swapchain.extent.height;
-	uint32_t rtLayers = 1;
-	_private->currentBeginInfoIndex = _private->vulkan.swapchain.currentImageIndex;
+	_private->subpassSequence.clear();
 
-	ET_ASSERT(_private->currentBeginInfoIndex != InvalidIndex);
+	Texture::Pointer renderTarget = info().color[0].texture;
+	Texture::Pointer depthTarget = info().depth.texture;
+	bool useCustomColor = info().color[0].enabled && !info().color[0].useDefaultRenderTarget;
+	bool useCustomDepth = info().depth.enabled && !info().depth.useDefaultRenderTarget;
+	uint32_t defaultWidth = _private->vulkan.swapchain.extent.width;
+	uint32_t defaultHeight = _private->vulkan.swapchain.extent.height;
+	_private->currentImageIndex = _private->vulkan.swapchain.currentImageIndex;
 
-	Texture::Pointer texture0 = info().color[0].texture;
-	if (!info().color[0].useDefaultRenderTarget && texture0.valid())
+	if ((useCustomColor && renderTarget.valid()) || (useCustomDepth && depthTarget.valid()))
+		_private->currentImageIndex = 0;
+
+	for (const RenderSubpass& subpass : beginInfo.subpasses)
 	{
-		rtWidth = static_cast<uint32_t>(texture0->size().x);
-        rtHeight = static_cast<uint32_t>(texture0->size().y);
-		_private->currentBeginInfoIndex = beginInfo.layerIndex;
-	}
-	else if (!info().depth.useDefaultRenderTarget && info().depth.texture.valid())
-	{
-		rtWidth = static_cast<uint32_t>(info().depth.texture->size().x);
-		rtHeight = static_cast<uint32_t>(info().depth.texture->size().y);
-		_private->currentBeginInfoIndex = 0;
-	}
-
-	VulkanRenderPassBeginInfo& cbi = _private->framebuffers[_private->currentBeginInfoIndex];
-	if ((cbi.framebufferInfo.width != rtWidth) || (cbi.framebufferInfo.height != rtHeight))
-	{
-		vkDestroyFramebuffer(_private->vulkan.device, cbi.beginInfo.framebuffer, nullptr);
-		cbi.beginInfo.framebuffer = nullptr;
-	}
-
-	if (cbi.beginInfo.framebuffer == nullptr)
-	{
-		Vector<VkImageView> attachments;
-		attachments.reserve(MaxRenderTargets + 1);
-
-		for (const RenderTarget& rt : info().color)
+		if (subpass.level > 0)
 		{
-			if (rt.enabled && rt.useDefaultRenderTarget)
-			{
-				attachments.emplace_back(_private->vulkan.swapchain.currentRenderTarget().colorView);
-			}
-			else if (rt.enabled)
-			{
-				ET_ASSERT(rt.texture.valid());
-				VulkanTexture::Pointer texture = rt.texture;
-				attachments.emplace_back(texture->nativeTexture().layerImageView(beginInfo.layerIndex));
-			}
-			else
-			{
-				break;
-			}
+			ET_ASSERT(useCustomColor);
+			ET_ASSERT(useCustomDepth);
 		}
+		uint64_t hash = framebufferHash(_private->currentImageIndex, subpass.level, subpass.layer);
+
+		uint32_t width = defaultWidth;
+		uint32_t height = defaultHeight;
+		if (useCustomColor)
+		{
+			vec2i sz = renderTarget->size(subpass.level);
+			width = static_cast<uint32_t>(sz.x);
+			height = static_cast<uint32_t>(sz.y);
+		}
+
+		VulkanRenderSubpass& subpassInfo = _private->subpasses[hash];
+		if ((subpassInfo.beginInfo.framebuffer != nullptr) &&
+			((subpassInfo.framebufferInfo.width != width) || (subpassInfo.framebufferInfo.height != height)))
+		{
+			vkDestroyFramebuffer(_private->vulkan.device, subpassInfo.beginInfo.framebuffer, nullptr);
+			subpassInfo.beginInfo.framebuffer = nullptr;
+		}
+
+		if (subpassInfo.beginInfo.framebuffer == nullptr)
+		{
+			Vector<VkImageView> attachments;
+			attachments.reserve(MaxRenderTargets + 1);
+
+			if (info().depth.enabled && info().depth.useDefaultRenderTarget)
+			{
+				attachments.emplace_back(_private->vulkan.swapchain.depthBuffer.depthView);
+			}
+			else if (info().depth.enabled)
+			{
+				ET_ASSERT(info().depth.texture.valid());
+				VulkanTexture::Pointer texture = info().depth.texture;
+				attachments.emplace_back(texture->nativeTexture().completeImageView);
+			}
+
+			for (const RenderTarget& rt : info().color)
+			{
+				if (rt.enabled && rt.useDefaultRenderTarget)
+				{
+					attachments.emplace_back(_private->vulkan.swapchain.currentRenderTarget().colorView);
+				}
+				else if (rt.enabled)
+				{
+					ET_ASSERT(rt.texture.valid());
+					const VulkanTexture::Pointer& texture = rt.texture;
+					attachments.emplace_back(texture->nativeTexture().layerImageView(subpass.layer));
+				}
+				else
+				{
+					break;
+				}
+			}
+			subpassInfo.framebufferInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
+			subpassInfo.framebufferInfo.pAttachments = attachments.data();
+			subpassInfo.framebufferInfo.width = width;
+			subpassInfo.framebufferInfo.height = height;
+			subpassInfo.framebufferInfo.layers = 1;
+			subpassInfo.framebufferInfo.renderPass = _private->renderPass;
+			VULKAN_CALL(vkCreateFramebuffer(_private->vulkan.device, &subpassInfo.framebufferInfo, nullptr, &subpassInfo.beginInfo.framebuffer));
+		}
+
+		subpassInfo.beginInfo.clearValueCount = static_cast<uint32_t>(_private->clearValues.size());
+		subpassInfo.beginInfo.pClearValues = _private->clearValues.data();
+		subpassInfo.beginInfo.renderPass = _private->renderPass;
+		subpassInfo.beginInfo.renderArea.extent.width = width;
+		subpassInfo.beginInfo.renderArea.extent.height = height;
+
+		subpassInfo.viewport.width = static_cast<float>(width);
+		subpassInfo.viewport.height = static_cast<float>(height);
+		subpassInfo.viewport.maxDepth = 1.0f;
+
+		subpassInfo.scissor.extent.width = width;
+		subpassInfo.scissor.extent.height = height;
 		
-		if (info().depth.enabled && info().depth.useDefaultRenderTarget)
-		{
-			attachments.emplace_back(_private->vulkan.swapchain.depthBuffer.depthView);
-		}
-		else if (info().depth.enabled)
-		{
-			ET_ASSERT(info().depth.texture.valid());
-			VulkanTexture::Pointer texture = info().depth.texture;
-			attachments.emplace_back(texture->nativeTexture().completeImageView);
-		}
-
-		cbi.framebufferInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
-		cbi.framebufferInfo.pAttachments = attachments.data();
-		cbi.framebufferInfo.width = rtWidth;
-		cbi.framebufferInfo.height = rtHeight;
-		cbi.framebufferInfo.layers = rtLayers;
-		cbi.framebufferInfo.renderPass = _private->renderPass;
-
-		VULKAN_CALL(vkCreateFramebuffer(_private->vulkan.device, &cbi.framebufferInfo, nullptr, &cbi.beginInfo.framebuffer));
+		_private->subpassSequence.emplace_back(subpassInfo);
 	}
-
-	cbi.beginInfo.clearValueCount = static_cast<uint32_t>(_private->clearValues.size());
-	cbi.beginInfo.pClearValues = _private->clearValues.data();
-	cbi.beginInfo.renderPass = _private->renderPass;
-	cbi.beginInfo.renderArea.extent.width = rtWidth;
-	cbi.beginInfo.renderArea.extent.height = rtHeight;
-
-	_private->scissor.extent = cbi.beginInfo.renderArea.extent;
-	_private->viewport.width = static_cast<float>(rtWidth);
-	_private->viewport.height = static_cast<float>(rtHeight);
-	_private->viewport.maxDepth = 1.0f;
+	
 	_private->loadVariables(info().camera, info().light);
 
 	_private->recording = true;
+	_private->currentSubpassIndex = 0;
+	_private->commands.emplace_back(beginInfo.subpasses.front());
+}
+
+void VulkanRenderPass::nextSubpass()
+{
+	ET_ASSERT(_private->recording);
+
+	if (_private->currentSubpassIndex + 1 >= _private->subpassSequence.size())
+		return;
+
+	_private->commands.emplace_back(VulkanCommand::Type::EndRenderPass);
+	_private->commands.emplace_back(VulkanCommand::Type::NextRenderPass);
+	_private->commands.emplace_back(VulkanCommand::Type::BeginRenderPass);
+	++_private->currentSubpassIndex;
 }
 
 void VulkanRenderPass::pushRenderBatch(const RenderBatch::Pointer& inBatch)
@@ -305,16 +372,14 @@ void VulkanRenderPass::pushRenderBatch(const RenderBatch::Pointer& inBatch)
 			memcpy(objectVariables.data() + var->second.offset, inBatch->rotationTransformation().data(), sizeof(inBatch->rotationTransformation()));
 		}
 	}
-	
+
 	for (const auto& sh : sharedTextures())
 	{
 		material->setTexture(sh.first, sh.second.first);
 		material->setSampler(sh.first, sh.second.second);
 	}
 
-	_private->batches.emplace_back();
-
-	VulkanRenderBatch& batch = _private->batches.back();
+	VulkanRenderBatch batch;
 	batch.textureSet = material->textureSet(info().name);
 	batch.dynamicOffsets[0] = objectVariables.offset();
 	batch.dynamicOffsets[1] = material->constantBufferData(info().name).offset();
@@ -324,11 +389,16 @@ void VulkanRenderPass::pushRenderBatch(const RenderBatch::Pointer& inBatch)
 	batch.startIndex = inBatch->firstIndex();
 	batch.indexCount = inBatch->numIndexes();
 	batch.pipeline = pipelineState;
+
+	_private->commands.emplace_back(std::move(batch));
 }
 
 void VulkanRenderPass::end()
 {
+	ET_ASSERT(_private->recording);
+
 	_private->recording = false;
+	_private->commands.emplace_back(VulkanCommand::Type::EndRenderPass);
 }
 
 void VulkanRenderPass::recordCommandBuffer()
@@ -339,14 +409,6 @@ void VulkanRenderPass::recordCommandBuffer()
 	dynamicConstantBuffer().flush();
 
 	VkCommandBuffer commandBuffer = _private->commandBuffer;
-
-	VkCommandBufferBeginInfo commandBufferBeginInfo = { VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO };
-	commandBufferBeginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
-	VULKAN_CALL(vkBeginCommandBuffer(commandBuffer, &commandBufferBeginInfo));
-
-	vkCmdSetScissor(commandBuffer, 0, 1, &_private->scissor);
-	vkCmdSetViewport(commandBuffer, 0, 1, &_private->viewport);
-
 	VkPipeline lastPipeline = nullptr;
 	VkBuffer lastVertexBuffer = nullptr;
 	VkBuffer lastIndexBuffer = nullptr;
@@ -357,41 +419,66 @@ void VulkanRenderPass::recordCommandBuffer()
 		nullptr,
 	};
 
-	VulkanRenderPassBeginInfo& bi = _private->framebuffers.at(_private->currentBeginInfoIndex);
-	vkCmdBeginRenderPass(commandBuffer, &bi.beginInfo, VK_SUBPASS_CONTENTS_INLINE);
-	for (const auto& batch : _private->batches)
+	VkCommandBufferBeginInfo commandBufferBeginInfo = { VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO };
+	commandBufferBeginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+	VULKAN_CALL(vkBeginCommandBuffer(commandBuffer, &commandBufferBeginInfo));
+
+	uint32_t subpassIndex = 0;
+	for (const VulkanCommand& cmd : _private->commands)
 	{
-		if (batch.pipeline->nativePipeline().pipeline != lastPipeline)
+		if (cmd.type == VulkanCommand::Type::BeginRenderPass)
 		{
-			lastPipeline = batch.pipeline->nativePipeline().pipeline;
-			vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, lastPipeline);
+			const VulkanRenderSubpass& subpass = _private->subpassSequence.at(subpassIndex);
+			vkCmdBeginRenderPass(commandBuffer, &subpass.beginInfo, VK_SUBPASS_CONTENTS_INLINE);
+			vkCmdSetScissor(commandBuffer, 0, 1, &subpass.scissor);
+			vkCmdSetViewport(commandBuffer, 0, 1, &subpass.viewport);
 		}
-
-		if (batch.vertexBuffer->nativeBuffer().buffer != lastVertexBuffer)
+		else if (cmd.type == VulkanCommand::Type::RenderBatch)
 		{
-			VkDeviceSize nullOffset = 0;
-			lastVertexBuffer = batch.vertexBuffer->nativeBuffer().buffer;
-			vkCmdBindVertexBuffers(commandBuffer, 0, 1, &lastVertexBuffer, &nullOffset);
-		}
+			const VulkanRenderBatch& batch = cmd.batch;
+			if (batch.pipeline->nativePipeline().pipeline != lastPipeline)
+			{
+				lastPipeline = batch.pipeline->nativePipeline().pipeline;
+				vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, lastPipeline);
+			}
 
-		if ((batch.indexBuffer->nativeBuffer().buffer != lastIndexBuffer) || (batch.indexBufferFormat != lastIndexType))
+			if (batch.vertexBuffer->nativeBuffer().buffer != lastVertexBuffer)
+			{
+				VkDeviceSize nullOffset = 0;
+				lastVertexBuffer = batch.vertexBuffer->nativeBuffer().buffer;
+				vkCmdBindVertexBuffers(commandBuffer, 0, 1, &lastVertexBuffer, &nullOffset);
+			}
+
+			if ((batch.indexBuffer->nativeBuffer().buffer != lastIndexBuffer) || (batch.indexBufferFormat != lastIndexType))
+			{
+				lastIndexBuffer = batch.indexBuffer->nativeBuffer().buffer;
+				lastIndexType = batch.indexBufferFormat;
+				vkCmdBindIndexBuffer(commandBuffer, lastIndexBuffer, 0, lastIndexType);
+			}
+
+			descriptorSets[DescriptorSetClass::Textures] = batch.textureSet->nativeSet().descriptorSet;
+
+			vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, batch.pipeline->nativePipeline().layout, 0,
+				DescriptorSetClass::Count, descriptorSets, DescriptorSetClass::DynamicDescriptorsCount, batch.dynamicOffsets);
+
+			vkCmdDrawIndexed(commandBuffer, batch.indexCount, 1, batch.startIndex, 0, 0);
+		}
+		else if (cmd.type == VulkanCommand::Type::EndRenderPass)
 		{
-			lastIndexBuffer = batch.indexBuffer->nativeBuffer().buffer;
-			lastIndexType = batch.indexBufferFormat;
-			vkCmdBindIndexBuffer(commandBuffer, lastIndexBuffer, 0, lastIndexType);
+			vkCmdEndRenderPass(commandBuffer);
 		}
-
-		descriptorSets[DescriptorSetClass::Textures] = batch.textureSet->nativeSet().descriptorSet;
-
-		vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, batch.pipeline->nativePipeline().layout, 0,
-			DescriptorSetClass::Count, descriptorSets, DescriptorSetClass::DynamicDescriptorsCount, batch.dynamicOffsets);
-
-		vkCmdDrawIndexed(commandBuffer, batch.indexCount, 1, batch.startIndex, 0, 0);
+		else if (cmd.type == VulkanCommand::Type::NextRenderPass)
+		{
+			++subpassIndex;
+		}
+		else
+		{
+			ET_FAIL("Not implemented");
+		}
 	}
-	vkCmdEndRenderPass(commandBuffer);
+	
 	VULKAN_CALL(vkEndCommandBuffer(commandBuffer));
-
-	_private->batches.clear();
+	_private->commands.clear();
 }
 
 void VulkanRenderPassPrivate::generateDynamicDescriptorSet(RenderPass* pass)

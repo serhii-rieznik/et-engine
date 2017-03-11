@@ -318,7 +318,7 @@ CubemapProjectionMatrixArray et::cubemapMatrixProjectionArray(const mat4& proj, 
 	CubemapProjectionMatrixArray result;
 
 	const vec4& rX = proj[0]; 
-	const vec4& rY = proj[1];
+	const vec4& rY = proj[1] * Camera::renderingOriginTransform;
 	const vec4& rZ = proj[2];
 	const vec4& rW = proj[3];
 
