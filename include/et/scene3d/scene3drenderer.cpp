@@ -40,7 +40,7 @@ void Renderer::render(RenderInterface::Pointer& renderer, const Scene::Pointer& 
 		renderer->submitRenderPass(_shadowPass);
 	}
 
-	// if (_state & RebuildCubemap)
+	if (_state & RebuildCubemap)
 	{
 		RenderPassBeginInfo beginInfo;
 		beginInfo.subpasses.emplace_back(0, 0);
