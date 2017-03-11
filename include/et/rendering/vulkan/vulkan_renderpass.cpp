@@ -25,6 +25,12 @@ struct VulkanRenderBatch
 	uint32_t indexCount = InvalidIndex;
 };
 
+struct VulkanRenderPassBeginInfo
+{
+	VkFramebufferCreateInfo framebufferInfo = { VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO };
+	VkRenderPassBeginInfo beginInfo = { VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO };
+};
+
 class VulkanRenderPassPrivate : public VulkanNativeRenderPass
 {
 public:
@@ -33,13 +39,12 @@ public:
 
 	VulkanState& vulkan;
 	VulkanRenderer* renderer = nullptr;
-	VkFramebufferCreateInfo framebufferInfo = { VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO };
-	VkRenderPassBeginInfo beginInfo = { VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO };
-	Vector<VkClearValue> clearValues;
 
 	ConstantBufferEntry variablesData;
 	Vector<VulkanRenderBatch> batches;
-	Map<uint32_t, VkFramebuffer> framebuffers;
+	Vector<VkClearValue> clearValues;
+	Map<uint32_t, VulkanRenderPassBeginInfo> framebuffers;
+	uint32_t currentBeginInfoIndex = 0;
 
 	std::atomic_bool recording{ false };
 
@@ -67,11 +72,11 @@ VulkanRenderPass::VulkanRenderPass(VulkanRenderer* renderer, VulkanState& vulkan
 	info.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
 	VULKAN_CALL(vkAllocateCommandBuffers(vulkan.device, &info, &_private->commandBuffer));
 
-	uint32_t colorAttachmentCount = 0;
-	Vector<VkAttachmentDescription> attachments;
 	Vector<VkAttachmentReference> colorAttachmentReferences;
-	attachments.reserve(4);
-	colorAttachmentReferences.reserve(4);
+	colorAttachmentReferences.reserve(8);
+
+	Vector<VkAttachmentDescription> attachments;
+	attachments.reserve(8);
 
 	for (const RenderTarget& target : passInfo.color)
 	{
@@ -79,7 +84,7 @@ VulkanRenderPass::VulkanRenderPass(VulkanRenderer* renderer, VulkanState& vulkan
 		{
 			colorAttachmentReferences.emplace_back();
 			VkAttachmentReference& ref = colorAttachmentReferences.back();
-			ref.attachment = colorAttachmentCount;
+			ref.attachment = static_cast<uint32_t>(colorAttachmentReferences.size() - 1);
 			ref.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
 			attachments.emplace_back();
@@ -111,11 +116,10 @@ VulkanRenderPass::VulkanRenderPass(VulkanRenderer* renderer, VulkanState& vulkan
 				_private->clearValues.emplace_back();
 				_private->clearValues.back().color = { cl.x, cl.y, cl.z, cl.w };
 			}
-			++colorAttachmentCount;
 		}
 	}
 
-	VkAttachmentReference depthAttachmentReference = { colorAttachmentCount };
+	VkAttachmentReference depthAttachmentReference = { static_cast<uint32_t>(colorAttachmentReferences.size()) };
 	if (passInfo.depth.enabled)
 	{
 		attachments.emplace_back();
@@ -164,7 +168,7 @@ VulkanRenderPass::VulkanRenderPass(VulkanRenderer* renderer, VulkanState& vulkan
 VulkanRenderPass::~VulkanRenderPass()
 {
 	for (const auto& fb : _private->framebuffers)
-		vkDestroyFramebuffer(_private->vulkan.device, fb.second, nullptr);
+		vkDestroyFramebuffer(_private->vulkan.device, fb.second.beginInfo.framebuffer, nullptr);
 
 	vkDestroyRenderPass(_private->vulkan.device, _private->renderPass, nullptr);
 	vkFreeCommandBuffers(_private->vulkan.device, _private->vulkan.commandPool, 1, &_private->commandBuffer);
@@ -182,46 +186,39 @@ const VulkanNativeRenderPass& VulkanRenderPass::nativeRenderPass() const
 	return *(_private);
 }
 
-void VulkanRenderPass::begin()
+void VulkanRenderPass::begin(const BeginInfo& beginInfo)
 {
 	ET_ASSERT(_private->recording == false);
 
 	uint32_t rtWidth = _private->vulkan.swapchain.extent.width;
 	uint32_t rtHeight = _private->vulkan.swapchain.extent.height;
 	uint32_t rtLayers = 1;
-	uint32_t currentImageIndex = _private->vulkan.swapchain.currentImageIndex;
+	_private->currentBeginInfoIndex = _private->vulkan.swapchain.currentImageIndex;
 
-	ET_ASSERT(currentImageIndex != InvalidIndex);
+	ET_ASSERT(_private->currentBeginInfoIndex != InvalidIndex);
 
 	Texture::Pointer texture0 = info().color[0].texture;
 	if (!info().color[0].useDefaultRenderTarget && texture0.valid())
 	{
 		rtWidth = static_cast<uint32_t>(texture0->size().x);
         rtHeight = static_cast<uint32_t>(texture0->size().y);
-		rtLayers = texture0->target() == TextureTarget::Texture_Cube ? 6 : texture0->description().layersCount;
-		currentImageIndex = 0;
+		_private->currentBeginInfoIndex = beginInfo.layerIndex;
 	}
 	else if (!info().depth.useDefaultRenderTarget && info().depth.texture.valid())
 	{
 		rtWidth = static_cast<uint32_t>(info().depth.texture->size().x);
 		rtHeight = static_cast<uint32_t>(info().depth.texture->size().y);
-		currentImageIndex = 0;
+		_private->currentBeginInfoIndex = 0;
 	}
 
-	if ((_private->framebufferInfo.width != rtWidth) || (_private->framebufferInfo.height != rtHeight))
+	VulkanRenderPassBeginInfo& cbi = _private->framebuffers[_private->currentBeginInfoIndex];
+	if ((cbi.framebufferInfo.width != rtWidth) || (cbi.framebufferInfo.height != rtHeight))
 	{
-		for (auto& fb : _private->framebuffers)
-		{
-			if (fb.second)
-			{
-				vkDestroyFramebuffer(_private->vulkan.device, fb.second, nullptr);
-			}
-			fb.second = nullptr;
-		}
+		vkDestroyFramebuffer(_private->vulkan.device, cbi.beginInfo.framebuffer, nullptr);
+		cbi.beginInfo.framebuffer = nullptr;
 	}
 
-	VkFramebuffer currentFramebuffer = _private->framebuffers[currentImageIndex];
-	if (currentFramebuffer == nullptr)
+	if (cbi.beginInfo.framebuffer == nullptr)
 	{
 		Vector<VkImageView> attachments;
 		attachments.reserve(MaxRenderTargets + 1);
@@ -236,7 +233,7 @@ void VulkanRenderPass::begin()
 			{
 				ET_ASSERT(rt.texture.valid());
 				VulkanTexture::Pointer texture = rt.texture;
-				attachments.emplace_back(texture->nativeTexture().imageView);
+				attachments.emplace_back(texture->nativeTexture().layerImageView(beginInfo.layerIndex));
 			}
 			else
 			{
@@ -252,28 +249,26 @@ void VulkanRenderPass::begin()
 		{
 			ET_ASSERT(info().depth.texture.valid());
 			VulkanTexture::Pointer texture = info().depth.texture;
-			attachments.emplace_back(texture->nativeTexture().imageView);
+			attachments.emplace_back(texture->nativeTexture().completeImageView);
 		}
 
-		_private->framebufferInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
-		_private->framebufferInfo.pAttachments = attachments.data();
-		_private->framebufferInfo.width = rtWidth;
-		_private->framebufferInfo.height = rtHeight;
-		_private->framebufferInfo.layers = rtLayers;
-		_private->framebufferInfo.renderPass = _private->renderPass;
+		cbi.framebufferInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
+		cbi.framebufferInfo.pAttachments = attachments.data();
+		cbi.framebufferInfo.width = rtWidth;
+		cbi.framebufferInfo.height = rtHeight;
+		cbi.framebufferInfo.layers = rtLayers;
+		cbi.framebufferInfo.renderPass = _private->renderPass;
 
-		VULKAN_CALL(vkCreateFramebuffer(_private->vulkan.device, &_private->framebufferInfo, nullptr, &currentFramebuffer));
-		_private->framebuffers[currentImageIndex] = currentFramebuffer;
+		VULKAN_CALL(vkCreateFramebuffer(_private->vulkan.device, &cbi.framebufferInfo, nullptr, &cbi.beginInfo.framebuffer));
 	}
 
-	_private->beginInfo.clearValueCount = static_cast<uint32_t>(_private->clearValues.size());
-	_private->beginInfo.pClearValues = _private->clearValues.data();
-	_private->beginInfo.renderPass = _private->renderPass;
-	_private->beginInfo.renderArea.extent.width = rtWidth;
-	_private->beginInfo.renderArea.extent.height = rtHeight;
-	_private->beginInfo.framebuffer = currentFramebuffer;
+	cbi.beginInfo.clearValueCount = static_cast<uint32_t>(_private->clearValues.size());
+	cbi.beginInfo.pClearValues = _private->clearValues.data();
+	cbi.beginInfo.renderPass = _private->renderPass;
+	cbi.beginInfo.renderArea.extent.width = rtWidth;
+	cbi.beginInfo.renderArea.extent.height = rtHeight;
 
-	_private->scissor.extent = _private->beginInfo.renderArea.extent;
+	_private->scissor.extent = cbi.beginInfo.renderArea.extent;
 	_private->viewport.width = static_cast<float>(rtWidth);
 	_private->viewport.height = static_cast<float>(rtHeight);
 	_private->viewport.maxDepth = 1.0f;
@@ -362,7 +357,8 @@ void VulkanRenderPass::recordCommandBuffer()
 		nullptr,
 	};
 
-	vkCmdBeginRenderPass(commandBuffer, &_private->beginInfo, VK_SUBPASS_CONTENTS_INLINE);
+	VulkanRenderPassBeginInfo& bi = _private->framebuffers.at(_private->currentBeginInfoIndex);
+	vkCmdBeginRenderPass(commandBuffer, &bi.beginInfo, VK_SUBPASS_CONTENTS_INLINE);
 	for (const auto& batch : _private->batches)
 	{
 		if (batch.pipeline->nativePipeline().pipeline != lastPipeline)

@@ -44,6 +44,16 @@ public:
 		std::string name;
 	};
 
+	struct BeginInfo
+	{
+		uint32_t layerIndex = 0;
+		uint32_t mipLevel = 0; // TODO : handle
+
+		BeginInfo() = default;
+		BeginInfo(uint32_t l) : layerIndex(l) { }
+		BeginInfo(uint32_t l, uint32_t m) : layerIndex(l), mipLevel(m) { }
+	};
+
 	struct Variables
 	{
 		mat4 viewProjection;
@@ -67,11 +77,11 @@ public:
 	RenderPass(RenderInterface* renderer, const ConstructionInfo& info);
 	virtual ~RenderPass();
 
-	virtual void begin() = 0;
+	virtual void begin(const BeginInfo&) = 0;
 	virtual void pushRenderBatch(const RenderBatch::Pointer&) = 0;
 	virtual void end() = 0;
 
-	void executeSingleRenderBatch(const RenderBatch::Pointer&);
+	void executeSingleRenderBatch(const RenderBatch::Pointer&, const BeginInfo&);
 
 	const ConstructionInfo& info() const;
 	ConstantBuffer& dynamicConstantBuffer();

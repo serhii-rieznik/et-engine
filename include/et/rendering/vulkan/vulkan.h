@@ -133,13 +133,25 @@ struct VulkanNativePipeline
 
 struct VulkanNativeTexture
 {
+	uint32_t layerCount = 0;
 	VkImage image = nullptr;
-	VkImageView imageView = nullptr;
 	VkDeviceMemory memory = nullptr;
 	VkMemoryRequirements memoryRequirements { };
 	VkImageLayout layout = VK_IMAGE_LAYOUT_UNDEFINED;
 	VkFormat format = VK_FORMAT_UNDEFINED;
 	VkImageAspectFlags aspect = VkImageAspectFlagBits::VK_IMAGE_ASPECT_FLAG_BITS_MAX_ENUM;
+	
+	VkImageView completeImageView;
+	Vector<VkImageView> layerViews;
+	
+	VkImageView layerImageView(uint32_t layer) const
+	{
+		if (layerCount == 1)
+			return completeImageView;
+
+		ET_ASSERT(layer < layerViews.size());
+		return layerViews.at(layer);
+	}
 };
 
 struct VulkanNativeSampler

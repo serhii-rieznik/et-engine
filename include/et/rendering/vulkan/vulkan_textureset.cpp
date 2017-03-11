@@ -65,7 +65,7 @@ public:
 		VkDescriptorImageInfo& info = imageInfos.back();
 		if (isTextureBinding)
 		{
-			info.imageView = VulkanTexture::Pointer(b.second.first)->nativeTexture().imageView;
+			info.imageView = VulkanTexture::Pointer(b.second.first)->nativeTexture().completeImageView;
 			info.imageLayout = VulkanTexture::Pointer(b.second.first)->nativeTexture().layout;
 		}
 		else 

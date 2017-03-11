@@ -75,12 +75,27 @@ VulkanTexture::VulkanTexture(VulkanState& vulkan, const Description& desc, const
 	VULKAN_CALL(vkAllocateMemory(vulkan.device, &allocInfo, nullptr, &_private->memory));
 	VULKAN_CALL(vkBindImageMemory(vulkan.device, _private->image, _private->memory, 0));
 
+	_private->layerCount = info.arrayLayers;
 	VkImageViewCreateInfo imageViewInfo = { VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO };
 	imageViewInfo.image = _private->image;
 	imageViewInfo.viewType = vulkan::textureTargetToImageViewType(desc.target);
 	imageViewInfo.format = vulkan::textureFormatValue(desc.format);
-	imageViewInfo.subresourceRange = { _private->aspect, 0, desc.levelCount, 0, info.arrayLayers };
-	VULKAN_CALL(vkCreateImageView(vulkan.device, &imageViewInfo, nullptr, &_private->imageView));
+	imageViewInfo.subresourceRange = { _private->aspect, 0, desc.levelCount, 0, _private->layerCount };
+	VULKAN_CALL(vkCreateImageView(vulkan.device, &imageViewInfo, nullptr, &_private->completeImageView));
+
+	if (_private->layerCount > 1)
+	{
+		_private->layerViews.resize(info.arrayLayers);
+		for (uint32_t i = 0; i < info.arrayLayers; ++i)
+		{
+			VkImageViewCreateInfo imageViewInfo = { VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO };
+			imageViewInfo.image = _private->image;
+			imageViewInfo.viewType = vulkan::textureTargetToImageViewType(desc.target);
+			imageViewInfo.format = vulkan::textureFormatValue(desc.format);
+			imageViewInfo.subresourceRange = { _private->aspect, 0, desc.levelCount, i, _private->layerCount };
+			VULKAN_CALL(vkCreateImageView(vulkan.device, &imageViewInfo, nullptr, _private->layerViews.data() + i));
+		}
+	}
 
 	if (data.size() > 0)
 		setImageData(data);
@@ -88,7 +103,11 @@ VulkanTexture::VulkanTexture(VulkanState& vulkan, const Description& desc, const
 
 VulkanTexture::~VulkanTexture()
 {
-	vkDestroyImageView(_private->vulkan.device, _private->imageView, nullptr);
+	for (VkImageView imageView : _private->layerViews)
+		vkDestroyImageView(_private->vulkan.device, imageView, nullptr);
+
+	vkDestroyImageView(_private->vulkan.device, _private->completeImageView, nullptr);
+
 	vkDestroyImage(_private->vulkan.device, _private->image, nullptr);
 	vkFreeMemory(_private->vulkan.device, _private->memory, nullptr);
 	ET_PIMPL_FINALIZE(VulkanTexture);

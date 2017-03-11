@@ -43,13 +43,12 @@ void Renderer::render(RenderInterface::Pointer& renderer, const Scene::Pointer& 
 	if (_state & RebuildCubemap)
 	{
 		_wrapCubemapBatch->material()->setTexture(MaterialTexture::BaseColor, _envTexture);
-		_wrapCubemapPass->executeSingleRenderBatch(_wrapCubemapBatch);
-		renderer->submitRenderPass(_wrapCubemapPass);
+		for (uint32_t i = 0; i < 6; ++i)
+		{
+			_wrapCubemapPass->executeSingleRenderBatch(_wrapCubemapBatch, { i, 0 });
+			renderer->submitRenderPass(_wrapCubemapPass);
+		}
 		_state &= ~RebuildCubemap;
-	}
-	else
-	{
-		printf(".");
 	}
 
 	clip(_mainPass, _renderBatches, _mainPassBatches);
@@ -60,7 +59,7 @@ void Renderer::render(RenderInterface::Pointer& renderer, const Scene::Pointer& 
 	render(_mainPass, _mainPassBatches);
 	renderer->submitRenderPass(_mainPass);
 
-	_cubemapDebugPass->executeSingleRenderBatch(_cubemapDebugBatch);
+	_cubemapDebugPass->executeSingleRenderBatch(_cubemapDebugBatch, {0, 0});
 	renderer->submitRenderPass(_cubemapDebugPass);
 }
 
@@ -209,7 +208,7 @@ void Renderer::clip(RenderPass::Pointer& pass, const RenderBatchCollection& inBa
 
 void Renderer::render(RenderPass::Pointer& pass, const RenderBatchInfoCollection& batches)
 {
-	pass->begin();
+	pass->begin({0, 0});
 	for (const RenderBatchInfo& rb : batches)
 		pass->pushRenderBatch(rb.batch);
 	pass->end();
@@ -241,6 +240,7 @@ void Renderer::validateWrapCubemapPass(RenderInterface::Pointer& renderer)
 		passInfo.color[0].loadOperation = FramebufferOperation::Clear;
 		passInfo.color[0].storeOperation = FramebufferOperation::Store;
 		passInfo.color[0].useDefaultRenderTarget = false;
+		passInfo.color[0].clearValue = vec4(1.0f, 0.5f, 0.25f, 1.0f);
 		passInfo.name = "eq-to-cubemap";
 		passInfo.priority = RenderPassPriority::Default + 0x100;
 		_wrapCubemapPass = renderer->allocateRenderPass(passInfo);
