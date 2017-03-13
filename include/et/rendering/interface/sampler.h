@@ -26,6 +26,8 @@ public:
 		TextureWrap wrapW = TextureWrap::Repeat;
 		CompareFunction compareFunction = CompareFunction::Always;
 		float maxAnisotropy = 16.0f;
+		float minLod = 0.0f;
+		float maxLod = std::numeric_limits<float>::max();
 		bool compareEnabled = false;
 	};
 };

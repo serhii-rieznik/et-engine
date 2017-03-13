@@ -137,7 +137,10 @@ struct VulkanNativePipeline
 
 struct VulkanNativeTexture
 {
-	uint32_t layerCount = 0;
+	VulkanState& vulkan;
+	VulkanNativeTexture(VulkanState& v) : 
+		vulkan(v) { }
+
 	VkImage image = nullptr;
 	VkDeviceMemory memory = nullptr;
 	VkMemoryRequirements memoryRequirements { };
@@ -145,17 +148,16 @@ struct VulkanNativeTexture
 	VkFormat format = VK_FORMAT_UNDEFINED;
 	VkImageAspectFlags aspect = VkImageAspectFlagBits::VK_IMAGE_ASPECT_FLAG_BITS_MAX_ENUM;
 	
-	VkImageView completeImageView;
-	Vector<VkImageView> layerViews;
-	
-	VkImageView layerImageView(uint32_t layer) const
-	{
-		if (layerCount == 1)
-			return completeImageView;
+	Map<uint32_t, VkImageView> allImageViews;
+	VkImageView completeImageView = nullptr;
+	VkImageViewType imageViewType = VkImageViewType::VK_IMAGE_VIEW_TYPE_MAX_ENUM;
+	uint32_t layerCount = 0;
+	uint32_t levelCount = 0;
 
-		ET_ASSERT(layer < layerViews.size());
-		return layerViews.at(layer);
-	}
+	uint32_t imageViewIndex(uint32_t layer, uint32_t level) const
+		{ return (layer & 0xffff) | ((level & 0xffff) << 16); }
+	
+	VkImageView imageView(uint32_t layer, uint32_t level);
 };
 
 struct VulkanNativeSampler

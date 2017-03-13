@@ -19,8 +19,8 @@ struct VulkanRenderBatch
 	VulkanTextureSet::Pointer textureSet;
 	VulkanBuffer::Pointer vertexBuffer;
 	VulkanBuffer::Pointer indexBuffer;
+	ConstantBufferEntry::Pointer dynamicOffsets[DescriptorSetClass::DynamicDescriptorsCount];
 	VkIndexType indexBufferFormat = VkIndexType::VK_INDEX_TYPE_MAX_ENUM;
-	uint32_t dynamicOffsets[DescriptorSetClass::DynamicDescriptorsCount]{};
 	uint32_t startIndex = InvalidIndex;
 	uint32_t indexCount = InvalidIndex;
 };
@@ -74,7 +74,7 @@ public:
 	VulkanState& vulkan;
 	VulkanRenderer* renderer = nullptr;
 
-	ConstantBufferEntry variablesData;
+	ConstantBufferEntry::Pointer variablesData;
 	Vector<VulkanCommand> commands;
 	Vector<VkClearValue> clearValues;
 	Map<uint64_t, VulkanRenderSubpass> subpasses;
@@ -207,13 +207,11 @@ VulkanRenderPass::~VulkanRenderPass()
 
 	vkDestroyRenderPass(_private->vulkan.device, _private->renderPass, nullptr);
 	vkFreeCommandBuffers(_private->vulkan.device, _private->vulkan.commandPool, 1, &_private->commandBuffer);
-
 	vkFreeDescriptorSets(_private->vulkan.device, _private->vulkan.descriptorPool, 1, &_private->dynamicDescriptorSet);
 	vkDestroyDescriptorSetLayout(_private->vulkan.device, _private->dynamicDescriptorSetLayout, nullptr);
-
-	dynamicConstantBuffer().free(_private->variablesData);
-
 	ET_PIMPL_FINALIZE(VulkanRenderPass);
+
+	dynamicConstantBuffer().flush();
 }
 
 const VulkanNativeRenderPass& VulkanRenderPass::nativeRenderPass() const
@@ -240,11 +238,8 @@ void VulkanRenderPass::begin(const RenderPassBeginInfo& beginInfo)
 
 	for (const RenderSubpass& subpass : beginInfo.subpasses)
 	{
-		if (subpass.level > 0)
-		{
-			ET_ASSERT(useCustomColor);
-			ET_ASSERT(useCustomDepth);
-		}
+		ET_ASSERT((subpass.level == 0) || useCustomColor || useCustomDepth);
+
 		uint64_t hash = framebufferHash(_private->currentImageIndex, subpass.level, subpass.layer);
 
 		uint32_t width = defaultWidth;
@@ -277,7 +272,7 @@ void VulkanRenderPass::begin(const RenderPassBeginInfo& beginInfo)
 			{
 				ET_ASSERT(info().depth.texture.valid());
 				VulkanTexture::Pointer texture = info().depth.texture;
-				attachments.emplace_back(texture->nativeTexture().completeImageView);
+				attachments.emplace_back(texture->nativeTexture().imageView(subpass.layer, subpass.level));
 			}
 
 			for (const RenderTarget& rt : info().color)
@@ -289,8 +284,8 @@ void VulkanRenderPass::begin(const RenderPassBeginInfo& beginInfo)
 				else if (rt.enabled)
 				{
 					ET_ASSERT(rt.texture.valid());
-					const VulkanTexture::Pointer& texture = rt.texture;
-					attachments.emplace_back(texture->nativeTexture().layerImageView(subpass.layer));
+					VulkanTexture::Pointer texture = rt.texture;
+					attachments.emplace_back(texture->nativeTexture().imageView(subpass.layer, subpass.level));
 				}
 				else
 				{
@@ -355,19 +350,19 @@ void VulkanRenderPass::pushRenderBatch(const RenderBatch::Pointer& inBatch)
 	if (pipelineState->nativePipeline().pipeline == nullptr)
 		return;
 
-	ConstantBufferEntry objectVariables;
+	ConstantBufferEntry::Pointer objectVariables;
 	if (program->reflection().objectVariablesBufferSize > 0)
 	{
 		objectVariables = dynamicConstantBuffer().dynamicAllocate(program->reflection().objectVariablesBufferSize);
 		auto var = program->reflection().objectVariables.find(PipelineState::kWorldTransform());
 		if (var != program->reflection().objectVariables.end())
 		{
-			memcpy(objectVariables.data() + var->second.offset, inBatch->transformation().data(), sizeof(inBatch->transformation()));
+			memcpy(objectVariables->data() + var->second.offset, inBatch->transformation().data(), sizeof(inBatch->transformation()));
 		}
 		var = program->reflection().objectVariables.find(PipelineState::kWorldRotationTransform());
 		if (var != program->reflection().objectVariables.end())
 		{
-			memcpy(objectVariables.data() + var->second.offset, inBatch->rotationTransformation().data(), sizeof(inBatch->rotationTransformation()));
+			memcpy(objectVariables->data() + var->second.offset, inBatch->rotationTransformation().data(), sizeof(inBatch->rotationTransformation()));
 		}
 	}
 
@@ -379,8 +374,8 @@ void VulkanRenderPass::pushRenderBatch(const RenderBatch::Pointer& inBatch)
 
 	VulkanRenderBatch batch;
 	batch.textureSet = material->textureSet(info().name);
-	batch.dynamicOffsets[0] = objectVariables.offset();
-	batch.dynamicOffsets[1] = material->constantBufferData(info().name).offset();
+	batch.dynamicOffsets[0] = objectVariables;
+	batch.dynamicOffsets[1] = material->constantBufferData(info().name);
 	batch.vertexBuffer = inBatch->vertexStream()->vertexBuffer();
 	batch.indexBuffer = inBatch->vertexStream()->indexBuffer();
 	batch.indexBufferFormat = vulkan::indexBufferFormat(inBatch->vertexStream()->indexArrayFormat());
@@ -411,6 +406,8 @@ void VulkanRenderPass::recordCommandBuffer()
 	VkBuffer lastVertexBuffer = nullptr;
 	VkBuffer lastIndexBuffer = nullptr;
 	VkIndexType lastIndexType = VkIndexType::VK_INDEX_TYPE_MAX_ENUM;
+
+	uint32_t dynamicOffsets[DescriptorSetClass::DynamicDescriptorsCount] = { };
 
 	VkDescriptorSet descriptorSets[DescriptorSetClass::Count] = {
 		_private->dynamicDescriptorSet,
@@ -456,8 +453,14 @@ void VulkanRenderPass::recordCommandBuffer()
 
 			descriptorSets[DescriptorSetClass::Textures] = batch.textureSet->nativeSet().descriptorSet;
 
+			for (uint32_t i = 0, e = DescriptorSetClass::DynamicDescriptorsCount; i < e; ++i)
+			{
+				if (batch.dynamicOffsets[i].valid())
+					dynamicOffsets[i] = batch.dynamicOffsets[i]->offset();
+			}
+
 			vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, batch.pipeline->nativePipeline().layout, 0,
-				DescriptorSetClass::Count, descriptorSets, DescriptorSetClass::DynamicDescriptorsCount, batch.dynamicOffsets);
+				DescriptorSetClass::Count, descriptorSets, DescriptorSetClass::DynamicDescriptorsCount, dynamicOffsets);
 
 			vkCmdDrawIndexed(commandBuffer, batch.indexCount, 1, batch.startIndex, 0, 0);
 		}
@@ -483,7 +486,7 @@ void VulkanRenderPassPrivate::generateDynamicDescriptorSet(RenderPass* pass)
 {
 	VulkanBuffer::Pointer db = pass->dynamicConstantBuffer().buffer();
 	VulkanBuffer::Pointer sb = renderer->sharedConstantBuffer().buffer();
-	VkDescriptorBufferInfo passBufferInfo = { db->nativeBuffer().buffer, variablesData.offset(), sizeof(RenderPass::Variables) };
+	VkDescriptorBufferInfo passBufferInfo = { db->nativeBuffer().buffer, variablesData->offset(), sizeof(RenderPass::Variables) };
 	VkDescriptorBufferInfo objectBufferInfo = { db->nativeBuffer().buffer, 0, VK_WHOLE_SIZE }; // TODO : calculate offset and size
 	VkDescriptorBufferInfo materialBufferInfo = { sb->nativeBuffer().buffer, 0, VK_WHOLE_SIZE }; // TODO : calculate offset and size
 	VkDescriptorSetLayoutBinding bindings[] = { { }, {  }, {  } };
@@ -531,7 +534,7 @@ void VulkanRenderPassPrivate::generateDynamicDescriptorSet(RenderPass* pass)
 
 void VulkanRenderPassPrivate::loadVariables(Camera::Pointer camera, Light::Pointer light)
 {
-	RenderPass::Variables* vptr = reinterpret_cast<RenderPass::Variables*>(variablesData.data());
+	RenderPass::Variables* vptr = reinterpret_cast<RenderPass::Variables*>(variablesData->data());
 	if (camera.valid())
 	{
 		vptr->viewProjection = camera->viewProjectionMatrix();

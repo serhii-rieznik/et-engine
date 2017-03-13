@@ -589,7 +589,23 @@ bool isSamplerType(int glType)
 	return validTypes.count(glType) > 0;
 }
 }
+}
 
+VkImageView VulkanNativeTexture::imageView( uint32_t layer, uint32_t level)
+{
+	uint32_t index = imageViewIndex(layer, level);
+	VkImageView imageView = allImageViews[index];
+	if (imageView == nullptr)
+	{
+		VkImageViewCreateInfo imageViewInfo = { VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO };
+		imageViewInfo.image = image;
+		imageViewInfo.viewType = imageViewType;
+		imageViewInfo.format = format;
+		imageViewInfo.subresourceRange = { aspect, level, 1, layer, layerCount };
+		VULKAN_CALL(vkCreateImageView(vulkan.device, &imageViewInfo, nullptr, &imageView));
+		allImageViews[index] = imageView;
+	}
+	return imageView;
 }
 
 }

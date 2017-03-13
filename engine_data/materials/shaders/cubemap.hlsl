@@ -14,6 +14,11 @@ cbuffer ObjectVariables : CONSTANT_LOCATION(b, ObjectVariablesBufferIndex, Varia
 	row_major float4x4 worldTransform;
 };
 
+cbuffer MaterialVariables : CONSTANT_LOCATION(b, MaterialVariablesBufferIndex, VariablesSetIndex)
+{
+	float roughnessScale;
+};
+
 struct VSOutput 
 {
 	float4 position : SV_Position;
@@ -43,6 +48,7 @@ VSOutput vertexMain(VSInput vsIn)
 float4 fragmentMain(VSOutput fsIn) : SV_Target0
 {
 #if (VISUALIZE_CUBEMAP)	
+
 	float phi = fsIn.texCoord0.x * 2.0 * PI - PI;
 	float theta = fsIn.texCoord0.y * PI - 0.5 * PI;
 	float sinTheta = sin(theta);
@@ -50,13 +56,18 @@ float4 fragmentMain(VSOutput fsIn) : SV_Target0
 	float sinPhi = sin(phi);
 	float cosPhi = cos(phi);
 	float3 sampleDirection = float3(cosPhi * cosTheta, sinTheta, sinPhi * cosTheta);
-	return baseColorTexture.Sample(baseColorSampler, sampleDirection);
+	return baseColorTexture.SampleLevel(baseColorSampler, sampleDirection, roughnessScale);
+
 #elif (EQ_MAP_TO_CUBEMAP)
+
 	float3 d = normalize(fsIn.direction);        	
 	float u = atan2(d.z, d.x) * 0.5 / PI + 0.5;
 	float v = asin(d.y) / PI + 0.5;
 	return baseColorTexture.Sample(baseColorSampler, float2(u, v));
+
 #else
+
 	return 1.0;
+
 #endif
 }

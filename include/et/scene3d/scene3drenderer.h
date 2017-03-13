@@ -28,6 +28,11 @@ public:
 		RenderAll = RenderMeshes | RenderDebugObjects
 	};
 
+	struct Options
+	{
+		bool drawEnvironmentProbe = false;
+	} options;
+
 public:
 	Renderer();
 
@@ -55,8 +60,11 @@ private:
 	void render(RenderPass::Pointer& pass, const RenderBatchInfoCollection&);
 	void validateMainPass(RenderInterface::Pointer&, const Scene::Pointer&);
 	void validateShadowPass(RenderInterface::Pointer&);
+	void renderDebug(RenderInterface::Pointer&);
 
 	void validateWrapCubemapPass(RenderInterface::Pointer&);
+
+	mat4 fullscreenBatchTransform(const vec2& viewport, const vec2& origin, const vec2& size);
 
 private:
 	enum : uint32_t
@@ -80,6 +88,7 @@ private:
 	RenderPass::Pointer _cubemapDebugPass;
 	RenderBatch::Pointer _cubemapDebugBatch;
 
+	Sampler::Pointer _cubemapDebugSampler;
     Texture::Pointer _shadowTexture;
 	Texture::Pointer _envTexture;
 	Texture::Pointer _envCubemap;

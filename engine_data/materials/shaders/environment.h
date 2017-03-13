@@ -1,10 +1,19 @@
+#if (EQUIRECTANGULAR_ENV_MAP)
 Texture2D<float4> environmentTexture : CONSTANT_LOCATION(t, EnvironmentTextureBinding, TexturesSetIndex);
+#else
+TextureCube<float4> environmentTexture : CONSTANT_LOCATION(t, EnvironmentTextureBinding, TexturesSetIndex);
+#endif
+
 SamplerState environmentSampler : CONSTANT_LOCATION(s, EnvironmentSamplerBinding, TexturesSetIndex);
 
 float3 sampleEnvironment(float3 i, float lod)
 {
+#if (EQUIRECTANGULAR_ENV_MAP)
 	float2 sampleCoord = float2(0.5 * atan2(i.z, i.x), asin(i.y)) / PI + 0.5;
 	return environmentTexture.SampleLevel(environmentSampler, sampleCoord, lod).xyz;
+#else
+	return environmentTexture.SampleLevel(environmentSampler, i, lod).xyz;
+#endif
 }
 
 float3 specularDominantDirection(in float3 n, in float3 v, in float roughness)

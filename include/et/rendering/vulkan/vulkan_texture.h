@@ -25,6 +25,7 @@ public:
 	void setImageData(const BinaryDataStorage&) override;
 	void updateRegion(const vec2i& pos, const vec2i& size, const BinaryDataStorage&);
 
+	VulkanNativeTexture& nativeTexture();
 	const VulkanNativeTexture& nativeTexture() const;
 
 private:

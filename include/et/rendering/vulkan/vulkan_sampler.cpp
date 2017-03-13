@@ -35,13 +35,14 @@ VulkanSampler::VulkanSampler(VulkanState& vulkan, const Sampler::Description& de
 	info.minFilter = vulkan::textureFiltrationValue(desc.minFilter);
 	info.magFilter = vulkan::textureFiltrationValue(desc.magFilter);
 	info.mipmapMode = vulkan::textureFiltrationValueToSamplerMipMapMode(desc.mipFilter);
-	info.maxLod = std::numeric_limits<float>::max();
+	info.minLod = desc.minLod;
+	info.maxLod = desc.maxLod;
 	info.anisotropyEnable = desc.maxAnisotropy > 1.0f ? VK_TRUE : VK_FALSE;
 	info.maxAnisotropy = desc.maxAnisotropy;
 	info.compareEnable = desc.compareEnabled;
 	info.compareOp = vulkan::depthCompareOperation(desc.compareFunction);
 	
-	vkCreateSampler(vulkan.device, &info, nullptr, &_private->sampler);
+	VULKAN_CALL(vkCreateSampler(vulkan.device, &info, nullptr, &_private->sampler));
 }
 
 VulkanSampler::~VulkanSampler()

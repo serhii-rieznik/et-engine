@@ -43,13 +43,11 @@ void Renderer::render(RenderInterface::Pointer& renderer, const Scene::Pointer& 
 	if (_state & RebuildCubemap)
 	{
 		RenderPassBeginInfo beginInfo;
-		beginInfo.subpasses.emplace_back(0, 0);
-		beginInfo.subpasses.emplace_back(1, 0);
-		beginInfo.subpasses.emplace_back(2, 0);
-		beginInfo.subpasses.emplace_back(3, 0);
-		beginInfo.subpasses.emplace_back(4, 0);
-		beginInfo.subpasses.emplace_back(5, 0);
-
+		for (uint32_t level = 0; level < _envCubemap->description().levelCount; ++level)
+		{
+			for (uint32_t layer = 0; layer < 6; ++layer)
+				beginInfo.subpasses.emplace_back(layer, level);
+		}
 		Camera cm;
 		const mat4& proj = cm.perspectiveProjection(HALF_PI, 1.0f, 1.0f, 2.0f);
 		CubemapProjectionMatrixArray projections = cubemapMatrixProjectionArray(proj, vec3(0.0f));
@@ -58,9 +56,9 @@ void Renderer::render(RenderInterface::Pointer& renderer, const Scene::Pointer& 
 
 		_wrapCubemapBatch->material()->setTexture(MaterialTexture::BaseColor, _envTexture);
 		_wrapCubemapPass->begin(beginInfo);
-		for (uint32_t i = 0; i < 6; ++i)
+		for (uint32_t i = 0, e = static_cast<uint32_t>(beginInfo.subpasses.size()); i < e; ++i)
 		{
-			_wrapCubemapBatch->setTransformation(projections[i]);
+			_wrapCubemapBatch->setTransformation(projections[i % 6]);
 			_wrapCubemapPass->pushRenderBatch(_wrapCubemapBatch);
 			_wrapCubemapPass->nextSubpass();
 		}
@@ -77,8 +75,7 @@ void Renderer::render(RenderInterface::Pointer& renderer, const Scene::Pointer& 
 	render(_mainPass, _mainPassBatches);
 	renderer->submitRenderPass(_mainPass);
 
-	_cubemapDebugPass->executeSingleRenderBatch(_cubemapDebugBatch, { 0, 0 });
-	renderer->submitRenderPass(_cubemapDebugPass);
+	renderDebug(renderer);
 }
 
 void Renderer::validateMainPass(RenderInterface::Pointer& renderer, const Scene::Pointer& scene)
@@ -132,7 +129,7 @@ void Renderer::validateMainPass(RenderInterface::Pointer& renderer, const Scene:
 	passInfo.name = RenderPass::kPassNameForward;
 
 	_mainPass = renderer->allocateRenderPass(passInfo);
-	_mainPass->setSharedTexture(MaterialTexture::Environment, _envTexture, renderer->defaultSampler());
+	_mainPass->setSharedTexture(MaterialTexture::Environment, _envCubemap, renderer->defaultSampler());
 
 	_shadowTexture.reset(nullptr);
 	_cache.flush();
@@ -237,6 +234,9 @@ void Renderer::validateWrapCubemapPass(RenderInterface::Pointer& renderer)
 	if (_cubemapMaterial.invalid())
 	{
 		_cubemapMaterial = renderer->sharedMaterialLibrary().loadMaterial(application().resolveFileName("engine_data/materials/cubemap.json"));
+
+		Sampler::Description smp;
+		_cubemapDebugSampler = renderer->createSampler(smp);
 	}
 
 	if (_envCubemap.invalid())
@@ -244,8 +244,9 @@ void Renderer::validateWrapCubemapPass(RenderInterface::Pointer& renderer)
 		TextureDescription::Pointer cubemapDesc(PointerInit::CreateInplace);
 		cubemapDesc->format = TextureFormat::RGBA32F;
 		cubemapDesc->target = TextureTarget::Texture_Cube;
-		cubemapDesc->size = vec2i(256);
 		cubemapDesc->isRenderTarget = true;
+		cubemapDesc->levelCount = 9;
+		cubemapDesc->size = vec2i(1 << (cubemapDesc->levelCount - 1));
 		_envCubemap = renderer->createTexture(cubemapDesc);
 	}
 
@@ -277,7 +278,42 @@ void Renderer::validateWrapCubemapPass(RenderInterface::Pointer& renderer)
 		passInfo.priority = RenderPassPriority::UI - 1;
 		_cubemapDebugPass = renderer->allocateRenderPass(passInfo);
 		_cubemapDebugBatch = renderhelper::createFullscreenRenderBatch(_envCubemap, _cubemapMaterial);
-		_cubemapDebugBatch->setTransformation(scaleMatrix(0.5f, 0.5f * Camera::renderingOriginTransform, 0.5f));
+	}
+}
+
+mat4 Renderer::fullscreenBatchTransform(const vec2& viewport, const vec2& origin, const vec2& size)
+{
+	vec2 fsz = size / viewport;
+	vec2 fps = origin / viewport;
+	mat4 result = scaleMatrix(fsz.x, fsz.y, 1.0f);
+	result[3].x = 2.0f * (fps.x + 0.5f * fsz.x) - 1.0f;
+	result[3].y = 2.0f * (fps.y + 0.5f * fsz.y) - 1.0f;
+	return result;
+}
+
+void Renderer::renderDebug(RenderInterface::Pointer& renderer)
+{
+	if (options.drawEnvironmentProbe)
+	{
+		vec2 vp = vector2ToFloat(renderer->rc()->size());
+
+		uint32_t totalLevels = _envCubemap->description().levelCount;
+		float dy = vp.y / static_cast<float>(totalLevels);
+		vec2 pos = vec2(0.0f, 0.0f);
+
+		_cubemapDebugBatch->material()->setTexture(MaterialTexture::BaseColor, _envCubemap);
+		_cubemapDebugBatch->material()->setSampler(MaterialTexture::BaseColor, _cubemapDebugSampler);
+
+		_cubemapDebugPass->begin({ 0, 0 });
+		for (uint32_t i = 0; i < totalLevels; ++i)
+		{
+			_cubemapDebugBatch->material()->setFloat(MaterialParameter::RoughnessScale, static_cast<float>(i));
+			_cubemapDebugBatch->setTransformation(fullscreenBatchTransform(vp, pos, vec2(2.0f * dy, dy)));
+			_cubemapDebugPass->pushRenderBatch(_cubemapDebugBatch);
+			pos.y += dy;
+		}
+		_cubemapDebugPass->end();
+		renderer->submitRenderPass(_cubemapDebugPass);
 	}
 }
 

@@ -17,9 +17,7 @@ class VulkanTexturePrivate : public VulkanNativeTexture
 {
 public:
 	VulkanTexturePrivate(VulkanState& v) :
-		vulkan(v) { }
-
-	VulkanState& vulkan;
+		VulkanNativeTexture(v) { }
 };
 
 VulkanTexture::VulkanTexture(VulkanState& vulkan, const Description& desc, const BinaryDataStorage& data)
@@ -29,6 +27,7 @@ VulkanTexture::VulkanTexture(VulkanState& vulkan, const Description& desc, const
 
 	_private->format = vulkan::textureFormatValue(desc.format);
 	_private->aspect = isDepthTextureFormat(desc.format) ? VK_IMAGE_ASPECT_DEPTH_BIT : VK_IMAGE_ASPECT_COLOR_BIT;
+	_private->imageViewType = vulkan::textureTargetToImageViewType(desc.target);
 
 	VkImageCreateInfo info = { VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO };
 	info.extent = { static_cast<uint32_t>(desc.size.x), static_cast<uint32_t>(desc.size.y), 1 };
@@ -57,6 +56,8 @@ VulkanTexture::VulkanTexture(VulkanState& vulkan, const Description& desc, const
 	default:
 		ET_FAIL("Invalid TextureTarget provided");
 	}
+	_private->layerCount = info.arrayLayers;
+	_private->levelCount = info.mipLevels;
 	
 	if (desc.isRenderTarget)
 	{
@@ -75,27 +76,12 @@ VulkanTexture::VulkanTexture(VulkanState& vulkan, const Description& desc, const
 	VULKAN_CALL(vkAllocateMemory(vulkan.device, &allocInfo, nullptr, &_private->memory));
 	VULKAN_CALL(vkBindImageMemory(vulkan.device, _private->image, _private->memory, 0));
 
-	_private->layerCount = info.arrayLayers;
 	VkImageViewCreateInfo imageViewInfo = { VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO };
 	imageViewInfo.image = _private->image;
-	imageViewInfo.viewType = vulkan::textureTargetToImageViewType(desc.target);
-	imageViewInfo.format = vulkan::textureFormatValue(desc.format);
-	imageViewInfo.subresourceRange = { _private->aspect, 0, desc.levelCount, 0, _private->layerCount };
+	imageViewInfo.viewType = _private->imageViewType;
+	imageViewInfo.format = _private->format;
+	imageViewInfo.subresourceRange = { _private->aspect, 0, _private->levelCount, 0, _private->layerCount };
 	VULKAN_CALL(vkCreateImageView(vulkan.device, &imageViewInfo, nullptr, &_private->completeImageView));
-
-	if (_private->layerCount > 1)
-	{
-		_private->layerViews.resize(info.arrayLayers);
-		for (uint32_t i = 0; i < info.arrayLayers; ++i)
-		{
-			VkImageViewCreateInfo imageViewInfo = { VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO };
-			imageViewInfo.image = _private->image;
-			imageViewInfo.viewType = vulkan::textureTargetToImageViewType(desc.target);
-			imageViewInfo.format = vulkan::textureFormatValue(desc.format);
-			imageViewInfo.subresourceRange = { _private->aspect, 0, desc.levelCount, i, _private->layerCount };
-			VULKAN_CALL(vkCreateImageView(vulkan.device, &imageViewInfo, nullptr, _private->layerViews.data() + i));
-		}
-	}
 
 	if (data.size() > 0)
 		setImageData(data);
@@ -103,8 +89,8 @@ VulkanTexture::VulkanTexture(VulkanState& vulkan, const Description& desc, const
 
 VulkanTexture::~VulkanTexture()
 {
-	for (VkImageView imageView : _private->layerViews)
-		vkDestroyImageView(_private->vulkan.device, imageView, nullptr);
+	for (auto imageView : _private->allImageViews)
+		vkDestroyImageView(_private->vulkan.device, imageView.second, nullptr);
 
 	vkDestroyImageView(_private->vulkan.device, _private->completeImageView, nullptr);
 
@@ -206,6 +192,11 @@ void VulkanTexture::updateRegion(const vec2i & pos, const vec2i & size, const Bi
 }
 
 const VulkanNativeTexture& VulkanTexture::nativeTexture() const
+{
+	return *(_private);
+}
+
+VulkanNativeTexture& VulkanTexture::nativeTexture()
 {
 	return *(_private);
 }

@@ -17,11 +17,11 @@ public:
 	Buffer::Pointer buffer;
 	BinaryDataStorage heapInfo;
 	BinaryDataStorage localData;
-	Vector<ConstantBufferEntry> allocations;
+	Vector<ConstantBufferEntry::Pointer> allocations;
 	bool modified = false;
 
-	const ConstantBufferEntry& internalAlloc(uint32_t, bool);
-	void internalFree(const ConstantBufferEntry&);
+	const ConstantBufferEntry::Pointer& internalAlloc(uint32_t, bool);
+	void internalFree(const ConstantBufferEntry::Pointer&);
 };
 
 ConstantBuffer::ConstantBuffer()
@@ -60,49 +60,51 @@ Buffer::Pointer ConstantBuffer::buffer() const
 
 void ConstantBuffer::flush()
 {
-	if (!_private->modified)
+	if (_private->modified == false)
 		return;
 
 	uint8_t* mappedMemory = _private->buffer->map(0, Capacity);
-	for (const ConstantBufferEntry& allocation : _private->allocations)
+	for (const ConstantBufferEntry::Pointer& allocation : _private->allocations)
 	{
-		memcpy(mappedMemory + allocation.offset(), _private->localData.begin() + allocation.offset(), allocation.length());
-		_private->buffer->modifyRange(allocation.offset(), allocation.length());
+		memcpy(mappedMemory + allocation->offset(), _private->localData.begin() + allocation->offset(), allocation->length());
+		_private->buffer->modifyRange(allocation->offset(), allocation->length());
 	}
 	_private->buffer->unmap();
 
-	for (const ConstantBufferEntry& allocation : _private->allocations)
+	Vector<ConstantBufferEntry::Pointer> objectsToRelease;
+	objectsToRelease.reserve(_private->allocations.size());
+
+	for (auto i = _private->allocations.begin(); i != _private->allocations.end();)
 	{
-		if (allocation.isDynamic())
-			free(allocation);
+		if ((*i)->isDynamic() || ((*i)->retainCount() == 1))
+		{
+			objectsToRelease.emplace_back(*i);
+			i = _private->allocations.erase(i);
+		}
+		else
+		{
+			++i;
+		}
 	}
-	auto toErase = std::remove_if(_private->allocations.begin(), _private->allocations.end(), [](const ConstantBufferEntry& allocation){
-		return allocation.isDynamic();
-	});
-	_private->allocations.erase(toErase, _private->allocations.end());
+	
+	for (const ConstantBufferEntry::Pointer& allocation : objectsToRelease)
+		_private->internalFree(allocation);
+
 	_private->heap.compress();
 	_private->modified = false;
 }
 
-const ConstantBufferEntry& ConstantBuffer::staticAllocate(uint32_t size)
+const ConstantBufferEntry::Pointer& ConstantBuffer::staticAllocate(uint32_t size)
 {
 	return _private->internalAlloc(size, false);
 }
 
-const ConstantBufferEntry& ConstantBuffer::dynamicAllocate(uint32_t size)
+const ConstantBufferEntry::Pointer& ConstantBuffer::dynamicAllocate(uint32_t size)
 {
 	return _private->internalAlloc(size, true);
 }
 
-void ConstantBuffer::free(const ConstantBufferEntry& entry)
-{
-	_private->internalFree(entry);
-
-	if (entry.isDynamic() == false)
-		_private->heap.compress();
-}
-
-const ConstantBufferEntry& ConstantBufferPrivate::internalAlloc(uint32_t size, bool dyn)
+const ConstantBufferEntry::Pointer& ConstantBufferPrivate::internalAlloc(uint32_t size, bool dyn)
 {
 	uint32_t offset = 0;
 
@@ -116,24 +118,25 @@ const ConstantBufferEntry& ConstantBufferPrivate::internalAlloc(uint32_t size, b
 	}
 
 	modified = true;
-	allocations.emplace_back(offset, size, localData.begin() + offset, dyn);
+	allocations.emplace_back(ConstantBufferEntry::Pointer::create(offset, size, localData.begin() + offset, dyn));
 	return allocations.back();
 }
 
-void ConstantBufferPrivate::internalFree(const ConstantBufferEntry& entry)
+void ConstantBufferPrivate::internalFree(const ConstantBufferEntry::Pointer& entry)
 {
-	ET_ASSERT(entry.data() >= localData.begin());
-	ET_ASSERT(entry.data() < localData.end());
+	ET_ASSERT(entry->data() >= localData.begin());
+	ET_ASSERT(entry->data() < localData.end());
 	
-	if (heap.release(entry.offset()) == false)
+	if (heap.release(entry->offset()) == false)
 		ET_ASSERT(0 && "Attempt to release memory which was not allocated here");
 
-	if (entry.isDynamic() == false)
+#if (ET_DEBUG)
+	if (entry->isDynamic() == false)
 	{
 		auto allocation = std::find(allocations.begin(), allocations.end(), entry);
-		ET_ASSERT(allocation != allocations.end());
-		allocations.erase(allocation);
+		ET_ASSERT(allocation == allocations.end());
 	}
+#endif
 }
 
 }

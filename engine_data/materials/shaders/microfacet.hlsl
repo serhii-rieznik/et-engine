@@ -91,14 +91,14 @@ float4 fragmentMain(VSOutput fsIn) : SV_Target0
 
 	BSDF bsdf = buildBSDF(wsNormal, wsLight, wsView);
 
-	float3 indirectDiffuse = importanceSampledDiffuse(wsNormal, wsView, surface);
-	float3 indirectSpecular = importanceSampledSpecular(wsNormal, wsView, surface);
+	float3 indirectDiffuse = sampleEnvironment(wsNormal, 8.0);
+	float3 indirectSpecular = sampleEnvironment(wsReflected, 8.0 * surface.roughness);
 
 	float3 directDiffuse = computeDirectDiffuse(surface, bsdf);
 	float3 directSpecular = computeDirectSpecular(surface, bsdf);
 	float3 directTerm = directDiffuse + directSpecular;
 
-	float3 result = directTerm + float3(0.0, 1.0, 0.0) * indirectSpecular; // directTerm + indirectSpecular + indirectDiffuse; 
+	float3 result = directDiffuse + directSpecular + surface.baseColor * indirectDiffuse + indirectSpecular; 
 	
-	return float4(result, 1.0);
-}
+	return float4(linearToSRGB(result), 1.0);
+}                              

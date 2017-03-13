@@ -104,7 +104,7 @@ public:
 	Material::Pointer base();
 
 	TextureSet::Pointer textureSet(const std::string&);
-	ConstantBufferEntry constantBufferData(const std::string&);
+	ConstantBufferEntry::Pointer constantBufferData(const std::string&);
 	const Configuration& configuration(const std::string&) const override;
 
 	void invalidateTextureSet() override;
@@ -129,7 +129,7 @@ private:
 private:
 	Material::Pointer _base;
 	std::map<std::string, Holder<TextureSet::Pointer>> _textureSets;
-	std::map<std::string, Holder<ConstantBufferEntry>> _constBuffers;
+	std::map<std::string, Holder<ConstantBufferEntry::Pointer>> _constBuffers;
 };
 
 template <class T>

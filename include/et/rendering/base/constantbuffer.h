@@ -14,11 +14,12 @@
 namespace et
 {
 
-class ConstantBufferEntry
+class ConstantBufferEntry : public Shared
 {
 public:
-	ConstantBufferEntry() = default;
+	ET_DECLARE_POINTER(ConstantBufferEntry);
 
+public:
 	ConstantBufferEntry(uint32_t off, uint32_t sz, uint8_t* ptr, bool dyn) :
 		_data(ptr), _offset(off), _length(sz), _isDynamic(dyn) { }
 
@@ -73,10 +74,10 @@ public:
 	Buffer::Pointer buffer() const;
 	void flush();
 
-	const ConstantBufferEntry& staticAllocate(uint32_t size);
-	const ConstantBufferEntry& dynamicAllocate(uint32_t size);
+	const ConstantBufferEntry::Pointer& staticAllocate(uint32_t size);
+	const ConstantBufferEntry::Pointer& dynamicAllocate(uint32_t size);
 
-	void free(const ConstantBufferEntry&);
+	// void free(const ConstantBufferEntry::Pointer&);
 
 private:
 	ET_DECLARE_PIMPL(ConstantBuffer, 256);

@@ -46,11 +46,11 @@ void Material::setTexture(MaterialTexture t, Texture::Pointer tex)
 
 void Material::setSampler(MaterialTexture t, Sampler::Pointer smp)
 {
-	OptionalObject<Sampler::Pointer>& entry = samplers[static_cast<uint32_t>(t)];
+	OptionalObject<Sampler::Pointer>& entry = samplers[static_cast<uint32_t>(t) + MaterialSamplerBindingOffset];
 	if (entry.object != smp)
 	{
 		entry.object = smp;
-		entry.index = static_cast<uint32_t>(t);
+		entry.index = static_cast<uint32_t>(t) + MaterialSamplerBindingOffset;
 		entry.binding = t;
 		invalidateTextureSet();
 	}
@@ -385,19 +385,15 @@ void MaterialInstance::buildTextureSet(const std::string& pt)
 
 void MaterialInstance::buildConstantBuffer(const std::string& pt)
 {
-	ConstantBufferEntry entry = _constBuffers[pt].obj;
-	if (entry.valid())
-		_renderer->sharedConstantBuffer().free(entry);
-	
 	const Program::Reflection& reflection = configuration(pt).program->reflection();
 	if (reflection.materialVariablesBufferSize == 0)
 	{
-		_constBuffers[pt].obj = { };
+		_constBuffers[pt].obj.reset(nullptr);
 		_constBuffers[pt].valid = true;
 		return;
 	}
 
-	entry = _renderer->sharedConstantBuffer().staticAllocate(reflection.materialVariablesBufferSize);
+	ConstantBufferEntry::Pointer entry = _renderer->sharedConstantBuffer().staticAllocate(reflection.materialVariablesBufferSize);
 
 	auto setFunc = [&, this](const OptionalValue& p) 
 	{
@@ -407,7 +403,7 @@ void MaterialInstance::buildConstantBuffer(const std::string& pt)
 			auto var = reflection.materialVariables.find(name);
 			if (var != reflection.materialVariables.end())
 			{
-				memcpy(entry.data() + var->second.offset, p.data, p.size);
+				memcpy(entry->data() + var->second.offset, p.data, p.size);
 			}
 		}
 	};
@@ -430,7 +426,7 @@ TextureSet::Pointer MaterialInstance::textureSet(const std::string& pt)
 	return _textureSets.at(pt).obj;
 }
 
-ConstantBufferEntry MaterialInstance::constantBufferData(const std::string& pt)
+ConstantBufferEntry::Pointer MaterialInstance::constantBufferData(const std::string& pt)
 {
 	if (!_constBuffers[pt].valid)
 		buildConstantBuffer(pt);
