@@ -109,7 +109,7 @@ float4 fragmentMain(VSOutput fsIn) : SV_Target0
 		 ((1.0 - surface.metallness) * brdfLookupSample.z);
 	                                                              
 	float3 wsSpecularDir = specularDominantDirection(wsNormal, wsView, surface.roughness);
-	float3 indirectSpecular = sampleEnvironment(wsDiffuseDir, 8.0 * surface.roughness);
+	float3 indirectSpecular = sampleEnvironment(wsSpecularDir, 8.0 * surface.roughness);
 	indirectSpecular *= (surface.f0 * brdfLookupSample.x + surface.f90 * brdfLookupSample.y);
 
 	float3 result = 
