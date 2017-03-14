@@ -14,5 +14,20 @@
 		"blend-state": "disabled",
 		"cull-mode" : "disabled",
 		"code" : "shaders/environment"
+	},
+	"generate-split-sum-approx" :
+	{ 
+		"input-layout" : {
+			"position" : 3,
+			"texcoord0" : 2
+		},
+		"depth-state": {
+			"depth-function": "less",
+			"depth-test": true,
+			"depth-write": false
+		},
+		"blend-state": "disabled",
+		"cull-mode" : "disabled",
+		"code" : "shaders/split-sum-approx"
 	}
 }

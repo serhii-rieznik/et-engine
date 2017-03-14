@@ -75,19 +75,17 @@ void VulkanPipelineState::build(const RenderPass::Pointer& inPass)
 
 	for (const RenderTarget& rt : pass->info().color)
 	{
-		if (rt.enabled)
-		{
-			attachmentInfo.emplace_back();
-			VkPipelineColorBlendAttachmentState& state = attachmentInfo.back();
-			state.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
-			state.blendEnable = blendState().enabled ? VK_TRUE : VK_FALSE;
-			state.colorBlendOp = vulkan::blendOperationValue(blendState().colorOperation);
-			state.srcColorBlendFactor = vulkan::blendFactorValur(blendState().color.source);
-			state.dstColorBlendFactor = vulkan::blendFactorValur(blendState().color.dest);
-			state.alphaBlendOp = vulkan::blendOperationValue(blendState().alphaOperation);
-			state.srcAlphaBlendFactor = vulkan::blendFactorValur(blendState().alpha.source);
-			state.dstAlphaBlendFactor = vulkan::blendFactorValur(blendState().alpha.dest);
-		}
+		if (!rt.enabled) break;
+		attachmentInfo.emplace_back();
+		VkPipelineColorBlendAttachmentState& state = attachmentInfo.back();
+		state.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
+		state.blendEnable = blendState().enabled ? VK_TRUE : VK_FALSE;
+		state.colorBlendOp = vulkan::blendOperationValue(blendState().colorOperation);
+		state.srcColorBlendFactor = vulkan::blendFactorValur(blendState().color.source);
+		state.dstColorBlendFactor = vulkan::blendFactorValur(blendState().color.dest);
+		state.alphaBlendOp = vulkan::blendOperationValue(blendState().alphaOperation);
+		state.srcAlphaBlendFactor = vulkan::blendFactorValur(blendState().alpha.source);
+		state.dstAlphaBlendFactor = vulkan::blendFactorValur(blendState().alpha.dest);
 	}
 	VkPipelineColorBlendStateCreateInfo blendInfo = { VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO };
 	{

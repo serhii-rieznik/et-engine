@@ -1,6 +1,7 @@
 struct Surface
 {
 	float roughness;
+	float metallness;
 	float roughnessSquared;
 	float3 baseColor;
 	float3 f0;
@@ -33,6 +34,7 @@ float3 directLighting(in Surface surface, in BSDF bsdf);
 
 Surface buildSurface(in float3 baseColor, in float m, in float r)
 {
+	r *= r;
 	float defaultReflectance = 0.5;
 	float reflectance = MIN_REFLECTANCE * defaultReflectance * defaultReflectance;	
 	                 	
@@ -40,8 +42,9 @@ Surface buildSurface(in float3 baseColor, in float m, in float r)
 	result.baseColor = baseColor * (1.0 - saturate(m));
 	result.f90 = saturate(50.0 * reflectance);
 	result.f0 = lerp(reflectance, baseColor, m);
-	result.roughness = clamp(r * r, MIN_ROUGHNESS, 1.0);
-	result.roughnessSquared = result.roughness * result.roughness;
+	result.roughness = clamp(r, MIN_ROUGHNESS, 1.0);
+	result.roughnessSquared = clamp(r * r, MIN_ROUGHNESS, 1.0);
+	result.metallness = m;
 	return result;
 }
 

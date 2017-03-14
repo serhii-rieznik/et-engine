@@ -1,5 +1,5 @@
-#define DIFFUSE_SAMPLES 	1
-#define SPECULAR_SAMPLES 	256
+#define DIFFUSE_SAMPLES  1
+#define SPECULAR_SAMPLES 256
 
 float3 sampleEnvironment(in float3 dir, in float level);
 float ggxDistribution(in float NdotH, in float roughnessSquared);
@@ -22,20 +22,27 @@ float bitfieldInverse(in uint bits)
 	return (float)(bits * 2.3283064365386963e-10);
 }
 
+float2 hammersley(in uint i, in uint n)
+{
+	return float2(bitfieldInverse(i), float(i) / float(n));
+}
+
 float3 importanceSampleCosine(in float2 Xi)
 {
 	float t = sqrt(Xi.x);	
-	return float3(cos(Xi.y) * t, sin(Xi.y) * t, sqrt(max(0.0, 1.0 - Xi.x)));
+	float phi = 2.0 * PI * Xi.y;            
+	return float3(cos(phi) * t, sin(phi) * t, sqrt(max(0.0, 1.0 - Xi.x)));
 }
 
 float3 importanceSampleGGX(in float2 Xi, in float r)
-{                                       
+{                           
+	float phi = 2.0 * PI * Xi.y;            
 	float t = sqrt((1.0f - Xi.x) / ((r * r - 1.0) * Xi.x + 1.0f));
 	float s = sqrt(max(0.0, 1.0 - t * t));
-
-	return float3(cos(Xi.y) * s, sin(Xi.y) * s, t);
+	return float3(cos(phi) * s, sin(phi) * s, t);
 }
 
+/*
 float3 importanceSampledDiffuse(in float3 n, in float3 v, in Surface surface)
 {
 	uint numSamples = DIFFUSE_SAMPLES;
@@ -46,9 +53,7 @@ float3 importanceSampledDiffuse(in float3 n, in float3 v, in Surface surface)
 	float3 result = 0.0;
 	for (uint i = 0; i < DIFFUSE_SAMPLES; ++i)
 	{
-		float2 Xi;
-		Xi.x = bitfieldInverse(i);
-		Xi.y = 2.0 * PI * (i / (float)(DIFFUSE_SAMPLES));
+		float2 Xi = hammersley(i);
 		float3 h = importanceSampleCosine(Xi);
 		float3 l = t * h.x + b * h.y + n * h.z;
 
@@ -71,10 +76,7 @@ float3 importanceSampledSpecular(in float3 n, in float3 v, in Surface surface)
 	float3 result = 0.0;
 	for (uint i = 0; i < SPECULAR_SAMPLES; ++i)
 	{
-		float2 Xi;
-		Xi.x = bitfieldInverse(i);
-		Xi.y = 2.0 * PI * (i / (float)(SPECULAR_SAMPLES));
-
+		float2 Xi = hammersley(i);
 		float3 h = importanceSampleGGX(Xi, surface.roughness);
 		h = t * h.x + b * h.y + n * h.z;
 		float3 l = normalize(2.0 * dot(v, h) * h - v);
@@ -98,3 +100,4 @@ float3 importanceSampledSpecular(in float3 n, in float3 v, in Surface surface)
 	
 	return result / float(SPECULAR_SAMPLES);
 }
+*/

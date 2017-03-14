@@ -11,7 +11,7 @@
 			"depth-test": true,
 			"depth-write": true
 		},
-		"blend-state": "disabled" 
+		"blend-state": "disabled",
 		"options" : {
 			"TRANSFORM_INPUT_POSITION" : 1
 		},

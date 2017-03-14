@@ -90,6 +90,7 @@ public:
 	 */
 	virtual Sampler::Pointer createSampler(const Sampler::Description&) = 0;
 	Sampler::Pointer defaultSampler();
+	Sampler::Pointer clampSampler();
 	Sampler::Pointer nearestSampler();
 
 protected:
@@ -105,6 +106,7 @@ private:
 	Texture::Pointer _blackTexture;
 	Sampler::Pointer _defaultSampler;
 	Sampler::Pointer _nearestSampler;
+	Sampler::Pointer _clampSampler;
 };
 
 inline Texture::Pointer RenderInterface::loadTexture(const std::string& fileName, ObjectsCache& cache)
@@ -134,7 +136,7 @@ inline Texture::Pointer RenderInterface::checkersTexture()
 {
 	if (_checkersTexture.invalid())
 	{
-		const uint32_t colors[] = { 0xFF000000, 0xFFFFFFFF };
+		const uint32_t colors[] = { 0xFFFF00FF, 0xFF00FF00 };
 		uint32_t numColors = static_cast<uint32_t>(sizeof(colors) / sizeof(colors[0]));
 		
 		TextureDescription::Pointer desc = TextureDescription::Pointer::create();
@@ -194,6 +196,19 @@ inline Sampler::Pointer RenderInterface::defaultSampler()
 	return _defaultSampler;
 }
 
+inline Sampler::Pointer RenderInterface::clampSampler()
+{
+	if (_clampSampler.invalid())
+	{
+		Sampler::Description desc;
+		desc.wrapU = TextureWrap::ClampToEdge;
+		desc.wrapV = TextureWrap::ClampToEdge;
+		desc.wrapW = TextureWrap::ClampToEdge;
+		_clampSampler = createSampler(desc);
+	}
+	return _clampSampler;
+}
+
 inline Sampler::Pointer RenderInterface::nearestSampler()
 {
 	if (_nearestSampler.invalid())
@@ -226,6 +241,7 @@ inline void RenderInterface::shutdownInternalStructures()
 	_whiteTexture.reset(nullptr);
 	_blackTexture.reset(nullptr);
 	_nearestSampler.reset(nullptr);
+	_clampSampler.reset(nullptr);
 }
 
 inline Buffer::Pointer RenderInterface::createDataBuffer(const std::string& name, uint32_t size)

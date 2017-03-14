@@ -1,6 +1,7 @@
 #include <et>
 #include <inputdefines>
 #include <inputlayout>
+#include "srgb.h"
 #include "environment.h"
 
 struct VSOutput 
@@ -25,5 +26,5 @@ VSOutput vertexMain(VSInput vsIn)
 
 float4 fragmentMain(VSOutput fsIn) : SV_Target0
 {
-	return float4(sampleEnvironment(normalize(fsIn.direction), 0.0), 1.0);
+	return float4(linearToSRGB(sampleEnvironment(normalize(fsIn.direction), 1.0)), 1.0);
 }

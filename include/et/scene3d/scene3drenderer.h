@@ -31,6 +31,7 @@ public:
 	struct Options
 	{
 		bool drawEnvironmentProbe = false;
+		bool drawLookupTexture = false;
 	} options;
 
 public:
@@ -60,17 +61,67 @@ private:
 	void render(RenderPass::Pointer& pass, const RenderBatchInfoCollection&);
 	void validateMainPass(RenderInterface::Pointer&, const Scene::Pointer&);
 	void validateShadowPass(RenderInterface::Pointer&);
+	
+	void processCubemap(RenderInterface::Pointer&);
 	void renderDebug(RenderInterface::Pointer&);
 
-	void validateWrapCubemapPass(RenderInterface::Pointer&);
+	void validateWrapCubemapPasses(RenderInterface::Pointer&);
 
 	mat4 fullscreenBatchTransform(const vec2& viewport, const vec2& origin, const vec2& size);
 
 private:
 	enum : uint32_t
 	{
-		RebuildCubemap = 1 << 0
+		/*
+		 * State flags
+		 */
+		RebuildCubemap = 1 << 0,
+		RebuildLookupTexture = 1 << 1,
+
+		/*
+		 * Constants
+		 */
+		CubemapLevels = 9
 	};
+
+	enum CubemapType : uint32_t
+	{
+		Source,
+		Downsampled,
+		Convoluted,
+		Count
+	};
+
+	struct Environment
+	{
+		Texture::Pointer lookup;
+		RenderPass::Pointer lookupPass;
+		RenderPass::Pointer lookupDebugPass;
+		Material::Pointer lookupDebugMaterial;
+		RenderBatch::Pointer lookupDebugBatch;
+
+		Texture::Pointer tex[CubemapType::Count];
+		Sampler::Pointer eqMapSampler;
+		
+		Material::Pointer processingMaterial;
+
+		RenderPass::Pointer downsamplePass;
+		RenderBatch::Pointer downsampleBatch;
+
+		RenderPass::Pointer cubemapDebugPass;
+		RenderBatch::Pointer cubemapDebugBatch;
+
+		RenderPass::Pointer specularConvolvePass;
+		RenderBatch::Pointer specularConvolveBatch;
+
+		Material::Pointer environmentMaterial;
+		RenderBatch::Pointer forwardBatch;
+
+		CubemapProjectionMatrixArray projections;
+		RenderPassBeginInfo wholeCubemapBeginInfo;
+		
+		bool lookupGenerated = false;
+	} _env;
 
 private:
 	ObjectsCache _cache;
@@ -80,22 +131,9 @@ private:
 	RenderPass::Pointer _mainPass;
     RenderBatchInfoCollection _shadowPassBatches;
 	RenderPass::Pointer _shadowPass;
-
-	Material::Pointer _cubemapMaterial;
-	RenderPass::Pointer _wrapCubemapPass;
-	RenderBatch::Pointer _wrapCubemapBatch;
-	
-	RenderPass::Pointer _cubemapDebugPass;
-	RenderBatch::Pointer _cubemapDebugBatch;
-
-	Sampler::Pointer _cubemapDebugSampler;
     Texture::Pointer _shadowTexture;
-	Texture::Pointer _envTexture;
-	Texture::Pointer _envCubemap;
-	Material::Pointer _envMaterial;
-	RenderBatch::Pointer _envBatch;
 
-	uint32_t _state = 0;
+	uint32_t _state = RebuildLookupTexture;
 };
 }
 }

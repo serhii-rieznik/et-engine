@@ -430,6 +430,8 @@ void VulkanRenderer::present()
 	_private->swapchain.present(_private->vulkan());
 	VULKAN_CALL(vkQueueWaitIdle(_private->queue));
 
+	for (VulkanRenderPass::Pointer& pass : _private->passes)
+		pass->clean();
 	_private->passes.clear();
 }
 

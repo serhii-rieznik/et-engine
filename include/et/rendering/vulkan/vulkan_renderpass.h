@@ -33,6 +33,7 @@ public:
 	void end() override;
 	
 	void recordCommandBuffer();
+	void clean();
 
 private:
 	ET_DECLARE_PIMPL(VulkanRenderPass, 384);

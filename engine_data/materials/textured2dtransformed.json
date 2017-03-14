@@ -1,0 +1,22 @@
+{
+	"name" : "textured-2d",
+
+	"forward" : 
+	{ 
+		"input-layout" : {
+			"position" : 3,
+			"texcoord0" : 2
+		},
+		"options" : {
+			"TRANSFORM_2D_POSITION" : 1
+		},
+		"depth-state": {
+			"depth-function": "always",
+			"depth-test": false,
+			"depth-write": false
+		},
+		"blend-state": "disabled",
+		"cull-mode" : "disabled",
+		"code" : "shaders/textured"
+	}
+}

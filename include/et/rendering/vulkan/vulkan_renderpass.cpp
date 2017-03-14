@@ -372,7 +372,9 @@ void VulkanRenderPass::pushRenderBatch(const RenderBatch::Pointer& inBatch)
 		material->setSampler(sh.first, sh.second.second);
 	}
 
-	VulkanRenderBatch batch;
+	_private->commands.emplace_back(VulkanCommand::Type::RenderBatch);
+
+	VulkanRenderBatch& batch = _private->commands.back().batch;
 	batch.textureSet = material->textureSet(info().name);
 	batch.dynamicOffsets[0] = objectVariables;
 	batch.dynamicOffsets[1] = material->constantBufferData(info().name);
@@ -382,8 +384,6 @@ void VulkanRenderPass::pushRenderBatch(const RenderBatch::Pointer& inBatch)
 	batch.startIndex = inBatch->firstIndex();
 	batch.indexCount = inBatch->numIndexes();
 	batch.pipeline = pipelineState;
-
-	_private->commands.emplace_back(std::move(batch));
 }
 
 void VulkanRenderPass::end()
@@ -477,8 +477,12 @@ void VulkanRenderPass::recordCommandBuffer()
 			ET_FAIL("Not implemented");
 		}
 	}
-	
+
 	VULKAN_CALL(vkEndCommandBuffer(commandBuffer));
+}
+
+void VulkanRenderPass::clean()
+{
 	_private->commands.clear();
 }
 

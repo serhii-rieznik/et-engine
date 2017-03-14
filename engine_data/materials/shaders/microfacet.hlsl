@@ -26,6 +26,12 @@ SamplerState normalSampler : CONSTANT_LOCATION(s, NormalSamplerBinding, Textures
 Texture2D<float4> shadowTexture : CONSTANT_LOCATION(t, ShadowTextureBinding, TexturesSetIndex);
 SamplerState shadowSampler : CONSTANT_LOCATION(s, ShadowSamplerBinding, TexturesSetIndex);;
 
+Texture2D<float4> brdfLookupTexture : CONSTANT_LOCATION(t, BrdfLookupTextureBinding, TexturesSetIndex);
+SamplerState brdfLookupSampler : CONSTANT_LOCATION(s, BrdfLookupSamplerBinding, TexturesSetIndex);;
+
+Texture2D<float4> opacityTexture : CONSTANT_LOCATION(t, OpacityTextureBinding, TexturesSetIndex);
+SamplerState opacitySampler : CONSTANT_LOCATION(s, OpacitySamplerBinding, TexturesSetIndex);;
+
 struct VSOutput 
 {
 	float4 position : SV_Position;
@@ -73,6 +79,10 @@ float4 fragmentMain(VSOutput fsIn) : SV_Target0
 {
 	float4 normalSample = normalTexture.Sample(normalSampler, fsIn.texCoord0);
 	float4 baseColorSample = baseColorTexture.Sample(baseColorSampler, fsIn.texCoord0);
+	float4 opacitySample = opacityTexture.Sample(opacitySampler, fsIn.texCoord0);
+
+	if ((opacitySample.x + opacitySample.y) < 127.0 / 255.0)
+		discard;
 
 	float3 baseColor = srgbToLinear(baseColorSample.xyz);
 	Surface surface = buildSurface(baseColor, normalSample.w * metallnessScale, baseColorSample.w * roughnessScale);
@@ -87,18 +97,24 @@ float4 fragmentMain(VSOutput fsIn) : SV_Target0
 
 	float3 wsLight = normalize(fsIn.toLight);
 	float3 wsView = normalize(fsIn.toCamera);
-	float3 wsReflected = -reflect(wsView, wsNormal);
 
 	BSDF bsdf = buildBSDF(wsNormal, wsLight, wsView);
-
-	float3 indirectDiffuse = sampleEnvironment(wsNormal, 8.0);
-	float3 indirectSpecular = sampleEnvironment(wsReflected, 8.0 * surface.roughness);
-
 	float3 directDiffuse = computeDirectDiffuse(surface, bsdf);
 	float3 directSpecular = computeDirectSpecular(surface, bsdf);
-	float3 directTerm = directDiffuse + directSpecular;
 
-	float3 result = directDiffuse + directSpecular + surface.baseColor * indirectDiffuse + indirectSpecular; 
+	float4 brdfLookupSample = brdfLookupTexture.Sample(brdfLookupSampler, float2(surface.roughness, bsdf.VdotN));
+
+	float3 wsDiffuseDir = diffuseDominantDirection(wsNormal, wsView, surface.roughness);
+	float3 indirectDiffuse = (surface.baseColor * sampleEnvironment(wsDiffuseDir, 8.0)) *
+		 ((1.0 - surface.metallness) * brdfLookupSample.z);
+	                                                              
+	float3 wsSpecularDir = specularDominantDirection(wsNormal, wsView, surface.roughness);
+	float3 indirectSpecular = sampleEnvironment(wsDiffuseDir, 8.0 * surface.roughness);
+	indirectSpecular *= (surface.f0 * brdfLookupSample.x + surface.f90 * brdfLookupSample.y);
+
+	float3 result = 
+			1.0 * (directDiffuse + directSpecular) + 
+			1.0 * (indirectDiffuse + indirectSpecular); 
 	
 	return float4(linearToSRGB(result), 1.0);
 }                              

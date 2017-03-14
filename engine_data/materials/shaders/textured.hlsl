@@ -2,7 +2,7 @@
 #include <inputdefines>
 #include <inputlayout>
 
-#if (TRANSFORM_INPUT_POSITION)
+#if (TRANSFORM_INPUT_POSITION || TRANSFORM_2D_POSITION)
 cbuffer ObjectVariables : CONSTANT_LOCATION(b, ObjectVariablesBufferIndex, VariablesSetIndex) 
 {
 	row_major float4x4 worldTransform; 
@@ -26,6 +26,8 @@ VSOutput vertexMain(VSInput vsIn)
 
 #if (TRANSFORM_INPUT_POSITION)
 	vsOut.position = mul(mul(vsOut.position, worldTransform), viewProjection);
+#elif (TRANSFORM_2D_POSITION)
+	vsOut.position = mul(vsOut.position, worldTransform);
 #endif
 
 	return vsOut;
