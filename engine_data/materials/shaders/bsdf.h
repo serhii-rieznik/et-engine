@@ -68,19 +68,18 @@ float ggxDistribution(in float NdotH, in float roughnessSquared)
 
 float ggxMasking(in float VdotN, in float LdotN, in float roughnessSquared)
 {
-	float VdotN2 = VdotN * VdotN;
-	float LdotN2 = LdotN * LdotN;
-	float g1 = 2.0 / (1.0 + sqrt(1.0 + roughnessSquared * (1.0 - VdotN2) / VdotN2));
-	float g2 = 2.0 / (1.0 + sqrt(1.0 + roughnessSquared * (1.0 - LdotN2) / LdotN2));
-	return g1 * g2;
+	float L1 = 0.5 * (sqrt(roughnessSquared + (1.0 - roughnessSquared) * VdotN * VdotN) / VdotN - 1.0); 
+	float L2 = 0.5 * (sqrt(roughnessSquared + (1.0 - roughnessSquared) * LdotN * LdotN) / LdotN - 1.0); 
+	return 1.0 / (1.0 + L1 + L2);
 }
 
 float ggxMaskingCombined(in float VdotN, in float LdotN, in float roughnessSquared)
 {
-	float a = roughnessSquared;
-	float VdotN2 = VdotN * VdotN;
-	float LdotN2 = LdotN * LdotN;
-	return 1.0 / ((VdotN + sqrt(VdotN2 * (1.0 - roughnessSquared) + roughnessSquared)) * (1.0 + sqrt(1.0 - roughnessSquared + roughnessSquared / (LdotN2 + MIN_FLOAT))));
+	float VoN2 = VdotN * VdotN;
+	float LoN2 = LdotN * LdotN;
+	float L1 = LdotN * sqrt(roughnessSquared + (1.0 - roughnessSquared) * VoN2); 
+	float L2 = VdotN * sqrt(roughnessSquared + (1.0 - roughnessSquared) * LoN2); 
+	return 0.5 * LdotN / (L1 + L2);
 }
 
 float diffuseBurley(in float LdotN, in float VdotN, in float LdotH, in float roughness)
@@ -113,8 +112,8 @@ float3 computeDirectDiffuse(in Surface surface, in BSDF bsdf)
 float3 computeDirectSpecular(in Surface surface, in BSDF bsdf)
 {
 	float d = ggxDistribution(bsdf.NdotH, surface.roughnessSquared);
-	float g = ggxMasking(bsdf.VdotN, bsdf.LdotN, surface.roughnessSquared);
-	return d * g * lerp(surface.f0, surface.f90, pow(1.0 - bsdf.LdotH, 5.0));
+	float g = ggxMaskingCombined(bsdf.VdotN, bsdf.LdotN, surface.roughnessSquared);
+	return g * d * lerp(surface.f0, surface.f90, pow(1.0 - bsdf.LdotH, 5.0));
 }
 
 

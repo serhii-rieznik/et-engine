@@ -1,0 +1,22 @@
+{
+	"name" : "cubemap downsample routines",
+
+	"eq-to-cubemap" : 
+	{ 
+		"input-layout" : {
+			"position" : 3,
+			"texcoord0" : 2
+		},
+		"depth-state": {
+			"depth-function": "always",
+			"depth-test": false,
+			"depth-write": false
+		},
+		"options" : {
+			"DOWNSAMPLE_CUBEMAP" : 1
+		},
+		"blend-state": "disabled",
+		"cull-mode" : "disabled",
+		"code" : "shaders/cubemap"
+	}
+}

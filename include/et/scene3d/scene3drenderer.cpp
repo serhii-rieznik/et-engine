@@ -16,7 +16,7 @@ namespace s3d
 {
 
 Renderer::Renderer() :
-	FlagsHolder(RenderAll)
+	FlagsHolder(RebuildLookupTexture)
 {
 	for (uint32_t level = 0; level < CubemapLevels; ++level)
 	{
@@ -99,7 +99,7 @@ void Renderer::validateMainPass(RenderInterface::Pointer& renderer, const Scene:
 		_env.forwardBatch.reset(nullptr);
 	}
 
-	_state |= RebuildCubemap;
+	setFlag(RebuildCubemap);
 
 	RenderPass::ConstructionInfo passInfo;
 	passInfo.camera = scene->mainCamera();
@@ -248,6 +248,7 @@ void Renderer::validateWrapCubemapPasses(RenderInterface::Pointer& renderer)
 		TextureDescription::Pointer lookupDesc(PointerInit::CreateInplace);
 		lookupDesc->format = TextureFormat::RGBA32F;
 		lookupDesc->size = vec2i(256);
+		lookupDesc->isRenderTarget = true;
 		_env.lookup = renderer->createTexture(lookupDesc);
 
 		RenderPass::ConstructionInfo passInfo;
@@ -269,8 +270,8 @@ void Renderer::validateWrapCubemapPasses(RenderInterface::Pointer& renderer)
 		passInfo.priority = RenderPassPriority::UI - 2;
 		_env.lookupDebugPass = renderer->allocateRenderPass(passInfo);
 
-		_env.lookupDebugMaterial = renderer->sharedMaterialLibrary().loadMaterial(application().resolveFileName("engine_data/materials/textured2dtransformed.json"));
-		_env.lookupDebugBatch = renderhelper::createFullscreenRenderBatch(_env.lookup, _env.lookupDebugMaterial);
+		Material::Pointer lookupDebugMaterial = renderer->sharedMaterialLibrary().loadMaterial(application().resolveFileName("engine_data/materials/textured2dtransformed.json"));
+		_env.lookupDebugBatch = renderhelper::createFullscreenRenderBatch(_env.lookup, lookupDebugMaterial);
 	}
 	
 	if (_env.downsamplePass.invalid())
@@ -286,6 +287,8 @@ void Renderer::validateWrapCubemapPasses(RenderInterface::Pointer& renderer)
 		passInfo.priority = passPriority--;
 		_env.downsamplePass = renderer->allocateRenderPass(passInfo);
 		_env.downsampleBatch = renderhelper::createFullscreenRenderBatch(_env.tex[CubemapType::Source], _env.processingMaterial);
+
+		_env.downsampleMaterial = renderer->sharedMaterialLibrary().loadMaterial(application().resolveFileName("engine_data/materials/cubemap-downsample.json"));
 	}
 
 	if (_env.specularConvolvePass.invalid())
@@ -372,28 +375,42 @@ void Renderer::processCubemap(RenderInterface::Pointer& renderer)
 {
 	validateWrapCubemapPasses(renderer);
 
-	if (_state & RebuildLookupTexture)
+	if (hasFlag(RebuildLookupTexture))
 	{
 		_env.lookupPass->begin({ 0, 0 });
 		_env.lookupPass->pushRenderBatch(renderhelper::createFullscreenRenderBatch(renderer->checkersTexture(), _env.environmentMaterial));
 		_env.lookupPass->end();
 		renderer->submitRenderPass(_env.lookupPass);
-		_state &= ~RebuildLookupTexture;
+		removeFlag(RebuildLookupTexture);
 	}
 
-	if (_state & RebuildCubemap)
+	if (hasFlag(RebuildCubemap))
 	{
 		/*
 		 * Downsampling convolution
 		 */
-		_env.downsampleBatch->material()->setTexture(MaterialTexture::BaseColor, _env.tex[CubemapType::Source]);
-		_env.downsampleBatch->material()->setSampler(MaterialTexture::BaseColor, _env.eqMapSampler);
+		_env.processingMaterial->setTexture(MaterialTexture::BaseColor, _env.tex[CubemapType::Source]);
+		_env.processingMaterial->setSampler(MaterialTexture::BaseColor, _env.eqMapSampler);
+		_env.downsampleMaterial->setTexture(MaterialTexture::BaseColor, _env.tex[CubemapType::Downsampled]);
+
+		_env.downsampleBatch->setMaterial(_env.processingMaterial->instance());
+		_env.processingMaterial->releaseInstances();
+
 		_env.downsamplePass->begin(_env.wholeCubemapBeginInfo);
 		for (uint32_t i = 0, e = static_cast<uint32_t>(_env.wholeCubemapBeginInfo.subpasses.size()); i < e; ++i)
 		{
-			_env.downsampleBatch->setTransformation(_env.projections[i % 6]);
+			uint32_t level = i / 6;
+			uint32_t face = i % 6;
+			_env.downsampleMaterial->setFloat(MaterialParameter::RoughnessScale, static_cast<float>(level));
+			_env.downsampleBatch->setTransformation(_env.projections[face]);
 			_env.downsamplePass->pushRenderBatch(_env.downsampleBatch);
 			_env.downsamplePass->nextSubpass();
+
+			if (i == 5)
+			{
+				_env.downsampleBatch->setMaterial(_env.downsampleMaterial->instance());
+				_env.downsampleMaterial->releaseInstances();
+			}
 		}
 		_env.downsamplePass->end();
 		renderer->submitRenderPass(_env.downsamplePass);
@@ -413,7 +430,7 @@ void Renderer::processCubemap(RenderInterface::Pointer& renderer)
 		}
 		_env.specularConvolvePass->end();
 		renderer->submitRenderPass(_env.specularConvolvePass);
-		_state &= ~RebuildCubemap;
+		removeFlag(RebuildCubemap);
 	}
 }
 

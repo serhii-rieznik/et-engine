@@ -5,10 +5,12 @@
 #include "bsdf.h"
 
 #if (EQ_MAP_TO_CUBEMAP)
-	Texture2D<float4> baseColorTexture : CONSTANT_LOCATION(t, BaseColorTextureBinding, TexturesSetIndex);
-#elif (VISUALIZE_CUBEMAP || SPECULAR_CONVOLUTION)
-	TextureCube<float4> baseColorTexture : CONSTANT_LOCATION(t, BaseColorTextureBinding, TexturesSetIndex);
+	#define InputTextureType Texture2D
+#elif (VISUALIZE_CUBEMAP || SPECULAR_CONVOLUTION || DOWNSAMPLE_CUBEMAP)
+	#define InputTextureType TextureCube
 #endif
+
+InputTextureType<float4> baseColorTexture : CONSTANT_LOCATION(t, BaseColorTextureBinding, TexturesSetIndex);
 SamplerState baseColorSampler : CONSTANT_LOCATION(s, BaseColorSamplerBinding, TexturesSetIndex);
 
 cbuffer ObjectVariables : CONSTANT_LOCATION(b, ObjectVariablesBufferIndex, VariablesSetIndex)
@@ -62,6 +64,10 @@ float4 fragmentMain(VSOutput fsIn) : SV_Target0
 	float v = asin(d.y) / PI + 0.5;
 	return baseColorTexture.SampleLevel(baseColorSampler, float2(u, v), 0.0);
 
+#elif (DOWNSAMPLE_CUBEMAP)
+	
+	return baseColorTexture.SampleLevel(baseColorSampler, fsIn.direction, roughnessScale.x - 1.0);
+
 #elif (SPECULAR_CONVOLUTION)
 
 	float3 n = normalize(fsIn.direction);
@@ -76,10 +82,12 @@ float4 fragmentMain(VSOutput fsIn) : SV_Target0
 #if (DIFFUSE_CONVOLUTION)
 	#define samples 512
 #else
-	#define samples 512
+	#define samples 4096
 	float roughness = roughnessScale.x / 8.0;
 	roughness = max(0.0001, roughness * roughness);
 #endif
+
+	float cubemapSolidAngle = 4.0 * PI / (6.0 * (roughnessScale.y * roughnessScale.z));
 
 	float3 result = 0.0;
 	float weight = 0.0;
@@ -107,9 +115,8 @@ float4 fragmentMain(VSOutput fsIn) : SV_Target0
 		float w = LdotN;
 	#endif
 		
-		float omegaS = 1.0 / ((float)(samples) * pdf);
-		float omegaP = 4.0 * PI / (6.0 * roughnessScale.y * roughnessScale.z);
-		float level = 0.5 * log2(omegaS / omegaP);
+		float sampleSolidAngle = 1.0 / ((float)(samples) * pdf);
+		float level = clamp(2.0 + 0.5 * log2(1.0 + sampleSolidAngle / cubemapSolidAngle), 0.0, 8.0);
 
 		result += w * baseColorTexture.SampleLevel(baseColorSampler, l, level).xyz;
 		weight += w;

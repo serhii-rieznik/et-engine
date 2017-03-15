@@ -19,13 +19,18 @@ class Renderer : public Shared, public FlagsHolder
 public:
 	ET_DECLARE_POINTER(Renderer);
 
-	enum : uint64_t
+	enum : uint32_t
 	{
-		RenderMeshes = 0x01,
-		RenderDebugObjects = 0x02,
-		Wireframe = 0x04,
+		/*
+		* State flags
+		*/
+		RebuildCubemap = 1 << 0,
+		RebuildLookupTexture = 1 << 1,
 
-		RenderAll = RenderMeshes | RenderDebugObjects
+		/*
+		* Constants
+		*/
+		CubemapLevels = 9
 	};
 
 	struct Options
@@ -70,20 +75,6 @@ private:
 	mat4 fullscreenBatchTransform(const vec2& viewport, const vec2& origin, const vec2& size);
 
 private:
-	enum : uint32_t
-	{
-		/*
-		 * State flags
-		 */
-		RebuildCubemap = 1 << 0,
-		RebuildLookupTexture = 1 << 1,
-
-		/*
-		 * Constants
-		 */
-		CubemapLevels = 9
-	};
-
 	enum CubemapType : uint32_t
 	{
 		Source,
@@ -97,7 +88,6 @@ private:
 		Texture::Pointer lookup;
 		RenderPass::Pointer lookupPass;
 		RenderPass::Pointer lookupDebugPass;
-		Material::Pointer lookupDebugMaterial;
 		RenderBatch::Pointer lookupDebugBatch;
 
 		Texture::Pointer tex[CubemapType::Count];
@@ -105,6 +95,7 @@ private:
 		
 		Material::Pointer processingMaterial;
 
+		Material::Pointer downsampleMaterial;
 		RenderPass::Pointer downsamplePass;
 		RenderBatch::Pointer downsampleBatch;
 
@@ -132,8 +123,6 @@ private:
     RenderBatchInfoCollection _shadowPassBatches;
 	RenderPass::Pointer _shadowPass;
     Texture::Pointer _shadowTexture;
-
-	uint32_t _state = RebuildLookupTexture;
 };
 }
 }
