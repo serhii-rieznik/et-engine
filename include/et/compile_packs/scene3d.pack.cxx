@@ -10,6 +10,10 @@
 #include "../scene3d/particlesystem.cpp"
 #include "../scene3d/renderableelement.cpp"
 #include "../scene3d/scene3d.cpp"
-#include "../scene3d/scene3drenderer.cpp"
 #include "../scene3d/skeletonelement.cpp"
 #include "../scene3d/storage.cpp"
+
+#include "../scene3d/drawer/common.cpp"
+#include "../scene3d/drawer/drawer.cpp"
+#include "../scene3d/drawer/shadowmaps.cpp"
+#include "../scene3d/drawer/cubemaps.cpp"

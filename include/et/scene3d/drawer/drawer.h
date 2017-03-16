@@ -7,17 +7,17 @@
 
 #pragma once
 
-#include <et/rendering/interface/renderer.h>
-#include <et/scene3d/scene3d.h>
+#include <et/scene3d/drawer/shadowmaps.h>
+#include <et/scene3d/drawer/cubemaps.h>
 
 namespace et
 {
 namespace s3d
 {
-class Renderer : public Shared, public FlagsHolder
+class Drawer : public Shared, public FlagsHolder
 {
 public:
-	ET_DECLARE_POINTER(Renderer);
+	ET_DECLARE_POINTER(Drawer);
 
 	enum : uint32_t
 	{
@@ -33,14 +33,10 @@ public:
 		CubemapLevels = 9
 	};
 
-	struct Options
-	{
-		bool drawEnvironmentProbe = false;
-		bool drawLookupTexture = false;
-	} options;
+	DrawerOptions options;
 
 public:
-	Renderer();
+	Drawer();
 
 	void render(RenderInterface::Pointer&, const Scene::Pointer&);
 
@@ -72,57 +68,19 @@ private:
 
 	void validateWrapCubemapPasses(RenderInterface::Pointer&);
 
-	mat4 fullscreenBatchTransform(const vec2& viewport, const vec2& origin, const vec2& size);
-
-private:
-	enum CubemapType : uint32_t
-	{
-		Source,
-		Downsampled,
-		Convoluted,
-		Count
-	};
-
-	struct Environment
-	{
-		Texture::Pointer lookup;
-		RenderPass::Pointer lookupPass;
-		RenderPass::Pointer lookupDebugPass;
-		RenderBatch::Pointer lookupDebugBatch;
-
-		Texture::Pointer tex[CubemapType::Count];
-		Sampler::Pointer eqMapSampler;
-		
-		Material::Pointer processingMaterial;
-
-		Material::Pointer downsampleMaterial;
-		RenderPass::Pointer downsamplePass;
-		RenderBatch::Pointer downsampleBatch;
-
-		RenderPass::Pointer cubemapDebugPass;
-		RenderBatch::Pointer cubemapDebugBatch;
-
-		RenderPass::Pointer specularConvolvePass;
-		RenderBatch::Pointer specularConvolveBatch;
-
-		Material::Pointer environmentMaterial;
-		RenderBatch::Pointer forwardBatch;
-
-		CubemapProjectionMatrixArray projections;
-		RenderPassBeginInfo wholeCubemapBeginInfo;
-		
-		bool lookupGenerated = false;
-	} _env;
-
 private:
 	ObjectsCache _cache;
+	CubemapProcessor::Pointer _cubemapProcessor;
 	RenderBatchCollection _renderBatches;
-
 	RenderBatchInfoCollection _mainPassBatches;
 	RenderPass::Pointer _mainPass;
     RenderBatchInfoCollection _shadowPassBatches;
 	RenderPass::Pointer _shadowPass;
     Texture::Pointer _shadowTexture;
+
+	RenderBatch::Pointer _environmentMapBatch;
+	Material::Pointer _environmentMaterial;
 };
+
 }
 }

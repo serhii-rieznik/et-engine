@@ -92,6 +92,9 @@
     <Filter Include="Source\rendering\systems">
       <UniqueIdentifier>{96b9fda0-02fd-4da0-9500-d749f15691a8}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\scene3d\drawer">
+      <UniqueIdentifier>{3a78c7d3-0603-4cd5-a332-5472c80561e6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\et\sound\platform-dependent.cpp">
@@ -131,9 +134,6 @@
       <Filter>Source\scene3d</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\et\scene3d\scene3d.cpp">
-      <Filter>Source\scene3d</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\et\scene3d\scene3drenderer.cpp">
       <Filter>Source\scene3d</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\et\scene3d\skeletonelement.cpp">
@@ -640,6 +640,18 @@
     <ClInclude Include="..\..\include\et\rendering\systems\cubemapprocessor.cpp">
       <Filter>Source\rendering\systems</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\et\scene3d\drawer\cubemaps.h">
+      <Filter>Source\scene3d\drawer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\scene3d\drawer\shadowmaps.h">
+      <Filter>Source\scene3d\drawer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\scene3d\drawer\drawer.h">
+      <Filter>Source\scene3d\drawer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\scene3d\drawer\common.h">
+      <Filter>Source\scene3d\drawer</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\et\sound\openal.h">
@@ -691,9 +703,6 @@
       <Filter>Source\scene3d</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\et\scene3d\scene3d.h">
-      <Filter>Source\scene3d</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\et\scene3d\scene3drenderer.h">
       <Filter>Source\scene3d</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\et\scene3d\serialization.h">
@@ -1237,6 +1246,18 @@
     </ClCompile>
     <ClCompile Include="..\..\include\external\spirvcross\spirv_msl.cpp">
       <Filter>spir-v-cross</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\include\et\scene3d\drawer\drawer.cpp">
+      <Filter>Source\scene3d\drawer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\include\et\scene3d\drawer\shadowmapping.cpp">
+      <Filter>Source\scene3d\drawer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\include\et\scene3d\drawer\cubemapprocessor.cpp">
+      <Filter>Source\scene3d\drawer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\include\et\scene3d\drawer\common.cpp">
+      <Filter>Source\scene3d\drawer</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -17,8 +17,16 @@
   <ItemGroup>
     <ClInclude Include="..\..\include\et\rendering\objects\light.cpp" />
     <ClInclude Include="..\..\include\et\rendering\systems\cubemapprocessor.h" />
+    <ClInclude Include="..\..\include\et\scene3d\drawer\cubemaps.h" />
+    <ClInclude Include="..\..\include\et\scene3d\drawer\drawer.h" />
+    <ClInclude Include="..\..\include\et\scene3d\drawer\common.h" />
+    <ClInclude Include="..\..\include\et\scene3d\drawer\shadowmaps.h" />
     <ClInclude Include="..\..\include\et\scene3d\lightelement.cpp" />
     <ClInclude Include="..\..\include\et\rendering\systems\cubemapprocessor.cpp" />
+    <ClInclude Include="..\..\include\et\scene3d\drawer\drawer.cpp" />
+    <ClInclude Include="..\..\include\et\scene3d\drawer\shadowmaps.cpp" />
+    <ClInclude Include="..\..\include\et\scene3d\drawer\cubemaps.cpp" />
+    <ClInclude Include="..\..\include\et\scene3d\drawer\common.cpp" />
     <ClCompile Include="..\..\include\external\spirvcross\spirv_cfg.cpp" />
     <ClCompile Include="..\..\include\external\spirvcross\spirv_cross.cpp" />
     <ClCompile Include="..\..\include\external\spirvcross\spirv_glsl.cpp" />
@@ -153,7 +161,6 @@
     <ClInclude Include="..\..\include\et\scene3d\particlesystem.cpp" />
     <ClInclude Include="..\..\include\et\scene3d\renderableelement.cpp" />
     <ClInclude Include="..\..\include\et\scene3d\scene3d.cpp" />
-    <ClInclude Include="..\..\include\et\scene3d\scene3drenderer.cpp" />
     <ClInclude Include="..\..\include\et\scene3d\skeletonelement.cpp" />
     <ClInclude Include="..\..\include\et\scene3d\storage.cpp" />
     <ClInclude Include="..\..\include\et\sound\platform-dependent.cpp" />
@@ -388,7 +395,6 @@
     <ClInclude Include="..\..\include\et\scene3d\particlesystem.h" />
     <ClInclude Include="..\..\include\et\scene3d\renderableelement.h" />
     <ClInclude Include="..\..\include\et\scene3d\scene3d.h" />
-    <ClInclude Include="..\..\include\et\scene3d\scene3drenderer.h" />
     <ClInclude Include="..\..\include\et\scene3d\serialization.h" />
     <ClInclude Include="..\..\include\et\scene3d\skeletonelement.h" />
     <ClInclude Include="..\..\include\et\scene3d\storage.h" />
