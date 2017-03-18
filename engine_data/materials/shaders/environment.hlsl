@@ -4,6 +4,12 @@
 #include "srgb.h"
 #include "environment.h"
 
+cbuffer ObjectVariables : DECL_BUFFER(Object)
+{
+	row_major float4x4 inverseViewTransform;
+	row_major float4x4 inverseProjectionTransform;
+};
+
 struct VSOutput 
 {
 	float4 position : SV_Position;
@@ -13,9 +19,9 @@ struct VSOutput
 
 VSOutput vertexMain(VSInput vsIn)
 {
-	float4x4 invView = inverseView;
+	float4x4 invView = inverseViewTransform;
 	invView[3] = float4(0.0, 0.0, 0.0, 1.0);
-	float4x4 finalInverseMatrix = invView * inverseProjection;
+	float4x4 finalInverseMatrix = invView * inverseProjectionTransform;
 
 	VSOutput vsOut;
 	vsOut.texCoord0 = vsIn.texCoord0;

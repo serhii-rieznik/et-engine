@@ -18,7 +18,17 @@ class ShadowmapProcessor : public Shared
 {
 public:
 	ET_DECLARE_POINTER(ShadowmapProcessor);
+
+public:
+	const Texture::Pointer& directionalShadowmap() const;
+
+private:
+	Texture::Pointer _directionalShadowmap;
 };
+
+inline const Texture::Pointer& ShadowmapProcessor::directionalShadowmap() const {
+	return _directionalShadowmap;
+}
 
 }
 }

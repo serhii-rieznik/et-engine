@@ -10,17 +10,17 @@
 	#define InputTextureType TextureCube
 #endif
 
-InputTextureType<float4> baseColorTexture : CONSTANT_LOCATION(t, BaseColorTextureBinding, TexturesSetIndex);
-SamplerState baseColorSampler : CONSTANT_LOCATION(s, BaseColorSamplerBinding, TexturesSetIndex);
+InputTextureType<float4> baseColorTexture : DECL_TEXTURE(BaseColor);
+SamplerState baseColorSampler : DECL_SAMPLER(BaseColor);
 
-cbuffer ObjectVariables : CONSTANT_LOCATION(b, ObjectVariablesBufferIndex, VariablesSetIndex)
+cbuffer ObjectVariables : DECL_BUFFER(Object)
 {
 	row_major float4x4 worldTransform;
 };
 
-cbuffer MaterialVariables : CONSTANT_LOCATION(b, MaterialVariablesBufferIndex, VariablesSetIndex)
+cbuffer MaterialVariables : DECL_BUFFER(Material)
 {
-	float4 roughnessScale;
+	float4 extraParameters;
 };
 
 struct VSOutput 
@@ -55,7 +55,7 @@ float4 fragmentMain(VSOutput fsIn) : SV_Target0
 	float sinPhi = sin(phi);
 	float cosPhi = cos(phi);
 	float3 sampleDirection = float3(cosPhi * cosTheta, sinTheta, sinPhi * cosTheta);
-	return baseColorTexture.SampleLevel(baseColorSampler, sampleDirection, roughnessScale.x);
+	return baseColorTexture.SampleLevel(baseColorSampler, sampleDirection, extraParameters.x);
 
 #elif (EQ_MAP_TO_CUBEMAP)
 
@@ -66,7 +66,7 @@ float4 fragmentMain(VSOutput fsIn) : SV_Target0
 
 #elif (DOWNSAMPLE_CUBEMAP)
 	
-	return baseColorTexture.SampleLevel(baseColorSampler, fsIn.direction, roughnessScale.x - 1.0);
+	return baseColorTexture.SampleLevel(baseColorSampler, fsIn.direction, extraParameters.x - 1.0);
 
 #elif (SPECULAR_CONVOLUTION)
 
@@ -83,11 +83,11 @@ float4 fragmentMain(VSOutput fsIn) : SV_Target0
 	#define samples 512
 #else
 	#define samples 4096
-	float roughness = roughnessScale.x / 8.0;
+	float roughness = extraParameters.x / 8.0;
 	roughness = max(0.0001, roughness * roughness);
 #endif
 
-	float cubemapSolidAngle = 4.0 * PI / (6.0 * (roughnessScale.y * roughnessScale.z));
+	float cubemapSolidAngle = 4.0 * PI / (6.0 * (extraParameters.y * extraParameters.z));
 
 	float3 result = 0.0;
 	float weight = 0.0;

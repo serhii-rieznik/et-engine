@@ -109,14 +109,9 @@ struct VulkanNativeRenderPass
 {
 	VkRenderPass renderPass = nullptr;
 	VkCommandBuffer commandBuffer { };
-
 	VkDescriptorSetLayout dynamicDescriptorSetLayout = nullptr;
 	VkDescriptorSet dynamicDescriptorSet = nullptr;
-
 	VkSemaphore semaphore = nullptr;
-	
-	// VkViewport viewport { };
-	// VkRect2D scissor { };
 };
 
 enum DescriptorSetClass : uint32_t

@@ -314,13 +314,21 @@ void buildProgramReflection(const glslang::TProgram& program, Program::Reflectio
 		int blockSize = program.getUniformBlockSize(block);
 
 		if (blockName == PipelineState::kObjectVariables())
+		{
 			reflection.objectVariablesBufferSize = blockSize;
+		}
 		else if (blockName == PipelineState::kMaterialVariables())
+		{
 			reflection.materialVariablesBufferSize = blockSize;
-		else if (blockName == PipelineState::kPassVariables())
-			reflection.passVariablesBufferSize = blockSize;
+		}
+		else if (blockName == PipelineState::kGlobalVariables())
+		{
+			reflection.globalVariablesBufferSize = blockSize;
+		}
 		else
+		{
 			log::error("Unknown uniform block: %s", blockName.c_str());
+		}
 	}
 
 	auto& textureSet = (stage == ProgramStage::Vertex) ? reflection.textures.vertexTextures : reflection.textures.fragmentTextures;
@@ -329,7 +337,7 @@ void buildProgramReflection(const glslang::TProgram& program, Program::Reflectio
 	int uniforms = program.getNumLiveUniformVariables();
 	for (int uniform = 0; uniform < uniforms; ++uniform)
 	{
-		String uniformName(program.getUniformName(uniform));
+		std::string uniformName(program.getUniformName(uniform));
 		int uniformBlockIndex = program.getUniformBlockIndex(uniform);
 		int uniformType = program.getUniformType(uniform);
 
@@ -337,13 +345,13 @@ void buildProgramReflection(const glslang::TProgram& program, Program::Reflectio
 		if (blockName.empty())
 		{
 			MaterialTexture tex = stringToMaterialTexture(uniformName);
-			if (tex != MaterialTexture::Count)
+			if (tex != MaterialTexture::max)
 			{
 				uint32_t binding = static_cast<uint32_t>(tex);
 				textureSet.emplace(uniformName, binding);
 			}
 			MaterialTexture smp = samplerToMaterialTexture(uniformName);
-			if (smp != MaterialTexture::Count)
+			if (smp != MaterialTexture::max)
 			{
 				uint32_t binding = static_cast<uint32_t>(smp) + MaterialSamplerBindingOffset;
 				samplerSet.emplace(uniformName, binding);
@@ -353,13 +361,30 @@ void buildProgramReflection(const glslang::TProgram& program, Program::Reflectio
 		{
 			int uniformOffset = program.getUniformBufferOffset(uniform);
 			if (blockName == PipelineState::kObjectVariables())
-				reflection.objectVariables[uniformName].offset = static_cast<uint32_t>(uniformOffset);
+			{
+				ObjectVariable varId = stringToObjectVariable(uniformName);
+				ET_ASSERT(varId != ObjectVariable::max);
+				reflection.objectVariables[static_cast<uint32_t>(varId)].offset = static_cast<uint32_t>(uniformOffset);
+				reflection.objectVariables[static_cast<uint32_t>(varId)].enabled = 1;
+			}
 			else if (blockName == PipelineState::kMaterialVariables())
-				reflection.materialVariables[uniformName].offset = static_cast<uint32_t>(uniformOffset);
-			else if (blockName == PipelineState::kPassVariables())
-				reflection.passVariables[uniformName].offset = static_cast<uint32_t>(uniformOffset);
+			{
+				MaterialVariable varId = stringToMaterialVariable(uniformName);
+				ET_ASSERT(varId != MaterialVariable::max);
+				reflection.materialVariables[static_cast<uint32_t>(varId)].offset = static_cast<uint32_t>(uniformOffset);
+				reflection.materialVariables[static_cast<uint32_t>(varId)].enabled = 1;
+			}
+			else if (blockName == PipelineState::kGlobalVariables())
+			{
+				GlobalVariable varId = stringToGlobalVariable(uniformName);
+				ET_ASSERT(varId != GlobalVariable::max);
+				reflection.globalVariables[static_cast<uint32_t>(varId)].offset = static_cast<uint32_t>(uniformOffset);
+				reflection.globalVariables[static_cast<uint32_t>(varId)].enabled = 1;
+			}
 			else
+			{
 				log::error("Unknown uniform block: %s for uniform %s", blockName.c_str(), uniformName.c_str());
+			}
 		}
 	}
 }

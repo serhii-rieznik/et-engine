@@ -19,26 +19,13 @@ class Drawer : public Shared, public FlagsHolder
 public:
 	ET_DECLARE_POINTER(Drawer);
 
-	enum : uint32_t
-	{
-		/*
-		* State flags
-		*/
-		RebuildCubemap = 1 << 0,
-		RebuildLookupTexture = 1 << 1,
-
-		/*
-		* Constants
-		*/
-		CubemapLevels = 9
-	};
-
 	DrawerOptions options;
 
 public:
 	Drawer();
 
-	void render(RenderInterface::Pointer&, const Scene::Pointer&);
+	void draw(RenderInterface::Pointer&);
+	void setScene(const Scene::Pointer&, RenderInterface::Pointer&);
 
 private:
 	struct RenderBatchInfo
@@ -57,29 +44,32 @@ private:
 	using RenderBatchCollection = Vector<RenderBatch::Pointer>;
 	using RenderBatchInfoCollection = Vector<RenderBatchInfo>;
 
-	void extractBatches(const Scene::Pointer&);
-	void clip(RenderPass::Pointer& pass, const RenderBatchCollection&, RenderBatchInfoCollection&);
-	void render(RenderPass::Pointer& pass, const RenderBatchInfoCollection&);
-	void validateMainPass(RenderInterface::Pointer&, const Scene::Pointer&);
-	void validateShadowPass(RenderInterface::Pointer&);
-	
-	void processCubemap(RenderInterface::Pointer&);
+	void clip(const Camera::Pointer&, const RenderBatchCollection&, RenderBatchInfoCollection&);
+	void validate(RenderInterface::Pointer&);
 	void renderDebug(RenderInterface::Pointer&);
-
-	void validateWrapCubemapPasses(RenderInterface::Pointer&);
 
 private:
 	ObjectsCache _cache;
 	CubemapProcessor::Pointer _cubemapProcessor;
-	RenderBatchCollection _renderBatches;
-	RenderBatchInfoCollection _mainPassBatches;
-	RenderPass::Pointer _mainPass;
-    RenderBatchInfoCollection _shadowPassBatches;
-	RenderPass::Pointer _shadowPass;
-    Texture::Pointer _shadowTexture;
 
-	RenderBatch::Pointer _environmentMapBatch;
-	Material::Pointer _environmentMaterial;
+	struct MainPass
+	{
+		RenderPass::Pointer pass;
+		RenderBatchCollection rendereables;
+		RenderBatchInfoCollection batches;
+		Camera::Pointer camera = Camera::Pointer::create();
+	} _main;
+
+	struct Lighting
+	{
+		Light::Pointer directional;
+
+		Light::Pointer environment;
+		Material::Pointer environmentMaterial;
+		RenderBatch::Pointer environmentBatch;
+		std::string environmentTextureFile;
+	} _lighting;
+
 };
 
 }

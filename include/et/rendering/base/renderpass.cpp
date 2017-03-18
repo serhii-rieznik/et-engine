@@ -35,26 +35,6 @@ ConstantBuffer& RenderPass::dynamicConstantBuffer()
 	return _dynamicConstantBuffer;
 }
 
-void RenderPass::setCamera(const Camera::Pointer& cam)
-{
-	_info.camera = cam;
-}
-
-void RenderPass::setLightCamera(const Camera::Pointer& cam)
-{
-	_info.light = cam;
-}
-
-Camera::Pointer& RenderPass::camera() 
-{
-	return _info.camera; 
-}
-
-const Camera::Pointer& RenderPass::camera() const
-{
-	return _info.camera; 
-}
-
 void RenderPass::setSharedTexture(MaterialTexture texId, const Texture::Pointer& tex, const Sampler::Pointer& smp)
 {
 	ET_ASSERT(texId >= MaterialTexture::FirstSharedTexture);
@@ -73,6 +53,21 @@ void RenderPass::executeSingleRenderBatch(const RenderBatch::Pointer& batch, con
 	begin(info);
 	pushRenderBatch(batch);
 	end();
+}
+
+void RenderPass::loadSharedVariablesFromCamera(const Camera::Pointer& cam)
+{
+	setSharedVariable(ObjectVariable::ViewTransform, cam->viewMatrix());
+	setSharedVariable(ObjectVariable::InverseViewTransform, cam->inverseViewMatrix());
+
+	setSharedVariable(ObjectVariable::ProjectionTransform, cam->projectionMatrix());
+	setSharedVariable(ObjectVariable::InverseProjectionTransform, cam->inverseProjectionMatrix());
+
+	setSharedVariable(ObjectVariable::ViewProjectionTransform, cam->viewProjectionMatrix());
+	setSharedVariable(ObjectVariable::InverseViewProjectionTransform, cam->inverseViewProjectionMatrix());
+	
+	setSharedVariable(ObjectVariable::CameraPosition, cam->position());
+	setSharedVariable(ObjectVariable::CameraDirection, cam->direction());
 }
 
 }

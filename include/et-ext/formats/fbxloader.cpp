@@ -81,7 +81,7 @@ public:
 	void loadMaterialTextureValue(MaterialInstance::Pointer, MaterialTexture, FbxSurfaceMaterial* fbxm, const char* fbxprop);
 
 	template <class Remap>
-	void loadMaterialValue(MaterialInstance::Pointer m, MaterialParameter, FbxSurfaceMaterial* fbxm, 
+	void loadMaterialValue(MaterialInstance::Pointer m, MaterialVariable, FbxSurfaceMaterial* fbxm, 
 		const char* fbxprop, Remap remap);
 
 	mat4 fbxMatrixToMat4(const FbxAMatrix& m)
@@ -523,7 +523,7 @@ inline vec4 TransparencyRemap(const vec4& a)
 }
 
 template <class Remap>
-inline void FBXLoaderPrivate::loadMaterialValue(MaterialInstance::Pointer m, MaterialParameter propName,
+inline void FBXLoaderPrivate::loadMaterialValue(MaterialInstance::Pointer m, MaterialVariable propName,
 	FbxSurfaceMaterial* fbxm, const char* fbxprop, Remap remap)
 {
 	const FbxProperty value = fbxm->FindProperty(fbxprop);
@@ -607,9 +607,9 @@ MaterialInstance::Pointer FBXLoaderPrivate::loadMaterial(FbxSurfaceMaterial* mat
 {
 	MaterialInstance::Pointer m = _renderer->sharedMaterialLibrary().loadDefaultMaterial(DefaultMaterial::Microfacet)->instance();
 	m->setName(mat->GetName());
-	m->setFloat(MaterialParameter::MetallnessScale, 1.0f);
-	m->setFloat(MaterialParameter::RoughnessScale, 1.0f);
-	m->setFloat(MaterialParameter::OpacityScale, 1.0f);
+	m->setFloat(MaterialVariable::MetallnessScale, 1.0f);
+	m->setFloat(MaterialVariable::RoughnessScale, 1.0f);
+	m->setFloat(MaterialVariable::OpacityScale, 1.0f);
 
 	/*
 	 * enumerate material properties to find something interesting
@@ -633,10 +633,10 @@ MaterialInstance::Pointer FBXLoaderPrivate::loadMaterial(FbxSurfaceMaterial* mat
 		loadMaterialTextureValue(m, MaterialTexture::Opacity, mat, FbxSurfaceMaterial::sTransparentColor);
 	}
 	
-	loadMaterialValue(m, MaterialParameter::DiffuseReflectance, mat, FbxSurfaceMaterial::sDiffuse, NullRemap);
-	loadMaterialValue(m, MaterialParameter::SpecularReflectance, mat, FbxSurfaceMaterial::sSpecular, NullRemap);
-	loadMaterialValue(m, MaterialParameter::EmissiveColor, mat, FbxSurfaceMaterial::sEmissive, NullRemap);
-	loadMaterialValue(m, MaterialParameter::NormalScale, mat, FbxSurfaceMaterial::sBumpFactor, NullRemap);
+	loadMaterialValue(m, MaterialVariable::DiffuseReflectance, mat, FbxSurfaceMaterial::sDiffuse, NullRemap);
+	loadMaterialValue(m, MaterialVariable::SpecularReflectance, mat, FbxSurfaceMaterial::sSpecular, NullRemap);
+	loadMaterialValue(m, MaterialVariable::EmissiveColor, mat, FbxSurfaceMaterial::sEmissive, NullRemap);
+	loadMaterialValue(m, MaterialVariable::NormalScale, mat, FbxSurfaceMaterial::sBumpFactor, NullRemap);
 
 	return m;
 }

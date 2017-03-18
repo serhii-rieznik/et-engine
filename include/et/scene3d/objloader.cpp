@@ -430,7 +430,7 @@ void OBJLoader::loadMaterials(const std::string& fileName, ObjectsCache& cache)
 					{
 						float value = 0.0f;
 						materialFile >> value;
-						_lastMaterial->setFloat(MaterialParameter::NormalScale, value);
+						_lastMaterial->setFloat(MaterialVariable::NormalScale, value);
 						
 						getLine(materialFile, line);
 						std::string actualName = application().resolveFileName(line);
@@ -475,19 +475,19 @@ void OBJLoader::loadMaterials(const std::string& fileName, ObjectsCache& cache)
 				{
 					vec4 value(0.0f);
 					materialFile >> value;
-					_lastMaterial->setVector(MaterialParameter::DiffuseReflectance, value);
+					_lastMaterial->setVector(MaterialVariable::DiffuseReflectance, value);
 				} 
 				else if (next == 's')
 				{
 					vec4 value(0.0f);
 					materialFile >> value;
-					_lastMaterial->setVector(MaterialParameter::SpecularReflectance, value);
+					_lastMaterial->setVector(MaterialVariable::SpecularReflectance, value);
 				} 
 				else if (next == 'e')
 				{
 					vec4 value(0.0f);
 					materialFile >> value;
-					_lastMaterial->setVector(MaterialParameter::EmissiveColor, value);
+					_lastMaterial->setVector(MaterialVariable::EmissiveColor, value);
 				} 
 				else
 				{
@@ -506,13 +506,13 @@ void OBJLoader::loadMaterials(const std::string& fileName, ObjectsCache& cache)
 			{
 				float value = 0.0f;
 				materialFile >> value;
-				_lastMaterial->setFloat(MaterialParameter::RoughnessScale, value);
+				_lastMaterial->setFloat(MaterialVariable::RoughnessScale, value);
 			}
 			else if (next == 'm')
 			{
 				float value = 0.0f;
 				materialFile >> value;
-				_lastMaterial->setFloat(MaterialParameter::MetallnessScale, value);
+				_lastMaterial->setFloat(MaterialVariable::MetallnessScale, value);
 			}
 		}
 		else if (key == 't')
@@ -525,7 +525,7 @@ void OBJLoader::loadMaterials(const std::string& fileName, ObjectsCache& cache)
 			{
 				float value = 0.0f;
 				materialFile >> value;
-				_lastMaterial->setFloat(MaterialParameter::OpacityScale, clamp(1.0f - value, 0.0f, 1.0f));
+				_lastMaterial->setFloat(MaterialVariable::OpacityScale, clamp(1.0f - value, 0.0f, 1.0f));
 			}
 			else if (next == 'f') // skip
 			{
@@ -609,7 +609,7 @@ void OBJLoader::loadMaterials(const std::string& fileName, ObjectsCache& cache)
 							{
 								float value;
 								materialFile >> value;
-								_lastMaterial->setFloat(MaterialParameter::NormalScale, value);
+								_lastMaterial->setFloat(MaterialVariable::NormalScale, value);
 								
 								getLine(materialFile, line);
 								std::string actualName = application().resolveFileName(line);
@@ -689,13 +689,13 @@ void OBJLoader::loadMaterials(const std::string& fileName, ObjectsCache& cache)
 			{
 				float value = 0.0f;
 				materialFile >> value;
-				_lastMaterial->setFloat(MaterialParameter::SpecularExponent, value);
+				_lastMaterial->setFloat(MaterialVariable::SpecularExponent, value);
 			}
 			else if (next == 'i')
 			{
 				float value = 0.0f;
 				materialFile >> value;
-				_lastMaterial->setFloat(MaterialParameter::IndexOfRefraction, value);
+				_lastMaterial->setFloat(MaterialVariable::IndexOfRefraction, value);
 			}
 			else if (next == 'e')
 			{

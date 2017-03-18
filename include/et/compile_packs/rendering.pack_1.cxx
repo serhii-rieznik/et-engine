@@ -11,9 +11,11 @@
 #include "../rendering/base/rendering.cpp"
 #include "../rendering/base/renderpass.cpp"
 #include "../rendering/base/shadersource.cpp"
+#include "../rendering/base/variableset.cpp"
 #include "../rendering/base/vertexarray.cpp"
 #include "../rendering/base/vertexdatachunk.cpp"
 #include "../rendering/base/vertexdeclaration.cpp"
 #include "../rendering/base/vertexstorage.cpp"
 
+#include "../rendering/interface/program.cpp"
 #include "../rendering/objects/light.cpp"

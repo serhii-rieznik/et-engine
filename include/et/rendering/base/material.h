@@ -8,8 +8,9 @@
 #pragma once
 
 #include <et/rendering/base/rendering.h>
-#include <et/rendering/base/materialhelpers.h>
+#include <et/rendering/base/variableset.h>
 #include <et/rendering/base/constantbuffer.h>
+#include <et/rendering/interface/program.h>
 
 namespace et
 {
@@ -47,11 +48,11 @@ public:
 	Texture::Pointer texture(MaterialTexture);
 	Sampler::Pointer sampler(MaterialTexture);
 
-	void setVector(MaterialParameter, const vec4&);
-	vec4 getVector(MaterialParameter) const;
+	void setVector(MaterialVariable, const vec4&);
+	vec4 getVector(MaterialVariable) const;
 
-	void setFloat(MaterialParameter, float);
-	float getFloat(MaterialParameter) const;
+	void setFloat(MaterialVariable, float);
+	float getFloat(MaterialVariable) const;
 
 	uint64_t sortingKey() const;
 
@@ -68,7 +69,7 @@ private:
 	friend class MaterialInstance;
 
 	template <class T>
-	T getParameter(MaterialParameter) const;
+	T getParameter(MaterialVariable) const;
 
 	VertexDeclaration loadInputLayout(Dictionary);
 	Program::Pointer loadCode(const std::string&, const std::string& baseFolder, 
@@ -82,9 +83,9 @@ private:
 	virtual void invalidateConstantBuffer();
 
 protected: // overrided / read by instanaces
-	MaterialTextureSet textures;
-	MaterialSamplerSet samplers;
-	MaterialParameterSet properties;
+	TexturesHolder textures;
+	SamplersHolder samplers;
+	VariablesHolder properties;
 
 private: // permanent private data
 	static std::string _shaderDefaultHeader;
@@ -133,7 +134,7 @@ private:
 };
 
 template <class T>
-inline T Material::getParameter(MaterialParameter p) const
+inline T Material::getParameter(MaterialVariable p) const
 {
 	uint32_t pIndex = static_cast<uint32_t>(p);
 	auto i = properties.find(pIndex);

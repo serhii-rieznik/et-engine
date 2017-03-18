@@ -20,10 +20,10 @@ public:
 
 	struct Reflection
 	{
-		UnorderedMap<String, uint32_t> vertexTextures;
-		UnorderedMap<String, uint32_t> vertexSamplers;
-		UnorderedMap<String, uint32_t> fragmentTextures;
-		UnorderedMap<String, uint32_t> fragmentSamplers;
+		UnorderedMap<std::string, uint32_t> vertexTextures;
+		UnorderedMap<std::string, uint32_t> vertexSamplers;
+		UnorderedMap<std::string, uint32_t> fragmentTextures;
+		UnorderedMap<std::string, uint32_t> fragmentSamplers;
 	};
 
 	struct Description

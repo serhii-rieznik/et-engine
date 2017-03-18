@@ -111,10 +111,8 @@ void VulkanPipelineState::build(const RenderPass::Pointer& inPass)
 		rasterizerInfo.cullMode = vulkan::cullModeFlags(cullMode());
 		rasterizerInfo.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
 		rasterizerInfo.polygonMode = VkPolygonMode::VK_POLYGON_MODE_FILL;
+		rasterizerInfo.depthBiasEnable = pass->info().enableDepthBias;
 		rasterizerInfo.lineWidth = 1.0f;
-		rasterizerInfo.depthBiasConstantFactor = pass->info().depthBias;
-		rasterizerInfo.depthBiasSlopeFactor = pass->info().depthSlope;
-		rasterizerInfo.depthBiasEnable = (rasterizerInfo.depthBiasConstantFactor > 0.0f) || (rasterizerInfo.depthBiasSlopeFactor > 0.0f);
 	}
 
 	VkPipelineInputAssemblyStateCreateInfo assemblyInfo = { VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO };
@@ -133,7 +131,7 @@ void VulkanPipelineState::build(const RenderPass::Pointer& inPass)
 	viewportState.scissorCount = 1;
 	viewportState.viewportCount = 1;
 
-	VkDynamicState dynamicStates[2] = { VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR };
+	VkDynamicState dynamicStates[] = { VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR, VK_DYNAMIC_STATE_DEPTH_BIAS };
 	VkPipelineDynamicStateCreateInfo dynamicState = { VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO };
 	{
 		dynamicState.pDynamicStates = dynamicStates;
@@ -174,7 +172,7 @@ void VulkanPipelineStatePrivate::generatePipelineLayout(const Program::Reflectio
 	
 	{
 		Vector<VkDescriptorSetLayoutBinding> textureLayoutBindings;
-		textureLayoutBindings.reserve(MaterialTexturesCount);
+		textureLayoutBindings.reserve(MaterialTexture_max);
 		for (uint32_t textureBinding : textureBindings)
 		{
 			textureLayoutBindings.emplace_back();

@@ -30,29 +30,19 @@ public:
 	Scene(const std::string& name = "scene");
 
 	Storage& storage()
-	{
-		return _storage;
-	}
+		{ return _storage; }
 
-	const Storage& storage() const
-	{
-		return _storage;
-	}
+	const Storage& storage() const 
+		{ return _storage; }
 
-	Camera::Pointer& mainCamera()
-	{
-		return _mainCamera;
-	}
+	Camera::Pointer& mainCamera() 
+		{ return _mainCamera; }
 
 	const Camera::Pointer& mainCamera() const
-	{
-		return _mainCamera;
-	}
-
+		{ return _mainCamera; }
+	
 	void setMainCamera(const Camera::Pointer& cam)
-	{
-		_mainCamera = cam;
-	}
+		{ _mainCamera = cam; }
 
 public:
 	ET_DECLARE_EVENT1(deserializationFinished, bool);

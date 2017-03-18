@@ -74,7 +74,6 @@ public:
 	VulkanState& vulkan;
 	VulkanRenderer* renderer = nullptr;
 
-	ConstantBufferEntry::Pointer variablesData;
 	Vector<VulkanCommand> commands;
 	Vector<VkClearValue> clearValues;
 	Map<uint64_t, VulkanRenderSubpass> subpasses;
@@ -95,7 +94,6 @@ VulkanRenderPass::VulkanRenderPass(VulkanRenderer* renderer, VulkanState& vulkan
 
 	ET_ASSERT(!passInfo.name.empty());
 
-	_private->variablesData = dynamicConstantBuffer().staticAllocate(sizeof(Variables));
 	_private->commands.reserve(256);
 	_private->generateDynamicDescriptorSet(this);
 	_private->subpassSequence.reserve(64);
@@ -317,8 +315,6 @@ void VulkanRenderPass::begin(const RenderPassBeginInfo& beginInfo)
 		_private->subpassSequence.emplace_back(subpassInfo);
 	}
 	
-	_private->loadVariables(info().camera, info().light);
-
 	_private->recording = true;
 	_private->currentSubpassIndex = 0;
 	_private->commands.emplace_back(beginInfo.subpasses.front());
@@ -354,16 +350,21 @@ void VulkanRenderPass::pushRenderBatch(const RenderBatch::Pointer& inBatch)
 	if (program->reflection().objectVariablesBufferSize > 0)
 	{
 		objectVariables = dynamicConstantBuffer().dynamicAllocate(program->reflection().objectVariablesBufferSize);
-		auto var = program->reflection().objectVariables.find(PipelineState::kWorldTransform());
-		if (var != program->reflection().objectVariables.end())
+		
+		for (const auto& v : sharedVariables())
 		{
-			memcpy(objectVariables->data() + var->second.offset, inBatch->transformation().data(), sizeof(inBatch->transformation()));
+			const Program::Variable& var = program->reflection().objectVariables[v.first];
+			if (v.second.isSet() && var.enabled)
+				memcpy(objectVariables->data() + var.offset, v.second.data, v.second.size);
 		}
-		var = program->reflection().objectVariables.find(PipelineState::kWorldRotationTransform());
-		if (var != program->reflection().objectVariables.end())
-		{
-			memcpy(objectVariables->data() + var->second.offset, inBatch->rotationTransformation().data(), sizeof(inBatch->rotationTransformation()));
-		}
+
+		const Program::Variable& w = program->reflection().objectVariables[static_cast<uint32_t>(ObjectVariable::WorldTransform)];
+		if (w.enabled)
+			memcpy(objectVariables->data() + w.offset, inBatch->transformation().data(), sizeof(inBatch->transformation()));
+
+		const Program::Variable& wr = program->reflection().objectVariables[static_cast<uint32_t>(ObjectVariable::WorldRotationTransform)];
+		if (w.enabled)
+			memcpy(objectVariables->data() + w.offset, inBatch->transformation().data(), sizeof(inBatch->rotationTransformation()));
 	}
 
 	for (const auto& sh : sharedTextures())
@@ -490,32 +491,32 @@ void VulkanRenderPassPrivate::generateDynamicDescriptorSet(RenderPass* pass)
 {
 	VulkanBuffer::Pointer db = pass->dynamicConstantBuffer().buffer();
 	VulkanBuffer::Pointer sb = renderer->sharedConstantBuffer().buffer();
-	VkDescriptorBufferInfo passBufferInfo = { db->nativeBuffer().buffer, variablesData->offset(), sizeof(RenderPass::Variables) };
+	VkDescriptorBufferInfo passBufferInfo = { db->nativeBuffer().buffer, 0, VK_WHOLE_SIZE };
 	VkDescriptorBufferInfo objectBufferInfo = { db->nativeBuffer().buffer, 0, VK_WHOLE_SIZE }; // TODO : calculate offset and size
 	VkDescriptorBufferInfo materialBufferInfo = { sb->nativeBuffer().buffer, 0, VK_WHOLE_SIZE }; // TODO : calculate offset and size
-	VkDescriptorSetLayoutBinding bindings[] = { { }, {  }, {  } };
+	VkDescriptorSetLayoutBinding bindings[] = { { }, {  }, { } };
 	VkWriteDescriptorSet writeSets[] = { { VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET }, { VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET }, { VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET } };
 	{
 		bindings[0] = { ObjectVariablesBufferIndex, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1 };
-		bindings[0].stageFlags = VK_SHADER_STAGE_ALL;
+		bindings[0].stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
 		writeSets[0].descriptorCount = bindings[0].descriptorCount;
 		writeSets[0].descriptorType = bindings[0].descriptorType;
 		writeSets[0].dstBinding = bindings[0].binding;
 		writeSets[0].pBufferInfo = &objectBufferInfo;
 
 		bindings[1] = { MaterialVariablesBufferIndex, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1 };
-		bindings[1].stageFlags = VK_SHADER_STAGE_ALL;
+		bindings[1].stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
 		writeSets[1].descriptorCount = bindings[1].descriptorCount;
 		writeSets[1].descriptorType = bindings[1].descriptorType;
 		writeSets[1].dstBinding = bindings[1].binding;
 		writeSets[1].pBufferInfo = &materialBufferInfo;
-
-		bindings[2] = { PassVariablesBufferIndex, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1 };
-		bindings[2].stageFlags = VK_SHADER_STAGE_ALL;
-		writeSets[2].descriptorCount = bindings[2].descriptorCount;
-		writeSets[2].descriptorType = bindings[2].descriptorType;
-		writeSets[2].dstBinding = bindings[2].binding;
-		writeSets[2].pBufferInfo = &passBufferInfo;
+		
+		bindings[2] = { GlobalVariablesBufferIndex, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1 };
+		bindings[2].stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
+		writeSets[2].descriptorCount = bindings[1].descriptorCount;
+		writeSets[2].descriptorType = bindings[1].descriptorType;
+		writeSets[2].dstBinding = bindings[1].binding;
+		writeSets[2].pBufferInfo = &materialBufferInfo;
 	}
 
 	VkDescriptorSetLayoutCreateInfo descriptorSetLayoutCreateInfo = { VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO };
@@ -538,6 +539,7 @@ void VulkanRenderPassPrivate::generateDynamicDescriptorSet(RenderPass* pass)
 
 void VulkanRenderPassPrivate::loadVariables(Camera::Pointer camera, Light::Pointer light)
 {
+	/*
 	RenderPass::Variables* vptr = reinterpret_cast<RenderPass::Variables*>(variablesData->data());
 	if (camera.valid())
 	{
@@ -557,6 +559,7 @@ void VulkanRenderPassPrivate::loadVariables(Camera::Pointer camera, Light::Point
 		vptr->lightPosition = light->type() == Light::Type::Directional ? vec4(-light->direction(), 0.0f) : vec4(light->position());
 		vptr->lightProjection = light->viewProjectionMatrix() * lightProjectionMatrix;
 	}
+	*/
 }
 
 }

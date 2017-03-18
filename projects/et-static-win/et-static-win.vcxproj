@@ -15,6 +15,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\include\et\rendering\base\variableset.h" />
     <ClInclude Include="..\..\include\et\rendering\objects\light.cpp" />
     <ClInclude Include="..\..\include\et\rendering\systems\cubemapprocessor.h" />
     <ClInclude Include="..\..\include\et\scene3d\drawer\cubemaps.h" />
@@ -27,6 +28,8 @@
     <ClInclude Include="..\..\include\et\scene3d\drawer\shadowmaps.cpp" />
     <ClInclude Include="..\..\include\et\scene3d\drawer\cubemaps.cpp" />
     <ClInclude Include="..\..\include\et\scene3d\drawer\common.cpp" />
+    <ClInclude Include="..\..\include\et\rendering\base\variableset.cpp" />
+    <ClInclude Include="..\..\include\et\rendering\interface\program.cpp" />
     <ClCompile Include="..\..\include\external\spirvcross\spirv_cfg.cpp" />
     <ClCompile Include="..\..\include\external\spirvcross\spirv_cross.cpp" />
     <ClCompile Include="..\..\include\external\spirvcross\spirv_glsl.cpp" />
@@ -36,7 +39,6 @@
     <ClInclude Include="..\..\include\et\rendering\base\helpers.h" />
     <ClInclude Include="..\..\include\et\rendering\base\indexarray.h" />
     <ClInclude Include="..\..\include\et\rendering\base\material.h" />
-    <ClInclude Include="..\..\include\et\rendering\base\materialhelpers.h" />
     <ClInclude Include="..\..\include\et\rendering\base\materiallibrary.h" />
     <ClInclude Include="..\..\include\et\rendering\base\primitives.h" />
     <ClInclude Include="..\..\include\et\rendering\base\renderbatch.h" />

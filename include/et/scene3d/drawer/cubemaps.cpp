@@ -11,6 +11,7 @@ namespace et
 {
 namespace s3d
 {
+
 CubemapProcessor::CubemapProcessor() :
 	FlagsHolder(CubemapProcessed)
 {
@@ -34,11 +35,11 @@ void CubemapProcessor::processEquiretangularTexture(const Texture::Pointer& tex)
 	removeFlag(CubemapProcessed);
 }
 
-void CubemapProcessor::process(RenderInterface::Pointer& renderer, const DrawerOptions& options)
+void CubemapProcessor::process(RenderInterface::Pointer& renderer, DrawerOptions& options)
 {
 	validate(renderer);
 
-	if (!hasFlag(BRDFLookupProcessed))
+	if (!hasFlag(BRDFLookupProcessed) || options.rebuildLookupTexture)
 	{
 		if (_lookupGeneratorMaterial.invalid())
 			_lookupGeneratorMaterial = renderer->sharedMaterialLibrary().loadDefaultMaterial(DefaultMaterial::EnvironmentMap);
@@ -49,9 +50,10 @@ void CubemapProcessor::process(RenderInterface::Pointer& renderer, const DrawerO
 		renderer->submitRenderPass(_lookupPass);
 
 		setFlag(BRDFLookupProcessed);
+		options.rebuildLookupTexture = false;
 	}
 
-	if (!hasFlag(CubemapProcessed))
+	if (!hasFlag(CubemapProcessed) || options.rebuldEnvironmentProbe)
 	{
 		/*
 		* Downsampling convolution
@@ -68,7 +70,7 @@ void CubemapProcessor::process(RenderInterface::Pointer& renderer, const DrawerO
 		{
 			uint32_t level = i / 6;
 			uint32_t face = i % 6;
-			_downsampleMaterial->setFloat(MaterialParameter::RoughnessScale, static_cast<float>(level));
+			_downsampleMaterial->setFloat(MaterialVariable::ExtraParameters, static_cast<float>(level));
 			_downsampleBatch->setTransformation(_projections[face]);
 			_downsamplePass->pushRenderBatch(_downsampleBatch);
 			_downsamplePass->nextSubpass();
@@ -90,7 +92,7 @@ void CubemapProcessor::process(RenderInterface::Pointer& renderer, const DrawerO
 			uint32_t level = i / 6;
 			uint32_t face = i % 6;
 			vec2 sz = vector2ToFloat(_tex[CubemapType::Downsampled]->size(level));
-			mtl->setVector(MaterialParameter::RoughnessScale, vec4(static_cast<float>(level), sz.x, sz.y, static_cast<float>(face)));
+			mtl->setVector(MaterialVariable::ExtraParameters, vec4(static_cast<float>(level), sz.x, sz.y, static_cast<float>(face)));
 			_specularConvolveBatch->setTransformation(_projections[face]);
 			_specularConvolvePass->pushRenderBatch(_specularConvolveBatch);
 			_specularConvolvePass->nextSubpass();
@@ -101,6 +103,7 @@ void CubemapProcessor::process(RenderInterface::Pointer& renderer, const DrawerO
 	}
 
 	drawDebug(renderer, options);
+	options.rebuldEnvironmentProbe = true;
 }
 
 void CubemapProcessor::validate(RenderInterface::Pointer& renderer)
@@ -142,8 +145,6 @@ void CubemapProcessor::validate(RenderInterface::Pointer& renderer)
 		_lookup = renderer->createTexture(lookupDesc);
 
 		RenderPass::ConstructionInfo passInfo;
-		passInfo.camera = Camera::Pointer(PointerInit::CreateInplace);
-
 		passInfo.color[0].enabled = true;
 		passInfo.color[0].texture = _lookup;
 		passInfo.color[0].loadOperation = FramebufferOperation::DontCare;
@@ -167,7 +168,6 @@ void CubemapProcessor::validate(RenderInterface::Pointer& renderer)
 	if (_downsamplePass.invalid())
 	{
 		RenderPass::ConstructionInfo passInfo;
-		passInfo.camera = Camera::Pointer(PointerInit::CreateInplace);
 		passInfo.color[0].enabled = true;
 		passInfo.color[0].texture = _tex[CubemapType::Downsampled];
 		passInfo.color[0].loadOperation = FramebufferOperation::DontCare;
@@ -184,7 +184,6 @@ void CubemapProcessor::validate(RenderInterface::Pointer& renderer)
 	if (_specularConvolvePass.invalid())
 	{
 		RenderPass::ConstructionInfo passInfo;
-		passInfo.camera = Camera::Pointer(PointerInit::CreateInplace);
 		passInfo.color[0].enabled = true;
 		passInfo.color[0].texture = _tex[CubemapType::Convoluted];
 		passInfo.color[0].loadOperation = FramebufferOperation::DontCare;
@@ -199,7 +198,6 @@ void CubemapProcessor::validate(RenderInterface::Pointer& renderer)
 	if (_cubemapDebugPass.invalid())
 	{
 		RenderPass::ConstructionInfo passInfo;
-		passInfo.camera = Camera::Pointer(PointerInit::CreateInplace);
 		passInfo.color[0].enabled = true;
 		passInfo.color[0].loadOperation = FramebufferOperation::Load;
 		passInfo.color[0].storeOperation = FramebufferOperation::Store;
@@ -228,7 +226,7 @@ void CubemapProcessor::drawDebug(RenderInterface::Pointer& renderer, const Drawe
 			_cubemapDebugBatch->material()->setTexture(MaterialTexture::BaseColor, _tex[i]);
 			for (uint32_t i = 0; i < CubemapLevels; ++i)
 			{
-				_cubemapDebugBatch->material()->setFloat(MaterialParameter::RoughnessScale, static_cast<float>(i));
+				_cubemapDebugBatch->material()->setFloat(MaterialVariable::ExtraParameters, static_cast<float>(i));
 				_cubemapDebugBatch->setTransformation(fullscreenBatchTransform(vp, pos, vec2(dx, dy)));
 				_cubemapDebugPass->pushRenderBatch(_cubemapDebugBatch);
 				pos.y += dy;

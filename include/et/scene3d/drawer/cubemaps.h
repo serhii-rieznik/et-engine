@@ -18,7 +18,7 @@ class CubemapProcessor : public Shared, public FlagsHolder
 {
 public:
 	ET_DECLARE_POINTER(CubemapProcessor);
-	
+
 public:
 	CubemapProcessor();
 
@@ -27,7 +27,7 @@ public:
 	const Texture::Pointer& brdfLookupTexture() const;
 
 	void processEquiretangularTexture(const Texture::Pointer&);
-	void process(RenderInterface::Pointer&, const DrawerOptions&);
+	void process(RenderInterface::Pointer&, DrawerOptions&);
 
 private:
 	void validate(RenderInterface::Pointer& renderer);

@@ -2,7 +2,7 @@
 #include <inputdefines>
 #include <inputlayout>
 
-cbuffer MaterialVariables : CONSTANT_LOCATION(b, MaterialVariablesBufferIndex, VariablesSetIndex)
+cbuffer MaterialVariables : DECL_BUFFFER(Material)
 {
 	float4 diffuseReflectance;
 	float4 specularReflectance;
@@ -11,26 +11,30 @@ cbuffer MaterialVariables : CONSTANT_LOCATION(b, MaterialVariablesBufferIndex, V
 	float metallnessScale;
 };
 
-cbuffer ObjectVariables : CONSTANT_LOCATION(b, ObjectVariablesBufferIndex, VariablesSetIndex)
+cbuffer ObjectVariables : DECL_BUFFFER(Object)
 {
+	row_major float4x4 lightProjectionTransform;
+	row_major float4x4 viewProjectionTransform;
 	row_major float4x4 worldTransform;
 	row_major float4x4 worldRotationTransform;
+	float4 cameraPosition;
+	float4 lightPosition;
 };
 
-Texture2D<float4> baseColorTexture : CONSTANT_LOCATION(t, BaseColorTextureBinding, TexturesSetIndex);
-SamplerState baseColorSampler : CONSTANT_LOCATION(s, BaseColorSamplerBinding, TexturesSetIndex);
+Texture2D<float4> baseColorTexture : DECL_TEXTURE(BaseColor);
+SamplerState baseColorSampler : DECL_SAMPLER(BaseColor);
 
-Texture2D<float4> normalTexture : CONSTANT_LOCATION(t, NormalTextureBinding, TexturesSetIndex);
-SamplerState normalSampler : CONSTANT_LOCATION(s, NormalSamplerBinding, TexturesSetIndex);;
+Texture2D<float4> normalTexture : DECL_TEXTURE(Normal);
+SamplerState normalSampler : DECL_SAMPLER(Normal);
 
-Texture2D<float4> shadowTexture : CONSTANT_LOCATION(t, ShadowTextureBinding, TexturesSetIndex);
-SamplerState shadowSampler : CONSTANT_LOCATION(s, ShadowSamplerBinding, TexturesSetIndex);;
+Texture2D<float4> shadowTexture : DECL_TEXTURE(Shadow);
+SamplerState shadowSampler : DECL_SAMPLER(Shadow);
 
-Texture2D<float4> brdfLookupTexture : CONSTANT_LOCATION(t, BrdfLookupTextureBinding, TexturesSetIndex);
-SamplerState brdfLookupSampler : CONSTANT_LOCATION(s, BrdfLookupSamplerBinding, TexturesSetIndex);;
+Texture2D<float4> brdfLookupTexture : DECL_TEXTURE(BrdfLookup);
+SamplerState brdfLookupSampler : DECL_SAMPLER(BrdfLookup);
 
-Texture2D<float4> opacityTexture : CONSTANT_LOCATION(t, OpacityTextureBinding, TexturesSetIndex);
-SamplerState opacitySampler : CONSTANT_LOCATION(s, OpacitySamplerBinding, TexturesSetIndex);;
+Texture2D<float4> opacityTexture : DECL_TEXTURE(Opacity);
+SamplerState opacitySampler : DECL_SAMPLER(Opacity);
 
 struct VSOutput 
 {
@@ -56,8 +60,8 @@ VSOutput vertexMain(VSInput vsIn)
 	vsOut.toCamera = (cameraPosition - transformedPosition).xyz;
 	vsOut.toLight = (lightPosition - transformedPosition * lightPosition.w).xyz;
 	vsOut.texCoord0 = vsIn.texCoord0;
-	vsOut.lightCoord = mul(transformedPosition, lightProjection);
-	vsOut.position = mul(transformedPosition, viewProjection);
+	vsOut.lightCoord = mul(transformedPosition, lightProjectionTransform);
+	vsOut.position = mul(transformedPosition, viewProjectionTransform);
 	vsOut.invTransformT = float3(tTangent.x, tBiTangent.x, tNormal.x);
 	vsOut.invTransformB = float3(tTangent.y, tBiTangent.y, tNormal.y);
 	vsOut.invTransformN = float3(tTangent.z, tBiTangent.z, tNormal.z);
@@ -68,12 +72,6 @@ VSOutput vertexMain(VSInput vsIn)
 #include "bsdf.h"
 #include "environment.h"
 #include "importance-sampling.h"
-
-float sampleShadow(float3 tc)
-{
-	float shadowSample = 0.5 + 0.5 * shadowTexture.Sample(shadowSampler, tc.xy).x;
-	return float(tc.z <= shadowSample);
-}
 
 float4 fragmentMain(VSOutput fsIn) : SV_Target0
 {

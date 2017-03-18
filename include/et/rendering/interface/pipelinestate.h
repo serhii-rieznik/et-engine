@@ -25,7 +25,7 @@ public:
 	static const String& kWorldRotationTransform() { static String value("worldRotationTransform"); return value; }
 	static const String& kObjectVariables() { static String value("ObjectVariables"); return value; }
 	static const String& kMaterialVariables() { static String value("MaterialVariables"); return value; }
-	static const String& kPassVariables() { static String value("PassVariables"); return value; }
+	static const String& kGlobalVariables() { static String value("GlobalVariables"); return value; }
 
 public:
 	virtual ~PipelineState() = default;

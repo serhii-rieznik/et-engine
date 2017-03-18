@@ -56,26 +56,26 @@ void Material::setSampler(MaterialTexture t, Sampler::Pointer smp)
 	}
 }
 
-void Material::setVector(MaterialParameter p, const vec4& v)
+void Material::setVector(MaterialVariable p, const vec4& v)
 {
 	properties[static_cast<uint32_t>(p)] = v;
-	properties[static_cast<uint32_t>(p)].binding = p;
+	properties[static_cast<uint32_t>(p)].binding = static_cast<uint32_t>(p);
 	invalidateConstantBuffer();
 }
 
-void Material::setFloat(MaterialParameter p, float f)
+void Material::setFloat(MaterialVariable p, float f)
 {
 	properties[static_cast<uint32_t>(p)] = f;
-	properties[static_cast<uint32_t>(p)].binding = p;
+	properties[static_cast<uint32_t>(p)].binding = static_cast<uint32_t>(p);
 	invalidateConstantBuffer();
 }
 
-vec4 Material::getVector(MaterialParameter p) const
+vec4 Material::getVector(MaterialVariable p) const
 {
 	return getParameter<vec4>(p);
 }
 
-float Material::getFloat(MaterialParameter p) const
+float Material::getFloat(MaterialVariable p) const
 {
 	return getParameter<float>(p);
 }
@@ -397,15 +397,8 @@ void MaterialInstance::buildConstantBuffer(const std::string& pt)
 
 	auto setFunc = [&, this](const OptionalValue& p) 
 	{
-		if (p.isSet())
-		{
-			const String& name = materialParameterToString(p.binding);
-			auto var = reflection.materialVariables.find(name);
-			if (var != reflection.materialVariables.end())
-			{
-				memcpy(entry->data() + var->second.offset, p.data, p.size);
-			}
-		}
+		if (p.isSet() && reflection.materialVariables[p.binding].enabled)
+			memcpy(entry->data() + reflection.materialVariables[p.binding].offset, p.data, p.size);
 	};
 
 	for (const auto& p : base()->properties)
@@ -451,96 +444,6 @@ void MaterialInstance::invalidateConstantBuffer()
 		hld.second.valid = false;
 }
 
-/*
- * Service
- */
-const String& materialParameterToString(MaterialParameter p)
-{
-	ET_ASSERT(p < MaterialParameter::Count);
-	static const Map<MaterialParameter, String> names =
-	{
-		{ MaterialParameter::DiffuseReflectance, "diffuseReflectance" },
-		{ MaterialParameter::SpecularReflectance, "specularReflectance" },
-		{ MaterialParameter::NormalScale, "normalScale" },
-		{ MaterialParameter::RoughnessScale, "roughnessScale" },
-		{ MaterialParameter::MetallnessScale, "metallnessScale" },
-		{ MaterialParameter::EmissiveColor, "emissiveColor" },
-		{ MaterialParameter::OpacityScale, "opacityScale" },
-		{ MaterialParameter::IndexOfRefraction, "indexOfRefraction" },
-		{ MaterialParameter::SpecularExponent, "specularExponent" },
-	};
-	return names.at(p);
-}
-
-const Map<MaterialTexture, String>& materialTextureNames()
-{ 
-	static const Map<MaterialTexture, String> localMap =
-	{
-		{ MaterialTexture::BaseColor, "baseColorTexture" },
-		{ MaterialTexture::Normal, "normalTexture" },
-		{ MaterialTexture::Roughness, "roughnessTexture" },
-		{ MaterialTexture::Metallness, "metallnessTexture" },
-		{ MaterialTexture::EmissiveColor, "emissiveColorTexture" },
-		{ MaterialTexture::Opacity, "opacityTexture" },
-		{ MaterialTexture::Shadow, "shadowTexture" },
-		{ MaterialTexture::AmbientOcclusion, "aoTexture" },
-		{ MaterialTexture::Environment, "environmentTexture" },
-		{ MaterialTexture::BRDFLookup, "brdfLookupTexture"},
-	};
-	return localMap;
-}
-
-const Map<MaterialTexture, String>& materialSamplerNames()
-{
-	static const Map<MaterialTexture, String> names =
-	{
-		{ MaterialTexture::BaseColor, "baseColorSampler" },
-		{ MaterialTexture::Normal, "normalSampler" },
-		{ MaterialTexture::Roughness, "roughnessSampler" },
-		{ MaterialTexture::Metallness, "metallnessSampler" },
-		{ MaterialTexture::EmissiveColor, "emissiveColorSampler" },
-		{ MaterialTexture::Opacity, "opacitySampler" },
-		{ MaterialTexture::Shadow, "shadowSampler" },
-		{ MaterialTexture::AmbientOcclusion, "aoSampler" },
-		{ MaterialTexture::Environment, "environmentSampler" },
-		{ MaterialTexture::BRDFLookup, "brdfLookupSampler"},
-	};
-	return names;
-}
-
-const String& materialTextureToString(MaterialTexture t)
-{
-	ET_ASSERT(t < MaterialTexture::Count);
-	return materialTextureNames().at(t);
-}
-
-MaterialTexture stringToMaterialTexture(const String& name)
-{
-	for (const auto& ts : materialTextureNames())
-	{
-		if (ts.second == name)
-			return ts.first;
-	}
-	return MaterialTexture::Count;
-}
-
-const String& materialSamplerToString(MaterialTexture t)
-{
-	ET_ASSERT(t < MaterialTexture::Count);
-	return materialSamplerNames().at(t);
-
-}
-
-MaterialTexture samplerToMaterialTexture(const String& name)
-{
-	for (const auto& ts : materialSamplerNames())
-	{
-		if (ts.second == name)
-			return ts.first;
-	}
-	return MaterialTexture::Count;
-}
-
 void Material::initDefaultHeader()
 {
 	_shaderDefaultHeader = R"(
@@ -554,10 +457,10 @@ void Material::initDefaultHeader()
 
 	char buffer[2048] = { };
 	int printPos = 0;
-	for (uint32_t i = static_cast<uint32_t>(MaterialTexture::FirstMaterialTexture), e = static_cast<uint32_t>(MaterialTexture::Count); i < e; ++i)
+	for (uint32_t i = static_cast<uint32_t>(MaterialTexture::FirstMaterialTexture); i < MaterialTexture_max; ++i)
 	{
-		String texName = materialTextureToString(static_cast<MaterialTexture>(i));
-		String smpName = materialSamplerToString(static_cast<MaterialTexture>(i));
+		std::string texName = materialTextureToString(static_cast<MaterialTexture>(i));
+		std::string smpName = materialSamplerToString(static_cast<MaterialTexture>(i));
 		texName[0] = toupper(texName[0]);
 		smpName[0] = toupper(smpName[0]);
 		printPos += sprintf(buffer + printPos, "#define %sBinding %u\n#define %sBinding %u\n", 
@@ -567,8 +470,8 @@ void Material::initDefaultHeader()
 		printPos += sprintf(buffer + printPos, 
 			"#define ObjectVariablesBufferIndex %u\n"
 			"#define MaterialVariablesBufferIndex %u\n"
-			"#define PassVariablesBufferIndex %u\n", 
-			ObjectVariablesBufferIndex, MaterialVariablesBufferIndex, PassVariablesBufferIndex);
+			"#define GlobalVariablesBufferIndex %u\n",
+			ObjectVariablesBufferIndex, MaterialVariablesBufferIndex, GlobalVariablesBufferIndex);
 	}
 	
 	_shaderDefaultHeader += buffer;
@@ -576,21 +479,9 @@ void Material::initDefaultHeader()
 	_shaderDefaultHeader += R"(
 #define CONSTANT_LOCATION_IMPL(name, registerName, spaceName) register(name##registerName, space##spaceName)
 #define CONSTANT_LOCATION(name, register, space)              CONSTANT_LOCATION_IMPL(name, register, space)
-
-cbuffer PassVariables : CONSTANT_LOCATION(b, PassVariablesBufferIndex, VariablesSetIndex) 
-{
-	row_major float4x4 viewProjection;
-	row_major float4x4 projection;
-	row_major float4x4 view;
-	row_major float4x4 inverseViewProjection;
-	row_major float4x4 inverseProjection;
-	row_major float4x4 inverseView;
-	float4 cameraPosition;
-	float4 cameraDirection;
-	float4 cameraUp;
-	float4 lightPosition;
-	row_major float4x4 lightProjection;
-};
+#define DECL_BUFFER(name)                                     CONSTANT_LOCATION(b, name##VariablesBufferIndex, VariablesSetIndex)
+#define DECL_TEXTURE(name)                                    CONSTANT_LOCATION(t, name##TextureBinding, TexturesSetIndex)
+#define DECL_SAMPLER(name)                                    CONSTANT_LOCATION(s, name##SamplerBinding, TexturesSetIndex)
 )";
 
 }

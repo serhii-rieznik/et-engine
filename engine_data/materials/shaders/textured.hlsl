@@ -2,15 +2,14 @@
 #include <inputdefines>
 #include <inputlayout>
 
-#if (TRANSFORM_INPUT_POSITION || TRANSFORM_2D_POSITION)
-cbuffer ObjectVariables : CONSTANT_LOCATION(b, ObjectVariablesBufferIndex, VariablesSetIndex) 
+Texture2D<float4> baseColorTexture : DECL_TEXTURE(BaseColor);
+SamplerState baseColorSampler : DECL_SAMPLER(BaseColor);
+
+cbuffer ObjectVariables : DECL_BUFFER(Object) 
 {
 	row_major float4x4 worldTransform; 
+	row_major float4x4 viewProjectionTransform;
 };
-#endif
-
-Texture2D<float4> baseColorTexture : CONSTANT_LOCATION(t, BaseColorTextureBinding, TexturesSetIndex);
-SamplerState baseColorSampler : CONSTANT_LOCATION(s, BaseColorSamplerBinding, TexturesSetIndex);
 
 struct VSOutput 
 {
@@ -25,7 +24,7 @@ VSOutput vertexMain(VSInput vsIn)
 	vsOut.position = float4(vsIn.position, 1.0);
 
 #if (TRANSFORM_INPUT_POSITION)
-	vsOut.position = mul(mul(vsOut.position, worldTransform), viewProjection);
+	vsOut.position = mul(mul(vsOut.position, worldTransform), viewProjectionTransform);
 #elif (TRANSFORM_2D_POSITION)
 	vsOut.position = mul(vsOut.position, worldTransform);
 #endif

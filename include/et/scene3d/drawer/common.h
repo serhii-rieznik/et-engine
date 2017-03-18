@@ -19,6 +19,8 @@ struct DrawerOptions
 {
 	bool drawEnvironmentProbe = false;
 	bool drawLookupTexture = false;
+	bool rebuldEnvironmentProbe = false;
+	bool rebuildLookupTexture = false;
 };
 
 mat4 fullscreenBatchTransform(const vec2& viewport, const vec2& origin, const vec2& size);

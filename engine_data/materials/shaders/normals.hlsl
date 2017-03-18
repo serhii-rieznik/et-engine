@@ -2,10 +2,11 @@
 #include <inputdefines>
 #include <inputlayout>
 
-cbuffer ObjectVariables : CONSTANT_LOCATION(b, ObjectVariablesBufferIndex, VariablesSetIndex)
+cbuffer ObjectVariables : DECL_BUFFER(Object)
 {
 	row_major float4x4 worldTransform;
 	row_major float4x4 worldRotationTransform;	
+	row_major float4x4 viewProjectionTransform;
 };
 
 struct VSOutput 
@@ -18,7 +19,7 @@ VSOutput vertexMain(VSInput vsIn)
 {
 	VSOutput vsOut;
 	vsOut.normal = mul(float4(vsIn.normal, 0.0), worldRotationTransform).xyz;
-	vsOut.position = mul(mul(float4(vsIn.position, 1.0), worldTransform), viewProjection);
+	vsOut.position = mul(mul(float4(vsIn.position, 1.0), worldTransform), viewProjectionTransform);
 	return vsOut;
 }
 
