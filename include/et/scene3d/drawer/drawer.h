@@ -22,10 +22,11 @@ public:
 	DrawerOptions options;
 
 public:
-	Drawer();
+	Drawer(const RenderInterface::Pointer&);
 
-	void draw(RenderInterface::Pointer&);
-	void setScene(const Scene::Pointer&, RenderInterface::Pointer&);
+	void draw();
+	void setScene(const Scene::Pointer&);
+	void setEnvironmentMap(const std::string&);
 
 private:
 	struct RenderBatchInfo
@@ -50,6 +51,7 @@ private:
 
 private:
 	ObjectsCache _cache;
+	RenderInterface::Pointer _renderer;
 	CubemapProcessor::Pointer _cubemapProcessor;
 
 	struct MainPass
@@ -62,9 +64,7 @@ private:
 
 	struct Lighting
 	{
-		Light::Pointer directional;
-
-		Light::Pointer environment;
+		Light::Pointer directional = Light::Pointer::create(Light::Type::Directional);
 		Material::Pointer environmentMaterial;
 		RenderBatch::Pointer environmentBatch;
 		std::string environmentTextureFile;

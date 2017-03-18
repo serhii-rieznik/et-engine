@@ -81,6 +81,7 @@ private:
 
 	virtual void invalidateTextureSet();
 	virtual void invalidateConstantBuffer();
+	virtual bool isInstance() const { return false; }
 
 protected: // overrided / read by instanaces
 	TexturesHolder textures;
@@ -110,6 +111,8 @@ public:
 
 	void invalidateTextureSet() override;
 	void invalidateConstantBuffer() override;
+	
+	bool isInstance() const override { return true; }
 
 private:
 	friend class Material;

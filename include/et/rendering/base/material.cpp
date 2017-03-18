@@ -325,11 +325,14 @@ MaterialInstance::MaterialInstance(Material::Pointer bs)
 
 Material::Pointer MaterialInstance::base()
 {
+	ET_ASSERT(isInstance());
 	return _base;
 }
 
 void MaterialInstance::buildTextureSet(const std::string& pt)
 {
+	ET_ASSERT(isInstance());
+
 	const Program::Reflection& reflection = configuration(pt).program->reflection();
 
 	TextureSet::Description description;
@@ -385,6 +388,8 @@ void MaterialInstance::buildTextureSet(const std::string& pt)
 
 void MaterialInstance::buildConstantBuffer(const std::string& pt)
 {
+	ET_ASSERT(isInstance());
+
 	const Program::Reflection& reflection = configuration(pt).program->reflection();
 	if (reflection.materialVariablesBufferSize == 0)
 	{
@@ -413,6 +418,8 @@ void MaterialInstance::buildConstantBuffer(const std::string& pt)
 
 TextureSet::Pointer MaterialInstance::textureSet(const std::string& pt)
 {
+	ET_ASSERT(isInstance());
+
 	if (!_textureSets[pt].valid)
 		buildTextureSet(pt);
 
@@ -421,6 +428,8 @@ TextureSet::Pointer MaterialInstance::textureSet(const std::string& pt)
 
 ConstantBufferEntry::Pointer MaterialInstance::constantBufferData(const std::string& pt)
 {
+	ET_ASSERT(isInstance());
+
 	if (!_constBuffers[pt].valid)
 		buildConstantBuffer(pt);
 
@@ -429,17 +438,23 @@ ConstantBufferEntry::Pointer MaterialInstance::constantBufferData(const std::str
 
 const Material::Configuration & MaterialInstance::configuration(const std::string& cls) const
 {
+	ET_ASSERT(isInstance());
+
 	return _base->configuration(cls);
 }
 
 void MaterialInstance::invalidateTextureSet()
 {
+	ET_ASSERT(isInstance());
+
 	for (auto& hld : _textureSets)
 		hld.second.valid = false;
 }
 
 void MaterialInstance::invalidateConstantBuffer()
 {
+	ET_ASSERT(isInstance());
+
 	for (auto& hld : _constBuffers)
 		hld.second.valid = false;
 }
@@ -469,9 +484,8 @@ void Material::initDefaultHeader()
 	{
 		printPos += sprintf(buffer + printPos, 
 			"#define ObjectVariablesBufferIndex %u\n"
-			"#define MaterialVariablesBufferIndex %u\n"
-			"#define GlobalVariablesBufferIndex %u\n",
-			ObjectVariablesBufferIndex, MaterialVariablesBufferIndex, GlobalVariablesBufferIndex);
+			"#define MaterialVariablesBufferIndex %u\n",
+			ObjectVariablesBufferIndex, MaterialVariablesBufferIndex);
 	}
 	
 	_shaderDefaultHeader += buffer;

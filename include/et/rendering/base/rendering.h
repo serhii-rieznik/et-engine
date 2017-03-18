@@ -307,7 +307,6 @@ enum : uint32_t
 
 	ObjectVariablesBufferIndex = 0,
 	MaterialVariablesBufferIndex = 1,
-	GlobalVariablesBufferIndex = 2,
 
 	MaxRenderTargets = 8,
 	MaxTextureUnits = 8

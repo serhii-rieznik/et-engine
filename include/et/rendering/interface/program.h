@@ -35,9 +35,6 @@ public:
 		uint32_t objectVariablesBufferSize = 0;
 		Variable objectVariables[ObjectVariable_max];
 
-		uint32_t globalVariablesBufferSize = 0;
-		Variable globalVariables[GlobalVariable_max];
-
 		uint32_t materialVariablesBufferSize = 0;
 		Variable materialVariables[MaterialVariable_max];
 

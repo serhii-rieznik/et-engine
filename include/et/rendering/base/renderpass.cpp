@@ -70,4 +70,11 @@ void RenderPass::loadSharedVariablesFromCamera(const Camera::Pointer& cam)
 	setSharedVariable(ObjectVariable::CameraDirection, cam->direction());
 }
 
+void RenderPass::loadSharedVariablesFromLight(const Light::Pointer& l)
+{
+	setSharedVariable(ObjectVariable::LightDirection, -l->direction());
+	setSharedVariable(ObjectVariable::LightViewTransform, l->viewMatrix());
+	setSharedVariable(ObjectVariable::LightProjectionTransform, l->projectionMatrix());
+}
+
 }

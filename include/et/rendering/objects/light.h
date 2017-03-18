@@ -26,10 +26,13 @@ public:
 public:
 	Light(Type);
 
-	const Type type() const { return _type; }
+	const Type type() const 
+		{ return _type; }
 
 	void setEnvironmentMap(const std::string&);
-	const std::string& environmentMap() const { return _environmentMap; }
+	
+	const std::string& environmentMap() const
+		{ return _environmentMap; }
 
 private:
 	Type _type = Type::Directional;

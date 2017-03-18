@@ -12,7 +12,6 @@ namespace et
 
 inline const std::string& objToStr(uint32_t i) { return objectVariableToString(static_cast<ObjectVariable>(i)); }
 inline const std::string& mtlToStr(uint32_t i) { return materialVariableToString(static_cast<MaterialVariable>(i)); }
-inline const std::string& glbToStr(uint32_t i) { return globalVariableToString(static_cast<GlobalVariable>(i)); }
 
 void Program::printReflection() const
 {
@@ -31,7 +30,6 @@ void Program::printReflection() const
 		log::info("}");
 	};
 
-	printVariables("Global variables", _reflection.globalVariables, GlobalVariable_max, glbToStr);
 	printVariables("Material variables", _reflection.materialVariables, MaterialVariable_max, mtlToStr);
 	printVariables("Object variables", _reflection.objectVariables, ObjectVariable_max, objToStr);
 	

@@ -307,23 +307,22 @@ void buildProgramInputLayout(const glslang::TProgram& program, Program::Reflecti
 
 void buildProgramReflection(const glslang::TProgram& program, Program::Reflection& reflection, ProgramStage stage)
 {
+	static const String& kObjectVariables = "ObjectVariables";
+	static const String& kMaterialVariables = "MaterialVariables";
+
 	int blocks = program.getNumLiveUniformBlocks();
 	for (int block = 0; block < blocks; ++block)
 	{
 		String blockName(program.getUniformBlockName(block));
 		int blockSize = program.getUniformBlockSize(block);
 
-		if (blockName == PipelineState::kObjectVariables())
+		if (blockName == kObjectVariables)
 		{
 			reflection.objectVariablesBufferSize = blockSize;
 		}
-		else if (blockName == PipelineState::kMaterialVariables())
+		else if (blockName == kMaterialVariables)
 		{
 			reflection.materialVariablesBufferSize = blockSize;
-		}
-		else if (blockName == PipelineState::kGlobalVariables())
-		{
-			reflection.globalVariablesBufferSize = blockSize;
 		}
 		else
 		{
@@ -360,26 +359,19 @@ void buildProgramReflection(const glslang::TProgram& program, Program::Reflectio
 		else
 		{
 			int uniformOffset = program.getUniformBufferOffset(uniform);
-			if (blockName == PipelineState::kObjectVariables())
+			if (blockName == kObjectVariables)
 			{
 				ObjectVariable varId = stringToObjectVariable(uniformName);
 				ET_ASSERT(varId != ObjectVariable::max);
 				reflection.objectVariables[static_cast<uint32_t>(varId)].offset = static_cast<uint32_t>(uniformOffset);
 				reflection.objectVariables[static_cast<uint32_t>(varId)].enabled = 1;
 			}
-			else if (blockName == PipelineState::kMaterialVariables())
+			else if (blockName == kMaterialVariables)
 			{
 				MaterialVariable varId = stringToMaterialVariable(uniformName);
 				ET_ASSERT(varId != MaterialVariable::max);
 				reflection.materialVariables[static_cast<uint32_t>(varId)].offset = static_cast<uint32_t>(uniformOffset);
 				reflection.materialVariables[static_cast<uint32_t>(varId)].enabled = 1;
-			}
-			else if (blockName == PipelineState::kGlobalVariables())
-			{
-				GlobalVariable varId = stringToGlobalVariable(uniformName);
-				ET_ASSERT(varId != GlobalVariable::max);
-				reflection.globalVariables[static_cast<uint32_t>(varId)].offset = static_cast<uint32_t>(uniformOffset);
-				reflection.globalVariables[static_cast<uint32_t>(varId)].enabled = 1;
 			}
 			else
 			{

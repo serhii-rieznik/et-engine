@@ -24,6 +24,10 @@ enum class ObjectVariable : uint32_t
 	InverseViewProjectionTransform,
 	CameraPosition,
 	CameraDirection,
+	
+	LightDirection,
+	LightViewTransform,
+	LightProjectionTransform,
 
 	max
 };
@@ -40,13 +44,6 @@ enum class MaterialVariable : uint32_t
 	IndexOfRefraction,
 	SpecularExponent,
 	ExtraParameters,
-
-	max
-};
-
-enum class GlobalVariable : uint32_t
-{
-	DirectionalLightDirection,
 
 	max
 };
@@ -83,7 +80,6 @@ enum : uint32_t
 	ObjectVariable_max = static_cast<uint32_t>(ObjectVariable::max),
 	MaterialVariable_max = static_cast<uint32_t>(MaterialVariable::max),
 	MaterialTexture_max = static_cast<uint32_t>(MaterialTexture::max),
-	GlobalVariable_max = static_cast<uint32_t>(GlobalVariable::max),
 };
 
 struct MaterialTextureHolder
@@ -169,17 +165,15 @@ struct OptionalValue
 using VariablesHolder = std::map<uint32_t, OptionalValue>;
 
 const std::string& objectVariableToString(ObjectVariable);
-const std::string& materialVariableToString(MaterialVariable);
-const std::string& globalVariableToString(GlobalVariable);
-
 ObjectVariable stringToObjectVariable(const std::string&);
+
+const std::string& materialVariableToString(MaterialVariable);
 MaterialVariable stringToMaterialVariable(const std::string&);
-GlobalVariable stringToGlobalVariable(const std::string&);
 
 const std::string& materialSamplerToString(MaterialTexture);
-const std::string& materialTextureToString(MaterialTexture);
-
-MaterialTexture stringToMaterialTexture(const std::string&);
 MaterialTexture samplerToMaterialTexture(const std::string&);
+
+const std::string& materialTextureToString(MaterialTexture);
+MaterialTexture stringToMaterialTexture(const std::string&);
 
 }

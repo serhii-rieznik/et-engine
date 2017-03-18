@@ -85,6 +85,7 @@ public:
 		{ _sharedVariables[static_cast<uint32_t>(var)] = value; }
 
 	void loadSharedVariablesFromCamera(const Camera::Pointer&);
+	void loadSharedVariablesFromLight(const Light::Pointer&);
 
 	uint64_t identifier() const;
 

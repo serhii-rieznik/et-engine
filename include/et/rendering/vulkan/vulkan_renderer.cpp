@@ -299,6 +299,9 @@ void VulkanRenderer::begin()
 
 void VulkanRenderer::present()
 {
+	static VkPipelineStageFlags firstWaitStage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
+	static VkPipelineStageFlags lastWaitStage = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
+
 	std::stable_sort(_private->passes.begin(), _private->passes.end(), [](const VulkanRenderPass::Pointer& l, const VulkanRenderPass::Pointer& r)
 	{
 		return l->info().priority > r->info().priority;
@@ -317,7 +320,6 @@ void VulkanRenderer::present()
 	signalSemaphores.reserve(maxQueueSize);
 
 	{
-		VkPipelineStageFlags firstWaitStage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
 		allSubmits.emplace_back();
 		VkSubmitInfo& submitInfo = allSubmits.back();
 		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
@@ -410,7 +412,6 @@ void VulkanRenderer::present()
 	}
 
 	{
-		VkPipelineStageFlags lastWaitStage = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
 		allSubmits.emplace_back();
 		VkSubmitInfo& submitInfo = allSubmits.back();
 		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;

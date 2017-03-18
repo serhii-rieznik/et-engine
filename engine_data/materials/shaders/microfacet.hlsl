@@ -2,7 +2,7 @@
 #include <inputdefines>
 #include <inputlayout>
 
-cbuffer MaterialVariables : DECL_BUFFFER(Material)
+cbuffer MaterialVariables : DECL_BUFFER(Material)
 {
 	float4 diffuseReflectance;
 	float4 specularReflectance;
@@ -11,14 +11,14 @@ cbuffer MaterialVariables : DECL_BUFFFER(Material)
 	float metallnessScale;
 };
 
-cbuffer ObjectVariables : DECL_BUFFFER(Object)
+cbuffer ObjectVariables : DECL_BUFFER(Object)
 {
-	row_major float4x4 lightProjectionTransform;
 	row_major float4x4 viewProjectionTransform;
 	row_major float4x4 worldTransform;
 	row_major float4x4 worldRotationTransform;
+	row_major float4x4 lightProjectionTransform;
+	float4 lightDirection;
 	float4 cameraPosition;
-	float4 lightPosition;
 };
 
 Texture2D<float4> baseColorTexture : DECL_TEXTURE(BaseColor);
@@ -58,7 +58,7 @@ VSOutput vertexMain(VSInput vsIn)
 
 	VSOutput vsOut;
 	vsOut.toCamera = (cameraPosition - transformedPosition).xyz;
-	vsOut.toLight = (lightPosition - transformedPosition * lightPosition.w).xyz;
+	vsOut.toLight = (lightDirection - transformedPosition * lightDirection.w).xyz;
 	vsOut.texCoord0 = vsIn.texCoord0;
 	vsOut.lightCoord = mul(transformedPosition, lightProjectionTransform);
 	vsOut.position = mul(transformedPosition, viewProjectionTransform);
@@ -107,12 +107,16 @@ float4 fragmentMain(VSOutput fsIn) : SV_Target0
 		 ((1.0 - surface.metallness) * brdfLookupSample.z);
 	                                                              
 	float3 wsSpecularDir = specularDominantDirection(wsNormal, wsView, surface.roughness);
-	float3 indirectSpecular = sampleEnvironment(wsSpecularDir, 8.0 * surface.roughness);
+	float3 indirectSpecular = sampleEnvironment(wsSpecularDir, 8.0 * surface.roughnessSquared);
 	indirectSpecular *= (surface.f0 * brdfLookupSample.x + surface.f90 * brdfLookupSample.y);
 
 	float3 result = 
 			1.0 * (directDiffuse + directSpecular) + 
 			1.0 * (indirectDiffuse + indirectSpecular); 
+
+//	result = directDiffuse.xyz;
+
+//	result = wsNormal;
 
 //	result = directSpecular;
 //	result = indirectSpecular;

@@ -13,7 +13,7 @@ namespace s3d
 {
 
 CubemapProcessor::CubemapProcessor() :
-	FlagsHolder(CubemapProcessed)
+	FlagsHolder()
 {
 	for (uint32_t level = 0; level < CubemapLevels; ++level)
 	{
@@ -99,11 +99,12 @@ void CubemapProcessor::process(RenderInterface::Pointer& renderer, DrawerOptions
 		}
 		_specularConvolvePass->end();
 		renderer->submitRenderPass(_specularConvolvePass);
+		
 		setFlag(CubemapProcessed);
+		options.rebuldEnvironmentProbe = false;
 	}
 
 	drawDebug(renderer, options);
-	options.rebuldEnvironmentProbe = true;
 }
 
 void CubemapProcessor::validate(RenderInterface::Pointer& renderer)

@@ -16,29 +16,32 @@ namespace et
 namespace s3d
 {
 
-Drawer::Drawer()
+Drawer::Drawer(const RenderInterface::Pointer& renderer) : 
+	_renderer(renderer)
 {
 	_cubemapProcessor = CubemapProcessor::Pointer(PointerInit::CreateInplace);
 }
 
-void Drawer::draw(RenderInterface::Pointer& renderer)
+void Drawer::draw()
 {
-	_cubemapProcessor->process(renderer, options);
-	validate(renderer);
+	_cubemapProcessor->process(_renderer, options);
+	validate(_renderer);
 
 	clip(_main.camera, _main.rendereables, _main.batches);
 	{
 		_main.pass->loadSharedVariablesFromCamera(_main.camera);
+		_main.pass->loadSharedVariablesFromLight(_lighting.directional);
+
 		_main.pass->begin({ 0, 0 });
 		for (const RenderBatchInfo& rb : _main.batches)
 			_main.pass->pushRenderBatch(rb.batch);
 		_main.pass->pushRenderBatch(_lighting.environmentBatch);
 		_main.pass->end();
 
-		renderer->submitRenderPass(_main.pass);
+		_renderer->submitRenderPass(_main.pass);
 	}
 
-	renderDebug(renderer);
+	renderDebug(_renderer);
 }
 
 void Drawer::validate(RenderInterface::Pointer& renderer)
@@ -68,7 +71,7 @@ void Drawer::validate(RenderInterface::Pointer& renderer)
 	_cache.flush();
 }
 
-void Drawer::setScene(const Scene::Pointer& scene, RenderInterface::Pointer& renderer)
+void Drawer::setScene(const Scene::Pointer& scene)
 {
 	BaseElement::List elements = scene->childrenOfType(ElementType::DontCare);
 
@@ -102,13 +105,11 @@ void Drawer::setScene(const Scene::Pointer& scene, RenderInterface::Pointer& ren
 			{
 				updateEnvironment = (_lighting.environmentTextureFile != light->environmentMap());
 				_lighting.environmentTextureFile = light->environmentMap();
-				_lighting.environment = light;
 				break;
 			}
 			case Light::Type::UniformColorSky:
 			{
 				_lighting.environmentTextureFile.clear();
-				_lighting.environment = light;
 				break;
 			}
 			default:
@@ -119,9 +120,14 @@ void Drawer::setScene(const Scene::Pointer& scene, RenderInterface::Pointer& ren
 
 	if (updateEnvironment)
 	{
-		Texture::Pointer env = renderer->loadTexture(_lighting.environmentTextureFile, _cache);
-		_cubemapProcessor->processEquiretangularTexture(env.valid() ? env : renderer->checkersTexture());
+		setEnvironmentMap(_lighting.environmentTextureFile);
 	}
+}
+
+void Drawer::setEnvironmentMap(const std::string& filename)
+{
+	Texture::Pointer tex = _renderer->loadTexture(filename, _cache);
+	_cubemapProcessor->processEquiretangularTexture(tex.valid() ? tex : _renderer->checkersTexture());
 }
 
 void Drawer::clip(const Camera::Pointer& cam, const RenderBatchCollection& inBatches, RenderBatchInfoCollection& passBatches)

@@ -22,6 +22,9 @@ static const std::map<ObjectVariable, std::string> objectVariableNames =
 	{ ObjectVariable::InverseViewProjectionTransform, "inverseViewProjectionTransform" },
 	{ ObjectVariable::CameraPosition, "cameraPosition" },
 	{ ObjectVariable::CameraDirection, "cameraDirection" },
+	{ ObjectVariable::LightDirection, "lightDirection" },
+	{ ObjectVariable::LightViewTransform, "lightViewTransform" },
+	{ ObjectVariable::LightProjectionTransform, "lightProjectionTransform" },
 };
 
 static const std::map<MaterialVariable, std::string> materialVariableNames =
@@ -38,11 +41,6 @@ static const std::map<MaterialVariable, std::string> materialVariableNames =
 	{ MaterialVariable::ExtraParameters, "extraParameters" },
 };
 
-static const Map<GlobalVariable, std::string> globalVariableNames =
-{
-	{ GlobalVariable::DirectionalLightDirection, "lightDirection" },
-};
-
 const std::string& objectVariableToString(ObjectVariable p)
 {
 	ET_ASSERT(p < ObjectVariable::max);
@@ -53,12 +51,6 @@ const std::string& materialVariableToString(MaterialVariable p)
 {
 	ET_ASSERT(p < MaterialVariable::max);
 	return materialVariableNames.at(p);
-}
-
-const std::string& globalVariableToString(GlobalVariable p)
-{
-	ET_ASSERT(p < GlobalVariable::max);
-	return globalVariableNames.at(p);
 }
 
 const std::map<MaterialTexture, std::string>& materialTextureNames()
@@ -148,17 +140,5 @@ MaterialVariable stringToMaterialVariable(const std::string& name)
 	}
 	return MaterialVariable::max;
 }
-
-GlobalVariable stringToGlobalVariable(const std::string& name)
-
-{
-	for (const auto& ts : globalVariableNames)
-	{
-		if (ts.second == name)
-			return static_cast<GlobalVariable>(ts.first);
-	}
-	return GlobalVariable::max;
-}
-
 
 }
