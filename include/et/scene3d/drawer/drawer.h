@@ -24,28 +24,16 @@ public:
 public:
 	Drawer(const RenderInterface::Pointer&);
 
-	void draw();
+	void setRenderTarget(const Texture::Pointer&);
 	void setScene(const Scene::Pointer&);
 	void setEnvironmentMap(const std::string&);
 
+	void draw();
+
 private:
-	struct RenderBatchInfo
-	{
-		uint64_t priority = 0;
-		RenderBatch::Pointer batch;
-		BoundingBox transformedBox;
-
-		RenderBatchInfo(const RenderBatch::Pointer& b) : 
-			batch(b) { }
-
-		RenderBatchInfo(uint64_t p, const RenderBatch::Pointer& b, const BoundingBox& bb) :
-			priority(p), batch(b), transformedBox(bb) { }
-	};
-
 	using RenderBatchCollection = Vector<RenderBatch::Pointer>;
-	using RenderBatchInfoCollection = Vector<RenderBatchInfo>;
 
-	void clip(const Camera::Pointer&, const RenderBatchCollection&, RenderBatchInfoCollection&);
+	void clip(const Camera::Pointer&, const RenderBatchCollection&, RenderBatchCollection&);
 	void validate(RenderInterface::Pointer&);
 	void renderDebug(RenderInterface::Pointer&);
 
@@ -57,9 +45,10 @@ private:
 	struct MainPass
 	{
 		RenderPass::Pointer pass;
-		RenderBatchCollection rendereables;
-		RenderBatchInfoCollection batches;
+		RenderBatchCollection all;
+		RenderBatchCollection rendereable;
 		Camera::Pointer camera = Camera::Pointer::create();
+		Texture::Pointer renderTarget;
 	} _main;
 
 	struct Lighting
@@ -69,7 +58,6 @@ private:
 		RenderBatch::Pointer environmentBatch;
 		std::string environmentTextureFile;
 	} _lighting;
-
 };
 
 }

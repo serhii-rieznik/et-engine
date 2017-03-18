@@ -62,10 +62,11 @@ void Application::enterRunLoop()
 
 	if (_parameters.shouldPreserveRenderContext)
 		_renderContext->pushAndActivateRenderingContext();
-	
+
+	_renderContext->init();
+
 	delegate()->applicationDidLoad(_renderContext);
 	
-	_renderContext->init();
 	setActive(true);
 	
 	if (_parameters.shouldPreserveRenderContext)

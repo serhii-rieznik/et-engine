@@ -82,7 +82,7 @@ float4 fragmentMain(VSOutput fsIn) : SV_Target0
 #if (DIFFUSE_CONVOLUTION)
 	#define samples 512
 #else
-	#define samples 128
+	#define samples 512
 	float roughness = extraParameters.x / 8.0;
 	roughness = max(0.0001, roughness * roughness);
 #endif

@@ -15,5 +15,6 @@
 
 #include "../scene3d/drawer/common.cpp"
 #include "../scene3d/drawer/drawer.cpp"
+#include "../scene3d/drawer/drawflow.cpp"
 #include "../scene3d/drawer/shadowmaps.cpp"
 #include "../scene3d/drawer/cubemaps.cpp"

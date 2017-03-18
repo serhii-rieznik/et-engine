@@ -227,15 +227,15 @@ Program::Pointer Material::loadCode(const std::string& codeString, const std::st
 		char buffer[1024] = {};
 		if (kv.second->variantClass() == VariantClass::Integer)
 		{
-			sprintf(buffer, "#define %s %llu", kv.first.c_str(), IntegerValue(kv.second)->content);
+			sprintf(buffer, "#define %s %llu\n", kv.first.c_str(), IntegerValue(kv.second)->content);
 		}
 		else if (kv.second->variantClass() == VariantClass::Float)
 		{
-			sprintf(buffer, "#define %s %0.7f", kv.first.c_str(), FloatValue(kv.second)->content);
+			sprintf(buffer, "#define %s %0.7f\n", kv.first.c_str(), FloatValue(kv.second)->content);
 		}
 		else if (kv.second->variantClass() == VariantClass::String)
 		{
-			sprintf(buffer, "#define %s %s", kv.first.c_str(), StringValue(kv.second)->content.c_str());
+			sprintf(buffer, "#define %s %s\n", kv.first.c_str(), StringValue(kv.second)->content.c_str());
 		}
 		else
 		{

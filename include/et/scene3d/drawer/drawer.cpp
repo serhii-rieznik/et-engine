@@ -27,14 +27,14 @@ void Drawer::draw()
 	_cubemapProcessor->process(_renderer, options);
 	validate(_renderer);
 
-	clip(_main.camera, _main.rendereables, _main.batches);
+	clip(_main.camera, _main.all, _main.rendereable);
 	{
 		_main.pass->loadSharedVariablesFromCamera(_main.camera);
 		_main.pass->loadSharedVariablesFromLight(_lighting.directional);
 
 		_main.pass->begin({ 0, 0 });
-		for (const RenderBatchInfo& rb : _main.batches)
-			_main.pass->pushRenderBatch(rb.batch);
+		for (const RenderBatch::Pointer& rb : _main.rendereable)
+			_main.pass->pushRenderBatch(rb);
 		_main.pass->pushRenderBatch(_lighting.environmentBatch);
 		_main.pass->end();
 
@@ -46,17 +46,20 @@ void Drawer::draw()
 
 void Drawer::validate(RenderInterface::Pointer& renderer)
 {
-	if (_main.pass.invalid())
+	if (_main.pass.invalid() || (_main.pass->info().color[0].texture != _main.renderTarget))
 	{
 		RenderPass::ConstructionInfo passInfo;
+		passInfo.color[0].texture = _main.renderTarget;
 		passInfo.color[0].loadOperation = FramebufferOperation::Clear;
 		passInfo.color[0].storeOperation = FramebufferOperation::Store;
 		passInfo.color[0].enabled = true;
 		passInfo.color[0].clearValue = vec4(0.0f, 1.0f);
+		passInfo.color[0].useDefaultRenderTarget = _main.renderTarget.invalid();
 		passInfo.depth.loadOperation = FramebufferOperation::Clear;
 		passInfo.depth.storeOperation = FramebufferOperation::DontCare;
 		passInfo.depth.enabled = true;
-		passInfo.name = RenderPass::kPassNameForward;
+		passInfo.name = RenderPass::kPassNameDefault;
+
 		_main.pass = renderer->allocateRenderPass(passInfo);
 		_main.pass->setSharedTexture(MaterialTexture::Environment, _cubemapProcessor->convolutedCubemap(), renderer->defaultSampler());
 		_main.pass->setSharedTexture(MaterialTexture::BRDFLookup, _cubemapProcessor->brdfLookupTexture(), renderer->clampSampler());
@@ -71,12 +74,17 @@ void Drawer::validate(RenderInterface::Pointer& renderer)
 	_cache.flush();
 }
 
+void Drawer::setRenderTarget(const Texture::Pointer& tex)
+{
+	_main.renderTarget = tex;
+}
+
 void Drawer::setScene(const Scene::Pointer& scene)
 {
 	BaseElement::List elements = scene->childrenOfType(ElementType::DontCare);
 
-	_main.rendereables.clear();
-	_main.rendereables.reserve(2 * elements.size());
+	_main.all.clear();
+	_main.all.reserve(2 * elements.size());
 
 	_main.camera = scene->mainCamera();
 	ET_ASSERT(_main.camera.valid());
@@ -89,7 +97,7 @@ void Drawer::setScene(const Scene::Pointer& scene)
 		{
 			Mesh::Pointer mesh = element;
 			mesh->prepareRenderBatches();
-			_main.rendereables.insert(_main.rendereables.end(), mesh->renderBatches().begin(), mesh->renderBatches().end());
+			_main.all.insert(_main.all.end(), mesh->renderBatches().begin(), mesh->renderBatches().end());
 		}
 		else if (element->type() == ElementType::Light)
 		{
@@ -130,32 +138,26 @@ void Drawer::setEnvironmentMap(const std::string& filename)
 	_cubemapProcessor->processEquiretangularTexture(tex.valid() ? tex : _renderer->checkersTexture());
 }
 
-void Drawer::clip(const Camera::Pointer& cam, const RenderBatchCollection& inBatches, RenderBatchInfoCollection& passBatches)
+void Drawer::clip(const Camera::Pointer& cam, const RenderBatchCollection& inBatches, RenderBatchCollection& passBatches)
 {
 	passBatches.clear();
 	passBatches.reserve(inBatches.size());
 
 	for (const RenderBatch::Pointer& batch : inBatches)
 	{
-		BoundingBox transformedBox = batch->boundingBox().transform(batch->transformation());
-		if (1 || cam->frustum().containsBoundingBox(transformedBox))
-		{
-			uint64_t key = batch->material()->sortingKey();
-			passBatches.emplace_back(key, batch, transformedBox);
-		}
+		// TODO : frustum clipping
+		passBatches.emplace_back(batch);
 	}
-
+	
 	vec3 cameraPosition = cam->position();
-	auto cmp = [cameraPosition, this](const RenderBatchInfo& l, const RenderBatchInfo& r)
+	auto cmp = [cameraPosition, this](RenderBatch::Pointer l, RenderBatch::Pointer r)
 	{
-		if (l.priority != r.priority)
-			return l.priority > r.priority;
-
-		const BlendState& lbs = l.batch->material()->configuration(_main.pass->info().name).blendState;
-		const BlendState& rbs = r.batch->material()->configuration(_main.pass->info().name).blendState;
+		const BlendState& lbs = l->material()->configuration(_main.pass->info().name).blendState;
+		const BlendState& rbs = r->material()->configuration(_main.pass->info().name).blendState;
 		if (lbs.enabled == rbs.enabled)
 		{
-			float delta = (l.transformedBox.center - cameraPosition).dotSelf() - (r.transformedBox.center - cameraPosition).dotSelf();
+			float delta = (l->transformedBoundingBox().center - cameraPosition).dotSelf() - 
+				(r->transformedBoundingBox().center - cameraPosition).dotSelf();
 			return lbs.enabled ? (delta >= 0.0f) : (delta < 0.0f);
 		}
 		return static_cast<int>(lbs.enabled) < static_cast<int>(rbs.enabled);

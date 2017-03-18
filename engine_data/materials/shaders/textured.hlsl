@@ -11,6 +11,11 @@ cbuffer ObjectVariables : DECL_BUFFER(Object)
 	row_major float4x4 viewProjectionTransform;
 };
 
+cbuffer MaterialVariables : DECL_BUFFER(Material) 
+{
+	float4 extraParameters;
+};
+
 struct VSOutput 
 {
 	float4 position : SV_Position;
@@ -34,5 +39,9 @@ VSOutput vertexMain(VSInput vsIn)
 
 float4 fragmentMain(VSOutput fsIn) : SV_Target0
 {
+#if (SPECIFIC_LOD)
+	return baseColorTexture.SampleLevel(baseColorSampler, fsIn.texCoord0, extraParameters.x);
+#else
 	return baseColorTexture.Sample(baseColorSampler, fsIn.texCoord0);
+#endif
 }

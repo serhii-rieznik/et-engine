@@ -1,22 +1,22 @@
 {
-	"name" : "textured-2d",
+	"name" : "posteffects",
 
-	"default" : 
+	"downsample" : 
 	{ 
 		"input-layout" : {
 			"position" : 3,
 			"texcoord0" : 2
-		},
-		"options" : {
-			"TRANSFORM_2D_POSITION" : 1
 		},
 		"depth-state": {
 			"depth-function": "always",
 			"depth-test": false,
 			"depth-write": false
 		},
+		"options" : {
+			"LUMINANCE_DOWNSAMPLE" : 1
+		},
 		"blend-state": "disabled",
 		"cull-mode" : "disabled",
-		"code" : "shaders/textured"
+		"code" : "shaders/posteffects"
 	}
 }

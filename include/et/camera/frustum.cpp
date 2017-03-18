@@ -20,12 +20,12 @@ void Frustum::build(const mat4& invVP)
 	vec3 c101 = invVP * vec3( 1.0f, -1.0f,  1.0f);
 	vec3 c011 = invVP * vec3(-1.0f,  1.0f,  1.0f);
 	// vec3 c111 = invVP * vec3( 1.0f,  1.0f,  1.0f); seems to be unused
-	planes[0] = plane(triangle(c000, c010, c100));
-	planes[1] = plane(triangle(c001, c101, c011));
-	planes[2] = plane(triangle(c000, c100, c001));
-	planes[3] = plane(triangle(c010, c011, c110));
-	planes[4] = plane(triangle(c000, c001, c010));
-	planes[5] = plane(triangle(c100, c110, c101));
+	_planes[0] = plane(triangle(c000, c010, c100));
+	_planes[1] = plane(triangle(c001, c101, c011));
+	_planes[2] = plane(triangle(c000, c100, c001));
+	_planes[3] = plane(triangle(c010, c011, c110));
+	_planes[4] = plane(triangle(c000, c001, c010));
+	_planes[5] = plane(triangle(c100, c110, c101));
 }
 
 bool Frustum::containsBoundingBox(const BoundingBox& aabb) const
@@ -33,7 +33,7 @@ bool Frustum::containsBoundingBox(const BoundingBox& aabb) const
 	BoundingBox::Corners corners;
 	aabb.calculateCorners(corners);
 
-	for (const plane& frustumPlane : planes)
+	for (const plane& frustumPlane : _planes)
 	{
 		uint32_t outCorners = 0;
 		for (const vec3& corner : corners)

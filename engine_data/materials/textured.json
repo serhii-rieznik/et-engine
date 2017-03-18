@@ -1,6 +1,6 @@
 {
 	"name" : "textured",
-	"forward" : 
+	"default" : 
 	{ 
 		"input-layout" : {
 			"position" : 3,

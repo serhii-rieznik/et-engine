@@ -236,8 +236,6 @@ void VulkanRenderPass::begin(const RenderPassBeginInfo& beginInfo)
 
 	for (const RenderSubpass& subpass : beginInfo.subpasses)
 	{
-		ET_ASSERT((subpass.level == 0) || useCustomColor || useCustomDepth);
-
 		uint64_t hash = framebufferHash(_private->currentImageIndex, subpass.level, subpass.layer);
 
 		uint32_t width = defaultWidth;

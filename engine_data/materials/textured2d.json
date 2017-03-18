@@ -1,7 +1,7 @@
 {
 	"name" : "textured-2d",
 
-	"forward" : 
+	"default" : 
 	{ 
 		"input-layout" : {
 			"position" : 3,

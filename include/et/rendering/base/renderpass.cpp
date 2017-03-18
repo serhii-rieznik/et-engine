@@ -10,7 +10,7 @@
 
 namespace et
 {
-const std::string RenderPass::kPassNameForward = "forward";
+const std::string RenderPass::kPassNameDefault = "default";
 const std::string RenderPass::kPassNameDepth = "depth";
 const std::string RenderPass::kPassNameUI = "ui";
 

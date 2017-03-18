@@ -25,16 +25,16 @@ void RenderBatch::calculateBoundingBox()
 	
 	if (_vertexStorage->hasAttributeWithType(VertexAttributeUsage::Position, DataType::Vec3))
 	{
-		_minExtent = vec3(std::numeric_limits<float>::max());
-		_maxExtent = vec3(-std::numeric_limits<float>::max());
+		vec3 minExtent = vec3(std::numeric_limits<float>::max());
+		vec3 maxExtent = vec3(-std::numeric_limits<float>::max());
 		const auto pos = _vertexStorage->accessData<DataType::Vec3>(VertexAttributeUsage::Position, 0);
 		for (uint32_t i = _firstIndex, e = _firstIndex + _numIndexes; i < e; ++i)
 		{
 			const auto& v = pos[_indexArray->getIndex(i)];
-			_minExtent = minv(_minExtent, v);
-			_maxExtent = maxv(_maxExtent, v);
+			minExtent = minv(minExtent, v);
+			maxExtent = maxv(maxExtent, v);
 		}
-		_boundingBox = BoundingBox(0.5f * (_minExtent + _maxExtent), 0.5f * (_maxExtent - _minExtent));
+		_boundingBox = BoundingBox(0.5f * (minExtent + maxExtent), 0.5f * (maxExtent - minExtent));
 	}
 	else
 	{
@@ -115,8 +115,6 @@ RenderBatch* RenderBatch::duplicate() const
 	RenderBatch* result = etCreateObject<RenderBatch>(_material, _vertexStream, _transformation, _firstIndex, _numIndexes);
 	result->setVertexStorage(_vertexStorage);
 	result->setIndexArray(_indexArray);
-	result->_minExtent = _minExtent;
-	result->_maxExtent = _maxExtent;
 	result->_boundingBox = _boundingBox;
 	result->_transformedBoudingBox = _transformedBoudingBox;
 	result->_transformedBoxValid = false;

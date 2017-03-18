@@ -60,7 +60,7 @@ public:
 		bool enableDepthBias = false;
 	};
 
-	static const std::string kPassNameForward;
+	static const std::string kPassNameDefault;
 	static const std::string kPassNameUI;
 	static const std::string kPassNameDepth;
 

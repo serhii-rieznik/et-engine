@@ -8,7 +8,8 @@
 			"texcoord0" : 2
 		},
 		"options" : {
-			"TRANSFORM_2D_POSITION" : 1
+			"TRANSFORM_2D_POSITION" : 1,
+			"SPECIFIC_LOD" : 1
 		},
 		"depth-state": {
 			"depth-function": "always",

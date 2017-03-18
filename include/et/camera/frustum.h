@@ -13,12 +13,14 @@
 namespace et
 {
 
-struct Frustum
+class Frustum
 {
-	StaticDataStorage<plane, 6> planes;
-
+public:
 	void build(const mat4& inverseViewProjectionMatrix);
 	bool containsBoundingBox(const BoundingBox& aabb) const;
+
+private:
+	std::array<plane, 6> _planes;
 };
 
 }

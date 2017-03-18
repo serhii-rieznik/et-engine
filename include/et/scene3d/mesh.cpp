@@ -38,8 +38,8 @@ void Mesh::calculateSupportData()
 		if (vs.valid() && ia.valid() && vs->hasAttributeWithType(VertexAttributeUsage::Position, DataType::Vec3))
 		{
 			rb->calculateBoundingBox();
-			minVertex = minv(minVertex, rb->minExtent());
-			maxVertex = maxv(maxVertex, rb->maxExtent());
+			minVertex = minv(minVertex, rb->boundingBox().minVertex());
+			maxVertex = maxv(maxVertex, rb->boundingBox().maxVertex());
 			processedBatches += 1.0f;
 		}
 	}

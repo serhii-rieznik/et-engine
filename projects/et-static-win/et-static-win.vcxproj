@@ -21,6 +21,7 @@
     <ClInclude Include="..\..\include\et\scene3d\drawer\cubemaps.h" />
     <ClInclude Include="..\..\include\et\scene3d\drawer\drawer.h" />
     <ClInclude Include="..\..\include\et\scene3d\drawer\common.h" />
+    <ClInclude Include="..\..\include\et\scene3d\drawer\drawflow.h" />
     <ClInclude Include="..\..\include\et\scene3d\drawer\shadowmaps.h" />
     <ClInclude Include="..\..\include\et\scene3d\lightelement.cpp" />
     <ClInclude Include="..\..\include\et\rendering\systems\cubemapprocessor.cpp" />
@@ -30,6 +31,7 @@
     <ClInclude Include="..\..\include\et\scene3d\drawer\common.cpp" />
     <ClInclude Include="..\..\include\et\rendering\base\variableset.cpp" />
     <ClInclude Include="..\..\include\et\rendering\interface\program.cpp" />
+    <ClInclude Include="..\..\include\et\scene3d\drawer\drawflow.cpp" />
     <ClCompile Include="..\..\include\external\spirvcross\spirv_cfg.cpp" />
     <ClCompile Include="..\..\include\external\spirvcross\spirv_cross.cpp" />
     <ClCompile Include="..\..\include\external\spirvcross\spirv_glsl.cpp" />
