@@ -43,7 +43,7 @@ float4 fragmentMain(VSOutput fsIn) : SV_Target0
 	float4 average = 0.2 * (sX + s0 + s1 + s2 + s3);
 
 	if (previousLevel == 0.0)
-		return (max(dot(average.xyz, float3(0.2989, 0.5870, 0.1140)), 0.00001));
+		return log2(max(dot(average.xyz, float3(0.2989, 0.5870, 0.1140)), 0.00001));
 
 	if (extraParameters.x >= levels - 1)
 		return exp(average);

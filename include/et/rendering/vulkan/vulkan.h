@@ -139,10 +139,10 @@ struct VulkanNativeTexture
 	VkImage image = nullptr;
 	VkDeviceMemory memory = nullptr;
 	VkMemoryRequirements memoryRequirements { };
-	VkImageLayout layout = VK_IMAGE_LAYOUT_UNDEFINED;
+	// VkImageLayout layout = VK_IMAGE_LAYOUT_UNDEFINED;
 	VkFormat format = VK_FORMAT_UNDEFINED;
 	VkImageAspectFlags aspect = VkImageAspectFlagBits::VK_IMAGE_ASPECT_FLAG_BITS_MAX_ENUM;
-	
+
 	Map<uint32_t, VkImageView> allImageViews;
 	VkImageView completeImageView = nullptr;
 	VkImageViewType imageViewType = VkImageViewType::VK_IMAGE_VIEW_TYPE_MAX_ENUM;
@@ -191,7 +191,9 @@ VkSamplerMipmapMode textureFiltrationValueToSamplerMipMapMode(TextureFiltration)
 VkAttachmentLoadOp frameBufferOperationToLoadOperation(FramebufferOperation);
 VkAttachmentStoreOp frameBufferOperationToStoreOperation(FramebufferOperation);
 VkBlendOp blendOperationValue(BlendOperation);
-VkBlendFactor blendFactorValur(BlendFunction);
+VkBlendFactor blendFactorValue(BlendFunction);
+VkAccessFlags texureStateToAccessFlags(TextureState);
+VkImageLayout texureStateToImageLayout(TextureState);
 
 namespace gl
 {

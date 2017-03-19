@@ -32,12 +32,14 @@ struct VulkanCommand
 		Undefined,
 		BeginRenderPass,
 		RenderBatch,
-		Barrier,
+		ImageBarrier,
 		NextRenderPass,
 		EndRenderPass,
 	} type = Type::Undefined;
 
 	VulkanRenderBatch batch;
+	VulkanTexture::Pointer image;
+	ResourceBarrier imageBarrier;
 	RenderSubpass subpass;
 
 	VulkanCommand(Type t) :
@@ -48,6 +50,11 @@ struct VulkanCommand
 
 	VulkanCommand(const RenderSubpass& sp) :
 		type(Type::BeginRenderPass), subpass(sp) { }
+
+	VulkanCommand(const Texture::Pointer& tex, const ResourceBarrier& b) :
+		type(Type::ImageBarrier), image(tex), imageBarrier(b) { }
+
+	~VulkanCommand() { }
 };
 
 struct VulkanRenderSubpass
@@ -379,6 +386,11 @@ void VulkanRenderPass::pushRenderBatch(const RenderBatch::Pointer& inBatch)
 	batch.pipeline = pipelineState;
 }
 
+void VulkanRenderPass::pushImageBarrier(const Texture::Pointer& tex, const ResourceBarrier& barrier)
+{
+	_private->commands.emplace_back(tex, barrier);
+}
+
 void VulkanRenderPass::end()
 {
 	ET_ASSERT(_private->recording);
@@ -457,13 +469,31 @@ void VulkanRenderPass::recordCommandBuffer()
 
 			vkCmdDrawIndexed(commandBuffer, batch.indexCount, 1, batch.startIndex, 0, 0);
 		}
-		else if (cmd.type == VulkanCommand::Type::EndRenderPass)
+		else if (cmd.type == VulkanCommand::Type::ImageBarrier)
 		{
-			vkCmdEndRenderPass(commandBuffer);
+			VulkanTexture::Pointer tex = cmd.image;
+			VkImageMemoryBarrier barrier = { VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER };
+			barrier.image = tex->nativeTexture().image;
+			barrier.srcAccessMask = 0;
+			barrier.dstAccessMask = vulkan::texureStateToAccessFlags(cmd.imageBarrier.toState);
+			barrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+			barrier.newLayout = vulkan::texureStateToImageLayout(cmd.imageBarrier.toState);
+			barrier.srcQueueFamilyIndex = _private->vulkan.graphicsQueueIndex;
+			barrier.dstQueueFamilyIndex = _private->vulkan.graphicsQueueIndex;
+			
+			barrier.subresourceRange = { tex->nativeTexture().aspect, cmd.imageBarrier.firstLevel, 
+				cmd.imageBarrier.levelCount, cmd.imageBarrier.firstLayer, cmd.imageBarrier.layerCount };
+
+			vkCmdPipelineBarrier(commandBuffer, VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, 
+				0, 0, nullptr, 0, nullptr, 1, &barrier);
 		}
 		else if (cmd.type == VulkanCommand::Type::NextRenderPass)
 		{
 			++subpassIndex;
+		}
+		else if (cmd.type == VulkanCommand::Type::EndRenderPass)
+		{
+			vkCmdEndRenderPass(commandBuffer);
 		}
 		else
 		{

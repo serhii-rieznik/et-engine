@@ -69,8 +69,9 @@ public:
 	virtual ~RenderPass();
 
 	virtual void begin(const RenderPassBeginInfo& info) = 0;
-	virtual void nextSubpass() = 0;
 	virtual void pushRenderBatch(const RenderBatch::Pointer&) = 0;
+	virtual void pushImageBarrier(const Texture::Pointer&, const ResourceBarrier&) = 0;
+	virtual void nextSubpass() = 0;
 	virtual void end() = 0;
 
 	void executeSingleRenderBatch(const RenderBatch::Pointer&, const RenderPassBeginInfo&);

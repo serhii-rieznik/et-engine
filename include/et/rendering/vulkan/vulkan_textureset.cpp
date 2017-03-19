@@ -66,15 +66,12 @@ public:
 		if (isTextureBinding)
 		{
 			info.imageView = VulkanTexture::Pointer(b.second.first)->nativeTexture().completeImageView;
-			info.imageLayout = VulkanTexture::Pointer(b.second.first)->nativeTexture().layout;
+			info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL; //  VulkanTexture::Pointer(b.second.first)->nativeTexture().layout;
 		}
 		else 
 		{
 			info.sampler = VulkanSampler::Pointer(b.second.second)->nativeSampler().sampler;
 		}
-
-		if (uintptr_t(info.imageView) == 0x17)
-			printf("");
 
 		VkWriteDescriptorSet& ws = writeSet.back();
 		ws.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;

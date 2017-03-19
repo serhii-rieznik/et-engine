@@ -35,8 +35,6 @@ void HDRFlow::resizeRenderTargets(const vec2i& sz)
 		while ((minDimension /= 2) > 0)
 			++levelCount;
 
-		// 824 - 412 - 206 - 103 - 51 - 25 - 12 - 6 - 3 - 1
-
 		_batches.downsampleBeginInfo.subpasses.clear();
 		for (uint32_t i = 1; i < levelCount; ++i)
 			_batches.downsampleBeginInfo.subpasses.emplace_back(0, i);
@@ -71,14 +69,32 @@ void HDRFlow::render()
 	if (drawer().valid())
 		drawer()->draw();
 
+	ResourceBarrier barrierToRenderTarget;
+	// barrierToRenderTarget.stateFrom = TextureState::ShaderResource;
+	barrierToRenderTarget.toState = TextureState::ColorRenderTarget;
+	
+	ResourceBarrier barrierToShaderResource;
+	// barrierToShaderResource.stateFrom = TextureState::ColorRenderTarget;
+	barrierToShaderResource.toState = TextureState::ShaderResource;
+
 	_downsamplePass->begin(_batches.downsampleBeginInfo);
 	_batches.downsample->material()->setTexture(MaterialTexture::BaseColor, _hdrTarget);
+
 	for (uint32_t l = 1; l < _hdrTarget->description().levelCount; ++l)
 	{
 		_batches.downsample->material()->setFloat(MaterialVariable::ExtraParameters, static_cast<float>(l));
+		
+		barrierToShaderResource.firstLevel = l - 1;
+		_downsamplePass->pushImageBarrier(_hdrTarget, barrierToShaderResource);
+		barrierToRenderTarget.firstLevel = l;
+		_downsamplePass->pushImageBarrier(_hdrTarget, barrierToRenderTarget);
+
 		_downsamplePass->pushRenderBatch(_batches.downsample);
 		_downsamplePass->nextSubpass();
 	}
+	barrierToShaderResource.firstLevel = 0;
+	barrierToShaderResource.levelCount = _hdrTarget->description().levelCount;
+	_downsamplePass->pushImageBarrier(_hdrTarget, barrierToShaderResource);
 	_downsamplePass->end();
 	_renderer->submitRenderPass(_downsamplePass);
 

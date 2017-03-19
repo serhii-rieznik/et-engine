@@ -275,6 +275,17 @@ enum MapBufferOptions : uint32_t
 	InvalidateBuffer = 0x10,
 };
 
+enum class TextureState : uint32_t
+{
+	Undefined,
+	CopySource,
+	CopyDestination,
+	ColorRenderTarget,
+	DepthRenderTarget,
+	ShaderResource,
+	PresentImage,
+};
+
 enum : uint32_t
 {
 	/*
@@ -445,6 +456,15 @@ enum RenderPassPriority : uint32_t
 {
 	Default = 1 << 24,
 	UI = 1 << 16
+};
+
+struct ResourceBarrier
+{
+	uint32_t firstLevel = 0;
+	uint32_t levelCount = 1;
+	uint32_t firstLayer = 0;
+	uint32_t layerCount = 1;
+	TextureState toState = TextureState::Undefined;
 };
 
 DataFormat dataTypeDataFormat(DataType t);

@@ -532,7 +532,7 @@ VkBlendOp blendOperationValue(BlendOperation val)
 	return values.at(val);
 }
 
-VkBlendFactor blendFactorValur(BlendFunction val)
+VkBlendFactor blendFactorValue(BlendFunction val)
 {
 	static std::map<BlendFunction, VkBlendFactor> values =
 	{
@@ -551,6 +551,37 @@ VkBlendFactor blendFactorValur(BlendFunction val)
 	return values.at(val);
 }
 
+VkAccessFlags texureStateToAccessFlags(TextureState val)
+{
+	static std::map<TextureState, VkAccessFlags> values =
+	{
+		{ TextureState::Undefined, 0 },
+		{ TextureState::CopySource, VK_ACCESS_TRANSFER_READ_BIT },
+		{ TextureState::CopyDestination, VK_ACCESS_TRANSFER_WRITE_BIT },
+		{ TextureState::ColorRenderTarget, VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT },
+		{ TextureState::DepthRenderTarget, VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT },
+		{ TextureState::ShaderResource, VK_ACCESS_SHADER_READ_BIT },
+		{ TextureState::PresentImage, VK_ACCESS_MEMORY_READ_BIT },
+	};
+	ET_ASSERT(values.count(val) > 0);
+	return values.at(val);
+}
+
+VkImageLayout texureStateToImageLayout(TextureState val)
+{
+	static std::map<TextureState, VkImageLayout> values =
+	{
+		{ TextureState::Undefined, VK_IMAGE_LAYOUT_UNDEFINED },
+		{ TextureState::CopySource, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL },
+		{ TextureState::CopyDestination, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL },
+		{ TextureState::ColorRenderTarget, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL },
+		{ TextureState::DepthRenderTarget, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL },
+		{ TextureState::ShaderResource, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL },
+		{ TextureState::PresentImage, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR },
+	};
+	ET_ASSERT(values.count(val) > 0);
+	return values.at(val);
+}
 
 namespace gl
 {

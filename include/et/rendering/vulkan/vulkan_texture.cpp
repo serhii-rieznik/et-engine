@@ -145,8 +145,6 @@ void VulkanTexture::setImageData(const BinaryDataStorage& data)
 			VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 
 			0, description().levelCount);
 	});
-
-	_private->layout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 }
 
 void VulkanTexture::updateRegion(const vec2i & pos, const vec2i & size, const BinaryDataStorage& data)
