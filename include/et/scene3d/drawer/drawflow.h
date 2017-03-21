@@ -68,6 +68,8 @@ private:
 		RenderPassBeginInfo downsampleBeginInfo;
 		Material::Pointer downsampleMaterial;
 		RenderBatch::Pointer downsample;
+
+		Material::Pointer resolveMaterial;
 	} _batches;
 	
 	RenderPass::Pointer _downsamplePass;

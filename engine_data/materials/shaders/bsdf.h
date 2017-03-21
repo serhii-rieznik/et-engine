@@ -28,9 +28,9 @@ float3 directSpecular(in Surface surface, in BSDF bsdf);
 float3 directLighting(in Surface surface, in BSDF bsdf);
 
 #define NORMALIZATION_SCALE 	INV_PI
-#define MIN_ROUGHNESS 			0.0001
+#define MIN_ROUGHNESS 			0.001
 #define MIN_REFLECTANCE 		0.16
-#define MIN_FLOAT				0.0000001
+#define MIN_FLOAT				6.10352e-5
 
 Surface buildSurface(in float3 baseColor, in float m, in float r)
 {
@@ -43,7 +43,7 @@ Surface buildSurface(in float3 baseColor, in float m, in float r)
 	result.f90 = saturate(50.0 * reflectance);
 	result.f0 = lerp(reflectance, baseColor, m);
 	result.roughness = clamp(r, MIN_ROUGHNESS, 1.0);
-	result.roughnessSquared = clamp(r * r, MIN_ROUGHNESS, 1.0);
+	result.roughnessSquared = result.roughness * result.roughness;
 	result.metallness = m;
 	return result;
 }
@@ -113,7 +113,7 @@ float3 computeDirectSpecular(in Surface surface, in BSDF bsdf)
 {
 	float d = ggxDistribution(bsdf.NdotH, surface.roughnessSquared);
 	float g = ggxMaskingCombined(bsdf.VdotN, bsdf.LdotN, surface.roughnessSquared);
-	return g * d * lerp(surface.f0, surface.f90, pow(1.0 - bsdf.LdotH, 5.0));
+	return (g * d) * lerp(surface.f0, surface.f90, pow(1.0 - bsdf.LdotH, 5.0));
 }
 
 

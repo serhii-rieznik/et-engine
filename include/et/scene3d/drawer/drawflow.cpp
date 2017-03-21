@@ -24,6 +24,7 @@ HDRFlow::HDRFlow(const RenderInterface::Pointer& ren) :
 	
 	_batches.downsampleMaterial = _renderer->sharedMaterialLibrary().loadMaterial(application().resolveFileName("engine_data/materials/posteffects.json"));
 	_batches.debugMaterial = _renderer->sharedMaterialLibrary().loadMaterial(application().resolveFileName("engine_data/materials/textured2dtransformedlod.json"));
+	_batches.resolveMaterial = _renderer->sharedMaterialLibrary().loadMaterial(application().resolveFileName("engine_data/materials/posteffects.json"));
 }
 
 void HDRFlow::resizeRenderTargets(const vec2i& sz)
@@ -54,7 +55,9 @@ void HDRFlow::resizeRenderTargets(const vec2i& sz)
 			desc->levelCount++;
 		_luminanceTarget = _renderer->createTexture(desc);
 
-		_batches.final = renderhelper::createFullscreenRenderBatch(_hdrTarget);
+		_batches.resolveMaterial->setTexture(MaterialTexture::EmissiveColor, _luminanceTarget);
+		_batches.resolveMaterial->setSampler(MaterialTexture::EmissiveColor, _renderer->clampSampler());
+		_batches.final = renderhelper::createFullscreenRenderBatch(_hdrTarget, _batches.resolveMaterial);
 		_batches.downsample = renderhelper::createFullscreenRenderBatch(_hdrTarget, _batches.downsampleMaterial);
 		_batches.debug = renderhelper::createFullscreenRenderBatch(_hdrTarget, _batches.debugMaterial);
 

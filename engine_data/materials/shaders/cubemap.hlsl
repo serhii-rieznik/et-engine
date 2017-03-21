@@ -84,7 +84,11 @@ float4 fragmentMain(VSOutput fsIn) : SV_Target0
 #else
 	#define samples 2048
 	float roughness = extraParameters.x / 8.0;
-	roughness = max(0.0001, roughness * roughness);
+	if (roughness == 0.0)
+	{
+		return baseColorTexture.SampleLevel(baseColorSampler, n, 0.0);
+	}
+	roughness = roughness * roughness;
 #endif
 
 	float cubemapSolidAngle = 4.0 * PI / (6.0 * (extraParameters.y * extraParameters.z));

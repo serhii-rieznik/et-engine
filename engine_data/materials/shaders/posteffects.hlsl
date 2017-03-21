@@ -1,9 +1,13 @@
 #include <et>
 #include <inputdefines>
 #include <inputlayout>
+#include "srgb.h"
 
 Texture2D<float4> baseColorTexture : DECL_TEXTURE(BaseColor);
 SamplerState baseColorSampler : DECL_SAMPLER(BaseColor);
+
+Texture2D<float4> emissiveColorTexture : DECL_TEXTURE(EmissiveColor);
+SamplerState emissiveColorSampler : DECL_SAMPLER(EmissiveColor);
 
 cbuffer MaterialVariables : DECL_BUFFER(Material) 
 {
@@ -50,6 +54,14 @@ float4 fragmentMain(VSOutput fsIn) : SV_Target0
 	float isLastLevel = (currentLevel + 1.0 >= levels);
 	
 	return lerp(lerp(average, expLum, isLastLevel), logLum, isFirstLevel);
+
+#elif (RESOLVE)
+
+	float luminanceSample = emissiveColorTexture.SampleLevel(emissiveColorSampler, fsIn.texCoord0, 10.0).x;
+	float ev100 = log2(luminanceSample * 100.0 / 12.5);
+	float exposure = 1.0 / (1.2 * pow(2.0, ev100));
+
+	return linearToSRGB(baseColorTexture.Sample(baseColorSampler, fsIn.texCoord0) * exposure);
 
 #else
 
