@@ -52,8 +52,12 @@ public:
 	void render() override;
 
 private:
+	void downsampleLuminance();
+
+private:
 	RenderInterface::Pointer _renderer;
 	Texture::Pointer _hdrTarget;
+	Texture::Pointer _luminanceTarget;
 
 	struct Batches
 	{

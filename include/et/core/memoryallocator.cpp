@@ -459,7 +459,6 @@ MemoryChunk::~MemoryChunk()
 			if (++leakNumber >= 1024)
 				break;
 		}
-		buffer[printPos - 2] = 0;
 
 		log::ConsoleOutput lOut;
 		lOut.info("Total memory leaked: %llu, use debug funtion:", totalLeaked);

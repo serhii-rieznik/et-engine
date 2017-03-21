@@ -32,5 +32,6 @@ VSOutput vertexMain(VSInput vsIn)
 
 float4 fragmentMain(VSOutput fsIn) : SV_Target0
 {
-	return float4(linearToSRGB(sampleEnvironment(normalize(fsIn.direction), 1.0)), 1.0);
+	float3 env = sampleEnvironment(normalize(fsIn.direction), 2.0);
+	return float4(env, 1.0);
 }

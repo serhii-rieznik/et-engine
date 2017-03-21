@@ -652,18 +652,6 @@
     <ClInclude Include="..\..\include\et\rendering\base\variableset.h">
       <Filter>Source\rendering\base</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\et\scene3d\drawer\drawer.cpp">
-      <Filter>Source</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\et\scene3d\drawer\common.cpp">
-      <Filter>Source</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\et\rendering\base\variableset.cpp">
-      <Filter>Source</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\et\rendering\interface\program.cpp">
-      <Filter>Source</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\et\scene3d\drawer\drawflow.h">
       <Filter>Source\scene3d\drawer</Filter>
     </ClInclude>
@@ -671,6 +659,21 @@
       <Filter>Source\scene3d\drawer</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\et\scene3d\drawer\shadowmaps.cpp">
+      <Filter>Source\scene3d\drawer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\interface\program.cpp">
+      <Filter>Source\rendering\base</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\base\variableset.cpp">
+      <Filter>Source\rendering\base</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\scene3d\drawer\drawer.cpp">
+      <Filter>Source\scene3d\drawer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\scene3d\drawer\common.cpp">
+      <Filter>Source\scene3d\drawer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\scene3d\drawer\drawflow.cpp">
       <Filter>Source\scene3d\drawer</Filter>
     </ClInclude>
   </ItemGroup>
@@ -1267,9 +1270,6 @@
     </ClCompile>
     <ClCompile Include="..\..\include\external\spirvcross\spirv_msl.cpp">
       <Filter>spir-v-cross</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\include\et\scene3d\drawer\renderflow.cpp">
-      <Filter>Source\scene3d\drawer</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

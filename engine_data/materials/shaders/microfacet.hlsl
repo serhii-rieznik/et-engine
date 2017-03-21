@@ -121,5 +121,5 @@ float4 fragmentMain(VSOutput fsIn) : SV_Target0
 //	result = directSpecular;
 //	result = indirectSpecular;
 	
-	return float4(linearToSRGB(result), 1.0);
+	return float4(result, 1.0);
 }                              

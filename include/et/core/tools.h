@@ -25,7 +25,7 @@ uint32_t streamSize(std::istream& s);
 template <class I>
 inline I roundToHighestPowerOfTwo(I x)
 {
-	static_assert(std::is_unsigned<T> && std::is_integral<T>::value, 
+	static_assert(std::is_unsigned<I>::value && std::is_integral<I>::value, 
 		"roundToHighestPowerOfTwo works with unsigned integral types only");
 
 	x = x - 1;
