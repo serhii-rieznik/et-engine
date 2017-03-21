@@ -8,6 +8,8 @@
 #include <et/core/et.h>
 #include "heapcontroller.h"
 
+#define ET_HEAP_USE_FIRST_FREE 0
+
 namespace et
 {
 struct HeapChunkInfo
@@ -50,6 +52,10 @@ struct HeapChunkInfo
 class HeapControllerPrivate
 {
 public:
+#if (ET_HEAP_USE_FIRST_FREE)
+	uint64_t firstFreeChunk = 0;
+#endif
+	
 	uint32_t capacity = 0;
 	uint32_t granularity = 1;
 	uint32_t maxInfoChunks = 0;
@@ -88,6 +94,8 @@ void HeapController::init(uint32_t cap, uint32_t gr)
 	_private->maxInfoChunks = (_private->capacity + _private->granularity - 1) / (_private->granularity);
 }
 
+extern std::set<uint32_t> _breakOnAllocations;
+
 bool HeapController::allocate(uint32_t sizeToAllocate, uint32_t& offset)
 {
 	ET_ASSERT(_private->capacity > 0);
@@ -96,6 +104,10 @@ bool HeapController::allocate(uint32_t sizeToAllocate, uint32_t& offset)
 	sizeToAllocate = alignUpTo(sizeToAllocate, _private->granularity);
 
 	HeapChunkInfo* info = _private->firstInfo;
+
+#if (ET_HEAP_USE_FIRST_FREE)
+	info += _private->firstFreeChunk;
+#endif
 	while (info < _private->lastInfo)
 	{
 		_private->validateInfo(info);
@@ -138,6 +150,9 @@ bool HeapController::allocate(uint32_t sizeToAllocate, uint32_t& offset)
 				nextInfo->allocationMask = HeapChunkInfo::Available;
 				nextInfo->begin = info->begin + info->length;
 				nextInfo->length = remaining;
+			#if (ET_HEAP_USE_FIRST_FREE)
+				_private->firstFreeChunk = std::min(_private->firstFreeChunk, static_cast<uint64_t>(nextInfo - _private->firstInfo));
+			#endif
 			}
 
 			offset = info->begin;
@@ -157,13 +172,16 @@ bool HeapController::release(uint32_t offset)
 		_private->validateInfo(i);
 		if (i->begin == offset)
 		{
-			if (i->allocationMask == HeapChunkInfo::Available)
+			if (i->allocationMask & HeapChunkInfo::Available)
 			{
 				ET_FAIL_FMT("Pointer being freed (0x%08x) was already deleted from this memory chunk.", offset);
 				return false;
 			}
 			else
 			{
+			#if (ET_HEAP_USE_FIRST_FREE)
+				_private->firstFreeChunk = std::min(_private->firstFreeChunk, static_cast<uint64_t>(i - _private->firstInfo));
+			#endif
 				i->allocationMask = HeapChunkInfo::Available;
 				if (_private->autoCompress)
 					_private->compress();
@@ -269,13 +287,18 @@ void HeapController::getAllocationIndexes(std::vector<uint32_t>& indexes) const
 void HeapControllerPrivate::compress()
 {
 	HeapChunkInfo* i = firstInfo;
+
+#if (ET_HEAP_USE_FIRST_FREE)
+	i += firstFreeChunk;
+#endif
+	
 	while (i < lastInfo)
 	{
 		validateInfo(i);
-		if (i->allocationMask == HeapChunkInfo::Available)
+		if (i->allocationMask & HeapChunkInfo::Available)
 		{
 			HeapChunkInfo* nextInfo = i + 1;
-			if ((nextInfo < lastInfo) && (nextInfo->allocationMask == HeapChunkInfo::Available))
+			if ((nextInfo < lastInfo) && (nextInfo->allocationMask & HeapChunkInfo::Available))
 			{
 				i->length += nextInfo->length;
 

@@ -12,12 +12,11 @@
 #include <et/core/hardware.h>
 #include <et/core/filesystem.h>
 #include <et/core/containers.h>
+#include <et/app/application.h>
 
 #include <Shlobj.h>
 #include <ShellAPI.h>
 #include <CommDlg.h>
-
-static bool shouldInitializeTime = true;
 
 static uint64_t performanceFrequency = 0;
 static uint64_t initialCounter = 0;
@@ -31,8 +30,6 @@ void initTime()
 	LARGE_INTEGER c = { };
 	LARGE_INTEGER f = { };
 
-	shouldInitializeTime = false;
-
 	QueryPerformanceCounter(&c);
 	QueryPerformanceFrequency(&f);
 
@@ -42,7 +39,7 @@ void initTime()
 
 uint64_t et::queryContiniousTimeInMilliSeconds()
 {
-	if (shouldInitializeTime)
+	if (performanceFrequency == 0)
 		initTime();
 
 	LARGE_INTEGER c = { };
@@ -58,6 +55,9 @@ float et::queryContiniousTimeInSeconds()
 
 uint64_t et::queryCurrentTimeInMicroSeconds()
 {
+	if (performanceFrequency == 0)
+		initTime();
+
 	LARGE_INTEGER c = { };
 	QueryPerformanceCounter(&c);
 	return 1000000 * c.QuadPart / performanceFrequency;
