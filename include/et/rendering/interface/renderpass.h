@@ -45,6 +45,17 @@ struct RenderPassBeginInfo
 		subpasses(1, { l, m }) { }
 };
 
+struct CopyDescriptor
+{
+	uint32_t levelFrom = 0;
+	uint32_t levelTo = 0;
+	uint32_t layerFrom = 0;
+	uint32_t layerTo = 0;
+	vec3i offsetFrom = vec3i(0, 0, 0);
+	vec3i offsetTo = vec3i(0, 0, 0);
+	vec3i size = vec3i(0, 0, 0);
+};
+
 class RenderInterface;
 class RenderPass : public Shared
 {
@@ -71,6 +82,7 @@ public:
 	virtual void begin(const RenderPassBeginInfo& info) = 0;
 	virtual void pushRenderBatch(const RenderBatch::Pointer&) = 0;
 	virtual void pushImageBarrier(const Texture::Pointer&, const ResourceBarrier&) = 0;
+	virtual void copyImage(const Texture::Pointer&, const Texture::Pointer&, const CopyDescriptor&) = 0;
 	virtual void nextSubpass() = 0;
 	virtual void end() = 0;
 

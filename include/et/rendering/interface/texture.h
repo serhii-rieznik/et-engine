@@ -24,6 +24,13 @@ public:
 		minCompressedBlockDataSize = 32,
 	};
 
+	enum Flags : uint32_t
+	{
+		RenderTarget = 1 << 0,
+		CopySource = 1 << 1,
+		CopyDestination = 1 << 2,
+	};
+
 	struct Description
 	{
 		vec2i size = vec2i(0, 0);
@@ -32,7 +39,7 @@ public:
 		TextureDataLayout dataLayout = TextureDataLayout::FacesFirst;
 		uint32_t levelCount = 1;
 		uint32_t layersCount = 1;
-		bool isRenderTarget = false;
+		uint32_t flags = 0;
 
 		vec2i sizeForMipLevel(uint32_t level) const;
 		uint32_t dataOffsetForLayer(uint32_t layer, uint32_t level) const;

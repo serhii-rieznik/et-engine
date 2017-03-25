@@ -59,11 +59,17 @@ VulkanTexture::VulkanTexture(VulkanState& vulkan, const Description& desc, const
 	_private->layerCount = info.arrayLayers;
 	_private->levelCount = info.mipLevels;
 	
-	if (desc.isRenderTarget)
+	if (desc.flags & Texture::Flags::RenderTarget)
 	{
 		info.usage |= isDepthTextureFormat(desc.format) ? VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT :  VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 	}
+
+	if (desc.flags & Texture::Flags::CopySource)
+		info.usage |= VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
 	
+	if (desc.flags & Texture::Flags::CopyDestination)
+		info.usage |= VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+
 	VULKAN_CALL(vkCreateImage(vulkan.device, &info, nullptr, &_private->image));
 
 	vkGetImageMemoryRequirements(vulkan.device, _private->image, &_private->memoryRequirements);

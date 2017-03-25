@@ -30,6 +30,7 @@ public:
 	void begin(const RenderPassBeginInfo&) override;
 	void pushRenderBatch(const RenderBatch::Pointer&) override;
 	void pushImageBarrier(const Texture::Pointer&, const ResourceBarrier&) override;
+	void copyImage(const Texture::Pointer&, const Texture::Pointer&, const CopyDescriptor&) override;
 	void nextSubpass() override;
 	void end() override;
 	

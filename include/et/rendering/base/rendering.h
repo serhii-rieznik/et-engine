@@ -465,6 +465,10 @@ struct ResourceBarrier
 	uint32_t firstLayer = 0;
 	uint32_t layerCount = 1;
 	TextureState toState = TextureState::Undefined;
+
+	ResourceBarrier() = default;
+	ResourceBarrier(TextureState ts) 
+		: toState(ts) {} 
 };
 
 DataFormat dataTypeDataFormat(DataType t);

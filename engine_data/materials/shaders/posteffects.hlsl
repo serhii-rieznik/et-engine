@@ -9,6 +9,9 @@ SamplerState baseColorSampler : DECL_SAMPLER(BaseColor);
 Texture2D<float4> emissiveColorTexture : DECL_TEXTURE(EmissiveColor);
 SamplerState emissiveColorSampler : DECL_SAMPLER(EmissiveColor);
 
+Texture2D<float4> shadowTexture : DECL_TEXTURE(Shadow);
+SamplerState shadowSampler : DECL_SAMPLER(Shadow);
+
 cbuffer MaterialVariables : DECL_BUFFER(Material) 
 {
 	float extraParameters;
@@ -47,21 +50,27 @@ float4 fragmentMain(VSOutput fsIn) : SV_Target0
 	float4 s2 = baseColorTexture.SampleLevel(baseColorSampler, fsIn.texCoord0 + float2(-delta / w,  delta / h), previousLevel);
 	float4 s3 = baseColorTexture.SampleLevel(baseColorSampler, fsIn.texCoord0 + float2( delta / w,  delta / h), previousLevel);
 	float4 average = 0.2 * (sX + s0 + s1 + s2 + s3);
-	float4 logLum = log2(max(dot(average.xyz, float3(0.2989, 0.5870, 0.1140)), 0.00001));
-	float4 expLum = exp(average);
 	
-	float isFirstLevel = (currentLevel == 0.0);
-	float isLastLevel = (currentLevel + 1.0 >= levels);
-	
-	return lerp(lerp(average, expLum, isLastLevel), logLum, isFirstLevel);
+	if (currentLevel == 0.0)
+	{
+		return log2(max(dot(average.xyz, float3(0.2989, 0.5870, 0.1140)), 0.00001));
+	}
+
+	if (currentLevel + 1.0 >= levels)
+	{
+		float previousLuminance = shadowTexture.SampleLevel(shadowSampler, float2(0.5, 0.5), 0.0).x;
+		float expoCorrection = 0.0;
+		float ev100 = log2(exp(average.x) * 100.0 / 12.5) - expoCorrection;
+		return lerp(previousLuminance, 0.18 / (0.125 * pow(2.0, ev100)), 0.5);
+	}
+
+	return average;
 
 #elif (RESOLVE)
 
-	float luminanceSample = emissiveColorTexture.SampleLevel(emissiveColorSampler, fsIn.texCoord0, 10.0).x;
-	float ev100 = log2(luminanceSample * 100.0 / 12.5);
-	float exposure = 1.0 / (1.2 * pow(2.0, ev100));
-
-	return linearToSRGB(baseColorTexture.Sample(baseColorSampler, fsIn.texCoord0) * exposure);
+	float3 source = baseColorTexture.Sample(baseColorSampler, fsIn.texCoord0).xyz;
+	float exposure = emissiveColorTexture.SampleLevel(emissiveColorSampler, fsIn.texCoord0, 10.0).x;
+	return float4(toneMapping(source, exposure), 1.0);
 
 #else
 

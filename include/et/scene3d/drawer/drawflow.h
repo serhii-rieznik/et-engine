@@ -58,6 +58,7 @@ private:
 	RenderInterface::Pointer _renderer;
 	Texture::Pointer _hdrTarget;
 	Texture::Pointer _luminanceTarget;
+	Texture::Pointer _luminanceHistory;
 
 	struct Batches
 	{

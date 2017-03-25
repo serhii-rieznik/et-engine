@@ -33,14 +33,18 @@ struct VulkanCommand
 		BeginRenderPass,
 		RenderBatch,
 		ImageBarrier,
+		CopyImage,
 		NextRenderPass,
 		EndRenderPass,
 	} type = Type::Undefined;
 
 	VulkanRenderBatch batch;
-	VulkanTexture::Pointer image;
+	VulkanTexture::Pointer sourceImage;
 	ResourceBarrier imageBarrier;
 	RenderSubpass subpass;
+	
+	VulkanTexture::Pointer destImage;
+	CopyDescriptor copyDescriptor;
 
 	VulkanCommand(Type t) :
 		type(t) { }
@@ -52,7 +56,10 @@ struct VulkanCommand
 		type(Type::BeginRenderPass), subpass(sp) { }
 
 	VulkanCommand(const Texture::Pointer& tex, const ResourceBarrier& b) :
-		type(Type::ImageBarrier), image(tex), imageBarrier(b) { }
+		type(Type::ImageBarrier), sourceImage(tex), imageBarrier(b) { }
+
+	VulkanCommand(const Texture::Pointer& texFrom, const Texture::Pointer& texTo, const CopyDescriptor& desc) :
+		type(Type::CopyImage), sourceImage(texFrom), destImage(texTo), copyDescriptor(desc) { }
 
 	~VulkanCommand() { }
 };
@@ -391,6 +398,11 @@ void VulkanRenderPass::pushImageBarrier(const Texture::Pointer& tex, const Resou
 	_private->commands.emplace_back(tex, barrier);
 }
 
+void VulkanRenderPass::copyImage(const Texture::Pointer& tFrom, const Texture::Pointer& tTo, const CopyDescriptor& desc)
+{
+	_private->commands.emplace_back(tFrom, tTo, desc);
+}
+
 void VulkanRenderPass::end()
 {
 	ET_ASSERT(_private->recording);
@@ -471,7 +483,7 @@ void VulkanRenderPass::recordCommandBuffer()
 		}
 		else if (cmd.type == VulkanCommand::Type::ImageBarrier)
 		{
-			VulkanTexture::Pointer tex = cmd.image;
+			VulkanTexture::Pointer tex = cmd.sourceImage;
 			VkImageMemoryBarrier barrier = { VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER };
 			barrier.image = tex->nativeTexture().image;
 			barrier.srcAccessMask = 0;
@@ -486,6 +498,31 @@ void VulkanRenderPass::recordCommandBuffer()
 
 			vkCmdPipelineBarrier(commandBuffer, VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, 
 				0, 0, nullptr, 0, nullptr, 1, &barrier);
+		}
+		else if (cmd.type == VulkanCommand::Type::CopyImage)
+		{
+			VulkanTexture::Pointer tFrom = cmd.sourceImage;
+			VulkanTexture::Pointer tTo = cmd.destImage;
+			VkImageCopy region = { };
+			region.srcSubresource.aspectMask = tFrom->nativeTexture().aspect;
+			region.srcSubresource.baseArrayLayer = cmd.copyDescriptor.layerFrom;
+			region.srcSubresource.layerCount = 1;
+			region.srcSubresource.mipLevel = cmd.copyDescriptor.levelFrom;
+			region.srcOffset.x = cmd.copyDescriptor.offsetFrom.x;
+			region.srcOffset.y = cmd.copyDescriptor.offsetFrom.y;
+			region.srcOffset.z = cmd.copyDescriptor.offsetFrom.z;
+			region.dstSubresource.aspectMask = tTo->nativeTexture().aspect;
+			region.dstSubresource.baseArrayLayer = cmd.copyDescriptor.layerTo;
+			region.dstSubresource.layerCount = 1;
+			region.dstSubresource.mipLevel = cmd.copyDescriptor.levelTo;
+			region.dstOffset.x = cmd.copyDescriptor.offsetTo.x;
+			region.dstOffset.y = cmd.copyDescriptor.offsetTo.y;
+			region.dstOffset.z = cmd.copyDescriptor.offsetTo.z;
+			region.extent.width = cmd.copyDescriptor.size.x;
+			region.extent.height = cmd.copyDescriptor.size.y;
+			region.extent.depth = cmd.copyDescriptor.size.z;
+			vkCmdCopyImage(commandBuffer, tFrom->nativeTexture().image, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+				tTo->nativeTexture().image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region);
 		}
 		else if (cmd.type == VulkanCommand::Type::NextRenderPass)
 		{
