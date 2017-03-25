@@ -12,46 +12,42 @@
 
 namespace et
 {
-	class RunLoop : public Shared
-	{
-	public:
-		ET_DECLARE_POINTER(RunLoop);
-		
-	public:
-		RunLoop();
-		virtual ~RunLoop();
-		
-		float time() const
-			{ return _time; }
-		
-		uint64_t timeMSec() const
-			{ return _actualTimeMSec; }
+class RunLoop : public Shared
+{
+public:
+	ET_DECLARE_POINTER(RunLoop);
 
-		TimerPool::Pointer& firstTimerPool()
-			{ return _timerPools.front(); }
-		
-		void updateTime(uint64_t t);
-		void update(uint64_t t);
+public:
+	RunLoop();
+	virtual ~RunLoop();
 
-		void pause();
-		void resume();
+	float time() const { return _time; }
+	float lastFrameTime() const { return _lastFrameTime; }
+	uint64_t timeMSec() const { return _actualTimeMSec; }
+	TimerPool::Pointer& mainTimerPool() { return _timerPools.front(); }
 
-		void attachTimerPool(const TimerPool::Pointer&);
-		void detachTimerPool(const TimerPool::Pointer&);
-		void detachAllTimerPools();
+	void updateTime(uint64_t t);
+	void update(uint64_t t);
 
-		virtual void addTask(Task*, float);
-		
-		bool hasTasks()
-			{ return _taskPool.hasTasks(); }
+	void pause();
+	void resume();
 
-	private:
-		std::vector<TimerPool::Pointer> _timerPools;
-		TaskPool _taskPool;
-		uint64_t _actualTimeMSec = 0;
-		uint64_t _activityTimeMSec = 0;
-		float _time = 0.0f;
-		bool _started = false;
-		bool _active = true;
-	};
+	void attachTimerPool(const TimerPool::Pointer&);
+	void detachTimerPool(const TimerPool::Pointer&);
+	void detachAllTimerPools();
+
+	bool hasTasks() { return _taskPool.hasTasks(); }
+
+	virtual void addTask(Task*, float);
+
+private:
+	std::vector<TimerPool::Pointer> _timerPools;
+	TaskPool _taskPool;
+	uint64_t _actualTimeMSec = 0;
+	uint64_t _activityTimeMSec = 0;
+	float _time = 0.0f;
+	float _lastFrameTime = 0.0f;
+	bool _started = false;
+	bool _active = true;
+};
 }

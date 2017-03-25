@@ -12,6 +12,11 @@ SamplerState emissiveColorSampler : DECL_SAMPLER(EmissiveColor);
 Texture2D<float4> shadowTexture : DECL_TEXTURE(Shadow);
 SamplerState shadowSampler : DECL_SAMPLER(Shadow);
 
+cbuffer ObjectVariables : DECL_BUFFER(Object)
+{
+	float deltaTime;
+};
+
 cbuffer MaterialVariables : DECL_BUFFER(Material) 
 {
 	float extraParameters;
@@ -58,10 +63,14 @@ float4 fragmentMain(VSOutput fsIn) : SV_Target0
 
 	if (currentLevel + 1.0 >= levels)
 	{
-		float previousLuminance = shadowTexture.SampleLevel(shadowSampler, float2(0.5, 0.5), 0.0).x;
+		float previousExposure = shadowTexture.SampleLevel(shadowSampler, float2(0.5, 0.5), 0.0).x;
 		float expoCorrection = 0.0;
 		float ev100 = log2(exp(average.x) * 100.0 / 12.5) - expoCorrection;
-		return lerp(previousLuminance, 0.18 / (0.125 * pow(2.0, ev100)), 0.5);
+		float exposure = 0.18 / (0.125 * pow(2.0, ev100));
+
+		float adaptationSpeed = lerp(5.0, 0.1, step(0.0, exposure - previousExposure));
+
+		return lerp(previousExposure, exposure, 1.0f - exp(-deltaTime * adaptationSpeed));
 	}
 
 	return average;

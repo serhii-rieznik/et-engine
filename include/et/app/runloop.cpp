@@ -97,7 +97,8 @@ void RunLoop::updateTime(uint64_t t)
 
 	if (_active) 
 	{
-		_time += static_cast<float>(t - _activityTimeMSec) / 1000.0f;
+		_lastFrameTime = static_cast<float>(t - _activityTimeMSec) / 1000.0f;
+		_time += _lastFrameTime;
 		_activityTimeMSec = t;
 	}
 }

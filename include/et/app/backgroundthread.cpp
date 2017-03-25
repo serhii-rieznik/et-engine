@@ -35,7 +35,7 @@ void BackgroundThread::main()
 	registerRunLoop(_runLoop);	
 	while (running())
 	{
-		if (_runLoop.hasTasks() || _runLoop.firstTimerPool()->hasObjects())
+		if (_runLoop.hasTasks() || _runLoop.mainTimerPool()->hasObjects())
 		{
 			_runLoop.update(queryContiniousTimeInMilliSeconds());
 			threading::sleepMSec(1);

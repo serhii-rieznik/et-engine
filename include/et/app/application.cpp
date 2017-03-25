@@ -263,11 +263,14 @@ const ApplicationIdentifier& Application::identifier() const
 	return _identifier;
 }
 
+float Application::frameDeltaTime() const
+{
+	return 0.0f;
+}
 
 /*
  * Service
  */
-
 namespace
 {
 	static std::map<threading::ThreadIdentifier, RunLoop*> allRunLoops;
@@ -314,12 +317,12 @@ RunLoop& currentRunLoop()
 
 TimerPool::Pointer& mainTimerPool()
 {
-	return application().mainRunLoop().firstTimerPool();
+	return application().mainRunLoop().mainTimerPool();
 }
 
 TimerPool::Pointer currentTimerPool()
 {
-	return currentRunLoop().firstTimerPool();
+	return currentRunLoop().mainTimerPool();
 }
 
 void registerRunLoop(RunLoop& runLoop)

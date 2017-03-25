@@ -27,76 +27,27 @@ class Application : public Singleton<Application>
 {
 public:
 	int run(int argc, char* argv[]);
-
 	void quit(int exitCode = 0);
 
-	IApplicationDelegate* delegate();
+	/*
+	 * Extern methods, should be implemented by the client app
+	 */
 	IApplicationDelegate* initApplicationDelegate();
-
-	void initContext();
-	void freeContext();
-
-	RunLoop& mainRunLoop()
-	{
-		return _runLoop;
-	}
-
-	BackgroundThread& backgroundThread()
-	{
-		return _backgroundThread;
-	}
-
-	RunLoop& backgroundRunLoop()
-	{
-		return _backgroundThread.runLoop();
-	}
-
-	PlatformDependentContext& context()
-	{
-		return _context;
-	}
-
-	const PlatformDependentContext& context() const
-	{
-		return _context;
-	}
-
-	Environment& environment()
-	{
-		return _env;
-	}
-
-	ApplicationParameters& parameters()
-	{
-		return _parameters;
-	}
-
-	const ApplicationParameters& parameters() const
-	{
-		return _parameters;
-	}
-
-	const StringList& launchParameters() const
-	{
-		return _launchParameters;
-	}
-
 	const ApplicationIdentifier& identifier() const;
 
-	bool running() const
-	{
-		return _running;
-	}
-
-	bool active() const
-	{
-		return _active;
-	}
-
-	bool suspended() const
-	{
-		return _suspended;
-	}
+	IApplicationDelegate* delegate();
+	RunLoop& mainRunLoop();
+	BackgroundThread& backgroundThread();
+	RunLoop& backgroundRunLoop();
+	PlatformDependentContext& context();
+	const PlatformDependentContext& context() const;
+	Environment& environment();
+	ApplicationParameters& parameters();
+	const ApplicationParameters& parameters() const;
+	const StringList& launchParameters() const;
+	bool running() const;
+	bool active() const;
+	bool suspended() const;
 
 	std::string resolveFileName(const std::string&);
 	std::string resolveFolderName(const std::string&);
@@ -107,20 +58,20 @@ public:
 	void pushSearchPaths(const std::set<std::string>&);
 	void popSearchPaths(size_t = 1);
 	void setShouldSilentPathResolverErrors(bool);
-
 	void setPathResolver(PathResolver::Pointer);
-
 	void setTitle(const std::string& s);
 	void setFrameRateLimit(size_t value);
-
 	void requestUserAttention();
-
 	void enableRemoteNotifications();
+
+	float frameDeltaTime() const;
 
 	ET_DECLARE_EVENT1(systemEvent, Dictionary);
 
 public:
-	void load();
+	void initContext();
+	void freeContext();
+
 	void suspend();
 	void resume();
 	void stop();
@@ -207,4 +158,68 @@ TimerPool::Pointer currentTimerPool();
 
 void registerRunLoop(RunLoop&);
 void unregisterRunLoop(RunLoop&);
+
+/*
+ * Application's inline methods
+ */
+inline RunLoop& Application::mainRunLoop()
+{
+	return _runLoop;
+}
+
+inline BackgroundThread& Application::backgroundThread()
+{
+	return _backgroundThread;
+}
+
+inline RunLoop& Application::backgroundRunLoop()
+{
+	return _backgroundThread.runLoop();
+}
+
+inline PlatformDependentContext& Application::context()
+{
+	return _context;
+}
+
+inline const PlatformDependentContext& Application::context() const
+{
+	return _context;
+}
+
+inline Environment& Application::environment()
+{
+	return _env;
+}
+
+inline ApplicationParameters& Application::parameters()
+{
+	return _parameters;
+}
+
+inline const ApplicationParameters& Application::parameters() const
+{
+	return _parameters;
+}
+
+inline const StringList& Application::launchParameters() const
+{
+	return _launchParameters;
+}
+
+inline bool Application::running() const
+{
+	return _running;
+}
+
+inline bool Application::active() const
+{
+	return _active;
+}
+
+inline bool Application::suspended() const
+{
+	return _suspended;
+}
+
 }

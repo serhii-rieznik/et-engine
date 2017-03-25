@@ -25,6 +25,7 @@ static const std::map<ObjectVariable, std::string> objectVariableNames =
 	{ ObjectVariable::LightDirection, "lightDirection" },
 	{ ObjectVariable::LightViewTransform, "lightViewTransform" },
 	{ ObjectVariable::LightProjectionTransform, "lightProjectionTransform" },
+	{ ObjectVariable::DeltaTime, "deltaTime" },
 };
 
 static const std::map<MaterialVariable, std::string> materialVariableNames =

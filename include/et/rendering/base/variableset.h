@@ -29,6 +29,8 @@ enum class ObjectVariable : uint32_t
 	LightViewTransform,
 	LightProjectionTransform,
 
+	DeltaTime,
+
 	max
 };
 
