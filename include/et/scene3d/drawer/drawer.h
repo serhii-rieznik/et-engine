@@ -39,15 +39,16 @@ private:
 
 private:
 	ObjectsCache _cache;
+	Scene::Pointer _scene;
 	RenderInterface::Pointer _renderer;
 	CubemapProcessor::Pointer _cubemapProcessor;
+	Camera::Pointer _defaultCamera = Camera::Pointer(PointerInit::CreateInplace);
 
 	struct MainPass
 	{
 		RenderPass::Pointer pass;
 		RenderBatchCollection all;
 		RenderBatchCollection rendereable;
-		Camera::Pointer camera = Camera::Pointer::create();
 		Texture::Pointer renderTarget;
 	} _main;
 

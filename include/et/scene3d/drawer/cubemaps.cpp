@@ -35,7 +35,7 @@ void CubemapProcessor::processEquiretangularTexture(const Texture::Pointer& tex)
 	removeFlag(CubemapProcessed);
 }
 
-void CubemapProcessor::process(RenderInterface::Pointer& renderer, DrawerOptions& options)
+void CubemapProcessor::process(RenderInterface::Pointer& renderer, DrawerOptions& options, const Light::Pointer& light)
 {
 	validate(renderer);
 
@@ -58,14 +58,16 @@ void CubemapProcessor::process(RenderInterface::Pointer& renderer, DrawerOptions
 		/*
 		* Downsampling convolution
 		*/
-		_processingMaterial->setTexture(MaterialTexture::BaseColor, _tex[CubemapType::Source]);
+		_processingMaterial->setTexture(MaterialTexture::Environment, _tex[CubemapType::Source]);
 		_processingMaterial->setSampler(MaterialTexture::BaseColor, _eqMapSampler);
+
 		_downsampleMaterial->setTexture(MaterialTexture::BaseColor, _tex[CubemapType::Downsampled]);
 
 		_downsampleBatch->setMaterial(_processingMaterial->instance());
 		_processingMaterial->releaseInstances();
 
 		_downsamplePass->begin(_wholeCubemapBeginInfo);
+		_downsamplePass->loadSharedVariablesFromLight(light);
 		for (uint32_t i = 0, e = static_cast<uint32_t>(_wholeCubemapBeginInfo.subpasses.size()); i < e; ++i)
 		{
 			uint32_t level = i / 6;

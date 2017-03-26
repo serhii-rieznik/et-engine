@@ -1,13 +1,14 @@
 #include <et>
 #include <inputdefines>
 #include <inputlayout>
-#include "srgb.h"
+#include "atmosphere.h"
 #include "environment.h"
 
 cbuffer ObjectVariables : DECL_BUFFER(Object)
 {
 	row_major float4x4 inverseViewTransform;
 	row_major float4x4 inverseProjectionTransform;
+	float4 lightDirection;
 };
 
 struct VSOutput 
@@ -32,6 +33,6 @@ VSOutput vertexMain(VSInput vsIn)
 
 float4 fragmentMain(VSOutput fsIn) : SV_Target0
 {
-	float3 env = sampleEnvironment(normalize(fsIn.direction), 2.0);
+	float3 env = sampleEnvironment(normalize(fsIn.direction), lightDirection.xyz, 2.0);
 	return float4(env, 1.0);
 }

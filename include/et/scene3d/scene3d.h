@@ -35,14 +35,23 @@ public:
 	const Storage& storage() const 
 		{ return _storage; }
 
-	Camera::Pointer& mainCamera() 
-		{ return _mainCamera; }
+	Camera::Pointer& renderCamera() 
+		{ return _renderCamera; }
 
-	const Camera::Pointer& mainCamera() const
-		{ return _mainCamera; }
-	
-	void setMainCamera(const Camera::Pointer& cam)
-		{ _mainCamera = cam; }
+	const Camera::Pointer& renderCamera() const
+		{ return _renderCamera; }
+
+	Camera::Pointer& clipCamera() 
+		{ return _clipCamera; }
+
+	const Camera::Pointer& clipCamera() const
+		{ return _clipCamera; }
+
+	void setRenderCamera(const Camera::Pointer& cam)
+		{ _renderCamera = cam; }
+
+	void setClipCamera(const Camera::Pointer& cam)
+		{ _clipCamera = cam; }
 
 public:
 	ET_DECLARE_EVENT1(deserializationFinished, bool);
@@ -55,15 +64,13 @@ private:
 	VertexStorage::Pointer vertexStorageWithName(const std::string&) override;
 	VertexStream::Pointer vertexStreamWithStorageName(const std::string&) override;
 
-	const std::string& serializationBasePath() const override
-	{
-		return _serializationBasePath;
-	}
+	const std::string& serializationBasePath() const override { return _serializationBasePath; }
 
 private:
 	Storage _storage;
 	std::string _serializationBasePath;
-	Camera::Pointer _mainCamera;
+	Camera::Pointer _renderCamera;
+	Camera::Pointer _clipCamera;
 };
 }
 }

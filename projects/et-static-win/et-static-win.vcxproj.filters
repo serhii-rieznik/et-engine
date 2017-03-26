@@ -631,12 +631,6 @@
     <ClInclude Include="..\..\include\et\scene3d\lightelement.h">
       <Filter>Source\scene3d</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\et\rendering\systems\cubemapprocessor.h">
-      <Filter>Source\rendering\systems</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\et\rendering\systems\cubemapprocessor.cpp">
-      <Filter>Source\rendering\systems</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\et\scene3d\drawer\cubemaps.h">
       <Filter>Source\scene3d\drawer</Filter>
     </ClInclude>

@@ -31,12 +31,12 @@ PipelineState::Pointer PipelineStateCache::find(uint64_t renderPassId, const Ver
 {
 	for (const PipelineState::Pointer& ps : _private->cache)
 	{
-		if (ps->inputLayout() != decl) continue;
+		if (ps->renderPassIdentifier() != renderPassId) continue;
 		if (ps->program() != program) continue;
+		if (ps->inputLayout() != decl) continue;
 		if (ps->depthState() != ds) continue;
 		if (ps->blendState() != bs) continue;
 		if (ps->cullMode() != cm) continue;
-		if (ps->renderPassIdentifier() != renderPassId) continue;
 		if (ps->primitiveType() != pt) continue;
 
 		return ps;
@@ -49,18 +49,28 @@ void PipelineStateCache::addToCache(const RenderPass::Pointer& pass, const Pipel
 {
 	PipelineState::Pointer existingState = find(pass->identifier(), ps->inputLayout(), ps->program(),
         ps->depthState(), ps->blendState(), ps->cullMode(), ps->primitiveType());
-
+	
 	ET_ASSERT(existingState.invalid());
 
-	if (existingState.invalid())
-	{
-		_private->cache.push_back(ps);
-	}
+	_private->cache.push_back(ps);
+	flush();
 }
 
 void PipelineStateCache::clear()
 {
 	_private->cache.clear();
+}
+
+void PipelineStateCache::flush()
+{
+	auto i = std::remove_if(_private->cache.begin(), _private->cache.end(), [](const PipelineState::Pointer& ps) { 
+		return ps->retainCount() == 1; });
+	
+	if (i != _private->cache.end())
+	{
+		log::info("%u pipelines flushed", static_cast<uint32_t>(std::distance(_private->cache.begin(), i)));
+		_private->cache.erase(i, _private->cache.end());
+	}
 }
 
 }

@@ -17,14 +17,12 @@
   <ItemGroup>
     <ClInclude Include="..\..\include\et\rendering\base\variableset.h" />
     <ClInclude Include="..\..\include\et\rendering\objects\light.cpp" />
-    <ClInclude Include="..\..\include\et\rendering\systems\cubemapprocessor.h" />
     <ClInclude Include="..\..\include\et\scene3d\drawer\cubemaps.h" />
     <ClInclude Include="..\..\include\et\scene3d\drawer\drawer.h" />
     <ClInclude Include="..\..\include\et\scene3d\drawer\common.h" />
     <ClInclude Include="..\..\include\et\scene3d\drawer\drawflow.h" />
     <ClInclude Include="..\..\include\et\scene3d\drawer\shadowmaps.h" />
     <ClInclude Include="..\..\include\et\scene3d\lightelement.cpp" />
-    <ClInclude Include="..\..\include\et\rendering\systems\cubemapprocessor.cpp" />
     <ClInclude Include="..\..\include\et\scene3d\drawer\drawer.cpp" />
     <ClInclude Include="..\..\include\et\scene3d\drawer\shadowmaps.cpp" />
     <ClInclude Include="..\..\include\et\scene3d\drawer\cubemaps.cpp" />

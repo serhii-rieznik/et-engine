@@ -24,12 +24,15 @@ Drawer::Drawer(const RenderInterface::Pointer& renderer) :
 
 void Drawer::draw()
 {
-	_cubemapProcessor->process(_renderer, options);
+	_cubemapProcessor->process(_renderer, options, _lighting.directional);
 	validate(_renderer);
 
-	clip(_main.camera, _main.all, _main.rendereable);
+	Camera::Pointer clipCamera = _scene.valid() ? _scene->clipCamera() : _defaultCamera;
+	Camera::Pointer renderCamera = _scene.valid() ? _scene->renderCamera() : _defaultCamera;
+	
+	clip(clipCamera, _main.all, _main.rendereable);
 	{
-		_main.pass->loadSharedVariablesFromCamera(_main.camera);
+		_main.pass->loadSharedVariablesFromCamera(renderCamera);
 		_main.pass->loadSharedVariablesFromLight(_lighting.directional);
 
 		_main.pass->begin({ 0, 0 });
@@ -79,15 +82,13 @@ void Drawer::setRenderTarget(const Texture::Pointer& tex)
 	_main.renderTarget = tex;
 }
 
-void Drawer::setScene(const Scene::Pointer& scene)
+void Drawer::setScene(const Scene::Pointer& inScene)
 {
-	BaseElement::List elements = scene->childrenOfType(ElementType::DontCare);
+	_scene = inScene;
+	BaseElement::List elements = _scene->childrenOfType(ElementType::DontCare);
 
 	_main.all.clear();
 	_main.all.reserve(2 * elements.size());
-
-	_main.camera = scene->mainCamera();
-	ET_ASSERT(_main.camera.valid());
 
 	bool updateEnvironment = false;
 

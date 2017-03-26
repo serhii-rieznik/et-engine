@@ -58,7 +58,8 @@ float4 fragmentMain(VSOutput fsIn) : SV_Target0
 	
 	if (currentLevel == 0.0)
 	{
-		return log2(max(dot(average.xyz, float3(0.2989, 0.5870, 0.1140)), 0.00001));
+		float lum = dot(average.xyz, float3(0.2989, 0.5870, 0.1140));
+		return log2(max(lum, 0.0001));
 	}
 
 	if (currentLevel + 1.0 >= levels)
@@ -80,6 +81,7 @@ float4 fragmentMain(VSOutput fsIn) : SV_Target0
 	float3 source = baseColorTexture.Sample(baseColorSampler, fsIn.texCoord0).xyz;
 	float exposure = emissiveColorTexture.SampleLevel(emissiveColorSampler, fsIn.texCoord0, 10.0).x;
 	return float4(toneMapping(source, exposure), 1.0);
+	// return float4(source, 1.0);
 
 #else
 

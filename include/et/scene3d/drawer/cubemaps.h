@@ -27,7 +27,7 @@ public:
 	const Texture::Pointer& brdfLookupTexture() const;
 
 	void processEquiretangularTexture(const Texture::Pointer&);
-	void process(RenderInterface::Pointer&, DrawerOptions&);
+	void process(RenderInterface::Pointer&, DrawerOptions&, const Light::Pointer&);
 
 private:
 	void validate(RenderInterface::Pointer& renderer);

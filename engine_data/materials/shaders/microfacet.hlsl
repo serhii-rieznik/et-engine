@@ -71,6 +71,7 @@ VSOutput vertexMain(VSInput vsIn)
 #include "srgb.h"
 #include "bsdf.h"
 #include "environment.h"
+#include "atmosphere.h"
 #include "importance-sampling.h"
 
 float4 fragmentMain(VSOutput fsIn) : SV_Target0
@@ -103,11 +104,11 @@ float4 fragmentMain(VSOutput fsIn) : SV_Target0
 	float4 brdfLookupSample = brdfLookupTexture.Sample(brdfLookupSampler, float2(surface.roughness, bsdf.VdotN));
 
 	float3 wsDiffuseDir = diffuseDominantDirection(wsNormal, wsView, surface.roughness);
-	float3 indirectDiffuse = (surface.baseColor * sampleEnvironment(wsDiffuseDir, 8.0)) *
+	float3 indirectDiffuse = (surface.baseColor * sampleEnvironment(wsDiffuseDir, lightDirection.xyz, 8.0)) *
 		 ((1.0 - surface.metallness) * brdfLookupSample.z);
 	                                                              
 	float3 wsSpecularDir = specularDominantDirection(wsNormal, wsView, surface.roughness);
-	float3 indirectSpecular = sampleEnvironment(wsSpecularDir, 8.0 * surface.roughness);
+	float3 indirectSpecular = sampleEnvironment(wsSpecularDir, lightDirection.xyz, 8.0 * surface.roughness);
 	indirectSpecular *= (surface.f0 * brdfLookupSample.x + surface.f90 * brdfLookupSample.y);
 
 	float3 result = 

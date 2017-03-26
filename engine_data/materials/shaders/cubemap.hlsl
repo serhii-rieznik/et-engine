@@ -1,7 +1,12 @@
 #include <et>
 #include <inputdefines>
 #include <inputlayout>
+
+#define EQUIRECTANGULAR_ENV_MAP 1
+
 #include "importance-sampling.h"
+#include "atmosphere.h"
+#include "environment.h"
 #include "bsdf.h"
 
 #if (EQ_MAP_TO_CUBEMAP)
@@ -16,6 +21,7 @@ SamplerState baseColorSampler : DECL_SAMPLER(BaseColor);
 cbuffer ObjectVariables : DECL_BUFFER(Object)
 {
 	row_major float4x4 worldTransform;
+	float4 lightDirection;
 };
 
 cbuffer MaterialVariables : DECL_BUFFER(Material)
@@ -62,7 +68,7 @@ float4 fragmentMain(VSOutput fsIn) : SV_Target0
 	float3 d = normalize(fsIn.direction);        	
 	float u = atan2(d.z, d.x) * 0.5 / PI + 0.5;
 	float v = asin(d.y) / PI + 0.5;
-	return baseColorTexture.SampleLevel(baseColorSampler, float2(u, v), 0.0);
+	return float4(sampleAtmosphere(d, lightDirection.xyz), 1.0);
 
 #elif (DOWNSAMPLE_CUBEMAP)
 	

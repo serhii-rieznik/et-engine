@@ -47,12 +47,12 @@ void HDRFlow::resizeRenderTargets(const vec2i& sz)
 		desc->levelCount = 1;
 		_hdrTarget = _renderer->createTexture(desc);
 
-		uint32_t dowsampledSize = roundToHighestPowerOfTwo(static_cast<uint32_t>(std::min(sz.x, sz.y) / 2));
+		uint32_t downsampledSize = roundToHighestPowerOfTwo(static_cast<uint32_t>(std::min(sz.x, sz.y) / 2));
 		desc->format = TextureFormat::RGBA16F;
-		desc->size = vec2i(dowsampledSize);
+		desc->size = vec2i(downsampledSize);
 		desc->levelCount = 1;
 		desc->flags = Texture::Flags::RenderTarget | Texture::Flags::CopySource;
-		while ((dowsampledSize /= 2) >= 1)
+		while ((downsampledSize /= 2) >= 1)
 			desc->levelCount++;
 		_luminanceTarget = _renderer->createTexture(desc);
 
@@ -64,7 +64,11 @@ void HDRFlow::resizeRenderTargets(const vec2i& sz)
 		_batches.resolveMaterial->setTexture(MaterialTexture::EmissiveColor, _luminanceTarget);
 		_batches.resolveMaterial->setSampler(MaterialTexture::EmissiveColor, _renderer->clampSampler());
 		_batches.final = renderhelper::createFullscreenRenderBatch(_hdrTarget, _batches.resolveMaterial);
+
+		_batches.downsampleMaterial->setTexture(MaterialTexture::Shadow, _luminanceHistory);
+		_batches.downsampleMaterial->setSampler(MaterialTexture::Shadow, _renderer->clampSampler());
 		_batches.downsample = renderhelper::createFullscreenRenderBatch(_hdrTarget, _batches.downsampleMaterial);
+		
 		_batches.debug = renderhelper::createFullscreenRenderBatch(_hdrTarget, _batches.debugMaterial);
 
 		RenderPass::ConstructionInfo dsDesc;
@@ -90,29 +94,7 @@ void HDRFlow::render()
 	_finalPass->begin({0, 0});
 	_finalPass->pushRenderBatch(_batches.final);
 
-	if (options.debugDraw)
-	{
-		uint32_t levels = _luminanceTarget->description().levelCount;
-		uint32_t gridSize = static_cast<uint32_t>(std::ceil(std::sqrt(static_cast<float>(levels))));
-		vec2 vp = vector2ToFloat(_renderer->rc()->size());
-		float dx = std::min(vp.y, vp.x) / static_cast<float>(gridSize);
-		float dy = dx;
-
-		vec2 pos = vec2(0.0f);
-		_batches.debug->material()->setTexture(MaterialTexture::BaseColor, _luminanceTarget);
-		for (uint32_t i = 0; i < levels; ++i)
-		{
-			_batches.debug->material()->setFloat(MaterialVariable::ExtraParameters, static_cast<float>(i));
-			_batches.debug->setTransformation(fullscreenBatchTransform(vp, pos, vec2(dx, dy)));
-			_finalPass->pushRenderBatch(_batches.debug);
-			pos.x += dx;
-			if (pos.x + dx >= vp.x)
-			{
-				pos.x = 0.0f;
-				pos.y += dy;
-			}
-		}
-	}
+	debugDraw();
 
 	_finalPass->end();
 	_renderer->submitRenderPass(_finalPass);
@@ -129,8 +111,6 @@ void HDRFlow::downsampleLuminance()
 
 	_batches.downsample->material()->setTexture(MaterialTexture::BaseColor, _hdrTarget);
 	_batches.downsample->material()->setSampler(MaterialTexture::BaseColor, _renderer->clampSampler());
-	_batches.downsample->material()->setTexture(MaterialTexture::Shadow, _luminanceHistory);
-	_batches.downsample->material()->setSampler(MaterialTexture::Shadow, _renderer->clampSampler());
 	_batches.downsample->material()->setFloat(MaterialVariable::ExtraParameters, 0.0f);
 	_downsamplePass->pushRenderBatch(_batches.downsample);
 	_downsamplePass->nextSubpass();
@@ -175,6 +155,33 @@ void HDRFlow::downsampleLuminance()
 	_downsamplePass->pushImageBarrier(_luminanceHistory, barrierToShaderResource);
 
 	_renderer->submitRenderPass(_downsamplePass);
+}
+
+void HDRFlow::debugDraw()
+{
+	if (!options.debugDraw)
+		return;
+
+	uint32_t levels = _luminanceTarget->description().levelCount;
+	uint32_t gridSize = static_cast<uint32_t>(std::ceil(std::sqrt(static_cast<float>(levels))));
+	vec2 vp = vector2ToFloat(_renderer->rc()->size());
+	float dx = std::min(vp.y, vp.x) / static_cast<float>(gridSize);
+	float dy = dx;
+
+	vec2 pos = vec2(0.0f);
+	_batches.debug->material()->setTexture(MaterialTexture::BaseColor, _luminanceTarget);
+	for (uint32_t i = 0; i < levels; ++i)
+	{
+		_batches.debug->material()->setFloat(MaterialVariable::ExtraParameters, static_cast<float>(i));
+		_batches.debug->setTransformation(fullscreenBatchTransform(vp, pos, vec2(dx, dy)));
+		_finalPass->pushRenderBatch(_batches.debug);
+		pos.x += dx;
+		if (pos.x + dx >= vp.x)
+		{
+			pos.x = 0.0f;
+			pos.y += dy;
+		}
+	}
 }
 
 }

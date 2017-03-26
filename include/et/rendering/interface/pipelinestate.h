@@ -66,7 +66,7 @@ public:
 		_cull = cm;
 	}
 
-	Program::Pointer program() const
+	const Program::Pointer& program() const
 	{
 		return _program;
 	}
@@ -114,6 +114,7 @@ public:
 		const DepthState&, const BlendState&, CullMode, PrimitiveType);
 
 	void addToCache(const RenderPass::Pointer& pass, const PipelineState::Pointer&);
+	void flush();
 	void clear();
 
 private:

@@ -6,7 +6,9 @@ TextureCube<float4> environmentTexture : CONSTANT_LOCATION(t, EnvironmentTexture
 
 SamplerState environmentSampler : CONSTANT_LOCATION(s, EnvironmentSamplerBinding, TexturesSetIndex);
 
-float3 sampleEnvironment(float3 i, float lod)
+float3 sampleAtmosphere(float3 i, float3 l);
+
+float3 sampleEnvironment(float3 i, in float3 l, float lod)
 {
 #if (EQUIRECTANGULAR_ENV_MAP)
 	float2 sampleCoord = float2(0.5 * atan2(i.z, i.x), asin(i.y)) / PI + 0.5;

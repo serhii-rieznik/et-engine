@@ -53,6 +53,7 @@ public:
 
 private:
 	void downsampleLuminance();
+	void debugDraw();
 
 private:
 	RenderInterface::Pointer _renderer;

@@ -1,7 +1,6 @@
 #define DIFFUSE_SAMPLES  1
 #define SPECULAR_SAMPLES 256
 
-float3 sampleEnvironment(in float3 dir, in float level);
 float ggxDistribution(in float NdotH, in float roughnessSquared);
 float ggxMasking(in float VdotN, in float LdotN, in float roughnessSquared);
 float diffuseBurley(in float LdotN, in float VdotN, in float LdotH, in float roughness);
@@ -43,6 +42,8 @@ float3 importanceSampleGGX(in float2 Xi, in float r)
 }
 
 /*
+float3 sampleEnvironment(in float3 dir, in float level);
+
 float3 importanceSampledDiffuse(in float3 n, in float3 v, in Surface surface)
 {
 	uint numSamples = DIFFUSE_SAMPLES;
