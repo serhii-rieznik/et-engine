@@ -164,7 +164,7 @@ void CubemapProcessor::validate(RenderInterface::Pointer& renderer)
 		passInfo.priority = RenderPassPriority::UI - 2;
 		_lookupDebugPass = renderer->allocateRenderPass(passInfo);
 
-		Material::Pointer lookupDebugMaterial = renderer->sharedMaterialLibrary().loadMaterial(application().resolveFileName("engine_data/materials/textured2dtransformed.json"));
+		Material::Pointer lookupDebugMaterial = renderer->sharedMaterialLibrary().loadMaterial(application().resolveFileName("engine_data/materials/textured2d-transformed.json"));
 		_lookupDebugBatch = renderhelper::createFullscreenRenderBatch(_lookup, lookupDebugMaterial);
 	}
 

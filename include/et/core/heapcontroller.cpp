@@ -9,6 +9,7 @@
 #include "heapcontroller.h"
 
 #define ET_HEAP_USE_FIRST_FREE 0
+#define ET_HEAP_DEEP_DEBUG     0
 
 namespace et
 {
@@ -322,10 +323,12 @@ void HeapControllerPrivate::compress()
 
 void HeapControllerPrivate::validateInfo(HeapChunkInfo* info)
 {
+#if (ET_HEAP_DEEP_DEBUG)
 	ET_ASSERT((info->allocationMask == HeapChunkInfo::Used) || (info->allocationMask == HeapChunkInfo::Available));
 	ET_ASSERT(info->begin < capacity);
 	ET_ASSERT(info->length <= capacity);
 	ET_ASSERT(info->begin + info->length <= capacity);
+#endif
 	(void)info;
 }
 

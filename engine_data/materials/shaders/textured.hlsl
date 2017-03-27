@@ -39,7 +39,10 @@ VSOutput vertexMain(VSInput vsIn)
 
 float4 fragmentMain(VSOutput fsIn) : SV_Target0
 {
-#if (SPECIFIC_LOD)
+#if (DISPLAY_DEPTH)
+	float sample = baseColorTexture.SampleLevel(baseColorSampler, fsIn.texCoord0, 0.0).x;
+	return pow(sample, 128.0);
+#elif (SPECIFIC_LOD)
 	return baseColorTexture.SampleLevel(baseColorSampler, fsIn.texCoord0, extraParameters.x);
 #else
 	return baseColorTexture.Sample(baseColorSampler, fsIn.texCoord0);

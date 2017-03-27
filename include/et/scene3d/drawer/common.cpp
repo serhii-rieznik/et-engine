@@ -22,5 +22,34 @@ mat4 fullscreenBatchTransform(const vec2& viewport, const vec2& origin, const ve
 	return result;
 }
 
+void clipAndSortRenderBatches(const RenderBatchCollection& batchesIn, RenderBatchCollection& batchesOut,
+	const Camera::Pointer& camera, const RenderPass::Pointer& pass)
+{
+	batchesOut.clear();
+	batchesOut.reserve(batchesIn.size());
+
+	for (const RenderBatch::Pointer& batch : batchesIn)
+	{
+		// TODO : frustum clipping
+		batchesOut.emplace_back(batch);
+	}
+
+	vec3 cameraPosition = camera->position();
+	auto cmp = [cameraPosition, pass](RenderBatch::Pointer l, RenderBatch::Pointer r)
+	{
+		const BlendState& lbs = l->material()->configuration(pass->info().name).blendState;
+		const BlendState& rbs = r->material()->configuration(pass->info().name).blendState;
+		if (lbs.enabled == rbs.enabled)
+		{
+			float delta = (l->transformedBoundingBox().center - cameraPosition).dotSelf() -
+				(r->transformedBoundingBox().center - cameraPosition).dotSelf();
+			return lbs.enabled ? (delta >= 0.0f) : (delta < 0.0f);
+		}
+		return static_cast<int>(lbs.enabled) < static_cast<int>(rbs.enabled);
+	};
+
+	std::stable_sort(batchesOut.begin(), batchesOut.end(), cmp);
+}
+
 }
 }

@@ -916,13 +916,6 @@ s3d::ElementContainer::Pointer OBJLoader::generateVertexBuffers(s3d::Storage& st
 		maxExtent = maxv(maxExtent, mesh->tranformedBoundingBox().maxVertex());
 		minExtent = minv(minExtent, mesh->tranformedBoundingBox().minVertex());
 	}
-
-	float bboxSize = (maxExtent - minExtent).length();
-	Light::Pointer light = Light::Pointer::create(Light::Type::Directional);
-	light->setDirection(normalize(minExtent - maxExtent));
-
-	s3d::LightElement::Pointer::create(light, result.pointer());
-
 	return result;
 }
 

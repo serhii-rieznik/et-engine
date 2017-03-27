@@ -19,11 +19,17 @@ struct DrawerOptions
 {
 	bool drawEnvironmentProbe = false;
 	bool drawLookupTexture = false;
+	bool drawShadowmap = false;
 	bool rebuldEnvironmentProbe = false;
 	bool rebuildLookupTexture = false;
 };
 
+using RenderBatchCollection = Vector<RenderBatch::Pointer>;
+
 mat4 fullscreenBatchTransform(const vec2& viewport, const vec2& origin, const vec2& size);
+
+void clipAndSortRenderBatches(const RenderBatchCollection& batchesIn, RenderBatchCollection& batchesOut,
+	const Camera::Pointer& camera, const RenderPass::Pointer& pass);
 
 }
 }

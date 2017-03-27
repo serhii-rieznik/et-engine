@@ -260,6 +260,12 @@ void VulkanRenderPass::begin(const RenderPassBeginInfo& beginInfo)
 			width = static_cast<uint32_t>(sz.x);
 			height = static_cast<uint32_t>(sz.y);
 		}
+		else if (useCustomDepth)
+		{
+			vec2i sz = depthTarget->size(subpass.level);
+			width = static_cast<uint32_t>(sz.x);
+			height = static_cast<uint32_t>(sz.y);
+		}
 
 		VulkanRenderSubpass& subpassInfo = _private->subpasses[hash];
 		if ((subpassInfo.beginInfo.framebuffer != nullptr) &&

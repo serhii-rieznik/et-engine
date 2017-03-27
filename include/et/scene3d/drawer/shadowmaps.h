@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include <et/rendering/interface/renderer.h>
+#include <et/scene3d/drawer/common.h>
 
 namespace et
 {
@@ -22,8 +22,28 @@ public:
 public:
 	const Texture::Pointer& directionalShadowmap() const;
 
+	void setScene(const Scene::Pointer& scene, const Light::Pointer& light);
+	void process(RenderInterface::Pointer& renderer, DrawerOptions& options);
+
+private:
+	void validate(RenderInterface::Pointer& renderer);
+
 private:
 	Texture::Pointer _directionalShadowmap;
+	Scene::Pointer _scene;
+	Light::Pointer _light;
+
+	struct Renderables
+	{
+		RenderPass::Pointer shadowpass;
+		RenderBatchCollection batches;
+		RenderBatchCollection activeBatches;
+		Vector<Mesh::Pointer> meshes;
+
+		Material::Pointer debugMaterial;
+		RenderBatch::Pointer debugBatch;
+		RenderPass::Pointer debugPass;
+	} _renderables;
 };
 
 inline const Texture::Pointer& ShadowmapProcessor::directionalShadowmap() const {

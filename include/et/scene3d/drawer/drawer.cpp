@@ -19,18 +19,19 @@ namespace s3d
 Drawer::Drawer(const RenderInterface::Pointer& renderer) : 
 	_renderer(renderer)
 {
-	_cubemapProcessor = CubemapProcessor::Pointer(PointerInit::CreateInplace);
+	setScene(Scene::Pointer(PointerInit::CreateInplace));
 }
 
 void Drawer::draw()
 {
 	_cubemapProcessor->process(_renderer, options, _lighting.directional);
+	_shadowmapProcessor->process(_renderer, options);
 	validate(_renderer);
 
 	Camera::Pointer clipCamera = _scene.valid() ? _scene->clipCamera() : _defaultCamera;
 	Camera::Pointer renderCamera = _scene.valid() ? _scene->renderCamera() : _defaultCamera;
 	
-	clip(clipCamera, _main.all, _main.rendereable);
+	clipAndSortRenderBatches(_main.all, _main.rendereable, clipCamera, _main.pass);
 	{
 		_main.pass->loadSharedVariablesFromCamera(renderCamera);
 		_main.pass->loadSharedVariablesFromLight(_lighting.directional);
@@ -43,8 +44,6 @@ void Drawer::draw()
 
 		_renderer->submitRenderPass(_main.pass);
 	}
-
-	renderDebug(_renderer);
 }
 
 void Drawer::validate(RenderInterface::Pointer& renderer)
@@ -65,6 +64,7 @@ void Drawer::validate(RenderInterface::Pointer& renderer)
 
 		_main.pass = renderer->allocateRenderPass(passInfo);
 		_main.pass->setSharedTexture(MaterialTexture::Environment, _cubemapProcessor->convolutedCubemap(), renderer->defaultSampler());
+		_main.pass->setSharedTexture(MaterialTexture::Shadow, _shadowmapProcessor->directionalShadowmap(), renderer->clampSampler());
 		_main.pass->setSharedTexture(MaterialTexture::BRDFLookup, _cubemapProcessor->brdfLookupTexture(), renderer->clampSampler());
 	}
 
@@ -89,6 +89,7 @@ void Drawer::setScene(const Scene::Pointer& inScene)
 
 	_main.all.clear();
 	_main.all.reserve(2 * elements.size());
+	_lighting.directional.reset(nullptr);
 
 	bool updateEnvironment = false;
 
@@ -131,44 +132,26 @@ void Drawer::setScene(const Scene::Pointer& inScene)
 	{
 		setEnvironmentMap(_lighting.environmentTextureFile);
 	}
+
+	if (_lighting.directional.invalid())
+	{
+		vec3 lightPoint = 10.0f * fromSpherical(DEG_60, DEG_15);
+		_lighting.directional = Light::Pointer::create(Light::Type::Directional);
+		_lighting.directional->setColor(vec3(120000.0f));
+		_lighting.directional->lookAt(lightPoint);
+		// _lighting.directional->setDirection(-);
+		// _lighting.directional->setPosition(-_lighting.directional->direction() * 200.0f);
+		_lighting.directional->perspectiveProjection(QUARTER_PI, 1.0f, 1.0f, 1000.0f);
+
+	}
+
+	_shadowmapProcessor->setScene(_scene, _lighting.directional);
 }
 
 void Drawer::setEnvironmentMap(const std::string& filename)
 {
 	Texture::Pointer tex = _renderer->loadTexture(filename, _cache);
 	_cubemapProcessor->processEquiretangularTexture(tex.valid() ? tex : _renderer->checkersTexture());
-}
-
-void Drawer::clip(const Camera::Pointer& cam, const RenderBatchCollection& inBatches, RenderBatchCollection& passBatches)
-{
-	passBatches.clear();
-	passBatches.reserve(inBatches.size());
-
-	for (const RenderBatch::Pointer& batch : inBatches)
-	{
-		// TODO : frustum clipping
-		passBatches.emplace_back(batch);
-	}
-	
-	vec3 cameraPosition = cam->position();
-	auto cmp = [cameraPosition, this](RenderBatch::Pointer l, RenderBatch::Pointer r)
-	{
-		const BlendState& lbs = l->material()->configuration(_main.pass->info().name).blendState;
-		const BlendState& rbs = r->material()->configuration(_main.pass->info().name).blendState;
-		if (lbs.enabled == rbs.enabled)
-		{
-			float delta = (l->transformedBoundingBox().center - cameraPosition).dotSelf() - 
-				(r->transformedBoundingBox().center - cameraPosition).dotSelf();
-			return lbs.enabled ? (delta >= 0.0f) : (delta < 0.0f);
-		}
-		return static_cast<int>(lbs.enabled) < static_cast<int>(rbs.enabled);
-	};
-
-	std::stable_sort(passBatches.begin(), passBatches.end(), cmp);
-}
-
-void Drawer::renderDebug(RenderInterface::Pointer& renderer)
-{
 }
 
 }

@@ -31,17 +31,14 @@ public:
 	void draw();
 
 private:
-	using RenderBatchCollection = Vector<RenderBatch::Pointer>;
-
-	void clip(const Camera::Pointer&, const RenderBatchCollection&, RenderBatchCollection&);
 	void validate(RenderInterface::Pointer&);
-	void renderDebug(RenderInterface::Pointer&);
 
 private:
 	ObjectsCache _cache;
 	Scene::Pointer _scene;
 	RenderInterface::Pointer _renderer;
-	CubemapProcessor::Pointer _cubemapProcessor;
+	CubemapProcessor::Pointer _cubemapProcessor = CubemapProcessor::Pointer(PointerInit::CreateInplace);
+	ShadowmapProcessor::Pointer _shadowmapProcessor = ShadowmapProcessor::Pointer(PointerInit::CreateInplace);
 	Camera::Pointer _defaultCamera = Camera::Pointer(PointerInit::CreateInplace);
 
 	struct MainPass

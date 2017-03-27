@@ -219,28 +219,6 @@ s3d::ElementContainer::Pointer FBXLoaderPrivate::parse(s3d::Storage& storage)
 		minExtent = minv(minExtent, mesh->tranformedBoundingBox().minVertex());
 	}
 	
-	/*
-	if (root->childrenOfType(s3d::ElementType::Light).empty())
-	{
-		float bboxSize = (maxExtent - minExtent).length();
-
-		Light::Pointer light = Light::Pointer::create(Light::Type::Directional);
-		light->lookAt(2.0f * maxExtent, 0.5f * (minExtent + maxExtent));
-		light->orthogonalProjection(-bboxSize, bboxSize, bboxSize, -bboxSize, 1.0f, 2.0f * bboxSize);
-
-		s3d::LightElement::Pointer::create(light, root.pointer());
-	}
-	*/
-
-	std::string backgroundFileName = replaceFileExt(_file, emptyString) + "-background.hdr";
-	if (fileExists(backgroundFileName))
-	{
-		Light::Pointer skyLight = Light::Pointer::create(Light::Type::ImageBasedSky);
-		skyLight->setEnvironmentMap(backgroundFileName);
-
-		s3d::LightElement::Pointer::create(skyLight, root.pointer());
-	}
-
 	return root;
 }
 
