@@ -35,6 +35,8 @@ VSOutput vertexMain(VSInput vsIn)
 float4 fragmentMain(VSOutput fsIn) : SV_Target0
 {
 	// float3 env = sampleEnvironment(normalize(fsIn.direction), lightDirection.xyz, 2.0);
-	float3 env = sampleAtmosphere(normalize(fsIn.direction), lightDirection.xyz, lightColor);
-	return float4(env, 1.0);
+	float3 v = normalize(fsIn.direction);
+	float3 env = sampleAtmosphere(v, lightDirection.xyz, lightColor);
+	float3 sunSpot = smoothstep(0.99925, 0.9995, dot(v, lightDirection.xyz));
+	return float4(sunSpot * lightColor + env, 1.0);
 }

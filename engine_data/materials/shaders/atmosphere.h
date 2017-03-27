@@ -14,12 +14,12 @@ float planetIntersection(in float3 origin, in float3 direction, in float radius)
 
 float phaseFunctionRayleigh(in float cosTheta)
 {
-	return (1.0 + cosTheta * cosTheta);
+	return (3.0 / (16.0 * PI)) * (1.0 + cosTheta * cosTheta);
 }
 
 float phaseFunctionMie(in float cosTheta, in float g)
 {
-	return (1.0 - g*g) / (4.0 * PI * pow(abs(1.0 + g*g - 2.0 * g * cosTheta), 1.5));
+	return (1.0 / (4.0 * PI)) * (1.0 - g*g) / (pow(abs(1.0 + g*g - 2.0 * g * cosTheta), 1.5));
 }
 
 float3 sampleAtmosphere(float3 dir, in float3 light, in float3 lightColor)
@@ -30,30 +30,40 @@ float3 sampleAtmosphere(float3 dir, in float3 light, in float3 lightColor)
 	const float Ra = 6421.0e+3;
 	const float Hr = 7994.0;
 	const float Hm = 1200.0;
-	const float g = 0.95;
+	const float g = 0.785;
 	const float3 betaR = float3(6.554e-6, 1.428e-5, 2.853e-5);
 	const float3 betaM = float3(6.894e-6, 1.018e-5, 1.438e-5);       	
 
+	/*
+	float theta = 15.0 * PI / 180.0;
+	light = float3(cos(theta), sin(theta), 0.0);
+	// */
+	
 	const float height = 10.0;
 	float3 origin = float3(0.0, Re + height, 0.0);
 	float cosTheta = dot(dir, light);
 	float2 phase = float2(phaseFunctionRayleigh(cosTheta), phaseFunctionMie(cosTheta, g));
 
-	float tE = planetIntersection(origin, dir, Re);
-	if (tE >= 0.0)
-	{                   
-		float3 inColor = lightColor * exp(-athmosphereIntersection(origin + dir * tE, light, Ra) * (betaR + betaM));
-		float3 extinction = exp(-tE * (betaR + betaM));
-		float3 inScattering = lightColor * (phaseFunctionRayleigh(cosTheta) * betaR + phaseFunctionMie(cosTheta, g) * betaM) / (betaR + betaM);
-		return inColor * extinction + inScattering * (1.0 - extinction);
+	float3 inColor = 0.0;
+
+	float viewDistance = planetIntersection(origin, dir, Re);
+	if (viewDistance >= 0.0)
+	{               
+		float3 groundPos = origin + dir * viewDistance;
+		float atmosphereDistance = athmosphereIntersection(groundPos, light, Ra);
+		inColor = lightColor * exp(-atmosphereDistance * (betaR + betaM));
+		inColor *= exp(-viewDistance * (betaR + betaM));
+	}
+	else
+	{
+		viewDistance = athmosphereIntersection(origin, dir, Ra);
 	}
 
 	float2 opticalDepth = 0.0;
 	float3 scatteringR = 0.0;
 	float3 scatteringM = 0.0;
 
-	float tA = athmosphereIntersection(origin, dir, Ra);
-	float stepSize = tA / float(steps);
+	float stepSize = viewDistance / float(steps);
 	for (uint i = 0; i < steps; ++i)
 	{
 		float3 pos = origin + dir * ((float(i) + 0.5) * stepSize);
@@ -78,5 +88,5 @@ float3 sampleAtmosphere(float3 dir, in float3 light, in float3 lightColor)
 		opticalDepth += opticalDepthAtStep;
 	}
 
-	return lightColor * (scatteringR * betaR * phase.x + scatteringM * betaM * phase.y);
+	return inColor + lightColor * (scatteringR * betaR * phase.x + scatteringM * betaM * phase.y);
 }
