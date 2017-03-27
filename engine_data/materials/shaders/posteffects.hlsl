@@ -41,6 +41,8 @@ float4 fragmentMain(VSOutput fsIn) : SV_Target0
 #if (LUMINANCE_DOWNSAMPLE)
 
 	#define delta 0.5
+	#define lowerRange 0.001
+	#define upperRange 100000.0
 	float currentLevel = extraParameters.x;
 	float previousLevel = max(0.0, currentLevel - 1.0);
 
@@ -59,17 +61,18 @@ float4 fragmentMain(VSOutput fsIn) : SV_Target0
 	if (currentLevel == 0.0)
 	{
 		float lum = dot(average.xyz, float3(0.2989, 0.5870, 0.1140));
-		return log2(max(lum, 0.0001));
+		return log2(max(lum, lowerRange));
 	}
 
 	if (currentLevel + 1.0 >= levels)
 	{
 		float previousExposure = shadowTexture.SampleLevel(shadowSampler, float2(0.5, 0.5), 0.0).x;
-		float expoCorrection = 0.0;
-		float ev100 = log2(exp(average.x) * 100.0 / 12.5) - expoCorrection;
+		float expoCorrection = 3.0;
+		float lum = clamp(exp(average.x), lowerRange, upperRange);
+		float ev100 = log2(lum * 100.0 / 12.5) - expoCorrection;
 		float exposure = 0.18 / (0.125 * pow(2.0, ev100));
 
-		float adaptationSpeed = lerp(5.0, 0.1, step(0.0, exposure - previousExposure));
+		float adaptationSpeed = lerp(3.0, 1.0, step(exposure - previousExposure, 0.0));
 
 		return lerp(previousExposure, exposure, 1.0f - exp(-deltaTime * adaptationSpeed));
 	}
@@ -79,6 +82,7 @@ float4 fragmentMain(VSOutput fsIn) : SV_Target0
 #elif (RESOLVE)
 
 	float3 source = baseColorTexture.Sample(baseColorSampler, fsIn.texCoord0).xyz;
+	float lum = dot(source, float3(0.2989, 0.5870, 0.1140));
 	float exposure = emissiveColorTexture.SampleLevel(emissiveColorSampler, fsIn.texCoord0, 10.0).x;
 	return float4(toneMapping(source, exposure), 1.0);
 	// return float4(source, 1.0);

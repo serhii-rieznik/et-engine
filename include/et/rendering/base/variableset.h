@@ -25,6 +25,7 @@ enum class ObjectVariable : uint32_t
 	CameraPosition,
 	CameraDirection,
 	
+	LightColor,
 	LightDirection,
 	LightViewTransform,
 	LightProjectionTransform,

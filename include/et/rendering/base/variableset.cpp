@@ -22,6 +22,7 @@ static const std::map<ObjectVariable, std::string> objectVariableNames =
 	{ ObjectVariable::InverseViewProjectionTransform, "inverseViewProjectionTransform" },
 	{ ObjectVariable::CameraPosition, "cameraPosition" },
 	{ ObjectVariable::CameraDirection, "cameraDirection" },
+	{ ObjectVariable::LightColor, "lightColor" },
 	{ ObjectVariable::LightDirection, "lightDirection" },
 	{ ObjectVariable::LightViewTransform, "lightViewTransform" },
 	{ ObjectVariable::LightProjectionTransform, "lightProjectionTransform" },

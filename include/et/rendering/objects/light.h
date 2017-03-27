@@ -29,6 +29,12 @@ public:
 	const Type type() const 
 		{ return _type; }
 
+	void setColor(const vec3& clr)
+		{ _color = clr; }
+
+	const vec3& color() const 
+		{ return _color; }
+
 	void setEnvironmentMap(const std::string&);
 	
 	const std::string& environmentMap() const
@@ -36,6 +42,7 @@ public:
 
 private:
 	Type _type = Type::Directional;
+	vec3 _color = vec3(1.0f, 1.0f, 1.0f);
 	std::string _environmentMap;
 };
 

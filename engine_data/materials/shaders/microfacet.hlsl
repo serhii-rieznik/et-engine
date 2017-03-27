@@ -17,6 +17,7 @@ cbuffer ObjectVariables : DECL_BUFFER(Object)
 	row_major float4x4 worldTransform;
 	row_major float4x4 worldRotationTransform;
 	row_major float4x4 lightProjectionTransform;
+	float3 lightColor;
 	float4 lightDirection;
 	float4 cameraPosition;
 };
@@ -112,7 +113,7 @@ float4 fragmentMain(VSOutput fsIn) : SV_Target0
 	indirectSpecular *= (surface.f0 * brdfLookupSample.x + surface.f90 * brdfLookupSample.y);
 
 	float3 result = 
-			1.0 * (directDiffuse + directSpecular) + 
+			lightColor * (directDiffuse + directSpecular) + 
 			1.0 * (indirectDiffuse + indirectSpecular); 
 
 //	result = directSpecular;

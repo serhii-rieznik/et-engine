@@ -8,6 +8,7 @@ cbuffer ObjectVariables : DECL_BUFFER(Object)
 {
 	row_major float4x4 inverseViewTransform;
 	row_major float4x4 inverseProjectionTransform;
+	float3 lightColor;
 	float4 lightDirection;
 };
 
@@ -33,6 +34,7 @@ VSOutput vertexMain(VSInput vsIn)
 
 float4 fragmentMain(VSOutput fsIn) : SV_Target0
 {
-	float3 env = sampleEnvironment(normalize(fsIn.direction), lightDirection.xyz, 2.0);
+	// float3 env = sampleEnvironment(normalize(fsIn.direction), lightDirection.xyz, 2.0);
+	float3 env = sampleAtmosphere(normalize(fsIn.direction), lightDirection.xyz, lightColor);
 	return float4(env, 1.0);
 }

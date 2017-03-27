@@ -25,7 +25,7 @@ CameraMovingController::CameraMovingController(Camera::Pointer cam, bool connect
 	{
 		if (pointerEventsEnabled() && (drag.pointerType == PointerTypeMask::General))
 		{
-			vec2 delta = _directionAnimator.targetValue() + vec2(drag.delta.x, -drag.delta.y);
+			vec2 delta = _directionAnimator.targetValue() + vec2(clamp(drag.delta.x, -DEG_15, DEG_15), -clamp(drag.delta.y, -DEG_15, DEG_15));
 			validateCameraAngles(delta);
 			_directionAnimator.setTargetValue(delta);
 		}

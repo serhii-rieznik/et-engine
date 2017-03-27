@@ -12,6 +12,8 @@ namespace et
 namespace s3d
 {
 
+const TextureFormat HDRTextureFormat = TextureFormat::RGBA32F;
+
 HDRFlow::HDRFlow(const RenderInterface::Pointer& ren) : 
 	_renderer(ren)
 {
@@ -41,14 +43,13 @@ void HDRFlow::resizeRenderTargets(const vec2i& sz)
 			_batches.downsampleBeginInfo.subpasses.emplace_back(0, i);
 
 		TextureDescription::Pointer desc(PointerInit::CreateInplace);
-		desc->format = TextureFormat::RGBA16F;
+		desc->format = HDRTextureFormat;
 		desc->size = sz;
 		desc->flags = Texture::Flags::RenderTarget;
 		desc->levelCount = 1;
 		_hdrTarget = _renderer->createTexture(desc);
 
 		uint32_t downsampledSize = roundToHighestPowerOfTwo(static_cast<uint32_t>(std::min(sz.x, sz.y) / 2));
-		desc->format = TextureFormat::RGBA16F;
 		desc->size = vec2i(downsampledSize);
 		desc->levelCount = 1;
 		desc->flags = Texture::Flags::RenderTarget | Texture::Flags::CopySource;
