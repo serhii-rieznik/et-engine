@@ -67,7 +67,7 @@ float4 fragmentMain(VSOutput fsIn) : SV_Target0
 	if (currentLevel + 1.0 >= levels)
 	{
 		float previousExposure = shadowTexture.SampleLevel(shadowSampler, float2(0.5, 0.5), 0.0).x;
-		float expoCorrection = 3.0;
+		float expoCorrection = 0.0;
 		float lum = clamp(exp(average.x), lowerRange, upperRange);
 		float ev100 = log2(lum * 100.0 / 12.5) - expoCorrection;
 		float exposure = 0.18 / (0.125 * pow(2.0, ev100));

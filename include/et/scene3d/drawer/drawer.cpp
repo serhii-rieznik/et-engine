@@ -11,6 +11,8 @@
 #include <et/rendering/base/helpers.h>
 #include <et/app/application.h>
 
+#define ET_ANIMATE_LIGHT_POSITION 1
+
 namespace et
 {
 namespace s3d
@@ -24,6 +26,11 @@ Drawer::Drawer(const RenderInterface::Pointer& renderer) :
 
 void Drawer::draw()
 {
+#if (ET_ANIMATE_LIGHT_POSITION)
+	_lighting.directional->lookAt(10.0f * fromSpherical(0.25f * queryContiniousTimeInSeconds(), DEG_15));
+	options.rebuldEnvironmentProbe = true;
+#endif
+	
 	_cubemapProcessor->process(_renderer, options, _lighting.directional);
 	_shadowmapProcessor->process(_renderer, options);
 	validate(_renderer);
@@ -139,8 +146,6 @@ void Drawer::setScene(const Scene::Pointer& inScene)
 		_lighting.directional = Light::Pointer::create(Light::Type::Directional);
 		_lighting.directional->setColor(vec3(120000.0f));
 		_lighting.directional->lookAt(lightPoint);
-		// _lighting.directional->setDirection(-);
-		// _lighting.directional->setPosition(-_lighting.directional->direction() * 200.0f);
 		_lighting.directional->perspectiveProjection(QUARTER_PI, 1.0f, 1.0f, 1000.0f);
 
 	}
