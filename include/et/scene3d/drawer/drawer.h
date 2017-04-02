@@ -30,6 +30,8 @@ public:
 
 	void draw();
 
+	Light::Pointer directionalLight();
+
 private:
 	void validate(RenderInterface::Pointer&);
 
@@ -57,6 +59,11 @@ private:
 		std::string environmentTextureFile;
 	} _lighting;
 };
+
+inline Light::Pointer Drawer::directionalLight()
+{
+	return _lighting.directional;
+}
 
 }
 }

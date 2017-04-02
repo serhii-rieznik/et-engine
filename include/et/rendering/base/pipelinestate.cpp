@@ -67,10 +67,7 @@ void PipelineStateCache::flush()
 		return ps->retainCount() == 1; });
 	
 	if (i != _private->cache.end())
-	{
-		log::info("%u pipelines flushed", static_cast<uint32_t>(std::distance(_private->cache.begin(), i)));
 		_private->cache.erase(i, _private->cache.end());
-	}
 }
 
 }

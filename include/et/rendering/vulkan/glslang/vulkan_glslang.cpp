@@ -16,8 +16,9 @@
 #include "vulkan_glslang.h"
 #include <fstream>
 
-#define ET_COMPILE_TEST_HLSL		  1
-#define ET_CROSS_COMPILE_SHADERS_TEST 0
+#define ET_PREPROCESS_HLSL				0
+#define ET_COMPILE_TEST_HLSL			1
+#define ET_CROSS_COMPILE_SHADERS_TEST	0
 
 #if (ET_PLATFORM_WIN && ET_COMPILE_TEST_HLSL)
 #	include <d3dcompiler.h>
@@ -204,9 +205,6 @@ bool performDX11CompileTest(const std::string& preprocessedVertexShader, const s
 bool hlslToSPIRV(const std::string& _source, std::vector<uint32_t>& vertexBin, std::vector<uint32_t>& fragmentBin,
 	Program::Reflection& reflection)
 {
-	std::string preprocessedVertexShader;
-	std::string preprocessedFragmentShader;
-
 	EShMessages messages = static_cast<EShMessages>(EShMsgSpvRules | EShMsgReadHlsl);
 	const char* vs[] = { _source.c_str() };
 	const char* fs[] = { _source.c_str() };
@@ -214,31 +212,37 @@ bool hlslToSPIRV(const std::string& _source, std::vector<uint32_t>& vertexBin, s
 	const char* fsName[] = { "fragment_shader_source" };
 
 	glslang::TShader::ForbidIncluder defaultIncluder;
-
+	
 	glslang::TShader vertexShader(EShLanguage::EShLangVertex);
 	vertexShader.setStringsWithLengthsAndNames(vs, nullptr, vsName, 1);
 	vertexShader.setAutoMapBindings(true);
 	vertexShader.setEntryPoint("vertexMain");
+
+	glslang::TShader fragmentShader(EShLanguage::EShLangFragment);
+	fragmentShader.setStringsWithLengthsAndNames(fs, nullptr, fsName, 1);
+	fragmentShader.setAutoMapBindings(true);
+	fragmentShader.setEntryPoint("fragmentMain");
+
+#if (ET_PREPROCESS_HLSL)
+	std::string preprocessedVertexShader;
+	std::string preprocessedFragmentShader;
+
 	if (!vertexShader.preprocess(&glslang::DefaultTBuiltInResource, 110, EProfile::ECoreProfile, false, true,
 		messages, &preprocessedVertexShader, defaultIncluder))
 	{
-		log::error("Failed to preprocess vertex shader:\n%s", vertexShader.getInfoLog());
 		dumpSource(_source);
+		log::error("Failed to preprocess vertex shader:\n%s", vertexShader.getInfoLog());
 		debug::debugBreak();
 		return false;
 	}
 	vs[0] = { preprocessedVertexShader.c_str() };
 	vertexShader.setStringsWithLengthsAndNames(vs, nullptr, vsName, 1);
 
-	glslang::TShader fragmentShader(EShLanguage::EShLangFragment);
-	fragmentShader.setStringsWithLengthsAndNames(fs, nullptr, fsName, 1);
-	fragmentShader.setAutoMapBindings(true);
-	fragmentShader.setEntryPoint("fragmentMain");
 	if (!fragmentShader.preprocess(&glslang::DefaultTBuiltInResource, 110, EProfile::ECoreProfile, false, true,
 		messages, &preprocessedFragmentShader, defaultIncluder))
 	{
-		log::error("Failed to preprocess fragment shader:\n%s", fragmentShader.getInfoLog());
 		dumpSource(_source);
+		log::error("Failed to preprocess fragment shader:\n%s", fragmentShader.getInfoLog());
 		debug::debugBreak();
 		return false;
 	}
@@ -246,11 +250,15 @@ bool hlslToSPIRV(const std::string& _source, std::vector<uint32_t>& vertexBin, s
 	fragmentShader.setStringsWithLengthsAndNames(fs, nullptr, fsName, 1);
 
 	performDX11CompileTest(preprocessedVertexShader, preprocessedFragmentShader);
+#else
+	const std::string& preprocessedVertexShader = _source;
+	const std::string& preprocessedFragmentShader = _source;
+#endif
 
 	if (!vertexShader.parse(&glslang::DefaultTBuiltInResource, 110, true, messages))
 	{
-		log::error("Failed to parse vertex shader:\n%s", vertexShader.getInfoLog());
 		dumpSource(preprocessedVertexShader);
+		log::error("Failed to parse vertex shader:\n%s", vertexShader.getInfoLog());
 #	if (ET_DEBUG)
 		debug::debugBreak();
 #	endif
@@ -259,8 +267,8 @@ bool hlslToSPIRV(const std::string& _source, std::vector<uint32_t>& vertexBin, s
 
 	if (!fragmentShader.parse(&glslang::DefaultTBuiltInResource, 110, true, messages))
 	{
-		log::error("Failed to parse fragment shader:\n%s", fragmentShader.getInfoLog());
 		dumpSource(preprocessedFragmentShader);
+		log::error("Failed to parse fragment shader:\n%s", fragmentShader.getInfoLog());
 #	if (ET_DEBUG)
 		debug::debugBreak();
 #	endif

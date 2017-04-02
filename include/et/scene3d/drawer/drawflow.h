@@ -26,6 +26,7 @@ public:
 	} options;
 
 public:
+	virtual ~Drawflow() { } 
 	virtual void resizeRenderTargets(const vec2i&) = 0;
 	virtual void render() = 0;
 

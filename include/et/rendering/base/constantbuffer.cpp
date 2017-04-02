@@ -47,6 +47,7 @@ void ConstantBuffer::init(RenderInterface* renderer)
 
 void ConstantBuffer::shutdown()
 {
+	flush();
 	_private->buffer.reset(nullptr);
 	_private->heap.clear();
 	_private->heapInfo.resize(0);
@@ -60,16 +61,17 @@ Buffer::Pointer ConstantBuffer::buffer() const
 
 void ConstantBuffer::flush()
 {
-	if (_private->modified == false)
-		return;
-
-	uint8_t* mappedMemory = _private->buffer->map(0, Capacity);
-	for (const ConstantBufferEntry::Pointer& allocation : _private->allocations)
+	if (_private->modified)
 	{
-		memcpy(mappedMemory + allocation->offset(), _private->localData.begin() + allocation->offset(), allocation->length());
-		_private->buffer->modifyRange(allocation->offset(), allocation->length());
+		uint8_t* mappedMemory = _private->buffer->map(0, Capacity);
+		for (const ConstantBufferEntry::Pointer& allocation : _private->allocations)
+		{
+			memcpy(mappedMemory + allocation->offset(), _private->localData.begin() + allocation->offset(), allocation->length());
+			_private->buffer->modifyRange(allocation->offset(), allocation->length());
+		}
+		_private->buffer->unmap();
+		_private->modified = false;
 	}
-	_private->buffer->unmap();
 
 	Vector<ConstantBufferEntry::Pointer> objectsToRelease;
 	objectsToRelease.reserve(_private->allocations.size());
@@ -88,10 +90,12 @@ void ConstantBuffer::flush()
 	}
 	
 	for (const ConstantBufferEntry::Pointer& allocation : objectsToRelease)
+	{
+		ET_ASSERT(allocation->isDynamic() || (allocation->retainCount() == 1));
 		_private->internalFree(allocation);
+	}
 
 	_private->heap.compress();
-	_private->modified = false;
 }
 
 const ConstantBufferEntry::Pointer& ConstantBuffer::staticAllocate(uint32_t size)

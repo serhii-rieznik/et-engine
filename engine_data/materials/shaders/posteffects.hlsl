@@ -42,7 +42,6 @@ float4 fragmentMain(VSOutput fsIn) : SV_Target0
 
 	#define delta 0.5
 	#define lowerRange 0.001
-	#define upperRange 100000.0
 	float currentLevel = extraParameters.x;
 	float previousLevel = max(0.0, currentLevel - 1.0);
 
@@ -61,18 +60,18 @@ float4 fragmentMain(VSOutput fsIn) : SV_Target0
 	if (currentLevel == 0.0)
 	{
 		float lum = dot(average.xyz, float3(0.2989, 0.5870, 0.1140));
-		return log2(max(lum, lowerRange));
+		return log(max(lum, lowerRange));
 	}
 
 	if (currentLevel + 1.0 >= levels)
 	{
 		float previousExposure = shadowTexture.SampleLevel(shadowSampler, float2(0.5, 0.5), 0.0).x;
 		float expoCorrection = 0.0;
-		float lum = clamp(exp(average.x), lowerRange, upperRange);
+		float lum = exp(average.x);
 		float ev100 = log2(lum * 100.0 / 12.5) - expoCorrection;
-		float exposure = 0.18 / (0.125 * pow(2.0, ev100));
+		float exposure = 1.0 / (0.125 * pow(2.0, ev100));
 
-		float adaptationSpeed = lerp(5.0, 3.0, step(exposure - previousExposure, 0.0));
+		float adaptationSpeed = lerp(3.0, 5.0, step(exposure - previousExposure, 0.0));
 
 		return lerp(previousExposure, exposure, 1.0f - exp(-deltaTime * adaptationSpeed));
 	}

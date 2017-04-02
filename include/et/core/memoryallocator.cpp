@@ -100,7 +100,7 @@ public:
 			buffer[printPos - 2] = 0;
 
 			lOut.info("Total memory leaked: %llu from small blocks, use debug funtion:", totalLeaked);
-			lOut.info("et::MemoryAllocatorBase::allocateOnBreaks({ %s })", buffer);
+			lOut.info("et::BlockMemoryAllocator::allocateOnBreaks({ %s })", buffer);
 		}
 #endif
 		::free(blocks);
@@ -442,6 +442,7 @@ MemoryChunk::MemoryChunk(uint32_t capacity) :
 
 MemoryChunk::~MemoryChunk()
 {
+#if (ET_DEBUG)
 	std::vector<uint32_t> detectedLeaks;
 	detectedLeaks.reserve(1024);
 	heap.getAllocationIndexes(detectedLeaks);
@@ -461,9 +462,10 @@ MemoryChunk::~MemoryChunk()
 		}
 
 		log::ConsoleOutput lOut;
-		lOut.info("Total memory leaked: %llu, use debug funtion:", totalLeaked);
-		lOut.info("et::MemoryAllocatorBase::allocateOnBreaks({ %s })", buffer);
+		lOut.info("Total memory leaked: %llu, use debug funtion:\n"
+			"et::BlockMemoryAllocator::allocateOnBreaks({ %s })", totalLeaked, buffer);
 	}
+#endif
 
 #if (ET_PLATFORM_WIN)
 	_aligned_free(allocatedMemoryBegin);

@@ -11,7 +11,7 @@
 #include <et/rendering/base/helpers.h>
 #include <et/app/application.h>
 
-#define ET_ANIMATE_LIGHT_POSITION 1
+#define ET_ANIMATE_LIGHT_POSITION 0
 
 namespace et
 {
@@ -147,7 +147,6 @@ void Drawer::setScene(const Scene::Pointer& inScene)
 		_lighting.directional->setColor(vec3(120000.0f));
 		_lighting.directional->lookAt(lightPoint);
 		_lighting.directional->perspectiveProjection(QUARTER_PI, 1.0f, 1.0f, 1000.0f);
-
 	}
 
 	_shadowmapProcessor->setScene(_scene, _lighting.directional);

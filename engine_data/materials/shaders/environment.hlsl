@@ -35,8 +35,15 @@ VSOutput vertexMain(VSInput vsIn)
 float4 fragmentMain(VSOutput fsIn) : SV_Target0
 {
 	float3 v = normalize(fsIn.direction);
-	float3 env = sampleEnvironment(normalize(fsIn.direction), lightDirection.xyz, 2.0);
-	// float3 env = sampleAtmosphere(v, lightDirection.xyz, lightColor);
-	float3 sunSpot = smoothstep(0.99925, 0.9995, dot(v, lightDirection.xyz));
-	return float4(sunSpot * lightColor + env, 1.0);
+
+	float intersectsPlanet = step(planetIntersection(positionOnPlanet, v), 0.0);
+	float sunSpot = smoothstep(0.9995, 0.99975, dot(v, lightDirection.xyz));
+	float3 sunColor = lightColor * (sunSpot * intersectsPlanet);
+
+	float a = atmosphereIntersection(positionOnPlanet, lightDirection.xyz);
+	sunColor *= outScattering(positionOnPlanet, positionOnPlanet + a * lightDirection.xyz);
+
+	float3 env = sampleEnvironment(normalize(fsIn.direction), lightDirection.xyz, 0.0);
+	// env = sampleAtmosphere(v, lightDirection.xyz, lightColor);
+	return float4(env + sunColor, 1.0);
 }

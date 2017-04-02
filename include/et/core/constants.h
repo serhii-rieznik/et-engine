@@ -89,6 +89,10 @@
 #	define ET_KEY_2						50
 #	define ET_KEY_3						51
 #	define ET_KEY_4						52
+#	define ET_KEY_GRAY_PLUS				107
+#	define ET_KEY_GRAY_MINUS			109
+#	define ET_KEY_GRAY_MULTIPLY			106
+#	define ET_KEY_GRAY_DIVIDE			111
 #
 #endif
 
