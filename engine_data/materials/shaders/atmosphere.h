@@ -1,12 +1,12 @@
-#define inScatteringSamples 16
-#define outScatteringSamples 16
-#define atmosphereHeight 122e+3
-#define height 2.0
+#define inScatteringSamples 32
+#define outScatteringSamples 32
+#define atmosphereHeight 50e+3
+#define height 5.0
 #define Re 6371e+3
 #define Ra (Re + atmosphereHeight) 
 #define H0r (7994.0)
 #define H0m (1200.0)
-#define mieG 0.85
+#define mieG 0.785
 #define betaR float3(6.554e-6, 1.428e-5, 2.853e-5)
 #define betaM float3(6.894e-6, 1.018e-5, 1.438e-5)
 #define positionOnPlanet float3(0.0, Re + height, 0.0)
