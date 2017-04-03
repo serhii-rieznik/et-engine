@@ -28,6 +28,7 @@ public:
 
 	void init(const RenderContextParameters& params) override;
 	void shutdown() override;
+	void destroy() override;
 
 	void resize(const vec2i&) override;
 

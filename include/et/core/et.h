@@ -148,6 +148,10 @@ using Vector = std::vector<T,
 	SharedBlockAllocatorSTDProxy<T>>;
 
 template <typename T>
+using List = std::list<T,
+	SharedBlockAllocatorSTDProxy<T>>;
+
+template <typename T>
 using Set = std::set<T, std::less<T>,
 	SharedBlockAllocatorSTDProxy<T>>;
 

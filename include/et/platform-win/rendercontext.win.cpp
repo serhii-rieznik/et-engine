@@ -97,7 +97,7 @@ void RenderContext::init()
 void RenderContext::shutdown()
 {
 	renderhelper::release();
-	_renderer->shutdown();
+	_renderer->destroy();
 }
 
 const vec2i& RenderContext::size() const

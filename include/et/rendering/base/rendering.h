@@ -291,6 +291,8 @@ enum : uint32_t
 	/*
 	 * Common values maxes
 	 */
+	RendererFrameCount = 3,
+
 	BlendFunction_max = static_cast<uint32_t>(BlendFunction::max),
 	BlendOperation_max = static_cast<uint32_t>(BlendOperation::max),
 	CompareFunction_max = static_cast<uint32_t>(CompareFunction::max),

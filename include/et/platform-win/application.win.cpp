@@ -47,6 +47,8 @@ void Application::platformFinalize()
 
 	_backgroundThread.stop();
 	_backgroundThread.join();
+
+	_renderContext->renderer()->shutdown();
 	sharedObjectFactory().deleteObject(_delegate);
 
 	if (_parameters.shouldPreserveRenderContext)

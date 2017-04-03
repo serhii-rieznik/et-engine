@@ -198,20 +198,27 @@ void VulkanSwapchain::createSizeDependentResources(VulkanState& vulkan, const ve
 
 	if (currentSwapchain != nullptr)
 	{
-		for (RenderTarget& rt : images)
+		for (Frame& frame : frames)
 		{
-			vkDestroyImageView(vulkan.device, rt.colorView, nullptr);
-			rt.colorView = nullptr;
+			vkDestroyImageView(vulkan.device, frame.colorView, nullptr);
+			frame.colorView = nullptr;
 
-			vkFreeCommandBuffers(vulkan.device, vulkan.commandPool, 1, &rt.barrierFromPresent);
-			rt.barrierFromPresent = nullptr;
-			vkFreeCommandBuffers(vulkan.device, vulkan.commandPool, 1, &rt.barrierToPresent);
-			rt.barrierToPresent = nullptr;
+			vkFreeCommandBuffers(vulkan.device, vulkan.commandPool, 1, &frame.barrierFromPresent);
+			frame.barrierFromPresent = nullptr;
+			vkFreeCommandBuffers(vulkan.device, vulkan.commandPool, 1, &frame.barrierToPresent);
+			frame.barrierToPresent = nullptr;
 
-			vkDestroySemaphore(vulkan.device, rt.semaphoreFromPresent, nullptr);
-			rt.semaphoreFromPresent = nullptr;
-			vkDestroySemaphore(vulkan.device, rt.semaphoreToPresent, nullptr);
-			rt.semaphoreToPresent = nullptr;
+			vkDestroySemaphore(vulkan.device, frame.semaphoreFromPresent, nullptr);
+			frame.semaphoreFromPresent = nullptr;
+			vkDestroySemaphore(vulkan.device, frame.semaphoreToPresent, nullptr);
+			frame.semaphoreToPresent = nullptr;
+			vkDestroySemaphore(vulkan.device, frame.imageAcquired, nullptr);
+			frame.imageAcquired = nullptr;
+			vkDestroySemaphore(vulkan.device, frame.submitCompleted, nullptr);
+			frame.submitCompleted = nullptr;
+
+			vkDestroyFence(vulkan.device, frame.imageFence, nullptr);
+			frame.imageFence = nullptr;
 		}
         
         vkDestroyImageView(vulkan.device, depthBuffer.depthView, nullptr);
@@ -227,54 +234,63 @@ void VulkanSwapchain::createSizeDependentResources(VulkanState& vulkan, const ve
 	}
 
 	Vector<VkImage> swapchainImages = enumerateVulkanObjects<VkImage>(vulkan, vkGetSwapchainImagesKHRWrapper);
-	images.resize(swapchainImages.size());
+	frames.resize(swapchainImages.size());
 
-	vulkan.executeServiceCommands([&](VkCommandBuffer cmdBuffer)
+	uint32_t i = 0;
+	VkImage* swapchainImagesPtr = swapchainImages.data();
+	for (Frame& frame : frames)
 	{
-		VkImage* swapchainImagesPtr = swapchainImages.data();
-		for (RenderTarget& rt : images)
-		{
-			rt.color = *swapchainImagesPtr++;
-			rt.colorView = createImageView(vulkan, rt.color, VK_IMAGE_ASPECT_COLOR_BIT, surfaceFormat.format);
+		frame.color = *swapchainImagesPtr++;
+		frame.colorView = createImageView(vulkan, frame.color, VK_IMAGE_ASPECT_COLOR_BIT, surfaceFormat.format);
 
-			VkCommandBufferAllocateInfo allocInfo = { VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO };
-			allocInfo.commandBufferCount = 1;
-			allocInfo.commandPool = vulkan.commandPool;
-			allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-			VULKAN_CALL(vkAllocateCommandBuffers(vulkan.device, &allocInfo, &rt.barrierFromPresent));
-			VULKAN_CALL(vkAllocateCommandBuffers(vulkan.device, &allocInfo, &rt.barrierToPresent));
+		VkCommandBufferAllocateInfo allocInfo = { VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO };
+		allocInfo.commandBufferCount = 1;
+		allocInfo.commandPool = vulkan.commandPool;
+		allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+		VULKAN_CALL(vkAllocateCommandBuffers(vulkan.device, &allocInfo, &frame.barrierFromPresent));
+		VULKAN_CALL(vkAllocateCommandBuffers(vulkan.device, &allocInfo, &frame.barrierToPresent));
 
-			VkCommandBufferBeginInfo beginInfo = { VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO };
-			beginInfo.flags = VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT;
-			
-			VULKAN_CALL(vkBeginCommandBuffer(rt.barrierFromPresent, &beginInfo));
-			vulkan::imageBarrier(vulkan, rt.barrierFromPresent, rt.color, VK_IMAGE_ASPECT_COLOR_BIT,
-				0, VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-				VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT);
-			VULKAN_CALL(vkEndCommandBuffer(rt.barrierFromPresent));
+		VkCommandBufferBeginInfo beginInfo = { VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO };
+		beginInfo.flags = VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT;
 
-			VULKAN_CALL(vkBeginCommandBuffer(rt.barrierToPresent, &beginInfo));
-			vulkan::imageBarrier(vulkan, rt.barrierToPresent, rt.color, VK_IMAGE_ASPECT_COLOR_BIT,
-				0, VK_ACCESS_MEMORY_READ_BIT, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
-				VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT);
-			VULKAN_CALL(vkEndCommandBuffer(rt.barrierToPresent));
+		VULKAN_CALL(vkBeginCommandBuffer(frame.barrierFromPresent, &beginInfo));
+		vulkan::imageBarrier(vulkan, frame.barrierFromPresent, frame.color, VK_IMAGE_ASPECT_COLOR_BIT,
+			0, VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+			VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT);
+		VULKAN_CALL(vkEndCommandBuffer(frame.barrierFromPresent));
 
-			VkSemaphoreCreateInfo semaphoreInfo = { VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO };
-			VULKAN_CALL(vkCreateSemaphore(vulkan.device, &semaphoreInfo, nullptr, &rt.semaphoreFromPresent));
-			VULKAN_CALL(vkCreateSemaphore(vulkan.device, &semaphoreInfo, nullptr, &rt.semaphoreToPresent));
+		VULKAN_CALL(vkBeginCommandBuffer(frame.barrierToPresent, &beginInfo));
+		vulkan::imageBarrier(vulkan, frame.barrierToPresent, frame.color, VK_IMAGE_ASPECT_COLOR_BIT,
+			0, VK_ACCESS_MEMORY_READ_BIT, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
+			VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT);
+		VULKAN_CALL(vkEndCommandBuffer(frame.barrierToPresent));
+
+		VkSemaphoreCreateInfo semaphoreInfo = { VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO };
+		VULKAN_CALL(vkCreateSemaphore(vulkan.device, &semaphoreInfo, nullptr, &frame.semaphoreFromPresent));
+		VULKAN_CALL(vkCreateSemaphore(vulkan.device, &semaphoreInfo, nullptr, &frame.semaphoreToPresent));
+		VULKAN_CALL(vkCreateSemaphore(vulkan.device, &semaphoreInfo, nullptr, &frame.imageAcquired));
+		VULKAN_CALL(vkCreateSemaphore(vulkan.device, &semaphoreInfo, nullptr, &frame.submitCompleted));
+
+		VkFenceCreateInfo fenceInfo = { VK_STRUCTURE_TYPE_FENCE_CREATE_INFO };
+		fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
+		VULKAN_CALL(vkCreateFence(vulkan.device, &fenceInfo, nullptr, &frame.imageFence));
+	}
+	
+	vulkan.executeServiceCommands([&](VkCommandBuffer cmdBuffer) {
+		if (createDepthImage(vulkan, depthBuffer.depth, depthBuffer.depthMemory, cmdBuffer)) {
+			depthBuffer.depthView = createImageView(vulkan, depthBuffer.depth, VK_IMAGE_ASPECT_DEPTH_BIT, depthFormat);
 		}
-        
-		if (createDepthImage(vulkan, depthBuffer.depth, depthBuffer.depthMemory, cmdBuffer))
-        {
-            depthBuffer.depthView = createImageView(vulkan, depthBuffer.depth, VK_IMAGE_ASPECT_DEPTH_BIT, depthFormat);
-        }
-    });
+	});
 }
 
 void VulkanSwapchain::acquireNextImage(VulkanState& vulkan)
 {
+	VkFence currentFence = frames[frameIndex].imageFence;
+	VULKAN_CALL(vkWaitForFences(vulkan.device, 1, &currentFence, VK_TRUE, UINT64_MAX));
+	VULKAN_CALL(vkResetFences(vulkan.device, 1, &currentFence));
+	
 	VULKAN_CALL(vkAcquireNextImageKHR(vulkan.device, swapchain, UINT64_MAX,
-		vulkan.semaphores.imageAvailable, nullptr, &currentImageIndex));
+		frames[frameIndex].imageAcquired, nullptr, &swapchainImageIndex));
 }
 
 void VulkanSwapchain::present(VulkanState& vulkan)
@@ -282,10 +298,13 @@ void VulkanSwapchain::present(VulkanState& vulkan)
 	VkPresentInfoKHR info = { VK_STRUCTURE_TYPE_PRESENT_INFO_KHR };
 	info.swapchainCount = 1;
 	info.pSwapchains = &swapchain;
-	info.pImageIndices = &currentImageIndex;
+	info.pImageIndices = &swapchainImageIndex;
 	info.waitSemaphoreCount = 1;
-	info.pWaitSemaphores = &vulkan.semaphores.renderComplete;
+	info.pWaitSemaphores = &frames[frameIndex].submitCompleted;
 	VULKAN_CALL(vkQueuePresentKHR(vulkan.queue, &info));
+	
+	uint32_t currentFrame = frameIndex;
+	frameIndex = (frameIndex + 1) % RendererFrameCount;
 }
 
 namespace vulkan

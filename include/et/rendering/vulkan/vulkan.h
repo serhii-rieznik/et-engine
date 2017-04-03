@@ -40,26 +40,36 @@ struct VulkanSwapchain
 	VkSurfaceFormatKHR surfaceFormat { };
 	VkFormat depthFormat = VK_FORMAT_D32_SFLOAT;
 
-	struct RenderTarget
+	struct Frame
 	{
 		VkImage color = nullptr;
 		VkImageView colorView = nullptr;
+
 		VkCommandBuffer barrierFromPresent = nullptr;
-		VkSemaphore semaphoreFromPresent = nullptr;
 		VkCommandBuffer barrierToPresent = nullptr;
+
+		VkFence imageFence = nullptr;
+
+		VkSemaphore imageAcquired = nullptr;
+		VkSemaphore semaphoreFromPresent = nullptr;
 		VkSemaphore semaphoreToPresent = nullptr;
+		VkSemaphore submitCompleted = nullptr;
 	};
-    struct DepthBuffer
+    
+	struct DepthBuffer
     {
         VkImage depth = nullptr;
         VkImageView depthView = nullptr;
         VkDeviceMemory depthMemory = nullptr;
     } depthBuffer;
-	Vector<RenderTarget> images;
-	uint32_t currentImageIndex = static_cast<uint32_t>(-1);
+	
+	Vector<Frame> frames;
+	uint32_t frameIndex = 0;
 
-	const RenderTarget& currentRenderTarget() const
-		{ return images.at(currentImageIndex); }
+	uint32_t swapchainImageIndex = static_cast<uint32_t>(-1);
+
+	const Frame& currentFrame() const
+		{ return frames.at(frameIndex); }
 };
 
 struct VulkanState
@@ -77,16 +87,9 @@ struct VulkanState
 	VkPipelineCache pipelineCache = nullptr;
 	VkCommandBuffer serviceCommandBuffer = nullptr;
 
-	struct Semaphores
-	{
-		VkSemaphore imageAvailable = nullptr;
-		VkSemaphore renderComplete = nullptr;
-	} semaphores;
-	
 	Vector<VkQueueFamilyProperties> queueProperties;
 	uint32_t graphicsQueueIndex = static_cast<uint32_t>(-1);
 	uint32_t presentQueueIndex = static_cast<uint32_t>(-1);
-
 
 	VulkanSwapchain swapchain;
 
@@ -108,10 +111,11 @@ struct VulkanShaderModules
 struct VulkanNativeRenderPass
 {
 	VkRenderPass renderPass = nullptr;
-	VkCommandBuffer commandBuffer { };
 	VkDescriptorSetLayout dynamicDescriptorSetLayout = nullptr;
 	VkDescriptorSet dynamicDescriptorSet = nullptr;
 	VkSemaphore semaphore = nullptr;
+
+	std::array<VkCommandBuffer, RendererFrameCount> commandBuffers { };
 };
 
 enum DescriptorSetClass : uint32_t

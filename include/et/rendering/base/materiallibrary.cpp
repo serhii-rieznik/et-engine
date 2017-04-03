@@ -76,10 +76,7 @@ Material::Pointer MaterialLibrary::loadMaterial(const std::string& fileName)
 		for (const auto& cfg : material->configurations())
 		{
 			for (const std::string& fn : cfg.second.usedFiles)
-			{
 				material->addOrigin(fn);
-				log::info("Used file: %s", fn.c_str());
-			}
 		}
 
 		_cache.manage(material, MaterialReloaded::Pointer::create());

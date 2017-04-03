@@ -89,7 +89,6 @@ public:
 	void executeSingleRenderBatch(const RenderBatch::Pointer&, const RenderPassBeginInfo&);
 
 	const ConstructionInfo& info() const;
-	ConstantBuffer& dynamicConstantBuffer();
 
 	void setSharedTexture(MaterialTexture, const Texture::Pointer&, const Sampler::Pointer&);
 	
@@ -110,7 +109,6 @@ protected:
 private:
 	RenderInterface* _renderer = nullptr;
 	ConstructionInfo _info;
-	ConstantBuffer _dynamicConstantBuffer;
 	SharedTexturesSet _sharedTextures;
 	VariablesHolder _sharedVariables;
 };

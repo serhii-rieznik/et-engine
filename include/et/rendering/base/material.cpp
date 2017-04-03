@@ -400,8 +400,7 @@ void MaterialInstance::buildConstantBuffer(const std::string& pt)
 
 	ConstantBufferEntry::Pointer entry = _renderer->sharedConstantBuffer().staticAllocate(reflection.materialVariablesBufferSize);
 
-	auto setFunc = [&, this](const OptionalValue& p) 
-	{
+	auto setFunc = [&, this](const OptionalValue& p) {
 		if (p.isSet() && reflection.materialVariables[p.binding].enabled)
 			memcpy(entry->data() + reflection.materialVariables[p.binding].offset, p.data, p.size);
 	};

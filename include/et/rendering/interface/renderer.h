@@ -37,13 +37,14 @@ public:
 	MaterialLibrary& sharedMaterialLibrary()
 		{ return _sharedMaterialLibrary; }
 
-	ConstantBuffer& sharedConstantBuffer() 
+	ConstantBuffer& sharedConstantBuffer()
 		{ return _sharedConstantBuffer; }
 
 	virtual RenderingAPI api() const = 0;
 
 	virtual void init(const RenderContextParameters& params) = 0;
 	virtual void shutdown() = 0;
+	virtual void destroy() = 0;
 
 	virtual void resize(const vec2i&) = 0;
 

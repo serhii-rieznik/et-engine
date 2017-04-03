@@ -60,7 +60,7 @@ class ConstantBuffer
 public:
 	enum
 	{
-		Capacity = 16 * 1024 * 1024,
+		Capacity = 32 * 1024 * 1024,
 		Granularity = 256
 	};
 

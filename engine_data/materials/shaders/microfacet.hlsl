@@ -52,7 +52,7 @@ struct VSOutput
 
 VSOutput vertexMain(VSInput vsIn)
 {
-    float4 transformedPosition = mul(float4(10.0 * vsIn.position, 1.0), worldTransform);
+    float4 transformedPosition = mul(float4(vsIn.position, 1.0), worldTransform);
     
     VSOutput vsOut;
     vsOut.texCoord0 = vsIn.texCoord0;

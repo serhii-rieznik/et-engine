@@ -17,7 +17,7 @@ public:
 	Buffer::Pointer buffer;
 	BinaryDataStorage heapInfo;
 	BinaryDataStorage localData;
-	Vector<ConstantBufferEntry::Pointer> allocations;
+	List<ConstantBufferEntry::Pointer> allocations;
 	bool modified = false;
 
 	const ConstantBufferEntry::Pointer& internalAlloc(uint32_t, bool);
@@ -42,7 +42,6 @@ void ConstantBuffer::init(RenderInterface* renderer)
 	_private->heap.setAutoCompress(false);
 
 	_private->buffer = renderer->createDataBuffer("shared-const-buffer", Capacity);
-	_private->allocations.reserve(1024);
 }
 
 void ConstantBuffer::shutdown()
@@ -72,15 +71,14 @@ void ConstantBuffer::flush()
 		_private->buffer->unmap();
 		_private->modified = false;
 	}
-
-	Vector<ConstantBufferEntry::Pointer> objectsToRelease;
-	objectsToRelease.reserve(_private->allocations.size());
-
+	
+	bool anyDeleted = false;
 	for (auto i = _private->allocations.begin(); i != _private->allocations.end();)
 	{
-		if ((*i)->isDynamic() || ((*i)->retainCount() == 1))
+		if ((*i)->retainCount() == 1)
 		{
-			objectsToRelease.emplace_back(*i);
+			anyDeleted = true;
+			_private->internalFree(*i);
 			i = _private->allocations.erase(i);
 		}
 		else
@@ -88,14 +86,11 @@ void ConstantBuffer::flush()
 			++i;
 		}
 	}
-	
-	for (const ConstantBufferEntry::Pointer& allocation : objectsToRelease)
-	{
-		ET_ASSERT(allocation->isDynamic() || (allocation->retainCount() == 1));
-		_private->internalFree(allocation);
-	}
 
-	_private->heap.compress();
+	if (anyDeleted)
+	{
+		_private->heap.compress();
+	}
 }
 
 const ConstantBufferEntry::Pointer& ConstantBuffer::staticAllocate(uint32_t size)

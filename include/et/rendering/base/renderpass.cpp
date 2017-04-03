@@ -10,6 +10,7 @@
 
 namespace et
 {
+
 const std::string RenderPass::kPassNameDefault = "default";
 const std::string RenderPass::kPassNameDepth = "depth";
 const std::string RenderPass::kPassNameUI = "ui";
@@ -17,22 +18,15 @@ const std::string RenderPass::kPassNameUI = "ui";
 RenderPass::RenderPass(RenderInterface* renderer, const ConstructionInfo& info) :
 	_renderer(renderer), _info(info)
 {
-	_dynamicConstantBuffer.init(renderer);
 }
 
 RenderPass::~RenderPass()
 {
-	_dynamicConstantBuffer.shutdown();
 }
 
 const RenderPass::ConstructionInfo& RenderPass::info() const
 {
 	return _info;
-}
-
-ConstantBuffer& RenderPass::dynamicConstantBuffer()
-{
-	return _dynamicConstantBuffer;
 }
 
 void RenderPass::setSharedTexture(MaterialTexture texId, const Texture::Pointer& tex, const Sampler::Pointer& smp)
