@@ -72,12 +72,10 @@ void ConstantBuffer::flush()
 		_private->modified = false;
 	}
 	
-	bool anyDeleted = false;
 	for (auto i = _private->allocations.begin(); i != _private->allocations.end();)
 	{
 		if ((*i)->retainCount() == 1)
 		{
-			anyDeleted = true;
 			_private->internalFree(*i);
 			i = _private->allocations.erase(i);
 		}
@@ -87,10 +85,7 @@ void ConstantBuffer::flush()
 		}
 	}
 
-	if (anyDeleted)
-	{
-		_private->heap.compress();
-	}
+	_private->heap.compress();
 }
 
 const ConstantBufferEntry::Pointer& ConstantBuffer::staticAllocate(uint32_t size)
