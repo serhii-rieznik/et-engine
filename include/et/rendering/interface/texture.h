@@ -29,6 +29,13 @@ public:
 		RenderTarget = 1 << 0,
 		CopySource = 1 << 1,
 		CopyDestination = 1 << 2,
+		Readback = 1 << 3,
+	};
+
+	enum MapOptions : uint32_t
+	{
+		Readable = 1 << 0,
+		Writeable = 1 << 1,
 	};
 
 	struct Description
@@ -93,6 +100,9 @@ public:
 	virtual void setImageData(const BinaryDataStorage&) = 0;
 	virtual void updateRegion(const vec2i& pos, const vec2i& size, const BinaryDataStorage&) = 0;
 
+	virtual uint8_t* map(uint32_t level, uint32_t face, uint32_t options) = 0;
+	virtual void unmap() = 0;
+
 private:
 	Description _desc;
 };
@@ -146,14 +156,11 @@ inline uint32_t Texture::Description::dataOffsetForLayer(uint32_t layer, uint32_
 {
 	if (dataLayout == TextureDataLayout::FacesFirst)
 	{
-		return dataSizeForAllMipLevels() * ((layer < layersCount) ?
-			layer : (layersCount > 0 ? layersCount - 1 : 0));
+		return dataSizeForAllMipLevels() * ((layer < layersCount) ? layer : (layersCount > 0 ? layersCount - 1 : 0));
 	}
 	else
 	{
-		return dataSizeForMipLevel(level) * ((layer < layersCount) ?
-			layer : (layersCount > 0 ? layersCount - 1 : 0));
-
+		return dataSizeForMipLevel(level) * ((layer < layersCount) ? layer : (layersCount > 0 ? layersCount - 1 : 0));
 	}
 }
 
@@ -163,9 +170,10 @@ inline uint32_t Texture::Description::dataSizeForMipLevel(uint32_t level) const
 
 	uint32_t actualSize = static_cast<uint32_t>(sizeForMipLevel(level).square()) * bpp;
 	uint32_t minimumSize = static_cast<uint32_t>(Texture::minCompressedBlockHeight * Texture::minCompressedBlockWidth) * bpp;
-	
-	return isCompressedTextureFormat(format) ? std::max(static_cast<uint32_t>(Texture::minCompressedBlockDataSize),
+	uint32_t size = isCompressedTextureFormat(format) ? std::max(static_cast<uint32_t>(Texture::minCompressedBlockDataSize),
 		std::max(minimumSize, actualSize)) : actualSize;
+	
+	return size * layersCount;
 }
 
 }

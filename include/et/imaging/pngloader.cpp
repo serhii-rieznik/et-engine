@@ -133,10 +133,13 @@ void et::png::loadFromStream(std::istream& source, TextureDescription& desc, boo
 
 	if (channels == 3)
 	{
+		log::warning("Coverting 24bit PNG to 32bit");
+		debug::debugBreak();
+
 		// convert RGB to RGBA
-		auto RGBData = desc.data;
-		const vec3ub* rgb = reinterpret_cast<const vec3ub*>(RGBData.data());
-		vec4ub* rgba = reinterpret_cast<vec4ub*>(desc.data.binary());
+		BinaryDataStorage rgbData = desc.data;
+		vec3ub* rgb = reinterpret_cast<vec3ub*>(rgbData.data());
+		vec4ub* rgba = reinterpret_cast<vec4ub*>(desc.data.data());
 		for (uint32_t i = 0, e = desc.data.size() / 4; i < e; ++i)
 		{
 			*rgba = vec4ub(*rgb, 255);
@@ -212,7 +215,6 @@ void parseFormat(TextureDescription& desc, png_structp pngPtr, png_infop infoPtr
 	if (rowBytes)
 		*rowBytes = png_get_rowbytes(pngPtr, infoPtr);
 
-	bool convertRGBtoRGBA = false;
 	switch (channels)
 	{
 		case 1:
@@ -229,7 +231,6 @@ void parseFormat(TextureDescription& desc, png_structp pngPtr, png_infop infoPtr
 
 		case 3:
 		{
-			convertRGBtoRGBA = true;
 			desc.format = (bpp == 16) ? TextureFormat::RGBA16 : TextureFormat::RGBA8;
 			break;
 		}

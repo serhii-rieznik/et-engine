@@ -27,6 +27,9 @@ public:
 
 	VulkanNativeTexture& nativeTexture();
 	const VulkanNativeTexture& nativeTexture() const;
+	
+	uint8_t* map(uint32_t level, uint32_t face, uint32_t options) override;
+	void unmap() override;
 
 private:
 	ET_DECLARE_PIMPL(VulkanTexture, 384);

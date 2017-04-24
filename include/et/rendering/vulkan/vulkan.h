@@ -79,6 +79,7 @@ struct VulkanState
 
 	VkPhysicalDevice physicalDevice = nullptr;
 	VkPhysicalDeviceProperties physicalDeviceProperties { };
+	VkPhysicalDeviceFeatures physicalDeviceFeatures { };
 
 	VkDevice device = nullptr;
 	VkCommandPool commandPool = nullptr;

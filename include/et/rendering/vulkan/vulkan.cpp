@@ -161,6 +161,8 @@ VkImageView VulkanSwapchain::createImageView(VulkanState& vulkan, VkImage image,
 
 void VulkanSwapchain::createSizeDependentResources(VulkanState& vulkan, const vec2i& sz)
 {
+	VULKAN_CALL(vkDeviceWaitIdle(vulkan.device));
+
 	extent.width = static_cast<uint32_t>(sz.x);
 	extent.height = static_cast<uint32_t>(sz.y);
 
@@ -281,6 +283,8 @@ void VulkanSwapchain::createSizeDependentResources(VulkanState& vulkan, const ve
 			depthBuffer.depthView = createImageView(vulkan, depthBuffer.depth, VK_IMAGE_ASPECT_DEPTH_BIT, depthFormat);
 		}
 	});
+	
+	VULKAN_CALL(vkDeviceWaitIdle(vulkan.device));
 }
 
 void VulkanSwapchain::acquireNextImage(VulkanState& vulkan)

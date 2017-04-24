@@ -35,4 +35,7 @@ public:
 	}
 };
 
+using TextureDescriptionUpdateMethod = void(TextureDescription::Pointer);
+inline void nullTextureDescriptionUpdateMethod(TextureDescription::Pointer) { }
+
 }

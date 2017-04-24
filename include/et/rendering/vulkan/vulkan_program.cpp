@@ -24,15 +24,15 @@ class VulkanProgramPrivate : public VulkanShaderModules
 {
 public:
 	VulkanProgramPrivate(VulkanState& v)
-		: vulkan(v)
-	{
-	}
+		: vulkan(v) { }
 
 	VulkanState& vulkan;
 
 	bool loadCached(uint64_t hash, std::vector<uint32_t>& vert, std::vector<uint32_t>& frag);
 	void saveCached(uint64_t hash, const std::vector<uint32_t>& vert, const std::vector<uint32_t>& frag);
 	void build(const std::vector<uint32_t>& vert, const std::vector<uint32_t>& frag);
+
+	std::string cacheFolder();
 };
 
 VulkanProgram::VulkanProgram(VulkanState& v)
@@ -75,17 +75,17 @@ const VulkanShaderModules& VulkanProgram::shaderModules() const
 bool VulkanProgramPrivate::loadCached(uint64_t hash, std::vector<uint32_t>& vert, std::vector<uint32_t>& frag)
 {
 #if ET_VULKAN_PROGRAM_USE_CACHE
-	const std::string& baseFolder = application().environment().applicationDocumentsFolder();
-	std::string cacheFile;
+	std::string baseFolder = cacheFolder();
+	std::string vertFile;
 	{
 		char buffer[1024] = {};
-		sprintf(buffer, "%s%016llX.vert", baseFolder.c_str(), hash);
+		sprintf(buffer, "%sv-%016llX.spv", baseFolder.c_str(), hash);
 		vertFile = buffer;
 	}
 	std::string fragFile;
 	{
 		char buffer[1024] = {};
-		sprintf(buffer, "%s%016llX.frag", baseFolder.c_str(), hash);
+		sprintf(buffer, "%sf-%016llX.spv", baseFolder.c_str(), hash);
 		fragFile = buffer;
 	}
 
@@ -98,7 +98,6 @@ bool VulkanProgramPrivate::loadCached(uint64_t hash, std::vector<uint32_t>& vert
 		vert.resize(vertSize / sizeof(uint32_t));
 		vertIn.read(reinterpret_cast<char*>(vert.data()), vertSize);
 	}
-	
 	std::ifstream fragIn(fragFile, std::ios::in | std::ios::binary);
 	{
 		uint32_t fragSize = streamSize(fragIn);
@@ -114,17 +113,17 @@ bool VulkanProgramPrivate::loadCached(uint64_t hash, std::vector<uint32_t>& vert
 void VulkanProgramPrivate::saveCached(uint64_t hash, const std::vector<uint32_t>& vert, const std::vector<uint32_t>& frag)
 {
 #if (ET_VULKAN_PROGRAM_USE_CACHE)
-	const std::string& baseFolder = application().environment().applicationDocumentsFolder();
+	std::string baseFolder = cacheFolder();
 	std::string vertFile;
 	{
 		char buffer[1024] = {};
-		sprintf(buffer, "%s%016llX.vert", baseFolder.c_str(), hash);
+		sprintf(buffer, "%sv-%016llX.spv", baseFolder.c_str(), hash);
 		vertFile = buffer;
 	}
 	std::string fragFile;
 	{
 		char buffer[1024] = {};
-		sprintf(buffer, "%s%016llX.frag", baseFolder.c_str(), hash);
+		sprintf(buffer, "%sf-%016llX.spv", baseFolder.c_str(), hash);
 		fragFile = buffer;
 	}
 
@@ -155,6 +154,16 @@ void VulkanProgramPrivate::build(const std::vector<uint32_t>& vert, const std::v
 
 	stageCreateInfo[0].pName = "vertexMain";
 	stageCreateInfo[1].pName = "fragmentMain";
+}
+
+std::string VulkanProgramPrivate::cacheFolder()
+{
+	std::string result = application().environment().applicationDocumentsFolder() + "shadercache/";
+	
+	if (!fileExists(result))
+		createDirectory(result, true);
+
+	return result;
 }
 
 }

@@ -70,7 +70,9 @@ public:
 	virtual Texture::Pointer createTexture(const TextureDescription::Pointer&) = 0;
 	virtual TextureSet::Pointer createTextureSet(const TextureSet::Description&) = 0;
 
-	Texture::Pointer loadTexture(const std::string& fileName, ObjectsCache& cache);
+	Texture::Pointer loadTexture(const std::string& fileName, ObjectsCache& cache, 
+		TextureDescriptionUpdateMethod = nullTextureDescriptionUpdateMethod);
+
 	Texture::Pointer checkersTexture();
 	Texture::Pointer whiteTexture();
 	Texture::Pointer blackTexture();
@@ -110,7 +112,8 @@ private:
 	Sampler::Pointer _clampSampler;
 };
 
-inline Texture::Pointer RenderInterface::loadTexture(const std::string& fileName, ObjectsCache& cache)
+inline Texture::Pointer RenderInterface::loadTexture(const std::string& fileName, ObjectsCache& cache, 
+	TextureDescriptionUpdateMethod update)
 {
 	LoadableObject::Collection existingObjects = cache.findObjects(fileName);
 	if (existingObjects.empty())
@@ -118,6 +121,8 @@ inline Texture::Pointer RenderInterface::loadTexture(const std::string& fileName
 		TextureDescription::Pointer desc = TextureDescription::Pointer::create();
 		if (desc->load(fileName))
 		{
+			update(desc);
+
 			Texture::Pointer texture = createTexture(desc);
 			texture->setOrigin(fileName);
 			cache.manage(texture, ObjectLoader::Pointer());

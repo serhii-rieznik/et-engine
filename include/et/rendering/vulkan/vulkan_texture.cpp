@@ -18,6 +18,8 @@ class VulkanTexturePrivate : public VulkanNativeTexture
 public:
 	VulkanTexturePrivate(VulkanState& v) :
 		VulkanNativeTexture(v) { }
+	
+	uint32_t mappedState = 0;
 };
 
 VulkanTexture::VulkanTexture(VulkanState& vulkan, const Description& desc, const BinaryDataStorage& data)
@@ -37,7 +39,7 @@ VulkanTexture::VulkanTexture(VulkanState& vulkan, const Description& desc, const
 	info.mipLevels = desc.levelCount;
 	info.samples = VK_SAMPLE_COUNT_1_BIT;
 	info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-	info.tiling = VK_IMAGE_TILING_OPTIMAL;
+	info.tiling = (desc.flags & Texture::Flags::Readback) ? VK_IMAGE_TILING_LINEAR : VK_IMAGE_TILING_OPTIMAL;
 	info.usage = VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
 
 	switch (desc.target)
@@ -74,7 +76,9 @@ VulkanTexture::VulkanTexture(VulkanState& vulkan, const Description& desc, const
 
 	vkGetImageMemoryRequirements(vulkan.device, _private->image, &_private->memoryRequirements);
 
-	VkMemoryPropertyFlags memoryProperties = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
+	VkMemoryPropertyFlags memoryProperties = (desc.flags & Texture::Flags::Readback) ?
+		(VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT) :
+		(VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
 	VkMemoryAllocateInfo allocInfo = { VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO };
 	allocInfo.allocationSize = _private->memoryRequirements.size;
@@ -193,6 +197,46 @@ void VulkanTexture::updateRegion(const vec2i & pos, const vec2i & size, const Bi
 			VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, 
 			VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0, 1);
 	});
+}
+
+uint8_t* VulkanTexture::map(uint32_t level, uint32_t layer, uint32_t options)
+{
+	// TODO : more intelligent mapping
+	ET_ASSERT(description().flags & Texture::Flags::Readback);
+	ET_ASSERT(_private->mappedState == 0);
+	_private->mappedState = options;
+	
+	VkDeviceSize offset = description().dataOffsetForLayer(layer, level);
+	VkDeviceSize dataSize = description().dataSizeForMipLevel(level) / description().layersCount;
+
+	_private->vulkan.executeServiceCommands([&](VkCommandBuffer cmdBuffer)
+	{
+		vulkan::imageBarrier(_private->vulkan, cmdBuffer, _private->image,
+			_private->aspect, 0, VK_ACCESS_HOST_READ_BIT | VK_ACCESS_HOST_WRITE_BIT,
+			VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_GENERAL,
+			VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,
+			0, description().levelCount);
+	});
+	
+	void* mappedMemory = nullptr;
+	vkMapMemory(_private->vulkan.device, _private->memory, offset, dataSize, 0, &mappedMemory);
+	return reinterpret_cast<uint8_t*>(mappedMemory);
+}
+
+void VulkanTexture::unmap()
+{
+	ET_ASSERT(_private->mappedState != 0);
+	vkUnmapMemory(_private->vulkan.device, _private->memory);
+
+	_private->vulkan.executeServiceCommands([&](VkCommandBuffer cmdBuffer)
+	{
+		vulkan::imageBarrier(_private->vulkan, cmdBuffer, _private->image,
+			_private->aspect, VK_ACCESS_HOST_READ_BIT | VK_ACCESS_HOST_WRITE_BIT, VK_ACCESS_SHADER_READ_BIT,
+			VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+			VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,
+			0, description().levelCount);
+	});
+	_private->mappedState = 0;
 }
 
 const VulkanNativeTexture& VulkanTexture::nativeTexture() const

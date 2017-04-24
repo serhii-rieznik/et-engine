@@ -138,6 +138,7 @@ void VulkanRenderer::init(const RenderContextParameters& params)
 
 	_private->physicalDevice = physicalDevices.front();
 	vkGetPhysicalDeviceProperties(_private->physicalDevice, &_private->physicalDeviceProperties);
+	vkGetPhysicalDeviceFeatures(_private->physicalDevice, &_private->physicalDeviceFeatures);
 
 	_private->queueProperties = enumerateVulkanObjects<VkQueueFamilyProperties>(_private->physicalDevice, vkGetPhysicalDeviceQueueFamilyProperties);
 	ET_ASSERT(!_private->queueProperties.empty());
@@ -161,11 +162,15 @@ void VulkanRenderer::init(const RenderContextParameters& params)
 
 	Vector<const char*> deviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
 
+	VkPhysicalDeviceFeatures deviceFeatures = { };
+	deviceFeatures.samplerAnisotropy = VK_TRUE;
+
 	VkDeviceCreateInfo deviceCreateInfo = { VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO };
 	deviceCreateInfo.queueCreateInfoCount = 1;
 	deviceCreateInfo.pQueueCreateInfos = &queueCreateInfo;
 	deviceCreateInfo.enabledExtensionCount = 1;
 	deviceCreateInfo.ppEnabledExtensionNames = deviceExtensions.data();
+	deviceCreateInfo.pEnabledFeatures = &deviceFeatures;
 	VULKAN_CALL(vkCreateDevice(_private->physicalDevice, &deviceCreateInfo, nullptr, &_private->device));
 
 	VkCommandPoolCreateInfo cmdPoolCreateInfo = { VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO };

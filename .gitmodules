@@ -1,6 +1,6 @@
 [submodule "include/external/glslang"]
 	path = include/external/glslang
-	url = https://github.com/KhronosGroup/glslang.git
+url=https://github.com/sergeyreznik/glslang.git
 [submodule "include/external/spirvcross"]
 	path = include/external/spirvcross
 	url = https://github.com/KhronosGroup/SPIRV-Cross.git
