@@ -13,9 +13,16 @@
 #include <et/rendering/vulkan/vulkan.h>
 #include <et/app/application.h>
 #include <et/core/tools.h>
+#include <et/core/serialization.h>
 #include <fstream>
 
-#define ET_VULKAN_PROGRAM_USE_CACHE 0
+#define ET_VULKAN_PROGRAM_USE_CACHE 1
+
+const uint32_t programCacheVersion = 1;
+const uint32_t programCacheHeader = 'PROG';
+const uint32_t programCacheVertex = 'VERT';
+const uint32_t programCacheFragment = 'FRAG';
+const uint32_t programCacheReflection = 'REFL';
 
 namespace et
 {
@@ -28,8 +35,8 @@ public:
 
 	VulkanState& vulkan;
 
-	bool loadCached(uint64_t hash, std::vector<uint32_t>& vert, std::vector<uint32_t>& frag);
-	void saveCached(uint64_t hash, const std::vector<uint32_t>& vert, const std::vector<uint32_t>& frag);
+	bool loadCached(uint64_t hash, std::vector<uint32_t>& vert, std::vector<uint32_t>& frag, Program::Reflection& reflection);
+	void saveCached(uint64_t hash, const std::vector<uint32_t>& vert, const std::vector<uint32_t>& frag, const Program::Reflection& reflection);
 	void build(const std::vector<uint32_t>& vert, const std::vector<uint32_t>& frag);
 
 	std::string cacheFolder();
@@ -53,16 +60,31 @@ VulkanProgram::~VulkanProgram()
 
 void VulkanProgram::build(const std::string& source)
 {
-	bool canBuild = false;
 	std::vector<uint32_t> vertexBin;
 	std::vector<uint32_t> fragmentBin;
+	
 	std::hash<std::string> sourceHash;
 	uint64_t hsh = sourceHash(source);
 
-	bool cacheLoaded = _private->loadCached(hsh, vertexBin, fragmentBin);
-	if (cacheLoaded || hlslToSPIRV(source, vertexBin, fragmentBin, _reflection))
+	bool canBuild = false;
+	
+	if (_private->loadCached(hsh, vertexBin, fragmentBin, _reflection))
 	{
-		_private->saveCached(hsh, vertexBin, fragmentBin);
+		canBuild = true;
+	}
+	else 
+	{
+		vertexBin.clear();
+		fragmentBin.clear();
+		canBuild = hlslToSPIRV(source, vertexBin, fragmentBin, _reflection);
+		if (canBuild)
+		{
+			_private->saveCached(hsh, vertexBin, fragmentBin, _reflection);
+		}
+	}
+	
+	if (canBuild)
+	{
 		_private->build(vertexBin, fragmentBin);
 	}
 }
@@ -72,66 +94,78 @@ const VulkanShaderModules& VulkanProgram::shaderModules() const
 	return *(_private);
 }
 
-bool VulkanProgramPrivate::loadCached(uint64_t hash, std::vector<uint32_t>& vert, std::vector<uint32_t>& frag)
+bool VulkanProgramPrivate::loadCached(uint64_t hash, std::vector<uint32_t>& vert, std::vector<uint32_t>& frag,
+	Program::Reflection& reflection)
 {
 #if ET_VULKAN_PROGRAM_USE_CACHE
+	char buffer[1024] = {};
 	std::string baseFolder = cacheFolder();
-	std::string vertFile;
-	{
-		char buffer[1024] = {};
-		sprintf(buffer, "%sv-%016llX.spv", baseFolder.c_str(), hash);
-		vertFile = buffer;
-	}
-	std::string fragFile;
-	{
-		char buffer[1024] = {};
-		sprintf(buffer, "%sf-%016llX.spv", baseFolder.c_str(), hash);
-		fragFile = buffer;
-	}
+	sprintf(buffer, "%s%016llX.program.cache", baseFolder.c_str(), hash);
+	std::string cacheFile(buffer);
 
-	if (!fileExists(vertFile) || !fileExists(fragFile))
+	if (!fileExists(cacheFile))
 		return false;
 
-	std::ifstream vertIn(vertFile, std::ios::in | std::ios::binary);
-	{
-		uint32_t vertSize = streamSize(vertIn);
-		vert.resize(vertSize / sizeof(uint32_t));
-		vertIn.read(reinterpret_cast<char*>(vert.data()), vertSize);
-	}
-	std::ifstream fragIn(fragFile, std::ios::in | std::ios::binary);
-	{
-		uint32_t fragSize = streamSize(fragIn);
-		frag.resize(fragSize / sizeof(uint32_t));
-		fragIn.read(reinterpret_cast<char*>(frag.data()), fragSize);
-	}
-	return !(vertIn.fail() && fragIn.fail());
+	std::ifstream file(cacheFile, std::ios::in | std::ios::binary);
+	uint32_t header = deserializeUInt32(file);
+	if (header != programCacheHeader)
+		return false;
+	
+	uint32_t version = deserializeUInt32(file);
+	if (version > programCacheVersion)
+		return false;
+
+	uint32_t vertexId = deserializeUInt32(file);
+	if (vertexId != programCacheVertex)
+		return false;
+
+	uint32_t vertexSize = deserializeUInt32(file);
+	vert.resize(vertexSize);
+	file.read(reinterpret_cast<char*>(vert.data()), vertexSize * sizeof(uint32_t));
+
+	uint32_t fragmentId = deserializeUInt32(file);
+	if (fragmentId != programCacheFragment)
+		return false;
+
+	uint32_t fragmentSize = deserializeUInt32(file);
+	frag.resize(fragmentSize);
+	file.read(reinterpret_cast<char*>(frag.data()), fragmentSize * sizeof(uint32_t));
+
+	uint32_t reflectionId = deserializeUInt32(file);
+	if (reflectionId != programCacheReflection)
+		return false;
+
+	reflection.deserialize(file);
+	return true;
+
 #else
 	return false;
 #endif
 }
 
-void VulkanProgramPrivate::saveCached(uint64_t hash, const std::vector<uint32_t>& vert, const std::vector<uint32_t>& frag)
+void VulkanProgramPrivate::saveCached(uint64_t hash, const std::vector<uint32_t>& vert, const std::vector<uint32_t>& frag, 
+	const Program::Reflection& reflection)
 {
 #if (ET_VULKAN_PROGRAM_USE_CACHE)
+	char buffer[1024] = {};
 	std::string baseFolder = cacheFolder();
-	std::string vertFile;
-	{
-		char buffer[1024] = {};
-		sprintf(buffer, "%sv-%016llX.spv", baseFolder.c_str(), hash);
-		vertFile = buffer;
-	}
-	std::string fragFile;
-	{
-		char buffer[1024] = {};
-		sprintf(buffer, "%sf-%016llX.spv", baseFolder.c_str(), hash);
-		fragFile = buffer;
-	}
+	sprintf(buffer, "%s%016llX.program.cache", baseFolder.c_str(), hash);
+	std::string cacheFile(buffer);
 
-	std::ofstream vertOut(vertFile, std::ios::out | std::ios::binary);
-	vertOut.write(reinterpret_cast<const char*>(vert.data()), vert.size() * sizeof(uint32_t));
+	std::ofstream file(cacheFile, std::ios::out | std::ios::binary);
+	serializeUInt32(file, programCacheHeader);
+	serializeUInt32(file, programCacheVersion);
+	
+	serializeUInt32(file, programCacheVertex);
+	serializeUInt32(file, static_cast<uint32_t>(vert.size()));
+	file.write(reinterpret_cast<const char*>(vert.data()), vert.size() * sizeof(uint32_t));
 
-	std::ofstream fragOut(fragFile, std::ios::out | std::ios::binary);
-	fragOut.write(reinterpret_cast<const char*>(frag.data()), frag.size() * sizeof(uint32_t));
+	serializeUInt32(file, programCacheFragment);
+	serializeUInt32(file, static_cast<uint32_t>(frag.size()));
+	file.write(reinterpret_cast<const char*>(frag.data()), frag.size() * sizeof(uint32_t));
+
+	serializeUInt32(file, programCacheReflection);
+	reflection.serialize(file);
 #endif
 }
 

@@ -66,4 +66,95 @@ void Program::printReflection() const
 	}
 }
 
+void Program::Reflection::serialize(std::ostream& file) const
+{
+	uint32_t e = inputLayout.numElements();
+	serializeUInt32(file, e);
+	for (uint32_t i = 0; i < e; ++i)
+	{
+		serializeUInt32(file, static_cast<uint32_t>(inputLayout[i].usage()));
+		serializeUInt32(file, static_cast<uint32_t>(inputLayout[i].type()));
+	}
+
+	serializeUInt32(file, objectVariablesBufferSize);
+	serializeUInt32(file, ObjectVariable_max);
+	for (uint32_t i = 0; i < ObjectVariable_max; ++i)
+	{
+		serializeUInt32(file, objectVariables[i].offset);
+		serializeUInt32(file, objectVariables[i].sizeInBytes);
+		serializeUInt32(file, objectVariables[i].arraySize);
+		serializeUInt32(file, objectVariables[i].enabled);
+	}
+
+	serializeUInt32(file, materialVariablesBufferSize);
+	serializeUInt32(file, MaterialVariable_max);
+	for (uint32_t i = 0; i < MaterialVariable_max; ++i)
+	{
+		serializeUInt32(file, materialVariables[i].offset);
+		serializeUInt32(file, materialVariables[i].sizeInBytes);
+		serializeUInt32(file, materialVariables[i].arraySize);
+		serializeUInt32(file, materialVariables[i].enabled);
+	}
+
+	auto serializeMap = [&file](const UnorderedMap<std::string, uint32_t>& m) {
+		serializeUInt32(file, static_cast<uint32_t>(m.size()));
+		for (const auto& i : m)
+		{
+			serializeString(file, i.first);
+			serializeUInt32(file, i.second);
+		}
+	};
+	serializeMap(textures.vertexTextures);
+	serializeMap(textures.vertexSamplers);
+	serializeMap(textures.fragmentTextures);
+	serializeMap(textures.fragmentSamplers);
+}
+
+bool Program::Reflection::deserialize(std::istream& file)
+{
+	uint32_t e = deserializeUInt32(file);
+	for (uint32_t i = 0; i < e; ++i)
+	{
+		VertexAttributeUsage usage = static_cast<VertexAttributeUsage>(deserializeUInt32(file));
+		DataType type = static_cast<DataType>(deserializeUInt32(file));
+		inputLayout.push_back(usage, type);
+	}
+
+	objectVariablesBufferSize = deserializeUInt32(file);
+	uint32_t varCount = deserializeUInt32(file);
+	for (uint32_t i = 0; i < varCount; ++i)
+	{
+		objectVariables[i].offset = deserializeUInt32(file);
+		objectVariables[i].sizeInBytes = deserializeUInt32(file);
+		objectVariables[i].arraySize = deserializeUInt32(file);
+		objectVariables[i].enabled = deserializeUInt32(file);
+	}
+
+	materialVariablesBufferSize = deserializeUInt32(file);
+	varCount = deserializeUInt32(file);
+	for (uint32_t i = 0; i < varCount; ++i)
+	{
+		materialVariables[i].offset      = deserializeUInt32(file);
+		materialVariables[i].sizeInBytes = deserializeUInt32(file);
+		materialVariables[i].arraySize   = deserializeUInt32(file);
+		materialVariables[i].enabled     = deserializeUInt32(file);
+	}
+
+	auto deserializeMap = [&file](UnorderedMap<std::string, uint32_t>& m) {
+		uint32_t size = deserializeUInt32(file);
+		for (uint32_t i = 0; i < size; ++i)
+		{
+			std::string k = deserializeString(file);
+			uint32_t v = deserializeUInt32(file);
+			m.emplace(k, v);
+		}
+	};
+	deserializeMap(textures.vertexTextures);
+	deserializeMap(textures.vertexSamplers);
+	deserializeMap(textures.fragmentTextures);
+	deserializeMap(textures.fragmentSamplers);
+	return true;
+}
+
+
 }

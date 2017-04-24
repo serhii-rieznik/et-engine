@@ -39,6 +39,9 @@ public:
 		Variable materialVariables[MaterialVariable_max];
 
 		TextureSet::Reflection textures;
+
+		void serialize(std::ostream&) const;
+		bool deserialize(std::istream&);
 	};
 
 public:
