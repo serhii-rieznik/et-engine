@@ -48,7 +48,7 @@ private:
 	MemoryChunk& operator = (const BlockMemoryAllocator&) = delete;
 
 public:
-	HeapController heap;
+	RemoteHeap heap;
 	char* allocatedMemoryBegin = nullptr;
 	char* allocatedMemoryEnd = nullptr;
 	char* actualDataMemory = nullptr;
@@ -253,7 +253,6 @@ void BlockMemoryAllocator::flushUnusedBlocks()
 /*
  * Private
  */
-
 BlockMemoryAllocatorPrivate::BlockMemoryAllocatorPrivate()
 {
 	_chunks.emplace_back(defaultChunkSize);
@@ -376,7 +375,7 @@ void BlockMemoryAllocatorPrivate::printInfo()
 	for (auto& chunk : _chunks)
 	{
 		log::info("\t{");
-		uint32_t allocatedMemory = chunk.heap.currentlyAllocatedSize();
+		uint32_t allocatedMemory = chunk.heap.allocatedSize();
 		log::info("\t\tTotal memory used: %u (%uKb, %uMb) of %u (%uKb, %uMb)", allocatedMemory, allocatedMemory / 1024,
 			allocatedMemory / megabytes, chunk.heap.capacity(), chunk.heap.capacity() / 1024, chunk.heap.capacity() / megabytes);
 		log::info("\t}");
@@ -443,27 +442,11 @@ MemoryChunk::MemoryChunk(uint32_t capacity) :
 MemoryChunk::~MemoryChunk()
 {
 #if (ET_DEBUG)
-	std::vector<uint32_t> detectedLeaks;
-	detectedLeaks.reserve(1024);
-	heap.getAllocationIndexes(detectedLeaks);
-
-	uint32_t totalLeaked = heap.currentlyAllocatedSize();
+	uint32_t totalLeaked = heap.allocatedSize();
 	if (totalLeaked > 0)
 	{
-		char buffer[1024 * 10] = {};
-
-		uint32_t leakNumber = 0;
-		int printPos = 0;
-		for (uint32_t i : detectedLeaks)
-		{
-			printPos += sprintf(buffer + printPos, "%u, ", i);
-			if (++leakNumber >= 1024)
-				break;
-		}
-
 		log::ConsoleOutput lOut;
-		lOut.info("Total memory leaked: %llu, use debug funtion:\n"
-			"et::BlockMemoryAllocator::allocateOnBreaks({ %s })", totalLeaked, buffer);
+		lOut.info("Total memory leaked: %llu", totalLeaked);
 	}
 #endif
 

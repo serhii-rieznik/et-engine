@@ -194,42 +194,42 @@ public:
 	}
 
 public:
-	void setObjectForKey(const std::string& key, VariantBase::Pointer value)
+	void setObjectForKey(const std::string& key, const VariantBase::Pointer& value)
 	{
 		setValueForKey<VariantBase::Pointer>(key, value);
 	}
 
-	void setStringForKey(const std::string& key, StringValue value)
+	void setStringForKey(const std::string& key, const StringValue& value)
 	{
 		setValueForKey<StringValue>(key, value);
 	}
 
-	void setIntegerForKey(const std::string& key, IntegerValue value)
+	void setIntegerForKey(const std::string& key, const IntegerValue& value)
 	{
 		setValueForKey<IntegerValue>(key, value);
 	}
 
-	void setBooleanForKey(const std::string& key, BooleanValue value)
+	void setBooleanForKey(const std::string& key, const BooleanValue& value)
 	{
 		setValueForKey<BooleanValue>(key, value);
 	}
 
-	void setFloatForKey(const std::string& key, FloatValue value)
+	void setFloatForKey(const std::string& key, const FloatValue& value)
 	{
 		setValueForKey<FloatValue>(key, value);
 	}
 
-	void setArrayForKey(const std::string& key, ArrayValue value)
+	void setArrayForKey(const std::string& key, const ArrayValue& value)
 	{
 		setValueForKey<ArrayValue>(key, value);
 	}
 
-	void setDictionaryForKey(const std::string& key, Dictionary value)
+	void setDictionaryForKey(const std::string& key, const Dictionary& value)
 	{
 		setValueForKey<Dictionary>(key, value);
 	}
 
-	void setFloatForKeyPath(const StringList& keyPath, FloatValue value)
+	void setFloatForKeyPath(const StringList& keyPath, const FloatValue& value)
 	{
 		setValueForKeyPath<FloatValue, VariantClass::Float>(keyPath, value);
 	}
@@ -237,56 +237,56 @@ public:
 	inline void performRecursive(VariantCallbackFunction func) override;
 
 public:
-	BooleanValue boolForKey(const std::string& key, BooleanValue def = BooleanValue()) const
+	BooleanValue boolForKey(const std::string& key, const BooleanValue& def = BooleanValue()) const
 	{
 		return valueForKey<BooleanValue::ValueType, VariantClass::Boolean>(key, def);
 	}
-	BooleanValue boolForKeyPath(const StringList& key, BooleanValue def = BooleanValue()) const
+	BooleanValue boolForKeyPath(const StringList& key, const BooleanValue& def = BooleanValue()) const
 	{
 		return valueForKeyPath<BooleanValue::ValueType, VariantClass::Boolean>(key, def);
 	}
 
-	IntegerValue integerForKey(const std::string& key, IntegerValue def = IntegerValue()) const
+	IntegerValue integerForKey(const std::string& key, const IntegerValue& def = IntegerValue()) const
 	{
 		return valueForKey<IntegerValue::ValueType, VariantClass::Integer>(key, def);
 	}
-	IntegerValue integerForKeyPath(const StringList& key, IntegerValue def = IntegerValue()) const
+	IntegerValue integerForKeyPath(const StringList& key, const IntegerValue& def = IntegerValue()) const
 	{
 		return valueForKeyPath<IntegerValue::ValueType, VariantClass::Integer>(key, def);
 	}
 
-	FloatValue floatForKey(const std::string& key, FloatValue def = FloatValue()) const
+	FloatValue floatForKey(const std::string& key, const FloatValue& def = FloatValue()) const
 	{
 		return valueForKey<FloatValue::ValueType, VariantClass::Float>(key, def);
 	}
-	FloatValue floatForKeyPath(const StringList& key, FloatValue def = FloatValue()) const
+	FloatValue floatForKeyPath(const StringList& key, const FloatValue& def = FloatValue()) const
 	{
 		return valueForKeyPath<FloatValue::ValueType, VariantClass::Float>(key, def);
 	}
 
-	StringValue stringForKey(const std::string& key, StringValue def = StringValue()) const
+	StringValue stringForKey(const std::string& key, const StringValue& def = StringValue()) const
 	{
 		return valueForKey<StringValue::ValueType, VariantClass::String>(key, def);
 	}
-	StringValue stringForKeyPath(const StringList& key, StringValue def = StringValue()) const
+	StringValue stringForKeyPath(const StringList& key, const StringValue& def = StringValue()) const
 	{
 		return valueForKeyPath<StringValue::ValueType, VariantClass::String>(key, def);
 	}
 
-	ArrayValue arrayForKey(const std::string& key, ArrayValue def = ArrayValue()) const
+	ArrayValue arrayForKey(const std::string& key, const ArrayValue& def = ArrayValue()) const
 	{
 		return valueForKey<ArrayValue::ValueType, VariantClass::Array>(key, def);
 	}
-	ArrayValue arrayForKeyPath(const StringList& key, ArrayValue def = ArrayValue()) const
+	ArrayValue arrayForKeyPath(const StringList& key, const ArrayValue& def = ArrayValue()) const
 	{
 		return valueForKeyPath<ArrayValue::ValueType, VariantClass::Array>(key, def);
 	}
 
-	Dictionary dictionaryForKey(const std::string& key, Dictionary def = Dictionary()) const
+	Dictionary dictionaryForKey(const std::string& key, const Dictionary& def = Dictionary()) const
 	{
 		return Dictionary(valueForKey<Dictionary::ValueType, VariantClass::Dictionary>(key, def));
 	}
-	Dictionary dictionaryForKeyPath(const StringList& key, Dictionary def = Dictionary()) const
+	Dictionary dictionaryForKeyPath(const StringList& key, const Dictionary& def = Dictionary()) const
 	{
 		return Dictionary(valueForKeyPath<Dictionary::ValueType, VariantClass::Dictionary>(key, def));
 	}
@@ -344,14 +344,14 @@ private:
 	}
 
 	template <typename T, VariantClass C>
-	VariantPointer<T, C> valueForKey(const std::string& key, VariantPointer<T, C> def) const
+	VariantPointer<T, C> valueForKey(const std::string& key, const VariantPointer<T, C>& def) const
 	{
 		auto i = objectForKey(key);
 		return (i.invalid() || (i->variantClass() != C)) ? def : VariantPointer<T, C>(i);
 	}
 
 	template <typename T, VariantClass C>
-	VariantPointer<T, C> valueForKeyPath(const StringList& key, VariantPointer<T, C> def) const
+	VariantPointer<T, C> valueForKeyPath(const StringList& key, const VariantPointer<T, C>& def) const
 	{
 		auto i = objectForKeyPath(key);
 		return (i.invalid() || (i->variantClass() != C)) ? def : VariantPointer<T, C>(i);

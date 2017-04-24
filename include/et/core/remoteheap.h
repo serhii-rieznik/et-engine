@@ -12,35 +12,32 @@
 
 namespace et
 {
-class HeapControllerPrivate;
-class HeapController
+class RemoteHeapPrivate;
+class RemoteHeap
 {
 public:
-	HeapController();
-	HeapController(uint32_t capacity, uint32_t granularity);
-	~HeapController();
+	RemoteHeap();
+	RemoteHeap(uint32_t capacity, uint32_t granularity);
+	~RemoteHeap();
 
 	uint32_t capacity() const;
 	uint32_t requiredInfoSize() const;
-	uint32_t currentlyAllocatedSize() const;
+	uint32_t allocatedSize() const;
 
 	void init(uint32_t capacity, uint32_t granularity);
 	void setInfoStorage(void*);
-	void setAutoCompress(bool);
+	void clear();
 
 	bool allocate(uint32_t size, uint32_t& offset);
 	bool containsAllocationWithOffset(uint32_t offset);
 	bool release(uint32_t offset);
-	
-	bool empty() const;
-	void compress();
-	void clear();
 
-	void getAllocationIndexes(std::vector<uint32_t>&) const;
+	bool empty() const;
+
 
 private:
-	ET_DENY_COPY(HeapController);
-	ET_DECLARE_PIMPL(HeapController, 128);
+	ET_DENY_COPY(RemoteHeap);
+	ET_DECLARE_PIMPL(RemoteHeap, 128);
 };
 
 }

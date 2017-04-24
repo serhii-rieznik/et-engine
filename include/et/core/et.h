@@ -53,7 +53,7 @@
 #include <et/core/constants.h>
 #include <et/core/memory.h>
 #include <et/core/memoryallocator.h>
-#include <et/core/heapcontroller.h>
+#include <et/core/remoteheap.h>
 #include <et/core/intrusiveptr.h>
 #include <et/core/log.h>
 

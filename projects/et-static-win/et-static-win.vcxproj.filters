@@ -358,12 +358,6 @@
     <ClInclude Include="..\..\include\et\rendering\rendercontextparams.h">
       <Filter>Source\rendering</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\et\core\heapcontroller.h">
-      <Filter>Source\core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\et\core\heapcontroller.cpp">
-      <Filter>Source\core</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\et\rendering\interface\pipelinestate.h">
       <Filter>Source\rendering\interface</Filter>
     </ClInclude>
@@ -669,6 +663,12 @@
     </ClInclude>
     <ClInclude Include="..\..\include\et\scene3d\drawer\drawflow.cpp">
       <Filter>Source\scene3d\drawer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\core\remoteheap.h">
+      <Filter>Source\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\core\remoteheap.cpp">
+      <Filter>Source\core</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -19,6 +19,9 @@ public:
 	ET_DECLARE_POINTER(ElementContainer);
 	
 public:
+	ElementContainer() :
+		BaseElement("container", nullptr) { }
+
 	ElementContainer(const std::string& name, BaseElement* parent) :
 		BaseElement(name, parent) { }
 

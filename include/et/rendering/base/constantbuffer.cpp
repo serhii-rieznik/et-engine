@@ -13,7 +13,7 @@ namespace et
 class ConstantBufferPrivate
 {
 public:
-	HeapController heap;
+	RemoteHeap heap;
 	Buffer::Pointer buffer;
 	BinaryDataStorage heapInfo;
 	BinaryDataStorage localData;
@@ -39,7 +39,6 @@ void ConstantBuffer::init(RenderInterface* renderer)
 	_private->heap.init(Capacity, Granularity);
 	_private->heapInfo.resize(_private->heap.requiredInfoSize());
 	_private->heap.setInfoStorage(_private->heapInfo.begin());
-	_private->heap.setAutoCompress(false);
 
 	_private->buffer = renderer->createDataBuffer("shared-const-buffer", Capacity);
 }
@@ -47,8 +46,8 @@ void ConstantBuffer::init(RenderInterface* renderer)
 void ConstantBuffer::shutdown()
 {
 	flush();
-	_private->buffer.reset(nullptr);
 	_private->heap.clear();
+	_private->buffer.reset(nullptr);
 	_private->heapInfo.resize(0);
 	_private->localData.resize(0);
 }
@@ -84,8 +83,6 @@ void ConstantBuffer::flush()
 			++i;
 		}
 	}
-
-	_private->heap.compress();
 }
 
 const ConstantBufferEntry::Pointer& ConstantBuffer::staticAllocate(uint32_t size)

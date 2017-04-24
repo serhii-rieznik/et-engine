@@ -136,22 +136,25 @@ ArrayValue deserializeArray(json_t* json)
 {
 	ET_ASSERT(json_is_array(json));
 	
+	size_t size = json_array_size(json);
+	
 	ArrayValue result;
-	for (size_t i = 0; i < json_array_size(json); ++i)
+	result->content.reserve(size);
+	for (size_t i = 0; i < size; ++i)
 	{
 		json_t* value = json_array_get(json, i);
 		if (json_is_string(value))
-			result->content.push_back(deserializeString(value));
+			result->content.emplace_back(deserializeString(value));
 		else if (json_is_integer(value))
-			result->content.push_back(deserializeInteger(value));
+			result->content.emplace_back(deserializeInteger(value));
 		else if (json_is_real(value))
-			result->content.push_back(deserializeFloat(value));
+			result->content.emplace_back(deserializeFloat(value));
 		else if (json_is_array(value))
-			result->content.push_back(deserializeArray(value));
+			result->content.emplace_back(deserializeArray(value));
 		else if (json_is_object(value))
-			result->content.push_back(deserializeDictionary(value));
+			result->content.emplace_back(deserializeDictionary(value));
 		else if (json_is_null(value))
-			result->content.push_back(Dictionary());
+			result->content.emplace_back(Dictionary());
 		else if (value)
 		{
 			ET_FAIL_FMT("Unsupported JSON type: %d", value->type);

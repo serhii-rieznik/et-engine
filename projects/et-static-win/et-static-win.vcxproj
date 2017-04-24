@@ -15,6 +15,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\include\et\core\remoteheap.h" />
     <ClInclude Include="..\..\include\et\rendering\base\variableset.h" />
     <ClInclude Include="..\..\include\et\rendering\objects\light.cpp" />
     <ClInclude Include="..\..\include\et\scene3d\drawer\cubemaps.h" />
@@ -30,11 +31,11 @@
     <ClInclude Include="..\..\include\et\rendering\base\variableset.cpp" />
     <ClInclude Include="..\..\include\et\rendering\interface\program.cpp" />
     <ClInclude Include="..\..\include\et\scene3d\drawer\drawflow.cpp" />
+    <ClInclude Include="..\..\include\et\core\remoteheap.cpp" />
     <ClCompile Include="..\..\include\external\spirvcross\spirv_cfg.cpp" />
     <ClCompile Include="..\..\include\external\spirvcross\spirv_cross.cpp" />
     <ClCompile Include="..\..\include\external\spirvcross\spirv_glsl.cpp" />
     <ClCompile Include="..\..\include\external\spirvcross\spirv_msl.cpp" />
-    <ClInclude Include="..\..\include\et\core\heapcontroller.h" />
     <ClInclude Include="..\..\include\et\rendering\base\constantbuffer.h" />
     <ClInclude Include="..\..\include\et\rendering\base\helpers.h" />
     <ClInclude Include="..\..\include\et\rendering\base\indexarray.h" />
@@ -171,7 +172,6 @@
     <ClInclude Include="..\..\include\et\sound\streamingthread.cpp" />
     <ClInclude Include="..\..\include\et\sound\track.cpp" />
     <ClInclude Include="..\..\include\et\rendering\vulkan\glslang\vulkan_glslang.cpp" />
-    <ClInclude Include="..\..\include\et\core\heapcontroller.cpp" />
     <ClInclude Include="..\..\include\et\rendering\vulkan\vulkan_textureset.cpp" />
     <ClInclude Include="..\..\include\et\rendering\base\constantbuffer.cpp" />
     <ClInclude Include="..\..\include\et\rendering\base\helpers.cpp" />

@@ -9,7 +9,6 @@
 #include "../core/json.cpp"
 #include "../core/locale.cpp"
 #include "../core/memoryallocator.cpp"
-#include "../core/heapcontroller.cpp"
 #include "../core/notifytimer.cpp"
 #include "../core/objectscache.cpp"
 #include "../core/sequence.cpp"
@@ -21,3 +20,4 @@
 #include "../core/timerpool.cpp"
 #include "../core/tools.cpp"
 #include "../core/transformable.cpp"
+#include "../core/remoteheap.cpp"

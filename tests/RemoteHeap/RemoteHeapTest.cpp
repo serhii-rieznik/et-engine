@@ -1,12 +1,13 @@
 #include <et/app/application.h>
 
-const uint32_t heapCapacity = 4 * 1024 * 1024;
+const uint32_t heapCapacity = 32 * 1024 * 1024;
 const uint32_t heapGranularity = 128;
 const uint32_t totalAllocations = heapCapacity / heapGranularity;
 
-void runTest()
+template <class HP>
+void runTest(uint32_t scale)
 {
-	et::HeapController heap(heapCapacity, heapGranularity);
+	HP heap(heapCapacity, heapGranularity);
 	std::vector<uint8_t> infoStorage(heap.requiredInfoSize());
 	heap.setInfoStorage(infoStorage.data());
 
@@ -18,7 +19,7 @@ void runTest()
 	for (uint32_t i = 0; i < totalAllocations; ++i)
 	{
 		uint32_t mem = 0;
-		if (heap.allocate(8 + rand() % (heapGranularity - 8), mem))
+		if (heap.allocate(8 + rand() % (scale * heapGranularity - 8), mem))
 			allocations.emplace_back(mem);
 	}
 
@@ -33,7 +34,9 @@ void runTest()
 	uint64_t releaseTime = times[2] - times[1];
 	uint64_t totalTime = times[2] - times[0];
 
-	et::log::info("Times : % 4llu.%04llu | % 4llu.%04llu | % 4llu.%04llu", 
+	et::log::info("%32s [% 12u] : % 4llu.%04llu | % 4llu.%04llu | % 4llu.%04llu", 
+		typeid(HP).name(), 
+		heap.requiredInfoSize(),
 		totalTime / 1000, totalTime % 1000,
 		allocTime / 1000, allocTime % 1000,
 		releaseTime / 1000, releaseTime % 1000);
@@ -44,9 +47,13 @@ int main()
 	et::log::addOutput(et::log::ConsoleOutput::Pointer::create());
 	et::log::info("Starting test...");
 
+	uint32_t s = 1;
 	for (uint32_t i = 0; i < 5; ++i)
-		runTest();
-
+	{
+		runTest<et::RemoteHeap>(s);
+		s *= 2;
+	}
+	
 	system("pause");
 	return 0;
 }

@@ -1081,7 +1081,7 @@ void FBXLoader::setShouldCreateRenderObjects(bool value)
 
 s3d::ElementContainer::Pointer FBXLoader::load(RenderInterface::Pointer renderer, s3d::Storage& storage, ObjectsCache& cache)
 {
-	s3d::ElementContainer::Pointer result;
+	s3d::ElementContainer::Pointer result(PointerInit::CreateInplace);
 	FBXLoaderPrivate* loader = etCreateObject<FBXLoaderPrivate>(renderer, cache);
 	loader->shouldCreateRenderObjects = _shouldCreateRenderObjects;
 
