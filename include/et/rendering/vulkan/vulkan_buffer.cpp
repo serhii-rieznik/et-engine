@@ -143,18 +143,20 @@ void VulkanBuffer::unmap()
 	ET_ASSERT(_private->mapped);
 	if (_private->modifiedRanges.size() > 0)
 	{
-		Vector<VkMappedMemoryRange> vkRanges;
-		vkRanges.reserve(_private->modifiedRanges.size());
+		VkDeviceSize flushBegin = std::numeric_limits<VkDeviceSize>::max();
+		VkDeviceSize flushEnd = 0;
 		for (const auto& range : _private->modifiedRanges)
 		{
-			vkRanges.emplace_back();
-			VkMappedMemoryRange& r = vkRanges.back();
-			r.sType = VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE;
-			r.memory = _private->memory;
-			r.offset = range.begin;
-			r.size = alignUpTo(range.length, _private->vulkan.physicalDeviceProperties.limits.nonCoherentAtomSize);
+			flushBegin = std::min(flushBegin, range.begin);
+			flushEnd = std::max(flushEnd, range.begin + range.length);
 		}
-		VULKAN_CALL(vkFlushMappedMemoryRanges(_private->vulkan.device, static_cast<uint32_t>(vkRanges.size()), vkRanges.data()));
+		ET_ASSERT(flushEnd > flushBegin);
+
+		VkMappedMemoryRange flushRange = { VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE };
+		flushRange.memory = _private->memory;
+		flushRange.offset = flushBegin;
+		flushRange.size = alignUpTo(flushEnd - flushBegin, _private->vulkan.physicalDeviceProperties.limits.nonCoherentAtomSize);
+		VULKAN_CALL(vkFlushMappedMemoryRanges(_private->vulkan.device, 1, &flushRange));
 	}
 	vkUnmapMemory(_private->vulkan.device, _private->memory);
 

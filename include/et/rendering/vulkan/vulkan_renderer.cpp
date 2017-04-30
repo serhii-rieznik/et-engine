@@ -38,6 +38,11 @@ public:
 
 	PipelineStateCache pipelineCache;
 	std::array<Vector<VulkanRenderPass::Pointer>, RendererFrameCount> passes;
+	Vector<VkSubmitInfo> allSubmits;
+	Vector<VkSemaphore> waitSemaphores;
+	Vector<VkSemaphore> signalSemaphores;
+	Vector<VkPipelineStageFlags> waitStages;
+	Vector<VkCommandBuffer> commandBuffers;
 };
 
 VulkanRenderer::VulkanRenderer(RenderContext* rc)
@@ -320,20 +325,24 @@ void VulkanRenderer::present()
 		pass->recordCommandBuffer();
 
 	size_t maxQueueSize = 2 * (1 + std::min(32ull, sqr(_private->passes.size())));
-	Vector<VkSubmitInfo> allSubmits;
-	Vector<VkSemaphore> waitSemaphores;
-	Vector<VkSemaphore> signalSemaphores;
-	Vector<VkPipelineStageFlags> waitStages;
-	Vector<VkCommandBuffer> commandBuffers;
-	allSubmits.reserve(maxQueueSize);
-	commandBuffers.reserve(maxQueueSize);
-	waitStages.reserve(maxQueueSize);
-	waitSemaphores.reserve(maxQueueSize);
-	signalSemaphores.reserve(maxQueueSize);
+	_private->allSubmits.clear();
+	_private->allSubmits.reserve(maxQueueSize);
+	
+	_private->commandBuffers.clear();
+	_private->commandBuffers.reserve(maxQueueSize);
+	
+	_private->waitStages.clear();
+	_private->waitStages.reserve(maxQueueSize);
+	
+	_private->waitSemaphores.clear();
+	_private->waitSemaphores.reserve(maxQueueSize);
+	
+	_private->signalSemaphores.clear();
+	_private->signalSemaphores.reserve(maxQueueSize);
 
 	{
-		allSubmits.emplace_back();
-		VkSubmitInfo& submitInfo = allSubmits.back();
+		_private->allSubmits.emplace_back();
+		VkSubmitInfo& submitInfo = _private->allSubmits.back();
 		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 		submitInfo.commandBufferCount = 1;
 		submitInfo.pCommandBuffers = &_private->swapchain.currentFrame().barrierFromPresent;
@@ -358,37 +367,37 @@ void VulkanRenderer::present()
 
 		if (i == passes.begin())
 		{
-			waitSemaphores.emplace_back(_private->swapchain.currentFrame().semaphoreFromPresent);
-			waitStages.emplace_back(VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT);
+			_private->waitSemaphores.emplace_back(_private->swapchain.currentFrame().semaphoreFromPresent);
+			_private->waitStages.emplace_back(VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT);
 			++waitEnd;
 		}
 
-		for (auto i = signalSemaphores.begin() + signalBegin - submittedSignal, e = signalSemaphores.end(); i != e; ++i)
+		for (auto i = _private->signalSemaphores.begin() + signalBegin - submittedSignal, e = _private->signalSemaphores.end(); i != e; ++i)
 		{
-			waitSemaphores.emplace_back(*i);
-			waitStages.emplace_back(VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT);
+			_private->waitSemaphores.emplace_back(*i);
+			_private->waitStages.emplace_back(VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT);
 			++waitEnd;
 		}
 
 		const VulkanRenderPass::Pointer& passI = *i;
-		signalSemaphores.emplace_back(passI->nativeRenderPass().semaphore);
-		commandBuffers.emplace_back(passI->nativeRenderPass().commandBuffers[_private->swapchain.frameIndex]);
+		_private->signalSemaphores.emplace_back(passI->nativeRenderPass().semaphore);
+		_private->commandBuffers.emplace_back(passI->nativeRenderPass().commandBuffers[_private->swapchain.frameIndex]);
 		++commandBuffersEnd;
 		++signalEnd;
 
 		for (auto j = i + 1; (j != e) && ((*j)->info().priority == (*i)->info().priority); ++j, ++i)
 		{
 			const VulkanRenderPass::Pointer& passJ = *j;
-			commandBuffers.emplace_back(passJ->nativeRenderPass().commandBuffers[_private->swapchain.frameIndex]);
-			signalSemaphores.emplace_back(passJ->nativeRenderPass().semaphore);
+			_private->commandBuffers.emplace_back(passJ->nativeRenderPass().commandBuffers[_private->swapchain.frameIndex]);
+			_private->signalSemaphores.emplace_back(passJ->nativeRenderPass().semaphore);
 			++commandBuffersEnd;
 			++signalEnd;
 		}
 
 		if (i + 1 == e)
 		{
-			signalSemaphores.emplace_back(_private->swapchain.currentFrame().semaphoreToPresent);
-			signalBegin = static_cast<uint32_t>(signalSemaphores.size()) - 1;
+			_private->signalSemaphores.emplace_back(_private->swapchain.currentFrame().semaphoreToPresent);
+			signalBegin = static_cast<uint32_t>(_private->signalSemaphores.size()) - 1;
 			signalEnd = signalBegin + 1;
 		}
 
@@ -396,20 +405,20 @@ void VulkanRenderer::present()
 		submittedSignal = signalEnd - signalBegin;
 		submittedWait = waitEnd - waitBegin;
 
-		allSubmits.emplace_back();
-		VkSubmitInfo& submitInfo = allSubmits.back();
+		_private->allSubmits.emplace_back();
+		VkSubmitInfo& submitInfo = _private->allSubmits.back();
 		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 
-		submitInfo.pCommandBuffers = commandBuffers.data() + commandBuffersBegin;
+		submitInfo.pCommandBuffers = _private->commandBuffers.data() + commandBuffersBegin;
 		submitInfo.commandBufferCount = submittedCommandBuffers;
 		ET_ASSERT(submitInfo.commandBufferCount > 0);
 
-		submitInfo.pSignalSemaphores = signalSemaphores.data() + signalBegin;
+		submitInfo.pSignalSemaphores = _private->signalSemaphores.data() + signalBegin;
 		submitInfo.signalSemaphoreCount = submittedSignal;
 		ET_ASSERT(submitInfo.signalSemaphoreCount > 0);
 
-		submitInfo.pWaitDstStageMask = waitStages.data() + waitBegin;
-		submitInfo.pWaitSemaphores = waitSemaphores.data() + waitBegin;
+		submitInfo.pWaitDstStageMask = _private->waitStages.data() + waitBegin;
+		submitInfo.pWaitSemaphores = _private->waitSemaphores.data() + waitBegin;
 		submitInfo.waitSemaphoreCount = submittedWait;
 		ET_ASSERT(submitInfo.waitSemaphoreCount > 0);
 
@@ -419,8 +428,8 @@ void VulkanRenderer::present()
 	}
 
 	{
-		allSubmits.emplace_back();
-		VkSubmitInfo& submitInfo = allSubmits.back();
+		_private->allSubmits.emplace_back();
+		VkSubmitInfo& submitInfo = _private->allSubmits.back();
 		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 		submitInfo.commandBufferCount = 1;
 		submitInfo.pCommandBuffers = &_private->swapchain.currentFrame().barrierToPresent;
@@ -432,9 +441,9 @@ void VulkanRenderer::present()
 	}
 
 #if (VULKAN_COMBINED_SUBMIT)
-	VULKAN_CALL(vkQueueSubmit(_private->queue, static_cast<uint32_t>(allSubmits.size()), allSubmits.data(), 
-		_private->swapchain.currentFrame().imageFence));
-	allSubmits.clear();
+	VULKAN_CALL(vkQueueSubmit(_private->queue, static_cast<uint32_t>(_private->allSubmits.size()),
+		_private->allSubmits.data(), _private->swapchain.currentFrame().imageFence));
+	_private->allSubmits.clear();
 #endif
 	
 	_private->swapchain.present(_private->vulkan());

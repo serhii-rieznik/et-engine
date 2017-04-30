@@ -415,7 +415,7 @@ void MaterialInstance::buildConstantBuffer(const std::string& pt)
 	_constBuffers[pt].valid = true;
 }
 
-TextureSet::Pointer MaterialInstance::textureSet(const std::string& pt)
+const TextureSet::Pointer& MaterialInstance::textureSet(const std::string& pt)
 {
 	ET_ASSERT(isInstance());
 
@@ -425,7 +425,7 @@ TextureSet::Pointer MaterialInstance::textureSet(const std::string& pt)
 	return _textureSets.at(pt).obj;
 }
 
-ConstantBufferEntry::Pointer MaterialInstance::constantBufferData(const std::string& pt)
+const ConstantBufferEntry::Pointer& MaterialInstance::constantBufferData(const std::string& pt)
 {
 	ET_ASSERT(isInstance());
 

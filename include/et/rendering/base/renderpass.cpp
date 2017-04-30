@@ -15,6 +15,8 @@ const std::string RenderPass::kPassNameDefault = "default";
 const std::string RenderPass::kPassNameDepth = "depth";
 const std::string RenderPass::kPassNameUI = "ui";
 
+const RenderPassBeginInfo RenderPassBeginInfo::singlePass = RenderPassBeginInfo(0, 0);
+
 RenderPass::RenderPass(RenderInterface* renderer, const ConstructionInfo& info) :
 	_renderer(renderer), _info(info)
 {

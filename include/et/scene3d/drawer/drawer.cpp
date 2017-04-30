@@ -43,7 +43,7 @@ void Drawer::draw()
 		_main.pass->loadSharedVariablesFromCamera(renderCamera);
 		_main.pass->loadSharedVariablesFromLight(_lighting.directional);
 
-		_main.pass->begin({ 0, 0 });
+		_main.pass->begin(RenderPassBeginInfo::singlePass);
 		for (const RenderBatch::Pointer& rb : _main.rendereable)
 			_main.pass->pushRenderBatch(rb);
 		_main.pass->pushRenderBatch(_lighting.environmentBatch);

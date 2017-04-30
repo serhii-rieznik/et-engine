@@ -44,7 +44,7 @@ void CubemapProcessor::process(RenderInterface::Pointer& renderer, DrawerOptions
 		if (_lookupGeneratorMaterial.invalid())
 			_lookupGeneratorMaterial = renderer->sharedMaterialLibrary().loadDefaultMaterial(DefaultMaterial::EnvironmentMap);
 
-		_lookupPass->begin({ 0, 0 });
+		_lookupPass->begin(RenderPassBeginInfo::singlePass);
 		_lookupPass->pushRenderBatch(renderhelper::createFullscreenRenderBatch(renderer->checkersTexture(), _lookupGeneratorMaterial));
 		_lookupPass->end();
 		renderer->submitRenderPass(_lookupPass);
@@ -222,7 +222,7 @@ void CubemapProcessor::drawDebug(RenderInterface::Pointer& renderer, const Drawe
 		float dx = 2.0f * dy;
 		vec2 pos = vec2(0.0f, 0.0f);
 
-		_cubemapDebugPass->begin({ 0, 0 });
+		_cubemapDebugPass->begin(RenderPassBeginInfo::singlePass);
 		for (uint32_t i = CubemapType::Downsampled; i < CubemapType::Count; ++i)
 		{
 			pos.y = 0.0f;
@@ -245,7 +245,7 @@ void CubemapProcessor::drawDebug(RenderInterface::Pointer& renderer, const Drawe
 	{
 		vec2 lookupSize = vec2(256.0f);
 		_lookupDebugBatch->setTransformation(fullscreenBatchTransform(vp, 0.5f * (vp - lookupSize), lookupSize));
-		_lookupDebugPass->begin({ 0, 0 });
+		_lookupDebugPass->begin(RenderPassBeginInfo::singlePass);
 		_lookupDebugPass->pushRenderBatch(_lookupDebugBatch);
 		_lookupDebugPass->end();
 		renderer->submitRenderPass(_lookupDebugPass);

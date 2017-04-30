@@ -41,8 +41,11 @@ struct RenderPassBeginInfo
 	Vector<RenderSubpass> subpasses;
 
 	RenderPassBeginInfo() = default;
+
 	RenderPassBeginInfo(uint32_t l, uint32_t m) : 
 		subpasses(1, { l, m }) { }
+
+	static const RenderPassBeginInfo singlePass;
 };
 
 struct CopyDescriptor

@@ -43,7 +43,7 @@ void ShadowmapProcessor::process(RenderInterface::Pointer& renderer, DrawerOptio
 
 	_renderables.shadowpass->loadSharedVariablesFromCamera(_light);
 	_renderables.shadowpass->loadSharedVariablesFromLight(_light);
-	_renderables.shadowpass->begin({ 0, 0 });
+	_renderables.shadowpass->begin(RenderPassBeginInfo::singlePass);
 	for (const RenderBatch::Pointer& batch : _renderables.activeBatches)
 		_renderables.shadowpass->pushRenderBatch(batch);
 	_renderables.shadowpass->end();
@@ -55,7 +55,7 @@ void ShadowmapProcessor::process(RenderInterface::Pointer& renderer, DrawerOptio
 		vec2 sz = vec2(vp.y * _directionalShadowmap->sizeFloat(0).aspect(), vp.y);
 		_renderables.debugBatch->setMaterial(_renderables.debugMaterial->instance());
 		_renderables.debugBatch->setTransformation(fullscreenBatchTransform(vp, vec2(0.0f), sz));
-		_renderables.debugPass->begin({ 0,0 });
+		_renderables.debugPass->begin(RenderPassBeginInfo::singlePass);
 		_renderables.debugPass->pushRenderBatch(_renderables.debugBatch);
 		_renderables.debugPass->end();
 		renderer->submitRenderPass(_renderables.debugPass);

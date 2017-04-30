@@ -92,7 +92,7 @@ void HDRFlow::render()
 
 	downsampleLuminance();
 
-	_finalPass->begin({0, 0});
+	_finalPass->begin(RenderPassBeginInfo::singlePass);
 	_finalPass->pushRenderBatch(_batches.final);
 
 	debugDraw();

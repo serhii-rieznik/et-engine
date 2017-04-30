@@ -209,21 +209,19 @@ public:
 		if (newData == _data)
 			return;
 
-		T* oldData = _data;
-
-		if (newData)
+		if (newData != nullptr)
 			newData->retain();
-
+		
+		T* oldData = _data;
 		std::swap(_data, newData);
 
-		if (oldData)
+		if (oldData != nullptr) 
 		{
 			ET_ASSERT(oldData->retainCount() > 0);
 			oldData->release();
+			
 			if (oldData->retainCount() == 0)
-			{
 				sharedObjectFactory().deleteObject<T>(oldData);
-			}
 		}
 	}
 

@@ -105,8 +105,8 @@ public:
 public:
 	Material::Pointer base();
 
-	TextureSet::Pointer textureSet(const std::string&);
-	ConstantBufferEntry::Pointer constantBufferData(const std::string&);
+	const TextureSet::Pointer& textureSet(const std::string&);
+	const ConstantBufferEntry::Pointer& constantBufferData(const std::string&);
 	const Configuration& configuration(const std::string&) const override;
 
 	void invalidateTextureSet() override;
