@@ -38,6 +38,8 @@ public:
 	RenderPass::Pointer allocateRenderPass(const RenderPass::ConstructionInfo&) override;
 	void submitRenderPass(RenderPass::Pointer) override;
 
+	uint32_t frameIndex() const override;
+
 	/*
 	 * Buffers
 	 */

@@ -51,6 +51,8 @@ public:
 	virtual void begin() = 0;
 	virtual void present() = 0;
 
+	virtual uint32_t frameIndex() const = 0;
+
 	virtual RenderPass::Pointer allocateRenderPass(const RenderPass::ConstructionInfo&) = 0;
 	virtual void submitRenderPass(RenderPass::Pointer) = 0;
 

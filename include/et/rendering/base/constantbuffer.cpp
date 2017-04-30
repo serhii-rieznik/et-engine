@@ -120,14 +120,6 @@ void ConstantBufferPrivate::internalFree(const ConstantBufferEntry::Pointer& ent
 	
 	if (heap.release(entry->offset()) == false)
 		ET_ASSERT(0 && "Attempt to release memory which was not allocated here");
-
-#if (ET_DEBUG)
-	if (entry->isDynamic() == false)
-	{
-		auto allocation = std::find(allocations.begin(), allocations.end(), entry);
-		ET_ASSERT(allocation == allocations.end());
-	}
-#endif
 }
 
 }

@@ -440,5 +440,9 @@ void VulkanRenderer::present()
 	_private->swapchain.present(_private->vulkan());
 }
 
+uint32_t VulkanRenderer::frameIndex() const
+{
+	return _private->swapchain.frameIndex;
+}
 
 }
