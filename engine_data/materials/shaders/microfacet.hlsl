@@ -17,9 +17,9 @@ cbuffer ObjectVariables : DECL_BUFFER(Object)
     row_major float4x4 worldTransform;
     row_major float4x4 worldRotationTransform;
     row_major float4x4 lightProjectionTransform;
-    float3 lightColor;
-    float4 lightDirection;
     float4 cameraPosition;
+    float4 lightDirection;
+    float3 lightColor;
 };
 
 Texture2D<float4> baseColorTexture : DECL_TEXTURE(BaseColor);

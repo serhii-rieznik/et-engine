@@ -375,16 +375,17 @@ void VulkanRenderPass::pushRenderBatch(const RenderBatch::Pointer& inBatch)
 	ConstantBufferEntry::Pointer objectVariables;
 	if (program->reflection().objectVariablesBufferSize > 0)
 	{
+		objectVariables = _private->renderer->sharedConstantBuffer().allocate(
+			program->reflection().objectVariablesBufferSize, ConstantBufferDynamicAllocation);
+
 		setSharedVariable(ObjectVariable::WorldTransform, inBatch->transformation());
 		setSharedVariable(ObjectVariable::WorldRotationTransform, inBatch->rotationTransformation());
 		setSharedVariable(ObjectVariable::DeltaTime, application().mainRunLoop().lastFrameTime());
-		
-		objectVariables = _private->renderer->sharedConstantBuffer().allocate(
-			program->reflection().objectVariablesBufferSize, ConstantBufferDynamicAllocation);
 
 		for (const auto& v : sharedVariables())
 		{
 			const Program::Variable& var = program->reflection().objectVariables[v.first];
+			
 			if (v.second.isSet() && var.enabled)
 				memcpy(objectVariables->data() + var.offset, v.second.data, v.second.size);
 		}

@@ -79,7 +79,7 @@ void ConstantBuffer::flush(uint32_t frameNumber)
 	
 	auto i = std::remove_if(_private->allocations.begin(), _private->allocations.end(), [this, frameNumber](const ConstantBufferEntry::Pointer& e)
 	{
-		bool shouldRelease = (frameNumber > e->flushFrame() + RendererFrameCount) && (e->retainCount() == 1);
+		bool shouldRelease = (e->retainCount() == 1) /* && (frameNumber > e->flushFrame() + RendererFrameCount)*/;
 		
 		if (shouldRelease)
 			_private->internalFree(e);
