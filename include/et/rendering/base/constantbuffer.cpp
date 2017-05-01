@@ -18,9 +18,10 @@ public:
 	BinaryDataStorage heapInfo;
 	BinaryDataStorage localData;
 	List<ConstantBufferEntry::Pointer> allocations;
+	uint32_t allowedAllocations = 0;
 	bool modified = false;
 
-	const ConstantBufferEntry::Pointer& internalAlloc(uint32_t, bool);
+	const ConstantBufferEntry::Pointer& allocateInternal(uint32_t, uint32_t);
 	void internalFree(const ConstantBufferEntry::Pointer&);
 };
 
@@ -34,8 +35,10 @@ ConstantBuffer::~ConstantBuffer()
 	ET_PIMPL_FINALIZE(ConstantBuffer);
 }
 
-void ConstantBuffer::init(RenderInterface* renderer)
+void ConstantBuffer::init(RenderInterface* renderer, uint32_t allowedAllocations)
 {
+	_private->allowedAllocations = allowedAllocations;
+
 	_private->heap.init(Capacity, Granularity);
 	_private->heapInfo.resize(_private->heap.requiredInfoSize());
 	_private->heap.setInfoStorage(_private->heapInfo.begin());
@@ -45,7 +48,6 @@ void ConstantBuffer::init(RenderInterface* renderer)
 
 void ConstantBuffer::shutdown()
 {
-	flush();
 	_private->heap.clear();
 	_private->buffer.reset(nullptr);
 	_private->heapInfo.resize(0);
@@ -57,45 +59,45 @@ Buffer::Pointer ConstantBuffer::buffer() const
 	return _private->buffer;
 }
 
-void ConstantBuffer::flush()
+void ConstantBuffer::flush(uint32_t frameNumber)
 {
 	if (_private->modified)
 	{
 		uint8_t* mappedMemory = _private->buffer->map(0, Capacity);
-		for (const ConstantBufferEntry::Pointer& allocation : _private->allocations)
+		for (ConstantBufferEntry::Pointer& allocation : _private->allocations)
 		{
-			memcpy(mappedMemory + allocation->offset(), _private->localData.begin() + allocation->offset(), allocation->length());
-			_private->buffer->modifyRange(allocation->offset(), allocation->length());
+			if (allocation->flushFrame() == InvalidFlushFrame)
+			{
+				memcpy(mappedMemory + allocation->offset(), _private->localData.begin() + allocation->offset(), allocation->length());
+				_private->buffer->modifyRange(allocation->offset(), allocation->length());
+				allocation->flush(frameNumber);
+			}
 		}
 		_private->buffer->unmap();
 		_private->modified = false;
 	}
 	
-	for (auto i = _private->allocations.begin(); i != _private->allocations.end();)
+	auto i = std::remove_if(_private->allocations.begin(), _private->allocations.end(), [this, frameNumber](const ConstantBufferEntry::Pointer& e)
 	{
-		if ((*i)->retainCount() == 1)
-		{
-			_private->internalFree(*i);
-			i = _private->allocations.erase(i);
-		}
-		else
-		{
-			++i;
-		}
-	}
+		bool shouldRelease = (frameNumber > e->flushFrame() + RendererFrameCount) && (e->retainCount() == 1);
+		
+		if (shouldRelease)
+			_private->internalFree(e);
+
+		return shouldRelease;
+	});
+	
+	if (i != _private->allocations.end())
+		_private->allocations.erase(i, _private->allocations.end());
 }
 
-const ConstantBufferEntry::Pointer& ConstantBuffer::staticAllocate(uint32_t size)
+const ConstantBufferEntry::Pointer& ConstantBuffer::allocate(uint32_t size, uint32_t allocationClass)
 {
-	return _private->internalAlloc(size, false);
+	ET_ASSERT(_private->allowedAllocations & allocationClass);
+	return _private->allocateInternal(size, allocationClass);
 }
 
-const ConstantBufferEntry::Pointer& ConstantBuffer::dynamicAllocate(uint32_t size)
-{
-	return _private->internalAlloc(size, true);
-}
-
-const ConstantBufferEntry::Pointer& ConstantBufferPrivate::internalAlloc(uint32_t size, bool dyn)
+const ConstantBufferEntry::Pointer& ConstantBufferPrivate::allocateInternal(uint32_t size, uint32_t cls)
 {
 	uint32_t offset = 0;
 
@@ -109,7 +111,7 @@ const ConstantBufferEntry::Pointer& ConstantBufferPrivate::internalAlloc(uint32_
 	}
 
 	modified = true;
-	allocations.emplace_back(ConstantBufferEntry::Pointer::create(offset, size, localData.begin() + offset, dyn));
+	allocations.emplace_back(ConstantBufferEntry::Pointer::create(offset, size, localData.begin() + offset, cls));
 	return allocations.back();
 }
 

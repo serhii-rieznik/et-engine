@@ -35,6 +35,7 @@ public:
 	void end() override;
 	
 	void recordCommandBuffer();
+	uint32_t recordedFrameIndex() const;
 
 private:
 	ET_DECLARE_PIMPL(VulkanRenderPass, 384);

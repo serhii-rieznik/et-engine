@@ -28,10 +28,10 @@ public:
 
 	struct Description
 	{
-		Map<uint32_t, Texture::Pointer> vertexTextures;
-		Map<uint32_t, Sampler::Pointer> vertexSamplers;
-		Map<uint32_t, Texture::Pointer> fragmentTextures;
-		Map<uint32_t, Sampler::Pointer> fragmentSamplers;
+		std::array<Texture::Pointer, MaterialTexture_max> vertexTextures;
+		std::array<Sampler::Pointer, MaterialTexture_max> vertexSamplers;
+		std::array<Texture::Pointer, MaterialTexture_max> fragmentTextures;
+		std::array<Sampler::Pointer, MaterialTexture_max> fragmentSamplers;
 	};
 
 public:

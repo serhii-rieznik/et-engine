@@ -212,7 +212,7 @@ std::string Material::generateInputLayout(const VertexDeclaration& decl)
 	return layout;
 }
 
-Program::Pointer Material::loadCode(const std::string& codeString, const std::string& baseFolder, 
+Program::Pointer Material::loadCode(const std::string& codeString, const std::string& baseFolder,
 	Dictionary defines, const VertexDeclaration& decl, StringList& fileNames)
 {
 	application().pushSearchPath(baseFolder);
@@ -261,10 +261,10 @@ Program::Pointer Material::loadCode(const std::string& codeString, const std::st
 		{
 			log::warning("Unknown directive in source code");
 		}
-	}, {ParseDirective::StageDefine});
-	
+	}, { ParseDirective::StageDefine });
+
 	fileNames.emplace_back(codeFileName);
-	
+
 	return _renderer->createProgram(programSource);
 }
 
@@ -336,52 +336,52 @@ void MaterialInstance::buildTextureSet(const std::string& pt)
 	const Program::Reflection& reflection = configuration(pt).program->reflection();
 
 	TextureSet::Description description;
-	for (const auto& i : reflection.textures.fragmentTextures)
-	{
-		description.fragmentTextures[i.second] = base()->textures[i.second].object;
-		if (textures[i.second].object.valid())
-			description.fragmentTextures[i.second] = textures[i.second].object;
-	}
 	for (const auto& i : reflection.textures.vertexTextures)
 	{
+		ET_ASSERT(i.second < MaterialTexture_max);
 		description.vertexTextures[i.second] = base()->textures[i.second].object;
 		if (textures[i.second].object.valid())
 			description.vertexTextures[i.second] = textures[i.second].object;
-	}
-	for (const auto& i : reflection.textures.fragmentSamplers)
-	{
-		description.fragmentSamplers[i.second] = base()->samplers[i.second].object;
-		if (samplers[i.second].object.valid())
-			description.fragmentSamplers[i.second] = samplers[i.second].object;
-	}
-	for (const auto& i : reflection.textures.vertexSamplers)
-	{
-		description.vertexSamplers[i.second] = base()->samplers[i.second].object;
-		if (samplers[i.second].object.valid())
-			description.vertexSamplers[i.second] = samplers[i.second].object;
+		if (description.vertexTextures[i.second].invalid())
+			description.vertexTextures[i.second] = _renderer->checkersTexture();
 	}
 
-	for (auto& i : description.fragmentTextures)
+	for (const auto& i : reflection.textures.fragmentTextures)
 	{
-		if (i.second.invalid())
-			i.second = _renderer->checkersTexture();
-	}
-	for (auto& i : description.vertexTextures)
-	{
-		if (i.second.invalid())
-			i.second = _renderer->checkersTexture();
-	}
-	for (auto& i : description.fragmentSamplers)
-	{
-		if (i.second.invalid())
-			i.second = _renderer->defaultSampler();
-	}
-	for (auto& i : description.vertexSamplers)
-	{
-		if (i.second.invalid())
-			i.second = _renderer->defaultSampler();
+		ET_ASSERT(i.second < MaterialTexture_max);
+		description.fragmentTextures[i.second] = base()->textures[i.second].object;
+		if (textures[i.second].object.valid())
+			description.fragmentTextures[i.second] = textures[i.second].object;
+		if (description.fragmentTextures[i.second].invalid())
+			description.fragmentTextures[i.second] = _renderer->checkersTexture();
 	}
 	
+	for (const auto& i : reflection.textures.vertexSamplers)
+	{
+		ET_ASSERT(i.second >= MaterialSamplerBindingOffset);
+		ET_ASSERT(i.second - MaterialSamplerBindingOffset < MaterialTexture_max);
+
+		uint32_t index = i.second - MaterialSamplerBindingOffset;
+		description.vertexSamplers[index] = base()->samplers[i.second].object;
+		if (samplers[i.second].object.valid())
+			description.vertexSamplers[index] = samplers[i.second].object;
+		if (description.vertexSamplers[index].invalid())
+			description.vertexSamplers[index] = _renderer->defaultSampler();
+	}
+
+	for (const auto& i : reflection.textures.fragmentSamplers)
+	{
+		ET_ASSERT(i.second >= MaterialSamplerBindingOffset);
+		ET_ASSERT(i.second - MaterialSamplerBindingOffset < MaterialTexture_max);
+		
+		uint32_t index = i.second - MaterialSamplerBindingOffset;
+		description.fragmentSamplers[index] = base()->samplers[i.second].object;
+		if (samplers[index].object.valid())
+			description.fragmentSamplers[index] = samplers[i.second].object;
+		if (description.fragmentSamplers[index].invalid())
+			description.fragmentSamplers[index] = _renderer->defaultSampler();
+	}
+
 	_textureSets[pt].obj = _renderer->createTextureSet(description);
 	_textureSets[pt].valid = true;
 }
@@ -390,29 +390,31 @@ void MaterialInstance::buildConstantBuffer(const std::string& pt)
 {
 	ET_ASSERT(isInstance());
 
+	Holder<ConstantBufferEntry::Pointer>& holder = _constBuffers[pt];
+
 	const Program::Reflection& reflection = configuration(pt).program->reflection();
 	if (reflection.materialVariablesBufferSize == 0)
 	{
-		_constBuffers[pt].obj.reset(nullptr);
-		_constBuffers[pt].valid = true;
-		return;
+		holder.obj.reset(nullptr);
+		holder.valid = true;
 	}
+	else
+	{
+		holder.obj = _renderer->sharedConstantBuffer().allocate(reflection.materialVariablesBufferSize, ConstantBufferStaticAllocation);
 
-	ConstantBufferEntry::Pointer entry = _renderer->sharedConstantBuffer().staticAllocate(reflection.materialVariablesBufferSize);
+		auto setFunc = [&, this](const OptionalValue& p) {
+			if (p.isSet() && reflection.materialVariables[p.binding].enabled)
+				memcpy(holder.obj->data() + reflection.materialVariables[p.binding].offset, p.data, p.size);
+		};
 
-	auto setFunc = [&, this](const OptionalValue& p) {
-		if (p.isSet() && reflection.materialVariables[p.binding].enabled)
-			memcpy(entry->data() + reflection.materialVariables[p.binding].offset, p.data, p.size);
-	};
+		for (const auto& p : base()->properties)
+			setFunc(p.second);
 
-	for (const auto& p : base()->properties)
-		setFunc(p.second);
+		for (const auto& p : properties)
+			setFunc(p.second);
 
-	for (const auto& p : properties)
-		setFunc(p.second);
-
-	_constBuffers[pt].obj = entry;
-	_constBuffers[pt].valid = true;
+		holder.valid = true;
+	}
 }
 
 const TextureSet::Pointer& MaterialInstance::textureSet(const std::string& pt)
@@ -477,16 +479,16 @@ void Material::initDefaultHeader()
 		std::string smpName = materialSamplerToString(static_cast<MaterialTexture>(i));
 		texName[0] = toupper(texName[0]);
 		smpName[0] = toupper(smpName[0]);
-		printPos += sprintf(buffer + printPos, "#define %sBinding %u\n#define %sBinding %u\n", 
+		printPos += sprintf(buffer + printPos, "#define %sBinding %u\n#define %sBinding %u\n",
 			texName.c_str(), i, smpName.c_str(), i + MaterialSamplerBindingOffset);
 	}
 	{
-		printPos += sprintf(buffer + printPos, 
+		printPos += sprintf(buffer + printPos,
 			"#define ObjectVariablesBufferIndex %u\n"
 			"#define MaterialVariablesBufferIndex %u\n",
 			ObjectVariablesBufferIndex, MaterialVariablesBufferIndex);
 	}
-	
+
 	_shaderDefaultHeader += buffer;
 
 	_shaderDefaultHeader += R"(

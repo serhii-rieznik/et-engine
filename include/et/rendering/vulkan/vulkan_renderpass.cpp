@@ -93,6 +93,7 @@ public:
 	Map<uint64_t, VulkanRenderSubpass> subpasses;
 	Vector<VulkanRenderSubpass> subpassSequence;
 	uint32_t currentSubpassIndex = 0;
+	uint32_t frameIndex = 0;
 
 	std::atomic_bool recording{ false };
 
@@ -112,14 +113,17 @@ VulkanRenderPass::VulkanRenderPass(VulkanRenderer* renderer, VulkanState& vulkan
 	_private->generateDynamicDescriptorSet(this);
 	_private->subpassSequence.reserve(64);
 
-	VkSemaphoreCreateInfo semaphoreInfo = { VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO };
-	VULKAN_CALL(vkCreateSemaphore(vulkan.device, &semaphoreInfo, nullptr, &_private->semaphore));
+	for (uint32_t i = 0; i < RendererFrameCount; ++i)
+	{
+		VkSemaphoreCreateInfo semaphoreInfo = { VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO };
+		VULKAN_CALL(vkCreateSemaphore(vulkan.device, &semaphoreInfo, nullptr, &_private->content[i].semaphore));
 
-	VkCommandBufferAllocateInfo info = { VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO };
-	info.commandPool = vulkan.commandPool;
-	info.commandBufferCount = RendererFrameCount;
-	info.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-	VULKAN_CALL(vkAllocateCommandBuffers(vulkan.device, &info, _private->commandBuffers.data()));
+		VkCommandBufferAllocateInfo info = { VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO };
+		info.commandPool = vulkan.commandPool;
+		info.commandBufferCount = 1;
+		info.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+		VULKAN_CALL(vkAllocateCommandBuffers(vulkan.device, &info, &_private->content[i].commandBuffer));
+	}
 
 	Vector<VkAttachmentDescription> attachments;
 	attachments.reserve(MaxRenderTargets + 1);
@@ -218,7 +222,11 @@ VulkanRenderPass::~VulkanRenderPass()
 		vkDestroyFramebuffer(_private->vulkan.device, fb.second.beginInfo.framebuffer, nullptr);
 
 	vkDestroyRenderPass(_private->vulkan.device, _private->renderPass, nullptr);
-	vkFreeCommandBuffers(_private->vulkan.device, _private->vulkan.commandPool, RendererFrameCount, _private->commandBuffers.data());
+	for (uint32_t i = 0; i < RendererFrameCount; ++i)
+	{
+		vkFreeCommandBuffers(_private->vulkan.device, _private->vulkan.commandPool, 1, &_private->content[i].commandBuffer);
+		vkDestroySemaphore(_private->vulkan.device, _private->content[i].semaphore, nullptr);
+	}
 	vkFreeDescriptorSets(_private->vulkan.device, _private->vulkan.descriptorPool, 1, &_private->dynamicDescriptorSet);
 	vkDestroyDescriptorSetLayout(_private->vulkan.device, _private->dynamicDescriptorSetLayout, nullptr);
 	ET_PIMPL_FINALIZE(VulkanRenderPass);
@@ -234,6 +242,7 @@ void VulkanRenderPass::begin(const RenderPassBeginInfo& beginInfo)
 	ET_ASSERT(_private->recording == false);
 
 	_private->subpassSequence.clear();
+	_private->frameIndex = _private->renderer->frameIndex();
 
 	Texture::Pointer renderTarget = info().color[0].texture;
 	Texture::Pointer depthTarget = info().depth.texture;
@@ -333,8 +342,8 @@ void VulkanRenderPass::begin(const RenderPassBeginInfo& beginInfo)
 	
 	_private->recording = true;
 	_private->currentSubpassIndex = 0;
-	_private->commands[_private->vulkan.swapchain.frameIndex].clear();
-	_private->commands[_private->vulkan.swapchain.frameIndex].emplace_back(beginInfo.subpasses.front());
+	_private->commands[_private->frameIndex].clear();
+	_private->commands[_private->frameIndex].emplace_back(beginInfo.subpasses.front());
 }
 
 void VulkanRenderPass::nextSubpass()
@@ -344,9 +353,9 @@ void VulkanRenderPass::nextSubpass()
 	if (_private->currentSubpassIndex + 1 >= _private->subpassSequence.size())
 		return;
 
-	_private->commands[_private->vulkan.swapchain.frameIndex].emplace_back(VulkanCommand::Type::EndRenderPass);
-	_private->commands[_private->vulkan.swapchain.frameIndex].emplace_back(VulkanCommand::Type::NextRenderPass);
-	_private->commands[_private->vulkan.swapchain.frameIndex].emplace_back(VulkanCommand::Type::BeginRenderPass);
+	_private->commands[_private->frameIndex].emplace_back(VulkanCommand::Type::EndRenderPass);
+	_private->commands[_private->frameIndex].emplace_back(VulkanCommand::Type::NextRenderPass);
+	_private->commands[_private->frameIndex].emplace_back(VulkanCommand::Type::BeginRenderPass);
 	++_private->currentSubpassIndex;
 }
 
@@ -370,7 +379,9 @@ void VulkanRenderPass::pushRenderBatch(const RenderBatch::Pointer& inBatch)
 		setSharedVariable(ObjectVariable::WorldRotationTransform, inBatch->rotationTransformation());
 		setSharedVariable(ObjectVariable::DeltaTime, application().mainRunLoop().lastFrameTime());
 		
-		objectVariables = _private->renderer->sharedConstantBuffer().dynamicAllocate(program->reflection().objectVariablesBufferSize);
+		objectVariables = _private->renderer->sharedConstantBuffer().allocate(
+			program->reflection().objectVariablesBufferSize, ConstantBufferDynamicAllocation);
+
 		for (const auto& v : sharedVariables())
 		{
 			const Program::Variable& var = program->reflection().objectVariables[v.first];
@@ -385,9 +396,9 @@ void VulkanRenderPass::pushRenderBatch(const RenderBatch::Pointer& inBatch)
 		material->setSampler(sh.first, sh.second.second);
 	}
 
-	_private->commands[_private->vulkan.swapchain.frameIndex].emplace_back(VulkanCommand::Type::RenderBatch);
+	_private->commands[_private->frameIndex].emplace_back(VulkanCommand::Type::RenderBatch);
 
-	VulkanRenderBatch& batch = _private->commands[_private->vulkan.swapchain.frameIndex].back().batch;
+	VulkanRenderBatch& batch = _private->commands[_private->frameIndex].back().batch;
 	batch.textureSet = material->textureSet(info().name);
 	batch.dynamicOffsets[0] = objectVariables;
 	batch.dynamicOffsets[1] = material->constantBufferData(info().name);
@@ -401,12 +412,12 @@ void VulkanRenderPass::pushRenderBatch(const RenderBatch::Pointer& inBatch)
 
 void VulkanRenderPass::pushImageBarrier(const Texture::Pointer& tex, const ResourceBarrier& barrier)
 {
-	_private->commands[_private->vulkan.swapchain.frameIndex].emplace_back(tex, barrier);
+	_private->commands[_private->frameIndex].emplace_back(tex, barrier);
 }
 
 void VulkanRenderPass::copyImage(const Texture::Pointer& tFrom, const Texture::Pointer& tTo, const CopyDescriptor& desc)
 {
-	_private->commands[_private->vulkan.swapchain.frameIndex].emplace_back(tFrom, tTo, desc);
+	_private->commands[_private->frameIndex].emplace_back(tFrom, tTo, desc);
 }
 
 void VulkanRenderPass::end()
@@ -414,14 +425,14 @@ void VulkanRenderPass::end()
 	ET_ASSERT(_private->recording);
 
 	_private->recording = false;
-	_private->commands[_private->vulkan.swapchain.frameIndex].emplace_back(VulkanCommand::Type::EndRenderPass);
+	_private->commands[_private->frameIndex].emplace_back(VulkanCommand::Type::EndRenderPass);
 }
 
 void VulkanRenderPass::recordCommandBuffer()
 {
 	ET_ASSERT(_private->recording == false);
 
-	VkCommandBuffer commandBuffer = _private->commandBuffers[_private->vulkan.swapchain.frameIndex];
+	VkCommandBuffer commandBuffer = _private->content[_private->frameIndex].commandBuffer;
 	VkPipeline lastPipeline = nullptr;
 	VkBuffer lastVertexBuffer = nullptr;
 	VkBuffer lastIndexBuffer = nullptr;
@@ -439,7 +450,7 @@ void VulkanRenderPass::recordCommandBuffer()
 	VULKAN_CALL(vkBeginCommandBuffer(commandBuffer, &commandBufferBeginInfo));
 
 	uint32_t subframeIndex = 0;
-	for (const VulkanCommand& cmd : _private->commands[_private->vulkan.swapchain.frameIndex])
+	for (const VulkanCommand& cmd : _private->commands[_private->frameIndex])
 	{
 		if (cmd.type == VulkanCommand::Type::BeginRenderPass)
 		{
@@ -544,33 +555,27 @@ void VulkanRenderPass::recordCommandBuffer()
 	VULKAN_CALL(vkEndCommandBuffer(commandBuffer));
 }
 
+uint32_t VulkanRenderPass::recordedFrameIndex() const
+{
+	return _private->frameIndex;
+}
+
 void VulkanRenderPassPrivate::generateDynamicDescriptorSet(RenderPass* pass)
 {
-	VulkanBuffer::Pointer cb = renderer->sharedConstantBuffer().buffer();
-	VkDescriptorBufferInfo objectBufferInfo = { cb->nativeBuffer().buffer, 0, sizeof(mat4) * ObjectVariable_max };
-	VkDescriptorBufferInfo materialBufferInfo = { cb->nativeBuffer().buffer, 0, sizeof(mat4) * MaterialVariable_max };
-	VkDescriptorSetLayoutBinding bindings[] = { { }, {  } };
-	VkWriteDescriptorSet writeSets[] = { { VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET }, { VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET } };
-	{
-		bindings[0] = { ObjectVariablesBufferIndex, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1 };
-		bindings[0].stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
-		writeSets[0].descriptorCount = bindings[0].descriptorCount;
-		writeSets[0].descriptorType = bindings[0].descriptorType;
-		writeSets[0].dstBinding = bindings[0].binding;
-		writeSets[0].pBufferInfo = &objectBufferInfo;
-
-		bindings[1] = { MaterialVariablesBufferIndex, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1 };
-		bindings[1].stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
-		writeSets[1].descriptorCount = bindings[1].descriptorCount;
-		writeSets[1].descriptorType = bindings[1].descriptorType;
-		writeSets[1].dstBinding = bindings[1].binding;
-		writeSets[1].pBufferInfo = &materialBufferInfo;
-	}
+	VkDescriptorSetLayoutBinding bindings[] = { {}, {} };
+	bindings[0] = { ObjectVariablesBufferIndex, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1 };
+	bindings[0].stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
+	bindings[1] = { MaterialVariablesBufferIndex, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1 };
+	bindings[1].stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
 
 	VkDescriptorSetLayoutCreateInfo descriptorSetLayoutCreateInfo = { VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO };
 	descriptorSetLayoutCreateInfo.bindingCount = sizeof(bindings) / sizeof(bindings[0]);
 	descriptorSetLayoutCreateInfo.pBindings = bindings;
 	VULKAN_CALL(vkCreateDescriptorSetLayout(vulkan.device, &descriptorSetLayoutCreateInfo, nullptr, &dynamicDescriptorSetLayout));
+
+	VulkanBuffer::Pointer cb = renderer->sharedConstantBuffer().buffer();
+	VkDescriptorBufferInfo objectBufferInfo = { cb->nativeBuffer().buffer, 0, sizeof(mat4) * ObjectVariable_max };
+	VkDescriptorBufferInfo materialBufferInfo = { cb->nativeBuffer().buffer, 0, sizeof(mat4) * MaterialVariable_max };
 
 	VkDescriptorSetAllocateInfo descriptorAllocInfo = { VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO };
 	descriptorAllocInfo.pSetLayouts = &dynamicDescriptorSetLayout;
@@ -578,9 +583,19 @@ void VulkanRenderPassPrivate::generateDynamicDescriptorSet(RenderPass* pass)
 	descriptorAllocInfo.descriptorSetCount = 1;
 	VULKAN_CALL(vkAllocateDescriptorSets(vulkan.device, &descriptorAllocInfo, &dynamicDescriptorSet));
 
-	for (VkWriteDescriptorSet& wd : writeSets)
-		wd.dstSet = dynamicDescriptorSet;
-
+	VkWriteDescriptorSet writeSets[] = { { VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET },{ VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET } };
+	{
+		writeSets[0].descriptorCount = bindings[0].descriptorCount;
+		writeSets[0].descriptorType = bindings[0].descriptorType;
+		writeSets[0].dstBinding = bindings[0].binding;
+		writeSets[0].pBufferInfo = &objectBufferInfo;
+		writeSets[0].dstSet = dynamicDescriptorSet;
+		writeSets[1].descriptorCount = bindings[1].descriptorCount;
+		writeSets[1].descriptorType = bindings[1].descriptorType;
+		writeSets[1].dstBinding = bindings[1].binding;
+		writeSets[1].pBufferInfo = &materialBufferInfo;
+		writeSets[1].dstSet = dynamicDescriptorSet;
+	}
 	uint32_t writeSetsCount = static_cast<uint32_t>(sizeof(writeSets) / sizeof(writeSets[0]));
 	vkUpdateDescriptorSets(vulkan.device, writeSetsCount, writeSets, 0, nullptr);
 }

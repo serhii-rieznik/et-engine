@@ -8,7 +8,7 @@ namespace et
 
 #define CASE_TO_STRING(C) case C: return #C;
 
-const char* vulkanResultToString(VkResult result)
+const char* vulkan::resultToString(VkResult result)
 {
 	switch (result)
 	{
@@ -289,12 +289,12 @@ void VulkanSwapchain::createSizeDependentResources(VulkanState& vulkan, const ve
 
 void VulkanSwapchain::acquireNextImage(VulkanState& vulkan)
 {
-	VkFence currentFence = frames[frameIndex].imageFence;
+	VkFence currentFence = frames[frameNumber % RendererFrameCount].imageFence;
 	VULKAN_CALL(vkWaitForFences(vulkan.device, 1, &currentFence, VK_TRUE, UINT64_MAX));
 	VULKAN_CALL(vkResetFences(vulkan.device, 1, &currentFence));
 	
 	VULKAN_CALL(vkAcquireNextImageKHR(vulkan.device, swapchain, UINT64_MAX,
-		frames[frameIndex].imageAcquired, nullptr, &swapchainImageIndex));
+		frames[frameNumber % RendererFrameCount].imageAcquired, nullptr, &swapchainImageIndex));
 }
 
 void VulkanSwapchain::present(VulkanState& vulkan)
@@ -304,11 +304,10 @@ void VulkanSwapchain::present(VulkanState& vulkan)
 	info.pSwapchains = &swapchain;
 	info.pImageIndices = &swapchainImageIndex;
 	info.waitSemaphoreCount = 1;
-	info.pWaitSemaphores = &frames[frameIndex].submitCompleted;
+	info.pWaitSemaphores = &frames[frameNumber % RendererFrameCount].submitCompleted;
 	VULKAN_CALL(vkQueuePresentKHR(vulkan.queue, &info));
 	
-	uint32_t currentFrame = frameIndex;
-	frameIndex = (frameIndex + 1) % RendererFrameCount;
+	++frameNumber;
 }
 
 namespace vulkan

@@ -64,12 +64,12 @@ struct VulkanSwapchain
     } depthBuffer;
 	
 	Vector<Frame> frames;
-	uint32_t frameIndex = 0;
+	uint32_t frameNumber = 0;
 
 	uint32_t swapchainImageIndex = static_cast<uint32_t>(-1);
 
 	const Frame& currentFrame() const
-		{ return frames.at(frameIndex); }
+		{ return frames.at(frameNumber % RendererFrameCount); }
 };
 
 struct VulkanState
@@ -114,9 +114,14 @@ struct VulkanNativeRenderPass
 	VkRenderPass renderPass = nullptr;
 	VkDescriptorSetLayout dynamicDescriptorSetLayout = nullptr;
 	VkDescriptorSet dynamicDescriptorSet = nullptr;
-	VkSemaphore semaphore = nullptr;
 
-	std::array<VkCommandBuffer, RendererFrameCount> commandBuffers { };
+	struct RenderPassContent
+	{
+		VkSemaphore semaphore = nullptr;
+		VkCommandBuffer commandBuffer = nullptr;
+	};
+
+	std::array<RenderPassContent, RendererFrameCount> content;
 };
 
 enum DescriptorSetClass : uint32_t
@@ -211,16 +216,17 @@ void imageBarrier(VulkanState&, VkCommandBuffer, VkImage, VkImageAspectFlags asp
 	VkImageLayout layoutFrom, VkImageLayout layoutTo,
 	VkPipelineStageFlags stageFrom, VkPipelineStageFlags stageTo, 
 	uint32_t startMipLevel = 0, uint32_t mipLevelsCount = 1);
+
+const char* resultToString(VkResult result);
 }
 
-const char* vulkanResultToString(VkResult result);
 
 #define VULKAN_CALL(expr) do { \
 	VkResult localVkResult = (expr); \
 	if (localVkResult != VkResult::VK_SUCCESS) \
 	{ \
 		et::log::error("Vulkan call failed: %s\nat %s [%d]\nresult = %s", \
-			(#expr), __FILE__, __LINE__, vulkanResultToString(localVkResult)); \
+			(#expr), __FILE__, __LINE__, vulkan::resultToString(localVkResult)); \
 		et::debug::debugBreak(); \
 	}} while (0)
 

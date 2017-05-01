@@ -52,6 +52,7 @@ public:
 	virtual void present() = 0;
 
 	virtual uint32_t frameIndex() const = 0;
+	virtual uint32_t frameNumber() const = 0;
 
 	virtual RenderPass::Pointer allocateRenderPass(const RenderPass::ConstructionInfo&) = 0;
 	virtual void submitRenderPass(RenderPass::Pointer) = 0;
@@ -231,9 +232,9 @@ inline Sampler::Pointer RenderInterface::nearestSampler()
 
 inline void RenderInterface::initInternalStructures()
 {
-	_sharedConstantBuffer.init(this);
+	_sharedConstantBuffer.init(this, ConstantBufferStaticAllocation | ConstantBufferDynamicAllocation);
+	
 	_sharedMaterialLibrary.init(this);
-
 	whiteTexture();
 	blackTexture();
 	checkersTexture();
@@ -244,6 +245,7 @@ inline void RenderInterface::shutdownInternalStructures()
 {
 	_sharedMaterialLibrary.shutdown();
 	_sharedConstantBuffer.shutdown();
+
 	_defaultSampler.reset(nullptr);
 	_checkersTexture.reset(nullptr);
 	_whiteTexture.reset(nullptr);

@@ -14,14 +14,21 @@
 namespace et
 {
 
+enum : uint32_t
+{
+	ConstantBufferStaticAllocation = 1 << 1,
+	ConstantBufferDynamicAllocation = 1 << 2,
+	InvalidFlushFrame = std::numeric_limits<uint32_t>::max()
+};
+
 class ConstantBufferEntry : public Shared
 {
 public:
 	ET_DECLARE_POINTER(ConstantBufferEntry);
 
 public:
-	ConstantBufferEntry(uint32_t off, uint32_t sz, uint8_t* ptr, bool dyn) :
-		_data(ptr), _offset(off), _length(sz), _isDynamic(dyn) { }
+	ConstantBufferEntry(uint32_t off, uint32_t sz, uint8_t* ptr, uint32_t aCl) :
+		_data(ptr), _offset(off), _length(sz), _allocationClass(aCl) { }
 
 	uint32_t offset() const
 		{ return _offset; }
@@ -38,19 +45,27 @@ public:
 	bool valid() const
 		{ return (_length > 0) && (_data != nullptr); }
 
-	bool isDynamic() const 
-		{ return _isDynamic; }
+	uint32_t allocationClass() const 
+		{ return _allocationClass; }
+
+	uint32_t flushFrame() const 
+		{ return _flushFrame;  }
+
+	void flush(uint32_t frame) 
+		{ _flushFrame = frame; }
 
 	bool operator == (const ConstantBufferEntry& r) const 
 	{
-		return (_data == r._data) && (_offset == r._offset) && (_length == r._length) && (_isDynamic == r._isDynamic);
+		return (_data == r._data) && (_offset == r._offset) && (_length == r._length) && 
+			(_allocationClass == r._allocationClass);
 	}
 
 private:
 	uint8_t* _data = nullptr;
+	uint32_t _allocationClass = 0;
 	uint32_t _offset = 0;
 	uint32_t _length = 0;
-	bool _isDynamic = false;
+	uint32_t _flushFrame = InvalidFlushFrame;
 };
 
 class RenderInterface;
@@ -60,22 +75,21 @@ class ConstantBuffer
 public:
 	enum
 	{
-		Capacity = 32 * 1024 * 1024,
-		Granularity = 256
+		Capacity = 16 * 1024 * 1024,
+		Granularity = 256,
 	};
 
 public:
 	ConstantBuffer();
 	~ConstantBuffer();
 
-	void init(RenderInterface*);
+	void init(RenderInterface*, uint32_t allowedAllocations);
 	void shutdown();
 
 	Buffer::Pointer buffer() const;
-	void flush();
+	void flush(uint32_t);
 
-	const ConstantBufferEntry::Pointer& staticAllocate(uint32_t size);
-	const ConstantBufferEntry::Pointer& dynamicAllocate(uint32_t size);
+	const ConstantBufferEntry::Pointer& allocate(uint32_t size, uint32_t allocationClass);
 
 	// void free(const ConstantBufferEntry::Pointer&);
 

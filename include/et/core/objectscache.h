@@ -45,16 +45,12 @@ private:
 	{
 		LoadableObject::Pointer object;
 		ObjectLoader::Pointer loader;
-		std::unordered_map<std::string, uint64_t> identifiers;
+		UnorderedMap<std::string, uint64_t> identifiers;
 
-		ObjectProperty()
-		{
-		}
+		ObjectProperty() = default;
 
 		ObjectProperty(LoadableObject::Pointer o, ObjectLoader::Pointer l) :
-			object(o), loader(l)
-		{
-		}
+			object(o), loader(l) { }
 	};
 
 	using ObjectPropertyList = Vector<ObjectProperty>;

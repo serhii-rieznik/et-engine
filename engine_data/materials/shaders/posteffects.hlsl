@@ -42,12 +42,12 @@ float4 fragmentMain(VSOutput fsIn) : SV_Target0
 
 	#define delta 0.5
 	#define lowerRange 0.001
-	float currentLevel = extraParameters.x;
-	float previousLevel = max(0.0, currentLevel - 1.0);
+	uint currentLevel = (uint)(extraParameters.x);
+	uint previousLevel = max(0.0, currentLevel - 1);
 
-	float w = 0;
-	float h = 0;
-	float levels = 0;
+	uint w = 0;
+	uint h = 0;
+	uint levels = 0;
 	baseColorTexture.GetDimensions(previousLevel, w, h, levels);
 
 	float4 sX = baseColorTexture.SampleLevel(baseColorSampler, fsIn.texCoord0, previousLevel);
@@ -57,13 +57,13 @@ float4 fragmentMain(VSOutput fsIn) : SV_Target0
 	float4 s3 = baseColorTexture.SampleLevel(baseColorSampler, fsIn.texCoord0 + float2( delta / w,  delta / h), previousLevel);
 	float4 average = 0.2 * (sX + s0 + s1 + s2 + s3);
 	
-	if (currentLevel == 0.0)
+	if (currentLevel == 0)
 	{
 		float lum = dot(average.xyz, float3(0.2989, 0.5870, 0.1140));
 		return log(max(lum, lowerRange));
 	}
 
-	if (currentLevel + 1.0 >= levels)
+	if (currentLevel + 1 >= levels)
 	{
 		float previousExposure = shadowTexture.SampleLevel(shadowSampler, float2(0.5, 0.5), 0.0).x;
 		float expoCorrection = 0.0;

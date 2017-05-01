@@ -300,13 +300,13 @@ RenderPass::Pointer VulkanRenderer::allocateRenderPass(const RenderPass::Constru
 
 void VulkanRenderer::submitRenderPass(RenderPass::Pointer inPass)
 {
-	_private->passes[_private->swapchain.frameIndex].emplace_back(inPass);
+	_private->passes[frameIndex()].emplace_back(inPass);
 }
 
 void VulkanRenderer::begin()
 {
 	_private->swapchain.acquireNextImage(_private->vulkan());
-	_private->passes[_private->swapchain.frameIndex].clear();
+	_private->passes[frameIndex()].clear();
 }
 
 void VulkanRenderer::present()
@@ -314,15 +314,18 @@ void VulkanRenderer::present()
 	static VkPipelineStageFlags firstWaitStage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
 	static VkPipelineStageFlags lastWaitStage = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
 
-	Vector<VulkanRenderPass::Pointer>& passes = _private->passes[_private->swapchain.frameIndex];
+	Vector<VulkanRenderPass::Pointer>& passes = _private->passes[frameIndex()];
 	std::stable_sort(passes.begin(), passes.end(), [](const VulkanRenderPass::Pointer& l, const VulkanRenderPass::Pointer& r) {
 		return l->info().priority > r->info().priority;
 	});
-
-	sharedConstantBuffer().flush();
+	
+	sharedConstantBuffer().flush(frameNumber());
 
 	for (VulkanRenderPass::Pointer pass : passes)
+	{
 		pass->recordCommandBuffer();
+		ET_ASSERT(pass->recordedFrameIndex() == frameIndex());
+	}
 
 	size_t maxQueueSize = 2 * (1 + std::min(32ull, sqr(_private->passes.size())));
 	_private->allSubmits.clear();
@@ -380,16 +383,16 @@ void VulkanRenderer::present()
 		}
 
 		const VulkanRenderPass::Pointer& passI = *i;
-		_private->signalSemaphores.emplace_back(passI->nativeRenderPass().semaphore);
-		_private->commandBuffers.emplace_back(passI->nativeRenderPass().commandBuffers[_private->swapchain.frameIndex]);
+		_private->signalSemaphores.emplace_back(passI->nativeRenderPass().content[frameIndex()].semaphore);
+		_private->commandBuffers.emplace_back(passI->nativeRenderPass().content[frameIndex()].commandBuffer);
 		++commandBuffersEnd;
 		++signalEnd;
 
 		for (auto j = i + 1; (j != e) && ((*j)->info().priority == (*i)->info().priority); ++j, ++i)
 		{
 			const VulkanRenderPass::Pointer& passJ = *j;
-			_private->commandBuffers.emplace_back(passJ->nativeRenderPass().commandBuffers[_private->swapchain.frameIndex]);
-			_private->signalSemaphores.emplace_back(passJ->nativeRenderPass().semaphore);
+			_private->commandBuffers.emplace_back(passJ->nativeRenderPass().content[frameIndex()].commandBuffer);
+			_private->signalSemaphores.emplace_back(passJ->nativeRenderPass().content[frameIndex()].semaphore);
 			++commandBuffersEnd;
 			++signalEnd;
 		}
@@ -451,7 +454,12 @@ void VulkanRenderer::present()
 
 uint32_t VulkanRenderer::frameIndex() const
 {
-	return _private->swapchain.frameIndex;
+	return _private->swapchain.frameNumber % RendererFrameCount;
+}
+
+uint32_t VulkanRenderer::frameNumber() const
+{
+	return _private->swapchain.frameNumber;
 }
 
 }

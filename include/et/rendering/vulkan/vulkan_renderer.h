@@ -39,6 +39,7 @@ public:
 	void submitRenderPass(RenderPass::Pointer) override;
 
 	uint32_t frameIndex() const override;
+	uint32_t frameNumber() const override;
 
 	/*
 	 * Buffers

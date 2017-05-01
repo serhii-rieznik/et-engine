@@ -32,7 +32,7 @@ public:
 		CullMode cullMode = CullMode::Disabled;
 		StringList usedFiles;
 	};
-	using ConfigurationMap = Map<std::string, Configuration>;
+	using ConfigurationMap = UnorderedMap<std::string, Configuration>;
 
 public:
 	Material(RenderInterface*);
@@ -132,8 +132,8 @@ private:
 
 private:
 	Material::Pointer _base;
-	std::map<std::string, Holder<TextureSet::Pointer>> _textureSets;
-	std::map<std::string, Holder<ConstantBufferEntry::Pointer>> _constBuffers;
+	UnorderedMap<std::string, Holder<TextureSet::Pointer>> _textureSets;
+	UnorderedMap<std::string, Holder<ConstantBufferEntry::Pointer>> _constBuffers;
 };
 
 template <class T>
