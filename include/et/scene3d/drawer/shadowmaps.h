@@ -36,8 +36,6 @@ private:
 	struct Renderables
 	{
 		RenderPass::Pointer shadowpass;
-		RenderBatchCollection batches;
-		RenderBatchCollection activeBatches;
 		Vector<Mesh::Pointer> meshes;
 
 		Material::Pointer debugMaterial;

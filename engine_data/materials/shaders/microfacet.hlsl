@@ -14,6 +14,7 @@ cbuffer MaterialVariables : DECL_BUFFER(Material)
 cbuffer ObjectVariables : DECL_BUFFER(Object)
 {
     row_major float4x4 viewProjectionTransform;
+    row_major float4x4 previousViewProjectionTransform;
     row_major float4x4 worldTransform;
     row_major float4x4 worldRotationTransform;
     row_major float4x4 lightProjectionTransform;
@@ -40,6 +41,8 @@ SamplerState opacitySampler : DECL_SAMPLER(Opacity);
 struct VSOutput 
 {
     float4 position : SV_Position;
+   	float4 projectedPosition;
+   	float4 previousProjectedPosition;
     float3 normal;
     float3 toLight;
     float3 toCamera;
@@ -64,10 +67,12 @@ VSOutput vertexMain(VSInput vsIn)
     vsOut.toCamera = (cameraPosition.xyz - transformedPosition.xyz).xyz;
     vsOut.toLight = (lightDirection.xyz - transformedPosition.xyz * lightDirection.w).xyz;
     vsOut.lightCoord = mul(transformedPosition, lightProjectionTransform);
-    vsOut.position = mul(transformedPosition, viewProjectionTransform);
     vsOut.invTransformT = float3(tTangent.x, tBiTangent.x, vsOut.normal.x);
     vsOut.invTransformB = float3(tTangent.y, tBiTangent.y, vsOut.normal.y);
     vsOut.invTransformN = float3(tTangent.z, tBiTangent.z, vsOut.normal.z);
+    vsOut.projectedPosition = mul(transformedPosition, viewProjectionTransform);
+    vsOut.previousProjectedPosition = mul(transformedPosition, previousViewProjectionTransform);
+    vsOut.position = vsOut.projectedPosition;
     return vsOut;
 }
 
@@ -77,7 +82,13 @@ VSOutput vertexMain(VSInput vsIn)
 #include "atmosphere.h"
 #include "importance-sampling.h"
 
-float4 fragmentMain(VSOutput fsIn) : SV_Target0
+struct FSOutput 
+{
+	float4 color : SV_Target0;
+	float2 velocity : SV_Target1;
+};
+
+FSOutput fragmentMain(VSOutput fsIn)
 {
     float4 normalSample = normalTexture.Sample(normalSampler, fsIn.texCoord0);
     float4 baseColorSample = baseColorTexture.Sample(baseColorSampler, fsIn.texCoord0);
@@ -125,6 +136,13 @@ float4 fragmentMain(VSOutput fsIn) : SV_Target0
     float3 inScatter = lightColor * inScatteringAtConstantHeight(originPosition, worldPosition, wsLight, float2(phaseR, phaseM));
 
     result = result * outScatter + inScatter;
+
+    float2 currentPosition = fsIn.projectedPosition.xy / fsIn.projectedPosition.w;
+    float2 previousPosition = fsIn.previousProjectedPosition.xy / fsIn.previousProjectedPosition.w;
+    float2 velocity = currentPosition - previousPosition;
     
-    return float4(result, 1.0);
+    FSOutput output;
+    output.color = float4(result, 1.0);
+	output.velocity = velocity;
+    return output;
 }                              

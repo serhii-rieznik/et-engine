@@ -76,9 +76,9 @@ public:
 	Texture::Pointer loadTexture(const std::string& fileName, ObjectsCache& cache, 
 		TextureDescriptionUpdateMethod = nullTextureDescriptionUpdateMethod);
 
-	Texture::Pointer checkersTexture();
-	Texture::Pointer whiteTexture();
-	Texture::Pointer blackTexture();
+	const Texture::Pointer& checkersTexture();
+	const Texture::Pointer& whiteTexture();
+	const Texture::Pointer& blackTexture();
 	Texture::Pointer generateHammersleySet(uint32_t size);
 	
 	/*
@@ -95,9 +95,9 @@ public:
 	 * Sampler
 	 */
 	virtual Sampler::Pointer createSampler(const Sampler::Description&) = 0;
-	Sampler::Pointer defaultSampler();
-	Sampler::Pointer clampSampler();
-	Sampler::Pointer nearestSampler();
+	const Sampler::Pointer& defaultSampler();
+	const Sampler::Pointer& clampSampler();
+	const Sampler::Pointer& nearestSampler();
 
 protected:
 	void initInternalStructures();
@@ -141,7 +141,7 @@ inline Texture::Pointer RenderInterface::loadTexture(const std::string& fileName
 	return checkersTexture();
 }
 
-inline Texture::Pointer RenderInterface::checkersTexture()
+inline const Texture::Pointer& RenderInterface::checkersTexture()
 {
 	if (_checkersTexture.invalid())
 	{
@@ -166,7 +166,7 @@ inline Texture::Pointer RenderInterface::checkersTexture()
 	return _checkersTexture;
 }
 
-inline Texture::Pointer RenderInterface::whiteTexture()
+inline const Texture::Pointer& RenderInterface::whiteTexture()
 {
 	if (_whiteTexture.invalid())
 	{
@@ -180,7 +180,7 @@ inline Texture::Pointer RenderInterface::whiteTexture()
 	return _whiteTexture;
 }
 
-inline Texture::Pointer RenderInterface::blackTexture()
+inline const Texture::Pointer& RenderInterface::blackTexture()
 {
 	if (_blackTexture.invalid())
 	{
@@ -195,7 +195,7 @@ inline Texture::Pointer RenderInterface::blackTexture()
 }
 
 
-inline Sampler::Pointer RenderInterface::defaultSampler()
+inline const Sampler::Pointer& RenderInterface::defaultSampler()
 {
 	if (_defaultSampler.invalid())
 	{
@@ -205,7 +205,7 @@ inline Sampler::Pointer RenderInterface::defaultSampler()
 	return _defaultSampler;
 }
 
-inline Sampler::Pointer RenderInterface::clampSampler()
+inline const Sampler::Pointer& RenderInterface::clampSampler()
 {
 	if (_clampSampler.invalid())
 	{
@@ -218,7 +218,7 @@ inline Sampler::Pointer RenderInterface::clampSampler()
 	return _clampSampler;
 }
 
-inline Sampler::Pointer RenderInterface::nearestSampler()
+inline const Sampler::Pointer& RenderInterface::nearestSampler()
 {
 	if (_nearestSampler.invalid())
 	{

@@ -73,7 +73,7 @@ void CubemapProcessor::process(RenderInterface::Pointer& renderer, DrawerOptions
 			uint32_t level = i / 6;
 			uint32_t face = i % 6;
 			_downsampleMaterial->setFloat(MaterialVariable::ExtraParameters, static_cast<float>(level));
-			_downsampleBatch->setTransformation(_projections[face]);
+			_downsamplePass->setSharedVariable(ObjectVariable::WorldTransform, _projections[face]);
 			_downsamplePass->pushRenderBatch(_downsampleBatch);
 			_downsamplePass->nextSubpass();
 
@@ -95,7 +95,7 @@ void CubemapProcessor::process(RenderInterface::Pointer& renderer, DrawerOptions
 			uint32_t face = i % 6;
 			vec2 sz = vector2ToFloat(_tex[CubemapType::Downsampled]->size(level));
 			mtl->setVector(MaterialVariable::ExtraParameters, vec4(static_cast<float>(level), sz.x, sz.y, static_cast<float>(face)));
-			_specularConvolveBatch->setTransformation(_projections[face]);
+			_specularConvolvePass->setSharedVariable(ObjectVariable::WorldTransform, _projections[face]);
 			_specularConvolvePass->pushRenderBatch(_specularConvolveBatch);
 			_specularConvolvePass->nextSubpass();
 		}
@@ -230,7 +230,7 @@ void CubemapProcessor::drawDebug(RenderInterface::Pointer& renderer, const Drawe
 			for (uint32_t i = 0; i < CubemapLevels; ++i)
 			{
 				_cubemapDebugBatch->material()->setFloat(MaterialVariable::ExtraParameters, static_cast<float>(i));
-				_cubemapDebugBatch->setTransformation(fullscreenBatchTransform(vp, pos, vec2(dx, dy)));
+				_cubemapDebugPass->setSharedVariable(ObjectVariable::WorldTransform, fullscreenBatchTransform(vp, pos, vec2(dx, dy)));
 				_cubemapDebugPass->pushRenderBatch(_cubemapDebugBatch);
 				pos.y += dy;
 			}
@@ -244,8 +244,8 @@ void CubemapProcessor::drawDebug(RenderInterface::Pointer& renderer, const Drawe
 	if (options.drawLookupTexture)
 	{
 		vec2 lookupSize = vec2(256.0f);
-		_lookupDebugBatch->setTransformation(fullscreenBatchTransform(vp, 0.5f * (vp - lookupSize), lookupSize));
 		_lookupDebugPass->begin(RenderPassBeginInfo::singlePass);
+		_lookupDebugPass->setSharedVariable(ObjectVariable::WorldTransform, fullscreenBatchTransform(vp, 0.5f * (vp - lookupSize), lookupSize));
 		_lookupDebugPass->pushRenderBatch(_lookupDebugBatch);
 		_lookupDebugPass->end();
 		renderer->submitRenderPass(_lookupDebugPass);

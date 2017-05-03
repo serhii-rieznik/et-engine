@@ -21,6 +21,11 @@ public:
 
 	DrawerOptions options;
 
+	enum class SupportTexture : uint32_t
+	{
+		Velocity,
+	};
+
 public:
 	Drawer(const RenderInterface::Pointer&);
 
@@ -30,14 +35,19 @@ public:
 
 	void draw();
 
-	Light::Pointer directionalLight();
+	const Light::Pointer& directionalLight();
+
+	const Texture::Pointer& supportTexture(SupportTexture);
 
 private:
 	void validate(RenderInterface::Pointer&);
 
 private:
 	ObjectsCache _cache;
+	
 	Scene::Pointer _scene;
+	Vector<Mesh::Pointer> _allMeshes;
+
 	RenderInterface::Pointer _renderer;
 	CubemapProcessor::Pointer _cubemapProcessor = CubemapProcessor::Pointer(PointerInit::CreateInplace);
 	ShadowmapProcessor::Pointer _shadowmapProcessor = ShadowmapProcessor::Pointer(PointerInit::CreateInplace);
@@ -46,9 +56,9 @@ private:
 	struct MainPass
 	{
 		RenderPass::Pointer pass;
-		RenderBatchCollection all;
-		RenderBatchCollection rendereable;
-		Texture::Pointer renderTarget;
+		Texture::Pointer color;
+		Texture::Pointer depth;
+		Texture::Pointer velocity;
 	} _main;
 
 	struct Lighting
@@ -60,9 +70,24 @@ private:
 	} _lighting;
 };
 
-inline Light::Pointer Drawer::directionalLight()
+inline const Light::Pointer& Drawer::directionalLight()
 {
 	return _lighting.directional;
+}
+
+inline const Texture::Pointer& Drawer::supportTexture(SupportTexture tex)
+{
+	switch (tex)
+	{
+	case Drawer::SupportTexture::Velocity:
+		return _main.velocity;
+
+	default:
+	{
+		ET_ASSERT("Invalid support texture requested");
+		return _renderer->blackTexture();
+	}
+	}
 }
 
 }

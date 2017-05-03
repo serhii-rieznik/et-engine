@@ -344,6 +344,8 @@ void VulkanRenderPass::begin(const RenderPassBeginInfo& beginInfo)
 	_private->currentSubpassIndex = 0;
 	_private->commands[_private->frameIndex].clear();
 	_private->commands[_private->frameIndex].emplace_back(beginInfo.subpasses.front());
+
+	setSharedVariable(ObjectVariable::DeltaTime, application().mainRunLoop().lastFrameTime());
 }
 
 void VulkanRenderPass::nextSubpass()
@@ -377,10 +379,6 @@ void VulkanRenderPass::pushRenderBatch(const RenderBatch::Pointer& inBatch)
 	{
 		objectVariables = _private->renderer->sharedConstantBuffer().allocate(
 			program->reflection().objectVariablesBufferSize, ConstantBufferDynamicAllocation);
-
-		setSharedVariable(ObjectVariable::WorldTransform, inBatch->transformation());
-		setSharedVariable(ObjectVariable::WorldRotationTransform, inBatch->rotationTransformation());
-		setSharedVariable(ObjectVariable::DeltaTime, application().mainRunLoop().lastFrameTime());
 
 		for (const auto& v : sharedVariables())
 		{

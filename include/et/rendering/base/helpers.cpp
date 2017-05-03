@@ -69,7 +69,7 @@ RenderBatch::Pointer renderhelper::createFullscreenRenderBatch(const Texture::Po
 	MaterialInstance::Pointer materialInstance = mat->instance();
 	materialInstance->setTexture(MaterialTexture::BaseColor, texture);
 	
-	return RenderBatch::Pointer::create(materialInstance, rh_local::default2DPlane, identityMatrix, 0, rh_local::default2DPlane->vertexCount());
+	return RenderBatch::Pointer::create(materialInstance, rh_local::default2DPlane, 0, rh_local::default2DPlane->vertexCount());
 }
 
 }

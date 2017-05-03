@@ -14,11 +14,15 @@ namespace et
 const mat4& ComponentTransformable::transform()
 {
 	if (!transformValid())
-	{
 		buildTransform();
-	}
 	
 	return _cachedTransform;
+}
+
+const mat4& ComponentTransformable::rotationTransform()
+{
+	transform(); // make sure rotation transform was built
+	return _rotationTransform;
 }
 
 void ComponentTransformable::buildTransform()
@@ -27,6 +31,9 @@ void ComponentTransformable::buildTransform()
 	{
 		_cachedTransform = _orientation.toMatrix() * scaleMatrix(_scale);
 		_cachedTransform[3] = vec4(_translation, 1.0f);
+
+		_rotationTransform = _cachedTransform.inverted().transposed();
+		_rotationTransform[3] = vec4(0.0f, 0.0f, 0.0f, 1.0f);
 	}
 
 	_flags |= Flag_Valid;

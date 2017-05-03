@@ -906,12 +906,10 @@ s3d::ElementContainer::Pointer OBJLoader::generateVertexBuffers(s3d::Storage& st
 		if (i.material->texture(MaterialTexture::Normal).invalid())
 			i.material->setTexture(MaterialTexture::Normal, _defaultNormal);
 
-		auto rb = RenderBatch::Pointer::create(i.material, vao, identityMatrix, i.start, i.count);
+		auto rb = RenderBatch::Pointer::create(i.material, vao, i.start, i.count);
 		rb->setVertexStorage(_vertexData);
 		rb->setIndexArray(_indices);
 		mesh->addRenderBatch(rb);
-
-		mesh->prepareRenderBatches();
 		mesh->calculateSupportData();
 		maxExtent = maxv(maxExtent, mesh->tranformedBoundingBox().maxVertex());
 		minExtent = minv(minExtent, mesh->tranformedBoundingBox().minVertex());

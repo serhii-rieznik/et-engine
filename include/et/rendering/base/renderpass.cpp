@@ -44,23 +44,32 @@ uint64_t RenderPass::identifier() const
 	return reinterpret_cast<uintptr_t>(this);
 }
 
-void RenderPass::executeSingleRenderBatch(const RenderBatch::Pointer& batch, const RenderPassBeginInfo& info)
-{
-	begin(info);
-	pushRenderBatch(batch);
-	end();
-}
-
 void RenderPass::loadSharedVariablesFromCamera(const Camera::Pointer& cam)
 {
-	setSharedVariable(ObjectVariable::ViewTransform, cam->viewMatrix());
-	setSharedVariable(ObjectVariable::InverseViewTransform, cam->inverseViewMatrix());
+	using matFunction = const mat4& (Camera::*)() const;
+	using tpl = std::tuple<ObjectVariable, ObjectVariable, matFunction>;
 
-	setSharedVariable(ObjectVariable::ProjectionTransform, cam->projectionMatrix());
-	setSharedVariable(ObjectVariable::InverseProjectionTransform, cam->inverseProjectionMatrix());
+	static const tpl variables[] = 
+	{
+		{ ObjectVariable::ViewTransform, ObjectVariable::PreviousViewTransform, &Camera::viewMatrix },
+		{ ObjectVariable::InverseViewTransform, ObjectVariable::PreviousInverseViewTransform, &Camera::inverseViewMatrix },
+		{ ObjectVariable::ProjectionTransform, ObjectVariable::PreviousProjectionTransform, &Camera::projectionMatrix },
+		{ ObjectVariable::InverseProjectionTransform, ObjectVariable::PreviousInverseProjectionTransform, &Camera::inverseProjectionMatrix },
+		{ ObjectVariable::ViewProjectionTransform, ObjectVariable::PreviousViewProjectionTransform, &Camera::viewProjectionMatrix },
+		{ ObjectVariable::InverseViewProjectionTransform, ObjectVariable::PreviousInverseViewProjectionTransform, &Camera::inverseViewProjectionMatrix },
+	};
 
-	setSharedVariable(ObjectVariable::ViewProjectionTransform, cam->viewProjectionMatrix());
-	setSharedVariable(ObjectVariable::InverseViewProjectionTransform, cam->inverseViewProjectionMatrix());
+	const Camera* camera = cam.pointer();
+	for (const auto& var : variables)
+	{
+		const mat4& actualValue = (camera->*(std::get<2>(var)))();
+		
+		mat4 previousValue = actualValue;
+		loadSharedVariable(std::get<0>(var), previousValue);
+
+		setSharedVariable(std::get<0>(var), actualValue);
+		setSharedVariable(std::get<1>(var), previousValue);
+	}
 	
 	setSharedVariable(ObjectVariable::CameraPosition, vec4(cam->position(), 1.0f));
 	setSharedVariable(ObjectVariable::CameraDirection, vec4(cam->direction(), 0.0f));

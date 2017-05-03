@@ -12,9 +12,8 @@
 
 using namespace et;
 
-RenderBatch::RenderBatch(const MaterialInstance::Pointer& m, const VertexStream::Pointer& v,
-	const mat4& transform, uint32_t i, uint32_t ni) : _material(m), _vertexStream(v), 
-	_transformation(transform), _firstIndex(i), _numIndexes(ni)
+RenderBatch::RenderBatch(const MaterialInstance::Pointer& m, const VertexStream::Pointer& v, uint32_t i, uint32_t ni) : 
+	_material(m), _vertexStream(v), _firstIndex(i), _numIndexes(ni)
 {
 }
 
@@ -40,16 +39,6 @@ void RenderBatch::calculateBoundingBox()
 	{
 		log::error("Unable to calculate support data - missing position attribute.");
 	}
-}
-
-const BoundingBox& RenderBatch::transformedBoundingBox()
-{
-	if (!_transformedBoxValid)
-	{
-		_transformedBoudingBox = _boundingBox.transform(_transformation);
-	}
-	
-	return _transformedBoudingBox;
 }
 
 Dictionary RenderBatch::serialize() const
@@ -112,27 +101,14 @@ RayIntersection RenderBatch::intersectsLocalSpaceRay(const ray3d& ray) const
 
 RenderBatch* RenderBatch::duplicate() const
 {
-	RenderBatch* result = etCreateObject<RenderBatch>(_material, _vertexStream, _transformation, _firstIndex, _numIndexes);
+	RenderBatch* result = etCreateObject<RenderBatch>(_material, _vertexStream, _firstIndex, _numIndexes);
 	result->setVertexStorage(_vertexStorage);
 	result->setIndexArray(_indexArray);
 	result->_boundingBox = _boundingBox;
-	result->_transformedBoudingBox = _transformedBoudingBox;
-	result->_transformedBoxValid = false;
 	return result;
 }
 
 void RenderBatch::setMaterial(MaterialInstance::Pointer mat)
 {
     _material = mat;
-}
-
-void RenderBatch::setTransformation(const mat4& m)
-{
-	_transformation = m;
-	_rotationTransformation = _transformation.inverted().transposed();
-	_rotationTransformation[0].w = 0.0f;
-	_rotationTransformation[1].w = 0.0f;
-	_rotationTransformation[2].w = 0.0f;
-	_rotationTransformation[3] = vec4(0.0f, 0.0f, 0.0f, 1.0f);
-
 }

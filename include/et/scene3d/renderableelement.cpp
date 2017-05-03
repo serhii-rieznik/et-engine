@@ -23,14 +23,6 @@ void RenderableElement::addRenderBatch(RenderBatch::Pointer rb)
 	_renderBatches.push_back(rb);
 }
 
-void RenderableElement::prepareRenderBatches()
-{
-	for (auto& rb : _renderBatches)
-	{
-		rb->setTransformation(additionalTransform() * finalTransform());
-	}
-}
-
 Vector<RenderBatch::Pointer>& RenderableElement::renderBatches()
 {
 	return _renderBatches;

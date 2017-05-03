@@ -20,32 +20,28 @@ void ShadowmapProcessor::setScene(const Scene::Pointer& scene, const Light::Poin
 	Vector<BaseElement::Pointer> meshes = _scene->childrenOfType(s3d::ElementType::Mesh);
 
 	_renderables.meshes.clear();
-	_renderables.batches.clear();
 	_renderables.meshes.reserve(meshes.size());
-	_renderables.batches.reserve(meshes.size() * 2);
+
 	for (Mesh::Pointer mesh : meshes)
-	{
-		mesh->prepareRenderBatches();
-		_renderables.batches.insert(_renderables.batches.end(), mesh->renderBatches().begin(), mesh->renderBatches().end());
-	}
-	_renderables.activeBatches.clear();
-	_renderables.activeBatches.reserve(_renderables.batches.size());
+		_renderables.meshes.emplace_back(mesh);
 }
 
 void ShadowmapProcessor::process(RenderInterface::Pointer& renderer, DrawerOptions& options)
 {
 	validate(renderer);
 
-	for (Mesh::Pointer mesh : _renderables.meshes)
-		mesh->prepareRenderBatches();
-
-	clipAndSortRenderBatches(_renderables.batches, _renderables.activeBatches, _light, _renderables.shadowpass);
-
 	_renderables.shadowpass->loadSharedVariablesFromCamera(_light);
 	_renderables.shadowpass->loadSharedVariablesFromLight(_light);
 	_renderables.shadowpass->begin(RenderPassBeginInfo::singlePass);
-	for (const RenderBatch::Pointer& batch : _renderables.activeBatches)
-		_renderables.shadowpass->pushRenderBatch(batch);
+	for (Mesh::Pointer mesh : _renderables.meshes)
+	{
+		const mat4& transform = mesh->transform();
+		const mat4& rotationTransform = mesh->rotationTransform();
+		_renderables.shadowpass->setSharedVariable(ObjectVariable::WorldTransform, transform);
+		_renderables.shadowpass->setSharedVariable(ObjectVariable::WorldRotationTransform, rotationTransform);
+		for (const RenderBatch::Pointer& batch : mesh->renderBatches())
+			_renderables.shadowpass->pushRenderBatch(batch);
+	}
 	_renderables.shadowpass->end();
 	renderer->submitRenderPass(_renderables.shadowpass);
 
@@ -54,10 +50,12 @@ void ShadowmapProcessor::process(RenderInterface::Pointer& renderer, DrawerOptio
 		vec2 vp = vector2ToFloat(renderer->rc()->size());
 		vec2 sz = vec2(vp.y * _directionalShadowmap->sizeFloat(0).aspect(), vp.y);
 		_renderables.debugBatch->setMaterial(_renderables.debugMaterial->instance());
-		_renderables.debugBatch->setTransformation(fullscreenBatchTransform(vp, vec2(0.0f), sz));
+		
 		_renderables.debugPass->begin(RenderPassBeginInfo::singlePass);
+		_renderables.debugPass->setSharedVariable(ObjectVariable::WorldTransform, fullscreenBatchTransform(vp, vec2(0.0f), sz));
 		_renderables.debugPass->pushRenderBatch(_renderables.debugBatch);
 		_renderables.debugPass->end();
+		
 		renderer->submitRenderPass(_renderables.debugPass);
 		_renderables.debugMaterial->flushInstances();
 	}

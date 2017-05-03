@@ -174,7 +174,7 @@ void HDRFlow::debugDraw()
 	for (uint32_t i = 0; i < levels; ++i)
 	{
 		_batches.debug->material()->setFloat(MaterialVariable::ExtraParameters, static_cast<float>(i));
-		_batches.debug->setTransformation(fullscreenBatchTransform(vp, pos, vec2(dx, dy)));
+		_finalPass->setSharedVariable(ObjectVariable::WorldTransform, fullscreenBatchTransform(vp, pos, vec2(dx, dy)));
 		_finalPass->pushRenderBatch(_batches.debug);
 		pos.x += dx;
 		if (pos.x + dx >= vp.x)
@@ -182,6 +182,15 @@ void HDRFlow::debugDraw()
 			pos.x = 0.0f;
 			pos.y += dy;
 		}
+	}
+
+	const Texture::Pointer& vel = drawer()->supportTexture(Drawer::SupportTexture::Velocity);
+	if (vel.valid())
+	{
+		Material::Pointer m = _renderer->sharedMaterialLibrary().loadMaterial(application().resolveFileName("engine_data/materials/textured2d-transformed.json"));
+		RenderBatch::Pointer b = renderhelper::createFullscreenRenderBatch(vel, m);
+		_finalPass->setSharedVariable(ObjectVariable::WorldTransform, fullscreenBatchTransform(vp, vec2(0.0f, 0.5f * vp.y), 0.5f * vp));
+		_finalPass->pushRenderBatch(b);
 	}
 }
 

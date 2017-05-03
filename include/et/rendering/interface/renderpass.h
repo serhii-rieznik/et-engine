@@ -89,15 +89,15 @@ public:
 	virtual void nextSubpass() = 0;
 	virtual void end() = 0;
 
-	void executeSingleRenderBatch(const RenderBatch::Pointer&, const RenderPassBeginInfo&);
-
 	const ConstructionInfo& info() const;
 
 	void setSharedTexture(MaterialTexture, const Texture::Pointer&, const Sampler::Pointer&);
 	
 	template <class T>
-	void setSharedVariable(ObjectVariable var, const T& value)
-		{ _sharedVariables[static_cast<uint32_t>(var)] = value; }
+	void setSharedVariable(ObjectVariable var, const T& value);
+
+	template <class T>
+	bool loadSharedVariable(ObjectVariable var, T& value);
 
 	void loadSharedVariablesFromCamera(const Camera::Pointer&);
 	void loadSharedVariablesFromLight(const Light::Pointer&);
@@ -115,5 +115,22 @@ private:
 	SharedTexturesSet _sharedTextures;
 	VariablesHolder _sharedVariables;
 };
+
+template <class T>
+inline void RenderPass::setSharedVariable(ObjectVariable var, const T& value)
+{
+	_sharedVariables[static_cast<uint32_t>(var)] = value;
+}
+
+template <class T>
+inline bool RenderPass::loadSharedVariable(ObjectVariable var, T& value)
+{
+	bool available = _sharedVariables[static_cast<uint32_t>(var)].isSet();
+	if (available)
+	{
+		value = _sharedVariables[static_cast<uint32_t>(var)].as<T>();
+	}
+	return available;
+}
 
 }

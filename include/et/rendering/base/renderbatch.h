@@ -23,8 +23,7 @@ public:
 public:
 	RenderBatch() = default;
 
-	RenderBatch(const MaterialInstance::Pointer&, const VertexStream::Pointer&, const mat4& transform,
-		uint32_t firstIndex, uint32_t indexCount);
+	RenderBatch(const MaterialInstance::Pointer&, const VertexStream::Pointer&, uint32_t firstIndex, uint32_t indexCount);
 
 	MaterialInstance::Pointer& material()
 		{ return _material; }
@@ -41,12 +40,6 @@ public:
 		{ return _firstIndex; }
 	uint32_t numIndexes() const
 		{ return _numIndexes; }
-
-	const mat4& transformation() const
-		{ return _transformation; }
-	const mat4& rotationTransformation() const
-		{ return _rotationTransformation; }
-	void setTransformation(const mat4& m);
 
 	VertexStorage::Pointer& vertexStorage()
 		{ return _vertexStorage; }
@@ -67,7 +60,6 @@ public:
 	const BoundingBox& boundingBox() const
 		{ return _boundingBox; }
 
-	const BoundingBox& transformedBoundingBox();
 	RayIntersection intersectsLocalSpaceRay(const ray3d&) const;
 	Dictionary serialize() const;
 
@@ -78,12 +70,8 @@ private:
 	VertexStream::Pointer _vertexStream;
 	VertexStorage::Pointer _vertexStorage;
 	IndexArray::Pointer _indexArray;
-	mat4 _transformation = identityMatrix;
-	mat4 _rotationTransformation = identityMatrix;
 	BoundingBox _boundingBox;
-	BoundingBox _transformedBoudingBox;
 	uint32_t _firstIndex = 0;
 	uint32_t _numIndexes = 0;
-	bool _transformedBoxValid = false;
 };
 }

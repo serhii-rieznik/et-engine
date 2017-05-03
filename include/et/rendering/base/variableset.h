@@ -16,12 +16,23 @@ enum class ObjectVariable : uint32_t
 {
 	WorldTransform,
 	WorldRotationTransform,
+	PreviousWorldTransform,
+	PreviousWorldRotationTransform,
+
 	ViewTransform,
 	InverseViewTransform,
 	ProjectionTransform,
 	InverseProjectionTransform,
 	ViewProjectionTransform,
 	InverseViewProjectionTransform,
+
+	PreviousViewTransform,
+	PreviousInverseViewTransform,
+	PreviousProjectionTransform,
+	PreviousInverseProjectionTransform,
+	PreviousViewProjectionTransform,
+	PreviousInverseViewProjectionTransform,
+
 	CameraPosition,
 	CameraDirection,
 	
@@ -65,7 +76,7 @@ enum class MaterialTexture : uint32_t
 	AmbientOcclusion,
 	Environment,
 	BRDFLookup,
-	
+
 	max,
 
 	// service values

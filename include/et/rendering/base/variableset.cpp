@@ -14,12 +14,24 @@ static const std::map<ObjectVariable, std::string> objectVariableNames =
 {
 	{ ObjectVariable::WorldTransform, "worldTransform" },
 	{ ObjectVariable::WorldRotationTransform, "worldRotationTransform" },
+	
 	{ ObjectVariable::ViewTransform, "viewTransform" },
 	{ ObjectVariable::ProjectionTransform, "projectionTransform" },
 	{ ObjectVariable::ViewProjectionTransform, "viewProjectionTransform" },
 	{ ObjectVariable::InverseViewTransform, "inverseViewTransform" },
 	{ ObjectVariable::InverseProjectionTransform, "inverseProjectionTransform" },
 	{ ObjectVariable::InverseViewProjectionTransform, "inverseViewProjectionTransform" },
+
+	{ ObjectVariable::PreviousWorldTransform, "previousWorldTransform" },
+	{ ObjectVariable::PreviousWorldRotationTransform, "previousWorldRotationTransform" },
+
+	{ ObjectVariable::PreviousViewTransform, "previousViewTransform" },
+	{ ObjectVariable::PreviousProjectionTransform, "previousProjectionTransform" },
+	{ ObjectVariable::PreviousViewProjectionTransform, "previousViewProjectionTransform" },
+	{ ObjectVariable::PreviousInverseViewTransform, "previousInverseViewTransform" },
+	{ ObjectVariable::PreviousInverseProjectionTransform, "previousInverseProjectionTransform" },
+	{ ObjectVariable::PreviousInverseViewProjectionTransform, "previousInverseViewProjectionTransform" },
+
 	{ ObjectVariable::CameraPosition, "cameraPosition" },
 	{ ObjectVariable::CameraDirection, "cameraDirection" },
 	{ ObjectVariable::LightColor, "lightColor" },

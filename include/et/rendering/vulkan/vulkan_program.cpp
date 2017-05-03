@@ -16,7 +16,7 @@
 #include <et/core/serialization.h>
 #include <fstream>
 
-#define ET_VULKAN_PROGRAM_USE_CACHE 1
+#define ET_VULKAN_PROGRAM_USE_CACHE 0
 
 const uint32_t programCacheVersion = 1;
 const uint32_t programCacheHeader = 'PROG';

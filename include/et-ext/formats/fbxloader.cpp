@@ -213,7 +213,6 @@ s3d::ElementContainer::Pointer FBXLoaderPrivate::parse(s3d::Storage& storage)
 	auto meshes = root->childrenOfType(s3d::ElementType::Mesh);
 	for (s3d::Mesh::Pointer mesh : meshes)
 	{
-		mesh->prepareRenderBatches();
 		mesh->calculateSupportData();
 		maxExtent = maxv(maxExtent, mesh->tranformedBoundingBox().maxVertex());
 		minExtent = minv(minExtent, mesh->tranformedBoundingBox().minVertex());
@@ -916,7 +915,7 @@ void FBXLoaderPrivate::buildVertexBuffers(s3d::Storage& storage)
 		{
 			for (auto& mc : ci->second)
 			{
-				RenderBatch::Pointer rb = RenderBatch::Pointer::create(mc.material, vStream, identityMatrix, mc.startIndex, mc.numIndices);
+				RenderBatch::Pointer rb = RenderBatch::Pointer::create(mc.material, vStream, mc.startIndex, mc.numIndices);
 				rb->setVertexStorage(i);
 				rb->setIndexArray(storage.indexArray());
 				rb->calculateBoundingBox();

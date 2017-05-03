@@ -45,6 +45,7 @@ namespace et
 		virtual ~ComponentTransformable() { }
 
 		const mat4& transform();
+		const mat4& rotationTransform();
 		const mat4& cachedTransform() const;
 		const mat4& additionalTransform() const;
 		
@@ -86,6 +87,7 @@ namespace et
 	private:
 		mat4 _cachedTransform = identityMatrix;
 		mat4 _additionalTransform = identityMatrix;
+		mat4 _rotationTransform = identityMatrix;
 		
 		vec3 _translation = vec3(0.0f);
 		vec3 _scale = vec3(1.0f);

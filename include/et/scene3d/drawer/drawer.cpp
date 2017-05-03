@@ -33,19 +33,27 @@ void Drawer::draw()
 	
 	_cubemapProcessor->process(_renderer, options, _lighting.directional);
 	_shadowmapProcessor->process(_renderer, options);
+	
 	validate(_renderer);
 
-	Camera::Pointer clipCamera = _scene.valid() ? _scene->clipCamera() : _defaultCamera;
 	Camera::Pointer renderCamera = _scene.valid() ? _scene->renderCamera() : _defaultCamera;
+	Camera::Pointer clipCamera = _scene.valid() ? _scene->clipCamera() : _defaultCamera;
 	
-	clipAndSortRenderBatches(_main.all, _main.rendereable, clipCamera, _main.pass);
 	{
 		_main.pass->loadSharedVariablesFromCamera(renderCamera);
 		_main.pass->loadSharedVariablesFromLight(_lighting.directional);
 
 		_main.pass->begin(RenderPassBeginInfo::singlePass);
-		for (const RenderBatch::Pointer& rb : _main.rendereable)
-			_main.pass->pushRenderBatch(rb);
+		for (Mesh::Pointer mesh : _allMeshes)
+		{
+			const mat4& transform = mesh->transform();
+			const mat4& rotationTransform = mesh->rotationTransform();
+			_main.pass->setSharedVariable(ObjectVariable::WorldTransform, transform);
+			_main.pass->setSharedVariable(ObjectVariable::WorldRotationTransform, rotationTransform);
+			for (const RenderBatch::Pointer& rb : mesh->renderBatches())
+				_main.pass->pushRenderBatch(rb);
+		}
+		_main.pass->setSharedVariable(ObjectVariable::WorldTransform, identityMatrix);
 		_main.pass->pushRenderBatch(_lighting.environmentBatch);
 		_main.pass->end();
 
@@ -55,19 +63,41 @@ void Drawer::draw()
 
 void Drawer::validate(RenderInterface::Pointer& renderer)
 {
-	if (_main.pass.invalid() || (_main.pass->info().color[0].texture != _main.renderTarget))
+	ET_ASSERT(_main.color.valid());
+
+	if (_main.pass.invalid() || (_main.pass->info().color[0].texture != _main.color))
 	{
+		TextureDescription::Pointer desc(PointerInit::CreateInplace);
+		desc->size = _main.color->size(0);
+		desc->format = TextureFormat::RG32F;
+		desc->flags |= Texture::Flags::RenderTarget;
+		_main.velocity = renderer->createTexture(desc);
+		
+		desc->format = TextureFormat::Depth32F;
+		_main.depth = renderer->createTexture(desc);
+
 		RenderPass::ConstructionInfo passInfo;
-		passInfo.color[0].texture = _main.renderTarget;
+		passInfo.name = RenderPass::kPassNameDefault;
+		
+		passInfo.color[0].texture = _main.color;
 		passInfo.color[0].loadOperation = FramebufferOperation::Clear;
 		passInfo.color[0].storeOperation = FramebufferOperation::Store;
 		passInfo.color[0].enabled = true;
 		passInfo.color[0].clearValue = vec4(0.0f, 1.0f);
-		passInfo.color[0].useDefaultRenderTarget = _main.renderTarget.invalid();
+		passInfo.color[0].useDefaultRenderTarget = false;
+		
+		passInfo.color[1].texture = _main.velocity;
+		passInfo.color[1].loadOperation = FramebufferOperation::Clear;
+		passInfo.color[1].storeOperation = FramebufferOperation::Store;
+		passInfo.color[1].enabled = true;
+		passInfo.color[1].clearValue = vec4(0.0f, 1.0f);
+		passInfo.color[1].useDefaultRenderTarget = false;
+
+		passInfo.depth.texture = _main.depth;
 		passInfo.depth.loadOperation = FramebufferOperation::Clear;
 		passInfo.depth.storeOperation = FramebufferOperation::DontCare;
 		passInfo.depth.enabled = true;
-		passInfo.name = RenderPass::kPassNameDefault;
+		passInfo.depth.useDefaultRenderTarget = false;
 
 		_main.pass = renderer->allocateRenderPass(passInfo);
 		_main.pass->setSharedTexture(MaterialTexture::Environment, _cubemapProcessor->convolutedCubemap(), renderer->defaultSampler());
@@ -86,7 +116,7 @@ void Drawer::validate(RenderInterface::Pointer& renderer)
 
 void Drawer::setRenderTarget(const Texture::Pointer& tex)
 {
-	_main.renderTarget = tex;
+	_main.color = tex;
 }
 
 void Drawer::setScene(const Scene::Pointer& inScene)
@@ -94,8 +124,8 @@ void Drawer::setScene(const Scene::Pointer& inScene)
 	_scene = inScene;
 	BaseElement::List elements = _scene->childrenOfType(ElementType::DontCare);
 
-	_main.all.clear();
-	_main.all.reserve(2 * elements.size());
+	_allMeshes.clear();
+	_allMeshes.reserve(elements.size());
 	_lighting.directional.reset(nullptr);
 
 	bool updateEnvironment = false;
@@ -104,9 +134,7 @@ void Drawer::setScene(const Scene::Pointer& inScene)
 	{
 		if (element->type() == ElementType::Mesh)
 		{
-			Mesh::Pointer mesh = element;
-			mesh->prepareRenderBatches();
-			_main.all.insert(_main.all.end(), mesh->renderBatches().begin(), mesh->renderBatches().end());
+			_allMeshes.emplace_back(element);
 		}
 		else if (element->type() == ElementType::Light)
 		{

@@ -23,7 +23,6 @@ public:
 	RenderableElement(const std::string& name, BaseElement* parent);
 
 	void addRenderBatch(RenderBatch::Pointer);
-	void prepareRenderBatches();
 	
 	Vector<RenderBatch::Pointer>& renderBatches();
 	const Vector<RenderBatch::Pointer>& renderBatches() const;
