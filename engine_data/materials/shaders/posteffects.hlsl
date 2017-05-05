@@ -86,6 +86,28 @@ float4 fragmentMain(VSOutput fsIn) : SV_Target0
 	return float4(toneMapping(source, exposure), 1.0);
 	// return float4(source, 1.0);
 
+#elif (MOTION_BLUR)
+
+	float w = 0.0;
+	float h = 0.0;
+	float levels = 0.0;
+	baseColorTexture.GetDimensions(0, w, h, levels);
+
+	const uint maxSamples = 20;
+	const float targetDeltaTime = 1.0 / 60.0;
+	float velocityScale = 0.5 * min(1.0, deltaTime / targetDeltaTime);
+
+	float2 velocity = velocityScale * emissiveColorTexture.Sample(emissiveColorSampler, fsIn.texCoord0).xy;
+	uint currentSamples = clamp(uint(length(velocity * float2(w, h))), 1, maxSamples);
+
+	float4 color = baseColorTexture.Sample(baseColorSampler, fsIn.texCoord0);
+	for (uint i = 1; i < currentSamples; ++i)
+	{
+		float t = (float(i) / float(currentSamples - 1) - 0.5);
+		color += baseColorTexture.Sample(baseColorSampler, fsIn.texCoord0 + velocity * t);
+	}
+	return color / currentSamples;
+
 #else
 
 	return baseColorTexture.Sample(baseColorSampler, fsIn.texCoord0);

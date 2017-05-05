@@ -32,7 +32,7 @@ uint64_t Material::sortingKey() const
 	return 0;
 }
 
-void Material::setTexture(MaterialTexture t, Texture::Pointer tex)
+void Material::setTexture(MaterialTexture t, const Texture::Pointer& tex)
 {
 	OptionalObject<Texture::Pointer>& entry = textures[static_cast<uint32_t>(t)];
 	if (entry.object != tex)
@@ -44,7 +44,7 @@ void Material::setTexture(MaterialTexture t, Texture::Pointer tex)
 	}
 }
 
-void Material::setSampler(MaterialTexture t, Sampler::Pointer smp)
+void Material::setSampler(MaterialTexture t, const Sampler::Pointer& smp)
 {
 	OptionalObject<Sampler::Pointer>& entry = samplers[static_cast<uint32_t>(t) + MaterialSamplerBindingOffset];
 	if (entry.object != smp)
@@ -54,6 +54,12 @@ void Material::setSampler(MaterialTexture t, Sampler::Pointer smp)
 		entry.binding = t;
 		invalidateTextureSet();
 	}
+}
+
+void Material::setTextureWithSampler(MaterialTexture t, const Texture::Pointer& tex, const Sampler::Pointer& smp)
+{
+	setTexture(t, tex);
+	setSampler(t, smp);
 }
 
 void Material::setVector(MaterialVariable p, const vec4& v)
@@ -376,7 +382,7 @@ void MaterialInstance::buildTextureSet(const std::string& pt)
 		
 		uint32_t index = i.second - MaterialSamplerBindingOffset;
 		description.fragmentSamplers[index] = base()->samplers[i.second].object;
-		if (samplers[index].object.valid())
+		if (samplers[i.second].object.valid())
 			description.fragmentSamplers[index] = samplers[i.second].object;
 		if (description.fragmentSamplers[index].invalid())
 			description.fragmentSamplers[index] = _renderer->defaultSampler();

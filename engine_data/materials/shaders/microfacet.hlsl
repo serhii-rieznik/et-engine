@@ -144,5 +144,6 @@ FSOutput fragmentMain(VSOutput fsIn)
     FSOutput output;
     output.color = float4(result, 1.0);
 	output.velocity = velocity;
+//	output.velocity = 0.0;
     return output;
 }                              

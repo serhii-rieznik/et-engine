@@ -27,6 +27,7 @@ HDRFlow::HDRFlow(const RenderInterface::Pointer& ren) :
 	_batches.downsampleMaterial = _renderer->sharedMaterialLibrary().loadMaterial(application().resolveFileName("engine_data/materials/posteffects.json"));
 	_batches.debugMaterial = _renderer->sharedMaterialLibrary().loadMaterial(application().resolveFileName("engine_data/materials/textured2d-transformed-lod.json"));
 	_batches.resolveMaterial = _renderer->sharedMaterialLibrary().loadMaterial(application().resolveFileName("engine_data/materials/posteffects.json"));
+	_batches.motionBlurMaterial = _renderer->sharedMaterialLibrary().loadMaterial(application().resolveFileName("engine_data/materials/posteffects.json"));
 }
 
 void HDRFlow::resizeRenderTargets(const vec2i& sz)
@@ -48,6 +49,7 @@ void HDRFlow::resizeRenderTargets(const vec2i& sz)
 		desc->flags = Texture::Flags::RenderTarget;
 		desc->levelCount = 1;
 		_hdrTarget = _renderer->createTexture(desc);
+		_postprocessedTarget = _renderer->createTexture(desc);
 
 		uint32_t downsampledSize = roundToHighestPowerOfTwo(static_cast<uint32_t>(std::min(sz.x, sz.y) / 2));
 		desc->size = vec2i(downsampledSize);
@@ -62,12 +64,7 @@ void HDRFlow::resizeRenderTargets(const vec2i& sz)
 		desc->flags = Texture::Flags::RenderTarget | Texture::Flags::CopyDestination;
 		_luminanceHistory = _renderer->createTexture(desc);
 
-		_batches.resolveMaterial->setTexture(MaterialTexture::EmissiveColor, _luminanceTarget);
-		_batches.resolveMaterial->setSampler(MaterialTexture::EmissiveColor, _renderer->clampSampler());
-		_batches.final = renderhelper::createFullscreenRenderBatch(_hdrTarget, _batches.resolveMaterial);
-
-		_batches.downsampleMaterial->setTexture(MaterialTexture::Shadow, _luminanceHistory);
-		_batches.downsampleMaterial->setSampler(MaterialTexture::Shadow, _renderer->clampSampler());
+		_batches.downsampleMaterial->setTextureWithSampler(MaterialTexture::Shadow, _luminanceHistory, _renderer->clampSampler());
 		_batches.downsample = renderhelper::createFullscreenRenderBatch(_hdrTarget, _batches.downsampleMaterial);
 		
 		_batches.debug = renderhelper::createFullscreenRenderBatch(_hdrTarget, _batches.debugMaterial);
@@ -79,8 +76,25 @@ void HDRFlow::resizeRenderTargets(const vec2i& sz)
 		dsDesc.color[0].loadOperation = FramebufferOperation::Clear;
 		dsDesc.name = "downsample";
 		_downsamplePass = _renderer->allocateRenderPass(dsDesc);
-	}
 
+		Texture::Pointer lastMotionBlurTarget;
+		RenderPass::ConstructionInfo mbDesc;
+		mbDesc.color[0].enabled = true;
+		mbDesc.color[0].useDefaultRenderTarget = false;
+		mbDesc.color[0].loadOperation = FramebufferOperation::Clear;
+		mbDesc.name = "motionblur";
+		for (uint32_t i = 0; i < MotionBlurPassCount; ++i)
+		{
+			lastMotionBlurTarget = (i % 2 == 0) ? _postprocessedTarget : _hdrTarget;
+			mbDesc.color[0].texture = lastMotionBlurTarget;
+			_motionBlurPass[i]= _renderer->allocateRenderPass(mbDesc);
+		}
+		_batches.motionBlur = renderhelper::createFullscreenRenderBatch(_hdrTarget, _batches.motionBlurMaterial);
+
+		_batches.resolveMaterial->setTextureWithSampler(MaterialTexture::EmissiveColor, _luminanceTarget, _renderer->clampSampler());
+		_batches.final = renderhelper::createFullscreenRenderBatch(lastMotionBlurTarget, _batches.resolveMaterial);
+	}
+	
 	if (drawer().valid())
 		drawer()->setRenderTarget(_hdrTarget);
 }
@@ -89,6 +103,8 @@ void HDRFlow::render()
 {
 	if (drawer().valid())
 		drawer()->draw();
+
+	postprocess();
 
 	downsampleLuminance();
 
@@ -101,6 +117,23 @@ void HDRFlow::render()
 	_renderer->submitRenderPass(_finalPass);
 }
 
+void HDRFlow::postprocess()
+{
+	const Texture::Pointer& vel = drawer()->supportTexture(Drawer::SupportTexture::Velocity);
+	_batches.motionBlur->material()->setTextureWithSampler(MaterialTexture::EmissiveColor, vel, _renderer->clampSampler());
+
+	for (uint32_t i = 0; i < MotionBlurPassCount; ++i)
+	{
+		Texture::Pointer src = (i % 2 == 0) ? _hdrTarget : _postprocessedTarget;
+		_batches.motionBlur->material()->setTextureWithSampler(MaterialTexture::BaseColor, src, _renderer->clampSampler());
+
+		_motionBlurPass[i]->begin(RenderPassBeginInfo::singlePass);
+		_motionBlurPass[i]->pushRenderBatch(_batches.motionBlur);
+		_motionBlurPass[i]->end();
+		_renderer->submitRenderPass(_motionBlurPass[i]);
+	}
+}
+
 void HDRFlow::downsampleLuminance()
 {
 	ResourceBarrier barrierToRenderTarget(TextureState::ColorRenderTarget);
@@ -110,8 +143,7 @@ void HDRFlow::downsampleLuminance()
 	barrierToRenderTarget.firstLevel = 0;
 	_downsamplePass->pushImageBarrier(_luminanceTarget, barrierToRenderTarget);
 
-	_batches.downsample->material()->setTexture(MaterialTexture::BaseColor, _hdrTarget);
-	_batches.downsample->material()->setSampler(MaterialTexture::BaseColor, _renderer->clampSampler());
+	_batches.downsample->material()->setTextureWithSampler(MaterialTexture::BaseColor, _hdrTarget, _renderer->clampSampler());
 	_batches.downsample->material()->setFloat(MaterialVariable::ExtraParameters, 0.0f);
 	_downsamplePass->pushRenderBatch(_batches.downsample);
 	_downsamplePass->nextSubpass();
@@ -124,7 +156,7 @@ void HDRFlow::downsampleLuminance()
 		_downsamplePass->pushImageBarrier(_luminanceTarget, barrierToRenderTarget);
 
 		_batches.downsample->material()->setFloat(MaterialVariable::ExtraParameters, static_cast<float>(level));
-		_batches.downsample->material()->setTexture(MaterialTexture::BaseColor, _luminanceTarget);
+		_batches.downsample->material()->setTextureWithSampler(MaterialTexture::BaseColor, _luminanceTarget, _renderer->clampSampler());
 		_downsamplePass->pushRenderBatch(_batches.downsample);
 		_downsamplePass->nextSubpass();
 	}
@@ -170,7 +202,7 @@ void HDRFlow::debugDraw()
 	float dy = dx;
 
 	vec2 pos = vec2(0.0f);
-	_batches.debug->material()->setTexture(MaterialTexture::BaseColor, _luminanceTarget);
+	_batches.debug->material()->setTextureWithSampler(MaterialTexture::BaseColor, _luminanceTarget, _renderer->clampSampler());
 	for (uint32_t i = 0; i < levels; ++i)
 	{
 		_batches.debug->material()->setFloat(MaterialVariable::ExtraParameters, static_cast<float>(i));

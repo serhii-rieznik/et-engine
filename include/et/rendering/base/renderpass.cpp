@@ -73,6 +73,7 @@ void RenderPass::loadSharedVariablesFromCamera(const Camera::Pointer& cam)
 	
 	setSharedVariable(ObjectVariable::CameraPosition, vec4(cam->position(), 1.0f));
 	setSharedVariable(ObjectVariable::CameraDirection, vec4(cam->direction(), 0.0f));
+	setSharedVariable(ObjectVariable::CameraClipPlanes, vec2(cam->zNear(), cam->zFar()));
 }
 
 void RenderPass::loadSharedVariablesFromLight(const Light::Pointer& l)

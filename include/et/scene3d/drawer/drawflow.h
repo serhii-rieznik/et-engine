@@ -53,12 +53,14 @@ public:
 	void render() override;
 
 private:
+	void postprocess();
 	void downsampleLuminance();
 	void debugDraw();
 
 private:
 	RenderInterface::Pointer _renderer;
 	Texture::Pointer _hdrTarget;
+	Texture::Pointer _postprocessedTarget;
 	Texture::Pointer _luminanceTarget;
 	Texture::Pointer _luminanceHistory;
 
@@ -73,8 +75,17 @@ private:
 		RenderBatch::Pointer downsample;
 
 		Material::Pointer resolveMaterial;
+
+		Material::Pointer motionBlurMaterial;
+		RenderBatch::Pointer motionBlur;
 	} _batches;
+
+	enum : uint32_t
+	{
+		MotionBlurPassCount = 2
+	};
 	
+	RenderPass::Pointer _motionBlurPass[MotionBlurPassCount];
 	RenderPass::Pointer _downsamplePass;
 	RenderPass::Pointer _finalPass;
 };

@@ -42,8 +42,9 @@ public:
 	void flushInstances();
 	void releaseInstances();
 
-	void setTexture(MaterialTexture, Texture::Pointer);
-	void setSampler(MaterialTexture, Sampler::Pointer);
+	void setTexture(MaterialTexture, const Texture::Pointer&);
+	void setSampler(MaterialTexture, const Sampler::Pointer&);
+	void setTextureWithSampler(MaterialTexture, const Texture::Pointer&, const Sampler::Pointer&);
 
 	Texture::Pointer texture(MaterialTexture);
 	Sampler::Pointer sampler(MaterialTexture);
