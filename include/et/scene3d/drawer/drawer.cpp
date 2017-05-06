@@ -53,12 +53,16 @@ void Drawer::draw()
 
 	validate(_renderer);
 
+	vec2 ji = sobolSequence[_frameIndex % sobolSequenceSize];
+	vec2 jj = sobolSequence[(_frameIndex + sobolSequenceSize - 1) % sobolSequenceSize];
+	_jitter.x = (ji.x * 2.0f - 1.0f) / static_cast<float>(_main.color->size(0).x);
+	_jitter.y = (ji.y * 2.0f - 1.0f) / static_cast<float>(_main.color->size(0).y);
+	_jitter.z = (jj.x * 2.0f - 1.0f) / static_cast<float>(_main.color->size(0).x);
+	_jitter.w = (jj.y * 2.0f - 1.0f) / static_cast<float>(_main.color->size(0).y);
+
 	Camera::Pointer renderCamera = _scene->renderCamera();
 	Camera::Pointer clipCamera = _scene->clipCamera();
-	mat4 m = _baseProjectionMatrix;
-	m[3].x += (sobolSequence[_frameIndex % sobolSequenceSize].x * 2.0f - 1.0f) / static_cast<float>(_main.color->size(0).x);
-	m[3].y += (sobolSequence[_frameIndex % sobolSequenceSize].y * 2.0f - 1.0f) / static_cast<float>(_main.color->size(0).y);
-	renderCamera->setProjectionMatrix(m);
+	renderCamera->setProjectionMatrix(_baseProjectionMatrix * translationMatrix(_jitter.x, _jitter.y, 0.0f));
 	{
 		_main.pass->loadSharedVariablesFromCamera(renderCamera);
 		_main.pass->loadSharedVariablesFromLight(_lighting.directional);

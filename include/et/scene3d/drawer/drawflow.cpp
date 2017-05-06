@@ -191,6 +191,7 @@ void HDRFlow::antialias()
 	_batches.txaa->material()->setTextureWithSampler(MaterialTexture::Normal, vel, _renderer->clampSampler());
 	_batches.txaa->material()->setTextureWithSampler(MaterialTexture::EmissiveColor, _renderHistory, _renderer->clampSampler());
 
+	_passes.txaa->setSharedVariable(ObjectVariable::CameraJitter, drawer()->latestCameraJitter());
 	_passes.txaa->begin(RenderPassBeginInfo::singlePass);
 	_passes.txaa->pushRenderBatch(_batches.txaa);
 	_passes.txaa->end();

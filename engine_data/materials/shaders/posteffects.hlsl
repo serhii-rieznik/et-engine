@@ -16,6 +16,7 @@ SamplerState normalSampler : DECL_SAMPLER(Normal);
 cbuffer ObjectVariables : DECL_BUFFER(Object)
 {
 	float deltaTime;
+	float4 cameraJitter;
 };
 
 cbuffer MaterialVariables : DECL_BUFFER(Material) 
@@ -93,30 +94,36 @@ float4 fragmentMain(VSOutput fsIn) : SV_Target0
 	float2 velocity = velocityScale * emissiveColorTexture.Sample(emissiveColorSampler, fsIn.texCoord0).xy;
 	uint currentSamples = clamp(uint(length(velocity * float2(w, h))), 1, maxSamples);
 
+	float totalWeight = 1.0;
 	float4 color = baseColorTexture.Sample(baseColorSampler, fsIn.texCoord0);
+
 	for (uint i = 1; i < currentSamples; ++i)
 	{
-		float t = (float(i) / float(currentSamples - 1) - 0.5);
-		color += baseColorTexture.Sample(baseColorSampler, fsIn.texCoord0 + velocity * t);
+		float t = float(i - 1) / float(currentSamples - 1);
+		float weight = 4.0 * t * (1.0 - t);
+		color += weight * baseColorTexture.Sample(baseColorSampler, fsIn.texCoord0 + velocity * (t - 0.5));
+		totalWeight += weight;
 	}
-	return color / currentSamples;
+	return color / totalWeight;
 
 #elif (TONE_MAPPING)
 
 	float3 source = baseColorTexture.Sample(baseColorSampler, fsIn.texCoord0).xyz;
-	float lum = dot(source, float3(0.2989, 0.5870, 0.1140));
+	float lum = dot(source, float3(0.299, 0.587, 0.114));
 	float exposure = emissiveColorTexture.SampleLevel(emissiveColorSampler, fsIn.texCoord0, 10.0).x;
 	return float4(toneMapping(source, exposure), 1.0);
 	// return float4(source, 1.0);
 
 #elif (TEMPORAL_AA)
 
-	float3 source = baseColorTexture.Sample(baseColorSampler, fsIn.texCoord0).xyz;
+	float2 jt = 0.5 * cameraJitter.xy;
+	float2 tc = fsIn.texCoord0 + jt;
 
-	float2 vel = normalTexture.Sample(normalSampler, fsIn.texCoord0).xy;
-	float3 history = emissiveColorTexture.Sample(emissiveColorSampler, fsIn.texCoord0 - vel).xyz;
+	float2 vel = 0.5 * normalTexture.Sample(normalSampler, tc).xy;
+	float3 source = baseColorTexture.Sample(baseColorSampler, tc).xyz;
+	float3 history = emissiveColorTexture.Sample(emissiveColorSampler, tc - vel - 0.5 * cameraJitter.zw).xyz;
 
-	return float4(lerp(history, source, 0.5), 1.0);
+	return float4(lerp(source, history, 0.85), 1.0);
 
 #else
 

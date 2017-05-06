@@ -35,6 +35,7 @@ static const std::map<ObjectVariable, std::string> objectVariableNames =
 	{ ObjectVariable::CameraPosition, "cameraPosition" },
 	{ ObjectVariable::CameraDirection, "cameraDirection" },
 	{ ObjectVariable::CameraClipPlanes, "cameraClipPlanes" },
+	{ ObjectVariable::CameraJitter, "cameraJitter" },
 
 	{ ObjectVariable::LightColor, "lightColor" },
 	{ ObjectVariable::LightDirection, "lightDirection" },

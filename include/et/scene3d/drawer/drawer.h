@@ -40,6 +40,8 @@ public:
 
 	const Texture::Pointer& supportTexture(SupportTexture);
 
+	const vec4& latestCameraJitter() const;
+
 private:
 	void validate(RenderInterface::Pointer&);
 
@@ -70,6 +72,7 @@ private:
 	} _lighting;
 
 	mat4 _baseProjectionMatrix;
+	vec4 _jitter;
 	uint64_t _frameIndex = 0;
 };
 
@@ -91,6 +94,11 @@ inline const Texture::Pointer& Drawer::supportTexture(SupportTexture tex)
 		return _renderer->blackTexture();
 	}
 	}
+}
+
+inline const vec4& Drawer::latestCameraJitter() const
+{
+	return _jitter;
 }
 
 }
