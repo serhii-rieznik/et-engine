@@ -55,6 +55,8 @@ public:
 private:
 	void postprocess();
 	void downsampleLuminance();
+	void tonemap();
+	void antialias();
 	void debugDraw();
 
 	enum : uint32_t
@@ -68,6 +70,7 @@ private:
 	Texture::Pointer _secondaryTarget;
 	Texture::Pointer _luminanceTarget;
 	Texture::Pointer _luminanceHistory;
+	Texture::Pointer _renderHistory;
 
 	struct Materials
 	{
@@ -80,13 +83,21 @@ private:
 		RenderPassBeginInfo downsampleBeginInfo;
 		RenderBatch::Pointer debug;
 		RenderBatch::Pointer final;
+		RenderBatch::Pointer tonemap;
 		RenderBatch::Pointer downsample;
 		RenderBatch::Pointer motionBlur;
+		RenderBatch::Pointer txaa;
 	} _batches;
 	
-	RenderPass::Pointer _motionBlurPass[MotionBlurPassCount];
-	RenderPass::Pointer _downsamplePass;
-	RenderPass::Pointer _finalPass;
+	struct Passes
+	{
+		RenderPass::Pointer motionBlur0;
+		RenderPass::Pointer motionBlur1;
+		RenderPass::Pointer downsample;
+		RenderPass::Pointer tonemapping;
+		RenderPass::Pointer txaa;
+		RenderPass::Pointer final;
+	} _passes;
 };
 
 }

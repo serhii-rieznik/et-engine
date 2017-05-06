@@ -18,6 +18,20 @@ namespace et
 namespace s3d
 {
 
+static const vec2 sobolSequence[] = {
+	vec2(0.000000, 0.000000),
+	vec2(0.500000, 0.500000),
+	vec2(0.750000, 0.250000),
+	vec2(0.250000, 0.750000),
+	vec2(0.375000, 0.375000),
+	vec2(0.875000, 0.875000),
+	vec2(0.625000, 0.125000),
+	vec2(0.125000, 0.625000),
+	vec2(0.187500, 0.312500),
+	vec2(0.687500, 0.812500),
+};
+static const uint64_t sobolSequenceSize = sizeof(sobolSequence) / sizeof(sobolSequence[0]);
+
 Drawer::Drawer(const RenderInterface::Pointer& renderer) :
 	_renderer(renderer)
 {
@@ -41,6 +55,10 @@ void Drawer::draw()
 
 	Camera::Pointer renderCamera = _scene->renderCamera();
 	Camera::Pointer clipCamera = _scene->clipCamera();
+	mat4 m = _baseProjectionMatrix;
+	m[3].x += (sobolSequence[_frameIndex % sobolSequenceSize].x * 2.0f - 1.0f) / static_cast<float>(_main.color->size(0).x);
+	m[3].y += (sobolSequence[_frameIndex % sobolSequenceSize].y * 2.0f - 1.0f) / static_cast<float>(_main.color->size(0).y);
+	renderCamera->setProjectionMatrix(m);
 	{
 		_main.pass->loadSharedVariablesFromCamera(renderCamera);
 		_main.pass->loadSharedVariablesFromLight(_lighting.directional);
@@ -61,6 +79,7 @@ void Drawer::draw()
 
 		_renderer->submitRenderPass(_main.pass);
 	}
+	++_frameIndex;
 }
 
 void Drawer::validate(RenderInterface::Pointer& renderer)

@@ -4,13 +4,14 @@
 #include "srgb.h"
 
 Texture2D<float4> baseColorTexture : DECL_TEXTURE(BaseColor);
-SamplerState baseColorSampler : DECL_SAMPLER(BaseColor);
-
 Texture2D<float4> emissiveColorTexture : DECL_TEXTURE(EmissiveColor);
-SamplerState emissiveColorSampler : DECL_SAMPLER(EmissiveColor);
-
 Texture2D<float4> shadowTexture : DECL_TEXTURE(Shadow);
+Texture2D<float4> normalTexture : DECL_TEXTURE(Normal);
+
+SamplerState baseColorSampler : DECL_SAMPLER(BaseColor);
+SamplerState emissiveColorSampler : DECL_SAMPLER(EmissiveColor);
 SamplerState shadowSampler : DECL_SAMPLER(Shadow);
+SamplerState normalSampler : DECL_SAMPLER(Normal);
 
 cbuffer ObjectVariables : DECL_BUFFER(Object)
 {
@@ -78,14 +79,6 @@ float4 fragmentMain(VSOutput fsIn) : SV_Target0
 
 	return average;
 
-#elif (RESOLVE)
-
-	float3 source = baseColorTexture.Sample(baseColorSampler, fsIn.texCoord0).xyz;
-	float lum = dot(source, float3(0.2989, 0.5870, 0.1140));
-	float exposure = emissiveColorTexture.SampleLevel(emissiveColorSampler, fsIn.texCoord0, 10.0).x;
-	return float4(toneMapping(source, exposure), 1.0);
-	// return float4(source, 1.0);
-
 #elif (MOTION_BLUR)
 
 	float w = 0.0;
@@ -107,6 +100,23 @@ float4 fragmentMain(VSOutput fsIn) : SV_Target0
 		color += baseColorTexture.Sample(baseColorSampler, fsIn.texCoord0 + velocity * t);
 	}
 	return color / currentSamples;
+
+#elif (TONE_MAPPING)
+
+	float3 source = baseColorTexture.Sample(baseColorSampler, fsIn.texCoord0).xyz;
+	float lum = dot(source, float3(0.2989, 0.5870, 0.1140));
+	float exposure = emissiveColorTexture.SampleLevel(emissiveColorSampler, fsIn.texCoord0, 10.0).x;
+	return float4(toneMapping(source, exposure), 1.0);
+	// return float4(source, 1.0);
+
+#elif (TEMPORAL_AA)
+
+	float3 source = baseColorTexture.Sample(baseColorSampler, fsIn.texCoord0).xyz;
+
+	float2 vel = normalTexture.Sample(normalSampler, fsIn.texCoord0).xy;
+	float3 history = emissiveColorTexture.Sample(emissiveColorSampler, fsIn.texCoord0 - vel).xyz;
+
+	return float4(lerp(history, source, 0.5), 1.0);
 
 #else
 

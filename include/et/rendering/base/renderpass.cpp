@@ -17,6 +17,16 @@ const std::string RenderPass::kPassNameUI = "ui";
 
 const RenderPassBeginInfo RenderPassBeginInfo::singlePass = RenderPassBeginInfo(0, 0);
 
+RenderPass::ConstructionInfo RenderPass::renderTargetPassInfo(const std::string& name, const Texture::Pointer& texture)
+{
+	ConstructionInfo result;
+	result.name = name;
+	result.color[0].enabled = true;
+	result.color[0].useDefaultRenderTarget = false;
+	result.color[0].texture = texture;
+	return result;
+}
+
 RenderPass::RenderPass(RenderInterface* renderer, const ConstructionInfo& info) :
 	_renderer(renderer), _info(info)
 {

@@ -39,7 +39,7 @@
 		"code" : "shaders/posteffects"
 	},
 
-	"default" : 
+	"tonemapping" : 
 	{ 
 		"input-layout" : {
 			"position" : 3,
@@ -51,11 +51,47 @@
 			"depth-write": false
 		},
 		"options" : {
-			"RESOLVE" : 1
+			"TONE_MAPPING" : 1
+		},
+		"blend-state": "disabled",
+		"cull-mode" : "disabled",
+		"code" : "shaders/posteffects"
+	},
+
+	"txaa" : 
+	{ 
+		"input-layout" : {
+			"position" : 3,
+			"texcoord0" : 2
+		},
+		"depth-state": {
+			"depth-function": "always",
+			"depth-test": false,
+			"depth-write": false
+		},
+		"options" : {
+			"TEMPORAL_AA" : 1
+		},
+		"blend-state": "disabled",
+		"cull-mode" : "disabled",
+		"code" : "shaders/posteffects"
+	},
+	
+	"default" : 
+	{ 
+		"input-layout" : {
+			"position" : 3,
+			"texcoord0" : 2
+		},
+		"depth-state": {
+			"depth-function": "always",
+			"depth-test": false,
+			"depth-write": false
 		},
 		"blend-state": "disabled",
 		"cull-mode" : "disabled",
 		"code" : "shaders/posteffects"
 	}
+
 
 }

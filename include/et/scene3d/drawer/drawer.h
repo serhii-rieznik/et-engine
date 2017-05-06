@@ -70,6 +70,7 @@ private:
 	} _lighting;
 
 	mat4 _baseProjectionMatrix;
+	uint64_t _frameIndex = 0;
 };
 
 inline const Light::Pointer& Drawer::directionalLight()

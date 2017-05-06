@@ -19,8 +19,8 @@ namespace et
 struct RenderTarget
 {
 	Texture::Pointer texture;
-	FramebufferOperation loadOperation = FramebufferOperation::Clear;
-	FramebufferOperation storeOperation = FramebufferOperation::Store;
+	FramebufferOperation loadOperation = FramebufferOperation::DontCare;
+	FramebufferOperation storeOperation = FramebufferOperation::DontCare;
 	vec4 clearValue = vec4(1.0f);
 	bool useDefaultRenderTarget = true;
 	bool enabled = false;
@@ -103,6 +103,8 @@ public:
 	void loadSharedVariablesFromLight(const Light::Pointer&);
 
 	uint64_t identifier() const;
+
+	static ConstructionInfo renderTargetPassInfo(const std::string& name, const Texture::Pointer&);
 
 protected:
 	using SharedTexturesSet = std::map<MaterialTexture, std::pair<Texture::Pointer, Sampler::Pointer>>;
