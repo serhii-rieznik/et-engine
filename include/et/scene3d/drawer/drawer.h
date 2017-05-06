@@ -32,6 +32,7 @@ public:
 	void setRenderTarget(const Texture::Pointer&);
 	void setScene(const Scene::Pointer&);
 	void setEnvironmentMap(const std::string&);
+	void updateBaseProjectionMatrix(const mat4&);
 
 	void draw();
 
@@ -51,7 +52,6 @@ private:
 	RenderInterface::Pointer _renderer;
 	CubemapProcessor::Pointer _cubemapProcessor = CubemapProcessor::Pointer(PointerInit::CreateInplace);
 	ShadowmapProcessor::Pointer _shadowmapProcessor = ShadowmapProcessor::Pointer(PointerInit::CreateInplace);
-	Camera::Pointer _defaultCamera = Camera::Pointer(PointerInit::CreateInplace);
 
 	struct MainPass
 	{
@@ -68,6 +68,8 @@ private:
 		RenderBatch::Pointer environmentBatch;
 		std::string environmentTextureFile;
 	} _lighting;
+
+	mat4 _baseProjectionMatrix;
 };
 
 inline const Light::Pointer& Drawer::directionalLight()

@@ -57,33 +57,32 @@ private:
 	void downsampleLuminance();
 	void debugDraw();
 
-private:
-	RenderInterface::Pointer _renderer;
-	Texture::Pointer _hdrTarget;
-	Texture::Pointer _postprocessedTarget;
-	Texture::Pointer _luminanceTarget;
-	Texture::Pointer _luminanceHistory;
-
-	struct Batches
-	{
-		Material::Pointer debugMaterial;
-		RenderBatch::Pointer debug;
-		RenderBatch::Pointer final;
-
-		RenderPassBeginInfo downsampleBeginInfo;
-		Material::Pointer downsampleMaterial;
-		RenderBatch::Pointer downsample;
-
-		Material::Pointer resolveMaterial;
-
-		Material::Pointer motionBlurMaterial;
-		RenderBatch::Pointer motionBlur;
-	} _batches;
-
 	enum : uint32_t
 	{
 		MotionBlurPassCount = 2
 	};
+
+private:
+	RenderInterface::Pointer _renderer;
+	Texture::Pointer _primaryTarget;
+	Texture::Pointer _secondaryTarget;
+	Texture::Pointer _luminanceTarget;
+	Texture::Pointer _luminanceHistory;
+
+	struct Materials
+	{
+		Material::Pointer debug;
+		Material::Pointer posteffects;
+	} _materials;
+
+	struct Batches
+	{
+		RenderPassBeginInfo downsampleBeginInfo;
+		RenderBatch::Pointer debug;
+		RenderBatch::Pointer final;
+		RenderBatch::Pointer downsample;
+		RenderBatch::Pointer motionBlur;
+	} _batches;
 	
 	RenderPass::Pointer _motionBlurPass[MotionBlurPassCount];
 	RenderPass::Pointer _downsamplePass;

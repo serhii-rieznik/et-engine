@@ -18,10 +18,13 @@ namespace et
 namespace s3d
 {
 
-Drawer::Drawer(const RenderInterface::Pointer& renderer) : 
+Drawer::Drawer(const RenderInterface::Pointer& renderer) :
 	_renderer(renderer)
 {
-	setScene(Scene::Pointer(PointerInit::CreateInplace));
+	Scene::Pointer scene(PointerInit::CreateInplace);
+	scene->setRenderCamera(Camera::Pointer(PointerInit::CreateInplace));
+	scene->setClipCamera(scene->renderCamera());
+	setScene(scene);
 }
 
 void Drawer::draw()
@@ -30,15 +33,14 @@ void Drawer::draw()
 	_lighting.directional->lookAt(10.0f * fromSpherical(0.25f * queryContiniousTimeInSeconds(), DEG_15));
 	options.rebuldEnvironmentProbe = true;
 #endif
-	
+
 	_cubemapProcessor->process(_renderer, options, _lighting.directional);
 	_shadowmapProcessor->process(_renderer, options);
-	
+
 	validate(_renderer);
 
-	Camera::Pointer renderCamera = _scene.valid() ? _scene->renderCamera() : _defaultCamera;
-	Camera::Pointer clipCamera = _scene.valid() ? _scene->clipCamera() : _defaultCamera;
-	
+	Camera::Pointer renderCamera = _scene->renderCamera();
+	Camera::Pointer clipCamera = _scene->clipCamera();
 	{
 		_main.pass->loadSharedVariablesFromCamera(renderCamera);
 		_main.pass->loadSharedVariablesFromLight(_lighting.directional);
@@ -72,20 +74,20 @@ void Drawer::validate(RenderInterface::Pointer& renderer)
 		desc->format = TextureFormat::RG32F;
 		desc->flags |= Texture::Flags::RenderTarget;
 		_main.velocity = renderer->createTexture(desc);
-		
+
 		desc->format = TextureFormat::Depth32F;
 		_main.depth = renderer->createTexture(desc);
 
 		RenderPass::ConstructionInfo passInfo;
 		passInfo.name = RenderPass::kPassNameDefault;
-		
+
 		passInfo.color[0].texture = _main.color;
 		passInfo.color[0].loadOperation = FramebufferOperation::Clear;
 		passInfo.color[0].storeOperation = FramebufferOperation::Store;
 		passInfo.color[0].enabled = true;
 		passInfo.color[0].clearValue = vec4(0.0f, 1.0f);
 		passInfo.color[0].useDefaultRenderTarget = false;
-		
+
 		passInfo.color[1].texture = _main.velocity;
 		passInfo.color[1].loadOperation = FramebufferOperation::Clear;
 		passInfo.color[1].storeOperation = FramebufferOperation::Store;
@@ -184,6 +186,11 @@ void Drawer::setEnvironmentMap(const std::string& filename)
 {
 	Texture::Pointer tex = _renderer->loadTexture(filename, _cache);
 	_cubemapProcessor->processEquiretangularTexture(tex.valid() ? tex : _renderer->checkersTexture());
+}
+
+void Drawer::updateBaseProjectionMatrix(const mat4& m)
+{
+	_baseProjectionMatrix = m;
 }
 
 }
