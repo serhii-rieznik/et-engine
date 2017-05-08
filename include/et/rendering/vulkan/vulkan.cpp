@@ -48,26 +48,31 @@ VkResult vkGetPhysicalDeviceSurfaceFormatsKHRWrapper(const VulkanState& state, u
 	return vkGetPhysicalDeviceSurfaceFormatsKHR(state.physicalDevice, state.swapchain.surface, count, formats);
 }
 
-void VulkanState::executeServiceCommands(ServiceCommands commands)
+void VulkanState::executeServiceCommands(VulkanQueueClass cls, ServiceCommands commands)
 {
+	VulkanQueue& queue = queues[cls];
+
 	VkCommandBufferBeginInfo beginInfo = { VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO };
 	beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+	VULKAN_CALL(vkBeginCommandBuffer(queue.serviceCommandBuffer, &beginInfo));
+	{
+		commands(queue.serviceCommandBuffer);
+	}
+	VULKAN_CALL(vkEndCommandBuffer(queue.serviceCommandBuffer));
 
 	VkSubmitInfo submit = { VK_STRUCTURE_TYPE_SUBMIT_INFO };
 	submit.commandBufferCount = 1;
-	submit.pCommandBuffers = &serviceCommandBuffer;
-
-	VULKAN_CALL(vkBeginCommandBuffer(serviceCommandBuffer, &beginInfo));
-	commands(serviceCommandBuffer);
-	VULKAN_CALL(vkEndCommandBuffer(serviceCommandBuffer));
-	VULKAN_CALL(vkQueueSubmit(queue, 1, &submit, nullptr));
-	VULKAN_CALL(vkQueueWaitIdle(queue));
+	submit.pCommandBuffers = &queue.serviceCommandBuffer;
+	VULKAN_CALL(vkQueueSubmit(queue.queue, 1, &submit, nullptr));
+	
+	VULKAN_CALL(vkQueueWaitIdle(queue.queue));
 }
 
 /*
+ *
  * Swapchain
+ *
  */
-
 void VulkanSwapchain::init(VulkanState& vulkan, const RenderContextParameters& params, HWND window)
 {
 	VkWin32SurfaceCreateInfoKHR surfaceInfo = { VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR };
@@ -75,19 +80,11 @@ void VulkanSwapchain::init(VulkanState& vulkan, const RenderContextParameters& p
 	surfaceInfo.hwnd = window;
 	vkCreateWin32SurfaceKHR(vulkan.instance, &surfaceInfo, nullptr, &surface);
 
-	for (uint32_t i = 0, e = static_cast<uint32_t>(vulkan.queueProperties.size()); i < e; ++i)
-	{
-		VkBool32 supported = false;
-		vkGetPhysicalDeviceSurfaceSupportKHR(vulkan.physicalDevice, vulkan.graphicsQueueIndex, surface, &supported);
-		if (supported)
-		{
-			vulkan.presentQueueIndex = i;
-			break;
-		}
-	}
-	ET_ASSERT(vulkan.presentQueueIndex == vulkan.graphicsQueueIndex);
+	VkBool32 graphicsQueueSupportsPresent = false;
+	vkGetPhysicalDeviceSurfaceSupportKHR(vulkan.physicalDevice, vulkan.queues[VulkanQueueClass::Graphics].index, surface, &graphicsQueueSupportsPresent);
+	ET_ASSERT(graphicsQueueSupportsPresent);
 
-	auto formats = enumerateVulkanObjects<VkSurfaceFormatKHR>(vulkan, vkGetPhysicalDeviceSurfaceFormatsKHRWrapper);
+	Vector<VkSurfaceFormatKHR> formats = enumerateVulkanObjects<VkSurfaceFormatKHR>(vulkan, vkGetPhysicalDeviceSurfaceFormatsKHRWrapper);
 	ET_ASSERT(formats.size() > 0);
 	surfaceFormat = formats.front();
 }
@@ -198,6 +195,8 @@ void VulkanSwapchain::createSizeDependentResources(VulkanState& vulkan, const ve
 
 	VULKAN_CALL(vkCreateSwapchainKHR(vulkan.device, &swapchainInfo, nullptr, &swapchain));
 
+	VkCommandPool graphicsCommandPool = vulkan.queues[VulkanQueueClass::Graphics].commandPool;
+
 	if (currentSwapchain != nullptr)
 	{
 		for (Frame& frame : frames)
@@ -205,9 +204,9 @@ void VulkanSwapchain::createSizeDependentResources(VulkanState& vulkan, const ve
 			vkDestroyImageView(vulkan.device, frame.colorView, nullptr);
 			frame.colorView = nullptr;
 
-			vkFreeCommandBuffers(vulkan.device, vulkan.commandPool, 1, &frame.barrierFromPresent);
+			vkFreeCommandBuffers(vulkan.device, graphicsCommandPool, 1, &frame.barrierFromPresent);
 			frame.barrierFromPresent = nullptr;
-			vkFreeCommandBuffers(vulkan.device, vulkan.commandPool, 1, &frame.barrierToPresent);
+			vkFreeCommandBuffers(vulkan.device, graphicsCommandPool, 1, &frame.barrierToPresent);
 			frame.barrierToPresent = nullptr;
 
 			vkDestroySemaphore(vulkan.device, frame.semaphoreFromPresent, nullptr);
@@ -247,7 +246,7 @@ void VulkanSwapchain::createSizeDependentResources(VulkanState& vulkan, const ve
 
 		VkCommandBufferAllocateInfo allocInfo = { VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO };
 		allocInfo.commandBufferCount = 1;
-		allocInfo.commandPool = vulkan.commandPool;
+		allocInfo.commandPool = graphicsCommandPool;
 		allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
 		VULKAN_CALL(vkAllocateCommandBuffers(vulkan.device, &allocInfo, &frame.barrierFromPresent));
 		VULKAN_CALL(vkAllocateCommandBuffers(vulkan.device, &allocInfo, &frame.barrierToPresent));
@@ -278,7 +277,7 @@ void VulkanSwapchain::createSizeDependentResources(VulkanState& vulkan, const ve
 		VULKAN_CALL(vkCreateFence(vulkan.device, &fenceInfo, nullptr, &frame.imageFence));
 	}
 	
-	vulkan.executeServiceCommands([&](VkCommandBuffer cmdBuffer) {
+	vulkan.executeServiceCommands(VulkanQueueClass::Graphics, [&](VkCommandBuffer cmdBuffer) {
 		if (createDepthImage(vulkan, depthBuffer.depth, depthBuffer.depthMemory, cmdBuffer)) {
 			depthBuffer.depthView = createImageView(vulkan, depthBuffer.depth, VK_IMAGE_ASPECT_DEPTH_BIT, depthFormat);
 		}
@@ -305,7 +304,7 @@ void VulkanSwapchain::present(VulkanState& vulkan)
 	info.pImageIndices = &swapchainImageIndex;
 	info.waitSemaphoreCount = 1;
 	info.pWaitSemaphores = &frames[frameNumber % RendererFrameCount].submitCompleted;
-	VULKAN_CALL(vkQueuePresentKHR(vulkan.queue, &info));
+	VULKAN_CALL(vkQueuePresentKHR(vulkan.queues[VulkanQueueClass::Graphics].queue, &info));
 	
 	++frameNumber;
 }
@@ -344,8 +343,8 @@ void imageBarrier(VulkanState& vulkan, VkCommandBuffer cmd, VkImage image, VkIma
 	barrierInfo.dstAccessMask = accessTo;
 	barrierInfo.oldLayout = layoutFrom;
 	barrierInfo.newLayout = layoutTo;
-	barrierInfo.srcQueueFamilyIndex = vulkan.presentQueueIndex;
-	barrierInfo.dstQueueFamilyIndex = vulkan.graphicsQueueIndex;
+	barrierInfo.srcQueueFamilyIndex = vulkan.queues[VulkanQueueClass::Graphics].index;
+	barrierInfo.dstQueueFamilyIndex = vulkan.queues[VulkanQueueClass::Graphics].index;
 	barrierInfo.subresourceRange = { aspect, startMipLevel, mipLevelsCount, 0, 1 };
 	barrierInfo.image = image;
 	vkCmdPipelineBarrier(cmd, stageFrom, stageTo, 0, 0, nullptr, 0, nullptr, 1, &barrierInfo);

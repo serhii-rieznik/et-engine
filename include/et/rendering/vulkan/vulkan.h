@@ -72,30 +72,43 @@ struct VulkanSwapchain
 		{ return frames.at(frameNumber % RendererFrameCount); }
 };
 
+enum VulkanQueueClass : uint32_t
+{
+	Graphics,
+	Compute,
+	
+	VulkanQueueClass_Count
+};
+
+struct VulkanQueue
+{
+	uint32_t index = static_cast<uint32_t>(-1);
+
+	VkQueue queue = nullptr;
+	VkCommandPool commandPool = nullptr;
+	VkCommandBuffer serviceCommandBuffer = nullptr;
+};
+
 struct VulkanState
 {
 	VkInstance instance = nullptr;
 	VkDebugReportCallbackEXT debugCallback = nullptr;
-
 	VkPhysicalDevice physicalDevice = nullptr;
+	VkDevice device = nullptr;
+	VkDescriptorPool descriptorPool = nullptr;
+	VkPipelineCache pipelineCache = nullptr;
+	
 	VkPhysicalDeviceProperties physicalDeviceProperties { };
 	VkPhysicalDeviceFeatures physicalDeviceFeatures { };
 
-	VkDevice device = nullptr;
-	VkCommandPool commandPool = nullptr;
-	VkDescriptorPool descriptorPool = nullptr;
-	VkQueue queue = nullptr;
-	VkPipelineCache pipelineCache = nullptr;
-	VkCommandBuffer serviceCommandBuffer = nullptr;
-
-	Vector<VkQueueFamilyProperties> queueProperties;
-	uint32_t graphicsQueueIndex = static_cast<uint32_t>(-1);
-	uint32_t presentQueueIndex = static_cast<uint32_t>(-1);
-
 	VulkanSwapchain swapchain;
+	VulkanQueue queues[VulkanQueueClass_Count];
+
+	VkCommandPool graphicsCommandPool = nullptr;
+	VkCommandPool computeCommandPool = nullptr;
 
 	using ServiceCommands = std::function<void(VkCommandBuffer)>;
-	void executeServiceCommands(ServiceCommands);
+	void executeServiceCommands(VulkanQueueClass, ServiceCommands);
 };
 
 struct VulkanShaderModules
@@ -128,8 +141,8 @@ enum DescriptorSetClass : uint32_t
 {
 	Buffers,
 	Textures,
-	Count,
 	
+	DescriptorSetClass_Count,
 	DynamicDescriptorsCount = 2
 };
 

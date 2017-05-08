@@ -119,7 +119,7 @@ VulkanRenderPass::VulkanRenderPass(VulkanRenderer* renderer, VulkanState& vulkan
 		VULKAN_CALL(vkCreateSemaphore(vulkan.device, &semaphoreInfo, nullptr, &_private->content[i].semaphore));
 
 		VkCommandBufferAllocateInfo info = { VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO };
-		info.commandPool = vulkan.commandPool;
+		info.commandPool = vulkan.graphicsCommandPool;
 		info.commandBufferCount = 1;
 		info.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
 		VULKAN_CALL(vkAllocateCommandBuffers(vulkan.device, &info, &_private->content[i].commandBuffer));
@@ -224,7 +224,7 @@ VulkanRenderPass::~VulkanRenderPass()
 	vkDestroyRenderPass(_private->vulkan.device, _private->renderPass, nullptr);
 	for (uint32_t i = 0; i < RendererFrameCount; ++i)
 	{
-		vkFreeCommandBuffers(_private->vulkan.device, _private->vulkan.commandPool, 1, &_private->content[i].commandBuffer);
+		vkFreeCommandBuffers(_private->vulkan.device, _private->vulkan.graphicsCommandPool, 1, &_private->content[i].commandBuffer);
 		vkDestroySemaphore(_private->vulkan.device, _private->content[i].semaphore, nullptr);
 	}
 	vkFreeDescriptorSets(_private->vulkan.device, _private->vulkan.descriptorPool, 1, &_private->dynamicDescriptorSet);
@@ -439,7 +439,7 @@ void VulkanRenderPass::recordCommandBuffer()
 
 	uint32_t dynamicOffsets[DescriptorSetClass::DynamicDescriptorsCount] = { };
 
-	VkDescriptorSet descriptorSets[DescriptorSetClass::Count] = {
+	VkDescriptorSet descriptorSets[DescriptorSetClass_Count] = {
 		_private->dynamicDescriptorSet,
 		nullptr,
 	};
@@ -490,7 +490,7 @@ void VulkanRenderPass::recordCommandBuffer()
 			}
 
 			vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, batch.pipeline->nativePipeline().layout, 0,
-				DescriptorSetClass::Count, descriptorSets, DescriptorSetClass::DynamicDescriptorsCount, dynamicOffsets);
+				DescriptorSetClass_Count, descriptorSets, DescriptorSetClass::DynamicDescriptorsCount, dynamicOffsets);
 
 			vkCmdDrawIndexed(commandBuffer, batch.indexCount, 1, batch.startIndex, 0, 0);
 		}
@@ -503,8 +503,8 @@ void VulkanRenderPass::recordCommandBuffer()
 			barrier.dstAccessMask = vulkan::texureStateToAccessFlags(cmd.imageBarrier.toState);
 			barrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 			barrier.newLayout = vulkan::texureStateToImageLayout(cmd.imageBarrier.toState);
-			barrier.srcQueueFamilyIndex = _private->vulkan.graphicsQueueIndex;
-			barrier.dstQueueFamilyIndex = _private->vulkan.graphicsQueueIndex;
+			barrier.srcQueueFamilyIndex = _private->vulkan.queues[VulkanQueueClass::Graphics].index;
+			barrier.dstQueueFamilyIndex = _private->vulkan.queues[VulkanQueueClass::Graphics].index;
 			
 			barrier.subresourceRange = { tex->nativeTexture().aspect, cmd.imageBarrier.firstLevel, 
 				cmd.imageBarrier.levelCount, cmd.imageBarrier.firstLayer, cmd.imageBarrier.layerCount };

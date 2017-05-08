@@ -18,8 +18,10 @@ HDRFlow::HDRFlow(const RenderInterface::Pointer& ren) :
 	_renderer(ren)
 {
 	RenderPass::ConstructionInfo desc;
-	desc.color[0].enabled = true;
 	desc.name = RenderPass::kPassNameDefault;
+	desc.color[0].enabled = true;
+	desc.color[0].loadOperation = FramebufferOperation::Clear;
+	desc.color[0].storeOperation = FramebufferOperation::Store;
 	_passes.final = _renderer->allocateRenderPass(desc);
 	
 	_materials.debug = _renderer->sharedMaterialLibrary().loadMaterial(application().resolveFileName("engine_data/materials/textured2d-transformed-lod.json"));

@@ -137,7 +137,7 @@ void VulkanTexture::setImageData(const BinaryDataStorage& data)
 		regions.emplace_back(region);
 	};
 
-	_private->vulkan.executeServiceCommands([&](VkCommandBuffer cmdBuffer)
+	_private->vulkan.executeServiceCommands(VulkanQueueClass::Graphics, [&](VkCommandBuffer cmdBuffer)
 	{
 		vulkan::imageBarrier(_private->vulkan, cmdBuffer, _private->image,
 			_private->aspect, 0, VK_ACCESS_TRANSFER_WRITE_BIT, 
@@ -183,7 +183,7 @@ void VulkanTexture::updateRegion(const vec2i & pos, const vec2i & size, const Bi
 	region.imageExtent.height = static_cast<uint32_t>(size.y);
 	region.imageExtent.depth = 1;
 	
-	_private->vulkan.executeServiceCommands([&](VkCommandBuffer cmdBuffer)
+	_private->vulkan.executeServiceCommands(VulkanQueueClass::Graphics, [&](VkCommandBuffer cmdBuffer)
 	{
 		vulkan::imageBarrier(_private->vulkan, cmdBuffer, _private->image, _private->aspect, 
 			0, VK_ACCESS_TRANSFER_WRITE_BIT, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
@@ -209,7 +209,7 @@ uint8_t* VulkanTexture::map(uint32_t level, uint32_t layer, uint32_t options)
 	VkDeviceSize offset = description().dataOffsetForLayer(layer, level);
 	VkDeviceSize dataSize = description().dataSizeForMipLevel(level) / description().layersCount;
 
-	_private->vulkan.executeServiceCommands([&](VkCommandBuffer cmdBuffer)
+	_private->vulkan.executeServiceCommands(VulkanQueueClass::Graphics, [&](VkCommandBuffer cmdBuffer)
 	{
 		vulkan::imageBarrier(_private->vulkan, cmdBuffer, _private->image,
 			_private->aspect, 0, VK_ACCESS_HOST_READ_BIT | VK_ACCESS_HOST_WRITE_BIT,
@@ -228,7 +228,7 @@ void VulkanTexture::unmap()
 	ET_ASSERT(_private->mappedState != 0);
 	vkUnmapMemory(_private->vulkan.device, _private->memory);
 
-	_private->vulkan.executeServiceCommands([&](VkCommandBuffer cmdBuffer)
+	_private->vulkan.executeServiceCommands(VulkanQueueClass::Graphics, [&](VkCommandBuffer cmdBuffer)
 	{
 		vulkan::imageBarrier(_private->vulkan, cmdBuffer, _private->image,
 			_private->aspect, VK_ACCESS_HOST_READ_BIT | VK_ACCESS_HOST_WRITE_BIT, VK_ACCESS_SHADER_READ_BIT,

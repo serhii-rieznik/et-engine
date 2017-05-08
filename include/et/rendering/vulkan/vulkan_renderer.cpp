@@ -25,8 +25,6 @@
 #	define VULKAN_ENABLE_VALIDATION 0
 #endif
 
-#define VULKAN_COMBINED_SUBMIT 1
-
 namespace et
 {
 class VulkanRendererPrivate : public VulkanState
@@ -145,25 +143,39 @@ void VulkanRenderer::init(const RenderContextParameters& params)
 	vkGetPhysicalDeviceProperties(_private->physicalDevice, &_private->physicalDeviceProperties);
 	vkGetPhysicalDeviceFeatures(_private->physicalDevice, &_private->physicalDeviceFeatures);
 
-	_private->queueProperties = enumerateVulkanObjects<VkQueueFamilyProperties>(_private->physicalDevice, vkGetPhysicalDeviceQueueFamilyProperties);
-	ET_ASSERT(!_private->queueProperties.empty());
+	Vector<VkQueueFamilyProperties> queueProperties = 
+		enumerateVulkanObjects<VkQueueFamilyProperties>(_private->physicalDevice, vkGetPhysicalDeviceQueueFamilyProperties);
+	ET_ASSERT(queueProperties.size() > 0);
 
-	_private->graphicsQueueIndex = static_cast<uint32_t>(-1);
-	for (size_t i = 0, e = _private->queueProperties.size(); i < e; ++i)
-	{
-		if (_private->queueProperties.at(i).queueFlags & VK_QUEUE_GRAPHICS_BIT)
-		{
-			_private->graphicsQueueIndex = static_cast<uint32_t>(i);
-			break;
-		}
-	}
-	ET_ASSERT(_private->graphicsQueueIndex != static_cast<uint32_t>(-1));
+	VkDeviceQueueCreateInfo queueCreateInfos[VulkanQueueClass_Count] = { 
+		{ VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO }, { VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO } };
 
+	uint32_t queuesIndex = 0;
 	float queuePriorities[] = { 0.0f };
-	VkDeviceQueueCreateInfo queueCreateInfo = { VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO };
-	queueCreateInfo.queueFamilyIndex = static_cast<uint32_t>(_private->graphicsQueueIndex);
-	queueCreateInfo.queueCount = 1;
-	queueCreateInfo.pQueuePriorities = queuePriorities;
+	for (const VkQueueFamilyProperties& queue : queueProperties)
+	{
+		if (queue.queueFlags & VK_QUEUE_GRAPHICS_BIT)
+		{
+			ET_ASSERT(_private->queues[VulkanQueueClass::Graphics].index == static_cast<uint32_t>(-1));
+			_private->queues[VulkanQueueClass::Graphics].index = queuesIndex;
+			queueCreateInfos[VulkanQueueClass::Graphics].queueFamilyIndex = queuesIndex;
+			queueCreateInfos[VulkanQueueClass::Graphics].queueCount = 1;
+			queueCreateInfos[VulkanQueueClass::Graphics].pQueuePriorities = queuePriorities;
+		}
+		if (queue.queueFlags & VK_QUEUE_COMPUTE_BIT)
+		{
+			ET_ASSERT(_private->queues[VulkanQueueClass::Compute].index == static_cast<uint32_t>(-1));
+			_private->queues[VulkanQueueClass::Compute].index = queuesIndex;
+			queueCreateInfos[VulkanQueueClass::Compute].queueFamilyIndex = queuesIndex;
+			queueCreateInfos[VulkanQueueClass::Compute].queueCount = 1;
+			queueCreateInfos[VulkanQueueClass::Compute].pQueuePriorities = queuePriorities;
+		}
+		++queuesIndex;
+	}
+
+	bool computeAndGraphicsIsTheSame =
+		(_private->queues[VulkanQueueClass::Compute].index == _private->queues[VulkanQueueClass::Graphics].index);;
+	uint32_t totalQueuesCount = computeAndGraphicsIsTheSame ? 1 : queuesIndex;
 
 	Vector<const char*> deviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
 
@@ -171,30 +183,43 @@ void VulkanRenderer::init(const RenderContextParameters& params)
 	deviceFeatures.samplerAnisotropy = VK_TRUE;
 
 	VkDeviceCreateInfo deviceCreateInfo = { VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO };
-	deviceCreateInfo.queueCreateInfoCount = 1;
-	deviceCreateInfo.pQueueCreateInfos = &queueCreateInfo;
-	deviceCreateInfo.enabledExtensionCount = 1;
+	deviceCreateInfo.queueCreateInfoCount = totalQueuesCount;
+	deviceCreateInfo.pQueueCreateInfos = queueCreateInfos;
+	deviceCreateInfo.enabledExtensionCount = static_cast<uint32_t>(deviceExtensions.size());
 	deviceCreateInfo.ppEnabledExtensionNames = deviceExtensions.data();
 	deviceCreateInfo.pEnabledFeatures = &deviceFeatures;
 	VULKAN_CALL(vkCreateDevice(_private->physicalDevice, &deviceCreateInfo, nullptr, &_private->device));
 
-	VkCommandPoolCreateInfo cmdPoolCreateInfo = { VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO };
-	cmdPoolCreateInfo.queueFamilyIndex = _private->graphicsQueueIndex;
-	cmdPoolCreateInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
-	VULKAN_CALL(vkCreateCommandPool(_private->device, &cmdPoolCreateInfo, nullptr, &_private->commandPool));
+	for (uint32_t i = 0; i < totalQueuesCount; ++i)
+	{
+		VulkanQueue& queue = _private->queues[i];
+		vkGetDeviceQueue(_private->device, queue.index, 0, &queue.queue);
 
-	vkGetDeviceQueue(_private->device, _private->graphicsQueueIndex, 0, &_private->queue);
+		VkCommandPoolCreateInfo cmdPoolCreateInfo = { VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO };
+		cmdPoolCreateInfo.queueFamilyIndex = queue.index;
+		cmdPoolCreateInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
+		VULKAN_CALL(vkCreateCommandPool(_private->device, &cmdPoolCreateInfo, nullptr, &queue.commandPool));
+		
+		VkCommandBufferAllocateInfo serviceBufferInfo = { VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO };
+		serviceBufferInfo.commandPool = queue.commandPool;
+		serviceBufferInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+		serviceBufferInfo.commandBufferCount = 1;
+		VULKAN_CALL(vkAllocateCommandBuffers(_private->device, &serviceBufferInfo, &queue.serviceCommandBuffer));
+	}
+
+	if (computeAndGraphicsIsTheSame)
+	{
+		_private->queues[VulkanQueueClass::Compute] = _private->queues[VulkanQueueClass::Graphics];
+	}
+
+	_private->graphicsCommandPool = _private->queues[VulkanQueueClass::Graphics].commandPool;
+	_private->computeCommandPool = _private->queues[VulkanQueueClass::Compute].commandPool;
 
 	HWND mainWindow = reinterpret_cast<HWND>(application().context().objects[0]);
 	_private->swapchain.init(_private->vulkan(), params, mainWindow);
 
-	VkCommandBufferAllocateInfo serviceBufferInfo = { VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO };
-	serviceBufferInfo.commandPool = _private->commandPool;
-	serviceBufferInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-	serviceBufferInfo.commandBufferCount = 1;
-	VULKAN_CALL(vkAllocateCommandBuffers(_private->device, &serviceBufferInfo, &_private->serviceCommandBuffer));
-
 	uint32_t defaultPoolSize = 1024;
+
 	VkDescriptorPoolSize poolSizes[] = {
 		{ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, defaultPoolSize },
 		{ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, defaultPoolSize },
@@ -209,7 +234,7 @@ void VulkanRenderer::init(const RenderContextParameters& params)
 	poolInfo.pPoolSizes = poolSizes;
 	VULKAN_CALL(vkCreateDescriptorPool(_private->device, &poolInfo, nullptr, &_private->descriptorPool));
 
-	RECT clientRect = {};
+	RECT clientRect = { };
 	GetClientRect(mainWindow, &clientRect);
 	resize(vec2i(clientRect.right - clientRect.left, clientRect.bottom - clientRect.top));
 
@@ -443,12 +468,10 @@ void VulkanRenderer::present()
 		submitInfo.pSignalSemaphores = &_private->swapchain.currentFrame().submitCompleted;
 	}
 
-#if (VULKAN_COMBINED_SUBMIT)
-	VULKAN_CALL(vkQueueSubmit(_private->queue, static_cast<uint32_t>(_private->allSubmits.size()),
+	VULKAN_CALL(vkQueueSubmit(_private->queues[VulkanQueueClass::Graphics].queue, static_cast<uint32_t>(_private->allSubmits.size()),
 		_private->allSubmits.data(), _private->swapchain.currentFrame().imageFence));
-	_private->allSubmits.clear();
-#endif
 	
+	_private->allSubmits.clear();
 	_private->swapchain.present(_private->vulkan());
 }
 

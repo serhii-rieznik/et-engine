@@ -106,8 +106,7 @@ void VulkanBuffer::transferData(Buffer::Pointer dst)
 	ET_ASSERT(destination->_private->memoryRequirements.size >= _private->memoryRequirements.size);
 
 	VkBufferCopy region = { 0, 0, _private->memoryRequirements.size };
-	_private->vulkan.executeServiceCommands([&](VkCommandBuffer cmdBuffer)
-	{
+	_private->vulkan.executeServiceCommands(VulkanQueueClass::Graphics, [&](VkCommandBuffer cmdBuffer) {
 		vkCmdCopyBuffer(cmdBuffer, _private->buffer, destination->_private->buffer, 1, &region);
 	});;
 }

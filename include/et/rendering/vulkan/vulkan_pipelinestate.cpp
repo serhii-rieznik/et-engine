@@ -196,7 +196,7 @@ void VulkanPipelineStatePrivate::generatePipelineLayout(const Program::Reflectio
 		VULKAN_CALL(vkCreateDescriptorSetLayout(vulkan.device, &layoutSetInfo, nullptr, &texturesLayout));
 	}
 
-	VkDescriptorSetLayout layouts[DescriptorSetClass::Count] =
+	VkDescriptorSetLayout layouts[DescriptorSetClass_Count] =
 	{
 		pass->nativeRenderPass().dynamicDescriptorSetLayout,
 		texturesLayout,
