@@ -24,7 +24,7 @@ public:
 	VulkanProgram(VulkanState&);
 	~VulkanProgram();
 
-	void build(const std::string& source) override;
+	void build(uint32_t stages, const std::string& source) override;
 
 	const VulkanShaderModules& shaderModules() const;
 

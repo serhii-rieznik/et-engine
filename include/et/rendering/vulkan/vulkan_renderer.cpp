@@ -285,10 +285,10 @@ Sampler::Pointer VulkanRenderer::createSampler(const Sampler::Description& desc)
 	return VulkanSampler::Pointer::create(_private->vulkan(), desc);
 }
 
-Program::Pointer VulkanRenderer::createProgram(const std::string& source)
+Program::Pointer VulkanRenderer::createProgram(uint32_t stages, const std::string& source)
 {
 	VulkanProgram::Pointer program = VulkanProgram::Pointer::create(_private->vulkan());
-	program->build(source);
+	program->build(stages, source);
 	return program;
 }
 

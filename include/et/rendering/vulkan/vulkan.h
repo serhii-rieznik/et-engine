@@ -113,13 +113,7 @@ struct VulkanState
 
 struct VulkanShaderModules
 {
-	VkShaderModule fragment = nullptr;
-	VkShaderModule vertex = nullptr;
-	VkPipelineShaderStageCreateInfo stageCreateInfo[2]
-	{ 
-		{ VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO }, 
-		{ VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO } 
-	};
+	Map<ProgramStage, VkPipelineShaderStageCreateInfo> stageCreateInfos;
 };
 
 struct VulkanNativeRenderPass
@@ -217,6 +211,8 @@ VkBlendOp blendOperationValue(BlendOperation);
 VkBlendFactor blendFactorValue(BlendFunction);
 VkAccessFlags texureStateToAccessFlags(TextureState);
 VkImageLayout texureStateToImageLayout(TextureState);
+VkShaderStageFlagBits programStageValue(ProgramStage);
+const char* programStageEntryName(ProgramStage);
 
 namespace gl
 {

@@ -45,7 +45,7 @@ public:
 	};
 
 public:
-	virtual void build(const std::string& source) = 0;
+	virtual void build(uint32_t stages, const std::string& source) = 0;
 
 	const Reflection& reflection() const
 		{ return _reflection; }

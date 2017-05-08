@@ -604,6 +604,30 @@ VkImageLayout texureStateToImageLayout(TextureState val)
 	return values.at(val);
 }
 
+VkShaderStageFlagBits programStageValue(ProgramStage val)
+{
+	static const std::map<ProgramStage, VkShaderStageFlagBits> values =
+	{
+		{ ProgramStage::Vertex, VK_SHADER_STAGE_VERTEX_BIT },
+		{ ProgramStage::Fragment, VK_SHADER_STAGE_FRAGMENT_BIT },
+		{ ProgramStage::Compute, VK_SHADER_STAGE_COMPUTE_BIT },
+	};
+	ET_ASSERT(values.count(val) > 0);
+	return values.at(val);
+}
+
+const char* programStageEntryName(ProgramStage val)
+{
+	static const std::map<ProgramStage, const char*> values =
+	{
+		{ ProgramStage::Vertex, "vertexMain" },
+		{ ProgramStage::Fragment, "fragmentMain" },
+		{ ProgramStage::Compute, "computeMain" },
+	};
+	ET_ASSERT(values.count(val) > 0);
+	return values.at(val);
+}
+
 namespace gl
 {
 DataType dataTypeFromGLType(int glType)

@@ -60,7 +60,7 @@ public:
 	/*
 	 * Programs
 	 */
-	Program::Pointer createProgram(const std::string& source) override;
+	Program::Pointer createProgram(uint32_t stages, const std::string& source) override;
 
 	/*
 	 * Pipeline state

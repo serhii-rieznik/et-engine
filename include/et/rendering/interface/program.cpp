@@ -32,37 +32,24 @@ void Program::printReflection() const
 
 	printVariables("Material variables", _reflection.materialVariables, MaterialVariable_max, mtlToStr);
 	printVariables("Object variables", _reflection.objectVariables, ObjectVariable_max, objToStr);
-	
-	if (!_reflection.textures.vertexTextures.empty())
-	{
-		log::info("Vertex textures: { ");
-		for (const auto& pv : _reflection.textures.vertexTextures)
-			log::info("\t%s : %u", pv.first.c_str(), pv.second);
-		log::info("}");
-	}
 
-	if (!_reflection.textures.vertexSamplers.empty())
+	for (const auto& tex : _reflection.textures)
 	{
-		log::info("Vertex samplers: { ");
-		for (const auto& pv : _reflection.textures.vertexSamplers)
-			log::info("\t%s : %u", pv.first.c_str(), pv.second);
-		log::info("}");
-	}
+		if (!tex.second.textures.empty())
+		{
+			log::info("Vertex textures: { ");
+			for (const auto& pv : tex.second.textures)
+				log::info("\t%s : %u", pv.first.c_str(), pv.second);
+			log::info("}");
+		}
 
-	if (!_reflection.textures.fragmentTextures.empty())
-	{
-		log::info("Fragment textures: { ");
-		for (const auto& pv : _reflection.textures.fragmentTextures)
-			log::info("\t%s : %u", pv.first.c_str(), pv.second);
-		log::info("}");
-	}
-
-	if (!_reflection.textures.fragmentSamplers.empty())
-	{
-		log::info("Fragment samplers: { ");
-		for (const auto& pv : _reflection.textures.fragmentSamplers)
-			log::info("\t%s : %u", pv.first.c_str(), pv.second);
-		log::info("}");
+		if (!tex.second.samplers.empty())
+		{
+			log::info("Vertex samplers: { ");
+			for (const auto& pv : tex.second.samplers)
+				log::info("\t%s : %u", pv.first.c_str(), pv.second);
+			log::info("}");
+		}
 	}
 }
 
@@ -104,10 +91,14 @@ void Program::Reflection::serialize(std::ostream& file) const
 			serializeUInt32(file, i.second);
 		}
 	};
+	/*
+	 * TODO : serialize
+	 *
 	serializeMap(textures.vertexTextures);
 	serializeMap(textures.vertexSamplers);
 	serializeMap(textures.fragmentTextures);
 	serializeMap(textures.fragmentSamplers);
+	// */
 }
 
 bool Program::Reflection::deserialize(std::istream& file)
@@ -149,10 +140,16 @@ bool Program::Reflection::deserialize(std::istream& file)
 			m.emplace(k, v);
 		}
 	};
+	
+	/*
+	 * TODO : deserialize
+	 *
 	deserializeMap(textures.vertexTextures);
 	deserializeMap(textures.vertexSamplers);
 	deserializeMap(textures.fragmentTextures);
 	deserializeMap(textures.fragmentSamplers);
+	// */
+
 	return true;
 }
 

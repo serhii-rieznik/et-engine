@@ -18,21 +18,19 @@ class TextureSet : public Object
 public:
 	ET_DECLARE_POINTER(TextureSet);
 
-	struct Reflection
+	struct ReflectionSet
 	{
-		UnorderedMap<std::string, uint32_t> vertexTextures;
-		UnorderedMap<std::string, uint32_t> vertexSamplers;
-		UnorderedMap<std::string, uint32_t> fragmentTextures;
-		UnorderedMap<std::string, uint32_t> fragmentSamplers;
+		UnorderedMap<std::string, uint32_t> textures;
+		UnorderedMap<std::string, uint32_t> samplers;
+	};
+	struct DescriptionSet
+	{
+		std::array<Texture::Pointer, MaterialTexture_max> textures;
+		std::array<Sampler::Pointer, MaterialTexture_max> samplers;
 	};
 
-	struct Description
-	{
-		std::array<Texture::Pointer, MaterialTexture_max> vertexTextures;
-		std::array<Sampler::Pointer, MaterialTexture_max> vertexSamplers;
-		std::array<Texture::Pointer, MaterialTexture_max> fragmentTextures;
-		std::array<Sampler::Pointer, MaterialTexture_max> fragmentSamplers;
-	};
+	using Reflection = Map<ProgramStage, ReflectionSet>;
+	using Description = Map<ProgramStage, DescriptionSet>;
 
 public:
 	TextureSet() = default;

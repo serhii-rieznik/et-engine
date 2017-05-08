@@ -34,12 +34,6 @@ extern const TBuiltInResource DefaultTBuiltInResource;
 namespace et
 {
 
-enum class ProgramStage : uint32_t
-{
-	Vertex,
-	Fragment
-};
-
 void buildProgramInputLayout(const glslang::TProgram&, Program::Reflection& reflection);
 void buildProgramReflection(const glslang::TProgram&, Program::Reflection& reflection, ProgramStage stage);
 void dumpSource(const std::string&);
@@ -82,77 +76,6 @@ bool buildProgram(glslang::TProgram& program, EShMessages messages)
 		log::error("Failed to build reflection:\n%s", program.getInfoLog());
 		debug::debugBreak();
 		return false;
-	}
-
-	return true;
-}
-
-bool parseVertexShader(glslang::TShader& shader, EShMessages messages, Program::Reflection& reflection, std::vector<uint32_t>& binary)
-{
-	glslang::TProgram program;
-	program.addShader(&shader);
-
-	if (!buildProgram(program, messages))
-		return false;
-
-	buildProgramInputLayout(program, reflection);
-	buildProgramReflection(program, reflection, ProgramStage::Vertex);
-
-	glslang::TIntermediate* vertexIntermediate = program.getIntermediate(EShLanguage::EShLangVertex);
-	if (vertexIntermediate == nullptr)
-	{
-		log::error("Failed to get vertex binary:\n%s", program.getInfoLog());
-		debug::debugBreak();
-		return false;
-	}
-	
-	{
-		VertexShaderAttribLocationTraverser attribFixup;
-		vertexIntermediate->getTreeRoot()->traverse(&attribFixup);
-
-		binary.reserve(10240);
-		spv::SpvBuildLogger logger;
-		glslang::GlslangToSpv(*vertexIntermediate, binary, &logger);
-		std::string allMessages = logger.getAllMessages();
-		if (!allMessages.empty())
-			log::info("Vertex HLSL to SPV:\n%s", allMessages.c_str());
-
-#	if (ET_CROSS_COMPILE_SHADERS_TEST)
-		crossCompile(vertexBin);
-#	endif
-	}
-	return true;
-}
-
-bool parseFragmentShader(glslang::TShader& shader, EShMessages messages, Program::Reflection& reflection, std::vector<uint32_t>& binary)
-{
-	glslang::TProgram program;
-	program.addShader(&shader);
-
-	if (!buildProgram(program, messages))
-		return false;
-
-	buildProgramReflection(program, reflection, ProgramStage::Fragment);
-
-	glslang::TIntermediate* fragmentIntermediate = program.getIntermediate(EShLanguage::EShLangFragment);
-	if (fragmentIntermediate == nullptr)
-	{
-		log::error("Failed to get fragment binary:\n%s", program.getInfoLog());
-		debug::debugBreak();
-		return false;
-	}
-
-	{
-		binary.reserve(10240);
-		spv::SpvBuildLogger logger;
-		glslang::GlslangToSpv(*fragmentIntermediate, binary, &logger);
-		std::string allMessages = logger.getAllMessages();
-		if (!allMessages.empty())
-			log::info("Fragment HLSL to SPV:\n%s", allMessages.c_str());
-
-#	if (ET_CROSS_COMPILE_SHADERS_TEST)
-		crossCompile(fragmentBin);
-#	endif
 	}
 
 	return true;
@@ -202,85 +125,83 @@ bool performDX11CompileTest(const std::string& preprocessedVertexShader, const s
 	return true;
 }
 
-bool hlslToSPIRV(const std::string& _source, std::vector<uint32_t>& vertexBin, std::vector<uint32_t>& fragmentBin,
-	Program::Reflection& reflection)
+EShLanguage shLanguageFromStage(ProgramStage stage)
+{
+	switch (stage)
+	{
+	case ProgramStage::Vertex:
+		return EShLanguage::EShLangVertex;
+	case ProgramStage::Fragment:
+		return EShLanguage::EShLangFragment;
+	case ProgramStage::Compute:
+		return EShLanguage::EShLangCompute;
+	default:
+		ET_FAIL("Invalid stage speicified");
+	}
+	return EShLanguage::EShLangCount;
+}
+
+bool generateSPIRFromHLSL(const std::string& source, SPIRProgramStageMap& stages, Program::Reflection& reflection)
 {
 	EShMessages messages = static_cast<EShMessages>(EShMsgSpvRules | EShMsgReadHlsl);
-	const char* vs[] = { _source.c_str() };
-	const char* fs[] = { _source.c_str() };
-	const char* vsName[] = { "vertex_shader_source" };
-	const char* fsName[] = { "fragment_shader_source" };
-
-	glslang::TShader::ForbidIncluder defaultIncluder;
-	
-	glslang::TShader vertexShader(EShLanguage::EShLangVertex);
-	vertexShader.setStringsWithLengthsAndNames(vs, nullptr, vsName, 1);
-	vertexShader.setAutoMapBindings(true);
-	vertexShader.setEntryPoint("vertexMain");
-
-	glslang::TShader fragmentShader(EShLanguage::EShLangFragment);
-	fragmentShader.setStringsWithLengthsAndNames(fs, nullptr, fsName, 1);
-	fragmentShader.setAutoMapBindings(true);
-	fragmentShader.setEntryPoint("fragmentMain");
-
-#if (ET_PREPROCESS_HLSL)
-	std::string preprocessedVertexShader;
-	std::string preprocessedFragmentShader;
-
-	if (!vertexShader.preprocess(&glslang::DefaultTBuiltInResource, 110, EProfile::ECoreProfile, false, true,
-		messages, &preprocessedVertexShader, defaultIncluder))
+	const char* rawSource[] = { source.c_str() };
+	const char* shaderName[] = { "shader_source" };
+	for (auto& stage : stages)
 	{
-		dumpSource(_source);
-		log::error("Failed to preprocess vertex shader:\n%s", vertexShader.getInfoLog());
-		debug::debugBreak();
-		return false;
+		EShLanguage language = shLanguageFromStage(stage.first);
+		const char* entryName = vulkan::programStageEntryName(stage.first);
+
+		glslang::TShader shader(language);
+		shader.setStringsWithLengthsAndNames(rawSource, nullptr, shaderName, 1);
+		shader.setAutoMapBindings(true);
+		shader.setEntryPoint(entryName);
+
+		if (!shader.parse(&glslang::DefaultTBuiltInResource, 110, true, messages))
+		{
+			dumpSource(source);
+			log::error("Failed to parse shader with entry %s:\n%s", entryName, shader.getInfoLog());
+#		if (ET_DEBUG)
+			debug::debugBreak();
+#		endif
+			return false;
+		}
+
+		glslang::TProgram program;
+		program.addShader(&shader);
+
+		if (!buildProgram(program, messages))
+			return false;
+
+		buildProgramInputLayout(program, reflection);
+		buildProgramReflection(program, reflection, stage.first);
+
+		glslang::TIntermediate* intermediate = program.getIntermediate(language);
+		if (intermediate == nullptr)
+		{
+			log::error("Failed to get binary for %s:\n%s", entryName, program.getInfoLog());
+			debug::debugBreak();
+			return false;
+		}
+
+		if (stage.first == ProgramStage::Vertex)
+		{
+			VertexShaderAttribLocationTraverser attribFixup;
+			intermediate->getTreeRoot()->traverse(&attribFixup);
+		}
+		
+		{
+			stage.second.reserve(10240);
+			spv::SpvBuildLogger logger;
+			glslang::GlslangToSpv(*intermediate, stage.second, &logger);
+			std::string allMessages = logger.getAllMessages();
+			if (!allMessages.empty())
+				log::info("HLSL to SPV:\n%s", allMessages.c_str());
+
+#		if (ET_CROSS_COMPILE_SHADERS_TEST)
+			crossCompile(vertexBin);
+#		endif
+		}
 	}
-	vs[0] = { preprocessedVertexShader.c_str() };
-	vertexShader.setStringsWithLengthsAndNames(vs, nullptr, vsName, 1);
-
-	if (!fragmentShader.preprocess(&glslang::DefaultTBuiltInResource, 110, EProfile::ECoreProfile, false, true,
-		messages, &preprocessedFragmentShader, defaultIncluder))
-	{
-		dumpSource(_source);
-		log::error("Failed to preprocess fragment shader:\n%s", fragmentShader.getInfoLog());
-		debug::debugBreak();
-		return false;
-	}
-	fs[0] = { preprocessedFragmentShader.c_str() };
-	fragmentShader.setStringsWithLengthsAndNames(fs, nullptr, fsName, 1);
-
-	performDX11CompileTest(preprocessedVertexShader, preprocessedFragmentShader);
-#else
-	const std::string& preprocessedVertexShader = _source;
-	const std::string& preprocessedFragmentShader = _source;
-#endif
-
-	if (!vertexShader.parse(&glslang::DefaultTBuiltInResource, 110, true, messages))
-	{
-		dumpSource(preprocessedVertexShader);
-		log::error("Failed to parse vertex shader:\n%s", vertexShader.getInfoLog());
-#	if (ET_DEBUG)
-		debug::debugBreak();
-#	endif
-		return false;
-	}
-
-	if (!fragmentShader.parse(&glslang::DefaultTBuiltInResource, 110, true, messages))
-	{
-		dumpSource(preprocessedFragmentShader);
-		log::error("Failed to parse fragment shader:\n%s", fragmentShader.getInfoLog());
-#	if (ET_DEBUG)
-		debug::debugBreak();
-#	endif
-		return false;
-	}
-
-	if (!parseVertexShader(vertexShader, messages, reflection, vertexBin))
-		return false;
-
-	if (!parseFragmentShader(fragmentShader, messages, reflection, fragmentBin))
-		return false;
-
 	return true;
 }
 
@@ -338,8 +259,8 @@ void buildProgramReflection(const glslang::TProgram& program, Program::Reflectio
 		}
 	}
 
-	auto& textureSet = (stage == ProgramStage::Vertex) ? reflection.textures.vertexTextures : reflection.textures.fragmentTextures;
-	auto& samplerSet = (stage == ProgramStage::Vertex) ? reflection.textures.vertexSamplers : reflection.textures.fragmentSamplers;
+	auto& textureSet = reflection.textures[stage].textures;
+	auto& samplerSet = reflection.textures[stage].samplers;
 
 	int uniforms = program.getNumLiveUniformVariables();
 	for (int uniform = 0; uniform < uniforms; ++uniform)

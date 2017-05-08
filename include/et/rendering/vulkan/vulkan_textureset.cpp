@@ -38,13 +38,13 @@ public:
 
 	using TSPair = std::pair<Texture::Pointer, Sampler::Pointer>;
 	std::array<TSPair, MaterialTexture_max> mergedData;
-
-	for (uint32_t i = 0; i < MaterialTexture_max; ++i)
+	for (const auto& tex : desc)
 	{
-		mergedData[i].first = desc.vertexTextures[i];
-		mergedData[i].first = desc.fragmentTextures[i];
-		mergedData[i].second = desc.vertexSamplers[i];
-		mergedData[i].second = desc.fragmentSamplers[i];
+		for (uint32_t i = 0; i < MaterialTexture_max; ++i)
+		{
+			mergedData[i].first = tex.second.textures[i];
+			mergedData[i].second = tex.second.samplers[i];
+		}
 	}
 
 	for (uint32_t i = 0; i < MaterialTexture_max; ++i)

@@ -84,7 +84,7 @@ public:
 	/*
 	 * Programs
 	 */
-	virtual Program::Pointer createProgram(const std::string& source) = 0;
+	virtual Program::Pointer createProgram(uint32_t stages, const std::string& source) = 0;
 
 	/*
 	 * Pipeline state

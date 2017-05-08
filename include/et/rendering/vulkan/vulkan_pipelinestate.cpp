@@ -64,8 +64,6 @@ const VulkanNativePipeline& VulkanPipelineState::nativePipeline() const
 void VulkanPipelineState::build(const RenderPass::Pointer& inPass)
 {
 	VulkanProgram::Pointer prog = program();
-	if ((prog->shaderModules().vertex == nullptr) || (prog->shaderModules().fragment == nullptr))
-		return;
 
 	VulkanRenderPass::Pointer pass = inPass;
 	_renderPassId = pass->identifier();
@@ -138,6 +136,11 @@ void VulkanPipelineState::build(const RenderPass::Pointer& inPass)
 		dynamicState.dynamicStateCount = sizeof(dynamicStates) / sizeof(dynamicStates[0]);
 	}
 
+	Vector<VkPipelineShaderStageCreateInfo> stages;
+	stages.reserve(prog->shaderModules().stageCreateInfos.size());
+	for (const auto& stage : prog->shaderModules().stageCreateInfos)
+		stages.emplace_back(stage.second);
+
 	VkGraphicsPipelineCreateInfo info = { VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO };
 	{
 		info.pColorBlendState = &blendInfo;
@@ -149,7 +152,7 @@ void VulkanPipelineState::build(const RenderPass::Pointer& inPass)
 		info.pDynamicState = &dynamicState;
 		info.pViewportState = &viewportState;
 		info.layout = _private->layout;
-		info.pStages = prog->shaderModules().stageCreateInfo;
+		info.pStages = stages.data();
 		info.renderPass = pass->nativeRenderPass().renderPass;
 		info.stageCount = 2;
 	}
@@ -159,17 +162,14 @@ void VulkanPipelineState::build(const RenderPass::Pointer& inPass)
 void VulkanPipelineStatePrivate::generatePipelineLayout(const Program::Reflection& reflection, const VulkanRenderPass::Pointer& pass)
 {
 	Set<uint32_t> textureBindings;
-	for (auto& tex : reflection.textures.vertexTextures)
-		textureBindings.insert(tex.second);
-	for (auto& tex : reflection.textures.fragmentTextures)
-		textureBindings.insert(tex.second);
-	
 	Set<uint32_t> samplerBindings;
-	for (auto& tex : reflection.textures.vertexSamplers)
-		samplerBindings.insert(tex.second);
-	for (auto& tex : reflection.textures.fragmentSamplers)
-		samplerBindings.insert(tex.second);
-	
+	for (const auto& tex : reflection.textures)
+	{
+		for (const auto& t : tex.second.textures)
+			textureBindings.emplace(t.second);
+		for (const auto& t : tex.second.samplers)
+			samplerBindings.emplace(t.second);
+	}
 	{
 		Vector<VkDescriptorSetLayoutBinding> textureLayoutBindings;
 		textureLayoutBindings.reserve(MaterialTexture_max);

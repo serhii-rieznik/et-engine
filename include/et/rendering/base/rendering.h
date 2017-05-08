@@ -286,6 +286,19 @@ enum class TextureState : uint32_t
 	PresentImage,
 };
 
+enum class ProgramStage : uint32_t
+{
+	Vertex = 1 << 0,
+	// TODO : Geometry = 1 << 1
+	// TODO : Hull = 1 << 2
+	// TODO : Domain = 1 << 3
+	Fragment = 1 << 4,
+	
+	Compute = 1 << 5,
+
+	max
+};
+
 enum : uint32_t
 {
 	/*
@@ -305,6 +318,7 @@ enum : uint32_t
 	DataFormat_max = static_cast<uint32_t>(DataFormat::max),
 	TextureTarget_max = static_cast<uint32_t>(TextureTarget::max),
 	TextureFormat_max = static_cast<uint32_t>(TextureFormat::max),
+	ProgramStage_max = static_cast<uint32_t>(ProgramStage::max),
 
 	/*
 	 * Invalid indices
@@ -525,6 +539,19 @@ std::string cullModeToString(CullMode);
 bool stringToCullMode(const std::string&, CullMode&);
 
 bool isValidRenderPassName(const std::string&);
+
+template <class ... PS>
+uint32_t programStagesMask(PS&&... args)
+{
+	ProgramStage stages[] = { args... };
+	
+	uint32_t result = 0;
+
+	for (ProgramStage ps : stages)
+		result |= static_cast<uint32_t>(ps);
+
+	return result;
+}
 
 template <class T>
 DataType dataTypeFromClass();

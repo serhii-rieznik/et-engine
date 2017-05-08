@@ -37,7 +37,7 @@ public:
 
 	bool loadCached(uint64_t hash, std::vector<uint32_t>& vert, std::vector<uint32_t>& frag, Program::Reflection& reflection);
 	void saveCached(uint64_t hash, const std::vector<uint32_t>& vert, const std::vector<uint32_t>& frag, const Program::Reflection& reflection);
-	void build(const std::vector<uint32_t>& vert, const std::vector<uint32_t>& frag);
+	void addProgramStage(ProgramStage stage, const std::vector<uint32_t>& code);
 
 	std::string cacheFolder();
 };
@@ -49,44 +49,54 @@ VulkanProgram::VulkanProgram(VulkanState& v)
 
 VulkanProgram::~VulkanProgram()
 {
-	if (_private->vertex)
-		vkDestroyShaderModule(_private->vulkan.device, _private->vertex, nullptr);
-
-	if (_private->fragment)
-		vkDestroyShaderModule(_private->vulkan.device, _private->fragment, nullptr);
+	for (const auto& module : _private->stageCreateInfos)
+		vkDestroyShaderModule(_private->vulkan.device, module.second.module, nullptr);
 
 	ET_PIMPL_FINALIZE(VulkanProgram);
 }
 
-void VulkanProgram::build(const std::string& source)
+void VulkanProgram::build(uint32_t stages, const std::string& source)
 {
+	SPIRProgramStageMap requestedStages;
+
+	if (stages & static_cast<uint32_t>(ProgramStage::Vertex)) 
+		requestedStages.emplace(ProgramStage::Vertex, SPIRSource());
+
+	if (stages & static_cast<uint32_t>(ProgramStage::Fragment)) 
+		requestedStages.emplace(ProgramStage::Fragment, SPIRSource());
+
+	if (stages & static_cast<uint32_t>(ProgramStage::Compute)) 
+		requestedStages.emplace(ProgramStage::Compute, SPIRSource());
+
+	generateSPIRFromHLSL(source, requestedStages, _reflection);
+
+	for (const auto& stage : requestedStages)
+		_private->addProgramStage(stage.first, stage.second);
+
+	/*
 	std::vector<uint32_t> vertexBin;
 	std::vector<uint32_t> fragmentBin;
-	
-	std::hash<std::string> sourceHash;
-	uint64_t hsh = sourceHash(source);
 
-	bool canBuild = false;
-	
-	if (_private->loadCached(hsh, vertexBin, fragmentBin, _reflection))
-	{
-		canBuild = true;
-	}
-	else 
+	uint64_t sourceHash = std::hash<std::string>()(source);
+
+	bool loadedFromCache = _private->loadCached(sourceHash, vertexBin, fragmentBin, _reflection);
+	bool readyToBuild = loadedFromCache;
+
+	if (loadedFromCache == false)
 	{
 		vertexBin.clear();
 		fragmentBin.clear();
-		canBuild = hlslToSPIRV(source, vertexBin, fragmentBin, _reflection);
-		if (canBuild)
-		{
-			_private->saveCached(hsh, vertexBin, fragmentBin, _reflection);
-		}
+		readyToBuild = hlslToSPIRV(source, vertexBin, fragmentBin, _reflection);
 	}
 	
-	if (canBuild)
+	if (readyToBuild)
 	{
 		_private->build(vertexBin, fragmentBin);
+		
+		if (loadedFromCache == false)
+			_private->saveCached(sourceHash, vertexBin, fragmentBin, _reflection);
 	}
+	*/
 }
 
 const VulkanShaderModules& VulkanProgram::shaderModules() const
@@ -94,7 +104,7 @@ const VulkanShaderModules& VulkanProgram::shaderModules() const
 	return *(_private);
 }
 
-bool VulkanProgramPrivate::loadCached(uint64_t hash, std::vector<uint32_t>& vert, std::vector<uint32_t>& frag,
+bool VulkanProgramPrivate::loadCached(uint64_t hash, std::vector<uint32_t>& vert, std::vector<uint32_t>& frag, 
 	Program::Reflection& reflection)
 {
 #if ET_VULKAN_PROGRAM_USE_CACHE
@@ -137,7 +147,6 @@ bool VulkanProgramPrivate::loadCached(uint64_t hash, std::vector<uint32_t>& vert
 
 	reflection.deserialize(file);
 	return true;
-
 #else
 	return false;
 #endif
@@ -169,25 +178,19 @@ void VulkanProgramPrivate::saveCached(uint64_t hash, const std::vector<uint32_t>
 #endif
 }
 
-void VulkanProgramPrivate::build(const std::vector<uint32_t>& vert, const std::vector<uint32_t>& frag)
+void VulkanProgramPrivate::addProgramStage(ProgramStage stage, const std::vector<uint32_t>& code)
 {
+	stageCreateInfos.emplace(stage, VkPipelineShaderStageCreateInfo());
+	
+	VkPipelineShaderStageCreateInfo& stageCreateInfo = stageCreateInfos[stage];
+	stageCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+	stageCreateInfo.stage = vulkan::programStageValue(stage);
+	stageCreateInfo.pName = vulkan::programStageEntryName(stage);
+
 	VkShaderModuleCreateInfo createInfo = { VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO };
-
-	createInfo.pCode = vert.data();
-	createInfo.codeSize = vert.size() * sizeof(uint32_t);
-	VULKAN_CALL(vkCreateShaderModule(vulkan.device, &createInfo, nullptr, &vertex));
-
-	createInfo.pCode = frag.data();
-	createInfo.codeSize = frag.size() * sizeof(uint32_t);
-	VULKAN_CALL(vkCreateShaderModule(vulkan.device, &createInfo, nullptr, &fragment));
-
-	stageCreateInfo[0].stage = VK_SHADER_STAGE_VERTEX_BIT;
-	stageCreateInfo[0].module = vertex;
-	stageCreateInfo[1].stage = VK_SHADER_STAGE_FRAGMENT_BIT;
-	stageCreateInfo[1].module = fragment;
-
-	stageCreateInfo[0].pName = "vertexMain";
-	stageCreateInfo[1].pName = "fragmentMain";
+	createInfo.pCode = code.data();
+	createInfo.codeSize = code.size() * sizeof(uint32_t);
+	VULKAN_CALL(vkCreateShaderModule(vulkan.device, &createInfo, nullptr, &stageCreateInfo.module));
 }
 
 std::string VulkanProgramPrivate::cacheFolder()
