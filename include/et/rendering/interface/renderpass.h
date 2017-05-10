@@ -9,6 +9,7 @@
 
 #include <et/camera/camera.h>
 #include <et/rendering/objects/light.h>
+#include <et/rendering/interface/compute.h>
 #include <et/rendering/base/rendering.h>
 #include <et/rendering/base/constantbuffer.h>
 #include <et/rendering/base/renderbatch.h>
@@ -86,6 +87,7 @@ public:
 	virtual void pushRenderBatch(const RenderBatch::Pointer&) = 0;
 	virtual void pushImageBarrier(const Texture::Pointer&, const ResourceBarrier&) = 0;
 	virtual void copyImage(const Texture::Pointer&, const Texture::Pointer&, const CopyDescriptor&) = 0;
+	virtual void dispatchCompute(const Compute::Pointer&, const vec3i&) = 0;
 	virtual void nextSubpass() = 0;
 	virtual void end() = 0;
 

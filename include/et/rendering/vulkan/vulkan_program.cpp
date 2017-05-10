@@ -72,31 +72,6 @@ void VulkanProgram::build(uint32_t stages, const std::string& source)
 
 	for (const auto& stage : requestedStages)
 		_private->addProgramStage(stage.first, stage.second);
-
-	/*
-	std::vector<uint32_t> vertexBin;
-	std::vector<uint32_t> fragmentBin;
-
-	uint64_t sourceHash = std::hash<std::string>()(source);
-
-	bool loadedFromCache = _private->loadCached(sourceHash, vertexBin, fragmentBin, _reflection);
-	bool readyToBuild = loadedFromCache;
-
-	if (loadedFromCache == false)
-	{
-		vertexBin.clear();
-		fragmentBin.clear();
-		readyToBuild = hlslToSPIRV(source, vertexBin, fragmentBin, _reflection);
-	}
-	
-	if (readyToBuild)
-	{
-		_private->build(vertexBin, fragmentBin);
-		
-		if (loadedFromCache == false)
-			_private->saveCached(sourceHash, vertexBin, fragmentBin, _reflection);
-	}
-	*/
 }
 
 const VulkanShaderModules& VulkanProgram::shaderModules() const

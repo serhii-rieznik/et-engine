@@ -560,7 +560,7 @@ bool stringToCullMode(const std::string& mode, CullMode& outMode)
 bool isValidRenderPassName(const std::string& v)
 {
 	std::string lc = lowercase(v);
-	return lc != "name";
+	return (lc != kName) && (lc != kCompute);
 }
 
 template <class T>

@@ -72,10 +72,13 @@ private:
 	Texture::Pointer _luminanceHistory;
 	Texture::Pointer _renderHistory;
 
+	Compute::Pointer _testCompute;
+
 	struct Materials
 	{
 		Material::Pointer debug;
 		Material::Pointer posteffects;
+		Material::Pointer computeTest;
 	} _materials;
 
 	struct Batches

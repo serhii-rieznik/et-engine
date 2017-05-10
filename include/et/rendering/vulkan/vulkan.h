@@ -190,6 +190,13 @@ struct VulkanNativeBuffer
 	VkMemoryRequirements memoryRequirements { };
 };
 
+struct VulkanNativeCompute
+{
+	VkDescriptorSetLayout texturesSetLayout = nullptr;
+	VkPipelineLayout pipelineLayout = nullptr;
+	VkPipeline pipeline = nullptr;
+};
+
 namespace vulkan
 {
 

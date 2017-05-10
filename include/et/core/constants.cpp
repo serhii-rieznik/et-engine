@@ -11,6 +11,7 @@ namespace et
 {
 const std::string kStorage = "storage";
 const std::string kName = "name";
+const std::string kCompute = "compute";
 const std::string kChildren = "children";
 const std::string kElementTypeCode = "element-type-code";
 const std::string kRenderBatches = "render-batches";

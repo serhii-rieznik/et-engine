@@ -99,6 +99,11 @@ public:
 	const Sampler::Pointer& clampSampler();
 	const Sampler::Pointer& nearestSampler();
 
+	/*
+	 * Compute
+	 */
+	virtual Compute::Pointer createCompute(const Material::Pointer&) = 0;
+
 protected:
 	void initInternalStructures();
 	void shutdownInternalStructures();

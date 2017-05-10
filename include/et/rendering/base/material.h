@@ -58,13 +58,11 @@ public:
 	uint64_t sortingKey() const;
 
 	virtual const Configuration& configuration(const std::string&) const;
-	const ConfigurationMap& configurations() const { return _passes; }
+	const ConfigurationMap& configurations() const { return _configurations; }
 
 	void loadFromJson(const std::string& json, const std::string& baseFolder);
-	void setProgram(const Program::Pointer&, const std::string&);
-	void setDepthState(const DepthState&, const std::string&);
-	void setBlendState(const BlendState&, const std::string&);
-	void setCullMode(CullMode, const std::string&);
+
+	PipelineClass pipelineClass() const { return _pipelineClass; }
 
 private:
 	friend class MaterialInstance;
@@ -74,10 +72,16 @@ private:
 
 	VertexDeclaration loadInputLayout(Dictionary);
 	Program::Pointer loadCode(const std::string&, const std::string& baseFolder, 
-		Dictionary defines, const VertexDeclaration&, StringList& fileNames);
+		const Dictionary& defines, const VertexDeclaration&, StringList& fileNames);
 	std::string generateInputLayout(const VertexDeclaration& decl);
 
+	void setProgram(const Program::Pointer&, const std::string&);
+	void setDepthState(const DepthState&, const std::string&);
+	void setBlendState(const BlendState&, const std::string&);
+	void setCullMode(CullMode, const std::string&);
+
 	void loadRenderPass(const std::string&, const Dictionary&, const std::string& baseFolder);
+	void loadCompute(const std::string&, const Dictionary&, const std::string& baseFolder);
 	void initDefaultHeader();
 
 	virtual void invalidateTextureSet();
@@ -93,7 +97,8 @@ private: // permanent private data
 	static std::string _shaderDefaultHeader;
 	RenderInterface* _renderer = nullptr;
 	MaterialInstanceCollection _instances;
-	ConfigurationMap _passes;
+	ConfigurationMap _configurations;
+	PipelineClass _pipelineClass = PipelineClass::Graphics;
 };
 
 class MaterialInstance : public Material

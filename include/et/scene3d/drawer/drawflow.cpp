@@ -26,6 +26,10 @@ HDRFlow::HDRFlow(const RenderInterface::Pointer& ren) :
 	
 	_materials.debug = _renderer->sharedMaterialLibrary().loadMaterial(application().resolveFileName("engine_data/materials/textured2d-transformed-lod.json"));
 	_materials.posteffects = _renderer->sharedMaterialLibrary().loadMaterial(application().resolveFileName("engine_data/materials/posteffects.json"));
+	
+	_materials.computeTest = _renderer->sharedMaterialLibrary().loadMaterial(application().resolveFileName("engine_data/compute/test.json"));
+	_testCompute = _renderer->createCompute(_materials.computeTest);
+
 	_batches.debug = renderhelper::createFullscreenRenderBatch(Texture::Pointer(), _materials.debug);
 	_batches.final = renderhelper::createFullscreenRenderBatch(Texture::Pointer(), _materials.posteffects);
 	_batches.tonemap = renderhelper::createFullscreenRenderBatch(Texture::Pointer(), _materials.posteffects);
@@ -183,6 +187,8 @@ void HDRFlow::tonemap()
 	_passes.tonemapping->pushRenderBatch(_batches.tonemap);
 	_passes.tonemapping->end();
 	
+	_passes.tonemapping->dispatchCompute(_testCompute, vec3i(1, 1, 1));
+
 	_renderer->submitRenderPass(_passes.tonemapping);
 }
 

@@ -25,6 +25,12 @@ struct VulkanRenderBatch
 	uint32_t indexCount = InvalidIndex;
 };
 
+struct VulkanComputeStruct
+{
+	VkPipeline pipeline = nullptr;
+	vec3i dimension = vec3i(0);
+};
+
 struct VulkanCommand
 {
 	enum class Type : uint32_t
@@ -34,6 +40,7 @@ struct VulkanCommand
 		RenderBatch,
 		ImageBarrier,
 		CopyImage,
+		DispatchCompute,
 		NextRenderPass,
 		EndRenderPass,
 	} type = Type::Undefined;
@@ -46,11 +53,16 @@ struct VulkanCommand
 	VulkanTexture::Pointer destImage;
 	CopyDescriptor copyDescriptor;
 
+	VulkanComputeStruct compute;
+
 	VulkanCommand(Type t) :
 		type(t) { }
 
 	VulkanCommand(VulkanRenderBatch&& b) :
 		type(Type::RenderBatch), batch(b) { }
+
+	VulkanCommand(VulkanComputeStruct& c) :
+		type(Type::DispatchCompute), compute(c) { }
 
 	VulkanCommand(const RenderSubpass& sp) :
 		type(Type::BeginRenderPass), subpass(sp) { }
@@ -466,14 +478,12 @@ void VulkanRenderPass::recordCommandBuffer()
 				lastPipeline = batch.pipeline->nativePipeline().pipeline;
 				vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, lastPipeline);
 			}
-
 			if (batch.vertexBuffer->nativeBuffer().buffer != lastVertexBuffer)
 			{
 				VkDeviceSize nullOffset = 0;
 				lastVertexBuffer = batch.vertexBuffer->nativeBuffer().buffer;
 				vkCmdBindVertexBuffers(commandBuffer, 0, 1, &lastVertexBuffer, &nullOffset);
 			}
-
 			if ((batch.indexBuffer->nativeBuffer().buffer != lastIndexBuffer) || (batch.indexBufferFormat != lastIndexType))
 			{
 				lastIndexBuffer = batch.indexBuffer->nativeBuffer().buffer;
@@ -537,6 +547,18 @@ void VulkanRenderPass::recordCommandBuffer()
 			vkCmdCopyImage(commandBuffer, tFrom->nativeTexture().image, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
 				tTo->nativeTexture().image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region);
 		}
+		else if (cmd.type == VulkanCommand::Type::DispatchCompute)
+		{
+			if (cmd.compute.pipeline != lastPipeline)
+			{
+				lastPipeline = cmd.compute.pipeline;
+				vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, lastPipeline);
+			}
+			uint32_t tx = static_cast<uint32_t>(cmd.compute.dimension.x);
+			uint32_t ty = static_cast<uint32_t>(cmd.compute.dimension.y);
+			uint32_t tz = static_cast<uint32_t>(cmd.compute.dimension.z);
+			vkCmdDispatch(commandBuffer, tx, ty, tz);
+		}
 		else if (cmd.type == VulkanCommand::Type::NextRenderPass)
 		{
 			++subframeIndex;
@@ -597,6 +619,15 @@ void VulkanRenderPassPrivate::generateDynamicDescriptorSet(RenderPass* pass)
 	}
 	uint32_t writeSetsCount = static_cast<uint32_t>(sizeof(writeSets) / sizeof(writeSets[0]));
 	vkUpdateDescriptorSets(vulkan.device, writeSetsCount, writeSets, 0, nullptr);
+}
+
+void VulkanRenderPass::dispatchCompute(const Compute::Pointer& compute, const vec3i& dim)
+{
+	VulkanCompute::Pointer vulkanCompute = compute;
+	VulkanComputeStruct cs;
+	cs.pipeline = vulkanCompute->nativeCompute().pipeline;
+	cs.dimension = dim;
+	_private->commands[_private->frameIndex].emplace_back(cs);
 }
 
 }

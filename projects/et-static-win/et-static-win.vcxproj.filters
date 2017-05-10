@@ -670,6 +670,12 @@
     <ClInclude Include="..\..\include\et\core\remoteheap.cpp">
       <Filter>Source\core</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\interface\compute.h">
+      <Filter>Source\rendering\interface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\vulkan\vulkan_compute.h">
+      <Filter>Source\rendering\vulkan</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\et\sound\openal.h">
@@ -1264,6 +1270,9 @@
     </ClCompile>
     <ClCompile Include="..\..\include\external\spirvcross\spirv_msl.cpp">
       <Filter>spir-v-cross</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\include\et\rendering\vulkan\vulkan_compute.cpp">
+      <Filter>Source\rendering\vulkan</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

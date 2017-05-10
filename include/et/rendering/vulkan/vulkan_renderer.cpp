@@ -8,6 +8,7 @@
 #pragma once
 
 #include <et/rendering/vulkan/vulkan_buffer.h>
+#include <et/rendering/vulkan/vulkan_compute.h>
 #include <et/rendering/vulkan/vulkan_program.h>
 #include <et/rendering/vulkan/vulkan_texture.h>
 #include <et/rendering/vulkan/vulkan_sampler.h>
@@ -295,6 +296,8 @@ Program::Pointer VulkanRenderer::createProgram(uint32_t stages, const std::strin
 PipelineState::Pointer VulkanRenderer::acquirePipelineState(const RenderPass::Pointer& pass, const Material::Pointer& mat,
 	const VertexStream::Pointer& vs)
 {
+	ET_ASSERT(mat->pipelineClass() == PipelineClass::Graphics);
+
 	const std::string& cls = pass->info().name;
 	const Material::Configuration& config = mat->configuration(cls);
 
@@ -316,6 +319,12 @@ PipelineState::Pointer VulkanRenderer::acquirePipelineState(const RenderPass::Po
 	}
 
 	return ps;
+}
+
+Compute::Pointer VulkanRenderer::createCompute(const Material::Pointer& mat)
+{
+	ET_ASSERT(mat->pipelineClass() == PipelineClass::Compute);
+	return VulkanCompute::Pointer::create(_private->vulkan(), mat);
 }
 
 RenderPass::Pointer VulkanRenderer::allocateRenderPass(const RenderPass::ConstructionInfo& info)

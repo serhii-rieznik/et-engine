@@ -487,6 +487,12 @@ struct ResourceBarrier
 		: toState(ts) {} 
 };
 
+enum class PipelineClass : uint32_t
+{
+	Graphics,
+	Compute
+};
+
 DataFormat dataTypeDataFormat(DataType t);
 
 VertexAttributeUsage stringToVertexAttributeUsage(const std::string& s);

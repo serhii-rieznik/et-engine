@@ -3,6 +3,7 @@
 #if (ET_PLATFORM_WIN)
 #	include "../rendering/vulkan/vulkan.cpp"
 #	include "../rendering/vulkan/vulkan_buffer.cpp"
+#	include "../rendering/vulkan/vulkan_compute.cpp"
 #	include "../rendering/vulkan/vulkan_pipelinestate.cpp"
 #	include "../rendering/vulkan/vulkan_program.cpp"
 #	include "../rendering/vulkan/vulkan_renderer.cpp"

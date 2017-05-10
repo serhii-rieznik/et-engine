@@ -98,22 +98,22 @@ Sampler::Pointer Material::sampler(MaterialTexture t)
 
 void Material::setProgram(const Program::Pointer& prog, const std::string& pt)
 {
-	_passes[pt].program = prog;
+	_configurations[pt].program = prog;
 }
 
 void Material::setDepthState(const DepthState& ds, const std::string& pt)
 {
-	_passes[pt].depthState = ds;
+	_configurations[pt].depthState = ds;
 }
 
 void Material::setBlendState(const BlendState& bs, const std::string& pt)
 {
-	_passes[pt].blendState = bs;
+	_configurations[pt].blendState = bs;
 }
 
 void Material::setCullMode(CullMode cm, const std::string& pt)
 {
-	_passes[pt].cullMode = cm;
+	_configurations[pt].cullMode = cm;
 }
 
 void Material::loadFromJson(const std::string& source, const std::string& baseFolder)
@@ -126,10 +126,24 @@ void Material::loadFromJson(const std::string& source, const std::string& baseFo
 		return;
 	}
 
-	setName(obj.stringForKey(kName)->content);
 	for (const auto& subObj : obj->content)
 	{
-		if (isValidRenderPassName(subObj.first))
+		if (subObj.first == kName)
+		{
+			setName(StringValue(subObj.second)->content);
+		}
+		else if (subObj.first == kCompute)
+		{
+			if (subObj.second->variantClass() == VariantClass::Dictionary)
+			{
+				loadCompute(subObj.first, Dictionary(subObj.second), baseFolder);
+			}
+			else
+			{
+				log::error("Entry `%s` in material `%s` description does not describe compute pipeline", subObj.first.c_str(), name().c_str());
+			}
+		}
+		else if (isValidRenderPassName(subObj.first))
 		{
 			if (subObj.second->variantClass() == VariantClass::Dictionary)
 			{
@@ -140,7 +154,7 @@ void Material::loadFromJson(const std::string& source, const std::string& baseFo
 				log::error("Entry `%s` in material `%s` description does not describe render pass", subObj.first.c_str(), name().c_str());
 			}
 		}
-		else if (subObj.first != kName)
+		else
 		{
 			log::warning("Entry `%s` in material `%s` description is not recognized", subObj.first.c_str(), name().c_str());
 		}
@@ -152,8 +166,8 @@ void Material::loadFromJson(const std::string& source, const std::string& baseFo
 
 const Material::Configuration& Material::configuration(const std::string& cls) const
 {
-	ET_ASSERT(_passes.count(cls) > 0);
-	return _passes.at(cls);
+	ET_ASSERT(_configurations.count(cls) > 0);
+	return _configurations.at(cls);
 }
 
 void Material::loadRenderPass(const std::string& cls, const Dictionary& obj, const std::string& baseFolder)
@@ -162,14 +176,22 @@ void Material::loadRenderPass(const std::string& cls, const Dictionary& obj, con
 	if (obj.hasKey(kCullMode) && !stringToCullMode(obj.stringForKey(kCullMode)->content, cullMode))
 		log::error("Invalid cull mode specified in material: %s", obj.stringForKey(kCullMode)->content.c_str());
 
-	_passes[cls].inputLayout = loadInputLayout(obj.dictionaryForKey(kInputLayout));
+	_configurations[cls].inputLayout = loadInputLayout(obj.dictionaryForKey(kInputLayout));
 
-	_passes[cls].program = loadCode(obj.stringForKey(kCode)->content, baseFolder, obj.dictionaryForKey(kOptions),
-		_passes[cls].inputLayout, _passes[cls].usedFiles);
+	_configurations[cls].program = loadCode(obj.stringForKey(kCode)->content, baseFolder, obj.dictionaryForKey(kOptions),
+		_configurations[cls].inputLayout, _configurations[cls].usedFiles);
 
 	setDepthState(deserializeDepthState(obj.dictionaryForKey(kDepthState)), cls);
 	setBlendState(deserializeBlendState(obj.objectForKey(kBlendState)), cls);
 	setCullMode(cullMode, cls);
+}
+
+void Material::loadCompute(const std::string& cls, const Dictionary& obj, const std::string& baseFolder)
+{
+	_pipelineClass = PipelineClass::Compute;
+	
+	_configurations[cls].program = loadCode(obj.stringForKey(kCode)->content, baseFolder, obj.dictionaryForKey(kOptions),
+		_configurations[cls].inputLayout, _configurations[cls].usedFiles);
 }
 
 VertexDeclaration Material::loadInputLayout(Dictionary layout)
@@ -219,7 +241,7 @@ std::string Material::generateInputLayout(const VertexDeclaration& decl)
 }
 
 Program::Pointer Material::loadCode(const std::string& codeString, const std::string& baseFolder,
-	Dictionary defines, const VertexDeclaration& decl, StringList& fileNames)
+	const Dictionary& defines, const VertexDeclaration& decl, StringList& fileNames)
 {
 	application().pushSearchPath(baseFolder);
 	std::string codeFileName = application().resolveFileName(codeString + ".hlsl");
@@ -256,8 +278,7 @@ Program::Pointer Material::loadCode(const std::string& codeString, const std::st
 	{
 		if (what == ParseDirective::InputLayout)
 		{
-			std::string layout = generateInputLayout(decl);
-			code.insert(positionInCode, layout);
+			code.insert(positionInCode, generateInputLayout(decl));
 		}
 		else if (what == ParseDirective::DefaultHeader)
 		{
@@ -271,7 +292,10 @@ Program::Pointer Material::loadCode(const std::string& codeString, const std::st
 
 	fileNames.emplace_back(codeFileName);
 
-	return _renderer->createProgram(programStagesMask(ProgramStage::Vertex, ProgramStage::Fragment), programSource);
+	uint32_t stagesMask = (_pipelineClass == PipelineClass::Graphics) ?
+		programStagesMask(ProgramStage::Vertex, ProgramStage::Fragment) : programStagesMask(ProgramStage::Compute);
+
+	return _renderer->createProgram(stagesMask, programSource);
 }
 
 MaterialInstancePointer Material::instance()
