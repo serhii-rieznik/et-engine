@@ -89,6 +89,16 @@ enum class MaterialTexture : uint32_t
 	LastSharedTexture = BRDFLookup,
 };
 
+enum class StorageBuffer
+{
+	StorageBuffer0,
+	StorageBuffer1,
+	StorageBuffer2,
+	StorageBuffer3,
+
+	max
+};
+
 enum : uint32_t
 {
 	MaterialSamplerBindingOffset = 16,
@@ -96,6 +106,8 @@ enum : uint32_t
 	ObjectVariable_max = static_cast<uint32_t>(ObjectVariable::max),
 	MaterialVariable_max = static_cast<uint32_t>(MaterialVariable::max),
 	MaterialTexture_max = static_cast<uint32_t>(MaterialTexture::max),
+	
+	StorageBuffer_max = static_cast<uint32_t>(StorageBuffer::max),
 };
 
 struct MaterialTextureHolder
@@ -123,7 +135,7 @@ struct MaterialPropertyHolder
 using MaterialPropertiesCollection = UnorderedMap<String, MaterialPropertyHolder>;
 
 template <class T>
-struct OptionalObject
+struct OptionalTextureObject
 {
 	T object;
 	MaterialTexture binding = MaterialTexture::max;
@@ -135,8 +147,22 @@ struct OptionalObject
 		object = nullptr;
 	}
 };
-using TexturesHolder = std::map<uint32_t, OptionalObject<Texture::Pointer>>;
-using SamplersHolder = std::map<uint32_t, OptionalObject<Sampler::Pointer>>;
+template <class T>
+struct OptionalImageObject
+{
+	T object;
+	StorageBuffer binding = StorageBuffer::max;
+	uint32_t index = 0;
+
+	void clear()
+	{
+		index = 0;
+		object = nullptr;
+	}
+};
+using TexturesHolder = std::map<uint32_t, OptionalTextureObject<Texture::Pointer>>;
+using SamplersHolder = std::map<uint32_t, OptionalTextureObject<Sampler::Pointer>>;
+using ImagesHolder = std::map<uint32_t, OptionalImageObject<Texture::Pointer>>;
 
 struct OptionalValue
 {
@@ -191,5 +217,8 @@ MaterialTexture samplerToMaterialTexture(const std::string&);
 
 const std::string& materialTextureToString(MaterialTexture);
 MaterialTexture stringToMaterialTexture(const std::string&);
+
+const std::string& storageBufferToString(StorageBuffer);
+StorageBuffer stringToStorageBuffer(const std::string&);
 
 }

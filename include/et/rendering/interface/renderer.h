@@ -79,6 +79,7 @@ public:
 	const Texture::Pointer& checkersTexture();
 	const Texture::Pointer& whiteTexture();
 	const Texture::Pointer& blackTexture();
+	const Texture::Pointer& blackImage();
 	Texture::Pointer generateHammersleySet(uint32_t size);
 	
 	/*
@@ -89,7 +90,7 @@ public:
 	/*
 	 * Pipeline state
 	 */
-	virtual PipelineState::Pointer acquirePipelineState(const RenderPass::Pointer&, const Material::Pointer&, const VertexStream::Pointer&) = 0;
+	virtual PipelineState::Pointer acquireGraphicsPipeline(const RenderPass::Pointer&, const Material::Pointer&, const VertexStream::Pointer&) = 0;
 
 	/*
 	 * Sampler
@@ -115,6 +116,7 @@ private:
 	Texture::Pointer _checkersTexture;
 	Texture::Pointer _whiteTexture;
 	Texture::Pointer _blackTexture;
+	Texture::Pointer _blackImage;
 	Sampler::Pointer _defaultSampler;
 	Sampler::Pointer _nearestSampler;
 	Sampler::Pointer _clampSampler;
@@ -199,6 +201,20 @@ inline const Texture::Pointer& RenderInterface::blackTexture()
 	return _blackTexture;
 }
 
+inline const Texture::Pointer& RenderInterface::blackImage()
+{
+	if (_blackImage.invalid())
+	{
+		TextureDescription::Pointer desc = TextureDescription::Pointer::create();
+		desc->flags |= Texture::Flags::Storage;
+		desc->size = vec2i(4);
+		desc->format = TextureFormat::RGBA8;
+		desc->data.resize(4 * static_cast<uint32_t>(desc->size.square()));
+		desc->data.fill(0);
+		_blackImage = createTexture(desc);
+	}
+	return _blackImage;
+}
 
 inline const Sampler::Pointer& RenderInterface::defaultSampler()
 {

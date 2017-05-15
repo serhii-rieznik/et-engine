@@ -104,6 +104,7 @@ namespace et
 extern const std::string kStorage;
 extern const std::string kName;
 extern const std::string kCompute;
+extern const std::string kClass;
 extern const std::string kChildren;
 extern const std::string kElementTypeCode;
 extern const std::string kRenderBatches;

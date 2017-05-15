@@ -24,11 +24,11 @@ HDRFlow::HDRFlow(const RenderInterface::Pointer& ren) :
 	desc.color[0].storeOperation = FramebufferOperation::Store;
 	_passes.final = _renderer->allocateRenderPass(desc);
 	
-	_materials.debug = _renderer->sharedMaterialLibrary().loadMaterial(application().resolveFileName("engine_data/materials/textured2d-transformed-lod.json"));
-	_materials.posteffects = _renderer->sharedMaterialLibrary().loadMaterial(application().resolveFileName("engine_data/materials/posteffects.json"));
-	
 	_materials.computeTest = _renderer->sharedMaterialLibrary().loadMaterial(application().resolveFileName("engine_data/compute/test.json"));
 	_testCompute = _renderer->createCompute(_materials.computeTest);
+
+	_materials.debug = _renderer->sharedMaterialLibrary().loadMaterial(application().resolveFileName("engine_data/materials/textured2d-transformed-lod.json"));
+	_materials.posteffects = _renderer->sharedMaterialLibrary().loadMaterial(application().resolveFileName("engine_data/materials/posteffects.json"));
 
 	_batches.debug = renderhelper::createFullscreenRenderBatch(Texture::Pointer(), _materials.debug);
 	_batches.final = renderhelper::createFullscreenRenderBatch(Texture::Pointer(), _materials.posteffects);
@@ -54,12 +54,16 @@ void HDRFlow::resizeRenderTargets(const vec2i& sz)
 		TextureDescription::Pointer desc(PointerInit::CreateInplace);
 		desc->size = sz;
 		desc->format = HDRTextureFormat;
-		desc->flags = Texture::Flags::RenderTarget;
+		desc->flags = Texture::Flags::RenderTarget | Texture::Flags::Storage;
 		_secondaryTarget = _renderer->createTexture(desc);
 		desc->flags = Texture::Flags::RenderTarget | Texture::Flags::CopySource;
 		_primaryTarget = _renderer->createTexture(desc);
 		desc->flags = Texture::Flags::RenderTarget | Texture::Flags::CopyDestination;
 		_renderHistory = _renderer->createTexture(desc);
+
+		desc->size = vec2i(256, 1);
+		desc->flags = Texture::Flags::Storage;
+		_luminanceHistogram = _renderer->createTexture(desc);
 
 		uint32_t downsampledSize = roundToHighestPowerOfTwo(static_cast<uint32_t>(std::min(sz.x, sz.y) / 2));
 		desc->size = vec2i(downsampledSize);
@@ -187,7 +191,12 @@ void HDRFlow::tonemap()
 	_passes.tonemapping->pushRenderBatch(_batches.tonemap);
 	_passes.tonemapping->end();
 	
-	_passes.tonemapping->dispatchCompute(_testCompute, vec3i(1, 1, 1));
+	_passes.tonemapping->pushImageBarrier(_luminanceHistogram, ResourceBarrier(TextureState::Storage));
+	_passes.tonemapping->pushImageBarrier(_secondaryTarget, ResourceBarrier(TextureState::ShaderResource));
+	_testCompute->material()->setTexture(MaterialTexture::BaseColor, _secondaryTarget);
+	_testCompute->material()->setImage(StorageBuffer::StorageBuffer0, _luminanceHistogram);
+	_passes.tonemapping->dispatchCompute(_testCompute, vec3i(_secondaryTarget->size(0), 1));
+	_passes.tonemapping->pushImageBarrier(_luminanceHistogram, ResourceBarrier(TextureState::ShaderResource));
 
 	_renderer->submitRenderPass(_passes.tonemapping);
 }
@@ -248,6 +257,13 @@ void HDRFlow::debugDraw()
 		Material::Pointer m = _renderer->sharedMaterialLibrary().loadMaterial(application().resolveFileName("engine_data/materials/textured2d-transformed.json"));
 		RenderBatch::Pointer b = renderhelper::createFullscreenRenderBatch(vel, m);
 		_passes.final->setSharedVariable(ObjectVariable::WorldTransform, fullscreenBatchTransform(vp, vec2(0.0f, 0.5f * vp.y), 0.5f * vp));
+		_passes.final->pushRenderBatch(b);
+	}
+
+	{
+		Material::Pointer m = _renderer->sharedMaterialLibrary().loadMaterial(application().resolveFileName("engine_data/materials/textured2d-transformed.json"));
+		RenderBatch::Pointer b = renderhelper::createFullscreenRenderBatch(_luminanceHistogram, m);
+		_passes.final->setSharedVariable(ObjectVariable::WorldTransform, fullscreenBatchTransform(vp, vec2(0.0f, 0.5f * vp.y), vec2(256.0f, 32.0f)));
 		_passes.final->pushRenderBatch(b);
 	}
 }

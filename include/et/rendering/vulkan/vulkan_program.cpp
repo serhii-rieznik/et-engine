@@ -71,7 +71,10 @@ void VulkanProgram::build(uint32_t stages, const std::string& source)
 	generateSPIRFromHLSL(source, requestedStages, _reflection);
 
 	for (const auto& stage : requestedStages)
-		_private->addProgramStage(stage.first, stage.second);
+	{
+		if (stage.second.size() > 0)
+			_private->addProgramStage(stage.first, stage.second);
+	}
 }
 
 const VulkanShaderModules& VulkanProgram::shaderModules() const
@@ -155,6 +158,8 @@ void VulkanProgramPrivate::saveCached(uint64_t hash, const std::vector<uint32_t>
 
 void VulkanProgramPrivate::addProgramStage(ProgramStage stage, const std::vector<uint32_t>& code)
 {
+	ET_ASSERT(code.size() > 0);
+
 	stageCreateInfos.emplace(stage, VkPipelineShaderStageCreateInfo());
 	
 	VkPipelineShaderStageCreateInfo& stageCreateInfo = stageCreateInfos[stage];

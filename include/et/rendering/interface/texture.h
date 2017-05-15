@@ -30,6 +30,7 @@ public:
 		CopySource = 1 << 1,
 		CopyDestination = 1 << 2,
 		Readback = 1 << 3,
+		Storage = 1 << 4,
 	};
 
 	enum MapOptions : uint32_t

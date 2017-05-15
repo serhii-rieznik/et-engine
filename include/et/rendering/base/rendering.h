@@ -283,6 +283,7 @@ enum class TextureState : uint32_t
 	ColorRenderTarget,
 	DepthRenderTarget,
 	ShaderResource,
+	Storage,
 	PresentImage,
 };
 

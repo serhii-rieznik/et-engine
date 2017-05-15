@@ -31,8 +31,6 @@ public:
 		VkPipelineVertexInputStateCreateInfo& vertexInfo, Vector<VkVertexInputAttributeDescription>& attribs,
 		VkVertexInputBindingDescription& binding);
 
-	void generatePipelineLayout(const Program::Reflection& reflection, const VulkanRenderPass::Pointer& pass);
-
 	VulkanRenderer* renderer = nullptr;
 	VulkanState& vulkan;
 };
@@ -44,15 +42,7 @@ VulkanPipelineState::VulkanPipelineState(VulkanRenderer* renderer, VulkanState& 
 
 VulkanPipelineState::~VulkanPipelineState()
 {
-	if (_private->pipeline)
-		vkDestroyPipeline(_private->vulkan.device, _private->pipeline, nullptr);
-
-	if (_private->layout)
-		vkDestroyPipelineLayout(_private->vulkan.device, _private->layout, nullptr);
-
-	if (_private->texturesLayout)
-		vkDestroyDescriptorSetLayout(_private->vulkan.device, _private->texturesLayout, nullptr);
-
+	_private->cleanup(_private->vulkan);
 	ET_PIMPL_FINALIZE(VulkanPipelineState);
 }
 
@@ -118,7 +108,7 @@ void VulkanPipelineState::build(const RenderPass::Pointer& inPass)
 		assemblyInfo.topology = vulkan::primitiveTopology(primitiveType());
 	}
 	
-	_private->generatePipelineLayout(prog->reflection(), pass);
+	_private->buildLayout(_private->vulkan, prog->reflection(), pass->nativeRenderPass().dynamicDescriptorSetLayout);
 
 	VkVertexInputBindingDescription binding = { };
 	Vector<VkVertexInputAttributeDescription> attribs;
@@ -154,58 +144,9 @@ void VulkanPipelineState::build(const RenderPass::Pointer& inPass)
 		info.layout = _private->layout;
 		info.pStages = stages.data();
 		info.renderPass = pass->nativeRenderPass().renderPass;
-		info.stageCount = 2;
+		info.stageCount = static_cast<uint32_t>(stages.size());
 	}
 	VULKAN_CALL(vkCreateGraphicsPipelines(_private->vulkan.device, _private->vulkan.pipelineCache, 1, &info, nullptr, &_private->pipeline));
-}
-
-void VulkanPipelineStatePrivate::generatePipelineLayout(const Program::Reflection& reflection, const VulkanRenderPass::Pointer& pass)
-{
-	Set<uint32_t> textureBindings;
-	Set<uint32_t> samplerBindings;
-	for (const auto& tex : reflection.textures)
-	{
-		for (const auto& t : tex.second.textures)
-			textureBindings.emplace(t.second);
-		for (const auto& t : tex.second.samplers)
-			samplerBindings.emplace(t.second);
-	}
-	{
-		Vector<VkDescriptorSetLayoutBinding> textureLayoutBindings;
-		textureLayoutBindings.reserve(MaterialTexture_max);
-		for (uint32_t textureBinding : textureBindings)
-		{
-			textureLayoutBindings.emplace_back();
-			textureLayoutBindings.back().binding = textureBinding;
-			textureLayoutBindings.back().stageFlags = VK_SHADER_STAGE_ALL;
-			textureLayoutBindings.back().descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
-			textureLayoutBindings.back().descriptorCount = 1;
-		}
-		for (uint32_t samplerBinding : samplerBindings)
-		{
-			textureLayoutBindings.emplace_back();
-			textureLayoutBindings.back().binding = samplerBinding;
-			textureLayoutBindings.back().stageFlags = VK_SHADER_STAGE_ALL;
-			textureLayoutBindings.back().descriptorType = VK_DESCRIPTOR_TYPE_SAMPLER;
-			textureLayoutBindings.back().descriptorCount = 1;
-		}		
-
-		VkDescriptorSetLayoutCreateInfo layoutSetInfo = { VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO };
-		layoutSetInfo.bindingCount = static_cast<uint32_t>(textureLayoutBindings.size());
-		layoutSetInfo.pBindings = textureLayoutBindings.data();
-		VULKAN_CALL(vkCreateDescriptorSetLayout(vulkan.device, &layoutSetInfo, nullptr, &texturesLayout));
-	}
-
-	VkDescriptorSetLayout layouts[DescriptorSetClass_Count] =
-	{
-		pass->nativeRenderPass().dynamicDescriptorSetLayout,
-		texturesLayout,
-	};
-
-	VkPipelineLayoutCreateInfo layoutInfo = { VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO };
-	layoutInfo.pSetLayouts = layouts;
-	layoutInfo.setLayoutCount = sizeof(layouts) / sizeof(layouts[0]);
-	VULKAN_CALL(vkCreatePipelineLayout(vulkan.device, &layoutInfo, nullptr, &layout));
 }
 
 void VulkanPipelineStatePrivate::generateInputLayout(const VertexDeclaration& inputLayout, const VertexDeclaration& expectedLayout,

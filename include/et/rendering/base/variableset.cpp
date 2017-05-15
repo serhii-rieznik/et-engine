@@ -14,7 +14,7 @@ static const std::map<ObjectVariable, std::string> objectVariableNames =
 {
 	{ ObjectVariable::WorldTransform, "worldTransform" },
 	{ ObjectVariable::WorldRotationTransform, "worldRotationTransform" },
-	
+
 	{ ObjectVariable::ViewTransform, "viewTransform" },
 	{ ObjectVariable::ProjectionTransform, "projectionTransform" },
 	{ ObjectVariable::ViewProjectionTransform, "viewProjectionTransform" },
@@ -106,6 +106,18 @@ const std::map<MaterialTexture, std::string>& materialSamplerNames()
 	return names;
 }
 
+static const std::map<StorageBuffer, std::string>& storageBufferNames()
+{
+	static const std::map<StorageBuffer, std::string> localMap =
+	{
+		{ StorageBuffer::StorageBuffer0, "storageBuffer0" },
+		{ StorageBuffer::StorageBuffer1, "storageBuffer1" },
+		{ StorageBuffer::StorageBuffer2, "storageBuffer2" },
+		{ StorageBuffer::StorageBuffer3, "storageBuffer3" },
+	};
+	return localMap;
+}
+
 const std::string& materialTextureToString(MaterialTexture t)
 {
 	ET_ASSERT(t < MaterialTexture::max);
@@ -156,6 +168,22 @@ MaterialVariable stringToMaterialVariable(const std::string& name)
 			return static_cast<MaterialVariable>(ts.first);
 	}
 	return MaterialVariable::max;
+}
+
+const std::string& storageBufferToString(StorageBuffer t)
+{
+	ET_ASSERT(t < StorageBuffer::max);
+	return storageBufferNames().at(t);
+}
+
+StorageBuffer stringToStorageBuffer(const std::string& name)
+{
+	for (const auto& ts : storageBufferNames())
+	{
+		if (ts.second == name)
+			return static_cast<StorageBuffer>(ts.first);
+	}
+	return StorageBuffer::max;
 }
 
 }

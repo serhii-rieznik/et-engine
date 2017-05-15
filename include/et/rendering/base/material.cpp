@@ -34,7 +34,7 @@ uint64_t Material::sortingKey() const
 
 void Material::setTexture(MaterialTexture t, const Texture::Pointer& tex)
 {
-	OptionalObject<Texture::Pointer>& entry = textures[static_cast<uint32_t>(t)];
+	OptionalTextureObject<Texture::Pointer>& entry = textures[static_cast<uint32_t>(t)];
 	if (entry.object != tex)
 	{
 		entry.object = tex;
@@ -46,13 +46,25 @@ void Material::setTexture(MaterialTexture t, const Texture::Pointer& tex)
 
 void Material::setSampler(MaterialTexture t, const Sampler::Pointer& smp)
 {
-	OptionalObject<Sampler::Pointer>& entry = samplers[static_cast<uint32_t>(t) + MaterialSamplerBindingOffset];
+	OptionalTextureObject<Sampler::Pointer>& entry = samplers[static_cast<uint32_t>(t) + MaterialSamplerBindingOffset];
 	if (entry.object != smp)
 	{
 		entry.object = smp;
 		entry.index = static_cast<uint32_t>(t) + MaterialSamplerBindingOffset;
 		entry.binding = t;
 		invalidateTextureSet();
+	}
+}
+
+void Material::setImage(StorageBuffer s, const Texture::Pointer& tex)
+{
+	OptionalImageObject<Texture::Pointer>& entry = images[static_cast<uint32_t>(s)];
+	if (entry.object != tex)
+	{
+		entry.object = tex;
+		entry.index = static_cast<uint32_t>(s);
+		entry.binding = s;
+		invalidateImageSet();
 	}
 }
 
@@ -132,17 +144,6 @@ void Material::loadFromJson(const std::string& source, const std::string& baseFo
 		{
 			setName(StringValue(subObj.second)->content);
 		}
-		else if (subObj.first == kCompute)
-		{
-			if (subObj.second->variantClass() == VariantClass::Dictionary)
-			{
-				loadCompute(subObj.first, Dictionary(subObj.second), baseFolder);
-			}
-			else
-			{
-				log::error("Entry `%s` in material `%s` description does not describe compute pipeline", subObj.first.c_str(), name().c_str());
-			}
-		}
 		else if (isValidRenderPassName(subObj.first))
 		{
 			if (subObj.second->variantClass() == VariantClass::Dictionary)
@@ -172,23 +173,20 @@ const Material::Configuration& Material::configuration(const std::string& cls) c
 
 void Material::loadRenderPass(const std::string& cls, const Dictionary& obj, const std::string& baseFolder)
 {
-	CullMode cullMode = CullMode::Disabled;
-	if (obj.hasKey(kCullMode) && !stringToCullMode(obj.stringForKey(kCullMode)->content, cullMode))
-		log::error("Invalid cull mode specified in material: %s", obj.stringForKey(kCullMode)->content.c_str());
+	bool isGraphicsPipeline = (obj.stringForKey(kClass)->content != kCompute);
+	_pipelineClass = isGraphicsPipeline ? PipelineClass::Graphics : PipelineClass::Compute;
 
-	_configurations[cls].inputLayout = loadInputLayout(obj.dictionaryForKey(kInputLayout));
+	if (isGraphicsPipeline)
+	{
+		CullMode cullMode = CullMode::Disabled;
+		if (obj.hasKey(kCullMode) && !stringToCullMode(obj.stringForKey(kCullMode)->content, cullMode))
+			log::error("Invalid cull mode specified in material: %s", obj.stringForKey(kCullMode)->content.c_str());
 
-	_configurations[cls].program = loadCode(obj.stringForKey(kCode)->content, baseFolder, obj.dictionaryForKey(kOptions),
-		_configurations[cls].inputLayout, _configurations[cls].usedFiles);
-
-	setDepthState(deserializeDepthState(obj.dictionaryForKey(kDepthState)), cls);
-	setBlendState(deserializeBlendState(obj.objectForKey(kBlendState)), cls);
-	setCullMode(cullMode, cls);
-}
-
-void Material::loadCompute(const std::string& cls, const Dictionary& obj, const std::string& baseFolder)
-{
-	_pipelineClass = PipelineClass::Compute;
+		_configurations[cls].inputLayout = loadInputLayout(obj.dictionaryForKey(kInputLayout));
+		setDepthState(deserializeDepthState(obj.dictionaryForKey(kDepthState)), cls);
+		setBlendState(deserializeBlendState(obj.objectForKey(kBlendState)), cls);
+		setCullMode(cullMode, cls);
+	}
 	
 	_configurations[cls].program = loadCode(obj.stringForKey(kCode)->content, baseFolder, obj.dictionaryForKey(kOptions),
 		_configurations[cls].inputLayout, _configurations[cls].usedFiles);
@@ -338,6 +336,12 @@ void Material::invalidateTextureSet()
 		i->invalidateTextureSet();
 }
 
+void Material::invalidateImageSet()
+{
+	for (MaterialInstance::Pointer& i : _instances)
+		i->invalidateImageSet();
+}
+
 void Material::invalidateConstantBuffer()
 {
 	for (MaterialInstance::Pointer& i : _instances)
@@ -353,7 +357,13 @@ MaterialInstance::MaterialInstance(Material::Pointer bs)
 {
 }
 
-Material::Pointer MaterialInstance::base()
+Material::Pointer& MaterialInstance::base()
+{
+	ET_ASSERT(isInstance());
+	return _base;
+}
+
+const Material::Pointer& MaterialInstance::base() const
 {
 	ET_ASSERT(isInstance());
 	return _base;
@@ -390,6 +400,31 @@ void MaterialInstance::buildTextureSet(const std::string& pt)
 
 	_textureSets[pt].obj = _renderer->createTextureSet(description);
 	_textureSets[pt].valid = true;
+}
+
+void MaterialInstance::buildImageSet(const std::string& pt)
+{
+	ET_ASSERT(isInstance());
+
+	const Program::Reflection& reflection = configuration(pt).program->reflection();
+
+	TextureSet::Description description;
+	for (const auto& ref : reflection.textures)
+	{
+		for (const auto& r : ref.second.images)
+		{
+			const Texture::Pointer& baseImage = base()->images[r.second].object;
+			const Texture::Pointer& ownImage = images[r.second].object;
+			Texture::Pointer& descriptionImage = description[ref.first].images[r.second];
+
+			descriptionImage = ownImage.valid() ? ownImage : baseImage;
+			if (descriptionImage.invalid())
+				descriptionImage = _renderer->blackImage();
+		}
+	}
+
+	_imageSets[pt].obj = _renderer->createTextureSet(description);
+	_imageSets[pt].valid = true;
 }
 
 void MaterialInstance::buildConstantBuffer(const std::string& pt)
@@ -433,6 +468,16 @@ const TextureSet::Pointer& MaterialInstance::textureSet(const std::string& pt)
 	return _textureSets.at(pt).obj;
 }
 
+const TextureSet::Pointer& MaterialInstance::imageSet(const std::string& pt)
+{
+	ET_ASSERT(isInstance());
+
+	if (!_imageSets[pt].valid)
+		buildImageSet(pt);
+
+	return _imageSets.at(pt).obj;
+}
+
 const ConstantBufferEntry::Pointer& MaterialInstance::constantBufferData(const std::string& pt)
 {
 	ET_ASSERT(isInstance());
@@ -447,7 +492,7 @@ const Material::Configuration & MaterialInstance::configuration(const std::strin
 {
 	ET_ASSERT(isInstance());
 
-	return _base->configuration(cls);
+	return base()->configuration(cls);
 }
 
 void MaterialInstance::invalidateTextureSet()
@@ -455,6 +500,15 @@ void MaterialInstance::invalidateTextureSet()
 	ET_ASSERT(isInstance());
 
 	for (auto& hld : _textureSets)
+		hld.second.valid = false;
+}
+
+
+void MaterialInstance::invalidateImageSet()
+{
+	ET_ASSERT(isInstance());
+
+	for (auto& hld : _imageSets)
 		hld.second.valid = false;
 }
 
@@ -471,6 +525,7 @@ void Material::initDefaultHeader()
 	_shaderDefaultHeader = R"(
 #define VariablesSetIndex 0
 #define TexturesSetIndex 1
+#define StorageSetIndex 2
 #define PI 3.1415926536
 #define HALF_PI 1.5707963268
 #define DOUBLE_PI 6.2831853072
@@ -488,6 +543,12 @@ void Material::initDefaultHeader()
 		printPos += sprintf(buffer + printPos, "#define %sBinding %u\n#define %sBinding %u\n",
 			texName.c_str(), i, smpName.c_str(), i + MaterialSamplerBindingOffset);
 	}
+	for (uint32_t i = static_cast<uint32_t>(StorageBuffer::StorageBuffer0); i < StorageBuffer_max; ++i)
+	{
+		std::string name = storageBufferToString(static_cast<StorageBuffer>(i));
+		name[0] = toupper(name[0]);
+		printPos += sprintf(buffer + printPos, "#define %sBinding %u\n", name.c_str(), i);
+	}
 	{
 		printPos += sprintf(buffer + printPos,
 			"#define ObjectVariablesBufferIndex %u\n"
@@ -503,6 +564,7 @@ void Material::initDefaultHeader()
 #define DECL_BUFFER(name)                                     CONSTANT_LOCATION(b, name##VariablesBufferIndex, VariablesSetIndex)
 #define DECL_TEXTURE(name)                                    CONSTANT_LOCATION(t, name##TextureBinding, TexturesSetIndex)
 #define DECL_SAMPLER(name)                                    CONSTANT_LOCATION(s, name##SamplerBinding, TexturesSetIndex)
+#define DECL_STORAGE(name)                                    CONSTANT_LOCATION(u, name##Binding, StorageSetIndex)
 )";
 
 }

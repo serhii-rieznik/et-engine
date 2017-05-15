@@ -17,6 +17,7 @@ struct VulkanRenderBatch
 {
 	VulkanPipelineState::Pointer pipeline;
 	VulkanTextureSet::Pointer textureSet;
+	VulkanTextureSet::Pointer imageSet;
 	VulkanBuffer::Pointer vertexBuffer;
 	VulkanBuffer::Pointer indexBuffer;
 	ConstantBufferEntry::Pointer dynamicOffsets[DescriptorSetClass::DynamicDescriptorsCount];
@@ -27,7 +28,10 @@ struct VulkanRenderBatch
 
 struct VulkanComputeStruct
 {
-	VkPipeline pipeline = nullptr;
+	VulkanTextureSet::Pointer textureSet;
+	VulkanTextureSet::Pointer imageSet;
+	VulkanCompute::Pointer compute;
+	ConstantBufferEntry::Pointer dynamicOffsets[DescriptorSetClass::DynamicDescriptorsCount];
 	vec3i dimension = vec3i(0);
 };
 
@@ -380,7 +384,7 @@ void VulkanRenderPass::pushRenderBatch(const RenderBatch::Pointer& inBatch)
 	retain();
 	MaterialInstance::Pointer material = inBatch->material();
 	VulkanProgram::Pointer program = inBatch->material()->configuration(info().name).program;
-	VulkanPipelineState::Pointer pipelineState = _private->renderer->acquirePipelineState(VulkanRenderPass::Pointer(this), material, inBatch->vertexStream());
+	VulkanPipelineState::Pointer pipelineState = _private->renderer->acquireGraphicsPipeline(VulkanRenderPass::Pointer(this), material, inBatch->vertexStream());
 	release();
 
 	if (pipelineState->nativePipeline().pipeline == nullptr)
@@ -411,6 +415,7 @@ void VulkanRenderPass::pushRenderBatch(const RenderBatch::Pointer& inBatch)
 
 	VulkanRenderBatch& batch = _private->commands[_private->frameIndex].back().batch;
 	batch.textureSet = material->textureSet(info().name);
+	batch.imageSet = material->imageSet(info().name);
 	batch.dynamicOffsets[0] = objectVariables;
 	batch.dynamicOffsets[1] = material->constantBufferData(info().name);
 	batch.vertexBuffer = inBatch->vertexStream()->vertexBuffer();
@@ -454,6 +459,7 @@ void VulkanRenderPass::recordCommandBuffer()
 	VkDescriptorSet descriptorSets[DescriptorSetClass_Count] = {
 		_private->dynamicDescriptorSet,
 		nullptr,
+		nullptr,
 	};
 
 	VkCommandBufferBeginInfo commandBufferBeginInfo = { VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO };
@@ -492,6 +498,7 @@ void VulkanRenderPass::recordCommandBuffer()
 			}
 
 			descriptorSets[DescriptorSetClass::Textures] = batch.textureSet->nativeSet().descriptorSet;
+			descriptorSets[DescriptorSetClass::Images] = batch.imageSet->nativeSet().descriptorSet;
 
 			for (uint32_t i = 0, e = DescriptorSetClass::DynamicDescriptorsCount; i < e; ++i)
 			{
@@ -549,11 +556,24 @@ void VulkanRenderPass::recordCommandBuffer()
 		}
 		else if (cmd.type == VulkanCommand::Type::DispatchCompute)
 		{
-			if (cmd.compute.pipeline != lastPipeline)
+			if (cmd.compute.compute->nativeCompute().pipeline != lastPipeline)
 			{
-				lastPipeline = cmd.compute.pipeline;
+				lastPipeline = cmd.compute.compute->nativeCompute().pipeline;
 				vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, lastPipeline);
 			}
+
+			descriptorSets[DescriptorSetClass::Textures] = cmd.compute.textureSet->nativeSet().descriptorSet;
+			descriptorSets[DescriptorSetClass::Images] = cmd.compute.imageSet->nativeSet().descriptorSet;
+
+			for (uint32_t i = 0, e = DescriptorSetClass::DynamicDescriptorsCount; i < e; ++i)
+			{
+				if (cmd.compute.dynamicOffsets[i].valid())
+					dynamicOffsets[i] = cmd.compute.dynamicOffsets[i]->offset();
+			}
+
+			vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, cmd.compute.compute->nativeCompute().layout,
+				0, DescriptorSetClass_Count, descriptorSets, DescriptorSetClass::DynamicDescriptorsCount, dynamicOffsets);
+
 			uint32_t tx = static_cast<uint32_t>(cmd.compute.dimension.x);
 			uint32_t ty = static_cast<uint32_t>(cmd.compute.dimension.y);
 			uint32_t tz = static_cast<uint32_t>(cmd.compute.dimension.z);
@@ -624,9 +644,35 @@ void VulkanRenderPassPrivate::generateDynamicDescriptorSet(RenderPass* pass)
 void VulkanRenderPass::dispatchCompute(const Compute::Pointer& compute, const vec3i& dim)
 {
 	VulkanCompute::Pointer vulkanCompute = compute;
+	MaterialInstance::Pointer material = compute->material();
+	VulkanProgram::Pointer program = material->configuration(info().name).program;
+
+	retain();
+	vulkanCompute->build(VulkanRenderPass::Pointer(this));
+	release();
+
+	ConstantBufferEntry::Pointer objectVariables;
+	if (program->reflection().objectVariablesBufferSize > 0)
+	{
+		objectVariables = _private->renderer->sharedConstantBuffer().allocate(
+			program->reflection().objectVariablesBufferSize, ConstantBufferDynamicAllocation);
+
+		for (const auto& v : sharedVariables())
+		{
+			const Program::Variable& var = program->reflection().objectVariables[v.first];
+
+			if (v.second.isSet() && var.enabled)
+				memcpy(objectVariables->data() + var.offset, v.second.data, v.second.size);
+		}
+	}
+
 	VulkanComputeStruct cs;
-	cs.pipeline = vulkanCompute->nativeCompute().pipeline;
+	cs.compute = vulkanCompute;
+	cs.textureSet = material->textureSet(info().name);
+	cs.imageSet = material->imageSet(info().name);
 	cs.dimension = dim;
+	cs.dynamicOffsets[0] = objectVariables;
+	cs.dynamicOffsets[1] = material->constantBufferData(info().name);
 	_private->commands[_private->frameIndex].emplace_back(cs);
 }
 

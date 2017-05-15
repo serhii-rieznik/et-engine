@@ -10,6 +10,7 @@
 #include <external/glslang/SPIRV/GlslangToSpv.h>
 #include <external/glslang/OGLCompilersDLL/InitializeDll.h>
 #include <external/glslang/glslang/MachineIndependent/localintermediate.h>
+#include <external/glslang/glslang/MachineIndependent/reflection.h>
 #include <external/spirvcross/spirv_cross.hpp>
 #include <external/spirvcross/spirv_glsl.hpp>
 #include <external/spirvcross/spirv_msl.hpp>
@@ -17,7 +18,7 @@
 #include <fstream>
 
 #define ET_PREPROCESS_HLSL				0
-#define ET_COMPILE_TEST_HLSL			1
+#define ET_COMPILE_TEST_HLSL			0
 #define ET_CROSS_COMPILE_SHADERS_TEST	0
 
 #if (ET_PLATFORM_WIN && ET_COMPILE_TEST_HLSL)
@@ -143,7 +144,7 @@ EShLanguage shLanguageFromStage(ProgramStage stage)
 
 bool generateSPIRFromHLSL(const std::string& source, SPIRProgramStageMap& stages, Program::Reflection& reflection)
 {
-	EShMessages messages = static_cast<EShMessages>(EShMsgSpvRules | EShMsgReadHlsl);
+	EShMessages messages = static_cast<EShMessages>(EShMsgSpvRules | EShMsgVulkanRules | EShMsgReadHlsl);
 	const char* rawSource[] = { source.c_str() };
 	const char* shaderName[] = { "shader_source" };
 	for (auto& stage : stages)
@@ -156,9 +157,26 @@ bool generateSPIRFromHLSL(const std::string& source, SPIRProgramStageMap& stages
 		shader.setAutoMapBindings(true);
 		shader.setEntryPoint(entryName);
 
-		if (!shader.parse(&glslang::DefaultTBuiltInResource, 110, true, messages))
+#	if (ET_PREPROCESS_HLSL)
+		std::string preprocessedSource;
+		preprocessedSource.reserve(source.size());
+		glslang::TShader::ForbidIncluder forbidIncluder;
+		if (!shader.preprocess(&glslang::DefaultTBuiltInResource, 0, EProfile::ECoreProfile, false, true, messages, &preprocessedSource, forbidIncluder))
 		{
-			dumpSource(source);
+			dumpSource(rawSource[0]);
+			log::error("Failed to preprocess shader with entry %s:\n%s", entryName, shader.getInfoLog());
+#		if (ET_DEBUG)
+			debug::debugBreak();
+#		endif
+			return false;
+		}
+		const char* preprocessedRawSource[] = { preprocessedSource.c_str() };
+		shader.setStringsWithLengthsAndNames(preprocessedRawSource, nullptr, shaderName, 1);
+#	endif
+
+		if (!shader.parse(&glslang::DefaultTBuiltInResource, 0, true, messages))
+		{
+			dumpSource(rawSource[0]);
 			log::error("Failed to parse shader with entry %s:\n%s", entryName, shader.getInfoLog());
 #		if (ET_DEBUG)
 			debug::debugBreak();
@@ -198,7 +216,7 @@ bool generateSPIRFromHLSL(const std::string& source, SPIRProgramStageMap& stages
 				log::info("HLSL to SPV:\n%s", allMessages.c_str());
 
 #		if (ET_CROSS_COMPILE_SHADERS_TEST)
-			crossCompile(vertexBin);
+			crossCompile(stage.second);
 #		endif
 		}
 	}
@@ -261,33 +279,54 @@ void buildProgramReflection(const glslang::TProgram& program, Program::Reflectio
 
 	auto& textureSet = reflection.textures[stage].textures;
 	auto& samplerSet = reflection.textures[stage].samplers;
+	auto& imageSet = reflection.textures[stage].images;
 
 	int uniforms = program.getNumLiveUniformVariables();
-	for (int uniform = 0; uniform < uniforms; ++uniform)
+	for (int u = 0; u < uniforms; ++u)
 	{
-		std::string uniformName(program.getUniformName(uniform));
-		int uniformBlockIndex = program.getUniformBlockIndex(uniform);
-		int uniformType = program.getUniformType(uniform);
+		std::string uniformName(program.getUniformName(u));
+		int uniformBlockIndex = program.getUniformBlockIndex(u);
+		int uniformType = program.getUniformType(u);
 
 		String blockName(program.getUniformBlockName(uniformBlockIndex));
 		if (blockName.empty())
 		{
-			MaterialTexture tex = stringToMaterialTexture(uniformName);
-			if (tex != MaterialTexture::max)
+			const glslang::TType* type = program.getUniformTType(u);
+			if (type->getBasicType() == glslang::TBasicType::EbtSampler)
 			{
-				uint32_t binding = static_cast<uint32_t>(tex);
-				textureSet.emplace(uniformName, binding);
+				const glslang::TQualifier& qualifier = type->getQualifier();
+				const glslang::TSampler& sampler = type->getSampler();
+				ET_ASSERT(qualifier.hasBinding());
+				ET_ASSERT(qualifier.hasSet());
+				if (sampler.isImage())
+				{
+					ET_ASSERT(qualifier.layoutBinding < StorageBuffer_max);
+					imageSet.emplace(uniformName, qualifier.layoutBinding);
+				}
+				else if (sampler.isTexture())
+				{
+					ET_ASSERT(qualifier.layoutBinding < MaterialTexture_max);
+					textureSet.emplace(uniformName, qualifier.layoutBinding);
+				}
+				else if (sampler.isPureSampler())
+				{
+					ET_ASSERT(qualifier.layoutBinding >= MaterialSamplerBindingOffset);
+					ET_ASSERT(qualifier.layoutBinding < MaterialTexture_max + MaterialSamplerBindingOffset);
+					samplerSet.emplace(uniformName, qualifier.layoutBinding);
+				}
+				else
+				{
+					log::warning("Unsupported sampler type in shader: %s", sampler.getString());
+				}
 			}
-			MaterialTexture smp = samplerToMaterialTexture(uniformName);
-			if (smp != MaterialTexture::max)
+			else
 			{
-				uint32_t binding = static_cast<uint32_t>(smp) + MaterialSamplerBindingOffset;
-				samplerSet.emplace(uniformName, binding);
+				log::warning("Unsupported uniform type in shader: %s", type->getBasicTypeString().c_str());
 			}
 		}
 		else
 		{
-			int uniformOffset = program.getUniformBufferOffset(uniform);
+			int uniformOffset = program.getUniformBufferOffset(u);
 			if (blockName == kObjectVariables)
 			{
 				ObjectVariable varId = stringToObjectVariable(uniformName);

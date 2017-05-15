@@ -8,13 +8,14 @@
 #pragma once
 
 #include <et/rendering/vulkan/vulkan_compute.h>
-#include <et/rendering/vulkan/vulkan.h>
 #include <et/rendering/vulkan/vulkan_program.h>
+#include <et/rendering/vulkan/vulkan_renderpass.h>
+#include <et/rendering/vulkan/vulkan.h>
 
 namespace et
 {
 
-class VulkanComputePrivate : public VulkanNativeCompute
+class VulkanComputePrivate : public VulkanNativePipeline
 {
 public:
 	VulkanComputePrivate(VulkanState& v) :
@@ -25,37 +26,33 @@ public:
 	VulkanState& vulkan;
 };
 
-VulkanCompute::VulkanCompute(VulkanState& vulkan, const Material::Pointer& mat)
+VulkanCompute::VulkanCompute(VulkanState& vulkan, const Material::Pointer& mat) :
+	Compute(mat)
 {
 	ET_PIMPL_INIT(VulkanCompute, vulkan);
-
-	VulkanProgram::Pointer program = mat->configuration(kCompute).program;
-
-	VkDescriptorSetLayoutCreateInfo layoutSetInfo = { VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO };
-	layoutSetInfo.bindingCount = 0;
-	layoutSetInfo.pBindings = nullptr;
-	VULKAN_CALL(vkCreateDescriptorSetLayout(vulkan.device, &layoutSetInfo, nullptr, &_private->texturesSetLayout));
-
-	VkPipelineLayoutCreateInfo layoutCreateInfo = { VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO };
-	layoutCreateInfo.pSetLayouts = &_private->texturesSetLayout;
-	layoutCreateInfo.setLayoutCount = 1;
-	VULKAN_CALL(vkCreatePipelineLayout(vulkan.device, &layoutCreateInfo, nullptr, &_private->pipelineLayout));
-	
-	VkComputePipelineCreateInfo createInfo = { VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO };
-	createInfo.stage = program->shaderModules().stageCreateInfos.begin()->second;
-	createInfo.layout = _private->pipelineLayout;
-	VULKAN_CALL(vkCreateComputePipelines(vulkan.device, vulkan.pipelineCache, 1, &createInfo, nullptr, &_private->pipeline));
 }
 
 VulkanCompute::~VulkanCompute()
 {
-	vkDestroyPipeline(_private->vulkan.device, _private->pipeline, nullptr);
-	vkDestroyPipelineLayout(_private->vulkan.device, _private->pipelineLayout, nullptr);
-	vkDestroyDescriptorSetLayout(_private->vulkan.device, _private->texturesSetLayout, nullptr);
+	_private->cleanup(_private->vulkan);
 	ET_PIMPL_FINALIZE(VulkanCompute);
 }
 
-const VulkanNativeCompute& VulkanCompute::nativeCompute() const
+void VulkanCompute::build(const VulkanRenderPass::Pointer& pass)
+{
+	if (_private->pipeline != nullptr)
+		return;
+
+	VulkanProgram::Pointer program = material()->configuration(pass->info().name).program;
+	_private->buildLayout(_private->vulkan, program->reflection(), pass->nativeRenderPass().dynamicDescriptorSetLayout);
+
+	VkComputePipelineCreateInfo createInfo = { VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO };
+	createInfo.stage = program->shaderModules().stageCreateInfos.begin()->second;
+	createInfo.layout = _private->layout;
+	VULKAN_CALL(vkCreateComputePipelines(_private->vulkan.device, _private->vulkan.pipelineCache, 1, &createInfo, nullptr, &_private->pipeline));
+}
+
+const VulkanNativePipeline& VulkanCompute::nativeCompute() const
 {
 	return (*_private);
 }

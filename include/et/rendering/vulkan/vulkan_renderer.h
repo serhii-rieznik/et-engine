@@ -65,7 +65,7 @@ public:
 	/*
 	 * Pipeline state
 	 */
-	PipelineState::Pointer acquirePipelineState(const RenderPass::Pointer&, const Material::Pointer&, const VertexStream::Pointer&) override;
+	PipelineState::Pointer acquireGraphicsPipeline(const RenderPass::Pointer&, const Material::Pointer&, const VertexStream::Pointer&) override;
 
 	/*
 	 * Compute

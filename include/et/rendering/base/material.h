@@ -45,9 +45,11 @@ public:
 	void setTexture(MaterialTexture, const Texture::Pointer&);
 	void setSampler(MaterialTexture, const Sampler::Pointer&);
 	void setTextureWithSampler(MaterialTexture, const Texture::Pointer&, const Sampler::Pointer&);
+	void setImage(StorageBuffer, const Texture::Pointer&);
 
 	Texture::Pointer texture(MaterialTexture);
 	Sampler::Pointer sampler(MaterialTexture);
+	Texture::Pointer image(StorageBuffer);
 
 	void setVector(MaterialVariable, const vec4&);
 	vec4 getVector(MaterialVariable) const;
@@ -81,9 +83,9 @@ private:
 	void setCullMode(CullMode, const std::string&);
 
 	void loadRenderPass(const std::string&, const Dictionary&, const std::string& baseFolder);
-	void loadCompute(const std::string&, const Dictionary&, const std::string& baseFolder);
 	void initDefaultHeader();
 
+	virtual void invalidateImageSet();
 	virtual void invalidateTextureSet();
 	virtual void invalidateConstantBuffer();
 	virtual bool isInstance() const { return false; }
@@ -91,6 +93,7 @@ private:
 protected: // overrided / read by instanaces
 	TexturesHolder textures;
 	SamplersHolder samplers;
+	ImagesHolder images;
 	VariablesHolder properties;
 
 private: // permanent private data
@@ -109,12 +112,15 @@ public:
 	using Map = UnorderedMap<std::string, MaterialInstance::Pointer>;
 
 public:
-	Material::Pointer base();
+	Material::Pointer& base();
+	const Material::Pointer& base() const;
 
+	const TextureSet::Pointer& imageSet(const std::string&);
 	const TextureSet::Pointer& textureSet(const std::string&);
 	const ConstantBufferEntry::Pointer& constantBufferData(const std::string&);
 	const Configuration& configuration(const std::string&) const override;
 
+	void invalidateImageSet() override;
 	void invalidateTextureSet() override;
 	void invalidateConstantBuffer() override;
 	
@@ -125,6 +131,7 @@ private:
 	friend class ObjectFactory;
 	MaterialInstance(Material::Pointer base);
 
+	void buildImageSet(const std::string&);
 	void buildTextureSet(const std::string&);
 	void buildConstantBuffer(const std::string&);
 
@@ -138,6 +145,7 @@ private:
 
 private:
 	Material::Pointer _base;
+	UnorderedMap<std::string, Holder<TextureSet::Pointer>> _imageSets;
 	UnorderedMap<std::string, Holder<TextureSet::Pointer>> _textureSets;
 	UnorderedMap<std::string, Holder<ConstantBufferEntry::Pointer>> _constBuffers;
 };

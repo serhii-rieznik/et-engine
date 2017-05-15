@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include <et/core/containers.h>
+#include <et/rendering/base/material.h>
 
 namespace et
 {
@@ -17,6 +17,17 @@ public:
 	ET_DECLARE_POINTER(Compute);
 
 public:
+	Compute(Material::Pointer m) 
+		: _material(m->instance()) { }
+	
+	MaterialInstance::Pointer& material()
+		{ return _material; }
+	
+	const MaterialInstance::Pointer& material() const
+		{ return _material; }
+
+private:
+	MaterialInstance::Pointer _material;
 };
 
 }

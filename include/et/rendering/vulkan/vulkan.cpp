@@ -309,6 +309,81 @@ void VulkanSwapchain::present(VulkanState& vulkan)
 	++frameNumber;
 }
 
+void VulkanNativePipeline::buildLayout(VulkanState& vulkan, const Program::Reflection& reflection, VkDescriptorSetLayout buffersSet)
+{
+	Vector<VkDescriptorSetLayoutBinding> textureBindings;
+	textureBindings.reserve(2 * MaterialTexture_max);
+
+	Vector<VkDescriptorSetLayoutBinding> imageBindings;
+	imageBindings.reserve(StorageBuffer_max);
+
+	for (const auto& tex : reflection.textures)
+	{
+		VkShaderStageFlagBits stageFlags = vulkan::programStageValue(tex.first);
+
+		for (const auto& t : tex.second.textures)
+		{
+			textureBindings.emplace_back();
+			textureBindings.back().binding = t.second;
+			textureBindings.back().stageFlags = stageFlags;
+			textureBindings.back().descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
+			textureBindings.back().descriptorCount = 1;
+		}
+		for (const auto& t : tex.second.samplers)
+		{
+			textureBindings.emplace_back();
+			textureBindings.back().binding = t.second;
+			textureBindings.back().stageFlags = stageFlags;
+			textureBindings.back().descriptorType = VK_DESCRIPTOR_TYPE_SAMPLER;
+			textureBindings.back().descriptorCount = 1;
+		}
+		for (const auto& t : tex.second.images)
+		{
+			imageBindings.emplace_back();
+			imageBindings.back().binding = t.second;
+			imageBindings.back().stageFlags = stageFlags;
+			imageBindings.back().descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
+			imageBindings.back().descriptorCount = 1;
+		}
+	}
+
+	VkDescriptorSetLayoutCreateInfo layoutSetInfo = { VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO };
+	layoutSetInfo.bindingCount = static_cast<uint32_t>(textureBindings.size());
+	layoutSetInfo.pBindings = textureBindings.data();
+	VULKAN_CALL(vkCreateDescriptorSetLayout(vulkan.device, &layoutSetInfo, nullptr, &textureSetLayout));
+
+	layoutSetInfo.bindingCount = static_cast<uint32_t>(imageBindings.size());
+	layoutSetInfo.pBindings = imageBindings.data();
+	VULKAN_CALL(vkCreateDescriptorSetLayout(vulkan.device, &layoutSetInfo, nullptr, &imageSetLayout));
+
+	VkDescriptorSetLayout layouts[] =
+	{
+		buffersSet,
+		textureSetLayout,
+		imageSetLayout
+	};
+
+	VkPipelineLayoutCreateInfo layoutCreateInfo = { VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO };
+	layoutCreateInfo.setLayoutCount = sizeof(layouts) / sizeof(layouts[0]);
+	layoutCreateInfo.pSetLayouts = layouts;
+	VULKAN_CALL(vkCreatePipelineLayout(vulkan.device, &layoutCreateInfo, nullptr, &layout));
+}
+
+void VulkanNativePipeline::cleanup(VulkanState& vulkan)
+{
+	if (pipeline)
+		vkDestroyPipeline(vulkan.device, pipeline, nullptr);
+
+	if (layout)
+		vkDestroyPipelineLayout(vulkan.device, layout, nullptr);
+
+	if (textureSetLayout)
+		vkDestroyDescriptorSetLayout(vulkan.device, textureSetLayout, nullptr);
+
+	if (imageSetLayout)
+		vkDestroyDescriptorSetLayout(vulkan.device, imageSetLayout, nullptr);
+}
+
 namespace vulkan
 {
 
@@ -583,6 +658,7 @@ VkAccessFlags texureStateToAccessFlags(TextureState val)
 		{ TextureState::DepthRenderTarget, VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT },
 		{ TextureState::ShaderResource, VK_ACCESS_SHADER_READ_BIT },
 		{ TextureState::PresentImage, VK_ACCESS_MEMORY_READ_BIT },
+		{ TextureState::Storage,  VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT },
 	};
 	ET_ASSERT(values.count(val) > 0);
 	return values.at(val);
@@ -599,6 +675,7 @@ VkImageLayout texureStateToImageLayout(TextureState val)
 		{ TextureState::DepthRenderTarget, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL },
 		{ TextureState::ShaderResource, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL },
 		{ TextureState::PresentImage, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR },
+		{ TextureState::Storage, VK_IMAGE_LAYOUT_GENERAL },
 	};
 	ET_ASSERT(values.count(val) > 0);
 	return values.at(val);

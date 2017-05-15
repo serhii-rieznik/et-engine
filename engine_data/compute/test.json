@@ -1,8 +1,9 @@
 {
 	"name" : "test",
 
-	"compute" : 
+	"tonemapping" : 
 	{ 
+		"class" : "compute",
     	"code" : "shaders/test"
 	}
 }

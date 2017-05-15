@@ -66,6 +66,11 @@ VulkanTexture::VulkanTexture(VulkanState& vulkan, const Description& desc, const
 		info.usage |= isDepthTextureFormat(desc.format) ? VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT :  VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 	}
 
+	if (desc.flags & Texture::Flags::Storage)
+	{
+		info.usage |= VK_IMAGE_USAGE_STORAGE_BIT;
+	}
+
 	if (desc.flags & Texture::Flags::CopySource)
 		info.usage |= VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
 	

@@ -22,11 +22,13 @@ public:
 	{
 		UnorderedMap<std::string, uint32_t> textures;
 		UnorderedMap<std::string, uint32_t> samplers;
+		UnorderedMap<std::string, uint32_t> images;
 	};
 	struct DescriptionSet
 	{
 		std::array<Texture::Pointer, MaterialTexture_max> textures;
 		std::array<Sampler::Pointer, MaterialTexture_max> samplers;
+		std::array<Texture::Pointer, StorageBuffer_max> images;
 	};
 
 	using Reflection = Map<ProgramStage, ReflectionSet>;

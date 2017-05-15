@@ -8,6 +8,7 @@
 #pragma once
 
 #include <et/rendering/base/rendering.h>
+#include <et/rendering/interface/program.h>
 
 #if (ET_PLATFORM_WIN)
 #	define VK_USE_PLATFORM_WIN32_KHR
@@ -35,9 +36,9 @@ struct VulkanSwapchain
 
 	VkSurfaceKHR surface = nullptr;
 	VkSwapchainKHR swapchain = nullptr;
-	
-	VkExtent2D extent { };
-	VkSurfaceFormatKHR surfaceFormat { };
+
+	VkExtent2D extent{ };
+	VkSurfaceFormatKHR surfaceFormat{ };
 	VkFormat depthFormat = VK_FORMAT_D32_SFLOAT;
 
 	struct Frame
@@ -55,28 +56,30 @@ struct VulkanSwapchain
 		VkSemaphore semaphoreToPresent = nullptr;
 		VkSemaphore submitCompleted = nullptr;
 	};
-    
+
 	struct DepthBuffer
-    {
-        VkImage depth = nullptr;
-        VkImageView depthView = nullptr;
-        VkDeviceMemory depthMemory = nullptr;
-    } depthBuffer;
-	
+	{
+		VkImage depth = nullptr;
+		VkImageView depthView = nullptr;
+		VkDeviceMemory depthMemory = nullptr;
+	} depthBuffer;
+
 	Vector<Frame> frames;
 	uint32_t frameNumber = 0;
 
 	uint32_t swapchainImageIndex = static_cast<uint32_t>(-1);
 
 	const Frame& currentFrame() const
-		{ return frames.at(frameNumber % RendererFrameCount); }
+	{
+		return frames.at(frameNumber % RendererFrameCount);
+	}
 };
 
 enum VulkanQueueClass : uint32_t
 {
 	Graphics,
 	Compute,
-	
+
 	VulkanQueueClass_Count
 };
 
@@ -97,9 +100,9 @@ struct VulkanState
 	VkDevice device = nullptr;
 	VkDescriptorPool descriptorPool = nullptr;
 	VkPipelineCache pipelineCache = nullptr;
-	
-	VkPhysicalDeviceProperties physicalDeviceProperties { };
-	VkPhysicalDeviceFeatures physicalDeviceFeatures { };
+
+	VkPhysicalDeviceProperties physicalDeviceProperties{ };
+	VkPhysicalDeviceFeatures physicalDeviceFeatures{ };
 
 	VulkanSwapchain swapchain;
 	VulkanQueue queues[VulkanQueueClass_Count];
@@ -135,7 +138,8 @@ enum DescriptorSetClass : uint32_t
 {
 	Buffers,
 	Textures,
-	
+	Images,
+
 	DescriptorSetClass_Count,
 	DynamicDescriptorsCount = 2
 };
@@ -144,18 +148,22 @@ struct VulkanNativePipeline
 {
 	VkPipeline pipeline = nullptr;
 	VkPipelineLayout layout = nullptr;
-	VkDescriptorSetLayout texturesLayout = nullptr;
+	VkDescriptorSetLayout textureSetLayout = nullptr;
+	VkDescriptorSetLayout imageSetLayout = nullptr;
+
+	void buildLayout(VulkanState& vulkan, const Program::Reflection&, VkDescriptorSetLayout buffersSet);
+	void cleanup(VulkanState& vulkan);
 };
 
 struct VulkanNativeTexture
 {
 	VulkanState& vulkan;
-	VulkanNativeTexture(VulkanState& v) : 
+	VulkanNativeTexture(VulkanState& v) :
 		vulkan(v) { }
 
 	VkImage image = nullptr;
 	VkDeviceMemory memory = nullptr;
-	VkMemoryRequirements memoryRequirements { };
+	VkMemoryRequirements memoryRequirements{ };
 	// VkImageLayout layout = VK_IMAGE_LAYOUT_UNDEFINED;
 	VkFormat format = VK_FORMAT_UNDEFINED;
 	VkImageAspectFlags aspect = VkImageAspectFlagBits::VK_IMAGE_ASPECT_FLAG_BITS_MAX_ENUM;
@@ -167,8 +175,10 @@ struct VulkanNativeTexture
 	uint32_t levelCount = 0;
 
 	uint32_t imageViewIndex(uint32_t layer, uint32_t level) const
-		{ return (layer & 0xffff) | ((level & 0xffff) << 16); }
-	
+	{
+		return (layer & 0xffff) | ((level & 0xffff) << 16);
+	}
+
 	VkImageView imageView(uint32_t layer, uint32_t level);
 };
 
@@ -187,14 +197,7 @@ struct VulkanNativeBuffer
 {
 	VkBuffer buffer = nullptr;
 	VkDeviceMemory memory = nullptr;
-	VkMemoryRequirements memoryRequirements { };
-};
-
-struct VulkanNativeCompute
-{
-	VkDescriptorSetLayout texturesSetLayout = nullptr;
-	VkPipelineLayout pipelineLayout = nullptr;
-	VkPipeline pipeline = nullptr;
+	VkMemoryRequirements memoryRequirements{ };
 };
 
 namespace vulkan
@@ -223,14 +226,14 @@ const char* programStageEntryName(ProgramStage);
 
 namespace gl
 {
-	DataType dataTypeFromOpenGLType(int glType);
-	bool isSamplerType(int glType);
+DataType dataTypeFromOpenGLType(int glType);
+bool isSamplerType(int glType);
 }
 
 void imageBarrier(VulkanState&, VkCommandBuffer, VkImage, VkImageAspectFlags aspect,
 	VkAccessFlags accessFrom, VkAccessFlags accessTo,
 	VkImageLayout layoutFrom, VkImageLayout layoutTo,
-	VkPipelineStageFlags stageFrom, VkPipelineStageFlags stageTo, 
+	VkPipelineStageFlags stageFrom, VkPipelineStageFlags stageTo,
 	uint32_t startMipLevel = 0, uint32_t mipLevelsCount = 1);
 
 const char* resultToString(VkResult result);

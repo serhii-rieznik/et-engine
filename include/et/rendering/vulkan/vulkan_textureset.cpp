@@ -36,69 +36,91 @@ public:
 	writeSet.reserve(128);
 	imageInfos.reserve(128);
 
-	using TSPair = std::pair<Texture::Pointer, Sampler::Pointer>;
-	std::array<TSPair, MaterialTexture_max> mergedData;
-	for (const auto& tex : desc)
+	for (const auto& entry : desc)
 	{
-		for (uint32_t i = 0; i < MaterialTexture_max; ++i)
+		VkShaderStageFlagBits stageFlags = vulkan::programStageValue(entry.first);
+
+		uint32_t bindingIndex = 0;
+		for (const auto& e : entry.second.textures)
 		{
-			mergedData[i].first = tex.second.textures[i];
-			mergedData[i].second = tex.second.samplers[i];
-		}
-	}
+			if (e.valid())
+			{
+				bindings.emplace_back();
+				VkDescriptorSetLayoutBinding& binding = bindings.back();
+				binding.binding = bindingIndex;
+				binding.descriptorCount = 1;
+				binding.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
+				binding.stageFlags = stageFlags;
 
-	for (uint32_t i = 0; i < MaterialTexture_max; ++i)
-	{
-		const TSPair& b = mergedData[i];
+				imageInfos.emplace_back();
+				VkDescriptorImageInfo& info = imageInfos.back();
+				info.imageView = VulkanTexture::Pointer(e)->nativeTexture().completeImageView;
+				info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 
-		if (b.first.invalid() && b.second.invalid())
-			continue;
-
-		if (b.first.valid())
-		{
-			bindings.emplace_back();
-			imageInfos.emplace_back();
-			writeSet.emplace_back();
-
-			VkDescriptorSetLayoutBinding& binding = bindings.back();
-			binding.binding = i;
-			binding.descriptorCount = 1;
-			binding.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
-			binding.stageFlags = VK_SHADER_STAGE_ALL;
-
-			VkDescriptorImageInfo& info = imageInfos.back();
-			info.imageView = VulkanTexture::Pointer(b.first)->nativeTexture().completeImageView;
-			info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-			
-			VkWriteDescriptorSet& ws = writeSet.back();
-			ws.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-			ws.descriptorCount = binding.descriptorCount;
-			ws.descriptorType = binding.descriptorType;
-			ws.dstBinding = binding.binding;
-			ws.pImageInfo = imageInfos.data() + imageInfos.size() - 1;
+				writeSet.emplace_back();
+				VkWriteDescriptorSet& ws = writeSet.back();
+				ws.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+				ws.descriptorCount = binding.descriptorCount;
+				ws.descriptorType = binding.descriptorType;
+				ws.dstBinding = binding.binding;
+				ws.pImageInfo = imageInfos.data() + imageInfos.size() - 1;
+			}
+			++bindingIndex;
 		}
 		
-		if (b.second.valid())
+		bindingIndex = MaterialSamplerBindingOffset;
+		for (const auto& e : entry.second.samplers)
 		{
-			bindings.emplace_back();
-			imageInfos.emplace_back();
-			writeSet.emplace_back();
+			if (e.valid())
+			{
+				bindings.emplace_back();
+				VkDescriptorSetLayoutBinding& binding = bindings.back();
+				binding.binding = bindingIndex;
+				binding.descriptorCount = 1;
+				binding.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLER;
+				binding.stageFlags = stageFlags;
 
-			VkDescriptorSetLayoutBinding& binding = bindings.back();
-			binding.binding = i + MaterialSamplerBindingOffset;
-			binding.descriptorCount = 1;
-			binding.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLER;
-			binding.stageFlags = VK_SHADER_STAGE_ALL;
+				imageInfos.emplace_back();
+				VkDescriptorImageInfo& info = imageInfos.back();
+				info.sampler = VulkanSampler::Pointer(e)->nativeSampler().sampler;
 
-			VkDescriptorImageInfo& info = imageInfos.back();
-			info.sampler = VulkanSampler::Pointer(b.second)->nativeSampler().sampler;
+				writeSet.emplace_back();
+				VkWriteDescriptorSet& ws = writeSet.back();
+				ws.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+				ws.descriptorCount = binding.descriptorCount;
+				ws.descriptorType = binding.descriptorType;
+				ws.dstBinding = binding.binding;
+				ws.pImageInfo = imageInfos.data() + imageInfos.size() - 1;
+			}
+			++bindingIndex;
+		}
 
-			VkWriteDescriptorSet& ws = writeSet.back();
-			ws.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-			ws.descriptorCount = binding.descriptorCount;
-			ws.descriptorType = binding.descriptorType;
-			ws.dstBinding = binding.binding;
-			ws.pImageInfo = imageInfos.data() + imageInfos.size() - 1;
+		bindingIndex = 0;
+		for (const auto& e : entry.second.images)
+		{
+			if (e.valid())
+			{
+				bindings.emplace_back();
+				VkDescriptorSetLayoutBinding& binding = bindings.back();
+				binding.binding = bindingIndex;
+				binding.descriptorCount = 1;
+				binding.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
+				binding.stageFlags = stageFlags;
+
+				imageInfos.emplace_back();
+				VkDescriptorImageInfo& info = imageInfos.back();
+				info.imageView = VulkanTexture::Pointer(e)->nativeTexture().completeImageView;
+				info.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
+
+				writeSet.emplace_back();
+				VkWriteDescriptorSet& ws = writeSet.back();
+				ws.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+				ws.descriptorCount = binding.descriptorCount;
+				ws.descriptorType = binding.descriptorType;
+				ws.dstBinding = binding.binding;
+				ws.pImageInfo = imageInfos.data() + imageInfos.size() - 1;
+			}
+			++bindingIndex;
 		}
 	}
 

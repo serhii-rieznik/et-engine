@@ -224,6 +224,7 @@ void VulkanRenderer::init(const RenderContextParameters& params)
 	VkDescriptorPoolSize poolSizes[] = {
 		{ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, defaultPoolSize },
 		{ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, defaultPoolSize },
+		{ VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, defaultPoolSize },
 		{ VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, defaultPoolSize },
 		{ VK_DESCRIPTOR_TYPE_SAMPLER, defaultPoolSize },
 	};
@@ -293,7 +294,7 @@ Program::Pointer VulkanRenderer::createProgram(uint32_t stages, const std::strin
 	return program;
 }
 
-PipelineState::Pointer VulkanRenderer::acquirePipelineState(const RenderPass::Pointer& pass, const Material::Pointer& mat,
+PipelineState::Pointer VulkanRenderer::acquireGraphicsPipeline(const RenderPass::Pointer& pass, const Material::Pointer& mat,
 	const VertexStream::Pointer& vs)
 {
 	ET_ASSERT(mat->pipelineClass() == PipelineClass::Graphics);
@@ -321,10 +322,9 @@ PipelineState::Pointer VulkanRenderer::acquirePipelineState(const RenderPass::Po
 	return ps;
 }
 
-Compute::Pointer VulkanRenderer::createCompute(const Material::Pointer& mat)
+Compute::Pointer VulkanRenderer::createCompute(const Material::Pointer& mtl)
 {
-	ET_ASSERT(mat->pipelineClass() == PipelineClass::Compute);
-	return VulkanCompute::Pointer::create(_private->vulkan(), mat);
+	return VulkanCompute::Pointer::create(_private->vulkan(), mtl);
 }
 
 RenderPass::Pointer VulkanRenderer::allocateRenderPass(const RenderPass::ConstructionInfo& info)
