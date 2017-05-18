@@ -108,17 +108,7 @@ const BoundingBox& Mesh::tranformedBoundingBox()
 {
 	if (_supportData.shouldUpdateBoundingBox)
 	{
-		BoundingBox::Corners corners;
-		_boundingBox.calculateTransformedCorners(corners, finalTransform().mat3());
-		
-		vec3 minVertex(+std::numeric_limits<float>::max());
-		vec3 maxVertex(-std::numeric_limits<float>::max());
-		for (uint32_t i = 0; i < 8; ++i)
-		{
-			minVertex = minv(minVertex, corners[i]);
-			maxVertex = maxv(maxVertex, corners[i]);
-		}
-		_supportData.transformedBoundingBox = BoundingBox(0.5f * (maxVertex + minVertex), 0.5f * maxv(vec3(0.0002f), maxVertex - minVertex));
+		_supportData.transformedBoundingBox = _boundingBox.transform(finalTransform());
 		_supportData.shouldUpdateBoundingBox = false;
 	}
 	

@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <et/scene3d/drawer/debugdrawer.h>
 #include <et/scene3d/drawer/shadowmaps.h>
 #include <et/scene3d/drawer/cubemaps.h>
 
@@ -52,6 +53,7 @@ private:
 	Vector<Mesh::Pointer> _allMeshes;
 
 	RenderInterface::Pointer _renderer;
+	DebugDrawer::Pointer _debugDrawer;
 	CubemapProcessor::Pointer _cubemapProcessor = CubemapProcessor::Pointer(PointerInit::CreateInplace);
 	ShadowmapProcessor::Pointer _shadowmapProcessor = ShadowmapProcessor::Pointer(PointerInit::CreateInplace);
 

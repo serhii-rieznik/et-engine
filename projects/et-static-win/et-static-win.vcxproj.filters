@@ -676,6 +676,12 @@
     <ClInclude Include="..\..\include\et\rendering\vulkan\vulkan_compute.h">
       <Filter>Source\rendering\vulkan</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\vulkan\vulkan_compute.cpp">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\scene3d\drawer\debugdrawer.h">
+      <Filter>Source\scene3d\drawer</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\et\sound\openal.h">
@@ -1271,8 +1277,8 @@
     <ClCompile Include="..\..\include\external\spirvcross\spirv_msl.cpp">
       <Filter>spir-v-cross</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\include\et\rendering\vulkan\vulkan_compute.cpp">
-      <Filter>Source\rendering\vulkan</Filter>
+    <ClCompile Include="..\..\include\et\scene3d\drawer\debugdrawer.cpp">
+      <Filter>Source\scene3d\drawer</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

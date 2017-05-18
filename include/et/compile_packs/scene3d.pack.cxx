@@ -18,3 +18,4 @@
 #include "../scene3d/drawer/drawflow.cpp"
 #include "../scene3d/drawer/shadowmaps.cpp"
 #include "../scene3d/drawer/cubemaps.cpp"
+#include "../scene3d/drawer/debugdrawer.cpp"

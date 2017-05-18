@@ -73,7 +73,7 @@ private:
 	Texture::Pointer _luminanceHistogram;
 	Texture::Pointer _renderHistory;
 
-	Compute::Pointer _testCompute;
+	// Compute::Pointer _testCompute;
 
 	struct Materials
 	{

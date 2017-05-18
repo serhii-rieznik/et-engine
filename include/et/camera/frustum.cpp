@@ -12,20 +12,21 @@ namespace et
 
 void Frustum::build(const mat4& invVP)
 {
-	vec3 c000 = invVP * vec3(-1.0f, -1.0f, -1.0f);
-	vec3 c100 = invVP * vec3( 1.0f, -1.0f, -1.0f);
-	vec3 c010 = invVP * vec3(-1.0f,  1.0f, -1.0f);
-	vec3 c110 = invVP * vec3( 1.0f,  1.0f, -1.0f);	
-	vec3 c001 = invVP * vec3(-1.0f, -1.0f,  1.0f);
-	vec3 c101 = invVP * vec3( 1.0f, -1.0f,  1.0f);
-	vec3 c011 = invVP * vec3(-1.0f,  1.0f,  1.0f);
-	// vec3 c111 = invVP * vec3( 1.0f,  1.0f,  1.0f); seems to be unused
-	_planes[0] = plane(triangle(c000, c010, c100));
-	_planes[1] = plane(triangle(c001, c101, c011));
-	_planes[2] = plane(triangle(c000, c100, c001));
-	_planes[3] = plane(triangle(c010, c011, c110));
-	_planes[4] = plane(triangle(c000, c001, c010));
-	_planes[5] = plane(triangle(c100, c110, c101));
+	_corners[0] = invVP * vec3(-1.0f, -1.0f, -1.0f);
+	_corners[1] = invVP * vec3( 1.0f, -1.0f, -1.0f);
+	_corners[2] = invVP * vec3(-1.0f,  1.0f, -1.0f);
+	_corners[3] = invVP * vec3( 1.0f,  1.0f, -1.0f);
+	_corners[4] = invVP * vec3(-1.0f, -1.0f,  1.0f);
+	_corners[5] = invVP * vec3( 1.0f, -1.0f,  1.0f);
+	_corners[6] = invVP * vec3(-1.0f,  1.0f,  1.0f);
+	_corners[7] = invVP * vec3( 1.0f,  1.0f,  1.0f);
+
+	_planes[0] = plane(triangle(_corners[0], _corners[2], _corners[1]));
+	_planes[1] = plane(triangle(_corners[4], _corners[5], _corners[6]));
+	_planes[2] = plane(triangle(_corners[0], _corners[1], _corners[4]));
+	_planes[3] = plane(triangle(_corners[2], _corners[6], _corners[3]));
+	_planes[4] = plane(triangle(_corners[0], _corners[4], _corners[2]));
+	_planes[5] = plane(triangle(_corners[1], _corners[3], _corners[5]));
 }
 
 bool Frustum::containsBoundingBox(const BoundingBox& aabb) const

@@ -25,6 +25,9 @@ public:
 	void setScene(const Scene::Pointer& scene, const Light::Pointer& light);
 	void process(RenderInterface::Pointer& renderer, DrawerOptions& options);
 
+	const BoundingBox& sceneBoundingBox() const 
+		{ return _sceneBoundingBox; }
+
 private:
 	void validate(RenderInterface::Pointer& renderer);
 
@@ -32,6 +35,7 @@ private:
 	Texture::Pointer _directionalShadowmap;
 	Scene::Pointer _scene;
 	Light::Pointer _light;
+	BoundingBox _sceneBoundingBox;
 
 	struct Renderables
 	{

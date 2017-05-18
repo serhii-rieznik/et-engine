@@ -1,0 +1,19 @@
+{
+	"name" : "debug",
+
+	"default" : 
+	{ 
+		"input-layout" : {
+			"position" : 3,
+			"color" : 4
+		},
+		"depth-state": {
+			"depth-function": "less",
+			"depth-test": true,
+			"depth-write": true
+		},
+		"blend-state": "disabled",
+		"cull-mode" : "disabled",
+		"code" : "shaders/debug"
+	}
+}

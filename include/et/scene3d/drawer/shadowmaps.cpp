@@ -22,8 +22,15 @@ void ShadowmapProcessor::setScene(const Scene::Pointer& scene, const Light::Poin
 	_renderables.meshes.clear();
 	_renderables.meshes.reserve(meshes.size());
 
+	vec3 minVertex(std::numeric_limits<float>::max());
+	vec3 maxVertex = -minVertex;
 	for (Mesh::Pointer mesh : meshes)
+	{
+		minVertex = minv(minVertex, mesh->tranformedBoundingBox().minVertex());
+		maxVertex = maxv(maxVertex, mesh->tranformedBoundingBox().maxVertex());
 		_renderables.meshes.emplace_back(mesh);
+	}
+	_sceneBoundingBox = BoundingBox(0.5f * (maxVertex + minVertex), 0.5f * (maxVertex - minVertex));
 }
 
 void ShadowmapProcessor::process(RenderInterface::Pointer& renderer, DrawerOptions& options)

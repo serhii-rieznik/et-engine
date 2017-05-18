@@ -35,6 +35,8 @@ static const uint64_t sobolSequenceSize = sizeof(sobolSequence) / sizeof(sobolSe
 Drawer::Drawer(const RenderInterface::Pointer& renderer) :
 	_renderer(renderer)
 {
+	_debugDrawer = DebugDrawer::Pointer::create(renderer);
+
 	Scene::Pointer scene(PointerInit::CreateInplace);
 	scene->setRenderCamera(Camera::Pointer(PointerInit::CreateInplace));
 	scene->setClipCamera(scene->renderCamera());
@@ -48,6 +50,7 @@ void Drawer::draw()
 	options.rebuldEnvironmentProbe = true;
 #endif
 
+	_debugDrawer->begin();
 	_cubemapProcessor->process(_renderer, options, _lighting.directional);
 	_shadowmapProcessor->process(_renderer, options);
 
@@ -79,6 +82,10 @@ void Drawer::draw()
 		}
 		_main.pass->setSharedVariable(ObjectVariable::WorldTransform, identityMatrix);
 		_main.pass->pushRenderBatch(_lighting.environmentBatch);
+
+		_debugDrawer->drawBoundingBox(_shadowmapProcessor->sceneBoundingBox(), identityMatrix, vec4(10000.0f, 10000.0f, 10000.0f, 1.0f));
+		_debugDrawer->submitBatches(_main.pass);
+
 		_main.pass->end();
 
 		_renderer->submitRenderPass(_main.pass);
