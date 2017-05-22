@@ -361,7 +361,11 @@ void VulkanRenderPass::begin(const RenderPassBeginInfo& beginInfo)
 	_private->commands[_private->frameIndex].clear();
 	_private->commands[_private->frameIndex].emplace_back(beginInfo.subpasses.front());
 
+	vec4 viewport(_private->subpassSequence.front().viewport.x, _private->subpassSequence.front().viewport.y,
+		_private->subpassSequence.front().viewport.width, _private->subpassSequence.front().viewport.height);
+	setSharedVariable(ObjectVariable::Viewport, viewport);
 	setSharedVariable(ObjectVariable::DeltaTime, application().mainRunLoop().lastFrameTime());
+	setSharedVariable(ObjectVariable::ContinuousTime, application().mainRunLoop().time());
 }
 
 void VulkanRenderPass::nextSubpass()
@@ -375,6 +379,13 @@ void VulkanRenderPass::nextSubpass()
 	_private->commands[_private->frameIndex].emplace_back(VulkanCommand::Type::NextRenderPass);
 	_private->commands[_private->frameIndex].emplace_back(VulkanCommand::Type::BeginRenderPass);
 	++_private->currentSubpassIndex;
+
+	vec4 viewport(
+		_private->subpassSequence[_private->currentSubpassIndex].viewport.x, 
+		_private->subpassSequence[_private->currentSubpassIndex].viewport.y,
+		_private->subpassSequence[_private->currentSubpassIndex].viewport.width, 
+		_private->subpassSequence[_private->currentSubpassIndex].viewport.height);
+	setSharedVariable(ObjectVariable::Viewport, viewport);
 }
 
 void VulkanRenderPass::pushRenderBatch(const RenderBatch::Pointer& inBatch)

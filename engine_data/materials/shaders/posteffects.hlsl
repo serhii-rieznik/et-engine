@@ -117,11 +117,12 @@ float4 fragmentMain(VSOutput fsIn) : SV_Target0
 #elif (TEMPORAL_AA)
 
 	float2 jt = 0.5 * cameraJitter.xy;
+	float2 jp = 0.5 * cameraJitter.zw;
 	float2 tc = fsIn.texCoord0 + jt;
 
 	float2 vel = 0.5 * normalTexture.Sample(normalSampler, tc).xy;
 	float3 source = baseColorTexture.Sample(baseColorSampler, tc).xyz;
-	float3 history = emissiveColorTexture.Sample(emissiveColorSampler, tc - vel - 0.5 * cameraJitter.zw).xyz;
+	float3 history = emissiveColorTexture.Sample(emissiveColorSampler, tc - vel - jp).xyz;
 
 	return float4(lerp(source, history, 0.85), 1.0);
 

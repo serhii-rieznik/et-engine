@@ -41,7 +41,9 @@ static const std::map<ObjectVariable, std::string> objectVariableNames =
 	{ ObjectVariable::LightDirection, "lightDirection" },
 	{ ObjectVariable::LightViewTransform, "lightViewTransform" },
 	{ ObjectVariable::LightProjectionTransform, "lightProjectionTransform" },
+	{ ObjectVariable::ContinuousTime, "continuousTime" },
 	{ ObjectVariable::DeltaTime, "deltaTime" },
+	{ ObjectVariable::Viewport, "viewport" },
 };
 
 static const std::map<MaterialVariable, std::string> materialVariableNames =
@@ -84,6 +86,7 @@ const std::map<MaterialTexture, std::string>& materialTextureNames()
 		{ MaterialTexture::AmbientOcclusion, "aoTexture" },
 		{ MaterialTexture::Environment, "environmentTexture" },
 		{ MaterialTexture::BRDFLookup, "brdfLookupTexture" },
+		{ MaterialTexture::Noise, "NoiseTexture" },
 	};
 	return localMap;
 }
@@ -102,6 +105,7 @@ const std::map<MaterialTexture, std::string>& materialSamplerNames()
 		{ MaterialTexture::AmbientOcclusion, "aoSampler" },
 		{ MaterialTexture::Environment, "environmentSampler" },
 		{ MaterialTexture::BRDFLookup, "brdfLookupSampler" },
+		{ MaterialTexture::Noise, "NoiseSampler" },
 	};
 	return names;
 }

@@ -146,7 +146,11 @@ void VulkanPipelineState::build(const RenderPass::Pointer& inPass)
 		info.renderPass = pass->nativeRenderPass().renderPass;
 		info.stageCount = static_cast<uint32_t>(stages.size());
 	}
-	VULKAN_CALL(vkCreateGraphicsPipelines(_private->vulkan.device, _private->vulkan.pipelineCache, 1, &info, nullptr, &_private->pipeline));
+	
+	if (info.stageCount == 2)
+	{
+		VULKAN_CALL(vkCreateGraphicsPipelines(_private->vulkan.device, _private->vulkan.pipelineCache, 1, &info, nullptr, &_private->pipeline));
+	}
 }
 
 void VulkanPipelineStatePrivate::generateInputLayout(const VertexDeclaration& inputLayout, const VertexDeclaration& expectedLayout,

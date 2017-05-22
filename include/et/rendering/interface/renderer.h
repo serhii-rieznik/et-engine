@@ -246,6 +246,8 @@ inline const Sampler::Pointer& RenderInterface::nearestSampler()
 		Sampler::Description desc;
 		desc.magFilter = TextureFiltration::Nearest;
 		desc.minFilter = TextureFiltration::Nearest;
+		desc.mipFilter = TextureFiltration::Nearest;
+		desc.maxAnisotropy = 1.0f;
 		_nearestSampler = createSampler(desc);
 	}
 	return _nearestSampler;

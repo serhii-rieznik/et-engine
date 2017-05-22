@@ -43,7 +43,9 @@ enum class ObjectVariable : uint32_t
 	LightViewTransform,
 	LightProjectionTransform,
 
+	ContinuousTime,
 	DeltaTime,
+	Viewport,
 
 	max
 };
@@ -78,6 +80,7 @@ enum class MaterialTexture : uint32_t
 	AmbientOcclusion,
 	Environment,
 	BRDFLookup,
+	Noise,
 
 	max,
 

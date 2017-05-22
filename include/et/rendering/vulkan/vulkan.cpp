@@ -470,8 +470,10 @@ VkFormat textureFormatValue(TextureFormat fmt)
 	static const Map<TextureFormat, VkFormat> lookup =
 	{
 		{ TextureFormat::R8, VK_FORMAT_R8_UNORM },
+		{ TextureFormat::R16, VK_FORMAT_R16_UNORM },
 		{ TextureFormat::RGBA8, VK_FORMAT_R8G8B8A8_UNORM },
 		{ TextureFormat::BGRA8, VK_FORMAT_B8G8R8A8_UNORM },
+		{ TextureFormat::RGBA16, VK_FORMAT_R16G16B16A16_UNORM },
 		{ TextureFormat::R16F, VK_FORMAT_R16_SFLOAT },
 		{ TextureFormat::RG16F, VK_FORMAT_R16G16_SFLOAT },
 		{ TextureFormat::RGBA16F, VK_FORMAT_R16G16B16A16_SFLOAT },

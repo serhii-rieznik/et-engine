@@ -22,6 +22,8 @@ cbuffer ObjectVariables : DECL_BUFFER(Object)
     float4 cameraPosition;
     float4 lightDirection;
     float3 lightColor;
+    float4 viewport;
+	float continuousTime;
 };
 
 Texture2D<float4> baseColorTexture : DECL_TEXTURE(BaseColor);
@@ -31,13 +33,16 @@ Texture2D<float4> normalTexture : DECL_TEXTURE(Normal);
 SamplerState normalSampler : DECL_SAMPLER(Normal);
 
 Texture2D<float4> shadowTexture : DECL_TEXTURE(Shadow);
-SamplerState shadowSampler : DECL_SAMPLER(Shadow);
+SamplerComparisonState shadowSampler : DECL_SAMPLER(Shadow);
 
 Texture2D<float4> brdfLookupTexture : DECL_TEXTURE(BrdfLookup);
 SamplerState brdfLookupSampler : DECL_SAMPLER(BrdfLookup);
 
 Texture2D<float4> opacityTexture : DECL_TEXTURE(Opacity);
 SamplerState opacitySampler : DECL_SAMPLER(Opacity);
+
+Texture2D<float> noiseTexture : DECL_TEXTURE(Noise);
+SamplerState noiseSampler : DECL_SAMPLER(Noise);
 
 struct VSOutput 
 {
@@ -82,6 +87,7 @@ VSOutput vertexMain(VSInput vsIn)
 #include "environment.h"
 #include "atmosphere.h"
 #include "importance-sampling.h"
+#include "shadowmapping.h"
 
 struct FSOutput 
 {
@@ -89,13 +95,34 @@ struct FSOutput
 	float2 velocity : SV_Target1;
 };
 
-float sampleShadow(in float3 shadowTexCoord)
+float sampleShadow(in float3 shadowTexCoord, in float rotationKernel, in float2 shadowmapSize)
 {
-    const float shadowBias = 0.001666666;
+	const float comparisonBias = 0.002;
+	const float2 poissonDistribution[8] = 
+	{
+		float2( 0.8528466f,  0.0213828f),
+		float2( 0.1141956f,  0.2880972f),
+		float2( 0.5853493f, -0.6930891f),
+		float2( 0.6362274f,  0.7029839f),
+		float2(-0.1640182f, -0.4143998f),
+		float2(-0.8862001f, -0.3506839f),
+		float2(-0.2186042f,  0.8690619f),
+		float2(-0.8200445f,  0.4156708f)
+	};
 
-	shadowTexCoord.xy = (shadowTexCoord.xy * 0.5 + 0.5);
-    float sampledDistance = shadowTexture.Sample(shadowSampler, shadowTexCoord).x;
-    return float(sampledDistance + shadowBias > shadowTexCoord.z);
+	float angle = 2.0 * PI * (rotationKernel + 8.0 * continuousTime);
+	float sn = sin(angle);
+	float cs = cos(angle);
+	float2 scaledUV = shadowTexCoord.xy * 0.5 + 0.5;
+
+	float shadow = 0.0;
+	for (uint i = 0; i < 1; ++i)
+	{
+		float2 o = poissonDistribution[i] / shadowmapSize;
+		float2 r = float2(dot(o, float2(cs, -sn)), dot(o, float2(sn,  cs)));
+		shadow += shadowTexture.SampleCmpLevelZero(shadowSampler, scaledUV + r, shadowTexCoord.z - comparisonBias);
+	}
+	return shadow / 8.0;
 }
 
 FSOutput fragmentMain(VSOutput fsIn)
@@ -107,7 +134,20 @@ FSOutput fragmentMain(VSOutput fsIn)
     if ((opacitySample.x + opacitySample.y) < 127.0 / 255.0) 
         discard;
 
-    float shadow = sampleShadow(fsIn.lightCoord.xyz / fsIn.lightCoord.w);
+    float2 currentPosition = fsIn.projectedPosition.xy / fsIn.projectedPosition.w;
+    float2 previousPosition = fsIn.previousProjectedPosition.xy / fsIn.previousProjectedPosition.w;
+    float2 velocity = currentPosition - previousPosition;
+
+	float3 noiseDimensions = 0.0;
+	noiseTexture.GetDimensions(0, noiseDimensions.x, noiseDimensions.y, noiseDimensions.z);
+
+	float3 shadowmapSize = 0.0;
+	shadowTexture.GetDimensions(0, shadowmapSize.x, shadowmapSize.y, shadowmapSize.z);
+
+	float2 noiseUV = (viewport.zw / noiseDimensions.xy) * (currentPosition.xy * 0.5 + 0.5);
+	float sampledNoise = noiseTexture.Sample(noiseSampler, noiseUV);
+        
+    float shadow = sampleShadow(fsIn.lightCoord.xyz / fsIn.lightCoord.w, sampledNoise, shadowmapSize.xy);
     float3 baseColor = srgbToLinear(baseColorSample.xyz);
     Surface surface = buildSurface(baseColor, normalSample.w, baseColorSample.w);
 
@@ -147,10 +187,6 @@ FSOutput fragmentMain(VSOutput fsIn)
     float3 inScatter = lightColor * inScatteringAtConstantHeight(originPosition, worldPosition, wsLight, float2(phaseR, phaseM));
 
     result = result * outScatter + inScatter;
-
-    float2 currentPosition = fsIn.projectedPosition.xy / fsIn.projectedPosition.w;
-    float2 previousPosition = fsIn.previousProjectedPosition.xy / fsIn.previousProjectedPosition.w;
-    float2 velocity = currentPosition - previousPosition;
     
     FSOutput output;
     output.color = float4(result, 1.0);
