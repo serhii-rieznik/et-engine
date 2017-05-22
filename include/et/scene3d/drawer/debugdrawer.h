@@ -24,10 +24,13 @@ public:
 
 	void begin();
 	void drawBoundingBox(const BoundingBox&, const mat4& transfrom, const vec4& color);
+	void drawViewProjectionMatrix(const mat4&, const vec4& color);
 	void drawCameraFrustum(const Camera::Pointer&, const vec4& color);
 	void submitBatches(RenderPass::Pointer);
 
 private:
+	void drawBoudingBoxCorners(const BoundingBox::Corners&, const vec4&);
+
 	void beginRenderBatch();
 	void appendLine(const vec3& pFrom, const vec3& pTo, const vec4& color);
 	void endRenderBatch();

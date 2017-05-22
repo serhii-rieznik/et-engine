@@ -50,15 +50,16 @@ public:
 	BoundingBox transform(const mat4& t) const
 	{
 		Corners corners;
-		calculateTransformedCorners(corners, t.mat3());
-		auto vMin = corners.front();
-		auto vMax = vMin;
-		for (size_t i = 1; i < corners.size(); ++i)
+		calculateCorners(corners);
+		vec3 vMin = vec3(std::numeric_limits<float>::max());
+		vec3 vMax = -vMin;
+		for (vec3& c : corners)
 		{
-			vMin = minv(vMin, corners[i]);
-			vMax = maxv(vMax, corners[i]);
+			c = t * c;
+			vMin = minv(vMin, c);
+			vMax = maxv(vMin, c);
 		}
-		return BoundingBox(t[3].xyz() + 0.5f * (vMin + vMax), 0.5f * (vMax - vMin));
+		return BoundingBox(0.5f * (vMin + vMax), 0.5f * (vMax - vMin));
 	}
 
 	vec3 minVertex() const

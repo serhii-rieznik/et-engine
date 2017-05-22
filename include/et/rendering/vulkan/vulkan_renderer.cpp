@@ -49,6 +49,7 @@ VulkanRenderer::VulkanRenderer(RenderContext* rc)
 {
 	ET_PIMPL_INIT(VulkanRenderer);
 	Camera::renderingOriginTransform = -1.0f;
+	Camera::zeroClipRange = true;
 }
 
 VulkanRenderer::~VulkanRenderer()

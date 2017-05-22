@@ -154,6 +154,7 @@ vec3 circleFromPoints(const vec2& p1, const vec2& p2, const vec2& p3);
 vec3 perpendicularVector(const vec3&);
 vec3 randomVectorOnHemisphere(const vec3& normal, float distributionAngle);
 vec3 randomVectorOnDisk(const vec3& normal);
+void buildOrthonormalBasis(const vec3& n, vec3& t, vec3& b);
 
 vec3 rotateAroundVector(const vec3& axis, const vec3& v, float);
 

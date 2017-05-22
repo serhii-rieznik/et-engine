@@ -12,14 +12,17 @@ namespace et
 
 void Frustum::build(const mat4& invVP)
 {
-	_corners[0] = invVP * vec3(-1.0f, -1.0f, -1.0f);
-	_corners[1] = invVP * vec3( 1.0f, -1.0f, -1.0f);
-	_corners[2] = invVP * vec3(-1.0f,  1.0f, -1.0f);
-	_corners[3] = invVP * vec3( 1.0f,  1.0f, -1.0f);
-	_corners[4] = invVP * vec3(-1.0f, -1.0f,  1.0f);
-	_corners[5] = invVP * vec3( 1.0f, -1.0f,  1.0f);
-	_corners[6] = invVP * vec3(-1.0f,  1.0f,  1.0f);
-	_corners[7] = invVP * vec3( 1.0f,  1.0f,  1.0f);
+	float zNear = Camera::zeroClipRange ? 0.0f : -1.0f;
+	float zFar = 1.0f;
+	
+	_corners[0] = invVP * vec3(-1.0f, -1.0f, zNear);
+	_corners[1] = invVP * vec3( 1.0f, -1.0f, zNear);
+	_corners[2] = invVP * vec3(-1.0f,  1.0f, zNear);
+	_corners[3] = invVP * vec3( 1.0f,  1.0f, zNear);
+	_corners[4] = invVP * vec3(-1.0f, -1.0f, zFar);
+	_corners[5] = invVP * vec3( 1.0f, -1.0f, zFar);
+	_corners[6] = invVP * vec3(-1.0f,  1.0f, zFar);
+	_corners[7] = invVP * vec3( 1.0f,  1.0f, zFar);
 
 	_planes[0] = plane(triangle(_corners[0], _corners[2], _corners[1]));
 	_planes[1] = plane(triangle(_corners[4], _corners[5], _corners[6]));

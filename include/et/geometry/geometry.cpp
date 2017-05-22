@@ -245,22 +245,26 @@ quaternion et::quaternionFromAngles(float yaw, float pitch, float roll)
 }
 
 vec3 et::perpendicularVector(const vec3& normal)
-{
+{	
 	vec3 componentsLength(sqr(normal.x), sqr(normal.y), sqr(normal.z));
 	
+	vec3 result;
 	if (componentsLength.x > 0.5f)
 	{
 		float scaleFactor = std::sqrt(componentsLength.z + componentsLength.x);
-		return vec3(normal.z / scaleFactor, 0.0f, -normal.x / scaleFactor);
+		result = vec3(normal.z / scaleFactor, 0.0f, -normal.x / scaleFactor);
 	}
 	else if (componentsLength.y > 0.5f)
 	{
 		float scaleFactor = std::sqrt(componentsLength.y + componentsLength.x);
-		return vec3(-normal.y / scaleFactor, normal.x / scaleFactor, 0.0f);
+		result = vec3(-normal.y / scaleFactor, normal.x / scaleFactor, 0.0f);
 	}
-	
-	float scaleFactor = std::sqrt(componentsLength.z + componentsLength.y);
-	return vec3(0.0f, -normal.z / scaleFactor, normal.y / scaleFactor);
+	else
+	{
+		float scaleFactor = std::sqrt(componentsLength.z + componentsLength.y);
+		result = vec3(0.0f, -normal.z / scaleFactor, normal.y / scaleFactor);
+	}
+	return result; 
 }
 
 vec3 et::randomVectorOnHemisphere(const vec3& normal, float distributionAngle)
@@ -278,6 +282,20 @@ vec3 et::randomVectorOnDisk(const vec3& normal)
 	vec3 v = cross(u, normal);
 	float phi = randomFloat(-PI, PI);
 	return (u * std::sin(phi) + v * std::cos(phi)).normalized();
+}
+
+void et::buildOrthonormalBasis(const vec3& n, vec3& b1, vec3& b2)
+{
+	/*
+	 * Building an Orthonormal Basis, Revisited
+	 * http://jcgt.org/published/0006/01/01/
+	 */
+
+	 float sign = std::copysign(1.0f, n.z);
+	 const float a = -1.0f / (sign + n.z);
+	 const float b = n.x * n.y * a;
+	 b1 = vec3(1.0f + sign * n.x * n.x * a, sign * b, -sign * n.x);
+	 b2 = vec3(b, sign + n.y * n.y * a, -n.y);
 }
 
 vec3 et::rotateAroundVector(const vec3& v, const vec3& p, float a)

@@ -34,13 +34,12 @@ public:
 	void setScene(const Scene::Pointer&);
 	void setEnvironmentMap(const std::string&);
 	void updateBaseProjectionMatrix(const mat4&);
+	void updateLight();
 
 	void draw();
 
 	const Light::Pointer& directionalLight();
-
 	const Texture::Pointer& supportTexture(SupportTexture);
-
 	const vec4& latestCameraJitter() const;
 
 private:

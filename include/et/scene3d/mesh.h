@@ -34,8 +34,9 @@ public:
 	const Sphere& boundingSphere();
 	const Sphere& boundingSphereUntransformed();
 	
+	const BoundingBox& boundingBox();
 	const BoundingBox& tranformedBoundingBox();
-	
+
 	float finalTransformScale();
 	
 	MeshDeformer::Pointer deformer()
@@ -58,7 +59,9 @@ protected:
 	{
 		Sphere untranfromedBoundingSphere;
 		Sphere tranfromedBoundingSphere;
+		BoundingBox boundingBox;
 		BoundingBox transformedBoundingBox;
+		float boundingSphereRadius = 0.0f;
 		bool shouldUpdateBoundingBox = true;
 		bool shouldUpdateBoundingSphere = true;
 		bool shouldUpdateBoundingSphereUntransformed = true;
@@ -67,8 +70,6 @@ protected:
 private:
 	MeshDeformer::Pointer _deformer;
 	SupportData _supportData;
-	BoundingBox _boundingBox;
-	float _boundingSphereRadius = 0.0f;
 	Vector<mat4> _undeformedTransformationMatrices;
 };
 }

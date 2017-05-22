@@ -25,7 +25,7 @@ Mesh::Mesh(const std::string& name, BaseElement* parent) :
 
 void Mesh::calculateSupportData()
 {
-	_boundingBox = BoundingBox();
+	_supportData.boundingBox = BoundingBox();
 	
 	float processedBatches = 0.0f;
 	vec3 minVertex( std::numeric_limits<float>::max());
@@ -47,8 +47,8 @@ void Mesh::calculateSupportData()
 	if (processedBatches > 0.0f)
 	{
 		vec3 dimensions = maxVertex - minVertex;
-		_boundingBox = BoundingBox(0.5f * (minVertex + maxVertex), 0.5f * dimensions);
-		_boundingSphereRadius =  0.5f * std::max(std::max(dimensions.x, dimensions.y), dimensions.z);
+		_supportData.boundingBox = BoundingBox(0.5f * (minVertex + maxVertex), 0.5f * dimensions);
+		_supportData.boundingSphereRadius =  0.5f * std::max(std::max(dimensions.x, dimensions.y), dimensions.z);
 	}
 }
 
@@ -56,8 +56,6 @@ Mesh* Mesh::duplicate()
 {
 	Mesh* result = etCreateObject<Mesh>(name(), parent());
 	result->_supportData = _supportData;
-	result->_boundingBox = _boundingBox;
-	result->_boundingSphereRadius = _boundingSphereRadius;
 	result->_undeformedTransformationMatrices = _undeformedTransformationMatrices;
 	
 	for (auto batch : renderBatches())
@@ -86,7 +84,7 @@ const Sphere& Mesh::boundingSphereUntransformed()
 {
 	if (_supportData.shouldUpdateBoundingSphereUntransformed)
 	{
-		_supportData.untranfromedBoundingSphere = Sphere(_boundingBox.center, _boundingSphereRadius);
+		_supportData.untranfromedBoundingSphere = Sphere(_supportData.boundingBox.center, _supportData.boundingSphereRadius);
 		_supportData.shouldUpdateBoundingSphereUntransformed = false;
 	}
 	return _supportData.untranfromedBoundingSphere;
@@ -97,18 +95,23 @@ const Sphere& Mesh::boundingSphere()
 	if (_supportData.shouldUpdateBoundingSphere)
 	{
 		const auto& ft = finalTransform();
-		_supportData.tranfromedBoundingSphere = Sphere(ft * _boundingBox.center,
-			finalTransformScale() * _boundingSphereRadius);
+		_supportData.tranfromedBoundingSphere = Sphere(ft * _supportData.boundingBox.center,
+			finalTransformScale() * _supportData.boundingSphereRadius);
 		_supportData.shouldUpdateBoundingSphere = false;
 	}
 	return _supportData.tranfromedBoundingSphere;
+}
+
+const BoundingBox& Mesh::boundingBox()
+{
+	return _supportData.boundingBox;
 }
 
 const BoundingBox& Mesh::tranformedBoundingBox()
 {
 	if (_supportData.shouldUpdateBoundingBox)
 	{
-		_supportData.transformedBoundingBox = _boundingBox.transform(finalTransform());
+		_supportData.transformedBoundingBox = _supportData.boundingBox.transform(finalTransform());
 		_supportData.shouldUpdateBoundingBox = false;
 	}
 	

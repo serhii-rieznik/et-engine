@@ -775,7 +775,7 @@ s3d::Mesh::Pointer FBXLoaderPrivate::loadMesh(s3d::Storage& storage, FbxMesh* me
 	std::map<size_t, std::vector<uint32_t>> controlPointToMeshIndex;
 
 #define PUSH_VERTEX FbxVector4 v = lControlPoints[lControlPointIndex]; \
-		controlPointToMeshIndex[lControlPointIndex].push_back(vertexCount); \
+		if (hasSkin) controlPointToMeshIndex[lControlPointIndex].push_back(vertexCount); \
 		pos[vertexCount] = vec3(static_cast<float>(v[0]), static_cast<float>(v[1]), static_cast<float>(v[2])); 
 #define PUSH_NORMAL if (hasNormal) { \
 		FbxVector4 n; mesh->GetPolygonVertexNormal(lPolygonIndex, lVerticeIndex, n); \

@@ -17,6 +17,7 @@ cbuffer ObjectVariables : DECL_BUFFER(Object)
     row_major float4x4 previousViewProjectionTransform;
     row_major float4x4 worldTransform;
     row_major float4x4 worldRotationTransform;
+    row_major float4x4 lightViewTransform;
     row_major float4x4 lightProjectionTransform;
     float4 cameraPosition;
     float4 lightDirection;
@@ -66,7 +67,7 @@ VSOutput vertexMain(VSInput vsIn)
 
     vsOut.toCamera = (cameraPosition.xyz - transformedPosition.xyz).xyz;
     vsOut.toLight = (lightDirection.xyz - transformedPosition.xyz * lightDirection.w).xyz;
-    vsOut.lightCoord = mul(transformedPosition, lightProjectionTransform);
+    vsOut.lightCoord = mul(mul(transformedPosition, lightViewTransform), lightProjectionTransform);
     vsOut.invTransformT = float3(tTangent.x, tBiTangent.x, vsOut.normal.x);
     vsOut.invTransformB = float3(tTangent.y, tBiTangent.y, vsOut.normal.y);
     vsOut.invTransformN = float3(tTangent.z, tBiTangent.z, vsOut.normal.z);
@@ -88,6 +89,15 @@ struct FSOutput
 	float2 velocity : SV_Target1;
 };
 
+float sampleShadow(in float3 shadowTexCoord)
+{
+    const float shadowBias = 0.001666666;
+
+	shadowTexCoord.xy = (shadowTexCoord.xy * 0.5 + 0.5);
+    float sampledDistance = shadowTexture.Sample(shadowSampler, shadowTexCoord).x;
+    return float(sampledDistance + shadowBias > shadowTexCoord.z);
+}
+
 FSOutput fragmentMain(VSOutput fsIn)
 {
     float4 normalSample = normalTexture.Sample(normalSampler, fsIn.texCoord0);
@@ -97,6 +107,7 @@ FSOutput fragmentMain(VSOutput fsIn)
     if ((opacitySample.x + opacitySample.y) < 127.0 / 255.0) 
         discard;
 
+    float shadow = sampleShadow(fsIn.lightCoord.xyz / fsIn.lightCoord.w);
     float3 baseColor = srgbToLinear(baseColorSample.xyz);
     Surface surface = buildSurface(baseColor, normalSample.w, baseColorSample.w);
 
@@ -125,7 +136,7 @@ FSOutput fragmentMain(VSOutput fsIn)
     float3 indirectSpecular = sampleEnvironment(wsSpecularDir, lightDirection.xyz, 8.0 * surface.roughness);
     indirectSpecular *= (surface.f0 * brdfLookupSample.x + surface.f90 * brdfLookupSample.y);
 
-    float3 result = lightColor * (directDiffuse + directSpecular) + (indirectDiffuse + indirectSpecular); 
+    float3 result = shadow * lightColor * (directDiffuse + directSpecular) + (indirectDiffuse + indirectSpecular); 
 
     float3 originPosition = positionOnPlanet + cameraPosition.xyz;
     float3 worldPosition = originPosition - fsIn.toCamera;
@@ -144,6 +155,5 @@ FSOutput fragmentMain(VSOutput fsIn)
     FSOutput output;
     output.color = float4(result, 1.0);
 	output.velocity = velocity;
-//	output.velocity = 0.0;
     return output;
 }                              

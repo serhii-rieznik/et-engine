@@ -14,7 +14,7 @@
 		"blend-state": {
 			"blend-configuration" : "disabled"
 		},
-		"cull-mode" : "front",
+		"cull-mode" : "back",
 		"code" : "shaders/depth"
 	},
 

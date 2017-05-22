@@ -17,6 +17,7 @@ public:
 	ET_DECLARE_POINTER(Camera);
 
 	static float renderingOriginTransform;
+	static bool zeroClipRange;
 
 public:
 	Camera();
@@ -27,8 +28,7 @@ public:
 
 	const mat4& customPerspectiveProjection(const vec2& fov, float zNear, float zFar);
 
-	const mat4& orthogonalProjection(float left, float right, float top,
-		float bottom, float zNear, float zFar);
+	const mat4& orthogonalProjection(float left, float right, float bottom, float top, float zNear, float zFar);
 
 	const mat4& windowProjection(const vec2& windowSize);
 

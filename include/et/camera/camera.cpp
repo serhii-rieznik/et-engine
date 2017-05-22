@@ -10,6 +10,7 @@
 using namespace et;
 
 float Camera::renderingOriginTransform = 1.0f;
+bool Camera::zeroClipRange = false;
 
 Camera::Camera() :
 	_viewMatrix(1.0f),
@@ -46,16 +47,23 @@ const mat4& Camera::perspectiveProjection(float fov, float aspect, float zNear, 
 
 	_projectionMatrix = identityMatrix;
 
-	float fHalfFOV = 0.5f * _fov;
-	float cotan = std::cos(fHalfFOV) / std::sin(fHalfFOV);
-	float dz = _zFar - _zNear;
+	float halfFovTangent = std::tan(0.5f * _fov);
 
-	_projectionMatrix[0][0] = cotan / aspect;
-	_projectionMatrix[1][1] = renderingOriginTransform * cotan;
-	_projectionMatrix[2][2] = -(_zFar + _zNear) / dz;
-	_projectionMatrix[3][3] =  0.0f;
+	_projectionMatrix[0][0] = 1.0f / (halfFovTangent * aspect);
+	_projectionMatrix[1][1] = renderingOriginTransform / halfFovTangent;
 	_projectionMatrix[2][3] = -1.0f;
-	_projectionMatrix[3][2] = -2.0f * (_zNear * _zFar) / dz;
+	_projectionMatrix[3][3] = 0.0f;
+
+	if (zeroClipRange)
+	{
+		_projectionMatrix[2][2] = zFar / (_zNear - _zFar);
+		_projectionMatrix[3][2] = -(_zFar * _zNear) / (_zFar - _zNear);
+	}
+	else
+	{
+		_projectionMatrix[2][2] = -(_zFar + _zNear) / (_zFar - _zNear);
+		_projectionMatrix[3][2] = -2.0f * (_zFar * _zNear) / (_zFar - _zNear);
+	}
 
 	projectionUpdated();
 	return _projectionMatrix;
@@ -84,17 +92,18 @@ const mat4& Camera::customPerspectiveProjection(const vec2& fullFov, float zNear
 	return _projectionMatrix;
 }
 
-const mat4& Camera::orthogonalProjection(float left, float right, float top, float bottom, float zNear, float zFar)
+const mat4& Camera::orthogonalProjection(float left, float right, float bottom, float top, float zNear, float zFar)
 {
 	_projectionMatrix = identityMatrix;
 
 	_projectionMatrix[0][0] = 2.0f / (right - left);
-	_projectionMatrix[1][1] = 2.0f / (top - bottom);
-	_projectionMatrix[2][2] = -2.0f / (zFar - zNear);
-
-	_projectionMatrix[3][0] = -(right + left) / (right - left);
-	_projectionMatrix[3][1] = -(top + bottom) / (top - bottom);
-	_projectionMatrix[3][2] = -(zFar + zNear) / (zFar - zNear);
+	_projectionMatrix[3][0] = (left + right) / (left - right);
+	
+	_projectionMatrix[1][1] = -2.0f / (top - bottom) * renderingOriginTransform;
+	_projectionMatrix[3][1] = -(top + bottom) / (bottom - top) * renderingOriginTransform;
+	
+	_projectionMatrix[2][2] = (zeroClipRange ? 1.0f : 2.0f) / (zNear - zFar);
+	_projectionMatrix[3][2] = (zNear + (zeroClipRange ? 0.0f : zFar)) / (zNear - zFar);
 
 	projectionUpdated();
 	return _projectionMatrix;

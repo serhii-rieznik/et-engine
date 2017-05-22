@@ -71,6 +71,7 @@ void Drawer::draw()
 		_main.pass->loadSharedVariablesFromLight(_lighting.directional);
 
 		_main.pass->begin(RenderPassBeginInfo::singlePass);
+		_main.pass->pushImageBarrier(_shadowmapProcessor->directionalShadowmap(), ResourceBarrier(TextureState::ShaderResource));
 		for (Mesh::Pointer mesh : _allMeshes)
 		{
 			const mat4& transform = mesh->transform();
@@ -78,11 +79,14 @@ void Drawer::draw()
 			_main.pass->setSharedVariable(ObjectVariable::WorldTransform, transform);
 			_main.pass->setSharedVariable(ObjectVariable::WorldRotationTransform, rotationTransform);
 			for (const RenderBatch::Pointer& rb : mesh->renderBatches())
+			{
 				_main.pass->pushRenderBatch(rb);
+			}
 		}
 		_main.pass->setSharedVariable(ObjectVariable::WorldTransform, identityMatrix);
 		_main.pass->pushRenderBatch(_lighting.environmentBatch);
 
+		_debugDrawer->drawCameraFrustum(_lighting.directional, vec4(10000.0f, 20000.0f, 0.0f, 1.0f));
 		_debugDrawer->drawBoundingBox(_shadowmapProcessor->sceneBoundingBox(), identityMatrix, vec4(10000.0f, 10000.0f, 10000.0f, 1.0f));
 		_debugDrawer->submitBatches(_main.pass);
 
@@ -221,6 +225,12 @@ void Drawer::setEnvironmentMap(const std::string& filename)
 void Drawer::updateBaseProjectionMatrix(const mat4& m)
 {
 	_baseProjectionMatrix = m;
+}
+
+void Drawer::updateLight()
+{
+	options.rebuldEnvironmentProbe = true;
+	_shadowmapProcessor->updateLight(_lighting.directional);
 }
 
 }

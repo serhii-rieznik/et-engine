@@ -73,25 +73,40 @@ void DebugDrawer::drawBoundingBox(const BoundingBox& bbox, const mat4& transform
 		c = transform * c;
 
 	beginRenderBatch();
-	appendLine(corners[0], corners[1], color);
-	appendLine(corners[2], corners[3], color);
-	appendLine(corners[0], corners[2], color);
-	appendLine(corners[1], corners[3], color);
-	appendLine(corners[0 + 4], corners[1 + 4], color);
-	appendLine(corners[2 + 4], corners[3 + 4], color);
-	appendLine(corners[0 + 4], corners[2 + 4], color);
-	appendLine(corners[1 + 4], corners[3 + 4], color);
-	appendLine(corners[0], corners[0 + 4], color);
-	appendLine(corners[1], corners[1 + 4], color);
-	appendLine(corners[2], corners[2 + 4], color);
-	appendLine(corners[3], corners[3 + 4], color);
+	drawBoudingBoxCorners(corners, color);
+	endRenderBatch();
+}
+
+void DebugDrawer::drawViewProjectionMatrix(const mat4& dm, const vec4& color)
+{
+	float zNear = Camera::zeroClipRange ? 0.0f : -1.0f;
+	float zFar = 1.0f;
+	mat4 m = dm.inverted();
+
+	BoundingBox::Corners corners;
+	corners[0] = m * vec3(-1.0f, -1.0f, zNear);
+	corners[1] = m * vec3(+1.0f, -1.0f, zNear);
+	corners[2] = m * vec3(-1.0f, +1.0f, zNear);
+	corners[3] = m * vec3(+1.0f, +1.0f, zNear);
+	corners[4] = m * vec3(-1.0f, -1.0f, zFar);
+	corners[5] = m * vec3(+1.0f, -1.0f, zFar);
+	corners[6] = m * vec3(-1.0f, +1.0f, zFar);
+	corners[7] = m * vec3(+1.0f, +1.0f, zFar);
+
+	beginRenderBatch();
+	drawBoudingBoxCorners(corners, color);
 	endRenderBatch();
 }
 
 void DebugDrawer::drawCameraFrustum(const Camera::Pointer& cam, const vec4& color)
 {
-	const Frustum::Corners& corners = cam->frustum().corners();
 	beginRenderBatch();
+	drawBoudingBoxCorners(cam->frustum().corners(), color);
+	endRenderBatch();
+}
+
+void DebugDrawer::drawBoudingBoxCorners(const BoundingBox::Corners& corners, const vec4& color)
+{
 	appendLine(corners[0], corners[1], color);
 	appendLine(corners[2], corners[3], color);
 	appendLine(corners[0], corners[2], color);
@@ -104,7 +119,6 @@ void DebugDrawer::drawCameraFrustum(const Camera::Pointer& cam, const vec4& colo
 	appendLine(corners[1], corners[1 + 4], color);
 	appendLine(corners[2], corners[2 + 4], color);
 	appendLine(corners[3], corners[3 + 4], color);
-	endRenderBatch();
 }
 
 void DebugDrawer::beginRenderBatch()

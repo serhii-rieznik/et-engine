@@ -12,10 +12,9 @@ namespace et
 namespace s3d
 {
 
-void ShadowmapProcessor::setScene(const Scene::Pointer& scene, const Light::Pointer& light)
+void ShadowmapProcessor::setScene(const Scene::Pointer& scene, Light::Pointer& light)
 {
 	_scene = scene;
-	_light = light;
 
 	Vector<BaseElement::Pointer> meshes = _scene->childrenOfType(s3d::ElementType::Mesh);
 
@@ -31,6 +30,45 @@ void ShadowmapProcessor::setScene(const Scene::Pointer& scene, const Light::Poin
 		_renderables.meshes.emplace_back(mesh);
 	}
 	_sceneBoundingBox = BoundingBox(0.5f * (maxVertex + minVertex), 0.5f * (maxVertex - minVertex));
+	updateLight(light);
+}
+
+void ShadowmapProcessor::updateLight(Light::Pointer& light)
+{
+	_light = light;
+
+	vec3 d = -light->direction();
+	vec3 s = normalize(cross(unitY, d));
+	vec3 u = normalize(cross(d, s));
+
+	mat3 lightViewMatrix;
+	lightViewMatrix[0][0] = s.x; lightViewMatrix[0][1] = u.x; lightViewMatrix[0][2] = -d.x;
+	lightViewMatrix[1][0] = s.y; lightViewMatrix[1][1] = u.y; lightViewMatrix[1][2] = -d.y;
+	lightViewMatrix[2][0] = s.z; lightViewMatrix[2][1] = u.z; lightViewMatrix[2][2] = -d.z;
+
+	BoundingBox::Corners corners;
+	_sceneBoundingBox.calculateCorners(corners);
+
+	vec3 viewMin(std::numeric_limits<float>::max());
+	vec3 viewMax = -viewMin;
+	for (const vec3& c : corners)
+	{
+		vec3 t = lightViewMatrix * c;
+		viewMin = minv(viewMin, t);
+		viewMax = maxv(viewMax, t);
+	}
+	
+	Camera lightCamera;
+	{
+		float projectionOffset = 0.05f * length(viewMax - viewMin);
+		lightCamera.setViewMatrix(mat4(lightViewMatrix));
+		lightCamera.orthogonalProjection(
+			viewMin.x - projectionOffset, viewMax.x + projectionOffset,
+			viewMin.y - projectionOffset, viewMax.y + projectionOffset,
+			-(viewMax.z + projectionOffset), -(viewMin.z - projectionOffset));
+	}
+	light->setViewMatrix(lightCamera.viewMatrix());
+	light->setProjectionMatrix(lightCamera.projectionMatrix());
 }
 
 void ShadowmapProcessor::process(RenderInterface::Pointer& renderer, DrawerOptions& options)
@@ -40,6 +78,7 @@ void ShadowmapProcessor::process(RenderInterface::Pointer& renderer, DrawerOptio
 	_renderables.shadowpass->loadSharedVariablesFromCamera(_light);
 	_renderables.shadowpass->loadSharedVariablesFromLight(_light);
 	_renderables.shadowpass->begin(RenderPassBeginInfo::singlePass);
+	_renderables.shadowpass->pushImageBarrier(_directionalShadowmap, ResourceBarrier(TextureState::DepthRenderTarget));
 	for (Mesh::Pointer mesh : _renderables.meshes)
 	{
 		const mat4& transform = mesh->transform();
@@ -49,6 +88,7 @@ void ShadowmapProcessor::process(RenderInterface::Pointer& renderer, DrawerOptio
 		for (const RenderBatch::Pointer& batch : mesh->renderBatches())
 			_renderables.shadowpass->pushRenderBatch(batch);
 	}
+	_renderables.shadowpass->pushImageBarrier(_directionalShadowmap, ResourceBarrier(TextureState::ShaderResource));
 	_renderables.shadowpass->end();
 	renderer->submitRenderPass(_renderables.shadowpass);
 
@@ -83,6 +123,8 @@ void ShadowmapProcessor::validate(RenderInterface::Pointer& renderer)
 	{
 		RenderPass::ConstructionInfo desc;
 		desc.color[0].enabled = false;
+		desc.depth.loadOperation = FramebufferOperation::Clear;
+		desc.depth.storeOperation = FramebufferOperation::Store;
 		desc.depth.enabled = true;
 		desc.depth.texture = _directionalShadowmap;
 		desc.depth.useDefaultRenderTarget = false;
