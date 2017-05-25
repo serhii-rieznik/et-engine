@@ -97,7 +97,8 @@ struct FSOutput
 
 float sampleShadow(in float3 shadowTexCoord, in float rotationKernel, in float2 shadowmapSize)
 {
-	const float comparisonBias = 0.002;
+	const float radius = 2.0;
+	const float bias = 0.004;
 	const float2 poissonDistribution[8] = 
 	{
 		float2( 0.8528466f,  0.0213828f),
@@ -116,11 +117,11 @@ float sampleShadow(in float3 shadowTexCoord, in float rotationKernel, in float2 
 	float2 scaledUV = shadowTexCoord.xy * 0.5 + 0.5;
 
 	float shadow = 0.0;
-	for (uint i = 0; i < 1; ++i)
+	for (uint i = 0; i < 8; ++i)
 	{
 		float2 o = poissonDistribution[i] / shadowmapSize;
-		float2 r = float2(dot(o, float2(cs, -sn)), dot(o, float2(sn,  cs)));
-		shadow += shadowTexture.SampleCmpLevelZero(shadowSampler, scaledUV + r, shadowTexCoord.z - comparisonBias);
+		float2 r = radius * float2(dot(o, float2(cs, -sn)), dot(o, float2(sn,  cs)));
+		shadow += shadowTexture.SampleCmpLevelZero(shadowSampler, scaledUV + r, shadowTexCoord.z - bias);
 	}
 	return shadow / 8.0;
 }

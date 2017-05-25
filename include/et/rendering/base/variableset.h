@@ -89,7 +89,7 @@ enum class MaterialTexture : uint32_t
 	LastMaterialTexture = EmissiveColor,
 
 	FirstSharedTexture = Shadow,
-	LastSharedTexture = BRDFLookup,
+	LastSharedTexture = Noise,
 };
 
 enum class StorageBuffer

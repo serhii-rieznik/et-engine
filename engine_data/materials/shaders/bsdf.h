@@ -28,9 +28,9 @@ float3 directSpecular(in Surface surface, in BSDF bsdf);
 float3 directLighting(in Surface surface, in BSDF bsdf);
 
 #define NORMALIZATION_SCALE 	INV_PI
-#define MIN_ROUGHNESS 			0.001
+#define MIN_ROUGHNESS 			0.000666666666
 #define MIN_REFLECTANCE 		0.16
-#define MIN_FLOAT				6.10352e-5
+#define MIN_FLOAT				1e-20
 
 Surface buildSurface(in float3 baseColor, in float m, in float r)
 {

@@ -57,7 +57,7 @@ public:
 		{
 			c = t * c;
 			vMin = minv(vMin, c);
-			vMax = maxv(vMin, c);
+			vMax = maxv(vMax, c);
 		}
 		return BoundingBox(0.5f * (vMin + vMax), 0.5f * (vMax - vMin));
 	}
