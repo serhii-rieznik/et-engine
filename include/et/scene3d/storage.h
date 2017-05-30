@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include <et/rendering/base/Material.h>
+#include <et/rendering/base/material.h>
 #include <et/rendering/base/indexarray.h>
 #include <et/rendering/base/vertexstorage.h>
 #include <et/rendering/base/vertexstream.h>

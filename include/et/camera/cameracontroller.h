@@ -20,6 +20,7 @@ public:
 
 public:
 	CameraController(Camera::Pointer cam, bool autoConnectToInput);
+	virtual ~CameraController() { } 
 
 	Camera::Pointer camera()
 	{

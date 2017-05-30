@@ -538,15 +538,15 @@ void Material::initDefaultHeader()
 	{
 		std::string texName = materialTextureToString(static_cast<MaterialTexture>(i));
 		std::string smpName = materialSamplerToString(static_cast<MaterialTexture>(i));
-		texName[0] = toupper(texName[0]);
-		smpName[0] = toupper(smpName[0]);
+		texName[0] = static_cast<char>(toupper(texName[0]));
+		smpName[0] = static_cast<char>(toupper(smpName[0]));
 		printPos += sprintf(buffer + printPos, "#define %sBinding %u\n#define %sBinding %u\n",
 			texName.c_str(), i, smpName.c_str(), i + MaterialSamplerBindingOffset);
 	}
 	for (uint32_t i = static_cast<uint32_t>(StorageBuffer::StorageBuffer0); i < StorageBuffer_max; ++i)
 	{
 		std::string name = storageBufferToString(static_cast<StorageBuffer>(i));
-		name[0] = toupper(name[0]);
+		name[0] = static_cast<char>(toupper(name[0]));
 		printPos += sprintf(buffer + printPos, "#define %sBinding %u\n", name.c_str(), i);
 	}
 	{

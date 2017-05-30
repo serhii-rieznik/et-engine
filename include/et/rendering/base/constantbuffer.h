@@ -28,7 +28,7 @@ public:
 
 public:
 	ConstantBufferEntry(uint32_t off, uint32_t sz, uint8_t* ptr, uint32_t aCl) :
-		_data(ptr), _offset(off), _length(sz), _allocationClass(aCl) { }
+		_data(ptr), _allocationClass(aCl), _offset(off), _length(sz) { }
 
 	uint32_t offset() const
 		{ return _offset; }

@@ -135,7 +135,6 @@
 		5CCB9C6F1E09C84C009FD413 /* vertexdeclaration.h in Headers */ = {isa = PBXBuildFile; fileRef = 5CCB9B051E09C84C009FD413 /* vertexdeclaration.h */; };
 		5CCB9C711E09C84C009FD413 /* vertexstorage.h in Headers */ = {isa = PBXBuildFile; fileRef = 5CCB9B071E09C84C009FD413 /* vertexstorage.h */; };
 		5CCB9C721E09C84C009FD413 /* vertexstream.h in Headers */ = {isa = PBXBuildFile; fileRef = 5CCB9B081E09C84C009FD413 /* vertexstream.h */; };
-		5CCB9C7F1E09C84C009FD413 /* framebuffer.h in Headers */ = {isa = PBXBuildFile; fileRef = 5CCB9B161E09C84C009FD413 /* framebuffer.h */; };
 		5CCB9C801E09C84C009FD413 /* buffer.h in Headers */ = {isa = PBXBuildFile; fileRef = 5CCB9B181E09C84C009FD413 /* buffer.h */; };
 		5CCB9C811E09C84C009FD413 /* pipelinestate.h in Headers */ = {isa = PBXBuildFile; fileRef = 5CCB9B191E09C84C009FD413 /* pipelinestate.h */; };
 		5CCB9C821E09C84C009FD413 /* program.h in Headers */ = {isa = PBXBuildFile; fileRef = 5CCB9B1A1E09C84C009FD413 /* program.h */; };
@@ -430,7 +429,6 @@
 		5CCB9B061E09C84C009FD413 /* vertexstorage.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; fileEncoding = 4; path = vertexstorage.cpp; sourceTree = "<group>"; };
 		5CCB9B071E09C84C009FD413 /* vertexstorage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = vertexstorage.h; sourceTree = "<group>"; };
 		5CCB9B081E09C84C009FD413 /* vertexstream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = vertexstream.h; sourceTree = "<group>"; };
-		5CCB9B161E09C84C009FD413 /* framebuffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = framebuffer.h; sourceTree = "<group>"; };
 		5CCB9B181E09C84C009FD413 /* buffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = buffer.h; sourceTree = "<group>"; };
 		5CCB9B191E09C84C009FD413 /* pipelinestate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = pipelinestate.h; sourceTree = "<group>"; };
 		5CCB9B1A1E09C84C009FD413 /* program.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = program.h; sourceTree = "<group>"; };
@@ -802,7 +800,6 @@
 			isa = PBXGroup;
 			children = (
 				5CCB9AEA1E09C84C009FD413 /* base */,
-				5CCB9B161E09C84C009FD413 /* framebuffer.h */,
 				5CCB9B171E09C84C009FD413 /* interface */,
 				5CCB9B201E09C84C009FD413 /* metal */,
 				5CCB9B351E09C84C009FD413 /* opengl */,
@@ -1156,7 +1153,6 @@
 				5CCB9BBE1E09C84C009FD413 /* dictionary.h in Headers */,
 				5CCB9CC51E09C84C009FD413 /* elementcontainer.h in Headers */,
 				5CCB9BEE1E09C84C009FD413 /* transformable.h in Headers */,
-				5CCB9C7F1E09C84C009FD413 /* framebuffer.h in Headers */,
 				5CCB9BD31E09C84C009FD413 /* notifytimer.h in Headers */,
 				5CCB9B9A1E09C84C009FD413 /* cameracontroller.h in Headers */,
 				5CCB9C251E09C84C009FD413 /* input.h in Headers */,
@@ -1351,12 +1347,14 @@
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
 				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = YES;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"DEBUG=1",
 					"$(inherited)",
 				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
 				GCC_TREAT_INCOMPATIBLE_POINTER_TYPE_WARNINGS_AS_ERRORS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_MISSING_FIELD_INITIALIZERS = YES;
@@ -1411,7 +1409,9 @@
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = YES;
 				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
 				GCC_TREAT_INCOMPATIBLE_POINTER_TYPE_WARNINGS_AS_ERRORS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_MISSING_FIELD_INITIALIZERS = YES;

@@ -58,7 +58,7 @@ void release()
 	rh_local::texturedMaterial.reset(nullptr);
 }
 	
-RenderBatch::Pointer renderhelper::createFullscreenRenderBatch(const Texture::Pointer& texture, Material::Pointer mat)
+RenderBatch::Pointer createFullscreenRenderBatch(const Texture::Pointer& texture, Material::Pointer mat)
 {
 	ET_ASSERT(rh_local::default2DPlane.valid());
 	ET_ASSERT(rh_local::texturedMaterial.valid());

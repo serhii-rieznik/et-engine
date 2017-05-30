@@ -11,39 +11,39 @@
 
 namespace et
 {
-	struct MetalState;
-    struct MetalNativePipelineState;
-	struct MetalNativeEncoder;
-    class MetalRenderer;
-	class MetalPipelineStatePrivate;
-	class MetalPipelineState : public PipelineState
-	{
-	public:
-		ET_DECLARE_POINTER(MetalPipelineState);
+struct MetalState;
+struct MetalNativePipelineState;
+struct MetalNativeEncoder;
+class MetalRenderer;
+class MetalPipelineStatePrivate;
+class MetalPipelineState : public PipelineState
+{
+public:
+	ET_DECLARE_POINTER(MetalPipelineState);
 
-	public:
-		MetalPipelineState(MetalRenderer*, MetalState&);
-		~MetalPipelineState();
+public:
+	MetalPipelineState(MetalRenderer*, MetalState&);
+	~MetalPipelineState();
 
-		void build() override;
-        
-        const MetalNativePipelineState& nativeState() const;
+	void build(const RenderPass::Pointer&) override;
+	
+	const MetalNativePipelineState& nativeState() const;
 
-		void bind(MetalNativeEncoder&, MaterialInstance::Pointer);
+	void bind(MetalNativeEncoder&, MaterialInstance::Pointer);
 
-		template <typename T>
-		void setMaterialVariable(const String& name, const T& t)
-			{ uploadMaterialVariable(name, &t, sizeof(T)); }
+	template <typename T>
+	void setMaterialVariable(const String& name, const T& t)
+		{ uploadMaterialVariable(name, &t, sizeof(T)); }
 
-		template <typename T>
-		void setObjectVariable(const String& name, const T& t)
-			{ uploadObjectVariable(name, &t, sizeof(T)); }
+	template <typename T>
+	void setObjectVariable(const String& name, const T& t)
+		{ uploadObjectVariable(name, &t, sizeof(T)); }
 
-	private:
-		void buildRequiredLayout(VertexDeclaration& decl);
-		void buildReflection();
+private:
+	void buildRequiredLayout(VertexDeclaration& decl);
+	void buildReflection();
 
-	private:
-		ET_DECLARE_PIMPL(MetalPipelineState, 256);
-	};
+private:
+	ET_DECLARE_PIMPL(MetalPipelineState, 256);
+};
 }

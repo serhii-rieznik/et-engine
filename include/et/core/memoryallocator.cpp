@@ -416,7 +416,7 @@ MemoryChunk::MemoryChunk(uint32_t capacity) :
 #if (ET_PLATFORM_APPLE)
 
 	void* allocatedPtr = nullptr;
-	posix_memalign(&allocatedPtr, minimumAllocationSize, capacity);
+	posix_memalign(&allocatedPtr, minimumAllocationSize, totalSize);
 	allocatedMemoryBegin = static_cast<char*>(allocatedPtr);
 
 #elif (ET_PLATFORM_WIN)

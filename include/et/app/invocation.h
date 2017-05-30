@@ -115,7 +115,7 @@ public:
 		(_object->*_method)(_param);
 	}
 
-	void setParameter(A1 p1)
+	void setParameter(const A1& p1)
 	{
 		_param = p1;
 	}
@@ -148,7 +148,7 @@ public:
 		_func(_param);
 	}
 
-	void setParameter(A1 p1)
+	void setParameter(const A1& p1)
 	{
 		_param = p1;
 	}
@@ -180,7 +180,7 @@ public:
 		(_object->*_method)(_p1, _p2);
 	}
 
-	void setParameters(A1 p1, A2 p2)
+	void setParameters(const A1& p1, const A2& p2)
 	{
 		_p1 = p1;
 		_p2 = p2;
@@ -218,7 +218,7 @@ public:
 		_func(_param1, _param2);
 	}
 
-	void setParameters(A1 p1, A2 p2)
+	void setParameters(const A1& p1, const A2& p2)
 	{
 		_param1 = p1; _param2 = p2;
 	}
@@ -296,11 +296,11 @@ public:
 		_target = UniquePtr<PureInvocationTarget>(etCreateObject<DirectInvocation1Target<F, A1>>(func, param));
 	}
 
-	template <typename T, typename A1>
-	void setParameter(A1 p)
+	template <typename T, typename A1, typename RET>
+	void setParameter(const A1& p)
 	{
 		ET_ASSERT(_target.get() != nullptr);
-		(static_cast<Invocation1Target<T, A1>*>(_target.get()))->setParameter(p);
+		(static_cast<Invocation1Target<T, A1, RET>*>(_target.get()))->setParameter(p);
 	}
 };
 
@@ -327,7 +327,7 @@ public:
 	}
 
 	template <typename T, typename A1, typename A2>
-	void setParameters(A1 p1, A2 p2)
+	void setParameters(const A1& p1, const A2& p2)
 	{
 		(static_cast<Invocation2Target<T, A1, A2>*>(_target.get()))->setParameters(p1, p2);
 	}

@@ -30,7 +30,7 @@ public:
 MetalRenderPass::MetalRenderPass(MetalRenderer* renderer, MetalState& state,
     const RenderPass::ConstructionInfo& info) : RenderPass(renderer, info)
 {
-	ET_PIMPL_INIT(MetalRenderPass, state)
+	ET_PIMPL_INIT(MetalRenderPass, state);
     _private->renderer = renderer;
 
 	const vec4& cl0 = info.color[0].clearValue;
@@ -47,10 +47,10 @@ MetalRenderPass::MetalRenderPass(MetalRenderer* renderer, MetalState& state,
 MetalRenderPass::~MetalRenderPass()
 {
 	ET_OBJC_RELEASE(_private->descriptor);
-	ET_PIMPL_FINALIZE(MetalRenderPass)
+	ET_PIMPL_FINALIZE(MetalRenderPass);
 }
 
-void MetalRenderPass::begin()
+void MetalRenderPass::begin(const RenderPassBeginInfo& /* info */)
 {
 	ET_ASSERT(_private->state.mainDrawable != nil);
 
@@ -95,9 +95,26 @@ void MetalRenderPass::pushRenderBatch(const RenderBatch::Pointer&)
 
 void MetalRenderPass::end()
 {
-	_private->renderer->sharedConstantBuffer().flush();
+	// TODO : move to the correct place
+	// _private->renderer->sharedConstantBuffer().flush();
 	[_private->encoder.encoder endEncoding];
 	_private->encoder.encoder = nil;
+}
+
+void MetalRenderPass::pushImageBarrier(const Texture::Pointer&, const ResourceBarrier&)
+{
+}
+
+void MetalRenderPass::copyImage(const Texture::Pointer&, const Texture::Pointer&, const CopyDescriptor&)
+{
+}
+
+void MetalRenderPass::dispatchCompute(const Compute::Pointer&, const vec3i&)
+{
+}
+
+void MetalRenderPass::nextSubpass()
+{
 }
 
 }

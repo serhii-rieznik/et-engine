@@ -171,10 +171,10 @@ inline uint32_t Texture::Description::dataSizeForMipLevel(uint32_t level) const
 
 	uint32_t actualSize = static_cast<uint32_t>(sizeForMipLevel(level).square()) * bpp;
 	uint32_t minimumSize = static_cast<uint32_t>(Texture::minCompressedBlockHeight * Texture::minCompressedBlockWidth) * bpp;
-	uint32_t size = isCompressedTextureFormat(format) ? std::max(static_cast<uint32_t>(Texture::minCompressedBlockDataSize),
+	uint32_t sz = isCompressedTextureFormat(format) ? std::max(static_cast<uint32_t>(Texture::minCompressedBlockDataSize),
 		std::max(minimumSize, actualSize)) : actualSize;
 	
-	return size * layersCount;
+	return sz * layersCount;
 }
 
 }

@@ -78,7 +78,7 @@ VertexAttributeUsage stringToVertexAttributeUsage(const std::string& s)
 	return result;
 }
 
-DataType stringToDataType(const std::string& s, RenderingAPI api)
+DataType stringToDataType(const std::string& s, RenderingAPI /* api */)
 {
 	for (uint32_t i = 0, e = DataType_max; i < e; ++i)
 	{
@@ -136,7 +136,7 @@ std::string vertexAttributeUsageSemantics(VertexAttributeUsage va)
 		intToStr(static_cast<uint32_t>(va));
 }
 
-std::string dataTypeToString(DataType vat, RenderingAPI api)
+std::string dataTypeToString(DataType vat, RenderingAPI /* api */)
 {
 	return (vat < DataType::max) ? dataTypeNames[static_cast<uint32_t>(vat)] : intToStr(static_cast<uint32_t>(vat));
 }

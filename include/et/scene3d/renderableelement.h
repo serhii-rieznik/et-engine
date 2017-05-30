@@ -30,7 +30,7 @@ public:
 	// Helper function - broadcasts material to all batches
 	void setMaterial(const Material::Pointer&);
 
-	virtual RayIntersection intersectsWorldSpaceRay(const ray3d& ray) { return RayIntersection(); }
+	virtual RayIntersection intersectsWorldSpaceRay(const ray3d&) { return RayIntersection(); }
 
 private:
 	Vector<RenderBatch::Pointer> _renderBatches;

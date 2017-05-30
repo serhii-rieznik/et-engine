@@ -23,8 +23,12 @@ public:
 	MetalRenderPass(MetalRenderer*, MetalState&, const RenderPass::ConstructionInfo&);
 	~MetalRenderPass();
 
-	void begin() override;
+	void begin(const RenderPassBeginInfo& info) override;
 	void pushRenderBatch(const RenderBatch::Pointer&) override;
+	void pushImageBarrier(const Texture::Pointer&, const ResourceBarrier&) override;
+	void copyImage(const Texture::Pointer&, const Texture::Pointer&, const CopyDescriptor&) override;
+	void dispatchCompute(const Compute::Pointer&, const vec3i&) override;
+	void nextSubpass() override;
 	void end() override;
 
 private:

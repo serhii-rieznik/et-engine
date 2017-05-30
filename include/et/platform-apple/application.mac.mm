@@ -62,26 +62,23 @@ void Application::initContext()
     (void)ET_OBJC_AUTORELEASE(applicationMenuItem);
     (void)ET_OBJC_AUTORELEASE(quitItem);
     (void)ET_OBJC_AUTORELEASE(applicationMenu);
-}
 
-void Application::freeContext()
-{
-    ApplicationContextFactoryOSX().destroyContext(_context);
-}
-
-void Application::load()
-{
 	_lastQueuedTimeMSec = queryContiniousTimeInMilliSeconds();
 	_runLoop.updateTime(_lastQueuedTimeMSec);
-		
+
 	RenderContextParameters parameters;
 	delegate()->setRenderContextParameters(parameters);
-	
+
 	_renderContext = etCreateObject<RenderContext>(parameters, this);
 	_standardPathResolver.setRenderContext(_renderContext);
 
 	_runLoop.updateTime(_lastQueuedTimeMSec);
 	enterRunLoop();
+}
+
+void Application::freeContext()
+{
+    ApplicationContextFactoryOSX().destroyContext(_context);
 }
 
 Application::~Application()
@@ -207,14 +204,13 @@ void Application::enableRemoteNotifications()
 		andSelector:@selector(handleURLEvent:withReplyEvent:)
 		forEventClass:kInternetEventClass andEventID:kAEGetURL];
 
-	et::application().systemEvent.invokeInMainRunLoop(et::Dictionary());
+	// et::application().systemEvent.invokeInMainRunLoop(et::Dictionary());
 }
 
 - (void)applicationDidFinishLaunching:(NSNotification*)notification
 {
     (void)notification;
-    et::application().load();
-	
+
 	_launchingFinished = YES;
 		
 	for (NSString* eventURL in _scheduledURLs)
@@ -225,6 +221,8 @@ void Application::enableRemoteNotifications()
 	{
 		[self application:[NSApplication sharedApplication] didReceiveRemoteNotification:remoteNotification.userInfo];
 	}
+
+	et::application().initContext();
 }
 
 - (void)applicationWillBecomeActive:(NSNotification*)notification

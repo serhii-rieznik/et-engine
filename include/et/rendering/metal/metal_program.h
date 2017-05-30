@@ -23,7 +23,7 @@ public:
 	MetalProgram(MetalState&);
 	~MetalProgram();
 
-	void build(const std::string& programSource) override;
+	void build(uint32_t stages, const std::string& source) override;
     
 	const MetalNativeProgram& nativeProgram() const;
 	

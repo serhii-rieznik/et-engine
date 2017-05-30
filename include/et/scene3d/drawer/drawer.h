@@ -93,7 +93,7 @@ inline const Texture::Pointer& Drawer::supportTexture(SupportTexture tex)
 
 	default:
 	{
-		ET_ASSERT("Invalid support texture requested");
+		ET_ASSERT(false && "Invalid support texture requested");
 		return _renderer->blackTexture();
 	}
 	}

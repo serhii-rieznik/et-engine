@@ -37,10 +37,10 @@ inline I roundToHighestPowerOfTwo(I x)
 	return x + 1;
 }
 
-template <class I>
-inline bool isPowerOfTwo(I x)
+template <class T>
+inline bool isPowerOfTwo(T x)
 {
-	static_assert(std::is_unsigned<T> && std::is_integral<T>::value, 
+	static_assert(std::is_unsigned<T>::value && std::is_integral<T>::value,
 		"roundToHighestPowerOfTwo works with unsigned integral types only");
 
 	return (x & (x - 1)) == 0;

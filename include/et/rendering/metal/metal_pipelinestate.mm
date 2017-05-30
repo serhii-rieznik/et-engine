@@ -49,7 +49,7 @@ MetalPipelineState::~MetalPipelineState()
     ET_PIMPL_FINALIZE(MetalPipelineState);
 }
 
-void MetalPipelineState::build()
+void MetalPipelineState::build(const RenderPass::Pointer&)
 {
 	/*
 	 * TODO : completely rewrite
@@ -113,7 +113,7 @@ const MetalNativePipelineState& MetalPipelineState::nativeState() const
 }
 
 
-void MetalPipelineState::bind(MetalNativeEncoder& e, MaterialInstance::Pointer material)
+void MetalPipelineState::bind(MetalNativeEncoder&, MaterialInstance::Pointer /* material */)
 {
 	/*
 	 * TODO : completely rewrite
@@ -287,7 +287,7 @@ void MetalPipelineState::buildReflection()
 	*/
 }
 
-void MetalPipelineState::buildRequiredLayout(VertexDeclaration& decl)
+void MetalPipelineState::buildRequiredLayout(VertexDeclaration& /* decl */)
 {
 	/*
 	 * TODO : remove, layout will be in program

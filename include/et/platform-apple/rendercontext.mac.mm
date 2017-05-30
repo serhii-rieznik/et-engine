@@ -36,9 +36,8 @@ CVReturn etDisplayLinkOutputCallback(CVDisplayLinkRef, const CVTimeStamp*, const
 RenderContext::RenderContext(const RenderContextParameters& inParams, Application* application)
 	: _params(inParams)
 {
-	ET_PIMPL_INIT(RenderContext)
+	ET_PIMPL_INIT(RenderContext);
 
-	application->initContext();
 	const auto& ctx = application->context();
 
 	if (application->parameters().renderingAPI == RenderingAPI::Metal)
@@ -77,7 +76,7 @@ RenderContext::RenderContext(const RenderContextParameters& inParams, Applicatio
 RenderContext::~RenderContext()
 {
 	_renderer->shutdown();
-	ET_PIMPL_FINALIZE(RenderContext)
+	ET_PIMPL_FINALIZE(RenderContext);
 }
 
 void RenderContext::init()

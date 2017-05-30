@@ -53,6 +53,9 @@
 #	define ET_KEY_ESCAPE				53
 #	define ET_KEY_BACKSPACE				51
 #	define ET_KEY_SHIFT					56
+#	define ET_KEY_CONTROL				1000000
+#	define ET_KEY_GRAY_PLUS				1000000
+#	define ET_KEY_GRAY_MINUS			1000000
 #
 #	define ET_KEY_LEFT					123
 #	define ET_KEY_RIGHT					124
@@ -64,6 +67,12 @@
 #	define ET_KEY_S						1
 #	define ET_KEY_D						2
 #	define ET_KEY_H						4
+#
+#	define ET_KEY_1						10000000
+#	define ET_KEY_2						10000000
+#	define ET_KEY_3						10000000
+#	define ET_KEY_4						10000000
+#
 #
 #elif (ET_PLATFORM_WIN)
 #

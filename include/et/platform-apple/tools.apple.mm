@@ -368,18 +368,6 @@ std::string et::bundleVersion()
 	return versionString == nil ? emptyString : std::string([versionString UTF8String]);
 }
 
-et::vec2i et::nativeScreenSize()
-{
-	NSSize size = [[NSScreen mainScreen] frame].size;
-	return vec2i(static_cast<int32_t>(size.width), static_cast<int32_t>(size.height));
-}
-
-et::vec2i et::availableScreenSize()
-{
-	auto size = [[NSScreen mainScreen] visibleFrame].size;
-	return vec2i(static_cast<int32_t>(size.width), static_cast<int32_t>(size.height));
-}
-
 et::Screen nsScreenToScreen(NSScreen* screen)
 {
 	NSRect frame = [screen frame];

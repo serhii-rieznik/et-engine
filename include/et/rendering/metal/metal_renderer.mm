@@ -35,10 +35,10 @@ MetalRenderer::MetalRenderer(RenderContext* rc)
 
 MetalRenderer::~MetalRenderer()
 {
-	ET_PIMPL_FINALIZE(MetalRenderer)
+	ET_PIMPL_FINALIZE(MetalRenderer);
 }
 
-void MetalRenderer::init(const RenderContextParameters& params)
+void MetalRenderer::init(const RenderContextParameters& /* params */)
 {
 	_private->metal.device = MTLCreateSystemDefaultDevice();
 	_private->metal.queue = [_private->metal.device newCommandQueue];
@@ -52,7 +52,7 @@ void MetalRenderer::init(const RenderContextParameters& params)
 	application().context().objects[3] = (__bridge void*)(_private->metal.device);
 	application().context().objects[4] = (__bridge void*)_private->metal.layer;
 
-	sharedConstantBuffer().init(this);
+	sharedConstantBuffer().init(this, ConstantBufferStaticAllocation | ConstantBufferDynamicAllocation);
 	sharedMaterialLibrary().init(this);
 }
 
@@ -63,6 +63,11 @@ void MetalRenderer::shutdown()
 
 	ET_OBJC_RELEASE(_private->metal.queue);
 	ET_OBJC_RELEASE(_private->metal.device);
+}
+
+void MetalRenderer::destroy()
+{
+
 }
 
 void MetalRenderer::begin()
@@ -109,10 +114,25 @@ void MetalRenderer::submitRenderPass(RenderPass::Pointer)
 	
 }
 
+void MetalRenderer::resize(const vec2i&)
+{
+	ET_FAIL("Not implemented");
+}
+
+uint32_t MetalRenderer::frameIndex() const
+{
+	return 0;
+}
+
+uint32_t MetalRenderer::frameNumber() const
+{
+	return 0;
+}
+
 /*
  * Buffers
  */
-Buffer::Pointer MetalRenderer::createBuffer(const std::string& name, const Buffer::Description& desc)
+Buffer::Pointer MetalRenderer::createBuffer(const std::string& /* name */, const Buffer::Description& desc)
 {
 	return MetalBuffer::Pointer::create(_private->metal, desc);
 }
@@ -120,7 +140,7 @@ Buffer::Pointer MetalRenderer::createBuffer(const std::string& name, const Buffe
 /*
  * Textures
  */
-Texture::Pointer MetalRenderer::createTexture(TextureDescription::Pointer desc)
+Texture::Pointer MetalRenderer::createTexture(const TextureDescription::Pointer& desc)
 {
     return MetalTexture::Pointer::create(_private->metal, desc);
 }
@@ -133,17 +153,17 @@ TextureSet::Pointer MetalRenderer::createTextureSet(const TextureSet::Descriptio
 /*
  * Programs
  */
-Program::Pointer MetalRenderer::createProgram(const std::string& source)
+Program::Pointer MetalRenderer::createProgram(uint32_t stages, const std::string& source)
 {
     MetalProgram::Pointer program = MetalProgram::Pointer::create(_private->metal);
-	program->build(source);
+	program->build(stages, source);
     return program;
 }
 
 /*
  * Pipeline state
  */
-PipelineState::Pointer MetalRenderer::acquirePipelineState(const RenderPass::Pointer&,
+PipelineState::Pointer MetalRenderer::acquireGraphicsPipeline(const RenderPass::Pointer&,
 	const Material::Pointer&, const VertexStream::Pointer&)
 {
 	return PipelineState::Pointer();
@@ -173,17 +193,17 @@ PipelineState::Pointer MetalRenderer::acquirePipelineState(const RenderPass::Poi
 	// */
 }
 
+Compute::Pointer MetalRenderer::createCompute(const Material::Pointer&)
+{
+	return Compute::Pointer();
+}
+
 /*
  * Sampler
  */
 Sampler::Pointer MetalRenderer::createSampler(const Sampler::Description& desc)
 {
 	return MetalSampler::Pointer::create(_private->metal, desc);
-}
-
-void MetalRenderer::resize(const vec2i&)
-{
-	ET_FAIL("Not implemented");
 }
 
 }

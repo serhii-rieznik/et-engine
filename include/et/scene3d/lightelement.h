@@ -28,7 +28,7 @@ public:
 	Light::Pointer& light() { return _light; }
 	const Light::Pointer& light() const { return _light; }
 
-	BaseElement* LightElement::duplicate() override;
+	BaseElement* duplicate() override;
 
 private:
 	Light::Pointer _light;

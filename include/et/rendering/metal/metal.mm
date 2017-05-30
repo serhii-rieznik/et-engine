@@ -19,7 +19,6 @@ MTLTextureType textureTargetValue(TextureTarget value, uint32_t samples)
         {TextureTarget::Texture_2D, MTLTextureType2D},
         {TextureTarget::Texture_Cube, MTLTextureTypeCube},
         {TextureTarget::Texture_2D_Array, MTLTextureType2DArray},
-        {TextureTarget::Texture_Rectangle, MTLTextureType(-1)},
     };
     
     if (samples > 1)
@@ -37,7 +36,8 @@ MTLPixelFormat textureFormatValue(TextureFormat value)
     static const std::map<TextureFormat, MTLPixelFormat> _map =
     {
 		{TextureFormat::R8, MTLPixelFormatR8Unorm},
-        {TextureFormat::RGBA8, MTLPixelFormatRGBA8Unorm},
+		{TextureFormat::RGBA8, MTLPixelFormatRGBA8Unorm},
+		{TextureFormat::RGBA16, MTLPixelFormatRGBA16Unorm},
         {TextureFormat::RGBA16F, MTLPixelFormatRGBA16Float},
         {TextureFormat::RGBA32F, MTLPixelFormatRGBA32Float},
         // TODO : add more

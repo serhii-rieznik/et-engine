@@ -5,7 +5,7 @@
  *
  */
 
-#include <et/platform/platformtools.h>
+#include <et/core/et.h>
 
 #if (ET_PLATFORM_MAC)
 
@@ -19,8 +19,7 @@ typedef void (^filePickerCallback)(__strong NSString* path);
 	NSArray* _allowedExtensions;
 	filePickerCallback _callback;
 }
-- (instancetype)initWithDefaultName:(NSString*)name fileTypes:(NSArray*)fileTypes
-						   callback:(filePickerCallback)cb;
+- (instancetype)initWithDefaultName:(NSString*)name fileTypes:(NSArray*)fileTypes callback:(filePickerCallback)cb;
 - (void)openFile;
 - (void)saveFile;
 @end

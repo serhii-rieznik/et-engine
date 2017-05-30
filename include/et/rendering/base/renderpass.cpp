@@ -29,8 +29,8 @@ RenderPass::ConstructionInfo RenderPass::renderTargetPassInfo(const std::string&
 	return result;
 }
 
-RenderPass::RenderPass(RenderInterface* renderer, const ConstructionInfo& info) :
-	_renderer(renderer), _info(info)
+RenderPass::RenderPass(RenderInterface*, const ConstructionInfo& info) :
+	_info(info)
 {
 }
 

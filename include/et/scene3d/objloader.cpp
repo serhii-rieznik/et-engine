@@ -9,7 +9,7 @@
 #include <et/core/conversion.h>
 #include <et/core/filesystem.h>
 #include <et/rendering/base/primitives.h>
-#include <et/rendering/base/Material.h>
+#include <et/rendering/base/material.h>
 #include <et/scene3d/objloader.h>
 
 using namespace et;

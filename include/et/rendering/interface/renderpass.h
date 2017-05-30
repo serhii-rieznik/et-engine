@@ -114,7 +114,6 @@ protected:
 	const VariablesHolder& sharedVariables() const { return _sharedVariables; }
 
 private:
-	RenderInterface* _renderer = nullptr;
 	ConstructionInfo _info;
 	SharedTexturesSet _sharedTextures;
 	VariablesHolder _sharedVariables;

@@ -29,6 +29,9 @@ public:
 	void setImageData(const BinaryDataStorage&) override;
 	void updateRegion(const vec2i& pos, const vec2i& size, const BinaryDataStorage&) override;
 
+	uint8_t* map(uint32_t level, uint32_t face, uint32_t options) override;
+	void unmap() override;
+
 private:
 	ET_DECLARE_PIMPL(MetalTexture, 64);
 };

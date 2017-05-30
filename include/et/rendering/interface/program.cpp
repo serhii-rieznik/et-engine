@@ -83,6 +83,9 @@ void Program::Reflection::serialize(std::ostream& file) const
 		serializeUInt32(file, materialVariables[i].enabled);
 	}
 
+	/*
+	 * TODO : serialize
+	 *
 	auto serializeMap = [&file](const UnorderedMap<std::string, uint32_t>& m) {
 		serializeUInt32(file, static_cast<uint32_t>(m.size()));
 		for (const auto& i : m)
@@ -91,9 +94,6 @@ void Program::Reflection::serialize(std::ostream& file) const
 			serializeUInt32(file, i.second);
 		}
 	};
-	/*
-	 * TODO : serialize
-	 *
 	serializeMap(textures.vertexTextures);
 	serializeMap(textures.vertexSamplers);
 	serializeMap(textures.fragmentTextures);
@@ -131,6 +131,9 @@ bool Program::Reflection::deserialize(std::istream& file)
 		materialVariables[i].enabled     = deserializeUInt32(file);
 	}
 
+	/*
+	 * TODO : deserialize
+	 *
 	auto deserializeMap = [&file](UnorderedMap<std::string, uint32_t>& m) {
 		uint32_t size = deserializeUInt32(file);
 		for (uint32_t i = 0; i < size; ++i)
@@ -141,9 +144,6 @@ bool Program::Reflection::deserialize(std::istream& file)
 		}
 	};
 	
-	/*
-	 * TODO : deserialize
-	 *
 	deserializeMap(textures.vertexTextures);
 	deserializeMap(textures.vertexSamplers);
 	deserializeMap(textures.fragmentTextures);

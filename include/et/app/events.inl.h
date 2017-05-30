@@ -54,7 +54,7 @@ void Event0::disconnect(R* receiver)
  * Event1Connection
  */
 
-template <typename ReceiverType, typename ArgType, typename ReturnType = void>
+template <typename ReceiverType, typename ArgType, typename ReturnType>
 Event1Connection<ReceiverType, ArgType, ReturnType>::Event1Connection(ReceiverType* receiver,
 	ReturnType(ReceiverType::*func)(ArgType)) : _receiverMethod(func), _receiver(receiver)
 {

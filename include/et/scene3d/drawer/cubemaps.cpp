@@ -227,9 +227,9 @@ void CubemapProcessor::drawDebug(RenderInterface::Pointer& renderer, const Drawe
 		{
 			pos.y = 0.0f;
 			_cubemapDebugBatch->material()->setTexture(MaterialTexture::BaseColor, _tex[i]);
-			for (uint32_t i = 0; i < CubemapLevels; ++i)
+			for (uint32_t j = 0; j < CubemapLevels; ++j)
 			{
-				_cubemapDebugBatch->material()->setFloat(MaterialVariable::ExtraParameters, static_cast<float>(i));
+				_cubemapDebugBatch->material()->setFloat(MaterialVariable::ExtraParameters, static_cast<float>(j));
 				_cubemapDebugPass->setSharedVariable(ObjectVariable::WorldTransform, fullscreenBatchTransform(vp, pos, vec2(dx, dy)));
 				_cubemapDebugPass->pushRenderBatch(_cubemapDebugBatch);
 				pos.y += dy;

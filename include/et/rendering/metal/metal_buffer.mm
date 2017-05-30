@@ -18,7 +18,7 @@ public:
 	std::atomic<bool> mapped{false};
 };
 
-MetalBuffer::MetalBuffer(MetalState& mtl, const Description& desc)
+MetalBuffer::MetalBuffer(MetalState& /* mtl */, const Description& /* desc */)
 {
 	ET_PIMPL_INIT(MetalBuffer);
 	// _private->buffer = [mtl.device newBuffer]
@@ -29,14 +29,14 @@ MetalBuffer::~MetalBuffer()
 	ET_PIMPL_FINALIZE(MetalBuffer);
 }
 
-uint8_t* MetalBuffer::map(uint32_t begin, uint32_t length)
+uint8_t* MetalBuffer::map(uint32_t begin, uint32_t /* length */)
 {
 	uint8_t* ptr = reinterpret_cast<uint8_t*>([_private->buffer contents]) + begin;
 	_private->mapped = true;
 	return ptr;
 }
 
-void MetalBuffer::modifyRange(uint64_t begin, uint64_t length)
+void MetalBuffer::modifyRange(uint64_t /* begin */, uint64_t /* length */)
 {
 
 }
@@ -51,12 +51,12 @@ bool MetalBuffer::mapped() const
 	return _private->mapped;
 }
 
-void MetalBuffer::updateData(uint32_t offset, const BinaryDataStorage&) 
+void MetalBuffer::updateData(uint32_t /* offset */, const BinaryDataStorage&)
 {
 
 }
 
-void MetalBuffer::transferData(Buffer::Pointer destination)
+void MetalBuffer::transferData(Buffer::Pointer /* destination */)
 {
 
 }

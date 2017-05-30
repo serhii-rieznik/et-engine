@@ -22,15 +22,15 @@ public:
 
 MetalProgram::MetalProgram(MetalState& state)
 {
-    ET_PIMPL_INIT(MetalProgram, state)
+    ET_PIMPL_INIT(MetalProgram, state);
 }
 
 MetalProgram::~MetalProgram()
 {
-	ET_PIMPL_FINALIZE(MetalProgram)
+	ET_PIMPL_FINALIZE(MetalProgram);
 }
     
-void MetalProgram::build(const std::string& source)
+void MetalProgram::build(uint32_t /* stages */, const std::string& source)
 {
 	NSError* error = nil;
 	id<MTLLibrary> lib = [_private->state.device newLibraryWithSource:[NSString stringWithUTF8String:source.c_str()] options:nil error:&error];
@@ -65,8 +65,8 @@ void MetalProgram::build(const std::string& source)
 		log::error("Shader source code does not contain all required functions:\n%s", source.c_str());
 	}
 
-	ET_ASSERT(_private->program.vertexFunction != nil);
-	ET_ASSERT(_private->program.fragmentFunction != nil);
+	// ET_ASSERT(_private->program.vertexFunction != nil);
+	// ET_ASSERT(_private->program.fragmentFunction != nil);
 
 	ET_OBJC_RELEASE(lib);
 }
