@@ -21,7 +21,16 @@ namespace rt
 class ET_ALIGNED(16) Scene
 {
 public:
-	void build(const Vector<RenderBatch::Pointer>&, const Camera::Pointer&);
+	struct GeometryEntry
+	{
+		RenderBatch::Pointer batch;
+		mat4 transformation;
+		GeometryEntry(const RenderBatch::Pointer& rb, const mat4& t)
+			: batch(rb), transformation(t) { }
+	};
+
+public:
+	void build(const Vector<GeometryEntry>&, const Camera::Pointer&);
 
 public:
 	Options options;

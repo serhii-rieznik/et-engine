@@ -215,6 +215,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		5CB4E0C81EDE065E00C9DCAA /* null_renderer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = null_renderer.h; sourceTree = "<group>"; };
 		5CCB9A111E09C84C009FD413 /* appevironment.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = appevironment.h; sourceTree = "<group>"; };
 		5CCB9A121E09C84C009FD413 /* application.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; fileEncoding = 4; path = application.cpp; sourceTree = "<group>"; };
 		5CCB9A131E09C84C009FD413 /* application.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = application.h; sourceTree = "<group>"; };
@@ -532,6 +533,14 @@
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
+		5CB4E0BF1EDE065E00C9DCAA /* null */ = {
+			isa = PBXGroup;
+			children = (
+				5CB4E0C81EDE065E00C9DCAA /* null_renderer.h */,
+			);
+			path = null;
+			sourceTree = "<group>";
+		};
 		5CCB9A101E09C84C009FD413 /* app */ = {
 			isa = PBXGroup;
 			children = (
@@ -802,6 +811,7 @@
 				5CCB9AEA1E09C84C009FD413 /* base */,
 				5CCB9B171E09C84C009FD413 /* interface */,
 				5CCB9B201E09C84C009FD413 /* metal */,
+				5CB4E0BF1EDE065E00C9DCAA /* null */,
 				5CCB9B351E09C84C009FD413 /* opengl */,
 				5CCB9B3B1E09C84C009FD413 /* rendercontext.h */,
 				5CCB9B3C1E09C84C009FD413 /* rendercontextparams.h */,

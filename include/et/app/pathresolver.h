@@ -32,7 +32,7 @@ namespace et
 		ET_DECLARE_POINTER(StandardPathResolver);
 		
 	public:
-		void setRenderContext(RenderContext*);
+		void init();
 		
 		std::string resolveFilePath(const std::string&);
 		std::string resolveFolderPath(const std::string&);
@@ -51,7 +51,6 @@ namespace et
 		void validateCaches();
 		
 	private:
-		RenderContext* _rc = nullptr;
 		std::deque<std::string> _searchPath;
 		
 		std::string _cachedLang;

@@ -27,17 +27,17 @@ public:
 
 	uint_fast32_t retain()
 	{
-#if (ET_DEBUG)
+	#if (ET_DEBUG)
 		if (_trackRetains) debug::debugBreak();
-#endif
+	#endif
 		return ++_retainCount;
 	}
 
 	uint_fast32_t release()
 	{
-#if (ET_DEBUG)
+	#if (ET_DEBUG)
 		if (_trackRetains) debug::debugBreak();
-#endif
+	#endif
 		return --_retainCount;
 	}
 
@@ -46,12 +46,11 @@ public:
 		return _retainCount.load();
 	}
 
-	void enableRetainCycleTracking(bool enabled)
-	{
 #if (ET_DEBUG)
-		_trackRetains = enabled ? 1 : 0;
+	void enableRetainCycleTracking(bool enabled) { _trackRetains = enabled ? 1 : 0; }
+#else
+	void enableRetainCycleTracking(bool) { }
 #endif
-	}
 
 private:
 	std::atomic_uint_fast32_t _retainCount{ 0 };

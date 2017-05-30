@@ -225,7 +225,7 @@ float BSDFSample::pdf()
 		h.normalize();
 		float cTh = std::min(1.0f, n.dot(h));
 		float sTh = std::sqrt(1.0f - cTh * cTh);
-		return normalDistribution(alpha * alpha, cTh) * cTh;
+		return normalDistribution(alpha * alpha, cTh) * sTh;
 	}
 	else if (cls == BSDFSample::Class::Transmittance)
 	{

@@ -65,12 +65,12 @@ void Application::initContext()
 
 	_lastQueuedTimeMSec = queryContiniousTimeInMilliSeconds();
 	_runLoop.updateTime(_lastQueuedTimeMSec);
+	_standardPathResolver.init();
 
 	RenderContextParameters parameters;
 	delegate()->setRenderContextParameters(parameters);
 
 	_renderContext = etCreateObject<RenderContext>(parameters, this);
-	_standardPathResolver.setRenderContext(_renderContext);
 
 	_runLoop.updateTime(_lastQueuedTimeMSec);
 	enterRunLoop();
@@ -83,6 +83,9 @@ void Application::freeContext()
 
 Application::~Application()
 {
+	_backgroundThread.stop();
+	_backgroundThread.join();
+	
 	platformFinalize();
     freeContext();
 }
@@ -94,8 +97,6 @@ void Application::quit(int code)
 	exitRunLoop();
 	
 	_renderContext->shutdown();
-	_backgroundThread.stop();
-	_backgroundThread.join();
 
 	[[NSApplication sharedApplication] performSelectorOnMainThread:@selector(terminate:) withObject:nil waitUntilDone:YES];
 	(void)code;

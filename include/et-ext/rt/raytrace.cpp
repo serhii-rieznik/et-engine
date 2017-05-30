@@ -31,6 +31,7 @@ public:
 	void visualizeSamplerThreadFunction(uint32_t index);
 
 	void emitWorkerThreads();
+	void waitForCompletion();
 	void stopWorkerThreads();
 
 	void buildScene(const s3d::Scene::Pointer&);	
@@ -94,7 +95,7 @@ Raytrace::~Raytrace()
 
 void Raytrace::perform(s3d::Scene::Pointer scene, const vec2i& dimension)
 {
-	_private->camera.getValuesFromCamera(scene->mainCamera().reference());
+	_private->camera.getValuesFromCamera(scene->renderCamera().reference());
 
 	_private->viewportSize = dimension;
 	_private->buildScene(scene);
@@ -103,25 +104,19 @@ void Raytrace::perform(s3d::Scene::Pointer scene, const vec2i& dimension)
 	ET_ASSERT(_private->viewportSize.y > 0);
 
 	_private->buildRegions(vec2i(static_cast<int>(_private->scene.options.renderRegionSize)));
+	_private->emitWorkerThreads();
+}
 
-	if (_private->scene.options.method == RaytraceMethod::BackwardPathTracing)
-	{
-		Invocation([this]()
-		{
-			_private->estimateRegionsOrder();
-		}).invokeInBackground();
-	}
-	else
-	{
-		_private->emitWorkerThreads();
-	}
+void Raytrace::waitForCompletion()
+{
+	_private->waitForCompletion();
 }
 
 vec4 Raytrace::performAtPoint(s3d::Scene::Pointer scene, const vec2i& dimension, const vec2i& pixel)
 {
 	_private->stopWorkerThreads();
 
-	_private->camera.getValuesFromCamera(scene->mainCamera().reference());
+	_private->camera.getValuesFromCamera(scene->renderCamera().reference());
 	_private->viewportSize = dimension;
 	_private->buildScene(scene);
 
@@ -213,27 +208,31 @@ void RaytracePrivate::emitWorkerThreads()
 	}
 }
 
-void RaytracePrivate::stopWorkerThreads()
+void RaytracePrivate::waitForCompletion()
 {
-	running = false;
 	for (auto& t : workerThreads)
 		t.join();
 	workerThreads.clear();
 }
 
+void RaytracePrivate::stopWorkerThreads()
+{
+	running = false;
+	waitForCompletion();
+}
+
 void RaytracePrivate::buildScene(const s3d::Scene::Pointer& input)
 {
-	Vector<RenderBatch::Pointer> batches;
-	batches.reserve(256);
+	Vector<Scene::GeometryEntry> geometry;
+	geometry.reserve(256);
 
 	auto meshes = input->childrenOfType(s3d::ElementType::Mesh);
 	for (s3d::Mesh::Pointer mesh : meshes)
 	{
-		mesh->prepareRenderBatches();
-		batches.insert(batches.end(), mesh->renderBatches().begin(), mesh->renderBatches().end());
+		for (const RenderBatch::Pointer& rb : mesh->renderBatches())
+			geometry.emplace_back(rb, mesh->transform());
 	}
-	
-	scene.build(batches, input->mainCamera());
+	scene.build(geometry, input->renderCamera());
 }
 
 void RaytracePrivate::buildRegions(const vec2i& aSize)
@@ -647,13 +646,13 @@ void RaytracePrivate::backwardPathTraceThreadFunction(uint32_t threadId)
 		}
 
 		elapsedTime += queryContiniousTimeInMilliSeconds() - runTime;
-		/*
-		 float averageTime = static_cast<float>(elapsedTime) / static_cast<float>(1000 * sampledRegions);
-		 auto actualElapsed = queryContiniousTimeInMilliSeconds() - startTime;
-		 log::info("Elapsed: %s, estimated: %s",
-		 floatToTimeStr(static_cast<float>(actualElapsed) / 1000.f, false).c_str(),
-		 floatToTimeStr(averageTime * static_cast<float>(regions.size() - sampledRegions), false).c_str());
-		 */
+		//*
+		float averageTime = static_cast<float>(elapsedTime) / static_cast<float>(1000 * sampledRegions);
+		auto actualElapsed = queryContiniousTimeInMilliSeconds() - startTime;
+		log::info("Elapsed: %s, estimated: %s",
+				  floatToTimeStr(static_cast<float>(actualElapsed) / 1000.f, false).c_str(),
+				  floatToTimeStr(averageTime * static_cast<float>(regions.size() - sampledRegions), false).c_str());
+		// */
 	}
 
 	--threadCounter;

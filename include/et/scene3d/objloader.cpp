@@ -133,7 +133,7 @@ void getLine(std::ifstream& stream, std::string& line);
  */
 
 OBJLoader::OBJLoader(const std::string& inFile, uint32_t options) :
-	inputFileName(application().resolveFileName(inFile).c_str()),
+	inputFileName(inFile.c_str()),
 	inputFile(inputFileName.c_str()), _loadOptions(options)
 {
 	inputFilePath = getFilePath(inputFileName);
@@ -355,15 +355,6 @@ s3d::ElementContainer::Pointer OBJLoader::load(et::RenderInterface::Pointer ren,
 	_vertices.reserve(1024);
 	_normals.reserve(1024);
 	_texCoords.reserve(1024);
-
-	TextureDescription::Pointer nrmDesc = TextureDescription::Pointer::create();
-	nrmDesc->size = vec2i(4, 4);
-	nrmDesc->format = TextureFormat::RGBA8;
-	nrmDesc->data.resize(nrmDesc->size.square() * 4);
-	vec4ub* nrmData = reinterpret_cast<vec4ub*>(nrmDesc->data.binary());
-	for (uint32_t i = 0; i < 16; ++i)
-		nrmData[i] = vec4ub(127, 127, 255, 255);
-	_defaultNormal = ren->createTexture(nrmDesc);
 
 	loadData(cache);
 	
@@ -902,9 +893,6 @@ s3d::ElementContainer::Pointer OBJLoader::generateVertexBuffers(s3d::Storage& st
 	{
 		s3d::Mesh::Pointer mesh = Mesh::Pointer::create(i.name, result.pointer());
 		mesh->setTranslation(i.center);
-
-		if (i.material->texture(MaterialTexture::Normal).invalid())
-			i.material->setTexture(MaterialTexture::Normal, _defaultNormal);
 
 		auto rb = RenderBatch::Pointer::create(i.material, vao, i.start, i.count);
 		rb->setVertexStorage(_vertexData);

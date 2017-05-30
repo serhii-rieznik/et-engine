@@ -14,6 +14,7 @@ enum class RenderingAPI : uint32_t
 {
 	Metal,
 	Vulkan,
+	Null,
 	
 	Count
 };

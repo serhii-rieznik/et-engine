@@ -13,6 +13,12 @@ namespace et
 
 uint32_t randomInteger(uint32_t limit);
 
+struct NullApplicationDelegate : IApplicationDelegate {
+	ApplicationIdentifier applicationIdentifier() const override {
+		return ApplicationIdentifier("com.et.app", "et-app", "et");
+	}
+};
+
 Application::Application()
 {
 	sharedObjectFactory();
@@ -35,7 +41,10 @@ IApplicationDelegate* Application::delegate()
 	if (_delegate == nullptr)
 	{
 		_delegate = initApplicationDelegate();
-		ET_ASSERT(_delegate);
+
+		if (_delegate == nullptr)
+			_delegate = etCreateObject<NullApplicationDelegate>();
+
 		_identifier = _delegate->applicationIdentifier();
 	}
     

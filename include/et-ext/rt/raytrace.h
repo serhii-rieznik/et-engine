@@ -43,6 +43,7 @@ public:
 	void setOptions(const Options&);
 	
 	void renderSpacePartitioning();
+	void waitForCompletion();
 	
 	ET_DECLARE_EVENT0(renderFinished);
 

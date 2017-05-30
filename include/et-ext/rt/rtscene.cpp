@@ -17,7 +17,7 @@ inline float4 gammaCorrectedInput(const vec4& c)
 	return float4(std::pow(c.x, 2.2f), std::pow(c.y, 2.2f), std::pow(c.z, 2.2f), 1.0f);
 }
 
-void Scene::build(const Vector<RenderBatch::Pointer>& batches, const Camera::Pointer& camera)
+void Scene::build(const Vector<GeometryEntry>& geometry, const Camera::Pointer& camera)
 {
 	materials.clear();
 	emitters.clear();
@@ -25,7 +25,7 @@ void Scene::build(const Vector<RenderBatch::Pointer>& batches, const Camera::Poi
 	TriangleList triangles;
 	triangles.reserve(0xffff);
 
-	auto  materialIndexWithName = [this](const std::string& name) -> index
+	auto materialIndexWithName = [this](const std::string& name) -> index
 	{
 		for (size_t i = 0, e = materials.size(); i < e; ++i)
 		{
@@ -35,16 +35,16 @@ void Scene::build(const Vector<RenderBatch::Pointer>& batches, const Camera::Poi
 		return InvalidIndex;
 	};
 
-	for (const auto& rb : batches)
+	for (const GeometryEntry& geo : geometry)
 	{
-		et::Material::Pointer batchMaterial = rb->material();
+		et::Material::Pointer batchMaterial = geo.batch->material();
 
 		index materialIndex = materialIndexWithName(batchMaterial->name());
 		if (materialIndex == InvalidIndex)
 		{
-			float alpha = clamp(batchMaterial->getFloat(MaterialParameter::RoughnessScale), 0.0f, 1.0f);
-			float metallness = clamp(batchMaterial->getFloat(MaterialParameter::MetallnessScale), 0.0f, 1.0f);
-			float eta = batchMaterial->getFloat(MaterialParameter::IndexOfRefraction);
+			float alpha = clamp(batchMaterial->getFloat(MaterialVariable::RoughnessScale), 0.0f, 1.0f);
+			float metallness = clamp(batchMaterial->getFloat(MaterialVariable::MetallnessScale), 0.0f, 1.0f);
+			float eta = batchMaterial->getFloat(MaterialVariable::IndexOfRefraction);
 
 			Material::Class cls = Material::Class::Diffuse;
 			if (metallness == 1.0f)
@@ -67,21 +67,21 @@ void Scene::build(const Vector<RenderBatch::Pointer>& batches, const Camera::Poi
 			auto& mat = materials.back();
 
 			mat.name = batchMaterial->name();
-			mat.diffuse = gammaCorrectedInput(batchMaterial->getVector(MaterialParameter::BaseColorScale));
-			mat.specular = gammaCorrectedInput(batchMaterial->getVector(MaterialParameter::BaseColorScale));
-			mat.emissive = float4(batchMaterial->getVector(MaterialParameter::EmissiveColor));
+			mat.diffuse = gammaCorrectedInput(batchMaterial->getVector(MaterialVariable::DiffuseReflectance));
+			mat.specular = gammaCorrectedInput(batchMaterial->getVector(MaterialVariable::SpecularReflectance));
+			mat.emissive = float4(batchMaterial->getVector(MaterialVariable::EmissiveColor));
 			mat.roughness = clamp(std::pow(alpha, 4.0f), 0.001f, 1.0f);
 			mat.metallness = metallness;
 			mat.ior = eta;
 		}
 
-		VertexStorage::Pointer vs = rb->vertexStorage();
+		VertexStorage::Pointer vs = geo.batch->vertexStorage();
 		ET_ASSERT(vs.valid());
 
-		IndexArray::Pointer ia = rb->indexArray();
+		IndexArray::Pointer ia = geo.batch->indexArray();
 		ET_ASSERT(ia.valid());
 
-		triangles.reserve(triangles.size() + rb->numIndexes());
+		triangles.reserve(triangles.size() + geo.batch->numIndexes());
 
 		const auto pos = vs->accessData<DataType::Vec3>(VertexAttributeUsage::Position, 0);
 		const auto nrm = vs->accessData<DataType::Vec3>(VertexAttributeUsage::Normal, 0);
@@ -95,12 +95,12 @@ void Scene::build(const Vector<RenderBatch::Pointer>& batches, const Camera::Poi
 
 		index firstTriange = static_cast<int>(triangles.size());
 
-		const mat4& t = rb->transformation();
-		for (uint32_t i = 0; i < rb->numIndexes(); i += 3)
+		const mat4& t = geo.transformation;
+		for (uint32_t i = 0; i < geo.batch->numIndexes(); i += 3)
 		{
-			uint32_t i0 = ia->getIndex(rb->firstIndex() + i + 0);
-			uint32_t i1 = ia->getIndex(rb->firstIndex() + i + 1);
-			uint32_t i2 = ia->getIndex(rb->firstIndex() + i + 2);
+			uint32_t i0 = ia->getIndex(geo.batch->firstIndex() + i + 0);
+			uint32_t i1 = ia->getIndex(geo.batch->firstIndex() + i + 1);
+			uint32_t i2 = ia->getIndex(geo.batch->firstIndex() + i + 2);
 
 			triangles.emplace_back();
 			auto& tri = triangles.back();

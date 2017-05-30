@@ -27,6 +27,7 @@ public:
 	};
 
 public:
+	virtual ~Sampler() { }
 	virtual bool next(vec2& sample) = 0;
 };
 

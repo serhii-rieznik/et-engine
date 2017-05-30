@@ -115,7 +115,6 @@ private:
 
 	IndexArray::Pointer _indices;
 	VertexStorage::Pointer _vertexData;
-	Texture::Pointer _defaultNormal;
 
 	Vector<et::vec3> _vertices;
 	Vector<et::vec3> _normals;

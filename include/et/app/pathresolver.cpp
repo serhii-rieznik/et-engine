@@ -13,9 +13,8 @@
 
 using namespace et;
 
-void StandardPathResolver::setRenderContext(RenderContext* rc)
+void StandardPathResolver::init()
 {
-	_rc = rc;
 	_baseFolder = application().environment().applicationInputDataFolder();
 	
 	pushSearchPath(application().environment().applicationPath());
@@ -24,8 +23,7 @@ void StandardPathResolver::setRenderContext(RenderContext* rc)
 
 void StandardPathResolver::validateCaches()
 {
-	ET_ASSERT(_rc != nullptr);
-	
+
 	if (Locale::instance().currentLocale() != _cachedLocale)
 	{
 		_cachedLocale = Locale::instance().currentLocale();
