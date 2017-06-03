@@ -13,12 +13,10 @@
 
 using namespace et;
 
-void StandardPathResolver::init()
+void StandardPathResolver::init(const Environment& env)
 {
-	_baseFolder = application().environment().applicationInputDataFolder();
-	
-	pushSearchPath(application().environment().applicationPath());
-	pushSearchPath(_baseFolder);
+	pushSearchPath(env.applicationPath());
+	pushSearchPath(env.applicationInputDataFolder());
 }
 
 void StandardPathResolver::validateCaches()
@@ -46,83 +44,102 @@ std::string StandardPathResolver::resolveFilePath(const std::string& input)
 {
 	validateCaches();
 	
-	auto ext = "." + getFileExt(input);
-	auto name = removeFileExt(getFileName(input));
-	auto path = getFilePath(input);
+	std::string ext = "." + getFileExt(input);
+	std::string name = removeFileExt(getFileName(input));
+	std::string path = getFilePath(input);
 	
 	std::string suggested = input;
 	
-	auto paths = resolveFolderPaths(path);
+	std::set<std::string> paths = resolveFolderPaths(path);
 	pushSearchPaths(paths);
 
-	for (const auto& folder : _searchPath)
+	bool pathFound = false;
+	for (const std::string& folder : _searchPath)
 	{
-		auto baseName = folder + name;
+		std::string baseName = folder + name;
 		
 		if (_cachedScreenScaleFactor > 0)
 		{
 			// path/file@Sx.ln-sb.ext
 			suggested = baseName + _cachedScreenScale + _cachedLanguage + ext;
 			if (fileExists(suggested))
+			{
+				pathFound = true;
 				break;
+			}
 
 			// path/file@Sx.ln.ext
 			suggested = baseName + _cachedScreenScale + _cachedLang + ext;
 			if (fileExists(suggested))
+			{
+				pathFound = true;
 				break;
-			
+			}
+
 			// path/file@Sx.ext
 			suggested = baseName + _cachedScreenScale + ext;
 			if (fileExists(suggested))
+			{
+				pathFound = true;
 				break;
+			}
 		}
 		
 		// path/file.ln-sb.ext
 		suggested = baseName + _cachedLanguage + ext;
 		if (fileExists(suggested))
+		{
+			pathFound = true;
 			break;
+		}
 
 		// path/file.ln.ext
 		suggested = baseName + _cachedLanguage + ext;
 		if (fileExists(suggested))
+		{
+			pathFound = true;
 			break;
-		
+		}
+
 		if (_cachedScreenScaleFactor > 0)
 		{
 			// path/file@Sx.ext
 			suggested = baseName + _cachedScreenScale + ext;
 			if (fileExists(suggested))
+			{
+				pathFound = true;
 				break;
+			}
 		}
 		
 		// path/file.ext
 		suggested = baseName + ext;
 		if (fileExists(suggested))
+		{
+			pathFound = true;
 			break;
+		}
 	}
-	
 	popSearchPaths(paths.size());
 	
 	if (!_silentErrors && !fileExists(suggested))
 		log::warning("Unable to resolve file name: %s", input.c_str());
 
-	return suggested;
+	return pathFound ? suggested : input;
 }
 
 std::set<std::string> StandardPathResolver::resolveFolderPaths(const std::string& input)
 {
 	validateCaches();
 
-	auto normalizedInput = normalizeFilePath(input);
+	std::string normalizedInput = normalizeFilePath(input);
 
 	if (!normalizedInput.empty() && normalizedInput.back() == pathDelimiter)
 		normalizedInput.pop_back();
 
 	std::set<std::string> result;
-	if (normalizedInput.empty())
-		result.insert(_baseFolder);
 	
-	auto suggested = addTrailingSlash(normalizedInput + _cachedLanguage);
+	std::string suggested = addTrailingSlash(normalizedInput + _cachedLanguage);
 	if (folderExists(suggested))
 		result.insert(suggested);
 	
@@ -133,9 +150,9 @@ std::set<std::string> StandardPathResolver::resolveFolderPaths(const std::string
 	if (folderExists(normalizedInput))
 		result.insert(addTrailingSlash(normalizedInput));
 	
-	for (const auto& path : _searchPath)
+	for (const std::string& path : _searchPath)
 	{
-		auto base = normalizeFilePath(path + normalizedInput);
+		std::string base = normalizeFilePath(path + normalizedInput);
 
 		if (base.back() == pathDelimiter)
 			base.pop_back();
@@ -175,10 +192,7 @@ std::string StandardPathResolver::resolveFolderPath(const std::string& input)
 {
 	validateCaches();
 	
-	if (input.empty())
-		return _baseFolder;
-	
-	auto suggested = addTrailingSlash(input + _cachedLanguage);
+	std::string suggested = addTrailingSlash(input + _cachedLanguage);
 	if (folderExists(suggested))
 		return suggested;
 
@@ -189,7 +203,7 @@ std::string StandardPathResolver::resolveFolderPath(const std::string& input)
 	if (folderExists(input))
 		return input;
 	
-	for (const auto& path : _searchPath)
+	for (const std::string& path : _searchPath)
 	{
 		suggested = addTrailingSlash(path + input + _cachedLanguage);
 		if (folderExists(suggested))
@@ -220,7 +234,7 @@ void StandardPathResolver::pushSearchPaths(const std::set<std::string>& paths)
 
 void StandardPathResolver::pushRelativeSearchPath(const std::string& path)
 {
-	const auto& env = application().environment();
+	const Environment& env = application().environment();
 	pushSearchPath(env.applicationPath() + path);
 
 	if (env.applicationPath() != env.applicationInputDataFolder())

@@ -53,8 +53,6 @@ const VulkanNativePipeline& VulkanPipelineState::nativePipeline() const
 
 void VulkanPipelineState::build(const RenderPass::Pointer& inPass)
 {
-	VulkanProgram::Pointer prog = program();
-
 	VulkanRenderPass::Pointer pass = inPass;
 	_renderPassId = pass->identifier();
 	
@@ -108,14 +106,7 @@ void VulkanPipelineState::build(const RenderPass::Pointer& inPass)
 		assemblyInfo.topology = vulkan::primitiveTopology(primitiveType());
 	}
 	
-	_private->buildLayout(_private->vulkan, prog->reflection(), pass->nativeRenderPass().dynamicDescriptorSetLayout);
-
-	VkVertexInputBindingDescription binding = { };
-	Vector<VkVertexInputAttributeDescription> attribs;
-	VkPipelineVertexInputStateCreateInfo vertexInfo = { };
-	_private->generateInputLayout(inputLayout(), prog->reflection().inputLayout, vertexInfo, attribs, binding);
-
-	VkPipelineViewportStateCreateInfo viewportState = { VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO }; 
+	VkPipelineViewportStateCreateInfo viewportState = { VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO };
 	viewportState.scissorCount = 1;
 	viewportState.viewportCount = 1;
 
@@ -126,10 +117,20 @@ void VulkanPipelineState::build(const RenderPass::Pointer& inPass)
 		dynamicState.dynamicStateCount = sizeof(dynamicStates) / sizeof(dynamicStates[0]);
 	}
 
+	VkVertexInputBindingDescription binding = {};
+	Vector<VkVertexInputAttributeDescription> attribs;
+	VkPipelineVertexInputStateCreateInfo vertexInfo = {};
 	Vector<VkPipelineShaderStageCreateInfo> stages;
-	stages.reserve(prog->shaderModules().stageCreateInfos.size());
-	for (const auto& stage : prog->shaderModules().stageCreateInfos)
-		stages.emplace_back(stage.second);
+
+	VulkanProgram::Pointer prog = program();
+	if (prog.valid())
+	{
+		_private->buildLayout(_private->vulkan, prog->reflection(), pass->nativeRenderPass().dynamicDescriptorSetLayout);
+		_private->generateInputLayout(inputLayout(), prog->reflection().inputLayout, vertexInfo, attribs, binding);
+		stages.reserve(prog->shaderModules().stageCreateInfos.size());
+		for (const auto& stage : prog->shaderModules().stageCreateInfos)
+			stages.emplace_back(stage.second);
+	}
 
 	VkGraphicsPipelineCreateInfo info = { VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO };
 	{
@@ -147,7 +148,7 @@ void VulkanPipelineState::build(const RenderPass::Pointer& inPass)
 		info.stageCount = static_cast<uint32_t>(stages.size());
 	}
 	
-	if (info.stageCount == 2)
+	if (prog.valid() && (info.stageCount == 2))
 	{
 		VULKAN_CALL(vkCreateGraphicsPipelines(_private->vulkan.device, _private->vulkan.pipelineCache, 1, &info, nullptr, &_private->pipeline));
 	}

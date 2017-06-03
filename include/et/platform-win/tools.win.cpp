@@ -68,20 +68,20 @@ const char et::invalidPathDelimiter = '/';
 
 std::string et::applicationPath()
 {
-	char ExePath[MAX_PATH] = { };
-	GetModuleFileNameA(nullptr, ExePath, MAX_PATH);
-	return getFilePath(normalizeFilePath(ExePath));
+	ET_CHAR_TYPE buffer[MAX_PATH] = { };
+	GetModuleFileName(nullptr, buffer, MAX_PATH);
+	return getFilePath(normalizeFilePath(ET_STRING_TO_OUTPUT_TYPE(buffer)));
 }
 
 bool et::fileExists(const std::string& name)
 {
-	auto attr = GetFileAttributes(ET_STRING_TO_PARAM_TYPE(name).c_str());
+	DWORD attr = GetFileAttributes(ET_STRING_TO_PARAM_TYPE(name).c_str());
 	return (attr != INVALID_FILE_ATTRIBUTES) && ((attr & FILE_ATTRIBUTE_DIRECTORY) != FILE_ATTRIBUTE_DIRECTORY);
 }
 
 bool et::folderExists(const std::string& folder)
 {
-	auto attr = GetFileAttributes(ET_STRING_TO_PARAM_TYPE(folder).c_str());
+	DWORD attr = GetFileAttributes(ET_STRING_TO_PARAM_TYPE(folder).c_str());
 	return (attr != INVALID_FILE_ATTRIBUTES) && ((attr & FILE_ATTRIBUTE_DIRECTORY) == FILE_ATTRIBUTE_DIRECTORY);
 }
 

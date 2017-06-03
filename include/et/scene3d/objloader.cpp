@@ -154,7 +154,7 @@ OBJLoader::~OBJLoader()
 void OBJLoader::loadData(ObjectsCache& cache)
 {
 	std::string line;
-	int lineNumber = 0;
+	uint32_t lineNumber = 0;
 	char key = 0;
 	while (inputFile.is_open() && !inputFile.eof())
 	{
@@ -186,6 +186,10 @@ void OBJLoader::loadData(ObjectsCache& cache)
 			{
 				std::cout << "Unresolved symbol: " << key << mtllib << std::endl;
 			}
+		}
+		else if (key == 'o') // object, ignored for now
+		{
+			getLine(inputFile, line);
 		}
 		else if (key == 'g') // group
 		{
@@ -335,13 +339,13 @@ void OBJLoader::loadData(ObjectsCache& cache)
 			else
 			{
 				getLine(inputFile, line);
-				std::cout << "Unknown line " << lineNumber << " in file: " << line << std::endl;
+				log::warning("Unknown line [%u] `%s`", lineNumber, line.c_str());
 			}
 		}
 		else
 		{
 			getLine(inputFile, line);
-			std::cout << "Unknown line " << lineNumber << " in file: " << key << line << std::endl;
+			log::warning("Unknown line [%u] `%c%s`", lineNumber, key, line.c_str());
 		}
 	}
 }

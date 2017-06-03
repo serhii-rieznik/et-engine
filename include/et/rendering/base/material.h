@@ -47,9 +47,9 @@ public:
 	void setTextureWithSampler(MaterialTexture, const Texture::Pointer&, const Sampler::Pointer&);
 	void setImage(StorageBuffer, const Texture::Pointer&);
 
-	Texture::Pointer texture(MaterialTexture);
-	Sampler::Pointer sampler(MaterialTexture);
-	Texture::Pointer image(StorageBuffer);
+	const Texture::Pointer& texture(MaterialTexture);
+	const Sampler::Pointer& sampler(MaterialTexture);
+	const Texture::Pointer& image(StorageBuffer);
 
 	void setVector(MaterialVariable, const vec4&);
 	vec4 getVector(MaterialVariable) const;

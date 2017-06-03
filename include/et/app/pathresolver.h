@@ -32,7 +32,7 @@ namespace et
 		ET_DECLARE_POINTER(StandardPathResolver);
 		
 	public:
-		void init();
+		void init(const Environment& env);
 		
 		std::string resolveFilePath(const std::string&);
 		std::string resolveFolderPath(const std::string&);
@@ -57,7 +57,6 @@ namespace et
 		std::string _cachedSubLang;
 		std::string _cachedLanguage;
 		std::string _cachedScreenScale;
-		std::string _baseFolder;
 		std::string _cachedLocale;
 		
 		float _cachedScreenScaleFactor = 0.0f;

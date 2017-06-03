@@ -98,14 +98,19 @@ float Material::getFloat(MaterialVariable p) const
 	return getParameter<float>(p);
 }
 
-Texture::Pointer Material::texture(MaterialTexture t)
+const Texture::Pointer& Material::texture(MaterialTexture t)
 {
 	return textures[static_cast<uint32_t>(t)].object;
 }
 
-Sampler::Pointer Material::sampler(MaterialTexture t)
+const Sampler::Pointer& Material::sampler(MaterialTexture t)
 {
 	return samplers[static_cast<uint32_t>(t)].object;
+}
+
+const Texture::Pointer& Material::image(StorageBuffer t)
+{
+	return images[static_cast<uint32_t>(t)].object;
 }
 
 void Material::setProgram(const Program::Pointer& prog, const std::string& pt)
@@ -167,8 +172,11 @@ void Material::loadFromJson(const std::string& source, const std::string& baseFo
 
 const Material::Configuration& Material::configuration(const std::string& cls) const
 {
-	ET_ASSERT(_configurations.count(cls) > 0);
-	return _configurations.at(cls);
+	static const Material::Configuration emptyConfiguration;
+
+	auto i = _configurations.find(cls);
+	ET_ASSERT(i != _configurations.end());
+	return (i == _configurations.end()) ? emptyConfiguration : i->second;
 }
 
 void Material::loadRenderPass(const std::string& cls, const Dictionary& obj, const std::string& baseFolder)
@@ -491,7 +499,6 @@ const ConstantBufferEntry::Pointer& MaterialInstance::constantBufferData(const s
 const Material::Configuration & MaterialInstance::configuration(const std::string& cls) const
 {
 	ET_ASSERT(isInstance());
-
 	return base()->configuration(cls);
 }
 

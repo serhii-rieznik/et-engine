@@ -1175,13 +1175,7 @@
     <ClCompile Include="..\..\include\external\glslang\glslang\MachineIndependent\preprocessor\PpContext.cpp">
       <Filter>glslang\glslang\MachineIndependent</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\include\external\glslang\glslang\MachineIndependent\preprocessor\PpMemory.cpp">
-      <Filter>glslang\glslang\MachineIndependent</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\include\external\glslang\glslang\MachineIndependent\preprocessor\PpScanner.cpp">
-      <Filter>glslang\glslang\MachineIndependent</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\include\external\glslang\glslang\MachineIndependent\preprocessor\PpSymbols.cpp">
       <Filter>glslang\glslang\MachineIndependent</Filter>
     </ClCompile>
     <ClCompile Include="..\..\include\external\glslang\glslang\MachineIndependent\preprocessor\PpTokens.cpp">

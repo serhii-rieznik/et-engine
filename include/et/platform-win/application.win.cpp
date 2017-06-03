@@ -100,7 +100,6 @@ int Application::platformRun(int, char*[])
 	_runLoop.updateTime(_lastQueuedTimeMSec);
 
 	_renderContext = sharedObjectFactory().createObject<RenderContext>(params, this);
-	_standardPathResolver.setRenderContext(_renderContext);
 	
 	enterRunLoop();
 	_delegate->applicationWillResizeContext(_renderContext->size());

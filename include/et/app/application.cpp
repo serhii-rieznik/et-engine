@@ -29,6 +29,7 @@ Application::Application()
 	
 	delegate()->setApplicationParameters(_parameters);
 	_env.updateDocumentsFolder(_identifier);
+	_standardPathResolver.init(_env);
 
 	threading::setMainThreadIdentifier(threading::currentThread());
 	platformActivate();
@@ -197,7 +198,7 @@ void Application::stop()
 
 std::string Application::resolveFileName(const std::string& path)
 {
-	std::string result;
+	std::string result = path;
 	
 	if (_customPathResolver.valid())
 		result = _customPathResolver->resolveFilePath(path);
