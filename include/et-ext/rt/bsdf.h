@@ -13,6 +13,7 @@ namespace et
 {
 namespace rt
 {
+
 struct Material;
 
 struct ET_ALIGNED(16) BSDFSample
@@ -66,10 +67,8 @@ public:
 	};
 
 public:
-	Material(Class cl) :
-		cls(cl)
-	{
-	}
+	Material(Class cl)
+		: cls(cl) { }
 
 public:
 	float4 diffuse = float4(1.0f);
@@ -81,5 +80,6 @@ public:
 	Class cls = Class::Diffuse;
 	std::string name;
 };
+
 }
 }

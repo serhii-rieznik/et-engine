@@ -59,7 +59,7 @@ public:
 	Scene scene;
 
 	Raytrace* owner = nullptr;
-	Integrator::Pointer integrator;
+	EvaluateFunction evaluateFunction = nullptr;
 	Camera camera;
 
 	Vector<std::thread> workerThreads;
@@ -73,10 +73,13 @@ public:
 	std::mutex forwardTraceBufferMutex;
 	std::atomic<bool> running{false};
 	std::atomic<uint32_t> threadCounter{0};
-	std::atomic<uint32_t> sampledRegions{0};
+	std::atomic<uint32_t> processedRegions{0};
 	std::atomic<uint64_t> startTime{0};
-	std::atomic<uint64_t> elapsedTime{0};
+	std::atomic<uint64_t> minTimePerRegion{0};
+	std::atomic<uint64_t> maxTimePerRegion{0};
+	std::atomic<uint64_t> totalTimePerRegions{0};
 
+	uint32_t totalRegions = 0;
 	uint32_t flushCounter = 0;
 	vec2i viewportSize;
 	vec2i regionSize;
@@ -149,10 +152,35 @@ void Raytrace::output(const vec2i& pos, const vec4& color)
 	_outputMethod(pos, color);
 }
 
-void Raytrace::setIntegrator(Integrator::Pointer integrator)
+void Raytrace::setIntegrator(EvaluateFunction eval)
 {
-	_private->integrator = integrator;
+	_private->evaluateFunction = eval;
 }
+
+bool Raytrace::running() const
+{
+	return _private->running;
+}
+
+void Raytrace::reportProgress()
+{
+	uint32_t processedRegions = _private->processedRegions.load();
+	if (processedRegions == 0)
+		return;
+
+	uint64_t elapsedTime = queryContiniousTimeInMilliSeconds() - _private->startTime;
+	uint64_t minTime = _private->minTimePerRegion.load();
+	uint64_t maxTime = _private->maxTimePerRegion.load();
+	uint64_t avgTime = elapsedTime / processedRegions;
+	uint64_t remTime = (_private->totalRegions - processedRegions) * avgTime;
+
+	log::info("[%s] region %3u / %3u, min: %llu.%03llu, max: %llu.%03llu, avg: %llu.%03llu, remaining: %llu.%03llu",
+		floatToTimeStr(static_cast<float>(elapsedTime) / 1000.0f, false).c_str(),
+		processedRegions, _private->totalRegions,
+		minTime / 1000, minTime % 1000, maxTime / 1000, maxTime % 1000,
+		avgTime / 1000, avgTime % 1000, remTime / 1000, remTime % 1000);
+}
+
 
 /*
  * Private implementation
@@ -171,7 +199,8 @@ void RaytracePrivate::emitWorkerThreads()
 {
 	srand(static_cast<unsigned int>(time(nullptr)));
 	startTime = queryContiniousTimeInMilliSeconds();
-	elapsedTime = 0;
+	minTimePerRegion.store(std::numeric_limits<uint64_t>::max());
+	maxTimePerRegion.store(0);
 
 	forwardTraceBuffer.clear();
 	forwardTraceBuffer.resize(viewportSize.square());
@@ -223,14 +252,23 @@ void RaytracePrivate::stopWorkerThreads()
 
 void RaytracePrivate::buildScene(const s3d::Scene::Pointer& input)
 {
-	Vector<Scene::GeometryEntry> geometry;
+	Vector<Scene::SceneEntry> geometry;
 	geometry.reserve(256);
 
-	auto meshes = input->childrenOfType(s3d::ElementType::Mesh);
-	for (s3d::Mesh::Pointer mesh : meshes)
+	s3d::BaseElement::List objects = input->childrenOfType(s3d::ElementType::DontCare);
+	for (s3d::BaseElement::Pointer obj : objects)
 	{
-		for (const RenderBatch::Pointer& rb : mesh->renderBatches())
-			geometry.emplace_back(rb, mesh->transform());
+		if (obj->type() == s3d::ElementType::Mesh)
+		{
+			s3d::Mesh::Pointer mesh = obj;
+			for (const RenderBatch::Pointer& rb : mesh->renderBatches())
+				geometry.emplace_back(rb, mesh->transform());
+		}
+		else if (obj->type() == s3d::ElementType::Light)
+		{
+			s3d::LightElement::Pointer light = obj;
+			geometry.emplace_back(light->light());
+		}
 	}
 	scene.build(geometry, input->renderCamera());
 }
@@ -239,7 +277,6 @@ void RaytracePrivate::buildRegions(const vec2i& aSize)
 {
 	std::unique_lock<std::mutex> lock(regionsLock);
 	regions.clear();
-	sampledRegions.store(0);
 
 	regionSize = aSize;
 
@@ -290,6 +327,9 @@ void RaytracePrivate::buildRegions(const vec2i& aSize)
 			regions.back().size = vec2i(w, h);
 		}
 	}
+
+	totalRegions = static_cast<uint32_t>(regions.size());
+	processedRegions.store(0);
 }
 
 Region RaytracePrivate::getNextRegion()
@@ -299,7 +339,6 @@ Region RaytracePrivate::getNextRegion()
 	{
 		if (rgn.sampled == false)
 		{
-			++sampledRegions;
 			rgn.sampled = true;
 			return rgn;
 		}
@@ -504,7 +543,7 @@ void RaytracePrivate::forwardPathTraceThreadFunction(uint32_t threadId)
 		toCamera.normalize();
 
 		const auto& tri = scene.kdTree.triangleAtIndex(hit.triangleIndex);
-		const auto& mat = scene.materials.at(tri.materialIndex);
+		const auto& mat = scene.materials[tri.materialIndex];
 		float4 uv0 = tri.interpolatedTexCoord0(hit.intersectionPointBarycentric);
 		BSDFSample sample(inRay.direction, toCamera, nrm, mat, uv0, BSDFSample::Direction::Forward);
 
@@ -557,7 +596,7 @@ void RaytracePrivate::forwardPathTraceThreadFunction(uint32_t threadId)
 			float pickProb = 1.0f / static_cast<float>(lightTriangles.size());
 			float area = emitterTriangle.area();
 
-			float4 color = scene.materials.at(emitterTriangle.materialIndex).emissive * (area / pickProb);
+			float4 color = scene.materials[emitterTriangle.materialIndex].emissive * (area / pickProb);
 			Ray currentRay(source.intersectionPoint + sourceDir * Constants::epsilon, sourceDir);
 
 			projectToCamera(currentRay, source, color, triangleNormal);
@@ -571,7 +610,7 @@ void RaytracePrivate::forwardPathTraceThreadFunction(uint32_t threadId)
 				}
 
 				const auto& tri = scene.kdTree.triangleAtIndex(hit.triangleIndex);
-				const auto& mat = scene.materials.at(tri.materialIndex);
+				const auto& mat = scene.materials[tri.materialIndex];
 
 				if (mat.emissive.dotSelf() > 0.0f)
 				{
@@ -612,7 +651,7 @@ void RaytracePrivate::backwardPathTraceThreadFunction(uint32_t threadId)
 		if (region.sampled == false)
 			break;
 
-		auto runTime = queryContiniousTimeInMilliSeconds();
+		uint64_t runTime = queryContiniousTimeInMilliSeconds();
 
 		vec2i pixel;
 		for (pixel.y = region.origin.y; pixel.y < region.origin.y + region.size.y; ++pixel.y)
@@ -645,36 +684,30 @@ void RaytracePrivate::backwardPathTraceThreadFunction(uint32_t threadId)
 			}
 		}
 
-		elapsedTime += queryContiniousTimeInMilliSeconds() - runTime;
-		//*
-		float averageTime = static_cast<float>(elapsedTime) / static_cast<float>(1000 * sampledRegions);
-		auto actualElapsed = queryContiniousTimeInMilliSeconds() - startTime;
-		log::info("Elapsed: %s, estimated: %s",
-				  floatToTimeStr(static_cast<float>(actualElapsed) / 1000.f, false).c_str(),
-				  floatToTimeStr(averageTime * static_cast<float>(regions.size() - sampledRegions), false).c_str());
-		// */
+		uint64_t regionTime = queryContiniousTimeInMilliSeconds() - runTime;
+		minTimePerRegion = std::min(minTimePerRegion.load(), regionTime);
+		maxTimePerRegion = std::max(maxTimePerRegion.load(), regionTime);
+		totalTimePerRegions += regionTime;
+		++processedRegions;
 	}
 
 	--threadCounter;
 
 	if (threadCounter.load() == 0)
 	{
+		running = false;
+
 		if (scene.options.renderKDTree)
 			renderSpacePartitioning();
 
-		auto endTime = queryContiniousTimeInMilliSeconds();
-		uint64_t diff = endTime - startTime;
-
-		log::info("Rendering completed: %llu, (in %llu ms, %.3g s)", endTime,
-			diff, static_cast<float>(diff) / 1000.0f);
-
+		owner->reportProgress();
 		owner->renderFinished.invokeInMainRunLoop();
 	}
 }
 
 vec4 RaytracePrivate::raytracePixel(const vec2i& intCoord, uint32_t samples, uint32_t& bounces)
 {
-	if (integrator.invalid())
+	if (evaluateFunction == nullptr)
 	{
 		ET_FAIL("Integrator is not set");
 		return vec4(0.0f);
@@ -685,13 +718,9 @@ vec4 RaytracePrivate::raytracePixel(const vec2i& intCoord, uint32_t samples, uin
 	vec2 pixelSize = vec2(1.0f) / vector2ToFloat(viewportSize);
 	vec2 baseCoordinate = vector2ToFloat(intCoord);
 
-	StratifiedSampler sampler(samples, 0.075f, 0.85f);
-	TriangleFilter filter;
-
-	vec2 sample(0.0f);
-	while (sampler.next(sample))
+	for (uint32_t i = 0; i < samples; ++i)
 	{
-		vec2 normalizedCoordinate = 2.0f * (baseCoordinate + sample) * pixelSize - vec2(1.0f);
+		vec2 normalizedCoordinate = 2.0f * (baseCoordinate) * pixelSize - vec2(1.0f);
 		ray3d baseRay = camera.castRay(normalizedCoordinate);
 		float distanceToFocalPlane = scene.focalDistance / baseRay.direction.dot(scene.centerRay.direction);
 		vec3 focalPoint = camera.position() + distanceToFocalPlane * baseRay.direction;
@@ -706,22 +735,11 @@ vec4 RaytracePrivate::raytracePixel(const vec2i& intCoord, uint32_t samples, uin
 		vec3 shiftedOrigin = camera.position() + uOffset * uScale + vOffset * vScale;
 		vec3 shiftedDirection = (focalPoint - shiftedOrigin).normalize();
 
-		float w = filter.weight(sample);
-		result += integrator->evaluate(scene, ray3d(shiftedOrigin, shiftedDirection), scene.options.maxPathLength, bounces) * w;
+		float w = 1.0f;
+		result += evaluateFunction(scene, ray3d(shiftedOrigin, shiftedDirection), scene.options.maxPathLength, bounces) * w;
 		weight += w;
 	}
-	vec3 output = result.xyz() / weight;
-
-#if (ET_RT_ENABLE_GAMMA_CORRECTION)
-	if (isnan(output.x) || isnan(output.y) || isnan(output.z))
-		output = vec3(1000.0f, 0.0f, 1000.0f);
-
-	output.x = std::pow(output.x, 1.0f / 2.2f);
-	output.y = std::pow(output.y, 1.0f / 2.2f);
-	output.z = std::pow(output.z, 1.0f / 2.2f);
-#endif
-
-	return vec4(output, 1.0f);
+	return vec4(result.xyz() / weight, 1.0f);
 }
 
 void RaytracePrivate::estimateRegionsOrder()
@@ -885,16 +903,6 @@ void RaytracePrivate::flushToForwardTraceBuffer(const Vector<float4>& localBuffe
 
 		vec4 output = dst->toVec4() * rsScale;
 		output.w = 1.0f;
-
-#   if (ET_RT_ENABLE_GAMMA_CORRECTION)
-
-		if (isnan(output.x) || isnan(output.y) || isnan(output.z))
-			output = vec4(1000.0f, 0.0f, 1000.0f, 1.0f);
-
-		output.x = std::pow(output.x, 1.0f / 2.2f);
-		output.y = std::pow(output.y, 1.0f / 2.2f);
-		output.z = std::pow(output.z, 1.0f / 2.2f);
-#    endif
 
 		vec2i px(static_cast<int>(i % viewportSize.x), static_cast<int>(i / viewportSize.x));
 		owner->output(px, output);

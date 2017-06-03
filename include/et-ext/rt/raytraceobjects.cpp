@@ -11,8 +11,8 @@
 namespace et {
 namespace rt {
 
-const float_type Constants::epsilon = 0.0001f;
-const float_type Constants::distanceEpsilon = 20.0f * Constants::epsilon;
+const float_type Constants::epsilon = 1.0e-4;
+const float_type Constants::distanceEpsilon = Constants::epsilon;
 const float_type Constants::initialSplitValue = std::numeric_limits<float>::max();
 
 const float4& defaultLightDirection()
@@ -25,15 +25,6 @@ const float4& defaultLightDirection()
 		shouldNormalize = false;
 	}
 	return d;
-}
-
-float4 computeDiffuseVector(const float4& incidence, const float4& normal, float roughness)
-{
-#if (ET_RT_VISUALIZE_BRDF)
-    return defaultLightDirection();
-#else
-	return randomVectorOnHemisphere(normal, cosineDistribution);
-#endif
 }
 
 float4 computeReflectionVector(const float4& incidence, const float4& normal, float roughness)

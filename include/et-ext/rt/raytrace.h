@@ -32,7 +32,7 @@ public:
 	void setOutputMethod(F func)
 		{ _outputMethod = func; }
 	
-	void setIntegrator(Integrator::Pointer);
+	void setIntegrator(EvaluateFunction);
 	
 	void output(const vec2i&, const vec4&);
 
@@ -44,7 +44,10 @@ public:
 	
 	void renderSpacePartitioning();
 	void waitForCompletion();
-	
+
+	bool running() const;
+	void reportProgress();
+
 	ET_DECLARE_EVENT0(renderFinished);
 
 private:

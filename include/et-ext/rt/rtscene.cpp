@@ -17,7 +17,7 @@ inline float4 gammaCorrectedInput(const vec4& c)
 	return float4(std::pow(c.x, 2.2f), std::pow(c.y, 2.2f), std::pow(c.z, 2.2f), 1.0f);
 }
 
-void Scene::build(const Vector<GeometryEntry>& geometry, const Camera::Pointer& camera)
+void Scene::build(const Vector<SceneEntry>& geometry, const Camera::Pointer& camera)
 {
 	materials.clear();
 	emitters.clear();
@@ -29,15 +29,28 @@ void Scene::build(const Vector<GeometryEntry>& geometry, const Camera::Pointer& 
 	{
 		for (size_t i = 0, e = materials.size(); i < e; ++i)
 		{
-			if (materials.at(i).name == name)
+			if (materials[i].name == name)
 				return static_cast<uint32_t>(i);
 		}
 		return InvalidIndex;
 	};
 
-	for (const GeometryEntry& geo : geometry)
+	for (const SceneEntry& scn : geometry)
 	{
-		et::Material::Pointer batchMaterial = geo.batch->material();
+		if (scn.light.valid())
+		{
+			switch (scn.light->type())
+			{
+				case Light::Type::UniformColorEnvironment:
+					addEmitter(UniformEmitter::Pointer::create(float4(scn.light->color(), 1.0f)));
+					break;
+				default:
+					ET_FAIL_FMT("Unsupported light type %u", scn.light->type());
+			}
+			continue;
+		}
+
+		et::Material::Pointer batchMaterial = scn.batch->material();
 
 		index materialIndex = materialIndexWithName(batchMaterial->name());
 		if (materialIndex == InvalidIndex)
@@ -75,13 +88,13 @@ void Scene::build(const Vector<GeometryEntry>& geometry, const Camera::Pointer& 
 			mat.ior = eta;
 		}
 
-		VertexStorage::Pointer vs = geo.batch->vertexStorage();
+		VertexStorage::Pointer vs = scn.batch->vertexStorage();
 		ET_ASSERT(vs.valid());
 
-		IndexArray::Pointer ia = geo.batch->indexArray();
+		IndexArray::Pointer ia = scn.batch->indexArray();
 		ET_ASSERT(ia.valid());
 
-		triangles.reserve(triangles.size() + geo.batch->numIndexes());
+		triangles.reserve(triangles.size() + scn.batch->numIndexes());
 
 		const auto pos = vs->accessData<DataType::Vec3>(VertexAttributeUsage::Position, 0);
 		const auto nrm = vs->accessData<DataType::Vec3>(VertexAttributeUsage::Normal, 0);
@@ -95,12 +108,12 @@ void Scene::build(const Vector<GeometryEntry>& geometry, const Camera::Pointer& 
 
 		index firstTriange = static_cast<int>(triangles.size());
 
-		const mat4& t = geo.transformation;
-		for (uint32_t i = 0; i < geo.batch->numIndexes(); i += 3)
+		const mat4& t = scn.transformation;
+		for (uint32_t i = 0; i < scn.batch->numIndexes(); i += 3)
 		{
-			uint32_t i0 = ia->getIndex(geo.batch->firstIndex() + i + 0);
-			uint32_t i1 = ia->getIndex(geo.batch->firstIndex() + i + 1);
-			uint32_t i2 = ia->getIndex(geo.batch->firstIndex() + i + 2);
+			uint32_t i0 = ia->getIndex(scn.batch->firstIndex() + i + 0);
+			uint32_t i1 = ia->getIndex(scn.batch->firstIndex() + i + 1);
+			uint32_t i2 = ia->getIndex(scn.batch->firstIndex() + i + 2);
 
 			triangles.emplace_back();
 			auto& tri = triangles.back();
@@ -125,12 +138,11 @@ void Scene::build(const Vector<GeometryEntry>& geometry, const Camera::Pointer& 
 		}
 
 		index numTriangles = static_cast<index>(triangles.size()) - firstTriange;
-		bool isEmitter = materials.at(materialIndex).emissive.length() > 0.0f;
+		bool isEmitter = materials[materialIndex].emissive.length() > 0.0f;
 		if (isEmitter && (numTriangles > 0))
 		{
 			log::info("Adding area emitter");
-			MeshEmitter::Pointer emitter = MeshEmitter::Pointer::create(firstTriange, numTriangles, materialIndex);
-			emitters.push_back(emitter);
+			addEmitter(MeshEmitter::Pointer::create(firstTriange, numTriangles, materialIndex));
 		}
 	}
 
@@ -160,6 +172,11 @@ void Scene::build(const Vector<GeometryEntry>& geometry, const Camera::Pointer& 
 	{
 		kdTree.printStructure();
 	}
+}
+
+void Scene::addEmitter(const Emitter::Pointer& em)
+{
+	emitters.emplace_back(em);
 }
 
 }

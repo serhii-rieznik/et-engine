@@ -12,6 +12,7 @@
 #include <et-ext/rt/bsdf.h>
 #include <et-ext/rt/emitter.h>
 #include <et/rendering/base/renderbatch.h>
+#include <et/rendering/objects/light.h>
 
 namespace et
 {
@@ -21,16 +22,22 @@ namespace rt
 class ET_ALIGNED(16) Scene
 {
 public:
-	struct GeometryEntry
+	struct SceneEntry
 	{
 		RenderBatch::Pointer batch;
+		Light::Pointer light;
 		mat4 transformation;
-		GeometryEntry(const RenderBatch::Pointer& rb, const mat4& t)
+
+		SceneEntry(const Light::Pointer& l)
+			: light(l) { }
+
+		SceneEntry(const RenderBatch::Pointer& rb, const mat4& t)
 			: batch(rb), transformation(t) { }
 	};
 
 public:
-	void build(const Vector<GeometryEntry>&, const Camera::Pointer&);
+	void build(const Vector<SceneEntry>&, const Camera::Pointer&);
+	void addEmitter(const Emitter::Pointer&);
 
 public:
 	Options options;

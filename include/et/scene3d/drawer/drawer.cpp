@@ -195,13 +195,13 @@ void Drawer::setScene(const Scene::Pointer& inScene)
 				_lighting.directional = light;
 				break;
 			}
-			case Light::Type::ImageBasedSky:
+			case Light::Type::ImageBasedEnvironment:
 			{
 				updateEnvironment = (_lighting.environmentTextureFile != light->environmentMap());
 				_lighting.environmentTextureFile = light->environmentMap();
 				break;
 			}
-			case Light::Type::UniformColorSky:
+			case Light::Type::UniformColorEnvironment:
 			{
 				_lighting.environmentTextureFile.clear();
 				break;

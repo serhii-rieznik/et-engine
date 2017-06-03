@@ -69,11 +69,11 @@ public:
 
 	const Node& nodeAt(size_t i) const
 	{
-		return _nodes.at(i);
+		return _nodes[i];
 	}
 	const BoundingBox& bboxAt(size_t i) const
 	{
-		return _boundingBoxes.at(i);
+		return _boundingBoxes[i];
 	}
 
 	TraverseResult traverse(const Ray& r) const;
@@ -113,6 +113,11 @@ public:
 	};
 
 public:
+	FastStack()
+	{
+		_elements = reinterpret_cast<T*>(_storage);
+	}
+
 	template <typename ... Args>
 	void emplace(Args&&... a)
 	{
@@ -158,7 +163,8 @@ public:
 	}
 
 private:
-	T _elements[MaxElements];
+	uint8_t _storage[sizeof(T) * MaxElements];
+	T* _elements = nullptr;
 	size_t _size = 0;
 };
 }

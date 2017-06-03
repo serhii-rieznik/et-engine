@@ -32,12 +32,38 @@ public:
 	ET_DECLARE_POINTER(Emitter);
 	using Collection = Vector<Pointer>;
 
-public:
-	virtual ~Emitter() = default;
-	virtual EmitterInteraction sample(const Scene&, const float4& position, const float4& normal) const = 0;
-	virtual void prepare(const Scene&) { }
+	enum class Type : uint32_t
+	{
+		Uniform,
+		Environment,
+		Area,
+	};
 
-	virtual index materialIndex() const { return InvalidIndex; }
+public:
+	Emitter(Type t) : _type(t) { }
+	virtual ~Emitter() = default;
+
+	virtual void prepare(const Scene&)
+		{ }
+
+	virtual float4 samplePoint(const Scene&) const
+		{ return float4(0.0f); }
+
+	virtual float4 evaluate(const Scene&, const float4& position, const float4& direction, float4& nrm, float4& pos, float& pdf) const
+		{ return float4(0.0f); }
+
+	virtual float pdf(const float4& position, const float4& direction, const float4& lightPosition, const float4& lightNormal) const
+		{ return 0.0f; }
+
+	virtual bool containsTriangle(index) const { return false; }
+
+	virtual index materialIndex() const
+		{ return InvalidIndex; }
+
+	Type type() const { return _type; }
+
+private:
+	Type _type = Type::Uniform;
 };
 
 class UniformEmitter : public Emitter
@@ -47,7 +73,9 @@ public:
 
 public:
 	UniformEmitter(const float4& color);
-	EmitterInteraction sample(const Scene&, const float4& position, const float4& normal) const override;
+	float4 samplePoint(const Scene&) const override;
+	float4 evaluate(const Scene&, const float4& position, const float4& direction, float4& nrm, float4& pos, float& pdf) const override;
+	float pdf(const float4& position, const float4& direction, const float4& lightPosition, const float4& lightNormal) const override;
 
 private:
 	float4 _color;
@@ -60,7 +88,6 @@ public:
 
 public:
 	EnvironmentEmitter(const Image::Pointer&);
-	EmitterInteraction sample(const Scene&, const float4& position, const float4& normal) const override;
 
 private:
 	Image::Pointer _image;
@@ -74,14 +101,16 @@ public:
 public:
 	MeshEmitter(index firstTriangle, index numTriangles, index materialIndex);
 	void prepare(const Scene&) override;
-	EmitterInteraction sample(const Scene&, const float4& position, const float4& normal) const override;
 
 	index materialIndex() const override { return _materialIndex; }
 
-	float4 samplePoint(const Scene&);
-	
-	float4 evaluate(const Scene&, const float4& position, const float4& direction, float4& nrm, float4& pos, float& pdf);
-	float pdf(const float4& position, const float4& direction, const float4& lightPosition, const float4& lightNormal);
+	float4 samplePoint(const Scene&) const override;
+	float4 evaluate(const Scene&, const float4& position, const float4& direction, float4& nrm, float4& pos, float& pdf) const override;
+	float pdf(const float4& position, const float4& direction, const float4& lightPosition, const float4& lightNormal) const override;
+
+	bool containsTriangle(index t) const override {
+		return (t >= _firstTriangle) && (t < _firstTriangle + _numTriangles);
+	};
 
 private:
 	index _firstTriangle = InvalidIndex;

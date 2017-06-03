@@ -19,9 +19,10 @@ public:
 
 	enum class Type : uint32_t
 	{
-		UniformColorSky,
-		ImageBasedSky,
+		UniformColorEnvironment,
+		ImageBasedEnvironment,
 		Directional,
+		Point,
 	};
 public:
 	Light(Type);
