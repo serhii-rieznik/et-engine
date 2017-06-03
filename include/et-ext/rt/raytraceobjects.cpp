@@ -11,7 +11,7 @@
 namespace et {
 namespace rt {
 
-const float_type Constants::epsilon = 1.0e-4;
+const float_type Constants::epsilon = 1.0e-4f;
 const float_type Constants::distanceEpsilon = Constants::epsilon;
 const float_type Constants::initialSplitValue = std::numeric_limits<float>::max();
 
