@@ -18,6 +18,7 @@
     <ClInclude Include="..\..\include\et\core\remoteheap.h" />
     <ClInclude Include="..\..\include\et\rendering\base\variableset.h" />
     <ClInclude Include="..\..\include\et\rendering\interface\compute.h" />
+    <ClInclude Include="..\..\include\et\rendering\null\null_renderer.h" />
     <ClInclude Include="..\..\include\et\rendering\objects\light.cpp" />
     <ClInclude Include="..\..\include\et\rendering\vulkan\vulkan_compute.h" />
     <ClInclude Include="..\..\include\et\scene3d\drawer\cubemaps.h" />

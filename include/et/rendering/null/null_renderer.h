@@ -18,14 +18,21 @@ public:
 	ET_DECLARE_POINTER(NullRenderer);
 
 public:
-	NullRenderer() :
-		RenderInterface(nullptr) { }
+	NullRenderer() : RenderInterface(nullptr) {
+		initInternalStructures();
+	}
+
+	~NullRenderer() {
+		shutdownInternalStructures();
+	}
 
 	RenderingAPI api() const override
 		{ return RenderingAPI::Null; }
 
 	void init(const RenderContextParameters& params) override { }
+
 	void shutdown() override { }
+	
 	void destroy() override { }
 
 	void begin() override { }

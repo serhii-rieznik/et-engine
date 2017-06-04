@@ -134,8 +134,11 @@ inline Texture::Pointer RenderInterface::loadTexture(const std::string& fileName
 			update(desc);
 
 			Texture::Pointer texture = createTexture(desc);
-			texture->setOrigin(fileName);
-			cache.manage(texture, ObjectLoader::Pointer());
+			if (texture.valid())
+			{
+				texture->setOrigin(fileName);
+				cache.manage(texture, ObjectLoader::Pointer());
+			}
 			return texture;
 		}
 	}

@@ -92,6 +92,9 @@
     <Filter Include="Source\scene3d\drawer">
       <UniqueIdentifier>{3a78c7d3-0603-4cd5-a332-5472c80561e6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\rendering\null">
+      <UniqueIdentifier>{2d437a61-9659-4f35-8770-2aaf412272ec}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\et\sound\platform-dependent.cpp">
@@ -681,6 +684,9 @@
     </ClInclude>
     <ClInclude Include="..\..\include\et\scene3d\drawer\debugdrawer.cpp">
       <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\null\null_renderer.h">
+      <Filter>Source\rendering\null</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

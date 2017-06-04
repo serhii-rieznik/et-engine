@@ -53,9 +53,6 @@ void Application::platformFinalize()
 	sharedObjectFactory().deleteObject(_delegate);
 	_delegate = nullptr;
 
-	_backgroundThread.stop();
-	_backgroundThread.join();
-
 	if (_renderContext != nullptr)
 	{
 		if (_parameters.shouldPreserveRenderContext)
@@ -138,6 +135,8 @@ void Application::quit(int exitCode)
 
 Application::~Application()
 {
+	_backgroundThread.stop();
+	_backgroundThread.join();
 }
 
 void Application::setTitle(const std::string& s)
