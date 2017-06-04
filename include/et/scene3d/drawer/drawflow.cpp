@@ -102,7 +102,7 @@ void HDRFlow::render()
 	tonemap();
 	antialias();
 
-	_passes.final->begin(RenderPassBeginInfo::singlePass);
+	_passes.final->begin(RenderPassBeginInfo::singlePass());
 	{
 		_batches.final->material()->setTextureWithSampler(MaterialTexture::BaseColor, _primaryTarget, _renderer->clampSampler());
 		_passes.final->pushRenderBatch(_batches.final);
@@ -117,13 +117,13 @@ void HDRFlow::postprocess()
 	const Texture::Pointer& vel = drawer()->supportTexture(Drawer::SupportTexture::Velocity);
 	_batches.motionBlur->material()->setTextureWithSampler(MaterialTexture::EmissiveColor, vel, _renderer->clampSampler());
 	_batches.motionBlur->material()->setTextureWithSampler(MaterialTexture::BaseColor, _primaryTarget, _renderer->clampSampler());
-	_passes.motionBlur0->begin(RenderPassBeginInfo::singlePass);
+	_passes.motionBlur0->begin(RenderPassBeginInfo::singlePass());
 	_passes.motionBlur0->pushRenderBatch(_batches.motionBlur);
 	_passes.motionBlur0->end();
 	_renderer->submitRenderPass(_passes.motionBlur0);
 	
 	_batches.motionBlur->material()->setTextureWithSampler(MaterialTexture::BaseColor, _secondaryTarget, _renderer->clampSampler());
-	_passes.motionBlur1->begin(RenderPassBeginInfo::singlePass);
+	_passes.motionBlur1->begin(RenderPassBeginInfo::singlePass());
 	_passes.motionBlur1->pushRenderBatch(_batches.motionBlur);
 	_passes.motionBlur1->end();
 	_renderer->submitRenderPass(_passes.motionBlur1);
@@ -191,7 +191,7 @@ void HDRFlow::tonemap()
 	_batches.tonemap->material()->setTextureWithSampler(MaterialTexture::BaseColor, _primaryTarget, _renderer->clampSampler());
 	_batches.tonemap->material()->setTextureWithSampler(MaterialTexture::EmissiveColor, _luminanceTarget, _renderer->clampSampler());
 
-	_passes.tonemapping->begin(RenderPassBeginInfo::singlePass);
+	_passes.tonemapping->begin(RenderPassBeginInfo::singlePass());
 	_passes.tonemapping->pushRenderBatch(_batches.tonemap);
 	_passes.tonemapping->end();
 	
@@ -217,7 +217,7 @@ void HDRFlow::antialias()
 	_batches.txaa->material()->setTextureWithSampler(MaterialTexture::EmissiveColor, _renderHistory, _renderer->clampSampler());
 
 	_passes.txaa->setSharedVariable(ObjectVariable::CameraJitter, drawer()->latestCameraJitter());
-	_passes.txaa->begin(RenderPassBeginInfo::singlePass);
+	_passes.txaa->begin(RenderPassBeginInfo::singlePass());
 	_passes.txaa->pushRenderBatch(_batches.txaa);
 	_passes.txaa->end();
 

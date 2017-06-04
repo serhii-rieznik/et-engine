@@ -82,7 +82,7 @@ void Drawer::draw()
 		_main.pass->loadSharedVariablesFromCamera(renderCamera);
 		_main.pass->loadSharedVariablesFromLight(_lighting.directional);
 
-		_main.pass->begin(RenderPassBeginInfo::singlePass);
+		_main.pass->begin(RenderPassBeginInfo::singlePass());
 		_main.pass->pushImageBarrier(_shadowmapProcessor->directionalShadowmap(), ResourceBarrier(TextureState::ShaderResource));
 		for (Mesh::Pointer mesh : _allMeshes)
 		{

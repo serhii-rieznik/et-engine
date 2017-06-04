@@ -210,7 +210,7 @@ bool generateSPIRFromHLSL(const std::string& source, SPIRProgramStageMap& stages
 		{
 			stage.second.reserve(10240);
 			spv::SpvBuildLogger logger;
-			glslang::GlslangToSpv(*intermediate, stage.second, &logger);
+			glslang::GlslangToSpv(*intermediate, stage.second, &logger, nullptr);
 			std::string allMessages = logger.getAllMessages();
 			if (!allMessages.empty())
 				log::info("HLSL to SPV:\n%s", allMessages.c_str());

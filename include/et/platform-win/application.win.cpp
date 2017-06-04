@@ -42,33 +42,37 @@ void Application::platformInit()
 
 void Application::platformFinalize()
 {
-	if (_parameters.shouldPreserveRenderContext)
-		_renderContext->pushAndActivateRenderingContext();
+	if (_renderContext != nullptr)
+	{
+		if (_parameters.shouldPreserveRenderContext)
+			_renderContext->pushAndActivateRenderingContext();
+
+		_renderContext->renderer()->shutdown();
+	}
+	
+	sharedObjectFactory().deleteObject(_delegate);
+	_delegate = nullptr;
 
 	_backgroundThread.stop();
 	_backgroundThread.join();
 
-	_renderContext->renderer()->shutdown();
-	sharedObjectFactory().deleteObject(_delegate);
+	if (_renderContext != nullptr)
+	{
+		if (_parameters.shouldPreserveRenderContext)
+			_renderContext->popRenderingContext();
 
-	if (_parameters.shouldPreserveRenderContext)
-		_renderContext->popRenderingContext();
-
-	_renderContext->shutdown();
-	sharedObjectFactory().deleteObject(_renderContext);
-
-	_delegate = nullptr;
-	_renderContext = nullptr;
+		_renderContext->shutdown();
+		sharedObjectFactory().deleteObject(_renderContext);
+		_renderContext = nullptr;
+	}
 }
 
 void Application::platformSuspend()
 {
-
 }
 
 void Application::platformResume()
 {
-
 }
 
 void Application::platformActivate()
@@ -102,7 +106,7 @@ int Application::platformRun(int, char*[])
 	_renderContext = sharedObjectFactory().createObject<RenderContext>(params, this);
 	
 	enterRunLoop();
-	_delegate->applicationWillResizeContext(_renderContext->size());
+	delegate()->applicationWillResizeContext(_renderContext->size());
 
 	MSG msg = { };
 	while (_running)
@@ -134,7 +138,6 @@ void Application::quit(int exitCode)
 
 Application::~Application()
 {
-
 }
 
 void Application::setTitle(const std::string& s)
