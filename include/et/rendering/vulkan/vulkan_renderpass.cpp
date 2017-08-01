@@ -47,6 +47,7 @@ struct VulkanCommand
 		DispatchCompute,
 		NextRenderPass,
 		EndRenderPass,
+		Debug,
 	} type = Type::Undefined;
 
 	VulkanRenderBatch batch;
@@ -108,7 +109,7 @@ public:
 	Vector<VkClearValue> clearValues;
 	Map<uint64_t, VulkanRenderSubpass> subpasses;
 	Vector<VulkanRenderSubpass> subpassSequence;
-	uint32_t currentSubpassIndex = 0;
+	uint32_t currentSubpassIndex = InvalidIndex;
 	uint32_t frameIndex = 0;
 
 	std::atomic_bool recording{ false };
@@ -357,35 +358,44 @@ void VulkanRenderPass::begin(const RenderPassBeginInfo& beginInfo)
 	}
 	
 	_private->recording = true;
-	_private->currentSubpassIndex = 0;
+	_private->currentSubpassIndex = InvalidIndex;
 	_private->commands[_private->frameIndex].clear();
-	_private->commands[_private->frameIndex].emplace_back(beginInfo.subpasses.front());
 
+	setSharedVariable(ObjectVariable::DeltaTime, application().mainRunLoop().lastFrameTime());
+	setSharedVariable(ObjectVariable::ContinuousTime, application().mainRunLoop().time());
+	/*
 	vec4 viewport(_private->subpassSequence.front().viewport.x, _private->subpassSequence.front().viewport.y,
 		_private->subpassSequence.front().viewport.width, _private->subpassSequence.front().viewport.height);
 	setSharedVariable(ObjectVariable::Viewport, viewport);
-	setSharedVariable(ObjectVariable::DeltaTime, application().mainRunLoop().lastFrameTime());
-	setSharedVariable(ObjectVariable::ContinuousTime, application().mainRunLoop().time());
+	*/
+}
+
+void VulkanRenderPass::endSubpass()
+{
+	ET_ASSERT(_private->recording);
+
+	_private->commands[_private->frameIndex].emplace_back(VulkanCommand::Type::EndRenderPass);
 }
 
 void VulkanRenderPass::nextSubpass()
 {
 	ET_ASSERT(_private->recording);
 
-	if (_private->currentSubpassIndex + 1 >= _private->subpassSequence.size())
-		return;
+	uint32_t nextSubpassIndex = (_private->currentSubpassIndex == InvalidIndex) ? 0 : _private->currentSubpassIndex + 1;
+	
+	if (nextSubpassIndex < _private->subpassSequence.size())
+	{
+		_private->commands[_private->frameIndex].emplace_back(VulkanCommand::Type::NextRenderPass);
+		_private->commands[_private->frameIndex].emplace_back(VulkanCommand::Type::BeginRenderPass);
+		_private->currentSubpassIndex = nextSubpassIndex;
 
-	_private->commands[_private->frameIndex].emplace_back(VulkanCommand::Type::EndRenderPass);
-	_private->commands[_private->frameIndex].emplace_back(VulkanCommand::Type::NextRenderPass);
-	_private->commands[_private->frameIndex].emplace_back(VulkanCommand::Type::BeginRenderPass);
-	++_private->currentSubpassIndex;
-
-	vec4 viewport(
-		_private->subpassSequence[_private->currentSubpassIndex].viewport.x, 
-		_private->subpassSequence[_private->currentSubpassIndex].viewport.y,
-		_private->subpassSequence[_private->currentSubpassIndex].viewport.width, 
-		_private->subpassSequence[_private->currentSubpassIndex].viewport.height);
-	setSharedVariable(ObjectVariable::Viewport, viewport);
+		vec4 viewport(
+			_private->subpassSequence[_private->currentSubpassIndex].viewport.x,
+			_private->subpassSequence[_private->currentSubpassIndex].viewport.y,
+			_private->subpassSequence[_private->currentSubpassIndex].viewport.width,
+			_private->subpassSequence[_private->currentSubpassIndex].viewport.height);
+		setSharedVariable(ObjectVariable::Viewport, viewport);
+	}
 }
 
 void VulkanRenderPass::pushRenderBatch(const RenderBatch::Pointer& inBatch)
@@ -450,9 +460,13 @@ void VulkanRenderPass::copyImage(const Texture::Pointer& tFrom, const Texture::P
 void VulkanRenderPass::end()
 {
 	ET_ASSERT(_private->recording);
-
+	
 	_private->recording = false;
-	_private->commands[_private->frameIndex].emplace_back(VulkanCommand::Type::EndRenderPass);
+}
+
+void VulkanRenderPass::debug()
+{
+	_private->commands[_private->frameIndex].emplace_back(VulkanCommand::Type::Debug);
 }
 
 void VulkanRenderPass::recordCommandBuffer()
@@ -477,18 +491,42 @@ void VulkanRenderPass::recordCommandBuffer()
 	commandBufferBeginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
 	VULKAN_CALL(vkBeginCommandBuffer(commandBuffer, &commandBufferBeginInfo));
 
-	uint32_t subframeIndex = 0;
+	bool renderPassStarted = false;
+	uint32_t subframeIndex = InvalidIndex;
 	for (const VulkanCommand& cmd : _private->commands[_private->frameIndex])
 	{
-		if (cmd.type == VulkanCommand::Type::BeginRenderPass)
+		switch (cmd.type)
 		{
+		case VulkanCommand::Type::BeginRenderPass:
+		{
+			ET_ASSERT(renderPassStarted == false);
+
+			renderPassStarted = true;
 			const VulkanRenderSubpass& subpass = _private->subpassSequence.at(subframeIndex);
 			vkCmdBeginRenderPass(commandBuffer, &subpass.beginInfo, VK_SUBPASS_CONTENTS_INLINE);
 			vkCmdSetScissor(commandBuffer, 0, 1, &subpass.scissor);
 			vkCmdSetViewport(commandBuffer, 0, 1, &subpass.viewport);
+			break;
 		}
-		else if (cmd.type == VulkanCommand::Type::RenderBatch)
+
+		case VulkanCommand::Type::EndRenderPass:
 		{
+			ET_ASSERT(renderPassStarted == true);
+			vkCmdEndRenderPass(commandBuffer);
+			renderPassStarted = false;
+			break;
+		}
+
+		case VulkanCommand::Type::NextRenderPass:
+		{
+			subframeIndex = (subframeIndex == InvalidIndex) ? 0 : (subframeIndex + 1);
+			break;
+		}
+
+		case VulkanCommand::Type::RenderBatch:
+		{
+			ET_ASSERT(renderPassStarted);
+
 			const VulkanRenderBatch& batch = cmd.batch;
 			if (batch.pipeline->nativePipeline().pipeline != lastPipeline)
 			{
@@ -521,8 +559,10 @@ void VulkanRenderPass::recordCommandBuffer()
 				DescriptorSetClass_Count, descriptorSets, DescriptorSetClass::DynamicDescriptorsCount, dynamicOffsets);
 
 			vkCmdDrawIndexed(commandBuffer, batch.indexCount, 1, batch.startIndex, 0, 0);
+			break;
 		}
-		else if (cmd.type == VulkanCommand::Type::ImageBarrier)
+		
+		case VulkanCommand::Type::ImageBarrier:
 		{
 			VulkanTexture::Pointer tex = cmd.sourceImage;
 			VkImageMemoryBarrier barrier = { VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER };
@@ -533,14 +573,16 @@ void VulkanRenderPass::recordCommandBuffer()
 			barrier.newLayout = vulkan::texureStateToImageLayout(cmd.imageBarrier.toState);
 			barrier.srcQueueFamilyIndex = _private->vulkan.queues[VulkanQueueClass::Graphics].index;
 			barrier.dstQueueFamilyIndex = _private->vulkan.queues[VulkanQueueClass::Graphics].index;
-			
-			barrier.subresourceRange = { tex->nativeTexture().aspect, cmd.imageBarrier.firstLevel, 
+
+			barrier.subresourceRange = { tex->nativeTexture().aspect, cmd.imageBarrier.firstLevel,
 				cmd.imageBarrier.levelCount, cmd.imageBarrier.firstLayer, cmd.imageBarrier.layerCount };
 
-			vkCmdPipelineBarrier(commandBuffer, VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, 
-				0, 0, nullptr, 0, nullptr, 1, &barrier);
+			vkCmdPipelineBarrier(commandBuffer, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+				VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, 0, 0, nullptr, 0, nullptr, 1, &barrier);
+			break;
 		}
-		else if (cmd.type == VulkanCommand::Type::CopyImage)
+		
+		case VulkanCommand::Type::CopyImage:
 		{
 			VulkanTexture::Pointer tFrom = cmd.sourceImage;
 			VulkanTexture::Pointer tTo = cmd.destImage;
@@ -564,8 +606,10 @@ void VulkanRenderPass::recordCommandBuffer()
 			region.extent.depth = cmd.copyDescriptor.size.z;
 			vkCmdCopyImage(commandBuffer, tFrom->nativeTexture().image, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
 				tTo->nativeTexture().image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region);
+			break;
 		}
-		else if (cmd.type == VulkanCommand::Type::DispatchCompute)
+		
+		case VulkanCommand::Type::DispatchCompute:
 		{
 			if (cmd.compute.compute->nativeCompute().pipeline != lastPipeline)
 			{
@@ -589,17 +633,16 @@ void VulkanRenderPass::recordCommandBuffer()
 			uint32_t ty = static_cast<uint32_t>(cmd.compute.dimension.y);
 			uint32_t tz = static_cast<uint32_t>(cmd.compute.dimension.z);
 			vkCmdDispatch(commandBuffer, tx, ty, tz);
+			break;
 		}
-		else if (cmd.type == VulkanCommand::Type::NextRenderPass)
+	
+		case VulkanCommand::Type::Debug:
 		{
-			++subframeIndex;
+			debug::debugBreak();
+			break;
 		}
-		else if (cmd.type == VulkanCommand::Type::EndRenderPass)
-		{
-			vkCmdEndRenderPass(commandBuffer);
-		}
-		else
-		{
+		
+		default:
 			ET_FAIL("Not implemented");
 		}
 	}

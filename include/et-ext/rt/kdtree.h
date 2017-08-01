@@ -19,13 +19,13 @@ class ET_ALIGNED(16) KDTree
 public:
 	struct ET_ALIGNED(16) Node
 	{
-		float_type distance = 0.0f;
-		index children[2]{ InvalidIndex, InvalidIndex };
-		index axis = InvalidIndex;
-		index startIndex = 0;
-		index endIndex = 0;
+		float distance = 0.0f;
+		uint32_t children[2]{ InvalidIndex, InvalidIndex };
+		uint32_t axis = InvalidIndex;
+		uint32_t startIndex = 0;
+		uint32_t endIndex = 0;
 
-		inline index numIndexes() const
+		inline uint32_t numIndexes() const
 		{
 			return endIndex - startIndex;
 		}
@@ -46,18 +46,18 @@ public:
 		size_t totalTriangles = 0;
 		size_t totalNodes = 0;
 		size_t maxDepth = 0;
-		index distributedTriangles = 0;
-		index leafNodes = 0;
-		index emptyLeafNodes = 0;
-		index maxTrianglesPerNode = 0;
-		index minTrianglesPerNode = std::numeric_limits<index>::max();
+		uint32_t distributedTriangles = 0;
+		uint32_t leafNodes = 0;
+		uint32_t emptyLeafNodes = 0;
+		uint32_t maxTrianglesPerNode = 0;
+		uint32_t minTrianglesPerNode = std::numeric_limits<uint32_t>::max();
 	};
 
 	struct ET_ALIGNED(16) TraverseResult
 	{
 		float4 intersectionPoint;
 		float4 intersectionPointBarycentric;
-		index triangleIndex = InvalidIndex;
+		uint32_t triangleIndex = InvalidIndex;
 	};
 
 public:
@@ -94,7 +94,7 @@ private:
 	BoundingBox _sceneBoundingBox;
 
 	Vector<Node> _nodes;
-	Vector<index> _indices;
+	Vector<uint32_t> _indices;
 	Vector<IntersectionData> _intersectionData;
 	Vector<BoundingBox> _boundingBoxes;
 

@@ -74,9 +74,9 @@ public:
 	float4 diffuse = float4(1.0f);
 	float4 specular = float4(1.0f);
 	float4 emissive = float4(0.0f);
-	float_type roughness = 0.0f;
-	float_type metallness = 0.0f;
-	float_type ior = 0.0f;
+	float roughness = 0.0f;
+	float metallness = 0.0f;
+	float ior = 0.0f;
 	Class cls = Class::Diffuse;
 	std::string name;
 };

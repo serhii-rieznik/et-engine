@@ -139,7 +139,6 @@ EShLanguage shLanguageFromStage(ProgramStage stage)
 	default:
 		ET_FAIL("Invalid stage speicified");
 	}
-	return EShLanguage::EShLangCount;
 }
 
 bool generateSPIRFromHLSL(const std::string& source, SPIRProgramStageMap& stages, Program::Reflection& reflection)
@@ -286,7 +285,6 @@ void buildProgramReflection(const glslang::TProgram& program, Program::Reflectio
 	{
 		std::string uniformName(program.getUniformName(u));
 		int uniformBlockIndex = program.getUniformBlockIndex(u);
-		int uniformType = program.getUniformType(u);
 
 		String blockName(program.getUniformBlockName(uniformBlockIndex));
 		if (blockName.empty())
@@ -316,7 +314,7 @@ void buildProgramReflection(const glslang::TProgram& program, Program::Reflectio
 				}
 				else
 				{
-					log::warning("Unsupported sampler type in shader: %s", sampler.getString());
+					log::warning("Unsupported sampler type in shader: %s", sampler.getString().c_str());
 				}
 			}
 			else

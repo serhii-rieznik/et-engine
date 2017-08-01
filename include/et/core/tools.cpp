@@ -81,7 +81,8 @@ std::string removeFileExt(const std::string& fileName)
 std::string& trim(std::string& str)
 {
 	size_t strSize = str.length();
-	if (!strSize) return str;
+	if (strSize == 0)
+		return str;
 
 	size_t leadingWhitespace = 0;
 	size_t trailingWhitespace = 0;

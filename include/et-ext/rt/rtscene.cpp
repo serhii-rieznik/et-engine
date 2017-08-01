@@ -25,7 +25,7 @@ void Scene::build(const Vector<SceneEntry>& geometry, const Camera::Pointer& cam
 	TriangleList triangles;
 	triangles.reserve(0xffff);
 
-	auto materialIndexWithName = [this](const std::string& name) -> index
+	auto materialIndexWithName = [this](const std::string& name) -> uint32_t
 	{
 		for (size_t i = 0, e = materials.size(); i < e; ++i)
 		{
@@ -52,7 +52,7 @@ void Scene::build(const Vector<SceneEntry>& geometry, const Camera::Pointer& cam
 
 		et::Material::Pointer batchMaterial = scn.batch->material();
 
-		index materialIndex = materialIndexWithName(batchMaterial->name());
+		uint32_t materialIndex = materialIndexWithName(batchMaterial->name());
 		if (materialIndex == InvalidIndex)
 		{
 			float alpha = clamp(batchMaterial->getFloat(MaterialVariable::RoughnessScale), 0.0f, 1.0f);
@@ -106,7 +106,7 @@ void Scene::build(const Vector<SceneEntry>& geometry, const Camera::Pointer& cam
 			uv0 = vs->accessData<DataType::Vec2>(VertexAttributeUsage::TexCoord0, 0);
 		}
 
-		index firstTriange = static_cast<int>(triangles.size());
+		uint32_t firstTriange = static_cast<int>(triangles.size());
 
 		const mat4& t = scn.transformation;
 		for (uint32_t i = 0; i < scn.batch->numIndexes(); i += 3)
@@ -133,11 +133,11 @@ void Scene::build(const Vector<SceneEntry>& geometry, const Camera::Pointer& cam
 			{
 				tri.t[0] = tri.t[1] = tri.t[2] = float4(0.0f);
 			}
-			tri.materialIndex = static_cast<index>(materialIndex);
+			tri.materialIndex = static_cast<uint32_t>(materialIndex);
 			tri.computeSupportData();
 		}
 
-		index numTriangles = static_cast<index>(triangles.size()) - firstTriange;
+		uint32_t numTriangles = static_cast<uint32_t>(triangles.size()) - firstTriange;
 		bool isEmitter = materials[materialIndex].emissive.length() > 0.0f;
 		if (isEmitter && (numTriangles > 0))
 		{

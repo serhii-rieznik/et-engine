@@ -18,23 +18,21 @@ namespace rt
 #define ET_RT_EVALUATE_DISTRIBUTION				0
 #define ET_RT_EVALUATE_SAMPLER					0
 #define ET_RT_VISUALIZE_BRDF					0
+#define ET_RT_USE_MT_GENERATOR					1
 
-using float_type = float;
-using float3 = vector3<float_type>;
+using float3 = vector3<float>;
 using float4 = vec4simd;
-using index = uint_fast32_t;
 
-enum : index
+enum : uint32_t
 {
-	InvalidIndex = index(-1),
+	InvalidIndex = uint32_t(-1),
 	MaxAxisIndex = 2
 };
 
 struct Constants
 {
-	static const float_type epsilon;
-	static const float_type distanceEpsilon;
-	static const float_type initialSplitValue;
+	static const float epsilon;
+	static const float initialSplitValue;
 };
 
 enum class SamplingMethod : uint32_t
@@ -55,7 +53,7 @@ struct Options
 	uint32_t threads = 0;
 	uint32_t raysPerPixel = 32;
 	uint32_t maxPathLength = 0;
-	uint32_t maxKDTreeDepth = 0;
+	uint32_t maxKDTreeDepth = 32;
 	uint32_t renderRegionSize = 32;
 	uint32_t lightSamples = 1;
 	uint32_t bsdfSamples = 1;
@@ -73,7 +71,7 @@ struct ET_ALIGNED(16) Triangle
 	float4 edge1to0;
 	float4 edge2to0;
 	float4 _invDenom;
-	index materialIndex = 0;
+	uint32_t materialIndex = 0;
 
 	void computeSupportData()
 	{
@@ -90,10 +88,10 @@ struct ET_ALIGNED(16) Triangle
 	float4 barycentric(const float4& inP) const
 	{
 		float4 p = inP - v[0];
-		float_type dot20 = p.dot(edge1to0);
-		float_type dot21 = p.dot(edge2to0);
-		float_type y = _dot11 * dot20 - _dot01 * dot21;
-		float_type z = _dot00 * dot21 - _dot01 * dot20;
+		float dot20 = p.dot(edge1to0);
+		float dot21 = p.dot(edge2to0);
+		float y = _dot11 * dot20 - _dot01 * dot21;
+		float z = _dot00 * dot21 - _dot01 * dot20;
 		return float4(_invDenomValue - y - z, y, z, 0.0f) * _invDenom;
 	}
 
@@ -146,17 +144,17 @@ struct ET_ALIGNED(16) Triangle
 		return v[0].maxWith(v[1].maxWith(v[2]));
 	}
 
-	float_type area() const
+	float area() const
 	{
 		return _area;
 	}
 
 private:
-	float_type _invDenomValue = 0.0f;
-	float_type _dot00 = 0.0f;
-	float_type _dot01 = 0.0f;
-	float_type _dot11 = 0.0f;
-	float_type _area = 0.0f;
+	float _invDenomValue = 0.0f;
+	float _dot00 = 0.0f;
+	float _dot01 = 0.0f;
+	float _dot11 = 0.0f;
+	float _area = 0.0f;
 };
 using TriangleList = Vector<rt::Triangle>;
 
@@ -200,15 +198,15 @@ struct ET_ALIGNED(16) BoundingBox
 		return center + halfSize;
 	}
 
-	float_type square() const
+	float square() const
 	{
-		float_type xy = halfSize.cX() * halfSize.cY();
-		float_type yz = halfSize.cY() * halfSize.cZ();
-		float_type xz = halfSize.cX() * halfSize.cZ();
+		float xy = halfSize.cX() * halfSize.cY();
+		float yz = halfSize.cY() * halfSize.cZ();
+		float xz = halfSize.cX() * halfSize.cZ();
 		return 4.0f * (xy + yz + xz);
 	}
 
-	float_type volume() const
+	float volume() const
 	{
 		return 8.0f * halfSize.cX() * halfSize.cY() * halfSize.cZ();
 	};
@@ -240,7 +238,7 @@ struct Region
 	bool sampled = false;
 };
 
-inline float_type fastRandomFloat()
+inline float fastRandomFloat()
 {
 #if (ET_RT_USE_MT_GENERATOR)
 	static std::random_device rd;
@@ -252,7 +250,7 @@ inline float_type fastRandomFloat()
 	union
 	{
 		uint32_t u;
-		float_type f;
+		float f;
 	} wrap = { ((seed *= 16807) >> 9) | 0x3f800000 };
 	return wrap.f - 1.0f;
 #endif
@@ -270,15 +268,15 @@ inline float4 perpendicularVector(const float4& normal)
 
 	if (componentsLength.x > 0.5f)
 	{
-		float_type scaleFactor = std::sqrt(componentsLength.z + componentsLength.x);
+		float scaleFactor = std::sqrt(componentsLength.z + componentsLength.x);
 		return normal.shuffle<2, 3, 0, 1>() * float4(1.0f / scaleFactor, 0.0f, -1.0f / scaleFactor, 0.0f);
 	}
 	else if (componentsLength.y > 0.5f)
 	{
-		float_type scaleFactor = std::sqrt(componentsLength.y + componentsLength.x);
+		float scaleFactor = std::sqrt(componentsLength.y + componentsLength.x);
 		return normal.shuffle<1, 0, 3, 3>() * float4(-1.0f / scaleFactor, 1.0f / scaleFactor, 0.0f, 0.0f);
 	}
-	float_type scaleFactor = std::sqrt(componentsLength.z + componentsLength.y);
+	float scaleFactor = std::sqrt(componentsLength.z + componentsLength.y);
 	return normal.shuffle<3, 2, 1, 3>() * float4(0.0f, -1.0f / scaleFactor, 1.0f / scaleFactor, 0.0f);
 }
 
@@ -298,12 +296,12 @@ inline float ggxDistribution(float Xi, float alpha)
 }
 
 template <typename F, typename ... Arg>
-inline float4 randomVectorOnHemisphere(const float4& normal, F distribution, Arg... args)
+inline float4 randomVectorOnHemisphere(const float4& rnd, const float4& normal, F distribution, Arg... args)
 {
-	float Xi = fastRandomFloat();
+	float Xi = rnd.component<0>();
+	float phi = rnd.component<1>() * DOUBLE_PI;
 	float cosTheta = distribution(Xi, std::forward<Arg>(args)...);
 	float sinTheta = std::sqrt(1.0f - cosTheta * cosTheta);
-	float phi = fastRandomFloat() * DOUBLE_PI;
 	float4 u = perpendicularVector(normal);
 	float4 v = u.crossXYZ(normal);
 	return (u * std::cos(phi) + v * std::sin(phi)) * sinTheta + normal * cosTheta;
@@ -333,6 +331,6 @@ const float4& defaultLightDirection();
 
 float4 computeDiffuseVector(const float4& i, const float4& n, float r);
 float4 computeReflectionVector(const float4& i, const float4& n, float r);
-float4 computeRefractionVector(const float4& i, const float4& n, float_type eta, float r, float sinTheta, float IdotN);
+float4 computeRefractionVector(const float4& i, const float4& n, float eta, float r, float sinTheta, float IdotN);
 }
 }

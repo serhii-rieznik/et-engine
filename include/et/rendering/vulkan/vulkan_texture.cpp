@@ -62,14 +62,10 @@ VulkanTexture::VulkanTexture(VulkanState& vulkan, const Description& desc, const
 	_private->levelCount = info.mipLevels;
 	
 	if (desc.flags & Texture::Flags::RenderTarget)
-	{
 		info.usage |= isDepthTextureFormat(desc.format) ? VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT :  VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
-	}
 
 	if (desc.flags & Texture::Flags::Storage)
-	{
 		info.usage |= VK_IMAGE_USAGE_STORAGE_BIT;
-	}
 
 	if (desc.flags & Texture::Flags::CopySource)
 		info.usage |= VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
@@ -78,9 +74,11 @@ VulkanTexture::VulkanTexture(VulkanState& vulkan, const Description& desc, const
 		info.usage |= VK_IMAGE_USAGE_TRANSFER_DST_BIT;
 
 	VULKAN_CALL(vkCreateImage(vulkan.device, &info, nullptr, &_private->image));
+	if (_private->image == VkImage(0x66))
+		printf(".");
 
 	vkGetImageMemoryRequirements(vulkan.device, _private->image, &_private->memoryRequirements);
-
+	
 	VkMemoryPropertyFlags memoryProperties = (desc.flags & Texture::Flags::Readback) ?
 		(VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT) :
 		(VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
@@ -169,8 +167,7 @@ void VulkanTexture::updateRegion(const vec2i & pos, const vec2i & size, const Bi
 	ET_ASSERT(pos.y >= 0);
 	ET_ASSERT(pos.y + size.y < description().size.y);
 
-	uint32_t dataSize = static_cast<uint32_t>(size.square()) * bitsPerPixelForTextureFormat(description().format) / 8;
-	ET_ASSERT(dataSize <= data.size());
+	ET_ASSERT((size.square() * bitsPerPixelForTextureFormat(description().format) / 8) <= data.size());
 
 	Buffer::Description stagingDesc;
 	stagingDesc.initialData = BinaryDataStorage(data.data(), data.size());

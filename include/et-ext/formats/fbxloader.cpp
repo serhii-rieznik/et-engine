@@ -312,9 +312,9 @@ void FBXLoaderPrivate::loadNodeAnimations(FbxNode* node, s3d::BaseElement::Point
 			auto curveNode = prop.GetCurveNode();
 			if (curveNode)
 			{
-				for (unsigned int i = 0; i < curveNode->GetChannelsCount(); ++i)
+				for (uint32_t ci = 0; ci < curveNode->GetChannelsCount(); ++ci)
 				{
-					auto curve = curveNode->GetCurve(i);
+					auto curve = curveNode->GetCurve(ci);
 					if (curve)
 					{
 						int keyFramesCount = curve->KeyGetCount();
@@ -654,10 +654,10 @@ s3d::Mesh::Pointer FBXLoaderPrivate::loadMesh(s3d::Storage& storage, FbxMesh* me
 
 	bool oneMaterialForPolygons = false;
 
-	FbxGeometryElementMaterial* material = mesh->GetElementMaterial();
-	ET_ASSERT(material != nullptr);
+	FbxGeometryElementMaterial* fbxMaterial = mesh->GetElementMaterial();
+	ET_ASSERT(fbxMaterial != nullptr);
 
-	FbxGeometryElement::EMappingMode mapping = material->GetMappingMode();
+	FbxGeometryElement::EMappingMode mapping = fbxMaterial->GetMappingMode();
 	ET_ASSERT((mapping == FbxGeometryElement::eAllSame) || (mapping == FbxGeometryElement::eByPolygon));
 	oneMaterialForPolygons = (mapping == FbxGeometryElement::eAllSame);
 
@@ -928,13 +928,13 @@ void FBXLoaderPrivate::buildVertexBuffers(s3d::Storage& storage)
 StringList FBXLoaderPrivate::loadNodeProperties(FbxNode* node)
 {
 	StringList result;
-	FbxProperty prop = node->GetFirstProperty();
+	FbxProperty fbxProp = node->GetFirstProperty();
 
-	while (prop.IsValid())
+	while (fbxProp.IsValid())
 	{
-		if (prop.GetPropertyDataType().GetType() == eFbxString)
+		if (fbxProp.GetPropertyDataType().GetType() == eFbxString)
 		{
-			FbxString str = prop.Get<FbxString>();
+			FbxString str = fbxProp.Get<FbxString>();
 			StringDataStorage line(static_cast<uint32_t>(str.GetLen() + 1), 0);
 
 			char c = 0;
@@ -960,7 +960,7 @@ StringList FBXLoaderPrivate::loadNodeProperties(FbxNode* node)
 				result.push_back(line.data());
 		}
 
-		prop = node->GetNextProperty(prop);
+		fbxProp = node->GetNextProperty(fbxProp);
 	};
 
 	for (auto& prop : result)
@@ -992,9 +992,9 @@ s3d::LineElement::Pointer FBXLoaderPrivate::loadLine(s3d::Storage&, FbxLine* lin
 	return result;
 }
 
-void FBXLoaderPrivate::linkSkeleton(s3d::ElementContainer::Pointer root)
+void FBXLoaderPrivate::linkSkeleton(s3d::ElementContainer::Pointer skeletonRoot)
 {
-	auto meshes = root->childrenOfType(s3d::ElementType::Mesh);
+	auto meshes = skeletonRoot->childrenOfType(s3d::ElementType::Mesh);
 	for (s3d::Mesh::Pointer mesh : meshes)
 	{
 		if (mesh->deformer().valid())

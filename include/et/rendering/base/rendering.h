@@ -485,8 +485,15 @@ struct ResourceBarrier
 	TextureState toState = TextureState::Undefined;
 
 	ResourceBarrier() = default;
-	ResourceBarrier(TextureState ts) 
-		: toState(ts) {} 
+	
+	ResourceBarrier(TextureState ts)
+		: toState(ts) {}
+	
+	ResourceBarrier(TextureState ts, uint32_t level, uint32_t layer)
+		: toState(ts), firstLevel(level), firstLayer(layer) {}
+	
+	ResourceBarrier(TextureState ts, uint32_t level, uint32_t levels, uint32_t layer, uint32_t layers)
+		: toState(ts), firstLevel(level), levelCount(levels), firstLayer(layer), layerCount(layers) {}
 };
 
 enum class PipelineClass : uint32_t

@@ -11,6 +11,7 @@
 #include <et-ext/rt/kdtree.h>
 #include <et-ext/rt/bsdf.h>
 #include <et-ext/rt/emitter.h>
+#include <et-ext/rt/sampler.h>
 #include <et/rendering/base/renderbatch.h>
 #include <et/rendering/objects/light.h>
 
@@ -45,6 +46,7 @@ public:
 	KDTree kdTree;
 	Material::Collection materials;
 	Emitter::Collection emitters;
+	HammersleyQMCSampler sampler;
 	
 	float focalDistance = 0.0f;
 	ray3d centerRay;

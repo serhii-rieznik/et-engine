@@ -200,7 +200,6 @@ void loadInfoFromHeader(TextureDescription& desc, jpeg_decompress_struct& cinfo)
 	else if (cinfo.out_color_space == JCS_RGB)
 	{
 		ET_FAIL("Not implemented");
-		desc.format = TextureFormat::RGBA8;
 	}
 	else
 	{

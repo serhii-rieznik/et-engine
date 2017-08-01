@@ -121,7 +121,7 @@ void ConstantBufferPrivate::internalFree(const ConstantBufferEntry::Pointer& ent
 	ET_ASSERT(entry->data() < localData.end());
 	
 	if (heap.release(entry->offset()) == false)
-		ET_ASSERT(0 && "Attempt to release memory which was not allocated here");
+		ET_ASSERT(!"Attempt to release memory which was not allocated here");
 }
 
 }

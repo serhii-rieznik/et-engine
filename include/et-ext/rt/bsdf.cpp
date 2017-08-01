@@ -29,7 +29,7 @@ BSDFSample::BSDFSample(const float4& _wi, const float4& _n, const Material& mat,
 	case Material::Class::Diffuse:
 	{
 		cls = BSDFSample::Class::Diffuse;
-		Wo = randomVectorOnHemisphere(n, ET_RT_DIFFUSE_DISTRIBUTION);
+		Wo = randomVectorOnHemisphere(float4(0.0f), n, ET_RT_DIFFUSE_DISTRIBUTION);
 		color = mat.diffuse;
 		break;
 	}
@@ -85,7 +85,7 @@ BSDFSample::BSDFSample(const float4& _wi, const float4& _n, const Material& mat,
 			else
 			{
 				cls = BSDFSample::Class::Diffuse;
-				Wo = randomVectorOnHemisphere(n, ET_RT_DIFFUSE_DISTRIBUTION);
+				Wo = randomVectorOnHemisphere(float4(0.0f), n, ET_RT_DIFFUSE_DISTRIBUTION);
 				color = mat.diffuse;
 			}
 		}

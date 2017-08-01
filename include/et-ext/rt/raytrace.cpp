@@ -64,7 +64,7 @@ public:
 
 	Vector<std::thread> workerThreads;
 
-	Map<uint32_t, index> lightTriangleToIndex;
+	Map<uint32_t, uint32_t> lightTriangleToIndex;
 	Vector<Region> regions;
 	Vector<float4> forwardTraceBuffer;
 	TriangleList lightTriangles;
@@ -99,7 +99,7 @@ Raytrace::~Raytrace()
 void Raytrace::perform(s3d::Scene::Pointer scene, const vec2i& dimension)
 {
 	_private->camera.getValuesFromCamera(scene->renderCamera().reference());
-
+	_private->scene.sampler.setSamplesCount(_private->scene.options.raysPerPixel);
 	_private->viewportSize = dimension;
 	_private->buildScene(scene);
 
@@ -115,20 +115,17 @@ void Raytrace::waitForCompletion()
 	_private->waitForCompletion();
 }
 
-vec4 Raytrace::performAtPoint(s3d::Scene::Pointer scene, const vec2i& dimension, const vec2i& pixel)
+vec4 Raytrace::performAtPoint(const vec2i& pixel)
 {
-	_private->stopWorkerThreads();
-
-	_private->camera.getValuesFromCamera(scene->renderCamera().reference());
-	_private->viewportSize = dimension;
-	_private->buildScene(scene);
-
 	uint32_t bounces = 0;
 	vec4 color = _private->raytracePixel(vec2i(pixel.x, pixel.y), _private->scene.options.raysPerPixel, bounces);
+
 	log::info("Sampled color:\n\tsRGB: %.4f, %.4f, %.4f\n\tRGB: %.4f, %.4f, %.4f, (%u bounces)",
 		color.x, color.y, color.z, std::pow(color.x, 2.2f), std::pow(color.y, 2.2f), std::pow(color.z, 2.2f),
 		bounces);
 	
+	_outputMethod(pixel, color);
+
 	return color;
 }
 
@@ -467,7 +464,8 @@ void RaytracePrivate::visualizeDistributionThreadFunction(uint32_t index)
 		float l = camera.position().length() / 10.0f;
 		for (uint32_t i = 0; running && (i < renderTestCount); ++i)
 		{
-			auto n = randomVectorOnHemisphere(testDirection, distribution, alpha);
+			float4 rnd = scene.sampler.sample(i, renderTestCount);
+			auto n = randomVectorOnHemisphere(rnd, testDirection, distribution, alpha);
 			vec2 e = projectPoint(n * l);
 			renderPixel(e, vec4(1.0f, 0.01f));
 		}
@@ -478,7 +476,8 @@ void RaytracePrivate::visualizeDistributionThreadFunction(uint32_t index)
 	Vector<uint32_t> prob(sampleCount, 0);
 	for (uint32_t i = 0; running && (i < sampleTestCount); ++i)
 	{
-		auto v = randomVectorOnHemisphere(testDirection, distribution, alpha).dot(testDirection);
+		float4 rnd = scene.sampler.sample(i, sampleTestCount);
+		auto v = randomVectorOnHemisphere(rnd, testDirection, distribution, alpha).dot(testDirection);
 		uint32_t VdotN = static_cast<uint32_t>(clamp(v, 0.0f, 1.0f) * static_cast<float>(sampleCount));
 		prob[VdotN] += 1;
 	}
@@ -526,7 +525,7 @@ void RaytracePrivate::forwardPathTraceThreadFunction(uint32_t threadId)
 		return;
 	}
 
-	const int raysPerIteration = viewportSize.square() / 4;
+	const uint32_t raysPerIteration = static_cast<uint32_t>(viewportSize.square() / 4);
 
 	float imagePlaneDistanceSq = 2.0f * sqr(static_cast<float>(viewportSize.x) / std::tan(camera.fieldOfView()));
 
@@ -580,7 +579,7 @@ void RaytracePrivate::forwardPathTraceThreadFunction(uint32_t threadId)
 
 	while (running)
 	{
-		for (int ir = 0; running && (ir < raysPerIteration); ++ir)
+		for (uint32_t ir = 0; running && (ir < raysPerIteration); ++ir)
 		{
 			uint32_t emitterIndex = rand() % lightTriangles.size();
 			const auto& emitterTriangle = lightTriangles[emitterIndex];
@@ -591,7 +590,8 @@ void RaytracePrivate::forwardPathTraceThreadFunction(uint32_t threadId)
 			source.triangleIndex = lightTriangleToIndex[emitterIndex];
 
 			float4 triangleNormal = emitterTriangle.interpolatedNormal(source.intersectionPointBarycentric);
-			float4 sourceDir = randomVectorOnHemisphere(triangleNormal, cosineDistribution);
+			float4 rnd = scene.sampler.sample(ir, raysPerIteration);
+			float4 sourceDir = randomVectorOnHemisphere(rnd, triangleNormal, cosineDistribution);
 
 			float pickProb = 1.0f / static_cast<float>(lightTriangles.size());
 			float area = emitterTriangle.area();
@@ -718,7 +718,11 @@ vec4 RaytracePrivate::raytracePixel(const vec2i& intCoord, uint32_t samples, uin
 	vec2 pixelSize = vec2(1.0f) / vector2ToFloat(viewportSize);
 	vec2 baseCoordinate = vector2ToFloat(intCoord);
 
-	for (uint32_t i = 0; i < samples; ++i)
+	uint32_t rndOffset = static_cast<uint32_t>(intCoord.x + intCoord.x * intCoord.y);
+
+	Evaluate eval;
+	eval.totalRayCount = samples;
+	for (eval.rayIndex = 0; eval.rayIndex < eval.totalRayCount; ++eval.rayIndex)
 	{
 		vec2 normalizedCoordinate = 2.0f * (baseCoordinate) * pixelSize - vec2(1.0f);
 		ray3d baseRay = camera.castRay(normalizedCoordinate);
@@ -736,7 +740,9 @@ vec4 RaytracePrivate::raytracePixel(const vec2i& intCoord, uint32_t samples, uin
 		vec3 shiftedDirection = (focalPoint - shiftedOrigin).normalize();
 
 		float w = 1.0f;
-		result += evaluateFunction(scene, ray3d(shiftedOrigin, shiftedDirection), scene.options.maxPathLength, bounces) * w;
+		eval.rayIndex += rndOffset;
+		result += evaluateFunction(scene, ray3d(shiftedOrigin, shiftedDirection), eval) * w;
+		eval.rayIndex -= rndOffset;
 		weight += w;
 	}
 	return vec4(result.xyz() / weight, 1.0f);

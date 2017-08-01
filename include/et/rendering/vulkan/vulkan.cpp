@@ -39,8 +39,6 @@ const char* vulkan::resultToString(VkResult result)
 	default:
 		ET_FAIL_FMT("Unknown Vulkan error: %d", static_cast<int>(result));
 	}
-
-	return nullptr;
 }
 
 VkResult vkGetPhysicalDeviceSurfaceFormatsKHRWrapper(const VulkanState& state, uint32_t* count, VkSurfaceFormatKHR* formats)
@@ -124,6 +122,7 @@ bool VulkanSwapchain::createDepthImage(VulkanState& vulkan, VkImage& image, VkDe
 		return false;
 
 	VULKAN_CALL(vkCreateImage(vulkan.device, &imageInfo, nullptr, &image));
+	if (image == VkImage(0x66)) debug::debugBreak();
 
 	VkMemoryRequirements memoryRequirements = {};
 	vkGetImageMemoryRequirements(vulkan.device, image, &memoryRequirements);
@@ -237,7 +236,6 @@ void VulkanSwapchain::createSizeDependentResources(VulkanState& vulkan, const ve
 	Vector<VkImage> swapchainImages = enumerateVulkanObjects<VkImage>(vulkan, vkGetSwapchainImagesKHRWrapper);
 	frames.resize(swapchainImages.size());
 
-	uint32_t i = 0;
 	VkImage* swapchainImagesPtr = swapchainImages.data();
 	for (Frame& frame : frames)
 	{
@@ -759,7 +757,7 @@ VkImageView VulkanNativeTexture::imageView( uint32_t layer, uint32_t level)
 		imageViewInfo.image = image;
 		imageViewInfo.viewType = imageViewType;
 		imageViewInfo.format = format;
-		imageViewInfo.subresourceRange = { aspect, level, 1, layer, layerCount };
+		imageViewInfo.subresourceRange = { aspect, level, 1, layer, VK_REMAINING_ARRAY_LAYERS };
 		VULKAN_CALL(vkCreateImageView(vulkan.device, &imageViewInfo, nullptr, &imageView));
 		allImageViews[index] = imageView;
 	}

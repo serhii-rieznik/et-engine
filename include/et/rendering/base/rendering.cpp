@@ -281,10 +281,7 @@ uint32_t bitsPerPixelForTextureFormat(TextureFormat format)
 		return 128;
 
 	default:
-	{
 		ET_FAIL_FMT("Not yet implemented for this format: %u", static_cast<uint32_t>(format));
-		return 0;
-	}
 	}
 }
 

@@ -15,25 +15,24 @@ void printArray(ArrayValue arr, const std::string& tabs);
 
 VariantBase::Pointer duplicateValue(VariantBase::Pointer obj)
 {
-	if (obj->variantClass() == VariantClass::String)
+	switch (obj->variantClass())
+	{
+	case VariantClass::String:
 		return StringValue(obj).duplicate();
-
-	if (obj->variantClass() == VariantClass::Dictionary)
+	case VariantClass::Dictionary:
 		return Dictionary(obj).duplicate();
-
-	if (obj->variantClass() == VariantClass::Array)
+	case VariantClass::Array:
 		return ArrayValue(obj).duplicate();
-
-	if (obj->variantClass() == VariantClass::Integer)
+	case VariantClass::Integer:
 		return IntegerValue(obj).duplicate();
-
-	if (obj->variantClass() == VariantClass::Boolean)
+	case VariantClass::Boolean:
 		return BooleanValue(obj).duplicate();
-
-	if (obj->variantClass() == VariantClass::Float)
+	case VariantClass::Float:
 		return FloatValue(obj).duplicate();
-
-	abort();
+	default:
+		break;
+	}
+	ET_ASSERT(!"Invalid VariantClass");
 	return VariantBase::Pointer();
 }
 

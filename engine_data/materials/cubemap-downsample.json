@@ -1,7 +1,7 @@
 {
 	"name" : "cubemap downsample routines",
 
-	"eq-to-cubemap" : 
+	"prepare-cubemap" : 
 	{ 
 		"input-layout" : {
 			"position" : 3,

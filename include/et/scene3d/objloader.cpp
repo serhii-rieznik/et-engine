@@ -782,28 +782,6 @@ void OBJLoader::processLoadedData()
 	
 	uint32_t index = 0;
 	
-	auto PUSH_VERTEX = [this, &pos, &nrm, &tex, &index, hasTexCoords, hasNormals](const OBJFace::VertexLink& vertex, const vec3& offset)
-	{
-		{
-			ET_ASSERT(vertex[0] < _vertices.size());
-			pos[index] = _vertices[vertex[0]] - offset;
-		}
-		
-		if (hasTexCoords)
-		{
-			ET_ASSERT(vertex[1] < _texCoords.size());
-			tex[index] = _texCoords[vertex[1]];
-		}
-		
-		if (hasNormals)
-		{
-			ET_ASSERT(vertex[2] < _normals.size());
-			nrm[index] = _normals[vertex[2]];
-		}
-		
-		++index;
-	};
-	
 	for (auto group : _groups)
 	{
 		uint32_t startIndex = index;
@@ -835,9 +813,22 @@ void OBJLoader::processLoadedData()
 			uint32_t numTriangles = face.vertexLinksCount - 2;
 			for (uint32_t i = 1; i <= numTriangles; ++i)
 			{
-				PUSH_VERTEX(face.vertexLinks[0], center);
-				PUSH_VERTEX(face.vertexLinks[i], center);
-				PUSH_VERTEX(face.vertexLinks[i+1], center);
+				pos[index+0] = _vertices[face.vertexLinks[0][0]] - center;
+				pos[index+1] = _vertices[face.vertexLinks[i][0]] - center;
+				pos[index+2] = _vertices[face.vertexLinks[i+1][0]] - center;
+				if (hasTexCoords)
+				{
+					tex[index+0] = _texCoords[face.vertexLinks[0][1]];
+					tex[index+1] = _texCoords[face.vertexLinks[i][1]];
+					tex[index+2] = _texCoords[face.vertexLinks[i+1][1]];
+				}
+				if (hasNormals)
+				{
+					nrm[index+0] = _normals[face.vertexLinks[0][2]];
+					nrm[index+1] = _normals[face.vertexLinks[i][2]];
+					nrm[index+2] = _normals[face.vertexLinks[i+1][2]];
+				}
+				index += 3;
 			}
 		}
 
@@ -925,13 +916,5 @@ void OBJLoader::threadFinished()
 void getLine(std::ifstream& stream, std::string& line)
 {
 	std::getline(stream, line);
-
-	if (line.empty())
-		return;
-
-	if (line.back() == '\r')
-		line.erase(line.end() - 1);
-	
-	while (!line.empty() && (line.front() == ' '))
-		line.erase(line.begin());
+	trim(line);
 }

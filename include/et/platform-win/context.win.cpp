@@ -79,7 +79,7 @@ PlatformDependentContext createWindowsContextWithOptions(ContextOptions& options
 	return result;
 }
 
-void destroyWindowsContext(PlatformDependentContext context)
+void destroyWindowsContext(PlatformDependentContext)
 {
 	// TODO
 }

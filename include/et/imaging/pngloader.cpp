@@ -134,8 +134,6 @@ void et::png::loadFromStream(std::istream& source, TextureDescription& desc, boo
 	if (channels == 3)
 	{
 		log::warning("Coverting 24bit PNG to 32bit");
-		debug::debugBreak();
-
 		// convert RGB to RGBA
 		BinaryDataStorage rgbData = desc.data;
 		vec3ub* rgb = reinterpret_cast<vec3ub*>(rgbData.data());

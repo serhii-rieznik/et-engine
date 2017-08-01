@@ -83,7 +83,7 @@ void Drawer::draw()
 		_main.pass->loadSharedVariablesFromLight(_lighting.directional);
 
 		_main.pass->begin(RenderPassBeginInfo::singlePass());
-		_main.pass->pushImageBarrier(_shadowmapProcessor->directionalShadowmap(), ResourceBarrier(TextureState::ShaderResource));
+		_main.pass->nextSubpass();
 		for (Mesh::Pointer mesh : _allMeshes)
 		{
 			const mat4& transform = mesh->transform();
@@ -91,9 +91,7 @@ void Drawer::draw()
 			_main.pass->setSharedVariable(ObjectVariable::WorldTransform, transform);
 			_main.pass->setSharedVariable(ObjectVariable::WorldRotationTransform, rotationTransform);
 			for (const RenderBatch::Pointer& rb : mesh->renderBatches())
-			{
 				_main.pass->pushRenderBatch(rb);
-			}
 		}
 		_main.pass->setSharedVariable(ObjectVariable::WorldTransform, identityMatrix);
 		_main.pass->pushRenderBatch(_lighting.environmentBatch);
@@ -102,6 +100,7 @@ void Drawer::draw()
 		_debugDrawer->drawBoundingBox(_shadowmapProcessor->sceneBoundingBox(), identityMatrix, vec4(10000.0f, 10000.0f, 10000.0f, 1.0f));
 		_debugDrawer->submitBatches(_main.pass);
 
+		_main.pass->endSubpass();
 		_main.pass->end();
 
 		_renderer->submitRenderPass(_main.pass);

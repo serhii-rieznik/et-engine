@@ -75,7 +75,9 @@ namespace et
 	}
 }
 
-#if (ET_DEBUG)
+#define ET_ASSERTS_ALWAYS_ENABLED 1
+
+#if (ET_ASSERTS_ALWAYS_ENABLED || ET_DEBUG)
 #
 #	define ET_ASSERT(C)	\
 	do { \

@@ -23,7 +23,7 @@ public:
 	{
 		Random,
 		Uniform,
-		Stratified
+		Stratified,
 	};
 
 public:
@@ -69,10 +69,25 @@ public:
 public:
 	StratifiedSampler(uint32_t maxSamples, float a, float b);
 	bool next(vec2& sample) override;
+
 private:
 	float _a = 0.0f;
 	float _b = 1.0f;
 };
+
+struct HammersleyQMCSampler
+{
+	void setSamplesCount(uint32_t s) 
+		{ samplesCount = s; }
+
+	float4 sample(uint32_t i, uint32_t dim);
+	float rinv(uint32_t);
+
+private:
+	uint32_t samplesCount = 1;
+	uint32_t index = 0;
+};
+
 
 }
 

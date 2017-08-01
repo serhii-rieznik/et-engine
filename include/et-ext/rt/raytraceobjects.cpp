@@ -11,9 +11,8 @@
 namespace et {
 namespace rt {
 
-const float_type Constants::epsilon = 1.0e-4f;
-const float_type Constants::distanceEpsilon = Constants::epsilon;
-const float_type Constants::initialSplitValue = std::numeric_limits<float>::max();
+const float Constants::epsilon = 1.0e-4f;
+const float Constants::initialSplitValue = std::numeric_limits<float>::max();
 
 const float4& defaultLightDirection()
 {
@@ -37,10 +36,10 @@ float4 computeReflectionVector(const float4& incidence, const float4& normal, fl
 #	define MAX_REFLECTION_ATTEMPTS 16
 
 	uint32_t attempts = 0;
-	auto result = randomVectorOnHemisphere(idealReflection, ggxDistribution, roughness);
+	auto result = randomVectorOnHemisphere(float4(0.0f), idealReflection, ggxDistribution, roughness);
 	while ((result.dot(normal) <= 0.0f) && (attempts < MAX_REFLECTION_ATTEMPTS))
 	{
-		result = randomVectorOnHemisphere(idealReflection, ggxDistribution, roughness);
+		result = randomVectorOnHemisphere(float4(0.0f), idealReflection, ggxDistribution, roughness);
 		++attempts;
 	}
 
@@ -48,22 +47,22 @@ float4 computeReflectionVector(const float4& incidence, const float4& normal, fl
 #endif
 }
 
-float4 computeRefractionVector(const float4& Wi, const float4& n, float_type eta, float roughness, float sinTheta, float IdotN)
+float4 computeRefractionVector(const float4& Wi, const float4& n, float eta, float roughness, float sinTheta, float IdotN)
 {
 #	define MAX_REFRACTION_ATTEMPTS 16
 
 	ET_ASSERT(sinTheta > 0);
 
 	float4 idealRefraction = Wi * eta - n * (eta * IdotN + std::sqrt(sinTheta));
-	float4 result = randomVectorOnHemisphere(idealRefraction, ggxDistribution, roughness);
+	float4 result = randomVectorOnHemisphere(float4(0.0f), idealRefraction, ggxDistribution, roughness);
 
 	uint32_t attempts = 0;
 	while ((result.dot(n) >= 0.0f) && (attempts < MAX_REFRACTION_ATTEMPTS))
 	{
-		result = randomVectorOnHemisphere(idealRefraction, ggxDistribution, roughness);
+		result = randomVectorOnHemisphere(float4(0.0f), idealRefraction, ggxDistribution, roughness);
 		++attempts;
 	}
-	return randomVectorOnHemisphere(idealRefraction, ggxDistribution, roughness);
+	return randomVectorOnHemisphere(float4(0.0f), idealRefraction, ggxDistribution, roughness);
 }
 
 #define SIGN_MASK 0x80000000
@@ -71,9 +70,9 @@ float4 computeRefractionVector(const float4& Wi, const float4& n, float_type eta
 
 bool rayToBoundingBox(Ray r, BoundingBox box, float& tNear, float& tFar)
 {
-	ET_ALIGNED(16) union { float a; uint32_t i; } diff;
+	ET_ALIGNED(16) union { float a; uint32_t i; uint32_t pad[4]; } diff;
 	ET_ALIGNED(16) union { float f[4]; uint32_t i[4]; } dir;
-	ET_ALIGNED(16) float_type bs[8];
+	ET_ALIGNED(16) float bs[8];
 
 	(r.direction & SIGN_MASK).loadToFloats(dir.f);
 	((box.minVertex() - r.origin) / r.direction).loadToFloats(bs);

@@ -92,8 +92,11 @@ public:
 	virtual void pushImageBarrier(const Texture::Pointer&, const ResourceBarrier&) = 0;
 	virtual void copyImage(const Texture::Pointer&, const Texture::Pointer&, const CopyDescriptor&) = 0;
 	virtual void dispatchCompute(const Compute::Pointer&, const vec3i&) = 0;
+	virtual void endSubpass() = 0;
 	virtual void nextSubpass() = 0;
 	virtual void end() = 0;
+
+	virtual void debug() = 0;
 
 	const ConstructionInfo& info() const;
 

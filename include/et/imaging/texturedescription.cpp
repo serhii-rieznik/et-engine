@@ -90,8 +90,7 @@ bool TextureDescription::load(const std::string& fileName)
     
     setOrigin(fileName);
     
-    std::string ext = getFileExt(fileName);
-    lowercase(ext);
+    std::string ext = lowercase(getFileExt(fileName));
     
     if (ext == "png")
     {

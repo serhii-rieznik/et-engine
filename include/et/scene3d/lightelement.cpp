@@ -29,7 +29,6 @@ LightElement::LightElement(const Light::Pointer& light, BaseElement* parent)
 BaseElement* LightElement::duplicate()
 {
 	ET_FAIL("TODO"); 
-	return nullptr;
 }
 
 }

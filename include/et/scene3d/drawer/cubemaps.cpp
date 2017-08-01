@@ -45,7 +45,9 @@ void CubemapProcessor::process(RenderInterface::Pointer& renderer, DrawerOptions
 			_lookupGeneratorMaterial = renderer->sharedMaterialLibrary().loadDefaultMaterial(DefaultMaterial::EnvironmentMap);
 
 		_lookupPass->begin(RenderPassBeginInfo::singlePass());
+		_lookupPass->nextSubpass();
 		_lookupPass->pushRenderBatch(renderhelper::createFullscreenRenderBatch(renderer->checkersTexture(), _lookupGeneratorMaterial));
+		_lookupPass->endSubpass();
 		_lookupPass->end();
 		renderer->submitRenderPass(_lookupPass);
 
@@ -58,24 +60,34 @@ void CubemapProcessor::process(RenderInterface::Pointer& renderer, DrawerOptions
 		/*
 		* Downsampling convolution
 		*/
-		_processingMaterial->setTexture(MaterialTexture::Environment, _tex[CubemapType::Source]);
+		_processingMaterial->setTexture(MaterialTexture::BaseColor, _tex[CubemapType::Source]);
 		_processingMaterial->setSampler(MaterialTexture::BaseColor, _eqMapSampler);
-
-		_downsampleMaterial->setTexture(MaterialTexture::BaseColor, _tex[CubemapType::Downsampled]);
 
 		_downsampleBatch->setMaterial(_processingMaterial->instance());
 		_processingMaterial->releaseInstances();
 
+		Texture::Pointer tex = _tex[CubemapType::Downsampled];
+		
 		_downsamplePass->begin(_wholeCubemapBeginInfo);
+		_downsamplePass->pushImageBarrier(tex, ResourceBarrier(TextureState::ColorRenderTarget, 0, 1, 0, 6));
 		_downsamplePass->loadSharedVariablesFromLight(light);
+		
 		for (uint32_t i = 0, e = static_cast<uint32_t>(_wholeCubemapBeginInfo.subpasses.size()); i < e; ++i)
 		{
 			uint32_t level = i / 6;
 			uint32_t face = i % 6;
 			_downsampleMaterial->setFloat(MaterialVariable::ExtraParameters, static_cast<float>(level));
 			_downsamplePass->setSharedVariable(ObjectVariable::WorldTransform, _projections[face]);
-			_downsamplePass->pushRenderBatch(_downsampleBatch);
+
+			if ((face == 0) && (level > 0))
+			{
+				_downsamplePass->pushImageBarrier(tex, ResourceBarrier(TextureState::ShaderResource, level - 1, 1, 0, 6));
+				_downsamplePass->pushImageBarrier(tex, ResourceBarrier(TextureState::ColorRenderTarget, level, 1, 0, 6));
+			}
+
 			_downsamplePass->nextSubpass();
+			_downsamplePass->pushRenderBatch(_downsampleBatch);
+			_downsamplePass->endSubpass();
 
 			if (i == 5)
 			{
@@ -84,6 +96,7 @@ void CubemapProcessor::process(RenderInterface::Pointer& renderer, DrawerOptions
 			}
 		}
 		_downsamplePass->end();
+		_downsamplePass->pushImageBarrier(tex, ResourceBarrier(TextureState::ShaderResource, 0, CubemapLevels, 0, 6));
 		renderer->submitRenderPass(_downsamplePass);
 
 		Material::Pointer mtl = _specularConvolveBatch->material();
@@ -95,9 +108,10 @@ void CubemapProcessor::process(RenderInterface::Pointer& renderer, DrawerOptions
 			uint32_t face = i % 6;
 			vec2 sz = vector2ToFloat(_tex[CubemapType::Downsampled]->size(level));
 			mtl->setVector(MaterialVariable::ExtraParameters, vec4(static_cast<float>(level), sz.x, sz.y, static_cast<float>(face)));
+			_specularConvolvePass->nextSubpass();
 			_specularConvolvePass->setSharedVariable(ObjectVariable::WorldTransform, _projections[face]);
 			_specularConvolvePass->pushRenderBatch(_specularConvolveBatch);
-			_specularConvolvePass->nextSubpass();
+			_specularConvolvePass->endSubpass();
 		}
 		_specularConvolvePass->end();
 		renderer->submitRenderPass(_specularConvolvePass);
@@ -176,7 +190,7 @@ void CubemapProcessor::validate(RenderInterface::Pointer& renderer)
 		passInfo.color[0].loadOperation = FramebufferOperation::DontCare;
 		passInfo.color[0].storeOperation = FramebufferOperation::Store;
 		passInfo.color[0].useDefaultRenderTarget = false;
-		passInfo.name = "eq-to-cubemap";
+		passInfo.name = "prepare-cubemap";
 		passInfo.priority = passPriority--;
 		_downsamplePass = renderer->allocateRenderPass(passInfo);
 		_downsampleBatch = renderhelper::createFullscreenRenderBatch(_tex[CubemapType::Source], _processingMaterial);
@@ -223,6 +237,7 @@ void CubemapProcessor::drawDebug(RenderInterface::Pointer& renderer, const Drawe
 		vec2 pos = vec2(0.0f, 0.0f);
 
 		_cubemapDebugPass->begin(RenderPassBeginInfo::singlePass());
+		_cubemapDebugPass->nextSubpass();
 		for (uint32_t i = CubemapType::Downsampled; i < CubemapType::Count; ++i)
 		{
 			pos.y = 0.0f;
@@ -236,7 +251,7 @@ void CubemapProcessor::drawDebug(RenderInterface::Pointer& renderer, const Drawe
 			}
 			pos.x += dx;
 		}
-
+		_cubemapDebugPass->endSubpass();
 		_cubemapDebugPass->end();
 		renderer->submitRenderPass(_cubemapDebugPass);
 	}
@@ -245,8 +260,10 @@ void CubemapProcessor::drawDebug(RenderInterface::Pointer& renderer, const Drawe
 	{
 		vec2 lookupSize = vec2(256.0f);
 		_lookupDebugPass->begin(RenderPassBeginInfo::singlePass());
+		_lookupDebugPass->nextSubpass();
 		_lookupDebugPass->setSharedVariable(ObjectVariable::WorldTransform, fullscreenBatchTransform(vp, 0.5f * (vp - lookupSize), lookupSize));
 		_lookupDebugPass->pushRenderBatch(_lookupDebugBatch);
+		_lookupDebugPass->endSubpass();
 		_lookupDebugPass->end();
 		renderer->submitRenderPass(_lookupDebugPass);
 	}

@@ -103,11 +103,13 @@ void HDRFlow::render()
 	antialias();
 
 	_passes.final->begin(RenderPassBeginInfo::singlePass());
+	_passes.final->nextSubpass();
 	{
 		_batches.final->material()->setTextureWithSampler(MaterialTexture::BaseColor, _primaryTarget, _renderer->clampSampler());
 		_passes.final->pushRenderBatch(_batches.final);
 		debugDraw();
 	}
+	_passes.final->endSubpass();
 	_passes.final->end();
 	_renderer->submitRenderPass(_passes.final);
 }
@@ -118,70 +120,62 @@ void HDRFlow::postprocess()
 	_batches.motionBlur->material()->setTextureWithSampler(MaterialTexture::EmissiveColor, vel, _renderer->clampSampler());
 	_batches.motionBlur->material()->setTextureWithSampler(MaterialTexture::BaseColor, _primaryTarget, _renderer->clampSampler());
 	_passes.motionBlur0->begin(RenderPassBeginInfo::singlePass());
+	_passes.motionBlur0->nextSubpass();
 	_passes.motionBlur0->pushRenderBatch(_batches.motionBlur);
+	_passes.motionBlur0->endSubpass();
 	_passes.motionBlur0->end();
 	_renderer->submitRenderPass(_passes.motionBlur0);
 	
 	_batches.motionBlur->material()->setTextureWithSampler(MaterialTexture::BaseColor, _secondaryTarget, _renderer->clampSampler());
 	_passes.motionBlur1->begin(RenderPassBeginInfo::singlePass());
+	_passes.motionBlur1->nextSubpass();
 	_passes.motionBlur1->pushRenderBatch(_batches.motionBlur);
+	_passes.motionBlur1->endSubpass();
 	_passes.motionBlur1->end();
 	_renderer->submitRenderPass(_passes.motionBlur1);
 }
 
 void HDRFlow::downsampleLuminance()
 {
-	ResourceBarrier barrierToRenderTarget(TextureState::ColorRenderTarget);
-	ResourceBarrier barrierToShaderResource(TextureState::ShaderResource);
-
-	_passes.downsample->begin(_batches.downsampleBeginInfo);
-	barrierToRenderTarget.firstLevel = 0;
-	_passes.downsample->pushImageBarrier(_luminanceTarget, barrierToRenderTarget);
-
 	_batches.downsample->material()->setTextureWithSampler(MaterialTexture::Shadow, _luminanceHistory, _renderer->clampSampler());
 	_batches.downsample->material()->setTextureWithSampler(MaterialTexture::BaseColor, _primaryTarget, _renderer->clampSampler());
 	_batches.downsample->material()->setFloat(MaterialVariable::ExtraParameters, 0.0f);
-	_passes.downsample->pushRenderBatch(_batches.downsample);
+
+	_passes.downsample->begin(_batches.downsampleBeginInfo);
+	_passes.downsample->pushImageBarrier(_luminanceTarget, ResourceBarrier(TextureState::ColorRenderTarget));
+
 	_passes.downsample->nextSubpass();
+	_passes.downsample->pushRenderBatch(_batches.downsample);
+	_passes.downsample->endSubpass();
 
 	for (uint32_t level = 1; level < _luminanceTarget->description().levelCount; ++level)
 	{
-		barrierToShaderResource.firstLevel = level - 1;
-		_passes.downsample->pushImageBarrier(_luminanceTarget, barrierToShaderResource);
-		barrierToRenderTarget.firstLevel = level;
-		_passes.downsample->pushImageBarrier(_luminanceTarget, barrierToRenderTarget);
-
 		_batches.downsample->material()->setFloat(MaterialVariable::ExtraParameters, static_cast<float>(level));
 		_batches.downsample->material()->setTextureWithSampler(MaterialTexture::BaseColor, _luminanceTarget, _renderer->clampSampler());
-		_passes.downsample->pushRenderBatch(_batches.downsample);
+		
+		_passes.downsample->pushImageBarrier(_luminanceTarget, ResourceBarrier(TextureState::ColorRenderTarget, level, 0));
+		_passes.downsample->pushImageBarrier(_luminanceTarget, ResourceBarrier(TextureState::ShaderResource, level - 1, 0));
+		
+		_passes.downsample->pushImageBarrier(_luminanceTarget, ResourceBarrier(TextureState::ShaderResource, 0,
+			_luminanceTarget->description().levelCount, 0, 1));
+
 		_passes.downsample->nextSubpass();
+		_passes.downsample->pushRenderBatch(_batches.downsample);
+		_passes.downsample->endSubpass();
 	}
 	_passes.downsample->end();
 
-	ResourceBarrier toCopySource(TextureState::CopySource);
-	toCopySource.firstLevel = _luminanceTarget->description().levelCount - 1;
-	toCopySource.levelCount = 1;
-	_passes.downsample->pushImageBarrier(_luminanceTarget, toCopySource);
-
-	ResourceBarrier toCopyDestination(TextureState::CopyDestination);
-	toCopyDestination.firstLevel = 0;
-	toCopyDestination.levelCount = 1;
-	_passes.downsample->pushImageBarrier(_luminanceHistory, toCopyDestination);
+	_passes.downsample->pushImageBarrier(_luminanceTarget, ResourceBarrier(TextureState::CopySource, _luminanceTarget->description().levelCount - 1, 0));
+	_passes.downsample->pushImageBarrier(_luminanceHistory, ResourceBarrier(TextureState::CopyDestination));
 	
 	CopyDescriptor copyLuminance;
 	copyLuminance.levelFrom = _luminanceTarget->description().levelCount - 1;
 	copyLuminance.size = vec3i(1, 1, 1);
 	_passes.downsample->copyImage(_luminanceTarget, _luminanceHistory, copyLuminance);
 
-	barrierToShaderResource.firstLevel = 0;
-	barrierToShaderResource.levelCount = _primaryTarget->description().levelCount;
-	_passes.downsample->pushImageBarrier(_primaryTarget, barrierToShaderResource);
-	
-	barrierToShaderResource.levelCount = _luminanceTarget->description().levelCount;
-	_passes.downsample->pushImageBarrier(_luminanceTarget, barrierToShaderResource);
-
-	barrierToShaderResource.levelCount = 1;
-	_passes.downsample->pushImageBarrier(_luminanceHistory, barrierToShaderResource);
+	_passes.downsample->pushImageBarrier(_primaryTarget, ResourceBarrier(TextureState::ShaderResource, 0, _primaryTarget->description().levelCount, 0, 1));
+	_passes.downsample->pushImageBarrier(_luminanceTarget, ResourceBarrier(TextureState::ShaderResource, 0, _luminanceTarget->description().levelCount, 0, 1));
+	_passes.downsample->pushImageBarrier(_luminanceHistory, ResourceBarrier(TextureState::ShaderResource, 0, 1, 0, 1));
 
 	_renderer->submitRenderPass(_passes.downsample);
 }
@@ -192,7 +186,9 @@ void HDRFlow::tonemap()
 	_batches.tonemap->material()->setTextureWithSampler(MaterialTexture::EmissiveColor, _luminanceTarget, _renderer->clampSampler());
 
 	_passes.tonemapping->begin(RenderPassBeginInfo::singlePass());
+	_passes.tonemapping->nextSubpass();
 	_passes.tonemapping->pushRenderBatch(_batches.tonemap);
+	_passes.tonemapping->endSubpass();
 	_passes.tonemapping->end();
 	
 	/*
@@ -218,7 +214,9 @@ void HDRFlow::antialias()
 
 	_passes.txaa->setSharedVariable(ObjectVariable::CameraJitter, drawer()->latestCameraJitter());
 	_passes.txaa->begin(RenderPassBeginInfo::singlePass());
+	_passes.txaa->nextSubpass();
 	_passes.txaa->pushRenderBatch(_batches.txaa);
+	_passes.txaa->endSubpass();
 	_passes.txaa->end();
 
 	CopyDescriptor copyDescriptor;

@@ -77,8 +77,10 @@ void ShadowmapProcessor::process(RenderInterface::Pointer& renderer, DrawerOptio
 
 	_renderables.shadowpass->loadSharedVariablesFromCamera(_light);
 	_renderables.shadowpass->loadSharedVariablesFromLight(_light);
+	
 	_renderables.shadowpass->begin(RenderPassBeginInfo::singlePass());
 	_renderables.shadowpass->pushImageBarrier(_directionalShadowmap, ResourceBarrier(TextureState::DepthRenderTarget));
+	_renderables.shadowpass->nextSubpass();
 	for (Mesh::Pointer mesh : _renderables.meshes)
 	{
 		const mat4& transform = mesh->transform();
@@ -88,8 +90,9 @@ void ShadowmapProcessor::process(RenderInterface::Pointer& renderer, DrawerOptio
 		for (const RenderBatch::Pointer& batch : mesh->renderBatches())
 			_renderables.shadowpass->pushRenderBatch(batch);
 	}
-	_renderables.shadowpass->pushImageBarrier(_directionalShadowmap, ResourceBarrier(TextureState::ShaderResource));
+	_renderables.shadowpass->endSubpass();
 	_renderables.shadowpass->end();
+	_renderables.shadowpass->pushImageBarrier(_directionalShadowmap, ResourceBarrier(TextureState::ShaderResource));
 	renderer->submitRenderPass(_renderables.shadowpass);
 
 	if (options.drawShadowmap)
@@ -99,8 +102,10 @@ void ShadowmapProcessor::process(RenderInterface::Pointer& renderer, DrawerOptio
 		_renderables.debugBatch->setMaterial(_renderables.debugMaterial->instance());
 		
 		_renderables.debugPass->begin(RenderPassBeginInfo::singlePass());
+		_renderables.debugPass->nextSubpass();
 		_renderables.debugPass->setSharedVariable(ObjectVariable::WorldTransform, fullscreenBatchTransform(vp, vec2(0.0f), sz));
 		_renderables.debugPass->pushRenderBatch(_renderables.debugBatch);
+		_renderables.debugPass->endSubpass();
 		_renderables.debugPass->end();
 		
 		renderer->submitRenderPass(_renderables.debugPass);

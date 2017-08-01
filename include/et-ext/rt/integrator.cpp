@@ -13,7 +13,7 @@ namespace rt
 {
 #define ET_RT_USE_RUSSIAN_ROULETTE 1
 
-float4 evaluateNormals(const Scene& scene, const Ray& inRay, uint32_t maxPathLength, uint32_t& pathLength)
+float4 evaluateNormals(Scene& scene, const Ray& inRay, Evaluate& eval)
 {
 	KDTree::TraverseResult hit0 = scene.kdTree.traverse(inRay);
 	if (hit0.triangleIndex == InvalidIndex)
@@ -23,33 +23,36 @@ float4 evaluateNormals(const Scene& scene, const Ray& inRay, uint32_t maxPathLen
 	return tri.interpolatedNormal(hit0.intersectionPointBarycentric) * 0.5f + float4(0.5f);
 }
 
-float4 evaluateAmbientOcclusion(const Scene& scene, const Ray& inRay, uint32_t maxPathLength, uint32_t& pathLength)
+float4 evaluateAmbientOcclusion(Scene& scene, const Ray& inRay, Evaluate& eval)
 {
 	float4 result(1.0f);
-	KDTree::TraverseResult hit0 = scene.kdTree.traverse(inRay);
-	if (hit0.triangleIndex != InvalidIndex)
+	KDTree::TraverseResult hit = scene.kdTree.traverse(inRay);
+	if (hit.triangleIndex != InvalidIndex)
 	{
-		++pathLength;
+		++eval.pathLength;
 		
-		const Triangle& tri = scene.kdTree.triangleAtIndex(hit0.triangleIndex);
-		float4 surfaceNormal = tri.interpolatedNormal(hit0.intersectionPointBarycentric);
-		float4 nextDirection = randomVectorOnHemisphere(surfaceNormal, uniformDistribution);
-		if (scene.kdTree.traverse(Ray(hit0.intersectionPoint, nextDirection)).triangleIndex != InvalidIndex)
+		const Triangle& tri = scene.kdTree.triangleAtIndex(hit.triangleIndex);
+		float4 surfaceNormal = tri.interpolatedNormal(hit.intersectionPointBarycentric);
+		float4 nextDirection = randomVectorOnHemisphere(scene.sampler.sample(eval.rayIndex, eval.totalRayCount), surfaceNormal, uniformDistribution);
+
+		float4 origin = hit.intersectionPoint;
+		hit = scene.kdTree.traverse(Ray(origin, nextDirection));
+		if (hit.triangleIndex != InvalidIndex)
 			result = float4(0.0f);
 	}
 	return result;
 }
 
-float4 evaluateGlobalIllumination(const Scene& scene, const Ray& inRay, uint32_t maxPathLength, uint32_t& pathLength)
+float4 evaluateGlobalIllumination(Scene& scene, const Ray& inRay, Evaluate& eval)
 {
-	if (maxPathLength == 0)
-		maxPathLength = 0x7FFFFFFF;
+	if (eval.maxPathLength == 0)
+		eval.maxPathLength = 0x7FFFFFFF;
 
 	float4 result(0.0f);
 	float4 throughput(1.0f);
 
 	Ray currentRay = inRay;
-	for (pathLength = 0; pathLength < maxPathLength; ++pathLength)
+	for (eval.pathLength = 0; eval.pathLength < eval.maxPathLength; ++eval.pathLength)
 	{
 		KDTree::TraverseResult intersection = scene.kdTree.traverse(currentRay);
 		if (intersection.triangleIndex == InvalidIndex)
@@ -82,7 +85,7 @@ float4 evaluateGlobalIllumination(const Scene& scene, const Ray& inRay, uint32_t
 		currentRay.direction = bsdfSample.Wo;
 
 #	if (ET_RT_USE_RUSSIAN_ROULETTE)
-		if (pathLength > 16)
+		if (eval.pathLength > 16)
 		{
 			ET_ALIGNED(16) float local[4] = {};
 			throughput.loadToFloats(local);

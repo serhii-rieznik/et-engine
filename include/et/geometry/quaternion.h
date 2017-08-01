@@ -174,7 +174,5 @@ namespace et
 	inline Quaternion<T> normalize(const Quaternion<T>& q)
 	{
 		return q.normalized();
-		T l = q.lengthSquared();
-		return (l > 0) ? (q / std::sqrt(l)) : Quaternion<T>();
 	}
 }

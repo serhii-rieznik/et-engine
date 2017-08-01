@@ -84,8 +84,6 @@ float4 fragmentMain(VSOutput fsIn) : SV_Target0
 	float3 tX = normalize(cross(up, n));
 	float3 tY = cross(n, tX);
 
-#define DIFFUSE_CONVOLUTION 0
-
 #if (DIFFUSE_CONVOLUTION)
 	#define samples 512
 #else

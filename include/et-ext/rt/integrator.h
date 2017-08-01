@@ -14,11 +14,19 @@ namespace et
 namespace rt
 {
 
-using EvaluateFunction = float4(*)(const Scene&, const Ray& inRay, uint32_t maxPathLength, uint32_t& pathLength);
+struct Evaluate
+{
+	uint32_t rayIndex = 0;
+	uint32_t totalRayCount = 0;
+	uint32_t maxPathLength = 0;
+	uint32_t pathLength = 0;
+};
 
-float4 evaluateNormals(const Scene&, const Ray& inRay, uint32_t maxPathLength, uint32_t& pathLength);
-float4 evaluateAmbientOcclusion(const Scene&, const Ray& inRay, uint32_t maxPathLength, uint32_t& pathLength);
-float4 evaluateGlobalIllumination(const Scene&, const Ray& inRay, uint32_t maxPathLength, uint32_t& pathLength);
+using EvaluateFunction = float4(*)(Scene&, const Ray&, Evaluate&);
+
+float4 evaluateNormals(Scene&, const Ray& inRay, Evaluate&);
+float4 evaluateAmbientOcclusion(Scene&, const Ray& inRay, Evaluate&);
+float4 evaluateGlobalIllumination(Scene&, const Ray& inRay, Evaluate&);
 
 }
 }

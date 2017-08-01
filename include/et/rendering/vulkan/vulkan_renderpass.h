@@ -32,8 +32,11 @@ public:
 	void pushImageBarrier(const Texture::Pointer&, const ResourceBarrier&) override;
 	void copyImage(const Texture::Pointer&, const Texture::Pointer&, const CopyDescriptor&) override;
 	void dispatchCompute(const Compute::Pointer&, const vec3i&) override;
+	void endSubpass() override;
 	void nextSubpass() override;
 	void end() override;
+
+	void debug() override;
 	
 	void recordCommandBuffer();
 	uint32_t recordedFrameIndex() const;

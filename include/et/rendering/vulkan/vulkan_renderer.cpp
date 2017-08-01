@@ -410,9 +410,9 @@ void VulkanRenderer::present()
 			++waitEnd;
 		}
 
-		for (auto i = _private->signalSemaphores.begin() + signalBegin - submittedSignal, e = _private->signalSemaphores.end(); i != e; ++i)
+		for (auto si = _private->signalSemaphores.begin() + signalBegin - submittedSignal, se = _private->signalSemaphores.end(); si != se; ++si)
 		{
-			_private->waitSemaphores.emplace_back(*i);
+			_private->waitSemaphores.emplace_back(*si);
 			_private->waitStages.emplace_back(VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT);
 			++waitEnd;
 		}
