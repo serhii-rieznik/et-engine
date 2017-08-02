@@ -195,6 +195,7 @@ VulkanRenderPass::VulkanRenderPass(VulkanRenderer* renderer, VulkanState& vulkan
 			attachment.finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 			if (target.useDefaultRenderTarget)
 			{
+				ET_ASSERT(target.storeOperation == FramebufferOperation::Store);
 				attachment.format = vulkan.swapchain.surfaceFormat.format;
 			}
 			else
