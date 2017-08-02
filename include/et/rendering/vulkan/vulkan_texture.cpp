@@ -74,8 +74,6 @@ VulkanTexture::VulkanTexture(VulkanState& vulkan, const Description& desc, const
 		info.usage |= VK_IMAGE_USAGE_TRANSFER_DST_BIT;
 
 	VULKAN_CALL(vkCreateImage(vulkan.device, &info, nullptr, &_private->image));
-	if (_private->image == VkImage(0x66))
-		printf(".");
 
 	vkGetImageMemoryRequirements(vulkan.device, _private->image, &_private->memoryRequirements);
 	

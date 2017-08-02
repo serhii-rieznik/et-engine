@@ -91,6 +91,7 @@ void CubemapProcessor::process(RenderInterface::Pointer& renderer, DrawerOptions
 
 			if (i == 5)
 			{
+				_downsampleMaterial->setTexture(MaterialTexture::BaseColor, tex);
 				_downsampleBatch->setMaterial(_downsampleMaterial->instance());
 				_downsampleMaterial->releaseInstances();
 			}
