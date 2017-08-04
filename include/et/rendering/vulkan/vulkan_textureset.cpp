@@ -43,7 +43,7 @@ public:
 		uint32_t bindingIndex = 0;
 		for (const auto& e : entry.second.textures)
 		{
-			if (e.valid())
+			if (e.image.valid())
 			{
 				bindings.emplace_back();
 				VkDescriptorSetLayoutBinding& binding = bindings.back();
@@ -54,7 +54,7 @@ public:
 
 				imageInfos.emplace_back();
 				VkDescriptorImageInfo& info = imageInfos.back();
-				info.imageView = VulkanTexture::Pointer(e)->nativeTexture().completeImageView;
+				info.imageView = VulkanTexture::Pointer(e.image)->nativeTexture().imageView(e.range);
 				info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 
 				writeSet.emplace_back();
@@ -109,7 +109,7 @@ public:
 
 				imageInfos.emplace_back();
 				VkDescriptorImageInfo& info = imageInfos.back();
-				info.imageView = VulkanTexture::Pointer(e)->nativeTexture().completeImageView;
+				info.imageView = VulkanTexture::Pointer(e)->nativeTexture().imageView(ResourceRange::whole);
 				info.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
 
 				writeSet.emplace_back();

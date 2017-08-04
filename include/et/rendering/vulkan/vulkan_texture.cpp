@@ -86,14 +86,7 @@ VulkanTexture::VulkanTexture(VulkanState& vulkan, const Description& desc, const
 	allocInfo.memoryTypeIndex = vulkan::getMemoryTypeIndex(vulkan, _private->memoryRequirements.memoryTypeBits, memoryProperties);
 	VULKAN_CALL(vkAllocateMemory(vulkan.device, &allocInfo, nullptr, &_private->memory));
 	VULKAN_CALL(vkBindImageMemory(vulkan.device, _private->image, _private->memory, 0));
-
-	VkImageViewCreateInfo imageViewInfo = { VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO };
-	imageViewInfo.image = _private->image;
-	imageViewInfo.viewType = _private->imageViewType;
-	imageViewInfo.format = _private->format;
-	imageViewInfo.subresourceRange = { _private->aspect, 0, _private->levelCount, 0, _private->layerCount };
-	VULKAN_CALL(vkCreateImageView(vulkan.device, &imageViewInfo, nullptr, &_private->completeImageView));
-
+	
 	if (data.size() > 0)
 		setImageData(data);
 }
@@ -102,8 +95,6 @@ VulkanTexture::~VulkanTexture()
 {
 	for (auto imageView : _private->allImageViews)
 		vkDestroyImageView(_private->vulkan.device, imageView.second, nullptr);
-
-	vkDestroyImageView(_private->vulkan.device, _private->completeImageView, nullptr);
 
 	vkDestroyImage(_private->vulkan.device, _private->image, nullptr);
 	vkFreeMemory(_private->vulkan.device, _private->memory, nullptr);

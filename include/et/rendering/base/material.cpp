@@ -32,12 +32,13 @@ uint64_t Material::sortingKey() const
 	return 0;
 }
 
-void Material::setTexture(MaterialTexture t, const Texture::Pointer& tex)
+void Material::setTexture(MaterialTexture t, const Texture::Pointer& tex, const ResourceRange& range)
 {
-	OptionalTextureObject<Texture::Pointer>& entry = textures[static_cast<uint32_t>(t)];
-	if (entry.object != tex)
+	OptionalTextureObject& entry = textures[static_cast<uint32_t>(t)];
+	if ((entry.object != tex) || (entry.range != range))
 	{
 		entry.object = tex;
+		entry.range = range;
 		entry.index = static_cast<uint32_t>(t);
 		entry.binding = t;
 		invalidateTextureSet();
@@ -46,7 +47,7 @@ void Material::setTexture(MaterialTexture t, const Texture::Pointer& tex)
 
 void Material::setSampler(MaterialTexture t, const Sampler::Pointer& smp)
 {
-	OptionalTextureObject<Sampler::Pointer>& entry = samplers[static_cast<uint32_t>(t) + MaterialSamplerBindingOffset];
+	OptionalSamplerObject& entry = samplers[static_cast<uint32_t>(t) + MaterialSamplerBindingOffset];
 	if (entry.object != smp)
 	{
 		entry.object = smp;
@@ -58,7 +59,7 @@ void Material::setSampler(MaterialTexture t, const Sampler::Pointer& smp)
 
 void Material::setImage(StorageBuffer s, const Texture::Pointer& tex)
 {
-	OptionalImageObject<Texture::Pointer>& entry = images[static_cast<uint32_t>(s)];
+	OptionalImageObject& entry = images[static_cast<uint32_t>(s)];
 	if (entry.object != tex)
 	{
 		entry.object = tex;
@@ -68,9 +69,9 @@ void Material::setImage(StorageBuffer s, const Texture::Pointer& tex)
 	}
 }
 
-void Material::setTextureWithSampler(MaterialTexture t, const Texture::Pointer& tex, const Sampler::Pointer& smp)
+void Material::setTextureWithSampler(MaterialTexture t, const Texture::Pointer& tex, const Sampler::Pointer& smp, const ResourceRange& range)
 {
-	setTexture(t, tex);
+	setTexture(t, tex, range);
 	setSampler(t, smp);
 }
 
@@ -390,10 +391,17 @@ void MaterialInstance::buildTextureSet(const std::string& pt)
 		{
 			const Texture::Pointer& baseTexture = base()->textures[r.second].object;
 			const Texture::Pointer& ownTexture = textures[r.second].object;
-			Texture::Pointer& descriptionTexture = description[ref.first].textures[r.second];
-			descriptionTexture = ownTexture.valid() ? ownTexture : baseTexture;
-			if (descriptionTexture.invalid())
-				descriptionTexture = _renderer->checkersTexture();
+			const ResourceRange& baseRange = base()->textures[r.second].range;
+			const ResourceRange& ownRange = textures[r.second].range;
+
+			TextureSet::TextureBinding& descriptionTexture = description[ref.first].textures[r.second];
+			descriptionTexture.image = ownTexture.valid() ? ownTexture : baseTexture;
+			descriptionTexture.range = ownTexture.valid() ? ownRange : baseRange;
+			if (descriptionTexture.image.invalid())
+			{
+				descriptionTexture.image = _renderer->checkersTexture();
+				descriptionTexture.range = ResourceRange::whole;
+			}
 		}
 		for (const auto& r : ref.second.samplers)
 		{

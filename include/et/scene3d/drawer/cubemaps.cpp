@@ -79,8 +79,9 @@ void CubemapProcessor::process(RenderInterface::Pointer& renderer, DrawerOptions
 			_downsampleMaterial->setFloat(MaterialVariable::ExtraParameters, static_cast<float>(level));
 			_downsamplePass->setSharedVariable(ObjectVariable::WorldTransform, _projections[face]);
 
-			if ((face == 0) && (level > 0))
+			if ((level > 0) && (face == 0))
 			{
+				_downsampleMaterial->setTexture(MaterialTexture::BaseColor, tex, { 0, level, 0, 6 });
 				_downsamplePass->pushImageBarrier(tex, ResourceBarrier(TextureState::ShaderResource, level - 1, 1, 0, 6));
 				_downsamplePass->pushImageBarrier(tex, ResourceBarrier(TextureState::ColorRenderTarget, level, 1, 0, 6));
 			}
@@ -88,16 +89,16 @@ void CubemapProcessor::process(RenderInterface::Pointer& renderer, DrawerOptions
 			_downsamplePass->nextSubpass();
 			_downsamplePass->pushRenderBatch(_downsampleBatch);
 			_downsamplePass->endSubpass();
-
+			
 			if (i == 5)
 			{
-				_downsampleMaterial->setTexture(MaterialTexture::BaseColor, tex);
 				_downsampleBatch->setMaterial(_downsampleMaterial->instance());
 				_downsampleMaterial->releaseInstances();
 			}
 		}
-		_downsamplePass->end();
 		_downsamplePass->pushImageBarrier(tex, ResourceBarrier(TextureState::ShaderResource, 0, CubemapLevels, 0, 6));
+		_downsamplePass->end();
+		
 		renderer->submitRenderPass(_downsamplePass);
 
 		Material::Pointer mtl = _specularConvolveBatch->material();

@@ -164,22 +164,15 @@ struct VulkanNativeTexture
 	VkImage image = nullptr;
 	VkDeviceMemory memory = nullptr;
 	VkMemoryRequirements memoryRequirements{ };
-	// VkImageLayout layout = VK_IMAGE_LAYOUT_UNDEFINED;
 	VkFormat format = VK_FORMAT_UNDEFINED;
 	VkImageAspectFlags aspect = VkImageAspectFlagBits::VK_IMAGE_ASPECT_FLAG_BITS_MAX_ENUM;
 
-	Map<uint32_t, VkImageView> allImageViews;
-	VkImageView completeImageView = nullptr;
+	Map<uint64_t, VkImageView> allImageViews;
 	VkImageViewType imageViewType = VkImageViewType::VK_IMAGE_VIEW_TYPE_MAX_ENUM;
 	uint32_t layerCount = 0;
 	uint32_t levelCount = 0;
 
-	uint32_t imageViewIndex(uint32_t layer, uint32_t level) const
-	{
-		return (layer & 0xffff) | ((level & 0xffff) << 16);
-	}
-
-	VkImageView imageView(uint32_t layer, uint32_t level);
+	VkImageView imageView(const ResourceRange&);
 };
 
 struct VulkanNativeSampler

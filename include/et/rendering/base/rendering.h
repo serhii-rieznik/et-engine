@@ -476,13 +476,56 @@ enum RenderPassPriority : uint32_t
 	UI = 1 << 16
 };
 
-struct ResourceBarrier
+struct ResourceRange
 {
 	uint32_t firstLevel = 0;
-	uint32_t levelCount = 1;
+	uint32_t levelCount = std::numeric_limits<uint32_t>::max();
 	uint32_t firstLayer = 0;
-	uint32_t layerCount = 1;
+	uint32_t layerCount = std::numeric_limits<uint32_t>::max();
+
+	ResourceRange() = default;
+
+	ResourceRange(uint32_t level, uint32_t layer) :
+		firstLevel(level), firstLayer(layer) { }
+
+	ResourceRange(uint32_t level, uint32_t lvlCount, uint32_t layer, uint32_t layCount) :
+		firstLevel(level), levelCount(lvlCount), firstLayer(layer), layerCount(layCount) { }
+
+	ResourceRange(std::initializer_list<uint32_t>&& il)
+	{
+		if (il.size() > 0)
+			firstLevel = *(il.begin() + 0);
+		if (il.size() > 1)
+			levelCount = *(il.begin() + 1);
+		if (il.size() > 2)
+			firstLayer = *(il.begin() + 2);
+		if (il.size() > 3)
+			layerCount = *(il.begin() + 3);
+	}
+
+	inline uint64_t hash() const
+	{
+		return (static_cast<uint64_t>(firstLevel & 0xffff) << 00) | (static_cast<uint64_t>(levelCount & 0xffff) << 16) |
+			(static_cast<uint64_t>(firstLayer & 0xffff) << 32) | (static_cast<uint64_t>(layerCount & 0xffff) << 48);
+	}
+
+	inline bool operator == (const ResourceRange& r) const
+	{
+		return hash() == r.hash();
+	}
+
+	inline bool operator != (const ResourceRange& r) const
+	{
+		return hash() != r.hash();
+	}
+
+	static const ResourceRange whole;
+};
+
+struct ResourceBarrier
+{
 	TextureState toState = TextureState::Undefined;
+	ResourceRange range;
 
 	ResourceBarrier() = default;
 	
@@ -490,10 +533,10 @@ struct ResourceBarrier
 		: toState(ts) {}
 	
 	ResourceBarrier(TextureState ts, uint32_t level, uint32_t layer)
-		: toState(ts), firstLevel(level), firstLayer(layer) {}
-	
+		: toState(ts), range(level, layer) {}
+
 	ResourceBarrier(TextureState ts, uint32_t level, uint32_t levels, uint32_t layer, uint32_t layers)
-		: toState(ts), firstLevel(level), levelCount(levels), firstLayer(layer), layerCount(layers) {}
+		: toState(ts), range(level, levels, layer, layers) {}
 };
 
 enum class PipelineClass : uint32_t

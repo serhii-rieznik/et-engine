@@ -91,8 +91,9 @@ void ShadowmapProcessor::process(RenderInterface::Pointer& renderer, DrawerOptio
 			_renderables.shadowpass->pushRenderBatch(batch);
 	}
 	_renderables.shadowpass->endSubpass();
-	_renderables.shadowpass->end();
+
 	_renderables.shadowpass->pushImageBarrier(_directionalShadowmap, ResourceBarrier(TextureState::ShaderResource));
+	_renderables.shadowpass->end();
 	renderer->submitRenderPass(_renderables.shadowpass);
 
 	if (options.drawShadowmap)

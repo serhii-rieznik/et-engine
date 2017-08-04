@@ -42,9 +42,9 @@ public:
 	void flushInstances();
 	void releaseInstances();
 
-	void setTexture(MaterialTexture, const Texture::Pointer&);
+	void setTexture(MaterialTexture, const Texture::Pointer&, const ResourceRange& = ResourceRange::whole);
 	void setSampler(MaterialTexture, const Sampler::Pointer&);
-	void setTextureWithSampler(MaterialTexture, const Texture::Pointer&, const Sampler::Pointer&);
+	void setTextureWithSampler(MaterialTexture, const Texture::Pointer&, const Sampler::Pointer&, const ResourceRange& = ResourceRange::whole);
 	void setImage(StorageBuffer, const Texture::Pointer&);
 
 	const Texture::Pointer& texture(MaterialTexture);

@@ -24,9 +24,16 @@ public:
 		UnorderedMap<std::string, uint32_t> samplers;
 		UnorderedMap<std::string, uint32_t> images;
 	};
-	struct DescriptionSet
+	
+	struct TextureBinding
 	{
-		std::array<Texture::Pointer, MaterialTexture_max> textures;
+		Texture::Pointer image;
+		ResourceRange range;
+	};
+
+	struct DescriptionSet
+	{		
+		std::array<TextureBinding, MaterialTexture_max> textures;
 		std::array<Sampler::Pointer, MaterialTexture_max> samplers;
 		std::array<Texture::Pointer, StorageBuffer_max> images;
 	};

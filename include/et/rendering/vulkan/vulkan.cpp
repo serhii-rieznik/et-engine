@@ -747,19 +747,32 @@ bool isSamplerType(int glType)
 }
 }
 
-VkImageView VulkanNativeTexture::imageView( uint32_t layer, uint32_t level)
+VkImageView VulkanNativeTexture::imageView(const ResourceRange& range)
 {
-	uint32_t index = imageViewIndex(layer, level);
-	VkImageView imageView = allImageViews[index];
+	uint64_t hsh = range.hash();
+	VkImageView imageView = allImageViews[hsh];
 	if (imageView == nullptr)
 	{
+		uint32_t levels = range.levelCount == std::numeric_limits<uint32_t>::max() ? VK_REMAINING_MIP_LEVELS : range.levelCount;
+		uint32_t layers = range.layerCount == std::numeric_limits<uint32_t>::max() ? VK_REMAINING_ARRAY_LAYERS : range.layerCount;
+
+		ET_ASSERT((levels == VK_REMAINING_MIP_LEVELS) || (levels <= levelCount));
+
+		ET_ASSERT((layers == VK_REMAINING_ARRAY_LAYERS) || (layers <= layerCount));
+		
+		ET_ASSERT
+		(
+			(imageViewType != VK_IMAGE_VIEW_TYPE_CUBE) ||
+			(imageViewType == VK_IMAGE_VIEW_TYPE_CUBE) && ((layers == 6) || (layers == VK_REMAINING_ARRAY_LAYERS))
+		);
+
 		VkImageViewCreateInfo imageViewInfo = { VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO };
 		imageViewInfo.image = image;
 		imageViewInfo.viewType = imageViewType;
 		imageViewInfo.format = format;
-		imageViewInfo.subresourceRange = { aspect, level, 1, layer, VK_REMAINING_ARRAY_LAYERS };
+		imageViewInfo.subresourceRange = { aspect, range.firstLevel, levels, range.firstLayer, layers };
 		VULKAN_CALL(vkCreateImageView(vulkan.device, &imageViewInfo, nullptr, &imageView));
-		allImageViews[index] = imageView;
+		allImageViews[hsh] = imageView;
 	}
 	return imageView;
 }

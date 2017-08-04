@@ -10,6 +10,8 @@
 namespace et
 {
 
+const ResourceRange ResourceRange::whole;
+
 const std::string vertexAttributeUsageNames[VertexAttributeUsage_max] =
 {
 	"position", "normal", "color", "tangent", "binormal",

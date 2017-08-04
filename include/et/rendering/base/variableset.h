@@ -138,34 +138,37 @@ struct MaterialPropertyHolder
 using MaterialPropertiesCollection = UnorderedMap<String, MaterialPropertyHolder>;
 
 template <class T>
-struct OptionalTextureObject
+struct OptionalObject
 {
-	T object;
+	IntrusivePtr<T> object;
+	uint32_t index = 0;
+
+	void clear()
+	{
+		index = 0;
+		object.reset(nullptr);
+	}
+};
+
+struct OptionalTextureObject : public OptionalObject<Texture>
+{
+	ResourceRange range;
 	MaterialTexture binding = MaterialTexture::max;
-	uint32_t index = 0;
-
-	void clear()
-	{
-		index = 0;
-		object = nullptr;
-	}
 };
-template <class T>
-struct OptionalImageObject
+
+struct OptionalSamplerObject : public OptionalObject<Sampler>
 {
-	T object;
-	StorageBuffer binding = StorageBuffer::max;
-	uint32_t index = 0;
-
-	void clear()
-	{
-		index = 0;
-		object = nullptr;
-	}
+	MaterialTexture binding = MaterialTexture::max;
 };
-using TexturesHolder = std::map<uint32_t, OptionalTextureObject<Texture::Pointer>>;
-using SamplersHolder = std::map<uint32_t, OptionalTextureObject<Sampler::Pointer>>;
-using ImagesHolder = std::map<uint32_t, OptionalImageObject<Texture::Pointer>>;
+
+struct OptionalImageObject : public OptionalObject<Texture>
+{
+	StorageBuffer binding = StorageBuffer::max;
+};
+
+using TexturesHolder = std::map<uint32_t, OptionalTextureObject>;
+using SamplersHolder = std::map<uint32_t, OptionalSamplerObject>;
+using ImagesHolder = std::map<uint32_t, OptionalImageObject>;
 
 struct OptionalValue
 {

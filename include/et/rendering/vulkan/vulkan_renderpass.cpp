@@ -313,7 +313,7 @@ void VulkanRenderPass::begin(const RenderPassBeginInfo& beginInfo)
 			{
 				ET_ASSERT(info().depth.texture.valid());
 				VulkanTexture::Pointer texture = info().depth.texture;
-				attachments.emplace_back(texture->nativeTexture().imageView(subpass.layer, subpass.level));
+				attachments.emplace_back(texture->nativeTexture().imageView({ subpass.level, 1, subpass.layer }));
 			}
 
 			for (const RenderTarget& rt : info().color)
@@ -326,7 +326,7 @@ void VulkanRenderPass::begin(const RenderPassBeginInfo& beginInfo)
 				{
 					ET_ASSERT(rt.texture.valid());
 					VulkanTexture::Pointer texture = rt.texture;
-					attachments.emplace_back(texture->nativeTexture().imageView(subpass.layer, subpass.level));
+					attachments.emplace_back(texture->nativeTexture().imageView({ subpass.level, 1, subpass.layer }));
 				}
 				else
 				{
@@ -364,11 +364,6 @@ void VulkanRenderPass::begin(const RenderPassBeginInfo& beginInfo)
 
 	setSharedVariable(ObjectVariable::DeltaTime, application().mainRunLoop().lastFrameTime());
 	setSharedVariable(ObjectVariable::ContinuousTime, application().mainRunLoop().time());
-	/*
-	vec4 viewport(_private->subpassSequence.front().viewport.x, _private->subpassSequence.front().viewport.y,
-		_private->subpassSequence.front().viewport.width, _private->subpassSequence.front().viewport.height);
-	setSharedVariable(ObjectVariable::Viewport, viewport);
-	*/
 }
 
 void VulkanRenderPass::endSubpass()
@@ -450,11 +445,15 @@ void VulkanRenderPass::pushRenderBatch(const RenderBatch::Pointer& inBatch)
 
 void VulkanRenderPass::pushImageBarrier(const Texture::Pointer& tex, const ResourceBarrier& barrier)
 {
+	ET_ASSERT(_private->recording);
+
 	_private->commands[_private->frameIndex].emplace_back(tex, barrier);
 }
 
 void VulkanRenderPass::copyImage(const Texture::Pointer& tFrom, const Texture::Pointer& tTo, const CopyDescriptor& desc)
 {
+	ET_ASSERT(_private->recording);
+
 	_private->commands[_private->frameIndex].emplace_back(tFrom, tTo, desc);
 }
 
@@ -575,8 +574,8 @@ void VulkanRenderPass::recordCommandBuffer()
 			barrier.srcQueueFamilyIndex = _private->vulkan.queues[VulkanQueueClass::Graphics].index;
 			barrier.dstQueueFamilyIndex = _private->vulkan.queues[VulkanQueueClass::Graphics].index;
 
-			barrier.subresourceRange = { tex->nativeTexture().aspect, cmd.imageBarrier.firstLevel,
-				cmd.imageBarrier.levelCount, cmd.imageBarrier.firstLayer, cmd.imageBarrier.layerCount };
+			barrier.subresourceRange = { tex->nativeTexture().aspect, cmd.imageBarrier.range.firstLevel,
+				cmd.imageBarrier.range.levelCount, cmd.imageBarrier.range.firstLayer, cmd.imageBarrier.range.layerCount };
 
 			vkCmdPipelineBarrier(commandBuffer, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
 				VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, 0, 0, nullptr, 0, nullptr, 1, &barrier);
