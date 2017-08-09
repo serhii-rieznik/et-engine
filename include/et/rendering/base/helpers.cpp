@@ -67,10 +67,25 @@ RenderBatch::Pointer createFullscreenRenderBatch(const Texture::Pointer& texture
 		mat = rh_local::texturedMaterial;
 
 	MaterialInstance::Pointer materialInstance = mat->instance();
-	materialInstance->setTexture(MaterialTexture::BaseColor, texture);
+	materialInstance->setTexture(MaterialTexture::BaseColor,  texture);
 	
 	return RenderBatch::Pointer::create(materialInstance, rh_local::default2DPlane, 0, rh_local::default2DPlane->vertexCount());
 }
+
+RenderBatch::Pointer createFullscreenRenderBatch(const Texture::Pointer& tex, const Material::Pointer& mat, const Sampler::Pointer& smp)
+{
+	RenderBatch::Pointer rb = createFullscreenRenderBatch(tex, mat);
+	rb->material()->setSampler(MaterialTexture::BaseColor, smp);
+	return rb;
+}
+
+RenderBatch::Pointer createFullscreenRenderBatch(const Texture::Pointer& tex, const Material::Pointer& mat, const Sampler::Pointer& smp, const ResourceRange& rng)
+{
+	RenderBatch::Pointer rb = createFullscreenRenderBatch(tex, mat, smp);
+	rb->material()->setTexture(MaterialTexture::BaseColor, tex, rng);
+	return rb;
+}
+
 
 }
 }

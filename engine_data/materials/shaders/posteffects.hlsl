@@ -3,6 +3,8 @@
 #include <inputlayout>
 #include "srgb.h"
 
+#define LuminanceLowerRange 0.001
+
 Texture2D<float4> baseColorTexture : DECL_TEXTURE(BaseColor);
 Texture2D<float4> emissiveColorTexture : DECL_TEXTURE(EmissiveColor);
 Texture2D<float4> shadowTexture : DECL_TEXTURE(Shadow);
@@ -40,45 +42,42 @@ VSOutput vertexMain(VSInput vsIn)
 
 float4 fragmentMain(VSOutput fsIn) : SV_Target0
 {
-#if (LUMINANCE_DOWNSAMPLE)
+#if (GATHER_AVERAGE)
+	float currentLevel = extraParameters.x;
+	float sampledLevel = max(0.0, currentLevel - 1);
 
-	#define delta 0.5
-	#define lowerRange 0.001
-	uint currentLevel = (uint)(extraParameters.x);
-	uint previousLevel = max(0.0, currentLevel - 1);
+	float w = 0;
+	float h = 0;
+	float levels = 0;
+	baseColorTexture.GetDimensions(sampledLevel, w, h, levels);
 
-	uint w = 0;
-	uint h = 0;
-	uint levels = 0;
-	baseColorTexture.GetDimensions(previousLevel, w, h, levels);
+	const float delta = 0.5;
+	float4 sX = baseColorTexture.SampleLevel(baseColorSampler, fsIn.texCoord0, sampledLevel);
+	float4 s0 = baseColorTexture.SampleLevel(baseColorSampler, fsIn.texCoord0 + float2(-delta / w, -delta / h), sampledLevel);
+	float4 s1 = baseColorTexture.SampleLevel(baseColorSampler, fsIn.texCoord0 + float2( delta / w, -delta / h), sampledLevel);
+	float4 s2 = baseColorTexture.SampleLevel(baseColorSampler, fsIn.texCoord0 + float2(-delta / w,  delta / h), sampledLevel);
+	float4 s3 = baseColorTexture.SampleLevel(baseColorSampler, fsIn.texCoord0 + float2( delta / w,  delta / h), sampledLevel);
+	float4 averageColor = 0.2 * (sX + s0 + s1 + s2 + s3);
+#endif
 
-	float4 sX = baseColorTexture.SampleLevel(baseColorSampler, fsIn.texCoord0, previousLevel);
-	float4 s0 = baseColorTexture.SampleLevel(baseColorSampler, fsIn.texCoord0 + float2(-delta / w, -delta / h), previousLevel);
-	float4 s1 = baseColorTexture.SampleLevel(baseColorSampler, fsIn.texCoord0 + float2( delta / w, -delta / h), previousLevel);
-	float4 s2 = baseColorTexture.SampleLevel(baseColorSampler, fsIn.texCoord0 + float2(-delta / w,  delta / h), previousLevel);
-	float4 s3 = baseColorTexture.SampleLevel(baseColorSampler, fsIn.texCoord0 + float2( delta / w,  delta / h), previousLevel);
-	float4 average = 0.2 * (sX + s0 + s1 + s2 + s3);
-	
-	if (currentLevel == 0)
-	{
-		float lum = dot(average.xyz, float3(0.2989, 0.5870, 0.1140));
-		return log(max(lum, lowerRange));
-	}
+#if (LOG_LUMINANCE)
 
-	if (currentLevel + 1 >= levels)
-	{
-		float previousExposure = shadowTexture.SampleLevel(shadowSampler, float2(0.5, 0.5), 0.0).x;
-		float expoCorrection = 0.0;
-		float lum = exp(average.x);
-		float ev100 = log2(lum * 100.0 / 12.5) - expoCorrection;
-		float exposure = 1.0 / (0.125 * pow(2.0, ev100));
+	float lum = dot(averageColor.xyz, float3(0.2989, 0.5870, 0.1140));
+	return log(max(lum, LuminanceLowerRange));
 
-		float adaptationSpeed = lerp(3.0, 5.0, step(exposure - previousExposure, 0.0));
+#elif (AVERAGE_LUMINANCE)
 
-		return lerp(previousExposure, exposure, 1.0f - exp(-deltaTime * adaptationSpeed));
-	}
+	return averageColor;
 
-	return average;
+#elif (RESOLVE_LUMINANCE)
+
+	float previousExposure = shadowTexture.SampleLevel(shadowSampler, float2(0.5, 0.5), 0.0).x;
+	float expoCorrection = 0.0;
+	float lum = exp(averageColor.x);
+	float ev100 = log2(lum * 100.0 / 12.5) - expoCorrection;
+	float exposure = 1.0 / (0.125 * pow(2.0, ev100));
+	float adaptationSpeed = lerp(3.0, 5.0, step(exposure - previousExposure, 0.0));
+	return lerp(previousExposure, exposure, 1.0f - exp(-deltaTime * adaptationSpeed));
 
 #elif (MOTION_BLUR)
 

@@ -1,7 +1,7 @@
 {
 	"name" : "posteffects",
 
-	"downsample" : 
+	"log-luminance" : 
 	{ 
 		"input-layout" : {
 			"position" : 3,
@@ -13,13 +13,54 @@
 			"depth-write": false
 		},
 		"options" : {
-			"LUMINANCE_DOWNSAMPLE" : 1
+			"GATHER_AVERAGE" : 1,
+			"LOG_LUMINANCE" : 1
 		},
 		"blend-state": "disabled",
 		"cull-mode" : "disabled",
 		"code" : "shaders/posteffects"
 	},
 
+	"average-luminance" : 
+	{ 
+		"input-layout" : {
+			"position" : 3,
+			"texcoord0" : 2
+		},
+		"depth-state": {
+			"depth-function": "always",
+			"depth-test": false,
+			"depth-write": false
+		},
+		"options" : {
+			"GATHER_AVERAGE" : 1,
+			"AVERAGE_LUMINANCE" : 1
+		},
+		"blend-state": "disabled",
+		"cull-mode" : "disabled",
+		"code" : "shaders/posteffects"
+	},
+
+	"resolve-luminance" : 
+	{ 
+		"input-layout" : {
+			"position" : 3,
+			"texcoord0" : 2
+		},
+		"depth-state": {
+			"depth-function": "always",
+			"depth-test": false,
+			"depth-write": false
+		},
+		"options" : {
+			"GATHER_AVERAGE" : 1,
+			"RESOLVE_LUMINANCE" : 1
+		},
+		"blend-state": "disabled",
+		"cull-mode" : "disabled",
+		"code" : "shaders/posteffects"
+	},
+	
 	"motionblur" : 
 	{ 
 		"input-layout" : {

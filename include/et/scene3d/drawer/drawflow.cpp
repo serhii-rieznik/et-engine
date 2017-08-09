@@ -34,12 +34,14 @@ HDRFlow::HDRFlow(const RenderInterface::Pointer& ren) :
 	_materials.debug = _renderer->sharedMaterialLibrary().loadMaterial(application().resolveFileName("engine_data/materials/textured2d-transformed-lod.json"));
 	_materials.posteffects = _renderer->sharedMaterialLibrary().loadMaterial(application().resolveFileName("engine_data/materials/posteffects.json"));
 
+	/*
 	_batches.debug = renderhelper::createFullscreenRenderBatch(Texture::Pointer(), _materials.debug);
 	_batches.final = renderhelper::createFullscreenRenderBatch(Texture::Pointer(), _materials.posteffects);
 	_batches.tonemap = renderhelper::createFullscreenRenderBatch(Texture::Pointer(), _materials.posteffects);
 	_batches.downsample = renderhelper::createFullscreenRenderBatch(Texture::Pointer(), _materials.posteffects);
 	_batches.motionBlur = renderhelper::createFullscreenRenderBatch(Texture::Pointer(), _materials.posteffects);
 	_batches.txaa = renderhelper::createFullscreenRenderBatch(Texture::Pointer(), _materials.posteffects);
+	*/
 }
 
 void HDRFlow::resizeRenderTargets(const vec2i& sz)
@@ -51,9 +53,12 @@ void HDRFlow::resizeRenderTargets(const vec2i& sz)
 		while ((minDimension /= 2) > 0)
 			++levelCount;
 
-		_batches.downsampleBeginInfo.subpasses.clear();
-		for (uint32_t i = 0; i < levelCount; ++i)
-			_batches.downsampleBeginInfo.subpasses.emplace_back(0, i);
+		_passes.logLuminanceBeginInfo.subpasses.emplace_back(0, 0);
+
+		for (uint32_t i = 1; i + 1  < levelCount; ++i)
+			_passes.averageLuminanceBeginInfo.subpasses.emplace_back(0, i);
+
+		_passes.resolveLuminanceBeginInfo.subpasses.emplace_back(0, levelCount - 1);
 
 		TextureDescription::Pointer desc(PointerInit::CreateInplace);
 		desc->size = sz;
@@ -81,7 +86,10 @@ void HDRFlow::resizeRenderTargets(const vec2i& sz)
 		desc->flags = Texture::Flags::RenderTarget | Texture::Flags::CopyDestination;
 		_luminanceHistory = _renderer->createTexture(desc);
 
-		_passes.downsample = _renderer->allocateRenderPass(RenderPass::renderTargetPassInfo("downsample", _luminanceTarget));
+		_passes.logLuminance = _renderer->allocateRenderPass(RenderPass::renderTargetPassInfo("log-luminance", _luminanceTarget));
+		_passes.averageLuminance = _renderer->allocateRenderPass(RenderPass::renderTargetPassInfo("average-luminance", _luminanceTarget));
+		_passes.resolveLuminance = _renderer->allocateRenderPass(RenderPass::renderTargetPassInfo("resolve-luminance", _luminanceTarget));
+
 		_passes.motionBlur0 = _renderer->allocateRenderPass(RenderPass::renderTargetPassInfo("motionblur", _secondaryTarget));
 		_passes.motionBlur1 = _renderer->allocateRenderPass(RenderPass::renderTargetPassInfo("motionblur", _primaryTarget));
 		_passes.tonemapping = _renderer->allocateRenderPass(RenderPass::renderTargetPassInfo("tonemapping", _secondaryTarget));
@@ -105,8 +113,8 @@ void HDRFlow::render()
 	_passes.final->begin(RenderPassBeginInfo::singlePass());
 	_passes.final->nextSubpass();
 	{
-		_batches.final->material()->setTextureWithSampler(MaterialTexture::BaseColor, _primaryTarget, _renderer->clampSampler());
-		_passes.final->pushRenderBatch(_batches.final);
+		RenderBatch::Pointer batch = renderhelper::createFullscreenRenderBatch(_primaryTarget, _materials.posteffects, _renderer->clampSampler());
+		_passes.final->pushRenderBatch(batch);
 		debugDraw();
 	}
 	_passes.final->endSubpass();
@@ -117,19 +125,21 @@ void HDRFlow::render()
 void HDRFlow::postprocess()
 {
 	const Texture::Pointer& vel = drawer()->supportTexture(Drawer::SupportTexture::Velocity);
-	_batches.motionBlur->material()->setTextureWithSampler(MaterialTexture::EmissiveColor, vel, _renderer->clampSampler());
-	_batches.motionBlur->material()->setTextureWithSampler(MaterialTexture::BaseColor, _primaryTarget, _renderer->clampSampler());
+	RenderBatch::Pointer batch = renderhelper::createFullscreenRenderBatch(_primaryTarget, _materials.posteffects, _renderer->clampSampler());
+	batch->material()->setTextureWithSampler(MaterialTexture::EmissiveColor, vel, _renderer->clampSampler());
+	
 	_passes.motionBlur0->begin(RenderPassBeginInfo::singlePass());
 	_passes.motionBlur0->nextSubpass();
-	_passes.motionBlur0->pushRenderBatch(_batches.motionBlur);
+	_passes.motionBlur0->pushRenderBatch(batch);
 	_passes.motionBlur0->endSubpass();
 	_passes.motionBlur0->end();
+	
 	_renderer->submitRenderPass(_passes.motionBlur0);
 	
-	_batches.motionBlur->material()->setTextureWithSampler(MaterialTexture::BaseColor, _secondaryTarget, _renderer->clampSampler());
+	batch->material()->setTextureWithSampler(MaterialTexture::BaseColor, _secondaryTarget, _renderer->clampSampler());
 	_passes.motionBlur1->begin(RenderPassBeginInfo::singlePass());
 	_passes.motionBlur1->nextSubpass();
-	_passes.motionBlur1->pushRenderBatch(_batches.motionBlur);
+	_passes.motionBlur1->pushRenderBatch(batch);
 	_passes.motionBlur1->endSubpass();
 	_passes.motionBlur1->end();
 	_renderer->submitRenderPass(_passes.motionBlur1);
@@ -137,56 +147,78 @@ void HDRFlow::postprocess()
 
 void HDRFlow::downsampleLuminance()
 {
-	_batches.downsample->material()->setTextureWithSampler(MaterialTexture::Shadow, _luminanceHistory, _renderer->clampSampler(), { 0, 1, 0, 1 });
-	_batches.downsample->material()->setTextureWithSampler(MaterialTexture::BaseColor, _primaryTarget, _renderer->clampSampler(), { 0, 1, 0, 1 });
-	_batches.downsample->material()->setFloat(MaterialVariable::ExtraParameters, 0.0f);
-
-	_passes.downsample->begin(_batches.downsampleBeginInfo);
-	_passes.downsample->pushImageBarrier(_luminanceTarget, ResourceBarrier(TextureState::ColorRenderTarget, 0, 1, 0, 1));
-
-	_passes.downsample->nextSubpass();
-	_passes.downsample->pushRenderBatch(_batches.downsample);
-	_passes.downsample->endSubpass();
-
-	_batches.downsample->material()->setSampler(MaterialTexture::BaseColor, _renderer->clampSampler());
-	for (uint32_t level = 1; level < _luminanceTarget->description().levelCount; ++level)
 	{
-		_batches.downsample->material()->setFloat(MaterialVariable::ExtraParameters, static_cast<float>(level));
-		_batches.downsample->material()->setTexture(MaterialTexture::BaseColor, _luminanceTarget, { 0, level, 0, 1 });
+		RenderBatch::Pointer logLuminanceBatch = renderhelper::createFullscreenRenderBatch(_primaryTarget, _materials.posteffects, _renderer->clampSampler(), { 0, 1, 0, 1 });
+		logLuminanceBatch->material()->setFloat(MaterialVariable::ExtraParameters, 0.0f);
+
+		_passes.logLuminance->begin(_passes.logLuminanceBeginInfo);
+		_passes.logLuminance->pushImageBarrier(_luminanceTarget, ResourceBarrier(TextureState::ColorRenderTarget, 0, 1, 0, 1));
+
+		_passes.logLuminance->nextSubpass();
+		_passes.logLuminance->pushRenderBatch(logLuminanceBatch);
+		_passes.logLuminance->endSubpass();
 		
-		_passes.downsample->pushImageBarrier(_luminanceTarget, ResourceBarrier(TextureState::ColorRenderTarget, level, 1, 0, 1));
-		_passes.downsample->pushImageBarrier(_luminanceTarget, ResourceBarrier(TextureState::ShaderResource, 0, level, 0, 1));
-		
-		_passes.downsample->nextSubpass();
-		_passes.downsample->pushRenderBatch(_batches.downsample);
-		_passes.downsample->endSubpass();
+		_passes.logLuminance->end();
+		_renderer->submitRenderPass(_passes.logLuminance);
+	}
+	
+	uint32_t processedLevel = 1;
+	{
+		_passes.averageLuminance->begin(_passes.averageLuminanceBeginInfo);
+		for (; processedLevel + 1 < _luminanceTarget->description().levelCount; ++processedLevel)
+		{
+			RenderBatch::Pointer averageLuminanceBatch = renderhelper::createFullscreenRenderBatch(_luminanceTarget, _materials.posteffects, _renderer->clampSampler(), { 0, processedLevel, 0, 1 });
+			averageLuminanceBatch->material()->setFloat(MaterialVariable::ExtraParameters, static_cast<float>(processedLevel));
+
+			_passes.averageLuminance->pushImageBarrier(_luminanceTarget, ResourceBarrier(TextureState::ColorRenderTarget, processedLevel, 1, 0, 1));
+			_passes.averageLuminance->pushImageBarrier(_luminanceTarget, ResourceBarrier(TextureState::ShaderResource, 0, processedLevel, 0, 1));
+			_passes.averageLuminance->nextSubpass();
+			_passes.averageLuminance->pushRenderBatch(averageLuminanceBatch);
+			_passes.averageLuminance->endSubpass();
+		}
+		_passes.averageLuminance->end();
+		_renderer->submitRenderPass(_passes.averageLuminance);
 	}
 
-	_passes.downsample->pushImageBarrier(_luminanceTarget, ResourceBarrier(TextureState::CopySource, _luminanceTarget->description().levelCount - 1, 0));
-	_passes.downsample->pushImageBarrier(_luminanceHistory, ResourceBarrier(TextureState::CopyDestination));
+	{
+		RenderBatch::Pointer resolveLuminanceBatch = renderhelper::createFullscreenRenderBatch(_luminanceTarget, _materials.posteffects, _renderer->clampSampler(), { 0, processedLevel, 0, 1 });
+		resolveLuminanceBatch->material()->setFloat(MaterialVariable::ExtraParameters, static_cast<float>(processedLevel));
+		resolveLuminanceBatch->material()->setTextureWithSampler(MaterialTexture::Shadow, _luminanceHistory, _renderer->clampSampler(), { 0, 1, 0, 1 });
+
+		CopyDescriptor copyLuminance;
+		copyLuminance.levelFrom = _luminanceTarget->description().levelCount - 1;
+		copyLuminance.size = vec3i(1, 1, 1);
+
+		_passes.resolveLuminance->begin(_passes.resolveLuminanceBeginInfo);
+
+		_passes.resolveLuminance->pushImageBarrier(_luminanceTarget, ResourceBarrier(TextureState::ColorRenderTarget, processedLevel, 1, 0, 1));
+		_passes.resolveLuminance->pushImageBarrier(_luminanceTarget, ResourceBarrier(TextureState::ShaderResource, 0, processedLevel, 0, 1));
+		_passes.resolveLuminance->nextSubpass();
+		_passes.resolveLuminance->pushRenderBatch(resolveLuminanceBatch);
+		_passes.resolveLuminance->endSubpass();
+		
+		_passes.resolveLuminance->pushImageBarrier(_luminanceTarget, ResourceBarrier(TextureState::CopySource, _luminanceTarget->description().levelCount - 1, 0));
+		_passes.resolveLuminance->pushImageBarrier(_luminanceHistory, ResourceBarrier(TextureState::CopyDestination));
+		_passes.resolveLuminance->copyImage(_luminanceTarget, _luminanceHistory, copyLuminance);
+
+		_passes.resolveLuminance->pushImageBarrier(_primaryTarget, ResourceBarrier(TextureState::ShaderResource, 0, _primaryTarget->description().levelCount, 0, 1));
+		_passes.resolveLuminance->pushImageBarrier(_luminanceTarget, ResourceBarrier(TextureState::ShaderResource, 0, _luminanceTarget->description().levelCount, 0, 1));
+		_passes.resolveLuminance->pushImageBarrier(_luminanceHistory, ResourceBarrier(TextureState::ShaderResource, 0, 1, 0, 1));
+		_passes.resolveLuminance->end();
+
+		_renderer->submitRenderPass(_passes.resolveLuminance);
+	}
 	
-	CopyDescriptor copyLuminance;
-	copyLuminance.levelFrom = _luminanceTarget->description().levelCount - 1;
-	copyLuminance.size = vec3i(1, 1, 1);
-	_passes.downsample->copyImage(_luminanceTarget, _luminanceHistory, copyLuminance);
-
-	_passes.downsample->pushImageBarrier(_primaryTarget, ResourceBarrier(TextureState::ShaderResource, 0, _primaryTarget->description().levelCount, 0, 1));
-	_passes.downsample->pushImageBarrier(_luminanceTarget, ResourceBarrier(TextureState::ShaderResource, 0, _luminanceTarget->description().levelCount, 0, 1));
-	_passes.downsample->pushImageBarrier(_luminanceHistory, ResourceBarrier(TextureState::ShaderResource, 0, 1, 0, 1));
-
-	_passes.downsample->end();
-
-	_renderer->submitRenderPass(_passes.downsample);
 }
 
 void HDRFlow::tonemap()
 {
-	_batches.tonemap->material()->setTextureWithSampler(MaterialTexture::BaseColor, _primaryTarget, _renderer->clampSampler());
-	_batches.tonemap->material()->setTextureWithSampler(MaterialTexture::EmissiveColor, _luminanceTarget, _renderer->clampSampler());
+	RenderBatch::Pointer batch = renderhelper::createFullscreenRenderBatch(_primaryTarget, _materials.posteffects, _renderer->clampSampler());
+	batch->material()->setTextureWithSampler(MaterialTexture::EmissiveColor, _luminanceTarget, _renderer->clampSampler());
 
 	_passes.tonemapping->begin(RenderPassBeginInfo::singlePass());
 	_passes.tonemapping->nextSubpass();
-	_passes.tonemapping->pushRenderBatch(_batches.tonemap);
+	_passes.tonemapping->pushRenderBatch(batch);
 	_passes.tonemapping->endSubpass();
 	_passes.tonemapping->end();
 	
@@ -207,14 +239,15 @@ void HDRFlow::tonemap()
 void HDRFlow::antialias()
 {
 	const Texture::Pointer& vel = drawer()->supportTexture(Drawer::SupportTexture::Velocity);
-	_batches.txaa->material()->setTextureWithSampler(MaterialTexture::BaseColor, _secondaryTarget, _renderer->clampSampler());
-	_batches.txaa->material()->setTextureWithSampler(MaterialTexture::Normal, vel, _renderer->clampSampler());
-	_batches.txaa->material()->setTextureWithSampler(MaterialTexture::EmissiveColor, _renderHistory, _renderer->clampSampler());
+
+	RenderBatch::Pointer batch = renderhelper::createFullscreenRenderBatch(_secondaryTarget, _materials.posteffects, _renderer->clampSampler());
+	batch->material()->setTextureWithSampler(MaterialTexture::Normal, vel, _renderer->clampSampler());
+	batch->material()->setTextureWithSampler(MaterialTexture::EmissiveColor, _renderHistory, _renderer->clampSampler());
 
 	_passes.txaa->setSharedVariable(ObjectVariable::CameraJitter, drawer()->latestCameraJitter());
 	_passes.txaa->begin(RenderPassBeginInfo::singlePass());
 	_passes.txaa->nextSubpass();
-	_passes.txaa->pushRenderBatch(_batches.txaa);
+	_passes.txaa->pushRenderBatch(batch);
 	_passes.txaa->endSubpass();
 
 	CopyDescriptor copyDescriptor;
@@ -242,12 +275,13 @@ void HDRFlow::debugDraw()
 	float dy = dx;
 
 	vec2 pos = vec2(0.0f);
-	_batches.debug->material()->setTextureWithSampler(MaterialTexture::BaseColor, _luminanceTarget, _renderer->clampSampler());
+	RenderBatch::Pointer batch = renderhelper::createFullscreenRenderBatch(_luminanceTarget, _materials.debug, _renderer->clampSampler());
 	for (uint32_t i = 0; i < levels; ++i)
 	{
-		_batches.debug->material()->setFloat(MaterialVariable::ExtraParameters, static_cast<float>(i));
+		batch->material()->setFloat(MaterialVariable::ExtraParameters, static_cast<float>(i));
+
 		_passes.final->setSharedVariable(ObjectVariable::WorldTransform, fullscreenBatchTransform(vp, pos, vec2(dx, dy)));
-		_passes.final->pushRenderBatch(_batches.debug);
+		_passes.final->pushRenderBatch(batch);
 		pos.x += dx;
 		if (pos.x + dx >= vp.x)
 		{

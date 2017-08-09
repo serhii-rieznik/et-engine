@@ -81,23 +81,20 @@ private:
 		Material::Pointer posteffects;
 		Material::Pointer computeTest;
 	} _materials;
-
-	struct Batches
-	{
-		RenderPassBeginInfo downsampleBeginInfo;
-		RenderBatch::Pointer debug;
-		RenderBatch::Pointer final;
-		RenderBatch::Pointer tonemap;
-		RenderBatch::Pointer downsample;
-		RenderBatch::Pointer motionBlur;
-		RenderBatch::Pointer txaa;
-	} _batches;
 	
 	struct Passes
 	{
+		RenderPass::Pointer logLuminance;
+		RenderPassBeginInfo logLuminanceBeginInfo;
+		
+		RenderPass::Pointer averageLuminance;
+		RenderPassBeginInfo averageLuminanceBeginInfo;
+		
+		RenderPass::Pointer resolveLuminance;
+		RenderPassBeginInfo resolveLuminanceBeginInfo;
+
 		RenderPass::Pointer motionBlur0;
 		RenderPass::Pointer motionBlur1;
-		RenderPass::Pointer downsample;
 		RenderPass::Pointer tonemapping;
 		RenderPass::Pointer txaa;
 		RenderPass::Pointer final;
