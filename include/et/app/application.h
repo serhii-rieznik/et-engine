@@ -23,6 +23,11 @@ extern const std::string kSystemEventRemoteNotification;
 extern const std::string kSystemEventRemoteNotificationStatusChanged;
 extern const std::string kSystemEventOpenURL;
 
+struct ProfilerInfo
+{
+	uint64_t frameTime = 0;
+};
+
 class Application : public Singleton<Application>
 {
 public:
@@ -64,7 +69,8 @@ public:
 	void requestUserAttention();
 	void enableRemoteNotifications();
 
-	float frameDeltaTime() const;
+	const ProfilerInfo& profiler() const 
+		{ return _profiler; }
 
 	ET_DECLARE_EVENT1(systemEvent, Dictionary);
 
@@ -84,11 +90,6 @@ public:
 
 private:
 	friend class RenderContext;
-
-	RenderContext* renderContext()
-	{
-		return _renderContext;
-	}
 
 	int platformRun(int, char*[]);
 
@@ -115,6 +116,7 @@ private:
 private:
 	ApplicationParameters _parameters;
 	ApplicationIdentifier _identifier;
+	ProfilerInfo _profiler;
 
 	RenderContext* _renderContext = nullptr;
 	IApplicationDelegate* _delegate = nullptr;

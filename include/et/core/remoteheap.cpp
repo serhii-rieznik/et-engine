@@ -7,9 +7,6 @@
 
 #include <et/core/et.h>
 
-#define ET_HEAP_USE_FIRST_FREE 0
-#define ET_HEAP_DEEP_DEBUG     0
-
 namespace et
 {
 
@@ -63,6 +60,8 @@ bool RemoteHeap::allocate(uint32_t sizeToAllocate, uint32_t& offset)
 	if (_private->firstEmpty + requiredInfoSize > _private->infoSize)
 		return false;
 
+	bool allocated = false;
+
 	uint8_t* ptr = _private->info + _private->firstEmpty;
 	uint8_t* end = _private->info + _private->infoSize;
 
@@ -73,7 +72,7 @@ bool RemoteHeap::allocate(uint32_t sizeToAllocate, uint32_t& offset)
 	uint8_t* allocationBegin = ptr;
 	while (ptr < end)
 	{
-		if (*ptr != RemoteHeapPrivate::Empty)
+		if (*ptr)
 		{
 			allocationBegin += sz;
 			sz = 0;
@@ -97,17 +96,18 @@ bool RemoteHeap::allocate(uint32_t sizeToAllocate, uint32_t& offset)
 			if (allocationBegin == seekBegin)
 			{
 				_private->firstEmpty += usedChunks;
-				while ((allocationEnd < end) && (*allocationEnd++ != RemoteHeapPrivate::Empty))
+				while ((allocationEnd < end) && (*allocationEnd++))
 					_private->firstEmpty++;
 			}
-			
-			return true;
+			allocated = true;
+			break;
 		}
 
 		++ptr;
 		++sz;
 	}
-	return false;
+	
+	return allocated;
 }
 
 bool RemoteHeap::release(uint32_t offset)

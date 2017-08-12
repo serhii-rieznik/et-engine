@@ -111,6 +111,7 @@ void Application::performUpdateAndRender()
 {
 	ET_ASSERT(_running && !_suspended);
     
+	uint64_t startTime = queryCurrentTimeInMicroSeconds();
     if (_renderContext->beginRender())
     {
         if (_scheduleResize)
@@ -124,6 +125,7 @@ void Application::performUpdateAndRender()
         _delegate->render(_renderContext);
         _renderContext->endRender();
     }
+	_profiler.frameTime = queryCurrentTimeInMicroSeconds() - startTime;
 }
 
 void Application::setFrameRateLimit(size_t value)
@@ -271,11 +273,6 @@ void Application::setShouldSilentPathResolverErrors(bool e)
 const ApplicationIdentifier& Application::identifier() const
 {
 	return _identifier;
-}
-
-float Application::frameDeltaTime() const
-{
-	return 0.0f;
 }
 
 /*
