@@ -13,29 +13,29 @@ const char* vulkan::resultToString(VkResult result)
 	switch (result)
 	{
 		CASE_TO_STRING(VK_SUCCESS)
-		CASE_TO_STRING(VK_NOT_READY)
-		CASE_TO_STRING(VK_TIMEOUT)
-		CASE_TO_STRING(VK_EVENT_SET)
-		CASE_TO_STRING(VK_EVENT_RESET)
-		CASE_TO_STRING(VK_INCOMPLETE)
-		CASE_TO_STRING(VK_ERROR_OUT_OF_HOST_MEMORY)
-		CASE_TO_STRING(VK_ERROR_OUT_OF_DEVICE_MEMORY)
-		CASE_TO_STRING(VK_ERROR_INITIALIZATION_FAILED)
-		CASE_TO_STRING(VK_ERROR_DEVICE_LOST)
-		CASE_TO_STRING(VK_ERROR_MEMORY_MAP_FAILED)
-		CASE_TO_STRING(VK_ERROR_LAYER_NOT_PRESENT)
-		CASE_TO_STRING(VK_ERROR_EXTENSION_NOT_PRESENT)
-		CASE_TO_STRING(VK_ERROR_FEATURE_NOT_PRESENT)
-		CASE_TO_STRING(VK_ERROR_INCOMPATIBLE_DRIVER)
-		CASE_TO_STRING(VK_ERROR_TOO_MANY_OBJECTS)
-		CASE_TO_STRING(VK_ERROR_FORMAT_NOT_SUPPORTED)
-		CASE_TO_STRING(VK_ERROR_SURFACE_LOST_KHR)
-		CASE_TO_STRING(VK_ERROR_NATIVE_WINDOW_IN_USE_KHR)
-		CASE_TO_STRING(VK_SUBOPTIMAL_KHR)
-		CASE_TO_STRING(VK_ERROR_OUT_OF_DATE_KHR)
-		CASE_TO_STRING(VK_ERROR_INCOMPATIBLE_DISPLAY_KHR)
-		CASE_TO_STRING(VK_ERROR_VALIDATION_FAILED_EXT)
-		CASE_TO_STRING(VK_ERROR_INVALID_SHADER_NV)
+			CASE_TO_STRING(VK_NOT_READY)
+			CASE_TO_STRING(VK_TIMEOUT)
+			CASE_TO_STRING(VK_EVENT_SET)
+			CASE_TO_STRING(VK_EVENT_RESET)
+			CASE_TO_STRING(VK_INCOMPLETE)
+			CASE_TO_STRING(VK_ERROR_OUT_OF_HOST_MEMORY)
+			CASE_TO_STRING(VK_ERROR_OUT_OF_DEVICE_MEMORY)
+			CASE_TO_STRING(VK_ERROR_INITIALIZATION_FAILED)
+			CASE_TO_STRING(VK_ERROR_DEVICE_LOST)
+			CASE_TO_STRING(VK_ERROR_MEMORY_MAP_FAILED)
+			CASE_TO_STRING(VK_ERROR_LAYER_NOT_PRESENT)
+			CASE_TO_STRING(VK_ERROR_EXTENSION_NOT_PRESENT)
+			CASE_TO_STRING(VK_ERROR_FEATURE_NOT_PRESENT)
+			CASE_TO_STRING(VK_ERROR_INCOMPATIBLE_DRIVER)
+			CASE_TO_STRING(VK_ERROR_TOO_MANY_OBJECTS)
+			CASE_TO_STRING(VK_ERROR_FORMAT_NOT_SUPPORTED)
+			CASE_TO_STRING(VK_ERROR_SURFACE_LOST_KHR)
+			CASE_TO_STRING(VK_ERROR_NATIVE_WINDOW_IN_USE_KHR)
+			CASE_TO_STRING(VK_SUBOPTIMAL_KHR)
+			CASE_TO_STRING(VK_ERROR_OUT_OF_DATE_KHR)
+			CASE_TO_STRING(VK_ERROR_INCOMPATIBLE_DISPLAY_KHR)
+			CASE_TO_STRING(VK_ERROR_VALIDATION_FAILED_EXT)
+			CASE_TO_STRING(VK_ERROR_INVALID_SHADER_NV)
 	default:
 		ET_FAIL_FMT("Unknown Vulkan error: %d", static_cast<int>(result));
 	}
@@ -62,7 +62,7 @@ void VulkanState::executeServiceCommands(VulkanQueueClass cls, ServiceCommands c
 	submit.commandBufferCount = 1;
 	submit.pCommandBuffers = &queue.serviceCommandBuffer;
 	VULKAN_CALL(vkQueueSubmit(queue.queue, 1, &submit, nullptr));
-	
+
 	VULKAN_CALL(vkQueueWaitIdle(queue.queue));
 }
 
@@ -122,7 +122,6 @@ bool VulkanSwapchain::createDepthImage(VulkanState& vulkan, VkImage& image, VkDe
 		return false;
 
 	VULKAN_CALL(vkCreateImage(vulkan.device, &imageInfo, nullptr, &image));
-	if (image == VkImage(0x66)) debug::debugBreak();
 
 	VkMemoryRequirements memoryRequirements = {};
 	vkGetImageMemoryRequirements(vulkan.device, image, &memoryRequirements);
@@ -133,10 +132,17 @@ bool VulkanSwapchain::createDepthImage(VulkanState& vulkan, VkImage& image, VkDe
 	VULKAN_CALL(vkAllocateMemory(vulkan.device, &allocInfo, nullptr, &memory));
 	VULKAN_CALL(vkBindImageMemory(vulkan.device, image, memory, 0));
 
-	vulkan::imageBarrier(vulkan, cmdBuffer, image, VK_IMAGE_ASPECT_DEPTH_BIT,
-		0, VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT,
-		VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
-		VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT);
+	VkImageMemoryBarrier barrierInfo = { VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER };
+	barrierInfo.srcAccessMask = 0;
+	barrierInfo.dstAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+	barrierInfo.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+	barrierInfo.newLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+	barrierInfo.srcQueueFamilyIndex = vulkan.queues[VulkanQueueClass::Graphics].index;
+	barrierInfo.dstQueueFamilyIndex = vulkan.queues[VulkanQueueClass::Graphics].index;
+	barrierInfo.subresourceRange = { VK_IMAGE_ASPECT_DEPTH_BIT, 0, 1, 0, 1 };
+	barrierInfo.image = image;
+	vkCmdPipelineBarrier(cmdBuffer, vulkan::accessMaskToPipelineStage(barrierInfo.srcAccessMask),  
+		vulkan::accessMaskToPipelineStage(barrierInfo.dstAccessMask), 0, 0, nullptr, 0, nullptr, 1, &barrierInfo);
 
 	return true;
 }
@@ -220,17 +226,17 @@ void VulkanSwapchain::createSizeDependentResources(VulkanState& vulkan, const ve
 			vkDestroyFence(vulkan.device, frame.imageFence, nullptr);
 			frame.imageFence = nullptr;
 		}
-        
-        vkDestroyImageView(vulkan.device, depthBuffer.depthView, nullptr);
-        depthBuffer.depthView = nullptr;
 
-        vkDestroyImage(vulkan.device, depthBuffer.depth, nullptr);
-        depthBuffer.depth = nullptr;
+		vkDestroyImageView(vulkan.device, depthBuffer.depthView, nullptr);
+		depthBuffer.depthView = nullptr;
 
-        vkFreeMemory(vulkan.device, depthBuffer.depthMemory, nullptr);
-        depthBuffer.depthMemory = nullptr;
-		
-        vkDestroySwapchainKHR(vulkan.device, currentSwapchain, nullptr);
+		vkDestroyImage(vulkan.device, depthBuffer.depth, nullptr);
+		depthBuffer.depth = nullptr;
+
+		vkFreeMemory(vulkan.device, depthBuffer.depthMemory, nullptr);
+		depthBuffer.depthMemory = nullptr;
+
+		vkDestroySwapchainKHR(vulkan.device, currentSwapchain, nullptr);
 	}
 
 	Vector<VkImage> swapchainImages = enumerateVulkanObjects<VkImage>(vulkan, vkGetSwapchainImagesKHRWrapper);
@@ -253,15 +259,35 @@ void VulkanSwapchain::createSizeDependentResources(VulkanState& vulkan, const ve
 		beginInfo.flags = VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT;
 
 		VULKAN_CALL(vkBeginCommandBuffer(frame.barrierFromPresent, &beginInfo));
-		vulkan::imageBarrier(vulkan, frame.barrierFromPresent, frame.color, VK_IMAGE_ASPECT_COLOR_BIT,
-			0, VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-			VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT);
+		{
+			VkImageMemoryBarrier barrierInfo = { VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER };
+			barrierInfo.srcAccessMask = 0;
+			barrierInfo.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+			barrierInfo.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+			barrierInfo.newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+			barrierInfo.srcQueueFamilyIndex = vulkan.queues[VulkanQueueClass::Graphics].index;
+			barrierInfo.dstQueueFamilyIndex = vulkan.queues[VulkanQueueClass::Graphics].index;
+			barrierInfo.subresourceRange = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 };
+			barrierInfo.image = frame.color;
+			vkCmdPipelineBarrier(frame.barrierFromPresent, vulkan::accessMaskToPipelineStage(barrierInfo.srcAccessMask),
+				vulkan::accessMaskToPipelineStage(barrierInfo.dstAccessMask), 0, 0, nullptr, 0, nullptr, 1, &barrierInfo);
+		}
 		VULKAN_CALL(vkEndCommandBuffer(frame.barrierFromPresent));
 
 		VULKAN_CALL(vkBeginCommandBuffer(frame.barrierToPresent, &beginInfo));
-		vulkan::imageBarrier(vulkan, frame.barrierToPresent, frame.color, VK_IMAGE_ASPECT_COLOR_BIT,
-			0, VK_ACCESS_MEMORY_READ_BIT, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
-			VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT);
+		{
+			VkImageMemoryBarrier barrierInfo = { VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER };
+			barrierInfo.srcAccessMask = 0;
+			barrierInfo.dstAccessMask = VK_ACCESS_MEMORY_READ_BIT;
+			barrierInfo.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+			barrierInfo.newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+			barrierInfo.srcQueueFamilyIndex = vulkan.queues[VulkanQueueClass::Graphics].index;
+			barrierInfo.dstQueueFamilyIndex = vulkan.queues[VulkanQueueClass::Graphics].index;
+			barrierInfo.subresourceRange = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 };
+			barrierInfo.image = frame.color;
+			vkCmdPipelineBarrier(frame.barrierToPresent, vulkan::accessMaskToPipelineStage(barrierInfo.srcAccessMask),
+				vulkan::accessMaskToPipelineStage(barrierInfo.dstAccessMask), 0, 0, nullptr, 0, nullptr, 1, &barrierInfo);
+		}
 		VULKAN_CALL(vkEndCommandBuffer(frame.barrierToPresent));
 
 		VkSemaphoreCreateInfo semaphoreInfo = { VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO };
@@ -274,13 +300,13 @@ void VulkanSwapchain::createSizeDependentResources(VulkanState& vulkan, const ve
 		fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
 		VULKAN_CALL(vkCreateFence(vulkan.device, &fenceInfo, nullptr, &frame.imageFence));
 	}
-	
+
 	vulkan.executeServiceCommands(VulkanQueueClass::Graphics, [&](VkCommandBuffer cmdBuffer) {
 		if (createDepthImage(vulkan, depthBuffer.depth, depthBuffer.depthMemory, cmdBuffer)) {
 			depthBuffer.depthView = createImageView(vulkan, depthBuffer.depth, VK_IMAGE_ASPECT_DEPTH_BIT, depthFormat);
 		}
 	});
-	
+
 	VULKAN_CALL(vkDeviceWaitIdle(vulkan.device));
 }
 
@@ -289,7 +315,7 @@ void VulkanSwapchain::acquireNextImage(VulkanState& vulkan)
 	VkFence currentFence = frames[frameNumber % RendererFrameCount].imageFence;
 	VULKAN_CALL(vkWaitForFences(vulkan.device, 1, &currentFence, VK_TRUE, UINT64_MAX));
 	VULKAN_CALL(vkResetFences(vulkan.device, 1, &currentFence));
-	
+
 	VULKAN_CALL(vkAcquireNextImageKHR(vulkan.device, swapchain, UINT64_MAX,
 		frames[frameNumber % RendererFrameCount].imageAcquired, nullptr, &swapchainImageIndex));
 }
@@ -303,7 +329,7 @@ void VulkanSwapchain::present(VulkanState& vulkan)
 	info.waitSemaphoreCount = 1;
 	info.pWaitSemaphores = &frames[frameNumber % RendererFrameCount].submitCompleted;
 	VULKAN_CALL(vkQueuePresentKHR(vulkan.queues[VulkanQueueClass::Graphics].queue, &info));
-	
+
 	++frameNumber;
 }
 
@@ -405,22 +431,6 @@ uint32_t getMemoryTypeIndex(VulkanState& vulkan, uint32_t typeFilter, VkMemoryPr
 	}
 
 	ET_FAIL("Unable to get memory type");
-}
-
-void imageBarrier(VulkanState& vulkan, VkCommandBuffer cmd, VkImage image, VkImageAspectFlags aspect,
-	VkAccessFlags accessFrom, VkAccessFlags accessTo, VkImageLayout layoutFrom, VkImageLayout layoutTo,
-	VkPipelineStageFlags stageFrom, VkPipelineStageFlags stageTo, uint32_t startMipLevel, uint32_t mipLevelsCount)
-{
-	VkImageMemoryBarrier barrierInfo = { VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER };
-	barrierInfo.srcAccessMask = accessFrom;
-	barrierInfo.dstAccessMask = accessTo;
-	barrierInfo.oldLayout = layoutFrom;
-	barrierInfo.newLayout = layoutTo;
-	barrierInfo.srcQueueFamilyIndex = vulkan.queues[VulkanQueueClass::Graphics].index;
-	barrierInfo.dstQueueFamilyIndex = vulkan.queues[VulkanQueueClass::Graphics].index;
-	barrierInfo.subresourceRange = { aspect, startMipLevel, mipLevelsCount, 0, 1 };
-	barrierInfo.image = image;
-	vkCmdPipelineBarrier(cmd, stageFrom, stageTo, 0, 0, nullptr, 0, nullptr, 1, &barrierInfo);
 }
 
 VkCompareOp depthCompareOperation(CompareFunction func)
@@ -658,10 +668,90 @@ VkAccessFlags texureStateToAccessFlags(TextureState val)
 		{ TextureState::DepthRenderTarget, VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT },
 		{ TextureState::ShaderResource, VK_ACCESS_SHADER_READ_BIT },
 		{ TextureState::PresentImage, VK_ACCESS_MEMORY_READ_BIT },
-		{ TextureState::Storage,  VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT },
+		{ TextureState::Storage,VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT },
 	};
 	ET_ASSERT(values.count(val) > 0);
 	return values.at(val);
+}
+
+VkPipelineStageFlags accessMaskToPipelineStage(VkAccessFlags flags)
+{
+	// shamelessly stolen from validation layers, 
+	// supposed to be correct
+	static const std::vector<std::pair<VkAccessFlags, VkPipelineStageFlags>> values =
+	{
+		{ VK_ACCESS_INDIRECT_COMMAND_READ_BIT, 
+			VK_PIPELINE_STAGE_DRAW_INDIRECT_BIT },
+		
+		{ VK_ACCESS_INDEX_READ_BIT, 
+			VK_PIPELINE_STAGE_VERTEX_INPUT_BIT },
+		
+		{ VK_ACCESS_VERTEX_ATTRIBUTE_READ_BIT, 
+			VK_PIPELINE_STAGE_VERTEX_INPUT_BIT },
+
+		{ VK_ACCESS_UNIFORM_READ_BIT,
+			VK_PIPELINE_STAGE_VERTEX_SHADER_BIT /* | VK_PIPELINE_STAGE_TESSELLATION_CONTROL_SHADER_BIT |
+			VK_PIPELINE_STAGE_TESSELLATION_EVALUATION_SHADER_BIT | VK_PIPELINE_STAGE_GEOMETRY_SHADER_BIT |
+			VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT */ | VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT },
+
+		{ VK_ACCESS_INPUT_ATTACHMENT_READ_BIT, 
+			VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT },
+
+		{ VK_ACCESS_SHADER_READ_BIT,
+			VK_PIPELINE_STAGE_VERTEX_SHADER_BIT /* | VK_PIPELINE_STAGE_TESSELLATION_CONTROL_SHADER_BIT |
+			VK_PIPELINE_STAGE_TESSELLATION_EVALUATION_SHADER_BIT | VK_PIPELINE_STAGE_GEOMETRY_SHADER_BIT |
+			VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT */ | VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT },
+
+		{ VK_ACCESS_SHADER_WRITE_BIT,
+			VK_PIPELINE_STAGE_VERTEX_SHADER_BIT /* | VK_PIPELINE_STAGE_TESSELLATION_CONTROL_SHADER_BIT |
+			VK_PIPELINE_STAGE_TESSELLATION_EVALUATION_SHADER_BIT | VK_PIPELINE_STAGE_GEOMETRY_SHADER_BIT |
+			VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT */ | VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT },
+
+		{ VK_ACCESS_COLOR_ATTACHMENT_READ_BIT, 
+			VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT },
+
+		{ VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT, 
+			VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT },
+
+		{ VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT,
+			VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT },
+
+		{ VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT,
+			VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT },
+
+		{ VK_ACCESS_TRANSFER_READ_BIT, 
+			VK_PIPELINE_STAGE_TRANSFER_BIT },
+		
+		{ VK_ACCESS_TRANSFER_WRITE_BIT, 
+			VK_PIPELINE_STAGE_TRANSFER_BIT },
+		
+		{ VK_ACCESS_HOST_READ_BIT, 
+			VK_PIPELINE_STAGE_HOST_BIT },
+		
+		{ VK_ACCESS_HOST_WRITE_BIT, 
+			VK_PIPELINE_STAGE_HOST_BIT },
+		
+		{ VK_ACCESS_MEMORY_READ_BIT, 
+			VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT },
+		
+		{ VK_ACCESS_MEMORY_WRITE_BIT, 
+			VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT },
+		
+		{ VK_ACCESS_COMMAND_PROCESS_READ_BIT_NVX, 
+			VK_PIPELINE_STAGE_COMMAND_PROCESS_BIT_NVX },
+		
+		{ VK_ACCESS_COMMAND_PROCESS_WRITE_BIT_NVX, 
+			VK_PIPELINE_STAGE_COMMAND_PROCESS_BIT_NVX },
+	};
+	
+	VkPipelineStageFlags result = 0;
+	for (const auto& p : values)
+	{
+		if ((p.first & flags) != 0)
+			result |= p.second;
+	}
+
+	return (result == 0) ? VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT : result;
 }
 
 VkImageLayout texureStateToImageLayout(TextureState val)
@@ -705,46 +795,6 @@ const char* programStageEntryName(ProgramStage val)
 	return values.at(val);
 }
 
-namespace gl
-{
-DataType dataTypeFromGLType(int glType)
-{
-	static std::map<int, DataType> validTypes = {
-		{ GL_FLOAT, DataType::Float },
-		{ GL_FLOAT_VEC2, DataType::Vec2 },
-		{ GL_FLOAT_VEC3, DataType::Vec3 },
-		{ GL_FLOAT_VEC4, DataType::Vec4 },
-		{ GL_INT, DataType::Int },
-		{ GL_INT_VEC2, DataType::IntVec2 },
-		{ GL_INT_VEC3, DataType::IntVec3 },
-		{ GL_INT_VEC4, DataType::IntVec4 },
-		{ GL_FLOAT_MAT3, DataType::Mat3 },
-		{ GL_FLOAT_MAT4, DataType::Mat4 },
-	};
-	ET_ASSERT(validTypes.count(glType) > 0);
-	return validTypes.at(glType);
-}
-
-bool isSamplerType(int glType)
-{
-	static std::set<int> validTypes = {
-		GL_SAMPLER_1D,
-		GL_SAMPLER_2D,
-		GL_SAMPLER_3D,
-		GL_SAMPLER_CUBE,
-		GL_SAMPLER_1D_SHADOW,
-		GL_SAMPLER_2D_SHADOW,
-		GL_SAMPLER_1D_ARRAY,
-		GL_SAMPLER_2D_ARRAY,
-		GL_SAMPLER_1D_ARRAY_SHADOW,
-		GL_SAMPLER_2D_ARRAY_SHADOW,
-		GL_SAMPLER_CUBE_SHADOW,
-		GL_SAMPLER_2D_RECT,
-		GL_SAMPLER_2D_RECT_SHADOW,
-	};
-	return validTypes.count(glType) > 0;
-}
-}
 }
 
 VkImageView VulkanNativeTexture::imageView(const ResourceRange& range)
@@ -759,7 +809,7 @@ VkImageView VulkanNativeTexture::imageView(const ResourceRange& range)
 		ET_ASSERT((levels == VK_REMAINING_MIP_LEVELS) || (levels <= levelCount));
 
 		ET_ASSERT((layers == VK_REMAINING_ARRAY_LAYERS) || (layers <= layerCount));
-		
+
 		ET_ASSERT
 		(
 			(imageViewType != VK_IMAGE_VIEW_TYPE_CUBE) ||

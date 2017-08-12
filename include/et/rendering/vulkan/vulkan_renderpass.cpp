@@ -573,12 +573,12 @@ void VulkanRenderPass::recordCommandBuffer()
 			barrier.newLayout = vulkan::texureStateToImageLayout(cmd.imageBarrier.toState);
 			barrier.srcQueueFamilyIndex = _private->vulkan.queues[VulkanQueueClass::Graphics].index;
 			barrier.dstQueueFamilyIndex = _private->vulkan.queues[VulkanQueueClass::Graphics].index;
-
 			barrier.subresourceRange = { tex->nativeTexture().aspect, cmd.imageBarrier.range.firstLevel,
 				cmd.imageBarrier.range.levelCount, cmd.imageBarrier.range.firstLayer, cmd.imageBarrier.range.layerCount };
 
-			vkCmdPipelineBarrier(commandBuffer, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
-				VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, 0, 0, nullptr, 0, nullptr, 1, &barrier);
+			vkCmdPipelineBarrier(commandBuffer, vulkan::accessMaskToPipelineStage(barrier.srcAccessMask),
+				vulkan::accessMaskToPipelineStage(barrier.dstAccessMask), 0, 0, nullptr, 0, nullptr, 1, &barrier);
+
 			break;
 		}
 		

@@ -146,6 +146,7 @@ void CubemapProcessor::validate(RenderInterface::Pointer& renderer)
 		cubemapDesc->target = TextureTarget::Texture_Cube;
 		cubemapDesc->flags = Texture::Flags::RenderTarget;
 		cubemapDesc->levelCount = CubemapLevels;
+		cubemapDesc->layerCount = 6;
 		cubemapDesc->size = vec2i(1 << (CubemapLevels - 1));
 		if (_tex[CubemapType::Downsampled].invalid())
 			_tex[CubemapType::Downsampled] = renderer->createTexture(cubemapDesc);

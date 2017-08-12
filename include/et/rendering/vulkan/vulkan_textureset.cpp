@@ -29,32 +29,39 @@ public:
 {
 	ET_PIMPL_INIT(VulkanTextureSet, vulkan);
 
+	size_t objectCount = 0;
+	for (const auto& entry : desc)
+	{
+		objectCount += entry.second.textures.size();
+		objectCount += entry.second.samplers.size();
+		objectCount += entry.second.images.size();
+	}
+
 	Vector<VkDescriptorSetLayoutBinding> bindings;
+	bindings.reserve(objectCount);
+	
 	Vector<VkWriteDescriptorSet> writeSet;
+	writeSet.reserve(objectCount);
+	
 	Vector<VkDescriptorImageInfo> imageInfos;
-	bindings.reserve(128);
-	writeSet.reserve(128);
-	imageInfos.reserve(128);
+	imageInfos.reserve(objectCount);
 
 	for (const auto& entry : desc)
 	{
 		VkShaderStageFlagBits stageFlags = vulkan::programStageValue(entry.first);
 
-		uint32_t bindingIndex = 0;
 		for (const auto& e : entry.second.textures)
 		{
-			if (e.image.valid())
-			{
 				bindings.emplace_back();
 				VkDescriptorSetLayoutBinding& binding = bindings.back();
-				binding.binding = bindingIndex;
+				binding.binding = static_cast<uint32_t>(e.first);
 				binding.descriptorCount = 1;
 				binding.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
 				binding.stageFlags = stageFlags;
 
 				imageInfos.emplace_back();
 				VkDescriptorImageInfo& info = imageInfos.back();
-				info.imageView = VulkanTexture::Pointer(e.image)->nativeTexture().imageView(e.range);
+				info.imageView = VulkanTexture::Pointer(e.second.image)->nativeTexture().imageView(e.second.range);
 				info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 
 				writeSet.emplace_back();
@@ -64,25 +71,20 @@ public:
 				ws.descriptorType = binding.descriptorType;
 				ws.dstBinding = binding.binding;
 				ws.pImageInfo = imageInfos.data() + imageInfos.size() - 1;
-			}
-			++bindingIndex;
 		}
 		
-		bindingIndex = MaterialSamplerBindingOffset;
 		for (const auto& e : entry.second.samplers)
 		{
-			if (e.valid())
-			{
 				bindings.emplace_back();
 				VkDescriptorSetLayoutBinding& binding = bindings.back();
-				binding.binding = bindingIndex;
+				binding.binding = MaterialSamplerBindingOffset + static_cast<uint32_t>(e.first);
 				binding.descriptorCount = 1;
 				binding.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLER;
 				binding.stageFlags = stageFlags;
 
 				imageInfos.emplace_back();
 				VkDescriptorImageInfo& info = imageInfos.back();
-				info.sampler = VulkanSampler::Pointer(e)->nativeSampler().sampler;
+				info.sampler = VulkanSampler::Pointer(e.second)->nativeSampler().sampler;
 
 				writeSet.emplace_back();
 				VkWriteDescriptorSet& ws = writeSet.back();
@@ -91,25 +93,20 @@ public:
 				ws.descriptorType = binding.descriptorType;
 				ws.dstBinding = binding.binding;
 				ws.pImageInfo = imageInfos.data() + imageInfos.size() - 1;
-			}
-			++bindingIndex;
 		}
 
-		bindingIndex = 0;
 		for (const auto& e : entry.second.images)
 		{
-			if (e.valid())
-			{
 				bindings.emplace_back();
 				VkDescriptorSetLayoutBinding& binding = bindings.back();
-				binding.binding = bindingIndex;
+				binding.binding = static_cast<uint32_t>(e.first);
 				binding.descriptorCount = 1;
 				binding.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
 				binding.stageFlags = stageFlags;
 
 				imageInfos.emplace_back();
 				VkDescriptorImageInfo& info = imageInfos.back();
-				info.imageView = VulkanTexture::Pointer(e)->nativeTexture().imageView(ResourceRange::whole);
+				info.imageView = VulkanTexture::Pointer(e.second)->nativeTexture().imageView(ResourceRange::whole);
 				info.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
 
 				writeSet.emplace_back();
@@ -119,8 +116,6 @@ public:
 				ws.descriptorType = binding.descriptorType;
 				ws.dstBinding = binding.binding;
 				ws.pImageInfo = imageInfos.data() + imageInfos.size() - 1;
-			}
-			++bindingIndex;
 		}
 	}
 

@@ -33,9 +33,9 @@ public:
 
 	struct DescriptionSet
 	{		
-		std::array<TextureBinding, MaterialTexture_max> textures;
-		std::array<Sampler::Pointer, MaterialTexture_max> samplers;
-		std::array<Texture::Pointer, StorageBuffer_max> images;
+		Map<MaterialTexture, TextureBinding> textures;
+		Map<MaterialTexture, Sampler::Pointer> samplers;
+		Map<StorageBuffer, Texture::Pointer> images;
 	};
 
 	using Reflection = Map<ProgramStage, ReflectionSet>;

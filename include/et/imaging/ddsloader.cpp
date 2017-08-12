@@ -228,14 +228,14 @@ void dds::loadInfoFromStream(std::istream& source, TextureDescription& desc)
 	desc.target = (header.dwCaps2 & DDSCAPS2_CUBEMAP) ? TextureTarget::Texture_Cube : TextureTarget::Texture_2D;
 	if (desc.target == TextureTarget::Texture_Cube)
 	{
-		desc.layersCount =
+		desc.layerCount =
 			((header.dwCaps2 & DDSCAPS2_CUBEMAP_POSITIVEX) ? 1 : 0) +
 			((header.dwCaps2 & DDSCAPS2_CUBEMAP_NEGATIVEX) ? 1 : 0) +
 			((header.dwCaps2 & DDSCAPS2_CUBEMAP_POSITIVEY) ? 1 : 0) +
 			((header.dwCaps2 & DDSCAPS2_CUBEMAP_NEGATIVEY) ? 1 : 0) +
 			((header.dwCaps2 & DDSCAPS2_CUBEMAP_POSITIVEZ) ? 1 : 0) +
 			((header.dwCaps2 & DDSCAPS2_CUBEMAP_NEGATIVEZ) ? 1 : 0);
-		ET_ASSERT(desc.layersCount == 6);
+		ET_ASSERT(desc.layerCount == 6);
 	}
 		
 	switch (header.ddspf.dwFourCC)
@@ -349,7 +349,7 @@ void dds::loadFromStream(std::istream& source, TextureDescription& desc)
 	
 	loadInfoFromStream(source, desc);
 	
-	uint32_t dataSize = desc.layersCount * desc.dataSizeForAllMipLevels();
+	uint32_t dataSize = desc.layerCount * desc.dataSizeForAllMipLevels();
 	if (dataSize)
 	{
 		desc.data = BinaryDataStorage(dataSize);

@@ -216,20 +216,10 @@ VkAccessFlags texureStateToAccessFlags(TextureState);
 VkImageLayout texureStateToImageLayout(TextureState);
 VkShaderStageFlagBits programStageValue(ProgramStage);
 const char* programStageEntryName(ProgramStage);
-
-namespace gl
-{
-DataType dataTypeFromOpenGLType(int glType);
-bool isSamplerType(int glType);
-}
-
-void imageBarrier(VulkanState&, VkCommandBuffer, VkImage, VkImageAspectFlags aspect,
-	VkAccessFlags accessFrom, VkAccessFlags accessTo,
-	VkImageLayout layoutFrom, VkImageLayout layoutTo,
-	VkPipelineStageFlags stageFrom, VkPipelineStageFlags stageTo,
-	uint32_t startMipLevel = 0, uint32_t mipLevelsCount = 1);
-
 const char* resultToString(VkResult result);
+
+// VkPipelineStageFlags texureStateToPipelineStageMask(TextureState);
+VkPipelineStageFlags accessMaskToPipelineStage(VkAccessFlags flags);
 }
 
 

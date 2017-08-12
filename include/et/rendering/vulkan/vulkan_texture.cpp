@@ -48,11 +48,12 @@ VulkanTexture::VulkanTexture(VulkanState& vulkan, const Description& desc, const
 		info.arrayLayers = 1;
 		break;
 	case TextureTarget::Texture_Cube:
+		ET_ASSERT(desc.layerCount == 6);
 		info.arrayLayers = 6;
 		info.flags |= VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT;
 		break;
 	case TextureTarget::Texture_2D_Array:
-		info.arrayLayers = desc.layersCount;
+		info.arrayLayers = desc.layerCount;
 		info.flags |= VK_IMAGE_CREATE_2D_ARRAY_COMPATIBLE_BIT_KHR;
 		break;
 	default:
@@ -131,21 +132,28 @@ void VulkanTexture::setImageData(const BinaryDataStorage& data)
 
 	_private->vulkan.executeServiceCommands(VulkanQueueClass::Graphics, [&](VkCommandBuffer cmdBuffer)
 	{
-		vulkan::imageBarrier(_private->vulkan, cmdBuffer, _private->image,
-			_private->aspect, 0, VK_ACCESS_TRANSFER_WRITE_BIT, 
-			VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-			VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT, 
-			0, description().levelCount);
+		VkImageMemoryBarrier barrierInfo = { VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER };
+		barrierInfo.srcAccessMask = 0;
+		barrierInfo.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+		barrierInfo.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+		barrierInfo.newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+		barrierInfo.srcQueueFamilyIndex = _private->vulkan.queues[VulkanQueueClass::Graphics].index;
+		barrierInfo.dstQueueFamilyIndex = _private->vulkan.queues[VulkanQueueClass::Graphics].index;
+		barrierInfo.subresourceRange = { _private->aspect, 0, description().levelCount, 0, description().layerCount };
+		barrierInfo.image = _private->image;
+		vkCmdPipelineBarrier(cmdBuffer, vulkan::accessMaskToPipelineStage(barrierInfo.srcAccessMask),
+			vulkan::accessMaskToPipelineStage(barrierInfo.dstAccessMask), 0, 0, nullptr, 0, nullptr, 1, &barrierInfo);
 
 		vkCmdCopyBufferToImage(cmdBuffer, stagingBuffer.nativeBuffer().buffer,
 			_private->image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
 			static_cast<uint32_t>(regions.size()), regions.data());
 
-		vulkan::imageBarrier(_private->vulkan, cmdBuffer, _private->image,
-			_private->aspect, VK_ACCESS_TRANSFER_WRITE_BIT, VK_ACCESS_SHADER_READ_BIT, 
-			VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, 
-			VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 
-			0, description().levelCount);
+		barrierInfo.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+		barrierInfo.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+		barrierInfo.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+		barrierInfo.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		vkCmdPipelineBarrier(cmdBuffer, vulkan::accessMaskToPipelineStage(barrierInfo.srcAccessMask),
+			vulkan::accessMaskToPipelineStage(barrierInfo.dstAccessMask), 0, 0, nullptr, 0, nullptr, 1, &barrierInfo);
 	});
 }
 
@@ -176,17 +184,27 @@ void VulkanTexture::updateRegion(const vec2i & pos, const vec2i & size, const Bi
 	
 	_private->vulkan.executeServiceCommands(VulkanQueueClass::Graphics, [&](VkCommandBuffer cmdBuffer)
 	{
-		vulkan::imageBarrier(_private->vulkan, cmdBuffer, _private->image, _private->aspect, 
-			0, VK_ACCESS_TRANSFER_WRITE_BIT, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-			VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT, 0, 1);
+		VkImageMemoryBarrier barrierInfo = { VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER };
+		barrierInfo.srcAccessMask = 0;
+		barrierInfo.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+		barrierInfo.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+		barrierInfo.newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+		barrierInfo.srcQueueFamilyIndex = _private->vulkan.queues[VulkanQueueClass::Graphics].index;
+		barrierInfo.dstQueueFamilyIndex = _private->vulkan.queues[VulkanQueueClass::Graphics].index;
+		barrierInfo.subresourceRange = { _private->aspect, 0, description().levelCount, 0, description().layerCount };
+		barrierInfo.image = _private->image;
+		vkCmdPipelineBarrier(cmdBuffer, vulkan::accessMaskToPipelineStage(barrierInfo.srcAccessMask),
+			vulkan::accessMaskToPipelineStage(barrierInfo.dstAccessMask), 0, 0, nullptr, 0, nullptr, 1, &barrierInfo);
 
 		vkCmdCopyBufferToImage(cmdBuffer, stagingBuffer.nativeBuffer().buffer,
 			_private->image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region);
 
-		vulkan::imageBarrier(_private->vulkan, cmdBuffer, _private->image, _private->aspect, 
-			VK_ACCESS_TRANSFER_WRITE_BIT, VK_ACCESS_SHADER_READ_BIT, 
-			VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, 
-			VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0, 1);
+		barrierInfo.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+		barrierInfo.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+		barrierInfo.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+		barrierInfo.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		vkCmdPipelineBarrier(cmdBuffer, vulkan::accessMaskToPipelineStage(barrierInfo.srcAccessMask),
+			vulkan::accessMaskToPipelineStage(barrierInfo.dstAccessMask), 0, 0, nullptr, 0, nullptr, 1, &barrierInfo);
 	});
 }
 
@@ -198,15 +216,21 @@ uint8_t* VulkanTexture::map(uint32_t level, uint32_t layer, uint32_t options)
 	_private->mappedState = options;
 	
 	VkDeviceSize offset = description().dataOffsetForLayer(layer, level);
-	VkDeviceSize dataSize = description().dataSizeForMipLevel(level) / description().layersCount;
+	VkDeviceSize dataSize = description().dataSizeForMipLevel(level) / description().layerCount;
 
 	_private->vulkan.executeServiceCommands(VulkanQueueClass::Graphics, [&](VkCommandBuffer cmdBuffer)
 	{
-		vulkan::imageBarrier(_private->vulkan, cmdBuffer, _private->image,
-			_private->aspect, 0, VK_ACCESS_HOST_READ_BIT | VK_ACCESS_HOST_WRITE_BIT,
-			VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_GENERAL,
-			VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,
-			0, description().levelCount);
+		VkImageMemoryBarrier barrierInfo = { VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER };
+		barrierInfo.srcAccessMask = 0;
+		barrierInfo.dstAccessMask = VK_ACCESS_HOST_READ_BIT | VK_ACCESS_HOST_WRITE_BIT;
+		barrierInfo.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+		barrierInfo.newLayout = VK_IMAGE_LAYOUT_GENERAL;
+		barrierInfo.srcQueueFamilyIndex = _private->vulkan.queues[VulkanQueueClass::Graphics].index;
+		barrierInfo.dstQueueFamilyIndex = _private->vulkan.queues[VulkanQueueClass::Graphics].index;
+		barrierInfo.subresourceRange = { _private->aspect, 0, description().levelCount, 0, description().layerCount };
+		barrierInfo.image = _private->image;
+		vkCmdPipelineBarrier(cmdBuffer, vulkan::accessMaskToPipelineStage(barrierInfo.srcAccessMask),
+			vulkan::accessMaskToPipelineStage(barrierInfo.dstAccessMask), 0, 0, nullptr, 0, nullptr, 1, &barrierInfo);
 	});
 	
 	void* mappedMemory = nullptr;
@@ -221,11 +245,17 @@ void VulkanTexture::unmap()
 
 	_private->vulkan.executeServiceCommands(VulkanQueueClass::Graphics, [&](VkCommandBuffer cmdBuffer)
 	{
-		vulkan::imageBarrier(_private->vulkan, cmdBuffer, _private->image,
-			_private->aspect, VK_ACCESS_HOST_READ_BIT | VK_ACCESS_HOST_WRITE_BIT, VK_ACCESS_SHADER_READ_BIT,
-			VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-			VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,
-			0, description().levelCount);
+		VkImageMemoryBarrier barrierInfo = { VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER };
+		barrierInfo.srcAccessMask = VK_ACCESS_HOST_READ_BIT | VK_ACCESS_HOST_WRITE_BIT;
+		barrierInfo.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+		barrierInfo.oldLayout = VK_IMAGE_LAYOUT_GENERAL;
+		barrierInfo.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		barrierInfo.srcQueueFamilyIndex = _private->vulkan.queues[VulkanQueueClass::Graphics].index;
+		barrierInfo.dstQueueFamilyIndex = _private->vulkan.queues[VulkanQueueClass::Graphics].index;
+		barrierInfo.subresourceRange = { _private->aspect, 0, description().levelCount, 0, description().layerCount };
+		barrierInfo.image = _private->image;
+		vkCmdPipelineBarrier(cmdBuffer, vulkan::accessMaskToPipelineStage(barrierInfo.srcAccessMask),
+			vulkan::accessMaskToPipelineStage(barrierInfo.dstAccessMask), 0, 0, nullptr, 0, nullptr, 1, &barrierInfo);
 	});
 	_private->mappedState = 0;
 }

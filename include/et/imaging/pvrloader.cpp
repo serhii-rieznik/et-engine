@@ -58,7 +58,7 @@ void pvr::loadInfoFromStream(std::istream& stream, TextureDescription& desc)
 void pvr::loadFromStream(std::istream& stream, TextureDescription& desc)
 {
 	loadInfoFromStream(stream, desc);
-	desc.data.resize(desc.layersCount * desc.dataSizeForAllMipLevels());
+	desc.data.resize(desc.layerCount * desc.dataSizeForAllMipLevels());
 	stream.read(desc.data.binary(), desc.data.dataSize());
 
 	bool decompress = (desc.format >= TextureFormat::PVR_2bpp_RGB) && (desc.format <= TextureFormat::PVR_4bpp_sRGBA);
@@ -285,12 +285,12 @@ void parseTextureFormat(const PVRTextureHeaderV3& sTextureHeader, TextureDescrip
 
 void loadInfoFromV3Header(const PVRTextureHeaderV3& header, const BinaryDataStorage&, TextureDescription& desc)
 {
-	desc.layersCount = header.u32NumFaces;
-	ET_ASSERT((desc.layersCount == 1) || (desc.layersCount == 6));
+	desc.layerCount = header.u32NumFaces;
+	ET_ASSERT((desc.layerCount == 1) || (desc.layerCount == 6));
 
 	desc.size = vec2i(header.u32Width, header.u32Height);
 	desc.levelCount = (header.u32MIPMapCount > 0) ? header.u32MIPMapCount : 1;
-	desc.target = (desc.layersCount == 6) ? TextureTarget::Texture_Cube : TextureTarget::Texture_2D;
+	desc.target = (desc.layerCount == 6) ? TextureTarget::Texture_Cube : TextureTarget::Texture_2D;
 
 	parseTextureFormat(header, desc);
 }

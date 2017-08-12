@@ -28,8 +28,8 @@ enum : uint32_t
 	defaultChunkSize = 16 * megabytes,
 	allocGranularity = 4 * megabytes,
 	minimumAllocationSize = 128,
-	smallBlockSize = 60,
-	mediumBlockSize = 124,
+	smallBlockSize = 156,
+	mediumBlockSize = 284,
 };
 
 class MemoryChunk
@@ -66,8 +66,14 @@ public:
 
 	SmallMemoryBlockAllocator()
 	{
-		auto sizeToAllocate = blocksCount * sizeof(SmallMemoryBlock);
-		blocks = reinterpret_cast<SmallMemoryBlock*>(calloc(1, sizeToAllocate));
+		size_t sizeToAllocate = blocksCount * sizeof(SmallMemoryBlock);
+	
+	#if (ET_PLATFORM_WIN)
+		 blocks = reinterpret_cast<SmallMemoryBlock*>(_aligned_malloc(sizeToAllocate, 32));
+	#else
+		#error Implement allocation
+	#endif
+
 		firstBlock = blocks;
 		currentBlock = firstBlock;
 		lastBlock = firstBlock + blocksCount;
@@ -103,7 +109,11 @@ public:
 			lOut.info("et::BlockMemoryAllocator::allocateOnBreaks({ %s })", buffer);
 		}
 #endif
-		::free(blocks);
+	#if (ET_PLATFORM_WIN)
+		_aligned_free(blocks);
+	#else
+		#error Implement deallocation
+	#endif
 	}
 
 	bool allocate(void*& result)
@@ -197,6 +207,7 @@ class BlockMemoryAllocatorPrivate
 {
 public:
 	BlockMemoryAllocatorPrivate();
+	~BlockMemoryAllocatorPrivate();
 
 	void* alloc(uint32_t);
 	void free(void*);
@@ -213,6 +224,11 @@ private:
 
 	SmallMemoryBlockAllocator<smallBlockSize> _allocatorSmall;
 	SmallMemoryBlockAllocator<mediumBlockSize> _allocatorMedium;
+	uint32_t _smallAllocations = 0;
+	uint32_t _mediumAllocations = 0;
+	uint32_t _largeAllocations = 0;
+	uint32_t _minAllocSize = std::numeric_limits<uint32_t>::max();
+	uint32_t _maxAllocSize = 0;
 };
 
 BlockMemoryAllocator::BlockMemoryAllocator()
@@ -258,17 +274,34 @@ BlockMemoryAllocatorPrivate::BlockMemoryAllocatorPrivate()
 	_chunks.emplace_back(defaultChunkSize);
 }
 
+BlockMemoryAllocatorPrivate::~BlockMemoryAllocatorPrivate()
+{
+	log::ConsoleOutput out;
+	out.info("Allocation statistics: %u / %u / %u, sizes: %u .. %u", 
+		_smallAllocations, _mediumAllocations, _largeAllocations,
+		_minAllocSize, _maxAllocSize);
+}
+
 void* BlockMemoryAllocatorPrivate::alloc(uint32_t allocSize)
 {
 	CriticalSectionScope lock(_csLock);
 
 	void* result = nullptr;
 
+	_minAllocSize = std::min(_minAllocSize, allocSize);
+	_maxAllocSize = std::max(_maxAllocSize, allocSize);
+	
 	if ((allocSize <= smallBlockSize) && _allocatorSmall.haveFreeBlocks() && _allocatorSmall.allocate(result))
+	{
+		++_smallAllocations;
 		return result;
-
+	}
+	
 	if ((allocSize <= mediumBlockSize) && _allocatorMedium.haveFreeBlocks() && _allocatorMedium.allocate(result))
+	{
+		++_mediumAllocations;
 		return result;
+	}
 
 	for (MemoryChunk& chunk : _chunks)
 	{
@@ -278,10 +311,15 @@ void* BlockMemoryAllocatorPrivate::alloc(uint32_t allocSize)
 
 	_chunks.emplace_back(alignUpTo(std::max(allocSize, uint32_t(defaultChunkSize)), uint32_t(allocGranularity)));
 
-	auto& lastChunk = _chunks.back();
-	lastChunk.allocate(allocSize, result);
+	MemoryChunk& lastChunk = _chunks.back();
+	if (lastChunk.allocate(allocSize, result))
+	{
+		++_largeAllocations;
+		return result;
+	}
 
-	return result;
+	ET_FAIL_FMT("Failed to allocate %u bytes", allocSize);
+	return nullptr;
 }
 
 bool BlockMemoryAllocatorPrivate::validate(void* ptr, bool abortOnFail)
@@ -297,7 +335,7 @@ bool BlockMemoryAllocatorPrivate::validate(void* ptr, bool abortOnFail)
 	if (_allocatorMedium.containsPointer(ptr))
 		return true;
 
-	auto charPtr = static_cast<char*>(ptr);
+	char* charPtr = static_cast<char*>(ptr);
 	for (MemoryChunk& chunk : _chunks)
 	{
 		if (chunk.containsPointer(charPtr))
@@ -343,7 +381,8 @@ void BlockMemoryAllocatorPrivate::flushUnusedBlocks()
 
 void BlockMemoryAllocatorPrivate::free(void* ptr)
 {
-	if (ptr == nullptr) return;
+	if (ptr == nullptr) 
+		return;
 
 	CriticalSectionScope lock(_csLock);
 
@@ -357,7 +396,7 @@ void BlockMemoryAllocatorPrivate::free(void* ptr)
 	}
 	else
 	{
-		auto charPtr = static_cast<char*>(ptr);
+		char* charPtr = static_cast<char*>(ptr);
 		for (MemoryChunk& chunk : _chunks)
 		{
 			if (chunk.free(charPtr))

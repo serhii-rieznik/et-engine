@@ -51,7 +51,7 @@ void et::bmp::loadFromStream(std::istream& source, TextureDescription& desc)
 	desc.target = TextureTarget::Texture_2D;
 	desc.size = vec2i(ih.biWidth, ih.biHeight);
 	desc.levelCount = 1;
-	desc.layersCount = 1;
+	desc.layerCount = 1;
 	if (channels == 4)
 	{
 		desc.format = TextureFormat::RGBA8;

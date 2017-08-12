@@ -66,12 +66,24 @@ const uint32_t vertexAttributeUsageMasks[VertexAttributeUsage_max] =
 
 VertexAttributeUsage stringToVertexAttributeUsage(const std::string& s)
 {
-	std::string lcS = lowercase(s);
-
 	VertexAttributeUsage result = VertexAttributeUsage::Unknown;
 	for (uint32_t i = 0, e = VertexAttributeUsage_max; i < e; ++i)
 	{
-		if (lcS == lowercase(vertexAttributeUsageNames[i]))
+		if (stricmp(s.c_str(), vertexAttributeUsageNames[i].c_str()) == 0)
+		{
+			result = static_cast<VertexAttributeUsage>(i);
+			break;
+		}
+	}
+	return result;
+}
+
+VertexAttributeUsage semanticToVertexAttributeUsage(const std::string& s)
+{
+	VertexAttributeUsage result = VertexAttributeUsage::Unknown;
+	for (uint32_t i = 0, e = VertexAttributeUsage_max; i < e; ++i)
+	{
+		if (stricmp(s.c_str(), vertexAttributeUsageSemanticsNames[i].c_str()) == 0)
 		{
 			result = static_cast<VertexAttributeUsage>(i);
 			break;

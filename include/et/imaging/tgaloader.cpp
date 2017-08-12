@@ -220,7 +220,7 @@ void et::tga::loadFromStream(std::istream& source, TextureDescription& desc)
 	desc.size.x = info.width;
 	desc.size.y = info.height;
 	desc.levelCount = 1;
-	desc.layersCount = 1;
+	desc.layerCount = 1;
 	
 	uint32_t channels = info.bitsPerPixel / 8;
 

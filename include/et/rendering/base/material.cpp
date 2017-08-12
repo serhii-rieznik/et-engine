@@ -394,7 +394,7 @@ void MaterialInstance::buildTextureSet(const std::string& pt)
 			const ResourceRange& baseRange = base()->textures[r.second].range;
 			const ResourceRange& ownRange = textures[r.second].range;
 
-			TextureSet::TextureBinding& descriptionTexture = description[ref.first].textures[r.second];
+			TextureSet::TextureBinding& descriptionTexture = description[ref.first].textures[static_cast<MaterialTexture>(r.second)];
 			descriptionTexture.image = ownTexture.valid() ? ownTexture : baseTexture;
 			descriptionTexture.range = ownTexture.valid() ? ownRange : baseRange;
 			if (descriptionTexture.image.invalid())
@@ -407,7 +407,7 @@ void MaterialInstance::buildTextureSet(const std::string& pt)
 		{
 			const Sampler::Pointer& baseSampler = base()->samplers[r.second].object;
 			const Sampler::Pointer& ownSampler = samplers[r.second].object;
-			Sampler::Pointer& descriptionSampler = description[ref.first].samplers[r.second - MaterialSamplerBindingOffset];
+			Sampler::Pointer& descriptionSampler = description[ref.first].samplers[static_cast<MaterialTexture>(r.second - MaterialSamplerBindingOffset)];
 			descriptionSampler = ownSampler.valid() ? ownSampler : baseSampler;
 			if (descriptionSampler.invalid())
 				descriptionSampler = _renderer->defaultSampler();
@@ -431,7 +431,7 @@ void MaterialInstance::buildImageSet(const std::string& pt)
 		{
 			const Texture::Pointer& baseImage = base()->images[r.second].object;
 			const Texture::Pointer& ownImage = images[r.second].object;
-			Texture::Pointer& descriptionImage = description[ref.first].images[r.second];
+			Texture::Pointer& descriptionImage = description[ref.first].images[static_cast<StorageBuffer>(r.second)];
 
 			descriptionImage = ownImage.valid() ? ownImage : baseImage;
 			if (descriptionImage.invalid())

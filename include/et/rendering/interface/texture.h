@@ -46,7 +46,7 @@ public:
 		TextureTarget target = TextureTarget::Texture_2D;
 		TextureDataLayout dataLayout = TextureDataLayout::FacesFirst;
 		uint32_t levelCount = 1;
-		uint32_t layersCount = 1;
+		uint32_t layerCount = 1;
 		uint32_t flags = 0;
 
 		vec2i sizeForMipLevel(uint32_t level) const;
@@ -135,7 +135,7 @@ inline uint32_t Texture::Description::dataOffsetForMipLevel(uint32_t level, uint
 	{
 		result = dataOffsetForLayer(layer, level);
 		for (uint32_t l = 0; l < level; ++l)
-			result += layersCount * dataSizeForMipLevel(l);
+			result += layerCount * dataSizeForMipLevel(l);
 	}
 	else
 	{
@@ -157,11 +157,11 @@ inline uint32_t Texture::Description::dataOffsetForLayer(uint32_t layer, uint32_
 {
 	if (dataLayout == TextureDataLayout::FacesFirst)
 	{
-		return dataSizeForAllMipLevels() * ((layer < layersCount) ? layer : (layersCount > 0 ? layersCount - 1 : 0));
+		return dataSizeForAllMipLevels() * ((layer < layerCount) ? layer : (layerCount > 0 ? layerCount - 1 : 0));
 	}
 	else
 	{
-		return dataSizeForMipLevel(level) * ((layer < layersCount) ? layer : (layersCount > 0 ? layersCount - 1 : 0));
+		return dataSizeForMipLevel(level) * ((layer < layerCount) ? layer : (layerCount > 0 ? layerCount - 1 : 0));
 	}
 }
 
@@ -174,7 +174,7 @@ inline uint32_t Texture::Description::dataSizeForMipLevel(uint32_t level) const
 	uint32_t sz = isCompressedTextureFormat(format) ? std::max(static_cast<uint32_t>(Texture::minCompressedBlockDataSize),
 		std::max(minimumSize, actualSize)) : actualSize;
 	
-	return sz * layersCount;
+	return sz * layerCount;
 }
 
 }

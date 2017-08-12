@@ -295,7 +295,6 @@ enum class ProgramStage : uint32_t
 	// TODO : Hull = 1 << 2
 	// TODO : Domain = 1 << 3
 	Fragment = 1 << 4,
-	
 	Compute = 1 << 5,
 
 	max
@@ -548,6 +547,7 @@ enum class PipelineClass : uint32_t
 DataFormat dataTypeDataFormat(DataType t);
 
 VertexAttributeUsage stringToVertexAttributeUsage(const std::string& s);
+VertexAttributeUsage semanticToVertexAttributeUsage(const std::string& s);
 DataType stringToDataType(const std::string& s, RenderingAPI);
 DataFormat stringToDataFormat(const std::string&);
 

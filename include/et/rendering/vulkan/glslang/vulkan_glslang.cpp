@@ -44,12 +44,10 @@ class VertexShaderAttribLocationTraverser : public glslang::TIntermTraverser
 {
 	void visitSymbol(glslang::TIntermSymbol* symbol) override
 	{
-		std::string attribName(symbol->getName().c_str());
 		glslang::TQualifier& qualifier = symbol->getQualifier();
-
 		if ((qualifier.storage == glslang::TStorageQualifier::EvqVaryingIn) && qualifier.hasLocation())
 		{
-			VertexAttributeUsage usage = stringToVertexAttributeUsage(attribName);
+			VertexAttributeUsage usage = semanticToVertexAttributeUsage(symbol->getQualifier().semanticName);
 			if ((usage != VertexAttributeUsage::Unknown) && (static_cast<int>(usage) != qualifier.layoutLocation))
 				qualifier.layoutLocation = static_cast<int>(usage);
 		}
@@ -240,13 +238,61 @@ void buildProgramInputLayout(const glslang::TProgram& program, Program::Reflecti
 	int attribs = program.getNumLiveAttributes();
 	for (int attrib = 0; attrib < attribs; ++attrib)
 	{
-		const char* attribName = program.getAttributeName(attrib);
-		VertexAttributeUsage usage = stringToVertexAttributeUsage(attribName);
+		const glslang::TType* attribType = program.getAttributeTType(attrib);
+		const char* semanticName = attribType->getQualifier().semanticName;
+		ET_ASSERT(semanticName != nullptr);
+
+		VertexAttributeUsage usage = semanticToVertexAttributeUsage(semanticName);
 		if (usage != VertexAttributeUsage::Unknown)
 		{
-			int attribType = program.getAttributeType(attrib);
-			DataType dataType = vulkan::gl::dataTypeFromGLType(attribType);
-			reflection.inputLayout.push_back(usage, dataType);
+			if (attribType->getBasicType() == glslang::TBasicType::EbtFloat)
+			{
+				switch (attribType->getVectorSize())
+				{
+				case 1:
+					reflection.inputLayout.push_back(usage, DataType::Float);
+					break;
+				case 2:
+					reflection.inputLayout.push_back(usage, DataType::Vec2);
+					break;
+				case 3:
+					reflection.inputLayout.push_back(usage, DataType::Vec3);
+					break;
+				case 4:
+					reflection.inputLayout.push_back(usage, DataType::Vec4);
+					break;
+				default:
+					ET_ASSERT(!"Invalid vector size for attribute");
+				}
+			}
+			else if ((attribType->getBasicType() == glslang::TBasicType::EbtInt) || (attribType->getBasicType() == glslang::TBasicType::EbtUint))
+			{
+				switch (attribType->getVectorSize())
+				{
+				case 1:
+					reflection.inputLayout.push_back(usage, DataType::Int);
+					break;
+				case 2:
+					reflection.inputLayout.push_back(usage, DataType::IntVec2);
+					break;
+				case 3:
+					reflection.inputLayout.push_back(usage, DataType::IntVec3);
+					break;
+				case 4:
+					reflection.inputLayout.push_back(usage, DataType::IntVec4);
+					break;
+				default:
+					ET_ASSERT(!"Invalid vector size for attribute");
+				}
+			}
+			else
+			{
+				ET_ASSERT(!"Unsupported vertex attribute type");
+			}
+		}
+		else
+		{
+			ET_ASSERT(!"Unsupported vertex attribute usage");
 		}
 	}
 }
