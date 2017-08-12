@@ -6,13 +6,19 @@ TextureCube<float4> environmentTexture : CONSTANT_LOCATION(t, EnvironmentTexture
 
 SamplerState environmentSampler : CONSTANT_LOCATION(s, EnvironmentSamplerBinding, TexturesSetIndex);
 
-float3 sampleEnvironment(float3 i, in float3 l, float lod)
+float3 sampleEnvironment(float3 i, in float3 l, float roughness)
 {
+	float w = 0.0;
+	float h = 0.0;
+	float levels = 0.0;
+	environmentTexture.GetDimensions(0, w, h, levels);
+	float sampledLod = roughness * levels;
+
 #if (EQUIRECTANGULAR_ENV_MAP)
 	float2 sampleCoord = float2(0.5 * atan2(i.z, i.x), asin(i.y)) / PI + 0.5;
-	return environmentTexture.SampleLevel(environmentSampler, sampleCoord, lod).xyz;
+	return environmentTexture.SampleLevel(environmentSampler, sampleCoord, sampledLod).xyz;
 #else
-	return environmentTexture.SampleLevel(environmentSampler, i, lod).xyz;
+	return environmentTexture.SampleLevel(environmentSampler, i, sampledLod).xyz;
 #endif
 }
 

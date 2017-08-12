@@ -98,7 +98,7 @@ struct FSOutput
 float sampleShadow(in float3 shadowTexCoord, in float rotationKernel, in float2 shadowmapSize)
 {
 	const float radius = 2.0;
-	const float bias = 0.004;
+	const float bias = 0.00625;
 	const float2 poissonDistribution[8] = 
 	{
 		float2( 0.8528466f,  0.0213828f),
@@ -111,7 +111,7 @@ float sampleShadow(in float3 shadowTexCoord, in float rotationKernel, in float2 
 		float2(-0.8200445f,  0.4156708f)
 	};
 
-	float angle = 2.0 * PI * (rotationKernel + 8.0 * continuousTime);
+	float angle = 2.0 * PI * (rotationKernel + 2.0 * PI * continuousTime);
 	float sn = sin(angle);
 	float cs = cos(angle);
 	float2 scaledUV = shadowTexCoord.xy * 0.5 + 0.5;
@@ -174,7 +174,7 @@ FSOutput fragmentMain(VSOutput fsIn)
         ((1.0 - surface.metallness) * brdfLookupSample.z);
                                                                   
     float3 wsSpecularDir = specularDominantDirection(wsNormal, wsView, surface.roughness);
-    float3 indirectSpecular = sampleEnvironment(wsSpecularDir, lightDirection.xyz, 8.0 * surface.roughness);
+    float3 indirectSpecular = sampleEnvironment(wsSpecularDir, lightDirection.xyz, surface.roughness);
     indirectSpecular *= (surface.f0 * brdfLookupSample.x + surface.f90 * brdfLookupSample.y);
 
     float3 result = shadow * lightColor * (directDiffuse + directSpecular) + (indirectDiffuse + indirectSpecular); 
