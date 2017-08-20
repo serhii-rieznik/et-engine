@@ -37,6 +37,8 @@ public:
 	void end() override;
 
 	void debug() override;
+
+	bool fillStatistics(uint64_t* buffer, RenderPassStatistics&);
 	
 	void recordCommandBuffer();
 	uint32_t recordedFrameIndex() const;

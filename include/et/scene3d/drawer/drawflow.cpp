@@ -24,24 +24,8 @@ HDRFlow::HDRFlow(const RenderInterface::Pointer& ren) :
 	desc.color[0].storeOperation = FramebufferOperation::Store;
 	_passes.final = _renderer->allocateRenderPass(desc);
 	
-	/*
-	 * TEST COMPUTE
-	 *
-	_materials.computeTest = _renderer->sharedMaterialLibrary().loadMaterial(application().resolveFileName("engine_data/compute/test.json"));
-	_testCompute = _renderer->createCompute(_materials.computeTest);
-	// */
-
 	_materials.debug = _renderer->sharedMaterialLibrary().loadMaterial(application().resolveFileName("engine_data/materials/textured2d-transformed-lod.json"));
 	_materials.posteffects = _renderer->sharedMaterialLibrary().loadMaterial(application().resolveFileName("engine_data/materials/posteffects.json"));
-
-	/*
-	_batches.debug = renderhelper::createFullscreenRenderBatch(Texture::Pointer(), _materials.debug);
-	_batches.final = renderhelper::createFullscreenRenderBatch(Texture::Pointer(), _materials.posteffects);
-	_batches.tonemap = renderhelper::createFullscreenRenderBatch(Texture::Pointer(), _materials.posteffects);
-	_batches.downsample = renderhelper::createFullscreenRenderBatch(Texture::Pointer(), _materials.posteffects);
-	_batches.motionBlur = renderhelper::createFullscreenRenderBatch(Texture::Pointer(), _materials.posteffects);
-	_batches.txaa = renderhelper::createFullscreenRenderBatch(Texture::Pointer(), _materials.posteffects);
-	*/
 }
 
 void HDRFlow::resizeRenderTargets(const vec2i& sz)
@@ -221,17 +205,6 @@ void HDRFlow::tonemap()
 	_passes.tonemapping->pushRenderBatch(batch);
 	_passes.tonemapping->endSubpass();
 	_passes.tonemapping->end();
-	
-	/*
-	 * TEST COMPUTE
-	 *
-	_passes.tonemapping->pushImageBarrier(_luminanceHistogram, ResourceBarrier(TextureState::Storage));
-	_passes.tonemapping->pushImageBarrier(_secondaryTarget, ResourceBarrier(TextureState::ShaderResource));
-	_testCompute->material()->setTexture(MaterialTexture::BaseColor, _secondaryTarget);
-	_testCompute->material()->setImage(StorageBuffer::StorageBuffer0, _luminanceHistogram);
-	_passes.tonemapping->dispatchCompute(_testCompute, vec3i(_secondaryTarget->size(0), 1));
-	_passes.tonemapping->pushImageBarrier(_luminanceHistogram, ResourceBarrier(TextureState::ShaderResource));
-	// */
 	
 	_renderer->submitRenderPass(_passes.tonemapping);
 }

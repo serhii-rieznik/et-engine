@@ -19,7 +19,6 @@ void cleanupGlslangResources();
 using SPIRSource = std::vector<uint32_t>;
 using SPIRProgramStageMap = std::map<ProgramStage, SPIRSource>;
 
-bool hlslToSPIRV(const std::string& source, std::vector<uint32_t>& vertexBin, std::vector<uint32_t>& fragmentBin, Program::Reflection& reflection);
 bool generateSPIRFromHLSL(const std::string& source, SPIRProgramStageMap& stages, Program::Reflection& reflection);
 
 }

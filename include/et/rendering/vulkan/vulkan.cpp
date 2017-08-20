@@ -13,29 +13,29 @@ const char* vulkan::resultToString(VkResult result)
 	switch (result)
 	{
 		CASE_TO_STRING(VK_SUCCESS)
-			CASE_TO_STRING(VK_NOT_READY)
-			CASE_TO_STRING(VK_TIMEOUT)
-			CASE_TO_STRING(VK_EVENT_SET)
-			CASE_TO_STRING(VK_EVENT_RESET)
-			CASE_TO_STRING(VK_INCOMPLETE)
-			CASE_TO_STRING(VK_ERROR_OUT_OF_HOST_MEMORY)
-			CASE_TO_STRING(VK_ERROR_OUT_OF_DEVICE_MEMORY)
-			CASE_TO_STRING(VK_ERROR_INITIALIZATION_FAILED)
-			CASE_TO_STRING(VK_ERROR_DEVICE_LOST)
-			CASE_TO_STRING(VK_ERROR_MEMORY_MAP_FAILED)
-			CASE_TO_STRING(VK_ERROR_LAYER_NOT_PRESENT)
-			CASE_TO_STRING(VK_ERROR_EXTENSION_NOT_PRESENT)
-			CASE_TO_STRING(VK_ERROR_FEATURE_NOT_PRESENT)
-			CASE_TO_STRING(VK_ERROR_INCOMPATIBLE_DRIVER)
-			CASE_TO_STRING(VK_ERROR_TOO_MANY_OBJECTS)
-			CASE_TO_STRING(VK_ERROR_FORMAT_NOT_SUPPORTED)
-			CASE_TO_STRING(VK_ERROR_SURFACE_LOST_KHR)
-			CASE_TO_STRING(VK_ERROR_NATIVE_WINDOW_IN_USE_KHR)
-			CASE_TO_STRING(VK_SUBOPTIMAL_KHR)
-			CASE_TO_STRING(VK_ERROR_OUT_OF_DATE_KHR)
-			CASE_TO_STRING(VK_ERROR_INCOMPATIBLE_DISPLAY_KHR)
-			CASE_TO_STRING(VK_ERROR_VALIDATION_FAILED_EXT)
-			CASE_TO_STRING(VK_ERROR_INVALID_SHADER_NV)
+		CASE_TO_STRING(VK_NOT_READY)
+		CASE_TO_STRING(VK_TIMEOUT)
+		CASE_TO_STRING(VK_EVENT_SET)
+		CASE_TO_STRING(VK_EVENT_RESET)
+		CASE_TO_STRING(VK_INCOMPLETE)
+		CASE_TO_STRING(VK_ERROR_OUT_OF_HOST_MEMORY)
+		CASE_TO_STRING(VK_ERROR_OUT_OF_DEVICE_MEMORY)
+		CASE_TO_STRING(VK_ERROR_INITIALIZATION_FAILED)
+		CASE_TO_STRING(VK_ERROR_DEVICE_LOST)
+		CASE_TO_STRING(VK_ERROR_MEMORY_MAP_FAILED)
+		CASE_TO_STRING(VK_ERROR_LAYER_NOT_PRESENT)
+		CASE_TO_STRING(VK_ERROR_EXTENSION_NOT_PRESENT)
+		CASE_TO_STRING(VK_ERROR_FEATURE_NOT_PRESENT)
+		CASE_TO_STRING(VK_ERROR_INCOMPATIBLE_DRIVER)
+		CASE_TO_STRING(VK_ERROR_TOO_MANY_OBJECTS)
+		CASE_TO_STRING(VK_ERROR_FORMAT_NOT_SUPPORTED)
+		CASE_TO_STRING(VK_ERROR_SURFACE_LOST_KHR)
+		CASE_TO_STRING(VK_ERROR_NATIVE_WINDOW_IN_USE_KHR)
+		CASE_TO_STRING(VK_SUBOPTIMAL_KHR)
+		CASE_TO_STRING(VK_ERROR_OUT_OF_DATE_KHR)
+		CASE_TO_STRING(VK_ERROR_INCOMPATIBLE_DISPLAY_KHR)
+		CASE_TO_STRING(VK_ERROR_VALIDATION_FAILED_EXT)
+		CASE_TO_STRING(VK_ERROR_INVALID_SHADER_NV)
 	default:
 		ET_FAIL_FMT("Unknown Vulkan error: %d", static_cast<int>(result));
 	}
@@ -64,6 +64,15 @@ void VulkanState::executeServiceCommands(VulkanQueueClass cls, ServiceCommands c
 	VULKAN_CALL(vkQueueSubmit(queue.queue, 1, &submit, nullptr));
 
 	VULKAN_CALL(vkQueueWaitIdle(queue.queue));
+}
+
+uint32_t VulkanState::writeTimestamp(VkCommandBuffer cmd, VkPipelineStageFlagBits stage)
+{
+	VulkanSwapchain::Frame& frame = swapchain.mutableCurrentFrame();
+	
+	uint32_t result = frame.timestampIndex++;
+	vkCmdWriteTimestamp(cmd, stage, frame.timestampsQueryPool, result);
+	return result;
 }
 
 /*
@@ -223,6 +232,9 @@ void VulkanSwapchain::createSizeDependentResources(VulkanState& vulkan, const ve
 			vkDestroySemaphore(vulkan.device, frame.submitCompleted, nullptr);
 			frame.submitCompleted = nullptr;
 
+			vkDestroyQueryPool(vulkan.device, frame.timestampsQueryPool, nullptr);
+			frame.timestampsQueryPool = nullptr;
+
 			vkDestroyFence(vulkan.device, frame.imageFence, nullptr);
 			frame.imageFence = nullptr;
 		}
@@ -248,6 +260,11 @@ void VulkanSwapchain::createSizeDependentResources(VulkanState& vulkan, const ve
 		frame.color = *swapchainImagesPtr++;
 		frame.colorView = createImageView(vulkan, frame.color, VK_IMAGE_ASPECT_COLOR_BIT, surfaceFormat.format);
 
+		VkQueryPoolCreateInfo queryPoolInfo = { VK_STRUCTURE_TYPE_QUERY_POOL_CREATE_INFO };
+		queryPoolInfo.queryType = VK_QUERY_TYPE_TIMESTAMP;
+		queryPoolInfo.queryCount = 1024;
+		VULKAN_CALL(vkCreateQueryPool(vulkan.device, &queryPoolInfo, nullptr, &frame.timestampsQueryPool));
+
 		VkCommandBufferAllocateInfo allocInfo = { VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO };
 		allocInfo.commandBufferCount = 1;
 		allocInfo.commandPool = graphicsCommandPool;
@@ -271,6 +288,7 @@ void VulkanSwapchain::createSizeDependentResources(VulkanState& vulkan, const ve
 			barrierInfo.image = frame.color;
 			vkCmdPipelineBarrier(frame.barrierFromPresent, vulkan::accessMaskToPipelineStage(barrierInfo.srcAccessMask),
 				vulkan::accessMaskToPipelineStage(barrierInfo.dstAccessMask), 0, 0, nullptr, 0, nullptr, 1, &barrierInfo);
+			vkCmdResetQueryPool(frame.barrierFromPresent, frame.timestampsQueryPool, 0, 1024);
 		}
 		VULKAN_CALL(vkEndCommandBuffer(frame.barrierFromPresent));
 

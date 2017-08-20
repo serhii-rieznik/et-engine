@@ -26,7 +26,6 @@ public:
 		uint32_t arraySize = 0;
 		uint32_t enabled = 0;
 	};
-	using VariableMap = UnorderedMap<String, Variable>;
 
 	struct Reflection
 	{

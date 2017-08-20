@@ -73,6 +73,8 @@ public:
 	#else
 		#error Implement allocation
 	#endif
+		
+		memset(blocks, 0, sizeToAllocate);
 
 		firstBlock = blocks;
 		currentBlock = firstBlock;
@@ -82,8 +84,7 @@ public:
 	~SmallMemoryBlockAllocator()
 	{
 #if (ET_DEBUG)
-		std::vector<uint32_t> detectedLeaks;
-		detectedLeaks.reserve(1024);
+		std::set<uint32_t> detectedLeaks;
 		uint32_t totalLeaked = 0;
 
 		log::ConsoleOutput lOut;
@@ -92,7 +93,7 @@ public:
 			if (i->blockAllocated)
 			{
 				totalLeaked += blockSize;
-				detectedLeaks.emplace_back(i->allocIndex);
+				detectedLeaks.insert(i->allocIndex);
 			}
 		}
 
@@ -102,11 +103,15 @@ public:
 
 			int printPos = 0;
 			for (uint32_t i : detectedLeaks)
+			{
 				printPos += sprintf(buffer + printPos, "%u, ", i);
+				if ((printPos + 128) > sizeof(buffer))
+					break;
+			}
 			buffer[printPos - 2] = 0;
 
-			lOut.info("Total memory leaked: %llu from small blocks, use debug funtion:", totalLeaked);
-			lOut.info("et::BlockMemoryAllocator::allocateOnBreaks({ %s })", buffer);
+			lOut.info("Total memory leaked: %llu from small blocks, use debug funtion:\n"
+				"et::BlockMemoryAllocator::allocateOnBreaks({ %s })", totalLeaked, buffer);
 		}
 #endif
 	#if (ET_PLATFORM_WIN)
@@ -179,15 +184,13 @@ private:
 
 	struct SmallMemoryBlock
 	{
-		static_assert((blockSize + sizeof(uint32_t)) % 32 == 0,
-			"Invalid block size will cause troubles allocating aligned objects");
-
 		char data[blockSize];
-		uint32_t blockAllocated = 0;
-#	if (ET_DEBUG)
-		uint32_t allocIndex = 0;
-#	endif
+		uint32_t blockAllocated : 1;
+		uint32_t allocIndex : 31;
 	};
+
+	static_assert(sizeof(SmallMemoryBlock) % 32 == 0,
+		"Invalid block size will cause troubles allocating aligned objects");
 
 	SmallMemoryBlock* advance(SmallMemoryBlock* b)
 	{

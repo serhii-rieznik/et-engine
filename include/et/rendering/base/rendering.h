@@ -337,7 +337,10 @@ enum : uint32_t
 	MaterialVariablesBufferIndex = 1,
 
 	MaxRenderTargets = 8,
-	MaxTextureUnits = 8
+	MaxTextureUnits = 8,
+
+	MaxRenderPassName = 256,
+	MaxRenderPasses = 128
 };
 
 struct DepthState
@@ -542,6 +545,19 @@ enum class PipelineClass : uint32_t
 {
 	Graphics,
 	Compute
+};
+
+struct RenderPassStatistics
+{
+	char name[MaxRenderPassName] = { };
+	uint64_t duration = 0;
+};
+
+struct FrameStatistics
+{
+	uint32_t activeRenderPasses = 0;
+	RenderPassStatistics passes[MaxRenderPasses] = { };
+	uint64_t duration = 0;
 };
 
 DataFormat dataTypeDataFormat(DataType t);

@@ -16,12 +16,13 @@
 #include <et/core/serialization.h>
 #include <fstream>
 
-#define ET_VULKAN_PROGRAM_USE_CACHE 0
+#define ET_VULKAN_PROGRAM_USE_CACHE 1
 
-const uint32_t programCacheVersion = 1;
+const uint32_t programCacheVersion = 2;
 const uint32_t programCacheHeader = 'PROG';
 const uint32_t programCacheVertex = 'VERT';
 const uint32_t programCacheFragment = 'FRAG';
+const uint32_t programCacheCompute = 'COMP';
 const uint32_t programCacheReflection = 'REFL';
 
 namespace et
@@ -35,11 +36,12 @@ public:
 
 	VulkanState& vulkan;
 
-	bool loadCached(uint64_t hash, std::vector<uint32_t>& vert, std::vector<uint32_t>& frag, Program::Reflection& reflection);
-	void saveCached(uint64_t hash, const std::vector<uint32_t>& vert, const std::vector<uint32_t>& frag, const Program::Reflection& reflection);
+	bool loadCached(uint32_t stages, uint64_t hash, SPIRProgramStageMap& dst, Program::Reflection& ref);
+	void saveCached(uint32_t stages, uint64_t hash, const SPIRProgramStageMap& src, const Program::Reflection& ref);
 	void addProgramStage(ProgramStage stage, const std::vector<uint32_t>& code);
 
 	std::string cacheFolder();
+	std::string cacheFile(uint32_t stages, uint64_t hash);
 };
 
 VulkanProgram::VulkanProgram(VulkanState& v)
@@ -68,7 +70,13 @@ void VulkanProgram::build(uint32_t stages, const std::string& source)
 	if (stages & static_cast<uint32_t>(ProgramStage::Compute)) 
 		requestedStages.emplace(ProgramStage::Compute, SPIRSource());
 
-	generateSPIRFromHLSL(source, requestedStages, _reflection);
+	uint64_t hash = std::hash<std::string>().operator()(source);
+
+	if (_private->loadCached(stages, hash, requestedStages, _reflection) == false)
+	{
+		generateSPIRFromHLSL(source, requestedStages, _reflection);
+		_private->saveCached(stages, hash, requestedStages, _reflection);
+	}
 
 	for (const auto& stage : requestedStages)
 	{
@@ -82,77 +90,116 @@ const VulkanShaderModules& VulkanProgram::shaderModules() const
 	return *(_private);
 }
 
-bool VulkanProgramPrivate::loadCached(uint64_t hash, std::vector<uint32_t>& vert, std::vector<uint32_t>& frag, 
-	Program::Reflection& reflection)
+bool VulkanProgramPrivate::loadCached(uint32_t stages, uint64_t hash, SPIRProgramStageMap& dst, Program::Reflection& ref)
 {
 #if ET_VULKAN_PROGRAM_USE_CACHE
-	char buffer[1024] = {};
-	std::string baseFolder = cacheFolder();
-	sprintf(buffer, "%s%016llX.program.cache", baseFolder.c_str(), hash);
-	std::string cacheFile(buffer);
+	std::string fileName = cacheFile(stages, hash);
 
-	if (!fileExists(cacheFile))
+	if (!fileExists(fileName))
 		return false;
 
-	std::ifstream file(cacheFile, std::ios::in | std::ios::binary);
+	#define RETURN_WITH_ERROR(err) do { log::error(err); return false; } while (0)
+
+	std::ifstream file(fileName, std::ios::in | std::ios::binary);
 	uint32_t header = deserializeUInt32(file);
 	if (header != programCacheHeader)
-		return false;
+		RETURN_WITH_ERROR("Invalid header read from cache file");
 	
 	uint32_t version = deserializeUInt32(file);
 	if (version > programCacheVersion)
-		return false;
+		RETURN_WITH_ERROR("Unsupported version read from cache file");
 
-	uint32_t vertexId = deserializeUInt32(file);
-	if (vertexId != programCacheVertex)
-		return false;
+	uint32_t storedStages = deserializeUInt32(file);
+	if ((storedStages & stages) != stages)
+		RETURN_WITH_ERROR("Stored stages in program cache does not match requested stages");
 
-	uint32_t vertexSize = deserializeUInt32(file);
-	vert.resize(vertexSize);
-	file.read(reinterpret_cast<char*>(vert.data()), vertexSize * sizeof(uint32_t));
+	uint32_t loadedStages = 0;
+	while (file.eof() == false)
+	{
+		uint32_t chunk = deserializeUInt32(file);
+		switch (chunk)
+		{
+		case programCacheVertex:
+		{
+			SPIRSource& source = dst.at(ProgramStage::Vertex);
+			source.resize(deserializeUInt64(file));
+			file.read(reinterpret_cast<char*>(source.data()), source.size() * sizeof(uint32_t));
+			loadedStages |= static_cast<uint32_t>(ProgramStage::Vertex);
+			break;
+		}
+		case programCacheFragment:
+		{
+			SPIRSource& source = dst.at(ProgramStage::Fragment);
+			source.resize(deserializeUInt64(file));
+			file.read(reinterpret_cast<char*>(source.data()), source.size() * sizeof(uint32_t));
+			loadedStages |= static_cast<uint32_t>(ProgramStage::Fragment);
+			break;
+		}
+		case programCacheCompute:
+		{
+			SPIRSource& source = dst.at(ProgramStage::Compute);
+			source.resize(deserializeUInt64(file));
+			file.read(reinterpret_cast<char*>(source.data()), source.size() * sizeof(uint32_t));
+			loadedStages |= static_cast<uint32_t>(ProgramStage::Compute);
+			break;
+		}
+		case programCacheReflection:
+		{
+			ref.deserialize(file);
+			break;
+		}
+		default:
+			break;
+		}
+	}
 
-	uint32_t fragmentId = deserializeUInt32(file);
-	if (fragmentId != programCacheFragment)
-		return false;
-
-	uint32_t fragmentSize = deserializeUInt32(file);
-	frag.resize(fragmentSize);
-	file.read(reinterpret_cast<char*>(frag.data()), fragmentSize * sizeof(uint32_t));
-
-	uint32_t reflectionId = deserializeUInt32(file);
-	if (reflectionId != programCacheReflection)
-		return false;
-
-	reflection.deserialize(file);
 	return true;
+	#undef RETURN_WITH_ERROR
+
 #else
 	return false;
 #endif
 }
 
-void VulkanProgramPrivate::saveCached(uint64_t hash, const std::vector<uint32_t>& vert, const std::vector<uint32_t>& frag, 
-	const Program::Reflection& reflection)
+void VulkanProgramPrivate::saveCached(uint32_t stages, uint64_t hash, const SPIRProgramStageMap& src, const Program::Reflection& ref)
 {
 #if (ET_VULKAN_PROGRAM_USE_CACHE)
-	char buffer[1024] = {};
-	std::string baseFolder = cacheFolder();
-	sprintf(buffer, "%s%016llX.program.cache", baseFolder.c_str(), hash);
-	std::string cacheFile(buffer);
+	std::string fileName = cacheFile(stages, hash);
 
-	std::ofstream file(cacheFile, std::ios::out | std::ios::binary);
+	std::ofstream file(fileName, std::ios::out | std::ios::binary);
 	serializeUInt32(file, programCacheHeader);
 	serializeUInt32(file, programCacheVersion);
-	
-	serializeUInt32(file, programCacheVertex);
-	serializeUInt32(file, static_cast<uint32_t>(vert.size()));
-	file.write(reinterpret_cast<const char*>(vert.data()), vert.size() * sizeof(uint32_t));
+	serializeUInt32(file, stages);
 
-	serializeUInt32(file, programCacheFragment);
-	serializeUInt32(file, static_cast<uint32_t>(frag.size()));
-	file.write(reinterpret_cast<const char*>(frag.data()), frag.size() * sizeof(uint32_t));
+	auto writeStage = [&src, stages, &file](ProgramStage stage) {
+		if ((static_cast<uint32_t>(stage) & stages) && (src.count(stage) > 0))
+		{
+			switch (stage)
+			{
+			case ProgramStage::Vertex:
+				serializeUInt32(file, programCacheVertex);
+				break;
+			case ProgramStage::Fragment:
+				serializeUInt32(file, programCacheFragment);
+				break;
+			case ProgramStage::Compute:
+				serializeUInt32(file, programCacheCompute);
+				break;
+			default:
+				ET_ASSERT(!"Invalid program stage");
+			}
+			const SPIRSource& source = src.at(stage);
+			serializeUInt64(file, source.size());
+			file.write(reinterpret_cast<const char*>(source.data()), source.size() * sizeof(uint32_t));
+		}
+	};
+
+	writeStage(ProgramStage::Vertex);
+	writeStage(ProgramStage::Fragment);
+	writeStage(ProgramStage::Compute);
 
 	serializeUInt32(file, programCacheReflection);
-	reflection.serialize(file);
+	ref.serialize(file);
 #endif
 }
 
@@ -181,6 +228,14 @@ std::string VulkanProgramPrivate::cacheFolder()
 		createDirectory(result, true);
 
 	return result;
+}
+
+std::string VulkanProgramPrivate::cacheFile(uint32_t stages, uint64_t hash)
+{
+	char buffer[2048] = { };
+	std::string baseFolder = cacheFolder();
+	sprintf(buffer, "%s%08X-%016llX.program.cache", baseFolder.c_str(), stages, hash);
+	return std::string(buffer);
 }
 
 }

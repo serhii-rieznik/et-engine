@@ -154,23 +154,25 @@ void VulkanRenderer::init(const RenderContextParameters& params)
 
 	uint32_t queuesIndex = 0;
 	float queuePriorities[] = { 0.0f };
-	for (const VkQueueFamilyProperties& queue : queueProperties)
+	for (const VkQueueFamilyProperties& props : queueProperties)
 	{
-		if (queue.queueFlags & VK_QUEUE_GRAPHICS_BIT)
+		if (props.queueFlags & VK_QUEUE_GRAPHICS_BIT)
 		{
 			ET_ASSERT(_private->queues[VulkanQueueClass::Graphics].index == static_cast<uint32_t>(-1));
 			_private->queues[VulkanQueueClass::Graphics].index = queuesIndex;
 			queueCreateInfos[VulkanQueueClass::Graphics].queueFamilyIndex = queuesIndex;
 			queueCreateInfos[VulkanQueueClass::Graphics].queueCount = 1;
 			queueCreateInfos[VulkanQueueClass::Graphics].pQueuePriorities = queuePriorities;
+			_private->queues[VulkanQueueClass::Graphics].properties = props;
 		}
-		if (queue.queueFlags & VK_QUEUE_COMPUTE_BIT)
+		if (props.queueFlags & VK_QUEUE_COMPUTE_BIT)
 		{
 			ET_ASSERT(_private->queues[VulkanQueueClass::Compute].index == static_cast<uint32_t>(-1));
 			_private->queues[VulkanQueueClass::Compute].index = queuesIndex;
 			queueCreateInfos[VulkanQueueClass::Compute].queueFamilyIndex = queuesIndex;
 			queueCreateInfos[VulkanQueueClass::Compute].queueCount = 1;
 			queueCreateInfos[VulkanQueueClass::Compute].pQueuePriorities = queuePriorities;
+			_private->queues[VulkanQueueClass::Compute].properties = props;
 		}
 		++queuesIndex;
 	}
@@ -341,6 +343,28 @@ void VulkanRenderer::submitRenderPass(RenderPass::Pointer inPass)
 void VulkanRenderer::begin()
 {
 	_private->swapchain.acquireNextImage(_private->vulkan());
+
+	VulkanSwapchain::Frame& currentFrame = _private->swapchain.mutableCurrentFrame();
+	if (currentFrame.timestampIndex > 0)
+	{
+		uint64_t timestampData[1024] = {};
+
+		VULKAN_CALL(vkGetQueryPoolResults(_private->vulkan().device, currentFrame.timestampsQueryPool, 0,
+			currentFrame.timestampIndex, sizeof(timestampData), timestampData, sizeof(uint64_t), VK_QUERY_RESULT_64_BIT | VK_QUERY_RESULT_WAIT_BIT));
+		
+		memset(&_statistics, 0, sizeof(_statistics));
+		for (VulkanRenderPass::Pointer& pass : _private->passes[frameIndex()])
+		{
+			if (pass->fillStatistics(timestampData, _statistics.passes[_statistics.activeRenderPasses]))
+			{
+				_statistics.duration += _statistics.passes[_statistics.activeRenderPasses].duration;
+				++_statistics.activeRenderPasses;
+			}
+		}
+		
+		currentFrame.timestampIndex = 0;
+	}
+
 	_private->passes[frameIndex()].clear();
 }
 

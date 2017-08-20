@@ -111,6 +111,8 @@ public:
 	Vector<VulkanRenderSubpass> subpassSequence;
 	uint32_t currentSubpassIndex = InvalidIndex;
 	uint32_t frameIndex = 0;
+	uint32_t beginQueryIndex = 0;
+	uint32_t endQueryIndex = 0;
 
 	std::atomic_bool recording{ false };
 
@@ -490,6 +492,7 @@ void VulkanRenderPass::recordCommandBuffer()
 	VkCommandBufferBeginInfo commandBufferBeginInfo = { VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO };
 	commandBufferBeginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
 	VULKAN_CALL(vkBeginCommandBuffer(commandBuffer, &commandBufferBeginInfo));
+	_private->beginQueryIndex = _private->vulkan.writeTimestamp(commandBuffer, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT);
 
 	bool renderPassStarted = false;
 	uint32_t subframeIndex = InvalidIndex;
@@ -647,6 +650,7 @@ void VulkanRenderPass::recordCommandBuffer()
 		}
 	}
 
+	_private->endQueryIndex = _private->vulkan.writeTimestamp(commandBuffer, VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT);
 	VULKAN_CALL(vkEndCommandBuffer(commandBuffer));
 }
 
@@ -728,6 +732,26 @@ void VulkanRenderPass::dispatchCompute(const Compute::Pointer& compute, const ve
 	cs.dynamicOffsets[0] = objectVariables;
 	cs.dynamicOffsets[1] = material->constantBufferData(info().name);
 	_private->commands[_private->frameIndex].emplace_back(cs);
+}
+
+bool VulkanRenderPass::fillStatistics(uint64_t* buffer, RenderPassStatistics& stat)
+{
+	uint32_t validBits = _private->vulkan.queues[VulkanQueueClass::Graphics].properties.timestampValidBits;
+
+	uint64_t timestampMask = 0;
+	for (uint64_t i = 0; i < validBits; ++i)
+		timestampMask |= (1llu << i);
+
+	uint64_t beginTime = buffer[_private->beginQueryIndex] & timestampMask;
+	uint64_t endTime = buffer[_private->endQueryIndex] & timestampMask;
+
+	double periodDuration = static_cast<double>(_private->vulkan.physicalDeviceProperties.limits.timestampPeriod);
+	double periods = static_cast<double>(endTime - beginTime);
+	
+	strncpy(stat.name, info().name.c_str(), std::min(static_cast<size_t>(MaxRenderPassName), info().name.size()));
+	stat.duration = static_cast<uint64_t>((periods * periodDuration) / 1000.0);
+
+	return true;
 }
 
 }

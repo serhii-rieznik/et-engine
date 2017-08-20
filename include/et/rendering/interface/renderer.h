@@ -40,6 +40,9 @@ public:
 	ConstantBuffer& sharedConstantBuffer()
 		{ return _sharedConstantBuffer; }
 
+	const FrameStatistics& statistics() const 
+		{ return _statistics; }
+
 	virtual RenderingAPI api() const = 0;
 
 	virtual void init(const RenderContextParameters& params) = 0;
@@ -108,6 +111,9 @@ public:
 protected:
 	void initInternalStructures();
 	void shutdownInternalStructures();
+
+protected:
+	FrameStatistics _statistics;
 
 private:
 	RenderContext* _rc = nullptr;

@@ -9,6 +9,7 @@
 
 #include <et/rendering/base/rendering.h>
 #include <et/rendering/interface/program.h>
+#include <mutex>
 
 #if (ET_PLATFORM_WIN)
 #	define VK_USE_PLATFORM_WIN32_KHR
@@ -45,16 +46,15 @@ struct VulkanSwapchain
 	{
 		VkImage color = nullptr;
 		VkImageView colorView = nullptr;
-
 		VkCommandBuffer barrierFromPresent = nullptr;
 		VkCommandBuffer barrierToPresent = nullptr;
-
 		VkFence imageFence = nullptr;
-
 		VkSemaphore imageAcquired = nullptr;
 		VkSemaphore semaphoreFromPresent = nullptr;
 		VkSemaphore semaphoreToPresent = nullptr;
 		VkSemaphore submitCompleted = nullptr;
+		VkQueryPool timestampsQueryPool = nullptr;
+		uint32_t timestampIndex = 0;
 	};
 
 	struct DepthBuffer
@@ -70,9 +70,10 @@ struct VulkanSwapchain
 	uint32_t swapchainImageIndex = static_cast<uint32_t>(-1);
 
 	const Frame& currentFrame() const
-	{
-		return frames.at(frameNumber % RendererFrameCount);
-	}
+		{ return frames.at(frameNumber % RendererFrameCount); }
+	
+	Frame& mutableCurrentFrame()
+		{ return frames.at(frameNumber % RendererFrameCount); }
 };
 
 enum VulkanQueueClass : uint32_t
@@ -90,6 +91,7 @@ struct VulkanQueue
 	VkQueue queue = nullptr;
 	VkCommandPool commandPool = nullptr;
 	VkCommandBuffer serviceCommandBuffer = nullptr;
+	VkQueueFamilyProperties properties = { };
 };
 
 struct VulkanState
@@ -112,6 +114,8 @@ struct VulkanState
 
 	using ServiceCommands = std::function<void(VkCommandBuffer)>;
 	void executeServiceCommands(VulkanQueueClass, ServiceCommands);
+
+	uint32_t writeTimestamp(VkCommandBuffer cmd, VkPipelineStageFlagBits stage);
 };
 
 struct VulkanShaderModules

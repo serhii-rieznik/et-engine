@@ -187,7 +187,9 @@ bool generateSPIRFromHLSL(const std::string& source, SPIRProgramStageMap& stages
 		if (!buildProgram(program, messages))
 			return false;
 
-		buildProgramInputLayout(program, reflection);
+		if (stage.first == ProgramStage::Vertex)
+			buildProgramInputLayout(program, reflection);
+
 		buildProgramReflection(program, reflection, stage.first);
 
 		glslang::TIntermediate* intermediate = program.getIntermediate(language);
