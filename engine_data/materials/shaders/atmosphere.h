@@ -113,6 +113,7 @@ float3 sampleAtmosphere(float3 dir, in float3 light, in float3 lightColor)
     float cosTheta = dot(dir, light);
     float2 phase = float2(phaseFunctionRayleigh(cosTheta), phaseFunctionMie(cosTheta, mieG));
 
-    float a = atmosphereIntersection(positionOnPlanet, dir);
+    float maxDistance = atmosphereHeight * 4.0;
+    float a = min(maxDistance, atmosphereIntersection(positionOnPlanet, dir));
     return lightColor * inScattering(positionOnPlanet, positionOnPlanet + a * dir, light, phase);
 }

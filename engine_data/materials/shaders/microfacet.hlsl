@@ -97,7 +97,7 @@ struct FSOutput
 
 float sampleShadow(in float3 shadowTexCoord, in float rotationKernel, in float2 shadowmapSize)
 {
-	const float radius = 2.0;
+	const float radius = sqrt(2.0);
 	const float bias = 0.00625;
 	const float2 poissonDistribution[8] = 
 	{
