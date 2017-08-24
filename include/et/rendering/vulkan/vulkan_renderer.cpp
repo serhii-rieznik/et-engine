@@ -357,7 +357,6 @@ void VulkanRenderer::begin()
 		{
 			if (pass->fillStatistics(timestampData, _statistics.passes[_statistics.activeRenderPasses]))
 			{
-				_statistics.duration += _statistics.passes[_statistics.activeRenderPasses].duration;
 				++_statistics.activeRenderPasses;
 			}
 		}

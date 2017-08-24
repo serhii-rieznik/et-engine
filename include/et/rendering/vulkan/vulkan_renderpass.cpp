@@ -113,6 +113,10 @@ public:
 	uint32_t frameIndex = 0;
 	uint32_t beginQueryIndex = 0;
 	uint32_t endQueryIndex = 0;
+	uint64_t buildBeginTime = 0;
+	uint64_t buildEndTime = 0;
+	uint64_t executionBeginTime = 0;
+	uint64_t executionEndTime = 0;
 
 	std::atomic_bool recording{ false };
 
@@ -260,6 +264,8 @@ const VulkanNativeRenderPass& VulkanRenderPass::nativeRenderPass() const
 void VulkanRenderPass::begin(const RenderPassBeginInfo& beginInfo)
 {
 	ET_ASSERT(_private->recording == false);
+
+	_private->buildBeginTime = queryCurrentTimeInMicroSeconds();
 
 	_private->subpassSequence.clear();
 	_private->frameIndex = _private->renderer->frameIndex();
@@ -464,6 +470,7 @@ void VulkanRenderPass::end()
 	ET_ASSERT(_private->recording);
 	
 	_private->recording = false;
+	_private->buildEndTime = queryCurrentTimeInMicroSeconds();
 }
 
 void VulkanRenderPass::debug()
@@ -474,6 +481,8 @@ void VulkanRenderPass::debug()
 void VulkanRenderPass::recordCommandBuffer()
 {
 	ET_ASSERT(_private->recording == false);
+
+	_private->executionBeginTime = queryCurrentTimeInMicroSeconds();
 
 	VkCommandBuffer commandBuffer = _private->content[_private->frameIndex].commandBuffer;
 	VkPipeline lastPipeline = nullptr;
@@ -652,6 +661,8 @@ void VulkanRenderPass::recordCommandBuffer()
 
 	_private->endQueryIndex = _private->vulkan.writeTimestamp(commandBuffer, VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT);
 	VULKAN_CALL(vkEndCommandBuffer(commandBuffer));
+	
+	_private->executionEndTime = queryCurrentTimeInMicroSeconds();
 }
 
 uint32_t VulkanRenderPass::recordedFrameIndex() const
@@ -749,7 +760,9 @@ bool VulkanRenderPass::fillStatistics(uint64_t* buffer, RenderPassStatistics& st
 	double periods = static_cast<double>(endTime - beginTime);
 	
 	strncpy(stat.name, info().name.c_str(), std::min(static_cast<size_t>(MaxRenderPassName), info().name.size()));
-	stat.duration = static_cast<uint64_t>((periods * periodDuration) / 1000.0);
+	stat.gpuExecution = static_cast<uint64_t>((periods * periodDuration) / 1000.0);
+	stat.cpuExecution = _private->executionEndTime - _private->executionBeginTime;
+	stat.cpuBuild = _private->buildEndTime - _private->buildBeginTime;;
 
 	return true;
 }

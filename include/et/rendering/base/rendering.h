@@ -550,14 +550,15 @@ enum class PipelineClass : uint32_t
 struct RenderPassStatistics
 {
 	char name[MaxRenderPassName] = { };
-	uint64_t duration = 0;
+	uint64_t cpuBuild = 0;
+	uint64_t cpuExecution = 0;
+	uint64_t gpuExecution = 0;
 };
 
 struct FrameStatistics
 {
 	uint32_t activeRenderPasses = 0;
 	RenderPassStatistics passes[MaxRenderPasses] = { };
-	uint64_t duration = 0;
 };
 
 DataFormat dataTypeDataFormat(DataType t);
