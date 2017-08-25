@@ -537,7 +537,10 @@ void MaterialInstance::invalidateConstantBuffer()
 
 void Material::initDefaultHeader()
 {
-	_shaderDefaultHeader = R"(
+	if (_shaderDefaultHeader.empty())
+	{
+
+		_shaderDefaultHeader = R"(
 #define VariablesSetIndex 0
 #define TexturesSetIndex 1
 #define StorageSetIndex 2
@@ -547,33 +550,32 @@ void Material::initDefaultHeader()
 #define INV_PI 0.3183098862
 )";
 
-	char buffer[2048] = { };
-	int printPos = 0;
-	for (uint32_t i = static_cast<uint32_t>(MaterialTexture::FirstMaterialTexture); i < MaterialTexture_max; ++i)
-	{
-		std::string texName = materialTextureToString(static_cast<MaterialTexture>(i));
-		std::string smpName = materialSamplerToString(static_cast<MaterialTexture>(i));
-		texName[0] = static_cast<char>(toupper(texName[0]));
-		smpName[0] = static_cast<char>(toupper(smpName[0]));
-		printPos += sprintf(buffer + printPos, "#define %sBinding %u\n#define %sBinding %u\n",
-			texName.c_str(), i, smpName.c_str(), i + MaterialSamplerBindingOffset);
-	}
-	for (uint32_t i = static_cast<uint32_t>(StorageBuffer::StorageBuffer0); i < StorageBuffer_max; ++i)
-	{
-		std::string name = storageBufferToString(static_cast<StorageBuffer>(i));
-		name[0] = static_cast<char>(toupper(name[0]));
-		printPos += sprintf(buffer + printPos, "#define %sBinding %u\n", name.c_str(), i);
-	}
-	{
+		int printPos = 0;
+		char buffer[2048] = { };
+		for (uint32_t i = static_cast<uint32_t>(MaterialTexture::FirstMaterialTexture); i < MaterialTexture_max; ++i)
+		{
+			std::string texName = materialTextureToString(static_cast<MaterialTexture>(i));
+			std::string smpName = materialSamplerToString(static_cast<MaterialTexture>(i));
+			texName[0] = static_cast<char>(toupper(texName[0]));
+			smpName[0] = static_cast<char>(toupper(smpName[0]));
+			printPos += sprintf(buffer + printPos, "#define %sBinding %u\n#define %sBinding %u\n",
+				texName.c_str(), i, smpName.c_str(), i + MaterialSamplerBindingOffset);
+		}
+		for (uint32_t i = static_cast<uint32_t>(StorageBuffer::StorageBuffer0); i < StorageBuffer_max; ++i)
+		{
+			std::string name = storageBufferToString(static_cast<StorageBuffer>(i));
+			name[0] = static_cast<char>(toupper(name[0]));
+			printPos += sprintf(buffer + printPos, "#define %sBinding %u\n", name.c_str(), i);
+		}
+
 		printPos += sprintf(buffer + printPos,
 			"#define ObjectVariablesBufferIndex %u\n"
 			"#define MaterialVariablesBufferIndex %u\n",
 			ObjectVariablesBufferIndex, MaterialVariablesBufferIndex);
-	}
 
-	_shaderDefaultHeader += buffer;
+		_shaderDefaultHeader += buffer;
 
-	_shaderDefaultHeader += R"(
+		_shaderDefaultHeader += R"(
 #define CONSTANT_LOCATION_IMPL(name, registerName, spaceName) register(name##registerName, space##spaceName)
 #define CONSTANT_LOCATION(name, register, space)              CONSTANT_LOCATION_IMPL(name, register, space)
 #define DECL_BUFFER(name)                                     CONSTANT_LOCATION(b, name##VariablesBufferIndex, VariablesSetIndex)
@@ -581,7 +583,7 @@ void Material::initDefaultHeader()
 #define DECL_SAMPLER(name)                                    CONSTANT_LOCATION(s, name##SamplerBinding, TexturesSetIndex)
 #define DECL_STORAGE(name)                                    CONSTANT_LOCATION(u, name##Binding, StorageSetIndex)
 )";
-
+	}
 }
 ;
 

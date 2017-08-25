@@ -50,24 +50,16 @@ struct VulkanCommand
 		Debug,
 	} type = Type::Undefined;
 
-	VulkanRenderBatch batch;
-	VulkanTexture::Pointer sourceImage;
-	ResourceBarrier imageBarrier;
 	RenderSubpass subpass;
-	
-	VulkanTexture::Pointer destImage;
-	CopyDescriptor copyDescriptor;
-
+	VulkanRenderBatch batch;
 	VulkanComputeStruct compute;
+	ResourceBarrier imageBarrier;
+	CopyDescriptor copyDescriptor;
+	VulkanTexture::Pointer sourceImage;
+	VulkanTexture::Pointer destImage;
 
 	VulkanCommand(Type t) :
 		type(t) { }
-
-	VulkanCommand(VulkanRenderBatch&& b) :
-		type(Type::RenderBatch), batch(b) { }
-
-	VulkanCommand(VulkanComputeStruct& c) :
-		type(Type::DispatchCompute), compute(c) { }
 
 	VulkanCommand(const RenderSubpass& sp) :
 		type(Type::BeginRenderPass), subpass(sp) { }
@@ -77,6 +69,14 @@ struct VulkanCommand
 
 	VulkanCommand(const Texture::Pointer& texFrom, const Texture::Pointer& texTo, const CopyDescriptor& desc) :
 		type(Type::CopyImage), sourceImage(texFrom), destImage(texTo), copyDescriptor(desc) { }
+
+	VulkanCommand(const VulkanCommand&) {
+		abort();
+	}
+	
+	VulkanCommand(const VulkanCommand&&) {
+		abort();
+	}
 
 	~VulkanCommand() { }
 };
@@ -735,14 +735,14 @@ void VulkanRenderPass::dispatchCompute(const Compute::Pointer& compute, const ve
 		}
 	}
 
-	VulkanComputeStruct cs;
+	_private->commands[_private->frameIndex].emplace_back(VulkanCommand::Type::DispatchCompute);
+	VulkanComputeStruct& cs = _private->commands[_private->frameIndex].back().compute;
 	cs.compute = vulkanCompute;
 	cs.textureSet = material->textureSet(info().name);
 	cs.imageSet = material->imageSet(info().name);
 	cs.dimension = dim;
 	cs.dynamicOffsets[0] = objectVariables;
 	cs.dynamicOffsets[1] = material->constantBufferData(info().name);
-	_private->commands[_private->frameIndex].emplace_back(cs);
 }
 
 bool VulkanRenderPass::fillStatistics(uint64_t* buffer, RenderPassStatistics& stat)
