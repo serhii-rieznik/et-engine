@@ -54,7 +54,7 @@ private:
 	{
 		enum : uint32_t
 		{
-			MaxVertexLinks = 16,
+			MaxVertexLinks = 8,
 			MaxVertexSize = 4
 		};
 		using VertexLink = StaticDataStorage<uint32_t, MaxVertexSize>;
@@ -67,33 +67,50 @@ private:
 
 	struct OBJGroup
 	{
-		std::string name;
-		std::string material;
-		Vector<OBJFace> faces;
-
-		OBJGroup()
+		enum : uint32_t
 		{
-			log::info("OBJGroup()");
-			faces.reserve(0xff);
+			MaxGroupName = 128,
+			MaxMaterialName = 128,
+		};
+		char name[MaxGroupName] = { };
+		char material[MaxMaterialName] = {};
+		std::vector<OBJFace> faces;
+
+		OBJGroup(uint64_t sizeEstimate = 256)
+		{
+			// log::info("OBJGroup()");
+			faces.reserve(sizeEstimate);
 		}
 
-		OBJGroup(const std::string& aName) :
-			name(aName)
+		OBJGroup(const char* aName, uint64_t sizeEstimate = 256) :
+			OBJGroup(sizeEstimate)
 		{
-			log::info("OBJGroup(%s)", aName.c_str());
-			faces.reserve(0xff);
+			strncpy(name, aName, std::min(strlen(aName), static_cast<size_t>(MaxGroupName)));
 		}
 
-		OBJGroup(const std::string& aName, const std::string& aMat) :
-			name(aName), material(aMat)
+		OBJGroup(const char* aName, const char* aMat, uint64_t sizeEstimate = 256) :
+			OBJGroup(sizeEstimate)
 		{
-			log::info("OBJGroup(%s, %s)", aName.c_str(), aMat.c_str());
-			faces.reserve(0xff);
+			strncpy(name, aName, std::min(strlen(aName), static_cast<size_t>(MaxGroupName)));
+			strncpy(name, aMat, std::min(strlen(aMat), static_cast<size_t>(MaxMaterialName)));
+		}
+		OBJGroup(const std::string& aName, uint64_t sizeEstimate = 256) :
+			OBJGroup(sizeEstimate)
+		{
+			strncpy(name, aName.data(), std::min(aName.size(), static_cast<size_t>(MaxGroupName)));
+		}
+
+		OBJGroup(const std::string& aName, const std::string& aMat, uint32_t sizeEstimate = 256) :
+			OBJGroup(sizeEstimate)
+		{
+			strncpy(name, aName.data(), std::min(aName.size(), static_cast<size_t>(MaxGroupName)));
+			strncpy(material, aMat.data(), std::min(aMat.size(), static_cast<size_t>(MaxMaterialName)));
 		}
 	};
 
 private:
 	void loadData(ObjectsCache& cache);
+	void load(ObjectsCache& cache);
 	void processLoadedData();
 
 	s3d::ElementContainer::Pointer generateVertexBuffers(s3d::Storage&);
@@ -116,12 +133,14 @@ private:
 	IndexArray::Pointer _indices;
 	VertexStorage::Pointer _vertexData;
 
-	Vector<et::vec3> _vertices;
-	Vector<et::vec3> _normals;
-	Vector<et::vec2> _texCoords;
-	Vector<OBJGroup> _groups;
+	std::vector<et::vec3> _vertices;
+	std::vector<et::vec3> _normals;
+	std::vector<et::vec2> _texCoords;
+	std::vector<OBJGroup> _groups;
+	Set<std::string> _loadedMaterials;
 
 	uint32_t _loadOptions = Option_JustLoad;
+	uint64_t _sizeEstimate = 1024;
 	int _lastSmoothGroup = 0;
 	int _lastGroupId = 0;
 };

@@ -56,47 +56,44 @@ void CubemapProcessor::process(RenderInterface::Pointer& renderer, DrawerOptions
 	}
 
 	if (!hasFlag(CubemapProcessed) || options.rebuldEnvironmentProbe)
-	{
-		/*
-		* Downsampling convolution
-		*/
-		_processingMaterial->setTexture(MaterialTexture::BaseColor, _tex[CubemapType::Source]);
-		_processingMaterial->setSampler(MaterialTexture::BaseColor, _eqMapSampler);
-
-		_downsampleBatch->setMaterial(_processingMaterial->instance());
-		_processingMaterial->releaseInstances();
-
-		Texture::Pointer tex = _tex[CubemapType::Downsampled];
-		
+	{	
 		_downsamplePass->begin(_wholeCubemapBeginInfo);
-		_downsamplePass->pushImageBarrier(tex, ResourceBarrier(TextureState::ColorRenderTarget, 0, 1, 0, 6));
 		_downsamplePass->loadSharedVariablesFromLight(light);
 		
-		for (uint32_t i = 0, e = static_cast<uint32_t>(_wholeCubemapBeginInfo.subpasses.size()); i < e; ++i)
+		RenderBatch::Pointer copyBatch = renderhelper::createFullscreenRenderBatch(_tex[CubemapType::Source], 
+			_processingMaterial, _eqMapSampler, ResourceRange(0, 1, 0, 6));
+		
+		_downsamplePass->pushImageBarrier(_tex[CubemapType::Downsampled], ResourceBarrier(TextureState::ColorRenderTarget, 0, 1, 0, 6));
+		for (uint32_t face = 0; face < 6; ++face)
 		{
-			uint32_t level = i / 6;
-			uint32_t face = i % 6;
-			_downsampleMaterial->setFloat(MaterialVariable::ExtraParameters, static_cast<float>(level));
 			_downsamplePass->setSharedVariable(ObjectVariable::WorldTransform, _projections[face]);
-
-			if ((level > 0) && (face == 0))
-			{
-				_downsampleMaterial->setTexture(MaterialTexture::BaseColor, tex, { 0, level, 0, 6 });
-				_downsamplePass->pushImageBarrier(tex, ResourceBarrier(TextureState::ShaderResource, level - 1, 1, 0, 6));
-				_downsamplePass->pushImageBarrier(tex, ResourceBarrier(TextureState::ColorRenderTarget, level, 1, 0, 6));
-			}
-
 			_downsamplePass->nextSubpass();
-			_downsamplePass->pushRenderBatch(_downsampleBatch);
+			_downsamplePass->pushRenderBatch(copyBatch);
 			_downsamplePass->endSubpass();
+		}
+
+		RenderBatch::Pointer downsampleBatch = renderhelper::createFullscreenRenderBatch(_tex[CubemapType::Downsampled], _downsampleMaterial, renderer->defaultSampler(), ResourceRange(0, 1, 0, 6));
+		for (uint32_t level = 1; level < CubemapLevels; ++level)
+		{
+			downsampleBatch->material()->setFloat(MaterialVariable::ExtraParameters, static_cast<float>(level));
+			downsampleBatch->material()->setTexture(MaterialTexture::BaseColor, _tex[CubemapType::Downsampled], { 0, level, 0, 6 });
+
+			_downsamplePass->pushImageBarrier(_tex[CubemapType::Downsampled],
+				ResourceBarrier(TextureState::ColorRenderTarget, level, 1, 0, 6));
+
+			_downsamplePass->pushImageBarrier(_tex[CubemapType::Downsampled],
+				ResourceBarrier(TextureState::ShaderResource, level - 1, 1, 0, 6));
 			
-			if (i == 5)
+			for (uint32_t face = 0; face < 6; ++face)
 			{
-				_downsampleBatch->setMaterial(_downsampleMaterial->instance());
-				_downsampleMaterial->releaseInstances();
+				_downsamplePass->setSharedVariable(ObjectVariable::WorldTransform, _projections[face]);
+				_downsamplePass->nextSubpass();
+				_downsamplePass->pushRenderBatch(downsampleBatch);
+				_downsamplePass->endSubpass();
 			}
 		}
-		_downsamplePass->pushImageBarrier(tex, ResourceBarrier(TextureState::ShaderResource, 0, CubemapLevels, 0, 6));
+
+		_downsamplePass->pushImageBarrier(_tex[CubemapType::Downsampled], ResourceBarrier(TextureState::ShaderResource, 0, CubemapLevels, 0, 6));
 		_downsamplePass->end();
 		
 		renderer->submitRenderPass(_downsamplePass);
@@ -130,6 +127,11 @@ void CubemapProcessor::validate(RenderInterface::Pointer& renderer)
 	if (_processingMaterial.invalid())
 	{
 		_processingMaterial = renderer->sharedMaterialLibrary().loadMaterial(application().resolveFileName("engine_data/materials/cubemap.json"));
+	}
+
+	if (_downsampleMaterial.invalid())
+	{
+		_downsampleMaterial = renderer->sharedMaterialLibrary().loadMaterial(application().resolveFileName("engine_data/materials/cubemap-downsample.json"));
 	}
 
 	if (_eqMapSampler.invalid())
@@ -196,9 +198,6 @@ void CubemapProcessor::validate(RenderInterface::Pointer& renderer)
 		passInfo.name = "prepare-cubemap";
 		passInfo.priority = passPriority--;
 		_downsamplePass = renderer->allocateRenderPass(passInfo);
-		_downsampleBatch = renderhelper::createFullscreenRenderBatch(_tex[CubemapType::Source], _processingMaterial);
-
-		_downsampleMaterial = renderer->sharedMaterialLibrary().loadMaterial(application().resolveFileName("engine_data/materials/cubemap-downsample.json"));
 	}
 
 	if (_specularConvolvePass.invalid())

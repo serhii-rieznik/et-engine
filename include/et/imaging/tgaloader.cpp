@@ -205,7 +205,8 @@ void et::tga::loadFromStream(std::istream& source, TextureDescription& desc)
 	}
 	else if (memcmp(cTGAcompare, header, sizeof(TGAHeader)) == 0)
 	{
-		ET_FAIL("Not implemented");
+		log::error("Invalid TGA file.");
+		return;
 	}
 	else
 	{

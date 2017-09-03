@@ -68,7 +68,6 @@ private:
 	RenderPass::Pointer _downsamplePass;
 	RenderPass::Pointer _cubemapDebugPass;
 	RenderPass::Pointer _specularConvolvePass;
-	RenderBatch::Pointer _downsampleBatch;
 	RenderBatch::Pointer _lookupDebugBatch;
 	RenderBatch::Pointer _cubemapDebugBatch;
 	RenderBatch::Pointer _specularConvolveBatch;

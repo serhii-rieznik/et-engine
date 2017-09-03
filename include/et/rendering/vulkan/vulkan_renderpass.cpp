@@ -70,15 +70,9 @@ struct VulkanCommand
 	VulkanCommand(const Texture::Pointer& texFrom, const Texture::Pointer& texTo, const CopyDescriptor& desc) :
 		type(Type::CopyImage), sourceImage(texFrom), destImage(texTo), copyDescriptor(desc) { }
 
-	VulkanCommand(const VulkanCommand&) {
-		abort();
-	}
-	
-	VulkanCommand(const VulkanCommand&&) {
-		abort();
-	}
-
-	~VulkanCommand() { }
+	VulkanCommand(const VulkanCommand&) = default;
+	VulkanCommand(VulkanCommand&&) = default;
+	~VulkanCommand() = default;
 };
 
 struct VulkanRenderSubpass

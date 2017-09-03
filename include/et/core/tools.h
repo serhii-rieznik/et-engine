@@ -20,7 +20,7 @@ uint64_t queryCurrentTimeInMicroSeconds();
  */
 std::string applicationIdentifierForCurrentProject();
 
-uint32_t streamSize(std::istream& s);
+intptr_t streamSize(std::istream& s);
 
 template <class I>
 inline I roundToHighestPowerOfTwo(I x)

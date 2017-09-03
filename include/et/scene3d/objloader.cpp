@@ -151,6 +151,270 @@ OBJLoader::~OBJLoader()
 		materialFile.close();
 }
 
+float naive_atof(const char *p) 
+{
+	float r = 0.0;
+	bool neg = false;
+	if (*p == '-') {
+		neg = true;
+		++p;
+	}
+	while (*p >= '0' && *p <= '9') 
+	{
+		r = (r * 10.0f) + (*p - '0');
+		++p;
+	}
+	if (*p == '.') 
+	{
+		float f = 0.0f;
+		int32_t n = 0;
+		++p;
+		while (*p >= '0' && *p <= '9') 
+		{
+			f = (f * 10.0f) + (*p - '0');
+			++p;
+			++n;
+		}
+		r += f / std::pow(10.0f, n);
+	}
+	return neg ? -r : r;
+}
+
+void OBJLoader::load(ObjectsCache& cache)
+{
+	uint32_t lineNumber = 0;
+
+	auto trimWhitespace = [](char* begin, char* end) -> char* {
+		
+		while (isWhitespaceChar(*begin))
+			++begin;
+
+		while ((end > begin) && (isWhitespaceChar(*(end - 1)))) {
+			*(end - 1) = 0;
+			--end;
+		}
+
+		return begin;
+	};
+
+	auto readFloats = [](char* line, char* end, uint32_t count, float* dst) {
+		uint32_t floatsRead = 0;
+		char* begin = line;
+		while ((floatsRead < count) && (begin < end))
+		{
+			char* token = begin;
+			while (!isWhitespaceChar(*token))
+				++token;
+			
+			char tokenValue = *token;
+
+			*token = 0;
+			dst[floatsRead] = naive_atof(begin);
+			*token = tokenValue;
+
+			begin = token + 1;
+			++floatsRead;
+		}
+	};
+
+	const uint32_t BufferSize = 256 * 1024;
+	char localBuffer[BufferSize + 3] = { };
+
+	intptr_t readOffset = 0;
+	intptr_t charactersRead = 0;
+	do 
+	{
+		inputFile.read(localBuffer + readOffset, BufferSize - readOffset);
+		charactersRead = inputFile.gcount();
+
+		intptr_t currentBufferLength = readOffset + charactersRead;
+		if (currentBufferLength > 0)
+		{
+			localBuffer[readOffset + charactersRead] = 0;
+			readOffset = 0;
+
+			char* begin = localBuffer;
+			char* end = begin;
+			while ((end - localBuffer) < currentBufferLength)
+			{
+				end = begin;
+				while ((*end != 0) && (*end != '\n'))
+					++end;
+
+				if ((*end == '\n') || ((*end == 0) && inputFile.eof()))
+				{
+					*end = 0;
+					{
+						++lineNumber;
+
+						char* line_begin = begin;
+						char* local_end = end;
+						char* local_begin = trimWhitespace(line_begin, local_end);
+						if ((*local_begin == '#') || ((local_end - local_begin) == 0))
+						{
+							begin = end + 1;
+							continue;
+						}
+						
+						char* keyEnd = local_begin;
+						while (!isWhitespaceChar(*keyEnd))
+							++keyEnd;
+
+						char* key = local_begin;
+						*keyEnd = 0;
+
+						char* local_value = trimWhitespace(keyEnd + 1, local_end);
+
+						bool recognized = true;
+						switch (*key)
+						{
+						case 'm':
+						{
+							if (strcmp(key, "mtllib") == 0)
+							{
+								loadMaterials(std::string(local_value, local_end - local_value), cache);
+							}
+							else
+							{
+								recognized = false;
+							}
+							break;
+						}
+						case 'g':
+						{
+							_groups.emplace_back(local_value, _sizeEstimate);
+							break;
+						}
+						case 'u':
+						{
+							if (strcmp(key, "usemtl") == 0)
+							{
+								bool addGroup = _groups.empty() ||
+									((strlen(_groups.back().material) > 0) && (strcmp(_groups.back().material, local_value) != 0));
+
+								if (addGroup)
+								{
+									char buffer[OBJGroup::MaxGroupName] = {};
+									sprintf(buffer, "group-%u-%s", static_cast<uint32_t>(_groups.size()), local_value);
+									_groups.emplace_back(buffer, local_value, _sizeEstimate);
+								}
+								else
+								{
+									size_t stringSize = std::min(static_cast<size_t>(OBJGroup::MaxMaterialName), strlen(local_value));
+									strncpy(_groups.back().material, local_value, stringSize);
+								}
+							}
+							else
+							{
+								recognized = false;
+							}
+							break;
+						}
+						case 'v':
+						{
+							switch (*(key + 1))
+							{
+							case 0:
+							{
+								_vertices.emplace_back();
+								readFloats(local_value, local_end, 3, _vertices.back().data());
+								break;
+							}
+							case 'n':
+							{
+								_normals.emplace_back();
+								readFloats(local_value, local_end, 3, _normals.back().data());
+								break;
+							}
+							case 't':
+							{
+								_texCoords.emplace_back();
+								readFloats(local_value, local_end, 2, _texCoords.back().data());
+								break;
+							}
+							default:
+								recognized = false;
+							}
+							break;
+						}
+						case 'f':
+						{
+							if (_groups.empty())
+							{
+								char buffer[OBJGroup::MaxGroupName] = {};
+								sprintf("buffer", "group-%u", static_cast<uint32_t>(_groups.size()));
+								_groups.emplace_back(buffer, _sizeEstimate);
+							}
+
+							_groups.back().faces.emplace_back();
+							OBJFace& face = _groups.back().faces.back();
+
+							while (local_value < local_end)
+							{
+								char* valueEnd = local_value;
+								while ((valueEnd < local_end) && !isWhitespaceChar(*valueEnd))
+									++valueEnd;
+
+								char valueKey = *valueEnd;
+								*valueEnd = 0;
+
+								char* link = local_value;
+								char* linkEnd = link;
+
+								uint32_t linkIndex = 0;
+								while (link < valueEnd)
+								{
+									char endValue = *linkEnd;
+									if ((endValue == '/') || (endValue == 0))
+									{
+										*linkEnd = 0;
+
+										int64_t linkValue = std::atoll(link);
+										ET_ASSERT(linkValue > 0);
+										ET_ASSERT(face.vertexLinksCount < OBJFace::MaxVertexLinks);
+
+										face.vertexLinks[face.vertexLinksCount][linkIndex] = static_cast<uint32_t>(linkValue - 1);
+										++linkIndex;
+
+										*linkEnd = endValue;
+										link = linkEnd + 1;
+									}
+									++linkEnd;
+								}
+
+								++face.vertexLinksCount;
+
+								*valueEnd = valueKey;
+								local_value = valueEnd + 1;
+							}
+							break;
+						}
+						case 's':
+						case 'o':
+							break;
+
+						default:
+							recognized = false;
+							break;
+						}
+
+						if (!recognized)
+						{
+							log::warning("Unsupported entry `%s` in OBJ file at line %u", key, lineNumber);
+						}
+					}
+					begin = end + 1;
+				}
+				else
+				{
+					readOffset = end - begin;
+					memmove(localBuffer, begin, readOffset);
+				}
+			}
+		}
+	} while (charactersRead > 0);
+}
+
 void OBJLoader::loadData(ObjectsCache& cache)
 {
 	std::string line;
@@ -201,7 +465,7 @@ void OBJLoader::loadData(ObjectsCache& cache)
 				_groups.back().faces.shrink_to_fit();
 			}
 
-            _groups.emplace_back(line);
+            _groups.emplace_back(line, _sizeEstimate);
 		}
 		else if (key == 'u') // group's material
 		{
@@ -217,11 +481,12 @@ void OBJLoader::loadData(ObjectsCache& cache)
                 if (_groups.empty())
                 {
                     auto groupName = "group-" + intToStr(_lastGroupId++) + "-" + materialId;
-                    _groups.emplace_back(groupName, materialId);
+                    _groups.emplace_back(groupName, materialId, _sizeEstimate);
                 }
-                else if (_groups.back().material.empty() || _groups.back().material == materialId)
+                else if ((strlen(_groups.back().material) == 0) || _groups.back().material == materialId)
                 {
-                    _groups.back().material = materialId;
+					size_t stringSize = std::min(static_cast<size_t>(OBJGroup::MaxMaterialName), materialId.size());
+					strncpy(_groups.back().material, materialId.c_str(), stringSize);
                 }
 				getLine(inputFile, line);
 			}
@@ -234,7 +499,7 @@ void OBJLoader::loadData(ObjectsCache& cache)
 		{
             if (_groups.empty())
             {
-                _groups.emplace_back("group-" + intToStr(_lastGroupId++));
+                _groups.emplace_back("group-" + intToStr(_lastGroupId++), _sizeEstimate);
             }
 			getLine(inputFile, line);
 			_lastSmoothGroup = (line.compare("off") == 0) ? 0 : strToInt(line);
@@ -252,7 +517,7 @@ void OBJLoader::loadData(ObjectsCache& cache)
 			splitAndWrite(line, ' ', [](const std::string& s) {
 				faces.emplace_back(s);
 			});
-			ET_ASSERT((faces.size() > 2) && (faces.size() < 6));
+			ET_ASSERT((faces.size() > 2) && (faces.size() < OBJFace::MaxVertexLinks));
 
 			for (auto inFace : faces)
 			{
@@ -301,7 +566,7 @@ void OBJLoader::loadData(ObjectsCache& cache)
 			
 			if (_groups.empty())
 			{
-                _groups.emplace_back("group-" + intToStr(_lastGroupId++));
+                _groups.emplace_back("group-" + intToStr(_lastGroupId++), _sizeEstimate);
 			}
 			
 			_groups.back().faces.push_back(face);
@@ -354,13 +619,26 @@ s3d::ElementContainer::Pointer OBJLoader::load(et::RenderInterface::Pointer ren,
 {
 	storage.flush();
 
-	_renderer = ren;
-	_groups.reserve(4);
-	_vertices.reserve(1024);
-	_normals.reserve(1024);
-	_texCoords.reserve(1024);
+	uint64_t fileSize = streamSize(inputFile);
+	_sizeEstimate = std::max(1024llu, fileSize / 128);
+	log::info("Loading OBJ, estimated array sizes: %llu", _sizeEstimate);
 
-	loadData(cache);
+	_renderer = ren;
+	_groups.reserve(128);
+	_vertices.reserve(_sizeEstimate);
+	_normals.reserve(_sizeEstimate);
+	_texCoords.reserve(_sizeEstimate);
+	
+	// estimate for faces count
+	_sizeEstimate = std::max(128llu, _sizeEstimate / 2048);
+	log::info("Loading OBJ, estimated face array sizes: %llu", _sizeEstimate);
+
+	auto t1 = queryCurrentTimeInMicroSeconds();
+	load(cache);
+	// loadData(cache);
+	auto t2 = queryCurrentTimeInMicroSeconds();
+
+	log::info("Loading time: %llu", t2 - t1);
 	
 	processLoadedData();
 
@@ -376,6 +654,13 @@ void OBJLoader::loadMaterials(const std::string& fileName, ObjectsCache& cache)
 {
 	application().pushSearchPath(inputFilePath);
 	std::string filePath = application().resolveFileName(fileName);
+	application().popSearchPaths();
+
+	if (_loadedMaterials.count(filePath) > 0)
+		return;
+
+	application().pushSearchPath(inputFilePath);
+	_loadedMaterials.insert(filePath);
 	
 	materialFile.open(filePath.c_str());
 	if (!materialFile.is_open())
@@ -738,9 +1023,9 @@ void OBJLoader::processLoadedData()
 {
 	uint32_t totalTriangles = 0;
 
-	for (const auto& group : _groups)
+	for (const OBJGroup& group : _groups)
 	{
-		for (const auto& face : group.faces)
+		for (const OBJFace& face : group.faces)
 		{
 			ET_ASSERT(face.vertexLinksCount > 1);
 			totalTriangles += static_cast<uint32_t>(face.vertexLinksCount - 2);
@@ -782,7 +1067,7 @@ void OBJLoader::processLoadedData()
 	
 	uint32_t index = 0;
 	
-	for (auto group : _groups)
+	for (const OBJGroup& group : _groups)
 	{
 		uint32_t startIndex = index;
 		
@@ -792,7 +1077,7 @@ void OBJLoader::processLoadedData()
 		{
 			uint32_t vertexCount = 0;
 			
-			for (auto face : group.faces)
+			for (const OBJFace& face : group.faces)
 			{
 				uint32_t numTriangles = face.vertexLinksCount - 2;
 				for (uint32_t i = 1; i <= numTriangles; ++i)
@@ -808,7 +1093,7 @@ void OBJLoader::processLoadedData()
 				center /= static_cast<float>(vertexCount);
 		}
 		
-		for (auto face : group.faces)
+		for (const OBJFace& face : group.faces)
 		{
 			uint32_t numTriangles = face.vertexLinksCount - 2;
 			for (uint32_t i = 1; i <= numTriangles; ++i)
@@ -833,7 +1118,7 @@ void OBJLoader::processLoadedData()
 		}
 
 		MaterialInstance::Pointer m;
-		for (auto mat : _materials)
+		for (const MaterialInstancePointer& mat : _materials)
 		{
 			if (mat->name() == group.material)
 			{
@@ -844,7 +1129,7 @@ void OBJLoader::processLoadedData()
 
 		if (m.invalid())
 		{
-			log::error("Unable to find material `%s`", group.material.c_str());
+			log::error("Unable to find material `%s`", group.material);
 			Material::Pointer microfacet = _renderer->sharedMaterialLibrary().loadDefaultMaterial(DefaultMaterial::Microfacet);
 			m = microfacet->instance();
 			m->setName("missing_material");
