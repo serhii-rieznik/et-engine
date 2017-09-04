@@ -138,7 +138,7 @@ bool VulkanSwapchain::createDepthImage(VulkanState& vulkan, VkImage& image, VkDe
 	VkMemoryAllocateInfo allocInfo = { VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO };
 	allocInfo.allocationSize = memoryRequirements.size;
 	allocInfo.memoryTypeIndex = vulkan::getMemoryTypeIndex(vulkan, memoryRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-	VULKAN_CALL(vkAllocateMemory(vulkan.device, &allocInfo, nullptr, &memory));
+	VULKAN_CALL(vulkan::allocateMemory(vulkan.device, &allocInfo, &memory));
 	VULKAN_CALL(vkBindImageMemory(vulkan.device, image, memory, 0));
 
 	VkImageMemoryBarrier barrierInfo = { VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER };
@@ -245,7 +245,7 @@ void VulkanSwapchain::createSizeDependentResources(VulkanState& vulkan, const ve
 		vkDestroyImage(vulkan.device, depthBuffer.depth, nullptr);
 		depthBuffer.depth = nullptr;
 
-		vkFreeMemory(vulkan.device, depthBuffer.depthMemory, nullptr);
+		vulkan::freeMemory(vulkan.device, depthBuffer.depthMemory);
 		depthBuffer.depthMemory = nullptr;
 
 		vkDestroySwapchainKHR(vulkan.device, currentSwapchain, nullptr);
@@ -811,6 +811,66 @@ const char* programStageEntryName(ProgramStage val)
 	};
 	ET_ASSERT(values.count(val) > 0);
 	return values.at(val);
+}
+
+static uint64_t totalAllocated = 0;
+static uint64_t allocationsCount = 0;
+static uint64_t aliveAllocated = 0;
+static uint64_t minAllocSize = std::numeric_limits<uint64_t>::max();
+static uint64_t maxAllocSize = 0;
+static std::map<VkDeviceMemory, uint64_t> allocationSizes;
+static std::set<uint32_t> allocationIndices;
+
+void reportAllocatedMemory(uint64_t size, uint32_t type)
+{
+	minAllocSize = std::min(size, minAllocSize);
+	maxAllocSize = std::max(size, maxAllocSize);
+
+	++allocationsCount;
+	totalAllocated += size;
+	aliveAllocated += size;
+
+	char typesBuffer[128] = { };
+	int p = 0;
+	for (uint32_t t : allocationIndices)
+		p += sprintf(typesBuffer + p, "%u ", t);
+
+	log::info("[+] %llu (%u), %llu alive, total %llu (%llu allocs, %llu...%llu) [used types: %s]", 
+		size, type, aliveAllocated, totalAllocated, allocationsCount, minAllocSize, maxAllocSize, typesBuffer);
+}
+
+void reportReleasedMemory(uint64_t size)
+{
+	ET_ASSERT(size <= aliveAllocated);
+
+	aliveAllocated -= size;
+	log::info("[-] %llu, total %llu bytes in %llu allocations, %llu bytes alive",
+		size, totalAllocated, allocationsCount, aliveAllocated);
+}
+
+VkResult allocateMemory(VkDevice device, const VkMemoryAllocateInfo* allocInfo, VkDeviceMemory* outMemory)
+{
+	VkDeviceMemory memory = VK_NULL_HANDLE;
+	VkResult result = vkAllocateMemory(device, allocInfo, nullptr, &memory);
+
+	*outMemory = memory;
+	allocationSizes[memory] = allocInfo->allocationSize;
+	allocationIndices.insert(allocInfo->memoryTypeIndex);
+	
+	reportAllocatedMemory(allocInfo->allocationSize, allocInfo->memoryTypeIndex);
+
+	return result;
+}
+
+void freeMemory(VkDevice device, VkDeviceMemory memory)
+{
+	auto i = allocationSizes.find(memory);
+	ET_ASSERT(i != allocationSizes.end());
+
+	reportReleasedMemory(i->second);
+	allocationSizes.erase(i);
+
+	vkFreeMemory(device, memory, nullptr);
 }
 
 }

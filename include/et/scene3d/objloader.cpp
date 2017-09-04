@@ -1050,6 +1050,7 @@ void OBJLoader::processLoadedData()
 
 	IndexArrayFormat fmt = (totalVertices > 65535) ? IndexArrayFormat::Format_32bit : IndexArrayFormat::Format_16bit;
 	
+	log::info("Index array + vertex storage: %u vertices", totalVertices);
 	_indices = IndexArray::Pointer::create(fmt, totalVertices, PrimitiveType::Triangles);
 	_indices->linearize(totalVertices);
 	

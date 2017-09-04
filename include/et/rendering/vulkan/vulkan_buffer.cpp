@@ -58,7 +58,7 @@ VulkanBuffer::VulkanBuffer(VulkanState& vulkan, const Description& desc)
 	VkMemoryAllocateInfo allocInfo = { VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO };
 	allocInfo.memoryTypeIndex = vulkan::getMemoryTypeIndex(_private->vulkan, _private->memoryRequirements.memoryTypeBits, memoryProperties);
 	allocInfo.allocationSize = _private->memoryRequirements.size;
-	VULKAN_CALL(vkAllocateMemory(_private->vulkan.device, &allocInfo, nullptr, &_private->memory));
+	VULKAN_CALL(vulkan::allocateMemory(_private->vulkan.device, &allocInfo, &_private->memory));
 
 	VULKAN_CALL(vkBindBufferMemory(_private->vulkan.device, _private->buffer, _private->memory, 0));
 
@@ -69,7 +69,7 @@ VulkanBuffer::VulkanBuffer(VulkanState& vulkan, const Description& desc)
 VulkanBuffer::~VulkanBuffer()
 {
 	vkDestroyBuffer(_private->vulkan.device, _private->buffer, nullptr);
-	vkFreeMemory(_private->vulkan.device, _private->memory, nullptr);
+	vulkan::freeMemory(_private->vulkan.device, _private->memory);
 
 	ET_PIMPL_FINALIZE(VulkanBuffer);
 }

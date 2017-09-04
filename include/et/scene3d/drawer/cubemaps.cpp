@@ -144,7 +144,7 @@ void CubemapProcessor::validate(RenderInterface::Pointer& renderer)
 
 	{
 		TextureDescription::Pointer cubemapDesc(PointerInit::CreateInplace);
-		cubemapDesc->format = TextureFormat::RGBA32F;
+		cubemapDesc->format = TextureFormat::RGBA16F;
 		cubemapDesc->target = TextureTarget::Texture_Cube;
 		cubemapDesc->flags = Texture::Flags::RenderTarget;
 		cubemapDesc->levelCount = CubemapLevels;
@@ -161,7 +161,7 @@ void CubemapProcessor::validate(RenderInterface::Pointer& renderer)
 	if (_lookupPass.invalid())
 	{
 		TextureDescription::Pointer lookupDesc(PointerInit::CreateInplace);
-		lookupDesc->format = TextureFormat::RGBA32F;
+		lookupDesc->format = TextureFormat::RGBA16F;
 		lookupDesc->size = vec2i(256);
 		lookupDesc->flags = Texture::Flags::RenderTarget;
 		_lookup = renderer->createTexture(lookupDesc);

@@ -12,7 +12,7 @@ namespace et
 namespace s3d
 {
 
-const TextureFormat HDRTextureFormat = TextureFormat::RGBA32F;
+const TextureFormat HDRTextureFormat = TextureFormat::RGBA16F;
 
 HDRFlow::HDRFlow(const RenderInterface::Pointer& ren) : 
 	_renderer(ren)

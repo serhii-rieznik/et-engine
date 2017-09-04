@@ -222,7 +222,7 @@ void VulkanRenderer::init(const RenderContextParameters& params)
 	HWND mainWindow = reinterpret_cast<HWND>(application().context().objects[0]);
 	_private->swapchain.init(_private->vulkan(), params, mainWindow);
 
-	uint32_t defaultPoolSize = 1024;
+	uint32_t defaultPoolSize = 2048;
 
 	VkDescriptorPoolSize poolSizes[] = {
 		{ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, defaultPoolSize },

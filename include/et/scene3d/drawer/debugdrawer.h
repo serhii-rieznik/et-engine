@@ -38,7 +38,7 @@ private:
 private:
 	enum : uint32_t
 	{
-		Capacity = 8 * 1024 * 1024,
+		Capacity = 8 * 1024,
 	};
 	
 	struct DebugVertex

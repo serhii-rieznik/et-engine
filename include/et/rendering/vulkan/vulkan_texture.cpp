@@ -85,7 +85,7 @@ VulkanTexture::VulkanTexture(VulkanState& vulkan, const Description& desc, const
 	VkMemoryAllocateInfo allocInfo = { VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO };
 	allocInfo.allocationSize = _private->memoryRequirements.size;
 	allocInfo.memoryTypeIndex = vulkan::getMemoryTypeIndex(vulkan, _private->memoryRequirements.memoryTypeBits, memoryProperties);
-	VULKAN_CALL(vkAllocateMemory(vulkan.device, &allocInfo, nullptr, &_private->memory));
+	VULKAN_CALL(vulkan::allocateMemory(vulkan.device, &allocInfo, &_private->memory));
 	VULKAN_CALL(vkBindImageMemory(vulkan.device, _private->image, _private->memory, 0));
 	
 	if (data.size() > 0)
@@ -98,7 +98,7 @@ VulkanTexture::~VulkanTexture()
 		vkDestroyImageView(_private->vulkan.device, imageView.second, nullptr);
 
 	vkDestroyImage(_private->vulkan.device, _private->image, nullptr);
-	vkFreeMemory(_private->vulkan.device, _private->memory, nullptr);
+	vulkan::freeMemory(_private->vulkan.device, _private->memory);
 	ET_PIMPL_FINALIZE(VulkanTexture);
 }
 

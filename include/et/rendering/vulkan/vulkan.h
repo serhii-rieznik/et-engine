@@ -224,6 +224,9 @@ const char* resultToString(VkResult result);
 
 // VkPipelineStageFlags texureStateToPipelineStageMask(TextureState);
 VkPipelineStageFlags accessMaskToPipelineStage(VkAccessFlags flags);
+VkResult allocateMemory(VkDevice device, const VkMemoryAllocateInfo* allocInfo, VkDeviceMemory* memory);
+void freeMemory(VkDevice device, VkDeviceMemory memory);
+
 }
 
 
