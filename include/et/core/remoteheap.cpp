@@ -10,9 +10,8 @@
 namespace et
 {
 
-class RemoteHeapPrivate
+struct RemoteHeapPrivate
 {
-public:
 	enum : uint8_t
 	{
 		Empty = 0x00,
@@ -38,6 +37,24 @@ RemoteHeap::RemoteHeap(uint32_t cap, uint32_t gr)
 {
 	ET_PIMPL_INIT(RemoteHeap);
 	init(cap, gr);
+}
+
+RemoteHeap::RemoteHeap(RemoteHeap&& r)
+{
+	ET_PIMPL_INIT(RemoteHeap);
+	std::swap(*_private, *r._private);
+}
+
+RemoteHeap& RemoteHeap::operator = (RemoteHeap&& r)
+{
+	std::swap(*_private, *r._private);
+	r._private->capacity = 0;
+	r._private->granularity = 0;
+	r._private->infoSize = 0;
+	r._private->firstEmpty = 0;
+	r._private->allocatedSize = 0;
+	r._private->info = nullptr;
+	return *this;
 }
 
 RemoteHeap::~RemoteHeap()

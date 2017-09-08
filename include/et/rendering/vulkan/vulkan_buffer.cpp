@@ -27,6 +27,8 @@ public:
 
 VulkanBuffer::VulkanBuffer(VulkanState& vulkan, const Description& desc)
 {
+	ET_PIMPL_INIT(VulkanBuffer, vulkan);
+
 	static Map<Usage, uint32_t> usageFlags =
 	{
 		{ Usage::Constant, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT },
@@ -34,8 +36,6 @@ VulkanBuffer::VulkanBuffer(VulkanState& vulkan, const Description& desc)
 		{ Usage::Index, VK_BUFFER_USAGE_INDEX_BUFFER_BIT },
 		{ Usage::Staging, VK_BUFFER_USAGE_TRANSFER_SRC_BIT },
 	};
-
-	ET_PIMPL_INIT(VulkanBuffer, vulkan);
 
 	_private->desc.location = desc.location;
 	_private->desc.usage = desc.usage;
@@ -55,12 +55,11 @@ VulkanBuffer::VulkanBuffer(VulkanState& vulkan, const Description& desc)
 		VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT :
 		VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT;
 
-	VkMemoryAllocateInfo allocInfo = { VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO };
-	allocInfo.memoryTypeIndex = vulkan::getMemoryTypeIndex(_private->vulkan, _private->memoryRequirements.memoryTypeBits, memoryProperties);
-	allocInfo.allocationSize = _private->memoryRequirements.size;
-	VULKAN_CALL(vulkan::allocateMemory(_private->vulkan.device, &allocInfo, &_private->memory));
-
-	VULKAN_CALL(vkBindBufferMemory(_private->vulkan.device, _private->buffer, _private->memory, 0));
+	uint32_t typeIndex = vulkan::getMemoryTypeIndex(_private->vulkan, _private->memoryRequirements.memoryTypeBits, memoryProperties);
+	if (_private->vulkan.allocator.allocateSharedMemory(_private->memoryRequirements.size, typeIndex, _private->allocation))
+	{
+		VULKAN_CALL(vkBindBufferMemory(_private->vulkan.device, _private->buffer, _private->allocation.memory, _private->allocation.offset));
+	}
 
 	if (desc.initialData.size() > 0)
 		updateData(0, desc.initialData);
@@ -69,7 +68,7 @@ VulkanBuffer::VulkanBuffer(VulkanState& vulkan, const Description& desc)
 VulkanBuffer::~VulkanBuffer()
 {
 	vkDestroyBuffer(_private->vulkan.device, _private->buffer, nullptr);
-	vulkan::freeMemory(_private->vulkan.device, _private->memory);
+	_private->vulkan.allocator.release(_private->allocation);
 
 	ET_PIMPL_FINALIZE(VulkanBuffer);
 }
@@ -125,11 +124,8 @@ uint8_t* VulkanBuffer::map(uint32_t offset, uint32_t size)
 	size = alignUpTo(size, uint32_t(_private->vulkan.physicalDeviceProperties.limits.nonCoherentAtomSize));
 	ET_ASSERT(offset + size <= _private->desc.alignedSize);
 
-	void* pointer = nullptr;
-	VULKAN_CALL(vkMapMemory(_private->vulkan.device, _private->memory, offset, size, 0, &pointer));
 	_private->mapped = true;
-
-	return reinterpret_cast<uint8_t*>(pointer);
+	return _private->vulkan.allocator.map(_private->allocation);
 }
 
 void VulkanBuffer::modifyRange(uint64_t begin, uint64_t length)
@@ -152,12 +148,13 @@ void VulkanBuffer::unmap()
 		ET_ASSERT(flushEnd > flushBegin);
 
 		VkMappedMemoryRange flushRange = { VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE };
-		flushRange.memory = _private->memory;
+		flushRange.memory = _private->allocation.memory;
 		flushRange.offset = flushBegin;
 		flushRange.size = alignUpTo(flushEnd - flushBegin, _private->vulkan.physicalDeviceProperties.limits.nonCoherentAtomSize);
 		VULKAN_CALL(vkFlushMappedMemoryRanges(_private->vulkan.device, 1, &flushRange));
 	}
-	vkUnmapMemory(_private->vulkan.device, _private->memory);
+	_private->vulkan.allocator.unmap(_private->allocation);
+// 	vkUnmapMemory(_private->vulkan.device, _private->allocation.memory);
 
 	_private->modifiedRanges.clear();
 	_private->mapped = false;

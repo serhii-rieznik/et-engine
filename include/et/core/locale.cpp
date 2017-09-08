@@ -119,7 +119,7 @@ et::Dictionary Locale::parseLanguageFile(const std::string& fileName)
 		InputStream file(fileName, StreamMode_Binary);
 		if (file.valid())
 		{
-			fileContent.resize(streamSize(file.stream()) + 1);
+			fileContent.resize(static_cast<uint32_t>(streamSize(file.stream()) + 1));
 			fileContent.fill(0);
 			file.stream().read(fileContent.data(), fileContent.size());
 		}

@@ -36,6 +36,6 @@ public:
 	uint32_t size() const override;
 
 private:
-	ET_DECLARE_PIMPL(VulkanBuffer, 128);
+	ET_DECLARE_PIMPL(VulkanBuffer, 160);
 };
 }

@@ -24,6 +24,56 @@ namespace et
 struct VulkanState;
 struct RenderContextParameters;
 
+enum VulkanQueueClass : uint32_t
+{
+	Graphics,
+	Compute,
+
+	VulkanQueueClass_Count
+};
+
+struct VulkanQueue
+{
+	uint32_t index = static_cast<uint32_t>(-1);
+
+	VkQueue queue = nullptr;
+	VkCommandPool commandPool = nullptr;
+	VkCommandBuffer serviceCommandBuffer = nullptr;
+	VkQueueFamilyProperties properties = { };
+};
+
+class VulkanMemoryAllocatorPrivate;
+class VulkanMemoryAllocator
+{
+public:
+	struct Allocation
+	{
+		uint64_t id = 0;
+		VkDeviceMemory memory = VK_NULL_HANDLE;
+		VkDeviceSize offset = 0;
+		uint32_t mapCounter = 0;
+		uint8_t* mappedData = nullptr;
+
+		bool operator < (const Allocation& r) const { return id < r.id; }
+	};
+public:
+	VulkanMemoryAllocator() = default;
+	~VulkanMemoryAllocator();
+
+	void init(VulkanState&);
+
+	bool allocateSharedMemory(VkDeviceSize size, uint32_t type, Allocation&);
+	bool allocateExclusiveMemory(VkDeviceSize size, uint32_t type, Allocation&);
+	bool release(const Allocation&);
+
+	uint8_t* map(const Allocation&);
+	void unmap(const Allocation&);
+
+private:
+	ET_DECLARE_PIMPL(VulkanMemoryAllocator, 128);
+};
+
+
 struct VulkanSwapchain
 {
 	void init(VulkanState& vulkan, const RenderContextParameters& params, HWND window);
@@ -32,14 +82,14 @@ struct VulkanSwapchain
 	void acquireNextImage(VulkanState& vulkan);
 	void present(VulkanState& vulkan);
 
-	bool createDepthImage(VulkanState& vulkan, VkImage& image, VkDeviceMemory& memory, VkCommandBuffer cmdBuffer);
+	bool createDepthImage(VulkanState& vulkan, VkImage& image, VulkanMemoryAllocator::Allocation& allocation, VkCommandBuffer cmdBuffer);
 	VkImageView createImageView(VulkanState&, VkImage, VkImageAspectFlags, VkFormat);
 
 	VkSurfaceKHR surface = nullptr;
 	VkSwapchainKHR swapchain = nullptr;
 
-	VkExtent2D extent{ };
-	VkSurfaceFormatKHR surfaceFormat{ };
+	VkExtent2D extent{};
+	VkSurfaceFormatKHR surfaceFormat{};
 	VkFormat depthFormat = VK_FORMAT_D32_SFLOAT;
 
 	struct Frame
@@ -59,9 +109,9 @@ struct VulkanSwapchain
 
 	struct DepthBuffer
 	{
-		VkImage depth = nullptr;
-		VkImageView depthView = nullptr;
-		VkDeviceMemory depthMemory = nullptr;
+		VkImage image = nullptr;
+		VkImageView imageView = nullptr;
+		VulkanMemoryAllocator::Allocation memory;
 	} depthBuffer;
 
 	Vector<Frame> frames;
@@ -70,28 +120,14 @@ struct VulkanSwapchain
 	uint32_t swapchainImageIndex = static_cast<uint32_t>(-1);
 
 	const Frame& currentFrame() const
-		{ return frames.at(frameNumber % RendererFrameCount); }
-	
+	{
+		return frames.at(frameNumber % RendererFrameCount);
+	}
+
 	Frame& mutableCurrentFrame()
-		{ return frames.at(frameNumber % RendererFrameCount); }
-};
-
-enum VulkanQueueClass : uint32_t
-{
-	Graphics,
-	Compute,
-
-	VulkanQueueClass_Count
-};
-
-struct VulkanQueue
-{
-	uint32_t index = static_cast<uint32_t>(-1);
-
-	VkQueue queue = nullptr;
-	VkCommandPool commandPool = nullptr;
-	VkCommandBuffer serviceCommandBuffer = nullptr;
-	VkQueueFamilyProperties properties = { };
+	{
+		return frames.at(frameNumber % RendererFrameCount);
+	}
 };
 
 struct VulkanState
@@ -107,6 +143,7 @@ struct VulkanState
 	VkPhysicalDeviceFeatures physicalDeviceFeatures{ };
 
 	VulkanSwapchain swapchain;
+	VulkanMemoryAllocator allocator;
 	VulkanQueue queues[VulkanQueueClass_Count];
 
 	VkCommandPool graphicsCommandPool = nullptr;
@@ -166,8 +203,9 @@ struct VulkanNativeTexture
 		vulkan(v) { }
 
 	VkImage image = nullptr;
-	VkDeviceMemory memory = nullptr;
-	VkMemoryRequirements memoryRequirements{ };
+	VkMemoryRequirements memoryRequirements{};
+	VulkanMemoryAllocator::Allocation allocation;
+
 	VkFormat format = VK_FORMAT_UNDEFINED;
 	VkImageAspectFlags aspect = VkImageAspectFlagBits::VK_IMAGE_ASPECT_FLAG_BITS_MAX_ENUM;
 
@@ -193,8 +231,8 @@ struct VulkanNativeTextureSet
 struct VulkanNativeBuffer
 {
 	VkBuffer buffer = nullptr;
-	VkDeviceMemory memory = nullptr;
-	VkMemoryRequirements memoryRequirements{ };
+	VulkanMemoryAllocator::Allocation allocation;
+	VkMemoryRequirements memoryRequirements{};
 };
 
 namespace vulkan
@@ -222,11 +260,7 @@ VkShaderStageFlagBits programStageValue(ProgramStage);
 const char* programStageEntryName(ProgramStage);
 const char* resultToString(VkResult result);
 
-// VkPipelineStageFlags texureStateToPipelineStageMask(TextureState);
 VkPipelineStageFlags accessMaskToPipelineStage(VkAccessFlags flags);
-VkResult allocateMemory(VkDevice device, const VkMemoryAllocateInfo* allocInfo, VkDeviceMemory* memory);
-void freeMemory(VkDevice device, VkDeviceMemory memory);
-
 }
 
 

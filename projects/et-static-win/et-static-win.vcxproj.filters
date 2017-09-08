@@ -1277,5 +1277,8 @@
     <ClCompile Include="..\..\include\external\spirvcross\spirv_msl.cpp">
       <Filter>spir-v-cross</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\include\et\rendering\vulkan\vulkan_memory.cpp">
+      <Filter>Source\rendering\vulkan</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

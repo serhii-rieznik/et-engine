@@ -220,6 +220,7 @@ void VulkanRenderer::init(const RenderContextParameters& params)
 	_private->computeCommandPool = _private->queues[VulkanQueueClass::Compute].commandPool;
 
 	HWND mainWindow = reinterpret_cast<HWND>(application().context().objects[0]);
+	_private->allocator.init(_private->vulkan());
 	_private->swapchain.init(_private->vulkan(), params, mainWindow);
 
 	uint32_t defaultPoolSize = 2048;

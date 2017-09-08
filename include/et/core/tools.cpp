@@ -28,7 +28,7 @@ std::string loadTextFile(const std::string& fileName)
 	InputStream file(fileName, StreamMode_Binary);
 	if (file.invalid()) return emptyString;
 
-	StringDataStorage data(streamSize(file.stream()) + 1, 0);
+	StringDataStorage data(static_cast<uint32_t>(streamSize(file.stream()) + 1), 0);
 	file.stream().read(data.data(), data.size());
 	
 	return std::string(data.data());

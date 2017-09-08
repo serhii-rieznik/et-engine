@@ -38,6 +38,7 @@
     <ClInclude Include="..\..\include\et\core\remoteheap.cpp" />
     <ClInclude Include="..\..\include\et\rendering\vulkan\vulkan_compute.cpp" />
     <ClInclude Include="..\..\include\et\scene3d\drawer\debugdrawer.cpp" />
+    <ClInclude Include="..\..\include\et\rendering\vulkan\vulkan_memory.cpp" />
     <ClCompile Include="..\..\include\external\spirvcross\spirv_cfg.cpp" />
     <ClCompile Include="..\..\include\external\spirvcross\spirv_cross.cpp" />
     <ClCompile Include="..\..\include\external\spirvcross\spirv_glsl.cpp" />

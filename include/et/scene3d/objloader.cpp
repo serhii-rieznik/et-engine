@@ -481,7 +481,7 @@ void OBJLoader::loadData(ObjectsCache& cache)
                 if (_groups.empty())
                 {
                     auto groupName = "group-" + intToStr(_lastGroupId++) + "-" + materialId;
-                    _groups.emplace_back(groupName, materialId, _sizeEstimate);
+					_groups.emplace_back(groupName, materialId, static_cast<uint32_t>(_sizeEstimate));
                 }
                 else if ((strlen(_groups.back().material) == 0) || _groups.back().material == materialId)
                 {

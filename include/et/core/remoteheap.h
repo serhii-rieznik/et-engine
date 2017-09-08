@@ -12,12 +12,14 @@
 
 namespace et
 {
-class RemoteHeapPrivate;
+struct RemoteHeapPrivate;
 class RemoteHeap
 {
 public:
 	RemoteHeap();
 	RemoteHeap(uint32_t capacity, uint32_t granularity);
+	RemoteHeap(RemoteHeap&&);
+	RemoteHeap& operator = (RemoteHeap&&);
 	~RemoteHeap();
 
 	uint32_t capacity() const;
@@ -33,7 +35,6 @@ public:
 	bool release(uint32_t offset);
 
 	bool empty() const;
-
 
 private:
 	ET_DENY_COPY(RemoteHeap);

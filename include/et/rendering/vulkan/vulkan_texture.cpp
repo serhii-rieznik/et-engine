@@ -82,11 +82,11 @@ VulkanTexture::VulkanTexture(VulkanState& vulkan, const Description& desc, const
 		(VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT) :
 		(VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
-	VkMemoryAllocateInfo allocInfo = { VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO };
-	allocInfo.allocationSize = _private->memoryRequirements.size;
-	allocInfo.memoryTypeIndex = vulkan::getMemoryTypeIndex(vulkan, _private->memoryRequirements.memoryTypeBits, memoryProperties);
-	VULKAN_CALL(vulkan::allocateMemory(vulkan.device, &allocInfo, &_private->memory));
-	VULKAN_CALL(vkBindImageMemory(vulkan.device, _private->image, _private->memory, 0));
+	uint32_t typeIndex = vulkan::getMemoryTypeIndex(vulkan, _private->memoryRequirements.memoryTypeBits, memoryProperties);
+	if (_private->vulkan.allocator.allocateExclusiveMemory(_private->memoryRequirements.size, typeIndex, _private->allocation))
+	{
+		VULKAN_CALL(vkBindImageMemory(vulkan.device, _private->image, _private->allocation.memory, _private->allocation.offset));
+	}
 	
 	if (data.size() > 0)
 		setImageData(data);
@@ -98,7 +98,8 @@ VulkanTexture::~VulkanTexture()
 		vkDestroyImageView(_private->vulkan.device, imageView.second, nullptr);
 
 	vkDestroyImage(_private->vulkan.device, _private->image, nullptr);
-	vulkan::freeMemory(_private->vulkan.device, _private->memory);
+	_private->vulkan.allocator.release(_private->allocation);
+
 	ET_PIMPL_FINALIZE(VulkanTexture);
 }
 
@@ -215,9 +216,6 @@ uint8_t* VulkanTexture::map(uint32_t level, uint32_t layer, uint32_t options)
 	ET_ASSERT(_private->mappedState == 0);
 	_private->mappedState = options;
 	
-	VkDeviceSize offset = description().dataOffsetForLayer(layer, level);
-	VkDeviceSize dataSize = description().dataSizeForMipLevel(level) / description().layerCount;
-
 	_private->vulkan.executeServiceCommands(VulkanQueueClass::Graphics, [&](VkCommandBuffer cmdBuffer)
 	{
 		VkImageMemoryBarrier barrierInfo = { VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER };
@@ -229,19 +227,19 @@ uint8_t* VulkanTexture::map(uint32_t level, uint32_t layer, uint32_t options)
 		barrierInfo.dstQueueFamilyIndex = _private->vulkan.queues[VulkanQueueClass::Graphics].index;
 		barrierInfo.subresourceRange = { _private->aspect, 0, description().levelCount, 0, description().layerCount };
 		barrierInfo.image = _private->image;
+
 		vkCmdPipelineBarrier(cmdBuffer, vulkan::accessMaskToPipelineStage(barrierInfo.srcAccessMask),
 			vulkan::accessMaskToPipelineStage(barrierInfo.dstAccessMask), 0, 0, nullptr, 0, nullptr, 1, &barrierInfo);
 	});
 	
-	void* mappedMemory = nullptr;
-	vkMapMemory(_private->vulkan.device, _private->memory, offset, dataSize, 0, &mappedMemory);
-	return reinterpret_cast<uint8_t*>(mappedMemory);
+	VkDeviceSize offset = description().dataOffsetForLayer(layer, level);
+	return _private->vulkan.allocator.map(_private->allocation) + offset;
 }
 
 void VulkanTexture::unmap()
 {
 	ET_ASSERT(_private->mappedState != 0);
-	vkUnmapMemory(_private->vulkan.device, _private->memory);
+	_private->vulkan.allocator.unmap(_private->allocation);
 
 	_private->vulkan.executeServiceCommands(VulkanQueueClass::Graphics, [&](VkCommandBuffer cmdBuffer)
 	{
