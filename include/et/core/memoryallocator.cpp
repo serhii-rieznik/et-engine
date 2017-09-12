@@ -131,7 +131,11 @@ public:
 			if (currentBlock == startBlock)
 			{
 				_haveFreeBlocks = false;
-				log::warning("Small memory block (%d) filled.", blockSize);
+				if (!_warningShown)
+				{
+					log::warning("Small memory block (%d) filled.", blockSize);
+					_warningShown = true;
+				}
 				return false;
 			}
 		}
@@ -204,6 +208,7 @@ public:
 	SmallMemoryBlock* lastBlock = nullptr;
 	SmallMemoryBlock* currentBlock = nullptr;
 	bool _haveFreeBlocks = true;
+	bool _warningShown = false;
 };
 
 class BlockMemoryAllocatorPrivate

@@ -58,7 +58,7 @@ public:
 	virtual bool mapped() const = 0;
 
 	virtual void updateData(uint32_t offset, const BinaryDataStorage&) = 0;
-	virtual void transferData(Buffer::Pointer destination) = 0;
+	virtual void transferData(Buffer::Pointer destination, uint32_t srcOffset, uint32_t dstOffset, uint32_t size) = 0;
 
 	virtual uint32_t size() const = 0;
 };

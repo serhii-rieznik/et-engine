@@ -42,6 +42,7 @@ public:
 	Vector<VkSemaphore> signalSemaphores;
 	Vector<VkPipelineStageFlags> waitStages;
 	Vector<VkCommandBuffer> commandBuffers;
+	VulkanTextureSet::Pointer emptyTextureSet;
 };
 
 VulkanRenderer::VulkanRenderer(RenderContext* rc)
@@ -223,7 +224,7 @@ void VulkanRenderer::init(const RenderContextParameters& params)
 	_private->allocator.init(_private->vulkan());
 	_private->swapchain.init(_private->vulkan(), params, mainWindow);
 
-	uint32_t defaultPoolSize = 2048;
+	uint32_t defaultPoolSize = 8192;
 
 	VkDescriptorPoolSize poolSizes[] = {
 		{ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, defaultPoolSize },
@@ -283,7 +284,19 @@ Texture::Pointer VulkanRenderer::createTexture(const TextureDescription::Pointer
 
 TextureSet::Pointer VulkanRenderer::createTextureSet(const TextureSet::Description& desc)
 {
-	return VulkanTextureSet::Pointer::create(this, _private->vulkan(), desc);
+	TextureSet::Pointer result;
+	if (desc.empty())
+	{
+		if (_private->emptyTextureSet.invalid())
+			_private->emptyTextureSet = VulkanTextureSet::Pointer::create(this, _private->vulkan(), desc);
+
+		result = _private->emptyTextureSet;;
+	}
+	else
+	{
+		result = VulkanTextureSet::Pointer::create(this, _private->vulkan(), desc);
+	}
+	return result;
 }
 
 Sampler::Pointer VulkanRenderer::createSampler(const Sampler::Description& desc)

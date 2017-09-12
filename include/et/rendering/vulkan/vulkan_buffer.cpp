@@ -86,25 +86,41 @@ void VulkanBuffer::updateData(uint32_t offset, const BinaryDataStorage& data)
 	}
 	else
 	{
+		const uint32_t StagingBufferPageSize = 4 * 1024 * 1024;
+		uint32_t stagingBufferSize = std::min(data.size(), StagingBufferPageSize);
+
 		Description desc;
-		desc.initialData = BinaryDataStorage(data.data(), data.size());
 		desc.location = Location::Host;
 		desc.usage = Usage::Staging;
-		desc.size = data.size();
+		desc.size = stagingBufferSize;
+		VulkanBuffer stagingBuffer(_private->vulkan, desc);
 
 		retain();
-		VulkanBuffer stagingBuffer(_private->vulkan, desc);
-		stagingBuffer.transferData(VulkanBuffer::Pointer(this));
+		uint32_t copyOffset = 0;
+		uint32_t bytesRemaining = data.size();
+		while (bytesRemaining > 0)
+		{ 
+			stagingBufferSize = std::min(stagingBufferSize, bytesRemaining);
+			uint8_t* ptr = stagingBuffer.map(0, stagingBufferSize);
+			memcpy(ptr, data.data() + copyOffset, stagingBufferSize);
+			stagingBuffer.modifyRange(0, stagingBufferSize);
+			stagingBuffer.unmap();
+
+			stagingBuffer.transferData(VulkanBuffer::Pointer(this), 0, copyOffset, stagingBufferSize);
+			bytesRemaining -= stagingBufferSize;
+			copyOffset += stagingBufferSize;
+		}
 		release();
 	}
 }
 
-void VulkanBuffer::transferData(Buffer::Pointer dst)
+void VulkanBuffer::transferData(Buffer::Pointer dst, uint32_t srcOffset, uint32_t dstOffset, uint32_t size)
 {
 	VulkanBuffer::Pointer destination = dst;
-	ET_ASSERT(destination->_private->memoryRequirements.size >= _private->memoryRequirements.size);
+	ET_ASSERT(destination->_private->memoryRequirements.size >= size);
 
-	VkBufferCopy region = { 0, 0, _private->memoryRequirements.size };
+	uint32_t targetSize = std::min(size, static_cast<uint32_t>(destination->_private->memoryRequirements.size));
+	VkBufferCopy region = { srcOffset, dstOffset, targetSize };
 	_private->vulkan.executeServiceCommands(VulkanQueueClass::Graphics, [&](VkCommandBuffer cmdBuffer) {
 		vkCmdCopyBuffer(cmdBuffer, _private->buffer, destination->_private->buffer, 1, &region);
 	});;
@@ -154,7 +170,6 @@ void VulkanBuffer::unmap()
 		VULKAN_CALL(vkFlushMappedMemoryRanges(_private->vulkan.device, 1, &flushRange));
 	}
 	_private->vulkan.allocator.unmap(_private->allocation);
-// 	vkUnmapMemory(_private->vulkan.device, _private->allocation.memory);
 
 	_private->modifiedRanges.clear();
 	_private->mapped = false;

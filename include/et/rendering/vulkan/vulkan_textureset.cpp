@@ -25,6 +25,14 @@ public:
 	VulkanState& vulkan;
 };
 
+static struct VulkanTextureSetStats
+{
+	uint32_t setsAllocated = 0;
+	uint32_t setsReleased = 0;
+	uint32_t descsAllocated = 0;
+	uint32_t descsReleased = 0;
+} _stats;
+
  VulkanTextureSet::VulkanTextureSet(VulkanRenderer* renderer, VulkanState& vulkan, const Description& desc) 
 {
 	ET_PIMPL_INIT(VulkanTextureSet, vulkan);
@@ -123,12 +131,14 @@ public:
 	createInfo.bindingCount = static_cast<uint32_t>(bindings.size());
 	createInfo.pBindings = bindings.data();
 	VULKAN_CALL(vkCreateDescriptorSetLayout(vulkan.device, &createInfo, nullptr, &_private->descriptorSetLayout));
+	_stats.descsAllocated++;
 
 	VkDescriptorSetAllocateInfo allocInfo = { VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO };
 	allocInfo.descriptorPool = vulkan.descriptorPool;
 	allocInfo.descriptorSetCount = 1;
 	allocInfo.pSetLayouts = &_private->descriptorSetLayout;
 	VULKAN_CALL(vkAllocateDescriptorSets(vulkan.device, &allocInfo, &_private->descriptorSet));
+	_stats.setsAllocated++;
 
 	for (auto& ws : writeSet)
 		ws.dstSet = _private->descriptorSet;
@@ -139,6 +149,11 @@ public:
 VulkanTextureSet::~VulkanTextureSet()
 {
 	VULKAN_CALL(vkFreeDescriptorSets(_private->vulkan.device, _private->vulkan.descriptorPool, 1, &_private->descriptorSet));
+	_stats.setsReleased++;
+
+	vkDestroyDescriptorSetLayout(_private->vulkan.device, _private->descriptorSetLayout, nullptr);
+	_stats.descsReleased++;
+
 	ET_PIMPL_FINALIZE(VulkanTextureSet);
 }
 

@@ -80,6 +80,7 @@ public:
 		TextureDescriptionUpdateMethod = nullTextureDescriptionUpdateMethod);
 
 	const Texture::Pointer& checkersTexture();
+	const Texture::Pointer& flatNormalTexture();
 	const Texture::Pointer& whiteTexture();
 	const Texture::Pointer& blackTexture();
 	const Texture::Pointer& blackImage();
@@ -121,6 +122,7 @@ private:
 	ConstantBuffer _sharedConstantBuffer;
 	Texture::Pointer _checkersTexture;
 	Texture::Pointer _whiteTexture;
+	Texture::Pointer _flatNormalTexture;
 	Texture::Pointer _blackTexture;
 	Texture::Pointer _blackImage;
 	Sampler::Pointer _defaultSampler;
@@ -194,6 +196,23 @@ inline const Texture::Pointer& RenderInterface::whiteTexture()
 		_whiteTexture = createTexture(desc);
 	}
 	return _whiteTexture;
+}
+
+inline const Texture::Pointer& RenderInterface::flatNormalTexture()
+{
+	if (_flatNormalTexture.invalid())
+	{
+		TextureDescription::Pointer desc = TextureDescription::Pointer::create();
+		desc->size = vec2i(1);
+		desc->format = TextureFormat::RGBA8;
+		desc->data.resize(4 * static_cast<uint32_t>(desc->size.square()));
+		desc->data[0] = 127;
+		desc->data[1] = 127;
+		desc->data[2] = 255;
+		desc->data[3] = 255;
+		_flatNormalTexture = createTexture(desc);
+	}
+	return _flatNormalTexture;
 }
 
 inline const Texture::Pointer& RenderInterface::blackTexture()

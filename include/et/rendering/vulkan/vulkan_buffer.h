@@ -29,7 +29,7 @@ public:
 	bool mapped() const override;
 	
 	void updateData(uint32_t offset, const BinaryDataStorage&) override;
-	void transferData(Buffer::Pointer destination) override;
+	void transferData(Buffer::Pointer destination, uint32_t srcOffset, uint32_t dstOffset, uint32_t size) override;
 
 	const VulkanNativeBuffer& nativeBuffer() const;
 

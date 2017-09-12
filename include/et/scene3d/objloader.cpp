@@ -12,8 +12,7 @@
 #include <et/rendering/base/material.h>
 #include <et/scene3d/objloader.h>
 
-using namespace et;
-using namespace et::s3d;
+namespace et {
 
 template <typename F>
 inline void splitAndWrite(const std::string& s, F func)
@@ -282,7 +281,7 @@ void OBJLoader::load(ObjectsCache& cache)
 						}
 						case 'g':
 						{
-							_groups.emplace_back(local_value, _sizeEstimate);
+							_groups.emplace_back(local_value, _lastUsedMaterial, _sizeEstimate);
 							break;
 						}
 						case 'u':
@@ -300,9 +299,12 @@ void OBJLoader::load(ObjectsCache& cache)
 								}
 								else
 								{
-									size_t stringSize = std::min(static_cast<size_t>(OBJGroup::MaxMaterialName), strlen(local_value));
+									size_t stringSize = std::min(static_cast<size_t>(OBJGroup::MaxMaterialName), strlen(local_value) + 1);
 									strncpy(_groups.back().material, local_value, stringSize);
 								}
+
+								memset(_lastUsedMaterial, 0, sizeof(_lastUsedMaterial));
+								strcpy(_lastUsedMaterial, local_value);
 							}
 							else
 							{
@@ -342,7 +344,7 @@ void OBJLoader::load(ObjectsCache& cache)
 							if (_groups.empty())
 							{
 								char buffer[OBJGroup::MaxGroupName] = {};
-								sprintf("buffer", "group-%u", static_cast<uint32_t>(_groups.size()));
+								sprintf(buffer, "group-%u", static_cast<uint32_t>(_groups.size()));
 								_groups.emplace_back(buffer, _sizeEstimate);
 							}
 
@@ -1031,7 +1033,14 @@ void OBJLoader::processLoadedData()
 			totalTriangles += static_cast<uint32_t>(face.vertexLinksCount - 2);
 		}
 	}
-	
+
+	for (MaterialInstance::Pointer& mat : _materials)
+	{
+		if (mat->texture(MaterialTexture::BaseColor).invalid())
+			mat->setTexture(MaterialTexture::BaseColor, _renderer->whiteTexture());
+		if (mat->texture(MaterialTexture::Normal).invalid())
+			mat->setTexture(MaterialTexture::Normal, _renderer->flatNormalTexture());
+	}
 	uint32_t totalVertices = 3 * totalTriangles;
 	
 	bool hasNormals = _normals.size() > 0;
@@ -1119,7 +1128,7 @@ void OBJLoader::processLoadedData()
 		}
 
 		MaterialInstance::Pointer m;
-		for (const MaterialInstancePointer& mat : _materials)
+		for (const MaterialInstance::Pointer& mat : _materials)
 		{
 			if (mat->name() == group.material)
 			{
@@ -1130,7 +1139,7 @@ void OBJLoader::processLoadedData()
 
 		if (m.invalid())
 		{
-			log::error("Unable to find material `%s`", group.material);
+			log::error("Unable to find material `%s` for group `%s`", group.material, group.name);
 			Material::Pointer microfacet = _renderer->sharedMaterialLibrary().loadDefaultMaterial(DefaultMaterial::Microfacet);
 			m = microfacet->instance();
 			m->setName("missing_material");
@@ -1157,9 +1166,7 @@ s3d::ElementContainer::Pointer OBJLoader::generateVertexBuffers(s3d::Storage& st
 	storage.setIndexArray(_indices);
 	
 	for (auto m : _materials)
-	{
 		storage.addMaterial(m);
-	}
 	
 	Buffer::Pointer vb = _renderer->createVertexBuffer("model-vb", _vertexData, Buffer::Location::Device);
 	Buffer::Pointer ib = _renderer->createIndexBuffer("model-ib", _indices, Buffer::Location::Device);
@@ -1203,4 +1210,6 @@ void getLine(std::ifstream& stream, std::string& line)
 {
 	std::getline(stream, line);
 	trim(line);
+}
+
 }

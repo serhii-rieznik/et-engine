@@ -92,7 +92,7 @@ private:
 			OBJGroup(sizeEstimate)
 		{
 			strncpy(name, aName, std::min(strlen(aName), static_cast<size_t>(MaxGroupName)));
-			strncpy(name, aMat, std::min(strlen(aMat), static_cast<size_t>(MaxMaterialName)));
+			strncpy(material, aMat, std::min(strlen(aMat), static_cast<size_t>(MaxMaterialName)));
 		}
 		OBJGroup(const std::string& aName, uint64_t sizeEstimate = 256) :
 			OBJGroup(sizeEstimate)
@@ -138,6 +138,7 @@ private:
 	std::vector<et::vec2> _texCoords;
 	std::vector<OBJGroup> _groups;
 	Set<std::string> _loadedMaterials;
+	char _lastUsedMaterial[256]{ };
 
 	uint32_t _loadOptions = Option_JustLoad;
 	uint64_t _sizeEstimate = 1024;
