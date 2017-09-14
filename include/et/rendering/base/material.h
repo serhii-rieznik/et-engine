@@ -126,6 +126,9 @@ public:
 	
 	bool isInstance() const override { return true; }
 
+	void serialize(std::ostream&) const;
+	void deserialize(std::istream&);
+
 private:
 	friend class Material;
 	friend class ObjectFactory;

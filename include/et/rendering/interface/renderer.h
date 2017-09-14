@@ -297,10 +297,12 @@ inline void RenderInterface::shutdownInternalStructures()
 	_sharedMaterialLibrary.shutdown();
 	_sharedConstantBuffer.shutdown();
 
-	_defaultSampler.reset(nullptr);
 	_checkersTexture.reset(nullptr);
 	_whiteTexture.reset(nullptr);
+	_flatNormalTexture.reset(nullptr);
 	_blackTexture.reset(nullptr);
+	_blackImage.reset(nullptr);
+	_defaultSampler.reset(nullptr);
 	_nearestSampler.reset(nullptr);
 	_clampSampler.reset(nullptr);
 }

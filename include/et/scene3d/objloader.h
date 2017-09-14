@@ -111,6 +111,10 @@ private:
 private:
 	void loadData(ObjectsCache& cache);
 	void load(ObjectsCache& cache);
+	
+	bool loadCached(const std::string& fileName);
+	void saveCache(const std::string& fileName);
+	
 	void processLoadedData();
 
 	s3d::ElementContainer::Pointer generateVertexBuffers(s3d::Storage&);
@@ -122,6 +126,7 @@ private:
 	RenderInterface::Pointer _renderer;
 
 	std::string inputFileName;
+	std::string cacheFileName;
 	std::string inputFilePath;
 	std::ifstream inputFile;
 	std::ifstream materialFile;

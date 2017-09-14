@@ -25,6 +25,9 @@ static const ET_STRING_TYPE currentFolder = ET_STRING_FROM_CONST_CHAR(".");
 static const ET_STRING_TYPE previousFolder = ET_STRING_FROM_CONST_CHAR("..");
 static const ET_STRING_TYPE allFilesMask = ET_STRING_FROM_CONST_CHAR("*.*");
 
+namespace et
+{
+
 void initTime()
 {
 	LARGE_INTEGER c = { };
@@ -37,7 +40,7 @@ void initTime()
 	performanceFrequency = f.QuadPart;
 }
 
-uint64_t et::queryContiniousTimeInMilliSeconds()
+uint64_t queryContiniousTimeInMilliSeconds()
 {
 	if (performanceFrequency == 0)
 		initTime();
@@ -48,12 +51,12 @@ uint64_t et::queryContiniousTimeInMilliSeconds()
 	return 1000 * (c.QuadPart - initialCounter) / performanceFrequency;
 }
 
-float et::queryContiniousTimeInSeconds()
+float queryContiniousTimeInSeconds()
 {
 	return static_cast<float>(queryContiniousTimeInMilliSeconds()) / 1000.0f;
 }
 
-uint64_t et::queryCurrentTimeInMicroSeconds()
+uint64_t queryCurrentTimeInMicroSeconds()
 {
 	if (performanceFrequency == 0)
 		initTime();
@@ -63,29 +66,29 @@ uint64_t et::queryCurrentTimeInMicroSeconds()
 	return 1000000 * c.QuadPart / performanceFrequency;
 }
 
-const char et::pathDelimiter = '\\';
-const char et::invalidPathDelimiter = '/';
+const char pathDelimiter = '\\';
+const char invalidPathDelimiter = '/';
 
-std::string et::applicationPath()
+std::string applicationPath()
 {
 	ET_CHAR_TYPE buffer[MAX_PATH] = { };
 	GetModuleFileName(nullptr, buffer, MAX_PATH);
 	return getFilePath(normalizeFilePath(ET_STRING_TO_OUTPUT_TYPE(buffer)));
 }
 
-bool et::fileExists(const std::string& name)
+bool fileExists(const std::string& name)
 {
 	DWORD attr = GetFileAttributes(ET_STRING_TO_PARAM_TYPE(name).c_str());
 	return (attr != INVALID_FILE_ATTRIBUTES) && ((attr & FILE_ATTRIBUTE_DIRECTORY) != FILE_ATTRIBUTE_DIRECTORY);
 }
 
-bool et::folderExists(const std::string& folder)
+bool folderExists(const std::string& folder)
 {
 	DWORD attr = GetFileAttributes(ET_STRING_TO_PARAM_TYPE(folder).c_str());
 	return (attr != INVALID_FILE_ATTRIBUTES) && ((attr & FILE_ATTRIBUTE_DIRECTORY) == FILE_ATTRIBUTE_DIRECTORY);
 }
 
-void et::findFiles(const std::string& folder, const std::string& mask, bool recursive, StringList& list)
+void findFiles(const std::string& folder, const std::string& mask, bool recursive, StringList& list)
 {
 	ET_STRING_TYPE normalizedFolder = ET_STRING_TO_PARAM_TYPE(addTrailingSlash(folder));
 	ET_STRING_TYPE searchPath = normalizedFolder + ET_STRING_TO_PARAM_TYPE(mask);
@@ -106,8 +109,7 @@ void et::findFiles(const std::string& folder, const std::string& mask, bool recu
 				if (isFolder && (name != currentFolder) && (name != previousFolder))
 					folderList.push_back(ET_STRING_TO_OUTPUT_TYPE(normalizedFolder + name));
 
-			}
-			while (FindNextFile(folderSearch, &folders));
+			} while (FindNextFile(folderSearch, &folders));
 			FindClose(folderSearch);
 		}
 	}
@@ -118,8 +120,8 @@ void et::findFiles(const std::string& folder, const std::string& mask, bool recu
 	{
 		do
 		{
-			bool isAcceptable = 
-				((data.dwFileAttributes & FILE_ATTRIBUTE_NORMAL) == FILE_ATTRIBUTE_NORMAL) || 
+			bool isAcceptable =
+				((data.dwFileAttributes & FILE_ATTRIBUTE_NORMAL) == FILE_ATTRIBUTE_NORMAL) ||
 				((data.dwFileAttributes & FILE_ATTRIBUTE_ARCHIVE) == FILE_ATTRIBUTE_ARCHIVE) ||
 				((data.dwFileAttributes & FILE_ATTRIBUTE_READONLY) == FILE_ATTRIBUTE_READONLY);
 
@@ -127,8 +129,7 @@ void et::findFiles(const std::string& folder, const std::string& mask, bool recu
 
 			if (isAcceptable && (name != currentFolder) && (name != previousFolder))
 				list.push_back(ET_STRING_TO_OUTPUT_TYPE(normalizedFolder + name));
-		}
-		while (FindNextFile(search, &data));
+		} while (FindNextFile(search, &data));
 		FindClose(search);
 	}
 
@@ -139,26 +140,26 @@ void et::findFiles(const std::string& folder, const std::string& mask, bool recu
 	}
 }
 
-std::string et::applicationPackagePath()
+std::string applicationPackagePath()
 {
 	ET_CHAR_TYPE buffer[MAX_PATH] = { };
 	GetCurrentDirectory(MAX_PATH, buffer);
 	return addTrailingSlash(ET_STRING_TO_OUTPUT_TYPE(buffer));
 }
 
-std::string et::applicationDataFolder()
+std::string applicationDataFolder()
 {
 	ET_CHAR_TYPE buffer[MAX_PATH] = { };
 	GetCurrentDirectory(MAX_PATH, buffer);
 	return addTrailingSlash(ET_STRING_TO_OUTPUT_TYPE(buffer));
 }
 
-std::string et::documentsBaseFolder()
+std::string documentsBaseFolder()
 {
 	wchar_t* path = nullptr;
 	SHGetKnownFolderPath(FOLDERID_Documents, 0, nullptr, &path);
 
-	if (path == nullptr) 
+	if (path == nullptr)
 		return emptyString;
 
 	std::string result = addTrailingSlash(unicodeToUtf8(path));
@@ -166,12 +167,12 @@ std::string et::documentsBaseFolder()
 	return result;
 }
 
-std::string et::libraryBaseFolder()
+std::string libraryBaseFolder()
 {
 	wchar_t* path = nullptr;
 	SHGetKnownFolderPath(FOLDERID_RoamingAppData, 0, nullptr, &path);
 
-	if (path == nullptr) 
+	if (path == nullptr)
 		return emptyString;
 
 	std::string result = addTrailingSlash(unicodeToUtf8(path));
@@ -179,23 +180,23 @@ std::string et::libraryBaseFolder()
 	return result;
 }
 
-std::string et::workingFolder()
+std::string workingFolder()
 {
 	char buffer[1024] = { };
 	GetCurrentDirectoryA(sizeof(buffer) - 2, buffer);
-	
+
 	auto* ptr = buffer;
-	while (*++ptr) { }
+	while (*++ptr) {}
 	*ptr = pathDelimiter;
 
 	return std::string(buffer);
 }
 
-bool et::createDirectory(const std::string& name, bool recursive)
+bool createDirectory(const std::string& name, bool recursive)
 {
 	if (recursive)
 	{
-		char delim[] = {pathDelimiter, 0};
+		char delim[] = { pathDelimiter, 0 };
 		bool gotError = false;
 		StringList components = split(name, std::string(delim));
 		std::string path;
@@ -212,7 +213,7 @@ bool et::createDirectory(const std::string& name, bool recursive)
 	return ::CreateDirectory(ET_STRING_TO_PARAM_TYPE(name).c_str(), nullptr) == 0;
 }
 
-bool et::removeFile(const std::string& name)
+bool removeFile(const std::string& name)
 {
 	ET_STRING_TYPE aName = ET_STRING_TO_PARAM_TYPE(name);
 	aName.resize(aName.size() + 1);
@@ -227,9 +228,9 @@ bool et::removeFile(const std::string& name)
 	return SHFileOperation(&fop) == 0;
 }
 
-bool et::copyFile(const std::string& from, const std::string& to)
+bool copyFile(const std::string& from, const std::string& to)
 {
-	ET_STRING_TYPE aFrom= ET_STRING_TO_PARAM_TYPE(from);
+	ET_STRING_TYPE aFrom = ET_STRING_TO_PARAM_TYPE(from);
 	ET_STRING_TYPE aTo = ET_STRING_TO_PARAM_TYPE(to);
 	aFrom.resize(aFrom.size() + 1);
 	aTo.resize(aTo.size() + 1);
@@ -246,7 +247,7 @@ bool et::copyFile(const std::string& from, const std::string& to)
 	return SHFileOperation(&fop) == 0;
 }
 
-bool et::removeDirectory(const std::string& name)
+bool removeDirectory(const std::string& name)
 {
 	ET_STRING_TYPE aName = ET_STRING_TO_PARAM_TYPE(name);
 	aName.resize(aName.size() + 1);
@@ -261,10 +262,10 @@ bool et::removeDirectory(const std::string& name)
 	return SHFileOperation(&fop) == 0;
 }
 
-void et::findSubfolders(const std::string& folder, bool recursive, StringList& list)
+void findSubfolders(const std::string& folder, bool recursive, StringList& list)
 {
 	StringList folderList;
-	
+
 	ET_STRING_TYPE normalizedFolder = ET_STRING_TO_PARAM_TYPE(addTrailingSlash(folder));
 	ET_STRING_TYPE foldersSearchPath = normalizedFolder + allFilesMask;
 
@@ -278,11 +279,10 @@ void et::findSubfolders(const std::string& folder, bool recursive, StringList& l
 			bool isFolder = (folders.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == FILE_ATTRIBUTE_DIRECTORY;
 			if (isFolder && (name != currentFolder) && (name != previousFolder))
 			{
-				folderList.push_back(ET_STRING_TO_OUTPUT_TYPE(normalizedFolder + 
+				folderList.push_back(ET_STRING_TO_OUTPUT_TYPE(normalizedFolder +
 					name + ET_STRING_FROM_CONST_CHAR("\\")));
 			}
-		}
-		while (FindNextFile(folderSearch, &folders));
+		} while (FindNextFile(folderSearch, &folders));
 		FindClose(folderSearch);
 	}
 
@@ -295,13 +295,13 @@ void et::findSubfolders(const std::string& folder, bool recursive, StringList& l
 	list.insert(list.end(), folderList.begin(), folderList.end());
 }
 
-void et::openUrl(const std::string& url)
+void openUrl(const std::string& url)
 {
-	ShellExecute(nullptr, ET_STRING_FROM_CONST_CHAR("open"), 
+	ShellExecute(nullptr, ET_STRING_FROM_CONST_CHAR("open"),
 		ET_STRING_TO_PARAM_TYPE(url).c_str(), 0, 0, SW_SHOWNORMAL);
 }
 
-std::string et::unicodeToUtf8(const std::wstring& w)
+std::string unicodeToUtf8(const std::wstring& w)
 {
 	int mbcWidth = WideCharToMultiByte(CP_UTF8, 0, w.c_str(), -1, 0, 0, 0, 0);
 
@@ -314,7 +314,7 @@ std::string et::unicodeToUtf8(const std::wstring& w)
 	return std::string(result.data());
 }
 
-std::wstring et::utf8ToUnicode(const std::string& mbcs)
+std::wstring utf8ToUnicode(const std::string& mbcs)
 {
 	int uWidth = MultiByteToWideChar(CP_UTF8, 0, mbcs.c_str(), -1, 0, 0);
 	if (uWidth == 0)
@@ -351,10 +351,12 @@ std::wstring et::utf8ToUnicode(const std::string& mbcs)
 	return std::wstring(result.data());
 }
 
-std::string et::applicationIdentifierForCurrentProject()
-	{ return "com.et.app"; }
+std::string applicationIdentifierForCurrentProject()
+{
+	return "com.et.app";
+}
 
-uint64_t et::getFileDate(const std::string& path)
+uint64_t getFileDate(const std::string& path)
 {
 	WIN32_FIND_DATA findData = { };
 	HANDLE search = FindFirstFile(ET_STRING_TO_PARAM_TYPE(path).c_str(), &findData);
@@ -364,15 +366,32 @@ uint64_t et::getFileDate(const std::string& path)
 		(static_cast<uint64_t>(findData.ftLastWriteTime.dwHighDateTime) << 32);
 }
 
-et::Vector<et::Screen> et::availableScreens()
+uint64_t getFileUniqueIdentifier(const std::string& path)
 {
-	et::Vector<et::Screen> result;
-	
+	WIN32_FIND_DATA findData = {};
+	HANDLE search = FindFirstFile(ET_STRING_TO_PARAM_TYPE(path).c_str(), &findData);
+	FindClose(search);
+
+	uint64_t dateUid =
+		(static_cast<uint64_t>(findData.ftLastWriteTime.dwLowDateTime)) |
+		(static_cast<uint64_t>(findData.ftLastWriteTime.dwHighDateTime) << 32);
+
+	uint64_t sizeUid =
+		(static_cast<uint64_t>(findData.nFileSizeLow)) |
+		(static_cast<uint64_t>(findData.nFileSizeHigh) << 32);
+
+	return dateUid ^ sizeUid;
+}
+
+Vector<Screen> availableScreens()
+{
+	Vector<Screen> result;
+
 	EnumDisplayMonitors(nullptr, nullptr, [](HMONITOR hMonitor, HDC, LPRECT, LPARAM dwData) -> BOOL
 	{
 		MONITORINFO info = { sizeof(MONITORINFO) };
 
-		GetMonitorInfo(hMonitor,  &info);
+		GetMonitorInfo(hMonitor, &info);
 
 		recti screenRect(info.rcMonitor.left, info.rcMonitor.top, info.rcMonitor.right - info.rcMonitor.left,
 			info.rcMonitor.bottom - info.rcMonitor.top);
@@ -380,26 +399,26 @@ et::Vector<et::Screen> et::availableScreens()
 		recti workarea(info.rcWork.left, info.rcWork.top, info.rcWork.right - info.rcWork.left,
 			info.rcWork.bottom - info.rcWork.top);
 
-		Vector<et::Screen>* r = reinterpret_cast<Vector<et::Screen>*>(dwData);
+		Vector<Screen>* r = reinterpret_cast<Vector<Screen>*>(dwData);
 		r->emplace_back(screenRect, workarea, 1.0f);
 		return 1;
-	}, 
-	reinterpret_cast<LPARAM>(&result));
+	},
+		reinterpret_cast<LPARAM>(&result));
 
 	return result;
 }
 
-et::Screen et::currentScreen()
+Screen currentScreen()
 {
 	return availableScreens().front();
 }
 
-std::string et::selectFile(const StringList& filters, SelectFileMode mode, const std::string& defaultName)
+std::string selectFile(const StringList& filters, SelectFileMode mode, const std::string& defaultName)
 {
 	ET_STRING_TYPE defaultFileName = ET_STRING_TO_PARAM_TYPE(defaultName);
 
 	uint32_t fileNameSize = static_cast<uint32_t>(std::max(size_t(MAX_PATH), defaultFileName.size()) + 1, 0);
-	
+
 	StaticDataStorage<ET_CHAR_TYPE, MAX_PATH> fileNameBuffer(0);
 	etCopyMemory(fileNameBuffer.begin(), defaultName.c_str(), fileNameSize);
 
@@ -429,29 +448,31 @@ std::string et::selectFile(const StringList& filters, SelectFileMode mode, const
 	return emptyString;
 }
 
-void et::alert(const std::string& title, const std::string& message, const std::string&, AlertType type)
+void alert(const std::string& title, const std::string& message, const std::string&, AlertType type)
 {
 	UINT alType = MB_ICONINFORMATION;
 
 	switch (type)
 	{
-	case AlertType::Warning: 
-		{
-			alType = MB_ICONWARNING;
-			break;
-		}
+	case AlertType::Warning:
+	{
+		alType = MB_ICONWARNING;
+		break;
+	}
 
-	case AlertType::Error: 
-		{
-			alType = MB_ICONERROR;
-			break;
-		}
+	case AlertType::Error:
+	{
+		alType = MB_ICONERROR;
+		break;
+	}
 
 	default:
 		break;
 	}
 
 	MessageBoxA(nullptr, message.c_str(), title.c_str(), alType);
+}
+
 }
 
 #endif // ET_PLATFORM_WIN

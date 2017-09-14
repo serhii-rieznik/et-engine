@@ -535,6 +535,16 @@ void MaterialInstance::invalidateConstantBuffer()
 		hld.second.valid = false;
 }
 
+void MaterialInstance::serialize(std::ostream&) const
+{
+
+}
+
+void MaterialInstance::deserialize(std::istream&)
+{
+
+}
+
 void Material::initDefaultHeader()
 {
 	if (_shaderDefaultHeader.empty())

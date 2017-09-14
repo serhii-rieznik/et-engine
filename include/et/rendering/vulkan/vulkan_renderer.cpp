@@ -250,6 +250,8 @@ void VulkanRenderer::init(const RenderContextParameters& params)
 
 void VulkanRenderer::shutdown()
 {
+	_private->emptyTextureSet.reset(nullptr);
+
 	VULKAN_CALL(vkDeviceWaitIdle(_private->device));
 
 	for (auto& pass : _private->passes)

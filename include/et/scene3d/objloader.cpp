@@ -137,6 +137,10 @@ OBJLoader::OBJLoader(const std::string& inFile, uint32_t options) :
 {
 	inputFilePath = getFilePath(inputFileName);
 	
+	uint64_t uid = getFileUniqueIdentifier(inputFileName);
+	cacheFileName = application().environment().applicationDocumentsFolder() + "modelscache/" + 
+		replaceFileExt(getFileName(inputFileName), "." + intToStr(uid) + ".cached_obj");
+
 	if (inputFile.fail())
 		log::info("Unable to open file %s", inputFileName.c_str());
 }
@@ -621,28 +625,38 @@ s3d::ElementContainer::Pointer OBJLoader::load(et::RenderInterface::Pointer ren,
 {
 	storage.flush();
 
-	uint64_t fileSize = streamSize(inputFile);
-	_sizeEstimate = std::max(1024llu, fileSize / 128);
-	log::info("Loading OBJ, estimated array sizes: %llu", _sizeEstimate);
+	bool cacheLoaded = false;
+	if (fileExists(cacheFileName))
+	{
+		cacheLoaded = loadCached(cacheFileName);
+	}
 
-	_renderer = ren;
-	_groups.reserve(128);
-	_vertices.reserve(_sizeEstimate);
-	_normals.reserve(_sizeEstimate);
-	_texCoords.reserve(_sizeEstimate);
-	
-	// estimate for faces count
-	_sizeEstimate = std::max(128llu, _sizeEstimate / 2048);
-	log::info("Loading OBJ, estimated face array sizes: %llu", _sizeEstimate);
+	if (cacheLoaded == false)
+	{
+		uint64_t fileSize = streamSize(inputFile);
+		_sizeEstimate = std::max(1024llu, fileSize / 128);
+		log::info("Loading OBJ, estimated array sizes: %llu", _sizeEstimate);
 
-	auto t1 = queryCurrentTimeInMicroSeconds();
-	load(cache);
-	// loadData(cache);
-	auto t2 = queryCurrentTimeInMicroSeconds();
+		_renderer = ren;
+		_groups.reserve(128);
+		_vertices.reserve(_sizeEstimate);
+		_normals.reserve(_sizeEstimate);
+		_texCoords.reserve(_sizeEstimate);
 
-	log::info("Loading time: %llu", t2 - t1);
-	
-	processLoadedData();
+		_sizeEstimate = std::max(128llu, _sizeEstimate / 2048);
+		log::info("Loading OBJ, estimated face array sizes: %llu", _sizeEstimate);
+
+		uint64_t t1 = queryCurrentTimeInMicroSeconds();
+
+		load(cache);
+		uint64_t t2 = queryCurrentTimeInMicroSeconds();
+
+		processLoadedData();
+		saveCache(cacheFileName);
+		uint64_t t3 = queryCurrentTimeInMicroSeconds();
+
+		log::info("Loading time: %llu, caching time: %llu", t2 - t1, t3 - t2);
+	}
 
 	s3d::ElementContainer::Pointer result = generateVertexBuffers(storage);
 	loaded.invoke(result);
@@ -1201,6 +1215,42 @@ void OBJLoader::threadFinished()
 	 *
 	loaded.invoke(generateVertexBuffers(storage));
 	// */
+}
+
+bool OBJLoader::loadCached(const std::string& fileName)
+{
+	return false;
+}
+
+void OBJLoader::saveCache(const std::string& fileName)
+{
+	std::string cachePath = getFilePath(fileName);
+
+	if (folderExists(cachePath) || createDirectory(cachePath, true))
+	{
+		std::ofstream fOut(fileName, std::ios::binary);
+		
+		_vertexData->serialize(fOut);
+		_indices->serialize(fOut);
+
+		uint32_t materialsCount = static_cast<uint32_t>(_materials.size());
+		serializeUInt32(fOut, materialsCount);
+		for (const MaterialInstance::Pointer& material : _materials)
+			material->serialize(fOut);
+
+		uint32_t meshesCount = static_cast<uint32_t>(_meshes.size());
+		serializeUInt32(fOut, meshesCount);
+		for (const OBJMeshIndexBounds& mesh : _meshes)
+		{
+			serializeString(fOut, mesh.name);
+			serializeString(fOut, mesh.material->name());
+			serializeUInt32(fOut, mesh.start);
+			serializeUInt32(fOut, mesh.count);
+			serializeVector(fOut, mesh.center);
+		}
+
+		fOut.close();
+	}
 }
 
 /*

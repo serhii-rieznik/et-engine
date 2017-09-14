@@ -184,7 +184,7 @@ void ObjectsCache::update(float t)
 
 uint64_t ObjectsCache::getFileProperty(const std::string& p)
 {
-	return getFileDate(p);
+	return getFileUniqueIdentifier(p);
 }
 
 uint64_t ObjectsCache::getObjectProperty(LoadableObject::Pointer ptr)

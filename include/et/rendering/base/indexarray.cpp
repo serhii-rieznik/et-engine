@@ -9,7 +9,8 @@
 #include <et/rendering/base/indexarray.h>
 #include <et/rendering/base/primitives.h>
 
-using namespace et;
+namespace et
+{
 
 const uint32_t IndexArray::MaxIndex = 0xffffffff;
 const uint16_t IndexArray::MaxShortIndex = 0xffff;
@@ -25,7 +26,7 @@ static const uint32_t indexTypeMask[static_cast<uint32_t>(IndexArrayFormat::Coun
 uint32_t verifyDataSize(uint32_t amount, IndexArrayFormat format);
 
 IndexArray::IndexArray(IndexArrayFormat format, uint32_t size, PrimitiveType content) : tag(0),
-	_data(verifyDataSize(size, format)), _actualSize(0), _format(format), _primitiveType(content)
+_data(verifyDataSize(size, format)), _actualSize(0), _format(format), _primitiveType(content)
 {
 	if (content == PrimitiveType::Points)
 		linearize(size);
@@ -45,9 +46,9 @@ void IndexArray::linearize(uint32_t size)
 uint32_t IndexArray::getIndex(uint32_t pos) const
 {
 	auto maskValue = indexTypeMask[static_cast<uint32_t>(_format) / 2];
-	
+
 	ET_ASSERT(pos <= maskValue);
-	
+
 	return *reinterpret_cast<const uint32_t*>(_data.element_ptr(pos * static_cast<uint32_t>(_format))) & maskValue;
 }
 
@@ -63,14 +64,14 @@ void IndexArray::setIndex(uint32_t value, uint32_t pos)
 	else if (_format == IndexArrayFormat::Format_16bit)
 	{
 		ET_ASSERT("Index value out of range" && (value <= MaxShortIndex));
-		
+
 		uint16_t* ptr = reinterpret_cast<uint16_t*>(elementPtr);
 		*ptr = static_cast<uint16_t>(value);
 	}
 	else if (_format == IndexArrayFormat::Format_8bit)
 	{
 		ET_ASSERT("Index value out of range" && (value <= MaxSmallIndex));
-		
+
 		uint8_t* ptr = reinterpret_cast<uint8_t*>(elementPtr);
 		*ptr = static_cast<uint8_t>(value);
 	}
@@ -88,22 +89,22 @@ uint32_t IndexArray::primitivesCount() const
 {
 	switch (_primitiveType)
 	{
-		case PrimitiveType::Points:
-			return _actualSize;
-			
-		case PrimitiveType::Lines:
-			return _actualSize / 2;
-			
-		case PrimitiveType::Triangles:
-			return _actualSize / 3;
-			
-		case PrimitiveType::TriangleStrips:
-			return _actualSize - 2;
-			
-		default:
-			break;
+	case PrimitiveType::Points:
+		return _actualSize;
+
+	case PrimitiveType::Lines:
+		return _actualSize / 2;
+
+	case PrimitiveType::Triangles:
+		return _actualSize / 3;
+
+	case PrimitiveType::TriangleStrips:
+		return _actualSize - 2;
+
+	default:
+		break;
 	}
-	
+
 	return 0;
 }
 
@@ -139,24 +140,24 @@ IndexArray::PrimitiveIterator IndexArray::primitive(uint32_t index) const
 	uint32_t primitiveIndex = 0;
 	switch (_primitiveType)
 	{
-		case PrimitiveType::Lines:
-		{
-			primitiveIndex = 2 * index;
-			break;
-		}
-		case PrimitiveType::Triangles:
-		{
-			primitiveIndex = 3 * index;
-			break;
-		}
-		case PrimitiveType::TriangleStrips:
-		{
-			primitiveIndex = index == 0 ? 0 : (2 + index);
-			break;
-		}
-			
-		default:
-			primitiveIndex = index;
+	case PrimitiveType::Lines:
+	{
+		primitiveIndex = 2 * index;
+		break;
+	}
+	case PrimitiveType::Triangles:
+	{
+		primitiveIndex = 3 * index;
+		break;
+	}
+	case PrimitiveType::TriangleStrips:
+	{
+		primitiveIndex = index == 0 ? 0 : (2 + index);
+		break;
+	}
+
+	default:
+		primitiveIndex = index;
 	}
 
 	return IndexArray::PrimitiveIterator(this, primitiveIndex > capacity() ? capacity() : primitiveIndex);
@@ -190,37 +191,37 @@ IndexArray::PrimitiveIterator::PrimitiveIterator(const IndexArray* ib, uint32_t 
 void IndexArray::PrimitiveIterator::configure(uint32_t p)
 {
 	uint32_t cap = _ib->_actualSize;
-	
+
 	switch (_ib->primitiveType())
 	{
-		case PrimitiveType::Points:
-		{
-			_primitive[0] = (p < cap) ? _ib->getIndex(p) : InvalidIndex;
-			_primitive[1] = static_cast<uint32_t>(InvalidIndex);
-			_primitive[2] = static_cast<uint32_t>(InvalidIndex);
-			break;
-		}
-			
-		case PrimitiveType::Lines:
-		case PrimitiveType::LineStrips:
-		{
-			_primitive[0] = (p < cap) ? _ib->getIndex(p) : InvalidIndex; ++p;
-			_primitive[1] = (p < cap) ? _ib->getIndex(p) : InvalidIndex;
-			_primitive[2] = static_cast<uint32_t>(InvalidIndex);
-			break;
-		}
+	case PrimitiveType::Points:
+	{
+		_primitive[0] = (p < cap) ? _ib->getIndex(p) : InvalidIndex;
+		_primitive[1] = static_cast<uint32_t>(InvalidIndex);
+		_primitive[2] = static_cast<uint32_t>(InvalidIndex);
+		break;
+	}
 
-		case PrimitiveType::Triangles:
-		case PrimitiveType::TriangleStrips:
-		{
-			_primitive[0] = (p < cap) ? _ib->getIndex(p) : InvalidIndex; ++p;
-			_primitive[1] = (p < cap) ? _ib->getIndex(p) : InvalidIndex; ++p;
-			_primitive[2] = (p < cap) ? _ib->getIndex(p) : InvalidIndex;
-			break;
-		}
+	case PrimitiveType::Lines:
+	case PrimitiveType::LineStrips:
+	{
+		_primitive[0] = (p < cap) ? _ib->getIndex(p) : InvalidIndex; ++p;
+		_primitive[1] = (p < cap) ? _ib->getIndex(p) : InvalidIndex;
+		_primitive[2] = static_cast<uint32_t>(InvalidIndex);
+		break;
+	}
 
-		default:
-			ET_FAIL("Unsupported PrimitiveType value");
+	case PrimitiveType::Triangles:
+	case PrimitiveType::TriangleStrips:
+	{
+		_primitive[0] = (p < cap) ? _ib->getIndex(p) : InvalidIndex; ++p;
+		_primitive[1] = (p < cap) ? _ib->getIndex(p) : InvalidIndex; ++p;
+		_primitive[2] = (p < cap) ? _ib->getIndex(p) : InvalidIndex;
+		break;
+	}
+
+	default:
+		ET_FAIL("Unsupported PrimitiveType value");
 	}
 }
 
@@ -242,7 +243,7 @@ IndexArray::PrimitiveIterator& IndexArray::PrimitiveIterator::operator ++()
 		{ PrimitiveType::TriangleStrips, 1 },
 		{ PrimitiveType::LineStrips, 1 },
 	};
-	
+
 	configure(_pos += primitiveOffset.at(_ib->primitiveType()));
 	return *this;
 }
@@ -264,10 +265,23 @@ bool IndexArray::PrimitiveIterator::operator != (const IndexArray::PrimitiveIter
 	return _primitive != p._primitive;
 }
 
+void IndexArray::serialize(std::ostream&)
+{
+
+}
+
+void IndexArray::deserialize(std::istream&)
+{
+
+}
+
+
 /*
  * Service functions
  */
 uint32_t verifyDataSize(uint32_t amount, IndexArrayFormat format)
 {
 	return static_cast<uint32_t>(format) * ((format == IndexArrayFormat::Format_32bit) ? amount : (1 + amount / 4) * 4);
+}
+
 }

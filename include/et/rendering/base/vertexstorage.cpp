@@ -105,6 +105,16 @@ void VertexStorage::resize(uint32_t sz)
 	_private->data.resize(_private->capacity * _private->decl.sizeInBytes());
 }
 
+void VertexStorage::serialize(std::ostream& fOut)
+{
+
+}
+
+void deserialize(std::istream& fIn)
+{
+
+}
+
 /*
  * Private
  */
