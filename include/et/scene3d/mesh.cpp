@@ -54,6 +54,11 @@ void Mesh::calculateSupportData()
 
 Mesh* Mesh::duplicate()
 {
+	abort();
+
+	/*
+	 * TODO : implement
+	 *
 	Mesh* result = etCreateObject<Mesh>(name(), parent());
 	result->_supportData = _supportData;
 	result->_undeformedTransformationMatrices = _undeformedTransformationMatrices;
@@ -66,6 +71,9 @@ Mesh* Mesh::duplicate()
 	duplicateChildrenToObject(result);
 	
 	return result;
+	// */
+	
+	return nullptr;
 }
 
 void Mesh::transformInvalidated()

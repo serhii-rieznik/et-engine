@@ -688,6 +688,12 @@
     <ClInclude Include="..\..\include\et\rendering\null\null_renderer.h">
       <Filter>Source\rendering\null</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\vulkan\vulkan_memory.cpp">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\core\pool.h">
+      <Filter>Source\core</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\et\sound\openal.h">
@@ -1276,9 +1282,6 @@
     </ClCompile>
     <ClCompile Include="..\..\include\external\spirvcross\spirv_msl.cpp">
       <Filter>spir-v-cross</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\include\et\rendering\vulkan\vulkan_memory.cpp">
-      <Filter>Source\rendering\vulkan</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

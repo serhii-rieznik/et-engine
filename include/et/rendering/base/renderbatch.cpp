@@ -10,9 +10,10 @@
 #include <et/core/conversion.h>
 #include <et/rendering/base/renderbatch.h>
 
-using namespace et;
+namespace et
+{
 
-RenderBatch::RenderBatch(const MaterialInstance::Pointer& m, const VertexStream::Pointer& v, uint32_t i, uint32_t ni) : 
+RenderBatch::RenderBatch(const MaterialInstance::Pointer& m, const VertexStream::Pointer& v, uint32_t i, uint32_t ni) :
 	_material(m), _vertexStream(v), _firstIndex(i), _numIndexes(ni)
 {
 }
@@ -21,7 +22,7 @@ void RenderBatch::calculateBoundingBox()
 {
 	ET_ASSERT(_vertexStorage.valid());
 	ET_ASSERT(_indexArray.valid());
-	
+
 	if (_vertexStorage->hasAttributeWithType(VertexAttributeUsage::Position, DataType::Vec3))
 	{
 		vec3 minExtent = vec3(std::numeric_limits<float>::max());
@@ -73,7 +74,7 @@ RayIntersection RenderBatch::intersectsLocalSpaceRay(const ray3d& ray) const
 	{
 		log::error("Unable to calculate intersection - missing position attribute.");
 	}
-	
+
 	const auto pos = _vertexStorage->accessData<DataType::Vec3>(VertexAttributeUsage::Position, 0);
 	uint32_t numTriangles = _numIndexes / 3;
 	for (uint32_t t = 0; t < numTriangles; ++t)
@@ -95,7 +96,7 @@ RayIntersection RenderBatch::intersectsLocalSpaceRay(const ray3d& ray) const
 			}
 		}
 	}
-	
+
 	return result;
 }
 
@@ -110,5 +111,7 @@ RenderBatch* RenderBatch::duplicate() const
 
 void RenderBatch::setMaterial(MaterialInstance::Pointer mat)
 {
-    _material = mat;
+	_material = mat;
+}
+
 }

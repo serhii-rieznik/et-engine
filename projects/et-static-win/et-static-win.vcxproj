@@ -15,6 +15,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\include\et\core\pool.h" />
     <ClInclude Include="..\..\include\et\core\remoteheap.h" />
     <ClInclude Include="..\..\include\et\rendering\base\variableset.h" />
     <ClInclude Include="..\..\include\et\rendering\interface\compute.h" />
