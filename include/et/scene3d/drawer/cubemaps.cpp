@@ -28,11 +28,18 @@ CubemapProcessor::CubemapProcessor() :
 		m = m.inverted();
 }
 
+void CubemapProcessor::processAtmosphere()
+{
+	removeFlag(CubemapProcessed);
+	setFlag(CubemapAtmosphere);
+}
+
 void CubemapProcessor::processEquiretangularTexture(const Texture::Pointer& tex)
 {
 	_sourceTextureName = tex->origin();
 	_tex[CubemapType::Source] = tex;
 	removeFlag(CubemapProcessed);
+	removeFlag(CubemapAtmosphere);
 }
 
 void CubemapProcessor::process(RenderInterface::Pointer& renderer, DrawerOptions& options, const Light::Pointer& light)
@@ -61,7 +68,7 @@ void CubemapProcessor::process(RenderInterface::Pointer& renderer, DrawerOptions
 		_downsamplePass->loadSharedVariablesFromLight(light);
 		
 		RenderBatch::Pointer copyBatch = renderhelper::createFullscreenRenderBatch(_tex[CubemapType::Source], 
-			_processingMaterial, _eqMapSampler, ResourceRange(0, 1, 0, 6));
+			hasFlag(CubemapAtmosphere) ? _atmosphereMaterial : _wrapMaterial, _eqMapSampler, ResourceRange(0, 1, 0, 1));
 		
 		_downsamplePass->pushImageBarrier(_tex[CubemapType::Downsampled], ResourceBarrier(TextureState::ColorRenderTarget, 0, 1, 0, 6));
 		for (uint32_t face = 0; face < 6; ++face)
@@ -125,14 +132,16 @@ void CubemapProcessor::process(RenderInterface::Pointer& renderer, DrawerOptions
 void CubemapProcessor::validate(RenderInterface::Pointer& renderer)
 {
 	if (_processingMaterial.invalid())
-	{
 		_processingMaterial = renderer->sharedMaterialLibrary().loadMaterial(application().resolveFileName("engine_data/materials/cubemap.json"));
-	}
+
+	if (_wrapMaterial.invalid())
+		_wrapMaterial = renderer->sharedMaterialLibrary().loadMaterial(application().resolveFileName("engine_data/materials/cubemap-wrap.json"));
+	
+	if (_atmosphereMaterial.invalid())
+		_atmosphereMaterial = renderer->sharedMaterialLibrary().loadMaterial(application().resolveFileName("engine_data/materials/cubemap-atmosphere.json"));
 
 	if (_downsampleMaterial.invalid())
-	{
 		_downsampleMaterial = renderer->sharedMaterialLibrary().loadMaterial(application().resolveFileName("engine_data/materials/cubemap-downsample.json"));
-	}
 
 	if (_eqMapSampler.invalid())
 	{

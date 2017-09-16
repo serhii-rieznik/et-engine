@@ -186,6 +186,7 @@ void VulkanRenderer::init(const RenderContextParameters& params)
 
 	VkPhysicalDeviceFeatures deviceFeatures = { };
 	deviceFeatures.samplerAnisotropy = VK_TRUE;
+	deviceFeatures.textureCompressionBC = VK_TRUE;
 
 	VkDeviceCreateInfo deviceCreateInfo = { VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO };
 	deviceCreateInfo.queueCreateInfoCount = totalQueuesCount;

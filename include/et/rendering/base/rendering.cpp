@@ -294,6 +294,9 @@ uint32_t bitsPerPixelForTextureFormat(TextureFormat format)
 	case TextureFormat::RGBA32F:
 		return 128;
 
+	case TextureFormat::DXT5:
+		return 8;
+
 	default:
 		ET_FAIL_FMT("Not yet implemented for this format: %u", static_cast<uint32_t>(format));
 	}
@@ -357,6 +360,18 @@ bool isCompressedTextureFormat(TextureFormat internalFormat)
 
 	default:
 		return false;
+	}
+}
+
+vec2i compressedFormatBlockSize(TextureFormat internalFormat)
+{
+	switch (internalFormat)
+	{
+	case TextureFormat::DXT5:
+		return vec2i(4);
+	
+	default:
+		return vec2i(1);
 	}
 }
 

@@ -62,7 +62,7 @@ void Drawer::draw()
 	options.rebuldEnvironmentProbe = true;
 #endif
 
-	_debugDrawer->begin();
+	// _debugDrawer->begin();
 	_cubemapProcessor->process(_renderer, options, _lighting.directional);
 	_shadowmapProcessor->process(_renderer, options);
 
@@ -96,9 +96,11 @@ void Drawer::draw()
 		_main.pass->setSharedVariable(ObjectVariable::WorldTransform, identityMatrix);
 		_main.pass->pushRenderBatch(_lighting.environmentBatch);
 
+		/*
 		_debugDrawer->drawCameraFrustum(_lighting.directional, vec4(10000.0f, 20000.0f, 0.0f, 1.0f));
 		_debugDrawer->drawBoundingBox(_shadowmapProcessor->sceneBoundingBox(), identityMatrix, vec4(10000.0f, 10000.0f, 10000.0f, 1.0f));
 		_debugDrawer->submitBatches(_main.pass);
+		*/
 
 		_main.pass->endSubpass();
 		_main.pass->end();
@@ -220,7 +222,7 @@ void Drawer::setScene(const Scene::Pointer& inScene)
 	{
 		vec3 lightPoint = 10.0f * fromSpherical(DEG_60, DEG_15);
 		_lighting.directional = Light::Pointer::create(Light::Type::Directional);
-		_lighting.directional->setColor(vec3(120000.0f));
+		_lighting.directional->setColor(vec3(10.0f));
 		_lighting.directional->lookAt(lightPoint);
 		_lighting.directional->perspectiveProjection(QUARTER_PI, 1.0f, 1.0f, 1000.0f);
 	}
@@ -230,8 +232,15 @@ void Drawer::setScene(const Scene::Pointer& inScene)
 
 void Drawer::setEnvironmentMap(const std::string& filename)
 {
-	Texture::Pointer tex = _renderer->loadTexture(filename, _cache);
-	_cubemapProcessor->processEquiretangularTexture(tex.valid() ? tex : _renderer->checkersTexture());
+	if (filename == "built-in:atmosphere")
+	{
+		_cubemapProcessor->processAtmosphere();
+	}
+	else
+	{
+		Texture::Pointer tex = _renderer->loadTexture(filename, _cache);
+		_cubemapProcessor->processEquiretangularTexture(tex.valid() ? tex : _renderer->checkersTexture());
+	}
 }
 
 void Drawer::updateBaseProjectionMatrix(const mat4& m)

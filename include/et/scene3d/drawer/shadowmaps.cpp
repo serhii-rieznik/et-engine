@@ -119,7 +119,7 @@ void ShadowmapProcessor::validate(RenderInterface::Pointer& renderer)
 	if (_directionalShadowmap.invalid())
 	{
 		TextureDescription::Pointer desc(PointerInit::CreateInplace);
-		desc->size = vec2i(1024, 1024);
+		desc->size = vec2i(4096, 4096);
 		desc->format = TextureFormat::Depth32F;
 		desc->flags = Texture::Flags::RenderTarget;
 		_directionalShadowmap = renderer->createTexture(desc);

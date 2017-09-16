@@ -1,21 +1,21 @@
 #include <et>
 #include <inputdefines>
 #include <inputlayout>
-
-#define EQUIRECTANGULAR_ENV_MAP 1
-
 #include "importance-sampling.h"
 #include "atmosphere.h"
 #include "environment.h"
 #include "bsdf.h"
 
-#if (EQ_MAP_TO_CUBEMAP)
-	#define InputTextureType Texture2D
+#if (WRAP_EQ_TO_CUBEMAP)
+
+	Texture2D<float4> baseColorTexture : DECL_TEXTURE(BaseColor);
+
 #elif (VISUALIZE_CUBEMAP || SPECULAR_CONVOLUTION || DOWNSAMPLE_CUBEMAP)
-	#define InputTextureType TextureCube
+
+	TextureCube<float4> baseColorTexture : DECL_TEXTURE(BaseColor);
+
 #endif
 
-InputTextureType<float4> baseColorTexture : DECL_TEXTURE(BaseColor);
 SamplerState baseColorSampler : DECL_SAMPLER(BaseColor);
 
 cbuffer ObjectVariables : DECL_BUFFER(Object)
@@ -64,11 +64,16 @@ float4 fragmentMain(VSOutput fsIn) : SV_Target0
 	float3 sampleDirection = float3(cosPhi * cosTheta, sinTheta, sinPhi * cosTheta);
 	return baseColorTexture.SampleLevel(baseColorSampler, sampleDirection, extraParameters.x);
 
-#elif (EQ_MAP_TO_CUBEMAP)
+#elif (WRAP_EQ_TO_CUBEMAP)
 
 	float3 d = normalize(fsIn.direction);        	
 	float u = atan2(d.z, d.x) * 0.5 / PI + 0.5;
 	float v = asin(d.y) / PI + 0.5;
+	return baseColorTexture.SampleLevel(baseColorSampler, float2(u, v), 0.0);
+
+#elif (ATMOSPHERE)
+
+	float3 d = normalize(fsIn.direction);        	
 	return float4(sampleAtmosphere(d, lightDirection.xyz, lightColor), 1.0);
 
 #elif (DOWNSAMPLE_CUBEMAP)

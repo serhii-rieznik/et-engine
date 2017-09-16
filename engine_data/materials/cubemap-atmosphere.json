@@ -1,0 +1,22 @@
+{
+	"name" : "cubemap routines",
+
+	"prepare-cubemap" : 
+	{ 
+		"input-layout" : {
+			"position" : 3,
+			"texcoord0" : 2
+		},
+		"depth-state": {
+			"depth-function": "always",
+			"depth-test": false,
+			"depth-write": false
+		},
+		"options" : {
+			"ATMOSPHERE" : 1
+		},
+		"blend-state": "disabled",
+		"cull-mode" : "disabled",
+		"code" : "shaders/cubemap"
+	}
+}

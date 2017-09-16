@@ -119,7 +119,8 @@ inline vec2 Texture::getTexCoord(const vec2& vec, uint32_t level, TextureOrigin 
 inline vec2i Texture::Description::sizeForMipLevel(uint32_t level) const
 {
 	ET_ASSERT(level <= levelCount);
-	return vec2i(size.x >> static_cast<int32_t>(level), size.y >> static_cast<int32_t>(level));
+	vec2i result = vec2i(size.x >> static_cast<int32_t>(level), size.y >> static_cast<int32_t>(level));
+	return maxv(result, compressedFormatBlockSize(format));
 }
 
 inline uint32_t Texture::Description::dataOffsetForMipLevel(uint32_t level, uint32_t layer) const

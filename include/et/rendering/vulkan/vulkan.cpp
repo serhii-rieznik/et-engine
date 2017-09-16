@@ -509,6 +509,7 @@ VkFormat textureFormatValue(TextureFormat fmt)
 		{ TextureFormat::Depth16, VK_FORMAT_D16_UNORM },
 		{ TextureFormat::Depth24, VK_FORMAT_D24_UNORM_S8_UINT },
 		{ TextureFormat::Depth32F, VK_FORMAT_D32_SFLOAT },
+		{ TextureFormat::DXT5, VK_FORMAT_BC3_UNORM_BLOCK },
 	};
 	ET_ASSERT(lookup.count(fmt) > 0);
 	return lookup.at(fmt);

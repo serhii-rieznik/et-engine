@@ -594,6 +594,8 @@ uint32_t channelsForTextureFormat(TextureFormat internalFormat);
 bool isCompressedTextureFormat(TextureFormat internalFormat);
 bool isDepthTextureFormat(TextureFormat internalFormat);
 
+vec2i compressedFormatBlockSize(TextureFormat internalFormat);
+
 const std::string& compareFunctionToString(CompareFunction);
 const std::string& blendFunctionToString(BlendFunction);
 const std::string& blendOperationToString(BlendOperation);

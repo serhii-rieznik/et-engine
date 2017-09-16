@@ -128,9 +128,12 @@ float sampleShadow(in float3 shadowTexCoord, in float rotationKernel, in float2 
 
 FSOutput fragmentMain(VSOutput fsIn)
 {
-    float4 normalSample = normalTexture.Sample(normalSampler, fsIn.texCoord0);
     float4 baseColorSample = baseColorTexture.Sample(baseColorSampler, fsIn.texCoord0);
+    float4 normalSample = normalTexture.Sample(normalSampler, fsIn.texCoord0);
     float4 opacitySample = opacityTexture.Sample(opacitySampler, fsIn.texCoord0);
+
+    baseColorSample = srgbToLinear(float4(diffuseReflectance.xyz * baseColorSample.xyz, baseColorSample.w));
+    normalSample.w = srgbToLinear(normalSample.w);
 
     if ((opacitySample.x + opacitySample.y) < 127.0 / 255.0) 
         discard;
@@ -149,8 +152,7 @@ FSOutput fragmentMain(VSOutput fsIn)
 	float sampledNoise = noiseTexture.Sample(noiseSampler, noiseUV);
         
     float shadow = sampleShadow(fsIn.lightCoord.xyz / fsIn.lightCoord.w, sampledNoise, shadowmapSize.xy);
-    float3 baseColor = srgbToLinear(baseColorSample.xyz);
-    Surface surface = buildSurface(baseColor, normalSample.w, baseColorSample.w);
+    Surface surface = buildSurface(baseColorSample.xyz, normalSample.w, baseColorSample.w);
 
     float3 tsNormal = normalize(normalSample.xyz - 0.5);
 
@@ -160,13 +162,21 @@ FSOutput fragmentMain(VSOutput fsIn)
     wsNormal.z = dot(fsIn.invTransformN, tsNormal);
     wsNormal = normalize(wsNormal);
 
+    float3 geometricNormal = normalize(float3(fsIn.invTransformT.z, fsIn.invTransformB.z, fsIn.invTransformN.z));
+
     float3 wsLight = normalize(fsIn.toLight);
     float3 wsView = normalize(fsIn.toCamera);
 
+    /*
+     * surface direct lighting
+     */
     BSDF bsdf = buildBSDF(wsNormal, wsLight, wsView);
     float3 directDiffuse = computeDirectDiffuse(surface, bsdf);
     float3 directSpecular = computeDirectSpecular(surface, bsdf);
 
+    /*
+     * surface ibl lighting
+     */
     float4 brdfLookupSample = brdfLookupTexture.Sample(brdfLookupSampler, float2(surface.roughness, bsdf.VdotN));
 
     float3 wsDiffuseDir = diffuseDominantDirection(wsNormal, wsView, surface.roughness);
@@ -177,17 +187,37 @@ FSOutput fragmentMain(VSOutput fsIn)
     float3 indirectSpecular = sampleEnvironment(wsSpecularDir, lightDirection.xyz, surface.roughness);
     indirectSpecular *= (surface.f0 * brdfLookupSample.x + surface.f90 * brdfLookupSample.y);
 
-    float3 result = shadow * lightColor * (directDiffuse + directSpecular) + (indirectDiffuse + indirectSpecular); 
+    /*
+     * clear coat direct lighting
+     */
+    Surface ccSurface = buildSurface(float3(1.0, 1.0, 1.0), 0.0, 0.0);
+    BSDF ccBSDF = buildBSDF(geometricNormal, wsLight, wsView);
+	float3 ccSpecular = computeDirectSpecular(ccSurface, ccBSDF);
 
+    /*
+     * clear coar ibl lighting
+     */
+    float4 ccBrdfLookupSample = brdfLookupTexture.Sample(brdfLookupSampler, float2(ccSurface.roughness, ccBSDF.VdotN));
+                                                                  
+    wsSpecularDir = specularDominantDirection(geometricNormal, wsView, ccSurface.roughness);
+    float3 ccIndirectSpecular = sampleEnvironment(wsSpecularDir, lightDirection.xyz, ccSurface.roughness);
+    ccIndirectSpecular *= (ccSurface.f0 * ccBrdfLookupSample.x + ccSurface.f90 * ccBrdfLookupSample.y);
+
+    float clearCoatFresnel = pow(saturate(1.0 - ccBSDF.VdotN), 5.0);
+
+    float3 result = 
+    	lerp(directDiffuse + directSpecular, ccSpecular, clearCoatFresnel) * shadow * lightColor + 
+    	lerp(indirectDiffuse + indirectSpecular, ccIndirectSpecular, clearCoatFresnel);
+
+    /*
     float3 originPosition = positionOnPlanet + cameraPosition.xyz;
     float3 worldPosition = originPosition - fsIn.toCamera;
     float3 outScatter = outScatteringAtConstantHeight(originPosition, worldPosition);
-
     float phaseR = phaseFunctionRayleigh(dot(wsView, wsLight));
     float phaseM = phaseFunctionMie(dot(wsView, wsLight), mieG);
     float3 inScatter = lightColor * inScatteringAtConstantHeight(originPosition, worldPosition, wsLight, float2(phaseR, phaseM));
-
-    result = result * outScatter + inScatter;
+    result = result * outScatter + inScatter; 
+    // */
     
     FSOutput output;
     output.color = float4(result, 1.0);

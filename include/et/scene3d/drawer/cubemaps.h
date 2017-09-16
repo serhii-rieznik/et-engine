@@ -26,6 +26,7 @@ public:
 	const Texture::Pointer& convolutedCubemap() const;
 	const Texture::Pointer& brdfLookupTexture() const;
 
+	void processAtmosphere();
 	void processEquiretangularTexture(const Texture::Pointer&);
 	void process(RenderInterface::Pointer&, DrawerOptions&, const Light::Pointer&);
 
@@ -49,6 +50,7 @@ private:
 		 */
 		CubemapProcessed = 1 << 0,
 		BRDFLookupProcessed = 1 << 1,
+		CubemapAtmosphere = 1 << 2,
 
 		/*
 		 * Constants
@@ -60,9 +62,12 @@ private:
 	Texture::Pointer _lookup;
 	Texture::Pointer _tex[CubemapType::Count];
 	Sampler::Pointer _eqMapSampler;
+	Material::Pointer _wrapMaterial;
+	Material::Pointer _atmosphereMaterial;
 	Material::Pointer _processingMaterial;
 	Material::Pointer _downsampleMaterial;
 	Material::Pointer _lookupGeneratorMaterial;
+
 	RenderPass::Pointer _lookupPass;
 	RenderPass::Pointer _lookupDebugPass;
 	RenderPass::Pointer _downsamplePass;
