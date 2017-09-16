@@ -132,8 +132,7 @@ FSOutput fragmentMain(VSOutput fsIn)
     float4 normalSample = normalTexture.Sample(normalSampler, fsIn.texCoord0);
     float4 opacitySample = opacityTexture.Sample(opacitySampler, fsIn.texCoord0);
 
-    baseColorSample = srgbToLinear(float4(diffuseReflectance.xyz * baseColorSample.xyz, baseColorSample.w));
-    normalSample.w = srgbToLinear(normalSample.w);
+    baseColorSample.xyz = srgbToLinear(diffuseReflectance.xyz * baseColorSample.xyz);
 
     if ((opacitySample.x + opacitySample.y) < 127.0 / 255.0) 
         discard;
