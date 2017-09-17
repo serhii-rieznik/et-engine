@@ -26,6 +26,7 @@ float4 evaluateNormals(Scene& scene, const Ray& inRay, Evaluate& eval)
 float4 evaluateAmbientOcclusion(Scene& scene, const Ray& inRay, Evaluate& eval)
 {
 	float4 result(1.0f);
+
 	KDTree::TraverseResult hit = scene.kdTree.traverse(inRay);
 	if (hit.triangleIndex != InvalidIndex)
 	{
@@ -37,9 +38,11 @@ float4 evaluateAmbientOcclusion(Scene& scene, const Ray& inRay, Evaluate& eval)
 
 		float4 origin = hit.intersectionPoint;
 		hit = scene.kdTree.traverse(Ray(origin, nextDirection));
+
 		if (hit.triangleIndex != InvalidIndex)
 			result = float4(0.0f);
 	}
+	
 	return result;
 }
 

@@ -102,6 +102,15 @@
 #	define ET_KEY_GRAY_MINUS			109
 #	define ET_KEY_GRAY_MULTIPLY			106
 #	define ET_KEY_GRAY_DIVIDE			111
+#	define ET_KEY_F1					112
+#	define ET_KEY_F2					113
+#	define ET_KEY_F3					114
+#	define ET_KEY_F4					115
+#	define ET_KEY_F5					116
+#	define ET_KEY_F6					117
+#	define ET_KEY_F7					118
+#	define ET_KEY_F8					119
+#	define ET_KEY_F9					120
 #
 #endif
 

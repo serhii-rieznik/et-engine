@@ -11,7 +11,7 @@
 namespace et {
 namespace rt {
 
-const float Constants::epsilon = 1.0e-4f;
+const float Constants::epsilon = 1.0e-3f;
 const float Constants::initialSplitValue = std::numeric_limits<float>::max();
 
 const float4& defaultLightDirection()
