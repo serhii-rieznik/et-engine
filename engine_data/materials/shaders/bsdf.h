@@ -22,6 +22,7 @@ BSDF buildBSDF(in float3 n, in float3 l, in float3 v);
 float ggxDistribution(in float NdotH, in float roughnessSquared);
 float ggxMasking(in float VdotN, in float LdotN, in float roughnessSquared);
 float diffuseBurley(in float LdotN, in float VdotN, in float LdotH, in float roughness);
+float fresnel(in float f0, in float f90, in float cosTheta);
 
 float3 directDiffuse(in Surface surface, in BSDF bsdf);
 float3 directSpecular(in Surface surface, in BSDF bsdf);
@@ -84,7 +85,7 @@ float ggxMaskingCombined(in float VdotN, in float LdotN, in float roughnessSquar
 
 float diffuseBurley(in float LdotN, in float VdotN, in float LdotH, in float roughness)
 {
-#define USE_FROSTBITE_VARIANT 1
+#define USE_FROSTBITE_VARIANT 0
 
 	float Fl = pow(1.0 - LdotN, 5.0);
 	float Fv = pow(1.0 - VdotN, 5.0);
@@ -116,4 +117,8 @@ float3 computeDirectSpecular(in Surface surface, in BSDF bsdf)
 	return (g * d) * lerp(surface.f0, surface.f90, pow(1.0 - bsdf.LdotH, 5.0));
 }
 
+float fresnel(in float f0, in float f90, in float cosTheta)
+{
+	return f0 + (f90 - f0) * pow(saturate(1.0 - cosTheta), 5.0);
+}
 

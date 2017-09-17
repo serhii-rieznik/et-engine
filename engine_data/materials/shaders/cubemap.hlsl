@@ -89,17 +89,9 @@ float4 fragmentMain(VSOutput fsIn) : SV_Target0
 	float3 tX = normalize(cross(up, n));
 	float3 tY = cross(n, tX);
 
-#if (DIFFUSE_CONVOLUTION)
-	#define samples 512
-#else
 	#define samples 2048
 	float roughness = extraParameters.x / 8.0;
-	if (roughness == 0.0)
-	{
-		return baseColorTexture.SampleLevel(baseColorSampler, n, 0.0);
-	}
-	roughness = roughness * roughness;
-#endif
+	roughness = max(roughness * roughness, MIN_ROUGHNESS);
 
 	float cubemapSolidAngle = 4.0 * PI / (6.0 * (extraParameters.y * extraParameters.z));
 
@@ -108,30 +100,17 @@ float4 fragmentMain(VSOutput fsIn) : SV_Target0
 	for (uint i = 0; i < samples; ++i)
 	{
 		float2 Xi = hammersley(i, samples);
-		                                   
-	#if (DIFFUSE_CONVOLUTION)
-		float3 h = importanceSampleCosine(Xi);	
-	#else
 		float3 h = importanceSampleGGX(Xi, roughness);	
-	#endif
 
 		h = tX * h.x + tY * h.y + n * h.z;
 		float3 l = 2.0 * dot(v, h) * h - v;
-		float LdotN = saturate(dot(l, n));
-
-	#if (DIFFUSE_CONVOLUTION)
-		float pdf = LdotN / PI;
-		float w = 1.0;
-	#else
+		float LdotN = saturate(dot(l, n));	
 		float NdotH = dot(n, h);
 		float LdotH = saturate(dot(l, h));
 		float pdf = ggxDistribution(NdotH, roughness) * NdotH / (4.0 * LdotH);
 		float w = LdotN;
-	#endif
-		
 		float sampleSolidAngle = 1.0 / ((float)(samples) * pdf);
 		float level = clamp(2.0 + 0.5 * log2(1.0 + sampleSolidAngle / cubemapSolidAngle), 0.0, 8.0);
-
 		result += w * baseColorTexture.SampleLevel(baseColorSampler, l, level).xyz;
 		weight += w;
 	}

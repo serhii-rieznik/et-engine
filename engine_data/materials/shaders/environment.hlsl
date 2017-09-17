@@ -52,7 +52,7 @@ FSOutput fragmentMain(VSOutput fsIn)
 	float a = atmosphereIntersection(positionOnPlanet, lightDirection.xyz);
 	sunColor *= outScattering(positionOnPlanet, positionOnPlanet + a * lightDirection.xyz);
 
-	float3 env = sampleEnvironment(v, lightDirection.xyz, 0.0);
+	float3 env = sampleEnvironment(v, lightDirection.xyz, 0.05);
 	// env = sampleAtmosphere(v, lightDirection.xyz, lightColor);
 
 	float4 currentProjectedDirection = mul(float4(v * cameraClipPlanes.y, 1.0), viewProjectionTransform);

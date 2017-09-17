@@ -188,7 +188,7 @@ void CubemapProcessor::validate(RenderInterface::Pointer& renderer)
 		passInfo.color[0].loadOperation = FramebufferOperation::Load;
 		passInfo.color[0].storeOperation = FramebufferOperation::Store;
 		passInfo.color[0].useDefaultRenderTarget = true;
-		passInfo.name = "forward";
+		passInfo.name = "default";
 		passInfo.priority = RenderPassPriority::UI - 2;
 		_lookupDebugPass = renderer->allocateRenderPass(passInfo);
 

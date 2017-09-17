@@ -59,6 +59,13 @@ struct VSOutput
     float3 invTransformN;
 };
 
+const float ClearCoatEta = 1.76;
+const float ClearCoatScale = 1.0;
+const float ClearCoatRoughness = 0.05;
+
+const float DirectLightScale = 1.0;
+const float IBLightScale = 1.0;
+
 VSOutput vertexMain(VSInput vsIn)
 {
     float4 transformedPosition = mul(float4(vsIn.position, 1.0), worldTransform);
@@ -128,14 +135,14 @@ float sampleShadow(in float3 shadowTexCoord, in float rotationKernel, in float2 
 
 FSOutput fragmentMain(VSOutput fsIn)
 {
-    float4 baseColorSample = baseColorTexture.Sample(baseColorSampler, fsIn.texCoord0);
-    float4 normalSample = normalTexture.Sample(normalSampler, fsIn.texCoord0);
     float4 opacitySample = opacityTexture.Sample(opacitySampler, fsIn.texCoord0);
-
-    baseColorSample.xyz = srgbToLinear(diffuseReflectance.xyz * baseColorSample.xyz);
-
     if ((opacitySample.x + opacitySample.y) < 127.0 / 255.0) 
         discard;
+
+    float4 baseColorSample = baseColorTexture.Sample(baseColorSampler, fsIn.texCoord0);
+    float4 normalSample = normalTexture.Sample(normalSampler, fsIn.texCoord0);
+
+    baseColorSample.xyz = srgbToLinear(diffuseReflectance.xyz * baseColorSample.xyz);
 
     float2 currentPosition = fsIn.projectedPosition.xy / fsIn.projectedPosition.w;
     float2 previousPosition = fsIn.previousProjectedPosition.xy / fsIn.previousProjectedPosition.w;
@@ -189,7 +196,7 @@ FSOutput fragmentMain(VSOutput fsIn)
     /*
      * clear coat direct lighting
      */
-    Surface ccSurface = buildSurface(float3(1.0, 1.0, 1.0), 0.0, 0.0);
+    Surface ccSurface = buildSurface(float3(1.0, 1.0, 1.0), 0.0, ClearCoatRoughness);
     BSDF ccBSDF = buildBSDF(geometricNormal, wsLight, wsView);
 	float3 ccSpecular = computeDirectSpecular(ccSurface, ccBSDF);
 
@@ -202,11 +209,12 @@ FSOutput fragmentMain(VSOutput fsIn)
     float3 ccIndirectSpecular = sampleEnvironment(wsSpecularDir, lightDirection.xyz, ccSurface.roughness);
     ccIndirectSpecular *= (ccSurface.f0 * ccBrdfLookupSample.x + ccSurface.f90 * ccBrdfLookupSample.y);
 
-    float clearCoatFresnel = pow(saturate(1.0 - ccBSDF.VdotN), 5.0);
+    float f0 = (ClearCoatEta - 1.0) / (ClearCoatEta + 1.0);
+    float clearCoatFresnel = ClearCoatScale * fresnel(f0 * f0, 1.0, ccBSDF.VdotN);
 
     float3 result = 
-    	lerp(directDiffuse + directSpecular, ccSpecular, clearCoatFresnel) * shadow * lightColor + 
-    	lerp(indirectDiffuse + indirectSpecular, ccIndirectSpecular, clearCoatFresnel);
+    	DirectLightScale * lerp(directDiffuse + directSpecular, ccSpecular, clearCoatFresnel) * shadow * lightColor + 
+    	IBLightScale * lerp(indirectDiffuse + indirectSpecular, ccIndirectSpecular, clearCoatFresnel);
 
     /*
     float3 originPosition = positionOnPlanet + cameraPosition.xyz;
