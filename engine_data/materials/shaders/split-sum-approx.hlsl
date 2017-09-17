@@ -44,6 +44,8 @@ float4 fragmentMain(VSOutput fsIn) : SV_Target0
 		float NdotH = saturate(dot(n, h));
 		float LdotH = saturate(dot(l, h));
 		
+		BSDF bsdf = buildBSDF(n, l, v);
+	
 		float d = ggxDistribution(NdotH, roughnessSquared);
 		float g = ggxMasking(NdotV, LdotN, roughnessSquared);
 		float f = fresnel(0.04, 1.0, LdotH);

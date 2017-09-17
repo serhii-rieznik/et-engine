@@ -95,6 +95,7 @@ VSOutput vertexMain(VSInput vsIn)
 #include "atmosphere.h"
 #include "importance-sampling.h"
 #include "shadowmapping.h"
+#include "iridescence.h"
 
 struct FSOutput 
 {
@@ -190,8 +191,13 @@ FSOutput fragmentMain(VSOutput fsIn)
         ((1.0 - surface.metallness) * brdfLookupSample.z);
                                                                   
     float3 wsSpecularDir = specularDominantDirection(wsNormal, wsView, surface.roughness);
+
+    BSDF iblBsdf = buildBSDF(wsNormal, wsSpecularDir, wsView);
+    float3 fresnelScale = iridescentFresnel(iblBsdf);
+    fresnelScale /= max(fresnelScale.x, max(fresnelScale.y, fresnelScale.z));
+
     float3 indirectSpecular = sampleEnvironment(wsSpecularDir, lightDirection.xyz, surface.roughness);
-    indirectSpecular *= (surface.f0 * brdfLookupSample.x + surface.f90 * brdfLookupSample.y);
+    indirectSpecular *= fresnelScale * (surface.f0 * brdfLookupSample.x + surface.f90 * brdfLookupSample.y);
 
     /*
      * clear coat direct lighting
@@ -215,6 +221,10 @@ FSOutput fragmentMain(VSOutput fsIn)
     float3 result = 
     	DirectLightScale * lerp(directDiffuse + directSpecular, ccSpecular, clearCoatFresnel) * shadow * lightColor + 
     	IBLightScale * lerp(indirectDiffuse + indirectSpecular, ccIndirectSpecular, clearCoatFresnel);
+
+    // result = fresnelScale;
+
+    // result = iridescentFresnel(bsdf);
 
     /*
     float3 originPosition = positionOnPlanet + cameraPosition.xyz;
