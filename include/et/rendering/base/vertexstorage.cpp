@@ -107,12 +107,23 @@ void VertexStorage::resize(uint32_t sz)
 
 void VertexStorage::serialize(std::ostream& fOut)
 {
-
+	serializeUInt32(fOut, 0);
+	_private->decl.serialize(fOut);
+	
+	serializeUInt32(fOut, _private->data.size());
+	if (_private->data.size() > 0)
+		fOut.write(_private->data.binary(), _private->data.size());
 }
 
-void deserialize(std::istream& fIn)
+void VertexStorage::deserialize(std::istream& fIn)
 {
-
+	uint32_t id = deserializeUInt32(fIn);
+	_private->decl.deserialize(fIn);
+	
+	uint32_t dataSize = deserializeUInt32(fIn);
+	_private->data.resize(dataSize);
+	if (dataSize > 0)
+		fIn.read(_private->data.binary(), dataSize);
 }
 
 /*

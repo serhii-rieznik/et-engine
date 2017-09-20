@@ -131,4 +131,29 @@ bool VertexDeclaration::hasSameElementsAs(const VertexDeclaration& r) const
 	return true;
 }
 
+void VertexDeclaration::serialize(std::ostream& fOut)
+{
+	serializeUInt32(fOut, 0);
+	serializeUInt32(fOut, static_cast<uint32_t>(_elements.size()));
+	for (const VertexElement& e : _elements)
+	{
+		serializeUInt32(fOut, static_cast<uint32_t>(e.usage()));
+		serializeUInt32(fOut, static_cast<uint32_t>(e.type()));
+	}
+}
+
+void VertexDeclaration::deserialize(std::istream& fIn)
+{
+	clear();
+
+	uint32_t id = deserializeUInt32(fIn);
+	uint32_t elementCount = deserializeUInt32(fIn);
+	for (uint32_t i = 0; i < elementCount; ++i)
+	{
+		VertexAttributeUsage usage = static_cast<VertexAttributeUsage>(deserializeUInt32(fIn));
+		DataType type = static_cast<DataType>(deserializeUInt32(fIn));
+		push_back(usage, type);
+	}
+}
+
 }
