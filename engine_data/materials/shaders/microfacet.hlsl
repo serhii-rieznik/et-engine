@@ -1,6 +1,7 @@
 #include <et>
 #include <inputdefines>
 #include <inputlayout>
+#include "options.h"
 
 cbuffer MaterialVariables : DECL_BUFFER(Material)
 {
@@ -59,12 +60,10 @@ struct VSOutput
     float3 invTransformN;
 };
 
+#if (EnableClearCoat)
 const float ClearCoatEta = 1.76;
-const float ClearCoatScale = 1.0;
 const float ClearCoatRoughness = 0.05;
-
-const float DirectLightScale = 1.0;
-const float IBLightScale = 1.0;
+#endif
 
 VSOutput vertexMain(VSInput vsIn)
 {
@@ -102,37 +101,6 @@ struct FSOutput
 	float4 color : SV_Target0;
 	float2 velocity : SV_Target1;
 };
-
-float sampleShadow(in float3 shadowTexCoord, in float rotationKernel, in float2 shadowmapSize)
-{
-	const float radius = sqrt(2.0);
-	const float bias = 0.00625;
-	const float2 poissonDistribution[8] = 
-	{
-		float2( 0.8528466f,  0.0213828f),
-		float2( 0.1141956f,  0.2880972f),
-		float2( 0.5853493f, -0.6930891f),
-		float2( 0.6362274f,  0.7029839f),
-		float2(-0.1640182f, -0.4143998f),
-		float2(-0.8862001f, -0.3506839f),
-		float2(-0.2186042f,  0.8690619f),
-		float2(-0.8200445f,  0.4156708f)
-	};
-
-	float angle = 2.0 * PI * (rotationKernel + 2.0 * PI * continuousTime);
-	float sn = sin(angle);
-	float cs = cos(angle);
-	float2 scaledUV = shadowTexCoord.xy * 0.5 + 0.5;
-
-	float shadow = 0.0;
-	for (uint i = 0; i < 8; ++i)
-	{
-		float2 o = poissonDistribution[i] / shadowmapSize;
-		float2 r = radius * float2(dot(o, float2(cs, -sn)), dot(o, float2(sn,  cs)));
-		shadow += shadowTexture.SampleCmpLevelZero(shadowSampler, scaledUV + r, shadowTexCoord.z - bias);
-	}
-	return shadow / 8.0;
-}
 
 FSOutput fragmentMain(VSOutput fsIn)
 {
@@ -174,16 +142,10 @@ FSOutput fragmentMain(VSOutput fsIn)
     float3 wsLight = normalize(fsIn.toLight);
     float3 wsView = normalize(fsIn.toCamera);
 
-    /*
-     * surface direct lighting
-     */
     BSDF bsdf = buildBSDF(wsNormal, wsLight, wsView);
     float3 directDiffuse = computeDirectDiffuse(surface, bsdf);
     float3 directSpecular = computeDirectSpecular(surface, bsdf);
 
-    /*
-     * surface ibl lighting
-     */
     float4 brdfLookupSample = brdfLookupTexture.Sample(brdfLookupSampler, float2(surface.roughness, bsdf.VdotN));
 
     float3 wsDiffuseDir = diffuseDominantDirection(wsNormal, wsView, surface.roughness);
@@ -191,24 +153,20 @@ FSOutput fragmentMain(VSOutput fsIn)
         ((1.0 - surface.metallness) * brdfLookupSample.z);
                                                                   
     float3 wsSpecularDir = specularDominantDirection(wsNormal, wsView, surface.roughness);
+    float3 indirectSpecular = sampleEnvironment(wsSpecularDir, lightDirection.xyz, surface.roughness);
+    indirectSpecular *= surface.f0 * brdfLookupSample.x + surface.f90 * brdfLookupSample.y;
 
+#if (EnableIridescence)
     BSDF iblBsdf = buildBSDF(wsNormal, wsSpecularDir, wsView);
     float3 fresnelScale = iridescentFresnel(iblBsdf);
-    fresnelScale /= max(fresnelScale.x, max(fresnelScale.y, fresnelScale.z));
+    indirectSpecular *= fresnelScale / max(fresnelScale.x, max(fresnelScale.y, fresnelScale.z));
+#endif
 
-    float3 indirectSpecular = sampleEnvironment(wsSpecularDir, lightDirection.xyz, surface.roughness);
-    indirectSpecular *= fresnelScale * (surface.f0 * brdfLookupSample.x + surface.f90 * brdfLookupSample.y);
-
-    /*
-     * clear coat direct lighting
-     */
+#if (EnableClearCoat)
     Surface ccSurface = buildSurface(float3(1.0, 1.0, 1.0), 0.0, ClearCoatRoughness);
     BSDF ccBSDF = buildBSDF(geometricNormal, wsLight, wsView);
 	float3 ccSpecular = computeDirectSpecular(ccSurface, ccBSDF);
 
-    /*
-     * clear coar ibl lighting
-     */
     float4 ccBrdfLookupSample = brdfLookupTexture.Sample(brdfLookupSampler, float2(ccSurface.roughness, ccBSDF.VdotN));
                                                                   
     wsSpecularDir = specularDominantDirection(geometricNormal, wsView, ccSurface.roughness);
@@ -216,11 +174,16 @@ FSOutput fragmentMain(VSOutput fsIn)
     ccIndirectSpecular *= (ccSurface.f0 * ccBrdfLookupSample.x + ccSurface.f90 * ccBrdfLookupSample.y);
 
     float f0 = (ClearCoatEta - 1.0) / (ClearCoatEta + 1.0);
-    float clearCoatFresnel = ClearCoatScale * fresnel(f0 * f0, 1.0, ccBSDF.VdotN);
+    float clearCoatFresnel = fresnel(f0 * f0, 1.0, ccBSDF.VdotN);
 
     float3 result = 
-    	DirectLightScale * lerp(directDiffuse + directSpecular, ccSpecular, clearCoatFresnel) * shadow * lightColor + 
-    	IBLightScale * lerp(indirectDiffuse + indirectSpecular, ccIndirectSpecular, clearCoatFresnel);
+    	lerp(directDiffuse + directSpecular, ccSpecular, clearCoatFresnel) * shadow * lightColor + 
+    	lerp(indirectDiffuse + indirectSpecular, ccIndirectSpecular, clearCoatFresnel);
+#else
+
+    float3 result = shadow * ((directDiffuse + directSpecular) * lightColor) +  (indirectDiffuse + indirectSpecular);
+
+#endif
 
     // result = fresnelScale;
 

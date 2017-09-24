@@ -146,7 +146,7 @@ void VertexDeclaration::deserialize(std::istream& fIn)
 {
 	clear();
 
-	uint32_t id = deserializeUInt32(fIn);
+	/* uint32_t version = */ deserializeUInt32(fIn);
 	uint32_t elementCount = deserializeUInt32(fIn);
 	for (uint32_t i = 0; i < elementCount; ++i)
 	{

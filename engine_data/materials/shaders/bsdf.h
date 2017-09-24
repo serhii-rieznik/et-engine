@@ -23,6 +23,7 @@ float ggxDistribution(in float NdotH, in float roughnessSquared);
 float ggxMasking(in float VdotN, in float LdotN, in float roughnessSquared);
 float diffuseBurley(in float LdotN, in float VdotN, in float LdotH, in float roughness);
 float fresnel(in float f0, in float f90, in float cosTheta);
+float3 fresnel(in float3 f0, in float3 f90, in float cosTheta);
 float3 iridescentFresnel(in BSDF bsdf);
 
 float3 directDiffuse(in Surface surface, in BSDF bsdf);
@@ -115,7 +116,12 @@ float3 computeDirectSpecular(in Surface surface, in BSDF bsdf)
 {
 	float d = ggxDistribution(bsdf.NdotH, surface.roughnessSquared);
 	float g = ggxMaskingCombined(bsdf.VdotN, bsdf.LdotN, surface.roughnessSquared);
-	return (g * d) * iridescentFresnel(bsdf); // lerp(surface.f0, surface.f90, pow(1.0 - bsdf.LdotH, 5.0));
+
+#if (EnableIridescence)
+	return (g * d) * iridescentFresnel(bsdf);
+#else
+	return (g * d) * fresnel(surface.f0, surface.f90, bsdf.LdotH);
+#endif
 }
 
 float fresnel(in float f0, in float f90, in float cosTheta)
@@ -123,3 +129,7 @@ float fresnel(in float f0, in float f90, in float cosTheta)
 	return f0 + (f90 - f0) * pow(saturate(1.0 - cosTheta), 5.0);
 }
 
+float3 fresnel(in float3 f0, in float3 f90, in float cosTheta)
+{
+	return f0 + (f90 - f0) * pow(saturate(1.0 - cosTheta), 5.0);
+}

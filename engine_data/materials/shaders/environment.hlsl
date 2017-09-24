@@ -52,7 +52,7 @@ FSOutput fragmentMain(VSOutput fsIn)
 	float a = atmosphereIntersection(positionOnPlanet, lightDirection.xyz);
 	sunColor *= outScattering(positionOnPlanet, positionOnPlanet + a * lightDirection.xyz);
 
-	float3 env = sampleEnvironment(v, lightDirection.xyz, 0.05);
+	float3 env = sampleEnvironment(v, lightDirection.xyz, 0.1);
 	// env = sampleAtmosphere(v, lightDirection.xyz, lightColor);
 
 	float4 currentProjectedDirection = mul(float4(v * cameraClipPlanes.y, 1.0), viewProjectionTransform);
@@ -61,7 +61,8 @@ FSOutput fragmentMain(VSOutput fsIn)
 	FSOutput result;
 	result.color = float4(env + sunColor, 1.0);
 
-	result.velocity = currentProjectedDirection.xy / currentProjectedDirection.w - 
+	result.velocity = 
+		currentProjectedDirection.xy / currentProjectedDirection.w - 
 		previousProjectedDirection.xy / previousProjectedDirection.w;
 
 	return result;

@@ -117,7 +117,7 @@ void VertexStorage::serialize(std::ostream& fOut)
 
 void VertexStorage::deserialize(std::istream& fIn)
 {
-	uint32_t id = deserializeUInt32(fIn);
+	/* uint32_t version = */ deserializeUInt32(fIn);
 	_private->decl.deserialize(fIn);
 	
 	uint32_t dataSize = deserializeUInt32(fIn);

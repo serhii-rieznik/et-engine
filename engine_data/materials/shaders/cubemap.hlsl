@@ -90,8 +90,8 @@ float4 fragmentMain(VSOutput fsIn) : SV_Target0
 	float3 tY = cross(n, tX);
 
 	#define samples 2048
-	float roughness = extraParameters.x / 8.0;
-	roughness = max(roughness * roughness, MIN_ROUGHNESS);
+	float roughness = clamp(extraParameters.x / 8.0, MIN_ROUGHNESS, 1.0);
+	roughness = roughness * roughness;
 
 	float cubemapSolidAngle = 4.0 * PI / (6.0 * (extraParameters.y * extraParameters.z));
 

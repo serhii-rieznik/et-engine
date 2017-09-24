@@ -4,6 +4,7 @@
 #include "srgb.h"
 
 #define LuminanceLowerRange 0.001
+#define EnableTemporalAA 0
 
 Texture2D<float4> baseColorTexture : DECL_TEXTURE(BaseColor);
 Texture2D<float4> emissiveColorTexture : DECL_TEXTURE(EmissiveColor);
@@ -111,18 +112,15 @@ float4 fragmentMain(VSOutput fsIn) : SV_Target0
 	float lum = dot(source, float3(0.299, 0.587, 0.114));
 	float exposure = emissiveColorTexture.SampleLevel(emissiveColorSampler, fsIn.texCoord0, 10.0).x;
 	return float4(toneMapping(source, exposure), 1.0);
-	// return float4(source, 1.0);
 
 #elif (TEMPORAL_AA)
 
 	float2 jt = 0.5 * cameraJitter.xy;
 	float2 jp = 0.5 * cameraJitter.zw;
 	float2 tc = fsIn.texCoord0 + jt;
-
 	float2 vel = 0.5 * normalTexture.Sample(normalSampler, tc).xy;
 	float3 source = baseColorTexture.Sample(baseColorSampler, tc).xyz;
 	float3 history = emissiveColorTexture.Sample(emissiveColorSampler, tc - vel - jp).xyz;
-
 	return float4(lerp(source, history, 0.85), 1.0);
 
 #else
