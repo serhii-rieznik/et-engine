@@ -35,18 +35,18 @@ void Program::printReflection() const
 
 	for (const auto& tex : _reflection.textures)
 	{
-		if (!tex.second.textures.empty())
+		if (!tex.textures.empty())
 		{
 			log::info("Vertex textures: { ");
-			for (const auto& pv : tex.second.textures)
+			for (const auto& pv : tex.textures)
 				log::info("\t%s : %u", pv.first.c_str(), pv.second);
 			log::info("}");
 		}
 
-		if (!tex.second.samplers.empty())
+		if (!tex.samplers.empty())
 		{
 			log::info("Vertex samplers: { ");
-			for (const auto& pv : tex.second.samplers)
+			for (const auto& pv : tex.samplers)
 				log::info("\t%s : %u", pv.first.c_str(), pv.second);
 			log::info("}");
 		}
@@ -86,21 +86,21 @@ void Program::Reflection::serialize(std::ostream& file) const
 	serializeUInt32(file, static_cast<uint32_t>(textures.size()));
 	for (const auto& tex : textures)
 	{
-		serializeUInt32(file, static_cast<uint32_t>(tex.first));
-		serializeUInt32(file, static_cast<uint32_t>(tex.second.textures.size()));
-		for (const auto& t : tex.second.textures)
+		serializeUInt32(file, static_cast<uint32_t>(tex.stage));
+		serializeUInt32(file, static_cast<uint32_t>(tex.textures.size()));
+		for (const auto& t : tex.textures)
 		{
 			serializeString(file, t.first);
 			serializeUInt32(file, t.second);
 		}
-		serializeUInt32(file, static_cast<uint32_t>(tex.second.samplers.size()));
-		for (const auto& t : tex.second.samplers)
+		serializeUInt32(file, static_cast<uint32_t>(tex.samplers.size()));
+		for (const auto& t : tex.samplers)
 		{
 			serializeString(file, t.first);
 			serializeUInt32(file, t.second);
 		}
-		serializeUInt32(file, static_cast<uint32_t>(tex.second.images.size()));
-		for (const auto& t : tex.second.images)
+		serializeUInt32(file, static_cast<uint32_t>(tex.images.size()));
+		for (const auto& t : tex.images)
 		{
 			serializeString(file, t.first);
 			serializeUInt32(file, t.second);
@@ -144,28 +144,32 @@ bool Program::Reflection::deserialize(std::istream& file)
 	uint32_t texturesSize = deserializeInt32(file);
 	for (uint32_t i = 0; i < texturesSize; ++i)
 	{
-		ProgramStage stage = static_cast<ProgramStage>(deserializeUInt32(file));
-		TextureSet::ReflectionSet& reflectionSet = textures[stage];
+		textures.emplace_back();
+		TextureSet::ReflectionSet& reflectionSet = textures.back();
+		reflectionSet.stage = static_cast<ProgramStage>(deserializeUInt32(file));
 		
 		uint32_t setSize = deserializeUInt32(file);
 		for (uint32_t s = 0; s < setSize; ++s)
 		{
 			std::string id = deserializeString(file);
-			reflectionSet.textures[id] = deserializeUInt32(file);
+			uint32_t index = deserializeUInt32(file);
+			reflectionSet.textures.emplace_back(id, index);
 		}
 		
 		setSize = deserializeUInt32(file);
 		for (uint32_t s = 0; s < setSize; ++s)
 		{
 			std::string id = deserializeString(file);
-			reflectionSet.samplers[id] = deserializeUInt32(file);
+			uint32_t index = deserializeUInt32(file);
+			reflectionSet.samplers.emplace_back(id, index);
 		}
 		
 		setSize = deserializeUInt32(file);
 		for (uint32_t s = 0; s < setSize; ++s)
 		{
 			std::string id = deserializeString(file);
-			reflectionSet.images[id] = deserializeUInt32(file);
+			uint32_t index = deserializeUInt32(file);
+			reflectionSet.images.emplace_back(id, index);
 		}
 	}
 

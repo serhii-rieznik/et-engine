@@ -28,7 +28,7 @@ public:
 	const VulkanNativeRenderPass& nativeRenderPass() const;
 
 	void begin(const RenderPassBeginInfo&) override;
-	void pushRenderBatch(const RenderBatch::Pointer&) override;
+	void pushRenderBatch(const MaterialInstance::Pointer&, const VertexStream::Pointer&, uint32_t firstIndex, uint32_t indexCount) override;
 	void pushImageBarrier(const Texture::Pointer&, const ResourceBarrier&) override;
 	void copyImage(const Texture::Pointer&, const Texture::Pointer&, const CopyDescriptor&) override;
 	void dispatchCompute(const Compute::Pointer&, const vec3i&) override;
@@ -42,6 +42,7 @@ public:
 	
 	void recordCommandBuffer();
 	uint32_t recordedFrameIndex() const;
+
 
 private:
 	ET_DECLARE_PIMPL(VulkanRenderPass, 384);

@@ -196,7 +196,7 @@ struct OptionalValue
 	}
 
 	template <class T>
-	void operator = (const T& value)
+	void set(const T& value)
 	{
 		static_assert(sizeof(T) <= sizeof(data), "Requested type is too large");
 		*(reinterpret_cast<T*>(data)) = value;
@@ -210,7 +210,7 @@ struct OptionalValue
 		storedType = DataType::max;
 	}
 };
-using VariablesHolder = std::map<uint32_t, OptionalValue>;
+using VariablesHolder = Vector<std::pair<uint32_t, OptionalValue>>;
 
 const std::string& objectVariableToString(ObjectVariable);
 ObjectVariable stringToObjectVariable(const std::string&);

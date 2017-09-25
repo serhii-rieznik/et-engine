@@ -915,7 +915,7 @@ void FBXLoaderPrivate::buildVertexBuffers(s3d::Storage& storage)
 		{
 			for (auto& mc : ci->second)
 			{
-				RenderBatch::Pointer rb = RenderBatch::Pointer::create(mc.material, vStream, mc.startIndex, mc.numIndices);
+				RenderBatch::Pointer rb = _renderer->allocateRenderBatch(mc.material, vStream, mc.startIndex, mc.numIndices);
 				rb->setVertexStorage(i);
 				rb->setIndexArray(storage.indexArray());
 				rb->calculateBoundingBox();

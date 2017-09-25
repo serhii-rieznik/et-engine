@@ -138,7 +138,7 @@ void DebugDrawer::endRenderBatch()
 {
 	if (_batchVertices > 0)
 	{
-		_batches.emplace_back(RenderBatch::Pointer::create(_material->instance(), _linesStream, _firstBatchVertex, _batchVertices));
+		_batches.emplace_back(_renderer->allocateRenderBatch(_material->instance(), _linesStream, _firstBatchVertex, _batchVertices));
 	}
 }
 

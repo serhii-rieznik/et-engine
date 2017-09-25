@@ -185,10 +185,6 @@ FSOutput fragmentMain(VSOutput fsIn)
 
 #endif
 
-    // result = fresnelScale;
-
-    // result = iridescentFresnel(bsdf);
-
     /*
     float3 originPosition = positionOnPlanet + cameraPosition.xyz;
     float3 worldPosition = originPosition - fsIn.toCamera;

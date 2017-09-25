@@ -81,7 +81,7 @@ void ShadowmapProcessor::process(RenderInterface::Pointer& renderer, DrawerOptio
 	_renderables.shadowpass->begin(RenderPassBeginInfo::singlePass());
 	_renderables.shadowpass->pushImageBarrier(_directionalShadowmap, ResourceBarrier(TextureState::DepthRenderTarget));
 	_renderables.shadowpass->nextSubpass();
-	for (Mesh::Pointer mesh : _renderables.meshes)
+	for (Mesh::Pointer& mesh : _renderables.meshes)
 	{
 		const mat4& transform = mesh->transform();
 		const mat4& rotationTransform = mesh->rotationTransform();

@@ -13,26 +13,31 @@
 namespace et
 {
 
-struct VulkanRenderBatch
+struct VulkanRenderCommand
 {
-	VulkanPipelineState::Pointer pipeline;
+	ConstantBufferEntry::Pointer dynamicOffsets[DescriptorSetClass::DynamicDescriptorsCount];
 	VulkanTextureSet::Pointer textureSet;
 	VulkanTextureSet::Pointer imageSet;
-	VulkanBuffer::Pointer vertexBuffer;
-	VulkanBuffer::Pointer indexBuffer;
-	ConstantBufferEntry::Pointer dynamicOffsets[DescriptorSetClass::DynamicDescriptorsCount];
-	VkIndexType indexBufferFormat = VkIndexType::VK_INDEX_TYPE_MAX_ENUM;
-	uint32_t startIndex = InvalidIndex;
-	uint32_t indexCount = InvalidIndex;
-};
+	union {
+		struct {
+			uint32_t startIndex;
+			uint32_t indexCount;
+			int32_t indexBufferFormat;
+		};
+		vec3i dimension;
+	};
 
-struct VulkanComputeStruct
-{
-	VulkanTextureSet::Pointer textureSet;
-	VulkanTextureSet::Pointer imageSet;
-	VulkanCompute::Pointer compute;
-	ConstantBufferEntry::Pointer dynamicOffsets[DescriptorSetClass::DynamicDescriptorsCount];
-	vec3i dimension = vec3i(0);
+	VulkanRenderCommand() {
+	}
+
+	VulkanRenderCommand(const VulkanRenderCommand& r) :
+		textureSet(r.textureSet),
+		imageSet(r.imageSet),
+		dimension(r.dimension)
+	{
+		for (uint32_t i = 0; i < DescriptorSetClass::DynamicDescriptorsCount; ++i)
+			dynamicOffsets[i] = r.dynamicOffsets[i];
+	}
 };
 
 struct VulkanCommand
@@ -50,16 +55,37 @@ struct VulkanCommand
 		Debug,
 	} type = Type::Undefined;
 
-	RenderSubpass subpass;
-	VulkanRenderBatch batch;
-	VulkanComputeStruct compute;
-	ResourceBarrier imageBarrier;
-	CopyDescriptor copyDescriptor;
+	VulkanRenderCommand renderCommand;
+	VulkanPipelineState::Pointer pipeline;
+	VulkanBuffer::Pointer vertexBuffer;
+	VulkanBuffer::Pointer indexBuffer;
+	VulkanCompute::Pointer compute;
 	VulkanTexture::Pointer sourceImage;
 	VulkanTexture::Pointer destImage;
 
+	union
+	{
+		CopyDescriptor copyDescriptor;
+		ResourceBarrier imageBarrier;
+		RenderSubpass subpass;
+		char supportData[std::max({ sizeof(CopyDescriptor), sizeof(ResourceBarrier), sizeof(RenderSubpass) })];
+	};
+
 	VulkanCommand(Type t) :
 		type(t) { }
+
+	VulkanCommand(const VulkanCommand& r) :
+		type(r.type),
+		renderCommand(r.renderCommand),
+		pipeline(r.pipeline),
+		vertexBuffer(r.vertexBuffer),
+		indexBuffer(r.indexBuffer),
+		compute(r.compute),
+		sourceImage(r.sourceImage),
+		destImage(r.destImage) 
+	{
+		memcpy(supportData, r.supportData, sizeof(supportData));
+	}
 
 	VulkanCommand(const RenderSubpass& sp) :
 		type(Type::BeginRenderPass), subpass(sp) { }
@@ -70,7 +96,6 @@ struct VulkanCommand
 	VulkanCommand(const Texture::Pointer& texFrom, const Texture::Pointer& texTo, const CopyDescriptor& desc) :
 		type(Type::CopyImage), sourceImage(texFrom), destImage(texTo), copyDescriptor(desc) { }
 
-	VulkanCommand(const VulkanCommand&) = default;
 	VulkanCommand(VulkanCommand&&) = default;
 	~VulkanCommand() = default;
 };
@@ -100,6 +125,7 @@ public:
 	VulkanRenderer* renderer = nullptr;
 
 	std::array<Vector<VulkanCommand>, RendererFrameCount> commands;
+
 	Vector<VkClearValue> clearValues;
 	Map<uint64_t, VulkanRenderSubpass> subpasses;
 	Vector<VulkanRenderSubpass> subpassSequence;
@@ -396,15 +422,14 @@ void VulkanRenderPass::nextSubpass()
 	}
 }
 
-void VulkanRenderPass::pushRenderBatch(const RenderBatch::Pointer& inBatch)
+
+void VulkanRenderPass::pushRenderBatch(const MaterialInstance::Pointer& inMaterial, const VertexStream::Pointer& vertexStream, uint32_t firstIndex, uint32_t indexCount)
 {
 	ET_ASSERT(_private->recording);
 
-	retain();
-	MaterialInstance::Pointer material = inBatch->material();
-	VulkanProgram::Pointer program = inBatch->material()->configuration(info().name).program;
-	VulkanPipelineState::Pointer pipelineState = _private->renderer->acquireGraphicsPipeline(VulkanRenderPass::Pointer(this), material, inBatch->vertexStream());
-	release();
+	InstusivePointerScope<VulkanRenderPass> scope(this);
+	VulkanProgram::Pointer program = inMaterial->configuration(info().name).program;
+	VulkanPipelineState::Pointer pipelineState = _private->renderer->acquireGraphicsPipeline(VulkanRenderPass::Pointer(this), inMaterial->base(), vertexStream);
 
 	if (pipelineState->nativePipeline().pipeline == nullptr)
 		return;
@@ -419,11 +444,12 @@ void VulkanRenderPass::pushRenderBatch(const RenderBatch::Pointer& inBatch)
 		{
 			const Program::Variable& var = program->reflection().objectVariables[v.first];
 			
-			if (v.second.isSet() && var.enabled)
+			if (var.enabled && v.second.isSet())
 				memcpy(objectVariables->data() + var.offset, v.second.data, v.second.size);
 		}
 	}
 
+	MaterialInstance::Pointer material = inMaterial;
 	for (const auto& sh : sharedTextures())
 	{
 		material->setTexture(sh.first, sh.second.first);
@@ -432,17 +458,18 @@ void VulkanRenderPass::pushRenderBatch(const RenderBatch::Pointer& inBatch)
 
 	_private->commands[_private->frameIndex].emplace_back(VulkanCommand::Type::RenderBatch);
 
-	VulkanRenderBatch& batch = _private->commands[_private->frameIndex].back().batch;
-	batch.textureSet = material->textureSet(info().name);
-	batch.imageSet = material->imageSet(info().name);
-	batch.dynamicOffsets[0] = objectVariables;
-	batch.dynamicOffsets[1] = material->constantBufferData(info().name);
-	batch.vertexBuffer = inBatch->vertexStream()->vertexBuffer();
-	batch.indexBuffer = inBatch->vertexStream()->indexBuffer();
-	batch.indexBufferFormat = vulkan::indexBufferFormat(inBatch->vertexStream()->indexArrayFormat());
-	batch.startIndex = inBatch->firstIndex();
-	batch.indexCount = inBatch->numIndexes();
-	batch.pipeline = pipelineState;
+	VulkanCommand& command = _private->commands[_private->frameIndex].back();
+	command.renderCommand.textureSet = material->textureSet(info().name);
+	command.renderCommand.imageSet = material->imageSet(info().name);
+	command.renderCommand.dynamicOffsets[0] = objectVariables;
+	command.renderCommand.dynamicOffsets[1] = material->constantBufferData(info().name);
+	command.renderCommand.indexBufferFormat = vulkan::indexBufferFormat(vertexStream->indexArrayFormat());
+	command.renderCommand.startIndex = firstIndex;
+	command.renderCommand.indexCount = indexCount;
+
+	command.vertexBuffer = vertexStream->vertexBuffer();
+	command.indexBuffer = vertexStream->indexBuffer();
+	command.pipeline = pipelineState;
 }
 
 void VulkanRenderPass::pushImageBarrier(const Texture::Pointer& tex, const ResourceBarrier& barrier)
@@ -533,38 +560,37 @@ void VulkanRenderPass::recordCommandBuffer()
 		{
 			ET_ASSERT(renderPassStarted);
 
-			const VulkanRenderBatch& batch = cmd.batch;
-			if (batch.pipeline->nativePipeline().pipeline != lastPipeline)
+			if (cmd.pipeline->nativePipeline().pipeline != lastPipeline)
 			{
-				lastPipeline = batch.pipeline->nativePipeline().pipeline;
+				lastPipeline = cmd.pipeline->nativePipeline().pipeline;
 				vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, lastPipeline);
 			}
-			if (batch.vertexBuffer->nativeBuffer().buffer != lastVertexBuffer)
+			if (cmd.vertexBuffer->nativeBuffer().buffer != lastVertexBuffer)
 			{
 				VkDeviceSize nullOffset = 0;
-				lastVertexBuffer = batch.vertexBuffer->nativeBuffer().buffer;
+				lastVertexBuffer = cmd.vertexBuffer->nativeBuffer().buffer;
 				vkCmdBindVertexBuffers(commandBuffer, 0, 1, &lastVertexBuffer, &nullOffset);
 			}
-			if ((batch.indexBuffer->nativeBuffer().buffer != lastIndexBuffer) || (batch.indexBufferFormat != lastIndexType))
+			if ((cmd.indexBuffer->nativeBuffer().buffer != lastIndexBuffer) || (cmd.renderCommand.indexBufferFormat != lastIndexType))
 			{
-				lastIndexBuffer = batch.indexBuffer->nativeBuffer().buffer;
-				lastIndexType = batch.indexBufferFormat;
+				lastIndexBuffer = cmd.indexBuffer->nativeBuffer().buffer;
+				lastIndexType = static_cast<VkIndexType>(cmd.renderCommand.indexBufferFormat);
 				vkCmdBindIndexBuffer(commandBuffer, lastIndexBuffer, 0, lastIndexType);
 			}
 
-			descriptorSets[DescriptorSetClass::Textures] = batch.textureSet->nativeSet().descriptorSet;
-			descriptorSets[DescriptorSetClass::Images] = batch.imageSet->nativeSet().descriptorSet;
+			descriptorSets[DescriptorSetClass::Textures] = cmd.renderCommand.textureSet->nativeSet().descriptorSet;
+			descriptorSets[DescriptorSetClass::Images] = cmd.renderCommand.imageSet->nativeSet().descriptorSet;
 
 			for (uint32_t i = 0, e = DescriptorSetClass::DynamicDescriptorsCount; i < e; ++i)
 			{
-				if (batch.dynamicOffsets[i].valid())
-					dynamicOffsets[i] = batch.dynamicOffsets[i]->offset();
+				if (cmd.renderCommand.dynamicOffsets[i].valid())
+					dynamicOffsets[i] = cmd.renderCommand.dynamicOffsets[i]->offset();
 			}
 
-			vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, batch.pipeline->nativePipeline().layout, 0,
+			vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, cmd.pipeline->nativePipeline().layout, 0,
 				DescriptorSetClass_Count, descriptorSets, DescriptorSetClass::DynamicDescriptorsCount, dynamicOffsets);
 
-			vkCmdDrawIndexed(commandBuffer, batch.indexCount, 1, batch.startIndex, 0, 0);
+			vkCmdDrawIndexed(commandBuffer, cmd.renderCommand.indexCount, 1, cmd.renderCommand.startIndex, 0, 0);
 			break;
 		}
 		
@@ -617,27 +643,27 @@ void VulkanRenderPass::recordCommandBuffer()
 		
 		case VulkanCommand::Type::DispatchCompute:
 		{
-			if (cmd.compute.compute->nativeCompute().pipeline != lastPipeline)
+			if (cmd.compute->nativeCompute().pipeline != lastPipeline)
 			{
-				lastPipeline = cmd.compute.compute->nativeCompute().pipeline;
+				lastPipeline = cmd.compute->nativeCompute().pipeline;
 				vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, lastPipeline);
 			}
 
-			descriptorSets[DescriptorSetClass::Textures] = cmd.compute.textureSet->nativeSet().descriptorSet;
-			descriptorSets[DescriptorSetClass::Images] = cmd.compute.imageSet->nativeSet().descriptorSet;
+			descriptorSets[DescriptorSetClass::Textures] = cmd.renderCommand.textureSet->nativeSet().descriptorSet;
+			descriptorSets[DescriptorSetClass::Images] = cmd.renderCommand.imageSet->nativeSet().descriptorSet;
 
 			for (uint32_t i = 0, e = DescriptorSetClass::DynamicDescriptorsCount; i < e; ++i)
 			{
-				if (cmd.compute.dynamicOffsets[i].valid())
-					dynamicOffsets[i] = cmd.compute.dynamicOffsets[i]->offset();
+				if (cmd.renderCommand.dynamicOffsets[i].valid())
+					dynamicOffsets[i] = cmd.renderCommand.dynamicOffsets[i]->offset();
 			}
 
-			vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, cmd.compute.compute->nativeCompute().layout,
+			vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, cmd.compute->nativeCompute().layout,
 				0, DescriptorSetClass_Count, descriptorSets, DescriptorSetClass::DynamicDescriptorsCount, dynamicOffsets);
 
-			uint32_t tx = static_cast<uint32_t>(cmd.compute.dimension.x);
-			uint32_t ty = static_cast<uint32_t>(cmd.compute.dimension.y);
-			uint32_t tz = static_cast<uint32_t>(cmd.compute.dimension.z);
+			uint32_t tx = static_cast<uint32_t>(cmd.renderCommand.dimension.x);
+			uint32_t ty = static_cast<uint32_t>(cmd.renderCommand.dimension.y);
+			uint32_t tz = static_cast<uint32_t>(cmd.renderCommand.dimension.z);
 			vkCmdDispatch(commandBuffer, tx, ty, tz);
 			break;
 		}
@@ -724,19 +750,19 @@ void VulkanRenderPass::dispatchCompute(const Compute::Pointer& compute, const ve
 		{
 			const Program::Variable& var = program->reflection().objectVariables[v.first];
 
-			if (v.second.isSet() && var.enabled)
+			if (var.enabled && v.second.isSet())
 				memcpy(objectVariables->data() + var.offset, v.second.data, v.second.size);
 		}
 	}
 
 	_private->commands[_private->frameIndex].emplace_back(VulkanCommand::Type::DispatchCompute);
-	VulkanComputeStruct& cs = _private->commands[_private->frameIndex].back().compute;
+	VulkanCommand& cs = _private->commands[_private->frameIndex].back();
+	cs.renderCommand.textureSet = material->textureSet(info().name);
+	cs.renderCommand.imageSet = material->imageSet(info().name);
+	cs.renderCommand.dimension = dim;
+	cs.renderCommand.dynamicOffsets[0] = objectVariables;
+	cs.renderCommand.dynamicOffsets[1] = material->constantBufferData(info().name);
 	cs.compute = vulkanCompute;
-	cs.textureSet = material->textureSet(info().name);
-	cs.imageSet = material->imageSet(info().name);
-	cs.dimension = dim;
-	cs.dynamicOffsets[0] = objectVariables;
-	cs.dynamicOffsets[1] = material->constantBufferData(info().name);
 }
 
 bool VulkanRenderPass::fillStatistics(uint64_t* buffer, RenderPassStatistics& stat)

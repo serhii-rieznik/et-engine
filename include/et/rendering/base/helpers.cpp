@@ -17,17 +17,18 @@ namespace renderhelper
 
 namespace rh_local
 {
-	Material::Pointer texturedMaterial;
-	VertexStream::Pointer default2DPlane;
+RenderContext* renderContext = nullptr;
+Material::Pointer texturedMaterial;
+VertexStream::Pointer default2DPlane;
 }
 
 void init(RenderContext* rc)
 {
 	ET_ASSERT(rh_local::default2DPlane.invalid());
 
-	IndexArray::Pointer ia = IndexArray::Pointer::create(IndexArrayFormat::Format_16bit, 4, PrimitiveType::TriangleStrips);
-
-	auto vd = VertexDeclaration(false, VertexAttributeUsage::Position, DataType::Vec3);
+	rh_local::renderContext = rc;
+	
+	VertexDeclaration vd(false, VertexAttributeUsage::Position, DataType::Vec3);
 	vd.push_back(VertexAttributeUsage::TexCoord0, et::DataType::Vec2);
 	VertexStorage::Pointer vs = VertexStorage::Pointer::create(vd, 4);
 
@@ -37,6 +38,8 @@ void init(RenderContext* rc)
 	pos[1] = vec3( 1.0f, -1.0f, 0.0f); tc0[1] = vec2(1.0f, 0.0f);
 	pos[2] = vec3(-1.0f,  1.0f, 0.0f); tc0[2] = vec2(0.0f, 1.0f);
 	pos[3] = vec3( 1.0f,  1.0f, 0.0f); tc0[3] = vec2(1.0f, 1.0f);
+	
+	IndexArray::Pointer ia = IndexArray::Pointer::create(IndexArrayFormat::Format_16bit, 4, PrimitiveType::TriangleStrips);
 	ia->linearize(4);
 
 	auto vb = rc->renderer()->createVertexBuffer("rh_local::vb", vs, Buffer::Location::Device);
@@ -66,10 +69,13 @@ RenderBatch::Pointer createFullscreenRenderBatch(const Texture::Pointer& texture
 	if (mat.invalid())
 		mat = rh_local::texturedMaterial;
 
-	MaterialInstance::Pointer materialInstance = mat->instance();
-	materialInstance->setTexture(MaterialTexture::BaseColor,  texture);
-	
-	return RenderBatch::Pointer::create(materialInstance, rh_local::default2DPlane, 0, rh_local::default2DPlane->vertexCount());
+	RenderBatch::Pointer batch = rh_local::renderContext->renderer()->allocateRenderBatch();
+	{
+		MaterialInstance::Pointer materialInstance = mat->instance();
+		materialInstance->setTexture(MaterialTexture::BaseColor, texture);
+		batch->construct(materialInstance, rh_local::default2DPlane, 0, rh_local::default2DPlane->vertexCount());
+	}
+	return batch;
 }
 
 RenderBatch::Pointer createFullscreenRenderBatch(const Texture::Pointer& tex, const Material::Pointer& mat, const Sampler::Pointer& smp)

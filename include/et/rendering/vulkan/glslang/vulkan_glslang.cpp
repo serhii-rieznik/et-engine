@@ -324,9 +324,29 @@ void buildProgramReflection(const glslang::TProgram& program, Program::Reflectio
 		}
 	}
 
-	auto& textureSet = reflection.textures[stage].textures;
-	auto& samplerSet = reflection.textures[stage].samplers;
-	auto& imageSet = reflection.textures[stage].images;
+	uint32_t reflectionTextureSetIndex = InvalidIndex;
+	uint32_t i = 0;
+	for (auto& tex : reflection.textures)
+	{
+		if (tex.stage == stage)
+		{
+			reflectionTextureSetIndex = i;
+			break;
+		}
+		++i;
+	}
+
+	if (reflectionTextureSetIndex == InvalidIndex)
+	{
+		reflectionTextureSetIndex = static_cast<uint32_t>(reflection.textures.size());
+		reflection.textures.emplace_back();
+		reflection.textures.back().stage = stage;
+	}
+
+	TextureSet::ReflectionSet& reflectionTextures = reflection.textures.at(reflectionTextureSetIndex);
+	auto& textureSet = reflectionTextures.textures;
+	auto& samplerSet = reflectionTextures.samplers;
+	auto& imageSet = reflectionTextures.images;
 
 	int uniforms = program.getNumLiveUniformVariables();
 	for (int u = 0; u < uniforms; ++u)
@@ -347,18 +367,18 @@ void buildProgramReflection(const glslang::TProgram& program, Program::Reflectio
 				if (sampler.isImage())
 				{
 					ET_ASSERT(qualifier.layoutBinding < StorageBuffer_max);
-					imageSet.emplace(uniformName, qualifier.layoutBinding);
+					imageSet.emplace_back(uniformName, qualifier.layoutBinding);
 				}
 				else if (sampler.isTexture())
 				{
 					ET_ASSERT(qualifier.layoutBinding < MaterialTexture_max);
-					textureSet.emplace(uniformName, qualifier.layoutBinding);
+					textureSet.emplace_back(uniformName, qualifier.layoutBinding);
 				}
 				else if (sampler.isPureSampler())
 				{
 					ET_ASSERT(qualifier.layoutBinding >= MaterialSamplerBindingOffset);
 					ET_ASSERT(qualifier.layoutBinding < MaterialTexture_max + MaterialSamplerBindingOffset);
-					samplerSet.emplace(uniformName, qualifier.layoutBinding);
+					samplerSet.emplace_back(uniformName, qualifier.layoutBinding);
 				}
 				else
 				{

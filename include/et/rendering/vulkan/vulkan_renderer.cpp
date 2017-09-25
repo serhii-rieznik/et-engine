@@ -21,7 +21,7 @@
 #include <et/app/application.h>
 
 #if (ET_DEBUG)
-#	define VULKAN_ENABLE_VALIDATION 1
+#	define VULKAN_ENABLE_VALIDATION 0
 #else
 #	define VULKAN_ENABLE_VALIDATION 0
 #endif
@@ -318,6 +318,7 @@ PipelineState::Pointer VulkanRenderer::acquireGraphicsPipeline(const RenderPass:
 	const VertexStream::Pointer& vs)
 {
 	ET_ASSERT(mat->pipelineClass() == PipelineClass::Graphics);
+	ET_ASSERT(mat->isInstance() == false);
 
 	const std::string& cls = pass->info().name;
 	const Material::Configuration& config = mat->configuration(cls);

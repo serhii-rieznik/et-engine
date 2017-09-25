@@ -66,6 +66,8 @@ public:
 
 	PipelineClass pipelineClass() const { return _pipelineClass; }
 
+	virtual bool isInstance() const { return false; }
+
 private:
 	friend class MaterialInstance;
 
@@ -88,7 +90,6 @@ private:
 	virtual void invalidateImageSet();
 	virtual void invalidateTextureSet();
 	virtual void invalidateConstantBuffer();
-	virtual bool isInstance() const { return false; }
 
 protected: // overrided / read by instanaces
 	TexturesHolder textures;
@@ -99,9 +100,11 @@ protected: // overrided / read by instanaces
 private: // permanent private data
 	static std::string _shaderDefaultHeader;
 	RenderInterface* _renderer = nullptr;
-	MaterialInstanceCollection _instances;
+	MaterialInstanceCollection _activeInstances;
+	MaterialInstanceCollection _instancesPool;
 	ConfigurationMap _configurations;
 	PipelineClass _pipelineClass = PipelineClass::Graphics;
+	uint32_t _instancesCounter = 0;
 };
 
 class MaterialInstance : public Material
@@ -157,7 +160,9 @@ template <class T>
 inline T Material::getParameter(MaterialVariable p) const
 {
 	uint32_t pIndex = static_cast<uint32_t>(p);
-	auto i = properties.find(pIndex);
+	auto i = std::find_if(properties.begin(), properties.end(), [pIndex](const VariablesHolder::value_type& t) {
+		return t.first == pIndex;
+	});
 	return ((i != properties.end()) && i->second.is<T>()) ? i->second.as<T>() : T();
 }
 

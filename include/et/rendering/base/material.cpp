@@ -24,6 +24,8 @@ std::string Material::_shaderDefaultHeader;
 Material::Material(RenderInterface* ren)
 	: _renderer(ren)
 {
+	_activeInstances.reserve(8);
+	_instancesPool.reserve(8);
 	initDefaultHeader();
 }
 
@@ -77,15 +79,45 @@ void Material::setTextureWithSampler(MaterialTexture t, const Texture::Pointer& 
 
 void Material::setVector(MaterialVariable p, const vec4& v)
 {
-	properties[static_cast<uint32_t>(p)] = v;
-	properties[static_cast<uint32_t>(p)].binding = static_cast<uint32_t>(p);
+	uint32_t ip = static_cast<uint32_t>(p);
+
+	auto i = std::find_if(properties.begin(), properties.end(), [ip](const VariablesHolder::value_type& t) {
+		return t.first == ip;
+	});
+	
+	if (i == properties.end())
+	{
+		properties.emplace_back(ip, OptionalValue());
+		properties.back().second.set(v);
+		properties.back().second.binding = ip;
+	}
+	else
+	{
+		i->second.set(v);
+		i->second.binding = ip;
+	}
 	invalidateConstantBuffer();
 }
 
 void Material::setFloat(MaterialVariable p, float f)
 {
-	properties[static_cast<uint32_t>(p)] = f;
-	properties[static_cast<uint32_t>(p)].binding = static_cast<uint32_t>(p);
+	uint32_t ip = static_cast<uint32_t>(p);
+
+	auto i = std::find_if(properties.begin(), properties.end(), [ip](const VariablesHolder::value_type& t) {
+		return t.first == ip;
+	});
+	
+	if (i == properties.end())
+	{
+		properties.emplace_back(ip, OptionalValue());
+		properties.back().second.set(f);
+		properties.back().second.binding = ip;
+	}
+	else
+	{
+		i->second.set(f);
+		i->second.binding = ip;
+	}
 	invalidateConstantBuffer();
 }
 
@@ -309,51 +341,67 @@ MaterialInstancePointer Material::instance()
 {
 	flushInstances();
 
-	retain();
-	MaterialInstance::Pointer result = MaterialInstance::Pointer::create(Material::Pointer(this));
-	release();
+	MaterialInstance::Pointer result;
+	if (_instancesPool.empty())
+	{
+		InstusivePointerScope<Material> pointerScope(this);
+		result = MaterialInstance::Pointer::create(Material::Pointer(this));
+	}
+	else
+	{
+		result = _instancesPool.back();
+		_instancesPool.pop_back();
+	}
 
-	result->setName(name() + "-Instance" + intToStr(_instances.size()));
+	result->setName(name() + "-Instance" + intToStr(_instancesCounter++));
 	result->textures = textures;
 	result->samplers = samplers;
 	result->properties = properties;
-	_instances.emplace_back(result);
+	
+	_activeInstances.emplace_back(result);
 	return result;
 }
 
 const MaterialInstanceCollection& Material::instances() const
 {
-	return _instances;
+	return _activeInstances;
 }
 
 void Material::flushInstances()
 {
-	auto i = std::remove_if(_instances.begin(), _instances.end(), [](const MaterialInstance::Pointer& inst) {
+	auto i = std::remove_if(_activeInstances.begin(), _activeInstances.end(), [](const MaterialInstance::Pointer& inst) {
 		return inst->retainCount() == 1;
 	});
-	_instances.erase(i, _instances.end());
+	
+	if (i != _activeInstances.end())
+	{
+		_instancesPool.insert(_instancesPool.end(), i, _activeInstances.end());
+		_activeInstances.erase(i, _activeInstances.end());
+	}
 }
 
 void Material::releaseInstances()
 {
-	_instances.clear();
+	_activeInstances.clear();
+	_instancesPool.clear();
+
 }
 
 void Material::invalidateTextureSet()
 {
-	for (MaterialInstance::Pointer& i : _instances)
+	for (MaterialInstance::Pointer& i : _activeInstances)
 		i->invalidateTextureSet();
 }
 
 void Material::invalidateImageSet()
 {
-	for (MaterialInstance::Pointer& i : _instances)
+	for (MaterialInstance::Pointer& i : _activeInstances)
 		i->invalidateImageSet();
 }
 
 void Material::invalidateConstantBuffer()
 {
-	for (MaterialInstance::Pointer& i : _instances)
+	for (MaterialInstance::Pointer& i : _activeInstances)
 		i->invalidateConstantBuffer();
 }
 
@@ -385,16 +433,19 @@ void MaterialInstance::buildTextureSet(const std::string& pt)
 	const Program::Reflection& reflection = configuration(pt).program->reflection();
 
 	TextureSet::Description description;
-	for (const auto& ref : reflection.textures)
+	for (const TextureSet::ReflectionSet& ref : reflection.textures)
 	{
-		for (const auto& r : ref.second.textures)
+		TextureSet::DescriptionSet& desc = description[ref.stage];
+
+		for (const auto& r : ref.textures)
 		{
 			const Texture::Pointer& baseTexture = base()->textures[r.second].object;
-			const Texture::Pointer& ownTexture = textures[r.second].object;
 			const ResourceRange& baseRange = base()->textures[r.second].range;
+			
+			const Texture::Pointer& ownTexture = textures[r.second].object;
 			const ResourceRange& ownRange = textures[r.second].range;
 
-			TextureSet::TextureBinding& descriptionTexture = description[ref.first].textures[static_cast<MaterialTexture>(r.second)];
+			TextureSet::TextureBinding& descriptionTexture = desc.textures[static_cast<MaterialTexture>(r.second)];
 			descriptionTexture.image = ownTexture.valid() ? ownTexture : baseTexture;
 			descriptionTexture.range = ownTexture.valid() ? ownRange : baseRange;
 			if (descriptionTexture.image.invalid())
@@ -403,19 +454,21 @@ void MaterialInstance::buildTextureSet(const std::string& pt)
 				descriptionTexture.range = ResourceRange::whole;
 			}
 		}
-		for (const auto& r : ref.second.samplers)
+		
+		for (const auto& r : ref.samplers)
 		{
 			const Sampler::Pointer& baseSampler = base()->samplers[r.second].object;
 			const Sampler::Pointer& ownSampler = samplers[r.second].object;
-			Sampler::Pointer& descriptionSampler = description[ref.first].samplers[static_cast<MaterialTexture>(r.second - MaterialSamplerBindingOffset)];
+			Sampler::Pointer& descriptionSampler = desc.samplers[static_cast<MaterialTexture>(r.second - MaterialSamplerBindingOffset)];
 			descriptionSampler = ownSampler.valid() ? ownSampler : baseSampler;
 			if (descriptionSampler.invalid())
 				descriptionSampler = _renderer->defaultSampler();
 		}
 	}
 
-	_textureSets[pt].obj = _renderer->createTextureSet(description);
-	_textureSets[pt].valid = true;
+	Holder<TextureSet::Pointer>& holder = _textureSets[pt];
+	holder.obj = _renderer->createTextureSet(description);
+	holder.valid = true;
 }
 
 void MaterialInstance::buildImageSet(const std::string& pt)
@@ -427,11 +480,11 @@ void MaterialInstance::buildImageSet(const std::string& pt)
 	TextureSet::Description description;
 	for (const auto& ref : reflection.textures)
 	{
-		for (const auto& r : ref.second.images)
+		for (const auto& r : ref.images)
 		{
 			const Texture::Pointer& baseImage = base()->images[r.second].object;
 			const Texture::Pointer& ownImage = images[r.second].object;
-			Texture::Pointer& descriptionImage = description[ref.first].images[static_cast<StorageBuffer>(r.second)];
+			Texture::Pointer& descriptionImage = description[ref.stage].images[static_cast<StorageBuffer>(r.second)];
 
 			descriptionImage = ownImage.valid() ? ownImage : baseImage;
 			if (descriptionImage.invalid())
@@ -547,10 +600,9 @@ void MaterialInstance::deserialize(std::istream&)
 
 void Material::initDefaultHeader()
 {
-	if (_shaderDefaultHeader.empty())
-	{
+	if (!_shaderDefaultHeader.empty()) return;
 
-		_shaderDefaultHeader = R"(
+	_shaderDefaultHeader = R"(
 #define VariablesSetIndex 0
 #define TexturesSetIndex 1
 #define StorageSetIndex 2
@@ -560,32 +612,32 @@ void Material::initDefaultHeader()
 #define INV_PI 0.3183098862
 )";
 
-		int printPos = 0;
-		char buffer[2048] = { };
-		for (uint32_t i = static_cast<uint32_t>(MaterialTexture::FirstMaterialTexture); i < MaterialTexture_max; ++i)
-		{
-			std::string texName = materialTextureToString(static_cast<MaterialTexture>(i));
-			std::string smpName = materialSamplerToString(static_cast<MaterialTexture>(i));
-			texName[0] = static_cast<char>(toupper(texName[0]));
-			smpName[0] = static_cast<char>(toupper(smpName[0]));
-			printPos += sprintf(buffer + printPos, "#define %sBinding %u\n#define %sBinding %u\n",
-				texName.c_str(), i, smpName.c_str(), i + MaterialSamplerBindingOffset);
-		}
-		for (uint32_t i = static_cast<uint32_t>(StorageBuffer::StorageBuffer0); i < StorageBuffer_max; ++i)
-		{
-			std::string name = storageBufferToString(static_cast<StorageBuffer>(i));
-			name[0] = static_cast<char>(toupper(name[0]));
-			printPos += sprintf(buffer + printPos, "#define %sBinding %u\n", name.c_str(), i);
-		}
+	int32_t printPos = 0;
+	char buffer[2048] = { };
+	for (uint32_t i = static_cast<uint32_t>(MaterialTexture::FirstMaterialTexture); i < MaterialTexture_max; ++i)
+	{
+		std::string texName = materialTextureToString(static_cast<MaterialTexture>(i));
+		std::string smpName = materialSamplerToString(static_cast<MaterialTexture>(i));
+		texName[0] = static_cast<char>(toupper(texName[0]));
+		smpName[0] = static_cast<char>(toupper(smpName[0]));
+		printPos += sprintf(buffer + printPos, "#define %sBinding %u\n#define %sBinding %u\n",
+			texName.c_str(), i, smpName.c_str(), i + MaterialSamplerBindingOffset);
+	}
+	for (uint32_t i = static_cast<uint32_t>(StorageBuffer::StorageBuffer0); i < StorageBuffer_max; ++i)
+	{
+		std::string name = storageBufferToString(static_cast<StorageBuffer>(i));
+		name[0] = static_cast<char>(toupper(name[0]));
+		printPos += sprintf(buffer + printPos, "#define %sBinding %u\n", name.c_str(), i);
+	}
 
-		printPos += sprintf(buffer + printPos,
-			"#define ObjectVariablesBufferIndex %u\n"
-			"#define MaterialVariablesBufferIndex %u\n",
-			ObjectVariablesBufferIndex, MaterialVariablesBufferIndex);
+	printPos += sprintf(buffer + printPos,
+		"#define ObjectVariablesBufferIndex %u\n"
+		"#define MaterialVariablesBufferIndex %u\n",
+		ObjectVariablesBufferIndex, MaterialVariablesBufferIndex);
 
-		_shaderDefaultHeader += buffer;
+	_shaderDefaultHeader += buffer;
 
-		_shaderDefaultHeader += R"(
+	_shaderDefaultHeader += R"(
 #define CONSTANT_LOCATION_IMPL(name, registerName, spaceName) register(name##registerName, space##spaceName)
 #define CONSTANT_LOCATION(name, register, space)              CONSTANT_LOCATION_IMPL(name, register, space)
 #define DECL_BUFFER(name)                                     CONSTANT_LOCATION(b, name##VariablesBufferIndex, VariablesSetIndex)
@@ -593,8 +645,6 @@ void Material::initDefaultHeader()
 #define DECL_SAMPLER(name)                                    CONSTANT_LOCATION(s, name##SamplerBinding, TexturesSetIndex)
 #define DECL_STORAGE(name)                                    CONSTANT_LOCATION(u, name##Binding, StorageSetIndex)
 )";
-	}
 }
-;
 
 }

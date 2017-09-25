@@ -17,7 +17,7 @@ public:
 	Buffer::Pointer buffer;
 	BinaryDataStorage heapInfo;
 	BinaryDataStorage localData;
-	List<ConstantBufferEntry::Pointer> allocations;
+	Vector<ConstantBufferEntry::Pointer> allocations;
 	uint32_t allowedAllocations = 0;
 	bool modified = false;
 

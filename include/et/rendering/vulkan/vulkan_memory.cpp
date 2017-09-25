@@ -16,7 +16,7 @@ class VulkanMemoryAllocatorPrivate
 public:
 	enum : uint64_t
 	{
-		PageSize = 32 * 1024 * 1024,
+		PageSize = 64 * 1024 * 1024,
 		PageIndexShift = 56,
 		Alignment = 1024,
 	};

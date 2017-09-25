@@ -88,7 +88,7 @@ public:
 	virtual ~RenderPass();
 
 	virtual void begin(const RenderPassBeginInfo& info) = 0;
-	virtual void pushRenderBatch(const RenderBatch::Pointer&) = 0;
+	virtual void pushRenderBatch(const MaterialInstance::Pointer&, const VertexStream::Pointer&, uint32_t firstIndex, uint32_t indexCount) = 0;
 	virtual void pushImageBarrier(const Texture::Pointer&, const ResourceBarrier&) = 0;
 	virtual void copyImage(const Texture::Pointer&, const Texture::Pointer&, const CopyDescriptor&) = 0;
 	virtual void dispatchCompute(const Compute::Pointer&, const vec3i&) = 0;
@@ -115,6 +115,10 @@ public:
 
 	static ConstructionInfo renderTargetPassInfo(const std::string& name, const Texture::Pointer&);
 
+	void pushRenderBatch(const RenderBatch::Pointer& inBatch) {
+		pushRenderBatch(inBatch->material(), inBatch->vertexStream(), inBatch->firstIndex(), inBatch->numIndexes());
+	}
+
 protected:
 	using SharedTexturesSet = std::map<MaterialTexture, std::pair<Texture::Pointer, Sampler::Pointer>>;
 	const SharedTexturesSet& sharedTextures() const { return _sharedTextures; }
@@ -129,18 +133,35 @@ private:
 template <class T>
 inline void RenderPass::setSharedVariable(ObjectVariable var, const T& value)
 {
-	_sharedVariables[static_cast<uint32_t>(var)] = value;
+	uint32_t ivar = static_cast<uint32_t>(var);
+
+	for (auto& v : _sharedVariables)
+	{
+		if (v.first == ivar)
+		{
+			v.second.set(value);
+			return;
+		}
+	}
+
+	_sharedVariables.emplace_back(static_cast<uint32_t>(var), OptionalValue());
+	_sharedVariables.back().second.set(value);
 }
 
 template <class T>
 inline bool RenderPass::loadSharedVariable(ObjectVariable var, T& value)
 {
-	bool available = _sharedVariables[static_cast<uint32_t>(var)].isSet();
-	if (available)
+	uint32_t ivar = static_cast<uint32_t>(var);
+	
+	for (const auto& v : _sharedVariables)
 	{
-		value = _sharedVariables[static_cast<uint32_t>(var)].as<T>();
+		if (v.first == ivar)
+		{
+			value = v.second.as<T>();
+			return true;
+		}
 	}
-	return available;
+	return false;
 }
 
 }

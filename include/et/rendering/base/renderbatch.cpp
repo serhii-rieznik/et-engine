@@ -18,6 +18,25 @@ RenderBatch::RenderBatch(const MaterialInstance::Pointer& m, const VertexStream:
 {
 }
 
+void RenderBatch::construct(const MaterialInstance::Pointer& m, const VertexStream::Pointer& vs, uint32_t firstIndex, uint32_t indexCount)
+{
+	_material = m;
+	_vertexStream = vs;
+	_firstIndex = firstIndex;
+	_numIndexes = indexCount;
+}
+
+void RenderBatch::clear()
+{
+	_material.reset(nullptr);
+	_vertexStream.reset(nullptr);
+	_vertexStorage.reset(nullptr);
+	_indexArray.reset(nullptr);
+	_boundingBox = {};
+	_firstIndex = 0;
+	_numIndexes = 0;
+}
+
 void RenderBatch::calculateBoundingBox()
 {
 	ET_ASSERT(_vertexStorage.valid());

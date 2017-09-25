@@ -13,29 +13,29 @@ const char* vulkan::resultToString(VkResult result)
 	switch (result)
 	{
 		CASE_TO_STRING(VK_SUCCESS)
-		CASE_TO_STRING(VK_NOT_READY)
-		CASE_TO_STRING(VK_TIMEOUT)
-		CASE_TO_STRING(VK_EVENT_SET)
-		CASE_TO_STRING(VK_EVENT_RESET)
-		CASE_TO_STRING(VK_INCOMPLETE)
-		CASE_TO_STRING(VK_ERROR_OUT_OF_HOST_MEMORY)
-		CASE_TO_STRING(VK_ERROR_OUT_OF_DEVICE_MEMORY)
-		CASE_TO_STRING(VK_ERROR_INITIALIZATION_FAILED)
-		CASE_TO_STRING(VK_ERROR_DEVICE_LOST)
-		CASE_TO_STRING(VK_ERROR_MEMORY_MAP_FAILED)
-		CASE_TO_STRING(VK_ERROR_LAYER_NOT_PRESENT)
-		CASE_TO_STRING(VK_ERROR_EXTENSION_NOT_PRESENT)
-		CASE_TO_STRING(VK_ERROR_FEATURE_NOT_PRESENT)
-		CASE_TO_STRING(VK_ERROR_INCOMPATIBLE_DRIVER)
-		CASE_TO_STRING(VK_ERROR_TOO_MANY_OBJECTS)
-		CASE_TO_STRING(VK_ERROR_FORMAT_NOT_SUPPORTED)
-		CASE_TO_STRING(VK_ERROR_SURFACE_LOST_KHR)
-		CASE_TO_STRING(VK_ERROR_NATIVE_WINDOW_IN_USE_KHR)
-		CASE_TO_STRING(VK_SUBOPTIMAL_KHR)
-		CASE_TO_STRING(VK_ERROR_OUT_OF_DATE_KHR)
-		CASE_TO_STRING(VK_ERROR_INCOMPATIBLE_DISPLAY_KHR)
-		CASE_TO_STRING(VK_ERROR_VALIDATION_FAILED_EXT)
-		CASE_TO_STRING(VK_ERROR_INVALID_SHADER_NV)
+			CASE_TO_STRING(VK_NOT_READY)
+			CASE_TO_STRING(VK_TIMEOUT)
+			CASE_TO_STRING(VK_EVENT_SET)
+			CASE_TO_STRING(VK_EVENT_RESET)
+			CASE_TO_STRING(VK_INCOMPLETE)
+			CASE_TO_STRING(VK_ERROR_OUT_OF_HOST_MEMORY)
+			CASE_TO_STRING(VK_ERROR_OUT_OF_DEVICE_MEMORY)
+			CASE_TO_STRING(VK_ERROR_INITIALIZATION_FAILED)
+			CASE_TO_STRING(VK_ERROR_DEVICE_LOST)
+			CASE_TO_STRING(VK_ERROR_MEMORY_MAP_FAILED)
+			CASE_TO_STRING(VK_ERROR_LAYER_NOT_PRESENT)
+			CASE_TO_STRING(VK_ERROR_EXTENSION_NOT_PRESENT)
+			CASE_TO_STRING(VK_ERROR_FEATURE_NOT_PRESENT)
+			CASE_TO_STRING(VK_ERROR_INCOMPATIBLE_DRIVER)
+			CASE_TO_STRING(VK_ERROR_TOO_MANY_OBJECTS)
+			CASE_TO_STRING(VK_ERROR_FORMAT_NOT_SUPPORTED)
+			CASE_TO_STRING(VK_ERROR_SURFACE_LOST_KHR)
+			CASE_TO_STRING(VK_ERROR_NATIVE_WINDOW_IN_USE_KHR)
+			CASE_TO_STRING(VK_SUBOPTIMAL_KHR)
+			CASE_TO_STRING(VK_ERROR_OUT_OF_DATE_KHR)
+			CASE_TO_STRING(VK_ERROR_INCOMPATIBLE_DISPLAY_KHR)
+			CASE_TO_STRING(VK_ERROR_VALIDATION_FAILED_EXT)
+			CASE_TO_STRING(VK_ERROR_INVALID_SHADER_NV)
 	default:
 		ET_FAIL_FMT("Unknown Vulkan error: %d", static_cast<int>(result));
 	}
@@ -69,7 +69,7 @@ void VulkanState::executeServiceCommands(VulkanQueueClass cls, ServiceCommands c
 uint32_t VulkanState::writeTimestamp(VkCommandBuffer cmd, VkPipelineStageFlagBits stage)
 {
 	VulkanSwapchain::Frame& frame = swapchain.mutableCurrentFrame();
-	
+
 	uint32_t result = frame.timestampIndex++;
 	vkCmdWriteTimestamp(cmd, stage, frame.timestampsQueryPool, result);
 	return result;
@@ -150,7 +150,7 @@ bool VulkanSwapchain::createDepthImage(VulkanState& vulkan, VkImage& image, Vulk
 	barrierInfo.dstQueueFamilyIndex = vulkan.queues[VulkanQueueClass::Graphics].index;
 	barrierInfo.subresourceRange = { VK_IMAGE_ASPECT_DEPTH_BIT, 0, 1, 0, 1 };
 	barrierInfo.image = image;
-	vkCmdPipelineBarrier(cmdBuffer, vulkan::accessMaskToPipelineStage(barrierInfo.srcAccessMask),  
+	vkCmdPipelineBarrier(cmdBuffer, vulkan::accessMaskToPipelineStage(barrierInfo.srcAccessMask),
 		vulkan::accessMaskToPipelineStage(barrierInfo.dstAccessMask), 0, 0, nullptr, 0, nullptr, 1, &barrierInfo);
 
 	return true;
@@ -361,9 +361,9 @@ void VulkanNativePipeline::buildLayout(VulkanState& vulkan, const Program::Refle
 
 	for (const auto& tex : reflection.textures)
 	{
-		VkShaderStageFlagBits stageFlags = vulkan::programStageValue(tex.first);
+		VkShaderStageFlagBits stageFlags = vulkan::programStageValue(tex.stage);
 
-		for (const auto& t : tex.second.textures)
+		for (const auto& t : tex.textures)
 		{
 			textureBindings.emplace_back();
 			textureBindings.back().binding = t.second;
@@ -371,7 +371,7 @@ void VulkanNativePipeline::buildLayout(VulkanState& vulkan, const Program::Refle
 			textureBindings.back().descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
 			textureBindings.back().descriptorCount = 1;
 		}
-		for (const auto& t : tex.second.samplers)
+		for (const auto& t : tex.samplers)
 		{
 			textureBindings.emplace_back();
 			textureBindings.back().binding = t.second;
@@ -379,7 +379,7 @@ void VulkanNativePipeline::buildLayout(VulkanState& vulkan, const Program::Refle
 			textureBindings.back().descriptorType = VK_DESCRIPTOR_TYPE_SAMPLER;
 			textureBindings.back().descriptorCount = 1;
 		}
-		for (const auto& t : tex.second.images)
+		for (const auto& t : tex.images)
 		{
 			imageBindings.emplace_back();
 			imageBindings.back().binding = t.second;
@@ -476,43 +476,45 @@ VkCompareOp depthCompareOperation(CompareFunction func)
 
 VkFormat dataTypeValue(DataType fmt)
 {
-	static const Map<DataType, VkFormat> lookup =
+	switch (fmt)
 	{
-		{ DataType::Float, VK_FORMAT_R32_SFLOAT },
-		{ DataType::Vec2, VK_FORMAT_R32G32_SFLOAT },
-		{ DataType::Vec3, VK_FORMAT_R32G32B32_SFLOAT },
-		{ DataType::Vec4, VK_FORMAT_R32G32B32A32_SFLOAT },
-		{ DataType::Int, VK_FORMAT_R32_SINT },
-		{ DataType::IntVec2, VK_FORMAT_R32G32_SINT },
-		{ DataType::IntVec3, VK_FORMAT_R32G32B32_SINT },
-		{ DataType::IntVec4, VK_FORMAT_R32G32B32A32_SINT },
+	case DataType::Float: return VK_FORMAT_R32_SFLOAT;
+	case DataType::Vec2: return VK_FORMAT_R32G32_SFLOAT;
+	case DataType::Vec3: return VK_FORMAT_R32G32B32_SFLOAT;
+	case DataType::Vec4: return VK_FORMAT_R32G32B32A32_SFLOAT;
+	case DataType::Int: return VK_FORMAT_R32_SINT;
+	case DataType::IntVec2: return VK_FORMAT_R32G32_SINT;
+	case DataType::IntVec3: return VK_FORMAT_R32G32B32_SINT;
+	case DataType::IntVec4: return VK_FORMAT_R32G32B32A32_SINT;
+	default:
+		ET_ASSERT(!"Invalid data type provided");
+		return VK_FORMAT_UNDEFINED;
 	};
-	ET_ASSERT(lookup.count(fmt) > 0);
-	return lookup.at(fmt);
 }
 
 VkFormat textureFormatValue(TextureFormat fmt)
 {
-	static const Map<TextureFormat, VkFormat> lookup =
+	switch (fmt)
 	{
-		{ TextureFormat::R8, VK_FORMAT_R8_UNORM },
-		{ TextureFormat::R16, VK_FORMAT_R16_UNORM },
-		{ TextureFormat::RGBA8, VK_FORMAT_R8G8B8A8_UNORM },
-		{ TextureFormat::BGRA8, VK_FORMAT_B8G8R8A8_UNORM },
-		{ TextureFormat::RGBA16, VK_FORMAT_R16G16B16A16_UNORM },
-		{ TextureFormat::R16F, VK_FORMAT_R16_SFLOAT },
-		{ TextureFormat::RG16F, VK_FORMAT_R16G16_SFLOAT },
-		{ TextureFormat::RGBA16F, VK_FORMAT_R16G16B16A16_SFLOAT },
-		{ TextureFormat::R32F, VK_FORMAT_R32_SFLOAT },
-		{ TextureFormat::RG32F, VK_FORMAT_R32G32_SFLOAT },
-		{ TextureFormat::RGBA32F, VK_FORMAT_R32G32B32A32_SFLOAT },
-		{ TextureFormat::Depth16, VK_FORMAT_D16_UNORM },
-		{ TextureFormat::Depth24, VK_FORMAT_D24_UNORM_S8_UINT },
-		{ TextureFormat::Depth32F, VK_FORMAT_D32_SFLOAT },
-		{ TextureFormat::DXT5, VK_FORMAT_BC3_UNORM_BLOCK },
+	case TextureFormat::R8: return VK_FORMAT_R8_UNORM;
+	case TextureFormat::R16: return VK_FORMAT_R16_UNORM;
+	case TextureFormat::RGBA8: return  VK_FORMAT_R8G8B8A8_UNORM;
+	case TextureFormat::BGRA8: return VK_FORMAT_B8G8R8A8_UNORM;
+	case TextureFormat::RGBA16: return VK_FORMAT_R16G16B16A16_UNORM;
+	case TextureFormat::R16F: return VK_FORMAT_R16_SFLOAT;
+	case TextureFormat::RG16F: return VK_FORMAT_R16G16_SFLOAT;
+	case TextureFormat::RGBA16F: return VK_FORMAT_R16G16B16A16_SFLOAT;
+	case TextureFormat::R32F: return VK_FORMAT_R32_SFLOAT;
+	case TextureFormat::RG32F: return VK_FORMAT_R32G32_SFLOAT;
+	case TextureFormat::RGBA32F: return VK_FORMAT_R32G32B32A32_SFLOAT;
+	case TextureFormat::Depth16: return VK_FORMAT_D16_UNORM;
+	case TextureFormat::Depth24: return VK_FORMAT_D24_UNORM_S8_UINT;
+	case TextureFormat::Depth32F: return VK_FORMAT_D32_SFLOAT;
+	case TextureFormat::DXT5: return VK_FORMAT_BC3_UNORM_BLOCK;
+	default:
+		ET_ASSERT(!"Invalid TextureFormat provided");
+		return VK_FORMAT_UNDEFINED;
 	};
-	ET_ASSERT(lookup.count(fmt) > 0);
-	return lookup.at(fmt);
 }
 
 VkImageType textureTargetToImageType(TextureTarget target)
@@ -525,7 +527,8 @@ VkImageType textureTargetToImageType(TextureTarget target)
 		return VkImageType::VK_IMAGE_TYPE_2D;
 
 	default:
-		ET_FAIL("Invalid TextureTarget specified");
+		ET_ASSERT(!"Invalid TextureTarget specified");
+		return VK_IMAGE_TYPE_MAX_ENUM;
 	}
 }
 
@@ -546,18 +549,19 @@ VkImageViewType textureTargetToImageViewType(TextureTarget target)
 
 VkPrimitiveTopology primitiveTopology(PrimitiveType type)
 {
-	static const Map<PrimitiveType, VkPrimitiveTopology> lookup =
+	switch (type)
 	{
-		{ PrimitiveType::Points, VkPrimitiveTopology::VK_PRIMITIVE_TOPOLOGY_POINT_LIST },
-		{ PrimitiveType::Lines, VkPrimitiveTopology::VK_PRIMITIVE_TOPOLOGY_LINE_LIST },
-		{ PrimitiveType::LineStrips, VkPrimitiveTopology::VK_PRIMITIVE_TOPOLOGY_LINE_STRIP },
-		{ PrimitiveType::LinesAdjacency, VkPrimitiveTopology::VK_PRIMITIVE_TOPOLOGY_LINE_LIST_WITH_ADJACENCY },
-		{ PrimitiveType::LineStripAdjacency, VkPrimitiveTopology::VK_PRIMITIVE_TOPOLOGY_LINE_STRIP_WITH_ADJACENCY },
-		{ PrimitiveType::Triangles, VkPrimitiveTopology::VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST },
-		{ PrimitiveType::TriangleStrips, VkPrimitiveTopology::VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP },
+	case PrimitiveType::Points: return VK_PRIMITIVE_TOPOLOGY_POINT_LIST;
+	case PrimitiveType::Lines: return VK_PRIMITIVE_TOPOLOGY_LINE_LIST;
+	case PrimitiveType::LineStrips: return VK_PRIMITIVE_TOPOLOGY_LINE_STRIP;
+	case PrimitiveType::LinesAdjacency: return VK_PRIMITIVE_TOPOLOGY_LINE_LIST_WITH_ADJACENCY;
+	case PrimitiveType::LineStripAdjacency: return VK_PRIMITIVE_TOPOLOGY_LINE_STRIP_WITH_ADJACENCY;
+	case PrimitiveType::Triangles: return VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+	case PrimitiveType::TriangleStrips: return VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP;
+	default:
+		ET_ASSERT(!"Invalid PrimitiveType provided");
+		return VK_PRIMITIVE_TOPOLOGY_MAX_ENUM;
 	};
-	ET_ASSERT(lookup.count(type) > 0);
-	return lookup.at(type);
 }
 
 VkCullModeFlags cullModeFlags(CullMode mode)
@@ -571,7 +575,8 @@ VkCullModeFlags cullModeFlags(CullMode mode)
 	case CullMode::Back:
 		return VkCullModeFlagBits::VK_CULL_MODE_BACK_BIT;
 	default:
-		ET_FAIL("Invalid CullMode");
+		ET_ASSERT(!"Invalid CullMode");
+		return VK_CULL_MODE_FLAG_BITS_MAX_ENUM;
 	}
 }
 
@@ -584,113 +589,122 @@ VkIndexType indexBufferFormat(IndexArrayFormat fmt)
 	case IndexArrayFormat::Format_32bit:
 		return VkIndexType::VK_INDEX_TYPE_UINT32;
 	default:
-		ET_FAIL("Invalid IndexArrayFormat");
+		ET_ASSERT(!"Invalid IndexArrayFormat");
+		return VK_INDEX_TYPE_MAX_ENUM;
 	}
 }
 
 VkSamplerAddressMode textureWrapToSamplerAddressMode(TextureWrap wrap)
 {
-	static std::map<TextureWrap, VkSamplerAddressMode> values =
+	switch (wrap)
 	{
-		{ TextureWrap::Repeat, VK_SAMPLER_ADDRESS_MODE_REPEAT },
-		{ TextureWrap::MirrorRepeat, VK_SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT },
-		{ TextureWrap::ClampToEdge, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE },
+	case TextureWrap::Repeat: return VK_SAMPLER_ADDRESS_MODE_REPEAT;
+	case TextureWrap::MirrorRepeat: return VK_SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT;
+	case TextureWrap::ClampToEdge: return VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+	default:
+		ET_ASSERT(!"Invalid TextureWrap provided");
+		return VK_SAMPLER_ADDRESS_MODE_MAX_ENUM;
 	};
-	ET_ASSERT(values.count(wrap) > 0);
-	return values.at(wrap);
 }
 
 VkFilter textureFiltrationValue(TextureFiltration flt)
 {
-	static std::map<TextureFiltration, VkFilter> values =
+	switch (flt)
 	{
-		{ TextureFiltration::Nearest, VK_FILTER_NEAREST },
-		{ TextureFiltration::Linear, VK_FILTER_LINEAR },
+	case TextureFiltration::Nearest: return VK_FILTER_NEAREST;
+	case TextureFiltration::Linear: return VK_FILTER_LINEAR;
+	default:
+		ET_ASSERT(!"Invalid TextureFiltration provided");
+		return VK_FILTER_MAX_ENUM;
 	};
-	ET_ASSERT(values.count(flt) > 0);
-	return values.at(flt);
 }
 
 VkSamplerMipmapMode textureFiltrationValueToSamplerMipMapMode(TextureFiltration flt)
 {
-	static std::map<TextureFiltration, VkSamplerMipmapMode> values =
+	switch (flt)
 	{
-		{ TextureFiltration::Nearest, VK_SAMPLER_MIPMAP_MODE_NEAREST },
-		{ TextureFiltration::Linear, VK_SAMPLER_MIPMAP_MODE_LINEAR },
+	case TextureFiltration::Nearest: return VK_SAMPLER_MIPMAP_MODE_NEAREST;
+	case TextureFiltration::Linear: return VK_SAMPLER_MIPMAP_MODE_LINEAR;
+	default:
+		ET_ASSERT(!"Invalid TextureFiltration provided");
+		return VK_SAMPLER_MIPMAP_MODE_MAX_ENUM;
 	};
-	ET_ASSERT(values.count(flt) > 0);
-	return values.at(flt);
 }
 
 VkAttachmentLoadOp frameBufferOperationToLoadOperation(FramebufferOperation val)
 {
-	static std::map<FramebufferOperation, VkAttachmentLoadOp> values =
+	switch (val)
 	{
-		{ FramebufferOperation::Clear, VK_ATTACHMENT_LOAD_OP_CLEAR },
-		{ FramebufferOperation::Load, VK_ATTACHMENT_LOAD_OP_LOAD },
-		{ FramebufferOperation::DontCare, VK_ATTACHMENT_LOAD_OP_DONT_CARE },
+	case FramebufferOperation::Clear: return VK_ATTACHMENT_LOAD_OP_CLEAR;
+	case FramebufferOperation::Load: return VK_ATTACHMENT_LOAD_OP_LOAD;
+	case FramebufferOperation::DontCare: return VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+	default:
+		ET_ASSERT(!"Invalid FramebufferOperation provided");
+		return VK_ATTACHMENT_LOAD_OP_MAX_ENUM;
 	};
-	ET_ASSERT(values.count(val) > 0);
-	return values.at(val);
 }
 
 VkAttachmentStoreOp frameBufferOperationToStoreOperation(FramebufferOperation val)
 {
-	static std::map<FramebufferOperation, VkAttachmentStoreOp> values =
+	switch (val)
 	{
-		{ FramebufferOperation::Store, VK_ATTACHMENT_STORE_OP_STORE },
-		{ FramebufferOperation::DontCare, VK_ATTACHMENT_STORE_OP_DONT_CARE },
+	case FramebufferOperation::Store: return VK_ATTACHMENT_STORE_OP_STORE;
+	case FramebufferOperation::DontCare: return VK_ATTACHMENT_STORE_OP_DONT_CARE;
+	default:
+		ET_ASSERT(!"Invalid FramebufferOperation provided");
+		return VK_ATTACHMENT_STORE_OP_MAX_ENUM;
 	};
-	ET_ASSERT(values.count(val) > 0);
-	return values.at(val);
 }
 
 VkBlendOp blendOperationValue(BlendOperation val)
 {
-	static std::map<BlendOperation, VkBlendOp> values =
+	switch (val)
 	{
-		{ BlendOperation::Add, VK_BLEND_OP_ADD },
-		{ BlendOperation::Subtract, VK_BLEND_OP_SUBTRACT },
-		{ BlendOperation::ReverseSubtract, VK_BLEND_OP_REVERSE_SUBTRACT },
+	case BlendOperation::Add: return VK_BLEND_OP_ADD;
+	case BlendOperation::Subtract: return VK_BLEND_OP_SUBTRACT;
+	case BlendOperation::ReverseSubtract: return VK_BLEND_OP_REVERSE_SUBTRACT;
+	default:
+		ET_ASSERT(!"Invalid BlendOperation provided");
+		return VK_BLEND_OP_MAX_ENUM;
 	};
-	ET_ASSERT(values.count(val) > 0);
-	return values.at(val);
 }
 
 VkBlendFactor blendFactorValue(BlendFunction val)
 {
-	static std::map<BlendFunction, VkBlendFactor> values =
+	switch (val)
 	{
-		{ BlendFunction::Zero, VK_BLEND_FACTOR_ZERO },
-		{ BlendFunction::One, VK_BLEND_FACTOR_ONE },
-		{ BlendFunction::SourceColor, VK_BLEND_FACTOR_SRC_COLOR },
-		{ BlendFunction::InvSourceColor, VK_BLEND_FACTOR_ONE_MINUS_SRC_COLOR },
-		{ BlendFunction::SourceAlpha, VK_BLEND_FACTOR_SRC_ALPHA },
-		{ BlendFunction::InvSourceAlpha, VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA },
-		{ BlendFunction::DestColor, VK_BLEND_FACTOR_DST_COLOR },
-		{ BlendFunction::InvDestColor, VK_BLEND_FACTOR_ONE_MINUS_DST_COLOR },
-		{ BlendFunction::DestAlpha, VK_BLEND_FACTOR_DST_ALPHA },
-		{ BlendFunction::InvDestAlpha, VK_BLEND_FACTOR_ONE_MINUS_DST_ALPHA },
+	case BlendFunction::Zero: return VK_BLEND_FACTOR_ZERO;
+	case BlendFunction::One: return VK_BLEND_FACTOR_ONE;
+	case BlendFunction::SourceColor: return VK_BLEND_FACTOR_SRC_COLOR;
+	case BlendFunction::InvSourceColor: return VK_BLEND_FACTOR_ONE_MINUS_SRC_COLOR;
+	case BlendFunction::SourceAlpha: return VK_BLEND_FACTOR_SRC_ALPHA;
+	case BlendFunction::InvSourceAlpha: return VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
+	case BlendFunction::DestColor: return VK_BLEND_FACTOR_DST_COLOR;
+	case BlendFunction::InvDestColor: return VK_BLEND_FACTOR_ONE_MINUS_DST_COLOR;
+	case BlendFunction::DestAlpha: return VK_BLEND_FACTOR_DST_ALPHA;
+	case BlendFunction::InvDestAlpha: return VK_BLEND_FACTOR_ONE_MINUS_DST_ALPHA;
+	default:
+		ET_ASSERT(!"Invalid BlendFunction provided");
+		return VK_BLEND_FACTOR_MAX_ENUM;
 	};
-	ET_ASSERT(values.count(val) > 0);
-	return values.at(val);
 }
 
 VkAccessFlags texureStateToAccessFlags(TextureState val)
 {
-	static std::map<TextureState, VkAccessFlags> values =
+	switch (val)
 	{
-		{ TextureState::Undefined, 0 },
-		{ TextureState::CopySource, VK_ACCESS_TRANSFER_READ_BIT },
-		{ TextureState::CopyDestination, VK_ACCESS_TRANSFER_WRITE_BIT },
-		{ TextureState::ColorRenderTarget, VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT },
-		{ TextureState::DepthRenderTarget, VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT },
-		{ TextureState::ShaderResource, VK_ACCESS_SHADER_READ_BIT },
-		{ TextureState::PresentImage, VK_ACCESS_MEMORY_READ_BIT },
-		{ TextureState::Storage,VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT },
+	case TextureState::Undefined: return 0;
+	case TextureState::CopySource: return VK_ACCESS_TRANSFER_READ_BIT;
+	case TextureState::CopyDestination: return VK_ACCESS_TRANSFER_WRITE_BIT;
+	case TextureState::ColorRenderTarget: return VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+	case TextureState::DepthRenderTarget: return VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+	case TextureState::ShaderResource: return VK_ACCESS_SHADER_READ_BIT;
+	case TextureState::PresentImage: return VK_ACCESS_MEMORY_READ_BIT;
+	case TextureState::Storage: return VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT;
+	default:
+		ET_ASSERT(!"Invalid TextureState provided");
+		return 0;
 	};
-	ET_ASSERT(values.count(val) > 0);
-	return values.at(val);
 }
 
 VkPipelineStageFlags accessMaskToPipelineStage(VkAccessFlags flags)
@@ -699,13 +713,13 @@ VkPipelineStageFlags accessMaskToPipelineStage(VkAccessFlags flags)
 	// supposed to be correct
 	static const std::vector<std::pair<VkAccessFlags, VkPipelineStageFlags>> values =
 	{
-		{ VK_ACCESS_INDIRECT_COMMAND_READ_BIT, 
+		{ VK_ACCESS_INDIRECT_COMMAND_READ_BIT,
 			VK_PIPELINE_STAGE_DRAW_INDIRECT_BIT },
-		
-		{ VK_ACCESS_INDEX_READ_BIT, 
+
+		{ VK_ACCESS_INDEX_READ_BIT,
 			VK_PIPELINE_STAGE_VERTEX_INPUT_BIT },
-		
-		{ VK_ACCESS_VERTEX_ATTRIBUTE_READ_BIT, 
+
+		{ VK_ACCESS_VERTEX_ATTRIBUTE_READ_BIT,
 			VK_PIPELINE_STAGE_VERTEX_INPUT_BIT },
 
 		{ VK_ACCESS_UNIFORM_READ_BIT,
@@ -713,7 +727,7 @@ VkPipelineStageFlags accessMaskToPipelineStage(VkAccessFlags flags)
 			VK_PIPELINE_STAGE_TESSELLATION_EVALUATION_SHADER_BIT | VK_PIPELINE_STAGE_GEOMETRY_SHADER_BIT |
 			VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT */ | VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT },
 
-		{ VK_ACCESS_INPUT_ATTACHMENT_READ_BIT, 
+		{ VK_ACCESS_INPUT_ATTACHMENT_READ_BIT,
 			VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT },
 
 		{ VK_ACCESS_SHADER_READ_BIT,
@@ -726,10 +740,10 @@ VkPipelineStageFlags accessMaskToPipelineStage(VkAccessFlags flags)
 			VK_PIPELINE_STAGE_TESSELLATION_EVALUATION_SHADER_BIT | VK_PIPELINE_STAGE_GEOMETRY_SHADER_BIT |
 			VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT */ | VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT },
 
-		{ VK_ACCESS_COLOR_ATTACHMENT_READ_BIT, 
+		{ VK_ACCESS_COLOR_ATTACHMENT_READ_BIT,
 			VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT },
 
-		{ VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT, 
+		{ VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
 			VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT },
 
 		{ VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT,
@@ -738,31 +752,31 @@ VkPipelineStageFlags accessMaskToPipelineStage(VkAccessFlags flags)
 		{ VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT,
 			VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT },
 
-		{ VK_ACCESS_TRANSFER_READ_BIT, 
+		{ VK_ACCESS_TRANSFER_READ_BIT,
 			VK_PIPELINE_STAGE_TRANSFER_BIT },
-		
-		{ VK_ACCESS_TRANSFER_WRITE_BIT, 
+
+		{ VK_ACCESS_TRANSFER_WRITE_BIT,
 			VK_PIPELINE_STAGE_TRANSFER_BIT },
-		
-		{ VK_ACCESS_HOST_READ_BIT, 
+
+		{ VK_ACCESS_HOST_READ_BIT,
 			VK_PIPELINE_STAGE_HOST_BIT },
-		
-		{ VK_ACCESS_HOST_WRITE_BIT, 
+
+		{ VK_ACCESS_HOST_WRITE_BIT,
 			VK_PIPELINE_STAGE_HOST_BIT },
-		
-		{ VK_ACCESS_MEMORY_READ_BIT, 
+
+		{ VK_ACCESS_MEMORY_READ_BIT,
 			VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT },
-		
-		{ VK_ACCESS_MEMORY_WRITE_BIT, 
+
+		{ VK_ACCESS_MEMORY_WRITE_BIT,
 			VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT },
-		
-		{ VK_ACCESS_COMMAND_PROCESS_READ_BIT_NVX, 
+
+		{ VK_ACCESS_COMMAND_PROCESS_READ_BIT_NVX,
 			VK_PIPELINE_STAGE_COMMAND_PROCESS_BIT_NVX },
-		
-		{ VK_ACCESS_COMMAND_PROCESS_WRITE_BIT_NVX, 
+
+		{ VK_ACCESS_COMMAND_PROCESS_WRITE_BIT_NVX,
 			VK_PIPELINE_STAGE_COMMAND_PROCESS_BIT_NVX },
 	};
-	
+
 	VkPipelineStageFlags result = 0;
 	for (const auto& p : values)
 	{
@@ -775,43 +789,46 @@ VkPipelineStageFlags accessMaskToPipelineStage(VkAccessFlags flags)
 
 VkImageLayout texureStateToImageLayout(TextureState val)
 {
-	static std::map<TextureState, VkImageLayout> values =
+	switch (val)
 	{
-		{ TextureState::Undefined, VK_IMAGE_LAYOUT_UNDEFINED },
-		{ TextureState::CopySource, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL },
-		{ TextureState::CopyDestination, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL },
-		{ TextureState::ColorRenderTarget, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL },
-		{ TextureState::DepthRenderTarget, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL },
-		{ TextureState::ShaderResource, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL },
-		{ TextureState::PresentImage, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR },
-		{ TextureState::Storage, VK_IMAGE_LAYOUT_GENERAL },
+	case TextureState::Undefined: return VK_IMAGE_LAYOUT_UNDEFINED;
+	case TextureState::CopySource: return VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+	case TextureState::CopyDestination: return VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+	case TextureState::ColorRenderTarget: return VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+	case TextureState::DepthRenderTarget: return VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+	case TextureState::ShaderResource: return VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+	case TextureState::PresentImage: return VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+	case TextureState::Storage: return VK_IMAGE_LAYOUT_GENERAL;
+	default:
+		ET_ASSERT(!"Invalid TextureState provided");
+		return VK_IMAGE_LAYOUT_MAX_ENUM;
 	};
-	ET_ASSERT(values.count(val) > 0);
-	return values.at(val);
 }
 
 VkShaderStageFlagBits programStageValue(ProgramStage val)
 {
-	static const std::map<ProgramStage, VkShaderStageFlagBits> values =
+	switch (val)
 	{
-		{ ProgramStage::Vertex, VK_SHADER_STAGE_VERTEX_BIT },
-		{ ProgramStage::Fragment, VK_SHADER_STAGE_FRAGMENT_BIT },
-		{ ProgramStage::Compute, VK_SHADER_STAGE_COMPUTE_BIT },
+	case ProgramStage::Vertex: return VK_SHADER_STAGE_VERTEX_BIT;
+	case ProgramStage::Fragment: return VK_SHADER_STAGE_FRAGMENT_BIT;
+	case ProgramStage::Compute: return VK_SHADER_STAGE_COMPUTE_BIT;
+	default:
+		ET_ASSERT(!"Invalid ProgramStage provided");
+		return VK_SHADER_STAGE_FLAG_BITS_MAX_ENUM;
 	};
-	ET_ASSERT(values.count(val) > 0);
-	return values.at(val);
 }
 
 const char* programStageEntryName(ProgramStage val)
 {
-	static const std::map<ProgramStage, const char*> values =
+	switch (val)
 	{
-		{ ProgramStage::Vertex, "vertexMain" },
-		{ ProgramStage::Fragment, "fragmentMain" },
-		{ ProgramStage::Compute, "computeMain" },
+	case ProgramStage::Vertex: return "vertexMain";
+	case ProgramStage::Fragment: return "fragmentMain";
+	case ProgramStage::Compute: return "computeMain";
+	default:
+		ET_ASSERT(!"Invalid ProgramStage provided");
+		return "???";
 	};
-	ET_ASSERT(values.count(val) > 0);
-	return values.at(val);
 }
 
 }

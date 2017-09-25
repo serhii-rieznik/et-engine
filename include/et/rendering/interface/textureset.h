@@ -20,11 +20,13 @@ public:
 
 	struct ReflectionSet
 	{
-		UnorderedMap<std::string, uint32_t> textures;
-		UnorderedMap<std::string, uint32_t> samplers;
-		UnorderedMap<std::string, uint32_t> images;
+		ProgramStage stage = ProgramStage::max;
+		Vector<std::pair<std::string, uint32_t>> textures;
+		Vector<std::pair<std::string, uint32_t>> samplers;
+		Vector<std::pair<std::string, uint32_t>> images;
 	};
-	
+	using Reflection = Vector<ReflectionSet>;
+
 	struct TextureBinding
 	{
 		Texture::Pointer image;
@@ -37,8 +39,6 @@ public:
 		Map<MaterialTexture, Sampler::Pointer> samplers;
 		Map<StorageBuffer, Texture::Pointer> images;
 	};
-
-	using Reflection = Map<ProgramStage, ReflectionSet>;
 	using Description = Map<ProgramStage, DescriptionSet>;
 
 public:

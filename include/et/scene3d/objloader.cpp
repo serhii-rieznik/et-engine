@@ -183,6 +183,17 @@ float naive_atof(const char *p)
 	return neg ? -r : r;
 }
 
+int64_t naive_atoll(char* ptr)
+{
+	int64_t result = 0;
+	while (*ptr)
+	{
+		result = (result * 10) + (*ptr - 48);
+		++ptr;
+	}
+	return result;
+}
+
 void OBJLoader::load(ObjectsCache& cache)
 {
 	uint32_t lineNumber = 0;
@@ -375,7 +386,7 @@ void OBJLoader::load(ObjectsCache& cache)
 									{
 										*linkEnd = 0;
 
-										int64_t linkValue = std::atoll(link);
+										int64_t linkValue = naive_atoll(link);
 										ET_ASSERT(linkValue > 0);
 										ET_ASSERT(face.vertexLinksCount < OBJFace::MaxVertexLinks);
 
@@ -1196,7 +1207,7 @@ s3d::ElementContainer::Pointer OBJLoader::generateVertexBuffers(s3d::Storage& st
 		s3d::Mesh::Pointer mesh = Mesh::Pointer::create(i.name, result.pointer());
 		mesh->setTranslation(i.center);
 
-		auto rb = RenderBatch::Pointer::create(i.material, vao, i.start, i.count);
+		RenderBatch::Pointer rb = _renderer->allocateRenderBatch(i.material, vao, i.start, i.count);
 		rb->setVertexStorage(_vertexData);
 		rb->setIndexArray(_indices);
 		mesh->addRenderBatch(rb);
@@ -1224,6 +1235,7 @@ bool OBJLoader::loadCached(const std::string& fileName)
 
 void OBJLoader::saveCache(const std::string& fileName)
 {
+	/*
 	std::string cachePath = getFilePath(fileName);
 
 	if (folderExists(cachePath) || createDirectory(cachePath, true))
@@ -1251,6 +1263,7 @@ void OBJLoader::saveCache(const std::string& fileName)
 
 		fOut.close();
 	}
+	*/
 }
 
 /*

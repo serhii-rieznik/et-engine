@@ -109,6 +109,18 @@ public:
 	 */
 	virtual Compute::Pointer createCompute(const Material::Pointer&) = 0;
 
+	/*
+	 * Render batch pool
+	 */
+	RenderBatch::Pointer allocateRenderBatch() {
+		return _renderBatchPool.allocate();
+	}
+
+	template <class ... Args>
+	RenderBatch::Pointer allocateRenderBatch(Args&&... args) {
+		return _renderBatchPool.allocate(std::forward<Args>(args)...);
+	}
+
 protected:
 	void initInternalStructures();
 	void shutdownInternalStructures();
@@ -120,6 +132,7 @@ private:
 	RenderContext* _rc = nullptr;
 	MaterialLibrary _sharedMaterialLibrary;
 	ConstantBuffer _sharedConstantBuffer;
+	RenderBatchPool _renderBatchPool;
 	Texture::Pointer _checkersTexture;
 	Texture::Pointer _whiteTexture;
 	Texture::Pointer _flatNormalTexture;
@@ -294,6 +307,7 @@ inline void RenderInterface::initInternalStructures()
 
 inline void RenderInterface::shutdownInternalStructures()
 {
+	_renderBatchPool.clear();
 	_sharedMaterialLibrary.shutdown();
 	_sharedConstantBuffer.shutdown();
 

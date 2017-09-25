@@ -75,8 +75,7 @@ void Drawer::draw()
 	_jitter.z = (jj.x * 2.0f - 1.0f) / static_cast<float>(_main.color->size(0).x);
 	_jitter.w = (jj.y * 2.0f - 1.0f) / static_cast<float>(_main.color->size(0).y);
 
-	Camera::Pointer renderCamera = _scene->renderCamera();
-	Camera::Pointer clipCamera = _scene->clipCamera();
+	Camera::Pointer& renderCamera = _scene->renderCamera();
 	renderCamera->setProjectionMatrix(_baseProjectionMatrix * translationMatrix(_jitter.x, _jitter.y, 0.0f));
 	{
 		_main.pass->loadSharedVariablesFromCamera(renderCamera);
@@ -84,7 +83,7 @@ void Drawer::draw()
 
 		_main.pass->begin(RenderPassBeginInfo::singlePass());
 		_main.pass->nextSubpass();
-		for (Mesh::Pointer mesh : _allMeshes)
+		for (Mesh::Pointer& mesh : _allMeshes)
 		{
 			const mat4& transform = mesh->transform();
 			const mat4& rotationTransform = mesh->rotationTransform();

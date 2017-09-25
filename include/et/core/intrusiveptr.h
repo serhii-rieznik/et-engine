@@ -65,6 +65,24 @@ enum class PointerInit : uint32_t
 	CreateInplace
 };
 
+template <class T>
+class InstusivePointerScope
+{
+public:
+	InstusivePointerScope(T* object) : _object(object) 
+		{ _object->retain(); }
+	
+	~InstusivePointerScope() 
+		{ _object->release(); }
+
+	InstusivePointerScope(const InstusivePointerScope&) = delete;
+	InstusivePointerScope(InstusivePointerScope&&) = delete;
+	InstusivePointerScope& operator = (const InstusivePointerScope&) = delete;
+
+private:
+	T* _object = nullptr;
+};
+
 template <typename T>
 class IntrusivePtr
 {
