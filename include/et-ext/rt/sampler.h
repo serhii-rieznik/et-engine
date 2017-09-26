@@ -40,6 +40,8 @@ public:
 	RandomSampler(uint32_t maxSamples);
 	bool next(vec2& sample) override;
 
+	float4 sample(uint32_t, uint32_t);
+
 private:
 	uint32_t _maxSamples = 1;
 	uint32_t _samples = 0;

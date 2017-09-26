@@ -64,6 +64,7 @@ private:
 		Texture::Pointer velocity;
 		Texture::Pointer noise;
 		Sampler::Pointer shadowSampler;
+		Sampler::Pointer shadowMomentsSampler;
 	} _main;
 
 	struct Lighting

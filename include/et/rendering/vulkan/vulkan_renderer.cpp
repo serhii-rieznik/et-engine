@@ -21,7 +21,7 @@
 #include <et/app/application.h>
 
 #if (ET_DEBUG)
-#	define VULKAN_ENABLE_VALIDATION 0
+#	define VULKAN_ENABLE_VALIDATION 1
 #else
 #	define VULKAN_ENABLE_VALIDATION 0
 #endif
@@ -353,7 +353,7 @@ RenderPass::Pointer VulkanRenderer::allocateRenderPass(const RenderPass::Constru
 	return VulkanRenderPass::Pointer::create(this, _private->vulkan(), info);
 }
 
-void VulkanRenderer::submitRenderPass(RenderPass::Pointer inPass)
+void VulkanRenderer::submitRenderPass(const RenderPass::Pointer& inPass)
 {
 	_private->passes[frameIndex()].emplace_back(inPass);
 }
@@ -397,7 +397,7 @@ void VulkanRenderer::present()
 	
 	sharedConstantBuffer().flush(frameNumber());
 
-	for (VulkanRenderPass::Pointer pass : passes)
+	for (VulkanRenderPass::Pointer& pass : passes)
 	{
 		pass->recordCommandBuffer();
 		ET_ASSERT(pass->recordedFrameIndex() == frameIndex());

@@ -36,7 +36,7 @@ public:
 	void present() override;
 
 	RenderPass::Pointer allocateRenderPass(const RenderPass::ConstructionInfo&) override;
-	void submitRenderPass(RenderPass::Pointer) override;
+	void submitRenderPass(const RenderPass::Pointer&) override;
 
 	uint32_t frameIndex() const override;
 	uint32_t frameNumber() const override;

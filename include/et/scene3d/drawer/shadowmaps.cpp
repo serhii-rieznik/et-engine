@@ -96,49 +96,79 @@ void ShadowmapProcessor::process(RenderInterface::Pointer& renderer, DrawerOptio
 	_renderables.shadowpass->end();
 	renderer->submitRenderPass(_renderables.shadowpass);
 
+	_renderables.blurPass0->begin(RenderPassBeginInfo::singlePass());
+	_renderables.blurPass0->nextSubpass();
+	_renderables.blurPass0->pushRenderBatch(_renderables.blurBatch0);
+	_renderables.blurPass0->endSubpass();
+	_renderables.blurPass0->end();
+	renderer->submitRenderPass(_renderables.blurPass0);
+
+	_renderables.blurPass1->begin(RenderPassBeginInfo::singlePass());
+	_renderables.blurPass1->nextSubpass();
+	_renderables.blurPass1->pushRenderBatch(_renderables.blurBatch1);
+	_renderables.blurPass1->endSubpass();
+	_renderables.blurPass1->end();
+	renderer->submitRenderPass(_renderables.blurPass1);
+
 	if (options.drawShadowmap)
 	{
 		vec2 vp = vector2ToFloat(renderer->rc()->size());
-		vec2 sz = vec2(vp.y * _directionalShadowmap->sizeFloat(0).aspect(), vp.y);
-		_renderables.debugBatch->setMaterial(_renderables.debugMaterial->instance());
-		
+		vec2 depthSz = vec2(0.5f * vp.x);
+		vec2 colorSz = depthSz;
+		vec2 depthPt = vec2(0.0f, vp.y - depthSz.y);
+		vec2 colorPt = vec2(depthSz.x, depthPt.y);
+
 		_renderables.debugPass->begin(RenderPassBeginInfo::singlePass());
 		_renderables.debugPass->nextSubpass();
-		_renderables.debugPass->setSharedVariable(ObjectVariable::WorldTransform, fullscreenBatchTransform(vp, vec2(0.0f), sz));
-		_renderables.debugPass->pushRenderBatch(_renderables.debugBatch);
+		_renderables.debugPass->setSharedVariable(ObjectVariable::WorldTransform, fullscreenBatchTransform(vp, depthPt, depthSz));
+		_renderables.debugPass->pushRenderBatch(_renderables.debugDepthBatch);
+		
+		_renderables.debugPass->setSharedVariable(ObjectVariable::WorldTransform, fullscreenBatchTransform(vp, colorPt, colorSz));
+		_renderables.debugPass->pushRenderBatch(_renderables.debugColorBatch);
 		_renderables.debugPass->endSubpass();
 		_renderables.debugPass->end();
 		
 		renderer->submitRenderPass(_renderables.debugPass);
-		_renderables.debugMaterial->flushInstances();
 	}
 }
 
 void ShadowmapProcessor::validate(RenderInterface::Pointer& renderer)
 {
-	if (_directionalShadowmap.invalid())
+	if (_renderables.initialized)
+		return;
+
+	_renderables.initialized = true;
 	{
 		TextureDescription::Pointer desc(PointerInit::CreateInplace);
-		desc->size = vec2i(4096, 4096);
+		desc->size = vec2i(2048);
 		desc->format = TextureFormat::Depth32F;
 		desc->flags = Texture::Flags::RenderTarget;
 		_directionalShadowmap = renderer->createTexture(desc);
+
+		desc->format = TextureFormat::RGBA16;
+		_directionalShadowmapMoments = renderer->createTexture(desc);
+		_directionalShadowmapMomentsBuffer = renderer->createTexture(desc);
 	}
 
-	if (_renderables.shadowpass.invalid())
 	{
 		RenderPass::ConstructionInfo desc;
-		desc.color[0].enabled = false;
+		desc.color[0].texture = _directionalShadowmapMoments;
+		desc.color[0].loadOperation = FramebufferOperation::Clear;
+		desc.color[0].storeOperation = FramebufferOperation::Store;
+		desc.color[0].clearValue = vec4(std::numeric_limits<float>::max());
+		desc.color[0].useDefaultRenderTarget = false;
+		desc.color[0].enabled = true;
+		
+		desc.depth.texture = _directionalShadowmap;
 		desc.depth.loadOperation = FramebufferOperation::Clear;
 		desc.depth.storeOperation = FramebufferOperation::Store;
-		desc.depth.enabled = true;
-		desc.depth.texture = _directionalShadowmap;
 		desc.depth.useDefaultRenderTarget = false;
+		desc.depth.enabled = true;
+		
 		desc.name = "depth";
 		_renderables.shadowpass = renderer->allocateRenderPass(desc);
 	}
 
-	if (_renderables.debugPass.invalid())
 	{
 		RenderPass::ConstructionInfo desc;
 		desc.color[0].loadOperation = FramebufferOperation::Load;
@@ -150,9 +180,34 @@ void ShadowmapProcessor::validate(RenderInterface::Pointer& renderer)
 		desc.priority = RenderPassPriority::UI - 1;
 		_renderables.debugPass = renderer->allocateRenderPass(desc);
 
-		_renderables.debugMaterial = renderer->sharedMaterialLibrary().loadMaterial(application().resolveFileName("engine_data/materials/textured2d-transformed-depth.json"));
-		_renderables.debugMaterial->setTexture(MaterialTexture::BaseColor, _directionalShadowmap);
-		_renderables.debugBatch = renderhelper::createFullscreenRenderBatch(_directionalShadowmap, _renderables.debugMaterial);
+		Material::Pointer mtl = renderer->sharedMaterialLibrary().loadMaterial(application().resolveFileName("engine_data/materials/textured2d-transformed-depth.json"));
+		mtl->setTexture(MaterialTexture::BaseColor, _directionalShadowmap);
+		_renderables.debugDepthBatch = renderhelper::createFullscreenRenderBatch(_directionalShadowmap, mtl);
+
+		mtl = renderer->sharedMaterialLibrary().loadMaterial(application().resolveFileName("engine_data/materials/textured2d-transformed.json"));
+		mtl->setTexture(MaterialTexture::BaseColor, _directionalShadowmap);
+		_renderables.debugColorBatch = renderhelper::createFullscreenRenderBatch(_directionalShadowmapMoments, mtl);
+	}
+
+	{
+		RenderPass::ConstructionInfo desc;
+		desc.color[0].texture = _directionalShadowmapMomentsBuffer;
+		desc.color[0].loadOperation = FramebufferOperation::DontCare;
+		desc.color[0].storeOperation = FramebufferOperation::Store;
+		desc.color[0].useDefaultRenderTarget = false;
+		desc.color[0].enabled = true;
+		desc.name = "gaussian-blur";
+		_renderables.blurPass0 = renderer->allocateRenderPass(desc);
+		
+		desc.color[0].texture = _directionalShadowmapMoments;
+		_renderables.blurPass1 = renderer->allocateRenderPass(desc);
+
+		Material::Pointer mtl = renderer->sharedMaterialLibrary().loadMaterial(application().resolveFileName("engine_data/materials/image-processing.json"));
+		_renderables.blurBatch0 = renderhelper::createFullscreenRenderBatch(_directionalShadowmapMoments, mtl);
+		_renderables.blurBatch0->material()->setVector(MaterialVariable::ExtraParameters, vec4(1.0f, 0.0f, 0.0f, 0.0f));
+		
+		_renderables.blurBatch1 = renderhelper::createFullscreenRenderBatch(_directionalShadowmapMomentsBuffer, mtl);
+		_renderables.blurBatch1->material()->setVector(MaterialVariable::ExtraParameters, vec4(0.0f, 1.0f, 0.0f, 0.0f));
 	}
 }
 

@@ -33,9 +33,6 @@ SamplerState baseColorSampler : DECL_SAMPLER(BaseColor);
 Texture2D<float4> normalTexture : DECL_TEXTURE(Normal);
 SamplerState normalSampler : DECL_SAMPLER(Normal);
 
-Texture2D<float4> shadowTexture : DECL_TEXTURE(Shadow);
-SamplerComparisonState shadowSampler : DECL_SAMPLER(Shadow);
-
 Texture2D<float4> brdfLookupTexture : DECL_TEXTURE(BrdfLookup);
 SamplerState brdfLookupSampler : DECL_SAMPLER(BrdfLookup);
 
@@ -184,6 +181,8 @@ FSOutput fragmentMain(VSOutput fsIn)
     float3 result = shadow * ((directDiffuse + directSpecular) * lightColor) +  (indirectDiffuse + indirectSpecular);
 
 #endif
+
+	// result = shadow;
 
     /*
     float3 originPosition = positionOnPlanet + cameraPosition.xyz;

@@ -21,6 +21,7 @@ public:
 
 public:
 	const Texture::Pointer& directionalShadowmap() const;
+	const Texture::Pointer& directionalShadowmapMoments() const;
 
 	void setScene(const Scene::Pointer& scene, Light::Pointer& light);
 	void process(RenderInterface::Pointer& renderer, DrawerOptions& options);
@@ -33,6 +34,8 @@ private:
 	void validate(RenderInterface::Pointer& renderer);
 
 private:
+	Texture::Pointer _directionalShadowmapMoments;
+	Texture::Pointer _directionalShadowmapMomentsBuffer;
 	Texture::Pointer _directionalShadowmap;
 	Scene::Pointer _scene;
 	BoundingBox _sceneBoundingBox;
@@ -43,14 +46,26 @@ private:
 		RenderPass::Pointer shadowpass;
 		Vector<Mesh::Pointer> meshes;
 
-		Material::Pointer debugMaterial;
-		RenderBatch::Pointer debugBatch;
+		RenderBatch::Pointer debugColorBatch;
+		RenderBatch::Pointer debugDepthBatch;
 		RenderPass::Pointer debugPass;
+
+		RenderPass::Pointer blurPass0;
+		RenderBatch::Pointer blurBatch0;
+		
+		RenderPass::Pointer blurPass1;
+		RenderBatch::Pointer blurBatch1;
+
+		bool initialized = false;
 	} _renderables;
 };
 
 inline const Texture::Pointer& ShadowmapProcessor::directionalShadowmap() const {
 	return _directionalShadowmap;
+}
+
+inline const Texture::Pointer& ShadowmapProcessor::directionalShadowmapMoments() const {
+	return _directionalShadowmapMoments;
 }
 
 }

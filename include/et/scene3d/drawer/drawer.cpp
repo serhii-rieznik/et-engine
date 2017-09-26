@@ -45,9 +45,15 @@ Drawer::Drawer(const RenderInterface::Pointer& renderer) :
 	shadowSamplerDesc.minFilter = TextureFiltration::Linear;
 	shadowSamplerDesc.magFilter = TextureFiltration::Linear;
 	shadowSamplerDesc.mipFilter = TextureFiltration::Nearest;
+	shadowSamplerDesc.maxAnisotropy = 1.0f;
 	shadowSamplerDesc.compareEnabled = true;
 	shadowSamplerDesc.compareFunction = CompareFunction::LessOrEqual;
 	_main.shadowSampler = _renderer->createSampler(shadowSamplerDesc);
+	
+	shadowSamplerDesc.minFilter = TextureFiltration::Linear;
+	shadowSamplerDesc.magFilter = TextureFiltration::Linear;
+	shadowSamplerDesc.compareEnabled = false;
+	_main.shadowMomentsSampler = _renderer->createSampler(shadowSamplerDesc);
 
 	Scene::Pointer scene(PointerInit::CreateInplace);
 	scene->setRenderCamera(Camera::Pointer(PointerInit::CreateInplace));
@@ -150,6 +156,7 @@ void Drawer::validate(RenderInterface::Pointer& renderer)
 		_main.pass = renderer->allocateRenderPass(passInfo);
 		_main.pass->setSharedTexture(MaterialTexture::Environment, _cubemapProcessor->convolutedCubemap(), renderer->defaultSampler());
 		_main.pass->setSharedTexture(MaterialTexture::Shadow, _shadowmapProcessor->directionalShadowmap(), _main.shadowSampler);
+		_main.pass->setSharedTexture(MaterialTexture::AmbientOcclusion, _shadowmapProcessor->directionalShadowmapMoments(), _main.shadowMomentsSampler);
 		_main.pass->setSharedTexture(MaterialTexture::BRDFLookup, _cubemapProcessor->brdfLookupTexture(), renderer->clampSampler());
 		_main.pass->setSharedTexture(MaterialTexture::Noise, _main.noise, renderer->nearestSampler());
 	}
@@ -179,7 +186,7 @@ void Drawer::setScene(const Scene::Pointer& inScene)
 
 	bool updateEnvironment = false;
 
-	for (BaseElement::Pointer element : elements)
+	for (const BaseElement::Pointer& element : elements)
 	{
 		if (element->type() == ElementType::Mesh)
 		{

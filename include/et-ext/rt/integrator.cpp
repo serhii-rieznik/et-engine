@@ -32,9 +32,11 @@ float4 evaluateAmbientOcclusion(Scene& scene, const Ray& inRay, Evaluate& eval)
 	{
 		++eval.pathLength;
 		
+		vec4simd randomSample(fastRandomFloat(), fastRandomFloat(), 0.0f, 0.0f);
+
 		const Triangle& tri = scene.kdTree.triangleAtIndex(hit.triangleIndex);
 		float4 surfaceNormal = tri.interpolatedNormal(hit.intersectionPointBarycentric);
-		float4 nextDirection = randomVectorOnHemisphere(scene.sampler.sample(eval.rayIndex, eval.totalRayCount), surfaceNormal, uniformDistribution);
+		float4 nextDirection = randomVectorOnHemisphere(randomSample, surfaceNormal, uniformDistribution);
 
 		float4 origin = hit.intersectionPoint;
 		hit = scene.kdTree.traverse(Ray(origin, nextDirection));

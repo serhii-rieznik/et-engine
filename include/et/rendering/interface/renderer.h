@@ -58,7 +58,7 @@ public:
 	virtual uint32_t frameNumber() const = 0;
 
 	virtual RenderPass::Pointer allocateRenderPass(const RenderPass::ConstructionInfo&) = 0;
-	virtual void submitRenderPass(RenderPass::Pointer) = 0;
+	virtual void submitRenderPass(const RenderPass::Pointer&) = 0;
 
 	/*
 	 * Buffers

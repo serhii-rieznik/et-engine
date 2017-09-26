@@ -26,6 +26,11 @@ bool RandomSampler::next(vec2& sample)
 	return _samples <= _maxSamples;
 }
 
+float4 RandomSampler::sample(uint32_t, uint32_t)
+{
+	return float4(0.0f, 0.0f, 0.0f, 0.0f);
+}
+
 UniformSampler::UniformSampler(uint32_t maxSamples)
 {
 	float sm = std::sqrt(static_cast<float>(maxSamples));
