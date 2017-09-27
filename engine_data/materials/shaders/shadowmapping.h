@@ -7,7 +7,7 @@ Texture2D<float4> shadowTexture : DECL_TEXTURE(Shadow);
 #endif
 
 static const float PCFShadowRadius = 2.0;
-static const float ShadowMapBias = 0.001 * PCFShadowRadius;
+static const float ShadowMapBias = 0.003 * PCFShadowRadius;
 
 float sampleMomentsShadow(in float2 shadowTexCoord, in float fragmentDepth, in float2 shadowmapSize)
 {
