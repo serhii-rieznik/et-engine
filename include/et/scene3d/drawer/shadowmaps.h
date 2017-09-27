@@ -32,6 +32,7 @@ public:
 
 private:
 	void validate(RenderInterface::Pointer& renderer);
+	void setupProjection(DrawerOptions& options);
 
 private:
 	Texture::Pointer _directionalShadowmapMoments;

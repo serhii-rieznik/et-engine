@@ -28,10 +28,14 @@ VSOutput vertexMain(VSInput vsIn)
 
 float4 fragmentMain(VSOutput fsIn) : SV_Target0
 {
+	static const int radius = 5;
+
+	if (radius == 0)
+		return baseColorTexture.Sample(baseColorSampler, fsIn.texCoord0);
+
 	float3 textureSize = 0.0;
 	baseColorTexture.GetDimensions(0, textureSize.x, textureSize.y, textureSize.z);
 
-	const int radius = 3;
 	
 	float2 texel = extraParameters.xy / textureSize.xy;
 	float2 coord = fsIn.texCoord0 - float(radius) * texel;

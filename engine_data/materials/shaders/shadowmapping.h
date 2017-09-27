@@ -30,25 +30,33 @@ static const float4x4 MomentsInverseTransformMatrix = float4x4(
 static const float ShadowMapBias = 0.0001;
 static const float PCFShadowRadius = PI / 2.0;
 static const float MomentsDepthBias = 0.035955884801f;
-static const float MomentBias = 1e-5;
+static const float MomentBias = 3e-5;
+
+#define Use16BitEncoding 1
+#define UseSmoothStep 1
 
 float4 encodeMoments(in float FragmentDepth)
 {
 	float Square = FragmentDepth * FragmentDepth;
 	float4 Moments = float4(FragmentDepth, Square, FragmentDepth * Square, Square * Square);
 
+#if (Use16BitEncoding)
 	float4 Out4MomentsOptimized = mul(Moments, MomentsTransformMatrix);
 	Out4MomentsOptimized.x += MomentsDepthBias;
-	
 	return Out4MomentsOptimized;
+#else
+	return Moments;
+#endif
 }
 
 float sampleMomentsShadow(in float3 shadowTexCoord, in float2 shadowmapSize)
 {
 	float4 moments = aoTexture.Sample(aoSampler, shadowTexCoord.xy * 0.5 + 0.5);
 
+#if (Use16BitEncoding)
 	moments.x -= MomentsDepthBias;
 	moments = mul(moments, MomentsInverseTransformMatrix);
+#endif
 
 	// Bias input data to avoid artifacts
 	float4 b = lerp(moments, float4(0.5f, 0.5f, 0.5f, 0.5f), MomentBias);
@@ -87,8 +95,13 @@ float sampleMomentsShadow(in float3 shadowTexCoord, in float2 shadowmapSize)
 		((z.y < z.x) ? float4(z.x, z.y, 0.0f, 1.0f) : float4(0.0f, 0.0f, 0.0f, 0.0f));
 
 	float Quotient = (Switch.x * z.z - b.x * (Switch.x + z.z) + b.y) / ((z.z - Switch.y) * (z.x - z.y));
+	float result = 1.0 - saturate(Switch.z + Switch.w * Quotient);
 
-	return 1.0 - saturate(Switch.z + Switch.w * Quotient);
+#if (UseSmoothStep)
+	return smoothstep(0.2, 1.0, result);
+#else
+	return result;
+#endif
 }
 
 float sampleShadow(in float3 shadowTexCoord, in float rotationKernel, in float2 shadowmapSize)

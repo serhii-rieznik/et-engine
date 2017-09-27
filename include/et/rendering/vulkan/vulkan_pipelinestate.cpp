@@ -169,11 +169,6 @@ void VulkanPipelineStatePrivate::generateInputLayout(const VertexDeclaration& in
 			attribs.back().format = vulkan::dataTypeValue(e.type());
 			attribs.back().location = static_cast<uint32_t>(e.usage());
 		}
-		else
-		{
-			log::warning("Vertex attrib %s ignored (not present in required layout)",
-				vertexAttributeUsageToString(e.usage()).c_str());
-		}
 	}
 
 	binding = { };

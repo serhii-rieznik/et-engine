@@ -36,8 +36,11 @@ void ShadowmapProcessor::setScene(const Scene::Pointer& scene, Light::Pointer& l
 void ShadowmapProcessor::updateLight(Light::Pointer& light)
 {
 	_light = light;
+}
 
-	vec3 d = -light->direction();
+void ShadowmapProcessor::setupProjection(DrawerOptions& options)
+{
+	vec3 d = -_light->direction();
 	vec3 s = normalize(cross(unitY, d));
 	vec3 u = normalize(cross(d, s));
 
@@ -62,18 +65,33 @@ void ShadowmapProcessor::updateLight(Light::Pointer& light)
 	{
 		float projectionOffset = 0.05f * length(viewMax - viewMin);
 		lightCamera.setViewMatrix(mat4(lightViewMatrix));
-		lightCamera.orthogonalProjection(
-			viewMin.x - projectionOffset, viewMax.x + projectionOffset,
-			viewMin.y - projectionOffset, viewMax.y + projectionOffset,
+
+		float left = viewMin.x - projectionOffset;
+		float right = viewMax.x + projectionOffset;
+		float top = viewMax.y + projectionOffset;
+		float bottom = viewMin.y - projectionOffset;
+
+		float hCenter = 0.5f * (right + left);
+		float hSize = 0.5f * (right - left) * options.shadowmapScale;
+		left = hCenter - hSize;
+		right = hCenter + hSize;
+		
+		float vCenter = 0.5f * (bottom + top);
+		float vSize = 0.5f * (top - bottom) * options.shadowmapScale;
+		bottom = vCenter - vSize;
+		top = vCenter + vSize;
+
+		lightCamera.orthogonalProjection(left, right, bottom, top,
 			-(viewMax.z + projectionOffset), -(viewMin.z - projectionOffset));
 	}
-	light->setViewMatrix(lightCamera.viewMatrix());
-	light->setProjectionMatrix(lightCamera.projectionMatrix());
+	_light->setViewMatrix(lightCamera.viewMatrix());
+	_light->setProjectionMatrix(lightCamera.projectionMatrix());
 }
 
 void ShadowmapProcessor::process(RenderInterface::Pointer& renderer, DrawerOptions& options)
 {
 	validate(renderer);
+	setupProjection(options);
 
 	_renderables.shadowpass->loadSharedVariablesFromCamera(_light);
 	_renderables.shadowpass->loadSharedVariablesFromLight(_light);
