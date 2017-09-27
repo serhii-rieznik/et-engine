@@ -21,7 +21,7 @@ public:
 
 public:
 	const Texture::Pointer& directionalShadowmap() const;
-	const Texture::Pointer& directionalShadowmapMoments() const;
+	const Sampler::Pointer& directionalShadowmapSampler() const;
 
 	void setScene(const Scene::Pointer& scene, Light::Pointer& light);
 	void process(RenderInterface::Pointer& renderer, DrawerOptions& options);
@@ -33,18 +33,23 @@ public:
 private:
 	void validate(RenderInterface::Pointer& renderer);
 	void setupProjection(DrawerOptions& options);
+	void updateConfig(RenderInterface::Pointer& renderer);
 
 private:
+	Texture::Pointer _directionalShadowmap;
 	Texture::Pointer _directionalShadowmapMoments;
 	Texture::Pointer _directionalShadowmapMomentsBuffer;
-	Texture::Pointer _directionalShadowmap;
+	Sampler::Pointer _directionalShadowmapSampler;
+	Sampler::Pointer _directionalShadowmapMomentsSampler;
 	Scene::Pointer _scene;
 	BoundingBox _sceneBoundingBox;
 	Light::Pointer _light;
+	bool _momentsBasedShadowmap = false;
 
 	struct Renderables
 	{
-		RenderPass::Pointer shadowpass;
+		RenderPass::Pointer depthBasedShadowPass;
+		RenderPass::Pointer momentsBasedShadowPass;
 		Vector<Mesh::Pointer> meshes;
 
 		RenderBatch::Pointer debugColorBatch;
@@ -62,11 +67,11 @@ private:
 };
 
 inline const Texture::Pointer& ShadowmapProcessor::directionalShadowmap() const {
-	return _directionalShadowmap;
+	return _momentsBasedShadowmap ? _directionalShadowmapMoments : _directionalShadowmap;
 }
 
-inline const Texture::Pointer& ShadowmapProcessor::directionalShadowmapMoments() const {
-	return _directionalShadowmapMoments;
+inline const Sampler::Pointer& ShadowmapProcessor::directionalShadowmapSampler() const {
+	return _momentsBasedShadowmap ? _directionalShadowmapMomentsSampler : _directionalShadowmapSampler;
 }
 
 }

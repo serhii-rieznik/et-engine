@@ -77,6 +77,9 @@ public:
 		RenderTarget depth;
 		uint32_t priority = RenderPassPriority::Default;
 		bool enableDepthBias = false;
+
+		ConstructionInfo() = default;
+		ConstructionInfo(const char* nm) : name(nm) { }
 	};
 
 	static const std::string kPassNameDefault;

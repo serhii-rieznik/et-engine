@@ -1,5 +1,7 @@
 #include <et/core/et.h>
 
+#include "../rendering/renderoptions.cpp"
+
 #include "../rendering/base/constantbuffer.cpp"
 #include "../rendering/base/helpers.cpp"
 #include "../rendering/base/indexarray.cpp"

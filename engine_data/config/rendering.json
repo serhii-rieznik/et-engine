@@ -1,0 +1,16 @@
+{
+	"ShadowMapping" : {
+		"values" : ["Hard", "PCF", "PoissonPCF", "Moments"],
+		"default" : "PoissonPCF"
+	},
+
+	"ToneMapping" : {
+		"values" : ["Disabled", "ACES", "Uncharted"],
+		"default" : "ACES"
+	},
+
+	"SRGBConversion" : {
+		"values" : ["Cheap", "Approximate", "Accurate"],
+		"default" : "Accurate"
+	}
+}

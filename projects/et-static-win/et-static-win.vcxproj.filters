@@ -694,6 +694,9 @@
     <ClInclude Include="..\..\include\et\core\pool.h">
       <Filter>Source\core</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\renderoptions.h">
+      <Filter>Source\rendering</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\et\sound\openal.h">
@@ -1282,6 +1285,9 @@
     </ClCompile>
     <ClCompile Include="..\..\include\external\spirvcross\spirv_msl.cpp">
       <Filter>spir-v-cross</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\include\et\rendering\renderoptions.cpp">
+      <Filter>Source\rendering</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

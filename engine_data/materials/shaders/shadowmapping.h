@@ -1,66 +1,21 @@
 Texture2D<float4> shadowTexture : DECL_TEXTURE(Shadow);
-SamplerComparisonState shadowSampler : DECL_SAMPLER(Shadow);
 
-Texture2D<float4> aoTexture : DECL_TEXTURE(Ao);
-SamplerState aoSampler : DECL_SAMPLER(Ao);
-
-static const float2 PoissonDistribution[8] = {
-	float2( 0.8528466f,  0.0213828f),
-	float2( 0.1141956f,  0.2880972f),
-	float2( 0.5853493f, -0.6930891f),
-	float2( 0.6362274f,  0.7029839f),
-	float2(-0.1640182f, -0.4143998f),
-	float2(-0.8862001f, -0.3506839f),
-	float2(-0.2186042f,  0.8690619f),
-	float2(-0.8200445f,  0.4156708f)
-};
-
-static const float4x4 MomentsTransformMatrix = float4x4(
-	-2.07224649f, 13.7948857237f, 0.105877704f, 9.7924062118f,
-	32.23703778f, -59.4683975703f, -1.9077466311f, -33.7652110555f,
-	-68.571074599f, 82.0359750338f, 9.3496555107f, 47.9456096605f,
-	39.3703274134f,-35.364903257f, -6.6543490743f, -23.9728048165f);
-
-static const float4x4 MomentsInverseTransformMatrix = float4x4(
-	0.2227744146f, 0.1549679261f, 0.1451988946f, 0.163127443f,
-	0.0771972861f, 0.1394629426f, 0.2120202157f, 0.2591432266f,
-	0.7926986636f, 0.7963415838f, 0.7258694464f, 0.6539092497f,
-	0.0319417555f, -0.1722823173f, -0.2758014811f, -0.3376131734f);
-
-static const float ShadowMapBias = 0.0001;
-static const float PCFShadowRadius = PI / 2.0;
-static const float MomentsDepthBias = 0.035955884801f;
-static const float MomentBias = 3e-5;
-
-#define Use16BitEncoding 1
-#define UseSmoothStep 1
-
-float4 encodeMoments(in float FragmentDepth)
-{
-	float Square = FragmentDepth * FragmentDepth;
-	float4 Moments = float4(FragmentDepth, Square, FragmentDepth * Square, Square * Square);
-
-#if (Use16BitEncoding)
-	float4 Out4MomentsOptimized = mul(Moments, MomentsTransformMatrix);
-	Out4MomentsOptimized.x += MomentsDepthBias;
-	return Out4MomentsOptimized;
+#if (ShadowMapping == ShadowMappingMoments)
+	SamplerState shadowSampler : DECL_SAMPLER(Shadow);
 #else
-	return Moments;
+	SamplerComparisonState shadowSampler : DECL_SAMPLER(Shadow);
 #endif
-}
 
-float sampleMomentsShadow(in float3 shadowTexCoord, in float2 shadowmapSize)
+static const float PCFShadowRadius = 2.0;
+static const float ShadowMapBias = 0.001 * PCFShadowRadius;
+
+float sampleMomentsShadow(in float2 shadowTexCoord, in float fragmentDepth, in float2 shadowmapSize)
 {
-	float4 moments = aoTexture.Sample(aoSampler, shadowTexCoord.xy * 0.5 + 0.5);
-
-#if (Use16BitEncoding)
-	moments.x -= MomentsDepthBias;
-	moments = mul(moments, MomentsInverseTransformMatrix);
-#endif
+	float4 moments = decodeMoments(shadowTexture.Sample(shadowSampler, shadowTexCoord));
 
 	// Bias input data to avoid artifacts
 	float4 b = lerp(moments, float4(0.5f, 0.5f, 0.5f, 0.5f), MomentBias);
-	float3 z = shadowTexCoord.z - ShadowMapBias;
+	float3 z = fragmentDepth;
 
 	// Compute a Cholesky factorization of the Hankel matrix B storing only non-
 	// trivial entries or related products
@@ -73,12 +28,15 @@ float sampleMomentsShadow(in float3 shadowTexCoord, in float2 shadowmapSize)
 
 	// Obtain a scaled inverse image of bz = (1, z.x, z.x * z.x)^T
 	float3 c = float3(1.0f, z.x, z.x * z.x);
+	
 	// Forward substitution to solve L*c1=bz
 	c.y -= b.x;
 	c.z -= b.y + L32 * c.y;
+	
 	// Scaling to solve D*c2=c1
 	c.y *= InvD22;
 	c.z *= D22 / D33D22;
+	
 	// Backward substitution to solve L^T*c3=c2
 	c.y -= L32 * c.z;
 	c.x -= dot(c.yz, b.xy);
@@ -97,38 +55,65 @@ float sampleMomentsShadow(in float3 shadowTexCoord, in float2 shadowmapSize)
 	float Quotient = (Switch.x * z.z - b.x * (Switch.x + z.z) + b.y) / ((z.z - Switch.y) * (z.x - z.y));
 	float result = 1.0 - saturate(Switch.z + Switch.w * Quotient);
 
-#if (UseSmoothStep)
-	return smoothstep(0.2, 1.0, result);
-#else
-	return result;
-#endif
+	return smoothstep(0.25, 1.0, result);
 }
 
 float sampleShadow(in float3 shadowTexCoord, in float rotationKernel, in float2 shadowmapSize)
 {
-#if (UseMomentsShadowmap)
-	
-	return sampleMomentsShadow(shadowTexCoord, shadowmapSize);
-
-#else
-	
-	float biasedZ = shadowTexCoord.z - ShadowMapBias;
 	float2 scaledUV = shadowTexCoord.xy * 0.5 + 0.5;
-	float shadow = shadowTexture.SampleCmpLevelZero(shadowSampler, scaledUV, biasedZ);
+	float biasedZ = shadowTexCoord.z - ShadowMapBias;
 
-#if (EnablePCFShadow)
+#if (ShadowMapping == ShadowMappingMoments)
+	
+	return sampleMomentsShadow(scaledUV, biasedZ, shadowmapSize);
+
+#elif (ShadowMapping == ShadowMappingPCF)
+
+	static const float2 Distribution[9] = {
+		float2(-0.5, -0.5), float2( 0.0, -0.5), float2( 0.5, -0.5),
+		float2(-0.5,  0.0), float2( 0.0,  0.0), float2( 0.5,  0.0),
+		float2(-0.5,  0.5), float2( 0.0,  0.5), float2( 0.5,  0.5),
+	};
+
+	float shadow = 0.0;
+	for (uint i = 0; i < 9; ++i)
+	{
+		float2 o = PCFShadowRadius * (Distribution[i] / shadowmapSize);
+		shadow += shadowTexture.SampleCmpLevelZero(shadowSampler, scaledUV + o, biasedZ);
+	}
+
+	return shadow / 9.0;
+
+#elif (ShadowMapping == ShadowMappingPoissonPCF)
+
+	static const float2 PoissonDistribution[9] = {
+		float2( 0.5853493, -0.6930891),
+		float2(-0.1640182, -0.4143998),
+		float2(-0.8862001, -0.3506839),
+		float2( 0.0000000,  0.0000000),
+		float2( 0.8528466,  0.0213828),
+		float2(-0.8200445,  0.4156708),
+		float2( 0.1141956,  0.2880972),
+		float2( 0.6362274,  0.7029839),
+		float2(-0.2186042,  0.8690619),
+	};
+
 	float angle = 2.0 * PI * (rotationKernel + 2.0 * PI * continuousTime);
 	float sn = sin(angle);
 	float cs = cos(angle);
-	for (uint i = 0; i < 8; ++i)
+	
+	float shadow = 0.0;
+	for (uint i = 0; i < 9; ++i)
 	{
 		float2 o = PoissonDistribution[i] / shadowmapSize;
 		float2 r = PCFShadowRadius * float2(dot(o, float2(cs, -sn)), dot(o, float2(sn,  cs)));
 		shadow += shadowTexture.SampleCmpLevelZero(shadowSampler, scaledUV + r, biasedZ);
 	}
-	shadow /= 9.0;
-#endif
+	return (shadow / 9.0);
 
-	return shadow;
-#endif
+#else
+
+	return shadowTexture.SampleCmpLevelZero(shadowSampler, scaledUV, biasedZ);
+
+#endif	
 }

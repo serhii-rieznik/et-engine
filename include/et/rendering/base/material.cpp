@@ -323,6 +323,10 @@ Program::Pointer Material::loadCode(const std::string& codeString, const std::st
 		{
 			code.insert(positionInCode, _shaderDefaultHeader);
 		}
+		else if (what == ParseDirective::Options)
+		{
+			code.insert(positionInCode, _renderer->options().optionsHeader());
+		}
 		else if (what != ParseDirective::StageDefine)
 		{
 			log::warning("Unknown directive in source code");

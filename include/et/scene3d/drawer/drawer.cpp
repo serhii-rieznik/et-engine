@@ -38,23 +38,6 @@ Drawer::Drawer(const RenderInterface::Pointer& renderer) :
 	_debugDrawer = DebugDrawer::Pointer::create(renderer);
 	_main.noise = _renderer->loadTexture(application().resolveFileName("engine_data/textures/bluenoise.png"), _cache);
 
-	Sampler::Description shadowSamplerDesc;
-	shadowSamplerDesc.wrapU = TextureWrap::ClampToEdge;
-	shadowSamplerDesc.wrapV = TextureWrap::ClampToEdge;
-	shadowSamplerDesc.wrapW = TextureWrap::ClampToEdge;
-	shadowSamplerDesc.minFilter = TextureFiltration::Linear;
-	shadowSamplerDesc.magFilter = TextureFiltration::Linear;
-	shadowSamplerDesc.mipFilter = TextureFiltration::Nearest;
-	shadowSamplerDesc.maxAnisotropy = 1.0f;
-	shadowSamplerDesc.compareEnabled = true;
-	shadowSamplerDesc.compareFunction = CompareFunction::LessOrEqual;
-	_main.shadowSampler = _renderer->createSampler(shadowSamplerDesc);
-	
-	shadowSamplerDesc.minFilter = TextureFiltration::Linear;
-	shadowSamplerDesc.magFilter = TextureFiltration::Linear;
-	shadowSamplerDesc.compareEnabled = false;
-	_main.shadowMomentsSampler = _renderer->createSampler(shadowSamplerDesc);
-
 	Scene::Pointer scene(PointerInit::CreateInplace);
 	scene->setRenderCamera(Camera::Pointer(PointerInit::CreateInplace));
 	scene->setClipCamera(scene->renderCamera());
@@ -86,6 +69,7 @@ void Drawer::draw()
 	{
 		_main.pass->loadSharedVariablesFromCamera(renderCamera);
 		_main.pass->loadSharedVariablesFromLight(_lighting.directional);
+		_main.pass->setSharedTexture(MaterialTexture::Shadow, _shadowmapProcessor->directionalShadowmap(), _shadowmapProcessor->directionalShadowmapSampler());
 
 		_main.pass->begin(RenderPassBeginInfo::singlePass());
 		_main.pass->nextSubpass();
@@ -155,8 +139,6 @@ void Drawer::validate(RenderInterface::Pointer& renderer)
 
 		_main.pass = renderer->allocateRenderPass(passInfo);
 		_main.pass->setSharedTexture(MaterialTexture::Environment, _cubemapProcessor->convolutedCubemap(), renderer->defaultSampler());
-		_main.pass->setSharedTexture(MaterialTexture::Shadow, _shadowmapProcessor->directionalShadowmap(), _main.shadowSampler);
-		_main.pass->setSharedTexture(MaterialTexture::AmbientOcclusion, _shadowmapProcessor->directionalShadowmapMoments(), _main.shadowMomentsSampler);
 		_main.pass->setSharedTexture(MaterialTexture::BRDFLookup, _cubemapProcessor->brdfLookupTexture(), renderer->clampSampler());
 		_main.pass->setSharedTexture(MaterialTexture::Noise, _main.noise, renderer->nearestSampler());
 	}

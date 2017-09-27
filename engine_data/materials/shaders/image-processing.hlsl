@@ -1,8 +1,8 @@
 #include <et>
 #include <inputdefines>
 #include <inputlayout>
+#include <options>
 #include "srgb.h"
-#include "options.h"
 
 Texture2D<float4> baseColorTexture : DECL_TEXTURE(BaseColor);
 SamplerState baseColorSampler : DECL_SAMPLER(BaseColor);
@@ -28,7 +28,7 @@ VSOutput vertexMain(VSInput vsIn)
 
 float4 fragmentMain(VSOutput fsIn) : SV_Target0
 {
-	static const int radius = 5;
+	static const int radius = 4;
 
 	if (radius == 0)
 		return baseColorTexture.Sample(baseColorSampler, fsIn.texCoord0);
@@ -36,7 +36,6 @@ float4 fragmentMain(VSOutput fsIn) : SV_Target0
 	float3 textureSize = 0.0;
 	baseColorTexture.GetDimensions(0, textureSize.x, textureSize.y, textureSize.z);
 
-	
 	float2 texel = extraParameters.xy / textureSize.xy;
 	float2 coord = fsIn.texCoord0 - float(radius) * texel;
 	

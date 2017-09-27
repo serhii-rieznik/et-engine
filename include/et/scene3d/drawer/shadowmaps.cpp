@@ -88,45 +88,54 @@ void ShadowmapProcessor::setupProjection(DrawerOptions& options)
 	_light->setProjectionMatrix(lightCamera.projectionMatrix());
 }
 
+void ShadowmapProcessor::updateConfig(RenderInterface::Pointer& renderer)
+{
+	const std::string& shadowmapMode = renderer->options().optionValue(RenderOptions::OptionClass::ShadowMapping).name;
+	_momentsBasedShadowmap = (shadowmapMode == "Moments");
+}
+
 void ShadowmapProcessor::process(RenderInterface::Pointer& renderer, DrawerOptions& options)
 {
 	validate(renderer);
 	setupProjection(options);
+	updateConfig(renderer);
 
-	_renderables.shadowpass->loadSharedVariablesFromCamera(_light);
-	_renderables.shadowpass->loadSharedVariablesFromLight(_light);
-	
-	_renderables.shadowpass->begin(RenderPassBeginInfo::singlePass());
-	_renderables.shadowpass->pushImageBarrier(_directionalShadowmap, ResourceBarrier(TextureState::DepthRenderTarget));
-	_renderables.shadowpass->nextSubpass();
+	RenderPass::Pointer activePass = _momentsBasedShadowmap ? _renderables.momentsBasedShadowPass : _renderables.depthBasedShadowPass;
+	activePass->loadSharedVariablesFromCamera(_light);
+	activePass->loadSharedVariablesFromLight(_light);
+	activePass->begin(RenderPassBeginInfo::singlePass());
+	activePass->pushImageBarrier(_directionalShadowmap, ResourceBarrier(TextureState::DepthRenderTarget));
+	activePass->nextSubpass();
 	for (Mesh::Pointer& mesh : _renderables.meshes)
 	{
 		const mat4& transform = mesh->transform();
 		const mat4& rotationTransform = mesh->rotationTransform();
-		_renderables.shadowpass->setSharedVariable(ObjectVariable::WorldTransform, transform);
-		_renderables.shadowpass->setSharedVariable(ObjectVariable::WorldRotationTransform, rotationTransform);
+		activePass->setSharedVariable(ObjectVariable::WorldTransform, transform);
+		activePass->setSharedVariable(ObjectVariable::WorldRotationTransform, rotationTransform);
 		for (const RenderBatch::Pointer& batch : mesh->renderBatches())
-			_renderables.shadowpass->pushRenderBatch(batch);
+			activePass->pushRenderBatch(batch);
 	}
-	_renderables.shadowpass->endSubpass();
+	activePass->endSubpass();
+	activePass->pushImageBarrier(_directionalShadowmap, ResourceBarrier(TextureState::ShaderResource));
+	activePass->end();
+	renderer->submitRenderPass(activePass);
 
-	_renderables.shadowpass->pushImageBarrier(_directionalShadowmap, ResourceBarrier(TextureState::ShaderResource));
-	_renderables.shadowpass->end();
-	renderer->submitRenderPass(_renderables.shadowpass);
+	if (_momentsBasedShadowmap)
+	{
+		_renderables.blurPass0->begin(RenderPassBeginInfo::singlePass());
+		_renderables.blurPass0->nextSubpass();
+		_renderables.blurPass0->pushRenderBatch(_renderables.blurBatch0);
+		_renderables.blurPass0->endSubpass();
+		_renderables.blurPass0->end();
+		renderer->submitRenderPass(_renderables.blurPass0);
 
-	_renderables.blurPass0->begin(RenderPassBeginInfo::singlePass());
-	_renderables.blurPass0->nextSubpass();
-	_renderables.blurPass0->pushRenderBatch(_renderables.blurBatch0);
-	_renderables.blurPass0->endSubpass();
-	_renderables.blurPass0->end();
-	renderer->submitRenderPass(_renderables.blurPass0);
-
-	_renderables.blurPass1->begin(RenderPassBeginInfo::singlePass());
-	_renderables.blurPass1->nextSubpass();
-	_renderables.blurPass1->pushRenderBatch(_renderables.blurBatch1);
-	_renderables.blurPass1->endSubpass();
-	_renderables.blurPass1->end();
-	renderer->submitRenderPass(_renderables.blurPass1);
+		_renderables.blurPass1->begin(RenderPassBeginInfo::singlePass());
+		_renderables.blurPass1->nextSubpass();
+		_renderables.blurPass1->pushRenderBatch(_renderables.blurBatch1);
+		_renderables.blurPass1->endSubpass();
+		_renderables.blurPass1->end();
+		renderer->submitRenderPass(_renderables.blurPass1);
+	}
 
 	if (options.drawShadowmap)
 	{
@@ -169,32 +178,47 @@ void ShadowmapProcessor::validate(RenderInterface::Pointer& renderer)
 	}
 
 	{
-		RenderPass::ConstructionInfo desc;
+		Sampler::Description shadowSamplerDesc;
+		shadowSamplerDesc.wrapU = TextureWrap::ClampToEdge;
+		shadowSamplerDesc.wrapV = TextureWrap::ClampToEdge;
+		shadowSamplerDesc.wrapW = TextureWrap::ClampToEdge;
+		shadowSamplerDesc.minFilter = TextureFiltration::Linear;
+		shadowSamplerDesc.magFilter = TextureFiltration::Linear;
+		shadowSamplerDesc.mipFilter = TextureFiltration::Nearest;
+		shadowSamplerDesc.maxAnisotropy = 16.0f;
+		shadowSamplerDesc.compareEnabled = true;
+		shadowSamplerDesc.compareFunction = CompareFunction::LessOrEqual;
+		_directionalShadowmapSampler = renderer->createSampler(shadowSamplerDesc);
+
+		shadowSamplerDesc.compareEnabled = false;
+		_directionalShadowmapMomentsSampler = renderer->createSampler(shadowSamplerDesc);
+	}
+
+	{
+		RenderPass::ConstructionInfo desc("depth");
+		desc.depth.texture = _directionalShadowmap;
+		desc.depth.loadOperation = FramebufferOperation::Clear;
+		desc.depth.storeOperation = FramebufferOperation::Store;
+		desc.depth.useDefaultRenderTarget = false;
+		desc.depth.enabled = true;
+		_renderables.depthBasedShadowPass = renderer->allocateRenderPass(desc);
+
 		desc.color[0].texture = _directionalShadowmapMoments;
 		desc.color[0].loadOperation = FramebufferOperation::Clear;
 		desc.color[0].storeOperation = FramebufferOperation::Store;
 		desc.color[0].clearValue = vec4(std::numeric_limits<float>::max());
 		desc.color[0].useDefaultRenderTarget = false;
 		desc.color[0].enabled = true;
-		
-		desc.depth.texture = _directionalShadowmap;
-		desc.depth.loadOperation = FramebufferOperation::Clear;
-		desc.depth.storeOperation = FramebufferOperation::Store;
-		desc.depth.useDefaultRenderTarget = false;
-		desc.depth.enabled = true;
-		
-		desc.name = "depth";
-		_renderables.shadowpass = renderer->allocateRenderPass(desc);
+		_renderables.momentsBasedShadowPass = renderer->allocateRenderPass(desc);
 	}
 
 	{
-		RenderPass::ConstructionInfo desc;
+		RenderPass::ConstructionInfo desc("default");
 		desc.color[0].loadOperation = FramebufferOperation::Load;
 		desc.color[0].storeOperation = FramebufferOperation::Store;
 		desc.color[0].enabled = true;
 		desc.color[0].useDefaultRenderTarget = true;
 		desc.depth.enabled = false;
-		desc.name = "default";
 		desc.priority = RenderPassPriority::UI - 1;
 		_renderables.debugPass = renderer->allocateRenderPass(desc);
 

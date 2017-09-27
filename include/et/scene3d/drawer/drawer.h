@@ -42,6 +42,8 @@ public:
 	const Texture::Pointer& supportTexture(SupportTexture);
 	const vec4& latestCameraJitter() const;
 
+	RenderInterface::Pointer renderInterface() const;
+
 private:
 	void validate(RenderInterface::Pointer&);
 
@@ -63,8 +65,6 @@ private:
 		Texture::Pointer depth;
 		Texture::Pointer velocity;
 		Texture::Pointer noise;
-		Sampler::Pointer shadowSampler;
-		Sampler::Pointer shadowMomentsSampler;
 	} _main;
 
 	struct Lighting
@@ -80,8 +80,7 @@ private:
 	uint64_t _frameIndex = 0;
 };
 
-inline const Light::Pointer& Drawer::directionalLight()
-{
+inline const Light::Pointer& Drawer::directionalLight() {
 	return _lighting.directional;
 }
 
@@ -100,9 +99,12 @@ inline const Texture::Pointer& Drawer::supportTexture(SupportTexture tex)
 	}
 }
 
-inline const vec4& Drawer::latestCameraJitter() const
-{
+inline const vec4& Drawer::latestCameraJitter() const {
 	return _jitter;
+}
+
+inline RenderInterface::Pointer Drawer::renderInterface() const {
+	return _renderer;
 }
 
 }

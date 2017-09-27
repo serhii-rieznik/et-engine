@@ -11,6 +11,7 @@
 #include <et/core/objectscache.h>
 #include <et/imaging/texturedescription.h>
 #include <et/rendering/rendercontextparams.h>
+#include <et/rendering/renderoptions.h>
 #include <et/rendering/base/materiallibrary.h>
 #include <et/rendering/interface/buffer.h>
 #include <et/rendering/interface/renderpass.h>
@@ -121,6 +122,17 @@ public:
 		return _renderBatchPool.allocate(std::forward<Args>(args)...);
 	}
 
+	/*
+	 * Options
+	 */
+	RenderOptions& options() {
+		return _options;
+	}
+	
+	const RenderOptions& options() const {
+		return _options;
+	}
+
 protected:
 	void initInternalStructures();
 	void shutdownInternalStructures();
@@ -133,6 +145,7 @@ private:
 	MaterialLibrary _sharedMaterialLibrary;
 	ConstantBuffer _sharedConstantBuffer;
 	RenderBatchPool _renderBatchPool;
+	RenderOptions _options;
 	Texture::Pointer _checkersTexture;
 	Texture::Pointer _whiteTexture;
 	Texture::Pointer _flatNormalTexture;
@@ -297,8 +310,13 @@ inline const Sampler::Pointer& RenderInterface::nearestSampler()
 inline void RenderInterface::initInternalStructures()
 {
 	_sharedConstantBuffer.init(this, ConstantBufferStaticAllocation | ConstantBufferDynamicAllocation);
-	
 	_sharedMaterialLibrary.init(this);
+	_options.load();
+
+	_options.optionChanged.connect([this](RenderOptions::ValueChangedEvent) {
+		_sharedMaterialLibrary.reloadMaterials();
+	});
+
 	whiteTexture();
 	blackTexture();
 	checkersTexture();

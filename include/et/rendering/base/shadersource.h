@@ -19,6 +19,7 @@ enum class ParseDirective : uint32_t
 	InputDefines,
 	StageDefine,
 	UserDefined,
+	Options,
 };
 
 using ParseDirectiveCallback = std::function<void(ParseDirective, std::string&, uint32_t)>;

@@ -14,7 +14,7 @@ namespace s3d
 
 const TextureFormat HDRTextureFormat = TextureFormat::RGBA16F;
 
-HDRFlow::HDRFlow(const RenderInterface::Pointer& ren) : 
+HDRFlow::HDRFlow(const RenderInterface::Pointer& ren) :
 	_renderer(ren)
 {
 	RenderPass::ConstructionInfo desc;

@@ -66,14 +66,13 @@ private:
 
 private:
 	RenderInterface::Pointer _renderer;
+
 	Texture::Pointer _primaryTarget;
 	Texture::Pointer _secondaryTarget;
 	Texture::Pointer _luminanceTarget;
 	Texture::Pointer _luminanceHistory;
 	Texture::Pointer _luminanceHistogram;
 	Texture::Pointer _renderHistory;
-
-	// Compute::Pointer _testCompute;
 
 	struct Materials
 	{

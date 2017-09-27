@@ -16,6 +16,7 @@ const std::string kDirectiveDefaultHeader = "et";
 const std::string kDirectiveInputLayout = "inputlayout";
 const std::string kDirectiveInputDefines = "inputdefines";
 const std::string kDirectiveStageDefine = "stagedefine";
+const std::string kDirectiveOptions = "options";
 
 inline bool getDirective(const std::string& source, size_t& pos, std::string& fileName,
 	ParseDirective& directive, const Set<ParseDirective>& skipDirectives)
@@ -59,6 +60,7 @@ inline bool getDirective(const std::string& source, size_t& pos, std::string& fi
 			{ kDirectiveDefaultHeader, ParseDirective::DefaultHeader },
 			{ kDirectiveStageDefine, ParseDirective::StageDefine },
 			{ kDirectiveInputDefines, ParseDirective::InputDefines },
+			{ kDirectiveOptions, ParseDirective::Options },
 		};
 
 		auto i = validDirectives.find(fileName);

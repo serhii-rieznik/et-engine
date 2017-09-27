@@ -1,7 +1,10 @@
 #include <et>
 #include <inputdefines>
 #include <inputlayout>
-#include "options.h"
+#include <options>
+
+#define EnableClearCoat 0
+#define EnableIridescence 0
 
 cbuffer MaterialVariables : DECL_BUFFER(Material)
 {
@@ -90,6 +93,7 @@ VSOutput vertexMain(VSInput vsIn)
 #include "environment.h"
 #include "atmosphere.h"
 #include "importance-sampling.h"
+#include "moments.h"
 #include "shadowmapping.h"
 #include "iridescence.h"
 

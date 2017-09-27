@@ -1,8 +1,8 @@
 #include <et>
 #include <inputdefines>
 #include <inputlayout>
+#include <options>
 #include "srgb.h"
-#include "options.h"
 
 #define LuminanceLowerRange 0.001
 #define EnableTemporalAA 0
@@ -109,13 +109,9 @@ float4 fragmentMain(VSOutput fsIn) : SV_Target0
 #elif (TONE_MAPPING)
 
 	float3 source = baseColorTexture.Sample(baseColorSampler, fsIn.texCoord0).xyz;
-	#if (DisablePostProcess)
-		return source;
-	#else
-		float lum = dot(source, float3(0.299, 0.587, 0.114));
-		float exposure = emissiveColorTexture.SampleLevel(emissiveColorSampler, fsIn.texCoord0, 10.0).x;
-		return float4(toneMapping(source, exposure), 1.0);
-	#endif
+	float lum = dot(source, float3(0.299, 0.587, 0.114));
+	float exposure = emissiveColorTexture.SampleLevel(emissiveColorSampler, fsIn.texCoord0, 10.0).x;
+	return float4(toneMapping(source, exposure), 1.0);
 
 #elif (TEMPORAL_AA)
 

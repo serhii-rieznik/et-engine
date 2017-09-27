@@ -33,6 +33,8 @@ public:
 	void init(RenderInterface*);
 	void shutdown();
 
+	void reloadMaterials();
+
 	Material::Pointer loadDefaultMaterial(DefaultMaterial mtl);
 	Material::Pointer loadMaterial(const std::string& fileName);
 	Material::Pointer loadMaterialFromJson(const std::string& json, const std::string& baseFolder);

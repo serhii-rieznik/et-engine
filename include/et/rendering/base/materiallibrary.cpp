@@ -51,6 +51,15 @@ void MaterialLibrary::shutdown()
 	_loadedMaterials.clear();
 }
 
+void MaterialLibrary::reloadMaterials()
+{
+	for (Material::Pointer mtl : _loadedMaterials)
+	{
+		mtl->releaseInstances();
+		mtl->loadFromJson(loadTextFile(mtl->origin()), getFilePath(mtl->origin()));
+	}
+}
+
 Material::Pointer MaterialLibrary::loadDefaultMaterial(DefaultMaterial mtl)
 {
 	ET_ASSERT(mtl < DefaultMaterial::Count);

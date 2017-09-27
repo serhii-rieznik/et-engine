@@ -1,14 +1,3 @@
-#define ToneMappingDisabled 0
-#define ToneMappingACES 1
-#define ToneMappingUncharted 2
-
-#define SRGBConversionCheap 0
-#define SRGBConversionApproximate 1
-#define SRGBConversionAccurate 2
-
-#define ToneMapping ToneMappingACES
-#define SRGBConversion SRGBConversionAccurate
-
 float3 srgbToLinear(in float3 c)
 {
 #if (SRGBConversion == SRGBConversionApproximate)
