@@ -131,7 +131,7 @@ void Drawer::validate(RenderInterface::Pointer& renderer)
 		_main.depth = renderer->createTexture(desc);
 
 		RenderPass::ConstructionInfo passInfo;
-		passInfo.name = RenderPass::kPassNameDefault;
+		passInfo.name = "forward";
 
 		passInfo.color[0].texture = _main.color;
 		passInfo.color[0].loadOperation = FramebufferOperation::Clear;

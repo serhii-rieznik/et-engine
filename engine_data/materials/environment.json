@@ -1,6 +1,6 @@
 {
 	"name" : "environment",
-	"default" : 
+	"forward" : 
 	{ 
 		"input-layout" : {
 			"position" : 3,

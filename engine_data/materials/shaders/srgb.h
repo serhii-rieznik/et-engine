@@ -1,29 +1,49 @@
-#define GAMMA_CORRECTION_IN  2.2
-#define GAMMA_CORRECTION_OUT 1.0 / 2.2
-
 #define ToneMappingDisabled 0
 #define ToneMappingACES 1
 #define ToneMappingUncharted 2
+
+#define SRGBConversionCheap 0
+#define SRGBConversionApproximate 1
+#define SRGBConversionAccurate 2
+
 #define ToneMapping ToneMappingACES
+#define SRGBConversion SRGBConversionAccurate
 
-float srgbToLinear(in float l)
+float3 srgbToLinear(in float3 c)
 {
-	return pow(l, GAMMA_CORRECTION_IN);
+#if (SRGBConversion == SRGBConversionApproximate)
+
+	return pow(c, 2.2);
+
+#elif (SRGBConversion == SRGBConversionAccurate)
+
+	float3 linearRGBLo = c / 12.92;
+	float3 linearRGBHi = pow((c + 0.055) / 1.055, 2.4);
+	return lerp(linearRGBLo, linearRGBHi, step(0.04045, c));
+
+#else
+
+	return c * c;
+
+#endif
 }
 
-float3 srgbToLinear(in float3 l)
+float3 linearToSRGB(in float3 c)
 {
-	return pow(l, float3(GAMMA_CORRECTION_IN, GAMMA_CORRECTION_IN, GAMMA_CORRECTION_IN));
-}
+#if (SRGBConversion == SRGBConversionApproximate)
 
-float4 srgbToLinear(in float4 l)
-{
-	return pow(l, float4(GAMMA_CORRECTION_IN, GAMMA_CORRECTION_IN, GAMMA_CORRECTION_IN, GAMMA_CORRECTION_IN));
-}
+	return pow(c, 1.0/2.2);
 
-float3 linearToSRGB(in float3 s)
-{
-	return pow(s, float3(GAMMA_CORRECTION_OUT, GAMMA_CORRECTION_OUT, GAMMA_CORRECTION_OUT));
+#elif (SRGBConversion == SRGBConversionAccurate)
+
+	float3 sRGBLo = c * 12.92;
+	float3 sRGBHi = (pow(c, 1.0/2.4) * 1.055) - 0.055;
+	return lerp(sRGBLo, sRGBHi, step(0.0031308, c));
+#else
+
+	return sqrt(c);
+
+#endif
 }
 
 float3 toneMapping(float3 color, float exposure)
@@ -40,11 +60,11 @@ float3 toneMapping(float3 color, float exposure)
     	{-0.10208,  1.10813, -0.00605},
 	    {-0.00327, -0.07276, 1.07602}};
 
-	const float a = 0.0245786;
-	const float b = 0.000090537;
-	const float c = 0.983729;
-	const float d = 0.4329510;
-	const float e = 0.238081;
+	static const float a = 0.0245786;
+	static const float b = 0.000090537;
+	static const float c = 0.983729;
+	static const float d = 0.4329510;
+	static const float e = 0.238081;
 	color = linearToSRGB(color * exposure);
 	color = mul(ACESInputMat, color);
     color = (color * (color + a) - b) / (color * (c * color + d) + e);
@@ -52,21 +72,21 @@ float3 toneMapping(float3 color, float exposure)
 
 #elif (ToneMapping == ToneMappingUncharted)
 
-	float A = 0.15;
-	float B = 0.50;
-	float C = 0.10;
-	float D = 0.20;
-	float E = 0.02;
-	float F = 0.30;
-	float W = 11.2;
+	static const float A = 0.15;
+	static const float B = 0.50;
+	static const float C = 0.10;
+	static const float D = 0.20;
+	static const float E = 0.02;
+	static const float F = 0.30;
+	static const float W = 11.2;
+	static const float whiteScale = ((W * (A * W + C * B) + D * E) / (W * (A * W + B) + D * F)) - E / F;
 	color *= exposure;
-	float whiteScale = ((W * (A * W + C * B) + D * E) / (W * (A * W + B) + D * F)) - E / F;
 	color = whiteScale * (((color * (A * color + C * B) + D * E) / (color * (A * color + B) + D * F)) - E / F);
 	return linearToSRGB(saturate(color));
 
 #else
 
-	return linearToSRGB(saturate(color * exposure));
+	return linearToSRGB(saturate(exposure * color));
 
 #endif
 	

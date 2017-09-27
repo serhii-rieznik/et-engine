@@ -74,10 +74,9 @@ float4 fragmentMain(VSOutput fsIn) : SV_Target0
 #elif (RESOLVE_LUMINANCE)
 
 	float previousExposure = shadowTexture.SampleLevel(shadowSampler, float2(0.5, 0.5), 0.0).x;
-	float expoCorrection = 0.0;
 	float lum = exp(averageColor.x);
-	float ev100 = log2(lum * 100.0 / 12.5) - expoCorrection;
-	float exposure = 1.0 / (0.125 * pow(2.0, ev100));
+	float ev100 = log2(lum * 100.0 / 12.5);
+	float exposure = 1.0 / (1.2 * exp2(ev100));
 	float adaptationSpeed = lerp(3.0, 5.0, step(exposure - previousExposure, 0.0));
 	return lerp(previousExposure, exposure, 1.0f - exp(-deltaTime * adaptationSpeed));
 

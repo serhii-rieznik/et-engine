@@ -782,7 +782,7 @@ bool VulkanRenderPass::fillStatistics(uint64_t* buffer, RenderPassStatistics& st
 	strncpy(stat.name, info().name.c_str(), std::min(static_cast<size_t>(MaxRenderPassName), info().name.size()));
 	stat.gpuExecution = static_cast<uint64_t>((periods * periodDuration) / 1000.0);
 	stat.cpuExecution = _private->executionEndTime - _private->executionBeginTime;
-	stat.cpuBuild = _private->buildEndTime - _private->buildBeginTime;;
+	stat.cpuBuild = _private->buildEndTime - _private->buildBeginTime;
 
 	return true;
 }

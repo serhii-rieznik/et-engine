@@ -178,7 +178,7 @@ FSOutput fragmentMain(VSOutput fsIn)
     	lerp(indirectDiffuse + indirectSpecular, ccIndirectSpecular, clearCoatFresnel);
 #else
 
-    float3 result = shadow * ((directDiffuse + directSpecular) * lightColor) +  (indirectDiffuse + indirectSpecular);
+    float3 result = shadow * ((directDiffuse + directSpecular) * lightColor) + (indirectDiffuse + indirectSpecular);
 
 #endif
 

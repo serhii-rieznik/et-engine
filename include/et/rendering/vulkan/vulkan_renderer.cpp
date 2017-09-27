@@ -370,7 +370,7 @@ void VulkanRenderer::begin()
 		VULKAN_CALL(vkGetQueryPoolResults(_private->vulkan().device, currentFrame.timestampsQueryPool, 0,
 			currentFrame.timestampIndex, sizeof(timestampData), timestampData, sizeof(uint64_t), VK_QUERY_RESULT_64_BIT | VK_QUERY_RESULT_WAIT_BIT));
 		
-		memset(&_statistics, 0, sizeof(_statistics));
+		_statistics = { };
 		for (VulkanRenderPass::Pointer& pass : _private->passes[frameIndex()])
 		{
 			if (pass->fillStatistics(timestampData, _statistics.passes[_statistics.activeRenderPasses]))

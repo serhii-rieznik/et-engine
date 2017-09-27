@@ -18,7 +18,7 @@
 		"code" : "shaders/depth"
 	},
 
-	"default" : 
+	"forward" : 
 	{
 		"input-layout" : {
 			"position" : 3,

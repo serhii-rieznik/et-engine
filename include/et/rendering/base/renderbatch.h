@@ -22,6 +22,7 @@ public:
 
 public:
 	RenderBatch() = default;
+	~RenderBatch();
 
 	RenderBatch(const MaterialInstance::Pointer&, const VertexStream::Pointer&, uint32_t firstIndex, uint32_t indexCount);
 
@@ -105,19 +106,20 @@ public:
 private:
 	void flush()
 	{
-		auto i = std::remove_if(_active.begin(), _active.end(), [](RenderBatch::Pointer& b) {
-			bool notUsedAnywhere = (b->retainCount() == 1);
-			
-			if (notUsedAnywhere)
-				b->clear();
-
-			return b->retainCount() == 1;
-		});
-
-		if (i != _active.end())
+		size_t index = 0;
+		while (index < _active.size())
 		{
-			_pool.insert(_pool.end(), i, _active.end());
-			_active.erase(i, _active.end());
+			if (_active[index]->retainCount() == 1)
+			{
+				std::swap(_active[index], _active.back());
+				_pool.emplace_back(_active.back());
+				_pool.back()->clear();
+				_active.pop_back();
+			}
+			else
+			{
+				++index;
+			}
 		}
 	}
 

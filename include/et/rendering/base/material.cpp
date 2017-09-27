@@ -369,14 +369,19 @@ const MaterialInstanceCollection& Material::instances() const
 
 void Material::flushInstances()
 {
-	auto i = std::remove_if(_activeInstances.begin(), _activeInstances.end(), [](const MaterialInstance::Pointer& inst) {
-		return inst->retainCount() == 1;
-	});
-	
-	if (i != _activeInstances.end())
+	size_t index = 0;
+	while (index < _activeInstances.size())
 	{
-		_instancesPool.insert(_instancesPool.end(), i, _activeInstances.end());
-		_activeInstances.erase(i, _activeInstances.end());
+		if (_activeInstances[index]->retainCount() == 1)
+		{
+			std::swap(_activeInstances[index], _activeInstances.back());
+			_instancesPool.emplace_back(_activeInstances.back());
+			_activeInstances.pop_back();
+		}
+		else
+		{
+			++index;
+		}
 	}
 }
 
@@ -384,7 +389,6 @@ void Material::releaseInstances()
 {
 	_activeInstances.clear();
 	_instancesPool.clear();
-
 }
 
 void Material::invalidateTextureSet()
@@ -570,7 +574,6 @@ void MaterialInstance::invalidateTextureSet()
 	for (auto& hld : _textureSets)
 		hld.second.valid = false;
 }
-
 
 void MaterialInstance::invalidateImageSet()
 {
