@@ -49,6 +49,7 @@ public:
 public:
 	HDRFlow(const RenderInterface::Pointer&);
 
+	void setColorGradingTable(const std::string&);
 	void resizeRenderTargets(const vec2i&) override;
 	void render() override;
 
@@ -73,6 +74,8 @@ private:
 	Texture::Pointer _luminanceHistory;
 	Texture::Pointer _luminanceHistogram;
 	Texture::Pointer _renderHistory;
+	Texture::Pointer _colorGradingTexture;
+	Sampler::Pointer _colorGradingSampler;
 
 	struct Materials
 	{

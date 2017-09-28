@@ -26,6 +26,29 @@ HDRFlow::HDRFlow(const RenderInterface::Pointer& ren) :
 	
 	_materials.debug = _renderer->sharedMaterialLibrary().loadMaterial(application().resolveFileName("engine_data/materials/textured2d-transformed-lod.json"));
 	_materials.posteffects = _renderer->sharedMaterialLibrary().loadMaterial(application().resolveFileName("engine_data/materials/posteffects.json"));
+
+	Sampler::Description smp;
+	smp.maxAnisotropy = 1.0f;
+	smp.minFilter = TextureFiltration::Linear;
+	smp.magFilter = TextureFiltration::Linear;
+	smp.wrapU = TextureWrap::ClampToEdge;
+	smp.wrapV = TextureWrap::ClampToEdge;
+	_colorGradingSampler = _renderer->createSampler(smp);
+
+	setColorGradingTable(emptyString);
+}
+
+void HDRFlow::setColorGradingTable(const std::string& st)
+{
+	ObjectsCache localCache;
+	if (st.empty())
+	{
+		_colorGradingTexture = _renderer->loadTexture(application().resolveFileName("engine_data/textures/colorgrading.png"), localCache);
+	}
+	else
+	{
+		_colorGradingTexture = _renderer->loadTexture(st, localCache);
+	}
 }
 
 void HDRFlow::resizeRenderTargets(const vec2i& sz)
@@ -199,6 +222,7 @@ void HDRFlow::tonemap()
 {
 	RenderBatch::Pointer batch = renderhelper::createFullscreenRenderBatch(_primaryTarget, _materials.posteffects, _renderer->clampSampler());
 	batch->material()->setTextureWithSampler(MaterialTexture::EmissiveColor, _luminanceTarget, _renderer->clampSampler());
+	batch->material()->setTextureWithSampler(MaterialTexture::Shadow, _colorGradingTexture, _colorGradingSampler);
 
 	_passes.tonemapping->begin(RenderPassBeginInfo::singlePass());
 	_passes.tonemapping->nextSubpass();

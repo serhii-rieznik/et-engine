@@ -109,9 +109,19 @@ float4 fragmentMain(VSOutput fsIn) : SV_Target0
 #elif (TONE_MAPPING)
 
 	float3 source = baseColorTexture.Sample(baseColorSampler, fsIn.texCoord0).xyz;
-	float lum = dot(source, float3(0.299, 0.587, 0.114));
 	float exposure = emissiveColorTexture.SampleLevel(emissiveColorSampler, fsIn.texCoord0, 10.0).x;
-	return float4(toneMapping(source, exposure), 1.0);
+	float3 ldrColor = toneMapping(source, exposure);
+
+	float z0 = floor(ldrColor.z * 16.0) / 16.0;
+	float z1 = z0 + 1.0 / 16.0;
+	float d = 0.175 / 256.0;
+	float v = ldrColor.y + 0.25 / 16.0;
+	float u = ldrColor.x / 16.0 + d;
+	float3 sample0 = shadowTexture.Sample(shadowSampler, float2(u + z0, v));
+	float3 sample1 = shadowTexture.Sample(shadowSampler, float2(u + z1, v));
+	float3 sample2 = lerp(sample0, sample1, (ldrColor.z - z0) * 16.0);
+
+	return float4(sample2, 1.0);
 
 #elif (TEMPORAL_AA)
 
