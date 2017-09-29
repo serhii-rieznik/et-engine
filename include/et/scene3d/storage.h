@@ -15,6 +15,8 @@
 
 namespace et
 {
+class RenderContext;
+
 namespace s3d
 {
 class Storage

@@ -14,7 +14,7 @@ namespace et
 namespace s3d
 {
 
-class ShadowmapProcessor : public Shared
+class ShadowmapProcessor : public Object
 {
 public:
 	ET_DECLARE_POINTER(ShadowmapProcessor);

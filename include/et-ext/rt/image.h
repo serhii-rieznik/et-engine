@@ -16,14 +16,14 @@ namespace rt
 {
 
 class ImagePrivate;
-class Image : public Shared
+class Image : public Object
 {
 public:
 	ET_DECLARE_POINTER(Image);
 
 public:
 	Image(const TextureDescription::Pointer);
-	virtual ~Image();
+	~Image() override;
 
 	float4 pointSample(uint32_t x, uint32_t y);
 	float4 sample(float u, float v);

@@ -7,19 +7,15 @@
 
 #pragma once
 
-#include <cstdarg>
+#if defined (ET_CORE_INCLUDES)
 
 namespace et
 {
 namespace log
 {
-class Output : public Shared
+struct Output : public Object
 {
-public:
 	ET_DECLARE_POINTER(Output);
-
-public:
-	virtual ~Output() {}
 
 	virtual void debug(const char*, va_list) {}
 	virtual void info(const char*, va_list) {}
@@ -73,3 +69,5 @@ public:
 };
 }
 }
+
+#endif

@@ -12,6 +12,8 @@
 
 namespace et
 {
+class RenderContext;
+
 namespace s3d
 {
 class ParticleSystem : public BaseElement, public EventReceiver

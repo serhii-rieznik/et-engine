@@ -11,7 +11,7 @@
 
 namespace et
 {
-class Camera : public Shared
+class Camera : public Object
 {
 public:
 	ET_DECLARE_POINTER(Camera);

@@ -26,7 +26,7 @@ struct ET_ALIGNED(16) EmitterInteraction
 };
 
 class Scene;
-class Emitter : public Shared
+class Emitter : public Object
 {
 public:
 	ET_DECLARE_POINTER(Emitter);
@@ -40,8 +40,8 @@ public:
 	};
 
 public:
-	Emitter(Type t) : _type(t) { }
-	virtual ~Emitter() = default;
+	Emitter(Type t) : 
+		_type(t) { }
 
 	virtual void prepare(const Scene&)
 		{ }

@@ -22,13 +22,10 @@ enum class VariantClass : int32_t
 	Dictionary,
 };
 
-class VariantBase : public Shared
+struct VariantBase : public Object
 {
-public:
 	ET_DECLARE_POINTER(VariantBase);
 
-public:
-	virtual ~VariantBase() {}
 	virtual VariantClass variantClass() const = 0;
 };
 

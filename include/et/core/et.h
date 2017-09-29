@@ -10,6 +10,7 @@
 #include <cmath>
 #include <ctime>
 #include <cstdlib>
+#include <cstdarg>
 #include <cstring>
 #include <cstddef>
 #include <cstdint>
@@ -55,14 +56,9 @@
 #include <et/core/memoryallocator.h>
 #include <et/core/remoteheap.h>
 #include <et/core/intrusiveptr.h>
-#include <et/core/log.h>
 
 namespace et
 {
-ObjectFactory& sharedObjectFactory();
-BlockMemoryAllocator& sharedBlockAllocator();
-std::vector<log::Output::Pointer>& sharedLogOutputs();
-
 template <typename T>
 struct SharedBlockAllocatorSTDProxy
 {
@@ -217,6 +213,7 @@ inline uint32_t alignDownTo(uint32_t sz, uint32_t al)
 #include <et/core/stream.h>
 #include <et/core/hierarchy.h>
 #include <et/core/dictionary.h>
+#include <et/core/log.h>
 
 #include <et/geometry/vector4.h>
 #include <et/geometry/matrix3.h>
@@ -228,6 +225,11 @@ inline uint32_t alignDownTo(uint32_t sz, uint32_t al)
 
 namespace et
 {
+
+ObjectFactory& sharedObjectFactory();
+BlockMemoryAllocator& sharedBlockAllocator();
+std::vector<log::Output::Pointer>& sharedLogOutputs();
+
 typedef vector2<float> vec2;
 typedef vector3<float> vec3;
 typedef vector4<float> vec4;

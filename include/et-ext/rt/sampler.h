@@ -14,9 +14,8 @@ namespace et
 namespace rt
 {
 
-class Sampler : public Shared
+struct Sampler : public Object
 {
-public:
 	ET_DECLARE_POINTER(Sampler);
 
 	enum class Type : uint32_t
@@ -26,8 +25,6 @@ public:
 		Stratified,
 	};
 
-public:
-	virtual ~Sampler() { }
 	virtual bool next(vec2& sample) = 0;
 };
 

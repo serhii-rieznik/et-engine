@@ -18,7 +18,7 @@ VertexArray::VertexArray(const VertexDeclaration& decl, uint32_t size) : _size(s
 	{
 		const VertexElement& e = decl.element(i);
 		_decl.push_back(e.usage(), e.type());
-		_chunks.push_back(VertexDataChunk(e.usage(), e.type(), size));
+		_chunks.push_back(VertexDataChunk::create(e.usage(), e.type(), size));
 	}
 }
 

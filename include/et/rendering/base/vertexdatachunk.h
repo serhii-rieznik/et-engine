@@ -12,71 +12,67 @@
 
 namespace et
 {
-	class VertexDataChunkData : public Shared
+class VertexDataChunkData : public Object
+{
+public:
+	VertexDataChunkData(std::istream& stream);
+	VertexDataChunkData(VertexAttributeUsage usage, DataType type, uint32_t size);
+
+	void resize(uint32_t);
+	void fitToSize(uint32_t);
+
+	char* data()
 	{
-	public:
-		VertexDataChunkData(std::istream& stream);
-		VertexDataChunkData(VertexAttributeUsage usage, DataType type, uint32_t size);
+		return _data.binary();
+	}
 
-		void resize(uint32_t);
-		void fitToSize(uint32_t);
-
-		char* data()
-			{ return _data.binary(); }
-
-		const char* data() const
-			{ return _data.binary(); }
-
-		uint32_t size() const
-			{ return static_cast<uint32_t>(_data.size()); }
-
-		uint32_t dataSize() const
-			{ return static_cast<uint32_t>(_data.dataSize()); }
-
-		uint32_t typeSize() const
-			{ return dataTypeSize(_type); }
-
-		VertexAttributeUsage usage() const
-			{ return _usage; }
-
-		DataType type() const
-			{ return _type; }
-
-		void copyTo(VertexDataChunkData&) const;
-
-	private:
-		VertexAttributeUsage _usage = VertexAttributeUsage::Position;
-		DataType _type = DataType::Float;
-		BinaryDataStorage _data;
-	};
-
-	class VertexDataChunk : public IntrusivePtr<VertexDataChunkData>
+	const char* data() const
 	{
-	public:
-		VertexDataChunk()
-			{ }
+		return _data.binary();
+	}
 
-		VertexDataChunk(std::istream& stream) : 
-			IntrusivePtr<VertexDataChunkData>(etCreateObject<VertexDataChunkData>(stream)) { }
+	uint32_t size() const
+	{
+		return static_cast<uint32_t>(_data.size());
+	}
 
-		VertexDataChunk(VertexAttributeUsage usage, DataType type, uint32_t size) : 
-			IntrusivePtr<VertexDataChunkData>(etCreateObject<VertexDataChunkData>(usage, type, size)) { }
+	uint32_t dataSize() const
+	{
+		return static_cast<uint32_t>(_data.dataSize());
+	}
 
-		template <typename T>
-		RawDataAcessor<T> accessData(size_t elementOffset) 
-		{
-			auto _this = pointer();
-			return valid() ? RawDataAcessor<T>(_this->data(), _this->dataSize(), _this->typeSize(),
-				elementOffset * _this->typeSize()) : RawDataAcessor<T>();
-		}
-		
-		template <typename T>
-		const RawDataAcessor<T> accessData(size_t elementOffset) const
-		{
-			auto _this = pointer();
-			return valid() ? RawDataAcessor<T>(_this->data(), _this->dataSize(), _this->typeSize(),
-				elementOffset * _this->typeSize()) : RawDataAcessor<T>();
-		}
-	};
-    using VertexDataChunkList = Vector<VertexDataChunk>;
+	uint32_t typeSize() const
+	{
+		return dataTypeSize(_type);
+	}
+
+	VertexAttributeUsage usage() const
+	{
+		return _usage;
+	}
+
+	DataType type() const
+	{
+		return _type;
+	}
+
+	void copyTo(VertexDataChunkData&) const;
+
+private:
+	VertexAttributeUsage _usage = VertexAttributeUsage::Position;
+	DataType _type = DataType::Float;
+	BinaryDataStorage _data;
+};
+
+using VertexDataChunk = IntrusivePtr<VertexDataChunkData>;
+using VertexDataChunkList = Vector<VertexDataChunk>;
+template <typename T>
+
+RawDataAcessor<T> accessData(VertexDataChunk ch, size_t elementOffset)
+{
+	auto _this = ch.pointer();
+	return ch.valid() ? RawDataAcessor<T>(_this->data(), _this->dataSize(), _this->typeSize(),
+		elementOffset * _this->typeSize()) : RawDataAcessor<T>();
+}
+
 }

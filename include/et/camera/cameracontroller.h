@@ -13,14 +13,13 @@
 
 namespace et
 {
-class CameraController : public et::Shared, public EventReceiver
+class CameraController : public Object, public EventReceiver
 {
 public:
 	ET_DECLARE_POINTER(CameraController);
 
 public:
 	CameraController(const Camera::Pointer& cam, bool autoConnectToInput);
-	virtual ~CameraController() { } 
 
 	Camera::Pointer& camera()
 	{

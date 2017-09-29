@@ -14,7 +14,7 @@ namespace et
 namespace s3d
 {
 
-class DebugDrawer : public Shared, public FlagsHolder
+class DebugDrawer : public Object, public FlagsHolder
 {
 public:
 	ET_DECLARE_POINTER(DebugDrawer);

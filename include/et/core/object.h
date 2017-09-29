@@ -9,20 +9,25 @@
 
 namespace et
 {
-class Object : public Shared
+class ObjectsCache;
+
+struct Object : public Shared
 {
-public:
 	ET_DECLARE_POINTER(Object);
 
-public:
 	Object() = default;
+	virtual ~Object() = default;
+};
 
-	Object(const std::string& aName) :
+class NamedObject : public Object
+{
+public:
+	NamedObject() = default;
+
+	NamedObject(const std::string& aName) :
 		_name(aName)
 	{
 	}
-
-	virtual ~Object() = default;
 
 	const std::string& name() const
 	{
@@ -36,12 +41,10 @@ public:
 
 private:
 	std::string _name;
+
 };
 
-class RenderContext;
-class ObjectsCache;
-
-class LoadableObject : public Object
+class LoadableObject : public NamedObject
 {
 public:
 	ET_DECLARE_POINTER(LoadableObject);
@@ -51,12 +54,12 @@ public:
 	LoadableObject() = default;
 
 	LoadableObject(const std::string& aName) :
-		Object(aName)
+		NamedObject(aName)
 	{
 	}
 
 	LoadableObject(const std::string& aName, const std::string& aOrigin) :
-		Object(aName), _origin(aOrigin)
+		NamedObject(aName), _origin(aOrigin)
 	{
 	}
 
@@ -90,13 +93,11 @@ private:
 	StringList _distributedOrigins;
 };
 
-class ObjectLoader : public Shared
+struct ObjectLoader : public Object
 {
-public:
 	ET_DECLARE_POINTER(ObjectLoader);
 
-public:
-	virtual ~ObjectLoader() = default;
 	virtual void reloadObject(LoadableObject::Pointer, ObjectsCache&) = 0;
 };
+
 }

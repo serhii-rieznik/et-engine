@@ -69,7 +69,7 @@ void primitives::createPhotonMap(VertexArray::Pointer buffer, const vec2i& densi
 	VertexDataChunk chunk = buffer->chunk(VertexAttributeUsage::Position);
 	ET_ASSERT(chunk->type() == DataType::Vec2);
 
-	RawDataAcessor<vec2> data = chunk.accessData<vec2>(0);
+	RawDataAcessor<vec2> data = accessData<vec2>(chunk, 0);
 
 	vec2 texel = vec2(1.0f / density.x, 1.0f / density.y);
 	vec2 dxdy = vec2(0.5f / density.x, 0.5f / density.y);
@@ -140,9 +140,9 @@ void primitives::createTorus(VertexArray::Pointer data, float centralRadius, flo
 	VertexDataChunk pos_c = data->chunk(VertexAttributeUsage::Position);
 	VertexDataChunk norm_c = data->chunk(VertexAttributeUsage::Normal);
 	VertexDataChunk tex_c = data->chunk(VertexAttributeUsage::TexCoord0);
-	RawDataAcessor<vec3> pos = pos_c.valid() ? pos_c.accessData<vec3>(lastIndex) : RawDataAcessor<vec3>();
-	RawDataAcessor<vec3> norm = norm_c.valid() ? norm_c.accessData<vec3>(lastIndex) : RawDataAcessor<vec3>();
-	RawDataAcessor<vec2> tex = tex_c.valid() ? tex_c.accessData<vec2>(lastIndex) : RawDataAcessor<vec2>();
+	RawDataAcessor<vec3> pos = pos_c.valid() ? accessData<vec3>(pos_c, lastIndex) : RawDataAcessor<vec3>();
+	RawDataAcessor<vec3> norm = norm_c.valid() ? accessData<vec3>(norm_c, lastIndex) : RawDataAcessor<vec3>();
+	RawDataAcessor<vec2> tex = tex_c.valid() ? accessData<vec2>(tex_c, lastIndex) : RawDataAcessor<vec2>();
 
 	bool hasPos = pos.valid();
 	bool hasNorm = norm.valid();
@@ -192,9 +192,9 @@ void primitives::createCylinder(VertexArray::Pointer data, float radius, float h
 	VertexDataChunk pos_c = data->chunk(VertexAttributeUsage::Position);
 	VertexDataChunk norm_c = data->chunk(VertexAttributeUsage::Normal);
 	VertexDataChunk tex_c = data->chunk(VertexAttributeUsage::TexCoord0);
-	RawDataAcessor<vec3> pos = pos_c.valid() ? pos_c.accessData<vec3>(lastIndex) : RawDataAcessor<vec3>();
-	RawDataAcessor<vec3> norm = norm_c.valid() ? norm_c.accessData<vec3>(lastIndex) : RawDataAcessor<vec3>();
-	RawDataAcessor<vec2> tex = tex_c.valid() ? tex_c.accessData<vec2>(lastIndex) : RawDataAcessor<vec2>();
+	RawDataAcessor<vec3> pos = pos_c.valid() ? accessData<vec3>(pos_c, lastIndex) : RawDataAcessor<vec3>();
+	RawDataAcessor<vec3> norm = norm_c.valid() ? accessData<vec3>(norm_c, lastIndex) : RawDataAcessor<vec3>();
+	RawDataAcessor<vec2> tex = tex_c.valid() ? accessData<vec2>(tex_c, lastIndex) : RawDataAcessor<vec2>();
 
 	bool hasPos = pos.valid();
 	bool hasNorm = norm.valid();
@@ -241,9 +241,9 @@ void primitives::createSquarePlane(VertexArray::Pointer data, const vec3& normal
 	VertexDataChunk pos_c = data->chunk(VertexAttributeUsage::Position);
 	VertexDataChunk norm_c = data->chunk(VertexAttributeUsage::Normal);
 	VertexDataChunk tex_c = data->chunk(VertexAttributeUsage::TexCoord0);
-	RawDataAcessor<vec3> pos = pos_c.valid() ? pos_c.accessData<vec3>(lastIndex) : RawDataAcessor<vec3>();
-	RawDataAcessor<vec3> norm = norm_c.valid() ? norm_c.accessData<vec3>(lastIndex) : RawDataAcessor<vec3>();
-	RawDataAcessor<vec2> tex = tex_c.valid() ? tex_c.accessData<vec2>(lastIndex) : RawDataAcessor<vec2>();
+	RawDataAcessor<vec3> pos = pos_c.valid() ? accessData<vec3>(pos_c, lastIndex) : RawDataAcessor<vec3>();
+	RawDataAcessor<vec3> norm = norm_c.valid() ? accessData<vec3>(norm_c, lastIndex) : RawDataAcessor<vec3>();
+	RawDataAcessor<vec2> tex = tex_c.valid() ? accessData<vec2>(tex_c, lastIndex) : RawDataAcessor<vec2>();
 
 	bool hasPos = pos.valid();
 	bool hasNorm = norm.valid();
@@ -349,8 +349,8 @@ IndexArray::Pointer primitives::createCirclePlane(VertexArray::Pointer data, con
 	IndexArray::Pointer result = IndexArray::Pointer::create(IndexArrayFormat::Format_16bit, 3 * density, PrimitiveType::Triangles);
 
 	data->fitToSize(1 + density);
-	auto pos = data->chunk(VertexAttributeUsage::Position).accessData<vec3>(0);
-	auto nrm = data->chunk(VertexAttributeUsage::Normal).accessData<vec3>(0);
+	auto pos = accessData<vec3>(data->chunk(VertexAttributeUsage::Position), 0);
+	auto nrm = accessData<vec3>(data->chunk(VertexAttributeUsage::Normal), 0);
 
 	vec3 angles = toSpherical(normal);
 	angles += vec3(-HALF_PI, HALF_PI, 0.0f);
@@ -518,8 +518,8 @@ void primitives::calculateNormals(VertexArray::Pointer data, const IndexArray::P
 		return;
 	}
 
-	RawDataAcessor<vec3> nrm = nrmChunk.accessData<vec3>(0);
-	RawDataAcessor<vec3> pos = posChunk.accessData<vec3>(0);
+	RawDataAcessor<vec3> pos = accessData<vec3>(posChunk, 0);
+	RawDataAcessor<vec3> nrm = accessData<vec3>(nrmChunk, 0);
 
 	const auto& e = buffer->primitive(last);
 
@@ -572,10 +572,10 @@ void primitives::calculateTangents(VertexArray::Pointer data, const IndexArray::
 	DataStorage<vec3> tan1(data->size(), 0);
 	DataStorage<vec3> tan2(data->size(), 0);
 
-	RawDataAcessor<vec3> pos = posChunk.accessData<vec3>(0);
-	RawDataAcessor<vec3> nrm = nrmChunk.accessData<vec3>(0);
-	RawDataAcessor<vec3> tan = tanChunk.accessData<vec3>(0);
-	RawDataAcessor<vec2> uv = uvChunk.accessData<vec2>(0);
+	RawDataAcessor<vec3> pos = accessData<vec3>(posChunk, 0);
+	RawDataAcessor<vec3> nrm = accessData<vec3>(nrmChunk, 0);
+	RawDataAcessor<vec3> tan = accessData<vec3>(tanChunk, 0);
+	RawDataAcessor<vec2> uv = accessData<vec2>(uvChunk, 0);
 
 	for (IndexArray::PrimitiveIterator i = buffer->primitive(first), e = buffer->primitive(last); i != e; ++i)
 	{
@@ -760,8 +760,8 @@ void primitives::createBox(VertexArray::Pointer data, const vec3& size, const ve
 	uint32_t offset = data->size();
 	data->fitToSize(offset + 12 * 3);
 
-	RawDataAcessor<vec3> pos = posChunk.accessData<vec3>(offset);
-	RawDataAcessor<vec3> nrm = nrmChunk.accessData<vec3>(offset);
+	RawDataAcessor<vec3> pos = accessData<vec3>(posChunk, offset);
+	RawDataAcessor<vec3> nrm = accessData<vec3>(nrmChunk, offset);
 
 	vec3 corners[8] =
 	{
@@ -804,8 +804,8 @@ void primitives::createOctahedron(VertexArray::Pointer data, float radius)
 	uint32_t offset = data->size();
 	data->fitToSize(24);
 
-	RawDataAcessor<vec3> pos = posChunk.accessData<vec3>(offset);
-	RawDataAcessor<vec3> nrm = nrmChunk.accessData<vec3>(offset);
+	RawDataAcessor<vec3> pos = accessData<vec3>(posChunk, offset);
+	RawDataAcessor<vec3> nrm = accessData<vec3>(nrmChunk, offset);
 
 	float d = 0.5f * SQRT_2 * radius;
 
@@ -843,8 +843,8 @@ void primitives::createDodecahedron(VertexArray::Pointer data, float radius)
 	uint32_t offset = data->size();
 	data->fitToSize(180);
 
-	RawDataAcessor<vec3> pos = posChunk.accessData<vec3>(offset);
-	RawDataAcessor<vec3> nrm = nrmChunk.accessData<vec3>(offset);
+	RawDataAcessor<vec3> pos = accessData<vec3>(posChunk, offset);
+	RawDataAcessor<vec3> nrm = accessData<vec3>(nrmChunk, offset);
 
 	float alpha = radius * std::sqrt(2.0f / (3.0f + std::sqrt(5.0f)));
 
@@ -1037,12 +1037,12 @@ void primitives::tesselateTriangles(VertexArray::Pointer data, IndexArray::Point
 
 	data->fitToSize(12 * numTriangles);
 
-	RawDataAcessor<vec3> opos = oldPos.accessData<vec3>(0);
-	RawDataAcessor<vec3> npos = newPos.accessData<vec3>(0);
-	RawDataAcessor<vec3> onrm = oldNrm.accessData<vec3>(0);
-	RawDataAcessor<vec3> nnrm = newNrm.accessData<vec3>(0);
-	RawDataAcessor<vec4> oclr = oldClr.accessData<vec4>(0);
-	RawDataAcessor<vec4> nclr = newClr.accessData<vec4>(0);
+	RawDataAcessor<vec3> opos = accessData<vec3>(oldPos, 0);
+	RawDataAcessor<vec3> npos = accessData<vec3>(newPos, 0);
+	RawDataAcessor<vec3> onrm = accessData<vec3>(oldNrm, 0);
+	RawDataAcessor<vec3> nnrm = accessData<vec3>(newNrm, 0);
+	RawDataAcessor<vec4> oclr = accessData<vec4>(oldClr, 0);
+	RawDataAcessor<vec4> nclr = accessData<vec4>(newClr, 0);
 
 	uint32_t nump = 0;
 	uint32_t numn = 0;
@@ -1134,9 +1134,9 @@ VertexArray::Pointer primitives::buildLinearIndexArray(VertexArray::Pointer vert
 	Vector<uint64_t> hashes;
 	hashes.reserve(vertexArray->size());
 
-	auto oldPos = vertexArray->chunk(VertexAttributeUsage::Position).accessData<vec3>(0);
-	auto oldNrm = vertexArray->chunk(VertexAttributeUsage::Normal).accessData<vec3>(0);
-	auto oldClr = vertexArray->chunk(VertexAttributeUsage::Color).accessData<vec4>(0);
+	auto oldPos = accessData<vec3>(vertexArray->chunk(VertexAttributeUsage::Position), 0);
+	auto oldNrm = accessData<vec3>(vertexArray->chunk(VertexAttributeUsage::Normal), 0);
+	auto oldClr = accessData<vec4>(vertexArray->chunk(VertexAttributeUsage::Color), 0);
 
 	for (uint32_t i = 0; i < dataSize; ++i)
 	{
@@ -1149,9 +1149,9 @@ VertexArray::Pointer primitives::buildLinearIndexArray(VertexArray::Pointer vert
 
 	VertexArray::Pointer result = VertexArray::Pointer::create(vertexArray->decl(), static_cast<uint32_t>(countMap.size()));
 
-	auto newPos = result->chunk(VertexAttributeUsage::Position).accessData<vec3>(0);
-	auto newNrm = result->chunk(VertexAttributeUsage::Normal).accessData<vec3>(0);
-	auto newClr = result->chunk(VertexAttributeUsage::Color).accessData<vec4>(0);
+	auto newPos = accessData<vec3>(result->chunk(VertexAttributeUsage::Position), 0);
+	auto newNrm = accessData<vec3>(result->chunk(VertexAttributeUsage::Normal), 0);
+	auto newClr = accessData<vec4>(result->chunk(VertexAttributeUsage::Color), 0);
 
 	bool hasNormals = newNrm.valid();
 	bool hasColor = newClr.valid();
@@ -1204,8 +1204,8 @@ VertexArray::Pointer primitives::linearizeTrianglesIndexArray(VertexArray::Point
 	{
 		if (e.type() == DataType::Vec4)
 		{
-			auto oldValues = data->chunk(e.usage()).accessData<vec4>(0);
-			auto newValues = result->chunk(e.usage()).accessData<vec4>(0);
+			auto oldValues = accessData<vec4>(data->chunk(e.usage()), 0);
+			auto newValues = accessData<vec4>(result->chunk(e.usage()), 0);
 			uint32_t i = 0;
 			for (auto p : indexArray.reference())
 			{
@@ -1216,8 +1216,8 @@ VertexArray::Pointer primitives::linearizeTrianglesIndexArray(VertexArray::Point
 		}
 		else if (e.type() == DataType::Vec3)
 		{
-			auto oldValues = data->chunk(e.usage()).accessData<vec3>(0);
-			auto newValues = result->chunk(e.usage()).accessData<vec3>(0);
+			auto oldValues = accessData<vec3>(data->chunk(e.usage()), 0);
+			auto newValues = accessData<vec3>(result->chunk(e.usage()), 0);
 			uint32_t i = 0;
 			for (auto p : indexArray.reference())
 			{
@@ -1228,8 +1228,8 @@ VertexArray::Pointer primitives::linearizeTrianglesIndexArray(VertexArray::Point
 		}
 		else if (e.type() == DataType::Vec2)
 		{
-			auto oldValues = data->chunk(e.usage()).accessData<vec2>(0);
-			auto newValues = result->chunk(e.usage()).accessData<vec2>(0);
+			auto oldValues = accessData<vec2>(data->chunk(e.usage()), 0);
+			auto newValues = accessData<vec2>(result->chunk(e.usage()), 0);
 			uint32_t i = 0;
 			for (auto p : indexArray.reference())
 			{

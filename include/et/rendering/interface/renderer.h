@@ -21,7 +21,7 @@
 namespace et
 {
 class RenderContext;
-class RenderInterface : public Shared
+class RenderInterface : public Object
 {
 public:
 	ET_DECLARE_POINTER(RenderInterface);
@@ -29,8 +29,6 @@ public:
 public:
 	RenderInterface(RenderContext* rc)
 		: _rc(rc) { }
-
-	virtual ~RenderInterface() = default;
 
 	RenderContext* rc() const
 		{ return _rc; }

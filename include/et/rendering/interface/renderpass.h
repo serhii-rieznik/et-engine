@@ -65,7 +65,7 @@ struct CopyDescriptor
 };
 
 class RenderInterface;
-class RenderPass : public Shared
+class RenderPass : public Object
 {
 public:
 	ET_DECLARE_POINTER(RenderPass);
@@ -88,7 +88,6 @@ public:
 
 public:
 	RenderPass(RenderInterface*, const ConstructionInfo&);
-	virtual ~RenderPass();
 
 	virtual void begin(const RenderPassBeginInfo& info) = 0;
 	virtual void pushRenderBatch(const MaterialInstance::Pointer&, const VertexStream::Pointer&, uint32_t firstIndex, uint32_t indexCount) = 0;

@@ -15,10 +15,6 @@ RunLoop::RunLoop()
 	attachTimerPool(TimerPool::Pointer::create(this));
 }
 
-RunLoop::~RunLoop()
-{
-}
-
 void RunLoop::update(uint64_t t)
 {
 	updateTime(t);

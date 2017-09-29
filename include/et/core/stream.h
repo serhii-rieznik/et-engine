@@ -16,7 +16,7 @@ enum StreamMode
 };
 
 class InputStreamPrivate;
-class InputStream : public Shared
+class InputStream : public Object
 {
 public:
 	ET_DECLARE_POINTER(InputStream);

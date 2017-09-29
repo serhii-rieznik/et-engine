@@ -11,7 +11,7 @@
 
 namespace et
 {
-class Buffer : public Object
+class Buffer : public NamedObject
 {
 public:
 	ET_DECLARE_POINTER(Buffer);

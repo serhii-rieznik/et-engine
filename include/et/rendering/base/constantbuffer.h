@@ -21,7 +21,7 @@ enum : uint32_t
 	InvalidFlushFrame = std::numeric_limits<uint32_t>::max()
 };
 
-class ConstantBufferEntry : public Shared
+class ConstantBufferEntry : public Object
 {
 public:
 	ET_DECLARE_POINTER(ConstantBufferEntry);

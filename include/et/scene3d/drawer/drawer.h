@@ -15,7 +15,7 @@ namespace et
 {
 namespace s3d
 {
-class Drawer : public Shared, public FlagsHolder
+class Drawer : public Object, public FlagsHolder
 {
 public:
 	ET_DECLARE_POINTER(Drawer);

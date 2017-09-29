@@ -12,7 +12,7 @@
 
 namespace et
 {
-class IndexArray : public Object
+class IndexArray : public NamedObject
 {
 public:
 	ET_DECLARE_POINTER(IndexArray);

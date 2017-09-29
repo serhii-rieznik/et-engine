@@ -16,14 +16,12 @@
 
 namespace et
 {
-class PipelineState : public Shared
+class PipelineState : public Object
 {
 public:
 	ET_DECLARE_POINTER(PipelineState);
 
 public:
-	virtual ~PipelineState() = default;
-
 	virtual void build(const RenderPass::Pointer&) = 0;
 
 	const VertexDeclaration& inputLayout() const

@@ -15,7 +15,7 @@ namespace et
 namespace s3d
 {
 
-class Drawflow : public Shared
+class Drawflow : public Object
 {
 public:
 	ET_DECLARE_POINTER(Drawflow);
@@ -26,7 +26,6 @@ public:
 	} options;
 
 public:
-	virtual ~Drawflow() { } 
 	virtual void resizeRenderTargets(const vec2i&) = 0;
 	virtual void render() = 0;
 

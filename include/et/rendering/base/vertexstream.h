@@ -13,7 +13,7 @@
 
 namespace et
 {
-class VertexStream : public Object
+class VertexStream : public NamedObject
 {
 public:
 	ET_DECLARE_POINTER(VertexStream);

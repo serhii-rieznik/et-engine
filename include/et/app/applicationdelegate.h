@@ -11,30 +11,29 @@
 
 namespace et
 {
-	class RenderContext;
-	struct RenderContextParameters;
-	template <typename T> union vector2;
-	typedef vector2<int32_t> vec2i;
-	
-	class IApplicationDelegate
-	{
-	public:
-		virtual ~IApplicationDelegate() { }
+class RenderContext;
+struct RenderContextParameters;
+template <typename T> union vector2;
+typedef vector2<int32_t> vec2i;
 
-		virtual et::ApplicationIdentifier applicationIdentifier() const = 0;
+struct IApplicationDelegate
+{
+	virtual ~IApplicationDelegate() {}
 
-		virtual void setApplicationParameters(et::ApplicationParameters&) { }
-		virtual void setRenderContextParameters(et::RenderContextParameters&) { }
-		
-		virtual void applicationDidLoad(et::RenderContext*) { }
-		virtual void applicationWillActivate() { }
-		virtual void applicationWillDeactivate() { }
-		virtual void applicationWillSuspend() { }
-		virtual void applicationWillResume() { }
-		virtual void applicationWillTerminate() { }
+	virtual et::ApplicationIdentifier applicationIdentifier() const = 0;
 
-		virtual void applicationWillResizeContext(const et::vec2i&) { }
+	virtual void setApplicationParameters(et::ApplicationParameters&) {}
+	virtual void setRenderContextParameters(et::RenderContextParameters&) {}
 
-		virtual void render(et::RenderContext*) { }
-	};
+	virtual void applicationDidLoad(et::RenderContext*) {}
+	virtual void applicationWillActivate() {}
+	virtual void applicationWillDeactivate() {}
+	virtual void applicationWillSuspend() {}
+	virtual void applicationWillResume() {}
+	virtual void applicationWillTerminate() {}
+
+	virtual void applicationWillResizeContext(const et::vec2i&) {}
+
+	virtual void render(et::RenderContext*) {}
+};
 }

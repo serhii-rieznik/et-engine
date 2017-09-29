@@ -12,14 +12,13 @@
 
 namespace et
 {
-class RunLoop : public Shared
+class RunLoop : public Object
 {
 public:
 	ET_DECLARE_POINTER(RunLoop);
 
 public:
 	RunLoop();
-	virtual ~RunLoop();
 
 	float time() const { return _time; }
 	float lastFrameTime() const { return _lastFrameTime; }

@@ -129,7 +129,7 @@ public:
 			_data->retain();
 	}
 
-	virtual ~IntrusivePtr()
+	~IntrusivePtr()
 	{
 		if (_data != nullptr)
 			release(_data);

@@ -12,100 +12,100 @@
 
 namespace et
 {
-	class Thread
+class Thread
+{
+public:
+	Thread(const std::string& name = std::string())
+		: _name(name)
 	{
-	public:
-		Thread(const std::string& name = std::string())
-			: _name(name)
+	}
+
+	virtual ~Thread()
+	{
+		ET_ASSERT(!_suspended);
+	}
+
+	void run()
+	{
+		ET_ASSERT(!_running);
+		_thread = std::thread(&Thread::threadFunction, this);
+	}
+
+	void suspend()
+	{
+		ET_ASSERT(!_suspended);
+		_suspended = true;
 		{
+			std::unique_lock<std::mutex> lock(_suspendMutex);
+			_suspendLock.wait(lock);
 		}
-		
-		virtual ~Thread()
+		_suspended = false;
+	}
+
+	void resume()
+	{
+		ET_ASSERT(_suspended);
+		_suspendLock.notify_all();
+	}
+
+	void stop()
+	{
+		_running = false;
+		if (_suspended)
 		{
-			ET_ASSERT(!_suspended);
+			resume();
 		}
+	}
 
-		void run()
-		{
-			ET_ASSERT(!_running);
-			_thread = std::thread(&Thread::threadFunction, this);
-		}
+	void join()
+	{
+		_thread.join();
+	}
 
-		void suspend()
-		{
-			ET_ASSERT(!_suspended);
-			_suspended = true;
-			{
-				std::unique_lock<std::mutex> lock(_suspendMutex);
-				_suspendLock.wait(lock);
-			}
-			_suspended = false;
-		}
+	bool running() const
+	{
+		return _running;
+	}
 
-		void resume()
-		{
-			ET_ASSERT(_suspended);
-			_suspendLock.notify_all();
-		}
+	bool suspended() const
+	{
+		return _suspended;
+	}
 
-		void stop()
-		{
-			_running = false;
-			if (_suspended)
-			{
-				resume();
-			}
-		}
+	threading::ThreadIdentifier identifier() const
+	{
+		return std::hash<std::thread::id>()(_thread.get_id());
+	}
 
-		void join()
-		{
-			_thread.join();
-		}
+	virtual void main() {}
 
-		bool running() const
-		{ 
-			return _running; 
-		}
+private:
+	void setName()
+	{
+		if (_name.empty())
+			return;
 
-		bool suspended() const
-		{
-			return _suspended; 
-		}
+	#		if (ET_PLATFORM_APPLE)
+		pthread_setname_np(_name.c_str());
+	#		endif
+	}
 
-		threading::ThreadIdentifier identifier() const
-		{
-			return std::hash<std::thread::id>()(_thread.get_id());
-		}
+	void threadFunction()
+	{
+		_running = true;
+		setName();
+		main();
+	}
 
-		virtual void main() { }
+private:
+	ET_DENY_COPY(Thread);
+	Thread(Thread&&) = delete;
 
-	private:
-		void setName()
-		{
-			if (_name.empty())
-				return;
-
-#		if (ET_PLATFORM_APPLE)
-			pthread_setname_np(_name.c_str());
-#		endif
-		}
-
-		void threadFunction()
-		{
-			_running = true;
-			setName();
-			main();
-		}
-
-	private:
-		ET_DENY_COPY(Thread);
-		Thread(Thread&&) = delete;
-
-		std::thread _thread;
-		std::condition_variable _suspendLock;
-		std::mutex _suspendMutex;
-		std::atomic<bool> _running{false};
-		std::atomic<bool> _suspended{false};
-		std::string _name;
-	};
+	std::thread _thread;
+	std::condition_variable _suspendLock;
+	std::mutex _suspendMutex;
+	std::atomic<bool> _running{ false };
+	std::atomic<bool> _suspended{ false };
+	std::string _name;
+};
 }

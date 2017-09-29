@@ -17,7 +17,7 @@ template <DataType T>
 class VertexDataAccessor { };
 
 class VertexStoragePrivate;
-class VertexStorage : public Object
+class VertexStorage : public NamedObject
 {
 public:
 	ET_DECLARE_POINTER(VertexStorage);

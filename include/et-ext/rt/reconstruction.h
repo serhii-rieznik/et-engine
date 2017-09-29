@@ -14,7 +14,7 @@ namespace et
 namespace rt
 {
 
-class ReconstructionFilter : public Shared
+class ReconstructionFilter : public Object
 {
 public:
 	virtual float weight(const vec2& sample) = 0;

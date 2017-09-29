@@ -32,10 +32,6 @@ RenderPass::RenderPass(RenderInterface*, const ConstructionInfo& info) :
 {
 }
 
-RenderPass::~RenderPass()
-{
-}
-
 const RenderPass::ConstructionInfo& RenderPass::info() const
 {
 	return _info;
