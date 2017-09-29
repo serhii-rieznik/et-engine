@@ -10,7 +10,7 @@
 namespace et
 {
 
-CameraOrbitController::CameraOrbitController(Camera::Pointer cam, bool connectInput) :
+CameraOrbitController::CameraOrbitController(const Camera::Pointer& cam, bool connectInput) :
 	CameraController(cam, connectInput), _gestures(false)
 {
 	camera()->lockUpVector(unitY);
@@ -150,7 +150,7 @@ void CameraOrbitController::setTargetPoint(const vec3& tp)
 	_targetPoint.setTargetValue(tp);
 }
 
-void CameraOrbitController::synchronize(const Camera::Pointer cam)
+void CameraOrbitController::synchronize(const Camera::Pointer& cam)
 {
 	_anglesDistanceAnimator.setTargetValue(toSpherical(cam->position() - _targetPoint.targetValue()));
 	_anglesDistanceAnimator.finishInterpolation();

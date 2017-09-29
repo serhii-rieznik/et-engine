@@ -80,44 +80,18 @@ void Material::setTextureWithSampler(MaterialTexture t, const Texture::Pointer& 
 void Material::setVector(MaterialVariable p, const vec4& v)
 {
 	uint32_t ip = static_cast<uint32_t>(p);
-
-	auto i = std::find_if(properties.begin(), properties.end(), [ip](const VariablesHolder::value_type& t) {
-		return t.first == ip;
-	});
-	
-	if (i == properties.end())
-	{
-		properties.emplace_back(ip, OptionalValue());
-		properties.back().second.set(v);
-		properties.back().second.binding = ip;
-	}
-	else
-	{
-		i->second.set(v);
-		i->second.binding = ip;
-	}
+	auto& prop = properties[ip];
+	prop.set(v);
+	prop.binding = ip;
 	invalidateConstantBuffer();
 }
 
 void Material::setFloat(MaterialVariable p, float f)
 {
 	uint32_t ip = static_cast<uint32_t>(p);
-
-	auto i = std::find_if(properties.begin(), properties.end(), [ip](const VariablesHolder::value_type& t) {
-		return t.first == ip;
-	});
-	
-	if (i == properties.end())
-	{
-		properties.emplace_back(ip, OptionalValue());
-		properties.back().second.set(f);
-		properties.back().second.binding = ip;
-	}
-	else
-	{
-		i->second.set(f);
-		i->second.binding = ip;
-	}
+	auto& prop = properties[ip];
+	prop.set(f);
+	prop.binding = ip;
 	invalidateConstantBuffer();
 }
 
@@ -434,11 +408,11 @@ const Material::Pointer& MaterialInstance::base() const
 	return _base;
 }
 
-void MaterialInstance::buildTextureSet(const std::string& pt)
+void MaterialInstance::buildTextureSet(const std::string& pt, Holder<TextureSet::Pointer>& holder)
 {
 	ET_ASSERT(isInstance());
 
-	const Program::Reflection& reflection = configuration(pt).program->reflection();
+	const Program::Reflection& reflection = base()->configuration(pt).program->reflection();
 
 	TextureSet::Description description;
 	for (const TextureSet::ReflectionSet& ref : reflection.textures)
@@ -474,16 +448,15 @@ void MaterialInstance::buildTextureSet(const std::string& pt)
 		}
 	}
 
-	Holder<TextureSet::Pointer>& holder = _textureSets[pt];
 	holder.obj = _renderer->createTextureSet(description);
 	holder.valid = true;
 }
 
-void MaterialInstance::buildImageSet(const std::string& pt)
+void MaterialInstance::buildImageSet(const std::string& pt, Holder<TextureSet::Pointer>& holder)
 {
 	ET_ASSERT(isInstance());
 
-	const Program::Reflection& reflection = configuration(pt).program->reflection();
+	const Program::Reflection& reflection = base()->configuration(pt).program->reflection();
 
 	TextureSet::Description description;
 	for (const auto& ref : reflection.textures)
@@ -500,17 +473,15 @@ void MaterialInstance::buildImageSet(const std::string& pt)
 		}
 	}
 
-	_imageSets[pt].obj = _renderer->createTextureSet(description);
-	_imageSets[pt].valid = true;
+	holder.obj = _renderer->createTextureSet(description);
+	holder.valid = true;
 }
 
-void MaterialInstance::buildConstantBuffer(const std::string& pt)
+void MaterialInstance::buildConstantBuffer(const std::string& pt, Holder<ConstantBufferEntry::Pointer>& holder)
 {
 	ET_ASSERT(isInstance());
 
-	Holder<ConstantBufferEntry::Pointer>& holder = _constBuffers[pt];
-
-	const Program::Reflection& reflection = configuration(pt).program->reflection();
+	const Program::Reflection& reflection = base()->configuration(pt).program->reflection();
 	if (reflection.materialVariablesBufferSize == 0)
 	{
 		holder.obj.reset(nullptr);
@@ -539,36 +510,33 @@ const TextureSet::Pointer& MaterialInstance::textureSet(const std::string& pt)
 {
 	ET_ASSERT(isInstance());
 
-	if (!_textureSets[pt].valid)
-		buildTextureSet(pt);
+	auto& holder = _textureSets[pt];
+	if (!holder.valid)
+		buildTextureSet(pt, holder);
 
-	return _textureSets.at(pt).obj;
+	return holder.obj;
 }
 
 const TextureSet::Pointer& MaterialInstance::imageSet(const std::string& pt)
 {
 	ET_ASSERT(isInstance());
 
-	if (!_imageSets[pt].valid)
-		buildImageSet(pt);
+	auto& holder = _imageSets[pt];
+	if (!holder.valid)
+		buildImageSet(pt, holder);
 
-	return _imageSets.at(pt).obj;
+	return holder.obj;
 }
 
 const ConstantBufferEntry::Pointer& MaterialInstance::constantBufferData(const std::string& pt)
 {
 	ET_ASSERT(isInstance());
 
-	if (!_constBuffers[pt].valid)
-		buildConstantBuffer(pt);
+	auto& holder = _constBuffers[pt];
+	if (!holder.valid)
+		buildConstantBuffer(pt, holder);
 
-	return _constBuffers.at(pt).obj;
-}
-
-const Material::Configuration & MaterialInstance::configuration(const std::string& cls) const
-{
-	ET_ASSERT(isInstance());
-	return base()->configuration(cls);
+	return holder.obj;
 }
 
 void MaterialInstance::invalidateTextureSet()

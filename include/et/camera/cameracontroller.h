@@ -19,15 +19,15 @@ public:
 	ET_DECLARE_POINTER(CameraController);
 
 public:
-	CameraController(Camera::Pointer cam, bool autoConnectToInput);
+	CameraController(const Camera::Pointer& cam, bool autoConnectToInput);
 	virtual ~CameraController() { } 
 
-	Camera::Pointer camera()
+	Camera::Pointer& camera()
 	{
 		return _camera;
 	}
 
-	const Camera::Pointer camera() const
+	const Camera::Pointer& camera() const
 	{
 		return _camera;
 	}
@@ -44,7 +44,7 @@ public:
 	virtual void startUpdates();
 	virtual void cancelUpdates();
 
-	virtual void synchronize(const Camera::Pointer) {}
+	virtual void synchronize(const Camera::Pointer&) {}
 
 	virtual void onKeyPressed(uint32_t) {}
 	virtual void onKeyReleased(uint32_t) {}

@@ -22,9 +22,9 @@ public:
 	struct Variable
 	{
 		uint32_t offset = 0;
-		uint32_t sizeInBytes = 0;
-		uint32_t arraySize = 0;
-		uint32_t enabled = 0;
+		uint32_t sizeInBytes = 24;
+		uint32_t arraySize : 7;
+		uint32_t enabled : 1;
 	};
 
 	struct Reflection
@@ -32,10 +32,10 @@ public:
 		VertexDeclaration inputLayout;
 
 		uint32_t objectVariablesBufferSize = 0;
-		Variable objectVariables[ObjectVariable_max];
+		Variable objectVariables[ObjectVariable_max]{ };
 
 		uint32_t materialVariablesBufferSize = 0;
-		Variable materialVariables[MaterialVariable_max];
+		Variable materialVariables[MaterialVariable_max]{ };
 
 		TextureSet::Reflection textures;
 

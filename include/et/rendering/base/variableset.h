@@ -210,7 +210,7 @@ struct OptionalValue
 		storedType = DataType::max;
 	}
 };
-using VariablesHolder = Vector<std::pair<uint32_t, OptionalValue>>;
+using VariablesHolder = Map<uint32_t, OptionalValue>;
 
 const std::string& objectVariableToString(ObjectVariable);
 ObjectVariable stringToObjectVariable(const std::string&);

@@ -10,7 +10,7 @@
 namespace et
 {
 
-CameraMovingController::CameraMovingController(Camera::Pointer cam, bool connectInput) :
+CameraMovingController::CameraMovingController(const Camera::Pointer& cam, bool connectInput) :
 	CameraController(cam, connectInput), _gestures(false)
 {
 	camera()->lockUpVector(unitY);
@@ -121,7 +121,7 @@ void CameraMovingController::validateCameraAngles(vec2& angles)
 	angles.y = clamp(angles.y, -HALF_PI + DEG_15, HALF_PI - DEG_15);
 }
 
-void CameraMovingController::synchronize(const Camera::Pointer)
+void CameraMovingController::synchronize(const Camera::Pointer&)
 {
 	vec2 angles = toSpherical(camera()->direction()).xy();
 	_directionAnimator.setValue(angles);

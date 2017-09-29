@@ -59,7 +59,7 @@ public:
 
 	uint64_t sortingKey() const;
 
-	virtual const Configuration& configuration(const std::string&) const;
+	const Configuration& configuration(const std::string&) const;
 	const ConfigurationMap& configurations() const { return _configurations; }
 
 	void loadFromJson(const std::string& json, const std::string& baseFolder);
@@ -121,7 +121,6 @@ public:
 	const TextureSet::Pointer& imageSet(const std::string&);
 	const TextureSet::Pointer& textureSet(const std::string&);
 	const ConstantBufferEntry::Pointer& constantBufferData(const std::string&);
-	const Configuration& configuration(const std::string&) const override;
 
 	void invalidateImageSet() override;
 	void invalidateTextureSet() override;
@@ -135,19 +134,19 @@ public:
 private:
 	friend class Material;
 	friend class ObjectFactory;
-	MaterialInstance(Material::Pointer base);
 
-	void buildImageSet(const std::string&);
-	void buildTextureSet(const std::string&);
-	void buildConstantBuffer(const std::string&);
-
-private:
-	template <class T>
+	template <class T> 
 	struct Holder
 	{
 		T obj;
 		bool valid = false;
 	};
+
+	MaterialInstance(Material::Pointer base);
+
+	void buildImageSet(const std::string&, Holder<TextureSet::Pointer>& holder);
+	void buildTextureSet(const std::string&, Holder<TextureSet::Pointer>&);
+	void buildConstantBuffer(const std::string&, Holder<ConstantBufferEntry::Pointer>& holder);
 
 private:
 	Material::Pointer _base;

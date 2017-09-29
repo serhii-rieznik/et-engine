@@ -19,9 +19,9 @@ public:
 	ET_DECLARE_POINTER(CameraMovingController);
 
 public:
-	CameraMovingController(Camera::Pointer, bool autoConnectToEvents);
+	CameraMovingController(const Camera::Pointer&, bool autoConnectToEvents);
 
-	void synchronize(const Camera::Pointer) override;
+	void synchronize(const Camera::Pointer&) override;
 
 	void setMovementSpeed(const vec3&);
 	void setIntepolationRate(float);

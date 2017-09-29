@@ -136,33 +136,17 @@ private:
 template <class T>
 inline void RenderPass::setSharedVariable(ObjectVariable var, const T& value)
 {
-	uint32_t ivar = static_cast<uint32_t>(var);
-
-	for (auto& v : _sharedVariables)
-	{
-		if (v.first == ivar)
-		{
-			v.second.set(value);
-			return;
-		}
-	}
-
-	_sharedVariables.emplace_back(static_cast<uint32_t>(var), OptionalValue());
-	_sharedVariables.back().second.set(value);
+	_sharedVariables[static_cast<uint32_t>(var)].set(value);
 }
 
 template <class T>
 inline bool RenderPass::loadSharedVariable(ObjectVariable var, T& value)
 {
-	uint32_t ivar = static_cast<uint32_t>(var);
-	
-	for (const auto& v : _sharedVariables)
+	auto i = _sharedVariables.find(static_cast<uint32_t>(var));
+	if (i != _sharedVariables.end())
 	{
-		if (v.first == ivar)
-		{
-			value = v.second.as<T>();
-			return true;
-		}
+		value = i->second.as<T>();
+		return true;
 	}
 	return false;
 }

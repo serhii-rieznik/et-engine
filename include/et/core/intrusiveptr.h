@@ -49,7 +49,7 @@ public:
 #if (ET_DEBUG)
 	void enableRetainCycleTracking(bool enabled) { _trackRetains = enabled ? 1 : 0; }
 #else
-	void enableRetainCycleTracking(bool) { }
+	void enableRetainCycleTracking(bool) {}
 #endif
 
 private:
@@ -69,11 +69,15 @@ template <class T>
 class InstusivePointerScope
 {
 public:
-	InstusivePointerScope(T* object) : _object(object) 
-		{ _object->retain(); }
-	
-	~InstusivePointerScope() 
-		{ _object->release(); }
+	InstusivePointerScope(T* object) : _object(object)
+	{
+		_object->retain();
+	}
+
+	~InstusivePointerScope()
+	{
+		_object->release();
+	}
 
 	InstusivePointerScope(const InstusivePointerScope&) = delete;
 	InstusivePointerScope(InstusivePointerScope&&) = delete;
@@ -98,30 +102,37 @@ public:
 			reset(sharedObjectFactory().createObject<T>());
 	}
 
-	IntrusivePtr(const IntrusivePtr& r)
+	IntrusivePtr(const IntrusivePtr& r) :
+		_data(r._data)
 	{
-		reset(r._data);
+		if (_data != nullptr)
+			_data->retain();
 	}
 
-	IntrusivePtr(IntrusivePtr&& r)
+	IntrusivePtr(IntrusivePtr&& r) :
+		_data(r._data)
 	{
-		std::swap(_data, r._data);
+		r._data = nullptr;
 	}
 
 	template <typename R>
-	IntrusivePtr(IntrusivePtr<R> r)
+	IntrusivePtr(IntrusivePtr<R> r) :
+		_data(static_cast<T*>(r.pointer()))
 	{
-		reset(static_cast<T*>(r.pointer()));
+		r.removeObject();
 	}
 
-	explicit IntrusivePtr(T* data)
+	explicit IntrusivePtr(T* data) :
+		_data(data)
 	{
-		reset(data);
+		if (_data != nullptr)
+			_data->retain();
 	}
 
 	virtual ~IntrusivePtr()
 	{
-		reset(nullptr);
+		if (_data != nullptr)
+			release(_data);
 	}
 
 #if (ET_SUPPORT_VARIADIC_TEMPLATES)
@@ -228,18 +239,26 @@ public:
 
 		if (newData != nullptr)
 			newData->retain();
-		
+
 		T* oldData = _data;
 		std::swap(_data, newData);
 
-		if (oldData != nullptr) 
-		{
-			ET_ASSERT(oldData->retainCount() > 0);
-			oldData->release();
-			
-			if (oldData->retainCount() == 0)
-				sharedObjectFactory().deleteObject<T>(oldData);
-		}
+		if (oldData != nullptr)
+			release(oldData);
+	}
+
+	void release(T* object)
+	{
+		ET_ASSERT(object != nullptr);
+		ET_ASSERT(object->retainCount() > 0);
+
+		if (object->release() == 0)
+			sharedObjectFactory().deleteObject<T>(object);
+	}
+
+	void removeObject()
+	{
+		_data = nullptr;
 	}
 
 	void swap(IntrusivePtr<T>& t)

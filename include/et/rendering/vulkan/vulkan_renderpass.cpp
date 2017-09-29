@@ -427,9 +427,10 @@ void VulkanRenderPass::pushRenderBatch(const MaterialInstance::Pointer& inMateri
 {
 	ET_ASSERT(_private->recording);
 
+	const Material::Pointer& baseMaterial = inMaterial->base();
 	InstusivePointerScope<VulkanRenderPass> scope(this);
-	VulkanProgram::Pointer program = inMaterial->configuration(info().name).program;
-	VulkanPipelineState::Pointer pipelineState = _private->renderer->acquireGraphicsPipeline(VulkanRenderPass::Pointer(this), inMaterial->base(), vertexStream);
+	VulkanPipelineState::Pointer pipelineState = _private->renderer->acquireGraphicsPipeline(VulkanRenderPass::Pointer(this), baseMaterial, vertexStream);
+	const VulkanProgram::Pointer& program = pipelineState->program();
 
 	if (pipelineState->nativePipeline().pipeline == nullptr)
 		return;
@@ -443,6 +444,7 @@ void VulkanRenderPass::pushRenderBatch(const MaterialInstance::Pointer& inMateri
 		for (const auto& v : sharedVariables())
 		{
 			const Program::Variable& var = program->reflection().objectVariables[v.first];
+			ET_ASSERT(v.second.isSet());
 			
 			if (var.enabled && v.second.isSet())
 				memcpy(objectVariables->data() + var.offset, v.second.data, v.second.size);

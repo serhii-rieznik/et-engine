@@ -19,7 +19,7 @@ public:
 	ET_DECLARE_POINTER(CameraOrbitController);
 
 public:
-	CameraOrbitController(Camera::Pointer, bool autoConnectToEvents);
+	CameraOrbitController(const Camera::Pointer&, bool autoConnectToEvents);
 
 	void setTargetPoint(const vec3&);
 	void setMovementSpeed(const vec3&);
@@ -28,7 +28,7 @@ public:
 	void startUpdates() override;
 	void cancelUpdates() override;
 
-	void synchronize(const Camera::Pointer) override;
+	void synchronize(const Camera::Pointer&) override;
 
 private:
 	void update(float) override;
