@@ -553,7 +553,6 @@ struct RenderPassStatistics
 {
 	char name[MaxRenderPassName] = { };
 	uint64_t cpuBuild = 0;
-	uint64_t cpuExecution = 0;
 	uint64_t gpuExecution = 0;
 };
 

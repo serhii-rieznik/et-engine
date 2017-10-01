@@ -40,15 +40,15 @@ class BlockMemoryAllocator
 {
 public:
 #if (ET_DEBUG)
-	static void allocateOnBreaks(const std::set<uint32_t>&);
-	static std::atomic<uint32_t> allocationIndex;
+	static void allocateOnBreaks(const std::set<uint64_t>&);
+	static std::atomic<uint64_t> allocationIndex;
 #endif
 
 public:
 	BlockMemoryAllocator();
 	~BlockMemoryAllocator();
 	
-	void* allocate(uint32_t);
+	void* allocate(uint64_t);
 	bool validatePointer(void*, bool = true);
 	void release(void* ptr);
 
@@ -81,7 +81,7 @@ template <typename O, typename ... args>
 inline O* ObjectFactory::createObject(args&&...a)
 {
 	ET_ASSERT(_allocator != nullptr);
-	return new (_allocator->allocate(sizeof(O))) O(a...); \
+	return new (_allocator->allocate(sizeof(O))) O(std::forward<args>(a)...); \
 }
 
 template <typename O>

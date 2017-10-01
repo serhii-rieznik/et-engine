@@ -21,7 +21,6 @@ void et::hdr::setShouldConvertRGBEToFloat(bool value)
 }
 
 unsigned char* readScanline(unsigned char*, int, vec4ub*);
-vec4 rgbeToFloat(const vec4ub&);
 
 void et::hdr::loadInfoFromStream(std::istream& source, TextureDescription& desc)
 {
@@ -29,7 +28,10 @@ void et::hdr::loadInfoFromStream(std::istream& source, TextureDescription& desc)
 	std::getline(source, line);
 	
 	if (line != kRadianceHeader)
+	{
+		log::error("Failed to load HDR image: invalid header");
 		return;
+	}
 
 	std::getline(source, line);
 	while (line.empty() || (line.find('#') == 0))
@@ -38,25 +40,37 @@ void et::hdr::loadInfoFromStream(std::istream& source, TextureDescription& desc)
 	uppercase(line);
 	
 	if (line.find(kRadianceFormatEntry) != 0)
+	{
+		log::error("Failed to load HDR image: can't find format in header");
 		return;
+	}
 	
 	std::string format = line.substr(kRadianceFormatEntry.size());
 	if (format != kRadiance32Bit_RLE_RGBE)
+	{
+		log::error("Failed to load HDR image: invalid format (%s)", format.c_str());
 		return;
-	
+	}
+
 	std::getline(source, line);
-	
-	while (line.empty() || (line.find('#') == 0))
-		std::getline(source, line);
-	
 	uppercase(line);
+
+	while (line.empty() || (line.find('#') == 0) || (line.find("EXPOSURE") == 0) || (line.find("GAMMA") == 0))
+	{
+		std::getline(source, line);
+		uppercase(line);
+	}
+	
 	line = removeWhitespace(line);
 	
 	size_t xpos = line.find('X');
 	size_t ypos = line.find('Y');
 	if ((xpos == std::string::npos) || (ypos == std::string::npos))
+	{
+		log::error("Failed to load HDR image: can't find dimensions in header (last checked line: %s)", line.c_str());
 		return;
-	
+	}
+
 	std::string ws;
 	std::string hs;
 	
@@ -74,7 +88,6 @@ void et::hdr::loadInfoFromStream(std::istream& source, TextureDescription& desc)
 	desc.size.x = strToInt(ws);
 	desc.size.y = strToInt(hs);
 	desc.target = TextureTarget::Texture_2D;
-	desc.format = TextureFormat::RGBA8;
 	desc.format = shouldConvertRGBEToFloat ? TextureFormat::RGBA32F : TextureFormat::RGBA8;	
 	desc.levelCount = 1;
 	desc.layerCount = 1;
@@ -85,17 +98,20 @@ void et::hdr::loadFromStream(std::istream& source, TextureDescription& desc)
 	loadInfoFromStream(source, desc);
 
 	if ((desc.size.x < 8) || (desc.size.x > 0x7fff))
-		ET_FAIL("Unsupported HDR format.");
+	{
+		log::error("Failed to load HDR image");
+		return;
+	}
 
 	auto sourcePos = source.tellg();
 
-    uint32_t square = desc.size.square();
-    uint32_t maxDataSize = square * bitsPerPixelForTextureFormat(desc.format) / 8;
+    uint64_t square = desc.size.square();
+    uint64_t maxDataSize = square * bitsPerPixelForTextureFormat(desc.format) / 8;
     
-    int32_t rowSize = desc.size.x * 4;
+    uint64_t rowSize = desc.size.x * 4;
 	BinaryDataStorage inData(maxDataSize, 0);
 	source.read(inData.binary(), maxDataSize);
-	auto ptr = inData.begin();
+	uint8_t* ptr = inData.begin();
 
 	if (shouldConvertRGBEToFloat)
 	{
@@ -104,14 +120,21 @@ void et::hdr::loadFromStream(std::istream& source, TextureDescription& desc)
 		DataStorage<vec4ub> rgbeData(desc.size.square(), 0);
 		DataStorage<vec4> floatDataWrapper(reinterpret_cast<vec4*>(desc.data.data()), desc.data.size());
 
-		for (int y = 0; y < desc.size.y; ++y)
+		for (int32_t y = 0; y < desc.size.y; ++y)
 		{
 			auto rowPtr = rgbeData.binary() + rowSize * (desc.size.y - 1 - y);
 			ptr = readScanline(ptr, desc.size.x, reinterpret_cast<vec4ub*>(rowPtr));
 		}
 
-		for (int i = 0; i < desc.size.square(); ++i)
-			floatDataWrapper[i] = rgbeToFloat(rgbeData[i]);
+		for (int32_t i = 0; i < desc.size.square(); ++i)
+		{
+			int8_t expo = rgbeData[i].w - 128;
+			float scale = (expo > 0) ? static_cast<float>(1 << expo) : 1.0f / static_cast<float>(1 << -expo);
+			float fx = scale * static_cast<float>(rgbeData[i].x);
+			float fy = scale * static_cast<float>(rgbeData[i].y);
+			float fz = scale * static_cast<float>(rgbeData[i].z);
+			floatDataWrapper[i] = vec4(fx, fy, fz, 1.0f);
+		}
 	}
 	else
 	{
@@ -187,17 +210,4 @@ unsigned char* readScanline(unsigned char* ptr, int width, vec4ub* scanline)
 	}
 
 	return ptr;
-}
-
-inline float convertComponent(char expo, unsigned char val)
-{
-	return (expo > 0) ? static_cast<float>(val * (1 << expo)) : 
-		static_cast<float>(val) / static_cast<float>(1 << -expo);
-}
-
-vec4 rgbeToFloat(const vec4ub& data)
-{
-	char expo = data.w - 128;
-	return vec4(convertComponent(expo, data.x), convertComponent(expo, data.y),
-		convertComponent(expo, data.z), 256.0f) / 256.0f;
 }

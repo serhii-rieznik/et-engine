@@ -12,15 +12,15 @@ namespace et
 {
 
 #if (ET_DEBUG)
-std::atomic<uint32_t> BlockMemoryAllocator::allocationIndex(0);
-static std::set<uint32_t> _breakOnAllocations;
-void BlockMemoryAllocator::allocateOnBreaks(const std::set<uint32_t>& indices)
+std::atomic<uint64_t> BlockMemoryAllocator::allocationIndex{ 0 };
+static std::set<uint64_t> _breakOnAllocations;
+void BlockMemoryAllocator::allocateOnBreaks(const std::set<uint64_t>& indices)
 {
 	_breakOnAllocations.insert(indices.begin(), indices.end());
 }
 #endif
 
-enum : uint32_t
+enum : uint64_t
 {
 	megabytes = 1024 * 1024,
 	allocatedValue = 0x00000000,
@@ -35,11 +35,11 @@ enum : uint32_t
 class MemoryChunk
 {
 public:
-	MemoryChunk(uint32_t);
+	MemoryChunk(uint64_t);
 
 	~MemoryChunk();
 
-	bool allocate(uint32_t size, void*& result);
+	bool allocate(uint64_t size, void*& result);
 	bool containsPointer(char*);
 	bool free(char*);
 
@@ -84,8 +84,8 @@ public:
 	~SmallMemoryBlockAllocator()
 	{
 #if (ET_DEBUG)
-		std::set<uint32_t> detectedLeaks;
-		uint32_t totalLeaked = 0;
+		std::set<uint64_t> detectedLeaks;
+		uint64_t totalLeaked = 0;
 
 		log::ConsoleOutput lOut;
 		for (auto i = firstBlock; i != lastBlock; ++i)
@@ -102,9 +102,9 @@ public:
 			char buffer[1024 * 10] = {};
 
 			int printPos = 0;
-			for (uint32_t i : detectedLeaks)
+			for (uint64_t i : detectedLeaks)
 			{
-				printPos += sprintf(buffer + printPos, "%u, ", i);
+				printPos += sprintf(buffer + printPos, "%llu, ", i);
 				if ((printPos + 128) > sizeof(buffer))
 					break;
 			}
@@ -217,7 +217,7 @@ public:
 	BlockMemoryAllocatorPrivate();
 	~BlockMemoryAllocatorPrivate();
 
-	void* alloc(uint32_t);
+	void* alloc(uint64_t);
 	void free(void*);
 
 	bool validate(void*, bool abortOnFail = true);
@@ -232,11 +232,11 @@ private:
 
 	SmallMemoryBlockAllocator<smallBlockSize> _allocatorSmall;
 	SmallMemoryBlockAllocator<mediumBlockSize> _allocatorMedium;
-	uint32_t _smallAllocations = 0;
-	uint32_t _mediumAllocations = 0;
-	uint32_t _largeAllocations = 0;
-	uint32_t _minAllocSize = std::numeric_limits<uint32_t>::max();
-	uint32_t _maxAllocSize = 0;
+	uint64_t _smallAllocations = 0;
+	uint64_t _mediumAllocations = 0;
+	uint64_t _largeAllocations = 0;
+	uint64_t _minAllocSize = std::numeric_limits<uint64_t>::max();
+	uint64_t _maxAllocSize = 0;
 };
 
 BlockMemoryAllocator::BlockMemoryAllocator()
@@ -249,9 +249,9 @@ BlockMemoryAllocator::~BlockMemoryAllocator()
 	ET_PIMPL_FINALIZE(BlockMemoryAllocator);
 }
 
-void* BlockMemoryAllocator::allocate(uint32_t sz)
+void* BlockMemoryAllocator::allocate(uint64_t sz)
 {
-	return _private->alloc(alignUpTo(sz, uint32_t(minimumAllocationSize)));
+	return _private->alloc(alignUpTo(sz, uint64_t(minimumAllocationSize)));
 }
 
 void BlockMemoryAllocator::release(void* ptr)
@@ -290,7 +290,7 @@ BlockMemoryAllocatorPrivate::~BlockMemoryAllocatorPrivate()
 		_minAllocSize, _maxAllocSize);
 }
 
-void* BlockMemoryAllocatorPrivate::alloc(uint32_t allocSize)
+void* BlockMemoryAllocatorPrivate::alloc(uint64_t allocSize)
 {
 	CriticalSectionScope lock(_csLock);
 
@@ -317,7 +317,7 @@ void* BlockMemoryAllocatorPrivate::alloc(uint32_t allocSize)
 			return result;
 	}
 
-	_chunks.emplace_back(alignUpTo(std::max(allocSize, uint32_t(defaultChunkSize)), uint32_t(allocGranularity)));
+	_chunks.emplace_back(alignUpTo(std::max(allocSize, uint64_t(defaultChunkSize)), uint64_t(allocGranularity)));
 
 	MemoryChunk& lastChunk = _chunks.back();
 	if (lastChunk.allocate(allocSize, result))
@@ -363,8 +363,8 @@ void BlockMemoryAllocatorPrivate::flushUnusedBlocks()
 {
 	CriticalSectionScope lock(_csLock);
 
-	uint32_t blocksFlushed = 0;
-	uint32_t memoryReleased = 0;
+	uint64_t blocksFlushed = 0;
+	uint64_t memoryReleased = 0;
 
 	auto i = _chunks.begin();
 	while (i != _chunks.end())
@@ -422,13 +422,13 @@ void BlockMemoryAllocatorPrivate::printInfo()
 	for (auto& chunk : _chunks)
 	{
 		log::info("\t{");
-		uint32_t allocatedMemory = chunk.heap.allocatedSize();
+		uint64_t allocatedMemory = chunk.heap.allocatedSize();
 		log::info("\t\tTotal memory used: %u (%uKb, %uMb) of %u (%uKb, %uMb)", allocatedMemory, allocatedMemory / 1024,
 			allocatedMemory / megabytes, chunk.heap.capacity(), chunk.heap.capacity() / 1024, chunk.heap.capacity() / megabytes);
 		log::info("\t}");
 	}
 
-	uint32_t allocatedBlocks = 0;
+	uint64_t allocatedBlocks = 0;
 
 	log::info("\t0...48 bytes");
 	log::info("\t{");
@@ -454,11 +454,11 @@ void BlockMemoryAllocatorPrivate::printInfo()
 /*
  * Chunk
  */
-MemoryChunk::MemoryChunk(uint32_t capacity) :
+MemoryChunk::MemoryChunk(uint64_t capacity) :
 	heap(capacity, minimumAllocationSize)
 {
-	uint32_t actualDataOffset = heap.requiredInfoSize();
-	uint32_t totalSize = alignUpTo(actualDataOffset + capacity, uint32_t(minimumAllocationSize));
+	uint64_t actualDataOffset = heap.requiredInfoSize();
+	uint64_t totalSize = alignUpTo(actualDataOffset + capacity, uint64_t(minimumAllocationSize));
 
 #if (ET_PLATFORM_APPLE)
 
@@ -489,7 +489,7 @@ MemoryChunk::MemoryChunk(uint32_t capacity) :
 MemoryChunk::~MemoryChunk()
 {
 #if (ET_DEBUG)
-	uint32_t totalLeaked = heap.allocatedSize();
+	uint64_t totalLeaked = heap.allocatedSize();
 	if (totalLeaked > 0)
 	{
 		log::ConsoleOutput lOut;
@@ -504,9 +504,9 @@ MemoryChunk::~MemoryChunk()
 #endif
 }
 
-bool MemoryChunk::allocate(uint32_t sizeToAllocate, void*& result)
+bool MemoryChunk::allocate(uint64_t sizeToAllocate, void*& result)
 {
-	uint32_t offset = 0;
+	uint64_t offset = 0;
 	if (heap.allocate(sizeToAllocate, offset))
 	{
 		result = actualDataMemory + offset;
@@ -520,13 +520,13 @@ bool MemoryChunk::containsPointer(char* ptr)
 	if ((ptr < actualDataMemory) || (ptr >= allocatedMemoryEnd))
 		return false;
 
-	return heap.containsAllocationWithOffset(static_cast<uint32_t>(ptr - actualDataMemory));
+	return heap.containsAllocationWithOffset(static_cast<uint64_t>(ptr - actualDataMemory));
 }
 
 bool MemoryChunk::free(char* ptr)
 {
 	if ((ptr < actualDataMemory) || (ptr >= allocatedMemoryEnd)) return false;
-	return heap.release(static_cast<uint32_t>(ptr - actualDataMemory));
+	return heap.release(static_cast<uint64_t>(ptr - actualDataMemory));
 }
 
 }

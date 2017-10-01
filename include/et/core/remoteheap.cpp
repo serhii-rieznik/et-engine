@@ -20,11 +20,11 @@ struct RemoteHeapPrivate
 		AllocationEnd = 0x03
 	};
 
-	uint32_t capacity = 0;
-	uint32_t granularity = 0;
-	uint32_t infoSize = 0;
-	uint32_t firstEmpty = 0;
-	uint32_t allocatedSize = 0;
+	uint64_t capacity = 0;
+	uint64_t granularity = 0;
+	uint64_t infoSize = 0;
+	uint64_t firstEmpty = 0;
+	uint64_t allocatedSize = 0;
 	uint8_t* info = nullptr;
 };
 
@@ -33,7 +33,7 @@ RemoteHeap::RemoteHeap()
 	ET_PIMPL_INIT(RemoteHeap);
 }
 
-RemoteHeap::RemoteHeap(uint32_t cap, uint32_t gr)
+RemoteHeap::RemoteHeap(uint64_t cap, uint64_t gr)
 {
 	ET_PIMPL_INIT(RemoteHeap);
 	init(cap, gr);
@@ -62,17 +62,17 @@ RemoteHeap::~RemoteHeap()
 	ET_PIMPL_FINALIZE(RemoteHeap);
 }
 
-void RemoteHeap::init(uint32_t cap, uint32_t gr)
+void RemoteHeap::init(uint64_t cap, uint64_t gr)
 {
 	_private->capacity = cap;
 	_private->granularity = gr;
 	_private->infoSize = (_private->capacity + _private->granularity - 1) / _private->granularity;
 }
 
-bool RemoteHeap::allocate(uint32_t sizeToAllocate, uint32_t& offset)
+bool RemoteHeap::allocate(uint64_t sizeToAllocate, uint64_t& offset)
 {
-	uint32_t alignedSize = alignUpTo(sizeToAllocate, _private->granularity);
-	uint32_t requiredInfoSize = alignedSize / _private->granularity;
+	uint64_t alignedSize = alignUpTo(sizeToAllocate, _private->granularity);
+	uint64_t requiredInfoSize = alignedSize / _private->granularity;
 
 	if (_private->firstEmpty + requiredInfoSize > _private->infoSize)
 		return false;
@@ -84,7 +84,7 @@ bool RemoteHeap::allocate(uint32_t sizeToAllocate, uint32_t& offset)
 
 	ET_ASSERT(*ptr == RemoteHeapPrivate::Empty);
 	
-	uint32_t sz = 1;
+	uint64_t sz = 1;
 	uint8_t* seekBegin = ptr;
 	uint8_t* allocationBegin = ptr;
 	while (ptr < end)
@@ -102,10 +102,10 @@ bool RemoteHeap::allocate(uint32_t sizeToAllocate, uint32_t& offset)
 			uint8_t* allocationEnd = allocationBegin + requiredInfoSize - 1;
 			ET_ASSERT(*allocationEnd == RemoteHeapPrivate::Empty);
 			
-			offset = _private->granularity * static_cast<uint32_t>(allocationBegin - _private->info);
+			offset = _private->granularity * static_cast<uint64_t>(allocationBegin - _private->info);
 			_private->allocatedSize += _private->granularity * requiredInfoSize;
 
-			uint32_t usedChunks = static_cast<uint32_t>(allocationEnd - allocationBegin);
+			uint64_t usedChunks = static_cast<uint64_t>(allocationEnd - allocationBegin);
 			memset(allocationBegin, RemoteHeapPrivate::AllocationInterior, usedChunks);
 			*allocationBegin = RemoteHeapPrivate::AllocationBegin;
 			*allocationEnd = RemoteHeapPrivate::AllocationEnd;
@@ -127,12 +127,12 @@ bool RemoteHeap::allocate(uint32_t sizeToAllocate, uint32_t& offset)
 	return allocated;
 }
 
-bool RemoteHeap::release(uint32_t offset)
+bool RemoteHeap::release(uint64_t offset)
 {
 	if (offset % _private->granularity)
 		return false;
 
-	uint32_t index = offset / _private->granularity;
+	uint64_t index = offset / _private->granularity;
 	if (index >= _private->infoSize)
 		return false;
 
@@ -140,7 +140,7 @@ bool RemoteHeap::release(uint32_t offset)
 	uint8_t state = *ptr;
 	ET_ASSERT((state == RemoteHeapPrivate::AllocationBegin) || (state == RemoteHeapPrivate::AllocationEnd));
 
-	uint32_t freedSize = 0;
+	uint64_t freedSize = 0;
 	do 
 	{
 		freedSize++;
@@ -158,24 +158,24 @@ bool RemoteHeap::release(uint32_t offset)
 	return true;
 }
 
-bool RemoteHeap::containsAllocationWithOffset(uint32_t offset)
+bool RemoteHeap::containsAllocationWithOffset(uint64_t offset)
 {
 	if (offset % _private->granularity != 0)
 		return false;
 
-	uint32_t index = offset / _private->granularity;
+	uint64_t index = offset / _private->granularity;
 	if (index >= _private->infoSize)
 		return false;
 
 	return true;
 }
 
-uint32_t RemoteHeap::requiredInfoSize() const
+uint64_t RemoteHeap::requiredInfoSize() const
 {
 	return _private->infoSize;
 }
 
-uint32_t RemoteHeap::capacity() const
+uint64_t RemoteHeap::capacity() const
 {
 	return _private->capacity;
 }
@@ -191,7 +191,7 @@ bool RemoteHeap::empty() const
 	return allocatedSize() == 0;
 }
 
-uint32_t RemoteHeap::allocatedSize() const
+uint64_t RemoteHeap::allocatedSize() const
 {
 	return _private->allocatedSize;
 }

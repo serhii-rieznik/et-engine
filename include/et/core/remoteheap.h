@@ -17,22 +17,22 @@ class RemoteHeap
 {
 public:
 	RemoteHeap();
-	RemoteHeap(uint32_t capacity, uint32_t granularity);
+	RemoteHeap(uint64_t capacity, uint64_t granularity);
 	RemoteHeap(RemoteHeap&&);
 	RemoteHeap& operator = (RemoteHeap&&);
 	~RemoteHeap();
 
-	uint32_t capacity() const;
-	uint32_t requiredInfoSize() const;
-	uint32_t allocatedSize() const;
+	uint64_t capacity() const;
+	uint64_t requiredInfoSize() const;
+	uint64_t allocatedSize() const;
 
-	void init(uint32_t capacity, uint32_t granularity);
+	void init(uint64_t capacity, uint64_t granularity);
 	void setInfoStorage(void*);
 	void clear();
 
-	bool allocate(uint32_t size, uint32_t& offset);
-	bool containsAllocationWithOffset(uint32_t offset);
-	bool release(uint32_t offset);
+	bool allocate(uint64_t size, uint64_t& offset);
+	bool containsAllocationWithOffset(uint64_t offset);
+	bool release(uint64_t offset);
 
 	bool empty() const;
 

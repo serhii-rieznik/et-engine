@@ -663,10 +663,11 @@ s3d::ElementContainer::Pointer OBJLoader::load(et::RenderInterface::Pointer ren,
 		uint64_t t2 = queryCurrentTimeInMicroSeconds();
 
 		processLoadedData();
-		saveCache(cacheFileName);
-		uint64_t t3 = queryCurrentTimeInMicroSeconds();
+		// saveCache(cacheFileName);
+		// uint64_t t3 = queryCurrentTimeInMicroSeconds();
 
-		log::info("Loading time: %llu, caching time: %llu", t2 - t1, t3 - t2);
+		uint64_t loadingTime = t2 - t1;
+		log::info("OBJ loading time: %llu.%3llums", loadingTime / 1000, loadingTime % 1000);
 	}
 
 	s3d::ElementContainer::Pointer result = generateVertexBuffers(storage);

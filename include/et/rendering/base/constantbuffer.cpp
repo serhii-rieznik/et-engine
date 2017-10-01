@@ -21,7 +21,7 @@ public:
 	uint32_t allowedAllocations = 0;
 	bool modified = false;
 
-	const ConstantBufferEntry::Pointer& allocateInternal(uint32_t, uint32_t);
+	const ConstantBufferEntry::Pointer& allocateInternal(uint64_t, uint32_t);
 	void internalFree(const ConstantBufferEntry::Pointer&);
 };
 
@@ -91,15 +91,15 @@ void ConstantBuffer::flush(uint32_t frameNumber)
 		_private->allocations.erase(i, _private->allocations.end());
 }
 
-const ConstantBufferEntry::Pointer& ConstantBuffer::allocate(uint32_t size, uint32_t allocationClass)
+const ConstantBufferEntry::Pointer& ConstantBuffer::allocate(uint64_t size, uint32_t allocationClass)
 {
 	ET_ASSERT(_private->allowedAllocations & allocationClass);
 	return _private->allocateInternal(size, allocationClass);
 }
 
-const ConstantBufferEntry::Pointer& ConstantBufferPrivate::allocateInternal(uint32_t size, uint32_t cls)
+const ConstantBufferEntry::Pointer& ConstantBufferPrivate::allocateInternal(uint64_t size, uint32_t cls)
 {
-	uint32_t offset = 0;
+	uint64_t offset = 0;
 
 	if (!heap.allocate(size, offset))
 		ET_FAIL("Failed to allocate data in shared constant buffer");

@@ -264,6 +264,9 @@ uint32_t bitsPerPixelForTextureFormat(TextureFormat format)
 {
 	switch (format)
 	{
+	case TextureFormat::Invalid:
+		return 0;
+
 	case TextureFormat::R8:
 		return 8;
 

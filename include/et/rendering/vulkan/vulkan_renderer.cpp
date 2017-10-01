@@ -397,12 +397,6 @@ void VulkanRenderer::present()
 	
 	sharedConstantBuffer().flush(frameNumber());
 
-	for (VulkanRenderPass::Pointer& pass : passes)
-	{
-		pass->recordCommandBuffer();
-		ET_ASSERT(pass->recordedFrameIndex() == frameIndex());
-	}
-
 	size_t maxQueueSize = 2 * (1 + std::min(32ull, sqr(_private->passes.size())));
 	_private->allSubmits.clear();
 	_private->allSubmits.reserve(maxQueueSize);

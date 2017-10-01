@@ -110,7 +110,7 @@ void VertexStorage::serialize(std::ostream& fOut)
 	serializeUInt32(fOut, 0);
 	_private->decl.serialize(fOut);
 	
-	serializeUInt32(fOut, _private->data.size());
+	serializeUInt64(fOut, _private->data.size());
 	if (_private->data.size() > 0)
 		fOut.write(_private->data.binary(), _private->data.size());
 }

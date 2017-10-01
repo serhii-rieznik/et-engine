@@ -40,9 +40,8 @@ public:
 
 	bool fillStatistics(uint64_t* buffer, RenderPassStatistics&);
 	
-	void recordCommandBuffer();
-	uint32_t recordedFrameIndex() const;
-
+private:
+	ConstantBufferEntry::Pointer VulkanRenderPass::buildObjectVariables(const VulkanProgram::Pointer&);
 
 private:
 	ET_DECLARE_PIMPL(VulkanRenderPass, 384);

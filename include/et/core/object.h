@@ -41,7 +41,6 @@ public:
 
 private:
 	std::string _name;
-
 };
 
 class LoadableObject : public NamedObject

@@ -137,7 +137,7 @@ void et::png::loadFromStream(std::istream& source, TextureDescription& desc, boo
 		BinaryDataStorage rgbData = desc.data;
 		vec3ub* rgb = reinterpret_cast<vec3ub*>(rgbData.data());
 		vec4ub* rgba = reinterpret_cast<vec4ub*>(desc.data.data());
-		for (uint32_t i = 0, e = desc.data.size() / 4; i < e; ++i)
+		for (uint64_t i = 0, e = desc.data.size() / 4; i < e; ++i)
 		{
 			*rgba = vec4ub(*rgb, 255);
 			++rgb;

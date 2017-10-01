@@ -163,9 +163,9 @@ et::Dictionary Locale::parseLanguageFile(const std::string& fileName)
 	}
 
 	inQuote = false;
-	uint32_t sourceLength = keyValues.lastElementIndex();
+	uint64_t sourceLength = keyValues.lastElementIndex();
 	StringDataStorage source(sourceLength + 1, 0);
-	for (uint32_t j = 0; j < sourceLength; ++j)
+	for (uint64_t j = 0; j < sourceLength; ++j)
 	{
 		char c = keyValues[j];
 

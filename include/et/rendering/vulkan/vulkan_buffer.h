@@ -23,19 +23,19 @@ public:
 	VulkanBuffer(VulkanState& vulkan, const Description&);
 	~VulkanBuffer();
 
-	uint8_t* map(uint32_t offset, uint32_t size) override;
+	uint8_t* map(uint64_t offset, uint64_t size) override;
 	void modifyRange(uint64_t begin, uint64_t length) override;
 	void unmap() override;
 	bool mapped() const override;
 	
-	void updateData(uint32_t offset, const BinaryDataStorage&) override;
-	void transferData(Buffer::Pointer destination, uint32_t srcOffset, uint32_t dstOffset, uint32_t size) override;
+	void updateData(uint64_t offset, const BinaryDataStorage&) override;
+	void transferData(Buffer::Pointer destination, uint64_t srcOffset, uint64_t dstOffset, uint64_t size) override;
 
 	const VulkanNativeBuffer& nativeBuffer() const;
 
-	uint32_t size() const override;
+	uint64_t size() const override;
 
 private:
-	ET_DECLARE_PIMPL(VulkanBuffer, 160);
+	ET_DECLARE_PIMPL(VulkanBuffer, 256);
 };
 }

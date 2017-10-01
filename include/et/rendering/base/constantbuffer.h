@@ -27,13 +27,13 @@ public:
 	ET_DECLARE_POINTER(ConstantBufferEntry);
 
 public:
-	ConstantBufferEntry(uint32_t off, uint32_t sz, uint8_t* ptr, uint32_t aCl) :
+	ConstantBufferEntry(uint64_t off, uint64_t sz, uint8_t* ptr, uint32_t aCl) :
 		_data(ptr), _allocationClass(aCl), _offset(off), _length(sz) { }
 
-	uint32_t offset() const
+	uint64_t offset() const
 		{ return _offset; }
 	
-	uint32_t length() const 
+	uint64_t length() const 
 		{ return _length; }
 
 	uint8_t* data() 
@@ -48,7 +48,7 @@ public:
 	uint32_t allocationClass() const 
 		{ return _allocationClass; }
 
-	uint32_t flushFrame() const 
+	uint64_t flushFrame() const 
 		{ return _flushFrame;  }
 
 	void flush(uint32_t frame) 
@@ -62,9 +62,9 @@ public:
 
 private:
 	uint8_t* _data = nullptr;
+	uint64_t _offset = 0;
+	uint64_t _length = 0;
 	uint32_t _allocationClass = 0;
-	uint32_t _offset = 0;
-	uint32_t _length = 0;
 	uint32_t _flushFrame = InvalidFlushFrame;
 };
 
@@ -89,12 +89,10 @@ public:
 	Buffer::Pointer buffer() const;
 	void flush(uint32_t);
 
-	const ConstantBufferEntry::Pointer& allocate(uint32_t size, uint32_t allocationClass);
-
-	// void free(const ConstantBufferEntry::Pointer&);
+	const ConstantBufferEntry::Pointer& allocate(uint64_t size, uint32_t allocationClass);
 
 private:
-	ET_DECLARE_PIMPL(ConstantBuffer, 256);
+	ET_DECLARE_PIMPL(ConstantBuffer, 384);
 };
 
 }

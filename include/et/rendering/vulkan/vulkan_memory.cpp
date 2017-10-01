@@ -16,8 +16,8 @@ class VulkanMemoryAllocatorPrivate
 public:
 	enum : uint64_t
 	{
-		PageSize = 64 * 1024 * 1024,
-		PageIndexShift = 56,
+		PageSize = 96 * 1024 * 1024,
+		PageIndexShift = 48,
 		Alignment = 1024,
 	};
 	
@@ -30,10 +30,10 @@ public:
 		bool exclusive = false;
 		bool unused = false;
 
-		MemoryPage(uint32_t typ, uint32_t cap, VulkanState& st) :
-			type(typ), controller(cap, static_cast<uint32_t>(Alignment))
+		MemoryPage(uint32_t typ, uint64_t cap, VulkanState& st) :
+			type(typ), controller(cap, Alignment)
 		{
-			uint32_t infoSize = controller.requiredInfoSize();
+			uint64_t infoSize = controller.requiredInfoSize();
 			info =  sharedBlockAllocator().allocate(infoSize);
 			controller.setInfoStorage(info);
 		}
@@ -97,12 +97,10 @@ void VulkanMemoryAllocator::init(VulkanState& state)
 	ET_PIMPL_INIT(VulkanMemoryAllocator, state);
 }
 
-bool VulkanMemoryAllocator::allocateSharedMemory(VkDeviceSize size, uint32_t type, Allocation& alloc)
+bool VulkanMemoryAllocator::allocateSharedMemory(VkDeviceSize requestedSize, uint32_t type, Allocation& alloc)
 {
-	uint32_t requestedSize = static_cast<uint32_t>(size);
-
 	uint64_t id = ++_private->allocationId;
-	uint32_t offset = 0;
+	uint64_t offset = 0;
 	VkDeviceMemory memory = VK_NULL_HANDLE;
 
 	bool allocated = false;
@@ -121,8 +119,8 @@ bool VulkanMemoryAllocator::allocateSharedMemory(VkDeviceSize size, uint32_t typ
 
 	if (allocated == false)
 	{
-		uint32_t alignedSize = alignUpTo(requestedSize, static_cast<uint32_t>(VulkanMemoryAllocatorPrivate::Alignment));
-		uint32_t pageSize = std::max(alignedSize, static_cast<uint32_t>(VulkanMemoryAllocatorPrivate::PageSize));
+		uint64_t alignedSize = alignUpTo(requestedSize, static_cast<uint64_t>(VulkanMemoryAllocatorPrivate::Alignment));
+		uint64_t pageSize = std::max(alignedSize, static_cast<uint64_t>(VulkanMemoryAllocatorPrivate::PageSize));
 
 		id ^= static_cast<uint64_t>(_private->pages.size()) << VulkanMemoryAllocatorPrivate::PageIndexShift;
 		_private->pages.emplace_back(type, pageSize, _private->state);
@@ -148,14 +146,12 @@ bool VulkanMemoryAllocator::allocateSharedMemory(VkDeviceSize size, uint32_t typ
 	return allocated;
 }
 
-bool VulkanMemoryAllocator::allocateExclusiveMemory(VkDeviceSize size, uint32_t type, Allocation& alloc)
+bool VulkanMemoryAllocator::allocateExclusiveMemory(VkDeviceSize requestedSize, uint32_t type, Allocation& alloc)
 {
-	uint32_t requestedSize = static_cast<uint32_t>(size);
-
 	uint64_t id = ++_private->allocationId;
-	uint32_t offset = 0;
+	uint64_t offset = 0;
 
-	uint32_t alignedSize = alignUpTo(requestedSize, static_cast<uint32_t>(VulkanMemoryAllocatorPrivate::Alignment));
+	uint64_t alignedSize = alignUpTo(requestedSize, static_cast<uint64_t>(VulkanMemoryAllocatorPrivate::Alignment));
 
 	id ^= static_cast<uint64_t>(_private->pages.size()) << VulkanMemoryAllocatorPrivate::PageIndexShift;
 	_private->pages.emplace_back(type, alignedSize, _private->state);
@@ -189,7 +185,7 @@ bool VulkanMemoryAllocator::release(const Allocation& alloc)
 	ET_ASSERT(pageIndex < _private->pages.size());
 
 	VulkanMemoryAllocatorPrivate::MemoryPage& page = _private->pages[pageIndex];
-	bool released = page.controller.release(static_cast<uint32_t>(alloc.offset));
+	bool released = page.controller.release(alloc.offset);
 
 	if (page.controller.empty())
 	{

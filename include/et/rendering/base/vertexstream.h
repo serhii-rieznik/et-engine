@@ -67,7 +67,7 @@ inline void VertexStream::setIndexBuffer(const Buffer::Pointer& ib, IndexArrayFo
 
 inline uint32_t VertexStream::vertexCount() const
 {
-	return _vb->size() / _vbDeclaration.sizeInBytes();
+	return static_cast<uint32_t>(_vb->size() / _vbDeclaration.sizeInBytes());
 }
 
 }

@@ -40,7 +40,7 @@ VulkanBuffer::VulkanBuffer(VulkanState& vulkan, const Description& desc)
 	_private->desc.location = desc.location;
 	_private->desc.usage = desc.usage;
 	_private->desc.size = desc.size;
-	_private->desc.alignedSize = alignUpTo(desc.size, uint32_t(_private->vulkan.physicalDeviceProperties.limits.nonCoherentAtomSize));
+	_private->desc.alignedSize = alignUpTo(desc.size, _private->vulkan.physicalDeviceProperties.limits.nonCoherentAtomSize);
 
 	VkBufferCreateInfo createInfo = { VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO };
 	createInfo.size = _private->desc.alignedSize;
@@ -73,7 +73,7 @@ VulkanBuffer::~VulkanBuffer()
 	ET_PIMPL_FINALIZE(VulkanBuffer);
 }
 
-void VulkanBuffer::updateData(uint32_t offset, const BinaryDataStorage& data)
+void VulkanBuffer::updateData(uint64_t offset, const BinaryDataStorage& data)
 {
 	ET_ASSERT(offset + data.size() <= _private->desc.alignedSize);
 
@@ -86,8 +86,8 @@ void VulkanBuffer::updateData(uint32_t offset, const BinaryDataStorage& data)
 	}
 	else
 	{
-		const uint32_t StagingBufferPageSize = 4 * 1024 * 1024;
-		uint32_t stagingBufferSize = std::min(data.size(), StagingBufferPageSize);
+		const uint64_t StagingBufferPageSize = 4 * 1024 * 1024;
+		uint64_t stagingBufferSize = std::min(data.size(), StagingBufferPageSize);
 
 		Description desc;
 		desc.location = Location::Host;
@@ -96,8 +96,8 @@ void VulkanBuffer::updateData(uint32_t offset, const BinaryDataStorage& data)
 		VulkanBuffer stagingBuffer(_private->vulkan, desc);
 
 		retain();
-		uint32_t copyOffset = 0;
-		uint32_t bytesRemaining = data.size();
+		uint64_t copyOffset = 0;
+		uint64_t bytesRemaining = data.size();
 		while (bytesRemaining > 0)
 		{ 
 			stagingBufferSize = std::min(stagingBufferSize, bytesRemaining);
@@ -114,12 +114,12 @@ void VulkanBuffer::updateData(uint32_t offset, const BinaryDataStorage& data)
 	}
 }
 
-void VulkanBuffer::transferData(Buffer::Pointer dst, uint32_t srcOffset, uint32_t dstOffset, uint32_t size)
+void VulkanBuffer::transferData(Buffer::Pointer dst, uint64_t srcOffset, uint64_t dstOffset, uint64_t size)
 {
 	VulkanBuffer::Pointer destination = dst;
 	ET_ASSERT(destination->_private->memoryRequirements.size >= size);
 
-	uint32_t targetSize = std::min(size, static_cast<uint32_t>(destination->_private->memoryRequirements.size));
+	uint64_t targetSize = std::min(size, destination->_private->memoryRequirements.size);
 	VkBufferCopy region = { srcOffset, dstOffset, targetSize };
 	_private->vulkan.executeServiceCommands(VulkanQueueClass::Graphics, [&](VkCommandBuffer cmdBuffer) {
 		vkCmdCopyBuffer(cmdBuffer, _private->buffer, destination->_private->buffer, 1, &region);
@@ -131,13 +131,13 @@ const VulkanNativeBuffer& VulkanBuffer::nativeBuffer() const
 	return *(_private);
 }
 
-uint8_t* VulkanBuffer::map(uint32_t offset, uint32_t size)
+uint8_t* VulkanBuffer::map(uint64_t offset, uint64_t size)
 {
 	ET_ASSERT(size > 0);
 	ET_ASSERT(_private->desc.location == Location::Host);
 	ET_ASSERT(_private->mapped == false);
 
-	size = alignUpTo(size, uint32_t(_private->vulkan.physicalDeviceProperties.limits.nonCoherentAtomSize));
+	size = alignUpTo(size, _private->vulkan.physicalDeviceProperties.limits.nonCoherentAtomSize);
 	ET_ASSERT(offset + size <= _private->desc.alignedSize);
 
 	_private->mapped = true;
@@ -180,7 +180,7 @@ bool VulkanBuffer::mapped() const
 	return _private->mapped;
 }
 
-uint32_t VulkanBuffer::size() const
+uint64_t VulkanBuffer::size() const
 {
 	return _private->desc.size;
 }
