@@ -34,18 +34,24 @@ void Frustum::build(const mat4& invVP)
 
 bool Frustum::containsBoundingBox(const BoundingBox& aabb) const
 {
-	BoundingBox::Corners corners;
-	aabb.calculateCorners(corners);
+	const BoundingBox::Corners& corners = aabb.corners();
 
 	for (const plane& frustumPlane : _planes)
 	{
+		const vec3& eq = frustumPlane.equation.xyz();
+		float w = frustumPlane.equation.w;
+		
 		uint32_t outCorners = 0;
-		for (const vec3& corner : corners)
-		{
-			if (dot(frustumPlane.equation.xyz(), corner) > frustumPlane.equation.w)
-				++outCorners;
-		}
-		if (outCorners == corners.size())
+		outCorners += (dot(eq, corners[0]) > w) ? 1u : 0u;
+		outCorners += (dot(eq, corners[1]) > w) ? 1u : 0u;
+		outCorners += (dot(eq, corners[2]) > w) ? 1u : 0u;
+		outCorners += (dot(eq, corners[3]) > w) ? 1u : 0u;
+		outCorners += (dot(eq, corners[4]) > w) ? 1u : 0u;
+		outCorners += (dot(eq, corners[5]) > w) ? 1u : 0u;
+		outCorners += (dot(eq, corners[6]) > w) ? 1u : 0u;
+		outCorners += (dot(eq, corners[7]) > w) ? 1u : 0u;
+
+		if (outCorners == 8)
 			return false;
 	}
 

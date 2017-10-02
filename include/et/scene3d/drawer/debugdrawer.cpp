@@ -67,8 +67,7 @@ void DebugDrawer::submitBatches(RenderPass::Pointer pass)
 
 void DebugDrawer::drawBoundingBox(const BoundingBox& bbox, const mat4& transform, const vec4& color)
 {
-	BoundingBox::Corners corners;
-	bbox.calculateCorners(corners);
+	BoundingBox::Corners corners = bbox.corners();
 	for (vec3& c : corners)
 		c = transform * c;
 

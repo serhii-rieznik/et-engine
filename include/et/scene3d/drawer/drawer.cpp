@@ -75,12 +75,15 @@ void Drawer::draw()
 		_main.pass->nextSubpass();
 		for (Mesh::Pointer& mesh : _allMeshes)
 		{
-			const mat4& transform = mesh->transform();
-			const mat4& rotationTransform = mesh->rotationTransform();
-			_main.pass->setSharedVariable(ObjectVariable::WorldTransform, transform);
-			_main.pass->setSharedVariable(ObjectVariable::WorldRotationTransform, rotationTransform);
-			for (const RenderBatch::Pointer& rb : mesh->renderBatches())
-				_main.pass->pushRenderBatch(rb);
+			if (renderCamera->frustum().containsBoundingBox(mesh->tranformedBoundingBox()))
+			{
+				const mat4& transform = mesh->transform();
+				const mat4& rotationTransform = mesh->rotationTransform();
+				_main.pass->setSharedVariable(ObjectVariable::WorldTransform, transform);
+				_main.pass->setSharedVariable(ObjectVariable::WorldRotationTransform, rotationTransform);
+				for (const RenderBatch::Pointer& rb : mesh->renderBatches())
+					_main.pass->pushRenderBatch(rb);
+			}
 		}
 		_main.pass->setSharedVariable(ObjectVariable::WorldTransform, identityMatrix);
 		_main.pass->pushRenderBatch(_lighting.environmentBatch);

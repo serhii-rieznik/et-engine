@@ -49,8 +49,7 @@ void ShadowmapProcessor::setupProjection(DrawerOptions& options)
 	lightViewMatrix[1][0] = s.y; lightViewMatrix[1][1] = u.y; lightViewMatrix[1][2] = -d.y;
 	lightViewMatrix[2][0] = s.z; lightViewMatrix[2][1] = u.z; lightViewMatrix[2][2] = -d.z;
 
-	BoundingBox::Corners corners;
-	_sceneBoundingBox.calculateCorners(corners);
+	const BoundingBox::Corners& corners = _sceneBoundingBox.corners();
 
 	vec3 viewMin(std::numeric_limits<float>::max());
 	vec3 viewMax = -viewMin;
@@ -108,12 +107,15 @@ void ShadowmapProcessor::process(RenderInterface::Pointer& renderer, DrawerOptio
 	activePass->nextSubpass();
 	for (Mesh::Pointer& mesh : _renderables.meshes)
 	{
-		const mat4& transform = mesh->transform();
-		const mat4& rotationTransform = mesh->rotationTransform();
-		activePass->setSharedVariable(ObjectVariable::WorldTransform, transform);
-		activePass->setSharedVariable(ObjectVariable::WorldRotationTransform, rotationTransform);
-		for (const RenderBatch::Pointer& batch : mesh->renderBatches())
-			activePass->pushRenderBatch(batch);
+		if (_light->frustum().containsBoundingBox(mesh->tranformedBoundingBox()))
+		{
+			const mat4& transform = mesh->transform();
+			const mat4& rotationTransform = mesh->rotationTransform();
+			activePass->setSharedVariable(ObjectVariable::WorldTransform, transform);
+			activePass->setSharedVariable(ObjectVariable::WorldRotationTransform, rotationTransform);
+			for (const RenderBatch::Pointer& batch : mesh->renderBatches())
+				activePass->pushRenderBatch(batch);
+		}
 	}
 	activePass->endSubpass();
 	activePass->pushImageBarrier(_directionalShadowmap, ResourceBarrier(TextureState::ShaderResource));
