@@ -90,7 +90,7 @@ public:
 	RenderPass(RenderInterface*, const ConstructionInfo&);
 
 	virtual void begin(const RenderPassBeginInfo& info) = 0;
-	virtual void pushRenderBatch(const MaterialInstance::Pointer&, const VertexStream::Pointer&, uint32_t firstIndex, uint32_t indexCount) = 0;
+	virtual void pushRenderBatch(const MaterialInstance::Pointer&, const VertexStream::Pointer&, uint32_t first, uint32_t count) = 0;
 	virtual void pushImageBarrier(const Texture::Pointer&, const ResourceBarrier&) = 0;
 	virtual void copyImage(const Texture::Pointer&, const Texture::Pointer&, const CopyDescriptor&) = 0;
 	virtual void dispatchCompute(const Compute::Pointer&, const vec3i&) = 0;

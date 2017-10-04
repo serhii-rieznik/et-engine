@@ -29,25 +29,16 @@ void init(RenderContext* rc)
 	rh_local::renderContext = rc;
 	
 	VertexDeclaration vd(false, VertexAttributeUsage::Position, DataType::Vec3);
-	vd.push_back(VertexAttributeUsage::TexCoord0, et::DataType::Vec2);
-	VertexStorage::Pointer vs = VertexStorage::Pointer::create(vd, 4);
+	VertexStorage::Pointer vs = VertexStorage::Pointer::create(vd, 3);
 
-	auto pos = vs->accessData<DataType::Vec3>(VertexAttributeUsage::Position, 0);
-	auto tc0 = vs->accessData<DataType::Vec2>(VertexAttributeUsage::TexCoord0, 0);
-	pos[0] = vec3(-1.0f, -1.0f, 0.0f); tc0[0] = vec2(0.0f, 0.0f);
-	pos[1] = vec3( 1.0f, -1.0f, 0.0f); tc0[1] = vec2(1.0f, 0.0f);
-	pos[2] = vec3(-1.0f,  1.0f, 0.0f); tc0[2] = vec2(0.0f, 1.0f);
-	pos[3] = vec3( 1.0f,  1.0f, 0.0f); tc0[3] = vec2(1.0f, 1.0f);
-	
-	IndexArray::Pointer ia = IndexArray::Pointer::create(IndexArrayFormat::Format_16bit, 4, PrimitiveType::TriangleStrips);
-	ia->linearize(4);
+	VertexDataAccessor<DataType::Vec3> pos = vs->accessData<DataType::Vec3>(VertexAttributeUsage::Position, 0);
+	pos[0] = vec3(-1.0f, -1.0f, 0.0f);
+	pos[1] = vec3( 3.0f, -1.0f, 0.0f);
+	pos[2] = vec3(-1.0f,  3.0f, 0.0f);
 
-	auto vb = rc->renderer()->createVertexBuffer("rh_local::vb", vs, Buffer::Location::Device);
-	auto ib = rc->renderer()->createIndexBuffer("rh_local::ib", ia, Buffer::Location::Device);
-	
+	Buffer::Pointer vb = rc->renderer()->createVertexBuffer("rh_local::vb", vs, Buffer::Location::Device);
 	rh_local::default2DPlane = VertexStream::Pointer::create();
 	rh_local::default2DPlane->setVertexBuffer(vb, vs->declaration());
-	rh_local::default2DPlane->setIndexBuffer(ib, ia->format(), ia->primitiveType());
 
 	rh_local::texturedMaterial = rc->renderer()->sharedMaterialLibrary().loadDefaultMaterial(DefaultMaterial::Textured2D);
 
@@ -73,7 +64,7 @@ RenderBatch::Pointer createFullscreenRenderBatch(const Texture::Pointer& texture
 	{
 		MaterialInstance::Pointer materialInstance = mat->instance();
 		materialInstance->setTexture(MaterialTexture::BaseColor, texture);
-		batch->construct(materialInstance, rh_local::default2DPlane, 0, rh_local::default2DPlane->vertexCount());
+		batch->construct(materialInstance, rh_local::default2DPlane, 0, 3);
 	}
 	return batch;
 }

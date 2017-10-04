@@ -34,13 +34,7 @@ struct VSOutput
 	float2 texCoord0 : TEXCOORD0;
 };
 
-VSOutput vertexMain(VSInput vsIn)
-{
-	VSOutput vsOut;
-	vsOut.texCoord0 = vsIn.texCoord0;
-	vsOut.position = float4(vsIn.position, 1.0);
-	return vsOut;
-}
+#include "vertexprogram-2d.h"
 
 float4 fragmentMain(VSOutput fsIn) : SV_Target0
 {
@@ -108,7 +102,7 @@ float4 fragmentMain(VSOutput fsIn) : SV_Target0
 
 #elif (TONE_MAPPING)
 
-	float3 source = baseColorTexture.Sample(baseColorSampler, fsIn.texCoord0).xyz;
+	float3 source = baseColorTexture.SampleLevel(baseColorSampler, fsIn.texCoord0, 0.0).xyz;
 	float exposure = emissiveColorTexture.SampleLevel(emissiveColorSampler, fsIn.texCoord0, 10.0).x;
 	float3 ldrColor = toneMapping(source, exposure);
 
@@ -117,8 +111,8 @@ float4 fragmentMain(VSOutput fsIn) : SV_Target0
 	float d = 0.175 / 256.0;
 	float v = ldrColor.y + 0.25 / 16.0;
 	float u = ldrColor.x / 16.0 + d;
-	float3 sample0 = shadowTexture.Sample(shadowSampler, float2(u + z0, v));
-	float3 sample1 = shadowTexture.Sample(shadowSampler, float2(u + z1, v));
+	float3 sample0 = shadowTexture.SampleLevel(shadowSampler, float2(u + z0, v), 0.0);
+	float3 sample1 = shadowTexture.SampleLevel(shadowSampler, float2(u + z1, v), 0.0);
 	float3 sample2 = lerp(sample0, sample1, (ldrColor.z - z0) * 16.0);
 
 	return float4(sample2, 1.0);

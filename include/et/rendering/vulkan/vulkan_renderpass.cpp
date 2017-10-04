@@ -347,7 +347,7 @@ void VulkanRenderPass::nextSubpass()
 	}
 }
 
-void VulkanRenderPass::pushRenderBatch(const MaterialInstance::Pointer& inMaterial, const VertexStream::Pointer& vertexStream, uint32_t firstIndex, uint32_t indexCount)
+void VulkanRenderPass::pushRenderBatch(const MaterialInstance::Pointer& inMaterial, const VertexStream::Pointer& vertexStream, uint32_t first, uint32_t count)
 {
 	ET_ASSERT(_private->recording);
 
@@ -400,19 +400,28 @@ void VulkanRenderPass::pushRenderBatch(const MaterialInstance::Pointer& inMateri
 		static_cast<uint32_t>(materialVariables != nullptr ? materialVariables->offset() : 0)
 	};
 
-	VkIndexType indexType = vulkan::indexBufferFormat(vertexStream->indexArrayFormat());
+	bool hasIndices = vertexStream->indexBuffer().valid();
+
+	VkIndexType indexType = hasIndices ? vulkan::indexBufferFormat(vertexStream->indexArrayFormat()) : VK_INDEX_TYPE_MAX_ENUM;
 	VkDeviceSize offsets[] = { 0 };
 	VkBuffer buffers[] = { vertexBuffer->nativeBuffer().buffer };
 
 	ET_ASSERT(_private->renderPassStarted);
 
 	VkCommandBuffer commandBuffer = _private->content[_private->frameIndex].commandBuffer;
-	vkCmdBindVertexBuffers(commandBuffer, 0, 1, buffers, offsets);
-	vkCmdBindIndexBuffer(commandBuffer, indexBuffer->nativeBuffer().buffer, 0, indexType);
 	vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineState->nativePipeline().pipeline);
 	vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineState->nativePipeline().layout, 0,
 		DescriptorSetClass_Count, descriptorSets, DescriptorSetClass::DynamicDescriptorsCount, dynamicOffsets);
-	vkCmdDrawIndexed(commandBuffer, indexCount, 1, firstIndex, 0, 0);
+	vkCmdBindVertexBuffers(commandBuffer, 0, 1, buffers, offsets);
+	if (hasIndices)
+	{
+		vkCmdBindIndexBuffer(commandBuffer, indexBuffer->nativeBuffer().buffer, 0, indexType);
+		vkCmdDrawIndexed(commandBuffer, count, 1, first, 0, 0);
+	}
+	else
+	{
+		vkCmdDraw(commandBuffer, count, 1, 0, 0);
+	}
 }
 
 void VulkanRenderPass::dispatchCompute(const Compute::Pointer& compute, const vec3i& dim)
@@ -623,6 +632,5 @@ void VulkanRenderPassPrivate::generateDynamicDescriptorSet(RenderPass* pass)
 	uint32_t writeSetsCount = static_cast<uint32_t>(sizeof(writeSets) / sizeof(writeSets[0]));
 	vkUpdateDescriptorSets(vulkan.device, writeSetsCount, writeSets, 0, nullptr);
 }
-
 
 }

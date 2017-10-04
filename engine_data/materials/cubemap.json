@@ -4,8 +4,7 @@
 	"prepare-cubemap" : 
 	{ 
 		"input-layout" : {
-			"position" : 3,
-			"texcoord0" : 2
+			"position" : 3
 		},
 		"depth-state": {
 			"depth-function": "always",
@@ -23,8 +22,7 @@
 	"cubemap-visualize" :
 	{ 
 		"input-layout" : {
-			"position" : 3,
-			"texcoord0" : 2
+			"position" : 3
 		},
 		"depth-state": {
 			"depth-function": "always",
@@ -42,8 +40,7 @@
 	"cubemap-specular-convolution" :
 	{ 
 		"input-layout" : {
-			"position" : 3,
-			"texcoord0" : 2
+			"position" : 3
 		},
 		"depth-state": {
 			"depth-function": "always",

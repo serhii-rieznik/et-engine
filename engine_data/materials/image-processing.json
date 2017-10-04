@@ -4,8 +4,7 @@
 	"gaussian-blur" : 
 	{ 
 		"input-layout" : {
-			"position" : 3,
-			"texcoord0" : 2
+			"position" : 3
 		},
 		"depth-state": {
 			"depth-function": "always",

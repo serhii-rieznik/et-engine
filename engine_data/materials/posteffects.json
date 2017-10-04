@@ -4,8 +4,7 @@
 	"log-luminance" : 
 	{ 
 		"input-layout" : {
-			"position" : 3,
-			"texcoord0" : 2
+			"position" : 3
 		},
 		"depth-state": {
 			"depth-function": "always",
@@ -24,8 +23,7 @@
 	"average-luminance" : 
 	{ 
 		"input-layout" : {
-			"position" : 3,
-			"texcoord0" : 2
+			"position" : 3
 		},
 		"depth-state": {
 			"depth-function": "always",
@@ -44,8 +42,7 @@
 	"resolve-luminance" : 
 	{ 
 		"input-layout" : {
-			"position" : 3,
-			"texcoord0" : 2
+			"position" : 3
 		},
 		"depth-state": {
 			"depth-function": "always",
@@ -64,8 +61,7 @@
 	"motionblur" : 
 	{ 
 		"input-layout" : {
-			"position" : 3,
-			"texcoord0" : 2
+			"position" : 3
 		},
 		"depth-state": {
 			"depth-function": "always",
@@ -83,8 +79,7 @@
 	"tonemapping" : 
 	{ 
 		"input-layout" : {
-			"position" : 3,
-			"texcoord0" : 2
+			"position" : 3
 		},
 		"depth-state": {
 			"depth-function": "always",
@@ -102,8 +97,7 @@
 	"txaa" : 
 	{ 
 		"input-layout" : {
-			"position" : 3,
-			"texcoord0" : 2
+			"position" : 3
 		},
 		"depth-state": {
 			"depth-function": "always",
@@ -121,8 +115,7 @@
 	"default" : 
 	{ 
 		"input-layout" : {
-			"position" : 3,
-			"texcoord0" : 2
+			"position" : 3
 		},
 		"depth-state": {
 			"depth-function": "always",

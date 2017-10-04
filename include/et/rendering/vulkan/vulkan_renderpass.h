@@ -28,7 +28,7 @@ public:
 	const VulkanNativeRenderPass& nativeRenderPass() const;
 
 	void begin(const RenderPassBeginInfo&) override;
-	void pushRenderBatch(const MaterialInstance::Pointer&, const VertexStream::Pointer&, uint32_t firstIndex, uint32_t indexCount) override;
+	void pushRenderBatch(const MaterialInstance::Pointer&, const VertexStream::Pointer&, uint32_t, uint32_t) override;
 	void pushImageBarrier(const Texture::Pointer&, const ResourceBarrier&) override;
 	void copyImage(const Texture::Pointer&, const Texture::Pointer&, const CopyDescriptor&) override;
 	void dispatchCompute(const Compute::Pointer&, const vec3i&) override;

@@ -18,13 +18,7 @@ struct VSOutput
 	float2 texCoord0 : TEXCOORD0;
 };
 
-VSOutput vertexMain(VSInput vsIn)
-{
-	VSOutput vsOut;
-	vsOut.texCoord0 = vsIn.texCoord0;
-	vsOut.position = float4(vsIn.position, 1.0);
-	return vsOut;
-}
+#include "vertexprogram-2d.h"
 
 float4 fragmentMain(VSOutput fsIn) : SV_Target0
 {

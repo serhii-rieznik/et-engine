@@ -25,7 +25,7 @@ struct VSOutput
 VSOutput vertexMain(VSInput vsIn)
 {
 	VSOutput vsOut;
-	vsOut.texCoord0 = vsIn.texCoord0;
+	vsOut.texCoord0 = vsIn.position.xy * 0.5 + 0.5;
 	vsOut.position = float4(vsIn.position, 1.0);
 
 #if (TRANSFORM_INPUT_POSITION)

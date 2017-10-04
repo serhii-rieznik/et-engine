@@ -29,7 +29,7 @@ VSOutput vertexMain(VSInput vsIn)
 	float4x4 finalInverseMatrix = invView * inverseProjectionTransform;
 	
 	VSOutput vsOut;
-	vsOut.texCoord0 = vsIn.texCoord0;
+	vsOut.texCoord0 = vsIn.position.xy * 0.5 + 0.5;
 	vsOut.position = float4(vsIn.position.xy, 0.9999999, 1.0);
 	vsOut.direction = mul(float4(vsIn.position, 1.0), finalInverseMatrix).xyz;
 	return vsOut;
