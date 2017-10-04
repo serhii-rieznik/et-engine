@@ -908,7 +908,8 @@ void FBXLoaderPrivate::buildVertexBuffers(s3d::Storage& storage)
 		
 		VertexStream::Pointer vStream = VertexStream::Pointer::create();
 		vStream->setVertexBuffer(vb, i->declaration());
-		vStream->setIndexBuffer(primaryIndexBuffer, storage.indexArray()->format(), storage.indexArray()->primitiveType());
+		vStream->setIndexBuffer(primaryIndexBuffer, storage.indexArray()->format());
+		vStream->setPrimitiveType(storage.indexArray()->primitiveType());
 
 		auto ci = constructionInfo.find(i.pointer());
 		if (ci != constructionInfo.end())

@@ -21,8 +21,9 @@ public:
 public:
 	VertexStream() = default;
 
-	void setVertexBuffer(const Buffer::Pointer& vb, const VertexDeclaration& decl);
-	void setIndexBuffer(const Buffer::Pointer& ib, IndexArrayFormat format, PrimitiveType pt);
+	void setVertexBuffer(const Buffer::Pointer&, const VertexDeclaration&);
+	void setIndexBuffer(const Buffer::Pointer&, IndexArrayFormat);
+	void setPrimitiveType(PrimitiveType);
 
 	const VertexDeclaration& vertexDeclaration() const 
 		{ return _vbDeclaration; }
@@ -58,10 +59,14 @@ inline void VertexStream::setVertexBuffer(const Buffer::Pointer& vb, const Verte
 	_vbDeclaration = decl;
 }
 
-inline void VertexStream::setIndexBuffer(const Buffer::Pointer& ib, IndexArrayFormat format, PrimitiveType pt)
+inline void VertexStream::setIndexBuffer(const Buffer::Pointer& ib, IndexArrayFormat format)
 {
 	_ib = ib;
 	_ibFormat = format;
+}
+
+inline void VertexStream::setPrimitiveType(PrimitiveType pt)
+{
 	_primitiveType = pt;
 }
 

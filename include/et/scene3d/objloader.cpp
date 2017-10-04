@@ -1199,7 +1199,8 @@ s3d::ElementContainer::Pointer OBJLoader::generateVertexBuffers(s3d::Storage& st
 	
 	VertexStream::Pointer vao = VertexStream::Pointer::create();
 	vao->setVertexBuffer(vb, _vertexData->declaration());
-	vao->setIndexBuffer(ib, _indices->format(), _indices->primitiveType());
+	vao->setIndexBuffer(ib, _indices->format());
+	vao->setPrimitiveType(_indices->primitiveType());
 
 	vec3 minExtent(+std::numeric_limits<float>::max());
 	vec3 maxExtent(-std::numeric_limits<float>::max());

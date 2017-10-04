@@ -39,7 +39,8 @@ DebugDrawer::DebugDrawer(const RenderInterface::Pointer& renderer) :
 
 	_linesStream = VertexStream::Pointer::create();
 	_linesStream->setVertexBuffer(_vertexBuffer, decl);
-	_linesStream->setIndexBuffer(ib, IndexArrayFormat::Format_32bit, PrimitiveType::Lines);
+	_linesStream->setIndexBuffer(ib, IndexArrayFormat::Format_32bit);
+	_linesStream->setPrimitiveType(PrimitiveType::Lines);
 
 	_material = _renderer->sharedMaterialLibrary().loadMaterial(application().resolveFileName("engine_data/materials/debug.json"));
 }

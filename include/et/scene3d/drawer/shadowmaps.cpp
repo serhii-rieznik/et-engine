@@ -226,11 +226,11 @@ void ShadowmapProcessor::validate(RenderInterface::Pointer& renderer)
 
 		Material::Pointer mtl = renderer->sharedMaterialLibrary().loadMaterial(application().resolveFileName("engine_data/materials/textured2d-transformed-depth.json"));
 		mtl->setTexture(MaterialTexture::BaseColor, _directionalShadowmap);
-		_renderables.debugDepthBatch = renderhelper::createFullscreenRenderBatch(_directionalShadowmap, mtl);
+		_renderables.debugDepthBatch = renderhelper::createQuadBatch(_directionalShadowmap, mtl, renderhelper::QuadType::Default);
 
 		mtl = renderer->sharedMaterialLibrary().loadMaterial(application().resolveFileName("engine_data/materials/textured2d-transformed.json"));
 		mtl->setTexture(MaterialTexture::BaseColor, _directionalShadowmap);
-		_renderables.debugColorBatch = renderhelper::createFullscreenRenderBatch(_directionalShadowmapMoments, mtl);
+		_renderables.debugColorBatch = renderhelper::createQuadBatch(_directionalShadowmapMoments, mtl, renderhelper::QuadType::Default);
 	}
 
 	{
@@ -247,10 +247,10 @@ void ShadowmapProcessor::validate(RenderInterface::Pointer& renderer)
 		_renderables.blurPass1 = renderer->allocateRenderPass(desc);
 
 		Material::Pointer mtl = renderer->sharedMaterialLibrary().loadMaterial(application().resolveFileName("engine_data/materials/image-processing.json"));
-		_renderables.blurBatch0 = renderhelper::createFullscreenRenderBatch(_directionalShadowmapMoments, mtl);
+		_renderables.blurBatch0 = renderhelper::createQuadBatch(_directionalShadowmapMoments, mtl);
 		_renderables.blurBatch0->material()->setVector(MaterialVariable::ExtraParameters, vec4(1.0f, 0.0f, 0.0f, 0.0f));
 		
-		_renderables.blurBatch1 = renderhelper::createFullscreenRenderBatch(_directionalShadowmapMomentsBuffer, mtl);
+		_renderables.blurBatch1 = renderhelper::createQuadBatch(_directionalShadowmapMomentsBuffer, mtl);
 		_renderables.blurBatch1->material()->setVector(MaterialVariable::ExtraParameters, vec4(0.0f, 1.0f, 0.0f, 0.0f));
 	}
 }

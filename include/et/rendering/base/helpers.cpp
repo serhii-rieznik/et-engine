@@ -19,26 +19,32 @@ namespace rh_local
 {
 RenderContext* renderContext = nullptr;
 Material::Pointer texturedMaterial;
-VertexStream::Pointer default2DPlane;
+VertexStream::Pointer vertexStream;
 }
 
 void init(RenderContext* rc)
 {
-	ET_ASSERT(rh_local::default2DPlane.invalid());
+	ET_ASSERT(rh_local::vertexStream.invalid());
 
 	rh_local::renderContext = rc;
 	
 	VertexDeclaration vd(false, VertexAttributeUsage::Position, DataType::Vec3);
-	VertexStorage::Pointer vs = VertexStorage::Pointer::create(vd, 3);
+	VertexStorage::Pointer vs = VertexStorage::Pointer::create(vd, 7);
 
 	VertexDataAccessor<DataType::Vec3> pos = vs->accessData<DataType::Vec3>(VertexAttributeUsage::Position, 0);
 	pos[0] = vec3(-1.0f, -1.0f, 0.0f);
-	pos[1] = vec3( 3.0f, -1.0f, 0.0f);
-	pos[2] = vec3(-1.0f,  3.0f, 0.0f);
+	pos[1] = vec3(+3.0f, -1.0f, 0.0f);
+	pos[2] = vec3(-1.0f, +3.0f, 0.0f);
+	
+	pos[3] = vec3(-1.0f, -1.0f, 0.0f); 
+	pos[4] = vec3(-1.0f, +1.0f, 0.0f); 
+	pos[5] = vec3(+1.0f, -1.0f, 0.0f); 
+	pos[6] = vec3(+1.0f, +1.0f, 0.0f); 
 
 	Buffer::Pointer vb = rc->renderer()->createVertexBuffer("rh_local::vb", vs, Buffer::Location::Device);
-	rh_local::default2DPlane = VertexStream::Pointer::create();
-	rh_local::default2DPlane->setVertexBuffer(vb, vs->declaration());
+	rh_local::vertexStream = VertexStream::Pointer::create();
+	rh_local::vertexStream->setVertexBuffer(vb, vs->declaration());
+	rh_local::vertexStream->setPrimitiveType(PrimitiveType::TriangleStrips);
 
 	rh_local::texturedMaterial = rc->renderer()->sharedMaterialLibrary().loadDefaultMaterial(DefaultMaterial::Textured2D);
 
@@ -48,13 +54,13 @@ void init(RenderContext* rc)
 
 void release()
 {
-	rh_local::default2DPlane.reset(nullptr);
+	rh_local::vertexStream.reset(nullptr);
 	rh_local::texturedMaterial.reset(nullptr);
 }
 	
-RenderBatch::Pointer createFullscreenRenderBatch(const Texture::Pointer& texture, Material::Pointer mat)
+RenderBatch::Pointer createQuadBatch(const Texture::Pointer& texture, Material::Pointer mat, QuadType type)
 {
-	ET_ASSERT(rh_local::default2DPlane.valid());
+	ET_ASSERT(rh_local::vertexStream.valid());
 	ET_ASSERT(rh_local::texturedMaterial.valid());
 
 	if (mat.invalid())
@@ -64,21 +70,30 @@ RenderBatch::Pointer createFullscreenRenderBatch(const Texture::Pointer& texture
 	{
 		MaterialInstance::Pointer materialInstance = mat->instance();
 		materialInstance->setTexture(MaterialTexture::BaseColor, texture);
-		batch->construct(materialInstance, rh_local::default2DPlane, 0, 3);
+		switch (type)
+		{
+		case QuadType::Fullscreen:
+			batch->construct(materialInstance, rh_local::vertexStream, 0, 3);
+			break;
+		
+		default:
+			batch->construct(materialInstance, rh_local::vertexStream, 3, 4);
+		}
+
 	}
 	return batch;
 }
 
-RenderBatch::Pointer createFullscreenRenderBatch(const Texture::Pointer& tex, const Material::Pointer& mat, const Sampler::Pointer& smp)
+RenderBatch::Pointer createQuadBatch(const Texture::Pointer& tex, const Material::Pointer& mat, const Sampler::Pointer& smp, QuadType type)
 {
-	RenderBatch::Pointer rb = createFullscreenRenderBatch(tex, mat);
+	RenderBatch::Pointer rb = createQuadBatch(tex, mat, type);
 	rb->material()->setSampler(MaterialTexture::BaseColor, smp);
 	return rb;
 }
 
-RenderBatch::Pointer createFullscreenRenderBatch(const Texture::Pointer& tex, const Material::Pointer& mat, const Sampler::Pointer& smp, const ResourceRange& rng)
+RenderBatch::Pointer createQuadBatch(const Texture::Pointer& tex, const Material::Pointer& mat, const Sampler::Pointer& smp, const ResourceRange& rng, QuadType type)
 {
-	RenderBatch::Pointer rb = createFullscreenRenderBatch(tex, mat, smp);
+	RenderBatch::Pointer rb = createQuadBatch(tex, mat, smp, type);
 	rb->material()->setTexture(MaterialTexture::BaseColor, tex, rng);
 	return rb;
 }

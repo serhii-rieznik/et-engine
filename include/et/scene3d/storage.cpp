@@ -108,7 +108,8 @@ void Storage::buildVertexStreams(RenderContext* rc)
 		
 		VertexStream::Pointer vertexStream = VertexStream::Pointer::create();
 		vertexStream->setVertexBuffer(vb, vs->declaration());
-		vertexStream->setIndexBuffer(ib, _indexArray->format(), _indexArray->primitiveType());
-        _vertexStreams.insert(vertexStream);
+		vertexStream->setIndexBuffer(ib, _indexArray->format());
+		vertexStream->setPrimitiveType(_indexArray->primitiveType());
+		_vertexStreams.insert(vertexStream);
     }
 }

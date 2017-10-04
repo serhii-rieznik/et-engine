@@ -403,7 +403,6 @@ void VulkanRenderPass::pushRenderBatch(const MaterialInstance::Pointer& inMateri
 	bool hasIndices = vertexStream->indexBuffer().valid();
 
 	VkIndexType indexType = hasIndices ? vulkan::indexBufferFormat(vertexStream->indexArrayFormat()) : VK_INDEX_TYPE_MAX_ENUM;
-	VkDeviceSize offsets[] = { 0 };
 	VkBuffer buffers[] = { vertexBuffer->nativeBuffer().buffer };
 
 	ET_ASSERT(_private->renderPassStarted);
@@ -412,7 +411,10 @@ void VulkanRenderPass::pushRenderBatch(const MaterialInstance::Pointer& inMateri
 	vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineState->nativePipeline().pipeline);
 	vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineState->nativePipeline().layout, 0,
 		DescriptorSetClass_Count, descriptorSets, DescriptorSetClass::DynamicDescriptorsCount, dynamicOffsets);
+	
+	VkDeviceSize offsets[] = { 0 };
 	vkCmdBindVertexBuffers(commandBuffer, 0, 1, buffers, offsets);
+
 	if (hasIndices)
 	{
 		vkCmdBindIndexBuffer(commandBuffer, indexBuffer->nativeBuffer().buffer, 0, indexType);
@@ -420,7 +422,7 @@ void VulkanRenderPass::pushRenderBatch(const MaterialInstance::Pointer& inMateri
 	}
 	else
 	{
-		vkCmdDraw(commandBuffer, count, 1, 0, 0);
+		vkCmdDraw(commandBuffer, count, 1, first, 0);
 	}
 }
 

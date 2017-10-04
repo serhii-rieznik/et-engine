@@ -41,7 +41,8 @@ ParticleSystem::ParticleSystem(RenderContext* rc, uint32_t maxSize, const std::s
 	
 	_vertexStream = VertexStream::Pointer::create();
 	_vertexStream->setVertexBuffer(vb, vs->declaration());
-	_vertexStream->setIndexBuffer(ib, ia->format(), ia->primitiveType());
+	_vertexStream->setIndexBuffer(ib, ia->format());
+	_vertexStream->setPrimitiveType(ia->primitiveType());
 	
 	_timer.expired.connect(this, &ParticleSystem::onTimerUpdated);
 	_timer.start(currentTimerPool(), 0.0f, NotifyTimer::RepeatForever);

@@ -16,13 +16,19 @@ class RenderContext;
 
 namespace renderhelper
 {
-	void init(RenderContext*);
-	void release();
+void init(RenderContext*);
+void release();
 
-	RenderBatch::Pointer createFullscreenRenderBatch(const Texture::Pointer&, Material::Pointer = Material::Pointer());
+enum class QuadType : uint32_t
+{
+	Default,
+	Fullscreen
+};
 
-	RenderBatch::Pointer createFullscreenRenderBatch(const Texture::Pointer&, const Material::Pointer&, const Sampler::Pointer&);
-	RenderBatch::Pointer createFullscreenRenderBatch(const Texture::Pointer&, const Material::Pointer&, const Sampler::Pointer&, const ResourceRange&);
+RenderBatch::Pointer createQuadBatch(const Texture::Pointer&, Material::Pointer = Material::Pointer(), QuadType type = QuadType::Fullscreen);
+RenderBatch::Pointer createQuadBatch(const Texture::Pointer&, const Material::Pointer&, const Sampler::Pointer&, QuadType type = QuadType::Fullscreen);
+RenderBatch::Pointer createQuadBatch(const Texture::Pointer&, const Material::Pointer&, const Sampler::Pointer&, const ResourceRange&, QuadType type = QuadType::Fullscreen);
+
 };
 
 }

@@ -53,7 +53,7 @@ void CubemapProcessor::process(RenderInterface::Pointer& renderer, DrawerOptions
 
 		_lookupPass->begin(RenderPassBeginInfo::singlePass());
 		_lookupPass->nextSubpass();
-		_lookupPass->pushRenderBatch(renderhelper::createFullscreenRenderBatch(renderer->checkersTexture(), _lookupGeneratorMaterial));
+		_lookupPass->pushRenderBatch(renderhelper::createQuadBatch(renderer->checkersTexture(), _lookupGeneratorMaterial));
 		_lookupPass->endSubpass();
 		_lookupPass->end();
 		renderer->submitRenderPass(_lookupPass);
@@ -67,7 +67,7 @@ void CubemapProcessor::process(RenderInterface::Pointer& renderer, DrawerOptions
 		_downsamplePass->begin(_wholeCubemapBeginInfo);
 		_downsamplePass->loadSharedVariablesFromLight(light);
 		
-		RenderBatch::Pointer copyBatch = renderhelper::createFullscreenRenderBatch(_tex[CubemapType::Source], 
+		RenderBatch::Pointer copyBatch = renderhelper::createQuadBatch(_tex[CubemapType::Source], 
 			hasFlag(CubemapAtmosphere) ? _atmosphereMaterial : _wrapMaterial, _eqMapSampler, ResourceRange(0, 1, 0, 1));
 		
 		_downsamplePass->pushImageBarrier(_tex[CubemapType::Downsampled], ResourceBarrier(TextureState::ColorRenderTarget, 0, 1, 0, 6));
@@ -79,7 +79,7 @@ void CubemapProcessor::process(RenderInterface::Pointer& renderer, DrawerOptions
 			_downsamplePass->endSubpass();
 		}
 
-		RenderBatch::Pointer downsampleBatch = renderhelper::createFullscreenRenderBatch(_tex[CubemapType::Downsampled], _downsampleMaterial, renderer->defaultSampler(), ResourceRange(0, 1, 0, 6));
+		RenderBatch::Pointer downsampleBatch = renderhelper::createQuadBatch(_tex[CubemapType::Downsampled], _downsampleMaterial, renderer->defaultSampler(), ResourceRange(0, 1, 0, 6));
 		for (uint32_t level = 1; level < CubemapLevels; ++level)
 		{
 			downsampleBatch->material()->setFloat(MaterialVariable::ExtraParameters, static_cast<float>(level));
@@ -193,7 +193,7 @@ void CubemapProcessor::validate(RenderInterface::Pointer& renderer)
 		_lookupDebugPass = renderer->allocateRenderPass(passInfo);
 
 		Material::Pointer lookupDebugMaterial = renderer->sharedMaterialLibrary().loadMaterial(application().resolveFileName("engine_data/materials/textured2d-transformed.json"));
-		_lookupDebugBatch = renderhelper::createFullscreenRenderBatch(_lookup, lookupDebugMaterial);
+		_lookupDebugBatch = renderhelper::createQuadBatch(_lookup, lookupDebugMaterial, renderhelper::QuadType::Default);
 	}
 
 	if (_downsamplePass.invalid())
@@ -220,7 +220,7 @@ void CubemapProcessor::validate(RenderInterface::Pointer& renderer)
 		passInfo.name = "cubemap-specular-convolution";
 		passInfo.priority = passPriority--;
 		_specularConvolvePass = renderer->allocateRenderPass(passInfo);
-		_specularConvolveBatch = renderhelper::createFullscreenRenderBatch(_tex[CubemapType::Downsampled], _processingMaterial);
+		_specularConvolveBatch = renderhelper::createQuadBatch(_tex[CubemapType::Downsampled], _processingMaterial);
 	}
 
 	if (_cubemapDebugPass.invalid())
@@ -233,7 +233,7 @@ void CubemapProcessor::validate(RenderInterface::Pointer& renderer)
 		passInfo.name = "cubemap-visualize";
 		passInfo.priority = RenderPassPriority::UI - 1;
 		_cubemapDebugPass = renderer->allocateRenderPass(passInfo);
-		_cubemapDebugBatch = renderhelper::createFullscreenRenderBatch(renderer->checkersTexture(), _processingMaterial);
+		_cubemapDebugBatch = renderhelper::createQuadBatch(renderer->checkersTexture(), _processingMaterial, renderhelper::QuadType::Default);
 	}
 }
 

@@ -150,7 +150,7 @@ void Drawer::validate(RenderInterface::Pointer& renderer)
 		_lighting.environmentMaterial = renderer->sharedMaterialLibrary().loadDefaultMaterial(DefaultMaterial::EnvironmentMap);
 
 	if (_lighting.environmentBatch.invalid())
-		_lighting.environmentBatch = renderhelper::createFullscreenRenderBatch(_cubemapProcessor->convolutedCubemap(), _lighting.environmentMaterial);
+		_lighting.environmentBatch = renderhelper::createQuadBatch(_cubemapProcessor->convolutedCubemap(), _lighting.environmentMaterial);
 
 	_cache.flush();
 }
