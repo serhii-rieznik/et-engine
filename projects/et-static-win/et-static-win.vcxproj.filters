@@ -95,6 +95,9 @@
     <Filter Include="Source\rendering\null">
       <UniqueIdentifier>{2d437a61-9659-4f35-8770-2aaf412272ec}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\pbr">
+      <UniqueIdentifier>{aa9f6b1e-8b64-439c-8d1a-11396e698cf5}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\et\sound\platform-dependent.cpp">
@@ -697,6 +700,15 @@
     <ClInclude Include="..\..\include\et\rendering\renderoptions.h">
       <Filter>Source\rendering</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\et\rendering\renderoptions.cpp">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\et-engine\include\et\pbr\pbr_spectrum.h">
+      <Filter>Source\pbr</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\et-engine\include\et\pbr\pbr.h">
+      <Filter>Source\pbr</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\et\sound\openal.h">
@@ -1285,9 +1297,6 @@
     </ClCompile>
     <ClCompile Include="..\..\include\external\spirvcross\spirv_msl.cpp">
       <Filter>spir-v-cross</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\include\et\rendering\renderoptions.cpp">
-      <Filter>Source\rendering</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

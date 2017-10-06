@@ -15,6 +15,8 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\..\..\et-engine\include\et\pbr\pbr.h" />
+    <ClInclude Include="..\..\..\..\..\et-engine\include\et\pbr\pbr_spectrum.h" />
     <ClInclude Include="..\..\include\et\core\pool.h" />
     <ClInclude Include="..\..\include\et\core\remoteheap.h" />
     <ClInclude Include="..\..\include\et\rendering\base\variableset.h" />
