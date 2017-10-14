@@ -4,6 +4,8 @@
 #include "atmosphere.h"
 #include "environment.h"
 
+#define DRAW_SUN 0
+
 cbuffer ObjectVariables : DECL_BUFFER(Object)
 {
 	row_major float4x4 inverseViewTransform;
@@ -45,25 +47,20 @@ FSOutput fragmentMain(VSOutput fsIn)
 {
 	float3 v = normalize(fsIn.direction);
 
+	float3 env = sampleEnvironment(v, lightDirection.xyz, 0.1);
+	float4 currentProjectedDirection = mul(float4(v * cameraClipPlanes.y, 1.0), viewProjectionTransform);
+	float4 previousProjectedDirection = mul(float4(v * cameraClipPlanes.y, 1.0), previousViewProjectionTransform);
+
+#if (DRAW_SUN)
 	float intersectsPlanet = step(planetIntersection(positionOnPlanet, v), 0.0);
 	float sunSpot = smoothstep(0.9995, 0.99975, dot(v, lightDirection.xyz));
 	float3 sunColor = lightColor * (sunSpot * intersectsPlanet);
-
 	float a = atmosphereIntersection(positionOnPlanet, lightDirection.xyz);
-	sunColor *= outScattering(positionOnPlanet, positionOnPlanet + a * lightDirection.xyz);
-
-	float3 env = sampleEnvironment(v, lightDirection.xyz, 0.1);
-	// env = sampleAtmosphere(v, lightDirection.xyz, lightColor);
-
-	float4 currentProjectedDirection = mul(float4(v * cameraClipPlanes.y, 1.0), viewProjectionTransform);
-	float4 previousProjectedDirection = mul(float4(v * cameraClipPlanes.y, 1.0), previousViewProjectionTransform);
+	env += sunColor * outScattering(positionOnPlanet, positionOnPlanet + a * lightDirection.xyz);
+#endif
 	
 	FSOutput result;
-	result.color = float4(env + sunColor, 1.0);
-
-	result.velocity = 
-		currentProjectedDirection.xy / currentProjectedDirection.w - 
-		previousProjectedDirection.xy / previousProjectedDirection.w;
-
+	result.color = float4(env, 1.0);
+	result.velocity = (currentProjectedDirection.xy / currentProjectedDirection.w) - (previousProjectedDirection.xy / previousProjectedDirection.w);
 	return result;
 }

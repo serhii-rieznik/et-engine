@@ -58,7 +58,7 @@ float4 fragmentMain(VSOutput fsIn) : SV_Target0
 
 #if (LOG_LUMINANCE)
 
-	float lum = dot(averageColor.xyz, float3(0.2989, 0.5870, 0.1140));
+	float lum = dot(averageColor.xyz, float3(0.2126, 0.7152, 0.0722));
 	return log(max(lum, LuminanceLowerRange));
 
 #elif (AVERAGE_LUMINANCE)
@@ -81,7 +81,7 @@ float4 fragmentMain(VSOutput fsIn) : SV_Target0
 	float levels = 0.0;
 	baseColorTexture.GetDimensions(0, w, h, levels);
 
-	const uint maxSamples = 20;
+	const uint maxSamples = 10;
 	const float targetDeltaTime = 1.0 / 60.0;
 	float velocityScale = 0.5 * min(1.0, deltaTime / targetDeltaTime);
 
@@ -90,7 +90,7 @@ float4 fragmentMain(VSOutput fsIn) : SV_Target0
 
 	float totalWeight = 1.0;
 	float4 color = baseColorTexture.Sample(baseColorSampler, fsIn.texCoord0);
-
+	//*
 	for (uint i = 1; i < currentSamples; ++i)
 	{
 		float t = float(i - 1) / float(currentSamples - 1);
@@ -98,6 +98,7 @@ float4 fragmentMain(VSOutput fsIn) : SV_Target0
 		color += weight * baseColorTexture.Sample(baseColorSampler, fsIn.texCoord0 + velocity * (t - 0.5));
 		totalWeight += weight;
 	}
+	// */
 	return color / totalWeight;
 
 #elif (TONE_MAPPING)
@@ -118,14 +119,47 @@ float4 fragmentMain(VSOutput fsIn) : SV_Target0
 	return float4(sample2, 1.0);
 
 #elif (TEMPORAL_AA)
+	
+	const float jitterScale = 0.5;
+	float2 tc = cameraJitter.xy * jitterScale + fsIn.texCoord0;
+	float2 vel = jitterScale * normalTexture.Sample(normalSampler, tc).xy;
 
-	float2 jt = 0.5 * cameraJitter.xy;
-	float2 jp = 0.5 * cameraJitter.zw;
-	float2 tc = fsIn.texCoord0 + jt;
-	float2 vel = 0.5 * normalTexture.Sample(normalSampler, tc).xy;
-	float3 source = baseColorTexture.Sample(baseColorSampler, tc).xyz;
-	float3 history = emissiveColorTexture.Sample(emissiveColorSampler, tc - vel - jp).xyz;
-	return float4(lerp(source, history, 0.85), 1.0);
+	float2 uvH = tc - vel - jitterScale * cameraJitter.zw;
+	float3 sH = emissiveColorTexture.Sample(emissiveColorSampler, uvH).xyz;
+
+	float3 s20 = baseColorTexture.Sample(baseColorSampler, tc, int2(-1, +1)).xyz;
+	float3 s21 = baseColorTexture.Sample(baseColorSampler, tc, int2( 0, +1)).xyz;
+	float3 s22 = baseColorTexture.Sample(baseColorSampler, tc, int2(+1, +1)).xyz;
+	float3 s10 = baseColorTexture.Sample(baseColorSampler, tc, int2(-1,  0)).xyz;
+	float3 s11 = baseColorTexture.Sample(baseColorSampler, tc, int2( 0,  0)).xyz;
+	float3 s12 = baseColorTexture.Sample(baseColorSampler, tc, int2(+1,  0)).xyz;
+	float3 s01 = baseColorTexture.Sample(baseColorSampler, tc, int2( 0, -1)).xyz;
+	float3 s00 = baseColorTexture.Sample(baseColorSampler, tc, int2(-1, -1)).xyz;
+	float3 s02 = baseColorTexture.Sample(baseColorSampler, tc, int2(+1, -1)).xyz;
+	float3 sum0 = 0.25 * (s01 + s10 + s12 + s21);
+	float3 sum1 = 0.25 * (s00 + s02 + s20 + s22);
+
+	float3 cMin0 = min(min(s01, s10), min(s12, s21));
+	float3 cMax0 = max(max(s01, s10), max(s12, s21));
+	float3 cMin1 = min(min(s00, s02), min(s20, s22));
+	float3 cMax1 = max(max(s00, s02), max(s20, s22));
+	float3 cMin = 0.5 * (cMin0 + min(cMin0, cMin1));
+	float3 cMax = 0.5 * (cMax0 + max(cMax0, cMax1));
+	
+	sH = clamp(sH, cMin, cMax);
+	
+	float3 wK0 = abs(0.5 * (sum1 + sum0) - s11);
+	float3 wK1 = abs(sum0 - s11);
+	float3 wK = 0.5 * (wK0 + wK1);
+	
+	const float3 kLowFreq = 1.33333333;
+	const float3 kHighFreq = 0.33333333;
+	float3 wRGB = saturate(rcp(lerp(kLowFreq, kHighFreq, wK)));
+
+	// return float4(wRGB, 1.0);
+	// return float4(sH, 1.0);
+	// return float4(s11, 1.0);
+	return float4(lerp(s11, sH, wRGB), 1.0);
 
 #else
 
