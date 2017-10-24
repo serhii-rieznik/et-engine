@@ -1,0 +1,9 @@
+{
+	"name" : "parallel-reduction",
+
+	"default" : 
+	{ 
+		"class" : "compute",
+    	"code" : "shaders/parallel-reduction"
+	}
+}

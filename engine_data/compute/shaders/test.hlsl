@@ -1,6 +1,6 @@
 #include <et>
 
-RWTexture2D<float4> outputTest : DECL_STORAGE(StorageBuffer0);
+RWTexture2D<float4> outputTest : DECL_STORAGE(0);
 
 Texture2D<float4> baseColorTexture : DECL_TEXTURE(BaseColor);
 SamplerState baseColorSampler : DECL_SAMPLER(BaseColor);

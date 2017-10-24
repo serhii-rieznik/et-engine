@@ -70,8 +70,8 @@ private:
 	Texture::Pointer _primaryTarget;
 	Texture::Pointer _secondaryTarget;
 	Texture::Pointer _luminanceTarget;
+	Texture::Pointer _averagedLuminance[2];
 	Texture::Pointer _luminanceHistory;
-	Texture::Pointer _luminanceHistogram;
 	Texture::Pointer _renderHistory;
 	Texture::Pointer _colorGradingTexture;
 	Sampler::Pointer _colorGradingSampler;
@@ -80,7 +80,7 @@ private:
 	{
 		Material::Pointer debug;
 		Material::Pointer posteffects;
-		Material::Pointer computeTest;
+		Material::Pointer averageLuminance;
 	} _materials;
 	
 	struct Passes
@@ -100,6 +100,17 @@ private:
 		RenderPass::Pointer txaa;
 		RenderPass::Pointer final;
 	} _passes;
+
+	struct Batches
+	{
+		RenderBatch::Pointer logLuminance;
+		Vector<RenderBatch::Pointer> averageLuminance;
+	} _batches;
+
+	struct Computes
+	{
+		Compute::Pointer averageLuminance;
+	} _compute;
 };
 
 }

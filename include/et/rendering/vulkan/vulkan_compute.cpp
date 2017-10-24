@@ -43,7 +43,8 @@ void VulkanCompute::build(const VulkanRenderPass::Pointer& pass)
 	if (_private->pipeline != nullptr)
 		return;
 
-	VulkanProgram::Pointer program = material()->configuration(pass->info().name).program;
+	ET_ASSERT(material()->isInstance());
+	VulkanProgram::Pointer program = material()->base()->configuration(pass->info().name).program;
 	_private->buildLayout(_private->vulkan, program->reflection(), pass->nativeRenderPass().dynamicDescriptorSetLayout);
 
 	VkComputePipelineCreateInfo createInfo = { VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO };

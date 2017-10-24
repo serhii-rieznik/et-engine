@@ -16,6 +16,7 @@ namespace et
 const std::string kCode = "code";
 const std::string kInputLayout = "input-layout";
 const std::string kOptions = "options";
+const std::string kDefault = "default";
 
 std::string Material::_shaderDefaultHeader;
 /*
@@ -182,7 +183,11 @@ const Material::Configuration& Material::configuration(const std::string& cls) c
 	static const Material::Configuration emptyConfiguration;
 
 	auto i = _configurations.find(cls);
-	ET_ASSERT(i != _configurations.end());
+	if (i == _configurations.end())
+	{
+		i = _configurations.find(kDefault);
+		ET_ASSERT(i != _configurations.end());
+	}
 	return (i == _configurations.end()) ? emptyConfiguration : i->second;
 }
 
@@ -618,7 +623,7 @@ void Material::initDefaultHeader()
 #define DECL_BUFFER(name)                                     CONSTANT_LOCATION(b, name##VariablesBufferIndex, VariablesSetIndex)
 #define DECL_TEXTURE(name)                                    CONSTANT_LOCATION(t, name##TextureBinding, TexturesSetIndex)
 #define DECL_SAMPLER(name)                                    CONSTANT_LOCATION(s, name##SamplerBinding, TexturesSetIndex)
-#define DECL_STORAGE(name)                                    CONSTANT_LOCATION(u, name##Binding, StorageSetIndex)
+#define DECL_STORAGE(name)                                    CONSTANT_LOCATION(u, StorageBuffer##name##Binding, StorageSetIndex)
 )";
 }
 

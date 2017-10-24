@@ -323,6 +323,8 @@ void VulkanRenderPass::nextSubpass()
 
 	uint32_t nextSubpassIndex = (_private->currentSubpassIndex == InvalidIndex) ? 0 : _private->currentSubpassIndex + 1;
 
+	ET_ASSERT(nextSubpassIndex < _private->subpassSequence.size());
+
 	if (nextSubpassIndex < _private->subpassSequence.size())
 	{
 		_private->subframeIndex = (_private->subframeIndex == InvalidIndex) ? 0 : (_private->subframeIndex + 1);
@@ -427,11 +429,12 @@ void VulkanRenderPass::pushRenderBatch(const MaterialInstance::Pointer& inMateri
 }
 
 void VulkanRenderPass::dispatchCompute(const Compute::Pointer& compute, const vec3i& dim)
-{
-	VulkanCompute::Pointer vulkanCompute = compute;
+{	
 	MaterialInstance::Pointer material = compute->material();
-	VulkanProgram::Pointer program = material->configuration(info().name).program;
+	ET_ASSERT(material->isInstance());
 
+	VulkanCompute::Pointer vulkanCompute = compute;
+	VulkanProgram::Pointer program = material->base()->configuration(info().name).program;
 	{
 		InstusivePointerScope<VulkanRenderPass> scope(this);
 		vulkanCompute->build(VulkanRenderPass::Pointer(this));
@@ -595,13 +598,12 @@ bool VulkanRenderPass::fillStatistics(uint64_t* buffer, RenderPassStatistics& st
 /*
  * Private implementation
  */
-void VulkanRenderPassPrivate::generateDynamicDescriptorSet(RenderPass* pass)
-{
+void VulkanRenderPassPrivate::generateDynamicDescriptorSet(RenderPass* pass) {
 	VkDescriptorSetLayoutBinding bindings[] = { {},{} };
 	bindings[0] = { ObjectVariablesBufferIndex, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1 };
-	bindings[0].stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
+	bindings[0].stageFlags = VK_SHADER_STAGE_ALL_GRAPHICS | VK_SHADER_STAGE_COMPUTE_BIT;
 	bindings[1] = { MaterialVariablesBufferIndex, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1 };
-	bindings[1].stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
+	bindings[1].stageFlags = VK_SHADER_STAGE_ALL_GRAPHICS | VK_SHADER_STAGE_COMPUTE_BIT;
 
 	VkDescriptorSetLayoutCreateInfo descriptorSetLayoutCreateInfo = { VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO };
 	descriptorSetLayoutCreateInfo.bindingCount = sizeof(bindings) / sizeof(bindings[0]);
