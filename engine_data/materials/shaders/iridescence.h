@@ -4,10 +4,10 @@
  * https://belcour.github.io/blog/research/2017/05/01/brdf-thin-film.html
  */
 
-const float Dinc = 1.5;// 10.0 0.5
-const float eta2 = 1.3333;// 5.0 2.0
-const float eta3 = 1.0; // 1.0 5.0 3.0
-const float kappa3 = 0.75; // 0.0 5.0 0.0
+static const float Dinc = 1.5;// 10.0 0.5
+static const float eta2 = 1.3333;// 5.0 2.0
+static const float eta3 = 1.0; // 1.0 5.0 3.0
+static const float kappa3 = 0.75; // 0.0 5.0 0.0
 
  // Square functions for cleaner code
 float sqr(float x) {
@@ -141,5 +141,5 @@ float3 iridescentFresnel(in BSDF bsdf)
 		I += depolColor(Cm.x * SmS, Cm.y * SmP);
 	}
 
-	return saturate(XYZ_TO_RGB * I);
+	return saturate(mul(I, XYZ_TO_RGB));
 }

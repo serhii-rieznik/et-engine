@@ -1,13 +1,8 @@
 Texture2D<float4> shadowTexture : DECL_TEXTURE(Shadow);
 
 #if (ShadowMapping == ShadowMappingMoments)
-	SamplerState shadowSampler : DECL_SAMPLER(Shadow);
-#else
-	SamplerComparisonState shadowSampler : DECL_SAMPLER(Shadow);
-#endif
 
-static const float PCFShadowRadius = 2.0;
-static const float ShadowMapBias = 0.003 * PCFShadowRadius;
+SamplerState shadowSampler : DECL_SAMPLER(Shadow);
 
 float sampleMomentsShadow(in float2 shadowTexCoord, in float fragmentDepth, in float2 shadowmapSize)
 {
@@ -57,6 +52,13 @@ float sampleMomentsShadow(in float2 shadowTexCoord, in float fragmentDepth, in f
 
 	return smoothstep(0.25, 1.0, result);
 }
+#else
+
+SamplerComparisonState shadowSampler : DECL_SAMPLER(Shadow);
+static const float PCFShadowRadius = 2.0;
+static const float ShadowMapBias = 0.003 * PCFShadowRadius;
+
+#endif
 
 float sampleShadow(in float3 shadowTexCoord, in float rotationKernel, in float2 shadowmapSize)
 {

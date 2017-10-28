@@ -6,7 +6,7 @@
 		"class" : "compute",
     	"code" : "shaders/parallel-reduction",
     	"options" : {
-	    	"DOWNSAMPLE" : 1
+	    	"LUMINOCITY_ADAPTATION" : 1
     	}
 	}
 }

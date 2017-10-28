@@ -70,7 +70,8 @@ private:
 	Texture::Pointer _primaryTarget;
 	Texture::Pointer _secondaryTarget;
 	Texture::Pointer _luminanceTarget;
-	Texture::Pointer _averagedLuminance[2];
+	Texture::Pointer _downsampledLuminance;
+	Texture::Pointer _computedLuminance;
 	Texture::Pointer _luminanceHistory;
 	Texture::Pointer _renderHistory;
 	Texture::Pointer _colorGradingTexture;
@@ -80,7 +81,7 @@ private:
 	{
 		Material::Pointer debug;
 		Material::Pointer posteffects;
-		Material::Pointer averageLuminance;
+		// Material::Pointer averageLuminance;
 	} _materials;
 	
 	struct Passes
@@ -109,7 +110,8 @@ private:
 
 	struct Computes
 	{
-		Compute::Pointer averageLuminance;
+		Compute::Pointer downsampleLuminance;
+		Compute::Pointer auminanceAdaptation;
 	} _compute;
 };
 

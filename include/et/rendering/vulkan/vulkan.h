@@ -258,6 +258,7 @@ VkAccessFlags texureStateToAccessFlags(TextureState);
 VkImageLayout texureStateToImageLayout(TextureState);
 VkShaderStageFlagBits programStageValue(ProgramStage);
 const char* programStageEntryName(ProgramStage);
+const char* programStageHLSLProfile(ProgramStage);
 const char* resultToString(VkResult result);
 
 VkPipelineStageFlags accessMaskToPipelineStage(VkAccessFlags flags);

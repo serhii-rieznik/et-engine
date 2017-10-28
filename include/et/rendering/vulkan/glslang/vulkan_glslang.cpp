@@ -17,8 +17,8 @@
 #include "vulkan_glslang.h"
 #include <fstream>
 
-#define ET_PREPROCESS_HLSL				0
 #define ET_COMPILE_TEST_HLSL			0
+#define ET_PREPROCESS_HLSL				(0 || ET_COMPILE_TEST_HLSL)
 #define ET_CROSS_COMPILE_SHADERS_TEST	0
 
 #if (ET_PLATFORM_WIN && ET_COMPILE_TEST_HLSL)
@@ -80,48 +80,31 @@ bool buildProgram(glslang::TProgram& program, EShMessages messages)
 	return true;
 }
 
-bool performDX11CompileTest(const std::string& preprocessedVertexShader, const std::string& preprocessedFragmentShader)
+bool performDX11CompileTest(const std::string& source, const char* entry, const char* profile)
 {
+	bool success = true;
 #if (ET_PLATFORM_WIN && ET_COMPILE_TEST_HLSL)
-	Microsoft::WRL::ComPtr<ID3DBlob> vertexBlob = nullptr;
-	Microsoft::WRL::ComPtr<ID3DBlob> vertexErrors = nullptr;
-	HRESULT vResult = D3DCompile(preprocessedVertexShader.c_str(), preprocessedVertexShader.length(),
-		nullptr, nullptr, nullptr, "vertexMain", "vs_5_1",
+	Microsoft::WRL::ComPtr<ID3DBlob> blob = nullptr;
+	Microsoft::WRL::ComPtr<ID3DBlob> errors = nullptr;
+	
+	HRESULT vResult = D3DCompile(source.c_str(), source.length(),
+		nullptr, nullptr, nullptr, entry, profile,
 		D3DCOMPILE_DEBUG | D3DCOMPILE_ENABLE_STRICTNESS | D3DCOMPILE_OPTIMIZATION_LEVEL0 | D3DCOMPILE_WARNINGS_ARE_ERRORS,
-		0, vertexBlob.GetAddressOf(), vertexErrors.GetAddressOf());
+		0, blob.GetAddressOf(), errors.GetAddressOf());
 
 	if (FAILED(vResult))
 	{
-		log::error("Compile test of HLSL vertex shader failed");
-		if (vertexErrors)
+		log::error("Failed to compile HLSL source");
+		if (errors)
 		{
-			std::string errorString(reinterpret_cast<const char*>(vertexErrors->GetBufferPointer()), vertexErrors->GetBufferSize());
+			std::string errorString(reinterpret_cast<const char*>(errors->GetBufferPointer()), errors->GetBufferSize());
 			log::error("Errors: %s", errorString.c_str());
-			dumpSource(preprocessedVertexShader);
+			dumpSource(source);
 		}
-		return false;
-	}
-
-	Microsoft::WRL::ComPtr<ID3DBlob> fragmentBlob = nullptr;
-	Microsoft::WRL::ComPtr<ID3DBlob> fragmentErrors = nullptr;
-	HRESULT fResult = D3DCompile(preprocessedFragmentShader.c_str(), preprocessedFragmentShader.length(),
-		nullptr, nullptr, nullptr, "fragmentMain", "ps_5_1",
-		D3DCOMPILE_DEBUG | D3DCOMPILE_ENABLE_STRICTNESS | D3DCOMPILE_OPTIMIZATION_LEVEL0 | D3DCOMPILE_WARNINGS_ARE_ERRORS,
-		0, fragmentBlob.GetAddressOf(), fragmentErrors.GetAddressOf());
-	if (FAILED(fResult))
-	{
-		log::error("Compile test of HLSL fragment shader failed");
-		if (fragmentErrors)
-		{
-			std::string errorString(reinterpret_cast<const char*>(fragmentErrors->GetBufferPointer()), fragmentErrors->GetBufferSize());
-			log::error("Errors: %s", errorString.c_str());
-			dumpSource(preprocessedFragmentShader);
-		}
-		return false;
+		success = false;
 	}
 #endif
-
-	return true;
+	return success;
 }
 
 EShLanguage shLanguageFromStage(ProgramStage stage)
@@ -148,6 +131,7 @@ bool generateSPIRFromHLSL(const std::string& source, SPIRProgramStageMap& stages
 	{
 		EShLanguage language = shLanguageFromStage(stage.first);
 		const char* entryName = vulkan::programStageEntryName(stage.first);
+		const char* profileId = vulkan::programStageHLSLProfile(stage.first);
 
 		glslang::TShader shader(language);
 		shader.setStringsWithLengthsAndNames(rawSource, nullptr, shaderName, 1);
@@ -167,6 +151,12 @@ bool generateSPIRFromHLSL(const std::string& source, SPIRProgramStageMap& stages
 #		endif
 			return false;
 		}
+	
+		if (!performDX11CompileTest(preprocessedSource, entryName, profileId))
+		{
+			debug::debugBreak();
+		}
+		
 		const char* preprocessedRawSource[] = { preprocessedSource.c_str() };
 		shader.setStringsWithLengthsAndNames(preprocessedRawSource, nullptr, shaderName, 1);
 #	endif
