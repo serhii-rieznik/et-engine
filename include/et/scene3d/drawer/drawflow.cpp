@@ -7,31 +7,28 @@
 
 #include <et/scene3d/drawer/drawflow.h>
 
-namespace et
-{
-namespace s3d
-{
+namespace et {
+namespace s3d {
 
 const TextureFormat HDRTextureFormat = TextureFormat::RGBA16F;
 const uint32_t luminanceTargetSize = 1024;
 const uint32_t computeGroupSize = 16;
 
 HDRFlow::HDRFlow(const RenderInterface::Pointer& ren) :
-	_renderer(ren)
-{
+	_renderer(ren) {
 	RenderPass::ConstructionInfo desc;
 	desc.name = RenderPass::kPassNameDefault;
 	desc.color[0].enabled = true;
 	desc.color[0].loadOperation = FramebufferOperation::Clear;
 	desc.color[0].storeOperation = FramebufferOperation::Store;
 	_passes.final = _renderer->allocateRenderPass(desc);
-	
+
 	_materials.debug = _renderer->sharedMaterialLibrary().loadMaterial(application().resolveFileName("engine_data/materials/textured2d-transformed-lod.json"));
 	_materials.posteffects = _renderer->sharedMaterialLibrary().loadMaterial(application().resolveFileName("engine_data/materials/posteffects.json"));
 
 	{
 		Material::Pointer computeMaterial;
-		
+
 		computeMaterial = _renderer->sharedMaterialLibrary().loadMaterial(application().resolveFileName("engine_data/compute/parallel-reduction.json"));
 		_compute.downsampleLuminance = _renderer->createCompute(computeMaterial);
 
@@ -50,8 +47,7 @@ HDRFlow::HDRFlow(const RenderInterface::Pointer& ren) :
 	setColorGradingTable(emptyString);
 }
 
-void HDRFlow::setColorGradingTable(const std::string& st)
-{
+void HDRFlow::setColorGradingTable(const std::string& st) {
 	ObjectsCache localCache;
 	if (st.empty())
 	{
@@ -63,8 +59,7 @@ void HDRFlow::setColorGradingTable(const std::string& st)
 	}
 }
 
-void HDRFlow::resizeRenderTargets(const vec2i& sz)
-{
+void HDRFlow::resizeRenderTargets(const vec2i& sz) {
 	if (_primaryTarget.invalid() || (_primaryTarget->size(0) != sz))
 	{
 		TextureDescription::Pointer desc(PointerInit::CreateInplace);
@@ -77,7 +72,6 @@ void HDRFlow::resizeRenderTargets(const vec2i& sz)
 		desc->flags = Texture::Flags::RenderTarget | Texture::Flags::CopyDestination;
 		_renderHistory = _renderer->createTexture(desc);
 
-		uint32_t downsampledSize = luminanceTargetSize; 
 		desc->size = vec2i(luminanceTargetSize);
 		desc->flags = Texture::Flags::RenderTarget | Texture::Flags::CopySource;
 		desc->levelCount = 1;
@@ -85,37 +79,20 @@ void HDRFlow::resizeRenderTargets(const vec2i& sz)
 		_passes.logLuminanceBeginInfo.subpasses.clear();
 		_passes.logLuminanceBeginInfo.subpasses.emplace_back(0, 0);
 
-		_passes.averageLuminanceBeginInfo.subpasses.clear();
-		while ((downsampledSize /= 2) > 0)
-		{
-			_passes.averageLuminanceBeginInfo.subpasses.emplace_back(0, desc->levelCount);
-			desc->levelCount++;
-		}
-		_passes.averageLuminanceBeginInfo.subpasses.pop_back();
-
-		_passes.resolveLuminanceBeginInfo.subpasses.clear();
-		_passes.resolveLuminanceBeginInfo.subpasses.emplace_back(0, desc->levelCount - 1);
-
-		_luminanceTarget = _renderer->createTexture(desc);
+		desc->format = TextureFormat::R32F;
 
 		desc->levelCount = 1;
-		desc->size = vec2i(1);
-		desc->flags = Texture::Flags::RenderTarget | Texture::Flags::CopyDestination;
-		_luminanceHistory = _renderer->createTexture(desc);
+		_luminanceTarget = _renderer->createTexture(desc);
 
 		desc->flags = Texture::Flags::Storage;
 
 		desc->size = vec2i(32, 32);
 		_downsampledLuminance = _renderer->createTexture(desc);
-		
+
 		desc->size = vec2i(1, 1);
-		desc->data.resize(16);
-		desc->data.fill(0);
 		_computedLuminance = _renderer->createTexture(desc);
 
 		_passes.logLuminance = _renderer->allocateRenderPass(RenderPass::renderTargetPassInfo("log-luminance", _luminanceTarget));
-		_passes.averageLuminance = _renderer->allocateRenderPass(RenderPass::renderTargetPassInfo("average-luminance", _luminanceTarget));
-		_passes.resolveLuminance = _renderer->allocateRenderPass(RenderPass::renderTargetPassInfo("resolve-luminance", _luminanceTarget));
 
 		_passes.motionBlur0 = _renderer->allocateRenderPass(RenderPass::renderTargetPassInfo("motionblur", _secondaryTarget));
 		_passes.motionBlur1 = _renderer->allocateRenderPass(RenderPass::renderTargetPassInfo("motionblur", _primaryTarget));
@@ -125,13 +102,12 @@ void HDRFlow::resizeRenderTargets(const vec2i& sz)
 		_batches.logLuminance = renderhelper::createQuadBatch(_primaryTarget, _materials.posteffects, _renderer->clampSampler(), { 0, 1, 0, 1 });
 		_batches.logLuminance->material()->setFloat(MaterialVariable::ExtraParameters, 0.0f);
 	}
-	
+
 	if (drawer().valid())
 		drawer()->setRenderTarget(_primaryTarget);
 }
 
-void HDRFlow::render()
-{
+void HDRFlow::render() {
 	if (drawer().valid())
 		drawer()->draw();
 
@@ -152,20 +128,19 @@ void HDRFlow::render()
 	_renderer->submitRenderPass(_passes.final);
 }
 
-void HDRFlow::postprocess()
-{
+void HDRFlow::postprocess() {
 	const Texture::Pointer& vel = drawer()->supportTexture(Drawer::SupportTexture::Velocity);
 	RenderBatch::Pointer batch = renderhelper::createQuadBatch(_primaryTarget, _materials.posteffects, _renderer->clampSampler());
 	batch->material()->setTextureWithSampler(MaterialTexture::EmissiveColor, vel, _renderer->clampSampler());
-	
+
 	_passes.motionBlur0->begin(RenderPassBeginInfo::singlePass());
 	_passes.motionBlur0->nextSubpass();
 	_passes.motionBlur0->pushRenderBatch(batch);
 	_passes.motionBlur0->endSubpass();
 	_passes.motionBlur0->end();
-	
+
 	_renderer->submitRenderPass(_passes.motionBlur0);
-	
+
 	batch->material()->setTextureWithSampler(MaterialTexture::BaseColor, _secondaryTarget, _renderer->clampSampler());
 	_passes.motionBlur1->begin(RenderPassBeginInfo::singlePass());
 	_passes.motionBlur1->nextSubpass();
@@ -175,105 +150,52 @@ void HDRFlow::postprocess()
 	_renderer->submitRenderPass(_passes.motionBlur1);
 }
 
-void HDRFlow::downsampleLuminance()
-{
-	{
-		_passes.logLuminance->begin(_passes.logLuminanceBeginInfo);
-		_passes.logLuminance->pushImageBarrier(_luminanceTarget, ResourceBarrier(TextureState::ColorRenderTarget, 0, 1, 0, 1));
+void HDRFlow::downsampleLuminance() {
+	_passes.logLuminance->begin(_passes.logLuminanceBeginInfo);
+	_passes.logLuminance->pushImageBarrier(_luminanceTarget, ResourceBarrier(TextureState::ColorRenderTarget, 0, 1, 0, 1));
 
-		_passes.logLuminance->nextSubpass();
-		_passes.logLuminance->pushRenderBatch(_batches.logLuminance);
-		_passes.logLuminance->endSubpass();
-		
-		uint32_t dispatchSize = 32;
+	_passes.logLuminance->nextSubpass();
+	_passes.logLuminance->pushRenderBatch(_batches.logLuminance);
+	_passes.logLuminance->endSubpass();
 
-		MaterialInstance::Pointer& downsampleMaterial = _compute.downsampleLuminance->material();
-		_passes.logLuminance->pushImageBarrier(_luminanceTarget, ResourceBarrier(TextureState::ShaderResource, 0, 1, 0, 1));
-		_passes.logLuminance->pushImageBarrier(_downsampledLuminance, ResourceBarrier(TextureState::Storage, 0, 1, 0, 1));
-		downsampleMaterial->setTexture(MaterialTexture::BaseColor, _luminanceTarget, { 0, 1, 0, 1 });
-		downsampleMaterial->setImage(StorageBuffer::StorageBuffer0, _downsampledLuminance);
-		_passes.logLuminance->dispatchCompute(_compute.downsampleLuminance, vec3i(dispatchSize, dispatchSize, 1));
+	uint32_t dispatchSize = 32;
 
-		MaterialInstance::Pointer& adaptationMaterial = _compute.auminanceAdaptation->material();
-		adaptationMaterial->setTexture(MaterialTexture::BaseColor, _downsampledLuminance, { 0, 1, 0, 1 });
-		adaptationMaterial->setImage(StorageBuffer::StorageBuffer0, _computedLuminance);
-		_passes.logLuminance->pushImageBarrier(_downsampledLuminance, ResourceBarrier(TextureState::ShaderResource, 0, 1, 0, 1));
-		_passes.logLuminance->pushImageBarrier(_computedLuminance, ResourceBarrier(TextureState::Storage, 0, 1, 0, 1));
-		_passes.logLuminance->dispatchCompute(_compute.auminanceAdaptation, vec3i(1, 1, 1));
+	MaterialInstance::Pointer& downsampleMaterial = _compute.downsampleLuminance->material();
+	_passes.logLuminance->pushImageBarrier(_luminanceTarget, ResourceBarrier(TextureState::ShaderResource, 0, 1, 0, 1));
+	_passes.logLuminance->pushImageBarrier(_downsampledLuminance, ResourceBarrier(TextureState::Storage, 0, 1, 0, 1));
+	downsampleMaterial->setTexture(MaterialTexture::BaseColor, _luminanceTarget, { 0, 1, 0, 1 });
+	downsampleMaterial->setImage(StorageBuffer::StorageBuffer0, _downsampledLuminance);
+	_passes.logLuminance->dispatchCompute(_compute.downsampleLuminance, vec3i(dispatchSize, dispatchSize, 1));
 
-		_passes.logLuminance->pushImageBarrier(_downsampledLuminance, ResourceBarrier(TextureState::ShaderResource, 0, 1, 0, 1));
-		_passes.logLuminance->pushImageBarrier(_computedLuminance, ResourceBarrier(TextureState::ShaderResource, 0, 1, 0, 1));
+	MaterialInstance::Pointer& adaptationMaterial = _compute.auminanceAdaptation->material();
+	adaptationMaterial->setTexture(MaterialTexture::BaseColor, _downsampledLuminance, { 0, 1, 0, 1 });
+	adaptationMaterial->setImage(StorageBuffer::StorageBuffer0, _computedLuminance);
+	_passes.logLuminance->pushImageBarrier(_downsampledLuminance, ResourceBarrier(TextureState::ShaderResource, 0, 1, 0, 1));
+	_passes.logLuminance->pushImageBarrier(_computedLuminance, ResourceBarrier(TextureState::Storage, 0, 1, 0, 1));
+	_passes.logLuminance->dispatchCompute(_compute.auminanceAdaptation, vec3i(1, 1, 1));
 
-		_passes.logLuminance->end();
-		_renderer->submitRenderPass(_passes.logLuminance);
-	}
-	//*
-	uint32_t processedLevel = 1;
-	{
-		_passes.averageLuminance->begin(_passes.averageLuminanceBeginInfo);
-		for (; processedLevel + 1 < _luminanceTarget->description().levelCount; ++processedLevel)
-		{
-			RenderBatch::Pointer averageLuminanceBatch = renderhelper::createQuadBatch(_luminanceTarget, _materials.posteffects, _renderer->clampSampler(), { 0, processedLevel, 0, 1 });
-			averageLuminanceBatch->material()->setFloat(MaterialVariable::ExtraParameters, static_cast<float>(processedLevel));
+	_passes.logLuminance->pushImageBarrier(_downsampledLuminance, ResourceBarrier(TextureState::ShaderResource, 0, 1, 0, 1));
+	_passes.logLuminance->pushImageBarrier(_computedLuminance, ResourceBarrier(TextureState::ShaderResource, 0, 1, 0, 1));
 
-			_passes.averageLuminance->pushImageBarrier(_luminanceTarget, ResourceBarrier(TextureState::ColorRenderTarget, processedLevel, 1, 0, 1));
-			_passes.averageLuminance->pushImageBarrier(_luminanceTarget, ResourceBarrier(TextureState::ShaderResource, 0, processedLevel, 0, 1));
-			_passes.averageLuminance->nextSubpass();
-			_passes.averageLuminance->pushRenderBatch(averageLuminanceBatch);
-			_passes.averageLuminance->endSubpass();
-		}
-		_passes.averageLuminance->end();
-		_renderer->submitRenderPass(_passes.averageLuminance);
-	}
-
-	{
-		RenderBatch::Pointer resolveLuminanceBatch = renderhelper::createQuadBatch(_luminanceTarget, _materials.posteffects, _renderer->clampSampler(), { 0, processedLevel, 0, 1 });
-		resolveLuminanceBatch->material()->setFloat(MaterialVariable::ExtraParameters, static_cast<float>(processedLevel));
-		resolveLuminanceBatch->material()->setTextureWithSampler(MaterialTexture::Shadow, _luminanceHistory, _renderer->clampSampler(), { 0, 1, 0, 1 });
-
-		CopyDescriptor copyLuminance;
-		copyLuminance.levelFrom = _luminanceTarget->description().levelCount - 1;
-		copyLuminance.size = vec3i(1, 1, 1);
-
-		_passes.resolveLuminance->begin(_passes.resolveLuminanceBeginInfo);
-
-		_passes.resolveLuminance->pushImageBarrier(_luminanceTarget, ResourceBarrier(TextureState::ColorRenderTarget, processedLevel, 1, 0, 1));
-		_passes.resolveLuminance->pushImageBarrier(_luminanceTarget, ResourceBarrier(TextureState::ShaderResource, 0, processedLevel, 0, 1));
-		_passes.resolveLuminance->nextSubpass();
-		_passes.resolveLuminance->pushRenderBatch(resolveLuminanceBatch);
-		_passes.resolveLuminance->endSubpass();
-		
-		_passes.resolveLuminance->pushImageBarrier(_luminanceTarget, ResourceBarrier(TextureState::CopySource, _luminanceTarget->description().levelCount - 1, 0));
-		_passes.resolveLuminance->pushImageBarrier(_luminanceHistory, ResourceBarrier(TextureState::CopyDestination));
-		_passes.resolveLuminance->copyImage(_luminanceTarget, _luminanceHistory, copyLuminance);
-
-		_passes.resolveLuminance->pushImageBarrier(_primaryTarget, ResourceBarrier(TextureState::ShaderResource, 0, _primaryTarget->description().levelCount, 0, 1));
-		_passes.resolveLuminance->pushImageBarrier(_luminanceTarget, ResourceBarrier(TextureState::ShaderResource, 0, _luminanceTarget->description().levelCount, 0, 1));
-		_passes.resolveLuminance->pushImageBarrier(_luminanceHistory, ResourceBarrier(TextureState::ShaderResource, 0, 1, 0, 1));
-		_passes.resolveLuminance->end();
-
-		_renderer->submitRenderPass(_passes.resolveLuminance);
-	}
-	// */
+	_passes.logLuminance->end();
+	_renderer->submitRenderPass(_passes.logLuminance);
 }
 
-void HDRFlow::tonemap()
-{
+void HDRFlow::tonemap() {
 	RenderBatch::Pointer batch = renderhelper::createQuadBatch(_primaryTarget, _materials.posteffects, _renderer->clampSampler());
-	batch->material()->setTextureWithSampler(MaterialTexture::EmissiveColor, _luminanceTarget, _renderer->clampSampler());
 	batch->material()->setTextureWithSampler(MaterialTexture::Shadow, _colorGradingTexture, _colorGradingSampler);
+	batch->material()->setTextureWithSampler(MaterialTexture::EmissiveColor, _computedLuminance, _renderer->clampSampler());
 
 	_passes.tonemapping->begin(RenderPassBeginInfo::singlePass());
 	_passes.tonemapping->nextSubpass();
 	_passes.tonemapping->pushRenderBatch(batch);
 	_passes.tonemapping->endSubpass();
 	_passes.tonemapping->end();
-	
+
 	_renderer->submitRenderPass(_passes.tonemapping);
 }
 
-void HDRFlow::antialias()
-{
+void HDRFlow::antialias() {
 	const Texture::Pointer& vel = drawer()->supportTexture(Drawer::SupportTexture::Velocity);
 
 	RenderBatch::Pointer batch = renderhelper::createQuadBatch(_secondaryTarget, _materials.posteffects, _renderer->clampSampler());
@@ -303,8 +225,7 @@ void HDRFlow::debugDraw() {
 	if (!options.debugDraw)
 		return;
 
-	uint32_t levels = _luminanceTarget->description().levelCount;
-	uint32_t gridSize = static_cast<uint32_t>(std::ceil(std::sqrt(static_cast<float>(levels))));
+	uint32_t gridSize = 4;
 	vec2 vp = vector2ToFloat(_renderer->rc()->size());
 	float dx = std::min(vp.y, vp.x) / static_cast<float>(gridSize);
 	float dy = dx;
@@ -321,9 +242,8 @@ void HDRFlow::debugDraw() {
 	};
 
 	RenderBatch::Pointer batch = renderhelper::createQuadBatch(_luminanceTarget, _materials.debug, _renderer->clampSampler(), renderhelper::QuadType::Default);
-	for (uint32_t i = 0; i < levels; ++i)
 	{
-		batch->material()->setFloat(MaterialVariable::ExtraParameters, static_cast<float>(i));
+		batch->material()->setFloat(MaterialVariable::ExtraParameters, 0.0f);
 		_passes.final->setSharedVariable(ObjectVariable::WorldTransform, fullscreenBatchTransform(vp, pos, vec2(dx, dy)));
 		_passes.final->pushRenderBatch(batch);
 		advancePosition();
@@ -334,14 +254,14 @@ void HDRFlow::debugDraw() {
 		_passes.final->setSharedVariable(ObjectVariable::WorldTransform, fullscreenBatchTransform(vp, pos, vec2(dx, dy)));
 		_passes.final->pushRenderBatch(batch);
 		advancePosition();
-		
+
 		batch = renderhelper::createQuadBatch(_computedLuminance, _materials.debug, _renderer->clampSampler(), renderhelper::QuadType::Default);
 		batch->material()->setFloat(MaterialVariable::ExtraParameters, 0.0f);
 		_passes.final->setSharedVariable(ObjectVariable::WorldTransform, fullscreenBatchTransform(vp, pos, vec2(dx, dy)));
 		_passes.final->pushRenderBatch(batch);
 		advancePosition();
 	}
-	
+
 	const Texture::Pointer& vel = drawer()->supportTexture(Drawer::SupportTexture::Velocity);
 	if (vel.valid())
 	{

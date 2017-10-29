@@ -72,7 +72,7 @@ private:
 	Texture::Pointer _luminanceTarget;
 	Texture::Pointer _downsampledLuminance;
 	Texture::Pointer _computedLuminance;
-	Texture::Pointer _luminanceHistory;
+
 	Texture::Pointer _renderHistory;
 	Texture::Pointer _colorGradingTexture;
 	Sampler::Pointer _colorGradingSampler;
@@ -81,20 +81,12 @@ private:
 	{
 		Material::Pointer debug;
 		Material::Pointer posteffects;
-		// Material::Pointer averageLuminance;
 	} _materials;
 	
 	struct Passes
 	{
 		RenderPass::Pointer logLuminance;
 		RenderPassBeginInfo logLuminanceBeginInfo;
-		
-		RenderPass::Pointer averageLuminance;
-		RenderPassBeginInfo averageLuminanceBeginInfo;
-		
-		RenderPass::Pointer resolveLuminance;
-		RenderPassBeginInfo resolveLuminanceBeginInfo;
-
 		RenderPass::Pointer motionBlur0;
 		RenderPass::Pointer motionBlur1;
 		RenderPass::Pointer tonemapping;
@@ -105,7 +97,6 @@ private:
 	struct Batches
 	{
 		RenderBatch::Pointer logLuminance;
-		Vector<RenderBatch::Pointer> averageLuminance;
 	} _batches;
 
 	struct Computes
