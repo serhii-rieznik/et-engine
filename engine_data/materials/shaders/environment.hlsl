@@ -1,6 +1,5 @@
 #include <et>
 #include <inputdefines>
-#include <inputlayout>
 #include "atmosphere.h"
 #include "environment.h"
 
@@ -24,16 +23,18 @@ struct VSOutput
 	float3 direction : TEXCOORD1;
 };
 
-VSOutput vertexMain(VSInput vsIn)
+VSOutput vertexMain(uint vertexIndex : SV_VertexID)
 {
+	float2 pos = float2((vertexIndex << 1) & 2, vertexIndex & 2) * 2.0 - 1.0;
+
 	float4x4 invView = inverseViewTransform;
 	invView[3] = float4(0.0, 0.0, 0.0, 1.0);
 	float4x4 finalInverseMatrix = invView * inverseProjectionTransform;
 	
 	VSOutput vsOut;
-	vsOut.texCoord0 = vsIn.position.xy * 0.5 + 0.5;
-	vsOut.position = float4(vsIn.position.xy, 0.9999999, 1.0);
-	vsOut.direction = mul(float4(vsIn.position, 1.0), finalInverseMatrix).xyz;
+	vsOut.texCoord0 = pos * 0.5 + 0.5;
+	vsOut.position = float4(pos, 0.9999999, 1.0);
+	vsOut.direction = mul(float4(pos, 0.0, 1.0), finalInverseMatrix).xyz;
 	return vsOut;
 }
 

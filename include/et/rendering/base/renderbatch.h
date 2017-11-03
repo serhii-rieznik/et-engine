@@ -22,7 +22,7 @@ public:
 
 public:
 	RenderBatch() = default;
-	~RenderBatch();
+	~RenderBatch() = default;
 
 	RenderBatch(const MaterialInstance::Pointer&, const VertexStream::Pointer&, uint32_t firstIndex, uint32_t indexCount);
 

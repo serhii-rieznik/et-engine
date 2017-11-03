@@ -61,7 +61,9 @@ void VulkanPipelineState::build(const RenderPass::Pointer& inPass)
 
 	for (const RenderTarget& rt : pass->info().color)
 	{
-		if (!rt.enabled) break;
+		if (!rt.enabled) 
+			break;
+
 		attachmentInfo.emplace_back();
 		VkPipelineColorBlendAttachmentState& state = attachmentInfo.back();
 		state.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
@@ -158,28 +160,37 @@ void VulkanPipelineStatePrivate::generateInputLayout(const VertexDeclaration& in
 	VkPipelineVertexInputStateCreateInfo& vertexInfo, Vector<VkVertexInputAttributeDescription>& attribs,
 	VkVertexInputBindingDescription& binding)
 {
-	attribs.clear();
-	attribs.reserve(inputLayout.numElements());
-	for (const auto& e : inputLayout.elements())
-	{
-		if (expectedLayout.has(e.usage()))
-		{
-			attribs.emplace_back();
-			attribs.back().offset = e.offset();
-			attribs.back().format = vulkan::dataTypeValue(e.type());
-			attribs.back().location = static_cast<uint32_t>(e.usage());
-		}
-	}
-
-	binding = { };
-	binding.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
-	binding.stride = inputLayout.sizeInBytes();
-
+	binding = {};
 	vertexInfo = { VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO };
-	vertexInfo.pVertexBindingDescriptions = &binding;
-	vertexInfo.vertexBindingDescriptionCount = 1;
-	vertexInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(attribs.size());
-	vertexInfo.pVertexAttributeDescriptions = attribs.data();
+
+	if (expectedLayout.elements().empty())
+	{
+		printf(".");
+	}
+	else
+	{
+		attribs.clear();
+		attribs.reserve(inputLayout.numElements());
+
+		for (const auto& e : inputLayout.elements())
+		{
+			if (expectedLayout.has(e.usage()))
+			{
+				attribs.emplace_back();
+				attribs.back().offset = e.offset();
+				attribs.back().format = vulkan::dataTypeValue(e.type());
+				attribs.back().location = static_cast<uint32_t>(e.usage());
+			}
+		}
+
+		binding.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+		binding.stride = inputLayout.sizeInBytes();
+
+		vertexInfo.pVertexBindingDescriptions = &binding;
+		vertexInfo.vertexBindingDescriptionCount = 1;
+		vertexInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(attribs.size());
+		vertexInfo.pVertexAttributeDescriptions = attribs.data();
+	}
 }
 
 }

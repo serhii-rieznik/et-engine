@@ -20,6 +20,7 @@ namespace rh_local
 RenderContext* renderContext = nullptr;
 Material::Pointer texturedMaterial;
 VertexStream::Pointer vertexStream;
+VertexStream::Pointer emptyStream;
 }
 
 void init(RenderContext* rc)
@@ -45,6 +46,9 @@ void init(RenderContext* rc)
 	rh_local::vertexStream = VertexStream::Pointer::create();
 	rh_local::vertexStream->setVertexBuffer(vb, vs->declaration());
 	rh_local::vertexStream->setPrimitiveType(PrimitiveType::TriangleStrips);
+
+	rh_local::emptyStream = VertexStream::Pointer::create();
+	rh_local::emptyStream->setPrimitiveType(PrimitiveType::TriangleStrips);
 
 	rh_local::texturedMaterial = rc->renderer()->sharedMaterialLibrary().loadDefaultMaterial(DefaultMaterial::Textured2D);
 
@@ -73,7 +77,7 @@ RenderBatch::Pointer createQuadBatch(const Texture::Pointer& texture, Material::
 		switch (type)
 		{
 		case QuadType::Fullscreen:
-			batch->construct(materialInstance, rh_local::vertexStream, 0, 3);
+			batch->construct(materialInstance, rh_local::emptyStream, 0, 3);
 			break;
 		
 		default:

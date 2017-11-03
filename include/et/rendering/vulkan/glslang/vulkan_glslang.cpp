@@ -131,7 +131,6 @@ bool generateSPIRFromHLSL(const std::string& source, SPIRProgramStageMap& stages
 	{
 		EShLanguage language = shLanguageFromStage(stage.first);
 		const char* entryName = vulkan::programStageEntryName(stage.first);
-		const char* profileId = vulkan::programStageHLSLProfile(stage.first);
 
 		glslang::TShader shader(language);
 		shader.setStringsWithLengthsAndNames(rawSource, nullptr, shaderName, 1);
@@ -152,6 +151,7 @@ bool generateSPIRFromHLSL(const std::string& source, SPIRProgramStageMap& stages
 			return false;
 		}
 	
+		const char* profileId = vulkan::programStageHLSLProfile(stage.first);
 		if (!performDX11CompileTest(preprocessedSource, entryName, profileId))
 		{
 			debug::debugBreak();
@@ -235,7 +235,11 @@ void buildProgramInputLayout(const glslang::TProgram& program, Program::Reflecti
 		ET_ASSERT(semanticName != nullptr);
 
 		VertexAttributeUsage usage = semanticToVertexAttributeUsage(semanticName);
-		if (usage != VertexAttributeUsage::Unknown)
+		if (usage == VertexAttributeUsage::BuiltIn)
+		{
+			// do nothing
+		}
+		else if (usage != VertexAttributeUsage::Unknown)
 		{
 			if (attribType->getBasicType() == glslang::TBasicType::EbtFloat)
 			{

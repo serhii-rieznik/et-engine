@@ -18,10 +18,6 @@ RenderBatch::RenderBatch(const MaterialInstance::Pointer& m, const VertexStream:
 {
 }
 
-RenderBatch::~RenderBatch()
-{
-}
-
 void RenderBatch::construct(const MaterialInstance::Pointer& m, const VertexStream::Pointer& vs, uint32_t firstIndex, uint32_t indexCount)
 {
 	_material = m;

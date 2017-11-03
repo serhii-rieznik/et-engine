@@ -3,7 +3,6 @@
 	"forward" : 
 	{ 
 		"input-layout" : {
-			"position" : 3
 		},
 		"depth-state": {
 			"depth-function": "less",
@@ -17,7 +16,6 @@
 	"generate-split-sum-approx" :
 	{ 
 		"input-layout" : {
-			"position" : 3
 		},
 		"depth-state": {
 			"depth-function": "less",

@@ -1,6 +1,5 @@
 #include <et>
 #include <inputdefines>
-#include <inputlayout>
 #include <options>
 #include "srgb.h"
 
@@ -34,7 +33,7 @@ struct VSOutput
 	float2 texCoord0 : TEXCOORD0;
 };
 
-#include "vertexprogram-2d.h"
+#include "vertexprogram-2d-triangle.h"
 
 float4 fragmentMain(VSOutput fsIn) : SV_Target0
 {

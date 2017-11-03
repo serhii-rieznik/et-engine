@@ -26,6 +26,13 @@ const std::string vertexAttributeUsageSemanticsNames[VertexAttributeUsage_max] =
 	"SMOOTHINGGROUP" "BLENDWEIGHT", "BLENDINDICES"
 };
 
+const std::string vertexAttributeUsageBuiltInNames[] =
+{
+	"SV_VERTEXID",
+	"SV_PRIMITIVEID",
+	"SV_INSTANCEID",
+};
+
 const std::string dataTypeNames[DataType_max] =
 {
 	"float", "float2", "float3", "float4", "float3x3", "float4x4", "int", "int2", "int3", "int4"
@@ -89,6 +96,19 @@ VertexAttributeUsage semanticToVertexAttributeUsage(const std::string& s)
 			break;
 		}
 	}
+
+	if (result == VertexAttributeUsage::Unknown)
+	{
+		for (const std::string& builtIn : vertexAttributeUsageBuiltInNames)
+		{
+			if (stricmp(s.c_str(), builtIn.c_str()) == 0)
+			{
+				result = VertexAttributeUsage::BuiltIn;
+				break;
+			}
+		}
+	}
+
 	return result;
 }
 

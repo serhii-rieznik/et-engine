@@ -363,6 +363,9 @@ void VulkanRenderPass::pushRenderBatch(const MaterialInstance::Pointer& inMateri
 	if (pipelineState->nativePipeline().pipeline == nullptr)
 		return;
 
+	bool hasVertexBuffer = vertexStream.valid() && vertexStream->indexBuffer().valid();
+	bool hasIndexBuffer = vertexStream.valid() && vertexStream->indexBuffer().valid();
+
 	MaterialInstance::Pointer material = inMaterial;
 	for (const auto& sh : sharedTextures())
 	{
@@ -372,13 +375,7 @@ void VulkanRenderPass::pushRenderBatch(const MaterialInstance::Pointer& inMateri
 	Vector<Object::Pointer>& usedObjects = _private->usedObjects[_private->frameIndex];
 	usedObjects.reserve(_private->usedObjects[_private->frameIndex].size() + 6);
 	usedObjects.emplace_back(pipelineState);
-
-	usedObjects.emplace_back(vertexStream->vertexBuffer());
-	VulkanBuffer* vertexBuffer = static_cast<VulkanBuffer*>(usedObjects.back().pointer());
-
-	usedObjects.emplace_back(vertexStream->indexBuffer());
-	VulkanBuffer* indexBuffer = static_cast<VulkanBuffer*>(usedObjects.back().pointer());
-
+	
 	usedObjects.emplace_back(material->constantBufferData(info().name));
 	ConstantBufferEntry* materialVariables = static_cast<ConstantBufferEntry*>(usedObjects.back().pointer());
 
@@ -402,11 +399,6 @@ void VulkanRenderPass::pushRenderBatch(const MaterialInstance::Pointer& inMateri
 		static_cast<uint32_t>(materialVariables != nullptr ? materialVariables->offset() : 0)
 	};
 
-	bool hasIndices = vertexStream->indexBuffer().valid();
-
-	VkIndexType indexType = hasIndices ? vulkan::indexBufferFormat(vertexStream->indexArrayFormat()) : VK_INDEX_TYPE_MAX_ENUM;
-	VkBuffer buffers[] = { vertexBuffer->nativeBuffer().buffer };
-
 	ET_ASSERT(_private->renderPassStarted);
 
 	VkCommandBuffer commandBuffer = _private->content[_private->frameIndex].commandBuffer;
@@ -414,11 +406,22 @@ void VulkanRenderPass::pushRenderBatch(const MaterialInstance::Pointer& inMateri
 	vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineState->nativePipeline().layout, 0,
 		DescriptorSetClass_Count, descriptorSets, DescriptorSetClass::DynamicDescriptorsCount, dynamicOffsets);
 	
-	VkDeviceSize offsets[] = { 0 };
-	vkCmdBindVertexBuffers(commandBuffer, 0, 1, buffers, offsets);
-
-	if (hasIndices)
+	if (hasVertexBuffer)
 	{
+		usedObjects.emplace_back(vertexStream->vertexBuffer());
+		VulkanBuffer* vertexBuffer = static_cast<VulkanBuffer*>(usedObjects.back().pointer());
+
+		VkDeviceSize offsets[] = { 0 };
+		VkBuffer buffers[] = { vertexBuffer->nativeBuffer().buffer };
+		vkCmdBindVertexBuffers(commandBuffer, 0, 1, buffers, offsets);
+	}
+	
+	if (hasIndexBuffer)
+	{
+		usedObjects.emplace_back(vertexStream->indexBuffer());
+		VulkanBuffer* indexBuffer = static_cast<VulkanBuffer*>(usedObjects.back().pointer());
+
+		VkIndexType indexType = vulkan::indexBufferFormat(vertexStream->indexArrayFormat());
 		vkCmdBindIndexBuffer(commandBuffer, indexBuffer->nativeBuffer().buffer, 0, indexType);
 		vkCmdDrawIndexed(commandBuffer, count, 1, first, 0, 0);
 	}

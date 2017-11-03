@@ -4,7 +4,6 @@
 	"prepare-cubemap" : 
 	{ 
 		"input-layout" : {
-			"position" : 3
 		},
 		"depth-state": {
 			"depth-function": "always",

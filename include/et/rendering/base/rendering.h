@@ -95,6 +95,7 @@ enum class VertexAttributeUsage : uint32_t
 	BlendWeights,
 	BlendIndices,
 
+	BuiltIn,
 	Unknown,
 	max
 };
