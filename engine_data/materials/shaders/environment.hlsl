@@ -29,7 +29,7 @@ VSOutput vertexMain(uint vertexIndex : SV_VertexID)
 
 	float4x4 invView = inverseViewTransform;
 	invView[3] = float4(0.0, 0.0, 0.0, 1.0);
-	float4x4 finalInverseMatrix = invView * inverseProjectionTransform;
+	float4x4 finalInverseMatrix = mul(invView, inverseProjectionTransform);
 	
 	VSOutput vsOut;
 	vsOut.texCoord0 = pos * 0.5 + 0.5;
