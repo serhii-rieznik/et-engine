@@ -386,14 +386,17 @@ void OBJLoader::load(ObjectsCache& cache)
 									{
 										*linkEnd = 0;
 
-										int64_t linkValue = naive_atoll(link);
-										ET_ASSERT(linkValue > 0);
-										ET_ASSERT(face.vertexLinksCount < OBJFace::MaxVertexLinks);
+										if (linkEnd > link)
+										{
+											int64_t linkValue = naive_atoll(link);
+											ET_ASSERT(linkValue > 0);
+											ET_ASSERT(face.vertexLinksCount < OBJFace::MaxVertexLinks);
 
-										face.vertexLinks[face.vertexLinksCount][linkIndex] = static_cast<uint32_t>(linkValue - 1);
+											face.vertexLinks[face.vertexLinksCount][linkIndex] = static_cast<uint32_t>(linkValue - 1);
+											*linkEnd = endValue;
+										}
 										++linkIndex;
 
-										*linkEnd = endValue;
 										link = linkEnd + 1;
 									}
 									++linkEnd;

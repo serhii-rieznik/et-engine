@@ -1,5 +1,8 @@
 Texture2D<float4> shadowTexture : DECL_TEXTURE(Shadow);
 
+static const float PCFShadowRadius = 2.0;
+static const float ShadowMapBias = 0.003 * PCFShadowRadius;
+
 #if (ShadowMapping == ShadowMappingMoments)
 
 SamplerState shadowSampler : DECL_SAMPLER(Shadow);
@@ -55,8 +58,6 @@ float sampleMomentsShadow(in float2 shadowTexCoord, in float fragmentDepth, in f
 #else
 
 SamplerComparisonState shadowSampler : DECL_SAMPLER(Shadow);
-static const float PCFShadowRadius = 2.0;
-static const float ShadowMapBias = 0.003 * PCFShadowRadius;
 
 #endif
 

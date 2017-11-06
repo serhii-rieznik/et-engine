@@ -363,7 +363,7 @@ void VulkanRenderPass::pushRenderBatch(const MaterialInstance::Pointer& inMateri
 	if (pipelineState->nativePipeline().pipeline == nullptr)
 		return;
 
-	bool hasVertexBuffer = vertexStream.valid() && vertexStream->indexBuffer().valid();
+	bool hasVertexBuffer = vertexStream.valid() && vertexStream->vertexBuffer().valid();
 	bool hasIndexBuffer = vertexStream.valid() && vertexStream->indexBuffer().valid();
 
 	MaterialInstance::Pointer material = inMaterial;
