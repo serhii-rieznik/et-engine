@@ -18,7 +18,7 @@
 		"code" : "shaders/depth"
 	},
 
-	"forward" : 
+	"z-prepass" : 
 	{
 		"input-layout" : {
 			"position" : 3,
@@ -30,6 +30,26 @@
 			"depth-function": "less",
 			"depth-test": true,
 			"depth-write": true
+		},
+			"blend-state": {
+			"blend-configuration" : "disabled"
+		},
+		"cull-mode" : "back",
+		"code" : "shaders/depth"
+	},
+
+	"forward" : 
+	{
+		"input-layout" : {
+			"position" : 3,
+			"normal" : 3,
+			"texCoord0" : 2,
+			"tangent" : 3
+		},
+			"depth-state": {
+			"depth-function": "equal",
+			"depth-test": true,
+			"depth-write": false
 		},
 			"blend-state": {
 			"blend-configuration" : "disabled"

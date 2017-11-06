@@ -45,13 +45,16 @@ public:
 	RenderInterface::Pointer renderInterface() const;
 
 private:
+	void updateVisibleMeshes();
 	void validate(RenderInterface::Pointer&);
 
 private:
 	ObjectsCache _cache;
 	
 	Scene::Pointer _scene;
+	Camera::Pointer _frameCamera;
 	Vector<Mesh::Pointer> _allMeshes;
+	Vector<Mesh::Pointer> _visibleMeshes;
 
 	RenderInterface::Pointer _renderer;
 	DebugDrawer::Pointer _debugDrawer;
@@ -60,7 +63,8 @@ private:
 
 	struct MainPass
 	{
-		RenderPass::Pointer pass;
+		RenderPass::Pointer zPrepass;
+		RenderPass::Pointer forward;
 		Texture::Pointer color;
 		Texture::Pointer depth;
 		Texture::Pointer velocity;

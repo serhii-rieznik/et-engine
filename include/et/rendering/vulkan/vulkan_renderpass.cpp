@@ -112,7 +112,6 @@ VulkanRenderPass::VulkanRenderPass(VulkanRenderer* renderer, VulkanState& vulkan
 			VulkanTexture::Pointer texture = passInfo.depth.texture;
 			attachment.format = texture->nativeTexture().format;
 		}
-		if (attachment.loadOp == VK_ATTACHMENT_LOAD_OP_CLEAR)
 		{
 			_private->clearValues.emplace_back();
 			_private->clearValues.back().depthStencil = { passInfo.depth.clearValue.x };
@@ -145,7 +144,6 @@ VulkanRenderPass::VulkanRenderPass(VulkanRenderer* renderer, VulkanState& vulkan
 				const VulkanTexture::Pointer& texture = target.texture;
 				attachment.format = texture->nativeTexture().format;
 			}
-			if (attachment.loadOp == VK_ATTACHMENT_LOAD_OP_CLEAR)
 			{
 				const vec4& cl = target.clearValue;
 				_private->clearValues.emplace_back();

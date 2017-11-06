@@ -13,10 +13,8 @@
 
 #define ET_ANIMATE_LIGHT_POSITION 0
 
-namespace et
-{
-namespace s3d
-{
+namespace et {
+namespace s3d {
 
 static const vec2 sobolSequence[] = {
 	vec2(0.000000, 0.000000),
@@ -33,8 +31,7 @@ static const vec2 sobolSequence[] = {
 static const uint64_t sobolSequenceSize = sizeof(sobolSequence) / sizeof(sobolSequence[0]);
 
 Drawer::Drawer(const RenderInterface::Pointer& renderer) :
-	_renderer(renderer)
-{
+	_renderer(renderer) {
 	_debugDrawer = DebugDrawer::Pointer::create(renderer);
 	_main.noise = _renderer->loadTexture(application().resolveFileName("engine_data/textures/bluenoise.png"), _cache);
 
@@ -44,14 +41,24 @@ Drawer::Drawer(const RenderInterface::Pointer& renderer) :
 	setScene(scene);
 }
 
-void Drawer::draw()
-{
+void Drawer::updateVisibleMeshes() {
+	_visibleMeshes.clear();
+	_visibleMeshes.reserve(_allMeshes.size());
+	for (Mesh::Pointer& mesh : _allMeshes)
+	{
+		if (_frameCamera->frustum().containsBoundingBox(mesh->tranformedBoundingBox()))
+		{
+			_visibleMeshes.emplace_back(mesh);
+		}
+	}
+}
+
+void Drawer::draw() {
 #if (ET_ANIMATE_LIGHT_POSITION)
 	_lighting.directional->lookAt(10.0f * fromSpherical(0.25f * queryContiniousTimeInSeconds(), DEG_15));
 	options.rebuldEnvironmentProbe = true;
 #endif
 
-	// _debugDrawer->begin();
 	_cubemapProcessor->process(_renderer, options, _lighting.directional);
 	_shadowmapProcessor->process(_renderer, options);
 
@@ -64,49 +71,51 @@ void Drawer::draw()
 	_jitter.z = (jj.x * 2.0f - 1.0f) / static_cast<float>(_main.color->size(0).x);
 	_jitter.w = (jj.y * 2.0f - 1.0f) / static_cast<float>(_main.color->size(0).y);
 
-	Camera::Pointer& renderCamera = _scene->renderCamera();
-	renderCamera->setProjectionMatrix(_baseProjectionMatrix * translationMatrix(_jitter.x, _jitter.y, 0.0f));
+	_frameCamera = _scene->renderCamera();
+	_frameCamera->setProjectionMatrix(_baseProjectionMatrix * translationMatrix(_jitter.x, _jitter.y, 0.0f));
+	updateVisibleMeshes();
+
+	_main.zPrepass->begin(RenderPassBeginInfo::singlePass());
 	{
-		_main.pass->loadSharedVariablesFromCamera(renderCamera);
-		_main.pass->loadSharedVariablesFromLight(_lighting.directional);
-		_main.pass->setSharedTexture(MaterialTexture::Shadow, _shadowmapProcessor->directionalShadowmap(), _shadowmapProcessor->directionalShadowmapSampler());
-
-		_main.pass->begin(RenderPassBeginInfo::singlePass());
-		_main.pass->nextSubpass();
-		for (Mesh::Pointer& mesh : _allMeshes)
+		_main.zPrepass->loadSharedVariablesFromCamera(_frameCamera);
+		_main.zPrepass->nextSubpass();
+		for (Mesh::Pointer& mesh : _visibleMeshes)
 		{
-			if (renderCamera->frustum().containsBoundingBox(mesh->tranformedBoundingBox()))
-			{
-				const mat4& transform = mesh->transform();
-				const mat4& rotationTransform = mesh->rotationTransform();
-				_main.pass->setSharedVariable(ObjectVariable::WorldTransform, transform);
-				_main.pass->setSharedVariable(ObjectVariable::WorldRotationTransform, rotationTransform);
-				for (const RenderBatch::Pointer& rb : mesh->renderBatches())
-					_main.pass->pushRenderBatch(rb);
-			}
+			_main.zPrepass->setSharedVariable(ObjectVariable::WorldTransform, mesh->transform());
+			for (const RenderBatch::Pointer& rb : mesh->renderBatches())
+				_main.zPrepass->pushRenderBatch(rb);
 		}
-		_main.pass->setSharedVariable(ObjectVariable::WorldTransform, identityMatrix);
-		_main.pass->pushRenderBatch(_lighting.environmentBatch);
-
-		/*
-		_debugDrawer->drawCameraFrustum(_lighting.directional, vec4(10000.0f, 20000.0f, 0.0f, 1.0f));
-		_debugDrawer->drawBoundingBox(_shadowmapProcessor->sceneBoundingBox(), identityMatrix, vec4(10000.0f, 10000.0f, 10000.0f, 1.0f));
-		_debugDrawer->submitBatches(_main.pass);
-		*/
-
-		_main.pass->endSubpass();
-		_main.pass->end();
-
-		_renderer->submitRenderPass(_main.pass);
+		_main.zPrepass->endSubpass();
+		_main.zPrepass->end();
 	}
+	_renderer->submitRenderPass(_main.zPrepass);
+
+	_main.forward->begin(RenderPassBeginInfo::singlePass());
+	{
+		_main.forward->loadSharedVariablesFromCamera(_frameCamera);
+		_main.forward->loadSharedVariablesFromLight(_lighting.directional);
+		_main.forward->setSharedTexture(MaterialTexture::Shadow, _shadowmapProcessor->directionalShadowmap(), _shadowmapProcessor->directionalShadowmapSampler());
+		_main.forward->nextSubpass();
+		for (Mesh::Pointer& mesh : _visibleMeshes)
+		{
+			_main.forward->setSharedVariable(ObjectVariable::WorldTransform, mesh->transform());
+			_main.forward->setSharedVariable(ObjectVariable::WorldRotationTransform, mesh->rotationTransform());
+			for (const RenderBatch::Pointer& rb : mesh->renderBatches())
+				_main.forward->pushRenderBatch(rb);
+		}
+		_main.forward->setSharedVariable(ObjectVariable::WorldTransform, identityMatrix);
+		_main.forward->pushRenderBatch(_lighting.environmentBatch);
+		_main.forward->endSubpass();
+		_main.forward->end();
+	}
+	_renderer->submitRenderPass(_main.forward);
 	++_frameIndex;
 }
 
-void Drawer::validate(RenderInterface::Pointer& renderer)
-{
+void Drawer::validate(RenderInterface::Pointer& renderer) {
 	ET_ASSERT(_main.color.valid());
 
-	if (_main.pass.invalid() || (_main.pass->info().color[0].texture != _main.color))
+	if (_main.forward.invalid() || (_main.forward->info().color[0].texture != _main.color))
 	{
 		TextureDescription::Pointer desc(PointerInit::CreateInplace);
 		desc->size = _main.color->size(0);
@@ -135,15 +144,22 @@ void Drawer::validate(RenderInterface::Pointer& renderer)
 		passInfo.color[1].useDefaultRenderTarget = false;
 
 		passInfo.depth.texture = _main.depth;
-		passInfo.depth.loadOperation = FramebufferOperation::Clear;
+		passInfo.depth.loadOperation = FramebufferOperation::Load;
 		passInfo.depth.storeOperation = FramebufferOperation::DontCare;
 		passInfo.depth.enabled = true;
 		passInfo.depth.useDefaultRenderTarget = false;
 
-		_main.pass = renderer->allocateRenderPass(passInfo);
-		_main.pass->setSharedTexture(MaterialTexture::Environment, _cubemapProcessor->convolutedCubemap(), renderer->defaultSampler());
-		_main.pass->setSharedTexture(MaterialTexture::BRDFLookup, _cubemapProcessor->brdfLookupTexture(), renderer->clampSampler());
-		_main.pass->setSharedTexture(MaterialTexture::Noise, _main.noise, renderer->nearestSampler());
+		_main.forward = renderer->allocateRenderPass(passInfo);
+		_main.forward->setSharedTexture(MaterialTexture::Environment, _cubemapProcessor->convolutedCubemap(), renderer->defaultSampler());
+		_main.forward->setSharedTexture(MaterialTexture::BRDFLookup, _cubemapProcessor->brdfLookupTexture(), renderer->clampSampler());
+		_main.forward->setSharedTexture(MaterialTexture::Noise, _main.noise, renderer->nearestSampler());
+
+		passInfo.name = "z-prepass";
+		passInfo.color[0].enabled = false;
+		passInfo.color[1].enabled = false;
+		passInfo.depth.loadOperation = FramebufferOperation::Clear;
+		passInfo.depth.storeOperation = FramebufferOperation::Store;
+		_main.zPrepass = renderer->allocateRenderPass(passInfo);
 	}
 
 	if (_lighting.environmentMaterial.invalid())
@@ -155,13 +171,11 @@ void Drawer::validate(RenderInterface::Pointer& renderer)
 	_cache.flush();
 }
 
-void Drawer::setRenderTarget(const Texture::Pointer& tex)
-{
+void Drawer::setRenderTarget(const Texture::Pointer& tex) {
 	_main.color = tex;
 }
 
-void Drawer::setScene(const Scene::Pointer& inScene)
-{
+void Drawer::setScene(const Scene::Pointer& inScene) {
 	_scene = inScene;
 	BaseElement::List elements = _scene->childrenOfType(ElementType::DontCare);
 
@@ -221,8 +235,7 @@ void Drawer::setScene(const Scene::Pointer& inScene)
 	_shadowmapProcessor->setScene(_scene, _lighting.directional);
 }
 
-void Drawer::setEnvironmentMap(const std::string& filename)
-{
+void Drawer::setEnvironmentMap(const std::string& filename) {
 	if (filename == "built-in:atmosphere")
 	{
 		_cubemapProcessor->processAtmosphere();
@@ -234,13 +247,11 @@ void Drawer::setEnvironmentMap(const std::string& filename)
 	}
 }
 
-void Drawer::updateBaseProjectionMatrix(const mat4& m)
-{
+void Drawer::updateBaseProjectionMatrix(const mat4& m) {
 	_baseProjectionMatrix = m;
 }
 
-void Drawer::updateLight()
-{
+void Drawer::updateLight() {
 	options.rebuldEnvironmentProbe = true;
 	_shadowmapProcessor->updateLight(_lighting.directional);
 }
