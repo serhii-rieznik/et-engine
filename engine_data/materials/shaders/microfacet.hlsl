@@ -45,6 +45,9 @@ SamplerState opacitySampler : DECL_SAMPLER(Opacity);
 Texture2D<float> noiseTexture : DECL_TEXTURE(Noise);
 SamplerState noiseSampler : DECL_SAMPLER(Noise);
 
+Texture2D<float> aoTexture : DECL_TEXTURE(Ao);
+SamplerState aoSampler : DECL_SAMPLER(Ao);
+
 struct VSOutput 
 {
     float4 position : SV_Position;
@@ -127,7 +130,8 @@ FSOutput fragmentMain(VSOutput fsIn)
 	float2 noiseUV = (viewport.zw / noiseDimensions.xy) * (currentPosition.xy * 0.5 + 0.5);
 	float sampledNoise = noiseTexture.Sample(noiseSampler, noiseUV);
         
-    float shadow = sampleShadow(fsIn.lightCoord.xyz / fsIn.lightCoord.w, sampledNoise, shadowmapSize.xy);
+    float ssShadow = aoTexture.Sample(aoSampler, currentPosition * 0.5 + 0.5);
+    float shadow = ssShadow + 0.0 * sampleShadow(fsIn.lightCoord.xyz / fsIn.lightCoord.w, sampledNoise, shadowmapSize.xy);
     Surface surface = buildSurface(baseColorSample.xyz, normalSample.w, baseColorSample.w);
 
     float3 tsNormal = normalize(normalSample.xyz - 0.5);

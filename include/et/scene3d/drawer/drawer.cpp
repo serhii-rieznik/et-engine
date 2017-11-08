@@ -139,7 +139,9 @@ void Drawer::validate(RenderInterface::Pointer& renderer) {
 		_main.depth = renderer->createTexture(desc);
 
 		desc->format = TextureFormat::RGBA8;
+		desc->size /= 2;
 		_main.shadows = renderer->createTexture(desc);
+		desc->size *= 2;
 
 		{
 			Material::Pointer material = renderer->sharedMaterialLibrary().loadMaterial(application().resolveFileName("engine_data/materials/screen-space-shadows.json"));
@@ -175,6 +177,7 @@ void Drawer::validate(RenderInterface::Pointer& renderer) {
 		_main.forward->setSharedTexture(MaterialTexture::Environment, _cubemapProcessor->convolutedCubemap(), renderer->defaultSampler());
 		_main.forward->setSharedTexture(MaterialTexture::BRDFLookup, _cubemapProcessor->brdfLookupTexture(), renderer->clampSampler());
 		_main.forward->setSharedTexture(MaterialTexture::Noise, _main.noise, renderer->nearestSampler());
+		_main.forward->setSharedTexture(MaterialTexture::AmbientOcclusion, _main.shadows, renderer->nearestSampler());
 
 		passInfo.name = "z-prepass";
 		passInfo.color[0].targetClass = RenderTarget::Class::Disabled;

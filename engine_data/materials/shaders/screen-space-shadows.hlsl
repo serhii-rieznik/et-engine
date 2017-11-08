@@ -26,11 +26,11 @@ struct VSOutput
 
 #include "vertexprogram-2d-triangle.h"
 
-float3 viewSpace(in float3 coord)
+float3 viewSpace(in float2 uv, in float z)
 {
 	float2 uvScale = float2(-inverseProjectionTransform[0][0], -inverseProjectionTransform[1][1]);
-	float linearZ = cameraClipPlanes.x * cameraClipPlanes.y / (coord.z * (cameraClipPlanes.y - cameraClipPlanes.x) - cameraClipPlanes.y);
-	return float3(coord.xy * uvScale, 1.0) * linearZ;
+	float linearZ = cameraClipPlanes.x * cameraClipPlanes.y / (z * (cameraClipPlanes.y - cameraClipPlanes.x) - cameraClipPlanes.y);
+	return float3(uv * uvScale, 1.0) * linearZ;
 }
 
 float3 projectionSpace(in float3 coord)
@@ -54,47 +54,40 @@ float noise(float p)
 
 float4 sampleShadowsInWorldSpace(in float2 uv)
 {
-	float z0 = baseColorTexture.Sample(baseColorSampler, uv);
-	
-	if (z0 == 1.0)
-		return 1.0;
+	float w = 0.0;
+	float h = 0.0;
+	float levels = 0.0;
+	baseColorTexture.GetDimensions(0, w, h, levels);
 
 	float4 projectedLight = mul(lightDirection, viewTransform);
 	projectedLight.xyz = normalize(projectedLight.xyz);
 
-	float3 screenSpace = float3(uv * 2.0 - 1.0, z0);
-	float3 viewSpaceCoord = viewSpace(screenSpace);
+	float z0 = baseColorTexture.Sample(baseColorSampler, uv);
+	float3 viewSpaceCoord = viewSpace(uv * 2.0 - 1.0, z0);
 	float3 projectionSpaceCoord = projectionSpace(viewSpaceCoord);
 
 	float3 p1 = projectionSpace(viewSpaceCoord + projectedLight);
-	float3 projectionSpaceLight = p1 - projectionSpaceCoord;
 	
-	float3 lightStep = projectionSpaceLight;
-
-	float rnd = noise(continuousTime + (uv.y + lightStep.x) * 43758.5453123 + (uv.x + lightStep.y) * 100000.0);
+	float3 lightStep = p1 - projectionSpaceCoord;
+	float stepSize = 0.25 * length(lightStep.xy);
+	float pixelStepSize = length(lightStep.xy / float2(stepSize * w, stepSize * h));
+	lightStep *= pixelStepSize / stepSize;
 
 	float lightContribution = 1.0;
-	const uint maxSamples = 200;
+	const uint maxSamples = 50;
 	for (uint i = 0; i < maxSamples; ++i)
 	{
-		float distanceScale = float(i) / maxSamples;
-		rnd = noise(rnd * 43758.5453123);
-		projectionSpaceCoord += lightStep * (rnd * distanceScale);
+		projectionSpaceCoord += lightStep;
 
 		float sampledZ = baseColorTexture.Sample(baseColorSampler, projectionSpaceCoord.xy * 0.5 + 0.5);
-		if (sampledZ < projectionSpaceCoord.z)
-		{
-			float3 projectedDir = normalize(
-				viewSpace(float3(projectionSpaceCoord.xy, sampledZ)) - viewSpaceCoord
-			);
+		float zTest = step(projectionSpaceCoord.z, sampledZ);
 
-			if (dot(projectedDir.xyz, projectedLight.xyz) > 0.999)
-			{
-				float uvScale = all(clamp(projectionSpaceCoord.xy, -1.0, 1.0) == projectionSpaceCoord.xy);
-				lightContribution = 1.0 - uvScale;
-				break;
-			}
-		}
+		float3 projectedDir = normalize(viewSpace(projectionSpaceCoord.xy, sampledZ) - viewSpaceCoord);
+		float ds = 1.0 - float(i) / float(maxSamples);
+		float threshold = 0.9999 - 0.009 * ds * ds;
+		float directionTest = step(threshold, dot(projectedDir, projectedLight));
+
+		lightContribution *= 1.0 - zTest * directionTest;
 	}
 
 	return lightContribution;
