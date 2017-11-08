@@ -90,7 +90,7 @@ VulkanRenderPass::VulkanRenderPass(VulkanRenderer* renderer, VulkanState& vulkan
 
 	uint32_t colorAttachmentIndex = 0;
 	VkAttachmentReference depthAttachmentReference = { };
-	if (passInfo.depth.enabled)
+	if (passInfo.depth.targetClass != RenderTarget::Class::Disabled)
 	{
 		attachments.emplace_back();
 		VkAttachmentDescription& attachment = attachments.back();
@@ -102,7 +102,7 @@ VulkanRenderPass::VulkanRenderPass(VulkanRenderer* renderer, VulkanState& vulkan
 		attachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 		attachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
-		if (passInfo.depth.useDefaultRenderTarget)
+		if (passInfo.depth.targetClass == RenderTarget::Class::DefaultBuffer)
 		{
 			attachment.format = vulkan.swapchain.depthFormat;
 		}
@@ -122,7 +122,7 @@ VulkanRenderPass::VulkanRenderPass(VulkanRenderer* renderer, VulkanState& vulkan
 
 	for (const RenderTarget& target : passInfo.color)
 	{
-		if (target.enabled)
+		if (target.targetClass != RenderTarget::Class::Disabled)
 		{
 			attachments.emplace_back();
 			VkAttachmentDescription& attachment = attachments.back();
@@ -133,7 +133,7 @@ VulkanRenderPass::VulkanRenderPass(VulkanRenderer* renderer, VulkanState& vulkan
 			attachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
 			attachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 			attachment.finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-			if (target.useDefaultRenderTarget)
+			if (target.targetClass == RenderTarget::Class::DefaultBuffer)
 			{
 				ET_ASSERT(target.storeOperation == FramebufferOperation::Store);
 				attachment.format = vulkan.swapchain.surfaceFormat.format;
@@ -162,7 +162,7 @@ VulkanRenderPass::VulkanRenderPass(VulkanRenderer* renderer, VulkanState& vulkan
 	subpassInfo.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
 	subpassInfo.colorAttachmentCount = static_cast<uint32_t>(colorAttachmentReferences.size());
 	subpassInfo.pColorAttachments = colorAttachmentReferences.empty() ? nullptr : colorAttachmentReferences.data();
-	subpassInfo.pDepthStencilAttachment = passInfo.depth.enabled ? &depthAttachmentReference : nullptr;
+	subpassInfo.pDepthStencilAttachment = (passInfo.depth.targetClass == RenderTarget::Class::Disabled) ? nullptr : &depthAttachmentReference;
 
 	VkRenderPassCreateInfo createInfo = { VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO };
 	createInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
@@ -205,8 +205,8 @@ void VulkanRenderPass::begin(const RenderPassBeginInfo& beginInfo)
 
 	Texture::Pointer renderTarget = info().color[0].texture;
 	Texture::Pointer depthTarget = info().depth.texture;
-	bool useCustomColor = info().color[0].enabled && !info().color[0].useDefaultRenderTarget;
-	bool useCustomDepth = info().depth.enabled && !info().depth.useDefaultRenderTarget;
+	bool useCustomColor = info().color[0].targetClass == RenderTarget::Class::Texture;
+	bool useCustomDepth = info().depth.targetClass == RenderTarget::Class::Texture;
 	uint32_t defaultWidth = _private->vulkan.swapchain.extent.width;
 	uint32_t defaultHeight = _private->vulkan.swapchain.extent.height;
 	uint32_t framebufferIndex = _private->vulkan.swapchain.swapchainImageIndex;
@@ -246,11 +246,11 @@ void VulkanRenderPass::begin(const RenderPassBeginInfo& beginInfo)
 			Vector<VkImageView> attachments;
 			attachments.reserve(MaxRenderTargets + 1);
 
-			if (info().depth.enabled && info().depth.useDefaultRenderTarget)
+			if (info().depth.targetClass == RenderTarget::Class::DefaultBuffer)
 			{
 				attachments.emplace_back(_private->vulkan.swapchain.depthBuffer.imageView);
 			}
-			else if (info().depth.enabled)
+			else if (info().depth.targetClass == RenderTarget::Class::Texture)
 			{
 				ET_ASSERT(info().depth.texture.valid());
 				VulkanTexture::Pointer texture = info().depth.texture;
@@ -259,11 +259,11 @@ void VulkanRenderPass::begin(const RenderPassBeginInfo& beginInfo)
 
 			for (const RenderTarget& rt : info().color)
 			{
-				if (rt.enabled && rt.useDefaultRenderTarget)
+				if (rt.targetClass == RenderTarget::Class::DefaultBuffer)
 				{
 					attachments.emplace_back(_private->vulkan.swapchain.currentFrame().colorView);
 				}
-				else if (rt.enabled)
+				else if (rt.targetClass == RenderTarget::Class::Texture)
 				{
 					ET_ASSERT(rt.texture.valid());
 					VulkanTexture::Pointer texture = rt.texture;

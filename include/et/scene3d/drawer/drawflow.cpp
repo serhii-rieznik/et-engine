@@ -14,11 +14,11 @@ const TextureFormat HDRTextureFormat = TextureFormat::RGBA16F;
 const uint32_t luminanceTargetSize = 1024;
 const uint32_t computeGroupSize = 16;
 
-HDRFlow::HDRFlow(const RenderInterface::Pointer& ren) :
-	_renderer(ren) {
+HDRFlow::HDRFlow(const RenderInterface::Pointer& ren)
+	: _renderer(ren) {
 	RenderPass::ConstructionInfo desc;
 	desc.name = RenderPass::kPassNameDefault;
-	desc.color[0].enabled = true;
+	desc.color[0].targetClass = RenderTarget::Class::DefaultBuffer;
 	desc.color[0].loadOperation = FramebufferOperation::Clear;
 	desc.color[0].storeOperation = FramebufferOperation::Store;
 	_passes.final = _renderer->allocateRenderPass(desc);
@@ -222,8 +222,6 @@ void HDRFlow::antialias() {
 }
 
 void HDRFlow::debugDraw() {
-	if (!options.debugDraw)
-		return;
 
 	uint32_t gridSize = 4;
 	vec2 vp = vector2ToFloat(_renderer->rc()->size());
@@ -241,14 +239,16 @@ void HDRFlow::debugDraw() {
 		}
 	};
 
-	RenderBatch::Pointer batch = renderhelper::createQuadBatch(_luminanceTarget, _materials.debug, _renderer->clampSampler(), renderhelper::QuadType::Default);
+	RenderBatch::Pointer batch;
+
+	if (options.drawLuminance)
 	{
+		batch = renderhelper::createQuadBatch(_luminanceTarget, _materials.debug, _renderer->clampSampler(), renderhelper::QuadType::Default);
 		batch->material()->setFloat(MaterialVariable::ExtraParameters, 0.0f);
 		_passes.final->setSharedVariable(ObjectVariable::WorldTransform, fullscreenBatchTransform(vp, pos, vec2(dx, dy)));
 		_passes.final->pushRenderBatch(batch);
 		advancePosition();
-	}
-	{
+
 		batch = renderhelper::createQuadBatch(_downsampledLuminance, _materials.debug, _renderer->clampSampler(), renderhelper::QuadType::Default);
 		batch->material()->setFloat(MaterialVariable::ExtraParameters, 0.0f);
 		_passes.final->setSharedVariable(ObjectVariable::WorldTransform, fullscreenBatchTransform(vp, pos, vec2(dx, dy)));
@@ -263,11 +263,19 @@ void HDRFlow::debugDraw() {
 	}
 
 	const Texture::Pointer& vel = drawer()->supportTexture(Drawer::SupportTexture::Velocity);
-	if (vel.valid())
+	if (options.drawVelocity && vel.valid())
 	{
-		Material::Pointer m = _renderer->sharedMaterialLibrary().loadMaterial(application().resolveFileName("engine_data/materials/textured2d-transformed.json"));
+		Material::Pointer m = _renderer->sharedMaterialLibrary().loadMaterial(application().resolveFileName("engine_data/materials/textured2d.json"));
 		batch = renderhelper::createQuadBatch(vel, m, renderhelper::QuadType::Default);
-		_passes.final->setSharedVariable(ObjectVariable::WorldTransform, fullscreenBatchTransform(vp, pos, vec2(dx, dy)));
+		_passes.final->pushRenderBatch(batch);
+		advancePosition();
+	}
+
+	const Texture::Pointer& sss = drawer()->supportTexture(Drawer::SupportTexture::ScreenspaceShadows);
+	if (options.drawShadows && sss.valid())
+	{
+		Material::Pointer m = _renderer->sharedMaterialLibrary().loadMaterial(application().resolveFileName("engine_data/materials/textured2d.json"));
+		batch = renderhelper::createQuadBatch(sss, m, renderhelper::QuadType::Default);
 		_passes.final->pushRenderBatch(batch);
 		advancePosition();
 	}

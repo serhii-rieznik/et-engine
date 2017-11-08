@@ -19,12 +19,17 @@ namespace et
 
 struct RenderTarget
 {
+	enum class Class : uint32_t
+	{
+		Disabled,
+		DefaultBuffer,
+		Texture
+	};
 	Texture::Pointer texture;
 	FramebufferOperation loadOperation = FramebufferOperation::DontCare;
 	FramebufferOperation storeOperation = FramebufferOperation::DontCare;
+	Class targetClass = Class::Disabled;
 	vec4 clearValue = vec4(1.0f);
-	bool useDefaultRenderTarget = true;
-	bool enabled = false;
 };
 
 struct RenderSubpass
@@ -79,7 +84,7 @@ public:
 		bool enableDepthBias = false;
 
 		ConstructionInfo() = default;
-		ConstructionInfo(const char* nm) : name(nm) { }
+		ConstructionInfo(const char* nm) : name(nm) {}
 	};
 
 	static const std::string kPassNameDefault;

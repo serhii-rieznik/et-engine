@@ -90,6 +90,18 @@ void Drawer::draw() {
 	}
 	_renderer->submitRenderPass(_main.zPrepass);
 
+	_main.screenSpaceShadows->begin(RenderPassBeginInfo::singlePass());
+	{
+		_main.screenSpaceShadows->setSharedVariable(ObjectVariable::CameraJitter, _jitter);
+		_main.screenSpaceShadows->loadSharedVariablesFromCamera(_frameCamera);
+		_main.screenSpaceShadows->loadSharedVariablesFromLight(_lighting.directional);
+		_main.screenSpaceShadows->nextSubpass();
+		_main.screenSpaceShadows->pushRenderBatch(_main.screenSpaceShadowsBatch);
+		_main.screenSpaceShadows->endSubpass();
+		_main.screenSpaceShadows->end();
+	}
+	_renderer->submitRenderPass(_main.screenSpaceShadows);
+
 	_main.forward->begin(RenderPassBeginInfo::singlePass());
 	{
 		_main.forward->loadSharedVariablesFromCamera(_frameCamera);
@@ -126,28 +138,38 @@ void Drawer::validate(RenderInterface::Pointer& renderer) {
 		desc->format = TextureFormat::Depth32F;
 		_main.depth = renderer->createTexture(desc);
 
+		desc->format = TextureFormat::RGBA8;
+		_main.shadows = renderer->createTexture(desc);
+
+		{
+			Material::Pointer material = renderer->sharedMaterialLibrary().loadMaterial(application().resolveFileName("engine_data/materials/screen-space-shadows.json"));
+			_main.screenSpaceShadowsBatch = renderhelper::createQuadBatch(_main.depth, material, renderer->nearestSampler());
+
+			RenderPass::ConstructionInfo screenSpaceShadowsInfo("screen-space-shadows");
+			screenSpaceShadowsInfo.color[0].texture = _main.shadows;
+			screenSpaceShadowsInfo.color[0].targetClass = RenderTarget::Class::Texture;
+			_main.screenSpaceShadows = renderer->allocateRenderPass(screenSpaceShadowsInfo);
+		}
+
 		RenderPass::ConstructionInfo passInfo;
 		passInfo.name = "forward";
 
 		passInfo.color[0].texture = _main.color;
 		passInfo.color[0].loadOperation = FramebufferOperation::Clear;
 		passInfo.color[0].storeOperation = FramebufferOperation::Store;
-		passInfo.color[0].enabled = true;
+		passInfo.color[0].targetClass = RenderTarget::Class::Texture;
 		passInfo.color[0].clearValue = vec4(0.0f, 1.0f);
-		passInfo.color[0].useDefaultRenderTarget = false;
 
 		passInfo.color[1].texture = _main.velocity;
 		passInfo.color[1].loadOperation = FramebufferOperation::Clear;
 		passInfo.color[1].storeOperation = FramebufferOperation::Store;
-		passInfo.color[1].enabled = true;
+		passInfo.color[1].targetClass = RenderTarget::Class::Texture;
 		passInfo.color[1].clearValue = vec4(0.0f, 1.0f);
-		passInfo.color[1].useDefaultRenderTarget = false;
 
 		passInfo.depth.texture = _main.depth;
 		passInfo.depth.loadOperation = FramebufferOperation::Load;
 		passInfo.depth.storeOperation = FramebufferOperation::DontCare;
-		passInfo.depth.enabled = true;
-		passInfo.depth.useDefaultRenderTarget = false;
+		passInfo.depth.targetClass = RenderTarget::Class::Texture;
 
 		_main.forward = renderer->allocateRenderPass(passInfo);
 		_main.forward->setSharedTexture(MaterialTexture::Environment, _cubemapProcessor->convolutedCubemap(), renderer->defaultSampler());
@@ -155,8 +177,8 @@ void Drawer::validate(RenderInterface::Pointer& renderer) {
 		_main.forward->setSharedTexture(MaterialTexture::Noise, _main.noise, renderer->nearestSampler());
 
 		passInfo.name = "z-prepass";
-		passInfo.color[0].enabled = false;
-		passInfo.color[1].enabled = false;
+		passInfo.color[0].targetClass = RenderTarget::Class::Disabled;
+		passInfo.color[1].targetClass = RenderTarget::Class::Disabled;
 		passInfo.depth.loadOperation = FramebufferOperation::Clear;
 		passInfo.depth.storeOperation = FramebufferOperation::Store;
 		_main.zPrepass = renderer->allocateRenderPass(passInfo);

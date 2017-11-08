@@ -10,33 +10,27 @@
 #include <stack>
 #include <et-ext/rt/raytraceobjects.h>
 
-namespace et
-{
-namespace rt
-{
-class ET_ALIGNED(16) KDTree
-{
+namespace et {
+namespace rt {
+
+class ET_ALIGNED(16) KDTree {
 public:
-	struct ET_ALIGNED(16) Node
-	{
+	struct ET_ALIGNED(16) Node {
 		float distance = 0.0f;
 		uint32_t children[2]{ InvalidIndex, InvalidIndex };
 		uint32_t axis = InvalidIndex;
 		uint32_t startIndex = 0;
 		uint32_t endIndex = 0;
 
-		inline uint32_t numIndexes() const
-		{
+		uint32_t numIndexes() const {
 			return endIndex - startIndex;
 		}
 
-		inline bool empty() const
-		{
+		bool empty() const {
 			return startIndex == endIndex;
 		}
 
-		inline bool nonEmpty() const
-		{
+		bool nonEmpty() const {
 			return startIndex != endIndex;
 		}
 	};
@@ -53,8 +47,7 @@ public:
 		uint32_t minTrianglesPerNode = std::numeric_limits<uint32_t>::max();
 	};
 
-	struct ET_ALIGNED(16) TraverseResult
-	{
+	struct ET_ALIGNED(16) TraverseResult {
 		float4 intersectionPoint;
 		float4 intersectionPointBarycentric;
 		uint32_t triangleIndex = InvalidIndex;
@@ -67,12 +60,10 @@ public:
 	Stats nodesStatistics() const;
 	void cleanUp();
 
-	const Node& nodeAt(size_t i) const
-	{
+	const Node& nodeAt(size_t i) const {
 		return _nodes[i];
 	}
-	const BoundingBox& bboxAt(size_t i) const
-	{
+	const BoundingBox& bboxAt(size_t i) const {
 		return _boundingBoxes[i];
 	}
 
@@ -104,8 +95,7 @@ private:
 };
 
 template <size_t MaxElements, class T>
-struct ET_ALIGNED(16) FastStack
-{
+struct ET_ALIGNED(16) FastStack {
 public:
 	enum : size_t
 	{
@@ -113,51 +103,42 @@ public:
 	};
 
 public:
-	FastStack()
-	{
+	FastStack() {
 		_elements = reinterpret_cast<T*>(_storage);
 	}
 
 	template <typename ... Args>
-	void emplace(Args&&... a)
-	{
+	void emplace(Args&&... a) {
 		ET_ASSERT(_size < MaxElements);
 		_elements[_size++] = T(std::forward<Args>(a)...);
 	}
 
-	void push(const T& value)
-	{
+	void push(const T& value) {
 		ET_ASSERT(_size < MaxElements);
 		_elements[_size++] = value;
 	}
 
-	bool empty() const
-	{
+	bool empty() const {
 		return _size == 0;
 	}
 
-	bool hasSomething() const
-	{
+	bool hasSomething() const {
 		return _size > 0;
 	}
 
-	const T& top() const
-	{
+	const T& top() const {
 		ET_ASSERT(_size < MaxElementsPlusOne); return _elements[_size - 1];
 	}
 
-	void pop()
-	{
+	void pop() {
 		ET_ASSERT(_size > 0); --_size;
 	}
 
-	size_t size() const
-	{
+	size_t size() const {
 		return _size;
 	}
 
-	T& emplace_back()
-	{
+	T& emplace_back() {
 		ET_ASSERT(_size < MaxElements);
 		return _elements[_size++];
 	}
@@ -167,5 +148,6 @@ private:
 	T* _elements = nullptr;
 	size_t _size = 0;
 };
+
 }
 }

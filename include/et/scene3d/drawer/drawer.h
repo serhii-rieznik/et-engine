@@ -25,6 +25,7 @@ public:
 	enum class SupportTexture : uint32_t
 	{
 		Velocity,
+		ScreenspaceShadows
 	};
 
 public:
@@ -65,10 +66,13 @@ private:
 	{
 		RenderPass::Pointer zPrepass;
 		RenderPass::Pointer forward;
+		RenderPass::Pointer screenSpaceShadows;
+		RenderBatch::Pointer screenSpaceShadowsBatch;
 		Texture::Pointer color;
 		Texture::Pointer depth;
 		Texture::Pointer velocity;
 		Texture::Pointer noise;
+		Texture::Pointer shadows;
 	} _main;
 
 	struct Lighting
@@ -94,6 +98,9 @@ inline const Texture::Pointer& Drawer::supportTexture(SupportTexture tex)
 	{
 	case Drawer::SupportTexture::Velocity:
 		return _main.velocity;
+	
+	case Drawer::SupportTexture::ScreenspaceShadows:
+		return _main.shadows;
 
 	default:
 	{

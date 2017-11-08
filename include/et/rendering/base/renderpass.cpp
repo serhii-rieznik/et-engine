@@ -19,10 +19,9 @@ RenderPass::ConstructionInfo RenderPass::renderTargetPassInfo(const std::string&
 {
 	ConstructionInfo result;
 	result.name = name;
-	result.color[0].enabled = true;
-	result.color[0].useDefaultRenderTarget = false;
 	result.color[0].texture = texture;
 	result.color[0].loadOperation = FramebufferOperation::Clear;
+	result.color[0].targetClass = RenderTarget::Class::Texture;
 	result.color[0].storeOperation = FramebufferOperation::Store;
 	return result;
 }

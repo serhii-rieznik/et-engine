@@ -61,7 +61,7 @@ void VulkanPipelineState::build(const RenderPass::Pointer& inPass)
 
 	for (const RenderTarget& rt : pass->info().color)
 	{
-		if (!rt.enabled) 
+		if (rt.targetClass == RenderTarget::Class::Disabled)
 			break;
 
 		attachmentInfo.emplace_back();

@@ -22,7 +22,9 @@ public:
 
 	struct Options
 	{
-		bool debugDraw = false;
+		bool drawLuminance = false;
+		bool drawVelocity = false;
+		bool drawShadows = false;
 	} options;
 
 public:

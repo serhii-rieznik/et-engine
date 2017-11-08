@@ -7,14 +7,11 @@
 
 #include <et/scene3d/drawer/cubemaps.h>
 
-namespace et
-{
-namespace s3d
-{
+namespace et {
+namespace s3d {
 
 CubemapProcessor::CubemapProcessor() :
-	FlagsHolder()
-{
+	FlagsHolder() {
 	for (uint32_t level = 0; level < CubemapLevels; ++level)
 	{
 		for (uint32_t layer = 0; layer < 6; ++layer)
@@ -28,22 +25,19 @@ CubemapProcessor::CubemapProcessor() :
 		m = m.inverted();
 }
 
-void CubemapProcessor::processAtmosphere()
-{
+void CubemapProcessor::processAtmosphere() {
 	removeFlag(CubemapProcessed);
 	setFlag(CubemapAtmosphere);
 }
 
-void CubemapProcessor::processEquiretangularTexture(const Texture::Pointer& tex)
-{
+void CubemapProcessor::processEquiretangularTexture(const Texture::Pointer& tex) {
 	_sourceTextureName = tex->origin();
 	_tex[CubemapType::Source] = tex;
 	removeFlag(CubemapProcessed);
 	removeFlag(CubemapAtmosphere);
 }
 
-void CubemapProcessor::process(RenderInterface::Pointer& renderer, DrawerOptions& options, const Light::Pointer& light)
-{
+void CubemapProcessor::process(RenderInterface::Pointer& renderer, DrawerOptions& options, const Light::Pointer& light) {
 	validate(renderer);
 
 	if (!hasFlag(BRDFLookupProcessed) || options.rebuildLookupTexture)
@@ -63,13 +57,13 @@ void CubemapProcessor::process(RenderInterface::Pointer& renderer, DrawerOptions
 	}
 
 	if (!hasFlag(CubemapProcessed) || options.rebuldEnvironmentProbe)
-	{	
+	{
 		_downsamplePass->begin(_wholeCubemapBeginInfo);
 		_downsamplePass->loadSharedVariablesFromLight(light);
-		
-		RenderBatch::Pointer copyBatch = renderhelper::createQuadBatch(_tex[CubemapType::Source], 
+
+		RenderBatch::Pointer copyBatch = renderhelper::createQuadBatch(_tex[CubemapType::Source],
 			hasFlag(CubemapAtmosphere) ? _atmosphereMaterial : _wrapMaterial, _eqMapSampler, ResourceRange(0, 1, 0, 1));
-		
+
 		_downsamplePass->pushImageBarrier(_tex[CubemapType::Downsampled], ResourceBarrier(TextureState::ColorRenderTarget, 0, 1, 0, 6));
 		for (uint32_t face = 0; face < 6; ++face)
 		{
@@ -90,7 +84,7 @@ void CubemapProcessor::process(RenderInterface::Pointer& renderer, DrawerOptions
 
 			_downsamplePass->pushImageBarrier(_tex[CubemapType::Downsampled],
 				ResourceBarrier(TextureState::ShaderResource, level - 1, 1, 0, 6));
-			
+
 			for (uint32_t face = 0; face < 6; ++face)
 			{
 				_downsamplePass->setSharedVariable(ObjectVariable::WorldTransform, _projections[face]);
@@ -102,7 +96,7 @@ void CubemapProcessor::process(RenderInterface::Pointer& renderer, DrawerOptions
 
 		_downsamplePass->pushImageBarrier(_tex[CubemapType::Downsampled], ResourceBarrier(TextureState::ShaderResource, 0, CubemapLevels, 0, 6));
 		_downsamplePass->end();
-		
+
 		renderer->submitRenderPass(_downsamplePass);
 
 		Material::Pointer mtl = _specularConvolveBatch->material();
@@ -121,7 +115,7 @@ void CubemapProcessor::process(RenderInterface::Pointer& renderer, DrawerOptions
 		}
 		_specularConvolvePass->end();
 		renderer->submitRenderPass(_specularConvolvePass);
-		
+
 		setFlag(CubemapProcessed);
 		options.rebuldEnvironmentProbe = false;
 	}
@@ -129,14 +123,13 @@ void CubemapProcessor::process(RenderInterface::Pointer& renderer, DrawerOptions
 	drawDebug(renderer, options);
 }
 
-void CubemapProcessor::validate(RenderInterface::Pointer& renderer)
-{
+void CubemapProcessor::validate(RenderInterface::Pointer& renderer) {
 	if (_processingMaterial.invalid())
 		_processingMaterial = renderer->sharedMaterialLibrary().loadMaterial(application().resolveFileName("engine_data/materials/cubemap.json"));
 
 	if (_wrapMaterial.invalid())
 		_wrapMaterial = renderer->sharedMaterialLibrary().loadMaterial(application().resolveFileName("engine_data/materials/cubemap-wrap.json"));
-	
+
 	if (_atmosphereMaterial.invalid())
 		_atmosphereMaterial = renderer->sharedMaterialLibrary().loadMaterial(application().resolveFileName("engine_data/materials/cubemap-atmosphere.json"));
 
@@ -176,18 +169,17 @@ void CubemapProcessor::validate(RenderInterface::Pointer& renderer)
 		_lookup = renderer->createTexture(lookupDesc);
 
 		RenderPass::ConstructionInfo passInfo;
-		passInfo.color[0].enabled = true;
 		passInfo.color[0].texture = _lookup;
 		passInfo.color[0].loadOperation = FramebufferOperation::DontCare;
 		passInfo.color[0].storeOperation = FramebufferOperation::Store;
-		passInfo.color[0].useDefaultRenderTarget = false;
+		passInfo.color[0].targetClass = RenderTarget::Class::Texture;
 		passInfo.name = "generate-split-sum-approx";
 		passInfo.priority = passPriority--;
 		_lookupPass = renderer->allocateRenderPass(passInfo);
 
 		passInfo.color[0].loadOperation = FramebufferOperation::Load;
 		passInfo.color[0].storeOperation = FramebufferOperation::Store;
-		passInfo.color[0].useDefaultRenderTarget = true;
+		passInfo.color[0].targetClass = RenderTarget::Class::DefaultBuffer;
 		passInfo.name = "default";
 		passInfo.priority = RenderPassPriority::UI - 2;
 		_lookupDebugPass = renderer->allocateRenderPass(passInfo);
@@ -199,11 +191,10 @@ void CubemapProcessor::validate(RenderInterface::Pointer& renderer)
 	if (_downsamplePass.invalid())
 	{
 		RenderPass::ConstructionInfo passInfo;
-		passInfo.color[0].enabled = true;
 		passInfo.color[0].texture = _tex[CubemapType::Downsampled];
 		passInfo.color[0].loadOperation = FramebufferOperation::DontCare;
 		passInfo.color[0].storeOperation = FramebufferOperation::Store;
-		passInfo.color[0].useDefaultRenderTarget = false;
+		passInfo.color[0].targetClass = RenderTarget::Class::Texture;
 		passInfo.name = "prepare-cubemap";
 		passInfo.priority = passPriority--;
 		_downsamplePass = renderer->allocateRenderPass(passInfo);
@@ -212,11 +203,10 @@ void CubemapProcessor::validate(RenderInterface::Pointer& renderer)
 	if (_specularConvolvePass.invalid())
 	{
 		RenderPass::ConstructionInfo passInfo;
-		passInfo.color[0].enabled = true;
 		passInfo.color[0].texture = _tex[CubemapType::Convoluted];
 		passInfo.color[0].loadOperation = FramebufferOperation::DontCare;
 		passInfo.color[0].storeOperation = FramebufferOperation::Store;
-		passInfo.color[0].useDefaultRenderTarget = false;
+		passInfo.color[0].targetClass = RenderTarget::Class::Texture;
 		passInfo.name = "cubemap-specular-convolution";
 		passInfo.priority = passPriority--;
 		_specularConvolvePass = renderer->allocateRenderPass(passInfo);
@@ -226,10 +216,9 @@ void CubemapProcessor::validate(RenderInterface::Pointer& renderer)
 	if (_cubemapDebugPass.invalid())
 	{
 		RenderPass::ConstructionInfo passInfo;
-		passInfo.color[0].enabled = true;
 		passInfo.color[0].loadOperation = FramebufferOperation::Load;
 		passInfo.color[0].storeOperation = FramebufferOperation::Store;
-		passInfo.color[0].useDefaultRenderTarget = true;
+		passInfo.color[0].targetClass = RenderTarget::Class::DefaultBuffer;
 		passInfo.name = "cubemap-visualize";
 		passInfo.priority = RenderPassPriority::UI - 1;
 		_cubemapDebugPass = renderer->allocateRenderPass(passInfo);
@@ -237,8 +226,7 @@ void CubemapProcessor::validate(RenderInterface::Pointer& renderer)
 	}
 }
 
-void CubemapProcessor::drawDebug(RenderInterface::Pointer& renderer, const DrawerOptions& options)
-{
+void CubemapProcessor::drawDebug(RenderInterface::Pointer& renderer, const DrawerOptions& options) {
 	vec2 vp = vector2ToFloat(renderer->rc()->size());
 
 	if (options.drawEnvironmentProbe)
@@ -280,18 +268,15 @@ void CubemapProcessor::drawDebug(RenderInterface::Pointer& renderer, const Drawe
 	}
 }
 
-const Texture::Pointer& CubemapProcessor::convolutedCubemap() const
-{
+const Texture::Pointer& CubemapProcessor::convolutedCubemap() const {
 	return _tex[CubemapType::Convoluted];
 }
 
-const Texture::Pointer& CubemapProcessor::brdfLookupTexture() const
-{
+const Texture::Pointer& CubemapProcessor::brdfLookupTexture() const {
 	return _lookup;
 }
 
-const std::string& CubemapProcessor::sourceTextureName() const
-{
+const std::string& CubemapProcessor::sourceTextureName() const {
 	return _sourceTextureName;
 }
 

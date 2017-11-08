@@ -201,16 +201,14 @@ void ShadowmapProcessor::validate(RenderInterface::Pointer& renderer)
 		desc.depth.texture = _directionalShadowmap;
 		desc.depth.loadOperation = FramebufferOperation::Clear;
 		desc.depth.storeOperation = FramebufferOperation::Store;
-		desc.depth.useDefaultRenderTarget = false;
-		desc.depth.enabled = true;
+		desc.depth.targetClass = RenderTarget::Class::Texture;
 		_renderables.depthBasedShadowPass = renderer->allocateRenderPass(desc);
 
 		desc.color[0].texture = _directionalShadowmapMoments;
 		desc.color[0].loadOperation = FramebufferOperation::Clear;
 		desc.color[0].storeOperation = FramebufferOperation::Store;
 		desc.color[0].clearValue = vec4(std::numeric_limits<float>::max());
-		desc.color[0].useDefaultRenderTarget = false;
-		desc.color[0].enabled = true;
+		desc.color[0].targetClass = RenderTarget::Class::Texture;
 		_renderables.momentsBasedShadowPass = renderer->allocateRenderPass(desc);
 	}
 
@@ -218,9 +216,8 @@ void ShadowmapProcessor::validate(RenderInterface::Pointer& renderer)
 		RenderPass::ConstructionInfo desc("default");
 		desc.color[0].loadOperation = FramebufferOperation::Load;
 		desc.color[0].storeOperation = FramebufferOperation::Store;
-		desc.color[0].enabled = true;
-		desc.color[0].useDefaultRenderTarget = true;
-		desc.depth.enabled = false;
+		desc.color[0].targetClass = RenderTarget::Class::DefaultBuffer;
+		desc.depth.targetClass = RenderTarget::Class::Disabled;
 		desc.priority = RenderPassPriority::UI - 1;
 		_renderables.debugPass = renderer->allocateRenderPass(desc);
 
@@ -234,13 +231,11 @@ void ShadowmapProcessor::validate(RenderInterface::Pointer& renderer)
 	}
 
 	{
-		RenderPass::ConstructionInfo desc;
+		RenderPass::ConstructionInfo desc("gaussian-blur");
 		desc.color[0].texture = _directionalShadowmapMomentsBuffer;
 		desc.color[0].loadOperation = FramebufferOperation::DontCare;
 		desc.color[0].storeOperation = FramebufferOperation::Store;
-		desc.color[0].useDefaultRenderTarget = false;
-		desc.color[0].enabled = true;
-		desc.name = "gaussian-blur";
+		desc.color[0].targetClass = RenderTarget::Class::Texture;
 		_renderables.blurPass0 = renderer->allocateRenderPass(desc);
 		
 		desc.color[0].texture = _directionalShadowmapMoments;

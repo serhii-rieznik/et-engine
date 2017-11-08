@@ -1,0 +1,19 @@
+{
+	"name" : "screen-space-shadows",
+
+	"default" : 
+	{ 
+		"input-layout" : {
+		},
+		"depth-state": {
+			"depth-function": "always",
+			"depth-test": false,
+			"depth-write": false
+		},
+		"options" : {
+		},
+		"blend-state": "disabled",
+		"cull-mode" : "disabled",
+		"code" : "shaders/screen-space-shadows"
+	}
+}
