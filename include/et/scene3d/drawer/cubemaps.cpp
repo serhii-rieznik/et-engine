@@ -12,11 +12,15 @@ namespace s3d {
 
 CubemapProcessor::CubemapProcessor() :
 	FlagsHolder() {
+	
 	for (uint32_t level = 0; level < CubemapLevels; ++level)
 	{
 		for (uint32_t layer = 0; layer < 6; ++layer)
 			_wholeCubemapBeginInfo.subpasses.emplace_back(layer, level);
 	}
+	
+	for (uint32_t layer = 0; layer < 6; ++layer)
+		_oneLevelCubemapBeginInfo.subpasses.emplace_back(layer, 0);
 
 	Camera cm;
 	const mat4& proj = cm.perspectiveProjection(HALF_PI, 1.0f, 1.0f, 2.0f);
@@ -99,15 +103,14 @@ void CubemapProcessor::process(RenderInterface::Pointer& renderer, DrawerOptions
 
 		renderer->submitRenderPass(_downsamplePass);
 
-		Material::Pointer mtl = _specularConvolveBatch->material();
-		mtl->setTexture(MaterialTexture::BaseColor, _tex[CubemapType::Downsampled]);
+		_specularConvolveBatch->material()->setTexture(MaterialTexture::BaseColor, _tex[CubemapType::Downsampled]);
 		_specularConvolvePass->begin(_wholeCubemapBeginInfo);
 		for (uint32_t i = 0, e = static_cast<uint32_t>(_wholeCubemapBeginInfo.subpasses.size()); i < e; ++i)
 		{
 			uint32_t level = i / 6;
 			uint32_t face = i % 6;
 			vec2 sz = vector2ToFloat(_tex[CubemapType::Downsampled]->size(level));
-			mtl->setVector(MaterialVariable::ExtraParameters, vec4(static_cast<float>(level), sz.x, sz.y, static_cast<float>(face)));
+			_specularConvolveBatch->material()->setVector(MaterialVariable::ExtraParameters, vec4(static_cast<float>(level), sz.x, sz.y, static_cast<float>(face)));
 			_specularConvolvePass->nextSubpass();
 			_specularConvolvePass->setSharedVariable(ObjectVariable::WorldTransform, _projections[face]);
 			_specularConvolvePass->pushRenderBatch(_specularConvolveBatch);
@@ -115,6 +118,21 @@ void CubemapProcessor::process(RenderInterface::Pointer& renderer, DrawerOptions
 		}
 		_specularConvolvePass->end();
 		renderer->submitRenderPass(_specularConvolvePass);
+
+		_diffuseConvolveBatch->material()->setTexture(MaterialTexture::BaseColor, _tex[CubemapType::Downsampled]);
+		_diffuseConvolvePass->begin(_oneLevelCubemapBeginInfo);
+		for (uint32_t i = 0, e = 6; i < e; ++i)
+		{
+			uint32_t face = i % 6;
+			vec2 sz = vector2ToFloat(_tex[CubemapType::Downsampled]->size(0.0f));
+			_diffuseConvolveBatch->material()->setVector(MaterialVariable::ExtraParameters, vec4(0.0f, sz.x, sz.y, static_cast<float>(face)));
+			_diffuseConvolvePass->nextSubpass();
+			_diffuseConvolvePass->setSharedVariable(ObjectVariable::WorldTransform, _projections[face]);
+			_diffuseConvolvePass->pushRenderBatch(_specularConvolveBatch);
+			_diffuseConvolvePass->endSubpass();
+		}
+		_diffuseConvolvePass->end();
+		renderer->submitRenderPass(_diffuseConvolvePass);
 
 		setFlag(CubemapProcessed);
 		options.rebuldEnvironmentProbe = false;
@@ -152,10 +170,19 @@ void CubemapProcessor::validate(RenderInterface::Pointer& renderer) {
 		cubemapDesc->levelCount = CubemapLevels;
 		cubemapDesc->layerCount = 6;
 		cubemapDesc->size = vec2i(1 << (CubemapLevels - 1));
+
 		if (_tex[CubemapType::Downsampled].invalid())
 			_tex[CubemapType::Downsampled] = renderer->createTexture(cubemapDesc);
-		if (_tex[CubemapType::Convoluted].invalid())
-			_tex[CubemapType::Convoluted] = renderer->createTexture(cubemapDesc);
+
+		if (_tex[CubemapType::Specular].invalid())
+			_tex[CubemapType::Specular] = renderer->createTexture(cubemapDesc);
+
+		if (_tex[CubemapType::Diffuse].invalid())
+		{
+			cubemapDesc->levelCount = 1;
+			cubemapDesc->size = vec2i(32);
+			_tex[CubemapType::Diffuse] = renderer->createTexture(cubemapDesc);
+		}
 	}
 
 	uint32_t passPriority = RenderPassPriority::Default + 0x100;
@@ -203,7 +230,7 @@ void CubemapProcessor::validate(RenderInterface::Pointer& renderer) {
 	if (_specularConvolvePass.invalid())
 	{
 		RenderPass::ConstructionInfo passInfo;
-		passInfo.color[0].texture = _tex[CubemapType::Convoluted];
+		passInfo.color[0].texture = _tex[CubemapType::Specular];
 		passInfo.color[0].loadOperation = FramebufferOperation::DontCare;
 		passInfo.color[0].storeOperation = FramebufferOperation::Store;
 		passInfo.color[0].targetClass = RenderTarget::Class::Texture;
@@ -213,6 +240,19 @@ void CubemapProcessor::validate(RenderInterface::Pointer& renderer) {
 		_specularConvolveBatch = renderhelper::createQuadBatch(_tex[CubemapType::Downsampled], _processingMaterial);
 	}
 
+	if (_diffuseConvolvePass.invalid())
+	{
+		RenderPass::ConstructionInfo passInfo;
+		passInfo.color[0].texture = _tex[CubemapType::Diffuse];
+		passInfo.color[0].loadOperation = FramebufferOperation::DontCare;
+		passInfo.color[0].storeOperation = FramebufferOperation::Store;
+		passInfo.color[0].targetClass = RenderTarget::Class::Texture;
+		passInfo.name = "cubemap-diffuse-convolution";
+		passInfo.priority = passPriority--;
+		_diffuseConvolvePass = renderer->allocateRenderPass(passInfo);
+		_diffuseConvolveBatch = renderhelper::createQuadBatch(_tex[CubemapType::Downsampled], _processingMaterial);
+	}
+
 	if (_cubemapDebugPass.invalid())
 	{
 		RenderPass::ConstructionInfo passInfo;
@@ -220,7 +260,7 @@ void CubemapProcessor::validate(RenderInterface::Pointer& renderer) {
 		passInfo.color[0].storeOperation = FramebufferOperation::Store;
 		passInfo.color[0].targetClass = RenderTarget::Class::DefaultBuffer;
 		passInfo.name = "cubemap-visualize";
-		passInfo.priority = RenderPassPriority::UI - 1;
+		passInfo.priority = RenderPassPriority::UI + 1;
 		_cubemapDebugPass = renderer->allocateRenderPass(passInfo);
 		_cubemapDebugBatch = renderhelper::createQuadBatch(renderer->checkersTexture(), _processingMaterial, renderhelper::QuadType::Default);
 	}
@@ -231,9 +271,11 @@ void CubemapProcessor::drawDebug(RenderInterface::Pointer& renderer, const Drawe
 
 	if (options.drawEnvironmentProbe)
 	{
-		float dy = vp.y / static_cast<float>(CubemapLevels);
+		float cubemapsCount = static_cast<float>(CubemapType::Count - CubemapType::Downsampled);
+		float dy = std::floor(vp.y / static_cast<float>(CubemapLevels));
 		float dx = 2.0f * dy;
-		vec2 pos = vec2(0.0f, 0.0f);
+		float xGap = 0.1f * dx;
+		vec2 pos = vec2(0.5f * (vp.x - dx * cubemapsCount - xGap * (cubemapsCount - 1.0f)), 0.0f);
 
 		_cubemapDebugPass->begin(RenderPassBeginInfo::singlePass());
 		_cubemapDebugPass->nextSubpass();
@@ -241,14 +283,14 @@ void CubemapProcessor::drawDebug(RenderInterface::Pointer& renderer, const Drawe
 		{
 			pos.y = 0.0f;
 			_cubemapDebugBatch->material()->setTexture(MaterialTexture::BaseColor, _tex[i]);
-			for (uint32_t j = 0; j < CubemapLevels; ++j)
+			for (uint32_t j = 0; j < _tex[i]->description().levelCount; ++j)
 			{
 				_cubemapDebugBatch->material()->setFloat(MaterialVariable::ExtraParameters, static_cast<float>(j));
 				_cubemapDebugPass->setSharedVariable(ObjectVariable::WorldTransform, fullscreenBatchTransform(vp, pos, vec2(dx, dy)));
 				_cubemapDebugPass->pushRenderBatch(_cubemapDebugBatch);
 				pos.y += dy;
 			}
-			pos.x += dx;
+			pos.x += dx + xGap;
 		}
 		_cubemapDebugPass->endSubpass();
 		_cubemapDebugPass->end();
@@ -268,8 +310,12 @@ void CubemapProcessor::drawDebug(RenderInterface::Pointer& renderer, const Drawe
 	}
 }
 
-const Texture::Pointer& CubemapProcessor::convolutedCubemap() const {
-	return _tex[CubemapType::Convoluted];
+const Texture::Pointer& CubemapProcessor::convolvedDiffuseCubemap() const {
+	return _tex[CubemapType::Diffuse];
+}
+
+const Texture::Pointer& CubemapProcessor::convolvedSpecularCubemap() const {
+	return _tex[CubemapType::Specular];
 }
 
 const Texture::Pointer& CubemapProcessor::brdfLookupTexture() const {

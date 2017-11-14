@@ -45,9 +45,6 @@ SamplerState opacitySampler : DECL_SAMPLER(Opacity);
 Texture2D<float> noiseTexture : DECL_TEXTURE(Noise);
 SamplerState noiseSampler : DECL_SAMPLER(Noise);
 
-Texture2D<float> aoTexture : DECL_TEXTURE(Ao);
-SamplerState aoSampler : DECL_SAMPLER(Ao);
-
 struct VSOutput 
 {
     float4 position : SV_Position;
@@ -130,8 +127,7 @@ FSOutput fragmentMain(VSOutput fsIn)
 	float2 noiseUV = (viewport.zw / noiseDimensions.xy) * (currentPosition.xy * 0.5 + 0.5);
 	float sampledNoise = noiseTexture.Sample(noiseSampler, noiseUV);
         
-    float ssShadow = aoTexture.Sample(aoSampler, currentPosition * 0.5 + 0.5);
-    float shadow = ssShadow + 0.0 * sampleShadow(fsIn.lightCoord.xyz / fsIn.lightCoord.w, sampledNoise, shadowmapSize.xy);
+    float shadow = sampleShadow(fsIn.lightCoord.xyz / fsIn.lightCoord.w, sampledNoise, shadowmapSize.xy);
     Surface surface = buildSurface(baseColorSample.xyz, normalSample.w, baseColorSample.w);
 
     float3 tsNormal = normalize(normalSample.xyz - 0.5);
@@ -154,12 +150,12 @@ FSOutput fragmentMain(VSOutput fsIn)
     float4 brdfLookupSample = brdfLookupTexture.Sample(brdfLookupSampler, float2(surface.roughness, bsdf.VdotN));
 
     float3 wsDiffuseDir = diffuseDominantDirection(wsNormal, wsView, surface.roughness);
-    float3 indirectDiffuse = (surface.baseColor * sampleEnvironment(wsDiffuseDir, lightDirection.xyz, 8.0)) *
-        ((1.0 - surface.metallness) * brdfLookupSample.z);
+    float3 indirectDiffuseSample = sampleDiffuseConvolution(wsDiffuseDir);
+    float3 indirectDiffuse = (surface.baseColor * indirectDiffuseSample) * ((1.0 - surface.metallness) * brdfLookupSample.z);
                                                                   
     float3 wsSpecularDir = specularDominantDirection(wsNormal, wsView, surface.roughness);
-    float3 indirectSpecular = sampleEnvironment(wsSpecularDir, lightDirection.xyz, surface.roughness);
-    indirectSpecular *= surface.f0 * brdfLookupSample.x + surface.f90 * brdfLookupSample.y;
+    float3 indirectSpecularSample = sampleSpecularConvolution(wsSpecularDir, surface.roughness);
+    float3 indirectSpecular = indirectSpecularSample * (surface.f0 * brdfLookupSample.x + surface.f90 * brdfLookupSample.y);
 
 #if (EnableIridescence)
     BSDF iblBsdf = buildBSDF(wsNormal, wsSpecularDir, wsView);
@@ -175,7 +171,7 @@ FSOutput fragmentMain(VSOutput fsIn)
     float4 ccBrdfLookupSample = brdfLookupTexture.Sample(brdfLookupSampler, float2(ccSurface.roughness, ccBSDF.VdotN));
                                                                   
     wsSpecularDir = specularDominantDirection(geometricNormal, wsView, ccSurface.roughness);
-    float3 ccIndirectSpecular = sampleEnvironment(wsSpecularDir, lightDirection.xyz, ccSurface.roughness);
+    float3 ccIndirectSpecular = sampleSpecularConvolution(wsSpecularDir, ccSurface.roughness);
     ccIndirectSpecular *= (ccSurface.f0 * ccBrdfLookupSample.x + ccSurface.f90 * ccBrdfLookupSample.y);
 
     float f0 = (ClearCoatEta - 1.0) / (ClearCoatEta + 1.0);
@@ -184,13 +180,12 @@ FSOutput fragmentMain(VSOutput fsIn)
     float3 result = 
     	lerp(directDiffuse + directSpecular, ccSpecular, clearCoatFresnel) * shadow * lightColor + 
     	lerp(indirectDiffuse + indirectSpecular, ccIndirectSpecular, clearCoatFresnel);
+
 #else
 
     float3 result = shadow * ((directDiffuse + directSpecular) * lightColor) + (indirectDiffuse + indirectSpecular);
 
 #endif
-
-	// result = shadow;
 
     /*
     float3 originPosition = positionOnPlanet + cameraPosition.xyz;

@@ -30,17 +30,13 @@ void init(RenderContext* rc)
 	rh_local::renderContext = rc;
 	
 	VertexDeclaration vd(false, VertexAttributeUsage::Position, DataType::Vec3);
-	VertexStorage::Pointer vs = VertexStorage::Pointer::create(vd, 7);
+	VertexStorage::Pointer vs = VertexStorage::Pointer::create(vd, 4);
 
 	VertexDataAccessor<DataType::Vec3> pos = vs->accessData<DataType::Vec3>(VertexAttributeUsage::Position, 0);
-	pos[0] = vec3(-1.0f, -1.0f, 0.0f);
-	pos[1] = vec3(+3.0f, -1.0f, 0.0f);
-	pos[2] = vec3(-1.0f, +3.0f, 0.0f);
-	
-	pos[3] = vec3(-1.0f, -1.0f, 0.0f); 
-	pos[4] = vec3(-1.0f, +1.0f, 0.0f); 
-	pos[5] = vec3(+1.0f, -1.0f, 0.0f); 
-	pos[6] = vec3(+1.0f, +1.0f, 0.0f); 
+	pos[0] = vec3(-1.0f, -1.0f, 0.0f); 
+	pos[1] = vec3(-1.0f, +1.0f, 0.0f); 
+	pos[2] = vec3(+1.0f, -1.0f, 0.0f); 
+	pos[3] = vec3(+1.0f, +1.0f, 0.0f); 
 
 	Buffer::Pointer vb = rc->renderer()->createVertexBuffer("rh_local::vb", vs, Buffer::Location::Device);
 	rh_local::vertexStream = VertexStream::Pointer::create();
@@ -81,7 +77,7 @@ RenderBatch::Pointer createQuadBatch(const Texture::Pointer& texture, Material::
 			break;
 		
 		default:
-			batch->construct(materialInstance, rh_local::vertexStream, 3, 4);
+			batch->construct(materialInstance, rh_local::vertexStream, 0, 4);
 		}
 
 	}

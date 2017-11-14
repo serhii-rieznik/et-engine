@@ -84,7 +84,8 @@ const std::map<MaterialTexture, std::string>& materialTextureNames()
 		{ MaterialTexture::Opacity, "opacityTexture" },
 		{ MaterialTexture::Shadow, "shadowTexture" },
 		{ MaterialTexture::AmbientOcclusion, "aoTexture" },
-		{ MaterialTexture::Environment, "environmentTexture" },
+		{ MaterialTexture::ConvolvedDiffuse, "convolvedDiffuseTexture" },
+		{ MaterialTexture::ConvolvedSpecular, "convolvedSpecularTexture" },
 		{ MaterialTexture::BRDFLookup, "brdfLookupTexture" },
 		{ MaterialTexture::Noise, "NoiseTexture" },
 	};
@@ -103,7 +104,8 @@ const std::map<MaterialTexture, std::string>& materialSamplerNames()
 		{ MaterialTexture::Opacity, "opacitySampler" },
 		{ MaterialTexture::Shadow, "shadowSampler" },
 		{ MaterialTexture::AmbientOcclusion, "aoSampler" },
-		{ MaterialTexture::Environment, "environmentSampler" },
+		{ MaterialTexture::ConvolvedDiffuse, "convolvedDiffuseSampler" },
+		{ MaterialTexture::ConvolvedSpecular, "convolvedSpecularSampler" },
 		{ MaterialTexture::BRDFLookup, "brdfLookupSampler" },
 		{ MaterialTexture::Noise, "NoiseSampler" },
 	};

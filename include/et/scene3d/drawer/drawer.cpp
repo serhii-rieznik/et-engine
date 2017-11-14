@@ -139,9 +139,7 @@ void Drawer::validate(RenderInterface::Pointer& renderer) {
 		_main.depth = renderer->createTexture(desc);
 
 		desc->format = TextureFormat::RGBA8;
-		desc->size /= 2;
 		_main.shadows = renderer->createTexture(desc);
-		desc->size *= 2;
 
 		{
 			Material::Pointer material = renderer->sharedMaterialLibrary().loadMaterial(application().resolveFileName("engine_data/materials/screen-space-shadows.json"));
@@ -174,7 +172,8 @@ void Drawer::validate(RenderInterface::Pointer& renderer) {
 		passInfo.depth.targetClass = RenderTarget::Class::Texture;
 
 		_main.forward = renderer->allocateRenderPass(passInfo);
-		_main.forward->setSharedTexture(MaterialTexture::Environment, _cubemapProcessor->convolutedCubemap(), renderer->defaultSampler());
+		_main.forward->setSharedTexture(MaterialTexture::ConvolvedDiffuse, _cubemapProcessor->convolvedDiffuseCubemap(), renderer->defaultSampler());
+		_main.forward->setSharedTexture(MaterialTexture::ConvolvedSpecular, _cubemapProcessor->convolvedSpecularCubemap(), renderer->defaultSampler());
 		_main.forward->setSharedTexture(MaterialTexture::BRDFLookup, _cubemapProcessor->brdfLookupTexture(), renderer->clampSampler());
 		_main.forward->setSharedTexture(MaterialTexture::Noise, _main.noise, renderer->nearestSampler());
 		_main.forward->setSharedTexture(MaterialTexture::AmbientOcclusion, _main.shadows, renderer->nearestSampler());
@@ -191,7 +190,7 @@ void Drawer::validate(RenderInterface::Pointer& renderer) {
 		_lighting.environmentMaterial = renderer->sharedMaterialLibrary().loadDefaultMaterial(DefaultMaterial::EnvironmentMap);
 
 	if (_lighting.environmentBatch.invalid())
-		_lighting.environmentBatch = renderhelper::createQuadBatch(_cubemapProcessor->convolutedCubemap(), _lighting.environmentMaterial);
+		_lighting.environmentBatch = renderhelper::createQuadBatch(_cubemapProcessor->convolvedSpecularCubemap(), _lighting.environmentMaterial);
 
 	_cache.flush();
 }

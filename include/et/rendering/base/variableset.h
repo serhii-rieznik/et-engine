@@ -78,7 +78,8 @@ enum class MaterialTexture : uint32_t
 
 	Shadow,
 	AmbientOcclusion,
-	Environment,
+	ConvolvedDiffuse,
+	ConvolvedSpecular,
 	BRDFLookup,
 	Noise,
 

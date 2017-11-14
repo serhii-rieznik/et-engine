@@ -1,25 +1,32 @@
-#if (EQUIRECTANGULAR_ENV_MAP)
-Texture2D<float4> environmentTexture : CONSTANT_LOCATION(t, EnvironmentTextureBinding, TexturesSetIndex);
-#else
-TextureCube<float4> environmentTexture : CONSTANT_LOCATION(t, EnvironmentTextureBinding, TexturesSetIndex);
-#endif
+TextureCube<float4> convolvedDiffuseTexture : CONSTANT_LOCATION(t, ConvolvedDiffuseTextureBinding, TexturesSetIndex);
+SamplerState convolvedDiffuseSampler : CONSTANT_LOCATION(s, ConvolvedDiffuseSamplerBinding, TexturesSetIndex);
 
-SamplerState environmentSampler : CONSTANT_LOCATION(s, EnvironmentSamplerBinding, TexturesSetIndex);
+TextureCube<float4> convolvedSpecularTexture : CONSTANT_LOCATION(t, ConvolvedSpecularTextureBinding, TexturesSetIndex);
+SamplerState convolvedSpecularSampler : CONSTANT_LOCATION(s, ConvolvedSpecularSamplerBinding, TexturesSetIndex);
 
 float3 sampleEnvironment(float3 i, in float3 l, float roughness)
 {
 	float w = 0.0;
 	float h = 0.0;
 	float levels = 0.0;
-	environmentTexture.GetDimensions(0, w, h, levels);
+	convolvedSpecularTexture.GetDimensions(0, w, h, levels);
 	float sampledLod = roughness * (levels - 1.0);
+	return convolvedSpecularTexture.SampleLevel(convolvedSpecularSampler, i, sampledLod).xyz;
+}
 
-#if (EQUIRECTANGULAR_ENV_MAP)
-	float2 sampleCoord = float2(0.5 * atan2(i.z, i.x), asin(i.y)) / PI + 0.5;
-	return environmentTexture.SampleLevel(environmentSampler, sampleCoord, sampledLod).xyz;
-#else
-	return environmentTexture.SampleLevel(environmentSampler, i, sampledLod).xyz;
-#endif
+float3 sampleDiffuseConvolution(float3 n)
+{
+	return convolvedDiffuseTexture.SampleLevel(convolvedDiffuseSampler, n, 0.0).xyz;
+}
+
+float3 sampleSpecularConvolution(float3 i, float roughness)
+{
+	float w = 0.0;
+	float h = 0.0;
+	float levels = 0.0;
+	convolvedSpecularTexture.GetDimensions(0, w, h, levels);
+	float sampledLod = roughness * (levels - 1.0);
+	return convolvedSpecularTexture.SampleLevel(convolvedSpecularSampler, i, sampledLod).xyz;
 }
 
 float3 specularDominantDirection(in float3 n, in float3 v, in float roughness)

@@ -23,7 +23,8 @@ public:
 	CubemapProcessor();
 
 	const std::string& sourceTextureName() const;
-	const Texture::Pointer& convolutedCubemap() const;
+	const Texture::Pointer& convolvedDiffuseCubemap() const;
+	const Texture::Pointer& convolvedSpecularCubemap() const;
 	const Texture::Pointer& brdfLookupTexture() const;
 
 	void processAtmosphere();
@@ -39,7 +40,8 @@ private:
 	{
 		Source,
 		Downsampled,
-		Convoluted,
+		Specular,
+		Diffuse,
 		Count
 	};
 
@@ -72,11 +74,14 @@ private:
 	RenderPass::Pointer _lookupDebugPass;
 	RenderPass::Pointer _downsamplePass;
 	RenderPass::Pointer _cubemapDebugPass;
+	RenderPass::Pointer _diffuseConvolvePass;
 	RenderPass::Pointer _specularConvolvePass;
 	RenderBatch::Pointer _lookupDebugBatch;
 	RenderBatch::Pointer _cubemapDebugBatch;
+	RenderBatch::Pointer _diffuseConvolveBatch;
 	RenderBatch::Pointer _specularConvolveBatch;
 	CubemapProjectionMatrixArray _projections;
+	RenderPassBeginInfo _oneLevelCubemapBeginInfo;
 	RenderPassBeginInfo _wholeCubemapBeginInfo;
 	std::string _sourceTextureName;
 };

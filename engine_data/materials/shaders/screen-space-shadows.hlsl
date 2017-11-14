@@ -73,21 +73,17 @@ float4 sampleShadowsInWorldSpace(in float2 uv)
 	float pixelStepSize = length(lightStep.xy / float2(stepSize * w, stepSize * h));
 	lightStep *= pixelStepSize / stepSize;
 
+	float rnd = noise((z0 + uv.x - uv.y) * 43758.5453123);
+	float tolerance = pow(1.0 - z0, 1.5);
 	float lightContribution = 1.0;
-	const uint maxSamples = 50;
+	const uint maxSamples = 25;
 	for (uint i = 0; i < maxSamples; ++i)
 	{
-		projectionSpaceCoord += lightStep;
-
+		rnd = noise(rnd * 43758.5453123);
+		projectionSpaceCoord += lightStep * (rnd * 0.5 + 0.5);
 		float sampledZ = baseColorTexture.Sample(baseColorSampler, projectionSpaceCoord.xy * 0.5 + 0.5);
-		float zTest = step(projectionSpaceCoord.z, sampledZ);
-
-		float3 projectedDir = normalize(viewSpace(projectionSpaceCoord.xy, sampledZ) - viewSpaceCoord);
-		float ds = 1.0 - float(i) / float(maxSamples);
-		float threshold = 0.9999 - 0.009 * ds * ds;
-		float directionTest = step(threshold, dot(projectedDir, projectedLight));
-
-		lightContribution *= 1.0 - zTest * directionTest;
+		float diff = sampledZ - projectionSpaceCoord.z;
+		lightContribution *= 1.0 - step(diff, 0.0) * step(abs(diff), tolerance);
 	}
 
 	return lightContribution;

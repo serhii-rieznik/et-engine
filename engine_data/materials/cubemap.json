@@ -37,6 +37,24 @@
 		"code" : "shaders/cubemap"
 	},
 
+	"cubemap-diffuse-convolution" :
+	{ 
+		"input-layout" : {
+			"position" : 3
+		},
+		"depth-state": {
+			"depth-function": "always",
+			"depth-test": false,
+			"depth-write": false
+		},
+		"options" : {
+			"DIFFUSE_CONVOLUTION" : 1
+		},
+		"blend-state": "disabled",
+		"cull-mode" : "disabled",
+		"code" : "shaders/cubemap"
+	},
+    
 	"cubemap-specular-convolution" :
 	{ 
 		"input-layout" : {
