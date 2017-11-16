@@ -113,9 +113,9 @@ float4 fragmentMain(VSOutput fsIn) : SV_Target0
 	float u = ldrColor.x / 16.0 + d;
 	float3 sample0 = shadowTexture.SampleLevel(shadowSampler, float2(u + z0, v), 0.0).xyz;
 	float3 sample1 = shadowTexture.SampleLevel(shadowSampler, float2(u + z1, v), 0.0).xyz;
-	float3 sample2 = lerp(sample0, sample1, (ldrColor.z - z0) * 16.0);
+	float3 result = lerp(sample0, sample1, (ldrColor.z - z0) * 16.0);
 
-	return float4(sample2, 1.0);
+	return float4(result, 1.0);
 
 #elif (TEMPORAL_AA)
 	
