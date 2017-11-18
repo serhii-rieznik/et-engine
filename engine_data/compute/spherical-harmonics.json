@@ -1,0 +1,11 @@
+{
+	"name" : "spherical-harmonics",
+
+	"default" : 
+	{ 
+		"class" : "compute",
+    	"code" : "shaders/spherical-harmonics",
+    	"options" : {
+    	}
+	}
+}

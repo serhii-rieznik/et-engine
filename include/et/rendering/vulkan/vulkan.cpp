@@ -3,51 +3,47 @@
 #include <et/rendering/opengl/gl/glext.h>
 #include <et/rendering/vulkan/vulkan.h>
 
-namespace et
-{
+namespace et {
 
-#define CASE_TO_STRING(C) case C: return #C;
+#define CASE_TO_STRING(C) case C: return #C
 
-const char* vulkan::resultToString(VkResult result)
-{
+const char* vulkan::resultToString(VkResult result) {
 	switch (result)
 	{
-		CASE_TO_STRING(VK_SUCCESS)
-			CASE_TO_STRING(VK_NOT_READY)
-			CASE_TO_STRING(VK_TIMEOUT)
-			CASE_TO_STRING(VK_EVENT_SET)
-			CASE_TO_STRING(VK_EVENT_RESET)
-			CASE_TO_STRING(VK_INCOMPLETE)
-			CASE_TO_STRING(VK_ERROR_OUT_OF_HOST_MEMORY)
-			CASE_TO_STRING(VK_ERROR_OUT_OF_DEVICE_MEMORY)
-			CASE_TO_STRING(VK_ERROR_INITIALIZATION_FAILED)
-			CASE_TO_STRING(VK_ERROR_DEVICE_LOST)
-			CASE_TO_STRING(VK_ERROR_MEMORY_MAP_FAILED)
-			CASE_TO_STRING(VK_ERROR_LAYER_NOT_PRESENT)
-			CASE_TO_STRING(VK_ERROR_EXTENSION_NOT_PRESENT)
-			CASE_TO_STRING(VK_ERROR_FEATURE_NOT_PRESENT)
-			CASE_TO_STRING(VK_ERROR_INCOMPATIBLE_DRIVER)
-			CASE_TO_STRING(VK_ERROR_TOO_MANY_OBJECTS)
-			CASE_TO_STRING(VK_ERROR_FORMAT_NOT_SUPPORTED)
-			CASE_TO_STRING(VK_ERROR_SURFACE_LOST_KHR)
-			CASE_TO_STRING(VK_ERROR_NATIVE_WINDOW_IN_USE_KHR)
-			CASE_TO_STRING(VK_SUBOPTIMAL_KHR)
-			CASE_TO_STRING(VK_ERROR_OUT_OF_DATE_KHR)
-			CASE_TO_STRING(VK_ERROR_INCOMPATIBLE_DISPLAY_KHR)
-			CASE_TO_STRING(VK_ERROR_VALIDATION_FAILED_EXT)
-			CASE_TO_STRING(VK_ERROR_INVALID_SHADER_NV)
+		CASE_TO_STRING(VK_SUCCESS);
+		CASE_TO_STRING(VK_NOT_READY);
+		CASE_TO_STRING(VK_TIMEOUT);
+		CASE_TO_STRING(VK_EVENT_SET);
+		CASE_TO_STRING(VK_EVENT_RESET);
+		CASE_TO_STRING(VK_INCOMPLETE);
+		CASE_TO_STRING(VK_ERROR_OUT_OF_HOST_MEMORY);
+		CASE_TO_STRING(VK_ERROR_OUT_OF_DEVICE_MEMORY);
+		CASE_TO_STRING(VK_ERROR_INITIALIZATION_FAILED);
+		CASE_TO_STRING(VK_ERROR_DEVICE_LOST);
+		CASE_TO_STRING(VK_ERROR_MEMORY_MAP_FAILED);
+		CASE_TO_STRING(VK_ERROR_LAYER_NOT_PRESENT);
+		CASE_TO_STRING(VK_ERROR_EXTENSION_NOT_PRESENT);
+		CASE_TO_STRING(VK_ERROR_FEATURE_NOT_PRESENT);
+		CASE_TO_STRING(VK_ERROR_INCOMPATIBLE_DRIVER);
+		CASE_TO_STRING(VK_ERROR_TOO_MANY_OBJECTS);
+		CASE_TO_STRING(VK_ERROR_FORMAT_NOT_SUPPORTED);
+		CASE_TO_STRING(VK_ERROR_SURFACE_LOST_KHR);
+		CASE_TO_STRING(VK_ERROR_NATIVE_WINDOW_IN_USE_KHR);
+		CASE_TO_STRING(VK_SUBOPTIMAL_KHR);
+		CASE_TO_STRING(VK_ERROR_OUT_OF_DATE_KHR);
+		CASE_TO_STRING(VK_ERROR_INCOMPATIBLE_DISPLAY_KHR);
+		CASE_TO_STRING(VK_ERROR_VALIDATION_FAILED_EXT);
+		CASE_TO_STRING(VK_ERROR_INVALID_SHADER_NV);
 	default:
 		ET_FAIL_FMT("Unknown Vulkan error: %d", static_cast<int>(result));
 	}
 }
 
-VkResult vkGetPhysicalDeviceSurfaceFormatsKHRWrapper(const VulkanState& state, uint32_t* count, VkSurfaceFormatKHR* formats)
-{
+VkResult vkGetPhysicalDeviceSurfaceFormatsKHRWrapper(const VulkanState& state, uint32_t* count, VkSurfaceFormatKHR* formats) {
 	return vkGetPhysicalDeviceSurfaceFormatsKHR(state.physicalDevice, state.swapchain.surface, count, formats);
 }
 
-void VulkanState::executeServiceCommands(VulkanQueueClass cls, ServiceCommands commands)
-{
+void VulkanState::executeServiceCommands(VulkanQueueClass cls, ServiceCommands commands) {
 	VulkanQueue& queue = queues[cls];
 
 	VkCommandBufferBeginInfo beginInfo = { VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO };
@@ -66,8 +62,7 @@ void VulkanState::executeServiceCommands(VulkanQueueClass cls, ServiceCommands c
 	VULKAN_CALL(vkQueueWaitIdle(queue.queue));
 }
 
-uint32_t VulkanState::writeTimestamp(VkCommandBuffer cmd, VkPipelineStageFlagBits stage)
-{
+uint32_t VulkanState::writeTimestamp(VkCommandBuffer cmd, VkPipelineStageFlagBits stage) {
 	VulkanSwapchain::Frame& frame = swapchain.mutableCurrentFrame();
 
 	uint32_t result = frame.timestampIndex++;
@@ -80,8 +75,7 @@ uint32_t VulkanState::writeTimestamp(VkCommandBuffer cmd, VkPipelineStageFlagBit
  * Swapchain
  *
  */
-void VulkanSwapchain::init(VulkanState& vulkan, const RenderContextParameters& params, HWND window)
-{
+void VulkanSwapchain::init(VulkanState& vulkan, const RenderContextParameters& params, HWND window) {
 	VkWin32SurfaceCreateInfoKHR surfaceInfo = { VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR };
 	surfaceInfo.hinstance = GetModuleHandle(nullptr);
 	surfaceInfo.hwnd = window;
@@ -96,18 +90,15 @@ void VulkanSwapchain::init(VulkanState& vulkan, const RenderContextParameters& p
 	surfaceFormat = formats.front();
 }
 
-VkResult vkGetPhysicalDeviceSurfacePresentModesKHRWrapper(const VulkanState& state, uint32_t* count, VkPresentModeKHR* modes)
-{
+VkResult vkGetPhysicalDeviceSurfacePresentModesKHRWrapper(const VulkanState& state, uint32_t* count, VkPresentModeKHR* modes) {
 	return vkGetPhysicalDeviceSurfacePresentModesKHR(state.physicalDevice, state.swapchain.surface, count, modes);
 }
 
-VkResult vkGetSwapchainImagesKHRWrapper(const VulkanState& state, uint32_t* count, VkImage* images)
-{
+VkResult vkGetSwapchainImagesKHRWrapper(const VulkanState& state, uint32_t* count, VkImage* images) {
 	return vkGetSwapchainImagesKHR(state.device, state.swapchain.swapchain, count, images);
 }
 
-bool VulkanSwapchain::createDepthImage(VulkanState& vulkan, VkImage& image, VulkanMemoryAllocator::Allocation& allocation, VkCommandBuffer cmdBuffer)
-{
+bool VulkanSwapchain::createDepthImage(VulkanState& vulkan, VkImage& image, VulkanMemoryAllocator::Allocation& allocation, VkCommandBuffer cmdBuffer) {
 	VkImageCreateInfo imageInfo = { VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO };
 	imageInfo.format = depthFormat;
 	imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
@@ -156,8 +147,7 @@ bool VulkanSwapchain::createDepthImage(VulkanState& vulkan, VkImage& image, Vulk
 	return true;
 }
 
-VkImageView VulkanSwapchain::createImageView(VulkanState& vulkan, VkImage image, VkImageAspectFlags aspect, VkFormat format)
-{
+VkImageView VulkanSwapchain::createImageView(VulkanState& vulkan, VkImage image, VkImageAspectFlags aspect, VkFormat format) {
 	VkImageViewCreateInfo viewInfo = { VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO };
 	viewInfo.image = image;
 	viewInfo.format = format;
@@ -170,8 +160,7 @@ VkImageView VulkanSwapchain::createImageView(VulkanState& vulkan, VkImage image,
 	return result;
 }
 
-void VulkanSwapchain::createSizeDependentResources(VulkanState& vulkan, const vec2i& sz)
-{
+void VulkanSwapchain::createSizeDependentResources(VulkanState& vulkan, const vec2i& sz) {
 	VULKAN_CALL(vkDeviceWaitIdle(vulkan.device));
 
 	extent.width = static_cast<uint32_t>(sz.x);
@@ -320,7 +309,8 @@ void VulkanSwapchain::createSizeDependentResources(VulkanState& vulkan, const ve
 	}
 
 	vulkan.executeServiceCommands(VulkanQueueClass::Graphics, [&](VkCommandBuffer cmdBuffer) {
-		if (createDepthImage(vulkan, depthBuffer.image, depthBuffer.memory, cmdBuffer)) {
+		if (createDepthImage(vulkan, depthBuffer.image, depthBuffer.memory, cmdBuffer))
+		{
 			depthBuffer.imageView = createImageView(vulkan, depthBuffer.image, VK_IMAGE_ASPECT_DEPTH_BIT, depthFormat);
 		}
 	});
@@ -328,8 +318,7 @@ void VulkanSwapchain::createSizeDependentResources(VulkanState& vulkan, const ve
 	VULKAN_CALL(vkDeviceWaitIdle(vulkan.device));
 }
 
-void VulkanSwapchain::acquireNextImage(VulkanState& vulkan)
-{
+void VulkanSwapchain::acquireNextImage(VulkanState& vulkan) {
 	VkFence currentFence = frames[frameNumber % RendererFrameCount].imageFence;
 	VULKAN_CALL(vkWaitForFences(vulkan.device, 1, &currentFence, VK_TRUE, UINT64_MAX));
 	VULKAN_CALL(vkResetFences(vulkan.device, 1, &currentFence));
@@ -338,8 +327,7 @@ void VulkanSwapchain::acquireNextImage(VulkanState& vulkan)
 		frames[frameNumber % RendererFrameCount].imageAcquired, nullptr, &swapchainImageIndex));
 }
 
-void VulkanSwapchain::present(VulkanState& vulkan)
-{
+void VulkanSwapchain::present(VulkanState& vulkan) {
 	VkPresentInfoKHR info = { VK_STRUCTURE_TYPE_PRESENT_INFO_KHR };
 	info.swapchainCount = 1;
 	info.pSwapchains = &swapchain;
@@ -351,8 +339,7 @@ void VulkanSwapchain::present(VulkanState& vulkan)
 	++frameNumber;
 }
 
-void VulkanNativePipeline::buildLayout(VulkanState& vulkan, const Program::Reflection& reflection, VkDescriptorSetLayout buffersSet)
-{
+void VulkanNativePipeline::buildLayout(VulkanState& vulkan, const Program::Reflection& reflection, VkDescriptorSetLayout buffersSet) {
 	Vector<VkDescriptorSetLayoutBinding> textureBindings;
 	textureBindings.reserve(2 * MaterialTexture_max);
 
@@ -411,8 +398,7 @@ void VulkanNativePipeline::buildLayout(VulkanState& vulkan, const Program::Refle
 	VULKAN_CALL(vkCreatePipelineLayout(vulkan.device, &layoutCreateInfo, nullptr, &layout));
 }
 
-void VulkanNativePipeline::cleanup(VulkanState& vulkan)
-{
+void VulkanNativePipeline::cleanup(VulkanState& vulkan) {
 	if (pipeline)
 		vkDestroyPipeline(vulkan.device, pipeline, nullptr);
 
@@ -426,11 +412,9 @@ void VulkanNativePipeline::cleanup(VulkanState& vulkan)
 		vkDestroyDescriptorSetLayout(vulkan.device, imageSetLayout, nullptr);
 }
 
-namespace vulkan
-{
+namespace vulkan {
 
-uint32_t getMemoryTypeIndex(VulkanState& vulkan, uint32_t typeFilter, VkMemoryPropertyFlags properties)
-{
+uint32_t getMemoryTypeIndex(VulkanState& vulkan, uint32_t typeFilter, VkMemoryPropertyFlags properties) {
 	static bool propertiesRetreived = false;
 	static VkPhysicalDeviceMemoryProperties memProperties = {};
 
@@ -451,8 +435,7 @@ uint32_t getMemoryTypeIndex(VulkanState& vulkan, uint32_t typeFilter, VkMemoryPr
 	ET_FAIL("Unable to get memory type");
 }
 
-VkCompareOp depthCompareOperation(CompareFunction func)
-{
+VkCompareOp depthCompareOperation(CompareFunction func) {
 	switch (func)
 	{
 	case CompareFunction::Always:
@@ -474,8 +457,7 @@ VkCompareOp depthCompareOperation(CompareFunction func)
 	}
 }
 
-VkFormat dataTypeValue(DataType fmt)
-{
+VkFormat dataTypeValue(DataType fmt) {
 	switch (fmt)
 	{
 	case DataType::Float: return VK_FORMAT_R32_SFLOAT;
@@ -492,8 +474,7 @@ VkFormat dataTypeValue(DataType fmt)
 	};
 }
 
-VkFormat textureFormatValue(TextureFormat fmt)
-{
+VkFormat textureFormatValue(TextureFormat fmt) {
 	switch (fmt)
 	{
 	case TextureFormat::R8: return VK_FORMAT_R8_UNORM;
@@ -517,8 +498,7 @@ VkFormat textureFormatValue(TextureFormat fmt)
 	};
 }
 
-VkImageType textureTargetToImageType(TextureTarget target)
-{
+VkImageType textureTargetToImageType(TextureTarget target) {
 	switch (target)
 	{
 	case TextureTarget::Texture_2D:
@@ -532,8 +512,7 @@ VkImageType textureTargetToImageType(TextureTarget target)
 	}
 }
 
-VkImageViewType textureTargetToImageViewType(TextureTarget target)
-{
+VkImageViewType textureTargetToImageViewType(TextureTarget target) {
 	switch (target)
 	{
 	case TextureTarget::Texture_2D:
@@ -547,8 +526,7 @@ VkImageViewType textureTargetToImageViewType(TextureTarget target)
 	}
 }
 
-VkPrimitiveTopology primitiveTopology(PrimitiveType type)
-{
+VkPrimitiveTopology primitiveTopology(PrimitiveType type) {
 	switch (type)
 	{
 	case PrimitiveType::Points: return VK_PRIMITIVE_TOPOLOGY_POINT_LIST;
@@ -564,8 +542,7 @@ VkPrimitiveTopology primitiveTopology(PrimitiveType type)
 	};
 }
 
-VkCullModeFlags cullModeFlags(CullMode mode)
-{
+VkCullModeFlags cullModeFlags(CullMode mode) {
 	switch (mode)
 	{
 	case CullMode::Disabled:
@@ -580,8 +557,7 @@ VkCullModeFlags cullModeFlags(CullMode mode)
 	}
 }
 
-VkIndexType indexBufferFormat(IndexArrayFormat fmt)
-{
+VkIndexType indexBufferFormat(IndexArrayFormat fmt) {
 	switch (fmt)
 	{
 	case IndexArrayFormat::Format_16bit:
@@ -594,8 +570,7 @@ VkIndexType indexBufferFormat(IndexArrayFormat fmt)
 	}
 }
 
-VkSamplerAddressMode textureWrapToSamplerAddressMode(TextureWrap wrap)
-{
+VkSamplerAddressMode textureWrapToSamplerAddressMode(TextureWrap wrap) {
 	switch (wrap)
 	{
 	case TextureWrap::Repeat: return VK_SAMPLER_ADDRESS_MODE_REPEAT;
@@ -607,8 +582,7 @@ VkSamplerAddressMode textureWrapToSamplerAddressMode(TextureWrap wrap)
 	};
 }
 
-VkFilter textureFiltrationValue(TextureFiltration flt)
-{
+VkFilter textureFiltrationValue(TextureFiltration flt) {
 	switch (flt)
 	{
 	case TextureFiltration::Nearest: return VK_FILTER_NEAREST;
@@ -619,8 +593,7 @@ VkFilter textureFiltrationValue(TextureFiltration flt)
 	};
 }
 
-VkSamplerMipmapMode textureFiltrationValueToSamplerMipMapMode(TextureFiltration flt)
-{
+VkSamplerMipmapMode textureFiltrationValueToSamplerMipMapMode(TextureFiltration flt) {
 	switch (flt)
 	{
 	case TextureFiltration::Nearest: return VK_SAMPLER_MIPMAP_MODE_NEAREST;
@@ -631,8 +604,7 @@ VkSamplerMipmapMode textureFiltrationValueToSamplerMipMapMode(TextureFiltration 
 	};
 }
 
-VkAttachmentLoadOp frameBufferOperationToLoadOperation(FramebufferOperation val)
-{
+VkAttachmentLoadOp frameBufferOperationToLoadOperation(FramebufferOperation val) {
 	switch (val)
 	{
 	case FramebufferOperation::Clear: return VK_ATTACHMENT_LOAD_OP_CLEAR;
@@ -644,8 +616,7 @@ VkAttachmentLoadOp frameBufferOperationToLoadOperation(FramebufferOperation val)
 	};
 }
 
-VkAttachmentStoreOp frameBufferOperationToStoreOperation(FramebufferOperation val)
-{
+VkAttachmentStoreOp frameBufferOperationToStoreOperation(FramebufferOperation val) {
 	switch (val)
 	{
 	case FramebufferOperation::Store: return VK_ATTACHMENT_STORE_OP_STORE;
@@ -656,8 +627,7 @@ VkAttachmentStoreOp frameBufferOperationToStoreOperation(FramebufferOperation va
 	};
 }
 
-VkBlendOp blendOperationValue(BlendOperation val)
-{
+VkBlendOp blendOperationValue(BlendOperation val) {
 	switch (val)
 	{
 	case BlendOperation::Add: return VK_BLEND_OP_ADD;
@@ -669,8 +639,7 @@ VkBlendOp blendOperationValue(BlendOperation val)
 	};
 }
 
-VkBlendFactor blendFactorValue(BlendFunction val)
-{
+VkBlendFactor blendFactorValue(BlendFunction val) {
 	switch (val)
 	{
 	case BlendFunction::Zero: return VK_BLEND_FACTOR_ZERO;
@@ -689,8 +658,7 @@ VkBlendFactor blendFactorValue(BlendFunction val)
 	};
 }
 
-VkAccessFlags texureStateToAccessFlags(TextureState val)
-{
+VkAccessFlags texureStateToAccessFlags(TextureState val) {
 	switch (val)
 	{
 	case TextureState::Undefined: return 0;
@@ -707,8 +675,7 @@ VkAccessFlags texureStateToAccessFlags(TextureState val)
 	};
 }
 
-VkPipelineStageFlags accessMaskToPipelineStage(VkAccessFlags flags)
-{
+VkPipelineStageFlags accessMaskToPipelineStage(VkAccessFlags flags) {
 	// shamelessly stolen from validation layers, 
 	// supposed to be correct
 	static const std::vector<std::pair<VkAccessFlags, VkPipelineStageFlags>> values =
@@ -787,8 +754,7 @@ VkPipelineStageFlags accessMaskToPipelineStage(VkAccessFlags flags)
 	return (result == 0) ? VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT : result;
 }
 
-VkImageLayout texureStateToImageLayout(TextureState val)
-{
+VkImageLayout texureStateToImageLayout(TextureState val) {
 	switch (val)
 	{
 	case TextureState::Undefined: return VK_IMAGE_LAYOUT_UNDEFINED;
@@ -805,8 +771,7 @@ VkImageLayout texureStateToImageLayout(TextureState val)
 	};
 }
 
-VkShaderStageFlagBits programStageValue(ProgramStage val)
-{
+VkShaderStageFlagBits programStageValue(ProgramStage val) {
 	switch (val)
 	{
 	case ProgramStage::Vertex: return VK_SHADER_STAGE_VERTEX_BIT;
@@ -829,8 +794,7 @@ const char* programStageHLSLProfile(ProgramStage val) {
 		return "???";
 	};
 }
-const char* programStageEntryName(ProgramStage val)
-{
+const char* programStageEntryName(ProgramStage val) {
 	switch (val)
 	{
 	case ProgramStage::Vertex: return "vertexMain";
@@ -844,8 +808,7 @@ const char* programStageEntryName(ProgramStage val)
 
 }
 
-VkImageView VulkanNativeTexture::imageView(const ResourceRange& range)
-{
+VkImageView VulkanNativeTexture::imageView(const ResourceRange& range) {
 	uint64_t hsh = range.hash();
 	VkImageView imageView = allImageViews[hsh];
 	if (imageView == nullptr)

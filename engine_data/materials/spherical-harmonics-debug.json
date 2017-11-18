@@ -1,0 +1,21 @@
+{
+	"name" : "spherical-harmonics-routines",
+
+	"cubemap-visualize" :
+	{ 
+		"input-layout" : {
+			"position" : 3
+		},
+		"depth-state": {
+			"depth-function": "always",
+			"depth-test": false,
+			"depth-write": false
+		},
+		"options" : {
+			"VISUALIZE_SPHERICAL_HARMONICS" : 1
+		},
+		"blend-state": "disabled",
+		"cull-mode" : "disabled",
+		"code" : "shaders/cubemap"
+	}
+}

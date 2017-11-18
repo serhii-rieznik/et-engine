@@ -104,7 +104,7 @@ private:
 	struct Computes
 	{
 		Compute::Pointer downsampleLuminance;
-		Compute::Pointer auminanceAdaptation;
+		Compute::Pointer luminanceAdaptation;
 	} _compute;
 };
 

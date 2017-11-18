@@ -67,8 +67,13 @@ private:
 	Material::Pointer _wrapMaterial;
 	Material::Pointer _atmosphereMaterial;
 	Material::Pointer _processingMaterial;
+	Material::Pointer _shMaterial;
 	Material::Pointer _downsampleMaterial;
 	Material::Pointer _lookupGeneratorMaterial;
+
+	Texture::Pointer _shValues;
+	Buffer::Pointer _shValuesBuffer;
+	Compute::Pointer _shConvolute;
 
 	RenderPass::Pointer _lookupPass;
 	RenderPass::Pointer _lookupDebugPass;
@@ -78,12 +83,14 @@ private:
 	RenderPass::Pointer _specularConvolvePass;
 	RenderBatch::Pointer _lookupDebugBatch;
 	RenderBatch::Pointer _cubemapDebugBatch;
+	RenderBatch::Pointer _shDebugBatch;
 	RenderBatch::Pointer _diffuseConvolveBatch;
 	RenderBatch::Pointer _specularConvolveBatch;
 	CubemapProjectionMatrixArray _projections;
 	RenderPassBeginInfo _oneLevelCubemapBeginInfo;
 	RenderPassBeginInfo _wholeCubemapBeginInfo;
 	std::string _sourceTextureName;
+	int32_t _grabHarmonicsFrame = -1;
 };
 
 }

@@ -4,6 +4,7 @@
 #include "atmosphere.h"
 #include "environment.h"
 #include "bsdf.h"
+#include "srgb.h"
 
 #if (WRAP_EQ_TO_CUBEMAP)
 
@@ -36,7 +37,7 @@ struct VSOutput
 	float3 direction : TEXCOORD1;
 };
 
-#if (VISUALIZE_CUBEMAP)
+#if (VISUALIZE_CUBEMAP || VISUALIZE_SPHERICAL_HARMONICS)
 
 #include <inputlayout>
 
@@ -107,7 +108,42 @@ const float cScale = 1.0; // 0.0066666;
 
 float4 fragmentMain(VSOutput fsIn) : SV_Target0
 {
-#if (VISUALIZE_CUBEMAP)	
+#if (VISUALIZE_SPHERICAL_HARMONICS)
+
+	float phi = PI * (fsIn.texCoord0.x * 2.0 - 1.0);
+	float theta = PI * (0.5 - fsIn.texCoord0.y);
+	float sinTheta = sin(theta);
+	float cosTheta = cos(theta);
+	float sinPhi = sin(phi);
+	float cosPhi = cos(phi);
+	float3 n = float3(cosPhi * cosTheta, sinTheta, sinPhi * cosTheta);
+
+	float3 test[] = {
+		float3( .79,  .44,  .54),
+		float3( .39,  .35,  .60),
+		float3(-.34, -.18, -.27),
+		float3(-.29, -.06,  .01),
+		float3(-.11, -.05, -.12),
+		float3(-.26, -.22, -.47),
+		float3(-.16, -.09, -.15),
+		float3( .56,  .21,  .14),
+		float3( .21, -.05, -.30)
+	};
+	
+	float3 shResult = 0.0;
+	shResult += 0.2820948 * test[0];
+	shResult += 0.3257351 * test[1] * (n.y);
+	shResult += 0.3257351 * test[2] * (n.z);
+	shResult += 0.3257351 * test[3] * (n.x);
+	shResult += 0.2731371 * test[4] * (n.x * n.y);
+	shResult += 0.2731371 * test[5] * (n.y * n.z);
+	shResult += 0.0788479 * test[6] * (3.0 * n.z * n.z - 1.0);
+	shResult += 0.2731371 * test[7] * (n.x * n.z);
+	shResult += 0.1365686 * test[8] * (n.x * n.x - n.y * n.y);
+
+	return float4(linearToSRGB(shResult), 1.0);
+
+#elif (VISUALIZE_CUBEMAP)	
 
 	float phi = PI * (fsIn.texCoord0.x * 2.0 - 1.0);
 	float theta = PI * (0.5 - fsIn.texCoord0.y);
@@ -116,7 +152,8 @@ float4 fragmentMain(VSOutput fsIn) : SV_Target0
 	float sinPhi = sin(phi);
 	float cosPhi = cos(phi);
 	float3 sampleDirection = float3(cosPhi * cosTheta, sinTheta, sinPhi * cosTheta);
-	return cScale * baseColorTexture.SampleLevel(baseColorSampler, sampleDirection, extraParameters.x);
+	float3 sampledValue = baseColorTexture.SampleLevel(baseColorSampler, sampleDirection, extraParameters.x).xyz;
+	return float4(linearToSRGB(cScale * sampledValue), 1.0);
 
 #elif (WRAP_EQ_TO_CUBEMAP)
 
@@ -195,7 +232,8 @@ float4 fragmentMain(VSOutput fsIn) : SV_Target0
 			}
 		}	
 	}
-	float3 result = integralResult * (1.03 / PI);
+	float scale = (1.0 + invFaceSize) / PI;
+	float3 result = integralResult * scale;
 
 	return float4(result, 1.0);
 

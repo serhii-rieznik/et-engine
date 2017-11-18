@@ -61,12 +61,16 @@ struct RenderPassBeginInfo
 struct CopyDescriptor
 {
 	uint32_t levelFrom = 0;
-	uint32_t levelTo = 0;
 	uint32_t layerFrom = 0;
-	uint32_t layerTo = 0;
 	vec3i offsetFrom = vec3i(0, 0, 0);
+
+	uint32_t levelTo = 0;
+	uint32_t layerTo = 0;
 	vec3i offsetTo = vec3i(0, 0, 0);
+
 	vec3i size = vec3i(0, 0, 0);
+
+	uint32_t bufferOffsetTo = 0;
 };
 
 class RenderInterface;
@@ -98,6 +102,7 @@ public:
 	virtual void pushRenderBatch(const MaterialInstance::Pointer&, const VertexStream::Pointer&, uint32_t first, uint32_t count) = 0;
 	virtual void pushImageBarrier(const Texture::Pointer&, const ResourceBarrier&) = 0;
 	virtual void copyImage(const Texture::Pointer&, const Texture::Pointer&, const CopyDescriptor&) = 0;
+	virtual void copyImageToBuffer(const Texture::Pointer&, const Buffer::Pointer&, const CopyDescriptor&) = 0;
 	virtual void dispatchCompute(const Compute::Pointer&, const vec3i&) = 0;
 	virtual void endSubpass() = 0;
 	virtual void nextSubpass() = 0;

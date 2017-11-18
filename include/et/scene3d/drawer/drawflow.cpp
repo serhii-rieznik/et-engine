@@ -33,7 +33,7 @@ HDRFlow::HDRFlow(const RenderInterface::Pointer& ren)
 		_compute.downsampleLuminance = _renderer->createCompute(computeMaterial);
 
 		computeMaterial = _renderer->sharedMaterialLibrary().loadMaterial(application().resolveFileName("engine_data/compute/luminocity-adaptation.json"));
-		_compute.auminanceAdaptation = _renderer->createCompute(computeMaterial);
+		_compute.luminanceAdaptation = _renderer->createCompute(computeMaterial);
 	}
 
 	Sampler::Description smp;
@@ -65,15 +65,15 @@ void HDRFlow::resizeRenderTargets(const vec2i& sz) {
 		TextureDescription::Pointer desc(PointerInit::CreateInplace);
 		desc->size = sz;
 		desc->format = HDRTextureFormat;
-		desc->flags = Texture::Flags::RenderTarget;
+		desc->flags = Texture::Flags::ShaderResource | Texture::Flags::RenderTarget;
 		_secondaryTarget = _renderer->createTexture(desc);
-		desc->flags = Texture::Flags::RenderTarget | Texture::Flags::CopySource;
+		desc->flags = Texture::Flags::ShaderResource | Texture::Flags::RenderTarget | Texture::Flags::CopySource;
 		_primaryTarget = _renderer->createTexture(desc);
-		desc->flags = Texture::Flags::RenderTarget | Texture::Flags::CopyDestination;
+		desc->flags = Texture::Flags::ShaderResource | Texture::Flags::RenderTarget | Texture::Flags::CopyDestination;
 		_renderHistory = _renderer->createTexture(desc);
 
 		desc->size = vec2i(luminanceTargetSize);
-		desc->flags = Texture::Flags::RenderTarget | Texture::Flags::CopySource;
+		desc->flags = Texture::Flags::ShaderResource | Texture::Flags::RenderTarget | Texture::Flags::CopySource;
 		desc->levelCount = 1;
 
 		_passes.logLuminanceBeginInfo.subpasses.clear();
@@ -84,7 +84,7 @@ void HDRFlow::resizeRenderTargets(const vec2i& sz) {
 		desc->levelCount = 1;
 		_luminanceTarget = _renderer->createTexture(desc);
 
-		desc->flags = Texture::Flags::Storage;
+		desc->flags = Texture::Flags::ShaderResource | Texture::Flags::Storage;
 
 		desc->size = vec2i(32, 32);
 		_downsampledLuminance = _renderer->createTexture(desc);
@@ -167,12 +167,12 @@ void HDRFlow::downsampleLuminance() {
 	downsampleMaterial->setImage(StorageBuffer::StorageBuffer0, _downsampledLuminance);
 	_passes.logLuminance->dispatchCompute(_compute.downsampleLuminance, vec3i(dispatchSize, dispatchSize, 1));
 
-	MaterialInstance::Pointer& adaptationMaterial = _compute.auminanceAdaptation->material();
+	MaterialInstance::Pointer& adaptationMaterial = _compute.luminanceAdaptation->material();
 	adaptationMaterial->setTexture(MaterialTexture::BaseColor, _downsampledLuminance, { 0, 1, 0, 1 });
 	adaptationMaterial->setImage(StorageBuffer::StorageBuffer0, _computedLuminance);
 	_passes.logLuminance->pushImageBarrier(_downsampledLuminance, ResourceBarrier(TextureState::ShaderResource, 0, 1, 0, 1));
 	_passes.logLuminance->pushImageBarrier(_computedLuminance, ResourceBarrier(TextureState::Storage, 0, 1, 0, 1));
-	_passes.logLuminance->dispatchCompute(_compute.auminanceAdaptation, vec3i(1, 1, 1));
+	_passes.logLuminance->dispatchCompute(_compute.luminanceAdaptation, vec3i(1, 1, 1));
 
 	_passes.logLuminance->pushImageBarrier(_downsampledLuminance, ResourceBarrier(TextureState::ShaderResource, 0, 1, 0, 1));
 	_passes.logLuminance->pushImageBarrier(_computedLuminance, ResourceBarrier(TextureState::ShaderResource, 0, 1, 0, 1));

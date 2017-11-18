@@ -171,7 +171,7 @@ void ShadowmapProcessor::validate(RenderInterface::Pointer& renderer)
 		TextureDescription::Pointer desc(PointerInit::CreateInplace);
 		desc->size = vec2i(2048);
 		desc->format = TextureFormat::Depth32F;
-		desc->flags = Texture::Flags::RenderTarget;
+		desc->flags = Texture::Flags::ShaderResource | Texture::Flags::RenderTarget;
 		_directionalShadowmap = renderer->createTexture(desc);
 
 		desc->format = TextureFormat::RGBA16;

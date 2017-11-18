@@ -10,8 +10,7 @@
 #include <et/rendering/vulkan/vulkan_renderpass.h>
 #include <et/rendering/vulkan/vulkan.h>
 
-namespace et
-{
+namespace et {
 struct VulkanRenderSubpass
 {
 	VkFramebufferCreateInfo framebufferInfo = { VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO };
@@ -20,8 +19,7 @@ struct VulkanRenderSubpass
 	VkRect2D scissor{ };
 };
 
-uint64_t framebufferHash(uint32_t imageIndex, uint32_t mipLevel, uint32_t layer)
-{
+uint64_t framebufferHash(uint32_t imageIndex, uint32_t mipLevel, uint32_t layer) {
 	return static_cast<uint64_t>(layer) |
 		((static_cast<uint64_t>(mipLevel) & 0xFFFF) << 32) |
 		((static_cast<uint64_t>(imageIndex) & 0xFFFF) << 48);
@@ -31,8 +29,7 @@ class VulkanRenderPassPrivate : public VulkanNativeRenderPass
 {
 public:
 	VulkanRenderPassPrivate(VulkanState& v, VulkanRenderer* r)
-		: vulkan(v), renderer(r)
-	{
+		: vulkan(v), renderer(r) {
 	}
 
 	VulkanState& vulkan;
@@ -59,8 +56,7 @@ public:
 };
 
 VulkanRenderPass::VulkanRenderPass(VulkanRenderer* renderer, VulkanState& vulkan, const RenderPass::ConstructionInfo& passInfo)
-	: RenderPass(renderer, passInfo)
-{
+	: RenderPass(renderer, passInfo) {
 	ET_PIMPL_INIT(VulkanRenderPass, vulkan, renderer);
 
 	ET_ASSERT(!passInfo.name.empty());
@@ -173,8 +169,7 @@ VulkanRenderPass::VulkanRenderPass(VulkanRenderer* renderer, VulkanState& vulkan
 	VULKAN_CALL(vkCreateRenderPass(vulkan.device, &createInfo, nullptr, &_private->renderPass));
 }
 
-VulkanRenderPass::~VulkanRenderPass()
-{
+VulkanRenderPass::~VulkanRenderPass() {
 	for (const auto& fb : _private->subpasses)
 		vkDestroyFramebuffer(_private->vulkan.device, fb.second.beginInfo.framebuffer, nullptr);
 
@@ -189,13 +184,11 @@ VulkanRenderPass::~VulkanRenderPass()
 	ET_PIMPL_FINALIZE(VulkanRenderPass);
 }
 
-const VulkanNativeRenderPass& VulkanRenderPass::nativeRenderPass() const
-{
+const VulkanNativeRenderPass& VulkanRenderPass::nativeRenderPass() const {
 	return *(_private);
 }
 
-void VulkanRenderPass::begin(const RenderPassBeginInfo& beginInfo)
-{
+void VulkanRenderPass::begin(const RenderPassBeginInfo& beginInfo) {
 	ET_ASSERT(_private->recording == false);
 
 	_private->buildBeginTime = queryCurrentTimeInMicroSeconds();
@@ -315,8 +308,7 @@ void VulkanRenderPass::begin(const RenderPassBeginInfo& beginInfo)
 	_private->beginQueryIndex = _private->vulkan.writeTimestamp(commandBuffer, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT);
 }
 
-void VulkanRenderPass::nextSubpass()
-{
+void VulkanRenderPass::nextSubpass() {
 	ET_ASSERT(_private->recording);
 
 	uint32_t nextSubpassIndex = (_private->currentSubpassIndex == InvalidIndex) ? 0 : _private->currentSubpassIndex + 1;
@@ -347,8 +339,7 @@ void VulkanRenderPass::nextSubpass()
 	}
 }
 
-void VulkanRenderPass::pushRenderBatch(const MaterialInstance::Pointer& inMaterial, const VertexStream::Pointer& vertexStream, uint32_t first, uint32_t count)
-{
+void VulkanRenderPass::pushRenderBatch(const MaterialInstance::Pointer& inMaterial, const VertexStream::Pointer& vertexStream, uint32_t first, uint32_t count) {
 	ET_ASSERT(_private->recording);
 
 	VulkanPipelineState::Pointer pipelineState;
@@ -373,7 +364,7 @@ void VulkanRenderPass::pushRenderBatch(const MaterialInstance::Pointer& inMateri
 	Vector<Object::Pointer>& usedObjects = _private->usedObjects[_private->frameIndex];
 	usedObjects.reserve(_private->usedObjects[_private->frameIndex].size() + 6);
 	usedObjects.emplace_back(pipelineState);
-	
+
 	usedObjects.emplace_back(material->constantBufferData(info().name));
 	ConstantBufferEntry* materialVariables = static_cast<ConstantBufferEntry*>(usedObjects.back().pointer());
 
@@ -403,7 +394,7 @@ void VulkanRenderPass::pushRenderBatch(const MaterialInstance::Pointer& inMateri
 	vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineState->nativePipeline().pipeline);
 	vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineState->nativePipeline().layout, 0,
 		DescriptorSetClass_Count, descriptorSets, DescriptorSetClass::DynamicDescriptorsCount, dynamicOffsets);
-	
+
 	if (hasVertexBuffer)
 	{
 		usedObjects.emplace_back(vertexStream->vertexBuffer());
@@ -413,7 +404,7 @@ void VulkanRenderPass::pushRenderBatch(const MaterialInstance::Pointer& inMateri
 		VkBuffer buffers[] = { vertexBuffer->nativeBuffer().buffer };
 		vkCmdBindVertexBuffers(commandBuffer, 0, 1, buffers, offsets);
 	}
-	
+
 	if (hasIndexBuffer)
 	{
 		usedObjects.emplace_back(vertexStream->indexBuffer());
@@ -429,8 +420,7 @@ void VulkanRenderPass::pushRenderBatch(const MaterialInstance::Pointer& inMateri
 	}
 }
 
-void VulkanRenderPass::dispatchCompute(const Compute::Pointer& compute, const vec3i& dim)
-{	
+void VulkanRenderPass::dispatchCompute(const Compute::Pointer& compute, const vec3i& dim) {
 	MaterialInstance::Pointer material = compute->material();
 	ET_ASSERT(material->isInstance());
 
@@ -474,8 +464,7 @@ void VulkanRenderPass::dispatchCompute(const Compute::Pointer& compute, const ve
 	vkCmdDispatch(commandBuffer, tx, ty, tz);
 }
 
-void VulkanRenderPass::pushImageBarrier(const Texture::Pointer& texture, const ResourceBarrier& resourceBarrier)
-{
+void VulkanRenderPass::pushImageBarrier(const Texture::Pointer& texture, const ResourceBarrier& resourceBarrier) {
 	ET_ASSERT(_private->recording);
 
 	_private->usedObjects[_private->frameIndex].emplace_back(texture);
@@ -497,8 +486,7 @@ void VulkanRenderPass::pushImageBarrier(const Texture::Pointer& texture, const R
 		vulkan::accessMaskToPipelineStage(barrier.dstAccessMask), 0, 0, nullptr, 0, nullptr, 1, &barrier);
 }
 
-void VulkanRenderPass::copyImage(const Texture::Pointer& texFrom, const Texture::Pointer& texTo, const CopyDescriptor& desc)
-{
+void VulkanRenderPass::copyImage(const Texture::Pointer& texFrom, const Texture::Pointer& texTo, const CopyDescriptor& desc) {
 	ET_ASSERT(_private->recording);
 
 	_private->usedObjects[_private->frameIndex].emplace_back(texFrom);
@@ -529,8 +517,31 @@ void VulkanRenderPass::copyImage(const Texture::Pointer& texFrom, const Texture:
 		tTo->nativeTexture().image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region);
 }
 
-void VulkanRenderPass::endSubpass()
-{
+void VulkanRenderPass::copyImageToBuffer(const Texture::Pointer& image, const Buffer::Pointer& buffer, const CopyDescriptor& desc) {
+	ET_ASSERT(_private->recording);
+
+	VulkanTexture::Pointer tex = image;
+	VulkanBuffer::Pointer buf = buffer;
+	_private->usedObjects[_private->frameIndex].emplace_back(tex);
+	_private->usedObjects[_private->frameIndex].emplace_back(buf);
+
+	VkBufferImageCopy region = {};
+	region.imageExtent = { std::max<uint32_t>(0u, desc.size.x), std::max<uint32_t>(0u, desc.size.y), std::max<uint32_t>(0u, desc.size.z) };
+	region.imageOffset.x = desc.offsetFrom.x;
+	region.imageOffset.y = desc.offsetFrom.y;
+	region.imageOffset.z = desc.offsetFrom.z;
+	region.imageSubresource.aspectMask = tex->nativeTexture().aspect;
+	region.imageSubresource.baseArrayLayer = desc.layerFrom;
+	region.imageSubresource.layerCount = 1;
+	region.imageSubresource.mipLevel = desc.levelFrom;
+	region.bufferOffset = desc.bufferOffsetTo;
+
+	VkCommandBuffer commandBuffer = _private->content[_private->frameIndex].commandBuffer;
+	vkCmdCopyImageToBuffer(commandBuffer, tex->nativeTexture().image, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+		buf->nativeBuffer().buffer, 1, &region);
+}
+
+void VulkanRenderPass::endSubpass() {
 	ET_ASSERT(_private->recording);
 
 	VkCommandBuffer commandBuffer = _private->content[_private->frameIndex].commandBuffer;
@@ -539,8 +550,7 @@ void VulkanRenderPass::endSubpass()
 	_private->renderPassStarted = false;
 }
 
-void VulkanRenderPass::end()
-{
+void VulkanRenderPass::end() {
 	ET_ASSERT(_private->recording);
 
 	VkCommandBuffer commandBuffer = _private->content[_private->frameIndex].commandBuffer;
@@ -551,13 +561,11 @@ void VulkanRenderPass::end()
 	_private->buildEndTime = queryCurrentTimeInMicroSeconds();
 }
 
-void VulkanRenderPass::debug()
-{
+void VulkanRenderPass::debug() {
 	debug::debugBreak();
 }
 
-ConstantBufferEntry::Pointer VulkanRenderPass::buildObjectVariables(const VulkanProgram::Pointer& program)
-{
+ConstantBufferEntry::Pointer VulkanRenderPass::buildObjectVariables(const VulkanProgram::Pointer& program) {
 	ConstantBufferEntry::Pointer result;
 	if (program->reflection().objectVariablesBufferSize > 0)
 	{
@@ -575,8 +583,7 @@ ConstantBufferEntry::Pointer VulkanRenderPass::buildObjectVariables(const Vulkan
 	return result;
 }
 
-bool VulkanRenderPass::fillStatistics(uint64_t* buffer, RenderPassStatistics& stat)
-{
+bool VulkanRenderPass::fillStatistics(uint64_t* buffer, RenderPassStatistics& stat) {
 	uint32_t validBits = _private->vulkan.queues[VulkanQueueClass::Graphics].properties.timestampValidBits;
 
 	uint64_t timestampMask = 0;

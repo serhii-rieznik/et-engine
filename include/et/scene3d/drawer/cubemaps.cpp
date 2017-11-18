@@ -44,6 +44,19 @@ void CubemapProcessor::processEquiretangularTexture(const Texture::Pointer& tex)
 void CubemapProcessor::process(RenderInterface::Pointer& renderer, DrawerOptions& options, const Light::Pointer& light) {
 	validate(renderer);
 
+	if (_grabHarmonicsFrame == 0)
+	{
+		vec4 harmonics[9] = {};
+		uint8_t* ptr = _shValuesBuffer->map(0, _shValuesBuffer->size());
+		memcpy(harmonics, ptr, sizeof(harmonics));
+		_shValuesBuffer->unmap();
+		_grabHarmonicsFrame = -1;
+	}
+	else if (_grabHarmonicsFrame > 0)
+	{
+		--_grabHarmonicsFrame;
+	}
+
 	if (!hasFlag(BRDFLookupProcessed) || options.rebuildLookupTexture)
 	{
 		if (_lookupGeneratorMaterial.invalid())
@@ -131,6 +144,17 @@ void CubemapProcessor::process(RenderInterface::Pointer& renderer, DrawerOptions
 			_diffuseConvolvePass->pushRenderBatch(_specularConvolveBatch);
 			_diffuseConvolvePass->endSubpass();
 		}
+		
+		CopyDescriptor shValuesCopy;
+		shValuesCopy.size = vec3i(_shValues->size(0), 1);
+
+		_shConvolute->material()->setImage(StorageBuffer::StorageBuffer0, _shValues);
+		_diffuseConvolvePass->pushImageBarrier(_shValues, ResourceBarrier(TextureState::Storage));
+		_diffuseConvolvePass->dispatchCompute(_shConvolute, vec3i(1, 1, 1));
+		_diffuseConvolvePass->pushImageBarrier(_shValues, ResourceBarrier(TextureState::CopySource));
+		_diffuseConvolvePass->copyImageToBuffer(_shValues, _shValuesBuffer, shValuesCopy);
+		_grabHarmonicsFrame = 2;
+
 		_diffuseConvolvePass->end();
 		renderer->submitRenderPass(_diffuseConvolvePass);
 
@@ -166,7 +190,7 @@ void CubemapProcessor::validate(RenderInterface::Pointer& renderer) {
 		TextureDescription::Pointer cubemapDesc(PointerInit::CreateInplace);
 		cubemapDesc->format = TextureFormat::RGBA16F;
 		cubemapDesc->target = TextureTarget::Texture_Cube;
-		cubemapDesc->flags = Texture::Flags::RenderTarget;
+		cubemapDesc->flags = Texture::Flags::ShaderResource | Texture::Flags::RenderTarget;
 		cubemapDesc->levelCount = CubemapLevels;
 		cubemapDesc->layerCount = 6;
 		cubemapDesc->size = vec2i(1 << (CubemapLevels - 1));
@@ -192,7 +216,7 @@ void CubemapProcessor::validate(RenderInterface::Pointer& renderer) {
 		TextureDescription::Pointer lookupDesc(PointerInit::CreateInplace);
 		lookupDesc->format = TextureFormat::RGBA16F;
 		lookupDesc->size = vec2i(256);
-		lookupDesc->flags = Texture::Flags::RenderTarget;
+		lookupDesc->flags = Texture::Flags::ShaderResource | Texture::Flags::RenderTarget;
 		_lookup = renderer->createTexture(lookupDesc);
 
 		RenderPass::ConstructionInfo passInfo;
@@ -264,6 +288,33 @@ void CubemapProcessor::validate(RenderInterface::Pointer& renderer) {
 		_cubemapDebugPass = renderer->allocateRenderPass(passInfo);
 		_cubemapDebugBatch = renderhelper::createQuadBatch(renderer->checkersTexture(), _processingMaterial, renderhelper::QuadType::Default);
 	}
+
+	if (_shDebugBatch.invalid())
+	{
+		_shMaterial = renderer->sharedMaterialLibrary().loadMaterial(application().resolveFileName("engine_data/materials/spherical-harmonics-debug.json"));
+		_shDebugBatch = renderhelper::createQuadBatch(renderer->checkersTexture(), _shMaterial, renderhelper::QuadType::Default);
+	}
+
+	if (_shValues.invalid())
+	{
+		TextureDescription::Pointer desc(PointerInit::CreateInplace);
+		desc->size = vec2i(1, 9);
+		desc->flags = Texture::Flags::Storage | Texture::Flags::CopySource;
+		desc->format = TextureFormat::RGBA32F;
+		_shValues = renderer->createTexture(desc);
+
+		Buffer::Description bufferDesc;
+		bufferDesc.usage = Buffer::Usage::Staging;
+		bufferDesc.size = sizeof(vec4) * 9;
+		bufferDesc.location = Buffer::Location::Host;
+		_shValuesBuffer = renderer->createBuffer("shValues", bufferDesc);
+	}
+
+	if (_shConvolute.invalid())
+	{
+		Material::Pointer shConvoluteMaterial = renderer->sharedMaterialLibrary().loadMaterial(application().resolveFileName("engine_data/compute/spherical-harmonics.json"));
+		_shConvolute = renderer->createCompute(shConvoluteMaterial);
+	}
 }
 
 void CubemapProcessor::drawDebug(RenderInterface::Pointer& renderer, const DrawerOptions& options) {
@@ -292,6 +343,10 @@ void CubemapProcessor::drawDebug(RenderInterface::Pointer& renderer, const Drawe
 			}
 			pos.x += dx + xGap;
 		}
+		pos.x -= dx + xGap;
+		_cubemapDebugPass->setSharedVariable(ObjectVariable::WorldTransform, fullscreenBatchTransform(vp, pos, vec2(dx, dy)));
+		_cubemapDebugPass->pushRenderBatch(_shDebugBatch);
+
 		_cubemapDebugPass->endSubpass();
 		_cubemapDebugPass->end();
 		renderer->submitRenderPass(_cubemapDebugPass);
