@@ -23,6 +23,9 @@ cbuffer ObjectVariables : DECL_BUFFER(Object)
 	row_major float4x4 worldTransform;
 	float3 lightColor;
 	float4 lightDirection;
+#if (VISUALIZE_SPHERICAL_HARMONICS)
+	float4 environmentSphericalHarmonics[9];
+#endif
 };
 
 cbuffer MaterialVariables : DECL_BUFFER(Material)
@@ -104,7 +107,7 @@ float texelSolidAngle(in float3 d, float invSize)
 	return texelSolidAngle(u, v, invSize);
 }
 
-const float cScale = 1.0; // 0.0066666;
+const float cScale = 0.005; // 0.0066666;
 
 float4 fragmentMain(VSOutput fsIn) : SV_Target0
 {
@@ -117,29 +120,26 @@ float4 fragmentMain(VSOutput fsIn) : SV_Target0
 	float sinPhi = sin(phi);
 	float cosPhi = cos(phi);
 	float3 n = float3(cosPhi * cosTheta, sinTheta, sinPhi * cosTheta);
-
-	float3 test[] = {
-		float3( .79,  .44,  .54),
-		float3( .39,  .35,  .60),
-		float3(-.34, -.18, -.27),
-		float3(-.29, -.06,  .01),
-		float3(-.11, -.05, -.12),
-		float3(-.26, -.22, -.47),
-		float3(-.16, -.09, -.15),
-		float3( .56,  .21,  .14),
-		float3( .21, -.05, -.30)
-	};
 	
+	float c0 = 0.2820951;
+	float c1 = 0.3257351;
+	float c2 = 0.2731371;
+	float c3 = 0.0788479;
+	float c4 = 0.1365686;
+
 	float3 shResult = 0.0;
-	shResult += 0.2820948 * test[0];
-	shResult += 0.3257351 * test[1] * (n.y);
-	shResult += 0.3257351 * test[2] * (n.z);
-	shResult += 0.3257351 * test[3] * (n.x);
-	shResult += 0.2731371 * test[4] * (n.x * n.y);
-	shResult += 0.2731371 * test[5] * (n.y * n.z);
-	shResult += 0.0788479 * test[6] * (3.0 * n.z * n.z - 1.0);
-	shResult += 0.2731371 * test[7] * (n.x * n.z);
-	shResult += 0.1365686 * test[8] * (n.x * n.x - n.y * n.y);
+	shResult += c0 * environmentSphericalHarmonics[0].xyz;
+	
+	shResult += c1 * environmentSphericalHarmonics[1].xyz * (n.y);
+	shResult += c1 * environmentSphericalHarmonics[2].xyz * (n.z);
+	shResult += c1 * environmentSphericalHarmonics[3].xyz * (n.x);
+
+	shResult += c2 * environmentSphericalHarmonics[4].xyz * (n.x * n.y);
+	shResult += c2 * environmentSphericalHarmonics[5].xyz * (n.y * n.z);
+	
+	shResult += c3 * environmentSphericalHarmonics[6].xyz * (3.0 * n.z * n.z - 1.0);
+	shResult += c2 * environmentSphericalHarmonics[7].xyz * (n.x * n.z);
+	shResult += c4 * environmentSphericalHarmonics[8].xyz * (n.x * n.x - n.y * n.y);
 
 	return float4(linearToSRGB(shResult), 1.0);
 

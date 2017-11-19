@@ -10,8 +10,7 @@
 #include <et/rendering/interface/texture.h>
 #include <et/rendering/interface/sampler.h>
 
-namespace et
-{
+namespace et {
 enum class ObjectVariable : uint32_t
 {
 	WorldTransform,
@@ -46,6 +45,8 @@ enum class ObjectVariable : uint32_t
 	ContinuousTime,
 	DeltaTime,
 	Viewport,
+
+	EnvironmentSphericalHarmonics,
 
 	max
 };
@@ -110,7 +111,7 @@ enum : uint32_t
 	ObjectVariable_max = static_cast<uint32_t>(ObjectVariable::max),
 	MaterialVariable_max = static_cast<uint32_t>(MaterialVariable::max),
 	MaterialTexture_max = static_cast<uint32_t>(MaterialTexture::max),
-	
+
 	StorageBuffer_max = static_cast<uint32_t>(StorageBuffer::max),
 };
 
@@ -133,7 +134,7 @@ using MaterialSamplersCollection = UnorderedMap<String, MaterialSamplerHolder>;
 struct MaterialPropertyHolder
 {
 	MaterialVariable binding = MaterialVariable::max;
-	char data[sizeof(mat4)] { };
+	char data[sizeof(mat4)]{ };
 	uint32_t size = 0;
 };
 using MaterialPropertiesCollection = UnorderedMap<String, MaterialPropertyHolder>;
@@ -144,8 +145,7 @@ struct OptionalObject
 	IntrusivePtr<T> object;
 	uint32_t index = 0;
 
-	void clear()
-	{
+	void clear() {
 		index = 0;
 		object.reset(nullptr);
 	}
@@ -175,40 +175,54 @@ struct OptionalValue
 {
 	DataType storedType = DataType::max;
 	uint32_t binding = InvalidIndex;
-	char data[sizeof(mat4)] { };
-	uint32_t size = 0;
+	char data[256]{ };
+	uint32_t dataSize = 0;
+	uint32_t elementCount = 0;
 
-	bool isSet() const
-		{ return storedType != DataType::max; }
+	bool isSet() const {
+		return storedType != DataType::max;
+	}
 
 	template <class T>
-	const T& as() const
-	{
+	const T& as() const {
 		static_assert(sizeof(T) <= sizeof(data), "Requested type is too large");
 		ET_ASSERT(is<T>());
 		return *(reinterpret_cast<const T*>(data));
 	};
 
 	template <class T>
-	bool is() const
-	{
+	const T* asPointer() const {
+		static_assert(sizeof(T) <= sizeof(data), "Requested type is too large");
+		ET_ASSERT(is<T>());
+		return (reinterpret_cast<const T*>(data));
+	}
+
+	template <class T>
+	bool is() const {
 		static_assert(sizeof(T) <= sizeof(data), "Requested type is too large");
 		return storedType == dataTypeFromClass<T>();
 	}
 
 	template <class T>
-	void set(const T& value)
-	{
+	void set(const T* value, uint32_t count) {
 		static_assert(sizeof(T) <= sizeof(data), "Requested type is too large");
-		*(reinterpret_cast<T*>(data)) = value;
+		elementCount = count;
+		dataSize = sizeof(T) * elementCount;
+		ET_ASSERT(dataSize <= sizeof(data));
+		memcpy(data, value, dataSize);
 		storedType = dataTypeFromClass<T>();
-		size = sizeof(value);
 	}
 
-	void clear()
-	{
+	template <class T>
+	void set(const T& value) {
+		set(&value, 1);
+	}
+
+	void clear() {
 		memset(data, 0, sizeof(data));
 		storedType = DataType::max;
+		elementCount = 0;
+		dataSize = 0;
 	}
 };
 using VariablesHolder = Map<uint32_t, OptionalValue>;

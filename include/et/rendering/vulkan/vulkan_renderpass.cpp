@@ -574,10 +574,15 @@ ConstantBufferEntry::Pointer VulkanRenderPass::buildObjectVariables(const Vulkan
 
 		for (const auto& v : sharedVariables())
 		{
-			const Program::Variable& var = program->reflection().objectVariables[v.first];
+			if (v.first == uint32_t(ObjectVariable::EnvironmentSphericalHarmonics))
+				printf(".");
 
+			const Program::Variable& var = program->reflection().objectVariables[v.first];
 			if (var.enabled && v.second.isSet())
-				memcpy(result->data() + var.offset, v.second.data, v.second.size);
+			{
+				ET_ASSERT(v.second.elementCount <= var.arraySize);
+				memcpy(result->data() + var.offset, v.second.data, v.second.dataSize);
+			}
 		}
 	}
 	return result;

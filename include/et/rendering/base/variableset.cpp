@@ -44,6 +44,8 @@ static const std::map<ObjectVariable, std::string> objectVariableNames =
 	{ ObjectVariable::ContinuousTime, "continuousTime" },
 	{ ObjectVariable::DeltaTime, "deltaTime" },
 	{ ObjectVariable::Viewport, "viewport" },
+	
+	{ ObjectVariable::EnvironmentSphericalHarmonics, "environmentSphericalHarmonics" },
 };
 
 static const std::map<MaterialVariable, std::string> materialVariableNames =

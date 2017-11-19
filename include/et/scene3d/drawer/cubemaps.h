@@ -26,6 +26,7 @@ public:
 	const Texture::Pointer& convolvedDiffuseCubemap() const;
 	const Texture::Pointer& convolvedSpecularCubemap() const;
 	const Texture::Pointer& brdfLookupTexture() const;
+	const vec4* EnvironmentSphericalHarmonics() const;
 
 	void processAtmosphere();
 	void processEquiretangularTexture(const Texture::Pointer&);
@@ -89,6 +90,8 @@ private:
 	CubemapProjectionMatrixArray _projections;
 	RenderPassBeginInfo _oneLevelCubemapBeginInfo;
 	RenderPassBeginInfo _wholeCubemapBeginInfo;
+
+	vec4 _environmentSphericalHarmonics[9]{};
 	std::string _sourceTextureName;
 	int32_t _grabHarmonicsFrame = -1;
 };

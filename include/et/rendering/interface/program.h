@@ -19,12 +19,16 @@ class Program : public LoadableObject
 public:
 	ET_DECLARE_POINTER(Program);
 
-	struct Variable
+	union Variable
 	{
-		uint32_t offset = 0;
-		uint32_t sizeInBytes = 24;
-		uint32_t arraySize : 7;
-		uint32_t enabled : 1;
+		struct
+		{
+			uint32_t offset : 12;
+			uint32_t sizeInBytes : 12;
+			uint32_t arraySize : 7;
+			uint32_t enabled : 1;
+		};
+		uint32_t data = 0;
 	};
 
 	struct Reflection
@@ -32,10 +36,10 @@ public:
 		VertexDeclaration inputLayout;
 
 		uint32_t objectVariablesBufferSize = 0;
-		Variable objectVariables[ObjectVariable_max]{ };
+		Variable objectVariables[ObjectVariable_max];
 
 		uint32_t materialVariablesBufferSize = 0;
-		Variable materialVariables[MaterialVariable_max]{ };
+		Variable materialVariables[MaterialVariable_max];
 
 		TextureSet::Reflection textures;
 

@@ -498,7 +498,7 @@ void MaterialInstance::buildConstantBuffer(const std::string& pt, Holder<Constan
 
 		auto setFunc = [&, this](const OptionalValue& p) {
 			if (p.isSet() && reflection.materialVariables[p.binding].enabled)
-				memcpy(holder.obj->data() + reflection.materialVariables[p.binding].offset, p.data, p.size);
+				memcpy(holder.obj->data() + reflection.materialVariables[p.binding].offset, p.data, p.dataSize);
 		};
 
 		for (const auto& p : base()->properties)

@@ -14,8 +14,7 @@
 #include <et/rendering/base/constantbuffer.h>
 #include <et/rendering/base/renderbatch.h>
 
-namespace et
-{
+namespace et {
 
 struct RenderTarget
 {
@@ -38,8 +37,9 @@ struct RenderSubpass
 	uint32_t level = 0;
 
 	RenderSubpass() = default;
-	RenderSubpass(uint32_t aLayer, uint32_t aLevel) : 
-		layer(aLayer), level(aLevel) { }
+	RenderSubpass(uint32_t aLayer, uint32_t aLevel) :
+		layer(aLayer), level(aLevel) {
+	}
 };
 
 struct RenderPassBeginInfo
@@ -48,11 +48,11 @@ struct RenderPassBeginInfo
 
 	RenderPassBeginInfo() = default;
 
-	RenderPassBeginInfo(uint32_t l, uint32_t m) : 
-		subpasses(1, { l, m }) { }
+	RenderPassBeginInfo(uint32_t l, uint32_t m) :
+		subpasses(1, { l, m }) {
+	}
 
-	static const RenderPassBeginInfo& singlePass()
-	{
+	static const RenderPassBeginInfo& singlePass() {
 		static const RenderPassBeginInfo singlePassObject(0, 0);
 		return singlePassObject;
 	}
@@ -113,9 +113,12 @@ public:
 	const ConstructionInfo& info() const;
 
 	void setSharedTexture(MaterialTexture, const Texture::Pointer&, const Sampler::Pointer&);
-	
+
 	template <class T>
 	void setSharedVariable(ObjectVariable var, const T& value);
+
+	template <class T>
+	void setSharedVariable(ObjectVariable var, const T* value, uint32_t count);
 
 	template <class T>
 	bool loadSharedVariable(ObjectVariable var, T& value);
@@ -143,14 +146,17 @@ private:
 };
 
 template <class T>
-inline void RenderPass::setSharedVariable(ObjectVariable var, const T& value)
-{
+inline void RenderPass::setSharedVariable(ObjectVariable var, const T& value) {
 	_sharedVariables[static_cast<uint32_t>(var)].set(value);
 }
 
 template <class T>
-inline bool RenderPass::loadSharedVariable(ObjectVariable var, T& value)
-{
+void RenderPass::setSharedVariable(ObjectVariable var, const T* value, uint32_t count) {
+	_sharedVariables[static_cast<uint32_t>(var)].set(value, count);
+}
+
+template <class T>
+inline bool RenderPass::loadSharedVariable(ObjectVariable var, T& value) {
 	auto i = _sharedVariables.find(static_cast<uint32_t>(var));
 	if (i != _sharedVariables.end())
 	{

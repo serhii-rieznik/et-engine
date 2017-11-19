@@ -12,13 +12,23 @@ namespace s3d {
 
 CubemapProcessor::CubemapProcessor() :
 	FlagsHolder() {
-	
+
+	_environmentSphericalHarmonics[0] = vec4(0.38f, 0.43f, 0.45f, 0.0f);
+	_environmentSphericalHarmonics[1] = vec4(0.29f, 0.36f, 0.41f, 0.0f);
+	_environmentSphericalHarmonics[2] = vec4(0.04f, 0.03f, 0.01f, 0.0f);
+	_environmentSphericalHarmonics[3] = vec4(-0.10f, -0.10f, -0.09f, 0.0f);
+	_environmentSphericalHarmonics[4] = vec4(-0.06f, -0.06f, -0.04f, 0.0f);
+	_environmentSphericalHarmonics[5] = vec4(.01f, -0.01f, -0.05f, 0.0f);
+	_environmentSphericalHarmonics[6] = vec4(-0.09f, -0.13f, -0.15f, 0.0f);
+	_environmentSphericalHarmonics[7] = vec4(-0.06f, -0.05f, -0.04f, 0.0f);
+	_environmentSphericalHarmonics[8] = vec4(0.02f, -0.00f, -0.05f, 0.0f);
+
 	for (uint32_t level = 0; level < CubemapLevels; ++level)
 	{
 		for (uint32_t layer = 0; layer < 6; ++layer)
 			_wholeCubemapBeginInfo.subpasses.emplace_back(layer, level);
 	}
-	
+
 	for (uint32_t layer = 0; layer < 6; ++layer)
 		_oneLevelCubemapBeginInfo.subpasses.emplace_back(layer, 0);
 
@@ -137,14 +147,14 @@ void CubemapProcessor::process(RenderInterface::Pointer& renderer, DrawerOptions
 		for (uint32_t i = 0, e = 6; i < e; ++i)
 		{
 			uint32_t face = i % 6;
-			vec2 sz = vector2ToFloat(_tex[CubemapType::Downsampled]->size(0.0f));
+			vec2 sz = vector2ToFloat(_tex[CubemapType::Downsampled]->size(0));
 			_diffuseConvolveBatch->material()->setVector(MaterialVariable::ExtraParameters, vec4(0.0f, sz.x, sz.y, static_cast<float>(face)));
 			_diffuseConvolvePass->nextSubpass();
 			_diffuseConvolvePass->setSharedVariable(ObjectVariable::WorldTransform, _projections[face]);
 			_diffuseConvolvePass->pushRenderBatch(_specularConvolveBatch);
 			_diffuseConvolvePass->endSubpass();
 		}
-		
+
 		CopyDescriptor shValuesCopy;
 		shValuesCopy.size = vec3i(_shValues->size(0), 1);
 
@@ -344,6 +354,9 @@ void CubemapProcessor::drawDebug(RenderInterface::Pointer& renderer, const Drawe
 			pos.x += dx + xGap;
 		}
 		pos.x -= dx + xGap;
+
+		uint32_t shCount = sizeof(_environmentSphericalHarmonics) / sizeof(_environmentSphericalHarmonics[0]);
+		_cubemapDebugPass->setSharedVariable(ObjectVariable::EnvironmentSphericalHarmonics, _environmentSphericalHarmonics, shCount);
 		_cubemapDebugPass->setSharedVariable(ObjectVariable::WorldTransform, fullscreenBatchTransform(vp, pos, vec2(dx, dy)));
 		_cubemapDebugPass->pushRenderBatch(_shDebugBatch);
 
@@ -379,6 +392,10 @@ const Texture::Pointer& CubemapProcessor::brdfLookupTexture() const {
 
 const std::string& CubemapProcessor::sourceTextureName() const {
 	return _sourceTextureName;
+}
+
+const vec4* CubemapProcessor::EnvironmentSphericalHarmonics() const {
+	return _environmentSphericalHarmonics;
 }
 
 }
