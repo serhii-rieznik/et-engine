@@ -118,4 +118,5 @@ public:
 private:
 	ET_DECLARE_PIMPL(PipelineStateCache, 256);
 };
+
 }

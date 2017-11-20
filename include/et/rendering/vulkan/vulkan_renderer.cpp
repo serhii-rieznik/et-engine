@@ -26,8 +26,7 @@
 #	define VULKAN_ENABLE_VALIDATION 0
 #endif
 
-namespace et
-{
+namespace et {
 class VulkanRendererPrivate : public VulkanState
 {
 public:
@@ -46,26 +45,22 @@ public:
 };
 
 VulkanRenderer::VulkanRenderer(RenderContext* rc)
-	: RenderInterface(rc)
-{
+	: RenderInterface(rc) {
 	ET_PIMPL_INIT(VulkanRenderer);
 	Camera::renderingOriginTransform = -1.0f;
 	Camera::zeroClipRange = true;
 }
 
-VulkanRenderer::~VulkanRenderer()
-{
+VulkanRenderer::~VulkanRenderer() {
 	ET_PIMPL_FINALIZE(VulkanRenderer);
 }
 
-VkResult vkEnumerateInstanceLayerPropertiesWrapper(int, uint32_t* count, VkLayerProperties* props)
-{
+VkResult vkEnumerateInstanceLayerPropertiesWrapper(int, uint32_t* count, VkLayerProperties* props) {
 	return vkEnumerateInstanceLayerProperties(count, props);
 }
 
 VkBool32 VKAPI_CALL vulkanDebugCallback(VkDebugReportFlagsEXT flags, VkDebugReportObjectTypeEXT objType, uint64_t obj,
-	size_t location, int32_t code, const char* layerPrefix, const char* msg, void* userData)
-{
+	size_t location, int32_t code, const char* layerPrefix, const char* msg, void* userData) {
 	if (obj == static_cast<uint64_t>(-1))
 		obj = 0;
 
@@ -85,8 +80,7 @@ VkBool32 VKAPI_CALL vulkanDebugCallback(VkDebugReportFlagsEXT flags, VkDebugRepo
 	return VK_FALSE;
 }
 
-void VulkanRenderer::init(const RenderContextParameters& params)
-{
+void VulkanRenderer::init(const RenderContextParameters& params) {
 	initGlslangResources();
 
 	std::vector<const char*> enabledExtensions =
@@ -146,11 +140,11 @@ void VulkanRenderer::init(const RenderContextParameters& params)
 	vkGetPhysicalDeviceProperties(_private->physicalDevice, &_private->physicalDeviceProperties);
 	vkGetPhysicalDeviceFeatures(_private->physicalDevice, &_private->physicalDeviceFeatures);
 
-	Vector<VkQueueFamilyProperties> queueProperties = 
+	Vector<VkQueueFamilyProperties> queueProperties =
 		enumerateVulkanObjects<VkQueueFamilyProperties>(_private->physicalDevice, vkGetPhysicalDeviceQueueFamilyProperties);
 	ET_ASSERT(queueProperties.size() > 0);
 
-	VkDeviceQueueCreateInfo queueCreateInfos[VulkanQueueClass_Count] = { 
+	VkDeviceQueueCreateInfo queueCreateInfos[VulkanQueueClass_Count] = {
 		{ VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO }, { VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO } };
 
 	uint32_t queuesIndex = 0;
@@ -205,7 +199,7 @@ void VulkanRenderer::init(const RenderContextParameters& params)
 		cmdPoolCreateInfo.queueFamilyIndex = queue.index;
 		cmdPoolCreateInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
 		VULKAN_CALL(vkCreateCommandPool(_private->device, &cmdPoolCreateInfo, nullptr, &queue.commandPool));
-		
+
 		VkCommandBufferAllocateInfo serviceBufferInfo = { VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO };
 		serviceBufferInfo.commandPool = queue.commandPool;
 		serviceBufferInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
@@ -249,8 +243,7 @@ void VulkanRenderer::init(const RenderContextParameters& params)
 	initInternalStructures();
 }
 
-void VulkanRenderer::shutdown()
-{
+void VulkanRenderer::shutdown() {
 	_private->emptyTextureSet.reset(nullptr);
 
 	VULKAN_CALL(vkDeviceWaitIdle(_private->device));
@@ -259,8 +252,7 @@ void VulkanRenderer::shutdown()
 		pass.clear();
 }
 
-void VulkanRenderer::destroy()
-{
+void VulkanRenderer::destroy() {
 	_private->pipelineCache.clear();
 	shutdownInternalStructures();
 
@@ -270,23 +262,19 @@ void VulkanRenderer::destroy()
 	cleanupGlslangResources();
 }
 
-void VulkanRenderer::resize(const vec2i& sz)
-{
+void VulkanRenderer::resize(const vec2i& sz) {
 	_private->swapchain.createSizeDependentResources(_private->vulkan(), sz);
 }
 
-Buffer::Pointer VulkanRenderer::createBuffer(const std::string&, const Buffer::Description& desc)
-{
+Buffer::Pointer VulkanRenderer::createBuffer(const std::string&, const Buffer::Description& desc) {
 	return VulkanBuffer::Pointer::create(_private->vulkan(), desc);
 }
 
-Texture::Pointer VulkanRenderer::createTexture(const TextureDescription::Pointer& desc)
-{
+Texture::Pointer VulkanRenderer::createTexture(const TextureDescription::Pointer& desc) {
 	return VulkanTexture::Pointer::create(_private->vulkan(), desc.reference(), desc->data);
 }
 
-TextureSet::Pointer VulkanRenderer::createTextureSet(const TextureSet::Description& desc)
-{
+TextureSet::Pointer VulkanRenderer::createTextureSet(const TextureSet::Description& desc) {
 	TextureSet::Pointer result;
 	if (desc.empty())
 	{
@@ -302,21 +290,18 @@ TextureSet::Pointer VulkanRenderer::createTextureSet(const TextureSet::Descripti
 	return result;
 }
 
-Sampler::Pointer VulkanRenderer::createSampler(const Sampler::Description& desc)
-{
+Sampler::Pointer VulkanRenderer::createSampler(const Sampler::Description& desc) {
 	return VulkanSampler::Pointer::create(_private->vulkan(), desc);
 }
 
-Program::Pointer VulkanRenderer::createProgram(uint32_t stages, const std::string& source)
-{
+Program::Pointer VulkanRenderer::createProgram(uint32_t stages, const std::string& source) {
 	VulkanProgram::Pointer program = VulkanProgram::Pointer::create(_private->vulkan());
 	program->build(stages, source);
 	return program;
 }
 
 PipelineState::Pointer VulkanRenderer::acquireGraphicsPipeline(const RenderPass::Pointer& pass, const Material::Pointer& mat,
-	const VertexStream::Pointer& vs)
-{
+	const VertexStream::Pointer& vs) {
 	ET_ASSERT(mat->pipelineClass() == PipelineClass::Graphics);
 	ET_ASSERT(mat->isInstance() == false);
 
@@ -343,8 +328,7 @@ PipelineState::Pointer VulkanRenderer::acquireGraphicsPipeline(const RenderPass:
 	return ps;
 }
 
-Compute::Pointer VulkanRenderer::createCompute(const Material::Pointer& mtl)
-{
+Compute::Pointer VulkanRenderer::createCompute(const Material::Pointer& mtl) {
 	return VulkanCompute::Pointer::create(_private->vulkan(), mtl);
 }
 
@@ -353,13 +337,11 @@ RenderPass::Pointer VulkanRenderer::allocateRenderPass(const RenderPass::Constru
 	return VulkanRenderPass::Pointer::create(this, _private->vulkan(), info);
 }
 
-void VulkanRenderer::submitRenderPass(const RenderPass::Pointer& inPass)
-{
+void VulkanRenderer::submitRenderPass(const RenderPass::Pointer& inPass) {
 	_private->passes[frameIndex()].emplace_back(inPass);
 }
 
-void VulkanRenderer::begin()
-{
+void VulkanRenderer::begin() {
 	_private->swapchain.acquireNextImage(_private->vulkan());
 
 	VulkanSwapchain::Frame& currentFrame = _private->swapchain.mutableCurrentFrame();
@@ -369,7 +351,7 @@ void VulkanRenderer::begin()
 
 		VULKAN_CALL(vkGetQueryPoolResults(_private->vulkan().device, currentFrame.timestampsQueryPool, 0,
 			currentFrame.timestampIndex, sizeof(timestampData), timestampData, sizeof(uint64_t), VK_QUERY_RESULT_64_BIT | VK_QUERY_RESULT_WAIT_BIT));
-		
+
 		_statistics = { };
 		for (VulkanRenderPass::Pointer& pass : _private->passes[frameIndex()])
 		{
@@ -378,15 +360,14 @@ void VulkanRenderer::begin()
 				++_statistics.activeRenderPasses;
 			}
 		}
-		
+
 		currentFrame.timestampIndex = 0;
 	}
 
 	_private->passes[frameIndex()].clear();
 }
 
-void VulkanRenderer::present()
-{
+void VulkanRenderer::present() {
 	static VkPipelineStageFlags firstWaitStage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
 	static VkPipelineStageFlags lastWaitStage = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
 
@@ -394,22 +375,22 @@ void VulkanRenderer::present()
 	std::stable_sort(passes.begin(), passes.end(), [](const VulkanRenderPass::Pointer& l, const VulkanRenderPass::Pointer& r) {
 		return l->info().priority > r->info().priority;
 	});
-	
+
 	sharedConstantBuffer().flush(frameNumber());
 
 	size_t maxQueueSize = 2 * (1 + std::min(32ull, sqr(_private->passes.size())));
 	_private->allSubmits.clear();
 	_private->allSubmits.reserve(maxQueueSize);
-	
+
 	_private->commandBuffers.clear();
 	_private->commandBuffers.reserve(maxQueueSize);
-	
+
 	_private->waitStages.clear();
 	_private->waitStages.reserve(maxQueueSize);
-	
+
 	_private->waitSemaphores.clear();
 	_private->waitSemaphores.reserve(maxQueueSize);
-	
+
 	_private->signalSemaphores.clear();
 	_private->signalSemaphores.reserve(maxQueueSize);
 
@@ -515,18 +496,16 @@ void VulkanRenderer::present()
 
 	VULKAN_CALL(vkQueueSubmit(_private->queues[VulkanQueueClass::Graphics].queue, static_cast<uint32_t>(_private->allSubmits.size()),
 		_private->allSubmits.data(), _private->swapchain.currentFrame().imageFence));
-	
+
 	_private->allSubmits.clear();
 	_private->swapchain.present(_private->vulkan());
 }
 
-uint32_t VulkanRenderer::frameIndex() const
-{
+uint32_t VulkanRenderer::frameIndex() const {
 	return _private->swapchain.frameNumber % RendererFrameCount;
 }
 
-uint32_t VulkanRenderer::frameNumber() const
-{
+uint32_t VulkanRenderer::frameNumber() const {
 	return _private->swapchain.frameNumber;
 }
 

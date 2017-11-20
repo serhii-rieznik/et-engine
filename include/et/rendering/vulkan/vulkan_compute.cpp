@@ -12,34 +12,29 @@
 #include <et/rendering/vulkan/vulkan_renderpass.h>
 #include <et/rendering/vulkan/vulkan.h>
 
-namespace et
-{
+namespace et {
 
 class VulkanComputePrivate : public VulkanNativePipeline
 {
 public:
 	VulkanComputePrivate(VulkanState& v) :
-		vulkan(v)
-	{
+		vulkan(v) {
 	}
 
 	VulkanState& vulkan;
 };
 
 VulkanCompute::VulkanCompute(VulkanState& vulkan, const Material::Pointer& mat) :
-	Compute(mat)
-{
+	Compute(mat) {
 	ET_PIMPL_INIT(VulkanCompute, vulkan);
 }
 
-VulkanCompute::~VulkanCompute()
-{
+VulkanCompute::~VulkanCompute() {
 	_private->cleanup(_private->vulkan);
 	ET_PIMPL_FINALIZE(VulkanCompute);
 }
 
-void VulkanCompute::build(const VulkanRenderPass::Pointer& pass)
-{
+void VulkanCompute::build(const VulkanRenderPass::Pointer& pass) {
 	if (_private->pipeline != nullptr)
 		return;
 
@@ -53,8 +48,7 @@ void VulkanCompute::build(const VulkanRenderPass::Pointer& pass)
 	VULKAN_CALL(vkCreateComputePipelines(_private->vulkan.device, _private->vulkan.pipelineCache, 1, &createInfo, nullptr, &_private->pipeline));
 }
 
-const VulkanNativePipeline& VulkanCompute::nativeCompute() const
-{
+const VulkanNativePipeline& VulkanCompute::nativeCompute() const {
 	return (*_private);
 }
 

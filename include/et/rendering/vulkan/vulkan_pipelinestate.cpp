@@ -163,11 +163,7 @@ void VulkanPipelineStatePrivate::generateInputLayout(const VertexDeclaration& in
 	binding = {};
 	vertexInfo = { VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO };
 
-	if (expectedLayout.elements().empty())
-	{
-		printf(".");
-	}
-	else
+	if (!expectedLayout.elements().empty())
 	{
 		attribs.clear();
 		attribs.reserve(inputLayout.numElements());

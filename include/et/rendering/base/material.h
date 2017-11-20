@@ -41,6 +41,7 @@ public:
 	const MaterialInstanceCollection& instances() const;
 	void flushInstances();
 	void releaseInstances();
+	void invalidateInstances();
 
 	void setTexture(MaterialTexture, const Texture::Pointer&, const ResourceRange& = ResourceRange::whole);
 	void setSampler(MaterialTexture, const Sampler::Pointer&);

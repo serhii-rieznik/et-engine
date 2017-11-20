@@ -574,9 +574,6 @@ ConstantBufferEntry::Pointer VulkanRenderPass::buildObjectVariables(const Vulkan
 
 		for (const auto& v : sharedVariables())
 		{
-			if (v.first == uint32_t(ObjectVariable::EnvironmentSphericalHarmonics))
-				printf(".");
-
 			const Program::Variable& var = program->reflection().objectVariables[v.first];
 			if (var.enabled && v.second.isSet())
 			{

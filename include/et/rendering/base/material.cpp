@@ -10,8 +10,7 @@
 #include <et/rendering/base/shadersource.h>
 #include <et/core/json.h>
 
-namespace et
-{
+namespace et {
 
 const std::string kCode = "code";
 const std::string kInputLayout = "input-layout";
@@ -23,20 +22,17 @@ std::string Material::_shaderDefaultHeader;
  * Material
  */
 Material::Material(RenderInterface* ren)
-	: _renderer(ren)
-{
+	: _renderer(ren) {
 	_activeInstances.reserve(8);
 	_instancesPool.reserve(8);
 	initDefaultHeader();
 }
 
-uint64_t Material::sortingKey() const
-{
+uint64_t Material::sortingKey() const {
 	return 0;
 }
 
-void Material::setTexture(MaterialTexture t, const Texture::Pointer& tex, const ResourceRange& range)
-{
+void Material::setTexture(MaterialTexture t, const Texture::Pointer& tex, const ResourceRange& range) {
 	OptionalTextureObject& entry = textures[static_cast<uint32_t>(t)];
 	if ((entry.object != tex) || (entry.range != range))
 	{
@@ -48,8 +44,7 @@ void Material::setTexture(MaterialTexture t, const Texture::Pointer& tex, const 
 	}
 }
 
-void Material::setSampler(MaterialTexture t, const Sampler::Pointer& smp)
-{
+void Material::setSampler(MaterialTexture t, const Sampler::Pointer& smp) {
 	OptionalSamplerObject& entry = samplers[static_cast<uint32_t>(t) + MaterialSamplerBindingOffset];
 	if (entry.object != smp)
 	{
@@ -60,8 +55,7 @@ void Material::setSampler(MaterialTexture t, const Sampler::Pointer& smp)
 	}
 }
 
-void Material::setImage(StorageBuffer s, const Texture::Pointer& tex)
-{
+void Material::setImage(StorageBuffer s, const Texture::Pointer& tex) {
 	OptionalImageObject& entry = images[static_cast<uint32_t>(s)];
 	if (entry.object != tex)
 	{
@@ -72,14 +66,12 @@ void Material::setImage(StorageBuffer s, const Texture::Pointer& tex)
 	}
 }
 
-void Material::setTextureWithSampler(MaterialTexture t, const Texture::Pointer& tex, const Sampler::Pointer& smp, const ResourceRange& range)
-{
+void Material::setTextureWithSampler(MaterialTexture t, const Texture::Pointer& tex, const Sampler::Pointer& smp, const ResourceRange& range) {
 	setTexture(t, tex, range);
 	setSampler(t, smp);
 }
 
-void Material::setVector(MaterialVariable p, const vec4& v)
-{
+void Material::setVector(MaterialVariable p, const vec4& v) {
 	uint32_t ip = static_cast<uint32_t>(p);
 	auto& prop = properties[ip];
 	prop.set(v);
@@ -87,8 +79,7 @@ void Material::setVector(MaterialVariable p, const vec4& v)
 	invalidateConstantBuffer();
 }
 
-void Material::setFloat(MaterialVariable p, float f)
-{
+void Material::setFloat(MaterialVariable p, float f) {
 	uint32_t ip = static_cast<uint32_t>(p);
 	auto& prop = properties[ip];
 	prop.set(f);
@@ -96,53 +87,43 @@ void Material::setFloat(MaterialVariable p, float f)
 	invalidateConstantBuffer();
 }
 
-vec4 Material::getVector(MaterialVariable p) const
-{
+vec4 Material::getVector(MaterialVariable p) const {
 	return getParameter<vec4>(p);
 }
 
-float Material::getFloat(MaterialVariable p) const
-{
+float Material::getFloat(MaterialVariable p) const {
 	return getParameter<float>(p);
 }
 
-const Texture::Pointer& Material::texture(MaterialTexture t)
-{
+const Texture::Pointer& Material::texture(MaterialTexture t) {
 	return textures[static_cast<uint32_t>(t)].object;
 }
 
-const Sampler::Pointer& Material::sampler(MaterialTexture t)
-{
+const Sampler::Pointer& Material::sampler(MaterialTexture t) {
 	return samplers[static_cast<uint32_t>(t)].object;
 }
 
-const Texture::Pointer& Material::image(StorageBuffer t)
-{
+const Texture::Pointer& Material::image(StorageBuffer t) {
 	return images[static_cast<uint32_t>(t)].object;
 }
 
-void Material::setProgram(const Program::Pointer& prog, const std::string& pt)
-{
+void Material::setProgram(const Program::Pointer& prog, const std::string& pt) {
 	_configurations[pt].program = prog;
 }
 
-void Material::setDepthState(const DepthState& ds, const std::string& pt)
-{
+void Material::setDepthState(const DepthState& ds, const std::string& pt) {
 	_configurations[pt].depthState = ds;
 }
 
-void Material::setBlendState(const BlendState& bs, const std::string& pt)
-{
+void Material::setBlendState(const BlendState& bs, const std::string& pt) {
 	_configurations[pt].blendState = bs;
 }
 
-void Material::setCullMode(CullMode cm, const std::string& pt)
-{
+void Material::setCullMode(CullMode cm, const std::string& pt) {
 	_configurations[pt].cullMode = cm;
 }
 
-void Material::loadFromJson(const std::string& source, const std::string& baseFolder)
-{
+void Material::loadFromJson(const std::string& source, const std::string& baseFolder) {
 	VariantClass cls = VariantClass::Invalid;
 	Dictionary obj = json::deserialize(source, cls);
 	if (cls != VariantClass::Dictionary)
@@ -178,8 +159,7 @@ void Material::loadFromJson(const std::string& source, const std::string& baseFo
 	invalidateTextureSet();
 }
 
-const Material::Configuration& Material::configuration(const std::string& cls) const
-{
+const Material::Configuration& Material::configuration(const std::string& cls) const {
 	static const Material::Configuration emptyConfiguration;
 
 	auto i = _configurations.find(cls);
@@ -191,8 +171,7 @@ const Material::Configuration& Material::configuration(const std::string& cls) c
 	return (i == _configurations.end()) ? emptyConfiguration : i->second;
 }
 
-void Material::loadRenderPass(const std::string& cls, const Dictionary& obj, const std::string& baseFolder)
-{
+void Material::loadRenderPass(const std::string& cls, const Dictionary& obj, const std::string& baseFolder) {
 	bool isGraphicsPipeline = (obj.stringForKey(kClass)->content != kCompute);
 	_pipelineClass = isGraphicsPipeline ? PipelineClass::Graphics : PipelineClass::Compute;
 
@@ -207,13 +186,12 @@ void Material::loadRenderPass(const std::string& cls, const Dictionary& obj, con
 		setBlendState(deserializeBlendState(obj.objectForKey(kBlendState)), cls);
 		setCullMode(cullMode, cls);
 	}
-	
+
 	_configurations[cls].program = loadCode(obj.stringForKey(kCode)->content, baseFolder, obj.dictionaryForKey(kOptions),
 		_configurations[cls].inputLayout, _configurations[cls].usedFiles);
 }
 
-VertexDeclaration Material::loadInputLayout(Dictionary layout)
-{
+VertexDeclaration Material::loadInputLayout(Dictionary layout) {
 	VertexDeclaration decl;
 
 	Map<VertexAttributeUsage, uint32_t> sortedContent;
@@ -236,8 +214,7 @@ VertexDeclaration Material::loadInputLayout(Dictionary layout)
 	return decl;
 }
 
-std::string Material::generateInputLayout(const VertexDeclaration& decl)
-{
+std::string Material::generateInputLayout(const VertexDeclaration& decl) {
 	std::string layout;
 	layout.reserve(1024);
 
@@ -259,8 +236,7 @@ std::string Material::generateInputLayout(const VertexDeclaration& decl)
 }
 
 Program::Pointer Material::loadCode(const std::string& codeString, const std::string& baseFolder,
-	const Dictionary& defines, const VertexDeclaration& decl, StringList& fileNames)
-{
+	const Dictionary& defines, const VertexDeclaration& decl, StringList& fileNames) {
 	application().pushSearchPath(baseFolder);
 	std::string codeFileName = application().resolveFileName(codeString + ".hlsl");
 	application().popSearchPaths();
@@ -292,8 +268,7 @@ Program::Pointer Material::loadCode(const std::string& codeString, const std::st
 
 	std::string programSource = loadTextFile(codeFileName);
 	fileNames = parseShaderSource(programSource, getFilePath(codeFileName), allDefines,
-		[this, &decl](ParseDirective what, std::string& code, uint32_t positionInCode)
-	{
+		[this, &decl](ParseDirective what, std::string& code, uint32_t positionInCode) {
 		if (what == ParseDirective::InputLayout)
 		{
 			code.insert(positionInCode, generateInputLayout(decl));
@@ -320,8 +295,7 @@ Program::Pointer Material::loadCode(const std::string& codeString, const std::st
 	return _renderer->createProgram(stagesMask, programSource);
 }
 
-MaterialInstancePointer Material::instance()
-{
+MaterialInstancePointer Material::instance() {
 	flushInstances();
 
 	MaterialInstance::Pointer result;
@@ -340,18 +314,16 @@ MaterialInstancePointer Material::instance()
 	result->textures = textures;
 	result->samplers = samplers;
 	result->properties = properties;
-	
+
 	_activeInstances.emplace_back(result);
 	return result;
 }
 
-const MaterialInstanceCollection& Material::instances() const
-{
+const MaterialInstanceCollection& Material::instances() const {
 	return _activeInstances;
 }
 
-void Material::flushInstances()
-{
+void Material::flushInstances() {
 	size_t index = 0;
 	while (index < _activeInstances.size())
 	{
@@ -368,26 +340,33 @@ void Material::flushInstances()
 	}
 }
 
-void Material::releaseInstances()
-{
+void Material::invalidateInstances() {
+	ET_ASSERT(!isInstance());
+	for (MaterialInstance::Pointer& i : _activeInstances)
+	{
+		i->invalidateConstantBuffer();
+		i->invalidateImageSet();
+		i->invalidateTextureSet();
+	}
+}
+
+void Material::releaseInstances() {
+	ET_ASSERT(!isInstance());
 	_activeInstances.clear();
 	_instancesPool.clear();
 }
 
-void Material::invalidateTextureSet()
-{
+void Material::invalidateTextureSet() {
 	for (MaterialInstance::Pointer& i : _activeInstances)
 		i->invalidateTextureSet();
 }
 
-void Material::invalidateImageSet()
-{
+void Material::invalidateImageSet() {
 	for (MaterialInstance::Pointer& i : _activeInstances)
 		i->invalidateImageSet();
 }
 
-void Material::invalidateConstantBuffer()
-{
+void Material::invalidateConstantBuffer() {
 	for (MaterialInstance::Pointer& i : _activeInstances)
 		i->invalidateConstantBuffer();
 }
@@ -397,24 +376,20 @@ void Material::invalidateConstantBuffer()
  * Material Instance
  */
 MaterialInstance::MaterialInstance(Material::Pointer bs)
-	: Material(bs->_renderer), _base(bs)
-{
+	: Material(bs->_renderer), _base(bs) {
 }
 
-Material::Pointer& MaterialInstance::base()
-{
+Material::Pointer& MaterialInstance::base() {
 	ET_ASSERT(isInstance());
 	return _base;
 }
 
-const Material::Pointer& MaterialInstance::base() const
-{
+const Material::Pointer& MaterialInstance::base() const {
 	ET_ASSERT(isInstance());
 	return _base;
 }
 
-void MaterialInstance::buildTextureSet(const std::string& pt, Holder<TextureSet::Pointer>& holder)
-{
+void MaterialInstance::buildTextureSet(const std::string& pt, Holder<TextureSet::Pointer>& holder) {
 	ET_ASSERT(isInstance());
 
 	const Program::Reflection& reflection = base()->configuration(pt).program->reflection();
@@ -428,7 +403,7 @@ void MaterialInstance::buildTextureSet(const std::string& pt, Holder<TextureSet:
 		{
 			const Texture::Pointer& baseTexture = base()->textures[r.second].object;
 			const ResourceRange& baseRange = base()->textures[r.second].range;
-			
+
 			const Texture::Pointer& ownTexture = textures[r.second].object;
 			const ResourceRange& ownRange = textures[r.second].range;
 
@@ -441,7 +416,7 @@ void MaterialInstance::buildTextureSet(const std::string& pt, Holder<TextureSet:
 				descriptionTexture.range = ResourceRange::whole;
 			}
 		}
-		
+
 		for (const auto& r : ref.samplers)
 		{
 			const Sampler::Pointer& baseSampler = base()->samplers[r.second].object;
@@ -457,8 +432,7 @@ void MaterialInstance::buildTextureSet(const std::string& pt, Holder<TextureSet:
 	holder.valid = true;
 }
 
-void MaterialInstance::buildImageSet(const std::string& pt, Holder<TextureSet::Pointer>& holder)
-{
+void MaterialInstance::buildImageSet(const std::string& pt, Holder<TextureSet::Pointer>& holder) {
 	ET_ASSERT(isInstance());
 
 	const Program::Reflection& reflection = base()->configuration(pt).program->reflection();
@@ -482,8 +456,7 @@ void MaterialInstance::buildImageSet(const std::string& pt, Holder<TextureSet::P
 	holder.valid = true;
 }
 
-void MaterialInstance::buildConstantBuffer(const std::string& pt, Holder<ConstantBufferEntry::Pointer>& holder)
-{
+void MaterialInstance::buildConstantBuffer(const std::string& pt, Holder<ConstantBufferEntry::Pointer>& holder) {
 	ET_ASSERT(isInstance());
 
 	const Program::Reflection& reflection = base()->configuration(pt).program->reflection();
@@ -511,8 +484,7 @@ void MaterialInstance::buildConstantBuffer(const std::string& pt, Holder<Constan
 	}
 }
 
-const TextureSet::Pointer& MaterialInstance::textureSet(const std::string& pt)
-{
+const TextureSet::Pointer& MaterialInstance::textureSet(const std::string& pt) {
 	ET_ASSERT(isInstance());
 
 	auto& holder = _textureSets[pt];
@@ -522,8 +494,7 @@ const TextureSet::Pointer& MaterialInstance::textureSet(const std::string& pt)
 	return holder.obj;
 }
 
-const TextureSet::Pointer& MaterialInstance::imageSet(const std::string& pt)
-{
+const TextureSet::Pointer& MaterialInstance::imageSet(const std::string& pt) {
 	ET_ASSERT(isInstance());
 
 	auto& holder = _imageSets[pt];
@@ -533,8 +504,7 @@ const TextureSet::Pointer& MaterialInstance::imageSet(const std::string& pt)
 	return holder.obj;
 }
 
-const ConstantBufferEntry::Pointer& MaterialInstance::constantBufferData(const std::string& pt)
-{
+const ConstantBufferEntry::Pointer& MaterialInstance::constantBufferData(const std::string& pt) {
 	ET_ASSERT(isInstance());
 
 	auto& holder = _constBuffers[pt];
@@ -544,42 +514,36 @@ const ConstantBufferEntry::Pointer& MaterialInstance::constantBufferData(const s
 	return holder.obj;
 }
 
-void MaterialInstance::invalidateTextureSet()
-{
+void MaterialInstance::invalidateTextureSet() {
 	ET_ASSERT(isInstance());
 
 	for (auto& hld : _textureSets)
 		hld.second.valid = false;
 }
 
-void MaterialInstance::invalidateImageSet()
-{
+void MaterialInstance::invalidateImageSet() {
 	ET_ASSERT(isInstance());
 
 	for (auto& hld : _imageSets)
 		hld.second.valid = false;
 }
 
-void MaterialInstance::invalidateConstantBuffer()
-{
+void MaterialInstance::invalidateConstantBuffer() {
 	ET_ASSERT(isInstance());
 
 	for (auto& hld : _constBuffers)
 		hld.second.valid = false;
 }
 
-void MaterialInstance::serialize(std::ostream&) const
-{
+void MaterialInstance::serialize(std::ostream&) const {
 
 }
 
-void MaterialInstance::deserialize(std::istream&)
-{
+void MaterialInstance::deserialize(std::istream&) {
 
 }
 
-void Material::initDefaultHeader()
-{
+void Material::initDefaultHeader() {
 	if (!_shaderDefaultHeader.empty()) return;
 
 	_shaderDefaultHeader = R"(

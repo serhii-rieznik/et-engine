@@ -18,7 +18,7 @@ struct MaterialReloaded : public ObjectLoader
 	void reloadObject(LoadableObject::Pointer object, ObjectsCache&) override
 	{
 		Material::Pointer mtl = object;
-		mtl->releaseInstances();
+		mtl->invalidateInstances();
 		mtl->loadFromJson(loadTextFile(mtl->origin()), getFilePath(mtl->origin()));
 	}
 };
@@ -55,7 +55,7 @@ void MaterialLibrary::reloadMaterials()
 {
 	for (Material::Pointer mtl : _loadedMaterials)
 	{
-		mtl->releaseInstances();
+		mtl->invalidateInstances();
 		mtl->loadFromJson(loadTextFile(mtl->origin()), getFilePath(mtl->origin()));
 	}
 }

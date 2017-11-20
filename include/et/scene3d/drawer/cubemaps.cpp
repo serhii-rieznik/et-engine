@@ -13,16 +13,6 @@ namespace s3d {
 CubemapProcessor::CubemapProcessor() :
 	FlagsHolder() {
 
-	_environmentSphericalHarmonics[0] = vec4(0.38f, 0.43f, 0.45f, 0.0f);
-	_environmentSphericalHarmonics[1] = vec4(0.29f, 0.36f, 0.41f, 0.0f);
-	_environmentSphericalHarmonics[2] = vec4(0.04f, 0.03f, 0.01f, 0.0f);
-	_environmentSphericalHarmonics[3] = vec4(-0.10f, -0.10f, -0.09f, 0.0f);
-	_environmentSphericalHarmonics[4] = vec4(-0.06f, -0.06f, -0.04f, 0.0f);
-	_environmentSphericalHarmonics[5] = vec4(.01f, -0.01f, -0.05f, 0.0f);
-	_environmentSphericalHarmonics[6] = vec4(-0.09f, -0.13f, -0.15f, 0.0f);
-	_environmentSphericalHarmonics[7] = vec4(-0.06f, -0.05f, -0.04f, 0.0f);
-	_environmentSphericalHarmonics[8] = vec4(0.02f, -0.00f, -0.05f, 0.0f);
-
 	for (uint32_t level = 0; level < CubemapLevels; ++level)
 	{
 		for (uint32_t layer = 0; layer < 6; ++layer)
@@ -56,9 +46,8 @@ void CubemapProcessor::process(RenderInterface::Pointer& renderer, DrawerOptions
 
 	if (_grabHarmonicsFrame == 0)
 	{
-		vec4 harmonics[9] = {};
 		uint8_t* ptr = _shValuesBuffer->map(0, _shValuesBuffer->size());
-		memcpy(harmonics, ptr, sizeof(harmonics));
+		memcpy(_environmentSphericalHarmonics, ptr, sizeof(_environmentSphericalHarmonics));
 		_shValuesBuffer->unmap();
 		_grabHarmonicsFrame = -1;
 	}
@@ -158,6 +147,7 @@ void CubemapProcessor::process(RenderInterface::Pointer& renderer, DrawerOptions
 		CopyDescriptor shValuesCopy;
 		shValuesCopy.size = vec3i(_shValues->size(0), 1);
 
+		_shConvolute->material()->setTexture(MaterialTexture::BaseColor, _tex[CubemapType::Downsampled]);
 		_shConvolute->material()->setImage(StorageBuffer::StorageBuffer0, _shValues);
 		_diffuseConvolvePass->pushImageBarrier(_shValues, ResourceBarrier(TextureState::Storage));
 		_diffuseConvolvePass->dispatchCompute(_shConvolute, vec3i(1, 1, 1));

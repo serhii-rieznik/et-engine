@@ -68,19 +68,21 @@ VSOutput vertexMain(uint vertexIndex : SV_VertexID)
 }
 
 #endif
-
-float areaElement(float x, float y)
-{
-    return atan2(x * y, sqrt(x * x + y * y + 1.0));
-}
  
-float texelSolidAngle(float U, float V, float invSize)
+float texelSolidAngle(float u, float v, float invSize)
 {
-    float x0 = U - invSize;
-    float x1 = U + invSize;
-    float y0 = V - invSize;
-    float y1 = V + invSize;
-    return areaElement(x0, y0) - areaElement(x0, y1) - areaElement(x1, y0) + areaElement(x1, y1);
+    float x0 = u - invSize;
+    float x1 = u + invSize;
+    float y0 = v - invSize;
+    float y1 = v + invSize;
+    float x00sq = x0 * x0;
+    float x11sq = x1 * x1;
+    float y00sq = y0 * y0;
+    float y11sq = y1 * y1;
+    return atan2(x0 * y0, sqrt(x00sq + y00sq + 1.0)) - 
+    	   atan2(x0 * y1, sqrt(x00sq + y11sq + 1.0)) - 
+		   atan2(x1 * y0, sqrt(x11sq + y00sq + 1.0)) + 
+		   atan2(x1 * y1, sqrt(x11sq + y11sq + 1.0)) ;
 }
 
 float texelSolidAngle(in float3 d, float invSize)
@@ -107,7 +109,7 @@ float texelSolidAngle(in float3 d, float invSize)
 	return texelSolidAngle(u, v, invSize);
 }
 
-const float cScale = 0.005; // 0.0066666;
+const float cScale = 0.001;
 
 float4 fragmentMain(VSOutput fsIn) : SV_Target0
 {
@@ -121,27 +123,18 @@ float4 fragmentMain(VSOutput fsIn) : SV_Target0
 	float cosPhi = cos(phi);
 	float3 n = float3(cosPhi * cosTheta, sinTheta, sinPhi * cosTheta);
 	
-	float c0 = 0.2820951;
-	float c1 = 0.3257351;
-	float c2 = 0.2731371;
-	float c3 = 0.0788479;
-	float c4 = 0.1365686;
-
 	float3 shResult = 0.0;
-	shResult += c0 * environmentSphericalHarmonics[0].xyz;
-	
-	shResult += c1 * environmentSphericalHarmonics[1].xyz * (n.y);
-	shResult += c1 * environmentSphericalHarmonics[2].xyz * (n.z);
-	shResult += c1 * environmentSphericalHarmonics[3].xyz * (n.x);
+	shResult += 0.282095 * environmentSphericalHarmonics[0];
+	shResult += 0.488603 * n.y * environmentSphericalHarmonics[1];
+	shResult += 0.488603 * n.z * environmentSphericalHarmonics[2];
+	shResult += 0.488603 * n.x * environmentSphericalHarmonics[3];
+	shResult += 1.092548 * n.x * n.y * environmentSphericalHarmonics[4];
+	shResult += 1.092548 * n.y * n.z * environmentSphericalHarmonics[5];
+	shResult += 0.315392 * (3.0 * n.z * n.z - 1.0) * environmentSphericalHarmonics[6];
+	shResult += 1.092548 * n.x * n.z * environmentSphericalHarmonics[7];
+	shResult += 0.546274 * (n.x * n.x - n.y * n.y) * environmentSphericalHarmonics[8];
 
-	shResult += c2 * environmentSphericalHarmonics[4].xyz * (n.x * n.y);
-	shResult += c2 * environmentSphericalHarmonics[5].xyz * (n.y * n.z);
-	
-	shResult += c3 * environmentSphericalHarmonics[6].xyz * (3.0 * n.z * n.z - 1.0);
-	shResult += c2 * environmentSphericalHarmonics[7].xyz * (n.x * n.z);
-	shResult += c4 * environmentSphericalHarmonics[8].xyz * (n.x * n.x - n.y * n.y);
-
-	return float4(linearToSRGB(shResult), 1.0);
+	return float4(linearToSRGB(abs(cScale * shResult)), 1.0);
 
 #elif (VISUALIZE_CUBEMAP)	
 
@@ -204,7 +197,6 @@ float4 fragmentMain(VSOutput fsIn) : SV_Target0
 	
 	uint w = level0Width >> sampledLevel;
 	uint h = level0Height >> sampledLevel;
-	uint numSamples = w * h * 6;
 	float invFaceSize = 1.0 / float(min(w, h));
 
 	float passedSamples = 0.0;
