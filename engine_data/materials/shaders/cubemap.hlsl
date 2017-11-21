@@ -10,7 +10,7 @@
 
 	Texture2D<float4> baseColorTexture : DECL_TEXTURE(BaseColor);
 
-#elif (VISUALIZE_CUBEMAP || DIFFUSE_CONVOLUTION || SPECULAR_CONVOLUTION || DOWNSAMPLE_CUBEMAP)
+#elif (VISUALIZE_CUBEMAP  || VISUALIZE_SPHERICAL_HARMONICS || DIFFUSE_CONVOLUTION || SPECULAR_CONVOLUTION || DOWNSAMPLE_CUBEMAP)
 
 	TextureCube<float4> baseColorTexture : DECL_TEXTURE(BaseColor);
 
@@ -69,47 +69,7 @@ VSOutput vertexMain(uint vertexIndex : SV_VertexID)
 
 #endif
  
-float texelSolidAngle(float u, float v, float invSize)
-{
-    float x0 = u - invSize;
-    float x1 = u + invSize;
-    float y0 = v - invSize;
-    float y1 = v + invSize;
-    float x00sq = x0 * x0;
-    float x11sq = x1 * x1;
-    float y00sq = y0 * y0;
-    float y11sq = y1 * y1;
-    return atan2(x0 * y0, sqrt(x00sq + y00sq + 1.0)) - 
-    	   atan2(x0 * y1, sqrt(x00sq + y11sq + 1.0)) - 
-		   atan2(x1 * y0, sqrt(x11sq + y00sq + 1.0)) + 
-		   atan2(x1 * y1, sqrt(x11sq + y11sq + 1.0)) ;
-}
-
-float texelSolidAngle(in float3 d, float invSize)
-{
-	float u = 0.0;
-	float v = 0.0;
-	float3 ad = abs(d);
-	float maxComponent = max(ad.x, max(ad.y, ad.z));
-	if (maxComponent == ad.x)
-	{
-		u = d.z / maxComponent;
-		v = d.y / maxComponent;
-	}
-	if (maxComponent == ad.y)
-	{
-		u = d.z / maxComponent;
-		v = d.x / maxComponent;
-	}
-	if (maxComponent == ad.z)
-	{
-		u = d.y / maxComponent;
-		v = d.x / maxComponent;
-	}
-	return texelSolidAngle(u, v, invSize);
-}
-
-const float cScale = 0.001;
+const float cScale = 0.01;
 
 float4 fragmentMain(VSOutput fsIn) : SV_Target0
 {
@@ -122,19 +82,8 @@ float4 fragmentMain(VSOutput fsIn) : SV_Target0
 	float sinPhi = sin(phi);
 	float cosPhi = cos(phi);
 	float3 n = float3(cosPhi * cosTheta, sinTheta, sinPhi * cosTheta);
-	
-	float3 shResult = 0.0;
-	shResult += 0.282095 * environmentSphericalHarmonics[0];
-	shResult += 0.488603 * n.y * environmentSphericalHarmonics[1];
-	shResult += 0.488603 * n.z * environmentSphericalHarmonics[2];
-	shResult += 0.488603 * n.x * environmentSphericalHarmonics[3];
-	shResult += 1.092548 * n.x * n.y * environmentSphericalHarmonics[4];
-	shResult += 1.092548 * n.y * n.z * environmentSphericalHarmonics[5];
-	shResult += 0.315392 * (3.0 * n.z * n.z - 1.0) * environmentSphericalHarmonics[6];
-	shResult += 1.092548 * n.x * n.z * environmentSphericalHarmonics[7];
-	shResult += 0.546274 * (n.x * n.x - n.y * n.y) * environmentSphericalHarmonics[8];
-
-	return float4(linearToSRGB(abs(cScale * shResult)), 1.0);
+	float3 shResult = getExitRadianceFromSphericalHarmonics(environmentSphericalHarmonics, n).xyz;
+	return float4(linearToSRGB(cScale * shResult), 1.0);
 
 #elif (VISUALIZE_CUBEMAP)	
 
@@ -166,6 +115,7 @@ float4 fragmentMain(VSOutput fsIn) : SV_Target0
 
 #elif (DIFFUSE_CONVOLUTION)
 
+	/*
 	float3 n = normalize(fsIn.direction);
 
 	const float3 t0[6] = {
@@ -189,17 +139,16 @@ float4 fragmentMain(VSOutput fsIn) : SV_Target0
 		float3(0.0, 1.0, 0.0),
 	};
 	
-	const uint sampledLevel = 3;
+	const uint sampledLevel = 0;
 
 	uint level0Width = 0;
 	uint level0Height = 0;
 	baseColorTexture.GetDimensions(level0Width, level0Height);
 	
-	uint w = level0Width >> sampledLevel;
-	uint h = level0Height >> sampledLevel;
+	uint w = max(1, level0Width >> sampledLevel);
+	uint h = max(1, level0Height >> sampledLevel);
 	float invFaceSize = 1.0 / float(min(w, h));
 
-	float passedSamples = 0.0;
 	float3 integralResult = 0.0;
 	for (uint face = 0; face < 6; ++face)
 	{
@@ -225,23 +174,27 @@ float4 fragmentMain(VSOutput fsIn) : SV_Target0
 		}	
 	}
 	float scale = (1.0 + invFaceSize) / PI;
-	float3 result = integralResult * scale;
+	return float4(integralResult * scale, 1.0);
+	*/
 
-	return float4(result, 1.0);
+	return float4(1.0, 0.5, 0.25, 1.0);
 
 #elif (SPECULAR_CONVOLUTION)
 	
+	float3 n = normalize(fsIn.direction);
+
+	if (extraParameters.x == 0.0)
+		return baseColorTexture.SampleLevel(baseColorSampler, n, 0.0);
+
 	uint level0Width = 0;
 	uint level0Height = 0;
 	baseColorTexture.GetDimensions(level0Width, level0Height);
 	float invFaceSize = 1.0 / float(min(level0Width, level0Height));
 
 	const uint samples = 2048;
-	float invSamples = 1.0 / float(samples);
-
-	float3 n = normalize(fsIn.direction);
-	float3 v = n;
+	const float invSamples = 1.0 / float(samples);
 	
+	float3 v = n;
 	float3 up = abs(n.y) < 0.999 ? float3(0.0, 1.0, 0.0) : float3(1.0, 0.0, 0.0);
 	float3 tX = normalize(cross(up, n));
 	float3 tY = cross(n, tX);

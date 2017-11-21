@@ -23,6 +23,7 @@ struct DrawerOptions
 	bool drawShadowmap = false;
 	bool rebuldEnvironmentProbe = false;
 	bool rebuildLookupTexture = false;
+	bool enableScreenSpaceShadows = false;
 };
 
 mat4 fullscreenBatchTransform(const vec2& viewport, const vec2& origin, const vec2& size);

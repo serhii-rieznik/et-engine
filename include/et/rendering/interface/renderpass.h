@@ -71,6 +71,10 @@ struct CopyDescriptor
 	vec3i size = vec3i(0, 0, 0);
 
 	uint32_t bufferOffsetTo = 0;
+
+	CopyDescriptor() = default;
+	CopyDescriptor(const vec3i& sz) : size(sz) {
+	}
 };
 
 class RenderInterface;
@@ -134,6 +138,8 @@ public:
 		pushRenderBatch(inBatch->material(), inBatch->vertexStream(), inBatch->firstIndex(), inBatch->numIndexes());
 	}
 
+	void executeSingleRenderBatch(const RenderBatch::Pointer& inBatch);
+
 protected:
 	using SharedTexturesSet = std::map<MaterialTexture, std::pair<Texture::Pointer, Sampler::Pointer>>;
 	const SharedTexturesSet& sharedTextures() const { return _sharedTextures; }
@@ -164,6 +170,14 @@ inline bool RenderPass::loadSharedVariable(ObjectVariable var, T& value) {
 		return true;
 	}
 	return false;
+}
+
+inline void RenderPass::executeSingleRenderBatch(const RenderBatch::Pointer& inBatch) {
+	begin(RenderPassBeginInfo::singlePass());
+	nextSubpass();
+	pushRenderBatch(inBatch);
+	endSubpass();
+	end();
 }
 
 }

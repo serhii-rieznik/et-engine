@@ -615,6 +615,15 @@ MaterialInstance::Pointer FBXLoaderPrivate::loadMaterial(FbxSurfaceMaterial* mat
 	loadMaterialValue(m, MaterialVariable::EmissiveColor, mat, FbxSurfaceMaterial::sEmissive, NullRemap);
 	loadMaterialValue(m, MaterialVariable::NormalScale, mat, FbxSurfaceMaterial::sBumpFactor, NullRemap);
 
+	if (m->texture(MaterialTexture::BaseColor).invalid())
+		m->setTexture(MaterialTexture::BaseColor, _renderer->whiteTexture());
+	
+	if (m->texture(MaterialTexture::Normal).invalid())
+		m->setTexture(MaterialTexture::Normal, _renderer->flatNormalTexture());
+	
+	if (m->texture(MaterialTexture::Opacity).invalid())
+		m->setTexture(MaterialTexture::Opacity, _renderer->whiteTexture());
+
 	return m;
 }
 

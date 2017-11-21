@@ -26,7 +26,7 @@ public:
 	const Texture::Pointer& convolvedDiffuseCubemap() const;
 	const Texture::Pointer& convolvedSpecularCubemap() const;
 	const Texture::Pointer& brdfLookupTexture() const;
-	const vec4* EnvironmentSphericalHarmonics() const;
+	const vec4* environmentSphericalHarmonics() const;
 
 	void processAtmosphere();
 	void processEquiretangularTexture(const Texture::Pointer&);
@@ -58,7 +58,7 @@ private:
 		/*
 		 * Constants
 		 */
-		CubemapLevels = 9
+		CubemapLevels = 8
 	};
 
 private:

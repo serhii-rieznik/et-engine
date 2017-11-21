@@ -72,7 +72,7 @@ private:
 		Texture::Pointer depth;
 		Texture::Pointer velocity;
 		Texture::Pointer noise;
-		Texture::Pointer shadows;
+		Texture::Pointer screenSpaceShadowsTexture;
 	} _main;
 
 	struct Lighting
@@ -100,7 +100,7 @@ inline const Texture::Pointer& Drawer::supportTexture(SupportTexture tex)
 		return _main.velocity;
 	
 	case Drawer::SupportTexture::ScreenspaceShadows:
-		return _main.shadows;
+		return _main.screenSpaceShadowsTexture;
 
 	default:
 	{

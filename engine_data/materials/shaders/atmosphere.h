@@ -58,12 +58,13 @@ float2 opticalDensity(in float3 origin, in float3 dir)
 
 float3 inScattering(in float3 origin, in float3 target, in float3 light, in float2 phase)
 {
-    float3 step = (target - origin) / inScatteringSamples;
+    const float3 step = (target - origin) / inScatteringSamples;
 
     float3 resultR = 0.0;
     float3 resultM = 0.0;
     float3 pos = origin + 0.5 * step;
     float2 totalDensity = 0.0;
+
     for (uint i = 0; i < inScatteringSamples; ++i)
     {
         float2 d = density(pos);
@@ -78,6 +79,7 @@ float3 inScattering(in float3 origin, in float3 target, in float3 light, in floa
         totalDensity += d;
         pos += step;
     }
+
     return (resultR * betaR * phase.x + resultM * betaM * phase.y) * length(step);
 }
 

@@ -4,6 +4,7 @@
 #include "environment.h"
 
 #define DRAW_SUN 0
+#define SAMPLE_ATMOSPHERE 0
 
 cbuffer ObjectVariables : DECL_BUFFER(Object)
 {
@@ -48,7 +49,11 @@ FSOutput fragmentMain(VSOutput fsIn)
 {
 	float3 v = normalize(fsIn.direction);
 
+#if (SAMPLE_ATMOSPHERE)
+	float3 env = sampleAtmosphere(v, lightDirection.xyz, lightColor);
+#else
 	float3 env = sampleEnvironment(v, lightDirection.xyz, 0.1);
+#endif
 	float4 currentProjectedDirection = mul(float4(v * cameraClipPlanes.y, 1.0), viewProjectionTransform);
 	float4 previousProjectedDirection = mul(float4(v * cameraClipPlanes.y, 1.0), previousViewProjectionTransform);
 

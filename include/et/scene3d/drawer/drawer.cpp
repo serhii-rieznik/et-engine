@@ -69,7 +69,8 @@ void Drawer::draw() {
 	_jitter.x = (ji.x * 2.0f - 1.0f) / static_cast<float>(_main.color->size(0).x);
 	_jitter.y = (ji.y * 2.0f - 1.0f) / static_cast<float>(_main.color->size(0).y);
 	_jitter.z = (jj.x * 2.0f - 1.0f) / static_cast<float>(_main.color->size(0).x);
-	_jitter.w = (jj.y * 2.0f - 1.0f) / static_cast<float>(_main.color->size(0).y);
+	
+_jitter.w = (jj.y * 2.0f - 1.0f) / static_cast<float>(_main.color->size(0).y);
 
 	_frameCamera = _scene->renderCamera();
 	_frameCamera->setProjectionMatrix(_baseProjectionMatrix * translationMatrix(_jitter.x, _jitter.y, 0.0f));
@@ -90,23 +91,21 @@ void Drawer::draw() {
 	}
 	_renderer->submitRenderPass(_main.zPrepass);
 
-	_main.screenSpaceShadows->begin(RenderPassBeginInfo::singlePass());
+	if (options.enableScreenSpaceShadows)
 	{
 		_main.screenSpaceShadows->setSharedVariable(ObjectVariable::CameraJitter, _jitter);
 		_main.screenSpaceShadows->loadSharedVariablesFromCamera(_frameCamera);
 		_main.screenSpaceShadows->loadSharedVariablesFromLight(_lighting.directional);
-		_main.screenSpaceShadows->nextSubpass();
-		_main.screenSpaceShadows->pushRenderBatch(_main.screenSpaceShadowsBatch);
-		_main.screenSpaceShadows->endSubpass();
-		_main.screenSpaceShadows->end();
+		_main.screenSpaceShadows->executeSingleRenderBatch(_main.screenSpaceShadowsBatch);
+		_renderer->submitRenderPass(_main.screenSpaceShadows);
 	}
-	_renderer->submitRenderPass(_main.screenSpaceShadows);
 
 	_main.forward->begin(RenderPassBeginInfo::singlePass());
 	{
 		_main.forward->loadSharedVariablesFromCamera(_frameCamera);
 		_main.forward->loadSharedVariablesFromLight(_lighting.directional);
 		_main.forward->setSharedTexture(MaterialTexture::Shadow, _shadowmapProcessor->directionalShadowmap(), _shadowmapProcessor->directionalShadowmapSampler());
+		_main.forward->setSharedVariable(ObjectVariable::EnvironmentSphericalHarmonics, _cubemapProcessor->environmentSphericalHarmonics(), 9);
 		_main.forward->nextSubpass();
 		for (Mesh::Pointer& mesh : _visibleMeshes)
 		{
@@ -139,14 +138,14 @@ void Drawer::validate(RenderInterface::Pointer& renderer) {
 		_main.depth = renderer->createTexture(desc);
 
 		desc->format = TextureFormat::RGBA8;
-		_main.shadows = renderer->createTexture(desc);
+		_main.screenSpaceShadowsTexture = renderer->createTexture(desc);
 
 		{
 			Material::Pointer material = renderer->sharedMaterialLibrary().loadMaterial(application().resolveFileName("engine_data/materials/screen-space-shadows.json"));
 			_main.screenSpaceShadowsBatch = renderhelper::createQuadBatch(_main.depth, material, renderer->nearestSampler());
 
 			RenderPass::ConstructionInfo screenSpaceShadowsInfo("screen-space-shadows");
-			screenSpaceShadowsInfo.color[0].texture = _main.shadows;
+			screenSpaceShadowsInfo.color[0].texture = _main.screenSpaceShadowsTexture;
 			screenSpaceShadowsInfo.color[0].targetClass = RenderTarget::Class::Texture;
 			_main.screenSpaceShadows = renderer->allocateRenderPass(screenSpaceShadowsInfo);
 		}
@@ -176,7 +175,6 @@ void Drawer::validate(RenderInterface::Pointer& renderer) {
 		_main.forward->setSharedTexture(MaterialTexture::ConvolvedSpecular, _cubemapProcessor->convolvedSpecularCubemap(), renderer->defaultSampler());
 		_main.forward->setSharedTexture(MaterialTexture::BRDFLookup, _cubemapProcessor->brdfLookupTexture(), renderer->clampSampler());
 		_main.forward->setSharedTexture(MaterialTexture::Noise, _main.noise, renderer->nearestSampler());
-		_main.forward->setSharedTexture(MaterialTexture::AmbientOcclusion, _main.shadows, renderer->nearestSampler());
 
 		passInfo.name = "z-prepass";
 		passInfo.color[0].targetClass = RenderTarget::Class::Disabled;

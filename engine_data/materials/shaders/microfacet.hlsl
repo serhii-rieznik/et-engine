@@ -23,6 +23,7 @@ cbuffer ObjectVariables : DECL_BUFFER(Object)
     row_major float4x4 worldRotationTransform;
     row_major float4x4 lightViewTransform;
     row_major float4x4 lightProjectionTransform;
+	float4 environmentSphericalHarmonics[9];
     float4 cameraPosition;
     float4 lightDirection;
     float3 lightColor;
@@ -106,26 +107,25 @@ struct FSOutput
 FSOutput fragmentMain(VSOutput fsIn)
 {
     float4 opacitySample = opacityTexture.Sample(opacitySampler, fsIn.texCoord0);
-    if ((opacitySample.x + opacitySample.y) < 127.0 / 255.0) 
-        discard;
+    if (opacitySample.x < 32.0 / 255.0) 
+   		discard;
+
+	float3 noiseDimensions = 0.0;
+	noiseTexture.GetDimensions(0, noiseDimensions.x, noiseDimensions.y, noiseDimensions.z);
+
+    float2 currentPosition = fsIn.projectedPosition.xy / fsIn.projectedPosition.w;
+    float2 previousPosition = fsIn.previousProjectedPosition.xy / fsIn.previousProjectedPosition.w;
+    float2 velocity = currentPosition - previousPosition;
+	float2 noiseUV = (viewport.zw / noiseDimensions.xy) * (currentPosition.xy * 0.5 + 0.5);
+	float sampledNoise = noiseTexture.Sample(noiseSampler, 0.5 * noiseUV);
 
     float4 baseColorSample = baseColorTexture.Sample(baseColorSampler, fsIn.texCoord0);
     float4 normalSample = normalTexture.Sample(normalSampler, fsIn.texCoord0);
 
     baseColorSample.xyz = srgbToLinear(diffuseReflectance.xyz * baseColorSample.xyz);
 
-    float2 currentPosition = fsIn.projectedPosition.xy / fsIn.projectedPosition.w;
-    float2 previousPosition = fsIn.previousProjectedPosition.xy / fsIn.previousProjectedPosition.w;
-    float2 velocity = currentPosition - previousPosition;
-
-	float3 noiseDimensions = 0.0;
-	noiseTexture.GetDimensions(0, noiseDimensions.x, noiseDimensions.y, noiseDimensions.z);
-
 	float3 shadowmapSize = 0.0;
 	shadowTexture.GetDimensions(0, shadowmapSize.x, shadowmapSize.y, shadowmapSize.z);
-
-	float2 noiseUV = (viewport.zw / noiseDimensions.xy) * (currentPosition.xy * 0.5 + 0.5);
-	float sampledNoise = noiseTexture.Sample(noiseSampler, noiseUV);
         
     float shadow = sampleShadow(fsIn.lightCoord.xyz / fsIn.lightCoord.w, sampledNoise, shadowmapSize.xy);
     Surface surface = buildSurface(baseColorSample.xyz, normalSample.w, baseColorSample.w);
@@ -150,7 +150,7 @@ FSOutput fragmentMain(VSOutput fsIn)
     float4 brdfLookupSample = brdfLookupTexture.Sample(brdfLookupSampler, float2(surface.roughness, bsdf.VdotN));
 
     float3 wsDiffuseDir = diffuseDominantDirection(wsNormal, wsView, surface.roughness);
-    float3 indirectDiffuseSample = sampleDiffuseConvolution(wsDiffuseDir);
+    float3 indirectDiffuseSample = getExitRadianceFromSphericalHarmonics(environmentSphericalHarmonics, wsDiffuseDir).xyz;
     float3 indirectDiffuse = (surface.baseColor * indirectDiffuseSample) * ((1.0 - surface.metallness) * brdfLookupSample.z);
                                                                   
     float3 wsSpecularDir = specularDominantDirection(wsNormal, wsView, surface.roughness);

@@ -1069,6 +1069,8 @@ void OBJLoader::processLoadedData()
 			mat->setTexture(MaterialTexture::BaseColor, _renderer->whiteTexture());
 		if (mat->texture(MaterialTexture::Normal).invalid())
 			mat->setTexture(MaterialTexture::Normal, _renderer->flatNormalTexture());
+		if (mat->texture(MaterialTexture::Opacity).invalid())
+			mat->setTexture(MaterialTexture::Opacity, _renderer->whiteTexture());
 	}
 	uint32_t totalVertices = 3 * totalTriangles;
 	

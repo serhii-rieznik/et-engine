@@ -492,6 +492,7 @@ VkFormat textureFormatValue(TextureFormat fmt) {
 	case TextureFormat::Depth24: return VK_FORMAT_D24_UNORM_S8_UINT;
 	case TextureFormat::Depth32F: return VK_FORMAT_D32_SFLOAT;
 	case TextureFormat::DXT5: return VK_FORMAT_BC3_UNORM_BLOCK;
+	case TextureFormat::R11G11B10F: return VK_FORMAT_B10G11R11_UFLOAT_PACK32;
 	default:
 		ET_ASSERT(!"Invalid TextureFormat provided");
 		return VK_FORMAT_UNDEFINED;
