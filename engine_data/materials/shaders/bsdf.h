@@ -38,6 +38,7 @@ float3 directLighting(in Surface surface, in BSDF bsdf);
 Surface buildSurface(in float3 baseColor, in float m, in float r)
 {
 	r *= r;
+	m *= m;
 	float defaultReflectance = 0.5;
 	float reflectance = MIN_REFLECTANCE * defaultReflectance * defaultReflectance;	
 	                 	
