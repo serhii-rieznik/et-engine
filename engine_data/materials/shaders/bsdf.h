@@ -115,8 +115,11 @@ float3 computeDirectDiffuse(in Surface surface, in BSDF bsdf)
 
 float3 computeDirectSpecular(in Surface surface, in BSDF bsdf)
 {
-	float d = ggxDistribution(bsdf.NdotH, surface.roughnessSquared);
-	float g = ggxMaskingCombined(bsdf.VdotN, bsdf.LdotN, surface.roughnessSquared);
+	float a = surface.roughnessSquared;
+	float k = (0.8 + 0.5 * a); k *= 0.5 * k;
+
+	float d = ggxDistribution(bsdf.NdotH, a);
+	float g = ggxMaskingCombined(bsdf.VdotN, bsdf.LdotN, k);
 
 #if (EnableIridescence)
 	return (g * d) * iridescentFresnel(bsdf);
