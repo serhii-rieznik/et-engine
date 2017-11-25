@@ -46,6 +46,9 @@ SamplerState opacitySampler : DECL_SAMPLER(Opacity);
 Texture2D<float> noiseTexture : DECL_TEXTURE(Noise);
 SamplerState noiseSampler : DECL_SAMPLER(Noise);
 
+Texture2D<float> aoTexture : DECL_TEXTURE(Ao);
+SamplerState aoSampler : DECL_SAMPLER(Ao);
+
 struct VSOutput 
 {
     float4 position : SV_Position;
@@ -114,9 +117,10 @@ FSOutput fragmentMain(VSOutput fsIn)
 	noiseTexture.GetDimensions(0, noiseDimensions.x, noiseDimensions.y, noiseDimensions.z);
 
     float2 currentPosition = fsIn.projectedPosition.xy / fsIn.projectedPosition.w;
+    float2 projectedUv = currentPosition.xy * 0.5 + 0.5;
     float2 previousPosition = fsIn.previousProjectedPosition.xy / fsIn.previousProjectedPosition.w;
     float2 velocity = currentPosition - previousPosition;
-	float2 noiseUV = (viewport.zw / noiseDimensions.xy) * (currentPosition.xy * 0.5 + 0.5);
+	float2 noiseUV = (viewport.zw / noiseDimensions.xy) * projectedUv;
 	float sampledNoise = noiseTexture.Sample(noiseSampler, 0.5 * noiseUV);
 
     float4 baseColorSample = baseColorTexture.Sample(baseColorSampler, fsIn.texCoord0);
@@ -129,6 +133,8 @@ FSOutput fragmentMain(VSOutput fsIn)
         
     float shadow = sampleShadow(fsIn.lightCoord.xyz / fsIn.lightCoord.w, sampledNoise, shadowmapSize.xy);
     Surface surface = buildSurface(baseColorSample.xyz, normalSample.w, baseColorSample.w);
+
+    float ao = aoTexture.Sample(aoSampler, projectedUv).x;
 
     float3 tsNormal = normalize(normalSample.xyz - 0.5);
 
@@ -183,7 +189,8 @@ FSOutput fragmentMain(VSOutput fsIn)
 
 #else
 
-    float3 result = shadow * ((directDiffuse + directSpecular) * lightColor) + (indirectDiffuse + indirectSpecular);
+    float3 result = shadow * ((directDiffuse + directSpecular) * lightColor) + 
+    	ao * (indirectDiffuse + indirectSpecular);
 
 #endif
 
@@ -196,7 +203,7 @@ FSOutput fragmentMain(VSOutput fsIn)
     float3 inScatter = lightColor * inScatteringAtConstantHeight(originPosition, worldPosition, wsLight, float2(phaseR, phaseM));
     result = result * outScatter + inScatter; 
     // */
-    
+
     FSOutput output;
     output.color = float4(result, 1.0);
 	output.velocity = velocity;

@@ -279,6 +279,15 @@ void HDRFlow::debugDraw() {
 		_passes.final->pushRenderBatch(batch);
 		advancePosition();
 	}
+
+	const Texture::Pointer& ssao = drawer()->supportTexture(Drawer::SupportTexture::ScreenspaceAO);
+	if (options.drawAO && ssao.valid())
+	{
+		Material::Pointer m = _renderer->sharedMaterialLibrary().loadMaterial(application().resolveFileName("engine_data/materials/textured2d.json"));
+		batch = renderhelper::createQuadBatch(ssao, m, renderhelper::QuadType::Default);
+		_passes.final->pushRenderBatch(batch);
+		advancePosition();
+	}
 }
 
 }

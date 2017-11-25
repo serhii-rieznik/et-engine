@@ -69,8 +69,7 @@ void Drawer::draw() {
 	_jitter.x = (ji.x * 2.0f - 1.0f) / static_cast<float>(_main.color->size(0).x);
 	_jitter.y = (ji.y * 2.0f - 1.0f) / static_cast<float>(_main.color->size(0).y);
 	_jitter.z = (jj.x * 2.0f - 1.0f) / static_cast<float>(_main.color->size(0).x);
-	
-_jitter.w = (jj.y * 2.0f - 1.0f) / static_cast<float>(_main.color->size(0).y);
+	_jitter.w = (jj.y * 2.0f - 1.0f) / static_cast<float>(_main.color->size(0).y);
 
 	_frameCamera = _scene->renderCamera();
 	_frameCamera->setProjectionMatrix(_baseProjectionMatrix * translationMatrix(_jitter.x, _jitter.y, 0.0f));
@@ -100,11 +99,22 @@ _jitter.w = (jj.y * 2.0f - 1.0f) / static_cast<float>(_main.color->size(0).y);
 		_renderer->submitRenderPass(_main.screenSpaceShadows);
 	}
 
+	if (options.enableScreenSpaceAO)
+	{
+		_main.screenSpaceAO->setSharedVariable(ObjectVariable::CameraJitter, _jitter);
+		_main.screenSpaceAO->setSharedTexture(MaterialTexture::Noise, _main.noise, _renderer->nearestSampler());
+		_main.screenSpaceAO->loadSharedVariablesFromCamera(_frameCamera);
+		_main.screenSpaceAO->loadSharedVariablesFromLight(_lighting.directional);
+		_main.screenSpaceAO->executeSingleRenderBatch(_main.screenSpaceAOBatch);
+		_renderer->submitRenderPass(_main.screenSpaceAO);
+	}
+
 	_main.forward->begin(RenderPassBeginInfo::singlePass());
 	{
 		_main.forward->loadSharedVariablesFromCamera(_frameCamera);
 		_main.forward->loadSharedVariablesFromLight(_lighting.directional);
 		_main.forward->setSharedTexture(MaterialTexture::Shadow, _shadowmapProcessor->directionalShadowmap(), _shadowmapProcessor->directionalShadowmapSampler());
+		_main.forward->setSharedTexture(MaterialTexture::AmbientOcclusion, _main.screenSpaceAOTexture, _renderer->defaultSampler());
 		_main.forward->setSharedVariable(ObjectVariable::EnvironmentSphericalHarmonics, _cubemapProcessor->environmentSphericalHarmonics(), 9);
 		_main.forward->nextSubpass();
 		for (Mesh::Pointer& mesh : _visibleMeshes)
@@ -139,6 +149,7 @@ void Drawer::validate(RenderInterface::Pointer& renderer) {
 
 		desc->format = TextureFormat::RGBA8;
 		_main.screenSpaceShadowsTexture = renderer->createTexture(desc);
+		_main.screenSpaceAOTexture = renderer->createTexture(desc);
 
 		{
 			Material::Pointer material = renderer->sharedMaterialLibrary().loadMaterial(application().resolveFileName("engine_data/materials/screen-space-shadows.json"));
@@ -148,6 +159,16 @@ void Drawer::validate(RenderInterface::Pointer& renderer) {
 			screenSpaceShadowsInfo.color[0].texture = _main.screenSpaceShadowsTexture;
 			screenSpaceShadowsInfo.color[0].targetClass = RenderTarget::Class::Texture;
 			_main.screenSpaceShadows = renderer->allocateRenderPass(screenSpaceShadowsInfo);
+		}
+
+		{
+			Material::Pointer material = renderer->sharedMaterialLibrary().loadMaterial(application().resolveFileName("engine_data/materials/screen-space-ao.json"));
+			_main.screenSpaceAOBatch = renderhelper::createQuadBatch(_main.depth, material, renderer->nearestSampler());
+
+			RenderPass::ConstructionInfo screenSpaceAOInfo("screen-space-ao");
+			screenSpaceAOInfo.color[0].texture = _main.screenSpaceAOTexture;
+			screenSpaceAOInfo.color[0].targetClass = RenderTarget::Class::Texture;
+			_main.screenSpaceAO = renderer->allocateRenderPass(screenSpaceAOInfo);
 		}
 
 		RenderPass::ConstructionInfo passInfo;

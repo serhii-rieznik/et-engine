@@ -25,6 +25,7 @@ public:
 		bool drawLuminance = false;
 		bool drawVelocity = false;
 		bool drawShadows = false;
+		bool drawAO = false;
 	} options;
 
 public:
