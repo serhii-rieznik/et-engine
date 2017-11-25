@@ -143,7 +143,7 @@ float4 fragmentMain(VSOutput fsIn) : SV_Target0
 	noiseTexture.GetDimensions(0, w, h, levels);
 	float2 noiseTexelSize = float2(w, h);
 
-	float2 noiseUv = fsIn.texCoord0 * (viewport.zw / noiseTexelSize);
+	float2 noiseUv = fsIn.texCoord0 * (viewport.zw / noiseTexelSize + continuousTime);
 	float4 sampledNoise = noiseTexture.SampleLevel(noiseSampler, noiseUv, 0.0);
 
 	return sampleAmbientOcclusion(fsIn.texCoord0, texelSize, sampledNoise);
