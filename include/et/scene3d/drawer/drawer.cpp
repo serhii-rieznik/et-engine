@@ -9,6 +9,8 @@
 #include <et/rendering/rendercontext.h>
 #include <et/rendering/base/primitives.h>
 #include <et/rendering/base/helpers.h>
+#include <et/imaging/pngloader.h>
+#include <et/imaging/imagewriter.h>
 #include <et/app/application.h>
 
 #define ET_ANIMATE_LIGHT_POSITION 0
@@ -33,8 +35,34 @@ static const uint64_t sobolSequenceSize = sizeof(sobolSequence) / sizeof(sobolSe
 Drawer::Drawer(const RenderInterface::Pointer& renderer) :
 	_renderer(renderer) {
 	_debugDrawer = DebugDrawer::Pointer::create(renderer);
-	_main.noise = _renderer->loadTexture(application().resolveFileName("engine_data/textures/bluenoise.png"), _cache);
+	_main.noise = _renderer->loadTexture(application().resolveFileName("engine_data/textures/bluenoise.sincos.png"), _cache);
+	/*
+	float minV = 1000.0f;
+	float maxV = -minV;
+	TextureDescription desc;
+	png::loadFromFile(application().resolveFileName("engine_data/textures/bluenoise.png"), desc, false);
+	vec4ub* ptr = reinterpret_cast<vec4ub*>(desc.data.binary());
+	for (uint32_t i = 0; i < 64 * 64; ++i)
+	{
+		vec4ub value = *ptr;
+		float t = static_cast<float>(value.z) / 255.0f * DOUBLE_PI;
+		float s = std::sin(t);
+		float c = std::cos(t);
+		value.z = static_cast<uint8_t>(clamp((s * 0.5f + 0.5f) * 255.0f, 0.0f, 255.0f));
+		value.w = static_cast<uint8_t>(clamp((c * 0.5f + 0.5f) * 255.0f, 0.0f, 255.0f));
 
+		float rz = (static_cast<float>(value.z) / 255.0f) * 2.0 - 1.0f;
+		float rw = (static_cast<float>(value.w) / 255.0f) * 2.0 - 1.0f;
+		float r = rz*rz + rw*rw;
+		minV = std::min(minV, r);
+		maxV = std::max(maxV, r);
+
+		*ptr++ = value;
+	}
+	auto dst = application().environment().applicationDocumentsFolder() + "bluenoise.sincos.png";
+	writeImageToFile(dst, desc.data, vec2i(64, 64), 4, 8, ImageFormat::ImageFormat_PNG, false);
+	log::warning("Processed image saved to: %s", dst.c_str());
+	// */
 	Scene::Pointer scene(PointerInit::CreateInplace);
 	scene->setRenderCamera(Camera::Pointer(PointerInit::CreateInplace));
 	scene->setClipCamera(scene->renderCamera());

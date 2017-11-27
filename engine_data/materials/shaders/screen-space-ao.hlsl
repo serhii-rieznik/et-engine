@@ -15,7 +15,7 @@ cbuffer ObjectVariables : DECL_BUFFER(Object)
     row_major float4x4 viewProjectionTransform;
     row_major float4x4 inverseViewProjectionTransform;
     row_major float4x4 inverseProjectionTransform;
-    float2 cameraJitter;
+    float4 cameraJitter;
     float4 lightDirection;
     float4 viewport;
     float2 cameraClipPlanes;
@@ -65,85 +65,71 @@ float3 reconstructNormal(in float2 uv, in float2 texelSize)
 	return normalize(cross(p3 - p2, p1 - p0));
 }
 
-const uint directionsCount = 8;
+static const float aoScale = 10.0;
+static const uint directionsCount = 4;
 
-float3 getRotatedDirection(in uint index, in float cs)
+float3 getRotatedDirection(in uint index, in float4 m)
 {
-	const float3 predefinedDirection[] = {
-        float3(1.000000, 0.000000, 0.0),
-        float3(0.707107, 0.707107, 0.0),
-        float3(-0.000000, 1.000000, 0.0),
-        float3(-0.707107, 0.707107, 0.0),
-        float3(-1.000000, -0.000000, 0.0),
-        float3(-0.707107, -0.707107, 0.0),
-        float3(0.000000, -1.000000, 0.0),
-        float3(0.707107, -0.707107, 0.0),
+	const float3 predefinedDirection[4] = {
+        float3(1.0, 0.0, 0.0),
+        float3(1.0, 1.0, 0.0),
+        float3(-1.0, 0.0, 0.0),
+        float3(0.0, -1.0, 0.0),
 	};
 	float2 base = predefinedDirection[index];
-
-	cs = cs * 2.0 - 1.0;
-	float sn = sqrt(1.0 - cs * cs); 
-	return float3(dot(base, float2(cs, -sn)), dot(base, float2(sn, cs)), 0.0);
+	return float3(dot(base, m.xy), dot(base, m.zw), 0.0);
 }
 
 float4 sampleAmbientOcclusion(in float2 uv, in float2 texelSize, in float4 rnd)
 {
-	const uint samplesPerDirection = 8;
-	const float influenceRadius = 1.0 * (rnd.y * 0.5 + 0.5);
-	const float deltaTheta = 2.0 * PI / float(directionsCount);
+	const uint samplesPerDirection = 6;
+	const float influenceRadius = 0.333333 * (rnd.x * 0.5 + 0.5); // 1.0 * (rnd.x * 0.5 + 0.5);
 
+	float3 p0 = viewSpace(uv * 2.0 - 1.0, baseColorTexture.Sample(baseColorSampler, uv));
 	float3 n0 = reconstructNormal(uv, texelSize);
-	float3 p0 = viewSpace(uv * 2.0 - 1.0, baseColorTexture.Sample(baseColorSampler, uv) - 0.000005);
+
+	float directionStepSize = -influenceRadius / (p0.z * float(samplesPerDirection));
+
+	float rotCos = rnd.z * 2.0 - 1.0;
+	float rotSin = rnd.w * 2.0 - 1.0;
+	
+	float4 rotationMatrix;
+	rotationMatrix.xy = float2(rotCos, -rotSin);
+	rotationMatrix.zw = float2(rotSin,  rotCos);
 
 	float ao = 0.0;
-	float theta = (rnd.x * 2.0 - 1.0) * PI;
 	for (uint i = 0; i < directionsCount; ++i)
 	{
-		float3 direction = getRotatedDirection(i, rnd.z);
-		float3 pEndProjected = projectionSpace(p0 + direction * influenceRadius) * 0.5 + 0.5;
-		float2 projectedStep = (pEndProjected.xy - uv) / float(samplesPerDirection);
-
-		float2 texelStepUv = uv + direction.xy * texelSize;
-		float directionZ = baseColorTexture.Sample(baseColorSampler, texelStepUv);
-		float3 tangentVector = (viewSpace(texelStepUv * 2.0 - 1.0, directionZ) - p0);
-		tangentVector -= dot(tangentVector, n0) * n0;
-
-		float maxOcclusion = 0.0;
-		for (uint j = 1; j <= samplesPerDirection; ++j)
+		float3 direction = getRotatedDirection(i, rotationMatrix);
+		float2 projectedStep = direction * directionStepSize;
+		float2 stepUv = uv + projectedStep;
+		for (uint j = 0; j < samplesPerDirection; ++j)
 		{
-			float2 stepUv = uv + projectedStep * float(j);
-			float stepZ = baseColorTexture.Sample(baseColorSampler, stepUv);
-			float3 stepViewSpace = viewSpace(stepUv * 2.0 - 1.0, stepZ);
-
+			float3 stepViewSpace = viewSpace(stepUv * 2.0 - 1.0, baseColorTexture.Sample(baseColorSampler, stepUv));
 			float3 horizonVector = stepViewSpace - p0;
 			float horizonVectorLength = length(horizonVector);
-
-			float occlusion = dot(n0, horizonVector / horizonVectorLength);
-			float occlusionDifference = max(0.0, occlusion - maxOcclusion);
-			maxOcclusion = max(maxOcclusion, occlusion);
-			float attenuation = 1.0 - saturate(horizonVectorLength / influenceRadius);
-			ao += occlusionDifference * attenuation;
+			float attenuation = saturate(1.0 - horizonVectorLength / influenceRadius);
+			ao += attenuation * saturate(dot(n0, horizonVector) / horizonVectorLength);
+			stepUv += projectedStep;
 		}
-
-		theta += deltaTheta;
 	}
-
-	ao = 1.0 - (ao * deltaTheta) / (2.0 * PI);
-	return ao * ao;
+	return saturate(1.0 - aoScale * ao / float(directionsCount * samplesPerDirection));
 }
 
 float4 fragmentMain(VSOutput fsIn) : SV_Target0
 {
-	float w = 0.0;
-	float h = 0.0;
+	float w = viewport.z;
+	float h = viewport.w;
 	float levels = 0.0;
 	baseColorTexture.GetDimensions(0, w, h, levels);
 	float2 texelSize = 1.0 / float2(w, h);
 
+	w = 64.0;
+	h = 64.0;
 	noiseTexture.GetDimensions(0, w, h, levels);
 	float2 noiseTexelSize = float2(w, h);
 
-	float2 noiseUv = fsIn.texCoord0 * (viewport.zw / noiseTexelSize + continuousTime);
+	float2 noiseUv = (fsIn.texCoord0 + sin(continuousTime * PI)) * (viewport.zw / noiseTexelSize);
 	float4 sampledNoise = noiseTexture.SampleLevel(noiseSampler, noiseUv, 0.0);
 
 	return sampleAmbientOcclusion(fsIn.texCoord0, texelSize, sampledNoise);
