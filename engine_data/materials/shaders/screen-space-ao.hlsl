@@ -66,15 +66,19 @@ float3 reconstructNormal(in float2 uv, in float2 texelSize)
 }
 
 static const float aoScale = 10.0;
-static const uint directionsCount = 4;
+static const uint directionsCount = 8;
 
 float3 getRotatedDirection(in uint index, in float4 m)
 {
-	const float3 predefinedDirection[4] = {
+	const float3 predefinedDirection[8] = {
         float3(1.0, 0.0, 0.0),
-        float3(1.0, 1.0, 0.0),
+        float3(0.707107, 0.707107, 0.0),
+        float3(0.0, 1.0, 0.0),
+        float3(-0.707107, 0.707107, 0.0),
         float3(-1.0, 0.0, 0.0),
+        float3(-0.707107, -0.707107, 0.0),
         float3(0.0, -1.0, 0.0),
+        float3(0.707107, -0.707107, 0.0),
 	};
 	float2 base = predefinedDirection[index];
 	return float3(dot(base, m.xy), dot(base, m.zw), 0.0);

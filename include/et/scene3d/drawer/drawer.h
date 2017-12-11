@@ -11,10 +11,8 @@
 #include <et/scene3d/drawer/shadowmaps.h>
 #include <et/scene3d/drawer/cubemaps.h>
 
-namespace et
-{
-namespace s3d
-{
+namespace et {
+namespace s3d {
 class Drawer : public Object, public FlagsHolder
 {
 public:
@@ -52,7 +50,7 @@ private:
 
 private:
 	ObjectsCache _cache;
-	
+
 	Scene::Pointer _scene;
 	Camera::Pointer _frameCamera;
 	Vector<Mesh::Pointer> _allMeshes;
@@ -96,13 +94,12 @@ inline const Light::Pointer& Drawer::directionalLight() {
 	return _lighting.directional;
 }
 
-inline const Texture::Pointer& Drawer::supportTexture(SupportTexture tex)
-{
+inline const Texture::Pointer& Drawer::supportTexture(SupportTexture tex) {
 	switch (tex)
 	{
 	case Drawer::SupportTexture::Velocity:
 		return _main.velocity;
-	
+
 	case Drawer::SupportTexture::ScreenspaceShadows:
 		return _main.screenSpaceShadowsTexture;
 

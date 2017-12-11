@@ -709,6 +709,15 @@
     <ClInclude Include="..\..\..\..\..\et-engine\include\et\pbr\pbr.h">
       <Filter>Source\pbr</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\et\scene3d\gltfloader.h">
+      <Filter>Source\scene3d</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\scene3d\gltfloader.cpp">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\et-engine\include\et\pbr\pbr_sensor.h">
+      <Filter>Source\pbr</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\et\sound\openal.h">

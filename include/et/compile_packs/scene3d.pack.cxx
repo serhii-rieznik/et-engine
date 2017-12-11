@@ -7,6 +7,7 @@
 #include "../scene3d/mesh.cpp"
 #include "../scene3d/meshdeformer.cpp"
 #include "../scene3d/objloader.cpp"
+#include "../scene3d/gltfloader.cpp"
 #include "../scene3d/particlesystem.cpp"
 #include "../scene3d/renderableelement.cpp"
 #include "../scene3d/scene3d.cpp"

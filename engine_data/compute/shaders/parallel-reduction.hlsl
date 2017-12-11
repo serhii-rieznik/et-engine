@@ -1,5 +1,6 @@
 #include <et>
 #include <inputdefines>
+#include "../../materials/shaders/srgb.h"
 
 Texture2D<float> inputImage : DECL_TEXTURE(BaseColor);
 RWTexture2D<float> outputImage : DECL_STORAGE(0);
@@ -54,13 +55,13 @@ void computeMain(CSInput input)
 	
 	#elif (LUMINOCITY_ADAPTATION)
 		
-		float storedValue = outputImage.Load(uint2(0, 0));
-		float previousExposure = storedValue.x;
-		float lum = exp(value);
-		float ev100 = log2(lum * 100.0 / 12.5);
-		float exposure = 1.0 / (1.2 * exp2(ev100));
-		float adaptationSpeed = lerp(3.0, 5.0, step(exposure - previousExposure, 0.0));
-		outputImage[uint2(0, 0)] = lerp(previousExposure, exposure, 1.0f - exp(-deltaTime * adaptationSpeed));
+		float lowerBound = exp2(expectedEv - 3.0 - adaptationRange.x);
+		float upperBound = exp2(expectedEv - 3.0 + adaptationRange.y);
+		float currentValue = clamp(exp(value), lowerBound, upperBound);
+
+		float previousValue = outputImage.Load(uint2(0, 0));
+		float adaptationSpeed = lerp(3.0, 5.0, step(currentValue - previousValue, 0.0));
+		outputImage[uint2(0, 0)] = lerp(previousValue, currentValue, 1.0f - exp(-deltaTime * adaptationSpeed));
    	
    	#else
 		

@@ -16,6 +16,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\..\et-engine\include\et\pbr\pbr.h" />
+    <ClInclude Include="..\..\..\..\..\et-engine\include\et\pbr\pbr_sensor.h" />
     <ClInclude Include="..\..\..\..\..\et-engine\include\et\pbr\pbr_spectrum.h" />
     <ClInclude Include="..\..\include\et\core\pool.h" />
     <ClInclude Include="..\..\include\et\core\remoteheap.h" />
@@ -31,6 +32,7 @@
     <ClInclude Include="..\..\include\et\scene3d\drawer\common.h" />
     <ClInclude Include="..\..\include\et\scene3d\drawer\drawflow.h" />
     <ClInclude Include="..\..\include\et\scene3d\drawer\shadowmaps.h" />
+    <ClInclude Include="..\..\include\et\scene3d\gltfloader.h" />
     <ClInclude Include="..\..\include\et\scene3d\lightelement.cpp" />
     <ClInclude Include="..\..\include\et\scene3d\drawer\drawer.cpp" />
     <ClInclude Include="..\..\include\et\scene3d\drawer\shadowmaps.cpp" />
@@ -44,6 +46,7 @@
     <ClInclude Include="..\..\include\et\scene3d\drawer\debugdrawer.cpp" />
     <ClInclude Include="..\..\include\et\rendering\vulkan\vulkan_memory.cpp" />
     <ClInclude Include="..\..\include\et\rendering\renderoptions.cpp" />
+    <ClInclude Include="..\..\include\et\scene3d\gltfloader.cpp" />
     <ClCompile Include="..\..\include\external\spirvcross\spirv_cfg.cpp" />
     <ClCompile Include="..\..\include\external\spirvcross\spirv_cross.cpp" />
     <ClCompile Include="..\..\include\external\spirvcross\spirv_glsl.cpp" />

@@ -1,3 +1,7 @@
+const float expectedEv = 12.0;
+const float2 dynamicRange = float2(3.0, 3.0);
+const float2 adaptationRange = float2(2.0, 2.0);
+
 float3 srgbToLinear(in float3 c)
 {
 #if (SRGBConversion == SRGBConversionApproximate)
@@ -37,6 +41,11 @@ float3 linearToSRGB(in float3 c)
 
 float3 toneMapping(float3 color, float exposure)
 {
+	float ratio = exposure / exp2(expectedEv - 3.0);
+	float3 lowerBound = exp2(expectedEv - 3.0 - dynamicRange.x) * ratio;
+	float3 upperBound = exp2(expectedEv - 3.0 + dynamicRange.y) * ratio;
+	color = (color - lowerBound) / (upperBound - lowerBound);
+
 #if (ToneMapping == ToneMappingACES)
 
 	static const float3x3 ACESInputMat = {
@@ -54,7 +63,7 @@ float3 toneMapping(float3 color, float exposure)
 	static const float c = 0.983729;
 	static const float d = 0.4329510;
 	static const float e = 0.238081;
-	color = linearToSRGB(color * exposure);
+	color = linearToSRGB(color);
 	color = mul(ACESInputMat, color);
     color = (color * (color + a) - b) / (color * (c * color + d) + e);
     return saturate(mul(ACESOutputMat, color));
@@ -69,14 +78,15 @@ float3 toneMapping(float3 color, float exposure)
 	static const float F = 0.30;
 	static const float W = 11.2;
 	static const float whiteScale = ((W * (A * W + C * B) + D * E) / (W * (A * W + B) + D * F)) - E / F;
-	color *= exposure;
 	color = whiteScale * (((color * (A * color + C * B) + D * E) / (color * (A * color + B) + D * F)) - E / F);
 	return linearToSRGB(saturate(color));
 
 #else
+	
+	color = saturate(1.0 - exp(-color));
 
-	return linearToSRGB(saturate(exposure * color));
+	return linearToSRGB(color);
 
 #endif
 	
-}
+}                                        

@@ -31,24 +31,24 @@ float3 directSpecular(in Surface surface, in BSDF bsdf);
 float3 directLighting(in Surface surface, in BSDF bsdf);
 
 #define NORMALIZATION_SCALE 	INV_PI
-#define MIN_ROUGHNESS 			0.0001
+#define MIN_ROUGHNESS 			0.05
 #define MIN_REFLECTANCE 		0.16
 #define MIN_FLOAT				1e-20
 
 Surface buildSurface(in float3 baseColor, in float m, in float r)
 {
-	r *= r;
-	m *= m;
+	r = clamp(r, MIN_ROUGHNESS, 1.0);
+
 	float defaultReflectance = 0.5;
 	float reflectance = MIN_REFLECTANCE * defaultReflectance * defaultReflectance;	
 	                 	
 	Surface	result;
-	result.baseColor = baseColor * (1.0 - saturate(m));
+	result.metallness = saturate(1.0 - (1.0 - m) * (1.0 - m));
+	result.baseColor = baseColor * (1.0 - result.metallness);
 	result.f90 = saturate(50.0 * reflectance);
-	result.f0 = lerp(reflectance, baseColor, m);
-	result.roughness = clamp(r, MIN_ROUGHNESS, 1.0);
+	result.f0 = lerp(reflectance, baseColor, result.metallness);
+	result.roughness = r * r;
 	result.roughnessSquared = result.roughness * result.roughness;
-	result.metallness = m;
 	return result;
 }
 

@@ -84,7 +84,6 @@ void RenderPass::loadSharedVariablesFromCamera(const Camera::Pointer& cam)
 void RenderPass::loadSharedVariablesFromLight(const Light::Pointer& l)
 {
 	setSharedVariable(ObjectVariable::LightColor, vec4(l->color(), 1.0f));
-	// TODO : provide 'w' component depending on light type
 	setSharedVariable(ObjectVariable::LightDirection, vec4(l->direction(), 0.0f));
 	setSharedVariable(ObjectVariable::LightViewTransform, l->viewMatrix());
 	setSharedVariable(ObjectVariable::LightProjectionTransform, l->projectionMatrix());

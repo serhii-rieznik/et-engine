@@ -296,11 +296,11 @@ void Drawer::setScene(const Scene::Pointer& inScene) {
 
 	if (_lighting.directional.invalid())
 	{
-		vec3 lightPoint = 10.0f * fromSpherical(DEG_60, DEG_15);
+		vec3 lightDirection = fromSpherical(DEG_45, DEG_45);
 		_lighting.directional = Light::Pointer::create(Light::Type::Directional);
-		_lighting.directional->setColor(vec3(10.0f));
-		_lighting.directional->lookAt(lightPoint);
-		_lighting.directional->perspectiveProjection(QUARTER_PI, 1.0f, 1.0f, 1000.0f);
+		_lighting.directional->setColor(vec3(120000.0f));
+		_lighting.directional->lookAt(lightDirection);
+		_lighting.directional->perspectiveProjection(QUARTER_PI, 1.0f, 1.0f, 2048.0f);
 	}
 
 	_shadowmapProcessor->setScene(_scene, _lighting.directional);
