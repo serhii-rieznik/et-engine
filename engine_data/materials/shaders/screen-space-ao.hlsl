@@ -87,7 +87,7 @@ float3 getRotatedDirection(in uint index, in float4 m)
 float4 sampleAmbientOcclusion(in float2 uv, in float2 texelSize, in float4 rnd)
 {
 	const uint samplesPerDirection = 6;
-	const float influenceRadius = 0.333333 * (rnd.x * 0.5 + 0.5); // 1.0 * (rnd.x * 0.5 + 0.5);
+	const float influenceRadius = (rnd.x * 0.5 + 0.5); // 1.0 * (rnd.x * 0.5 + 0.5);
 
 	float3 p0 = viewSpace(uv * 2.0 - 1.0, baseColorTexture.Sample(baseColorSampler, uv));
 	float3 n0 = reconstructNormal(uv, texelSize);
@@ -117,7 +117,7 @@ float4 sampleAmbientOcclusion(in float2 uv, in float2 texelSize, in float4 rnd)
 			stepUv += projectedStep;
 		}
 	}
-	return saturate(1.0 - aoScale * ao / float(directionsCount * samplesPerDirection));
+	return 1.0; // saturate(1.0 - aoScale * ao / float(directionsCount * samplesPerDirection));
 }
 
 float4 fragmentMain(VSOutput fsIn) : SV_Target0

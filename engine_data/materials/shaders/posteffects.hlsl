@@ -106,7 +106,7 @@ float4 fragmentMain(VSOutput fsIn) : SV_Target0
 	float averageLuminance = emissiveColorTexture.SampleLevel(emissiveColorSampler, fsIn.texCoord0, 10.0).x;
 	float3 ldrColor = toneMapping(source, averageLuminance);
 
-	/*
+#if (ENABLE_COLOR_GRADING)
 	float z0 = floor(ldrColor.z * 16.0) / 16.0;
 	float z1 = z0 + 1.0 / 16.0;
 	float u = ldrColor.x / 16.0 + 0.5 / 256.0;
@@ -114,52 +114,48 @@ float4 fragmentMain(VSOutput fsIn) : SV_Target0
 	float3 sample0 = shadowTexture.SampleLevel(shadowSampler, float2(u + z0, v), 0.0).xyz;
 	float3 sample1 = shadowTexture.SampleLevel(shadowSampler, float2(u + z1, v), 0.0).xyz;
 	ldrColor = lerp(sample0, sample1, (ldrColor.z - z0) * 16.0);
-	// */
+#endif
 	
 	return float4(ldrColor, 1.0);
 
 #elif (TEMPORAL_AA)
 	
-	const float jitterScale = 0.5;
-	float2 tc = cameraJitter.xy * jitterScale + fsIn.texCoord0;
-	float2 vel = jitterScale * normalTexture.Sample(normalSampler, tc).xy;
+	float4 result = 0.25;
 
-	float2 uvH = tc - vel - jitterScale * cameraJitter.zw;
-	float3 sH = emissiveColorTexture.Sample(emissiveColorSampler, uvH).xyz;
+	float2 unjitteredTexCoords = fsIn.texCoord0 + cameraJitter.xy;
+	float4 currentSample = baseColorTexture.Sample(baseColorSampler, unjitteredTexCoords);
+	float4 historySample = emissiveColorTexture.Sample(emissiveColorSampler, fsIn.texCoord0);
 
-	float3 s20 = baseColorTexture.Sample(baseColorSampler, tc, int2(-1, +1)).xyz;
-	float3 s21 = baseColorTexture.Sample(baseColorSampler, tc, int2( 0, +1)).xyz;
-	float3 s22 = baseColorTexture.Sample(baseColorSampler, tc, int2(+1, +1)).xyz;
-	float3 s10 = baseColorTexture.Sample(baseColorSampler, tc, int2(-1,  0)).xyz;
-	float3 s11 = baseColorTexture.Sample(baseColorSampler, tc, int2( 0,  0)).xyz;
-	float3 s12 = baseColorTexture.Sample(baseColorSampler, tc, int2(+1,  0)).xyz;
-	float3 s01 = baseColorTexture.Sample(baseColorSampler, tc, int2( 0, -1)).xyz;
-	float3 s00 = baseColorTexture.Sample(baseColorSampler, tc, int2(-1, -1)).xyz;
-	float3 s02 = baseColorTexture.Sample(baseColorSampler, tc, int2(+1, -1)).xyz;
-	float3 sum0 = 0.25 * (s01 + s10 + s12 + s21);
-	float3 sum1 = 0.25 * (s00 + s02 + s20 + s22);
+	float4 box[9];
+	box[0] = baseColorTexture.Sample(baseColorSampler, unjitteredTexCoords, int2(-1, -1));
+	box[1] = baseColorTexture.Sample(baseColorSampler, unjitteredTexCoords, int2( 0, -1));
+	box[2] = baseColorTexture.Sample(baseColorSampler, unjitteredTexCoords, int2(+1, -1));
+	box[3] = baseColorTexture.Sample(baseColorSampler, unjitteredTexCoords, int2(-1, 0));
+	box[4] = currentSample;
+	box[5] = baseColorTexture.Sample(baseColorSampler, unjitteredTexCoords, int2(+1, 0));
+	box[6] = baseColorTexture.Sample(baseColorSampler, unjitteredTexCoords, int2(-1, +1));
+	box[7] = baseColorTexture.Sample(baseColorSampler, unjitteredTexCoords, int2( 0, +1));
+	box[8] = baseColorTexture.Sample(baseColorSampler, unjitteredTexCoords, int2(+1, +1));
 
-	float3 cMin0 = min(min(s01, s10), min(s12, s21));
-	float3 cMax0 = max(max(s01, s10), max(s12, s21));
-	float3 cMin1 = min(min(s00, s02), min(s20, s22));
-	float3 cMax1 = max(max(s00, s02), max(s20, s22));
-	float3 cMin = 0.5 * (cMin0 + min(cMin0, cMin1));
-	float3 cMax = 0.5 * (cMax0 + max(cMax0, cMax1));
-	
-	sH = clamp(sH, cMin, cMax);
-	
-	float3 wK0 = abs(0.5 * (sum1 + sum0) - s11);
-	float3 wK1 = abs(sum0 - s11);
-	float3 wK = 0.5 * (wK0 + wK1);
-	
-	const float3 kLowFreq = 1.33333333;
-	const float3 kHighFreq = 0.33333333;
-	float3 wRGB = saturate(rcp(lerp(kLowFreq, kHighFreq, wK)));
+	float4 minValue = min(min(box[0], box[1]), min(min(box[2], box[3]), 
+		min(min(box[4], box[5]), min(min(box[6], box[7]), box[8]))));
 
-	// return float4(wRGB, 1.0);
-	// return float4(sH, 1.0);
-	// return float4(s11, 1.0);
-	return float4(lerp(s11, sH, wRGB), 1.0);
+	float4 maxValue = max(max(box[0], box[1]), max(max(box[2], box[3]), 
+		max(max(box[4], box[5]), max(max(box[6], box[7]), box[8]))));
+
+	historySample = clamp(historySample, minValue, maxValue);
+
+	float currentLuminance = dot(currentSample.xyz, float3(0.2126, 0.7152, 0.0722));
+	float historyLuminance = dot(historySample.xyz, float3(0.2126, 0.7152, 0.0722));
+
+	const float diffMinDivisor = 0.2;
+	const float lerpMinValue = 1.0 / 8.0; // 1.0 / 3.0;
+	const float lerpMaxValue = 1.0 / 4.0; // 2.0 / 3.0;
+
+	float weight = 1.0 - abs(currentLuminance - historyLuminance) / max(diffMinDivisor, max(currentLuminance, historyLuminance));
+	float lerpValue = lerp(lerpMinValue, lerpMaxValue, weight * weight);
+
+	return lerp(historySample, currentSample, lerpValue);
 
 #else
 

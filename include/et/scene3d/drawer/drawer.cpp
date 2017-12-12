@@ -94,10 +94,11 @@ void Drawer::draw() {
 
 	vec2 ji = sobolSequence[_frameIndex % sobolSequenceSize];
 	vec2 jj = sobolSequence[(_frameIndex + sobolSequenceSize - 1) % sobolSequenceSize];
-	_jitter.x = (ji.x * 2.0f - 1.0f) / static_cast<float>(_main.color->size(0).x);
-	_jitter.y = (ji.y * 2.0f - 1.0f) / static_cast<float>(_main.color->size(0).y);
-	_jitter.z = (jj.x * 2.0f - 1.0f) / static_cast<float>(_main.color->size(0).x);
-	_jitter.w = (jj.y * 2.0f - 1.0f) / static_cast<float>(_main.color->size(0).y);
+	const float jitterScale = 1.0f / static_cast<float>(_main.color->size(0).x);
+	_jitter.z = _jitter.x;
+	_jitter.w = _jitter.y;
+	_jitter.x = (ji.x) * jitterScale;
+	_jitter.y = (ji.y) * jitterScale;
 
 	_frameCamera = _scene->renderCamera();
 	_frameCamera->setProjectionMatrix(_baseProjectionMatrix * translationMatrix(_jitter.x, _jitter.y, 0.0f));
