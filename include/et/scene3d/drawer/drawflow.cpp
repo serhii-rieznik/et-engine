@@ -131,7 +131,7 @@ void HDRFlow::render() {
 void HDRFlow::postprocess() {
 	const Texture::Pointer& vel = drawer()->supportTexture(Drawer::SupportTexture::Velocity);
 	RenderBatch::Pointer batch = renderhelper::createQuadBatch(_primaryTarget, _materials.posteffects, _renderer->clampSampler());
-	batch->material()->setTextureWithSampler(MaterialTexture::EmissiveColor, vel, _renderer->clampSampler());
+	batch->material()->setTextureWithSampler(MaterialTexture::Normal, vel, _renderer->clampSampler());
 
 	_passes.motionBlur0->begin(RenderPassBeginInfo::singlePass());
 	_passes.motionBlur0->nextSubpass();

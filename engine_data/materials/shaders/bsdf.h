@@ -35,19 +35,19 @@ float3 directLighting(in Surface surface, in BSDF bsdf);
 #define MIN_REFLECTANCE 		0.16
 #define MIN_FLOAT				1e-20
 
-Surface buildSurface(in float3 baseColor, in float m, in float r)
+Surface buildSurface(in float3 baseColor, in float roughness, in float metallness)
 {
-	r = clamp(r, MIN_ROUGHNESS, 1.0);
+	roughness = clamp(roughness, MIN_ROUGHNESS, 1.0);
 
 	float defaultReflectance = 0.5;
 	float reflectance = MIN_REFLECTANCE * defaultReflectance * defaultReflectance;	
 	                 	
 	Surface	result;
-	result.metallness = saturate(1.0 - (1.0 - m) * (1.0 - m));
+	result.metallness = saturate(1.0 - (1.0 - metallness) * (1.0 - metallness));
 	result.baseColor = baseColor * (1.0 - result.metallness);
 	result.f90 = saturate(50.0 * reflectance);
 	result.f0 = lerp(reflectance, baseColor, result.metallness);
-	result.roughness = r * r;
+	result.roughness = roughness * roughness;
 	result.roughnessSquared = result.roughness * result.roughness;
 	return result;
 }

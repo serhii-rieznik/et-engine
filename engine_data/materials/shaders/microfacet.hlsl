@@ -2,6 +2,7 @@
 #include <inputdefines>
 #include <inputlayout>
 #include <options>
+#include "common.h"
 
 #define EnableClearCoat 0
 #define EnableIridescence 0
@@ -19,7 +20,10 @@ cbuffer ObjectVariables : DECL_BUFFER(Object)
 {
     row_major float4x4 viewProjectionTransform;
     row_major float4x4 previousViewProjectionTransform;
+    
     row_major float4x4 worldTransform;
+    row_major float4x4 previousWorldTransform;
+
     row_major float4x4 worldRotationTransform;
     row_major float4x4 lightViewTransform;
     row_major float4x4 lightProjectionTransform;
@@ -71,8 +75,14 @@ const float ClearCoatRoughness = 0.05;
 
 VSOutput vertexMain(VSInput vsIn)
 {
+#if (HARDCODE_OBJECTS_POSITION)
+    float4 transformedPosition = float4(vsIn.position + HARDCODED_OBJECT_POSITION, 1.0);
+    float4 previousTransformedPosition =  float4(vsIn.position + HARDCODED_OBJECT_PREVIOUS_POSITION, 1.0);
+#else
     float4 transformedPosition = mul(float4(vsIn.position, 1.0), worldTransform);
-    
+    float4 previousTransformedPosition = mul(float4(vsIn.position, 1.0), previousWorldTransform);
+#endif	
+
     VSOutput vsOut;
     vsOut.texCoord0 = vsIn.texCoord0;
     vsOut.normal = normalize(mul(float4(vsIn.normal, 0.0), worldRotationTransform).xyz);
@@ -87,7 +97,7 @@ VSOutput vertexMain(VSInput vsIn)
     vsOut.invTransformB = float3(tTangent.y, tBiTangent.y, vsOut.normal.y);
     vsOut.invTransformN = float3(tTangent.z, tBiTangent.z, vsOut.normal.z);
     vsOut.projectedPosition = mul(transformedPosition, viewProjectionTransform);
-    vsOut.previousProjectedPosition = mul(transformedPosition, previousViewProjectionTransform);
+    vsOut.previousProjectedPosition = mul(previousTransformedPosition, previousViewProjectionTransform);
     vsOut.position = vsOut.projectedPosition;
     return vsOut;
 }
@@ -113,36 +123,33 @@ FSOutput fragmentMain(VSOutput fsIn)
     if (opacitySample.x < 32.0 / 255.0) 
    		discard;
 
-	float3 noiseDimensions = 0.0;
-	noiseTexture.GetDimensions(0, noiseDimensions.x, noiseDimensions.y, noiseDimensions.z);
-
-    float2 currentPosition = fsIn.projectedPosition.xy / fsIn.projectedPosition.w;
-    float2 projectedUv = currentPosition.xy * 0.5 + 0.5;
-    float2 previousPosition = fsIn.previousProjectedPosition.xy / fsIn.previousProjectedPosition.w;
-    float2 velocity = currentPosition - previousPosition;
-	float2 noiseUV = (viewport.zw / noiseDimensions.xy) * projectedUv;
-	float sampledNoise = noiseTexture.Sample(noiseSampler, 0.5 * noiseUV);
-
     float4 baseColorSample = baseColorTexture.Sample(baseColorSampler, fsIn.texCoord0);
     float4 normalSample = normalTexture.Sample(normalSampler, fsIn.texCoord0);
 
-    baseColorSample.xyz = srgbToLinear(diffuseReflectance.xyz * baseColorSample.xyz);
+	float3 noiseDimensions = 0.0;
+	noiseTexture.GetDimensions(0, noiseDimensions.x, noiseDimensions.y, noiseDimensions.z);
 
 	float3 shadowmapSize = 0.0;
 	shadowTexture.GetDimensions(0, shadowmapSize.x, shadowmapSize.y, shadowmapSize.z);
+
+    float2 currentPosition = fsIn.projectedPosition.xy / fsIn.projectedPosition.w;
+    float2 previousPosition = fsIn.previousProjectedPosition.xy / fsIn.previousProjectedPosition.w;
+
+    float2 projectedUv = currentPosition.xy * 0.5 + 0.5;
+	float2 noiseUV = (2.0 * projectedUv * viewport.zw / noiseDimensions.xy);
+	float sampledNoise = noiseTexture.Sample(noiseSampler, 0.5 * noiseUV);
+
+    float2 nxy = normalSample.xy * 2.0 - 1.0;
+    float3 tsNormal = normalize(float3(nxy, sqrt(1.0 - saturate(dot(nxy, nxy)))));
+    float3 wsNormal = normalize(float3(dot(fsIn.invTransformT, tsNormal), dot(fsIn.invTransformB, tsNormal), dot(fsIn.invTransformN, tsNormal)));
+
+    float3 baseColor = srgbToLinear(diffuseReflectance.xyz * baseColorSample.xyz);
+    float roughness = normalSample.z;
+    float metallness = normalSample.w;
+    float ambientOcclusion = aoTexture.Sample(aoSampler, projectedUv).x;
+	float shadow = sampleShadow(fsIn.lightCoord.xyz / fsIn.lightCoord.w, sampledNoise, shadowmapSize.xy);
         
-    float shadow = sampleShadow(fsIn.lightCoord.xyz / fsIn.lightCoord.w, sampledNoise, shadowmapSize.xy);
-    Surface surface = buildSurface(baseColorSample.xyz, normalSample.w, baseColorSample.w);
-
-    float ao = aoTexture.Sample(aoSampler, projectedUv).x;
-
-    float3 tsNormal = normalize(normalSample.xyz - 0.5);
-
-    float3 wsNormal;
-    wsNormal.x = dot(fsIn.invTransformT, tsNormal);
-    wsNormal.y = dot(fsIn.invTransformB, tsNormal);
-    wsNormal.z = dot(fsIn.invTransformN, tsNormal);
-    wsNormal = normalize(wsNormal);
+    Surface surface = buildSurface(baseColor, roughness, metallness);
 
     float3 geometricNormal = normalize(float3(fsIn.invTransformT.z, fsIn.invTransformB.z, fsIn.invTransformN.z));
 
@@ -190,7 +197,7 @@ FSOutput fragmentMain(VSOutput fsIn)
 #else
 
     float3 result = shadow * ((directDiffuse + directSpecular) * lightColor) + 
-    	ao * (indirectDiffuse + indirectSpecular);
+    	ambientOcclusion * (indirectDiffuse + indirectSpecular);
 
 #endif
 
@@ -206,6 +213,6 @@ FSOutput fragmentMain(VSOutput fsIn)
 
     FSOutput output;
     output.color = float4(result, 1.0);
-	output.velocity = velocity;
+	output.velocity = 0.5 * (currentPosition - previousPosition);
     return output;
 }                              

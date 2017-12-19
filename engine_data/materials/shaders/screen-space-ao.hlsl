@@ -87,7 +87,7 @@ float3 getRotatedDirection(in uint index, in float4 m)
 float4 sampleAmbientOcclusion(in float2 uv, in float2 texelSize, in float4 rnd)
 {
 	const uint samplesPerDirection = 6;
-	const float influenceRadius = (rnd.x * 0.5 + 0.5); // 1.0 * (rnd.x * 0.5 + 0.5);
+	const float influenceRadius = 0.5 * (rnd.x * 0.5 + 0.5); // 1.0 * (rnd.x * 0.5 + 0.5);
 
 	float3 p0 = viewSpace(uv * 2.0 - 1.0, baseColorTexture.Sample(baseColorSampler, uv));
 	float3 n0 = reconstructNormal(uv, texelSize);
@@ -117,7 +117,7 @@ float4 sampleAmbientOcclusion(in float2 uv, in float2 texelSize, in float4 rnd)
 			stepUv += projectedStep;
 		}
 	}
-	return 1.0; // saturate(1.0 - aoScale * ao / float(directionsCount * samplesPerDirection));
+	return saturate(1.0 - aoScale * ao / float(directionsCount * samplesPerDirection));
 }
 
 float4 fragmentMain(VSOutput fsIn) : SV_Target0
@@ -133,9 +133,20 @@ float4 fragmentMain(VSOutput fsIn) : SV_Target0
 	noiseTexture.GetDimensions(0, w, h, levels);
 	float2 noiseTexelSize = float2(w, h);
 
-	float2 noiseUv = (fsIn.texCoord0 + sin(continuousTime * PI)) * (viewport.zw / noiseTexelSize);
-	float4 sampledNoise = noiseTexture.SampleLevel(noiseSampler, noiseUv, 0.0);
+	float2 noiseUv = frac(continuousTime + fsIn.texCoord0 * (viewport.zw / noiseTexelSize));
+	
+	float cs = cos(continuousTime * PI);
+	float sn = sin(continuousTime * PI);
+	
+	float2 rotatedUv;
+	rotatedUv.x = dot(noiseUv, float2(cs, -sn));
+	rotatedUv.y = dot(noiseUv, float2(+sn, cs));
 
-	return sampleAmbientOcclusion(fsIn.texCoord0, texelSize, sampledNoise);
+	float4 sampledNoise = noiseTexture.SampleLevel(noiseSampler, rotatedUv, 0.0);
+
+	return 
+	// 1.0; 
+	// sampledNoise; 
+	sampleAmbientOcclusion(fsIn.texCoord0, texelSize, sampledNoise);
 }
                                                                 

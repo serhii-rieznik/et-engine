@@ -55,6 +55,7 @@ private:
 	Camera::Pointer _frameCamera;
 	Vector<Mesh::Pointer> _allMeshes;
 	Vector<Mesh::Pointer> _visibleMeshes;
+	Map<Mesh::Pointer, std::pair<mat4, mat4>> _previousFrameTransforms;
 
 	RenderInterface::Pointer _renderer;
 	DebugDrawer::Pointer _debugDrawer;

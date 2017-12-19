@@ -19,16 +19,38 @@ namespace et {
 namespace s3d {
 
 static const vec2 sobolSequence[] = {
-	vec2(0.000000, 0.000000),
-	vec2(0.500000, 0.500000),
-	vec2(0.750000, 0.250000),
-	vec2(0.250000, 0.750000),
-	vec2(0.375000, 0.375000),
-	vec2(0.875000, 0.875000),
-	vec2(0.625000, 0.125000),
-	vec2(0.125000, 0.625000),
-	vec2(0.187500, 0.312500),
-	vec2(0.687500, 0.812500),
+	vec2(-1.0f, -1.0f),
+	vec2(0.0f, 0.0f),
+	vec2(-0.5f, 0.5f),
+	vec2(0.5f, -0.5f),
+	vec2(-0.75f, 0.25f),
+	vec2(0.25f, -0.75f),
+	vec2(-0.25f, -0.25f),
+	vec2(0.75f, 0.75f),
+	vec2(-0.875f, 0.875f),
+	vec2(0.125f, -0.125f),
+	vec2(-0.375f, -0.625f),
+	vec2(0.625f, 0.375f),
+	vec2(-0.625f, -0.375f),
+	vec2(0.375f, 0.625f),
+	vec2(-0.125f, 0.125f),
+	vec2(0.875f, -0.875f),
+	vec2(-0.9375f, 0.0625f),
+	vec2(0.0625f, -0.9375f),
+	vec2(-0.4375f, -0.4375f),
+	vec2(0.5625f, 0.5625f),
+	vec2(-0.6875f, -0.6875f),
+	vec2(0.3125f, 0.3125f),
+	vec2(-0.1875f, 0.8125f),
+	vec2(0.8125f, -0.1875f),
+	vec2(-0.8125f, -0.0625f),
+	vec2(0.1875f, 0.9375f),
+	vec2(-0.3125f, 0.4375f),
+	vec2(0.6875f, -0.5625f),
+	vec2(-0.5625f, 0.6875f),
+	vec2(0.4375f, -0.3125f),
+	vec2(-0.0625f, -0.8125f),
+	vec2(0.9375f, 0.1875f),
 };
 static const uint64_t sobolSequenceSize = sizeof(sobolSequence) / sizeof(sobolSequence[0]);
 
@@ -92,13 +114,13 @@ void Drawer::draw() {
 
 	validate(_renderer);
 
-	vec2 ji = sobolSequence[_frameIndex % sobolSequenceSize];
-	vec2 jj = sobolSequence[(_frameIndex + sobolSequenceSize - 1) % sobolSequenceSize];
-	const float jitterScale = 1.0f / static_cast<float>(_main.color->size(0).x);
+	vec2 jitterScale = vec2(1.0f) / vector2ToFloat(_main.color->size(0));
+	vec2 ji = jitterScale * vec2(randomFloat() * 2.0f - 1.0f, randomFloat() * 2.0f - 1.0f); // sobolSequence[_frameIndex % sobolSequenceSize];
+
 	_jitter.z = _jitter.x;
 	_jitter.w = _jitter.y;
-	_jitter.x = (ji.x) * jitterScale;
-	_jitter.y = (ji.y) * jitterScale;
+	_jitter.x = ji.x;
+	_jitter.y = ji.y;
 
 	_frameCamera = _scene->renderCamera();
 	_frameCamera->setProjectionMatrix(_baseProjectionMatrix * translationMatrix(_jitter.x, _jitter.y, 0.0f));
@@ -150,8 +172,13 @@ void Drawer::draw() {
 		{
 			_main.forward->setSharedVariable(ObjectVariable::WorldTransform, mesh->transform());
 			_main.forward->setSharedVariable(ObjectVariable::WorldRotationTransform, mesh->rotationTransform());
+			_main.forward->setSharedVariable(ObjectVariable::PreviousWorldTransform, _previousFrameTransforms[mesh].first);
+			_main.forward->setSharedVariable(ObjectVariable::PreviousWorldRotationTransform, _previousFrameTransforms[mesh].second);
+
 			for (const RenderBatch::Pointer& rb : mesh->renderBatches())
 				_main.forward->pushRenderBatch(rb);
+
+			_previousFrameTransforms[mesh] = std::make_pair(mesh->transform(), mesh->rotationTransform());
 		}
 		_main.forward->setSharedVariable(ObjectVariable::WorldTransform, identityMatrix);
 		_main.forward->pushRenderBatch(_lighting.environmentBatch);

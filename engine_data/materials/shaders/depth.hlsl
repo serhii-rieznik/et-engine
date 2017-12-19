@@ -3,6 +3,7 @@
 #include <inputlayout>
 #include <options>
 #include "moments.h"
+#include "common.h"
 
 cbuffer ObjectVariables : DECL_BUFFER(Object)
 {
@@ -20,8 +21,14 @@ struct VSOutput
 
 VSOutput vertexMain(VSInput vsIn)
 {
+#if (HARDCODE_OBJECTS_POSITION)
+    float4 transformedPosition = float4(vsIn.position + HARDCODED_OBJECT_POSITION, 1.0);
+#else
+    float4 transformedPosition = mul(float4(vsIn.position, 1.0), worldTransform);
+#endif	
+
 	VSOutput output;
-	output.position = mul(mul(float4(vsIn.position, 1.0), worldTransform), viewProjectionTransform);
+	output.position = mul(transformedPosition, viewProjectionTransform);
 #if (ShadowMapping == ShadowMappingMoments)
 	output.projected = output.position;
 #endif

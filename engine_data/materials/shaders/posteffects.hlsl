@@ -82,23 +82,23 @@ float4 fragmentMain(VSOutput fsIn) : SV_Target0
 
 	const uint maxSamples = 10;
 	const float targetDeltaTime = 1.0 / 60.0;
-	float velocityScale = 0.5 * min(1.0, deltaTime / targetDeltaTime);
+	float velocityScale = min(1.0, deltaTime / targetDeltaTime);
 
-	float2 velocity = velocityScale * emissiveColorTexture.Sample(emissiveColorSampler, fsIn.texCoord0).xy;
-	uint currentSamples = clamp(uint(length(velocity * float2(w, h))), 1, maxSamples);
+	float2 velocity = normalTexture.Sample(emissiveColorSampler, fsIn.texCoord0).xy;
+	uint currentSamples = 1; // clamp(uint(length(velocity * float2(w, h))), 1, maxSamples);
 
-	float totalWeight = 1.0;
+	float2 currentUv = fsIn.texCoord0;
+	float2 previousUv = fsIn.texCoord0 - velocityScale * velocity;
+
 	float4 color = baseColorTexture.Sample(baseColorSampler, fsIn.texCoord0);
-	//*
 	for (uint i = 1; i < currentSamples; ++i)
 	{
-		float t = float(i - 1) / float(currentSamples - 1);
-		float weight = 4.0 * t * (1.0 - t);
-		color += weight * baseColorTexture.Sample(baseColorSampler, fsIn.texCoord0 + velocity * (t - 0.5));
-		totalWeight += weight;
+		float t = float(i) / float(currentSamples - 1);
+		float2 uv = lerp(currentUv, previousUv, t);
+		color += baseColorTexture.Sample(baseColorSampler, uv);
 	}
-	// */
-	return color / totalWeight;
+
+	return color / float(currentSamples);
 
 #elif (TONE_MAPPING)
 
@@ -106,36 +106,41 @@ float4 fragmentMain(VSOutput fsIn) : SV_Target0
 	float averageLuminance = emissiveColorTexture.SampleLevel(emissiveColorSampler, fsIn.texCoord0, 10.0).x;
 	float3 ldrColor = toneMapping(source, averageLuminance);
 
-#if (ENABLE_COLOR_GRADING)
-	float z0 = floor(ldrColor.z * 16.0) / 16.0;
-	float z1 = z0 + 1.0 / 16.0;
-	float u = ldrColor.x / 16.0 + 0.5 / 256.0;
-	float v = ldrColor.y + 0.5 / 16.0;
-	float3 sample0 = shadowTexture.SampleLevel(shadowSampler, float2(u + z0, v), 0.0).xyz;
-	float3 sample1 = shadowTexture.SampleLevel(shadowSampler, float2(u + z1, v), 0.0).xyz;
-	ldrColor = lerp(sample0, sample1, (ldrColor.z - z0) * 16.0);
-#endif
+#	if (ENABLE_COLOR_GRADING)
+	{
+		float z0 = floor(ldrColor.z * 16.0) / 16.0;
+		float z1 = z0 + 1.0 / 16.0;
+		float u = ldrColor.x / 16.0 + 0.5 / 256.0;
+		float v = ldrColor.y + 0.5 / 16.0;
+		float3 sample0 = shadowTexture.SampleLevel(shadowSampler, float2(u + z0, v), 0.0).xyz;
+		float3 sample1 = shadowTexture.SampleLevel(shadowSampler, float2(u + z1, v), 0.0).xyz;
+		ldrColor = lerp(sample0, sample1, (ldrColor.z - z0) * 16.0);
+	}
+#	endif
 	
 	return float4(ldrColor, 1.0);
 
 #elif (TEMPORAL_AA)
 	
-	float4 result = 0.25;
+	float2 baseUv = fsIn.texCoord0 + 0.5 * cameraJitter.xy;
+	float2 velocity = normalTexture.Sample(baseColorSampler, baseUv).xy;
 
-	float2 unjitteredTexCoords = fsIn.texCoord0 + cameraJitter.xy;
-	float4 currentSample = baseColorTexture.Sample(baseColorSampler, unjitteredTexCoords);
-	float4 historySample = emissiveColorTexture.Sample(emissiveColorSampler, fsIn.texCoord0);
+	float4 currentSample = baseColorTexture.Sample(baseColorSampler, baseUv);
+
+	float2 motion = 0.5 * (cameraJitter.xy - cameraJitter.zw);
+	float2 historyUv = fsIn.texCoord0 + velocity.xy;// - motion;
+	float4 historySample = emissiveColorTexture.Sample(emissiveColorSampler, historyUv);
 
 	float4 box[9];
-	box[0] = baseColorTexture.Sample(baseColorSampler, unjitteredTexCoords, int2(-1, -1));
-	box[1] = baseColorTexture.Sample(baseColorSampler, unjitteredTexCoords, int2( 0, -1));
-	box[2] = baseColorTexture.Sample(baseColorSampler, unjitteredTexCoords, int2(+1, -1));
-	box[3] = baseColorTexture.Sample(baseColorSampler, unjitteredTexCoords, int2(-1, 0));
+	box[0] = baseColorTexture.Sample(baseColorSampler, baseUv, int2(-1, -1));
+	box[1] = baseColorTexture.Sample(baseColorSampler, baseUv, int2( 0, -1));
+	box[2] = baseColorTexture.Sample(baseColorSampler, baseUv, int2(+1, -1));
+	box[3] = baseColorTexture.Sample(baseColorSampler, baseUv, int2(-1,  0));
 	box[4] = currentSample;
-	box[5] = baseColorTexture.Sample(baseColorSampler, unjitteredTexCoords, int2(+1, 0));
-	box[6] = baseColorTexture.Sample(baseColorSampler, unjitteredTexCoords, int2(-1, +1));
-	box[7] = baseColorTexture.Sample(baseColorSampler, unjitteredTexCoords, int2( 0, +1));
-	box[8] = baseColorTexture.Sample(baseColorSampler, unjitteredTexCoords, int2(+1, +1));
+	box[5] = baseColorTexture.Sample(baseColorSampler, baseUv, int2(+1,  0));
+	box[6] = baseColorTexture.Sample(baseColorSampler, baseUv, int2(-1, +1));
+	box[7] = baseColorTexture.Sample(baseColorSampler, baseUv, int2( 0, +1));
+	box[8] = baseColorTexture.Sample(baseColorSampler, baseUv, int2(+1, +1));
 
 	float4 minValue = min(min(box[0], box[1]), min(min(box[2], box[3]), 
 		min(min(box[4], box[5]), min(min(box[6], box[7]), box[8]))));
@@ -148,14 +153,22 @@ float4 fragmentMain(VSOutput fsIn) : SV_Target0
 	float currentLuminance = dot(currentSample.xyz, float3(0.2126, 0.7152, 0.0722));
 	float historyLuminance = dot(historySample.xyz, float3(0.2126, 0.7152, 0.0722));
 
-	const float diffMinDivisor = 0.2;
-	const float lerpMinValue = 1.0 / 8.0; // 1.0 / 3.0;
-	const float lerpMaxValue = 1.0 / 4.0; // 2.0 / 3.0;
+	const float diffMinDivisor = 0.1; // 0.25;
+	const float lerpMinValue = 0.125;// / 8.0; // 1.0 / 3.0;
+	const float lerpMaxValue = 0.875; // 2.0 / 3.0;
 
 	float weight = 1.0 - abs(currentLuminance - historyLuminance) / max(diffMinDivisor, max(currentLuminance, historyLuminance));
 	float lerpValue = lerp(lerpMinValue, lerpMaxValue, weight * weight);
 
-	return lerp(historySample, currentSample, lerpValue);
+	// lerpValue = 0.0;
+
+	return 
+	// length(velocity.xy - motion) * 1000.0;
+	// lerpValue;
+	// weight;
+	// historySample;
+	// currentSample;
+	lerp(historySample, currentSample, lerpValue);
 
 #else
 
