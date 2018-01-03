@@ -3,7 +3,7 @@
 #include "atmosphere.h"
 #include "environment.h"
 
-#define DRAW_SUN 0
+#define DRAW_SUN 1
 #define SAMPLE_ATMOSPHERE 0
 
 cbuffer ObjectVariables : DECL_BUFFER(Object)

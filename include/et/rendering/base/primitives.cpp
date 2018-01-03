@@ -662,12 +662,12 @@ void primitives::calculateTangents(VertexStorage::Pointer data, const IndexArray
 	{
 		IndexArray::Primitive& p = (*i);
 
-		vec3& v1 = pos[p[0]];
-		vec3& v2 = pos[p[1]];
-		vec3& v3 = pos[p[2]];
-		vec2& w1 = uv[p[0]];
-		vec2& w2 = uv[p[1]];
-		vec2& w3 = uv[p[2]];
+		const vec3& v1 = pos[p[0]];
+		const vec3& v2 = pos[p[1]];
+		const vec3& v3 = pos[p[2]];
+		const vec2& w1 = uv[p[0]];
+		const vec2& w2 = uv[p[1]];
+		const vec2& w3 = uv[p[2]];
 
 		float x1 = v2.x - v1.x;
 		float x2 = v3.x - v1.x;
@@ -693,15 +693,19 @@ void primitives::calculateTangents(VertexStorage::Pointer data, const IndexArray
 		tan2[p[2]] += tdir;
 	}
 
+	for (auto& t : tan1)
+		t.normalize();
+
 	for (IndexArray::PrimitiveIterator i = buffer->primitive(first), e = buffer->primitive(last); i != e; ++i)
 	{
 		const IndexArray::Primitive& p = (*i);
 		for (uint32_t k = 0; k < 3; ++k)
 		{
-			vec3& n = nrm[p[k]];
-			vec3& t = tan1[p[k]];
-			float value = dot(cross(n, t), tan2[p[k]]);
-			tan[p[k]] = normalize(t - n * dot(n, t)) * signOrZero(value);
+			// const vec3& n = nrm[p[k]];
+			const vec3& t = tan1[p[k]];
+			// float value = dot(cross(n, t), tan2[p[k]]);
+			// tan[p[k]] = normalize(t - n * dot(n, t)) * signOrZero(value);
+			tan[p[k]] = t;
 		}
 	}
 }

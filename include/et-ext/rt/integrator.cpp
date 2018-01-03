@@ -7,14 +7,11 @@
 
 #include <et-ext/rt/integrator.h>
 
-namespace et
-{
-namespace rt
-{
+namespace et {
+namespace rt {
 #define ET_RT_USE_RUSSIAN_ROULETTE 1
 
-float4 evaluateNormals(Scene& scene, const Ray& inRay, Evaluate& eval)
-{
+float4 evaluateNormals(Scene& scene, const Ray& inRay, Evaluate& eval) {
 	KDTree::TraverseResult hit0 = scene.kdTree.traverse(inRay);
 	if (hit0.triangleIndex == InvalidIndex)
 		return float4(1.0f); // TODO : sample light? env->sampleInDirection(inRay.direction);
@@ -31,7 +28,7 @@ float4 evaluateAmbientOcclusion(Scene& scene, const Ray& inRay, Evaluate& eval)
 	if (hit.triangleIndex != InvalidIndex)
 	{
 		++eval.pathLength;
-		
+
 		vec4simd randomSample(fastRandomFloat(), fastRandomFloat(), 0.0f, 0.0f);
 
 		const Triangle& tri = scene.kdTree.triangleAtIndex(hit.triangleIndex);
@@ -44,12 +41,11 @@ float4 evaluateAmbientOcclusion(Scene& scene, const Ray& inRay, Evaluate& eval)
 		if (hit.triangleIndex != InvalidIndex)
 			result = float4(0.0f);
 	}
-	
+
 	return result;
 }
 
-float4 evaluateGlobalIllumination(Scene& scene, const Ray& inRay, Evaluate& eval)
-{
+float4 evaluateGlobalIllumination(Scene& scene, const Ray& inRay, Evaluate& eval) {
 	if (eval.maxPathLength == 0)
 		eval.maxPathLength = 0x7FFFFFFF;
 
@@ -89,7 +85,7 @@ float4 evaluateGlobalIllumination(Scene& scene, const Ray& inRay, Evaluate& eval
 		currentRay.origin = intersection.intersectionPoint;
 		currentRay.direction = bsdfSample.Wo;
 
-#	if (ET_RT_USE_RUSSIAN_ROULETTE)
+	#	if (ET_RT_USE_RUSSIAN_ROULETTE)
 		if (eval.pathLength > 16)
 		{
 			ET_ALIGNED(16) float local[4] = {};
@@ -100,7 +96,7 @@ float4 evaluateGlobalIllumination(Scene& scene, const Ray& inRay, Evaluate& eval
 				break;
 			throughput /= q;
 		}
-#	endif
+	#	endif
 
 	}
 

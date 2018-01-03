@@ -22,11 +22,13 @@ struct VSOutput
 	float2 texCoord0 : TEXCOORD0;
 };
 
-VSOutput vertexMain(VSInput vsIn)
+VSOutput vertexMain(uint vertexIndex : SV_VertexID)
 {
+	float2 pos = float2((vertexIndex << 1) & 2, vertexIndex & 2) * 2.0 - 1.0;
+
 	VSOutput vsOut;
-	vsOut.texCoord0 = vsIn.position.xy * 0.5 + 0.5;
-	vsOut.position = float4(vsIn.position, 1.0);
+	vsOut.texCoord0 = pos * 0.5 + 0.5;
+	vsOut.position = float4(pos, 0.0, 1.0);
 
 #if (TRANSFORM_INPUT_POSITION)
 	vsOut.position = mul(mul(vsOut.position, worldTransform), viewProjectionTransform);

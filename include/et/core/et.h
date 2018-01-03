@@ -56,61 +56,52 @@
 #include <et/core/memoryallocator.h>
 #include <et/core/remoteheap.h>
 #include <et/core/intrusiveptr.h>
+#include <et/core/basicmath.h>
 
-namespace et
-{
+namespace et {
 template <typename T>
 struct SharedBlockAllocatorSTDProxy
 {
 	using size_type = size_t;
 	using value_type = T;
-	using pointer = T*;
-	using reference = T&;
+	using pointer = T * ;
+	using reference = T & ;
 	using const_reference = const T&;
 
-	SharedBlockAllocatorSTDProxy()
-	{
+	SharedBlockAllocatorSTDProxy() {
 	}
 
-	SharedBlockAllocatorSTDProxy(const SharedBlockAllocatorSTDProxy&)
-	{
+	SharedBlockAllocatorSTDProxy(const SharedBlockAllocatorSTDProxy&) {
 	}
 
 	template<class U>
-	SharedBlockAllocatorSTDProxy(const SharedBlockAllocatorSTDProxy<U>&)
-	{
+	SharedBlockAllocatorSTDProxy(const SharedBlockAllocatorSTDProxy<U>&) {
 	}
 
-	pointer allocate(size_type n)
-	{
+	pointer allocate(size_type n) {
 		uint32_t sz = static_cast<uint32_t>(n * sizeof(T));
 		return reinterpret_cast<pointer>(sharedBlockAllocator().allocate(sz));
 	}
 
-	void deallocate(pointer ptr, size_type)
-	{
+	void deallocate(pointer ptr, size_type) {
 		sharedBlockAllocator().release(ptr);
 	}
 
 	template<class U, class... Args>
-	void construct(U* p, Args&&... args)
-	{
+	void construct(U* p, Args&&... args) {
 		new ((void*)p) U(std::forward<Args>(args)...);
 	}
 
 	template<class U>
-	void destroy(U* p)
-	{
+	void destroy(U* p) {
 		p->~U();
 	}
 
-	bool operator == (const SharedBlockAllocatorSTDProxy<T>&) const
-	{
+	bool operator == (const SharedBlockAllocatorSTDProxy<T>&) const {
 		return true;
 	}
 
-	bool operator != (const SharedBlockAllocatorSTDProxy<T>&) const
-	{
+	bool operator != (const SharedBlockAllocatorSTDProxy<T>&) const {
 		return false;
 	}
 
@@ -122,14 +113,12 @@ struct SharedBlockAllocatorSTDProxy
 };
 
 template <class C, typename ... args>
-C* etCreateObject(args&&... a)
-{
+C* etCreateObject(args&&... a) {
 	return sharedObjectFactory().createObject<C>(std::forward<args>(a)...);
 }
 
 template <class C>
-void etDestroyObject(C* c)
-{
+void etDestroyObject(C* c) {
 	sharedObjectFactory().deleteObject(c);
 }
 
@@ -162,8 +151,7 @@ using UnorderedMap = std::unordered_map<Key, Value, std::hash<Key>, std::equal_t
 template <typename T>
 struct DefaultDeleter
 {
-	void operator () (T* ptr)
-	{
+	void operator () (T* ptr) {
 		etDestroyObject<T>(ptr);
 	}
 };
@@ -172,8 +160,7 @@ template <typename T>
 using UniquePtr = std::unique_ptr<T, DefaultDeleter<T>>;
 
 template <typename T, typename ... Arg>
-UniquePtr<T> makeUnique(Arg&&... arg)
-{
+UniquePtr<T> makeUnique(Arg&&... arg) {
 	return UniquePtr<T>(etCreateObject<T>(std::forward<Arg>(arg...)...));
 }
 
@@ -190,16 +177,14 @@ public:
 };
 
 template <class INT_T>
-inline INT_T alignUpTo(INT_T sz, INT_T al)
-{
+inline INT_T alignUpTo(INT_T sz, INT_T al) {
 	static_assert(std::is_integral<INT_T>::value, "alignUpTo can only be used with integral types");
 	ET_ASSERT(al > 0);
 	INT_T m = al - 1;
 	return sz + m & (~m);
 }
 
-inline uint32_t alignDownTo(uint32_t sz, uint32_t al)
-{
+inline uint32_t alignDownTo(uint32_t sz, uint32_t al) {
 	ET_ASSERT(al > 0);
 	return sz & (~(al - 1));
 }
@@ -223,8 +208,7 @@ inline uint32_t alignDownTo(uint32_t sz, uint32_t al)
 
 #undef ET_CORE_INCLUDES
 
-namespace et
-{
+namespace et {
 
 ObjectFactory& sharedObjectFactory();
 BlockMemoryAllocator& sharedBlockAllocator();
@@ -254,8 +238,7 @@ using recti = Rect<int32_t>;
 using rectf = Rect<float>;
 
 template<typename T>
-inline T clamp(T value, T min, T max)
-{
+inline T clamp(T value, T min, T max) {
 	return (value < min) ? min : (value > max) ? max : value;
 }
 

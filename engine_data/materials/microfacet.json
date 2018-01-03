@@ -4,7 +4,8 @@
 	"depth" : 
 	{
 		"input-layout" :  {
-			"position" : 3
+			"position" : 3,
+			"texCoord0" : 2
 		},
 		"depth-state": {
 			"depth-function": "less",

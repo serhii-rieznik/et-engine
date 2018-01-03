@@ -15,7 +15,7 @@ namespace rt {
 
 class ET_ALIGNED(16) KDTree {
 public:
-	struct ET_ALIGNED(16) Node {
+	struct ET_ALIGNED(8) Node {
 		float distance = 0.0f;
 		uint32_t children[2]{ InvalidIndex, InvalidIndex };
 		uint32_t axis = InvalidIndex;
@@ -95,7 +95,7 @@ private:
 };
 
 template <size_t MaxElements, class T>
-struct ET_ALIGNED(16) FastStack {
+struct ET_ALIGNED(8) FastStack {
 public:
 	enum : size_t
 	{

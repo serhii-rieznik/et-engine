@@ -718,6 +718,9 @@
     <ClInclude Include="..\..\..\..\..\et-engine\include\et\pbr\pbr_sensor.h">
       <Filter>Source\pbr</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\et\core\basicmath.h">
+      <Filter>Source\core</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\et\sound\openal.h">
@@ -1306,6 +1309,12 @@
     </ClCompile>
     <ClCompile Include="..\..\include\external\spirvcross\spirv_msl.cpp">
       <Filter>spir-v-cross</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\et-engine\include\et\pbr\pbr_spectrum.cpp">
+      <Filter>Source\pbr</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\include\et\compile_packs\pbr.pack.cxx">
+      <Filter>Source\compile_packs</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

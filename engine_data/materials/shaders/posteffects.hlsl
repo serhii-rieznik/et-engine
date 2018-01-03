@@ -37,13 +37,13 @@ struct VSOutput
 
 float4 fragmentMain(VSOutput fsIn) : SV_Target0
 {
-#if (GATHER_AVERAGE)
-	float currentLevel = extraParameters.x;
-	float sampledLevel = max(0.0, currentLevel - 1);
-
 	float w = 0;
 	float h = 0;
 	float levels = 0;
+
+#if (GATHER_AVERAGE)
+	float currentLevel = extraParameters.x;
+	float sampledLevel = max(0.0, currentLevel - 1);
 	baseColorTexture.GetDimensions(sampledLevel, w, h, levels);
 
 	const float delta = 0.5;
@@ -75,36 +75,49 @@ float4 fragmentMain(VSOutput fsIn) : SV_Target0
 
 #elif (MOTION_BLUR)
 
-	float w = 0.0;
-	float h = 0.0;
-	float levels = 0.0;
-	baseColorTexture.GetDimensions(0, w, h, levels);
+	baseColorTexture.GetDimensions(0.0, w, h, levels);
 
-	const uint maxSamples = 10;
-	const float targetDeltaTime = 1.0 / 60.0;
+	const uint maxSamples = 11;
+	const float targetDeltaTime = 1.0 / 130.0;
 	float velocityScale = min(1.0, deltaTime / targetDeltaTime);
 
 	float2 velocity = normalTexture.Sample(emissiveColorSampler, fsIn.texCoord0).xy;
-	uint currentSamples = 1; // clamp(uint(length(velocity * float2(w, h))), 1, maxSamples);
+	uint currentSamples = clamp(uint(length(velocity * float2(w, h))), 1, maxSamples);
 
 	float2 currentUv = fsIn.texCoord0;
 	float2 previousUv = fsIn.texCoord0 - velocityScale * velocity;
 
 	float4 color = baseColorTexture.Sample(baseColorSampler, fsIn.texCoord0);
+	//*
 	for (uint i = 1; i < currentSamples; ++i)
 	{
 		float t = float(i) / float(currentSamples - 1);
 		float2 uv = lerp(currentUv, previousUv, t);
 		color += baseColorTexture.Sample(baseColorSampler, uv);
 	}
-
+	// */
 	return color / float(currentSamples);
 
 #elif (TONE_MAPPING)
 
-	float3 source = baseColorTexture.SampleLevel(baseColorSampler, fsIn.texCoord0, 0.0).xyz;
 	float averageLuminance = emissiveColorTexture.SampleLevel(emissiveColorSampler, fsIn.texCoord0, 10.0).x;
-	float3 ldrColor = toneMapping(source, averageLuminance);
+
+	baseColorTexture.GetDimensions(0.0, w, h, levels);
+	float2 texel = float2(1.0 / w, 1.0 / h);
+
+	float3 c01 = baseColorTexture.Sample(baseColorSampler, fsIn.texCoord0, int2(0, -1)).xyz;
+	float3 c10 = baseColorTexture.Sample(baseColorSampler, fsIn.texCoord0, int2(-1, 0)).xyz;
+	float3 c11 = baseColorTexture.Sample(baseColorSampler, fsIn.texCoord0).xyz;
+	float3 c12 = baseColorTexture.Sample(baseColorSampler, fsIn.texCoord0, int2(+1, 0)).xyz;
+	float3 c21 = baseColorTexture.Sample(baseColorSampler, fsIn.texCoord0, int2(0, +1)).xyz;
+
+	c01 = toneMapping(c01, averageLuminance);
+	c10 = toneMapping(c10, averageLuminance);
+	c11 = toneMapping(c11, averageLuminance);
+	c12 = toneMapping(c12, averageLuminance);
+	c21 = toneMapping(c21, averageLuminance);
+
+	float3 ldrColor = c11; // 5.0 * c11 - (c01 + c10 + c12 + c21);
 
 #	if (ENABLE_COLOR_GRADING)
 	{
@@ -126,9 +139,8 @@ float4 fragmentMain(VSOutput fsIn) : SV_Target0
 	float2 velocity = normalTexture.Sample(baseColorSampler, baseUv).xy;
 
 	float4 currentSample = baseColorTexture.Sample(baseColorSampler, baseUv);
-
-	float2 motion = 0.5 * (cameraJitter.xy - cameraJitter.zw);
-	float2 historyUv = fsIn.texCoord0 + velocity.xy;// - motion;
+	                                         
+	float2 historyUv = fsIn.texCoord0 + velocity.xy;
 	float4 historySample = emissiveColorTexture.Sample(emissiveColorSampler, historyUv);
 
 	float4 box[9];
@@ -153,14 +165,14 @@ float4 fragmentMain(VSOutput fsIn) : SV_Target0
 	float currentLuminance = dot(currentSample.xyz, float3(0.2126, 0.7152, 0.0722));
 	float historyLuminance = dot(historySample.xyz, float3(0.2126, 0.7152, 0.0722));
 
-	const float diffMinDivisor = 0.1; // 0.25;
-	const float lerpMinValue = 0.125;// / 8.0; // 1.0 / 3.0;
-	const float lerpMaxValue = 0.875; // 2.0 / 3.0;
+	const float diffMinDivisor = 0.1;
+	const float lerpMinValue = 0.25;
+	const float lerpMaxValue = 0.33;
 
 	float weight = 1.0 - abs(currentLuminance - historyLuminance) / max(diffMinDivisor, max(currentLuminance, historyLuminance));
 	float lerpValue = lerp(lerpMinValue, lerpMaxValue, weight * weight);
 
-	// lerpValue = 0.0;
+	// lerpValue = 1.0;
 
 	return 
 	// length(velocity.xy - motion) * 1000.0;

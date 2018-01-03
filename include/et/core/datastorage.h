@@ -9,8 +9,7 @@
 
 #include <et/core/containersbase.h>
 
-namespace et
-{
+namespace et {
 template <typename T>
 class DataStorage : public ContainerBase<T>
 {
@@ -22,34 +21,29 @@ public:
 
 public:
 	DataStorage() :
-		_mutableData(nullptr), _flags(DataStorageFlag_OwnsMutableData)
-	{
+		_mutableData(nullptr), _flags(DataStorageFlag_OwnsMutableData) {
 	}
 
 	explicit DataStorage(uint64_t size) :
-		_mutableData(nullptr), _flags(DataStorageFlag_OwnsMutableData)
-	{
+		_mutableData(nullptr), _flags(DataStorageFlag_OwnsMutableData) {
 		resize(size);
 	}
 
 	DataStorage(uint64_t size, int initValue) :
-		_mutableData(nullptr), _flags(DataStorageFlag_OwnsMutableData)
-	{
+		_mutableData(nullptr), _flags(DataStorageFlag_OwnsMutableData) {
 		resize(size);
 		fill(initValue);
 	}
 
 	DataStorage(const DataStorage& copy) :
-		_mutableData(nullptr), _flags(DataStorageFlag_OwnsMutableData)
-	{
+		_mutableData(nullptr), _flags(DataStorageFlag_OwnsMutableData) {
 		resize(copy.size());
 
 		if (copy.size() > 0)
 			etCopyMemory(_mutableData, copy.data(), copy.dataSize());
 	}
 
-	DataStorage(DataStorage&& mv)
-	{
+	DataStorage(DataStorage&& mv) {
 		_size = mv._size;
 		_dataSize = mv._dataSize;
 		_lastElementIndex = mv._lastElementIndex;
@@ -67,23 +61,19 @@ public:
 
 	DataStorage(T* data, uint64_t dataSize) :
 		_mutableData(data), _size(dataSize / DataTypeSize), _dataSize(dataSize),
-		_flags(DataStorageFlag_Mutable)
-	{
+		_flags(DataStorageFlag_Mutable) {
 	}
 
 	DataStorage(const T* data, uint64_t dataSize) :
-		_immutableData(data), _size(dataSize / DataTypeSize), _dataSize(dataSize)
-	{
+		_immutableData(data), _size(dataSize / DataTypeSize), _dataSize(dataSize) {
 	}
 
-	~DataStorage()
-	{
+	~DataStorage() {
 		resize(0);
 	}
 
 public:
-	DataStorage& operator = (const DataStorage& buf)
-	{
+	DataStorage & operator = (const DataStorage& buf) {
 		if (buf.ownsData())
 		{
 			_lastElementIndex = buf._lastElementIndex;
@@ -109,132 +99,108 @@ public:
 	/*
 	 * mutable accessors
 	 */
-	T* data()
-	{
+	T* data() {
 		ET_ASSERT(mutableData()); return _mutableData;
 	}
 
-	char* binary()
-	{
+	char* binary() {
 		ET_ASSERT(mutableData()); return reinterpret_cast<char*>(_mutableData);
 	}
 
-	T& operator [] (uint64_t aIndex)
-	{
+	T& operator [] (uint64_t aIndex) {
 		ET_ASSERT(mutableData() && (aIndex < _size)); return _mutableData[aIndex];
 	}
 
-	T& current()
-	{
+	T& current() {
 		ET_ASSERT(mutableData() && (_lastElementIndex < _size)); return _mutableData[_lastElementIndex];
 	}
 
-	T* current_ptr()
-	{
+	T* current_ptr() {
 		ET_ASSERT(mutableData() && (_lastElementIndex < _size)); return _mutableData + _lastElementIndex;
 	}
 
-	T* element_ptr(uint64_t aIndex)
-	{
+	T* element_ptr(uint64_t aIndex) {
 		ET_ASSERT(aIndex < _size); return (_mutableData + aIndex);
 	}
 
-	T* begin()
-	{
+	T* begin() {
 		ET_ASSERT(mutableData()); return _mutableData;
 	}
 
-	T* end()
-	{
+	T* end() {
 		ET_ASSERT(mutableData()); return _mutableData + _size;
 	}
 
 	/*
 	 * const accessors
 	 */
-	const T* data() const
-	{
+	const T* data() const {
 		return constData();
 	}
 
-	const T* constData() const
-	{
+	const T* constData() const {
 		return _immutableData;
 	}
 
-	const T& operator [] (uint64_t i) const
-	{
+	const T& operator [] (uint64_t i) const {
 		ET_ASSERT(i < _size); return _immutableData[i];
 	}
 
-	const T& current() const
-	{
+	const T& current() const {
 		ET_ASSERT(_lastElementIndex < _size); return _immutableData[_lastElementIndex];
 	}
 
-	const T* current_ptr() const
-	{
+	const T* current_ptr() const {
 		ET_ASSERT(_lastElementIndex < _size); return _immutableData + _lastElementIndex;
 	}
 
-	const T* element_ptr(uint64_t i) const
-	{
+	const T* element_ptr(uint64_t i) const {
 		ET_ASSERT(i < _size); return _immutableData + i;
 	}
 
-	const T* begin() const
-	{
+	const T* begin() const {
 		return _immutableData;
 	}
 
-	const T* end() const
-	{
+	const T* end() const {
 		return _immutableData + _size;
 	}
 
-	const char* binary() const
-	{
+	const char* binary() const {
 		return reinterpret_cast<const char*>(_immutableData);
 	}
 
-	uint64_t size() const
-	{
+	uint64_t size() const {
 		return _size;
 	}
 
-	uint64_t dataSize() const
-	{
+	uint64_t dataSize() const {
 		return _dataSize;
 	}
 
-	bool empty() const
-	{
+	bool empty() const {
 		return _size == 0;
 	}
 
 	/*
 	 * wrappers
 	 */
-	char* mutableBinaryData()
-	{
+	char* mutableBinaryData() {
 		return binary();
 	}
 
-	const char* constBinaryData() const
-	{
+	const char* constBinaryData() const {
 		return binary();
 	}
 
 	/*
 	 * modifiers
 	 */
-	void fill(int value)
-	{
+	void fill(int value) {
 		ET_ASSERT(mutableData()); etFillMemory(_mutableData, value, _dataSize);
 	}
 
-	void resize(uint64_t newSize)
-	{
+	void resize(uint64_t newSize) {
 		if (_size == newSize) return;
 
 		T* new_data = nullptr;
@@ -260,15 +226,13 @@ public:
 		_mutableData = new_data;
 	}
 
-	void push_back(const T& value)
-	{
+	void push_back(const T& value) {
 		ET_ASSERT(mutableData());
 		ET_ASSERT((_lastElementIndex < _size) && "Do no use push back to increase capacity of DataStorage");
 		_mutableData[_lastElementIndex++] = value;
 	}
 
-	void append(const T* values, uint64_t count)
-	{
+	void append(const T* values, uint64_t count) {
 		ET_ASSERT(mutableData());
 
 		uint64_t currenDataTypeSize = _size;
@@ -276,8 +240,7 @@ public:
 		etCopyMemory(&_mutableData[currenDataTypeSize], values, count * DataTypeSize);
 	}
 
-	void appendData(const void* ptr, uint64_t dataSize)
-	{
+	void appendData(const void* ptr, uint64_t dataSize) {
 		ET_ASSERT(mutableData());
 		ET_ASSERT(ptr);
 
@@ -287,8 +250,7 @@ public:
 		etCopyMemory(&_mutableData[currenDataTypeSize], ptr, dataSize);
 	}
 
-	T* extract()
-	{
+	T* extract() {
 		T* value = _mutableData;
 		_mutableData = nullptr;
 		_size = 0;
@@ -297,25 +259,21 @@ public:
 		return value;
 	}
 
-	void fitToSize(uint64_t size)
-	{
+	void fitToSize(uint64_t size) {
 		uint64_t need_size = _lastElementIndex + size;
 		if (need_size > _size)
 			resize(need_size);
 	}
 
-	uint64_t lastElementIndex() const
-	{
+	uint64_t lastElementIndex() const {
 		return _lastElementIndex;
 	}
 
-	void applyOffset(uint64_t o)
-	{
+	void applyOffset(uint64_t o) {
 		ET_ASSERT(mutableData()); _lastElementIndex += o;
 	}
 
-	void setOffset(uint64_t o)
-	{
+	void setOffset(uint64_t o) {
 		ET_ASSERT(mutableData()); _lastElementIndex = o;
 	}
 
@@ -323,8 +281,7 @@ public:
 	/*
 	 * Filesystem
 	 */
-	bool writeToFile(const std::string& fileName, bool atomically = true) const
-	{
+	bool writeToFile(const std::string& fileName, bool atomically = true) const {
 		auto targetFileName = fileName;
 
 		if (atomically)
@@ -365,13 +322,11 @@ private:
 		DataStorageFlag_OwnsMutableData = DataStorageFlag_OwnsData | DataStorageFlag_Mutable,
 	};
 
-	bool ownsData() const
-	{
+	bool ownsData() const {
 		return (_flags & DataStorageFlag_OwnsData);
 	}
 
-	bool mutableData() const
-	{
+	bool mutableData() const {
 		return (_flags & DataStorageFlag_Mutable) != 0;
 	}
 

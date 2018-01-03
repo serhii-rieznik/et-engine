@@ -28,6 +28,7 @@ cbuffer ObjectVariables : DECL_BUFFER(Object)
     row_major float4x4 lightViewTransform;
     row_major float4x4 lightProjectionTransform;
 	float4 environmentSphericalHarmonics[9];
+	float4 cameraJitter;
     float4 cameraPosition;
     float4 lightDirection;
     float3 lightColor;
@@ -96,9 +97,15 @@ VSOutput vertexMain(VSInput vsIn)
     vsOut.invTransformT = float3(tTangent.x, tBiTangent.x, vsOut.normal.x);
     vsOut.invTransformB = float3(tTangent.y, tBiTangent.y, vsOut.normal.y);
     vsOut.invTransformN = float3(tTangent.z, tBiTangent.z, vsOut.normal.z);
+
     vsOut.projectedPosition = mul(transformedPosition, viewProjectionTransform);
+    vsOut.projectedPosition.xy += cameraJitter.xy * vsOut.projectedPosition.w;
+
     vsOut.previousProjectedPosition = mul(previousTransformedPosition, previousViewProjectionTransform);
+    vsOut.previousProjectedPosition.xy += cameraJitter.zw * vsOut.projectedPosition.w;
+
     vsOut.position = vsOut.projectedPosition;
+
     return vsOut;
 }
 
@@ -120,8 +127,8 @@ struct FSOutput
 FSOutput fragmentMain(VSOutput fsIn)
 {
     float4 opacitySample = opacityTexture.Sample(opacitySampler, fsIn.texCoord0);
-    if (opacitySample.x < 32.0 / 255.0) 
-   		discard;
+    if (opacitySample.x < ALPHA_TEST_TRESHOLD) 
+    	discard;
 
     float4 baseColorSample = baseColorTexture.Sample(baseColorSampler, fsIn.texCoord0);
     float4 normalSample = normalTexture.Sample(normalSampler, fsIn.texCoord0);
@@ -151,8 +158,6 @@ FSOutput fragmentMain(VSOutput fsIn)
         
     Surface surface = buildSurface(baseColor, roughness, metallness);
 
-    float3 geometricNormal = normalize(float3(fsIn.invTransformT.z, fsIn.invTransformB.z, fsIn.invTransformN.z));
-
     float3 wsLight = normalize(fsIn.toLight);
     float3 wsView = normalize(fsIn.toCamera);
 
@@ -169,7 +174,7 @@ FSOutput fragmentMain(VSOutput fsIn)
     float3 wsSpecularDir = specularDominantDirection(wsNormal, wsView, surface.roughness);
     float3 indirectSpecularSample = sampleSpecularConvolution(wsSpecularDir, surface.roughness);
     float3 indirectSpecular = indirectSpecularSample * (surface.f0 * brdfLookupSample.x + surface.f90 * brdfLookupSample.y);
-
+                        
 #if (EnableIridescence)
     BSDF iblBsdf = buildBSDF(wsNormal, wsSpecularDir, wsView);
     float3 fresnelScale = iridescentFresnel(iblBsdf);
@@ -178,12 +183,12 @@ FSOutput fragmentMain(VSOutput fsIn)
 
 #if (EnableClearCoat)
     Surface ccSurface = buildSurface(float3(1.0, 1.0, 1.0), 0.0, ClearCoatRoughness);
-    BSDF ccBSDF = buildBSDF(geometricNormal, wsLight, wsView);
+    BSDF ccBSDF = buildBSDF(fsIn.normal, wsLight, wsView);
 	float3 ccSpecular = computeDirectSpecular(ccSurface, ccBSDF);
 
     float4 ccBrdfLookupSample = brdfLookupTexture.Sample(brdfLookupSampler, float2(ccSurface.roughness, ccBSDF.VdotN));
                                                                   
-    wsSpecularDir = specularDominantDirection(geometricNormal, wsView, ccSurface.roughness);
+    wsSpecularDir = specularDominantDirection(fsIn.normal, wsView, ccSurface.roughness);
     float3 ccIndirectSpecular = sampleSpecularConvolution(wsSpecularDir, ccSurface.roughness);
     ccIndirectSpecular *= (ccSurface.f0 * ccBrdfLookupSample.x + ccSurface.f90 * ccBrdfLookupSample.y);
 

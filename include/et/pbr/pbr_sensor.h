@@ -6,7 +6,9 @@
 
 namespace et {
 
-class PBRCamera
+namespace pbr {
+
+class Camera
 {
 public:
 	float ev() const;
@@ -17,8 +19,10 @@ private:
 	float _iso = 100.0f;
 };
 
-inline float PBRCamera::ev() const {
+inline float Camera::ev() const {
 	return std::log2(_aperture * _aperture / _shutterTime * (_iso / 100.0f));
+}
+
 }
 
 }

@@ -110,7 +110,7 @@ float diffuseBurley(in float LdotN, in float VdotN, in float LdotH, in float rou
 float3 computeDirectDiffuse(in Surface surface, in BSDF bsdf)
 {
 	float diffuseTerm = diffuseBurley(bsdf.LdotN, bsdf.VdotN, bsdf.LdotH, surface.roughness);
-	return surface.baseColor * saturate(diffuseTerm * bsdf.LdotN * NORMALIZATION_SCALE);
+	return surface.baseColor;// * saturate(diffuseTerm * bsdf.LdotN * NORMALIZATION_SCALE);
 }
 
 float3 computeDirectSpecular(in Surface surface, in BSDF bsdf)

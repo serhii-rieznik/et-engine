@@ -102,6 +102,7 @@ void ShadowmapProcessor::process(RenderInterface::Pointer& renderer, DrawerOptio
 	RenderPass::Pointer activePass = _momentsBasedShadowmap ? _renderables.momentsBasedShadowPass : _renderables.depthBasedShadowPass;
 	activePass->loadSharedVariablesFromCamera(_light);
 	activePass->loadSharedVariablesFromLight(_light);
+	activePass->setSharedVariable(ObjectVariable::CameraJitter, vec4(0.0f));
 	activePass->begin(RenderPassBeginInfo::singlePass());
 	activePass->pushImageBarrier(_directionalShadowmap, ResourceBarrier(TextureState::DepthRenderTarget));
 	activePass->nextSubpass();

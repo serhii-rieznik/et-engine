@@ -1,12 +1,11 @@
 #define inScatteringSamples 32
 #define outScatteringSamples 32
 #define atmosphereHeight 50e+3
-#define height 5.0
+#define height 2.0
 #define Re 6371e+3
 #define Ra (Re + atmosphereHeight) 
-#define H0r (7994.0)
-#define H0m (1200.0)
-#define mieG 0.785
+#define H0 float2(7994.0, 1200.0)
+#define mieG 0.85
 #define betaR float3(6.554e-6, 1.428e-5, 2.853e-5)
 #define betaM float3(6.894e-6, 1.018e-5, 1.438e-5)
 #define positionOnPlanet float3(0.0, Re + height, 0.0)
@@ -39,7 +38,7 @@ float phaseFunctionMie(in float cosTheta, in float g)
 float2 density(in float3 pos)
 {
     float h = max(0.0, length(pos) - Re);
-    return float2(exp(-h / H0r), exp(-h / H0m));
+    return exp(-h / H0);
 }
 
 float2 opticalDensity(in float3 origin, in float3 dir)
@@ -63,7 +62,6 @@ float3 inScattering(in float3 origin, in float3 target, in float3 light, in floa
     float3 resultR = 0.0;
     float3 resultM = 0.0;
     float3 pos = origin + 0.5 * step;
-    float2 totalDensity = 0.0;
 
     for (uint i = 0; i < inScatteringSamples; ++i)
     {
@@ -71,12 +69,11 @@ float3 inScattering(in float3 origin, in float3 target, in float3 light, in floa
 
         float3 toLight = light * atmosphereIntersection(pos, light);
         float2 opticalDepth = opticalDensity(pos, toLight) + opticalDensity(pos, origin - pos);
-        float3 scattering = exp(-betaR * (totalDensity.x + opticalDepth.x) - betaM * (totalDensity.y + opticalDepth.y));
+        float3 scattering = exp(-betaR * opticalDepth.x - betaM * opticalDepth.y);
 
         resultR += d.x * scattering;
         resultM += d.y * scattering;
 
-        totalDensity += d;
         pos += step;
     }
 

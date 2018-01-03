@@ -114,8 +114,12 @@ void Drawer::draw() {
 
 	validate(_renderer);
 
+	// float t = 10.0f * PI * queryContiniousTimeInSeconds();
 	vec2 jitterScale = vec2(1.0f) / vector2ToFloat(_main.color->size(0));
-	vec2 ji = jitterScale * vec2(randomFloat() * 2.0f - 1.0f, randomFloat() * 2.0f - 1.0f); // sobolSequence[_frameIndex % sobolSequenceSize];
+	vec2 ji = jitterScale * 
+		// vec2(std::cos(t), std::sin(t));
+		// vec2(randomFloat() * 2.0f - 1.0f, randomFloat() * 2.0f - 1.0f); 
+		sobolSequence[_frameIndex % sobolSequenceSize];
 
 	_jitter.z = _jitter.x;
 	_jitter.w = _jitter.y;
@@ -123,11 +127,16 @@ void Drawer::draw() {
 	_jitter.y = ji.y;
 
 	_frameCamera = _scene->renderCamera();
-	_frameCamera->setProjectionMatrix(_baseProjectionMatrix * translationMatrix(_jitter.x, _jitter.y, 0.0f));
+	mat4 jitteredProjection = _baseProjectionMatrix;
+	jitteredProjection[3].x += _jitter.x;
+	jitteredProjection[3].y += _jitter.y;
+	// _frameCamera->setProjectionMatrix(jitteredProjection);
+
 	updateVisibleMeshes();
 
 	_main.zPrepass->begin(RenderPassBeginInfo::singlePass());
 	{
+		_main.zPrepass->setSharedVariable(ObjectVariable::CameraJitter, _jitter);
 		_main.zPrepass->loadSharedVariablesFromCamera(_frameCamera);
 		_main.zPrepass->nextSubpass();
 		for (Mesh::Pointer& mesh : _visibleMeshes)
@@ -167,6 +176,7 @@ void Drawer::draw() {
 		_main.forward->setSharedTexture(MaterialTexture::Shadow, _shadowmapProcessor->directionalShadowmap(), _shadowmapProcessor->directionalShadowmapSampler());
 		_main.forward->setSharedTexture(MaterialTexture::AmbientOcclusion, _main.screenSpaceAOTexture, _renderer->defaultSampler());
 		_main.forward->setSharedVariable(ObjectVariable::EnvironmentSphericalHarmonics, _cubemapProcessor->environmentSphericalHarmonics(), 9);
+		_main.forward->setSharedVariable(ObjectVariable::CameraJitter, _jitter);
 		_main.forward->nextSubpass();
 		for (Mesh::Pointer& mesh : _visibleMeshes)
 		{

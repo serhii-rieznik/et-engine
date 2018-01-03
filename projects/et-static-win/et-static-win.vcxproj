@@ -18,6 +18,7 @@
     <ClInclude Include="..\..\..\..\..\et-engine\include\et\pbr\pbr.h" />
     <ClInclude Include="..\..\..\..\..\et-engine\include\et\pbr\pbr_sensor.h" />
     <ClInclude Include="..\..\..\..\..\et-engine\include\et\pbr\pbr_spectrum.h" />
+    <ClInclude Include="..\..\include\et\core\basicmath.h" />
     <ClInclude Include="..\..\include\et\core\pool.h" />
     <ClInclude Include="..\..\include\et\core\remoteheap.h" />
     <ClInclude Include="..\..\include\et\rendering\base\variableset.h" />
@@ -47,6 +48,8 @@
     <ClInclude Include="..\..\include\et\rendering\vulkan\vulkan_memory.cpp" />
     <ClInclude Include="..\..\include\et\rendering\renderoptions.cpp" />
     <ClInclude Include="..\..\include\et\scene3d\gltfloader.cpp" />
+    <ClInclude Include="..\..\..\..\..\et-engine\include\et\pbr\pbr_spectrum.cpp" />
+    <ClCompile Include="..\..\include\et\compile_packs\pbr.pack.cxx" />
     <ClCompile Include="..\..\include\external\spirvcross\spirv_cfg.cpp" />
     <ClCompile Include="..\..\include\external\spirvcross\spirv_cross.cpp" />
     <ClCompile Include="..\..\include\external\spirvcross\spirv_glsl.cpp" />
