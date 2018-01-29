@@ -11,29 +11,28 @@
 #include <et-ext/rt/integrator.h>
 #include <et-ext/rt/rtscene.h>
 
-namespace et 
-{
-namespace rt
-{
+namespace et {
+namespace rt {
 
 class RaytracePrivate;
-class ET_ALIGNED(16) Raytrace
-{
+
+class ET_ALIGNED(16) Raytrace {
 	ET_DECLARE_PIMPL(Raytrace, 4096);
 
 public:
-	using OutputMethod = std::function<void(const vec2i&, const vec4&)>;
+	using OutputMethod = std::function<void(const vec2i& /* location */, const vec4& /* color */ )>;
 
 public:
 	Raytrace();
 	~Raytrace();
 
 	template <typename F>
-	void setOutputMethod(F func)
-		{ _outputMethod = func; }
-	
+	void setOutputMethod(F func) {
+		_outputMethod = func;
+	}
+
 	void setIntegrator(EvaluateFunction);
-	
+
 	void output(const vec2i&, const vec4&);
 
 	void perform(s3d::Scene::Pointer, const vec2i&);
@@ -41,7 +40,7 @@ public:
 
 	void stop();
 	void setOptions(const Options&);
-	
+
 	void renderSpacePartitioning();
 	void waitForCompletion();
 

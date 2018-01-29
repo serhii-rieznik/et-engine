@@ -74,6 +74,7 @@ private:
 		Texture::Pointer depth;
 		Texture::Pointer velocity;
 		Texture::Pointer noise;
+		Texture::Pointer ltcTransform;
 		Texture::Pointer screenSpaceShadowsTexture;
 		Texture::Pointer screenSpaceAOTexture;
 	} _main;

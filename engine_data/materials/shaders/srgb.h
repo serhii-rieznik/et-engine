@@ -1,6 +1,11 @@
-const float expectedEv = 12.0;
-const float2 dynamicRange = float2(3.0, 3.0);
-const float2 adaptationRange = float2(2.0, 2.0);
+const float aperture = 16.0;
+const float iso = 100.0;
+const float shutterSpeed = 1.0 / 100.0;
+const float expectedEv = log2(aperture * aperture / shutterSpeed * (100.0 / iso));
+
+const float exposureRange = 5.0;
+const float2 dynamicRange = float2(exposureRange, exposureRange);
+const float2 adaptationRange = float2(5.0, 5.0);
 
 float3 srgbToLinear(in float3 c)
 {
@@ -25,12 +30,12 @@ float3 linearToSRGB(in float3 c)
 {
 #if (SRGBConversion == SRGBConversionApproximate)
 
-	return pow(c, 1.0/2.2);
+	return pow(c, 1.0 / 2.2);
 
 #elif (SRGBConversion == SRGBConversionAccurate)
 
 	float3 sRGBLo = c * 12.92;
-	float3 sRGBHi = (pow(c, 1.0/2.4) * 1.055) - 0.055;
+	float3 sRGBHi = (pow(c, 1.0 / 2.4) * 1.055) - 0.055;
 	return lerp(sRGBLo, sRGBHi, step(0.0031308, c));
 #else
 
@@ -39,12 +44,24 @@ float3 linearToSRGB(in float3 c)
 #endif
 }
 
-float3 toneMapping(float3 color, float exposure)
+float luminanceToEv(in float lum) {
+	return log2(max(0.001, lum)) + 3.0;
+}
+
+float evToLuminance(in float ev) {
+	return exp2(ev - 3.0);
+}
+
+float3 toneMapping(float3 color, float averageLuminance, in float t)
 {
-	float ratio = exposure / exp2(expectedEv - 3.0);
-	float3 lowerBound = exp2(expectedEv - 3.0 - dynamicRange.x) * ratio;
-	float3 upperBound = exp2(expectedEv - 3.0 + dynamicRange.y) * ratio;
-	color = (color - lowerBound) / (upperBound - lowerBound);
+	float lowerBound = expectedEv - dynamicRange.x;
+	float upperBound = expectedEv + dynamicRange.y;
+
+	float ev100 = expectedEv; 
+	float maxLuminance = 78.0 / (iso * 0.65) * exp2(ev100);
+
+	float exposure = 1.0 / maxLuminance;
+	color = clamp(color, evToLuminance(lowerBound), evToLuminance(upperBound)) * exposure;
 
 #if (ToneMapping == ToneMappingACES)
 
@@ -84,7 +101,6 @@ float3 toneMapping(float3 color, float exposure)
 #else
 	
 	color = saturate(1.0 - exp(-color));
-
 	return linearToSRGB(color);
 
 #endif

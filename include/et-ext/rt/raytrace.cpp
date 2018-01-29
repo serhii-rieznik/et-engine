@@ -14,6 +14,8 @@
 #include <et/app/application.h>
 #include <et/camera/camera.h>
 
+#include <et/pbr/pbr.h>
+
 namespace et
 {
 namespace rt
@@ -670,8 +672,29 @@ void RaytracePrivate::backwardPathTraceThreadFunction(uint32_t threadId)
 		{
 			for (pixel.x = region.origin.x; running && (pixel.x < region.origin.x + region.size.x); ++pixel.x)
 			{
+				float s = static_cast<float>(pixel.x) / static_cast<float>(viewportSize.x);
+
+				float temperature = 750.0f + s * 12000.0f;
+				pbr::DefaultSpectrumSamples smp;
+				float* samples = smp.mutableSamples();
+
+				pbr::SpectrumBase::blackBodyRadiation(pbr::SpectrumBase::defaultWavelengths, samples,
+					pbr::SpectrumBase::WavelengthSamples, temperature);
+
+				smp.toRGB(localData[k].xyz().data());
+				localData[k] /= std::max(localData[k].x, std::max(localData[k].y, localData[k].z));
+
+				const float keyPoints[] = { 2700.0f, 4000.0f, 6500.0f };
+
+				for (const float p : keyPoints)
+				{
+					if (std::abs(temperature - p) < 5.0f)
+						localData[k] = vec4(0.0f);
+				}
+
 				uint32_t bounces = 0;
-				localData[k++] = raytracePixel(pixel, scene.options.raysPerPixel, bounces);
+				// localData[k] = raytracePixel(pixel, scene.options.raysPerPixel, bounces);
+				++k;
 			}
 		}
 

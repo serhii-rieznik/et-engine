@@ -58,6 +58,7 @@ Drawer::Drawer(const RenderInterface::Pointer& renderer) :
 	_renderer(renderer) {
 	_debugDrawer = DebugDrawer::Pointer::create(renderer);
 	_main.noise = _renderer->loadTexture(application().resolveFileName("engine_data/textures/bluenoise.sincos.png"), _cache);
+	_main.ltcTransform = _renderer->loadTexture(application().resolveFileName("engine_data/textures/ltc_mat.dds"), _cache);
 	/*
 	float minV = 1000.0f;
 	float maxV = -minV;
@@ -262,6 +263,7 @@ void Drawer::validate(RenderInterface::Pointer& renderer) {
 		_main.forward->setSharedTexture(MaterialTexture::ConvolvedSpecular, _cubemapProcessor->convolvedSpecularCubemap(), renderer->defaultSampler());
 		_main.forward->setSharedTexture(MaterialTexture::BRDFLookup, _cubemapProcessor->brdfLookupTexture(), renderer->clampSampler());
 		_main.forward->setSharedTexture(MaterialTexture::Noise, _main.noise, renderer->nearestSampler());
+		_main.forward->setSharedTexture(MaterialTexture::LTCTransform, _main.ltcTransform, renderer->defaultSampler());
 
 		passInfo.name = "z-prepass";
 		passInfo.color[0].targetClass = RenderTarget::Class::Disabled;

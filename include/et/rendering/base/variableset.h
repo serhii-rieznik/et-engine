@@ -83,6 +83,7 @@ enum class MaterialTexture : uint32_t
 	ConvolvedSpecular,
 	BRDFLookup,
 	Noise,
+	LTCTransform,
 
 	max,
 
@@ -91,7 +92,7 @@ enum class MaterialTexture : uint32_t
 	LastMaterialTexture = EmissiveColor,
 
 	FirstSharedTexture = Shadow,
-	LastSharedTexture = Noise,
+	LastSharedTexture = LTCTransform,
 };
 
 enum class StorageBuffer

@@ -10,19 +10,22 @@ extern const float CIE_Wavelengths[CIE_SamplesCount];
 extern const float CIE_X[CIE_SamplesCount];
 extern const float CIE_Y[CIE_SamplesCount];
 extern const float CIE_Z[CIE_SamplesCount];
+float SpectrumBase::defaultWavelengths[WavelengthSamples] = {};
 
 DefaultSpectrumSamples& spectrumX() { 
 	static DefaultSpectrumSamples sx; 
-	return sx; }
+	return sx; 
+}
 
 DefaultSpectrumSamples& spectrumY() {
 	static DefaultSpectrumSamples sy; 
-	return sy; }
+	return sy; 
+}
 
 DefaultSpectrumSamples& spectrumZ() { 
 	static DefaultSpectrumSamples sz; 
-	return sz; }
-
+	return sz; 
+}
 
 float SpectrumBase::averageSamples(const float wavelengths[], const float values[], size_t count, float wavelengthBegin, float wavelengthEnd) {
 	if (count == 0)
@@ -68,6 +71,26 @@ float SpectrumBase::averageSamples(const float wavelengths[], const float values
 	return result;
 }
 
+float SpectrumBase::maximumBlackBodyRadiationWavelength(float temperature) {
+	const float b = 2.8977729e-3f;
+	float lMax = b / temperature;
+	return lMax * 1.0e+9f;
+}
+
+float SpectrumBase::blackBodyRadiation(float wavelength, float temperature) {
+	const float K1 = 1.1910427585e+19f; // 2 * h * c^2 / 10^-35
+	const float K2 = 1.4387751602e+5f; // h * c / k * 10^-7
+	wavelength /= 100.0f;
+	float wl5 = wavelength * (wavelength * wavelength) * (wavelength * wavelength);
+	return K1 / (wl5 * (std::exp(K2 / (wavelength * temperature)) - 1.0f));
+}
+
+void SpectrumBase::blackBodyRadiation(const float wavelengths[], float values[], size_t count, float temperature) {
+
+	for (size_t i = 0; i < count; ++i)
+		values[i] = blackBodyRadiation(wavelengths[i], temperature);
+}
+
 void initSpectrumInternalValues() {
 	
 	static volatile bool spectrumInitialized = false;
@@ -85,6 +108,7 @@ void initSpectrumInternalValues() {
 		spectrumY().samples[i] = SpectrumBase::averageSamples(CIE_Wavelengths, CIE_Y, CIE_SamplesCount, l0, l1);
 		spectrumZ().samples[i] = SpectrumBase::averageSamples(CIE_Wavelengths, CIE_Z, CIE_SamplesCount, l0, l1);
 		CIE_Y_Integral += spectrumY().samples[i];
+		SpectrumBase::defaultWavelengths[i] = l0;
 	}
 }
 
@@ -98,9 +122,10 @@ void DefaultSpectrumSamples::toXYZ(float xyz[3]) {
 		xyz[1] += spectrumY().samples[i] * samples[i];
 		xyz[2] += spectrumZ().samples[i] * samples[i];
 	}
-	xyz[0] /= CIE_Y_Integral;
-	xyz[1] /= CIE_Y_Integral;
-	xyz[2] /= CIE_Y_Integral;
+	float scale = float(WavelengthEnd - WavelengthStart) / (CIE_Y_Integral * float(WavelengthSamples));
+	xyz[0] *= scale;
+	xyz[1] *= scale;
+	xyz[2] *= scale;
 }
 
 void DefaultSpectrumSamples::toRGB(float rgb[3]) {

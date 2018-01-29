@@ -51,6 +51,9 @@ SamplerState opacitySampler : DECL_SAMPLER(Opacity);
 Texture2D<float> noiseTexture : DECL_TEXTURE(Noise);
 SamplerState noiseSampler : DECL_SAMPLER(Noise);
 
+Texture2D<float4> ltcTexture : DECL_TEXTURE(LTCTransform);
+SamplerState ltcSampler : DECL_SAMPLER(LTCTransform);
+
 Texture2D<float> aoTexture : DECL_TEXTURE(Ao);
 SamplerState aoSampler : DECL_SAMPLER(Ao);
 
@@ -67,6 +70,7 @@ struct VSOutput
     float3 invTransformT;
     float3 invTransformB;
     float3 invTransformN;
+    float3 worldPosition;
 };
 
 #if (EnableClearCoat)
@@ -91,6 +95,7 @@ VSOutput vertexMain(VSInput vsIn)
     float3 tTangent = normalize(mul(float4(vsIn.tangent, 0.0), worldRotationTransform).xyz);
     float3 tBiTangent = cross(vsOut.normal, tTangent);
 
+    vsOut.worldPosition =transformedPosition.xyz;
     vsOut.toCamera = (cameraPosition.xyz - transformedPosition.xyz).xyz;
     vsOut.toLight = (lightDirection.xyz - transformedPosition.xyz * lightDirection.w).xyz;
     vsOut.lightCoord = mul(mul(transformedPosition, lightViewTransform), lightProjectionTransform);
@@ -123,6 +128,42 @@ struct FSOutput
 	float4 color : SV_Target0;
 	float2 velocity : SV_Target1;
 };
+
+float integrateEdge(in float3 p1, in float3 p2)
+{
+	float cosTheta = dot(p1, p2);
+	float theta = acos(cosTheta);
+	return cross(p1, p2).z * ((theta > 0.001) ? theta / sin(theta) : 0.0);
+}
+
+float3 evaluateLTC(in float3 n, in float3 v, in float3 p, in float3x3 inverseTransform, in float3 points[4])
+{
+	float3 t1 = normalize(v - n * dot(n, v));
+	float3 t2 = cross(n, t1);
+	row_major float3x3 t = inverseTransform * float3x3(t1.x, t2.x, n.x, t1.y, t2.y, n.y, t1.z, t2.z, n.z);
+	
+	points[0] -= p;
+	points[1] -= p;
+	points[2] -= p;
+	points[3] -= p;
+
+	points[0] = mul(points[0], t);
+	points[1] = mul(points[1], t);
+	points[2] = mul(points[2], t);
+	points[3] = mul(points[3], t);
+
+	points[0] = normalize(points[0]);
+	points[1] = normalize(points[1]);
+	points[2] = normalize(points[2]);
+	points[3] = normalize(points[3]);
+	
+	float result = 0.0;
+	result += integrateEdge(points[0], points[1]);
+	result += integrateEdge(points[1], points[2]);
+	result += integrateEdge(points[2], points[3]);
+	result += integrateEdge(points[3], points[0]);
+	return max(0.0, result);
+}
 
 FSOutput fragmentMain(VSOutput fsIn)
 {
@@ -174,7 +215,34 @@ FSOutput fragmentMain(VSOutput fsIn)
     float3 wsSpecularDir = specularDominantDirection(wsNormal, wsView, surface.roughness);
     float3 indirectSpecularSample = sampleSpecularConvolution(wsSpecularDir, surface.roughness);
     float3 indirectSpecular = indirectSpecularSample * (surface.f0 * brdfLookupSample.x + surface.f90 * brdfLookupSample.y);
-                        
+
+    float3 emitter[4];
+    {
+		emitter[3] = float3(-15.0,  5.0, -50.0);
+		emitter[2] = float3( 15.0,  5.0, -50.0);
+		emitter[1] = float3( 15.0, 35.0, -50.0);
+		emitter[0] = float3(-15.0, 35.0, -50.0);
+    };
+    float2 ltcSampleCoords;
+	ltcSampleCoords.x =	pow(1.0 + surface.roughness, 3.0) / 8.0;
+	ltcSampleCoords.y = acos(bsdf.VdotN) / (0.5 * PI);
+
+	float4 ltcSample = ltcTexture.Sample(ltcSampler, ltcSampleCoords);
+
+    float3x3 ltcTransform = float3x3(
+    	1.0, 0.0, ltcSample.y,
+    	0.0, ltcSample.z, 0.0,
+    	ltcSample.w, 0.0, ltcSample.x);
+
+    float3x3 identityTransform = float3x3(
+    	1.0, 0.0, 0.0,
+    	0.0, 1.0, 0.0,
+    	0.0, 0.0, 1.0);
+
+    float3 ltcColor = float3(50000.0, 25000.0, 0.0);
+    float3 ltcSpecular = evaluateLTC(wsNormal, wsView, fsIn.worldPosition, ltcTransform, emitter);
+    float3 ltcDiffuse = evaluateLTC(wsNormal, wsView, fsIn.worldPosition, identityTransform, emitter) * (1.0 - surface.metallness);
+        
 #if (EnableIridescence)
     BSDF iblBsdf = buildBSDF(wsNormal, wsSpecularDir, wsView);
     float3 fresnelScale = iridescentFresnel(iblBsdf);
@@ -201,20 +269,11 @@ FSOutput fragmentMain(VSOutput fsIn)
 
 #else
 
-    float3 result = shadow * ((directDiffuse + directSpecular) * lightColor) + 
-    	ambientOcclusion * (indirectDiffuse + indirectSpecular);
+    float3 result = shadow * ((directDiffuse + directSpecular) * lightColor * 0.0) + 
+    	ambientOcclusion * (indirectDiffuse + indirectSpecular) + 
+    	ltcColor * (ltcDiffuse + ltcSpecular);
 
 #endif
-
-    /*
-    float3 originPosition = positionOnPlanet + cameraPosition.xyz;
-    float3 worldPosition = originPosition - fsIn.toCamera;
-    float3 outScatter = outScatteringAtConstantHeight(originPosition, worldPosition);
-    float phaseR = phaseFunctionRayleigh(dot(wsView, wsLight));
-    float phaseM = phaseFunctionMie(dot(wsView, wsLight), mieG);
-    float3 inScatter = lightColor * inScatteringAtConstantHeight(originPosition, worldPosition, wsLight, float2(phaseR, phaseM));
-    result = result * outScatter + inScatter; 
-    // */
 
     FSOutput output;
     output.color = float4(result, 1.0);

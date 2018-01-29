@@ -66,12 +66,7 @@ float4 fragmentMain(VSOutput fsIn) : SV_Target0
 
 #elif (RESOLVE_LUMINANCE)
 
-	float previousExposure = shadowTexture.SampleLevel(shadowSampler, float2(0.5, 0.5), 0.0).x;
-	float lum = exp(averageColor.x);
-	float ev100 = log2(lum * 100.0 / 12.5);
-	float exposure = 1.0 / (1.2 * exp2(ev100));
-	float adaptationSpeed = lerp(3.0, 5.0, step(exposure - previousExposure, 0.0));
-	return lerp(previousExposure, exposure, 1.0f - exp(-deltaTime * adaptationSpeed));
+	#error moved to compute shader
 
 #elif (MOTION_BLUR)
 
@@ -111,11 +106,12 @@ float4 fragmentMain(VSOutput fsIn) : SV_Target0
 	float3 c12 = baseColorTexture.Sample(baseColorSampler, fsIn.texCoord0, int2(+1, 0)).xyz;
 	float3 c21 = baseColorTexture.Sample(baseColorSampler, fsIn.texCoord0, int2(0, +1)).xyz;
 
-	c01 = toneMapping(c01, averageLuminance);
-	c10 = toneMapping(c10, averageLuminance);
-	c11 = toneMapping(c11, averageLuminance);
-	c12 = toneMapping(c12, averageLuminance);
-	c21 = toneMapping(c21, averageLuminance);
+	float u = fsIn.texCoord0.x;
+	c01 = toneMapping(c01, averageLuminance, u);
+	c10 = toneMapping(c10, averageLuminance, u);
+	c11 = toneMapping(c11, averageLuminance, u);
+	c12 = toneMapping(c12, averageLuminance, u);
+	c21 = toneMapping(c21, averageLuminance, u);
 
 	float3 ldrColor = c11; // 5.0 * c11 - (c01 + c10 + c12 + c21);
 

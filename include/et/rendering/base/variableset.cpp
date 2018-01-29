@@ -7,8 +7,7 @@
 
 #include <et/rendering/base/variableset.h>
 
-namespace et
-{
+namespace et {
 
 static const std::map<ObjectVariable, std::string> objectVariableNames =
 {
@@ -44,7 +43,7 @@ static const std::map<ObjectVariable, std::string> objectVariableNames =
 	{ ObjectVariable::ContinuousTime, "continuousTime" },
 	{ ObjectVariable::DeltaTime, "deltaTime" },
 	{ ObjectVariable::Viewport, "viewport" },
-	
+
 	{ ObjectVariable::EnvironmentSphericalHarmonics, "environmentSphericalHarmonics" },
 };
 
@@ -62,20 +61,17 @@ static const std::map<MaterialVariable, std::string> materialVariableNames =
 	{ MaterialVariable::ExtraParameters, "extraParameters" },
 };
 
-const std::string& objectVariableToString(ObjectVariable p)
-{
+const std::string& objectVariableToString(ObjectVariable p) {
 	ET_ASSERT(p < ObjectVariable::max);
 	return objectVariableNames.at(p);
 }
 
-const std::string& materialVariableToString(MaterialVariable p)
-{
+const std::string& materialVariableToString(MaterialVariable p) {
 	ET_ASSERT(p < MaterialVariable::max);
 	return materialVariableNames.at(p);
 }
 
-const std::map<MaterialTexture, std::string>& materialTextureNames()
-{
+const std::map<MaterialTexture, std::string>& materialTextureNames() {
 	static const std::map<MaterialTexture, std::string> localMap =
 	{
 		{ MaterialTexture::BaseColor, "baseColorTexture" },
@@ -90,12 +86,12 @@ const std::map<MaterialTexture, std::string>& materialTextureNames()
 		{ MaterialTexture::ConvolvedSpecular, "convolvedSpecularTexture" },
 		{ MaterialTexture::BRDFLookup, "brdfLookupTexture" },
 		{ MaterialTexture::Noise, "NoiseTexture" },
+		{ MaterialTexture::LTCTransform, "LTCTransformTexture" },
 	};
 	return localMap;
 }
 
-const std::map<MaterialTexture, std::string>& materialSamplerNames()
-{
+const std::map<MaterialTexture, std::string>& materialSamplerNames() {
 	static const std::map<MaterialTexture, std::string> names =
 	{
 		{ MaterialTexture::BaseColor, "baseColorSampler" },
@@ -110,12 +106,12 @@ const std::map<MaterialTexture, std::string>& materialSamplerNames()
 		{ MaterialTexture::ConvolvedSpecular, "convolvedSpecularSampler" },
 		{ MaterialTexture::BRDFLookup, "brdfLookupSampler" },
 		{ MaterialTexture::Noise, "NoiseSampler" },
+		{ MaterialTexture::LTCTransform, "LTCTransformSampler" },
 	};
 	return names;
 }
 
-static const std::map<StorageBuffer, std::string>& storageBufferNames()
-{
+static const std::map<StorageBuffer, std::string>& storageBufferNames() {
 	static const std::map<StorageBuffer, std::string> localMap =
 	{
 		{ StorageBuffer::StorageBuffer0, "storageBuffer0" },
@@ -126,14 +122,12 @@ static const std::map<StorageBuffer, std::string>& storageBufferNames()
 	return localMap;
 }
 
-const std::string& materialTextureToString(MaterialTexture t)
-{
+const std::string& materialTextureToString(MaterialTexture t) {
 	ET_ASSERT(t < MaterialTexture::max);
 	return materialTextureNames().at(t);
 }
 
-MaterialTexture stringToMaterialTexture(const std::string& name)
-{
+MaterialTexture stringToMaterialTexture(const std::string& name) {
 	for (const auto& ts : materialTextureNames())
 	{
 		if (ts.second == name)
@@ -142,14 +136,12 @@ MaterialTexture stringToMaterialTexture(const std::string& name)
 	return MaterialTexture::max;
 }
 
-const std::string& materialSamplerToString(MaterialTexture t)
-{
+const std::string& materialSamplerToString(MaterialTexture t) {
 	ET_ASSERT(t < MaterialTexture::max);
 	return materialSamplerNames().at(t);
 }
 
-MaterialTexture samplerToMaterialTexture(const std::string& name)
-{
+MaterialTexture samplerToMaterialTexture(const std::string& name) {
 	for (const auto& ts : materialSamplerNames())
 	{
 		if (ts.second == name)
@@ -158,8 +150,7 @@ MaterialTexture samplerToMaterialTexture(const std::string& name)
 	return MaterialTexture::max;
 }
 
-ObjectVariable stringToObjectVariable(const std::string& name)
-{
+ObjectVariable stringToObjectVariable(const std::string& name) {
 	for (const auto& ts : objectVariableNames)
 	{
 		if (ts.second == name)
@@ -168,8 +159,7 @@ ObjectVariable stringToObjectVariable(const std::string& name)
 	return ObjectVariable::max;
 }
 
-MaterialVariable stringToMaterialVariable(const std::string& name)
-{
+MaterialVariable stringToMaterialVariable(const std::string& name) {
 	for (const auto& ts : materialVariableNames)
 	{
 		if (ts.second == name)
@@ -178,14 +168,12 @@ MaterialVariable stringToMaterialVariable(const std::string& name)
 	return MaterialVariable::max;
 }
 
-const std::string& storageBufferToString(StorageBuffer t)
-{
+const std::string& storageBufferToString(StorageBuffer t) {
 	ET_ASSERT(t < StorageBuffer::max);
 	return storageBufferNames().at(t);
 }
 
-StorageBuffer stringToStorageBuffer(const std::string& name)
-{
+StorageBuffer stringToStorageBuffer(const std::string& name) {
 	for (const auto& ts : storageBufferNames())
 	{
 		if (ts.second == name)

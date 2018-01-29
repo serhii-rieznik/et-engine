@@ -19,7 +19,11 @@ struct SpectrumBase
 		WavelengthSamples = 30,
 	};
 
+	static float defaultWavelengths[WavelengthSamples];
 	static float averageSamples(const float wavelengths[], const float values[], size_t count, float wavelengthBegin, float wavelengthEnd);
+	static float blackBodyRadiation(float wavelength, float temperature);
+	static float maximumBlackBodyRadiationWavelength(float temperature);
+	static void blackBodyRadiation(const float wavelengths[], float values[], size_t count, float temperature);
 };
 
 template <size_t numSamples>
@@ -125,6 +129,18 @@ public:
 		}
 		return result;
 	}
+
+	float* begin() { 
+		return std::begin(samples); }
+
+	float* end() {
+		return std::end(samples); }
+
+	const float* begin() const {
+		return std::begin(samples); }
+
+	const float* end() const {
+		return std::end(samples); }
 
 protected:
 	float samples[SamplesCount]{};

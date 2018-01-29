@@ -1,11 +1,11 @@
 #define inScatteringSamples 32
 #define outScatteringSamples 32
-#define atmosphereHeight 50e+3
+#define atmosphereHeight 60e+3
 #define height 2.0
 #define Re 6371e+3
 #define Ra (Re + atmosphereHeight) 
 #define H0 float2(7994.0, 1200.0)
-#define mieG 0.85
+#define mieG 0.75
 #define betaR float3(6.554e-6, 1.428e-5, 2.853e-5)
 #define betaM float3(6.894e-6, 1.018e-5, 1.438e-5)
 #define positionOnPlanet float3(0.0, Re + height, 0.0)
@@ -31,8 +31,8 @@ float phaseFunctionRayleigh(in float cosTheta)
 
 float phaseFunctionMie(in float cosTheta, in float g)
 {
-    return (3.0 * (1.0 - g * g)) / (2.0 * (2.0 + g * g) * 
-        (1.0 + cosTheta * cosTheta) ) / pow(abs(1.0 + g * g - 2.0 * g * cosTheta), 3.0 / 2.0) / (4.0 * PI);
+    return (3.0 * (1.0 - g * g)) / (2.0 * (2.0 + g * g)) * 
+        (1.0 + cosTheta * cosTheta) / pow(abs(1.0 + g * g - 2.0 * g * cosTheta), 3.0 / 2.0) / (4.0 * PI);
 }
 
 float2 density(in float3 pos)

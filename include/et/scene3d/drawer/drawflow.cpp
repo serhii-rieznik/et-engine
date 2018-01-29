@@ -10,7 +10,7 @@
 namespace et {
 namespace s3d {
 
-const TextureFormat HDRTextureFormat = TextureFormat::RGBA16F;
+const TextureFormat HDRTextureFormat = TextureFormat::RGBA32F;
 const uint32_t luminanceTargetSize = 1024;
 const uint32_t computeGroupSize = 16;
 
