@@ -370,7 +370,9 @@ void VulkanRenderer::begin() {
 void VulkanRenderer::present() {
 	static VkPipelineStageFlags firstWaitStage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
 	static VkPipelineStageFlags lastWaitStage = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
-
+	
+	const VulkanSwapchain::Frame& frame = _private->swapchain.currentFrame();
+	
 	Vector<VulkanRenderPass::Pointer>& passes = _private->passes[frameIndex()];
 	std::stable_sort(passes.begin(), passes.end(), [](const VulkanRenderPass::Pointer& l, const VulkanRenderPass::Pointer& r) {
 		return l->info().priority > r->info().priority;
@@ -399,12 +401,12 @@ void VulkanRenderer::present() {
 		VkSubmitInfo& submitInfo = _private->allSubmits.back();
 		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 		submitInfo.commandBufferCount = 1;
-		submitInfo.pCommandBuffers = &_private->swapchain.currentFrame().barrierFromPresent;
+		submitInfo.pCommandBuffers = &frame.barrierFromPresent;
 		submitInfo.waitSemaphoreCount = 1;
-		submitInfo.pWaitSemaphores = &_private->swapchain.currentFrame().imageAcquired;
+		submitInfo.pWaitSemaphores = &frame.imageAcquired;
 		submitInfo.pWaitDstStageMask = &firstWaitStage;
 		submitInfo.signalSemaphoreCount = 1;
-		submitInfo.pSignalSemaphores = &_private->swapchain.currentFrame().semaphoreFromPresent;
+		submitInfo.pSignalSemaphores = &frame.semaphoreFromPresent;
 	}
 
 	uint32_t commandBuffersBegin = 0;
@@ -421,7 +423,7 @@ void VulkanRenderer::present() {
 
 		if (i == passes.begin())
 		{
-			_private->waitSemaphores.emplace_back(_private->swapchain.currentFrame().semaphoreFromPresent);
+			_private->waitSemaphores.emplace_back(frame.semaphoreFromPresent);
 			_private->waitStages.emplace_back(VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT);
 			++waitEnd;
 		}
@@ -450,7 +452,7 @@ void VulkanRenderer::present() {
 
 		if (i + 1 == e)
 		{
-			_private->signalSemaphores.emplace_back(_private->swapchain.currentFrame().semaphoreToPresent);
+			_private->signalSemaphores.emplace_back(frame.semaphoreToPresent);
 			signalBegin = static_cast<uint32_t>(_private->signalSemaphores.size()) - 1;
 			signalEnd = signalBegin + 1;
 		}
@@ -486,16 +488,16 @@ void VulkanRenderer::present() {
 		VkSubmitInfo& submitInfo = _private->allSubmits.back();
 		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 		submitInfo.commandBufferCount = 1;
-		submitInfo.pCommandBuffers = &_private->swapchain.currentFrame().barrierToPresent;
+		submitInfo.pCommandBuffers = &frame.barrierToPresent;
 		submitInfo.waitSemaphoreCount = 1;
-		submitInfo.pWaitSemaphores = &_private->swapchain.currentFrame().semaphoreToPresent;
+		submitInfo.pWaitSemaphores = passes.empty() ? &frame.semaphoreFromPresent : &frame.semaphoreToPresent;
 		submitInfo.pWaitDstStageMask = &lastWaitStage;
 		submitInfo.signalSemaphoreCount = 1;
-		submitInfo.pSignalSemaphores = &_private->swapchain.currentFrame().submitCompleted;
+		submitInfo.pSignalSemaphores = &frame.submitCompleted;
 	}
 
 	VULKAN_CALL(vkQueueSubmit(_private->queues[VulkanQueueClass::Graphics].queue, static_cast<uint32_t>(_private->allSubmits.size()),
-		_private->allSubmits.data(), _private->swapchain.currentFrame().imageFence));
+		_private->allSubmits.data(), frame.imageFence));
 
 	_private->allSubmits.clear();
 	_private->swapchain.present(_private->vulkan());

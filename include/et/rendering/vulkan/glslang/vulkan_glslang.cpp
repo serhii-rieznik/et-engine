@@ -393,7 +393,7 @@ void buildProgramReflection(const glslang::TProgram& program, Program::Reflectio
 			{
 				ObjectVariable varId = stringToObjectVariable(uniformName);
 				if (varId == ObjectVariable::max)
-					log::error("Failed to get object variable uniform: %s", uniformName);
+					log::error("Failed to get object variable uniform: %s", uniformName.c_str());
 				ET_ASSERT(varId != ObjectVariable::max);
 				reflection.objectVariables[static_cast<uint32_t>(varId)].arraySize = static_cast<uint32_t>(arraySize);
 				reflection.objectVariables[static_cast<uint32_t>(varId)].offset = static_cast<uint32_t>(uniformOffset);
@@ -403,7 +403,7 @@ void buildProgramReflection(const glslang::TProgram& program, Program::Reflectio
 			{
 				MaterialVariable varId = stringToMaterialVariable(uniformName);
 				if (varId == MaterialVariable::max)
-					log::error("Failed to get material variable uniform: %s", uniformName);
+					log::error("Failed to get material variable uniform: %s", uniformName.c_str());
 				ET_ASSERT(varId != MaterialVariable::max);
 				reflection.materialVariables[static_cast<uint32_t>(varId)].arraySize = static_cast<uint32_t>(arraySize);
 				reflection.materialVariables[static_cast<uint32_t>(varId)].offset = static_cast<uint32_t>(uniformOffset);
