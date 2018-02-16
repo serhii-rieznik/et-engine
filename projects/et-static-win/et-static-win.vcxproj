@@ -92,7 +92,7 @@
     <ClInclude Include="..\..\include\et\rendering\vulkan\vulkan_texture.cpp" />
     <ClInclude Include="..\..\include\et\rendering\vulkan\vulkan_textureset.h" />
     <ClInclude Include="..\..\include\et\app\application.cpp" />
-    <ClInclude Include="..\..\include\et\app\backgroundthread.cpp" />
+    <ClInclude Include="..\..\include\et\app\applicationthreads.cpp" />
     <ClInclude Include="..\..\include\et\app\events.cpp" />
     <ClInclude Include="..\..\include\et\app\invocation.cpp" />
     <ClInclude Include="..\..\include\et\app\pathresolver.cpp" />
@@ -299,7 +299,7 @@
     <ClInclude Include="..\..\include\et\app\appevironment.h" />
     <ClInclude Include="..\..\include\et\app\application.h" />
     <ClInclude Include="..\..\include\et\app\applicationdelegate.h" />
-    <ClInclude Include="..\..\include\et\app\backgroundthread.h" />
+    <ClInclude Include="..\..\include\et\app\applicationthreads.h" />
     <ClInclude Include="..\..\include\et\app\context.h" />
     <ClInclude Include="..\..\include\et\app\events.h" />
     <ClInclude Include="..\..\include\et\app\events.inl.h" />

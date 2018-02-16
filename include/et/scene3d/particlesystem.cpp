@@ -12,7 +12,7 @@
 using namespace et;
 using namespace et::s3d;
 
-ParticleSystem::ParticleSystem(RenderContext* rc, uint32_t maxSize, const std::string& name, BaseElement* parent)
+ParticleSystem::ParticleSystem(RenderInterface::Pointer& rc, uint32_t maxSize, const std::string& name, BaseElement* parent)
     : BaseElement(name, parent)
     , _emitter(maxSize)
     , _decl(true, VertexAttributeUsage::Position, DataType::Vec3)
@@ -36,8 +36,8 @@ ParticleSystem::ParticleSystem(RenderContext* rc, uint32_t maxSize, const std::s
 
 	_capacity = vs->capacity();
 
-	auto vb = rc->renderer()->createVertexBuffer(name + "-vb", vs, Buffer::Location::Host);
-	auto ib = rc->renderer()->createIndexBuffer(name + "-ib", ia, Buffer::Location::Device);
+	auto vb = rc->createVertexBuffer(name + "-vb", vs, Buffer::Location::Host);
+	auto ib = rc->createIndexBuffer(name + "-ib", ia, Buffer::Location::Device);
 	
 	_vertexStream = VertexStream::Pointer::create();
 	_vertexStream->setVertexBuffer(vb, vs->declaration());

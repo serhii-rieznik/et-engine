@@ -14,12 +14,12 @@
 #include <et/rendering/renderoptions.h>
 #include <et/rendering/base/materiallibrary.h>
 #include <et/rendering/interface/buffer.h>
+#include <et/rendering/interface/texture.h>
 #include <et/rendering/interface/renderpass.h>
 #include <et/rendering/interface/pipelinestate.h>
 #include <et/rendering/interface/sampler.h>
 
-namespace et
-{
+namespace et {
 class RenderContext;
 class RenderInterface : public Object
 {
@@ -27,20 +27,19 @@ public:
 	ET_DECLARE_POINTER(RenderInterface);
 
 public:
-	RenderInterface(RenderContext* rc)
-		: _rc(rc) { }
+	RenderInterface() = default;
 
-	RenderContext* rc() const
-		{ return _rc; }
+	MaterialLibrary& sharedMaterialLibrary() {
+		return _sharedMaterialLibrary;
+	}
 
-	MaterialLibrary& sharedMaterialLibrary()
-		{ return _sharedMaterialLibrary; }
+	ConstantBuffer& sharedConstantBuffer() {
+		return _sharedConstantBuffer;
+	}
 
-	ConstantBuffer& sharedConstantBuffer()
-		{ return _sharedConstantBuffer; }
-
-	const FrameStatistics& statistics() const 
-		{ return _statistics; }
+	const FrameStatistics& statistics() const {
+		return _statistics;
+	}
 
 	virtual RenderingAPI api() const = 0;
 
@@ -49,6 +48,7 @@ public:
 	virtual void destroy() = 0;
 
 	virtual void resize(const vec2i&) = 0;
+	virtual vec2i contextSize() const = 0;
 
 	virtual void begin() = 0;
 	virtual void present() = 0;
@@ -75,7 +75,7 @@ public:
 	virtual Texture::Pointer createTexture(const TextureDescription::Pointer&) = 0;
 	virtual TextureSet::Pointer createTextureSet(const TextureSet::Description&) = 0;
 
-	Texture::Pointer loadTexture(const std::string& fileName, ObjectsCache& cache, 
+	Texture::Pointer loadTexture(const std::string& fileName, ObjectsCache& cache,
 		TextureDescriptionUpdateMethod = nullTextureDescriptionUpdateMethod);
 
 	const Texture::Pointer& checkersTexture();
@@ -84,7 +84,7 @@ public:
 	const Texture::Pointer& blackTexture();
 	const Texture::Pointer& blackImage();
 	Texture::Pointer generateHammersleySet(uint32_t size);
-	
+
 	/*
 	 * Programs
 	 */
@@ -126,7 +126,7 @@ public:
 	RenderOptions& options() {
 		return _options;
 	}
-	
+
 	const RenderOptions& options() const {
 		return _options;
 	}
@@ -139,7 +139,6 @@ protected:
 	FrameStatistics _statistics;
 
 private:
-	RenderContext* _rc = nullptr;
 	MaterialLibrary _sharedMaterialLibrary;
 	ConstantBuffer _sharedConstantBuffer;
 	RenderBatchPool _renderBatchPool;
@@ -154,9 +153,8 @@ private:
 	Sampler::Pointer _clampSampler;
 };
 
-inline Texture::Pointer RenderInterface::loadTexture(const std::string& fileName, ObjectsCache& cache, 
-	TextureDescriptionUpdateMethod update)
-{
+inline Texture::Pointer RenderInterface::loadTexture(const std::string& fileName, ObjectsCache& cache,
+	TextureDescriptionUpdateMethod update) {
 	LoadableObject::Collection existingObjects = cache.findObjects(fileName);
 	if (existingObjects.empty())
 	{
@@ -174,7 +172,7 @@ inline Texture::Pointer RenderInterface::loadTexture(const std::string& fileName
 			return texture;
 		}
 	}
-	else 
+	else
 	{
 		return existingObjects.front();
 	}
@@ -183,18 +181,17 @@ inline Texture::Pointer RenderInterface::loadTexture(const std::string& fileName
 	return checkersTexture();
 }
 
-inline const Texture::Pointer& RenderInterface::checkersTexture()
-{
+inline const Texture::Pointer& RenderInterface::checkersTexture() {
 	if (_checkersTexture.invalid())
 	{
 		const uint32_t colors[] = { 0xFFFF00FF, 0xFF00FF00 };
 		uint32_t numColors = static_cast<uint32_t>(sizeof(colors) / sizeof(colors[0]));
-		
+
 		TextureDescription::Pointer desc = TextureDescription::Pointer::create();
 		desc->size = vec2i(16);
 		desc->format = TextureFormat::RGBA8;
 		desc->data.resize(4 * static_cast<uint32_t>(desc->size.square()));
-		
+
 		uint32_t* data = reinterpret_cast<uint32_t*>(desc->data.data());
 		for (uint32_t p = 0, e = static_cast<uint32_t>(desc->size.square()); p < e; ++p)
 		{
@@ -208,8 +205,7 @@ inline const Texture::Pointer& RenderInterface::checkersTexture()
 	return _checkersTexture;
 }
 
-inline const Texture::Pointer& RenderInterface::whiteTexture()
-{
+inline const Texture::Pointer& RenderInterface::whiteTexture() {
 	if (_whiteTexture.invalid())
 	{
 		TextureDescription::Pointer desc = TextureDescription::Pointer::create();
@@ -222,8 +218,7 @@ inline const Texture::Pointer& RenderInterface::whiteTexture()
 	return _whiteTexture;
 }
 
-inline const Texture::Pointer& RenderInterface::flatNormalTexture()
-{
+inline const Texture::Pointer& RenderInterface::flatNormalTexture() {
 	if (_flatNormalTexture.invalid())
 	{
 		TextureDescription::Pointer desc = TextureDescription::Pointer::create();
@@ -239,8 +234,7 @@ inline const Texture::Pointer& RenderInterface::flatNormalTexture()
 	return _flatNormalTexture;
 }
 
-inline const Texture::Pointer& RenderInterface::blackTexture()
-{
+inline const Texture::Pointer& RenderInterface::blackTexture() {
 	if (_blackTexture.invalid())
 	{
 		TextureDescription::Pointer desc = TextureDescription::Pointer::create();
@@ -253,8 +247,7 @@ inline const Texture::Pointer& RenderInterface::blackTexture()
 	return _blackTexture;
 }
 
-inline const Texture::Pointer& RenderInterface::blackImage()
-{
+inline const Texture::Pointer& RenderInterface::blackImage() {
 	if (_blackImage.invalid())
 	{
 		TextureDescription::Pointer desc = TextureDescription::Pointer::create();
@@ -268,8 +261,7 @@ inline const Texture::Pointer& RenderInterface::blackImage()
 	return _blackImage;
 }
 
-inline const Sampler::Pointer& RenderInterface::defaultSampler()
-{
+inline const Sampler::Pointer& RenderInterface::defaultSampler() {
 	if (_defaultSampler.invalid())
 	{
 		Sampler::Description desc;
@@ -278,8 +270,7 @@ inline const Sampler::Pointer& RenderInterface::defaultSampler()
 	return _defaultSampler;
 }
 
-inline const Sampler::Pointer& RenderInterface::clampSampler()
-{
+inline const Sampler::Pointer& RenderInterface::clampSampler() {
 	if (_clampSampler.invalid())
 	{
 		Sampler::Description desc;
@@ -291,8 +282,7 @@ inline const Sampler::Pointer& RenderInterface::clampSampler()
 	return _clampSampler;
 }
 
-inline const Sampler::Pointer& RenderInterface::nearestSampler()
-{
+inline const Sampler::Pointer& RenderInterface::nearestSampler() {
 	if (_nearestSampler.invalid())
 	{
 		Sampler::Description desc;
@@ -305,8 +295,7 @@ inline const Sampler::Pointer& RenderInterface::nearestSampler()
 	return _nearestSampler;
 }
 
-inline void RenderInterface::initInternalStructures()
-{
+inline void RenderInterface::initInternalStructures() {
 	_sharedConstantBuffer.init(this, ConstantBufferStaticAllocation | ConstantBufferDynamicAllocation);
 	_sharedMaterialLibrary.init(this);
 	_options.load();
@@ -321,8 +310,7 @@ inline void RenderInterface::initInternalStructures()
 	defaultSampler();
 }
 
-inline void RenderInterface::shutdownInternalStructures()
-{
+inline void RenderInterface::shutdownInternalStructures() {
 	_renderBatchPool.clear();
 	_sharedMaterialLibrary.shutdown();
 	_sharedConstantBuffer.shutdown();
@@ -337,8 +325,7 @@ inline void RenderInterface::shutdownInternalStructures()
 	_clampSampler.reset(nullptr);
 }
 
-inline Buffer::Pointer RenderInterface::createDataBuffer(const std::string& name, uint32_t size)
-{
+inline Buffer::Pointer RenderInterface::createDataBuffer(const std::string& name, uint32_t size) {
 	Buffer::Description desc;
 	desc.size = size;
 	desc.location = Buffer::Location::Host;
@@ -346,8 +333,7 @@ inline Buffer::Pointer RenderInterface::createDataBuffer(const std::string& name
 	return createBuffer(name, desc);
 }
 
-inline Buffer::Pointer RenderInterface::createDataBuffer(const std::string& name, const BinaryDataStorage& data)
-{
+inline Buffer::Pointer RenderInterface::createDataBuffer(const std::string& name, const BinaryDataStorage& data) {
 	Buffer::Description desc;
 	desc.size = data.size();
 	desc.location = Buffer::Location::Host;
@@ -356,8 +342,7 @@ inline Buffer::Pointer RenderInterface::createDataBuffer(const std::string& name
 	return createBuffer(name, desc);
 }
 
-inline Buffer::Pointer RenderInterface::createVertexBuffer(const std::string& name, const VertexStorage::Pointer& vs, Buffer::Location location)
-{
+inline Buffer::Pointer RenderInterface::createVertexBuffer(const std::string& name, const VertexStorage::Pointer& vs, Buffer::Location location) {
 	Buffer::Description desc;
 	desc.size = vs->data().size();
 	desc.location = location;
@@ -366,8 +351,7 @@ inline Buffer::Pointer RenderInterface::createVertexBuffer(const std::string& na
 	return createBuffer(name, desc);
 }
 
-inline Buffer::Pointer RenderInterface::createIndexBuffer(const std::string& name, const IndexArray::Pointer& ia , Buffer::Location location)
-{
+inline Buffer::Pointer RenderInterface::createIndexBuffer(const std::string& name, const IndexArray::Pointer& ia, Buffer::Location location) {
 	Buffer::Description desc;
 	desc.size = ia->dataSize();
 	desc.location = location;
@@ -376,10 +360,8 @@ inline Buffer::Pointer RenderInterface::createIndexBuffer(const std::string& nam
 	return createBuffer(name, desc);
 }
 
-inline Texture::Pointer RenderInterface::generateHammersleySet(uint32_t size)
-{
-	auto inv = [](uint32_t bits) -> float
-	{
+inline Texture::Pointer RenderInterface::generateHammersleySet(uint32_t size) {
+	auto inv = [](uint32_t bits) -> float {
 		bits = (bits << 16u) | (bits >> 16u);
 		bits = ((bits & 0x55555555u) << 1u) | ((bits & 0xAAAAAAAAu) >> 1u);
 		bits = ((bits & 0x33333333u) << 2u) | ((bits & 0xCCCCCCCCu) >> 2u);

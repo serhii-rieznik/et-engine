@@ -12,20 +12,20 @@
 #define ET_SINGLETON_CONSTRUCTORS(t)	friend class et::Singleton<t>; t() { } ET_DENY_COPY(t)
 #define ET_SINGLETON_COPY_DENY(t)		friend class et::Singleton<t>; ET_DENY_COPY(t)
 
-namespace et
-{ 
-	template <class t_class>
-	class Singleton
-	{
-	public:
-		static t_class& instance()
-		{
-			static t_class _instance;
-			return _instance;
-		}
+namespace et {
 
-	protected:
-		Singleton() { };
-		ET_DENY_COPY(Singleton);
-	};
+template <class t_class>
+class Singleton
+{
+public:
+	static t_class& instance() {
+		static t_class _instance;
+		return _instance;
+	}
+
+protected:
+	Singleton() {};
+	ET_DENY_COPY(Singleton);
+	ET_DENY_MOVE(Singleton);
+};
 }

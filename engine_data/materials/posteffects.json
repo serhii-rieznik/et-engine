@@ -36,24 +36,6 @@
 		"cull-mode" : "disabled",
 		"code" : "shaders/posteffects"
 	},
-
-	"resolve-luminance" : 
-	{ 
-		"input-layout" : {
-		},
-		"depth-state": {
-			"depth-function": "always",
-			"depth-test": false,
-			"depth-write": false
-		},
-		"options" : {
-			"GATHER_AVERAGE" : 1,
-			"RESOLVE_LUMINANCE" : 1
-		},
-		"blend-state": "disabled",
-		"cull-mode" : "disabled",
-		"code" : "shaders/posteffects"
-	},
 	
 	"motionblur" : 
 	{ 

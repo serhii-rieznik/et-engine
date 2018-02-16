@@ -15,7 +15,6 @@ cbuffer ObjectVariables : DECL_BUFFER(Object)
     row_major float4x4 viewProjectionTransform;
     row_major float4x4 inverseViewProjectionTransform;
     row_major float4x4 inverseProjectionTransform;
-    float4 cameraJitter;
     float4 lightDirection;
     float4 viewport;
     float2 cameraClipPlanes;

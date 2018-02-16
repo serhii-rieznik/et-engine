@@ -11,22 +11,25 @@
 #	error This file should not be included from anywhere except et.h
 #endif
 
-namespace et
-{
-	namespace threading
-	{
-		using ThreadIdentifier = uint64_t;
-		
-		void setMainThreadIdentifier(ThreadIdentifier);
-		
-		ThreadIdentifier mainThreadIdentifier();
-		bool inMainThread();
-		
-		size_t maxConcurrentThreads();
-		
-		ThreadIdentifier currentThread();
-		
-		void sleep(float seconds);
-		void sleepMSec(uint64_t msec);
-	}
+namespace et {
+namespace threading {
+
+using ThreadIdentifier = uint64_t;
+
+void setMainThreadIdentifier(ThreadIdentifier);
+void setRenderThreadIdentifier(ThreadIdentifier);
+
+ThreadIdentifier mainThreadIdentifier();
+ThreadIdentifier renderThreadIdentifier();
+
+bool inMainThread();
+bool inRenderThread();
+
+size_t maxConcurrentThreads();
+
+ThreadIdentifier currentThread();
+
+void sleep(float seconds);
+void sleepMSec(uint64_t msec);
+}
 }

@@ -93,6 +93,7 @@ public:
 
 		ConstructionInfo() = default;
 		ConstructionInfo(const char* nm) : name(nm) {}
+		ConstructionInfo(const std::string& nm) : name(nm) {}
 	};
 
 	static const std::string kPassNameDefault;
@@ -138,7 +139,10 @@ public:
 		pushRenderBatch(inBatch->material(), inBatch->vertexStream(), inBatch->firstIndex(), inBatch->numIndexes());
 	}
 
+	void addSingleRenderBatchSubpass(const RenderBatch::Pointer& inBatch);
 	void executeSingleRenderBatch(const RenderBatch::Pointer& inBatch);
+
+	const Texture::Pointer& colorTarget(uint32_t = 0) const;
 
 protected:
 	using SharedTexturesSet = std::map<MaterialTexture, std::pair<Texture::Pointer, Sampler::Pointer>>;
@@ -172,12 +176,20 @@ inline bool RenderPass::loadSharedVariable(ObjectVariable var, T& value) {
 	return false;
 }
 
-inline void RenderPass::executeSingleRenderBatch(const RenderBatch::Pointer& inBatch) {
-	begin(RenderPassBeginInfo::singlePass());
+inline void RenderPass::addSingleRenderBatchSubpass(const RenderBatch::Pointer& inBatch) {
 	nextSubpass();
 	pushRenderBatch(inBatch);
 	endSubpass();
+}
+
+inline void RenderPass::executeSingleRenderBatch(const RenderBatch::Pointer& inBatch) {
+	begin(RenderPassBeginInfo::singlePass());
+	addSingleRenderBatchSubpass(inBatch);
 	end();
+}
+
+inline const Texture::Pointer& RenderPass::colorTarget(uint32_t index) const {
+	return _info.color[index].texture;
 }
 
 }

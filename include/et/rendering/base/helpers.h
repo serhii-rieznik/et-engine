@@ -9,14 +9,11 @@
 
 #include <et/rendering/base/renderbatch.h>
 
-namespace et
-{
+namespace et {
 
-class RenderContext;
+namespace renderhelper {
 
-namespace renderhelper
-{
-void init(RenderContext*);
+void init(RenderInterface::Pointer&);
 void release();
 
 enum class QuadType : uint32_t

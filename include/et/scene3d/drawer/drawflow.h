@@ -49,14 +49,14 @@ public:
 	ET_DECLARE_POINTER(HDRFlow);
 
 public:
-	HDRFlow(const RenderInterface::Pointer&);
+	HDRFlow(RenderInterface::Pointer&);
 
 	void setColorGradingTable(const std::string&);
 	void resizeRenderTargets(const vec2i&) override;
 	void render() override;
 
 private:
-	void postprocess();
+	void motionBlur();
 	void downsampleLuminance();
 	void tonemap();
 	void antialias();
@@ -67,18 +67,47 @@ private:
 		MotionBlurPassCount = 2
 	};
 
+	using PostprocessStep = Texture::Pointer(HDRFlow::*)(Texture::Pointer);
+
+	Texture::Pointer luminanceStep(Texture::Pointer);
+	Texture::Pointer tonemapStep(Texture::Pointer);
+	Texture::Pointer anitialiasStep(Texture::Pointer);
+
+	void addStep(PostprocessStep);
+	Texture::Pointer executeSteps();
+
 private:
 	RenderInterface::Pointer _renderer;
 
-	Texture::Pointer _primaryTarget;
-	Texture::Pointer _secondaryTarget;
-	Texture::Pointer _luminanceTarget;
-	Texture::Pointer _downsampledLuminance;
-	Texture::Pointer _computedLuminance;
+	Vector<PostprocessStep> _steps;
 
-	Texture::Pointer _renderHistory;
+	Texture::Pointer _primaryTarget;
+
 	Texture::Pointer _colorGradingTexture;
 	Sampler::Pointer _colorGradingSampler;
+
+	struct LuminanceStep
+	{
+		RenderPass::Pointer pass;
+		RenderBatch::Pointer batch;
+		Compute::Pointer downsample;
+		Texture::Pointer downsampled;
+		Compute::Pointer adaptation;
+		Texture::Pointer computed;
+	} _lum;
+
+	struct TAAStep
+	{
+		RenderPass::Pointer pass;
+		RenderBatch::Pointer batch;
+		Texture::Pointer history;
+	} _taa;
+
+	struct TonemapStep
+	{
+		RenderPass::Pointer pass;
+		RenderBatch::Pointer batch;
+	} _tonemap;
 
 	struct Materials
 	{
@@ -88,25 +117,10 @@ private:
 	
 	struct Passes
 	{
-		RenderPass::Pointer logLuminance;
-		RenderPassBeginInfo logLuminanceBeginInfo;
-		RenderPass::Pointer motionBlur0;
-		RenderPass::Pointer motionBlur1;
-		RenderPass::Pointer tonemapping;
-		RenderPass::Pointer txaa;
 		RenderPass::Pointer final;
 	} _passes;
 
-	struct Batches
-	{
-		RenderBatch::Pointer logLuminance;
-	} _batches;
-
-	struct Computes
-	{
-		Compute::Pointer downsampleLuminance;
-		Compute::Pointer luminanceAdaptation;
-	} _compute;
+	bool _enableMotionBlur = false;
 };
 
 }

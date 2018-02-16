@@ -13,11 +13,12 @@
 #include <et/app/runloop.h>
 #include <et/app/appevironment.h>
 #include <et/app/applicationdelegate.h>
-#include <et/app/backgroundthread.h>
+#include <et/app/applicationthreads.h>
 #include <et/app/pathresolver.h>
+#include <et/rendering/rendercontext.h>
 
-namespace et
-{
+namespace et {
+
 extern const std::string kSystemEventType;
 extern const std::string kSystemEventRemoteNotification;
 extern const std::string kSystemEventRemoteNotificationStatusChanged;
@@ -35,9 +36,10 @@ public:
 	void quit(int exitCode = 0);
 
 	/*
-	 * Extern methods, should be implemented by the client app
+	 * Extern method, should be implemented by the client app
 	 */
 	IApplicationDelegate* initApplicationDelegate();
+	
 	const ApplicationIdentifier& identifier() const;
 
 	IApplicationDelegate* delegate();
@@ -45,7 +47,7 @@ public:
 	BackgroundThread& backgroundThread();
 	RunLoop& backgroundRunLoop();
 	PlatformDependentContext& context();
-	const PlatformDependentContext& context() const;
+	RenderContext& renderContext();
 	Environment& environment();
 	ApplicationParameters& parameters();
 	const ApplicationParameters& parameters() const;
@@ -69,8 +71,9 @@ public:
 	void requestUserAttention();
 	void enableRemoteNotifications();
 
-	const ProfilerInfo& profiler() const 
-		{ return _profiler; }
+	const ProfilerInfo& profiler() const {
+		return _profiler;
+	}
 
 	ET_DECLARE_EVENT1(systemEvent, Dictionary);
 
@@ -91,7 +94,7 @@ public:
 private:
 	friend class RenderContext;
 
-	int platformRun(int, char*[]);
+	int platformRun();
 
 	void platformInit();
 	void platformFinalize();
@@ -107,18 +110,17 @@ private:
 	Application();
 	~Application();
 
-	Application(const Application&) = delete;
-	Application(Application&&) = delete;
-	Application& operator = (const Application&) = delete;
-
 	friend class et::Singleton<Application>;
+
+	ET_DENY_COPY(Application);
+	ET_DENY_MOVE(Application);
 
 private:
 	ApplicationParameters _parameters;
 	ApplicationIdentifier _identifier;
 	ProfilerInfo _profiler;
+	RenderContext _renderContext;
 
-	RenderContext* _renderContext = nullptr;
 	IApplicationDelegate* _delegate = nullptr;
 
 	PlatformDependentContext _context;
@@ -129,6 +131,7 @@ private:
 
 	RunLoop _runLoop;
 	BackgroundThread _backgroundThread;
+	RenderThread _renderThread;
 
 	std::string _emptyParamter;
 	StringList _launchParameters;
@@ -146,9 +149,6 @@ private:
 	bool _scheduleResize = false;
 };
 
-/*
- * currentRunLoop - returns background run loop if called in background and mainRunLoop otherwise
- */
 Application& application();
 
 RunLoop& mainRunLoop();
@@ -161,66 +161,74 @@ TimerPool::Pointer currentTimerPool();
 void registerRunLoop(RunLoop&);
 void unregisterRunLoop(RunLoop&);
 
+class RunLoopScope
+{
+public:
+	RunLoopScope(RunLoop& rl) : 
+		_runLoop(rl) {
+		registerRunLoop(_runLoop);
+	}
+
+	~RunLoopScope() {
+		unregisterRunLoop(_runLoop);
+	}
+
+private:
+	ET_DENY_COPY(RunLoopScope);
+	ET_DENY_MOVE(RunLoopScope);
+
+private:
+	RunLoop& _runLoop;
+};
+
 /*
  * Application's inline methods
  */
-inline RunLoop& Application::mainRunLoop()
-{
+inline RunLoop& Application::mainRunLoop() {
 	return _runLoop;
 }
 
-inline BackgroundThread& Application::backgroundThread()
-{
+inline BackgroundThread& Application::backgroundThread() {
 	return _backgroundThread;
 }
 
-inline RunLoop& Application::backgroundRunLoop()
-{
+inline RunLoop& Application::backgroundRunLoop() {
 	return _backgroundThread.runLoop();
 }
 
-inline PlatformDependentContext& Application::context()
-{
+inline PlatformDependentContext& Application::context() {
 	return _context;
 }
 
-inline const PlatformDependentContext& Application::context() const
-{
-	return _context;
+inline RenderContext& Application::renderContext() {
+	return _renderContext;
 }
 
-inline Environment& Application::environment()
-{
+inline Environment& Application::environment() {
 	return _env;
 }
 
-inline ApplicationParameters& Application::parameters()
-{
+inline ApplicationParameters& Application::parameters() {
 	return _parameters;
 }
 
-inline const ApplicationParameters& Application::parameters() const
-{
+inline const ApplicationParameters& Application::parameters() const {
 	return _parameters;
 }
 
-inline const StringList& Application::launchParameters() const
-{
+inline const StringList& Application::launchParameters() const {
 	return _launchParameters;
 }
 
-inline bool Application::running() const
-{
+inline bool Application::running() const {
 	return _running;
 }
 
-inline bool Application::active() const
-{
+inline bool Application::active() const {
 	return _active;
 }
 
-inline bool Application::suspended() const
-{
+inline bool Application::suspended() const {
 	return _suspended;
 }
 

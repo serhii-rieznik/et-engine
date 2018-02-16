@@ -14,7 +14,7 @@ namespace et
 namespace s3d
 {
 
-DebugDrawer::DebugDrawer(const RenderInterface::Pointer& renderer) :
+DebugDrawer::DebugDrawer(RenderInterface::Pointer& renderer) :
 	_renderer(renderer)
 {
 	Buffer::Description vbDesc;

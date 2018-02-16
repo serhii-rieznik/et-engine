@@ -142,7 +142,7 @@ void ShadowmapProcessor::process(RenderInterface::Pointer& renderer, DrawerOptio
 
 	if (options.drawShadowmap)
 	{
-		vec2 vp = vector2ToFloat(renderer->rc()->size());
+		vec2 vp = vector2ToFloat(renderer->contextSize());
 		vec2 depthSz = vec2(0.5f * vp.x);
 		vec2 colorSz = depthSz;
 		vec2 depthPt = vec2(0.0f, vp.y - depthSz.y);

@@ -45,7 +45,6 @@ struct ApplicationParameters
 	RenderingAPI renderingAPI = RenderingAPI::Metal;
 #endif
 	bool shouldSuspendOnDeactivate = false;
-	bool shouldPreserveRenderContext = false;
 };
 
 struct PlatformDependentContext

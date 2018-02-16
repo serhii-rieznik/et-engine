@@ -94,7 +94,7 @@ void Storage::flush()
 	}
 }
 
-void Storage::buildVertexStreams(RenderContext* rc)
+void Storage::buildVertexStreams(RenderInterface::Pointer& rc)
 {
     Buffer::Pointer ib;
     for (const VertexStorage::Pointer& vs : _vertexStorages)
@@ -102,9 +102,9 @@ void Storage::buildVertexStreams(RenderContext* rc)
         std::string vaoName = "vao-" + intToStr(_vertexStreams.size() + 1);
         if (ib.invalid())
         {
-            ib = rc->renderer()->createIndexBuffer("mainIndexBuffer", _indexArray, Buffer::Location::Device);
+            ib = rc->createIndexBuffer("mainIndexBuffer", _indexArray, Buffer::Location::Device);
         }
-        Buffer::Pointer vb = rc->renderer()->createVertexBuffer(vs->name(), vs, Buffer::Location::Device);
+        Buffer::Pointer vb = rc->createVertexBuffer(vs->name(), vs, Buffer::Location::Device);
 		
 		VertexStream::Pointer vertexStream = VertexStream::Pointer::create();
 		vertexStream->setVertexBuffer(vb, vs->declaration());

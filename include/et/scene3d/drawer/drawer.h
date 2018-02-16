@@ -28,12 +28,11 @@ public:
 	};
 
 public:
-	Drawer(const RenderInterface::Pointer&);
+	Drawer(RenderInterface::Pointer&);
 
 	void setRenderTarget(const Texture::Pointer&);
 	void setScene(const Scene::Pointer&);
 	void setEnvironmentMap(const std::string&);
-	void updateBaseProjectionMatrix(const mat4&);
 	void updateLight();
 
 	void draw();
@@ -52,7 +51,6 @@ private:
 	ObjectsCache _cache;
 
 	Scene::Pointer _scene;
-	Camera::Pointer _frameCamera;
 	Vector<Mesh::Pointer> _allMeshes;
 	Vector<Mesh::Pointer> _visibleMeshes;
 	Map<Mesh::Pointer, std::pair<mat4, mat4>> _previousFrameTransforms;
@@ -87,7 +85,6 @@ private:
 		std::string environmentTextureFile;
 	} _lighting;
 
-	mat4 _baseProjectionMatrix;
 	vec4 _jitter;
 	uint64_t _frameIndex = 0;
 };

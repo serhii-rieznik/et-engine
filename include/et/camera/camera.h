@@ -9,8 +9,7 @@
 
 #include <et/camera/frustum.h>
 
-namespace et
-{
+namespace et {
 class Camera : public Object
 {
 public:
@@ -23,53 +22,62 @@ public:
 	Camera();
 
 	void lookAt(const vec3& pos, const vec3& point = vec3(0.0f), const vec3& up = vec3(0.0f, 1.0f, 0.0f));
-	
+
 	const mat4& perspectiveProjection(float fov, float aspect, float zNear, float zFar);
-
 	const mat4& customPerspectiveProjection(const vec2& fov, float zNear, float zFar);
-
 	const mat4& orthogonalProjection(float left, float right, float bottom, float top, float zNear, float zFar);
-
 	const mat4& windowProjection(const vec2& windowSize);
 
-	const vec3& position() const
-		{ return _inverseViewMatrix[3].xyz(); }
+	const vec3& position() const {
+		return _inverseViewMatrix[3].xyz();
+	}
 
 	void setPosition(const vec3& pos);
 
-	const quaternion orientation() const
-		{ return matrixToQuaternion(_viewMatrix.mat3()); }
-	
-	float zNear() const
-		{ return _zNear; }
-	
-	float zFar() const
-		{ return _zFar; }
+	const quaternion orientation() const {
+		return matrixToQuaternion(_viewMatrix.mat3());
+	}
 
-	float perspectiveProjectionAspect() const
-		{ return _perspecitveAspect; }
+	float zNear() const {
+		return _zNear;
+	}
 
-	float fieldOfView() const
-		{ return _fov; }
+	float zFar() const {
+		return _zFar;
+	}
+
+	float perspectiveProjectionAspect() const {
+		return _perspecitveAspect;
+	}
+
+	float fieldOfView() const {
+		return _fov;
+	}
 
 	vec3 direction() const;
 	void setDirection(const vec3& d);
 	void setSide(const vec3& s);
 
-	const mat4& viewMatrix() const
-		{ return _viewMatrix; }
-	const mat4& inverseViewMatrix() const
-		{ return _inverseViewMatrix; }
+	const mat4& viewMatrix() const {
+		return _viewMatrix;
+	}
+	const mat4& inverseViewMatrix() const {
+		return _inverseViewMatrix;
+	}
 
-	const mat4& projectionMatrix() const 
-		{ return _projectionMatrix; }
-	const mat4& inverseProjectionMatrix() const
-		{ return _inverseProjectionMatrix; }
+	const mat4& projectionMatrix() const {
+		return _projectionMatrix;
+	}
+	const mat4& inverseProjectionMatrix() const {
+		return _inverseProjectionMatrix;
+	}
 
-	const mat4& viewProjectionMatrix() const
-		{ return _viewProjectionMatrix; }
-	const mat4& inverseViewProjectionMatrix() const
-		{ return _inverseViewProjectionMatrix; }
+	const mat4& viewProjectionMatrix() const {
+		return _viewProjectionMatrix;
+	}
+	const mat4& inverseViewProjectionMatrix() const {
+		return _inverseViewProjectionMatrix;
+	}
 
 	vec3 up() const;
 	vec3 side() const;
@@ -88,22 +96,29 @@ public:
 	void lockUpVector(const vec3& u);
 	void unlockUpVector();
 
-	bool upVectorLocked() const
-		{ return _lockUpVector; }
+	bool upVectorLocked() const {
+		return _lockUpVector;
+	}
 
-	const vec3& lockedUpVector() const 
-		{ return _upLocked; }
+	const vec3& lockedUpVector() const {
+		return _upLocked;
+	}
 
-	const Frustum& frustum() const
-		{ return _frustum; }
+	const Frustum& frustum() const {
+		return _frustum;
+	}
 
 	ray3d castRay(const vec2& pt) const;
 
-	void setViewMatrix(const mat4& m)
-		{ _viewMatrix = m; viewUpdated(); }
-	
-	void setProjectionMatrix(const mat4& m)
-		{ _projectionMatrix = m; projectionUpdated(); }
+	void setViewMatrix(const mat4& m) {
+		_viewMatrix = m; 
+		viewUpdated();
+	}
+
+	void setProjectionMatrix(const mat4& m) {
+		_projectionMatrix = m; 
+		projectionUpdated();
+	}
 
 	void reflected(const plane&, Camera&) const;
 

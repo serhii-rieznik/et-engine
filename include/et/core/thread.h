@@ -10,29 +10,25 @@
 #include <mutex>
 #include <et/core/threading.h>
 
-namespace et
-{
+namespace et {
+
 class Thread
 {
 public:
 	Thread(const std::string& name = std::string())
-		: _name(name)
-	{
+		: _name(name) {
 	}
 
-	virtual ~Thread()
-	{
+	virtual ~Thread() {
 		ET_ASSERT(!_suspended);
 	}
 
-	void run()
-	{
+	void run() {
 		ET_ASSERT(!_running);
 		_thread = std::thread(&Thread::threadFunction, this);
 	}
 
-	void suspend()
-	{
+	void suspend() {
 		ET_ASSERT(!_suspended);
 		_suspended = true;
 		{
@@ -42,14 +38,12 @@ public:
 		_suspended = false;
 	}
 
-	void resume()
-	{
+	void resume() {
 		ET_ASSERT(_suspended);
 		_suspendLock.notify_all();
 	}
 
-	void stop()
-	{
+	void stop() {
 		_running = false;
 		if (_suspended)
 		{
@@ -57,41 +51,35 @@ public:
 		}
 	}
 
-	void join()
-	{
+	void join() {
 		_thread.join();
 	}
 
-	bool running() const
-	{
+	bool running() const {
 		return _running;
 	}
 
-	bool suspended() const
-	{
+	bool suspended() const {
 		return _suspended;
 	}
 
-	threading::ThreadIdentifier identifier() const
-	{
+	threading::ThreadIdentifier identifier() const {
 		return std::hash<std::thread::id>()(_thread.get_id());
 	}
 
 	virtual void main() {}
 
 private:
-	void setName()
-	{
+	void setName() {
 		if (_name.empty())
 			return;
 
-	#		if (ET_PLATFORM_APPLE)
+	#if (ET_PLATFORM_APPLE)
 		pthread_setname_np(_name.c_str());
-	#		endif
+	#endif
 	}
 
-	void threadFunction()
-	{
+	void threadFunction() {
 		_running = true;
 		setName();
 		main();

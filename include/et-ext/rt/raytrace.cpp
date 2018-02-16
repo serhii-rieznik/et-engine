@@ -692,7 +692,7 @@ void RaytracePrivate::backwardPathTraceThreadFunction(uint32_t threadId)
 						localData[k] = vec4(0.0f);
 				}
 
-				uint32_t bounces = 0;
+				// uint32_t bounces = 0;
 				// localData[k] = raytracePixel(pixel, scene.options.raysPerPixel, bounces);
 				++k;
 			}

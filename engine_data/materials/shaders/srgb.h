@@ -104,5 +104,14 @@ float3 toneMapping(float3 color, float averageLuminance, in float t)
 	return linearToSRGB(color);
 
 #endif
-	
 }                                        
+
+float3 RGBToYCoCg(float3 c)
+{
+	return float3(c.x / 4.0 + c.y / 2.0 + c.z / 4.0, c.x / 2.0 - c.z / 2.0, -c.x / 4.0 + c.y / 2.0 - c.z / 4.0);
+}
+
+float3 YCoCgToRGB(float3 c)
+{
+	return saturate(float3(c.x + c.y - c.z, c.x + c.z, c.x - c.y - c.z));
+}

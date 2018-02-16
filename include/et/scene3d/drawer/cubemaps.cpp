@@ -318,7 +318,7 @@ void CubemapProcessor::validate(RenderInterface::Pointer& renderer) {
 }
 
 void CubemapProcessor::drawDebug(RenderInterface::Pointer& renderer, const DrawerOptions& options) {
-	vec2 vp = vector2ToFloat(renderer->rc()->size());
+	vec2 vp = vector2ToFloat(renderer->contextSize());
 
 	if (options.drawEnvironmentProbe)
 	{

@@ -283,9 +283,6 @@
     <ClInclude Include="..\..\include\et\app\application.cpp">
       <Filter>Source\app</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\et\app\backgroundthread.cpp">
-      <Filter>Source\app</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\et\app\events.cpp">
       <Filter>Source\app</Filter>
     </ClInclude>
@@ -721,6 +718,15 @@
     <ClInclude Include="..\..\include\et\core\basicmath.h">
       <Filter>Source\core</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\..\et-engine\include\et\pbr\pbr_spectrum.cpp">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\app\applicationthreads.h">
+      <Filter>Source\app</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\et\app\applicationthreads.cpp">
+      <Filter>Source\app</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\et\sound\openal.h">
@@ -1074,9 +1080,6 @@
     <ClInclude Include="..\..\include\et\app\applicationdelegate.h">
       <Filter>Source\app</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\et\app\backgroundthread.h">
-      <Filter>Source\app</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\et\app\context.h">
       <Filter>Source\app</Filter>
     </ClInclude>
@@ -1309,9 +1312,6 @@
     </ClCompile>
     <ClCompile Include="..\..\include\external\spirvcross\spirv_msl.cpp">
       <Filter>spir-v-cross</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\..\et-engine\include\et\pbr\pbr_spectrum.cpp">
-      <Filter>Source\pbr</Filter>
     </ClCompile>
     <ClCompile Include="..\..\include\et\compile_packs\pbr.pack.cxx">
       <Filter>Source\compile_packs</Filter>

@@ -35,17 +35,18 @@ namespace et
 	
 	struct RenderContextParameters
 	{
+		/*
+		 * Deprecated options
+		 * 
 		MultisamplingQuality multisamplingQuality = MultisamplingQuality::Best;
-		
 		bool multipleTouch = true;
 		bool bindDefaultFramebufferEachFrame = true;
 		bool lockScreenScaleToInitial = true;
 		bool compatibilityProfile = false;
 		bool debugContext = false;
-
 		size_t swapInterval = 1;
         size_t supportedInterfaceOrientations = InterfaceOrientation_Any;
-
 		vec2i contextTargetVersion = vec2i(4, 5);
+		*/
 	};
 }

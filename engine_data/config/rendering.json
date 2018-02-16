@@ -6,7 +6,7 @@
 
 	"ToneMapping" : {
 		"values" : ["Disabled", "ACES", "Uncharted"],
-		"default" : "ACES"
+		"default" : "Disabled"
 	},
 
 	"SRGBConversion" : {

@@ -9,8 +9,7 @@
 
 #include <et/rendering/interface/renderer.h>
 
-namespace et
-{
+namespace et {
 class VulkanRendererPrivate;
 class VulkanRenderer : public RenderInterface
 {
@@ -18,12 +17,11 @@ public:
 	ET_DECLARE_POINTER(VulkanRenderer);
 
 public:
-	RenderingAPI api() const override
-	{
+	RenderingAPI api() const override {
 		return RenderingAPI::Vulkan;
 	}
 
-	VulkanRenderer(RenderContext* rc);
+	VulkanRenderer();
 	~VulkanRenderer();
 
 	void init(const RenderContextParameters& params) override;
@@ -31,6 +29,7 @@ public:
 	void destroy() override;
 
 	void resize(const vec2i&) override;
+	vec2i contextSize() const override;
 
 	void begin() override;
 	void present() override;

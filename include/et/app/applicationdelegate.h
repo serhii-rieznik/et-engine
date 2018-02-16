@@ -9,8 +9,7 @@
 
 #include <et/app/context.h>
 
-namespace et
-{
+namespace et {
 class RenderContext;
 struct RenderContextParameters;
 template <typename T> union vector2;
@@ -25,7 +24,7 @@ struct IApplicationDelegate
 	virtual void setApplicationParameters(et::ApplicationParameters&) {}
 	virtual void setRenderContextParameters(et::RenderContextParameters&) {}
 
-	virtual void applicationDidLoad(et::RenderContext*) {}
+	virtual void applicationDidLoad() {}
 	virtual void applicationWillActivate() {}
 	virtual void applicationWillDeactivate() {}
 	virtual void applicationWillSuspend() {}
@@ -34,6 +33,6 @@ struct IApplicationDelegate
 
 	virtual void applicationWillResizeContext(const et::vec2i&) {}
 
-	virtual void render(et::RenderContext*) {}
+	virtual void update() {}
 };
 }

@@ -44,8 +44,7 @@ public:
 	VulkanTextureSet::Pointer emptyTextureSet;
 };
 
-VulkanRenderer::VulkanRenderer(RenderContext* rc)
-	: RenderInterface(rc) {
+VulkanRenderer::VulkanRenderer() {
 	ET_PIMPL_INIT(VulkanRenderer);
 	Camera::renderingOriginTransform = -1.0f;
 	Camera::zeroClipRange = true;
@@ -264,6 +263,10 @@ void VulkanRenderer::destroy() {
 
 void VulkanRenderer::resize(const vec2i& sz) {
 	_private->swapchain.createSizeDependentResources(_private->vulkan(), sz);
+}
+
+vec2i VulkanRenderer::contextSize() const {
+	return vec2i(static_cast<int32_t>(_private->swapchain.extent.width), static_cast<int32_t>(_private->swapchain.extent.height));
 }
 
 Buffer::Pointer VulkanRenderer::createBuffer(const std::string&, const Buffer::Description& desc) {

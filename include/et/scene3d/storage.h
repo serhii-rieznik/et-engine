@@ -11,7 +11,7 @@
 #include <et/rendering/base/indexarray.h>
 #include <et/rendering/base/vertexstorage.h>
 #include <et/rendering/base/vertexstream.h>
-#include <et/rendering/interface/texture.h>
+#include <et/rendering/interface/renderer.h>
 
 namespace et
 {
@@ -68,7 +68,7 @@ public:
 	
 	void flush();
 	
-	void buildVertexStreams(RenderContext* rc);
+	void buildVertexStreams(RenderInterface::Pointer& rc);
 
 private:
 	Storage* duplicate()

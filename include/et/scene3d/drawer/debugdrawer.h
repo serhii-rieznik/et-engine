@@ -20,7 +20,7 @@ public:
 	ET_DECLARE_POINTER(DebugDrawer);
 
 public:
-	DebugDrawer(const RenderInterface::Pointer&);
+	DebugDrawer(RenderInterface::Pointer&);
 
 	void begin();
 	void drawBoundingBox(const BoundingBox&, const mat4& transfrom, const vec4& color);

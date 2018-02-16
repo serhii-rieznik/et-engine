@@ -17,17 +17,17 @@ namespace renderhelper
 
 namespace rh_local
 {
-RenderContext* renderContext = nullptr;
+RenderInterface::Pointer renderer;
 Material::Pointer texturedMaterial;
 VertexStream::Pointer vertexStream;
 VertexStream::Pointer emptyStream;
 }
 
-void init(RenderContext* rc)
+void init(RenderInterface::Pointer& rc)
 {
 	ET_ASSERT(rh_local::vertexStream.invalid());
 
-	rh_local::renderContext = rc;
+	rh_local::renderer = rc;
 	
 	VertexDeclaration vd(false, VertexAttributeUsage::Position, DataType::Vec3);
 	VertexStorage::Pointer vs = VertexStorage::Pointer::create(vd, 4);
@@ -38,7 +38,7 @@ void init(RenderContext* rc)
 	pos[2] = vec3(+1.0f, -1.0f, 0.0f); 
 	pos[3] = vec3(+1.0f, +1.0f, 0.0f); 
 
-	Buffer::Pointer vb = rc->renderer()->createVertexBuffer("rh_local::vb", vs, Buffer::Location::Device);
+	Buffer::Pointer vb = rh_local::renderer->createVertexBuffer("rh_local::vb", vs, Buffer::Location::Device);
 	rh_local::vertexStream = VertexStream::Pointer::create();
 	rh_local::vertexStream->setVertexBuffer(vb, vs->declaration());
 	rh_local::vertexStream->setPrimitiveType(PrimitiveType::TriangleStrips);
@@ -46,16 +46,17 @@ void init(RenderContext* rc)
 	rh_local::emptyStream = VertexStream::Pointer::create();
 	rh_local::emptyStream->setPrimitiveType(PrimitiveType::TriangleStrips);
 
-	rh_local::texturedMaterial = rc->renderer()->sharedMaterialLibrary().loadDefaultMaterial(DefaultMaterial::Textured2D);
+	rh_local::texturedMaterial = rh_local::renderer->sharedMaterialLibrary().loadDefaultMaterial(DefaultMaterial::Textured2D);
 
 	Sampler::Description defaultSampler;
-	rh_local::texturedMaterial->setSampler(MaterialTexture::BaseColor, rc->renderer()->createSampler(defaultSampler));
+	rh_local::texturedMaterial->setSampler(MaterialTexture::BaseColor, rh_local::renderer->createSampler(defaultSampler));
 }
 
 void release()
 {
 	rh_local::vertexStream.reset(nullptr);
 	rh_local::texturedMaterial.reset(nullptr);
+	rh_local::renderer.release();
 }
 	
 RenderBatch::Pointer createQuadBatch(const Texture::Pointer& texture, Material::Pointer mat, QuadType type)
@@ -66,7 +67,7 @@ RenderBatch::Pointer createQuadBatch(const Texture::Pointer& texture, Material::
 	if (mat.invalid())
 		mat = rh_local::texturedMaterial;
 
-	RenderBatch::Pointer batch = rh_local::renderContext->renderer()->allocateRenderBatch();
+	RenderBatch::Pointer batch = rh_local::renderer->allocateRenderBatch();
 	{
 		MaterialInstance::Pointer materialInstance = mat->instance();
 		materialInstance->setTexture(MaterialTexture::BaseColor, texture);

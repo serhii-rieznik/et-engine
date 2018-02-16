@@ -9,7 +9,7 @@
 Texture2D<float4> baseColorTexture : DECL_TEXTURE(BaseColor);
 Texture2D<float4> emissiveColorTexture : DECL_TEXTURE(EmissiveColor);
 Texture2D<float4> shadowTexture : DECL_TEXTURE(Shadow);
-Texture2D<float4> normalTexture : DECL_TEXTURE(Normal);
+Texture2D<float2> normalTexture : DECL_TEXTURE(Normal);
 
 SamplerState baseColorSampler : DECL_SAMPLER(BaseColor);
 SamplerState emissiveColorSampler : DECL_SAMPLER(EmissiveColor);
@@ -64,10 +64,6 @@ float4 fragmentMain(VSOutput fsIn) : SV_Target0
 
 	return averageColor;
 
-#elif (RESOLVE_LUMINANCE)
-
-	#error moved to compute shader
-
 #elif (MOTION_BLUR)
 
 	baseColorTexture.GetDimensions(0.0, w, h, levels);
@@ -76,7 +72,7 @@ float4 fragmentMain(VSOutput fsIn) : SV_Target0
 	const float targetDeltaTime = 1.0 / 130.0;
 	float velocityScale = min(1.0, deltaTime / targetDeltaTime);
 
-	float2 velocity = normalTexture.Sample(emissiveColorSampler, fsIn.texCoord0).xy;
+	float2 velocity = normalTexture.Sample(emissiveColorSampler, fsIn.texCoord0);
 	uint currentSamples = clamp(uint(length(velocity * float2(w, h))), 1, maxSamples);
 
 	float2 currentUv = fsIn.texCoord0;
@@ -100,20 +96,8 @@ float4 fragmentMain(VSOutput fsIn) : SV_Target0
 	baseColorTexture.GetDimensions(0.0, w, h, levels);
 	float2 texel = float2(1.0 / w, 1.0 / h);
 
-	float3 c01 = baseColorTexture.Sample(baseColorSampler, fsIn.texCoord0, int2(0, -1)).xyz;
-	float3 c10 = baseColorTexture.Sample(baseColorSampler, fsIn.texCoord0, int2(-1, 0)).xyz;
-	float3 c11 = baseColorTexture.Sample(baseColorSampler, fsIn.texCoord0).xyz;
-	float3 c12 = baseColorTexture.Sample(baseColorSampler, fsIn.texCoord0, int2(+1, 0)).xyz;
-	float3 c21 = baseColorTexture.Sample(baseColorSampler, fsIn.texCoord0, int2(0, +1)).xyz;
-
-	float u = fsIn.texCoord0.x;
-	c01 = toneMapping(c01, averageLuminance, u);
-	c10 = toneMapping(c10, averageLuminance, u);
-	c11 = toneMapping(c11, averageLuminance, u);
-	c12 = toneMapping(c12, averageLuminance, u);
-	c21 = toneMapping(c21, averageLuminance, u);
-
-	float3 ldrColor = c11; // 5.0 * c11 - (c01 + c10 + c12 + c21);
+	float3 hdrColor = baseColorTexture.Sample(baseColorSampler, fsIn.texCoord0).xyz;
+	float3 ldrColor = toneMapping(hdrColor, averageLuminance, fsIn.texCoord0.x);
 
 #	if (ENABLE_COLOR_GRADING)
 	{
@@ -131,52 +115,38 @@ float4 fragmentMain(VSOutput fsIn) : SV_Target0
 
 #elif (TEMPORAL_AA)
 	
-	float2 baseUv = fsIn.texCoord0 + 0.5 * cameraJitter.xy;
-	float2 velocity = normalTexture.Sample(baseColorSampler, baseUv).xy;
+	float2 velocitySample = normalTexture.Sample(normalSampler, fsIn.texCoord0);
+	float3 historySample = emissiveColorTexture.Sample(emissiveColorSampler, fsIn.texCoord0 + velocitySample).xyz;
 
-	float4 currentSample = baseColorTexture.Sample(baseColorSampler, baseUv);
-	                                         
-	float2 historyUv = fsIn.texCoord0 + velocity.xy;
-	float4 historySample = emissiveColorTexture.Sample(emissiveColorSampler, historyUv);
+	float3 s00 = baseColorTexture.Sample(baseColorSampler, fsIn.texCoord0, uint2(-1, -1)).xyz;
+	float3 s01 = baseColorTexture.Sample(baseColorSampler, fsIn.texCoord0, uint2( 0, -1)).xyz;
+	float3 s02 = baseColorTexture.Sample(baseColorSampler, fsIn.texCoord0, uint2(+1, -1)).xyz;
+	float3 s10 = baseColorTexture.Sample(baseColorSampler, fsIn.texCoord0, uint2(-1, 0)).xyz;
+	float3 s11 = baseColorTexture.Sample(baseColorSampler, fsIn.texCoord0, uint2( 0, 0)).xyz;
+	float3 s12 = baseColorTexture.Sample(baseColorSampler, fsIn.texCoord0, uint2(+1, 0)).xyz;
+	float3 s20 = baseColorTexture.Sample(baseColorSampler, fsIn.texCoord0, uint2(-1, +1)).xyz;
+	float3 s21 = baseColorTexture.Sample(baseColorSampler, fsIn.texCoord0, uint2( 0, +1)).xyz;
+	float3 s22 = baseColorTexture.Sample(baseColorSampler, fsIn.texCoord0, uint2(+1, +1)).xyz;
 
-	float4 box[9];
-	box[0] = baseColorTexture.Sample(baseColorSampler, baseUv, int2(-1, -1));
-	box[1] = baseColorTexture.Sample(baseColorSampler, baseUv, int2( 0, -1));
-	box[2] = baseColorTexture.Sample(baseColorSampler, baseUv, int2(+1, -1));
-	box[3] = baseColorTexture.Sample(baseColorSampler, baseUv, int2(-1,  0));
-	box[4] = currentSample;
-	box[5] = baseColorTexture.Sample(baseColorSampler, baseUv, int2(+1,  0));
-	box[6] = baseColorTexture.Sample(baseColorSampler, baseUv, int2(-1, +1));
-	box[7] = baseColorTexture.Sample(baseColorSampler, baseUv, int2( 0, +1));
-	box[8] = baseColorTexture.Sample(baseColorSampler, baseUv, int2(+1, +1));
+	float3 minSample = min(s00, min(min(min(s01, s02), min(s10, s11)), min(min(s12, s20), min(s21, s22))));
+	float3 maxSample = max(s00, max(max(max(s01, s02), max(s10, s11)), max(max(s12, s20), max(s21, s22))));
+	float3 average = 1.0 / 9.0 * (s00 + s01 + s02 + s10 + s11 + s12 + s20 + s21 + s22);
 
-	float4 minValue = min(min(box[0], box[1]), min(min(box[2], box[3]), 
-		min(min(box[4], box[5]), min(min(box[6], box[7]), box[8]))));
+	minSample = RGBToYCoCg(minSample);
+	maxSample = RGBToYCoCg(maxSample);
+	historySample = RGBToYCoCg(historySample);
+	historySample = clamp(historySample, minSample, maxSample);
+	float3 currentSample = RGBToYCoCg(s11);
 
-	float4 maxValue = max(max(box[0], box[1]), max(max(box[2], box[3]), 
-		max(max(box[4], box[5]), max(max(box[6], box[7]), box[8]))));
+	float weightMin = 0.5;
+	float weightMax = 0.15;
+	float lumDifference = abs(currentSample.y - historySample.y) / max(currentSample.y, max(historySample.y, 0.2));
+	float weight = 1.0 - lumDifference;
+	float weightSquared = weight * weight;
+	weight = lerp(weightMin, weightMax, weightSquared);
+	float3 temporal = lerp(historySample, currentSample, weight);
 
-	historySample = clamp(historySample, minValue, maxValue);
-
-	float currentLuminance = dot(currentSample.xyz, float3(0.2126, 0.7152, 0.0722));
-	float historyLuminance = dot(historySample.xyz, float3(0.2126, 0.7152, 0.0722));
-
-	const float diffMinDivisor = 0.1;
-	const float lerpMinValue = 0.25;
-	const float lerpMaxValue = 0.33;
-
-	float weight = 1.0 - abs(currentLuminance - historyLuminance) / max(diffMinDivisor, max(currentLuminance, historyLuminance));
-	float lerpValue = lerp(lerpMinValue, lerpMaxValue, weight * weight);
-
-	// lerpValue = 1.0;
-
-	return 
-	// length(velocity.xy - motion) * 1000.0;
-	// lerpValue;
-	// weight;
-	// historySample;
-	// currentSample;
-	lerp(historySample, currentSample, lerpValue);
+	return float4(YCoCgToRGB(temporal), 1.0);
 
 #else
 

@@ -35,7 +35,7 @@ VSOutput vertexMain(VSInput vsIn)
 	VSOutput output;
     output.texCoord0 = vsIn.texCoord0;
 	output.position = mul(transformedPosition, viewProjectionTransform);
-	output.position.xy += cameraJitter.xy * output.position.w;
+	// output.position.xy += cameraJitter.xy * output.position.w;
 
 #if (ShadowMapping == ShadowMappingMoments)
 	output.projected = output.position;

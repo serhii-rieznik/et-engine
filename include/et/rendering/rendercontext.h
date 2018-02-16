@@ -11,44 +11,22 @@
 #include <et/rendering/rendercontextparams.h>
 #include <et/rendering/interface/renderer.h>
 
-namespace et
-{
+namespace et {
+
 class Application;
 class RenderContextPrivate;
 class RenderContext
 {
 public:
-	RenderContext(const RenderContextParameters& params, Application* app);
+	RenderContext();
 	~RenderContext();
 
-	void init();
+	void init(const ApplicationParameters& appParams, const RenderContextParameters& rcParams);
 	void shutdown();
-	const vec2i& size() const;
 
-	RenderContextParameters& parameters()
-	{
-		return _params;
-	}
-
-	const RenderContextParameters& parameters() const
-	{
-		return _params;
-	}
-
-	RenderInterface::Pointer& renderer()
-	{
+	RenderInterface::Pointer& renderer() {
 		return _renderer;
 	}
-
-	const RenderInterface::Pointer& renderer() const
-	{
-		return _renderer;
-	}
-
-	void pushRenderingContext();
-	bool activateRenderingContext();
-	bool pushAndActivateRenderingContext();
-	void popRenderingContext();
 
 	bool beginRender();
 	void endRender();
@@ -56,13 +34,11 @@ public:
 	void performResizing(const vec2i&);
 
 private:
-	RenderContext(RenderContext&&) = delete;
-	RenderContext(const RenderContext&) = delete;
-	RenderContext& operator = (const RenderContext&) = delete;
+	ET_DENY_COPY(RenderContext);
+	ET_DENY_MOVE(RenderContext);
 
 private:
 	ET_DECLARE_PIMPL(RenderContext, 256);
-	RenderContextParameters _params;
 	RenderInterface::Pointer _renderer;
 };
 

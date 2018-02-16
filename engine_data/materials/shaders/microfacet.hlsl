@@ -102,13 +102,8 @@ VSOutput vertexMain(VSInput vsIn)
     vsOut.invTransformT = float3(tTangent.x, tBiTangent.x, vsOut.normal.x);
     vsOut.invTransformB = float3(tTangent.y, tBiTangent.y, vsOut.normal.y);
     vsOut.invTransformN = float3(tTangent.z, tBiTangent.z, vsOut.normal.z);
-
     vsOut.projectedPosition = mul(transformedPosition, viewProjectionTransform);
-    vsOut.projectedPosition.xy += cameraJitter.xy * vsOut.projectedPosition.w;
-
     vsOut.previousProjectedPosition = mul(previousTransformedPosition, previousViewProjectionTransform);
-    vsOut.previousProjectedPosition.xy += cameraJitter.zw * vsOut.projectedPosition.w;
-
     vsOut.position = vsOut.projectedPosition;
 
     return vsOut;
@@ -269,14 +264,17 @@ FSOutput fragmentMain(VSOutput fsIn)
 
 #else
 
-    float3 result = shadow * ((directDiffuse + directSpecular) * lightColor * 0.0) + 
+    float3 result = shadow * ((directDiffuse + directSpecular) * lightColor) + 
     	ambientOcclusion * (indirectDiffuse + indirectSpecular) + 
-    	ltcColor * (ltcDiffuse + ltcSpecular);
+    	0.0 * ltcColor * (ltcDiffuse + ltcSpecular);
 
 #endif
+	
+	currentPosition += cameraJitter.xy;
+	previousPosition += cameraJitter.zw;
 
     FSOutput output;
     output.color = float4(result, 1.0);
-	output.velocity = 0.5 * (currentPosition - previousPosition);
+	output.velocity = 0.5 * (previousPosition - currentPosition);
     return output;
 }                              

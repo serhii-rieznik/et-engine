@@ -11,9 +11,8 @@ cbuffer ObjectVariables : DECL_BUFFER(Object)
 	row_major float4x4 inverseViewTransform;
 	row_major float4x4 inverseProjectionTransform;
 	row_major float4x4 viewProjectionTransform;
-	row_major float4x4 previousViewProjectionTransform;
+	row_major float4x4 inverseViewProjectionTransform;
 	float4 lightDirection;
-	float3 cameraClipPlanes;
 	float3 lightColor;
 };
 
@@ -54,8 +53,6 @@ FSOutput fragmentMain(VSOutput fsIn)
 #else
 	float3 env = sampleEnvironment(v, lightDirection.xyz, 0.1);
 #endif
-	float4 currentProjectedDirection = mul(float4(v * cameraClipPlanes.y, 1.0), viewProjectionTransform);
-	float4 previousProjectedDirection = mul(float4(v * cameraClipPlanes.y, 1.0), previousViewProjectionTransform);
 
 #if (DRAW_SUN)
 	float intersectsPlanet = step(planetIntersection(positionOnPlanet, v), 0.0);
@@ -67,6 +64,6 @@ FSOutput fragmentMain(VSOutput fsIn)
 	
 	FSOutput result;
 	result.color = float4(env, 1.0);
-	result.velocity = (currentProjectedDirection.xy / currentProjectedDirection.w) - (previousProjectedDirection.xy / previousProjectedDirection.w);
+	result.velocity = 0.0;
 	return result;
 }

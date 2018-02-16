@@ -10,8 +10,7 @@
 #include <atomic>
 #include <type_traits>
 
-namespace et
-{
+namespace et {
 #	define ET_DECLARE_POINTER(T)					using Pointer = et::IntrusivePtr<T>
 #	define ET_FORWARD_DECLARE_POINTER(T)			class T; using T##Pointer = et::IntrusivePtr<T>
 
@@ -25,24 +24,21 @@ public:
 	Shared(const Shared&) = delete;
 	Shared& operator = (const Shared&) = delete;
 
-	uint_fast32_t retain()
-	{
+	uint_fast32_t retain() {
 	#if (ET_DEBUG)
 		if (_trackRetains) debug::debugBreak();
 	#endif
 		return ++_retainCount;
 	}
 
-	uint_fast32_t release()
-	{
+	uint_fast32_t release() {
 	#if (ET_DEBUG)
 		if (_trackRetains) debug::debugBreak();
 	#endif
 		return --_retainCount;
 	}
 
-	uint_fast32_t retainCount() const
-	{
+	uint_fast32_t retainCount() const {
 		return _retainCount.load();
 	}
 
@@ -69,13 +65,11 @@ template <class T>
 class InstusivePointerScope
 {
 public:
-	InstusivePointerScope(T* object) : _object(object)
-	{
+	InstusivePointerScope(T* object) : _object(object) {
 		_object->retain();
 	}
 
-	~InstusivePointerScope()
-	{
+	~InstusivePointerScope() {
 		_object->release();
 	}
 
@@ -84,7 +78,7 @@ public:
 	InstusivePointerScope& operator = (const InstusivePointerScope&) = delete;
 
 private:
-	T* _object = nullptr;
+	T * _object = nullptr;
 };
 
 template <typename T>
@@ -96,41 +90,35 @@ class IntrusivePtr
 public:
 	IntrusivePtr() = default;
 
-	IntrusivePtr(PointerInit initType)
-	{
+	IntrusivePtr(PointerInit initType) {
 		if (initType == PointerInit::CreateInplace)
 			reset(sharedObjectFactory().createObject<T>());
 	}
 
 	IntrusivePtr(const IntrusivePtr& r) :
-		_data(r._data)
-	{
+		_data(r._data) {
 		if (_data != nullptr)
 			_data->retain();
 	}
 
 	IntrusivePtr(IntrusivePtr&& r) :
-		_data(r._data)
-	{
+		_data(r._data) {
 		r._data = nullptr;
 	}
 
 	template <typename R>
 	IntrusivePtr(IntrusivePtr<R> r) :
-		_data(static_cast<T*>(r.pointer()))
-	{
+		_data(static_cast<T*>(r.pointer())) {
 		r.removeObject();
 	}
 
 	explicit IntrusivePtr(T* data) :
-		_data(data)
-	{
+		_data(data) {
 		if (_data != nullptr)
 			_data->retain();
 	}
 
-	~IntrusivePtr()
-	{
+	~IntrusivePtr() {
 		if (_data != nullptr)
 			release(_data);
 	}
@@ -138,8 +126,7 @@ public:
 #if (ET_SUPPORT_VARIADIC_TEMPLATES)
 
 	template <typename ...args>
-	static IntrusivePtr create(args&&...a)
-	{
+	static IntrusivePtr create(args&&...a) {
 		return IntrusivePtr<T>(sharedObjectFactory().createObject<T>(std::forward<args>(a)...));
 	}
 
@@ -149,91 +136,74 @@ public:
 #
 #endif
 
-	T* operator *()
-	{
+	T* operator *() {
 		ET_ASSERT(valid()); return _data;
 	}
 
-	const T* operator *() const
-	{
+	const T* operator *() const {
 		ET_ASSERT(valid()); return _data;
 	}
 
-	T* operator -> ()
-	{
+	T* operator -> () {
 		ET_ASSERT(valid()); return _data;
 	}
 
-	const T* operator -> () const
-	{
+	const T* operator -> () const {
 		ET_ASSERT(valid()); return _data;
 	}
 
-	T* pointer()
-	{
+	T* pointer() {
 		return _data;
 	}
 
-	const T* pointer() const
-	{
+	const T* pointer() const {
 		return _data;
 	}
 
-	T& reference()
-	{
+	T& reference() {
 		ET_ASSERT(valid()); return *_data;
 	}
 
-	const T& reference() const
-	{
+	const T& reference() const {
 		ET_ASSERT(valid()); return *_data;
 	}
 
-	bool invalid() const
-	{
+	bool invalid() const {
 		return _data == nullptr;
 	}
 
-	bool valid() const
-	{
+	bool valid() const {
 		return _data != nullptr;
 	}
 
-	bool operator == (const IntrusivePtr& r) const
-	{
+	bool operator == (const IntrusivePtr& r) const {
 		return _data == r._data;
 	}
 
-	bool operator != (const IntrusivePtr& tr) const
-	{
+	bool operator != (const IntrusivePtr& tr) const {
 		return _data != tr._data;
 	}
 
-	bool operator < (const IntrusivePtr& tr) const
-	{
+	bool operator < (const IntrusivePtr& tr) const {
 		return _data < tr._data;
 	}
 
-	uint_fast32_t retainCount() const
-	{
+	uint_fast32_t retainCount() const {
 		return _data ? _data->retainCount() : 0;
 	}
 
-	IntrusivePtr<T>& operator = (const IntrusivePtr<T>& r)
-	{
+	IntrusivePtr<T>& operator = (const IntrusivePtr<T>& r) {
 		reset(r._data);
 		return *this;
 	}
 
 	template <typename R>
-	IntrusivePtr<T>& operator = (IntrusivePtr<R> r)
-	{
+	IntrusivePtr<T>& operator = (IntrusivePtr<R> r) {
 		reset(static_cast<T*>(r.pointer()));
 		return *this;
 	}
 
-	void reset(T* newData)
-	{
+	void reset(T* newData) {
 		if (newData == _data)
 			return;
 
@@ -247,8 +217,21 @@ public:
 			release(oldData);
 	}
 
-	void release(T* object)
-	{
+	void release() {
+		release(_data);
+		_data = nullptr;
+	}
+
+	void removeObject() {
+		_data = nullptr;
+	}
+
+	void swap(IntrusivePtr<T>& t) {
+		std::swap(_data, t._data);
+	}
+
+private:
+	void release(T* object) {
 		ET_ASSERT(object != nullptr);
 		ET_ASSERT(object->retainCount() > 0);
 
@@ -256,18 +239,8 @@ public:
 			sharedObjectFactory().deleteObject<T>(object);
 	}
 
-	void removeObject()
-	{
-		_data = nullptr;
-	}
-
-	void swap(IntrusivePtr<T>& t)
-	{
-		std::swap(_data, t._data);
-	}
-
 private:
-	T* _data = nullptr;
+	T * _data = nullptr;
 };
 
 }

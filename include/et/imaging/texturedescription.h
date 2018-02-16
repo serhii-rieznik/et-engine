@@ -10,8 +10,7 @@
 #include <et/core/containers.h>
 #include <et/rendering/interface/texture.h>
 
-namespace et
-{
+namespace et {
 class TextureDescription : public LoadableObject, public Texture::Description
 {
 public:
@@ -27,15 +26,15 @@ public:
 
 public:
 	TextureDescription() = default;
+	TextureDescription(const Texture::Description& r) : Texture::Description(r) {}
 	TextureDescription(const std::string& fileName) { load(fileName); }
 
-	bool valid() const
-	{
+	bool valid() const {
 		return (size.square() > 0);
 	}
 };
 
 using TextureDescriptionUpdateMethod = void(TextureDescription::Pointer);
-inline void nullTextureDescriptionUpdateMethod(TextureDescription::Pointer) { }
+inline void nullTextureDescriptionUpdateMethod(TextureDescription::Pointer) {}
 
 }

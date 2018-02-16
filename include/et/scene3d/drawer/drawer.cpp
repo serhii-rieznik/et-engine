@@ -54,7 +54,7 @@ static const vec2 sobolSequence[] = {
 };
 static const uint64_t sobolSequenceSize = sizeof(sobolSequence) / sizeof(sobolSequence[0]);
 
-Drawer::Drawer(const RenderInterface::Pointer& renderer) :
+Drawer::Drawer(RenderInterface::Pointer& renderer) :
 	_renderer(renderer) {
 	_debugDrawer = DebugDrawer::Pointer::create(renderer);
 	_main.noise = _renderer->loadTexture(application().resolveFileName("engine_data/textures/bluenoise.sincos.png"), _cache);
@@ -97,7 +97,7 @@ void Drawer::updateVisibleMeshes() {
 	_visibleMeshes.reserve(_allMeshes.size());
 	for (Mesh::Pointer& mesh : _allMeshes)
 	{
-		if (_frameCamera->frustum().containsBoundingBox(mesh->tranformedBoundingBox()))
+		if (_scene->renderCamera()->frustum().containsBoundingBox(mesh->tranformedBoundingBox()))
 		{
 			_visibleMeshes.emplace_back(mesh);
 		}
@@ -115,30 +115,25 @@ void Drawer::draw() {
 
 	validate(_renderer);
 
-	// float t = 10.0f * PI * queryContiniousTimeInSeconds();
 	vec2 jitterScale = vec2(1.0f) / vector2ToFloat(_main.color->size(0));
-	vec2 ji = jitterScale * 
-		// vec2(std::cos(t), std::sin(t));
-		// vec2(randomFloat() * 2.0f - 1.0f, randomFloat() * 2.0f - 1.0f); 
-		sobolSequence[_frameIndex % sobolSequenceSize];
+	vec2 ji = jitterScale * sobolSequence[_frameIndex % sobolSequenceSize];
 
 	_jitter.z = _jitter.x;
 	_jitter.w = _jitter.y;
 	_jitter.x = ji.x;
 	_jitter.y = ji.y;
 
-	_frameCamera = _scene->renderCamera();
-	mat4 jitteredProjection = _baseProjectionMatrix;
-	jitteredProjection[3].x += _jitter.x;
-	jitteredProjection[3].y += _jitter.y;
-	// _frameCamera->setProjectionMatrix(jitteredProjection);
+	mat4 projectionMatrix = _scene->renderCamera()->projectionMatrix();
+	projectionMatrix[2].x = _jitter.x;
+	projectionMatrix[2].y = _jitter.y;
+	_scene->renderCamera()->setProjectionMatrix(projectionMatrix);
 
 	updateVisibleMeshes();
 
 	_main.zPrepass->begin(RenderPassBeginInfo::singlePass());
 	{
 		_main.zPrepass->setSharedVariable(ObjectVariable::CameraJitter, _jitter);
-		_main.zPrepass->loadSharedVariablesFromCamera(_frameCamera);
+		_main.zPrepass->loadSharedVariablesFromCamera(_scene->renderCamera());
 		_main.zPrepass->nextSubpass();
 		for (Mesh::Pointer& mesh : _visibleMeshes)
 		{
@@ -154,7 +149,7 @@ void Drawer::draw() {
 	if (options.enableScreenSpaceShadows)
 	{
 		_main.screenSpaceShadows->setSharedVariable(ObjectVariable::CameraJitter, _jitter);
-		_main.screenSpaceShadows->loadSharedVariablesFromCamera(_frameCamera);
+		_main.screenSpaceShadows->loadSharedVariablesFromCamera(_scene->renderCamera());
 		_main.screenSpaceShadows->loadSharedVariablesFromLight(_lighting.directional);
 		_main.screenSpaceShadows->executeSingleRenderBatch(_main.screenSpaceShadowsBatch);
 		_renderer->submitRenderPass(_main.screenSpaceShadows);
@@ -164,7 +159,7 @@ void Drawer::draw() {
 	{
 		_main.screenSpaceAO->setSharedVariable(ObjectVariable::CameraJitter, _jitter);
 		_main.screenSpaceAO->setSharedTexture(MaterialTexture::Noise, _main.noise, _renderer->nearestSampler());
-		_main.screenSpaceAO->loadSharedVariablesFromCamera(_frameCamera);
+		_main.screenSpaceAO->loadSharedVariablesFromCamera(_scene->renderCamera());
 		_main.screenSpaceAO->loadSharedVariablesFromLight(_lighting.directional);
 		_main.screenSpaceAO->executeSingleRenderBatch(_main.screenSpaceAOBatch);
 		_renderer->submitRenderPass(_main.screenSpaceAO);
@@ -172,7 +167,7 @@ void Drawer::draw() {
 
 	_main.forward->begin(RenderPassBeginInfo::singlePass());
 	{
-		_main.forward->loadSharedVariablesFromCamera(_frameCamera);
+		_main.forward->loadSharedVariablesFromCamera(_scene->renderCamera());
 		_main.forward->loadSharedVariablesFromLight(_lighting.directional);
 		_main.forward->setSharedTexture(MaterialTexture::Shadow, _shadowmapProcessor->directionalShadowmap(), _shadowmapProcessor->directionalShadowmapSampler());
 		_main.forward->setSharedTexture(MaterialTexture::AmbientOcclusion, _main.screenSpaceAOTexture, _renderer->defaultSampler());
@@ -356,10 +351,6 @@ void Drawer::setEnvironmentMap(const std::string& filename) {
 		Texture::Pointer tex = _renderer->loadTexture(filename, _cache);
 		_cubemapProcessor->processEquiretangularTexture(tex.valid() ? tex : _renderer->checkersTexture());
 	}
-}
-
-void Drawer::updateBaseProjectionMatrix(const mat4& m) {
-	_baseProjectionMatrix = m;
 }
 
 void Drawer::updateLight() {

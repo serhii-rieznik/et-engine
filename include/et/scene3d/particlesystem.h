@@ -8,6 +8,7 @@
 #pragma once
 
 #include <et/scene3d/baseelement.h>
+#include <et/rendering/interface/renderer.h>
 #include <et-ext/helpers/particles.h>
 
 namespace et
@@ -22,7 +23,7 @@ public:
 	ET_DECLARE_POINTER(ParticleSystem);
 
 public:
-	ParticleSystem(RenderContext*, uint32_t capacity, const std::string&, BaseElement*);
+	ParticleSystem(RenderInterface::Pointer&, uint32_t capacity, const std::string&, BaseElement*);
 
 	ElementType type() const
 	{
