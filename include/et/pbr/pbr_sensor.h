@@ -8,7 +8,7 @@ namespace et {
 
 namespace pbr {
 
-class Camera
+class Sensor
 {
 public:
 	float ev() const;
@@ -19,7 +19,7 @@ private:
 	float _iso = 100.0f;
 };
 
-inline float Camera::ev() const {
+inline float Sensor::ev() const {
 	return std::log2(_aperture * _aperture / _shutterTime * (_iso / 100.0f));
 }
 

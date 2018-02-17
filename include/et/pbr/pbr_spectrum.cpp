@@ -4,30 +4,32 @@ namespace et {
 
 namespace pbr {
 
+namespace Spectrum {
+
 const size_t CIE_SamplesCount = 471;
 float CIE_Y_Integral = 106.856895f;
 extern const float CIE_Wavelengths[CIE_SamplesCount];
 extern const float CIE_X[CIE_SamplesCount];
 extern const float CIE_Y[CIE_SamplesCount];
 extern const float CIE_Z[CIE_SamplesCount];
-float SpectrumBase::defaultWavelengths[WavelengthSamples] = {};
+float defaultWavelengths[WavelengthSamples] = {};
 
-DefaultSpectrumSamples& spectrumX() { 
-	static DefaultSpectrumSamples sx; 
-	return sx; 
+DefaultSpectrumSamples& spectrumX() {
+	static DefaultSpectrumSamples sx;
+	return sx;
 }
 
 DefaultSpectrumSamples& spectrumY() {
-	static DefaultSpectrumSamples sy; 
-	return sy; 
+	static DefaultSpectrumSamples sy;
+	return sy;
 }
 
-DefaultSpectrumSamples& spectrumZ() { 
-	static DefaultSpectrumSamples sz; 
-	return sz; 
+DefaultSpectrumSamples& spectrumZ() {
+	static DefaultSpectrumSamples sz;
+	return sz;
 }
 
-float SpectrumBase::averageSamples(const float wavelengths[], const float values[], size_t count, float wavelengthBegin, float wavelengthEnd) {
+float averageSamples(const float wavelengths[], const float values[], size_t count, float wavelengthBegin, float wavelengthEnd) {
 	if (count == 0)
 		return 0.0f;
 
@@ -54,7 +56,7 @@ float SpectrumBase::averageSamples(const float wavelengths[], const float values
 
 	auto interpolate = [&wavelengths, &values](float w, size_t i) {
 		float t = (w - wavelengths[i]) / (wavelengths[i + 1] - wavelengths[i]);
-		return lerp(values[i], values[i+1], t);
+		return lerp(values[i], values[i + 1], t);
 	};
 
 	auto average = [&interpolate](float wl0, float wl1, size_t i) {
@@ -64,20 +66,20 @@ float SpectrumBase::averageSamples(const float wavelengths[], const float values
 	for (; (index < count) && (wavelengthEnd >= wavelengths[index]); ++index)
 	{
 		float segmentBegin = std::max(wavelengthBegin, wavelengths[index]);
-		float segmentEnd = std::min(wavelengthEnd, wavelengths[index+1]);
+		float segmentEnd = std::min(wavelengthEnd, wavelengths[index + 1]);
 		result += average(segmentBegin, segmentEnd, index) * (segmentEnd - segmentBegin);
 	}
 
 	return result;
 }
 
-float SpectrumBase::maximumBlackBodyRadiationWavelength(float temperature) {
+float maximumBlackBodyRadiationWavelength(float temperature) {
 	const float b = 2.8977729e-3f;
 	float lMax = b / temperature;
 	return lMax * 1.0e+9f;
 }
 
-float SpectrumBase::blackBodyRadiation(float wavelength, float temperature) {
+float blackBodyRadiation(float wavelength, float temperature) {
 	const float K1 = 1.1910427585e+19f; // 2 * h * c^2 / 10^-35
 	const float K2 = 1.4387751602e+5f; // h * c / k * 10^-7
 	wavelength /= 100.0f;
@@ -85,14 +87,18 @@ float SpectrumBase::blackBodyRadiation(float wavelength, float temperature) {
 	return K1 / (wl5 * (std::exp(K2 / (wavelength * temperature)) - 1.0f));
 }
 
-void SpectrumBase::blackBodyRadiation(const float wavelengths[], float values[], size_t count, float temperature) {
+void blackBodyRadiation(const float wavelengths[], float values[], size_t count, float temperature) {
 
 	for (size_t i = 0; i < count; ++i)
 		values[i] = blackBodyRadiation(wavelengths[i], temperature);
 }
 
+}
+
 void initSpectrumInternalValues() {
-	
+
+	using namespace Spectrum;
+
 	static volatile bool spectrumInitialized = false;
 	if (spectrumInitialized) return;
 	spectrumInitialized = true;
@@ -102,13 +108,13 @@ void initSpectrumInternalValues() {
 	{
 		float t0 = static_cast<float>(i) / static_cast<float>(DefaultSpectrumSamples::SamplesCount);
 		float t1 = static_cast<float>(i + 1) / static_cast<float>(DefaultSpectrumSamples::SamplesCount);
-		float l0 = lerp(static_cast<float>(SpectrumBase::WavelengthStart), static_cast<float>(SpectrumBase::WavelengthEnd), t0);
-		float l1 = lerp(static_cast<float>(SpectrumBase::WavelengthStart), static_cast<float>(SpectrumBase::WavelengthEnd), t1);
-		spectrumX().samples[i] = SpectrumBase::averageSamples(CIE_Wavelengths, CIE_X, CIE_SamplesCount, l0, l1);
-		spectrumY().samples[i] = SpectrumBase::averageSamples(CIE_Wavelengths, CIE_Y, CIE_SamplesCount, l0, l1);
-		spectrumZ().samples[i] = SpectrumBase::averageSamples(CIE_Wavelengths, CIE_Z, CIE_SamplesCount, l0, l1);
+		float l0 = lerp(static_cast<float>(WavelengthStart), static_cast<float>(WavelengthEnd), t0);
+		float l1 = lerp(static_cast<float>(WavelengthStart), static_cast<float>(WavelengthEnd), t1);
+		spectrumX().samples[i] = averageSamples(CIE_Wavelengths, CIE_X, CIE_SamplesCount, l0, l1);
+		spectrumY().samples[i] = averageSamples(CIE_Wavelengths, CIE_Y, CIE_SamplesCount, l0, l1);
+		spectrumZ().samples[i] = averageSamples(CIE_Wavelengths, CIE_Z, CIE_SamplesCount, l0, l1);
 		CIE_Y_Integral += spectrumY().samples[i];
-		SpectrumBase::defaultWavelengths[i] = l0;
+		defaultWavelengths[i] = l0;
 	}
 }
 
@@ -118,11 +124,11 @@ void DefaultSpectrumSamples::toXYZ(float xyz[3]) {
 	xyz[2] = 0.0f;
 	for (size_t i = 0; i < SamplesCount; ++i)
 	{
-		xyz[0] += spectrumX().samples[i] * samples[i];
-		xyz[1] += spectrumY().samples[i] * samples[i];
-		xyz[2] += spectrumZ().samples[i] * samples[i];
+		xyz[0] += Spectrum::spectrumX().samples[i] * samples[i];
+		xyz[1] += Spectrum::spectrumY().samples[i] * samples[i];
+		xyz[2] += Spectrum::spectrumZ().samples[i] * samples[i];
 	}
-	float scale = float(WavelengthEnd - WavelengthStart) / (CIE_Y_Integral * float(WavelengthSamples));
+	float scale = float(Spectrum::WavelengthEnd - Spectrum::WavelengthStart) / (Spectrum::CIE_Y_Integral * float(Spectrum::WavelengthSamples));
 	xyz[0] *= scale;
 	xyz[1] *= scale;
 	xyz[2] *= scale;
@@ -134,7 +140,7 @@ void DefaultSpectrumSamples::toRGB(float rgb[3]) {
 	XYZToRGB(xyz, rgb);;
 }
 
-const float CIE_Wavelengths[CIE_SamplesCount] = {
+const float Spectrum::CIE_Wavelengths[CIE_SamplesCount] = {
 	360.0f, 361.0f, 362.0f, 363.0f, 364.0f, 365.0f, 366.0f, 367.0f, 368.0f, 369.0f, 370.0f, 371.0f, 372.0f, 373.0f, 374.0f,
 	375.0f, 376.0f, 377.0f, 378.0f, 379.0f, 380.0f, 381.0f, 382.0f, 383.0f, 384.0f, 385.0f, 386.0f, 387.0f, 388.0f, 389.0f,
 	390.0f, 391.0f, 392.0f, 393.0f, 394.0f, 395.0f, 396.0f, 397.0f, 398.0f, 399.0f, 400.0f, 401.0f, 402.0f, 403.0f, 404.0f,
@@ -169,7 +175,7 @@ const float CIE_Wavelengths[CIE_SamplesCount] = {
 	825.0f, 826.0f, 827.0f, 828.0f, 829.0f, 830.0f
 };
 
-const float CIE_X[CIE_SamplesCount] = {
+const float Spectrum::CIE_X[CIE_SamplesCount] = {
 	0.0001299000f, 0.0001458470f, 0.0001638021f, 0.0001840037f, 0.0002066902f, 0.0002321000f, 0.0002607280f, 0.0002930750f,
 	0.0003293880f, 0.0003699140f, 0.0004149000f, 0.0004641587f, 0.0005189860f, 0.0005818540f, 0.0006552347f, 0.0007416000f,
 	0.0008450296f, 0.0009645268f, 0.001094949f, 0.001231154f, 0.001368000f, 0.001502050f, 0.001642328f, 0.001802382f,
@@ -280,7 +286,7 @@ const float CIE_X[CIE_SamplesCount] = {
 	0.000001905497f, 0.000001776509f, 0.000001656215f, 0.000001544022f,
 	0.000001439440f, 0.000001341977f, 0.000001251141f };
 
-const float CIE_Y[CIE_SamplesCount] = {
+const float Spectrum::CIE_Y[CIE_SamplesCount] = {
 	0.000003917000f, 0.000004393581f, 0.000004929604f, 0.000005532136f,
 	0.000006208245f, 0.000006965000f, 0.000007813219f, 0.000008767336f,
 	0.000009839844f, 0.00001104323f, 0.00001239000f, 0.00001388641f,
@@ -401,7 +407,7 @@ const float CIE_Y[CIE_SamplesCount] = {
 	0.0000005198080f, 0.0000004846123f, 0.0000004518100f
 };
 
-const float CIE_Z[CIE_SamplesCount] = {
+const float Spectrum::CIE_Z[CIE_SamplesCount] = {
 	0.0006061000f, 0.0006808792f, 0.0007651456f, 0.0008600124f, 0.0009665928f, 0.001086000f, 0.001220586f, 0.001372729f, 
 	0.001543579f, 0.001734286f, 0.001946000f, 0.002177777f, 0.002435809f, 0.002731953f, 0.003078064f, 0.003486000f, 0.003975227f,
 	0.004540880f, 0.005158320f, 0.005802907f, 0.006450001f, 0.007083216f, 0.007745488f, 0.008501152f, 0.009414544f, 0.01054999f,

@@ -10,24 +10,23 @@ namespace pbr {
 
 extern void initSpectrumInternalValues();
 
-struct SpectrumBase
+namespace Spectrum {
+enum : size_t
 {
-	enum : size_t
-	{
-		WavelengthStart = 400,
-		WavelengthEnd = 700,
-		WavelengthSamples = 30,
-	};
+	WavelengthStart = 400,
+	WavelengthEnd = 700,
+	WavelengthSamples = 30,
+};
 
-	static float defaultWavelengths[WavelengthSamples];
-	static float averageSamples(const float wavelengths[], const float values[], size_t count, float wavelengthBegin, float wavelengthEnd);
-	static float blackBodyRadiation(float wavelength, float temperature);
-	static float maximumBlackBodyRadiationWavelength(float temperature);
-	static void blackBodyRadiation(const float wavelengths[], float values[], size_t count, float temperature);
+extern float defaultWavelengths[WavelengthSamples];
+float averageSamples(const float wavelengths[], const float values[], size_t count, float wavelengthBegin, float wavelengthEnd);
+float blackBodyRadiation(float wavelength, float temperature);
+float maximumBlackBodyRadiationWavelength(float temperature);
+void blackBodyRadiation(const float wavelengths[], float values[], size_t count, float temperature);
 };
 
 template <size_t numSamples>
-class SpectrumSamples : public SpectrumBase
+class SpectrumSamples
 {
 public:
 	enum : size_t
@@ -149,10 +148,10 @@ private:
 	friend void initSpectrumInternalValues();
 };
 
-class DefaultSpectrumSamples : public SpectrumSamples<SpectrumBase::WavelengthSamples>
+class DefaultSpectrumSamples : public SpectrumSamples<Spectrum::WavelengthSamples>
 {
 public:
-	using BaseClass = SpectrumSamples<SpectrumBase::WavelengthSamples>;
+	using BaseClass = SpectrumSamples<Spectrum::WavelengthSamples>;
 
 public:
 	DefaultSpectrumSamples() = default;

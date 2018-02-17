@@ -678,8 +678,8 @@ void RaytracePrivate::backwardPathTraceThreadFunction(uint32_t threadId)
 				pbr::DefaultSpectrumSamples smp;
 				float* samples = smp.mutableSamples();
 
-				pbr::SpectrumBase::blackBodyRadiation(pbr::SpectrumBase::defaultWavelengths, samples,
-					pbr::SpectrumBase::WavelengthSamples, temperature);
+				pbr::Spectrum::blackBodyRadiation(pbr::Spectrum::defaultWavelengths, samples, 
+					pbr::Spectrum::WavelengthSamples, temperature);
 
 				smp.toRGB(localData[k].xyz().data());
 				localData[k] /= std::max(localData[k].x, std::max(localData[k].y, localData[k].z));
