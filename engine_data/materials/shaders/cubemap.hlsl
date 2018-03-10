@@ -69,7 +69,7 @@ VSOutput vertexMain(uint vertexIndex : SV_VertexID)
 
 #endif
  
-const float cScale = 0.01;
+static const float cScale = 0.01;
 
 float4 fragmentMain(VSOutput fsIn) : SV_Target0
 {

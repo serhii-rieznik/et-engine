@@ -24,7 +24,7 @@ Application::Application() {
 	platformInit();
 
 	log::addOutput(log::ConsoleOutput::Pointer::create());
-	_lastQueuedTimeMSec = queryContiniousTimeInMilliSeconds();
+	_lastQueuedTimeMSec = queryContinuousTimeInMilliSeconds();
 
 	delegate()->setApplicationParameters(_parameters);
 	_env.updateDocumentsFolder(_identifier);
@@ -70,7 +70,7 @@ void Application::exitRunLoop() {
 }
 
 bool Application::shouldPerformRendering() {
-	uint64_t currentTime = queryContiniousTimeInMilliSeconds();
+	uint64_t currentTime = queryContinuousTimeInMilliSeconds();
 	uint64_t elapsedTime = currentTime - _lastQueuedTimeMSec;
 
 	if ((_fpsLimitMSec > 0) && (elapsedTime < _fpsLimitMSec))
@@ -82,7 +82,7 @@ bool Application::shouldPerformRendering() {
 
 		return false;
 	}
-	_lastQueuedTimeMSec = queryContiniousTimeInMilliSeconds();
+	_lastQueuedTimeMSec = queryContinuousTimeInMilliSeconds();
 
 	return !_suspended;
 }
@@ -161,7 +161,7 @@ void Application::resume() {
 
 	platformResume();
 
-	_lastQueuedTimeMSec = queryContiniousTimeInMilliSeconds();
+	_lastQueuedTimeMSec = queryContinuousTimeInMilliSeconds();
 	_runLoop.update(_lastQueuedTimeMSec);
 	_runLoop.resume();
 }

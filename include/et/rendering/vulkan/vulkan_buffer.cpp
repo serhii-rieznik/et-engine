@@ -106,6 +106,7 @@ void VulkanBuffer::updateData(uint64_t offset, const BinaryDataStorage& data)
 			stagingBuffer.modifyRange(0, stagingBufferSize);
 			stagingBuffer.unmap();
 
+			InstusivePointerScope<VulkanBuffer> scope(this);
 			stagingBuffer.transferData(VulkanBuffer::Pointer(this), 0, copyOffset, stagingBufferSize);
 			bytesRemaining -= stagingBufferSize;
 			copyOffset += stagingBufferSize;

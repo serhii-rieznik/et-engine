@@ -74,8 +74,8 @@ struct VSOutput
 };
 
 #if (EnableClearCoat)
-const float ClearCoatEta = 1.76;
-const float ClearCoatRoughness = 0.05;
+static const float ClearCoatEta = 1.76;
+static const float ClearCoatRoughness = 0.05;
 #endif
 
 VSOutput vertexMain(VSInput vsIn)

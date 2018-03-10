@@ -40,7 +40,7 @@ void initTime()
 	performanceFrequency = f.QuadPart;
 }
 
-uint64_t queryContiniousTimeInMilliSeconds()
+uint64_t queryContinuousTimeInMilliSeconds()
 {
 	if (performanceFrequency == 0)
 		initTime();
@@ -51,9 +51,9 @@ uint64_t queryContiniousTimeInMilliSeconds()
 	return 1000 * (c.QuadPart - initialCounter) / performanceFrequency;
 }
 
-float queryContiniousTimeInSeconds()
+float queryContinuousTimeInSeconds()
 {
-	return static_cast<float>(queryContiniousTimeInMilliSeconds()) / 1000.0f;
+	return static_cast<float>(queryContinuousTimeInMilliSeconds()) / 1000.0f;
 }
 
 uint64_t queryCurrentTimeInMicroSeconds()

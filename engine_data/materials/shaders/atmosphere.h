@@ -1,5 +1,4 @@
-#define inScatteringSamples 32
-#define outScatteringSamples 32
+#define scatteringSamples 32
 #define atmosphereHeight 60e+3
 #define height 2.0
 #define Re 6371e+3
@@ -35,19 +34,24 @@ float phaseFunctionMie(in float cosTheta, in float g)
         (1.0 + cosTheta * cosTheta) / pow(abs(1.0 + g * g - 2.0 * g * cosTheta), 3.0 / 2.0) / (4.0 * PI);
 }
 
-float2 density(in float3 pos)
+float2 densityAtHeight(in float h)
 {
-    float h = max(0.0, length(pos) - Re);
     return exp(-h / H0);
 }
 
-float2 opticalDensity(in float3 origin, in float3 dir)
+float2 density(in float3 pos)
 {
-    float3 dp = dir / outScatteringSamples;
-    origin += 0.5 * dp;
+    float h = max(0.0, length(pos) - Re);
+    return densityAtHeight(h);
+}
+
+float2 opticalDensity(in float3 from, in float3 to)
+{
+    float3 dp = (to - from) / scatteringSamples;
+    float3 origin = from;
     
     float2 result = 0.0;
-    for (uint i = 0; i < outScatteringSamples; ++i)
+    for (uint i = 0; i < scatteringSamples; ++i)
     {
         result += density(origin);
         origin += dp;
@@ -57,18 +61,18 @@ float2 opticalDensity(in float3 origin, in float3 dir)
 
 float3 inScattering(in float3 origin, in float3 target, in float3 light, in float2 phase)
 {
-    const float3 step = (target - origin) / inScatteringSamples;
+    float3 step = (target - origin) / scatteringSamples;
 
     float3 resultR = 0.0;
     float3 resultM = 0.0;
     float3 pos = origin + 0.5 * step;
 
-    for (uint i = 0; i < inScatteringSamples; ++i)
+    for (uint i = 0; i < scatteringSamples; ++i)
     {
         float2 d = density(pos);
 
-        float3 toLight = light * atmosphereIntersection(pos, light);
-        float2 opticalDepth = opticalDensity(pos, toLight) + opticalDensity(pos, origin - pos);
+        float3 outerIntersection = pos + light * atmosphereIntersection(pos, light);
+        float2 opticalDepth = opticalDensity(outerIntersection, pos) + opticalDensity(pos, origin);
         float3 scattering = exp(-betaR * opticalDepth.x - betaM * opticalDepth.y);
 
         resultR += d.x * scattering;
@@ -84,27 +88,6 @@ float3 outScattering(in float3 origin, in float3 target)
 {
     float2 scatter = opticalDensity(origin, target - origin);
     return exp(-(scatter.x * betaR + scatter.y * betaM));   
-}
-
-float2 opticalDensityAtConstantHeight(in float3 origin, in float3 dir)
-{
-    return density(origin + 0.5 * dir) * length(dir);
-}
-
-float3 inScatteringAtConstantHeight(in float3 origin, in float3 target, in float3 light, in float2 phase)
-{
-    float2 constantDensity = density(origin);
-    float2 opticalDepthToLight = opticalDensity(origin, light * atmosphereIntersection(origin, light));
-    float2 opticalDepthToOrigin = opticalDensity(target, origin - target);
-    float2 opticalDepth = opticalDepthToLight + opticalDepthToOrigin;
-    float3 result = exp(-betaR * opticalDepth.x - betaM * opticalDepth.y);
-    return result * (betaR * constantDensity.x * phase.x + constantDensity.y * betaM * phase.y) * length(target - origin);
-}
-
-float3 outScatteringAtConstantHeight(in float3 origin, in float3 target)
-{
-    float2 scatter = density(target) * length(target - origin);
-    return exp(-betaR * scatter.x - betaM * scatter.y);
 }
 
 float3 sampleAtmosphere(float3 dir, in float3 light, in float3 lightColor)

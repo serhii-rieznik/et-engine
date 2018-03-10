@@ -11,8 +11,8 @@
 
 namespace et
 {
-float queryContiniousTimeInSeconds();
-uint64_t queryContiniousTimeInMilliSeconds();
+float queryContinuousTimeInSeconds();
+uint64_t queryContinuousTimeInMilliSeconds();
 uint64_t queryCurrentTimeInMicroSeconds();
 
 /*

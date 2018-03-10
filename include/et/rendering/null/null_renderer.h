@@ -9,8 +9,7 @@
 
 #include <et/rendering/interface/renderer.h>
 
-namespace et
-{
+namespace et {
 class RenderContext;
 class NullRenderer : public RenderInterface
 {
@@ -18,7 +17,7 @@ public:
 	ET_DECLARE_POINTER(NullRenderer);
 
 public:
-	NullRenderer() : RenderInterface(nullptr) {
+	NullRenderer() {
 		initInternalStructures();
 	}
 
@@ -26,25 +25,24 @@ public:
 		shutdownInternalStructures();
 	}
 
-	RenderingAPI api() const override
-		{ return RenderingAPI::Null; }
+	RenderingAPI api() const override {
+		return RenderingAPI::Null;
+	}
 
-	void init(const RenderContextParameters& params) override { }
+	void init(const RenderContextParameters& params) override {}
 
-	void shutdown() override { }
-	
-	void destroy() override { }
+	void shutdown() override {}
 
-	void begin() override { }
-	void present() override { }
+	void destroy() override {}
 
-	void resize(const vec2i&) override { }
+	RendererFrame allocateFrame() override { return RendererFrame(); }
+	void submitFrame(const RendererFrame&) override {}
+	void present() override {}
+
+	void resize(const vec2i&) override {}
 
 	RenderPass::Pointer allocateRenderPass(const RenderPass::ConstructionInfo&) override { return RenderPass::Pointer(); }
-	void submitRenderPass(RenderPass::Pointer) override { }
-
-	uint32_t frameIndex() const override { return 0; }
-	uint32_t frameNumber() const override { return 0; }
+	void submitRenderPass(const RenderPass::Pointer&) override {}
 
 	/*
 	 * Buffer
@@ -56,7 +54,7 @@ public:
 	 */
 	Texture::Pointer createTexture(const TextureDescription::Pointer&) override { return Texture::Pointer(); }
 	TextureSet::Pointer createTextureSet(const TextureSet::Description&) override { return TextureSet::Pointer(); }
-	
+
 	/*
 	 * Programs
 	 */
@@ -66,7 +64,9 @@ public:
 	 * Pipeline state
 	 */
 	PipelineState::Pointer acquireGraphicsPipeline(const RenderPass::Pointer&, const Material::Pointer&,
-		const VertexStream::Pointer&) override { return PipelineState::Pointer(); }
+		const VertexStream::Pointer&) override {
+		return PipelineState::Pointer();
+	}
 
 	/*
 	 * Sampler

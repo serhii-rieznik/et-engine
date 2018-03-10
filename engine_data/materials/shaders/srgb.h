@@ -1,11 +1,10 @@
-const float aperture = 16.0;
-const float iso = 100.0;
-const float shutterSpeed = 1.0 / 100.0;
-const float expectedEv = log2(aperture * aperture / shutterSpeed * (100.0 / iso));
-
-const float exposureRange = 5.0;
-const float2 dynamicRange = float2(exposureRange, exposureRange);
-const float2 adaptationRange = float2(5.0, 5.0);
+static const float aperture = 16.0;
+static const float iso = 100.0;
+static const float shutterSpeed = 1.0 / 100.0;
+static const float expectedEv = log2(aperture * aperture / shutterSpeed * (100.0 / iso));
+static const float exposureRange = 5.0;
+static const float2 dynamicRange = float2(exposureRange, exposureRange);
+static const float2 adaptationRange = float2(5.0, 5.0);
 
 float3 srgbToLinear(in float3 c)
 {

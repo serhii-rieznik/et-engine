@@ -82,6 +82,9 @@ private:
 };
 
 template <typename T>
+class IntrusivePtrScope;
+
+template <typename T>
 class IntrusivePtr
 {
 	static_assert(std::is_base_of<Shared, T>::value,
@@ -123,18 +126,10 @@ public:
 			release(_data);
 	}
 
-#if (ET_SUPPORT_VARIADIC_TEMPLATES)
-
 	template <typename ...args>
 	static IntrusivePtr create(args&&...a) {
 		return IntrusivePtr<T>(sharedObjectFactory().createObject<T>(std::forward<args>(a)...));
 	}
-
-#else
-#
-#	error Please compile with variadic templates enabled
-#
-#endif
 
 	T* operator *() {
 		ET_ASSERT(valid()); return _data;

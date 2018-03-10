@@ -6,14 +6,11 @@
  */
 
 #include <external/glslang/glslang/Public/ShaderLang.h>
+#include <external/glslang/glslang/MachineIndependent/localintermediate.h>
+#include <external/glslang/glslang/MachineIndependent/reflection.h>
 #include <external/glslang/SPIRV/Logger.h>
 #include <external/glslang/SPIRV/GlslangToSpv.h>
 #include <external/glslang/OGLCompilersDLL/InitializeDll.h>
-#include <external/glslang/glslang/MachineIndependent/localintermediate.h>
-#include <external/glslang/glslang/MachineIndependent/reflection.h>
-#include <external/spirvcross/spirv_cross.hpp>
-#include <external/spirvcross/spirv_glsl.hpp>
-#include <external/spirvcross/spirv_msl.hpp>
 #include "vulkan_glslang.h"
 #include <fstream>
 
@@ -25,6 +22,13 @@
 #	include <d3dcompiler.h>
 #	include <wrl/client.h>
 #	pragma comment(lib, "d3dcompiler.lib")
+#endif
+
+#if (ET_CROSS_COMPILE_SHADERS_TEST)
+#	include <external/spirvcross/spirv_cross.hpp>
+#	include <external/spirvcross/spirv_glsl.hpp>
+#	include <external/spirvcross/spirv_msl.hpp>
+#	pragma comment(lib, "todo.lib")
 #endif
 
 namespace glslang
@@ -376,12 +380,12 @@ void buildProgramReflection(const glslang::TProgram& program, Program::Reflectio
 				}
 				else
 				{
-					log::warning("Unsupported sampler type in shader: %s", sampler.getString().c_str());
+					log::warning("Unsupported sampler (%s) type in shader: %s", uniformName.c_str(), sampler.getString().c_str());
 				}
 			}
 			else
 			{
-				log::warning("Unsupported uniform type in shader: %s", type->getBasicTypeString().c_str());
+				log::warning("Unsupported uniform (%s) type in shader: %s", uniformName.c_str(), type->getBasicTypeString().c_str());
 			}
 		}
 		else
@@ -429,12 +433,14 @@ void dumpSource(const std::string& s)
 	}
 }
 
+#if (ET_CROSS_COMPILE_SHADERS_TEST)
 void crossCompile(const std::vector<uint32_t>& spirv)
 {
 	spirv_cross::CompilerGLSL compiler(spirv);
 	compiler.build_combined_image_samplers();
 	dumpSource(compiler.compile());
 }
+#endif
 
 }
 

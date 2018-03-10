@@ -19,10 +19,21 @@ RenderThread::RenderThread()
 	: Thread("et-render-thread") {
 }
 
+void RenderThread::init(const RenderInterface::Pointer& renderer) {
+	_renderer = renderer;
+}
+
 void RenderThread::main() {
 	while (running())
 	{
-		threading::sleepMSec(1);
+		if (_renderer.valid() && _renderer->parameters().multithreadingEnabled)
+		{
+			_renderer->present();
+		}
+		else
+		{
+			threading::sleepMSec(0);
+		}
 	}
 	log::info("Out");
 }
@@ -32,7 +43,7 @@ void RenderThread::main() {
  */
 
 void BackgroundThread::BackgroundRunLoop::addTask(Task* t, float delay) {
-	updateTime(queryContiniousTimeInMilliSeconds());
+	updateTime(queryContinuousTimeInMilliSeconds());
 	RunLoop::addTask(t, delay);
 
 	if (owner->suspended())
@@ -51,7 +62,7 @@ void BackgroundThread::main() {
 	{
 		if (_runLoop.hasTasks() || _runLoop.mainTimerPool()->hasObjects())
 		{
-			_runLoop.update(queryContiniousTimeInMilliSeconds());
+			_runLoop.update(queryContinuousTimeInMilliSeconds());
 		}
 		else
 		{

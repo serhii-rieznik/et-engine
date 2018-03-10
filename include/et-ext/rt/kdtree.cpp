@@ -75,9 +75,9 @@ void KDTree::build(const TriangleList& triangles, size_t maxDepth)
 	_nodes.reserve(maxDepth * maxDepth);
 	_nodes.emplace_back(buildRootNode());
 
-	uint64_t t0 = queryContiniousTimeInMilliSeconds();
+	uint64_t t0 = queryContinuousTimeInMilliSeconds();
 	splitNodeUsingSortedArray(0, 0);
-	uint64_t t1 = queryContiniousTimeInMilliSeconds();
+	uint64_t t1 = queryContinuousTimeInMilliSeconds();
 	log::info("kD-tree building time: %llu", t1 - t0);
 }
 

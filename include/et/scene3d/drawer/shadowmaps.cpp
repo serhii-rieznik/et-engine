@@ -103,7 +103,8 @@ void ShadowmapProcessor::process(RenderInterface::Pointer& renderer, DrawerOptio
 	activePass->loadSharedVariablesFromCamera(_light);
 	activePass->loadSharedVariablesFromLight(_light);
 	activePass->setSharedVariable(ObjectVariable::CameraJitter, vec4(0.0f));
-	activePass->begin(RenderPassBeginInfo::singlePass());
+	
+	renderer->beginRenderPass(activePass, RenderPassBeginInfo::singlePass());
 	activePass->pushImageBarrier(_directionalShadowmap, ResourceBarrier(TextureState::DepthRenderTarget));
 	activePass->nextSubpass();
 	for (Mesh::Pointer& mesh : _renderables.meshes)
@@ -120,23 +121,20 @@ void ShadowmapProcessor::process(RenderInterface::Pointer& renderer, DrawerOptio
 	}
 	activePass->endSubpass();
 	activePass->pushImageBarrier(_directionalShadowmap, ResourceBarrier(TextureState::ShaderResource));
-	activePass->end();
 	renderer->submitRenderPass(activePass);
 
 	if (_momentsBasedShadowmap)
 	{
-		_renderables.blurPass0->begin(RenderPassBeginInfo::singlePass());
+		renderer->beginRenderPass(_renderables.blurPass0, RenderPassBeginInfo::singlePass());
 		_renderables.blurPass0->nextSubpass();
 		_renderables.blurPass0->pushRenderBatch(_renderables.blurBatch0);
 		_renderables.blurPass0->endSubpass();
-		_renderables.blurPass0->end();
 		renderer->submitRenderPass(_renderables.blurPass0);
 
-		_renderables.blurPass1->begin(RenderPassBeginInfo::singlePass());
+		renderer->beginRenderPass(_renderables.blurPass1, RenderPassBeginInfo::singlePass());
 		_renderables.blurPass1->nextSubpass();
 		_renderables.blurPass1->pushRenderBatch(_renderables.blurBatch1);
 		_renderables.blurPass1->endSubpass();
-		_renderables.blurPass1->end();
 		renderer->submitRenderPass(_renderables.blurPass1);
 	}
 
@@ -148,16 +146,13 @@ void ShadowmapProcessor::process(RenderInterface::Pointer& renderer, DrawerOptio
 		vec2 depthPt = vec2(0.0f, vp.y - depthSz.y);
 		vec2 colorPt = vec2(depthSz.x, depthPt.y);
 
-		_renderables.debugPass->begin(RenderPassBeginInfo::singlePass());
+		renderer->beginRenderPass(_renderables.debugPass, RenderPassBeginInfo::singlePass());
 		_renderables.debugPass->nextSubpass();
 		_renderables.debugPass->setSharedVariable(ObjectVariable::WorldTransform, fullscreenBatchTransform(vp, depthPt, depthSz));
 		_renderables.debugPass->pushRenderBatch(_renderables.debugDepthBatch);
-		
 		_renderables.debugPass->setSharedVariable(ObjectVariable::WorldTransform, fullscreenBatchTransform(vp, colorPt, colorSz));
 		_renderables.debugPass->pushRenderBatch(_renderables.debugColorBatch);
 		_renderables.debugPass->endSubpass();
-		_renderables.debugPass->end();
-		
 		renderer->submitRenderPass(_renderables.debugPass);
 	}
 }

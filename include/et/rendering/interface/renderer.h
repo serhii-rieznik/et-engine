@@ -50,14 +50,16 @@ public:
 	virtual void resize(const vec2i&) = 0;
 	virtual vec2i contextSize() const = 0;
 
-	virtual void begin() = 0;
+	virtual RendererFrame allocateFrame() = 0;
+	virtual void submitFrame(const RendererFrame&) = 0;
+
 	virtual void present() = 0;
 
-	virtual uint32_t frameIndex() const = 0;
-	virtual uint32_t frameNumber() const = 0;
-
 	virtual RenderPass::Pointer allocateRenderPass(const RenderPass::ConstructionInfo&) = 0;
+	virtual void beginRenderPass(const RenderPass::Pointer&, const RenderPassBeginInfo&) = 0;
 	virtual void submitRenderPass(const RenderPass::Pointer&) = 0;
+
+	void submitPassWithRenderBatch(RenderPass::Pointer&, const RenderBatch::Pointer&);
 
 	/*
 	 * Buffers
@@ -131,12 +133,17 @@ public:
 		return _options;
 	}
 
+	const RenderContextParameters& parameters() const {
+		return _parameters;
+	}
+
 protected:
 	void initInternalStructures();
 	void shutdownInternalStructures();
 
 protected:
 	FrameStatistics _statistics;
+	RenderContextParameters _parameters;
 
 private:
 	MaterialLibrary _sharedMaterialLibrary;
@@ -382,6 +389,12 @@ inline Texture::Pointer RenderInterface::generateHammersleySet(uint32_t size) {
 		*data++ = vec2(t, inv(i));
 	}
 	return createTexture(desc);
+}
+
+inline void RenderInterface::submitPassWithRenderBatch(RenderPass::Pointer& pass, const RenderBatch::Pointer& inBatch) {
+	beginRenderPass(pass, RenderPassBeginInfo::singlePass());
+	pass->addSingleRenderBatchSubpass(inBatch);
+	submitRenderPass(pass);
 }
 
 }

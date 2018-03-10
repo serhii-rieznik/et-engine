@@ -18,8 +18,7 @@
 #	error Not implemented for this platform
 #endif
 
-namespace et
-{
+namespace et {
 
 struct VulkanState;
 struct RenderContextParameters;
@@ -74,25 +73,10 @@ private:
 };
 
 
-struct VulkanSwapchain
+class VulkanSwapchain
 {
-	void init(VulkanState& vulkan, const RenderContextParameters& params, HWND window);
-	void createSizeDependentResources(VulkanState& vulkan, const vec2i&);
-
-	void acquireNextImage(VulkanState& vulkan);
-	void present(VulkanState& vulkan);
-
-	bool createDepthImage(VulkanState& vulkan, VkImage& image, VulkanMemoryAllocator::Allocation& allocation, VkCommandBuffer cmdBuffer);
-	VkImageView createImageView(VulkanState&, VkImage, VkImageAspectFlags, VkFormat);
-
-	VkSurfaceKHR surface = nullptr;
-	VkSwapchainKHR swapchain = nullptr;
-
-	VkExtent2D extent{};
-	VkSurfaceFormatKHR surfaceFormat{};
-	VkFormat depthFormat = VK_FORMAT_D32_SFLOAT;
-
-	struct Frame
+public:
+	struct SwapchainFrame
 	{
 		VkImage color = nullptr;
 		VkImageView colorView = nullptr;
@@ -105,7 +89,25 @@ struct VulkanSwapchain
 		VkSemaphore submitCompleted = nullptr;
 		VkQueryPool timestampsQueryPool = nullptr;
 		uint32_t timestampIndex = 0;
+		uint32_t swapchainImageIndex = static_cast<uint32_t>(-1);
 	};
+
+public:
+	void init(VulkanState& vulkan, const RenderContextParameters& params, HWND window);
+	void createSizeDependentResources(VulkanState& vulkan, const vec2i&);
+
+	void acquireFrameImage(SwapchainFrame&, VulkanState& vulkan);
+	void present(SwapchainFrame&, VulkanState& vulkan);
+
+	bool createDepthImage(VulkanState& vulkan, VkImage& image, VulkanMemoryAllocator::Allocation& allocation, VkCommandBuffer cmdBuffer);
+	VkImageView createImageView(VulkanState&, VkImage, VkImageAspectFlags, VkFormat);
+
+	VkSurfaceKHR surface = nullptr;
+	VkSwapchainKHR swapchain = nullptr;
+
+	VkExtent2D extent{};
+	VkSurfaceFormatKHR surfaceFormat{};
+	VkFormat depthFormat = VK_FORMAT_D32_SFLOAT;
 
 	struct DepthBuffer
 	{
@@ -114,19 +116,16 @@ struct VulkanSwapchain
 		VulkanMemoryAllocator::Allocation memory;
 	} depthBuffer;
 
-	Vector<Frame> frames;
-	uint32_t frameNumber = 0;
+	Vector<SwapchainFrame> frames;
 
-	uint32_t swapchainImageIndex = static_cast<uint32_t>(-1);
-
-	const Frame& currentFrame() const
-	{
-		return frames.at(frameNumber % RendererFrameCount);
+	const SwapchainFrame& frame(uint64_t index) const {
+		ET_ASSERT(index < RendererFrameCount);
+		return frames[index];
 	}
 
-	Frame& mutableCurrentFrame()
-	{
-		return frames.at(frameNumber % RendererFrameCount);
+	SwapchainFrame& mutableFrame(uint64_t index) {
+		ET_ASSERT(index < RendererFrameCount);
+		return frames[index];
 	}
 };
 
@@ -152,7 +151,7 @@ struct VulkanState
 	using ServiceCommands = std::function<void(VkCommandBuffer)>;
 	void executeServiceCommands(VulkanQueueClass, ServiceCommands);
 
-	uint32_t writeTimestamp(VkCommandBuffer cmd, VkPipelineStageFlagBits stage);
+	uint32_t writeTimestamp(VulkanSwapchain::SwapchainFrame& frame, VkCommandBuffer cmd, VkPipelineStageFlagBits stage);
 };
 
 struct VulkanShaderModules
@@ -162,17 +161,15 @@ struct VulkanShaderModules
 
 struct VulkanNativeRenderPass
 {
-	VkRenderPass renderPass = nullptr;
-	VkDescriptorSetLayout dynamicDescriptorSetLayout = nullptr;
-	VkDescriptorSet dynamicDescriptorSet = nullptr;
-
-	struct RenderPassContent
+	struct Content
 	{
 		VkSemaphore semaphore = nullptr;
 		VkCommandBuffer commandBuffer = nullptr;
 	};
 
-	std::array<RenderPassContent, RendererFrameCount> content;
+	VkRenderPass renderPass = nullptr;
+	VkDescriptorSetLayout dynamicDescriptorSetLayout = nullptr;
+	VkDescriptorSet dynamicDescriptorSet = nullptr;
 };
 
 enum DescriptorSetClass : uint32_t
@@ -200,7 +197,8 @@ struct VulkanNativeTexture
 {
 	VulkanState& vulkan;
 	VulkanNativeTexture(VulkanState& v) :
-		vulkan(v) { }
+		vulkan(v) {
+	}
 
 	VkImage image = nullptr;
 	VkMemoryRequirements memoryRequirements{};
@@ -235,8 +233,7 @@ struct VulkanNativeBuffer
 	VkMemoryRequirements memoryRequirements{};
 };
 
-namespace vulkan
-{
+namespace vulkan {
 
 VkCompareOp depthCompareOperation(CompareFunction);
 VkFormat dataTypeValue(DataType);
@@ -280,8 +277,7 @@ struct VulkanObjectsEnumerator;
 template <class EnumeratedClass, class Holder, typename Function>
 struct VulkanObjectsEnumerator<EnumeratedClass, Holder, Function, VkResult>
 {
-	Vector<EnumeratedClass> operator ()(const Holder& holder, Function callable)
-	{
+	Vector<EnumeratedClass> operator ()(const Holder& holder, Function callable) {
 		uint32_t count = 0;
 		Vector<EnumeratedClass> objects;
 		VULKAN_CALL(callable(holder, &count, nullptr));
@@ -297,8 +293,7 @@ struct VulkanObjectsEnumerator<EnumeratedClass, Holder, Function, VkResult>
 template <class EnumeratedClass, class Holder, typename Function>
 struct VulkanObjectsEnumerator<EnumeratedClass, Holder, Function, void>
 {
-	Vector<EnumeratedClass> operator ()(const Holder& holder, Function callable)
-	{
+	Vector<EnumeratedClass> operator ()(const Holder& holder, Function callable) {
 		uint32_t count = 0;
 		Vector<EnumeratedClass> objects;
 		callable(holder, &count, nullptr);
@@ -312,8 +307,7 @@ struct VulkanObjectsEnumerator<EnumeratedClass, Holder, Function, void>
 };
 
 template <class EnumeratedClass, class Holder, typename Function>
-Vector<EnumeratedClass> enumerateVulkanObjects(const Holder& holder, Function callable)
-{
+Vector<EnumeratedClass> enumerateVulkanObjects(const Holder& holder, Function callable) {
 	using ReturnClass = decltype(callable(holder, nullptr, nullptr));
 	VulkanObjectsEnumerator<EnumeratedClass, Holder, Function, ReturnClass> enumerator;
 	return enumerator(holder, callable);

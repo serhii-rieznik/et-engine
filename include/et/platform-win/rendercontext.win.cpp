@@ -29,6 +29,7 @@ public:
 
 	HWND mainWindow = nullptr;
 	RECT clientRect{ };
+	RendererFrame currentFrame;
 	uint32_t mouseCaptureCounter = 0;
 	bool resizeScheduled = false;
 };
@@ -78,12 +79,15 @@ bool RenderContext::beginRender() {
 		_private->resizeScheduled = false;
 	}
 
-	_renderer->begin();
-	return true;
+	_private->currentFrame = _renderer->allocateFrame();
+	return (_private->currentFrame.identifier != 0);
 }
 
 void RenderContext::endRender() {
-	_renderer->present();
+	_renderer->submitFrame(_private->currentFrame);
+
+	if (_renderer->parameters().multithreadingEnabled == false)
+		_renderer->present();
 }
 
 void RenderContext::performResizing(const vec2i&) {
@@ -220,7 +224,7 @@ PointerInputInfo RenderContextPrivate::mouseInputInfo(uint32_t x, uint32_t y, ui
 	info.pos.y = static_cast<float>(y);
 	info.normalizedPos.x = 2.0f * info.pos.x / static_cast<float>(clientRect.right - clientRect.left) - 1.0f;
 	info.normalizedPos.y = 1.0f - 2.0f * info.pos.y / static_cast<float>(clientRect.bottom - clientRect.top);
-	info.timestamp = queryContiniousTimeInSeconds();
+	info.timestamp = queryContinuousTimeInSeconds();
 	return info;
 }
 

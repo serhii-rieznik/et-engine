@@ -9,6 +9,7 @@
 
 #include <et/core/thread.h>
 #include <et/app/runloop.h>
+#include <et/rendering/interface/renderer.h>
 
 namespace et {
 
@@ -17,8 +18,13 @@ class RenderThread : public Thread
 public:
 	RenderThread();
 
+	void init(const RenderInterface::Pointer&);
+
 private:
 	void main() override;
+
+private:
+	RenderInterface::Pointer _renderer;
 };
 
 class BackgroundThread : public Thread

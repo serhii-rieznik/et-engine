@@ -95,7 +95,7 @@ Texture::Pointer HDRFlow::luminanceStep(Texture::Pointer input) {
 
 	Texture::Pointer luminanceTarget = _lum.pass->colorTarget();
 
-	_lum.pass->begin(RenderPassBeginInfo::singlePass());
+	_renderer->beginRenderPass(_lum.pass, RenderPassBeginInfo::singlePass());
 	{
 		MaterialInstance::Pointer& downsampleMaterial = _lum.downsample->material();
 		downsampleMaterial->setTexture(MaterialTexture::BaseColor, luminanceTarget, { 0, 1, 0, 1 });
@@ -119,7 +119,6 @@ Texture::Pointer HDRFlow::luminanceStep(Texture::Pointer input) {
 		_lum.pass->pushImageBarrier(_lum.downsampled, ResourceBarrier(TextureState::ShaderResource, 0, 1, 0, 1));
 		_lum.pass->pushImageBarrier(_lum.computed, ResourceBarrier(TextureState::ShaderResource, 0, 1, 0, 1));
 	}
-	_lum.pass->end();
 	_renderer->submitRenderPass(_lum.pass);
 	
 	return input;
@@ -150,7 +149,7 @@ Texture::Pointer HDRFlow::anitialiasStep(Texture::Pointer input) {
 		_taa.batch->material()->setTextureWithSampler(MaterialTexture::EmissiveColor, _taa.history, _renderer->clampSampler());
 	}
 
-	_taa.pass->begin(RenderPassBeginInfo::singlePass());
+	_renderer->beginRenderPass(_taa.pass, RenderPassBeginInfo::singlePass());
 	{
 		_taa.batch->material()->setTextureWithSampler(MaterialTexture::Normal, vel, _renderer->clampSampler());
 		_taa.pass->setSharedVariable(ObjectVariable::CameraJitter, drawer()->latestCameraJitter());
@@ -162,7 +161,6 @@ Texture::Pointer HDRFlow::anitialiasStep(Texture::Pointer input) {
 		_taa.pass->pushImageBarrier(target, ResourceBarrier(TextureState::ShaderResource));
 		_taa.pass->pushImageBarrier(_taa.history, ResourceBarrier(TextureState::ShaderResource));
 	}
-	_taa.pass->end();
 	_renderer->submitRenderPass(_taa.pass);
 
 	return target;
@@ -183,8 +181,7 @@ Texture::Pointer HDRFlow::tonemapStep(Texture::Pointer input) {
 
 	_tonemap.batch->material()->setTextureWithSampler(MaterialTexture::Shadow, _colorGradingTexture, _colorGradingSampler);
 	_tonemap.batch->material()->setTextureWithSampler(MaterialTexture::EmissiveColor, _lum.computed, _renderer->clampSampler());
-	_tonemap.pass->executeSingleRenderBatch(_tonemap.batch);
-	_renderer->submitRenderPass(_tonemap.pass);
+	_renderer->submitPassWithRenderBatch(_tonemap.pass, _tonemap.batch);
 
 	return _tonemap.pass->colorTarget(0);
 }
@@ -223,7 +220,7 @@ void HDRFlow::render() {
 
 	Texture::Pointer processedImage = executeSteps();
 
-	_passes.final->begin(RenderPassBeginInfo::singlePass());
+	_renderer->beginRenderPass(_passes.final, RenderPassBeginInfo::singlePass());
 	_passes.final->nextSubpass();
 	{
 		RenderBatch::Pointer batch = renderhelper::createQuadBatch(processedImage, _materials.posteffects, _renderer->clampSampler());
@@ -231,7 +228,6 @@ void HDRFlow::render() {
 		debugDraw();
 	}
 	_passes.final->endSubpass();
-	_passes.final->end();
 	_renderer->submitRenderPass(_passes.final);
 }
 

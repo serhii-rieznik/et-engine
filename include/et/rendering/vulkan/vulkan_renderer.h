@@ -31,14 +31,14 @@ public:
 	void resize(const vec2i&) override;
 	vec2i contextSize() const override;
 
-	void begin() override;
+	RendererFrame allocateFrame() override;
+	void submitFrame(const RendererFrame&) override;
+
 	void present() override;
 
 	RenderPass::Pointer allocateRenderPass(const RenderPass::ConstructionInfo&) override;
+	void beginRenderPass(const RenderPass::Pointer&, const RenderPassBeginInfo&) override;
 	void submitRenderPass(const RenderPass::Pointer&) override;
-
-	uint32_t frameIndex() const override;
-	uint32_t frameNumber() const override;
 
 	/*
 	 * Buffers
@@ -72,6 +72,6 @@ public:
 	Compute::Pointer createCompute(const Material::Pointer&) override;
 
 private:
-	ET_DECLARE_PIMPL(VulkanRenderer, 2048);
+	ET_DECLARE_PIMPL(VulkanRenderer, 4096);
 };
 }

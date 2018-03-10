@@ -61,11 +61,10 @@ void CubemapProcessor::process(RenderInterface::Pointer& renderer, DrawerOptions
 		if (_lookupGeneratorMaterial.invalid())
 			_lookupGeneratorMaterial = renderer->sharedMaterialLibrary().loadDefaultMaterial(DefaultMaterial::EnvironmentMap);
 
-		_lookupPass->begin(RenderPassBeginInfo::singlePass());
+		renderer->beginRenderPass(_lookupPass, RenderPassBeginInfo::singlePass());
 		_lookupPass->nextSubpass();
 		_lookupPass->pushRenderBatch(renderhelper::createQuadBatch(renderer->checkersTexture(), _lookupGeneratorMaterial));
 		_lookupPass->endSubpass();
-		_lookupPass->end();
 		renderer->submitRenderPass(_lookupPass);
 
 		setFlag(BRDFLookupProcessed);
@@ -74,7 +73,7 @@ void CubemapProcessor::process(RenderInterface::Pointer& renderer, DrawerOptions
 
 	if (!hasFlag(CubemapProcessed) || options.rebuldEnvironmentProbe)
 	{
-		_downsamplePass->begin(_wholeCubemapBeginInfo);
+		renderer->beginRenderPass(_downsamplePass, _wholeCubemapBeginInfo);
 		_downsamplePass->loadSharedVariablesFromLight(light);
 
 		RenderBatch::Pointer copyBatch = renderhelper::createQuadBatch(_tex[CubemapType::Source],
@@ -118,14 +117,13 @@ void CubemapProcessor::process(RenderInterface::Pointer& renderer, DrawerOptions
 		_downsamplePass->dispatchCompute(_shConvolute, vec3i(1, 1, 1));
 		_downsamplePass->pushImageBarrier(_shValues, ResourceBarrier(TextureState::CopySource));
 		_downsamplePass->copyImageToBuffer(_shValues, _shValuesBuffer, CopyDescriptor(vec3i(_shValues->size(0), 1)));
-		_downsamplePass->end();
 		renderer->submitRenderPass(_downsamplePass);
 
 		_grabHarmonicsFrame = RendererFrameCount;
 
 		//*
 		_specularConvolveBatch->material()->setTexture(MaterialTexture::BaseColor, _tex[CubemapType::Downsampled]);
-		_specularConvolvePass->begin(_wholeCubemapBeginInfo);
+		renderer->beginRenderPass(_specularConvolvePass, _wholeCubemapBeginInfo);
 		for (uint32_t i = 0, e = static_cast<uint32_t>(_wholeCubemapBeginInfo.subpasses.size()); i < e; ++i)
 		{
 			uint32_t level = i / 6;
@@ -137,7 +135,6 @@ void CubemapProcessor::process(RenderInterface::Pointer& renderer, DrawerOptions
 			_specularConvolvePass->pushRenderBatch(_specularConvolveBatch);
 			_specularConvolvePass->endSubpass();
 		}
-		_specularConvolvePass->end();
 		renderer->submitRenderPass(_specularConvolvePass);
 		// */
 
@@ -328,7 +325,7 @@ void CubemapProcessor::drawDebug(RenderInterface::Pointer& renderer, const Drawe
 		float xGap = 0.1f * dx;
 		vec2 pos = vec2(0.5f * (vp.x - dx * cubemapsCount - xGap * (cubemapsCount - 1.0f)), 0.0f);
 
-		_cubemapDebugPass->begin(RenderPassBeginInfo::singlePass());
+		renderer->beginRenderPass(_cubemapDebugPass, RenderPassBeginInfo::singlePass());
 		_cubemapDebugPass->nextSubpass();
 		for (uint32_t i = CubemapType::Downsampled; i < CubemapType::Count; ++i)
 		{
@@ -351,19 +348,17 @@ void CubemapProcessor::drawDebug(RenderInterface::Pointer& renderer, const Drawe
 		_cubemapDebugPass->pushRenderBatch(_shDebugBatch);
 
 		_cubemapDebugPass->endSubpass();
-		_cubemapDebugPass->end();
 		renderer->submitRenderPass(_cubemapDebugPass);
 	}
 
 	if (options.drawLookupTexture)
 	{
 		vec2 lookupSize = vec2(256.0f);
-		_lookupDebugPass->begin(RenderPassBeginInfo::singlePass());
+		renderer->beginRenderPass(_lookupDebugPass, RenderPassBeginInfo::singlePass());
 		_lookupDebugPass->nextSubpass();
 		_lookupDebugPass->setSharedVariable(ObjectVariable::WorldTransform, fullscreenBatchTransform(vp, 0.5f * (vp - lookupSize), lookupSize));
 		_lookupDebugPass->pushRenderBatch(_lookupDebugBatch);
 		_lookupDebugPass->endSubpass();
-		_lookupDebugPass->end();
 		renderer->submitRenderPass(_lookupDebugPass);
 	}
 }

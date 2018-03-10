@@ -35,6 +35,7 @@ namespace et
 	
 	struct RenderContextParameters
 	{
+		bool multithreadingEnabled = false;
 		/*
 		 * Deprecated options
 		 * 

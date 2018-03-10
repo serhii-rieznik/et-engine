@@ -167,7 +167,7 @@ void Raytrace::reportProgress()
 	if (processedRegions == 0)
 		return;
 
-	uint64_t elapsedTime = queryContiniousTimeInMilliSeconds() - _private->startTime;
+	uint64_t elapsedTime = queryContinuousTimeInMilliSeconds() - _private->startTime;
 	uint64_t minTime = _private->minTimePerRegion.load();
 	uint64_t maxTime = _private->maxTimePerRegion.load();
 	uint64_t avgTime = elapsedTime / processedRegions;
@@ -197,7 +197,7 @@ RaytracePrivate::~RaytracePrivate()
 void RaytracePrivate::emitWorkerThreads()
 {
 	srand(static_cast<unsigned int>(time(nullptr)));
-	startTime = queryContiniousTimeInMilliSeconds();
+	startTime = queryContinuousTimeInMilliSeconds();
 	minTimePerRegion.store(std::numeric_limits<uint64_t>::max());
 	maxTimePerRegion.store(0);
 
@@ -653,7 +653,7 @@ void RaytracePrivate::backwardPathTraceThreadFunction(uint32_t threadId)
 		if (region.sampled == false)
 			break;
 
-		uint64_t runTime = queryContiniousTimeInMilliSeconds();
+		uint64_t runTime = queryContinuousTimeInMilliSeconds();
 
 		vec2i pixel;
 		for (pixel.y = region.origin.y; pixel.y < region.origin.y + region.size.y; ++pixel.y)
@@ -707,7 +707,7 @@ void RaytracePrivate::backwardPathTraceThreadFunction(uint32_t threadId)
 			}
 		}
 
-		uint64_t regionTime = queryContiniousTimeInMilliSeconds() - runTime;
+		uint64_t regionTime = queryContinuousTimeInMilliSeconds() - runTime;
 		minTimePerRegion = std::min(minTimePerRegion.load(), regionTime);
 		maxTimePerRegion = std::max(maxTimePerRegion.load(), regionTime);
 		totalTimePerRegions += regionTime;

@@ -106,7 +106,7 @@ void Drawer::updateVisibleMeshes() {
 
 void Drawer::draw() {
 #if (ET_ANIMATE_LIGHT_POSITION)
-	_lighting.directional->lookAt(10.0f * fromSpherical(0.25f * queryContiniousTimeInSeconds(), DEG_15));
+	_lighting.directional->lookAt(10.0f * fromSpherical(0.25f * queryContinuousTimeInSeconds(), DEG_15));
 	options.rebuldEnvironmentProbe = true;
 #endif
 
@@ -130,7 +130,7 @@ void Drawer::draw() {
 
 	updateVisibleMeshes();
 
-	_main.zPrepass->begin(RenderPassBeginInfo::singlePass());
+	_renderer->beginRenderPass(_main.zPrepass, RenderPassBeginInfo::singlePass());
 	{
 		_main.zPrepass->setSharedVariable(ObjectVariable::CameraJitter, _jitter);
 		_main.zPrepass->loadSharedVariablesFromCamera(_scene->renderCamera());
@@ -142,7 +142,6 @@ void Drawer::draw() {
 				_main.zPrepass->pushRenderBatch(rb);
 		}
 		_main.zPrepass->endSubpass();
-		_main.zPrepass->end();
 	}
 	_renderer->submitRenderPass(_main.zPrepass);
 
@@ -151,8 +150,7 @@ void Drawer::draw() {
 		_main.screenSpaceShadows->setSharedVariable(ObjectVariable::CameraJitter, _jitter);
 		_main.screenSpaceShadows->loadSharedVariablesFromCamera(_scene->renderCamera());
 		_main.screenSpaceShadows->loadSharedVariablesFromLight(_lighting.directional);
-		_main.screenSpaceShadows->executeSingleRenderBatch(_main.screenSpaceShadowsBatch);
-		_renderer->submitRenderPass(_main.screenSpaceShadows);
+		_renderer->submitPassWithRenderBatch(_main.screenSpaceShadows, _main.screenSpaceShadowsBatch);
 	}
 
 	if (options.enableScreenSpaceAO)
@@ -161,11 +159,10 @@ void Drawer::draw() {
 		_main.screenSpaceAO->setSharedTexture(MaterialTexture::Noise, _main.noise, _renderer->nearestSampler());
 		_main.screenSpaceAO->loadSharedVariablesFromCamera(_scene->renderCamera());
 		_main.screenSpaceAO->loadSharedVariablesFromLight(_lighting.directional);
-		_main.screenSpaceAO->executeSingleRenderBatch(_main.screenSpaceAOBatch);
-		_renderer->submitRenderPass(_main.screenSpaceAO);
+		_renderer->submitPassWithRenderBatch(_main.screenSpaceAO, _main.screenSpaceAOBatch);
 	}
 
-	_main.forward->begin(RenderPassBeginInfo::singlePass());
+	_renderer->beginRenderPass(_main.forward, RenderPassBeginInfo::singlePass());
 	{
 		_main.forward->loadSharedVariablesFromCamera(_scene->renderCamera());
 		_main.forward->loadSharedVariablesFromLight(_lighting.directional);
@@ -189,7 +186,6 @@ void Drawer::draw() {
 		_main.forward->setSharedVariable(ObjectVariable::WorldTransform, identityMatrix);
 		_main.forward->pushRenderBatch(_lighting.environmentBatch);
 		_main.forward->endSubpass();
-		_main.forward->end();
 	}
 	_renderer->submitRenderPass(_main.forward);
 	++_frameIndex;

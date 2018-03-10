@@ -46,7 +46,7 @@ float4 fragmentMain(VSOutput fsIn) : SV_Target0
 	float sampledLevel = max(0.0, currentLevel - 1);
 	baseColorTexture.GetDimensions(sampledLevel, w, h, levels);
 
-	const float delta = 0.5;
+	float delta = 0.5;
 	float4 sX = baseColorTexture.SampleLevel(baseColorSampler, fsIn.texCoord0, sampledLevel);
 	float4 s0 = baseColorTexture.SampleLevel(baseColorSampler, fsIn.texCoord0 + float2(-delta / w, -delta / h), sampledLevel);
 	float4 s1 = baseColorTexture.SampleLevel(baseColorSampler, fsIn.texCoord0 + float2( delta / w, -delta / h), sampledLevel);

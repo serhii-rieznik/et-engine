@@ -90,6 +90,7 @@ public:
 
 	bool shouldPerformRendering();
 	void performUpdateAndRender();
+	void processEvents();
 
 private:
 	friend class RenderContext;

@@ -74,10 +74,11 @@ int Application::platformRun() {
 	RenderContextParameters renderContextParameters;
 	delegate()->setRenderContextParameters(renderContextParameters);
 
-	_lastQueuedTimeMSec = queryContiniousTimeInMilliSeconds();
+	_lastQueuedTimeMSec = queryContinuousTimeInMilliSeconds();
 	_runLoop.updateTime(_lastQueuedTimeMSec);
 
 	_renderContext.init(_parameters, renderContextParameters);
+	_renderThread.init(_renderContext.renderer());
 
 	delegate()->applicationDidLoad();
 
@@ -93,9 +94,9 @@ int Application::platformRun() {
 			TranslateMessage(&msg);
 			DispatchMessageW(&msg);
 		}
-		else if (shouldPerformRendering())
+		else
 		{
-			performUpdateAndRender();
+			processEvents();
 		}
 	}
 
@@ -138,6 +139,14 @@ void Application::requestUserAttention() {
 	fi.hwnd = reinterpret_cast<HWND>(_context.objects[0]);
 	fi.uCount = std::numeric_limits<UINT>::max();
 	FlashWindowEx(&fi);
+}
+
+void Application::processEvents() {
+
+	if (shouldPerformRendering())
+	{
+		performUpdateAndRender();
+	}
 }
 
 /*

@@ -62,9 +62,7 @@ void VulkanState::executeServiceCommands(VulkanQueueClass cls, ServiceCommands c
 	VULKAN_CALL(vkQueueWaitIdle(queue.queue));
 }
 
-uint32_t VulkanState::writeTimestamp(VkCommandBuffer cmd, VkPipelineStageFlagBits stage) {
-	VulkanSwapchain::Frame& frame = swapchain.mutableCurrentFrame();
-
+uint32_t VulkanState::writeTimestamp(VulkanSwapchain::SwapchainFrame& frame, VkCommandBuffer cmd, VkPipelineStageFlagBits stage) {
 	uint32_t result = frame.timestampIndex++;
 	vkCmdWriteTimestamp(cmd, stage, frame.timestampsQueryPool, result);
 	return result;
@@ -169,9 +167,7 @@ void VulkanSwapchain::createSizeDependentResources(VulkanState& vulkan, const ve
 	VkSurfaceCapabilitiesKHR surfaceCaps = { };
 	vkGetPhysicalDeviceSurfaceCapabilitiesKHR(vulkan.physicalDevice, surface, &surfaceCaps);
 
-	uint32_t numImages = surfaceCaps.minImageCount + 1;
-	if ((surfaceCaps.maxImageCount > 0) && (numImages > surfaceCaps.maxImageCount))
-		numImages = surfaceCaps.maxImageCount;
+	uint32_t numImages = clamp(+RendererFrameCount, surfaceCaps.minImageCount, surfaceCaps.maxImageCount);
 
 	VkSurfaceTransformFlagsKHR preTransform = VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR;
 	ET_ASSERT(surfaceCaps.supportedTransforms & VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR);
@@ -202,7 +198,7 @@ void VulkanSwapchain::createSizeDependentResources(VulkanState& vulkan, const ve
 
 	if (currentSwapchain != nullptr)
 	{
-		for (Frame& frame : frames)
+		for (SwapchainFrame& frame : frames)
 		{
 			vkDestroyImageView(vulkan.device, frame.colorView, nullptr);
 			frame.colorView = nullptr;
@@ -244,7 +240,7 @@ void VulkanSwapchain::createSizeDependentResources(VulkanState& vulkan, const ve
 	frames.resize(swapchainImages.size());
 
 	VkImage* swapchainImagesPtr = swapchainImages.data();
-	for (Frame& frame : frames)
+	for (SwapchainFrame& frame : frames)
 	{
 		frame.color = *swapchainImagesPtr++;
 		frame.colorView = createImageView(vulkan, frame.color, VK_IMAGE_ASPECT_COLOR_BIT, surfaceFormat.format);
@@ -318,25 +314,20 @@ void VulkanSwapchain::createSizeDependentResources(VulkanState& vulkan, const ve
 	VULKAN_CALL(vkDeviceWaitIdle(vulkan.device));
 }
 
-void VulkanSwapchain::acquireNextImage(VulkanState& vulkan) {
-	VkFence currentFence = frames[frameNumber % RendererFrameCount].imageFence;
-	VULKAN_CALL(vkWaitForFences(vulkan.device, 1, &currentFence, VK_TRUE, UINT64_MAX));
-	VULKAN_CALL(vkResetFences(vulkan.device, 1, &currentFence));
-
-	VULKAN_CALL(vkAcquireNextImageKHR(vulkan.device, swapchain, UINT64_MAX,
-		frames[frameNumber % RendererFrameCount].imageAcquired, nullptr, &swapchainImageIndex));
+void VulkanSwapchain::acquireFrameImage(SwapchainFrame& frame, VulkanState& vulkan) {
+	VULKAN_CALL(vkWaitForFences(vulkan.device, 1, &frame.imageFence, VK_TRUE, UINT64_MAX));
+	VULKAN_CALL(vkResetFences(vulkan.device, 1, &frame.imageFence));
+	VULKAN_CALL(vkAcquireNextImageKHR(vulkan.device, swapchain, UINT64_MAX, frame.imageAcquired, nullptr, &frame.swapchainImageIndex));
 }
 
-void VulkanSwapchain::present(VulkanState& vulkan) {
+void VulkanSwapchain::present(SwapchainFrame& frame, VulkanState& vulkan) {
 	VkPresentInfoKHR info = { VK_STRUCTURE_TYPE_PRESENT_INFO_KHR };
 	info.swapchainCount = 1;
 	info.pSwapchains = &swapchain;
-	info.pImageIndices = &swapchainImageIndex;
+	info.pImageIndices = &frame.swapchainImageIndex;
 	info.waitSemaphoreCount = 1;
-	info.pWaitSemaphores = &frames[frameNumber % RendererFrameCount].submitCompleted;
+	info.pWaitSemaphores = &frame.submitCompleted;
 	VULKAN_CALL(vkQueuePresentKHR(vulkan.queues[VulkanQueueClass::Graphics].queue, &info));
-
-	++frameNumber;
 }
 
 void VulkanNativePipeline::buildLayout(VulkanState& vulkan, const Program::Reflection& reflection, VkDescriptorSetLayout buffersSet) {

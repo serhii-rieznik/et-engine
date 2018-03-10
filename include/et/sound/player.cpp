@@ -127,9 +127,8 @@ void Player::play(bool looped)
 		alSourcePlay(_private->source);
 		checkOpenALError("alSourcePlay");
 		
-		retain();
+		InstusivePointerScope<Player> scope(this);
 		manager().streamingThread().addPlayer(Player::Pointer(this));
-		release();
 	}
 }
 
@@ -149,9 +148,8 @@ void Player::stop()
 {
 	if (retainCount() > 0)
 	{
-		retain();
+		InstusivePointerScope<Player> scope(this);
 		manager().streamingThread().removePlayer(Player::Pointer(this));
-		release();
 	}
 	
 	alSourceStop(_private->source);

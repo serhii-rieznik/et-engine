@@ -103,7 +103,7 @@ public:
 public:
 	RenderPass(RenderInterface*, const ConstructionInfo&);
 
-	virtual void begin(const RenderPassBeginInfo& info) = 0;
+	// virtual void begin(const RenderPassBeginInfo& info) = 0;
 	virtual void pushRenderBatch(const MaterialInstance::Pointer&, const VertexStream::Pointer&, uint32_t first, uint32_t count) = 0;
 	virtual void pushImageBarrier(const Texture::Pointer&, const ResourceBarrier&) = 0;
 	virtual void copyImage(const Texture::Pointer&, const Texture::Pointer&, const CopyDescriptor&) = 0;
@@ -111,7 +111,6 @@ public:
 	virtual void dispatchCompute(const Compute::Pointer&, const vec3i&) = 0;
 	virtual void endSubpass() = 0;
 	virtual void nextSubpass() = 0;
-	virtual void end() = 0;
 
 	virtual void debug() = 0;
 
@@ -140,7 +139,6 @@ public:
 	}
 
 	void addSingleRenderBatchSubpass(const RenderBatch::Pointer& inBatch);
-	void executeSingleRenderBatch(const RenderBatch::Pointer& inBatch);
 
 	const Texture::Pointer& colorTarget(uint32_t = 0) const;
 
@@ -150,6 +148,7 @@ protected:
 	const VariablesHolder& sharedVariables() const { return _sharedVariables; }
 
 private:
+	RenderInterface * _renderer = nullptr;
 	ConstructionInfo _info;
 	SharedTexturesSet _sharedTextures;
 	VariablesHolder _sharedVariables;
@@ -180,12 +179,6 @@ inline void RenderPass::addSingleRenderBatchSubpass(const RenderBatch::Pointer& 
 	nextSubpass();
 	pushRenderBatch(inBatch);
 	endSubpass();
-}
-
-inline void RenderPass::executeSingleRenderBatch(const RenderBatch::Pointer& inBatch) {
-	begin(RenderPassBeginInfo::singlePass());
-	addSingleRenderBatchSubpass(inBatch);
-	end();
 }
 
 inline const Texture::Pointer& RenderPass::colorTarget(uint32_t index) const {

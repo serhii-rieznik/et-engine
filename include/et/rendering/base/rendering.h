@@ -346,6 +346,16 @@ enum : uint32_t
 	MaxRenderPasses = 128
 };
 
+struct RendererFrame
+{
+	uint64_t identifier = 0;
+	uint64_t continuousNumber = 0;
+	
+	uint64_t index() const {
+		return continuousNumber % RendererFrameCount;
+	}
+};
+
 struct DepthState
 {
 	CompareFunction compareFunction = CompareFunction::Less;
