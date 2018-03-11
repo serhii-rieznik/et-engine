@@ -2,13 +2,10 @@
 #include <inputdefines>
 #include <options>
 
-Texture2D<float> baseColorTexture : DECL_TEXTURE(BaseColor);
-SamplerState baseColorSampler : DECL_SAMPLER(BaseColor);
+Texture2D<float> sceneDepth : DECLARE_TEXTURE;
+Texture2D<float4> noise : DECLARE_TEXTURE;
 
-Texture2D<float4> noiseTexture : DECL_TEXTURE(Noise);
-SamplerState noiseSampler : DECL_SAMPLER(Noise);
-
-cbuffer ObjectVariables : DECL_BUFFER(Object)
+cbuffer ObjectVariables : DECL_OBJECT_BUFFER
 {
     row_major float4x4 viewTransform;
     row_major float4x4 projectionTransform;
@@ -50,11 +47,11 @@ float3 reconstructNormal(in float2 uv, in float2 texelSize)
 	float2 uv2 = uv - float2(0.0, texelSize.y);
 	float2 uv3 = uv + float2(0.0, texelSize.y);
 	
-	float z = baseColorTexture.Sample(baseColorSampler, uv);
-	float z0 = baseColorTexture.Sample(baseColorSampler, uv0);
-	float z1 = baseColorTexture.Sample(baseColorSampler, uv1);	
-	float z2 = baseColorTexture.Sample(baseColorSampler, uv2);
-	float z3 = baseColorTexture.Sample(baseColorSampler, uv3);
+	float z = sceneDepth.Sample(PointClamp, uv);
+	float z0 = sceneDepth.Sample(PointClamp, uv0);
+	float z1 = sceneDepth.Sample(PointClamp, uv1);	
+	float z2 = sceneDepth.Sample(PointClamp, uv2);
+	float z3 = sceneDepth.Sample(PointClamp, uv3);
 	float3 pC = viewSpace(uv * 2.0 - 1.0, z);
 	float3 p0 = viewSpace(uv0 * 2.0 - 1.0, z0);
 	float3 p1 = viewSpace(uv1 * 2.0 - 1.0, z1);
@@ -87,7 +84,7 @@ float4 sampleAmbientOcclusion(in float2 uv, in float2 texelSize, in float4 rnd)
 {
 	const uint samplesPerDirection = 6;
 
-	float3 p0 = viewSpace(uv * 2.0 - 1.0, baseColorTexture.Sample(baseColorSampler, uv));
+	float3 p0 = viewSpace(uv * 2.0 - 1.0, sceneDepth.Sample(PointClamp, uv));
 	float3 n0 = reconstructNormal(uv, texelSize);
 	float r = (-0.1 * p0.z + 0.25);
 	float influenceRadius = (r) * (rnd.x * 0.5 + 0.5); // 1.0 * (rnd.x * 0.5 + 0.5);
@@ -109,7 +106,7 @@ float4 sampleAmbientOcclusion(in float2 uv, in float2 texelSize, in float4 rnd)
 		float2 stepUv = uv + projectedStep;
 		for (uint j = 0; j < samplesPerDirection; ++j)
 		{
-			float3 stepViewSpace = viewSpace(stepUv * 2.0 - 1.0, baseColorTexture.Sample(baseColorSampler, stepUv));
+			float3 stepViewSpace = viewSpace(stepUv * 2.0 - 1.0, sceneDepth.Sample(PointClamp, stepUv));
 			float3 horizonVector = stepViewSpace - p0;
 			float horizonVectorLength = length(horizonVector);
 			float attenuation = saturate(1.0 - horizonVectorLength / influenceRadius);
@@ -125,12 +122,12 @@ float4 fragmentMain(VSOutput fsIn) : SV_Target0
 	float w = viewport.z;
 	float h = viewport.w;
 	float levels = 0.0;
-	baseColorTexture.GetDimensions(0, w, h, levels);
+	sceneDepth.GetDimensions(0, w, h, levels);
 	float2 texelSize = 1.0 / float2(w, h);
 
 	w = 64.0;
 	h = 64.0;
-	noiseTexture.GetDimensions(0, w, h, levels);
+	noise.GetDimensions(0, w, h, levels);
 	float2 noiseTexelSize = float2(w, h);
 
 	float2 noiseUv = frac(continuousTime + fsIn.texCoord0 * (viewport.zw / noiseTexelSize));
@@ -142,7 +139,7 @@ float4 fragmentMain(VSOutput fsIn) : SV_Target0
 	rotatedUv.x = dot(noiseUv, float2(cs, -sn));
 	rotatedUv.y = dot(noiseUv, float2(+sn, cs));
 
-	float4 sampledNoise = noiseTexture.SampleLevel(noiseSampler, rotatedUv, 0.0);
+	float4 sampledNoise = noise.SampleLevel(PointClamp, rotatedUv, 0.0);
 
 	return 
 	// 1.0; 

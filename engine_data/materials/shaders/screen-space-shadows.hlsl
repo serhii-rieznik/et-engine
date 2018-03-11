@@ -2,10 +2,9 @@
 #include <inputdefines>
 #include <options>
 
-Texture2D<float> baseColorTexture : DECL_TEXTURE(BaseColor);
-SamplerState baseColorSampler : DECL_SAMPLER(BaseColor);
+Texture2D<float> sceneDepth : DECLARE_TEXTURE;
 
-cbuffer ObjectVariables : DECL_BUFFER(Object)
+cbuffer ObjectVariables : DECL_OBJECT_BUFFER
 {
     row_major float4x4 viewTransform;
     row_major float4x4 projectionTransform;
@@ -57,12 +56,12 @@ float4 sampleShadowsInWorldSpace(in float2 uv)
 	float w = 0.0;
 	float h = 0.0;
 	float levels = 0.0;
-	baseColorTexture.GetDimensions(0, w, h, levels);
+	sceneDepth.GetDimensions(0, w, h, levels);
 
 	float4 projectedLight = mul(lightDirection, viewTransform);
 	projectedLight.xyz = normalize(projectedLight.xyz);
 
-	float z0 = baseColorTexture.Sample(baseColorSampler, uv);
+	float z0 = sceneDepth.Sample(PointClamp, uv);
 	float3 viewSpaceCoord = viewSpace(uv * 2.0 - 1.0, z0);
 	float3 projectionSpaceCoord = projectionSpace(viewSpaceCoord);
 
@@ -81,7 +80,7 @@ float4 sampleShadowsInWorldSpace(in float2 uv)
 	{
 		rnd = noise(rnd * 43758.5453123);
 		projectionSpaceCoord += lightStep * (rnd * 0.5 + 0.5);
-		float sampledZ = baseColorTexture.Sample(baseColorSampler, projectionSpaceCoord.xy * 0.5 + 0.5);
+		float sampledZ = sceneDepth.Sample(PointClamp, projectionSpaceCoord.xy * 0.5 + 0.5);
 		float diff = sampledZ - projectionSpaceCoord.z;
 		lightContribution *= 1.0 - step(diff, 0.0) * step(abs(diff), tolerance);
 	}

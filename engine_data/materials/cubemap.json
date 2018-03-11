@@ -1,23 +1,5 @@
 {
-	"name" : "cubemap routines",
-
-	"prepare-cubemap" : 
-	{ 
-		"input-layout" : {
-			"position" : 3
-		},
-		"depth-state": {
-			"depth-function": "always",
-			"depth-test": false,
-			"depth-write": false
-		},
-		"options" : {
-			"EQ_MAP_TO_CUBEMAP" : 1
-		},
-		"blend-state": "disabled",
-		"cull-mode" : "disabled",
-		"code" : "shaders/cubemap"
-	},
+	"name" : "cubemap-routines",
 
 	"cubemap-visualize" :
 	{ 

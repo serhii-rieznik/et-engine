@@ -2,11 +2,11 @@
 #include <inputdefines>
 #include "../../materials/shaders/srgb.h"
 
-Texture2D<float> inputImage : DECL_TEXTURE(BaseColor);
-RWTexture2D<float> outputImage : DECL_STORAGE(0);
+Texture2D<float> inputImage : DECLARE_TEXTURE;
+RWTexture2D<float> outputImage : DECLARE_STORAGE;
 
 #if (LUMINOCITY_ADAPTATION)
-cbuffer ObjectVariables : DECL_BUFFER(Object) {
+cbuffer ObjectVariables : DECL_OBJECT_BUFFER {
 	float deltaTime;
 };
 #endif

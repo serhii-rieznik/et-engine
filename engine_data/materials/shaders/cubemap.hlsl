@@ -8,17 +8,16 @@
 
 #if (WRAP_EQ_TO_CUBEMAP)
 
-	Texture2D<float4> baseColorTexture : DECL_TEXTURE(BaseColor);
+	Texture2D<float4> inputTexture : DECLARE_TEXTURE;
+	SamplerState eqMapSampler : DECLARE_EXPLICIT_SAMPLER;
 
-#elif (VISUALIZE_CUBEMAP  || VISUALIZE_SPHERICAL_HARMONICS || DIFFUSE_CONVOLUTION || SPECULAR_CONVOLUTION || DOWNSAMPLE_CUBEMAP)
+#elif (VISUALIZE_CUBEMAP || VISUALIZE_SPHERICAL_HARMONICS || DIFFUSE_CONVOLUTION || SPECULAR_CONVOLUTION || DOWNSAMPLE_CUBEMAP)
 
-	TextureCube<float4> baseColorTexture : DECL_TEXTURE(BaseColor);
+	TextureCube<float4> inputTexture : DECLARE_TEXTURE;
 
 #endif
 
-SamplerState baseColorSampler : DECL_SAMPLER(BaseColor);
-
-cbuffer ObjectVariables : DECL_BUFFER(Object)
+cbuffer ObjectVariables : DECL_OBJECT_BUFFER
 {
 	row_major float4x4 worldTransform;
 	float3 lightColor;
@@ -28,7 +27,7 @@ cbuffer ObjectVariables : DECL_BUFFER(Object)
 #endif
 };
 
-cbuffer MaterialVariables : DECL_BUFFER(Material)
+cbuffer MaterialVariables : DECL_MATERIAL_BUFFER
 {
 	float4 extraParameters;
 };
@@ -94,7 +93,7 @@ float4 fragmentMain(VSOutput fsIn) : SV_Target0
 	float sinPhi = sin(phi);
 	float cosPhi = cos(phi);
 	float3 sampleDirection = float3(cosPhi * cosTheta, sinTheta, sinPhi * cosTheta);
-	float3 sampledValue = baseColorTexture.SampleLevel(baseColorSampler, sampleDirection, extraParameters.x).xyz;
+	float3 sampledValue = inputTexture.SampleLevel(LinearWrap, sampleDirection, extraParameters.x).xyz;
 	return float4(linearToSRGB(cScale * sampledValue), 1.0);
 
 #elif (WRAP_EQ_TO_CUBEMAP)
@@ -102,7 +101,7 @@ float4 fragmentMain(VSOutput fsIn) : SV_Target0
 	float3 d = normalize(fsIn.direction);        	
 	float u = atan2(d.z, d.x) * 0.5 / PI + 0.5;
 	float v = asin(d.y) / PI + 0.5;
-	return baseColorTexture.SampleLevel(baseColorSampler, float2(u, v), 0.0);
+	return inputTexture.SampleLevel(LinearWrap, float2(u, v), 0.0);
 
 #elif (ATMOSPHERE)
 
@@ -111,7 +110,7 @@ float4 fragmentMain(VSOutput fsIn) : SV_Target0
 
 #elif (DOWNSAMPLE_CUBEMAP)
 	
-	return baseColorTexture.SampleLevel(baseColorSampler, fsIn.direction, extraParameters.x - 1.0);
+	return inputTexture.SampleLevel(LinearWrap, fsIn.direction, extraParameters.x - 1.0);
 
 #elif (DIFFUSE_CONVOLUTION)
 
@@ -143,7 +142,7 @@ float4 fragmentMain(VSOutput fsIn) : SV_Target0
 
 	uint level0Width = 0;
 	uint level0Height = 0;
-	baseColorTexture.GetDimensions(level0Width, level0Height);
+	inputTexture.GetDimensions(level0Width, level0Height);
 	
 	uint w = max(1, level0Width >> sampledLevel);
 	uint h = max(1, level0Height >> sampledLevel);
@@ -167,7 +166,7 @@ float4 fragmentMain(VSOutput fsIn) : SV_Target0
 				if (cs >= 0.0)
 				{
 					float solidAngle = texelSolidAngle(u, v, invFaceSize);
-					float3 smp = baseColorTexture.SampleLevel(baseColorSampler, direction, sampledLevel).xyz;
+					float3 smp = inputTexture.SampleLevel(LinearWrap, direction, sampledLevel).xyz;
 					integralResult += cs * solidAngle * smp;
 				}
 			}
@@ -184,11 +183,11 @@ float4 fragmentMain(VSOutput fsIn) : SV_Target0
 	float3 n = normalize(fsIn.direction);
 
 	if (extraParameters.x == 0.0)
-		return baseColorTexture.SampleLevel(baseColorSampler, n, 0.0);
+		return inputTexture.SampleLevel(LinearWrap, n, 0.0);
 
 	uint level0Width = 0;
 	uint level0Height = 0;
-	baseColorTexture.GetDimensions(level0Width, level0Height);
+	inputTexture.GetDimensions(level0Width, level0Height);
 	float invFaceSize = 1.0 / float(min(level0Width, level0Height));
 
 	const uint samples = 2048;
@@ -219,7 +218,7 @@ float4 fragmentMain(VSOutput fsIn) : SV_Target0
 			float sampleSolidAngle = invSamples * invPdf;
 			float cubemapSolidAngle = texelSolidAngle(l, invFaceSize);
 			float sampledLevel = clamp(2.0 + 0.5 * log2(1.0 + sampleSolidAngle / cubemapSolidAngle), 0.0, 8.0);
-			result += LdotN * baseColorTexture.SampleLevel(baseColorSampler, l, sampledLevel).xyz;
+			result += LdotN * inputTexture.SampleLevel(LinearWrap, l, sampledLevel).xyz;
 			weight += LdotN;
 		}
 	}

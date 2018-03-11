@@ -47,9 +47,6 @@ void init(RenderInterface::Pointer& rc)
 	rh_local::emptyStream->setPrimitiveType(PrimitiveType::TriangleStrips);
 
 	rh_local::texturedMaterial = rh_local::renderer->sharedMaterialLibrary().loadDefaultMaterial(DefaultMaterial::Textured2D);
-
-	Sampler::Description defaultSampler;
-	rh_local::texturedMaterial->setSampler(MaterialTexture::BaseColor, rh_local::renderer->createSampler(defaultSampler));
 }
 
 void release()
@@ -58,9 +55,7 @@ void release()
 	rh_local::texturedMaterial.reset(nullptr);
 	rh_local::renderer.release();
 }
-	
-RenderBatch::Pointer createQuadBatch(const Texture::Pointer& texture, Material::Pointer mat, QuadType type)
-{
+RenderBatch::Pointer createQuadBatch(Material::Pointer mat, QuadType type) {
 	ET_ASSERT(rh_local::vertexStream.valid());
 	ET_ASSERT(rh_local::texturedMaterial.valid());
 
@@ -70,19 +65,29 @@ RenderBatch::Pointer createQuadBatch(const Texture::Pointer& texture, Material::
 	RenderBatch::Pointer batch = rh_local::renderer->allocateRenderBatch();
 	{
 		MaterialInstance::Pointer materialInstance = mat->instance();
-		materialInstance->setTexture(MaterialTexture::BaseColor, texture);
 		switch (type)
 		{
 		case QuadType::Fullscreen:
 			batch->construct(materialInstance, rh_local::emptyStream, 0, 3);
 			break;
-		
+
 		default:
 			batch->construct(materialInstance, rh_local::vertexStream, 0, 4);
 		}
 
 	}
 	return batch;
+}
+
+RenderBatch::Pointer createQuadBatch(const std::string& textureId, const Texture::Pointer& texture, const Material::Pointer& mat, QuadType type) {
+	RenderBatch::Pointer batch = createQuadBatch(mat, type);
+	batch->material()->setTexture(textureId, texture);
+	return batch;
+}
+	
+RenderBatch::Pointer createQuadBatch(const Texture::Pointer& texture, const Material::Pointer& mat, QuadType type)
+{
+	return createQuadBatch(MaterialTexture::BaseColor, texture, mat, type);
 }
 
 RenderBatch::Pointer createQuadBatch(const Texture::Pointer& tex, const Material::Pointer& mat, const Sampler::Pointer& smp, QuadType type)
@@ -98,7 +103,6 @@ RenderBatch::Pointer createQuadBatch(const Texture::Pointer& tex, const Material
 	rb->material()->setTexture(MaterialTexture::BaseColor, tex, rng);
 	return rb;
 }
-
 
 }
 }

@@ -332,7 +332,10 @@ void VulkanSwapchain::present(SwapchainFrame& frame, VulkanState& vulkan) {
 
 void VulkanNativePipeline::buildLayout(VulkanState& vulkan, const Program::Reflection& reflection, VkDescriptorSetLayout buffersSet) {
 	Vector<VkDescriptorSetLayoutBinding> textureBindings;
-	textureBindings.reserve(2 * MaterialTexture_max);
+	textureBindings.reserve(32);
+
+	Vector<VkDescriptorSetLayoutBinding> samplerBindings;
+	samplerBindings.reserve(32);
 
 	Vector<VkDescriptorSetLayoutBinding> imageBindings;
 	imageBindings.reserve(StorageBuffer_max);
@@ -351,11 +354,11 @@ void VulkanNativePipeline::buildLayout(VulkanState& vulkan, const Program::Refle
 		}
 		for (const auto& t : tex.samplers)
 		{
-			textureBindings.emplace_back();
-			textureBindings.back().binding = t.second;
-			textureBindings.back().stageFlags = stageFlags;
-			textureBindings.back().descriptorType = VK_DESCRIPTOR_TYPE_SAMPLER;
-			textureBindings.back().descriptorCount = 1;
+			samplerBindings.emplace_back();
+			samplerBindings.back().binding = t.second;
+			samplerBindings.back().stageFlags = stageFlags;
+			samplerBindings.back().descriptorType = VK_DESCRIPTOR_TYPE_SAMPLER;
+			samplerBindings.back().descriptorCount = 1;
 		}
 		for (const auto& t : tex.images)
 		{
@@ -370,21 +373,26 @@ void VulkanNativePipeline::buildLayout(VulkanState& vulkan, const Program::Refle
 	VkDescriptorSetLayoutCreateInfo layoutSetInfo = { VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO };
 	layoutSetInfo.bindingCount = static_cast<uint32_t>(textureBindings.size());
 	layoutSetInfo.pBindings = textureBindings.data();
-	VULKAN_CALL(vkCreateDescriptorSetLayout(vulkan.device, &layoutSetInfo, nullptr, &textureSetLayout));
+	VULKAN_CALL(vkCreateDescriptorSetLayout(vulkan.device, &layoutSetInfo, nullptr, &texturesSetLayout));
+
+	layoutSetInfo.bindingCount = static_cast<uint32_t>(samplerBindings.size());
+	layoutSetInfo.pBindings = samplerBindings.data();
+	VULKAN_CALL(vkCreateDescriptorSetLayout(vulkan.device, &layoutSetInfo, nullptr, &samplersSetLayout));
 
 	layoutSetInfo.bindingCount = static_cast<uint32_t>(imageBindings.size());
 	layoutSetInfo.pBindings = imageBindings.data();
-	VULKAN_CALL(vkCreateDescriptorSetLayout(vulkan.device, &layoutSetInfo, nullptr, &imageSetLayout));
+	VULKAN_CALL(vkCreateDescriptorSetLayout(vulkan.device, &layoutSetInfo, nullptr, &imagesSetLayout));
 
 	VkDescriptorSetLayout layouts[] =
 	{
 		buffersSet,
-		textureSetLayout,
-		imageSetLayout
+		texturesSetLayout,
+		samplersSetLayout,
+		imagesSetLayout
 	};
 
 	VkPipelineLayoutCreateInfo layoutCreateInfo = { VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO };
-	layoutCreateInfo.setLayoutCount = sizeof(layouts) / sizeof(layouts[0]);
+	layoutCreateInfo.setLayoutCount = static_cast<uint32_t>(std::size(layouts));
 	layoutCreateInfo.pSetLayouts = layouts;
 	VULKAN_CALL(vkCreatePipelineLayout(vulkan.device, &layoutCreateInfo, nullptr, &layout));
 }
@@ -396,11 +404,14 @@ void VulkanNativePipeline::cleanup(VulkanState& vulkan) {
 	if (layout)
 		vkDestroyPipelineLayout(vulkan.device, layout, nullptr);
 
-	if (textureSetLayout)
-		vkDestroyDescriptorSetLayout(vulkan.device, textureSetLayout, nullptr);
+	if (texturesSetLayout)
+		vkDestroyDescriptorSetLayout(vulkan.device, texturesSetLayout, nullptr);
+	
+	if (samplersSetLayout)
+		vkDestroyDescriptorSetLayout(vulkan.device, samplersSetLayout, nullptr);
 
-	if (imageSetLayout)
-		vkDestroyDescriptorSetLayout(vulkan.device, imageSetLayout, nullptr);
+	if (imagesSetLayout)
+		vkDestroyDescriptorSetLayout(vulkan.device, imagesSetLayout, nullptr);
 }
 
 namespace vulkan {

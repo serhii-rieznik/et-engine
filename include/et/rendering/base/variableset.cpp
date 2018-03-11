@@ -71,44 +71,19 @@ const std::string& materialVariableToString(MaterialVariable p) {
 	return materialVariableNames.at(p);
 }
 
-const std::map<MaterialTexture, std::string>& materialTextureNames() {
-	static const std::map<MaterialTexture, std::string> localMap =
-	{
-		{ MaterialTexture::BaseColor, "baseColorTexture" },
-		{ MaterialTexture::Normal, "normalTexture" },
-		{ MaterialTexture::Roughness, "roughnessTexture" },
-		{ MaterialTexture::Metallness, "metallnessTexture" },
-		{ MaterialTexture::EmissiveColor, "emissiveColorTexture" },
-		{ MaterialTexture::Opacity, "opacityTexture" },
-		{ MaterialTexture::Shadow, "shadowTexture" },
-		{ MaterialTexture::AmbientOcclusion, "aoTexture" },
-		{ MaterialTexture::ConvolvedDiffuse, "convolvedDiffuseTexture" },
-		{ MaterialTexture::ConvolvedSpecular, "convolvedSpecularTexture" },
-		{ MaterialTexture::BRDFLookup, "brdfLookupTexture" },
-		{ MaterialTexture::Noise, "NoiseTexture" },
-		{ MaterialTexture::LTCTransform, "LTCTransformTexture" },
-	};
-	return localMap;
-}
+namespace MaterialTexture {
 
-const std::map<MaterialTexture, std::string>& materialSamplerNames() {
-	static const std::map<MaterialTexture, std::string> names =
-	{
-		{ MaterialTexture::BaseColor, "baseColorSampler" },
-		{ MaterialTexture::Normal, "normalSampler" },
-		{ MaterialTexture::Roughness, "roughnessSampler" },
-		{ MaterialTexture::Metallness, "metallnessSampler" },
-		{ MaterialTexture::EmissiveColor, "emissiveColorSampler" },
-		{ MaterialTexture::Opacity, "opacitySampler" },
-		{ MaterialTexture::Shadow, "shadowSampler" },
-		{ MaterialTexture::AmbientOcclusion, "aoSampler" },
-		{ MaterialTexture::ConvolvedDiffuse, "convolvedDiffuseSampler" },
-		{ MaterialTexture::ConvolvedSpecular, "convolvedSpecularSampler" },
-		{ MaterialTexture::BRDFLookup, "brdfLookupSampler" },
-		{ MaterialTexture::Noise, "NoiseSampler" },
-		{ MaterialTexture::LTCTransform, "LTCTransformSampler" },
-	};
-	return names;
+const std::string MaterialTexture::BaseColor = "baseColor";
+const std::string MaterialTexture::Normal = "normal";
+const std::string MaterialTexture::Opacity = "opacity";
+const std::string MaterialTexture::EmissiveColor = "emissiveColor";
+const std::string MaterialTexture::Shadow = "shadow";
+const std::string MaterialTexture::AmbientOcclusion = "ao";
+const std::string MaterialTexture::ConvolvedSpecular = "convolvedSpecular";
+const std::string MaterialTexture::BRDFLookup = "brdfLookup";
+const std::string MaterialTexture::Noise = "noise";
+const std::string MaterialTexture::LTCTransform = "ltcTransform";
+
 }
 
 static const std::map<StorageBuffer, std::string>& storageBufferNames() {
@@ -120,34 +95,6 @@ static const std::map<StorageBuffer, std::string>& storageBufferNames() {
 		{ StorageBuffer::StorageBuffer3, "storageBuffer3" },
 	};
 	return localMap;
-}
-
-const std::string& materialTextureToString(MaterialTexture t) {
-	ET_ASSERT(t < MaterialTexture::max);
-	return materialTextureNames().at(t);
-}
-
-MaterialTexture stringToMaterialTexture(const std::string& name) {
-	for (const auto& ts : materialTextureNames())
-	{
-		if (ts.second == name)
-			return ts.first;
-	}
-	return MaterialTexture::max;
-}
-
-const std::string& materialSamplerToString(MaterialTexture t) {
-	ET_ASSERT(t < MaterialTexture::max);
-	return materialSamplerNames().at(t);
-}
-
-MaterialTexture samplerToMaterialTexture(const std::string& name) {
-	for (const auto& ts : materialSamplerNames())
-	{
-		if (ts.second == name)
-			return ts.first;
-	}
-	return MaterialTexture::max;
 }
 
 ObjectVariable stringToObjectVariable(const std::string& name) {

@@ -21,7 +21,7 @@
 #include <et/app/application.h>
 
 #if (ET_DEBUG)
-#	define VULKAN_ENABLE_VALIDATION 1
+#	define VULKAN_ENABLE_VALIDATION 0
 #else
 #	define VULKAN_ENABLE_VALIDATION 0
 #endif

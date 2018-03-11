@@ -59,7 +59,7 @@ Buffer::Pointer ConstantBuffer::buffer() const
 	return _private->buffer;
 }
 
-void ConstantBuffer::flush(uint32_t frameNumber)
+void ConstantBuffer::flush(uint64_t frameNumber)
 {
 	if (_private->modified)
 	{

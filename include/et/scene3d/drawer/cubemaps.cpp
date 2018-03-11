@@ -63,7 +63,7 @@ void CubemapProcessor::process(RenderInterface::Pointer& renderer, DrawerOptions
 
 		renderer->beginRenderPass(_lookupPass, RenderPassBeginInfo::singlePass());
 		_lookupPass->nextSubpass();
-		_lookupPass->pushRenderBatch(renderhelper::createQuadBatch(renderer->checkersTexture(), _lookupGeneratorMaterial));
+		_lookupPass->pushRenderBatch(renderhelper::createQuadBatch(_lookupGeneratorMaterial));
 		_lookupPass->endSubpass();
 		renderer->submitRenderPass(_lookupPass);
 
@@ -76,8 +76,17 @@ void CubemapProcessor::process(RenderInterface::Pointer& renderer, DrawerOptions
 		renderer->beginRenderPass(_downsamplePass, _wholeCubemapBeginInfo);
 		_downsamplePass->loadSharedVariablesFromLight(light);
 
-		RenderBatch::Pointer copyBatch = renderhelper::createQuadBatch(_tex[CubemapType::Source],
-			hasFlag(CubemapAtmosphere) ? _atmosphereMaterial : _wrapMaterial, _eqMapSampler, ResourceRange(0, 1, 0, 1));
+		RenderBatch::Pointer copyBatch;
+		if (hasFlag(CubemapAtmosphere))
+		{
+			copyBatch = renderhelper::createQuadBatch(_atmosphereMaterial);
+		}
+		else
+		{
+			copyBatch = renderhelper::createQuadBatch(_wrapMaterial);
+			copyBatch->material()->setTexture("inputTexture", _tex[CubemapType::Source], ResourceRange(0, 1, 0, 1));
+			copyBatch->material()->setSampler("eqMapSampler", _eqMapSampler);
+		}
 
 		_downsamplePass->pushImageBarrier(_tex[CubemapType::Downsampled], ResourceBarrier(TextureState::ColorRenderTarget, 0, 1, 0, 6));
 		for (uint32_t face = 0; face < 6; ++face)
@@ -88,11 +97,11 @@ void CubemapProcessor::process(RenderInterface::Pointer& renderer, DrawerOptions
 			_downsamplePass->endSubpass();
 		}
 
-		RenderBatch::Pointer downsampleBatch = renderhelper::createQuadBatch(_tex[CubemapType::Downsampled], _downsampleMaterial, renderer->defaultSampler(), ResourceRange(0, 1, 0, 6));
+		RenderBatch::Pointer downsampleBatch = renderhelper::createQuadBatch(_downsampleMaterial);
 		for (uint32_t level = 1; level < CubemapLevels; ++level)
 		{
 			downsampleBatch->material()->setFloat(MaterialVariable::ExtraParameters, static_cast<float>(level));
-			downsampleBatch->material()->setTexture(MaterialTexture::BaseColor, _tex[CubemapType::Downsampled], { 0, level, 0, 6 });
+			downsampleBatch->material()->setTexture("inputTexture", _tex[CubemapType::Downsampled], { 0, level, 0, 6 });
 
 			_downsamplePass->pushImageBarrier(_tex[CubemapType::Downsampled],
 				ResourceBarrier(TextureState::ColorRenderTarget, level, 1, 0, 6));
@@ -109,7 +118,7 @@ void CubemapProcessor::process(RenderInterface::Pointer& renderer, DrawerOptions
 			}
 		}
 
-		_shConvolute->material()->setTexture(MaterialTexture::BaseColor, _tex[CubemapType::Downsampled]);
+		_shConvolute->material()->setTexture("inputTexture", _tex[CubemapType::Downsampled]);
 		_shConvolute->material()->setImage(StorageBuffer::StorageBuffer0, _shValues);
 
 		_downsamplePass->pushImageBarrier(_tex[CubemapType::Downsampled], ResourceBarrier(TextureState::ShaderResource, 0, CubemapLevels, 0, 6));
@@ -122,7 +131,7 @@ void CubemapProcessor::process(RenderInterface::Pointer& renderer, DrawerOptions
 		_grabHarmonicsFrame = RendererFrameCount;
 
 		//*
-		_specularConvolveBatch->material()->setTexture(MaterialTexture::BaseColor, _tex[CubemapType::Downsampled]);
+		_specularConvolveBatch->material()->setTexture("inputTexture", _tex[CubemapType::Downsampled]);
 		renderer->beginRenderPass(_specularConvolvePass, _wholeCubemapBeginInfo);
 		for (uint32_t i = 0, e = static_cast<uint32_t>(_wholeCubemapBeginInfo.subpasses.size()); i < e; ++i)
 		{
@@ -140,7 +149,7 @@ void CubemapProcessor::process(RenderInterface::Pointer& renderer, DrawerOptions
 
 		/*
 		_diffuseConvolvePass->begin(_oneLevelCubemapBeginInfo);
-		_diffuseConvolveBatch->material()->setTexture(MaterialTexture::BaseColor, _tex[CubemapType::Downsampled]);
+		_diffuseConvolveBatch->material()->setTexture("inputTexture", _tex[CubemapType::Downsampled]);
 		for (uint32_t i = 0, e = 6; i < e; ++i)
 		{
 			uint32_t face = i % 6;
@@ -258,7 +267,7 @@ void CubemapProcessor::validate(RenderInterface::Pointer& renderer) {
 		passInfo.name = "cubemap-specular-convolution";
 		passInfo.priority = passPriority--;
 		_specularConvolvePass = renderer->allocateRenderPass(passInfo);
-		_specularConvolveBatch = renderhelper::createQuadBatch(_tex[CubemapType::Downsampled], _processingMaterial);
+		_specularConvolveBatch = renderhelper::createQuadBatch("inputTexture", _tex[CubemapType::Downsampled], _processingMaterial);
 	}
 
 	if (_diffuseConvolvePass.invalid())
@@ -271,7 +280,8 @@ void CubemapProcessor::validate(RenderInterface::Pointer& renderer) {
 		passInfo.name = "cubemap-diffuse-convolution";
 		passInfo.priority = passPriority--;
 		_diffuseConvolvePass = renderer->allocateRenderPass(passInfo);
-		_diffuseConvolveBatch = renderhelper::createQuadBatch(_tex[CubemapType::Downsampled], _processingMaterial);
+		_diffuseConvolveBatch = renderhelper::createQuadBatch(_processingMaterial);
+		_diffuseConvolveBatch->material()->setTexture("inputTexture", _tex[CubemapType::Downsampled]);
 	}
 
 	if (_cubemapDebugPass.invalid())
@@ -283,13 +293,13 @@ void CubemapProcessor::validate(RenderInterface::Pointer& renderer) {
 		passInfo.name = "cubemap-visualize";
 		passInfo.priority = RenderPassPriority::UI + 1;
 		_cubemapDebugPass = renderer->allocateRenderPass(passInfo);
-		_cubemapDebugBatch = renderhelper::createQuadBatch(renderer->checkersTexture(), _processingMaterial, renderhelper::QuadType::Default);
+		_cubemapDebugBatch = renderhelper::createQuadBatch(_processingMaterial, renderhelper::QuadType::Default);
 	}
 
 	if (_shDebugBatch.invalid())
 	{
 		_shMaterial = renderer->sharedMaterialLibrary().loadMaterial(application().resolveFileName("engine_data/materials/spherical-harmonics-debug.json"));
-		_shDebugBatch = renderhelper::createQuadBatch(renderer->checkersTexture(), _shMaterial, renderhelper::QuadType::Default);
+		_shDebugBatch = renderhelper::createQuadBatch(_shMaterial, renderhelper::QuadType::Default);
 	}
 
 	if (_shValues.invalid())

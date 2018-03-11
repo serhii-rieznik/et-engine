@@ -2,7 +2,7 @@
 #include <inputdefines>
 #include <inputlayout>
 
-cbuffer ObjectVariables : DECL_BUFFER(Object)
+cbuffer ObjectVariables : DECL_OBJECT_BUFFER
 {
 	row_major float4x4 worldTransform;
 	row_major float4x4 viewProjectionTransform;

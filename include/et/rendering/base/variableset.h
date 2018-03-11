@@ -67,32 +67,19 @@ enum class MaterialVariable : uint32_t
 	max
 };
 
-enum class MaterialTexture : uint32_t
-{
-	// per-object textures
-	BaseColor,
-	Normal,
-	Roughness,
-	Metallness,
-	EmissiveColor,
-	Opacity,
+namespace MaterialTexture {
 
-	Shadow,
-	AmbientOcclusion,
-	ConvolvedDiffuse,
-	ConvolvedSpecular,
-	BRDFLookup,
-	Noise,
-	LTCTransform,
+extern const std::string BaseColor;
+extern const std::string Normal;
+extern const std::string EmissiveColor;
+extern const std::string Opacity;
+extern const std::string Shadow;
+extern const std::string AmbientOcclusion;
+extern const std::string ConvolvedSpecular;
+extern const std::string BRDFLookup;
+extern const std::string Noise;
+extern const std::string LTCTransform;
 
-	max,
-
-	// service values
-	FirstMaterialTexture = BaseColor,
-	LastMaterialTexture = EmissiveColor,
-
-	FirstSharedTexture = Shadow,
-	LastSharedTexture = LTCTransform,
 };
 
 enum class StorageBuffer
@@ -108,17 +95,14 @@ enum class StorageBuffer
 enum : uint32_t
 {
 	MaterialSamplerBindingOffset = 16,
-
 	ObjectVariable_max = static_cast<uint32_t>(ObjectVariable::max),
 	MaterialVariable_max = static_cast<uint32_t>(MaterialVariable::max),
-	MaterialTexture_max = static_cast<uint32_t>(MaterialTexture::max),
-
 	StorageBuffer_max = static_cast<uint32_t>(StorageBuffer::max),
 };
 
 struct MaterialTextureHolder
 {
-	MaterialTexture binding = MaterialTexture::max;
+	std::string binding;
 	Texture::Pointer texture;
 	uint32_t index = 0;
 };
@@ -126,7 +110,7 @@ using MaterialTexturesCollection = UnorderedMap<String, MaterialTextureHolder>;
 
 struct MaterialSamplerHolder
 {
-	MaterialTexture binding = MaterialTexture::max;
+	std::string binding;
 	Sampler::Pointer sampler;
 	uint32_t index = 0;
 };
@@ -144,10 +128,8 @@ template <class T>
 struct OptionalObject
 {
 	IntrusivePtr<T> object;
-	uint32_t index = 0;
-
+	 
 	void clear() {
-		index = 0;
 		object.reset(nullptr);
 	}
 };
@@ -155,12 +137,12 @@ struct OptionalObject
 struct OptionalTextureObject : public OptionalObject<Texture>
 {
 	ResourceRange range;
-	MaterialTexture binding = MaterialTexture::max;
+	std::string binding;
 };
 
 struct OptionalSamplerObject : public OptionalObject<Sampler>
 {
-	MaterialTexture binding = MaterialTexture::max;
+	std::string binding;
 };
 
 struct OptionalImageObject : public OptionalObject<Texture>
@@ -168,8 +150,8 @@ struct OptionalImageObject : public OptionalObject<Texture>
 	StorageBuffer binding = StorageBuffer::max;
 };
 
-using TexturesHolder = std::map<uint32_t, OptionalTextureObject>;
-using SamplersHolder = std::map<uint32_t, OptionalSamplerObject>;
+using TexturesHolder = UnorderedMap<std::string, OptionalTextureObject>;
+using SamplersHolder = UnorderedMap<std::string, OptionalSamplerObject>;
 using ImagesHolder = std::map<uint32_t, OptionalImageObject>;
 
 struct OptionalValue
@@ -233,12 +215,6 @@ ObjectVariable stringToObjectVariable(const std::string&);
 
 const std::string& materialVariableToString(MaterialVariable);
 MaterialVariable stringToMaterialVariable(const std::string&);
-
-const std::string& materialSamplerToString(MaterialTexture);
-MaterialTexture samplerToMaterialTexture(const std::string&);
-
-const std::string& materialTextureToString(MaterialTexture);
-MaterialTexture stringToMaterialTexture(const std::string&);
 
 const std::string& storageBufferToString(StorageBuffer);
 StorageBuffer stringToStorageBuffer(const std::string&);

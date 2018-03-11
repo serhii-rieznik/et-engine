@@ -146,12 +146,12 @@ Texture::Pointer HDRFlow::anitialiasStep(Texture::Pointer input) {
 	if (_taa.batch.invalid() || (_taa.batch->material()->texture(MaterialTexture::BaseColor) != input))
 	{
 		_taa.batch = renderhelper::createQuadBatch(input, _materials.posteffects, _renderer->clampSampler());
-		_taa.batch->material()->setTextureWithSampler(MaterialTexture::EmissiveColor, _taa.history, _renderer->clampSampler());
+		_taa.batch->material()->setTexture(MaterialTexture::EmissiveColor, _taa.history);
 	}
 
 	_renderer->beginRenderPass(_taa.pass, RenderPassBeginInfo::singlePass());
 	{
-		_taa.batch->material()->setTextureWithSampler(MaterialTexture::Normal, vel, _renderer->clampSampler());
+		_taa.batch->material()->setTexture(MaterialTexture::Normal, vel);
 		_taa.pass->setSharedVariable(ObjectVariable::CameraJitter, drawer()->latestCameraJitter());
 		_taa.pass->addSingleRenderBatchSubpass(_taa.batch);
 
@@ -179,8 +179,8 @@ Texture::Pointer HDRFlow::tonemapStep(Texture::Pointer input) {
 		_tonemap.batch = renderhelper::createQuadBatch(input, _materials.posteffects, _renderer->clampSampler());
 	}
 
-	_tonemap.batch->material()->setTextureWithSampler(MaterialTexture::Shadow, _colorGradingTexture, _colorGradingSampler);
-	_tonemap.batch->material()->setTextureWithSampler(MaterialTexture::EmissiveColor, _lum.computed, _renderer->clampSampler());
+	_tonemap.batch->material()->setTexture(MaterialTexture::Shadow, _colorGradingTexture);
+	_tonemap.batch->material()->setTexture(MaterialTexture::EmissiveColor, _lum.computed);
 	_renderer->submitPassWithRenderBatch(_tonemap.pass, _tonemap.batch);
 
 	return _tonemap.pass->colorTarget(0);

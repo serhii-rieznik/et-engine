@@ -176,6 +176,7 @@ enum DescriptorSetClass : uint32_t
 {
 	Buffers,
 	Textures,
+	Samplers,
 	Images,
 
 	DescriptorSetClass_Count,
@@ -186,8 +187,9 @@ struct VulkanNativePipeline
 {
 	VkPipeline pipeline = nullptr;
 	VkPipelineLayout layout = nullptr;
-	VkDescriptorSetLayout textureSetLayout = nullptr;
-	VkDescriptorSetLayout imageSetLayout = nullptr;
+	VkDescriptorSetLayout texturesSetLayout = nullptr;
+	VkDescriptorSetLayout samplersSetLayout = nullptr;
+	VkDescriptorSetLayout imagesSetLayout = nullptr;
 
 	void buildLayout(VulkanState& vulkan, const Program::Reflection&, VkDescriptorSetLayout buffersSet);
 	void cleanup(VulkanState& vulkan);
@@ -222,8 +224,11 @@ struct VulkanNativeSampler
 
 struct VulkanNativeTextureSet
 {
-	VkDescriptorSetLayout descriptorSetLayout = nullptr;
-	VkDescriptorSet descriptorSet = nullptr;
+	VkDescriptorSetLayout texturesSetLayout = nullptr;
+	VkDescriptorSet texturesSet = nullptr;
+	
+	VkDescriptorSetLayout samplersSetLayout = nullptr;
+	VkDescriptorSet samplersSet = nullptr;
 };
 
 struct VulkanNativeBuffer

@@ -35,6 +35,8 @@ void MaterialLibrary::init(RenderInterface* ren)
 {
 	_renderer = ren;
 	_cache.startMonitoring();
+
+	loadDefaultMaterial(DefaultMaterial::Microfacet);
 }
 
 void MaterialLibrary::shutdown()

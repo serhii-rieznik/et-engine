@@ -1,9 +1,7 @@
 #include <et>
 
-RWTexture2D<float4> outputTest : DECL_STORAGE(0);
-
-Texture2D<float4> baseColorTexture : DECL_TEXTURE(BaseColor);
-SamplerState baseColorSampler : DECL_SAMPLER(BaseColor);
+Texture2D<float4> baseColor : DECLARE_TEXTURE;
+RWTexture2D<float4> outputTest : DECLARE_STORAGE;
 
 struct CSInput
 {
@@ -18,11 +16,11 @@ void computeMain(CSInput input)
 	float w = 0.0;
 	float h = 0.0;
 	float levels = 0.0;
-	baseColorTexture.GetDimensions(0, w, h, levels);
+	baseColor.GetDimensions(0, w, h, levels);
 	float u = float(input.dispatchThreadId.x) / w;
 	float v = float(input.dispatchThreadId.y) / h;
 
-	float3 color = baseColorTexture.SampleLevel(baseColorSampler, float2(u, v), 0.0).xyz;
+	float3 color = baseColor.SampleLevel(LinearClamp, float2(u, v), 0.0).xyz;
 	float lum = saturate(dot(color, float3(0.3, 0.58, 0.11)));
 
 	uint2 dst = uint2(uint(255 * lum), 0);

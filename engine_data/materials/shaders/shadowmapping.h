@@ -1,15 +1,13 @@
-Texture2D<float4> shadowTexture : DECL_TEXTURE(Shadow);
+Texture2D<float4> shadow : DECLARE_TEXTURE;
 
 static const float PCFShadowRadius = 2.0;
 static const float ShadowMapBias = 0.003 * PCFShadowRadius;
 
 #if (ShadowMapping == ShadowMappingMoments)
 
-SamplerState shadowSampler : DECL_SAMPLER(Shadow);
-
 float sampleMomentsShadow(in float2 shadowTexCoord, in float fragmentDepth, in float2 shadowmapSize)
 {
-	float4 moments = decodeMoments(shadowTexture.Sample(shadowSampler, shadowTexCoord));
+	float4 moments = decodeMoments(shadow.Sample(LinearClamp, shadowTexCoord));
 
 	// Bias input data to avoid artifacts
 	float4 b = lerp(moments, float4(0.5f, 0.5f, 0.5f, 0.5f), MomentBias);
@@ -57,7 +55,7 @@ float sampleMomentsShadow(in float2 shadowTexCoord, in float fragmentDepth, in f
 }
 #else
 
-SamplerComparisonState shadowSampler : DECL_SAMPLER(Shadow);
+SamplerComparisonState shadowSampler : DECLARE_EXPLICIT_SAMPLER;
 
 #endif
 
@@ -82,7 +80,7 @@ float sampleShadow(in float3 shadowTexCoord, in float rotationKernel, in float2 
 	for (uint i = 0; i < 9; ++i)
 	{
 		float2 o = PCFShadowRadius * (Distribution[i] / shadowmapSize);
-		shadow += shadowTexture.SampleCmpLevelZero(shadowSampler, scaledUV + o, biasedZ);
+		shadow += shadow.SampleCmpLevelZero(shadowSampler, scaledUV + o, biasedZ);
 	}
 
 	return shadow / 9.0;
@@ -105,18 +103,18 @@ float sampleShadow(in float3 shadowTexCoord, in float rotationKernel, in float2 
 	float sn = sin(angle);
 	float cs = cos(angle);
 	
-	float shadow = 0.0;
+	float result = 0.0;
 	for (uint i = 0; i < 9; ++i)
 	{
 		float2 o = PoissonDistribution[i] / shadowmapSize;
 		float2 r = PCFShadowRadius * float2(dot(o, float2(cs, -sn)), dot(o, float2(sn,  cs)));
-		shadow += shadowTexture.SampleCmpLevelZero(shadowSampler, scaledUV + r, biasedZ);
+		result += shadow.SampleCmpLevelZero(shadowSampler, scaledUV + r, biasedZ);
 	}
-	return (shadow / 9.0);
+	return (result / 9.0);
 
 #else
 
-	return shadowTexture.SampleCmpLevelZero(shadowSampler, scaledUV, biasedZ);
+	return shadow.SampleCmpLevelZero(shadowSampler, scaledUV, biasedZ);
 
 #endif	
 }

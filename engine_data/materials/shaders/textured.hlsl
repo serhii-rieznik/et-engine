@@ -2,16 +2,15 @@
 #include <inputdefines>
 #include <inputlayout>
 
-Texture2D<float4> baseColorTexture : DECL_TEXTURE(BaseColor);
-SamplerState baseColorSampler : DECL_SAMPLER(BaseColor);
+Texture2D<float4> baseColor : DECLARE_TEXTURE;
 
-cbuffer ObjectVariables : DECL_BUFFER(Object) 
+cbuffer ObjectVariables : DECL_OBJECT_BUFFER 
 {
 	row_major float4x4 worldTransform; 
 	row_major float4x4 viewProjectionTransform;
 };
 
-cbuffer MaterialVariables : DECL_BUFFER(Material) 
+cbuffer MaterialVariables : DECL_MATERIAL_BUFFER 
 {
 	float4 extraParameters;
 };
@@ -42,11 +41,11 @@ VSOutput vertexMain(uint vertexIndex : SV_VertexID)
 float4 fragmentMain(VSOutput fsIn) : SV_Target0
 {
 #if (DISPLAY_DEPTH)
-	float sample = baseColorTexture.SampleLevel(baseColorSampler, fsIn.texCoord0, 0.0).x;
+	float sample = baseColor.SampleLevel(PointClamp, fsIn.texCoord0, 0.0).x;
 	return pow(sample, 1.0);
 #elif (SPECIFIC_LOD)
-	return baseColorTexture.SampleLevel(baseColorSampler, fsIn.texCoord0, extraParameters.x);
+	return baseColor.SampleLevel(LinearClamp, fsIn.texCoord0, extraParameters.x);
 #else
-	return baseColorTexture.Sample(baseColorSampler, fsIn.texCoord0);
+	return baseColor.Sample(LinearClamp, fsIn.texCoord0);
 #endif
 }

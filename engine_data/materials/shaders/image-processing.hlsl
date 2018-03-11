@@ -3,10 +3,9 @@
 #include <options>
 #include "srgb.h"
 
-Texture2D<float4> baseColorTexture : DECL_TEXTURE(BaseColor);
-SamplerState baseColorSampler : DECL_SAMPLER(BaseColor);
+Texture2D<float4> baseColor : DECLARE_TEXTURE;
 
-cbuffer MaterialVariables : DECL_BUFFER(Material) 
+cbuffer MaterialVariables : DECL_MATERIAL_BUFFER 
 {
 	float4 extraParameters;
 };
@@ -24,10 +23,10 @@ float4 fragmentMain(VSOutput fsIn) : SV_Target0
 	static const int radius = 4;
 
 	if (radius == 0)
-		return baseColorTexture.Sample(baseColorSampler, fsIn.texCoord0);
+		return baseColor.Sample(LinearClamp, fsIn.texCoord0);
 
 	float3 textureSize = 0.0;
-	baseColorTexture.GetDimensions(0, textureSize.x, textureSize.y, textureSize.z);
+	baseColor.GetDimensions(0, textureSize.x, textureSize.y, textureSize.z);
 
 	float2 texel = extraParameters.xy / textureSize.xy;
 	float2 coord = fsIn.texCoord0 - float(radius) * texel;
@@ -38,7 +37,7 @@ float4 fragmentMain(VSOutput fsIn) : SV_Target0
 	{
 		float w = 1.0 - abs(float(i) / float(radius));
 		weight += w;
-		result += w * baseColorTexture.Sample(baseColorSampler, coord);
+		result += w * baseColor.Sample(LinearClamp, coord);
 		coord += texel;
 	}
 	

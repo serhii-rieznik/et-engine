@@ -19,12 +19,6 @@ struct VulkanRenderSubpass
 	VkRect2D scissor{ };
 };
 
-uint64_t framebufferHash(uint32_t imageIndex, uint32_t mipLevel, uint32_t layer) {
-	return static_cast<uint64_t>(layer) |
-		((static_cast<uint64_t>(mipLevel) & 0xFFFF) << 32) |
-		((static_cast<uint64_t>(imageIndex) & 0xFFFF) << 48);
-}
-
 class VulkanRenderPassPrivate : public VulkanNativeRenderPass
 {
 public:
@@ -220,13 +214,18 @@ void VulkanRenderPass::begin(const RendererFrame& frame, const RenderPassBeginIn
 	bool useCustomDepth = info().depth.targetClass == RenderTarget::Class::Texture;
 	uint32_t defaultWidth = _private->vulkan.swapchain.extent.width;
 	uint32_t defaultHeight = _private->vulkan.swapchain.extent.height;
-	uint32_t framebufferIndex = _private->buildingFrame.index();
+	uint64_t framebufferIndex = _private->buildingFrame.index();
 
 	if ((useCustomColor && renderTarget.valid()) || (useCustomDepth && depthTarget.valid()))
 		framebufferIndex = 0;
 
 	for (const RenderSubpass& subpass : beginInfo.subpasses)
 	{
+		auto framebufferHash = [](uint64_t imageIndex, uint32_t mipLevel, uint32_t layer) -> uint64_t {
+			return static_cast<uint64_t>(layer) | ((static_cast<uint64_t>(mipLevel) & 0xFFFF) << 32) |
+				((static_cast<uint64_t>(imageIndex) & 0xFFFF) << 48);
+		};
+
 		uint64_t hash = framebufferHash(framebufferIndex, subpass.level, subpass.layer);
 
 		uint32_t width = defaultWidth;
@@ -375,8 +374,11 @@ void VulkanRenderPass::pushRenderBatch(const MaterialInstance::Pointer& inMateri
 	MaterialInstance::Pointer material = inMaterial;
 	for (const auto& sh : sharedTextures())
 	{
-		material->setTexture(sh.first, sh.second.first);
-		material->setSampler(sh.first, sh.second.second);
+		if (sh.second.first.valid())
+			material->setTexture(sh.first, sh.second.first);
+
+		if (sh.second.second.valid())
+			material->setSampler(sh.first, sh.second.second);
 	}
 	Vector<Object::Pointer>& usedObjects = _private->currentContent().usedObjects;
 	usedObjects.reserve(usedObjects.size() + 6);
@@ -396,8 +398,9 @@ void VulkanRenderPass::pushRenderBatch(const MaterialInstance::Pointer& inMateri
 
 	VkDescriptorSet descriptorSets[DescriptorSetClass_Count] = {
 		_private->dynamicDescriptorSet,
-		textureSet->nativeSet().descriptorSet,
-		imageSet->nativeSet().descriptorSet,
+		textureSet->nativeSet().texturesSet,
+		textureSet->nativeSet().samplersSet,
+		imageSet->nativeSet().texturesSet,
 	};
 
 	uint32_t dynamicOffsets[DescriptorSetClass::DynamicDescriptorsCount] = {
@@ -463,8 +466,9 @@ void VulkanRenderPass::dispatchCompute(const Compute::Pointer& compute, const ve
 
 	VkDescriptorSet descriptorSets[DescriptorSetClass_Count] = {
 		_private->dynamicDescriptorSet,
-		textureSet->nativeSet().descriptorSet,
-		imageSet->nativeSet().descriptorSet,
+		textureSet->nativeSet().texturesSet,
+		textureSet->nativeSet().samplersSet,
+		imageSet->nativeSet().texturesSet,
 	};
 
 	uint32_t dynamicOffsets[DescriptorSetClass::DynamicDescriptorsCount] = {

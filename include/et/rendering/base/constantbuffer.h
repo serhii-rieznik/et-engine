@@ -51,7 +51,7 @@ public:
 	uint64_t flushFrame() const 
 		{ return _flushFrame;  }
 
-	void flush(uint32_t frame) 
+	void flush(uint64_t frame) 
 		{ _flushFrame = frame; }
 
 	bool operator == (const ConstantBufferEntry& r) const 
@@ -65,7 +65,7 @@ private:
 	uint64_t _offset = 0;
 	uint64_t _length = 0;
 	uint32_t _allocationClass = 0;
-	uint32_t _flushFrame = InvalidFlushFrame;
+	uint64_t _flushFrame = InvalidFlushFrame;
 };
 
 class RenderInterface;
@@ -87,7 +87,7 @@ public:
 	void shutdown();
 
 	Buffer::Pointer buffer() const;
-	void flush(uint32_t);
+	void flush(uint64_t);
 
 	const ConstantBufferEntry::Pointer& allocate(uint64_t size, uint32_t allocationClass);
 

@@ -43,13 +43,12 @@ public:
 	void releaseInstances();
 	void invalidateInstances();
 
-	void setTexture(MaterialTexture, const Texture::Pointer&, const ResourceRange& = ResourceRange::whole);
-	void setSampler(MaterialTexture, const Sampler::Pointer&);
-	void setTextureWithSampler(MaterialTexture, const Texture::Pointer&, const Sampler::Pointer&, const ResourceRange& = ResourceRange::whole);
+	void setTexture(const std::string&, const Texture::Pointer&, const ResourceRange& = ResourceRange::whole);
+	void setSampler(const std::string&, const Sampler::Pointer&);
 	void setImage(StorageBuffer, const Texture::Pointer&);
 
-	const Texture::Pointer& texture(MaterialTexture);
-	const Sampler::Pointer& sampler(MaterialTexture);
+	const Texture::Pointer& texture(const std::string&);
+	const Sampler::Pointer& sampler(const std::string&);
 	const Texture::Pointer& image(StorageBuffer);
 
 	void setVector(MaterialVariable, const vec4&);
@@ -98,8 +97,13 @@ protected: // overrided / read by instanaces
 	ImagesHolder images;
 	VariablesHolder properties;
 
+	virtual bool validateTextureName(const std::string&);
+	virtual bool validateSamplerName(const std::string&);
+
 private: // permanent private data
 	static std::string _shaderDefaultHeader;
+	Set<std::string> _usedTextures;
+	Set<std::string> _usedSamplers;
 	RenderInterface* _renderer = nullptr;
 	MaterialInstanceCollection _activeInstances;
 	MaterialInstanceCollection _instancesPool;
@@ -131,6 +135,9 @@ public:
 
 	void serialize(std::ostream&) const;
 	void deserialize(std::istream&);
+
+	bool validateTextureName(const std::string&) override;
+	bool validateSamplerName(const std::string&) override;
 
 private:
 	friend class Material;

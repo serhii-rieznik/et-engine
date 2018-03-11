@@ -211,7 +211,7 @@ void Drawer::validate(RenderInterface::Pointer& renderer) {
 
 		{
 			Material::Pointer material = renderer->sharedMaterialLibrary().loadMaterial(application().resolveFileName("engine_data/materials/screen-space-shadows.json"));
-			_main.screenSpaceShadowsBatch = renderhelper::createQuadBatch(_main.depth, material, renderer->nearestSampler());
+			_main.screenSpaceShadowsBatch = renderhelper::createQuadBatch("sceneDepth", _main.depth, material);
 
 			RenderPass::ConstructionInfo screenSpaceShadowsInfo("screen-space-shadows");
 			screenSpaceShadowsInfo.color[0].texture = _main.screenSpaceShadowsTexture;
@@ -221,7 +221,7 @@ void Drawer::validate(RenderInterface::Pointer& renderer) {
 
 		{
 			Material::Pointer material = renderer->sharedMaterialLibrary().loadMaterial(application().resolveFileName("engine_data/materials/screen-space-ao.json"));
-			_main.screenSpaceAOBatch = renderhelper::createQuadBatch(_main.depth, material, renderer->nearestSampler());
+			_main.screenSpaceAOBatch = renderhelper::createQuadBatch("sceneDepth", _main.depth, material);
 
 			RenderPass::ConstructionInfo screenSpaceAOInfo("screen-space-ao");
 			screenSpaceAOInfo.color[0].texture = _main.screenSpaceAOTexture;
@@ -250,11 +250,10 @@ void Drawer::validate(RenderInterface::Pointer& renderer) {
 		passInfo.depth.targetClass = RenderTarget::Class::Texture;
 
 		_main.forward = renderer->allocateRenderPass(passInfo);
-		_main.forward->setSharedTexture(MaterialTexture::ConvolvedDiffuse, _cubemapProcessor->convolvedDiffuseCubemap(), renderer->defaultSampler());
-		_main.forward->setSharedTexture(MaterialTexture::ConvolvedSpecular, _cubemapProcessor->convolvedSpecularCubemap(), renderer->defaultSampler());
-		_main.forward->setSharedTexture(MaterialTexture::BRDFLookup, _cubemapProcessor->brdfLookupTexture(), renderer->clampSampler());
-		_main.forward->setSharedTexture(MaterialTexture::Noise, _main.noise, renderer->nearestSampler());
-		_main.forward->setSharedTexture(MaterialTexture::LTCTransform, _main.ltcTransform, renderer->defaultSampler());
+		_main.forward->setSharedTexture(MaterialTexture::ConvolvedSpecular, _cubemapProcessor->convolvedSpecularCubemap());
+		_main.forward->setSharedTexture(MaterialTexture::BRDFLookup, _cubemapProcessor->brdfLookupTexture());
+		_main.forward->setSharedTexture(MaterialTexture::Noise, _main.noise);
+		_main.forward->setSharedTexture(MaterialTexture::LTCTransform, _main.ltcTransform);
 
 		passInfo.name = "z-prepass";
 		passInfo.color[0].targetClass = RenderTarget::Class::Disabled;
@@ -268,7 +267,7 @@ void Drawer::validate(RenderInterface::Pointer& renderer) {
 		_lighting.environmentMaterial = renderer->sharedMaterialLibrary().loadDefaultMaterial(DefaultMaterial::EnvironmentMap);
 
 	if (_lighting.environmentBatch.invalid())
-		_lighting.environmentBatch = renderhelper::createQuadBatch(_cubemapProcessor->convolvedSpecularCubemap(), _lighting.environmentMaterial);
+		_lighting.environmentBatch = renderhelper::createQuadBatch("convolvedSpecular", _cubemapProcessor->convolvedSpecularCubemap(), _lighting.environmentMaterial);
 
 	_cache.flush();
 }

@@ -1,9 +1,7 @@
 #include <et>
 
-TextureCube<float4> baseColorTexture : DECL_TEXTURE(BaseColor);
-SamplerState baseColorSampler : DECL_SAMPLER(BaseColor);
-
-RWTexture2D<float4> outputImage : DECL_STORAGE(0);
+TextureCube<float4> inputTexture : DECLARE_TEXTURE;
+RWTexture2D<float4> outputImage : DECLARE_STORAGE;
 
 struct CSInput
 {
@@ -62,7 +60,7 @@ void computeMain(CSInput input)
 
 	uint level0Width = 0;
 	uint level0Height = 0;
-	baseColorTexture.GetDimensions(level0Width, level0Height);
+	inputTexture.GetDimensions(level0Width, level0Height);
 
 	uint w = max(1, level0Width >> sampledLevel);
 	uint h = max(1, level0Height >> sampledLevel);
@@ -84,7 +82,7 @@ void computeMain(CSInput input)
 			float u = (float(x) / float(w - 1)) * 2.0 - 1.0;
 			float solidAngle = texelSolidAngle(u, v, invFaceSize);
 			float3 direction = normalize(a0 + a1 * u + a2 * v);
-			float3 radiance = baseColorTexture.SampleLevel(baseColorSampler, direction, sampledLevel).xyz;
+			float3 radiance = inputTexture.SampleLevel(LinearWrap, direction, sampledLevel).xyz;
 			sh[0] += radiance * (solidAngle);
 			sh[1] += radiance * (solidAngle  * direction.y);
 			sh[2] += radiance * (solidAngle  * direction.z);

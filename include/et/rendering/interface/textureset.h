@@ -35,9 +35,9 @@ public:
 
 	struct DescriptionSet
 	{		
-		Map<MaterialTexture, TextureBinding> textures;
-		Map<MaterialTexture, Sampler::Pointer> samplers;
-		Map<StorageBuffer, Texture::Pointer> images;
+		Map<uint32_t, TextureBinding> textures;
+		Map<uint32_t, Texture::Pointer> images;
+		Map<uint32_t, Sampler::Pointer> samplers;
 	};
 	using Description = Map<ProgramStage, DescriptionSet>;
 

@@ -78,7 +78,7 @@ public:
 
 	void linkSkeleton(s3d::ElementContainer::Pointer);
 	void buildBlendWeightsForMesh(s3d::Mesh::Pointer);
-	void loadMaterialTextureValue(MaterialInstance::Pointer, MaterialTexture, FbxSurfaceMaterial* fbxm, const char* fbxprop);
+	void loadMaterialTextureValue(MaterialInstance::Pointer, const std::string&, FbxSurfaceMaterial* fbxm, const char* fbxprop);
 
 	template <class Remap>
 	void loadMaterialValue(MaterialInstance::Pointer m, MaterialVariable, FbxSurfaceMaterial* fbxm, 
@@ -468,8 +468,7 @@ void et::FBXLoaderPrivate::loadNode(s3d::Storage& storage, FbxNode* node, s3d::B
 	}
 }
 
-void FBXLoaderPrivate::loadMaterialTextureValue(MaterialInstance::Pointer m, MaterialTexture texId,
-	FbxSurfaceMaterial* fbxm, const char* fbxprop)
+void FBXLoaderPrivate::loadMaterialTextureValue(MaterialInstance::Pointer m, const std::string& texId, FbxSurfaceMaterial* fbxm, const char* fbxprop)
 {
 	FbxProperty value = fbxm->FindProperty(fbxprop);
 	if (!value.IsValid())
@@ -605,8 +604,6 @@ MaterialInstance::Pointer FBXLoaderPrivate::loadMaterial(FbxSurfaceMaterial* mat
 		loadMaterialTextureValue(m, MaterialTexture::BaseColor, mat, FbxSurfaceMaterial::sDiffuse);
 		loadMaterialTextureValue(m, MaterialTexture::EmissiveColor, mat, FbxSurfaceMaterial::sEmissive);
 		loadMaterialTextureValue(m, MaterialTexture::Normal, mat, FbxSurfaceMaterial::sNormalMap);
-		loadMaterialTextureValue(m, MaterialTexture::Metallness, mat, FbxSurfaceMaterial::sSpecularFactor);
-		loadMaterialTextureValue(m, MaterialTexture::Roughness, mat, FbxSurfaceMaterial::sShininess);
 		loadMaterialTextureValue(m, MaterialTexture::Opacity, mat, FbxSurfaceMaterial::sTransparentColor);
 	}
 	

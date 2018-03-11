@@ -32,10 +32,12 @@ const RenderPass::ConstructionInfo& RenderPass::info() const {
 	return _info;
 }
 
-void RenderPass::setSharedTexture(MaterialTexture texId, const Texture::Pointer& tex, const Sampler::Pointer& smp) {
-	ET_ASSERT(texId >= MaterialTexture::FirstSharedTexture);
-	ET_ASSERT(texId <= MaterialTexture::LastSharedTexture);
+void RenderPass::setSharedTexture(const std::string& texId, const Texture::Pointer& tex) {
 	_sharedTextures[texId].first = tex;
+}
+
+void RenderPass::setSharedTexture(const std::string& texId, const Texture::Pointer& tex, const Sampler::Pointer& smp) {
+	setSharedTexture(texId, tex);
 	_sharedTextures[texId].second = smp;
 }
 

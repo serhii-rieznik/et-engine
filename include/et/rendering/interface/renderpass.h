@@ -116,7 +116,8 @@ public:
 
 	const ConstructionInfo& info() const;
 
-	void setSharedTexture(MaterialTexture, const Texture::Pointer&, const Sampler::Pointer&);
+	void setSharedTexture(const std::string&, const Texture::Pointer&);
+	void setSharedTexture(const std::string&, const Texture::Pointer&, const Sampler::Pointer&);
 
 	template <class T>
 	void setSharedVariable(ObjectVariable var, const T& value);
@@ -143,7 +144,7 @@ public:
 	const Texture::Pointer& colorTarget(uint32_t = 0) const;
 
 protected:
-	using SharedTexturesSet = std::map<MaterialTexture, std::pair<Texture::Pointer, Sampler::Pointer>>;
+	using SharedTexturesSet = UnorderedMap<std::string, std::pair<Texture::Pointer, Sampler::Pointer>>;
 	const SharedTexturesSet& sharedTextures() const { return _sharedTextures; }
 	const VariablesHolder& sharedVariables() const { return _sharedVariables; }
 

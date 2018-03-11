@@ -7,7 +7,7 @@
 #define EnableClearCoat 0
 #define EnableIridescence 0
 
-cbuffer MaterialVariables : DECL_BUFFER(Material)
+cbuffer MaterialVariables : DECL_MATERIAL_BUFFER
 {
     float4 diffuseReflectance;
     float4 specularReflectance;
@@ -16,7 +16,7 @@ cbuffer MaterialVariables : DECL_BUFFER(Material)
     float metallnessScale;
 };
 
-cbuffer ObjectVariables : DECL_BUFFER(Object)
+cbuffer ObjectVariables : DECL_OBJECT_BUFFER
 {
     row_major float4x4 viewProjectionTransform;
     row_major float4x4 previousViewProjectionTransform;
@@ -36,26 +36,13 @@ cbuffer ObjectVariables : DECL_BUFFER(Object)
 	float continuousTime;
 };
 
-Texture2D<float4> baseColorTexture : DECL_TEXTURE(BaseColor);
-SamplerState baseColorSampler : DECL_SAMPLER(BaseColor);
-
-Texture2D<float4> normalTexture : DECL_TEXTURE(Normal);
-SamplerState normalSampler : DECL_SAMPLER(Normal);
-
-Texture2D<float4> brdfLookupTexture : DECL_TEXTURE(BrdfLookup);
-SamplerState brdfLookupSampler : DECL_SAMPLER(BrdfLookup);
-
-Texture2D<float4> opacityTexture : DECL_TEXTURE(Opacity);
-SamplerState opacitySampler : DECL_SAMPLER(Opacity);
-
-Texture2D<float> noiseTexture : DECL_TEXTURE(Noise);
-SamplerState noiseSampler : DECL_SAMPLER(Noise);
-
-Texture2D<float4> ltcTexture : DECL_TEXTURE(LTCTransform);
-SamplerState ltcSampler : DECL_SAMPLER(LTCTransform);
-
-Texture2D<float> aoTexture : DECL_TEXTURE(Ao);
-SamplerState aoSampler : DECL_SAMPLER(Ao);
+Texture2D<float4> baseColor : DECLARE_TEXTURE;
+Texture2D<float4> normal : DECLARE_TEXTURE;
+Texture2D<float4> brdfLookup : DECLARE_TEXTURE;
+Texture2D<float4> opacity : DECLARE_TEXTURE;
+Texture2D<float4> ltcTransform : DECLARE_TEXTURE;
+Texture2D<float> noise : DECLARE_TEXTURE;
+Texture2D<float> ao : DECLARE_TEXTURE;
 
 struct VSOutput 
 {
@@ -80,13 +67,8 @@ static const float ClearCoatRoughness = 0.05;
 
 VSOutput vertexMain(VSInput vsIn)
 {
-#if (HARDCODE_OBJECTS_POSITION)
-    float4 transformedPosition = float4(vsIn.position + HARDCODED_OBJECT_POSITION, 1.0);
-    float4 previousTransformedPosition =  float4(vsIn.position + HARDCODED_OBJECT_PREVIOUS_POSITION, 1.0);
-#else
     float4 transformedPosition = mul(float4(vsIn.position, 1.0), worldTransform);
     float4 previousTransformedPosition = mul(float4(vsIn.position, 1.0), previousWorldTransform);
-#endif	
 
     VSOutput vsOut;
     vsOut.texCoord0 = vsIn.texCoord0;
@@ -162,25 +144,25 @@ float3 evaluateLTC(in float3 n, in float3 v, in float3 p, in float3x3 inverseTra
 
 FSOutput fragmentMain(VSOutput fsIn)
 {
-    float4 opacitySample = opacityTexture.Sample(opacitySampler, fsIn.texCoord0);
+    float4 opacitySample = opacity.Sample(AnisotropicWrap, fsIn.texCoord0);
     if (opacitySample.x < ALPHA_TEST_TRESHOLD) 
     	discard;
 
-    float4 baseColorSample = baseColorTexture.Sample(baseColorSampler, fsIn.texCoord0);
-    float4 normalSample = normalTexture.Sample(normalSampler, fsIn.texCoord0);
+    float4 baseColorSample = baseColor.Sample(AnisotropicWrap, fsIn.texCoord0);
+    float4 normalSample = normal.Sample(AnisotropicWrap, fsIn.texCoord0);
 
 	float3 noiseDimensions = 0.0;
-	noiseTexture.GetDimensions(0, noiseDimensions.x, noiseDimensions.y, noiseDimensions.z);
+	noise.GetDimensions(0, noiseDimensions.x, noiseDimensions.y, noiseDimensions.z);
 
 	float3 shadowmapSize = 0.0;
-	shadowTexture.GetDimensions(0, shadowmapSize.x, shadowmapSize.y, shadowmapSize.z);
+	shadow.GetDimensions(0, shadowmapSize.x, shadowmapSize.y, shadowmapSize.z);
 
     float2 currentPosition = fsIn.projectedPosition.xy / fsIn.projectedPosition.w;
     float2 previousPosition = fsIn.previousProjectedPosition.xy / fsIn.previousProjectedPosition.w;
 
     float2 projectedUv = currentPosition.xy * 0.5 + 0.5;
 	float2 noiseUV = (2.0 * projectedUv * viewport.zw / noiseDimensions.xy);
-	float sampledNoise = noiseTexture.Sample(noiseSampler, 0.5 * noiseUV);
+	float sampledNoise = noise.Sample(PointClamp, 0.5 * noiseUV);
 
     float2 nxy = normalSample.xy * 2.0 - 1.0;
     float3 tsNormal = normalize(float3(nxy, sqrt(1.0 - saturate(dot(nxy, nxy)))));
@@ -189,8 +171,8 @@ FSOutput fragmentMain(VSOutput fsIn)
     float3 baseColor = srgbToLinear(diffuseReflectance.xyz * baseColorSample.xyz);
     float roughness = normalSample.z;
     float metallness = normalSample.w;
-    float ambientOcclusion = aoTexture.Sample(aoSampler, projectedUv).x;
-	float shadow = sampleShadow(fsIn.lightCoord.xyz / fsIn.lightCoord.w, sampledNoise, shadowmapSize.xy);
+    float ambientOcclusion = ao.Sample(LinearClamp, projectedUv).x;
+	float shadowValue = sampleShadow(fsIn.lightCoord.xyz / fsIn.lightCoord.w, sampledNoise, shadowmapSize.xy);
         
     Surface surface = buildSurface(baseColor, roughness, metallness);
 
@@ -201,7 +183,7 @@ FSOutput fragmentMain(VSOutput fsIn)
     float3 directDiffuse = computeDirectDiffuse(surface, bsdf);
     float3 directSpecular = computeDirectSpecular(surface, bsdf);
 
-    float4 brdfLookupSample = brdfLookupTexture.Sample(brdfLookupSampler, float2(surface.roughness, bsdf.VdotN));
+    float4 brdfLookupSample = brdfLookup.Sample(LinearClamp, float2(surface.roughness, bsdf.VdotN));
 
     float3 wsDiffuseDir = diffuseDominantDirection(wsNormal, wsView, surface.roughness);
     float3 indirectDiffuseSample = getExitRadianceFromSphericalHarmonics(environmentSphericalHarmonics, wsDiffuseDir).xyz;
@@ -222,7 +204,7 @@ FSOutput fragmentMain(VSOutput fsIn)
 	ltcSampleCoords.x =	pow(1.0 + surface.roughness, 3.0) / 8.0;
 	ltcSampleCoords.y = acos(bsdf.VdotN) / (0.5 * PI);
 
-	float4 ltcSample = ltcTexture.Sample(ltcSampler, ltcSampleCoords);
+	float4 ltcSample = ltcTransform.Sample(LinearClamp, ltcSampleCoords);
 
     float3x3 ltcTransform = float3x3(
     	1.0, 0.0, ltcSample.y,
@@ -249,7 +231,7 @@ FSOutput fragmentMain(VSOutput fsIn)
     BSDF ccBSDF = buildBSDF(fsIn.normal, wsLight, wsView);
 	float3 ccSpecular = computeDirectSpecular(ccSurface, ccBSDF);
 
-    float4 ccBrdfLookupSample = brdfLookupTexture.Sample(brdfLookupSampler, float2(ccSurface.roughness, ccBSDF.VdotN));
+    float4 ccBrdfLookupSample = brdfLookup.Sample(LinearClamp, float2(ccSurface.roughness, ccBSDF.VdotN));
                                                                   
     wsSpecularDir = specularDominantDirection(fsIn.normal, wsView, ccSurface.roughness);
     float3 ccIndirectSpecular = sampleSpecularConvolution(wsSpecularDir, ccSurface.roughness);
@@ -259,12 +241,12 @@ FSOutput fragmentMain(VSOutput fsIn)
     float clearCoatFresnel = fresnel(f0 * f0, 1.0, ccBSDF.VdotN);
 
     float3 result = 
-    	lerp(directDiffuse + directSpecular, ccSpecular, clearCoatFresnel) * shadow * lightColor + 
+    	lerp(directDiffuse + directSpecular, ccSpecular, clearCoatFresnel) * shadowValue * lightColor + 
     	lerp(indirectDiffuse + indirectSpecular, ccIndirectSpecular, clearCoatFresnel);
 
 #else
 
-    float3 result = shadow * ((directDiffuse + directSpecular) * lightColor) + 
+    float3 result = shadowValue * ((directDiffuse + directSpecular) * lightColor) + 
     	ambientOcclusion * (indirectDiffuse + indirectSpecular) + 
     	0.0 * ltcColor * (ltcDiffuse + ltcSpecular);
 

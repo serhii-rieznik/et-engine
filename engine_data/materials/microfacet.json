@@ -32,7 +32,10 @@
 			"depth-test": true,
 			"depth-write": true
 		},
-			"blend-state": {
+		"options": {
+			"DEPTH_PREPASS" : 1
+		},
+		"blend-state": {
 			"blend-configuration" : "disabled"
 		},
 		"cull-mode" : "back",

@@ -364,28 +364,24 @@ void buildProgramReflection(const glslang::TProgram& program, Program::Reflectio
 				ET_ASSERT(qualifier.hasSet());
 				if (sampler.isImage())
 				{
-					ET_ASSERT(qualifier.layoutBinding < StorageBuffer_max);
 					imageSet.emplace_back(uniformName, qualifier.layoutBinding);
 				}
 				else if (sampler.isTexture())
 				{
-					ET_ASSERT(qualifier.layoutBinding < MaterialTexture_max);
 					textureSet.emplace_back(uniformName, qualifier.layoutBinding);
 				}
 				else if (sampler.isPureSampler())
 				{
-					ET_ASSERT(qualifier.layoutBinding >= MaterialSamplerBindingOffset);
-					ET_ASSERT(qualifier.layoutBinding < MaterialTexture_max + MaterialSamplerBindingOffset);
 					samplerSet.emplace_back(uniformName, qualifier.layoutBinding);
 				}
 				else
 				{
-					log::warning("Unsupported sampler (%s) type in shader: %s", uniformName.c_str(), sampler.getString().c_str());
+					log::warning("Unsupported object (%s) in shader: %s", uniformName.c_str(), sampler.getString().c_str());
 				}
 			}
 			else
 			{
-				log::warning("Unsupported uniform (%s) type in shader: %s", uniformName.c_str(), type->getBasicTypeString().c_str());
+				log::warning("Unsupported object (%s) type in shader: %s", uniformName.c_str(), type->getBasicTypeString().c_str());
 			}
 		}
 		else

@@ -6,7 +6,7 @@
 #define DRAW_SUN 1
 #define SAMPLE_ATMOSPHERE 0
 
-cbuffer ObjectVariables : DECL_BUFFER(Object)
+cbuffer ObjectVariables : DECL_OBJECT_BUFFER
 {
 	row_major float4x4 inverseViewTransform;
 	row_major float4x4 inverseProjectionTransform;

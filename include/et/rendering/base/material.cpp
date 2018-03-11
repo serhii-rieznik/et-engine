@@ -32,25 +32,29 @@ uint64_t Material::sortingKey() const {
 	return 0;
 }
 
-void Material::setTexture(MaterialTexture t, const Texture::Pointer& tex, const ResourceRange& range) {
-	OptionalTextureObject& entry = textures[static_cast<uint32_t>(t)];
+void Material::setTexture(const std::string& t, const Texture::Pointer& tex, const ResourceRange& range) {
+	if (validateTextureName(t) == false)
+		return;
+
+	OptionalTextureObject& entry = textures[t];
 	if ((entry.object != tex) || (entry.range != range))
 	{
 		entry.object = tex;
 		entry.range = range;
-		entry.index = static_cast<uint32_t>(t);
 		entry.binding = t;
 		invalidateTextureSet();
 	}
 }
 
-void Material::setSampler(MaterialTexture t, const Sampler::Pointer& smp) {
-	OptionalSamplerObject& entry = samplers[static_cast<uint32_t>(t) + MaterialSamplerBindingOffset];
+void Material::setSampler(const std::string& s, const Sampler::Pointer& smp) {
+	if (validateSamplerName(s) == false)
+		return;
+
+	OptionalSamplerObject& entry = samplers[s];
 	if (entry.object != smp)
 	{
 		entry.object = smp;
-		entry.index = static_cast<uint32_t>(t) + MaterialSamplerBindingOffset;
-		entry.binding = t;
+		entry.binding = s;
 		invalidateTextureSet();
 	}
 }
@@ -60,15 +64,9 @@ void Material::setImage(StorageBuffer s, const Texture::Pointer& tex) {
 	if (entry.object != tex)
 	{
 		entry.object = tex;
-		entry.index = static_cast<uint32_t>(s);
 		entry.binding = s;
 		invalidateImageSet();
 	}
-}
-
-void Material::setTextureWithSampler(MaterialTexture t, const Texture::Pointer& tex, const Sampler::Pointer& smp, const ResourceRange& range) {
-	setTexture(t, tex, range);
-	setSampler(t, smp);
 }
 
 void Material::setVector(MaterialVariable p, const vec4& v) {
@@ -95,12 +93,12 @@ float Material::getFloat(MaterialVariable p) const {
 	return getParameter<float>(p);
 }
 
-const Texture::Pointer& Material::texture(MaterialTexture t) {
-	return textures[static_cast<uint32_t>(t)].object;
+const Texture::Pointer& Material::texture(const std::string& t) {
+	return textures[t].object;
 }
 
-const Sampler::Pointer& Material::sampler(MaterialTexture t) {
-	return samplers[static_cast<uint32_t>(t)].object;
+const Sampler::Pointer& Material::sampler(const std::string& t) {
+	return samplers[t].object;
 }
 
 const Texture::Pointer& Material::image(StorageBuffer t) {
@@ -152,6 +150,17 @@ void Material::loadFromJson(const std::string& source, const std::string& baseFo
 		else
 		{
 			log::warning("Entry `%s` in material `%s` description is not recognized", subObj.first.c_str(), name().c_str());
+		}
+	}
+
+	for (const auto& config : _configurations)
+	{
+		for (const auto& ts : config.second.program->reflection().textures)
+		{
+			for (const auto& t : ts.samplers)
+				_usedSamplers.emplace(t.first);
+			for (const auto& t : ts.textures)
+				_usedTextures.emplace(t.first);
 		}
 	}
 
@@ -371,6 +380,13 @@ void Material::invalidateConstantBuffer() {
 		i->invalidateConstantBuffer();
 }
 
+bool Material::validateTextureName(const std::string& textureName) {
+	return _usedTextures.count(textureName) > 0;
+}
+
+bool Material::validateSamplerName(const std::string& samplerName) {
+	return _usedSamplers.count(samplerName) > 0;
+}
 
 /*
  * Material Instance
@@ -401,13 +417,13 @@ void MaterialInstance::buildTextureSet(const std::string& pt, Holder<TextureSet:
 
 		for (const auto& r : ref.textures)
 		{
-			const Texture::Pointer& baseTexture = base()->textures[r.second].object;
-			const ResourceRange& baseRange = base()->textures[r.second].range;
+			const Texture::Pointer& baseTexture = base()->textures[r.first].object;
+			const ResourceRange& baseRange = base()->textures[r.first].range;
 
-			const Texture::Pointer& ownTexture = textures[r.second].object;
-			const ResourceRange& ownRange = textures[r.second].range;
+			const Texture::Pointer& ownTexture = textures[r.first].object;
+			const ResourceRange& ownRange = textures[r.first].range;
 
-			TextureSet::TextureBinding& descriptionTexture = desc.textures[static_cast<MaterialTexture>(r.second)];
+			TextureSet::TextureBinding& descriptionTexture = desc.textures[r.second];
 			descriptionTexture.image = ownTexture.valid() ? ownTexture : baseTexture;
 			descriptionTexture.range = ownTexture.valid() ? ownRange : baseRange;
 			if (descriptionTexture.image.invalid())
@@ -419,9 +435,9 @@ void MaterialInstance::buildTextureSet(const std::string& pt, Holder<TextureSet:
 
 		for (const auto& r : ref.samplers)
 		{
-			const Sampler::Pointer& baseSampler = base()->samplers[r.second].object;
-			const Sampler::Pointer& ownSampler = samplers[r.second].object;
-			Sampler::Pointer& descriptionSampler = desc.samplers[static_cast<MaterialTexture>(r.second - MaterialSamplerBindingOffset)];
+			const Sampler::Pointer& baseSampler = base()->samplers[r.first].object;
+			const Sampler::Pointer& ownSampler = samplers[r.first].object;
+			Sampler::Pointer& descriptionSampler = desc.samplers[r.second];
 			descriptionSampler = ownSampler.valid() ? ownSampler : baseSampler;
 			if (descriptionSampler.invalid())
 				descriptionSampler = _renderer->defaultSampler();
@@ -444,7 +460,7 @@ void MaterialInstance::buildImageSet(const std::string& pt, Holder<TextureSet::P
 		{
 			const Texture::Pointer& baseImage = base()->images[r.second].object;
 			const Texture::Pointer& ownImage = images[r.second].object;
-			Texture::Pointer& descriptionImage = description[ref.stage].images[static_cast<StorageBuffer>(r.second)];
+			Texture::Pointer& descriptionImage = description[ref.stage].images[r.second];
 
 			descriptionImage = ownImage.valid() ? ownImage : baseImage;
 			if (descriptionImage.invalid())
@@ -543,52 +559,50 @@ void MaterialInstance::deserialize(std::istream&) {
 
 }
 
+bool MaterialInstance::validateTextureName(const std::string& nm) {
+	return _base->validateTextureName(nm);
+}
+bool MaterialInstance::validateSamplerName(const std::string& nm) {
+	return _base->validateSamplerName(nm);
+
+}
+
 void Material::initDefaultHeader() {
-	if (!_shaderDefaultHeader.empty()) return;
-
-	_shaderDefaultHeader = R"(
-#define VariablesSetIndex 0
-#define TexturesSetIndex 1
-#define StorageSetIndex 2
-#define PI 3.1415926536
-#define HALF_PI 1.5707963268
-#define DOUBLE_PI 6.2831853072
-#define INV_PI 0.3183098862
-)";
-
-	int32_t printPos = 0;
-	char buffer[2048] = { };
-	for (uint32_t i = static_cast<uint32_t>(MaterialTexture::FirstMaterialTexture); i < MaterialTexture_max; ++i)
+	if (_shaderDefaultHeader.empty())
 	{
-		std::string texName = materialTextureToString(static_cast<MaterialTexture>(i));
-		std::string smpName = materialSamplerToString(static_cast<MaterialTexture>(i));
-		texName[0] = static_cast<char>(toupper(texName[0]));
-		smpName[0] = static_cast<char>(toupper(smpName[0]));
-		printPos += sprintf(buffer + printPos, "#define %sBinding %u\n#define %sBinding %u\n",
-			texName.c_str(), i, smpName.c_str(), i + MaterialSamplerBindingOffset);
-	}
-	for (uint32_t i = static_cast<uint32_t>(StorageBuffer::StorageBuffer0); i < StorageBuffer_max; ++i)
-	{
-		std::string name = storageBufferToString(static_cast<StorageBuffer>(i));
-		name[0] = static_cast<char>(toupper(name[0]));
-		printPos += sprintf(buffer + printPos, "#define %sBinding %u\n", name.c_str(), i);
-	}
+		_shaderDefaultHeader = R"(
+/*
+ * Internal values
+ */ 
+#define PI			3.1415926536
+#define HALF_PI		1.5707963268
+#define DOUBLE_PI	6.2831853072
+#define INV_PI		0.3183098862
 
-	printPos += sprintf(buffer + printPos,
-		"#define ObjectVariablesBufferIndex %u\n"
-		"#define MaterialVariablesBufferIndex %u\n",
-		ObjectVariablesBufferIndex, MaterialVariablesBufferIndex);
+#define DECL_REGISTER_IMPL(type, index, space)	register(type##index, space)
+#define DECL_REGISTER_PROXY(type, index, space) DECL_REGISTER_IMPL(type, index, space)
+#define DECL_REGISTER(type, space)				DECL_REGISTER_PROXY(type, __LINE__, space)
 
-	_shaderDefaultHeader += buffer;
+#define DECL_OBJECT_BUFFER		register(c0, space0)
+#define DECL_MATERIAL_BUFFER	register(c1, space0)
 
-	_shaderDefaultHeader += R"(
-#define CONSTANT_LOCATION_IMPL(name, registerName, spaceName) register(name##registerName, space##spaceName)
-#define CONSTANT_LOCATION(name, register, space)              CONSTANT_LOCATION_IMPL(name, register, space)
-#define DECL_BUFFER(name)                                     CONSTANT_LOCATION(b, name##VariablesBufferIndex, VariablesSetIndex)
-#define DECL_TEXTURE(name)                                    CONSTANT_LOCATION(t, name##TextureBinding, TexturesSetIndex)
-#define DECL_SAMPLER(name)                                    CONSTANT_LOCATION(s, name##SamplerBinding, TexturesSetIndex)
-#define DECL_STORAGE(name)                                    CONSTANT_LOCATION(u, StorageBuffer##name##Binding, StorageSetIndex)
+#define DECLARE_BUFFER		DECL_REGISTER(c, space0)
+#define DECLARE_TEXTURE		DECL_REGISTER(t, space1) 
+#define DECLARE_STORAGE		DECL_REGISTER(u, space3)
+
+#define DECLARE_EXPLICIT_SAMPLER		DECL_REGISTER(s, space2) 
+#define DECLARE_SAMPLER(filter, wrap)	SamplerState filter##wrap : DECLARE_EXPLICIT_SAMPLER
+
+/*
+ * Basic samplers
+ */
+DECLARE_SAMPLER(Anisotropic, Wrap);
+DECLARE_SAMPLER(Linear, Wrap);
+DECLARE_SAMPLER(Linear, Clamp);
+DECLARE_SAMPLER(Point, Clamp);
+
 )";
+	}
 }
 
 }

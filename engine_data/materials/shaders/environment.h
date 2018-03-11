@@ -1,22 +1,13 @@
-TextureCube<float4> convolvedDiffuseTexture : CONSTANT_LOCATION(t, ConvolvedDiffuseTextureBinding, TexturesSetIndex);
-SamplerState convolvedDiffuseSampler : CONSTANT_LOCATION(s, ConvolvedDiffuseSamplerBinding, TexturesSetIndex);
-
-TextureCube<float4> convolvedSpecularTexture : CONSTANT_LOCATION(t, ConvolvedSpecularTextureBinding, TexturesSetIndex);
-SamplerState convolvedSpecularSampler : CONSTANT_LOCATION(s, ConvolvedSpecularSamplerBinding, TexturesSetIndex);
+TextureCube<float4> convolvedSpecular : DECLARE_TEXTURE;
 
 float3 sampleEnvironment(float3 i, in float3 l, float roughness)
 {
 	float w = 0.0;
 	float h = 0.0;
 	float levels = 0.0;
-	convolvedSpecularTexture.GetDimensions(0, w, h, levels);
+	convolvedSpecular.GetDimensions(0, w, h, levels);
 	float sampledLod = roughness * (levels - 1.0);
-	return convolvedSpecularTexture.SampleLevel(convolvedSpecularSampler, i, sampledLod).xyz;
-}
-
-float3 sampleDiffuseConvolution(float3 n)
-{
-	return convolvedDiffuseTexture.SampleLevel(convolvedDiffuseSampler, n, 0.0).xyz;
+	return convolvedSpecular.SampleLevel(LinearWrap, i, sampledLod).xyz;
 }
 
 float3 sampleSpecularConvolution(float3 i, float roughness)
@@ -24,9 +15,9 @@ float3 sampleSpecularConvolution(float3 i, float roughness)
 	float w = 0.0;
 	float h = 0.0;
 	float levels = 0.0;
-	convolvedSpecularTexture.GetDimensions(0, w, h, levels);
+	convolvedSpecular.GetDimensions(0, w, h, levels);
 	float sampledLod = roughness * (levels - 1.0);
-	return convolvedSpecularTexture.SampleLevel(convolvedSpecularSampler, i, sampledLod).xyz;
+	return convolvedSpecular.SampleLevel(LinearWrap, i, sampledLod).xyz;
 }
 
 float3 specularDominantDirection(in float3 n, in float3 v, in float roughness)

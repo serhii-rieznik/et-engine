@@ -303,9 +303,9 @@ inline const Sampler::Pointer& RenderInterface::nearestSampler() {
 }
 
 inline void RenderInterface::initInternalStructures() {
+	_options.load();
 	_sharedConstantBuffer.init(this, ConstantBufferStaticAllocation | ConstantBufferDynamicAllocation);
 	_sharedMaterialLibrary.init(this);
-	_options.load();
 
 	_options.optionChanged.connect([this](RenderOptions::ValueChangedEvent) {
 		_sharedMaterialLibrary.reloadMaterials();
