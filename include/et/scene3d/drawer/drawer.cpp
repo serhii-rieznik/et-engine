@@ -156,7 +156,7 @@ void Drawer::draw() {
 	if (options.enableScreenSpaceAO)
 	{
 		_main.screenSpaceAO->setSharedVariable(ObjectVariable::CameraJitter, _jitter);
-		_main.screenSpaceAO->setSharedTexture(MaterialTexture::Noise, _main.noise, _renderer->nearestSampler());
+		_main.screenSpaceAO->setSharedTexture(MaterialTexture::Noise, _main.noise);
 		_main.screenSpaceAO->loadSharedVariablesFromCamera(_scene->renderCamera());
 		_main.screenSpaceAO->loadSharedVariablesFromLight(_lighting.directional);
 		_renderer->submitPassWithRenderBatch(_main.screenSpaceAO, _main.screenSpaceAOBatch);
@@ -166,8 +166,11 @@ void Drawer::draw() {
 	{
 		_main.forward->loadSharedVariablesFromCamera(_scene->renderCamera());
 		_main.forward->loadSharedVariablesFromLight(_lighting.directional);
-		_main.forward->setSharedTexture(MaterialTexture::Shadow, _shadowmapProcessor->directionalShadowmap(), _shadowmapProcessor->directionalShadowmapSampler());
-		_main.forward->setSharedTexture(MaterialTexture::AmbientOcclusion, _main.screenSpaceAOTexture, _renderer->defaultSampler());
+		
+		_main.forward->setSharedTexture(MaterialTexture::AmbientOcclusion, _main.screenSpaceAOTexture);
+		_main.forward->setSharedTexture(MaterialTexture::Shadow, _shadowmapProcessor->directionalShadowmap());
+		_main.forward->setSharedSampler("shadowSampler", _shadowmapProcessor->directionalShadowmapSampler());
+
 		_main.forward->setSharedVariable(ObjectVariable::EnvironmentSphericalHarmonics, _cubemapProcessor->environmentSphericalHarmonics(), 9);
 		_main.forward->setSharedVariable(ObjectVariable::CameraJitter, _jitter);
 		_main.forward->nextSubpass();

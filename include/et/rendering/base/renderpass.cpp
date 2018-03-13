@@ -36,8 +36,7 @@ void RenderPass::setSharedTexture(const std::string& texId, const Texture::Point
 	_sharedTextures[texId].first = tex;
 }
 
-void RenderPass::setSharedTexture(const std::string& texId, const Texture::Pointer& tex, const Sampler::Pointer& smp) {
-	setSharedTexture(texId, tex);
+void RenderPass::setSharedSampler(const std::string& texId, const Sampler::Pointer& smp) {
 	_sharedTextures[texId].second = smp;
 }
 

@@ -43,11 +43,11 @@ Surface buildSurface(in float3 baseColor, in float roughness, in float metallnes
 	float reflectance = MIN_REFLECTANCE * defaultReflectance * defaultReflectance;	
 	                 	
 	Surface	result;
-	result.metallness = saturate(1.0 - (1.0 - metallness) * (1.0 - metallness));
+	result.metallness = metallness; // saturate(1.0 - (1.0 - metallness) * (1.0 - metallness));
 	result.baseColor = baseColor * (1.0 - result.metallness);
 	result.f90 = saturate(50.0 * reflectance);
 	result.f0 = lerp(reflectance, baseColor, result.metallness);
-	result.roughness = roughness * roughness;
+	result.roughness = roughness;
 	result.roughnessSquared = result.roughness * result.roughness;
 	return result;
 }

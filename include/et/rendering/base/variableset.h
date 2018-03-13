@@ -79,17 +79,9 @@ extern const std::string ConvolvedSpecular;
 extern const std::string BRDFLookup;
 extern const std::string Noise;
 extern const std::string LTCTransform;
+extern const std::string Input;
+extern const std::string OutputImage;
 
-};
-
-enum class StorageBuffer
-{
-	StorageBuffer0,
-	StorageBuffer1,
-	StorageBuffer2,
-	StorageBuffer3,
-
-	max
 };
 
 enum : uint32_t
@@ -97,7 +89,6 @@ enum : uint32_t
 	MaterialSamplerBindingOffset = 16,
 	ObjectVariable_max = static_cast<uint32_t>(ObjectVariable::max),
 	MaterialVariable_max = static_cast<uint32_t>(MaterialVariable::max),
-	StorageBuffer_max = static_cast<uint32_t>(StorageBuffer::max),
 };
 
 struct MaterialTextureHolder
@@ -147,12 +138,12 @@ struct OptionalSamplerObject : public OptionalObject<Sampler>
 
 struct OptionalImageObject : public OptionalObject<Texture>
 {
-	StorageBuffer binding = StorageBuffer::max;
+	std::string binding;
 };
 
 using TexturesHolder = UnorderedMap<std::string, OptionalTextureObject>;
 using SamplersHolder = UnorderedMap<std::string, OptionalSamplerObject>;
-using ImagesHolder = std::map<uint32_t, OptionalImageObject>;
+using ImagesHolder = UnorderedMap<std::string, OptionalImageObject>;
 
 struct OptionalValue
 {
@@ -215,8 +206,5 @@ ObjectVariable stringToObjectVariable(const std::string&);
 
 const std::string& materialVariableToString(MaterialVariable);
 MaterialVariable stringToMaterialVariable(const std::string&);
-
-const std::string& storageBufferToString(StorageBuffer);
-StorageBuffer stringToStorageBuffer(const std::string&);
 
 }

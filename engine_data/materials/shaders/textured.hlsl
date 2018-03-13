@@ -2,7 +2,7 @@
 #include <inputdefines>
 #include <inputlayout>
 
-Texture2D<float4> baseColor : DECLARE_TEXTURE;
+Texture2D<float4> inputTexture : DECLARE_TEXTURE;
 
 cbuffer ObjectVariables : DECL_OBJECT_BUFFER 
 {
@@ -41,11 +41,11 @@ VSOutput vertexMain(uint vertexIndex : SV_VertexID)
 float4 fragmentMain(VSOutput fsIn) : SV_Target0
 {
 #if (DISPLAY_DEPTH)
-	float sample = baseColor.SampleLevel(PointClamp, fsIn.texCoord0, 0.0).x;
+	float sample = inputTexture.SampleLevel(PointClamp, fsIn.texCoord0, 0.0).x;
 	return pow(sample, 1.0);
 #elif (SPECIFIC_LOD)
-	return baseColor.SampleLevel(LinearClamp, fsIn.texCoord0, extraParameters.x);
+	return inputTexture.SampleLevel(LinearClamp, fsIn.texCoord0, extraParameters.x);
 #else
-	return baseColor.Sample(LinearClamp, fsIn.texCoord0);
+	return inputTexture.Sample(LinearClamp, fsIn.texCoord0);
 #endif
 }

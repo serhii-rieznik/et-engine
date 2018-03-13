@@ -54,9 +54,9 @@ Texture::Pointer HDRFlow::executeSteps() {
 
 Texture::Pointer HDRFlow::luminanceStep(Texture::Pointer input) {
 
-	if (_lum.batch.invalid() || (_lum.batch->material()->texture(MaterialTexture::BaseColor) != input))
+	if (_lum.batch.invalid() || (_lum.batch->material()->texture(MaterialTexture::Input) != input))
 	{
-		_lum.batch = renderhelper::createQuadBatch(input, _materials.posteffects, _renderer->clampSampler(), { 0, 1, 0, 1 });
+		_lum.batch = renderhelper::createQuadBatch(MaterialTexture::Input, input, _materials.posteffects, { 0, 1, 0, 1 });
 		_lum.batch->material()->setFloat(MaterialVariable::ExtraParameters, 0.0f);
 	}
 
@@ -98,12 +98,12 @@ Texture::Pointer HDRFlow::luminanceStep(Texture::Pointer input) {
 	_renderer->beginRenderPass(_lum.pass, RenderPassBeginInfo::singlePass());
 	{
 		MaterialInstance::Pointer& downsampleMaterial = _lum.downsample->material();
-		downsampleMaterial->setTexture(MaterialTexture::BaseColor, luminanceTarget, { 0, 1, 0, 1 });
-		downsampleMaterial->setImage(StorageBuffer::StorageBuffer0, _lum.downsampled);
+		downsampleMaterial->setTexture(MaterialTexture::Input, luminanceTarget, { 0, 1, 0, 1 });
+		downsampleMaterial->setImage(MaterialTexture::OutputImage, _lum.downsampled);
 		
 		MaterialInstance::Pointer& adaptationMaterial = _lum.adaptation->material();
-		adaptationMaterial->setTexture(MaterialTexture::BaseColor, _lum.downsampled, { 0, 1, 0, 1 });
-		adaptationMaterial->setImage(StorageBuffer::StorageBuffer0, _lum.computed);
+		adaptationMaterial->setTexture(MaterialTexture::Input, _lum.downsampled, { 0, 1, 0, 1 });
+		adaptationMaterial->setImage(MaterialTexture::OutputImage, _lum.computed);
 
 		_lum.pass->pushImageBarrier(luminanceTarget, ResourceBarrier(TextureState::ColorRenderTarget, 0, 1, 0, 1));
 		_lum.pass->addSingleRenderBatchSubpass(_lum.batch);
@@ -143,15 +143,15 @@ Texture::Pointer HDRFlow::anitialiasStep(Texture::Pointer input) {
 	const Texture::Pointer& target = _taa.pass->colorTarget();
 	const Texture::Pointer& vel = drawer()->supportTexture(Drawer::SupportTexture::Velocity);
 
-	if (_taa.batch.invalid() || (_taa.batch->material()->texture(MaterialTexture::BaseColor) != input))
+	if (_taa.batch.invalid() || (_taa.batch->material()->texture(MaterialTexture::Input) != input))
 	{
-		_taa.batch = renderhelper::createQuadBatch(input, _materials.posteffects, _renderer->clampSampler());
-		_taa.batch->material()->setTexture(MaterialTexture::EmissiveColor, _taa.history);
+		_taa.batch = renderhelper::createQuadBatch(MaterialTexture::Input, input, _materials.posteffects);
+		_taa.batch->material()->setTexture("historyTexture", _taa.history);
 	}
 
 	_renderer->beginRenderPass(_taa.pass, RenderPassBeginInfo::singlePass());
 	{
-		_taa.batch->material()->setTexture(MaterialTexture::Normal, vel);
+		_taa.batch->material()->setTexture("velocityTexture", vel);
 		_taa.pass->setSharedVariable(ObjectVariable::CameraJitter, drawer()->latestCameraJitter());
 		_taa.pass->addSingleRenderBatchSubpass(_taa.batch);
 
@@ -176,11 +176,11 @@ Texture::Pointer HDRFlow::tonemapStep(Texture::Pointer input) {
 
 	if (_tonemap.batch.invalid())
 	{
-		_tonemap.batch = renderhelper::createQuadBatch(input, _materials.posteffects, _renderer->clampSampler());
+		_tonemap.batch = renderhelper::createQuadBatch(MaterialTexture::Input, input, _materials.posteffects);
 	}
 
-	_tonemap.batch->material()->setTexture(MaterialTexture::Shadow, _colorGradingTexture);
-	_tonemap.batch->material()->setTexture(MaterialTexture::EmissiveColor, _lum.computed);
+	_tonemap.batch->material()->setTexture("colorGradingTable", _colorGradingTexture);
+	_tonemap.batch->material()->setTexture("averageLuminance", _lum.computed);
 	_renderer->submitPassWithRenderBatch(_tonemap.pass, _tonemap.batch);
 
 	return _tonemap.pass->colorTarget(0);
@@ -223,7 +223,7 @@ void HDRFlow::render() {
 	_renderer->beginRenderPass(_passes.final, RenderPassBeginInfo::singlePass());
 	_passes.final->nextSubpass();
 	{
-		RenderBatch::Pointer batch = renderhelper::createQuadBatch(processedImage, _materials.posteffects, _renderer->clampSampler());
+		RenderBatch::Pointer batch = renderhelper::createQuadBatch(MaterialTexture::Input, processedImage, _materials.posteffects);
 		_passes.final->pushRenderBatch(batch);
 		debugDraw();
 	}
@@ -253,19 +253,19 @@ void HDRFlow::debugDraw() {
 
 	if (options.drawLuminance)
 	{
-		batch = renderhelper::createQuadBatch(_lum.pass->info().color[0].texture, _materials.debug, _renderer->clampSampler(), renderhelper::QuadType::Default);
+		batch = renderhelper::createQuadBatch(MaterialTexture::Input, _lum.pass->info().color[0].texture, _materials.debug, renderhelper::QuadType::Default);
 		batch->material()->setFloat(MaterialVariable::ExtraParameters, 0.0f);
 		_passes.final->setSharedVariable(ObjectVariable::WorldTransform, fullscreenBatchTransform(vp, pos, vec2(dx, dy)));
 		_passes.final->pushRenderBatch(batch);
 		advancePosition();
 
-		batch = renderhelper::createQuadBatch(_lum.downsampled, _materials.debug, _renderer->clampSampler(), renderhelper::QuadType::Default);
+		batch = renderhelper::createQuadBatch(MaterialTexture::Input, _lum.downsampled, _materials.debug, renderhelper::QuadType::Default);
 		batch->material()->setFloat(MaterialVariable::ExtraParameters, 0.0f);
 		_passes.final->setSharedVariable(ObjectVariable::WorldTransform, fullscreenBatchTransform(vp, pos, vec2(dx, dy)));
 		_passes.final->pushRenderBatch(batch);
 		advancePosition();
 
-		batch = renderhelper::createQuadBatch(_lum.computed, _materials.debug, _renderer->clampSampler(), renderhelper::QuadType::Default);
+		batch = renderhelper::createQuadBatch(MaterialTexture::Input, _lum.computed, _materials.debug, renderhelper::QuadType::Default);
 		batch->material()->setFloat(MaterialVariable::ExtraParameters, 0.0f);
 		_passes.final->setSharedVariable(ObjectVariable::WorldTransform, fullscreenBatchTransform(vp, pos, vec2(dx, dy)));
 		_passes.final->pushRenderBatch(batch);
@@ -276,7 +276,7 @@ void HDRFlow::debugDraw() {
 	if (options.drawVelocity && vel.valid())
 	{
 		Material::Pointer m = _renderer->sharedMaterialLibrary().loadMaterial(application().resolveFileName("engine_data/materials/textured2d.json"));
-		batch = renderhelper::createQuadBatch(vel, m, renderhelper::QuadType::Default);
+		batch = renderhelper::createQuadBatch("velocityTexture", vel, m, renderhelper::QuadType::Default);
 		_passes.final->pushRenderBatch(batch);
 		advancePosition();
 	}
@@ -285,7 +285,7 @@ void HDRFlow::debugDraw() {
 	if (options.drawShadows && sss.valid())
 	{
 		Material::Pointer m = _renderer->sharedMaterialLibrary().loadMaterial(application().resolveFileName("engine_data/materials/textured2d.json"));
-		batch = renderhelper::createQuadBatch(sss, m, renderhelper::QuadType::Default);
+		batch = renderhelper::createQuadBatch(MaterialTexture::Input, sss, m, renderhelper::QuadType::Default);
 		_passes.final->pushRenderBatch(batch);
 		advancePosition();
 	}
@@ -294,7 +294,7 @@ void HDRFlow::debugDraw() {
 	if (options.drawAO && ssao.valid())
 	{
 		Material::Pointer m = _renderer->sharedMaterialLibrary().loadMaterial(application().resolveFileName("engine_data/materials/textured2d.json"));
-		batch = renderhelper::createQuadBatch(ssao, m, renderhelper::QuadType::Default);
+		batch = renderhelper::createQuadBatch(MaterialTexture::Input, ssao, m, renderhelper::QuadType::Default);
 		_passes.final->pushRenderBatch(batch);
 		advancePosition();
 	}

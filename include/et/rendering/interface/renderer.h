@@ -77,6 +77,8 @@ public:
 	virtual Texture::Pointer createTexture(const TextureDescription::Pointer&) = 0;
 	virtual TextureSet::Pointer createTextureSet(const TextureSet::Description&) = 0;
 
+	const TextureSet::Pointer& emptyTextureBindingsSet();
+
 	Texture::Pointer loadTexture(const std::string& fileName, ObjectsCache& cache,
 		TextureDescriptionUpdateMethod = nullTextureDescriptionUpdateMethod);
 
@@ -101,9 +103,7 @@ public:
 	 * Sampler
 	 */
 	virtual Sampler::Pointer createSampler(const Sampler::Description&) = 0;
-	const Sampler::Pointer& defaultSampler();
-	const Sampler::Pointer& clampSampler();
-	const Sampler::Pointer& nearestSampler();
+	const Sampler::Pointer& builtInSampler(const std::string&);
 
 	/*
 	 * Compute
@@ -155,9 +155,8 @@ private:
 	Texture::Pointer _flatNormalTexture;
 	Texture::Pointer _blackTexture;
 	Texture::Pointer _blackImage;
-	Sampler::Pointer _defaultSampler;
-	Sampler::Pointer _nearestSampler;
-	Sampler::Pointer _clampSampler;
+	TextureSet::Pointer _emptyTextureBindingsSet;
+	UnorderedMap<std::string, Sampler::Pointer> _builtInSamplers;
 };
 
 inline Texture::Pointer RenderInterface::loadTexture(const std::string& fileName, ObjectsCache& cache,
@@ -268,38 +267,10 @@ inline const Texture::Pointer& RenderInterface::blackImage() {
 	return _blackImage;
 }
 
-inline const Sampler::Pointer& RenderInterface::defaultSampler() {
-	if (_defaultSampler.invalid())
-	{
-		Sampler::Description desc;
-		_defaultSampler = createSampler(desc);
-	}
-	return _defaultSampler;
-}
-
-inline const Sampler::Pointer& RenderInterface::clampSampler() {
-	if (_clampSampler.invalid())
-	{
-		Sampler::Description desc;
-		desc.wrapU = TextureWrap::ClampToEdge;
-		desc.wrapV = TextureWrap::ClampToEdge;
-		desc.wrapW = TextureWrap::ClampToEdge;
-		_clampSampler = createSampler(desc);
-	}
-	return _clampSampler;
-}
-
-inline const Sampler::Pointer& RenderInterface::nearestSampler() {
-	if (_nearestSampler.invalid())
-	{
-		Sampler::Description desc;
-		desc.magFilter = TextureFiltration::Nearest;
-		desc.minFilter = TextureFiltration::Nearest;
-		desc.mipFilter = TextureFiltration::Nearest;
-		desc.maxAnisotropy = 1.0f;
-		_nearestSampler = createSampler(desc);
-	}
-	return _nearestSampler;
+inline const Sampler::Pointer& RenderInterface::builtInSampler(const std::string& samplerId) {
+	static Sampler::Pointer invalidSampler;
+	auto i = _builtInSamplers.find(samplerId);
+	return (i == _builtInSamplers.end()) ? invalidSampler : i->second;
 }
 
 inline void RenderInterface::initInternalStructures() {
@@ -314,7 +285,64 @@ inline void RenderInterface::initInternalStructures() {
 	whiteTexture();
 	blackTexture();
 	checkersTexture();
-	defaultSampler();
+
+	TextureSet::Description tsDesc;
+	tsDesc[ProgramStage::Vertex].allowEmptySet = true;
+	tsDesc[ProgramStage::Fragment].allowEmptySet = true;
+	tsDesc[ProgramStage::Compute].allowEmptySet = true;
+	_emptyTextureBindingsSet = createTextureSet(tsDesc);
+
+	Sampler::Description desc;
+	{
+		desc.minFilter = TextureFiltration::Linear;
+		desc.magFilter = TextureFiltration::Linear;
+		desc.mipFilter = TextureFiltration::Linear;
+		desc.wrapU = TextureWrap::Repeat;
+		desc.wrapV = TextureWrap::Repeat;
+		desc.wrapW = TextureWrap::Repeat;
+		desc.maxAnisotropy = 16.0f;
+		_builtInSamplers[Sampler::AnisotropicWrap] = createSampler(desc);
+	}
+	{
+		desc.minFilter = TextureFiltration::Linear;
+		desc.magFilter = TextureFiltration::Linear;
+		desc.mipFilter = TextureFiltration::Linear;
+		desc.wrapU = TextureWrap::Repeat;
+		desc.wrapV = TextureWrap::Repeat;
+		desc.wrapW = TextureWrap::Repeat;
+		desc.maxAnisotropy = 1.0f;
+		_builtInSamplers[Sampler::LinearWrap] = createSampler(desc);
+	}
+	{
+		desc.minFilter = TextureFiltration::Linear;
+		desc.magFilter = TextureFiltration::Linear;
+		desc.mipFilter = TextureFiltration::Linear;
+		desc.wrapU = TextureWrap::ClampToEdge;
+		desc.wrapV = TextureWrap::ClampToEdge;
+		desc.wrapW = TextureWrap::ClampToEdge;
+		desc.maxAnisotropy = 16.0f;
+		_builtInSamplers[Sampler::AnisotropicClamp] = createSampler(desc);
+	}
+	{
+		desc.minFilter = TextureFiltration::Linear;
+		desc.magFilter = TextureFiltration::Linear;
+		desc.mipFilter = TextureFiltration::Linear;
+		desc.wrapU = TextureWrap::ClampToEdge;
+		desc.wrapV = TextureWrap::ClampToEdge;
+		desc.wrapW = TextureWrap::ClampToEdge;
+		desc.maxAnisotropy = 1.0f;
+		_builtInSamplers[Sampler::LinearClamp] = createSampler(desc);
+	}
+	{
+		desc.minFilter = TextureFiltration::Nearest;
+		desc.magFilter = TextureFiltration::Nearest;
+		desc.mipFilter = TextureFiltration::Nearest;
+		desc.wrapU = TextureWrap::ClampToEdge;
+		desc.wrapV = TextureWrap::ClampToEdge;
+		desc.wrapW = TextureWrap::ClampToEdge;
+		desc.maxAnisotropy = 1.0f;
+		_builtInSamplers[Sampler::PointClamp] = createSampler(desc);
+	}
 }
 
 inline void RenderInterface::shutdownInternalStructures() {
@@ -327,9 +355,9 @@ inline void RenderInterface::shutdownInternalStructures() {
 	_flatNormalTexture.reset(nullptr);
 	_blackTexture.reset(nullptr);
 	_blackImage.reset(nullptr);
-	_defaultSampler.reset(nullptr);
-	_nearestSampler.reset(nullptr);
-	_clampSampler.reset(nullptr);
+	_emptyTextureBindingsSet.reset(nullptr);
+
+	_builtInSamplers.clear();
 }
 
 inline Buffer::Pointer RenderInterface::createDataBuffer(const std::string& name, uint32_t size) {
@@ -395,6 +423,10 @@ inline void RenderInterface::submitPassWithRenderBatch(RenderPass::Pointer& pass
 	beginRenderPass(pass, RenderPassBeginInfo::singlePass());
 	pass->addSingleRenderBatchSubpass(inBatch);
 	submitRenderPass(pass);
+}
+
+inline const TextureSet::Pointer& RenderInterface::emptyTextureBindingsSet() {
+	return _emptyTextureBindingsSet;
 }
 
 }

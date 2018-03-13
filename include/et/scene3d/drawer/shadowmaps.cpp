@@ -218,12 +218,12 @@ void ShadowmapProcessor::validate(RenderInterface::Pointer& renderer)
 		_renderables.debugPass = renderer->allocateRenderPass(desc);
 
 		Material::Pointer mtl = renderer->sharedMaterialLibrary().loadMaterial(application().resolveFileName("engine_data/materials/textured2d-transformed-depth.json"));
-		mtl->setTexture(MaterialTexture::BaseColor, _directionalShadowmap);
-		_renderables.debugDepthBatch = renderhelper::createQuadBatch(_directionalShadowmap, mtl, renderhelper::QuadType::Default);
+		mtl->setTexture(MaterialTexture::Input, _directionalShadowmap);
+		_renderables.debugDepthBatch = renderhelper::createQuadBatch(MaterialTexture::Input, _directionalShadowmap, mtl, renderhelper::QuadType::Default);
 
 		mtl = renderer->sharedMaterialLibrary().loadMaterial(application().resolveFileName("engine_data/materials/textured2d-transformed.json"));
-		mtl->setTexture(MaterialTexture::BaseColor, _directionalShadowmap);
-		_renderables.debugColorBatch = renderhelper::createQuadBatch(_directionalShadowmapMoments, mtl, renderhelper::QuadType::Default);
+		mtl->setTexture(MaterialTexture::Input, _directionalShadowmap);
+		_renderables.debugColorBatch = renderhelper::createQuadBatch(MaterialTexture::Input, _directionalShadowmapMoments, mtl, renderhelper::QuadType::Default);
 	}
 
 	{
@@ -238,10 +238,10 @@ void ShadowmapProcessor::validate(RenderInterface::Pointer& renderer)
 		_renderables.blurPass1 = renderer->allocateRenderPass(desc);
 
 		Material::Pointer mtl = renderer->sharedMaterialLibrary().loadMaterial(application().resolveFileName("engine_data/materials/image-processing.json"));
-		_renderables.blurBatch0 = renderhelper::createQuadBatch(_directionalShadowmapMoments, mtl);
+		_renderables.blurBatch0 = renderhelper::createQuadBatch(MaterialTexture::Input, _directionalShadowmapMoments, mtl);
 		_renderables.blurBatch0->material()->setVector(MaterialVariable::ExtraParameters, vec4(1.0f, 0.0f, 0.0f, 0.0f));
 		
-		_renderables.blurBatch1 = renderhelper::createQuadBatch(_directionalShadowmapMomentsBuffer, mtl);
+		_renderables.blurBatch1 = renderhelper::createQuadBatch(MaterialTexture::Input, _directionalShadowmapMomentsBuffer, mtl);
 		_renderables.blurBatch1->material()->setVector(MaterialVariable::ExtraParameters, vec4(0.0f, 1.0f, 0.0f, 0.0f));
 	}
 }

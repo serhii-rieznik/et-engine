@@ -85,22 +85,10 @@ RenderBatch::Pointer createQuadBatch(const std::string& textureId, const Texture
 	return batch;
 }
 	
-RenderBatch::Pointer createQuadBatch(const Texture::Pointer& texture, const Material::Pointer& mat, QuadType type)
+RenderBatch::Pointer createQuadBatch(const std::string& textureId, const Texture::Pointer& tex, const Material::Pointer& mat, const ResourceRange& rng, QuadType type)
 {
-	return createQuadBatch(MaterialTexture::BaseColor, texture, mat, type);
-}
-
-RenderBatch::Pointer createQuadBatch(const Texture::Pointer& tex, const Material::Pointer& mat, const Sampler::Pointer& smp, QuadType type)
-{
-	RenderBatch::Pointer rb = createQuadBatch(tex, mat, type);
-	rb->material()->setSampler(MaterialTexture::BaseColor, smp);
-	return rb;
-}
-
-RenderBatch::Pointer createQuadBatch(const Texture::Pointer& tex, const Material::Pointer& mat, const Sampler::Pointer& smp, const ResourceRange& rng, QuadType type)
-{
-	RenderBatch::Pointer rb = createQuadBatch(tex, mat, smp, type);
-	rb->material()->setTexture(MaterialTexture::BaseColor, tex, rng);
+	RenderBatch::Pointer rb = createQuadBatch(mat, type);
+	rb->material()->setTexture(textureId, tex, rng);
 	return rb;
 }
 

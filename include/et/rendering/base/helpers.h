@@ -24,9 +24,7 @@ enum class QuadType : uint32_t
 
 RenderBatch::Pointer createQuadBatch(Material::Pointer = Material::Pointer(), QuadType type = QuadType::Fullscreen);
 RenderBatch::Pointer createQuadBatch(const std::string&, const Texture::Pointer&, const Material::Pointer& = Material::Pointer(), QuadType type = QuadType::Fullscreen);
-RenderBatch::Pointer createQuadBatch(const Texture::Pointer&, const Material::Pointer& = Material::Pointer(), QuadType type = QuadType::Fullscreen);
-RenderBatch::Pointer createQuadBatch(const Texture::Pointer&, const Material::Pointer&, const Sampler::Pointer&, QuadType type = QuadType::Fullscreen);
-RenderBatch::Pointer createQuadBatch(const Texture::Pointer&, const Material::Pointer&, const Sampler::Pointer&, const ResourceRange&, QuadType type = QuadType::Fullscreen);
+RenderBatch::Pointer createQuadBatch(const std::string&, const Texture::Pointer&, const Material::Pointer&, const ResourceRange&, QuadType type = QuadType::Fullscreen);
 
 };
 

@@ -168,13 +168,13 @@ FSOutput fragmentMain(VSOutput fsIn)
     float3 tsNormal = normalize(float3(nxy, sqrt(1.0 - saturate(dot(nxy, nxy)))));
     float3 wsNormal = normalize(float3(dot(fsIn.invTransformT, tsNormal), dot(fsIn.invTransformB, tsNormal), dot(fsIn.invTransformN, tsNormal)));
 
-    float3 baseColor = srgbToLinear(diffuseReflectance.xyz * baseColorSample.xyz);
+    float3 linearBaseColor = srgbToLinear(diffuseReflectance.xyz * baseColorSample.xyz);
     float roughness = normalSample.z;
     float metallness = normalSample.w;
     float ambientOcclusion = ao.Sample(LinearClamp, projectedUv).x;
 	float shadowValue = sampleShadow(fsIn.lightCoord.xyz / fsIn.lightCoord.w, sampledNoise, shadowmapSize.xy);
         
-    Surface surface = buildSurface(baseColor, roughness, metallness);
+    Surface surface = buildSurface(linearBaseColor, roughness, metallness);
 
     float3 wsLight = normalize(fsIn.toLight);
     float3 wsView = normalize(fsIn.toCamera);
@@ -246,7 +246,8 @@ FSOutput fragmentMain(VSOutput fsIn)
 
 #else
 
-    float3 result = shadowValue * ((directDiffuse + directSpecular) * lightColor) + 
+    float3 result = 
+    	shadowValue * ((directDiffuse + directSpecular) * lightColor) + 
     	ambientOcclusion * (indirectDiffuse + indirectSpecular) + 
     	0.0 * ltcColor * (ltcDiffuse + ltcSpecular);
 

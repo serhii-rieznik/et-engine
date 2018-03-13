@@ -42,7 +42,7 @@ void Material::setTexture(const std::string& t, const Texture::Pointer& tex, con
 		entry.object = tex;
 		entry.range = range;
 		entry.binding = t;
-		invalidateTextureSet();
+		invalidateTextureBindingsSet();
 	}
 }
 
@@ -55,17 +55,20 @@ void Material::setSampler(const std::string& s, const Sampler::Pointer& smp) {
 	{
 		entry.object = smp;
 		entry.binding = s;
-		invalidateTextureSet();
+		invalidateTextureBindingsSet();
 	}
 }
 
-void Material::setImage(StorageBuffer s, const Texture::Pointer& tex) {
-	OptionalImageObject& entry = images[static_cast<uint32_t>(s)];
+void Material::setImage(const std::string& s, const Texture::Pointer& tex) {
+	if (validateImageName(s) == false)
+		return;
+
+	OptionalImageObject& entry = images[s];
 	if (entry.object != tex)
 	{
 		entry.object = tex;
 		entry.binding = s;
-		invalidateImageSet();
+		invalidateTextureBindingsSet();
 	}
 }
 
@@ -101,8 +104,8 @@ const Sampler::Pointer& Material::sampler(const std::string& t) {
 	return samplers[t].object;
 }
 
-const Texture::Pointer& Material::image(StorageBuffer t) {
-	return images[static_cast<uint32_t>(t)].object;
+const Texture::Pointer& Material::image(const std::string& t) {
+	return images[t].object;
 }
 
 void Material::setProgram(const Program::Pointer& prog, const std::string& pt) {
@@ -161,11 +164,13 @@ void Material::loadFromJson(const std::string& source, const std::string& baseFo
 				_usedSamplers.emplace(t.first);
 			for (const auto& t : ts.textures)
 				_usedTextures.emplace(t.first);
+			for (const auto& t : ts.images)
+				_usedImages.emplace(t.first);
 		}
 	}
 
 	invalidateConstantBuffer();
-	invalidateTextureSet();
+	invalidateTextureBindingsSet();
 }
 
 const Material::Configuration& Material::configuration(const std::string& cls) const {
@@ -354,8 +359,7 @@ void Material::invalidateInstances() {
 	for (MaterialInstance::Pointer& i : _activeInstances)
 	{
 		i->invalidateConstantBuffer();
-		i->invalidateImageSet();
-		i->invalidateTextureSet();
+		i->invalidateTextureBindingsSet();
 	}
 }
 
@@ -365,19 +369,18 @@ void Material::releaseInstances() {
 	_instancesPool.clear();
 }
 
-void Material::invalidateTextureSet() {
+void Material::invalidateTextureBindingsSet() {
 	for (MaterialInstance::Pointer& i : _activeInstances)
-		i->invalidateTextureSet();
-}
-
-void Material::invalidateImageSet() {
-	for (MaterialInstance::Pointer& i : _activeInstances)
-		i->invalidateImageSet();
+		i->invalidateTextureBindingsSet();
 }
 
 void Material::invalidateConstantBuffer() {
 	for (MaterialInstance::Pointer& i : _activeInstances)
 		i->invalidateConstantBuffer();
+}
+
+bool Material::validateImageName(const std::string& samplerName) {
+	return _usedImages.count(samplerName) > 0;
 }
 
 bool Material::validateTextureName(const std::string& textureName) {
@@ -405,7 +408,7 @@ const Material::Pointer& MaterialInstance::base() const {
 	return _base;
 }
 
-void MaterialInstance::buildTextureSet(const std::string& pt, Holder<TextureSet::Pointer>& holder) {
+void MaterialInstance::buildTextureBindingsSet(const std::string& pt, Holder<TextureSet::Pointer>& holder) {
 	ET_ASSERT(isInstance());
 
 	const Program::Reflection& reflection = base()->configuration(pt).program->reflection();
@@ -435,31 +438,26 @@ void MaterialInstance::buildTextureSet(const std::string& pt, Holder<TextureSet:
 
 		for (const auto& r : ref.samplers)
 		{
-			const Sampler::Pointer& baseSampler = base()->samplers[r.first].object;
-			const Sampler::Pointer& ownSampler = samplers[r.first].object;
 			Sampler::Pointer& descriptionSampler = desc.samplers[r.second];
-			descriptionSampler = ownSampler.valid() ? ownSampler : baseSampler;
-			if (descriptionSampler.invalid())
-				descriptionSampler = _renderer->defaultSampler();
+			const Sampler::Pointer& builtInSampler = _renderer->builtInSampler(r.first);
+			if (builtInSampler.valid())
+			{
+				descriptionSampler = builtInSampler;
+			}
+			else
+			{
+				const Sampler::Pointer& baseSampler = base()->samplers[r.first].object;
+				const Sampler::Pointer& ownSampler = samplers[r.first].object;
+				descriptionSampler = ownSampler.valid() ? ownSampler : baseSampler;
+				if (descriptionSampler.invalid())
+					descriptionSampler = _renderer->builtInSampler(Sampler::PointClamp);
+			}
 		}
-	}
 
-	holder.obj = _renderer->createTextureSet(description);
-	holder.valid = true;
-}
-
-void MaterialInstance::buildImageSet(const std::string& pt, Holder<TextureSet::Pointer>& holder) {
-	ET_ASSERT(isInstance());
-
-	const Program::Reflection& reflection = base()->configuration(pt).program->reflection();
-
-	TextureSet::Description description;
-	for (const auto& ref : reflection.textures)
-	{
 		for (const auto& r : ref.images)
 		{
-			const Texture::Pointer& baseImage = base()->images[r.second].object;
-			const Texture::Pointer& ownImage = images[r.second].object;
+			const Texture::Pointer& baseImage = base()->images[r.first].object;
+			const Texture::Pointer& ownImage = images[r.first].object;
 			Texture::Pointer& descriptionImage = description[ref.stage].images[r.second];
 
 			descriptionImage = ownImage.valid() ? ownImage : baseImage;
@@ -500,22 +498,12 @@ void MaterialInstance::buildConstantBuffer(const std::string& pt, Holder<Constan
 	}
 }
 
-const TextureSet::Pointer& MaterialInstance::textureSet(const std::string& pt) {
+const TextureSet::Pointer& MaterialInstance::textureBindingsSet(const std::string& pt) {
 	ET_ASSERT(isInstance());
 
-	auto& holder = _textureSets[pt];
+	auto& holder = _textureBindingsSets[pt];
 	if (!holder.valid)
-		buildTextureSet(pt, holder);
-
-	return holder.obj;
-}
-
-const TextureSet::Pointer& MaterialInstance::imageSet(const std::string& pt) {
-	ET_ASSERT(isInstance());
-
-	auto& holder = _imageSets[pt];
-	if (!holder.valid)
-		buildImageSet(pt, holder);
+		buildTextureBindingsSet(pt, holder);
 
 	return holder.obj;
 }
@@ -530,17 +518,10 @@ const ConstantBufferEntry::Pointer& MaterialInstance::constantBufferData(const s
 	return holder.obj;
 }
 
-void MaterialInstance::invalidateTextureSet() {
+void MaterialInstance::invalidateTextureBindingsSet() {
 	ET_ASSERT(isInstance());
 
-	for (auto& hld : _textureSets)
-		hld.second.valid = false;
-}
-
-void MaterialInstance::invalidateImageSet() {
-	ET_ASSERT(isInstance());
-
-	for (auto& hld : _imageSets)
+	for (auto& hld : _textureBindingsSets)
 		hld.second.valid = false;
 }
 
@@ -559,9 +540,14 @@ void MaterialInstance::deserialize(std::istream&) {
 
 }
 
+bool MaterialInstance::validateImageName(const std::string& nm) {
+	return _base->validateImageName(nm);
+}
+
 bool MaterialInstance::validateTextureName(const std::string& nm) {
 	return _base->validateTextureName(nm);
 }
+
 bool MaterialInstance::validateSamplerName(const std::string& nm) {
 	return _base->validateSamplerName(nm);
 

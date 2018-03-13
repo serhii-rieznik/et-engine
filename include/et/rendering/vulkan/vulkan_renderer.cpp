@@ -21,7 +21,7 @@
 #include <et/app/application.h>
 
 #if (ET_DEBUG)
-#	define VULKAN_ENABLE_VALIDATION 0
+#	define VULKAN_ENABLE_VALIDATION 1
 #else
 #	define VULKAN_ENABLE_VALIDATION 0
 #endif
@@ -54,7 +54,6 @@ public:
 	Vector<VkSemaphore> signalSemaphores;
 	Vector<VkPipelineStageFlags> waitStages;
 	Vector<VkCommandBuffer> commandBuffers;
-	VulkanTextureSet::Pointer emptyTextureSet;
 
 	uint64_t continuousFrameNumber = 0;
 
@@ -264,8 +263,6 @@ void VulkanRenderer::init(const RenderContextParameters& params) {
 }
 
 void VulkanRenderer::shutdown() {
-	_private->emptyTextureSet.reset(nullptr);
-
 	VULKAN_CALL(vkDeviceWaitIdle(_private->device));
 	_private->framesQueue.clear();
 	_private->framesCache.clear();
@@ -301,18 +298,16 @@ Texture::Pointer VulkanRenderer::createTexture(const TextureDescription::Pointer
 
 TextureSet::Pointer VulkanRenderer::createTextureSet(const TextureSet::Description& desc) {
 	TextureSet::Pointer result;
-	if (desc.empty())
-	{
-		if (_private->emptyTextureSet.invalid())
-			_private->emptyTextureSet = VulkanTextureSet::Pointer::create(this, _private->vulkan(), desc);
 
-		result = _private->emptyTextureSet;;
-	}
-	else
+	bool hasObjects = false;
+	for (const auto& e : desc)
 	{
-		result = VulkanTextureSet::Pointer::create(this, _private->vulkan(), desc);
+		hasObjects |= e.second.allowEmptySet;
+		hasObjects |= !e.second.images.empty();
+		hasObjects |= !e.second.textures.empty();
+		hasObjects |= !e.second.samplers.empty();
 	}
-	return result;
+	return hasObjects ? VulkanTextureSet::Pointer::create(this, _private->vulkan(), desc) : emptyTextureBindingsSet();
 }
 
 Sampler::Pointer VulkanRenderer::createSampler(const Sampler::Description& desc) {

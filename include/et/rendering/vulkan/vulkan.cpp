@@ -338,7 +338,7 @@ void VulkanNativePipeline::buildLayout(VulkanState& vulkan, const Program::Refle
 	samplerBindings.reserve(32);
 
 	Vector<VkDescriptorSetLayoutBinding> imageBindings;
-	imageBindings.reserve(StorageBuffer_max);
+	imageBindings.reserve(32);
 
 	for (const auto& tex : reflection.textures)
 	{

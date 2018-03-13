@@ -45,11 +45,11 @@ public:
 
 	void setTexture(const std::string&, const Texture::Pointer&, const ResourceRange& = ResourceRange::whole);
 	void setSampler(const std::string&, const Sampler::Pointer&);
-	void setImage(StorageBuffer, const Texture::Pointer&);
+	void setImage(const std::string&, const Texture::Pointer&);
 
 	const Texture::Pointer& texture(const std::string&);
 	const Sampler::Pointer& sampler(const std::string&);
-	const Texture::Pointer& image(StorageBuffer);
+	const Texture::Pointer& image(const std::string&);
 
 	void setVector(MaterialVariable, const vec4&);
 	vec4 getVector(MaterialVariable) const;
@@ -87,8 +87,7 @@ private:
 	void loadRenderPass(const std::string&, const Dictionary&, const std::string& baseFolder);
 	void initDefaultHeader();
 
-	virtual void invalidateImageSet();
-	virtual void invalidateTextureSet();
+	virtual void invalidateTextureBindingsSet();
 	virtual void invalidateConstantBuffer();
 
 protected: // overrided / read by instanaces
@@ -97,6 +96,7 @@ protected: // overrided / read by instanaces
 	ImagesHolder images;
 	VariablesHolder properties;
 
+	virtual bool validateImageName(const std::string&);
 	virtual bool validateTextureName(const std::string&);
 	virtual bool validateSamplerName(const std::string&);
 
@@ -104,6 +104,7 @@ private: // permanent private data
 	static std::string _shaderDefaultHeader;
 	Set<std::string> _usedTextures;
 	Set<std::string> _usedSamplers;
+	Set<std::string> _usedImages;
 	RenderInterface* _renderer = nullptr;
 	MaterialInstanceCollection _activeInstances;
 	MaterialInstanceCollection _instancesPool;
@@ -123,12 +124,10 @@ public:
 	Material::Pointer& base();
 	const Material::Pointer& base() const;
 
-	const TextureSet::Pointer& imageSet(const std::string&);
-	const TextureSet::Pointer& textureSet(const std::string&);
+	const TextureSet::Pointer& textureBindingsSet(const std::string&);
 	const ConstantBufferEntry::Pointer& constantBufferData(const std::string&);
 
-	void invalidateImageSet() override;
-	void invalidateTextureSet() override;
+	void invalidateTextureBindingsSet() override;
 	void invalidateConstantBuffer() override;
 	
 	bool isInstance() const override { return true; }
@@ -136,6 +135,7 @@ public:
 	void serialize(std::ostream&) const;
 	void deserialize(std::istream&);
 
+	bool validateImageName(const std::string&) override;
 	bool validateTextureName(const std::string&) override;
 	bool validateSamplerName(const std::string&) override;
 
@@ -152,14 +152,12 @@ private:
 
 	MaterialInstance(Material::Pointer base);
 
-	void buildImageSet(const std::string&, Holder<TextureSet::Pointer>& holder);
-	void buildTextureSet(const std::string&, Holder<TextureSet::Pointer>&);
+	void buildTextureBindingsSet(const std::string&, Holder<TextureSet::Pointer>& holder);
 	void buildConstantBuffer(const std::string&, Holder<ConstantBufferEntry::Pointer>& holder);
 
 private:
 	Material::Pointer _base;
-	UnorderedMap<std::string, Holder<TextureSet::Pointer>> _imageSets;
-	UnorderedMap<std::string, Holder<TextureSet::Pointer>> _textureSets;
+	UnorderedMap<std::string, Holder<TextureSet::Pointer>> _textureBindingsSets;
 	UnorderedMap<std::string, Holder<ConstantBufferEntry::Pointer>> _constBuffers;
 };
 

@@ -117,7 +117,7 @@ public:
 	const ConstructionInfo& info() const;
 
 	void setSharedTexture(const std::string&, const Texture::Pointer&);
-	void setSharedTexture(const std::string&, const Texture::Pointer&, const Sampler::Pointer&);
+	void setSharedSampler(const std::string&, const Sampler::Pointer&);
 
 	template <class T>
 	void setSharedVariable(ObjectVariable var, const T& value);

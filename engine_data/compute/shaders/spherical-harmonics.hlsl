@@ -107,7 +107,7 @@ void computeMain(CSInput input)
 			if (face == 5)
 			{
 				for (uint j = 0; j < 9; ++j)
-					outputImage[uint2(0, j)] = float4(sphericalHarmonics[j] + sh[j], 0.0);
+					outputImage[uint2(j, 0)] = float4(sphericalHarmonics[j] + sh[j], 0.0);
 			}
 			else
 			{

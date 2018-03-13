@@ -226,9 +226,10 @@ struct VulkanNativeTextureSet
 {
 	VkDescriptorSetLayout texturesSetLayout = nullptr;
 	VkDescriptorSet texturesSet = nullptr;
-	
 	VkDescriptorSetLayout samplersSetLayout = nullptr;
 	VkDescriptorSet samplersSet = nullptr;
+	VkDescriptorSetLayout imagesSetLayout = nullptr;
+	VkDescriptorSet imagesSet = nullptr;
 };
 
 struct VulkanNativeBuffer

@@ -83,18 +83,9 @@ const std::string MaterialTexture::ConvolvedSpecular = "convolvedSpecular";
 const std::string MaterialTexture::BRDFLookup = "brdfLookup";
 const std::string MaterialTexture::Noise = "noise";
 const std::string MaterialTexture::LTCTransform = "ltcTransform";
+const std::string MaterialTexture::Input = "inputTexture";
+const std::string MaterialTexture::OutputImage = "outputImage";
 
-}
-
-static const std::map<StorageBuffer, std::string>& storageBufferNames() {
-	static const std::map<StorageBuffer, std::string> localMap =
-	{
-		{ StorageBuffer::StorageBuffer0, "storageBuffer0" },
-		{ StorageBuffer::StorageBuffer1, "storageBuffer1" },
-		{ StorageBuffer::StorageBuffer2, "storageBuffer2" },
-		{ StorageBuffer::StorageBuffer3, "storageBuffer3" },
-	};
-	return localMap;
 }
 
 ObjectVariable stringToObjectVariable(const std::string& name) {
@@ -113,20 +104,6 @@ MaterialVariable stringToMaterialVariable(const std::string& name) {
 			return static_cast<MaterialVariable>(ts.first);
 	}
 	return MaterialVariable::max;
-}
-
-const std::string& storageBufferToString(StorageBuffer t) {
-	ET_ASSERT(t < StorageBuffer::max);
-	return storageBufferNames().at(t);
-}
-
-StorageBuffer stringToStorageBuffer(const std::string& name) {
-	for (const auto& ts : storageBufferNames())
-	{
-		if (ts.second == name)
-			return static_cast<StorageBuffer>(ts.first);
-	}
-	return StorageBuffer::max;
 }
 
 }

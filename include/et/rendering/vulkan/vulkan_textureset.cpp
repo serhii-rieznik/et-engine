@@ -30,62 +30,70 @@ VulkanTextureSet::VulkanTextureSet(VulkanRenderer* renderer, VulkanState& vulkan
 	ET_PIMPL_INIT(VulkanTextureSet, vulkan);
 
 	const uint32_t MaxObjectsCount = 32;
-	std::array<VkDescriptorSetLayoutBinding, MaxObjectsCount> imageBindings = {};
-	std::array<VkWriteDescriptorSet, MaxObjectsCount> imageWriteSet = {};
-	std::array<VkDescriptorImageInfo, MaxObjectsCount> imageInfos = {};
 
-	std::array<VkDescriptorSetLayoutBinding, MaxObjectsCount> samplerBindings = {};
-	std::array<VkWriteDescriptorSet, MaxObjectsCount> samplerWriteSet = {};
-	std::array<VkDescriptorImageInfo, MaxObjectsCount> samplerInfos = {};
+	std::array<VkDescriptorSetLayoutBinding, MaxObjectsCount> texturesBindings = {};
+	std::array<VkWriteDescriptorSet, MaxObjectsCount> texturesWriteSet = {};
+	std::array<VkDescriptorImageInfo, MaxObjectsCount> texturesInfos = {};
 
-	uint32_t imagesCount = 0;
+	std::array<VkDescriptorSetLayoutBinding, MaxObjectsCount> imagesBindings = {};
+	std::array<VkWriteDescriptorSet, MaxObjectsCount> imagesWriteSet = {};
+	std::array<VkDescriptorImageInfo, MaxObjectsCount> imagesInfos = {};
+
+	std::array<VkDescriptorSetLayoutBinding, MaxObjectsCount> samplersBindings = {};
+	std::array<VkWriteDescriptorSet, MaxObjectsCount> samplersWriteSet = {};
+	std::array<VkDescriptorImageInfo, MaxObjectsCount> samplersInfos = {};
+
+	bool allowEmptySet = false;
+	uint32_t texturesCount = 0;
 	uint32_t samplersCount = 0;
+	uint32_t imagesCount = 0;
 	for (const auto& entry : desc)
 	{
-		VkShaderStageFlagBits stageFlags = vulkan::programStageValue(entry.first);
+		allowEmptySet |= entry.second.allowEmptySet;
 
+		VkShaderStageFlagBits stageFlags = vulkan::programStageValue(entry.first);
 		for (const auto& e : entry.second.textures)
 		{
-			VkDescriptorSetLayoutBinding& binding = imageBindings[imagesCount];
+			VkDescriptorSetLayoutBinding& binding = texturesBindings[texturesCount];
 			binding.binding = e.first;
 			binding.descriptorCount = 1;
 			binding.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
 			binding.stageFlags = stageFlags;
 
-			VkDescriptorImageInfo& info = imageInfos[imagesCount];
+			VkDescriptorImageInfo& info = texturesInfos[texturesCount];
 			info.imageView = VulkanTexture::Pointer(e.second.image)->nativeTexture().imageView(e.second.range);
 			info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 
-			VkWriteDescriptorSet& ws = imageWriteSet[imagesCount];
+			VkWriteDescriptorSet& ws = texturesWriteSet[texturesCount];
 			ws.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 			ws.descriptorCount = binding.descriptorCount;
 			ws.descriptorType = binding.descriptorType;
 			ws.dstBinding = binding.binding;
-			ws.pImageInfo = imageInfos.data() + imagesCount;
+			ws.pImageInfo = texturesInfos.data() + texturesCount;
 
-			++imagesCount;
-			ET_ASSERT(imagesCount < MaxObjectsCount);
+			++texturesCount;
+			ET_ASSERT(texturesCount < MaxObjectsCount);
 		}
 
 		for (const auto& e : entry.second.images)
 		{
-			VkDescriptorSetLayoutBinding& binding = imageBindings[imagesCount];
+			VkDescriptorSetLayoutBinding& binding = imagesBindings[imagesCount];
 			binding.binding = e.first;
 			binding.descriptorCount = 1;
 			binding.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
 			binding.stageFlags = stageFlags;
 
 			// TODO : use range for images (instead of whole range)
-			VkDescriptorImageInfo& info = imageInfos[imagesCount];
+			VkDescriptorImageInfo& info = imagesInfos[imagesCount];
 			info.imageView = VulkanTexture::Pointer(e.second)->nativeTexture().imageView(ResourceRange::whole);
 			info.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
 
-			VkWriteDescriptorSet& ws = imageWriteSet[imagesCount];
+			VkWriteDescriptorSet& ws = imagesWriteSet[imagesCount];
 			ws.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 			ws.descriptorCount = binding.descriptorCount;
 			ws.descriptorType = binding.descriptorType;
 			ws.dstBinding = binding.binding;
-			ws.pImageInfo = imageInfos.data() + imagesCount;
+			ws.pImageInfo = imagesInfos.data() + imagesCount;
 
 			++imagesCount;
 			ET_ASSERT(imagesCount < MaxObjectsCount);
@@ -93,51 +101,51 @@ VulkanTextureSet::VulkanTextureSet(VulkanRenderer* renderer, VulkanState& vulkan
 
 		for (const auto& e : entry.second.samplers)
 		{
-			VkDescriptorSetLayoutBinding& binding = samplerBindings[samplersCount];
+			VkDescriptorSetLayoutBinding& binding = samplersBindings[samplersCount];
 			binding.binding = e.first;
 			binding.descriptorCount = 1;
 			binding.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLER;
 			binding.stageFlags = stageFlags;
 
-			VkDescriptorImageInfo& info = imageInfos[samplersCount];
+			VkDescriptorImageInfo& info = samplersInfos[samplersCount];
 			info.sampler = VulkanSampler::Pointer(e.second)->nativeSampler().sampler;
 
-			VkWriteDescriptorSet& ws = samplerWriteSet[samplersCount];
+			VkWriteDescriptorSet& ws = samplersWriteSet[samplersCount];
 			ws.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 			ws.descriptorCount = binding.descriptorCount;
 			ws.descriptorType = binding.descriptorType;
 			ws.dstBinding = binding.binding;
-			ws.pImageInfo = imageInfos.data() + samplersCount;
+			ws.pImageInfo = samplersInfos.data() + samplersCount;
 			
 			++samplersCount;
 			ET_ASSERT(samplersCount < MaxObjectsCount);
 		}
 	}
 
-	// if (objectsCount > 0)
+	if ((imagesCount > 0) || allowEmptySet)
 	{
 		VkDescriptorSetLayoutCreateInfo createInfo = { VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO };
 		createInfo.bindingCount = imagesCount;
-		createInfo.pBindings = imageBindings.data();
-		VULKAN_CALL(vkCreateDescriptorSetLayout(vulkan.device, &createInfo, nullptr, &_private->texturesSetLayout));
+		createInfo.pBindings = imagesBindings.data();
+		VULKAN_CALL(vkCreateDescriptorSetLayout(vulkan.device, &createInfo, nullptr, &_private->imagesSetLayout));
 
 		VkDescriptorSetAllocateInfo allocInfo = { VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO };
 		allocInfo.descriptorPool = vulkan.descriptorPool;
 		allocInfo.descriptorSetCount = 1;
-		allocInfo.pSetLayouts = &_private->texturesSetLayout;
-		VULKAN_CALL(vkAllocateDescriptorSets(vulkan.device, &allocInfo, &_private->texturesSet));
+		allocInfo.pSetLayouts = &_private->imagesSetLayout;
+		VULKAN_CALL(vkAllocateDescriptorSets(vulkan.device, &allocInfo, &_private->imagesSet));
 
 		for (uint32_t i = 0; i < imagesCount; ++i)
-			imageWriteSet[i].dstSet = _private->texturesSet;
+			imagesWriteSet[i].dstSet = _private->imagesSet;
 
-		vkUpdateDescriptorSets(vulkan.device, imagesCount, imageWriteSet.data(), 0, nullptr);
+		vkUpdateDescriptorSets(vulkan.device, imagesCount, imagesWriteSet.data(), 0, nullptr);
 	}
 
-	// if (samplersCount > 0)
+	if ((samplersCount > 0) || allowEmptySet)
 	{
 		VkDescriptorSetLayoutCreateInfo createInfo = { VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO };
 		createInfo.bindingCount = samplersCount;
-		createInfo.pBindings = samplerBindings.data();
+		createInfo.pBindings = samplersBindings.data();
 		VULKAN_CALL(vkCreateDescriptorSetLayout(vulkan.device, &createInfo, nullptr, &_private->samplersSetLayout));
 
 		VkDescriptorSetAllocateInfo allocInfo = { VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO };
@@ -147,9 +155,28 @@ VulkanTextureSet::VulkanTextureSet(VulkanRenderer* renderer, VulkanState& vulkan
 		VULKAN_CALL(vkAllocateDescriptorSets(vulkan.device, &allocInfo, &_private->samplersSet));
 
 		for (uint32_t i = 0; i < samplersCount; ++i)
-			samplerWriteSet[i].dstSet = _private->samplersSet;
+			samplersWriteSet[i].dstSet = _private->samplersSet;
 
-		vkUpdateDescriptorSets(vulkan.device, samplersCount, samplerWriteSet.data(), 0, nullptr);
+		vkUpdateDescriptorSets(vulkan.device, samplersCount, samplersWriteSet.data(), 0, nullptr);
+	}
+
+	if ((texturesCount > 0) || allowEmptySet)
+	{
+		VkDescriptorSetLayoutCreateInfo createInfo = { VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO };
+		createInfo.bindingCount = texturesCount;
+		createInfo.pBindings = texturesBindings.data();
+		VULKAN_CALL(vkCreateDescriptorSetLayout(vulkan.device, &createInfo, nullptr, &_private->texturesSetLayout));
+
+		VkDescriptorSetAllocateInfo allocInfo = { VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO };
+		allocInfo.descriptorPool = vulkan.descriptorPool;
+		allocInfo.descriptorSetCount = 1;
+		allocInfo.pSetLayouts = &_private->texturesSetLayout;
+		VULKAN_CALL(vkAllocateDescriptorSets(vulkan.device, &allocInfo, &_private->texturesSet));
+
+		for (uint32_t i = 0; i < texturesCount; ++i)
+			texturesWriteSet[i].dstSet = _private->texturesSet;
+
+		vkUpdateDescriptorSets(vulkan.device, texturesCount, texturesWriteSet.data(), 0, nullptr);
 	}
 }
 
@@ -160,6 +187,9 @@ VulkanTextureSet::~VulkanTextureSet()
 	
 	VULKAN_CALL(vkFreeDescriptorSets(_private->vulkan.device, _private->vulkan.descriptorPool, 1, &_private->samplersSet));
 	vkDestroyDescriptorSetLayout(_private->vulkan.device, _private->samplersSetLayout, nullptr);
+	
+	VULKAN_CALL(vkFreeDescriptorSets(_private->vulkan.device, _private->vulkan.descriptorPool, 1, &_private->imagesSet));
+	vkDestroyDescriptorSetLayout(_private->vulkan.device, _private->imagesSetLayout, nullptr);
 
 	ET_PIMPL_FINALIZE(VulkanTextureSet);
 }

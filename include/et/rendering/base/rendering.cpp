@@ -6,9 +6,9 @@
  */
 
 #include <et/rendering/base/rendering.h>
+#include <et/rendering/interface/sampler.h>
 
-namespace et
-{
+namespace et {
 
 const ResourceRange ResourceRange::whole;
 
@@ -71,8 +71,13 @@ const uint32_t vertexAttributeUsageMasks[VertexAttributeUsage_max] =
 	0x0001, 0x0002, 0x0004, 0x0008, 0x0010, 0x0020, 0x0040, 0x0080, 0x0100, 0x0200, 0x0400, 0x0000
 };
 
-VertexAttributeUsage stringToVertexAttributeUsage(const std::string& s)
-{
+const std::string Sampler::AnisotropicWrap = "AnisotropicWrap";
+const std::string Sampler::LinearWrap = "LinearWrap";
+const std::string Sampler::AnisotropicClamp = "AnisotropicClamp";
+const std::string Sampler::LinearClamp = "LinearClamp";
+const std::string Sampler::PointClamp = "PointClamp";
+
+VertexAttributeUsage stringToVertexAttributeUsage(const std::string& s) {
 	VertexAttributeUsage result = VertexAttributeUsage::Unknown;
 	for (uint32_t i = 0, e = VertexAttributeUsage_max; i < e; ++i)
 	{
@@ -85,8 +90,7 @@ VertexAttributeUsage stringToVertexAttributeUsage(const std::string& s)
 	return result;
 }
 
-VertexAttributeUsage semanticToVertexAttributeUsage(const std::string& s)
-{
+VertexAttributeUsage semanticToVertexAttributeUsage(const std::string& s) {
 	VertexAttributeUsage result = VertexAttributeUsage::Unknown;
 	for (uint32_t i = 0, e = VertexAttributeUsage_max; i < e; ++i)
 	{
@@ -112,8 +116,7 @@ VertexAttributeUsage semanticToVertexAttributeUsage(const std::string& s)
 	return result;
 }
 
-DataType stringToDataType(const std::string& s, RenderingAPI /* api */)
-{
+DataType stringToDataType(const std::string& s, RenderingAPI /* api */) {
 	for (uint32_t i = 0, e = DataType_max; i < e; ++i)
 	{
 		if (s == dataTypeNames[i])
@@ -123,8 +126,7 @@ DataType stringToDataType(const std::string& s, RenderingAPI /* api */)
 	return DataType::Float;
 }
 
-DataFormat stringToDataFormat(const std::string& s)
-{
+DataFormat stringToDataFormat(const std::string& s) {
 	for (uint32_t i = 0, e = DataFormat_max; i < e; ++i)
 	{
 		if (s == dataFormatNames[i])
@@ -134,8 +136,7 @@ DataFormat stringToDataFormat(const std::string& s)
 	return DataFormat::Char;
 }
 
-IndexArrayFormat stringToIndexArrayFormat(const std::string& s)
-{
+IndexArrayFormat stringToIndexArrayFormat(const std::string& s) {
 	for (auto& kv : indexArrayFormats)
 	{
 		if (kv.second.first == s)
@@ -146,8 +147,7 @@ IndexArrayFormat stringToIndexArrayFormat(const std::string& s)
 	return IndexArrayFormat::Format_32bit;
 }
 
-PrimitiveType stringToPrimitiveType(const std::string& s)
-{
+PrimitiveType stringToPrimitiveType(const std::string& s) {
 	for (uint32_t i = 0, e = PrimitiveType_max; i < e; ++i)
 	{
 		if (s == primitiveTypeNames[i])
@@ -157,51 +157,42 @@ PrimitiveType stringToPrimitiveType(const std::string& s)
 	return PrimitiveType::Points;
 }
 
-
-std::string vertexAttributeUsageToString(VertexAttributeUsage va)
-{
+std::string vertexAttributeUsageToString(VertexAttributeUsage va) {
 	return (va < VertexAttributeUsage::max) ? vertexAttributeUsageNames[static_cast<uint32_t>(va)] :
 		intToStr(static_cast<uint32_t>(va));
 }
 
-std::string vertexAttributeUsageSemantics(VertexAttributeUsage va)
-{
+std::string vertexAttributeUsageSemantics(VertexAttributeUsage va) {
 	return (va < VertexAttributeUsage::max) ? vertexAttributeUsageSemanticsNames[static_cast<uint32_t>(va)] :
 		intToStr(static_cast<uint32_t>(va));
 }
 
-std::string dataTypeToString(DataType vat, RenderingAPI /* api */)
-{
+std::string dataTypeToString(DataType vat, RenderingAPI /* api */) {
 	return (vat < DataType::max) ? dataTypeNames[static_cast<uint32_t>(vat)] : intToStr(static_cast<uint32_t>(vat));
 }
 
-std::string dataFormatToString(DataFormat dt)
-{
+std::string dataFormatToString(DataFormat dt) {
 	return (dt < DataFormat::max) ? dataFormatNames[static_cast<uint32_t>(dt)] : intToStr(static_cast<uint32_t>(dt));
 }
 
-std::string indexArrayFormatToString(IndexArrayFormat fmt)
-{
+std::string indexArrayFormatToString(IndexArrayFormat fmt) {
 	auto i = indexArrayFormats.find(fmt);
 	ET_ASSERT(i != indexArrayFormats.end());
 	return i->second.first;
 }
 
-DataFormat indexArrayFormatToDataFormat(IndexArrayFormat fmt)
-{
+DataFormat indexArrayFormatToDataFormat(IndexArrayFormat fmt) {
 	auto i = indexArrayFormats.find(fmt);
 	ET_ASSERT(i != indexArrayFormats.end());
 	return i->second.second;
 }
 
-std::string primitiveTypeToString(PrimitiveType pt)
-{
+std::string primitiveTypeToString(PrimitiveType pt) {
 	return (pt < PrimitiveType::max) ? primitiveTypeNames[static_cast<uint32_t>(pt)] :
 		intToStr(static_cast<uint32_t>(pt));
 }
 
-uint32_t dataTypeComponents(DataType t)
-{
+uint32_t dataTypeComponents(DataType t) {
 	ET_ASSERT(t < DataType::max);
 
 	static const uint32_t values[DataType_max] =
@@ -220,8 +211,7 @@ uint32_t dataTypeComponents(DataType t)
 	return values[static_cast<uint32_t>(t)];
 }
 
-DataFormat dataTypeDataFormat(DataType t)
-{
+DataFormat dataTypeDataFormat(DataType t) {
 	ET_ASSERT(t < DataType::max);
 	static const DataFormat values[DataType_max] =
 	{
@@ -239,19 +229,16 @@ DataFormat dataTypeDataFormat(DataType t)
 	return values[int32_t(t)];
 }
 
-uint32_t dataTypeSize(DataType t)
-{
+uint32_t dataTypeSize(DataType t) {
 	return dataTypeComponents(t) * ((t == DataType::Int) ? sizeof(int) : sizeof(float));
 }
 
-uint32_t vertexAttributeUsageMask(VertexAttributeUsage u)
-{
+uint32_t vertexAttributeUsageMask(VertexAttributeUsage u) {
 	ET_ASSERT(u < VertexAttributeUsage::max);
 	return vertexAttributeUsageMasks[static_cast<uint32_t>(u)];
 }
 
-uint32_t sizeOfDataFormat(DataFormat type)
-{
+uint32_t sizeOfDataFormat(DataFormat type) {
 	switch (type)
 	{
 	case DataFormat::Char:
@@ -280,8 +267,7 @@ uint32_t sizeOfDataFormat(DataFormat type)
 	}
 }
 
-uint32_t bitsPerPixelForTextureFormat(TextureFormat format)
-{
+uint32_t bitsPerPixelForTextureFormat(TextureFormat format) {
 	switch (format)
 	{
 	case TextureFormat::Invalid:
@@ -325,8 +311,7 @@ uint32_t bitsPerPixelForTextureFormat(TextureFormat format)
 	}
 }
 
-uint32_t bitsPerPixelForDataFormat(DataFormat type)
-{
+uint32_t bitsPerPixelForDataFormat(DataFormat type) {
 	switch (type)
 	{
 	case DataFormat::Char:
@@ -362,8 +347,7 @@ uint32_t bitsPerPixelForDataFormat(DataFormat type)
 	}
 }
 
-bool isCompressedTextureFormat(TextureFormat internalFormat)
-{
+bool isCompressedTextureFormat(TextureFormat internalFormat) {
 	switch (internalFormat)
 	{
 	case TextureFormat::PVR_2bpp_RGB:
@@ -386,20 +370,18 @@ bool isCompressedTextureFormat(TextureFormat internalFormat)
 	}
 }
 
-vec2i compressedFormatBlockSize(TextureFormat internalFormat)
-{
+vec2i compressedFormatBlockSize(TextureFormat internalFormat) {
 	switch (internalFormat)
 	{
 	case TextureFormat::DXT5:
 		return vec2i(4);
-	
+
 	default:
 		return vec2i(1);
 	}
 }
 
-bool isDepthTextureFormat(TextureFormat internalFormat)
-{
+bool isDepthTextureFormat(TextureFormat internalFormat) {
 	static const std::set<TextureFormat> depthFormats =
 	{
 		TextureFormat::Depth16,
@@ -410,8 +392,7 @@ bool isDepthTextureFormat(TextureFormat internalFormat)
 	return depthFormats.count(internalFormat) > 0;
 }
 
-uint32_t channelsForTextureFormat(TextureFormat internalFormat)
-{
+uint32_t channelsForTextureFormat(TextureFormat internalFormat) {
 	switch (internalFormat)
 	{
 	case TextureFormat::Depth16:
@@ -453,8 +434,7 @@ uint32_t channelsForTextureFormat(TextureFormat internalFormat)
 	}
 }
 
-Dictionary serializeDepthState(const DepthState& _depth)
-{
+Dictionary serializeDepthState(const DepthState& _depth) {
 	Dictionary depth;
 	depth.setBooleanForKey(kDepthTestEnabled, _depth.depthTestEnabled);
 	depth.setBooleanForKey(kDepthWriteEnabled, _depth.depthWriteEnabled);
@@ -462,8 +442,7 @@ Dictionary serializeDepthState(const DepthState& _depth)
 	return depth;
 }
 
-Dictionary serializeBlendState(const BlendState& _blend)
-{
+Dictionary serializeBlendState(const BlendState& _blend) {
 	Dictionary blend;
 	blend.setBooleanForKey(kBlendEnabled, _blend.enabled);
 
@@ -484,8 +463,7 @@ Dictionary serializeBlendState(const BlendState& _blend)
 	return blend;
 }
 
-DepthState deserializeDepthState(const Dictionary& depth)
-{
+DepthState deserializeDepthState(const Dictionary& depth) {
 	DepthState _depth;
 	_depth.compareFunction = stringToCompareFunction(depth.stringForKey(kDepthFunction, compareFunctionToString(CompareFunction::Less))->content);
 	_depth.depthWriteEnabled = depth.boolForKey(kDepthWriteEnabled, true)->content != 0;
@@ -493,8 +471,7 @@ DepthState deserializeDepthState(const Dictionary& depth)
 	return _depth;
 }
 
-BlendState deserializeBlendState(const VariantBase::Pointer& inBlend)
-{
+BlendState deserializeBlendState(const VariantBase::Pointer& inBlend) {
 	if (inBlend->variantClass() == VariantClass::String)
 	{
 		StringValue sv(inBlend);
@@ -522,8 +499,7 @@ BlendState deserializeBlendState(const VariantBase::Pointer& inBlend)
 	return _blend;
 }
 
-namespace
-{
+namespace {
 using BlendStateNameMap = std::pair<BlendState, std::string>;
 const BlendStateNameMap blendConfigToStateMap[BlendConfiguration_max] =
 {
@@ -545,8 +521,7 @@ std::string cullModeMap[CullMode_max] =
 };
 }
 
-bool blendStateToConfiguration(const BlendState& state, BlendConfiguration& config)
-{
+bool blendStateToConfiguration(const BlendState& state, BlendConfiguration& config) {
 	uint32_t e = sizeof(blendConfigToStateMap) / sizeof(blendConfigToStateMap[0]);
 	for (uint32_t i = 0; i < e; ++i)
 	{
@@ -559,8 +534,7 @@ bool blendStateToConfiguration(const BlendState& state, BlendConfiguration& conf
 	return false;
 }
 
-bool stringToBlendConfiguration(const std::string& name, BlendConfiguration& config)
-{
+bool stringToBlendConfiguration(const std::string& name, BlendConfiguration& config) {
 	uint32_t e = sizeof(blendConfigToStateMap) / sizeof(blendConfigToStateMap[0]);
 	for (uint32_t i = 0; i < e; ++i)
 	{
@@ -573,26 +547,22 @@ bool stringToBlendConfiguration(const std::string& name, BlendConfiguration& con
 	return false;
 }
 
-BlendState blendConfigurationToBlendState(BlendConfiguration config)
-{
+BlendState blendConfigurationToBlendState(BlendConfiguration config) {
 	ET_ASSERT(config < BlendConfiguration::max);
 	return blendConfigToStateMap[static_cast<uint32_t>(config)].first;
 }
 
-std::string blendConfigurationToString(BlendConfiguration config)
-{
+std::string blendConfigurationToString(BlendConfiguration config) {
 	ET_ASSERT(config < BlendConfiguration::max);
 	return blendConfigToStateMap[static_cast<uint32_t>(config)].second;
 }
 
-std::string cullModeToString(CullMode mode)
-{
+std::string cullModeToString(CullMode mode) {
 	ET_ASSERT(mode < CullMode::max);
 	return cullModeMap[static_cast<uint32_t>(mode)];
 }
 
-bool stringToCullMode(const std::string& mode, CullMode& outMode)
-{
+bool stringToCullMode(const std::string& mode, CullMode& outMode) {
 	uint32_t e = sizeof(cullModeMap) / sizeof(cullModeMap[0]);
 	for (uint32_t i = 0; i < e; ++i)
 	{
@@ -606,8 +576,7 @@ bool stringToCullMode(const std::string& mode, CullMode& outMode)
 	return false;
 }
 
-bool isValidRenderPassName(const std::string& v)
-{
+bool isValidRenderPassName(const std::string& v) {
 	std::string lc = lowercase(v);
 	return (lc != kName) && (lc != kCompute);
 }
@@ -648,15 +617,13 @@ static ValueNamePair<BlendOperation> blendOperationsMap[BlendOperation_max] =
 };
 
 template <class ENUM>
-const ValueNamePair<ENUM>& sampleValueFromMap(ENUM value, const ValueNamePair<ENUM>* fromMap)
-{
+const ValueNamePair<ENUM>& sampleValueFromMap(ENUM value, const ValueNamePair<ENUM>* fromMap) {
 	ET_ASSERT(value < ENUM::max);
 	return fromMap[static_cast<uint32_t>(value)];
 }
 
 template <class ENUM>
-ENUM findValueInMap(uint32_t value, const ValueNamePair<ENUM>* inMap, size_t mapSize)
-{
+ENUM findValueInMap(uint32_t value, const ValueNamePair<ENUM>* inMap, size_t mapSize) {
 	for (size_t i = 0; i < mapSize; ++i)
 	{
 		if (value == inMap[i].first)
@@ -668,8 +635,7 @@ ENUM findValueInMap(uint32_t value, const ValueNamePair<ENUM>* inMap, size_t map
 }
 
 template <class ENUM>
-ENUM findStringInMap(const std::string& value, const ValueNamePair<ENUM>* inMap, size_t mapSize)
-{
+ENUM findStringInMap(const std::string& value, const ValueNamePair<ENUM>* inMap, size_t mapSize) {
 	for (size_t i = 0; i < mapSize; ++i)
 	{
 		if (value == inMap[i].second)
@@ -680,33 +646,27 @@ ENUM findStringInMap(const std::string& value, const ValueNamePair<ENUM>* inMap,
 	return static_cast<ENUM>(0);
 }
 
-const std::string& compareFunctionToString(CompareFunction value)
-{
+const std::string& compareFunctionToString(CompareFunction value) {
 	return sampleValueFromMap(value, compareFunctionsMap).second;
 }
 
-const std::string& blendFunctionToString(BlendFunction value)
-{
+const std::string& blendFunctionToString(BlendFunction value) {
 	return sampleValueFromMap(value, blendFunctionsMap).second;
 }
 
-const std::string& blendOperationToString(BlendOperation value)
-{
+const std::string& blendOperationToString(BlendOperation value) {
 	return sampleValueFromMap(value, blendOperationsMap).second;
 }
 
-CompareFunction stringToCompareFunction(const std::string& value)
-{
+CompareFunction stringToCompareFunction(const std::string& value) {
 	return findStringInMap<CompareFunction>(value, compareFunctionsMap, sizeof(compareFunctionsMap) / sizeof(compareFunctionsMap[0]));
 }
 
-BlendFunction stringToBlendFunction(const std::string& value)
-{
+BlendFunction stringToBlendFunction(const std::string& value) {
 	return findStringInMap<BlendFunction>(value, blendFunctionsMap, sizeof(blendFunctionsMap) / sizeof(blendFunctionsMap[0]));
 }
 
-BlendOperation stringToBlendOperation(const std::string& value)
-{
+BlendOperation stringToBlendOperation(const std::string& value) {
 	return findStringInMap<BlendOperation>(value, blendOperationsMap, sizeof(blendOperationsMap) / sizeof(blendOperationsMap[0]));
 }
 

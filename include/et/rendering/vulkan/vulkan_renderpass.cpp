@@ -8,6 +8,7 @@
 #pragma once
 
 #include <et/rendering/vulkan/vulkan_renderpass.h>
+#include <et/rendering/vulkan/vulkan_textureset.h>
 #include <et/rendering/vulkan/vulkan.h>
 
 namespace et {
@@ -38,6 +39,7 @@ public:
 
 	VulkanState& vulkan;
 	VulkanRenderer* renderer = nullptr;
+	VulkanNativeTextureSet emptyTextureBindingsSet;
 	PassInternal internals[RendererFrameCount];
 	RendererFrame buildingFrame;
 
@@ -57,6 +59,12 @@ public:
 		ET_ASSERT(buildingFrame.identifier != 0);
 		return internals[buildingFrame.index()];
 	}
+
+	void fillDescriptorSetWithTextures(VkDescriptorSet dsSet[DescriptorSetClass_Count], const VulkanNativeTextureSet& nativeTextureSet) {
+		dsSet[DescriptorSetClass::Textures] = nativeTextureSet.texturesSet ? nativeTextureSet.texturesSet : emptyTextureBindingsSet.texturesSet;
+		dsSet[DescriptorSetClass::Samplers] = nativeTextureSet.samplersSet ? nativeTextureSet.samplersSet : emptyTextureBindingsSet.samplersSet;
+		dsSet[DescriptorSetClass::Images] = nativeTextureSet.imagesSet ? nativeTextureSet.imagesSet : emptyTextureBindingsSet.imagesSet;
+	}
 };
 
 VulkanRenderPass::VulkanRenderPass(VulkanRenderer* renderer, VulkanState& vulkan, const RenderPass::ConstructionInfo& passInfo)
@@ -68,6 +76,7 @@ VulkanRenderPass::VulkanRenderPass(VulkanRenderer* renderer, VulkanState& vulkan
 	for (uint32_t i = 0; i < RendererFrameCount; ++i)
 		_private->internals[i].usedObjects.reserve(65536);
 
+	_private->emptyTextureBindingsSet = VulkanTextureSet::Pointer(renderer->emptyTextureBindingsSet())->nativeSet();
 	_private->generateDynamicDescriptorSet(this);
 	_private->subpassSequence.reserve(64);
 
@@ -390,18 +399,13 @@ void VulkanRenderPass::pushRenderBatch(const MaterialInstance::Pointer& inMateri
 	usedObjects.emplace_back(buildObjectVariables(pipelineState->program()));
 	ConstantBufferEntry* objectVariables = static_cast<ConstantBufferEntry*>(usedObjects.back().pointer());
 
-	usedObjects.emplace_back(material->textureSet(info().name));
-	VulkanTextureSet* textureSet = static_cast<VulkanTextureSet*>(usedObjects.back().pointer());
-
-	usedObjects.emplace_back(material->imageSet(info().name));
-	VulkanTextureSet* imageSet = static_cast<VulkanTextureSet*>(usedObjects.back().pointer());
-
+	usedObjects.emplace_back(material->textureBindingsSet(info().name));
+	VulkanTextureSet* textureBindings = static_cast<VulkanTextureSet*>(usedObjects.back().pointer());
+	
 	VkDescriptorSet descriptorSets[DescriptorSetClass_Count] = {
 		_private->dynamicDescriptorSet,
-		textureSet->nativeSet().texturesSet,
-		textureSet->nativeSet().samplersSet,
-		imageSet->nativeSet().texturesSet,
 	};
+	_private->fillDescriptorSetWithTextures(descriptorSets, textureBindings->nativeSet());
 
 	uint32_t dynamicOffsets[DescriptorSetClass::DynamicDescriptorsCount] = {
 		static_cast<uint32_t>(objectVariables != nullptr ? objectVariables->offset() : 0),
@@ -451,14 +455,12 @@ void VulkanRenderPass::dispatchCompute(const Compute::Pointer& compute, const ve
 		vulkanCompute->build(VulkanRenderPass::Pointer(this));
 	}
 
-	VulkanTextureSet::Pointer textureSet = material->textureSet(info().name);
-	VulkanTextureSet::Pointer imageSet = material->imageSet(info().name);
+	VulkanTextureSet::Pointer textureBindingsSet = material->textureBindingsSet(info().name);
 	ConstantBufferEntry::Pointer materialVariables = material->constantBufferData(info().name);
 	ConstantBufferEntry::Pointer objectVariables = buildObjectVariables(program);
 
 	Vector<Object::Pointer>& usedObjects = _private->currentContent().usedObjects;
-	usedObjects.emplace_back(textureSet);
-	usedObjects.emplace_back(imageSet);
+	usedObjects.emplace_back(textureBindingsSet);
 	usedObjects.emplace_back(materialVariables);
 	usedObjects.emplace_back(objectVariables);
 
@@ -466,10 +468,8 @@ void VulkanRenderPass::dispatchCompute(const Compute::Pointer& compute, const ve
 
 	VkDescriptorSet descriptorSets[DescriptorSetClass_Count] = {
 		_private->dynamicDescriptorSet,
-		textureSet->nativeSet().texturesSet,
-		textureSet->nativeSet().samplersSet,
-		imageSet->nativeSet().texturesSet,
 	};
+	_private->fillDescriptorSetWithTextures(descriptorSets, textureBindingsSet->nativeSet());
 
 	uint32_t dynamicOffsets[DescriptorSetClass::DynamicDescriptorsCount] = {
 		static_cast<uint32_t>(objectVariables.valid() ? objectVariables->offset() : 0),

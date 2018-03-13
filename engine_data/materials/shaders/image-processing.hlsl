@@ -3,7 +3,7 @@
 #include <options>
 #include "srgb.h"
 
-Texture2D<float4> baseColor : DECLARE_TEXTURE;
+Texture2D<float4> inputTexture : DECLARE_TEXTURE;
 
 cbuffer MaterialVariables : DECL_MATERIAL_BUFFER 
 {
@@ -23,10 +23,10 @@ float4 fragmentMain(VSOutput fsIn) : SV_Target0
 	static const int radius = 4;
 
 	if (radius == 0)
-		return baseColor.Sample(LinearClamp, fsIn.texCoord0);
+		return inputTexture.Sample(LinearClamp, fsIn.texCoord0);
 
 	float3 textureSize = 0.0;
-	baseColor.GetDimensions(0, textureSize.x, textureSize.y, textureSize.z);
+	inputTexture.GetDimensions(0, textureSize.x, textureSize.y, textureSize.z);
 
 	float2 texel = extraParameters.xy / textureSize.xy;
 	float2 coord = fsIn.texCoord0 - float(radius) * texel;
@@ -37,7 +37,7 @@ float4 fragmentMain(VSOutput fsIn) : SV_Target0
 	{
 		float w = 1.0 - abs(float(i) / float(radius));
 		weight += w;
-		result += w * baseColor.Sample(LinearClamp, coord);
+		result += w * inputTexture.Sample(LinearClamp, coord);
 		coord += texel;
 	}
 	

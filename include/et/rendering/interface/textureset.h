@@ -38,6 +38,7 @@ public:
 		Map<uint32_t, TextureBinding> textures;
 		Map<uint32_t, Texture::Pointer> images;
 		Map<uint32_t, Sampler::Pointer> samplers;
+		bool allowEmptySet = false;
 	};
 	using Description = Map<ProgramStage, DescriptionSet>;
 
