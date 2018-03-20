@@ -4,7 +4,7 @@
 #include <options>
 #include "common.h"
 
-#define EnableClearCoat 0
+#define EnableClearCoat 1
 #define EnableIridescence 0
 
 cbuffer MaterialVariables : DECL_MATERIAL_BUFFER
@@ -31,7 +31,6 @@ cbuffer ObjectVariables : DECL_OBJECT_BUFFER
 	float4 cameraJitter;
     float4 cameraPosition;
     float4 lightDirection;
-    float3 lightColor;
     float4 viewport;
 	float continuousTime;
 };
@@ -50,7 +49,6 @@ struct VSOutput
    	float4 projectedPosition;
    	float4 previousProjectedPosition;
     float3 normal;
-    float3 toLight;
     float3 toCamera;
     float2 texCoord0;
     float4 lightCoord;
@@ -79,7 +77,6 @@ VSOutput vertexMain(VSInput vsIn)
 
     vsOut.worldPosition =transformedPosition.xyz;
     vsOut.toCamera = (cameraPosition.xyz - transformedPosition.xyz).xyz;
-    vsOut.toLight = (lightDirection.xyz - transformedPosition.xyz * lightDirection.w).xyz;
     vsOut.lightCoord = mul(mul(transformedPosition, lightViewTransform), lightProjectionTransform);
     vsOut.invTransformT = float3(tTangent.x, tBiTangent.x, vsOut.normal.x);
     vsOut.invTransformB = float3(tTangent.y, tBiTangent.y, vsOut.normal.y);
@@ -168,7 +165,7 @@ FSOutput fragmentMain(VSOutput fsIn)
     float3 tsNormal = normalize(float3(nxy, sqrt(1.0 - saturate(dot(nxy, nxy)))));
     float3 wsNormal = normalize(float3(dot(fsIn.invTransformT, tsNormal), dot(fsIn.invTransformB, tsNormal), dot(fsIn.invTransformN, tsNormal)));
 
-    float3 linearBaseColor = srgbToLinear(diffuseReflectance.xyz * baseColorSample.xyz);
+    float3 linearBaseColor = srgbToLinear(baseColorSample.xyz);
     float roughness = normalSample.z;
     float metallness = normalSample.w;
     float ambientOcclusion = ao.Sample(LinearClamp, projectedUv).x;
@@ -176,7 +173,8 @@ FSOutput fragmentMain(VSOutput fsIn)
         
     Surface surface = buildSurface(linearBaseColor, roughness, metallness);
 
-    float3 wsLight = normalize(fsIn.toLight);
+    float3 wsLight = lightDirection.xyz;
+    float3 lightColorValue = lightColor(wsLight);
     float3 wsView = normalize(fsIn.toCamera);
 
     BSDF bsdf = buildBSDF(wsNormal, wsLight, wsView);
@@ -223,7 +221,7 @@ FSOutput fragmentMain(VSOutput fsIn)
 #if (EnableIridescence)
     BSDF iblBsdf = buildBSDF(wsNormal, wsSpecularDir, wsView);
     float3 fresnelScale = iridescentFresnel(iblBsdf);
-    indirectSpecular *= fresnelScale / max(fresnelScale.x, max(fresnelScale.y, fresnelScale.z));
+    indirectSpecular = fresnelScale;// / max(fresnelScale.x, max(fresnelScale.y, fresnelScale.z));
 #endif
 
 #if (EnableClearCoat)
@@ -241,17 +239,17 @@ FSOutput fragmentMain(VSOutput fsIn)
     float clearCoatFresnel = fresnel(f0 * f0, 1.0, ccBSDF.VdotN);
 
     float3 result = 
-    	lerp(directDiffuse + directSpecular, ccSpecular, clearCoatFresnel) * shadowValue * lightColor + 
+    	lerp(directDiffuse + directSpecular, ccSpecular, clearCoatFresnel) * shadowValue * lightColorValue + 
     	lerp(indirectDiffuse + indirectSpecular, ccIndirectSpecular, clearCoatFresnel);
 
 #else
 
     float3 result = 
-    	shadowValue * ((directDiffuse + directSpecular) * lightColor) + 
+    	shadowValue * ((directDiffuse + directSpecular) * lightColorValue) + 
     	ambientOcclusion * (indirectDiffuse + indirectSpecular) + 
     	0.0 * ltcColor * (ltcDiffuse + ltcSpecular);
 
-#endif
+#endif   
 	
 	currentPosition += cameraJitter.xy;
 	previousPosition += cameraJitter.zw;

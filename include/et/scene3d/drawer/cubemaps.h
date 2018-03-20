@@ -9,10 +9,8 @@
 
 #include <et/scene3d/drawer/common.h>
 
-namespace et
-{
-namespace s3d
-{
+namespace et {
+namespace s3d {
 
 class CubemapProcessor : public Object, public FlagsHolder
 {
@@ -26,6 +24,7 @@ public:
 	const Texture::Pointer& convolvedDiffuseCubemap() const;
 	const Texture::Pointer& convolvedSpecularCubemap() const;
 	const Texture::Pointer& brdfLookupTexture() const;
+	const Texture::Pointer& precomputedOpticalDepthTexture() const;
 	const vec4* environmentSphericalHarmonics() const;
 
 	void processAtmosphere();
@@ -68,6 +67,7 @@ private:
 	Material::Pointer _wrapMaterial;
 	Material::Pointer _atmosphereMaterial;
 	Material::Pointer _processingMaterial;
+	Material::Pointer _cubemapDebugMaterial;
 	Material::Pointer _shMaterial;
 	Material::Pointer _downsampleMaterial;
 	Material::Pointer _lookupGeneratorMaterial;
@@ -76,13 +76,18 @@ private:
 	Buffer::Pointer _shValuesBuffer;
 	Compute::Pointer _shConvolute;
 
+	RenderPass::Pointer _atmospherePrecomputePass;
+	RenderBatch::Pointer _atmospherePrecomputeBatch;
+	Texture::Pointer _atmospherePrecomputedOpticalDepth;
+
 	RenderPass::Pointer _lookupPass;
-	RenderPass::Pointer _lookupDebugPass;
 	RenderPass::Pointer _downsamplePass;
 	RenderPass::Pointer _cubemapDebugPass;
 	RenderPass::Pointer _diffuseConvolvePass;
 	RenderPass::Pointer _specularConvolvePass;
 	RenderBatch::Pointer _lookupDebugBatch;
+	RenderBatch::Pointer _atmosphereDebugBatch;
+
 	RenderBatch::Pointer _cubemapDebugBatch;
 	RenderBatch::Pointer _shDebugBatch;
 	RenderBatch::Pointer _diffuseConvolveBatch;
@@ -94,7 +99,32 @@ private:
 	vec4 _environmentSphericalHarmonics[9]{};
 	std::string _sourceTextureName;
 	int32_t _grabHarmonicsFrame = -1;
+	bool _atmospherePrecomputed = false;
 };
+
+inline const Texture::Pointer& CubemapProcessor::convolvedDiffuseCubemap() const {
+	return _tex[CubemapType::Diffuse];
+}
+
+inline const Texture::Pointer& CubemapProcessor::convolvedSpecularCubemap() const {
+	return _tex[CubemapType::Specular];
+}
+
+inline const Texture::Pointer& CubemapProcessor::brdfLookupTexture() const {
+	return _lookup;
+}
+
+inline const Texture::Pointer& CubemapProcessor::precomputedOpticalDepthTexture() const {
+	return _atmospherePrecomputedOpticalDepth;
+}
+
+inline const std::string& CubemapProcessor::sourceTextureName() const {
+	return _sourceTextureName;
+}
+
+inline const vec4* CubemapProcessor::environmentSphericalHarmonics() const {
+	return _environmentSphericalHarmonics;
+}
 
 }
 }

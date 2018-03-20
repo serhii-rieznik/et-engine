@@ -169,6 +169,7 @@ void Drawer::draw() {
 		
 		_main.forward->setSharedTexture(MaterialTexture::AmbientOcclusion, _main.screenSpaceAOTexture);
 		_main.forward->setSharedTexture(MaterialTexture::Shadow, _shadowmapProcessor->directionalShadowmap());
+		_main.forward->setSharedTexture("precomputedOpticalDepth", _cubemapProcessor->precomputedOpticalDepthTexture());
 		_main.forward->setSharedSampler("shadowSampler", _shadowmapProcessor->directionalShadowmapSampler());
 
 		_main.forward->setSharedVariable(ObjectVariable::EnvironmentSphericalHarmonics, _cubemapProcessor->environmentSphericalHarmonics(), 9);
@@ -251,6 +252,7 @@ void Drawer::validate(RenderInterface::Pointer& renderer) {
 		passInfo.depth.loadOperation = FramebufferOperation::Load;
 		passInfo.depth.storeOperation = FramebufferOperation::DontCare;
 		passInfo.depth.targetClass = RenderTarget::Class::Texture;
+		passInfo.depth.clearValue = vec4(0.0f);
 
 		_main.forward = renderer->allocateRenderPass(passInfo);
 		_main.forward->setSharedTexture(MaterialTexture::ConvolvedSpecular, _cubemapProcessor->convolvedSpecularCubemap());
@@ -333,7 +335,7 @@ void Drawer::setScene(const Scene::Pointer& inScene) {
 		_lighting.directional = Light::Pointer::create(Light::Type::Directional);
 		_lighting.directional->setColor(vec3(120000.0f));
 		_lighting.directional->lookAt(lightDirection);
-		_lighting.directional->perspectiveProjection(QUARTER_PI, 1.0f, 1.0f, 2048.0f);
+		_lighting.directional->perspectiveProjection(QUARTER_PI, 1.0f, 1.0f, 2048.0f, false);
 	}
 
 	_shadowmapProcessor->setScene(_scene, _lighting.directional);

@@ -28,7 +28,7 @@
 			"tangent" : 3
 		},
 			"depth-state": {
-			"depth-function": "less",
+			"depth-function": "greater",
 			"depth-test": true,
 			"depth-write": true
 		},

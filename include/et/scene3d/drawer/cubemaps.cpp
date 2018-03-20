@@ -23,7 +23,7 @@ CubemapProcessor::CubemapProcessor() :
 		_oneLevelCubemapBeginInfo.subpasses.emplace_back(layer, 0);
 
 	Camera cm;
-	const mat4& proj = cm.perspectiveProjection(HALF_PI, 1.0f, 1.0f, 2.0f);
+	const mat4& proj = cm.perspectiveProjection(HALF_PI, 1.0f, 1.0f, 2.0f, false);
 	_projections = cubemapMatrixProjectionArray(proj, vec3(0.0f));
 	for (mat4& m : _projections)
 		m = m.inverted();
@@ -43,6 +43,12 @@ void CubemapProcessor::processEquiretangularTexture(const Texture::Pointer& tex)
 
 void CubemapProcessor::process(RenderInterface::Pointer& renderer, DrawerOptions& options, const Light::Pointer& light) {
 	validate(renderer);
+
+	if (_atmospherePrecomputed == false)
+	{
+		renderer->submitPassWithRenderBatch(_atmospherePrecomputePass, _atmospherePrecomputeBatch);
+		_atmospherePrecomputed = true;
+	}
 
 	if (_grabHarmonicsFrame == 0)
 	{
@@ -80,6 +86,7 @@ void CubemapProcessor::process(RenderInterface::Pointer& renderer, DrawerOptions
 		if (hasFlag(CubemapAtmosphere))
 		{
 			copyBatch = renderhelper::createQuadBatch(_atmosphereMaterial);
+			copyBatch->material()->setTexture("precomputedOpticalDepth", _atmospherePrecomputedOpticalDepth);
 		}
 		else
 		{
@@ -174,6 +181,9 @@ void CubemapProcessor::process(RenderInterface::Pointer& renderer, DrawerOptions
 void CubemapProcessor::validate(RenderInterface::Pointer& renderer) {
 	if (_processingMaterial.invalid())
 		_processingMaterial = renderer->sharedMaterialLibrary().loadMaterial(application().resolveFileName("engine_data/materials/cubemap.json"));
+	
+	if (_cubemapDebugMaterial.invalid())
+		_cubemapDebugMaterial = renderer->sharedMaterialLibrary().loadMaterial(application().resolveFileName("engine_data/materials/cubemap-debug.json"));
 
 	if (_wrapMaterial.invalid())
 		_wrapMaterial = renderer->sharedMaterialLibrary().loadMaterial(application().resolveFileName("engine_data/materials/cubemap-wrap.json"));
@@ -233,16 +243,12 @@ void CubemapProcessor::validate(RenderInterface::Pointer& renderer) {
 		passInfo.name = "generate-split-sum-approx";
 		passInfo.priority = passPriority--;
 		_lookupPass = renderer->allocateRenderPass(passInfo);
+	}
 
-		passInfo.color[0].loadOperation = FramebufferOperation::Load;
-		passInfo.color[0].storeOperation = FramebufferOperation::Store;
-		passInfo.color[0].targetClass = RenderTarget::Class::DefaultBuffer;
-		passInfo.name = "default";
-		passInfo.priority = RenderPassPriority::UI - 2;
-		_lookupDebugPass = renderer->allocateRenderPass(passInfo);
-
-		Material::Pointer lookupDebugMaterial = renderer->sharedMaterialLibrary().loadMaterial(application().resolveFileName("engine_data/materials/textured2d-transformed.json"));
-		_lookupDebugBatch = renderhelper::createQuadBatch(MaterialTexture::Input, _lookup, lookupDebugMaterial, renderhelper::QuadType::Default);
+	if (_lookupDebugBatch.invalid())
+	{
+		Material::Pointer debugMaterial = renderer->sharedMaterialLibrary().loadMaterial(application().resolveFileName("engine_data/materials/textured2d-transformed.json"));
+		_lookupDebugBatch = renderhelper::createQuadBatch(MaterialTexture::Input, _lookup, debugMaterial, renderhelper::QuadType::Default);
 	}
 
 	if (_downsamplePass.invalid())
@@ -290,10 +296,33 @@ void CubemapProcessor::validate(RenderInterface::Pointer& renderer) {
 		passInfo.color[0].loadOperation = FramebufferOperation::Load;
 		passInfo.color[0].storeOperation = FramebufferOperation::Store;
 		passInfo.color[0].targetClass = RenderTarget::Class::DefaultBuffer;
-		passInfo.name = "cubemap-visualize";
+		passInfo.name = "default";
 		passInfo.priority = RenderPassPriority::UI + 1;
 		_cubemapDebugPass = renderer->allocateRenderPass(passInfo);
-		_cubemapDebugBatch = renderhelper::createQuadBatch(_processingMaterial, renderhelper::QuadType::Default);
+		_cubemapDebugBatch = renderhelper::createQuadBatch(_cubemapDebugMaterial, renderhelper::QuadType::Default);
+	}
+
+	if (_atmospherePrecomputePass.invalid())
+	{
+		TextureDescription::Pointer txDesc(PointerInit::CreateInplace);
+		txDesc->format = TextureFormat::RGBA32F;
+		txDesc->size = vec2i(256, 256);
+		txDesc->flags = Texture::Flags::ShaderResource | Texture::Flags::RenderTarget;
+		_atmospherePrecomputedOpticalDepth = renderer->createTexture(txDesc);
+
+		RenderPass::ConstructionInfo passInfo;
+		passInfo.color[0].loadOperation = FramebufferOperation::DontCare;
+		passInfo.color[0].storeOperation = FramebufferOperation::Store;
+		passInfo.color[0].targetClass = RenderTarget::Class::Texture;
+		passInfo.color[0].texture = _atmospherePrecomputedOpticalDepth;
+		passInfo.name = "precompute-optical-depth";
+		passInfo.priority = RenderPassPriority::UI + 1;
+
+		_atmospherePrecomputePass = renderer->allocateRenderPass(passInfo);
+		_atmospherePrecomputeBatch = renderhelper::createQuadBatch(_atmosphereMaterial);
+
+		Material::Pointer debugMaterial = renderer->sharedMaterialLibrary().loadMaterial(application().resolveFileName("engine_data/materials/textured2d-transformed.json"));
+		_atmosphereDebugBatch = renderhelper::createQuadBatch(MaterialTexture::Input, _atmospherePrecomputedOpticalDepth, debugMaterial, renderhelper::QuadType::Default);
 	}
 
 	if (_shDebugBatch.invalid())
@@ -327,12 +356,14 @@ void CubemapProcessor::validate(RenderInterface::Pointer& renderer) {
 void CubemapProcessor::drawDebug(RenderInterface::Pointer& renderer, const DrawerOptions& options) {
 	vec2 vp = vector2ToFloat(renderer->contextSize());
 
-	if (options.drawEnvironmentProbe)
+	if (options.drawCubemapsDebug)
 	{
 		float cubemapsCount = static_cast<float>(CubemapType::Count - CubemapType::Downsampled);
 		float dy = std::floor(vp.y / static_cast<float>(CubemapLevels));
 		float dx = 2.0f * dy;
+		float ds = std::max(dx, dy);
 		float xGap = 0.1f * dx;
+		float yGap = 0.1f * dy;
 		vec2 pos = vec2(0.5f * (vp.x - dx * cubemapsCount - xGap * (cubemapsCount - 1.0f)), 0.0f);
 
 		renderer->beginRenderPass(_cubemapDebugPass, RenderPassBeginInfo::singlePass());
@@ -348,48 +379,27 @@ void CubemapProcessor::drawDebug(RenderInterface::Pointer& renderer, const Drawe
 				_cubemapDebugPass->pushRenderBatch(_cubemapDebugBatch);
 				pos.y += dy;
 			}
-			pos.x += dx + xGap;
+			if (i + 1 < CubemapType::Count)
+				pos.x += dx + xGap;
 		}
-		pos.x -= dx + xGap;
+		pos.y += yGap;
 
 		_cubemapDebugPass->setSharedVariable(ObjectVariable::EnvironmentSphericalHarmonics, _environmentSphericalHarmonics, 9);
 		_cubemapDebugPass->setSharedVariable(ObjectVariable::WorldTransform, fullscreenBatchTransform(vp, pos, vec2(dx, dy)));
 		_cubemapDebugPass->pushRenderBatch(_shDebugBatch);
+		pos.y += dy;
+		
+		_cubemapDebugPass->setSharedVariable(ObjectVariable::WorldTransform, fullscreenBatchTransform(vp, pos, vec2(ds, ds)));
+		_cubemapDebugPass->pushRenderBatch(_atmosphereDebugBatch);
+		pos.y += ds;
+		
+		_cubemapDebugPass->setSharedVariable(ObjectVariable::WorldTransform, fullscreenBatchTransform(vp, pos, vec2(ds, ds)));
+		_cubemapDebugPass->pushRenderBatch(_lookupDebugBatch);
+		pos.y += ds;
 
 		_cubemapDebugPass->endSubpass();
 		renderer->submitRenderPass(_cubemapDebugPass);
 	}
-
-	if (options.drawLookupTexture)
-	{
-		vec2 lookupSize = vec2(256.0f);
-		renderer->beginRenderPass(_lookupDebugPass, RenderPassBeginInfo::singlePass());
-		_lookupDebugPass->nextSubpass();
-		_lookupDebugPass->setSharedVariable(ObjectVariable::WorldTransform, fullscreenBatchTransform(vp, 0.5f * (vp - lookupSize), lookupSize));
-		_lookupDebugPass->pushRenderBatch(_lookupDebugBatch);
-		_lookupDebugPass->endSubpass();
-		renderer->submitRenderPass(_lookupDebugPass);
-	}
-}
-
-const Texture::Pointer& CubemapProcessor::convolvedDiffuseCubemap() const {
-	return _tex[CubemapType::Diffuse];
-}
-
-const Texture::Pointer& CubemapProcessor::convolvedSpecularCubemap() const {
-	return _tex[CubemapType::Specular];
-}
-
-const Texture::Pointer& CubemapProcessor::brdfLookupTexture() const {
-	return _lookup;
-}
-
-const std::string& CubemapProcessor::sourceTextureName() const {
-	return _sourceTextureName;
-}
-
-const vec4* CubemapProcessor::environmentSphericalHarmonics() const {
-	return _environmentSphericalHarmonics;
 }
 
 }

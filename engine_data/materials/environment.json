@@ -5,7 +5,7 @@
 		"input-layout" : {
 		},
 		"depth-state": {
-			"depth-function": "less",
+			"depth-function": "greater",
 			"depth-test": true,
 			"depth-write": false
 		},

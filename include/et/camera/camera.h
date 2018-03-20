@@ -23,16 +23,16 @@ public:
 
 	void lookAt(const vec3& pos, const vec3& point = vec3(0.0f), const vec3& up = vec3(0.0f, 1.0f, 0.0f));
 
-	const mat4& perspectiveProjection(float fov, float aspect, float zNear, float zFar);
+	const mat4& perspectiveProjection(float fov, float aspect, float zNear, float zFar, bool reverseZ);
 	const mat4& customPerspectiveProjection(const vec2& fov, float zNear, float zFar);
 	const mat4& orthogonalProjection(float left, float right, float bottom, float top, float zNear, float zFar);
 	const mat4& windowProjection(const vec2& windowSize);
 
+	void setPosition(const vec3& pos);
+
 	const vec3& position() const {
 		return _inverseViewMatrix[3].xyz();
 	}
-
-	void setPosition(const vec3& pos);
 
 	const quaternion orientation() const {
 		return matrixToQuaternion(_viewMatrix.mat3());
@@ -78,6 +78,8 @@ public:
 	const mat4& inverseViewProjectionMatrix() const {
 		return _inverseViewProjectionMatrix;
 	}
+
+	BoundingBox::Corners frustumCornersWithDistance(float nearDistance, float farDistance);
 
 	vec3 up() const;
 	vec3 side() const;

@@ -1,8 +1,23 @@
 {
 	"name" : "cubemap-atmosphere",
 
-	"prepare-cubemap" : 
-	{ 
+	"precompute-optical-depth" : { 
+		"input-layout" : {
+		},
+		"depth-state": {
+			"depth-function": "always",
+			"depth-test": false,
+			"depth-write": false
+		},
+		"options" : {
+			"PRECOMPUTE_OPTICAL_DEPTH" : 1
+		},
+		"blend-state": "disabled",
+		"cull-mode" : "disabled",
+		"code" : "shaders/cubemap"
+	},
+
+	"prepare-cubemap" : { 
 		"input-layout" : {
 		},
 		"depth-state": {

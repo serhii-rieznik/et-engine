@@ -118,6 +118,7 @@ VulkanRenderPass::VulkanRenderPass(VulkanRenderer* renderer, VulkanState& vulkan
 		else
 		{
 			ET_ASSERT(passInfo.depth.texture.valid());
+			ET_ASSERT(passInfo.depth.texture->description().flags & Texture::Flags::RenderTarget);
 			VulkanTexture::Pointer texture = passInfo.depth.texture;
 			attachment.format = texture->nativeTexture().format;
 		}
@@ -150,6 +151,7 @@ VulkanRenderPass::VulkanRenderPass(VulkanRenderer* renderer, VulkanState& vulkan
 			else
 			{
 				ET_ASSERT(target.texture.valid());
+				ET_ASSERT(target.texture->description().flags & Texture::Flags::RenderTarget);
 				const VulkanTexture::Pointer& texture = target.texture;
 				attachment.format = texture->nativeTexture().format;
 			}

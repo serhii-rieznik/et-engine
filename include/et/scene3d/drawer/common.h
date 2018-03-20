@@ -18,8 +18,7 @@ namespace s3d
 struct DrawerOptions
 {
 	float shadowmapScale = 1.0f;
-	bool drawEnvironmentProbe = false;
-	bool drawLookupTexture = false;
+	bool drawCubemapsDebug = false;
 	bool drawShadowmap = false;
 	bool rebuldEnvironmentProbe = false;
 	bool rebuildLookupTexture = false;

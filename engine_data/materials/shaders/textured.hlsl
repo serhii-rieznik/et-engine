@@ -21,9 +21,15 @@ struct VSOutput
 	float2 texCoord0 : TEXCOORD0;
 };
 
-VSOutput vertexMain(uint vertexIndex : SV_VertexID)
-{
+#define USE_INPUT_VERTICES (TRANSFORM_2D_POSITION || TRANSFORM_INPUT_POSITION)
+
+#if (USE_INPUT_VERTICES)
+VSOutput vertexMain(VSInput vsIn) {
+	float2 pos = vsIn.position;
+#else
+VSOutput vertexMain(uint vertexIndex : SV_VertexID) { 
 	float2 pos = float2((vertexIndex << 1) & 2, vertexIndex & 2) * 2.0 - 1.0;
+#endif
 
 	VSOutput vsOut;
 	vsOut.texCoord0 = pos * 0.5 + 0.5;
@@ -42,7 +48,7 @@ float4 fragmentMain(VSOutput fsIn) : SV_Target0
 {
 #if (DISPLAY_DEPTH)
 	float sample = inputTexture.SampleLevel(PointClamp, fsIn.texCoord0, 0.0).x;
-	return pow(sample, 1.0);
+	return pow(sample, 4.0);
 #elif (SPECIFIC_LOD)
 	return inputTexture.SampleLevel(LinearClamp, fsIn.texCoord0, extraParameters.x);
 #else

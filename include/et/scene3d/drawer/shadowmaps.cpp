@@ -49,8 +49,18 @@ void ShadowmapProcessor::setupProjection(DrawerOptions& options)
 	lightViewMatrix[1][0] = s.y; lightViewMatrix[1][1] = u.y; lightViewMatrix[1][2] = -d.y;
 	lightViewMatrix[2][0] = s.z; lightViewMatrix[2][1] = u.z; lightViewMatrix[2][2] = -d.z;
 
-	const BoundingBox::Corners& corners = _sceneBoundingBox.corners();
+	vec3 worldMin(std::numeric_limits<float>::max());
+	vec3 worldMax = -worldMin;
+	BoundingBox::Corners corners = _sceneBoundingBox.corners();
+	for (const vec3& c : corners)
+	{
+		vec3 t = lightViewMatrix * c;
+		worldMin = minv(worldMin, t);
+		worldMax = maxv(worldMax, t);
+	}
 
+	/*
+	corners = _scene->renderCamera()->frustumCornersWithDistance(_scene->renderCamera()->zNear(), 8.0f);
 	vec3 viewMin(std::numeric_limits<float>::max());
 	vec3 viewMax = -viewMin;
 	for (const vec3& c : corners)
@@ -59,16 +69,16 @@ void ShadowmapProcessor::setupProjection(DrawerOptions& options)
 		viewMin = minv(viewMin, t);
 		viewMax = maxv(viewMax, t);
 	}
+	*/
 	
 	Camera lightCamera;
 	{
-		float projectionOffset = 0.05f * length(viewMax - viewMin);
-		lightCamera.setViewMatrix(mat4(lightViewMatrix));
+		float projectionOffset = 0.0f; // 0.05f * length(worldMax - worldMin);
 
-		float left = viewMin.x - projectionOffset;
-		float right = viewMax.x + projectionOffset;
-		float top = viewMax.y + projectionOffset;
-		float bottom = viewMin.y - projectionOffset;
+		float left = worldMin.x - projectionOffset;
+		float right = worldMax.x + projectionOffset;
+		float top = worldMax.y + projectionOffset;
+		float bottom = worldMin.y - projectionOffset;
 
 		float hCenter = 0.5f * (right + left);
 		float hSize = 0.5f * (right - left) * options.shadowmapScale;
@@ -79,11 +89,12 @@ void ShadowmapProcessor::setupProjection(DrawerOptions& options)
 		float vSize = 0.5f * (top - bottom) * options.shadowmapScale;
 		bottom = vCenter - vSize;
 		top = vCenter + vSize;
-
-		lightCamera.orthogonalProjection(left, right, bottom, top,
-			-(viewMax.z + projectionOffset), -(viewMin.z - projectionOffset));
+		// */
+		lightCamera.orthogonalProjection(left, right, bottom, top, worldMin.z, worldMax.z);
+		// */
+		// lightCamera.orthogonalProjection(viewMin.x, viewMax.x, viewMin.y, viewMax.y, worldNear, worldFar);
 	}
-	_light->setViewMatrix(lightCamera.viewMatrix());
+	_light->setViewMatrix(mat4(lightViewMatrix));
 	_light->setProjectionMatrix(lightCamera.projectionMatrix());
 }
 
@@ -109,7 +120,7 @@ void ShadowmapProcessor::process(RenderInterface::Pointer& renderer, DrawerOptio
 	activePass->nextSubpass();
 	for (Mesh::Pointer& mesh : _renderables.meshes)
 	{
-		if (_light->frustum().containsBoundingBox(mesh->tranformedBoundingBox()))
+		// if (_light->frustum().containsBoundingBox(mesh->tranformedBoundingBox()))
 		{
 			const mat4& transform = mesh->transform();
 			const mat4& rotationTransform = mesh->rotationTransform();

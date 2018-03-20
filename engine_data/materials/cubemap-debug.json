@@ -1,5 +1,5 @@
 {
-	"name" : "spherical-harmonics-routines",
+	"name" : "cubemap-debug-routines",
 
 	"default" :
 	{ 
@@ -12,7 +12,7 @@
 			"depth-write": false
 		},
 		"options" : {
-			"VISUALIZE_SPHERICAL_HARMONICS" : 1
+			"VISUALIZE_CUBEMAP" : 1
 		},
 		"blend-state": "disabled",
 		"cull-mode" : "disabled",

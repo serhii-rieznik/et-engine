@@ -20,7 +20,6 @@
 cbuffer ObjectVariables : DECL_OBJECT_BUFFER
 {
 	row_major float4x4 worldTransform;
-	float3 lightColor;
 	float4 lightDirection;
 #if (VISUALIZE_SPHERICAL_HARMONICS)
 	float4 environmentSphericalHarmonics[9];
@@ -72,7 +71,14 @@ static const float cScale = 0.0001;
 
 float4 fragmentMain(VSOutput fsIn) : SV_Target0
 {
-#if (VISUALIZE_SPHERICAL_HARMONICS)
+#if (PRECOMPUTE_OPTICAL_DEPTH)
+
+	float h = fsIn.texCoord0.y;
+	float sinTheta = fsIn.texCoord0.x * 2.0 - 1.0;
+
+	return float4(evaluateTransmittance(h, sinTheta), 1.0);
+
+#elif (VISUALIZE_SPHERICAL_HARMONICS)
 
 	float phi = PI * (fsIn.texCoord0.x * 2.0 - 1.0);
 	float theta = PI * (0.5 - fsIn.texCoord0.y);
@@ -106,7 +112,8 @@ float4 fragmentMain(VSOutput fsIn) : SV_Target0
 #elif (ATMOSPHERE)
 
 	float3 d = normalize(fsIn.direction);        	
-	return float4(sampleAtmosphere(d, lightDirection.xyz, lightColor), 1.0);
+	float3 a = sampleAtmosphere(d, lightDirection.xyz);
+	return float4(a, 1.0);
 
 #elif (DOWNSAMPLE_CUBEMAP)
 	

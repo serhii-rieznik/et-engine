@@ -34,6 +34,8 @@ void Frustum::build(const mat4& invVP)
 
 bool Frustum::containsBoundingBox(const BoundingBox& aabb) const
 {
+	return true;
+
 	const BoundingBox::Corners& corners = aabb.corners();
 
 	for (const plane& frustumPlane : _planes)
