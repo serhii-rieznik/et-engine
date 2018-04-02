@@ -3,10 +3,10 @@
 #define ATMOSPHERE_HEIGHT 			60e+3
 #define ATMOSPHERE_RADIUS			(EARTH_RADIUS + ATMOSPHERE_HEIGHT) 
 #define H0 							float2(7994.0, 1200.0)
-#define MIE_EXTINCTION_ANISOTROPY	0.7875
-#define RAYLEIGH_EXTINCTION			2.0 * float3(6.554e-6, 1.428e-5, 2.853e-5)
+#define MIE_EXTINCTION_ANISOTROPY	0.75
+#define RAYLEIGH_EXTINCTION			float3(6.554e-6, 1.428e-5, 2.853e-5)
 #define MIE_EXTINCTION 				float3(6.894e-6, 1.018e-5, 1.438e-5)
-#define OZONE_ABSORPTION			5.0 * float3(2.0556e-6, 4.9788e-6, 2.136e-7)
+#define OZONE_ABSORPTION			float3(2.0556e-6, 4.9788e-6, 2.136e-7)
 #define SUN_ILLUMINANCE 			120000.0
 #define SUN_ANGULAR_SIZE			(0.009512 * 2.0)
 #define SUN_SOLID_ANGLE				(PI * SUN_ANGULAR_SIZE * SUN_ANGULAR_SIZE) // (2.0 * PI * (1.0 - cos(SUN_ANGULAR_SIZE)))
@@ -68,6 +68,12 @@ float3 evaluateTransmittance(in float h, in float sinTheta)
 	return exp(-opticalLength.x * (OZONE_ABSORPTION + RAYLEIGH_EXTINCTION) - opticalLength.y * MIE_EXTINCTION);
 }                           
 
+float3 evaluateTransmittance(in float3 p0, in float3 p1)
+{
+    float2 opticalLength = evaluateOpticalLength(p0, p1);
+	return exp(-opticalLength.x * (OZONE_ABSORPTION + RAYLEIGH_EXTINCTION) - opticalLength.y * MIE_EXTINCTION);
+}                           
+
 float3 samplePrecomputedTransmittance(in float h, in float sinTheta)
 {
 	return precomputedOpticalDepth.Sample(LinearClamp, float2(sinTheta * 0.5 + 0.5, h / ATMOSPHERE_HEIGHT)).xyz;
@@ -110,6 +116,12 @@ float3 lightColor(in float3 light)
 	return SUN_ILLUMINANCE * samplePrecomputedTransmittance(0.0, light.y);
 }
 
+float3 sunLuminance()
+{
+	float3 zenithLuminance = SUN_ILLUMINANCE / SUN_SOLID_ANGLE;
+	return zenithLuminance / samplePrecomputedTransmittance(0.0, 1.0);
+}
+
 float3 sunColor(in float3 view, in float3 light)
 {
 	float3 result = 0.0;
@@ -121,11 +133,8 @@ float3 sunColor(in float3 view, in float3 light)
 		float mu = sqrt(1.0 - distanceToCenter * distanceToCenter);
 		float3 darkening = pow(mu, SUN_LIMB_DARKENING);
 
-		float3 zenithLuminance = SUN_ILLUMINANCE / SUN_SOLID_ANGLE;
-		float3 zenithTransmittance = samplePrecomputedTransmittance(0.0, 1.0);
-		float3 outerspaceLuminance = zenithLuminance / zenithTransmittance;
 		float3 transmittance = samplePrecomputedTransmittance(0.0, view.y);
-		result = outerspaceLuminance * darkening * transmittance * transmittance;
+		result = sunLuminance() * darkening * transmittance;
 	}
 
 	return result;
@@ -137,6 +146,6 @@ float3 sampleAtmosphere(float3 view, in float3 light)
     float2 phase = float2(phaseFunctionRayleigh(cosTheta), phaseFunctionMie(cosTheta, MIE_EXTINCTION_ANISOTROPY));
 
     float3 pos = float3(0.0, EARTH_RADIUS, 0.0);
-    float t = min(4.0 * ATMOSPHERE_HEIGHT, atmosphereIntersection(pos, view));
-    return SUN_ILLUMINANCE * inScattering(pos, pos + t * view, light, phase);
+    float t = min(8.0 * ATMOSPHERE_HEIGHT, atmosphereIntersection(pos, view));
+    return SUN_ILLUMINANCE * inScattering(pos, pos + t * view, light, phase) / samplePrecomputedTransmittance(0.0, 1.0);
 }

@@ -76,9 +76,18 @@ private:
 	Buffer::Pointer _shValuesBuffer;
 	Compute::Pointer _shConvolute;
 
-	RenderPass::Pointer _atmospherePrecomputePass;
-	RenderBatch::Pointer _atmospherePrecomputeBatch;
-	Texture::Pointer _atmospherePrecomputedOpticalDepth;
+	struct
+	{
+		RenderPass::Pointer opticalDepthPass;
+		RenderBatch::Pointer opticalDepthBatch;
+		RenderBatch::Pointer opticalDepthBatchDebug;
+		RenderBatch::Pointer inScatteringBatchDebug;
+		Texture::Pointer opticalDepth;
+
+		RenderPass::Pointer inScatteringPass;
+		RenderBatch::Pointer inScatteringBatch;
+		Texture::Pointer inScattering;
+	} _atmosphere;
 
 	RenderPass::Pointer _lookupPass;
 	RenderPass::Pointer _downsamplePass;
@@ -86,7 +95,6 @@ private:
 	RenderPass::Pointer _diffuseConvolvePass;
 	RenderPass::Pointer _specularConvolvePass;
 	RenderBatch::Pointer _lookupDebugBatch;
-	RenderBatch::Pointer _atmosphereDebugBatch;
 
 	RenderBatch::Pointer _cubemapDebugBatch;
 	RenderBatch::Pointer _shDebugBatch;
@@ -115,7 +123,7 @@ inline const Texture::Pointer& CubemapProcessor::brdfLookupTexture() const {
 }
 
 inline const Texture::Pointer& CubemapProcessor::precomputedOpticalDepthTexture() const {
-	return _atmospherePrecomputedOpticalDepth;
+	return _atmosphere.opticalDepth;
 }
 
 inline const std::string& CubemapProcessor::sourceTextureName() const {

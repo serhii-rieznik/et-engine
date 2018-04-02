@@ -4,7 +4,7 @@
 #include <options>
 #include "common.h"
 
-#define EnableClearCoat 1
+#define EnableClearCoat 0
 #define EnableIridescence 0
 
 cbuffer MaterialVariables : DECL_MATERIAL_BUFFER
@@ -249,7 +249,22 @@ FSOutput fragmentMain(VSOutput fsIn)
     	ambientOcclusion * (indirectDiffuse + indirectSpecular) + 
     	0.0 * ltcColor * (ltcDiffuse + ltcSpecular);
 
-#endif   
+#endif
+
+#if (1)
+	{
+		float3 invView = -wsView;
+
+	    float cosTheta = dot(invView, wsLight);
+    	float2 phase = float2(phaseFunctionRayleigh(cosTheta), phaseFunctionMie(cosTheta, MIE_EXTINCTION_ANISOTROPY));
+
+	    float3 p0 = fsIn.worldPosition + float3(0.0, EARTH_RADIUS, 0.0);
+	    float3 p1 = p0 + invView * length(fsIn.toCamera);
+
+	    result *= evaluateTransmittance(p0, p1);
+	    result += SUN_ILLUMINANCE * inScattering(p0, p1, wsLight, phase) / samplePrecomputedTransmittance(0.0, 1.0);
+    }
+#endif
 	
 	currentPosition += cameraJitter.xy;
 	previousPosition += cameraJitter.zw;

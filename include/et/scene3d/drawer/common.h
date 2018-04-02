@@ -20,8 +20,8 @@ struct DrawerOptions
 	float shadowmapScale = 1.0f;
 	bool drawCubemapsDebug = false;
 	bool drawShadowmap = false;
-	bool rebuldEnvironmentProbe = false;
-	bool rebuildLookupTexture = false;
+	bool rebuldEnvironmentProbe = true;
+	bool rebuildLookupTexture = true;
 	bool enableScreenSpaceShadows = false;
 	bool enableScreenSpaceAO = true;
 };

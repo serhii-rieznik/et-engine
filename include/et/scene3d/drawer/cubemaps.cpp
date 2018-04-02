@@ -46,8 +46,9 @@ void CubemapProcessor::process(RenderInterface::Pointer& renderer, DrawerOptions
 
 	if (_atmospherePrecomputed == false)
 	{
-		renderer->submitPassWithRenderBatch(_atmospherePrecomputePass, _atmospherePrecomputeBatch);
-		_atmospherePrecomputed = true;
+		renderer->submitPassWithRenderBatch(_atmosphere.opticalDepthPass, _atmosphere.opticalDepthBatch);
+		renderer->submitPassWithRenderBatch(_atmosphere.inScatteringPass, _atmosphere.inScatteringBatch);
+		// _atmospherePrecomputed = true;
 	}
 
 	if (_grabHarmonicsFrame == 0)
@@ -86,7 +87,7 @@ void CubemapProcessor::process(RenderInterface::Pointer& renderer, DrawerOptions
 		if (hasFlag(CubemapAtmosphere))
 		{
 			copyBatch = renderhelper::createQuadBatch(_atmosphereMaterial);
-			copyBatch->material()->setTexture("precomputedOpticalDepth", _atmospherePrecomputedOpticalDepth);
+			copyBatch->material()->setTexture("precomputedOpticalDepth", _atmosphere.opticalDepth);
 		}
 		else
 		{
@@ -302,27 +303,50 @@ void CubemapProcessor::validate(RenderInterface::Pointer& renderer) {
 		_cubemapDebugBatch = renderhelper::createQuadBatch(_cubemapDebugMaterial, renderhelper::QuadType::Default);
 	}
 
-	if (_atmospherePrecomputePass.invalid())
+	if (_atmosphere.opticalDepthPass.invalid())
 	{
 		TextureDescription::Pointer txDesc(PointerInit::CreateInplace);
 		txDesc->format = TextureFormat::RGBA32F;
 		txDesc->size = vec2i(256, 256);
 		txDesc->flags = Texture::Flags::ShaderResource | Texture::Flags::RenderTarget;
-		_atmospherePrecomputedOpticalDepth = renderer->createTexture(txDesc);
+		_atmosphere.opticalDepth = renderer->createTexture(txDesc);
 
 		RenderPass::ConstructionInfo passInfo;
 		passInfo.color[0].loadOperation = FramebufferOperation::DontCare;
 		passInfo.color[0].storeOperation = FramebufferOperation::Store;
 		passInfo.color[0].targetClass = RenderTarget::Class::Texture;
-		passInfo.color[0].texture = _atmospherePrecomputedOpticalDepth;
+		passInfo.color[0].texture = _atmosphere.opticalDepth;
 		passInfo.name = "precompute-optical-depth";
 		passInfo.priority = RenderPassPriority::UI + 1;
 
-		_atmospherePrecomputePass = renderer->allocateRenderPass(passInfo);
-		_atmospherePrecomputeBatch = renderhelper::createQuadBatch(_atmosphereMaterial);
+		_atmosphere.opticalDepthPass = renderer->allocateRenderPass(passInfo);
+		_atmosphere.opticalDepthBatch = renderhelper::createQuadBatch(_atmosphereMaterial);
 
 		Material::Pointer debugMaterial = renderer->sharedMaterialLibrary().loadMaterial(application().resolveFileName("engine_data/materials/textured2d-transformed.json"));
-		_atmosphereDebugBatch = renderhelper::createQuadBatch(MaterialTexture::Input, _atmospherePrecomputedOpticalDepth, debugMaterial, renderhelper::QuadType::Default);
+		_atmosphere.opticalDepthBatchDebug = renderhelper::createQuadBatch(MaterialTexture::Input, _atmosphere.opticalDepth, debugMaterial, renderhelper::QuadType::Default);
+	}
+
+	if (_atmosphere.inScattering.invalid())
+	{
+		TextureDescription::Pointer txDesc(PointerInit::CreateInplace);
+		txDesc->format = TextureFormat::RGBA32F;
+		txDesc->size = vec2i(256, 256);
+		txDesc->flags = Texture::Flags::ShaderResource | Texture::Flags::RenderTarget;
+		_atmosphere.inScattering = renderer->createTexture(txDesc);
+
+		RenderPass::ConstructionInfo passInfo;
+		passInfo.color[0].loadOperation = FramebufferOperation::DontCare;
+		passInfo.color[0].storeOperation = FramebufferOperation::Store;
+		passInfo.color[0].targetClass = RenderTarget::Class::Texture;
+		passInfo.color[0].texture = _atmosphere.inScattering;
+		passInfo.name = "precompute-in-scattering";
+		passInfo.priority = RenderPassPriority::UI + 1;
+
+		_atmosphere.inScatteringPass = renderer->allocateRenderPass(passInfo);
+		_atmosphere.inScatteringBatch = renderhelper::createQuadBatch(_atmosphereMaterial);
+
+		Material::Pointer debugMaterial = renderer->sharedMaterialLibrary().loadMaterial(application().resolveFileName("engine_data/materials/textured2d-transformed.json"));
+		_atmosphere.inScatteringBatchDebug = renderhelper::createQuadBatch(MaterialTexture::Input, _atmosphere.inScattering, debugMaterial, renderhelper::QuadType::Default);
 	}
 
 	if (_shDebugBatch.invalid())
@@ -390,9 +414,13 @@ void CubemapProcessor::drawDebug(RenderInterface::Pointer& renderer, const Drawe
 		pos.y += dy;
 		
 		_cubemapDebugPass->setSharedVariable(ObjectVariable::WorldTransform, fullscreenBatchTransform(vp, pos, vec2(ds, ds)));
-		_cubemapDebugPass->pushRenderBatch(_atmosphereDebugBatch);
+		_cubemapDebugPass->pushRenderBatch(_atmosphere.opticalDepthBatchDebug);
 		pos.y += ds;
-		
+
+		_cubemapDebugPass->setSharedVariable(ObjectVariable::WorldTransform, fullscreenBatchTransform(vp, pos, vec2(ds, ds)));
+		_cubemapDebugPass->pushRenderBatch(_atmosphere.inScatteringBatchDebug);
+		pos.y += ds;
+
 		_cubemapDebugPass->setSharedVariable(ObjectVariable::WorldTransform, fullscreenBatchTransform(vp, pos, vec2(ds, ds)));
 		_cubemapDebugPass->pushRenderBatch(_lookupDebugBatch);
 		pos.y += ds;

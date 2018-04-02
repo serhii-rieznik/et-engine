@@ -71,7 +71,11 @@ static const float cScale = 0.0001;
 
 float4 fragmentMain(VSOutput fsIn) : SV_Target0
 {
-#if (PRECOMPUTE_OPTICAL_DEPTH)
+#if (PRECOMPUTE_IN_SCATTERING)
+	
+	return float4(0.5, 0.5, 1.0, 1.0);
+
+#elif (PRECOMPUTE_OPTICAL_DEPTH)
 
 	float h = fsIn.texCoord0.y;
 	float sinTheta = fsIn.texCoord0.x * 2.0 - 1.0;
