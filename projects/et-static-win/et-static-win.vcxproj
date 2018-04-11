@@ -445,7 +445,7 @@
     <ProjectGuid>{C16E6F9D-51E8-4DC3-BEA8-3822B46E3EDF}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>etstaticwin</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.14393.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">

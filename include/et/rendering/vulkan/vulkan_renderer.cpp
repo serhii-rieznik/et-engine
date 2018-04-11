@@ -167,24 +167,24 @@ void VulkanRenderer::init(const RenderContextParameters& params) {
 	float queuePriorities[] = { 0.0f };
 	for (const VkQueueFamilyProperties& props : queueProperties)
 	{
-		if (props.queueFlags & VK_QUEUE_GRAPHICS_BIT)
+		if (props.queueFlags & VK_QUEUE_GRAPHICS_BIT && (_private->queues[VulkanQueueClass::Graphics].index == static_cast<uint32_t>(-1)))
 		{
-			ET_ASSERT(_private->queues[VulkanQueueClass::Graphics].index == static_cast<uint32_t>(-1));
 			_private->queues[VulkanQueueClass::Graphics].index = queuesIndex;
 			queueCreateInfos[VulkanQueueClass::Graphics].queueFamilyIndex = queuesIndex;
 			queueCreateInfos[VulkanQueueClass::Graphics].queueCount = 1;
 			queueCreateInfos[VulkanQueueClass::Graphics].pQueuePriorities = queuePriorities;
 			_private->queues[VulkanQueueClass::Graphics].properties = props;
 		}
-		if (props.queueFlags & VK_QUEUE_COMPUTE_BIT)
+		
+		if ((props.queueFlags & VK_QUEUE_COMPUTE_BIT) && (_private->queues[VulkanQueueClass::Compute].index == static_cast<uint32_t>(-1)))
 		{
-			ET_ASSERT(_private->queues[VulkanQueueClass::Compute].index == static_cast<uint32_t>(-1));
 			_private->queues[VulkanQueueClass::Compute].index = queuesIndex;
 			queueCreateInfos[VulkanQueueClass::Compute].queueFamilyIndex = queuesIndex;
 			queueCreateInfos[VulkanQueueClass::Compute].queueCount = 1;
 			queueCreateInfos[VulkanQueueClass::Compute].pQueuePriorities = queuePriorities;
 			_private->queues[VulkanQueueClass::Compute].properties = props;
 		}
+		
 		++queuesIndex;
 	}
 

@@ -59,11 +59,21 @@ float2 evaluateOpticalLength(in float3 from, in float3 to)
     return result * length(dp);
 }
 
-float3 evaluateTransmittance(in float h, in float sinTheta)
+float3 zenithDirectionFromAngle(in float sinTheta)
 {
 	float cosTheta = sqrt(1.0 - sinTheta * sinTheta);
-	float3 pos = float3(0.0, EARTH_RADIUS + ATMOSPHERE_HEIGHT * h, 0.0);
-	float3 light = float3(0.0, sinTheta, cosTheta);
+	return float3(0.0, sinTheta, cosTheta);
+}
+
+float3 positionFromNormalizedHeight(in float he)
+{
+	return float3(0.0, EARTH_RADIUS + ATMOSPHERE_HEIGHT * he, 0.0);
+}
+
+float3 evaluateTransmittance(in float h, in float sinTheta)
+{
+	float3 pos = positionFromNormalizedHeight(h);
+	float3 light = zenithDirectionFromAngle(sinTheta);
     float2 opticalLength = evaluateOpticalLength(pos, pos + light * atmosphereIntersection(pos, light));
 	return exp(-opticalLength.x * (OZONE_ABSORPTION + RAYLEIGH_EXTINCTION) - opticalLength.y * MIE_EXTINCTION);
 }                           
@@ -99,8 +109,8 @@ float3 inScattering(in float3 origin, in float3 target, in float3 light, in floa
 
     	float3 transmittance = t0 * t1;
 
-    	rr += d.x * transmittance;
-    	rm += d.y * transmittance;
+		rr += d.x * transmittance;
+		rm += d.y * transmittance;
 
     	opticalLengthToOrigin += d * ds;
     	origin += dp;
@@ -144,8 +154,7 @@ float3 sampleAtmosphere(float3 view, in float3 light)
 {                                                  
     float cosTheta = dot(view, light);
     float2 phase = float2(phaseFunctionRayleigh(cosTheta), phaseFunctionMie(cosTheta, MIE_EXTINCTION_ANISOTROPY));
-
-    float3 pos = float3(0.0, EARTH_RADIUS, 0.0);
+    float3 pos = positionFromNormalizedHeight(0.0);
     float t = min(8.0 * ATMOSPHERE_HEIGHT, atmosphereIntersection(pos, view));
     return SUN_ILLUMINANCE * inScattering(pos, pos + t * view, light, phase) / samplePrecomputedTransmittance(0.0, 1.0);
 }

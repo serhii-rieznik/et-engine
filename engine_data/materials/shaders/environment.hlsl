@@ -18,7 +18,7 @@ cbuffer ObjectVariables : DECL_OBJECT_BUFFER
 struct VSOutput 
 {
 	float4 position : SV_Position;
-	float2 texCoord0 : TEXCOORD0;
+	float2 texCoord : TEXCOORD0;
 	float3 direction : TEXCOORD1;
 };
 
@@ -31,7 +31,7 @@ VSOutput vertexMain(uint vertexIndex : SV_VertexID)
 	float4x4 finalInverseMatrix = mul(inverseProjectionTransform, invView);
 	
 	VSOutput vsOut;
-	vsOut.texCoord0 = pos * 0.5 + 0.5;
+	vsOut.texCoord = pos * 0.5 + 0.5;
 	vsOut.position = float4(pos, 0.000001, 1.0);
 	vsOut.direction = mul(float4(pos, 0.0, 1.0), finalInverseMatrix).xyz;
 	return vsOut;
@@ -46,6 +46,11 @@ struct FSOutput
 FSOutput fragmentMain(VSOutput fsIn)
 {
 	float3 v = normalize(fsIn.direction);
+
+	float phi = fsIn.texCoord.x * 2.0 * PI;
+	float the = PI * (1.0 - fsIn.texCoord.y) - 0.5 * PI;
+
+	// v = float3(cos(phi) * cos(the), sin(the), sin(phi) * cos(the));
 
 #if (SAMPLE_ATMOSPHERE)
 	float3 env = sampleAtmosphere(v, lightDirection.xyz);
