@@ -52,14 +52,16 @@ FSOutput fragmentMain(VSOutput fsIn)
 
 	// v = float3(cos(phi) * cos(the), sin(the), sin(phi) * cos(the));
 
+	float3 light = lightDirection;
+
 #if (SAMPLE_ATMOSPHERE)
-	float3 env = sampleAtmosphere(v, lightDirection.xyz);
+	float3 env = sampleAtmosphere(v, light.xyz);
 #else
-	float3 env = sampleEnvironment(v, lightDirection.xyz, 0.1);
+	float3 env = sampleEnvironment(v, light.xyz, 0.1);
 #endif
 
 #if (DRAW_SUN)
-	env += sunColor(v, lightDirection.xyz);
+	env += sunColor(v, light.xyz);
 #endif
 	
 	FSOutput result;

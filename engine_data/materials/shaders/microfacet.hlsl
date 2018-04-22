@@ -256,7 +256,7 @@ FSOutput fragmentMain(VSOutput fsIn)
 		float3 invView = -wsView;
 
 	    float cosTheta = dot(invView, wsLight);
-    	float2 phase = float2(phaseFunctionRayleigh(cosTheta), phaseFunctionMie(cosTheta, MIE_EXTINCTION_ANISOTROPY));
+    	float2 phase = float2(phaseFunctionRayleigh(cosTheta), phaseFunctionMie(cosTheta, MIE_SCATTERING_ANISOTROPY));
 
 	    float3 p0 = fsIn.worldPosition + float3(0.0, EARTH_RADIUS, 0.0);
 	    float3 p1 = p0 + invView * length(fsIn.toCamera);

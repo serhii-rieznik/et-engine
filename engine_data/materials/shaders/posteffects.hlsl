@@ -87,9 +87,6 @@ float4 fragmentMain(VSOutput fsIn) : SV_Target0
 
 	float averageLuminance = averageLuminance.SampleLevel(LinearClamp, fsIn.texCoord0, 10.0).x;
 
-	inputTexture.GetDimensions(0.0, w, h, levels);
-	float2 texel = float2(1.0 / w, 1.0 / h);
-
 	float3 hdrColor = inputTexture.Sample(LinearClamp, fsIn.texCoord0).xyz;
 	float3 ldrColor = toneMapping(hdrColor, averageLuminance, fsIn.texCoord0.x);
 

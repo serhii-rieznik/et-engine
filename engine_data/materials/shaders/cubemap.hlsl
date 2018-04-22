@@ -72,15 +72,41 @@ static const float cScale = 0.0001;
 float4 fragmentMain(VSOutput fsIn) : SV_Target0
 {
 #if (PRECOMPUTE_IN_SCATTERING)
+
+	const float lookupTableSlices = 32.0;
+
+	LookupParameters lookup;
+	lookup.v = fsIn.texCoord0.y;
+	lookup.u = frac(fsIn.texCoord0.x * lookupTableSlices);
+	lookup.w = floor(fsIn.texCoord0.x * lookupTableSlices) / lookupTableSlices;
+	AtmosphereParameters params = lookupParametersToAtmosphere(lookup);
 	
-	return float4(0.5, 0.5, 1.0, 1.0);
+	float3 view;
+	float3 light;
+	float3 position;
+	atmosphereParametersToValues(params, position, view, light);
+
+	float2 atmosphereIntersection = 0.0;
+	int atmosphereIntersections = sphereIntersection(position, view, ATMOSPHERE_RADIUS, atmosphereIntersection);
+
+	float3 origin = position + atmosphereIntersection.x * view;
+	float3 target = position + atmosphereIntersection.y * view;
+
+	return integrateInScattering(origin, target, light, 32);
 
 #elif (PRECOMPUTE_OPTICAL_DEPTH)
 
 	float h = fsIn.texCoord0.y;
-	float sinTheta = fsIn.texCoord0.x * 2.0 - 1.0;
+	float cosTheta = fsIn.texCoord0.x * 2.0 - 1.0;
 
-	return float4(evaluateTransmittance(h, sinTheta), 1.0);
+	LookupParameters lp;
+	lp.u = 0.0; // view
+	lp.v = fsIn.texCoord0.y; // height
+	lp.w = fsIn.texCoord0.x; // light
+	AtmosphereParameters ap = lookupParametersToAtmosphere(lp);
+	float3 transmittance = evaluateTransmittanceToAtmosphereBounds(ap);
+
+	return float4(transmittance, 1.0);
 
 #elif (VISUALIZE_SPHERICAL_HARMONICS)
 

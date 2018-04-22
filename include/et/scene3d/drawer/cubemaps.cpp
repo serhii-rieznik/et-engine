@@ -47,6 +47,8 @@ void CubemapProcessor::process(RenderInterface::Pointer& renderer, DrawerOptions
 	if (_atmospherePrecomputed == false)
 	{
 		renderer->submitPassWithRenderBatch(_atmosphere.opticalDepthPass, _atmosphere.opticalDepthBatch);
+
+		_atmosphere.inScatteringBatch->material()->setTexture("precomputedOpticalDepth", _atmosphere.opticalDepth);
 		renderer->submitPassWithRenderBatch(_atmosphere.inScatteringPass, _atmosphere.inScatteringBatch);
 		// _atmospherePrecomputed = true;
 	}
@@ -330,7 +332,7 @@ void CubemapProcessor::validate(RenderInterface::Pointer& renderer) {
 	{
 		TextureDescription::Pointer txDesc(PointerInit::CreateInplace);
 		txDesc->format = TextureFormat::RGBA32F;
-		txDesc->size = vec2i(256, 256);
+		txDesc->size = vec2i(32 * 32, 32);
 		txDesc->flags = Texture::Flags::ShaderResource | Texture::Flags::RenderTarget;
 		_atmosphere.inScattering = renderer->createTexture(txDesc);
 
@@ -418,12 +420,13 @@ void CubemapProcessor::drawDebug(RenderInterface::Pointer& renderer, const Drawe
 		pos.y += ds;
 
 		_cubemapDebugPass->setSharedVariable(ObjectVariable::WorldTransform, fullscreenBatchTransform(vp, pos, vec2(ds, ds)));
-		_cubemapDebugPass->pushRenderBatch(_atmosphere.inScatteringBatchDebug);
-		pos.y += ds;
-
-		_cubemapDebugPass->setSharedVariable(ObjectVariable::WorldTransform, fullscreenBatchTransform(vp, pos, vec2(ds, ds)));
 		_cubemapDebugPass->pushRenderBatch(_lookupDebugBatch);
 		pos.y += ds;
+
+		vec2 inScatteringSize = vector2ToFloat(_atmosphere.inScattering->size(0));
+		vec2 inScatteringPos = vec2(0.5f * (vp.x - inScatteringSize.x), 0.0f);
+		_cubemapDebugPass->setSharedVariable(ObjectVariable::WorldTransform, fullscreenBatchTransform(vp, inScatteringPos, inScatteringSize));
+		_cubemapDebugPass->pushRenderBatch(_atmosphere.inScatteringBatchDebug);
 
 		_cubemapDebugPass->endSubpass();
 		renderer->submitRenderPass(_cubemapDebugPass);
