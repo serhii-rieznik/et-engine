@@ -332,7 +332,7 @@ void CubemapProcessor::validate(RenderInterface::Pointer& renderer) {
 	{
 		TextureDescription::Pointer txDesc(PointerInit::CreateInplace);
 		txDesc->format = TextureFormat::RGBA32F;
-		txDesc->size = vec2i(32 * 32, 32);
+		txDesc->size = vec2i(256 * 32, 128);
 		txDesc->flags = Texture::Flags::ShaderResource | Texture::Flags::RenderTarget;
 		_atmosphere.inScattering = renderer->createTexture(txDesc);
 
@@ -424,6 +424,9 @@ void CubemapProcessor::drawDebug(RenderInterface::Pointer& renderer, const Drawe
 		pos.y += ds;
 
 		vec2 inScatteringSize = vector2ToFloat(_atmosphere.inScattering->size(0));
+		inScatteringSize.x = std::min(inScatteringSize.x, 2.0f / 3.0f * vp.x);
+		inScatteringSize.y *= std::min(inScatteringSize.x, 2.0f / 3.0f * vp.x) / inScatteringSize.x;
+
 		vec2 inScatteringPos = vec2(0.5f * (vp.x - inScatteringSize.x), 0.0f);
 		_cubemapDebugPass->setSharedVariable(ObjectVariable::WorldTransform, fullscreenBatchTransform(vp, inScatteringPos, inScatteringSize));
 		_cubemapDebugPass->pushRenderBatch(_atmosphere.inScatteringBatchDebug);

@@ -170,6 +170,7 @@ void Drawer::draw() {
 		_main.forward->setSharedTexture(MaterialTexture::AmbientOcclusion, _main.screenSpaceAOTexture);
 		_main.forward->setSharedTexture(MaterialTexture::Shadow, _shadowmapProcessor->directionalShadowmap());
 		_main.forward->setSharedTexture("precomputedOpticalDepth", _cubemapProcessor->precomputedOpticalDepthTexture());
+		_main.forward->setSharedTexture("precomputedInScattering", _cubemapProcessor->precomputedInScatteringTexture());
 		_main.forward->setSharedSampler("shadowSampler", _shadowmapProcessor->directionalShadowmapSampler());
 
 		_main.forward->setSharedVariable(ObjectVariable::EnvironmentSphericalHarmonics, _cubemapProcessor->environmentSphericalHarmonics(), 9);

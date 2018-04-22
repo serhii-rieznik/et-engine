@@ -25,6 +25,7 @@ public:
 	const Texture::Pointer& convolvedSpecularCubemap() const;
 	const Texture::Pointer& brdfLookupTexture() const;
 	const Texture::Pointer& precomputedOpticalDepthTexture() const;
+	const Texture::Pointer& precomputedInScatteringTexture() const;
 	const vec4* environmentSphericalHarmonics() const;
 
 	void processAtmosphere();
@@ -124,6 +125,10 @@ inline const Texture::Pointer& CubemapProcessor::brdfLookupTexture() const {
 
 inline const Texture::Pointer& CubemapProcessor::precomputedOpticalDepthTexture() const {
 	return _atmosphere.opticalDepth;
+}
+
+inline const Texture::Pointer& CubemapProcessor::precomputedInScatteringTexture() const {
+	return _atmosphere.inScattering;
 }
 
 inline const std::string& CubemapProcessor::sourceTextureName() const {

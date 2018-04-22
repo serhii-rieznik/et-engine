@@ -50,12 +50,20 @@ FSOutput fragmentMain(VSOutput fsIn)
 	float phi = fsIn.texCoord.x * 2.0 * PI;
 	float the = PI * (1.0 - fsIn.texCoord.y) - 0.5 * PI;
 
+	float3 light = lightDirection;
 	// v = float3(cos(phi) * cos(the), sin(the), sin(phi) * cos(the));
 
-	float3 light = lightDirection;
+	AtmosphereParameters ap;
+	ap.heightAboveGround = HEIGHT_ABOVE_GROUND;
+	ap.viewZenithAngle = v.y;
+	ap.lightZenithAngle = light.y;
 
 #if (SAMPLE_ATMOSPHERE)
-	float3 env = sampleAtmosphere(v, light.xyz);
+	float3 sampledAtmosphere = evaluateAtmosphere(ap, v, light);
+	float3 evaluatedAtmosphere = sampleAtmosphere(v, light.xyz);
+	float3 env = 
+		// abs(evaluatedAtmosphere - sampledAtmosphere);
+		lerp(evaluatedAtmosphere, sampledAtmosphere, 1.0);
 #else
 	float3 env = sampleEnvironment(v, light.xyz, 0.1);
 #endif

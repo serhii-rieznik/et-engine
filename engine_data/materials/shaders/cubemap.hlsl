@@ -73,12 +73,10 @@ float4 fragmentMain(VSOutput fsIn) : SV_Target0
 {
 #if (PRECOMPUTE_IN_SCATTERING)
 
-	const float lookupTableSlices = 32.0;
-
 	LookupParameters lookup;
 	lookup.v = fsIn.texCoord0.y;
-	lookup.u = frac(fsIn.texCoord0.x * lookupTableSlices);
-	lookup.w = floor(fsIn.texCoord0.x * lookupTableSlices) / lookupTableSlices;
+	lookup.u = frac(fsIn.texCoord0.x * IN_SCATTERING_SLICES);
+	lookup.w = floor(fsIn.texCoord0.x * IN_SCATTERING_SLICES) / IN_SCATTERING_SLICES;
 	AtmosphereParameters params = lookupParametersToAtmosphere(lookup);
 	
 	float3 view;

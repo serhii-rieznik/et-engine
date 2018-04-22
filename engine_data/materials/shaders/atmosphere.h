@@ -14,7 +14,8 @@
 #define SUN_SOLID_ANGLE				(6.87e-5) // (2.0 * PI * (1.0 - cos(SUN_ANGULAR_SIZE)))
 #define SUN_ANGULAR_SIZE_COSINE		(cos(SUN_ANGULAR_SIZE))
 #define SUN_LIMB_DARKENING			float3(0.397, 0.503, 0.652)
-#define HEIGHT_ABOVE_GROUND			50.0
+#define HEIGHT_ABOVE_GROUND			100.0
+#define IN_SCATTERING_SLICES 		16.0
 
 struct LookupParameters
 {
@@ -31,22 +32,64 @@ struct AtmosphereParameters
 };
 
 Texture2D<float4> precomputedOpticalDepth : DECLARE_TEXTURE;
+Texture2D<float4> precomputedInScattering : DECLARE_TEXTURE;
 
 LookupParameters atmosphereParametersToLookup(in AtmosphereParameters p)
 {
+	float normalisedViewZenithTrans = 0.5 * (atan(max(p.viewZenithAngle, -0.45) * tan(1.26 * 0.75)) / 0.75 + (1.0 - 0.26));
+
 	LookupParameters result;
-	result.u = p.viewZenithAngle * 0.5 + 0.5;
-	result.v = p.heightAboveGround / ATMOSPHERE_HEIGHT;
-	result.w = p.lightZenithAngle * 0.5 + 0.5; 
+	result.v = sqrt(p.heightAboveGround / ATMOSPHERE_HEIGHT);
+	result.w = 
+		// p.lightZenithAngle * 0.5 + 0.5;
+		0.5 * (atan(max(p.lightZenithAngle , -0.45) * tan(1.26 * 0.75)) / 0.75 + (1.0 - 0.26));
+
+	float height = max(p.heightAboveGround, 0.0);
+	float cosHorizon = -sqrt(height * (2.0 * EARTH_RADIUS + height)) / (EARTH_RADIUS + height);
+	float normalisedViewZenithScatt = 0.0;
+	if (p.viewZenithAngle > cosHorizon)
+	{
+		float cosViewAngle = max(p.viewZenithAngle, cosHorizon + 0.0001);
+		normalisedViewZenithScatt = saturate((cosViewAngle - cosHorizon) / (1.0 - cosHorizon));
+	}
+	else
+	{
+		float cosViewAngle = min(p.viewZenithAngle, cosHorizon - 0.0001);
+		normalisedViewZenithScatt = saturate((cosHorizon - cosViewAngle) / (cosHorizon + 1.0));
+	}
+
+	result.u = 
+		// p.viewZenithAngle * 0.5 + 0.5;
+		pow(normalisedViewZenithScatt, 0.2);
+
 	return result;
 }
 
 AtmosphereParameters lookupParametersToAtmosphere(in LookupParameters p)
 {
 	AtmosphereParameters result;
-	result.heightAboveGround = p.v * ATMOSPHERE_HEIGHT;
-	result.viewZenithAngle = p.u * 2.0 - 1.0;
-	result.lightZenithAngle = p.w * 2.0 - 1.0;
+	result.heightAboveGround = (p.v * p.v) * ATMOSPHERE_HEIGHT;
+	result.lightZenithAngle = 
+		// p.w * 2.0 - 1.0;
+		tan((2.0 * p.w - (1.0 - 0.26)) * 0.75) / tan(1.26 * 0.75);
+
+	float cU = pow(p.u, 5.0);
+	float height = max(result.heightAboveGround, 0.0);
+	float cosHorizon = -sqrt(height * (2.0 * EARTH_RADIUS + height)) / (EARTH_RADIUS + height);
+
+	float cosViewAngle = 0.0;
+	if (p.u > 0.25)
+	{
+		cosViewAngle = max((cosHorizon + cU * (1.0 - cosHorizon)) , cosHorizon + 1.0e-4);
+	}
+	else
+	{
+		cosViewAngle = min((cosHorizon - cU * (cosHorizon + 1.0)) , cosHorizon -1.0e-4);
+	}
+	result.viewZenithAngle = 
+		// p.u * 2.0 - 1.0;
+		cosViewAngle;
+
 	return result;
 } 
 
@@ -117,7 +160,7 @@ float3 densityFunction(in float heightAboveGround)
 {
 	const float2 rmDensityScale = float2(7994.0, 1200.0);
 	float2 rmDensity = exp(-heightAboveGround / rmDensityScale);
-	float oDensity = rmDensity.x; // 7.0 - 6.0 * rmDensity.x;
+	float oDensity = rmDensity.x;
 	return float3(rmDensity, oDensity);
 }
 
@@ -176,6 +219,11 @@ float3 sampleTransmittanceToAtmosphereBounds(in AtmosphereParameters p)
 	return precomputedOpticalDepth.Sample(LinearClamp, float2(lookup.w, lookup.v));
 }
 
+float3 samplePrecomputedTransmittance(in float h, in float sinTheta)
+{
+	return precomputedOpticalDepth.Sample(LinearClamp, float2(sinTheta * 0.5 + 0.5, saturate(h / ATMOSPHERE_HEIGHT))).xyz;
+}
+
 float phaseFunctionRayleigh(in float cosTheta)
 {
     return (8.0 / 10.0) * (7.0 / 5.0 + 1.0 / 2.0 * cosTheta);
@@ -229,9 +277,6 @@ float4 integrateInScattering(in float3 origin, float3 target, float3 light, in i
 	}
 
 	return float4(integralR * RAYLEIGH_SCATTERING, (integralM * MIE_SCATTERING).x);
-
-	integralM = approximateMieScatteringFromRayleigh(integralR, integralM.x);
-	integralR *= 0.0;
 }
 
 float3 evaluateSingleScattering(in float3 view, in float3 light, in float3 integralR, in float3 integralM, in float3 lightIntensity)
@@ -240,6 +285,41 @@ float3 evaluateSingleScattering(in float3 view, in float3 light, in float3 integ
 	float phaseR = phaseFunctionRayleigh(cosTheta);
 	float phaseM = phaseFunctionMie(cosTheta, MIE_SCATTERING_ANISOTROPY);
 	return lightIntensity * (integralR * phaseR + integralM * phaseM);
+}
+
+float3 evaluateAtmosphere(in AtmosphereParameters p, in float3 sourceView, in float3 sourceLight)
+{
+	float3 view;
+	float3 light;
+	float3 position;
+	atmosphereParametersToValues(p, position, view, light);
+
+	float2 planetIntersection = 0.0;
+	if (sphereIntersection(position, sourceView, EARTH_RADIUS, planetIntersection) > 0)
+		return 0.0;
+
+	LookupParameters lookup = atmosphereParametersToLookup(p);
+
+	float3 textureDimensions = 0.0;
+	precomputedInScattering.GetDimensions(0, textureDimensions.x, textureDimensions.y, textureDimensions.z);
+	float textureSliceSize = textureDimensions.x / IN_SCATTERING_SLICES;
+
+	float2 sampleCoord0 = 0.0;
+	sampleCoord0.y = lookup.v;
+	sampleCoord0.x = lookup.u / IN_SCATTERING_SLICES + floor(lookup.w * IN_SCATTERING_SLICES) / IN_SCATTERING_SLICES;
+	float4 sampledIntegral0 = precomputedInScattering.Sample(LinearClamp, sampleCoord0);
+
+	float2 sampleCoord1 = 0.0;
+	sampleCoord1.y = lookup.v;
+	sampleCoord1.x = lookup.u / IN_SCATTERING_SLICES + floor(lookup.w * IN_SCATTERING_SLICES + 1.0) / IN_SCATTERING_SLICES;
+	float4 sampledIntegral1 = precomputedInScattering.Sample(LinearClamp, sampleCoord1);
+
+	float t = lookup.w * IN_SCATTERING_SLICES - floor(lookup.w * IN_SCATTERING_SLICES);
+	float4 sampledIntegral = lerp(sampledIntegral0, sampledIntegral1, t);
+	float3 mieScattering = approximateMieScatteringFromRayleigh(sampledIntegral.xyz, sampledIntegral.w);
+
+	float3 lightIntensity = SUN_ILLUMINANCE / samplePrecomputedTransmittance(0.0, 1.0); 
+	return evaluateSingleScattering(sourceView, sourceLight, sampledIntegral.xyz, mieScattering, lightIntensity);
 }
 
 /******************************************************
@@ -308,11 +388,6 @@ float3 evaluateTransmittance(in float3 p0, in float3 p1)
     float2 opticalLength = evaluateOpticalLength(p0, p1, 32);
 	return exp(-opticalLength.x * (OZONE_ABSORPTION + RAYLEIGH_EXTINCTION) - opticalLength.y * MIE_EXTINCTION);
 }                           
-
-float3 samplePrecomputedTransmittance(in float h, in float sinTheta)
-{
-	return precomputedOpticalDepth.Sample(LinearClamp, float2(sinTheta * 0.5 + 0.5, saturate(h / ATMOSPHERE_HEIGHT))).xyz;
-}
 
 float3 inScattering(in float3 origin, in float3 target, in float3 light, in float2 phase)
 {
