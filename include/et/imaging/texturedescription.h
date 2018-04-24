@@ -28,10 +28,6 @@ public:
 	TextureDescription() = default;
 	TextureDescription(const Texture::Description& r) : Texture::Description(r) {}
 	TextureDescription(const std::string& fileName) { load(fileName); }
-
-	bool valid() const {
-		return (size.square() > 0);
-	}
 };
 
 using TextureDescriptionUpdateMethod = void(TextureDescription::Pointer);

@@ -12,20 +12,17 @@
 
 namespace et {
 
-class Texture : public LoadableObject
-{
+class Texture : public LoadableObject {
 public:
 	ET_DECLARE_POINTER(Texture);
 
-	enum : uint32_t
-	{
+	enum : uint32_t {
 		minCompressedBlockWidth = 4,
 		minCompressedBlockHeight = 4,
 		minCompressedBlockDataSize = 32,
 	};
 
-	enum Flags : uint32_t
-	{
+	enum Flags : uint32_t {
 		ShaderResource = 1 << 0,
 		RenderTarget = 1 << 1,
 		CopySource = 1 << 2,
@@ -34,15 +31,14 @@ public:
 		Storage = 1 << 5,
 	};
 
-	enum MapOptions : uint32_t
-	{
+	enum MapOptions : uint32_t {
 		Readable = 1 << 0,
 		Writeable = 1 << 1,
 	};
 
-	struct Description
-	{
+	struct Description {
 		vec2i size = vec2i(0, 0);
+		uint32_t depth = 1;
 		TextureFormat format = TextureFormat::Invalid;
 		TextureTarget target = TextureTarget::Texture_2D;
 		TextureDataLayout dataLayout = TextureDataLayout::FacesFirst;
@@ -61,8 +57,7 @@ public:
 	Texture() = default;
 
 	Texture(const Description& desc) :
-		_desc(desc) {
-	}
+		_desc(desc) {}
 
 	const Description& description() const {
 		return _desc;
@@ -158,7 +153,7 @@ inline uint32_t Texture::Description::dataOffsetForLayer(uint32_t layer, uint32_
 inline uint32_t Texture::Description::dataSizeForMipLevel(uint32_t level) const {
 	uint32_t bpp = bitsPerPixelForTextureFormat(format) / 8;
 
-	uint32_t actualSize = static_cast<uint32_t>(sizeForMipLevel(level).square()) * bpp;
+	uint32_t actualSize = static_cast<uint32_t>(sizeForMipLevel(level).square()) * depth * bpp;
 	uint32_t minimumSize = static_cast<uint32_t>(Texture::minCompressedBlockHeight * Texture::minCompressedBlockWidth) * bpp;
 	uint32_t sz = isCompressedTextureFormat(format) ? std::max(static_cast<uint32_t>(Texture::minCompressedBlockDataSize),
 		std::max(minimumSize, actualSize)) : actualSize;

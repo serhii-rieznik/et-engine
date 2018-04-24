@@ -59,11 +59,7 @@ FSOutput fragmentMain(VSOutput fsIn)
 	ap.lightZenithAngle = light.y;
 
 #if (SAMPLE_ATMOSPHERE)
-	float3 sampledAtmosphere = evaluateAtmosphere(ap, v, light);
-	float3 evaluatedAtmosphere = sampleAtmosphere(v, light.xyz);
-	float3 env = 
-		// abs(evaluatedAtmosphere - sampledAtmosphere);
-		lerp(evaluatedAtmosphere, sampledAtmosphere, 1.0);
+	float3 env = samplePrecomputedAtmosphere(ap, v, light);
 #else
 	float3 env = sampleEnvironment(v, light.xyz, 0.1);
 #endif

@@ -74,23 +74,21 @@ float4 fragmentMain(VSOutput fsIn) : SV_Target0
 #if (PRECOMPUTE_IN_SCATTERING)
 
 	LookupParameters lookup;
-	lookup.v = fsIn.texCoord0.y;
-	lookup.u = frac(fsIn.texCoord0.x * IN_SCATTERING_SLICES);
-	lookup.w = floor(fsIn.texCoord0.x * IN_SCATTERING_SLICES) / IN_SCATTERING_SLICES;
+	lookup.scattering.x = fsIn.texCoord0.x; // view
+	lookup.scattering.y = fsIn.texCoord0.y; // light;
+	lookup.scattering.z = saturate(HEIGHT_ABOVE_GROUND / ATMOSPHERE_HEIGHT);
 	AtmosphereParameters params = lookupParametersToAtmosphere(lookup);
 	
 	float3 view;
 	float3 light;
 	float3 position;
 	atmosphereParametersToValues(params, position, view, light);
-
+	
 	float2 atmosphereIntersection = 0.0;
 	int atmosphereIntersections = sphereIntersection(position, view, ATMOSPHERE_RADIUS, atmosphereIntersection);
-
 	float3 origin = position + atmosphereIntersection.x * view;
 	float3 target = position + atmosphereIntersection.y * view;
-
-	return integrateInScattering(origin, target, light, 32);
+	return integrateInScattering(origin, target, light, 512);
 
 #elif (PRECOMPUTE_OPTICAL_DEPTH)
 
@@ -98,9 +96,10 @@ float4 fragmentMain(VSOutput fsIn) : SV_Target0
 	float cosTheta = fsIn.texCoord0.x * 2.0 - 1.0;
 
 	LookupParameters lp;
-	lp.u = 0.0; // view
-	lp.v = fsIn.texCoord0.y; // height
-	lp.w = fsIn.texCoord0.x; // light
+	lp.scattering.x = 0.0; // view
+	lp.scattering.y = fsIn.texCoord0.x; // light
+	lp.scattering.z = fsIn.texCoord0.y; // height;
+	
 	AtmosphereParameters ap = lookupParametersToAtmosphere(lp);
 	float3 transmittance = evaluateTransmittanceToAtmosphereBounds(ap);
 
@@ -140,7 +139,7 @@ float4 fragmentMain(VSOutput fsIn) : SV_Target0
 #elif (ATMOSPHERE)
 
 	float3 d = normalize(fsIn.direction);        	
-	float3 a = sampleAtmosphere(d, lightDirection.xyz);
+	float3 a = evaluateAtmosphere(d, lightDirection.xyz);
 	return float4(a, 1.0);
 
 #elif (DOWNSAMPLE_CUBEMAP)

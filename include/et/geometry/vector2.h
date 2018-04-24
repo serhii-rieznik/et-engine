@@ -10,22 +10,18 @@
 namespace et {
 
 template <typename T>
-union vector2
-{
+union vector2 {
 	struct { T x, y; };
 	T c[2];
 
 	vector2() :
-		x(static_cast<T>(0)), y(static_cast<T>(0)) {
-	}
+		x(static_cast<T>(0)), y(static_cast<T>(0)) {}
 
 	explicit vector2(T value) :
-		x(value), y(value) {
-	}
+		x(value), y(value) {}
 
 	vector2(T _x, T _y) :
-		x(_x), y(_y) {
-	}
+		x(_x), y(_y) {}
 
 	T& operator [](unsigned long i) {
 		ET_ASSERT(i < 2); return c[i];

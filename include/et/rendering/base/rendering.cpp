@@ -56,9 +56,9 @@ const std::string dataFormatNames[DataFormat_max] =
 
 const std::map<IndexArrayFormat, std::pair<std::string, DataFormat>> indexArrayFormats =
 {
-	{ IndexArrayFormat::Format_8bit, {"8 bit", DataFormat::UnsignedChar} },
-	{ IndexArrayFormat::Format_16bit, {"16 bit", DataFormat::UnsignedShort} },
-	{ IndexArrayFormat::Format_32bit, {"32 bit", DataFormat::UnsignedInt} },
+	{ IndexArrayFormat::Format_8bit, { "8 bit", DataFormat::UnsignedChar } },
+	{ IndexArrayFormat::Format_32bit, { "32 bit", DataFormat::UnsignedInt } },
+	{ IndexArrayFormat::Format_16bit, { "16 bit", DataFormat::UnsignedShort } },
 };
 
 const std::string primitiveTypeNames[PrimitiveType_max] =
@@ -503,14 +503,14 @@ namespace {
 using BlendStateNameMap = std::pair<BlendState, std::string>;
 const BlendStateNameMap blendConfigToStateMap[BlendConfiguration_max] =
 {
-	{ BlendState(0, BlendFunction::One, BlendFunction::Zero), "disabled"}, // Disabled,
-	{ BlendState(1, BlendFunction::SourceAlpha, BlendFunction::InvSourceAlpha), "alpha-blend"}, // Default,
-	{ BlendState(1, BlendFunction::One, BlendFunction::InvSourceAlpha), "alpha-premultiplied"}, // AlphaPremultiplied,
-	{ BlendState(1, BlendFunction::One, BlendFunction::One), "additive"}, // Additive,
-	{ BlendState(1, BlendFunction::SourceAlpha, BlendFunction::One), "alpha-additive"}, // AlphaAdditive,
-	{ BlendState(1, BlendFunction::Zero, BlendFunction::SourceAlpha), "alpha-multiplicative"}, // AlphaMultiplicative,
-	{ BlendState(1, BlendFunction::SourceColor, BlendFunction::One), "color-additive"}, // ColorAdditive,
-	{ BlendState(1, BlendFunction::Zero, BlendFunction::InvSourceAlpha), "alpha-inverse-multiplicative"} // AlphaInverseMultiplicative,
+	{ BlendState(0, BlendFunction::One, BlendFunction::Zero), "disabled" }, // Disabled,
+	{ BlendState(1, BlendFunction::SourceAlpha, BlendFunction::InvSourceAlpha), "alpha-blend" }, // Default,
+	{ BlendState(1, BlendFunction::One, BlendFunction::InvSourceAlpha), "alpha-premultiplied" }, // AlphaPremultiplied,
+	{ BlendState(1, BlendFunction::One, BlendFunction::One), "additive" }, // Additive,
+	{ BlendState(1, BlendFunction::SourceAlpha, BlendFunction::One), "alpha-additive" }, // AlphaAdditive,
+	{ BlendState(1, BlendFunction::Zero, BlendFunction::SourceAlpha), "alpha-multiplicative" }, // AlphaMultiplicative,
+	{ BlendState(1, BlendFunction::SourceColor, BlendFunction::One), "color-additive" }, // ColorAdditive,
+	{ BlendState(1, BlendFunction::Zero, BlendFunction::InvSourceAlpha), "alpha-inverse-multiplicative" } // AlphaInverseMultiplicative,
 };
 
 std::string cullModeMap[CullMode_max] =
@@ -586,34 +586,34 @@ using ValueNamePair = const std::pair<T, std::string>;
 
 static ValueNamePair<CompareFunction> compareFunctionsMap[CompareFunction_max] =
 {
-	{CompareFunction::Never, "never"},
-	{CompareFunction::Less, "less"},
-	{CompareFunction::LessOrEqual, "less-or-equal"},
-	{CompareFunction::Equal, "equal"},
-	{CompareFunction::GreaterOrEqual, "greater-or-equal"},
-	{CompareFunction::Greater, "greater"},
-	{CompareFunction::Always, "always"},
+	{ CompareFunction::Never, "never" },
+	{ CompareFunction::Less, "less" },
+	{ CompareFunction::LessOrEqual, "less-or-equal" },
+	{ CompareFunction::Equal, "equal" },
+	{ CompareFunction::GreaterOrEqual, "greater-or-equal" },
+	{ CompareFunction::Greater, "greater" },
+	{ CompareFunction::Always, "always" },
 };
 
 static ValueNamePair<BlendFunction> blendFunctionsMap[BlendFunction_max] =
 {
-	{BlendFunction::Zero, "zero"}, // Zero,
-	{BlendFunction::One, "one"}, // One,
-	{BlendFunction::SourceColor, "src-color"}, // SourceColor,
-	{BlendFunction::InvSourceColor, "inv-src-color"}, // InvSourceColor,
-	{BlendFunction::SourceAlpha, "src-alpha"}, // SourceAlpha,
-	{BlendFunction::InvSourceAlpha, "inv-src-alpha"}, // InvSourceAlpha,
-	{BlendFunction::DestColor, "dst-color"}, // DestColor,
-	{BlendFunction::InvDestColor, "inv-dst-color"}, // InvDestColor,
-	{BlendFunction::DestAlpha, "dst-alpha"}, // DestAlpha,
-	{BlendFunction::InvDestAlpha, "inv-dst-alpha"}, // InvDestAlpha,
+	{ BlendFunction::Zero, "zero" }, // Zero,
+	{ BlendFunction::One, "one" }, // One,
+	{ BlendFunction::SourceColor, "src-color" }, // SourceColor,
+	{ BlendFunction::InvSourceColor, "inv-src-color" }, // InvSourceColor,
+	{ BlendFunction::SourceAlpha, "src-alpha" }, // SourceAlpha,
+	{ BlendFunction::InvSourceAlpha, "inv-src-alpha" }, // InvSourceAlpha,
+	{ BlendFunction::DestColor, "dst-color" }, // DestColor,
+	{ BlendFunction::InvDestColor, "inv-dst-color" }, // InvDestColor,
+	{ BlendFunction::DestAlpha, "dst-alpha" }, // DestAlpha,
+	{ BlendFunction::InvDestAlpha, "inv-dst-alpha" }, // InvDestAlpha,
 };
 
 static ValueNamePair<BlendOperation> blendOperationsMap[BlendOperation_max] =
 {
-	{BlendOperation::Add, "add"}, // Add,
-	{BlendOperation::Subtract, "subtract"}, // Subtract,
-	{BlendOperation::ReverseSubtract, "reverse-subtract"}, // ReverseSubtract,
+	{ BlendOperation::Add, "add" }, // Add,
+	{ BlendOperation::Subtract, "subtract" }, // Subtract,
+	{ BlendOperation::ReverseSubtract, "reverse-subtract" }, // ReverseSubtract,
 };
 
 template <class ENUM>

@@ -184,7 +184,7 @@ void CubemapProcessor::process(RenderInterface::Pointer& renderer, DrawerOptions
 void CubemapProcessor::validate(RenderInterface::Pointer& renderer) {
 	if (_processingMaterial.invalid())
 		_processingMaterial = renderer->sharedMaterialLibrary().loadMaterial(application().resolveFileName("engine_data/materials/cubemap.json"));
-	
+
 	if (_cubemapDebugMaterial.invalid())
 		_cubemapDebugMaterial = renderer->sharedMaterialLibrary().loadMaterial(application().resolveFileName("engine_data/materials/cubemap-debug.json"));
 
@@ -332,7 +332,7 @@ void CubemapProcessor::validate(RenderInterface::Pointer& renderer) {
 	{
 		TextureDescription::Pointer txDesc(PointerInit::CreateInplace);
 		txDesc->format = TextureFormat::RGBA32F;
-		txDesc->size = vec2i(256 * 32, 128);
+		txDesc->size = vec2i(64, 64);
 		txDesc->flags = Texture::Flags::ShaderResource | Texture::Flags::RenderTarget;
 		_atmosphere.inScattering = renderer->createTexture(txDesc);
 
@@ -414,23 +414,29 @@ void CubemapProcessor::drawDebug(RenderInterface::Pointer& renderer, const Drawe
 		_cubemapDebugPass->setSharedVariable(ObjectVariable::WorldTransform, fullscreenBatchTransform(vp, pos, vec2(dx, dy)));
 		_cubemapDebugPass->pushRenderBatch(_shDebugBatch);
 		pos.y += dy;
-		
-		_cubemapDebugPass->setSharedVariable(ObjectVariable::WorldTransform, fullscreenBatchTransform(vp, pos, vec2(ds, ds)));
-		_cubemapDebugPass->pushRenderBatch(_atmosphere.opticalDepthBatchDebug);
-		pos.y += ds;
 
 		_cubemapDebugPass->setSharedVariable(ObjectVariable::WorldTransform, fullscreenBatchTransform(vp, pos, vec2(ds, ds)));
 		_cubemapDebugPass->pushRenderBatch(_lookupDebugBatch);
 		pos.y += ds;
 
-		vec2 inScatteringSize = vector2ToFloat(_atmosphere.inScattering->size(0));
-		inScatteringSize.x = std::min(inScatteringSize.x, 2.0f / 3.0f * vp.x);
-		inScatteringSize.y *= std::min(inScatteringSize.x, 2.0f / 3.0f * vp.x) / inScatteringSize.x;
+		{
+			vec2 inScatteringSize = vector2ToFloat(_atmosphere.inScattering->size(0));
+			inScatteringSize.x = std::min(inScatteringSize.x, 2.0f / 3.0f * vp.x);
+			inScatteringSize.y *= std::min(inScatteringSize.x, 2.0f / 3.0f * vp.x) / inScatteringSize.x;
 
-		vec2 inScatteringPos = vec2(0.5f * (vp.x - inScatteringSize.x), 0.0f);
-		_cubemapDebugPass->setSharedVariable(ObjectVariable::WorldTransform, fullscreenBatchTransform(vp, inScatteringPos, inScatteringSize));
-		_cubemapDebugPass->pushRenderBatch(_atmosphere.inScatteringBatchDebug);
+			vec2 inScatteringPos = vec2(0.5f * (vp.x - inScatteringSize.x), 0.0f);
+			_cubemapDebugPass->setSharedVariable(ObjectVariable::WorldTransform, fullscreenBatchTransform(vp, inScatteringPos, inScatteringSize));
+			_cubemapDebugPass->pushRenderBatch(_atmosphere.inScatteringBatchDebug);
+		}
+		{
+			vec2 transmittanceSize = vector2ToFloat(_atmosphere.opticalDepth->size(0));
+			transmittanceSize.x = std::min(transmittanceSize.x, 2.0f / 3.0f * vp.x);
+			transmittanceSize.y *= std::min(transmittanceSize.x, 2.0f / 3.0f * vp.x) / transmittanceSize.x;
 
+			vec2 transmittancePos = vec2(0.5f * (vp.x - transmittanceSize.x), vp.y - transmittanceSize.y);
+			_cubemapDebugPass->setSharedVariable(ObjectVariable::WorldTransform, fullscreenBatchTransform(vp, transmittancePos, transmittanceSize));
+			_cubemapDebugPass->pushRenderBatch(_atmosphere.opticalDepthBatchDebug);
+		}
 		_cubemapDebugPass->endSubpass();
 		renderer->submitRenderPass(_cubemapDebugPass);
 	}
