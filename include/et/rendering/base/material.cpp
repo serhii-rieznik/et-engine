@@ -557,13 +557,11 @@ void Material::initDefaultHeader() {
 	if (_shaderDefaultHeader.empty())
 	{
 		_shaderDefaultHeader = R"(
-/*
- * Internal values
- */ 
-#define PI			3.1415926536
-#define HALF_PI		1.5707963268
-#define DOUBLE_PI	6.2831853072
-#define INV_PI		0.3183098862
+#define PI					(3.1415926536)
+#define HALF_PI				(1.5707963268)
+#define DOUBLE_PI			(6.2831853072)
+#define INV_PI				(0.3183098862)
+#define LUMINANCE_SCALE		(25600.0)
 
 #define DECL_REGISTER_IMPL(type, index, space)	register(type##index, space)
 #define DECL_REGISTER_PROXY(type, index, space) DECL_REGISTER_IMPL(type, index, space)
@@ -579,12 +577,10 @@ void Material::initDefaultHeader() {
 #define DECLARE_EXPLICIT_SAMPLER		DECL_REGISTER(s, space2) 
 #define DECLARE_SAMPLER(filter, wrap)	SamplerState filter##wrap : DECLARE_EXPLICIT_SAMPLER
 
-/*
- * Basic samplers
- */
 DECLARE_SAMPLER(Anisotropic, Wrap);
 DECLARE_SAMPLER(Linear, Wrap);
 DECLARE_SAMPLER(Linear, Clamp);
+DECLARE_SAMPLER(Point, Wrap);
 DECLARE_SAMPLER(Point, Clamp);
 
 )";

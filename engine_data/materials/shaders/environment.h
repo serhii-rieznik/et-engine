@@ -78,7 +78,8 @@ float texelSolidAngle(in float3 d, float invSize)
 
 float4 getExitRadianceFromSphericalHarmonics(in float4 sh[9], in float3 n)
 {
-	float4 shResult = sh[0] * (0.282095);
+	float4 shResult = 0.0;
+	shResult += sh[0] * (0.282095);
 	shResult += sh[1] * (0.488603 * n.y);
 	shResult += sh[2] * (0.488603 * n.z);
 	shResult += sh[3] * (0.488603 * n.x);

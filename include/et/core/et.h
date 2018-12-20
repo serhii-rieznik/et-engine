@@ -59,6 +59,8 @@
 #include <et/core/basicmath.h>
 
 namespace et {
+BlockMemoryAllocator& sharedBlockAllocator();
+
 template <typename T>
 struct SharedBlockAllocatorSTDProxy
 {
@@ -211,7 +213,6 @@ inline uint32_t alignDownTo(uint32_t sz, uint32_t al) {
 namespace et {
 
 ObjectFactory& sharedObjectFactory();
-BlockMemoryAllocator& sharedBlockAllocator();
 std::vector<log::Output::Pointer>& sharedLogOutputs();
 
 typedef vector2<float> vec2;

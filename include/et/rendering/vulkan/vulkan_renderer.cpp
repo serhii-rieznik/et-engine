@@ -20,12 +20,6 @@
 #include <et/rendering/vulkan/glslang/vulkan_glslang.h>
 #include <et/app/application.h>
 
-#if (ET_DEBUG)
-#	define VULKAN_ENABLE_VALIDATION 1
-#else
-#	define VULKAN_ENABLE_VALIDATION 0
-#endif
-
 namespace et {
 class VulkanRendererPrivate : public VulkanState
 {
@@ -74,6 +68,10 @@ VkResult vkEnumerateInstanceLayerPropertiesWrapper(int, uint32_t* count, VkLayer
 	return vkEnumerateInstanceLayerProperties(count, props);
 }
 
+VkResult vkEnumerateDeviceExtensionPropertiesWrapper(VkPhysicalDevice physicalDevice, uint32_t* pPropertyCount, VkExtensionProperties* pProperties) {
+	return vkEnumerateDeviceExtensionProperties(physicalDevice, nullptr, pPropertyCount, pProperties);
+}
+
 VkBool32 VKAPI_CALL vulkanDebugCallback(VkDebugReportFlagsEXT flags, VkDebugReportObjectTypeEXT objType, uint64_t obj,
 	size_t location, int32_t code, const char* layerPrefix, const char* msg, void* userData) {
 	if (obj == static_cast<uint64_t>(-1))
@@ -99,18 +97,9 @@ void VulkanRenderer::init(const RenderContextParameters& params) {
 	_parameters = params;
 	initGlslangResources();
 
-	std::vector<const char*> enabledExtensions =
-	{
-		VK_KHR_SURFACE_EXTENSION_NAME,
-		VK_KHR_WIN32_SURFACE_EXTENSION_NAME,
-#	if (VULKAN_ENABLE_VALIDATION)
-		VK_EXT_DEBUG_REPORT_EXTENSION_NAME,
-#	endif
-	};
-
 	Vector<const char*> validationLayers;
 
-#if (VULKAN_ENABLE_VALIDATION)
+#if (ET_VULKAN_ENABLE_VALIDATION)
 	auto layerProps = enumerateVulkanObjects<VkLayerProperties>(0, vkEnumerateInstanceLayerPropertiesWrapper);
 	validationLayers.reserve(4);
 	for (const VkLayerProperties& layerProp : layerProps)
@@ -128,15 +117,24 @@ void VulkanRenderer::init(const RenderContextParameters& params) {
 	appInfo.pEngineName = "et-engine";
 	appInfo.apiVersion = VK_API_VERSION_1_0;
 
+	std::vector<const char*> instanceExtensions =
+	{
+		VK_KHR_SURFACE_EXTENSION_NAME,
+		VK_KHR_WIN32_SURFACE_EXTENSION_NAME,
+	#	if (ET_VULKAN_ENABLE_VALIDATION)
+		VK_EXT_DEBUG_REPORT_EXTENSION_NAME,
+	#	endif
+	};
+
 	VkInstanceCreateInfo instanceCreateInfo = { VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO };
 	instanceCreateInfo.pApplicationInfo = &appInfo;
-	instanceCreateInfo.enabledExtensionCount = static_cast<uint32_t>(enabledExtensions.size());
-	instanceCreateInfo.ppEnabledExtensionNames = enabledExtensions.data();
+	instanceCreateInfo.enabledExtensionCount = static_cast<uint32_t>(instanceExtensions.size());
+	instanceCreateInfo.ppEnabledExtensionNames = instanceExtensions.data();
 	instanceCreateInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
 	instanceCreateInfo.ppEnabledLayerNames = validationLayers.data();
 	VULKAN_CALL(vkCreateInstance(&instanceCreateInfo, nullptr, &_private->instance));
 
-#if (VULKAN_ENABLE_VALIDATION)
+#if (ET_VULKAN_ENABLE_VALIDATION)
 	PFN_vkCreateDebugReportCallbackEXT createDebugCb =
 		reinterpret_cast<PFN_vkCreateDebugReportCallbackEXT>(vkGetInstanceProcAddr(_private->instance, "vkCreateDebugReportCallbackEXT"));
 
@@ -192,7 +190,21 @@ void VulkanRenderer::init(const RenderContextParameters& params) {
 		(_private->queues[VulkanQueueClass::Compute].index == _private->queues[VulkanQueueClass::Graphics].index);;
 	uint32_t totalQueuesCount = computeAndGraphicsIsTheSame ? 1 : queuesIndex;
 
-	Vector<const char*> deviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
+	Vector<VkExtensionProperties> availableExtensions = 
+		enumerateVulkanObjects<VkExtensionProperties>(_private->physicalDevice, vkEnumerateDeviceExtensionPropertiesWrapper);
+
+	bool hasDebugMarker = std::find_if(std::begin(availableExtensions), std::end(availableExtensions), [](const VkExtensionProperties& i) {
+		return (strcmp(i.extensionName, VK_EXT_DEBUG_MARKER_EXTENSION_NAME) == 0);
+	}) != std::end(availableExtensions);
+
+	Vector<const char*> deviceExtensions = { 
+		VK_KHR_SWAPCHAIN_EXTENSION_NAME 
+	};
+
+	if (hasDebugMarker)
+	{
+		deviceExtensions.emplace_back(VK_EXT_DEBUG_MARKER_EXTENSION_NAME);
+	}
 
 	VkPhysicalDeviceFeatures deviceFeatures = { };
 	deviceFeatures.samplerAnisotropy = VK_TRUE;

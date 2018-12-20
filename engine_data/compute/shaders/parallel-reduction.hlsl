@@ -55,8 +55,8 @@ void computeMain(CSInput input)
 	
 	#elif (LUMINOCITY_ADAPTATION)
 		
-		float lowerBound = exp2(expectedEv - 3.0 - adaptationRange.x);
-		float upperBound = exp2(expectedEv - 3.0 + adaptationRange.y);
+		float lowerBound = evToLuminance(expectedEv - adaptationRange.x);
+		float upperBound = evToLuminance(expectedEv + adaptationRange.y);
 		float currentValue = clamp(exp(value), lowerBound, upperBound);
 
 		float previousValue = outputImage.Load(uint2(0, 0));

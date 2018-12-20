@@ -658,16 +658,19 @@ s3d::Mesh::Pointer FBXLoaderPrivate::loadMesh(s3d::Storage& storage, FbxMesh* me
 	const char* nName = mesh->GetNode()->GetName();
 	std::string meshName(strlen(mName) == 0 ? nName : mName);
 
+	s3d::Mesh::Pointer result = s3d::Mesh::Pointer::create(meshName, parent.pointer());
+
 	bool oneMaterialForPolygons = false;
 
 	FbxGeometryElementMaterial* fbxMaterial = mesh->GetElementMaterial();
 	ET_ASSERT(fbxMaterial != nullptr);
 
+	if (fbxMaterial == nullptr)
+		return result;
+
 	FbxGeometryElement::EMappingMode mapping = fbxMaterial->GetMappingMode();
 	ET_ASSERT((mapping == FbxGeometryElement::eAllSame) || (mapping == FbxGeometryElement::eByPolygon));
 	oneMaterialForPolygons = (mapping == FbxGeometryElement::eAllSame);
-
-	s3d::Mesh::Pointer result = s3d::Mesh::Pointer::create(meshName, parent.pointer());
 
 	size_t uvChannels = mesh->GetElementUVCount();
 

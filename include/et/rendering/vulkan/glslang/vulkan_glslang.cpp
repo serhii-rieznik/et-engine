@@ -419,14 +419,22 @@ void buildProgramReflection(const glslang::TProgram& program, Program::Reflectio
 
 void dumpSource(const std::string& s)
 {
+	static char buffer[128 * 1024] = {};
+	memset(buffer, 0, std::size(buffer));
+
 	StringList lines = split(s, "\n");
 
 	uint32_t lineIndex = 1;
+	int32_t printPosition = 0;
 	for (const std::string& line : lines)
 	{
-		log::info("%04u: %s", lineIndex, line.c_str());
-		++lineIndex;
+		if (printPosition + 1 >= std::size(buffer))
+			break;
+
+		printPosition += snprintf(buffer + printPosition, std::size(buffer) - printPosition,
+			"%04u: %s\n", lineIndex++, line.c_str());
 	}
+	log::info("%s", buffer);
 }
 
 #if (ET_CROSS_COMPILE_SHADERS_TEST)

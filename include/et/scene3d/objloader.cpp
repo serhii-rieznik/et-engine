@@ -1050,8 +1050,7 @@ void OBJLoader::loadMaterials(const std::string& fileName, ObjectsCache& cache)
 	application().popSearchPaths();
 }
 
-void OBJLoader::processLoadedData()
-{
+void OBJLoader::processLoadedData() {
 	uint32_t totalTriangles = 0;
 
 	for (const OBJGroup& group : _groups)
@@ -1073,10 +1072,10 @@ void OBJLoader::processLoadedData()
 			mat->setTexture(MaterialTexture::Opacity, _renderer->whiteTexture());
 	}
 	uint32_t totalVertices = 3 * totalTriangles;
-	
+
 	bool hasNormals = _normals.size() > 0;
 	bool hasTexCoords = _texCoords.size() > 0;
-		
+
 	VertexDeclaration decl(true, VertexAttributeUsage::Position, DataType::Vec3);
 	decl.push_back(VertexAttributeUsage::Normal, DataType::Vec3);
 
@@ -1089,35 +1088,35 @@ void OBJLoader::processLoadedData()
 	}
 
 	IndexArrayFormat fmt = (totalVertices > 65535) ? IndexArrayFormat::Format_32bit : IndexArrayFormat::Format_16bit;
-	
+
 	log::info("Index array + vertex storage: %u vertices", totalVertices);
 	_indices = IndexArray::Pointer::create(fmt, totalVertices, PrimitiveType::Triangles);
 	_indices->linearize(totalVertices);
-	
+
 	_vertexData = VertexStorage::Pointer::create(decl, totalVertices);
 
 	auto pos = _vertexData->accessData<DataType::Vec3>(VertexAttributeUsage::Position, 0);
-	
+
 	VertexDataAccessor<DataType::Vec3> nrm;
 	if (_vertexData->hasAttributeWithType(VertexAttributeUsage::Normal, DataType::Vec3))
 		nrm = _vertexData->accessData<DataType::Vec3>(VertexAttributeUsage::Normal, 0);
-	
+
 	VertexDataAccessor<DataType::Vec2> tex;
 	if (_vertexData->hasAttributeWithType(VertexAttributeUsage::TexCoord0, DataType::Vec2))
 		tex = _vertexData->accessData<DataType::Vec2>(VertexAttributeUsage::TexCoord0, 0);
-	
+
 	uint32_t index = 0;
-	
+
 	for (const OBJGroup& group : _groups)
 	{
 		uint32_t startIndex = index;
-		
+
 		vec3 center(0.0f);
-		
+
 		if (_loadOptions & Option_CalculateTransforms)
 		{
 			uint32_t vertexCount = 0;
-			
+
 			for (const OBJFace& face : group.faces)
 			{
 				uint32_t numTriangles = face.vertexLinksCount - 2;
@@ -1125,34 +1124,34 @@ void OBJLoader::processLoadedData()
 				{
 					center += _vertices[face.vertexLinks[0][0]];
 					center += _vertices[face.vertexLinks[i][0]];
-					center += _vertices[face.vertexLinks[i+1][0]];
+					center += _vertices[face.vertexLinks[i + 1][0]];
 					vertexCount += 3;
 				}
 			}
-			
+
 			if (vertexCount > 0.0f)
 				center /= static_cast<float>(vertexCount);
 		}
-		
+
 		for (const OBJFace& face : group.faces)
 		{
 			uint32_t numTriangles = face.vertexLinksCount - 2;
 			for (uint32_t i = 1; i <= numTriangles; ++i)
 			{
-				pos[index+0] = _vertices[face.vertexLinks[0][0]] - center;
-				pos[index+1] = _vertices[face.vertexLinks[i][0]] - center;
-				pos[index+2] = _vertices[face.vertexLinks[i+1][0]] - center;
+				pos[index + 0] = _vertices[face.vertexLinks[0][0]] - center;
+				pos[index + 1] = _vertices[face.vertexLinks[i][0]] - center;
+				pos[index + 2] = _vertices[face.vertexLinks[i + 1][0]] - center;
 				if (hasTexCoords)
 				{
-					tex[index+0] = _texCoords[face.vertexLinks[0][1]];
-					tex[index+1] = _texCoords[face.vertexLinks[i][1]];
-					tex[index+2] = _texCoords[face.vertexLinks[i+1][1]];
+					tex[index + 0] = _texCoords[face.vertexLinks[0][1]];
+					tex[index + 1] = _texCoords[face.vertexLinks[i][1]];
+					tex[index + 2] = _texCoords[face.vertexLinks[i + 1][1]];
 				}
 				if (hasNormals)
 				{
-					nrm[index+0] = _normals[face.vertexLinks[0][2]];
-					nrm[index+1] = _normals[face.vertexLinks[i][2]];
-					nrm[index+2] = _normals[face.vertexLinks[i+1][2]];
+					nrm[index + 0] = _normals[face.vertexLinks[0][2]];
+					nrm[index + 1] = _normals[face.vertexLinks[i][2]];
+					nrm[index + 2] = _normals[face.vertexLinks[i + 1][2]];
 				}
 				index += 3;
 			}
@@ -1175,17 +1174,23 @@ void OBJLoader::processLoadedData()
 			m = microfacet->instance();
 			m->setName("missing_material");
 		}
-		
+
 		uint32_t startIndex_u32 = static_cast<uint32_t>(startIndex);
 		uint32_t numIndexes_u32 = static_cast<uint32_t>(index - startIndex);
 		_meshes.emplace_back(group.name, startIndex_u32, numIndexes_u32, m, center);
 	}
-	
-	if (!hasNormals)
+
+	if (hasNormals == false)
+	{
+		log::info("Calculating normals...");
 		primitives::calculateNormals(_vertexData, _indices, 0, _indices->primitivesCount());
+	}
 
 	if ((_loadOptions & Option_CalculateTangents) == Option_CalculateTangents)
-		primitives::calculateTangents(_vertexData, _indices, 0, _indices->primitivesCount() & 0xffffffff);
+	{
+		log::info("Calculating tangents...");
+		primitives::calculateTangents(_vertexData, _indices, 0, _indices->primitivesCount());
+	}
 }
 
 s3d::ElementContainer::Pointer OBJLoader::generateVertexBuffers(s3d::Storage& storage)

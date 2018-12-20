@@ -18,6 +18,14 @@
 #	error Not implemented for this platform
 #endif
 
+#if (ET_DEBUG)
+#	define ET_VULKAN_ENABLE_VALIDATION		1
+#	define ET_VULKAN_ENABLE_DEBUG_MARKERS	1
+#else
+#	define ET_VULKAN_ENABLE_VALIDATION		0
+#	define ET_VULKAN_ENABLE_DEBUG_MARKERS	1
+#endif
+
 namespace et {
 
 struct VulkanState;

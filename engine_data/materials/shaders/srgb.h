@@ -44,11 +44,11 @@ float3 linearToSRGB(in float3 c)
 }
 
 float luminanceToEv(in float lum) {
-	return log2(max(0.001, lum)) + 3.0;
+	return log2(max(0.001, lum * LUMINANCE_SCALE)) + 3.0;
 }
 
 float evToLuminance(in float ev) {
-	return exp2(ev - 3.0);
+	return exp2(ev - 3.0) / LUMINANCE_SCALE;
 }
 
 float3 toneMapping(float3 color, float averageLuminance, in float t)
@@ -56,8 +56,7 @@ float3 toneMapping(float3 color, float averageLuminance, in float t)
 	float lowerBound = expectedEv - dynamicRange.x;
 	float upperBound = expectedEv + dynamicRange.y;
 
-	float ev100 = expectedEv; 
-	float maxLuminance = 78.0 / (iso * 0.65) * exp2(ev100);
+	float maxLuminance = 78.0 / (iso * 0.65) * exp2(expectedEv) / LUMINANCE_SCALE;
 
 	float exposure = 1.0 / maxLuminance;
 	color = clamp(color, evToLuminance(lowerBound), evToLuminance(upperBound)) * exposure;

@@ -10,11 +10,11 @@
 #define MIE_EXTINCTION 				(MIE_SCATTERING / 0.9)
 #define OZONE_ABSORPTION			(float3(3.426, 8.298, 0.356) * 6.0e-7)
 #define SUN_ILLUMINANCE 			120000.0
-#define SUN_ANGULAR_SIZE			(9.35e-3)
-#define SUN_SOLID_ANGLE				(6.87e-5) // (2.0 * PI * (1.0 - cos(SUN_ANGULAR_SIZE)))
+#define SUN_ANGULAR_SIZE			(9.35e-3 * 2.0)
+#define SUN_SOLID_ANGLE				/* (6.87e-5) //*/ (2.0 * PI * (1.0 - cos(SUN_ANGULAR_SIZE)))
 #define SUN_ANGULAR_SIZE_COSINE		(cos(SUN_ANGULAR_SIZE))
 #define SUN_LIMB_DARKENING			float3(0.397, 0.503, 0.652)
-#define HEIGHT_ABOVE_GROUND			10.0
+#define HEIGHT_ABOVE_GROUND			50.0
 #define IN_SCATTERING_SLICES 		1.0
 #define NON_LINEAR_LOOKUP			1
 #define NON_LINEAR_VIEW				1
@@ -245,9 +245,12 @@ float3 sampleTransmittanceToAtmosphereBounds(in AtmosphereParameters p)
 	return precomputedOpticalDepth.Sample(LinearClamp, lookup.transmittance);
 }
 
-float3 samplePrecomputedTransmittance(in float h, in float sinTheta)
+float3 samplePrecomputedTransmittance(in float h, in float lightZenithAngle)
 {
-	return precomputedOpticalDepth.Sample(LinearClamp, float2(sinTheta * 0.5 + 0.5, saturate(h / ATMOSPHERE_HEIGHT))).xyz;
+	AtmosphereParameters parameters;
+	parameters.heightAboveGround = h;
+	parameters.lightZenithAngle = lightZenithAngle;
+	return sampleTransmittanceToAtmosphereBounds(parameters); // precomputedOpticalDepth.Sample(LinearClamp, float2(sinTheta * 0.5 + 0.5, saturate(h / ATMOSPHERE_HEIGHT))).xyz;
 }
 
 float phaseFunctionRayleigh(in float cosTheta)
@@ -302,15 +305,83 @@ float4 integrateInScattering(in float3 origin, float3 target, float3 light, in i
 		samplePosition += pStep;	
 	}
 
-	return float4(integralR * RAYLEIGH_SCATTERING, (integralM * MIE_SCATTERING).x);
+	float3 lightIntensity = (SUN_ILLUMINANCE / samplePrecomputedTransmittance(0.0, 1.0)) / LUMINANCE_SCALE; 
+	return lightIntensity.xyzx * float4(integralR * RAYLEIGH_SCATTERING, (integralM * MIE_SCATTERING).x) / (4.0 * PI);
 }
 
-float3 evaluateSingleScattering(in float3 view, in float3 light, in float3 integralR, in float3 integralM, in float3 lightIntensity)
+float4 gatherInScattering(in float3 direction, in float3 light)
+{
+	AtmosphereParameters ap;
+	ap.heightAboveGround = HEIGHT_ABOVE_GROUND;
+	ap.lightZenithAngle = light.y;
+
+	float4 result = 0.0;
+	const uint integrationSteps = 64;	
+	for (int i = 0; i < integrationSteps; ++i)
+	{
+		float theta = -PI / 2.0 + PI * float(i) / float(integrationSteps);
+		ap.viewZenithAngle = sin(theta);
+
+		float3 l;
+		float3 pos;
+		float3 view;
+		atmosphereParametersToValues(ap, pos, view, l);
+
+		float cosTheta = -dot(view, direction);                    
+		float phaseR = phaseFunctionRayleigh(cosTheta);
+		float phaseM = phaseFunctionMie(cosTheta, MIE_SCATTERING_ANISOTROPY);
+
+		LookupParameters lookup = atmosphereParametersToLookup(ap);
+		result += float4(phaseR, phaseR, phaseR, phaseM) * precomputedInScattering.Sample(LinearClamp, lookup.scattering.xy);
+	}
+	
+	return result * (4.0 * PI / float(integrationSteps));	
+}
+
+float4 integrateMultipleScattering(in float3 origin, float3 target, float3 light, in int samples)
+{
+	float3 pStep = (target - origin) / float(samples);
+	float3 viewDirection = normalize(pStep);
+	float pStepSize = length(pStep);
+
+	float3 samplePosition = origin;
+
+	float3 integralR = 0.0;
+	float3 integralM = 0.0;
+
+	float3 opticalLengthToOrigin = 0.0;
+	for (int i = 0; i < samples; ++i)
+	{
+		float h = max(0.0, length(samplePosition) - EARTH_RADIUS);
+		float3 densityAtSample = densityFunction(h) * pStepSize;
+		
+		AtmosphereParameters params;
+		valuesToAtmosphereParameters(samplePosition, viewDirection, viewDirection, params);
+
+		float3 t0 = evaluateTransmittanceFromOpticalLength(opticalLengthToOrigin);
+		float3 t1 = 1.0; // sampleTransmittanceToAtmosphereBounds(params);
+		float3 transmittance = t0 * t1;
+
+		float4 gatheredInScattering = gatherInScattering(viewDirection, light);
+		float3 gatheredRayleighScattering = gatheredInScattering.xyz;
+		float3 gatheredMieScattering = approximateMieScatteringFromRayleigh(gatheredInScattering.xyz, gatheredInScattering.w);
+
+		integralR += gatheredRayleighScattering * densityAtSample.x * transmittance;
+		integralM += gatheredMieScattering * densityAtSample.y * transmittance;
+		
+        opticalLengthToOrigin += densityAtSample;
+		samplePosition += pStep;	
+	}
+
+	return float4(integralR * RAYLEIGH_SCATTERING, (integralM * MIE_SCATTERING).x) / (4.0 * PI);
+}
+
+float3 evaluateSingleScattering(in float3 view, in float3 light, in float3 integralR, in float3 integralM)
 {
 	float cosTheta = dot(light, view);
 	float phaseR = phaseFunctionRayleigh(cosTheta);
 	float phaseM = phaseFunctionMie(cosTheta, MIE_SCATTERING_ANISOTROPY);
-	return lightIntensity * (integralR * phaseR + integralM * phaseM);
+	return integralR * phaseR + integralM * phaseM;
 }
 
 float3 samplePrecomputedAtmosphere(in AtmosphereParameters p, in float3 sourceView, in float3 sourceLight)
@@ -320,19 +391,14 @@ float3 samplePrecomputedAtmosphere(in AtmosphereParameters p, in float3 sourceVi
 	float3 position;
 	atmosphereParametersToValues(p, position, view, light);
 
-	float2 planetIntersection = 0.0;
-	// if (sphereIntersection(position, sourceView, EARTH_RADIUS, planetIntersection) > 0)
-	//	return 0.0;
-
-	float3 lightIntensity = SUN_ILLUMINANCE / samplePrecomputedTransmittance(0.0, 1.0); 
-
 	float4 sampledIntegralValue = 0.0;
 	{
 		LookupParameters lookup = atmosphereParametersToLookup(p);
 		sampledIntegralValue = precomputedInScattering.Sample(LinearClamp, lookup.scattering.xy);
 	}
-
+	
 	/*
+	float3 lightIntensity = (SUN_ILLUMINANCE / samplePrecomputedTransmittance(0.0, 1.0)) / LUMINANCE_SCALE; 
 	float4 evaluatedIntegralValue = 0.0;
 	{
 		float2 atmosphereIntersection = 0.0;
@@ -348,7 +414,7 @@ float3 samplePrecomputedAtmosphere(in AtmosphereParameters p, in float3 sourceVi
 	float3 result = 0.0;
 	{
 		float3 mieScattering = approximateMieScatteringFromRayleigh(sampledIntegralValue.xyz, sampledIntegralValue.w);
-		result = evaluateSingleScattering(sourceView, sourceLight, sampledIntegralValue.xyz, mieScattering, lightIntensity);
+		result = evaluateSingleScattering(sourceView, sourceLight, sampledIntegralValue.xyz, mieScattering);
 	}
 	
 	return result;
@@ -457,13 +523,13 @@ float3 inScattering(in float3 origin, in float3 target, in float3 light, in floa
 
 float3 lightColor(in float3 light)
 {
-	return SUN_ILLUMINANCE * samplePrecomputedTransmittance(0.0, light.y);
+	float3 t = samplePrecomputedTransmittance(HEIGHT_ABOVE_GROUND, light.y);
+	return t * (SUN_ILLUMINANCE / LUMINANCE_SCALE);
 }
 
 float3 sunLuminance()
 {
-	float3 zenithLuminance = SUN_ILLUMINANCE / SUN_SOLID_ANGLE;
-	return zenithLuminance / samplePrecomputedTransmittance(0.0, 1.0);
+	return (SUN_ILLUMINANCE / (4.0 * PI * SUN_SOLID_ANGLE * LUMINANCE_SCALE)) / samplePrecomputedTransmittance(0.0, 1.0);
 }
 
 float3 sunColor(in float3 view, in float3 light)
@@ -480,16 +546,16 @@ float3 sunColor(in float3 view, in float3 light)
 	
 	float distanceToCenter = (1.0 - cosTheta) / (1.0 - SUN_ANGULAR_SIZE_COSINE);
 	float mu = sqrt(1.0 - distanceToCenter * distanceToCenter);
-	float3 darkening = pow(mu, SUN_LIMB_DARKENING);
-	float3 transmittance = samplePrecomputedTransmittance(HEIGHT_ABOVE_GROUND / ATMOSPHERE_HEIGHT, view.y);
+	float3 darkening = pow(mu, 5.0 * SUN_LIMB_DARKENING);
+	float3 transmittance = samplePrecomputedTransmittance(HEIGHT_ABOVE_GROUND, view.y);
 	
-	return sunLuminance() * darkening * transmittance;
+	return sunLuminance() * transmittance * darkening;
 }
 
 float3 evaluateAtmosphere(in float3 view, in float3 light)
 {    
 	float3 result = 0.0;
-	float3 lightIntensity = SUN_ILLUMINANCE / samplePrecomputedTransmittance(0.0, 1.0); 
+	float3 lightIntensity = (SUN_ILLUMINANCE / samplePrecomputedTransmittance(0.0, 1.0)) / LUMINANCE_SCALE;
 
 	float3 position = float3(0.0, EARTH_RADIUS + HEIGHT_ABOVE_GROUND, 0.0);
 
@@ -508,5 +574,5 @@ float3 evaluateAtmosphere(in float3 view, in float3 light)
 	float4 integral = integrateInScattering(origin, target, light, 32);
 	float3 mieScattering = approximateMieScatteringFromRayleigh(integral.xyz, integral.w);
 
-	return evaluateSingleScattering(view, light, integral.xyz, mieScattering, lightIntensity);
+	return evaluateSingleScattering(view, light, integral.xyz, mieScattering);
 }

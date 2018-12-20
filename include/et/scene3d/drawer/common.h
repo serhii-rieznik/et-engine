@@ -20,10 +20,10 @@ struct DrawerOptions
 	float shadowmapScale = 1.0f;
 	bool drawCubemapsDebug = false;
 	bool drawShadowmap = false;
-	bool rebuldEnvironmentProbe = true;
-	bool rebuildLookupTexture = true;
+	bool rebuildEnvironmentTextures = true;
 	bool enableScreenSpaceShadows = false;
 	bool enableScreenSpaceAO = true;
+	bool enableMultipleScattering = true;
 };
 
 mat4 fullscreenBatchTransform(const vec2& viewport, const vec2& origin, const vec2& size);

@@ -58,7 +58,8 @@ private:
 		/*
 		 * Constants
 		 */
-		CubemapLevels = 8
+		CubemapLevels = 8,
+		ScatteringOrder = 4,
 	};
 
 private:
@@ -79,27 +80,35 @@ private:
 
 	struct
 	{
+		Texture::Pointer opticalDepth;
+		Texture::Pointer singleScattering;
+		Texture::Pointer multipleScattering[ScatteringOrder];
+		Texture::Pointer finalScattering;
+
 		RenderPass::Pointer opticalDepthPass;
+		RenderPass::Pointer singleScatteringPass;
+		RenderPass::Pointer multipleScatteringPass[ScatteringOrder];
+		RenderPass::Pointer combineScatteringPass;
+
 		RenderBatch::Pointer opticalDepthBatch;
 		RenderBatch::Pointer opticalDepthBatchDebug;
 		RenderBatch::Pointer inScatteringBatchDebug;
-		Texture::Pointer opticalDepth;
+		RenderBatch::Pointer singleScatteringBatch;
+		RenderBatch::Pointer multipleScatteringBatch;
+		RenderBatch::Pointer combineScatteringBatch;
 
-		RenderPass::Pointer inScatteringPass;
-		RenderBatch::Pointer inScatteringBatch;
-		Texture::Pointer inScattering;
+		bool multipleScatteringInitialized = false;
+		bool enableMultipleScattering = false;
 	} _atmosphere;
 
 	RenderPass::Pointer _lookupPass;
 	RenderPass::Pointer _downsamplePass;
 	RenderPass::Pointer _cubemapDebugPass;
-	RenderPass::Pointer _diffuseConvolvePass;
 	RenderPass::Pointer _specularConvolvePass;
 	RenderBatch::Pointer _lookupDebugBatch;
 
 	RenderBatch::Pointer _cubemapDebugBatch;
 	RenderBatch::Pointer _shDebugBatch;
-	RenderBatch::Pointer _diffuseConvolveBatch;
 	RenderBatch::Pointer _specularConvolveBatch;
 	CubemapProjectionMatrixArray _projections;
 	RenderPassBeginInfo _oneLevelCubemapBeginInfo;
@@ -128,7 +137,7 @@ inline const Texture::Pointer& CubemapProcessor::precomputedOpticalDepthTexture(
 }
 
 inline const Texture::Pointer& CubemapProcessor::precomputedInScatteringTexture() const {
-	return _atmosphere.inScattering;
+	return _atmosphere.enableMultipleScattering ? _atmosphere.finalScattering : _atmosphere.singleScattering;
 }
 
 inline const std::string& CubemapProcessor::sourceTextureName() const {

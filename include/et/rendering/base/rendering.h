@@ -487,6 +487,7 @@ enum class FramebufferOperation : uint32_t
 
 enum RenderPassPriority : uint32_t
 {
+	Preprocess = 1 << 30,
 	Default = 1 << 24,
 	UI = 1 << 16
 };

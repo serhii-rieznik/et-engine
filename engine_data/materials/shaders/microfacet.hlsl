@@ -168,7 +168,7 @@ FSOutput fragmentMain(VSOutput fsIn)
     float3 linearBaseColor = srgbToLinear(baseColorSample.xyz);
     float roughness = normalSample.z;
     float metallness = normalSample.w;
-    float ambientOcclusion = ao.Sample(LinearClamp, projectedUv).x;
+    float ambientOcclusion = baseColorSample.w; // ao.Sample(LinearClamp, projectedUv).x;
 	float shadowValue = sampleShadow(fsIn.lightCoord.xyz / fsIn.lightCoord.w, sampledNoise, shadowmapSize.xy);
         
     Surface surface = buildSurface(linearBaseColor, roughness, metallness);
@@ -251,7 +251,7 @@ FSOutput fragmentMain(VSOutput fsIn)
 
 #endif
 
-#if (1)
+#if (0)
 	{
 		float3 invView = -wsView;
 
@@ -265,6 +265,11 @@ FSOutput fragmentMain(VSOutput fsIn)
 	    result += SUN_ILLUMINANCE * inScattering(p0, p1, wsLight, phase) / samplePrecomputedTransmittance(0.0, 1.0);
     }
 #endif
+
+	// result = shadowValue * ((directDiffuse + directSpecular) * lightColorValue) + 
+	//	ambientOcclusion * (indirectDiffuse + indirectSpecular);
+
+	// result = ambientOcclusion;
 	
 	currentPosition += cameraJitter.xy;
 	previousPosition += cameraJitter.zw;

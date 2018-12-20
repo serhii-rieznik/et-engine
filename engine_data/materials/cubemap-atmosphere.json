@@ -17,7 +17,7 @@
 		"code" : "shaders/cubemap"
 	},
 
-	"precompute-in-scattering" : { 
+	"precompute-single-scattering" : { 
 		"input-layout" : {
 		},
 		"depth-state": {
@@ -27,6 +27,38 @@
 		},
 		"options" : {
 			"PRECOMPUTE_IN_SCATTERING" : 1
+		},
+		"blend-state": "disabled",
+		"cull-mode" : "disabled",
+		"code" : "shaders/cubemap"
+	},
+
+	"precompute-multiple-scattering" : { 
+		"input-layout" : {
+		},
+		"depth-state": {
+			"depth-function": "always",
+			"depth-test": false,
+			"depth-write": false
+		},
+		"options" : {
+			"PRECOMPUTE_MULTIPLE_SCATTERING" : 1
+		},
+		"blend-state": "disabled",
+		"cull-mode" : "disabled",
+		"code" : "shaders/cubemap"
+	},
+
+	"combine-in-scattering" : { 
+		"input-layout" : {
+		},
+		"depth-state": {
+			"depth-function": "always",
+			"depth-test": false,
+			"depth-write": false
+		},
+		"options" : {
+			"COMBINE_IN_SCATTERING" : 1
 		},
 		"blend-state": "disabled",
 		"cull-mode" : "disabled",

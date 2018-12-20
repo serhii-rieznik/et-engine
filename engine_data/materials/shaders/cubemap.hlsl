@@ -15,6 +15,14 @@
 
 	TextureCube<float4> inputTexture : DECLARE_TEXTURE;
 
+#elif (COMBINE_IN_SCATTERING)
+
+	Texture2D<float4> order0 : DECLARE_TEXTURE;
+	Texture2D<float4> order1 : DECLARE_TEXTURE;
+	Texture2D<float4> order2 : DECLARE_TEXTURE;
+	Texture2D<float4> order3 : DECLARE_TEXTURE;
+	Texture2D<float4> order4 : DECLARE_TEXTURE;
+
 #endif
 
 cbuffer ObjectVariables : DECL_OBJECT_BUFFER
@@ -66,18 +74,31 @@ VSOutput vertexMain(uint vertexIndex : SV_VertexID)
 }
 
 #endif
- 
-static const float cScale = 0.0001;
+
+float phaseFunctionRayleigh(in float cosTheta);
+float phaseFunctionMie(in float cosTheta, in float g);
 
 float4 fragmentMain(VSOutput fsIn) : SV_Target0
 {
-#if (PRECOMPUTE_IN_SCATTERING)
+#if (COMBINE_IN_SCATTERING)
+
+	float4 o0 = order0.Sample(LinearClamp, fsIn.texCoord0);
+	float4 o1 = order1.Sample(LinearClamp, fsIn.texCoord0);
+	float4 o2 = order2.Sample(LinearClamp, fsIn.texCoord0);
+	float4 o3 = order3.Sample(LinearClamp, fsIn.texCoord0);
+	float4 o4 = order4.Sample(LinearClamp, fsIn.texCoord0);
+
+	return o0 + o1 + o2 + o3 + o4;
+
+#elif (PRECOMPUTE_MULTIPLE_SCATTERING)
 
 	LookupParameters lookup;
 	lookup.scattering.x = fsIn.texCoord0.x; // view
 	lookup.scattering.y = fsIn.texCoord0.y; // light;
 	lookup.scattering.z = saturate(HEIGHT_ABOVE_GROUND / ATMOSPHERE_HEIGHT);
+
 	AtmosphereParameters params = lookupParametersToAtmosphere(lookup);
+	params.viewZenithAngle = max(params.viewZenithAngle, -horizonAngleAtHeight(params.heightAboveGround));
 	
 	float3 view;
 	float3 light;
@@ -88,6 +109,27 @@ float4 fragmentMain(VSOutput fsIn) : SV_Target0
 	int atmosphereIntersections = sphereIntersection(position, view, ATMOSPHERE_RADIUS, atmosphereIntersection);
 	float3 origin = position + atmosphereIntersection.x * view;
 	float3 target = position + atmosphereIntersection.y * view;
+	return integrateMultipleScattering(origin, target, light, 512);
+
+#elif (PRECOMPUTE_IN_SCATTERING)
+
+	LookupParameters lookup;
+	lookup.scattering.x = fsIn.texCoord0.x; // view
+	lookup.scattering.y = fsIn.texCoord0.y; // light;
+	lookup.scattering.z = saturate(HEIGHT_ABOVE_GROUND / ATMOSPHERE_HEIGHT);
+
+	AtmosphereParameters params = lookupParametersToAtmosphere(lookup);
+	params.viewZenithAngle = max(params.viewZenithAngle, -horizonAngleAtHeight(params.heightAboveGround));
+	
+	float3 view;
+	float3 light;
+	float3 position;
+	atmosphereParametersToValues(params, position, view, light);
+	
+	float2 intersections = 0.0;
+	int atmosphereIntersections = sphereIntersection(position, view, ATMOSPHERE_RADIUS, intersections);
+	float3 origin = position + intersections.x * view;
+	float3 target = position + intersections.y * view;
 	return integrateInScattering(origin, target, light, 512);
 
 #elif (PRECOMPUTE_OPTICAL_DEPTH)
@@ -115,7 +157,7 @@ float4 fragmentMain(VSOutput fsIn) : SV_Target0
 	float cosPhi = cos(phi);
 	float3 n = float3(cosPhi * cosTheta, sinTheta, sinPhi * cosTheta);
 	float3 shResult = getExitRadianceFromSphericalHarmonics(environmentSphericalHarmonics, n).xyz;
-	return float4(linearToSRGB(cScale * shResult), 1.0);
+	return float4(linearToSRGB(shResult), 1.0);
 
 #elif (VISUALIZE_CUBEMAP)	
 
@@ -127,7 +169,7 @@ float4 fragmentMain(VSOutput fsIn) : SV_Target0
 	float cosPhi = cos(phi);
 	float3 sampleDirection = float3(cosPhi * cosTheta, sinTheta, sinPhi * cosTheta);
 	float3 sampledValue = inputTexture.SampleLevel(LinearWrap, sampleDirection, extraParameters.x).xyz;
-	return float4(linearToSRGB(cScale * sampledValue), 1.0);
+	return float4(linearToSRGB(sampledValue), 1.0);
 
 #elif (WRAP_EQ_TO_CUBEMAP)
 
@@ -139,7 +181,11 @@ float4 fragmentMain(VSOutput fsIn) : SV_Target0
 #elif (ATMOSPHERE)
 
 	float3 d = normalize(fsIn.direction);        	
-	float3 a = evaluateAtmosphere(d, lightDirection.xyz);
+	AtmosphereParameters ap;
+	ap.heightAboveGround = HEIGHT_ABOVE_GROUND;
+	ap.viewZenithAngle = d.y;
+	ap.lightZenithAngle = lightDirection.y;
+	float3 a = samplePrecomputedAtmosphere(ap, d, lightDirection.xyz);
 	return float4(a, 1.0);
 
 #elif (DOWNSAMPLE_CUBEMAP)

@@ -511,8 +511,7 @@ void primitives::calculateNormals(VertexArray::Pointer data, const IndexArray::P
 	VertexDataChunk posChunk = data->chunk(VertexAttributeUsage::Position);
 	VertexDataChunk nrmChunk = data->chunk(VertexAttributeUsage::Normal);
 
-	if (posChunk.invalid() || (posChunk->type() != DataType::Vec3) || !nrmChunk.valid() ||
-		(nrmChunk->type() != DataType::Vec3))
+	if (posChunk.invalid() || (posChunk->type() != DataType::Vec3) || !nrmChunk.valid() || (nrmChunk->type() != DataType::Vec3))
 	{
 		log::error("primitives::calculateNormals - data is invalid.");
 		return;
@@ -631,22 +630,22 @@ void primitives::calculateTangents(VertexStorage::Pointer data, const IndexArray
 
 	if (!data->hasAttributeWithType(VertexAttributeUsage::Position, DataType::Vec3))
 	{
-		log::error("primitives::calculateNormals - vertex storage does not contain positions of type vec3.");
+		log::error("primitives::calculateTangents - vertex storage does not contain positions of type vec3.");
 		return;
 	}
 	if (!data->hasAttributeWithType(VertexAttributeUsage::Normal, DataType::Vec3))
 	{
-		log::error("primitives::calculateNormals - vertex storage does not contain normals of type vec3.");
+		log::error("primitives::calculateTangents - vertex storage does not contain normals of type vec3.");
 		return;
 	}
 	if (!data->hasAttributeWithType(VertexAttributeUsage::TexCoord0, DataType::Vec2))
 	{
-		log::error("primitives::calculateNormals - vertex storage does not contain TexCoord0 of type vec2.");
+		log::error("primitives::calculateTangents - vertex storage does not contain TexCoord0 of type vec2.");
 		return;
 	}
 	if (!data->hasAttributeWithType(VertexAttributeUsage::Tangent, DataType::Vec3))
 	{
-		log::error("primitives::calculateNormals - vertex storage does not contain tangents of type vec3.");
+		log::error("primitives::calculateTangents - vertex storage does not contain tangents of type vec3.");
 		return;
 	}
 

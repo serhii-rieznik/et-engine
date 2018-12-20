@@ -142,6 +142,7 @@ void Drawer::draw() {
 				_main.zPrepass->pushRenderBatch(rb);
 		}
 		_main.zPrepass->endSubpass();
+		_main.zPrepass->pushImageBarrier(_main.zPrepass->info().depth.texture, ResourceBarrier(TextureState::ShaderResource));
 	}
 	_renderer->submitRenderPass(_main.zPrepass);
 
@@ -164,6 +165,8 @@ void Drawer::draw() {
 
 	_renderer->beginRenderPass(_main.forward, RenderPassBeginInfo::singlePass());
 	{
+		_main.forward->pushImageBarrier(_main.forward->info().depth.texture, ResourceBarrier(TextureState::DepthRenderTarget));
+
 		_main.forward->loadSharedVariablesFromCamera(_scene->renderCamera());
 		_main.forward->loadSharedVariablesFromLight(_lighting.directional);
 		
@@ -355,7 +358,7 @@ void Drawer::setEnvironmentMap(const std::string& filename) {
 }
 
 void Drawer::updateLight() {
-	options.rebuldEnvironmentProbe = true;
+	options.rebuildEnvironmentTextures = true;
 	_shadowmapProcessor->updateLight(_lighting.directional);
 }
 
