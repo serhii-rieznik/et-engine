@@ -234,7 +234,9 @@ void Drawer::validate(RenderInterface::Pointer& renderer) {
 			RenderPass::ConstructionInfo screenSpaceAOInfo("screen-space-ao");
 			screenSpaceAOInfo.color[0].texture = _main.screenSpaceAOTexture;
 			screenSpaceAOInfo.color[0].targetClass = RenderTarget::Class::Texture;
-			_main.screenSpaceAO = renderer->allocateRenderPass(screenSpaceAOInfo);
+            screenSpaceAOInfo.color[0].loadOperation = FramebufferOperation::DontCare;
+            screenSpaceAOInfo.color[0].storeOperation = FramebufferOperation::Store;
+            _main.screenSpaceAO = renderer->allocateRenderPass(screenSpaceAOInfo);
 		}
 
 		RenderPass::ConstructionInfo passInfo;

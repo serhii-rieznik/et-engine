@@ -33,6 +33,7 @@ public:
 	static const std::string LinearWrap;
 	static const std::string AnisotropicClamp;
 	static const std::string LinearClamp;
-	static const std::string PointClamp;
+    static const std::string PointClamp;
+    static const std::string PointWrap;
 };
 }

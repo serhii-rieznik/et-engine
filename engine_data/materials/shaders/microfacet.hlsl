@@ -168,7 +168,7 @@ FSOutput fragmentMain(VSOutput fsIn)
     float3 linearBaseColor = srgbToLinear(baseColorSample.xyz);
     float roughness = normalSample.z;
     float metallness = normalSample.w;
-    float ambientOcclusion = baseColorSample.w; // ao.Sample(LinearClamp, projectedUv).x;
+    float ambientOcclusion = baseColorSample.w * ao.Sample(LinearClamp, projectedUv).x;
 	float shadowValue = sampleShadow(fsIn.lightCoord.xyz / fsIn.lightCoord.w, sampledNoise, shadowmapSize.xy);
         
     Surface surface = buildSurface(linearBaseColor, roughness, metallness);

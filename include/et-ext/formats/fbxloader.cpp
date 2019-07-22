@@ -663,7 +663,7 @@ s3d::Mesh::Pointer FBXLoaderPrivate::loadMesh(s3d::Storage& storage, FbxMesh* me
 	bool oneMaterialForPolygons = false;
 
 	FbxGeometryElementMaterial* fbxMaterial = mesh->GetElementMaterial();
-	ET_ASSERT(fbxMaterial != nullptr);
+	// ET_ASSERT(fbxMaterial != nullptr);
 
 	if (fbxMaterial == nullptr)
 		return result;

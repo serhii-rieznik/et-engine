@@ -76,6 +76,7 @@ const std::string Sampler::LinearWrap = "LinearWrap";
 const std::string Sampler::AnisotropicClamp = "AnisotropicClamp";
 const std::string Sampler::LinearClamp = "LinearClamp";
 const std::string Sampler::PointClamp = "PointClamp";
+const std::string Sampler::PointWrap = "PointWrap";
 
 VertexAttributeUsage stringToVertexAttributeUsage(const std::string& s) {
 	VertexAttributeUsage result = VertexAttributeUsage::Unknown;

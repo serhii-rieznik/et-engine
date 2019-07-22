@@ -8,10 +8,11 @@ Texture2D<float4> noise : DECLARE_TEXTURE;
 cbuffer ObjectVariables : DECL_OBJECT_BUFFER
 {
     row_major float4x4 viewTransform;
+    row_major float4x4 inverseViewTransform;
     row_major float4x4 projectionTransform;
+    row_major float4x4 inverseProjectionTransform;
     row_major float4x4 viewProjectionTransform;
     row_major float4x4 inverseViewProjectionTransform;
-    row_major float4x4 inverseProjectionTransform;
     float4 lightDirection;
     float4 viewport;
     float2 cameraClipPlanes;
@@ -28,9 +29,8 @@ struct VSOutput
 
 float3 viewSpace(in float2 uv, in float z)
 {
-	float2 uvScale = float2(-inverseProjectionTransform[0][0], -inverseProjectionTransform[1][1]);
-	float linearZ = cameraClipPlanes.x * cameraClipPlanes.y / (z * (cameraClipPlanes.y - cameraClipPlanes.x) - cameraClipPlanes.y);
-	return float3(uv * uvScale, 1.0) * linearZ;
+    float4 a = mul(float4(uv, z, 1.0), inverseProjectionTransform);
+    return a.xyz / a.w;
 }
 
 float3 projectionSpace(in float3 coord)
@@ -40,56 +40,58 @@ float3 projectionSpace(in float3 coord)
 	return float3(coord.xy / (coord.z * uvScale), encodedZ);
 }
                     
-float3 reconstructNormal(in float2 uv, in float2 texelSize)
-{
-	float2 uv0 = uv - float2(texelSize.x, 0.0);
-	float2 uv1 = uv + float2(texelSize.x, 0.0);
-	float2 uv2 = uv - float2(0.0, texelSize.y);
-	float2 uv3 = uv + float2(0.0, texelSize.y);
-	
-	float z = sceneDepth.Sample(PointClamp, uv);
-	float z0 = sceneDepth.Sample(PointClamp, uv0);
-	float z1 = sceneDepth.Sample(PointClamp, uv1);	
-	float z2 = sceneDepth.Sample(PointClamp, uv2);
-	float z3 = sceneDepth.Sample(PointClamp, uv3);
-	float3 pC = viewSpace(uv * 2.0 - 1.0, z);
-	float3 p0 = viewSpace(uv0 * 2.0 - 1.0, z0);
-	float3 p1 = viewSpace(uv1 * 2.0 - 1.0, z1);
-	float3 p2 = viewSpace(uv2 * 2.0 - 1.0, z2);
-	float3 p3 = viewSpace(uv3 * 2.0 - 1.0, z3);
+static const float aoScale = 1.0;
 
-	return normalize(cross(p3 - p2, p1 - p0));
-}
-
-static const float aoScale = 10.0;
 static const uint directionsCount = 8;
+
+static const float3 predefinedDirection[directionsCount] = {
+    float3(1.0, 0.0, 0.0),
+    float3(0.707107, 0.707107, 0.0),
+    float3(0.0, 1.0, 0.0),
+    float3(-0.707107, 0.707107, 0.0),
+    float3(-1.0, 0.0, 0.0),
+    float3(-0.707107, -0.707107, 0.0),
+    float3(0.0, -1.0, 0.0),
+    float3(0.707107, -0.707107, 0.0),
+};
 
 float3 getRotatedDirection(in uint index, in float4 m)
 {
-	const float3 predefinedDirection[8] = {
-        float3(1.0, 0.0, 0.0),
-        float3(0.707107, 0.707107, 0.0),
-        float3(0.0, 1.0, 0.0),
-        float3(-0.707107, 0.707107, 0.0),
-        float3(-1.0, 0.0, 0.0),
-        float3(-0.707107, -0.707107, 0.0),
-        float3(0.0, -1.0, 0.0),
-        float3(0.707107, -0.707107, 0.0),
-	};
 	float2 base = predefinedDirection[index];
 	return float3(dot(base, m.xy), dot(base, m.zw), 0.0);
 }
 
+float3 reconstructNormal(in float2 uv, in float2 texelSize)
+{
+    float2 uv_left = uv - float2(texelSize.x, 0.0);
+    float z_left = sceneDepth.Sample(PointClamp, uv_left);
+    float3 p_left = viewSpace(uv_left * 2.0 - 1.0, z_left);
+    
+    float2 uv_right = uv + float2(texelSize.x, 0.0);
+    float z_right = sceneDepth.Sample(PointClamp, uv_right);
+    float3 p_right = viewSpace(uv_right * 2.0 - 1.0, z_right);
+
+    float2 uv_top = uv - float2(0.0, texelSize.y);
+    float z_top = sceneDepth.Sample(PointClamp, uv_top);
+    float3 p_top = viewSpace(uv_top * 2.0 - 1.0, z_top);
+    
+    float2 uv_bottom = uv + float2(0.0, texelSize.y);
+    float z_bottom = sceneDepth.Sample(PointClamp, uv_bottom);
+    float3 p_bottom = viewSpace(uv_bottom * 2.0 - 1.0, z_bottom);
+
+    return normalize(cross(p_right - p_left, p_top - p_bottom));
+}
+
 float4 sampleAmbientOcclusion(in float2 uv, in float2 texelSize, in float4 rnd)
 {
-	const uint samplesPerDirection = 6;
-
 	float3 p0 = viewSpace(uv * 2.0 - 1.0, sceneDepth.Sample(PointClamp, uv));
 	float3 n0 = reconstructNormal(uv, texelSize);
-	float r = (-0.1 * p0.z + 0.25);
-	float influenceRadius = (r) * (rnd.x * 0.5 + 0.5); // 1.0 * (rnd.x * 0.5 + 0.5);
 
-	float directionStepSize = -influenceRadius / (p0.z * float(samplesPerDirection));
+	const uint samplesPerDirection = 8;
+
+	float influenceRadius = 1.0 * (rnd.x * 0.75 + 0.25);
+
+	float directionStepSize = influenceRadius / (p0.z * float(samplesPerDirection));
 
 	float rotCos = rnd.z * 2.0 - 1.0;
 	float rotSin = rnd.w * 2.0 - 1.0;
@@ -114,36 +116,41 @@ float4 sampleAmbientOcclusion(in float2 uv, in float2 texelSize, in float4 rnd)
 			stepUv += projectedStep;
 		}
 	}
-	return 1.0; // saturate(1.0 - aoScale * ao / float(directionsCount * samplesPerDirection));
+    ao = saturate(1.0 - ao / float(directionsCount * samplesPerDirection));
+   
+    ao = pow(ao, 16.0);
+    
+	return ao;
 }
 
 float4 fragmentMain(VSOutput fsIn) : SV_Target0
 {
-	float w = viewport.z;
-	float h = viewport.w;
+	float w = 0.0f;
+	float h = 0.0f;
 	float levels = 0.0;
 	sceneDepth.GetDimensions(0, w, h, levels);
+
 	float2 texelSize = 1.0 / float2(w, h);
 
-	w = 64.0;
-	h = 64.0;
+	w = 0.0f;
+	h = 0.0f;
 	noise.GetDimensions(0, w, h, levels);
 	float2 noiseTexelSize = float2(w, h);
 
-	float2 noiseUv = frac(continuousTime + fsIn.texCoord0 * (viewport.zw / noiseTexelSize));
+	float2 noiseUv = fsIn.texCoord0 * (viewport.zw / noiseTexelSize);
 	
 	float cs = cos(continuousTime * PI);
 	float sn = sin(continuousTime * PI);
 	
-	float2 rotatedUv;
+	float2 rotatedUv = noiseUv;
 	rotatedUv.x = dot(noiseUv, float2(cs, -sn));
 	rotatedUv.y = dot(noiseUv, float2(+sn, cs));
 
-	float4 sampledNoise = noise.SampleLevel(PointClamp, rotatedUv, 0.0);
+	float4 sampledNoise = noise.SampleLevel(PointWrap, rotatedUv, 0.0);
 
 	return 
-	// 1.0; 
-	// sampledNoise; 
-	sampleAmbientOcclusion(fsIn.texCoord0, texelSize, sampledNoise);
+	  // 1.0; 
+	  // sampledNoise; 
+	  sampleAmbientOcclusion(fsIn.texCoord0, texelSize, sampledNoise);
 }
                                                                 

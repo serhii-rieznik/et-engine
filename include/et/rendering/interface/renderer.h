@@ -343,6 +343,16 @@ inline void RenderInterface::initInternalStructures() {
 		desc.maxAnisotropy = 1.0f;
 		_builtInSamplers[Sampler::PointClamp] = createSampler(desc);
 	}
+    {
+        desc.minFilter = TextureFiltration::Nearest;
+        desc.magFilter = TextureFiltration::Nearest;
+        desc.mipFilter = TextureFiltration::Nearest;
+        desc.wrapU = TextureWrap::Repeat;
+        desc.wrapV = TextureWrap::Repeat;
+        desc.wrapW = TextureWrap::Repeat;
+        desc.maxAnisotropy = 1.0f;
+        _builtInSamplers[Sampler::PointWrap] = createSampler(desc);
+    }
 }
 
 inline void RenderInterface::shutdownInternalStructures() {
