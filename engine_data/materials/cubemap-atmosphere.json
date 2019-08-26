@@ -65,6 +65,22 @@
 		"code" : "shaders/cubemap"
 	},
 
+	"bake-sky" : { 
+		"input-layout" : {
+		},
+		"depth-state": {
+			"depth-function": "always",
+			"depth-test": false,
+			"depth-write": false
+		},
+		"options" : {
+			"BAKE_SKY" : 1
+		},
+		"blend-state": "disabled",
+		"cull-mode" : "disabled",
+		"code" : "shaders/cubemap"
+	},
+
 	"prepare-cubemap" : { 
 		"input-layout" : {
 		},

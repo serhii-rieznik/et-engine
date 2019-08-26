@@ -2,6 +2,7 @@
 #include <inputdefines>
 #include "atmosphere.h"
 #include "environment.h"
+#include "srgb.h"
 
 #define DRAW_SUN 1
 #define SAMPLE_ATMOSPHERE 1
@@ -47,25 +48,28 @@ FSOutput fragmentMain(VSOutput fsIn)
 {
 	float3 v = normalize(fsIn.direction);
 
-	float phi = fsIn.texCoord.x * 2.0 * PI;
-	float the = PI * (1.0 - fsIn.texCoord.y) - 0.5 * PI;
-
-	float3 light = lightDirection;
-	// v = float3(cos(phi) * cos(the), sin(the), sin(phi) * cos(the));
-
 	AtmosphereParameters ap;
 	ap.heightAboveGround = HEIGHT_ABOVE_GROUND;
 	ap.viewZenithAngle = v.y;
-	ap.lightZenithAngle = light.y;
+	ap.lightZenithAngle = lightDirection.y;
 
 #if (SAMPLE_ATMOSPHERE)
-	float3 env = samplePrecomputedAtmosphere(ap, v, light);
+	float3 env = samplePrecomputedAtmosphere(ap, v, lightDirection);
+ 
+    float sx = lightDirection.y * lightDirection.y;
+    float sy = 1.0 - max(0.0, v.y);
+	env = precomputedInScattering.Sample(LinearClamp, float2(sx, sy));	
+	env.xyz = srgbToLinear(env);
+	// env = ph;
+
 #else
+
 	float3 env = sampleEnvironment(v, light.xyz, 0.1);
+
 #endif
 
 #if (DRAW_SUN)
-	env += sunColor(v, light.xyz);
+	env += sunColor(v, lightDirection.xyz);
 #endif
 	
 	FSOutput result;

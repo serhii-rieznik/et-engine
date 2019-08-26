@@ -55,8 +55,8 @@ VSOutput vertexMain(VSInput vsIn)
 	VSOutput vsOut;
 	vsOut.texCoord0 = vsIn.position.xy * 0.5 + 0.5;
 	vsOut.position = float4(vsIn.position.xy, 0.0, 1.0);
-	vsOut.direction = mul(vsOut.position, worldTransform).xyz;
 	vsOut.position = mul(vsOut.position, worldTransform);
+	vsOut.direction = mul(vsOut.position, worldTransform).xyz;
 	return vsOut;
 }
 
@@ -70,6 +70,7 @@ VSOutput vertexMain(uint vertexIndex : SV_VertexID)
     vsOut.texCoord0 = pos * 0.5 + 0.5;
     vsOut.position = float4(pos, 0.0, 1.0);
 	vsOut.direction = mul(vsOut.position, worldTransform).xyz;
+
 	return vsOut;
 }
 
@@ -80,7 +81,30 @@ float phaseFunctionMie(in float cosTheta, in float g);
 
 float4 fragmentMain(VSOutput fsIn) : SV_Target0
 {
-#if (COMBINE_IN_SCATTERING)
+#if (BAKE_SKY)
+
+    float phi = fsIn.texCoord0.x * 2.0 * PI;
+    float theta = (1.0 - fsIn.texCoord0.y) * PI / 2.0;
+
+	float3 v = 0.0;	
+	v.x = cos(phi) * cos(theta);
+	v.y = sin(theta);
+	v.z = sin(phi) * cos(theta);
+
+    float e = sin(fsIn.texCoord0.x * PI / 2.0);
+    float t = lerp(sin(0.0 / 180.0 * PI), sin(30.0 / 180.0 * PI), e * e);
+
+	AtmosphereParameters ap;
+	ap.heightAboveGround = HEIGHT_ABOVE_GROUND;
+	ap.viewZenithAngle = v.y;
+	ap.lightZenithAngle = t;
+	float3 a = 10.0 * samplePrecomputedAtmosphere(ap, v, lightDirection);
+	a = 1.0 - exp(-a);
+	a = linearToSRGB(saturate(a));
+	// a = toneMapping(a, 0.0, 0.0);
+	return float4(a, 1.0);
+
+#elif (COMBINE_IN_SCATTERING)
 
 	float4 o0 = order0.Sample(LinearClamp, fsIn.texCoord0);
 	float4 o1 = order1.Sample(LinearClamp, fsIn.texCoord0);

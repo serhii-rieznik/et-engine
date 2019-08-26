@@ -397,27 +397,13 @@ float3 samplePrecomputedAtmosphere(in AtmosphereParameters p, in float3 sourceVi
 		sampledIntegralValue = precomputedInScattering.Sample(LinearClamp, lookup.scattering.xy);
 	}
 	
-	/*
-	float3 lightIntensity = (SUN_ILLUMINANCE / samplePrecomputedTransmittance(0.0, 1.0)) / LUMINANCE_SCALE; 
-	float4 evaluatedIntegralValue = 0.0;
-	{
-		float2 atmosphereIntersection = 0.0;
-		int atmosphereIntersections = sphereIntersection(position, view, ATMOSPHERE_RADIUS, atmosphereIntersection);
-		float3 origin = position + atmosphereIntersection.x * view;
-		float3 target = position + atmosphereIntersection.y * view;
-
-		evaluatedIntegralValue = integrateInScattering(origin, target, light, 512);
-	}
-	return abs(sampledIntegralValue - evaluatedIntegralValue).xyz * lightIntensity;
-	// */
-
 	float3 result = 0.0;
 	{
 		float3 mieScattering = approximateMieScatteringFromRayleigh(sampledIntegralValue.xyz, sampledIntegralValue.w);
 		result = evaluateSingleScattering(sourceView, sourceLight, sampledIntegralValue.xyz, mieScattering);
 	}
 	
-	return result;
+	return sampledIntegralValue;
 }
 
 /******************************************************

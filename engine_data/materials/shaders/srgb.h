@@ -51,7 +51,7 @@ float evToLuminance(in float ev) {
 	return exp2(ev - 3.0) / LUMINANCE_SCALE;
 }
 
-float3 toneMapping(float3 color, float averageLuminance, in float t)
+float3 toneMapping(float3 color, float averageLuminance, in float unused)
 {
 	float lowerBound = expectedEv - dynamicRange.x;
 	float upperBound = expectedEv + dynamicRange.y;
@@ -93,7 +93,8 @@ float3 toneMapping(float3 color, float averageLuminance, in float t)
 	static const float F = 0.30;
 	static const float W = 11.2;
 	static const float whiteScale = ((W * (A * W + C * B) + D * E) / (W * (A * W + B) + D * F)) - E / F;
-	color = whiteScale * (((color * (A * color + C * B) + D * E) / (color * (A * color + B) + D * F)) - E / F);
+	color *= 3.0;
+	color = (((color * (A * color + C * B) + D * E) / (color * (A * color + B) + D * F)) - E / F) / whiteScale;
 	return linearToSRGB(saturate(color));
 
 #else

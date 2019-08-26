@@ -84,18 +84,21 @@ private:
 		Texture::Pointer singleScattering;
 		Texture::Pointer multipleScattering[ScatteringOrder];
 		Texture::Pointer finalScattering;
+        Texture::Pointer bakedSky;
 
 		RenderPass::Pointer opticalDepthPass;
 		RenderPass::Pointer singleScatteringPass;
 		RenderPass::Pointer multipleScatteringPass[ScatteringOrder];
-		RenderPass::Pointer combineScatteringPass;
+        RenderPass::Pointer combineScatteringPass;
+        RenderPass::Pointer bakeSkyPass;
 
 		RenderBatch::Pointer opticalDepthBatch;
 		RenderBatch::Pointer opticalDepthBatchDebug;
 		RenderBatch::Pointer inScatteringBatchDebug;
 		RenderBatch::Pointer singleScatteringBatch;
 		RenderBatch::Pointer multipleScatteringBatch;
-		RenderBatch::Pointer combineScatteringBatch;
+        RenderBatch::Pointer combineScatteringBatch;
+        RenderBatch::Pointer bakeSkyBatch;
 
 		bool multipleScatteringInitialized = false;
 		bool enableMultipleScattering = false;
@@ -110,6 +113,7 @@ private:
 	RenderBatch::Pointer _cubemapDebugBatch;
 	RenderBatch::Pointer _shDebugBatch;
 	RenderBatch::Pointer _specularConvolveBatch;
+
 	CubemapProjectionMatrixArray _projections;
 	RenderPassBeginInfo _oneLevelCubemapBeginInfo;
 	RenderPassBeginInfo _wholeCubemapBeginInfo;
@@ -137,7 +141,7 @@ inline const Texture::Pointer& CubemapProcessor::precomputedOpticalDepthTexture(
 }
 
 inline const Texture::Pointer& CubemapProcessor::precomputedInScatteringTexture() const {
-	return _atmosphere.enableMultipleScattering ? _atmosphere.finalScattering : _atmosphere.singleScattering;
+    return _atmosphere.bakedSky; // _atmosphere.enableMultipleScattering ? _atmosphere.finalScattering : _atmosphere.singleScattering;
 }
 
 inline const std::string& CubemapProcessor::sourceTextureName() const {
