@@ -60,6 +60,9 @@ FSOutput fragmentMain(VSOutput fsIn)
     float sy = 1.0 - max(0.0, v.y);
 	env = precomputedInScattering.Sample(LinearClamp, float2(sx, sy));	
 	env.xyz = srgbToLinear(env);
+
+	env *= phaseFunctionRayleigh(dot(v, lightDirection)) +  env * env * phaseFunctionMie(dot(v, lightDirection), 0.99 - 0.1 * sy);
+
 	// env = ph;
 
 #else
